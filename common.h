@@ -104,7 +104,6 @@ extern int cycleDelay;
 extern int readDelay;
 extern int messageDelay;
 
-
 /*
  * Shared functions
  */

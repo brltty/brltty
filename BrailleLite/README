@@ -31,6 +31,7 @@ Stéphane Doyon and Dave Mielke, September 2001, version 0.5.2:
 -closebrl: don't clear display, use TCSADRAIN.
 -Slight API and name changes for BRLTTY 3.0. Commands can no longer be
     assumed to be chars, changed type of cmdtrans.
+-Fixed binding for switching virtual terminal with o-chord... it was wrong.
 Stéphane Doyon, September 2001, version 0.5.2:
 -Added baudrate parameter. Fixed up initialization, in particular a bug
     with use of qbase buffer unitialized.
@@ -69,7 +70,8 @@ Stéphane Doyon, August 2001
    need to do e-chord. You can do a one-digit repeat of a movement key in
    three strokes now.
 -Abused the repeat count function to allow switching directly to a VT
-   given it's number: o-chord then VT number then s-chord or 156-chord.
+   given it's number: o-chord then VT number then s-chord or :-chord.
+   NB: Changed to v-chord / #-chord.
 -Fixed a very nice little bug that caused the internal cursor to go off
    the display during g-chord with advance bar left.
 -Fixed a statement that caused a portability problem.

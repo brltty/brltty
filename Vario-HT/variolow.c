@@ -79,7 +79,7 @@ int varioclose()
 {
 		/*	Flush all pending output and then close the port */
 	if(devfd>0) {
-		tcflush(devfd, TCIOFLUSH);
+		tcdrain(devfd);
 		close(devfd);
 		return 0;
 	}

@@ -128,7 +128,7 @@ __errexit:
 static void closebrl(brldim *brl)
 {
 	free(brl->disp); // handles NULL
-	tcsetattr(brl_fd, TCSANOW, &oldtermios);
+	tcsetattr(brl_fd, TCSADRAIN, &oldtermios);
 	close(brl_fd);
 }
 

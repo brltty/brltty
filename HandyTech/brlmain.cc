@@ -51,7 +51,7 @@ BRLPARAMS Models[] =
 {
   {
     /* ID == 0x80 */
-    "Handy 24",
+    "Modular 20+4",
     HANDY_24,
     20,
     4
@@ -59,7 +59,7 @@ BRLPARAMS Models[] =
   ,
   {
     /* ID == 89 */
-    "Handy 44",
+    "Modular 40+4",
     HANDY_44,
     40,
     4
@@ -67,10 +67,34 @@ BRLPARAMS Models[] =
   ,
   {
     /* ID == 0x88 */
-    "Handy 84",
+    "Modular 80+4",
     HANDY_84,
     80,
     4
+  }
+  ,
+  {
+    /* ID == 0x05 */
+    "Braille Wave",
+    HANDY_BRAILLE_WAVE,
+    40,
+    0
+  }
+  ,
+  {
+    /* ID == 0x90 */
+    "Book Worm",
+    HANDY_BOOK_WORM,
+    8,
+    0
+  }
+  ,
+  {
+    /* end of table */
+    NULL,
+    0,
+    0,
+    0
   }
 };
 static unsigned int CurrentKeys[0x81], LastKeys[0x81], ReleasedKeys[0x81], nullKeys[0x81];
@@ -312,7 +336,7 @@ void closebrl (brldim *brl)
   free (brl->disp);
   free (rawdata);
   free (prevdata);
-  tcsetattr (brl_fd, TCSANOW, &oldtio);		/* restore terminal settings */
+  tcsetattr (brl_fd, TCSADRAIN, &oldtio);		/* restore terminal settings */
   close (brl_fd);
 }
 

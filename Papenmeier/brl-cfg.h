@@ -180,8 +180,8 @@ static one_terminal pm_terminals[] =
 {
   {
     0,				/* identity */
-    "BRAILLEX Compact 486",	/* name of terminal */
-    "brltty-pm1.hlp",		/* filename of local helpfile */
+    "BrailleX Compact 486",	/* name of terminal */
+    "brltty-pm-c-486.hlp",		/* filename of local helpfile */
     40, 1,			/* size of display */
     0,				/* number of status cells */
     9,				/* number of frontkeys */
@@ -198,8 +198,8 @@ static one_terminal pm_terminals[] =
 
   {
     1,				/* identity */
-    "BRAILLEX 2D Lite (plus)",	/* name of terminal */
-    "brltty-pm2.hlp",		/* filename of local helpfile */
+    "BrailleX 2D Lite (plus)",	/* name of terminal */
+    "brltty-pm-2d-l.hlp",		/* filename of local helpfile */
     40, 1,			/* size of display */
     13,				/* number of status cells */
     9,				/* number of frontkeys */
@@ -218,8 +218,8 @@ static one_terminal pm_terminals[] =
 
   {
     2,				/* identity */
-    "BRAILLEX Compact/Tiny",	/* name of terminal */
-    "brltty-pm3.hlp",		/* filename of local helpfile */
+    "BrailleX Compact/Tiny",	/* name of terminal */
+    "brltty-pm-c.hlp",		/* filename of local helpfile */
     40, 1,			/* size of display */
     0,				/* number of status cells */
     9,				/* number of frontkeys */
@@ -236,8 +236,8 @@ static one_terminal pm_terminals[] =
 
   {
     3,				/* identity */
-    "Papenmeier Screen 2D Soft", /* name of terminal */
-    "brltty-pm4.hlp",		/* filename of local helpfile */
+    "BrailleX 2D Screen Soft", /* name of terminal */
+    "brltty-pm-2d-s.hlp",		/* filename of local helpfile */
     80, 1,			/* size of display */
     22,				/* number of status cells */
     13,				/* number of frontkeys */
@@ -314,8 +314,8 @@ static one_terminal pm_terminals[] =
 
   {
     6,				/* identity */
-    "BRAILLEX IB 80 cr soft",	/* name of terminal */
-    "brltty-pm5.hlp",		/* filename of local helpfile */
+    "BrailleX IB 80 CR Soft",	/* name of terminal */
+    "brltty-pm-ib-80.hlp",		/* filename of local helpfile */
     80, 1,			/* size of display */
     4,				/* number of status cells */
     9,				/* number of frontkeys */
@@ -336,8 +336,8 @@ static one_terminal pm_terminals[] =
 
   {
     64,				/* identity */
-    "BRAILLEX EL 2D-40",	/* name of terminal */
-    "brltty-pm6.hlp",		/* filename of local helpfile */
+    "BrailleX EL 2D-40",	/* name of terminal */
+    "brltty-pm-el-2d-40.hlp",		/* filename of local helpfile */
     40, 1,			/* size of display */
     13,				/* number of status cells */
     0,				/* number of frontkeys */
@@ -356,8 +356,8 @@ static one_terminal pm_terminals[] =
 
   {
     65,				/* identity */
-    "BRAILLEX EL 2D-66",	/* name of terminal */
-    "brltty-pm7.hlp",		/* filename of local helpfile */
+    "BrailleX EL 2D-66",	/* name of terminal */
+    "brltty-pm-el-2d-66.hlp",		/* filename of local helpfile */
     66, 1,			/* size of display */
     13,				/* number of status cells */
     0,				/* number of frontkeys */
@@ -375,8 +375,8 @@ static one_terminal pm_terminals[] =
   },
   {
     66,				/* identity */
-    "BRAILLEX EL-80",		/* name of terminal */
-    "brltty-pm8.hlp",		/* filename of local helpfile */
+    "BrailleX EL-80",		/* name of terminal */
+    "brltty-pm-el-80.hlp",		/* filename of local helpfile */
     80, 1,			/* size of display */
     2,				/* number of status cells */
     0,				/* number of frontkeys */

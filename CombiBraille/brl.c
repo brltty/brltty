@@ -203,7 +203,7 @@ closebrl (brldim *brl)
   free (rawdata);
 
 #if 0
-  tcsetattr (brl_fd, TCSANOW, &oldtio);		/* restore terminal settings */
+  tcsetattr (brl_fd, TCSADRAIN, &oldtio);		/* restore terminal settings */
 #endif
   close (brl_fd);
 }

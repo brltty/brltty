@@ -80,7 +80,7 @@ static char *opt_configurationFile = NULL;
 static short opt_errors = 0;
 static short opt_help = 0;
 static short opt_logLevel = LOG_NOTICE;
-static short opt_noDaemon = 0;
+short opt_noDaemon = 0;
 static char *opt_pidFile = NULL;
 static char *opt_preferencesFile = NULL;
 static short opt_quiet = 0;
@@ -189,7 +189,7 @@ static OptionEntry optionTable[] = {
     "Braille driver: full library path, or one of {" BRLLIBS "}"},
    {'d', "braille-device", "device", configureBrailleDevice,
     "Path to device for accessing braille display."},
-   {'e', "errors", NULL, NULL,
+   {'e', "standard-error", NULL, NULL,
     "Log to standard error instead of via syslog."},
    {'f', "configuration-file", "file", NULL,
     "Path to default parameters file."},
@@ -731,6 +731,7 @@ readKey (DriverCommandContext cmds)
 	 return key;
       }
       delay(readDelay);
+      closeTuneDevice(0);
    }
 }
 

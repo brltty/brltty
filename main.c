@@ -41,7 +41,7 @@
 #include "common.h"
 
 
-char VERSION[] = "BRLTTY 2.99s (beta)";
+char VERSION[] = "BRLTTY 2.99t";
 char COPYRIGHT[] = "Copyright (C) 1995-2001 by The BRLTTY Team - all rights reserved.";
 
 int cycleDelay = CYCLE_DELAY;
@@ -152,21 +152,35 @@ exitScreenParameters (void) {
 }
 
 static void
-terminateProgram (void) {
-  message("BRLTTY exiting.", 0);
+terminateProgram (int quickly) {
+  int silently = quickly || (strcmp(speech->name, "NoSpeech") == 0);
+  message("BRLTTY exiting.", 
+	  MSG_NODELAY | (silently? MSG_SILENT: 0));
+  if (!silently) {
+    int trackingSpeech = speech->isSpeaking();
+    int i;
+    for (i=0; i<messageDelay; i+=readDelay) {
+      delay(readDelay);
+      if (braille->read(CMDS_MESSAGE) != EOF) break;
+      if (trackingSpeech) {
+	speech->processSpkTracking();
+	if (!speech->isSpeaking()) break;
+      }
+    }
+  }
   exit(0);
 }
 
 static void 
-terminationHandler (int signum) {
-  terminateProgram();
+terminationHandler (int signalNumber) {
+  terminateProgram(signalNumber == SIGINT);
 }
 
 static void 
-childDeathHandler (int signum)
+childDeathHandler (int signalNumber)
 {
   pid_t pid;
-  signal (signum, childDeathHandler);
+  signal(signalNumber, childDeathHandler);
   pid = wait(NULL);
   if (pid == csr_pid) 
     {
@@ -1224,8 +1238,8 @@ main (int argc, char *argv[])
 	   * updated together, it is guaranteed * that setbrlstat() will 
 	   * be called just *before* writebrl(). 
 	   */
-	  switch (env.stcellstyle)
-	    {
+	  memset(statcells, 0, sizeof(statcells));
+	  switch (env.stcellstyle) {
 	    case ST_AlvaStyle:
 	      if ((dispmd & HELP_SCRN) == HELP_SCRN)
 		{
@@ -1272,7 +1286,6 @@ main (int argc, char *argv[])
 		| (num[(p->winx+1) % 10] << 4);
 	      break;
 	    case ST_Papenmeier:
-	      memset (statcells, 0, sizeof(statcells));
 	      statcells [STAT_current] = p->winy+1;
 	      statcells [STAT_row] = scr.posy+1;
 	      statcells [STAT_col] = scr.posx+1;
@@ -1290,9 +1303,8 @@ main (int argc, char *argv[])
 	      statcells [STAT_blinkattr] = env.attrblink;
 	      break;
 	    default:
-	      memset (statcells, 0, sizeof(statcells));
 	      break;
-	    }
+	  }
 	  braille->setstatus(statcells);
 
 	  winlen = MIN(brl.x, scr.cols -p->winx);
@@ -1446,7 +1458,7 @@ main (int argc, char *argv[])
       delay(cycleDelay);
     }
 
-  terminateProgram();
+  terminateProgram(0);
   return 0;
 }
 

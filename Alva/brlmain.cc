@@ -503,7 +503,7 @@ static void closebrl (brldim *brl)
 #if USE_PARALLEL_PORT
   BrailleClose();
 #else
-  tcsetattr (brl_fd, TCSANOW, &oldtio);		/* restore terminal settings */
+  tcsetattr (brl_fd, TCSADRAIN, &oldtio);		/* restore terminal settings */
   close (brl_fd);
 #endif
 }

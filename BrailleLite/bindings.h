@@ -120,8 +120,8 @@ static unsigned char dangcmd[8] =
 #define BLT_CONFIG '3'
 #define BLT_ENDCMD 'e'
 #define BLT_ABORT 'z'
-#define SWITCHVT_NEXT 's'
-#define SWITCHVT_PREV ':'
+#define SWITCHVT_NEXT 'v'
+#define SWITCHVT_PREV '#'
 
 
 /* For keyboard emulation mode: */

@@ -164,7 +164,9 @@ refreshCells (void)
       }
    }
 
-   safe_write(fileDescriptor, outputBuffer, output-outputBuffer);
+   if (safe_write(fileDescriptor, outputBuffer, output-outputBuffer) == -1) {
+      systemError("BrailleNote write");
+   }
 }
 
 static void
@@ -396,7 +398,7 @@ initbrl (char **parameters, brldim *brl, const char *device)
 			   memset(cellBuffer, 0, cellCount);
 			   statusArea = cellBuffer;
 			   dataArea = statusArea + statusCells;
-			   if ((outputBuffer = malloc((cellCount * 2) + 2))) {
+			   if ((outputBuffer = malloc(2 + (cellCount * 2)))) {
 			      if ((brl->disp = malloc(dataCells))) {
 				 memset(brl->disp, 0, dataCells);
 				 refreshCells();
@@ -447,7 +449,6 @@ initbrl (char **parameters, brldim *brl, const char *device)
 static void
 closebrl (brldim *brl)
 {
-   tcflush(fileDescriptor, TCIFLUSH);
    tcsetattr(fileDescriptor, TCSADRAIN, &oldSettings);
 
    close(fileDescriptor);
@@ -477,7 +478,9 @@ setbrlstat (const unsigned char *status)
 {
    if (memcmp(statusArea, status, statusCells) != 0) {
       memcpy(statusArea, status, statusCells);
-      refreshCells();
+      /* refreshCells();
+       * Not needed since writebrl will be called shortly.
+       */
    }
 }
 
@@ -911,9 +914,13 @@ static int
 readbrl (DriverCommandContext cmds)
 {
    unsigned char character;
+   int count = read(fileDescriptor, &character, 1);
    int (*handler)(unsigned char, DriverCommandContext);
 
-   if (read(fileDescriptor, &character, 1) != 1) {
+   if (count != 1) {
+      if (count == -1) {
+         systemError("BrailleNote read");
+      }
       return EOF;
    }
    switch (character) {

@@ -274,7 +274,7 @@ static void closebrl (brldim *brl)
    free (brl->disp);
    free (rawdata);
    free (prevdata);
-   tcsetattr (brl_fd, TCSANOW, &oldtio);		/* restore terminal settings */
+   tcsetattr (brl_fd, TCSADRAIN, &oldtio);		/* restore terminal settings */
    close (brl_fd);
 }
 

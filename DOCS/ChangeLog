@@ -21,7 +21,7 @@ Note: this file is in reversed chronological order (bottom to top).
       braille-configuration becomes preferences-file
       dot-translation becomes text-table
       speech-driverparm becomes speech-parameters
-   Added -e (--errors) option to log to standard error rather than via syslog. (dm,sd)
+   Added -e (--standard-error) option to log to standard error rather than via syslog. (dm,sd)
    Added -f (--configuration-file=) option to specify default parameters file (brltty.conf). (dm)
    Recognize level names (and abbreviations thereof) for -l (--log-level=) option. (dm)
       (emergency, alert, critical, error, warning, notice, information, debug)
@@ -31,7 +31,11 @@ Note: this file is in reversed chronological order (bottom to top).
       Introduce short option -a.
       Introduce long option --attributes-table=.
       Introduce brltty.conf directive attributes-table.
-   Implemented generic driver parameter facility. (dm,sd)
+   Added -C (--cycle-delay=) option. (dm)
+   Added -M (--message-delay=) option. (dm)
+   Added -R (--read-delay=) option. (dm)
+   Added -P (--pid-file=) option. (dm)
+   Implemented generic driver parameters facility. (dm,sd)
    BrailleNote driver added. (dm) with help from Mike Pedersen <mpedersen@mindspring.com>
    HandyTech driver added. Andreas Gross <andi@andi-bika.de>
    BrailleLite driver enhancements. (sd)
@@ -54,6 +58,7 @@ Note: this file is in reversed chronological order (bottom to top).
       Fixed type 3 status key assignments: 5-8 -> 6-9.
       Redefined type 3 front key 13 from cut_beg to cut_end.
       Renamed environment variable BRLTTY_CONF to BRLTTY_PM_CONF.
+      Key releases no longer interrupt message waits.
    TSI driver enhancements. (sd)
       Added bindings for go to beginning/end of current line.
    Cleaned up Alva parallel port build. (dm) + Andreas Gross <andi@andi-bika.de>
@@ -66,9 +71,11 @@ Note: this file is in reversed chronological order (bottom to top).
    Add command parameter to GenericSay driver. (dm)
    Add program, uid, and gid parameters to ExternalSpeech driver. (sd)
    List translation tables in make file. (dm)
-   Cross-compile support added to make file. (sd)
+   Cross-compile support added to make file. (sd,dm)
    INSTALL_ROOT added to make file. (dm)
    Configuration menu made more user-friendly. (dm,sd)
+      Choices are words rather than numbers.
+      Only present relevant items.
    Added support for tunes via sound card (/dev/dsp). (dm,np)
    Added support for tunes via MIDI (/dev/sequencer). (dm)
    Added support for tunes via AdLib/OPL3/SB-FM. (dm)
@@ -89,22 +96,35 @@ Note: this file is in reversed chronological order (bottom to top).
       Added to BrailleNote driver. (dm)
       Added to TSI driver. (sd)
    Maintain reverse text translation table for input from braille display. (dm,sd)
-   Converted CMD_ defines to enum. (dm)
-      CombiBraille: tables.h converted to cmdtrans.h, argtrans removed
+   Converted CMD_ from defines to enum. (dm)
+      CombiBraille: tables.h converted to cmdtrans.h, argtrans removed.
+   Converted CMD_KEY_... commands to VAL_PASSKEY+VPK_... mechanism. (dm)
+      BrailleLite cmdtrans[] and blkey.cmd changed from unsigned char to int.
+   Renamed VAL_PASSTHRU to VAL_PASSCHAR. (dm)
+   Renamed VAL_BRLKEY to VAL_PASSDOTS. (dm)
    Inform readbrl of the current command context. (dm)
+   Remove TBL_CMD and TBL_ARG. (dm)
    Log command line option errors to syslog. (dm)
    Make message delay by default; add MSG_NODELAY flag. (sd)
    Close console file descriptor in switchvt. (dm)
    Fix problems with the skipping of blank windows and ends of liens. (sd)
    Change directory to right place if PREFIX is set. (dm)
    Disable speech tracking when CMD_SAY is used. (np)
+   Merged LogAndStderr into LohPrint. (dm)
+   Long help (-h) output lines now wrap cleanly. (dm)
+   Increased default message delay from 2 to 5 seconds. (dm)
+   Message delay is now interruptable by pressing key on braille display. (dm)
+   Startup and exiting messages now fit within 18 characters. (dm,sd)
+   Added message to alert user to presence of startup errors. (dm)
+   Warn if a configuration file directive is specified more than once. (dm)
+   Added more memory allocation and I/O error checks. (dm)
+   Control-C now usable during startup and driver restart. (dm,sd)
    Audit all braille and speech drivers. (dm)
       Remove printing via stdio.
       Ensure that first line of identification output uses LOG_NOTICE.
       Ensure that subsequent lines of identification output use LOG_INFO.
-      Ensure that all driver identification lines use LogAndStderr.
-      Ensure that all driver execution reporting uses LogPrint.
       Remove new-lines from logged messages.
+      Ensure that all output to braille display is drained before closing. 
 
 June 26, 2001:
  - BRLTTY 2.98 released:

@@ -28,6 +28,8 @@
 #define HANDY_24 0x80
 #define HANDY_44 0x89
 #define HANDY_84 0x88
+#define HANDY_BRAILLE_WAVE 0x05
+#define HANDY_BOOK_WORM 0x90
 
 /***** User Settings *****/
 /* typematic settings */

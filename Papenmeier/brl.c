@@ -55,8 +55,13 @@
 #include "../brl_driver.h"
 
 #ifdef READ_CONFIG
-#include "read_config.c"
+#include "config.tab.c"
 static void read_config();
+int yyerror (char* s)  /* Called by yyparse on error */
+{
+  LogPrint(LOG_CRIT, "Error: Zeile %d: %s", linenumber, s);
+  exit(99);
+}
 #else
 #include "brl-cfg.h"
 #endif
@@ -331,15 +336,18 @@ identbrl (void)
   LogPrint(LOG_INFO, "   Copyright (C) 1998-2000 by The BRLTTY Team.");
   LogPrint(LOG_INFO, "                 August Hörandl <august.hoerandl@gmx.at>");
   LogPrint(LOG_INFO, "                 Heimo Schön <heimo.schoen@gmx.at>");
-# ifdef RD_DEBUG
+
+#ifdef RD_DEBUG
   LogPrint(LOG_INFO, "   Input debugging enabled.");
-# endif
-# ifdef WR_DEBUG
+#endif
+
+#ifdef WR_DEBUG
   LogPrint(LOG_INFO, "   Output debugging enabled.");
-# endif
+#endif
+
 #ifdef MOD_DEBUG
   LogPrint(LOG_INFO, "   Modifier Keys debugging enabled.");
-# endif
+#endif
 
   /* read the config file for individual configurations */
 #ifdef READ_CONFIG

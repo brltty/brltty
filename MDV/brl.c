@@ -538,7 +538,7 @@ closebrl (brldim *brl)
 {
   if (brl_fd >= 0)
     {
-      tcsetattr (brl_fd, TCSANOW, &oldtio);
+      tcsetattr (brl_fd, TCSADRAIN, &oldtio);
       close (brl_fd);
     }
   if (brl->disp) free (brl->disp);

@@ -28,10 +28,8 @@ BRAILLE_MODELS =
 include ../driver.mk
 
 
-LD = ld
-
 brlmain.o: brlmain.cc brlconf.h ../brl.h ../misc.h ../scr.h ../config.h
-	$(COMPCPP) $(CFLAGS) $(BRL_CFLAGS) '-DBRLDEV="$(BRLDEV)"' -c brlmain.cc
+	$(COMPCPP) $(BRL_CFLAGS) '-DBRLDEV="$(BRLDEV)"' -c brlmain.cc
 
 brl.o: brlmain.o
 	$(LD) -r -o brl.o brlmain.o
