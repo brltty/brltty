@@ -309,9 +309,81 @@ static int wheelCounter;
 
 static void
 negativeAcknowledgement (const Packet *packet) {
-  LogPrint(LOG_WARNING, "Negative Acknowledgement: %02X %02X",
-           packet->header.arg1,
-           packet->header.arg2);
+  const char *problem;
+  const char *component;
+
+  switch (packet->header.arg1) {
+    default:
+      problem = "unknown problem";
+      break;
+    case PKT_ERR_TIMEOUT:
+      problem = "no response from host";
+      break;
+    case PKT_ERR_CHECKSUM:
+      problem = "incorrect checksum";
+      break;
+    case PKT_ERR_TYPE:
+      problem = "unknown packet type";
+      break;
+    case PKT_ERR_PARAMETER:
+      problem = "invalid parameter value";
+      break;
+    case PKT_ERR_SIZE:
+      problem = "write size too large";
+      break;
+    case PKT_ERR_POSITION:
+      problem = "write start too large";
+      break;
+    case PKT_ERR_OVERRUN:
+      problem = "message FIFO overflow";
+      break;
+    case PKT_ERR_POWER:
+      problem = "insufficient USB power";
+      break;
+    case PKT_ERR_SPI:
+      problem = "SPI bus timeout";
+      break;
+  }
+
+  switch (packet->header.arg2) {
+    default:
+      component = "unknown component";
+      break;
+    case PKT_EXT_HVADJ:
+      component = "VariBraille packet";
+      break;
+    case PKT_EXT_BEEP:
+      component = "beep packet";
+      break;
+    case PKT_EXT_CLEAR:
+      component = "ClearMsgBuf function";
+      break;
+    case PKT_EXT_LOOP:
+      component = "timing loop of ParseCommands function";
+      break;
+    case PKT_EXT_TYPE:
+      component = "ParseCommands function";
+      break;
+    case PKT_EXT_CMDWRITE:
+      component = "CmdWrite function";
+      break;
+    case PKT_EXT_UPDATE:
+      component = "update packet";
+      break;
+    case PKT_EXT_DIAG:
+      component = "diag packet";
+      break;
+    case PKT_EXT_QUERY:
+      component = "query packet";
+      break;
+    case PKT_EXT_WRITE:
+      component = "write packet";
+      break;
+  }
+
+  LogPrint(LOG_WARNING, "Negative Acknowledgement: %02X [%s] in %02X [%s]",
+           packet->header.arg1, problem,
+           packet->header.arg2, component);
 }
 
 static int
@@ -513,8 +585,10 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
                      model->textCells, model->statusCells,
                      response.payload.info.firmware);
 
-            statusOffset = 0;
-            textOffset =  (model->statusCells)? model->statusCells+1: 0;
+            textOffset = statusOffset = 0;
+            if (model->statusCells) {
+              textOffset += model->statusCells + 1;
+            }
 
             memset(outputBuffer, 0, model->totalCells);
             writeFrom = 0;
@@ -776,54 +850,59 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
 
         activeKeys = 0;
         if (press) {
-          switch (row) {
-            default:
-              break;
+          if ((button >= textOffset) && (button < (textOffset + model->textCells))) {
+            button -= textOffset;
+            switch (row) {
+              default:
+                break;
 
-            case 0:
-              switch (pressedKeys) {
-                default:
-                  break;
-                case 0:
-                  command = CR_ROUTE;
-                  break;
-                case (KEY_ADVANCE_LEFT):
-                  command = CR_CUTBEGIN;
-                  break;
-                case (KEY_ADVANCE_RIGHT):
-                  command = CR_CUTRECT;
-                  break;
-                case (KEY_GDF_LEFT):
-                  command = CR_CUTAPPEND;
-                  break;
-                case (KEY_GDF_RIGHT):
-                  command = CR_CUTLINE;
-                  break;
-              }
-              break;
+              case 0:
+                switch (pressedKeys) {
+                  default:
+                    break;
+                  case 0:
+                    command = CR_ROUTE;
+                    break;
+                  case (KEY_ADVANCE_LEFT):
+                    command = CR_CUTBEGIN;
+                    break;
+                  case (KEY_ADVANCE_RIGHT):
+                    command = CR_CUTRECT;
+                    break;
+                  case (KEY_GDF_LEFT):
+                    command = CR_CUTAPPEND;
+                    break;
+                  case (KEY_GDF_RIGHT):
+                    command = CR_CUTLINE;
+                    break;
+                }
+                break;
 
-            case 1:
-              switch (pressedKeys) {
-                default:
-                  break;
-                case 0:
-                  command = CR_DESCCHAR;
-                  break;
-                case (KEY_ADVANCE_LEFT):
-                  command = CR_PRINDENT;
-                  break;
-                case (KEY_ADVANCE_RIGHT):
-                  command = CR_NXINDENT;
-                  break;
-                case (KEY_GDF_LEFT):
-                  command = CR_SETLEFT;
-                  break;
-              }
-              break;
+              case 1:
+                switch (pressedKeys) {
+                  default:
+                    break;
+                  case 0:
+                    command = CR_DESCCHAR;
+                    break;
+                  case (KEY_ADVANCE_LEFT):
+                    command = CR_PRINDENT;
+                    break;
+                  case (KEY_ADVANCE_RIGHT):
+                    command = CR_NXINDENT;
+                    break;
+                  case (KEY_GDF_LEFT):
+                    command = CR_SETLEFT;
+                    break;
+                }
+                break;
+            }
+            if (command != CMD_NOOP) command += button;
+          } else if ((button >= statusOffset) && (button < (statusOffset + model->statusCells))) {
+            button -= statusOffset;
           }
         }
 
-        if (command != CMD_NOOP) command += button;
         return command;
       }
 
