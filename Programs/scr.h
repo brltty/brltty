@@ -48,24 +48,24 @@ typedef struct {
 } ScreenBox;
 extern int validateScreenBox (const ScreenBox *box, int columns, int rows);
 
-#define KEY_MOD_META 0X100
+#define SCR_KEY_MOD_META 0X100
 typedef enum {
-  KEY_RETURN = 0X200,
-  KEY_TAB,
-  KEY_BACKSPACE,
-  KEY_ESCAPE,
-  KEY_CURSOR_LEFT,
-  KEY_CURSOR_RIGHT,
-  KEY_CURSOR_UP,
-  KEY_CURSOR_DOWN,
-  KEY_PAGE_UP,
-  KEY_PAGE_DOWN,
-  KEY_HOME,
-  KEY_END,
-  KEY_INSERT,
-  KEY_DELETE,
-  KEY_FUNCTION
-} ConsoleKey;
+  SCR_KEY_RETURN = 0X200,
+  SCR_KEY_TAB,
+  SCR_KEY_BACKSPACE,
+  SCR_KEY_ESCAPE,
+  SCR_KEY_CURSOR_LEFT,
+  SCR_KEY_CURSOR_RIGHT,
+  SCR_KEY_CURSOR_UP,
+  SCR_KEY_CURSOR_DOWN,
+  SCR_KEY_PAGE_UP,
+  SCR_KEY_PAGE_DOWN,
+  SCR_KEY_HOME,
+  SCR_KEY_END,
+  SCR_KEY_INSERT,
+  SCR_KEY_DELETE,
+  SCR_KEY_FUNCTION
+} ScreenKey;
 
 /* Routines which apply to all screens. */
 void initializeAllScreens (void);		/* close screen reading */

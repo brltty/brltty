@@ -697,7 +697,7 @@ insertCharacter (unsigned char character, int flags) {
 
   {
     unsigned short key = character;
-    if (flags & VPC_META) key |= KEY_MOD_META;
+    if (flags & VPC_META) key |= SCR_KEY_MOD_META;
     return insertKey(key);
   }
 }
@@ -1635,50 +1635,50 @@ main (int argc, char *argv[]) {
                 unsigned short key;
                 switch (arg) {
                   case VPK_RETURN:
-                    key = KEY_RETURN;
+                    key = SCR_KEY_RETURN;
                     break;
                   case VPK_TAB:
-                    key = KEY_TAB;
+                    key = SCR_KEY_TAB;
                     break;
                   case VPK_BACKSPACE:
-                    key = KEY_BACKSPACE;
+                    key = SCR_KEY_BACKSPACE;
                     break;
                   case VPK_ESCAPE:
-                    key = KEY_ESCAPE;
+                    key = SCR_KEY_ESCAPE;
                     break;
                   case VPK_CURSOR_LEFT:
-                    key = KEY_CURSOR_LEFT;
+                    key = SCR_KEY_CURSOR_LEFT;
                     break;
                   case VPK_CURSOR_RIGHT:
-                    key = KEY_CURSOR_RIGHT;
+                    key = SCR_KEY_CURSOR_RIGHT;
                     break;
                   case VPK_CURSOR_UP:
-                    key = KEY_CURSOR_UP;
+                    key = SCR_KEY_CURSOR_UP;
                     break;
                   case VPK_CURSOR_DOWN:
-                    key = KEY_CURSOR_DOWN;
+                    key = SCR_KEY_CURSOR_DOWN;
                     break;
                   case VPK_PAGE_UP:
-                    key = KEY_PAGE_UP;
+                    key = SCR_KEY_PAGE_UP;
                     break;
                   case VPK_PAGE_DOWN:
-                    key = KEY_PAGE_DOWN;
+                    key = SCR_KEY_PAGE_DOWN;
                     break;
                   case VPK_HOME:
-                    key = KEY_HOME;
+                    key = SCR_KEY_HOME;
                     break;
                   case VPK_END:
-                    key = KEY_END;
+                    key = SCR_KEY_END;
                     break;
                   case VPK_INSERT:
-                    key = KEY_INSERT;
+                    key = SCR_KEY_INSERT;
                     break;
                   case VPK_DELETE:
-                    key = KEY_DELETE;
+                    key = SCR_KEY_DELETE;
                     break;
                   default:
                     if (arg < VPK_FUNCTION) goto badKey;
-                    key = KEY_FUNCTION + (arg - VPK_FUNCTION);
+                    key = SCR_KEY_FUNCTION + (arg - VPK_FUNCTION);
                     break;
                 }
                 if (!insertKey(key))

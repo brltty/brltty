@@ -71,7 +71,7 @@ doCursorRouting (int column, int row, int screen) {
 
   /* Deal with vertical movement first, ignoring horizontal jumping ... */
   while ((dif = row - scr.posy) && (scr.no == screen)) {
-    insertCursorKey((dif > 0)? KEY_CURSOR_DOWN: KEY_CURSOR_UP, &mask);
+    insertCursorKey((dif > 0)? SCR_KEY_CURSOR_DOWN: SCR_KEY_CURSOR_UP, &mask);
     timeout_yet(0);		/* initialise stop-watch */
     while (1) {
       delay(CURSOR_ROUTING_INTERVAL);	/* sleep a while ... */
@@ -95,7 +95,7 @@ doCursorRouting (int column, int row, int screen) {
          * go back to the previous position wich was obviously the 
          * nearest ever reached to date before giving up.
          */
-        insertCursorKey((dif < 0)? KEY_CURSOR_DOWN: KEY_CURSOR_UP, &mask);
+        insertCursorKey((dif < 0)? SCR_KEY_CURSOR_DOWN: SCR_KEY_CURSOR_UP, &mask);
         break;
       }
     }
@@ -104,7 +104,7 @@ doCursorRouting (int column, int row, int screen) {
   if (column >= 0) {	/* don't do this for vertical-only routing (column=-1) */
     /* Now horizontal movement, quitting if the vertical position is wrong: */
     while ((dif = column - scr.posx) && (scr.posy == row) && (scr.no == screen)) {
-      insertCursorKey((dif > 0)? KEY_CURSOR_RIGHT: KEY_CURSOR_LEFT, &mask);
+      insertCursorKey((dif > 0)? SCR_KEY_CURSOR_RIGHT: SCR_KEY_CURSOR_LEFT, &mask);
       timeout_yet(0);	/* initialise stop-watch */
       while (1) {
         delay(CURSOR_ROUTING_INTERVAL);	/* sleep a while ... */
@@ -128,7 +128,7 @@ doCursorRouting (int column, int row, int screen) {
            * position which was obviously the nearest ever reached
            * to date before we exit.
            */
-          insertCursorKey((dif > 0)? KEY_CURSOR_LEFT: KEY_CURSOR_RIGHT, &mask);
+          insertCursorKey((dif > 0)? SCR_KEY_CURSOR_LEFT: SCR_KEY_CURSOR_RIGHT, &mask);
           break;
         }
       }

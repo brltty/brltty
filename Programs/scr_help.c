@@ -252,39 +252,39 @@ read_HelpScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
 static int
 insert_HelpScreen (unsigned short key) {
   switch (key) {
-    case KEY_PAGE_UP:
+    case SCR_KEY_PAGE_UP:
       if (pageNumber > 0) {
         --pageNumber;
         cursorRow = cursorColumn = 0;
         return 1;
       }
       break;
-    case KEY_PAGE_DOWN:
+    case SCR_KEY_PAGE_DOWN:
       if (pageNumber < (fileHeader.pages - 1)) {
         ++pageNumber;
         cursorRow = cursorColumn = 0;
         return 1;
       }
       break;
-    case KEY_CURSOR_UP:
+    case SCR_KEY_CURSOR_UP:
       if (cursorRow > 0) {
         --cursorRow;
         return 1;
       }
       break;
-    case KEY_CURSOR_DOWN:
+    case SCR_KEY_CURSOR_DOWN:
       if (cursorRow < (getBigEndian(pageDescriptions[pageNumber].height) - 1)) {
         ++cursorRow;
         return 1;
       }
       break;
-    case KEY_CURSOR_LEFT:
+    case SCR_KEY_CURSOR_LEFT:
       if (cursorColumn > 0) {
         --cursorColumn;
         return 1;
       }
       break;
-    case KEY_CURSOR_RIGHT:
+    case SCR_KEY_CURSOR_RIGHT:
       if (cursorColumn < (getBigEndian(pageDescriptions[pageNumber].width) - 1)) {
         ++cursorColumn;
         return 1;

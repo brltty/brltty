@@ -806,9 +806,9 @@ insertCode (unsigned short key, int raw) {
   int modControl = 0;
   int modMeta = 0;
 
-  if (key < KEY_RETURN) {
-    if (key & KEY_MOD_META) {
-      key &= ~KEY_MOD_META;
+  if (key < SCR_KEY_RETURN) {
+    if (key & SCR_KEY_MOD_META) {
+      key &= ~SCR_KEY_MOD_META;
       modMeta = 1;
     }
 
@@ -822,100 +822,100 @@ insertCode (unsigned short key, int raw) {
   }
 
   switch (key) {
-    case KEY_ESCAPE:        code = 0X01; break;
-    case KEY_FUNCTION +  0: code = 0X3B; break;
-    case KEY_FUNCTION +  1: code = 0X3C; break;
-    case KEY_FUNCTION +  2: code = 0X3D; break;
-    case KEY_FUNCTION +  3: code = 0X3E; break;
-    case KEY_FUNCTION +  4: code = 0X3F; break;
-    case KEY_FUNCTION +  5: code = 0X40; break;
-    case KEY_FUNCTION +  6: code = 0X41; break;
-    case KEY_FUNCTION +  7: code = 0X42; break;
-    case KEY_FUNCTION +  8: code = 0X43; break;
-    case KEY_FUNCTION +  9: code = 0X44; break;
-    case KEY_FUNCTION + 10: code = 0X57; break;
-    case KEY_FUNCTION + 11: code = 0X58; break;
-    case '`':               code = 0X29; break;
-    case '1':               code = 0X02; break;
-    case '2':               code = 0X03; break;
-    case '3':               code = 0X04; break;
-    case '4':               code = 0X05; break;
-    case '5':               code = 0X06; break;
-    case '6':               code = 0X07; break;
-    case '7':               code = 0X08; break;
-    case '8':               code = 0X09; break;
-    case '9':               code = 0X0A; break;
-    case '0':               code = 0X0B; break;
-    case '-':               code = 0X0C; break;
-    case '=':               code = 0X0D; break;
-    case KEY_BACKSPACE:     code = 0X0E; break;
-    case KEY_TAB:           code = 0X0F; break;
-    case 'q':               code = 0X10; break;
-    case 'w':               code = 0X11; break;
-    case 'e':               code = 0X12; break;
-    case 'r':               code = 0X13; break;
-    case 't':               code = 0X14; break;
-    case 'y':               code = 0X15; break;
-    case 'u':               code = 0X16; break;
-    case 'i':               code = 0X17; break;
-    case 'o':               code = 0X18; break;
-    case 'p':               code = 0X19; break;
-    case '[':               code = 0X1A; break;
-    case ']':               code = 0X1B; break;
-    case '\\':              code = 0X2B; break;
-    case 'a':               code = 0X1E; break;
-    case 's':               code = 0X1F; break;
-    case 'd':               code = 0X20; break;
-    case 'f':               code = 0X21; break;
-    case 'g':               code = 0X22; break;
-    case 'h':               code = 0X23; break;
-    case 'j':               code = 0X24; break;
-    case 'k':               code = 0X25; break;
-    case 'l':               code = 0X26; break;
-    case ';':               code = 0X27; break;
-    case '\'':              code = 0X28; break;
-    case KEY_RETURN:        code = 0X1C; break;
-    case 'z':               code = 0X2C; break;
-    case 'x':               code = 0X2D; break;
-    case 'c':               code = 0X2E; break;
-    case 'v':               code = 0X2F; break;
-    case 'b':               code = 0X30; break;
-    case 'n':               code = 0X31; break;
-    case 'm':               code = 0X32; break;
-    case ',':               code = 0X33; break;
-    case '.':               code = 0X34; break;
-    case '/':               code = 0X35; break;
-    case ' ':               code = 0X39; break;
+    case SCR_KEY_ESCAPE:        code = 0X01; break;
+    case SCR_KEY_FUNCTION +  0: code = 0X3B; break;
+    case SCR_KEY_FUNCTION +  1: code = 0X3C; break;
+    case SCR_KEY_FUNCTION +  2: code = 0X3D; break;
+    case SCR_KEY_FUNCTION +  3: code = 0X3E; break;
+    case SCR_KEY_FUNCTION +  4: code = 0X3F; break;
+    case SCR_KEY_FUNCTION +  5: code = 0X40; break;
+    case SCR_KEY_FUNCTION +  6: code = 0X41; break;
+    case SCR_KEY_FUNCTION +  7: code = 0X42; break;
+    case SCR_KEY_FUNCTION +  8: code = 0X43; break;
+    case SCR_KEY_FUNCTION +  9: code = 0X44; break;
+    case SCR_KEY_FUNCTION + 10: code = 0X57; break;
+    case SCR_KEY_FUNCTION + 11: code = 0X58; break;
+    case '`':                   code = 0X29; break;
+    case '1':                   code = 0X02; break;
+    case '2':                   code = 0X03; break;
+    case '3':                   code = 0X04; break;
+    case '4':                   code = 0X05; break;
+    case '5':                   code = 0X06; break;
+    case '6':                   code = 0X07; break;
+    case '7':                   code = 0X08; break;
+    case '8':                   code = 0X09; break;
+    case '9':                   code = 0X0A; break;
+    case '0':                   code = 0X0B; break;
+    case '-':                   code = 0X0C; break;
+    case '=':                   code = 0X0D; break;
+    case SCR_KEY_BACKSPACE:     code = 0X0E; break;
+    case SCR_KEY_TAB:           code = 0X0F; break;
+    case 'q':                   code = 0X10; break;
+    case 'w':                   code = 0X11; break;
+    case 'e':                   code = 0X12; break;
+    case 'r':                   code = 0X13; break;
+    case 't':                   code = 0X14; break;
+    case 'y':                   code = 0X15; break;
+    case 'u':                   code = 0X16; break;
+    case 'i':                   code = 0X17; break;
+    case 'o':                   code = 0X18; break;
+    case 'p':                   code = 0X19; break;
+    case '[':                   code = 0X1A; break;
+    case ']':                   code = 0X1B; break;
+    case '\\':                  code = 0X2B; break;
+    case 'a':                   code = 0X1E; break;
+    case 's':                   code = 0X1F; break;
+    case 'd':                   code = 0X20; break;
+    case 'f':                   code = 0X21; break;
+    case 'g':                   code = 0X22; break;
+    case 'h':                   code = 0X23; break;
+    case 'j':                   code = 0X24; break;
+    case 'k':                   code = 0X25; break;
+    case 'l':                   code = 0X26; break;
+    case ';':                   code = 0X27; break;
+    case '\'':                  code = 0X28; break;
+    case SCR_KEY_RETURN:        code = 0X1C; break;
+    case 'z':                   code = 0X2C; break;
+    case 'x':                   code = 0X2D; break;
+    case 'c':                   code = 0X2E; break;
+    case 'v':                   code = 0X2F; break;
+    case 'b':                   code = 0X30; break;
+    case 'n':                   code = 0X31; break;
+    case 'm':                   code = 0X32; break;
+    case ',':                   code = 0X33; break;
+    case '.':                   code = 0X34; break;
+    case '/':                   code = 0X35; break;
+    case ' ':                   code = 0X39; break;
     default:
       if (raw) {
         prefix = 0XE0;
         switch (key) {
-          case KEY_INSERT:       code = 0X52; break;
-          case KEY_HOME:         code = 0X47; break;
-          case KEY_PAGE_UP:      code = 0X49; break;
-          case KEY_DELETE:       code = 0X53; break;
-          case KEY_END:          code = 0X4F; break;
-          case KEY_PAGE_DOWN:    code = 0X51; break;
-          case KEY_CURSOR_UP:    code = 0X48; break;
-          case KEY_CURSOR_LEFT:  code = 0X4B; break;
-          case KEY_CURSOR_DOWN:  code = 0X50; break;
-          case KEY_CURSOR_RIGHT: code = 0X4D; break;
+          case SCR_KEY_INSERT:       code = 0X52; break;
+          case SCR_KEY_HOME:         code = 0X47; break;
+          case SCR_KEY_PAGE_UP:      code = 0X49; break;
+          case SCR_KEY_DELETE:       code = 0X53; break;
+          case SCR_KEY_END:          code = 0X4F; break;
+          case SCR_KEY_PAGE_DOWN:    code = 0X51; break;
+          case SCR_KEY_CURSOR_UP:    code = 0X48; break;
+          case SCR_KEY_CURSOR_LEFT:  code = 0X4B; break;
+          case SCR_KEY_CURSOR_DOWN:  code = 0X50; break;
+          case SCR_KEY_CURSOR_RIGHT: code = 0X4D; break;
           default:
             LogPrint(LOG_WARNING, "Key %4.4X not suported in scancode mode.", key);
             return 0;
         }
       } else {
         switch (key) {
-          case KEY_INSERT:       code = 0X6E; break;
-          case KEY_HOME:         code = 0X66; break;
-          case KEY_PAGE_UP:      code = 0X68; break;
-          case KEY_DELETE:       code = 0X6F; break;
-          case KEY_END:          code = 0X6B; break;
-          case KEY_PAGE_DOWN:    code = 0X6D; break;
-          case KEY_CURSOR_UP:    code = 0X67; break;
-          case KEY_CURSOR_LEFT:  code = 0X69; break;
-          case KEY_CURSOR_DOWN:  code = 0X6C; break;
-          case KEY_CURSOR_RIGHT: code = 0X6A; break;
+          case SCR_KEY_INSERT:       code = 0X6E; break;
+          case SCR_KEY_HOME:         code = 0X66; break;
+          case SCR_KEY_PAGE_UP:      code = 0X68; break;
+          case SCR_KEY_DELETE:       code = 0X6F; break;
+          case SCR_KEY_END:          code = 0X6B; break;
+          case SCR_KEY_PAGE_DOWN:    code = 0X6D; break;
+          case SCR_KEY_CURSOR_UP:    code = 0X67; break;
+          case SCR_KEY_CURSOR_LEFT:  code = 0X69; break;
+          case SCR_KEY_CURSOR_DOWN:  code = 0X6C; break;
+          case SCR_KEY_CURSOR_RIGHT: code = 0X6A; break;
           default:
             LogPrint(LOG_WARNING, "Key %4.4X not suported in keycode mode.", key);
             return 0;
@@ -953,12 +953,12 @@ insertMapped (unsigned short key, int (*byteInserter)(unsigned char byte)) {
   unsigned char buffer[3];
   unsigned char *sequence;
 
-  if (key < KEY_RETURN) {
+  if (key < SCR_KEY_RETURN) {
     sequence = buffer + sizeof(buffer);
     *--sequence = 0;
     *--sequence = key & 0XFF;
 
-    if (key & KEY_MOD_META) {
+    if (key & SCR_KEY_MOD_META) {
       long meta;
       if (controlConsole(KDGKBMETA, &meta) == -1) return 0;
 
@@ -978,107 +978,107 @@ insertMapped (unsigned short key, int (*byteInserter)(unsigned char byte)) {
     }
   } else {
     switch (key) {
-      case KEY_RETURN:
+      case SCR_KEY_RETURN:
         sequence = "\r";
         break;
-      case KEY_TAB:
+      case SCR_KEY_TAB:
         sequence = "\t";
         break;
-      case KEY_BACKSPACE:
-        sequence = "\177";
+      case SCR_KEY_BACKSPACE:
+        sequence = "\x7f";
         break;
-      case KEY_ESCAPE:
-        sequence = "\033";
+      case SCR_KEY_ESCAPE:
+        sequence = "\x1b";
         break;
-      case KEY_CURSOR_LEFT:
-        sequence = "\033[D";
+      case SCR_KEY_CURSOR_LEFT:
+        sequence = "\x1b[D";
         break;
-      case KEY_CURSOR_RIGHT:
-        sequence = "\033[C";
+      case SCR_KEY_CURSOR_RIGHT:
+        sequence = "\x1b[C";
         break;
-      case KEY_CURSOR_UP:
-        sequence = "\033[A";
+      case SCR_KEY_CURSOR_UP:
+        sequence = "\x1b[A";
         break;
-      case KEY_CURSOR_DOWN:
-        sequence = "\033[B";
+      case SCR_KEY_CURSOR_DOWN:
+        sequence = "\x1b[B";
         break;
-      case KEY_PAGE_UP:
-        sequence = "\033[5~";
+      case SCR_KEY_PAGE_UP:
+        sequence = "\x1b[5~";
         break;
-      case KEY_PAGE_DOWN:
-        sequence = "\033[6~";
+      case SCR_KEY_PAGE_DOWN:
+        sequence = "\x1b[6~";
         break;
-      case KEY_HOME:
-        sequence = "\033[1~";
+      case SCR_KEY_HOME:
+        sequence = "\x1b[1~";
         break;
-      case KEY_END:
-        sequence = "\033[4~";
+      case SCR_KEY_END:
+        sequence = "\x1b[4~";
         break;
-      case KEY_INSERT:
-        sequence = "\033[2~";
+      case SCR_KEY_INSERT:
+        sequence = "\x1b[2~";
         break;
-      case KEY_DELETE:
-        sequence = "\033[3~";
+      case SCR_KEY_DELETE:
+        sequence = "\x1b[3~";
         break;
-      case KEY_FUNCTION + 0:
-        sequence = "\033OP";
+      case SCR_KEY_FUNCTION + 0:
+        sequence = "\x1bOP";
         break;
-      case KEY_FUNCTION + 1:
-        sequence = "\033OQ";
+      case SCR_KEY_FUNCTION + 1:
+        sequence = "\x1bOQ";
         break;
-      case KEY_FUNCTION + 2:
-        sequence = "\033OR";
+      case SCR_KEY_FUNCTION + 2:
+        sequence = "\x1bOR";
         break;
-      case KEY_FUNCTION + 3:
-        sequence = "\033OS";
+      case SCR_KEY_FUNCTION + 3:
+        sequence = "\x1bOS";
         break;
-      case KEY_FUNCTION + 4:
-        sequence = "\033[15~";
+      case SCR_KEY_FUNCTION + 4:
+        sequence = "\x1b[15~";
         break;
-      case KEY_FUNCTION + 5:
-        sequence = "\033[17~";
+      case SCR_KEY_FUNCTION + 5:
+        sequence = "\x1b[17~";
         break;
-      case KEY_FUNCTION + 6:
-        sequence = "\033[18~";
+      case SCR_KEY_FUNCTION + 6:
+        sequence = "\x1b[18~";
         break;
-      case KEY_FUNCTION + 7:
-        sequence = "\033[19~";
+      case SCR_KEY_FUNCTION + 7:
+        sequence = "\x1b[19~";
         break;
-      case KEY_FUNCTION + 8:
-        sequence = "\033[20~";
+      case SCR_KEY_FUNCTION + 8:
+        sequence = "\x1b[20~";
         break;
-      case KEY_FUNCTION + 9:
-        sequence = "\033[21~";
+      case SCR_KEY_FUNCTION + 9:
+        sequence = "\x1b[21~";
         break;
-      case KEY_FUNCTION + 10:
-        sequence = "\033[23~";
+      case SCR_KEY_FUNCTION + 10:
+        sequence = "\x1b[23~";
         break;
-      case KEY_FUNCTION + 11:
-        sequence = "\033[24~";
+      case SCR_KEY_FUNCTION + 11:
+        sequence = "\x1b[24~";
         break;
-      case KEY_FUNCTION + 12:
-        sequence = "\033[25~";
+      case SCR_KEY_FUNCTION + 12:
+        sequence = "\x1b[25~";
         break;
-      case KEY_FUNCTION + 13:
-        sequence = "\033[26~";
+      case SCR_KEY_FUNCTION + 13:
+        sequence = "\x1b[26~";
         break;
-      case KEY_FUNCTION + 14:
-        sequence = "\033[28~";
+      case SCR_KEY_FUNCTION + 14:
+        sequence = "\x1b[28~";
         break;
-      case KEY_FUNCTION + 15:
-        sequence = "\033[29~";
+      case SCR_KEY_FUNCTION + 15:
+        sequence = "\x1b[29~";
         break;
-      case KEY_FUNCTION + 16:
-        sequence = "\033[31~";
+      case SCR_KEY_FUNCTION + 16:
+        sequence = "\x1b[31~";
         break;
-      case KEY_FUNCTION + 17:
-        sequence = "\033[32~";
+      case SCR_KEY_FUNCTION + 17:
+        sequence = "\x1b[32~";
         break;
-      case KEY_FUNCTION + 18:
-        sequence = "\033[33~";
+      case SCR_KEY_FUNCTION + 18:
+        sequence = "\x1b[33~";
         break;
-      case KEY_FUNCTION + 19:
-        sequence = "\033[34~";
+      case SCR_KEY_FUNCTION + 19:
+        sequence = "\x1b[34~";
         break;
       default:
         LogPrint(LOG_WARNING, "Key %4.4X not suported in ANSI mode.", key);
