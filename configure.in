@@ -753,7 +753,7 @@ BRLTTY_BRAILLE_DRIVER([md], [MDV])
 BRLTTY_BRAILLE_DRIVER([mn], [MiniBraille])
 BRLTTY_BRAILLE_DRIVER([pm], [Papenmeier])
 BRLTTY_BRAILLE_DRIVER([ts], [TSI])
-test -n "${curses_package}" && {
+test -n "${brltty_package_curses}" && {
    BRLTTY_BRAILLE_DRIVER([tt], [TTY], [-l$(CURSES_LIB)])
 }
 BRLTTY_BRAILLE_DRIVER([va], [Vario])
