@@ -69,11 +69,14 @@ scr_real.$O:
 route.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/route.c
 
+scr_shm.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/scr_shm.c
+
 scr_linux.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/scr_linux.c
 
-scr_shm.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/scr_shm.c
+scr_hurd.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/scr_hurd.c
 
 ###############################################################################
 
