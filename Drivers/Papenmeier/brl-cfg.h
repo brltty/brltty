@@ -70,7 +70,7 @@ typedef enum {
 #define  EASYMAX   8
 #define  NAMEMAX   80
 #define  MODMAX    16
-#define  CMDMAX    200
+#define  CMDMAX    230
 #define  INPUTSPECMAX 20
 #define  HELPLEN   80
 
@@ -300,16 +300,18 @@ typedef struct {
   CMDS_EASY_L(key, swt, l1, l2), \
   CMDS_EASY_R(key, swt, r1, r2)
 #define CMDS_EASY_C(swt) \
-  {CMD_PREFMENU    , NOKEY, 0X10|swt}, \
-  {CMD_INFO        , NOKEY, 0X20|swt}, \
+  {CMD_BACK        , NOKEY, 0X10|swt}, \
+  {CMD_HOME        , NOKEY, 0X20|swt}, \
   {CMD_HELP        , NOKEY, 0X40|swt}, \
   {CMD_LEARN       , NOKEY, 0X80|swt}, \
-  {CMD_PASTE       , NOKEY, 0X50|swt}, \
-  {CMD_CSRJMP_VERT , NOKEY, 0X90|swt}, \
-  {CMD_BACK        , NOKEY, 0X60|swt}, \
-  {CMD_HOME        , NOKEY, 0XA0|swt}, \
+  CMDS_EASY_K(NOKEY,        0X10|swt, \
+              CMD_SIXDOTS, CMD_PASTE, CMD_CAPBLINK, CMD_CSRJMP_VERT, \
+              CMD_DISPMD, CMD_CSRTRK, CMD_ATTRVIS, CMD_CSRVIS), \
+  CMDS_EASY_K(NOKEY,        0X40|swt, \
+              CMD_AUTOSPEAK, CMD_AUTOREPEAT, CMD_RESTARTBRL, CMD_FREEZE, \
+              CMD_INFO, CMD_PREFMENU, CMD_PREFLOAD, CMD_PREFSAVE), \
   {CR_ROUTE        , ROUTINGKEY, swt}, \
-  CMDS_EASY_K(ROUTINGKEY, swt, \
+  CMDS_EASY_K(ROUTINGKEY,        swt, \
               CR_PRINDENT, CR_NXINDENT, CR_SETLEFT, CR_DESCCHAR, \
               CR_CUTAPPEND, CR_CUTLINE, CR_CUTBEGIN, CR_CUTRECT)
 #define CMDS_EASY \
@@ -332,11 +334,7 @@ typedef struct {
   CMDS_EASY_K(NOKEY, 0X02, \
               CMD_PRSEARCH, CMD_NXSEARCH, CMD_TOP_LEFT, CMD_BOT_LEFT, \
               CMD_CHRLT, CMD_CHRRT, CMD_HWINLT, CMD_HWINRT), \
-  CMDS_EASY_C(0X02), \
-  CMDS_EASY_K(NOKEY, 0X08, \
-              CMD_SIXDOTS, CMD_SKPIDLNS, CMD_FREEZE, CMD_SKPBLNKWINS, \
-              CMD_ATTRVIS, CMD_CSRVIS, CMD_DISPMD, CMD_CSRTRK), \
-  CMDS_EASY_C(0X08)
+  CMDS_EASY_C(0X02)
 
 
 /* what to show for 2 status cells */
