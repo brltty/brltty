@@ -69,6 +69,15 @@ ibm850toiso$X: $(IBM850TOISO_OBJECTS)
 ibm850toiso.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/ibm850toiso.c
 
+text.%.tbl:: text.%.txt txt2tbl$X
+	./txt2tbl$X $< $@
+
+text.%.txt:: text.%.tbl tbl2txt$X
+	./tbl2txt$X $< $@
+
 clean::
 	-rm -f $(PROGRAMS)
+
+distclean::
+	-rm -f *.txt
 
