@@ -31,6 +31,7 @@ syntaxError() {
 originalImage="boot.iso"
 modifiedImage="brltty.iso"
 brailleDrivers="all"
+invokeShell=false
 showUsage() {
    cat <<EOF
 Usage: ${programName} [-option ...] [original-image [modified-image]]
@@ -39,16 +40,18 @@ The modified (output) image defaults to "${modifiedImage}".
 The following options are supported:
 -b driver,...   The braille driver(s) to include (default: ${brailleDrivers}).
 -h              Display usage information for this command.
+-s              Invoke interactive shell to inspect modified image.
 EOF
    exit 0
 }
 
-while getopts ":b:h" option
+while getopts ":b:hs" option
 do
    case "${option}"
    in
       b) brailleDrivers="${OPTARG}";;
       h) showUsage;;
+      s) invokeShell=true;;
      \?) syntaxError "unknown option: -${OPTARG}";;
       :) syntaxError "missing operand: -${OPTARG}";;
       *) syntaxError "unimplemented option: -${option}";;
@@ -174,7 +177,7 @@ brlttyDirectory="${1}"
    make -s -C Programs install-programs install-help install-tables
 ) || exit "${?}"
 
-false && (
+"${invokeShell}" && (
    set +e
    trap "" 0
 
