@@ -18,6 +18,10 @@
 #ifndef _SCR_HELP_H
 #define _SCR_HELP_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 #include "scr_base.h"
 #include "help.h"
 
@@ -31,5 +35,9 @@ typedef struct {
 } HelpScreen;
 
 extern void initializeHelpScreen (HelpScreen *);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* _SCR_HELP_H */

@@ -18,6 +18,10 @@
 #ifndef _SCR_FROZEN_H
 #define _SCR_FROZEN_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 #include "scr_base.h"
 
 typedef struct {
@@ -27,5 +31,9 @@ typedef struct {
 } FrozenScreen;
 
 extern void initializeFrozenScreen (FrozenScreen *);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* _SCR_FROZEN_H */

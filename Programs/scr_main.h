@@ -18,6 +18,10 @@
 #ifndef _SCR_MAIN_H
 #define _SCR_MAIN_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 #include "scr_base.h"
 
 typedef struct {
@@ -31,5 +35,9 @@ typedef struct {
 
 extern void initializeMainScreen (MainScreen *);
 extern void initializeLiveScreen (MainScreen *);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* _SCR_MAIN_H */

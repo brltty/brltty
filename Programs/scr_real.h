@@ -18,8 +18,16 @@
 #ifndef _SCR_REAL_H
 #define _SCR_REAL_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 #include "scr_main.h"
 
 extern void initializeRealScreen (MainScreen *);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* _SCR_REAL_H */

@@ -18,10 +18,18 @@
 #ifndef _SCR_LINUX_H
 #define _SCR_LINUX_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 #define LINUX_SCREEN_DEVICES  "/dev/vcsa /dev/vcsa0 /dev/vcc/a"
 #define LINUX_CONSOLE_DEVICES "/dev/tty0 /dev/vc/0"
 
 typedef unsigned short int UnicodeNumber;
 typedef UnicodeNumber ApplicationCharacterMap[0X100];
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* _SCR_LINUX_H */

@@ -18,6 +18,10 @@
 #ifndef _SCR_BASE_H
 #define _SCR_BASE_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 typedef struct {
   void (*describe) (ScreenDescription *);
   unsigned char * (*read) (ScreenBox, unsigned char *, ScreenMode);
@@ -32,5 +36,9 @@ typedef struct {
 } BaseScreen;
 
 extern void initializeBaseScreen (BaseScreen *);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* _SCR_BASE_H */
