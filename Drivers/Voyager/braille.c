@@ -15,7 +15,7 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 #define VERSION "0.20"
-#define DATE "June 2004"
+#define DATE "July 2004"
 #define COPYRIGHT \
 "   Copyright (C) 2004 by Stéphane Doyon  <s.doyon@videotron.ca>"
 
@@ -35,6 +35,7 @@
  *       Move complex routing key combinations to front/dot keys.
  *       Duplicate status key bindings on front/dot keys.
  *       Execute on first release rather than on all released.
+ *       Add support for the part232 serial adapter.
  * 0.10, March 2004: Use BRLTTY core repeat functions. Add brlinput parameter
  *   and toggle to disallow braille typing.
  * 0.01, January 2004: fork from the original driver which relied on an
@@ -80,7 +81,7 @@ typedef struct {
   int (*getDisplayCurrent) (unsigned char *current);
   int (*setDisplayState) (unsigned char state);
   int (*writeBraille) (unsigned char *cells, unsigned char count, unsigned char start);
-  int (*getKeys) (unsigned char *packet);
+  int (*getKeys) (unsigned char *packet, int size);
   int (*soundBeep) (unsigned char duration);
 } InputOutputOperations;
 static const InputOutputOperations *io;
@@ -332,11 +333,12 @@ writeSerialBraille (unsigned char *cells, unsigned char count, unsigned char sta
 }
 
 static int
-getSerialKeys (unsigned char *packet) {
-  unsigned char buffer[9];
+getSerialKeys (unsigned char *packet, int size) {
+  const int offset = 1;
+  unsigned char buffer[offset + size];
   int length = nextSerialPacket(0X4B, buffer, sizeof(buffer));
   if (length) {
-    memcpy(packet, buffer+1, --length);
+    memcpy(packet, buffer+offset, length-=offset);
     return length;
   }
   return -1;
@@ -500,8 +502,8 @@ writeUsbBraille (unsigned char *cells, unsigned char count, unsigned char start)
 }
 
 static int
-getUsbKeys (unsigned char *packet) {
-  return usbReapInput(usb->device, usb->definition.inputEndpoint, packet, 8, 0, 0);
+getUsbKeys (unsigned char *packet, int size) {
+  return usbReapInput(usb->device, usb->definition.inputEndpoint, packet, size, 0, 0);
 }
 
 static int
@@ -845,7 +847,7 @@ brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds) {
   }
 
   {
-    int size = io->getKeys(packet);
+    int size = io->getKeys(packet, sizeof(packet));
     if (size < 0) {
       if (errno == EAGAIN) {
         /* no input */
