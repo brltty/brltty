@@ -6,7 +6,7 @@ The serial and USB ports are both supported. The following models are
 recognized:
 *  Focus: 44, 70, 84
 *  Focus 2: 40, 80
-*  PAC Mate: 20, 40
+*  PAC Mate: 20, 40, 80
 
 If an unrecognized model is connected then the driver makes an attempt to
 determine its size and to provide generic capabilities.
