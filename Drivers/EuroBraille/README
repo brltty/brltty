@@ -1,4 +1,4 @@
-This is the EuroBraille family driver for BRLTTY, version 1.1a
+This is the EuroBraille family driver for BRLTTY, version 1.2
 
 Initial writing by Nicolas Pitre <nico@cam.org>, Copyright 1997-1998.
 
@@ -14,13 +14,21 @@ All EuroBraille's displays should be supported here. However it has been tested
 on the following hardware:
    - a Clio-Notebraille display (20 40 and 80 cells);
    - a Scriba display (20 and 40);
-   - Someone reported that it worked pretty well with an Azerbraille display;
+   - an Azerbraille 40 and 80 display;
+   - a Clio-PupiBraille display (80 cells)
    - The driver is although tested with a NoteBraille display in order to 
      maintain backward compatibility.
 
 
 FIXES/ADDITIONS
 ===============
+Version 1.2 :
+	- Significantly reduced the size of the sourcecode: propper and easier
+	  to understand/customize;
+	- Added LCD support;
+	- Beta new Iris 20/32/40 support, not tested yet;
+	- Re-added Cut-n-paste routines: it was disabled, don't know why...
+
 Version 1.1a :
 	- Minor changes to function-keys to make the program easier to 
 	  undepstand. 
@@ -41,14 +49,14 @@ Version 1.0 :
      	  file if you didn't use a Scriba (or the Draculawin program) before to
      	  learn more about this menu.
    	- When the drivers starts, it now plays a melody on the terminal's 
-	  internalspeaker. 
+	  internal speaker. 
 	  This was made to ensure the user that the driver is loaded and is
        	  ready to be used.
 
 Version 0.9: 
-   - 	You can now view the internal date/time of your display, typing "#M" 
-	(or "Alpha+L9" on a Scriba). This doesn't work very well - don't know 
-	why...
+   	- You can now view the internal date/time of your display, typing "#M" 
+	  (or "Alpha+L9" on a Scriba). This doesn't work very well - don't know 
+	  why...
 
 Version 0.8:
    	- Minor changes were made in the use of the "inskey()" function.
@@ -74,9 +82,4 @@ EuroBraille version of BRLTTY in the world so if you use this driver, just
 e-mail me what are your suggestions for next versions.
 
 Yannick Plassiard <plassi_y@epitech.net>
-    November 24 2002
-
-
-
-
-
+    March 13 2003

@@ -21,9 +21,6 @@
 
 #define SPKNAME "BrailleLite"
 
-#ifdef SPEECH_C
-#undef SPEECH_C
-
 /* These sequences are sent to the Braille Lite before and after the
  * speech data itself.  The first byte is the length, so embedded nuls are
  * allowed.
@@ -141,5 +138,3 @@ static unsigned char *vocab[MAX_TRANS - 32] =
   " tilde "
 };
 #endif /* MAX_TRANS > 32 */
-
-#endif /* defined(SPEECH_C) */

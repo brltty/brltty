@@ -142,6 +142,7 @@ main (int argc, char *argv[]) {
     }
 
     memset(&prefs, 0, sizeof(prefs));
+    prefs.alertMessages = 0;
     prefs.alertDots = 0;
     prefs.alertTunes = 1;
     switch (opt_tuneDevice) {

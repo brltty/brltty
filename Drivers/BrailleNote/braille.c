@@ -20,8 +20,6 @@
  * Author: Dave Mielke <dave@mielke.cc>
  */
 
-#define BRL_C
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif /* HAVE_CONFIG_H */

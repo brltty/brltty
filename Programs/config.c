@@ -62,6 +62,9 @@ char COPYRIGHT[] = "Copyright (C) 1995-2003 by The BRLTTY Team - all rights rese
 #define TEXT_TABLE_PREFIX "text."
 #define ATTRIBUTES_TABLE_PREFIX "attr."
 
+#ifdef ENABLE_API
+static char *opt_apiParameters = NULL;
+#endif /* ENABLE_API */
 static const char *opt_attributesTable = NULL;
 static const char *opt_brailleDevice = NULL;
 static const char *opt_brailleDriver = NULL;
@@ -92,6 +95,9 @@ static char *cfg_attributesTable = NULL;
 #ifdef ENABLE_CONTRACTED_BRAILLE
 static char *cfg_contractionTable = NULL;
 #endif /* ENABLE_CONTRACTED_BRAILLE */
+#ifdef ENABLE_API
+static char *cfg_apiParameters = NULL;
+#endif /* ENABLE_API */
 static char *cfg_brailleDevice = NULL;
 static char *cfg_brailleDriver = NULL;
 static char *cfg_brailleParameters = NULL;
@@ -103,6 +109,10 @@ static char *cfg_screenParameters = NULL;
 
 static const BrailleDriver *brailleDriver;
 static char **brailleParameters = NULL;
+
+#ifdef ENABLE_API
+static char **apiParameters = NULL;
+#endif /* ENABLE_API */
 
 #ifdef ENABLE_SPEECH_SUPPORT
 static const SpeechDriver *speechDriver;
@@ -146,6 +156,13 @@ configureContractionTable (const char *delimiters) {
   return getToken(&cfg_contractionTable, delimiters);
 }
 #endif /* ENABLE_CONTRACTED_BRAILLE */
+
+#ifdef ENABLE_API
+static int
+configureApiParameters (const char *delimiters) {
+  return getToken(&cfg_apiParameters, delimiters);
+}
+#endif /* ENABLE_API */
 
 static int
 configureBrailleDevice (const char *delimiters) {
@@ -210,8 +227,12 @@ BEGIN_OPTION_TABLE
    "Path to text translation table file."},
   {'v', "version", NULL, NULL, 0,
    "Print start-up messages and exit."},
+#ifdef ENABLE_API
+  {'A', "api-parameters", "arg,...", configureApiParameters, 0,
+   "Parameters for the application programming interface."},
+#endif /* ENABLE_API */
   {'B', "braille-parameters", "arg,...", configureBrailleParameters, 0,
-   "Parameters to braille driver."},
+   "Parameters for the braille driver."},
   {'E', "environment-variables", NULL, NULL, 0,
    "Recognize environment variables."},
   {'M', "message-delay", "csecs", NULL, 0,
@@ -224,10 +245,10 @@ BEGIN_OPTION_TABLE
    "Braille window refresh interval [4]."},
 #ifdef ENABLE_SPEECH_SUPPORT
   {'S', "speech-parameters", "arg,...", configureSpeechParameters, 0,
-   "Parameters to speech driver."},
+   "Parameters for the speech driver."},
 #endif /* ENABLE_SPEECH_SUPPORT */
   {'X', "screen-parameters", "arg,...", configureScreenParameters, 0,
-   "Parameters to screen driver."},
+   "Parameters for the screen driver."},
 END_OPTION_TABLE
 
 static const char **bootParameters = NULL;
@@ -512,23 +533,25 @@ getBrailleDriver (void) {
 
 void
 startBrailleDriver (void) {
-   if (brailleDriver->open(&brl, brailleParameters, opt_brailleDevice)) {
-      if (allocateBrailleBuffer(&brl)) {
-         braille = brailleDriver;
-         clearStatusCells();
-         setHelpPageNumber(brl.helpPage);
-         playTune(&tune_detected);
-         return;
+   while (1) {
+      if (brailleDriver->open(&brl, brailleParameters, opt_brailleDevice)) {
+         if (allocateBrailleBuffer(&brl)) {
+            braille = brailleDriver;
+            clearStatusCells();
+            setHelpPageNumber(brl.helpPage);
+            playTune(&tune_detected);
+            return;
+         } else {
+            LogPrint(LOG_CRIT, "Braille buffer allocation failed.");
+         }
+         brailleDriver->close(&brl);
       } else {
-         LogPrint(LOG_CRIT, "Braille buffer allocation failed.");
+         LogPrint(LOG_CRIT, "Braille driver initialization failed.");
       }
-      brailleDriver->close(&brl);
-   } else {
-      LogPrint(LOG_CRIT, "Braille driver initialization failed.");
-   }
 
-   initializeBraille();
-   exit(6);
+      initializeBraille();
+      sleep(5);
+   }
 }
 
 void
@@ -545,6 +568,13 @@ exitBrailleDriver (void) {
    message("BRLTTY terminated.", MSG_NODELAY|MSG_SILENT);
    stopBrailleDriver();
 }
+
+#ifdef ENABLE_API
+static void
+exitApi (void) {
+   api_close(&brl);
+}
+#endif /* ENABLE_API */
 
 #ifdef ENABLE_SPEECH_SUPPORT
 void
@@ -627,12 +657,14 @@ loadPreferences (int change) {
         if (change) changedPreferences();
       } else
         LogPrint(LOG_ERR, "Invalid preferences file: %s", opt_preferencesFile);
-    } else if (count == -1)
+    } else if (count == -1) {
       LogPrint(LOG_ERR, "Cannot read preferences file: %s: %s",
                opt_preferencesFile, strerror(errno));
-    else
-      LogPrint(LOG_ERR, "Preferences file '%s' has incorrect size %d (should be %d).",
-               opt_preferencesFile, count, sizeof(newPreferences));
+    } else {
+      long int actualSize = sizeof(newPreferences);
+      LogPrint(LOG_ERR, "Preferences file '%s' has incorrect size %d (should be %ld).",
+               opt_preferencesFile, count, actualSize);
+    }
     close(fd);
   } else
     LogPrint((errno==ENOENT? LOG_DEBUG: LOG_ERR),
@@ -967,6 +999,7 @@ updatePreferences (void) {
        VOLUME_ITEM(prefs.fmVolume, changedFmVolume, testTunesFm, "FM Volume"),
 #endif /* ENABLE_FM_TUNES */
        BOOLEAN_ITEM(prefs.alertDots, NULL, NULL, "Alert Dots"),
+       BOOLEAN_ITEM(prefs.alertMessages, NULL, NULL, "Alert Messages"),
        SYMBOLIC_ITEM(prefs.statusStyle, NULL, NULL, "Status Style", statusStyles),
 #ifdef ENABLE_TABLE_SELECTION
        GLOB_ITEM(glob_textTable, changedTextTable, NULL, "Text Table"),
@@ -1302,7 +1335,12 @@ handleOption (const int option) {
     case 'v':                /* version */
       opt_version = 1;
       break;
-    case 'B':                        /* parameter to speech driver */
+#ifdef ENABLE_API
+    case 'A':	/* parameters for application programming interface */
+      extendParameters(&opt_apiParameters, optarg);
+      break;
+#endif /* ENABLE_API */
+    case 'B':                        /* parameters for braille driver */
       extendParameters(&opt_brailleParameters, optarg);
       break;
     case 'E':                        /* parameter to speech driver */
@@ -1329,11 +1367,11 @@ handleOption (const int option) {
       break;
     }
 #ifdef ENABLE_SPEECH_SUPPORT
-    case 'S':                        /* parameter to speech driver */
+    case 'S':                        /* parameters for speech driver */
       extendParameters(&opt_speechParameters, optarg);
       break;
 #endif /* ENABLE_SPEECH_SUPPORT */
-    case 'X':                        /* parameter to speech driver */
+    case 'X':                        /* parameters for screen driver */
       extendParameters(&opt_screenParameters, optarg);
       break;
   }
@@ -1431,6 +1469,10 @@ startup(int argc, char *argv[]) {
 #ifdef ENABLE_SPEECH_SUPPORT
   getSpeechDriver();
 #endif /* ENABLE_SPEECH_SUPPORT */
+#ifdef ENABLE_API
+  processParameters(&apiParameters, api_parameters, "application programming interface",
+                    opt_apiParameters, cfg_apiParameters, "BRLTTY_API_PARAMETERS");
+#endif /* ENABLE_API */
   processParameters(&screenParameters, getScreenParameters(), "screen driver",
                     opt_screenParameters, cfg_screenParameters, "BRLTTY_SCREEN_PARAMETERS");
 
@@ -1503,9 +1545,16 @@ startup(int argc, char *argv[]) {
   LogPrint(LOG_INFO, "Help Page: %s[%d]", brailleDriver->helpFile, getHelpPageNumber());
   LogPrint(LOG_INFO, "Text Table: %s", opt_textTable);
   LogPrint(LOG_INFO, "Attributes Table: %s", opt_attributesTable);
-  LogPrint(LOG_INFO, "Braille Device: %s", opt_brailleDevice);
+#ifdef ENABLE_CONTRACTED_BRAILLE
+  LogPrint(LOG_INFO, "Contraction Table: %s",
+           opt_contractionTable? opt_contractionTable: "none");
+#endif /* ENABLE_CONTRACTED_BRAILLE */
+#ifdef ENABLE_API
+  logParameters(api_parameters, apiParameters, "API");
+#endif /* ENABLE_API */
   LogPrint(LOG_INFO, "Braille Driver: %s (%s)",
            opt_brailleDriver, brailleDriver->name);
+  LogPrint(LOG_INFO, "Braille Device: %s", opt_brailleDevice);
   logParameters(brailleDriver->parameters, brailleParameters, "Braille");
 #ifdef ENABLE_SPEECH_SUPPORT
   LogPrint(LOG_INFO, "Speech Driver: %s (%s)",
@@ -1514,9 +1563,9 @@ startup(int argc, char *argv[]) {
 #endif /* ENABLE_SPEECH_SUPPORT */
   logParameters(getScreenParameters(), screenParameters, "Screen");
 
-  /*
-   * Give braille and speech libraries a chance to introduce themselves.
-   */
+#ifdef ENABLE_API
+  api_identify();
+#endif /* ENABLE_API */
   brailleDriver->identify();
 #ifdef ENABLE_SPEECH_SUPPORT
   speechDriver->identify();
@@ -1561,6 +1610,7 @@ startup(int argc, char *argv[]) {
     prefs.skipBlankWindows = DEFAULT_SKIP_BLANK_WINDOWS;
     prefs.blankWindowsSkipMode = DEFAULT_BLANK_WINDOWS_SKIP_MODE;
 
+    prefs.alertMessages = DEFAULT_ALERT_MESSAGES;
     prefs.alertDots = DEFAULT_ALERT_DOTS;
     prefs.alertTunes = DEFAULT_ALERT_TUNES;
     prefs.tuneDevice = getDefaultTuneDevice();
@@ -1615,17 +1665,23 @@ startup(int argc, char *argv[]) {
    * be used instead.
    */
 
-  /* Initialise Braille display: */
+  /* Activate the braille display. */
   startBrailleDriver();
   atexit(exitBrailleDriver);
 
+#ifdef ENABLE_API
+  /* Activate the application programming interface. */
+  api_open(&brl, apiParameters);
+  atexit(exitApi);
+#endif /* ENABLE_API */
+
 #ifdef ENABLE_SPEECH_SUPPORT
-  /* Initialise speech */
+  /* Activate the speech synthesizer. */
   startSpeechDriver();
   atexit(exitSpeechDriver);
 #endif /* ENABLE_SPEECH_SUPPORT */
 
-  /* Initialize help screen */
+  /* Initialize the braille driver help screen. */
   if (!initializeHelpScreen(brailleDriver->helpFile))
     LogPrint(LOG_WARNING, "Cannot open help screen file: %s", brailleDriver->helpFile);
 

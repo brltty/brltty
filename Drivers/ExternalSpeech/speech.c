@@ -36,8 +36,6 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
-#define SPEECH_C 1
-
 #include "Programs/misc.h"
 #include "speech.h"
 #include "Programs/spk.h"

@@ -15,8 +15,6 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#define BRL_C 1
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
@@ -371,8 +369,8 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *dev) {
        model++ );
   if( !model->name ) {
     /* Unknown model */
-    LogPrint( LOG_ERR, "*** Detected unknown HandyTech model with ID %d.", modelIdentifier );
-    LogPrint(LOG_WARNING, "*** Please fix Models[] in HandyTech/braille.c and mail the maintainer.");
+    LogPrint( LOG_ERR, "Detected unknown HandyTech model with ID %d.", modelIdentifier );
+    LogPrint(LOG_WARNING, "Please fix Models[] in HandyTech/braille.c and mail the maintainer.");
     goto failure;
   }
   LogPrint(LOG_INFO, "Detected %s: %d data %s, %d status %s.",

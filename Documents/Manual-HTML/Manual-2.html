@@ -16,7 +16,7 @@
 
 <P>BRLTTY can be downloaded from its web site
 (see section 
-<A HREF="Manual-8.html#contact">Contact Information</A> for its location).
+<A HREF="Manual-9.html#contact">Contact Information</A> for its location).
 All releases are provided as compressed 
 <A HREF="#tar">tar balls</A>.
 Newer releases are also provided as 
@@ -35,8 +35,7 @@ to first become familiar with the files which will ultimately be installed.</P>
 <DL>
 <DT><B>brltty</B><DD><P>The BRLTTY program.</P>
 <DT><B>
-<A HREF="#utility-install-brltty">install-brltty</A></B><DD><P>A 
-<A HREF="#utility-install-brltty">utility</A> for copying BRLTTY's
+<A HREF="#utility-brltty-install">brltty-install</A></B><DD><P>A utility for copying BRLTTY's
 <A HREF="#hierarchy">installed file hierarchy</A>
 from one location to another.</P>
 </DL>
@@ -49,15 +48,16 @@ They're only created as needed based on the build options you select
 <DT><B>*.conf</B><DD><P>Driver-specific configuration data.
 Their names look more or less like <CODE>brltty-</CODE><EM>driver</EM><CODE>.conf</CODE>,
 where <EM>driver</EM> is the two-letter 
-<A HREF="Manual-7.html#drivers">driver identification code</A>.</P>
+<A HREF="Manual-8.html#drivers">driver identification code</A>.</P>
 <DT><B>*.ctb</B><DD><P>Contraction tables
 (see section 
 <A HREF="Manual-4.html#contraction">Contracted Braille</A> for details).
 Their names look like <EM>language</EM><CODE>-</CODE><EM>country</EM><CODE>-</CODE><EM>level</EM><CODE>.ctb</CODE>.</P>
+<DT><B>*.cti</B><DD><P>Include files for contraction tables.</P>
 <DT><B>*.hlp</B><DD><P>Driver-specific help pages.
 Their names look more or less like <CODE>brltty-</CODE><EM>driver</EM><CODE>.hlp</CODE>,
 where <EM>driver</EM> is the two-letter 
-<A HREF="Manual-7.html#drivers">driver identification code</A>.</P>
+<A HREF="Manual-8.html#drivers">driver identification code</A>.</P>
 <DT><B>*.tbl</B><DD><P>Translation tables
 (see section 
 <A HREF="Manual-5.html#translation">Translation Tables</A> for details).
@@ -84,7 +84,7 @@ a tab character,
 and a description of the braille display which that driver is for.</P>
 <DT><B>libbrlttyb<EM>driver</EM>.so.1</B><DD><P>The dynamically loadable driver for a braille display,
 where <EM>driver</EM> is the two-letter 
-<A HREF="Manual-7.html#drivers">driver identification code</A>.</P>
+<A HREF="Manual-8.html#drivers">driver identification code</A>.</P>
 <DT><B>brltty-spk.lst</B><DD><P>A list of the speech synthesizer drivers which have been built
 as dynamically loadable shared objects,
 and, therefore, which can be selected at run-time.
@@ -94,7 +94,7 @@ a tab character,
 and a description of the speech synthesizer which that driver is for.</P>
 <DT><B>libbrlttys<EM>driver</EM>.so.1</B><DD><P>The dynamically loadable driver for a speech synthesizer,
 where <EM>driver</EM> is the two-letter 
-<A HREF="Manual-7.html#drivers">driver identification code</A>.</P>
+<A HREF="Manual-8.html#drivers">driver identification code</A>.</P>
 </DL>
 </P>
 </DL>
@@ -108,7 +108,7 @@ See
 <A HREF="Manual-3.html#configure">The Configuration File</A> for details.</P>
 <DT><B>/etc/brltty-<EM>driver</EM>.prefs</B><DD><P>The saved preferences settings file
 (<EM>driver</EM> is a two-letter 
-<A HREF="Manual-7.html#drivers">driver identification code</A>).
+<A HREF="Manual-8.html#drivers">driver identification code</A>).
 It's created by the 
 <A HREF="Manual-3.html#command-PREFSAVE">PREFSAVE</A> command.
 See 
@@ -182,7 +182,7 @@ for any additional display-specific instructions.</P>
 <DT><B><CODE>--with-braille-driver=</CODE><EM>driver</EM>
 <A NAME="build-braille-driver"></A> </B><DD><P>Specify the braille display driver.
 Either a two-letter 
-<A HREF="Manual-7.html#drivers">driver identification code</A>
+<A HREF="Manual-8.html#drivers">driver identification code</A>
 or the proper name (full or abbreviated) of the driver
 may be used.
 If this option isn't specified,
@@ -220,7 +220,7 @@ and the
 build options for more details).
 If this option isn't specified,
 then a commonly (in North America) used 8-dot variant of the
-<A HREF="Manual-7.html#nabcc">North American Braille Computer Code</A>
+<A HREF="Manual-8.html#nabcc">North American Braille Computer Code</A>
 is assumed.
 See the 
 <A HREF="Manual-3.html#configure-text-table">text-table</A> configuration file directive
@@ -252,7 +252,7 @@ This setting can be changed with the
 <DT><B><CODE>--with-speech-driver=</CODE><EM>driver</EM>
 <A NAME="build-speech-driver"></A> </B><DD><P>Specify the speech synthesizer driver.
 Either a two-letter 
-<A HREF="Manual-7.html#drivers">driver identification code</A>
+<A HREF="Manual-8.html#drivers">driver identification code</A>
 or the proper name (full or abbreviated) of the driver
 may be used.
 If this option isn't specified,
@@ -308,7 +308,7 @@ BRLTTY's run-time files in a non-standard location.
 You need to use this feature, for example, if you'd like to have
 more than one version of BRLTTY installed at the same time
 (see section 
-<A HREF="Manual-6.html#multiple">Installing Multiple Versions</A>
+<A HREF="Manual-7.html#multiple">Installing Multiple Versions</A>
 for an example of how to do this).</P>
 <DT><B><CODE>--with-install-root=</CODE><EM>directory</EM>
 <A NAME="build-install-root"></A> </B><DD><P>Specify the directory beneath which the
@@ -465,6 +465,10 @@ so that, on systems which support it,
 BRLTTY will interact with the pointer (mouse) device
 (see section 
 <A HREF="Manual-4.html#gpm">Pointer (Mouse) Support via GPM</A>).</P>
+<DT><B><CODE>--enable-api</CODE>
+<A NAME="build-api"></A> </B><DD><P>Include the application programming interface
+(see section 
+<A HREF="Manual-6.html#api">The Application Programming Interface</A>).</P>
 </DL>
 </P>
 
@@ -559,7 +563,7 @@ brltty -b<EM>driver</EM> -d<EM>device</EM>
 </CODE></BLOCKQUOTE>
 
 For <EM>driver</EM>, specify the two-letter
-<A HREF="Manual-7.html#drivers">driver identification code</A>
+<A HREF="Manual-8.html#drivers">driver identification code</A>
 corresponding to your braille display.
 For <EM>device</EM>, specify the full path
 for the device to which your braille display is connected.</P>
@@ -850,13 +854,13 @@ rpm -e brltty
 <P>Building BRLTTY also results in the building of
 a few small helper and diagnostic utilities.</P>
 
-<H3><A NAME="utility-install-brltty"></A> install-brltty</H3>
+<H3><A NAME="utility-brltty-install"></A> brltty-install</H3>
 
 <P>This utility copies BRLTTY's
 <A HREF="#hierarchy">installed file hierarchy</A>
 from one location to another.
 <BLOCKQUOTE><CODE>
-install-brltty <EM>to</EM> [<EM>from</EM>]
+brltty-install <EM>to</EM> [<EM>from</EM>]
 </CODE></BLOCKQUOTE>
 
 <DL>
@@ -876,7 +880,7 @@ If a root floppy is mounted as <CODE>/mnt</CODE>,
 and BRLTTY is installed on the main system,
 then typing 
 <BLOCKQUOTE><CODE>
-install-brltty /mnt
+brltty-install /mnt
 </CODE></BLOCKQUOTE>
 
 copies BRLTTY, along with all of its data and library files,
@@ -930,7 +934,7 @@ brltest -<EM>option</EM> ... [<EM>driver</EM> [<EM>name</EM>=<EM>value</EM> ...]
 <DT><B><EM>driver</EM></B><DD><P>The driver for the braille display.
 It may be
 either a two-letter 
-<A HREF="Manual-7.html#drivers">driver identification code</A>
+<A HREF="Manual-8.html#drivers">driver identification code</A>
 or the absolute path to a dynamically loadable shared object.
 If it's not specified, then the driver configured via the
 <A HREF="#build-braille-driver">--with-braille-driver</A> build option
@@ -1053,7 +1057,7 @@ for details regarding the default device and platform restrictions.</P>
 <DT><B><CODE>-i</CODE><EM>instrument</EM> <CODE>--instrument=</CODE><EM>instrument</EM></B><DD><P>The instrument to use if the selected device is <CODE>midi</CODE>.
 For the complete list of instruments,
 see the 
-<A HREF="Manual-7.html#midi">MIDI Instrument Table</A>.
+<A HREF="Manual-8.html#midi">MIDI Instrument Table</A>.
 The default instrument is an <CODE>acoustic grand piano</CODE>.
 The words comprising the instrument name must be separated from one another
 by a single minus sign rather than by spaces,

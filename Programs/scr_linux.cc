@@ -424,10 +424,13 @@ int LinuxScreen::setup (void) {
  * the expected character set.
  */
 int LinuxScreen::setTranslationTable (int force) {
-  int acmChanged = setApplicationCharacterMap && (this->*setApplicationCharacterMap)(force);
   int sfmChanged = setScreenFontMap(force);
-  if (acmChanged || sfmChanged) {
+  if (sfmChanged) {
     setFontTableSize();
+  }
+
+  int acmChanged = setApplicationCharacterMap && (this->*setApplicationCharacterMap)(force);
+  if (acmChanged || sfmChanged) {
     unsigned short directPosition = 0XFF;
     if (isBigFontTable) directPosition |= 0X100;
 
@@ -476,11 +479,11 @@ int LinuxScreen::setTranslationTable (int force) {
     }
     return 1;
   }
+
   return 0;
 }
 
 int LinuxScreen::setFontTableSize (void) {
-  int ok = 0;
   fontTableSize = 0X100;
   isBigFontTable = 0;
 
@@ -490,6 +493,7 @@ int LinuxScreen::setFontTableSize (void) {
   cfo.height = 32;
   cfo.width = 16;
 
+  int ok = 0;
   if (controlConsole(KDFONTOP, &cfo) != -1) {
     switch (cfo.charcount) {
       case 0X200:
@@ -504,7 +508,8 @@ int LinuxScreen::setFontTableSize (void) {
         break;
     }
   } else {
-    LogError("ioctl KDFONTOP[GET]");
+    LogPrint((errno == EINVAL)? LOG_DEBUG: LOG_WARNING,
+             "ioctl KDFONTOP[GET]: %s", strerror(errno));
   }
 
   LogPrint(LOG_DEBUG, "Font table size: %d(%s)",
@@ -655,8 +660,9 @@ void LinuxScreen::getScreenDescription (ScreenDescription &stat) {
     } else if (count == -1) {
       LogError("Screen header read");
     } else {
-      LogPrint(LOG_ERR, "Truncated screen header: expected %d bytes, read %d.",
-               sizeof(buffer), count);
+      long int expected = sizeof(buffer);
+      LogPrint(LOG_ERR, "Truncated screen header: expected %ld bytes, read %d.",
+               expected, count);
     }
   } else {
     LogError("Screen seek");
@@ -1064,4 +1070,10 @@ int LinuxScreen::switchvt (int vt) {
     }
   }
   return 0;
+}
+
+int LinuxScreen::currentvt (void) {
+  ScreenDescription desc;
+  getConsoleDescription(desc);
+  return desc.no;
 }

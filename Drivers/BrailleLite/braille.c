@@ -26,8 +26,6 @@
 #define VERSION \
 "Braille Lite driver, version 0.5.10 (April 2002)"
 
-#define BRL_C
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
@@ -40,6 +38,7 @@
 #include <sys/termios.h>
 #include <string.h>
 
+#define BL_NEED_ARRAYS
 #include "Programs/brl.h"
 #include "Programs/misc.h"
 #include "Programs/message.h"

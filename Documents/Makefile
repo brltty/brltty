@@ -43,7 +43,7 @@ include $(SRC_TOP)common.mk
 ###############################################################################
 
 include $(BLD_TOP)/config.mk
-ABS_SRC_DIR = /users/dave/brltty/brltty-3.2/Documents
+ABS_SRC_DIR = /users/dave/brltty/brltty-3.3/Documents
 
 programs: english german
 

@@ -76,8 +76,6 @@
  * Version 1.1 worked on nav40 and was reported to work on pb40.
  */
 
-#define BRL_C 1
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif /* HAVE_CONFIG_H */

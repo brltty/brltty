@@ -247,6 +247,8 @@ then the dot pattern is briefly displayed on every braille cell.
 Some braille displays don't respond quickly enough
 for this mechanism to work effectively.</P>
 <DT><B>a message</B><DD><P>If a message has been associated with the event,
+and if the 
+<A HREF="#preference-alert-messages">Alert Messages</A> preference is active,
 then it is displayed for a few seconds
 (see the 
 <A HREF="Manual-3.html#options-message-delay">-M</A> command line option).</P>
@@ -636,7 +638,7 @@ and <CODE>PCM</CODE> on those platforms which don't.</P>
 is being used to play the alert tunes,
 this setting specifies which instrument is to be used
 (see the 
-<A HREF="Manual-7.html#midi">MIDI Instrument Table</A>).
+<A HREF="Manual-8.html#midi">MIDI Instrument Table</A>).
 The initial setting is <CODE>Acoustic Grand Piano</CODE>.</P>
 <DT><B>Alert Dots
 <A NAME="preference-alert-dots"></A> </B><DD><P>Whenever a significant event with an associated dot pattern occurs
@@ -655,6 +657,27 @@ and the
 if a tune has been associated with the event,
 and if the selected tune device can be opened,
 then, regardless of the setting of this preference, the dot pattern isn't displayed.</P>
+<DT><B>Alert Messages
+<A NAME="preference-alert-messages"></A> </B><DD><P>Whenever a significant event with an associated message occurs
+(see 
+<A HREF="#tunes">Alert Tunes</A>):
+<DL>
+<DT><B>No</B><DD><P>Don't display the message.</P>
+<DT><B>Yes</B><DD><P>Display the message.</P>
+</DL>
+
+If alert tunes are to be played
+(see the 
+<A HREF="Manual-3.html#command-TUNES">TUNES</A> command
+and the 
+<A HREF="#preference-alert-tunes">Alert Tunes</A> preference),
+if a tune has been associated with the event,
+and if the selected tune device can be opened,
+or if alert dot patterns are to be displayed
+(see the 
+<A HREF="#preference-alert-dots">Alert Dots</A> preference)
+and if a dot pattern has been associated with the event,
+then, regardless of the setting of this preference, the message isn't displayed.</P>
 <DT><B>Status Style
 <A NAME="preference-status-style"></A> </B><DD><P>This setting specifies the way that the status cells are to be used.
 You shuldn't normally need to play with it.
@@ -1060,6 +1083,7 @@ This feature isn't available if the
 <A HREF="Manual-2.html#build-contracted-braille">--disable-contracted-braille</A> build option was specified.</P>
 <P>The following contraction tables are provided:
 <DL>
+<DT><B>big5.ctb</B><DD><P>Chinese big5.</P>
 <DT><B>compress.ctb</B><DD><P>Remove excessive white-space.</P>
 <DT><B>en-us-g2.ctb</B><DD><P>Grade 2 American English.</P>
 </DL>
@@ -1131,7 +1155,7 @@ with the first digit being zero (<CODE>0</CODE>).</P>
 <DT><B>dots</B><DD><P>A braille symbol.
 The braille dots must be specified via their standard numbers
 (see section 
-<A HREF="Manual-7.html#dots">Braille Dot Numbering Convention</A>),
+<A HREF="Manual-8.html#dots">Braille Dot Numbering Convention</A>),
 and, for a multi-cell symbol, the cell specifications
 must be separated from one another by a dash (<CODE>-</CODE>).
 For example, the contraction for the English word <CODE>lord</CODE>
@@ -1186,7 +1210,7 @@ For the details, see section
 <DT><B>
 <A HREF="#contraction-opcode-18">18</A> <EM>characters</EM></B><DD><P>Prefix with letter sign if word.</P>
 <DT><B>
-<A HREF="#contraction-opcode-19">19</A> <EM>characters</EM></B><DD><P>Ignore unconditionally.</P>
+<A HREF="#contraction-opcode-19">19</A> <EM>characters</EM> <EM>characters</EM></B><DD><P>Replace the first set of characters with the second.</P>
 <DT><B>
 <A HREF="#contraction-opcode-20">20</A> <EM>characters</EM> <EM>dots</EM></B><DD><P>Translate if at end of number.</P>
 <DT><B>
@@ -1287,8 +1311,9 @@ within the sequence is to be used.</P>
 <A HREF="Manual-3.html#options-text-table">-t</A> command line option
 and the 
 <A HREF="Manual-3.html#configure-text-table">text-table</A> configuration file directive).</P>
-<DT><B>19 <EM>characters</EM>
-<A NAME="contraction-opcode-19"></A> </B><DD><P>Ignore the characters no matter where they appear.</P>
+<DT><B>19 <EM>characters</EM> <EM>characters</EM>
+<A NAME="contraction-opcode-19"></A> </B><DD><P>Replace the first set of characters, no matter where they appear, with the second.
+The replaced characters aren't reprocessed.</P>
 <DT><B>6 <EM>characters</EM> <EM>dots</EM>
 <A NAME="contraction-opcode-6"></A> </B><DD><P>Translate the characters no matter where they appear.
 If there's only one character, then, in addition,

@@ -18,6 +18,7 @@ $(BLD_TOP)BrailleTables/tbl2jbt.o: $(SRC_TOP)BrailleTables/tbl2jbt.c
 $(BLD_TOP)BrailleTables/tbl2jbt.o: $(BLD_TOP)config.h
 $(BLD_TOP)BrailleTables/tbl2jbt.o: $(SRC_TOP)Programs/options.h
 $(BLD_TOP)BrailleTables/tbl2jbt.o: $(SRC_TOP)Programs/brl.h
+$(BLD_TOP)BrailleTables/tbl2jbt.o: $(SRC_TOP)Programs/brldefs.h
 	cd $(@D) && $(MAKE) $(@F)
 
 # Dependencies for BrailleTables/tbl2tbl.o:
@@ -31,6 +32,7 @@ $(BLD_TOP)BrailleTables/tbl2txt.o: $(SRC_TOP)BrailleTables/tbl2txt.c
 $(BLD_TOP)BrailleTables/tbl2txt.o: $(BLD_TOP)config.h
 $(BLD_TOP)BrailleTables/tbl2txt.o: $(SRC_TOP)Programs/options.h
 $(BLD_TOP)BrailleTables/tbl2txt.o: $(SRC_TOP)Programs/brl.h
+$(BLD_TOP)BrailleTables/tbl2txt.o: $(SRC_TOP)Programs/brldefs.h
 $(BLD_TOP)BrailleTables/tbl2txt.o: $(SRC_TOP)Unicode/unicode.h
 	cd $(@D) && $(MAKE) $(@F)
 
@@ -39,6 +41,7 @@ $(BLD_TOP)BrailleTables/txt2tbl.o: $(SRC_TOP)BrailleTables/txt2tbl.c
 $(BLD_TOP)BrailleTables/txt2tbl.o: $(BLD_TOP)config.h
 $(BLD_TOP)BrailleTables/txt2tbl.o: $(SRC_TOP)Programs/options.h
 $(BLD_TOP)BrailleTables/txt2tbl.o: $(SRC_TOP)Programs/brl.h
+$(BLD_TOP)BrailleTables/txt2tbl.o: $(SRC_TOP)Programs/brldefs.h
 	cd $(@D) && $(MAKE) $(@F)
 
 # Dependencies for Drivers/Alva/braille.o:
@@ -47,6 +50,7 @@ $(BLD_TOP)Drivers/Alva/braille.o: $(BLD_TOP)config.h
 $(BLD_TOP)Drivers/Alva/braille.o: $(SRC_TOP)Drivers/Alva/brlconf.h
 $(BLD_TOP)Drivers/Alva/braille.o: $(SRC_TOP)Programs/misc.h
 $(BLD_TOP)Drivers/Alva/braille.o: $(SRC_TOP)Programs/brl.h
+$(BLD_TOP)Drivers/Alva/braille.o: $(SRC_TOP)Programs/brldefs.h
 $(BLD_TOP)Drivers/Alva/braille.o: $(SRC_TOP)Programs/brltty.h
 $(BLD_TOP)Drivers/Alva/braille.o: $(SRC_TOP)Programs/brl_driver.h
 	cd $(@D) && $(MAKE) $(@F)
@@ -65,6 +69,7 @@ $(BLD_TOP)Drivers/Alva/speech.o: $(SRC_TOP)Programs/misc.h
 $(BLD_TOP)Drivers/BrailleLite/braille.o: $(SRC_TOP)Drivers/BrailleLite/braille.c
 $(BLD_TOP)Drivers/BrailleLite/braille.o: $(BLD_TOP)config.h
 $(BLD_TOP)Drivers/BrailleLite/braille.o: $(SRC_TOP)Programs/brl.h
+$(BLD_TOP)Drivers/BrailleLite/braille.o: $(SRC_TOP)Programs/brldefs.h
 $(BLD_TOP)Drivers/BrailleLite/braille.o: $(SRC_TOP)Programs/misc.h
 $(BLD_TOP)Drivers/BrailleLite/braille.o: $(SRC_TOP)Programs/message.h
 $(BLD_TOP)Drivers/BrailleLite/braille.o: $(SRC_TOP)Drivers/BrailleLite/brlconf.h
@@ -88,12 +93,14 @@ $(BLD_TOP)Drivers/BrailleNote/braille.o: $(SRC_TOP)Programs/misc.h
 $(BLD_TOP)Drivers/BrailleNote/braille.o: $(SRC_TOP)Drivers/BrailleNote/brlconf.h
 $(BLD_TOP)Drivers/BrailleNote/braille.o: $(SRC_TOP)Programs/brl.h
 $(BLD_TOP)Drivers/BrailleNote/braille.o: $(SRC_TOP)Programs/brl_driver.h
+$(BLD_TOP)Drivers/BrailleNote/braille.o: $(SRC_TOP)Programs/brldefs.h
 	cd $(@D) && $(MAKE) $(@F)
 
 # Dependencies for Drivers/CombiBraille/braille.o:
 $(BLD_TOP)Drivers/CombiBraille/braille.o: $(SRC_TOP)Drivers/CombiBraille/braille.c
 $(BLD_TOP)Drivers/CombiBraille/braille.o: $(BLD_TOP)config.h
 $(BLD_TOP)Drivers/CombiBraille/braille.o: $(SRC_TOP)Programs/brl.h
+$(BLD_TOP)Drivers/CombiBraille/braille.o: $(SRC_TOP)Programs/brldefs.h
 $(BLD_TOP)Drivers/CombiBraille/braille.o: $(SRC_TOP)Programs/misc.h
 $(BLD_TOP)Drivers/CombiBraille/braille.o: $(SRC_TOP)Drivers/CombiBraille/brlconf.h
 $(BLD_TOP)Drivers/CombiBraille/braille.o: $(SRC_TOP)Programs/brl_driver.h
@@ -115,6 +122,7 @@ $(BLD_TOP)Drivers/EcoBraille/braille.o: $(SRC_TOP)Drivers/EcoBraille/braille.c
 $(BLD_TOP)Drivers/EcoBraille/braille.o: $(BLD_TOP)config.h
 $(BLD_TOP)Drivers/EcoBraille/braille.o: $(SRC_TOP)Drivers/EcoBraille/brlconf.h
 $(BLD_TOP)Drivers/EcoBraille/braille.o: $(SRC_TOP)Programs/brl.h
+$(BLD_TOP)Drivers/EcoBraille/braille.o: $(SRC_TOP)Programs/brldefs.h
 $(BLD_TOP)Drivers/EcoBraille/braille.o: $(SRC_TOP)Programs/misc.h
 $(BLD_TOP)Drivers/EcoBraille/braille.o: $(SRC_TOP)Programs/brl_driver.h
 	cd $(@D) && $(MAKE) $(@F)
@@ -124,6 +132,7 @@ $(BLD_TOP)Drivers/EuroBraille/braille.o: $(SRC_TOP)Drivers/EuroBraille/braille.c
 $(BLD_TOP)Drivers/EuroBraille/braille.o: $(BLD_TOP)config.h
 $(BLD_TOP)Drivers/EuroBraille/braille.o: $(SRC_TOP)Drivers/EuroBraille/brlconf.h
 $(BLD_TOP)Drivers/EuroBraille/braille.o: $(SRC_TOP)Programs/brl.h
+$(BLD_TOP)Drivers/EuroBraille/braille.o: $(SRC_TOP)Programs/brldefs.h
 $(BLD_TOP)Drivers/EuroBraille/braille.o: $(SRC_TOP)Programs/message.h
 $(BLD_TOP)Drivers/EuroBraille/braille.o: $(SRC_TOP)Programs/misc.h
 $(BLD_TOP)Drivers/EuroBraille/braille.o: $(SRC_TOP)Programs/brl_driver.h
@@ -161,6 +170,7 @@ $(BLD_TOP)Drivers/HandyTech/braille.o: $(SRC_TOP)Drivers/HandyTech/braille.c
 $(BLD_TOP)Drivers/HandyTech/braille.o: $(BLD_TOP)config.h
 $(BLD_TOP)Drivers/HandyTech/braille.o: $(SRC_TOP)Drivers/HandyTech/brlconf.h
 $(BLD_TOP)Drivers/HandyTech/braille.o: $(SRC_TOP)Programs/brl.h
+$(BLD_TOP)Drivers/HandyTech/braille.o: $(SRC_TOP)Programs/brldefs.h
 $(BLD_TOP)Drivers/HandyTech/braille.o: $(SRC_TOP)Programs/brltty.h
 $(BLD_TOP)Drivers/HandyTech/braille.o: $(SRC_TOP)Programs/misc.h
 $(BLD_TOP)Drivers/HandyTech/braille.o: $(SRC_TOP)Programs/brl_driver.h
@@ -170,6 +180,7 @@ $(BLD_TOP)Drivers/HandyTech/braille.o: $(SRC_TOP)Programs/brl_driver.h
 $(BLD_TOP)Drivers/LogText/braille.o: $(SRC_TOP)Drivers/LogText/braille.c
 $(BLD_TOP)Drivers/LogText/braille.o: $(BLD_TOP)config.h
 $(BLD_TOP)Drivers/LogText/braille.o: $(SRC_TOP)Programs/brl.h
+$(BLD_TOP)Drivers/LogText/braille.o: $(SRC_TOP)Programs/brldefs.h
 $(BLD_TOP)Drivers/LogText/braille.o: $(SRC_TOP)Programs/misc.h
 $(BLD_TOP)Drivers/LogText/braille.o: $(SRC_TOP)Drivers/LogText/brlconf.h
 $(BLD_TOP)Drivers/LogText/braille.o: $(SRC_TOP)Programs/brl_driver.h
@@ -181,6 +192,7 @@ $(BLD_TOP)Drivers/LogText/braille.o: $(SRC_TOP)Drivers/LogText/output.h
 $(BLD_TOP)Drivers/MDV/braille.o: $(SRC_TOP)Drivers/MDV/braille.c
 $(BLD_TOP)Drivers/MDV/braille.o: $(BLD_TOP)config.h
 $(BLD_TOP)Drivers/MDV/braille.o: $(SRC_TOP)Programs/brl.h
+$(BLD_TOP)Drivers/MDV/braille.o: $(SRC_TOP)Programs/brldefs.h
 $(BLD_TOP)Drivers/MDV/braille.o: $(SRC_TOP)Programs/misc.h
 $(BLD_TOP)Drivers/MDV/braille.o: $(SRC_TOP)Drivers/MDV/brlconf.h
 $(BLD_TOP)Drivers/MDV/braille.o: $(SRC_TOP)Programs/brl_driver.h
@@ -190,6 +202,7 @@ $(BLD_TOP)Drivers/MDV/braille.o: $(SRC_TOP)Programs/brl_driver.h
 $(BLD_TOP)Drivers/MiniBraille/braille.o: $(SRC_TOP)Drivers/MiniBraille/braille.c
 $(BLD_TOP)Drivers/MiniBraille/braille.o: $(BLD_TOP)config.h
 $(BLD_TOP)Drivers/MiniBraille/braille.o: $(SRC_TOP)Programs/brl.h
+$(BLD_TOP)Drivers/MiniBraille/braille.o: $(SRC_TOP)Programs/brldefs.h
 $(BLD_TOP)Drivers/MiniBraille/braille.o: $(SRC_TOP)Programs/misc.h
 $(BLD_TOP)Drivers/MiniBraille/braille.o: $(SRC_TOP)Drivers/MiniBraille/brlconf.h
 $(BLD_TOP)Drivers/MiniBraille/braille.o: $(SRC_TOP)Programs/brl_driver.h
@@ -201,6 +214,7 @@ $(BLD_TOP)Drivers/MiniBraille/braille.o: $(SRC_TOP)Drivers/MiniBraille/minibrail
 $(BLD_TOP)Drivers/MultiBraille/braille.o: $(SRC_TOP)Drivers/MultiBraille/braille.c
 $(BLD_TOP)Drivers/MultiBraille/braille.o: $(BLD_TOP)config.h
 $(BLD_TOP)Drivers/MultiBraille/braille.o: $(SRC_TOP)Programs/brl.h
+$(BLD_TOP)Drivers/MultiBraille/braille.o: $(SRC_TOP)Programs/brldefs.h
 $(BLD_TOP)Drivers/MultiBraille/braille.o: $(SRC_TOP)Programs/misc.h
 $(BLD_TOP)Drivers/MultiBraille/braille.o: $(SRC_TOP)Drivers/MultiBraille/brlconf.h
 $(BLD_TOP)Drivers/MultiBraille/braille.o: $(SRC_TOP)Programs/brl_driver.h
@@ -221,6 +235,7 @@ $(BLD_TOP)Drivers/Papenmeier/braille.o: $(SRC_TOP)Drivers/Papenmeier/braille.c
 $(BLD_TOP)Drivers/Papenmeier/braille.o: $(BLD_TOP)config.h
 $(BLD_TOP)Drivers/Papenmeier/braille.o: $(SRC_TOP)Drivers/Papenmeier/brlconf.h
 $(BLD_TOP)Drivers/Papenmeier/braille.o: $(SRC_TOP)Programs/brl.h
+$(BLD_TOP)Drivers/Papenmeier/braille.o: $(SRC_TOP)Programs/brldefs.h
 $(BLD_TOP)Drivers/Papenmeier/braille.o: $(SRC_TOP)Programs/misc.h
 $(BLD_TOP)Drivers/Papenmeier/braille.o: $(SRC_TOP)Programs/brl_driver.h
 $(BLD_TOP)Drivers/Papenmeier/braille.o: $(BLD_TOP)Drivers/Papenmeier/config.tab.c
@@ -232,6 +247,7 @@ $(BLD_TOP)Drivers/Papenmeier/config.tab.c: $(SRC_TOP)Drivers/Papenmeier/config.y
 $(BLD_TOP)Drivers/Papenmeier/config.tab.c: $(BLD_TOP)config.h
 $(BLD_TOP)Drivers/Papenmeier/config.tab.c: $(SRC_TOP)Drivers/Papenmeier/brl-cfg.h
 $(BLD_TOP)Drivers/Papenmeier/config.tab.c: $(SRC_TOP)Programs/brl.h
+$(BLD_TOP)Drivers/Papenmeier/config.tab.c: $(SRC_TOP)Programs/brldefs.h
 	cd $(@D) && $(MAKE) $(@F)
 
 # Dependencies for Drivers/Papenmeier/dump-codes.o:
@@ -252,6 +268,7 @@ $(BLD_TOP)Drivers/Papenmeier/serial.o: $(SRC_TOP)Drivers/Papenmeier/brlconf.h
 $(BLD_TOP)Drivers/Papenmeier/serial.o: $(BLD_TOP)Drivers/Papenmeier/config.tab.c
 $(BLD_TOP)Drivers/Papenmeier/serial.o: $(SRC_TOP)Programs/brl.h
 $(BLD_TOP)Drivers/Papenmeier/serial.o: $(SRC_TOP)Programs/brl_driver.h
+$(BLD_TOP)Drivers/Papenmeier/serial.o: $(SRC_TOP)Programs/brldefs.h
 $(BLD_TOP)Drivers/Papenmeier/serial.o: $(SRC_TOP)Programs/misc.h
 $(BLD_TOP)Drivers/Papenmeier/serial.o: $(BLD_TOP)config.h
 $(BLD_TOP)Drivers/Papenmeier/serial.o: $(SRC_TOP)Programs/misc.c
@@ -265,6 +282,7 @@ $(BLD_TOP)Drivers/Papenmeier/simulate.o: $(SRC_TOP)Drivers/Papenmeier/brlconf.h
 $(BLD_TOP)Drivers/Papenmeier/simulate.o: $(BLD_TOP)Drivers/Papenmeier/config.tab.c
 $(BLD_TOP)Drivers/Papenmeier/simulate.o: $(SRC_TOP)Programs/brl.h
 $(BLD_TOP)Drivers/Papenmeier/simulate.o: $(SRC_TOP)Programs/brl_driver.h
+$(BLD_TOP)Drivers/Papenmeier/simulate.o: $(SRC_TOP)Programs/brldefs.h
 $(BLD_TOP)Drivers/Papenmeier/simulate.o: $(SRC_TOP)Programs/misc.h
 $(BLD_TOP)Drivers/Papenmeier/simulate.o: $(BLD_TOP)config.h
 $(BLD_TOP)Drivers/Papenmeier/simulate.o: $(SRC_TOP)Programs/misc.c
@@ -275,6 +293,7 @@ $(BLD_TOP)Drivers/TSI/braille.o: $(SRC_TOP)Drivers/TSI/braille.c
 $(BLD_TOP)Drivers/TSI/braille.o: $(BLD_TOP)config.h
 $(BLD_TOP)Drivers/TSI/braille.o: $(SRC_TOP)Drivers/TSI/brlconf.h
 $(BLD_TOP)Drivers/TSI/braille.o: $(SRC_TOP)Programs/brl.h
+$(BLD_TOP)Drivers/TSI/braille.o: $(SRC_TOP)Programs/brldefs.h
 $(BLD_TOP)Drivers/TSI/braille.o: $(SRC_TOP)Programs/misc.h
 $(BLD_TOP)Drivers/TSI/braille.o: $(SRC_TOP)Programs/brl_driver.h
 	cd $(@D) && $(MAKE) $(@F)
@@ -293,6 +312,7 @@ $(BLD_TOP)Drivers/Vario/braille.o: $(SRC_TOP)Drivers/Vario/braille.c
 $(BLD_TOP)Drivers/Vario/braille.o: $(BLD_TOP)config.h
 $(BLD_TOP)Drivers/Vario/braille.o: $(SRC_TOP)Drivers/Vario/brlconf.h
 $(BLD_TOP)Drivers/Vario/braille.o: $(SRC_TOP)Programs/brl.h
+$(BLD_TOP)Drivers/Vario/braille.o: $(SRC_TOP)Programs/brldefs.h
 $(BLD_TOP)Drivers/Vario/braille.o: $(SRC_TOP)Programs/misc.h
 $(BLD_TOP)Drivers/Vario/braille.o: $(SRC_TOP)Programs/brl_driver.h
 	cd $(@D) && $(MAKE) $(@F)
@@ -302,6 +322,7 @@ $(BLD_TOP)Drivers/VarioHT/vario.o: $(SRC_TOP)Drivers/VarioHT/vario.c
 $(BLD_TOP)Drivers/VarioHT/vario.o: $(BLD_TOP)config.h
 $(BLD_TOP)Drivers/VarioHT/vario.o: $(SRC_TOP)Drivers/VarioHT/variolow.h
 $(BLD_TOP)Drivers/VarioHT/vario.o: $(SRC_TOP)Programs/brl.h
+$(BLD_TOP)Drivers/VarioHT/vario.o: $(SRC_TOP)Programs/brldefs.h
 $(BLD_TOP)Drivers/VarioHT/vario.o: $(SRC_TOP)Drivers/VarioHT/brlconf.h
 $(BLD_TOP)Drivers/VarioHT/vario.o: $(SRC_TOP)Programs/brl_driver.h
 $(BLD_TOP)Drivers/VarioHT/vario.o: $(SRC_TOP)Programs/misc.h
@@ -328,6 +349,7 @@ $(BLD_TOP)Drivers/VideoBraille/vb.o: $(SRC_TOP)Drivers/VideoBraille/vb.c
 $(BLD_TOP)Drivers/VideoBraille/vb.o: $(BLD_TOP)config.h
 $(BLD_TOP)Drivers/VideoBraille/vb.o: $(SRC_TOP)Drivers/VideoBraille/vblow.h
 $(BLD_TOP)Drivers/VideoBraille/vb.o: $(SRC_TOP)Programs/brl.h
+$(BLD_TOP)Drivers/VideoBraille/vb.o: $(SRC_TOP)Programs/brldefs.h
 $(BLD_TOP)Drivers/VideoBraille/vb.o: $(SRC_TOP)Drivers/VideoBraille/brlconf.h
 $(BLD_TOP)Drivers/VideoBraille/vb.o: $(SRC_TOP)Programs/brl_driver.h
 $(BLD_TOP)Drivers/VideoBraille/vb.o: $(SRC_TOP)Programs/misc.h
@@ -346,8 +368,9 @@ $(BLD_TOP)Drivers/VideoBraille/vblow.o: $(SRC_TOP)Programs/system.h
 $(BLD_TOP)Drivers/VisioBraille/braille.o: $(SRC_TOP)Drivers/VisioBraille/braille.c
 $(BLD_TOP)Drivers/VisioBraille/braille.o: $(BLD_TOP)config.h
 $(BLD_TOP)Drivers/VisioBraille/braille.o: $(SRC_TOP)Drivers/VisioBraille/brlconf.h
-$(BLD_TOP)Drivers/VisioBraille/braille.o: $(SRC_TOP)Drivers/VisioBraille/brlkeydefs.h
+$(BLD_TOP)Drivers/VisioBraille/braille.o: $(SRC_TOP)Drivers/VisioBraille/brldefs-vs.h
 $(BLD_TOP)Drivers/VisioBraille/braille.o: $(SRC_TOP)Programs/brl.h
+$(BLD_TOP)Drivers/VisioBraille/braille.o: $(SRC_TOP)Programs/brldefs.h
 $(BLD_TOP)Drivers/VisioBraille/braille.o: $(SRC_TOP)Programs/misc.h
 $(BLD_TOP)Drivers/VisioBraille/braille.o: $(SRC_TOP)Programs/scr.h
 $(BLD_TOP)Drivers/VisioBraille/braille.o: $(SRC_TOP)Programs/message.h
@@ -358,6 +381,7 @@ $(BLD_TOP)Drivers/VisioBraille/braille.o: $(SRC_TOP)Programs/brl_driver.h
 $(BLD_TOP)Drivers/Voyager/braille.o: $(SRC_TOP)Drivers/Voyager/braille.c
 $(BLD_TOP)Drivers/Voyager/braille.o: $(BLD_TOP)config.h
 $(BLD_TOP)Drivers/Voyager/braille.o: $(SRC_TOP)Programs/brl.h
+$(BLD_TOP)Drivers/Voyager/braille.o: $(SRC_TOP)Programs/brldefs.h
 $(BLD_TOP)Drivers/Voyager/braille.o: $(SRC_TOP)Programs/misc.h
 $(BLD_TOP)Drivers/Voyager/braille.o: $(SRC_TOP)Programs/brl_driver.h
 $(BLD_TOP)Drivers/Voyager/braille.o: $(SRC_TOP)Drivers/Voyager/brlconf.h
@@ -380,6 +404,33 @@ $(BLD_TOP)Programs/adlib.o: $(SRC_TOP)Programs/system.h
 $(BLD_TOP)Programs/adlib.o: $(SRC_TOP)Programs/adlib.h
 	cd $(@D) && $(MAKE) $(@F)
 
+# Dependencies for Programs/api_client.o:
+$(BLD_TOP)Programs/api_client.o: $(SRC_TOP)Programs/api_client.c
+$(BLD_TOP)Programs/api_client.o: $(BLD_TOP)config.h
+$(BLD_TOP)Programs/api_client.o: $(SRC_TOP)Programs/brlapi.h
+$(BLD_TOP)Programs/api_client.o: $(SRC_TOP)Programs/api_common.h
+	cd $(@D) && $(MAKE) $(@F)
+
+# Dependencies for Programs/api_common.o:
+$(BLD_TOP)Programs/api_common.o: $(SRC_TOP)Programs/api_common.c
+$(BLD_TOP)Programs/api_common.o: $(BLD_TOP)config.h
+$(BLD_TOP)Programs/api_common.o: $(SRC_TOP)Programs/brlapi.h
+	cd $(@D) && $(MAKE) $(@F)
+
+# Dependencies for Programs/api_server.o:
+$(BLD_TOP)Programs/api_server.o: $(SRC_TOP)Programs/api_server.c
+$(BLD_TOP)Programs/api_server.o: $(BLD_TOP)config.h
+$(BLD_TOP)Programs/api_server.o: $(SRC_TOP)Programs/brlapi.h
+$(BLD_TOP)Programs/api_server.o: $(SRC_TOP)Programs/api_common.h
+$(BLD_TOP)Programs/api_server.o: $(SRC_TOP)Programs/rangelist.h
+$(BLD_TOP)Programs/api_server.o: $(SRC_TOP)Programs/brl.h
+$(BLD_TOP)Programs/api_server.o: $(SRC_TOP)Programs/brldefs.h
+$(BLD_TOP)Programs/api_server.o: $(SRC_TOP)Programs/brltty.h
+$(BLD_TOP)Programs/api_server.o: $(SRC_TOP)Programs/misc.h
+$(BLD_TOP)Programs/api_server.o: $(SRC_TOP)Programs/scr.h
+$(BLD_TOP)Programs/api_server.o: $(SRC_TOP)Programs/tunes.h
+	cd $(@D) && $(MAKE) $(@F)
+
 # Dependencies for Programs/beeper.o:
 $(BLD_TOP)Programs/beeper.o: $(SRC_TOP)Programs/beeper.c
 $(BLD_TOP)Programs/beeper.o: $(BLD_TOP)config.h
@@ -395,6 +446,7 @@ $(BLD_TOP)Programs/brl.o: $(SRC_TOP)Programs/misc.h
 $(BLD_TOP)Programs/brl.o: $(SRC_TOP)Programs/system.h
 $(BLD_TOP)Programs/brl.o: $(SRC_TOP)Programs/message.h
 $(BLD_TOP)Programs/brl.o: $(SRC_TOP)Programs/brl.h
+$(BLD_TOP)Programs/brl.o: $(SRC_TOP)Programs/brldefs.h
 $(BLD_TOP)Programs/brl.o: $(SRC_TOP)Programs/brl_driver.h
 	cd $(@D) && $(MAKE) $(@F)
 
@@ -403,6 +455,7 @@ $(BLD_TOP)Programs/brltest.o: $(SRC_TOP)Programs/brltest.c
 $(BLD_TOP)Programs/brltest.o: $(BLD_TOP)config.h
 $(BLD_TOP)Programs/brltest.o: $(SRC_TOP)Programs/options.h
 $(BLD_TOP)Programs/brltest.o: $(SRC_TOP)Programs/brl.h
+$(BLD_TOP)Programs/brltest.o: $(SRC_TOP)Programs/brldefs.h
 $(BLD_TOP)Programs/brltest.o: $(SRC_TOP)Programs/misc.h
 $(BLD_TOP)Programs/brltest.o: $(SRC_TOP)Programs/message.h
 $(BLD_TOP)Programs/brltest.o: $(SRC_TOP)Programs/scr.h
@@ -413,6 +466,7 @@ $(BLD_TOP)Programs/brltest.o: $(SRC_TOP)Programs/defaults.h
 $(BLD_TOP)Programs/config.o: $(SRC_TOP)Programs/config.c
 $(BLD_TOP)Programs/config.o: $(BLD_TOP)config.h
 $(BLD_TOP)Programs/config.o: $(SRC_TOP)Programs/brl.h
+$(BLD_TOP)Programs/config.o: $(SRC_TOP)Programs/brldefs.h
 $(BLD_TOP)Programs/config.o: $(SRC_TOP)Programs/spk.h
 $(BLD_TOP)Programs/config.o: $(SRC_TOP)Programs/scr.h
 $(BLD_TOP)Programs/config.o: $(SRC_TOP)Programs/contract.h
@@ -432,6 +486,7 @@ $(BLD_TOP)Programs/ctb_compile.o: $(SRC_TOP)Programs/misc.h
 $(BLD_TOP)Programs/ctb_compile.o: $(SRC_TOP)Programs/contract.h
 $(BLD_TOP)Programs/ctb_compile.o: $(SRC_TOP)Programs/ctb_definitions.h
 $(BLD_TOP)Programs/ctb_compile.o: $(SRC_TOP)Programs/brl.h
+$(BLD_TOP)Programs/ctb_compile.o: $(SRC_TOP)Programs/brldefs.h
 	cd $(@D) && $(MAKE) $(@F)
 
 # Dependencies for Programs/ctb_translate.o:
@@ -440,6 +495,7 @@ $(BLD_TOP)Programs/ctb_translate.o: $(BLD_TOP)config.h
 $(BLD_TOP)Programs/ctb_translate.o: $(SRC_TOP)Programs/contract.h
 $(BLD_TOP)Programs/ctb_translate.o: $(SRC_TOP)Programs/ctb_definitions.h
 $(BLD_TOP)Programs/ctb_translate.o: $(SRC_TOP)Programs/brl.h
+$(BLD_TOP)Programs/ctb_translate.o: $(SRC_TOP)Programs/brldefs.h
 	cd $(@D) && $(MAKE) $(@F)
 
 # Dependencies for Programs/cut.o:
@@ -454,6 +510,7 @@ $(BLD_TOP)Programs/cut.o: $(SRC_TOP)Programs/cut.h
 $(BLD_TOP)Programs/fm.o: $(SRC_TOP)Programs/fm.c
 $(BLD_TOP)Programs/fm.o: $(BLD_TOP)config.h
 $(BLD_TOP)Programs/fm.o: $(SRC_TOP)Programs/brl.h
+$(BLD_TOP)Programs/fm.o: $(SRC_TOP)Programs/brldefs.h
 $(BLD_TOP)Programs/fm.o: $(SRC_TOP)Programs/brltty.h
 $(BLD_TOP)Programs/fm.o: $(SRC_TOP)Programs/misc.h
 $(BLD_TOP)Programs/fm.o: $(SRC_TOP)Programs/notes.h
@@ -471,6 +528,7 @@ $(BLD_TOP)Programs/main.o: $(SRC_TOP)Programs/route.h
 $(BLD_TOP)Programs/main.o: $(SRC_TOP)Programs/cut.h
 $(BLD_TOP)Programs/main.o: $(SRC_TOP)Programs/scr.h
 $(BLD_TOP)Programs/main.o: $(SRC_TOP)Programs/brl.h
+$(BLD_TOP)Programs/main.o: $(SRC_TOP)Programs/brldefs.h
 $(BLD_TOP)Programs/main.o: $(SRC_TOP)Programs/spk.h
 $(BLD_TOP)Programs/main.o: $(SRC_TOP)Programs/brltty.h
 $(BLD_TOP)Programs/main.o: $(SRC_TOP)Programs/defaults.h
@@ -480,6 +538,7 @@ $(BLD_TOP)Programs/main.o: $(SRC_TOP)Programs/defaults.h
 $(BLD_TOP)Programs/midi.o: $(SRC_TOP)Programs/midi.c
 $(BLD_TOP)Programs/midi.o: $(BLD_TOP)config.h
 $(BLD_TOP)Programs/midi.o: $(SRC_TOP)Programs/brl.h
+$(BLD_TOP)Programs/midi.o: $(SRC_TOP)Programs/brldefs.h
 $(BLD_TOP)Programs/midi.o: $(SRC_TOP)Programs/brltty.h
 $(BLD_TOP)Programs/midi.o: $(SRC_TOP)Programs/misc.h
 $(BLD_TOP)Programs/midi.o: $(SRC_TOP)Programs/system.h
@@ -491,6 +550,7 @@ $(BLD_TOP)Programs/misc.o: $(SRC_TOP)Programs/misc.c
 $(BLD_TOP)Programs/misc.o: $(BLD_TOP)config.h
 $(BLD_TOP)Programs/misc.o: $(SRC_TOP)Programs/misc.h
 $(BLD_TOP)Programs/misc.o: $(SRC_TOP)Programs/brl.h
+$(BLD_TOP)Programs/misc.o: $(SRC_TOP)Programs/brldefs.h
 	cd $(@D) && $(MAKE) $(@F)
 
 # Dependencies for Programs/options.o:
@@ -504,10 +564,18 @@ $(BLD_TOP)Programs/options.o: $(SRC_TOP)Programs/options.h
 $(BLD_TOP)Programs/pcm.o: $(SRC_TOP)Programs/pcm.c
 $(BLD_TOP)Programs/pcm.o: $(BLD_TOP)config.h
 $(BLD_TOP)Programs/pcm.o: $(SRC_TOP)Programs/brl.h
+$(BLD_TOP)Programs/pcm.o: $(SRC_TOP)Programs/brldefs.h
 $(BLD_TOP)Programs/pcm.o: $(SRC_TOP)Programs/brltty.h
 $(BLD_TOP)Programs/pcm.o: $(SRC_TOP)Programs/misc.h
 $(BLD_TOP)Programs/pcm.o: $(SRC_TOP)Programs/system.h
 $(BLD_TOP)Programs/pcm.o: $(SRC_TOP)Programs/notes.h
+	cd $(@D) && $(MAKE) $(@F)
+
+# Dependencies for Programs/rangelist.o:
+$(BLD_TOP)Programs/rangelist.o: $(SRC_TOP)Programs/rangelist.c
+$(BLD_TOP)Programs/rangelist.o: $(BLD_TOP)config.h
+$(BLD_TOP)Programs/rangelist.o: $(SRC_TOP)Programs/rangelist.h
+$(BLD_TOP)Programs/rangelist.o: $(SRC_TOP)Programs/misc.h
 	cd $(@D) && $(MAKE) $(@F)
 
 # Dependencies for Programs/route.o:
@@ -635,6 +703,7 @@ $(BLD_TOP)Programs/tunes.o: $(SRC_TOP)Programs/misc.h
 $(BLD_TOP)Programs/tunes.o: $(SRC_TOP)Programs/system.h
 $(BLD_TOP)Programs/tunes.o: $(SRC_TOP)Programs/message.h
 $(BLD_TOP)Programs/tunes.o: $(SRC_TOP)Programs/brl.h
+$(BLD_TOP)Programs/tunes.o: $(SRC_TOP)Programs/brldefs.h
 $(BLD_TOP)Programs/tunes.o: $(SRC_TOP)Programs/brltty.h
 $(BLD_TOP)Programs/tunes.o: $(SRC_TOP)Programs/tunes.h
 $(BLD_TOP)Programs/tunes.o: $(SRC_TOP)Programs/notes.h
@@ -648,6 +717,7 @@ $(BLD_TOP)Programs/tunetest.o: $(SRC_TOP)Programs/tunes.h
 $(BLD_TOP)Programs/tunetest.o: $(SRC_TOP)Programs/misc.h
 $(BLD_TOP)Programs/tunetest.o: $(SRC_TOP)Programs/defaults.h
 $(BLD_TOP)Programs/tunetest.o: $(SRC_TOP)Programs/brl.h
+$(BLD_TOP)Programs/tunetest.o: $(SRC_TOP)Programs/brldefs.h
 $(BLD_TOP)Programs/tunetest.o: $(SRC_TOP)Programs/brltty.h
 $(BLD_TOP)Programs/tunetest.o: $(SRC_TOP)Programs/message.h
 	cd $(@D) && $(MAKE) $(@F)

@@ -147,6 +147,9 @@ The default log level (see the
 option) is changed to
 .BR "information" "."
 .TP
+.BI "-A " "name" "=" "value" ",... (--api-parameters=)"
+Specify parameters for the application programming interface.
+.TP
 .BI "-B " "name" "=" "value" ",... (--braille-parameters=)"
 Specify parameters for the braille display driver.
 .TP
@@ -186,6 +189,9 @@ Specify parameters for the screen driver.
 The following environment variables are recognized if the
 .BR "-E" " (" "--environment-variables" ")"
 option is in effect:
+.TP
+.BI "BRLTTY_API_PARAMETERS=" "name" "=" "value" ",..."
+Specify parameters for the application programming interface.
 .TP
 .BI "BRLTTY_ATTRIBUTES_TABLE=" "table"
 The path to the attributes translation table.
@@ -239,6 +245,9 @@ occurs on any line then
 all characters from it to the end of that line are treated as a comment.
 .PP
 The following configuration directives are supported:
+.TP
+.BI "api-parameters " "name" "=" "value" ",..."
+Specify parameters for the application programming interface.
 .TP
 .BI "attributes-table " "table"
 The path to the attributes translation table.

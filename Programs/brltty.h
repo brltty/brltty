@@ -71,7 +71,7 @@ typedef struct {
   unsigned char alertTunes;
   unsigned char tuneDevice;
   unsigned char skipIdenticalLines;
-  unsigned char spare15;
+  unsigned char alertMessages;
   unsigned char blankWindowsSkipMode;
   unsigned char alertDots;
   unsigned char skipBlankWindows;
@@ -104,6 +104,13 @@ extern void setStatusText (const char *text);
 extern void initializeSpeech (void);
 extern void startSpeechDriver (void);
 extern void stopSpeechDriver (void);
+
+extern void api_identify (void);
+extern void api_open (BrailleDisplay *brl, char **parameters);
+extern void api_close (BrailleDisplay *brl);
+extern void api_link (void);
+extern void api_unlink (void);
+extern const char *const api_parameters[];
 
 #ifdef __cplusplus
 }

@@ -15,6 +15,7 @@ tbl2jbt.o: $(SRC_DIR)/tbl2jbt.c
 tbl2jbt.o: $(BLD_TOP)config.h
 tbl2jbt.o: $(SRC_TOP)Programs/options.h
 tbl2jbt.o: $(SRC_TOP)Programs/brl.h
+tbl2jbt.o: $(SRC_TOP)Programs/brldefs.h
 
 # Dependencies for tbl2tbl.o:
 tbl2tbl.o: $(SRC_DIR)/tbl2tbl.c
@@ -26,6 +27,7 @@ tbl2txt.o: $(SRC_DIR)/tbl2txt.c
 tbl2txt.o: $(BLD_TOP)config.h
 tbl2txt.o: $(SRC_TOP)Programs/options.h
 tbl2txt.o: $(SRC_TOP)Programs/brl.h
+tbl2txt.o: $(SRC_TOP)Programs/brldefs.h
 tbl2txt.o: $(SRC_TOP)Unicode/unicode.h
 
 # Dependencies for txt2tbl.o:
@@ -33,4 +35,5 @@ txt2tbl.o: $(SRC_DIR)/txt2tbl.c
 txt2tbl.o: $(BLD_TOP)config.h
 txt2tbl.o: $(SRC_TOP)Programs/options.h
 txt2tbl.o: $(SRC_TOP)Programs/brl.h
+txt2tbl.o: $(SRC_TOP)Programs/brldefs.h
 

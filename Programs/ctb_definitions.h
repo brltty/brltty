@@ -30,7 +30,7 @@ extern "C" {
 #define HASHNUM 1087
 #define hash(x) (((x[0]<<8)+x[1])%HASHNUM)
 
-typedef unsigned short int ContractionTableOffset;
+typedef unsigned long int ContractionTableOffset;
 
 typedef enum {
   CTC_Space       = 0X01,
@@ -68,7 +68,7 @@ typedef enum { /*Op codes*/
   CTO_JoinableWord, /*to, by, into*/
   CTO_Literal, /*don't translate this string*/
   CTO_Contraction, /*multiletter word sign that needs letsign*/
-  CTO_Ignore, /*ignore this string (replace with nothing)*/
+  CTO_Replace, /*replace this string with another*/
   CTO_EndNum, /*end of number*/
   CTO_BegNum, /*beginning of number*/
   CTO_PrePunc, /*punctuation in string at beginning of word*/

@@ -72,12 +72,13 @@ extern "C" {
 #define DEFAULT_SKIP_BLANK_WINDOWS 0       /* 1 = skip blank windows */
 #define DEFAULT_BLANK_WINDOWS_SKIP_MODE sbwEndOfLine
 
+#define DEFAULT_ALERT_MESSAGES 0		/* 1 for on, 0 for off */
 #define DEFAULT_ALERT_DOTS 0		/* 1 for on, 0 for off */
 #define DEFAULT_ALERT_TUNES 1		/* 1 for on, 0 for off */
-#define DEFAULT_PCM_VOLUME 70		/* 1 for on, 0 for off */
-#define DEFAULT_MIDI_VOLUME 70		/* 1 for on, 0 for off */
-#define DEFAULT_MIDI_INSTRUMENT 0		/* 1 for on, 0 for off */
-#define DEFAULT_FM_VOLUME 70		/* 1 for on, 0 for off */
+#define DEFAULT_PCM_VOLUME 70		/* 0 to 100 (percent) */
+#define DEFAULT_MIDI_VOLUME 70		/* 0 to 100 (percent) */
+#define DEFAULT_MIDI_INSTRUMENT 0	/* 0 to 127 */
+#define DEFAULT_FM_VOLUME 70		/* 0 to 100 (percent) */
 
 #ifdef __cplusplus
 }

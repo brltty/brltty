@@ -3,6 +3,7 @@ vario.o: $(SRC_DIR)/vario.c
 vario.o: $(BLD_TOP)config.h
 vario.o: $(SRC_DIR)/variolow.h
 vario.o: $(SRC_TOP)Programs/brl.h
+vario.o: $(SRC_TOP)Programs/brldefs.h
 vario.o: $(SRC_DIR)/brlconf.h
 vario.o: $(SRC_TOP)Programs/brl_driver.h
 vario.o: $(SRC_TOP)Programs/misc.h

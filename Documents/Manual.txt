@@ -9,7 +9,7 @@
 
   Dave Mielke <dave@mielke.cc>
 
-  Version 3.2, February 2003
+  Version 3.3, February 2003
 
   Copyright © 1995-2003 by The BRLTTY Team - All Rights Reserved.  This
   is free software, placed under the terms of TThhee GGNNUU GGeenneerraall PPuubblliicc
@@ -40,7 +40,7 @@
      2.6 Build and Run-Time Restrictions
      2.7 Installing from an RPM File
      2.8 Other Utilities
-        2.8.1 install-brltty
+        2.8.1 brltty-install
         2.8.2 txt2hlp
         2.8.3 tbl2hex
         2.8.4 brltest
@@ -93,24 +93,25 @@
         5.4.2 txt2tbl
         5.4.3 tbl2tbl
 
-  6. Advanced Topics
-     6.1 Installing Multiple Versions
-     6.2 Installation/Rescue Root Disks for Linux
-     6.3 Future Enhancements
-     6.4 Known Bugs
+  6. The Application Programming Interface
+  7. Advanced Topics
+     7.1 Installing Multiple Versions
+     7.2 Installation/Rescue Root Disks for Linux
+     7.3 Future Enhancements
+     7.4 Known Bugs
 
-  7. Appendices
-     7.1 Supported Braille Displays
-     7.2 Supported Speech Synthesizers
-     7.3 Driver Identification Codes
-     7.4 Braille Dot Numbering Convention
-     7.5 North American Braille Computer Code
-     7.6 MIDI Instrument Table
+  8. Appendices
+     8.1 Supported Braille Displays
+     8.2 Supported Speech Synthesizers
+     8.3 Driver Identification Codes
+     8.4 Braille Dot Numbering Convention
+     8.5 North American Braille Computer Code
+     8.6 MIDI Instrument Table
 
-  8. Epilogue
-     8.1 Contact Information
-     8.2 License
-     8.3 Disclaimer
+  9. Epilogue
+     9.1 Contact Information
+     9.2 License
+     9.3 Disclaimer
 
 
   ______________________________________________________________________
@@ -150,6 +151,7 @@
   ·  Intelligent cursor routing, allowing easy fetching of cursor within
      text editors, web browsers, etc., without moving ones hands from
      the braille display.
+
 
   ·  A cut-and-paste function (linear or rectangular) which is
      particularly useful for copying long file names, copying text
@@ -215,6 +217,7 @@
   this way.  This capability:
 
   ·  Allows BRLTTY to be started very early in the system boot sequence.
+
 
   ·  Enables the braille display to be fully operational during the
      login prompt.
@@ -282,8 +285,6 @@
   first become familiar with the files which will ultimately be
   installed.
 
-
-
   22..11..  IInnssttaalllleedd FFiillee HHiieerraarrcchhyy
 
   The build procedure should result in the installation of the following
@@ -294,9 +295,9 @@
         bbrrllttttyy
            The BRLTTY program.
 
-        ````iinnssttaallll--bbrrllttttyy''''
-           A ``utility'' for copying BRLTTY's ``installed file
-           hierarchy'' from one location to another.
+        ````bbrrllttttyy--iinnssttaallll''''
+           A utility for copying BRLTTY's ``installed file hierarchy''
+           from one location to another.
 
      //eettcc//bbrrllttttyy//
         Your installation of BRLTTY may not have all of the following
@@ -311,6 +312,9 @@
         **..ccttbb
            Contraction tables (see section ``Contracted Braille'' for
            details).  Their names look like _l_a_n_g_u_a_g_e-_c_o_u_n_t_r_y-_l_e_v_e_l.ctb.
+
+        **..ccttii
+           Include files for contraction tables.
 
         **..hhllpp
            Driver-specific help pages.  Their names look more or less
@@ -350,6 +354,7 @@
            two-letter identification code for a driver, a tab character,
            and a description of the speech synthesizer which that driver
            is for.
+
         lliibbbbrrllttttyyss_d_r_i_v_e_r..ssoo..11
            The dynamically loadable driver for a speech synthesizer,
            where _d_r_i_v_e_r is the two-letter ``driver identification
@@ -415,6 +420,7 @@
   any options at all.
 
        ./configure
+
 
   If, however, you have some special requirements, or even if you're
   just adventurous, you should find out what your choices are.
@@ -543,11 +549,11 @@
         specified, then the system's root directory is assumed.  This
         directory is rooted at the directory specified by the ``--with-
         execute-root'' build option.
-
      --exec-prefix=_d_i_r_e_c_t_o_r_y
         Specify the directory within the ``installed file hierarchy''
         where the default directories for the architecture-dependent
         files are to be rooted.  These directories include:
+
         ·  the ``program directory''
 
         ·  the ``library directory''
@@ -609,7 +615,6 @@
         Reduce program size by excluding the table selection entries
         from the preferences menu (see the ``Text Table'', ``Attributes
         Table'', and ``Contraction Table'' preferences).
-
      --disable-learn-mode
         Reduce program size by excluding command learn mode (see section
         ``Command Learn Mode'').
@@ -651,6 +656,10 @@
         which support it, BRLTTY will interact with the pointer (mouse)
         device (see section ``Pointer (Mouse) Support via GPM'').
 
+     --enable-api
+        Include the application programming interface (see section ``The
+        Application Programming Interface'').
+
 
   22..22..11..44..  MMiisscceellllaanneeoouuss OOppttiioonnss
 
@@ -671,6 +680,7 @@
         2. brltty should be moved to the init program's original
            location.
 
+
         3. When the system runs init at startup, brltty is actually run.
            It puts itself into the background, and runs the real init in
            the foreground.  This is one (somewhat sneaky) way to have
@@ -679,6 +689,7 @@
 
         If this option isn't specified, then this feature isn't acti­
         vated.
+
 
   22..22..22..  MMaakkee FFiillee TTaarrggeettss
 
@@ -746,6 +757,7 @@
   ``braille-device'' configuration file directives, and/or compile your
   needs right into BRLTTY via the ``--with-braille-driver'' and the
   ``--with-braille-device'' build options.
+
   If all is well, BRLTTY's version identification message should appear
   on the braille display for a few seconds (see the ``-M'' command line
   option).  After it goes away (which you can hasten by pressing any key
@@ -801,17 +813,17 @@
   Starting BRLTTY from this script is a good approach (especially for
   new users).  Just add a set of lines like these:
 
-
-       if [ -x /bin/brltty ]
-       then
-          /bin/brltty
-       fi
+  if [ -x /bin/brltty ]
+  then
+     /bin/brltty
+  fi
 
 
 
   This can usually be abbreviated to the somewhat less readable form:
 
-  [ -x /bin/brltty ] && /bin/brltty
+
+       [ -x /bin/brltty ] && /bin/brltty
 
 
 
@@ -863,7 +875,7 @@
      automatially restarted if it dies, then add a line like this before
      the first :sysinit: line which is already in there.
 
-       brl::sysinit:/bin/brltty
+  brl::sysinit:/bin/brltty
 
 
   ·  If you don't mind it being started later but do want it to be
@@ -937,7 +949,6 @@
   priviledge.
 
 
-
   22..66..  BBuuiilldd aanndd RRuunn--TTiimmee RReessttrriiccttiioonnss
 
 
@@ -992,12 +1003,11 @@
   diagnostic utilities.
 
 
-  22..88..11..  iinnssttaallll--bbrrllttttyy
+  22..88..11..  bbrrllttttyy--iinnssttaallll
 
   This utility copies BRLTTY's ``installed file hierarchy'' from one
   location to another.
-
-       install-brltty _t_o [_f_r_o_m]
+       brltty-install _t_o [_f_r_o_m]
 
 
 
@@ -1014,7 +1024,7 @@
   If a root floppy is mounted as /mnt, and BRLTTY is installed on the
   main system, then typing
 
-       install-brltty /mnt
+       brltty-install /mnt
 
 
   copies BRLTTY, along with all of its data and library files, to the
@@ -1063,7 +1073,7 @@
   interactive way to learn what the keys on the braille display do.  It
   must be run as root.
 
-       brltest -_o_p_t_i_o_n ... [_d_r_i_v_e_r [_n_a_m_e=_v_a_l_u_e ...]]
+  brltest -_o_p_t_i_o_n ... [_d_r_i_v_e_r [_n_a_m_e=_v_a_l_u_e ...]]
 
 
 
@@ -1127,6 +1137,7 @@
         Specify the height of the region (in rows).  If this value isn't
         supplied, then a default value, based on the specified starting
         row, is selected such that the region is vertically centred.
+
 
      -h --help
         Display a summary of the command line options, and then exit.
@@ -1194,7 +1205,6 @@
 
         mmiiddii
            The Musical Instrument Digital Interface on the sound card.
-
         ffmm The FM synthesizer on an AdLib, OPL3, Sound Blaster, or
            equivalent sound card.
 
@@ -1327,12 +1337,10 @@
 
      BBOOTT__LLEEFFTT
         Go to the bottom-left corner.
-
      PPRRPPGGRRPPHH
         Go up to the last line of the previous paragraph (the first non-
         blank line beyond the nearest previous blank line).  The current
         line is included when searching for the inter-paragraph space.
-
 
      NNXXPPGGRRPPHH
         Go down to the first line of the next paragraph (the first non-
@@ -1393,6 +1401,7 @@
         current line.  Other features like its ability to skip blank
         windows (see the ``SKPBLNKWINS'' command) further enhance its
         usefulness for this purpose.
+
 
      FFWWIINNLLTTSSKKIIPP
         Go left to the nearest previous non-blank window.
@@ -1460,7 +1469,6 @@
         option and the ``contraction-table'' configuration file
         directive), then it is used.  This setting can also be changed
         with the ``Text Style'' preference.
-
      SSLLIIDDEEWWIINN
         If cursor tracking (see the ``CSRTRK'' command) is oonn, then,
         whenever the cursor moves too close to (or beyond) either end of
@@ -1526,12 +1534,14 @@
         Underline (with combinations of dots 7 and 8) highlighted
         characters.
 
+
         nnoo uunnddeerrlliinnee
            White on black (normal), gray on black, white on blue, black
            on cyan.
 
         ddoottss 77 aanndd 88
            Black on white (reverse video).
+
         ddoott 88
            Everything else.
 
@@ -1590,6 +1600,7 @@
         operation.  This command isn't available if the ``--disable-
         preferences-menu'' build option was specified.
 
+
      PPRREEFFSSAAVVEE
         Save the current preferences settings (see ``Preferences'' for
         full details).
@@ -1597,6 +1608,7 @@
      PPRREEFFLLOOAADD
         Restore the most recently saved preferences settings (see
         ``Preferences'' for full details).
+
 
   33..11..77..  MMeennuu NNaavviiggaattiioonn
 
@@ -1759,6 +1771,14 @@
   continues to the end of the line.  The following directives are
   recognized:
 
+     api-parameters _n_a_m_e=_v_a_l_u_e,...
+        Specify parameters for the application programming interrface.
+        If the same parameter is specified more than once, then its
+        rightmost assignment is used.  For a description of the
+        parameters accepted by the interface, please see section ``The
+        Application Programming Interface''.  This directive can be
+        overridden with the ``-A'' command line option.
+
      attributes-table _f_i_l_e
         Specify the attributes translation table (see section
         ``Translation Tables'' for details).  If a relative path is
@@ -1910,6 +1930,7 @@
 
         44  warning
 
+
         55  notice
 
         66  information
@@ -1960,6 +1981,14 @@
         translation tables, and the braille display device and help file
         are identified.
 
+     -A_n_a_m_e=_v_a_l_u_e,... --api-parameters=_n_a_m_e=_v_a_l_u_e,...
+        Specify parameters for the application programming interface.
+        If the same parameter is specified more than once, then its
+        rightmost assignment is used.  For a description of the
+        parameters accepted by the interface, please see section ``The
+        Application Programming Interface''.  See the ``api-parameters''
+        configuration file directive for the default run-time setting.
+
      -B_n_a_m_e=_v_a_l_u_e,... --braille-parameters=_n_a_m_e=_v_a_l_u_e,...
         Specify parameters for the braille display driver.  If the same
         parameter is specified more than once, then its rightmost
@@ -1987,6 +2016,10 @@
         as it allows default settings to be passed to BRLTTY via boot
         parameters.  The following environment variables are supported:
 
+        BRLTTY_API_PARAMETERS
+           Parameters for the application programming interface (see the
+           ``-A'' command line option).
+
         BRLTTY_ATTRIBUTES_TABLE
            The attributes translation table (see the ``-a'' command line
            option).
@@ -1994,6 +2027,7 @@
         BRLTTY_BRAILLE_DEVICE
            The braille display device (see the ``-d'' command line
            option).
+
         BRLTTY_BRAILLE_DRIVER
            The braille display driver (see the ``-b'' command line
            option).
@@ -2161,7 +2195,6 @@
      If your display has routing keys, then move the braille window so
      that the last character to be cut appears anywhere within it, and
      then
-
      ·  invoke the ``CUTRECT'' command to cut a rectangular area
 
      ·  invoke the ``CUTLINE'' command to cut a linear area
@@ -2190,7 +2223,6 @@
   If BRLTTY is configured with the ``--enable-gpm'' build option on a
   system where the gpm application has been installed, then it'll
   interact with the pointer (mouse).
-
 
   Moving the braille window moves the pointer (see the ``Pointer Follows
   Window'' preference).  Any motion of the braille window (manual,
@@ -2229,7 +2261,6 @@
 
   ·  Copy the current line to the cut buffer by tripple-clicking the
      left button.
-
   ·  Copy a linear region to the cut buffer as follows:
 
      1. Place the pointer on the first character of the region.
@@ -2257,7 +2288,6 @@
   The tunes are played via the internal beeper by default, but other
   alternatives can be selected with the ``Tune Device'' preference.
 
-
   Each significant event is associated, from highest to lowest priority,
   with one or more of the following:
 
@@ -2275,9 +2305,9 @@
         effectively.
 
      aa mmeessssaaggee
-        If a message has been associated with the event, then it is
-        displayed for a few seconds (see the ``-M'' command line
-        option).
+        If a message has been associated with the event, and if the
+        ``Alert Messages'' preference is active, then it is displayed
+        for a few seconds (see the ``-M'' command line option).
 
   These events include:
 
@@ -2295,6 +2325,7 @@
 
   ·  When the braille window wraps either down to the beginning of the
      next line or up to the end of the previous line.
+
 
   ·  When a requested motion cannot be performed.
 
@@ -2389,7 +2420,6 @@
 
         The initial setting is No.
 
-
      TTeexxtt SSttyyllee
         When displaying screen content (see the ``DISPMD'' command),
         show characters:
@@ -2429,7 +2459,6 @@
         YYeess
            Skip passed lines which have the same content as the current
            line.
-
         This setting can also be changed with the ``SKPIDLNS'' command.
 
      SSkkiipp BBllaannkk WWiinnddoowwss
@@ -2522,6 +2551,7 @@
            predefined interval.
 
         This setting can also be changed with the ``CSRBLINK'' command.
+
      CCuurrssoorr VViissiibbllee PPeerriioodd
         When the cursor is to be blinked, this setting specifies the
         length of time (see the note on ``time settings'' below) during
@@ -2560,6 +2590,7 @@
         settings'' below) during each cycle that it is to be visible.
         The initial setting is 4.
 
+
      AAttttrriibbuutteess IInnvviissiibbllee PPeerriioodd
         When the highlighted character underline is to be blinked, this
         setting specifies the length of time (see the note on ``time
@@ -2588,6 +2619,7 @@
         the length of time (see the note on ``time settings'' below)
         during each cycle that they're to be invisible.  The initial
         setting is 2.
+
      WWiinnddooww FFoolllloowwss PPooiinntteerr
         When moving the pointer device (mouse):
 
@@ -2654,6 +2686,7 @@
            which doesn't support this feature.  This device isn't
            available if the ``--disable-fm-tunes'' build option was
            specified.
+
         The initial setting is beeper on those platforms which support
         it, and PCM on those platforms which don't.
 
@@ -2678,6 +2711,23 @@
         with the event, and if the selected tune device can be opened,
         then, regardless of the setting of this preference, the dot pat­
         tern isn't displayed.
+
+     AAlleerrtt MMeessssaaggeess
+        Whenever a significant event with an associated message occurs
+        (see ``Alert Tunes''):
+
+        NNoo Don't display the message.
+
+        YYeess
+           Display the message.
+
+        If alert tunes are to be played (see the ``TUNES'' command and
+        the ``Alert Tunes'' preference), if a tune has been associated
+        with the event, and if the selected tune device can be opened,
+        or if alert dot patterns are to be displayed (see the ``Alert
+        Dots'' preference) and if a dot pattern has been associated with
+        the event, then, regardless of the setting of this preference,
+        the message isn't displayed.
 
      SSttaattuuss SSttyyllee
         This setting specifies the way that the status cells are to be
@@ -2720,6 +2770,7 @@
 
            NNoo DDoottss
               The first (leftmost) window.
+
            DDoott 77
               The second window.
 
@@ -2804,7 +2855,6 @@
 
            11  The row (counting from 0) corresponding to the top of the
               braille window (see below).
-
            22  The row (counting from 0) whereon the cursor is (see
               below).
 
@@ -2917,7 +2967,6 @@
      _d  The number of braille dots being used to display each character
         (see the ``SIXDOTS'' command).
 
-
         8  All eight dots are being used.
 
         6  Only dots 1 through 6 are being used.
@@ -2936,7 +2985,8 @@
   Short pneumonics have been used, even though they're rather cryptic,
   in order to show the precise column layout.
 
-       _x_x_y_y_s _v_t _t_c_m_f_d_u
+
+  _x_x_y_y_s _v_t _t_c_m_f_d_u
 
 
 
@@ -2984,6 +3034,7 @@
 
         bbllaannkk
            Cursor tracking is off.
+
         t  Cursor tracking is on.
 
      _c  The state of the cursor visibility features (see the ``CSRVIS''
@@ -2999,6 +3050,7 @@
         B  The cursor is visible, and is blinking.
 
      _m  The current display mode (see the ``DISPMD'' command).
+
 
         t  Screen content (text) is being displayed.
 
@@ -3066,8 +3118,10 @@
 
      This feature isn't available if the ``--disable-contracted-
      braille'' build option was specified.
-
   The following contraction tables are provided:
+
+     bbiigg55..ccttbb
+        Chinese big5.
 
      ccoommpprreessss..ccttbb
         Remove excessive white-space.
@@ -3181,7 +3235,6 @@
      ````33'''' _d_o_t_s
         Define begin capitals sign.
 
-
      ````44'''' _d_o_t_s
         Define letter sign.
 
@@ -3228,8 +3281,8 @@
      ````1188'''' _c_h_a_r_a_c_t_e_r_s
         Prefix with letter sign if word.
 
-     ````1199'''' _c_h_a_r_a_c_t_e_r_s
-        Ignore unconditionally.
+     ````1199'''' _c_h_a_r_a_c_t_e_r_s _c_h_a_r_a_c_t_e_r_s
+        Replace the first set of characters with the second.
 
      ````2200'''' _c_h_a_r_a_c_t_e_r_s _d_o_t_s
         Translate if at end of number.
@@ -3248,6 +3301,8 @@
 
      ````2255'''' _d_o_t_s
         Define end capitals sign.
+
+
   44..88..33..  OOppccooddeess bbyy FFuunnccttiioonn
 
   Now for all of the details.  The opcodes here are grouped by function
@@ -3259,6 +3314,7 @@
 
   These opcodes make it easier to write contraction tables.  They have
   no direct effect on the character translation.
+
 
      00 _o_p_c_o_d_e _n_a_m_e
         Assign a name to an opcode.  The name must be defined before
@@ -3325,6 +3381,7 @@
      wwoorrdd
         A maximal sequence of one or more consecutive letters.
 
+
   Now, finally, here are the opcode descriptions themselves:
 
      1177 _c_h_a_r_a_c_t_e_r_s
@@ -3332,8 +3389,10 @@
         sequence into computer braille (see the ``-t'' command line
         option and the ``text-table'' configuration file directive).
 
-     1199 _c_h_a_r_a_c_t_e_r_s
-        Ignore the characters no matter where they appear.
+     1199 _c_h_a_r_a_c_t_e_r_s _c_h_a_r_a_c_t_e_r_s
+        Replace the first set of characters, no matter where they
+        appear, with the second.  The replaced characters aren't
+        reprocessed.
 
      66 _c_h_a_r_a_c_t_e_r_s _d_o_t_s
         Translate the characters no matter where they appear.  If
@@ -3387,6 +3446,7 @@
      2233 _c_h_a_r_a_c_t_e_r_s _d_o_t_s
         Translate the characters if they're part of punctuation at the
         end of a word.
+
 
      2211 _c_h_a_r_a_c_t_e_r_s _d_o_t_s
         Translate the characters if they're at the beginning of a
@@ -3445,7 +3505,6 @@
      tteexxtt..sswweeddiisshh..ttbbll
         Swedish
 
-
      tteexxtt..uukk..ttbbll
         United Kingdom English
 
@@ -3455,8 +3514,6 @@
   See the ``-t'' command line option, the ``text-table'' configuration
   file directive, and the ``--with-text-table'' build option for details
   regarding how to use an alternate text translation table.
-
-
   55..22..  AAttttrriibbuutteess TTrraannssllaattiioonn
 
   The attributes translation table is used when BRLTTY is displaying
@@ -3511,7 +3568,6 @@
         DDoott 33
            Blue
 
-
         DDoott 77
            Blink
 
@@ -3522,6 +3578,7 @@
 
         DDoott 55
            Green
+
 
         DDoott 66
            Blue
@@ -3573,7 +3630,6 @@
 
   This particular mapping makes it easy and efficient for BRLTTY to ver­
   tically shift a dot pattern.
-
 
 
   55..44..  TTaabbllee UUttiilliittiieess
@@ -3706,7 +3762,7 @@
   This utility converts a binary translation table from one dot mapping
   to another.
 
-  tbl2tbl _i_n_p_u_t_-_m_a_p_p_i_n_g _o_u_t_p_u_t_-_m_a_p_p_i_n_g
+       tbl2tbl _i_n_p_u_t_-_m_a_p_p_i_n_g _o_u_t_p_u_t_-_m_a_p_p_i_n_g
 
 
 
@@ -3719,6 +3775,7 @@
   The source table is read from standard input, and the converted table
   is written to standard output.  The following dot mappings are sup­
   ported:
+
 
      ssttaannddaarrdd
         BRLTTY's native mapping (described above).
@@ -3771,7 +3828,6 @@
         BBiitt 55
            Dot 6
 
-
         BBiitt 66
            Dot 7
 
@@ -3779,11 +3835,17 @@
            Dot 8
 
 
-  66..  AAddvvaanncceedd TTooppiiccss
+  66..  TThhee AApppplliiccaattiioonn PPrrooggrraammmmiinngg IInntteerrffaaccee
+
+  This section hasn't been written yet.
 
 
 
-  66..11..  IInnssttaalllliinngg MMuullttiippllee VVeerrssiioonnss
+  77..  AAddvvaanncceedd TTooppiiccss
+
+
+
+  77..11..  IInnssttaalllliinngg MMuullttiippllee VVeerrssiioonnss
 
   It's easy to have more than one version of BRLTTY installed on the
   same system at the same time.  This capability allows you to test a
@@ -3843,15 +3905,13 @@
        ln -s /brltty/etc/brltty /etc/brltty
        ln -s /brltty/lib/brltty /lib/brltty
 
-
-
   Then all you need to do is to point /brltty to the desired version.
 
        ln -s /brltty-3.1 /brltty
 
 
 
-  66..22..  IInnssttaallllaattiioonn//RReessccuuee RRoooott DDiisskkss ffoorr LLiinnuuxx
+  77..22..  IInnssttaallllaattiioonn//RReessccuuee RRoooott DDiisskkss ffoorr LLiinnuuxx
 
   BRLTTY can run as a stand-alone executable.  Everything it needs to
   know can be explicitly configured at build-time (see ``Build
@@ -3900,7 +3960,8 @@
        strip brltty
 
 
-  66..33..  FFuuttuurree EEnnhhaanncceemmeennttss
+
+  77..33..  FFuuttuurree EEnnhhaanncceemmeennttss
 
   Apart from fixing bugs and supporting more types of braille displays,
   we hope, time permitting, to work on the following:
@@ -3935,7 +3996,7 @@
   See the file TODO for a more complete list.
 
 
-  66..44..  KKnnoowwnn BBuuggss
+  77..44..  KKnnoowwnn BBuuggss
 
   At the time of writing (December 2001), the following problems are
   known:
@@ -3948,11 +4009,11 @@
   to a remote host.
 
 
-  77..  AAppppeennddiicceess
+  88..  AAppppeennddiicceess
 
 
 
-  77..11..  SSuuppppoorrtteedd BBrraaiillllee DDiissppllaayyss
+  88..11..  SSuuppppoorrtteedd BBrraaiillllee DDiissppllaayyss
 
   BRLTTY supports the following braille displays:
 
@@ -3990,7 +4051,7 @@
   ·  Tiflosoft: VideoBraille 40
 
 
-  77..22..  SSuuppppoorrtteedd SSppeeeecchh SSyynntthheessiizzeerrss
+  88..22..  SSuuppppoorrtteedd SSppeeeecchh SSyynntthheessiizzeerrss
 
   BRLTTY supports the following speech synthesizers:
 
@@ -4008,7 +4069,7 @@
      Research): Festival
 
 
-  77..33..  DDrriivveerr IIddeennttiiffiiccaattiioonn CCooddeess
+  88..33..  DDrriivveerr IIddeennttiiffiiccaattiioonn CCooddeess
 
 
      aall Alva
@@ -4030,7 +4091,6 @@
      ggss GenericSay
 
      hhtt HandyTech
-
 
      lltt LogText
 
@@ -4061,7 +4121,7 @@
      vvvv ViaVoice
 
 
-  77..44..  BBrraaiillllee DDoott NNuummbbeerriinngg CCoonnvveennttiioonn
+  88..44..  BBrraaiillllee DDoott NNuummbbeerriinngg CCoonnvveennttiioonn
 
   A standard braille cell consists of six dots arranged in two columns
   and three rows.  Computer braille has introduced a fourth row at the
@@ -4095,7 +4155,7 @@
 
 
 
-  77..55..  NNoorrtthh AAmmeerriiccaann BBrraaiillllee CCoommppuutteerr CCooddee
+  88..55..  NNoorrtthh AAmmeerriiccaann BBrraaiillllee CCoommppuutteerr CCooddee
 
 
 
@@ -4361,7 +4421,7 @@
 
 
 
-  77..66..  MMIIDDII IInnssttrruummeenntt TTaabbllee
+  88..66..  MMIIDDII IInnssttrruummeenntt TTaabbllee
 
 
      PPiiaannoo
@@ -4524,11 +4584,11 @@
         Gunshot
 
 
-  88..  EEppiilloogguuee
+  99..  EEppiilloogguuee
 
 
 
-  88..11..  CCoonnttaacctt IInnffoorrmmaattiioonn
+  99..11..  CCoonnttaacctt IInnffoorrmmaattiioonn
 
   For up-to-date information, see our web page at
   [http://mielke.cc/brltty/].
@@ -4552,7 +4612,7 @@
   its driver (see the README file in its subdirectory for details).
 
 
-  88..22..  LLiicceennssee
+  99..22..  LLiicceennssee
 
   This program is free software.  You may redistribute it and/or modify
   it under the terms of The GNU General Public License as published by
@@ -4565,7 +4625,7 @@
   Cambridge, MA 02139, USA.
 
 
-  88..33..  DDiissccllaaiimmeerr
+  99..33..  DDiissccllaaiimmeerr
 
   This program is distributed in the hope that it will be useful, but
   WITHOUT ANY WARRANTY - not even the implied warranty of

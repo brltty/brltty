@@ -1,0 +1,43 @@
+###############################################################################
+# BRLTTY - A background process providing access to the Linux console (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2003 by The BRLTTY Team. All rights reserved.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU General Public License, as published by the Free Software
+# Foundation.  Please see the file COPYING for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+0 0 opcode
+opcode 1 include
+opcode 2 capsign
+opcode 3 begcaps
+opcode 4 letsign
+opcode 5 numsign
+opcode 6 always
+opcode 7 repeated for multiple blanks, lines of underscores, etc.
+opcode 8 word
+opcode 9 begword
+opcode 10 midword
+opcode 11 endword
+opcode 12 midendword
+opcode 13 midnum e.g. decimal point
+opcode 14 lowword
+opcode 15 largesign
+opcode 16 joinword to,  by, into
+opcode 17 literal display in computer braille
+opcode 18 contraction multi-letter contraction that needs a letter sign
+opcode 19 replace replace with another string
+opcode 20 endnum
+opcode 21 begnum
+opcode 22 prepunc
+opcode 23 postpunc
+opcode 24 sufword
+opcode 25 endcaps

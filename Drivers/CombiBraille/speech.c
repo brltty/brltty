@@ -21,8 +21,6 @@
  * $Id: speech.c,v 1.2 1996/09/24 01:04:29 nn201 Exp $
  */
 
-#define SPEECH_C 1
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
@@ -41,7 +39,12 @@
 
 /* These are shared with CombiBraille/braille.c: */
 extern int brl_fd;
-extern unsigned char *rawdata;
+extern int chars_per_sec;			/* file descriptor for Braille display */
+static size_t spk_size = 0X1000;
+static unsigned char *spk_buffer = NULL;
+static int spk_fd = -1;
+static FILE *spk_stream = NULL;
+static unsigned int spk_written = 0;
 
 
 /* charset conversion table from iso latin-1 == iso 8859-1 to cp437==ibmpc
@@ -69,51 +72,72 @@ static unsigned char latin2cp437[128] =
 static void
 spk_identify (void)
 {
-  LogPrint(LOG_NOTICE, "Using the CombiBraille's built-in speech.");
+  LogPrint(LOG_NOTICE, "Using the CombiBraille's built-in speech synthesizer.");
 }
 
 
 static void
 spk_open (char **parameters)
 {
+  if ((spk_buffer = malloc(spk_size))) {
+    if ((spk_fd = dup(brl_fd)) != -1) {
+      if ((spk_stream = fdopen(spk_fd, "a"))) {
+        setvbuf(spk_stream, spk_buffer, _IOFBF, spk_size);
+        return;
+      } else {
+        LogError("fdopen");
+      }
+      close(spk_fd);
+      spk_fd = -1;
+    } else {
+      LogError("dup");
+    }
+    free(spk_buffer);
+    spk_buffer = NULL;
+  } else {
+    LogError("malloc");
+  }
 }
 
+
+static void
+spk_write (const unsigned char *address, unsigned int count)
+{
+  fwrite(address, 1, count, spk_stream);
+  spk_written += count;
+}
+
+static void
+spk_flush (void)
+{
+  fflush(spk_stream);
+  delay(spk_written * 1000 / chars_per_sec);
+  spk_written = 0;
+}
 
 static void
 spk_say (const unsigned char *buffer, int len)
 {
   unsigned char *pre_speech = PRE_SPEECH;
   unsigned char *post_speech = POST_SPEECH;
-  unsigned char c;
   int i;
 
-  if (pre_speech[0])
-    {
-      memcpy (rawdata, pre_speech + 1, pre_speech[0]);
-      write (brl_fd, rawdata, pre_speech[0]);
+  if (pre_speech[0]) spk_write(pre_speech+1, pre_speech[0]);
+  for (i = 0; i < len; i++) {
+    unsigned char byte = buffer[i];
+    unsigned char *byte_address = &byte;
+    unsigned int byte_count = 1;
+    if (byte >= 0X80) byte = latin2cp437[byte];
+    if (byte < 33) {	/* space or control character */
+      byte = ' ';
+    } else if (byte <= MAX_TRANS) {
+      byte_address = vocab[byte - 33];
+      byte_count = strlen(byte_address);
     }
-  for (i = 0; i < len; i++)
-    {
-      c = buffer[i];
-      if (c >= 128) c = latin2cp437[c];
-      if (c < 33)	/* space or control character */
-	{
-	  rawdata[0] = ' ';
-	  write (brl_fd, rawdata, 1);
-	}
-      else if (c > MAX_TRANS)
-	write (brl_fd, &c, 1);
-      else
-	{
-	  memcpy (rawdata, vocab[c - 33], strlen (vocab[c - 33]));
-	  write (brl_fd, rawdata, strlen (vocab[c - 33]));
-	}
-    }
-  if (post_speech[0])
-    {
-      memcpy (rawdata, post_speech + 1, post_speech[0]);
-      write (brl_fd, rawdata, post_speech[0]);
-    }
+    spk_write(byte_address, byte_count);
+  }
+  if (post_speech[0]) spk_write(post_speech+1, post_speech[0]);
+  spk_flush();
 }
 
 
@@ -122,12 +146,24 @@ spk_mute (void)
 {
   unsigned char *mute_seq = MUTE_SEQ;
 
-  memcpy (rawdata, mute_seq + 1, mute_seq[0]);
-  write (brl_fd, rawdata, mute_seq[0]);
+  spk_write(mute_seq+1, mute_seq[0]);
+  spk_flush();
 }
 
 
 static void
 spk_close (void)
 {
+  if (spk_stream) {
+    fclose(spk_stream);
+    spk_stream = NULL;
+    spk_fd = -1;
+  } else if (spk_fd != -1) {
+    close(spk_fd);
+    spk_fd = -1;
+  }
+  if (spk_buffer) {
+    free(spk_buffer);
+    spk_buffer = NULL;
+  }
 }

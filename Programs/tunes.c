@@ -489,7 +489,7 @@ playTune (TuneDefinition *tune) {
 	 unsigned char dots = tune->tactile & 0XFF;
 	 unsigned char duration = tune->tactile >> 8;
          showDotPattern(dots, duration);
-      } else if (tune->message) {
+      } else if (prefs.alertMessages && tune->message) {
 	 message(tune->message, 0);
       }
    }

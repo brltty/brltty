@@ -177,6 +177,12 @@ switchVirtualTerminal (int vt) {
 
 
 int
+currentVirtualTerminal (void) {
+  return current->currentvt();
+}
+
+
+int
 executeScreenCommand (int cmd) {
   return current->execute(cmd);
 }

@@ -400,7 +400,7 @@ parseDots (FileData *data, ByteString *cells, const BYTE *token, const int lengt
 }				/*end of function parseDots */
 
 static int
-getFind (FileData *data, ByteString *find, const BYTE **token, int *length) {
+getFindText (FileData *data, ByteString *find, const BYTE **token, int *length) {
   if (getToken(data, token, length, "find text"))
     if (parseText(data, find, *token, *length))
       return 1;
@@ -408,7 +408,15 @@ getFind (FileData *data, ByteString *find, const BYTE **token, int *length) {
 }
 
 static int
-getReplace (FileData *data, ByteString *replace, const BYTE **token, int *length) {
+getReplaceText (FileData *data, ByteString *replace, const BYTE **token, int *length) {
+  if (getToken(data, token, length, "replacement text"))
+    if (parseText(data, replace, *token, *length))
+      return 1;
+  return 0;
+}
+
+static int
+getReplacePattern (FileData *data, ByteString *replace, const BYTE **token, int *length) {
   if (getToken(data, token, length, "replacement pattern")) {
     if (*length == 1 && **token == '=') {
       replace->length = 0;
@@ -522,17 +530,25 @@ processLine (FileData *data, const BYTE *line) {
     case CTO_Repeated: {
       ByteString find;
       ByteString replace;
-      if (getFind(data, &find, &token, &length))
-        if (getReplace(data, &replace, &token, &length))
+      if (getFindText(data, &find, &token, &length))
+        if (getReplacePattern(data, &replace, &token, &length))
+          if (!addEntry(data, opcode, &find, &replace))
+            goto failure;
+      break;
+    }
+    case CTO_Replace: {
+      ByteString find;
+      ByteString replace;
+      if (getFindText(data, &find, &token, &length))
+        if (getReplaceText(data, &replace, &token, &length))
           if (!addEntry(data, opcode, &find, &replace))
             goto failure;
       break;
     }
     case CTO_Contraction:
-    case CTO_Ignore:
     case CTO_Literal: {
       ByteString find;
-      if (getFind(data, &find, &token, &length))
+      if (getFindText(data, &find, &token, &length))
         if (!addEntry(data, opcode, &find, NULL))
           goto failure;
       break;
@@ -679,6 +695,22 @@ cacheCharacterAttributes (void) {
 }
 
 static int
+auditCharacters (BYTE *encountered, const BYTE *start, BYTE length) {
+   const BYTE *address = start;
+   BYTE count = length;
+  while (count--) {
+    BYTE character = *address++;
+    if (!tableHeader->characters[character].entry && !encountered[character]) {
+      encountered[character] = 1;
+      compileError(NULL, "character representation not defined: %c (%.*s)",
+                   character, length, start);
+      return 0;
+    }
+  }
+  return 1;
+}
+
+static int
 auditTable (void) {
   int ok = 1;
   BYTE characterEncountered[0X100];
@@ -691,18 +723,16 @@ auditTable (void) {
       switch (entry->opcode) {
         default:
           if (!entry->replen) {
-            int findIndex;
-            for (findIndex = 0; findIndex < entry->findlen; findIndex++) {
-              BYTE character = entry->findrep[findIndex];
-              if (!tableHeader->characters[character].entry && !characterEncountered[character]) {
-                characterEncountered[character] = 1;
-                compileError(NULL, "character representation not defined: %c (%.*s)",
-                             character, entry->findlen, entry->findrep);
-                ok = 0;
-              }
+            if (!auditCharacters(characterEncountered, &entry->findrep[0], entry->findlen)) {
+              ok = 0;
             }
           }
-        case CTO_Ignore:
+          break;
+        case CTO_Replace:
+          if (!auditCharacters(characterEncountered, &entry->findrep[entry->findlen], entry->replen)) {
+            ok = 0;
+          }
+          break;
         case CTO_Literal:
           break;
       }

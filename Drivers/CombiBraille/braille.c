@@ -45,6 +45,7 @@ static int cmdtrans[0X100] = {
 static unsigned char combitrans[256];	/* dot mapping table (output) */
 int brl_fd;			/* file descriptor for Braille display */
 int brl_cols;			/* file descriptor for Braille display */
+int chars_per_sec;			/* file descriptor for Braille display */
 static unsigned char *prevdata;	/* previously received data */
 static unsigned char status[5], oldstatus[5];	/* status cells - always five */
 unsigned char *rawdata;		/* writebrl() buffer for raw Braille data */
@@ -96,6 +97,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *brldev)
   newtio.c_cc[VMIN] = 0;	/* set nonblocking read */
   newtio.c_cc[VTIME] = 0;
   resetSerialDevice(brl_fd, &newtio, BAUDRATE);		/* activate new settings */
+  chars_per_sec = baud2integer(BAUDRATE) / 10;
 
   /* CombiBraille initialisation procedure: */
   success = 0;
@@ -253,6 +255,7 @@ brl_writeWindow (BrailleDisplay *brl)
 	  rawlen += post_data[0];
 	}
       write (brl_fd, rawdata, rawlen);
+      brl->writeDelay += rawlen * 1000 / chars_per_sec;
     }
 }
 

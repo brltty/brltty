@@ -14,10 +14,8 @@
  *
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
-
-#define VERSION "BRLTTY driver for VisioBraille, version 0.1, 2000"
-#define COPYRIGHT "Copyright Sebastien HINDERER <shindere@ens-lyon.fr>"
-#define BRL_C 1
+#define VERSION "BRLTTY driver for VisioBraille, version 0.2, 2002"
+#define COPYRIGHT "Copyright Sebastien HINDERER <Sebastien.Hinderer@libertysurf.fr"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -33,13 +31,14 @@
 #include <termios.h>
 #include <errno.h>
 #include "brlconf.h"
-#include "brlkeydefs.h"
+#include "brldefs-vs.h"
 #include "Programs/brl.h"
 #include "Programs/misc.h"
 #include "Programs/scr.h"
 #include "Programs/message.h"
 
-//#define BRL_HAVE_PACKET_IO
+#define BRL_HAVE_PACKET_IO
+#define BRL_HAVE_KEY_CODES
 #include "Programs/brl_driver.h"
 
 #define MAXPKTLEN 512
@@ -68,11 +67,11 @@ static int printcode = 0;
 /* Function : brl_writePacket */ 
 /* Sends a packet of size bytes, stored at address p to the braille terminal */
 /* Returns 0 if everything is right, -1 if an error occured while sending */
-static int brl_writePacket(BrailleDisplay *brl, unsigned char *p, int size)
+static int brl_writePacket(BrailleDisplay *brl, const unsigned char *p, int size)
 {
  int lgtho = 1;
  static unsigned char obuf[MAXPKTLEN] = { 02 };
- unsigned char *x;
+ const unsigned char *x;
  unsigned char *y = obuf+1;
  unsigned char chksum=0;
  int i,res;
@@ -320,9 +319,9 @@ static void brl_writeStatus(BrailleDisplay *brl, const unsigned char *s)
 {
 }
 
-/* Function : brl_keyCommand */
+/* Function : brl_keyToCommand */
 /* Converts a key code to a brltty command according to the context */
-int brl_keyCommand(BrailleDisplay *brl, DriverCommandContext caller, int code)
+int brl_keyToCommand(BrailleDisplay *brl, DriverCommandContext caller, int code)
 {
  static int ctrlpressed = 0; 
  static int altpressed = 0;
@@ -333,6 +332,8 @@ int brl_keyCommand(BrailleDisplay *brl, DriverCommandContext caller, int code)
  int type;
  ch = code & 0xff;
  type = code & (~ 0xff);
+ if (code==0) return 0;
+ if (code==EOF) return EOF;
  if (type==BRLKEY_CHAR)
   return ch | VAL_PASSCHAR | altpressed | ctrlpressed | (altpressed = ctrlpressed = 0);
  else if (type==BRLKEY_ROUTING) {
@@ -360,7 +361,9 @@ int brl_keyCommand(BrailleDisplay *brl, DriverCommandContext caller, int code)
    case keyB6: return CMD_TOP_LEFT; 
    case keyD6: return CMD_BOT_LEFT;
    case keyA4: return CMD_FWINLTSKIP;
+   case keyB8: return CMD_FWINLTSKIP;
    case keyA5: return CMD_FWINRTSKIP;
+   case keyD8: return CMD_FWINRTSKIP;
    case keyB7: return CMD_LNUP;
    case keyD7: return CMD_LNDN;
    case keyC8: return CMD_FWINRT;
@@ -417,34 +420,27 @@ int brl_keyCommand(BrailleDisplay *brl, DriverCommandContext caller, int code)
  return EOF; 
 }
 
-/* Function : brl_readCommand */
-/* Reads a key from the braille keyboard */
-/* The corresponded packee is analysed, and an integer value is calculated */
-/* if readbrl was called directly by brltty, this value is re-interpreted */
-/* to obtain a valid brltty-command-code that's finally returned */
-/* if the call was made for other applications neeed, the intermediate value */
-/* is returned */
+/* Function : brl_readKey */
+/* Reads a key. The result is context-independent */
 /* The intermediate value contains a keycode, masked with the key type */
 /* the keytype is one of BRL_NORMALCHAR, BRL_FUNCTIONKEY or BRL_ROUTING */
 /* for a normal character, the keycode is the latin1-code of the character */
 /* for function-keys, codes 0 to 31 are reserved for A1 to D8 keys */
 /* codes after 32 are for ~~* combinations, the order has to be determined */
 /* for BRL_ROUTING, the code is the ofset to route, starting from 0 */
-static int brl_readCommand(BrailleDisplay *brl, DriverCommandContext caller)
+static int brl_readKey(BrailleDisplay *brl)
 {
  unsigned char ch, ibuf[MAXPKTLEN-1];
  static int routing = 0;
- int lgthi = brl_readPacket(brl,(unsigned char *) &ibuf,MAXPKTLEN-1);
+ int lgthi;
+ readNextPacket:
+ lgthi = brl_readPacket(brl,(unsigned char *) &ibuf,MAXPKTLEN-1);
  if (lgthi==0) return EOF;
  if (ibuf[0]=='%') 
  {
-  #ifndef CHANGED
-   ibuf[lgthi] = '\0';
-   insertString(&ibuf[1]); 
-  #else /* CHANGED */
-   ibuf[lgthi] = '\0';
-   insertString(ibuf[1]);
-  #endif /* CHANGED */
+  ibuf[lgthi] = '\0';
+  insertString(&ibuf[1]);
+  return EOF;
  }  
  if ((ibuf[0]!=0x3c) && (ibuf[0]!=0x3d) && (ibuf[0]!=0x23)) return EOF;
  ch = ibuf[1];
@@ -460,15 +456,16 @@ static int brl_readCommand(BrailleDisplay *brl, DriverCommandContext caller)
  {
   routing=0;
   if (ch>=0xc0) 
-   return brl_keyCommand(brl,caller,(ibuf[1]-0xc0) | BRLKEY_ROUTING);
+   return (ibuf[1]-0xc0) | BRLKEY_ROUTING;
   return EOF;
  }
  if ((ch>=0xc0) && (ch<=0xdf)) 
-  return brl_keyCommand(brl,caller,(ch-0xc0) | BRLKEY_FUNCTIONKEY);
+  return (ch-0xc0) | BRLKEY_FUNCTIONKEY;
  if (ch==0x91) 
  {
   routing = 1;
-  return CMD_NOOP; /* We want to be called again immediately */
+  goto readNextPacket;
+  /* return CMD_NOOP; We want to be called again immediately */
  } 
  if ((ch>=0x20) && (ch<=0x9e))
  {
@@ -491,7 +488,14 @@ static int brl_readCommand(BrailleDisplay *brl, DriverCommandContext caller)
    case 0x87: ch = 0xe7; break;
    case 0x9e: ch = 0x60; break;
   }
-  return brl_keyCommand(brl,caller, ch | BRLKEY_CHAR);
+  return ch | BRLKEY_CHAR;
  }
- return brl_keyCommand(brl,caller,ch | BRLKEY_OTHER);
+ return ch | BRLKEY_OTHER;
+}
+
+/* Function : brl_readCommand */
+/* Reads a command from the braille keyboard */
+static int brl_readCommand(BrailleDisplay *brl, DriverCommandContext context)
+{
+ return brl_keyToCommand(brl,context,brl_readKey(brl));
 }

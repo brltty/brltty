@@ -5,6 +5,30 @@ adlib.o: $(SRC_DIR)/misc.h
 adlib.o: $(SRC_DIR)/system.h
 adlib.o: $(SRC_DIR)/adlib.h
 
+# Dependencies for api_client.o:
+api_client.o: $(SRC_DIR)/api_client.c
+api_client.o: $(BLD_TOP)config.h
+api_client.o: $(SRC_DIR)/brlapi.h
+api_client.o: $(SRC_DIR)/api_common.h
+
+# Dependencies for api_common.o:
+api_common.o: $(SRC_DIR)/api_common.c
+api_common.o: $(BLD_TOP)config.h
+api_common.o: $(SRC_DIR)/brlapi.h
+
+# Dependencies for api_server.o:
+api_server.o: $(SRC_DIR)/api_server.c
+api_server.o: $(BLD_TOP)config.h
+api_server.o: $(SRC_DIR)/brlapi.h
+api_server.o: $(SRC_DIR)/api_common.h
+api_server.o: $(SRC_DIR)/rangelist.h
+api_server.o: $(SRC_DIR)/brl.h
+api_server.o: $(SRC_DIR)/brldefs.h
+api_server.o: $(SRC_DIR)/brltty.h
+api_server.o: $(SRC_DIR)/misc.h
+api_server.o: $(SRC_DIR)/scr.h
+api_server.o: $(SRC_DIR)/tunes.h
+
 # Dependencies for beeper.o:
 beeper.o: $(SRC_DIR)/beeper.c
 beeper.o: $(BLD_TOP)config.h
@@ -19,6 +43,7 @@ brl.o: $(SRC_DIR)/misc.h
 brl.o: $(SRC_DIR)/system.h
 brl.o: $(SRC_DIR)/message.h
 brl.o: $(SRC_DIR)/brl.h
+brl.o: $(SRC_DIR)/brldefs.h
 brl.o: $(SRC_DIR)/brl_driver.h
 
 # Dependencies for brltest.o:
@@ -26,6 +51,7 @@ brltest.o: $(SRC_DIR)/brltest.c
 brltest.o: $(BLD_TOP)config.h
 brltest.o: $(SRC_DIR)/options.h
 brltest.o: $(SRC_DIR)/brl.h
+brltest.o: $(SRC_DIR)/brldefs.h
 brltest.o: $(SRC_DIR)/misc.h
 brltest.o: $(SRC_DIR)/message.h
 brltest.o: $(SRC_DIR)/scr.h
@@ -35,6 +61,7 @@ brltest.o: $(SRC_DIR)/defaults.h
 config.o: $(SRC_DIR)/config.c
 config.o: $(BLD_TOP)config.h
 config.o: $(SRC_DIR)/brl.h
+config.o: $(SRC_DIR)/brldefs.h
 config.o: $(SRC_DIR)/spk.h
 config.o: $(SRC_DIR)/scr.h
 config.o: $(SRC_DIR)/contract.h
@@ -53,6 +80,7 @@ ctb_compile.o: $(SRC_DIR)/misc.h
 ctb_compile.o: $(SRC_DIR)/contract.h
 ctb_compile.o: $(SRC_DIR)/ctb_definitions.h
 ctb_compile.o: $(SRC_DIR)/brl.h
+ctb_compile.o: $(SRC_DIR)/brldefs.h
 
 # Dependencies for ctb_translate.o:
 ctb_translate.o: $(SRC_DIR)/ctb_translate.c
@@ -60,6 +88,7 @@ ctb_translate.o: $(BLD_TOP)config.h
 ctb_translate.o: $(SRC_DIR)/contract.h
 ctb_translate.o: $(SRC_DIR)/ctb_definitions.h
 ctb_translate.o: $(SRC_DIR)/brl.h
+ctb_translate.o: $(SRC_DIR)/brldefs.h
 
 # Dependencies for cut.o:
 cut.o: $(SRC_DIR)/cut.c
@@ -72,6 +101,7 @@ cut.o: $(SRC_DIR)/cut.h
 fm.o: $(SRC_DIR)/fm.c
 fm.o: $(BLD_TOP)config.h
 fm.o: $(SRC_DIR)/brl.h
+fm.o: $(SRC_DIR)/brldefs.h
 fm.o: $(SRC_DIR)/brltty.h
 fm.o: $(SRC_DIR)/misc.h
 fm.o: $(SRC_DIR)/notes.h
@@ -88,6 +118,7 @@ main.o: $(SRC_DIR)/route.h
 main.o: $(SRC_DIR)/cut.h
 main.o: $(SRC_DIR)/scr.h
 main.o: $(SRC_DIR)/brl.h
+main.o: $(SRC_DIR)/brldefs.h
 main.o: $(SRC_DIR)/spk.h
 main.o: $(SRC_DIR)/brltty.h
 main.o: $(SRC_DIR)/defaults.h
@@ -96,6 +127,7 @@ main.o: $(SRC_DIR)/defaults.h
 midi.o: $(SRC_DIR)/midi.c
 midi.o: $(BLD_TOP)config.h
 midi.o: $(SRC_DIR)/brl.h
+midi.o: $(SRC_DIR)/brldefs.h
 midi.o: $(SRC_DIR)/brltty.h
 midi.o: $(SRC_DIR)/misc.h
 midi.o: $(SRC_DIR)/system.h
@@ -106,6 +138,7 @@ misc.o: $(SRC_DIR)/misc.c
 misc.o: $(BLD_TOP)config.h
 misc.o: $(SRC_DIR)/misc.h
 misc.o: $(SRC_DIR)/brl.h
+misc.o: $(SRC_DIR)/brldefs.h
 
 # Dependencies for options.o:
 options.o: $(SRC_DIR)/options.c
@@ -117,10 +150,17 @@ options.o: $(SRC_DIR)/options.h
 pcm.o: $(SRC_DIR)/pcm.c
 pcm.o: $(BLD_TOP)config.h
 pcm.o: $(SRC_DIR)/brl.h
+pcm.o: $(SRC_DIR)/brldefs.h
 pcm.o: $(SRC_DIR)/brltty.h
 pcm.o: $(SRC_DIR)/misc.h
 pcm.o: $(SRC_DIR)/system.h
 pcm.o: $(SRC_DIR)/notes.h
+
+# Dependencies for rangelist.o:
+rangelist.o: $(SRC_DIR)/rangelist.c
+rangelist.o: $(BLD_TOP)config.h
+rangelist.o: $(SRC_DIR)/rangelist.h
+rangelist.o: $(SRC_DIR)/misc.h
 
 # Dependencies for route.o:
 route.o: $(SRC_DIR)/route.c
@@ -233,6 +273,7 @@ tunes.o: $(SRC_DIR)/misc.h
 tunes.o: $(SRC_DIR)/system.h
 tunes.o: $(SRC_DIR)/message.h
 tunes.o: $(SRC_DIR)/brl.h
+tunes.o: $(SRC_DIR)/brldefs.h
 tunes.o: $(SRC_DIR)/brltty.h
 tunes.o: $(SRC_DIR)/tunes.h
 tunes.o: $(SRC_DIR)/notes.h
@@ -245,6 +286,7 @@ tunetest.o: $(SRC_DIR)/tunes.h
 tunetest.o: $(SRC_DIR)/misc.h
 tunetest.o: $(SRC_DIR)/defaults.h
 tunetest.o: $(SRC_DIR)/brl.h
+tunetest.o: $(SRC_DIR)/brldefs.h
 tunetest.o: $(SRC_DIR)/brltty.h
 tunetest.o: $(SRC_DIR)/message.h
 

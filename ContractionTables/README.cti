@@ -1,0 +1,30 @@
+# The format of table entries is: opcode, operands. A line may contain only
+# one entry. The opcode is a number and tells the grade 2 compiler how to
+# handle the entry. The number 0 can be used to define mnemonic synonyms for
+# these numbers, such as "opcode" for 0 itself. In an entry, the opcode and
+# the operands are separated by blanks or tabs. more than one blank or tab is
+# ignored. Leading blanks at the beginning of lines are also ignored. Blank
+# lines and lines beginning with '#' are ignored. Lines containing table
+# entries may also contain comments following the entry and separated from the
+# last operand by at least one blank or tab. Most entries have two operands,
+# but the number is determined by the opcode.
+#
+# Define the opcodes.
+# Opcodes must be defined before they are used. Except for this restriction,
+# the order of the entries in the table may be anything that is convenient.
+# You may wish to bear in mind, however, that the compiler arranges entries so
+# that the longest of several entries beginning with the same two characters
+# is tested first. If entries have the same first operand, they are arranged
+# in the order in which they are found in the table. Thus, the same string may
+# have different translations under different circumstances. This method of
+# arrangement is also followed for entries whose first operand is just one
+# character.
+# In specifying the first operand, you may simply type it, if all the
+# characters are on the keyboard. For those characters which are not, use a
+# backslash followed by two hexadecimal digits. If you wish, you can follow
+# the C convention and place "0x" between the backslash and the hexadecimal
+# digits. To enter a backslash, use two in sequence, "\\".
+#
+# In most entries, the first operand is the string to be translated, and the
+# second operand is the dot patterns of the Braille cells in the translation.
+# The standard dot numbering is used. Cells are separated by hyphens ('-').

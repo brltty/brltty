@@ -75,7 +75,7 @@ selectRule (int length) { /*check for valid contractions */
       switch (curop) { /*check validity of this contraction */
         case CTO_Always:
         case CTO_Repeated:
-        case CTO_Ignore:
+        case CTO_Replace:
         case CTO_Literal:
           return 1;
         case CTO_LargeSign:
@@ -207,15 +207,22 @@ putUnknown (BYTE character) { /* Convert unknown character to hexadecimal. */
 }
 
 static int
-putCharacter (BYTE character) { /* Convert unknown character to hexadecimal. */
+putCharacter (BYTE character) {
   ContractionTableOffset offset = table->characters[character].entry;
   if (offset) {
     const ContractionTableEntry *entry = CTE(table, offset);
-    if (!entry->replen) return putBytes(&textTable[character], 1);
-    return putBytes(&entry->findrep[1], entry->replen);
+    if (entry->replen) return putBytes(&entry->findrep[1], entry->replen);
+    return putBytes(&textTable[character], 1);
   }
-  if (putUnknown(character)) return 1;
-  return 0;
+  return putUnknown(character);
+}
+
+static int
+putCharacters (const BYTE *characters, int count) {
+  while (count--)
+    if (!putCharacter(*characters++))
+      return 0;
+  return 1;
 }
 
 static int
@@ -313,8 +320,9 @@ contractText (void *contractionTable,
 
       /* main processing */
       switch (curop) {
-        case CTO_Ignore:
+        case CTO_Replace:
           src += curfindlen;
+          if (!putCharacters(&curentry->findrep[curfindlen], curentry->replen)) goto done;
           break;
         case CTO_Literal: {
           const BYTE *srcorig = src;

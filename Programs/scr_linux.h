@@ -86,6 +86,7 @@ public:
   int insert (unsigned short);
   int selectvt (int);
   int switchvt (int);
+  int currentvt (void);
 };
 
 #endif /* _SCR_LINUX_H */

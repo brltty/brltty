@@ -3,6 +3,7 @@ braille.o: $(SRC_DIR)/braille.c
 braille.o: $(BLD_TOP)config.h
 braille.o: $(SRC_DIR)/brlconf.h
 braille.o: $(SRC_TOP)Programs/brl.h
+braille.o: $(SRC_TOP)Programs/brldefs.h
 braille.o: $(SRC_TOP)Programs/misc.h
 braille.o: $(SRC_TOP)Programs/brl_driver.h
 braille.o: $(BLD_DIR)/config.tab.c
@@ -13,6 +14,7 @@ config.tab.c: $(SRC_DIR)/config.y
 config.tab.c: $(BLD_TOP)config.h
 config.tab.c: $(SRC_DIR)/brl-cfg.h
 config.tab.c: $(SRC_TOP)Programs/brl.h
+config.tab.c: $(SRC_TOP)Programs/brldefs.h
 
 # Dependencies for dump-codes.o:
 dump-codes.o: $(SRC_DIR)/dump-codes.c
@@ -30,6 +32,7 @@ serial.o: $(SRC_DIR)/brlconf.h
 serial.o: $(BLD_DIR)/config.tab.c
 serial.o: $(SRC_TOP)Programs/brl.h
 serial.o: $(SRC_TOP)Programs/brl_driver.h
+serial.o: $(SRC_TOP)Programs/brldefs.h
 serial.o: $(SRC_TOP)Programs/misc.h
 serial.o: $(BLD_TOP)config.h
 serial.o: $(SRC_TOP)Programs/misc.c
@@ -42,6 +45,7 @@ simulate.o: $(SRC_DIR)/brlconf.h
 simulate.o: $(BLD_DIR)/config.tab.c
 simulate.o: $(SRC_TOP)Programs/brl.h
 simulate.o: $(SRC_TOP)Programs/brl_driver.h
+simulate.o: $(SRC_TOP)Programs/brldefs.h
 simulate.o: $(SRC_TOP)Programs/misc.h
 simulate.o: $(BLD_TOP)config.h
 simulate.o: $(SRC_TOP)Programs/misc.c

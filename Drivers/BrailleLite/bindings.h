@@ -29,9 +29,9 @@
  * and just use 64-byte tables.
  */
 
-/* The static arrays must only be in brl.c, so just in case ... */
-#ifdef BRL_C
-#undef BRL_C
+/* The static arrays must only be in braille.c, so just in case ... */
+#ifdef BL_NEED_ARRAYS
+#undef BL_NEED_ARRAYS
 
 static unsigned char brltrans[64] =
 {
@@ -88,7 +88,7 @@ static int cmdtrans[64] =
 static unsigned char dangcmd[8] =
 { 0x00, 0x88, 0x80, 0x05, 0x40, 0x00, 0x10, 0x00 };
 
-#endif /* BRL_C */
+#endif /* BL_NEED_ARRAYS */
 
 
 /*

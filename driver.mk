@@ -57,6 +57,15 @@ speech-driver: $(SPK_FILE)
 spk-lib-name:
 	echo "$(DRIVER_CODE)  $(DRIVER_NAME) [$(SPEECH_MODELS)]" >>$(SPKNAMES)
 
+install-api:
+	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(INC_DIR)
+	for file in *-$(DRIVER_CODE).h; do test -f $$file && $(INSTALL_DATA) $$file $(INSTALL_ROOT)$(INC_DIR); done || :
+
+install:: $(INSTALL_API)
+
+uninstall::
+	rm -f $(INSTALL_ROOT)$(INC_DIR)/*-$(DRIVER_CODE).h
+
 clean::
 	-rm -f $(BLD_TOP)$(DRV_DIR)/$(LIB_NAME)?$(DRIVER_CODE).*
 	-rm -f $(BLD_TOP)$(HLP_DIR)/brltty-$(DRIVER_CODE)[-.]*

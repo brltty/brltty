@@ -70,6 +70,12 @@ Screen::switchvt (int vt) {
 
 
 int
+Screen::currentvt (void) {
+  return 0;
+}
+
+
+int
 Screen::execute (int cmd) {
   return 0;
 }

@@ -16,37 +16,111 @@ dnl Process this file with autoconf 2.53 to produce a configure script.
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-AC_INIT([brltty], [3.2])
+AC_PREREQ([2.53])
+AC_INIT([brltty], [3.3], [http://mielke.cc/brltty/])
+AC_CONFIG_SRCDIR([Programs/brltty.h])
 BRLTTY_SUMMARY_BEGIN
 
-# PACKAGE_NAME="brltty"
-# AC_SUBST([PACKAGE_NAME])
-# AC_DEFINE_UNQUOTED([PACKAGE_NAME], ["${PACKAGE_NAME}"])
-
-# PACKAGE_VERSION="3.2"
-# AC_SUBST([PACKAGE_VERSION])
-# AC_DEFINE_UNQUOTED([PACKAGE_VERSION], ["${PACKAGE_VERSION}"])
-
-PACKAGE_TITLE="`echo "${PACKAGE_NAME}" | sed -e 'y%abcdefghijklmnopqrstuvwxyz%ABCDEFGHIJKLMNOPQRSTUVWXYZ%'`"
-AC_SUBST([PACKAGE_TITLE])
+AC_SUBST([PACKAGE_TITLE], ["`echo "${PACKAGE_NAME}" | sed -e 'y%abcdefghijklmnopqrstuvwxyz%ABCDEFGHIJKLMNOPQRSTUVWXYZ%'`"])
 AC_DEFINE_UNQUOTED([PACKAGE_TITLE], ["${PACKAGE_TITLE}"])
 
-package_date="`date "+%Y/%m/%d"`"
-AC_SUBST([package_date])
+AC_SUBST([package_date], ["`date "+%Y/%m/%d"`"])
 
 AC_CONFIG_HEADER([config.h])
 AC_PREFIX_DEFAULT([])
 AC_CONFIG_AUX_DIR([aux])
 AC_CANONICAL_SYSTEM
 
-program_directory="${bindir}"
-AC_SUBST([program_directory])
+brltty_default_execute_root="/${PACKAGE_NAME}-${PACKAGE_VERSION}"
+BRLTTY_ARG_WITH(
+   [execute-root], [DIRECTORY],
+   [where the package is to be anchored at run-time],
+   [execute_root], [""]
+)
+if test "${execute_root}" = "no"
+then
+   execute_root=""
+elif test "${execute_root}" = "yes"
+then
+   execute_root="${brltty_default_execute_root}"
+fi
+AC_SUBST([execute_root])
+BRLTTY_SUMMARY_ITEM([execute-root], [execute_root])
 
-library_directory="${libdir}/\${PACKAGE_NAME}"
-AC_SUBST([library_directory])
+brltty_default_install_root="/tmp/${PACKAGE_NAME}-${PACKAGE_VERSION}"
+BRLTTY_ARG_WITH(
+   [install-root], [DIRECTORY],
+   [where to install the package],
+   [install_root], ["${execute_root}"]
+)
+if test "${install_root}" = "no"
+then
+   install_root="${execute_root}"
+elif test "${install_root}" = "yes"
+then
+   install_root="${brltty_default_install_root}"
+fi
+AC_SUBST([install_root])
+BRLTTY_SUMMARY_ITEM([install-root], [install_root])
 
-data_directory="${sysconfdir}/\${PACKAGE_NAME}"
-AC_SUBST([data_directory])
+BRLTTY_PREFIX_SUBDIRECTORY([includedir], [/usr])
+BRLTTY_PREFIX_SUBDIRECTORY([mandir], [/usr/share])
+BRLTTY_SUMMARY_ITEM([bindir], [bindir])
+BRLTTY_SUMMARY_ITEM([libdir], [libdir])
+BRLTTY_SUMMARY_ITEM([sysconfdir], [sysconfdir])
+BRLTTY_SUMMARY_ITEM([mandir], [mandir])
+BRLTTY_SUMMARY_ITEM([includedir], [includedir])
+
+AC_SUBST([program_directory], ["${bindir}"])
+AC_SUBST([library_directory], ["${libdir}/${PACKAGE_NAME}"])
+AC_SUBST([data_directory], ["${sysconfdir}/${PACKAGE_NAME}"])
+AC_SUBST([manpage_directory], ["${mandir}"])
+AC_SUBST([include_directory], ["${includedir}/${PACKAGE_NAME}"])
+
+original_prefix="${prefix}"
+test "${prefix}" = "NONE" && prefix=""
+original_exec_prefix="${exec_prefix}"
+test "${exec_prefix}" = "NONE" && exec_prefix="${prefix}"
+BRLTTY_DEFINE_EXPANDED([HOME_DIRECTORY], ["${execute_root}${data_directory}"])
+BRLTTY_DEFINE_EXPANDED([CONFIGURATION_DIRECTORY], ["${sysconfdir}"])
+BRLTTY_DEFINE_EXPANDED([LIBRARY_DIRECTORY], ["${execute_root}${library_directory}"])
+prefix="${original_prefix}"
+exec_prefix="${original_exec_prefix}"
+
+brltty_default_compiler_prefix="${host_os}-"
+BRLTTY_ARG_WITH(
+   [compiler-prefix], [PREFIX],
+   [prefix for compiler programs],
+   [compiler_prefix], [""]
+)
+if test "${compiler_prefix}" = "no"
+then
+   compiler_prefix=""
+elif test "${compiler_prefix}" = "yes"
+then
+   compiler_prefix="${brltty_default_compiler_prefix}"
+fi
+AC_SUBST([compiler_prefix])
+BRLTTY_SUMMARY_ITEM([compiler-prefix], [compiler_prefix])
+
+brltty_default_init_path=/sbin/init_real
+BRLTTY_ARG_WITH(
+   [init-path], [FILE],
+   [path to real init program],
+   [init_path], [""]
+)
+if test "${init_path}" = "no"
+then
+   init_path=""
+elif test "${init_path}" = "yes"
+then
+   init_path="${brltty_default_init_path}"
+fi
+if test -n "${init_path}"
+then
+   AC_DEFINE_UNQUOTED([INIT_PATH], ["${init_path}"])
+fi
+BRLTTY_SUMMARY_ITEM([init-path], [init_path])
 
 AC_PROG_MAKE_SET
 AC_PROG_CC
@@ -69,7 +143,9 @@ AC_PROG_CXX
 AC_CHECK_PROGS([LD], [ld], [ld])
 AC_PROG_YACC
 AC_PROG_AWK
+
 AC_PROG_INSTALL
+BRLTTY_EXECUTABLE_PATH([INSTALL])
 
 AC_CACHE_CHECK([for make relocatable object command], [brltty_cv_prog_mkobj], [dnl
 case "${host_os}"
@@ -186,6 +262,16 @@ library_extension="${brltty_cv_ext_lib}"
 AC_SUBST([library_extension])
 AC_DEFINE_UNQUOTED([LIBRARY_EXTENSION], ["${library_extension}"])
 
+AC_CACHE_CHECK([for static archive extension], [brltty_cv_ext_arc], [dnl
+case "${host_os}"
+in
+   *)
+      brltty_cv_ext_arc="a"
+      ;;
+esac])
+archive_extension="${brltty_cv_ext_arc}"
+AC_SUBST([archive_extension])
+
 AC_CACHE_CHECK([for shared object run-time search path environment variable], [brltty_cv_env_libsearch], [dnl
 case "${host_os}"
 in
@@ -252,16 +338,18 @@ BRLTTY_ARG_DISABLE(
    [in-line contracted braille], [dnl
    AC_DEFINE([ENABLE_CONTRACTED_BRAILLE])
    contracted_braille_objects="ctb_compile.o ctb_translate.o"
+   install_contraction_tables=install-contraction-tables
 ])
 AC_SUBST([contracted_braille_objects])
+AC_SUBST([install_contraction_tables])
 
 BRLTTY_ARG_DISABLE(
    [speech-support],
    [speech synthesizer support], [dnl
    AC_DEFINE([ENABLE_SPEECH_SUPPORT])
-   speech_support_objects="spk.o"
+   speech_support_object="spk.o"
 ])
-AC_SUBST([speech_support_objects])
+AC_SUBST([speech_support_object])
 
 BRLTTY_ARG_DISABLE(
    [beeper-tunes],
@@ -309,72 +397,20 @@ BRLTTY_ARG_ENABLE(
    AC_CHECK_LIB([gpm], [Gpm_Open])
 ])
 
-brltty_default_execute_root="/${PACKAGE_NAME}-${PACKAGE_VERSION}"
-BRLTTY_ARG_WITH(
-   [execute-root], [DIRECTORY],
-   [where the package is to be anchored at run-time],
-   [execute_root], [""]
-)
-if test "${execute_root}" = "no"
-then
-   execute_root=""
-elif test "${execute_root}" = "yes"
-then
-   execute_root="${brltty_default_execute_root}"
-fi
-AC_SUBST([execute_root])
-BRLTTY_SUMMARY_ITEM([execute-root], [execute_root])
-
-brltty_default_install_root="/tmp/${PACKAGE_NAME}-${PACKAGE_VERSION}"
-BRLTTY_ARG_WITH(
-   [install-root], [DIRECTORY],
-   [where to install the package],
-   [install_root], ["${execute_root}"]
-)
-if test "${install_root}" = "no"
-then
-   install_root="${execute_root}"
-elif test "${install_root}" = "yes"
-then
-   install_root="${brltty_default_install_root}"
-fi
-AC_SUBST([install_root])
-BRLTTY_SUMMARY_ITEM([install-root], [install_root])
-
-brltty_default_compiler_prefix="${host_os}-"
-BRLTTY_ARG_WITH(
-   [compiler-prefix], [PREFIX],
-   [prefix for compiler programs],
-   [compiler_prefix], [""]
-)
-if test "${compiler_prefix}" = "no"
-then
-   compiler_prefix=""
-elif test "${compiler_prefix}" = "yes"
-then
-   compiler_prefix="${brltty_default_compiler_prefix}"
-fi
-AC_SUBST([compiler_prefix])
-BRLTTY_SUMMARY_ITEM([compiler-prefix], [compiler_prefix])
-
-brltty_default_init_path=/sbin/init_real
-BRLTTY_ARG_WITH(
-   [init-path], [FILE],
-   [path to real init program],
-   [init_path], [""]
-)
-if test "${init_path}" = "no"
-then
-   init_path=""
-elif test "${init_path}" = "yes"
-then
-   init_path="${brltty_default_init_path}"
-fi
-if test -n "${init_path}"
-then
-   AC_DEFINE_UNQUOTED([INIT_PATH], ["${init_path}"])
-fi
-BRLTTY_SUMMARY_ITEM([init-path], [init_path])
+BRLTTY_ARG_ENABLE(
+   [api],
+   [the application programming interface], [dnl
+   AC_DEFINE([ENABLE_API])
+   api_objects="api_server.o api_common.o rangelist.o"
+   build_api="api"
+   install_api="install-api"
+   BRLTTY_SEARCH_LIBS([pthread_create], [pthread])
+])
+AC_SUBST([api_objects])
+AC_SUBST([build_api])
+AC_SUBST([install_api])
+AC_SUBST([api_keyfile], [brlapi-key])
+BRLTTY_DEFINE_EXPANDED([API_KEYFILE], ["${api_keyfile}"])
 
 BRLTTY_BRAILLE_DRIVER([al], [Alva])
 BRLTTY_BRAILLE_DRIVER([bl], [BrailleLite])
@@ -441,6 +477,7 @@ brltty_default_text_table=text.nabcc.tbl
 BRLTTY_ARG_WITH(
    [text-table], [FILE],
    [default text table
+- text.cz.tbl        Czech (iso-8859-2)
 - text.da.tbl        Danish
 - text.de.tbl        German
 - text.es.tbl        Spanish
@@ -460,13 +497,16 @@ BRLTTY_ARG_WITH(
 - /path/to/file      your favourite table],
    [text_table], ["${brltty_default_text_table}"]
 )
+install_text_tables=install-text-tables
 if test "${text_table}" = "no"
 then
+   install_text_tables=
    text_table="${brltty_default_text_table}"
 elif test "${text_table}" = "yes"
 then
    text_table="${brltty_default_text_table}"
 fi
+AC_SUBST([install_text_tables])
 AC_SUBST([text_table])
 AC_DEFINE_UNQUOTED([TEXT_TABLE], ["${text_table}"])
 BRLTTY_SUMMARY_ITEM([text-table], [text_table])
@@ -480,13 +520,16 @@ BRLTTY_ARG_WITH(
 - /path/to/file],
    [attributes_table], ["${brltty_default_attributes_table}"]
 )
+install_attributes_tables=install-attributes-tables
 if test "${attributes_table}" = "no"
 then
+   install_attributes_tables=
    attributes_table="${brltty_default_attributes_table}"
 elif test "${attributes_table}" = "yes"
 then
    attributes_table="${brltty_default_attributes_table}"
 fi
+AC_SUBST([install_attributes_tables])
 AC_SUBST([attributes_table])
 AC_DEFINE_UNQUOTED([ATTRIBUTES_TABLE], ["${attributes_table}"])
 BRLTTY_SUMMARY_ITEM([attributes-table], [attributes_table])
@@ -607,19 +650,9 @@ in
       ;;
 esac
 
-library_name="lib${PACKAGE_NAME}"
-AC_SUBST([library_name])
+AC_SUBST([library_prefix], [lib])
+AC_SUBST([library_name], ["${library_prefix}${PACKAGE_NAME}"])
 AC_DEFINE_UNQUOTED([LIBRARY_NAME], ["${library_name}"])
-
-original_prefix="${prefix}"
-test "${prefix}" = "NONE" && prefix=""
-original_exec_prefix="${exec_prefix}"
-test "${exec_prefix}" = "NONE" && exec_prefix="${prefix}"
-BRLTTY_DEFINE_EXPANDED([HOME_DIRECTORY], ["${execute_root}${data_directory}"])
-BRLTTY_DEFINE_EXPANDED([CONFIGURATION_DIRECTORY], ["${sysconfdir}"])
-BRLTTY_DEFINE_EXPANDED([LIBRARY_DIRECTORY], ["${execute_root}${library_directory}"])
-prefix="${original_prefix}"
-exec_prefix="${original_exec_prefix}"
 
 brltty_driver_names=
 for brltty_driver in ${brltty_item_names_braille} ${brltty_item_names_speech}
@@ -627,7 +660,6 @@ do
    if test `expr "${brltty_driver_names} " : ".* ${brltty_driver} "` -eq 0
    then
       brltty_driver_names="${brltty_driver_names} ${brltty_driver} "
-      # ${INSTALL} -d "Drivers/${brltty_driver}"
    fi
 done
 changequote(, )dnl

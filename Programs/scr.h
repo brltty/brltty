@@ -79,6 +79,7 @@ int setPointer (int, int);
 int getPointer (int *, int *);
 int selectVirtualTerminal (int);
 int switchVirtualTerminal (int);
+int currentVirtualTerminal (void);
 int executeScreenCommand (int);
 
 /* Routines which apply to the live screen. */

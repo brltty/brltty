@@ -143,3 +143,25 @@ AC_OUTPUT_COMMANDS([echo "${brltty_summary_lines}"], [brltty_summary_lines="${br
 AC_DEFUN([BRLTTY_SUMMARY_ITEM], [dnl
 brltty_summary_lines="${brltty_summary_lines}
    $1=${$2}"])
+
+AC_DEFUN([BRLTTY_PREFIX_SUBDIRECTORY], [dnl
+if test -z "${execute_root}"
+then
+   if test "${prefix}" = "NONE"
+   then
+changequote()dnl
+      if test `expr "${$1} " : '\${prefix}/[^/]*$'` -gt 0
+      then
+         $1="`echo ${$1} | sed -e 's%/%$2/%'`"
+      fi
+changequote([, ])dnl
+   fi
+fi])
+
+AC_DEFUN([BRLTTY_EXECUTABLE_PATH], [dnl
+changequote()dnl
+if test `expr "${$1} " : '[^/ ][^/ ]*/'` -gt 0
+changequote([, ])dnl
+then
+   $1="`pwd`/${$1}"
+fi])

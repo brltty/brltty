@@ -43,10 +43,13 @@ static void brl_writeStatus (BrailleDisplay *brl, const unsigned char *);
 
 #ifdef BRL_HAVE_PACKET_IO
   static int brl_readPacket (BrailleDisplay *, unsigned char *, int);
-  static int brl_writePacket (BrailleDisplay *, unsigned char *, int);
-  static int brl_readKey (BrailleDisplay *);
-  static int brl_keyCommand (BrailleDisplay *, DriverCommandContext, int);
+  static int brl_writePacket (BrailleDisplay *, const unsigned char *, int);
 #endif /* BRL_HAVE_PACKET_IO */
+
+#ifdef BRL_HAVE_KEY_CODES
+  static int brl_readKey (BrailleDisplay *);
+  static int brl_keyToCommand (BrailleDisplay *, DriverCommandContext, int);
+#endif /* BRL_HAVE_KEY_CODES */
 
 #ifdef BRLPARMS
   static const char *const brl_parameters[] = {BRLPARMS, NULL};
@@ -88,14 +91,18 @@ BRLCONST BrailleDriver BRLSYMBOL = {
 #ifdef BRL_HAVE_PACKET_IO
   brl_readPacket,
   brl_writePacket,
-  brl_readKey,
-  brl_keyCommand
 #else /* BRL_HAVE_PACKET_IO */
   NULL, /* brl_readPacket */
   NULL, /* brl_writePacket */
-  NULL, /* brl_readKey */
-  NULL  /* brl_keyCommand */
 #endif /* BRL_HAVE_PACKET_IO */
+
+#ifdef BRL_HAVE_KEY_CODES
+  brl_readKey,
+  brl_keyToCommand
+#else /* BRL_HAVE_KEY_CODES */
+  NULL, /* brl_readKey */
+  NULL  /* brl_keyToCommand */
+#endif /* BRL_HAVE_KEY_CODES */
 };
 
 #ifdef __cplusplus

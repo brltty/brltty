@@ -12,7 +12,7 @@
     <name>Stéphane Doyon <tt><htmlurl url="mailto:s.doyon@videotron.ca" name="&lt;s.doyon@videotron.ca&gt;"></tt>
   <and>
     <name>Dave Mielke <tt><htmlurl url="mailto:dave@mielke.cc" name="&lt;dave@mielke.cc&gt;"></tt>
-  <date>Version 3.2, February 2003
+  <date>Version 3.3, February 2003
   <abstract>
     Copyright &copy; 1995-2003 by The BRLTTY Team - All Rights Reserved.
     This is free software, placed under the terms of
@@ -212,8 +212,8 @@ The build procedure should result in the installation of the following files:
     <descrip>
       <tag>brltty</tag>
         The BRLTTY program.
-      <tag><ref id="utility-install-brltty" name="install-brltty"></tag>
-        A <ref id="utility-install-brltty" name="utility"> for copying BRLTTY's
+      <tag><ref id="utility-brltty-install" name="brltty-install"></tag>
+        A utility for copying BRLTTY's
         <ref id="hierarchy" name="installed file hierarchy">
         from one location to another.
     </descrip>
@@ -230,6 +230,8 @@ The build procedure should result in the installation of the following files:
         Contraction tables
         (see section <ref id="contraction" name="Contracted Braille"> for details).
         Their names look like <em/language/<tt/-/<em/country/<tt/-/<em/level/<tt/.ctb/.
+      <tag/*.cti/
+        Include files for contraction tables.
       <tag/*.hlp/
         Driver-specific help pages.
         Their names look more or less like <tt/brltty-/<em/driver/<tt/.hlp/,
@@ -588,6 +590,9 @@ These options are primarily useful when building BRLTTY for use on a boot disk.
     so that, on systems which support it,
     BRLTTY will interact with the pointer (mouse) device
     (see section <ref id="gpm" name="Pointer (Mouse) Support via GPM">).
+  <tag><tt/--enable-api/<label id="build-api"></tag>
+    Include the application programming interface
+    (see section <ref id="api" name="The Application Programming Interface">).
 </descrip>
 
 <sect3>Miscellaneous Options<label id="build-miscellaneous"><p>
@@ -924,11 +929,11 @@ To uninstall BRLTTY, do:
 Building BRLTTY also results in the building of
 a few small helper and diagnostic utilities.
 
-<sect2>install-brltty<label id="utility-install-brltty"><p>
+<sect2>brltty-install<label id="utility-brltty-install"><p>
 This utility copies BRLTTY's
 <ref id="hierarchy" name="installed file hierarchy">
 from one location to another.
-<tscreen>install-brltty <em/to/ &lsqb;<em/from/&rsqb;</tscreen>
+<tscreen>brltty-install <em/to/ &lsqb;<em/from/&rsqb;</tscreen>
 <descrip>
   <tag><em/to/</tag>
     The location to which the
@@ -946,7 +951,7 @@ from one location to another.
 This utility can be used, for example, to copy BRLTTY to a root disk.
 If a root floppy is mounted as <tt>/mnt</>,
 and BRLTTY is installed on the main system,
-then typing <tscreen>install-brltty /mnt</tscreen>
+then typing <tscreen>brltty-install /mnt</tscreen>
 copies BRLTTY, along with all of its data and library files,
 to the root floppy.
 
@@ -1644,6 +1649,14 @@ A comment begin with a number sign (<tt/&num;/),
 and continues to the end of the line.
 The following directives are recognized:
 <descrip>
+  <tag><tt/api-parameters/ <em/name/<tt/=/<em/value/<tt/,/...<label id="configure-api-parameters"></tag>
+    Specify parameters for the application programming interrface.
+    If the same parameter is specified more than once,
+    then its rightmost assignment is used.
+    For a description of the parameters accepted by the interface,
+    please see section <ref id="api" name="The Application Programming Interface">.
+    This directive can be overridden with the
+    <ref id="options-api-parameters" name="-A"> command line option.
   <tag><tt/attributes-table/ <em/file/<label id="configure-attributes-table"></tag>
     Specify the attributes translation table
     (see section <ref id="translation" name="Translation Tables"> for details).
@@ -1852,6 +1865,14 @@ The <tt/brltty/ command accepts the following options:
     and the working directory, the preferences file,
     the text and attributes translation tables,
     and the braille display device and help file are identified.
+  <tag><tt/-A/<em/name/<tt/=/<em/value/<tt/,/... <tt/--api-parameters=/<em/name/<tt/=/<em/value/<tt/,/...<label id="options-api-parameters"></tag>
+    Specify parameters for the application programming interface.
+    If the same parameter is specified more than once,
+    then its rightmost assignment is used.
+    For a description of the parameters accepted by the interface,
+    please see section <ref id="api" name="The Application Programming Interface">.
+    See the <ref id="configure-api-parameters" name="api-parameters">
+    configuration file directive for the default run-time setting.
   <tag><tt/-B/<em/name/<tt/=/<em/value/<tt/,/... <tt/--braille-parameters=/<em/name/<tt/=/<em/value/<tt/,/...<label id="options-braille-parameters"></tag>
     Specify parameters for the braille display driver.
     If the same parameter is specified more than once,
@@ -1878,6 +1899,9 @@ The <tt/brltty/ command accepts the following options:
     as it allows default settings to be passed to BRLTTY via boot parameters.
     The following environment variables are supported:
     <descrip>
+      <tag><tt/BRLTTY_API_PARAMETERS/</tag>
+        Parameters for the application programming interface
+        (see the <ref id="options-api-parameters" name="-A"> command line option).
       <tag><tt/BRLTTY_ATTRIBUTES_TABLE/</tag>
         The attributes translation table
         (see the <ref id="options-attributes-table" name="-a"> command line option).
@@ -2177,6 +2201,7 @@ with one or more of the following:
     for this mechanism to work effectively.
   <tag/a message/
     If a message has been associated with the event,
+    and if the <ref id="preference-alert-messages" name="Alert Messages"> preference is active,
     then it is displayed for a few seconds
     (see the <ref id="options-message-delay" name="-M"> command line option).
 </descrip>
@@ -2580,6 +2605,24 @@ Notes:
     if a tune has been associated with the event,
     and if the selected tune device can be opened,
     then, regardless of the setting of this preference, the dot pattern isn't displayed.
+  <tag>Alert Messages<label id="preference-alert-messages"></tag>
+    Whenever a significant event with an associated message occurs
+    (see <ref id="tunes" name="Alert Tunes">):
+    <descrip>
+      <tag/No/
+        Don't display the message.
+      <tag/Yes/
+        Display the message.
+    </descrip>
+    If alert tunes are to be played
+    (see the <ref id="command-TUNES" name="TUNES"> command
+    and the <ref id="preference-alert-tunes" name="Alert Tunes"> preference),
+    if a tune has been associated with the event,
+    and if the selected tune device can be opened,
+    or if alert dot patterns are to be displayed
+    (see the <ref id="preference-alert-dots" name="Alert Dots"> preference)
+    and if a dot pattern has been associated with the event,
+    then, regardless of the setting of this preference, the message isn't displayed.
   <tag>Status Style<label id="preference-status-style"></tag>
     This setting specifies the way that the status cells are to be used.
     You shuldn't normally need to play with it.
@@ -2957,6 +3000,7 @@ This feature isn't available if the
 
 The following contraction tables are provided:
 <descrip>
+  <tag/big5.ctb/Chinese big5.
   <tag/compress.ctb/Remove excessive white-space.
   <tag/en-us-g2.ctb/Grade 2 American English.
 </descrip>
@@ -3072,8 +3116,8 @@ For the details, see section
     Translate whole white-space-bounded sequence unconditionally into computer braille.
   <tag><ref id="contraction-opcode-18" name="18"> <em/characters/</tag>
     Prefix with letter sign if word.
-  <tag><ref id="contraction-opcode-19" name="19"> <em/characters/</tag>
-    Ignore unconditionally.
+  <tag><ref id="contraction-opcode-19" name="19"> <em/characters/ <em/characters/</tag>
+    Replace the first set of characters with the second.
   <tag><ref id="contraction-opcode-20" name="20"> <em/characters/ <em/dots/</tag>
     Translate if at end of number.
   <tag><ref id="contraction-opcode-21" name="21"> <em/characters/ <em/dots/</tag>
@@ -3166,8 +3210,9 @@ Now, finally, here are the opcode descriptions themselves:
     Translate the entire white-space-bounded containing character sequence into computer braille
     (see the <ref id="options-text-table" name="-t"> command line option
     and the <ref id="configure-text-table" name="text-table"> configuration file directive).
-  <tag>19 <em/characters/<label id="contraction-opcode-19"></tag>
-    Ignore the characters no matter where they appear.
+  <tag>19 <em/characters/ <em/characters/<label id="contraction-opcode-19"></tag>
+    Replace the first set of characters, no matter where they appear, with the second.
+    The replaced characters aren't reprocessed.
   <tag>6 <em/characters/ <em/dots/<label id="contraction-opcode-6"></tag>
     Translate the characters no matter where they appear.
     If there's only one character, then, in addition,
@@ -3457,6 +3502,9 @@ The following dot mappings are supported:
       <tag/Bit 7/Dot 8
     </descrip>
 </descrip>
+
+<sect>The Application Programming Interface<label id="api"><p>
+This section hasn't been written yet.
 
 <sect>Advanced Topics<p>
 

@@ -32,6 +32,7 @@ public:
   virtual int pointer (int &, int &);
   virtual int selectvt (int);
   virtual int switchvt (int);
+  virtual int currentvt (void);
   virtual int execute (int);
 };
 

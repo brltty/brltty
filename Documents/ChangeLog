@@ -1,6 +1,23 @@
 Note: this file is in reversed chronological order (bottom to top).
 
 
+ - BRLTTY 3.3 released:
+   Clean up the rpm spec file. (dm)
+   Move default install directory for man pages from /man to /usr/share/man. (dm)
+   Rename install-brltty to brltty-install. (dm)
+   Updated EuroBraille README. Yannick Plassiard <plassi_y@epita.fr>
+   Implement brlapi. Sébastien Hinderer <Sebastien.Hinderer@ens-lyon.fr> + Samuel Thibault <Samuel.Thibault@ens-lyon.fr>
+   Core changes to support big5.ctb: (dm)
+      Change ctb opcode "ignore" to "replace".
+   Add table for Chinese big5 character set (big5.ctb). Samuel Yang <mison@bbs.ee.ntu.edu.tw>
+   Add Czech text table (text.cz.tbl). Jan Buchal <buchal@brailcom.org>
+   Add alert messages preference. (dm)
+   VisioBraille driver enhancements. Sébastien Hinderer <Sebastien.Hinderer@ens-lyon.fr>
+   IA64 sizeof returns a long and needs a long printf format. (dm)
+   Make install no longer installs unneeded tables. (dm)
+      (--without-text-table, --without-attributes-table, --disable-contracted-braille)
+   Change text-table default from us to nabcc in brltty.conf. (dm)
+
 February 3, 2003:
  - BRLTTY 3.2 released:
    Russian text table (text.ru.tbl) based on koi8-r. Hans Schou <chlor@schou.dk>
@@ -35,6 +52,7 @@ February 3, 2003:
       Reordered brl_open parameters to put BrailleDisplay first.
       Use brl->helpPage instead of setHelpPageNumber().
       Pass BrailleDisplay to readCommand and writeStatus.
+   Support boot parameters (brltty=driver,device,table).
    Allow option operand shortcuts. (dm)
       Relative device paths are anchored at /dev.
       The .tbl table extension is optional.

@@ -34,12 +34,12 @@ Some speech capability has also been incorporated.
 %build
 set -e
 
-./configure --with-install-root="${RPM_BUILD_ROOT}"
+./configure --with-install-root="${RPM_BUILD_ROOT}" --enable-api
 make
 
 directory="doc"
 mkdir -p "${directory}"
-for file in `find . -path "./${directory}" -prune -o \( -name 'README*' -o -name '*.txt' -o -name '*.html' -o -name '*.sgml' \) -print`
+for file in `find . -path "./${directory}" -prune -o \( -name 'README*' -o -name '*.txt' -o -name '*.html' -o -name '*.sgml' -o \( -path "./Bootdisks/*" -type f -perm +ugo=x \) \) -print`
 do
    mkdir -p "${directory}/${file%/*}"
    cp -rp "${file}" "${directory}/${file}"
@@ -49,42 +49,23 @@ unset file directory
 %install
 set -e
 
-make install-programs install-help install-tables install-drivers install-manpage
+make install
 install Documents/brltty.conf "${RPM_BUILD_ROOT}/etc"
 
 %post
 set -e
 
-devices="/dev/vcsa /dev/vcsa0 /dev/vcc/a"
-install=true
-for device in ${devices}
-do
-   if [ -c "${device}" ]
-   then
-      install=false
-      break
-   fi
-done
-if $install
-then
-   device="`set -- ${devices} && echo "${1}"`"
-   echo -n "Creating screen inspection device ${device}..."
-   mkdir -p "${device%/*}"
-   mknod -m o= "${device}" c 7 128
-   chmod 660 "${device}"
-   chown root.tty "${device}"
-   echo "done."
-fi
-unset device install devices
 
 %files
 %defattr(-,root,root)
 %doc COPYING
 %doc Documents/ChangeLog Documents/TODO
-%doc Bootdisks/rhmkboot Bootdisks/rhmkroot
 %doc doc/*
 %config(noreplace) /etc/brltty.conf
 /bin/brltty
-/bin/install-brltty
+/bin/brltty-install
 /etc/brltty
 /lib/brltty
+/lib/libbrlapi.so
+/usr/include/brltty
+/usr/share/man/man?/*

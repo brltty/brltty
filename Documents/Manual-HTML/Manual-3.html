@@ -628,6 +628,15 @@ A comment begin with a number sign (<CODE>#</CODE>),
 and continues to the end of the line.
 The following directives are recognized:
 <DL>
+<DT><B><CODE>api-parameters</CODE> <EM>name</EM><CODE>=</CODE><EM>value</EM><CODE>,</CODE>...
+<A NAME="configure-api-parameters"></A> </B><DD><P>Specify parameters for the application programming interrface.
+If the same parameter is specified more than once,
+then its rightmost assignment is used.
+For a description of the parameters accepted by the interface,
+please see section 
+<A HREF="Manual-6.html#api">The Application Programming Interface</A>.
+This directive can be overridden with the
+<A HREF="#options-api-parameters">-A</A> command line option.</P>
 <DT><B><CODE>attributes-table</CODE> <EM>file</EM>
 <A NAME="configure-attributes-table"></A> </B><DD><P>Specify the attributes translation table
 (see section 
@@ -646,7 +655,7 @@ This directive can be overridden with the
 <DT><B><CODE>braille-driver</CODE> <EM>driver</EM>
 <A NAME="configure-braille-driver"></A> </B><DD><P>Specify the braille display driver.
 Either a two-letter 
-<A HREF="Manual-7.html#drivers">driver identification code</A>
+<A HREF="Manual-8.html#drivers">driver identification code</A>
 or the full path to a dynamically loadable shared object
 may be supplied.
 See the 
@@ -694,7 +703,7 @@ It isn't available if the
 <A NAME="configure-preferences-file"></A> </B><DD><P>Specify the location of the preferences file.
 If it's not specified, then <CODE>/etc/brltty-</CODE><EM>driver</EM><CODE>.prefs</CODE> is assumed,
 where <EM>driver</EM> is a two-letter 
-<A HREF="Manual-7.html#drivers">driver identification code</A>.
+<A HREF="Manual-8.html#drivers">driver identification code</A>.
 The preferences file doesn't need to exist.
 This directive can be overridden with the
 <A HREF="#options-preferences-file">-p</A> command line option.</P>
@@ -709,7 +718,7 @@ This directive can be overridden with the
 <DT><B><CODE>speech-driver</CODE> <EM>driver</EM>
 <A NAME="configure-speech-driver"></A> </B><DD><P>Specify the speech synthesizer driver.
 Either a two-letter 
-<A HREF="Manual-7.html#drivers">driver identification code</A>
+<A HREF="Manual-8.html#drivers">driver identification code</A>
 or the full path to a dynamically loadable shared object
 may be supplied.
 See the 
@@ -767,7 +776,7 @@ This setting can be changed with the
 <DT><B><CODE>-b</CODE><EM>driver</EM> <CODE>--braille-driver=</CODE><EM>driver</EM>
 <A NAME="options-braille-driver"></A> </B><DD><P>Specify the braille display driver.
 Either a two-letter 
-<A HREF="Manual-7.html#drivers">driver identification code</A>
+<A HREF="Manual-8.html#drivers">driver identification code</A>
 or the full path to a dynamically loadable shared object
 may be supplied.
 See the 
@@ -850,7 +859,7 @@ to <CODE>notice</CODE>.</P>
 <DT><B><CODE>-s</CODE><EM>driver</EM> <CODE>--speech-driver=</CODE><EM>driver</EM>
 <A NAME="options-speech-driver"></A> </B><DD><P>Specify the speech synthesizer driver.
 Either a two-letter 
-<A HREF="Manual-7.html#drivers">driver identification code</A>
+<A HREF="Manual-8.html#drivers">driver identification code</A>
 or the full path to a dynamically loadable shared object
 may be supplied.
 See the 
@@ -883,6 +892,16 @@ are also displayed,
 and the working directory, the preferences file,
 the text and attributes translation tables,
 and the braille display device and help file are identified.</P>
+<DT><B><CODE>-A</CODE><EM>name</EM><CODE>=</CODE><EM>value</EM><CODE>,</CODE>... <CODE>--api-parameters=</CODE><EM>name</EM><CODE>=</CODE><EM>value</EM><CODE>,</CODE>...
+<A NAME="options-api-parameters"></A> </B><DD><P>Specify parameters for the application programming interface.
+If the same parameter is specified more than once,
+then its rightmost assignment is used.
+For a description of the parameters accepted by the interface,
+please see section 
+<A HREF="Manual-6.html#api">The Application Programming Interface</A>.
+See the 
+<A HREF="#configure-api-parameters">api-parameters</A>
+configuration file directive for the default run-time setting.</P>
 <DT><B><CODE>-B</CODE><EM>name</EM><CODE>=</CODE><EM>value</EM><CODE>,</CODE>... <CODE>--braille-parameters=</CODE><EM>name</EM><CODE>=</CODE><EM>value</EM><CODE>,</CODE>...
 <A NAME="options-braille-parameters"></A> </B><DD><P>Specify parameters for the braille display driver.
 If the same parameter is specified more than once,
@@ -912,6 +931,9 @@ This option is particularly useful on the Linux operating system
 as it allows default settings to be passed to BRLTTY via boot parameters.
 The following environment variables are supported:
 <DL>
+<DT><B><CODE>BRLTTY_API_PARAMETERS</CODE></B><DD><P>Parameters for the application programming interface
+(see the 
+<A HREF="#options-api-parameters">-A</A> command line option).</P>
 <DT><B><CODE>BRLTTY_ATTRIBUTES_TABLE</CODE></B><DD><P>The attributes translation table
 (see the 
 <A HREF="#options-attributes-table">-a</A> command line option).</P>

@@ -70,9 +70,11 @@ INSTALL_PROGRAM = $(INSTALL_SCRIPT) -s
 INSTALL_DATA = $(INSTALL) -m 644
 INSTALL_DIRECTORY = $(INSTALL) -d
 
+LIB_PFX = @library_prefix@
 LIB_NAME = @library_name@
 LIB_EXT = @library_extension@
 LIB_VAR = @libsearch_variable@
+ARC_EXT = @archive_extension@
 
 prefix = @prefix@
 exec_prefix = @exec_prefix@
@@ -92,9 +94,8 @@ mandir = @mandir@
 PROG_DIR = @program_directory@
 LIB_DIR = @library_directory@
 DATA_DIR = @data_directory@
-
-MAN_NUM = 1
-MAN_DIR = $(mandir)/man$(MAN_NUM)
+MAN_DIR = @manpage_directory@
+INC_DIR = @include_directory@
 
 BRL_TARGET = @brltty_item_name_braille@
 BRL_TARGETS = @brltty_item_names_braille@
@@ -106,21 +107,31 @@ SPK_LIBS = @brltty_item_codes_speech@
 
 BRAILLE_TARGETS = @brltty_driver_targets_braille@
 BRAILLE_OBJECTS = @brltty_driver_objects_braille@
+
 SPEECH_TARGETS = @brltty_driver_targets_speech@
 SPEECH_OBJECTS = @brltty_driver_objects_speech@
+
+INSTALL_TEXT_TABLES = @install_text_tables@
+INSTALL_ATTRIBUTES_TABLES = @install_attributes_tables@
+INSTALL_CONTRACTION_TABLES = @install_contraction_tables@
 INSTALL_DRIVERS = @install_drivers@
 CONFIGURED_DRIVERS = @brltty_driver_names@
 
-SCR_OBJ = @screen_object@
+SCREEN_OBJECT = @screen_object@
 
 TEXTTRANS = @text_table@
 ATTRTRANS = @attributes_table@
 
-SYS_OBJ = @system_object@
-CTB_OBJS = @contracted_braille_objects@
-SPEECH_OBJS = @speech_support_objects@
-BEEPER_OBJS = @beeper_tune_objects@
-PCM_OBJS = @pcm_tune_objects@
-MIDI_OBJS = @midi_tune_objects@
-FM_OBJS = @fm_tune_objects@
+SYSTEM_OBJECT = @system_object@
+CTB_OBJECTS = @contracted_braille_objects@
+SPEECH_OBJECT = @speech_support_object@
+BEEPER_OBJECTS = @beeper_tune_objects@
+PCM_OBJECTS = @pcm_tune_objects@
+MIDI_OBJECTS = @midi_tune_objects@
+FM_OBJECTS = @fm_tune_objects@
+
+API_OBJECTS = @api_objects@
+API_KEYFILE = @api_keyfile@
+BUILD_API = @build_api@
+INSTALL_API = @install_api@
 

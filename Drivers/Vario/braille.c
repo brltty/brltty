@@ -30,7 +30,6 @@
  * History:
  * Version 1.0: Initial patch submittion.
  */
-#define BRL_C 1
 
 #define VERSION "BRLTTY driver for BAUM Vario (Emul. 1) displays, version 1.0 (September 2000)"
 #define COPYRIGHT "Copyright (C) 2000 by Mario Lang " \

@@ -17,7 +17,7 @@
 ###############################################################################
 
 # Installation script for binary BRLTTY distributions.
-# Usage: install-brltty dest-prefix [source-prefix]
+# Usage: brltty-install dest-prefix [source-prefix]
 
 programName="${0##*/}"
 programMessage()
@@ -34,23 +34,38 @@ execute()
 {
    "${@}"
    returnCode="${?}"
-   if [ "${returnCode}" -ne 0 ]
-   then
-      exit "${returnCode}"
-   fi
+   [ "${returnCode}" -eq 0 ] || exit "${returnCode}"
    return 0
 }
 makeDirectory()
 {
    if [ ! -a "${1}" ]
    then
-      echo -n "Creating ${2} directory..."
+      echo "Creating ${2} directory: ${1}"
       execute mkdir -p -- "${1}"
-      echo "done."
    elif [ ! -d "${1}" ]
    then
       syntaxError "not a directory: ${1}"
    fi
+}
+copyContents()
+{
+   execute cp -pR -- "${1}/"* "${2}"
+}
+copyFiles()
+{
+   for f in $3
+   do
+      if [ -f "${1}/${f}" ]
+      then
+         execute cp -p -- "${1}/${f}" "${2}"
+      elif [ -a "${1}/${f}" ]
+      then
+         programMessage "not a file: ${1}/${f}"
+      else
+         programMessage "file not found: ${1}/${f}"
+      fi
+   done
 }
 
 if [ "${#}" -eq 0 ]
@@ -66,7 +81,7 @@ then
 elif [ "${#}" -eq 1 ]
 then
    from="${1}"
-   if [ ! -a "${from}" ]
+   if [ ! -d "${from}" ]
    then
       syntaxError "source does not exist."
    fi
@@ -85,23 +100,16 @@ fi
 makeDirectory "${to}" "destination"
 
 makeDirectory "${to}=P" "executables"
-echo -n "Installing executables..."
-for executable in brltty install-brltty
-do
-   execute cp -p -- "${from}=P/${executable}" "${to}=P"
-done
-unset executable
-echo "done."
+echo "Installing executables."
+copyFiles "${from}=P" "${to}=P" "brltty brltty-install"
 
 makeDirectory "${to}=L" "library"
-echo -n "Installing library files..."
-execute cp -pR "${from}=L" "${to}=L"
-echo "done."
+echo "Installing library files."
+copyContents "${from}=L" "${to}=L"
 
 makeDirectory "${to}=D" "data"
-echo -n "Installing data files..."
-cp -pR "${from}=D" "${to}=D"
-echo "done."
+echo "Installing data files."
+copyContents "${from}=D" "${to}=D"
 
 echo "Installation complete."
 exit 0
