@@ -397,7 +397,7 @@ processLines (FILE *file, int (*handler) (char *line, void *data), void *data) {
       break;
 
   if (buffer) free(buffer);
-  return feof(file);
+  return !ferror(file);
 }
 
 /* Write data safely by continually retrying the write system call until
