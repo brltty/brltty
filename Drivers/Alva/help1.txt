@@ -25,7 +25,7 @@ F2b Left/Right    go left/right half window
 
 Tumbler Keys:
 Left              go left/right one character
-Right             go left/right half window
+Right             go to start/end of line
 
 Braille (right) Key Pad:
 F1                enter/leave help display

@@ -1120,9 +1120,11 @@ static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
             case KEY_RIGHT:
               res = CMD_FWINRT;
               break;
+            case KEY_TUMBLER2A:
             case KEY_HOME | KEY_LEFT:
               res = CMD_LNBEG;
               break;
+            case KEY_TUMBLER2B:
             case KEY_HOME | KEY_RIGHT:
               res = CMD_LNEND;
               break;
@@ -1140,11 +1142,9 @@ static int brl_readCommand (BrailleDisplay *brl, DriverCommandContext cmds)
             case KEY_BRL_F1 | KEY_RIGHT:
               res = CMD_CHRRT;
               break;
-            case KEY_TUMBLER2A:
             case KEY_BRL_F2 | KEY_LEFT:
               res = CMD_HWINLT;
               break;
-            case KEY_TUMBLER2B:
             case KEY_BRL_F2 | KEY_RIGHT:
               res = CMD_HWINRT;
               break;
