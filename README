@@ -115,6 +115,7 @@ BRLTTY has been tested on:
 *  Solaris/Sparc (release 7 and beyond)
 *  Solaris/Intel (release 9 and beyond)
 *  OpenBSD/Intel (release 3.4 and beyond)
+*  FreeBSD/Intel (release 5.1 and beyond)
 
 The following braille displays are supported:
 

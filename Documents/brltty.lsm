@@ -25,6 +25,7 @@ Original-site:
 Platforms: Linux (kernel 1.1.92 or later)
            Solaris (release 7 or later)
            OpenBSD (release 3.4 or later)
+           FreeBSD (release 5.1 or later)
            Supported Braille Displays:
            - Albatross [46/80]
            - Alva [ABT(3nn), Delphi(4nn), Satellite(5nn)]

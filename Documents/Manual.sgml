@@ -90,7 +90,7 @@ BRLTTY provides the following capabilities:
 </itemize>
 
 <sect1>System Requirements<p>
-To date, BRLTTY runs under Linux, Solaris, and OpenBSD.
+To date, BRLTTY runs under Linux, Solaris, OpenBSD, and FreeBSD.
 While ports to other Unix-like operating systems aren't currently planned,
 we do welcome any interest in such projects.
 
@@ -109,12 +109,6 @@ we do welcome any interest in such projects.
       <item>
         Many kernels, including 1.2.13, 2.0, 2.2, and 2.4.
     </itemize>
-  <tag/OpenBSD/
-    This software has been tested on the following OpenBSD systems:
-    <itemize>
-      <item>
-        The Intel architecture (release 3.4).
-    </itemize>
   <tag/Solaris/
     This software has been tested on the following Solaris systems:
     <itemize>
@@ -122,6 +116,18 @@ we do welcome any interest in such projects.
         The Sparc architecture (releases 7, 8, and 9).
       <item>
         The Intel architecture (release 9).
+    </itemize>
+  <tag/OpenBSD/
+    This software has been tested on the following OpenBSD systems:
+    <itemize>
+      <item>
+        The Intel architecture (release 3.4).
+    </itemize>
+  <tag/FreeBSD/
+    This software has been tested on the following FreeBSD systems:
+    <itemize>
+      <item>
+        The Intel architecture (release 5.1).
     </itemize>
 </descrip>
 
@@ -3103,24 +3109,29 @@ Notes:
     <descrip>
       <tag/Beeper/
         The internal beeper (console tone generator).
-        This setting is supported on Linux,
-        and on OpenBSD.
+        This setting is supported
+        on Linux,
+        on OpenBSD,
+        and on FreeBSD.
         It's always safe to use,
         although it may be somewhat soft.
         This device isn't available if the
         <ref id="build-beeper-tunes" name="--disable-beeper-tunes"> build option was specified.
       <tag/PCM/
         The digital audio interface on the sound card.
-        This setting is supported on Linux (via <tt>/dev/dsp</>),
+        This setting is supported
+        on Linux (via <tt>/dev/dsp</>),
+        on Solaris (via <tt>/dev/audio</>),
         on OpenBSD (via <tt>/dev/audio0</>),
-        and on Solaris (via <tt>/dev/audio</>).
+        and on FreeBSD (via <tt>/dev/dsp</>).
         It doesn't work when this device is already being used
         by another application.
         This device isn't available if the
         <ref id="build-pcm-tunes" name="--disable-pcm-tunes"> build option was specified.
       <tag/MIDI/
         The Musical Instrument Digital Interface on the sound card
-        This setting is supported on Linux (via <tt>/dev/sequencer</>).
+        This setting is supported
+        on Linux (via <tt>/dev/sequencer</>).
         It doesn't work when this device is already being used
         by another application.
         This device isn't available if the
@@ -3128,7 +3139,8 @@ Notes:
       <tag/FM/
         The FM synthesizer on an
         AdLib, OPL3, Sound Blaster, or equivalent sound card.
-        This setting is supported on Linux.
+        This setting is supported
+        on Linux.
         It works even if the FM synthesizer
         is already being used by another application.
         The results are unpredictable, and potentially not very good,
