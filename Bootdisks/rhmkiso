@@ -4,6 +4,7 @@ originalImage="boot.iso"
 modifiedImage="bootbrl.iso"
 loaderDirectory="isolinux"
 configurationFile="isolinux.cfg"
+brailleDrivers="all"
 
 programName="${0##*/}"
 programMessage() {
@@ -47,7 +48,7 @@ originalMounted=true
 
 modifiedRoot="${temporaryDirectory}/modified"
 mkdir "${modifiedRoot}"
-cp -a "${originalRoot}/${loaderDirectory}" "${modifiedRoot}"
+cp -a "${originalRoot}/." "${modifiedRoot}"
 
 sed -n -e '
 /^\( *default  *\).*$/s//\1text/
@@ -108,7 +109,8 @@ brlttyDirectory="${1}"
    ./autogen.sh
    ./configure --quiet --with-install-root="${initrdRoot}" \
 	       --with-init-path="${initPath}" \
-	       --with-braille-driver=all --disable-speech-support \
+	       --with-braille-driver="${brailleDrivers}" \
+	       --disable-speech-support \
 	       --disable-pcm-tunes --disable-fm-tunes --disable-midi-tunes \
                --enable-standalone-programs --disable-api --disable-gpm
    make -s -C Programs all
@@ -129,9 +131,10 @@ initrdMounted=false
 umount "${initrdRoot}"
 gzip -c -9 "${initrdImage}" >"${initrdPath}"
 
-mkisofs -quiet -R -T -boot-load-size 4 -boot-info-table -no-emul-boot \
-	-A "" \
-	-V "" \
-	-b "${loaderDirectory}/isolinux.bin" -c "${loaderDirectory}/boot.cat" -no-emul-boot \
+isoVolumeIdentifier="$(isoinfo -d -i "${originalImage}" | grep '^Volume id:' | cut -d' ' -f3-)"
+isoApplicationIdentifier="$(isoinfo -d -i "${originalImage}" | grep '^Application id:' | cut -d' ' -f3-)"
+mkisofs -quiet -J -R -T -boot-load-size 4 -boot-info-table -no-emul-boot \
+	-A "${isoApplicationIdentifier}" -V "${isoVolumeIdentifier}" \
+	-b "${loaderDirectory}/isolinux.bin" -c "${loaderDirectory}/boot.cat" \
 	-o "${modifiedImage}" "${modifiedRoot}"
 exit 0
