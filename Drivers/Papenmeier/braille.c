@@ -949,12 +949,7 @@ interpretIdentity2 (BrailleDisplay *brl, const unsigned char *identity) {
 }
 
 static void
-writeText2 (BrailleDisplay *brl, int start, int count) {
-  refreshRequired2 = 1;
-}
-
-static void
-writeStatus2 (BrailleDisplay *brl, int start, int count) {
+writeCells2 (BrailleDisplay *brl, int start, int count) {
   refreshRequired2 = 1;
 }
 
@@ -1032,15 +1027,16 @@ readCommand2 (BrailleDisplay *brl, DriverCommandContext cmds) {
               while (bit) {
                 if (!(new & bit) && (old & bit)) {
                   InputMapping2 *mapping = &inputMap2[index];
-                  inputState2[byte] &= ~bit;
 
                   if (mapping->code != NOKEY) {
                     int cmd = handleKey(mapping->code, 0, mapping->offset);
                     if (!release) {
-                      release = 1;
                       command = cmd;
+                      release = 1;
                     }
                   }
+
+                  if ((inputState2[byte] &= ~bit) == new) break;
                 }
 
                 index++;
@@ -1064,11 +1060,12 @@ readCommand2 (BrailleDisplay *brl, DriverCommandContext cmds) {
             while (bit) {
               if ((new & bit) && !(old & bit)) {
                 InputMapping2 *mapping = &inputMap2[index];
-                inputState2[byte] |= bit;
 
                 if (mapping->code != NOKEY) {
                   command = handleKey(mapping->code, 1, mapping->offset);
                 }
+
+                if ((inputState2[byte] |= bit) == new) break;
               }
 
               index++;
@@ -1102,7 +1099,7 @@ releaseResources2 (void) {
 static const ProtocolOperations protocolOperations2 = {
   initializeTerminal2, releaseResources2,
   readCommand2,
-  writeText2, writeStatus2, flushCells2
+  writeCells2, writeCells2, flushCells2
 };
 
 static void
