@@ -412,15 +412,14 @@ determineApplicationCharacterMap (int force) {
   return 1;
 }
 
-static int fontTableSize;
-static int isBigFontTable;
+static int vgaCharacterCount;
+static int vgaLargeTable;
 static int
-setFontTableSize (void) {
-  int ok = 0;
+setVgaCharacterCount (int force) {
   struct console_font_op cfo;
-
-  fontTableSize = 0X100;
-  isBigFontTable = 0;
+  int oldCount = vgaCharacterCount;
+  vgaCharacterCount = 0X100;
+  vgaLargeTable = 0;
 
   memset(&cfo, 0, sizeof(cfo));
   cfo.op = KD_FONT_OP_GET;
@@ -429,26 +428,26 @@ setFontTableSize (void) {
 
   if (controlConsole(KDFONTOP, &cfo) != -1) {
     switch (cfo.charcount) {
-      case 0X200:
-        isBigFontTable = 1;
-      case 0X100:
-        fontTableSize = cfo.charcount;
-      case 0X000:
-        ok = 1;
-        break;
       default:
-        LogPrint(LOG_WARNING, "Unexpected font table size: %d", cfo.charcount);
+        LogPrint(LOG_WARNING, "Unexpected VGA character count: %d", cfo.charcount);
+      case 0X200:
+        vgaLargeTable = 1;
+      case 0X100:
+        vgaCharacterCount = cfo.charcount;
+      case 0X000:
         break;
     }
-  } else {
-    LogPrint((errno == EINVAL)? LOG_DEBUG: LOG_WARNING,
-             "ioctl KDFONTOP[GET]: %s", strerror(errno));
+  } else if (errno != EINVAL) {
+    LogPrint(LOG_WARNING, "ioctl KDFONTOP[GET]: %s", strerror(errno));
   }
 
-  LogPrint(LOG_INFO, "Font Table Size: %d(%s)",
-           fontTableSize,
-           isBigFontTable? "big": "small");
-  return ok;
+  if (!force)
+    if (vgaCharacterCount == oldCount)
+      return 0;
+  LogPrint(LOG_INFO, "VGA Character Count: %d(%s)",
+           vgaCharacterCount,
+           vgaLargeTable? "large": "small");
+  return 1;
 }
 
 static struct unipair *screenFontMapTable;
@@ -581,14 +580,11 @@ static int
 setTranslationTable (int force) {
   int acmChanged = setApplicationCharacterMap && setApplicationCharacterMap(force);
   int sfmChanged = setScreenFontMap(force);
+  int vccChanged = setVgaCharacterCount(force);
 
-  if (sfmChanged) {
-    setFontTableSize();
-  }
-
-  if (acmChanged || sfmChanged) {
+  if (acmChanged || sfmChanged || vccChanged) {
     unsigned short directPosition = 0XFF;
-    if (isBigFontTable) directPosition |= 0X100;
+    if (vgaLargeTable) directPosition |= 0X100;
 
     memset(translationTable, '?', sizeof(translationTable));
     {
@@ -611,7 +607,7 @@ setTranslationTable (int force) {
              else if (map->unicode > unicode)
                last = current - 1;
              else {
-               if (map->fontpos < fontTableSize) position = map->fontpos;
+               if (map->fontpos < vgaCharacterCount) position = map->fontpos;
                break;
              }
            }
@@ -632,7 +628,7 @@ setTranslationTable (int force) {
     if (debugCharacterTranslationTable) {
       const unsigned int count = 0X10;
       int position;
-      for (position=0; position<fontTableSize; position+=count) {
+      for (position=0; position<vgaCharacterCount; position+=count) {
         char description[0X20];
         sprintf(description, "c2f[%02X]", position);
         LogBytes(description, &translationTable[position], count);
@@ -754,7 +750,7 @@ read_LinuxScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
           int column;
           for (column=0; column<box.width; ++column) {
             int position = *source;
-            if (isBigFontTable)
+            if (vgaLargeTable)
               if (source[1] & 0X08)
                 position |= 0X100;
             src[column] = *source;
@@ -773,7 +769,7 @@ read_LinuxScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
           int column;
           source++;
           for (column=0; column<box.width; ++column) {
-            if (isBigFontTable) *source &= 0XF7;
+            if (vgaLargeTable) *source &= 0XF7;
             *target++ = *source;
             source += 2;
           }
