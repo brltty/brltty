@@ -52,7 +52,7 @@ cp -a "${originalRoot}/${loaderDirectory}" "${modifiedRoot}"
 sed -n -e '
 /^\( *default  *\).*$/s//\1text/
 /^\( *timeout  *\).*$/s//\10/
-/^ *append.* text/s/$/ video=vc:13/
+/^ *append.* text/s/$/ nofb/
 p
 ' <"${originalRoot}/${loaderDirectory}/${configurationFile}" >"${modifiedRoot}/${loaderDirectory}/${configurationFile}"
 
@@ -111,10 +111,12 @@ brlttyDirectory="${1}"
 	       --with-braille-driver=all --disable-speech-support \
 	       --disable-pcm-tunes --disable-fm-tunes --disable-midi-tunes \
                --enable-standalone-programs --disable-api --disable-gpm
+   make -s -C Programs all
+   strip Programs/brltty
    make -s -C Programs install-programs install-help install-tables
 ) || exit "${?}"
 
-(
+false && (
    set +e
    trap "" 0
 
