@@ -409,8 +409,8 @@ install:: install-programs install-help install-tables $(INSTALL_DRIVERS) instal
 install-programs: brltty$X
 	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(PROGRAM_DIRECTORY) 
 	$(INSTALL_PROGRAM) brltty$X $(INSTALL_ROOT)$(PROGRAM_DIRECTORY) 
-	$(INSTALL_DATA) brltty-config$X $(INSTALL_ROOT)$(PROGRAM_DIRECTORY) 
-	$(INSTALL_SCRIPT) $(SRC_DIR)/brltty-install$X $(INSTALL_ROOT)$(PROGRAM_DIRECTORY) 
+	$(INSTALL_DATA) brltty-config $(INSTALL_ROOT)$(PROGRAM_DIRECTORY) 
+	$(INSTALL_SCRIPT) $(SRC_DIR)/brltty-install $(INSTALL_ROOT)$(PROGRAM_DIRECTORY) 
 
 install-help: $(BRAILLE_DRIVERS) $(BRAILLE_HELP) install-data-directory
 	$(INSTALL_DATA) $(BLD_TOP)$(DAT_DIR)/* $(INSTALL_ROOT)$(DATA_DIRECTORY) 

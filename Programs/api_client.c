@@ -242,26 +242,25 @@ int brlapi_initializeConnection(const brlapi_settings_t *clientSettings, brlapi_
     lport = strlen(port);
     if (lpath+lport+1>sizeof(sa.sun_path)) {
       brlapi_libcerrno=ENAMETOOLONG;
-      brlapi_libcerrfun="brlapi_initializeConnection";
+      brlapi_libcerrfun="path";
       brlapi_errno = BRLERR_LIBCERR;
-      return -1;
+      goto out;
     }
     if ((fd = socket(PF_LOCAL, SOCK_STREAM, 0))<0) {
-      brlapi_errno = BRLERR_LIBCERR;
-      brlapi_libcerrno = errno;
-      return fd;
+      brlapi_libcerrfun="socket";
+      goto outlibc;
     }
-    sa.sun_family = AF_UNIX;
+    sa.sun_family = AF_LOCAL;
     memcpy(sa.sun_path,BRLAPI_SOCKETPATH,lpath);
     memcpy(sa.sun_path+lpath,port,lport+1);
     if (connect(fd, (struct sockaddr *) &sa, sizeof(sa))<0) {
-      brlapi_errno = BRLERR_LIBCERR;
-      brlapi_libcerrno = errno;
-      close(fd);
-      fd = -1;
-      return -1;
+      brlapi_libcerrfun="connect";
+      goto outlibc;
     }
   } else {
+
+#ifdef HAVE_GETADDRINFO
+
     struct addrinfo *res,*cur;
     struct addrinfo hints;
     memset(&hints, 0, sizeof(hints));
@@ -273,7 +272,7 @@ int brlapi_initializeConnection(const brlapi_settings_t *clientSettings, brlapi_
     free(port);
     if (gai_error) {
       brlapi_errno=BRLERR_GAIERR;
-      return -1;
+      goto out;
     }
     for(cur = res; cur; cur = cur->ai_next) {
       fd = socket(cur->ai_family, cur->ai_socktype, cur->ai_protocol);
@@ -287,30 +286,80 @@ int brlapi_initializeConnection(const brlapi_settings_t *clientSettings, brlapi_
     }
     freeaddrinfo(res);
     if (!cur) {
-      pthread_mutex_unlock(&brlapi_fd_mutex);
       brlapi_errno=BRLERR_CONNREFUSED;
-      return -1;
+      goto out;
     }
+
+#else /* HAVE_GETADDRINFO */
+
+    struct sockaddr_in addr;
+    struct hostent *he;
+
+    memset(&addr,0,sizeof(addr));
+    if (!port)
+      addr.sin_port = htons(BRLAPI_SOCKETPORTNUM);
+    else {
+      char *c;
+      addr.sin_port = htons(strtol(port, &c, 0));
+      if (*c) {
+	struct servent *se;
+	
+	if (!(se = getservbyname(port,"tcp"))) {
+	  gai_error = h_errno;
+          brlapi_errno=BRLERR_GAIERR;
+	  goto out;
+	}
+	addr.sin_port = se->s_port;
+      }
+    }
+
+    if (!hostname) {
+      addr.sin_family = AF_INET;
+      addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+    } else {
+      if (!(he = gethostbyname(hostname))) {
+	gai_error = h_errno;
+	brlapi_errno = BRLERR_GAIERR;
+	goto out;
+      }
+      addr.sin_family = he->h_addrtype;
+      memcpy(&addr.sin_addr,he->h_addr,he->h_length);
+    }
+    
+    fd = socket(addr.sin_family, SOCK_STREAM, 0);
+    if (fd<0) {
+      brlapi_libcerrfun = "socket";
+      goto outlibc;
+    }
+    if (connect(fd, (struct sockaddr *) &addr, sizeof(addr))<0) {
+      brlapi_libcerrfun = "connect";
+      goto outlibc;
+    }
+
+#endif /* HAVE_GETADDRINFO */
+
   }
 
-  if ((err=brlapi_writePacket(fd, BRLPACKET_AUTHKEY, packet, sizeof(auth->protocolVersion)+authKeyLength))<0) {
-    pthread_mutex_unlock(&brlapi_fd_mutex);
-    close(fd);
-    fd = -1;
-    return err;
-  }
-  if ((err=brlapi_waitForAck())<0) {
-    pthread_mutex_unlock(&brlapi_fd_mutex);
-    close(fd);
-    fd = -1;
-    return err;
-  }
+  if ((err=brlapi_writePacket(fd, BRLPACKET_AUTHKEY, packet, sizeof(auth->protocolVersion)+authKeyLength))<0)
+    goto outfd;
+  if ((err=brlapi_waitForAck())<0)
+    goto outfd;
   pthread_mutex_unlock(&brlapi_fd_mutex);
 
   pthread_mutex_lock(&stateMutex);
   state = STCONNECTED;
   pthread_mutex_unlock(&stateMutex);
   return fd;
+
+outlibc:
+  brlapi_errno = BRLERR_LIBCERR;
+  brlapi_libcerrno = errno;
+outfd:
+  close(fd);
+  fd = -1;
+out:
+  pthread_mutex_unlock(&brlapi_fd_mutex);
+  return -1;
 }
 
 /* brlapi_closeConnection */
@@ -785,7 +834,11 @@ const char *brlapi_strerror(int err)
   if (err>=brlapi_nerr)
     return "Unknown error";
   else if (err==BRLERR_GAIERR)
+#ifdef HAVE_GETADDRINFO
     return gai_strerror(gai_error);
+#else /* HAVE_GETADDRINFO */
+    return hstrerror(gai_error);
+#endif /* HAVE_GETADDRINFO */
   else if (err==BRLERR_LIBCERR)
     return strerror(brlapi_libcerrno);
   else

@@ -22,6 +22,10 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#if defined(__CYGWIN32__) || defined(__MINGW32__)
+#define WINDOWS
+#endif /* defined(__CYGWIN32__) || defined(__MINGW32__) */
+
 /* Define this if the host is big endian. */
 #undef WORDS_BIGENDIAN
 
@@ -72,6 +76,9 @@ extern "C" {
 
 /* Define this if the function fchdir exists. */
 #undef HAVE_FCHDIR
+
+/* Define this if the function getaddrinfo exists. */
+#undef HAVE_GETADDRINFO
 
 /* Define this if the function getopt_long exists. */
 #undef HAVE_GETOPT_LONG

@@ -784,7 +784,12 @@ static int loopBind(int fd, struct sockaddr *addr, socklen_t len)
 /* Returns the descriptor, or -1 if an error occurred */
 static int initializeTcpSocket(char *hostname, char *port)
 {
-  int fd=-1, err, yes=1;
+  int fd=-1, yes=1;
+  const char *fun;
+
+#ifdef HAVE_GETADDRINFO
+
+  int err;
   struct addrinfo *res,*cur;
   struct addrinfo hints;
 
@@ -807,20 +812,21 @@ static int initializeTcpSocket(char *hostname, char *port)
     }
     /* Specifies that address can be reused */
     if (setsockopt(fd,SOL_SOCKET,SO_REUSEADDR,&yes,sizeof(yes))!=0) {
-      LogError("setsockopt");
-      close(fd);
-       continue;
+      fun = "setsockopt";
+      goto cont;
     }
     if (loopBind(fd, cur->ai_addr, cur->ai_addrlen)<0) {
-      LogPrint(LOG_WARNING,"bind: %s",strerror(errno));
-      continue;
+      fun = "bind";
+      goto cont;
     }
     if (listen(fd,1)<0) {
-      LogPrint(LOG_WARNING,"listen: %s",strerror(errno));
-      close(fd);
-      continue;
+      fun = "listen";
+      goto cont;
     }
     break;
+cont:
+    close(fd);
+    LogError(fun);
   }
   freeaddrinfo(res);
   if (cur) {
@@ -829,6 +835,69 @@ static int initializeTcpSocket(char *hostname, char *port)
     return fd;
   }
   LogPrint(LOG_WARNING,"unable to find a local TCP port %s:%s !",hostname,port);
+
+#else /* HAVE_GETADDRINFO */
+
+  struct sockaddr_in addr;
+  struct hostent *he;
+
+  memset(&addr,0,sizeof(addr));
+  if (!port)
+    addr.sin_port = htons(BRLAPI_SOCKETPORTNUM);
+  else {
+    char *c;
+    addr.sin_port = htons(strtol(port, &c, 0));
+    if (*c) {
+      struct servent *se;
+
+      if (!(se = getservbyname(port,"tcp"))) {
+        LogPrint(LOG_ERR,"port %s: %s",port,hstrerror(h_errno));
+	return -1;
+      }
+      addr.sin_port = se->s_port;
+    }
+  }
+
+  if (!hostname) {
+    addr.sin_family = AF_INET;
+    addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+  } else {
+    if (!(he = gethostbyname(hostname))) {
+      LogPrint(LOG_ERR,"gethostbyname(%s): %s",hostname,hstrerror(h_errno));
+      return -1;
+    }
+    addr.sin_family = he->h_addrtype;
+    memcpy(&addr.sin_addr,he->h_addr,he->h_length);
+  }
+
+  fd = socket(addr.sin_family, SOCK_STREAM, 0);
+  if (fd<0) {
+    fun = "socket";
+    goto err;
+  }
+  if (setsockopt(fd,SOL_SOCKET,SO_REUSEADDR,&yes,sizeof(yes))!=0) {
+    fun = "setsockopt";
+    goto errfd;
+  }
+  if (loopBind(fd, (struct sockaddr *) &addr, sizeof(addr))<0) {
+    fun = "setsockopt";
+    goto errfd;
+  }
+  if (listen(fd,1)<0) {
+    fun = "listen";
+    goto errfd;
+  }
+  free(hostname);
+  free(port);
+  return fd;
+
+errfd:
+  close(fd);
+err:
+  LogError(fun);
+
+#endif /* HAVE_GETADDRINFO */
+
   free(hostname);
   free(port);
   return -1;
@@ -847,7 +916,7 @@ static int initializeUnixSocket(const char *port)
     LogError("socket");
     goto out;
   }
-  sa.sun_family = AF_UNIX;
+  sa.sun_family = AF_LOCAL;
   lport=strlen(port);
   if (lpath+lport+1>sizeof(sa.sun_path)) {
     LogError("Unix path too long");
@@ -889,11 +958,14 @@ out:
 
 static void *establishSocket(void *arg)
 {
-  int num = (int) arg, res;
+  int num = (int) arg;
   char *host = socketHosts[num];
-  sigset_t blockedSignals;
   char *hostname;
   struct closeinfo *cinfo = &socketClose[num];
+
+#ifndef WINDOWS
+  int res;
+  sigset_t blockedSignals;
 
   sigemptyset(&blockedSignals);
   sigaddset(&blockedSignals,SIGTERM);
@@ -905,6 +977,7 @@ static void *establishSocket(void *arg)
     LogPrint(LOG_WARNING,"pthread_sigmask: %s",strerror(res));
     return NULL;
   }
+#endif /* WINDOWS */
 
   cinfo->addrfamily=brlapi_splitHost(host,&hostname,&cinfo->port);
   if ((cinfo->addrfamily==PF_LOCAL && (cinfo->fd = initializeUnixSocket(cinfo->port))==-1) ||
@@ -995,11 +1068,12 @@ static void *server(void *arg)
   struct sockaddr addr;
   socklen_t addrlen = sizeof(addr);
   Connection *c;
-  sigset_t blockedSignals;
   long currentTime;
   struct timeval tv;
   int n;
 
+#ifndef WINDOWS
+  sigset_t blockedSignals;
   sigemptyset(&blockedSignals);
   sigaddset(&blockedSignals,SIGTERM);
   sigaddset(&blockedSignals,SIGINT);
@@ -1010,6 +1084,7 @@ static void *server(void *arg)
     LogPrint(LOG_WARNING,"pthread_sigmask : %s",strerror(res));
     pthread_exit(NULL);
   }
+#endif /* WINDOWS */
 
   socketHosts = splitString(hosts,'+',&numSockets);
   if (numSockets>MAXSOCKETS) {
@@ -1051,6 +1126,7 @@ static void *server(void *arg)
     tv.tv_sec = 1; tv.tv_usec = 0;
     if ((n=select(fdmax+1, &sockset, NULL, NULL, &tv))<0)
     {
+      if (fdmax==0) continue; /* still no server socket */
       LogPrint(LOG_WARNING,"select: %s",strerror(errno));
       break;
     }
