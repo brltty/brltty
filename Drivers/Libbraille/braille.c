@@ -32,7 +32,7 @@
 
 #include "Programs/misc.h"
 
-#include "braille.h"
+#include <braille.h>
 
 #define BRL_HAVE_VISUAL_DISPLAY
 #include "Programs/brl_driver.h"
