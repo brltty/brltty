@@ -950,12 +950,12 @@ insertCode (ScreenKey key, int raw) {
 
 static int
 insertMapped (ScreenKey key, int (*byteInserter)(unsigned char byte)) {
-  unsigned char buffer[3];
+  unsigned char buffer[2];
   unsigned char *sequence;
+  unsigned char *end;
 
   if (key < SCR_KEY_ENTER) {
-    sequence = buffer + sizeof(buffer);
-    *--sequence = 0;
+    sequence = end = buffer + sizeof(buffer);
     *--sequence = key & 0XFF;
 
     if (key & SCR_KEY_MOD_META) {
@@ -1084,9 +1084,10 @@ insertMapped (ScreenKey key, int (*byteInserter)(unsigned char byte)) {
         LogPrint(LOG_WARNING, "Key %4.4X not suported in ANSI mode.", key);
         return 0;
     }
+    end = sequence + strlen(sequence);
   }
 
-  while (*sequence)
+  while (sequence != end)
     if (!byteInserter(*sequence++))
       return 0;
   return 1;
