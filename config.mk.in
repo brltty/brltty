@@ -104,7 +104,6 @@ LIBRARY_DIRECTORY = @library_directory@
 DATA_DIR = @data_directory@
 MANPAGE_DIRECTORY = @manpage_directory@
 INCLUDE_DIRECTORY = @include_directory@
-API_DIRECTORY = @api_directory@
 
 BRL_TARGET = @brltty_item_name_braille@
 BRL_TARGETS = @brltty_item_names_braille@

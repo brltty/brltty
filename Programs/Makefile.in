@@ -309,11 +309,11 @@ install-manpages:
 install-api: install-api-libraries install-api-headers install-api-key
 
 install-api-libraries: $(API_LIB) $(API_ARC)
-	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(API_DIRECTORY)
-	$(INSTALL_PROGRAM) $(API_LIB) $(INSTALL_ROOT)$(API_DIRECTORY)/$(API_LIB).$(API_RELEASE)
-	$(SYMLINK) -f $(API_LIB).$(API_RELEASE) $(INSTALL_ROOT)$(API_DIRECTORY)/$(API_LIB)
-	$(CONFLIBDIR) $(INSTALL_ROOT)$(API_DIRECTORY)
-	$(INSTALL_DATA) $(API_ARC) $(INSTALL_ROOT)$(API_DIRECTORY)
+	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(libdir)
+	$(INSTALL_PROGRAM) $(API_LIB) $(INSTALL_ROOT)$(libdir)/$(API_LIB).$(API_RELEASE)
+	$(SYMLINK) -f $(API_LIB).$(API_RELEASE) $(INSTALL_ROOT)$(libdir)/$(API_LIB)
+	$(CONFLIBDIR) $(INSTALL_ROOT)$(libdir)
+	$(INSTALL_DATA) $(API_ARC) $(INSTALL_ROOT)$(libdir)
 
 install-api-headers:
 	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
@@ -344,10 +344,10 @@ uninstall-libraries:
 	-rm -f $(INSTALL_ROOT)$(LIBRARY_DIRECTORY)/$(LIB_NAME)*
 	-rm -f $(INSTALL_ROOT)$(LIBRARY_DIRECTORY)/brltty-*.lst
 	-rmdir $(INSTALL_ROOT)$(LIBRARY_DIRECTORY)
-	-rm -f $(INSTALL_ROOT)$(API_DIRECTORY)/$(API_LIB)
-	-rm -f $(INSTALL_ROOT)$(API_DIRECTORY)/$(API_LIB).$(API_RELEASE)
-	$(CONFLIBDIR) $(INSTALL_ROOT)$(API_DIRECTORY)
-	-rm -f $(INSTALL_ROOT)$(API_DIRECTORY)/$(API_ARC)
+	-rm -f $(INSTALL_ROOT)$(libdir)/$(API_LIB)
+	-rm -f $(INSTALL_ROOT)$(libdir)/$(API_LIB).$(API_RELEASE)
+	$(CONFLIBDIR) $(INSTALL_ROOT)$(libdir)
+	-rm -f $(INSTALL_ROOT)$(libdir)/$(API_ARC)
 
 uninstall-manpages:
 	-for page in $(SRC_TOP)$(DOC_DIR)/*.[1-9]; do \

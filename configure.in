@@ -74,8 +74,6 @@ BRLTTY_SUMMARY_ITEM([install-root], [install_root])
 AC_SUBST([configuration_file], ["${PACKAGE_NAME}.conf"])
 BRLTTY_DEFINE_EXPANDED([CONFIGURATION_FILE], ["${configuration_file}"])
 
-AC_SUBST([api_directory], ["${libdir}"])
-BRLTTY_ARCHITECTURE_DIRECTORY([api_directory], [/usr])
 BRLTTY_PORTABLE_DIRECTORY([includedir], [/usr])
 BRLTTY_PORTABLE_DIRECTORY([mandir], [/usr/share])
 
