@@ -273,7 +273,7 @@ contractText (void *contractionTable,
     setOffset();
     setBefore();
     if (computerBraille)
-      if (src == computerBraille)
+      if (src >= computerBraille)
         if (CTC(*src, CTC_Space) || CTC(src[-1], CTC_Space))
           computerBraille = NULL;
     if (computerBraille) {

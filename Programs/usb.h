@@ -38,7 +38,12 @@ extern "C" {
 #define USB_DESCRIPTOR_SIZE_INTERFACE      9
 #define USB_DESCRIPTOR_SIZE_ENDPOINT       7
 
-/* Device and interface classes. */
+/* Configuration attributes (bmAttributes). */
+#define USB_ATTRIBUTE_BUS_POWERED   0X80
+#define USB_ATTRIBUTE_SELF_POWERED  0X40
+#define USB_ATTRIBUTE_REMOTE_WAKEUP 0X20
+
+/* Device and interface classes (bDeviceClass, bInterfaceClass). */
 #define USB_CLASS_PER_INTERFACE 0X00
 #define USB_CLASS_AUDIO         0X01
 #define USB_CLASS_COMM          0X02
@@ -55,12 +60,18 @@ extern "C" {
 #define USB_ENDPOINT_NUMBER_MASK    0X0F
 #define USB_ENDPOINT_DIRECTION_MASK 0X80
 
-/* Endpoint types (bmAttributes). */
+/* Endpoint transfer types (bmAttributes). */
 #define USB_ENDPOINT_TRANSFER_MASK        0X03
 #define USB_ENDPOINT_TRANSFER_CONTROL     0X00
 #define USB_ENDPOINT_TRANSFER_ISOCHRONOUS 0X01
 #define USB_ENDPOINT_TRANSFER_BULK        0X02
 #define USB_ENDPOINT_TRANSFER_INTERRUPT   0X03
+
+/* Endpoint isochronous types (bmAttributes). */
+#define USB_ENDPOINT_ISOCHRONOUS_MASK          0X0C
+#define USB_ENDPOINT_ISOCHRONOUS_aSYNOCHRONOUS 0X04
+#define USB_ENDPOINT_ISOCHRONOUS_ADAPTABLE     0X08
+#define USB_ENDPOINT_ISOCHRONOUS_SYNCHRONOUS   0X0C
 
 /* Control transfer recipients. */
 #define USB_RECIPIENT_MASK      0X1F
@@ -123,13 +134,13 @@ typedef struct {
   uint8_t bConfigurationValue; /* Configuration number. */
   uint8_t iConfiguration;
   uint8_t bmAttributes;        /* Configuration attributes. */
-  uint8_t MaxPower;            /* Maximum power in milliamps. */
+  uint8_t bMaxPower;           /* Maximum power in 2 milliamp units. */
 } __attribute__((packed)) UsbConfigurationDescriptor;
 
 typedef struct {
   uint8_t bLength;         /* Descriptor size in bytes (2 + numchars/2). */
   uint8_t bDescriptorType; /* Descriptor type (3 == string). */
-  uint16_t wData[1];       /* First 16-bit character. */
+  uint16_t wData[127];     /* 16-bit characters. */
 } __attribute__((packed)) UsbStringDescriptor;
 
 typedef struct {
