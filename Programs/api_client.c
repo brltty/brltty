@@ -80,26 +80,6 @@ pthread_mutex_t brlapi_fd_mutex = PTHREAD_MUTEX_INITIALIZER; /* to protect concu
 
 static int deliver_mode = -1; /* How keypresses are delivered (codes | commands) */
 
-/* what a key press does */
-typedef enum { NONE=0, STROKE=1, MOD=2, UNMOD=3 } actions;
-
-#define NBMAXMODS 32
-static uint32_t mods_state;
-static pthread_mutex_t mods_mutex; /* to protect concurrent key reading */
-
-/* key binding */
-struct bind {
-  brl_keycode_t code;
-  uint32_t mods_state;
-  union {
-    char *cmd;
-    int mod;
-  } modif;
-  actions action;
-};
-static struct bind *bindings = NULL;
-static char *cmdnames;
-
 /* key presses buffer, for when key presses are received instead of
  * acknowledgements for instance
  *
@@ -466,15 +446,15 @@ int brlapi_getDisplaySize(unsigned int *x, unsigned int *y)
 /* Function : brlapi_getControllingTty */
 /* Returns the number of the caller's controlling terminal */
 /* -1 if error or unknown */
-int brlapi_getControllingTty()
+static uint32_t brlapi_getControllingTty()
 {
   int vt = 0;
+  int tty;
+  const char *env;
 
-  const char *number = getenv("CONTROLVT");
-  if (number) {
-    int tty;
-    if (sscanf(number, "%d", &tty) == 1) vt = tty;
-  } else {
+  if ((env = getenv("CONTROLVT")) && sscanf(env, "%u", &tty) == 1) vt = tty;
+  else if ((env = getenv("WINDOWID")) && sscanf(env, "%u", &tty) == 1) vt = tty;
+  else {
 #ifdef linux
     pid_t pid = getpid();
     while (pid != 1) {
@@ -519,26 +499,11 @@ struct def {
   brl_keycode_t code;
   char *name;
 };
-int brlapi_getTty(uint32_t tty, uint32_t how, brlapi_keybinding_t *keybinding)
+int brlapi_getTty(int tty, int how)
 {
   int truetty = -1;
   uint32_t uints[2];
-  char *home;
-  char *driverid;
-  char *fichname;
-  int fdbinds,fddefs;
-  struct stat statbinds,statdefs;
-  char *keybinds,*keydefs;
   int res;
-  char *c,*d;
-  struct def *defs,*deftmp;
-  int nbdefs,idefs;
-  int nbbinds,cmdsize; // number of final bindings, and size of final command names
-  int modunmod;
-  unsigned long mod;
-  char *cmdnames_tmp;
-  struct bind *bindtmp;
-  uint32_t mods_state;
  
   /* Check if "how" is valid */
   if ((how!=BRLKEYCODES) && (how!=BRLCOMMANDS)) {
@@ -566,248 +531,7 @@ int brlapi_getTty(uint32_t tty, uint32_t how, brlapi_keybinding_t *keybinding)
   keybuf_next = keybuf_nb = 0;
   pthread_mutex_unlock(&keybuf_mutex);
 
-  /* ok, grabbed it, see if a key binding is required */
-  if (!keybinding) return 0;
-  if (!keybinding->client) return 0;
-  if (!(*keybinding->client)) return 0;
-
-  res = -1;
-  /* first fetch pieces of information */
-  home = getenv("HOME");
-  if (!home) goto gettty_end;
-  driverid = brlapi_getDriverId();
-  if (!driverid) goto gettty_end;
-
-  /* first look for key bindings */
-  fichname = malloc(strlen(home)+strlen("/" BRLAPI_HOMEKEYDIR "/")+strlen(keybinding->client)
-                    +strlen("-")+strlen(driverid)+strlen(BRLAPI_HOMEKEYEXT)+1);
-  if (!fichname) goto gettty_end;
-  strcpy(fichname,home);
-  strcat(fichname,"/" BRLAPI_HOMEKEYDIR "/");
-  strcat(fichname,keybinding->client);
-  strcat(fichname,"-");
-  strcat(fichname,driverid);
-  strcat(fichname,BRLAPI_HOMEKEYEXT);
-  fdbinds = open(fichname,O_RDONLY);
-  free(fichname);
-  if (fdbinds<0) goto gettty_end;
-  if (fstat(fdbinds,&statbinds)!=0) goto gettty_endbindsfd;
-  keybinds = (char *) mmap(NULL, statbinds.st_size+1, PROT_READ|PROT_WRITE, MAP_PRIVATE, fdbinds, 0);
-  if (!keybinds) goto gettty_endbindsfd;
-  keybinds[statbinds.st_size]='\0';
-
-  /* now look for key definitions */
-  fichname = malloc(strlen(BRLAPI_ETCDIR "/" BRLAPI_ETCKEYFILE "-")
-                    +strlen(driverid)+strlen(".h")+1);
-  strcpy(fichname,BRLAPI_ETCDIR "/" BRLAPI_ETCKEYFILE "-");
-  strcat(fichname,driverid);
-  strcat(fichname,".h");
-  fddefs = open(fichname,O_RDONLY);
-  free(fichname);
-  if (fddefs<0) goto gettty_endbindsmmap;
-  if (fstat(fddefs,&statdefs)!=0) goto gettty_enddefsfd;
-  keydefs = (char *) mmap(NULL, statdefs.st_size+1, PROT_READ|PROT_WRITE, MAP_PRIVATE, fddefs, 0);
-  if (!keydefs) goto gettty_enddefsfd;
-  keydefs[statdefs.st_size]='\0';
-
-  /* ok, these files were found, first parse key defs to record where they are */
-  /* we used MAP_PRIVATE, so we can modify it like crazy */
-  c = keydefs;
-  nbdefs = 16;  // arbitrarily enough
-  idefs = 0;
-  defs = (struct def *) malloc(nbdefs * sizeof(struct def));
-  if (!defs) goto gettty_enddefsmmap;
-
-  while(*c) {
-    /* parse one definition, ie a line which looks like */
-    /* #define keyA1 0x00 anythingUnImportant */
-    /* be warned that code MUST be an integer, not a formula */
-
-    /* first #define */
-    if (strncmp(c,"#define",strlen("#define"))) goto gettty_skiplndefs;
-    c+=strlen("#define");
-    if (*c && *c!=' ' && *c!='\t') goto gettty_skiplndefs;
-
-    /* skip blank */
-    while (*c && *c!='\n' && (*c==' ' || *c=='\t')) c++;
-    if (!*c) break;
-    if (*c == '\n') { c++; continue; } // ?! line unfinished, give up
-
-    /* key name, skip it */
-    defs[idefs].name = c;
-    while (*c && *c!=' ' && *c!='\t' && *c != '\n') c++;
-    if (!*c) break;
-    if (*c == '\n') { c++; continue; } // ?! line unfinished, give up
-    *c++ = '\0'; // close key name, no modification in file thanks to MAP_PRIVATE
-
-    /* skip blank */
-    while (*c && *c!='\n' && (*c==' ' || *c=='\t')) c++;
-    if (!*c) break;
-    if (*c == '\n') { c++; continue; } // ?! line unfinished, give up
-
-    /* code value */
-    defs[idefs].code = strtoul(c, &d, 0);
-    if (c==d || (*d!=' ' && *d!='\t' && *d!='\n' && *d!='\0')) goto gettty_skiplndefs; // invalid #define
-
-    /* great ! at last we got one, increment i, and check for overflow */
-    if (++idefs == nbdefs) {
-      nbdefs <<= 1;
-      deftmp=realloc(defs, nbdefs * sizeof(struct def));
-      if (!deftmp) goto gettty_enddefs;
-    }
-
-  gettty_skiplndefs:
-    while (*c && *c!='\n') c++;
-    c++;
-  }
-  defs[idefs].name = NULL;
-  nbdefs = idefs;
-
-  /* OK, we have every key definition, let's look at user's binding */
-  /* they look like */
-  /* keyB5 4 mod 1 anythingUnImportant */
-  /* keyB6 unmod 1 anythingUnImportant */
-  /* keyA1 1 4 BLIP stillUnImportant */
-  /* keyA1 BLOP alwaysUnImportant */
-
-  /* first pass to count how many definitions are there */
-  c = keybinds;
-  nbbinds = 0;
-  cmdsize = 0;
-  while(*c) {
-    while (*c && (*c==' ' || *c=='\t' || *c=='\n')) c++;
-    if (!*c) break;
-    for (deftmp = defs; deftmp->name; deftmp++)
-      if (!strncmp(c, deftmp->name, strlen(deftmp->name))
-          && c[strlen(deftmp->name)]
-          && (c[strlen(deftmp->name)]==' ' || c[strlen(deftmp->name)]=='\t'))
-        break;
-    if (!deftmp->name) goto gettty_skiplnbinds1;        // not found
-    c+=strlen(deftmp->name);
-
-    /* check that there's really a command name */
-    while (*c && (*c==' ' || *c=='\t') && *c!='\n') c++;
-    if (!*c) break;
-    if (*c == '\n') { c++; continue; }
-
-    do strtoul(c,&d,0); while (d!=c && (*d==' ' || *d=='\t') && (c=d+1));
-
-    while (*c && (*c==' ' || *c=='\t') && *c!='\n') c++;
-    if (!*c) break;
-    if (*c == '\n') { c++; continue; }
-
-    if ((!strncmp(c,"mod",3  ) && c[3] && (c[3]==' ' || c[3]=='\t') && (c+=4))        || (!strncmp(c,"unmod",5) && c[5] && (c[5]==' ' || c[5]=='\t') && (c+=6))) {
-      strtoul(c,&d,0);
-      if (c!=d) nbbinds++;
-      goto gettty_skiplnbinds1;
-    }
-
-    /* this one will be ok, count it */
-    nbbinds++;
-
-    while (*c && *c!=' ' && *c!='\t' && *c!='\n') { c++; cmdsize++; }
-    cmdsize++; // for final \0
-    if (!*c) break;
-
-  gettty_skiplnbinds1:
-    while (*c && *c!='\n') c++;
-    c++;
-  }
-  if (!nbbinds) goto gettty_enddefs;
-
-  /* we've found nbbinds definitions */
-  /* if there were already, get rid of them */
-  /* note that if GetTty fails, old definition still apply, and ReadKeyCmd can */
-  /* still be called */
-  if (bindings) { free(bindings); free(cmdnames); }
-  bindings = (struct bind *) malloc((nbbinds+1) * sizeof(struct bind));
-  if (!bindings) goto gettty_enddefs;
-  cmdnames = (char *) malloc(cmdsize);
-  if (!cmdnames) { free(bindings); goto gettty_enddefs; }
-  cmdnames_tmp = cmdnames;
-  bindings[nbbinds].action = NONE;
-
-  /* parse again, but record this time */
-  c = keybinds;
-  while (*c) {
-    /* cut & paste of what is just 20 lines upper */
-    while (*c && (*c==' ' || *c=='\t' || *c=='\n')) c++;
-    if (!*c) break;
-    for (deftmp = defs; deftmp->name; deftmp++)
-      if (!strncmp(c, deftmp->name, strlen(deftmp->name)) && c[strlen(deftmp->name)] && (c[strlen(deftmp->name)]==' ' || c[strlen(deftmp->name)]=='\t'))
-        break;
-    if (!deftmp->name) goto gettty_skiplnbinds2;        // not found
-    c+=strlen(deftmp->name);
-
-    /* check that there's really a command name */
-    while (*c && (*c==' ' || *c=='\t') && *c!='\n') c++;
-    if (!*c) break;
-    if (*c == '\n') { c++; continue; }
-
-    mods_state=0;
-    do mod=strtoul(c,&d,0); while (d!=c && (*d==' ' || *d=='\t') && (c=d+1) && (mods_state|=1<<mod,1));
-
-    while (*c && (*c==' ' || *c=='\t') && *c!='\n') c++;
-    if (!*c) break;
-    if (*c == '\n') { c++; continue; }
-
-    if ((!strncmp(c,"mod",3  ) && c[3] && (c[3]==' ' || c[3]=='\t') && (c+=4) && (modunmod=MOD)) || (!strncmp(c,"unmod",5) && c[5] && (c[5]==' ' || c[5]=='\t') && (c+=6) && (modunmod=UNMOD))) {
-      mod=strtoul(c,&d,0);
-      if (c!=d) {
-        nbbinds--;
-        bindings[nbbinds].modif.mod = mod;
-        bindings[nbbinds].code = deftmp->code;
-        bindings[nbbinds].action = modunmod;
-        bindings[nbbinds].mods_state = mods_state;
-        /* fprintf(stderr,"bound 0x%x(0x%x) to %smodify %u\n", bindings[nbbinds].code, bindings[nbbinds].mods_state,modunmod==MOD?"":"un", bindings[nbbinds].mod); */
-      }
-      goto gettty_skiplnbinds2;
-    }
-    /* we point on the command name */
-    /* we can record it */
-
-    nbbinds--;
-    bindings[nbbinds].modif.cmd = cmdnames_tmp;
-    bindings[nbbinds].code = deftmp->code;
-    bindings[nbbinds].action = STROKE;
-    bindings[nbbinds].mods_state = mods_state;
-
-    /* and close command name */
-    while (*c && *c!=' ' && *c!='\t' && *c!='\n') *cmdnames_tmp++ = *c++;
-    *cmdnames_tmp++='\0';
-    if (!*c) break;
-    if (*c == '\n') {
-      *c++='\0';
-      /* fprintf(stderr,"bound 0x%x(0x%x) to \"%s\"\n", bindings[nbbinds].code, bindings[nbbinds].mods_state, bindings[nbbinds].cmd); */
-      continue;
-    }
-    *c++='\0';
-    /* fprintf(stderr,"bound 0x%x(0x%x) to \"%s\"\n", bindings[nbbinds].code, bindings[nbbinds].mods_state, bindings[nbbinds].cmd); */
-
-  gettty_skiplnbinds2:
-    while (*c && *c!='\n') c++;
-    c++;
-  }
-
-  /* great ! it worked, so unmask only those keys */
-  if (brlapi_ignoreKeys(0U, ~0U)!=1) goto gettty_enddefs;
-  for(bindtmp = bindings; bindtmp->action; bindtmp++)
-    if (brlapi_unignoreKeys(bindtmp->code, bindtmp->code)!=1) goto gettty_enddefs;
-
-  res = 0;
- gettty_enddefs:
-  free(defs);
- gettty_enddefsmmap:
-  munmap(keydefs,statdefs.st_size+1);
- gettty_enddefsfd:
-  close(fddefs);
- gettty_endbindsmmap:
-  munmap(keybinds,statbinds.st_size+1);
- gettty_endbindsfd:
-  close(fdbinds);
- gettty_end:
-  if (res != 0 ) brlapi_leaveTty();
-  return res;
+  return 0;
 }
 
 /* Function : brlapi_leaveTty */
@@ -820,7 +544,7 @@ int brlapi_leaveTty()
 
 /* Function : brlapi_writeBrl */
 /* Writes a string to the braille display */
-int brlapi_writeBrl(uint32_t cursor, const char *str)
+int brlapi_writeBrl(int cursor, const char *str)
 {
   static unsigned char disp[sizeof(uint32_t)+256];
   uint32_t *csr = (uint32_t *) &disp[0];
@@ -839,7 +563,7 @@ int brlapi_writeBrl(uint32_t cursor, const char *str)
 
 /* Function : brlapi_writeBrlDots */
 /* Writes dot-matrix to the braille display */
-int brlapi_writeBrlDots(const char *dots)
+int brlapi_writeBrlDots(const unsigned char *dots)
 {
   static unsigned char disp[256];
   uint32_t size = brlx * brly;
@@ -957,43 +681,6 @@ int brlapi_readCommand(int block, brl_keycode_t *code)
   }
 }
 
-/* Function : brlapi_readBinding */
-/* Reads a key from the braille keyboard */
-int brlapi_readBinding(int block, const char **code)
-{
-  brl_keycode_t keycode;
-  struct bind *bindtmp;
-  int res;
-  if (!bindings) {
-    brlapi_errno=BRLERR_INVALID_PARAMETER;
-    return -1;
-  }
-  while (1) {
-    if ((res=brlapi_readKey(block, &keycode))<=0)
-      return res;
-    for (bindtmp = bindings; bindtmp->action; bindtmp++) if (bindtmp->code == keycode && bindtmp->mods_state == mods_state) {
-      switch (bindtmp->action) {
-        case STROKE: *code=bindtmp->modif.cmd; return 1;
-        case MOD:  {
-          pthread_mutex_lock(&mods_mutex);
-          mods_state|=1<<bindtmp->modif.mod;
-          pthread_mutex_unlock(&mods_mutex);
-          break;
-        }
-        case UNMOD: {
-          pthread_mutex_lock(&mods_mutex);
-          mods_state&=~(1<<bindtmp->modif.mod);
-          pthread_mutex_unlock(&mods_mutex);
-          break;
-        }
-        default: break;
-      }
-      mods_state=0;
-    }
-    /* if not found, drop it */
-  }
-}
-
 /* Function : Mask_Unmask */
 /* Common tasks for masking and unmasking keys */
 /* what = 0 for masing, !0 for unmasking */
@@ -1039,21 +726,24 @@ const char *brlapi_errlist[] = {
 /* brlapi_nerr: last error number */
 const int brlapi_nerr = (sizeof(brlapi_errlist)/sizeof(char*)) - 1;
 
+/* brlapi_strerror: return error message */
+const char *brlapi_strerror(void)
+{
+  int err=brlapi_errno;
+  if (err>=brlapi_nerr)
+    return "Unknown error";
+  else if (err==BRLERR_GAIERR)
+    return gai_strerror(gai_error);
+  else if (err==BRLERR_LIBCERR)
+    return strerror(brlapi_libcerrno);
+  else
+    return brlapi_errlist[err];
+}
+
 /* brlapi_perror: error message printing */
 void brlapi_perror(const char *s)
 {
-  int err=brlapi_errno;
-  if (err>brlapi_nerr)
-    fprintf(stderr,"%s: Unknown error\n",s);
-  else if (err==BRLERR_GAIERR)
-    fprintf(stderr,"%s: %s: %s\n",s,brlapi_errlist[err],gai_strerror(gai_error));
-  else if (err==BRLERR_LIBCERR)
-    if (brlapi_libcerrno>sys_nerr)
-      fprintf(stderr,"%s: %s: Unknown error\n",s,brlapi_errlist[err]);
-    else
-      fprintf(stderr,"%s: %s: %s\n",s,brlapi_errlist[err],sys_errlist[brlapi_libcerrno]);
-  else
-    fprintf(stderr,"%s: %s\n",s,brlapi_errlist[err]);
+  fprintf(stderr,"%s: %s\n",s,brlapi_strerror());
 }
 
 #ifdef brlapi_errno
@@ -1092,7 +782,7 @@ int *brlapi_errno_location(void)
         return errnop;
       else
         /* on the first time, must allocate it */
-        if ((errnop=malloc(sizeof(*errnop))) && !pthread_setspecific(errno_key,errnop));
+        if ((errnop=malloc(sizeof(*errnop))) && !pthread_setspecific(errno_key,errnop))
           return errnop;
       }
     }

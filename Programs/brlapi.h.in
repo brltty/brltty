@@ -43,7 +43,7 @@ extern "C" {
  * Before calling any other function of the library, calling
  * brlapi_initializeConnection() is needed to establish a connection to
  * \e BrlAPI 's server.
- * When the connection is no more needed, brlapi_closeConnection() must be
+ * When the connection is not needed any more, brlapi_closeConnection() must be
  * called to close the connection.
  *
  * @{ */
@@ -184,30 +184,6 @@ void brlapi_closeConnection(void);
  * \sa brlapi_settings_t, brlapi_initializeConnection */
 int brlapi_loadAuthKey(const char *filename, int *authlength, void *auth);
 
-/* brlapi_getControllingTty */
-/** Return the number of the caller's controlling terminal
- *
- * BrlAPI needs to know on which VT the application is connected.
- * This function tries to find it out. It first looks for the CONTROLTTY
- * environment variable, then tries to get it from /proc/self/stat
- *
- * Hence people has to modify their xinitrc & xsession so that CONTROLTTY is
- * set to 7 for instance, if the X server is launched on VT 7. The value can
- * be got by grepping "using VT number [0-9]*" from X's log.
- *
- * I personnaly have
- *
- * CONTROLVT="$(grep "using VT number" "/var/log/XFree86.$(echo "$DISPLAY" | sed -e "s/^.*::*\([0-9]*\).*$/\1/").log" | sed -e "s/^.*using VT number \([0-9]*\).*$/\1/")"
- * export CONTROLVT
- *
- * in my .xsession
- *
- * People also have to set CONTROLTTY when working remotely (as well as
- * BRLAPI_HOSTNAME)
- *
- * \return -1 if unknown or on error */
-int brlapi_getControllingTty(void);
-
 /** @} */
 
 /** \defgroup brlapi_info Getting Terminal information
@@ -245,23 +221,6 @@ int brlapi_getDisplaySize(unsigned int *x, unsigned int *y);
 
 /** @} */
 
-/** \brief Key binding structure
- * \ingroup brlapi_keys
- *
- * This holds settings for the key binding mechanism. Calling
- * brlapi_getTty() with it will load bindings from file
- * \c "$HOME/BRLAPI_HOMEKEYDIR/client-xy\#\#BRLAPI_HOMEKEYEXT"
- * where \c xy is the driver code, as returned by brlapi_getDriverId()
- */
-typedef struct
-{
-  /** application name
-   *
-   * this is used to build the name of the file which will be read for bindings.
-   */
-  const char *client;
-} brlapi_keybinding_t;
-
 /** \defgroup brlapi_tty Tty getting & leaving
  * \brief How to take control of ttys for direct braille display / read
  *
@@ -280,7 +239,7 @@ typedef struct
  * - COMMANDS means that applications will get exactly the same values as
  *   \e brltty. This allows driver-independent clients, which will hopefully
  *   be nice to use with a lot of different terminals
- * \sa brlapi_readKey() brlapi_readCommand() brlapi_readBinding()
+ * \sa brlapi_readKey() brlapi_readCommand()
  * @{
  */
 
@@ -289,23 +248,31 @@ typedef struct
  *
  * \param tty
  * - If tty>0, application takes control of the specified tty;
- * - if tty==0, the library calls brlapi_getControllingTty() itself and
- * takes control of the result.
+ * - if tty==0, the library first looks at a CONTROLVT environment variable to
+ * get the tty number. If none is found, the WINDOWID is tried (for an xterm
+ * case), and if none is found, it tries to get it from /proc/self/stat
  *
  * \param how tells whether the application wants brlapi_readKey() to return
  * keycodes or \e brltty commands: either BRLKEYCODES or BRLCOMMANDS;
  *
- * \param keybinding tells settings for bindings. This is only necessary if
- * brlapi_readBinding() will be called; else \c NULL can be given.
+ * In an X window environment, CONTROLVT might be useful. XFree86 >=4.4 defines
+ * an XFree86_VT root window property which exactly holds the used VT, so that
+ * it should be given to brlapi_getTty. If it isn't available, one may,
+ * right into .xsession and .xinitrc, grep X's log, for instance:
+ * 
+ * CONTROLVT="$(grep "using VT number" "/var/log/XFree86.$(echo "$DISPLAY" | sed -e "s/^.*::*\([0-9]*\).*$/\1/").log" | sed -e "s/^.*using VT number \([0-9]*\).*$/\1/")"
+ *
+ * CONTROLVT should also be propagated when running remote applications via ssh,
+ * for instance, along with BRLAPI_HOSTNAME, and the authentication key.
  *
  * \return 0 on success, -1 on error
  */
-int brlapi_getTty(uint32_t tty, uint32_t how, brlapi_keybinding_t *keybinding);
+int brlapi_getTty(int tty, int how);
 
 /** ask for raw driver keycodes */
-#define BRLKEYCODES ((uint32_t) 1)
+#define BRLKEYCODES 1
 /** ask for \e brltty commands */
-#define BRLCOMMANDS ((uint32_t) 2)
+#define BRLCOMMANDS 2
 
 /* brlapi_leaveTty */
 /** stop controlling the tty
@@ -339,7 +306,7 @@ int brlapi_leaveTty(void);
  *
  * \return 0 on success, -1 on error.
  */
-int brlapi_writeBrl(uint32_t cursor, const char *str);
+int brlapi_writeBrl(int cursor, const char *str);
 
 /* brlapi_writeBrlDots */
 /** Write the given dots array to the display
@@ -349,16 +316,16 @@ int brlapi_writeBrl(uint32_t cursor, const char *str);
  *
  * \return 0 on success, -1 on error.
  */
-int brlapi_writeBrlDots(const char *dots);
+int brlapi_writeBrlDots(const unsigned char *dots);
 
 /** @} */
 
 /** \defgroup brlapi_keys Reading key presses
  * \brief How to read key presses from the braille terminal
  *
- * Once brlapi_getTty() is called, the application can call brlapi_readKey(),
- * brlapi_readCommand() or brlapi_readBinding() to read key presses. Not
- * everyone can be called, it depends on parameters given to brlapi_getTty().
+ * Once brlapi_getTty() is called, the application can call brlapi_readKey() or
+ * brlapi_readCommand() to read key presses. Not everyone can be called, it
+ * depends on parameters given to brlapi_getTty().
  *
  * key presses are buffered, so that calling brlapi_readKey() in non-blocking
  * mode from times to times should suffice.
@@ -436,49 +403,12 @@ int brlapi_readKey(int block, brl_keycode_t *code);
  */
 int brlapi_readCommand(int block, brl_keycode_t *code);
 
-/** \e BrlAPI 's $HOME settings directory
- *
- * this directory will contain per-user configuration
- */
-#define BRLAPI_HOMEKEYDIR ".brlkeys"
-
-/** \e BrlAPI 's key binding suffix
- */
-#define BRLAPI_HOMEKEYEXT ".kbd"
-
-/** Prefix for driver-dependent key names header files
- *
- * Driver-dependent key names header files are stored in
- * BRLAPI_ETCDIR/BRLAPI_ETCKEYFILE-xy.h
- * where \c xy is the driver code, as returned by brlapi_getDriverId() */
-#define BRLAPI_ETCKEYFILE "brlkeys"
-
-/* brlapi_readBinding */
-/** read a key binding from the braille keyboard
- *
- * This function returns a command name, as bound in user's configuration file:
- * if the read is successful, a pointer on a string is
- * returned, this is the string defined in $HOME/.brlkeys/appli-xy.kbd for the
- * key which was read, else \c NULL is returned
- *
- * \param block tells whether the call should block until a key is pressed (1)
- *  or should only probe key presses (0).
- * \param code holds the key string if a key press is indeed read.
- *
- * It can be called only if a brlapi_keybinding_t structure was filled and
- * given to brlapi_getTty()
- *
- * \return -1 on error and *code is then undefined, 0 if block was 0 and no
- *  key was pressed so far, or 1 and *code holds the key string.
- */
-int brlapi_readBinding(int block, const char **code);
-
 /* brlapi_ignoreKeys */
 /** Ignore some key presses from the braille keyboard
  *
  * This function asks the server to give keys between x and y to \e brltty,
  * rather than returning them to the application via
- * brlapi_read(Key|Command|Binding)()
+ * brlapi_read(Key|Command)()
  *
  * \note The given codes are either raw keycodes if BRLKEYCODES was given to
  * brlapi_getTty(), or \e brltty commands if BRLCOMMANDS was given. */
@@ -603,6 +533,14 @@ int *brlapi_errno_location(void);
 extern int brlapi_errno;
 /** cheat about the brlapi_errno C token */
 #define brlapi_errno (*brlapi_errno_location ())
+
+/* brlapi_strerror */
+/** Get plain error message
+ * 
+ * brlapi_strerror reads brlapi_errno, and returns the corresponding plain
+ * error message.
+ */
+extern const char *brlapi_strerror(void);
 
 /** @} */
 

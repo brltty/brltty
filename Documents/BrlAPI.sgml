@@ -477,7 +477,7 @@ first:
 
 <tscreen><code>
  fprintf(stderr,"Taking control of the tty... ");
- if (brlapi_getTty(0,BRLCOMMANDS,NULL)>=0)
+ if (brlapi_getTty(0,BRLCOMMANDS)>=0)
  {
   printf("Ok\n");
 </code></tscreen>
@@ -486,8 +486,6 @@ The first parameter tells the server the number of the tty to take
 control of. Setting 0 lets the library determine it for us.
 
 <p>The server is asked to send <em/brltty/ commands, which are device-independant.
-The last parameter might be used when binding keys. This is discussed in
-online manual pages.
 
 <p>Getting control might fail if, for instance, another application already took
 control of this tty, so testing is needed.
@@ -604,7 +602,7 @@ int main()
 
 /* Get tty control */
  printf("Taking control of the tty... ");
- if (brlapi_getTty(0,BRLCOMMANDS,NULL)>=0)
+ if (brlapi_getTty(0,BRLCOMMANDS)>=0)
  {
   printf("Ok\n");
 
