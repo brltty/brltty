@@ -126,6 +126,11 @@
 # HandyTech Braille Driver Parameters
 #braille-parameters ht:InputMode=no # [no,yes]
 
+# Libbraille Braille Driver Parameters
+#braille-parameters lb:Device=/dev/ttyS0 # 
+#braille-parameters lb:Driver=auto # 
+#braille-parameters lb:Table=us.tbl # 
+
 # Papenmeier Braille Driver Parameters
 #braille-parameters pm:ConfigFile=@DATA_DIRECTORY@/brltty-pm.conf
 #braille-parameters pm:DebugKeys=no # [no,yes]

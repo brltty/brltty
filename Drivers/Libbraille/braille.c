@@ -34,6 +34,13 @@
 
 #include <braille.h>
 
+typedef enum {
+  PARM_DEVICE,
+  PARM_DRIVER,
+  PARM_TABLE
+} DriverParameter;
+#define BRLPARMS "device", "driver", "table"
+
 #define BRL_HAVE_VISUAL_DISPLAY
 #include "Programs/brl_driver.h"
 #include "Programs/tbl.h"
@@ -44,7 +51,7 @@ static TranslationTable inputTable;
 static void
 brl_identify(void)
 {
-  LogPrint(LOG_NOTICE, "BRLTTY wrapper for Libbraille");
+  LogPrint(LOG_NOTICE, "BRLTTY driver for Libbraille");
   LogPrint(LOG_INFO, "   Copyright (C) 2004 by Sébastien Sablé <sable@users.sourceforge.net>");
 }
 
@@ -52,13 +59,44 @@ static int
 brl_open(BrailleDisplay *brl, char **parameters, const char *device)
 {
   {
-    static const DotsTable dots = {0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80};
+    static const DotsTable dots = {
+      BRAILLE(1, 0, 0, 0, 0, 0, 0, 0),
+      BRAILLE(0, 1, 0, 0, 0, 0, 0, 0),
+      BRAILLE(0, 0, 1, 0, 0, 0, 0, 0),
+      BRAILLE(0, 0, 0, 1, 0, 0, 0, 0),
+      BRAILLE(0, 0, 0, 0, 1, 0, 0, 0),
+      BRAILLE(0, 0, 0, 0, 0, 1, 0, 0),
+      BRAILLE(0, 0, 0, 0, 0, 0, 1, 0),
+      BRAILLE(0, 0, 0, 0, 0, 0, 0, 1)
+    };
     makeOutputTable(&dots, &outputTable);
     reverseTranslationTable(&outputTable, &inputTable);
   }
   
+  if(*parameters[PARM_DEVICE])
+    braille_config(BRL_DEVICE, parameters[PARM_DEVICE]);
+
+  if(*parameters[PARM_DRIVER])
+    braille_config(BRL_DRIVER, parameters[PARM_DRIVER]);
+
+  if(*parameters[PARM_TABLE])
+    braille_config(BRL_TABLE, parameters[PARM_TABLE]);
+
   if(braille_init())
     {
+      LogPrint(LOG_INFO, "Libbraille Version: %s", braille_info(BRL_VERSION));
+      LogPrint(LOG_DEBUG, "Libbraille Installation Directory: %s", braille_info(BRL_PATH));
+      LogPrint(LOG_DEBUG, "Libbraille Configuration Directory: %s", braille_info(BRL_PATHCONF));
+      LogPrint(LOG_DEBUG, "Libbraille Tables Directory: %s", braille_info(BRL_PATHTBL));
+      LogPrint(LOG_DEBUG, "Libbraille Drivers Directory: %s", braille_info(BRL_PATHDRV));
+
+      LogPrint(LOG_INFO, "Libbraille Table: %s", braille_info(BRL_TABLE));
+      LogPrint(LOG_INFO, "Libbraille Driver: %s", braille_info(BRL_DRIVER));
+      LogPrint(LOG_INFO, "Libbraille Device: %s", braille_info(BRL_DEVICE));
+
+      LogPrint(LOG_INFO, "Display Type: %s", braille_info(BRL_TERMINAL));
+      LogPrint(LOG_INFO, "Display Size: %d", braille_size());
+
       brl->x = braille_size();  /* initialise size of display */
       brl->y = 1;
       brl->helpPage = 0;
@@ -66,6 +104,10 @@ brl_open(BrailleDisplay *brl, char **parameters, const char *device)
       braille_timeout(100);
 
       return 1;
+    }
+  else
+    {
+      LogPrint(LOG_ERR, "Libbraille initialization erorr: %s", braille_geterror());
     }
   
   return 0;

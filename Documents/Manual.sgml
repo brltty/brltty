@@ -501,6 +501,22 @@ for any additional display-specific instructions.
     See the <ref id="configure-braille-device" name="braille-device"> configuration file directive
     and the <ref id="options-braille-device" name="-d"> command line option
     for run-time selection.
+  <tag><tt/--with-libbraille=/<em/directory/<label id="build-libbraille"></tag>
+    Specify the installed location of the Libbraille package,
+    and build the Libbraille braille display driver
+    (see <ref id="restrictions-libbraille" name="Build Restrictions">).
+    Any of the following words can also be used as the operand of this option:
+    <descrip>
+      <tag/no/
+        Don't build the driver.
+        This is equivalent to specifying <tt/--without-libbraille/.
+      <tag/yes/
+        Build the driver if the package can be found in
+        <tt>/usr</>,
+        <tt>/usr/local</>,
+        or <tt>/opt/libbraille</>.
+        This is equivalent to specifying <tt/--with-libbraille/.
+    </descrip>
   <tag><tt/--with-text-table=/<em/file/<label id="build-text-table"></tag>
     Specify the default text translation table
     (see section <ref id="translation-text" name="Text Translation"> for details).
@@ -1241,6 +1257,9 @@ and all that, you can run BRLTTY without root priviledge.
     cannot be simultaneously linked into the BRLTTY binary
     (see the <ref id="build-speech-driver" name="--with-speech-driver"> build option)
     because their run-time libraries contain conflicting symbols.
+  <tag/Libbraille Braille Display Driver/<label id="restrictions-libbraille">
+    The driver for the Libbraille package
+    is only built if that package has been installed.
   <tag/Mikropuhe Speech Synthesizer Driver/<label id="restrictions-mikropuhe">
     The driver for the Mikropuhe text to speech engine
     is only built if that package has been installed.
@@ -4357,6 +4376,7 @@ BRLTTY supports the following speech synthesizers:
     fv|Festival@
     gs|GenericSay@
     ht|HandyTech@
+    lb|Libbraille@
     lt|LogText@
     mb|MultiBraille@
     md|MDV@
