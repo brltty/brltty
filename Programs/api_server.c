@@ -107,6 +107,11 @@ if (!( condition )) { \
 int brlapi_errno;
 int *brlapi_errno_location(void) { return &brlapi_errno; }
 
+/** ask for \e brltty commands */
+#define BRLCOMMANDS 0
+/** ask for raw driver keycodes */
+#define BRLKEYCODES 1
+
 /****************************************************************************/
 /** GLOBAL TYPES AND VARIABLES                                              */
 /****************************************************************************/
@@ -231,6 +236,24 @@ static WSADATA wsadata;
 
 extern void processParameters(char ***values, const char *const *names, const char *description, char *optionParameters, char *configuredParameters, const char *environmentVariable);
 static int initializeUnmaskedKeys(Connection *c);
+
+/****************************************************************************/
+/** DRIVER CAPABILITIES                                                    **/
+/****************************************************************************/
+
+/* Function : isRawCapable */
+/* Returns !0 if the specified driver is raw capable, 0 if it is not. */
+static int isRawCapable(const BrailleDriver *brl)
+{
+  return ((brl->readPacket!=NULL) && (brl->writePacket!=NULL) && (brl->reset!=NULL));
+}
+
+/* Function : isKeyCapable */
+/* Returns !0 if driver can return specific keycodes, 0 if not. */
+static int isKeyCapable(const BrailleDriver *brl)
+{
+  return ((brl->readKey!=NULL) && (brl->keyToCommand!=NULL));
+}
 
 /****************************************************************************/
 /** PACKET MANAGING                                                        **/
@@ -664,22 +687,32 @@ static int processRequest(Connection *c)
   }
   switch (type) {
     case BRLPACKET_GETTTY: {
-      unsigned int how;
+      uint32_t nbTtys;
+      int how;
+      unsigned int n;
+      unsigned char *p = packet, name[BRLAPI_MAXNAMELENGTH+1];
       Tty *tty,*tty2,*tty3;
       uint32_t *ptty;
       LogPrintRequest(type, c->fd);
       CHECKEXC((!c->raw),BRLERR_ILLEGAL_INSTRUCTION);
-      CHECKEXC((!(size%sizeof(uint32_t))),BRLERR_INVALID_PACKET);
-      CHECKEXC(((size<(MAXTTYRECUR+1)*sizeof(uint32_t))),BRLERR_TOORECURSE);
-      how = ntohl(ints[size/sizeof(uint32_t)-1]);
-      CHECKEXC(((how == BRLKEYCODES) || (how == BRLCOMMANDS)),BRLERR_INVALID_PARAMETER);
-      c->how = how;
-      if (how==BRLKEYCODES) { /* We must check if the braille driver supports that */
-        if ((trueBraille->readKey==NULL) || (trueBraille->keyToCommand==NULL)) {
-          WEXC(c->fd, BRLERR_KEYSNOTSUPP);
-          return 0;
-        }
+      CHECKEXC(size>=sizeof(uint32_t), BRLERR_INVALID_PACKET);
+      p += sizeof(uint32_t); size -= sizeof(uint32_t);
+      nbTtys = ntohl(ints[0]);
+      CHECKEXC(nbTtys<=MAXTTYRECUR, BRLERR_TOORECURSE);
+      CHECKEXC(size>=nbTtys*sizeof(uint32_t), BRLERR_INVALID_PACKET);
+      p += nbTtys*sizeof(uint32_t); size -= nbTtys*sizeof(uint32_t);
+      CHECKEXC(*p<=BRLAPI_MAXNAMELENGTH, BRLERR_INVALID_PARAMETER);
+      n = *p; p++; size--;
+      CHECKEXC(size==n, BRLERR_INVALID_PACKET);
+      memcpy(name, p, n);
+      name[n] = '\0';
+      if (!*name) how = BRLCOMMANDS; else {
+        if ((!strcmp(name, trueBraille->name)) && (isKeyCapable(trueBraille)))
+          how = BRLKEYCODES;
+        else how = -1;
       }
+      CHECKEXC(((how == BRLKEYCODES) || (how == BRLCOMMANDS)),BRLERR_KEYSNOTSUPP);
+      c->how = how;
       freeBrailleWindow(&c->brailleWindow); /* In case of multiple gettty requests */
       if ((initializeUnmaskedKeys(c)==-1) || (allocBrailleWindow(&c->brailleWindow)==-1)) {
         LogPrint(LOG_WARNING,"Failed to allocate some ressources");
@@ -689,7 +722,7 @@ static int processRequest(Connection *c)
       }
       pthread_mutex_lock(&connectionsMutex);
       tty = tty2 = &ttys;
-      for (ptty=ints; ptty<&ints[size/sizeof(uint32_t)-1]; ptty++) {
+      for (ptty=ints+1; ptty<=ints+nbTtys; ptty++) {
         for (tty2=tty->subttys; tty2 && tty2->number!=ntohl(*ptty); tty2=tty2->next);
 	if (!tty2) break;
 	tty = tty2;
@@ -883,16 +916,20 @@ static int processRequest(Connection *c)
       return 0;
     }
     case BRLPACKET_GETRAW: {
-      unsigned int rawMagic;
+      getRawPacket_t *getRawPacket = (getRawPacket_t *) packet;
+      unsigned char name[BRLAPI_MAXNAMELENGTH+1];
       LogPrintRequest(type, c->fd);
-      CHECKEXC(((trueBraille->readPacket!=NULL) && (trueBraille->writePacket!=NULL)), BRLERR_RAWNOTSUPP);
-      if (c->raw) {
-        LogPrint(LOG_DEBUG,"satisfied immediately since one already is in raw mode");
-        writeAck(c->fd);
-        return 0;
-      }
-      rawMagic = ntohl(ints[0]);
-      CHECKEXC(rawMagic==BRLRAW_MAGIC,BRLERR_INVALID_PARAMETER);
+      CHECKEXC(!c->raw, BRLERR_ILLEGAL_INSTRUCTION);
+      CHECKEXC(size>sizeof(uint32_t), BRLERR_INVALID_PACKET);
+      size -= sizeof(uint32_t);
+      getRawPacket->magic = ntohl(getRawPacket->magic);
+      CHECKEXC(getRawPacket->magic==BRLRAW_MAGIC,BRLERR_INVALID_PARAMETER);
+      CHECKEXC(getRawPacket->nameLength<=BRLAPI_MAXNAMELENGTH, BRLERR_INVALID_PARAMETER);
+      size--;
+      CHECKEXC(size==getRawPacket->nameLength, BRLERR_INVALID_PACKET);
+      memcpy(name, &getRawPacket->name, getRawPacket->nameLength);
+      name[getRawPacket->nameLength] = '\0';
+      CHECKEXC(((!strcmp(name, trueBraille->name)) && isRawCapable(trueBraille)), BRLERR_RAWNOTSUPP);
       CHECKERR(rawConnection==NULL,BRLERR_RAWMODEBUSY);
       c->raw = 1;
       rawConnection = c;

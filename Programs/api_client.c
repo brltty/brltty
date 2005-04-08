@@ -450,11 +450,20 @@ void brlapi_closeConnection(void)
 
 /* brlapi_getRaw */
 /* Switch to Raw mode */
-int brlapi_getRaw(void)
+int brlapi_getRaw(const char *driver)
 {
   int res;
-  const uint32_t magic = htonl(BRLRAW_MAGIC);
-  res = brlapi_writePacketWaitForAck(fd, BRLPACKET_GETRAW, &magic, sizeof(magic));
+  unsigned char packet[BRLAPI_MAXPACKETSIZE];
+  getRawPacket_t *rawPacket = (getRawPacket_t *) packet;
+  unsigned int n = strlen(driver);
+  if (n>BRLAPI_MAXNAMELENGTH) {
+    brlapi_errno = BRLERR_INVALID_PARAMETER;
+    return -1;
+  }
+  rawPacket->magic = htonl(BRLRAW_MAGIC);
+  rawPacket->nameLength = n;
+  memcpy(&rawPacket->name, driver, n);
+  res = brlapi_writePacketWaitForAck(fd, BRLPACKET_GETRAW, packet, sizeof(uint32_t)+1+n);
   if (res!=-1) {
     pthread_mutex_lock(&stateMutex);
     state |= STRAW;
@@ -581,17 +590,19 @@ static int brlapi_getControllingTty(void)
 
 /* Function : brlapi_getTty */
 /* Takes control of a tty */
-int brlapi_getTty(int tty, int how)
+int brlapi_getTty(int tty, const char *how)
 {
-  uint32_t uints[BRLAPI_MAXPACKETSIZE/sizeof(uint32_t)],*curuints=uints;
   int res;
+  unsigned char packet[BRLAPI_MAXPACKETSIZE], *p;
+  uint32_t *nbTtys = (uint32_t *) packet, *t = nbTtys+1;
   char *ttytreepath,*ttytreepathstop;
   int ttypath;
+  unsigned int n;
 
   /* Determine which tty to take control of */
   if (tty<=0) truetty = brlapi_getControllingTty(); else truetty = tty;
-  // 0 can be a valid screen WINDOW
-  // 0xffffffff can not be a valid WINDOWID (top 3 bits guaranteed to be zero)
+  /* 0 can be a valid screen WINDOW
+  0xffffffff can not be a valid WINDOWID (top 3 bits guaranteed to be zero) */
   if (truetty<0) { brlapi_errno=BRLERR_UNKNOWNTTY; return -1; }
   
   if (brlapi_getDisplaySize(&brlx, &brly)<0) return -1;
@@ -602,18 +613,29 @@ int brlapi_getTty(int tty, int how)
   pthread_mutex_unlock(&keybuf_mutex);
 
   /* OK, Now we know where we are, so get the effective control of the terminal! */
+  *nbTtys = 0;
   ttytreepath = getenv("WINDOWSPATH");
   if (ttytreepath)
-  for(; *ttytreepath && curuints-uints+2<=BRLAPI_MAXPACKETSIZE/sizeof(uint32_t);
-      *curuints++ = htonl(ttypath), ttytreepath = ttytreepathstop+1) {
+  for(; *ttytreepath && t-(nbTtys+1)<=BRLAPI_MAXPACKETSIZE/sizeof(uint32_t);
+    *t++ = htonl(ttypath), (*nbTtys)++, ttytreepath = ttytreepathstop+1) {
     ttypath=strtol(ttytreepath,&ttytreepathstop,0);
     /* TODO: log it out. check overflow/underflow & co */
     if (ttytreepathstop==ttytreepath) break;
   }
 
-  *curuints++ = htonl(truetty); 
-  *curuints++ = htonl(how);
-  if ((res=brlapi_writePacketWaitForAck(fd,BRLPACKET_GETTTY,&uints[0],(curuints-uints)*sizeof(uint32_t)))<0)
+  *t++ = htonl(truetty); (*nbTtys)++;
+  *nbTtys = htonl(*nbTtys);
+  p = (unsigned char *) t;
+  if (how==NULL) n = 0; else n = strlen(how);
+  if (n>BRLAPI_MAXNAMELENGTH) {
+    brlapi_errno = BRLERR_INVALID_PARAMETER;
+    return -1;
+  }
+  *p = n;
+  p++;
+  memcpy(p, how, n);
+  p += n;
+  if ((res=brlapi_writePacketWaitForAck(fd,BRLPACKET_GETTTY,packet,(p-packet)))<0)
     return res;
 
   pthread_mutex_lock(&stateMutex);
@@ -1005,10 +1027,8 @@ int brlapi_strexception(char *buf, size_t n, int err, brl_type_t type, const voi
   char hexString[3*chars+1];
   int i, nbChars = MAX(chars, size);
   unsigned char *p = hexString;
-  for (i=0; i<nbChars; i++) {
-    sprintf(p, "%2x ", ((char *) packet)[i]);
-    p+=3;
-  }
+  for (i=0; i<nbChars; i++)
+    p += sprintf(p, "%02x ", ((char *) packet)[i]);
   p--; /* Don't keep last space */
   *p = '\0';
   return snprintf(buf, n, "%s on %s request (%s)",

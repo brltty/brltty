@@ -49,7 +49,7 @@ extern "C" {
  *
  * @{ */
 
-#define BRLAPI_PROTOCOL_VERSION ((uint32_t) 6) /** Communication protocol version */
+#define BRLAPI_PROTOCOL_VERSION ((uint32_t) 7) /** Communication protocol version */
 
 #define BRLPACKET_AUTHKEY           'K'    /**< Authentication key          */
 #define BRLPACKET_GETDRIVERID       'd'    /**< Ask which driver is used    */
@@ -94,6 +94,13 @@ typedef struct {
   brl_type_t type;
   unsigned char packet;
 } errorPacket_t;
+
+/** Structure of getRaw packets */
+typedef struct {
+  uint32_t magic;
+  unsigned char nameLength;
+  unsigned char name;
+} getRawPacket_t;
 
 /** Flags for writing */
 #define BRLAPI_WF_DISPLAYNUMBER 0X01    /**< Display number                 */

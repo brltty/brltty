@@ -46,6 +46,9 @@ extern "C" {
  * terminal */
 #define BRLAPI_MAXPACKETSIZE 512
 
+/** Maximum name length for names embeded in BrlAPI packets */
+#define BRLAPI_MAXNAMELENGTH 31
+
 /** \defgroup brlapi_connection Connecting to BrlAPI
  *
  * Before calling any other function of the library, calling
@@ -281,8 +284,10 @@ int brlapi_getDisplaySize(unsigned int *x, unsigned int *y);
  * /proc/self/stat (on linux). If none is found, it looks at a CONTROLVT
  * environment variable, then WINDOWID is tried (for an xterm case).
  *
- * \param how tells whether the application wants brlapi_readKey() to return
- * keycodes or \e brltty commands: either BRLKEYCODES or BRLCOMMANDS;
+ * \param how tells how the application wants brlapi_readKey() to return
+ * key presses. NULL or "" means BRLTTY commands are required,
+ * whereas a driver name means that raw key codes returned by tis
+ * driver are expected.
  *
  * In an X window environment, CONTROLVT might be useful. XFree86 >=4.4 defines
  * an XFree86_VT root window property which exactly holds the used VT, so that
@@ -298,12 +303,7 @@ int brlapi_getDisplaySize(unsigned int *x, unsigned int *y);
  *
  * \sa brlapi_leaveTty() brlapi_readKey()
  */
-int brlapi_getTty(int tty, int how);
-
-/** ask for \e brltty commands */
-#define BRLCOMMANDS 0
-/** ask for raw driver keycodes */
-#define BRLKEYCODES 1
+int brlapi_getTty(int tty, const char *);
 
 /* brlapi_leaveTty */
 /** stop controlling the tty
@@ -421,7 +421,7 @@ typedef uint32_t brl_keycode_t;
  * As defined in \c <inttypes.h> */
 #define BRL_KEYCODE_MAX ((brl_keycode_t) (UINT32_MAX))
 
-/** Maximum keyset size, i.e. maximum number of keys */
+/** Maximum keyset size, i.e. maximum number of keys
  * allowed in a key set
  */
 #define BRLAPI_MAXKEYSETSIZE (BRLAPI_MAXPACKETSIZE / sizeof(brl_keycode_t))
@@ -533,8 +533,10 @@ int brlapi_unignoreKeySet(const brl_keycode_t *s, unsigned int n);
 
 /* brlapi_getRaw */
 /** Switch to Raw mode
+ * \param Specifies the name of the driver for which the raw
+ * communication must be established
  * \return 0 on success, -1 on error */
-int brlapi_getRaw(void);
+int brlapi_getRaw(const char *);
 
 /* brlapi_leaveRaw */
 /** Leave Raw mode

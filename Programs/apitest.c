@@ -103,7 +103,7 @@ void enterLearnMode(void)
   char buf[0X100];
 
   fprintf(stderr,"Entering learn mode\n");
-  if (brlapi_getTty(0, BRLCOMMANDS)<0) {
+  if (brlapi_getTty(0, NULL)<0) {
     brlapi_perror("getTty");
     exit(1);
   }
