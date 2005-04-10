@@ -33,11 +33,16 @@
 #include "spk.h"
 #include "misc.h"
 
+char *opt_pcmDevice;
 static char *opt_textString;
 static char *opt_libraryDirectory;
 static char *opt_dataDirectory;
 
 BEGIN_OPTION_TABLE
+  {"pcm-device", "device", 'p', 0, OPT_Config | OPT_Environ,
+   &opt_pcmDevice, NULL,
+   "Device specifier for soundcard digital audio."},
+
   {"text-string", "string", 't', 0, 0,
    &opt_textString, NULL,
    "Text to be spoken."},
@@ -62,6 +67,7 @@ main (int argc, char *argv[]) {
   int status;
   const char *driver = NULL;
   void *object;
+setLogLevel(LOG_DEBUG);
 
   processOptions(optionTable, optionCount,
                  "spktest", &argc, &argv,
