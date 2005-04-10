@@ -514,6 +514,9 @@ for any additional display-specific instructions.
         Build the driver if the package can be found in
         <tt>/usr</>,
         <tt>/usr/local</>,
+        <tt>/usr/local/Libbraille</>,
+        <tt>/usr/local/libbraille</>,
+        <tt>/opt/Libbraille</>,
         or <tt>/opt/libbraille</>.
         This is equivalent to specifying <tt/--with-libbraille/.
     </descrip>
@@ -607,6 +610,9 @@ for any additional display-specific instructions.
         Build the driver if the package can be found in
         <tt>/usr</>,
         <tt>/usr/local</>,
+        <tt>/usr/local/FestivalLite</>,
+        <tt>/usr/local/flite</>,
+        <tt>/opt/FestivalLite</>,
         or <tt>/opt/flite</>.
         This is equivalent to specifying <tt/--with-flite/.
     </descrip>
@@ -632,6 +638,9 @@ for any additional display-specific instructions.
         Build the driver if the package can be found in
         <tt>/usr</>,
         <tt>/usr/local</>,
+        <tt>/usr/local/Mikropuhe</>,
+        <tt>/usr/local/mikropuhe</>,
+        <tt>/opt/Mikropuhe</>,
         or <tt>/opt/mikropuhe</>.
         This is equivalent to specifying <tt/--with-mikropuhe/.
     </descrip>
@@ -647,8 +656,10 @@ for any additional display-specific instructions.
         Build the driver if the package can be found in
         <tt>/usr</>,
         <tt>/usr/local</>,
-        <tt>/opt/swift</>,
-        or <tt>/opt/Swift</>.
+        <tt>/usr/local/Swift</>,
+        <tt>/usr/local/swift</>,
+        <tt>/opt/Swift</>,
+        or <tt>/opt/swift</>.
         This is equivalent to specifying <tt/--with-swift/.
     </descrip>
   <tag><tt/--with-theta=/<em/directory/<label id="build-theta"></tag>
@@ -664,6 +675,9 @@ for any additional display-specific instructions.
         Build the driver if the package can be found in
         <tt>/usr</>,
         <tt>/usr/local</>,
+        <tt>/usr/local/Theta</>,
+        <tt>/usr/local/theta</>,
+        <tt>/opt/Theta</>,
         or <tt>/opt/theta</>.
         This is equivalent to specifying <tt/--with-theta/.
     </descrip>
@@ -680,6 +694,9 @@ for any additional display-specific instructions.
         Build the driver if the package can be found in
         <tt>/usr</>,
         <tt>/usr/local</>,
+        <tt>/usr/local/ViaVoice</>,
+        <tt>/usr/local/viavoice</>,
+        <tt>/opt/ViaVoice</>,
         or <tt>/opt/viavoice</>.
         This is equivalent to specifying <tt/--with-viavoice/.
     </descrip>

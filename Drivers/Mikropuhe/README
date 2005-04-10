@@ -4,8 +4,9 @@ speech engine [http://www.mikropuhe.com] from TimeHouse
 by Dave Mielke <dave@mielke.cc>.
 
 BRLTTY's configure script automatically includes this driver if Mikropuhe has
-been installed. The default is to check the directories /usr, /usr/local, and
-/opt/theta. The actual location can be explicitly specified via --with-mplinux.
+been installed. The default is to check the directories /usr, /usr/local,
+/usr/local/Mikropuhe, /usr/local/mikropuhe, /opt/Mikropuhe, and /opt/mikropuhe. 
+The actual location can be explicitly specified via --with-mikropuhe.
 
 Check the date of the file "libmplinux.so" within the Mikropuhe package to
 ensure that you have a recent enough version. It must not be dated earlier than

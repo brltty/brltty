@@ -4,8 +4,8 @@ being maintained, by Dave Mielke <dave@mielke.cc>.
 
 BRLTTY's configure script automatically includes this driver if Swift has been
 installed. The default is to check the directories /usr, /usr/local,
-/opt/swift, and /opt/Swift. The actual location can be explicitly specified via
---with-swift.
+/usr/local/Swift, /usr/local/swift, /opt/Swift, and /opt/swift. The actual
+location can be explicitly specified via --with-swift.
 
 This driver recognizes the following parameters:
 

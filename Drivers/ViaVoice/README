@@ -5,8 +5,9 @@ implemented, and is being maintained, by Dave Mielke <dave@mielke.cc>.
 
 BRLTTY's configure script automatically includes this driver if ViaVoice's
 software development kit has been installed. The default is to check the
-directories /usr, /usr/local, and /opt/viavoice. The actual location can be
-explicitly specified via --with-viavoice.
+directories /usr, /usr/local, /usr/local/ViaVoice, /usr/local/viavoice,
+/opt/ViaVoice, and /opt/viavoice. The actual location can be explicitly
+specified via --with-viavoice.
 
 This driver can be either dynamically loaded (at run time) or built directly
 into a dynamically linked BRLTTY binary (via --with-speech-driver), but it

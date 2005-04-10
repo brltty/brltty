@@ -3,8 +3,9 @@ engine from Cepstral [http://www.cepstral.com/]. It was implemented, and is
 being maintained, by Dave Mielke <dave@mielke.cc>.
 
 BRLTTY's configure script automatically includes this driver if Theta has been
-installed. The default is to check the directories /usr, /usr/local, and
-/opt/theta. The actual location can be explicitly specified via --with-theta.
+installed. The default is to check the directories /usr, /usr/local,
+/usr/local/Theta, /usr/local/theta, /opt/Theta, and /opt/theta. The actual
+location can be explicitly specified via --with-theta.
 
 This driver and that for the FestivalLite text to speech engine cannot be
 linked into BRLTTY's binary at the same time (via --enable-speech-driver)
