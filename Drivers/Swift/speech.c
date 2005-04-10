@@ -89,46 +89,51 @@ spk_identify (void) {
 static int
 spk_open (char **parameters) {
   swift_result_t result;
-  swift_params *engineParameters;
 
-  if ((engineParameters = swift_params_new(NULL))) {
-    swift_params_set_string(engineParameters,
-                            "config/voice-path",
-                            SWIFT_ROOT "/voices");
+  if (setenv("SWIFT_HOME", SWIFT_ROOT, 1) != -1) {
+    swift_params *engineParameters;
 
-    if ((swiftEngine = swift_engine_open(engineParameters))) {
-      if ((swiftPort = swift_port_open(swiftEngine, NULL))) {
-        {
-          const char *name = parameters[PARM_NAME];
-          if (name && *name) {
-            swift_voice *voice;
-            if (*name == '/') {
-              voice = swift_port_set_voice_from_dir(swiftPort, name);
-            } else {
-              voice = swift_port_set_voice_by_name(swiftPort, name);
-            }
+    if ((engineParameters = swift_params_new(NULL))) {
+      swift_params_set_string(engineParameters,
+                              "config/voice-path",
+                              SWIFT_ROOT "/voices");
 
-            if (!voice) {
-               LogPrint(LOG_WARNING, "Swift voice set error: %s", name);
+      if ((swiftEngine = swift_engine_open(engineParameters))) {
+        if ((swiftPort = swift_port_open(swiftEngine, NULL))) {
+          {
+            const char *name = parameters[PARM_NAME];
+            if (name && *name) {
+              swift_voice *voice;
+              if (*name == '/') {
+                voice = swift_port_set_voice_from_dir(swiftPort, name);
+              } else {
+                voice = swift_port_set_voice_by_name(swiftPort, name);
+              }
+
+              if (!voice) {
+                 LogPrint(LOG_WARNING, "Swift voice set error: %s", name);
+              }
             }
           }
+
+          setStringParameter("tts/content-type", "text/plain");
+          return 1;
+        } else {
+          LogPrint(LOG_ERR, "Swift port open error.");
         }
 
-        setStringParameter("tts/content-type", "text/plain");
-        return 1;
+        if ((result = swift_engine_close(swiftEngine)) != SWIFT_SUCCESS) {
+          speechError(result, "engine close");
+        }
+        swiftEngine = NULL;
       } else {
-        LogPrint(LOG_ERR, "Swift port open error.");
+        LogPrint(LOG_ERR, "Swift engine open error.");
       }
-
-      if ((result = swift_engine_close(swiftEngine)) != SWIFT_SUCCESS) {
-        speechError(result, "engine close");
-      }
-      swiftEngine = NULL;
     } else {
-      LogPrint(LOG_ERR, "Swift engine open error.");
+      LogPrint(LOG_ERR, "Swift engine parameters allocation error.");
     }
   } else {
-    LogPrint(LOG_ERR, "Swift engine parameters allocation error.");
+    LogPrint(LOG_ERR, "Unable to set Swift's home directory.");
   }
 
   return 0;
