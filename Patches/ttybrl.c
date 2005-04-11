@@ -32,52 +32,55 @@
 #include <string.h>
 
 #include <glib.h>
+#include <gdk/gdkwindow.h>
+#include <gdk/gdkproperty.h>
+#include <gdk/gdkx.h>
 
 #include <brltty/brldefs.h>
 #include <brltty/api.h>
 
+#include <X11/Xatom.h>
+
 #include "braille.h"
+#include "srintl.h"
 
 typedef struct
 {
-  int 		x;
-  int 		y;
-
-  unsigned char key_codes[512];
-  unsigned char sensor_codes[32];
-} BRLTTY_DEVICE_DATA;
+    gint   x;
+    gint   y;
+    guchar key_codes[512];
+    guchar sensor_codes[32];
+} BRLTTYDeviceData;
 
 /* Globals */
 static GIOChannel 		*gioch = NULL;
-static BRL_DEV_CALLBACK		ClientCallback = NULL;
-static BRLTTY_DEVICE_DATA 	dd;
+static BRLDevCallback		client_callback = NULL;
+static BRLTTYDeviceData 	dd;
 
 /* Functions */
 
-/* function brltty_brl_send_dots
- *
- * Send array of dots of length count to brlapi.  Argument blocking is
- * ignored.
- */
-int
-brltty_brl_send_dots (unsigned char 	*dots, 
-		      short 		count, 
-		      short 		blocking)
+
+/* Send array of dots of length count to brlapi.  Argument blocking is ignored. */
+gint
+brltty_brl_send_dots (guchar 	*dots, 
+		      gshort 	count, 
+		      gshort 	blocking)
 {
-    int 		i, 
+    gint 		i, 
 			len = dd.x * dd.y;
-    unsigned char 	sendbuff[256];
+    guchar 	        sendbuff[256];
+
+    brlapi_writeStruct ws = BRLAPI_WRITESTRUCT_INITIALIZER;
   
-			
     if (count > len) 
 	return 0;
 
-  /* Gnopernicus's idea of how to arrange braille dots
-   * is slightly different from BRLTTY's representation.
-   */
+    /* Gnopernicus's idea of how to arrange braille dots
+    * is slightly different from BRLTTY's representation.
+    */
     for (i = 0; i < count; i++) 
     {
-	unsigned char val = 0;
+	guchar val = 0;
 	
 	if (dots[i] & 0x01 ) 
 	    val = val|BRL_DOT1;
@@ -103,10 +106,14 @@ brltty_brl_send_dots (unsigned char 	*dots,
 	memset (&sendbuff[count], 0, len-count);
     }
 
-    if (brlapi_writeDots(sendbuff) == 0) 
+    ws.attrOr = sendbuff;
+    if (brlapi_write(&ws) == 0) 
 	return 1;
     else 
+    {
+        brlapi_perror("brlapi_write");
 	return 0;
+    }
 }
 
 void
@@ -117,83 +124,159 @@ brltty_brl_close_device ()
 }
 
 static void
-sendKey (BRAILLE_EVENT_CODE bec, BRAILLE_EVENT_DATA *bed, const char *key)
+send_key (gint layer,
+          gint key)
 {
-    sprintf(&dd.key_codes[0], key);
-    bec = bec_key_codes;
-    bed->KeyCodes = dd.key_codes;						
-    ClientCallback(bec, bed);
+    BRLEventData bed;
+    sprintf(&dd.key_codes[0], "L%02dK%02d", layer, key);
+    bed.key_codes = dd.key_codes;						
+    ClientCallback(BRL_EVCODE_KEY_CODES, bed);
 }
 
 static gboolean
-brltty_brl_glib_cb (GIOChannel *source, GIOCondition condition, gpointer data)
+brltty_brl_glib_cb (GIOChannel   *source, 
+		    GIOCondition condition, 
+		    gpointer     data)
 {
     brl_keycode_t	keypress;
 
-    BRAILLE_EVENT_CODE 	bec;
-    BRAILLE_EVENT_DATA 	bed;
+    BRLEventCode 	bec;
+    BRLEventData 	bed;
 
     while (brlapi_readKey (0, &keypress) == 1) 
     {
-	/* TODO: Find a better way to map brltty commands to gnopernicus keys. */
-	switch (keypress & ~BRL_FLG_TOGGLE_MASK) 
+	/* This is an attempt to match as many BRLTTY commands
+	 * to Gnopernicus equivalents as possible.
+	 * Not all drivers will send all commands.
+	 * If the user undefines the Gnopernicus key, the BRLTTY
+	 * command will stop working.
+	 */
+	switch (keypress & BRL_MSK_CMD) 
 	{
-	    case BRL_CMD_LNUP:
-    		sendKey(bec, &bed, "DK00");
-    		break;
-      
+	    /*goto title*/
+	    case BRL_CMD_TOP:
+		send_key(0, 7);
+		break;
+
+	    /*goto statusbar*/
+	    case BRL_CMD_BOT:
+		send_key(0, 3);
+		break;
+
+	    /*goto menu*/
+	    case BRL_CMD_TOP_LEFT:
+		send_key(0, 9);
+		break;
+
+	    /*goto toolbar*/
+	    case BRL_CMD_BOT_LEFT:
+		send_key(0, 1);
+		break;
+
+	    /*goto focus*/
 	    case BRL_CMD_HOME:
-    		sendKey(bec, &bed, "DK01");
-    		break;
+	    case BRL_CMD_RETURN:
+		send_key(0, 12);
+		break;
 
+	    /*goto parent*/
+	    case BRL_CMD_PRPROMPT:
+		send_key(0, 8);
+		break;
+
+	    /*goto child*/
+	    case BRL_CMD_NXPROMPT:
+		send_key(0, 2);
+		break;
+
+	    /*goto first*/
+	    case BRL_CMD_PRPGRPH:
+		send_key(0, 15);
+		break;
+
+	    /*goto last*/
+	    case BRL_CMD_NXPGRPH:
+		send_key(0, 14);
+		break;
+
+	    /*goto previous*/
+	    case BRL_CMD_LNUP:
+	    case BRL_CMD_PRDIFLN:
+		send_key(0, 4);
+		break;
+	    
+	    /*goto next*/
 	    case BRL_CMD_LNDN:
-    		sendKey (bec, &bed, "DK02");
-    		break;
-      
+	    case BRL_CMD_NXDIFLN:
+		send_key(0, 6);
+		break;
+
+	    /*toggle FocusTracking/FlatReview mode*/
+	    case BRL_CMD_FREEZE:
+		send_key(0, 10);
+		break;
+
+	    /*display left*/
 	    case BRL_CMD_FWINLT:
-    		sendKey(bec, &bed, "DK03");
-    		break;
-      
+	    case BRL_CMD_FWINLTSKIP:
+    		send_key(9, 4);
+		break;
+
+	    /*display right*/
 	    case BRL_CMD_FWINRT:
-    		sendKey(bec, &bed, "DK05");
-    		break;
-      
+	    case BRL_CMD_FWINRTSKIP:
+		send_key(9, 6);
+		break;
+
+	    /*char left*/
 	    case BRL_CMD_CHRLT:
-    		sendKey(bec, &bed, "L09K01");
-    		break;
-      
+		send_key(9, 1);
+		break;
+
+	    /*char right*/
 	    case BRL_CMD_CHRRT:
-    		sendKey(bec, &bed, "L09K03");
-    		break;
-      
-	    case BRL_CMD_HWINLT:
-    		sendKey(bec, &bed, "L09K04");
-    		break;
-      
-	    case BRL_CMD_HWINRT:
-    		sendKey(bec, &bed, "L09K06");
-    		break;
-      
-    	    /* TBD: Default action (DK01DK02) and repeat last */
-	    default: 
+		send_key(9, 3);
+		break;
+
+	    /*decrease speech volume*/
+	    case BRL_CMD_SAY_SOFTER:
+		send_key(8, 1);
+		break;
+
+	    /*increase speech volume*/
+	    case BRL_CMD_SAY_LOUDER:
+		send_key(8, 3);
+		break;
+		    
+	    /*decrease speech rate*/
+	    case BRL_CMD_SAY_SLOWER:
+		send_key(8, 4);
+		break;
+
+	    /*increase speech rate*/
+	    case BRL_CMD_SAY_FASTER:
+		send_key(8, 6);
+		break;
+		    
+	    default:
 	    {
-    		int key = keypress & BRL_MSK_BLK;
-    		int arg = keypress & BRL_MSK_ARG;
+		gint key = keypress & BRL_MSK_BLK;
+		gint arg = keypress & BRL_MSK_ARG;
 
-    		switch (key) 
-    		{
-    		    case BRL_BLK_ROUTE:
+		switch (key) 
+		{
+		    case BRL_BLK_ROUTE:
 			sprintf(&dd.sensor_codes[0], "HMS%02d", arg);
-			bec = bec_sensor;
-			bed.Sensor.SensorCodes = dd.sensor_codes;
-			ClientCallback (bec, &bed);
+			bec = BRL_EVCODE_SENSOR;
+			bed.sensor.sensor_codes = dd.sensor_codes;
+			client_callback (bec, &bed);
 			break;
-
 		    default:
-			fprintf(stderr,"BRLTTY command code not bound to Gnopernicus key code: 0X%04X\n", keypress);
+			//to be translated
+			fprintf(stderr, "BRLTTY command code not bound to Gnopernicus key code: 0X%04X\n", keypress);
 			break;
-    		}
-    		break;
+		}
+		break;
 	    }
 	}
     }
@@ -201,89 +284,159 @@ brltty_brl_glib_cb (GIOChannel *source, GIOCondition condition, gpointer data)
 }
 
 static void
-ignoreBlock (int block)
+ignore_block (gint block)
 {
-    brlapi_ignoreKeyRange(block, block|BRL_MSK_ARG);
+    if (brlapi_ignoreKeyRange(block, block|BRL_MSK_ARG) == -1) {
+	brlapi_perror("brlapi_ignoreKeyRange");
+	fprintf(stderr,"(block 0x%x)", block);
+    }
 }
 
 static void
-ignoreInput (int block)
+ignore_input (gint block)
 {
-    static const int flags[] = {
-                         0 |                  0 |                 0 |                    0,
-                         0 |                  0 |                 0 | BRL_FLG_CHAR_CONTROL,
-                         0 |                  0 | BRL_FLG_CHAR_META |                    0,
-                         0 |                  0 | BRL_FLG_CHAR_META | BRL_FLG_CHAR_CONTROL,
-                         0 | BRL_FLG_CHAR_UPPER |                 0 |                    0,
-                         0 | BRL_FLG_CHAR_UPPER |                 0 | BRL_FLG_CHAR_CONTROL,
-                         0 | BRL_FLG_CHAR_UPPER | BRL_FLG_CHAR_META |                    0,
-                         0 | BRL_FLG_CHAR_UPPER | BRL_FLG_CHAR_META | BRL_FLG_CHAR_CONTROL,
-        BRL_FLG_CHAR_SHIFT |                  0 |                 0 |                    0,
-        BRL_FLG_CHAR_SHIFT |                  0 |                 0 | BRL_FLG_CHAR_CONTROL,
-        BRL_FLG_CHAR_SHIFT |                  0 | BRL_FLG_CHAR_META |                    0,
-        BRL_FLG_CHAR_SHIFT |                  0 | BRL_FLG_CHAR_META | BRL_FLG_CHAR_CONTROL,
-        BRL_FLG_CHAR_SHIFT | BRL_FLG_CHAR_UPPER |                 0 |                    0,
-        BRL_FLG_CHAR_SHIFT | BRL_FLG_CHAR_UPPER |                 0 | BRL_FLG_CHAR_CONTROL,
-        BRL_FLG_CHAR_SHIFT | BRL_FLG_CHAR_UPPER | BRL_FLG_CHAR_META |                    0,
+    static const gint flags[] = {
+    		         0 |		      0 |          	  0 |           	 0,
+	                 0 |         	      0 |        	  0 | BRL_FLG_CHAR_CONTROL,
+    		         0 |         	      0 | BRL_FLG_CHAR_META |           	 0,
+	                 0 |         	      0 | BRL_FLG_CHAR_META | BRL_FLG_CHAR_CONTROL,
+            		 0 | BRL_FLG_CHAR_UPPER |        	  0 |           	 0,
+    		         0 | BRL_FLG_CHAR_UPPER |        	  0 | BRL_FLG_CHAR_CONTROL,
+	                 0 | BRL_FLG_CHAR_UPPER | BRL_FLG_CHAR_META |            	 0,
+            		 0 | BRL_FLG_CHAR_UPPER | BRL_FLG_CHAR_META | BRL_FLG_CHAR_CONTROL,
+        BRL_FLG_CHAR_SHIFT |         	      0 |        	  0 |           	 0,
+        BRL_FLG_CHAR_SHIFT |         	      0 |        	  0 | BRL_FLG_CHAR_CONTROL,
+        BRL_FLG_CHAR_SHIFT |         	      0 | BRL_FLG_CHAR_META |           	 0,
+        BRL_FLG_CHAR_SHIFT |   		      0 | BRL_FLG_CHAR_META | BRL_FLG_CHAR_CONTROL,
+        BRL_FLG_CHAR_SHIFT | BRL_FLG_CHAR_UPPER |        	  0 |           	 0,
+        BRL_FLG_CHAR_SHIFT | BRL_FLG_CHAR_UPPER |        	  0 | BRL_FLG_CHAR_CONTROL,
+        BRL_FLG_CHAR_SHIFT | BRL_FLG_CHAR_UPPER | BRL_FLG_CHAR_META |           	 0,
         BRL_FLG_CHAR_SHIFT | BRL_FLG_CHAR_UPPER | BRL_FLG_CHAR_META | BRL_FLG_CHAR_CONTROL
     };
-    const int *flag = flags + (sizeof(flags) / sizeof(*flag));
+    const gint *flag = flags + (sizeof(flags) / sizeof(*flag));
     do {
-        ignoreBlock(block | *--flag);
+        ignore_block(block | *--flag);
     } while (*flag);
 }
 
-int
-brltty_brl_open_device (char* 			DeviceName, 
-			short 			Port,
-			BRL_DEV_CALLBACK 	DeviceCallback, 
-			BRL_DEVICE 		*Device)
+gint
+brltty_brl_open_device (gchar* 			device_name, 
+			gshort 			port,
+			BRLDevCallback 	        device_callback, 
+			BRLDevice 		*device)
 {
-    int fd;
+    gint fd;
+    brlapi_settings_t settings;
+    GdkWindow *root;
+    GdkAtom VTAtom, type;
+    guint VT = 0;
+    gint format, length;
+    unsigned char *buf;
 
-    if ( (fd = brlapi_initializeConnection (NULL, NULL) ) < 0) 
+
+    if ((fd = brlapi_initializeConnection (NULL, &settings)) < 0) 
     {
-	fprintf(stderr, "Error opening brlapi connection");
+	brlapi_perror("Error opening brlapi connection"); //to be translated
+	fprintf(stderr,"Please check that\n\
+ - %s exists and contains some data\n\
+ - you have read permission on %s\n\
+ - BRLTTY is running\n", settings.authKey, settings.authKey); //to be translated
 	return 0;
     }
 
     if (brlapi_getDisplaySize (&dd.x, &dd.y) != 0) 
     {
-	fprintf(stderr, "Unable to get display size");
+	brlapi_perror("Unable to get display size"); //to be translated
 	return 0;
     }
 
-    fprintf(stderr, "BrlAPI detected a %dx%d display\n", dd.x, dd.y);
+    fprintf(stderr, "BrlAPI detected a %dx%d display\n", dd.x, dd.y); //to be translated
 
-    Device->CellCount = dd.x * dd.y;
-    Device->DisplayCount = 1; /* No status cells implemented yet */
+    device->cell_count = dd.x * dd.y;
+    device->display_count = 1; /* No status cells implemented yet */
 
-    Device->Displays[0].StartCell 	= 0;
-    Device->Displays[0].Width 		= dd.x;
-    Device->Displays[0].Type 		= bdt_main;
+    device->displays[0].start_cell 	= 0;
+    device->displays[0].width 		= dd.x;
+    device->displays[0].type 		= BRL_DISP_MAIN;
 
     /* fill device functions for the upper level */
-    Device->send_dots = brltty_brl_send_dots;
-    Device->close_device = brltty_brl_close_device;
+    device->send_dots = brltty_brl_send_dots;
+    device->close_device = brltty_brl_close_device;
 	
     /* Setup glib polling for the socket fd of brlapi */
     gioch = g_io_channel_unix_new (fd);
     g_io_add_watch (gioch, G_IO_IN | G_IO_PRI, brltty_brl_glib_cb, NULL);
 
-    ClientCallback = DeviceCallback;
+    client_callback = device_callback;
 
-    /* TODO: Write a function which reliably determines the TTY
-     where the X server is running.  
-     Currently if the tty is set to 0 the function brlapi_getTty will look at the CONTROLVT environment
-     variable
+    /* Determine the TTY where the X server is running.  
+
+     This only works with XFree86 starting from 4.3.99.903 and X.Org
+     starting from 6.8.0
+
+     If you have an older version, the tty will be kept to 0 so that the
+     brlapi_getTty() function will look at the CONTROLVT environment variable.
+     So people having old versions should have something like this in their
+     .xsession, before launching gnopernicus:
+
      CONTROLVT="$(grep "using VT number" "/var/log/XFree86.$(echo "$DISPLAY" | sed -e "s/^.*::*\([0-9]*\).*$/\1/").log" | sed -e "s/^.*using VT number \([0-9]*\).*$/\1/")"
-    */
-    brlapi_getTty (0, BRLCOMMANDS);
 
-    ignoreInput(BRL_BLK_PASSCHAR);
-    ignoreInput(BRL_BLK_PASSDOTS);
-    ignoreBlock(BRL_BLK_PASSKEY);
+     for XFree86
+
+     CONTROLVT="$(grep "using VT number" "/var/log/Xorg.$(echo "$DISPLAY" | sed -e "s/^.*::*\([0-9]*\).*$/\1/").log" | sed -e "s/^.*using VT number \([0-9]*\).*$/\1/")"
+
+     for X.Org
+
+    */
+
+    root = gdk_get_default_root_window();
+    if (!root)
+	goto gettty;
+
+    VTAtom = gdk_atom_intern("XFree86_VT", TRUE);
+    if (VTAtom == None)
+	goto gettty;
+
+    if (!(gdk_property_get(root, VTAtom, AnyPropertyType, 0, 1, FALSE,
+	    &type, &format, &length, &buf)))
+    {
+	fprintf(stderr, "no XFree86_VT property\n"); //to be translated
+	goto gettty;
+    }
+
+    if (length<1)
+    {
+	fprintf(stderr, "no item in XFree86_VT property\n"); //to be translated
+    	goto gettty;
+    }
+
+    switch ((guint)type)
+    {
+	case XA_CARDINAL:
+	case XA_INTEGER:
+	case XA_WINDOW:
+	    switch (format)
+	    {
+		case 8:  VT = (*(guint8  *)buf); break;
+		case 16: VT = (*(guint16 *)buf); break;
+		case 32: VT = (*(guint32 *)buf); break;
+		default: fprintf(stderr, "Bad format for VT number\n"); break; //to be translated
+	    }
+	    break;
+	default:
+	    fprintf(stderr, "Bad type for VT number\n"); //to be translated
+    }
+
+gettty:
+    if (brlapi_getTty (VT, BRLCOMMANDS) == -1)
+    {
+	brlapi_perror("Unable to get Tty"); //to be translated
+	return 0;
+    }
+
+    ignore_input(BRL_BLK_PASSCHAR);
+    ignore_input(BRL_BLK_PASSDOTS);
+    ignore_block(BRL_BLK_PASSKEY);
 
     return 1;
 }
-
