@@ -94,10 +94,6 @@ spk_open (char **parameters) {
     swift_params *engineParameters;
 
     if ((engineParameters = swift_params_new(NULL))) {
-      swift_params_set_string(engineParameters,
-                              "config/voice-path",
-                              SWIFT_ROOT "/voices");
-
       if ((swiftEngine = swift_engine_open(engineParameters))) {
         if ((swiftPort = swift_port_open(swiftEngine, NULL))) {
           {
