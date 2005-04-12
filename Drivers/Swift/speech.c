@@ -169,7 +169,7 @@ spk_mute (void) {
   swift_result_t result;
 
   if ((result = swift_port_stop(swiftPort, SWIFT_ASYNC_CURRENT, SWIFT_EVENT_NOW)) != SWIFT_SUCCESS) {
-    speechError(result, "port stop");
+  //speechError(result, "port stop");
   }
 }
 
