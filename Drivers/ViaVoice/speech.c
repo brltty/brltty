@@ -54,6 +54,7 @@ typedef enum {
 #include "speech.h"
 
 static ECIHand eci = NULL_ECI_HAND;
+static int units;
 
 static char *sayBuffer = NULL;
 static int saySize = 0;
@@ -244,6 +245,7 @@ spk_open (char **parameters) {
    if (!eci) {
       if (setIni(parameters[PARM_IniFile])) {
 	 if ((eci = eciNew()) != NULL_ECI_HAND) {
+            units = 0;
 	    if (eciSetOutputDevice(eci, 0)) {
 	       const char *sampleRates[] = {"8000", "11025", "22050", NULL};
 	       const char *abbreviationModes[] = {"on", "off", NULL};
@@ -390,15 +392,31 @@ spk_isSpeaking (void) {
    return 0;
 }
 
-static void
-spk_rate (int setting) {
-   eciSetVoiceParam(eci, 0, eciSpeed,
-                    (setting * 40 / SPK_DEFAULT_RATE) + 10);
+static int
+setUnits (int setting) {
+   if (setting != units) {
+      if (!setVoiceParameter(eci, "units", eciRealWorldUnits, setting)) return 0;
+      units = setting;
+   }
+   return 1;
+}
+
+static int
+setInternalUnits (void) {
+   return setUnits(0);
+}
+
+static int
+setExternalUnits (void) {
+   return setUnits(1);
 }
 
 static void
-spk_volume (int setting) {
-   float fraction = (float)setting / (float)SPK_MAXIMUM_VOLUME;
-   int volume = (int)(fraction * (2.0 - fraction) * 100.0);
-   eciSetVoiceParam(eci, 0, eciVolume, volume);
+spk_rate (float setting) {
+   if (setExternalUnits()) setVoiceParameter (eci, "rate", eciSpeed, (int)(setting * 210.0));
+}
+
+static void
+spk_volume (float setting) {
+   if (setInternalUnits()) setVoiceParameter(eci, "volume", eciVolume, (int)(setting * 100.0));
 }

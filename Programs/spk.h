@@ -46,10 +46,10 @@ typedef struct {
   int (*isSpeaking) (void);		/* get current speaking position */
 
   /* These require SPK_HAVE_RATE. */
-  void (*rate) (int setting);		/* mute speech */
+  void (*rate) (float setting);		/* mute speech */
 
   /* These require SPK_HAVE_VOLUME. */
-  void (*volume) (int setting);		/* mute speech */
+  void (*volume) (float setting);		/* mute speech */
 } SpeechDriver;
 
 extern const SpeechDriver *loadSpeechDriver (const char *identifier, void **driverObject, const char *driverDirectory);
@@ -59,14 +59,12 @@ extern const SpeechDriver *speech;
 extern const SpeechDriver noSpeech;
 
 extern void sayString (const char *string);
-extern void saySpeechSetting (int setting, const char *name);
-extern void setSpeechRate (int setting);
-extern void setSpeechVolume (int setting);
 
+extern void setSpeechRate (int setting, int say);
 #define SPK_DEFAULT_RATE 10
 #define SPK_MAXIMUM_RATE (SPK_DEFAULT_RATE * 2)
-extern float spkDurationStretchTable[];
 
+extern void setSpeechVolume (int setting, int say);
 #define SPK_DEFAULT_VOLUME 10
 #define SPK_MAXIMUM_VOLUME (SPK_DEFAULT_VOLUME * 2)
 

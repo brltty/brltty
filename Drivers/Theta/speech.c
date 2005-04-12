@@ -219,11 +219,11 @@ spk_mute (void) {
 }
 
 static void
-spk_rate (int setting) {
-  theta_set_rate_stretch(voice, spkDurationStretchTable[setting], NULL);
+spk_rate (float setting) {
+  theta_set_rate_stretch(voice, 1.0/setting, NULL);
 }
 
 static void
-spk_volume (int setting) {
-  theta_set_rescale(voice, (float)setting/(float)SPK_DEFAULT_VOLUME, NULL);
+spk_volume (float setting) {
+  theta_set_rescale(voice, setting, NULL);
 }

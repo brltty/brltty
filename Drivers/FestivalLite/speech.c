@@ -144,8 +144,7 @@ spk_mute (void)
 }
 
 static void
-spk_rate (int setting)
+spk_rate (float setting)
 {
-  feat_set_float(voice->features, "duration_stretch",
-                 spkDurationStretchTable[setting]);
+  feat_set_float(voice->features, "duration_stretch", 1.0/setting);
 }

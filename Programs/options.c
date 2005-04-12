@@ -621,6 +621,27 @@ processOptions (
   return info.errorCount == 0;
 }
 
+float
+floatArgument (
+  const char *argument,
+  float minimum,
+  float maximum,
+  const char *name
+) {
+  char *end;
+  double value = strtod(argument, &end);
+  if ((end == argument) || *end) {
+    fprintf(stderr, "%s: Invalid %s: %s\n", programName, name, argument);
+  } else if (value < minimum) {
+    fprintf(stderr, "%s: %s is less than %g: %g\n", programName, name, minimum, value);
+  } else if (value > maximum) {
+    fprintf(stderr, "%s: %s is greater than %g: %g\n", programName, name, maximum, value);
+  } else {
+    return value;
+  }
+  exit(2);
+}
+
 short
 integerArgument (
   const char *argument,

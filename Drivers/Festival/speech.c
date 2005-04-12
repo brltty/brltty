@@ -370,10 +370,10 @@ spk_mute (void) {
 }
 
 static void
-spk_rate (int setting) {
+spk_rate (float setting) {
   char command[0X40];
   snprintf(command, sizeof(command), "(Parameter.set 'Duration_Stretch %f)\n",
-           spkDurationStretchTable[setting]);
+           1.0/setting);
   fputs(command, festival);
   fflush(festival);
 }

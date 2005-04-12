@@ -47,28 +47,28 @@ static void spk_mute (void) { }
 
 const SpeechDriver *speech = &noSpeech;
 
-float spkDurationStretchTable[] = {
-  3.0000,
-  2.6879,
-  2.4082,
-  2.1577,
-  1.9332,
-  1.7320,
-  1.5518,
-  1.3904,
-  1.2457,
-  1.1161,
-  1.0000,
-  0.8960,
-  0.8027,
-  0.7192,
-  0.6444,
-  0.5774,
-  0.5173,
-  0.4635,
-  0.4152,
+static const float spkRateTable[] = {
+  0.3333,
   0.3720,
-  0.3333
+  0.4152,
+  0.4635,
+  0.5173,
+  0.5774,
+  0.6444,
+  0.7192,
+  0.8027,
+  0.8960,
+  1.0000,
+  1.1161,
+  1.2457,
+  1.3904,
+  1.5518,
+  1.7320,
+  1.9332,
+  2.1577,
+  2.4082,
+  2.6879,
+  3.0000
 };
 
 const SpeechDriver *
@@ -118,7 +118,7 @@ sayString (const char *string) {
   speech->say((unsigned char *)string, strlen(string));
 }
 
-void
+static void
 saySpeechSetting (int setting, const char *name) {
   char phrase[0X40];
   snprintf(phrase, sizeof(phrase), "%s %d", name, setting);
@@ -127,15 +127,15 @@ saySpeechSetting (int setting, const char *name) {
 }
 
 void
-setSpeechRate (int setting) {
-  speech->rate(setting);
-  saySpeechSetting(setting, "rate");
+setSpeechRate (int setting, int say) {
+  speech->rate(spkRateTable[setting]);
+  if (say) saySpeechSetting(setting, "rate");
 }
 
 void
-setSpeechVolume (int setting) {
-  speech->volume(setting);
-  saySpeechSetting(setting, "volume");
+setSpeechVolume (int setting, int say) {
+  speech->volume((float)setting / (float)SPK_DEFAULT_VOLUME);
+  if (say) saySpeechSetting(setting, "volume");
 }
 
 static char *speechFifoPath = NULL;

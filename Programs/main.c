@@ -1631,14 +1631,14 @@ main (int argc, char *argv[]) {
 
           case BRL_CMD_SAY_SLOWER:
             if (speech->rate && (prefs.speechRate > 0)) {
-              setSpeechRate(--prefs.speechRate);
+              setSpeechRate(--prefs.speechRate, 1);
             } else {
               playTune(&tune_command_rejected);
             }
             break;
           case BRL_CMD_SAY_FASTER:
             if (speech->rate && (prefs.speechRate < SPK_MAXIMUM_RATE)) {
-              setSpeechRate(++prefs.speechRate);
+              setSpeechRate(++prefs.speechRate, 1);
             } else {
               playTune(&tune_command_rejected);
             }
@@ -1646,14 +1646,14 @@ main (int argc, char *argv[]) {
 
           case BRL_CMD_SAY_SOFTER:
             if (speech->volume && (prefs.speechVolume > 0)) {
-              setSpeechVolume(--prefs.speechVolume);
+              setSpeechVolume(--prefs.speechVolume, 1);
             } else {
               playTune(&tune_command_rejected);
             }
             break;
           case BRL_CMD_SAY_LOUDER:
             if (speech->volume && (prefs.speechVolume < SPK_MAXIMUM_VOLUME)) {
-              setSpeechVolume(++prefs.speechVolume);
+              setSpeechVolume(++prefs.speechVolume, 1);
             } else {
               playTune(&tune_command_rejected);
             }

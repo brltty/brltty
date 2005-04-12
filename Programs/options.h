@@ -67,6 +67,12 @@ extern int processOptions (
 extern const char *programPath;
 extern const char *programName;
 
+extern float floatArgument (
+  const char *argument,
+  float minimum,
+  float maximum,
+  const char *name
+);
 extern short integerArgument (
   const char *argument,
   short minimum,

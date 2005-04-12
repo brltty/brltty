@@ -34,7 +34,9 @@
 #include "misc.h"
 
 char *opt_pcmDevice;
+static char *opt_speechRate;
 static char *opt_textString;
+static char *opt_speechVolume;
 static char *opt_libraryDirectory;
 static char *opt_dataDirectory;
 
@@ -43,9 +45,17 @@ BEGIN_OPTION_TABLE
    &opt_pcmDevice, NULL,
    "Device specifier for soundcard digital audio."},
 
+  {"rate", "speed", 'r', 0, OPT_Config | OPT_Environ,
+   &opt_speechRate, NULL,
+   "Floating-point speech rate multiplier."},
+
   {"text-string", "string", 't', 0, 0,
    &opt_textString, NULL,
    "Text to be spoken."},
+
+  {"volume", "loudness", 'v', 0, OPT_Config | OPT_Environ,
+   &opt_speechVolume, NULL,
+   "Floating-point speech volume multiplier."},
 
   {"data-directory", "directory", 'D', 0, 0,
    &opt_dataDirectory, DATA_DIRECTORY,
@@ -67,12 +77,25 @@ main (int argc, char *argv[]) {
   int status;
   const char *driver = NULL;
   void *object;
-setLogLevel(LOG_DEBUG);
+  float speechRate;
+  float speechVolume;
 
   processOptions(optionTable, optionCount,
                  "spktest", &argc, &argv,
                  NULL, NULL, NULL,
                  "[driver [parameter=value ...]]");
+
+  if (opt_speechRate && *opt_speechRate) {
+    speechRate = floatArgument(opt_speechRate, 0.1, 10.0, "multiplier");
+  } else {
+    speechRate = 1.0;
+  }
+
+  if (opt_speechVolume && *opt_speechVolume) {
+    speechVolume = floatArgument(opt_speechVolume, 0.0, 200.0, "multiplier");
+  } else {
+    speechVolume = 1.0;
+  }
 
   if (argc) {
     driver = *argv++;
@@ -128,6 +151,9 @@ setLogLevel(LOG_DEBUG);
     if (chdir(opt_dataDirectory) != -1) {
       speech->identify();		/* start-up messages */
       if (speech->open(parameterSettings)) {
+        if (speech->rate) speech->rate(speechRate);
+        if (speech->volume) speech->volume(speechVolume);
+
         if (opt_textString) {
           sayString(opt_textString);
         } else {

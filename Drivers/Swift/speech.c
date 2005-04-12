@@ -173,17 +173,12 @@ spk_mute (void) {
   }
 }
 
-static int
-convertSetting (float setting, int reference, int scale) {
-  return (int)(setting * (float)scale / (float)reference);
+static void
+spk_rate (float setting) {
+  setRate((int)(setting * 170));
 }
 
 static void
-spk_rate (int setting) {
-  setRate(convertSetting(1.0/spkDurationStretchTable[setting], 1, 170));
-}
-
-static void
-spk_volume (int setting) {
-  setVolume(convertSetting(setting, SPK_DEFAULT_VOLUME, 100));
+spk_volume (float setting) {
+  setVolume((int)(setting * 100.0));
 }

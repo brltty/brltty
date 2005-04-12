@@ -51,11 +51,11 @@ static void spk_close (void);
 #endif /* SPK_HAVE_TRACK */
 
 #ifdef SPK_HAVE_RATE
-  static void spk_rate (int setting);		/* mute speech */
+  static void spk_rate (float setting);		/* mute speech */
 #endif /* SPK_HAVE_RATE */
 
 #ifdef SPK_HAVE_VOLUME
-  static void spk_volume (int setting);		/* mute speech */
+  static void spk_volume (float setting);		/* mute speech */
 #endif /* SPK_HAVE_VOLUME */
 
 #ifdef SPKPARMS

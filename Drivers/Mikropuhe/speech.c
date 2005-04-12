@@ -29,6 +29,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#include <math.h>
 
 #ifdef __MINGW32__
 #include "Programs/win_pthread.h"
@@ -476,18 +477,17 @@ spk_mute (void) {
 }
 
 static void
-spk_rate (int setting) {
+spk_rate (float setting) {
   char tag[0X40];
   snprintf(tag, sizeof(tag), "<rate absspeed=\"%d\"/>",
-           setting * 10 / SPK_DEFAULT_RATE - 10);
+           (int)(log10(setting) * 10.0 / log10(3.0)));
   enqueueTag(tag);
 }
 
 static void
-spk_volume (int setting) {
+spk_volume (float setting) {
   char tag[0X40];
-  int percentage = setting * 50 / SPK_DEFAULT_VOLUME;
   snprintf(tag, sizeof(tag), "<volume level=\"%d\"/>",
-           MIN(100, MAX(1, percentage)));
+           (int)(setting * 100.0));
   enqueueTag(tag);
 }

@@ -290,13 +290,13 @@ static void spk_mute (void)
   mywrite(helper_fd_out, &c,1);
 }
 
-static void spk_rate (int setting)
+static void spk_rate (float setting)
 {
-  float expand = spkDurationStretchTable[setting]; 
+  float expand = 1.0 / setting; 
   unsigned char *p = (unsigned char *)&expand;
   unsigned char l[5];
   if(helper_fd_out < 0) return;
-  LogPrint(LOG_DEBUG,"set rate to %d (time scale %f)", setting, expand);
+  LogPrint(LOG_DEBUG,"set rate to %f (time scale %f)", setting, expand);
   l[0] = 3; /* time scale code */
 #ifdef WORDS_BIGENDIAN
   l[1] = p[0]; l[2] = p[1]; l[3] = p[2]; l[4] = p[3];
