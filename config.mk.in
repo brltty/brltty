@@ -22,6 +22,8 @@ PGM_DIR = Programs
 DOC_DIR = Documents
 TBL_DIR = BrailleTables
 CTB_DIR = ContractionTables
+BRL_DIR = BrailleDrivers
+SPK_DIR = SpeechDrivers
 DRV_DIR = lib
 DAT_DIR = data
 
@@ -148,7 +150,6 @@ INSTALL_TEXT_TABLES = @install_text_tables@
 INSTALL_ATTRIBUTES_TABLES = @install_attributes_tables@
 INSTALL_CONTRACTION_TABLES = @install_contraction_tables@
 INSTALL_DRIVERS = @install_drivers@
-CONFIGURED_DRIVERS = @brltty_driver_names@
 
 SCREEN_DRIVER_OBJECTS = @screen_driver_objects@
 SCREEN_DRIVER_LIBRARIES = @screen_driver_libraries@

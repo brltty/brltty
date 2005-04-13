@@ -20,6 +20,7 @@ AC_PREREQ([2.53])
 AC_INIT([brltty], [3.7pre1], [http://mielke.cc/brltty/])
 AC_CONFIG_SRCDIR([Programs/brltty.h])
 BRLTTY_SUMMARY_BEGIN
+brltty_setup_files=". Programs Documents"
 
 AC_SUBST([api_major], [1])
 AC_SUBST([api_minor], [0])
@@ -894,7 +895,7 @@ BRLTTY_BRAILLE_DRIVER([vs], [VisioBraille])
 test -n "${brltty_package_gui_toolkit}" && {
    BRLTTY_BRAILLE_DRIVER([xw], [XWindow])
 }
-BRLTTY_ARG_DRIVER([braille])
+BRLTTY_ARG_DRIVER([braille], [BrailleDrivers])
 
 AC_CACHE_CHECK([for device directory], [brltty_cv_device_directory], [dnl
 case "${host_os}"
@@ -1039,7 +1040,7 @@ BRLTTY_ARG_DISABLE(
    BRLTTY_IF_PACKAGE([ViaVoice], [viavoice], [include/eci.h], [BRLTTY_SPEECH_DRIVER([vv], [ViaVoice], [-L$(VIAVOICE_ROOT)/lib -libmeci50])])
 ])
 AC_SUBST([speech_support_object])
-BRLTTY_ARG_DRIVER([speech])
+BRLTTY_ARG_DRIVER([speech], [SpeechDrivers])
 
 AC_CACHE_CHECK([for default screen driver], [brltty_cv_default_screen_driver], [dnl
 case "${host_os}"
@@ -1115,31 +1116,15 @@ AC_SUBST([screen_driver_libraries])
 
 BRLTTY_ARG_PARAMETERS([screen])
 
-brltty_driver_names=
-for brltty_driver in ${brltty_item_names_braille} ${brltty_item_names_speech}
-do
-   if test `expr "${brltty_driver_names} " : ".* ${brltty_driver} "` -eq 0
-   then
-      brltty_driver_names="${brltty_driver_names} ${brltty_driver} "
-   fi
-done
-changequote(, )dnl
-brltty_setup_files="`echo "${brltty_driver_names}" | sed -e '
-s%  *% %g
-s% \([^ ][^ ]*\)% Drivers/\1%g
-s%^%. Programs Documents%
-s%\([^ ][^ ]*\) %\1/Makefile:setup.mk.in:\1/Makefile.in %g
-s% *$%%
-'`"
-changequote([, ])dnl
-BRLTTY_VAR_TRIM([brltty_driver_names])
-AC_SUBST([brltty_driver_names])
-
-configuration_file_customization_script="Bootdisks/bp2cf"
-AC_SUBST_FILE([configuration_file_customization_script])
-
 AC_SUBST([install_drivers])
 BRLTTY_SUMMARY_END
+
+changequote(, )dnl
+brltty_setup_files="`echo "${brltty_setup_files}" | sed -e '
+s%\([^ ][^ ]*\)%\1/Makefile:setup.mk.in:\1/Makefile.in%g
+'`"
+changequote([, ])dnl
+
 AC_OUTPUT([
    config.mk
    brltty.spec
@@ -1147,5 +1132,5 @@ AC_OUTPUT([
    Programs/brltty-config
    Documents/brltty.conf
    Documents/BrlAPIref.doxy
-   Drivers/Voyager/mkhlp
+   BrailleDrivers/Voyager/mkhlp
    ${brltty_setup_files}])

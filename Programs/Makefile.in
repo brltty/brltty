@@ -323,12 +323,12 @@ apitest.$O:
 braille-drivers: txt2hlp
 	-rm -f $(BLD_TOP)$(DRV_DIR)/brltty-brl.lst
 	for driver in $(BRAILLE_EXTERNAL_DRIVER_NAMES); \
-	do (cd $(BLD_TOP)Drivers/$$driver && $(MAKE) braille-driver braille-help brl-lib-name) || exit 1; \
+	do (cd $(BLD_TOP)$(BRL_DIR)/$$driver && $(MAKE) braille-driver braille-help brl-lib-name) || exit 1; \
 	done
 
 braille-help: txt2hlp
 	for driver in $(BRAILLE_INTERNAL_DRIVER_NAMES); \
-	do (cd $(BLD_TOP)Drivers/$$driver && $(MAKE) braille-help) || exit 1; \
+	do (cd $(BLD_TOP)$(BRL_DIR)/$$driver && $(MAKE) braille-help) || exit 1; \
 	done
 
 ###############################################################################
@@ -336,7 +336,7 @@ braille-help: txt2hlp
 speech-drivers:
 	-rm -f $(BLD_TOP)$(DRV_DIR)/brltty-spk.lst
 	for driver in $(SPEECH_EXTERNAL_DRIVER_NAMES); \
-	do (cd $(BLD_TOP)Drivers/$$driver && $(MAKE) speech-driver spk-lib-name) || exit 1; \
+	do (cd $(BLD_TOP)$(SPK_DIR)/$$driver && $(MAKE) speech-driver spk-lib-name) || exit 1; \
 	done
 
 ###############################################################################
@@ -531,7 +531,8 @@ clean::
 	-rm -f $(BLD_TOP)$(DRV_DIR)/* $(BLD_TOP)$(DAT_DIR)/*
 
 distclean clean install uninstall::
-	-for driver in $(CONFIGURED_DRIVERS); do (cd $(BLD_TOP)Drivers/$$driver && $(MAKE) $@); done
+	-for driver in $(BRAILLE_EXTERNAL_DRIVER_NAMES); do (cd $(BLD_TOP)$(BRL_DIR)/$$driver && $(MAKE) $@); done
+	-for driver in $(SPEECH_EXTERNAL_DRIVER_NAMES); do (cd $(BLD_TOP)$(SPK_DIR)/$$driver && $(MAKE) $@); done
 
 distclean::
 	-rm -f brltty-config$X
