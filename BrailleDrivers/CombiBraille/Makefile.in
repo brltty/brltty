@@ -17,16 +17,10 @@
 
 include $(BLD_TOP)config.mk
 
-###############################################################################
-# Makefile for the Tieman B.V. CombiBraille driver
-# $Id: Makefile,v 1.1 1996/09/25 00:26:28 nn201 Exp $
-###############################################################################
-
 DRIVER_CODE = cb
 DRIVER_NAME = CombiBraille
 BRAILLE_MODELS = 25/45/85
 HELP_DEPS = $(HELP_TEXT)
-
 include $(SRC_TOP)braille.mk
 
 braille.$O:

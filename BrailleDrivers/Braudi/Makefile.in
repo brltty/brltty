@@ -17,15 +17,10 @@
 
 include $(BLD_TOP)config.mk
 
-###############################################################################
-# Makefile for BRLTTY's driver for Braudi braille displays.
-###############################################################################
-
 DRIVER_CODE = bd
 DRIVER_NAME = Braudi
 BRAILLE_MODELS = Pro
 HELP_DEPS = $(HELP_TEXT)
-
 include $(SRC_TOP)braille.mk
 
 braille.$O:

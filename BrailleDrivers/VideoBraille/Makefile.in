@@ -17,18 +17,10 @@
 
 include $(BLD_TOP)config.mk
 
-###############################################################################
-#
-# Makefile for BRLTTY VideoBraille driver
-# All variables are defined in the main Makefile...
-#
-###############################################################################
-
 DRIVER_CODE = vd
 DRIVER_NAME = VideoBraille
 BRAILLE_MODELS = 40
 HELP_DEPS = $(HELP_TEXT)
-
 include $(SRC_TOP)braille.mk
 
 vblow.$O:

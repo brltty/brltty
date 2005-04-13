@@ -17,15 +17,10 @@
 
 include $(BLD_TOP)config.mk
 
-###############################################################################
-# Makefile for BRLTTY's driver for Tactilog's LogText.
-###############################################################################
-
 DRIVER_CODE = lt
 DRIVER_NAME = LogText
 BRAILLE_MODELS = 32
 HELP_DEPS = $(HELP_TEXT)
-
 include $(SRC_TOP)braille.mk
 
 braille.$O:

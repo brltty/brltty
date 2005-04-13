@@ -17,18 +17,10 @@
 
 include $(BLD_TOP)config.mk
 
-###############################################################################
-#
-# Makefile for BRLTTY EuroBraille driver
-# All variables are defined in the main Makefile...
-#
-###############################################################################
-
 DRIVER_CODE = eu
 DRIVER_NAME = EuroBraille
 BRAILLE_MODELS = AzerBraille, Clio, Iris, NoteBraille, Scriba
 HELP_DEPS = $(HELP_TEXT)
-
 include $(SRC_TOP)braille.mk
 
 braille.$O:

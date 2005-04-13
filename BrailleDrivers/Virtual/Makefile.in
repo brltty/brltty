@@ -17,18 +17,10 @@
 
 include $(BLD_TOP)config.mk
 
-###############################################################################
-#
-# Makefile for BRLTTY Virtual driver
-# All variables are defined in the main Makefile...
-#
-###############################################################################
-
 DRIVER_CODE = vr
 DRIVER_NAME = Virtual
 BRAILLE_MODELS = TCP/Unix, client/server
 HELP_DEPS = $(HELP_TEXT)
-
 include $(SRC_TOP)braille.mk
 
 braille.$O:

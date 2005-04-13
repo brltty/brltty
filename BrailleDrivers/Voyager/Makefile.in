@@ -17,15 +17,10 @@
 
 include $(BLD_TOP)config.mk
 
-###############################################################################
-# Makefile for BRLTTY Voyager driver
-###############################################################################
-
 DRIVER_CODE = vo
 DRIVER_NAME = Voyager
 BRAILLE_MODELS = 44/70
 HELP_DEPS = $(HELP_TEXT)
-
 include $(SRC_TOP)braille.mk
 
 braille.$O:
@@ -35,3 +30,4 @@ braille.$O:
 remakehelp: mkhlp $(SRC_DIR)/trhlp $(SRC_DIR)/braille.c $(SRC_DIR)/help.template
 	chmod u+x mkhlp
 	./mkhlp
+

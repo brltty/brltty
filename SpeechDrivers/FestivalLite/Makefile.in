@@ -17,15 +17,10 @@
 
 include $(BLD_TOP)config.mk
 
-###############################################################################
-# Makefile for BRLTTY Festival Lite speech driver
-###############################################################################
-
 DRIVER_CODE = fl
 DRIVER_NAME = FestivalLite
 SPEECH_MODELS = text to speech engine
 SPK_OBJS = @speech_libraries_fl@
-
 include $(SRC_TOP)speech.mk
 
 speech.$O:

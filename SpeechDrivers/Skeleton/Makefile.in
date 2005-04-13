@@ -17,12 +17,12 @@
 
 include $(BLD_TOP)config.mk
 
-DRIVER_CODE = tn
-DRIVER_NAME = TechniBraille
-BRAILLE_MODELS = Manager 40
-HELP_DEPS = $(HELP_TEXT)
-include $(SRC_TOP)braille.mk
+DRIVER_CODE = xx
+DRIVER_NAME = DirectoryName
+SPEECH_MODELS = model1, model2
+SPK_OBJS = @speech_libraries_xx@
+include $(SRC_TOP)speech.mk
 
-braille.$O:
-	$(CC) $(BRL_CFLAGS) -c $(SRC_DIR)/braille.c
+speech.$O:
+	$(CC) $(SPK_CFLAGS) -c $(SRC_DIR)/speech.c
 

@@ -17,21 +17,13 @@
 
 include $(BLD_TOP)config.mk
 
-###############################################################################
-#
-# Makefile for BRLTTY BrlAPI driver
-# All variables are defined in the main Makefile...
-#
-###############################################################################
-
 DRIVER_CODE = ba
 DRIVER_NAME = BrlAPI
 BRAILLE_MODELS = 
-
 HELP_DEPS = $(HELP_TEXT)
 BRL_OBJS = @braille_libraries_ba@
-
 include $(SRC_TOP)braille.mk
 
 braille.$O:
 	$(CC) $(BRL_CFLAGS) -c $(SRC_DIR)/braille.c
+

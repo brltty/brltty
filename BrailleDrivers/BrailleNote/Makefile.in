@@ -17,15 +17,10 @@
 
 include $(BLD_TOP)config.mk
 
-###############################################################################
-# Makefile for BRLTTY's driver for Pulse Data International's Braille Note.
-###############################################################################
-
 DRIVER_CODE = bn
 DRIVER_NAME = BrailleNote
 BRAILLE_MODELS = 18/32
 HELP_DEPS = $(HELP_TEXT)
-
 include $(SRC_TOP)braille.mk
 
 braille.$O:

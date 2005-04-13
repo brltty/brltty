@@ -17,15 +17,10 @@
 
 include $(BLD_TOP)config.mk
 
-###############################################################################
-# Makefile for BRLTTY general speech drivers
-###############################################################################
-
 DRIVER_CODE = th
 DRIVER_NAME = Theta
 SPEECH_MODELS = text to speech engine
 SPK_OBJS = @speech_libraries_th@
-
 include $(SRC_TOP)speech.mk
 
 speech.$O:

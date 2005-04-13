@@ -17,15 +17,10 @@
 
 include $(BLD_TOP)config.mk
 
-###############################################################################
-# Makefile for BRLTTY's driver for Freedom Scientific's Focus and PacMate displays.
-###############################################################################
-
 DRIVER_CODE = fs
 DRIVER_NAME = FreedomScientific
 BRAILLE_MODELS = Focus 40/44/70/80/84, PacMate 20/40
 HELP_DEPS = $(HELP_TEXT)
-
 include $(SRC_TOP)braille.mk
 
 braille.$O:

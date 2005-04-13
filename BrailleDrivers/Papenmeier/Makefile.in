@@ -17,16 +17,10 @@
 
 include $(BLD_TOP)config.mk
 
-###############################################################################
-# Makefile for the Papenmeier Terminal
-# This software is maintained by August Hörandl <august.hoerandl@gmx.at>
-###############################################################################
-
 DRIVER_CODE = pm
 DRIVER_NAME = Papenmeier
 BRAILLE_MODELS = Tiny, Compact, 2D Lite/Screen, EL2D 40/66/80, EL 40/80, EL 40 P, Elba 20/32, IB 80, II EL 40/66/80 S
 HELP_DEPS = $(HELP_TEXT)
-
 include $(SRC_TOP)braille.mk
 
 PM_CMD_SOURCES = $(SRC_TOP)$(PGM_DIR)/brldefs.h $(SRC_DIR)/brl-cfg.h

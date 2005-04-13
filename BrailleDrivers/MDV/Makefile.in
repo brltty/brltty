@@ -17,18 +17,10 @@
 
 include $(BLD_TOP)config.mk
 
-###############################################################################
-#
-# Makefile for BRLTTY TSI driver
-# All variables are defined in the main Makefile...
-#
-###############################################################################
-
 DRIVER_CODE = md
 DRIVER_NAME = MDV
 BRAILLE_MODELS = MB208/MB408L/MB408S (protocol 5)
 HELP_DEPS = $(HELP_TEXT)
-
 include $(SRC_TOP)braille.mk
 
 braille.$O:

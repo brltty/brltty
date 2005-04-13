@@ -21,7 +21,6 @@ DRIVER_CODE = mp
 DRIVER_NAME = Mikropuhe
 SPEECH_MODELS = text to speech engine
 SPK_OBJS = @speech_libraries_mp@
-
 include $(SRC_TOP)speech.mk
 
 speech.$O:

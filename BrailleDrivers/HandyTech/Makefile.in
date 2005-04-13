@@ -17,18 +17,10 @@
 
 include $(BLD_TOP)config.mk
 
-###############################################################################
-#
-# Makefile for BRLTTY Handy driver
-# All variables are defined in the main Makefile...
-#
-###############################################################################
-
 DRIVER_CODE = ht
 DRIVER_NAME = HandyTech
 BRAILLE_MODELS = Modular 20/40/80, Braille Wave 40, Braille Star 40/80, Bookworm, Braillino 20
 HELP_DEPS = $(HELP_TEXT)
-
 include $(SRC_TOP)braille.mk
 
 braille.$O:

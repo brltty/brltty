@@ -17,15 +17,10 @@
 
 include $(BLD_TOP)config.mk
 
-###############################################################################
-# Makefile for BRLTTY general speech drivers
-###############################################################################
-
 DRIVER_CODE = vv
 DRIVER_NAME = ViaVoice
 SPEECH_MODELS = text to speech engine
 SPK_OBJS = @speech_libraries_vv@
-
 include $(SRC_TOP)speech.mk
 
 speech.$O:

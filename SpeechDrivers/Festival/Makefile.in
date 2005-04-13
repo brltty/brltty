@@ -17,14 +17,9 @@
 
 include $(BLD_TOP)config.mk
 
-###############################################################################
-# Makefile for BRLTTY general speech drivers
-###############################################################################
-
 DRIVER_CODE = fv
 DRIVER_NAME = Festival
 SPEECH_MODELS = text to speech engine
-
 include $(SRC_TOP)speech.mk
 
 speech.$O:

@@ -17,14 +17,9 @@
 
 include $(BLD_TOP)config.mk
 
-###############################################################################
-# Makefile for BRLTTY driver for Viavoice text-to-speech library
-###############################################################################
-
 DRIVER_CODE = es
 DRIVER_NAME = ExternalSpeech
 SPEECH_MODELS = runs /usr/local/bin/externalspeech
-
 include $(SRC_TOP)speech.mk
 
 speech.$O:
