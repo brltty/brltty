@@ -26,7 +26,8 @@ extern "C" {
 
 typedef struct {
   const char *name;
-  const char *identifier;
+  const char *code;
+  const char *comment;
   const char *date;
   const char *time;
   const char *const *parameters;
@@ -37,7 +38,7 @@ typedef struct {
 extern void initializeRealScreen (MainScreen *);
 
 extern const ScreenDriver noScreen;
-extern const ScreenDriver *loadScreenDriver (const char *identifier, void **driverObject, const char *driverDirectory);
+extern const ScreenDriver *loadScreenDriver (const char *code, void **driverObject, const char *driverDirectory);
 extern void identifyScreenDrivers (void);
 extern void identifyScreenDriver (const ScreenDriver *driver);
 

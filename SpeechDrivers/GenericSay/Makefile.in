@@ -19,7 +19,7 @@ include $(BLD_TOP)config.mk
 
 DRIVER_CODE = gs
 DRIVER_NAME = GenericSay
-SPEECH_MODELS = pipes to /usr/local/bin/say
+DRIVER_COMMENT = pipes to /usr/local/bin/say
 include $(SRC_TOP)speech.mk
 
 speech.$O:

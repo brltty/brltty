@@ -19,7 +19,7 @@ include $(BLD_TOP)config.mk
 
 DRIVER_CODE = xx
 DRIVER_NAME = DirectoryName
-SCREEN_MODELS = 
+DRIVER_COMMENT = 
 include $(SRC_TOP)screen.mk
 
 screen.$O:

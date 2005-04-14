@@ -313,7 +313,7 @@ parseParameters (
               int nameAdjustment = qualifierLength + 1;
               eligible = 0;
               if (!qualifierLength) {
-                LogPrint(LOG_ERR, "Missing %s identifier: %s",
+                LogPrint(LOG_ERR, "Missing %s code: %s",
                          description, name);
               } else if (!(nameLength -= nameAdjustment)) {
                 goto noName;
@@ -1346,37 +1346,37 @@ openBrailleDriver (int verify) {
   if (!oneDevice || !oneDriver || autodetect) verify = 0;
 
   while (*device) {
-    const char *const *identifier;
+    const char *const *code;
 
     if (autodetect) {
       const char *type;
       const char *dev = *device;
 
       if (isSerialDevice(&dev)) {
-        static const char *const serialIdentifiers[] = {
+        static const char *const serialCodes[] = {
           "pm", "ts",
           NULL
         };
-        identifier = serialIdentifiers;
+        code = serialCodes;
         type = "serial";
 
 #ifdef ENABLE_USB_SUPPORT
       } else if (isUsbDevice(&dev)) {
-        static const char *const usbIdentifiers[] = {
+        static const char *const usbCodes[] = {
           "al", "fs", "ht", "pm", "vo",
           NULL
         };
-        identifier = usbIdentifiers;
+        code = usbCodes;
         type = "USB";
 #endif /* ENABLE_USB_SUPPORT */
 
 #ifdef ENABLE_BLUETOOTH_SUPPORT
       } else if (isBluetoothDevice(&dev)) {
-        static const char *bluetoothIdentifiers[] = {
+        static const char *bluetoothCodes[] = {
           "ht",
           NULL
         };
-        identifier = bluetoothIdentifiers;
+        code = bluetoothCodes;
         type = "bluetooth";
 #endif /* ENABLE_BLUETOOTH_SUPPORT */
 
@@ -1386,25 +1386,25 @@ openBrailleDriver (int verify) {
       }
       LogPrint(LOG_DEBUG, "Looking for %s braille display on '%s'.", type, *device);
     } else {
-      identifier = (const char *const *)brailleDrivers;
+      code = (const char *const *)brailleDrivers;
       LogPrint(LOG_DEBUG, "Looking for braille display on '%s'.", *device);
     }
 
-    while (*identifier) {
+    while (*code) {
       const BrailleDriver *driver;
       void *object;
-      LogPrint(LOG_DEBUG, "Checking for '%s' braille display.", *identifier);
-      if ((driver = loadBrailleDriver(*identifier, &object, opt_libraryDirectory))) {
+      LogPrint(LOG_DEBUG, "Checking for '%s' braille display.", *code);
+      if ((driver = loadBrailleDriver(*code, &object, opt_libraryDirectory))) {
         char **parameters = processParameters(driver->parameters,
                                               "braille driver",
-                                              driver->identifier,
+                                              driver->code,
                                               opt_brailleParameters);
         if (parameters) {
           int opened = verify;
 
           if (!opened) {
             LogPrint(LOG_DEBUG, "Initializing braille driver: %s -> %s",
-                     driver->identifier, *device);
+                     driver->code, *device);
             initializeBraille();
             if (driver->open(&brl, parameters, *device)) {
               opened = 1;
@@ -1417,7 +1417,7 @@ openBrailleDriver (int verify) {
             brailleParameters = parameters;
 
             LogPrint(LOG_INFO, "Braille Driver: %s [%s] (compiled on %s at %s)",
-                     driver->identifier, driver->name,
+                     driver->code, driver->name,
                      driver->date, driver->time);
             driver->identify();
             logParameters(driver->parameters, parameters, "Braille");
@@ -1439,7 +1439,7 @@ openBrailleDriver (int verify) {
 
             {
               const char *part1 = CONFIGURATION_DIRECTORY "/brltty-";
-              const char *part2 = driver->identifier;
+              const char *part2 = driver->code;
               const char *part3 = ".prefs";
               char *path = mallocWrapper(strlen(part1) + strlen(part2) + strlen(part3) + 1);
               sprintf(path, "%s%s%s", part1, part2, part3);
@@ -1450,7 +1450,7 @@ openBrailleDriver (int verify) {
             return 1;
           } else {
             LogPrint(LOG_DEBUG, "Braille driver initialization failed: %s -> %s",
-                     driver->identifier, *device);
+                     driver->code, *device);
           }
 
           deallocateStrings(parameters);
@@ -1458,10 +1458,10 @@ openBrailleDriver (int verify) {
 
         if (object) unloadSharedObject(object);
       } else {
-        LogPrint(LOG_ERR, "Braille driver not loadable: %s", *identifier);
+        LogPrint(LOG_ERR, "Braille driver not loadable: %s", *code);
       }
 
-      ++identifier;
+      ++code;
     }
 
   nextDevice:
@@ -1572,36 +1572,36 @@ static int
 openSpeechDriver (int verify) {
   int oneDriver = speechDrivers[0] && !speechDrivers[1];
   int autodetect = oneDriver && (strcmp(speechDrivers[0], "auto") == 0);
-  const char *const *identifier;
+  const char *const *code;
 
   if (!oneDriver || autodetect) verify = 0;
 
   if (autodetect) {
-    static const char *const speechIdentifiers[] = {
+    static const char *const speechCodes[] = {
       "al", "bl", "cb",
       NULL
     };
-    identifier = speechIdentifiers;
+    code = speechCodes;
   } else {
-    identifier = (const char *const *)speechDrivers;
+    code = (const char *const *)speechDrivers;
   }
   LogPrint(LOG_DEBUG, "Looking for speech synthesizer.");
 
-  while (*identifier) {
+  while (*code) {
     const SpeechDriver *driver;
     void *object;
-    LogPrint(LOG_DEBUG, "Checking for '%s' speech synthesizer.", *identifier);
-    if ((driver = loadSpeechDriver(*identifier, &object, opt_libraryDirectory))) {
+    LogPrint(LOG_DEBUG, "Checking for '%s' speech synthesizer.", *code);
+    if ((driver = loadSpeechDriver(*code, &object, opt_libraryDirectory))) {
       char **parameters = processParameters(driver->parameters,
                                             "speech driver",
-                                            driver->identifier,
+                                            driver->code,
                                             opt_speechParameters);
       if (parameters) {
         int opened = verify;
 
         if (!opened) {
           LogPrint(LOG_DEBUG, "Initializing speech driver: %s",
-                   driver->identifier);
+                   driver->code);
           initializeSpeech();
           if (driver->open(parameters)) {
             opened = 1;
@@ -1614,7 +1614,7 @@ openSpeechDriver (int verify) {
           speechParameters = parameters;
 
           LogPrint(LOG_INFO, "Speech Driver: %s [%s] (compiled on %s at %s)",
-                   driver->identifier, driver->name,
+                   driver->code, driver->name,
                    driver->date, driver->time);
           driver->identify();
           logParameters(driver->parameters, parameters, "Speech");
@@ -1622,7 +1622,7 @@ openSpeechDriver (int verify) {
           return 1;
         } else {
           LogPrint(LOG_DEBUG, "Speech driver initialization failed: %s",
-                   driver->identifier);
+                   driver->code);
         }
 
         deallocateStrings(parameters);
@@ -1630,10 +1630,10 @@ openSpeechDriver (int verify) {
 
       if (object) unloadSharedObject(object);
     } else {
-      LogPrint(LOG_ERR, "Speech driver not loadable: %s", *identifier);
+      LogPrint(LOG_ERR, "Speech driver not loadable: %s", *code);
     }
 
-    ++identifier;
+    ++code;
   }
 
   LogPrint(LOG_DEBUG, "No speech synthesizer found.");

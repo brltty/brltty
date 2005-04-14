@@ -1052,7 +1052,7 @@ in
       BRLTTY_SCREEN_DRIVER([hd], [Hurd])
       ;;
    cygwin*|mingw*)
-      BRLTTY_SCREEN_DRIVER([wd], [Windows])
+      BRLTTY_SCREEN_DRIVER([wn], [Windows])
       ;;
    *)
       AC_MSG_WARN([no native screen driver - using shared memory])

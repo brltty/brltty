@@ -19,7 +19,7 @@ include $(BLD_TOP)config.mk
 
 DRIVER_CODE = bl
 DRIVER_NAME = BrailleLite
-SPEECH_MODELS = 
+DRIVER_COMMENT = 
 include $(SRC_TOP)speech.mk
 
 speech.$O:

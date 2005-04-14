@@ -27,32 +27,33 @@ extern "C" {
 
 typedef struct {
   const char *name;
-  const char *identifier;
+  const char *code;
+  const char *comment;
   const char *date;
   const char *time;
   const char *const *parameters;
-  void (*identify) (void);		/* print start-up messages */
-  int (*open) (char **parameters);		/* initialize speech device */
-  void (*close) (void);		/* close speech device */
-  void (*say) (const unsigned char *buffer, int len);	/* speak text */
-  void (*mute) (void);		/* mute speech */
+  void (*identify) (void);
+  int (*open) (char **parameters);
+  void (*close) (void);
+  void (*say) (const unsigned char *buffer, int len);
+  void (*mute) (void);
 
   /* These require SPK_HAVE_EXPRESS. */
-  void (*express) (const unsigned char *buffer, int len);	/* speak text */
+  void (*express) (const unsigned char *buffer, int len);
 
   /* These require SPK_HAVE_TRACK. */
-  void (*doTrack) (void);		/* get current speaking position */
-  int (*getTrack) (void);		/* get current speaking position */
-  int (*isSpeaking) (void);		/* get current speaking position */
+  void (*doTrack) (void);
+  int (*getTrack) (void);
+  int (*isSpeaking) (void);
 
   /* These require SPK_HAVE_RATE. */
-  void (*rate) (float setting);		/* mute speech */
+  void (*rate) (float setting);
 
   /* These require SPK_HAVE_VOLUME. */
-  void (*volume) (float setting);		/* mute speech */
+  void (*volume) (float setting);
 } SpeechDriver;
 
-extern const SpeechDriver *loadSpeechDriver (const char *identifier, void **driverObject, const char *driverDirectory);
+extern const SpeechDriver *loadSpeechDriver (const char *code, void **driverObject, const char *driverDirectory);
 extern void identifySpeechDrivers (void);
 extern int listSpeechDrivers (const char *directory);
 extern const SpeechDriver *speech;

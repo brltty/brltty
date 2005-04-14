@@ -19,7 +19,7 @@ include $(BLD_TOP)config.mk
 
 DRIVER_CODE = cb
 DRIVER_NAME = CombiBraille
-BRAILLE_MODELS = 25/45/85
+DRIVER_COMMENT = 25/45/85
 HELP_DEPS = $(HELP_TEXT)
 include $(SRC_TOP)braille.mk
 

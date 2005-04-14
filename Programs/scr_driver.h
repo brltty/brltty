@@ -24,7 +24,7 @@ extern "C" {
 
 /* this header file is used to create the driver structure
  * for a dynamically loadable screen driver.
- * SCRNAME, and SCRCODE must be defined - see driver make file
+ * SCRNAME, SCRCODE, and SCRCOMMENT must be defined - see driver make file
  */
 
 #include "scr.h"
@@ -49,6 +49,7 @@ extern SCRCONST ScreenDriver SCRSYMBOL;
 SCRCONST ScreenDriver SCRSYMBOL = {
   STRINGIFY(SCRNAME),
   STRINGIFY(SCRCODE),
+  SCRCOMMENT,
   __DATE__,
   __TIME__,
 

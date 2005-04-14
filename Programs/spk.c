@@ -36,6 +36,7 @@
 #define SPKSYMBOL noSpeech
 #define SPKNAME NoSpeech
 #define SPKCODE no
+#define SPKCOMMENT ""
 #include "spk_driver.h"
 static void spk_identify (void) {
   LogPrint(LOG_NOTICE, "No speech support.");
@@ -72,11 +73,11 @@ static const float spkRateTable[] = {
 };
 
 const SpeechDriver *
-loadSpeechDriver (const char *identifier, void **driverObject, const char *driverDirectory) {
-  return loadDriver(identifier, driverObject,
+loadSpeechDriver (const char *code, void **driverObject, const char *driverDirectory) {
+  return loadDriver(code, driverObject,
                     driverDirectory, driverTable,
                     "speech", 's', "spk_driver",
-                    &noSpeech, noSpeech.identifier);
+                    &noSpeech, noSpeech.code);
 }
 
 void

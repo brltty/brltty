@@ -19,7 +19,7 @@ include $(BLD_TOP)config.mk
 
 DRIVER_CODE = vv
 DRIVER_NAME = ViaVoice
-SPEECH_MODELS = text to speech engine
+DRIVER_COMMENT = text to speech engine
 SPK_OBJS = @speech_libraries_vv@
 include $(SRC_TOP)speech.mk
 

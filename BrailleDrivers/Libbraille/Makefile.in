@@ -19,7 +19,7 @@ include $(BLD_TOP)config.mk
 
 DRIVER_CODE = lb
 DRIVER_NAME = Libbraille
-BRAILLE_MODELS = Libbraille
+DRIVER_COMMENT = Libbraille
 HELP_DEPS = $(HELP_TEXT)
 BRL_OBJS = @braille_libraries_lb@
 include $(SRC_TOP)braille.mk

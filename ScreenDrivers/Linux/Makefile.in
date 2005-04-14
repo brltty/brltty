@@ -19,7 +19,7 @@ include $(BLD_TOP)config.mk
 
 DRIVER_CODE = lx
 DRIVER_NAME = Linux
-SCREEN_MODELS = 
+DRIVER_COMMENT = 
 include $(SRC_TOP)screen.mk
 
 screen.$O:

@@ -19,7 +19,7 @@ include $(BLD_TOP)config.mk
 
 DRIVER_CODE = xx
 DRIVER_NAME = DirectoryName
-BRAILLE_MODELS = model1, model2
+DRIVER_COMMENT = 
 HELP_DEPS = $(HELP_TEXT)
 include $(SRC_TOP)braille.mk
 

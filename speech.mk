@@ -16,7 +16,7 @@
 ###############################################################################
 
 SPKNAMES = $(BLD_TOP)$(DRV_DIR)/brltty-spk.lst
-SPK_DEFS ='-DSPKNAME=$(DRIVER_NAME)' '-DSPKCODE=$(DRIVER_CODE)'
+SPK_DEFS ='-DSPKNAME=$(DRIVER_NAME)' '-DSPKCODE=$(DRIVER_CODE)' '-DSPKCOMMENT="$(DRIVER_COMMENT)"'
 SPK_CFLAGS = $(LIBCFLAGS) $(SPK_DEFS)
 SPK_CXXFLAGS = $(LIBCXXFLAGS) $(SPK_DEFS)
 SPK_SO_NAME = $(MOD_NAME)s
@@ -26,9 +26,6 @@ $(SPK_FILE): speech.$O
 	$(INSTALL_DIRECTORY) $(@D)
 	$(MKMOD) $(@) speech.$O $(SPK_OBJS)
 speech-driver: $(SPK_FILE)
-
-spk-lib-name:
-	echo "$(DRIVER_CODE)  $(DRIVER_NAME) [$(SPEECH_MODELS)]" >>$(SPKNAMES)
 
 install::
 

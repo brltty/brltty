@@ -19,7 +19,7 @@ include $(BLD_TOP)config.mk
 
 DRIVER_CODE = mn
 DRIVER_NAME = MiniBraille
-BRAILLE_MODELS = 20
+DRIVER_COMMENT = 20
 HELP_DEPS = $(HELP_TEXT)
 include $(SRC_TOP)braille.mk
 

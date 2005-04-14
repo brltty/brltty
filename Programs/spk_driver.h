@@ -24,7 +24,7 @@ extern "C" {
 
 /* this header file is used to create the driver structure
  * for a dynamically loadable speech driver.
- * SPKNAME, and SPKCODE must be defined - see driver make file
+ * SPKNAME, SPKCODE, and SPKCOMMENT must be defined - see driver make file
  */
 
 #include "spk.h"
@@ -74,6 +74,7 @@ extern SPKCONST SpeechDriver SPKSYMBOL;
 SPKCONST SpeechDriver SPKSYMBOL = {
   STRINGIFY(SPKNAME),
   STRINGIFY(SPKCODE),
+  SPKCOMMENT,
   __DATE__,
   __TIME__,
 

@@ -19,7 +19,7 @@ include $(BLD_TOP)config.mk
 
 DRIVER_CODE = mb
 DRIVER_NAME = MultiBraille
-SPEECH_MODELS = 
+DRIVER_COMMENT = 
 include $(SRC_TOP)speech.mk
 
 speech.$O:

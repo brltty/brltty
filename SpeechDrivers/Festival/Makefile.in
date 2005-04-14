@@ -19,7 +19,7 @@ include $(BLD_TOP)config.mk
 
 DRIVER_CODE = fv
 DRIVER_NAME = Festival
-SPEECH_MODELS = text to speech engine
+DRIVER_COMMENT = text to speech engine
 include $(SRC_TOP)speech.mk
 
 speech.$O:

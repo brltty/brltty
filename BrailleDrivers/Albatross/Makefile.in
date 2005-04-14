@@ -19,7 +19,7 @@ include $(BLD_TOP)config.mk
 
 DRIVER_CODE = at
 DRIVER_NAME = Albatross
-BRAILLE_MODELS = 46/80
+DRIVER_COMMENT = 46/80
 HELP_DEPS = $(HELP_TEXT)
 include $(SRC_TOP)braille.mk
 

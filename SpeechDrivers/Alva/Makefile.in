@@ -19,7 +19,7 @@ include $(BLD_TOP)config.mk
 
 DRIVER_CODE = al
 DRIVER_NAME = Alva
-SPEECH_MODELS = Delphi(4nn)
+DRIVER_COMMENT = Delphi(4nn)
 include $(SRC_TOP)speech.mk
 
 speech.$O:

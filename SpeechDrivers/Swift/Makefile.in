@@ -19,7 +19,7 @@ include $(BLD_TOP)config.mk
 
 DRIVER_CODE = sw
 DRIVER_NAME = Swift
-SPEECH_MODELS = text to speech engine
+DRIVER_COMMENT = text to speech engine
 SPK_OBJS = @speech_libraries_sw@
 include $(SRC_TOP)speech.mk
 

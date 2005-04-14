@@ -304,9 +304,8 @@ apitest.$O:
 ###############################################################################
 
 braille-drivers: txt2hlp
-	-rm -f $(BLD_TOP)$(DRV_DIR)/brltty-brl.lst
 	for driver in $(BRAILLE_EXTERNAL_DRIVER_NAMES); \
-	do (cd $(BLD_TOP)$(BRL_DIR)/$$driver && $(MAKE) braille-driver braille-help brl-lib-name) || exit 1; \
+	do (cd $(BLD_TOP)$(BRL_DIR)/$$driver && $(MAKE) braille-driver braille-help) || exit 1; \
 	done
 
 braille-help: txt2hlp
@@ -317,17 +316,15 @@ braille-help: txt2hlp
 ###############################################################################
 
 speech-drivers:
-	-rm -f $(BLD_TOP)$(DRV_DIR)/brltty-spk.lst
 	for driver in $(SPEECH_EXTERNAL_DRIVER_NAMES); \
-	do (cd $(BLD_TOP)$(SPK_DIR)/$$driver && $(MAKE) speech-driver spk-lib-name) || exit 1; \
+	do (cd $(BLD_TOP)$(SPK_DIR)/$$driver && $(MAKE) speech-driver) || exit 1; \
 	done
 
 ###############################################################################
 
 screen-drivers:
-	-rm -f $(BLD_TOP)$(DRV_DIR)/brltty-scr.lst
 	for driver in $(SCREEN_EXTERNAL_DRIVER_NAMES); \
-	do (cd $(BLD_TOP)$(SCR_DIR)/$$driver && $(MAKE) screen-driver scr-lib-name) || exit 1; \
+	do (cd $(BLD_TOP)$(SCR_DIR)/$$driver && $(MAKE) screen-driver) || exit 1; \
 	done
 
 ###############################################################################
@@ -444,7 +441,6 @@ install-data-directory:
 install-drivers: $(BRAILLE_DRIVERS) $(SPEECH_DRIVERS) $(SCREEN_DRIVERS)
 	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(LIBRARY_DIRECTORY)
 	$(INSTALL_PROGRAM) $(BLD_TOP)$(DRV_DIR)/*.$(MOD_EXT) $(INSTALL_ROOT)$(LIBRARY_DIRECTORY)
-	$(INSTALL_DATA) $(BLD_TOP)$(DRV_DIR)/*.lst $(INSTALL_ROOT)$(LIBRARY_DIRECTORY)
 
 install-manpages:
 	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(MANPAGE_DIRECTORY)/man1
@@ -493,7 +489,6 @@ uninstall-data:
 
 uninstall-libraries:
 	-rm -f $(INSTALL_ROOT)$(LIBRARY_DIRECTORY)/$(LIB_NAME)*
-	-rm -f $(INSTALL_ROOT)$(LIBRARY_DIRECTORY)/brltty-*.lst
 	-[ -d $(INSTALL_ROOT)$(LIBRARY_DIRECTORY) ] && rmdir $(INSTALL_ROOT)$(LIBRARY_DIRECTORY)
 	-rm -f $(INSTALL_ROOT)$(libdir)/$(API_LIB)
 	-rm -f $(INSTALL_ROOT)$(libdir)/$(API_LIB).$(API_RELEASE)

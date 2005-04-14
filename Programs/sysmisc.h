@@ -24,14 +24,14 @@ extern "C" {
 
 typedef struct {
   const void *address;
-  const char *const *identifier;
+  const char *const *code;
 } DriverEntry;
 
 extern const void *loadDriver (
-  const char *driverIdentifier, void **driverObject,
+  const char *driverCode, void **driverObject,
   const char *driverDirectory, const DriverEntry *driverTable,
   const char *driverType, char driverCharacter, const char *driverSymbol,
-  const void *nullAddress, const char *nullIdentifier
+  const void *nullAddress, const char *nullCode
 );
 
 #ifdef __cplusplus

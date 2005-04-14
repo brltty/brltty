@@ -19,7 +19,7 @@ include $(BLD_TOP)config.mk
 
 DRIVER_CODE = tn
 DRIVER_NAME = TechniBraille
-BRAILLE_MODELS = Manager 40
+DRIVER_COMMENT = Manager 40
 HELP_DEPS = $(HELP_TEXT)
 include $(SRC_TOP)braille.mk
 

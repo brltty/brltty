@@ -17,9 +17,9 @@
 
 include $(BLD_TOP)config.mk
 
-DRIVER_CODE = wd
+DRIVER_CODE = wn
 DRIVER_NAME = Windows
-SCREEN_MODELS = 
+DRIVER_COMMENT = 
 include $(SRC_TOP)screen.mk
 
 screen.$O:

@@ -19,7 +19,7 @@ include $(BLD_TOP)config.mk
 
 DRIVER_CODE = bn
 DRIVER_NAME = BrailleNote
-BRAILLE_MODELS = 18/32
+DRIVER_COMMENT = 18/32
 HELP_DEPS = $(HELP_TEXT)
 include $(SRC_TOP)braille.mk
 

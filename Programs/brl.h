@@ -78,24 +78,25 @@ typedef enum {
  * with pointers to all the functions and variables.
  */
 typedef struct {
-  const char *name;			/* name of driver */
-  const char *identifier;		/* name of driver */
-  const char *date;		/* compilation date of driver */
-  const char *time;		/* compilation time of driver */
-  const char *const *parameters;	/* user-supplied driver parameters */
-  const char *helpFile;		/* name of help file */
-  int statusStyle;		/* prefered status cells mode */
+  const char *name;
+  const char *code;
+  const char *comment;
+  const char *date;
+  const char *time;
+  const char *const *parameters;
+  const char *helpFile;
+  int statusStyle;
 
   /* Routines provided by the braille driver library: */
-  void (*identify) (void);	/* print start-up messages */
-  int (*open) (BrailleDisplay *, char **parameters, const char *);	/* initialise Braille display */
-  void (*close) (BrailleDisplay *);		/* close braille display */
-  int (*readCommand) (BrailleDisplay *, BRL_DriverCommandContext);		/* get key press from braille display */
-  void (*writeWindow) (BrailleDisplay *);		/* write to braille display */
-  void (*writeStatus) (BrailleDisplay *brl, const unsigned char *);	/* set status cells */
+  void (*identify) (void);
+  int (*open) (BrailleDisplay *, char **parameters, const char *);
+  void (*close) (BrailleDisplay *);
+  int (*readCommand) (BrailleDisplay *, BRL_DriverCommandContext);
+  void (*writeWindow) (BrailleDisplay *);
+  void (*writeStatus) (BrailleDisplay *brl, const unsigned char *);
 
   /* These require BRL_HAVE_VISUAL_DISPLAY. */
-  void (*writeVisual) (BrailleDisplay *);		/* write to braille display */
+  void (*writeVisual) (BrailleDisplay *);
 
   /* These require BRL_HAVE_PACKET_IO. */
   ssize_t (*readPacket) (BrailleDisplay *, unsigned char *, size_t);
@@ -107,10 +108,10 @@ typedef struct {
   int (*keyToCommand) (BrailleDisplay *, BRL_DriverCommandContext, int);
 
   /* These require BRL_HAVE_FIRMNESS. */
-  void (*firmness) (BrailleDisplay *brl, BrailleFirmness setting);		/* mute speech */
+  void (*firmness) (BrailleDisplay *brl, BrailleFirmness setting);
 } BrailleDriver;
 
-extern const BrailleDriver *loadBrailleDriver (const char *identifier, void **driverObject, const char *driverDirectory);
+extern const BrailleDriver *loadBrailleDriver (const char *code, void **driverObject, const char *driverDirectory);
 extern void identifyBrailleDrivers (void);
 extern int listBrailleDrivers (const char *directory);
 extern const BrailleDriver *braille;

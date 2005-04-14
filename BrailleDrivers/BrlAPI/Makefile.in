@@ -19,7 +19,7 @@ include $(BLD_TOP)config.mk
 
 DRIVER_CODE = ba
 DRIVER_NAME = BrlAPI
-BRAILLE_MODELS = 
+DRIVER_COMMENT = 
 HELP_DEPS = $(HELP_TEXT)
 BRL_OBJS = @braille_libraries_ba@
 include $(SRC_TOP)braille.mk

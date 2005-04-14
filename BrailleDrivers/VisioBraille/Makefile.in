@@ -19,7 +19,7 @@ include $(BLD_TOP)config.mk
 
 DRIVER_CODE = vs
 DRIVER_NAME = VisioBraille
-BRAILLE_MODELS = 20/40
+DRIVER_COMMENT = 20/40
 HELP_DEPS = $(HELP_TEXT)
 include $(SRC_TOP)braille.mk
 

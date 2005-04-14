@@ -19,7 +19,7 @@ include $(BLD_TOP)config.mk
 
 DRIVER_CODE = es
 DRIVER_NAME = ExternalSpeech
-SPEECH_MODELS = runs /usr/local/bin/externalspeech
+DRIVER_COMMENT = runs /usr/local/bin/externalspeech
 include $(SRC_TOP)speech.mk
 
 speech.$O:

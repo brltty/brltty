@@ -16,7 +16,7 @@
 ###############################################################################
 
 SCRNAMES = $(BLD_TOP)$(DRV_DIR)/brltty-scr.lst
-SCR_DEFS ='-DSCRNAME=$(DRIVER_NAME)' '-DSCRCODE=$(DRIVER_CODE)'
+SCR_DEFS ='-DSCRNAME=$(DRIVER_NAME)' '-DSCRCODE=$(DRIVER_CODE)' '-DSCRCOMMENT="$(DRIVER_COMMENT)"'
 SCR_CFLAGS = $(LIBCFLAGS) $(SCR_DEFS)
 SCR_CXXFLAGS = $(LIBCXXFLAGS) $(SCR_DEFS)
 SCR_SO_NAME = $(MOD_NAME)x
@@ -26,9 +26,6 @@ $(SCR_FILE): screen.$O
 	$(INSTALL_DIRECTORY) $(@D)
 	$(MKMOD) $(@) screen.$O $(SCR_OBJS)
 screen-driver: $(SCR_FILE)
-
-scr-lib-name:
-	echo "$(DRIVER_CODE)  $(DRIVER_NAME) [$(SCREEN_MODELS)]" >>$(SCRNAMES)
 
 install::
 

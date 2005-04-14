@@ -36,6 +36,7 @@
 #define BRLSYMBOL noBraille
 #define BRLNAME NoBraille
 #define BRLCODE no
+#define BRLCOMMENT ""
 #define BRLHELP "/dev/null"
 #include "brl_driver.h"
 static void
@@ -80,11 +81,11 @@ TranslationTable attributesTable = {
 void *contractionTable = NULL;
 
 const BrailleDriver *
-loadBrailleDriver (const char *identifier, void **driverObject, const char *driverDirectory) {
-  return loadDriver(identifier, driverObject,
+loadBrailleDriver (const char *code, void **driverObject, const char *driverDirectory) {
+  return loadDriver(code, driverObject,
                     driverDirectory, driverTable,
                     "braille", 'b', "brl_driver",
-                    &noBraille, noBraille.identifier);
+                    &noBraille, noBraille.code);
 }
 
 void

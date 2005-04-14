@@ -41,17 +41,18 @@
 #define SCRSYMBOL noScreen
 #define SCRNAME NoScreen
 #define SCRCODE no
+#define SCRCOMMENT ""
 #include "scr_driver.h"
 static void scr_initialize (MainScreen *main) {
   initializeMainScreen(main);
 }
 
 const ScreenDriver *
-loadScreenDriver (const char *identifier, void **driverObject, const char *driverDirectory) {
-  return loadDriver(identifier, driverObject,
+loadScreenDriver (const char *code, void **driverObject, const char *driverDirectory) {
+  return loadDriver(code, driverObject,
                     driverDirectory, driverTable,
                     "screen", 'x', "scr_driver",
-                    &noScreen, noScreen.identifier);
+                    &noScreen, noScreen.code);
 }
 
 void

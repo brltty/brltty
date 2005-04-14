@@ -19,7 +19,7 @@ include $(BLD_TOP)config.mk
 
 DRIVER_CODE = xx
 DRIVER_NAME = DirectoryName
-SPEECH_MODELS = model1, model2
+DRIVER_COMMENT = 
 SPK_OBJS = @speech_libraries_xx@
 include $(SRC_TOP)speech.mk
 

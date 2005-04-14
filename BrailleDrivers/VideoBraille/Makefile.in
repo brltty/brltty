@@ -19,7 +19,7 @@ include $(BLD_TOP)config.mk
 
 DRIVER_CODE = vd
 DRIVER_NAME = VideoBraille
-BRAILLE_MODELS = 40
+DRIVER_COMMENT = 40
 HELP_DEPS = $(HELP_TEXT)
 include $(SRC_TOP)braille.mk
 

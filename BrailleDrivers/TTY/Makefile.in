@@ -19,7 +19,7 @@ include $(BLD_TOP)config.mk
 
 DRIVER_CODE = tt
 DRIVER_NAME = TTY
-BRAILLE_MODELS = terminfo
+DRIVER_COMMENT = terminfo
 HELP_DEPS = $(HELP_TEXT)
 BRL_OBJS = @braille_libraries_tt@
 include $(SRC_TOP)braille.mk

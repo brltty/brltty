@@ -953,7 +953,7 @@ static int processRequest(Connection *c)
       pthread_mutex_unlock(&driverMutex);
       return 0;
     }
-    case BRLPACKET_GETDRIVERID: str = braille->identifier; goto l1;
+    case BRLPACKET_GETDRIVERID: str = braille->code; goto l1;
     case BRLPACKET_GETDRIVERNAME: {
       str = braille->name;
 l1:   len = strlen(str);

@@ -19,7 +19,7 @@ include $(BLD_TOP)config.mk
 
 DRIVER_CODE = bd
 DRIVER_NAME = Braudi
-BRAILLE_MODELS = Pro
+DRIVER_COMMENT = Pro
 HELP_DEPS = $(HELP_TEXT)
 include $(SRC_TOP)braille.mk
 

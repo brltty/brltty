@@ -19,7 +19,7 @@ include $(BLD_TOP)config.mk
 
 DRIVER_CODE = sm
 DRIVER_NAME = SharedMemory
-SCREEN_MODELS = 
+DRIVER_COMMENT = 
 include $(SRC_TOP)screen.mk
 
 screen.$O:

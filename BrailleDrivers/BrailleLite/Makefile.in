@@ -19,7 +19,7 @@ include $(BLD_TOP)config.mk
 
 DRIVER_CODE = bl
 DRIVER_NAME = BrailleLite
-BRAILLE_MODELS = 18/40/M20/M40
+DRIVER_COMMENT = 18/40/M20/M40
 HELP_DEPS = $(SRC_DIR)/help0.txt $(SRC_DIR)/help1.txt
 include $(SRC_TOP)braille.mk
 

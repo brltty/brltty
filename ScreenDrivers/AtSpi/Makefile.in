@@ -19,7 +19,7 @@ include $(BLD_TOP)config.mk
 
 DRIVER_CODE = as
 DRIVER_NAME = AtSpi
-SCREEN_MODELS = 
+DRIVER_COMMENT = 
 SCR_OBJS = @screen_libraries_as@
 include $(SRC_TOP)screen.mk
 

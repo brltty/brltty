@@ -19,7 +19,7 @@ include $(BLD_TOP)config.mk
 
 DRIVER_CODE = hd
 DRIVER_NAME = Hurd
-SCREEN_MODELS = 
+DRIVER_COMMENT = 
 include $(SRC_TOP)screen.mk
 
 screen.$O:

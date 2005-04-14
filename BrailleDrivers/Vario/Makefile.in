@@ -19,7 +19,7 @@ include $(BLD_TOP)config.mk
 
 DRIVER_CODE = va
 DRIVER_NAME = Vario
-BRAILLE_MODELS = 40/80 (native mode)
+DRIVER_COMMENT = 40/80 (native mode)
 HELP_DEPS = $(HELP_TEXT)
 include $(SRC_TOP)braille.mk
 

@@ -19,7 +19,7 @@ include $(BLD_TOP)config.mk
 
 DRIVER_CODE = eu
 DRIVER_NAME = EuroBraille
-BRAILLE_MODELS = AzerBraille, Clio, Iris, NoteBraille, Scriba
+DRIVER_COMMENT = AzerBraille, Clio, Iris, NoteBraille, Scriba
 HELP_DEPS = $(HELP_TEXT)
 include $(SRC_TOP)braille.mk
 

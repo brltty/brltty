@@ -30,27 +30,27 @@
 
 const void *
 loadDriver (
-  const char *driverIdentifier, void **driverObject,
+  const char *driverCode, void **driverObject,
   const char *driverDirectory, const DriverEntry *driverTable,
   const char *driverType, char driverCharacter, const char *driverSymbol,
-  const void *nullAddress, const char *nullIdentifier
+  const void *nullAddress, const char *nullCode
 ) {
   const void *driverAddress = NULL;
   *driverObject = NULL;
 
-  if (!driverIdentifier || !*driverIdentifier) {
+  if (!driverCode || !*driverCode) {
     if (driverTable)
       if (driverTable->address)
         return driverTable->address;
     return nullAddress;
   }
 
-  if (strcmp(driverIdentifier, nullIdentifier) == 0) return nullAddress;
+  if (strcmp(driverCode, nullCode) == 0) return nullAddress;
 
   if (driverTable) {
     const DriverEntry *driverEntry = driverTable;
     while (driverEntry->address) {
-      if (strcmp(driverIdentifier, *driverEntry->identifier) == 0) {
+      if (strcmp(driverCode, *driverEntry->code) == 0) {
         return driverEntry->address;
       }
       ++driverEntry;
@@ -63,19 +63,19 @@ loadDriver (
     const char *symbolName;
 
     {
-      int length = strlen(MODULE_NAME) + strlen(driverIdentifier) + strlen(MODULE_EXTENSION) + 3;
+      int length = strlen(MODULE_NAME) + strlen(driverCode) + strlen(MODULE_EXTENSION) + 3;
       char *name = mallocWrapper(length);
       snprintf(name, length, "%s%c%s.%s",
-               MODULE_NAME, driverCharacter, driverIdentifier, MODULE_EXTENSION);
+               MODULE_NAME, driverCharacter, driverCode, MODULE_EXTENSION);
       libraryName = name;
     }
     libraryPath = makePath(driverDirectory, libraryName);
 
     {
-      int length = strlen(driverSymbol) + strlen(driverIdentifier) + 2;
+      int length = strlen(driverSymbol) + strlen(driverCode) + 2;
       char *name = mallocWrapper(length);
       snprintf(name, length, "%s_%s",
-               driverSymbol, driverIdentifier);
+               driverSymbol, driverCode);
       symbolName = name;
     }
 
