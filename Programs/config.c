@@ -1953,7 +1953,7 @@ startup (int argc, char *argv[]) {
   initializeAllScreens(opt_screenDriver, opt_libraryDirectory);
   screenParameters = processParameters(getScreenParameters(),
                                        "screen driver",
-                                       NULL,
+                                       getScreenDriverCode(),
                                        opt_screenParameters);
   logParameters(getScreenParameters(), screenParameters, "Screen");
   if (!opt_verify) {

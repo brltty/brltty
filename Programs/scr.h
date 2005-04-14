@@ -88,6 +88,7 @@ extern int executeScreenCommand (int);
 
 /* Routines which apply to the main screen. */
 extern const char *const *getScreenParameters (void);			/* initialise screen reading functions */
+extern const char *getScreenDriverCode (void);			/* initialise screen reading functions */
 extern int openMainScreen (char **parameters);			/* initialise screen reading functions */
 
 /* Routines which apply to the routing screen.

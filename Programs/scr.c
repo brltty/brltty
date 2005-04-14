@@ -229,6 +229,11 @@ getScreenParameters (void) {
   return screenDriver->parameters;
 }
 
+const char *
+getScreenDriverCode (void) {
+  return screenDriver->code;
+}
+
 
 int
 openMainScreen (char **parameters) {
