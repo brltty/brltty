@@ -271,7 +271,7 @@ int brlapi_getDisplaySize(unsigned int *x, unsigned int *y);
  * - COMMANDS means that applications will get exactly the same values as
  *   \e brltty. This allows driver-independent clients, which will hopefully
  *   be nice to use with a lot of different terminals
- * \sa brlapi_readKeyl()
+ * \sa brlapi_readKey()
  * @{
  */
 

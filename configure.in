@@ -22,8 +22,8 @@ AC_CONFIG_SRCDIR([Programs/brltty.h])
 BRLTTY_SUMMARY_BEGIN
 brltty_build_directories=". Programs Documents"
 
-AC_SUBST([api_major], [1])
-AC_SUBST([api_minor], [0])
+AC_SUBST([api_major], [0])
+AC_SUBST([api_minor], [4])
 AC_SUBST([api_revision], [0])
 AC_SUBST([api_version], [${api_major}.${api_minor}])
 AC_SUBST([api_release], [${api_version}.${api_revision}])
