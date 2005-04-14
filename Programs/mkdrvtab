@@ -46,7 +46,7 @@ done
 echo "static const DriverEntry driverTable[] = {"
 for driverCode
 do
-   echo "  {&${symbolPrefix}${driverCode}, &${symbolPrefix}${driverCode}.identifier},"
+   echo "  {&${symbolPrefix}${driverCode}, &${symbolPrefix}${driverCode}.code},"
 done
 echo "  {NULL, NULL}"
 echo "};"

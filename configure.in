@@ -20,7 +20,7 @@ AC_PREREQ([2.53])
 AC_INIT([brltty], [3.7pre1], [http://mielke.cc/brltty/])
 AC_CONFIG_SRCDIR([Programs/brltty.h])
 BRLTTY_SUMMARY_BEGIN
-brltty_setup_files=". Programs Documents"
+brltty_build_directories=". Programs Documents"
 
 AC_SUBST([api_major], [1])
 AC_SUBST([api_minor], [0])
@@ -1085,7 +1085,7 @@ AC_SUBST([install_drivers])
 BRLTTY_SUMMARY_END
 
 changequote(, )dnl
-brltty_setup_files="`echo "${brltty_setup_files}" | sed -e '
+brltty_make_files="`echo "${brltty_build_directories}" | sed -e '
 s%\([^ ][^ ]*\)%\1/Makefile:setup.mk.in:\1/Makefile.in%g
 '`"
 changequote([, ])dnl
@@ -1098,4 +1098,4 @@ AC_OUTPUT([
    Documents/brltty.conf
    Documents/BrlAPIref.doxy
    BrailleDrivers/Voyager/mkhlp
-   ${brltty_setup_files}])
+   ${brltty_make_files}])

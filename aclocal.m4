@@ -356,7 +356,7 @@ fi
 
 for brltty_driver in ${brltty_item_names_$1}
 do
-   brltty_setup_files="${brltty_setup_files} $2/${brltty_driver}"
+   brltty_build_directories="${brltty_build_directories} $2/${brltty_driver}"
 done
 
 AC_SUBST([$1_driver_objects])
