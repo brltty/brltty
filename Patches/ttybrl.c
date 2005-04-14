@@ -428,7 +428,7 @@ brltty_brl_open_device (gchar* 			device_name,
     }
 
 gettty:
-    if (brlapi_getTty (VT, "") == -1)
+    if (brlapi_getTty (VT, BRLCOMMANDS) == -1)
     {
 	brlapi_perror("Unable to get Tty"); //to be translated
 	return 0;

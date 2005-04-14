@@ -275,6 +275,10 @@ int brlapi_getDisplaySize(unsigned int *x, unsigned int *y);
  * @{
  */
 
+/* The following macro is for backward compatibility. */
+/* It should be removed in the long run. */
+#define BRLCOMMANDS NULL
+
 /* brlapi_getTty */
 /** ask for some tty, with some key mechanism
  *

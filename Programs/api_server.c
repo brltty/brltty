@@ -108,9 +108,9 @@ int brlapi_errno;
 int *brlapi_errno_location(void) { return &brlapi_errno; }
 
 /** ask for \e brltty commands */
-#define BRLCOMMANDS 0
+#define BRL_COMMANDS 0
 /** ask for raw driver keycodes */
-#define BRLKEYCODES 1
+#define BRL_KEYCODES 1
 
 /****************************************************************************/
 /** GLOBAL TYPES AND VARIABLES                                              */
@@ -706,12 +706,12 @@ static int processRequest(Connection *c)
       CHECKEXC(size==n, BRLERR_INVALID_PACKET);
       memcpy(name, p, n);
       name[n] = '\0';
-      if (!*name) how = BRLCOMMANDS; else {
+      if (!*name) how = BRL_COMMANDS; else {
         if ((!strcmp(name, trueBraille->name)) && (isKeyCapable(trueBraille)))
-          how = BRLKEYCODES;
+          how = BRL_KEYCODES;
         else how = -1;
       }
-      CHECKEXC(((how == BRLKEYCODES) || (how == BRLCOMMANDS)),BRLERR_KEYSNOTSUPP);
+      CHECKEXC(((how == BRL_KEYCODES) || (how == BRL_COMMANDS)),BRLERR_KEYSNOTSUPP);
       c->how = how;
       freeBrailleWindow(&c->brailleWindow); /* In case of multiple gettty requests */
       if ((initializeUnmaskedKeys(c)==-1) || (allocBrailleWindow(&c->brailleWindow)==-1)) {
@@ -772,11 +772,11 @@ static int processRequest(Connection *c)
 	    WEXC(c->fd, BRLERR_ILLEGAL_INSTRUCTION);
           } else {
             /* Here one is in the case where the client tries to change */
-            /* from BRLKEYCODES to BRLCOMMANDS, or something like that */
+            /* from BRL_KEYCODES to BRL_COMMANDS, or something like that */
             /* For the moment this operation is not supported */
             /* A client that wants to do that should first LeaveTty() */
             /* and then get it again, risking to lose it */
-            LogPrint(LOG_INFO,"Switching from BRLKEYCODES to BRLCOMMANDS not supported yet");
+            LogPrint(LOG_INFO,"Switching from BRL_KEYCODES to BRL_COMMANDS not supported yet");
             WERR(c->fd,BRLERR_OPNOTSUPP);
           }
           return 0;
@@ -1704,7 +1704,7 @@ static void *server(void *arg)
 static int initializeUnmaskedKeys(Connection *c)
 {
   if (c==NULL) return 0;
-  if (c->how==BRLKEYCODES) return 0;
+  if (c->how==BRL_KEYCODES) return 0;
   if (addRange(0,BRL_KEYCODE_MAX,&c->unmaskedKeys)==-1) return -1;
   if (removeRange(BRL_CMD_SWITCHVT_PREV,BRL_CMD_SWITCHVT_NEXT,&c->unmaskedKeys)==-1) return -1;
   if (removeRange(BRL_CMD_RESTARTBRL,BRL_CMD_RESTARTSPEECH,&c->unmaskedKeys)==-1) return -1;
@@ -1804,7 +1804,7 @@ static Connection *whoGetsKey(Tty *tty, brl_keycode_t command, brl_keycode_t key
     int masked;
     for (c=tty->connections->next; c!=tty->connections; c = c->next) {
       pthread_mutex_lock(&c->maskMutex);
-      if (c->how==BRLKEYCODES)
+      if (c->how==BRL_KEYCODES)
         masked = (contains(c->unmaskedKeys,keycode) == NULL);
       else
         masked = (contains(c->unmaskedKeys,command & BRL_MSK_CMD) == NULL);
@@ -1880,7 +1880,7 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
   }
   c = whoGetsKey(&ttys,command,keycode);
   if (c) {
-    if (c->how==BRLKEYCODES) {
+    if (c->how==BRL_KEYCODES) {
       LogPrint(LOG_DEBUG,"Transmitting unmasked key %lu",(unsigned long)keycode);
       keycode = htonl(keycode);
       brlapi_writePacket(c->fd,BRLPACKET_KEY,&keycode,sizeof(keycode));

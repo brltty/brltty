@@ -10,7 +10,8 @@ basic braille displaying, as well as key transmission, work fine.
 Configuring BRLTTY
 ==================
 
-Gnopernicus uses BrlAPI (BRLTTY's application programming interface).
+Gnopernicus uses BrlAPI (a general-purpose braille-enabling application
+programming interface).
 
 After installation, but *before* launching the new BRLTTY, please check that a
 BrlAPI authentication key has been defined. If the file /etc/brlapi.key either
