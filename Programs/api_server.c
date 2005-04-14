@@ -929,7 +929,7 @@ static int processRequest(Connection *c)
       CHECKEXC(size==getRawPacket->nameLength, BRLERR_INVALID_PACKET);
       memcpy(name, &getRawPacket->name, getRawPacket->nameLength);
       name[getRawPacket->nameLength] = '\0';
-      CHECKEXC(((!strcmp(name, trueBraille->name)) && isRawCapable(trueBraille)), BRLERR_RAWNOTSUPP);
+      CHECKERR(((!strcmp(name, trueBraille->name)) && isRawCapable(trueBraille)), BRLERR_RAWNOTSUPP);
       CHECKERR(rawConnection==NULL,BRLERR_RAWMODEBUSY);
       c->raw = 1;
       rawConnection = c;
