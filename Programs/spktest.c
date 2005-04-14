@@ -41,11 +41,11 @@ static char *opt_libraryDirectory;
 static char *opt_dataDirectory;
 
 BEGIN_OPTION_TABLE
-  {"pcm-device", "device", 'p', 0, OPT_Config | OPT_Environ,
+  {"pcm-device", "device", 'p', 0, 0,
    &opt_pcmDevice, NULL,
    "Device specifier for soundcard digital audio."},
 
-  {"rate", "speed", 'r', 0, OPT_Config | OPT_Environ,
+  {"rate", "speed", 'r', 0, 0,
    &opt_speechRate, NULL,
    "Floating-point speech rate multiplier."},
 
@@ -53,7 +53,7 @@ BEGIN_OPTION_TABLE
    &opt_textString, NULL,
    "Text to be spoken."},
 
-  {"volume", "loudness", 'v', 0, OPT_Config | OPT_Environ,
+  {"volume", "loudness", 'v', 0, 0,
    &opt_speechVolume, NULL,
    "Floating-point speech volume multiplier."},
 
