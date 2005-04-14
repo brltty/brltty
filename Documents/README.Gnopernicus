@@ -7,19 +7,15 @@ display that is supported by BRLTTY. Although support is far from complete,
 basic braille displaying, as well as key transmission, work fine.
 
 
-Building BRLTTY
-===============
+Configuring BRLTTY
+==================
 
-Gnopernicus uses BrlAPI (BRLTTY's application programming interface).  When
-building BRLTTY, therefore, configure it with --enable-api in order to enable
-the compilation and installation of libbrlapi and its header files.
+Gnopernicus uses BrlAPI (BRLTTY's application programming interface).
 
-    ./configure --enable-api
-    make
-    make install
-
-After installation, but *before* launching the new BRLTTY, you need to generate
-an authentication key for its API. The easiest way to do this is:
+After installation, but *before* launching the new BRLTTY, please check that a
+BrlAPI authentication key has been defined. If the file /etc/brlapi.key either
+doesn't exist or is empty then you need to generate a key. The easiest way to
+do this is:
 
     echo some-string >/etc/brlapi.key
 
@@ -36,7 +32,7 @@ If you have the dd command and the /dev/random device then you can do:
     dd if=/dev/random of=/etc/brlapi.key bs=32 count=1
 
 If there's the slightest possibility that even just one untrustworthy user can
-access your system then you should seriously consider ensuring that the fiLe
+access your system then you should seriously consider ensuring that the file
 containing the authentication key for BrlAPI can only be accessed by those
 users who actually need to use the braille display. If there's only one braille
 user then it's easy.  Just make him the owner of the file and ensure that noone
@@ -56,6 +52,17 @@ user is a member of that group.
     usermod -G brlapi user1
     usermod -G brlapi user2
     ...
+
+
+Compiling Gnopernicus
+=====================
+
+Gnopernicus must be linked against the libbrlapi.so which comes with the
+currently running BRLTTY. Whenever the version of this shared object changes
+(only the first two digits matter, e.g. libbrlapi.so.0.2.0 upgraded to
+libbrlapi.so.3.0.0 but not libbrlapi.so.0.3.0 upgraded to libbrlapi.so.0.3.1),
+you must rebuild (compile and link) Gnopernicus so as to make it use the
+correct interface.
 
 
 Configuring Gnopernicus
@@ -271,18 +278,3 @@ settings. BRLTTY commands are mapped to Gnopernicus key bindings as follows:
    BRL_CMD_HWINLT  L09K04    Left One Display Width
    BRL_CMD_HWINRT  L09K06    Right One Display Width
    BRL_BLK_ROUTE   HMSnn     Route Cursor
-
-
-What's Left
-===========
-
-We need some way to figure out the tty on which the X server is currently
-running. Some investigation didn't really show any way to get this information
-via the X protocol. We'll probably need to add a BrlAPI-specific configuration
-entry which at least lets the user set this. The downside would be that this
-would make it very hard to use Gnopernicus for more than one X server
-concurrently.
-
-Any input on these issues would be highly appreciated.
-
-
