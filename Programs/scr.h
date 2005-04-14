@@ -86,9 +86,9 @@ extern int switchVirtualTerminal (int);
 extern int currentVirtualTerminal (void);
 extern int executeScreenCommand (int);
 
-/* Routines which apply to the live screen. */
+/* Routines which apply to the main screen. */
 extern const char *const *getScreenParameters (void);			/* initialise screen reading functions */
-extern int openLiveScreen (char **parameters);			/* initialise screen reading functions */
+extern int openMainScreen (char **parameters);			/* initialise screen reading functions */
 
 /* Routines which apply to the routing screen.
  * An extra `thread' for the cursor routing subprocess.

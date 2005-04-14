@@ -226,12 +226,12 @@ executeScreenCommand (int cmd) {
 
 const char *const *
 getScreenParameters (void) {
-  return mainScreen.parameters();
+  return screenDriver->parameters;
 }
 
 
 int
-openLiveScreen (char **parameters) {
+openMainScreen (char **parameters) {
   if (mainScreen.prepare(parameters)) {
     if (mainScreen.open()) {
       if (mainScreen.setup()) {
@@ -248,7 +248,7 @@ openLiveScreen (char **parameters) {
 int
 openRoutingScreen (void) {
   /* This function should be used in a forked process. Though we want to
-   * have a separate file descriptor for the live screen from the one used
+   * have a separate file descriptor for the main screen from the one used
    * in the main thread.  So we close and reopen the device.
    */
   mainScreen.close();

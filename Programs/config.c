@@ -1957,7 +1957,7 @@ startup (int argc, char *argv[]) {
                                        opt_screenParameters);
   logParameters(getScreenParameters(), screenParameters, "Screen");
   if (!opt_verify) {
-    if (!openLiveScreen(screenParameters)) {                                
+    if (!openMainScreen(screenParameters)) {                                
       LogPrint(LOG_CRIT, "Cannot read screen.");
       exit(7);
     }

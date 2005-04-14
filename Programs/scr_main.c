@@ -27,12 +27,6 @@
 #include "scr.h"
 #include "scr_main.h"
 
-static const char *const screenParameters[] = {NULL};
-static const char *const *
-parameters_MainScreen (void) {
-  return screenParameters;
-}
-
 static int
 prepare_MainScreen (char **parameters) {
   return 1;
@@ -55,7 +49,6 @@ close_MainScreen (void) {
 void
 initializeMainScreen (MainScreen *main) {
   initializeBaseScreen(&main->base);
-  main->parameters = parameters_MainScreen;
   main->prepare = prepare_MainScreen;
   main->open = open_MainScreen;
   main->setup = setup_MainScreen;

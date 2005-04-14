@@ -143,7 +143,7 @@ main (int argc, char *argv[]) {
     --argc;
   }
 
-  if (openLiveScreen(parameterSettings)) {
+  if (openMainScreen(parameterSettings)) {
     ScreenDescription description;
     short left, top, width, height;
     unsigned char buffer[0X800];

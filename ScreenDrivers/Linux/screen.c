@@ -33,6 +33,14 @@
 #include "Programs/misc.h"
 #include "Programs/brldefs.h"
 
+typedef enum {
+  PARM_ACM,
+  PARM_DEBUGACM,
+  PARM_DEBUGSFM,
+  PARM_DEBUGCTT
+} ScreenParameters;
+#define SCRPARMS "acm", "debugacm", "debugsfm", "debugctt"
+
 #include "Programs/scr_driver.h"
 #include "screen.h"
 
@@ -512,24 +520,6 @@ setVgaCharacterCount (int force) {
            vgaCharacterCount,
            vgaLargeTable? "large": "small");
   return 1;
-}
-
-static const char *const screenParameters[] = {
-  "acm",
-  "debugacm",
-  "debugsfm",
-  "debugctt",
-  NULL
-};
-typedef enum {
-  PARM_ACM,
-  PARM_DEBUGACM,
-  PARM_DEBUGSFM,
-  PARM_DEBUGCTT
-} ScreenParameters;
-static const char *const *
-parameters_LinuxScreen (void) {
-  return screenParameters;
 }
 
 static int
@@ -1398,7 +1388,6 @@ scr_initialize (MainScreen *main) {
   main->base.switchvt = switchvt_LinuxScreen;
   main->base.currentvt = currentvt_LinuxScreen;
   main->base.execute = execute_LinuxScreen;
-  main->parameters = parameters_LinuxScreen;
   main->prepare = prepare_LinuxScreen;
   main->open = open_LinuxScreen;
   main->setup = setup_LinuxScreen;

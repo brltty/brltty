@@ -195,17 +195,8 @@ static void delRows(long pos, long num) {
   curRowLengths = realloc(curRowLengths,curNumRows*sizeof(*curRowLengths));
 }
 
-static const char *const screenParameters[] = {
-  NULL
-};
-
-static const char *const *
-parameters_AtSPIScreen (void) {
-  return screenParameters;
-}
-
 static int
-prepare_AtSPIScreen (char **parameters) {
+prepare_AtSpiScreen (char **parameters) {
   return 1;
 }
 
@@ -445,7 +436,7 @@ static void evListenerCB(const AccessibleEvent *event, void *user_data) {
   running = 0;
 }
 
-static void *doAtSPIScreenOpen(void *arg) {
+static void *doAtSpiScreenOpen(void *arg) {
   AccessibleEventListener *evListener;
   sem_t *SPI_init_sem = (sem_t *)arg;
   int res;
@@ -478,10 +469,10 @@ static void *doAtSPIScreenOpen(void *arg) {
 }
 
 static int
-open_AtSPIScreen (void) {
+open_AtSpiScreen (void) {
   sem_t SPI_init_sem;
   sem_init(&SPI_init_sem,0,0);
-  if (pthread_create(&SPI_main_thread,NULL,doAtSPIScreenOpen,(void *)&SPI_init_sem)) {
+  if (pthread_create(&SPI_main_thread,NULL,doAtSpiScreenOpen,(void *)&SPI_init_sem)) {
     LogPrint(LOG_ERR,"main SPI thread failed to be launched");
     return 0;
   }
@@ -491,19 +482,19 @@ open_AtSPIScreen (void) {
 }
 
 static int
-setup_AtSPIScreen (void) {
+setup_AtSpiScreen (void) {
   return 1;
 }
 
 static void
-close_AtSPIScreen (void) {
+close_AtSpiScreen (void) {
   SPI_event_quit();
   pthread_join(SPI_main_thread,NULL);
   LogPrint(LOG_DEBUG,"SPI stopped");
 }
 
 static void
-describe_AtSPIScreen (ScreenDescription *description) {
+describe_AtSpiScreen (ScreenDescription *description) {
   pthread_mutex_lock(&updateMutex);
   description->cols = curNumCols;
   description->rows = curNumRows?:1;
@@ -514,7 +505,7 @@ describe_AtSPIScreen (ScreenDescription *description) {
 }
 
 static unsigned char *
-read_AtSPIScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
+read_AtSpiScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
   long x,y;
   wchar_t c;
   if (box.height<0 || box.width<0) return NULL;
@@ -540,7 +531,7 @@ out:
 }
 
 static int
-insert_AtSPIScreen (ScreenKey key) {
+insert_AtSpiScreen (ScreenKey key) {
   long keysym;
   int modMeta = 0, modControl=0;
   LogPrint(LOG_DEBUG, "Insert key: %4.4X", key);
@@ -618,24 +609,24 @@ insert_AtSPIScreen (ScreenKey key) {
 }
 
 static int
-selectvt_AtSPIScreen (int vt) {
+selectvt_AtSpiScreen (int vt) {
   return 0;
 }
 
 static int
-switchvt_AtSPIScreen (int vt) {
+switchvt_AtSpiScreen (int vt) {
   return 0;
 }
 
 static int
-currentvt_AtSPIScreen (void) {
+currentvt_AtSpiScreen (void) {
   ScreenDescription description;
-  describe_AtSPIScreen(&description);
+  describe_AtSpiScreen(&description);
   return description.no;
 }
 
 static int
-execute_AtSPIScreen (int command) {
+execute_AtSpiScreen (int command) {
   int blk = command & BRL_MSK_BLK;
   int arg
 #ifdef HAVE_ATTRIBUTE_UNUSED
@@ -653,16 +644,15 @@ execute_AtSPIScreen (int command) {
 static void
 scr_initialize (MainScreen *main) {
   initializeRealScreen(main);
-  main->base.describe = describe_AtSPIScreen;
-  main->base.read = read_AtSPIScreen;
-  main->base.insert = insert_AtSPIScreen;
-  main->base.selectvt = selectvt_AtSPIScreen;
-  main->base.switchvt = switchvt_AtSPIScreen;
-  main->base.currentvt = currentvt_AtSPIScreen;
-  main->base.execute = execute_AtSPIScreen;
-  main->parameters = parameters_AtSPIScreen;
-  main->prepare = prepare_AtSPIScreen;
-  main->open = open_AtSPIScreen;
-  main->setup = setup_AtSPIScreen;
-  main->close = close_AtSPIScreen;
+  main->base.describe = describe_AtSpiScreen;
+  main->base.read = read_AtSpiScreen;
+  main->base.insert = insert_AtSpiScreen;
+  main->base.selectvt = selectvt_AtSpiScreen;
+  main->base.switchvt = switchvt_AtSpiScreen;
+  main->base.currentvt = currentvt_AtSpiScreen;
+  main->base.execute = execute_AtSpiScreen;
+  main->prepare = prepare_AtSpiScreen;
+  main->open = open_AtSpiScreen;
+  main->setup = setup_AtSpiScreen;
+  main->close = close_AtSpiScreen;
 }

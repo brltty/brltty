@@ -26,15 +26,6 @@
 
 static HANDLE consoleOutput = INVALID_HANDLE_VALUE;
 
-static const char *const screenParameters[] = {
-  NULL
-};
-
-static const char *const *
-parameters_WindowsScreen (void) {
-  return screenParameters;
-}
-
 static int
 prepare_WindowsScreen (char **parameters) {
   return 1;
@@ -172,7 +163,6 @@ scr_initialize (MainScreen *main) {
   main->base.switchvt = switchvt_WindowsScreen;
   main->base.currentvt = currentvt_WindowsScreen;
   main->base.execute = execute_WindowsScreen;
-  main->parameters = parameters_WindowsScreen;
   main->prepare = prepare_WindowsScreen;
   main->open = open_WindowsScreen;
   main->setup = setup_WindowsScreen;

@@ -26,7 +26,6 @@ extern "C" {
 
 typedef struct {
   BaseScreen base;
-  const char *const * (*parameters) (void);
   int (*prepare) (char **parameters);
   int (*open) (void);
   int (*setup) (void);

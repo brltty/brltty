@@ -166,15 +166,6 @@ openScreen (unsigned char vt) {
   return 0;
 }
 
-static const char *const screenParameters[] = {
-  NULL
-};
-
-static const char *const *
-parameters_HurdScreen (void) {
-  return screenParameters;
-}
-
 static int
 prepare_HurdScreen (char **parameters) {
   screenDescriptor = -1;
@@ -480,7 +471,6 @@ scr_initialize (MainScreen *main) {
   main->base.switchvt = switchvt_HurdScreen;
   main->base.currentvt = currentvt_HurdScreen;
   main->base.execute = execute_HurdScreen;
-  main->parameters = parameters_HurdScreen;
   main->prepare = prepare_HurdScreen;
   main->open = open_HurdScreen;
   main->setup = setup_HurdScreen;
