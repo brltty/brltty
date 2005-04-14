@@ -181,6 +181,12 @@ extern "C" {
 /* Define this to be a string containing the default speech driver parameters. */
 #undef SPEECH_PARAMETERS
 
+/* Define this to be a string containing the default screen driver code. */
+#undef SCREEN_DRIVER
+
+/* Define this to be a string containing a list of the screen driver codes. */
+#undef SCREEN_DRIVER_CODES
+
 /* Define this to be a string containing the default screen driver parameters. */
 #undef SCREEN_PARAMETERS
 

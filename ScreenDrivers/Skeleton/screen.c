@@ -23,10 +23,11 @@
 #include <unistd.h>
 #include <stdio.h>
 
-#include "scr.h"
-#include "scr_main.h"
+#include "Programs/misc.h"
 
-void
-initializeLiveScreen (MainScreen *main) {
-  initializeMainScreen(main);
+#include "Programs/scr_driver.h"
+
+static void
+scr_initialize (MainScreen *main) {
+  initializeRealScreen(main);
 }

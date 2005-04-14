@@ -24,7 +24,22 @@ extern "C" {
 
 #include "scr_main.h"
 
+typedef struct {
+  const char *name;
+  const char *identifier;
+  const char *date;
+  const char *time;
+  const char *const *parameters;
+
+  void (*initialize) (MainScreen *main);		/* initialize speech device */
+} ScreenDriver;
+
 extern void initializeRealScreen (MainScreen *);
+
+extern const ScreenDriver noScreen;
+extern const ScreenDriver *loadScreenDriver (const char *identifier, void **driverObject, const char *driverDirectory);
+extern void identifyScreenDrivers (void);
+extern void identifyScreenDriver (const ScreenDriver *driver);
 
 #ifdef __cplusplus
 }

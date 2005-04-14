@@ -34,7 +34,6 @@ typedef struct {
 } MainScreen;
 
 extern void initializeMainScreen (MainScreen *);
-extern void initializeLiveScreen (MainScreen *);
 
 #ifdef __cplusplus
 }

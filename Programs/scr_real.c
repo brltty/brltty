@@ -32,9 +32,41 @@
 #endif /* HAVE_SYS_SELECT_H */
 
 #include "misc.h"
-#include "route.h"
+#include "sysmisc.h"
 #include "scr.h"
 #include "scr_real.h"
+#include "scr.auto.h"
+#include "route.h"
+
+#define SCRSYMBOL noScreen
+#define SCRNAME NoScreen
+#define SCRCODE no
+#include "scr_driver.h"
+static void scr_initialize (MainScreen *main) {
+  initializeMainScreen(main);
+}
+
+const ScreenDriver *
+loadScreenDriver (const char *identifier, void **driverObject, const char *driverDirectory) {
+  return loadDriver(identifier, driverObject,
+                    driverDirectory, driverTable,
+                    "screen", 'x', "scr_driver",
+                    &noScreen, noScreen.identifier);
+}
+
+void
+identifyScreenDriver (const ScreenDriver *driver) {
+  LogPrint(LOG_NOTICE, "%s Screen Driver", driver->name);
+}
+
+void
+identifyScreenDrivers (void) {
+  const DriverEntry *entry = driverTable;
+  while (entry->address) {
+    const ScreenDriver *driver = entry++->address;
+    identifyScreenDriver(driver);
+  }
+}
 
 #ifdef HAVE_LIBGPM
 #include <gpm.h>

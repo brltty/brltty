@@ -32,28 +32,50 @@
 #include <unistd.h>
 #include <string.h>
 
+#include "misc.h"
+#include "system.h"
 #include "scr.h"
 #include "scr_frozen.h"
 #include "scr_help.h"
-#include "scr_main.h"
+#include "scr_real.h"
 
-HelpScreen helpScreen;
-FrozenScreen frozenScreen;                
-MainScreen liveScreen;
-BaseScreen *currentScreen;
+static BaseScreen *currentScreen;
+static HelpScreen helpScreen;
+static FrozenScreen frozenScreen;                
+static MainScreen mainScreen;
+static const ScreenDriver *screenDriver = NULL;
+static void *screenObject;
 
 void
-initializeAllScreens (void) {
+initializeAllScreens (const char *identifier, const char *driverDirectory) {
   initializeHelpScreen(&helpScreen);
-  initializeLiveScreen(&liveScreen);
   initializeFrozenScreen(&frozenScreen);
+
+  {
+    if (!(screenDriver = loadScreenDriver(identifier, &screenObject, driverDirectory))) {
+      screenDriver = &noScreen;
+      screenObject = NULL;
+    }
+
+    identifyScreenDriver(screenDriver);
+    screenDriver->initialize(&mainScreen);
+  }
 }
 
 void
 closeAllScreens (void) {
   frozenScreen.close();
-  liveScreen.close();
   helpScreen.close();
+  mainScreen.close();
+
+  if (screenDriver) {
+    screenDriver = NULL;
+
+    if (screenObject) {
+      unloadSharedObject(screenObject);
+      screenObject = NULL;
+    }
+  }
 }
 
 
@@ -78,7 +100,7 @@ selectDisplay (int disp) {
         {
           if (curscrn == HELP_SCRN)
             dismd & FROZ_SCRN ? (currentScreen = &frozenScreen.base, curscrn = FROZ_SCRN) : \
-              (currentScreen = &liveScreen.base, curscrn = LIVE_SCRN);
+              (currentScreen = &mainScreen.base, curscrn = LIVE_SCRN);
           return (dismd &= ~HELP_SCRN);
         }
     }
@@ -86,7 +108,7 @@ selectDisplay (int disp) {
     {
       if (disp & FROZ_SCRN)
         {
-          if (frozenScreen.open(&liveScreen.base))
+          if (frozenScreen.open(&mainScreen.base))
             {
               if (curscrn == LIVE_SCRN)
                 {
@@ -103,7 +125,7 @@ selectDisplay (int disp) {
           if (curscrn == FROZ_SCRN)
             {
               frozenScreen.close();
-              currentScreen = &liveScreen.base;
+              currentScreen = &mainScreen.base;
               curscrn = LIVE_SCRN;
             }
           return (dismd &= ~FROZ_SCRN);
@@ -204,19 +226,19 @@ executeScreenCommand (int cmd) {
 
 const char *const *
 getScreenParameters (void) {
-  return liveScreen.parameters();
+  return mainScreen.parameters();
 }
 
 
 int
 openLiveScreen (char **parameters) {
-  if (liveScreen.prepare(parameters)) {
-    if (liveScreen.open()) {
-      if (liveScreen.setup()) {
-        currentScreen = &liveScreen.base;
+  if (mainScreen.prepare(parameters)) {
+    if (mainScreen.open()) {
+      if (mainScreen.setup()) {
+        currentScreen = &mainScreen.base;
         return 1;
       }
-      liveScreen.close();
+      mainScreen.close();
     }
   }
   return 0;
@@ -229,20 +251,20 @@ openRoutingScreen (void) {
    * have a separate file descriptor for the live screen from the one used
    * in the main thread.  So we close and reopen the device.
    */
-  liveScreen.close();
-  return liveScreen.open();
+  mainScreen.close();
+  return mainScreen.open();
 }
 
 
 void
 describeRoutingScreen (ScreenDescription *desscription) {
-  liveScreen.base.describe(desscription);
+  mainScreen.base.describe(desscription);
 }
 
 
 void
 closeRoutingScreen (void) {
-  liveScreen.close();
+  mainScreen.close();
 }
 
 

@@ -1042,48 +1042,26 @@ BRLTTY_ARG_DISABLE(
 AC_SUBST([speech_support_object])
 BRLTTY_ARG_DRIVER([speech], [SpeechDrivers])
 
-AC_CACHE_CHECK([for default screen driver], [brltty_cv_default_screen_driver], [dnl
+screen_driver=""
 case "${host_os}"
 in
    linux*)
-      brltty_cv_default_screen_driver="linux"
+      BRLTTY_SCREEN_DRIVER([lx], [Linux])
       ;;
    gnu*)
-      brltty_cv_default_screen_driver="hurd"
+      BRLTTY_SCREEN_DRIVER([hd], [Hurd])
       ;;
    cygwin*|mingw*)
-      brltty_cv_default_screen_driver="windows"
+      BRLTTY_SCREEN_DRIVER([wd], [Windows])
       ;;
    *)
-      brltty_cv_default_screen_driver="shm"
-      AC_MSG_WARN([no default screen driver - using ${brltty_cv_default_screen_driver}])
-      ;;
-esac])
-
-BRLTTY_ARG_WITH(
-   [screen-driver], [DRIVER],
-   [screen driver],
-   [screen_driver], ["${brltty_cv_default_screen_driver}"]
-)
-if test "${screen_driver}" = "no"
-then
-   screen_driver="null"
-elif test "${screen_driver}" = "yes"
-then
-   screen_driver="${brltty_cv_default_screen_driver}"
-fi
-BRLTTY_SUMMARY_ITEM([screen-driver], [screen_driver])
-
-screen_driver_objects="scr_${screen_driver}."'$O'
-case "${screen_driver}"
-in
-   linux|hurd|shm|windows|atspi)
-      screen_driver_objects="${screen_driver_objects} "'scr_real.$O'
+      AC_MSG_WARN([no native screen driver - using shared memory])
       ;;
 esac
-AC_SUBST([screen_driver_objects])
+BRLTTY_SCREEN_DRIVER([sm], [SharedMemory])
+AC_DEFINE_UNQUOTED([SCREEN_DRIVER], ["${screen_driver}"])
+BRLTTY_SUMMARY_ITEM([screen-driver], [screen_driver])
 
-cspi_found=false
 cspi_includes=""
 cspi_libdirs=""
 cspi_libraries=""
@@ -1093,7 +1071,7 @@ do
       cspi_includes="`pkg-config --cflags-only-I "${package}"`"
       cspi_libdirs="`pkg-config --libs-only-L "${package}"`"
       cspi_libraries="`pkg-config --libs-only-l "${package}"`"
-      cspi_found=true
+      BRLTTY_SCREEN_DRIVER([as], [AtSpi], [$(CSPI_LIBDIRS) $(CSPI_LIBRARIES)])
       break
    }
 done
@@ -1101,20 +1079,7 @@ AC_SUBST([cspi_includes])
 AC_SUBST([cspi_libdirs])
 AC_SUBST([cspi_libraries])
 
-screen_driver_libraries=""
-case "${screen_driver}"
-in
-   atspi)
-      "${cspi_found}" || {
-         AC_MSG_ERROR([cspi not found.])
-      }
-
-      screen_driver_libraries="${cspi_libdirs} ${cspi_libraries}"
-      ;;
-esac
-AC_SUBST([screen_driver_libraries])
-
-BRLTTY_ARG_PARAMETERS([screen])
+BRLTTY_ARG_DRIVER([screen], [ScreenDrivers])
 
 AC_SUBST([install_drivers])
 BRLTTY_SUMMARY_END

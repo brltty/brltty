@@ -124,6 +124,7 @@ static char *opt_speechFifo;
 static int opt_noSpeech;
 #endif /* ENABLE_SPEECH_SUPPORT */
 
+static char *opt_screenDriver;
 static char *opt_screenParameters;
 static char **screenParameters = NULL;
 
@@ -199,6 +200,10 @@ BEGIN_OPTION_TABLE
   {"verify", NULL, 'v', 0, 0,
    &opt_verify, NULL,
    "Print start-up messages and exit."},
+
+  {"screen-driver", "driver", 'x', 0, OPT_Config | OPT_Environ,
+   &opt_screenDriver, SCREEN_DRIVER,
+   "Screen driver: one of {" SCREEN_DRIVER_CODES "}"},
 
 #ifdef ENABLE_API
   {"api-parameters", "arg,...", 'A', 0, OPT_Extend | OPT_Config | OPT_Environ,
@@ -1945,7 +1950,7 @@ startup (int argc, char *argv[]) {
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
   /* initialize screen driver */
-  initializeAllScreens();
+  initializeAllScreens(opt_screenDriver, opt_libraryDirectory);
   screenParameters = processParameters(getScreenParameters(),
                                        "screen driver",
                                        NULL,

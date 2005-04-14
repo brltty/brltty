@@ -37,6 +37,8 @@ static char *opt_boxLeft;
 static char *opt_boxWidth;
 static char *opt_boxTop;
 static char *opt_boxHeight;
+static char *opt_screenDriver;
+static char *opt_libraryDirectory;
 
 BEGIN_OPTION_TABLE
   {"left", "column", 'l', 0, 0,
@@ -54,6 +56,14 @@ BEGIN_OPTION_TABLE
   {"rows", "count", 'r', 0, 0,
    &opt_boxHeight, NULL,
    "Height of region."},
+
+  {"screen-driver", "driver", 'x', 0, 0,
+   &opt_screenDriver, SCREEN_DRIVER,
+   "Screen driver: one of {" SCREEN_DRIVER_CODES "}"},
+
+  {"library-directory", "directory", 'L', 0, 0,
+   &opt_libraryDirectory, LIBRARY_DIRECTORY,
+   "Path to directory for loading drivers."},
 END_OPTION_TABLE
 
 static void
@@ -88,7 +98,7 @@ main (int argc, char *argv[]) {
                  NULL, NULL, NULL,
                  "[parameter=value ...]");
 
-  initializeAllScreens();
+  initializeAllScreens(opt_screenDriver, opt_libraryDirectory);
   if (!(parameterNames = getScreenParameters())) {
     static const char *const noNames[] = {NULL};
     parameterNames = noNames;

@@ -182,6 +182,10 @@ BRLTTY_ITEM([braille], [$1], [$2], [$3])])
 AC_DEFUN([BRLTTY_SPEECH_DRIVER], [dnl
 BRLTTY_ITEM([speech], [$1], [$2], [$3])])
 
+AC_DEFUN([BRLTTY_SCREEN_DRIVER], [dnl
+test -z "${screen_driver}" && screen_driver="$1"
+BRLTTY_ITEM([screen], [$1], [$2], [$3])])
+
 AC_DEFUN([BRLTTY_ARG_ITEM], [dnl
 BRLTTY_VAR_TRIM([brltty_item_codes_$1])
 AC_SUBST([brltty_item_codes_$1])

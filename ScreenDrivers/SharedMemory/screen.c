@@ -41,17 +41,17 @@ static const char *shmPath = "/screen";
 static int shmFileDescriptor = -1;
 #endif /* HAVE_SHM_OPEN */
 
-#include "misc.h"
-#include "scr.h"
-#include "scr_real.h"
-#include "scr_shm.h"
+#include "Programs/misc.h"
+
+#include "Programs/scr_driver.h"
+#include "screen.h"
 
 static char *shmAddress = NULL;
 static const mode_t shmMode = S_IRWXU;
 static const int shmSize = 4 + ((66 * 132) * 2);
 
 static int
-open_ShmScreen (void) {
+open_SharedMemoryScreen (void) {
 #ifdef HAVE_SHMGET
   key_t keys[2];
   int keyCount = 0;
@@ -111,7 +111,7 @@ open_ShmScreen (void) {
 }
 
 static void
-describe_ShmScreen (ScreenDescription *description) {
+describe_SharedMemoryScreen (ScreenDescription *description) {
   description->cols = shmAddress[0];
   description->rows = shmAddress[1];
   description->posx = shmAddress[2];
@@ -120,9 +120,9 @@ describe_ShmScreen (ScreenDescription *description) {
 }
 
 static unsigned char *
-read_ShmScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
+read_SharedMemoryScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
   ScreenDescription description;                 /* screen statistics */
-  describe_ShmScreen(&description);
+  describe_SharedMemoryScreen(&description);
   if (validateScreenBox(&box, description.cols, description.rows)) {
     off_t start = 4 + (((mode == SCR_TEXT)? 0: 1) * description.cols * description.rows) + (box.top * description.cols) + box.left;
     int row;
@@ -137,7 +137,7 @@ read_ShmScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
 }
 
 static void
-close_ShmScreen (void) {
+close_SharedMemoryScreen (void) {
 #ifdef HAVE_SHMGET
   if (shmIdentifier != -1) {
     shmdt(shmAddress);
@@ -155,11 +155,11 @@ close_ShmScreen (void) {
   shmAddress = NULL;
 }
 
-void
-initializeLiveScreen (MainScreen *main) {
+static void
+scr_initialize (MainScreen *main) {
   initializeRealScreen(main);
-  main->base.describe = describe_ShmScreen;
-  main->base.read = read_ShmScreen;
-  main->open = open_ShmScreen;
-  main->close = close_ShmScreen;
+  main->base.describe = describe_SharedMemoryScreen;
+  main->base.read = read_SharedMemoryScreen;
+  main->open = open_SharedMemoryScreen;
+  main->close = close_SharedMemoryScreen;
 }

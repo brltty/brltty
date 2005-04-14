@@ -30,11 +30,11 @@
 #include <linux/vt.h>
 #include <linux/kd.h>
 
-#include "misc.h"
-#include "scr.h"
-#include "scr_real.h"
-#include "scr_linux.h"
-#include "brldefs.h"
+#include "Programs/misc.h"
+#include "Programs/brldefs.h"
+
+#include "Programs/scr_driver.h"
+#include "screen.h"
 
 static unsigned int debugCharacterTranslationTable = 0;
 static unsigned int debugApplicationCharacterMap = 0;
@@ -1388,8 +1388,8 @@ execute_LinuxScreen (int command) {
   return 0;
 }
 
-void
-initializeLiveScreen (MainScreen *main) {
+static void
+scr_initialize (MainScreen *main) {
   initializeRealScreen(main);
   main->base.describe = describe_LinuxScreen;
   main->base.read = read_LinuxScreen;

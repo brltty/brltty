@@ -1,4 +1,4 @@
-# BRLTT - A background process providing access to the console screen (when in
+# BRLTTY - A background process providing access to the console screen (when in
 #          text mode) for a blind person using a refreshable braille display.
 #
 # Copyright (C) 1995-2005 by The BRLTTY Team. All rights reserved.
@@ -16,10 +16,11 @@
 
 include $(BLD_TOP)config.mk
 
-all: all-brltty all-brltest all-spktest scrtest$X tbltest$X ctbtest$X tunetest$X $(ALL_API)
-all-brltty: brltty$X $(BRAILLE_DRIVERS) $(BRAILLE_HELP) $(SPEECH_DRIVERS)
+all: all-brltty all-brltest all-spktest all-scrtest tbltest$X ctbtest$X tunetest$X $(ALL_API)
+all-brltty: brltty$X $(BRAILLE_DRIVERS) $(BRAILLE_HELP) $(SPEECH_DRIVERS) $(SCREEN_DRIVERS)
 all-brltest: brltest$X $(BRAILLE_DRIVERS)
 all-spktest: spktest$X $(SPEECH_DRIVERS)
+all-scrtest: scrtest$X $(SCREEN_DRIVERS)
 all-api: apitest$X
 
 ###############################################################################
@@ -42,7 +43,7 @@ ctb_translate.$O:
 
 ###############################################################################
 
-SCREEN_OBJECTS = scr.$O scr_base.$O scr_help.$O scr_frozen.$O scr_main.$O $(SCREEN_DRIVER_OBJECTS)
+SCREEN_OBJECTS = scr.$O scr_base.$O scr_help.$O scr_frozen.$O scr_main.$O scr_real.$O
 
 scr.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/scr.c
@@ -59,29 +60,11 @@ scr_frozen.$O:
 scr_main.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/scr_main.c
 
-scr_null.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/scr_null.c
-
-scr_real.$O:
+scr_real.$O: scr.auto.h
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/scr_real.c
 
 route.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/route.c
-
-scr_shm.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/scr_shm.c
-
-scr_linux.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/scr_linux.c
-
-scr_hurd.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/scr_hurd.c
-
-scr_windows.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/scr_windows.c
-
-scr_atspi.$O:
-	$(CC) $(CFLAGS) $(CSPI_INCLUDES) -c $(SRC_DIR)/scr_atspi.c
 
 ###############################################################################
 
@@ -135,7 +118,7 @@ rangelist.$O:
 
 ###############################################################################
 
-BRLTTY_OBJECTS = main.$O config.$O options.$O misc.$O $(SYSTEM_OBJECT) iomisc.$O sysmisc.$O queue.$O cut.$O route.$O cmd.$O at2.$O $(TBL_OBJECTS) $(CTB_OBJECTS) serial.$O $(USB_OBJECTS) $(BLUETOOTH_OBJECTS) brl.$O $(BRAILLE_DRIVER_OBJECTS) $(SPEECH_OBJECT) $(SPEECH_DRIVER_OBJECTS) $(API_OBJECTS) $(SCREEN_OBJECTS) $(TUNE_OBJECTS)
+BRLTTY_OBJECTS = main.$O config.$O options.$O misc.$O $(SYSTEM_OBJECT) iomisc.$O sysmisc.$O queue.$O cut.$O route.$O cmd.$O at2.$O $(TBL_OBJECTS) $(CTB_OBJECTS) serial.$O $(USB_OBJECTS) $(BLUETOOTH_OBJECTS) brl.$O $(BRAILLE_DRIVER_OBJECTS) $(SPEECH_OBJECT) $(SPEECH_DRIVER_OBJECTS) $(SCREEN_OBJECTS) $(SCREEN_DRIVER_OBJECTS) $(TUNE_OBJECTS) $(API_OBJECTS)
 
 brltty$X: $(BRLTTY_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(SPEECH_DRIVER_LIBRARIES) $(SCREEN_DRIVER_LIBRARIES) $(LDLIBS)
@@ -270,7 +253,7 @@ spktest.$O:
 
 ###############################################################################
 
-SCRTEST_OBJECTS = scrtest.$O options.$O misc.$O $(SYSTEM_OBJECT) iomisc.$O route.$O $(SCREEN_OBJECTS)
+SCRTEST_OBJECTS = scrtest.$O options.$O misc.$O $(SYSTEM_OBJECT) iomisc.$O sysmisc.$O route.$O $(SCREEN_OBJECTS) $(SCREEN_DRIVER_OBJECTS)
 
 scrtest$X: $(SCRTEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(SCRTEST_OBJECTS) $(SCREEN_DRIVER_LIBRARIES) $(LDLIBS)
@@ -341,6 +324,14 @@ speech-drivers:
 
 ###############################################################################
 
+screen-drivers:
+	-rm -f $(BLD_TOP)$(DRV_DIR)/brltty-scr.lst
+	for driver in $(SCREEN_EXTERNAL_DRIVER_NAMES); \
+	do (cd $(BLD_TOP)$(SCR_DIR)/$$driver && $(MAKE) screen-driver scr-lib-name) || exit 1; \
+	done
+
+###############################################################################
+
 text.auto.h: $(TEXT_TABLE) tbl2hex
 	./tbl2hex $(TEXT_TABLE) >$@
 
@@ -355,6 +346,9 @@ brl.auto.h: $(SRC_DIR)/mkdrvtab
 
 spk.auto.h: $(SRC_DIR)/mkdrvtab
 	$(SRC_DIR)/mkdrvtab SpeechDriver spk_driver_ $(SPEECH_INTERNAL_DRIVER_CODES) >$@
+
+scr.auto.h: $(SRC_DIR)/mkdrvtab
+	$(SRC_DIR)/mkdrvtab ScreenDriver scr_driver_ $(SCREEN_INTERNAL_DRIVER_CODES) >$@
 
 ###############################################################################
 
@@ -447,7 +441,7 @@ install-contraction-tables: install-data-directory
 install-data-directory:
 	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(DATA_DIRECTORY) 
 
-install-drivers: $(BRAILLE_DRIVERS) $(SPEECH_DRIVERS)
+install-drivers: $(BRAILLE_DRIVERS) $(SPEECH_DRIVERS) $(SCREEN_DRIVERS)
 	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(LIBRARY_DIRECTORY)
 	$(INSTALL_PROGRAM) $(BLD_TOP)$(DRV_DIR)/*.$(MOD_EXT) $(INSTALL_ROOT)$(LIBRARY_DIRECTORY)
 	$(INSTALL_DATA) $(BLD_TOP)$(DRV_DIR)/*.lst $(INSTALL_ROOT)$(LIBRARY_DIRECTORY)
@@ -533,6 +527,7 @@ clean::
 distclean clean install uninstall::
 	-for driver in $(BRAILLE_EXTERNAL_DRIVER_NAMES); do (cd $(BLD_TOP)$(BRL_DIR)/$$driver && $(MAKE) $@); done
 	-for driver in $(SPEECH_EXTERNAL_DRIVER_NAMES); do (cd $(BLD_TOP)$(SPK_DIR)/$$driver && $(MAKE) $@); done
+	-for driver in $(SCREEN_EXTERNAL_DRIVER_NAMES); do (cd $(BLD_TOP)$(SCR_DIR)/$$driver && $(MAKE) $@); done
 
 distclean::
 	-rm -f brltty-config$X

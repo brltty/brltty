@@ -30,11 +30,11 @@
 #include <sys/mman.h>
 #include <hurd/console.h>
 
-#include "misc.h"
-#include "scr.h"
-#include "scr_real.h"
-#include "scr_hurd.h"
-#include "brldefs.h"
+#include "Programs/misc.h"
+#include "Programs/brldefs.h"
+
+#include "Programs/scr_driver.h"
+#include "screen.h"
 
 static char *
 vtPath (const char *base, unsigned char vt) {
@@ -470,8 +470,8 @@ execute_HurdScreen (int command) {
   return 0;
 }
 
-void
-initializeLiveScreen (MainScreen *main) {
+static void
+scr_initialize (MainScreen *main) {
   initializeRealScreen(main);
   main->base.describe = describe_HurdScreen;
   main->base.read = read_HurdScreen;

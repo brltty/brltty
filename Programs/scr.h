@@ -68,36 +68,36 @@ typedef enum {
 } ScreenKey;
 
 /* Routines which apply to all screens. */
-void initializeAllScreens (void);		/* close screen reading */
-void closeAllScreens (void);		/* close screen reading */
-int selectDisplay (int);		/* select display page */
+extern void initializeAllScreens (const char *identifier, const char *driverDirectory);		/* close screen reading */
+extern void closeAllScreens (void);		/* close screen reading */
+extern int selectDisplay (int);		/* select display page */
 
 /* Routines which apply to the current screen. */
-void describeScreen (ScreenDescription *);		/* get screen status */
-unsigned char *readScreen (short, short, short, short, unsigned char *, ScreenMode);
-int insertKey (ScreenKey);
-int insertCharacters (const char *, int);
-int insertString (const char *);
-int routeCursor (int, int, int);
-int setPointer (int, int);
-int getPointer (int *, int *);
-int selectVirtualTerminal (int);
-int switchVirtualTerminal (int);
-int currentVirtualTerminal (void);
-int executeScreenCommand (int);
+extern void describeScreen (ScreenDescription *);		/* get screen status */
+extern unsigned char *readScreen (short, short, short, short, unsigned char *, ScreenMode);
+extern int insertKey (ScreenKey);
+extern int insertCharacters (const char *, int);
+extern int insertString (const char *);
+extern int routeCursor (int, int, int);
+extern int setPointer (int, int);
+extern int getPointer (int *, int *);
+extern int selectVirtualTerminal (int);
+extern int switchVirtualTerminal (int);
+extern int currentVirtualTerminal (void);
+extern int executeScreenCommand (int);
 
 /* Routines which apply to the live screen. */
-const char *const *getScreenParameters (void);			/* initialise screen reading functions */
-int openLiveScreen (char **parameters);			/* initialise screen reading functions */
+extern const char *const *getScreenParameters (void);			/* initialise screen reading functions */
+extern int openLiveScreen (char **parameters);			/* initialise screen reading functions */
 
 /* Routines which apply to the routing screen.
  * An extra `thread' for the cursor routing subprocess.
  * This is needed because the forked subprocess shares its parent's
  * file descriptors.  A readScreen equivalent is not needed.
  */
-int openRoutingScreen (void);
-void describeRoutingScreen (ScreenDescription *);
-void closeRoutingScreen (void);
+extern int openRoutingScreen (void);
+extern void describeRoutingScreen (ScreenDescription *);
+extern void closeRoutingScreen (void);
 
 /* Routines which apply to the help screen. */
 extern int openHelpScreen (const char *);

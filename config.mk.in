@@ -24,6 +24,7 @@ TBL_DIR = BrailleTables
 CTB_DIR = ContractionTables
 BRL_DIR = BrailleDrivers
 SPK_DIR = SpeechDrivers
+SCR_DIR = ScreenDrivers
 DRV_DIR = lib
 DAT_DIR = data
 
@@ -137,6 +138,14 @@ SPEECH_INTERNAL_DRIVER_NAMES = @brltty_internal_names_speech@
 SPEECH_DRIVERS = @speech_drivers@
 SPEECH_EXTERNAL_DRIVER_NAMES = @brltty_external_names_speech@
 
+SCREEN_DRIVER_CODES = @brltty_item_codes_screen@
+SCREEN_DRIVER_OBJECTS = @screen_driver_objects@
+SCREEN_DRIVER_LIBRARIES = @screen_driver_libraries@
+SCREEN_INTERNAL_DRIVER_CODES = @brltty_internal_codes_screen@
+SCREEN_INTERNAL_DRIVER_NAMES = @brltty_internal_names_screen@
+SCREEN_DRIVERS = @screen_drivers@
+SCREEN_EXTERNAL_DRIVER_NAMES = @brltty_external_names_screen@
+
 FLITE_ROOT = @flite_root@
 FLITE_LANGUAGE = @flite_language@
 FLITE_LEXICON = @flite_lexicon@
@@ -150,9 +159,6 @@ INSTALL_TEXT_TABLES = @install_text_tables@
 INSTALL_ATTRIBUTES_TABLES = @install_attributes_tables@
 INSTALL_CONTRACTION_TABLES = @install_contraction_tables@
 INSTALL_DRIVERS = @install_drivers@
-
-SCREEN_DRIVER_OBJECTS = @screen_driver_objects@
-SCREEN_DRIVER_LIBRARIES = @screen_driver_libraries@
 
 CSPI_INCLUDES = @cspi_includes@
 CSPI_LIBDIRS = @cspi_libdirs@

@@ -35,10 +35,10 @@
 #include <cspi/spi.h>
 #include <X11/keysym.h>
 
-#include "misc.h"
-#include "scr.h"
-#include "scr_real.h"
-#include "brldefs.h"
+#include "Programs/misc.h"
+#include "Programs/brldefs.h"
+
+#include "Programs/scr_driver.h"
 
 static AccessibleText *curTerm;
 static Accessible *curFocus;
@@ -650,8 +650,8 @@ execute_AtSPIScreen (int command) {
   return 0;
 }
 
-void
-initializeLiveScreen (MainScreen *main) {
+static void
+scr_initialize (MainScreen *main) {
   initializeRealScreen(main);
   main->base.describe = describe_AtSPIScreen;
   main->base.read = read_AtSPIScreen;

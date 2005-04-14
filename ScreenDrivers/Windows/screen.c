@@ -19,10 +19,10 @@
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
 
-#include "misc.h"
-#include "scr.h"
-#include "scr_real.h"
-#include "brldefs.h"
+#include "Programs/misc.h"
+#include "Programs/brldefs.h"
+
+#include "Programs/scr_driver.h"
 
 static HANDLE consoleOutput = INVALID_HANDLE_VALUE;
 
@@ -162,8 +162,8 @@ execute_WindowsScreen (int command) {
   return 0;
 }
 
-void
-initializeLiveScreen (MainScreen *main) {
+static void
+scr_initialize (MainScreen *main) {
   initializeRealScreen(main);
   main->base.describe = describe_WindowsScreen;
   main->base.read = read_WindowsScreen;
