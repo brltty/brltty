@@ -307,7 +307,7 @@ int brlapi_getDisplaySize(unsigned int *x, unsigned int *y);
  *
  * \sa brlapi_leaveTty() brlapi_readKey()
  */
-int brlapi_getTty(int tty, const char *);
+int brlapi_getTty(int tty, const char *how);
 
 /* brlapi_leaveTty */
 /** stop controlling the tty
@@ -540,7 +540,7 @@ int brlapi_unignoreKeySet(const brl_keycode_t *s, unsigned int n);
  * \param Specifies the name of the driver for which the raw
  * communication must be established
  * \return 0 on success, -1 on error */
-int brlapi_getRaw(const char *);
+int brlapi_getRaw(const char *driver);
 
 /* brlapi_leaveRaw */
 /** Leave Raw mode
