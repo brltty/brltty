@@ -183,7 +183,6 @@ AC_DEFUN([BRLTTY_SPEECH_DRIVER], [dnl
 BRLTTY_ITEM([speech], [$1], [$2], [$3])])
 
 AC_DEFUN([BRLTTY_SCREEN_DRIVER], [dnl
-test -z "${screen_driver}" && screen_driver="$1"
 BRLTTY_ITEM([screen], [$1], [$2], [$3])])
 
 AC_DEFUN([BRLTTY_ARG_ITEM], [dnl
@@ -353,6 +352,10 @@ changequote([, ])dnl
    BRLTTY_SUMMARY_ITEM([internal-$1-drivers], [brltty_internal_codes_$1])
    BRLTTY_ARG_PARAMETERS([$1])
 fi
+
+set -- ${brltty_internal_codes_$1}
+test ${#} -eq 0 && set -- ${brltty_external_codes_$1}
+brltty_default_code_$1="${1}"
 
 for brltty_driver in ${brltty_item_names_$1}
 do

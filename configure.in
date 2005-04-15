@@ -1042,7 +1042,6 @@ BRLTTY_ARG_DISABLE(
 AC_SUBST([speech_support_object])
 BRLTTY_ARG_DRIVER([speech], [SpeechDrivers])
 
-screen_driver=""
 case "${host_os}"
 in
    linux*)
@@ -1055,12 +1054,10 @@ in
       BRLTTY_SCREEN_DRIVER([wn], [Windows])
       ;;
    *)
-      AC_MSG_WARN([no native screen driver - using shared memory])
+      AC_MSG_WARN([no native screen driver for ${host_os}])
       ;;
 esac
 BRLTTY_SCREEN_DRIVER([sm], [SharedMemory])
-AC_DEFINE_UNQUOTED([SCREEN_DRIVER], ["${screen_driver}"])
-BRLTTY_SUMMARY_ITEM([screen-driver], [screen_driver])
 
 cspi_includes=""
 cspi_libdirs=""
@@ -1080,6 +1077,8 @@ AC_SUBST([cspi_libdirs])
 AC_SUBST([cspi_libraries])
 
 BRLTTY_ARG_DRIVER([screen], [ScreenDrivers])
+AC_DEFINE_UNQUOTED([SCREEN_DRIVER], ["${brltty_default_code_screen}"])
+BRLTTY_SUMMARY_ITEM([screen-driver], [brltty_default_code_screen])
 
 AC_SUBST([install_drivers])
 BRLTTY_SUMMARY_END
