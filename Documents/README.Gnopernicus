@@ -65,6 +65,10 @@ libbrlapi.so.3.0.0 but not libbrlapi.so.0.3.0 upgraded to libbrlapi.so.0.3.1),
 you must rebuild (compile and link) Gnopernicus so as to make it use the
 correct interface.
 
+If the build fails then one thing you should try is replacing the Gnopernicus
+source file braille/libbrl/ttybrl.c with the one provided by BRLTTY in
+Patches/ttybrl.c.
+
 
 Configuring Gnopernicus
 =======================
