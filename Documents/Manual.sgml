@@ -453,12 +453,10 @@ for any additional display-specific instructions.
     Each driver must be identified
     either by its two-letter <ref id="drivers" name="driver identification code">
     or by its proper name (full or abbreviated).
-    The driver identifiers and/or names must be
+    The driver identifiers must be
     separated from one another by a single comma.
     If a driver identifier is prefixed by a minus sign (<tt/-/),
     then that driver is excluded from the build.
-    The first non-excluded driver becomes the default driver.
-    There's no default driver if this option isn't used.
     Any of the following words can also be used as the operand of this option:
     <descrip>
       <tag/all/
@@ -476,6 +474,9 @@ for any additional display-specific instructions.
         Don't link any of them into the binary.
         This is equivalent to specifying <tt/--with-braille-driver/.
     </descrip>
+    The first non-excluded driver becomes the default driver.
+    There's no default driver if this option isn't used
+    or if no driver is specifically included.
     See the <ref id="configure-braille-driver" name="braille-driver"> configuration file directive
     and the <ref id="options-braille-driver" name="-b"> command line option
     for run-time selection.
@@ -558,12 +559,10 @@ for any additional display-specific instructions.
     Each driver must be identified
     either by its two-letter <ref id="drivers" name="driver identification code">
     or by its proper name (full or abbreviated).
-    The driver identifiers and/or names must be
+    The driver identifiers must be
     separated from one another by a single comma.
     If a driver identifier is prefixed by a minus sign (<tt/-/),
     then that driver is excluded from the build.
-    The first non-excluded driver becomes the default driver.
-    There's no default driver if this option isn't used.
     Any of the following words can also be used as the operand of this option:
     <descrip>
       <tag/all/
@@ -581,6 +580,9 @@ for any additional display-specific instructions.
         Don't link any of them into the binary.
         This is equivalent to specifying <tt/--with-speech-driver/.
     </descrip>
+    The first non-excluded driver becomes the default driver.
+    There's no default driver if this option isn't used
+    or if no driver is specifically included.
     See the <ref id="configure-speech-driver" name="speech-driver"> configuration file directive
     and the <ref id="options-speech-driver" name="-s"> command line option
     for run-time selection.
@@ -701,35 +703,54 @@ for any additional display-specific instructions.
         This is equivalent to specifying <tt/--with-viavoice/.
     </descrip>
   <tag><tt/--with-screen-driver=/<em/driver/<label id="build-screen-driver"></tag>
-    Specify the screen driver.
-    It may be one of the following:
+    Specify the screen drivers
+    which are to be linked into the BRLTTY binary.
+    Those drivers which aren't listed via this option
+    are built as dynamically loadable shared objects
+    and can still be selected at run-time.
+    Each driver must be identified
+    either by its two-letter driver identification code
+    (see section <ref id="screen" name="Supported Screen Drivers">)
+    or by its proper name (full or abbreviated).
+    The driver identifiers must be
+    separated from one another by a single comma.
+    If a driver identifier is prefixed by a minus sign (<tt/-/),
+    then that driver is excluded from the build.
+    Any of the following words can also be used as the operand of this option:
     <descrip>
-      <tag/hurd/
-        This driver provides direct access to the Hurd console screen.
-        It's only selectable, and is the default, on Hurd systems.
-      <tag/linux/
-        This driver provides direct access to the Linux console screen.
-        It's only selectable, and is the default, on Linux systems.
-      <tag/shm/
-        This driver provides access to the <tt/screen/ program.
-        It's selectable on all systems,
-        and is the default on most.
-        The patch for <tt/screen/ which we provide
-        (see the <tt/Patches/ subdirectory)
-        must be applied.
-        Use of this driver,
-        due to the fact that <tt/screen/ must be concurrently running,
-        makes BRLTTY effectively useful only after the user has logged in.
+      <tag/all/
+        Link all of the drivers into the binary.
+        Don't build any of them as dynamically loadable shared objects.
+        This word may also be specified as the final element of a driver list.
+        This is how to specify the dfault driver when all the drivers are to be linked in.
+      <tag/-all/
+        Only build those drivers which have been explicitly included via this option.
+      <tag/no/
+        Don't build any drivers at all.
+        This is equivalent to specifying <tt/--without-screen-driver/.
+      <tag/yes/
+        Build all of the drivers as dynamically loadable shared objects.
+        Don't link any of them into the binary.
+        This is equivalent to specifying <tt/--with-screen-driver/.
     </descrip>
+    The first non-excluded driver becomes the default driver.
     If this option isn't specified,
-    then an operating system appropriate selection is made.
-    If a specific driver for the current operating system is available,
-    then it's used.
-    If not, then <tt/shm/ is used.
-  <tag><tt/--with-screen-parameters=/<em/name/<tt/=/<em/value/<tt/,/...<label id="build-screen-parameters"></tag>
-    Specify the default parameter settings for the screen driver.
+    or if no drivdr is specifically included,
+    then an operating system appropriate default is selected.
+    If a native driver for the current operating system is available,
+    then that driver is selected;
+    if not, then <tt/sc/ is selected.
+    See the <ref id="configure-screen-driver" name="screen-driver"> configuration file directive
+    and the <ref id="options-screen-driver" name="-x"> command line option
+    for run-time selection.
+  <tag><tt/--with-screen-parameters=/[<em/driver/<tt/:/]<em/name/<tt/=/<em/value/<tt/,/...<label id="build-screen-parameters"></tag>
+    Specify the default parameter settings for the screen drivers.
     If the same parameter is specified more than once,
     then its rightmost assignment is used.
+    If a parameter name is qualified by a driver
+    (see section <ref id="screen" name="Supported Screen Drivers">)
+    then that setting only applies to that driver;
+    if it isn't then it applies to all drivers.
     For a description of the parameters accepted by a specific driver,
     please see the documentation for that driver.
     See the <ref id="configure-screen-parameters" name="screen-parameters"> configuration file directive
@@ -2282,10 +2303,21 @@ The following directives are recognized:
     <ref id="options-pcm-device" name="-p"> command line option.
     It isn't available if the
     <ref id="build-pcm-support" name="--disable-pcm-support"> build option was specified.
-  <tag><tt/screen-parameters/ <em/name/<tt/=/<em/value/<tt/,/...<label id="configure-screen-parameters"></tag>
-    Specify parameters for the screen driver.
+  <tag><tt/screen-driver/ <em/driver/<label id="configure-screen-driver"></tag>
+    Specify the screen driver
+    (see section <ref id="screen" name="Supported Screen Drivers">).
+    See the <ref id="build-screen-driver" name="--with-screen-driver">
+    build option for the default established during the build procedure.
+    This directive can be overridden with the
+    <ref id="options-screen-driver" name="-x"> command line option.
+  <tag><tt/screen-parameters/ [<em/driver/<tt/:/]<em/name/<tt/=/<em/value/<tt/,/...<label id="configure-screen-parameters"></tag>
+    Specify parameters for the screen drivers.
     If the same parameter is specified more than once,
     then its rightmost assignment is used.
+    If a parameter name is qualified by a driver
+    (see section <ref id="screen" name="Supported Screen Drivers">)
+    then that setting only applies to that driver;
+    if it isn't then it applies to all drivers.
     For a description of the parameters accepted by a specific driver,
     please see the documentation for that driver.
     See the <ref id="build-screen-parameters" name="--with-screen-parameters">
@@ -2471,6 +2503,11 @@ The <tt/brltty/ command accepts the following options:
     If more than one speech driver
     (see the <ref id="options-speech-driver" name="-s"> command line option)
     has been specified then speech synthesizer autodetection is performed.
+  <tag><tt/-x/<em/driver/ <tt/--screen-driver=/<em/driver/<label id="options-screen-driver"></tag>
+    Specify the screen driver
+    (see section <ref id="screen" name="Supported Screen Drivers">).
+    See the <ref id="configure-screen-driver" name="screen-driver">
+    configuration file directive for the default run-time setting.
   <tag><tt/-A/<em/name/<tt/=/<em/value/<tt/,/... <tt/--api-parameters=/<em/name/<tt/=/<em/value/<tt/,/...<label id="options-api-parameters"></tag>
     Specify parameters for the Application Programming Interface.
     If the same parameter is specified more than once,
@@ -2596,10 +2633,14 @@ The <tt/brltty/ command accepts the following options:
     and then exit.
     If the <ref id="options-quiet" name="-q"> option isn't specified,
     then also display copyright information.
-  <tag><tt/-X/<em/name/<tt/=/<em/value/<tt/,/... <tt/--screen-parameters=/<em/name/<tt/=/<em/value/<tt/,/...<label id="options-screen-parameters"></tag>
-    Specify parameters for the screen driver.
+  <tag><tt/-X/[<em/driver/<tt/:/]<em/name/<tt/=/<em/value/<tt/,/... <tt/--screen-parameters=/[<em/driver/<tt/:/]<em/name/<tt/=/<em/value/<tt/,/...<label id="options-screen-parameters"></tag>
+    Specify parameters for the screen drivers.
     If the same parameter is specified more than once,
     then its rightmost assignment is used.
+    If a parameter name is qualified by a driver
+    (see section <ref id="screen" name="Supported Screen Drivers">)
+    then that setting only applies to that driver;
+    if it isn't then it applies to all drivers.
     For a description of the parameters accepted by a specific driver,
     please see the documentation for that driver.
     See the <ref id="configure-screen-parameters" name="screen-parameters">
@@ -4436,6 +4477,32 @@ BRLTTY supports the following speech synthesizers:
     xw|XWindow@
   </tabular>
 </table>
+
+<sect>Supported Screen Drivers<label id="screen"><p>
+BRLTTY supports the following screen drivers:
+<descrip>
+  <tag/as/
+    AT-SPI
+  <tag/hd/
+    This driver provides direct access to the Hurd console screen.
+    It's only selectable, and is the default, on Hurd systems.
+  <tag/lx/
+    This driver provides direct access to the Linux console screen.
+    It's only selectable, and is the default, on Linux systems.
+  <tag/sc/
+    This driver provides access to the <tt/screen/ program.
+    It's selectable on all systems,
+    and is the default if no native screen driver is available.
+    The patch for <tt/screen/ which we provide
+    (see the <tt/Patches/ subdirectory)
+    must be applied.
+    Use of this driver,
+    due to the fact that <tt/screen/ must be concurrently running,
+    makes BRLTTY effectively useful only after the user has logged in.
+  <tag/wn/
+    This driver provides direct access to the Windows console screen.
+    It's only selectable, and is the default, on Windows/Cygwin systems.
+</descrip>
 
 <sect>Operand Syntax<p>
 

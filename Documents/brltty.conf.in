@@ -305,6 +305,20 @@
 #api-parameters KeyFile=@CONFIGURATION_DIRECTORY@/@api_keyfile@
 
 
+###########################
+# Generic Screen Settings #
+###########################
+
+# The screen-driver directive specifies the two-letter driver
+# identification code of the driver for the console screen.
+# (can be overridden with the -x [--screen-driver=] option)
+#screen-driver	as	# AtSpi
+#screen-driver	hd	# Hurd
+#screen-driver	lx	# Linux
+#screen-driver	sc	# Screen
+#screen-driver	wn	# Windows
+
+
 ############################
 # Screen Driver Parameters #
 ############################
@@ -312,12 +326,12 @@
 # The screen-parameters directive passes non-generic parameters through
 # to the screen driver.
 # (can be overridden with the -X [--screen-parameters=] option)
-#screen-parameters parameter=setting,...
+#screen-parameters driver:parameter=setting,...
 
 # Linux Screen Driver Parameters
-#screen-parameters Acm=auto # [auto,iso01,vt100,cp437,user]
-#screen-parameters DebugAcm=no # [no,yes]
-#screen-parameters DebugSfm=no # [no,yes]
-#screen-parameters DebugCtt=no # [no,yes]
+#screen-parameters lx:Acm=auto # [auto,iso01,vt100,cp437,user]
+#screen-parameters lx:DebugAcm=no # [no,yes]
+#screen-parameters lx:DebugSfm=no # [no,yes]
+#screen-parameters lx:DebugCtt=no # [no,yes]
 
 
