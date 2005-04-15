@@ -154,22 +154,22 @@ brltty_brl_glib_cb (GIOChannel   *source,
 	switch (keypress & BRL_MSK_CMD) 
 	{
 	    /*goto title*/
-	    case BRL_CMD_TOP:
+	    case BRL_CMD_TOP_LEFT:
 		send_key(0, 7);
 		break;
 
 	    /*goto statusbar*/
-	    case BRL_CMD_BOT:
+	    case BRL_CMD_BOT_LEFT:
 		send_key(0, 3);
 		break;
 
 	    /*goto menu*/
-	    case BRL_CMD_TOP_LEFT:
+	    case BRL_CMD_TOP:
 		send_key(0, 9);
 		break;
 
 	    /*goto toolbar*/
-	    case BRL_CMD_BOT_LEFT:
+	    case BRL_CMD_BOT:
 		send_key(0, 1);
 		break;
 
