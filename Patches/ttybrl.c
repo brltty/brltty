@@ -130,7 +130,7 @@ send_key (gint layer,
     BRLEventData bed;
     sprintf(&dd.key_codes[0], "L%02dK%02d", layer, key);
     bed.key_codes = dd.key_codes;						
-    ClientCallback(BRL_EVCODE_KEY_CODES, bed);
+    client_callback(BRL_EVCODE_KEY_CODES, bed);
 }
 
 static gboolean
