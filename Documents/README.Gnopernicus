@@ -262,24 +262,67 @@ manually edit the session file as follows:
    0,RestartCommand=gnopernicus
 
 
-Key Bindings
+Key Mappings
 ============
 
 This driver assumes that Gnopernicus key bindings remain at their default
-settings. BRLTTY commands are mapped to Gnopernicus key bindings as follows:
+settings. Changing Gnopernicus's key bindings may interfere with the user's
+ability to accurately and/or predictably control window navigation when using
+BRLTTY.
 
-   BRLTTY       Gnopernicus
+
+Original Mappings
+-----------------
+
+The original way in which BRLTTY commands were mapped to Gnopernicus functions
+wasn't very practical. It's still documented here, though, in case the version
+of Gnopernicus which you're running is still using it. It is as follows:
+
+   BRLTTY          Gnopern   Functional
    Command         Binding   Description
    --------------  --------  -----------
-   BRL_CMD_LNUP    DK00      Go To Parent
-   BRL_CMD_HOME    DK01      Go To Focus
-   BRL_CMD_LNDN    DK02      Go To Child
-   BRL_CMD_FWINLT  DK03      Go To Previous
-                   DK04      Repeat Last
-   BRL_CMD_FWINRT  DK05      Go To Next
-                   DK01DK02  Do Default Action
-   BRL_CMD_CHRLT   L09K01    Left One Character
-   BRL_CMD_CHRRT   L09K03    Right One Character
-   BRL_CMD_HWINLT  L09K04    Left One Display Width
-   BRL_CMD_HWINRT  L09K06    Right One Display Width
-   BRL_BLK_ROUTE   HMSnn     Route Cursor
+   BRL_CMD_LNUP    DK00      Go to parent object
+   BRL_CMD_HOME    DK01      Go to object with focus
+   BRL_CMD_LNDN    DK02      Go to child object
+   BRL_CMD_FWINLT  DK03      Go to previous object
+   BRL_CMD_FWINRT  DK05      Go to next object
+   BRL_CMD_CHRLT   L09K01    Move left one character
+   BRL_CMD_CHRRT   L09K03    Move right one character
+   BRL_CMD_HWINLT  L09K04    Move left one display-width
+   BRL_CMD_HWINRT  L09K06    Move right one display-width
+   BRL_BLK_ROUTE   HMSnn     Route (bring) cursor to character
+
+
+Current Mappings
+----------------
+
+The current way in which BRLTTY commands are mapped to Gnopernicus functions is
+listed below. If the version of Gnopernicus which you're running isn't yet
+using it then copy the file ttybrl.c from the Patches/ subdirectory of BRLTTY's
+source tree to the braille/libbrl/ subdirectory of Gnopernicus's source tree,
+and then rebuild Gnopernicus.
+
+   BRLTTY              Gnopern  Functional
+   Command             Binding  Description
+   --------------      -------  -----------
+   BRL_CMD_TOP_LEFT    L00K07   Go to title
+   BRL_CMD_BOT_LEFT    L00K03   Go to status bar
+   BRL_CMD_TOP         L00K09   Go to menu
+   BRL_CMD_BOT         L00K01   Go to tool bar
+   BRL_CMD_HOME        L00K12   Go to object with focus
+   BRL_CMD_PRPROMPT    L00K08   Go to parent object
+   BRL_CMD_NXPROMPT    L00K02   Go to child object
+   BRL_CMD_PRPGRPH     L00K15   Go to first object
+   BRL_CMD_NXPGRPH     L00K14   Go to last object
+   BRL_CMD_LNUP        L00K04   Go to previous object
+   BRL_CMD_LNDN        L00K06   Go to next object
+   BRL_CMD_FREEZE      L00K10   Toggle focus-tracking/flat-review mode
+   BRL_CMD_FWINLT      L09K04   Move one display-width left
+   BRL_CMD_FWINRT      L09K06   Move one display-width right
+   BRL_CMD_CHRLT       L09K01   Move one character left
+   BRL_CMD_CHRRT       L09K03   Move one character right
+   BRL_CMD_SAY_SOFTER  L08K01   Decrease speech volume
+   BRL_CMD_SAY_LOUDER  L08K03   Increase speech volume
+   BRL_CMD_SAY_SLOWER  L08K04   Decrease speech rate
+   BRL_CMD_SAY_FASTER  L08K06   Increase speech rate
+   BRL_BLK_ROUTE       HMSnn    Route (bring) cursor to character
