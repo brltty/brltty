@@ -56,22 +56,24 @@ Chord required for *dangerous* commands, e.g. routing, cut/paste,
 restart driver, etc.
 
 <x40>Advance Bar Combinations:
-<x40>both none: half window left
-<x40>none both: half window right
-<x40>left left: up to line with different content
-<x40>left right: down to line with different content
-<x40>right left: up to line with different highlighting
-<x40>right right: down to line with different highlighting
-<x40>both left: up to top line
-<x40>both right: down to bottom line
+<x40>Left   Right  Description
+<x40>center ------ half window left
+<x40>------ center half window right
+<x40>left   left   up to line with different content
+<x40>left   right  down to line with different content
+<x40>right  left   up to line with different highlighting
+<x40>right  right  down to line with different highlighting
+<x40>center left   up to top line
+<x40>center right  down to bottom line
 <x40>
-<x40>Whiz Wheel Functions:
-<x40>left up: one line up
-<x40>left down: one line down
-<x40>right up: full window left
-<x40>right down: full window right
-<x40>left press: attribute underlining (toggle)
-<x40>right press: show cursor (toggle)
+<x40>Whiz Wheels (Millennium models):
+<x40>Wheel Motion Description
+<x40>left  up     one line up
+<x40>left  down   one line down
+<x40>right up     full window left
+<x40>right down   full window right
+<x40>left  press  attribute underlining (toggle)
+<x40>right press  show cursor (toggle)
 <x40>
 Internal:
 
