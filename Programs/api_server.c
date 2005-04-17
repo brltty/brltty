@@ -748,7 +748,7 @@ static int processRequest(Connection *c)
 	}
 	ptty++;
 	LogPrint(LOG_DEBUG,"allocated tty %#010lx",(unsigned long)ntohl(*(ptty-1)));
-	for (; ptty<&ints[size/sizeof(uint32_t)-1]; ptty++) {
+	for (; ptty<=ints+nbTtys; ptty++) {
 	  if (!(tty2 = newTty(tty2,ntohl(*ptty)))) {
 	    /* gasp, couldn't allocate :/, clean tree */
 	    for (tty2 = tty->subttys; tty2; tty2 = tty3) {
