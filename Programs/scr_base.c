@@ -37,15 +37,13 @@ describe_BaseScreen (ScreenDescription *description) {
   description->no = 1;
 }
 
-static unsigned char *
+static int
 read_BaseScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
   ScreenDescription description;
   describe_BaseScreen(&description);
-  if (validateScreenBox(&box, description.cols, description.rows)) {
-    memset(buffer, (mode == SCR_TEXT? ' ' : 0X07), box.width*box.height);
-    return buffer;
-  }
-  return NULL;
+  if (!validateScreenBox(&box, description.cols, description.rows)) return 0;
+  memset(buffer, (mode == SCR_TEXT? ' ' : 0X07), box.width*box.height);
+  return 1;
 }
 
 static int

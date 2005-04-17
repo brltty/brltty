@@ -732,20 +732,23 @@ describe_LinuxScreen (ScreenDescription *description) {
   }
 }
 
-static unsigned char *
+static int
 read_LinuxScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
   ScreenDescription description;
   describe_LinuxScreen(&description);
   if (validateScreenBox(&box, description.cols, description.rows)) {
     int text = mode == SCR_TEXT;
+
     if (consoleProblem) {
       if (text) {
         memcpy(buffer, consoleProblem+box.left, box.width);
       } else {
         memset(buffer, 0X07, box.width);
       }
-      return buffer;
-    } else {
+      return 1;
+    }
+
+    {
       off_t start = 4 + (box.top * description.cols + box.left) * 2;
       if (lseek(screenDescriptor, start, SEEK_SET) != -1) {
         int length = box.width * 2;
@@ -760,7 +763,7 @@ read_LinuxScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
           if (row) {
             if (lseek(screenDescriptor, increment, SEEK_CUR) == -1) {
               LogError("Screen seek");
-              return NULL;
+              return 0;
             }
           }
 
@@ -772,7 +775,7 @@ read_LinuxScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
               LogPrint(LOG_ERR, "Truncated screen data: expected %d bytes, read %d.",
                        length, count);
             }
-            return NULL;
+            return 0;
           }
 
           source = line;
@@ -807,7 +810,7 @@ read_LinuxScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
             }
           }
         }
-        return buffer;
+        return 1;
       } else {
         LogError("Screen seek");
       }
@@ -817,7 +820,7 @@ read_LinuxScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
              description.cols, box.left, box.width,
              description.rows, box.top, box.height);
   }
-  return NULL;
+  return 0;
 }
 
 static int

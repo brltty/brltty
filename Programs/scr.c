@@ -152,7 +152,7 @@ describeScreen (ScreenDescription *description) {
 }
 
 
-unsigned char *
+int
 readScreen (short left, short top, short width, short height, unsigned char *buffer, ScreenMode mode) {
   ScreenBox box;
   box.left = left;

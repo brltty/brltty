@@ -230,7 +230,7 @@ describe_HelpScreen (ScreenDescription *description) {
   description->no = 0;	/* 0 is reserved for help screen */
 }
 
-static unsigned char *
+static int
 read_HelpScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
   const HelpPageEntry *description = &pageDescriptions[pageNumber];
   if (validateScreenBox(&box, getBigEndian(description->width), getBigEndian(description->height))) {
@@ -244,9 +244,9 @@ read_HelpScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
     } else {
       memset(buffer, 0X07, box.width*box.height);
     }
-    return buffer;
+    return 1;
   }
-  return NULL;
+  return 0;
 }
 
 static int

@@ -62,7 +62,7 @@ describe_WindowsScreen (ScreenDescription *description) {
   description->no = 0;
 }
 
-static unsigned char *
+static int
 read_WindowsScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
   int x,y;
   int text = mode == SCR_TEXT;
@@ -75,10 +75,10 @@ read_WindowsScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
   CONSOLE_SCREEN_BUFFER_INFO info;
 
   if (consoleOutput == INVALID_HANDLE_VALUE)
-    return NULL;
+    return 0;
 
   if (!(GetConsoleScreenBufferInfo(consoleOutput, &info)))
-    return NULL;
+    return 0;
 
   coord.X = box.left + info.srWindow.Left;
   coord.Y = box.top + info.srWindow.Top;
@@ -92,7 +92,7 @@ read_WindowsScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
   }
 
   if (!(buf = malloc(box.width*size)))
-    return NULL;
+    return 0;
 
   for (y = 0; y < box.height; y++, coord.Y++) {
     if (!fun(consoleOutput, buf, box.width, coord, &read) || read != box.width) {
@@ -112,7 +112,7 @@ read_WindowsScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
 	buffer[y*box.width+x] = ((WORD *)buf)[x];
   }
   free(buf);
-  return buffer;
+  return 1;
 }
 
 static int

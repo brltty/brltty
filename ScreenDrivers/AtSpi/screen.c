@@ -504,11 +504,11 @@ describe_AtSpiScreen (ScreenDescription *description) {
   description->no = 0;
 }
 
-static unsigned char *
+static int
 read_AtSpiScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
   long x,y;
   wchar_t c;
-  if (box.height<0 || box.width<0) return NULL;
+  if (box.height<0 || box.width<0) return 0;
   memset(buffer,' ',box.height*box.width);
   pthread_mutex_lock(&updateMutex);
   if (!curTerm) goto out;
@@ -527,7 +527,7 @@ read_AtSpiScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
     }
 out:
   pthread_mutex_unlock(&updateMutex);
-  return buffer;
+  return 1;
 }
 
 static int

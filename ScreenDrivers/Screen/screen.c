@@ -51,7 +51,7 @@ static const mode_t shmMode = S_IRWXU;
 static const int shmSize = 4 + ((66 * 132) * 2);
 
 static int
-open_SharedMemoryScreen (void) {
+open_ScreenScreen (void) {
 #ifdef HAVE_SHMGET
   key_t keys[2];
   int keyCount = 0;
@@ -111,7 +111,7 @@ open_SharedMemoryScreen (void) {
 }
 
 static void
-describe_SharedMemoryScreen (ScreenDescription *description) {
+describe_ScreenScreen (ScreenDescription *description) {
   description->cols = shmAddress[0];
   description->rows = shmAddress[1];
   description->posx = shmAddress[2];
@@ -119,10 +119,10 @@ describe_SharedMemoryScreen (ScreenDescription *description) {
   description->no = 1;  /* not yet implemented */
 }
 
-static unsigned char *
-read_SharedMemoryScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
+static int
+read_ScreenScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
   ScreenDescription description;                 /* screen statistics */
-  describe_SharedMemoryScreen(&description);
+  describe_ScreenScreen(&description);
   if (validateScreenBox(&box, description.cols, description.rows)) {
     off_t start = 4 + (((mode == SCR_TEXT)? 0: 1) * description.cols * description.rows) + (box.top * description.cols) + box.left;
     int row;
@@ -131,13 +131,13 @@ read_SharedMemoryScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) 
              shmAddress + start + (row * description.cols),
              box.width);
     }
-    return buffer;
+    return 1;
   }
-  return NULL;
+  return 0;
 }
 
 static void
-close_SharedMemoryScreen (void) {
+close_ScreenScreen (void) {
 #ifdef HAVE_SHMGET
   if (shmIdentifier != -1) {
     shmdt(shmAddress);
@@ -158,8 +158,8 @@ close_SharedMemoryScreen (void) {
 static void
 scr_initialize (MainScreen *main) {
   initializeRealScreen(main);
-  main->base.describe = describe_SharedMemoryScreen;
-  main->base.read = read_SharedMemoryScreen;
-  main->open = open_SharedMemoryScreen;
-  main->close = close_SharedMemoryScreen;
+  main->base.describe = describe_ScreenScreen;
+  main->base.read = read_ScreenScreen;
+  main->open = open_ScreenScreen;
+  main->close = close_ScreenScreen;
 }

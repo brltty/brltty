@@ -74,7 +74,7 @@ extern int selectDisplay (int);		/* select display page */
 
 /* Routines which apply to the current screen. */
 extern void describeScreen (ScreenDescription *);		/* get screen status */
-extern unsigned char *readScreen (short, short, short, short, unsigned char *, ScreenMode);
+extern int readScreen (short, short, short, short, unsigned char *, ScreenMode);
 extern int insertKey (ScreenKey);
 extern int insertCharacters (const char *, int);
 extern int insertString (const char *);

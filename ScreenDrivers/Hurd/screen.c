@@ -211,7 +211,7 @@ describe_HurdScreen (ScreenDescription *description) {
 #ifndef offsetof
 #define offsetof(type,field) ((size_t) &((type *) 0)->field)
 #endif
-static unsigned char *
+static int
 read_HurdScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
   ScreenDescription description;
   describe_HurdScreen(&description);
@@ -228,13 +228,13 @@ read_HurdScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
       for (col=box.left; col<box.left+box.width; ++col)
 	      /* TODO: correctly translate uint32_t into char */
 	*buffer++ = *(uint32_t *)(((unsigned char *) &screenDisplay[(row%lines)*description.cols+col])+which);
-    return buffer;
+    return 1;
   } else {
     LogPrint(LOG_ERR, "Invalid screen area: cols=%d left=%d width=%d rows=%d top=%d height=%d",
              description.cols, box.left, box.width,
              description.rows, box.top, box.height);
   }
-  return NULL;
+  return 0;
 }
 
 static int
