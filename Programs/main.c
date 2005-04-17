@@ -1246,10 +1246,10 @@ main (int argc, char *argv[]) {
               playTune(&tune_bounce);
             break;
           case BRL_CMD_LNEND:
-            if (p->winx == (scr.cols - brl.x))
-              playTune(&tune_bounce);
-            else
+            if (p->winx < (scr.cols - brl.x))
               p->winx = scr.cols - brl.x;
+            else
+              playTune(&tune_bounce);
             break;
 
           case BRL_CMD_CHRLT:
