@@ -28,7 +28,6 @@
 #include <string.h>
 #include <ctype.h>
 #include <signal.h>
-#include <sys/types.h>
 #include <errno.h>
 
 #ifdef HAVE_SYS_WAIT_H

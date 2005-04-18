@@ -25,7 +25,6 @@
 #include <string.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <sys/types.h>
 #include <sys/stat.h>
 
 #include "misc.h"

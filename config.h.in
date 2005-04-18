@@ -28,6 +28,7 @@ extern "C" {
 #define __USE_W32_SOCKETS
 #include <windows.h>
 #endif /* defined(__CYGWIN32__) || defined(__MINGW32__) */
+#include <sys/types.h>
 
 /* Define this if the host is big endian. */
 #undef WORDS_BIGENDIAN

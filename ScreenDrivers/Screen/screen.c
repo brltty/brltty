@@ -26,7 +26,6 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/stat.h>
-#include <sys/types.h>
 
 #ifdef HAVE_SHMGET
 #include <sys/ipc.h>

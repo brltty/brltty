@@ -30,7 +30,6 @@ extern "C" {
 #include <windows.h>
 #include <stdio.h>
 #include <errno.h>
-#include <sys/types.h>
 #define win_pthread_assert(expr) do { if (!(expr)) { errno = -1; return -1; } } while (0)
 
 /***********
