@@ -37,7 +37,7 @@ typedef enum {
 #define HELP_SCRN 2		/* read help screen */
 
 typedef struct {
-  short rows, cols;	/* screen dimentions */
+  short rows, cols;	/* screen dimensions */
   short posx, posy;	/* cursor position */
   short no;		      /* screen number */
 } ScreenDescription;
