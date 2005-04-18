@@ -468,6 +468,12 @@ void getText(const BrailleWindow *brailleWindow, unsigned char *buf)
   memcpy(buf,brailleWindow->text,displaySize);
 }
 
+static void handleResize(BrailleDisplay *brl)
+{
+  /* TODO: handle resize */
+  LogPrint(LOG_INFO,"BrlAPI resize\n");
+}
+
 /****************************************************************************/
 /** CONNECTIONS MANAGING                                                   **/
 /****************************************************************************/
@@ -1507,7 +1513,7 @@ static void *server(void *arg)
   pthread_attr_t attr;
   int i;
   int res;
-  struct sockaddr addr;
+  struct sockaddr_storage addr;
   socklen_t addrlen;
   Connection *c;
   time_t currentTime;
@@ -1642,7 +1648,7 @@ static void *server(void *arg)
     if (socketInfo[i].fd>=0 && FD_ISSET(socketInfo[i].fd, &sockset)) {
 #endif /* WINDOWS */
 	addrlen = sizeof(addr);
-	res = accept(socketInfo[i].fd, &addr, &addrlen);
+	res = accept(socketInfo[i].fd, (struct sockaddr *) &addr, &addrlen);
 	if (res<0) {
 	  LogPrint(LOG_WARNING,"accept(%d): %s",socketInfo[i].fd,strerror(errno));
 	  break;
@@ -1868,12 +1874,16 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
   }
   if (trueBraille->readKey) {
     res = trueBraille->readKey(brl);
+    if (brl->resizeRequired)
+      handleResize(brl);
     if (res==EOF) return EOF;
     keycode = (brl_keycode_t) res;
     command = trueBraille->keyToCommand(brl,caller,keycode);
   } else {
     /* we already ensured in GETTTY that no connection has how == KEYCODES */
     res = trueBraille->readCommand(brl,caller);
+    if (brl->resizeRequired)
+      handleResize(brl);
     if (res==EOF) return EOF;
     keycode = 0;
     command = (brl_keycode_t) res;
