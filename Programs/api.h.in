@@ -351,8 +351,9 @@ int brlapi_setFocus(int tty);
  * If the string is too long, it is cut. If it's too short, spaces are appended.
  *
  * \param cursor gives the cursor position; if equal to 0, no cursor is shown at
- * all;
- * \param str points on the string to be displayed.
+ * all; if cursor==-1, the cursor is left where it is
+ *
+ * \param str points to the string to be displayed.
  *
  * \return 0 on success, -1 on error.
  */
@@ -576,12 +577,12 @@ ssize_t brlapi_recvRaw(unsigned char *buf, size_t size);
  * When something really wrong was done somewhere, like an out-of-bounds
  * argument, which is really a bug in either the implementation of BrlAPI or
  * in the application, an exception may be sent by the server. As soon as
- * libbrlapi receives it, an exception handler prints it and \e exit()s the program,
+ * libbrlapi receives it, an exception handler prints it and \e abort()s the program,
  * since it means something went really wrong and that we shouldn't go further.
  *
  * This is hopefully a really seldom event, but in the case of an editor, for
  * instance, one would surely want to have files saved before actually
- * exit()ing. brlapi_setExceptionHandler() lets the programmer to define another
+ * abort()ing. brlapi_setExceptionHandler() lets the programmer define another
  * exception handler which would save files and then call the default handler
  * brlapi_defaultExceptionHandler().
  *

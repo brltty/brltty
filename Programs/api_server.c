@@ -170,14 +170,15 @@ typedef struct Tty {
   struct Connection *connections;
   struct Tty *father; /* father */
   struct Tty **prevnext,*next; /* siblings */
-  struct Tty *subttys; /* childs */
+  struct Tty *subttys; /* children */
 } Tty;
 #define MAXTTYRECUR 16
 
 static int connectionsAllowed = 0;
 
-/* Pointer on the connection accepter thread */
 #define MAXSOCKETS 4 /* who knows what users want to do... */
+
+/* Pointer to the connection accepter thread */
 static pthread_t serverThread; /* server */
 static pthread_t socketThreads[MAXSOCKETS]; /* socket binding threads */
 static char **socketHosts; /* socket local hosts */
@@ -207,7 +208,7 @@ static unsigned int unauthConnLog = 0;
 static pthread_mutex_t driverMutex = PTHREAD_MUTEX_INITIALIZER;
 static Connection *rawConnection = NULL;
 
-/* Pointer on subroutines of the real braille driver */
+/* Pointer to subroutines of the real braille driver */
 static const BrailleDriver *trueBraille;
 static BrailleDriver ApiBraille;
 

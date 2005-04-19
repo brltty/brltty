@@ -555,10 +555,10 @@ int brlapi_getDisplaySize(unsigned int *x, unsigned int *y)
   return 0;
 }
 
-/* Function : brlapi_getControllingTty */
+/* Function : getControllingTty */
 /* Returns the number of the caller's controlling terminal */
 /* -1 if error or unknown */
-static int brlapi_getControllingTty(void)
+static int getControllingTty(void)
 {
   int tty;
   const char *env;
@@ -599,7 +599,7 @@ int brlapi_getTty(int tty, const char *how)
   unsigned int n;
 
   /* Determine which tty to take control of */
-  if (tty<=0) truetty = brlapi_getControllingTty(); else truetty = tty;
+  if (tty<=0) truetty = getControllingTty(); else truetty = tty;
   /* 0 can be a valid screen WINDOW
   0xffffffff can not be a valid WINDOWID (top 3 bits guaranteed to be zero) */
   if (truetty<0) { brlapi_errno=BRLERR_UNKNOWNTTY; return -1; }
@@ -698,7 +698,7 @@ int brlapi_writeText(int cursor, const char *str)
     ws->flags |= BRLAPI_WF_CURSOR;
     *((uint32_t *) p) = htonl(cursor);
     p += sizeof(cursor);
-  } else {
+  } else if (cursor!=-1) {
     brlapi_errno = BRLERR_INVALID_PARAMETER;
     return -1;
   }
@@ -1024,14 +1024,14 @@ int brlapi_strexception(char *buf, size_t n, int err, brl_type_t type, const voi
 {
   int chars = 16; /* Number of bytes to dump */
   char hexString[3*chars+1];
-  int i, nbChars = MAX(chars, size);
+  int i, nbChars = MIN(chars, size);
   unsigned char *p = hexString;
   for (i=0; i<nbChars; i++)
     p += sprintf(p, "%02x ", ((char *) packet)[i]);
   p--; /* Don't keep last space */
   *p = '\0';
-  return snprintf(buf, n, "%s on %s request (%s)",
-    brlapi_strerror(err), brlapi_packetType(type), hexString);
+  return snprintf(buf, n, "%s on %s request of size %d (%s)",
+    brlapi_strerror(err), brlapi_packetType(type), size, hexString);
 }
 
 void brlapi_defaultExceptionHandler(int err, brl_type_t type, const void *packet, size_t size)
@@ -1039,5 +1039,5 @@ void brlapi_defaultExceptionHandler(int err, brl_type_t type, const void *packet
   char str[0X100];
   brlapi_strexception(str,0X100, err, type, packet, size);
   fprintf(stderr, "BrlAPI exception: %s\n", str);
-  exit(1);
+  abort();
 }
