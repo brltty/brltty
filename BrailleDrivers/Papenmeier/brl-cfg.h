@@ -686,6 +686,15 @@ static CommandDefinition pm_commands_el_66_s[] = {
   CMDS_EASY_SWSIM
 };
 
+static uint16_t pm_status_el_80_s2[] = {
+};
+static int16_t pm_modifiers_el_80_s2[] = {
+  MOD_EASY
+};
+static CommandDefinition pm_commands_el_80_s2[] = {
+  CMDS_EASY_ALL,
+  CMDS_EASY_SWSIM
+};
 
 static TerminalDefinition pmTerminalTable[] = {
   PM_TERMINAL(
@@ -819,6 +828,15 @@ static TerminalDefinition pmTerminalTable[] = {
     el_66_s,		/* filename of local helpfile */
     "BrailleX II EL 66 S",		/* name of terminal */
     66, 1,			/* size of display */
+    0,				/* number of front keys */
+    1, 0, 0, 1, 1		/* terminal has an easy bar */
+  )
+  ,
+  PM_TERMINAL(
+    88,				/* identity */
+    el_80_s2,		/* filename of local helpfile */
+    "BrailleX EL+ 80",		/* name of terminal */
+    80, 1,			/* size of display */
     0,				/* number of front keys */
     1, 0, 0, 1, 1		/* terminal has an easy bar */
   )
