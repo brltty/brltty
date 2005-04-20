@@ -370,17 +370,9 @@ static int WriteToBrlDisplay (BrailleDisplay *brl, int len, const unsigned char 
 
 static ssize_t brl_writePacket(BrailleDisplay *brl, const unsigned char *p, size_t sz)
 {
-  unsigned char	c;
-
-  if (((size_t)WriteToBrlDisplay(brl, sz, p)) != sz)
-    return (0);
-  if (!serialAwaitInput(serialDevice, 200))
-    return (0);
-  if (serialReadData(serialDevice, &c, 1, 0, 0) == 1 && c == ACK)
-    return (sz);
-  else
-    serialReadData(serialDevice, &c, 1, 0, 0); /* This is done to trap the error code */
-  return (0);
+  if (!WriteToBrlDisplay(brl, sz, p))
+    return 0;
+  return sz;
 }
 
 static int brl_reset(BrailleDisplay *brl)
@@ -910,43 +902,45 @@ static int	key_handle(BrailleDisplay *brl, unsigned char *buf)
 
 static ssize_t brl_readPacket(BrailleDisplay *brl, unsigned char *bp, size_t size)
 {
-  int		i = 0;
-  char		start = 0;  /* a flag */
-  size_t	offset = 0;
-  unsigned char		par = 0;
-  int		j = 0;
+  int           i = 0; /* cpt to build the received packet */
+  char          start = 0;  /* a flag */
+  size_t        offset = 0;
+  unsigned char         par = 0;
+  int           j = 0;
+  int           k = 0; /* cpt to build the returned buffer (bp) */
   unsigned char c;
-  unsigned char	buf[512];
-
-  if (bp == NULL)
-    return 0;
-  while (serialReadChunk(serialDevice, &c, &offset, 1, 100, 0))
+  unsigned char buf[512];
+  
+  while (serialReadChunk(serialDevice, &c, &offset, 1, 1000, 0))
     {
       if (c == SOH)
-	start = 1;
+        start = 1;
       if (c == EOT && buf[i - 1] != DLE)
-	{
-	  buf[i++] = EOT;
-	  break;
-	}
+        {
+          buf[i++] = EOT;
+          break;
+        }
       if (start) {
-	buf[i++] = c;
+        buf[i++] = c;
       }
       offset = 0;
     }
   if (i == 0) /* no character, timeout */
-    return 0;
-  for (j = 1; j < i - 2 && j <= size ; j++) {
-    if (buf[j] != DLE || (buf[j - 1] == DLE)) 
-       {
-	 par ^= buf[j];
-	 bp[j - 1] = buf[j];
-       }
+    {
+      return 0;
+    }
+  for (j = 1, k = 0; j < i - 2 && k < size ; j++) {
+    if (buf[j] != DLE || (buf[j - 1] == DLE))
+      {
+	par ^= buf[j];
+	bp[k] = buf[j];
+	k++;
+      }
   }
   if (par == buf[i - 2])
     {
       sendbyte(ACK);
-      return i - 4;
+      return k - 1;
     }
   /* if bad parity */
   sendbyte(NACK);
