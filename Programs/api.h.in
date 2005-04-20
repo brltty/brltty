@@ -322,7 +322,7 @@ int brlapi_leaveTty(void);
 /** tell the current tty to brltty
  *
  * This is intended for focus tellers, such as brltty, xbrlapi, screen, ...
- * brlapi_getTty() must have been called beforewards to tell where this focus
+ * brlapi_getTty() must have been called beforehand to tell where this focus
  * applies in the tty tree.
  *
  * \return 0 on success, -1 on error.
@@ -373,11 +373,12 @@ int brlapi_writeDots(const unsigned char *dots);
 /** Structure containing arguments to be given to brlapi_write() */
 typedef struct {
   int displayNumber; /** Display number -1 == unspecified */
-  unsigned int regionBegin, regionEnd; /** Region of display to update, 1st character of display is 1 */
+  unsigned int regionBegin, regionSize; /** Region of display to update, 1st character of display is 1 */
   char *text; /** Text to display */
   char *attrAnd; /** And attributes; applied first */
   char *attrOr; /** Or attributes; applied \e after ANDing */
   int cursor; /** -1 == don't touch, 0 == turn off, 1 = 1st char of display, ... */
+  char *charset; /** Text charset. NULL or "" means current locale's */
 } brlapi_writeStruct;
 
 /* BRLAPI_WRITESTRUCT_INITIALIZER */
@@ -389,7 +390,7 @@ typedef struct {
  * cursor = -1; (don't touch cursor)
 */
 #define BRLAPI_WRITESTRUCT_INITIALIZER \
-  { -1, 0, 0, NULL, NULL, NULL, -1};
+  { -1, 0, 0, NULL, NULL, NULL, -1, NULL };
 
 /* brlapi_write */
 /** Update a specific region of the braille display and apply and/or masks

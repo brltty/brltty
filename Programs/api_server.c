@@ -31,6 +31,10 @@
 #include <sys/stat.h>
 #include <signal.h>
 #include <time.h>
+#include <wchar.h>
+#ifdef HAVE_ICONV_H
+#include <iconv.h>
+#endif /* HAVE_ICONV_H */
 
 #ifdef WINDOWS
 #include <ws2tcpip.h>
@@ -120,7 +124,7 @@ extern char *cfg_brailleParameters;
 
 typedef struct {
   unsigned int cursor;
-  unsigned char *text;
+  wchar_t *text;
   unsigned char *andAttr;
   unsigned char *orAttr;
 } BrailleWindow;
@@ -407,11 +411,13 @@ out:
 /* Returns to report success, -1 on errors */
 int allocBrailleWindow(BrailleWindow *brailleWindow)
 {
-  if (!(brailleWindow->text = malloc(displaySize))) goto out;
+  int i;
+  if (!(brailleWindow->text = malloc(displaySize*sizeof(wchar_t)))) goto out;
   if (!(brailleWindow->andAttr = malloc(displaySize))) goto outText;
   if (!(brailleWindow->orAttr = malloc(displaySize))) goto outAnd;
 
-  memset(brailleWindow->text, ' ', displaySize);
+  for (i=0;i<displaySize;i++)
+    brailleWindow->text[i]=L' ';
   memset(brailleWindow->andAttr, 0xFF, displaySize);
   memset(brailleWindow->orAttr, 0x00, displaySize);
   brailleWindow->cursor = 0;
@@ -442,7 +448,7 @@ void freeBrailleWindow(BrailleWindow *brailleWindow)
 void copyBrailleWindow(BrailleWindow *dest, const BrailleWindow *src)
 {
   dest->cursor = src->cursor;
-  memcpy(dest->text, src->text, displaySize);
+  memcpy(dest->text, src->text, displaySize*sizeof(wchar_t));
   memcpy(dest->andAttr, src->andAttr, displaySize);
   memcpy(dest->orAttr, src->orAttr, displaySize);
 }
@@ -453,10 +459,14 @@ void copyBrailleWindow(BrailleWindow *dest, const BrailleWindow *src)
 void getDots(const BrailleWindow *brailleWindow, unsigned char *buf)
 {
   int i;
-  for (i=0; i<displaySize; i++)
-    buf[i] = (textTable[*(brailleWindow->text+i)] &
-              brailleWindow->andAttr[i]) |
-             brailleWindow->orAttr[i];              
+  wchar_t wc;
+  for (i=0; i<displaySize; i++) {
+    if ((wc = brailleWindow->text[i]) >= 256)
+      wc = L'?';
+    buf[i] = (textTable[wc]
+	& brailleWindow->andAttr[i])
+      | brailleWindow->orAttr[i];
+  }
   if (brailleWindow->cursor) buf[brailleWindow->cursor-1] |= cursorDots();
 }
 
@@ -465,7 +475,14 @@ void getDots(const BrailleWindow *brailleWindow, unsigned char *buf)
 /* No allocation of buf is performed */
 void getText(const BrailleWindow *brailleWindow, unsigned char *buf)
 {
-  memcpy(buf,brailleWindow->text,displaySize);
+  int i;
+  wchar_t wc;
+  for (i=0; i<displaySize; i++) {
+    if ((wc = brailleWindow->text[i]) >= 256)
+      buf[i] = '?';
+    else
+      buf[i] = wc;
+  }
 }
 
 static void handleResize(BrailleDisplay *brl)
@@ -856,67 +873,111 @@ static int processRequest(Connection *c)
     }
     case BRLPACKET_WRITE: {
       writeStruct *ws = (writeStruct *) packet;
-      BrailleWindow brailleWindow;
       /* Hack to avoid allocating fields with malloc */
-      unsigned char x[displaySize], y[displaySize], z[displaySize];
-      unsigned int rbeg, rend, strLen;
+      unsigned char *text = NULL, *orAttr = NULL, *andAttr = NULL;
+      unsigned int rbeg, rsiz, textLen = 0;
+      int cursor = -1;
       unsigned char *p = &ws->data;
+#ifdef HAVE_ICONV_H
+      unsigned char *charset = NULL;
+      unsigned int charsetLen = 0;
+#endif /* HAVE_ICONV_H */
       LogPrintRequest(type, c->fd);
       CHECKEXC(size>=sizeof(ws->flags), BRLERR_INVALID_PACKET);
       CHECKEXC(((!c->raw)&&c->tty),BRLERR_ILLEGAL_INSTRUCTION);
-      brailleWindow.text = x;
-      brailleWindow.andAttr = y;
-      brailleWindow.orAttr = z;
       ws->flags = ntohl(ws->flags);
-      pthread_mutex_lock(&c->brlMutex);
       if ((size==sizeof(ws->flags))&&(ws->flags==0)) {
         c->brlbufstate = EMPTY;
-        pthread_mutex_unlock(&c->brlMutex);
         return 0;
       }
-      copyBrailleWindow(&brailleWindow, &c->brailleWindow);
-      pthread_mutex_unlock(&c->brlMutex);
       size -= sizeof(ws->flags); /* flags */
-      CHECKERR((ws->flags & BRLAPI_WF_DISPLAYNUMBER)==0, BRLERR_OPNOTSUPP);
+      CHECKEXC((ws->flags & BRLAPI_WF_DISPLAYNUMBER)==0, BRLERR_OPNOTSUPP);
       if (ws->flags & BRLAPI_WF_REGION) {
         CHECKEXC(size>2*sizeof(uint32_t), BRLERR_INVALID_PACKET);
         rbeg = ntohl( *((uint32_t *) p) );
         p += sizeof(uint32_t); size -= sizeof(uint32_t); /* region begin */
-        rend = ntohl( *((uint32_t *) p) );
-        p += sizeof(uint32_t); size -= sizeof(uint32_t); /* region end */
+        rsiz = ntohl( *((uint32_t *) p) );
+        p += sizeof(uint32_t); size -= sizeof(uint32_t); /* region size */
         CHECKEXC(
-          (1<=rbeg) && (rbeg<=rend) && (rend<=displaySize),
+          (1<=rbeg) && (rsiz>0) && (rbeg+rsiz-1<=displaySize),
           BRLERR_INVALID_PARAMETER);
       } else {
         rbeg = 1;
-        rend = displaySize;
+        rsiz = displaySize;
       }
-      strLen = (rend-rbeg) + 1;
       if (ws->flags & BRLAPI_WF_TEXT) {
-        CHECKEXC(size>=strLen, BRLERR_INVALID_PACKET);
-        memcpy(brailleWindow.text+rbeg-1, p, strLen);
-        p += strLen; size -= strLen; /* text */
+        CHECKEXC(size>=sizeof(uint32_t), BRLERR_INVALID_PACKET);
+	textLen = ntohl( *((uint32_t *) p) );
+	p += sizeof(uint32_t); size -= sizeof(uint32_t); /* text size */
+        CHECKEXC(size>=textLen, BRLERR_INVALID_PACKET);
+	text = p;
+        p += textLen; size -= textLen; /* text */
       }
       if (ws->flags & BRLAPI_WF_ATTR_AND) {
-        CHECKEXC(size>=strLen, BRLERR_INVALID_PACKET);
-        memcpy(brailleWindow.andAttr+rbeg-1, p, strLen);
-        p += strLen; size -= strLen; /* and attributes */
+        CHECKEXC(size>=rsiz, BRLERR_INVALID_PACKET);
+	andAttr = p;
+        p += rsiz; size -= rsiz; /* and attributes */
       }
       if (ws->flags & BRLAPI_WF_ATTR_OR) {
-        CHECKEXC(size>=strLen, BRLERR_INVALID_PACKET);
-        memcpy(brailleWindow.orAttr+rbeg-1, p, strLen);
-        p += strLen; size -= strLen; /* or attributes */
+        CHECKEXC(size>=rsiz, BRLERR_INVALID_PACKET);
+	orAttr = p;
+        p += rsiz; size -= rsiz; /* or attributes */
       }
       if (ws->flags & BRLAPI_WF_CURSOR) {
         CHECKEXC(size>=sizeof(uint32_t), BRLERR_INVALID_PACKET);
-        brailleWindow.cursor = ntohl( *((uint32_t *) p) );
+        cursor = ntohl( *((uint32_t *) p) );
         p += sizeof(uint32_t); size -= sizeof(uint32_t); /* cursor */
-        CHECKEXC(brailleWindow.cursor<=displaySize, BRLERR_INVALID_PACKET);
+        CHECKEXC(cursor<=displaySize, BRLERR_INVALID_PACKET);
       }
+#ifdef HAVE_ICONV_H
+      if (ws->flags & BRLAPI_WF_CHARSET) {
+	CHECKEXC(ws->flags & BRLAPI_WF_TEXT, BRLERR_INVALID_PACKET);
+        CHECKEXC(size>=1, BRLERR_INVALID_PACKET);
+	charsetLen = *p++;
+	size--;
+        CHECKEXC(size>=charsetLen, BRLERR_INVALID_PACKET);
+	charset = p;
+	p += charsetLen; size -= charsetLen;
+      }
+#else /* HAVE_ICONV_H */
+      CHECKEXC(!(ws->flags & BRLAPI_WF_CHARSET), BRLERR_INVALID_PARAMETER);
+#endif /* HAVE_ICONV_H */
       CHECKEXC(size==0, BRLERR_INVALID_PACKET);
       /* Here all the packet has been processed. */
-      pthread_mutex_lock(&c->brlMutex);
-      copyBrailleWindow(&c->brailleWindow, &brailleWindow);
+      if (text) {
+#ifdef HAVE_ICONV_H
+	if (charset) {
+	  unsigned char _charset[charsetLen+1];
+	  iconv_t conv;
+	  wchar_t textBuf[rsiz];
+	  char *in = (char *) text, *out = (char *) textBuf;
+	  size_t sin = textLen, sout = sizeof(textBuf), res;
+
+	  memcpy(_charset,charset,charsetLen);
+	  _charset[charsetLen] = '\0';
+	  CHECKEXC((conv = iconv_open("WCHAR_T",_charset)) != (iconv_t)(-1),
+	      BRLERR_INVALID_PACKET);
+	  res = iconv(conv,&in,&sin,&out,&sout);
+	  iconv_close(conv);
+	  CHECKEXC(res == 0 && !sin && !sout, BRLERR_INVALID_PACKET);
+	  pthread_mutex_lock(&c->brlMutex);
+	  memcpy(c->brailleWindow.text+rbeg-1,textBuf,rsiz*sizeof(wchar_t));
+	} else
+#endif /* HAVE_ICONV_H */
+	{
+	  int i;
+	  pthread_mutex_lock(&c->brlMutex);
+	  for (i=0; i<rsiz; i++)
+	    c->brailleWindow.text[rbeg-1+i] = text[i];
+	}
+      } else
+	pthread_mutex_lock(&c->brlMutex);
+      if (andAttr)
+	memcpy(c->brailleWindow.orAttr+rbeg-1,andAttr,rsiz);
+      if (orAttr)
+	memcpy(c->brailleWindow.orAttr+rbeg-1,orAttr,rsiz);
+      if (cursor>=0)
+	c->brailleWindow.cursor = cursor;
       c->brlbufstate = TODISPLAY;
       pthread_mutex_unlock(&c->brlMutex);
       return 0;

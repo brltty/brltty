@@ -109,6 +109,7 @@ typedef struct {
 #define BRLAPI_WF_ATTR_AND      0X08    /**< And attributes                 */
 #define BRLAPI_WF_ATTR_OR       0X10    /**< Or attributes                  */
 #define BRLAPI_WF_CURSOR        0X20    /**< Cursor position                */
+#define BRLAPI_WF_CHARSET       0X40    /**< Charset                        */
 
 /** Structure of extended write packets */
 typedef struct {

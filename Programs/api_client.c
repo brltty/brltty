@@ -34,6 +34,9 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+#include <wchar.h>
+#include <langinfo.h>
+#include <locale.h>
 
 #ifdef WINDOWS
 #include <ws2tcpip.h>
@@ -678,34 +681,65 @@ int brlapi_writeText(int cursor, const char *str)
   unsigned int min, i;
   unsigned char packet[BRLAPI_MAXPACKETSIZE];
   writeStruct *ws = (writeStruct *) packet;
-  unsigned char *p = &ws->data;
+  unsigned char *p = &ws->data, *locale;
   int res;
   if ((dispSize == 0) || (dispSize > BRLAPI_MAXPACKETSIZE/4)) {
     brlapi_errno=BRLERR_INVALID_PARAMETER;
     return -1;
   }
   ws->flags = 0;
-  if (str==NULL) {
-    if (cursor==-1) goto send;
-  } else {
+  if (str) {
+    mbstate_t ps;
+    size_t len,eaten;
+    uint32_t *size;
+    memset(&ps,0,sizeof(ps));
     ws->flags |= BRLAPI_WF_TEXT;
-    min = MIN( strlen(str), dispSize);
-    memcpy(p,str,min);
-    p += min;
-    for (i = min; i<dispSize; i++,p++) *p = ' ';
+    size = (uint32_t *) p;
+    p += sizeof(*size);
+    len = strlen(str);
+    for (min=0;min<dispSize;min++) {
+      eaten = mbrlen(str,len,&ps);
+      switch(eaten) {
+	case (size_t)(-2):
+	  errno = EILSEQ;
+	case (size_t)(-1):
+	  brlapi_libcerrno = errno;
+	  brlapi_libcerrfun = "mbrlen";
+	  brlapi_errno = BRLERR_LIBCERR;
+	  return -1;
+	case 0:
+	  goto endcount;
+      }
+      memcpy(p, str, eaten);
+      p += eaten;
+      str += eaten;
+      len -= eaten;
+    }
+endcount:
+    for (i = min; i<dispSize; i++) p += wcrtomb(p, L' ', &ps);
+    *size = htonl((p-(unsigned char *)(size+1)));
   }
   if ((cursor>=0) && (cursor<=dispSize)) {
     ws->flags |= BRLAPI_WF_CURSOR;
     *((uint32_t *) p) = htonl(cursor);
-    p += sizeof(cursor);
+    p += sizeof(uint32_t);
   } else if (cursor!=-1) {
     brlapi_errno = BRLERR_INVALID_PARAMETER;
     return -1;
   }
-  send:
+
+  if ((locale = setlocale(LC_CTYPE,NULL)) && strcmp(locale,"C")) {
+    /* not default locale, tell charset to server */
+    char *lang = nl_langinfo(CODESET);
+    size_t len = strlen(lang);
+    ws->flags |= BRLAPI_WF_CHARSET;
+    *p++ = len;
+    memcpy(p, lang, len);
+    p += len;
+  }
   ws->flags = htonl(ws->flags);
   pthread_mutex_lock(&brlapi_fd_mutex);
-  res=brlapi_writePacket(fd,BRLPACKET_WRITE,packet,sizeof(ws->flags)+(p-&ws->data));
+  res = brlapi_writePacket(fd,BRLPACKET_WRITE,packet,sizeof(ws->flags)+(p-&ws->data));
   pthread_mutex_unlock(&brlapi_fd_mutex);
   return res;
 }
@@ -722,7 +756,7 @@ int brlapi_writeDots(const unsigned char *dots)
     return -1;
   }
   ws.displayNumber = -1;
-  ws.regionBegin = 0; ws.regionEnd = 0;
+  ws.regionBegin = 0; ws.regionSize = 0;
   ws.text = malloc(size);
   if (ws.text==NULL) {
     brlapi_errno = BRLERR_NOMEM;
@@ -738,6 +772,7 @@ int brlapi_writeDots(const unsigned char *dots)
   memcpy(ws.attrOr, dots, size);
   ws.attrAnd = NULL;
   ws.cursor = 0;
+  ws.charset = NULL;
   res = brlapi_write(&ws);
   free(ws.text);
   free(ws.attrOr);
@@ -749,42 +784,52 @@ int brlapi_writeDots(const unsigned char *dots)
 int brlapi_write(const brlapi_writeStruct *s)
 {
   int dispSize = brlx * brly;
-  unsigned int rbeg, rend, strLen;
+  unsigned int rbeg = s->regionBegin, rsiz = s->regionSize, strLen;
   unsigned char packet[BRLAPI_MAXPACKETSIZE];
   writeStruct *ws = (writeStruct *) packet;
   unsigned char *p = &ws->data;
   int res;
   ws->flags = 0;
   if (s==NULL) goto send;
-  if ((1<=s->regionBegin) && (s->regionBegin<=dispSize) && (1<=s->regionEnd) && (s->regionEnd<=dispSize)) {
-    if (s->regionBegin>s->regionEnd) return 0;
-    rbeg = s->regionBegin; rend = s->regionEnd;
+  if ((1<=rbeg) && (rbeg<=dispSize) && (1<=rbeg+rsiz-1) && (rbeg+rsiz-1<=dispSize)) {
+    if (rsiz == 0) return 0;
     ws->flags |= BRLAPI_WF_REGION;
     *((uint32_t *) p) = htonl(rbeg); p += sizeof(uint32_t);
-    *((uint32_t *) p) = htonl(rend); p += sizeof(uint32_t);
+    *((uint32_t *) p) = htonl(rsiz); p += sizeof(uint32_t);
   } else {
-    rbeg = 1; rend = dispSize;
+    rbeg = 1; rsiz = dispSize;
   }
-  strLen = (rend-rbeg) + 1;
   if (s->text) {
+    strLen = strlen(s->text);
+    *((uint32_t *) p) = htonl(strLen); p += sizeof(uint32_t);
     ws->flags |= BRLAPI_WF_TEXT;
     memcpy(p, s->text, strLen);
     p += strLen;
   }
   if (s->attrAnd) {
     ws->flags |= BRLAPI_WF_ATTR_AND;
-    memcpy(p, s->attrAnd, strLen);
-    p += strLen;
+    memcpy(p, s->attrAnd, rsiz);
+    p += rsiz;
   }
   if (s->attrOr) {
     ws->flags |= BRLAPI_WF_ATTR_OR;
-    memcpy(p, s->attrOr, strLen);
-    p += strLen;
+    memcpy(p, s->attrOr, rsiz);
+    p += rsiz;
   }
   if ((s->cursor>=0) && (s->cursor<=dispSize)) {
     ws->flags |= BRLAPI_WF_CURSOR;
     *((uint32_t *) p) = htonl(s->cursor);
     p += sizeof(uint32_t);
+  } else if (s->cursor!=-1) {
+    brlapi_errno = BRLERR_INVALID_PARAMETER;
+    return -1;    
+  }
+  if (s->charset && *s->charset) {
+    strLen = strlen(s->charset);
+    *p++ = strLen;
+    ws->flags |= BRLAPI_WF_CHARSET;
+    strcpy(p, s->charset);
+    p += strLen;
   }
   send:
   ws->flags = htonl(ws->flags);
