@@ -367,7 +367,7 @@ addCommand (int code) {
 %token NUM STRING IS AND
 %token NAME IDENT HELPFILE DISPLAYSIZE STATCELLS FRONTKEYS EASYBAR
 %token MODIFIER
-%token ROUTING EASY SWITCH KEY
+%token ROUTING1 ROUTING2 EASY SWITCH KEY
 %token LEFT RIGHT REAR FRONT
 %token STAT KEYCODE STATCODE EASYCODE
 %token NUMBER FLAG HORIZ
@@ -433,7 +433,8 @@ anykey:   STAT   NUM         { keyindex= OFFS_STAT + numval; }
         | KEY    LEFT  FRONT { keyindex= OFFS_SWITCH + KEY_LEFT_FRONT; }
         | KEY    RIGHT REAR  { keyindex= OFFS_SWITCH + KEY_RIGHT_REAR; }
         | KEY    RIGHT FRONT { keyindex= OFFS_SWITCH + KEY_RIGHT_FRONT; }
-        | ROUTING            { keyindex= ROUTINGKEY; }
+        | ROUTING1           { keyindex= ROUTINGKEY1; }
+        | ROUTING2           { keyindex= ROUTINGKEY2; }
         ; 
 
 modifiers: modifier
@@ -499,7 +500,8 @@ static struct init_v symbols[]= {
   { "down1",       EASYCODE, EASY_D1},
   { "down2",       EASYCODE, EASY_D2 },
 
-  { "routing",     ROUTING, 0 },
+  { "routing1",    ROUTING1, 0 },
+  { "routing2",    ROUTING2, 0 },
 
   { "on",          ON, 0 },
   { "off",         OFF, 0 },

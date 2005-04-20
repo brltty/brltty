@@ -694,7 +694,7 @@ handleKey1 (BrailleDisplay *brl, int code, int press, int time) {
   if (rcvCursorFirst <= code && 
       code <= rcvCursorLast) { /* Routing Keys */ 
     num = (code - rcvCursorFirst) / 3;
-    return handleKey(brl, ROUTINGKEY, press, num);
+    return handleKey(brl, ROUTINGKEY1, press, num);
   }
 
   LogPrint(LOG_WARNING, "Unexpected key: %04X", code);
@@ -1158,7 +1158,7 @@ readCommand2 (BrailleDisplay *brl, BRL_DriverCommandContext context) {
           }
         }
 
-        /* Find out whihc keys have been pressed.
+        /* Find out which keys have been pressed.
          * The last one determines the command to be executed.
          */
         for (byte=0; byte<bytes; ++byte) {
@@ -1265,7 +1265,8 @@ mapInputModules2 (void) {
     unsigned char column = terminal->columns;
     while (column) {
       nextInputModule2(&byte, &bit);
-      addInputMapping2(byte, bit, ROUTINGKEY, --column);
+      addInputMapping2(byte, bit, ROUTINGKEY1, column-1);
+      addInputMapping2(byte, bit+1, ROUTINGKEY2, --column);
     }
   }
 

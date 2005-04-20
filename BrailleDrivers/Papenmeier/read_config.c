@@ -94,9 +94,15 @@ static char* search_toggle(int cmd)
 static char* search_key(int16_t key) {
   static char res[20];
 
-  if (key == ROUTINGKEY) {
+  if (key == ROUTINGKEY1) {
     snprintf(res, sizeof(res), "%s",
-             search_code(ROUTING, 0));
+             search_code(ROUTING1, 0));
+    return res;
+  }
+
+  if (key == ROUTINGKEY2) {
+    snprintf(res, sizeof(res), "%s",
+             search_code(ROUTING2, 0));
     return res;
   }
 
