@@ -656,44 +656,44 @@ static CommandDefinition pm_commands_elba_20[] = {
   CMDS_EASY_ALL
 };
 
-static uint16_t pm_status_el_40_s[] = {
+static uint16_t pm_status_el_40s[] = {
 };
-static int16_t pm_modifiers_el_40_s[] = {
+static int16_t pm_modifiers_el_40s[] = {
   MOD_EASY
 };
-static CommandDefinition pm_commands_el_40_s[] = {
+static CommandDefinition pm_commands_el_40s[] = {
   CMDS_EASY_ALL,
   CMDS_EASY_SWSIM
 };
 
-static uint16_t pm_status_el_80_s[] = {
+static uint16_t pm_status_el_80_ii[] = {
   SHOW_STAT_2
 };
-static int16_t pm_modifiers_el_80_s[] = {
+static int16_t pm_modifiers_el_80_ii[] = {
   MOD_EASY
 };
-static CommandDefinition pm_commands_el_80_s[] = {
+static CommandDefinition pm_commands_el_80_ii[] = {
   CMDS_EASY_ALL,
   CMDS_STAT_2,
   CMDS_EASY_SWSIM
 };
 
-static uint16_t pm_status_el_66_s[] = {
+static uint16_t pm_status_el_66s[] = {
 };
-static int16_t pm_modifiers_el_66_s[] = {
+static int16_t pm_modifiers_el_66s[] = {
   MOD_EASY
 };
-static CommandDefinition pm_commands_el_66_s[] = {
+static CommandDefinition pm_commands_el_66s[] = {
   CMDS_EASY_ALL,
   CMDS_EASY_SWSIM
 };
 
-static uint16_t pm_status_el_80_s2[] = {
+static uint16_t pm_status_el_80s[] = {
 };
-static int16_t pm_modifiers_el_80_s2[] = {
+static int16_t pm_modifiers_el_80s[] = {
   MOD_EASY
 };
-static CommandDefinition pm_commands_el_80_s2[] = {
+static CommandDefinition pm_commands_el_80s[] = {
   CMDS_EASY_ALL,
   CMDS_EASY_SWSIM
 };
@@ -809,8 +809,8 @@ static TerminalDefinition pmTerminalTable[] = {
   ,
   PM_TERMINAL(
     85,				/* identity */
-    el_40_s,		/* filename of local helpfile */
-    "BrailleX II EL 40 S",		/* name of terminal */
+    el_40s,		/* filename of local helpfile */
+    "BrailleX EL 40s",		/* name of terminal */
     40, 1,			/* size of display */
     0,				/* number of front keys */
     1, 0, 0, 1, 1		/* terminal has an easy bar */
@@ -818,8 +818,8 @@ static TerminalDefinition pmTerminalTable[] = {
   ,
   PM_TERMINAL(
     86,				/* identity */
-    el_80_s,		/* filename of local helpfile */
-    "BrailleX II EL 80 S",		/* name of terminal */
+    el_80_ii,		/* filename of local helpfile */
+    "BrailleX EL 80 II",		/* name of terminal */
     80, 1,			/* size of display */
     0,				/* number of front keys */
     1, 0, 0, 1, 1		/* terminal has an easy bar */
@@ -827,8 +827,8 @@ static TerminalDefinition pmTerminalTable[] = {
   ,
   PM_TERMINAL(
     87,				/* identity */
-    el_66_s,		/* filename of local helpfile */
-    "BrailleX II EL 66 S",		/* name of terminal */
+    el_66s,		/* filename of local helpfile */
+    "BrailleX EL 66s",		/* name of terminal */
     66, 1,			/* size of display */
     0,				/* number of front keys */
     1, 0, 0, 1, 1		/* terminal has an easy bar */
@@ -836,8 +836,8 @@ static TerminalDefinition pmTerminalTable[] = {
   ,
   PM_TERMINAL(
     88,				/* identity */
-    el_80_s2,		/* filename of local helpfile */
-    "BrailleX EL+ 80",		/* name of terminal */
+    el_80s,		/* filename of local helpfile */
+    "BrailleX EL 80s",		/* name of terminal */
     80, 1,			/* size of display */
     0,				/* number of front keys */
     1, 0, 0, 1, 1		/* terminal has an easy bar */
