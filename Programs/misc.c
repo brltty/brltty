@@ -89,6 +89,7 @@ deallocateStrings (char **array) {
    static int syslogOpened = 0;
 #endif /* HAVE_SYSLOG_H */
 static int logLevel = LOG_INFO;
+static const char *printPrefix = NULL;
 static int printLevel = LOG_NOTICE;
 int loggedProblemCount = 0;
 
@@ -135,19 +136,21 @@ LogPrint (int level, char *format, ...) {
 #endif /* HAVE_VSYSLOG */
       goto done;
     }
-#endif /* HAVE_SYSLOG_H */
     level = printLevel;
+#endif /* HAVE_SYSLOG_H */
   }
 #ifdef HAVE_SYSLOG_H
 done:
 #endif /* HAVE_SYSLOG_H */
 
   if (level <= printLevel) {
+    FILE *stream = stderr;
+    if (printPrefix) fprintf(stream, "%s: ", printPrefix);
     va_start(argp, format);
-    vfprintf(stderr, format, argp);
+    vfprintf(stream, format, argp);
     va_end(argp);
-    fprintf(stderr, "\n");
-    fflush(stderr);
+    fprintf(stream, "\n");
+    fflush(stream);
   }
 }
 
@@ -190,6 +193,13 @@ int
 setLogLevel (int level) {
   int previous = logLevel;
   logLevel = level;
+  return previous;
+}
+
+const char *
+setPrintPrefix (const char *prefix) {
+  const char *previous = printPrefix;
+  printPrefix = prefix;
   return previous;
 }
 

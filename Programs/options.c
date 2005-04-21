@@ -601,6 +601,7 @@ processOptions (
   }
   programName = strrchr(programPath, '/');
   programName = programName? programName+1: programPath;
+  setPrintPrefix(programName);
 
   processCommandLine(&info, argumentCount, argumentVector, argumentsSummary);
   {

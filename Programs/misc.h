@@ -118,6 +118,7 @@ extern void LogWindowsError (const char *action);
 #endif /* WINDOWS */
 extern void LogBytes (const char *description, const unsigned char *data, unsigned int length);
 extern int setLogLevel (int level);
+extern const char *setPrintPrefix (const char *prefix);
 extern int setPrintLevel (int level);
 extern int setPrintOff (void);
 extern int loggedProblemCount;
