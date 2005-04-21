@@ -117,13 +117,15 @@ extern int listBrailleDrivers (const char *directory);
 extern const BrailleDriver *braille;
 extern const BrailleDriver noBraille;
 
-typedef unsigned char TranslationTable[0X100];
+#define TRANSLATION_TABLE_SIZE 0X100
+typedef unsigned char TranslationTable[TRANSLATION_TABLE_SIZE];
 extern TranslationTable textTable;	 /* current text to braille translation table */
 extern TranslationTable untextTable;     /* current braille to text translation table */
 extern TranslationTable attributesTable; /* current attributes to braille translation table */
 extern void *contractionTable; /* current braille contraction table */
 
-typedef unsigned char DotsTable[8];
+#define DOTS_TABLE_SIZE 8
+typedef unsigned char DotsTable[DOTS_TABLE_SIZE];
 extern void makeOutputTable (const DotsTable *dots, TranslationTable *table);
 
 /* Formatting of status cells. */

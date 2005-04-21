@@ -44,7 +44,6 @@ typedef struct {
 } ByteEntry;
 
 typedef struct {
-  TranslationTableReporter report;
   int options;
   unsigned ok:1;
   const char *file;
@@ -64,7 +63,7 @@ reportError (InputData *input, const char *format, ...) {
   vsnprintf(message, sizeof(message), format, args);
   va_end(args);
 
-  input->report(message);
+  LogPrint(LOG_ERR, "%s", message);
   input->ok = 0;
 }
 
@@ -462,35 +461,34 @@ setTable (InputData *input, TranslationTable *table) {
 
 int
 loadTranslationTable (
-  const char *file,
+  const char *path,
+  FILE *file,
   TranslationTable *table,
-  TranslationTableReporter report,
   int options
 ) {
   int ok = 0;
   InputData input;
-  FILE *stream;
+  int opened = file != NULL;
 
   memset(&input, 0, sizeof(input));
-  input.report = report;
   input.options = options;
   input.ok = 1;
-  input.file = file;
+  input.file = path;
   input.line = 0;
   input.undefined = 0XFF;
 
-  if ((stream = fopen(file, "r"))) {
-    if (processLines(stream, processTableLine, &input)) {
+  if (opened || (file = fopen(path, "r"))) {
+    if (processLines(file, processTableLine, &input)) {
       if (input.ok) {
         setTable(&input, table);
         ok = 1;
       }
     }
 
-    fclose(stream);
+    if (!opened) fclose(file);
   } else {
     reportError(&input, "Cannot open translation table '%s': %s",
-                file, strerror(errno));
+                path, strerror(errno));
   }
 
   return ok;

@@ -387,17 +387,12 @@ logParameters (const char *const *names, char **values, char *description) {
   }
 }
 
-static void
-reportTranslationTableMessage (const char *message) {
-  LogPrint(LOG_WARNING, "%s", message);
-}
-
 static int
 replaceTranslationTable (TranslationTable *table, const char *file, const char *type) {
   int ok = 0;
   char *path = makePath(opt_tablesDirectory, file);
   if (path) {
-    if (loadTranslationTable(path, table, reportTranslationTableMessage, 0)) {
+    if (loadTranslationTable(path, NULL, table, 0)) {
       ok = 1;
     }
     free(path);

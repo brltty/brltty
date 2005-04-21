@@ -22,16 +22,16 @@
 extern "C" {
 #endif /* __cplusplus */
 
-typedef void (*TranslationTableReporter) (const char *message);
+#include <stdio.h>
 
 #define TBL_UNDEFINED 0X1
 #define TBL_DUPLICATE 0X2
 #define TBL_UNUSED    0X4
 
 extern int loadTranslationTable (
-  const char *file,
+  const char *path,
+  FILE *file,
   TranslationTable *table,
-  TranslationTableReporter report,
   int options
 );
 extern void reverseTranslationTable (TranslationTable *from, TranslationTable *to);

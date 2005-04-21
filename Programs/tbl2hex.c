@@ -34,11 +34,6 @@
 BEGIN_OPTION_TABLE
 END_OPTION_TABLE
 
-static void
-reportMessage (const char *message) {
-  fprintf(stderr, "%s: %s\n", programName, message);
-}
-
 int
 main (int argc, char *argv[]) {
   int status;
@@ -56,7 +51,7 @@ main (int argc, char *argv[]) {
   }
   path = *argv++, argc--;
 
-  if (loadTranslationTable(path, &table, reportMessage, 0)) {
+  if (loadTranslationTable(path, NULL, &table, 0)) {
     unsigned int columns = 8;
     unsigned int rows = 0X100 / columns;
     unsigned int row;
