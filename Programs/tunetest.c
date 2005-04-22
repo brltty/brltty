@@ -112,7 +112,7 @@ instrumentArgument (const char *argument) {
       }
     }
   }
-  fprintf(stderr, "%s: Invalid instrument: %s\n", programName, argument);
+  LogPrint(LOG_ERR, "invalid instrument: %s", argument);
   exit(2);
 }
 #endif /* ENABLE_MIDI_SUPPORT */
@@ -152,9 +152,9 @@ main (int argc, char *argv[]) {
   }
 
   if (!argc) {
-    fprintf(stderr, "%s: Missing tune.\n", programName);
+    LogPrint(LOG_ERR, "missing tune.");
   } else if (argc % 2) {
-    fprintf(stderr, "%s: Missing duration.\n", programName);
+    LogPrint(LOG_ERR, "missing duration.");
   } else {
     unsigned int count = argc / 2;
     TuneElement *elements = mallocWrapper((sizeof(*elements) * count) + 1);
@@ -169,7 +169,7 @@ main (int argc, char *argv[]) {
     *element = TUNE_STOP();
 
     if (!setTuneDevice(tuneDevice)) {
-      fprintf(stderr, "%s: Unsupported tune device: %s\n", programName, deviceNames[tuneDevice]);
+      LogPrint(LOG_ERR, "unsupported tune device: %s", deviceNames[tuneDevice]);
       exit(3);
     }
 

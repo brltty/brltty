@@ -160,7 +160,7 @@ exitLog (void) {
    */
   LogOpen(0);
   setPrintOff();
-  LogPrint(LOG_INFO, "Terminated.");
+  LogPrint(LOG_INFO, "terminated.");
   LogClose();
 }
 
@@ -896,7 +896,7 @@ main (int argc, char *argv[]) {
 
   /* Open the system log. */
   LogOpen(0);
-  LogPrint(LOG_INFO, "Starting.");
+  LogPrint(LOG_INFO, "starting.");
   atexit(exitLog);
 
   /* Initialize global data assumed to be ready by the termination handler. */
@@ -995,7 +995,7 @@ main (int argc, char *argv[]) {
           repeatStarted = 1;
         } else {
           int repeatFlags = next & BRL_FLG_REPEAT_MASK;
-          LogPrint(LOG_DEBUG, "Command: %06X", next);
+          LogPrint(LOG_DEBUG, "command: %06X", next);
           next &= ~BRL_FLG_REPEAT_MASK;
 
           if (prefs.skipIdenticalLines) {
@@ -1838,7 +1838,7 @@ main (int argc, char *argv[]) {
               }
               default:
                 playTune(&tune_command_rejected);
-                LogPrint(LOG_WARNING, "Unrecognized command: %04X", command);
+                LogPrint(LOG_WARNING, "unrecognized command: %04X", command);
             }
             break;
           }

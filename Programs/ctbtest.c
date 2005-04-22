@@ -93,7 +93,7 @@ main (int argc, char *argv[]) {
                  "contraction-table");
 
   if (argc == 0) {
-    fprintf(stderr, "%s: missing contraction table.\n", programName);
+    LogPrint(LOG_ERR, "missing contraction table.");
     exit(2);
   }
   contractionTablePath = *argv++, argc--;

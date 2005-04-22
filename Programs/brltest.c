@@ -119,7 +119,7 @@ main (int argc, char *argv[]) {
       while (*name) ++name;
       count = name - parameterNames;
       if (!(parameterSettings = malloc((count + 1) * sizeof(*parameterSettings)))) {
-        fprintf(stderr, "%s: Insufficient memory.\n", programName);
+        LogPrint(LOG_ERR, "insufficient memory.");
         exit(9);
       }
       setting = parameterSettings;
@@ -131,9 +131,9 @@ main (int argc, char *argv[]) {
       int ok = 0;
       char *delimiter = strchr(assignment, '=');
       if (!delimiter) {
-        LogPrint(LOG_ERR, "Missing braille driver parameter value: %s", assignment);
+        LogPrint(LOG_ERR, "missing braille driver parameter value: %s", assignment);
       } else if (delimiter == assignment) {
-        LogPrint(LOG_ERR, "Missing braille driver parameter name: %s", assignment);
+        LogPrint(LOG_ERR, "missing braille driver parameter name: %s", assignment);
       } else {
         size_t nameLength = delimiter - assignment;
         const char *const *name = parameterNames;
@@ -145,7 +145,7 @@ main (int argc, char *argv[]) {
           }
           ++name;
         }
-        if (!ok) LogPrint(LOG_ERR, "Invalid braille driver parameter: %s", assignment);
+        if (!ok) LogPrint(LOG_ERR, "invalid braille driver parameter: %s", assignment);
       }
       if (!ok) exit(2);
       --argc;
@@ -166,20 +166,20 @@ main (int argc, char *argv[]) {
           braille->close(&brl);		/* finish with the display */
           status = 0;
         } else {
-          LogPrint(LOG_ERR, "Can't allocate braille buffer.");
+          LogPrint(LOG_ERR, "can't allocate braille buffer.");
           status = 6;
         }
       } else {
-        LogPrint(LOG_ERR, "Can't initialize braille driver.");
+        LogPrint(LOG_ERR, "can't initialize braille driver.");
         status = 5;
       }
     } else {
-      LogPrint(LOG_ERR, "Can't change directory to '%s': %s",
+      LogPrint(LOG_ERR, "can't change directory to '%s': %s",
                opt_dataDirectory, strerror(errno));
       status = 4;
     }
   } else {
-    LogPrint(LOG_ERR, "Can't load braille driver.");
+    LogPrint(LOG_ERR, "can't load braille driver.");
     status = 3;
   }
   return status;

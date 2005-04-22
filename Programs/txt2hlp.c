@@ -65,8 +65,8 @@ main (int argc, char *argv[]) {
             const char *inputPath = argv[pageNumber];
             FILE *inputStream = fopen(inputPath, "r");
             if (!inputStream) {
-              fprintf(stderr, "%s: Cannot open input file %s: %s\n",
-                      programName, inputPath, strerror(errno));
+              LogPrint(LOG_ERR, "cannot open input file %s: %s",
+                       inputPath, strerror(errno));
               status = pageNumber + 11;
               break;
             }
@@ -102,20 +102,20 @@ main (int argc, char *argv[]) {
 
           fclose(outputStream);
         } else {
-          fprintf(stderr, "%s: Cannot open output file %s: %s\n",
-                  programName, outputPath, strerror(errno));
+          LogPrint(LOG_ERR, "cannot open output file %s: %s",
+                   outputPath, strerror(errno));
           status = 10;
         }
         free(pageTable);
       } else {
-        fprintf (stderr, "%s: Out of memory.\n", programName);
+        LogPrint(LOG_ERR, "out of memory.");
         status = 3;
       }
     } else {
-      fprintf(stderr, "%s: Missing input file.\n", programName);
+      LogPrint(LOG_ERR, "missing input file.");
     }
   } else {
-    fprintf(stderr, "%s: Missing output file.\n", programName);
+    LogPrint(LOG_ERR, "missing output file.");
   }
 
   return 0;

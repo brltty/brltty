@@ -92,14 +92,14 @@ ensureSetting (
         } else if (strcasecmp(value, "off") == 0) {
           *setting = 0;
         } else if (!(option->flags & OPT_Extend)) {
-          LogPrint(LOG_ERR, "Invalid flag setting: %s", value);
+          LogPrint(LOG_ERR, "invalid flag setting: %s", value);
           info->errorCount++;
         } else {
           int count;
           if (isInteger(&count, value) && (count >= 0)) {
             *setting = count;
           } else {
-            LogPrint(LOG_ERR, "Invalid counter setting: %s", value);
+            LogPrint(LOG_ERR, "invalid counter setting: %s", value);
             info->errorCount++;
           }
         }
@@ -632,11 +632,11 @@ floatArgument (
   char *end;
   double value = strtod(argument, &end);
   if ((end == argument) || *end) {
-    fprintf(stderr, "%s: Invalid %s: %s\n", programName, name, argument);
+    LogPrint(LOG_ERR, "invalid %s: %s", name, argument);
   } else if (value < minimum) {
-    fprintf(stderr, "%s: %s is less than %g: %g\n", programName, name, minimum, value);
+    LogPrint(LOG_ERR, "%s is less than %g: %g", name, minimum, value);
   } else if (value > maximum) {
-    fprintf(stderr, "%s: %s is greater than %g: %g\n", programName, name, maximum, value);
+    LogPrint(LOG_ERR, "%s is greater than %g: %g", name, maximum, value);
   } else {
     return value;
   }
@@ -653,11 +653,11 @@ integerArgument (
   char *end;
   long int value = strtol(argument, &end, 0);
   if ((end == argument) || *end) {
-    fprintf(stderr, "%s: Invalid %s: %s\n", programName, name, argument);
+    LogPrint(LOG_ERR, "invalid %s: %s", name, argument);
   } else if (value < minimum) {
-    fprintf(stderr, "%s: %s is less than %d: %ld\n", programName, name, minimum, value);
+    LogPrint(LOG_ERR, "%s is less than %d: %ld", name, minimum, value);
   } else if (value > maximum) {
-    fprintf(stderr, "%s: %s is greater than %d: %ld\n", programName, name, maximum, value);
+    LogPrint(LOG_ERR, "%s is greater than %d: %ld", name, maximum, value);
   } else {
     return value;
   }
@@ -676,6 +676,6 @@ wordArgument (
     if (strncasecmp(argument, *choice, length) == 0) return choice - choices;
     ++choice;
   }
-  fprintf(stderr, "%s: Invalid %s: %s\n", programName, name, argument);
+  LogPrint(LOG_ERR, "invalid %s: %s", name, argument);
   exit(2);
 }

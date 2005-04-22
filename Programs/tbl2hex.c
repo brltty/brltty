@@ -28,6 +28,7 @@
 #include <stdio.h>
 
 #include "options.h"
+#include "misc.h"
 #include "brl.h"
 #include "tbl.h"
 
@@ -46,7 +47,7 @@ main (int argc, char *argv[]) {
                  "translation-table");
 
   if (argc == 0) {
-    fprintf(stderr, "%s: missing translation table.\n", programName);
+    LogPrint(LOG_ERR, "missing translation table.");
     exit(2);
   }
   path = *argv++, argc--;

@@ -700,7 +700,7 @@ serialOpenDevice (const char *path) {
 
             serial->stream = NULL;
 
-            LogPrint(LOG_DEBUG, "Serial device opened: %s: fd=%d",
+            LogPrint(LOG_DEBUG, "serial device opened: %s: fd=%d",
                      device,
 #ifdef __MINGW32__
 		     (int)serial->fileHandle

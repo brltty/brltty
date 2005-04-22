@@ -183,7 +183,7 @@ const unsigned int midiInstrumentCount = sizeof(midiInstrumentTable) / sizeof(mi
 static int openMidi (int errorLevel) {
    if (!midi) {
       if (!(midi = openMidiDevice(errorLevel, opt_midiDevice))) {
-         LogPrint(LOG_DEBUG, "Cannot open MIDI.");
+         LogPrint(LOG_DEBUG, "cannot open MIDI.");
          return 0;
       }
       LogPrint(LOG_DEBUG, "MIDI opened.");
@@ -196,12 +196,12 @@ static int playMidi (int note, int duration) {
    if (midi) {
       beginMidiBlock(midi);
       if (note) {
-	 LogPrint(LOG_DEBUG, "Tone: msec=%d note=%d", duration, note);
+	 LogPrint(LOG_DEBUG, "tone: msec=%d note=%d", duration, note);
          startMidiNote(midi, channelNumber, note, prefs.midiVolume);
 	 insertMidiWait(midi, duration);
          stopMidiNote(midi, channelNumber);
       } else {
-	 LogPrint(LOG_DEBUG, "Tone: msec=%d", duration);
+	 LogPrint(LOG_DEBUG, "tone: msec=%d", duration);
 	 insertMidiWait(midi, duration);
       }
       endMidiBlock(midi);

@@ -31,6 +31,7 @@
 #include <ctype.h>
 
 #include "options.h"
+#include "misc.h"
 #include "scr.h"
 
 static char *opt_boxLeft;
@@ -110,7 +111,7 @@ main (int argc, char *argv[]) {
     while (*name) ++name;
     count = name - parameterNames;
     if (!(parameterSettings = malloc((count + 1) * sizeof(*parameterSettings)))) {
-      fprintf(stderr, "%s: Insufficient memory.\n", programName);
+      LogPrint(LOG_ERR, "insufficient memory.");
       exit(9);
     }
     setting = parameterSettings;
@@ -123,9 +124,9 @@ main (int argc, char *argv[]) {
     int ok = 0;
     char *delimiter = strchr(assignment, '=');
     if (!delimiter) {
-      fprintf(stderr, "%s: Missing screen parameter value: %s\n", programName, assignment);
+      LogPrint(LOG_ERR, "missing screen parameter value: %s", assignment);
     } else if (delimiter == assignment) {
-      fprintf(stderr, "%s: Missing screen parameter name: %s\n", programName, assignment);
+      LogPrint(LOG_ERR, "missing screen parameter name: %s", assignment);
     } else {
       size_t nameLength = delimiter - assignment;
       const char *const *name = parameterNames;
@@ -137,7 +138,7 @@ main (int argc, char *argv[]) {
         }
         ++name;
       }
-      if (!ok) fprintf(stderr, "%s: Invalid screen parameter: %s\n", programName, assignment);
+      if (!ok) LogPrint(LOG_ERR, "invalid screen parameter: %s", assignment);
     }
     if (!ok) exit(2);
     --argc;
@@ -172,12 +173,12 @@ main (int argc, char *argv[]) {
       }
       status = 0;
     } else {
-      fprintf(stderr, "%s: can't read screen.\n", programName);
+      LogPrint(LOG_ERR, "Can't read screen.");
       status = 4;
     }
     closeAllScreens();
   } else {
-    fprintf(stderr, "%s: Can't initialize screen driver.\n", programName);
+    LogPrint(LOG_ERR, "can't initialize screen driver.");
     status = 3;
   }
   return status;

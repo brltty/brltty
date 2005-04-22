@@ -116,7 +116,7 @@ main (int argc, char *argv[]) {
       while (*name) ++name;
       count = name - parameterNames;
       if (!(parameterSettings = malloc((count + 1) * sizeof(*parameterSettings)))) {
-        fprintf(stderr, "%s: Insufficient memory.\n", programName);
+        LogPrint(LOG_ERR, "insufficient memory.");
         exit(9);
       }
       setting = parameterSettings;
@@ -128,9 +128,9 @@ main (int argc, char *argv[]) {
       int ok = 0;
       char *delimiter = strchr(assignment, '=');
       if (!delimiter) {
-        LogPrint(LOG_ERR, "Missing speech driver parameter value: %s", assignment);
+        LogPrint(LOG_ERR, "missing speech driver parameter value: %s", assignment);
       } else if (delimiter == assignment) {
-        LogPrint(LOG_ERR, "Missing speech driver parameter name: %s", assignment);
+        LogPrint(LOG_ERR, "missing speech driver parameter name: %s", assignment);
       } else {
         size_t nameLength = delimiter - assignment;
         const char *const *name = parameterNames;
@@ -142,7 +142,7 @@ main (int argc, char *argv[]) {
           }
           ++name;
         }
-        if (!ok) LogPrint(LOG_ERR, "Invalid speech driver parameter: %s", assignment);
+        if (!ok) LogPrint(LOG_ERR, "invalid speech driver parameter: %s", assignment);
       }
       if (!ok) exit(2);
       --argc;
@@ -162,16 +162,16 @@ main (int argc, char *argv[]) {
         speech->close();		/* finish with the display */
         status = 0;
       } else {
-        LogPrint(LOG_ERR, "Can't initialize speech driver.");
+        LogPrint(LOG_ERR, "can't initialize speech driver.");
         status = 5;
       }
     } else {
-      LogPrint(LOG_ERR, "Can't change directory to '%s': %s",
+      LogPrint(LOG_ERR, "can't change directory to '%s': %s",
                opt_dataDirectory, strerror(errno));
       status = 4;
     }
   } else {
-    LogPrint(LOG_ERR, "Can't load speech driver.");
+    LogPrint(LOG_ERR, "can't load speech driver.");
     status = 3;
   }
   return status;

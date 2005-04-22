@@ -295,11 +295,11 @@ parseParameters (
       if (*name) {
         char *value = strchr(name, '=');
         if (!value) {
-          LogPrint(LOG_ERR, "Missing %s parameter value: %s",
+          LogPrint(LOG_ERR, "missing %s parameter value: %s",
                    description, name);
         } else if (value == name) {
         noName:
-          LogPrint(LOG_ERR, "Missing %s parameter name: %s",
+          LogPrint(LOG_ERR, "missing %s parameter name: %s",
                    description, name);
         } else {
           int nameLength = value++ - name;
@@ -312,7 +312,7 @@ parseParameters (
               int nameAdjustment = qualifierLength + 1;
               eligible = 0;
               if (!qualifierLength) {
-                LogPrint(LOG_ERR, "Missing %s code: %s",
+                LogPrint(LOG_ERR, "missing %s code: %s",
                          description, name);
               } else if (!(nameLength -= nameAdjustment)) {
                 goto noName;
@@ -336,7 +336,7 @@ parseParameters (
             }
 
             if (!names[index]) {
-              LogPrint(LOG_ERR, "Unsupported %s parameter: %s", description, name);
+              LogPrint(LOG_ERR, "unsupported %s parameter: %s", description, name);
             }
           }
         }
@@ -456,7 +456,7 @@ int
 readCommand (BRL_DriverCommandContext context) {
   int command = readBrailleCommand(&brl, context);
   if (command != EOF) {
-    LogPrint(LOG_DEBUG, "Command: %06X", command);
+    LogPrint(LOG_DEBUG, "command: %06X", command);
     if (IS_DELAYED_COMMAND(command)) command = BRL_CMD_NOOP;
     command &= BRL_MSK_CMD;
   }
@@ -490,10 +490,10 @@ loadContractionTable (const char *file) {
   void *table = NULL;
   if (*file) {
     char *path = makePath(opt_contractionsDirectory, file);
-    LogPrint(LOG_DEBUG, "Compiling contraction table: %s", file);
+    LogPrint(LOG_DEBUG, "compiling contraction table: %s", file);
     if (path) {
       if (!(table = compileContractionTable(path))) {
-        LogPrint(LOG_ERR, "Cannot compile contraction table: %s", path);
+        LogPrint(LOG_ERR, "cannot compile contraction table: %s", path);
       }
       free(path);
     }
@@ -523,7 +523,7 @@ dimensionsChanged (int rows, int columns) {
   fwinshift = MAX(columns-prefs.windowOverlap, 1);
   hwinshift = columns / 2;
   vwinshift = (rows > 1)? rows: 5;
-  LogPrint(LOG_DEBUG, "Shifts: fwin=%d hwin=%d vwin=%d",
+  LogPrint(LOG_DEBUG, "shifts: fwin=%d hwin=%d vwin=%d",
            fwinshift, hwinshift, vwinshift);
 }
 
@@ -600,13 +600,13 @@ loadPreferences (int change) {
 
         if (change) changedPreferences();
       } else
-        LogPrint(LOG_ERR, "Invalid preferences file: %s", preferencesFile);
+        LogPrint(LOG_ERR, "invalid preferences file: %s", preferencesFile);
     } else if (length == -1) {
-      LogPrint(LOG_ERR, "Cannot read preferences file: %s: %s",
+      LogPrint(LOG_ERR, "cannot read preferences file: %s: %s",
                preferencesFile, strerror(errno));
     } else {
       long int actualSize = sizeof(newPreferences);
-      LogPrint(LOG_ERR, "Preferences file '%s' has incorrect size %d (should be %ld).",
+      LogPrint(LOG_ERR, "preferences file '%s' has incorrect size %d (should be %ld).",
                preferencesFile, length, actualSize);
     }
     close(fd);
@@ -692,12 +692,12 @@ savePreferences (void) {
     if (write(fd, &prefs, sizeof(prefs)) == sizeof(prefs)) {
       ok = 1;
     } else {
-      LogPrint(LOG_ERR, "Cannot write to preferences file: %s: %s",
+      LogPrint(LOG_ERR, "cannot write to preferences file: %s: %s",
                preferencesFile, strerror(errno));
     }
     close(fd);
   } else {
-    LogPrint(LOG_ERR, "Cannot open preferences file: %s: %s",
+    LogPrint(LOG_ERR, "cannot open preferences file: %s: %s",
              preferencesFile, strerror(errno));
   }
   if (!ok)
@@ -841,7 +841,7 @@ globBegin (GlobData *data) {
           LogError("working directory restore");
         }
       } else {
-        LogPrint(LOG_ERR, "Cannot set working directory: %s: %s",
+        LogPrint(LOG_ERR, "cannot set working directory: %s: %s",
                  data->directory, strerror(errno));
       }
 
@@ -1375,19 +1375,19 @@ openBrailleDriver (int verify) {
 #endif /* ENABLE_BLUETOOTH_SUPPORT */
 
       } else {
-        LogPrint(LOG_WARNING, "Braille display autodetection not supported for device '%s'.", dev);
+        LogPrint(LOG_WARNING, "braille display autodetection not supported for device '%s'.", dev);
         goto nextDevice;
       }
-      LogPrint(LOG_DEBUG, "Looking for %s braille display on '%s'.", type, *device);
+      LogPrint(LOG_DEBUG, "looking for %s braille display on '%s'.", type, *device);
     } else {
       code = (const char *const *)brailleDrivers;
-      LogPrint(LOG_DEBUG, "Looking for braille display on '%s'.", *device);
+      LogPrint(LOG_DEBUG, "looking for braille display on '%s'.", *device);
     }
 
     while (*code) {
       const BrailleDriver *driver;
       void *object;
-      LogPrint(LOG_DEBUG, "Checking for '%s' braille display.", *code);
+      LogPrint(LOG_DEBUG, "checking for '%s' braille display.", *code);
       if ((driver = loadBrailleDriver(*code, &object, opt_libraryDirectory))) {
         char **parameters = processParameters(driver->parameters,
                                               "braille driver",
@@ -1397,7 +1397,7 @@ openBrailleDriver (int verify) {
           int opened = verify;
 
           if (!opened) {
-            LogPrint(LOG_DEBUG, "Initializing braille driver: %s -> %s",
+            LogPrint(LOG_DEBUG, "initializing braille driver: %s -> %s",
                      driver->code, *device);
             initializeBraille();
             if (driver->open(&brl, parameters, *device)) {
@@ -1426,7 +1426,7 @@ openBrailleDriver (int verify) {
                 if (verify || openHelpScreen(path))
                   LogPrint(LOG_INFO, "Help Page: %s[%d]", path, getHelpPageNumber());
                 else
-                  LogPrint(LOG_WARNING, "Cannot open help file: %s", path);
+                  LogPrint(LOG_WARNING, "cannot open help file: %s", path);
                 free(path);
               }
             }
@@ -1443,7 +1443,7 @@ openBrailleDriver (int verify) {
 
             return 1;
           } else {
-            LogPrint(LOG_DEBUG, "Braille driver initialization failed: %s -> %s",
+            LogPrint(LOG_DEBUG, "braille driver initialization failed: %s -> %s",
                      driver->code, *device);
           }
 
@@ -1452,7 +1452,7 @@ openBrailleDriver (int verify) {
 
         if (object) unloadSharedObject(object);
       } else {
-        LogPrint(LOG_ERR, "Braille driver not loadable: %s", *code);
+        LogPrint(LOG_ERR, "braille driver not loadable: %s", *code);
       }
 
       ++code;
@@ -1462,7 +1462,7 @@ openBrailleDriver (int verify) {
     ++device;
   }
 
-  LogPrint(LOG_DEBUG, "No braille display found.");
+  LogPrint(LOG_DEBUG, "no braille display found.");
   return 0;
 }
 
@@ -1508,7 +1508,7 @@ startBrailleDriver (void) {
         playTune(&tune_braille_on);
         return;
       } else {
-        LogPrint(LOG_DEBUG, "Braille buffer allocation failed.");
+        LogPrint(LOG_DEBUG, "braille buffer allocation failed.");
       }
       closeBrailleDriver();
     }
@@ -1534,7 +1534,7 @@ restartBrailleDriver (void) {
 #endif /* ENABLE_API */
 
   stopBrailleDriver();
-  LogPrint(LOG_INFO, "Reinitializing braille driver.");
+  LogPrint(LOG_INFO, "reinitializing braille driver.");
   startBrailleDriver();
 
 #ifdef ENABLE_API
@@ -1579,12 +1579,12 @@ openSpeechDriver (int verify) {
   } else {
     code = (const char *const *)speechDrivers;
   }
-  LogPrint(LOG_DEBUG, "Looking for speech synthesizer.");
+  LogPrint(LOG_DEBUG, "looking for speech synthesizer.");
 
   while (*code) {
     const SpeechDriver *driver;
     void *object;
-    LogPrint(LOG_DEBUG, "Checking for '%s' speech synthesizer.", *code);
+    LogPrint(LOG_DEBUG, "checking for '%s' speech synthesizer.", *code);
     if ((driver = loadSpeechDriver(*code, &object, opt_libraryDirectory))) {
       char **parameters = processParameters(driver->parameters,
                                             "speech driver",
@@ -1594,7 +1594,7 @@ openSpeechDriver (int verify) {
         int opened = verify;
 
         if (!opened) {
-          LogPrint(LOG_DEBUG, "Initializing speech driver: %s",
+          LogPrint(LOG_DEBUG, "initializing speech driver: %s",
                    driver->code);
           initializeSpeech();
           if (driver->open(parameters)) {
@@ -1615,7 +1615,7 @@ openSpeechDriver (int verify) {
 
           return 1;
         } else {
-          LogPrint(LOG_DEBUG, "Speech driver initialization failed: %s",
+          LogPrint(LOG_DEBUG, "speech driver initialization failed: %s",
                    driver->code);
         }
 
@@ -1624,13 +1624,13 @@ openSpeechDriver (int verify) {
 
       if (object) unloadSharedObject(object);
     } else {
-      LogPrint(LOG_ERR, "Speech driver not loadable: %s", *code);
+      LogPrint(LOG_ERR, "speech driver not loadable: %s", *code);
     }
 
     ++code;
   }
 
-  LogPrint(LOG_DEBUG, "No speech synthesizer found.");
+  LogPrint(LOG_DEBUG, "no speech synthesizer found.");
   return 0;
 }
 
@@ -1655,7 +1655,7 @@ closeSpeechDriver (void) {
 static void
 startSpeechDriver (void) {
   if (opt_noSpeech) {
-    LogPrint(LOG_INFO, "Automatic speech driver initialization disabled.");
+    LogPrint(LOG_INFO, "automatic speech driver initialization disabled.");
   } else if (openSpeechDriver(0)) {
     speech = speechDriver;
     setSpeechPreferences();
@@ -1676,7 +1676,7 @@ stopSpeechDriver (void) {
 void
 restartSpeechDriver (void) {
   stopSpeechDriver();
-  LogPrint(LOG_INFO, "Reinitializing speech driver.");
+  LogPrint(LOG_INFO, "reinitializing speech driver.");
   startSpeechDriver();
 }
 
@@ -1716,7 +1716,7 @@ background (void) {
 
   switch (child = fork()) {
     case -1: /* error */
-      LogPrint(LOG_CRIT, "Process creation error: %s", strerror(errno));
+      LogPrint(LOG_CRIT, "process creation error: %s", strerror(errno));
       exit(10);
 
     case 0: /* child */
@@ -1761,7 +1761,7 @@ startup (int argc, char *argv[]) {
                  "brltty", &argc, &argv,
                  &opt_bootParameters, &opt_environmentVariables, &opt_configurationFile,
                  NULL);
-  if (argc) LogPrint(LOG_ERR, "Excess parameter: %s", argv[0]);
+  if (argc) LogPrint(LOG_ERR, "excess parameter: %s", argv[0]);
 
   validateInterval(&updateInterval, "update interval", opt_updateInterval);
   validateInterval(&messageDelay, "message delay", opt_messageDelay);
@@ -1797,7 +1797,7 @@ startup (int argc, char *argv[]) {
         }
       }
 
-      LogPrint(LOG_ERR, "Invalid log level: %s", opt_logLevel);
+      LogPrint(LOG_ERR, "invalid log level: %s", opt_logLevel);
     }
   setLevel:
 
@@ -1862,7 +1862,7 @@ startup (int argc, char *argv[]) {
       fclose(stream);
       atexit(exitPidFile);
     } else {
-      LogPrint(LOG_ERR, "Cannot open process identifier file: %s: %s",
+      LogPrint(LOG_ERR, "cannot open process identifier file: %s: %s",
                opt_pidFile, strerror(errno));
     }
   }
@@ -1872,7 +1872,7 @@ startup (int argc, char *argv[]) {
     const char **directory = directories;
     while (*directory) {
       if (chdir(*directory) != -1) break;                /* * change to directory containing data files  */
-      LogPrint(LOG_WARNING, "Cannot change directory to '%s': %s",
+      LogPrint(LOG_WARNING, "cannot change working directory to '%s': %s",
                *directory, strerror(errno));
       ++directory;
     }
@@ -1884,7 +1884,7 @@ startup (int argc, char *argv[]) {
       LogPrint(LOG_INFO, "Working Directory: %s", directory);
       free(directory);
     } else {
-      LogPrint(LOG_ERR, "Cannot determine working directory: %s", strerror(errno));
+      LogPrint(LOG_ERR, "cannot determine working directory: %s", strerror(errno));
     }
   }
 
@@ -1952,7 +1952,7 @@ startup (int argc, char *argv[]) {
   logParameters(getScreenParameters(), screenParameters, "Screen");
   if (!opt_verify) {
     if (!openMainScreen(screenParameters)) {                                
-      LogPrint(LOG_CRIT, "Cannot read screen.");
+      LogPrint(LOG_CRIT, "cannot read screen.");
       exit(7);
     }
     atexit(exitScreen);
@@ -1975,13 +1975,13 @@ startup (int argc, char *argv[]) {
 
     /* tell the parent process to exit */
     if (kill(getppid(), SIGUSR1) == -1) {
-      LogPrint(LOG_CRIT, "Stop parent error: %s", strerror(errno));
+      LogPrint(LOG_CRIT, "stop parent error: %s", strerror(errno));
       exit(12);
     }
 
     /* request a new session (job control) */
     if (setsid() == -1) {                        
-      LogPrint(LOG_CRIT, "Session creation error: %s", strerror(errno));
+      LogPrint(LOG_CRIT, "session creation error: %s", strerror(errno));
       exit(13);
     }
   }
@@ -1995,7 +1995,7 @@ startup (int argc, char *argv[]) {
 
   /* The device(s) the braille display might be connected to. */
   if (!*opt_brailleDevice) {
-    LogPrint(LOG_CRIT, "Braille device not specified.");
+    LogPrint(LOG_CRIT, "braille device not specified.");
     exit(4);
   }
   brailleDevices = splitString(opt_brailleDevice, ',', NULL);

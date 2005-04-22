@@ -31,18 +31,18 @@ static int beeperOpened = 0;
 static int openBeeper (int errorLevel) {
    if (!beeperOpened) {
       if (!canBeep()) {
-         LogPrint(LOG_DEBUG, "Cannot open beeper.");
+         LogPrint(LOG_DEBUG, "cannot open beeper.");
          return 0;
       }
       beeperOpened = 1;
-      LogPrint(LOG_DEBUG, "Beeper opened.");
+      LogPrint(LOG_DEBUG, "beeper opened.");
    }
    return 1;
 }
 
 static int playBeeper (int note, int duration) {
    if (beeperOpened) {
-      LogPrint(LOG_DEBUG, "Tone: msec=%d note=%d",
+      LogPrint(LOG_DEBUG, "tone: msec=%d note=%d",
                duration, note);
 
       if (!note) {
@@ -75,7 +75,7 @@ static void closeBeeper (void) {
    if (beeperOpened) {
       beeperOpened = 0;
       endBeep();
-      LogPrint(LOG_DEBUG, "Beeper closed.");
+      LogPrint(LOG_DEBUG, "beeper closed.");
    }
 }
 

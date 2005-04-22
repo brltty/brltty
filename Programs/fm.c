@@ -39,7 +39,7 @@ static int openFm (int errorLevel) {
 	 }
       }
       if (!ready) {
-         LogPrint(LOG_DEBUG, "Cannot open FM.");
+         LogPrint(LOG_DEBUG, "cannot open FM.");
          return 0;
       }
       LogPrint(LOG_DEBUG, "FM opened.");
@@ -49,7 +49,7 @@ static int openFm (int errorLevel) {
 }
 
 static int playFm (int note, int duration) {
-   LogPrint(LOG_DEBUG, "Tone: msec=%d note=%d",
+   LogPrint(LOG_DEBUG, "tone: msec=%d note=%d",
 	    duration, note);
    if (note)
       AL_playTone(channelNumber, (int)noteFrequencies[note], duration, prefs.fmVolume);

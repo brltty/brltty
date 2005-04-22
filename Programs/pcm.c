@@ -56,7 +56,7 @@ static int openPcm (int errorLevel) {
       closePcmDevice(pcm);
       pcm = NULL;
    } else {
-      LogPrint(LOG_DEBUG, "Cannot open PCM.");
+      LogPrint(LOG_DEBUG, "cannot open PCM.");
    }
    return 0;
 }
@@ -149,7 +149,7 @@ static int playPcm (int note, int duration) {
          float stepSample = 4 * maxAmplitude / waveLength;
          float currSample = 0;
          if (waveLength <= 2) stepSample = 0;
-         LogPrint(LOG_DEBUG, "Tone: msec=%d smct=%lu note=%d",
+         LogPrint(LOG_DEBUG, "tone: msec=%d smct=%lu note=%d",
                   duration, sampleCount, note);
          while (sampleCount > 0) {
             do {
@@ -166,7 +166,7 @@ static int playPcm (int note, int duration) {
             } while ((stepSample < 0) || (currSample < 0) || (currSample > stepSample));
          }
       } else {
-         LogPrint(LOG_DEBUG, "Tone: msec=%d smct=%lu note=%d",
+         LogPrint(LOG_DEBUG, "tone: msec=%d smct=%lu note=%d",
                   duration, sampleCount, note);
          while (sampleCount > 0) {
             if (!writeAmplitude(0)) return 0;
