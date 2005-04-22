@@ -404,15 +404,15 @@ processTableLine (char *line, void *data) {
 }
 
 static void
-setTable (InputData *input, TranslationTable *table) {
+setTable (InputData *input, TranslationTable table) {
   TranslationTable dotsDefined;
-  memset(&dotsDefined, 0, sizeof(dotsDefined));
+  memset(dotsDefined, 0, sizeof(TranslationTable));
 
   {
     int byteIndex;
-    for (byteIndex=0; byteIndex<0X100; ++byteIndex) {
+    for (byteIndex=0; byteIndex<TRANSLATION_TABLE_SIZE; ++byteIndex) {
       ByteEntry *byte = &input->bytes[byteIndex];
-      unsigned char *cell = &(*table)[byteIndex];
+      unsigned char *cell = &table[byteIndex];
       if (byte->defined) {
         *cell = byte->cell;
 
@@ -448,7 +448,7 @@ setTable (InputData *input, TranslationTable *table) {
 
   if (input->options & TBL_UNUSED) {
     int cell;
-    for (cell=0; cell<0X100; ++cell) {
+    for (cell=0; cell<TRANSLATION_TABLE_SIZE; ++cell) {
       if (!dotsDefined[cell]) {
         char dotsBuffer[DOT_COUNT];
         int dotCount;
@@ -463,7 +463,7 @@ int
 loadTranslationTable (
   const char *path,
   FILE *file,
-  TranslationTable *table,
+  TranslationTable table,
   int options
 ) {
   int ok = 0;
@@ -495,8 +495,8 @@ loadTranslationTable (
 }
 
 void
-reverseTranslationTable (TranslationTable *from, TranslationTable *to) {
+reverseTranslationTable (TranslationTable from, TranslationTable to) {
   int byte;
-  memset(to, 0, sizeof(*to));
-  for (byte=sizeof(*to)-1; byte>=0; byte--) (*to)[(*from)[byte]] = byte;
+  memset(to, 0, sizeof(TranslationTable));
+  for (byte=TRANSLATION_TABLE_SIZE-1; byte>=0; byte--) to[from[byte]] = byte;
 }

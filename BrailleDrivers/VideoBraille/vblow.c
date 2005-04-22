@@ -37,7 +37,7 @@ static TranslationTable outputTable;
 int vbinit() {
   {
     static const DotsTable dots = {0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80};
-    makeOutputTable(&dots, &outputTable);
+    makeOutputTable(dots, outputTable);
   }
 
   if (enablePorts(LOG_ERR, LPTPORT, 3)) {

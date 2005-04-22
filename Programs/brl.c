@@ -30,6 +30,7 @@
 #include "sysmisc.h"
 #include "message.h"
 #include "brl.h"
+#include "tbl.h"
 #include "brl.auto.h"
 #include "cmd.h"
 
@@ -95,31 +96,6 @@ identifyBrailleDrivers (void) {
     const BrailleDriver *driver = entry++->address;
     driver->identify();
   }
-}
-
-int
-listBrailleDrivers (const char *directory) {
-  int ok = 0;
-  char *path = makePath(directory, "brltty-brl.lst");
-  if (path) {
-    int fd = open(path, O_RDONLY);
-    if (fd != -1) {
-      char buffer[0X40];
-      int count;
-      fprintf(stderr, "Available Braille Drivers:\n\n");
-      fprintf(stderr, "XX  Description\n");
-      fprintf(stderr, "--  -----------\n");
-      while ((count = read(fd, buffer, sizeof(buffer))))
-        fwrite(buffer, count, 1, stderr);
-      ok = 1;
-      close(fd);
-    } else {
-      LogPrint(LOG_ERR, "Cannot open braille driver list: %s: %s",
-               path, strerror(errno));
-    }
-    free(path);
-  }
-  return ok;
 }
 
 void
@@ -276,14 +252,19 @@ learnMode (BrailleDisplay *brl, int poll, int timeout) {
 #endif /* ENABLE_LEARN_MODE */
 
 void
-makeOutputTable (const DotsTable *dots, TranslationTable *table) {
+makeOutputTable (const DotsTable dots, TranslationTable table) {
   static const DotsTable internalDots = {BRL_DOT1, BRL_DOT2, BRL_DOT3, BRL_DOT4, BRL_DOT5, BRL_DOT6, BRL_DOT7, BRL_DOT8};
   int byte, dot;
-  memset(table, 0, sizeof(*table));
-  for (byte=0; byte<0X100; byte++)
-    for (dot=0; dot<sizeof(*dots); dot++)
+  memset(table, 0, sizeof(TranslationTable));
+  for (byte=0; byte<TRANSLATION_TABLE_SIZE; byte++)
+    for (dot=0; dot<DOTS_TABLE_SIZE; dot++)
       if (byte & internalDots[dot])
-        (*table)[byte] |= (*dots)[dot];
+        table[byte] |= dots[dot];
+}
+
+void
+makeUntextTable (void) {
+  reverseTranslationTable(textTable, untextTable);
 }
 
 /* Functions which support horizontal status cells, e.g. Papenmeier. */

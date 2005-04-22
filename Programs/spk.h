@@ -55,7 +55,6 @@ typedef struct {
 
 extern const SpeechDriver *loadSpeechDriver (const char *code, void **driverObject, const char *driverDirectory);
 extern void identifySpeechDrivers (void);
-extern int listSpeechDrivers (const char *directory);
 extern const SpeechDriver *speech;
 extern const SpeechDriver noSpeech;
 

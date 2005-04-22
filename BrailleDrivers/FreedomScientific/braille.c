@@ -734,7 +734,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
             }
 
             if (model) {
-              makeOutputTable(model->dotsTable, &outputTable);
+              makeOutputTable(model->dotsTable[0], outputTable);
               textCells = model->totalCells;
               textOffset = statusOffset = 0;
 

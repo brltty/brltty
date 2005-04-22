@@ -388,7 +388,7 @@ logParameters (const char *const *names, char **values, char *description) {
 }
 
 static int
-replaceTranslationTable (TranslationTable *table, const char *file, const char *type) {
+replaceTranslationTable (TranslationTable table, const char *file, const char *type) {
   int ok = 0;
   char *path = makePath(opt_tablesDirectory, file);
   if (path) {
@@ -397,20 +397,20 @@ replaceTranslationTable (TranslationTable *table, const char *file, const char *
     }
     free(path);
   }
-  if (!ok) LogPrint(LOG_ERR, "Cannot load %s table: %s", type, file);
+  if (!ok) LogPrint(LOG_ERR, "cannot load %s table: %s", type, file);
   return ok;
 }
 
 static int
 replaceTextTable (const char *file) {
-  if (!replaceTranslationTable(&textTable, file, "text")) return 0;
-  reverseTranslationTable(&textTable, &untextTable);
+  if (!replaceTranslationTable(textTable, file, "text")) return 0;
+  makeUntextTable();
   return 1;
 }
 
 static int
 replaceAttributesTable (const char *file) {
-  return replaceTranslationTable(&attributesTable, file, "attributes");
+  return replaceTranslationTable(attributesTable, file, "attributes");
 }
 
 static void
@@ -1899,7 +1899,7 @@ startup (int argc, char *argv[]) {
   }
   if (!opt_textTable) {
     opt_textTable = TEXT_TABLE;
-    reverseTranslationTable(&textTable, &untextTable);
+    makeUntextTable();
   }
   LogPrint(LOG_INFO, "Text Table: %s", opt_textTable);
 #ifdef ENABLE_PREFERENCES_MENU

@@ -113,7 +113,6 @@ typedef struct {
 
 extern const BrailleDriver *loadBrailleDriver (const char *code, void **driverObject, const char *driverDirectory);
 extern void identifyBrailleDrivers (void);
-extern int listBrailleDrivers (const char *directory);
 extern const BrailleDriver *braille;
 extern const BrailleDriver noBraille;
 
@@ -124,9 +123,11 @@ extern TranslationTable untextTable;     /* current braille to text translation 
 extern TranslationTable attributesTable; /* current attributes to braille translation table */
 extern void *contractionTable; /* current braille contraction table */
 
+extern void makeUntextTable (void);
+
 #define DOTS_TABLE_SIZE 8
 typedef unsigned char DotsTable[DOTS_TABLE_SIZE];
-extern void makeOutputTable (const DotsTable *dots, TranslationTable *table);
+extern void makeOutputTable (const DotsTable dots, TranslationTable table);
 
 /* Formatting of status cells. */
 extern const unsigned char landscapeDigits[11];

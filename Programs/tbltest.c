@@ -15,10 +15,6 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/* tbl2hex.c - filter to compile 256-byte table file into C code
- * $Id: tbl2hex.c,v 1.3 1996/09/24 01:04:25 nn201 Exp $
- */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
@@ -52,23 +48,41 @@ BEGIN_OPTION_TABLE
    "Path to directory for configuration files."},
 END_OPTION_TABLE
 
-typedef int TableReader (const char *path, FILE *file, TranslationTable *table, void *data);
-typedef int TableWriter (const char *path, FILE *file, const TranslationTable *table, void *data);
+static const DotsTable dotsInternal = {
+  BRL_DOT1, BRL_DOT2, BRL_DOT3, BRL_DOT4,
+  BRL_DOT5, BRL_DOT6, BRL_DOT7, BRL_DOT8
+};
+
+static const DotsTable dots12345678 = {
+  0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80
+};
+
+static unsigned char
+mapDots (unsigned char input, const DotsTable from, const DotsTable to) {
+  unsigned char output = 0;
+  {
+    int dot;
+    for (dot=0; dot<DOTS_TABLE_SIZE; ++dot) {
+      if (input & from[dot]) output |= to[dot];
+    }
+  }
+  return output;
+}
 
 static int
-readTable_tbl (const char *path, FILE *file, TranslationTable *table, void *data) {
+readTable_tbl (const char *path, FILE *file, TranslationTable table, void *data) {
   return loadTranslationTable(path, file, table,
                               TBL_UNDEFINED | TBL_DUPLICATE | TBL_UNUSED);
 }
 
 static int
-writeTable_tbl (const char *path, FILE *file, const TranslationTable *table, void *data) {
+writeTable_tbl (const char *path, FILE *file, const TranslationTable table, void *data) {
   int index;
   for (index=0; index<TRANSLATION_TABLE_SIZE; ++index) {
-    unsigned char cell = (*table)[index];
-    fprintf(file, "\\X%02X (", index);
+    unsigned char cell = table[index];
+    if (fprintf(file, "\\X%02X (", index) == EOF) goto error;
 
-#define DOT(dot) fputs(((cell & BRL_DOT##dot)? #dot: " "), file)
+#define DOT(dot) if (fputs(((cell & BRL_DOT##dot)? #dot: " "), file) == EOF) goto error
     DOT(1);
     DOT(2);
     DOT(3);
@@ -79,74 +93,57 @@ writeTable_tbl (const char *path, FILE *file, const TranslationTable *table, voi
     DOT(8);
 #undef DOT
 
-    fprintf(file, ")\n");
+    if (fprintf(file, ")\n") == EOF) goto error;
   }
   return 1;
+
+error:
+  return 0;
 }
 
 static int
-readTable_bin (const char *path, FILE *file, TranslationTable *table, void *data) {
-  const DotsTable *dots = data;
-  int index;
+readTable_bin (const char *path, FILE *file, TranslationTable table, void *data) {
+  {
+    int character;
+    for (character=0; character<TRANSLATION_TABLE_SIZE; ++character) {
+      int cell = fgetc(file);
 
-  for (index=0; index<TRANSLATION_TABLE_SIZE; ++index) {
-    int from = fgetc(file);
-    unsigned char to = 0;
-
-    if (from == EOF) {
-      if (ferror(file)) {
-        LogPrint(LOG_ERR, "input error: %s: %s", path, strerror(errno));
-      } else {
-        LogPrint(LOG_ERR, "table too short: %s", path);
+      if (cell == EOF) {
+        if (ferror(file)) {
+          LogPrint(LOG_ERR, "input error: %s: %s", path, strerror(errno));
+        } else {
+          LogPrint(LOG_ERR, "table too short: %s", path);
+        }
+        return 0;
       }
-      return 0;
+
+      if (data) cell = mapDots(cell, data, dotsInternal);
+      table[character] = cell;
     }
-
-    if (from & (*dots)[0]) to |= BRL_DOT1;
-    if (from & (*dots)[1]) to |= BRL_DOT2;
-    if (from & (*dots)[2]) to |= BRL_DOT3;
-    if (from & (*dots)[3]) to |= BRL_DOT4;
-    if (from & (*dots)[4]) to |= BRL_DOT5;
-    if (from & (*dots)[5]) to |= BRL_DOT6;
-    if (from & (*dots)[6]) to |= BRL_DOT7;
-    if (from & (*dots)[7]) to |= BRL_DOT8;
-
-    (*table)[index] = to;
   }
 
   return 1;
 }
 
 static int
-writeTable_bin (const char *path, FILE *file, const TranslationTable *table, void *data) {
-  const DotsTable *dots = data;
-  int index;
-
-  for (index=0; index<TRANSLATION_TABLE_SIZE; ++index) {
-    unsigned char from = (*table)[index];
-    unsigned char to = 0;
-
-    if (from & BRL_DOT1) to |= (*dots)[0];
-    if (from & BRL_DOT2) to |= (*dots)[1];
-    if (from & BRL_DOT3) to |= (*dots)[2];
-    if (from & BRL_DOT4) to |= (*dots)[3];
-    if (from & BRL_DOT5) to |= (*dots)[4];
-    if (from & BRL_DOT6) to |= (*dots)[5];
-    if (from & BRL_DOT7) to |= (*dots)[6];
-    if (from & BRL_DOT8) to |= (*dots)[7];
-
-    fputc(to, file);
-    if (ferror(file)) {
-      LogPrint(LOG_ERR, "output error: %s: %s", path, strerror(errno));
-      return 0;
+writeTable_bin (const char *path, FILE *file, const TranslationTable table, void *data) {
+  {
+    int character;
+    for (character=0; character<TRANSLATION_TABLE_SIZE; ++character) {
+      unsigned char cell = character;
+      if (data) cell = mapDots(cell, dotsInternal, data);
+      if (fputc(cell, file) == EOF) {
+        LogPrint(LOG_ERR, "output error: %s: %s", path, strerror(errno));
+        return 0;
+      }
     }
   }
 
   return 1;
 }
 
-static const DotsTable dots12345678 = {0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80};
-
+typedef int TableReader (const char *path, FILE *file, TranslationTable table, void *data);
+typedef int TableWriter (const char *path, FILE *file, const TranslationTable table, void *data);
 typedef struct {
   const char *name;
   TableReader *read;
@@ -251,7 +248,7 @@ main (int argc, char *argv[]) {
     if (inputFile) {
       TranslationTable table;
 
-      if (inputFormat->read(inputPath, inputFile, &table, inputFormat->data)) {
+      if (inputFormat->read(inputPath, inputFile, table, inputFormat->data)) {
         if (outputPath) {
           FILE *outputFile;
 
@@ -263,7 +260,7 @@ main (int argc, char *argv[]) {
           }
 
           if (outputFile) {
-            if (outputFormat->write(outputPath, outputFile, &table, outputFormat->data)) {
+            if (outputFormat->write(outputPath, outputFile, table, outputFormat->data)) {
               status = 0;
             } else {
               status = 6;

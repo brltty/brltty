@@ -69,8 +69,8 @@ brl_open(BrailleDisplay *brl, char **parameters, const char *device)
       BRAILLE(0, 0, 0, 0, 0, 0, 1, 0),
       BRAILLE(0, 0, 0, 0, 0, 0, 0, 1)
     };
-    makeOutputTable(&dots, &outputTable);
-    reverseTranslationTable(&outputTable, &inputTable);
+    makeOutputTable(dots, outputTable);
+    reverseTranslationTable(outputTable, inputTable);
   }
   
   if(*parameters[PARM_DEVICE])

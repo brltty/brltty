@@ -88,31 +88,6 @@ identifySpeechDrivers (void) {
   }
 }
 
-int
-listSpeechDrivers (const char *directory) {
-  int ok = 0;
-  char *path = makePath(directory, "brltty-spk.lst");
-  if (path) {
-    int fd = open(path, O_RDONLY);
-    if (fd != -1) {
-      char buffer[0X40];
-      int count;
-      fprintf(stderr, "Available Speech Drivers:\n\n");
-      fprintf(stderr, "XX  Description\n");
-      fprintf(stderr, "--  -----------\n");
-      while ((count = read(fd, buffer, sizeof(buffer))))
-        fwrite(buffer, count, 1, stderr);
-      ok = 1;
-      close(fd);
-    } else {
-      LogPrint(LOG_ERR, "Cannot open speech driver list: %s: %s",
-               path, strerror(errno));
-    }
-    free(path);
-  }
-  return ok;
-}
-
 void
 sayString (const char *string) {
   speech->say((unsigned char *)string, strlen(string));

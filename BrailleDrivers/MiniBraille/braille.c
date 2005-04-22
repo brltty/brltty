@@ -80,7 +80,7 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
 	
 	{
 		static const DotsTable dots = {0X01, 0X02, 0X04, 0X80, 0X40, 0X20, 0X08, 0X10};
-		makeOutputTable(&dots, &outputTable);
+		makeOutputTable(dots, outputTable);
 	}
 
 	if (!isSerialDevice(&device)) {

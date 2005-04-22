@@ -865,7 +865,7 @@ identifyTerminal1 (BrailleDisplay *brl) {
 
                 {
                   static const DotsTable dots = {0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80};
-                  makeOutputTable(&dots, &outputTable);
+                  makeOutputTable(dots, outputTable);
                 }
 
                 return 1;
@@ -1299,7 +1299,7 @@ identifyTerminal2 (BrailleDisplay *brl) {
 
             {
               static const DotsTable dots = {0X80, 0X40, 0X20, 0X10, 0X08, 0X04, 0X02, 0X01};
-              makeOutputTable(&dots, &outputTable);
+              makeOutputTable(dots, outputTable);
             }
 
             {

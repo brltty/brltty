@@ -31,10 +31,10 @@ extern "C" {
 extern int loadTranslationTable (
   const char *path,
   FILE *file,
-  TranslationTable *table,
+  TranslationTable table,
   int options
 );
-extern void reverseTranslationTable (TranslationTable *from, TranslationTable *to);
+extern void reverseTranslationTable (TranslationTable from, TranslationTable to);
 
 #ifdef __cplusplus
 }

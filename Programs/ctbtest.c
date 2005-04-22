@@ -51,11 +51,6 @@ TranslationTable textTable;
 TranslationTable untextTable;
 void *contractionTable;
 
-static void
-reportTextTableMessage (const char *message) {
-  fprintf(stderr, "%s: %s\n", programName, message);
-}
-
 typedef struct {
   unsigned char status;
 } LineProcessingData;
@@ -107,9 +102,9 @@ main (int argc, char *argv[]) {
     if ((contractionTable = compileContractionTable(contractionTablePath))) {
       char *textTablePath;
       if ((textTablePath = makePath(opt_dataDirectory, opt_textTable))) {
-        if (loadTranslationTable(textTablePath, &textTable, reportTextTableMessage, 0)) {
+        if (loadTranslationTable(textTablePath, NULL, textTable, 0)) {
           LineProcessingData lpd;
-          reverseTranslationTable(&textTable, &untextTable);
+          reverseTranslationTable(textTable, untextTable);
           lpd.status = 0;
           if (processLines(stdin, processLine, &lpd)) {
             status = lpd.status;

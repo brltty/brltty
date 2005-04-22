@@ -51,7 +51,7 @@ main (int argc, char *argv[]) {
   }
   path = *argv++, argc--;
 
-  if (loadTranslationTable(path, NULL, &table, 0)) {
+  if (loadTranslationTable(path, NULL, table, 0)) {
     unsigned int columns = 8;
     unsigned int rows = 0X100 / columns;
     unsigned int row;
