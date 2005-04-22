@@ -725,6 +725,7 @@ endcount:
       memcpy(p, str, min);
       p += min;
       memset(p, ' ', dispSize-min);
+      p += dispSize-min;
     }
     *size = htonl((p-(unsigned char *)(size+1)));
   }
