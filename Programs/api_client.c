@@ -687,36 +687,45 @@ int brlapi_writeText(int cursor, const char *str)
     brlapi_errno=BRLERR_INVALID_PARAMETER;
     return -1;
   }
+  locale = setlocale(LC_CTYPE,NULL);
   ws->flags = 0;
   if (str) {
-    mbstate_t ps;
-    size_t len,eaten;
+    size_t len;
     uint32_t *size;
-    memset(&ps,0,sizeof(ps));
     ws->flags |= BRLAPI_WF_TEXT;
     size = (uint32_t *) p;
     p += sizeof(*size);
     len = strlen(str);
-    for (min=0;min<dispSize;min++) {
-      eaten = mbrlen(str,len,&ps);
-      switch(eaten) {
-	case (size_t)(-2):
-	  errno = EILSEQ;
-	case (size_t)(-1):
-	  brlapi_libcerrno = errno;
-	  brlapi_libcerrfun = "mbrlen";
-	  brlapi_errno = BRLERR_LIBCERR;
-	  return -1;
-	case 0:
-	  goto endcount;
+    if (locale && strcmp(locale,"C")) {
+      mbstate_t ps;
+      size_t eaten;
+      memset(&ps,0,sizeof(ps));
+      for (min=0;min<dispSize;min++) {
+	eaten = mbrlen(str,len,&ps);
+	switch(eaten) {
+	  case (size_t)(-2):
+	    errno = EILSEQ;
+	  case (size_t)(-1):
+	    brlapi_libcerrno = errno;
+	    brlapi_libcerrfun = "mbrlen";
+	    brlapi_errno = BRLERR_LIBCERR;
+	    return -1;
+	  case 0:
+	    goto endcount;
+	}
+	memcpy(p, str, eaten);
+	p += eaten;
+	str += eaten;
+	len -= eaten;
       }
-      memcpy(p, str, eaten);
-      p += eaten;
-      str += eaten;
-      len -= eaten;
-    }
 endcount:
-    for (i = min; i<dispSize; i++) p += wcrtomb(p, L' ', &ps);
+      for (i = min; i<dispSize; i++) p += wcrtomb(p, L' ', &ps);
+    } else {
+      min = MIN(len, dispSize);
+      memcpy(p, str, min);
+      p += min;
+      memset(p, ' ', dispSize-min);
+    }
     *size = htonl((p-(unsigned char *)(size+1)));
   }
   if ((cursor>=0) && (cursor<=dispSize)) {
@@ -728,7 +737,7 @@ endcount:
     return -1;
   }
 
-  if ((locale = setlocale(LC_CTYPE,NULL)) && strcmp(locale,"C")) {
+  if (locale && strcmp(locale,"C")) {
     /* not default locale, tell charset to server */
     char *lang = nl_langinfo(CODESET);
     size_t len = strlen(lang);
