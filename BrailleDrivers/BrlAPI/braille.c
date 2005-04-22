@@ -29,6 +29,7 @@
 
 #include "Programs/misc.h"
 #include "Programs/api.h"
+#include "Programs/scr.h"
 
 typedef enum {
   PARM_HOSTNAME=0,
@@ -48,6 +49,7 @@ typedef enum {
 
 static int displaySize;
 static unsigned char *prevData;
+static int prevShown;
 
 /* Function : brl_identify */
 /* Prints information about the driver in the system log and on stderr */
@@ -98,9 +100,22 @@ static void brl_close(BrailleDisplay *brl)
 /* the one already displayed */
 static void brl_writeWindow(BrailleDisplay *brl)
 {
-  if (memcmp(&prevData,brl->buffer,displaySize)==0) return;
-  if (brlapi_writeDots(brl->buffer)==0) {
-    memcpy(&prevData,brl->buffer,displaySize);
+  int vt;
+  vt = currentVirtualTerminal();
+  if (vt == -1) {
+    /* should leave display */
+    if (prevShown) {
+      brlapi_writeStruct ws = BRLAPI_WRITESTRUCT_INITIALIZER;
+      brlapi_write(&ws);
+      prevShown = 0;
+    }
+    return;
+  } else {
+    if (prevShown && memcmp(prevData,brl->buffer,displaySize)==0) return;
+    if (brlapi_writeDots(brl->buffer)==0) {
+      memcpy(prevData,brl->buffer,displaySize);
+      prevShown = 1;
+    } else LogPrint(LOG_ERR, "writeDots: %s", brlapi_strerror(brlapi_errno)); \
   }
 }
 
