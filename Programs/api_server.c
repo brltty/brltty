@@ -768,7 +768,7 @@ static int handleGetTty(Connection *c, brl_type_t type, char *packet, size_t siz
     if (c->tty == tty) {
       if (c->how==how) {
         LogPrint(LOG_WARNING,"One already controls tty %#010x !",c->tty->number);
-        WEXC(c->fd, BRLERR_ILLEGAL_INSTRUCTION);
+        WERR(c->fd, BRLERR_ILLEGAL_INSTRUCTION);
       } else {
         /* Here one is in the case where the client tries to change */
         /* from BRL_KEYCODES to BRL_COMMANDS, or something like that */
@@ -844,7 +844,7 @@ static int handleKeyRange(Connection *c, brl_type_t type, char *packet, size_t s
   if (type==BRLPACKET_IGNOREKEYRANGE) res = removeRange(x,y,&c->unmaskedKeys);
   else res = addRange(x,y,&c->unmaskedKeys);
   pthread_mutex_unlock(&c->maskMutex);
-  if (res==-1) WEXC(c->fd,BRLERR_NOMEM);
+  if (res==-1) WERR(c->fd,BRLERR_NOMEM);
   else writeAck(c->fd);
   return 0;
 }
