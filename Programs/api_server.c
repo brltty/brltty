@@ -1886,11 +1886,7 @@ found:
 }
 
 static inline void setCurrentRootTty(void) {
-  int tty;
-  if ((tty = currentVirtualTerminal()))
-    ttys.focus = tty;
-  else
-    ttys.focus = -1;
+  ttys.focus = currentVirtualTerminal();
 }
 
 /* Function : api_writeWindow */
