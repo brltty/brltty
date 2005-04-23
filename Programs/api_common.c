@@ -56,9 +56,6 @@
 #define MAX(a, b) (((a) > (b))? (a): (b))
 #endif /* MAX */
 
-int brlapi_libcerrno;
-const char *brlapi_libcerrfun;
-
 #ifndef WINDOWS
 #define get_osfhandle(fd) (fd)
 #endif /* WINDOWS */
@@ -84,8 +81,6 @@ static ssize_t brlapi_writeFile(int fd, const void *buf, size_t size)
       !GetOverlappedResult((HANDLE) fd, &overl, &res, TRUE)) {
       errno = GetLastError();
       CloseHandle(overl.hEvent);
-      brlapi_libcerrfun="write in writeFile";
-      brlapi_errno=BRLERR_LIBCERR;
       res = -1;
     }
     CloseHandle(overl.hEvent);
@@ -99,7 +94,7 @@ static ssize_t brlapi_writeFile(int fd, const void *buf, size_t size)
 #endif /* EWOULDBLOCK */
         (errno!=EAGAIN)) { /* EAGAIN shouldn't happen, but who knows... */
       brlapi_libcerrno=errno;
-      brlapi_libcerrfun="write in writeFile";
+      brlapi_errfun="write in writeFile";
       brlapi_errno=BRLERR_LIBCERR;
       return res;
     }
@@ -125,8 +120,6 @@ static ssize_t brlapi_readFile(int fd, void *buf, size_t size)
       !GetOverlappedResult((HANDLE) fd, &overl, &res, TRUE)) {
       errno = GetLastError();
       CloseHandle(overl.hEvent);
-      brlapi_libcerrfun="read in readFile";
-      brlapi_errno=BRLERR_LIBCERR;
       res = -1;
     }
     CloseHandle(overl.hEvent);
@@ -143,7 +136,7 @@ static ssize_t brlapi_readFile(int fd, void *buf, size_t size)
 #endif /* EWOULDBLOCK */
         (errno!=EAGAIN)) { /* EAGAIN shouldn't happen, but who knows... */
       brlapi_libcerrno=errno;
-      brlapi_libcerrfun="read in readFile";
+      brlapi_errfun="read in readFile";
       brlapi_errno=BRLERR_LIBCERR;
       return -1;
     }
@@ -180,7 +173,7 @@ ssize_t brlapi_readPacketHeader(int fd, brl_type_t *packetType)
     if (res<0) {
       brlapi_errno = BRLERR_LIBCERR;
       brlapi_libcerrno = errno;
-      brlapi_libcerrfun = "read in brlapi_readPacketHeader";
+      brlapi_errfun = "read in brlapi_readPacketHeader";
       return -1;    
     } else return -2;
   }
@@ -210,7 +203,7 @@ ssize_t brlapi_readPacketContent(int fd, size_t packetSize, void *buf, size_t bu
 out:
   brlapi_errno = BRLERR_LIBCERR;
   brlapi_libcerrno = errno;
-  brlapi_libcerrfun = "read in brlapi_readPacket";
+  brlapi_errfun = "read in brlapi_readPacket";
   return -1;
 }
 
@@ -238,21 +231,21 @@ int brlapi_loadAuthKey(const char *filename, size_t *authlength, void *auth)
   struct stat statbuf;
   if (stat(filename, &statbuf)<0) {
     brlapi_libcerrno=errno;
-    brlapi_libcerrfun="stat in loadAuthKey";
+    brlapi_errfun="stat in loadAuthKey";
     brlapi_errno=BRLERR_LIBCERR;
     return -1;
   }
 
   if ((stsize = statbuf.st_size)>BRLAPI_MAXPACKETSIZE) {
     brlapi_libcerrno=EFBIG;
-    brlapi_libcerrfun="stat in loadAuthKey";
+    brlapi_errfun="stat in loadAuthKey";
     brlapi_errno=BRLERR_LIBCERR;
     return -1;
   }
 
   if ((fd = open(filename, O_RDONLY)) <0) {
     brlapi_libcerrno=errno;
-    brlapi_libcerrfun="open in loadAuthKey";
+    brlapi_errfun="open in loadAuthKey";
     brlapi_errno=BRLERR_LIBCERR;
     return -1;
   }
@@ -315,7 +308,7 @@ int brlapi_splitHost(const char *host, char **hostname, char **port) {
 
 typedef struct {
   brl_type_t type;
-  char *name;
+  const char *name;
 } brlapi_packetType_t;
 
 brlapi_packetType_t brlapi_packetTypes[] = {

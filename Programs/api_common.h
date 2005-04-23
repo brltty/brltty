@@ -34,14 +34,6 @@ extern "C" {
 #define PF_LOCAL PF_UNIX
 #endif /* !defined(PF_LOCAL) && defined(PF_UNIX) */
  
-/* brlapi_libcerrno */
-/* saves the libc errno */
-int brlapi_libcerrno;
-
-/* brlapi_liberrfun */
-/* saves the libc function which generated an error */
-const char *brlapi_libcerrfun;
-
 /* brlapi_splitHost */
 /* splits host into hostname & port, returns address family to use */
 int brlapi_splitHost(const char *host, char **hostname, char **port);

@@ -99,9 +99,6 @@
 #define STRAW 2
 #define STCONTROLLINGTTY 4
 
-/* for remembering getaddrinfo error code */
-static int gai_error;
-
 #ifdef WINDOWS
 static WSADATA wsadata;
 #endif /* WINDOWS */
@@ -276,7 +273,7 @@ int brlapi_initializeConnection(const brlapi_settings_t *clientSettings, brlapi_
 	      FILE_SHARE_READ|FILE_SHARE_WRITE,NULL,OPEN_EXISTING,0,NULL))
 	  == INVALID_HANDLE_VALUE) {
 	if (GetLastError() != ERROR_PIPE_BUSY) {
-	  brlapi_libcerrfun="CreateFile";
+	  brlapi_errfun="CreateFile";
 	  goto outlibc;
 	}
 	WaitNamedPipe(path,NMPWAIT_WAIT_FOREVER);
@@ -287,19 +284,19 @@ int brlapi_initializeConnection(const brlapi_settings_t *clientSettings, brlapi_
       struct sockaddr_un sa;
       if (lpath+lport+1>sizeof(sa.sun_path)) {
 	brlapi_libcerrno=ENAMETOOLONG;
-	brlapi_libcerrfun="path";
+	brlapi_errfun="path";
 	brlapi_errno = BRLERR_LIBCERR;
 	goto out;
       }
       if ((fd = socket(PF_LOCAL, SOCK_STREAM, 0))<0) {
-	brlapi_libcerrfun="socket";
+	brlapi_errfun="socket";
 	goto outlibc;
       }
       sa.sun_family = AF_LOCAL;
       memcpy(sa.sun_path,BRLAPI_SOCKETPATH,lpath);
       memcpy(sa.sun_path+lpath,port,lport+1);
       if (connect(fd, (struct sockaddr *) &sa, sizeof(sa))<0) {
-	brlapi_libcerrfun="connect";
+	brlapi_errfun="connect";
 	goto outlibc;
       }
     }
@@ -322,10 +319,10 @@ int brlapi_initializeConnection(const brlapi_settings_t *clientSettings, brlapi_
     hints.ai_family = PF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
 
-    gai_error = getaddrinfo(hostname, port, &hints, &res);
+    brlapi_gaierrno = getaddrinfo(hostname, port, &hints, &res);
     free(hostname);
     free(port);
-    if (gai_error) {
+    if (brlapi_gaierrno) {
       brlapi_errno=BRLERR_GAIERR;
       goto out;
     }
@@ -365,7 +362,7 @@ int brlapi_initializeConnection(const brlapi_settings_t *clientSettings, brlapi_
 	struct servent *se;
 	
 	if (!(se = getservbyname(port,"tcp"))) {
-	  gai_error = h_errno;
+	  brlapi_gaierrno = h_errno;
           brlapi_errno=BRLERR_GAIERR;
 	  goto out;
 	}
@@ -377,7 +374,7 @@ int brlapi_initializeConnection(const brlapi_settings_t *clientSettings, brlapi_
       addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
     } else {
       if (!(he = gethostbyname(hostname))) {
-	gai_error = h_errno;
+	brlapi_gaierrno = h_errno;
 	brlapi_errno = BRLERR_GAIERR;
 	goto out;
       }
@@ -387,12 +384,12 @@ int brlapi_initializeConnection(const brlapi_settings_t *clientSettings, brlapi_
 #else /* EAFNOSUPPORT */
         errno = EINVAL;
 #endif /* EAFNOSUPPORT */
-	brlapi_libcerrfun = "gethostbyname";
+	brlapi_errfun = "gethostbyname";
 	goto outlibc;
       }
       if (he->h_length > sizeof(addr.sin_addr)) {
         errno = EINVAL;
-	brlapi_libcerrfun = "gethostbyname";
+	brlapi_errfun = "gethostbyname";
 	goto outlibc;
       }
       memcpy(&addr.sin_addr,he->h_addr,he->h_length);
@@ -400,11 +397,11 @@ int brlapi_initializeConnection(const brlapi_settings_t *clientSettings, brlapi_
     
     fd = socket(addr.sin_family, SOCK_STREAM, 0);
     if (fd<0) {
-      brlapi_libcerrfun = "socket";
+      brlapi_errfun = "socket";
       goto outlibc;
     }
     if (connect(fd, (struct sockaddr *) &addr, sizeof(addr))<0) {
-      brlapi_libcerrfun = "connect";
+      brlapi_errfun = "connect";
       goto outlibc;
     }
 
@@ -707,7 +704,7 @@ int brlapi_writeText(int cursor, const char *str)
 	    errno = EILSEQ;
 	  case (size_t)(-1):
 	    brlapi_libcerrno = errno;
-	    brlapi_libcerrfun = "mbrlen";
+	    brlapi_errfun = "mbrlen";
 	    brlapi_errno = BRLERR_LIBCERR;
 	    return -1;
 	  case 0:
@@ -979,48 +976,50 @@ const char *brlapi_errlist[] = {
 const int brlapi_nerr = (sizeof(brlapi_errlist)/sizeof(char*)) - 1;
 
 /* brlapi_strerror: return error message */
-const char *brlapi_strerror(int err)
+const char *brlapi_strerror(const brlapi_error_t *error)
 {
-  if (err>=brlapi_nerr)
+  static char errmsg[128];
+  if (error->brlerrno>=brlapi_nerr)
     return "Unknown error";
-  else if (err==BRLERR_GAIERR)
+  else if (error->brlerrno==BRLERR_GAIERR) {
+    snprintf(errmsg,sizeof(errmsg),"resolve: "
 #if defined(HAVE_GETADDRINFO) && defined(HAVE_GAI_STRERROR)
-    return gai_strerror(gai_error);
+	"%s\n", gai_strerror(error->exterrno.gaierrno)
 #elif defined(HAVE_HSTRERROR) && !defined(WINDOWS)
-    return hstrerror(gai_error);
+	"%s\n", hstrerror(error->exterrno.gaierrno)
 #else
-    {
-      static char c[15];
-      snprintf(c,15,"error %x", gai_error);
-      return c;
-    }
+	"%x\n", error->exterrno.gaierrno
 #endif
-  else if (err==BRLERR_LIBCERR)
-    return strerror(brlapi_libcerrno);
-  else
-    return brlapi_errlist[err];
+	);
+    return errmsg;
+  }
+  else if (error->brlerrno==BRLERR_LIBCERR) {
+    snprintf(errmsg,sizeof(errmsg),"%s: %s", error->errfun, strerror(error->exterrno.libcerrno));
+    return errmsg;
+  } else
+    return brlapi_errlist[error->brlerrno];
 }
 
 /* brlapi_perror: error message printing */
 void brlapi_perror(const char *s)
 {
-  fprintf(stderr,"%s: %s\n",s,brlapi_strerror(brlapi_errno));
+  fprintf(stderr,"%s: %s\n",s,brlapi_strerror(&brlapi_error));
 }
 
 /* XXX functions mustn't use brlapi_errno after this since it #undefs it XXX */
 
-#ifdef brlapi_errno
-#undef brlapi_errno
+#ifdef brlapi_error
+#undef brlapi_error
 #endif
 
-int brlapi_errno;
-static int pthread_errno_ok;
+brlapi_error_t brlapi_error;
+static int pthread_error_ok;
 
 /* we need a per-thread errno variable, thanks to pthread_keys */
-static pthread_key_t errno_key;
+static pthread_key_t error_key;
 
 /* the key must be created at most once */
-static pthread_once_t errno_key_once = PTHREAD_ONCE_INIT;
+static pthread_once_t error_key_once = PTHREAD_ONCE_INIT;
 
 #ifndef WINDOWS
 /* We need to declare these with __attribute__((weak)) to determine at runtime 
@@ -1034,35 +1033,35 @@ WEAK_REDEFINE(pthread_getspecific);
 WEAK_REDEFINE(pthread_setspecific);
 #endif /* WINDOWS */
 
-static void errno_key_free(void *key)
+static void error_key_free(void *key)
 {
   free(key);
 }
 
-static void errno_key_alloc(void)
+static void error_key_alloc(void)
 {
-  pthread_errno_ok=!pthread_key_create(&errno_key, errno_key_free);
+  pthread_error_ok=!pthread_key_create(&error_key, error_key_free);
 }
 
 /* how to get per-thread errno variable. This will be called by the macro
  * brlapi_errno */
-int *brlapi_errno_location(void)
+brlapi_error_t *brlapi_error_location(void)
 {
-  int *errnop;
+  brlapi_error_t *errorp;
   if (pthread_once && pthread_key_create) {
-    pthread_once(&errno_key_once, errno_key_alloc);
-    if (pthread_errno_ok) {
-      if ((errnop=(int *) pthread_getspecific(errno_key)))
+    pthread_once(&error_key_once, error_key_alloc);
+    if (pthread_error_ok) {
+      if ((errorp=(brlapi_error_t *) pthread_getspecific(error_key)))
         /* normal case */
-        return errnop;
+        return errorp;
       else
         /* on the first time, must allocate it */
-        if ((errnop=malloc(sizeof(*errnop))) && !pthread_setspecific(errno_key,errnop))
-          return errnop;
+        if ((errorp=malloc(sizeof(*errorp))) && !pthread_setspecific(error_key,errorp))
+          return errorp;
       }
     }
   /* fall-back: shared errno :/ */
-  return &brlapi_errno;
+  return &brlapi_error;
 }
 
 brlapi_exceptionHandler_t brlapi_setExceptionHandler(brlapi_exceptionHandler_t new)
@@ -1081,12 +1080,13 @@ int brlapi_strexception(char *buf, size_t n, int err, brl_type_t type, const voi
   char hexString[3*chars+1];
   int i, nbChars = MIN(chars, size);
   unsigned char *p = hexString;
+  brlapi_error_t error = { .brlerrno = err };
   for (i=0; i<nbChars; i++)
     p += sprintf(p, "%02x ", ((char *) packet)[i]);
   p--; /* Don't keep last space */
   *p = '\0';
   return snprintf(buf, n, "%s on %s request of size %d (%s)",
-    brlapi_strerror(err), brlapi_packetType(type), size, hexString);
+    brlapi_strerror(&error), brlapi_packetType(type), size, hexString);
 }
 
 void brlapi_defaultExceptionHandler(int err, brl_type_t type, const void *packet, size_t size)

@@ -44,7 +44,7 @@ typedef enum {
 #define CHECK(cond, label) \
   do { \
     if (!(cond)<0) { \
-      LogPrint(LOG_ERR, "%s", brlapi_strerror(brlapi_errno)); \
+      LogPrint(LOG_ERR, "%s", brlapi_strerror(&brlapi_error)); \
       goto label; \
     } \
   } while (0);
@@ -119,7 +119,7 @@ static void brl_writeWindow(BrailleDisplay *brl)
     if (brlapi_writeDots(brl->buffer)==0) {
       memcpy(prevData,brl->buffer,displaySize);
       prevShown = 1;
-    } else LogPrint(LOG_ERR, "writeDots: %s", brlapi_strerror(brlapi_errno));
+    } else LogPrint(LOG_ERR, "writeDots: %s", brlapi_strerror(&brlapi_error));
   }
 }
 

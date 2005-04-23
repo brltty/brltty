@@ -103,12 +103,12 @@ if (!( condition )) { \
 #define WERR(x, y) writeError(x, y)
 #define WEXC(x, y) writeException(x, y, type, packet, size)
 
-#ifdef brlapi_errno
-#undef brlapi_errno
+#ifdef brlapi_error
+#undef brlapi_error
 #endif
 
-int brlapi_errno;
-int *brlapi_errno_location(void) { return &brlapi_errno; }
+brlapi_error_t brlapi_error;
+brlapi_error_t *brlapi_error_location(void) { return &brlapi_error; }
 
 /** ask for \e brltty commands */
 #define BRL_COMMANDS 0
@@ -2081,7 +2081,7 @@ int api_open(BrailleDisplay *brl, char **parameters)
 
   res = brlapi_loadAuthKey(keyfile,&authKeyLength,authKey);
   if (res==-1) {
-    LogPrint(LOG_WARNING,"Unable to load API authentication key from %s: %s in %s, no connections will be accepted.", keyfile, strerror(brlapi_libcerrno), brlapi_libcerrfun);
+    LogPrint(LOG_WARNING,"Unable to load API authentication key from %s: %s in %s, no connections will be accepted.", keyfile, strerror(brlapi_libcerrno), brlapi_errfun);
     goto out;
   }
   LogPrint(LOG_DEBUG, "Authentication key loaded");
