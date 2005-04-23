@@ -235,14 +235,16 @@ main (int argc, char *argv[]) {
     outputFormat = NULL;
   }
 
-  if ((inputPath = makePath(opt_dataDirectory, inputPath))) {
+  {
     FILE *inputFile;
 
     if (strcmp(inputPath, "-") == 0) {
       inputFile = stdin;
       inputPath = "<standard-input>";
-    } else {
-      inputFile = fopen(inputPath, "r");
+    } else if (!(inputPath = makePath(opt_dataDirectory, inputPath))) {
+      inputFile = NULL;
+    } else if (!(inputFile = fopen(inputPath, "r"))) {
+      LogPrint(LOG_ERR, "cannot open input table: %s: %s", inputPath, strerror(errno));
     }
 
     if (inputFile) {
@@ -280,13 +282,8 @@ main (int argc, char *argv[]) {
 
       fclose(inputFile);
     } else {
-      LogPrint(LOG_ERR, "cannot open input table: %s: %s", inputPath, strerror(errno));
       status = 3;
     }
-
-    free(inputPath);
-  } else {
-    status = 9;
   }
 
   return status;
