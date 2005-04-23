@@ -115,7 +115,7 @@ static void brl_writeWindow(BrailleDisplay *brl)
     if (brlapi_writeDots(brl->buffer)==0) {
       memcpy(prevData,brl->buffer,displaySize);
       prevShown = 1;
-    } else LogPrint(LOG_ERR, "writeDots: %s", brlapi_strerror(brlapi_errno)); \
+    } else LogPrint(LOG_ERR, "writeDots: %s", brlapi_strerror(brlapi_errno));
   }
 }
 
