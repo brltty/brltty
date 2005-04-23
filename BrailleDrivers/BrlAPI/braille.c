@@ -65,11 +65,11 @@ static void brl_identify(void)
 /* Opens a connection with BrlAPI's server */
 static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
 {
-  int ttyMin = 0, ttyMax = 255, tty = 0;
+  int ttyMin = 0, tty = 0;
   brlapi_settings_t settings;
   settings.hostName = parameters[PARM_HOSTNAME];
   settings.authKey = parameters[PARM_AUTHKEY];
-  validateInteger(&tty, "Tty to grab", parameters[PARM_TTY], &ttyMin, &ttyMax);
+  validateInteger(&tty, "Tty to grab", parameters[PARM_TTY], &ttyMin, NULL);
   CHECK((brlapi_initializeConnection(&settings, &settings)>=0), out);
   LogPrint(LOG_DEBUG, "Connected to %s using %s", settings.hostName, settings.authKey);
   CHECK((brlapi_getTty(tty, NULL)>=0), out0);
