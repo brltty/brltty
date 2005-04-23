@@ -102,7 +102,7 @@ void fatal(const char *fmt, ...) {
 static int brlapi_fd;
 
 void api_cleanExit(int foo) {
-  brlapi_closeConnection();
+  close(brlapi_fd);
   exit(0);
 }
 
