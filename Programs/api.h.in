@@ -539,7 +539,7 @@ int brlapi_unignoreKeySet(const brl_keycode_t *s, unsigned int n);
 
 /* brlapi_getRaw */
 /** Switch to Raw mode
- * \param Specifies the name of the driver for which the raw
+ * \param driver Specifies the name of the driver for which the raw
  * communication must be established
  * \return 0 on success, -1 on error */
 int brlapi_getRaw(const char *driver);
