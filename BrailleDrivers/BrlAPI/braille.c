@@ -16,7 +16,8 @@
  */
 
 #define BA_VERSION "BRLTTY driver for BrlAPI, version 0.1, 2005"
-#define BA_COPYRIGHT "Copyright Sebastien HINDERER <Sebastien.Hinderer@libertysurf.fr"
+#define BA_COPYRIGHT "   Copyright Sebastien HINDERER <Sebastien.Hinderer@ens-lyon.org>, \
+Samuel THIBAULT <samuel.thibault@ens-lyon.org>"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -33,9 +34,10 @@
 
 typedef enum {
   PARM_HOSTNAME=0,
-  PARM_AUTHKEY=1
+  PARM_AUTHKEY=1,
+  PARM_TTY=2
 } DriverParameter;
-#define BRLPARMS "host", "key"
+#define BRLPARMS "host", "key", "tty"
 
 #include "Programs/brl_driver.h"
 
@@ -63,12 +65,14 @@ static void brl_identify(void)
 /* Opens a connection with BrlAPI's server */
 static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
 {
+  int ttyMin = 0, ttyMax = 255, tty = 0;
   brlapi_settings_t settings;
   settings.hostName = parameters[PARM_HOSTNAME];
   settings.authKey = parameters[PARM_AUTHKEY];
+  validateInteger(&tty, "Tty to grab", parameters[PARM_TTY], &ttyMin, &ttyMax);
   CHECK((brlapi_initializeConnection(&settings, &settings)>=0), out);
   LogPrint(LOG_DEBUG, "Connected to %s using %s", settings.hostName, settings.authKey);
-  CHECK((brlapi_getTty(7, BRLCOMMANDS)>=0), out0);
+  CHECK((brlapi_getTty(tty, NULL)>=0), out0);
   LogPrint(LOG_DEBUG, "Got tty successfully");
   CHECK((brlapi_getDisplaySize(&brl->x, &brl->y)==0), out1);
   LogPrint(LOG_DEBUG,"Found out display size: %dx%d", brl->x, brl->y);
