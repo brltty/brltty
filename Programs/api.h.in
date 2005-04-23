@@ -284,9 +284,9 @@ int brlapi_getDisplaySize(unsigned int *x, unsigned int *y);
  *
  * \param tty
  * - If tty>0, application takes control of the specified tty;
- * - if tty<=0, the library first tries to get the tty number by reading
- * /proc/self/stat (on linux). If none is found, it looks at a CONTROLVT
- * environment variable, then WINDOWID is tried (for an xterm case).
+ * - if tty<=0, the library first tries to get the tty number from the
+ * CONTROLVT environment variable, then the WINDOWID variable (for xterm
+ * case), and at last reads /proc/self/stat (on linux).
  *
  * \param how tells how the application wants brlapi_readKey() to return
  * key presses. NULL or "" means BRLTTY commands are required,
@@ -350,8 +350,8 @@ int brlapi_setFocus(int tty);
  *
  * If the string is too long, it is cut. If it's too short, spaces are
  * appended.  The current LC_CTYPE locale is considered, unless it is left as
- * default "C", in which case the charset is assumed to be the same as the
- * server's.
+ * default "C", in which case the charset is assumed to be 8bits, and the same
+ * as the server's.
  *
  * \param cursor gives the cursor position; if equal to 0, no cursor is shown at
  * all; if cursor==-1, the cursor is left where it is
@@ -381,7 +381,7 @@ typedef struct {
   char *attrAnd; /** And attributes; applied first */
   char *attrOr; /** Or attributes; applied \e after ANDing */
   int cursor; /** -1 == don't touch, 0 == turn off, 1 = 1st char of display, ... */
-  char *charset; /** Text charset. NULL or "" means current LC_CTYPE locale */
+  char *charset; /** Text charset. NULL or "" means it is assumed to be 8bits, and the same as the server's. */
 } brlapi_writeStruct;
 
 /* BRLAPI_WRITESTRUCT_INITIALIZER */
