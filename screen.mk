@@ -15,21 +15,19 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-SCRNAMES = $(BLD_TOP)$(DRV_DIR)/brltty-scr.lst
 SCR_DEFS ='-DSCRNAME=$(DRIVER_NAME)' '-DSCRCODE=$(DRIVER_CODE)' '-DSCRCOMMENT="$(DRIVER_COMMENT)"'
 SCR_CFLAGS = $(LIBCFLAGS) $(SCR_DEFS)
 SCR_CXXFLAGS = $(LIBCXXFLAGS) $(SCR_DEFS)
-SCR_SO_NAME = $(MOD_NAME)x
-SCR_NAME = $(SCR_SO_NAME)$(DRIVER_CODE).$(MOD_EXT)
-SCR_FILE = $(BLD_TOP)$(DRV_DIR)/$(SCR_NAME)
-$(SCR_FILE): screen.$O
+SCR_MOD_NAME = $(BLD_TOP)$(DRV_DIR)/$(MOD_NAME)x$(DRIVER_CODE)
+SCR_MOD_FILE = $(SCR_MOD_NAME).$(MOD_EXT)
+$(SCR_MOD_FILE): screen.$O
 	$(INSTALL_DIRECTORY) $(@D)
 	$(MKMOD) $(@) screen.$O $(SCR_OBJS)
-screen-driver: $(SCR_FILE)
+screen-driver: $(SCR_MOD_FILE)
 
 install::
 
 uninstall::
 
 clean::
-	-rm -f $(BLD_TOP)$(DRV_DIR)/$(SCR_SO_NAME)$(DRIVER_CODE).*
+	-rm -f $(SCR_MOD_NAME).*

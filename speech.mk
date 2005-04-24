@@ -15,21 +15,19 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-SPKNAMES = $(BLD_TOP)$(DRV_DIR)/brltty-spk.lst
 SPK_DEFS ='-DSPKNAME=$(DRIVER_NAME)' '-DSPKCODE=$(DRIVER_CODE)' '-DSPKCOMMENT="$(DRIVER_COMMENT)"'
 SPK_CFLAGS = $(LIBCFLAGS) $(SPK_DEFS)
 SPK_CXXFLAGS = $(LIBCXXFLAGS) $(SPK_DEFS)
-SPK_SO_NAME = $(MOD_NAME)s
-SPK_NAME = $(SPK_SO_NAME)$(DRIVER_CODE).$(MOD_EXT)
-SPK_FILE = $(BLD_TOP)$(DRV_DIR)/$(SPK_NAME)
-$(SPK_FILE): speech.$O
+SPK_MOD_NAME = $(BLD_TOP)$(DRV_DIR)/$(MOD_NAME)s$(DRIVER_CODE)
+SPK_MOD_FILE = $(SPK_MOD_NAME).$(MOD_EXT)
+$(SPK_MOD_FILE): speech.$O
 	$(INSTALL_DIRECTORY) $(@D)
 	$(MKMOD) $(@) speech.$O $(SPK_OBJS)
-speech-driver: $(SPK_FILE)
+speech-driver: $(SPK_MOD_FILE)
 
 install::
 
 uninstall::
 
 clean::
-	-rm -f $(BLD_TOP)$(DRV_DIR)/$(SPK_SO_NAME)$(DRIVER_CODE).*
+	-rm -f $(SPK_MOD_NAME).*
