@@ -283,10 +283,10 @@ int brlapi_getDisplaySize(unsigned int *x, unsigned int *y);
 /** ask for some tty, with some key mechanism
  *
  * \param tty
- * - If tty>0, application takes control of the specified tty;
- * - if tty<=0, the library first tries to get the tty number from the
- * CONTROLVT environment variable, then the WINDOWID variable (for xterm
- * case), and at last reads /proc/self/stat (on linux).
+ * - If tty>=0, application takes control of the specified tty;
+ * - if tty==-1, the library first tries to get the tty number from the WINDOWID
+ * environment variable (for xterm case), then the CONTROLVT variable, and at
+ * last reads /proc/self/stat (on linux).
  *
  * \param how tells how the application wants brlapi_readKey() to return
  * key presses. NULL or "" means BRLTTY commands are required,
