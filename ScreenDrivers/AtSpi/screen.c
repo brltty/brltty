@@ -158,7 +158,7 @@ static size_t my_mbsrtowcs(wchar_t *dest, const char **src, size_t len, my_mbsta
 }
 
 static size_t my_mbrlen(const char *s, size_t n, my_mbstate_t *ps) {
-  return my_mbrtowc(NULL, s, n, ps?:&internal);
+  return my_mbrtowc(NULL, s, n, ps?ps:&internal);
 }
 
 static size_t my_mbslen(const char *s, size_t n) {
@@ -510,13 +510,22 @@ currentvt_AtSpiScreen (void) {
   return curTerm? 0: -1;
 }
 
+static const char nonatspi [] = "not an AT-SPI terminal widget";
+
 static void
 describe_AtSpiScreen (ScreenDescription *description) {
   pthread_mutex_lock(&updateMutex);
-  description->cols = curNumCols;
-  description->rows = curNumRows?:1;
-  description->posx = curPosX;
-  description->posy = curPosY;
+  if (curTerm) {
+    description->cols = curNumCols;
+    description->rows = curNumRows?curNumRows:1;
+    description->posx = curPosX;
+    description->posy = curPosY;
+  } else {
+    description->rows = 1;
+    description->cols = strlen(nonatspi);
+    description->posx = 0;
+    description->posy = 0;
+  }
   pthread_mutex_unlock(&updateMutex);
   description->no = currentvt_AtSpiScreen();
 }
@@ -526,22 +535,29 @@ read_AtSpiScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
   long x,y;
   wchar_t c;
   if (box.height<0 || box.width<0) return 0;
+  if (mode == SCR_ATTRIB) {
+    memset(buffer,0x07,box.height*box.width);
+    return 1;
+  }
   memset(buffer,' ',box.height*box.width);
   pthread_mutex_lock(&updateMutex);
-  if (!curTerm) goto out;
+  if (!curTerm) {
+    strncpy(buffer, nonatspi+box.left, box.width);
+    goto out;
+  }
   if (box.top+box.height>curNumRows)
     box.height = curNumRows-box.top;
   if (box.top<curNumRows && box.left<curNumCols)
-  for (y=0; y<box.height; y++)
-    for (x=0; x<box.width; x++) {
-      if (box.left+x<curRowLengths[box.top+y] - (curRows[box.top+y][curRowLengths[box.top+y]-1]=='\n')) {
-	if ((c = curRows[box.top+y][box.left+x])<0x100)
-	  /* latin1 only */
-	  buffer[y*box.width+x] = c;
-	else
-	  buffer[y*box.width+x] = '?';
+    for (y=0; y<box.height; y++)
+      for (x=0; x<box.width; x++) {
+	if (box.left+x<curRowLengths[box.top+y] - (curRows[box.top+y][curRowLengths[box.top+y]-1]=='\n')) {
+	  if ((c = curRows[box.top+y][box.left+x])<0x100)
+	    /* latin1 only */
+	    buffer[y*box.width+x] = c;
+	  else
+	    buffer[y*box.width+x] = '?';
+	}
       }
-    }
 out:
   pthread_mutex_unlock(&updateMutex);
   return 1;
