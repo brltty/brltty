@@ -122,26 +122,30 @@ static const ScreenState initialScreenState = {
  */
 static ScreenState **screenStates = NULL;
 static int screenCount = 0;
-static int screenNumber;
 static ScreenState *p;
 
 static void
-setScreenNumber (int number) {
-  if (number >= screenCount) {
-    int newCount = (number + 1) | 0XF;
+updateScreenAttributes (void) {
+  {
+    int old = scr.no;
+    describeScreen(&scr);
+    if (scr.no == old) return;
+  }
+
+  if (scr.no >= screenCount) {
+    int newCount = (scr.no + 1) | 0XF;
     screenStates = reallocWrapper(screenStates, newCount*sizeof(*screenStates));
     while (screenCount < newCount) screenStates[screenCount++] = NULL;
   }
 
   {
-    ScreenState **state = &screenStates[number];
+    ScreenState **state = &screenStates[scr.no];
     if (!*state) {
       *state = mallocWrapper(sizeof(**state));
       **state = initialScreenState;
     }
     p = *state;
   }
-  screenNumber = number;
 
   setTranslationTable(p->showAttributes);
 }
@@ -418,7 +422,7 @@ showInfo (void) {
 
   if (brl.x*brl.y >= 21) {
     snprintf(text, sizeof(text), "%02d:%02d %02d:%02d %02d %c%c%c%c%c%c",
-             p->winx, p->winy, scr.posx, scr.posy, screenNumber, 
+             p->winx, p->winy, scr.posx, scr.posy, scr.no, 
              p->trackCursor? 't': ' ',
              prefs.showCursor? (prefs.blinkingCursor? 'B': 'v'):
                                (prefs.blinkingCursor? 'b': ' '),
@@ -430,7 +434,7 @@ showInfo (void) {
   } else {
     brl.cursor = -1;
     snprintf(text, sizeof(text), "xxxxx %02d %c%c%c%c%c%c     ",
-             screenNumber,
+             scr.no,
              p->trackCursor? 't': ' ',
              prefs.showCursor? (prefs.blinkingCursor? 'B': 'v'):
                                (prefs.blinkingCursor? 'b': ' '),
@@ -923,14 +927,13 @@ main (int argc, char *argv[]) {
   handleSignal(SIGCHLD, childDeathHandler);
 #endif /* SIGCHLD */
 
-  describeScreen(&scr);
+  atexit(exitScreenStates);
+  updateScreenAttributes();
   /* NB: screen size can sometimes change, e.g. the video mode may be changed
    * when installing a new font. This will be detected by another call to
    * describeScreen() within the main loop. Don't assume that scr.rows
    * and scr.cols are constants across loop iterations.
    */
-  atexit(exitScreenStates);
-  setScreenNumber(scr.no);                        /* allocate current screen params */
 
   p->trkx = scr.posx; p->trky = scr.posy;
   trackCursor(1);        /* set initial window position */
@@ -1459,7 +1462,7 @@ main (int argc, char *argv[]) {
             playTune(&tune_command_rejected);
             break;
           case BRL_CMD_CSRJMP_VERT:
-            playTune(routeCursor(-1, p->winy, screenNumber)?
+            playTune(routeCursor(-1, p->winy, scr.no)?
                      &tune_routing_started:
                      &tune_command_rejected);
             break;
@@ -1736,7 +1739,7 @@ main (int argc, char *argv[]) {
               case BRL_BLK_ROUTE:
                 if (arg < brl.x) {
                   arg = getOffset(arg, 0);
-                  if (routeCursor(MIN(p->winx+arg, scr.cols-1), p->winy, screenNumber)) {
+                  if (routeCursor(MIN(p->winx+arg, scr.cols-1), p->winy, scr.no)) {
                     playTune(&tune_routing_started);
                     break;
                   }
@@ -1852,7 +1855,7 @@ main (int argc, char *argv[]) {
         int column = MIN(MAX(scr.posx, p->winx), p->winx+brl.x-1);
         int row = MIN(MAX(scr.posy, p->winy), p->winy+brl.y-1);
         if ((column != scr.posx) || (row != scr.posy))
-          if (routeCursor(column, row, screenNumber))
+          if (routeCursor(column, row, scr.no))
             playTune(&tune_routing_started);
       }
     }
@@ -1872,10 +1875,9 @@ main (int argc, char *argv[]) {
 
     /*
      * Update Braille display and screen information.  Switch screen 
-     * params if screen number has changed.
+     * state if screen number has changed.
      */
-    describeScreen(&scr);
-    if (!(dispmd & (HELP_SCRN|FROZ_SCRN)) && screenNumber != scr.no) setScreenNumber(scr.no);
+    updateScreenAttributes();
 
     /* NB: This should also accomplish screen resizing: scr.rows and
      * scr.cols may have changed.
