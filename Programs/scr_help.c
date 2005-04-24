@@ -220,6 +220,11 @@ getPageCount_HelpScreen (void) {
   return (fileDescriptor != -1)? fileHeader.pages: 0;
 }
 
+static int
+currentvt_HelpScreen (void) {
+  return 0;
+}
+
 static void
 describe_HelpScreen (ScreenDescription *description) {
   const HelpPageEntry *page = &pageDescriptions[pageNumber];
@@ -227,7 +232,7 @@ describe_HelpScreen (ScreenDescription *description) {
   description->posy = cursorRow;
   description->cols = getBigEndian(page->width);
   description->rows = getBigEndian(page->height);
-  description->no = 0;	/* 0 is reserved for help screen */
+  description->no = currentvt_HelpScreen();
 }
 
 static int
@@ -313,6 +318,7 @@ route_HelpScreen (int column, int row, int screen) {
 void
 initializeHelpScreen (HelpScreen *help) {
   initializeBaseScreen(&help->base);
+  help->base.currentvt = currentvt_HelpScreen;
   help->base.describe = describe_HelpScreen;
   help->base.read = read_HelpScreen;
   help->base.insert = insert_HelpScreen;

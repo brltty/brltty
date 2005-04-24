@@ -28,13 +28,28 @@
 #include "scr.h"
 #include "scr_base.h"
 
+static int
+selectvt_BaseScreen (int vt) {
+  return 0;
+}
+
+static int
+switchvt_BaseScreen (int vt) {
+  return 0;
+}
+
+static int
+currentvt_BaseScreen (void) {
+  return 0;
+}
+
 static void
 describe_BaseScreen (ScreenDescription *description) {
   description->rows = 1;
   description->cols = 1;
   description->posx = 0;
   description->posy = 0;
-  description->no = 1;
+  description->no = currentvt_BaseScreen();
 }
 
 static int
@@ -67,35 +82,20 @@ pointer_BaseScreen (int *column, int *row) {
 }
 
 static int
-selectvt_BaseScreen (int vt) {
-  return 0;
-}
-
-static int
-switchvt_BaseScreen (int vt) {
-  return 0;
-}
-
-static int
-currentvt_BaseScreen (void) {
-  return 0;
-}
-
-static int
 execute_BaseScreen (int cmd) {
   return 0;
 }
 
 void
 initializeBaseScreen (BaseScreen *base) {
+  base->selectvt = selectvt_BaseScreen;
+  base->switchvt = switchvt_BaseScreen;
+  base->currentvt = currentvt_BaseScreen;
   base->describe = describe_BaseScreen;
   base->read = read_BaseScreen;
   base->insert = insert_BaseScreen;
   base->route = route_BaseScreen;
   base->point = point_BaseScreen;
   base->pointer = pointer_BaseScreen;
-  base->selectvt = selectvt_BaseScreen;
-  base->switchvt = switchvt_BaseScreen;
-  base->currentvt = currentvt_BaseScreen;
   base->execute = execute_BaseScreen;
 }

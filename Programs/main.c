@@ -82,11 +82,10 @@ static unsigned int updateIntervals = 0;        /* incremented each main loop cy
 #define BRL_ISUPPER(c) \
   (isupper((c)) || (c)=='@' || (c)=='[' || (c)=='^' || (c)==']' || (c)=='\\')
 
-unsigned char *curtbl = textTable;        /* active translation table */
-
+static unsigned char *translationTable = textTable;        /* active translation table */
 static void
 setTranslationTable (int attributes) {
-  curtbl = attributes? attributesTable: textTable;
+  translationTable = attributes? attributesTable: textTable;
 }
 
 
@@ -107,7 +106,7 @@ typedef struct {
   int ptrx, ptry;	/* mouse pointer position */
   ScreenMark marks[0X100];
 } ScreenState;
-static ScreenState initialScreenState = {
+static const ScreenState initialScreenState = {
   DEFAULT_TRACK_CURSOR, DEFAULT_HIDE_CURSOR, 0,
   0, 0, /* winx/y */
   0, 0, /* motx/y */
@@ -120,37 +119,42 @@ static ScreenState initialScreenState = {
  * Array definition containing pointers to ScreenState structures for 
  * each screen.  Each structure is dynamically allocated when its 
  * screen is used for the first time.
- * Screen 0 is reserved for the help screen; its structure is static.
  */
-#define MAX_SCR 0X3F              /* actual number of separate screens */
-static ScreenState scr0;        /* at least one is statically allocated */
-static ScreenState *scrparam[MAX_SCR+1] = {&scr0, };
-static ScreenState *p = &scr0;        /* pointer to current state structure */
-static int curscr;                        /* current screen number */
+static ScreenState **screenStates = NULL;
+static int screenCount = 0;
+static int screenNumber;
+static ScreenState *p;
 
 static void
-switchto (unsigned int scrno) {
-  curscr = scrno;
-  if (scrno > MAX_SCR)
-    scrno = 0;
-  if (!scrparam[scrno]) {         /* if not already allocated... */
-    {
-      if (!(scrparam[scrno] = malloc(sizeof(*p))))
-        scrno = 0;         /* unable to allocate a new structure */
-      else
-        *scrparam[scrno] = initialScreenState;
-    }
+setScreenNumber (int number) {
+  if (number >= screenCount) {
+    int newCount = (number + 1) | 0XF;
+    screenStates = reallocWrapper(screenStates, newCount*sizeof(*screenStates));
+    while (screenCount < newCount) screenStates[screenCount++] = NULL;
   }
-  p = scrparam[scrno];
+
+  {
+    ScreenState **state = &screenStates[number];
+    if (!*state) {
+      *state = mallocWrapper(sizeof(**state));
+      **state = initialScreenState;
+    }
+    p = *state;
+  }
+  screenNumber = number;
+
   setTranslationTable(p->showAttributes);
 }
 
 static void
-exitScreenParameters (void) {
-  int i;
-  /* don't forget that scrparam[0] is staticaly allocated */
-  for (i = 1; i <= MAX_SCR; i++) 
-    free(scrparam[i]);
+exitScreenStates (void) {
+  if (screenStates) {
+    while (screenCount > 0) free(screenStates[--screenCount]);
+    free(screenStates);
+    screenStates = NULL;
+  } else {
+    screenCount = 0;
+  }
 }
 
 static void
@@ -414,7 +418,7 @@ showInfo (void) {
 
   if (brl.x*brl.y >= 21) {
     snprintf(text, sizeof(text), "%02d:%02d %02d:%02d %02d %c%c%c%c%c%c",
-             p->winx, p->winy, scr.posx, scr.posy, curscr, 
+             p->winx, p->winy, scr.posx, scr.posy, screenNumber, 
              p->trackCursor? 't': ' ',
              prefs.showCursor? (prefs.blinkingCursor? 'B': 'v'):
                                (prefs.blinkingCursor? 'b': ' '),
@@ -426,7 +430,7 @@ showInfo (void) {
   } else {
     brl.cursor = -1;
     snprintf(text, sizeof(text), "xxxxx %02d %c%c%c%c%c%c     ",
-             curscr,
+             screenNumber,
              p->trackCursor? 't': ' ',
              prefs.showCursor? (prefs.blinkingCursor? 'B': 'v'):
                                (prefs.blinkingCursor? 'b': ' '),
@@ -899,14 +903,6 @@ main (int argc, char *argv[]) {
   LogPrint(LOG_INFO, "starting.");
   atexit(exitLog);
 
-  /* Initialize global data assumed to be ready by the termination handler. */
-  *p = initialScreenState;
-  scrparam[0] = p;
-  for (i = 1; i <= MAX_SCR; i++)
-    scrparam[i] = NULL;
-  curscr = 0;
-  atexit(exitScreenParameters);
-  
 #ifdef SIGPIPE
   /* We install SIGPIPE handler before startup() so that drivers which
    * use pipes can't cause program termination (the call to message() in
@@ -928,12 +924,14 @@ main (int argc, char *argv[]) {
 #endif /* SIGCHLD */
 
   describeScreen(&scr);
-  /* NB: screen size can sometimes change, f.e. the video mode may be changed
-   * when installing a new font. Will be detected by another call to
-   * describeScreen in the main loop. Don't assume that scr.rows
+  /* NB: screen size can sometimes change, e.g. the video mode may be changed
+   * when installing a new font. This will be detected by another call to
+   * describeScreen() within the main loop. Don't assume that scr.rows
    * and scr.cols are constants across loop iterations.
    */
-  switchto(scr.no);                        /* allocate current screen params */
+  atexit(exitScreenStates);
+  setScreenNumber(scr.no);                        /* allocate current screen params */
+
   p->trkx = scr.posx; p->trky = scr.posy;
   trackCursor(1);        /* set initial window position */
   p->motx = p->winx; p->moty = p->winy;
@@ -1461,7 +1459,7 @@ main (int argc, char *argv[]) {
             playTune(&tune_command_rejected);
             break;
           case BRL_CMD_CSRJMP_VERT:
-            playTune(routeCursor(-1, p->winy, curscr)?
+            playTune(routeCursor(-1, p->winy, screenNumber)?
                      &tune_routing_started:
                      &tune_command_rejected);
             break;
@@ -1571,9 +1569,7 @@ main (int argc, char *argv[]) {
             infmode = 0;        /* ... and not in info mode */
             if (TOGGLE_NOPLAY(help)) {
               dispmd = selectDisplay(dispmd | HELP_SCRN);
-              if (dispmd & HELP_SCRN) { /* help screen selection successful */
-                switchto(0);        /* screen 0 for help screen */
-              } else {      /* help screen selection failed */
+              if (!(dispmd & HELP_SCRN)) { /* help screen selection successful */
                 message("help not available", 0);
               }
             } else {
@@ -1740,7 +1736,7 @@ main (int argc, char *argv[]) {
               case BRL_BLK_ROUTE:
                 if (arg < brl.x) {
                   arg = getOffset(arg, 0);
-                  if (routeCursor(MIN(p->winx+arg, scr.cols-1), p->winy, curscr)) {
+                  if (routeCursor(MIN(p->winx+arg, scr.cols-1), p->winy, screenNumber)) {
                     playTune(&tune_routing_started);
                     break;
                   }
@@ -1856,7 +1852,7 @@ main (int argc, char *argv[]) {
         int column = MIN(MAX(scr.posx, p->winx), p->winx+brl.x-1);
         int row = MIN(MAX(scr.posy, p->winy), p->winy+brl.y-1);
         if ((column != scr.posx) || (row != scr.posy))
-          if (routeCursor(column, row, curscr))
+          if (routeCursor(column, row, screenNumber))
             playTune(&tune_routing_started);
       }
     }
@@ -1879,7 +1875,7 @@ main (int argc, char *argv[]) {
      * params if screen number has changed.
      */
     describeScreen(&scr);
-    if (!(dispmd & (HELP_SCRN|FROZ_SCRN)) && curscr != scr.no) switchto(scr.no);
+    if (!(dispmd & (HELP_SCRN|FROZ_SCRN)) && screenNumber != scr.no) setScreenNumber(scr.no);
 
     /* NB: This should also accomplish screen resizing: scr.rows and
      * scr.cols may have changed.
@@ -2195,17 +2191,17 @@ main (int argc, char *argv[]) {
               brl.buffer[i] = ' ';
 
         /* convert to dots using the current translation table */
-        if ((curtbl == attributesTable) || !prefs.textStyle) {
+        if ((translationTable == attributesTable) || !prefs.textStyle) {
           for (
             i = 0;
             i < (winlen * brl.y);
-            brl.buffer[i] = curtbl[brl.buffer[i]], i++
+            brl.buffer[i] = translationTable[brl.buffer[i]], i++
           );
         } else {
           for (
             i = 0;
             i < (winlen * brl.y);
-            brl.buffer[i] = curtbl[brl.buffer[i]] & (BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT4 | BRL_DOT5 | BRL_DOT6), i++
+            brl.buffer[i] = translationTable[brl.buffer[i]] & (BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT4 | BRL_DOT5 | BRL_DOT6), i++
           );
         }
 

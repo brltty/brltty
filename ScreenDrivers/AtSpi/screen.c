@@ -495,6 +495,21 @@ close_AtSpiScreen (void) {
   LogPrint(LOG_DEBUG,"SPI stopped");
 }
 
+static int
+selectvt_AtSpiScreen (int vt) {
+  return 0;
+}
+
+static int
+switchvt_AtSpiScreen (int vt) {
+  return 0;
+}
+
+static int
+currentvt_AtSpiScreen (void) {
+  return curTerm? 0: -1;
+}
+
 static void
 describe_AtSpiScreen (ScreenDescription *description) {
   pthread_mutex_lock(&updateMutex);
@@ -503,7 +518,7 @@ describe_AtSpiScreen (ScreenDescription *description) {
   description->posx = curPosX;
   description->posy = curPosY;
   pthread_mutex_unlock(&updateMutex);
-  description->no = 0;
+  description->no = currentvt_AtSpiScreen();
 }
 
 static int
@@ -608,23 +623,6 @@ insert_AtSpiScreen (ScreenKey key) {
   if (modMeta)
     SPI_generateKeyboardEvent(XK_Meta_L,NULL,SPI_KEY_SYM);
   return 1;
-}
-
-static int
-selectvt_AtSpiScreen (int vt) {
-  return 0;
-}
-
-static int
-switchvt_AtSpiScreen (int vt) {
-  return 0;
-}
-
-static int
-currentvt_AtSpiScreen (void) {
-  ScreenDescription description;
-  describe_AtSpiScreen(&description);
-  return description.no;
 }
 
 static int

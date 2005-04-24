@@ -44,7 +44,7 @@ typedef enum {
 #include "Programs/scr_driver.h"
 #include "screen.h"
 
-static const char *consoleProblem;
+static const char *problemText;
 
 static unsigned int debugCharacterTranslationTable = 0;
 static unsigned int debugApplicationCharacterMap = 0;
@@ -657,7 +657,7 @@ close_LinuxScreen (void) {
 
 static int
 getScreenDescription (ScreenDescription *description) {
-  if (!consoleProblem) {
+  if (!problemText) {
     if (lseek(screenDescriptor, 0, SEEK_SET) != -1) {
       unsigned char buffer[4];
       int count = read(screenDescriptor, buffer, sizeof(buffer));
@@ -677,10 +677,10 @@ getScreenDescription (ScreenDescription *description) {
     } else {
       LogError("Screen seek");
     }
-    consoleProblem = "Screen header read error.";
+    problemText = "Screen header read error.";
   }
   description->rows = 1;
-  description->cols = strlen(consoleProblem);
+  description->cols = strlen(problemText);
   description->posx = 0;
   description->posy = 0;
   return 0;
@@ -695,7 +695,7 @@ getConsoleDescription (ScreenDescription *description) {
     if (controlConsole(VT_GETSTATE, &state) == -1) {
       LogError("ioctl VT_GETSTATE");
       description->no = 0;
-      consoleProblem = "Can't get virtual terminal number.";
+      problemText = "Can't get virtual terminal number.";
       return 0;
     }
     description->no = state.v_active;
@@ -706,10 +706,10 @@ getConsoleDescription (ScreenDescription *description) {
     if (controlConsole(KDGETMODE, &mode) == -1) {
       LogError("ioctl KDGETMODE");
     } else if (mode == KD_TEXT) {
-      consoleProblem = NULL;
+      problemText = NULL;
       return 1;
     }
-    consoleProblem = "Screen not in text mode.";
+    problemText = "Screen not in text mode.";
     return 0;
   }
 }
@@ -739,9 +739,9 @@ read_LinuxScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
   if (validateScreenBox(&box, description.cols, description.rows)) {
     int text = mode == SCR_TEXT;
 
-    if (consoleProblem) {
+    if (problemText) {
       if (text) {
-        memcpy(buffer, consoleProblem+box.left, box.width);
+        memcpy(buffer, problemText+box.left, box.width);
       } else {
         memset(buffer, 0X07, box.width);
       }

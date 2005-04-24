@@ -43,7 +43,9 @@
 #define SCRCODE no
 #define SCRCOMMENT ""
 #include "scr_driver.h"
-static void scr_initialize (MainScreen *main) {
+
+static void
+scr_initialize (MainScreen *main) {
   initializeMainScreen(main);
 }
 
