@@ -24,10 +24,9 @@ HELP_DEPS = $(HELP_TEXT)
 BRL_OBJS = @braille_libraries_ba@
 include $(SRC_TOP)braille.mk
 
-$(BRL_MOD_FILE): api
 api:
 	cd $(BLD_TOP)$(PGM_DIR) && $(MAKE) $@
 
-braille.$O:
+braille.$O: api
 	$(CC) $(BRL_CFLAGS) -c $(SRC_DIR)/braille.c
 
