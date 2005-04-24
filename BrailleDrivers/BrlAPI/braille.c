@@ -65,7 +65,7 @@ static void brl_identify(void)
 /* Opens a connection with BrlAPI's server */
 static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
 {
-  int ttyMin = 0, tty = 0;
+  int ttyMin = -1, tty = -1;
   brlapi_settings_t settings;
   settings.hostName = parameters[PARM_HOSTNAME];
   settings.authKey = parameters[PARM_AUTHKEY];

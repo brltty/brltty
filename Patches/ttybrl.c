@@ -329,7 +329,7 @@ brltty_brl_open_device (gchar* 			device_name,
     brlapi_settings_t settings;
     GdkWindow *root;
     GdkAtom VTAtom, type;
-    guint VT = 0;
+    guint VT = -1;
     gint format, length;
     unsigned char *buf;
 
@@ -374,7 +374,7 @@ brltty_brl_open_device (gchar* 			device_name,
      This only works with XFree86 starting from 4.3.99.903 and X.Org
      starting from 6.8.0
 
-     If you have an older version, the tty will be kept to 0 so that the
+     If you have an older version, the tty will be kept to -1 so that the
      brlapi_getTty() function will look at the CONTROLVT environment variable.
      So people having old versions should have something like this in their
      .xsession, before launching gnopernicus:
