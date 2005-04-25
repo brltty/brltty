@@ -114,6 +114,11 @@ currentvt_ScreenScreen (void) {
   return 0;
 }
 
+static int
+uservt_ScreenScreen (int number) {
+  return 1 + number;
+}
+
 static void
 describe_ScreenScreen (ScreenDescription *description) {
   description->cols = shmAddress[0];
@@ -167,4 +172,5 @@ scr_initialize (MainScreen *main) {
   main->base.read = read_ScreenScreen;
   main->open = open_ScreenScreen;
   main->close = close_ScreenScreen;
+  main->uservt = uservt_ScreenScreen;
 }
