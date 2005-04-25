@@ -48,7 +48,7 @@ close_MainScreen (void) {
 
 static int
 uservt_MainScreen (int number) {
-  return 1 + number;
+  return 0 + number;
 }
 
 void

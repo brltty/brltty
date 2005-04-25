@@ -126,17 +126,17 @@ static ScreenState *p;
 
 static void
 updateScreenAttributes (void) {
-  {
-    int old = scr.no;
-    describeScreen(&scr);
-    if (scr.no == -1) scr.no = userVirtualTerminal(0);
-    if (scr.no == old) return;
-  }
+  int previousScreen = scr.no;
+
+  describeScreen(&scr);
+  if (scr.no == -1) scr.no = userVirtualTerminal(0);
 
   if (scr.no >= screenCount) {
     int newCount = (scr.no + 1) | 0XF;
     screenStates = reallocWrapper(screenStates, newCount*sizeof(*screenStates));
     while (screenCount < newCount) screenStates[screenCount++] = NULL;
+  } else if (scr.no == previousScreen) {
+    return;
   }
 
   {
@@ -929,7 +929,6 @@ main (int argc, char *argv[]) {
 #endif /* SIGCHLD */
 
   atexit(exitScreenStates);
-  scr.no = -1;
   updateScreenAttributes();
   /* NB: screen size can sometimes change, e.g. the video mode may be changed
    * when installing a new font. This will be detected by another call to

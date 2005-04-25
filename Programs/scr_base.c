@@ -28,6 +28,8 @@
 #include "scr.h"
 #include "scr_base.h"
 
+static const char *text_BaseScreen = "no screen";
+
 static int
 selectvt_BaseScreen (int vt) {
   return 0;
@@ -40,13 +42,13 @@ switchvt_BaseScreen (int vt) {
 
 static int
 currentvt_BaseScreen (void) {
-  return 0;
+  return -1;
 }
 
 static void
 describe_BaseScreen (ScreenDescription *description) {
   description->rows = 1;
-  description->cols = 1;
+  description->cols = strlen(text_BaseScreen);
   description->posx = 0;
   description->posy = 0;
   description->no = currentvt_BaseScreen();
@@ -57,7 +59,11 @@ read_BaseScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
   ScreenDescription description;
   describe_BaseScreen(&description);
   if (!validateScreenBox(&box, description.cols, description.rows)) return 0;
-  memset(buffer, (mode == SCR_TEXT? ' ' : 0X07), box.width*box.height);
+  if (mode == SCR_TEXT) {
+    memcpy(buffer, text_BaseScreen+box.left, box.width);
+  } else {
+    memset(buffer, 0X07, box.width);
+  }
   return 1;
 }
 
