@@ -217,6 +217,11 @@ currentVirtualTerminal (void) {
   return currentScreen->currentvt();
 }
 
+int
+userVirtualTerminal (int number) {
+  return mainScreen.uservt(number);
+}
+
 
 int
 executeScreenCommand (int cmd) {

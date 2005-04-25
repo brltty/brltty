@@ -222,7 +222,7 @@ getPageCount_HelpScreen (void) {
 
 static int
 currentvt_HelpScreen (void) {
-  return 0;
+  return userVirtualTerminal(1);
 }
 
 static void

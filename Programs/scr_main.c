@@ -46,6 +46,11 @@ static void
 close_MainScreen (void) {
 }
 
+static int
+uservt_MainScreen (int number) {
+  return 1 + number;
+}
+
 void
 initializeMainScreen (MainScreen *main) {
   initializeBaseScreen(&main->base);
@@ -53,4 +58,5 @@ initializeMainScreen (MainScreen *main) {
   main->open = open_MainScreen;
   main->setup = setup_MainScreen;
   main->close = close_MainScreen;
+  main->uservt = uservt_MainScreen;
 }

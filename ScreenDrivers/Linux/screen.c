@@ -27,6 +27,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
+#include <linux/tty.h>
 #include <linux/vt.h>
 #include <linux/kd.h>
 
@@ -653,6 +654,11 @@ static void
 close_LinuxScreen (void) {
   closeConsole();
   closeScreen();
+}
+
+static int
+uservt_LinuxScreen (int number) {
+  return MAX_NR_CONSOLES + 1 + number;
 }
 
 static int
@@ -1429,6 +1435,7 @@ scr_initialize (MainScreen *main) {
   main->open = open_LinuxScreen;
   main->setup = setup_LinuxScreen;
   main->close = close_LinuxScreen;
+  main->uservt = uservt_LinuxScreen;
 
 #ifdef HAVE_LINUX_INPUT_H
   at2Keys = at2KeysOriginal;

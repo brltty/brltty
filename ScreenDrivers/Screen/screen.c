@@ -109,13 +109,18 @@ open_ScreenScreen (void) {
   return 0;
 }
 
+static int
+currentvt_ScreenScreen (void) {
+  return 0;
+}
+
 static void
 describe_ScreenScreen (ScreenDescription *description) {
   description->cols = shmAddress[0];
   description->rows = shmAddress[1];
   description->posx = shmAddress[2];
   description->posy = shmAddress[3];
-  description->no = 1;  /* not yet implemented */
+  description->no = currentvt_ScreenScreen();
 }
 
 static int
@@ -157,6 +162,7 @@ close_ScreenScreen (void) {
 static void
 scr_initialize (MainScreen *main) {
   initializeRealScreen(main);
+  main->base.currentvt = currentvt_ScreenScreen;
   main->base.describe = describe_ScreenScreen;
   main->base.read = read_ScreenScreen;
   main->open = open_ScreenScreen;

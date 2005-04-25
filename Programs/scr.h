@@ -84,6 +84,7 @@ extern int getPointer (int *, int *);
 extern int selectVirtualTerminal (int);
 extern int switchVirtualTerminal (int);
 extern int currentVirtualTerminal (void);
+extern int userVirtualTerminal (int number);
 extern int executeScreenCommand (int);
 
 /* Routines which apply to the main screen. */

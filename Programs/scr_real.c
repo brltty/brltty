@@ -44,9 +44,47 @@
 #define SCRCOMMENT ""
 #include "scr_driver.h"
 
+static const char *text_NoScreen = "no screen";
+
+static int
+uservt_NoScreen (int number) {
+  return 0 + number;
+}
+
+static int
+currentvt_NoScreen (void) {
+  return -1;
+}
+
+static void
+describe_NoScreen (ScreenDescription *description) {
+  description->rows = 1;
+  description->cols = strlen(text_NoScreen);
+  description->posx = 0;
+  description->posy = 0;
+  description->no = currentvt_NoScreen();
+}
+
+static int
+read_NoScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
+  ScreenDescription description;
+  describe_NoScreen(&description);
+  if (!validateScreenBox(&box, description.cols, description.rows)) return 0;
+  if (mode == SCR_TEXT) {
+    memcpy(buffer, text_NoScreen+box.left, box.width);
+  } else {
+    memset(buffer, 0X07, box.width);
+  }
+  return 1;
+}
+
 static void
 scr_initialize (MainScreen *main) {
   initializeMainScreen(main);
+  main->uservt = uservt_NoScreen;
+  main->base.currentvt = currentvt_NoScreen;
+  main->base.describe = describe_NoScreen;
+  main->base.read = read_NoScreen;
 }
 
 const ScreenDriver *
