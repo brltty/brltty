@@ -31,11 +31,6 @@ typedef enum {
   SCR_ATTRIB		/* get screen attributes */
 } ScreenMode;
 
-/* disp argument for selectDisplay() */
-#define LIVE_SCRN 0		/* read the physical screen */
-#define FROZ_SCRN 1		/* read frozen screen image */
-#define HELP_SCRN 2		/* read help screen */
-
 typedef struct {
   short rows, cols;	/* screen dimensions */
   short posx, posy;	/* cursor position */
@@ -70,7 +65,18 @@ typedef enum {
 /* Routines which apply to all screens. */
 extern void initializeAllScreens (const char *identifier, const char *driverDirectory);		/* close screen reading */
 extern void closeAllScreens (void);		/* close screen reading */
-extern int selectDisplay (int);		/* select display page */
+
+extern int isLiveScreen (void);
+
+extern int isFrozenScreen (void);
+extern int haveFrozenScreen (void);
+extern int activateFrozenScreen (void);
+extern void deactivateFrozenScreen (void);
+
+extern int isHelpScreen (void);
+extern int haveHelpScreen (void);
+extern int activateHelpScreen (void);
+extern void deactivateHelpScreen (void);
 
 /* Routines which apply to the current screen. */
 extern void describeScreen (ScreenDescription *);		/* get screen status */

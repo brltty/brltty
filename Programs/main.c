@@ -60,9 +60,8 @@ BrailleDisplay brl;                        /* For the Braille routines */
 short fwinshift;                /* Full window horizontal distance */
 short hwinshift;                /* Half window horizontal distance */
 short vwinshift;                /* Window vertical distance */
-ScreenDescription scr;                        /* For screen state infos */
-static short dispmd = LIVE_SCRN;        /* freeze screen on/off */
-static unsigned char infmode = 0;                /* display screen image or info */
+ScreenDescription scr;          /* For screen state infos */
+static unsigned char infmode = 0; /* display screen image or info */
 
 static int contracted = 0;
 #ifdef ENABLE_CONTRACTED_BRAILLE
@@ -296,22 +295,22 @@ setCoordinateAlphabetic (unsigned char *cell, int x, int y) {
 
 static void
 setStateLetter (unsigned char *cell) {
-  *cell = textTable[(p->showAttributes)? 'a':
-                    ((dispmd & FROZ_SCRN) == FROZ_SCRN)? 'f':
+  *cell = textTable[p->showAttributes? 'a':
+                    isFrozenScreen()? 'f':
                     p->trackCursor? 't':
                     ' '];
 }
 
 static void
 setStateDots (unsigned char *cell) {
-  *cell = ((dispmd & FROZ_SCRN) == FROZ_SCRN? BRL_DOT1: 0) |
-          (prefs.showCursor                 ? BRL_DOT4: 0) |
-          (p->showAttributes                ? BRL_DOT2: 0) |
-          (prefs.cursorStyle                ? BRL_DOT5: 0) |
-          (prefs.alertTunes                 ? BRL_DOT3: 0) |
-          (prefs.blinkingCursor             ? BRL_DOT6: 0) |
-          (p->trackCursor                   ? BRL_DOT7: 0) |
-          (prefs.slidingWindow              ? BRL_DOT8: 0);
+  *cell = (isFrozenScreen()    ? BRL_DOT1: 0) |
+          (prefs.showCursor    ? BRL_DOT4: 0) |
+          (p->showAttributes   ? BRL_DOT2: 0) |
+          (prefs.cursorStyle   ? BRL_DOT5: 0) |
+          (prefs.alertTunes    ? BRL_DOT3: 0) |
+          (prefs.blinkingCursor? BRL_DOT6: 0) |
+          (p->trackCursor      ? BRL_DOT7: 0) |
+          (prefs.slidingWindow ? BRL_DOT8: 0);
 }
 
 static void
@@ -320,7 +319,7 @@ setStatusCellsNone (unsigned char *status) {
 
 static void
 setStatusCellsAlva (unsigned char *status) {
-  if ((dispmd & HELP_SCRN) == HELP_SCRN) {
+  if (isHelpScreen()) {
     status[0] = textTable['h'];
     status[1] = textTable['l'];
     status[2] = textTable['p'];
@@ -351,7 +350,7 @@ setStatusCellsGeneric (unsigned char *status) {
   status[BRL_GSC_CSRCOL] = scr.posx+1;
   status[BRL_GSC_CSRROW] = scr.posy+1;
   status[BRL_GSC_SCRNUM] = scr.no;
-  status[BRL_GSC_FREEZE] = (dispmd & FROZ_SCRN) == FROZ_SCRN;
+  status[BRL_GSC_FREEZE] = isFrozenScreen();
   status[BRL_GSC_DISPMD] = p->showAttributes;
   status[BRL_GSC_SIXDOTS] = prefs.textStyle;
   status[BRL_GSC_SLIDEWIN] = prefs.slidingWindow;
@@ -366,7 +365,7 @@ setStatusCellsGeneric (unsigned char *status) {
   status[BRL_GSC_ATTRBLINK] = prefs.blinkingAttributes;
   status[BRL_GSC_CAPBLINK] = prefs.blinkingCapitals;
   status[BRL_GSC_TUNES] = prefs.alertTunes;
-  status[BRL_GSC_HELP] = (dispmd & HELP_SCRN) != 0;
+  status[BRL_GSC_HELP] = isHelpScreen();
   status[BRL_GSC_INFO] = infmode;
   status[BRL_GSC_AUTOREPEAT] = prefs.autorepeat;
   status[BRL_GSC_AUTOSPEAK] = prefs.autospeak;
@@ -381,7 +380,7 @@ static void
 setStatusCellsVoyager (unsigned char *status) {
   setNumberVertical(&status[0], p->winy);
   setNumberVertical(&status[1], scr.posy);
-  if ((dispmd & FROZ_SCRN) == FROZ_SCRN) {
+  if (isFrozenScreen()) {
     status[2] = textTable['F'];
   } else {
     setNumberVertical(&status[2], scr.posx);
@@ -428,7 +427,7 @@ showInfo (void) {
              prefs.showCursor? (prefs.blinkingCursor? 'B': 'v'):
                                (prefs.blinkingCursor? 'b': ' '),
              p->showAttributes? 'a': 't',
-             ((dispmd & FROZ_SCRN) == FROZ_SCRN)? 'f': ' ',
+             isFrozenScreen()? 'f': ' ',
              prefs.textStyle? '6': '8',
              prefs.blinkingCapitals? 'B': ' ');
     writeBrailleString(&brl, text);
@@ -440,7 +439,7 @@ showInfo (void) {
              prefs.showCursor? (prefs.blinkingCursor? 'B': 'v'):
                                (prefs.blinkingCursor? 'b': ' '),
              p->showAttributes? 'a': 't',
-             ((dispmd & FROZ_SCRN) == FROZ_SCRN) ?'f': ' ',
+             isFrozenScreen()? 'f': ' ',
              prefs.textStyle? '6': '8',
              prefs.blinkingCapitals? 'B': ' ');
 
@@ -985,7 +984,7 @@ main (int argc, char *argv[]) {
         static int repeatStarted = 0;
         int next = readBrailleCommand(&brl,
                                       infmode? BRL_CTX_STATUS:
-                                      ((dispmd & HELP_SCRN) == HELP_SCRN)? BRL_CTX_HELP:
+                                      isHelpScreen()? BRL_CTX_HELP:
                                       BRL_CTX_SCREEN);
         if (!prefs.autorepeat) repeatTimer = 0;
         if (!repeatTimer) repeatStarted = 0;
@@ -1457,9 +1456,9 @@ main (int argc, char *argv[]) {
             restartBrailleDriver();
             break;
           case BRL_CMD_PASTE:
-            if ((dispmd & HELP_SCRN) != HELP_SCRN && !routingProcess)
-              if (cutPaste())
-                break;
+            if (isLiveScreen() && !routingProcess) {
+              if (cutPaste()) break;
+            }
             playTune(&tune_command_rejected);
             break;
           case BRL_CMD_CSRJMP_VERT:
@@ -1541,15 +1540,16 @@ main (int argc, char *argv[]) {
           case BRL_CMD_TUNES:
             TOGGLE_PLAY(prefs.alertTunes);        /* toggle sound on/off */
             break;
-          case BRL_CMD_FREEZE: {
-            unsigned char frozen = (dispmd & FROZ_SCRN) != 0;
-            if (TOGGLE(frozen, &tune_screen_unfrozen, &tune_screen_frozen)) {
-              dispmd = selectDisplay(dispmd | FROZ_SCRN);
+          case BRL_CMD_FREEZE:
+            if (isLiveScreen()) {
+              playTune(activateFrozenScreen()? &tune_screen_frozen: &tune_command_rejected);
+            } else if (isFrozenScreen()) {
+              deactivateFrozenScreen();
+              playTune(&tune_screen_unfrozen);
             } else {
-              dispmd = selectDisplay(dispmd & ~FROZ_SCRN);
+              playTune(&tune_command_rejected);
             }
             break;
-          }
 
 #ifdef ENABLE_PREFERENCES_MENU
           case BRL_CMD_PREFMENU:
@@ -1568,19 +1568,14 @@ main (int argc, char *argv[]) {
             }
             break;
 
-          case BRL_CMD_HELP: {
-            unsigned char help = (dispmd & HELP_SCRN) != 0;
-            infmode = 0;        /* ... and not in info mode */
-            if (TOGGLE_NOPLAY(help)) {
-              dispmd = selectDisplay(dispmd | HELP_SCRN);
-              if (!(dispmd & HELP_SCRN)) { /* help screen selection successful */
-                message("help not available", 0);
-              }
-            } else {
-              dispmd = selectDisplay(dispmd & ~HELP_SCRN);
+          case BRL_CMD_HELP:
+            infmode = 0;
+            if (isHelpScreen()) {
+              deactivateHelpScreen();
+            } else if (!activateHelpScreen()) {
+              message("help not available", 0);
             }
             break;
-          }
           case BRL_CMD_INFO:
             TOGGLE_NOPLAY(infmode);
             break;

@@ -79,60 +79,48 @@ closeAllScreens (void) {
 }
 
 
-static int helpOpened;
-int
-selectDisplay (int disp) {
-  static int dismd = LIVE_SCRN;        /* current mode */
-  static int curscrn = LIVE_SCRN;        /* current display screen */
+typedef enum {
+  SCR_HELP   = 0X01,
+  SCR_FROZEN = 0X02
+} ActiveScreen;
+static ActiveScreen activeScreens = 0;
 
-  if ((disp & HELP_SCRN) ^ (dismd & HELP_SCRN))
-    {
-      if (disp & HELP_SCRN)
-        /* set help mode: */
-        {
-          if (!helpOpened) return dismd;
-          currentScreen = &helpScreen.base;
-          curscrn = HELP_SCRN;
-          return (dismd |= HELP_SCRN);
-        }
-      else
-        /* clear help mode: */
-        {
-          if (curscrn == HELP_SCRN)
-            dismd & FROZ_SCRN ? (currentScreen = &frozenScreen.base, curscrn = FROZ_SCRN) : \
-              (currentScreen = &mainScreen.base, curscrn = LIVE_SCRN);
-          return (dismd &= ~HELP_SCRN);
-        }
-    }
-  if ((disp & FROZ_SCRN) ^ (dismd & FROZ_SCRN))
-    {
-      if (disp & FROZ_SCRN)
-        {
-          if (frozenScreen.open(&mainScreen.base))
-            {
-              if (curscrn == LIVE_SCRN)
-                {
-                  currentScreen = &frozenScreen.base;
-                  curscrn = FROZ_SCRN;
-                }
-              return (dismd |= FROZ_SCRN);
-            }
-          else
-            return dismd;
-        }
-      else
-        {
-          if (curscrn == FROZ_SCRN)
-            {
-              frozenScreen.close();
-              currentScreen = &mainScreen.base;
-              curscrn = LIVE_SCRN;
-            }
-          return (dismd &= ~FROZ_SCRN);
-        }
-    }
-  return dismd;
+static void
+selectScreen (void) {
+  typedef struct {
+    ActiveScreen which;
+    BaseScreen *screen;
+  } ScreenEntry;
+  static const ScreenEntry screenEntries[] = {
+    {SCR_HELP  , &helpScreen.base},
+    {SCR_FROZEN, &frozenScreen.base},
+    {0         , &mainScreen.base}
+  };
+  const ScreenEntry *entry = screenEntries;
+  while (entry->which) {
+    if (entry->which & activeScreens) break;
+    ++entry;
+  }
+  currentScreen = entry->screen;
 }
+
+static void
+activateScreen (ActiveScreen which) {
+  activeScreens |= which;
+  selectScreen();
+}
+
+static void
+deactivateScreen (ActiveScreen which) {
+  activeScreens &= ~which;
+  selectScreen();
+}
+
+int
+isLiveScreen (void) {
+  return currentScreen == &mainScreen.base;
+}
+
 
 int
 validateScreenBox (const ScreenBox *box, int columns, int rows) {
@@ -151,7 +139,6 @@ describeScreen (ScreenDescription *description) {
   currentScreen->describe(description);
 }
 
-
 int
 readScreen (short left, short top, short width, short height, unsigned char *buffer, ScreenMode mode) {
   ScreenBox box;
@@ -162,12 +149,10 @@ readScreen (short left, short top, short width, short height, unsigned char *buf
   return currentScreen->read(box, buffer, mode);
 }
 
-
 int
 insertKey (ScreenKey key) {
   return currentScreen->insert(key);
 }
-
 
 int
 insertCharacters (const char *characters, int count) {
@@ -182,12 +167,10 @@ insertString (const char *string) {
   return insertCharacters(string, strlen(string));
 }
 
-
 int
 routeCursor (int column, int row, int screen) {
   return currentScreen->route(column, row, screen);
 }
-
 
 int
 setPointer (int column, int row) {
@@ -199,18 +182,15 @@ getPointer (int *column, int *row) {
   return currentScreen->pointer(column, row);
 }
 
-
 int
 selectVirtualTerminal (int vt) {
   return currentScreen->selectvt(vt);
 }
 
-
 int
 switchVirtualTerminal (int vt) {
   return currentScreen->switchvt(vt);
 }
-
 
 int
 currentVirtualTerminal (void) {
@@ -221,7 +201,6 @@ int
 userVirtualTerminal (int number) {
   return mainScreen.uservt(number);
 }
-
 
 int
 executeScreenCommand (int cmd) {
@@ -238,7 +217,6 @@ const char *
 getScreenDriverCode (void) {
   return screenDriver->code;
 }
-
 
 int
 openMainScreen (char **parameters) {
@@ -265,12 +243,10 @@ openRoutingScreen (void) {
   return mainScreen.open();
 }
 
-
 void
 describeRoutingScreen (ScreenDescription *desscription) {
   mainScreen.base.describe(desscription);
 }
-
 
 void
 closeRoutingScreen (void) {
@@ -278,11 +254,34 @@ closeRoutingScreen (void) {
 }
 
 
+static int helpOpened = 0;
+
+int
+isHelpScreen (void) {
+  return currentScreen == &helpScreen.base;
+}
+
+int
+haveHelpScreen (void) {
+  return (activeScreens & SCR_HELP) != 0;
+}
+
+int
+activateHelpScreen (void) {
+  if (!helpOpened) return 0;
+  activateScreen(SCR_HELP);
+  return 1;
+}
+
+void
+deactivateHelpScreen (void) {
+  deactivateScreen(SCR_HELP);
+}
+
 int
 openHelpScreen (const char *file) {
   return helpOpened = helpScreen.open(file);
 }
-
 
 void
 closeHelpScreen (void) {
@@ -292,20 +291,43 @@ closeHelpScreen (void) {
   }
 }
 
-
 void
 setHelpPageNumber (short page) {
   helpScreen.setPageNumber(page);
 }
-
 
 short
 getHelpPageNumber (void) {
   return helpScreen.getPageNumber();
 }
 
-
 short
 getHelpPageCount (void) {
   return helpScreen.getPageCount();
+}
+
+
+int
+isFrozenScreen (void) {
+  return currentScreen == &frozenScreen.base;
+}
+
+int
+haveFrozenScreen (void) {
+  return (activeScreens & SCR_FROZEN) != 0;
+}
+
+int
+activateFrozenScreen (void) {
+  if (haveFrozenScreen() || !frozenScreen.open(&mainScreen.base)) return 0;
+  activateScreen(SCR_FROZEN);
+  return 1;
+}
+
+void
+deactivateFrozenScreen (void) {
+  if (haveFrozenScreen()) {
+    frozenScreen.close();
+    deactivateScreen(SCR_FROZEN);
+  }
 }
