@@ -56,12 +56,12 @@ int messageDelay = DEFAULT_MESSAGE_DELAY;
  * Misc param variables
  */
 Preferences prefs;                /* environment (i.e. global) parameters */
+static unsigned char infoMode = 0; /* display screen image or info */
+
 BrailleDisplay brl;                        /* For the Braille routines */
 short fwinshift;                /* Full window horizontal distance */
 short hwinshift;                /* Half window horizontal distance */
 short vwinshift;                /* Window vertical distance */
-ScreenDescription scr;          /* For screen state infos */
-static unsigned char infmode = 0; /* display screen image or info */
 
 static int contracted = 0;
 #ifdef ENABLE_CONTRACTED_BRAILLE
@@ -106,7 +106,8 @@ typedef struct {
   ScreenMark marks[0X100];
 } ScreenState;
 static const ScreenState initialScreenState = {
-  DEFAULT_TRACK_CURSOR, DEFAULT_HIDE_CURSOR, 0,
+  DEFAULT_TRACK_CURSOR, DEFAULT_HIDE_CURSOR,
+  0, /* showAttributes */
   0, 0, /* winx/y */
   0, 0, /* motx/y */
   0, 0, /* trkx/y */
@@ -122,6 +123,7 @@ static const ScreenState initialScreenState = {
 static ScreenState **screenStates = NULL;
 static int screenCount = 0;
 static ScreenState *p;
+ScreenDescription scr;          /* For screen state infos */
 
 static void
 updateScreenAttributes (void) {
@@ -366,7 +368,7 @@ setStatusCellsGeneric (unsigned char *status) {
   status[BRL_GSC_CAPBLINK] = prefs.blinkingCapitals;
   status[BRL_GSC_TUNES] = prefs.alertTunes;
   status[BRL_GSC_HELP] = isHelpScreen();
-  status[BRL_GSC_INFO] = infmode;
+  status[BRL_GSC_INFO] = infoMode;
   status[BRL_GSC_AUTOREPEAT] = prefs.autorepeat;
   status[BRL_GSC_AUTOSPEAK] = prefs.autospeak;
 }
@@ -983,7 +985,7 @@ main (int argc, char *argv[]) {
         static int repeatTimer = 0;
         static int repeatStarted = 0;
         int next = readBrailleCommand(&brl,
-                                      infmode? BRL_CTX_STATUS:
+                                      infoMode? BRL_CTX_STATUS:
                                       isHelpScreen()? BRL_CTX_HELP:
                                       BRL_CTX_SCREEN);
         if (!prefs.autorepeat) repeatTimer = 0;
@@ -1569,7 +1571,7 @@ main (int argc, char *argv[]) {
             break;
 
           case BRL_CMD_HELP:
-            infmode = 0;
+            infoMode = 0;
             if (isHelpScreen()) {
               deactivateHelpScreen();
             } else if (!activateHelpScreen()) {
@@ -1577,7 +1579,7 @@ main (int argc, char *argv[]) {
             }
             break;
           case BRL_CMD_INFO:
-            TOGGLE_NOPLAY(infmode);
+            TOGGLE_NOPLAY(infoMode);
             break;
 
 #ifdef ENABLE_LEARN_MODE
@@ -2069,7 +2071,7 @@ main (int argc, char *argv[]) {
       oldwiny = p->winy;
     }
 
-    if (infmode) {
+    if (infoMode) {
       showInfo();
     } else {
       brl.cursor = -1;
