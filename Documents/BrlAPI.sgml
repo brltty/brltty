@@ -487,13 +487,13 @@ first:
 
 <tscreen><code>
  fprintf(stderr,"Taking control of the tty... ");
- if (brlapi_getTty(0,BRLCOMMANDS)>=0)
+ if (brlapi_getTty(-1,NULL)>=0)
  {
   printf("Ok\n");
 </code></tscreen>
 
 The first parameter tells the server the number of the tty to take
-control of. Setting 0 lets the library determine it for us.
+control of. Setting -1 lets the library determine it for us.
 
 <p>The server is asked to send <em/brltty/ commands, which are device-independent.
 
@@ -612,7 +612,7 @@ int main()
 
 /* Get tty control */
  printf("Taking control of the tty... ");
- if (brlapi_getTty(0,BRLCOMMANDS)>=0)
+ if (brlapi_getTty(-1,NULL)>=0)
  {
   printf("Ok\n");
 
@@ -980,7 +980,7 @@ are transmitted this way:
 <p>
 The size does not include the { size, type } header, so that packets which
 don't need any data have a size of 0 byte. The type of the packet can be
-either of <tt/BRLPACKET_*/ constants defined in <tt/api.h/. Each type of
+either of <tt/BRLPACKET_*/ constants defined in <tt/api_protocol.h/. Each type of
 packet will be further discussed below.
 
 <p>
@@ -1117,12 +1117,14 @@ size. The returned data are two integers: width and then height.
 <sect2><tt/BRLPACKET_GETTTY/ (see <em/brlapi_getTty()/)
 <p>
 This should be sent by the client to get control of a tty. Sent data are
-first a series of integers: the numbers of ttys that leads to the tty that
+first a series of integers: the first one gives the number of following
+integers, which are the numbers of ttys that leads to the tty that
 the application wants to take control of (it can be empty if the tty is 
-one of the machine's VT). Then comes an integer telling the number of the tty
-to get control of, and finaly
-how key presses should be sent: either <tt/BRLKEYCODES/ or <tt/BRLCOMMANDS/.
-This packet is then acknowledged by the server.
+one of the machine's VT). The last integer of this series tells the number of
+the tty to get control of. Finaly, how key presses should be reported is sent:
+either a driver name or "", preceded by the number of caracters in the driver
+name (0 in the case of ""), as an unsigned byte. This packet is then
+acknowledged by the server.
 
 <sect2><tt/BRLPACKET_KEY/ (see <em/brlapi_readKey()/)
 <p>
@@ -1133,16 +1135,6 @@ was pressed on the braille terminal, hopefuly).
 The data holds the key or command code
 as an integer, depending on what has been request in the
 <tt/BRLPACKET_GETTTY/ packet.
-
-<sect2><tt/BRLPACKET_SETFOCUS/ (see <em/brlapi_setFocus()/)
-
-<p>
-For the server to know which tty is active, one particular client is responsible
-for sending <tt/BRLPACKET_SETFOCUS/ packets. They hold a single integer telling
-the new current tty. For instance, when running an X server on VT7, the
-<tt/xbrlapi/ client would have sent a <tt/BRLPACKET_GETTTY(7)/ and will send
-window IDs whenever X focus changes, allowing display and keypresses switching
-between xterms.
 
 <sect2><tt/BRLPACKET_SETFOCUS/ (see <em/brlapi_setFocus()/)
 
@@ -1189,15 +1181,14 @@ flag weight):
 <item> A display number can be given as a integer, in case the braille
 display has several. If not given, usual display is used.
 <item> A region can be given as two integers indicating the beginning and the
-end of the part of the braille display which is to be updated (included),
-the first cell of the display being numberd 1. If not given, the whole display
+number of characters of the part of the braille display which is to be updated,
+the first cell of the display being numbered 1. If not given, the whole display
 is considered to be updated (and hence the following three fields should exactly
 fit the braille display ie hold <em/height/*<em/width/
-bytes, where <em/height/ and <em/width/ must be get by sending a
+bytes, where <em/height/ and <em/width/ must be got by sending a
 <tt/BRLPACKET_GETDISPLAYSIZE/ packet.
-<item> The text to display can then be given, one byte per caracter, expected to
-be encoded in latin-1 (an extension to the bitfield may set other encodings
-some day).
+<item> The text to display can then be given, preceded by its size in bytes
+expressed in an unsigned byte.
 <item> Then an AND field can be given, one byte per character: the 8-dot
 representation of the above text will be AND-ed with this field, hence allowing
 to erase some unwanted parts of characters.
@@ -1205,9 +1196,14 @@ to erase some unwanted parts of characters.
 result of the AND operation above (or the 8-dot representation of the text if
 no AND operation was performed) is OR-ed with this field, hence allowing
 to set some dots, to underline characters for instance.
-<item> Last but not least, a cursor position can be specified. 1 representing
+<item> A cursor position can be specified. 1 representing
 the first character of the display, 0 turning the cursor off. If not given,
 the cursor (if any) is left unmodified.
+<item> Last but not least, the charset of the text can be specified. If it is
+not, an 8-bit charset is assumed, and it is assumed to be the same as the
+server's. Multibyte charsets may be used, AND and OR fields' bytes will
+correspond to each text's wide <em/character/, be it a composing or a
+double-width character.
 </itemize>
 
 <sect2><tt/BRLPACKET_GETRAW/ (see <em/brlapi_getRaw()/)
