@@ -89,7 +89,7 @@ which directly accesses a refreshable braille display.
 %setup -n @PACKAGE_NAME@-@PACKAGE_VERSION@
 
 %build
-%configure --with-install-root="${RPM_BUILD_ROOT}" --without-flite --without-mikropuhe --without-theta --without-viavoice --without-curses --without-x
+%configure --with-install-root="${RPM_BUILD_ROOT}" --without-flite --without-mikropuhe --without-swift --without-theta --without-viavoice --without-curses --without-x
 make
 
 directory="doc"
@@ -135,13 +135,14 @@ rm -fr "${RPM_BUILD_ROOT}"
 %doc Documents/BrlAPIref-HTML
 
 %changelog
-* Tue Feb 22 2005 Dave Mielke <dave@mielke.cc> 3.6.2
+* Tue May 5 2005 Dave Mielke <dave@mielke.cc> 3.6.2
 -  French braille uses dots 348 for the inverted question mark.
 -  Don't build the TTY and XWindow drivers when braillifying a boot image.
 -  If mcookie isn't available then use /dev/urandom or /dev/random to generate the API key.
 -  The shared memory screen driver should primarily use a per user segment.
 -  Update the screen patch to generate a per-user shared memory key.
 -  Some platforms don't define PF_LOCAL.
+-  Add the Swift speech synthesizer driver.
 -  FreedomScientific braille driver changes:
       Add support for the Focus 2 series (40 and 80).
 -  VisioBraille braille driver changes:
@@ -151,6 +152,7 @@ rm -fr "${RPM_BUILD_ROOT}"
 -  Mikropuhe speech driver changes:
       Lock the mutex while calling pthread_cond_signal().
       Check for already enqueued speech before the first wait.
+      The mute method can hang brltty.
 -  API changes:
       The flags and protocol version fields weren't being maintained in network byte order.
       brlapi_writeFile() and brlapi_readFile() are only for use within api_common.c.

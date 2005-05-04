@@ -12,7 +12,7 @@
     <name>Stéphane Doyon <tt><htmlurl url="mailto:s.doyon@videotron.ca" name="&lt;s.doyon@videotron.ca&gt;"></tt>
   <and>
     <name>Dave Mielke <tt><htmlurl url="mailto:dave@mielke.cc" name="&lt;dave@mielke.cc&gt;"></tt>
-  <date>Version 3.6.2, February 2005
+  <date>Version 3.6.2, May 2005
   <abstract>
     Copyright &copy; 1995-2004 by The BRLTTY Team - All Rights Reserved.
     BRLTTY is free software,
@@ -618,6 +618,21 @@ for any additional display-specific instructions.
         <tt>/usr/local</>,
         or <tt>/opt/mikropuhe</>.
         This is equivalent to specifying <tt/--with-mikropuhe/.
+    </descrip>
+  <tag><tt/--with-swift=/<em/directory/<label id="build-swift"></tag>
+    Specify the installed location of the Swift text-to-speech package,
+    and build the Swift speech synthesizer driver.
+    Any of the following words can also be used as the operand of this option:
+    <descrip>
+      <tag/no/
+        Don't build the driver.
+        This is equivalent to specifying <tt/--without-swift/.
+      <tag/yes/
+        Build the driver if the package can be found in
+        <tt>/usr</>,
+        <tt>/usr/local</>,
+        or <tt>/opt/swift</>.
+        This is equivalent to specifying <tt/--with-swift/.
     </descrip>
   <tag><tt/--with-theta=/<em/directory/<label id="build-theta"></tag>
     Specify the installed location of the Theta text-to-speech package,
@@ -4333,6 +4348,8 @@ BRLTTY supports the following speech synthesizers:
       |pipes to /usr/local/bin/say@
     Mikropuhe
       |text to speech engine@
+    Swift
+      |text to speech engine@
     Theta
       |text to speech engine@
     ViaVoice
@@ -4364,6 +4381,7 @@ BRLTTY supports the following speech synthesizers:
     mp|Mikropuhe@
     no|no driver@
     pm|Papenmeier@
+    sw|Swift@
     th|Theta@
     ts|Telesensory Systems Inc.@
     tt|TTY@

@@ -1,0 +1,17 @@
+This directory contains the BRLTTY speech driver for the Swift text to speech
+engine from Cepstral [http://www.cepstral.com/]. It was implemented, and is
+being maintained, by Dave Mielke <dave@mielke.cc>.
+
+BRLTTY's configure script automatically includes this driver if Swift has been
+installed. The default is to check the directories /usr, /usr/local,
+/usr/local/Swift, /usr/local/swift, /opt/Swift, and /opt/swift. The actual
+location can be explicitly specified via --with-swift.
+
+This driver recognizes the following parameters:
+
+   Parameter Settings
+   name      name (human), /path/to/directory
+
+If the human name of the voice is specified then it is interpreted as a Swift
+voice directory if it begins with a slash and as a subdirectory of
+$SWIFT_HOME/voices/ if it doesn't.

@@ -2,7 +2,7 @@ BRLTTY is a background process (daemon) providing access to the Linux/Unix
 console (when in text mode) for a blind person using a refreshable braille
 display.
 
-Version 3.6.2, February 2005
+Version 3.6.2, May 2005
 
 Copyright (C) 1995-2004 by The BRLTTY Team - All Rights Reserved.
 
@@ -174,6 +174,7 @@ The following speech synthesizers are supported:
 -  FestivalLite [text to speech engine]
 -  GenericSay [pipes to /usr/local/bin/say]
 -  Mikropuhe [text to speech engine]
+-  Swift [text to speech engine]
 -  Theta [text to speech engine]
 -  ViaVoice [text to speech engine]
 
