@@ -142,15 +142,22 @@ rm -fr "${RPM_BUILD_ROOT}"
 -  The shared memory screen driver should primarily use a per user segment.
 -  Update the screen patch to generate a per-user shared memory key.
 -  Some platforms don't define PF_LOCAL.
+-  BRL_CMD_LNEND is broken when the display sticks out to the right of the screen.
 -  Updated big5 contraction table.
 -  The feature list now states that French contracted braille is provided.
 -  Add the Swift speech synthesizer driver.
+   BrailleLite braille driver changes:
+      Clarify the help for advance bar combinations and whiz wheels.
 -  EuroBraille braille driver changes:
       Corrected several bugs in write/read operations.
       Corrected several key bugs on Iris models.
 -  FreedomScientific braille driver changes:
       Add support for the Focus 2 series (40 and 80).
       Add support for the PacMate 80.
+   Papenmeier braille driver changes:
+      Add support for the EL+ 80.
+      Add support for the second row of routing keys.
+      Give the four protocol II models we support their proper names.
 -  VisioBraille braille driver changes:
       Return NOOP rather than EOF when CTRL or ALT is pressed.
       Bind a key to BRL_CMD_LEARN.
