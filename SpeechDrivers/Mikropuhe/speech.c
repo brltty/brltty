@@ -220,14 +220,19 @@ synthesizeSpeech (const unsigned char *bytes, int length, int tags) {
 }
 
 static void
+synthesizeSpeechSegment (const SpeechSegment *segment) {
+  synthesizeSpeech((unsigned char *)(segment+1), segment->length, segment->tags);
+}
+
+static void
 synthesizeSpeechSegments (void) {
   SpeechSegment *segment;
   while ((segment = dequeueItem(speechQueue))) {
     if (segment->tags) {
-      synthesizeSpeech((unsigned char *)(segment+1), segment->length, segment->tags);
+      synthesizeSpeechSegment(segment);
     } else if (synthesisThreadStarted && openSoundDevice()) {
       pthread_mutex_unlock(&speechMutex);
-      synthesizeSpeech((unsigned char *)(segment+1), segment->length, segment->tags);
+      synthesizeSpeechSegment(segment);
       pthread_mutex_lock(&speechMutex);
     }
     deallocateSpeechSegment(segment);
@@ -236,7 +241,7 @@ synthesizeSpeechSegments (void) {
 
 static int
 awaitSpeechSegment (void) {
-  while (1) {
+  while (synthesisThreadStarted) {
     int error;
 
     if (pcm) {
@@ -263,6 +268,7 @@ awaitSpeechSegment (void) {
         return 0;
     }
   }
+  return 0;
 }
 
 static void *
