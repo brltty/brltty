@@ -9,9 +9,9 @@ name="&lt;Sebastien.Hinderer@ens-lyon.org&gt;"></tt><newline></name>
 <name>Samuel Thibault <tt><htmlurl url="mailto:Samuel.Thibault@ens-lyon.org"
 name="&lt;Samuel.Thibault@ens-lyon.org&gt;"></tt><newline></name>
 </author>
-<date>V1.2, July 2004
+<date>V1.3, May 2005
 <abstract>
-This document describes how to use <tt>BrlAPI</tt>.
+This document describes <tt>BrlAPI</tt>.
 </abstract>
 <toc>
 
@@ -21,7 +21,7 @@ This document describes how to use <tt>BrlAPI</tt>.
 -->
 
 <!---->
-<sect>Introduction
+<sect>Introduction<label id="sec-intro">
 <!---->
 <!-- Seb -->
 <!-- an introduction explaining very briefly what BrlAPI does, the
@@ -103,6 +103,11 @@ functionalities of the driver's communication protocol.
 The part of <em/brltty/ that controls incoming connections and communication
 between clients and braille drivers.
 
+<tag/Tty/
+Synonym for console, terminal, ...  Linux' console consist of several Virtual
+Ttys (VTs).  The screen program's windows also are Ttys.  X-window system's
+xterms emulate Ttys as well.
+
 </descrip>
 
 <sect1>How to read this manual
@@ -111,7 +116,7 @@ between clients and braille drivers.
 
 <descrip>
 
-<tag/General description/
+<tag><ref id="sec-general" name="General description"></tag>
 Describes more precisely what <em/BrlAPI/
 is and how it works in collaboration with <em/brltty/'s core, the braille driver
 and clients. In this part, a "connection-use-disconnection" scenario
@@ -119,23 +124,27 @@ will be described step by step, explaining for each step what <em/BrlAPI/ does i
 reaction to client instructions. These explanations will take place at a
 user level.
 
-<tag/Installation and configuration/
+<tag><ref id="sec-concurrency" name="Concurrency management"></tag>
+This part explains how concurrency between <em/BrlAPI/ clients is handled
+thanks to focus tellers.
+
+<tag><ref id="sec-install" name="Installation and configuration"></tag>
 This part explains in detail how to install and configure the API. For
 instructions on how to install and configure <em/brltty/, please report to
 the <em/brltty/ documentation.
 
-<tag/Library description/
+<tag><ref id="sec-library" name="Library description"></tag>
 This part describes how client applications
 can communicate with the server using the <em/BrlAPI/ library that
 comes with <em/brltty/. Each function will be briefly described,
 classified by categories. More exhaustive descriptions of every
 function are available in the corresponding online manual pages.
 
-<tag/Writing braille drivers/
+<tag><ref id="sec-drivers" name="Writing braille drivers"></tag>
 This part describes how the braille drivers included in <em/brltty/ should be
 written in order to take advantage of <em/BrlAPI/'s services.
 
-<tag/Protocol reference/
+<tag><ref id="sec-protocol" name="Protocol reference"></tag>
 This part describes in detail the communication
 protocol that is used to communicate between server and clients.
 
@@ -144,26 +153,28 @@ protocol that is used to communicate between server and clients.
 What should be read probably depends on what should be done by applications with
 <em/BrlAPI/.
 
-Reading chapters 2 and 3 is recommended, since they provide useful
-information and (hopefully) lead to a good understanding of <em/BrlAPI/,
+Reading chapters <ref id="sec-general" name="General description">, <ref
+id="sec-concurrency" name="Concurrency management"> and <ref id="sec-install"
+name="Installation and configuration"> is recommended, since they provide
+useful information and (hopefully) lead to a good understanding of <em/BrlAPI/,
 for an efficient use.
 
-Chapter 4 concerns writing applications that take advantage of
-braille terminals so as to bring specific (and more useful) information to 
-blind people.
+Chapter <ref id="sec-library" Name="Library description"> concerns writing
+applications that take advantage of braille terminals so as to bring specific
+(and more useful) information to blind people.
 
-Chapter 5 is for braille driver implementation: either adding a braille driver
+Chapter <ref id="sec-drivers" Name="Drivers"> is for braille driver implementation: either adding a braille driver
 to <em/brltty/ or modifying an existing one so that it can benefit from
 <em/BrlAPI/'s features, this chapter will be of interest, since it describes
 exactly what is needed to write a driver for <em/brltty/: the core
 of drivers interface for instance.
 
-Finally, Chapter 6 is for <em/not using/ the library, but using the <em/BrlAPI/
+Finally, chapter <ref id="sec-protocol" Name="Protocol reference"> is for <em/not using/ the library, but using the <em/BrlAPI/
 server directly, when the library might not be sufficient: it describes the
 underlying protocol that will have to be used to do so.
 
 <!---->
-<sect>General description of <em/BrlAPI/
+<sect>General description of <em/BrlAPI/<label id="sec-general">
 <!---->
 <!-- a general documentation, which explains the issue and the design we
 chose to handle it -->
@@ -171,7 +182,7 @@ chose to handle it -->
 <p>Here is explained what <em/BrlAPI/ is, and what it precisely does.
 These explanations should be simple enough to be accessible to every user.
 For a more technical review of <em/BrlAPI/'s functionalities, please see chapter
-4.
+<ref id="sec-library" name="Libary description">.
 
 <sect1>Historical notes.
 
@@ -257,7 +268,7 @@ read permissions on this file to users that are allowed to
 communicate with the braille terminal, and only to them. This
 way, only authorized users will have access to the
 authentication key and then be able to send it to <em/BrlAPI/.
-To see how to do that, please see chapter 3.
+To see how to do that, please see chapter <ref id="sec-install" name="Installation and configuration">.
 
 At the end of this step, the user is authorized to take
 control of the braille terminal. On <em/brltty/'s side, some data
@@ -281,11 +292,6 @@ file transfer), it will enter what is called "raw mode".
 display or to process braille keys itself, rather than letting
 <em/brltty/ process them, it has to take control of the Linux
 terminal it is running on.
-
-Each Linux terminal (tty) can be controlled by at most one
-application at a time,
-that's why <em/BrlAPI/ will honnor a valid tty control request if
-and only if no other application already controls this tty.
 
 Once a client has obtained the control of his tty, <em/BrlAPI/
 will completely discard <em/brltty/'s display on this tty (and only
@@ -339,7 +345,7 @@ concerning the ability to deliver/convert keycodes into
 commands: not every driver has this ability, it has to be
 modified to get it.
 
-<item>Operations described in 3.1 and 3.2 can be repeated.
+<item>Operations previously described can be repeated.
 You can, for instance, use raw mode to transfer data onto
 your braille terminal, display text in braille, return to raw
 mode..., all that without having to reconnect to <em/BrlAPI/ before
@@ -356,9 +362,175 @@ another client. This step is transparent for the user, in the
 sense that it involves no change on the braille display.
 
 
+<!---->
+<sect>Concurrency management between <em/BrlAPI/ clients<label id="sec-concurrency">
+<!---->
+<!-- Sam -->
+<!-- explain focus tellers, tty tree, & co -->
+
+<p>
+An essential purpose of <em/BrlAPI/ is to manage concurrent access to the
+braille display between the <em/brltty/ daemon and applications. This
+concurrency is managed "per Tty". We first describe this with a flat view, and
+then consider Tty hierarchy.
+
+<sect1>VT switching
+
+<p>
+Let's first describe how things work with the simple case of a single series of
+Virtual Ttys (VTs), the linux console for instance.
+
+<p>
+As described in <ref id="sec-general" name="General Description">, before being able
+to write output, a <em/BrlAPI/ client has to "get" a tty, i.e. it sends to the
+<em/BrlAPI/ server the number of the linux' Virtual Tty on which it is running.
+The <em/BrlAPI/ server uses this information so as to know which client's output
+should be shown on the braille display, according to the focus teller's
+information.
+
+<p>
+Let's say some client <em/A/ is running on VT 2.  It "got" VT 2 and wrote some
+output on its <em/BrlAPI/ connection.  The focus teller is <em/brltty/ here: it
+always tells to the <em/BrlAPI/ server which VT is currently shown on the screen
+and gets usual keyboard presses (it is "active").
+
+<p>
+Let's say VT 1 is active, then the <em/BrlAPI/ server shows <em/brltty/'s output
+on the braille display.  I.e. the usual <em/brltty/ screen reading appears.
+Moreover, when braille keys are pressed, they are passed to <em/brltty/, so that
+usual screen reading can be performed.  When the user switches to VT 2,
+<em/brltty/ (as focus teller) tells it to the <em/BrlAPI/ server, which then
+remembers that client <em/A/ has got it and has produced some output.  The
+server then displays this output on the braille display.  Note that <em/A/
+doesn't need to re-submit its output: the server had recorded it so as to be
+able to show it as soon as the focus switches to VT 2.  Whenever some key of the
+braille device is pressed, <em/BrlAPI/ looks whether it is in the list of keys
+that client <em/A/ said to be of his interest.  If it is, it is passed to <em/A/
+(and not to <em/brltty/). If it isn't, it is passed to <em/brltty/ (and not to
+<em/A/).
+
+<p>
+As a consequence, whenever clients get and release Ttys and the user switches
+between Ttys, either the <em/brltty/ screen reading or the client's output is
+automatically shown according to rather natural rules.
+
+<sect1>A pile of "paper sheets"
+
+Let's look at VT 2 by itself. What is shown on the braille display can be seen
+as the result of a pile of two paper sheets.  <em/brltty/ is represented by the
+bottom sheet on which its screen reading is written, and client <em/A/ by the
+top sheet on which its output is written. <em/A/'s sheet hence "covers"
+<em/brltty/'s sheet: <em/A/'s output "mask" <em/brltty/'s screen reading.
+
+<p>
+<em/A/ may yet want to temporarily let <em/brltty/'s screen reading appear on VT
+2, while still receiving some key presses, for instance.  For this, it sends a
+"void" write.  The server then clears the recorded output for this connection
+(in the sheet representation, the sheet becomes "transparent").  As a
+consequence, <em/brltty/'s output is automatically shown (by transparency in the
+sheet representation), just like if <em/A/ had released the Tty.
+
+<p>
+Keypresses are handled in a similar way: <em/A/'s desire to get key presses is
+satisfied first before <em/brltty/.
+
+<p>
+Let's say some other client <em/B/ (probably launched by <em/A/) also gets VT 2
+and outputs some text on its <em/BrlAPI/ connection.  This adds a third sheet,
+on top of the two previous ones.  It means that the <em/BrlAPI/ server will show
+<em/B/'s output on the braille device.  If <em/A/ then outputs some text, the
+server will record it (on <em/A/'s sheet which hence becomes opaque again), but
+it won't be displayed on the braille device, since <em/B/'s sheet is still at
+the top and opaque (i.e. with some text on it).  But if <em/B/ issues a void
+write, the server clears its ouput buffer (i.e. <em/B/'s sheet becomes
+transparent), and as a result <em/A/'s output appear on the braille display (by
+transparency through <em/B/'s sheet).
+
+<p>
+The sheet order is determined by the Tty "get"ting order. Some mecanism will be
+added in near future for clients to precise "at which level its sheet should be
+inserted" so as to avoid race conditions on the "get"ting order.
+
+<sect1>Hierarchy
+
+<p>
+Now, what happens when running some <em/screen/ program on, say, VT 3?  It
+emulates a series of Ttys, whose output actually appear on the same VT 3.
+That's where a hierarchy level appears: the focus information is not only the VT
+number but also, in the case of VT 3, which <em/screen/ window is active.  This
+hence forms a <em/tree/ of Ttys: the "root" being the vga driver's output, whose
+sons are VTs, and VT 3 has the <em/screen/ windows as sons.  <em/Brltty/ is a
+focus teller for the root, <em/screen/ will have to be a focus teller for VT 3.
+<em/Screen/ should then get VT 3, not display anything (so that the usual
+<em/brltty/ screen reading will be shown by transparency), and tell the
+<em/BrlAPI/ server which <em/screen/ window is active (at startup and at each
+window switch).  This is not implemented directly in <em/screen/ yet, but this
+may be achieved via a second <em/brltty/ daemon running the Screen driver (but
+it isn't yet able to get the current window number though) and the <em/BrlAPI/
+driver.
+
+<p>
+A <em/BrlAPI/ client <em/C/ running in some <em/screen/ window number 1 would
+then have to get the Tty path "VT 3 then window 1", which is merely expressed as
+"3 1".  The window number is available in the <tt/WINDOW/ environment variable,
+set by <em/screen/. The VT number, which actually represents the "path to
+screen's output" should be available in the <tt/WINDOWSPATH/ environment
+variable, also set by <em/screen/.  The client can thus merely concatenates the
+content of <tt/WINDOWSPATH/ (which could hold many levels of window numbers) and
+of <tt/WINDOW/ and give the result as tty path to the <em/BrlAPI/ server, which
+then knows precisely where the client's usual output resides.
+
+<p>
+Whenever the user switches to VT 3, the <em/BrlAPI/ server remembers the window
+that <em/screen/ told to be active.  If it was window 1, it then displays
+<em/C/'s output (if any).  Else <em/brltty/'s usual screen reading is shown.
+Of course, several clients may be run in window 1 as well, and the "sheet pile"
+mecanism applies: <em/brltty/'s sheet first (at the root of the Ttys tree), then
+<em/screen/'s sheet (which is transparent, on VT 3), then <em/C/'s sheet (on
+window 1 of VT 3), then other clients' sheets (on the same window).
+
+<p>
+Ttys are hence organized in a tree, each client adding its sheet at some tty in
+the tree.
+
+<sect1>The X-window case
+
+<p>
+Let's say some X server is running on VT 7.  The user should also launch
+<em/xbrlapi/, which is a focus teller for X-window as well as a keyboard
+simulator (<em/brltty/ can't reliably simulate them at the kernel level in such
+situation).  For accessing AT-SPI contents (like gnome or kde applications),
+gnopernicus should also be launched.  For accessing AT-SPI terminals (like
+gnome-terminal), a second <em/brltty/ daemon running the at-spi screen driver
+and the <em/BrlAPI/ driver should also be launched.  All three would get VT 7,
+in that order (for now): <em/xbrlapi/ first, then <em/gnopernicus/ and
+<em/brltty/ at last.  When the X focus is on an AT-SPI terminal, <em/brltty/
+will hence be able to grab the braille display and key presses.  Else
+<em/gnopernicus/ would get them.  And <em/xbrlapi/ would finally get remaining
+key presses and simulate them.
+
+<p>
+The user should also set in his <tt>~/.xsession</tt>, <tt>~/.xinitrc</tt>,
+<tt>~/.gdmrc</tt>... the <tt/WINDOWSPATH/ environment variable to "7", so that
+clients running in xterms will be able to prepend it to the content of the
+<tt/WINDOWID/ variable (set by xterms) and give this Tty path to the <em/BrlAPI/
+server.  Any <em/screen/ run in some xterm should then concatenate these
+<tt/WINDOWSPATH/ and <tt/WINDOWID/ variables to form a new <tt/WINDOWSPATH/
+variable to give to sessions running in it.
+
+<sect1>Detaching
+
+<p>
+Several programs allow detaching: <em/screen/ and <em/VNC/ for instance. In such
+situation, an intermediate <em/BrlAPI/ server should be run for each such
+session. Clients would connect to it, and it would prepend the "current tty"
+path on the fly while forwarding things to the root <em/BrlAPI/ server. This
+intermediate server is yet to be written (but it is actually relatively close to
+be).
+
 
 <!---->
-<sect>Installation and configuration <em/BrlAPI/
+<sect>Installation and configuration of <em/BrlAPI/<label id="sec-install">
 <!---->
 <!-- Seb -->
 <!-- an installation and configuration documentation -->
@@ -380,7 +552,7 @@ be able to connect to the server. For instance, you may want to do:
 
 
 <!---->
-<sect>Library description
+<sect>Library description<label id="sec-library">
 <!---->
 <!-- the library documentation, for those who want to write
 applications which use it, it should be split in: -->
@@ -478,7 +650,7 @@ so testing is needed.
 
 While in raw mode, <tt>brlapi_sendRaw</tt> and <tt>brlapi_recvRaw</tt>
 can be used to send and get data directly to and from the device.
-It should be used with care, improper use might completely thrash the device !
+It should be used with care, improper use might completely thrash the device!
 
 <sect1>Getting tty control
 
@@ -648,7 +820,7 @@ This should compile well thanks to
 <tt>gcc apiclient.c -o apiclient -lbrlapi</tt>
 
 <!---->
-<sect>Writing (<em/BrlAPI/-compliant) drivers for <em/brltty/
+<sect>Writing (<em/BrlAPI/-compliant) drivers for <em/brltty/<label id="sec-drivers">
 <!---->
 <!-- Seb -->
 
@@ -835,7 +1007,7 @@ terminal and a client application running on the PC.
 
 For each feature presented below, only a short description of each
 concerned macro and function will be given. For a more complete description
-of concepts used here, please refer to previous chapters.
+of concepts used here, please refer to chapters <ref id="sec-intro" name="Introduction"> and <ref id="sec-general" name="General description">.
 
 <sect2>Reading braille key codes
 
@@ -943,7 +1115,7 @@ can safely be ignored by the functions described here.
 </itemize>
 
 <!---->
-<sect>Protocol reference
+<sect>Protocol reference<label id="sec-protocol">
 <!---->
 <!-- a boring documentation, explaining the underlying protocol of the api
 in detail -->
@@ -1141,7 +1313,7 @@ as an integer, depending on what has been request in the
 <p>
 For the server to know which tty is active, one particular client is responsible
 for sending <tt/BRLPACKET_SETFOCUS/ packets. They hold a single integer telling
-the new current tty. For instance, when running an X server on VT7, the
+the new current tty. For instance, when running an X server on VT 7, the
 <tt/xbrlapi/ client would have sent a <tt/BRLPACKET_GETTTY(7)/ and will send
 window IDs whenever X focus changes, allowing display and keypresses switching
 between xterms.
@@ -1205,6 +1377,9 @@ server's. Multibyte charsets may be used, AND and OR fields' bytes will
 correspond to each text's wide <em/character/, be it a composing or a
 double-width character.
 </itemize>
+
+A <tt/BRLPACKET_WRITE/ packet without any flag (and hence no data) means a
+"void" WRITE: the server clears the output buffer for this connection.
 
 <sect2><tt/BRLPACKET_GETRAW/ (see <em/brlapi_getRaw()/)
 <p>
