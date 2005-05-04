@@ -169,6 +169,7 @@
 #speech-driver	fv	# Festival (text to speech engine)
 #speech-driver	gs	# GenericSay (pipes to /usr/local/bin/say)
 #speech-driver	mp	# Mikropuhe (text to speech engine)
+#speech-driver	sw	# Swift (text to speech engine)
 #speech-driver	th	# Theta (text to speech engine)
 #speech-driver	vv	# ViaVoice (text to speech engine)
 
@@ -206,6 +207,9 @@
 # Mikropuhe Speech Driver Parameters
 #speech-parameters mp:Name= # [/path/to/mikropuhe/name.pu5]
 #speech-parameters mp:Pitch=0 # [-10-10]
+
+# Swift Speech Driver Parameters
+#speech-parameters sw:Name= # [voice,/path/to/voice]
 
 # Theta Speech Driver Parameters
 #speech-parameters th:Age= # [1-99,-1--99]

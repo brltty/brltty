@@ -168,10 +168,10 @@ typedef enum {
   PKT_WHEEL  = 0X05, /* unit->host: whiz wheel event */
   PKT_HVADJ  = 0X08, /* host->unit: set braille display voltage */
   PKT_BEEP   = 0X09, /* host->unit: sound short beep */
-  PKT_UPDATE = 0X7E, /* host->unit: enter firmware update mode */
-  PKT_DIAG   = 0X7F, /* host->unit: enter diagnostic mode */
+  PKT_CONFIG = 0X0F, /* host->unit: configure device options */
   PKT_INFO   = 0X80, /* unit->host: response to query packet */
-  PKT_WRITE  = 0X81  /* host->unit: write to braille display */
+  PKT_WRITE  = 0X81, /* host->unit: write to braille display */
+  PKT_EXTKEY = 0X82  /* unit->host: extended keys event */
 } PacketType;
 
 typedef enum {
@@ -199,6 +199,10 @@ typedef enum {
   PKT_EXT_WRITE    = 0X81  /* error in write packet */
 } PacketExtended;
 
+typedef enum {
+  OPT_EXTKEY = 0X01  /* send extended key events */
+} UnitOption;
+
 typedef struct {
   unsigned char type;
   unsigned char arg1;
@@ -215,6 +219,9 @@ typedef struct {
       char model[16];
       char firmware[8];
     } info;
+    struct {
+      unsigned char byes[4];
+    } extkey;
   } payload;
 } Packet;
 
@@ -237,6 +244,7 @@ static const ModelEntry modelTable[] = {
   {"Focus 84"     , &dots12374568, 84, 3, -1},
   {"pm display 20", &dots12345678, 20, 0,  1},
   {"pm display 40", &dots12345678, 40, 0,  1},
+  {"pm display 80", &dots12345678, 80, 0,  1},
   {NULL           , NULL         ,  0, 0, -1}
 };
 static const ModelEntry *model;
@@ -266,31 +274,35 @@ static int realKeys;
 static int virtualKeys;
 static int pressedKeys;
 static int activeKeys;
-#define KEY_DOT1          0X00000001
-#define KEY_DOT2          0X00000002
-#define KEY_DOT3          0X00000004
-#define KEY_DOT4          0X00000008
-#define KEY_DOT5          0X00000010
-#define KEY_DOT6          0X00000020
-#define KEY_DOT7          0X00000040
-#define KEY_DOT8          0X00000080
-#define KEY_WHEEL_LEFT    0X00000100
-#define KEY_WHEEL_RIGHT   0X00000200
-#define KEY_SHIFT_LEFT    0X00000400
-#define KEY_SHIFT_RIGHT   0X00000800
-#define KEY_ADVANCE_LEFT  0X00001000
-#define KEY_ADVANCE_RIGHT 0X00002000
-#define KEY_SPACE         0X00008000
-#define KEY_GDF_LEFT      0X00010000
-#define KEY_GDF_RIGHT     0X00020000
-#define KEY_HOT1          0X01000000
-#define KEY_HOT2          0X02000000
-#define KEY_HOT3          0X04000000
-#define KEY_HOT4          0X08000000
-#define KEY_HOT5          0X10000000
-#define KEY_HOT6          0X20000000
-#define KEY_HOT7          0X40000000
-#define KEY_HOT8          0X80000000
+#define KEY_DOT1            0X00000001
+#define KEY_DOT2            0X00000002
+#define KEY_DOT3            0X00000004
+#define KEY_DOT4            0X00000008
+#define KEY_DOT5            0X00000010
+#define KEY_DOT6            0X00000020
+#define KEY_DOT7            0X00000040
+#define KEY_DOT8            0X00000080
+#define KEY_WHEEL_LEFT      0X00000100
+#define KEY_WHEEL_RIGHT     0X00000200
+#define KEY_SHIFT_LEFT      0X00000400
+#define KEY_SHIFT_RIGHT     0X00000800
+#define KEY_ADVANCE_LEFT    0X00001000
+#define KEY_ADVANCE_RIGHT   0X00002000
+#define KEY_SPACE           0X00008000
+#define KEY_GDF_LEFT        0X00010000
+#define KEY_GDF_RIGHT       0X00020000
+#define KEY_BUMP_LEFT_UP    0X00100000
+#define KEY_BUMP_LEFT_DOWN  0X00200000
+#define KEY_BUMP_RIGHT_UP   0X00400000
+#define KEY_BUMP_RIGHT_DOWN 0X00800000
+#define KEY_HOT1            0X01000000
+#define KEY_HOT2            0X02000000
+#define KEY_HOT3            0X04000000
+#define KEY_HOT4            0X08000000
+#define KEY_HOT5            0X10000000
+#define KEY_HOT6            0X20000000
+#define KEY_HOT7            0X40000000
+#define KEY_HOT8            0X80000000
 
 #define DOT_KEYS (KEY_DOT1 | KEY_DOT2 | KEY_DOT3 | KEY_DOT4 | KEY_DOT5 | KEY_DOT6 | KEY_DOT7 | KEY_DOT8)
 #define HOT_KEYS (KEY_HOT1 | KEY_HOT2 | KEY_HOT3 | KEY_HOT4 | KEY_HOT5 | KEY_HOT6 | KEY_HOT7 | KEY_HOT8)

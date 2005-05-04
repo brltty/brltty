@@ -107,7 +107,7 @@ Features
 *  A cut & paste function which is particularly useful for copying long file
    names, copying text between virtual terminals, entering complicated
    commands, etc.
-*  Table driven in-line contracted braille (english grade 2 provided).
+*  Table driven in-line contracted braille (English and French provided).
 *  Support for multiple braille codes.
 *  Ability to identify an unknown character.
 *  Ability to inspect character highlighting.
@@ -145,7 +145,7 @@ The following braille displays are supported:
 -  CombiBraille [25/45/85]
 -  EcoBraille [20/40/80]
 -  EuroBraille [AzerBraille, Clio, Iris, NoteBraille, Scriba]
--  FreedomScientific [Focus 40/44/70/80/84, PacMate 20/40]
+-  FreedomScientific [Focus 40/44/70/80/84, PacMate 20/40/80]
 -  HandyTech [Modular 20/40/80, Braille Wave 40, Braille Star 40/80,
               Bookworm, Braillino 20]
 -  LogText [32]

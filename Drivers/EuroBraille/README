@@ -1,4 +1,4 @@
-This is the EuroBraille family driver for BRLTTY, version 1.3.2
+This is the EuroBraille family driver for BRLTTY, version 1.3.3
 
 Initial writing by Nicolas Pitre <nico@cam.org>, Copyright 1997-1998.
 
@@ -23,6 +23,10 @@ on the following hardware:
 
 FIXES/ADDITIONS
 ===============
+Version 1.3.3:
+	- Corrected several bugs in write/read operations;
+	- Corrected severa; key bugs on Iris models.
+
 Version 1.3.2:
 	- Remade the brl_ReadPacket and brl_WritePacket, to allow writting of 
 	  low-level packets and error code retrieving;
