@@ -103,12 +103,14 @@ saySpeechSetting (int setting, const char *name) {
 
 void
 setSpeechRate (int setting, int say) {
+  LogPrint(LOG_DEBUG, "setting speech rate: %d", setting);
   speech->rate(spkRateTable[setting]);
   if (say) saySpeechSetting(setting, "rate");
 }
 
 void
 setSpeechVolume (int setting, int say) {
+  LogPrint(LOG_DEBUG, "setting speech volume: %d", setting);
   speech->volume((float)setting / (float)SPK_DEFAULT_VOLUME);
   if (say) saySpeechSetting(setting, "volume");
 }

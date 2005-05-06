@@ -344,5 +344,6 @@ portraitFlag (int number, int on) {
 
 void
 setBrailleFirmness (BrailleDisplay *brl, int setting) {
+  LogPrint(LOG_DEBUG, "setting braille firmness: %d", setting);
   braille->firmness(brl, setting);
 }
