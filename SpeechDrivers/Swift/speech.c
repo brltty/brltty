@@ -58,6 +58,7 @@ setPortParameter (const char *name, swift_val *value) {
 
 static int
 setStringParameter (const char *name, const char *value) {
+  LogPrint(LOG_DEBUG, "setting swift string parameter: %s=%s", name, value);
   if (setPortParameter(name, swift_val_string(value))) return 1;
   LogPrint(LOG_WARNING, "Couldn't set %s=%s", name, value);
   return 0;
@@ -65,6 +66,7 @@ setStringParameter (const char *name, const char *value) {
 
 static int
 setIntegerParameter (const char *name, int value) {
+  LogPrint(LOG_DEBUG, "setting swift integer parameter: %s=%d", name, value);
   if (setPortParameter(name, swift_val_int(value))) return 1;
   LogPrint(LOG_WARNING, "Couldn't set %s=%d", name, value);
   return 0;
@@ -80,6 +82,14 @@ setVolume (int volume) {
   return setIntegerParameter("audio/volume", volume);
 }
 
+static int
+setEnvironmentVariable (const char *name, const char *value) {
+  LogPrint(LOG_DEBUG, "setting swift environment variable: %s=%s", name, value);
+  if (setenv(name, value, 1) != -1) return 1;
+  LogError("environment variable set");
+  return 0;
+}
+
 static void
 spk_identify (void) {
   LogPrint(LOG_NOTICE, "Swift Speech Driver [using %s (for %s), version %s, %s].",
@@ -90,7 +100,7 @@ static int
 spk_open (char **parameters) {
   swift_result_t result;
 
-  if (setenv("SWIFT_HOME", SWIFT_ROOT, 1) != -1) {
+  if (setEnvironmentVariable("SWIFT_HOME", SWIFT_ROOT)) {
     swift_params *engineParameters;
 
     if ((engineParameters = swift_params_new(NULL))) {
@@ -101,8 +111,10 @@ spk_open (char **parameters) {
             if (name && *name) {
               swift_voice *voice;
               if (*name == '/') {
+                LogPrint(LOG_DEBUG, "setting swift voice directory: %s", name);
                 voice = swift_port_set_voice_from_dir(swiftPort, name);
               } else {
+                LogPrint(LOG_DEBUG, "setting swift voice name: %s", name);
                 voice = swift_port_set_voice_by_name(swiftPort, name);
               }
 
@@ -128,8 +140,6 @@ spk_open (char **parameters) {
     } else {
       LogPrint(LOG_ERR, "Swift engine parameters allocation error.");
     }
-  } else {
-    LogPrint(LOG_ERR, "Unable to set Swift's home directory.");
   }
 
   return 0;
