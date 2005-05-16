@@ -209,7 +209,19 @@ static void findPosition(long position, long *px, long *py) {
       break;
     offset = newoffset;
   }
-  x = position-offset;
+  if (y==curNumRows) {
+    if (!curNumRows) {
+      y = 0;
+      x = 0;
+    } else {
+      /* this _can_ happen, when deleting while caret is at the end of the
+       * terminal: caret position is only updated afterwards... In the
+       * meanwhile, keep caret at the end of last line. */
+      y = curNumRows-1;
+      x = curRowLengths[y]-1;
+    }
+  } else
+    x = position-offset;
   *px = x;
   *py = y;
 }
