@@ -357,7 +357,7 @@ static void evListenerCB(const AccessibleEvent *event, void *user_data) {
 	    curRows[y]=realloc(curRows[y],curRowLengths[y]*sizeof(*curRows[y]));
 	  }
 	  if ((toCopy = length-toDelete-x))
-	    memcpy(curRows[y]+x,curRows[downTo]+curRowLengths[downTo]-toCopy,toCopy*sizeof(curRows[downTo]));
+	    memmove(curRows[y]+x,curRows[downTo]+curRowLengths[downTo]-toCopy,toCopy*sizeof(curRows[downTo]));
 	  if (y==downTo) {
 	    curRowLengths[y] = length-toDelete;
 	    curRows[y]=realloc(curRows[y],curRowLengths[y]*sizeof(*curRows[y]));
