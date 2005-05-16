@@ -218,7 +218,7 @@ static void findPosition(long position, long *px, long *py) {
        * terminal: caret position is only updated afterwards... In the
        * meanwhile, keep caret at the end of last line. */
       y = curNumRows-1;
-      x = curRowLengths[y]-1;
+      x = curRowLengths[y];
     }
   } else
     x = position-offset;
@@ -561,15 +561,16 @@ read_AtSpiScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
     box.height = curNumRows-box.top;
   if (box.top<curNumRows && box.left<curNumCols)
     for (y=0; y<box.height; y++)
-      for (x=0; x<box.width; x++) {
-	if (box.left+x<curRowLengths[box.top+y] - (curRows[box.top+y][curRowLengths[box.top+y]-1]=='\n')) {
-	  if ((c = curRows[box.top+y][box.left+x])<0x100)
-	    /* latin1 only */
-	    buffer[y*box.width+x] = c;
-	  else
-	    buffer[y*box.width+x] = '?';
+      if (curRowLengths[box.top+y])
+	for (x=0; x<box.width; x++) {
+	  if (box.left+x<curRowLengths[box.top+y] - (curRows[box.top+y][curRowLengths[box.top+y]-1]=='\n')) {
+	    if ((c = curRows[box.top+y][box.left+x])<0x100)
+	      /* latin1 only */
+	      buffer[y*box.width+x] = c;
+	    else
+	      buffer[y*box.width+x] = '?';
+	  }
 	}
-      }
 out:
   pthread_mutex_unlock(&updateMutex);
   return 1;
