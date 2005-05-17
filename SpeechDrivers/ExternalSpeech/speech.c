@@ -26,14 +26,15 @@
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
 
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <unistd.h>
-
-#include <errno.h>
-#include <string.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <stdarg.h>
+#include <string.h>
+#include <errno.h>
+#include <pwd.h>
+#include <grp.h>
+#include <fcntl.h>
+#include <sys/stat.h>
 
 #include "Programs/misc.h"
 
@@ -104,19 +105,29 @@ static int spk_open (char **parameters)
 
   if(!*extProgPath) extProgPath = HELPER_PROG_PATH;
   if(*s_uid) {
-    char *ptr;
-    uid = strtol(s_uid, &ptr, 0);
-    if(*ptr != 0) {
-      myerror("Unable to parse uid value '%s'", s_uid);
-      return 0;
+    struct passwd *pe = getpwnam(s_uid);
+    if (pe) {
+      uid = pe->pw_uid;
+    } else {
+      char *ptr;
+      uid = strtol(s_uid, &ptr, 0);
+      if(*ptr != 0) {
+        myerror("Unable to get an uid value with '%s'", s_uid);
+        return 0;
+      }
     }
   }else uid = UID;
   if(*s_gid) {
-    char *ptr;
-    gid = strtol(s_gid, &ptr, 0);
-    if(*ptr != 0) {
-      myerror("Unable to parse gid value '%s'", s_uid);
-      return 0;
+    struct group *ge = getgrnam(s_gid);
+    if (ge) {
+      gid = ge->gr_gid;
+    } else {
+      char *ptr;
+      gid = strtol(s_gid, &ptr, 0);
+      if(*ptr != 0) {
+        myerror("Unable to get a gid value with '%s'", s_gid);
+        return 0;
+      }
     }
   }else gid = GID;
 
