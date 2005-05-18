@@ -45,7 +45,7 @@ has also been incorporated.
 Install this package if you use a refreshable braille display.
 
 %package -n brlapi
-Version: @BRLAPI_RELEASE@
+Version: @api_release@
 Group: Applications/System
 License: LGPL
 
@@ -62,14 +62,14 @@ Install this package if you have an application which directly accesses
 a refreshable braille display.
 
 %package -n brlapi-devel
-Version: @BRLAPI_RELEASE@
+Version: @api_release@
 Group: Development/System
 License: LGPL
 
 AutoProv: 1
 
 AutoReq: 1
-Requires: brlapi = @BRLAPI_RELEASE@
+Requires: brlapi = @api_release@
 
 Summary: Headers, static archive, and documentation for BrlAPI.
 %description -n brlapi-devel
