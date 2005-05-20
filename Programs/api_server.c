@@ -201,16 +201,24 @@ static pthread_t socketSelectThread;
 static HANDLE socketSelectEvent;
 #endif /* WINDOWS */
 
+/* Protects from connection addition / remove from the server thread */
 static pthread_mutex_t connectionsMutex = PTHREAD_MUTEX_INITIALIZER;
+
+/* Protects the real driver's functions */
+static pthread_mutex_t driverMutex = PTHREAD_MUTEX_INITIALIZER;
+
+/* Which connection currently has raw mode */
+static pthread_mutex_t rawMutex = PTHREAD_MUTEX_INITIALIZER;
+static Connection *rawConnection = NULL;
+
+/* mutex lock order is connectionsMutex first, then rawMutex, then (maskMutex
+ * or brlMutex) then driverMutex */
+
 static Tty notty;
 static Tty ttys;
 
 static unsigned int unauthConnections;
 static unsigned int unauthConnLog = 0;
-
-/* These variables let access to some information be synchronized */
-static pthread_mutex_t driverMutex = PTHREAD_MUTEX_INITIALIZER;
-static Connection *rawConnection = NULL;
 
 /* Pointer to subroutines of the real braille driver */
 static const BrailleDriver *trueBraille;
@@ -993,9 +1001,11 @@ static int handleGetRaw(Connection *c, brl_type_t type, char *packet, size_t siz
   name[getRawPacket->nameLength] = '\0';
   CHECKERR(((!strcmp(name, trueBraille->name)) && isRawCapable(trueBraille)), BRLERR_RAWNOTSUPP);
   CHECKERR(rawConnection==NULL,BRLERR_RAWMODEBUSY);
+  pthread_mutex_lock(&rawMutex);
   c->raw = 1;
   rawConnection = c;
   writeAck(c->fd);
+  pthread_mutex_unlock(&rawMutex);
   return 0;
 }
 
@@ -1004,9 +1014,11 @@ static int handleLeaveRaw(Connection *c, brl_type_t type, char *packet, size_t s
   LogPrintRequest(type, c->fd);
   CHECKERR(c->raw,BRLERR_ILLEGAL_INSTRUCTION);
   LogPrint(LOG_DEBUG,"Going out of raw mode");
+  pthread_mutex_lock(&rawMutex);
   c->raw = 0;
   rawConnection = NULL;
   writeAck(c->fd);
+  pthread_mutex_unlock(&rawMutex);
   return 0;
 }
 
@@ -1052,10 +1064,12 @@ static int processRequest(Connection *c, PacketHandlers *handlers)
       rawConnection = NULL;
       LogPrint(LOG_WARNING,"Client on fd %d did not give up raw mode properly",c->fd);
       LogPrint(LOG_WARNING,"Trying to reset braille terminal");
+      pthread_mutex_lock(&driverMutex);
       if (trueBraille->reset && !trueBraille->reset(disp)) {
         LogPrint(LOG_WARNING,"Reset failed. Restarting braille driver");
         restartBrailleDriver();
       }
+      pthread_mutex_unlock(&driverMutex);
     }
     if (c->tty) {
       LogPrint(LOG_DEBUG,"Client on fd %d did not give up control of tty %#010x properly",c->fd,c->tty->number);
@@ -1901,7 +1915,9 @@ static void api_writeWindow(BrailleDisplay *brl)
   }
   pthread_mutex_unlock(&connectionsMutex);
   last_conn_write=NULL;
+  pthread_mutex_lock(&driverMutex);
   trueBraille->writeWindow(brl);
+  pthread_mutex_unlock(&driverMutex);
 }
 
 /* Function : api_writeVisual */
@@ -1917,7 +1933,9 @@ static void api_writeVisual(BrailleDisplay *brl)
   }
   pthread_mutex_unlock(&connectionsMutex);
   last_conn_write=NULL;
+  pthread_mutex_lock(&driverMutex);
   trueBraille->writeVisual(brl);
+  pthread_mutex_unlock(&driverMutex);
 }
 
 /* Function: whoGetsKey */
@@ -1957,6 +1975,7 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
   unsigned char packet[BRLAPI_MAXPACKETSIZE];
   brl_keycode_t keycode, command;
 
+  pthread_mutex_lock(&rawMutex);
   if (rawConnection!=NULL) {
     pthread_mutex_lock(&driverMutex);
     size = trueBraille->readPacket(brl, packet,BRLAPI_MAXPACKETSIZE);
@@ -1965,8 +1984,10 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
       writeException(rawConnection->fd, BRLERR_DRIVERERROR, BRLPACKET_PACKET, NULL, 0);
     else 
       brlapi_writePacket(rawConnection->fd,BRLPACKET_PACKET,packet,size);
+    pthread_mutex_unlock(&rawMutex);
     return EOF;
   }
+  pthread_mutex_unlock(&rawMutex);
   setCurrentRootTty();
   pthread_mutex_lock(&connectionsMutex);
   c = whoFillsTty(&ttys);
@@ -1974,7 +1995,6 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
     last_conn_write=c;
     refresh=1;
   }
-  pthread_mutex_unlock(&connectionsMutex);
   if (c) {
     pthread_mutex_lock(&c->brlMutex);
     if ((c->brlbufstate==TODISPLAY) || (refresh)) {
@@ -1983,31 +2003,43 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
       if (trueBraille->writeVisual) {
         getText(&c->brailleWindow, buf);
         brl->cursor = c->brailleWindow.cursor-1;
+	pthread_mutex_lock(&driverMutex);
         trueBraille->writeVisual(brl);
+	pthread_mutex_unlock(&driverMutex);
       }
       getDots(&c->brailleWindow, buf);
+      pthread_mutex_lock(&driverMutex);
       trueBraille->writeWindow(brl);
+      pthread_mutex_unlock(&driverMutex);
       disp->buffer = oldbuf;
       c->brlbufstate = FULL;
     }
     pthread_mutex_unlock(&c->brlMutex);
   }
+  pthread_mutex_unlock(&connectionsMutex);
   if (trueBraille->readKey) {
+    pthread_mutex_lock(&driverMutex);
     res = trueBraille->readKey(brl);
+    pthread_mutex_unlock(&driverMutex);
     if (brl->resizeRequired)
       handleResize(brl);
     if (res==EOF) return EOF;
     keycode = (brl_keycode_t) res;
+    pthread_mutex_lock(&driverMutex);
     command = trueBraille->keyToCommand(brl,caller,keycode);
+    pthread_mutex_unlock(&driverMutex);
   } else {
     /* we already ensured in GETTTY that no connection has how == KEYCODES */
+    pthread_mutex_lock(&driverMutex);
     res = trueBraille->readCommand(brl,caller);
+    pthread_mutex_unlock(&driverMutex);
     if (brl->resizeRequired)
       handleResize(brl);
     if (res==EOF) return EOF;
     keycode = 0;
     command = (brl_keycode_t) res;
   }
+  pthread_mutex_lock(&connectionsMutex);
   c = whoGetsKey(&ttys,command,keycode);
   if (c) {
     if (c->how==BRL_KEYCODES) {
@@ -2021,8 +2053,10 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
         brlapi_writePacket(c->fd,BRLPACKET_KEY,&keycode,sizeof(command));
       }
     }
+    pthread_mutex_unlock(&connectionsMutex);
     return EOF;
   }
+  pthread_mutex_unlock(&connectionsMutex);
   return command;
 }
 
