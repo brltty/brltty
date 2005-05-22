@@ -76,6 +76,8 @@
 #define UNAUTH_MAX 5
 #define UNAUTH_DELAY 30
 
+#define BRAILLE_UNICODE_ROW 0x2800
+
 typedef enum {
   PARM_HOST,
   PARM_KEYFILE
@@ -488,11 +490,22 @@ void getDots(const BrailleWindow *brailleWindow, unsigned char *buf)
   int i;
   wchar_t wc;
   for (i=0; i<displaySize; i++) {
-    if ((wc = brailleWindow->text[i]) >= 256)
-      wc = L'?';
-    buf[i] = (textTable[wc]
-	& brailleWindow->andAttr[i])
-      | brailleWindow->orAttr[i];
+    if ((wc = brailleWindow->text[i]) < 0x100)
+      buf[i] = textTable[wc];
+    else
+      if (wc >= BRAILLE_UNICODE_ROW && wc < BRAILLE_UNICODE_ROW + 0x100)
+	buf[i] =
+	  (wc&(1<<(1-1))?BRL_DOT1:0) |
+	  (wc&(1<<(2-1))?BRL_DOT2:0) |
+	  (wc&(1<<(3-1))?BRL_DOT3:0) |
+	  (wc&(1<<(4-1))?BRL_DOT4:0) |
+	  (wc&(1<<(5-1))?BRL_DOT5:0) |
+	  (wc&(1<<(6-1))?BRL_DOT6:0) |
+	  (wc&(1<<(7-1))?BRL_DOT7:0) |
+	  (wc&(1<<(8-1))?BRL_DOT8:0);
+      else
+        buf[i] = textTable[(unsigned char) '?'];
+    buf[i] = (buf[i] & brailleWindow->andAttr[i]) | brailleWindow->orAttr[i];
   }
   if (brailleWindow->cursor) buf[brailleWindow->cursor-1] |= cursorDots();
 }
