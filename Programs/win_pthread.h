@@ -50,6 +50,11 @@ static inline int pthread_attr_setdetachstate (pthread_attr_t *attr, int yes) {
   return 0;
 }
 
+static inline int pthread_attr_setstacksize (pthread_attr_t *attr, size_t stacksize) {
+  /* not supported, ignore */
+  return 0;
+}
+
 static inline int pthread_attr_destroy (pthread_attr_t *attr) {
   return 0;
 }

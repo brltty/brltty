@@ -78,6 +78,12 @@
 
 #define BRAILLE_UNICODE_ROW 0x2800
 
+#define OUR_STACK_MIN 65536
+#ifndef PTHREAD_STACK_MIN
+#define PTHREAD_STACK_MIN OUR_STACK_MIN
+#endif /* PTHREAD_STACK_MIN */
+#define STACK_SIZE (PTHREAD_STACK_MIN<OUR_STACK_MIN?OUR_STACK_MIN:PTHREAD_STACK_MIN)
+
 typedef enum {
   PARM_HOST,
   PARM_KEYFILE
@@ -1709,6 +1715,8 @@ static void *server(void *arg)
 
   pthread_attr_init(&attr);
   pthread_attr_setdetachstate(&attr,PTHREAD_CREATE_DETACHED);
+  /* don't care if it fails */
+  pthread_attr_setstacksize(&attr,STACK_SIZE);
 
   for (i=0;i<numSockets;i++)
     socketInfo[i].fd = -1;
@@ -2147,6 +2155,8 @@ int api_open(BrailleDisplay *brl, char **parameters)
 
   pthread_attr_init(&attr);
   pthread_attr_setdetachstate(&attr,PTHREAD_CREATE_DETACHED);
+  /* don't care if it fails */
+  pthread_attr_setstacksize(&attr,STACK_SIZE);
 
   trueBraille=braille;
   if ((res = pthread_create(&serverThread,&attr,server,hosts)) != 0) {
