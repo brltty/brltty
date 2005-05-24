@@ -1,0 +1,56 @@
+#!/bin/sh
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2005 by The BRLTTY Team. All rights reserved.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU General Public License, as published by the Free Software
+# Foundation.  Please see the file COPYING for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+. "`dirname "${0}"`/begin.sh"
+needTemporaryDirectory
+
+[ "${#}" -eq 0 ] && syntaxError "missing archive name."
+archiveName="${1}"
+shift
+
+if [ "${#}" -eq 0 ]
+then
+   archiveFile="${archiveName}.tar"
+else
+   archiveFile="${1}"
+   shift
+   [ "${#}" -eq 0 ] || syntaxError "too many parameters."
+fi
+[ "${archiveFile#/}" = "${archiveFile}" ] && archiveFile="${initialDirectory}/${archiveFile}"
+
+set -e
+
+cp -a -- "${initialDirectory}" "${archiveName}"
+cd "${archiveName}"
+
+./autogen.sh
+./configure --quiet
+
+cd Documents
+make -s clean
+make -s
+cd ..
+
+specFile="brltty.spec"
+mv -- "${specFile}" "${temporaryDirectory}"
+make -s distclean
+mv -- "${temporaryDirectory}/${specFile}" .
+
+cd ..
+tar --create --exclude=.svn --no-anchored --file "${archiveFile}" "${archiveName}"
+exit 0

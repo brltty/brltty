@@ -20,9 +20,30 @@ include $(BLD_TOP)config.mk
 all install uninstall install-programs install-help install-tables install-drivers:
 	cd $(PGM_DIR) && $(MAKE) $@
 
+ARCHIVE_NAME = $(PACKAGE_NAME)-$(PACKAGE_VERSION)
+
+TAR_FILE = $(ARCHIVE_NAME).tar
+$(TAR_FILE):
+	$(SRC_TOP)mktar $(ARCHIVE_NAME) $@
+tar: $(TAR_FILE)
+
+GZIP_FILE = $(TAR_FILE).gz
+$(GZIP_FILE): $(TAR_FILE)
+	gzip -c -9 $(TAR_FILE) >$@
+gzip: $(GZIP_FILE)
+
+BZIP2_FILE = $(TAR_FILE).bz2
+$(BZIP2_FILE): $(TAR_FILE)
+	bzip2 -c -9 $(TAR_FILE) >$@
+bzip2: $(BZIP2_FILE)
+
+rpm: $(GZIP_FILE)
+	$(SRC_TOP)mkrpm $(GZIP_FILE)
+
 ITERATE = -for directory in $(PGM_DIR); do (cd $$directory && $(MAKE) $@); done
 clean::
 	$(ITERATE)
+	-rm -f -- *.tar *.gz *.bz2 *.rpm
 distclean:: clean
 	-cd $(DOC_DIR) && $(MAKE) $@
 	$(ITERATE)

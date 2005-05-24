@@ -9,5 +9,9 @@ config.h
 brltty.spec
 brltty.lsm
 configure
+*.tar
+*.gz
+*.bz2
+*.rpm
 data
 lib
