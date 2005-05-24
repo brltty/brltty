@@ -17,11 +17,20 @@
 ###############################################################################
 
 . "`dirname "${0}"`/begin.sh"
-needTemporaryDirectory
 
-[ "${#}" -eq 0 ] && syntaxError "missing archive name."
-archiveName="${1}"
+[ "${#}" -eq 0 ] && syntaxError "missing source root."
+sourceRoot="${1}"
 shift
+cd "${sourceRoot}" || exit "${?}"
+sourceRoot="`pwd`"
+
+if [ "${#}" -eq 0 ]
+then
+   archiveName="`basename "${sourceRoot}"`"
+else
+   archiveName="${1}"
+   shift
+fi
 
 if [ "${#}" -eq 0 ]
 then
@@ -29,13 +38,15 @@ then
 else
    archiveFile="${1}"
    shift
-   [ "${#}" -eq 0 ] || syntaxError "too many parameters."
 fi
 [ "${archiveFile#/}" = "${archiveFile}" ] && archiveFile="${initialDirectory}/${archiveFile}"
 
+[ "${#}" -eq 0 ] || syntaxError "too many parameters."
+
+needTemporaryDirectory
 set -e
 
-cp -a -- "${initialDirectory}" "${archiveName}"
+cp -p -r -- "${sourceRoot}" "${archiveName}"
 cd "${archiveName}"
 
 ./autogen.sh
