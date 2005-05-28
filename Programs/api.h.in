@@ -604,17 +604,15 @@ ssize_t brlapi_recvRaw(unsigned char *buf, size_t size);
 #define BRLERR_ILLEGAL_INSTRUCTION      5  /**< Forbiden in current mode */
 #define BRLERR_INVALID_PARAMETER        6  /**< Out of range or have no sense */
 #define BRLERR_INVALID_PACKET           7  /**< Invalid size */
-#define BRLERR_RAWNOTSUPP               8  /**< Raw mode not supported by loaded driver */
-#define BRLERR_KEYSNOTSUPP              9  /**< Reading of key codes not supported by loaded driver */
-#define BRLERR_CONNREFUSED             10  /**< Connection refused */
-#define BRLERR_OPNOTSUPP               11  /**< Operation not supported */
-#define BRLERR_GAIERR                  12  /**< Getaddrinfo error */
-#define BRLERR_LIBCERR                 13  /**< Libc error */
-#define BRLERR_UNKNOWNTTY              14  /**< Couldn't find out the tty number */
-#define BRLERR_PROTOCOL_VERSION        15  /**< Bad protocol version */
-#define BRLERR_EOF                     16  /**< Unexpected end of file */
-#define BRLERR_TOORECURSE              17  /**< Too many levels of recursion */
-#define BRLERR_DRIVERERROR             18  /**< Packet returned by driver too large */
+#define BRLERR_CONNREFUSED              8  /**< Connection refused */
+#define BRLERR_OPNOTSUPP                9  /**< Operation not supported */
+#define BRLERR_GAIERR                  10  /**< Getaddrinfo error */
+#define BRLERR_LIBCERR                 11  /**< Libc error */
+#define BRLERR_UNKNOWNTTY              12  /**< Couldn't find out the tty number */
+#define BRLERR_PROTOCOL_VERSION        13  /**< Bad protocol version */
+#define BRLERR_EOF                     14  /**< Unexpected end of file */
+#define BRLERR_EMPTYKEY                15  /**< Key file empty */
+#define BRLERR_DRIVERERROR             16  /**< Packet returned by driver too large */
 
 /* brlapi_errlist */
 /** Error message list

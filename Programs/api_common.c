@@ -19,7 +19,7 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/* api_common.c: communication via the socket */
+/* api_common.c: Shared definitions */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -62,6 +62,11 @@
 #ifdef __MINGW32__
 #define get_osfhandle(fd) _get_osfhandle(fd)
 #endif /* __MINGW32__ */
+
+#define LibcError(function) \
+  brlapi_errno=BRLERR_LIBCERR; \
+  brlapi_libcerrno = errno; \
+  brlapi_errfun = function;
 
 /* brlapi_writeFile */
 /* Writes a buffer to a file */
@@ -135,9 +140,7 @@ static ssize_t brlapi_readFile(int fd, void *buf, size_t size)
         (errno!=EWOULDBLOCK) &&
 #endif /* EWOULDBLOCK */
         (errno!=EAGAIN)) { /* EAGAIN shouldn't happen, but who knows... */
-      brlapi_libcerrno=errno;
-      brlapi_errfun="read in readFile";
-      brlapi_errno=BRLERR_LIBCERR;
+      LibcError("read in readFile");
       return -1;
     }
   }
@@ -171,9 +174,7 @@ ssize_t brlapi_readPacketHeader(int fd, brl_type_t *packetType)
   ssize_t res;
   if ((res=brlapi_readFile(fd,header,sizeof(header))) != sizeof(header)) {
     if (res<0) {
-      brlapi_errno = BRLERR_LIBCERR;
-      brlapi_libcerrno = errno;
-      brlapi_errfun = "read in brlapi_readPacketHeader";
+      LibcError("read in brlapi_readPacketHeader");
       return -1;    
     } else return -2;
   }
@@ -201,9 +202,7 @@ ssize_t brlapi_readPacketContent(int fd, size_t packetSize, void *buf, size_t bu
   return packetSize;
 
 out:
-  brlapi_errno = BRLERR_LIBCERR;
-  brlapi_libcerrno = errno;
-  brlapi_errfun = "read in brlapi_readPacket";
+  LibcError("read in brlapi_readPacket");
   return -1;
 }
 
@@ -230,23 +229,20 @@ int brlapi_loadAuthKey(const char *filename, size_t *authlength, void *auth)
   off_t stsize;
   struct stat statbuf;
   if (stat(filename, &statbuf)<0) {
-    brlapi_libcerrno=errno;
-    brlapi_errfun="stat in loadAuthKey";
-    brlapi_errno=BRLERR_LIBCERR;
+    LibcError("stat in loadAuthKey");
+    return -1;
+  }
+  
+  if (statbuf.st_size==0) {
+    brlapi_errno = BRLERR_EMPTYKEY;
+    brlapi_errfun = "brlapi_laudAuthKey";
     return -1;
   }
 
-  if ((stsize = statbuf.st_size)>BRLAPI_MAXPACKETSIZE) {
-    brlapi_libcerrno=EFBIG;
-    brlapi_errfun="stat in loadAuthKey";
-    brlapi_errno=BRLERR_LIBCERR;
-    return -1;
-  }
+  stsize = MIN(statbuf.st_size, BRLAPI_MAXPACKETSIZE-sizeof(uint32_t));
 
   if ((fd = open(filename, O_RDONLY)) <0) {
-    brlapi_libcerrno=errno;
-    brlapi_errfun="open in loadAuthKey";
-    brlapi_errno=BRLERR_LIBCERR;
+    LibcError("open in loadAuthKey");
     return -1;
   }
 

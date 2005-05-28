@@ -959,8 +959,6 @@ const char *brlapi_errlist[] = {
   "Illegal instruction",                /* BRLERR_ILLEGAL_INSTRUCTION */
   "Invalid parameter",                  /* BRLERR_INVALID_PARAMETER */
   "Invalid packet",                     /* BRLERR_INVALID_PACKET */
-  "Raw mode not supported by driver",   /* BRLERR_RAWNOTSUPP */
-  "Key codes not supported by driver",  /* BRLERR_KEYSNOTSUPP */
   "Connection refused",                 /* BRLERR_CONNREFUSED */
   "Operation not supported",            /* BRLERR_OPNOTSUPP */
   "getaddrinfo error",                  /* BRLERR_GAIERR */
@@ -968,8 +966,8 @@ const char *brlapi_errlist[] = {
   "Couldn't find out tty number",       /* BRLERR_UNKNOWNTTY */
   "Bad protocol version",               /* BRLERR_PROTOCOL_VERSION */
   "Unexpected end of file",             /* BRLERR_EOF */
-  "Too many levels of recursion",       /* BRLERR_TOORECURSE */
-  "Driver error",
+  "Key file is empty",                  /* BRLERR_EMPTYKEY */
+  "Driver error",                       /* BRLERR_DRIVERERROR */
 };
 
 /* brlapi_nerr: last error number */

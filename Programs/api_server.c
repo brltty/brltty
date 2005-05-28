@@ -184,7 +184,6 @@ typedef struct Tty {
   struct Tty **prevnext,*next; /* siblings */
   struct Tty *subttys; /* children */
 } Tty;
-#define MAXTTYRECUR 16
 
 static int connectionsAllowed = 0;
 
@@ -542,11 +541,7 @@ static void handleResize(BrailleDisplay *brl)
 /****************************************************************************/
 
 /* Function : createConnection */
-/* Creates a struct of type Connection and stores suitable values */
-/* x and y correspond to the braille display size */
-/* This function also records the connection in an array */
-/* If an error occurs, one returns NULL, and an error message is written on */
-/* the socket before closing it */
+/* Creates a connectiN */
 static Connection *createConnection(int fd, time_t currentTime)
 {
   Connection *c =  malloc(sizeof(Connection));
@@ -724,7 +719,6 @@ static int handleGetTty(Connection *c, brl_type_t type, char *packet, size_t siz
   CHECKERR(size>=sizeof(uint32_t), BRLERR_INVALID_PACKET);
   p += sizeof(uint32_t); size -= sizeof(uint32_t);
   nbTtys = ntohl(ints[0]);
-  CHECKERR(nbTtys<=MAXTTYRECUR, BRLERR_TOORECURSE);
   CHECKERR(size>=nbTtys*sizeof(uint32_t), BRLERR_INVALID_PACKET);
   p += nbTtys*sizeof(uint32_t); size -= nbTtys*sizeof(uint32_t);
   CHECKERR(*p<=BRLAPI_MAXNAMELENGTH, BRLERR_INVALID_PARAMETER);
@@ -737,7 +731,7 @@ static int handleGetTty(Connection *c, brl_type_t type, char *packet, size_t siz
       how = BRL_KEYCODES;
     else how = -1;
   }
-  CHECKERR(((how == BRL_KEYCODES) || (how == BRL_COMMANDS)),BRLERR_KEYSNOTSUPP);
+  CHECKERR(((how == BRL_KEYCODES) || (how == BRL_COMMANDS)),BRLERR_OPNOTSUPP);
   c->how = how;
   freeBrailleWindow(&c->brailleWindow); /* In case of multiple gettty requests */
   if ((initializeUnmaskedKeys(c)==-1) || (allocBrailleWindow(&c->brailleWindow)==-1)) {
@@ -966,7 +960,7 @@ static int handleWrite(Connection *c, brl_type_t type, char *packet, size_t size
     p += charsetLen; size -= charsetLen; /* charset name */
   }
 #else /* HAVE_ICONV_H */
-  CHECKEXC(!(ws->flags & BRLAPI_WF_CHARSET), BRLERR_INVALID_PARAMETER);
+  CHECKEXC(!(ws->flags & BRLAPI_WF_CHARSET), BRLERR_OPNOTSUPP);
 #endif /* HAVE_ICONV_H */
   CHECKEXC(size==0, BRLERR_INVALID_PACKET);
   /* Here the whole packet has been checked */
@@ -1018,7 +1012,7 @@ static int handleGetRaw(Connection *c, brl_type_t type, char *packet, size_t siz
   CHECKERR(size==getRawPacket->nameLength, BRLERR_INVALID_PACKET);
   memcpy(name, &getRawPacket->name, getRawPacket->nameLength);
   name[getRawPacket->nameLength] = '\0';
-  CHECKERR(((!strcmp(name, trueBraille->name)) && isRawCapable(trueBraille)), BRLERR_RAWNOTSUPP);
+  CHECKERR(((!strcmp(name, trueBraille->name)) && isRawCapable(trueBraille)), BRLERR_OPNOTSUPP);
   CHECKERR(rawConnection==NULL,BRLERR_RAWMODEBUSY);
   pthread_mutex_lock(&rawMutex);
   c->raw = 1;
