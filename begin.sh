@@ -42,5 +42,5 @@ needTemporaryDirectory() {
       TMPDIR="/tmp"
       export TMPDIR
    }
-   temporaryDirectory="`mktemp -d "${TMPDIR}/${programName}.XXXXXX"`" && cd "${temporaryDirectory}" || exit 3
+   temporaryDirectory="`mktemp -d "${TMPDIR}/${programName}.XXXXXX"`" && cd "${temporaryDirectory}" || exit "${?}"
 }
