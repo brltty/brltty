@@ -78,18 +78,20 @@
 
 #define BRAILLE_UNICODE_ROW 0x2800
 
-#define OUR_STACK_MIN 65536
+#define OUR_STACK_MIN 0X10000
 #ifndef PTHREAD_STACK_MIN
 #define PTHREAD_STACK_MIN OUR_STACK_MIN
 #endif /* PTHREAD_STACK_MIN */
-#define STACK_SIZE (PTHREAD_STACK_MIN<OUR_STACK_MIN?OUR_STACK_MIN:PTHREAD_STACK_MIN)
 
 typedef enum {
   PARM_HOST,
-  PARM_KEYFILE
+  PARM_KEYFILE,
+  PARM_STACKSIZE
 } Parameters;
 
-const char *const api_parameters[] = { "host", "keyfile", NULL };
+const char *const api_parameters[] = { "host", "keyfile", "stacksize", NULL };
+
+size_t stackSize;
 
 #define RELEASE "BRLTTY API Library: release " BRLAPI_RELEASE
 #define COPYRIGHT "   Copyright Sebastien HINDERER <Sebastien.Hinderer@ens-lyon.org>, \
@@ -1710,7 +1712,7 @@ static void *server(void *arg)
   pthread_attr_init(&attr);
   pthread_attr_setdetachstate(&attr,PTHREAD_CREATE_DETACHED);
   /* don't care if it fails */
-  pthread_attr_setstacksize(&attr,STACK_SIZE);
+  pthread_attr_setstacksize(&attr,stackSize);
 
   for (i=0;i<numSockets;i++)
     socketInfo[i].fd = -1;
@@ -2147,10 +2149,19 @@ int api_open(BrailleDisplay *brl, char **parameters)
 
   if (*parameters[PARM_HOST]) hosts = parameters[PARM_HOST];
 
+  {
+    int size;
+    static const int minSize = 0X1000;
+    if (*parameters[PARM_STACKSIZE] && validateInteger(&size, "stack size", parameters[PARM_STACKSIZE], &minSize, NULL))
+      stackSize = size;
+    else
+      stackSize = MAX(PTHREAD_STACK_MIN,OUR_STACK_MIN);
+  }
+
   pthread_attr_init(&attr);
   pthread_attr_setdetachstate(&attr,PTHREAD_CREATE_DETACHED);
   /* don't care if it fails */
-  pthread_attr_setstacksize(&attr,STACK_SIZE);
+  pthread_attr_setstacksize(&attr,stackSize);
 
   trueBraille=braille;
   if ((res = pthread_create(&serverThread,&attr,server,hosts)) != 0) {
