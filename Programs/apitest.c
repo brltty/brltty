@@ -33,6 +33,7 @@
 static brlapi_settings_t settings;
 
 static int opt_learnMode;
+static int opt_showDots;
 static int opt_showIdentifier;
 static int opt_showName;
 static int opt_showSize;
@@ -49,6 +50,10 @@ BEGIN_OPTION_TABLE
   {"learn", NULL, 'l', 0, 0,
    &opt_learnMode, NULL,
    "Enter interactive command learn mode."},
+
+  {"dots", NULL, 'd', 0, 0,
+   &opt_showDots, NULL,
+   "Show dot pattern."},
 
   {"name", NULL, 'n', 0, 0,
    &opt_showName, NULL,
@@ -94,6 +99,50 @@ void showDriverName(void)
     exit(1);
   }
   fprintf(stderr, "%s\n", name);
+}
+
+#define DOTS_TEXT "dots: "
+#define DOTS_TEXTLEN (strlen(DOTS_TEXT))
+#define DOTS_LEN 8
+#define DOTS_TOTALLEN (DOTS_TEXTLEN+DOTS_LEN)
+void showDots(void)
+{
+  unsigned int x, y;
+  if (brlapi_getDisplaySize(&x, &y)<0) {
+    brlapi_perror("failed");
+    exit(1);
+  }
+  if (brlapi_getTty(-1, NULL)<0) {
+    brlapi_perror("getTty");
+    exit(1);
+  }
+  if (x*y<DOTS_TOTALLEN) {
+    fprintf(stderr,"can't show dots with a braille display with less than %d cells\n",DOTS_TOTALLEN);
+    exit(1);
+  }
+  {
+    char text[x*y], or[x*y];
+    brlapi_writeStruct ws = BRLAPI_WRITESTRUCT_INITIALIZER;
+    fprintf(stderr,"Showing dot patterns\n");
+    memcpy(text,DOTS_TEXT,DOTS_TEXTLEN);
+    memset(text+DOTS_TEXTLEN,' ',sizeof(text)-DOTS_TEXTLEN);
+    ws.text = text;
+    memset(or,0,sizeof(or));
+    or[DOTS_TEXTLEN+0] = BRL_DOT1;
+    or[DOTS_TEXTLEN+1] = BRL_DOT2;
+    or[DOTS_TEXTLEN+2] = BRL_DOT3;
+    or[DOTS_TEXTLEN+3] = BRL_DOT4;
+    or[DOTS_TEXTLEN+4] = BRL_DOT5;
+    or[DOTS_TEXTLEN+5] = BRL_DOT6;
+    or[DOTS_TEXTLEN+6] = BRL_DOT7;
+    or[DOTS_TEXTLEN+7] = BRL_DOT8;
+    ws.attrOr = or;
+    if (brlapi_write(&ws)<0) {
+      brlapi_perror("brlapi_write");
+      exit(1);
+    }
+  }
+  getchar();
 }
 
 void enterLearnMode(void)
@@ -148,6 +197,10 @@ int main(int argc, char *argv[])
 
     if (opt_showSize) {
       showDisplaySize();
+    }
+
+    if (opt_showDots) {
+      showDots();
     }
 
     if (opt_learnMode) {

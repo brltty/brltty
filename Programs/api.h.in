@@ -344,6 +344,11 @@ int brlapi_setFocus(int tty);
  * else you'll get an error. This is particularly not always trivial when
  * writing multithreaded applications.
  *
+ * \note Dots are coded as described in ISO/TR 11548-1: dot 1 is set iff bit 0
+ * is set, dot 2 is set iff bit 1 is set, ... dot \e i+1 is set iff bit \e i is
+ * set. This also corresponds to the low-order byte of the coding of unicode's
+ * braille row U+2800.
+ *
  * @{ */
 
 /* brlapi_writeText */
