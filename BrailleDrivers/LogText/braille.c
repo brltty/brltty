@@ -354,8 +354,10 @@ makeDownloadFifo (void) {
 
 static int
 brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
-   reverseTranslationTable(outputTable, inputTable);
-   outputTable[inputTable[0XFF]] = 0X1A;
+   if (memchr(outputTable, 0XFF, sizeof(outputTable))) {
+      reverseTranslationTable(outputTable, inputTable);
+      outputTable[inputTable[0XFF]] = 0X1A;
+   }
 
    if (!isSerialDevice(&device)) {
       unsupportedDevice(device);
