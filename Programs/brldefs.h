@@ -257,26 +257,31 @@ typedef enum {
 
 /* The bits for each braille dot.
  *
- * DotNumber  BitNumber  ActualBit
- *    1 4        0 1     0X01 0X02
- *    2 5        2 3     0X04 0X08
- *    3 6        4 5     0X10 0X20
- *    7 8        6 7     0X40 0X80
+ * This is the same dot-to-bit mapping which is:
+ * +  specified by the ISO/TR 11548-1 standard
+ * +  used within the \u2800 Unicode plain
  *
- * This dot mapping was chosen for BRLTTY's internal dot representation
- * because it makes programming prettier and more efficient for things such
- * as underlining, cursor drawing, and vertical braille character shifting.
- *
- * Bx: x from dot number, value from actual bit.
+ * From least- to most-significant octal digit:
+ * +  the first contains dots 1-3
+ * +  the second contains dots 4-6
+ * +  the third contains dots 7-8
+ * 
+ * Here are a few ways to illustrate a braille cell:
+ *    By Dot   By Bit   As Octal
+ *    Number   Number    Digits
+ *     1  4     0  3    001  010
+ *     2  5     1  4    002  020
+ *     3  6     2  5    004  040
+ *     7  8     6  7    100  200
  */
-#define BRL_DOT1 0X01
-#define BRL_DOT2 0X04
-#define BRL_DOT3 0X10
-#define BRL_DOT4 0X02
-#define BRL_DOT5 0X08
-#define BRL_DOT6 0X20
-#define BRL_DOT7 0X40
-#define BRL_DOT8 0X80
+#define BRL_DOT1 0001
+#define BRL_DOT2 0002
+#define BRL_DOT3 0004
+#define BRL_DOT4 0010
+#define BRL_DOT5 0020
+#define BRL_DOT6 0040
+#define BRL_DOT7 0100
+#define BRL_DOT8 0200
 
 #ifdef __cplusplus
 }
