@@ -91,7 +91,7 @@ typedef enum {
 
 const char *const api_parameters[] = { "host", "keyfile", "stacksize", NULL };
 
-size_t stackSize;
+static size_t stackSize;
 
 #define RELEASE "BRLTTY API Library: release " BRLAPI_RELEASE
 #define COPYRIGHT "   Copyright Sebastien HINDERER <Sebastien.Hinderer@ens-lyon.org>, \
@@ -2151,7 +2151,7 @@ int api_open(BrailleDisplay *brl, char **parameters)
 
   {
     int size;
-    static const int minSize = 0X1000;
+    static const int minSize = MIN(0X1000,PTHREAD_STACK_MIN);
     if (*parameters[PARM_STACKSIZE] && validateInteger(&size, "stack size", parameters[PARM_STACKSIZE], &minSize, NULL))
       stackSize = size;
     else
