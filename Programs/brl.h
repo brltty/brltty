@@ -130,6 +130,7 @@ typedef unsigned char DotsTable[DOTS_TABLE_SIZE];
 extern void makeOutputTable (const DotsTable dots, TranslationTable table);
 
 /* Formatting of status cells. */
+extern unsigned char lowerDigit (unsigned char upper);
 extern const unsigned char landscapeDigits[11];
 extern int landscapeNumber (int x);
 extern int landscapeFlag (int number, int on);

@@ -267,8 +267,17 @@ makeUntextTable (void) {
   reverseTranslationTable(textTable, untextTable);
 }
 
-/* Functions which support horizontal status cells, e.g. Papenmeier. */
-/* this stuff is real wired - dont try to understand */
+/* Functions which support vertical and horizontal status cells. */
+
+unsigned char
+lowerDigit (unsigned char upper) {
+  unsigned char lower = 0;
+  if (upper & BRL_DOT1) lower |= BRL_DOT3;
+  if (upper & BRL_DOT2) lower |= BRL_DOT7;
+  if (upper & BRL_DOT4) lower |= BRL_DOT6;
+  if (upper & BRL_DOT5) lower |= BRL_DOT8;
+  return lower;
+}
 
 /* Dots for landscape (counterclockwise-rotated) digits. */
 const unsigned char landscapeDigits[11] = {
@@ -283,14 +292,14 @@ const unsigned char landscapeDigits[11] = {
 /* Format landscape representation of numbers 0 through 99. */
 int
 landscapeNumber (int x) {
-  return landscapeDigits[(x / 10) % 10] | (landscapeDigits[x % 10] << 4);  
+  return landscapeDigits[(x / 10) % 10] | lowerDigit(landscapeDigits[x % 10]);  
 }
 
 /* Format landscape flag state indicator. */
 int
 landscapeFlag (int number, int on) {
   int dots = landscapeDigits[number % 10];
-  if (on) dots |= landscapeDigits[10] << 4;
+  if (on) dots |= lowerDigit(landscapeDigits[10]);
   return dots;
 }
 
@@ -307,13 +316,13 @@ const unsigned char seascapeDigits[11] = {
 /* Format seascape representation of numbers 0 through 99. */
 int
 seascapeNumber (int x) {
-  return (seascapeDigits[(x / 10) % 10] << 4) | seascapeDigits[x % 10];  
+  return lowerDigit(seascapeDigits[(x / 10) % 10]) | seascapeDigits[x % 10];  
 }
 
 /* Format seascape flag state indicator. */
 int
 seascapeFlag (int number, int on) {
-  int dots = seascapeDigits[number % 10] << 4;
+  int dots = lowerDigit(seascapeDigits[number % 10]);
   if (on) dots |= seascapeDigits[10];
   return dots;
 }
@@ -331,13 +340,13 @@ const unsigned char portraitDigits[11] = {
 /* Format portrait representation of numbers 0 through 99. */
 int
 portraitNumber (int x) {
-  return portraitDigits[(x / 10) % 10] | (portraitDigits[x % 10]<<4);  
+  return portraitDigits[(x / 10) % 10] | lowerDigit(portraitDigits[x % 10]);  
 }
 
 /* Format portrait flag state indicator. */
 int
 portraitFlag (int number, int on) {
-  int dots = portraitDigits[number % 10] << 4;
+  int dots = lowerDigit(portraitDigits[number % 10]);
   if (on) dots |= portraitDigits[10];
   return dots;
 }

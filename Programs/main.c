@@ -248,7 +248,7 @@ setDigitUpper (unsigned char *cell, int digit) {
 
 static void
 setDigitLower (unsigned char *cell, int digit) {
-  *cell |= portraitDigits[digit] << 4;
+  *cell |= lowerDigit(portraitDigits[digit]);
 }
 
 static void
