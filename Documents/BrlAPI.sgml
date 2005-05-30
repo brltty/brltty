@@ -1365,7 +1365,7 @@ expressed in an unsigned byte.
 representation of the above text will be AND-ed with this field, hence allowing
 to erase some unwanted parts of characters. Dots are coded as described in
 ISO/TR 11548-1: dot 1 is set iff bit 0 is set, dot 2 is set iff bit 1 is set,
-...  dot <em/i+1/ is set if bit <em/i/ is set. This also correspond to the
+...  dot <em/i+1/ is set if bit <em/i/ is set. This also corresponds to the
 low-order byte of the coding of unicode's braille row <tt/U+2800/.
 <item> As well, an OR field may be given, one byte per character: the 8-dot
 result of the AND operation above (or the 8-dot representation of the text if

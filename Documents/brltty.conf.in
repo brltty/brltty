@@ -301,7 +301,6 @@
 #api-parameters parameter=setting,...
 
 #api-parameters Host=
-#api-parameters Port=35751
 #api-parameters KeyFile=@CONFIGURATION_DIRECTORY@/@api_keyfile@
 #api-parameters StackSize=65536
 
