@@ -2151,7 +2151,7 @@ int api_open(BrailleDisplay *brl, char **parameters)
 
   {
     int size;
-    static const int minSize = MIN(0X1000,PTHREAD_STACK_MIN);
+    static const int minSize = PTHREAD_STACK_MIN;
     if (*parameters[PARM_STACKSIZE] && validateInteger(&size, "stack size", parameters[PARM_STACKSIZE], &minSize, NULL))
       stackSize = size;
     else
