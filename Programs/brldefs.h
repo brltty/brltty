@@ -259,7 +259,7 @@ typedef enum {
  *
  * This is the same dot-to-bit mapping which is:
  * +  specified by the ISO/TR 11548-1 standard
- * +  used within the \u2800 Unicode plain
+ * +  used within the Unicode braille row (U+2800) 
  *
  * From least- to most-significant octal digit:
  * +  the first contains dots 1-3
