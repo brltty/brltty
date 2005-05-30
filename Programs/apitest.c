@@ -108,6 +108,7 @@ void showDriverName(void)
 void showDots(void)
 {
   unsigned int x, y;
+  brl_keycode_t k;
   if (brlapi_getDisplaySize(&x, &y)<0) {
     brlapi_perror("failed");
     exit(1);
@@ -142,7 +143,7 @@ void showDots(void)
       exit(1);
     }
   }
-  getchar();
+  brlapi_readKey(1, &k);
 }
 
 void enterLearnMode(void)
