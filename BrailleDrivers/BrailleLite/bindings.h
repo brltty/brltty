@@ -167,7 +167,7 @@ static const int cmdtrans[64] = {
   /* 046 ( 23  6) */ BRL_BLK_CUTBEGIN,
   /* 047 (123  6) */ BRL_CMD_SWITCHVT_NEXT,
   /* 050 (   4 6) */ BRL_BLK_PASSKEY+BRL_KEY_ENTER,
-  /* 051 (1  4 6) */ 0 /*145: free*/,
+  /* 051 (1  4 6) */ 0 /*146: free*/,
   /* 052 ( 2 4 6) */ BRL_BLK_PASSKEY+BRL_KEY_ESCAPE,
   /* 053 (12 4 6) */ BRL_CMD_PRPGRPH,
   /* 054 (  34 6) */ 0 /*346: free*/,
