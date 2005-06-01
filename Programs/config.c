@@ -107,6 +107,7 @@ static char *opt_contractionTable;
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
 #ifdef ENABLE_API
+static int opt_noApi;
 static char *opt_apiParameters;
 static char **apiParameters = NULL;
 static int apiOpened;
@@ -120,7 +121,6 @@ static void *speechObject;
 static char *opt_speechParameters;
 static char **speechParameters = NULL;
 static char *opt_speechFifo;
-static int opt_noSpeech;
 #endif /* ENABLE_SPEECH_SUPPORT */
 
 static char *opt_screenDriver;
@@ -242,11 +242,11 @@ BEGIN_OPTION_TABLE
    &opt_messageDelay, NULL,
    "Message hold time [400]."},
 
-#ifdef ENABLE_SPEECH_SUPPORT
-  {"no-speech", NULL, 'N', 0, 0,
-   &opt_noSpeech, NULL,
-   "Defer speech until restarted by command."},
-#endif /* ENABLE_SPEECH_SUPPORT */
+#ifdef ENABLE_API
+  {"no-api", NULL, 'N', 0, 0,
+   &opt_noApi, NULL,
+   "Disable the application programming interface."},
+#endif /* ENABLE_API */
 
   {"pid-file", "file", 'P', 0, 0,
    &opt_pidFile, NULL,
@@ -1654,9 +1654,7 @@ closeSpeechDriver (void) {
 
 static void
 startSpeechDriver (void) {
-  if (opt_noSpeech) {
-    LogPrint(LOG_INFO, "automatic speech driver initialization disabled.");
-  } else if (openSpeechDriver(0)) {
+  if (openSpeechDriver(0)) {
     speech = speechDriver;
     setSpeechPreferences();
   }
@@ -1664,13 +1662,9 @@ startSpeechDriver (void) {
 
 static void
 stopSpeechDriver (void) {
-  if (opt_noSpeech) {
-    opt_noSpeech = 0;
-  } else {
-    speech->mute();
-    speech = &noSpeech;
-    closeSpeechDriver();
-  }
+  speech->mute();
+  speech = &noSpeech;
+  closeSpeechDriver();
 }
 
 void
@@ -2010,16 +2004,19 @@ startup (int argc, char *argv[]) {
   }
 
 #ifdef ENABLE_API
-  /* Activate the application programming interface. */
-  api_identify();
-  apiParameters = processParameters(api_parameters,
-                                    "application programming interface",
-                                    NULL,
-                                    opt_apiParameters);
-  logParameters(api_parameters, apiParameters, "API");
-  if (!opt_verify) {
-    if ((apiOpened = api_open(&brl, apiParameters))) {
-      atexit(exitApi);
+  apiOpened = 0;
+  if (!opt_noApi) {
+    api_identify();
+    apiParameters = processParameters(api_parameters,
+                                      "application programming interface",
+                                      NULL,
+                                      opt_apiParameters);
+    logParameters(api_parameters, apiParameters, "API");
+    if (!opt_verify) {
+      if (api_open(&brl, apiParameters)) {
+        atexit(exitApi);
+        apiOpened = 1;
+      }
     }
   }
 #endif /* ENABLE_API */

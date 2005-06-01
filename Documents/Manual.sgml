@@ -1247,12 +1247,6 @@ is sufficient to stop BRLTTY in its tracks.
 If it dies during entry into single user mode, for example,
 it may well be due to a problem of this nature.
 
-Some systems experience problems if an application tries to use
-the kernel's sound subsystem before it has been initialized.
-If your system is one of them, then
-you may need to disable the automatic starting of the speech synthesizer driver
-with the <ref id="options-no-speech" name="-N"> option.
-
 Some systems, as part of the boot sequence, probe the serial ports
 (usually in order to automatically find the mouse and deduce its type).
 If your braille display is using a serial port,
@@ -2602,10 +2596,8 @@ The <tt/brltty/ command accepts the following options:
     Specify the amount of time (in hundredths of a second)
     that BRLTTY keeps its own internally generated messages on the braille display.
     If not specified, then <tt/400/ (4 seconds) is assumed.
-  <tag><tt/-N/ <tt/--no-speech/<label id="options-no-speech"></tag>
-    Don't automatically start the speech synthesizer driver.
-    This option is unfortunately necessary on some systems when BRLTTY is
-    started before the sound subsystem within the kernel has been initialized.
+  <tag><tt/-N/ <tt/--no-api/<label id="options-no-api"></tag>
+    Disable the application programming interface.
   <tag><tt/-P/<em/file/ <tt/--pid-file=/<em/file/<label id="options-pid-file"></tag>
     Specify the file wherein BRLTTY is to write its process identifier (pid).
     If not specified, BRLTTY doesn't write its process identifier anywhere.
