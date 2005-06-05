@@ -807,7 +807,7 @@ int brlapi_write(const brlapi_writeStruct *s)
     rbeg = 1; rsiz = dispSize;
   }
   if (s->text) {
-    strLen = strlen(s->text);
+    strLen = rsiz;
     *((uint32_t *) p) = htonl(strLen); p += sizeof(uint32_t);
     ws->flags |= BRLAPI_WF_TEXT;
     memcpy(p, s->text, strLen);
