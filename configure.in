@@ -515,6 +515,9 @@ in
    hpux*)
       brltty_cv_ext_lib="sl"
       ;;
+   cygwin*|mingw*)
+      brltty_cv_ext_lib="dll"
+      ;;
    darwin*)
       brltty_cv_ext_lib="dylib"
       ;;
