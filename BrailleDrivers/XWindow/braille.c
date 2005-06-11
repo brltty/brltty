@@ -99,7 +99,9 @@
 
 #ifdef USE_WINDOWS
 #include <commctrl.h>
+#include <windowsx.h>
 #define XtNumber(t) (sizeof(t)/sizeof(*t))
+typedef void *XtPointer;
 #endif /* USE_WINDOWS */
 
 #if defined(USE_XAW)
@@ -109,6 +111,17 @@
 #define commandWidgetClass    commandWidgetClass
 #define repeaterWidgetClass   repeaterWidgetClass
 #define menuEntryWidgetClass  smeBSBObjectClass
+#define CreatePopupMenu(title, toplevel) \
+	XtCreatePopupShell(title, simpleMenuWidgetClass, toplevel, NULL, 0)
+#define AddMenuSeparator(title, menu) \
+	XtVaCreateManagedWidget(title, smeLineObjectClass, menu, NULL)
+#define AddMenuLabel(title, menu) \
+	XtVaCreateManagedWidget(title, smeBSBObjectClass, menu, NULL);
+#define AddMenuRadio(title, menu, cb, checked) \
+	XtVaCreateManagedWidget(title, menuEntryWidgetClass, menu, \
+	NvalueChangedCallback, cb, NtoggleState, checked ? check : None, \
+	XtNleftMargin, 9, \
+	NULL);
 #define Nlabel                XtNlabel
 #define Ncallback             XtNcallback
 #define NvalueChangedCallback XtNcallback
@@ -123,8 +136,7 @@
 #define NvertDistance         XtNvertDistance
 #define NhorizDistance        XtNhorizDistance
 #define NtoggleState          XtNleftBitmap
-#define toggleSet             check
-#define toggleUnset           None
+#define MenuWidget            Widget
 #elif defined(USE_XM)
 #define formWidgetClass       xmFormWidgetClass
 #define panedWidgetClass      xmPanedWindowWidgetClass
@@ -132,6 +144,15 @@
 #define commandWidgetClass    xmPushButtonWidgetClass
 #define repeaterWidgetClass   xmPushButtonWidgetClass
 #define menuEntryWidgetClass  xmToggleButtonWidgetClass
+#define CreatePopupMenu(title, toplevel) \
+	XmCreatePopupMenu(toplevel, title, NULL, 0)
+#define AddMenuSeparator(title, menu) while (0) { }
+#define AddMenuLabel(title, menu) \
+	XtVaCreateManagedWidget(title, xmToggleButtonWidgetClass, menu, NULL);
+#define AddMenuRadio(title, menu, cb, checked) \
+	XtVaCreateManagedWidget(title, menuEntryWidgetClass, menu, \
+	NvalueChangedCallback, cb, NtoggleState, checked ? XmSET : XmUNSET, \
+	NULL);
 #define Nlabel                XmNlabelString
 #define Ncallback             XmNactivateCallback
 #define NvalueChangedCallback XmNvalueChangedCallback
@@ -146,10 +167,18 @@
 #define NvertDistance         XmNtopOffset
 #define NhorizDistance        XmNleftOffset
 #define NtoggleState          XmNset
-#define toggleSet             XmSET
-#define toggleUnset           XmUNSET
+#define MenuWidget            Widget
 #elif defined(USE_WINDOWS)
-#define Widget HWND
+#define Widget                HWND
+#define MenuWidget            HMENU
+#define CreatePopupMenu(title, toplevel) \
+	CreatePopupMenu()
+#define AddMenuSeparator(title, menu) \
+	AppendMenu(menu, MF_SEPARATOR, 0, NULL)
+#define AddMenuLabel(title, menu) \
+	AppendMenu(menu, MF_STRING | MF_DISABLED, 0, title)
+#define AddMenuRadio(title, menu, cb, check) \
+	AppendMenu(menu, MF_STRING | (check?MF_CHECKED:0), cb, title)
 #define CHRX 16
 #define CHRY 20
 #else /* USE_ */
@@ -188,12 +217,10 @@ static unsigned char displayedVisual[WHOLESIZE];
 #define BUTHEIGHT 32
 
 static Widget toplevel,hbox,display[WHOLESIZE];
-#ifdef USE_XT
-static Widget menu, bareMenuEntry;
+static MenuWidget menu;
 #ifdef USE_XAW
 static Pixmap check;
 #endif /* USE_XAW */
-#endif /* USE_XT */
 static int lastcursor = -1;
 #ifdef USE_XT
 static Widget vbox,keybox;
@@ -228,20 +255,6 @@ static void route(Widget w, XEvent *event, String *params, Cardinal *num_params)
   keypressed = BRL_BLK_ROUTE | (index&BRL_MSK_ARG);
 }
 #endif /* USE_XT */
-
-#ifdef USE_WINDOWS
-static LRESULT CALLBACK wndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-  if (uMsg == WM_COMMAND) {
-    hwnd = (HWND) lParam;
-    keypressed = GetWindowLong(hwnd, GWL_USERDATA);
-    LogPrint(LOG_DEBUG,"keypress(%lx)", keypressed);
-    if ((keypressed & BRL_MSK_BLK) == BRL_BLK_ROUTE)
-      lastcursor = -1;
-    return 0;
-  }
-  return DefWindowProc(hwnd, uMsg, wParam, lParam);
-}
-#endif /* USE_WINDOWS */
 
 static inline Widget crKeyBut(char *name, long keycode, int repeat,
     int horizDistance, int vertDistance)
@@ -282,7 +295,6 @@ struct model {
   char *name;
   struct button *buttons;
   int width,height;
-  Widget menuEntry;
 };
 
 static struct model *keyModel;
@@ -340,20 +352,19 @@ static struct button buttons_vs[] = {
 };
 
 static struct model models[] = {
-  { "normal",	buttons_simple,	4, 4, NULL },
-  { "vs",	buttons_vs,	9, 5, NULL },
+  { "normal",	buttons_simple,	4, 4 },
+  { "vs",	buttons_vs,	9, 5 },
 };
 
-#ifdef USE_XT
 static void setModel(Widget w, XtPointer closure, XtPointer data)
 {
-  char *newModel = (char *) closure;
-  model = newModel;
-  for (keyModel = models; keyModel < &models[XtNumber(models)] && strcmp(keyModel->name,model); keyModel++);
-  if (keyModel == &models[XtNumber(models)]) keyModel = NULL;
+  int newModel = (int) closure;
+  if (newModel == XtNumber(models))
+    keyModel = NULL;
+  else
+    keyModel = &models[newModel];
   regenerate = 1;
 }
-#endif /* USE_XT */
 
 static void createKeyButtons(struct button *buttons) {
   struct button *b;
@@ -361,24 +372,22 @@ static void createKeyButtons(struct button *buttons) {
     crKeyBut(b->label, b->keycode, b->repeat, b->x*(BUTWIDTH+1), b->y*(BUTHEIGHT+1));
 }
 
-#ifdef USE_XT
 struct radioInt {
   char *name;
   int value;
-  Widget menuEntry;
 };
 
 static struct radioInt colsRadio [] = {
-  { "80", 80, NULL },
-  { "40", 40, NULL },
-  { "20", 20, NULL },
-  { "8",  8,  NULL },
+  { "80", 80 },
+  { "40", 40 },
+  { "20", 20 },
+  { "8",  8  },
 };
 
 static struct radioInt linesRadio [] = {
-  { "3", 3, NULL },
-  { "2", 2, NULL },
-  { "1", 1, NULL },
+  { "3", 3 },
+  { "2", 2 },
+  { "1", 1 },
 };
 
 static void setWidth(Widget w, XtPointer closure, XtPointer data)
@@ -394,7 +403,59 @@ static void setHeight(Widget w, XtPointer closure, XtPointer data)
   lines = newLines;
   regenerate = 1;
 }
-#endif /* USE_XT */
+
+typedef void (*actionfun_t)(Widget, XtPointer, XtPointer);
+
+enum actions {
+  SETMODEL,
+  SETWIDTH,
+  SETHEIGHT,
+};
+
+static actionfun_t actionfun[] = {
+  [SETMODEL] = setModel,
+  [SETWIDTH] = setWidth,
+  [SETHEIGHT] = setHeight,
+};
+
+#if defined(USE_XT)
+#define SET_ACTION(cb, set) \
+  (cb)[0].callback = (XtCallbackProc) actionfun[set]
+#define SET_VALUE(cb, value) \
+  (cb)[0].closure = (caddr_t) (value)
+#elif defined(USE_WINDOWS)
+#define SET_ACTION(cb, set) \
+  (cb) = (set) << 8
+#define SET_VALUE(cb, value) \
+  (cb) = ((cb) & (~0xff)) | (value)
+#define GET_ACTIONFUN(cbint) \
+  actionfun[(cbint) >> 8]
+#define GET_VALUE(cbint) \
+  ((cbint) & 0xff)
+#else /* USE_ */
+#error Toolkit callback recording unspecified
+#endif /* USE_ */
+  
+#ifdef USE_WINDOWS
+static LRESULT CALLBACK wndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+  if (uMsg == WM_COMMAND) {
+    hwnd = GET_WM_COMMAND_HWND(wParam, lParam);
+    keypressed = GetWindowLong(hwnd, GWL_USERDATA);
+    if (!keypressed) {
+      /* menu entry */
+      GET_ACTIONFUN(wParam)(NULL, (XtPointer)(GET_VALUE(wParam)), NULL);
+    }
+    if ((keypressed & BRL_MSK_BLK) == BRL_BLK_ROUTE)
+      lastcursor = -1;
+    return 0;
+  }
+  if (uMsg == WM_CONTEXTMENU) {
+    TrackPopupMenu(menu, TPM_LEFTALIGN|TPM_RIGHTBUTTON, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), 0, toplevel, NULL);
+    return 0;
+  }
+  return DefWindowProc(hwnd, uMsg, wParam, lParam);
+}
+#endif /* USE_WINDOWS */
 
 static int brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context)
 {
@@ -409,8 +470,6 @@ static int brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context
       if (msg.message == WM_QUIT)
 	return BRL_CMD_RESTARTBRL;
       else {
-	if (msg.message == WM_COMMAND)
-	  fprintf(stderr,"message %p %d\n",msg.hwnd,msg.message);
 	TranslateMessage(&msg);
 	DispatchMessage(&msg);
       }
@@ -418,9 +477,9 @@ static int brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context
 #error Toolkit loop unspecified
 #endif /* USE_ */
     if (regenerate) {
+      regenerate = 0;
       destroyToplevel();
       generateToplevel();
-      regenerate = 0;
       brl->x = cols;
       brl->y = lines;
       brl->resizeRequired = 1;
@@ -486,9 +545,12 @@ static void generateToplevel(void)
   char *dispb;
 #endif /* USE_XAW */
   XtCallbackRec cb[2] = { { NULL, NULL }, { NULL, NULL } };
+#endif /* USE_XT */
+#ifdef USE_WINDOWS
+  UINT cb = 0;
+#endif /* USE_WINDOWS */
   struct radioInt *radioInt;
   struct model *radioModel;
-#endif /* USE_XT */
   int y,x;
 
 #if defined(USE_XT)
@@ -517,7 +579,8 @@ static void generateToplevel(void)
       .lpszMenuName = NULL,
       .lpszClassName = "BRLTTYWClass",
     };
-    if (!(RegisterClass(&wndclass))) {
+    if (!(RegisterClass(&wndclass)) &&
+	GetLastError() != ERROR_CLASS_ALREADY_EXISTS) {
       LogWindowsError("RegisterClass");
       exit(1);
     }
@@ -694,14 +757,7 @@ static void generateToplevel(void)
     createKeyButtons(keyModel->buttons);
   }
 
-#ifdef USE_XT
-#if defined(USE_XAW)
-  menu = XtCreatePopupShell("menu", simpleMenuWidgetClass, toplevel, NULL, 0);
-#elif defined(USE_XM)
-  menu = XmCreatePopupMenu(toplevel, "menu", NULL, 0);
-#else
-#error Toolkit popup menu creation unspecified
-#endif /* USE_ */
+  menu = CreatePopupMenu("menu", toplevel);
 
 #ifdef USE_XAW
   if (!check) {
@@ -712,59 +768,37 @@ static void generateToplevel(void)
 	RootWindowOfScreen(XtScreen(toplevel)), (char *) checkimg, 8, 8);
   }
 #endif /* USE_XAW */
+
 #ifdef USE_XAW
-  XtVaCreateManagedWidget("WidthLine", smeLineObjectClass, menu, NULL);
+  AddMenuSeparator("WidthLine", menu);
 #endif /* USE_XAW */
-  XtVaCreateManagedWidget("Width", menuEntryWidgetClass, menu, NULL);
-  cb[0].callback = (XtCallbackProc) setWidth;
+  AddMenuLabel("Width", menu);
+  SET_ACTION(cb, SETWIDTH);
   for (radioInt = colsRadio; radioInt < &colsRadio[XtNumber(colsRadio)]; radioInt++) {
-    cb[0].closure = (caddr_t) radioInt->value;
-    radioInt->menuEntry = XtVaCreateManagedWidget(radioInt->name, menuEntryWidgetClass, menu,
-	NvalueChangedCallback, cb,
-	NtoggleState, radioInt->value == cols ? toggleSet : toggleUnset,
-#ifdef USE_XAW
-	XtNleftMargin, 9,
-#endif /* USE_XAW */
-	NULL);
+    SET_VALUE(cb, radioInt->value);
+    AddMenuRadio(radioInt->name, menu, cb, radioInt->value == cols);
   }
-#ifdef USE_XAW
-  XtVaCreateManagedWidget("HeightLine", smeLineObjectClass, menu, NULL);
-#endif /* USE_XAW */
-  XtVaCreateManagedWidget("Height", menuEntryWidgetClass, menu, NULL);
-  cb[0].callback = (XtCallbackProc) setHeight;
+
+  AddMenuSeparator("HeightLine", menu);
+  AddMenuLabel("Height", menu);
+  SET_ACTION(cb, SETHEIGHT);
   for (radioInt = linesRadio; radioInt < &linesRadio[XtNumber(linesRadio)]; radioInt++) {
-    cb[0].closure = (caddr_t) radioInt->value;
-    radioInt->menuEntry = XtVaCreateManagedWidget(radioInt->name, menuEntryWidgetClass, menu,
-	NvalueChangedCallback, cb,
-	NtoggleState, radioInt->value == lines ? toggleSet : toggleUnset,
-#ifdef USE_XAW
-	XtNleftMargin, 9,
-#endif /* USE_XAW */
-	NULL);
+    SET_VALUE(cb, radioInt->value);
+    AddMenuRadio(radioInt->name, menu, cb, radioInt->value == lines);
   }
-#ifdef USE_XAW
-  XtVaCreateManagedWidget("ModelLine", smeLineObjectClass, menu, NULL);
-#endif /* USE_XAW */
-  XtVaCreateManagedWidget("Model", menuEntryWidgetClass, menu, NULL);
-  cb[0].callback = (XtCallbackProc) setModel;
+
+  AddMenuSeparator("ModelLine", menu);
+  AddMenuLabel("Model", menu);
+  SET_ACTION(cb, SETMODEL);
   for (radioModel = models; radioModel < &models[XtNumber(models)]; radioModel++) {
-    cb[0].closure = (caddr_t) radioModel->name;
-    radioModel->menuEntry = XtVaCreateManagedWidget(radioModel->name, menuEntryWidgetClass, menu,
-	NvalueChangedCallback, cb,
-	NtoggleState, radioModel == keyModel ? toggleSet : toggleUnset,
-#ifdef USE_XAW
-	XtNleftMargin, 9,
-#endif /* USE_XAW */
-	NULL);
+    SET_VALUE(cb, radioModel-models);
+    AddMenuRadio(radioModel->name, menu, cb, radioModel == keyModel);
   }
-  cb[0].closure = (caddr_t) "bare";
-  bareMenuEntry = XtVaCreateManagedWidget("bare", menuEntryWidgetClass, menu,
-      NvalueChangedCallback, cb,
-      NtoggleState, keyModel ? toggleUnset : toggleSet,
-#ifdef USE_XAW
-      XtNleftMargin, 9,
-#endif /* USE_XAW */
-      NULL);
+
+  SET_VALUE(cb, XtNumber(models));
+  AddMenuRadio("bare", menu, cb, !keyModel);
+
+#ifdef USE_XT
   XtVaSetValues(toplevel, XtNtranslations, XtParseTranslationTable(
 	"None<Btn3Down>: "
 #if defined(USE_XAW)
@@ -854,6 +888,7 @@ static void destroyToplevel(void)
   XtDestroyApplicationContext(app_con);
   app_con = NULL;
 #elif defined(USE_WINDOWS)
+  DestroyMenu(menu);
   if (!DestroyWindow(toplevel))
     LogWindowsError("DestroyWindow");
 #else /* USE_ */
