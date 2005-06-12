@@ -29,7 +29,8 @@ X = @EXEEXT@
 
 default: all
 
-include $(SRC_DIR)/reldeps.mk
-include $(SRC_TOP)absdeps.mk
+include $(BLD_TOP)config.mk
 include $(SRC_TOP)common.mk
+include $(SRC_TOP)absdeps.mk
+include $(SRC_DIR)/reldeps.mk
 

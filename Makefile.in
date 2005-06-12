@@ -15,8 +15,6 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-include $(BLD_TOP)config.mk
-
 all install uninstall install-programs install-help install-tables install-drivers:
 	cd $(PGM_DIR) && $(MAKE) $@
 

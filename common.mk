@@ -15,12 +15,12 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-$(BLD_TOP)Drivers/VarioHT/braille.$O: $(BLD_TOP)Drivers/VarioHT/vario.$O
-$(BLD_TOP)Drivers/VarioHT/braille.$O: $(BLD_TOP)Drivers/VarioHT/variolow.$O
+$(BLD_TOP)$(BRL_DIR)/VarioHT/braille.$O: $(BLD_TOP)$(BRL_DIR)/VarioHT/vario.$O
+$(BLD_TOP)$(BRL_DIR)/VarioHT/braille.$O: $(BLD_TOP)$(BRL_DIR)/VarioHT/variolow.$O
 	cd $(@D) && $(MAKE) $(@F)
 
-$(SRC_TOP)Drivers/VideoBraille/braille.$O: $(BLD_TOP)Drivers/VideoBraille/vb.$O
-$(BLD_TOP)Drivers/VideoBraille/braille.$O: $(BLD_TOP)Drivers/VideoBraille/vblow.$O
+$(BLD_TOP)$(BRL_DIR)/VideoBraille/braille.$O: $(BLD_TOP)$(BRL_DIR)/VideoBraille/vb.$O
+$(BLD_TOP)$(BRL_DIR)/VideoBraille/braille.$O: $(BLD_TOP)$(BRL_DIR)/VideoBraille/vblow.$O
 	cd $(@D) && $(MAKE) $(@F)
 
 clean::

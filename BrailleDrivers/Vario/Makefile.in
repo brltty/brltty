@@ -15,8 +15,6 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-include $(BLD_TOP)config.mk
-
 DRIVER_CODE = va
 DRIVER_NAME = Vario
 DRIVER_COMMENT = 40/80 (native mode)

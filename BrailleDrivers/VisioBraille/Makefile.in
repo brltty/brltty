@@ -15,8 +15,6 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-include $(BLD_TOP)config.mk
-
 DRIVER_CODE = vs
 DRIVER_NAME = VisioBraille
 DRIVER_COMMENT = 20/40

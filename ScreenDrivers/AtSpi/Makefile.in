@@ -15,8 +15,6 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-include $(BLD_TOP)config.mk
-
 DRIVER_CODE = as
 DRIVER_NAME = AtSpi
 DRIVER_COMMENT = 

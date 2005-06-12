@@ -15,8 +15,6 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-include $(BLD_TOP)config.mk
-
 DRIVER_CODE = al
 DRIVER_NAME = Alva
 DRIVER_COMMENT = Delphi(4nn)

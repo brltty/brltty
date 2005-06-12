@@ -1,3 +1,4 @@
+###############################################################################
 # BRLTTY - A background process providing access to the console screen (when in
 #          text mode) for a blind person using a refreshable braille display.
 #
@@ -13,8 +14,6 @@
 #
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
-
-include $(BLD_TOP)config.mk
 
 all: all-brltty all-brltest all-spktest all-scrtest tbltest$X ctbtest$X tunetest$X $(ALL_API)
 all-brltty: brltty$X $(BRAILLE_DRIVERS) $(BRAILLE_HELP) $(SPEECH_DRIVERS) $(SCREEN_DRIVERS)

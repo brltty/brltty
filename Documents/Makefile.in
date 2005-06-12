@@ -15,7 +15,6 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-include $(BLD_TOP)/config.mk
 ABS_SRC_DIR = @abs_srcdir@
 
 all: Manual BrlAPI $(ALL_API)

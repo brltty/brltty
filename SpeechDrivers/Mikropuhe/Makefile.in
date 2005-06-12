@@ -15,8 +15,6 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-include $(BLD_TOP)config.mk
-
 DRIVER_CODE = mp
 DRIVER_NAME = Mikropuhe
 DRIVER_COMMENT = text to speech engine

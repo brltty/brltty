@@ -15,8 +15,6 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-include $(BLD_TOP)config.mk
-
 DRIVER_CODE = es
 DRIVER_NAME = ExternalSpeech
 DRIVER_COMMENT = runs /usr/local/bin/externalspeech

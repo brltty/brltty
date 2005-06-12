@@ -15,8 +15,6 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-include $(BLD_TOP)config.mk
-
 DRIVER_CODE = md
 DRIVER_NAME = MDV
 DRIVER_COMMENT = MB208/MB408L/MB408S (protocol 5)

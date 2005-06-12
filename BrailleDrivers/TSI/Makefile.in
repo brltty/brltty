@@ -15,8 +15,6 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-include $(BLD_TOP)config.mk
-
 DRIVER_CODE = ts
 DRIVER_NAME = TSI
 DRIVER_COMMENT = Navigator 20/40/80, PowerBraille 40/65/80

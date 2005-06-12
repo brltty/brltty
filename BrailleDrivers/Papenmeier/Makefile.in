@@ -15,8 +15,6 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-include $(BLD_TOP)config.mk
-
 DRIVER_CODE = pm
 DRIVER_NAME = Papenmeier
 DRIVER_COMMENT = Tiny, Compact, 2D Lite/Screen, EL2D 40/66/80, EL 40/80, EL 40 P, Elba 20/32, IB 80, II EL 40/66/80 S

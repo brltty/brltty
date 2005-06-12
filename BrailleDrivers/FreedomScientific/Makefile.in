@@ -15,8 +15,6 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-include $(BLD_TOP)config.mk
-
 DRIVER_CODE = fs
 DRIVER_NAME = FreedomScientific
 DRIVER_COMMENT = Focus 40/44/70/80/84, PacMate 20/40

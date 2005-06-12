@@ -15,8 +15,6 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-include $(BLD_TOP)config.mk
-
 DRIVER_CODE = vh
 DRIVER_NAME = VarioHT
 DRIVER_COMMENT = 40 (Vario in HandyTech emulation mode)
