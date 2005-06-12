@@ -331,15 +331,16 @@ openScreen (unsigned char vt) {
   if (path) {
     int screen = openDevice(path, "screen", O_RDWR, 7, 0X80|vt);
     if (screen != -1) {
+      LogPrint(LOG_DEBUG, "Screen opened: %s: fd=%d", path, screenDescriptor);
       if (openConsole(vt)) {
         closeScreen();
         screenDescriptor = screen;
-        LogPrint(LOG_DEBUG, "Screen opened: %s: fd=%d", path, screenDescriptor);
-        free(path);
         virtualTerminal = vt;
+        free(path);
         return 1;
       }
       close(screen);
+      LogPrint(LOG_DEBUG, "Screen closed: fd=%d", screen);
     }
     free(path);
   }
@@ -558,8 +559,10 @@ prepare_LinuxScreen (char **parameters) {
   return 0;
 }
 
+static int currentConsoleNumber;
 static int
 open_LinuxScreen (void) {
+  currentConsoleNumber = 0;
   return openScreen(0);
 }
 
@@ -683,7 +686,7 @@ getScreenDescription (ScreenDescription *description) {
     } else {
       LogError("Screen seek");
     }
-    problemText = "Screen header read error.";
+    problemText = "screen header read error";
   }
   description->rows = 1;
   description->cols = strlen(problemText);
@@ -701,10 +704,16 @@ getConsoleDescription (ScreenDescription *description) {
     if (controlConsole(VT_GETSTATE, &state) == -1) {
       LogError("ioctl VT_GETSTATE");
       description->no = 0;
-      problemText = "Can't get virtual terminal number.";
+      problemText = "can't get virtual terminal number";
       return 0;
     }
     description->no = state.v_active;
+
+    if (currentConsoleNumber && (description->no != currentConsoleNumber) && !rebindConsole()) {
+      problemText = "can't access console";
+      return 0;
+    }
+    currentConsoleNumber = description->no;
   }
 
   {
@@ -715,7 +724,7 @@ getConsoleDescription (ScreenDescription *description) {
       problemText = NULL;
       return 1;
     }
-    problemText = "Screen not in text mode.";
+    problemText = "screen not in text mode";
     return 0;
   }
 }
