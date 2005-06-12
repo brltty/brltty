@@ -237,7 +237,7 @@ static const DotsTable dots12345678 = {0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40,
 static const DotsTable dots12374568 = {0X01, 0X02, 0X04, 0X10, 0X20, 0X40, 0X08, 0X80};
 
 static const ModelEntry modelTable[] = {
-  {"Focus 40"     , &dots12345678, 80, 0, -1},
+  {"Focus 40"     , &dots12345678, 40, 0, -1},
   {"Focus 44"     , &dots12374568, 44, 3, -1},
   {"Focus 70"     , &dots12374568, 70, 3, -1},
   {"Focus 80"     , &dots12345678, 80, 0, -1},
