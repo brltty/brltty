@@ -511,18 +511,27 @@ uninstall-headers:
 
 ###############################################################################
 
-distclean::
-	-rm -f api.h
+install uninstall::
+	-set -- $(BRAILLE_EXTERNAL_DRIVER_NAMES); \
+	for driver; do (cd $(BLD_TOP)$(BRL_DIR)/$$driver && $(MAKE) $@); done
+	-set -- $(SPEECH_EXTERNAL_DRIVER_NAMES); \
+	for driver; do (cd $(BLD_TOP)$(SPK_DIR)/$$driver && $(MAKE) $@); done
+	-set -- $(SCREEN_EXTERNAL_DRIVER_NAMES); \
+	for driver; do (cd $(BLD_TOP)$(SCR_DIR)/$$driver && $(MAKE) $@); done
+
+distclean clean::
+	-set -- $(BRAILLE_EXTERNAL_DRIVER_NAMES) $(BRAILLE_INTERNAL_DRIVER_NAMES); \
+	for driver; do (cd $(BLD_TOP)$(BRL_DIR)/$$driver && $(MAKE) $@); done
+	-set -- $(SPEECH_EXTERNAL_DRIVER_NAMES) $(SPEECH_INTERNAL_DRIVER_NAMES); \
+	for driver; do (cd $(BLD_TOP)$(SPK_DIR)/$$driver && $(MAKE) $@); done
+	-set -- $(SCREEN_EXTERNAL_DRIVER_NAMES) $(SCREEN_INTERNAL_DRIVER_NAMES); \
+	for driver; do (cd $(BLD_TOP)$(SCR_DIR)/$$driver && $(MAKE) $@); done
 
 clean::
 	-rm -f brltty$X xbrlapi$X txt2hlp$X tbl2hex$X *test$X *-static$X
 	-rm -f $(API_LIB) $(API_ARC)
 	-rm -f $(BLD_TOP)$(DRV_DIR)/* $(BLD_TOP)$(DAT_DIR)/*
 
-distclean clean install uninstall::
-	-for driver in $(BRAILLE_EXTERNAL_DRIVER_NAMES); do (cd $(BLD_TOP)$(BRL_DIR)/$$driver && $(MAKE) $@); done
-	-for driver in $(SPEECH_EXTERNAL_DRIVER_NAMES); do (cd $(BLD_TOP)$(SPK_DIR)/$$driver && $(MAKE) $@); done
-	-for driver in $(SCREEN_EXTERNAL_DRIVER_NAMES); do (cd $(BLD_TOP)$(SCR_DIR)/$$driver && $(MAKE) $@); done
-
 distclean::
+	-rm -f api.h
 	-rm -f brltty-config$X
