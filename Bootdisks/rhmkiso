@@ -177,6 +177,7 @@ brlttyInstallRoot="${temporaryDirectory}/install"
    ./autogen.sh
    ./configure --quiet --with-install-root="${brlttyInstallRoot}" \
 	       --with-init-path="${initPath}" \
+               --with-screen-driver="lx,-all" \
 	       --with-braille-driver="-tt,-vr,${brailleDrivers}" \
 	       --with-text-table="${textTable}" \
 	       --disable-speech-support --without-libbraille --without-curses --without-x \
