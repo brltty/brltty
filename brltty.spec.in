@@ -89,7 +89,7 @@ which directly accesses a refreshable braille display.
 %setup -n @PACKAGE_NAME@-@PACKAGE_VERSION@
 
 %build
-%configure --with-install-root="${RPM_BUILD_ROOT}" --without-flite --without-mikropuhe --without-swift --without-theta --without-viavoice --without-libbraille --without-curses --without-x
+%configure --with-install-root="${RPM_BUILD_ROOT}" --without-flite --without-mikropuhe --without-swift --without-theta --without-viavoice --without-libbraille --without-curses --without-x --with-braille-driver=-tt
 make
 
 directory="doc"
