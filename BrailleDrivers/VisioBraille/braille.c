@@ -17,9 +17,7 @@
 #define VS_VERSION "BRLTTY driver for VisioBraille, version 0.2, 2002"
 #define VS_COPYRIGHT "Copyright Sebastien HINDERER <Sebastien.Hinderer@libertysurf.fr"
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif /* HAVE_CONFIG_H */
+#include "prologue.h"
 
 #include <stdlib.h>
 #include <unistd.h>

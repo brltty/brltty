@@ -17,9 +17,7 @@
 #define XW_VERSION "BRLTTY driver for X, version 0.1, 2004"
 #define XW_COPYRIGHT "Copyright Samuel Thibault <samuel.thibault@ens-lyon.org>"
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif /* HAVE_CONFIG_H */
+#include "prologue.h"
 
 #include <stdio.h>
 #include <stdlib.h>

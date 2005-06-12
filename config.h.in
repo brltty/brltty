@@ -22,14 +22,6 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#if defined(__CYGWIN32__) || defined(__MINGW32__)
-#define WINDOWS
-
-#define __USE_W32_SOCKETS
-#include <windows.h>
-#endif /* defined(__CYGWIN32__) || defined(__MINGW32__) */
-#include <sys/types.h>
-
 /* Define this if the host is big endian. */
 #undef WORDS_BIGENDIAN
 
@@ -38,6 +30,21 @@ extern "C" {
 
 /* Define this if the compiler doesn't fully support the inline keyword. */
 #undef inline
+
+/* Define this if the __alignof__ operator is supported. */
+#undef HAVE_OPERATOR_ALIGNOF
+#ifndef HAVE_OPERATOR_ALIGNOF
+#define __alignof__(x) 8
+#endif /* HAVE_OPERATOR_ALIGNOF */
+
+/* Define this if the printf format attribute is supported. */
+#undef HAVE_ATTRIBUTE_FORMAT_PRINTF
+
+/* Define this if the packed attribute is supported. */
+#undef HAVE_ATTRIBUTE_PACKED
+
+/* Define this if the unused attribute is supported. */
+#undef HAVE_ATTRIBUTE_UNUSED
 
 /* Define this if the header file alloca.h exists. */
 #undef HAVE_ALLOCA_H
@@ -54,7 +61,7 @@ extern "C" {
 #ifndef WINDOWS
 /* Define this if the header file sys/select.h exists. */
 #undef HAVE_SYS_SELECT_H
-#endif
+#endif /* WINDOWS */
 
 /* Define this if the header file sys/wait.h exists. */
 #undef HAVE_SYS_WAIT_H
@@ -276,21 +283,6 @@ extern "C" {
 #undef HAVE_PKG_NEXTAW
 #undef HAVE_PKG_XAWPLUS
 #undef HAVE_PKG_XM
-
-/* Define this if the __alignof__ operator is supported. */
-#undef HAVE_OPERATOR_ALIGNOF
-#ifndef HAVE_OPERATOR_ALIGNOF
-#define __alignof__(x) 8
-#endif /* HAVE_OPERATOR_ALIGNOF */
-
-/* Define this if the printf format attribute is supported. */
-#undef HAVE_ATTRIBUTE_FORMAT_PRINTF
-
-/* Define this if the packed attribute is supported. */
-#undef HAVE_ATTRIBUTE_PACKED
-
-/* Define this if the unused attribute is supported. */
-#undef HAVE_ATTRIBUTE_UNUSED
 
 #define TRANSLATION_TABLE_EXTENSION ".tbl"
 #define TEXT_TABLE_PREFIX "text."

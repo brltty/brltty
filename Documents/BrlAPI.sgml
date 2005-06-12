@@ -855,13 +855,11 @@ and by defining associated functions.
 
 <p><em>Every</em> <em/brltty/ driver <em>must</em> consist in at least
 a file called braille.c, located in an appropriate subdirectory of
-the Drivers subdirectory. This braille.c file must have the
+the BrailleDrivers subdirectory. This braille.c file must have the
 following layout
 
 <verb>
-    #ifdef HAVE_CONFIG_H
-    #include "config.h"
-    #endif /* HAVE_CONFIG_H */
+    #include "prologue.h"
     /* Include standard C headers */
     #include "Programs/brl.h"
     #include "Programs/misc.h"

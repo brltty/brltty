@@ -17,9 +17,7 @@
 
 /* apitest provides a small test utility for BRLTTY's API */
  
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif /* HAVE_CONFIG_H */
+#include "prologue.h"
 
 #include <stdlib.h>
 #include <stdio.h>

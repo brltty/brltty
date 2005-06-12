@@ -27,9 +27,7 @@
  *              - fix correct size of braille lines.
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif /* HAVE_CONFIG_H */
+#include "prologue.h"
 
 #include <stdlib.h>
 #include <unistd.h>

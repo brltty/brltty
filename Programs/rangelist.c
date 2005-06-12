@@ -15,9 +15,7 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
  
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif /* HAVE_CONFIG_H */
+#include "prologue.h"
 
 /* Source file for range list management module */
 /* For a description of what each function does, see rangelist.h */

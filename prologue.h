@@ -15,22 +15,27 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#include "prologue.h"
+#ifndef BRLTTY_INCLUDED_PROLOGUE
+#define BRLTTY_INCLUDED_PROLOGUE
 
-#include <stdlib.h>
-#include <unistd.h>
-#include <stdio.h>
-#include <string.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <sys/ioctl.h>
-#include <sys/param.h>
-#include <dev/usb/usb.h>
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
-#include "misc.h"
-#include "usb.h"
-#include "usb_internal.h"
+#if defined(__CYGWIN32__) || defined(__MINGW32__)
+#define WINDOWS
 
-#define USB_CONTROL_PATH_FORMAT "/dev/%s"
-#define USB_ENDPOINT_PATH_FORMAT "%.*s.%d"
-#include "usb_bsd.h"
+#define __USE_W32_SOCKETS
+#include <windows.h>
+#endif /* defined(__CYGWIN32__) || defined(__MINGW32__) */
+#include <sys/types.h>
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+
+#endif /* BRLTTY_INCLUDED_PROLOGUE */

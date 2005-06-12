@@ -19,9 +19,7 @@
 #define TT_DATE "August, 2004"
 #define TT_COPYRIGHT "Copyright Samuel Thibault <samuel.thibault@ens-lyon.org>"
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif /* HAVE_CONFIG_H */
+#include "prologue.h"
 
 #include <stdlib.h>
 #include <unistd.h>

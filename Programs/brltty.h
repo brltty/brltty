@@ -18,9 +18,7 @@
 #ifndef BRLTTY_INCLUDED_BRLTTY
 #define BRLTTY_INCLUDED_BRLTTY
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif /* HAVE_CONFIG_H */
+#include "prologue.h"
 
 #ifdef __cplusplus
 extern "C" {

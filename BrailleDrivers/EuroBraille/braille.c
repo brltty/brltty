@@ -22,9 +22,7 @@
  * See the README file for details about copyrights and version informations
  */
 
-#ifdef HAVE_CONFIG_H
-# include "config.h"
-#endif /* HAVE_CONFIG_H */
+#include "prologue.h"
 
 #include <fcntl.h>
 #include <stdlib.h>

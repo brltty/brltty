@@ -35,9 +35,7 @@
 #define VA_COPYRIGHT "Copyright (C) 2000 by Mario Lang " \
                   "<mlang@delysid.org>"
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif /* HAVE_CONFIG_H */
+#include "prologue.h"
 
 #include <stdlib.h>
 #include <unistd.h>

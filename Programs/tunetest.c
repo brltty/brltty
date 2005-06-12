@@ -18,9 +18,7 @@
 /* tunetest.c - Test program for the tune playing library
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif /* HAVE_CONFIG_H */
+#include "prologue.h"
 
 #include <stdlib.h>
 #include <unistd.h>
