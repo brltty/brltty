@@ -213,6 +213,7 @@ static pthread_mutex_t connectionsMutex = PTHREAD_MUTEX_INITIALIZER;
 
 /* Protects the real driver's functions */
 static pthread_mutex_t driverMutex = PTHREAD_MUTEX_INITIALIZER;
+static int in_readCommand;
 
 /* Which connection currently has raw mode */
 static pthread_mutex_t rawMutex = PTHREAD_MUTEX_INITIALIZER;
@@ -1930,9 +1931,11 @@ static void api_writeWindow(BrailleDisplay *brl)
   }
   pthread_mutex_unlock(&connectionsMutex);
   last_conn_write=NULL;
-  pthread_mutex_lock(&driverMutex);
+  if (!in_readCommand)
+    pthread_mutex_lock(&driverMutex);
   trueBraille->writeWindow(brl);
-  pthread_mutex_unlock(&driverMutex);
+  if (!in_readCommand)
+    pthread_mutex_unlock(&driverMutex);
 }
 
 /* Function : api_writeVisual */
@@ -1948,9 +1951,11 @@ static void api_writeVisual(BrailleDisplay *brl)
   }
   pthread_mutex_unlock(&connectionsMutex);
   last_conn_write=NULL;
-  pthread_mutex_lock(&driverMutex);
+  if (!in_readCommand)
+    pthread_mutex_lock(&driverMutex);
   trueBraille->writeVisual(brl);
-  pthread_mutex_unlock(&driverMutex);
+  if (!in_readCommand)
+    pthread_mutex_unlock(&driverMutex);
 }
 
 /* Function: whoGetsKey */
@@ -1988,8 +1993,9 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
   ssize_t size;
   Connection *c;
   unsigned char packet[BRLAPI_MAXPACKETSIZE];
-  brl_keycode_t keycode, command;
+  brl_keycode_t keycode, command = EOF;
 
+  in_readCommand = 1;
   pthread_mutex_lock(&rawMutex);
   if (rawConnection!=NULL) {
     pthread_mutex_lock(&driverMutex);
@@ -2000,7 +2006,7 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
     else 
       brlapi_writePacket(rawConnection->fd,BRLPACKET_PACKET,packet,size);
     pthread_mutex_unlock(&rawMutex);
-    return EOF;
+    goto out;
   }
   pthread_mutex_unlock(&rawMutex);
   setCurrentRootTty();
@@ -2038,7 +2044,7 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
     pthread_mutex_unlock(&driverMutex);
     if (brl->resizeRequired)
       handleResize(brl);
-    if (res==EOF) return EOF;
+    if (res==EOF) goto out;
     keycode = (brl_keycode_t) res;
     pthread_mutex_lock(&driverMutex);
     command = trueBraille->keyToCommand(brl,caller,keycode);
@@ -2050,7 +2056,7 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
     pthread_mutex_unlock(&driverMutex);
     if (brl->resizeRequired)
       handleResize(brl);
-    if (res==EOF) return EOF;
+    if (res==EOF) goto out;
     keycode = 0;
     command = (brl_keycode_t) res;
   }
@@ -2068,10 +2074,11 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
         brlapi_writePacket(c->fd,BRLPACKET_KEY,&keycode,sizeof(command));
       }
     }
-    pthread_mutex_unlock(&connectionsMutex);
-    return EOF;
+    command = EOF;
   }
   pthread_mutex_unlock(&connectionsMutex);
+out:
+  in_readCommand = 0;
   return command;
 }
 
