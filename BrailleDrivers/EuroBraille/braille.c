@@ -796,14 +796,14 @@ static int	convert(int keys)
   int		res;
 
   res = 0;
-  res = (keys & 128) ? 128 : 0;
-  res += (keys & 64) ? 64 : 0;
-  res += (keys & 32) ? 32 : 0;
-  res += (keys & 16) ? 8 : 0;
-  res += (keys & 8) ? 2 : 0;
-  res += (keys & 4) ? 16 : 0;
-  res += (keys & 2) ? 4 : 0;
-  res += (keys & 1) ? 1 : 0;
+  res = (keys & 128) ? BRL_DOT8 : 0;
+  res += (keys & 64) ? BRL_DOT7 : 0;
+  res += (keys & 32) ? BRL_DOT6 : 0;
+  res += (keys & 16) ? BRL_DOT5 : 0;
+  res += (keys & 8) ? BRL_DOT4 : 0;
+  res += (keys & 4) ? BRL_DOT3 : 0;
+  res += (keys & 2) ? BRL_DOT2 : 0;
+  res += (keys & 1) ? BRL_DOT1 : 0;
   return (res);
 }
 
