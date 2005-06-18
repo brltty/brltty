@@ -89,9 +89,11 @@
 #endif /* HAVE_PKG_ */
 
 #ifdef USE_XT
+#define XK_MISCELLANY
 #include <X11/Intrinsic.h>
 #include <X11/Xlib.h>
 #include <X11/StringDefs.h>
+#include <X11/keysymdef.h>
 #include <X11/Shell.h>
 #endif /* USE_XT */
 
@@ -187,9 +189,10 @@ typedef enum {
   PARM_TKPARMS,
   PARM_LINES,
   PARM_COLS,
-  PARM_MODEL
+  PARM_MODEL,
+  PARM_INPUT
 } DriverParameter;
-#define BRLPARMS "tkparms", "lines", "cols", "model"
+#define BRLPARMS "tkparms", "lines", "cols", "model", "input"
 
 #define BRL_HAVE_VISUAL_DISPLAY
 #include "Programs/brl_driver.h"
@@ -199,6 +202,7 @@ typedef enum {
 #define MAXCOLS 80
 #define WHOLESIZE (MAXLINES * MAXCOLS)
 static int cols,lines;
+static int input;
 static char *model = "simple";
 static int xtArgc = 1;
 static char *xtDefArgv[]= { "brltty", NULL };
@@ -242,8 +246,134 @@ static long keypressed;
 #ifdef USE_XT
 static void KeyPressCB(Widget w, XtPointer closure, XtPointer callData)
 {
-  LogPrint(LOG_DEBUG,"keypress(%p)",closure);
-  keypressed=(long)closure;
+  LogPrint(LOG_DEBUG,"keypresscb(%p)", closure);
+  keypressed = (long)closure;
+}
+
+static void keypress(Widget w, XEvent *event, String *params, Cardinal *num_params) {
+  static Modifiers my_modifiers;
+  Modifiers modifiers, modifier;
+  KeySym keysym;
+  if (event->type != KeyPress && event->type != KeyRelease) {
+    LogPrint(LOG_ERR,"keypress is not a KeyPress");
+    return;
+  }
+  keysym = XtGetActionKeysym(event, &modifiers);
+  modifiers |= my_modifiers;
+  LogPrint(LOG_DEBUG,"keypress(%#lx), modif(%#x)", keysym, modifiers);
+  switch(keysym) {
+    case XK_Shift_L:
+    case XK_Shift_R:   modifier = ShiftMask; goto modif;
+    case XK_Control_L:
+    case XK_Control_R: modifier = ControlMask; goto modif;
+    case XK_Alt_L:
+    case XK_Alt_R:
+    case XK_Meta_L:
+    case XK_Meta_R:    modifier = Mod1Mask; goto modif;
+  }
+  if (event->type == KeyRelease) return;
+  if (keysym<0x100) keypressed = keysym | BRL_BLK_PASSCHAR;
+  else switch(keysym) {
+    case XK_KP_Enter:
+    case XK_Return:       keypressed = BRL_BLK_PASSKEY | BRL_KEY_ENTER;           break;
+    case XK_KP_Tab:
+    case XK_Tab:          keypressed = BRL_BLK_PASSKEY | BRL_KEY_TAB;             break;
+    case XK_BackSpace:    keypressed = BRL_BLK_PASSKEY | BRL_KEY_BACKSPACE;       break;
+    case XK_Escape:       keypressed = BRL_BLK_PASSKEY | BRL_KEY_ESCAPE;          break;
+    case XK_KP_Left:
+    case XK_Left:         keypressed = BRL_BLK_PASSKEY | BRL_KEY_CURSOR_LEFT;     break;
+    case XK_KP_Right:
+    case XK_Right:        keypressed = BRL_BLK_PASSKEY | BRL_KEY_CURSOR_RIGHT;    break;
+    case XK_KP_Up:
+    case XK_Up:           keypressed = BRL_BLK_PASSKEY | BRL_KEY_CURSOR_UP;       break;
+    case XK_KP_Down:
+    case XK_Down:         keypressed = BRL_BLK_PASSKEY | BRL_KEY_CURSOR_DOWN;     break;
+    case XK_KP_Page_Up:
+    case XK_Page_Up:      keypressed = BRL_BLK_PASSKEY | BRL_KEY_PAGE_UP;         break;
+    case XK_KP_Page_Down:
+    case XK_Page_Down:    keypressed = BRL_BLK_PASSKEY | BRL_KEY_PAGE_DOWN;       break;
+    case XK_KP_Home:
+    case XK_Home:         keypressed = BRL_BLK_PASSKEY | BRL_KEY_HOME;            break;
+    case XK_KP_End:
+    case XK_End:          keypressed = BRL_BLK_PASSKEY | BRL_KEY_END;             break;
+    case XK_KP_Insert:
+    case XK_Insert:       keypressed = BRL_BLK_PASSKEY | BRL_KEY_INSERT;          break;
+    case XK_KP_Delete:
+    case XK_Delete:       keypressed = BRL_BLK_PASSKEY | BRL_KEY_DELETE;          break;
+    case XK_KP_F1:
+    case XK_F1:           keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION +  0); break;
+    case XK_KP_F2:
+    case XK_F2:           keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION +  1); break;
+    case XK_KP_F3:
+    case XK_F3:           keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION +  2); break;
+    case XK_KP_F4:
+    case XK_F4:           keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION +  3); break;
+    case XK_F5:           keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION +  4); break;
+    case XK_F6:           keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION +  5); break;
+    case XK_F7:           keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION +  6); break;
+    case XK_F8:           keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION +  7); break;
+    case XK_F9:           keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION +  8); break;
+    case XK_F10:          keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION +  9); break;
+    case XK_F11:          keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION + 10); break;
+    case XK_F12:          keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION + 11); break;
+    case XK_F13:          keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION + 12); break;
+    case XK_F14:          keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION + 13); break;
+    case XK_F15:          keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION + 14); break;
+    case XK_F16:          keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION + 15); break;
+    case XK_F17:          keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION + 16); break;
+    case XK_F18:          keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION + 17); break;
+    case XK_F19:          keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION + 18); break;
+    case XK_F20:          keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION + 19); break;
+    case XK_F21:          keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION + 20); break;
+    case XK_F22:          keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION + 21); break;
+    case XK_F23:          keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION + 22); break;
+    case XK_F24:          keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION + 23); break;
+    case XK_F25:          keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION + 24); break;
+    case XK_F26:          keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION + 25); break;
+    case XK_F27:          keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION + 26); break;
+    case XK_F28:          keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION + 27); break;
+    case XK_F29:          keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION + 28); break;
+    case XK_F30:          keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION + 29); break;
+    case XK_F31:          keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION + 30); break;
+    case XK_F32:          keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION + 31); break;
+    case XK_F33:          keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION + 32); break;
+    case XK_F34:          keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION + 33); break;
+    case XK_F35:          keypressed = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION + 34); break;
+    case XK_KP_Space:     keypressed = BRL_BLK_PASSCHAR | ' '; break;
+    case XK_KP_Equal:     keypressed = BRL_BLK_PASSCHAR | '='; break;
+    case XK_KP_Multiply:  keypressed = BRL_BLK_PASSCHAR | '*'; break;
+    case XK_KP_Add:       keypressed = BRL_BLK_PASSCHAR | '+'; break;
+    case XK_KP_Separator: keypressed = BRL_BLK_PASSCHAR | ','; break;
+    case XK_KP_Subtract:  keypressed = BRL_BLK_PASSCHAR | '-'; break;
+    case XK_KP_Decimal:   keypressed = BRL_BLK_PASSCHAR | '.'; break;
+    case XK_KP_Divide:    keypressed = BRL_BLK_PASSCHAR | '/'; break;
+    case XK_KP_0:         keypressed = BRL_BLK_PASSCHAR | '0'; break;
+    case XK_KP_1:         keypressed = BRL_BLK_PASSCHAR | '1'; break;
+    case XK_KP_2:         keypressed = BRL_BLK_PASSCHAR | '2'; break;
+    case XK_KP_3:         keypressed = BRL_BLK_PASSCHAR | '3'; break;
+    case XK_KP_4:         keypressed = BRL_BLK_PASSCHAR | '4'; break;
+    case XK_KP_5:         keypressed = BRL_BLK_PASSCHAR | '5'; break;
+    case XK_KP_6:         keypressed = BRL_BLK_PASSCHAR | '6'; break;
+    case XK_KP_7:         keypressed = BRL_BLK_PASSCHAR | '7'; break;
+    case XK_KP_8:         keypressed = BRL_BLK_PASSCHAR | '8'; break;
+    case XK_KP_9:         keypressed = BRL_BLK_PASSCHAR | '9'; break;
+    default: return;
+  }
+  if (modifiers & ControlMask)
+    keypressed |= BRL_FLG_CHAR_CONTROL;
+  if (modifiers & Mod1Mask)
+    keypressed |= BRL_FLG_CHAR_META;
+  if (modifiers & (ShiftMask|LockMask))
+    keypressed |= BRL_FLG_CHAR_SHIFT;
+  LogPrint(LOG_DEBUG,"keypressed %#lx", keypressed);
+  return;
+
+modif:
+  LogPrint(LOG_DEBUG,"modifier %#x", modifier);
+  if (event->type == KeyPress)
+    my_modifiers |= modifier;
+  else
+    my_modifiers &= ~modifier;
 }
 
 static void route(Widget w, XEvent *event, String *params, Cardinal *num_params)
@@ -533,10 +663,17 @@ static void generateToplevel(void)
   char **missing_charset_list_return;
   int missing_charset_count_return;
 #endif /* USE_XAW */
-  XtActionsRec routeAction [] = { { "route", route } };
+  XtActionsRec actions [] = {
+    { "route", route },
+    { "keypress", keypress },
 #ifdef USE_XM
-  XtActionsRec popupAction [] = { { "popup", popup } };
+    { "popup", popup },
 #endif /* USE_XM */
+    };
+  char topActions[] = "\
+:<Key>: keypress()\n\
+:<KeyUp>: keypress()\n";
+  XtTranslations topTransl;
   Widget tmp_vbox;
   char *disp;
 #ifdef USE_XAW
@@ -563,6 +700,9 @@ static void generateToplevel(void)
     sessionShellWidgetClass,
     XtNallowShellResize, True,
     NULL);
+
+  XtAppAddActions(app_con,actions,XtNumber(actions));
+
 #elif defined(USE_WINDOWS)
   {
     WNDCLASS wndclass = {
@@ -601,15 +741,9 @@ static void generateToplevel(void)
 #error Toolkit toplevel creation unspecified
 #endif /* USE_ */
 
-#ifdef USE_XT
-  XtAppAddActions(app_con,routeAction,XtNumber(routeAction));
-#ifdef USE_XM
-  XtAppAddActions(app_con,popupAction,XtNumber(popupAction));
-#endif /* USE_XM */
-#endif /* USE_XT */
-
   /* vertical separation */
 #ifdef USE_XT
+  topTransl = XtParseTranslationTable(input?topActions:"");
   vbox = XtVaCreateManagedWidget("vbox",panedWidgetClass,toplevel,
 #ifdef USE_XM
     XmNmarginHeight, 0,
@@ -617,6 +751,7 @@ static void generateToplevel(void)
     XmNspacing, 1,
 #endif /* USE_XM */
     XtNresize, True,
+    XtNtranslations, topTransl,
     NULL);
 #endif /* USE_XT */
 
@@ -843,6 +978,12 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
     int value;
     if (validateInteger(&value, "cols", parameters[PARM_COLS], &minimum, &maximum))
       cols=value;
+  }
+
+  if (*parameters[PARM_INPUT]) {
+    unsigned int value;
+    if (validateFlag(&value, "input", parameters[PARM_INPUT], "on", "off"))
+      input = value;
   }
 
   if (*parameters[PARM_TKPARMS]) {

@@ -2,23 +2,29 @@ This driver lets use a Graphical User Interface as BrlTTY device:
 it behaves just like a real braille device, its cost excepted :)
 
 It is mostly intended for sighted developers who don't have access to a real
-device, but still want to have an idea of the result.
-It is most useful for writing BrlAPI applications.
+device, but still want to have an idea of the accessiblity of their application.
 
 Assuming you're under X, first launch brltty:
-$ brltty -b xw
-
-(note: to be able to run brltty as non-root user, give the
---without-screen-driver option to ./configure before compiling)
+$ brltty -b xw -x as
 
 Then you can launch a BrlAPI application:
 $ ~/brltty/Programs/apitest
+or you can launch text applications in AT-SPI terminals like gnome-terminal.
 
 You may give several parameters to the driver:
-$ brltty -b xw -t identity -B tkparms="-geometry -0+0",lines=2,cols=20,model=bare
+$ brltty -b xw -t identity -B tkparms="-geometry -0+0 -display :1",lines=2,cols=20,model=bare
 will set a 20x2 braille display appear in the upper right corner of the
-display, without any navigation key. There is also the vs model which will show
-up most of VisioBraille device's keys.
+:1 display, without any navigation key. There is also the vs model which
+will show up most of VisioBraille device's keys.
+
+You should configure your window manager not to let the BRLTTY window get
+keyboard focus, so as to be able to simulate keypresses by pressing buttons.
+Or you may use the -display tkparameter option to display the emulated device
+on another X server and add the input=on option so that keypresses in the
+device window will get simulated in the original display.
+
+*** Don't set input=on without using -display too on a different display,
+because else emulated keypresses will just loop ! ***
 
 If you want braille display as well, you'll need the ClearlyU font
 (included in recent xfonts-base packages) and a UTF-8 locale for
