@@ -87,9 +87,13 @@ proc getDependencies {file} {
          set stream [open $file {RDONLY}]
          scanfile $sourceContext $stream
          close $stream; unset stream
-         set directory [file dirname $file]
+         if {[cequal [set directory [file dirname $file]] .]} {
+            set directory ""
+         }
          foreach include $includes {
-            if {[cequal [file extension [file rootname $include]] .auto]} continue
+            if {[cequal [file extension [file rootname $include]] .auto]} {
+               continue
+            }
             if {[dependencyExists [set path [file join $directory $include]]]} {
                set include $path
             } elseif {![dependencyExists $include]} {
@@ -102,18 +106,21 @@ proc getDependencies {file} {
    }
    return $dependencies
 }
+
 set sourceExtensions {c cc y}
 set sourceExtensionsGlob "{[join $sourceExtensions ,]}"
 set sourceContext [scancontext create]
 scanmatch $sourceContext {^ *# *include *"([^"]*)"} {
    lappend includes $matchInfo(submatch0)
 }
+
 foreach buildDirectory [set buildDirectories [getBuildDirectories]] {
    foreach sourceFile [glob -nocomplain [file join $buildDirectory "*.$sourceExtensionsGlob"]] {
       regsub {^(\./)+} $sourceFile {} sourceFile
-      if {[skipFile $sourceFile]} continue
-      lappend sourceFiles($buildDirectory) $sourceFile
-      getDependencies $sourceFile
+      if {![skipFile $sourceFile]} {
+         lappend sourceFiles($buildDirectory) $sourceFile
+         getDependencies $sourceFile
+      }
    }
 }
 
