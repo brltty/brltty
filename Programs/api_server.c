@@ -209,14 +209,13 @@ static HANDLE socketSelectEvent;
 #endif /* WINDOWS */
 
 /* Protects from connection addition / remove from the server thread */
-static pthread_mutex_t connectionsMutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t connectionsMutex;
 
 /* Protects the real driver's functions */
-static pthread_mutex_t driverMutex = PTHREAD_MUTEX_INITIALIZER;
-static int in_readCommand;
+static pthread_mutex_t driverMutex;
 
 /* Which connection currently has raw mode */
-static pthread_mutex_t rawMutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t rawMutex;
 static Connection *rawConnection = NULL;
 
 /* mutex lock order is connectionsMutex first, then rawMutex, then (maskMutex
@@ -545,6 +544,7 @@ static void handleResize(BrailleDisplay *brl)
 /* Creates a connectiN */
 static Connection *createConnection(int fd, time_t currentTime)
 {
+  pthread_mutexattr_t mattr;
   Connection *c =  malloc(sizeof(Connection));
   if (c==NULL) goto out;
   c->auth = 0;
@@ -552,8 +552,10 @@ static Connection *createConnection(int fd, time_t currentTime)
   c->tty = NULL;
   c->raw = 0;
   c->brlbufstate = EMPTY;
-  pthread_mutex_init(&c->brlMutex,NULL);
-  pthread_mutex_init(&c->maskMutex,NULL);
+  pthread_mutexattr_init(&mattr);
+  pthread_mutexattr_settype(&mattr, PTHREAD_MUTEX_RECURSIVE);
+  pthread_mutex_init(&c->brlMutex,&mattr);
+  pthread_mutex_init(&c->maskMutex,&mattr);
   c->how = 0;
   c->unmaskedKeys = NULL;
   c->upTime = currentTime;
@@ -1931,11 +1933,9 @@ static void api_writeWindow(BrailleDisplay *brl)
   }
   pthread_mutex_unlock(&connectionsMutex);
   last_conn_write=NULL;
-  if (!in_readCommand)
-    pthread_mutex_lock(&driverMutex);
+  pthread_mutex_lock(&driverMutex);
   trueBraille->writeWindow(brl);
-  if (!in_readCommand)
-    pthread_mutex_unlock(&driverMutex);
+  pthread_mutex_unlock(&driverMutex);
 }
 
 /* Function : api_writeVisual */
@@ -1951,11 +1951,9 @@ static void api_writeVisual(BrailleDisplay *brl)
   }
   pthread_mutex_unlock(&connectionsMutex);
   last_conn_write=NULL;
-  if (!in_readCommand)
-    pthread_mutex_lock(&driverMutex);
+  pthread_mutex_lock(&driverMutex);
   trueBraille->writeVisual(brl);
-  if (!in_readCommand)
-    pthread_mutex_unlock(&driverMutex);
+  pthread_mutex_unlock(&driverMutex);
 }
 
 /* Function: whoGetsKey */
@@ -1995,7 +1993,6 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
   unsigned char packet[BRLAPI_MAXPACKETSIZE];
   brl_keycode_t keycode, command = EOF;
 
-  in_readCommand = 1;
   pthread_mutex_lock(&rawMutex);
   if (rawConnection!=NULL) {
     pthread_mutex_lock(&driverMutex);
@@ -2078,7 +2075,6 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
   }
   pthread_mutex_unlock(&connectionsMutex);
 out:
-  in_readCommand = 0;
   return command;
 }
 
@@ -2129,6 +2125,7 @@ int api_open(BrailleDisplay *brl, char **parameters)
 #endif
   char *keyfile = *parameters[PARM_KEYFILE]?parameters[PARM_KEYFILE]:BRLAPI_DEFAUTHPATH;
   pthread_attr_t attr;
+  pthread_mutexattr_t mattr;
 
   displayDimensions[0] = htonl(brl->x);
   displayDimensions[1] = htonl(brl->y);
@@ -2153,6 +2150,12 @@ int api_open(BrailleDisplay *brl, char **parameters)
   ttys.connections->prev = ttys.connections->next = ttys.connections;
 
   if (*parameters[PARM_HOST]) hosts = parameters[PARM_HOST];
+
+  pthread_mutexattr_init(&mattr);
+  pthread_mutexattr_settype(&mattr, PTHREAD_MUTEX_RECURSIVE);
+  pthread_mutex_init(&connectionsMutex,&mattr);
+  pthread_mutex_init(&driverMutex,&mattr);
+  pthread_mutex_init(&rawMutex,&mattr);
 
   {
     int size;

@@ -120,9 +120,23 @@ static inline int pthread_join (pthread_t thread, void **res) {
 
 #define PTHREAD_MUTEX_INITIALIZER NULL
 typedef HANDLE pthread_mutex_t;
+#define PTHREAD_MUTEX_RECURSIVE 1
+typedef int pthread_mutexattr_t;
+
+static inline int pthread_mutexattr_init(pthread_mutexattr_t *attr) {
+  *attr = PTHREAD_MUTEX_RECURSIVE;
+  return 0;
+}
+
+static inline int pthread_mutexattr_settype(pthread_mutexattr_t *attr, int type) {
+  if (type != PTHREAD_MUTEX_RECURSIVE)
+    return EINVAL;
+  *attr = type;
+  return 0;
+}
 
 static inline int pthread_mutex_init (pthread_mutex_t *mutex, void *attr) {
-  if (attr) {
+  if (attr && *attr!=PTHREAD_MUTEX_RECURSIVE) {
     errno = EINVAL;
     return -1;
   }
