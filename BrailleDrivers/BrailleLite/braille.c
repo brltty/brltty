@@ -703,9 +703,9 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context)
       temp = BRL_BLK_PASSDOTS |
 	(keys_to_dots[key.raw &0x3F]
 	 | ((meta) ? BRL_FLG_CHAR_META : 0)
-	 | ((ctrl) ? 0xC0 : 
-	    (shift) ? 0x40 : 
-	    (dot8shift) ? 0x80 : 0));
+	 | ((ctrl) ? (BRL_DOT7 | BRL_DOT8) : 
+	    (shift) ? BRL_DOT7 : 
+	    (dot8shift) ? BRL_DOT8 : 0));
 #endif /* USE_TEXTTRANS */
       if (!shiftlck)
 	shift = 0;

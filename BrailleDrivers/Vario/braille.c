@@ -489,22 +489,22 @@ static int brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context
 	   Bits should get changed like this:
 	   87654321  ->  84716253
 	*/
-	if (ck & (1<<2)) t |= (1<<0);
-	if (ck & (1<<4)) t |= (1<<1);
-	if (ck & (1<<1)) t |= (1<<2);
-	if (ck & (1<<5)) t |= (1<<3);
-	if (ck & (1<<0)) t |= (1<<4);
-	if (ck & (1<<6)) t |= (1<<5);
-	if (ck & (1<<3)) t |= (1<<6);
+	if (ck & (1<<2)) t |= BRL_DOT1;
+	if (ck & (1<<1)) t |= BRL_DOT2;
+	if (ck & (1<<0)) t |= BRL_DOT3;
+	if (ck & (1<<4)) t |= BRL_DOT4;
+	if (ck & (1<<5)) t |= BRL_DOT5;
+	if (ck & (1<<6)) t |= BRL_DOT6;
+	if (ck & (1<<3)) t |= BRL_DOT7;
 	ck = 0;
 	/* Define some special combinations. I only use dot 7 in combination
 	   with dot 2, 3, 4, 5 and 6. */
-	if (t == (1<<6)) t = 0;  /* Space is 00000000 */
-	else if (t == ((1<<6)|(1<<1))) return(BRL_BLK_PASSKEY+BRL_KEY_ENTER);
-	else if (t == ((1<<6)|(1<<2))) return(BRL_BLK_PASSCHAR+127);
-	else if (t == ((1<<6)|(1<<3))) return(BRL_BLK_PASSCHAR+9);
-	else if (t == ((1<<6)|(1<<4))) return(BRL_BLK_PASSKEY+BRL_KEY_CURSOR_LEFT);
-	else if (t == ((1<<6)|(1<<5))) return(BRL_BLK_PASSKEY+BRL_KEY_CURSOR_RIGHT);
+	if (t == BRL_DOT7) t = 0;  /* Space is 00000000 */
+	else if (t == (BRL_DOT7|BRL_DOT4)) return(BRL_BLK_PASSKEY+BRL_KEY_ENTER);
+	else if (t == (BRL_DOT7|BRL_DOT2)) return(BRL_BLK_PASSCHAR+127);
+	else if (t == (BRL_DOT7|BRL_DOT5)) return(BRL_BLK_PASSCHAR+9);
+	else if (t == (BRL_DOT7|BRL_DOT3)) return(BRL_BLK_PASSKEY+BRL_KEY_CURSOR_LEFT);
+	else if (t == (BRL_DOT7|BRL_DOT6)) return(BRL_BLK_PASSKEY+BRL_KEY_CURSOR_RIGHT);
 	return(BRL_BLK_PASSDOTS+t);
       } else {
 	code |= (ck<<16);
