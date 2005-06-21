@@ -328,11 +328,11 @@ screen-drivers:
 
 ###############################################################################
 
-text.auto.h: $(TEXT_TABLE) tbl2hex
-	./tbl2hex $(TEXT_TABLE) >$@
+text.auto.h: $(TEXT_TABLE) tbl2hex$X
+	./tbl2hex$X $(TEXT_TABLE) >$@
 
-attrib.auto.h: $(ATTRIBUTES_TABLE) tbl2hex
-	./tbl2hex $(ATTRIBUTES_TABLE) >$@
+attrib.auto.h: $(ATTRIBUTES_TABLE) tbl2hex$X
+	./tbl2hex$X $(ATTRIBUTES_TABLE) >$@
 
 cmds.auto.h: $(SRC_DIR)/brldefs.h $(SRC_DIR)/cmds.awk
 	$(AWK) -f $(SRC_DIR)/cmds.awk $(SRC_DIR)/brldefs.h >$@
@@ -376,7 +376,7 @@ txt2hlp.$O:
 
 TBL2HEX_OBJECTS = tbl2hex.$O host_tbl.$O $(HOSTOPTS_OBJECTS)
 
-tbl2hex: $(TBL2HEX_OBJECTS)
+tbl2hex$X: $(TBL2HEX_OBJECTS)
 	$(HOSTCC) $(HOSTLDFLAGS) -o $@ $(TBL2HEX_OBJECTS) $(LDLIBS)
 
 tbl2hex.$O:
