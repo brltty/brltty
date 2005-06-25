@@ -28,6 +28,74 @@ syntaxError() {
    programError "${1}" 2
 }
 
+mount_ext2() {
+   mount -o loop -t ext2 "${2}" "${1}"
+}
+unmount_ext2() {
+   umount "${1}"
+}
+check_ext2() {
+   set -- $(stat -f -- "${initrdRoot}" | grep '^ *Blocks:')
+   initrdAvailableBlocks="${7}"
+   initrdBlockSize="${9}"
+   set -- $(du --block-size="${initrdBlockSize}" -s "${brlttyInstallRoot}")
+   brlttyInstallBlocks="${1}"
+   set -- $(stat -- "${initrdImage}" | grep '^ *Size:')
+   initrdImageBytes="${2}"
+   initrdImageBlocks=$(( (initrdImageBytes + initrdBlockSize - 1) / initrdBlockSize ))
+   initrdPadBlocks=$(( brlttyInstallBlocks - initrdAvailableBlocks ))
+   (( (initrdPadBlocks += 100) > 0 )) && {
+      initrdMounted=false
+      "unmount_${initrdType}" "${initrdRoot}" "${initrdImage}"
+
+      dd bs="${initrdBlockSize}" count="${initrdPadBlocks}" if="/dev/zero" of="${initrdImage}" seek="${initrdImageBlocks}"
+      e2fsck -y -f "${initrdImage}" && resize2fs "${initrdImage}" || {
+         newImage="${temporaryDirectory}/new.${initrdType}"
+         cp -a -- "${initrdImage}" "${newImage}"
+         mke2fs -q -b "${initrdBlockSize}" -F "${newImage}"
+
+         newRoot="${temporaryDirectory}/new"
+         mkdir "${newRoot}"
+
+         "mount_${initrdType}" "${newRoot}" "${newImage}"
+         newMounted=true
+
+         "mount_${initrdType}" "${initrdRoot}" "${initrdImage}"
+         initrdMounted=true
+         cp -a -- "${initrdRoot}/." "${newRoot}"
+         initrdMounted=false
+         "unmount_${initrdType}" "${initrdRoot}" "${initrdImage}"
+
+         newMounted=false
+         "unmount_${initrdType}" "${newRoot}" "${newImage}"
+
+         cp -- "${newImage}" "${initrdImage}"
+      }
+
+      "mount_${initrdType}" "${initrdRoot}" "${initrdImage}"
+      initrdMounted=true
+   }
+}
+
+mount_cpio() {
+   cd "${1}"
+   cpio --quiet -i -I "${2}"
+   cd "${workingDirectory}"
+}
+unmount_cpio() {
+   cd "${1}"
+   [ -n "${2}" ] && {
+      find . -print |
+      sed -e '/^\.$/d' -e 's/^\.\///' |
+      cpio --quiet -o -O "${2}" -c
+   }
+   rm -f -r -- $(ls -1 -A)
+   cd "${workingDirectory}"
+}
+check_cpio() {
+   :
+}
+
 originalImage="boot.iso"
 modifiedImage="brltty.iso"
 brlttyPattern="brltty-*"
@@ -83,8 +151,8 @@ brlttyArchive="${1}"
 cleanup() {
    set +e
    cd /
-   "${newMounted}" && umount "${newRoot}"
-   "${initrdMounted}" && umount "${initrdRoot}"
+   "${newMounted}" && "unmount_${initrdType}" "${newRoot}"
+   "${initrdMounted}" && "unmount_${initrdType}" "${initrdRoot}"
    "${originalMounted}" && umount "${originalRoot}"
    [ -n "${temporaryDirectory}" ] && rm -r "${temporaryDirectory}"
 }
@@ -94,6 +162,7 @@ initrdMounted=false
 newMounted=false
 trap "cleanup" 0
 
+workingDirectory="${PWD}"
 temporaryDirectory="$(mktemp -d "${TMPDIR:-/tmp}/${programName}.XXXXXX")"
 
 originalRoot="${temporaryDirectory}/original"
@@ -127,17 +196,33 @@ p
 # echo -n -e '\a' >"${modifiedRoot}/${loaderDirectory}/${bootMessage}"
 # cat "${originalRoot}/${loaderDirectory}/${bootMessage}" >>"${modifiedRoot}/${loaderDirectory}/${bootMessage}"
 
-initrdImage="${temporaryDirectory}/initrd.ext2"
+initrdImage="${temporaryDirectory}/initrd.img"
 initrdPath="${modifiedRoot}/${loaderDirectory}/initrd.img"
 gunzip -c "${initrdPath}" >"${initrdImage}"
 
+initrdDescription="`file -b "${initrdImage}"`"
+case "${initrdDescription}"
+in
+   *" ext2 "*) initrdType=ext2;;
+   *" cpio "*) initrdType=cpio;;
+   *) programError "unsupported initrd image format: ${initrdDescription}"
+esac
+
 initrdRoot="${temporaryDirectory}/initrd"
 mkdir "${initrdRoot}"
-mount -o loop -t ext2 "${initrdImage}" "${initrdRoot}"
+"mount_${initrdType}" "${initrdRoot}" "${initrdImage}"
 initrdMounted=true
 
-linuxrcPath="${initrdRoot}/linuxrc"
-initPath="$(readlink "${linuxrcPath}")"
+found=false
+for name in linuxrc init
+do
+   linuxrcPath="${initrdRoot}/${name}"
+   initPath="$(readlink "${linuxrcPath}")" && {
+      found=true
+      break
+   }
+done
+"${found}" || programError "linuxrc not found."
 rm "${linuxrcPath}"
 ln -s /bin/brltty "${linuxrcPath}"
 
@@ -155,9 +240,11 @@ in
    *.tar.gz|*.tgz)
       tar x -z -C "${temporaryDirectory}" -f "${brlttyArchive}"
       ;;
+
    *.tar)
       tar x -C "${temporaryDirectory}" -f "${brlttyArchive}"
       ;;
+
    *)
       programError "unsupported brltty archive name: ${brlttyArchive}"
       ;;
@@ -188,47 +275,7 @@ brlttyInstallRoot="${temporaryDirectory}/install"
    make -s -C Programs install-programs install-help install-tables
 ) || exit "${?}"
 
-set -- $(stat -f -- "${initrdRoot}" | grep '^ *Blocks:')
-initrdAvailableBlocks="${7}"
-initrdBlockSize="${9}"
-set -- $(du --block-size="${initrdBlockSize}" -s "${brlttyInstallRoot}")
-brlttyInstallBlocks="${1}"
-set -- $(stat -- "${initrdImage}" | grep '^ *Size:')
-initrdImageBytes="${2}"
-initrdImageBlocks=$(( (initrdImageBytes + initrdBlockSize - 1) / initrdBlockSize ))
-initrdPadBlocks=$(( brlttyInstallBlocks - initrdAvailableBlocks ))
-(( (initrdPadBlocks += 100) > 0 )) && {
-   initrdMounted=false
-   umount "${initrdRoot}"
-
-   dd bs="${initrdBlockSize}" count="${initrdPadBlocks}" if="/dev/zero" of="${initrdImage}" seek="${initrdImageBlocks}"
-   e2fsck -y -f "${initrdImage}" && resize2fs "${initrdImage}" || {
-      newImage="${temporaryDirectory}/new.ext2"
-      cp -a -- "${initrdImage}" "${newImage}"
-      mke2fs -q -b "${initrdBlockSize}" -F "${newImage}"
-
-      newRoot="${temporaryDirectory}/new"
-      mkdir "${newRoot}"
-
-      mount -o loop -t ext2 "${newImage}" "${newRoot}"
-      newMounted=true
-
-      mount -o loop -t ext2 "${initrdImage}" "${initrdRoot}"
-      initrdMounted=true
-      cp -a -- "${initrdRoot}/." "${newRoot}"
-      initrdMounted=false
-      umount "${initrdRoot}"
-
-      newMounted=false
-      umount "${newRoot}"
-
-      cp -- "${newImage}" "${initrdImage}"
-   }
-
-   mount -o loop -t ext2 "${initrdImage}" "${initrdRoot}"
-   initrdMounted=true
-}
-
+"check_${initrdType}"
 (
    set -e
    cd "${brlttyInstallRoot}"
@@ -245,7 +292,7 @@ initrdPadBlocks=$(( brlttyInstallBlocks - initrdAvailableBlocks ))
 )
 
 initrdMounted=false
-umount "${initrdRoot}"
+"unmount_${initrdType}" "${initrdRoot}" "${initrdImage}"
 gzip -c -9 "${initrdImage}" >"${initrdPath}"
 
 isoVolumeIdentifier="$(isoinfo -d -i "${originalImage}" | grep '^Volume id:' | cut -d' ' -f3-)"
