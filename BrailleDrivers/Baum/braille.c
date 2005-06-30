@@ -603,29 +603,24 @@ nextPacket:
     }
 
     case RSP_RoutingKeys: {
-      int index = 0;
-      int block;
-      for (block=0; block<MAXIMUM_ROUTING_BYTES; ++block) {
-        unsigned char byte = packet.data.values.routingKeys[block];
-        if (byte) {
-          int key;
-          for (key=0; key<8; ++key) {
-            unsigned char *pressed = &pressedKeys.routing[index];
+      int key = 0;
+      int index;
+      for (index=0; index<MAXIMUM_ROUTING_BYTES; ++index) {
+        unsigned char byte = packet.data.values.routingKeys[index];
+        unsigned char bit;
+        for (bit=0X01; bit; bit<<=1) {
+          unsigned char *pressed = &pressedKeys.routing[key];
 
-            if (byte & (1 << key)) {
-              if (!*pressed) *pressed = keyPressed = 1;
-              routingKeys[routingCount++] = index;
-            } else {
-              *pressed = 0;
-            }
-
-            ++index;
+          if (!(byte & bit)) {
+            *pressed = 0;
+          } else if (!*pressed) {
+            *pressed = keyPressed = 1;
           }
+
+          if (++key == cellCount) goto doneRoutingKeys;
         }
-
-        if (index >= cellCount) break;
       }
-
+doneRoutingKeys:
       break;
     }
 
@@ -633,6 +628,13 @@ nextPacket:
       goto nextPacket;
   }
   if (keyPressed) activeKeys = pressedKeys;
+
+  {
+    int key;
+    for (key=0; key<cellCount; ++key)
+      if (activeKeys.routing[key])
+        routingKeys[routingCount++] = key;
+  }
 
 #define KEY(key,cmd) case (key): command = (cmd); break;
   if (routingCount == 0) {
