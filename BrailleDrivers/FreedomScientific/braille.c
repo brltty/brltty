@@ -218,7 +218,7 @@ typedef struct {
       char firmware[8];
     } info;
     struct {
-      unsigned char byes[4];
+      unsigned char bytes[4];
     } extkey;
   } payload;
 } Packet;
