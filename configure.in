@@ -875,6 +875,7 @@ test -n "${api_objects}" && {
 }
 BRLTTY_BRAILLE_DRIVER([bd], [Braudi])
 BRLTTY_BRAILLE_DRIVER([bl], [BrailleLite])
+BRLTTY_BRAILLE_DRIVER([bm], [Baum])
 BRLTTY_BRAILLE_DRIVER([bn], [BrailleNote])
 BRLTTY_BRAILLE_DRIVER([cb], [CombiBraille])
 BRLTTY_BRAILLE_DRIVER([ec], [EcoBraille])
