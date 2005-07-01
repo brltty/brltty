@@ -44,3 +44,4 @@ TL3+TR2: speak current line
 TL3+TR1+TR2: speak from top of screen through current line
 TL3+TR2+TR3: speak from current line through bottom of screen
 TL3+TR1+TR3: go to current (most recent) speech position
+TL3+TR1+TR2+TR3: toggle autospeak mode
