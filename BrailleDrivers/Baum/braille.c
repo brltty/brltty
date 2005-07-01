@@ -411,7 +411,7 @@ translateCells (int start, int count) {
 static void
 brl_identify (void) {
   LogPrint(LOG_NOTICE, "BAUM Vario (Emul. 1) Driver");
-  LogPrint(LOG_INFO,   "   Copyright (C) 2005 by Mario Lang <mlang@delysid.org>");
+  LogPrint(LOG_INFO,   "   Copyright (C) 2005 by Dave Mielke <dave@mielke.cc>");
 }
 
 static int
