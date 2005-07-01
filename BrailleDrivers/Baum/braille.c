@@ -470,41 +470,58 @@ identifyDisplay (BrailleDisplay *brl, const BaumResponsePacket *packet) {
     }
   }
   identity[length] = 0;
+  LogPrint(LOG_INFO, "Model Name: %s", identity);
 
-  LogPrint(LOG_INFO, "Detected Display: %s", identity);
   {
-    const char *number = strpbrk(identity, "0123456789");
-    if (number) {
-      int count = atoi(number);
-      switch (count) {
-        case 24:
-          break;
+    static const char request[] = {REQ_DisplayData};
+    if (!writeBaumPacket(request, sizeof(request))) goto error;
+    if (!writeBaumPacket(request, sizeof(request))) goto error;
 
-        case 32:
-          break;
+    while (io->awaitInput(100)) {
+      BaumResponsePacket response;
+      if (readBaumPacket(&response)) {
+        switch (response.data.code) {
+          case RSP_CellCount:
+            cellCount = response.data.values.cellCount;
+            goto explicit;
 
-        case 40:
-          break;
-
-        case 64:
-          break;
-
-        case 80:
-          break;
-
-        default:
-          LogPrint(LOG_WARNING, "Unsupported Vario cell count: %d", count);
-          return 0;
+          default:
+            LogPrint(LOG_DEBUG, "unexpected packet type: %02X", response.data.code);
+            break;
+        }
+      } else if (errno != EAGAIN) {
+        goto error;
       }
-      cellCount = count;
-      goto found;
     }
   }
 
-  LogPrint(LOG_WARNING, "Unsupported Vario model: %s", identity);
+  {
+    const char *number = strpbrk(identity, "0123456789");
+    if (number) {
+      cellCount = atoi(number);
+      goto implicit;
+    }
+  }
+  LogPrint(LOG_WARNING, "unknown cell count: %s", identity);
+
+error:
   return 0;
 
-found:
+  {
+    const char *how;
+
+  explicit:
+    how = "explicit";
+    goto ready;
+
+  implicit:
+    how = "implicit";
+    goto ready;
+
+  ready:
+    LogPrint(LOG_INFO, "Cell Count: %d (%s)", cellCount, how);
+  }
+
   brl->x = cellCount;
   brl->y = 1;
   brl->helpPage = 0;
