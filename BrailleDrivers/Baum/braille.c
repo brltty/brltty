@@ -212,8 +212,19 @@ static const InputOutputOperations bluezOperations = {
 #define ESCAPE 0X1B
 
 typedef enum {
-  REQ_DisplayData    = 0X01,
-  REQ_DeviceIdentity = 0X84
+  REQ_DisplayData             = 0X01,
+  REQ_GetVersionNumber        = 0X05,
+  REQ_GetKeys                 = 0X08,
+  REQ_GetMode                 = 0X11,
+  REQ_SetMode                 = 0X12,
+  REQ_SetProtocolState        = 0X15,
+  REQ_SetCommunicationChannel = 0X16,
+  REQ_CausePowerdown          = 0X17,
+  REQ_GetDeviceIdentity       = 0X84,
+  REQ_GetSerialNumber         = 0X8A,
+  REQ_GetBluetoothName        = 0X8C,
+  REQ_SetBluetoothName        = 0X8D,
+  REQ_SetBluetoothPin         = 0X8E
 } BaumRequestCode;
 
 typedef enum {
@@ -233,11 +244,28 @@ typedef enum {
 } BaumResponseCode;
 
 typedef enum {
-  BPR_ProtocolRequested = 0X01,
-  BPR_PowerSwitch       = 0X02,
-  BPR_AutoPowerOff      = 0X04,
-  BPR_BatteryLow        = 0X08,
-  BPR_Charging          = 0X80
+  BAUM_MODE_RoutingEnabled   = 0X08,
+  BAUM_MODE_DisplayReversed  = 0X10,
+  BAUM_MODE_DisplayEnabled   = 0X20,
+  BAUM_MODE_PowerdownEnabled = 0X21,
+  BAUM_MODE_PowerdownTime    = 0X22,
+  BAUM_MODE_BluetoothEnabled = 0X23,
+  BAUM_MODE_UsbCharge        = 0X24
+} BaumMode;
+
+typedef enum {
+  BAUM_PDT_5Minutes  = 1,
+  BAUM_PDT_10Minutes = 2,
+  BAUM_PDT_1Hour     = 3,
+  BAUM_PDT_2Hours    = 4
+} BaumPowerdownTime;
+
+typedef enum {
+  BAUM_PDR_ProtocolRequested = 0X01,
+  BAUM_PDR_PowerSwitch       = 0X02,
+  BAUM_PDR_AutoPowerOff      = 0X04,
+  BAUM_PDR_BatteryLow        = 0X08,
+  BAUM_PDR_Charging          = 0X80
 } BaumPowerdownReason;
 
 typedef enum {
@@ -263,14 +291,14 @@ typedef enum {
 } BaumKey;
 
 typedef enum {
-  BAUM_ERR_BluetoothModule        = 0X0A,
-  BAUM_ERR_TransmitOverflow       = 0X10,
-  BAUM_ERR_ReceiveOverflow        = 0X11,
+  BAUM_ERR_BluetoothSupport       = 0X0A,
+  BAUM_ERR_TransmitOverrun        = 0X10,
+  BAUM_ERR_ReceiveOverrun         = 0X11,
   BAUM_ERR_TransmitTimeout        = 0X12,
   BAUM_ERR_ReceiveTimeout         = 0X13,
   BAUM_ERR_PacketType             = 0X14,
-  BAUM_ERR_Checksum               = 0X15,
-  BAUM_ERR_Data                   = 0X16,
+  BAUM_ERR_PacketChecksum         = 0X15,
+  BAUM_ERR_PacketData             = 0X16,
   BAUM_ERR_Test                   = 0X18,
   BAUM_ERR_FlashWrite             = 0X19,
   BAUM_ERR_CommunicationChannel   = 0X1F,
@@ -451,6 +479,12 @@ translateCells (int start, int count) {
 }
 
 static void
+clearCells (int start, int count) {
+  memset(&internalCells[start], 0, count);
+  translateCells(start, count);
+}
+
+static void
 brl_identify (void) {
   LogPrint(LOG_NOTICE, "BAUM Vario (Emul. 1) Driver");
   LogPrint(LOG_INFO,   "   Copyright (C) 2005 by Dave Mielke <dave@mielke.cc>");
@@ -556,7 +590,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
 
   if (io->openPort(parameters, device)) {
     int tries = 0;
-    static const unsigned char request[] = {REQ_DeviceIdentity};
+    static const unsigned char request[] = {REQ_GetDeviceIdentity};
     while (writeBaumPacket(request, sizeof(request))) {
       while (io->awaitInput(500)) {
         BaumResponsePacket response;
@@ -567,8 +601,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
               memset(&pressedKeys, 0, sizeof(pressedKeys));
               pendingCommand = EOF;
 
-              memset(internalCells, 0, sizeof(internalCells));
-              translateCells(0, cellCount);
+              clearCells(0, cellCount);
               if (updateCells()) return 1;
             }
           }
@@ -653,6 +686,19 @@ nextPacket:
   }
 
   switch (packet.data.code) {
+    case RSP_CellCount: {
+      unsigned char count = packet.data.values.cellCount;
+      if (count != cellCount) {
+        if (count > cellCount) clearCells(cellCount, count-cellCount);
+        cellCount = count;
+
+        LogPrint(LOG_INFO, "Cell Count: %d", cellCount);
+        brl->x = cellCount;
+        brl->resizeRequired = 1;
+      }
+      goto nextPacket;
+    }
+
     {
       unsigned int keys;
       unsigned int shift;
