@@ -217,46 +217,14 @@ static int brlapi_writePacketWaitForAck(int fd, brl_type_t type, const void *buf
   return res;
 }
 
-/* Function : updateSettings */
-/* Updates the content of a brlapi_settings_t structure according to */
-/* another structure of the same type */
-static void updateSettings(brlapi_settings_t *s1, const brlapi_settings_t *s2)
-{
-  if (s2==NULL) return;
-  if ((s2->authKey) && (*s2->authKey))
-    s1->authKey = s2->authKey;
-  if ((s2->hostName) && (*s2->hostName))
-    s1->hostName = s2->hostName;
-}
-
-/* Function: brlapi_initializeConnection
- * Creates a socket to connect to BrlApi */
-int brlapi_initializeConnection(const brlapi_settings_t *clientSettings, brlapi_settings_t *usedSettings)
-{
-  unsigned char packet[BRLAPI_MAXPACKETSIZE];
-  authStruct *auth = (authStruct *) packet;
+/* Function: tryHostName */
+/* Tries to connect to the given hostname. */
+static int tryHostName(char *hostName) {
   int addrfamily;
   char *hostname = NULL;
   char *port;
-  size_t authKeyLength;
-  int err;
 
-  brlapi_settings_t settings = { BRLAPI_DEFAUTHPATH, ":0" };
-  brlapi_settings_t envsettings = { getenv("BRLAPI_AUTHPATH"), getenv("BRLAPI_HOSTNAME") };
-
-  /* Here update settings with the parameters from misc sources (files, env...) */
-  updateSettings(&settings, &envsettings);
-  updateSettings(&settings, clientSettings);
-  if (usedSettings!=NULL) updateSettings(usedSettings, &settings);
-
-  if ((err=brlapi_loadAuthKey(settings.authKey,&authKeyLength,(void *) &auth->key))<0)
-    return err;
-
-  auth->protocolVersion = htonl(BRLAPI_PROTOCOL_VERSION);
-
-  addrfamily=brlapi_splitHost(settings.hostName,&hostname,&port);
-
-  pthread_mutex_lock(&brlapi_fd_mutex);
+  addrfamily = brlapi_splitHost(hostName,&hostname,&port);
 
 #ifdef PF_LOCAL
   if (addrfamily == PF_LOCAL) {
@@ -318,8 +286,6 @@ int brlapi_initializeConnection(const brlapi_settings_t *clientSettings, brlapi_
     hints.ai_socktype = SOCK_STREAM;
 
     brlapi_gaierrno = getaddrinfo(hostname, port, &hints, &res);
-    free(hostname);
-    free(port);
     if (brlapi_gaierrno) {
       brlapi_errno=BRLERR_GAIERR;
       goto out;
@@ -406,10 +372,101 @@ int brlapi_initializeConnection(const brlapi_settings_t *clientSettings, brlapi_
 #endif /* HAVE_GETADDRINFO */
 
   }
+  free(hostname);
+  free(port);
+  return 0;
 
-  if ((err=brlapi_writePacket(fd, BRLPACKET_AUTHKEY, packet, sizeof(auth->protocolVersion)+authKeyLength))<0)
-    goto outfd;
-  if ((err=brlapi_waitForAck())<0) goto outfd;
+outlibc:
+  brlapi_errno = BRLERR_LIBCERR;
+  brlapi_libcerrno = errno;
+  if (fd>=0) {
+    close(fd);
+    fd = -1;
+  }
+out:
+  free(hostname);
+  free(port);
+  return -1;
+}
+
+/* Function: tryAuthKey */
+/* Tries to authenticate to server with the given key. */
+static int tryAuthKey(authStruct *auth, size_t authKeyLength) {
+  if ((brlapi_writePacket(fd, BRLPACKET_AUTHKEY, auth, sizeof(auth->protocolVersion)+authKeyLength))<0)
+    return -1;
+  if ((brlapi_waitForAck())<0)
+    return -1;
+  return 0;
+}
+
+/* Function : updateSettings */
+/* Updates the content of a brlapi_settings_t structure according to */
+/* another structure of the same type */
+static void updateSettings(brlapi_settings_t *s1, const brlapi_settings_t *s2)
+{
+  if (s2==NULL) return;
+  if ((s2->authKey) && (*s2->authKey))
+    s1->authKey = s2->authKey;
+  if ((s2->hostName) && (*s2->hostName))
+    s1->hostName = s2->hostName;
+}
+
+/* Function: brlapi_initializeConnection
+ * Creates a socket to connect to BrlApi */
+int brlapi_initializeConnection(const brlapi_settings_t *clientSettings, brlapi_settings_t *usedSettings)
+{
+  unsigned char packet[BRLAPI_MAXPACKETSIZE];
+  authStruct *auth = (authStruct *) packet;
+  size_t authKeyLength;
+
+  brlapi_settings_t settings = { BRLAPI_DEFAUTHPATH, ":0" };
+  brlapi_settings_t envsettings = { getenv("BRLAPI_AUTHPATH"), getenv("BRLAPI_HOSTNAME") };
+
+  /* Here update settings with the parameters from misc sources (files, env...) */
+  updateSettings(&settings, &envsettings);
+  updateSettings(&settings, clientSettings);
+  if (usedSettings!=NULL) updateSettings(usedSettings, &settings);
+
+  pthread_mutex_lock(&brlapi_fd_mutex);
+
+retry:
+  if (tryHostName(settings.hostName)<0) {
+    brlapi_error_t error = brlapi_error;
+    if (tryHostName(settings.hostName="127.0.0.1:0")<0
+#ifdef AF_INET6
+      && tryHostName(settings.hostName="::1:0")<0
+#endif
+      ) {
+      brlapi_error = error;
+      goto out;
+    }
+    if (usedSettings) usedSettings->hostName = settings.hostName;
+  }
+
+  auth->protocolVersion = htonl(BRLAPI_PROTOCOL_VERSION);
+
+  /* try with an empty key as well, in case no authentication is needed */
+  if (!settings.authKey) {
+    if (tryAuthKey(auth,0)<0)
+      goto outfd;
+    if (usedSettings) usedSettings->authKey = "none";
+  } else if (brlapi_loadAuthKey(settings.authKey,&authKeyLength,(void *) &auth->key)<0) {
+    brlapi_error_t error = brlapi_error;
+    if (tryAuthKey(auth,0)<0) {
+      brlapi_error = error;
+      goto outfd;
+    }
+    if (usedSettings) usedSettings->authKey = "none";
+  } else if (tryAuthKey(auth,authKeyLength)<0) {
+    if (brlapi_errno != BRLERR_CONNREFUSED)
+      goto outfd;
+    if (fd>=0) {
+      close(fd);
+      fd = -1;
+    }
+    settings.authKey = NULL;
+    goto retry;
+  }
   pthread_mutex_unlock(&brlapi_fd_mutex);
 
   pthread_mutex_lock(&stateMutex);
@@ -417,13 +474,11 @@ int brlapi_initializeConnection(const brlapi_settings_t *clientSettings, brlapi_
   pthread_mutex_unlock(&stateMutex);
   return fd;
 
-outlibc:
-  brlapi_errno = BRLERR_LIBCERR;
-  brlapi_libcerrno = errno;
 outfd:
-  if (fd>=0)
+  if (fd>=0) {
     close(fd);
-  fd = -1;
+    fd = -1;
+  }
 out:
   pthread_mutex_unlock(&brlapi_fd_mutex);
   return -1;
