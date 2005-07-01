@@ -48,6 +48,8 @@ typedef struct {
   int (*writeBytes) (const unsigned char *buffer, int length);
 } InputOutputOperations;
 
+#define BITS_PER_SECOND 19200
+#define BYTES_PER_SECOND (BITS_PER_SECOND / 10)
 static const InputOutputOperations *io;
 static int cellCount;
 static int cellsUpdated;
@@ -63,7 +65,7 @@ static SerialDevice *serialDevice = NULL;
 static int
 openSerialPort (char **parameters, const char *device) {
   if ((serialDevice = serialOpenDevice(device))) {
-    if (serialRestartDevice(serialDevice, 19200)) {
+    if (serialRestartDevice(serialDevice, BITS_PER_SECOND)) {
       return 1;
     }
 
@@ -433,7 +435,7 @@ readBaumPacket (BaumResponsePacket *packet) {
 }
 
 static int
-writeBaumPacket (const unsigned char *packet, int length) {
+writeBaumPacket (BrailleDisplay *brl, const unsigned char *packet, int length) {
   unsigned char buffer[1 + (length * 2)];
   unsigned char *byte = buffer;
   *byte++ = ESCAPE;
@@ -448,12 +450,17 @@ writeBaumPacket (const unsigned char *packet, int length) {
   {
     int count = byte - buffer;
     LogBytes("Output Packet", buffer, count);
-    return io->writeBytes(buffer, count) != -1;
+
+    {
+      int ok = io->writeBytes(buffer, count) != -1;
+      if (ok) brl->writeDelay += count * 1000 / BYTES_PER_SECOND;
+      return ok;
+    }
   }
 }
 
 static int
-updateCells (void) {
+updateCells (BrailleDisplay *brl) {
   if (cellsUpdated) {
     unsigned char packet[1 + cellCount];
     unsigned char *byte = packet;
@@ -463,7 +470,7 @@ updateCells (void) {
     memcpy(byte, externalCells, cellCount);
     byte += cellCount;
 
-    if (!writeBaumPacket(packet, byte-packet)) return 0;
+    if (!writeBaumPacket(brl, packet, byte-packet)) return 0;
     cellsUpdated = 0;
   }
   return 1;
@@ -485,9 +492,8 @@ clearCells (int start, int count) {
 }
 
 static void
-brl_identify (void) {
-  LogPrint(LOG_NOTICE, "BAUM Vario (Emul. 1) Driver");
-  LogPrint(LOG_INFO,   "   Copyright (C) 2005 by Dave Mielke <dave@mielke.cc>");
+logCellCount (const char *source) {
+  LogPrint(LOG_INFO, "Cell Count: %d (%s)", cellCount, source);
 }
 
 static int
@@ -508,8 +514,8 @@ identifyDisplay (BrailleDisplay *brl, const BaumResponsePacket *packet) {
 
   {
     static const char request[] = {REQ_DisplayData};
-    if (!writeBaumPacket(request, sizeof(request))) goto error;
-    if (!writeBaumPacket(request, sizeof(request))) goto error;
+    if (!writeBaumPacket(brl, request, sizeof(request))) goto error;
+    if (!writeBaumPacket(brl, request, sizeof(request))) goto error;
 
     while (io->awaitInput(100)) {
       BaumResponsePacket response;
@@ -518,7 +524,8 @@ identifyDisplay (BrailleDisplay *brl, const BaumResponsePacket *packet) {
         switch (response.data.code) {
           case RSP_CellCount:
             cellCount = response.data.values.cellCount;
-            goto explicit;
+            logCellCount("explicit");
+            goto ready;
 
           default:
             LogBytes("unexpected packet", response.bytes, size);
@@ -534,7 +541,8 @@ identifyDisplay (BrailleDisplay *brl, const BaumResponsePacket *packet) {
     const char *number = strpbrk(identity, "0123456789");
     if (number) {
       cellCount = atoi(number);
-      goto implicit;
+      logCellCount("implicit");
+      goto ready;
     }
   }
   LogPrint(LOG_WARNING, "unknown cell count: %s", identity);
@@ -542,25 +550,17 @@ identifyDisplay (BrailleDisplay *brl, const BaumResponsePacket *packet) {
 error:
   return 0;
 
-  {
-    const char *how;
-
-  explicit:
-    how = "explicit";
-    goto ready;
-
-  implicit:
-    how = "implicit";
-    goto ready;
-
-  ready:
-    LogPrint(LOG_INFO, "Cell Count: %d (%s)", cellCount, how);
-  }
-
+ready:
   brl->x = cellCount;
   brl->y = 1;
   brl->helpPage = 0;
   return 1;
+}
+
+static void
+brl_identify (void) {
+  LogPrint(LOG_NOTICE, "BAUM Vario (Emul. 1) Driver");
+  LogPrint(LOG_INFO,   "   Copyright (C) 2005 by Dave Mielke <dave@mielke.cc>");
 }
 
 static int
@@ -591,7 +591,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
   if (io->openPort(parameters, device)) {
     int tries = 0;
     static const unsigned char request[] = {REQ_GetDeviceIdentity};
-    while (writeBaumPacket(request, sizeof(request))) {
+    while (writeBaumPacket(brl, request, sizeof(request))) {
       while (io->awaitInput(500)) {
         BaumResponsePacket response;
         if (readBaumPacket(&response)) {
@@ -602,7 +602,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
               pendingCommand = EOF;
 
               clearCells(0, cellCount);
-              if (updateCells()) return 1;
+              if (updateCells(brl)) return 1;
             }
           }
         }
@@ -632,7 +632,7 @@ brl_readPacket (BrailleDisplay *brl, unsigned char *buffer, size_t size) {
 
 static ssize_t
 brl_writePacket (BrailleDisplay *brl, const unsigned char *packet, size_t length) {
-  return writeBaumPacket(packet, length)? length: -1;
+  return writeBaumPacket(brl, packet, length)? length: -1;
 }
 
 static int
@@ -657,7 +657,7 @@ brl_writeWindow (BrailleDisplay *brl) {
 
   memcpy(&internalCells[start], &brl->buffer[start], count);
   translateCells(start, count);
-  updateCells();
+  updateCells(brl);
 }
 
 static void
@@ -691,8 +691,8 @@ nextPacket:
       if (count != cellCount) {
         if (count > cellCount) clearCells(cellCount, count-cellCount);
         cellCount = count;
+        logCellCount("resize");
 
-        LogPrint(LOG_INFO, "Cell Count: %d", cellCount);
         brl->x = cellCount;
         brl->resizeRequired = 1;
       }
