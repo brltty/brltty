@@ -1,12 +1,12 @@
 Help for Baum Displays
 
 TL2/TR2: go left/right one window
-TL1+TL3/TR1+TR3: go left/right one character
-TL1+TL2+TL3/TR1+TR2+TR3: go to beginning/end of line
-TL1/TL3: go up/down one line
-TR1/TR3: go to top/bottom line
-TL2 + TL1/TL3: go up/down to nearest line with different content
-TR2 + TR1/TR3: go up/down to nearest line with different highlighting
+TL1+TL3 / TR1+TR3: go left/right one character
+TL1+TL2+TL3 / TR1+TR2+TR3: go to beginning/end of line
+TR1/TR3: go up/down one line
+TL1/TL3: go to top/bottom line
+TR2 + TR1/TR3: go up/down to nearest line with different content
+TL2 + TL1/TL3: go up/down to nearest line with different highlighting
 TL1+TR1: go to cursor
 
 CRn: bring cursor to character
@@ -21,11 +21,11 @@ TL2+TR2: paste (insert cut buffer at cursor)
 TL3+CRn: describe characteR
 TR3+CRn: position left end of window at character
 
-TL1+TL2+CRn: go up to nearest line without greater indent
-TL2+TL3+CRn: go down to nearest line without greater indent
+TL1+TL2+CRn: remember current window position
+TL2+TL3+CRn: go to remembered window position
 
-TR1+TR2+CRn: remember current window position
-TR2+TR3+CRn: go to remembered window position
+TR1+TR2+CRn: go up to nearest line without greater indent
+TR2+TR3+CRn: go down to nearest line without greater indent
 
 TL1+TL2+TR2: enter/leave the (h)elp screen
 TL2+TL3+TR1: switch to/from the (s)tatus line
