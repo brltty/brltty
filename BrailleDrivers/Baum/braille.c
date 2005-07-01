@@ -223,6 +223,8 @@ typedef enum {
   RSP_CommunicationChannel = 0X16,
   RSP_RoutingKeys          = 0X22,
   RSP_TopKeys              = 0X24,
+  RSP_FrontKeys            = 0X28,
+  RSP_CommandKeys          = 0X2B,
   RSP_ErrorCode            = 0X40,
   RSP_DeviceIdentity       = 0X84,
   RSP_SerialNumber         = 0X8A,
@@ -230,13 +232,26 @@ typedef enum {
 } BaumResponseCode;
 
 typedef enum {
-  BAUM_KEY_TL1  = 001,
-  BAUM_KEY_TL2  = 002,
-  BAUM_KEY_TL3  = 004,
-  BAUM_KEY_TR1 = 010,
-  BAUM_KEY_TR2 = 020,
-  BAUM_KEY_TR3 = 040
-} BaumTopKeyCode;
+  BAUM_KEY_TL1 = 0X000001,
+  BAUM_KEY_TL2 = 0X000002,
+  BAUM_KEY_TL3 = 0X000004,
+  BAUM_KEY_TR1 = 0X000008,
+  BAUM_KEY_TR2 = 0X000010,
+  BAUM_KEY_TR3 = 0X000020,
+  BAUM_KEY_FLU = 0X000100,
+  BAUM_KEY_FLD = 0X000200,
+  BAUM_KEY_FMU = 0X000400,
+  BAUM_KEY_FMD = 0X000800,
+  BAUM_KEY_FRU = 0X001000,
+  BAUM_KEY_FRD = 0X002000,
+  BAUM_KEY_CK1 = 0X010000,
+  BAUM_KEY_CK2 = 0X020000,
+  BAUM_KEY_CK3 = 0X040000,
+  BAUM_KEY_CK4 = 0X080000,
+  BAUM_KEY_CK5 = 0X100000,
+  BAUM_KEY_CK6 = 0X200000,
+  BAUM_KEY_CK7 = 0X400000
+} BaumKey;
 
 #define BAUM_DEVICE_IDENTITY_LENGTH 16
 #define BAUM_SERIAL_NUMBER_LENGTH 8
@@ -249,8 +264,10 @@ typedef union {
     unsigned char code;
 
     union {
-      unsigned char topKeys;
       unsigned char routingKeys[MAXIMUM_ROUTING_BYTES];
+      unsigned char topKeys;
+      unsigned char frontKeys;
+      unsigned char commandKeys;
 
       unsigned char cellCount;
       unsigned char versionNumber;
@@ -328,6 +345,8 @@ readBaumPacket (BaumResponsePacket *packet) {
           break;
 
         case RSP_TopKeys:
+        case RSP_FrontKeys:
+        case RSP_CommandKeys:
           length = 2;
           break;
 
@@ -595,8 +614,27 @@ nextPacket:
   }
 
   switch (packet.data.code) {
-    case RSP_TopKeys: {
-      unsigned int keys = packet.data.values.topKeys;
+    {
+      unsigned int keys;
+      unsigned int shift;
+
+    case RSP_TopKeys:
+      keys = packet.data.values.topKeys;
+      shift = 0;
+      goto doKeys;
+
+    case RSP_FrontKeys:
+      keys = packet.data.values.frontKeys;
+      shift = 8;
+      goto doKeys;
+
+    case RSP_CommandKeys:
+      keys = packet.data.values.commandKeys;
+      shift = 16;
+      goto doKeys;
+
+    doKeys:
+      keys = (pressedKeys.keys & ~(0XFF << shift)) | (keys << shift);
       if (keys & ~pressedKeys.keys) keyPressed = 1;
       pressedKeys.keys = keys;
       break;
