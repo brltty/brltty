@@ -479,14 +479,15 @@ identifyDisplay (BrailleDisplay *brl, const BaumResponsePacket *packet) {
 
     while (io->awaitInput(100)) {
       BaumResponsePacket response;
-      if (readBaumPacket(&response)) {
+      int size = readBaumPacket(&response);
+      if (size) {
         switch (response.data.code) {
           case RSP_CellCount:
             cellCount = response.data.values.cellCount;
             goto explicit;
 
           default:
-            LogPrint(LOG_DEBUG, "unexpected packet type: %02X", response.data.code);
+            LogBytes("unexpected packet", response.bytes, size);
             break;
         }
       } else if (errno != EAGAIN) {
@@ -637,6 +638,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   unsigned char routingKeys[cellCount];
   int routingCount = 0;
   BaumResponsePacket packet;
+  int size;
 
   if (pendingCommand != EOF) {
     command = pendingCommand;
@@ -645,7 +647,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   }
 
 nextPacket:
-  if (!readBaumPacket(&packet)) {
+  if (!(size = readBaumPacket(&packet))) {
     if (errno == EAGAIN) return EOF;
     return BRL_CMD_RESTARTBRL;
   }
@@ -700,6 +702,7 @@ doneRoutingKeys:
     }
 
     default:
+      LogBytes("unexpected packet", packet.bytes, size);
       goto nextPacket;
   }
   if (keyPressed) activeKeys = pressedKeys;
