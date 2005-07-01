@@ -1,1 +1,40 @@
 Help for Baum Displays
+
+TL2/TR2: go left/right one window
+TL1+TL3/TR1+TR3: go left/right one character
+TL1+TL2+TL3/TR1+TR2+TR3: go to beginning/end of line
+TL1/TL3: go up/down one line
+TR1/TR3: go to top/bottom line
+TL2 + TL1/TL3: go up/down to nearest line with different content
+TR2 + TR1/TR3: go up/down to nearest line with different highlighting
+TL1+TR1: go to cursor
+
+CRn: bring cursor to character
+TL3+TR3: bring cursor to current line (no horizontal motion)
+
+TL1+CRn: start new cut buffer at character
+TL2+CRn: append to existing cut buffer from character
+TR1+CRn: linear cut to character
+TR2+CRn: rectangular cut to character
+TL2+TR2: paste (insert cut buffer at cursor)
+
+TL3+CRn: describe characteR
+TR3+CRn: position left end of window at character
+
+TL1+TL2+CRn: go up to nearest line without greater indent
+TL2+TL3+CRn: go down to nearest line without greater indent
+
+TR1+TR2+CRn: remember current window position
+TR2+TR3+CRn: go to remembered window position
+
+TL1+TL2+TR2: enter/leave the (h)elp screen
+TL2+TL3+TR1: switch to/from the (s)tatus line
+TL1+TL2+TL3+TR1: enter/leave the (p)references menu
+TL1+TL2+TL3+TR2: (r)ead the preferences from disk
+TL2+TR1+TR2+TR3: (w)rite the preferences to disk
+
+TL1+TL2+TR1: toggle screen freeze mode
+TL2+TL3+TR1+TR2: toggle cursor (t)racking
+TL1+TL3+TR3: (u)ndo last cursor tracking motion
+TL2+TL3+TR2: switch to (6)-dot braille
+TL2+TL3+TR3: switch to (8)-dot braille
