@@ -1055,6 +1055,12 @@ usbGetSerialOperations (UsbDevice *device) {
       usbFtdiInputFilter
     }
     ,
+    { /* Baum FTDI */
+      0X0403, 0XFE72,
+      &usbFtdiOperations_FT232BM,
+      usbFtdiInputFilter
+    }
+    ,
     {}
   };
   const UsbSerialAdapter *sa = usbSerialAdapters;
@@ -1089,10 +1095,10 @@ usbChooseChannel (UsbDevice *device, void *data) {
 
       if (usbConfigureDevice(device, definition->configuration)) {
         if (usbOpenInterface(device, definition->interface, definition->alternative)) {
+          const UsbSerialOperations *serial = usbGetSerialOperations(device);
           int ok = 1;
 
           if (definition->baud) {
-            const UsbSerialOperations *serial = usbGetSerialOperations(device);
             if (serial) {
               if (!serial->setBaud(device, definition->baud)) ok = 0;
               if (!serial->setFlowControl(device, definition->flowControl)) ok = 0;
