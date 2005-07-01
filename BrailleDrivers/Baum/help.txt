@@ -38,3 +38,9 @@ TL2+TL3+TR1+TR2: toggle cursor (t)racking
 TL1+TL3+TR3: (u)ndo last cursor tracking motion
 TL2+TL3+TR2: switch to (6)-dot braille
 TL2+TL3+TR3: switch to (8)-dot braille
+
+TL3+TR1: stop speaking immediately
+TL3+TR2: speak current line
+TL3+TR1+TR2: speak from top of screen through current line
+TL3+TR2+TR3: speak from current line through bottom of screen
+TL3+TR1+TR3: go to current (most recent) speech position
