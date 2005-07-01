@@ -221,6 +221,7 @@ typedef enum {
   RSP_VersionNumber        = 0X05,
   RSP_ModeSetting          = 0X11,
   RSP_CommunicationChannel = 0X16,
+  RSP_PowerdownSignal      = 0X17,
   RSP_RoutingKeys          = 0X22,
   RSP_TopKeys              = 0X24,
   RSP_FrontKeys            = 0X28,
@@ -230,6 +231,14 @@ typedef enum {
   RSP_SerialNumber         = 0X8A,
   RSP_BluetoothName        = 0X8C
 } BaumResponseCode;
+
+typedef enum {
+  BPR_ProtocolRequested = 0X01,
+  BPR_PowerSwitch       = 0X02,
+  BPR_AutoPowerOff      = 0X04,
+  BPR_BatteryLow        = 0X08,
+  BPR_Charging          = 0X80
+} BaumPowerdownReason;
 
 typedef enum {
   BAUM_KEY_TL1 = 0X000001,
@@ -253,6 +262,30 @@ typedef enum {
   BAUM_KEY_CK7 = 0X400000
 } BaumKey;
 
+typedef enum {
+  BAUM_ERR_BluetoothModule        = 0X0A,
+  BAUM_ERR_TransmitOverflow       = 0X10,
+  BAUM_ERR_ReceiveOverflow        = 0X11,
+  BAUM_ERR_TransmitTimeout        = 0X12,
+  BAUM_ERR_ReceiveTimeout         = 0X13,
+  BAUM_ERR_PacketType             = 0X14,
+  BAUM_ERR_Checksum               = 0X15,
+  BAUM_ERR_Data                   = 0X16,
+  BAUM_ERR_Test                   = 0X18,
+  BAUM_ERR_FlashWrite             = 0X19,
+  BAUM_ERR_CommunicationChannel   = 0X1F,
+  BAUM_ERR_SerialNumber           = 0X20,
+  BAUM_ERR_SerialParity           = 0X21,
+  BAUM_ERR_SerialOverrun          = 0X22,
+  BAUM_ERR_SerialFrame            = 0X24,
+  BAUM_ERR_LocalizationIdentifier = 0X25,
+  BAUM_ERR_LocalizationIndex      = 0X26,
+  BAUM_ERR_LanguageIdentifier     = 0X27,
+  BAUM_ERR_LanguageIndex          = 0X28,
+  BAUM_ERR_BrailleTableIdentifier = 0X29,
+  BAUM_ERR_BrailleTableIndex      = 0X2A
+} BaumError;
+
 #define BAUM_DEVICE_IDENTITY_LENGTH 16
 #define BAUM_SERIAL_NUMBER_LENGTH 8
 #define BAUM_BLUETOOTH_NAME_LENGTH 14
@@ -272,6 +305,7 @@ typedef union {
       unsigned char cellCount;
       unsigned char versionNumber;
       unsigned char communicationChannel;
+      unsigned char powerdownReason;
 
       struct {
         unsigned char identifier;
@@ -327,6 +361,7 @@ readBaumPacket (BaumResponsePacket *packet) {
         case RSP_CellCount:
         case RSP_VersionNumber:
         case RSP_CommunicationChannel:
+        case RSP_PowerdownSignal:
         case RSP_TopKeys:
         case RSP_FrontKeys:
         case RSP_CommandKeys:
