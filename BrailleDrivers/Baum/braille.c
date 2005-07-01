@@ -325,37 +325,17 @@ readBaumPacket (BaumResponsePacket *packet) {
     if (offset == 0) {
       switch (byte) {
         case RSP_CellCount:
-          length = 2;
-          break;
-
         case RSP_VersionNumber:
+        case RSP_CommunicationChannel:
+        case RSP_TopKeys:
+        case RSP_FrontKeys:
+        case RSP_CommandKeys:
+        case RSP_ErrorCode:
           length = 2;
           break;
 
         case RSP_ModeSetting:
           length = 3;
-          break;
-
-        case RSP_CommunicationChannel:
-          length = 2;
-          break;
-
-        case RSP_RoutingKeys:
-          length = (cellCount > 40)? 11: 6;
-          break;
-
-        case RSP_TopKeys:
-        case RSP_FrontKeys:
-        case RSP_CommandKeys:
-          length = 2;
-          break;
-
-        case RSP_ErrorCode:
-          length = 2;
-          break;
-
-        case RSP_DeviceIdentity:
-          length = 17;
           break;
 
         case RSP_SerialNumber:
@@ -364,6 +344,14 @@ readBaumPacket (BaumResponsePacket *packet) {
 
         case RSP_BluetoothName:
           length = 15;
+          break;
+
+        case RSP_DeviceIdentity:
+          length = 17;
+          break;
+
+        case RSP_RoutingKeys:
+          length = (cellCount > 40)? 11: 6;
           break;
 
         default:
@@ -461,14 +449,12 @@ identifyDisplay (BrailleDisplay *brl, const BaumResponsePacket *packet) {
           break;
 
         case 40:
-          brl->helpPage = 1;
           break;
 
         case 64:
           break;
 
         case 80:
-          brl->helpPage = 0;
           break;
 
         default:
@@ -486,6 +472,7 @@ identifyDisplay (BrailleDisplay *brl, const BaumResponsePacket *packet) {
 found:
   brl->x = cellCount;
   brl->y = 1;
+  brl->helpPage = 0;
   return 1;
 }
 
@@ -529,9 +516,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
 
               memset(internalCells, 0, sizeof(internalCells));
               translateCells(0, cellCount);
-              updateCells();
-
-              return 1;
+              if (updateCells()) return 1;
             }
           }
         }
