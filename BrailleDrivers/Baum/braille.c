@@ -28,17 +28,26 @@
 #define BRL_HAVE_PACKET_IO
 #include "Programs/brl_driver.h"
 
+/* Global Definitions */
+
+#define BITS_PER_SECOND 19200
+#define BYTES_PER_SECOND (BITS_PER_SECOND / 10)
+
 #define MAXIMUM_CELLS 85
 #define MAXIMUM_ROUTING_BYTES ((MAXIMUM_CELLS + 7) / 8)
+
+static int cellCount;
+static int cellsUpdated;
+static unsigned char internalCells[MAXIMUM_CELLS];
+static unsigned char externalCells[MAXIMUM_CELLS];
+static TranslationTable outputTable;
 
 typedef struct {
   unsigned int keys;
   unsigned char routing[MAXIMUM_CELLS];
 } Keys;
-
 static Keys activeKeys;
 static Keys pressedKeys;
-static int pendingCommand;
 
 typedef struct {
   int (*openPort) (char **parameters, const char *device);
@@ -47,15 +56,14 @@ typedef struct {
   int (*readBytes) (unsigned char *buffer, int length, int wait);
   int (*writeBytes) (const unsigned char *buffer, int length);
 } InputOutputOperations;
-
-#define BITS_PER_SECOND 19200
-#define BYTES_PER_SECOND (BITS_PER_SECOND / 10)
 static const InputOutputOperations *io;
-static int cellCount;
-static int cellsUpdated;
-static unsigned char internalCells[MAXIMUM_CELLS];
-static unsigned char externalCells[MAXIMUM_CELLS];
-static TranslationTable outputTable;
+
+typedef struct {
+  int (*identifyDisplay) (BrailleDisplay *brl);
+  int (*updateKeys) (BrailleDisplay *brl, int *keyPressed);
+  int (*writeCells) (BrailleDisplay *brl);
+} ProtocolOperations;
+static const ProtocolOperations *protocol;
 
 /* Serial IO */
 #include "Programs/serial.h"
@@ -208,6 +216,37 @@ static const InputOutputOperations bluezOperations = {
   awaitBluezInput, readBluezBytes, writeBluezBytes
 };
 #endif /* ENABLE_BLUETOOTH_SUPPORT */
+
+/* Internal Routines */
+
+static int
+updateCells (BrailleDisplay *brl) {
+  if (cellsUpdated) {
+    if (!protocol->writeCells(brl)) return 0;
+    cellsUpdated = 0;
+  }
+  return 1;
+}
+
+static void
+translateCells (int start, int count) {
+  while (count-- > 0) {
+    externalCells[start] = outputTable[internalCells[start]];
+    ++start;
+    cellsUpdated = 1;
+  }
+}
+
+static void
+clearCells (int start, int count) {
+  memset(&internalCells[start], 0, count);
+  translateCells(start, count);
+}
+
+static void
+logCellCount (const char *source) {
+  LogPrint(LOG_INFO, "Cell Count: %d (%s)", cellCount, source);
+}
 
 /* Baum Protocol */
 
@@ -460,102 +499,169 @@ writeBaumPacket (BrailleDisplay *brl, const unsigned char *packet, int length) {
 }
 
 static int
-updateCells (BrailleDisplay *brl) {
-  if (cellsUpdated) {
-    unsigned char packet[1 + cellCount];
-    unsigned char *byte = packet;
-
-    *byte++ = REQ_DisplayData;
-
-    memcpy(byte, externalCells, cellCount);
-    byte += cellCount;
-
-    if (!writeBaumPacket(brl, packet, byte-packet)) return 0;
-    cellsUpdated = 0;
-  }
-  return 1;
-}
-
-static void
-translateCells (int start, int count) {
-  while (count-- > 0) {
-    externalCells[start] = outputTable[internalCells[start]];
-    ++start;
-    cellsUpdated = 1;
-  }
-}
-
-static void
-clearCells (int start, int count) {
-  memset(&internalCells[start], 0, count);
-  translateCells(start, count);
-}
-
-static void
-logCellCount (const char *source) {
-  LogPrint(LOG_INFO, "Cell Count: %d (%s)", cellCount, source);
-}
-
-static int
-identifyDisplay (BrailleDisplay *brl, const BaumResponsePacket *packet) {
-  int length = BAUM_DEVICE_IDENTITY_LENGTH;
-  char identity[length + 1];
-
-  memcpy(identity, &packet->data.values.deviceIdentity, length);
-  while (length) {
-    const char byte = identity[--length];
-    if ((byte != ' ') && (byte != 0)) {
-      ++length;
-      break;
-    }
-  }
-  identity[length] = 0;
-  LogPrint(LOG_INFO, "Model Name: %s", identity);
-
-  {
-    static const char request[] = {REQ_DisplayData};
-    if (!writeBaumPacket(brl, request, sizeof(request))) goto error;
-    if (!writeBaumPacket(brl, request, sizeof(request))) goto error;
-
-    while (io->awaitInput(100)) {
+identifyBaumDisplay (BrailleDisplay *brl) {
+  int tries = 0;
+  static const unsigned char request[] = {REQ_GetDeviceIdentity};
+  while (writeBaumPacket(brl, request, sizeof(request))) {
+    while (io->awaitInput(500)) {
       BaumResponsePacket response;
-      int size = readBaumPacket(&response);
-      if (size) {
-        switch (response.data.code) {
-          case RSP_CellCount:
-            cellCount = response.data.values.cellCount;
-            logCellCount("explicit");
-            goto ready;
+      if (readBaumPacket(&response)) {
+        if (response.data.code == RSP_DeviceIdentity) {
+          int length = BAUM_DEVICE_IDENTITY_LENGTH;
+          char identity[length + 1];
 
-          default:
-            LogBytes("unexpected packet", response.bytes, size);
-            break;
+          memcpy(identity, response.data.values.deviceIdentity, length);
+          while (length) {
+            const char byte = identity[--length];
+            if ((byte != ' ') && (byte != 0)) {
+              ++length;
+              break;
+            }
+          }
+          identity[length] = 0;
+          LogPrint(LOG_INFO, "Model Name: %s", identity);
+
+          {
+            static const char request[] = {REQ_DisplayData};
+            if (!writeBaumPacket(brl, request, sizeof(request))) goto error;
+            if (!writeBaumPacket(brl, request, sizeof(request))) goto error;
+
+            while (io->awaitInput(100)) {
+              BaumResponsePacket response;
+              int size = readBaumPacket(&response);
+              if (size) {
+                switch (response.data.code) {
+                  case RSP_CellCount:
+                    cellCount = response.data.values.cellCount;
+                    logCellCount("explicit");
+                    return 1;
+
+                  default:
+                    LogBytes("unexpected packet", response.bytes, size);
+                    break;
+                }
+              } else if (errno != EAGAIN) {
+                goto error;
+              }
+            }
+          }
+
+          {
+            const char *number = strpbrk(identity, "0123456789");
+            if (number) {
+              cellCount = atoi(number);
+              logCellCount("implicit");
+              return 1;
+            }
+          }
+          LogPrint(LOG_WARNING, "unknown cell count: %s", identity);
         }
-      } else if (errno != EAGAIN) {
-        goto error;
       }
     }
+    if (errno != EAGAIN) break;
+    if (++tries == 5) break;
   }
-
-  {
-    const char *number = strpbrk(identity, "0123456789");
-    if (number) {
-      cellCount = atoi(number);
-      logCellCount("implicit");
-      goto ready;
-    }
-  }
-  LogPrint(LOG_WARNING, "unknown cell count: %s", identity);
 
 error:
   return 0;
-
-ready:
-  brl->x = cellCount;
-  brl->y = 1;
-  brl->helpPage = 0;
-  return 1;
 }
+
+static int
+updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
+  while (1) {
+    BaumResponsePacket packet;
+    int size = readBaumPacket(&packet);
+    if (!size) return 0;
+
+    *keyPressed = 0;
+    switch (packet.data.code) {
+      case RSP_CellCount: {
+        unsigned char count = packet.data.values.cellCount;
+        if (count != cellCount) {
+          if (count > cellCount) clearCells(cellCount, count-cellCount);
+          cellCount = count;
+          logCellCount("resize");
+
+          brl->x = cellCount;
+          brl->resizeRequired = 1;
+        }
+        continue;
+      }
+
+      {
+        unsigned int keys;
+        unsigned int shift;
+
+      case RSP_TopKeys:
+        keys = packet.data.values.topKeys;
+        shift = 0;
+        goto doKeys;
+
+      case RSP_FrontKeys:
+        keys = packet.data.values.frontKeys;
+        shift = 8;
+        goto doKeys;
+
+      case RSP_CommandKeys:
+        keys = packet.data.values.commandKeys;
+        shift = 16;
+        goto doKeys;
+
+      doKeys:
+        keys = (pressedKeys.keys & ~(0XFF << shift)) | (keys << shift);
+        if (keys & ~pressedKeys.keys) *keyPressed = 1;
+        pressedKeys.keys = keys;
+        return 1;
+      }
+
+      case RSP_RoutingKeys: {
+        int key = 0;
+        int index;
+        for (index=0; index<MAXIMUM_ROUTING_BYTES; ++index) {
+          unsigned char byte = packet.data.values.routingKeys[index];
+          unsigned char bit;
+          for (bit=0X01; bit; bit<<=1) {
+            unsigned char *pressed = &pressedKeys.routing[key];
+
+            if (!(byte & bit)) {
+              *pressed = 0;
+            } else if (!*pressed) {
+              *pressed = *keyPressed = 1;
+            }
+
+            if (++key == cellCount) goto doneRoutingKeys;
+          }
+        }
+      doneRoutingKeys:
+
+        return 1;
+      }
+
+      default:
+        LogBytes("unexpected packet", packet.bytes, size);
+        continue;
+    }
+  }
+}
+
+static int
+writeBaumCells (BrailleDisplay *brl) {
+  unsigned char packet[1 + cellCount];
+  unsigned char *byte = packet;
+
+  *byte++ = REQ_DisplayData;
+
+  memcpy(byte, externalCells, cellCount);
+  byte += cellCount;
+
+  return writeBaumPacket(brl, packet, byte-packet);
+}
+
+static const ProtocolOperations baumOperations = {
+  identifyBaumDisplay, updateBaumKeys, writeBaumCells
+};
+
+/* Driver Handlers */
 
 static void
 brl_identify (void) {
@@ -589,26 +695,29 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
   }
 
   if (io->openPort(parameters, device)) {
-    int tries = 0;
-    static const unsigned char request[] = {REQ_GetDeviceIdentity};
-    while (writeBaumPacket(brl, request, sizeof(request))) {
-      while (io->awaitInput(500)) {
-        BaumResponsePacket response;
-        if (readBaumPacket(&response)) {
-          if (response.data.code == RSP_DeviceIdentity) {
-            if (identifyDisplay(brl, &response)) {
-              memset(&activeKeys, 0, sizeof(activeKeys));
-              memset(&pressedKeys, 0, sizeof(pressedKeys));
-              pendingCommand = EOF;
+    static const ProtocolOperations *protocolTable[] = {
+      &baumOperations,
+      NULL
+    };
+    const ProtocolOperations **protocolEntry = protocolTable;
 
-              clearCells(0, cellCount);
-              if (updateCells(brl)) return 1;
-            }
-          }
-        }
+    while (*protocolEntry) {
+      if ((*protocolEntry)->identifyDisplay(brl)) {
+        protocol = *protocolEntry;
+
+        memset(&activeKeys, 0, sizeof(activeKeys));
+        memset(&pressedKeys, 0, sizeof(pressedKeys));
+
+        clearCells(0, cellCount);
+        if (!updateCells(brl)) break;
+
+        brl->x = cellCount;
+        brl->y = 1;
+        brl->helpPage = 0;
+        return 1;
       }
-      if (errno != EAGAIN) break;
-      if (++tries == 5) break;
+
+      ++protocolEntry;
     }
 
     io->closePort();
@@ -619,6 +728,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
 
 static void
 brl_close (BrailleDisplay *brl) {
+  io->closePort();
 }
 
 static ssize_t
@@ -666,92 +776,18 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) {
 
 static int
 brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
-  int command = BRL_CMD_NOOP;
-  int keyPressed = 0;
+  int command;
+  int keyPressed;
   unsigned char routingKeys[cellCount];
   int routingCount = 0;
-  BaumResponsePacket packet;
-  int size;
 
-  if (pendingCommand != EOF) {
-    command = pendingCommand;
-    pendingCommand = EOF;
-    return command;
-  }
-
-nextPacket:
-  if (!(size = readBaumPacket(&packet))) {
+  if (!protocol->updateKeys(brl, &keyPressed)) {
     if (errno == EAGAIN) return EOF;
     return BRL_CMD_RESTARTBRL;
   }
 
-  switch (packet.data.code) {
-    case RSP_CellCount: {
-      unsigned char count = packet.data.values.cellCount;
-      if (count != cellCount) {
-        if (count > cellCount) clearCells(cellCount, count-cellCount);
-        cellCount = count;
-        logCellCount("resize");
-
-        brl->x = cellCount;
-        brl->resizeRequired = 1;
-      }
-      goto nextPacket;
-    }
-
-    {
-      unsigned int keys;
-      unsigned int shift;
-
-    case RSP_TopKeys:
-      keys = packet.data.values.topKeys;
-      shift = 0;
-      goto doKeys;
-
-    case RSP_FrontKeys:
-      keys = packet.data.values.frontKeys;
-      shift = 8;
-      goto doKeys;
-
-    case RSP_CommandKeys:
-      keys = packet.data.values.commandKeys;
-      shift = 16;
-      goto doKeys;
-
-    doKeys:
-      keys = (pressedKeys.keys & ~(0XFF << shift)) | (keys << shift);
-      if (keys & ~pressedKeys.keys) keyPressed = 1;
-      pressedKeys.keys = keys;
-      break;
-    }
-
-    case RSP_RoutingKeys: {
-      int key = 0;
-      int index;
-      for (index=0; index<MAXIMUM_ROUTING_BYTES; ++index) {
-        unsigned char byte = packet.data.values.routingKeys[index];
-        unsigned char bit;
-        for (bit=0X01; bit; bit<<=1) {
-          unsigned char *pressed = &pressedKeys.routing[key];
-
-          if (!(byte & bit)) {
-            *pressed = 0;
-          } else if (!*pressed) {
-            *pressed = keyPressed = 1;
-          }
-
-          if (++key == cellCount) goto doneRoutingKeys;
-        }
-      }
-doneRoutingKeys:
-      break;
-    }
-
-    default:
-      LogBytes("unexpected packet", packet.bytes, size);
-      goto nextPacket;
-  }
   if (keyPressed) activeKeys = pressedKeys;
+  command = BRL_CMD_NOOP;
 
   {
     int key;
