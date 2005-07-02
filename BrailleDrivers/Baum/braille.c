@@ -59,7 +59,7 @@ typedef struct {
 static const InputOutputOperations *io;
 
 typedef struct {
-  int (*readPacket) (void *address, int size);
+  int (*readPacket) (unsigned char *packet, int size);
   int (*writePacket) (BrailleDisplay *brl, const unsigned char *packet, int length);
   int (*identifyDisplay) (BrailleDisplay *brl);
   int (*updateKeys) (BrailleDisplay *brl, int *keyPressed);
@@ -246,8 +246,8 @@ clearCells (int start, int count) {
 }
 
 static void
-logCellCount (const char *source) {
-  LogPrint(LOG_INFO, "Cell Count: %d (%s)", cellCount, source);
+logCellCount (void) {
+  LogPrint(LOG_INFO, "Cell Count: %d", cellCount);
 }
 
 /* Baum Protocol */
@@ -391,8 +391,7 @@ typedef union {
 } BaumResponsePacket;
 
 static int
-readBaumPacket (void *address, int size) {
-  BaumResponsePacket *packet = address;
+readBaumPacket (unsigned char *packet, int size) {
   int started = 0;
   int escape = 0;
   int offset = 0;
@@ -405,7 +404,7 @@ readBaumPacket (void *address, int size) {
       int count = io->readBytes(&byte, 1, started);
       if (count < 1) {
         if (count == 0) errno = EAGAIN;
-        if (offset > 0) LogBytes("Partial Packet", packet->bytes, offset);
+        if (offset > 0) LogBytes("Partial Packet", packet, offset);
         return 0;
       }
     }
@@ -416,7 +415,7 @@ readBaumPacket (void *address, int size) {
       escape = 0;
 
       if (offset > 0) {
-        LogBytes("Short Packet", packet->bytes, offset);
+        LogBytes("Short Packet", packet, offset);
         offset = 0;
       } else {
         started = 1;
@@ -424,7 +423,7 @@ readBaumPacket (void *address, int size) {
     }
 
     if (started && (offset >= size)) {
-      LogBytes("Truncated Packet", packet->bytes, offset);
+      LogBytes("Truncated Packet", packet, offset);
       offset = 0;
       started = 0;
     }
@@ -474,9 +473,9 @@ readBaumPacket (void *address, int size) {
       }
     }
 
-    packet->bytes[offset++] = byte;
+    packet[offset++] = byte;
     if (offset == length) {
-    //LogBytes("Input Packet", packet->bytes, offset);
+    //LogBytes("Input Packet", packet, offset);
       return length;
     }
   }
@@ -484,7 +483,7 @@ readBaumPacket (void *address, int size) {
 
 static int
 getBaumPacket (BaumResponsePacket *packet) {
-  return readBaumPacket(packet, sizeof(*packet));
+  return readBaumPacket(packet->bytes, sizeof(*packet));
 }
 
 static int
@@ -547,7 +546,6 @@ identifyBaumDisplay (BrailleDisplay *brl) {
                 switch (response.data.code) {
                   case RSP_CellCount:
                     cellCount = response.data.values.cellCount;
-                    logCellCount("explicit");
                     return 1;
 
                   default:
@@ -564,7 +562,6 @@ identifyBaumDisplay (BrailleDisplay *brl) {
             const char *number = strpbrk(identity, "0123456789");
             if (number) {
               cellCount = atoi(number);
-              logCellCount("implicit");
               return 1;
             }
           }
@@ -582,19 +579,19 @@ error:
 
 static int
 updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
-  while (1) {
-    BaumResponsePacket packet;
-    int size = getBaumPacket(&packet);
-    if (!size) return 0;
+  BaumResponsePacket packet;
+  int size;
 
+  while ((size = getBaumPacket(&packet))) {
     *keyPressed = 0;
+
     switch (packet.data.code) {
       case RSP_CellCount: {
         unsigned char count = packet.data.values.cellCount;
         if (count != cellCount) {
           if (count > cellCount) clearCells(cellCount, count-cellCount);
           cellCount = count;
-          logCellCount("resize");
+          logCellCount();
 
           brl->x = cellCount;
           brl->resizeRequired = 1;
@@ -656,6 +653,8 @@ updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
         continue;
     }
   }
+
+  return 0;
 }
 
 static int
@@ -676,11 +675,264 @@ static const ProtocolOperations baumOperations = {
   identifyBaumDisplay, updateBaumKeys, writeBaumCells
 };
 
+/* HandyTech Protocol */
+
+typedef enum {
+  HT_REQ_WRITE = 0X01,
+  HT_REQ_RESET = 0XFF
+} HandyTechRequestCode;
+
+typedef enum {
+  HT_RSP_KEY_TL1   = 0X04, /* UP */
+  HT_RSP_KEY_TL2   = 0X03, /* B1 */
+  HT_RSP_KEY_TL3   = 0X08, /* DN */
+  HT_RSP_KEY_TR1   = 0X07, /* B2 */
+  HT_RSP_KEY_TR2   = 0X0B, /* B3 */
+  HT_RSP_KEY_TR3   = 0X0F, /* B4 */
+  HT_RSP_KEY_CR1   = 0X20,
+  HT_RSP_WRITE_ACK = 0X7E,
+  HT_RSP_RELEASE   = 0X80,
+  HT_RSP_IDENTITY  = 0XFE
+} HandyTechResponseCode;
+#define HT_IS_ROUTING_KEY(code) (((code) >= HT_RSP_KEY_CR1) && ((code) < (HT_RSP_KEY_CR1 + cellCount)))
+
+typedef union {
+  unsigned char bytes[0X100];
+
+  struct {
+    unsigned char code;
+
+    union {
+      unsigned char identity;
+    } values;
+  } data;
+} HandyTechResponsePacket;
+
+typedef struct {
+  const char *name;
+  unsigned char identity;
+  unsigned char textCount;
+  unsigned char statusCount;
+} HandyTechModelEntry;
+
+static const HandyTechModelEntry handyTechModelTable[] = {
+  { "Modular 40",
+    0X89, 40, 4
+  }
+  ,
+  {NULL}        
+};
+static const HandyTechModelEntry *ht;
+
+static int
+readHandyTechPacket (unsigned char *packet, int size) {
+  int offset = 0;
+  int length = 0;
+
+  while (1) {
+    unsigned char byte;
+
+    {
+      int count = io->readBytes(&byte, 1, offset>0);
+      if (count < 1) {
+        if (count == 0) errno = EAGAIN;
+        if (offset > 0) LogBytes("Partial Packet", packet, offset);
+        return 0;
+      }
+    }
+
+    if (offset < size) {
+      if (offset == 0) {
+        switch (byte) {
+          default:
+            if (!HT_IS_ROUTING_KEY(byte)) {
+              LogBytes("Unknown Packet", &byte, 1);
+              continue;
+            }
+
+          case HT_RSP_KEY_TL1:
+          case HT_RSP_KEY_TL2:
+          case HT_RSP_KEY_TL3:
+          case HT_RSP_KEY_TR1:
+          case HT_RSP_KEY_TR2:
+          case HT_RSP_KEY_TR3:
+          case HT_RSP_WRITE_ACK:
+            length = 1;
+            break;
+
+          case HT_RSP_IDENTITY:
+            length = 2;
+            break;
+        }
+      }
+
+      packet[offset] = byte;
+    } else {
+      if (offset == size) LogBytes("Truncated Packet", packet, offset);
+      LogBytes("Discarded Byte", &byte, 1);
+    }
+
+    if (++offset == length) {
+    //LogBytes("Input Packet", packet, offset);
+      return length;
+    }
+  }
+}
+
+static int
+getHandyTechPacket (HandyTechResponsePacket *packet) {
+  return readHandyTechPacket(packet->bytes, sizeof(*packet));
+}
+
+static int
+writeHandyTechPacket (BrailleDisplay *brl, const unsigned char *packet, int length) {
+//LogBytes("Output Packet", packet, length);
+
+  {
+    int ok = io->writeBytes(packet, length) != -1;
+    if (ok) brl->writeDelay += length * 1000 / BYTES_PER_SECOND;
+    return ok;
+  }
+}
+
+static const HandyTechModelEntry *
+findHandyTechModel (unsigned char identity) {
+  const HandyTechModelEntry *model;
+
+  for (model=handyTechModelTable; model->name; ++model) {
+    if (identity == model->identity) {
+      LogPrint(LOG_INFO, "HandyTech Model: %02X -> %s", identity, model->name);
+      return model;
+    }
+  }
+
+  LogPrint(LOG_WARNING, "unknown HandyTech identity code: %02X", identity);
+  return NULL;
+}
+
+static int
+identifyHandyTechDisplay (BrailleDisplay *brl) {
+  int tries = 0;
+  static const unsigned char request[] = {HT_REQ_RESET};
+  while (writeHandyTechPacket(brl, request, sizeof(request))) {
+    while (io->awaitInput(500)) {
+      HandyTechResponsePacket response;
+      if (getHandyTechPacket(&response)) {
+        if (response.data.code == HT_RSP_IDENTITY) {
+          if (!(ht = findHandyTechModel(response.data.values.identity))) return 0;
+          cellCount = ht->textCount;
+          return 1;
+        }
+      }
+    }
+    if (errno != EAGAIN) break;
+    if (++tries == 5) break;
+  }
+
+  return 0;
+}
+
+static int
+updateHandyTechKeys (BrailleDisplay *brl, int *keyPressed) {
+  HandyTechResponsePacket packet;
+  int size;
+
+  while ((size = getHandyTechPacket(&packet))) {
+    unsigned char code = packet.data.code;
+    *keyPressed = 0;
+
+    switch (code) {
+      case HT_RSP_IDENTITY: {
+        const HandyTechModelEntry *model = findHandyTechModel(packet.data.values.identity);
+        if (model && (model != ht)) {
+          ht = model;
+
+          if (ht->textCount != cellCount) {
+            if (ht->textCount > cellCount) clearCells(cellCount, ht->textCount-cellCount);
+            cellCount = ht->textCount;
+            logCellCount();
+
+            brl->x = cellCount;
+            brl->resizeRequired = 1;
+          }
+        }
+        continue;
+      }
+
+      case HT_RSP_WRITE_ACK:
+        continue;
+    }
+
+    {
+      unsigned char key = code & ~HT_RSP_RELEASE;
+      int press = (code & HT_RSP_RELEASE) == 0;
+
+      if (HT_IS_ROUTING_KEY(key)) {
+        unsigned char *pressed = &pressedKeys.routing[key - HT_RSP_KEY_CR1];
+        if (press != *pressed)
+          if ((*pressed = press))
+            *keyPressed = 1;
+      } else {
+        unsigned int bit;
+        switch (key) {
+#define KEY(name) case HT_RSP_KEY_##name: bit = BAUM_KEY_##name; break;
+          KEY(TL1);
+          KEY(TL2);
+          KEY(TL3);
+          KEY(TR1);
+          KEY(TR2);
+          KEY(TR3);
+#undef KEY
+
+          default:
+            LogBytes("unexpected packet", packet.bytes, size);
+            continue;
+        }
+
+        if (press != ((pressedKeys.keys & bit) != 0)) {
+          if (press) {
+            pressedKeys.keys |= bit;
+            *keyPressed = 1;
+          } else {
+            pressedKeys.keys &= ~bit;
+          }
+        }
+      }
+      return 1;
+    }
+  }
+
+  return 0;
+}
+
+static int
+writeHandyTechCells (BrailleDisplay *brl) {
+  unsigned char packet[1 + ht->statusCount + cellCount];
+  unsigned char *byte = packet;
+
+  *byte++ = HT_REQ_WRITE;
+
+  {
+    int count = ht->statusCount;
+    while (count-- > 0) *byte++ = 0;
+  }
+
+  memcpy(byte, externalCells, cellCount);
+  byte += cellCount;
+
+  return writeHandyTechPacket(brl, packet, byte-packet);
+}
+
+static const ProtocolOperations handyTechOperations = {
+  readHandyTechPacket, writeHandyTechPacket,
+  identifyHandyTechDisplay, updateHandyTechKeys, writeHandyTechCells
+};
+
 /* Driver Handlers */
 
 static void
 brl_identify (void) {
-  LogPrint(LOG_NOTICE, "Baum Native (Emul. 1) Driver");
+  LogPrint(LOG_NOTICE, "Baum Driver");
   LogPrint(LOG_INFO,   "   Copyright (C) 2005 by Dave Mielke <dave@mielke.cc>");
 }
 
@@ -710,14 +962,16 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
   }
 
   if (io->openPort(parameters, device)) {
-    static const ProtocolOperations *protocolTable[] = {
+    static const ProtocolOperations *const protocolTable[] = {
       &baumOperations,
+      &handyTechOperations,
       NULL
     };
-    const ProtocolOperations **protocolEntry = protocolTable;
+    const ProtocolOperations *const *protocolEntry = protocolTable;
 
     while (*protocolEntry) {
       if ((*protocolEntry)->identifyDisplay(brl)) {
+        logCellCount();
         protocol = *protocolEntry;
 
         memset(&activeKeys, 0, sizeof(activeKeys));
