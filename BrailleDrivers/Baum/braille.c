@@ -59,6 +59,8 @@ typedef struct {
 static const InputOutputOperations *io;
 
 typedef struct {
+  int (*readPacket) (void *address, int size);
+  int (*writePacket) (BrailleDisplay *brl, const unsigned char *packet, int length);
   int (*identifyDisplay) (BrailleDisplay *brl);
   int (*updateKeys) (BrailleDisplay *brl, int *keyPressed);
   int (*writeCells) (BrailleDisplay *brl);
@@ -389,7 +391,8 @@ typedef union {
 } BaumResponsePacket;
 
 static int
-readBaumPacket (BaumResponsePacket *packet) {
+readBaumPacket (void *address, int size) {
+  BaumResponsePacket *packet = address;
   int started = 0;
   int escape = 0;
   int offset = 0;
@@ -418,6 +421,12 @@ readBaumPacket (BaumResponsePacket *packet) {
       } else {
         started = 1;
       }
+    }
+
+    if (started && (offset >= size)) {
+      LogBytes("Truncated Packet", packet->bytes, offset);
+      offset = 0;
+      started = 0;
     }
 
     if (!started) {
@@ -467,10 +476,15 @@ readBaumPacket (BaumResponsePacket *packet) {
 
     packet->bytes[offset++] = byte;
     if (offset == length) {
-      LogBytes("Input Packet", packet->bytes, offset);
+    //LogBytes("Input Packet", packet->bytes, offset);
       return length;
     }
   }
+}
+
+static int
+getBaumPacket (BaumResponsePacket *packet) {
+  return readBaumPacket(packet, sizeof(*packet));
 }
 
 static int
@@ -488,7 +502,7 @@ writeBaumPacket (BrailleDisplay *brl, const unsigned char *packet, int length) {
 
   {
     int count = byte - buffer;
-    LogBytes("Output Packet", buffer, count);
+  //LogBytes("Output Packet", buffer, count);
 
     {
       int ok = io->writeBytes(buffer, count) != -1;
@@ -505,7 +519,7 @@ identifyBaumDisplay (BrailleDisplay *brl) {
   while (writeBaumPacket(brl, request, sizeof(request))) {
     while (io->awaitInput(500)) {
       BaumResponsePacket response;
-      if (readBaumPacket(&response)) {
+      if (getBaumPacket(&response)) {
         if (response.data.code == RSP_DeviceIdentity) {
           int length = BAUM_DEVICE_IDENTITY_LENGTH;
           char identity[length + 1];
@@ -528,7 +542,7 @@ identifyBaumDisplay (BrailleDisplay *brl) {
 
             while (io->awaitInput(100)) {
               BaumResponsePacket response;
-              int size = readBaumPacket(&response);
+              int size = getBaumPacket(&response);
               if (size) {
                 switch (response.data.code) {
                   case RSP_CellCount:
@@ -570,7 +584,7 @@ static int
 updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
   while (1) {
     BaumResponsePacket packet;
-    int size = readBaumPacket(&packet);
+    int size = getBaumPacket(&packet);
     if (!size) return 0;
 
     *keyPressed = 0;
@@ -658,6 +672,7 @@ writeBaumCells (BrailleDisplay *brl) {
 }
 
 static const ProtocolOperations baumOperations = {
+  readBaumPacket, writeBaumPacket,
   identifyBaumDisplay, updateBaumKeys, writeBaumCells
 };
 
@@ -665,7 +680,7 @@ static const ProtocolOperations baumOperations = {
 
 static void
 brl_identify (void) {
-  LogPrint(LOG_NOTICE, "BAUM Vario (Emul. 1) Driver");
+  LogPrint(LOG_NOTICE, "Baum Native (Emul. 1) Driver");
   LogPrint(LOG_INFO,   "   Copyright (C) 2005 by Dave Mielke <dave@mielke.cc>");
 }
 
@@ -733,16 +748,14 @@ brl_close (BrailleDisplay *brl) {
 
 static ssize_t
 brl_readPacket (BrailleDisplay *brl, unsigned char *buffer, size_t size) {
-  BaumResponsePacket packet;
-  int count = readBaumPacket(&packet);
-  if (!count) return -1;
-  memcpy(buffer, packet.bytes, count);
+  int count = protocol->readPacket(buffer, size);
+  if (!count) count = -1;
   return count;
 }
 
 static ssize_t
 brl_writePacket (BrailleDisplay *brl, const unsigned char *packet, size_t length) {
-  return writeBaumPacket(brl, packet, length)? length: -1;
+  return protocol->writePacket(brl, packet, length)? length: -1;
 }
 
 static int
