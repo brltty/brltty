@@ -944,7 +944,16 @@ static const ProtocolOperations handyTechOperations = {
 
 /* PowerBraille Protocol */
 
+#define PB_BUTTONS0_TL2    0X01
+#define PB_BUTTONS0_TL1    0X02
+#define PB_BUTTONS0_TR2    0X04
+#define PB_BUTTONS0_TL3    0X08
+#define PB_BUTTONS0_TL2TR2 0X10
 #define PB_BUTTONS0_MARKER 0X60
+
+#define PB_BUTTONS1_TR1    0X02
+#define PB_BUTTONS1_TR3    0X04
+#define PB_BUTTONS1_TL2TR3 0X10
 #define PB_BUTTONS1_MARKER 0XE0
 
 typedef enum {
@@ -1104,68 +1113,22 @@ identifyPowerBrailleDisplay (BrailleDisplay *brl) {
 
 static int
 updatePowerBrailleKeys (BrailleDisplay *brl, int *keyPressed) {
-/*
   PowerBrailleResponsePacket packet;
   int size;
 
   while ((size = getPowerBraillePacket(&packet))) {
-    unsigned char code = packet.data.code;
     *keyPressed = 0;
 
-    switch (code) {
-      case PB_RSP_IDENTITY: {
-        const PowerBrailleModelEntry *model = findPowerBrailleModel(packet.data.values.identity);
-        if (model && (model != ht)) {
-          ht = model;
-          changeCellCount(brl, ht->textCount);
-        }
-        continue;
+    if (!packet.data.zero) {
+      switch (packet.data.code) {
+        default:
+          LogBytes("unexpected packet", packet.bytes, size);
+          continue;
       }
-
-      case PB_RSP_WRITE_ACK:
-        continue;
-    }
-
-    {
-      unsigned char key = code & ~PB_RSP_RELEASE;
-      int press = (code & PB_RSP_RELEASE) == 0;
-
-      if (PB_IS_ROUTING_KEY(key)) {
-        unsigned char *pressed = &pressedKeys.routing[key - PB_RSP_KEY_CR1];
-        if (press != *pressed)
-          if ((*pressed = press))
-            *keyPressed = 1;
-      } else {
-        unsigned int bit;
-        switch (key) {
-#define KEY(name) case PB_RSP_KEY_##name: bit = BAUM_KEY_##name; break;
-          KEY(TL1);
-          KEY(TL2);
-          KEY(TL3);
-          KEY(TR1);
-          KEY(TR2);
-          KEY(TR3);
-#undef KEY
-
-          default:
-            LogBytes("unexpected packet", packet.bytes, size);
-            continue;
-        }
-
-        if (press != ((pressedKeys.keys & bit) != 0)) {
-          if (press) {
-            pressedKeys.keys |= bit;
-            *keyPressed = 1;
-          } else {
-            pressedKeys.keys &= ~bit;
-          }
-        }
-      }
-      return 1;
+    } else {
     }
   }
 
-*/
   return 0;
 }
 
@@ -1175,17 +1138,17 @@ writePowerBrailleCells (BrailleDisplay *brl) {
   unsigned char *byte = packet;
 
   *byte++ = PB_REQ_WRITE;
-  *byte++ = 0;
-  *byte++ = 0;
-  *byte++ = 1;
-  *byte++ = cellCount * 2;
+  *byte++ = 0; /* cursor mode: disabled */
+  *byte++ = 0; /* cursor position: nowhere */
+  *byte++ = 1; /* cursor type: command */
+  *byte++ = cellCount * 2; /* attribute-data pairs */
   *byte++ = 0; /* start */
 
   {
     int i;
     for (i=0; i<cellCount; ++i) {
-      *byte++ = 0;
-      *byte++ = externalCells[i];
+      *byte++ = 0; /* attributes */
+      *byte++ = externalCells[i]; /* data */
     }
   }
 
