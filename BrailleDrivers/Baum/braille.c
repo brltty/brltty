@@ -49,6 +49,10 @@ typedef struct {
 static Keys activeKeys;
 static Keys pressedKeys;
 
+static unsigned char inputBuffer[0X20];
+static int inputCount;
+static int inputIndex;
+
 typedef struct {
   int (*openPort) (char **parameters, const char *device);
   void (*closePort) ();
@@ -66,6 +70,85 @@ typedef struct {
   int (*writeCells) (BrailleDisplay *brl);
 } ProtocolOperations;
 static const ProtocolOperations *protocol;
+
+/* Internal Routines */
+
+static int
+fillInputBuffer (int wait) {
+  int count = io->readBytes(inputBuffer, sizeof(inputBuffer), wait);
+  inputIndex = 0;
+
+  if (count < 1) {
+    if (count == 0) errno = EAGAIN;
+    inputCount = 0;
+    return 0;
+  }
+
+  inputCount = count;
+  return 1;
+}
+
+static int
+readByte (unsigned char *byte, int wait) {
+  if (inputIndex == inputCount)
+    if (!fillInputBuffer(wait))
+      return 0;
+
+  *byte = inputBuffer[inputIndex++];
+  return 1;
+}
+
+static int
+flushInput (void) {
+  while (fillInputBuffer(0));
+  return errno == EAGAIN;
+}
+
+static int
+updateCells (BrailleDisplay *brl) {
+  if (cellsUpdated) {
+    if (!protocol->writeCells(brl)) return 0;
+    cellsUpdated = 0;
+  }
+  return 1;
+}
+
+static void
+translateCells (int start, int count) {
+  while (count-- > 0) {
+    externalCells[start] = outputTable[internalCells[start]];
+    ++start;
+    cellsUpdated = 1;
+  }
+}
+
+static void
+clearCells (int start, int count) {
+  memset(&internalCells[start], 0, count);
+  translateCells(start, count);
+}
+
+static void
+logCellCount (void) {
+  LogPrint(LOG_INFO, "Cell Count: %d", cellCount);
+}
+
+static void
+changeCellCount (BrailleDisplay *brl, int count) {
+  if (count != cellCount) {
+    if (count > cellCount) clearCells(cellCount, count-cellCount);
+    cellCount = count;
+    logCellCount();
+
+    brl->x = cellCount;
+    brl->resizeRequired = 1;
+  }
+}
+
+static void
+adjustWriteDelay (BrailleDisplay *brl, int bytes) {
+  brl->writeDelay += bytes * 1000 / BYTES_PER_SECOND;
+}
 
 /* Serial IO */
 #include "Programs/serial.h"
@@ -219,54 +302,6 @@ static const InputOutputOperations bluezOperations = {
 };
 #endif /* ENABLE_BLUETOOTH_SUPPORT */
 
-/* Internal Routines */
-
-static int
-updateCells (BrailleDisplay *brl) {
-  if (cellsUpdated) {
-    if (!protocol->writeCells(brl)) return 0;
-    cellsUpdated = 0;
-  }
-  return 1;
-}
-
-static void
-translateCells (int start, int count) {
-  while (count-- > 0) {
-    externalCells[start] = outputTable[internalCells[start]];
-    ++start;
-    cellsUpdated = 1;
-  }
-}
-
-static void
-clearCells (int start, int count) {
-  memset(&internalCells[start], 0, count);
-  translateCells(start, count);
-}
-
-static void
-logCellCount (void) {
-  LogPrint(LOG_INFO, "Cell Count: %d", cellCount);
-}
-
-static void
-changeCellCount (BrailleDisplay *brl, int count) {
-  if (count != cellCount) {
-    if (count > cellCount) clearCells(cellCount, count-cellCount);
-    cellCount = count;
-    logCellCount();
-
-    brl->x = cellCount;
-    brl->resizeRequired = 1;
-  }
-}
-
-static void
-adjustWriteDelay (BrailleDisplay *brl, int bytes) {
-  brl->writeDelay += bytes * 1000 / BYTES_PER_SECOND;
-}
-
 /* Baum Protocol */
 
 #define ESCAPE 0X1B
@@ -417,13 +452,9 @@ readBaumPacket (unsigned char *packet, int size) {
   while (1) {
     unsigned char byte;
 
-    {
-      int count = io->readBytes(&byte, 1, started);
-      if (count < 1) {
-        if (count == 0) errno = EAGAIN;
-        if (offset > 0) LogBytes("Partial Packet", packet, offset);
-        return 0;
-      }
+    if (!readByte(&byte, started)) {
+      if (offset > 0) LogBytes("Partial Packet", packet, offset);
+      return 0;
     }
 
     if (byte == ESCAPE) {
@@ -748,13 +779,9 @@ readHandyTechPacket (unsigned char *packet, int size) {
   while (1) {
     unsigned char byte;
 
-    {
-      int count = io->readBytes(&byte, 1, offset>0);
-      if (count < 1) {
-        if (count == 0) errno = EAGAIN;
-        if (offset > 0) LogBytes("Partial Packet", packet, offset);
-        return 0;
-      }
+    if (!readByte(&byte, offset>0)) {
+      if (offset > 0) LogBytes("Partial Packet", packet, offset);
+      return 0;
     }
 
     if (offset < size) {
@@ -944,15 +971,15 @@ static const ProtocolOperations handyTechOperations = {
 
 /* PowerBraille Protocol */
 
-#define PB_BUTTONS0_TL2    0X01
-#define PB_BUTTONS0_TL1    0X02
-#define PB_BUTTONS0_TR2    0X04
-#define PB_BUTTONS0_TL3    0X08
+#define PB_BUTTONS0_TL2    0X01 /* left button */
+#define PB_BUTTONS0_TL1    0X02 /* left rocker up */
+#define PB_BUTTONS0_TR2    0X04 /* right button */
+#define PB_BUTTONS0_TL3    0X08 /* left rocker down */
 #define PB_BUTTONS0_TL2TR2 0X10
 #define PB_BUTTONS0_MARKER 0X60
 
-#define PB_BUTTONS1_TR1    0X02
-#define PB_BUTTONS1_TR3    0X04
+#define PB_BUTTONS1_TR1    0X02 /* right rocker up */
+#define PB_BUTTONS1_TR3    0X04 /* right rocker down */
 #define PB_BUTTONS1_TL2TR3 0X10
 #define PB_BUTTONS1_MARKER 0XE0
 
@@ -999,13 +1026,9 @@ readPowerBraillePacket (unsigned char *packet, int size) {
   while (1) {
     unsigned char byte;
 
-    {
-      int count = io->readBytes(&byte, 1, offset>0);
-      if (count < 1) {
-        if (count == 0) errno = EAGAIN;
-        if (offset > 0) LogBytes("Partial Packet", packet, offset);
-        return 0;
-      }
+    if (!readByte(&byte, offset>0)) {
+      if (offset > 0) LogBytes("Partial Packet", packet, offset);
+      return 0;
     }
 
     if (offset == 0) {
@@ -1203,6 +1226,8 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
     const ProtocolOperations *const *protocolEntry = protocolTable;
 
     while (*protocolEntry) {
+      if (!flushInput()) break;
+
       if ((*protocolEntry)->identifyDisplay(brl)) {
         logCellCount();
         protocol = *protocolEntry;
