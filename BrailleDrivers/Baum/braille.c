@@ -250,6 +250,23 @@ logCellCount (void) {
   LogPrint(LOG_INFO, "Cell Count: %d", cellCount);
 }
 
+static void
+changeCellCount (BrailleDisplay *brl, int count) {
+  if (count != cellCount) {
+    if (count > cellCount) clearCells(cellCount, count-cellCount);
+    cellCount = count;
+    logCellCount();
+
+    brl->x = cellCount;
+    brl->resizeRequired = 1;
+  }
+}
+
+static void
+adjustWriteDelay (BrailleDisplay *brl, int bytes) {
+  brl->writeDelay += bytes * 1000 / BYTES_PER_SECOND;
+}
+
 /* Baum Protocol */
 
 #define ESCAPE 0X1B
@@ -505,7 +522,7 @@ writeBaumPacket (BrailleDisplay *brl, const unsigned char *packet, int length) {
 
     {
       int ok = io->writeBytes(buffer, count) != -1;
-      if (ok) brl->writeDelay += count * 1000 / BYTES_PER_SECOND;
+      if (ok) adjustWriteDelay(brl, count);
       return ok;
     }
   }
@@ -586,18 +603,9 @@ updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
     *keyPressed = 0;
 
     switch (packet.data.code) {
-      case BAUM_RSP_CellCount: {
-        unsigned char count = packet.data.values.cellCount;
-        if (count != cellCount) {
-          if (count > cellCount) clearCells(cellCount, count-cellCount);
-          cellCount = count;
-          logCellCount();
-
-          brl->x = cellCount;
-          brl->resizeRequired = 1;
-        }
+      case BAUM_RSP_CellCount:
+        changeCellCount(brl, packet.data.values.cellCount);
         continue;
-      }
 
       {
         unsigned int keys;
@@ -790,7 +798,7 @@ writeHandyTechPacket (BrailleDisplay *brl, const unsigned char *packet, int leng
 
   {
     int ok = io->writeBytes(packet, length) != -1;
-    if (ok) brl->writeDelay += length * 1000 / BYTES_PER_SECOND;
+    if (ok) adjustWriteDelay(brl, length);
     return ok;
   }
 }
@@ -846,15 +854,7 @@ updateHandyTechKeys (BrailleDisplay *brl, int *keyPressed) {
         const HandyTechModelEntry *model = findHandyTechModel(packet.data.values.identity);
         if (model && (model != ht)) {
           ht = model;
-
-          if (ht->textCount != cellCount) {
-            if (ht->textCount > cellCount) clearCells(cellCount, ht->textCount-cellCount);
-            cellCount = ht->textCount;
-            logCellCount();
-
-            brl->x = cellCount;
-            brl->resizeRequired = 1;
-          }
+          changeCellCount(brl, ht->textCount);
         }
         continue;
       }
