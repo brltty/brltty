@@ -942,6 +942,261 @@ static const ProtocolOperations handyTechOperations = {
   identifyHandyTechDisplay, updateHandyTechKeys, writeHandyTechCells
 };
 
+/* PowerBraille Protocol */
+
+#define PB_BUTTONS0_MARKER 0X60
+#define PB_BUTTONS1_MARKER 0XE0
+
+typedef enum {
+  PB_REQ_WRITE = 0X04,
+  PB_REQ_RESET = 0X0A
+} PowerBrailleRequestCode;
+
+typedef enum {
+  PB_RSP_IDENTITY = 0X05,
+  PB_RSP_SENSORS  = 0X08
+} PowerBrailleResponseCode;
+
+typedef union {
+  unsigned char bytes[11];
+
+  unsigned char buttons[2];
+
+  struct {
+    unsigned char zero;
+    unsigned char code;
+
+    union {
+      struct {
+        unsigned char cells;
+        unsigned char dots;
+        unsigned char version[4];
+        unsigned char checksum[4];
+      } identity;
+
+      struct {
+        unsigned char vertical[4];
+        unsigned char horizontal[10];
+      } sensors;
+    } values;
+  } data;
+} PowerBrailleResponsePacket;
+
+static int
+readPowerBraillePacket (unsigned char *packet, int size) {
+  int offset = 0;
+  int length = 0;
+
+  while (1) {
+    unsigned char byte;
+
+    {
+      int count = io->readBytes(&byte, 1, offset>0);
+      if (count < 1) {
+        if (count == 0) errno = EAGAIN;
+        if (offset > 0) LogBytes("Partial Packet", packet, offset);
+        return 0;
+      }
+    }
+
+    if (offset == 0) {
+      if (!byte) {
+        length = 2;
+      } else if ((byte & PB_BUTTONS0_MARKER) == PB_BUTTONS0_MARKER) {
+        length = 2;
+      } else {
+        LogBytes("Ignored Byte", &byte, 1);
+        continue;
+      }
+    } else if (!packet[0]) {
+      if (offset == 1) {
+        switch (byte) {
+          case PB_RSP_IDENTITY:
+            length = 12;
+            break;
+
+          case PB_RSP_SENSORS:
+            length = 3;
+            break;
+
+          default:
+            LogBytes("Unknown Packet", &byte, 1);
+            offset = 0;
+            length = 0;
+            continue;
+        }
+      } else if ((offset == 2) && (packet[1] == PB_RSP_SENSORS)) {
+        length += byte;
+      }
+    }
+
+    if (offset < length) {
+      packet[offset] = byte;
+    } else {
+      if (offset == size) LogBytes("Truncated Packet", packet, offset);
+      LogBytes("Discarded Byte", &byte, 1);
+    }
+
+    if (++offset == length) {
+      if (offset > size) {
+        offset = 0;
+        length = 0;
+        continue;
+      }
+
+    //LogBytes("Input Packet", packet, offset);
+      return length;
+    }
+  }
+}
+
+static int
+getPowerBraillePacket (PowerBrailleResponsePacket *packet) {
+  return readPowerBraillePacket(packet->bytes, sizeof(*packet));
+}
+
+static int
+writePowerBraillePacket (BrailleDisplay *brl, const unsigned char *packet, int length) {
+  unsigned char buffer[2 + length];
+  unsigned char *byte = buffer;
+
+  *byte++ = 0XFF;
+  *byte++ = 0XFF;
+
+  memcpy(byte, packet, length);
+  byte += length;
+
+  {
+    int count = byte - buffer;
+  //LogBytes("Output Packet", buffer, count);
+
+    {
+      int ok = io->writeBytes(buffer, count) != -1;
+      if (ok) adjustWriteDelay(brl, count);
+      return ok;
+    }
+  }
+}
+
+static int
+identifyPowerBrailleDisplay (BrailleDisplay *brl) {
+  int tries = 0;
+  static const unsigned char request[] = {PB_REQ_RESET};
+  while (writePowerBraillePacket(brl, request, sizeof(request))) {
+    while (io->awaitInput(500)) {
+      PowerBrailleResponsePacket response;
+      if (getPowerBraillePacket(&response)) {
+        if (response.data.code == PB_RSP_IDENTITY) {
+          const unsigned char *version = response.data.values.identity.version;
+          LogPrint(LOG_INFO, "PowerBraille Version: %c%c%c%c",
+                   version[0], version[1], version[2], version[3]);
+          cellCount = response.data.values.identity.cells;
+          return 1;
+        }
+      }
+    }
+    if (errno != EAGAIN) break;
+    if (++tries == 5) break;
+  }
+
+  return 0;
+}
+
+static int
+updatePowerBrailleKeys (BrailleDisplay *brl, int *keyPressed) {
+/*
+  PowerBrailleResponsePacket packet;
+  int size;
+
+  while ((size = getPowerBraillePacket(&packet))) {
+    unsigned char code = packet.data.code;
+    *keyPressed = 0;
+
+    switch (code) {
+      case PB_RSP_IDENTITY: {
+        const PowerBrailleModelEntry *model = findPowerBrailleModel(packet.data.values.identity);
+        if (model && (model != ht)) {
+          ht = model;
+          changeCellCount(brl, ht->textCount);
+        }
+        continue;
+      }
+
+      case PB_RSP_WRITE_ACK:
+        continue;
+    }
+
+    {
+      unsigned char key = code & ~PB_RSP_RELEASE;
+      int press = (code & PB_RSP_RELEASE) == 0;
+
+      if (PB_IS_ROUTING_KEY(key)) {
+        unsigned char *pressed = &pressedKeys.routing[key - PB_RSP_KEY_CR1];
+        if (press != *pressed)
+          if ((*pressed = press))
+            *keyPressed = 1;
+      } else {
+        unsigned int bit;
+        switch (key) {
+#define KEY(name) case PB_RSP_KEY_##name: bit = BAUM_KEY_##name; break;
+          KEY(TL1);
+          KEY(TL2);
+          KEY(TL3);
+          KEY(TR1);
+          KEY(TR2);
+          KEY(TR3);
+#undef KEY
+
+          default:
+            LogBytes("unexpected packet", packet.bytes, size);
+            continue;
+        }
+
+        if (press != ((pressedKeys.keys & bit) != 0)) {
+          if (press) {
+            pressedKeys.keys |= bit;
+            *keyPressed = 1;
+          } else {
+            pressedKeys.keys &= ~bit;
+          }
+        }
+      }
+      return 1;
+    }
+  }
+
+*/
+  return 0;
+}
+
+static int
+writePowerBrailleCells (BrailleDisplay *brl) {
+  unsigned char packet[6 + (cellCount * 2)];
+  unsigned char *byte = packet;
+
+  *byte++ = PB_REQ_WRITE;
+  *byte++ = 0;
+  *byte++ = 0;
+  *byte++ = 1;
+  *byte++ = cellCount * 2;
+  *byte++ = 0; /* start */
+
+  {
+    int i;
+    for (i=0; i<cellCount; ++i) {
+      *byte++ = 0;
+      *byte++ = externalCells[i];
+    }
+  }
+
+  return writePowerBraillePacket(brl, packet, byte-packet);
+}
+
+static const ProtocolOperations powerBrailleOperations = {
+  readPowerBraillePacket, writePowerBraillePacket,
+  identifyPowerBrailleDisplay, updatePowerBrailleKeys, writePowerBrailleCells
+};
+
 /* Driver Handlers */
 
 static void
@@ -979,6 +1234,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
     static const ProtocolOperations *const protocolTable[] = {
       &baumOperations,
       &handyTechOperations,
+      &powerBrailleOperations,
       NULL
     };
     const ProtocolOperations *const *protocolEntry = protocolTable;
