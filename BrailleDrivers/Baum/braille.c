@@ -255,35 +255,35 @@ logCellCount (void) {
 #define ESCAPE 0X1B
 
 typedef enum {
-  REQ_DisplayData             = 0X01,
-  REQ_GetVersionNumber        = 0X05,
-  REQ_GetKeys                 = 0X08,
-  REQ_GetMode                 = 0X11,
-  REQ_SetMode                 = 0X12,
-  REQ_SetProtocolState        = 0X15,
-  REQ_SetCommunicationChannel = 0X16,
-  REQ_CausePowerdown          = 0X17,
-  REQ_GetDeviceIdentity       = 0X84,
-  REQ_GetSerialNumber         = 0X8A,
-  REQ_GetBluetoothName        = 0X8C,
-  REQ_SetBluetoothName        = 0X8D,
-  REQ_SetBluetoothPin         = 0X8E
+  BAUM_REQ_DisplayData             = 0X01,
+  BAUM_REQ_GetVersionNumber        = 0X05,
+  BAUM_REQ_GetKeys                 = 0X08,
+  BAUM_REQ_GetMode                 = 0X11,
+  BAUM_REQ_SetMode                 = 0X12,
+  BAUM_REQ_SetProtocolState        = 0X15,
+  BAUM_REQ_SetCommunicationChannel = 0X16,
+  BAUM_REQ_CausePowerdown          = 0X17,
+  BAUM_REQ_GetDeviceIdentity       = 0X84,
+  BAUM_REQ_GetSerialNumber         = 0X8A,
+  BAUM_REQ_GetBluetoothName        = 0X8C,
+  BAUM_REQ_SetBluetoothName        = 0X8D,
+  BAUM_REQ_SetBluetoothPin         = 0X8E
 } BaumRequestCode;
 
 typedef enum {
-  RSP_CellCount            = 0X01,
-  RSP_VersionNumber        = 0X05,
-  RSP_ModeSetting          = 0X11,
-  RSP_CommunicationChannel = 0X16,
-  RSP_PowerdownSignal      = 0X17,
-  RSP_RoutingKeys          = 0X22,
-  RSP_TopKeys              = 0X24,
-  RSP_FrontKeys            = 0X28,
-  RSP_CommandKeys          = 0X2B,
-  RSP_ErrorCode            = 0X40,
-  RSP_DeviceIdentity       = 0X84,
-  RSP_SerialNumber         = 0X8A,
-  RSP_BluetoothName        = 0X8C
+  BAUM_RSP_CellCount            = 0X01,
+  BAUM_RSP_VersionNumber        = 0X05,
+  BAUM_RSP_ModeSetting          = 0X11,
+  BAUM_RSP_CommunicationChannel = 0X16,
+  BAUM_RSP_PowerdownSignal      = 0X17,
+  BAUM_RSP_RoutingKeys          = 0X22,
+  BAUM_RSP_TopKeys              = 0X24,
+  BAUM_RSP_FrontKeys            = 0X28,
+  BAUM_RSP_CommandKeys          = 0X2B,
+  BAUM_RSP_ErrorCode            = 0X40,
+  BAUM_RSP_DeviceIdentity       = 0X84,
+  BAUM_RSP_SerialNumber         = 0X8A,
+  BAUM_RSP_BluetoothName        = 0X8C
 } BaumResponseCode;
 
 typedef enum {
@@ -435,34 +435,34 @@ readBaumPacket (unsigned char *packet, int size) {
 
     if (offset == 0) {
       switch (byte) {
-        case RSP_CellCount:
-        case RSP_VersionNumber:
-        case RSP_CommunicationChannel:
-        case RSP_PowerdownSignal:
-        case RSP_TopKeys:
-        case RSP_FrontKeys:
-        case RSP_CommandKeys:
-        case RSP_ErrorCode:
+        case BAUM_RSP_CellCount:
+        case BAUM_RSP_VersionNumber:
+        case BAUM_RSP_CommunicationChannel:
+        case BAUM_RSP_PowerdownSignal:
+        case BAUM_RSP_TopKeys:
+        case BAUM_RSP_FrontKeys:
+        case BAUM_RSP_CommandKeys:
+        case BAUM_RSP_ErrorCode:
           length = 2;
           break;
 
-        case RSP_ModeSetting:
+        case BAUM_RSP_ModeSetting:
           length = 3;
           break;
 
-        case RSP_SerialNumber:
+        case BAUM_RSP_SerialNumber:
           length = 9;
           break;
 
-        case RSP_BluetoothName:
+        case BAUM_RSP_BluetoothName:
           length = 15;
           break;
 
-        case RSP_DeviceIdentity:
+        case BAUM_RSP_DeviceIdentity:
           length = 17;
           break;
 
-        case RSP_RoutingKeys:
+        case BAUM_RSP_RoutingKeys:
           length = (cellCount > 40)? 11: 6;
           break;
 
@@ -514,12 +514,12 @@ writeBaumPacket (BrailleDisplay *brl, const unsigned char *packet, int length) {
 static int
 identifyBaumDisplay (BrailleDisplay *brl) {
   int tries = 0;
-  static const unsigned char request[] = {REQ_GetDeviceIdentity};
+  static const unsigned char request[] = {BAUM_REQ_GetDeviceIdentity};
   while (writeBaumPacket(brl, request, sizeof(request))) {
     while (io->awaitInput(500)) {
       BaumResponsePacket response;
       if (getBaumPacket(&response)) {
-        if (response.data.code == RSP_DeviceIdentity) {
+        if (response.data.code == BAUM_RSP_DeviceIdentity) {
           int length = BAUM_DEVICE_IDENTITY_LENGTH;
           char identity[length + 1];
 
@@ -535,7 +535,7 @@ identifyBaumDisplay (BrailleDisplay *brl) {
           LogPrint(LOG_INFO, "Model Name: %s", identity);
 
           {
-            static const char request[] = {REQ_DisplayData};
+            static const char request[] = {BAUM_REQ_DisplayData};
             if (!writeBaumPacket(brl, request, sizeof(request))) goto error;
             if (!writeBaumPacket(brl, request, sizeof(request))) goto error;
 
@@ -544,7 +544,7 @@ identifyBaumDisplay (BrailleDisplay *brl) {
               int size = getBaumPacket(&response);
               if (size) {
                 switch (response.data.code) {
-                  case RSP_CellCount:
+                  case BAUM_RSP_CellCount:
                     cellCount = response.data.values.cellCount;
                     return 1;
 
@@ -586,7 +586,7 @@ updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
     *keyPressed = 0;
 
     switch (packet.data.code) {
-      case RSP_CellCount: {
+      case BAUM_RSP_CellCount: {
         unsigned char count = packet.data.values.cellCount;
         if (count != cellCount) {
           if (count > cellCount) clearCells(cellCount, count-cellCount);
@@ -603,17 +603,17 @@ updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
         unsigned int keys;
         unsigned int shift;
 
-      case RSP_TopKeys:
+      case BAUM_RSP_TopKeys:
         keys = packet.data.values.topKeys;
         shift = 0;
         goto doKeys;
 
-      case RSP_FrontKeys:
+      case BAUM_RSP_FrontKeys:
         keys = packet.data.values.frontKeys;
         shift = 8;
         goto doKeys;
 
-      case RSP_CommandKeys:
+      case BAUM_RSP_CommandKeys:
         keys = packet.data.values.commandKeys;
         shift = 16;
         goto doKeys;
@@ -625,7 +625,7 @@ updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
         return 1;
       }
 
-      case RSP_RoutingKeys: {
+      case BAUM_RSP_RoutingKeys: {
         int key = 0;
         int index;
         for (index=0; index<MAXIMUM_ROUTING_BYTES; ++index) {
@@ -662,7 +662,7 @@ writeBaumCells (BrailleDisplay *brl) {
   unsigned char packet[1 + cellCount];
   unsigned char *byte = packet;
 
-  *byte++ = REQ_DisplayData;
+  *byte++ = BAUM_REQ_DisplayData;
 
   memcpy(byte, externalCells, cellCount);
   byte += cellCount;
