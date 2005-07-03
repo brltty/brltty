@@ -379,7 +379,7 @@ typedef enum {
 #define BAUM_BLUETOOTH_NAME_LENGTH 14
 
 typedef union {
-  unsigned char bytes[0X100];
+  unsigned char bytes[17];
 
   struct {
     unsigned char code;
@@ -434,64 +434,72 @@ readBaumPacket (unsigned char *packet, int size) {
       if (offset > 0) {
         LogBytes("Short Packet", packet, offset);
         offset = 0;
+        length = 0;
       } else {
         started = 1;
       }
     }
 
-    if (started && (offset >= size)) {
-      LogBytes("Truncated Packet", packet, offset);
-      offset = 0;
-      started = 0;
-    }
-
     if (!started) {
-      LogBytes("Discarded Byte", &byte, 1);
+      LogBytes("Ignored Byte", &byte, 1);
       continue;
     }
 
-    if (offset == 0) {
-      switch (byte) {
-        case BAUM_RSP_CellCount:
-        case BAUM_RSP_VersionNumber:
-        case BAUM_RSP_CommunicationChannel:
-        case BAUM_RSP_PowerdownSignal:
-        case BAUM_RSP_TopKeys:
-        case BAUM_RSP_FrontKeys:
-        case BAUM_RSP_CommandKeys:
-        case BAUM_RSP_ErrorCode:
-          length = 2;
-          break;
+    if (offset < length) {
+      if (offset == 0) {
+        switch (byte) {
+          case BAUM_RSP_CellCount:
+          case BAUM_RSP_VersionNumber:
+          case BAUM_RSP_CommunicationChannel:
+          case BAUM_RSP_PowerdownSignal:
+          case BAUM_RSP_TopKeys:
+          case BAUM_RSP_FrontKeys:
+          case BAUM_RSP_CommandKeys:
+          case BAUM_RSP_ErrorCode:
+            length = 2;
+            break;
 
-        case BAUM_RSP_ModeSetting:
-          length = 3;
-          break;
+          case BAUM_RSP_ModeSetting:
+            length = 3;
+            break;
 
-        case BAUM_RSP_SerialNumber:
-          length = 9;
-          break;
+          case BAUM_RSP_SerialNumber:
+            length = 9;
+            break;
 
-        case BAUM_RSP_BluetoothName:
-          length = 15;
-          break;
+          case BAUM_RSP_BluetoothName:
+            length = 15;
+            break;
 
-        case BAUM_RSP_DeviceIdentity:
-          length = 17;
-          break;
+          case BAUM_RSP_DeviceIdentity:
+            length = 17;
+            break;
 
-        case BAUM_RSP_RoutingKeys:
-          length = (cellCount > 40)? 11: 6;
-          break;
+          case BAUM_RSP_RoutingKeys:
+            length = (cellCount > 40)? 11: 6;
+            break;
 
-        default:
-          LogBytes("Unknown Packet", &byte, 1);
-          started = 0;
-          continue;
+          default:
+            LogBytes("Unknown Packet", &byte, 1);
+            started = 0;
+            continue;
+        }
       }
+
+      packet[offset] = byte;
+    } else {
+      if (offset == size) LogBytes("Truncated Packet", packet, offset);
+      LogBytes("Discarded Byte", &byte, 1);
     }
 
-    packet[offset++] = byte;
-    if (offset == length) {
+    if (++offset == length) {
+      if (offset > size) {
+        offset = 0;
+        length = 0;
+        started = 0;
+        continue;
+      }
+
     //LogBytes("Input Packet", packet, offset);
       return length;
     }
@@ -705,7 +713,7 @@ typedef enum {
 #define HT_IS_ROUTING_KEY(code) (((code) >= HT_RSP_KEY_CR1) && ((code) < (HT_RSP_KEY_CR1 + cellCount)))
 
 typedef union {
-  unsigned char bytes[0X100];
+  unsigned char bytes[2];
 
   struct {
     unsigned char code;
@@ -781,6 +789,12 @@ readHandyTechPacket (unsigned char *packet, int size) {
     }
 
     if (++offset == length) {
+      if (offset > size) {
+        offset = 0;
+        length = 0;
+        continue;
+      }
+
     //LogBytes("Input Packet", packet, offset);
       return length;
     }
