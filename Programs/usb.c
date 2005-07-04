@@ -1055,8 +1055,32 @@ usbGetSerialOperations (UsbDevice *device) {
       usbFtdiInputFilter
     }
     ,
-    { /* Baum FTDI */
+    { /* Baum FTDI: 24 cells  */
+      0X0403, 0XFE71,
+      &usbFtdiOperations_FT232BM,
+      usbFtdiInputFilter
+    }
+    ,
+    { /* Baum FTDI: 40 cells  */
       0X0403, 0XFE72,
+      &usbFtdiOperations_FT232BM,
+      usbFtdiInputFilter
+    }
+    ,
+    { /* Baum FTDI: 32 cells  */
+      0X0403, 0XFE73,
+      &usbFtdiOperations_FT232BM,
+      usbFtdiInputFilter
+    }
+    ,
+    { /* Baum FTDI: 64 cells  */
+      0X0403, 0XFE74,
+      &usbFtdiOperations_FT232BM,
+      usbFtdiInputFilter
+    }
+    ,
+    { /* Baum FTDI: 80 cells  */
+      0X0403, 0XFE75,
       &usbFtdiOperations_FT232BM,
       usbFtdiInputFilter
     }

@@ -229,7 +229,11 @@ static UsbChannel *usb = NULL;
 static int
 openUsbPort (char **parameters, const char *device) {
   const UsbChannelDefinition definitions[] = {
-    {0X0403, 0XFE72, 1, 0, 0, 1, 2, 0},
+    {0X0403, 0XFE71, 1, 0, 0, 1, 2, 0}, /* 24 cells */
+    {0X0403, 0XFE72, 1, 0, 0, 1, 2, 0}, /* 40 cells */
+    {0X0403, 0XFE73, 1, 0, 0, 1, 2, 0}, /* 32 cells */
+    {0X0403, 0XFE74, 1, 0, 0, 1, 2, 0}, /* 64 cells */
+    {0X0403, 0XFE75, 1, 0, 0, 1, 2, 0}, /* 80 cells */
     {0}
   };
 
@@ -643,6 +647,17 @@ identifyBaumDisplay (BrailleDisplay *brl) {
               return 1;
             }
           }
+
+          if (strcmp(identity, "PocketVario") == 0) {
+            cellCount = 24;
+            return 1;
+          }
+
+          if (strcmp(identity, "SuperVario") == 0) {
+            cellCount = 40;
+            return 1;
+          }
+
           LogPrint(LOG_WARNING, "unknown cell count: %s", identity);
         }
       }
