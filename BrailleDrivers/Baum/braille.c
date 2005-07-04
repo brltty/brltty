@@ -30,6 +30,7 @@
 
 /* Global Definitions */
 
+static int logInputChunks = 0;
 static int logInputPackets = 0;
 static int logOutputPackets = 0;
 
@@ -88,6 +89,7 @@ fillInputBuffer (int wait) {
   }
 
   inputCount = count;
+  if (logInputChunks) LogBytes("Input Chunk", inputBuffer, inputCount);
   return 1;
 }
 
@@ -104,6 +106,7 @@ readByte (unsigned char *byte, int wait) {
 static int
 flushInput (void) {
   while (fillInputBuffer(0));
+  inputCount = 0;
   return errno == EAGAIN;
 }
 
@@ -815,25 +818,34 @@ readHandyTechPacket (unsigned char *packet, int size) {
     if (offset < size) {
       if (offset == 0) {
         switch (byte) {
-          default:
-            if (!HT_IS_ROUTING_KEY(byte)) {
-              LogBytes("Unknown Packet", &byte, 1);
-              continue;
-            }
+          case HT_RSP_IDENTITY:
+            length = 2;
+            break;
 
-          case HT_RSP_KEY_TL1:
-          case HT_RSP_KEY_TL2:
-          case HT_RSP_KEY_TL3:
-          case HT_RSP_KEY_TR1:
-          case HT_RSP_KEY_TR2:
-          case HT_RSP_KEY_TR3:
           case HT_RSP_WRITE_ACK:
             length = 1;
             break;
 
-          case HT_RSP_IDENTITY:
-            length = 2;
+          default: {
+            unsigned char key = byte & ~HT_RSP_RELEASE;
+            switch (key) {
+              default:
+                if (!HT_IS_ROUTING_KEY(key)) {
+                  LogBytes("Unknown Packet", &byte, 1);
+                  continue;
+                }
+
+              case HT_RSP_KEY_TL1:
+              case HT_RSP_KEY_TL2:
+              case HT_RSP_KEY_TL3:
+              case HT_RSP_KEY_TR1:
+              case HT_RSP_KEY_TR2:
+              case HT_RSP_KEY_TR3:
+                length = 1;
+                break;
+            }
             break;
+          }
         }
       }
 
@@ -953,7 +965,7 @@ updateHandyTechKeys (BrailleDisplay *brl, int *keyPressed) {
             LogBytes("unexpected packet", packet.bytes, size);
             continue;
         }
-        if (!setFunctionKeys(bit, (bit? bit: 0), keyPressed)) continue;
+        if (!setFunctionKeys(bit, (press? bit: 0), keyPressed)) continue;
       }
       return 1;
     }
