@@ -30,6 +30,9 @@
 
 /* Global Definitions */
 
+static int logInputPackets = 0;
+static int logOutputPackets = 0;
+
 #define BITS_PER_SECOND 19200
 #define BYTES_PER_SECOND (BITS_PER_SECOND / 10)
 
@@ -43,7 +46,7 @@ static unsigned char externalCells[MAXIMUM_CELLS];
 static TranslationTable outputTable;
 
 typedef struct {
-  unsigned int keys;
+  unsigned int function;
   unsigned char routing[MAXIMUM_CELLS];
 } Keys;
 static Keys activeKeys;
@@ -143,6 +146,25 @@ changeCellCount (BrailleDisplay *brl, int count) {
     brl->x = cellCount;
     brl->resizeRequired = 1;
   }
+}
+
+static int
+changeFunctionKeys (unsigned int mask, unsigned int keys, int *pressed) {
+  keys |= pressedKeys.function & ~mask;
+  if (keys == pressedKeys.function) return 0;
+
+  if (keys & ~pressedKeys.function) *pressed = 1;
+  pressedKeys.function = keys;
+  return 1;
+}
+
+static int
+changeRoutingKey (int number, int press, int *pressed) {
+  unsigned char *state = &pressedKeys.routing[number];
+  if (!press == !*state) return 0;
+
+  if ((*state = !!press)) *pressed = 1;
+  return 1;
 }
 
 static void
@@ -531,7 +553,7 @@ readBaumPacket (unsigned char *packet, int size) {
         continue;
       }
 
-    //LogBytes("Input Packet", packet, offset);
+      if (logInputPackets) LogBytes("Input Packet", packet, offset);
       return length;
     }
   }
@@ -557,7 +579,7 @@ writeBaumPacket (BrailleDisplay *brl, const unsigned char *packet, int length) {
 
   {
     int count = byte - buffer;
-  //LogBytes("Output Packet", buffer, count);
+    if (logOutputPackets) LogBytes("Output Packet", buffer, count);
 
     {
       int ok = io->writeBytes(buffer, count) != -1;
@@ -639,8 +661,6 @@ updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
   int size;
 
   while ((size = getBaumPacket(&packet))) {
-    *keyPressed = 0;
-
     switch (packet.data.code) {
       case BAUM_RSP_CellCount:
         changeCellCount(brl, packet.data.values.cellCount);
@@ -666,32 +686,25 @@ updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
         goto doKeys;
 
       doKeys:
-        keys = (pressedKeys.keys & ~(0XFF << shift)) | (keys << shift);
-        if (keys & ~pressedKeys.keys) *keyPressed = 1;
-        pressedKeys.keys = keys;
+        if (!changeFunctionKeys((0XFF << shift), (keys << shift), keyPressed)) continue;
         return 1;
       }
 
       case BAUM_RSP_RoutingKeys: {
-        int key = 0;
+        int changed = 0;
+        int number = 0;
         int index;
         for (index=0; index<MAXIMUM_ROUTING_BYTES; ++index) {
           unsigned char byte = packet.data.values.routingKeys[index];
           unsigned char bit;
           for (bit=0X01; bit; bit<<=1) {
-            unsigned char *pressed = &pressedKeys.routing[key];
-
-            if (!(byte & bit)) {
-              *pressed = 0;
-            } else if (!*pressed) {
-              *pressed = *keyPressed = 1;
-            }
-
-            if (++key == cellCount) goto doneRoutingKeys;
+            if (changeRoutingKey(number, (byte & bit), keyPressed)) changed = 1;
+            if (++number == cellCount) goto doneRoutingKeys;
           }
         }
-      doneRoutingKeys:
 
+      doneRoutingKeys:
+        if (!changed) continue;
         return 1;
       }
 
@@ -822,7 +835,7 @@ readHandyTechPacket (unsigned char *packet, int size) {
         continue;
       }
 
-    //LogBytes("Input Packet", packet, offset);
+      if (logInputPackets) LogBytes("Input Packet", packet, offset);
       return length;
     }
   }
@@ -835,7 +848,7 @@ getHandyTechPacket (HandyTechResponsePacket *packet) {
 
 static int
 writeHandyTechPacket (BrailleDisplay *brl, const unsigned char *packet, int length) {
-//LogBytes("Output Packet", packet, length);
+  if (logOutputPackets) LogBytes("Output Packet", packet, length);
 
   {
     int ok = io->writeBytes(packet, length) != -1;
@@ -888,7 +901,6 @@ updateHandyTechKeys (BrailleDisplay *brl, int *keyPressed) {
 
   while ((size = getHandyTechPacket(&packet))) {
     unsigned char code = packet.data.code;
-    *keyPressed = 0;
 
     switch (code) {
       case HT_RSP_IDENTITY: {
@@ -909,10 +921,7 @@ updateHandyTechKeys (BrailleDisplay *brl, int *keyPressed) {
       int press = (code & HT_RSP_RELEASE) == 0;
 
       if (HT_IS_ROUTING_KEY(key)) {
-        unsigned char *pressed = &pressedKeys.routing[key - HT_RSP_KEY_CR1];
-        if (press != *pressed)
-          if ((*pressed = press))
-            *keyPressed = 1;
+        if (!changeRoutingKey((key - HT_RSP_KEY_CR1), press, keyPressed)) continue;
       } else {
         unsigned int bit;
         switch (key) {
@@ -929,15 +938,7 @@ updateHandyTechKeys (BrailleDisplay *brl, int *keyPressed) {
             LogBytes("unexpected packet", packet.bytes, size);
             continue;
         }
-
-        if (press != ((pressedKeys.keys & bit) != 0)) {
-          if (press) {
-            pressedKeys.keys |= bit;
-            *keyPressed = 1;
-          } else {
-            pressedKeys.keys &= ~bit;
-          }
-        }
+        if (!changeFunctionKeys(bit, (bit? bit: 0), keyPressed)) continue;
       }
       return 1;
     }
@@ -1076,7 +1077,7 @@ readPowerBraillePacket (unsigned char *packet, int size) {
         continue;
       }
 
-    //LogBytes("Input Packet", packet, offset);
+      if (logInputPackets) LogBytes("Input Packet", packet, offset);
       return length;
     }
   }
@@ -1100,7 +1101,7 @@ writePowerBraillePacket (BrailleDisplay *brl, const unsigned char *packet, int l
 
   {
     int count = byte - buffer;
-  //LogBytes("Output Packet", buffer, count);
+    if (logOutputPackets) LogBytes("Output Packet", buffer, count);
 
     {
       int ok = io->writeBytes(buffer, count) != -1;
@@ -1140,8 +1141,6 @@ updatePowerBrailleKeys (BrailleDisplay *brl, int *keyPressed) {
   int size;
 
   while ((size = getPowerBraillePacket(&packet))) {
-    *keyPressed = 0;
-
     if (!packet.data.zero) {
       switch (packet.data.code) {
         default:
@@ -1302,7 +1301,7 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) {
 static int
 brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   int command;
-  int keyPressed;
+  int keyPressed = 0;
   unsigned char routingKeys[cellCount];
   int routingCount = 0;
 
@@ -1323,7 +1322,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 
 #define KEY(key,cmd) case (key): command = (cmd); break;
   if (routingCount == 0) {
-    switch (activeKeys.keys) {
+    switch (activeKeys.function) {
       KEY(BAUM_KEY_TL2, BRL_CMD_FWINLT);
       KEY(BAUM_KEY_TR2, BRL_CMD_FWINRT);
 
@@ -1372,7 +1371,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
     }
   } else if (routingCount == 1) {
     unsigned char key = routingKeys[0];
-    switch (activeKeys.keys) {
+    switch (activeKeys.function) {
       KEY(0, BRL_BLK_ROUTE+key);
 
       KEY(BAUM_KEY_TL1, BRL_BLK_CUTBEGIN+key);
