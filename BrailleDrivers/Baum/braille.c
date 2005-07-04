@@ -149,7 +149,7 @@ changeCellCount (BrailleDisplay *brl, int count) {
 }
 
 static int
-changeFunctionKeys (unsigned int mask, unsigned int keys, int *pressed) {
+setFunctionKeys (unsigned int mask, unsigned int keys, int *pressed) {
   keys |= pressedKeys.function & ~mask;
   if (keys == pressedKeys.function) return 0;
 
@@ -159,7 +159,7 @@ changeFunctionKeys (unsigned int mask, unsigned int keys, int *pressed) {
 }
 
 static int
-changeRoutingKey (int number, int press, int *pressed) {
+setRoutingKey (int number, int press, int *pressed) {
   unsigned char *state = &pressedKeys.routing[number];
   if (!press == !*state) return 0;
 
@@ -686,7 +686,7 @@ updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
         goto doKeys;
 
       doKeys:
-        if (!changeFunctionKeys((0XFF << shift), (keys << shift), keyPressed)) continue;
+        if (!setFunctionKeys((0XFF << shift), (keys << shift), keyPressed)) continue;
         return 1;
       }
 
@@ -698,7 +698,7 @@ updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
           unsigned char byte = packet.data.values.routingKeys[index];
           unsigned char bit;
           for (bit=0X01; bit; bit<<=1) {
-            if (changeRoutingKey(number, (byte & bit), keyPressed)) changed = 1;
+            if (setRoutingKey(number, (byte & bit), keyPressed)) changed = 1;
             if (++number == cellCount) goto doneRoutingKeys;
           }
         }
@@ -921,7 +921,7 @@ updateHandyTechKeys (BrailleDisplay *brl, int *keyPressed) {
       int press = (code & HT_RSP_RELEASE) == 0;
 
       if (HT_IS_ROUTING_KEY(key)) {
-        if (!changeRoutingKey((key - HT_RSP_KEY_CR1), press, keyPressed)) continue;
+        if (!setRoutingKey((key - HT_RSP_KEY_CR1), press, keyPressed)) continue;
       } else {
         unsigned int bit;
         switch (key) {
@@ -938,7 +938,7 @@ updateHandyTechKeys (BrailleDisplay *brl, int *keyPressed) {
             LogBytes("unexpected packet", packet.bytes, size);
             continue;
         }
-        if (!changeFunctionKeys(bit, (bit? bit: 0), keyPressed)) continue;
+        if (!setFunctionKeys(bit, (bit? bit: 0), keyPressed)) continue;
       }
       return 1;
     }
@@ -1143,11 +1143,43 @@ updatePowerBrailleKeys (BrailleDisplay *brl, int *keyPressed) {
   while ((size = getPowerBraillePacket(&packet))) {
     if (!packet.data.zero) {
       switch (packet.data.code) {
+        case PB_RSP_IDENTITY:
+          changeCellCount(brl, packet.data.values.identity.cells);
+          continue;
+
+        case PB_RSP_SENSORS: {
+          int changed = 0;
+          int number = 0;
+          int index;
+          for (index=0; index<MAXIMUM_ROUTING_BYTES; ++index) {
+            unsigned char byte = packet.data.values.sensors.horizontal[index];
+            unsigned char bit;
+            for (bit=0X01; bit; bit<<=1) {
+              if (setRoutingKey(number, (byte & bit), keyPressed)) changed = 1;
+              if (++number == cellCount) goto doneRoutingKeys;
+            }
+          }
+
+        doneRoutingKeys:
+          if (!changed) continue;
+          return 1;
+        }
+
         default:
           LogBytes("unexpected packet", packet.bytes, size);
           continue;
       }
     } else {
+      unsigned int keys = 0;
+      if (packet.buttons[0] & PB_BUTTONS0_TL1) keys |= BAUM_KEY_TL1;
+      if (packet.buttons[0] & PB_BUTTONS0_TL2) keys |= BAUM_KEY_TL2;
+      if (packet.buttons[0] & PB_BUTTONS0_TL3) keys |= BAUM_KEY_TL3;
+      if (packet.buttons[1] & PB_BUTTONS1_TR1) keys |= BAUM_KEY_TR1;
+      if (packet.buttons[0] & PB_BUTTONS0_TR2) keys |= BAUM_KEY_TR2;
+      if (packet.buttons[1] & PB_BUTTONS1_TR3) keys |= BAUM_KEY_TR3;
+
+      if (!setFunctionKeys(0XFF, keys, keyPressed)) continue;
+      return 1;
     }
   }
 
