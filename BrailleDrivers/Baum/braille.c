@@ -483,7 +483,7 @@ readBaumPacket (unsigned char *packet, int size) {
       continue;
     }
 
-    if (offset < length) {
+    if (offset < size) {
       if (offset == 0) {
         switch (byte) {
           case BAUM_RSP_CellCount:
