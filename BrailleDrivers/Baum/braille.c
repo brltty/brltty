@@ -30,7 +30,6 @@
 
 /* Global Definitions */
 
-static int logInputChunks = 0;
 static int logInputPackets = 0;
 static int logOutputPackets = 0;
 
@@ -53,10 +52,6 @@ typedef struct {
 static Keys activeKeys;
 static Keys pressedKeys;
 
-static unsigned char inputBuffer[0X20];
-static int inputCount;
-static int inputIndex;
-
 typedef struct {
   int (*openPort) (char **parameters, const char *device);
   void (*closePort) ();
@@ -78,35 +73,18 @@ static const ProtocolOperations *protocol;
 /* Internal Routines */
 
 static int
-fillInputBuffer (int wait) {
-  int count = io->readBytes(inputBuffer, sizeof(inputBuffer), wait);
-  inputIndex = 0;
-
-  if (count < 1) {
-    if (count == 0) errno = EAGAIN;
-    inputCount = 0;
-    return 0;
-  }
-
-  inputCount = count;
-  if (logInputChunks) LogBytes("Input Chunk", inputBuffer, inputCount);
-  return 1;
-}
-
-static int
 readByte (unsigned char *byte, int wait) {
-  if (inputIndex == inputCount)
-    if (!fillInputBuffer(wait))
-      return 0;
+  int count = io->readBytes(byte, 1, wait);
+  if (count > 0) return 1;
 
-  *byte = inputBuffer[inputIndex++];
-  return 1;
+  if (count == 0) errno = EAGAIN;
+  return 0;
 }
 
 static int
 flushInput (void) {
-  while (fillInputBuffer(0));
-  inputCount = 0;
+  unsigned char byte;
+  while (readByte(&byte, 0));
   return errno == EAGAIN;
 }
 
