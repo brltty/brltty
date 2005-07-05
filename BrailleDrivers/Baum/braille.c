@@ -173,7 +173,7 @@ openSerialPort (char **parameters, const char *device) {
 static int
 configureSerialPort (void) {
   if (!serialRestartDevice(serialDevice, protocol->serialBaud)) return 0;
-  if (!serialSetParity(serialDevice, protocol->serialBaud)) return 0;
+  if (!serialSetParity(serialDevice, protocol->serialParity)) return 0;
   return 1;
 }
 
