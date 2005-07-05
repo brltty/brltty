@@ -1346,7 +1346,7 @@ openBrailleDriver (int verify) {
 
       if (isSerialDevice(&dev)) {
         static const char *const serialCodes[] = {
-          "pm", "ts",
+          "pm", "ts", "bm",
           NULL
         };
         code = serialCodes;
@@ -1355,7 +1355,7 @@ openBrailleDriver (int verify) {
 #ifdef ENABLE_USB_SUPPORT
       } else if (isUsbDevice(&dev)) {
         static const char *const usbCodes[] = {
-          "al", "fs", "ht", "pm", "vo",
+          "al", "bm", "fs", "ht", "pm", "vo",
           NULL
         };
         code = usbCodes;
@@ -1365,7 +1365,7 @@ openBrailleDriver (int verify) {
 #ifdef ENABLE_BLUETOOTH_SUPPORT
       } else if (isBluetoothDevice(&dev)) {
         static const char *bluetoothCodes[] = {
-          "ht",
+          "ht", "bm",
           NULL
         };
         code = bluetoothCodes;
