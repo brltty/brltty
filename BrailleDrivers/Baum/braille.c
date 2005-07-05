@@ -24,6 +24,7 @@
 #include <errno.h>
 
 #include "Programs/misc.h"
+#include "Programs/iodefs.h"
 
 #define BRL_HAVE_PACKET_IO
 #include "Programs/brl_driver.h"
@@ -54,6 +55,7 @@ static Keys pressedKeys;
 
 typedef struct {
   int (*openPort) (char **parameters, const char *device);
+  int (*configurePort) (void);
   void (*closePort) ();
   int (*awaitInput) (int milliseconds);
   int (*readBytes) (unsigned char *buffer, int length, int wait);
@@ -62,6 +64,8 @@ typedef struct {
 static const InputOutputOperations *io;
 
 typedef struct {
+  int serialBaud;
+  SerialParity serialParity;
   int (*readPacket) (unsigned char *packet, int size);
   int (*writePacket) (BrailleDisplay *brl, const unsigned char *packet, int length);
   int (*identifyDisplay) (BrailleDisplay *brl);
@@ -161,14 +165,16 @@ static SerialDevice *serialDevice = NULL;
 static int
 openSerialPort (char **parameters, const char *device) {
   if ((serialDevice = serialOpenDevice(device))) {
-    if (serialRestartDevice(serialDevice, BITS_PER_SECOND)) {
-      return 1;
-    }
-
-    serialCloseDevice(serialDevice);
-    serialDevice = NULL;
+    return 1;
   }
   return 0;
+}
+
+static int
+configureSerialPort (void) {
+  if (!serialRestartDevice(serialDevice, protocol->serialBaud)) return 0;
+  if (!serialSetParity(serialDevice, protocol->serialBaud)) return 0;
+  return 1;
 }
 
 static int
@@ -197,7 +203,7 @@ closeSerialPort (void) {
 }
 
 static const InputOutputOperations serialOperations = {
-  openSerialPort, closeSerialPort,
+  openSerialPort, configureSerialPort, closeSerialPort,
   awaitSerialInput, readSerialBytes, writeSerialBytes
 };
 
@@ -223,6 +229,11 @@ openUsbPort (char **parameters, const char *device) {
     return 1;
   }
   return 0;
+}
+
+static int
+configureUsbPort (void) {
+  return 1;
 }
 
 static int
@@ -254,7 +265,7 @@ closeUsbPort (void) {
 }
 
 static const InputOutputOperations usbOperations = {
-  openUsbPort, closeUsbPort,
+  openUsbPort, configureUsbPort, closeUsbPort,
   awaitUsbInput, readUsbBytes, writeUsbBytes
 };
 #endif /* ENABLE_USB_SUPPORT */
@@ -269,6 +280,11 @@ static int bluezConnection = -1;
 static int
 openBluezPort (char **parameters, const char *device) {
   return (bluezConnection = openRfcommConnection(device, 1)) != -1;
+}
+
+static int
+configureBluezPort (void) {
+  return 1;
 }
 
 static int
@@ -304,7 +320,7 @@ closeBluezPort (void) {
 }
 
 static const InputOutputOperations bluezOperations = {
-  openBluezPort, closeBluezPort,
+  openBluezPort, configureBluezPort, closeBluezPort,
   awaitBluezInput, readBluezBytes, writeBluezBytes
 };
 #endif /* ENABLE_BLUETOOTH_SUPPORT */
@@ -727,6 +743,7 @@ writeBaumCells (BrailleDisplay *brl) {
 }
 
 static const ProtocolOperations baumOperations = {
+  19200, SERIAL_PARITY_NONE,
   readBaumPacket, writeBaumPacket,
   identifyBaumDisplay, updateBaumKeys, writeBaumCells
 };
@@ -971,6 +988,7 @@ writeHandyTechCells (BrailleDisplay *brl) {
 }
 
 static const ProtocolOperations handyTechOperations = {
+  19200, SERIAL_PARITY_ODD,
   readHandyTechPacket, writeHandyTechPacket,
   identifyHandyTechDisplay, updateHandyTechKeys, writeHandyTechCells
 };
@@ -1017,6 +1035,7 @@ typedef union {
       } identity;
 
       struct {
+        unsigned char count;
         unsigned char vertical[4];
         unsigned char horizontal[10];
       } sensors;
@@ -1215,6 +1234,7 @@ writePowerBrailleCells (BrailleDisplay *brl) {
 }
 
 static const ProtocolOperations powerBrailleOperations = {
+  9600, SERIAL_PARITY_NONE,
   readPowerBraillePacket, writePowerBraillePacket,
   identifyPowerBrailleDisplay, updatePowerBrailleKeys, writePowerBrailleCells
 };
@@ -1259,28 +1279,29 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
       &powerBrailleOperations,
       NULL
     };
-    const ProtocolOperations *const *protocolEntry = protocolTable;
+    const ProtocolOperations *const *protocolAddress = protocolTable;
 
-    while (*protocolEntry) {
-      if (!flushInput()) break;
+    while ((protocol = *protocolAddress)) {
+      if (io->configurePort()) {
+        if (!flushInput()) break;
 
-      if ((*protocolEntry)->identifyDisplay(brl)) {
-        logCellCount();
-        protocol = *protocolEntry;
+        if (protocol->identifyDisplay(brl)) {
+          logCellCount();
 
-        memset(&activeKeys, 0, sizeof(activeKeys));
-        memset(&pressedKeys, 0, sizeof(pressedKeys));
+          memset(&activeKeys, 0, sizeof(activeKeys));
+          memset(&pressedKeys, 0, sizeof(pressedKeys));
 
-        clearCells(0, cellCount);
-        if (!updateCells(brl)) break;
+          clearCells(0, cellCount);
+          if (!updateCells(brl)) break;
 
-        brl->x = cellCount;
-        brl->y = 1;
-        brl->helpPage = 0;
-        return 1;
+          brl->x = cellCount;
+          brl->y = 1;
+          brl->helpPage = 0;
+          return 1;
+        }
       }
 
-      ++protocolEntry;
+      ++protocolAddress;
     }
 
     io->closePort();
