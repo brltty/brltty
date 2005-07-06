@@ -5,15 +5,16 @@ TL1+TL3 / TR1+TR3: go left/right one character
 TL1+TL2+TL3 / TR1+TR2+TR3: go to beginning/end of line
 TR1/TR3: go up/down one line
 TL1+TR1 / TL3+TR3: go to top/bottom line
+TL2 + TR1/TR3: go to top-left/bottom-left corner
 TR2 + TR1/TR3: go up/down to nearest line with different content
 TL2 + TL1/TL3: go up/down to nearest line with different highlighting
 TL1+TL2+TR1+TR2 / TL2+TL3+TR2+TR3: go up/down to nearest command prompt
 TL1: go to cursor
 TL3: switch to/from the status line
+TL2+TR2: toggle cursor tracking
 
 CRn: bring cursor to character
 TL1+TL3+TR1+TR3: bring cursor to current line (no horizontal motion)
-TL2+TR2: toggle cursor tracking
 
 TL1+CRn: start new cut buffer at character
 TL2+CRn: append to existing cut buffer from character
@@ -44,5 +45,6 @@ TL3+TR1: stop speaking immediately
 TL3+TR2: speak current line
 TL3+TR1+TR2: speak from top of screen through current line
 TL3+TR2+TR3: speak from current line through bottom of screen
-TL3+TR1+TR3: go to current (most recent) speech position
-TL3+TR1+TR2+TR3: toggle autospeak mode
+TL3+TR1+TR3: toggle autospeak mode
+TL3+TR1+TR2+TR3: go to current (most recent) speech position
+TL2+TR1+TR2: restart (s)peech driver

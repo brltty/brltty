@@ -492,7 +492,7 @@ logBaumDeviceIdentity (const BaumResponsePacket *packet) {
 
   while (length) {
     const char byte = identity[length - 1];
-    if ((byte != ' ') || !byte) break;
+    if (byte && (byte != ' ')) break;
     --length;
   }
   identity[length] = 0;
@@ -516,7 +516,7 @@ logBaumSerialNumber (const BaumResponsePacket *packet) {
 
   while (length) {
     unsigned char byte = number[length - 1];
-    if ((byte != ' ') || !byte) break;
+    if (byte && (byte != ' ')) break;
     --length;
   }
   number[length] = 0;
@@ -1491,6 +1491,9 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
       KEY(BAUM_KEY_TL1|BAUM_KEY_TR1, BRL_CMD_TOP);
       KEY(BAUM_KEY_TL3|BAUM_KEY_TR3, BRL_CMD_BOT);
 
+      KEY(BAUM_KEY_TL2|BAUM_KEY_TR1, BRL_CMD_TOP_LEFT);
+      KEY(BAUM_KEY_TL2|BAUM_KEY_TR3, BRL_CMD_BOT_LEFT);
+
       KEY(BAUM_KEY_TR2|BAUM_KEY_TR1, BRL_CMD_PRDIFLN);
       KEY(BAUM_KEY_TR2|BAUM_KEY_TR3, BRL_CMD_NXDIFLN);
 
@@ -1511,6 +1514,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
       KEY(BAUM_KEY_TL1|BAUM_KEY_TL3|BAUM_KEY_TR1, BRL_CMD_PREFMENU);
       KEY(BAUM_KEY_TL1|BAUM_KEY_TL2|BAUM_KEY_TL3|BAUM_KEY_TR1, BRL_CMD_PASTE);
       KEY(BAUM_KEY_TL1|BAUM_KEY_TL2|BAUM_KEY_TL3|BAUM_KEY_TR2, BRL_CMD_PREFLOAD);
+      KEY(BAUM_KEY_TL2|BAUM_KEY_TL3|BAUM_KEY_TR1, BRL_CMD_RESTARTSPEECH);
       KEY(BAUM_KEY_TL1|BAUM_KEY_TL3|BAUM_KEY_TR3, BRL_CMD_BACK);
       KEY(BAUM_KEY_TL2|BAUM_KEY_TR1|BAUM_KEY_TR2|BAUM_KEY_TR3, BRL_CMD_PREFSAVE);
       KEY(BAUM_KEY_TL2|BAUM_KEY_TL3|BAUM_KEY_TR2, BRL_CMD_SIXDOTS|BRL_FLG_TOGGLE_ON);
@@ -1520,8 +1524,8 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
       KEY(BAUM_KEY_TL3|BAUM_KEY_TR2, BRL_CMD_SAY_LINE);
       KEY(BAUM_KEY_TL3|BAUM_KEY_TR1|BAUM_KEY_TR2, BRL_CMD_SAY_ABOVE);
       KEY(BAUM_KEY_TL3|BAUM_KEY_TR2|BAUM_KEY_TR3, BRL_CMD_SAY_BELOW);
-      KEY(BAUM_KEY_TL3|BAUM_KEY_TR1|BAUM_KEY_TR3, BRL_CMD_SPKHOME);
-      KEY(BAUM_KEY_TL3|BAUM_KEY_TR1|BAUM_KEY_TR2|BAUM_KEY_TR3, BRL_CMD_AUTOSPEAK);
+      KEY(BAUM_KEY_TL3|BAUM_KEY_TR1|BAUM_KEY_TR3, BRL_CMD_AUTOSPEAK);
+      KEY(BAUM_KEY_TL3|BAUM_KEY_TR1|BAUM_KEY_TR2|BAUM_KEY_TR3, BRL_CMD_SPKHOME);
 
       default:
         break;
