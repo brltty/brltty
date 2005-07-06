@@ -55,7 +55,6 @@ static Keys pressedKeys;
 
 typedef struct {
   int (*openPort) (char **parameters, const char *device);
-  int (*configurePort) (void);
   void (*closePort) ();
   int (*awaitInput) (int milliseconds);
   int (*readBytes) (unsigned char *buffer, int length, int wait);
@@ -165,16 +164,17 @@ static SerialDevice *serialDevice = NULL;
 static int
 openSerialPort (char **parameters, const char *device) {
   if ((serialDevice = serialOpenDevice(device))) {
-    return 1;
-  }
-  return 0;
-}
+    if (serialRestartDevice(serialDevice, protocol->serialBaud)) {
+      if (serialSetParity(serialDevice, protocol->serialParity)) {
+        return 1;
+      }
+    }
 
-static int
-configureSerialPort (void) {
-  if (!serialRestartDevice(serialDevice, protocol->serialBaud)) return 0;
-  if (!serialSetParity(serialDevice, protocol->serialParity)) return 0;
-  return 1;
+    io->closePort(serialDevice);
+    serialDevice = NULL;
+  }
+
+  return 0;
 }
 
 static int
@@ -203,7 +203,7 @@ closeSerialPort (void) {
 }
 
 static const InputOutputOperations serialOperations = {
-  openSerialPort, configureSerialPort, closeSerialPort,
+  openSerialPort, closeSerialPort,
   awaitSerialInput, readSerialBytes, writeSerialBytes
 };
 
@@ -215,25 +215,27 @@ static UsbChannel *usb = NULL;
 
 static int
 openUsbPort (char **parameters, const char *device) {
-  const UsbChannelDefinition definitions[] = {
-    {0X0403, 0XFE71, 1, 0, 0, 1, 2, 0}, /* 24 cells */
-    {0X0403, 0XFE72, 1, 0, 0, 1, 2, 0}, /* 40 cells */
-    {0X0403, 0XFE73, 1, 0, 0, 1, 2, 0}, /* 32 cells */
-    {0X0403, 0XFE74, 1, 0, 0, 1, 2, 0}, /* 64 cells */
-    {0X0403, 0XFE75, 1, 0, 0, 1, 2, 0}, /* 80 cells */
+  static UsbChannelDefinition definitions[] = {
+    {0X0403, 0XFE71, 1, 0, 0, 1, 2, 0, 0, 8, 1}, /* 24 cells */
+    {0X0403, 0XFE72, 1, 0, 0, 1, 2, 0, 0, 8, 1}, /* 40 cells */
+    {0X0403, 0XFE73, 1, 0, 0, 1, 2, 0, 0, 8, 1}, /* 32 cells */
+    {0X0403, 0XFE74, 1, 0, 0, 1, 2, 0, 0, 8, 1}, /* 64 cells */
+    {0X0403, 0XFE75, 1, 0, 0, 1, 2, 0, 0, 8, 1}, /* 80 cells */
     {0}
   };
+  UsbChannelDefinition *def = definitions;
+
+  while (def->vendor) {
+    def->baud = protocol->serialBaud;
+    def->parity = protocol->serialParity;
+    def++;
+  }
 
   if ((usb = usbFindChannel(definitions, (void *)device))) {
     usbBeginInput(usb->device, usb->definition.inputEndpoint, 8);
     return 1;
   }
   return 0;
-}
-
-static int
-configureUsbPort (void) {
-  return 1;
 }
 
 static int
@@ -265,7 +267,7 @@ closeUsbPort (void) {
 }
 
 static const InputOutputOperations usbOperations = {
-  openUsbPort, configureUsbPort, closeUsbPort,
+  openUsbPort, closeUsbPort,
   awaitUsbInput, readUsbBytes, writeUsbBytes
 };
 #endif /* ENABLE_USB_SUPPORT */
@@ -280,11 +282,6 @@ static int bluezConnection = -1;
 static int
 openBluezPort (char **parameters, const char *device) {
   return (bluezConnection = openRfcommConnection(device, 1)) != -1;
-}
-
-static int
-configureBluezPort (void) {
-  return 1;
 }
 
 static int
@@ -320,7 +317,7 @@ closeBluezPort (void) {
 }
 
 static const InputOutputOperations bluezOperations = {
-  openBluezPort, configureBluezPort, closeBluezPort,
+  openBluezPort, closeBluezPort,
   awaitBluezInput, readBluezBytes, writeBluezBytes
 };
 #endif /* ENABLE_BLUETOOTH_SUPPORT */
@@ -1284,7 +1281,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
     return 0;
   }
 
-  if (io->openPort(parameters, device)) {
+  {
     static const ProtocolOperations *const protocolTable[] = {
       &baumOperations,
       &handyTechOperations,
@@ -1294,7 +1291,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
     const ProtocolOperations *const *protocolAddress = protocolTable;
 
     while ((protocol = *protocolAddress)) {
-      if (io->configurePort()) {
+      if (io->openPort(parameters, device)) {
         if (!flushInput()) break;
 
         if (protocol->identifyDisplay(brl)) {
@@ -1311,12 +1308,12 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
           brl->helpPage = 0;
           return 1;
         }
+
+        io->closePort();
       }
 
       ++protocolAddress;
     }
-
-    io->closePort();
   }
 
   return 0;
