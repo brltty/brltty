@@ -525,6 +525,39 @@ logBaumSerialNumber (const BaumResponsePacket *packet) {
 }
 
 static int
+logBaumPowerdownReason (BaumPowerdownReason reason) {
+  typedef struct {
+    BaumPowerdownReason bit;
+    const char *explanation;
+  } ReasonEntry;
+  static const ReasonEntry reasonTable[] = {
+    {BAUM_PDR_ProtocolRequested, "driver request"},
+    {BAUM_PDR_PowerSwitch      , "power switch"},
+    {BAUM_PDR_AutoPowerOff     , "idle timeout"},
+    {BAUM_PDR_BatteryLow       , "battery low"},
+    {0}
+  };
+  const ReasonEntry *entry;
+
+  unsigned char buffer[0X100];
+  int length = 0;
+  char delimiter = ':';
+
+  sprintf(&buffer[length], "Baum Powerdown%n", &length);
+  for (entry=reasonTable; entry->bit; ++entry) {
+    if (reason & entry->bit) {
+      int count;
+      sprintf(&buffer[length], "%c %s%n", delimiter, entry->explanation, &count);
+      length += count;
+      delimiter = ',';
+    }
+  }
+
+  LogPrint(LOG_WARNING, "%.*s", length, buffer);
+  return 1;
+}
+
+static int
 readBaumPacket (unsigned char *packet, int size) {
   int started = 0;
   int escape = 0;
@@ -716,6 +749,11 @@ updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
         continue;
 
       case BAUM_RSP_CommunicationChannel:
+        continue;
+
+      case BAUM_RSP_PowerdownSignal:
+        if (logBaumPowerdownReason(packet.data.values.powerdownReason)) {
+        }
         continue;
 
       {
