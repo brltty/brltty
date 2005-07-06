@@ -716,7 +716,14 @@ identifyBaumDisplay (BrailleDisplay *brl) {
             }
           }
 
-          if (cellCount) return 1;
+          if (cellCount) {
+            {
+              const char request[] = {BAUM_REQ_GetSerialNumber};
+              if (!writeBaumPacket(brl, request, sizeof(request))) goto error;
+            }
+
+            return 1;
+          }
           LogPrint(LOG_DEBUG, "unknown cell count.");
         }
       }
