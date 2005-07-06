@@ -422,7 +422,7 @@ showInfo (void) {
 
   if (brl.x*brl.y >= 21) {
     snprintf(text, sizeof(text), "%02d:%02d %02d:%02d %02d %c%c%c%c%c%c",
-             p->winx, p->winy, scr.posx, scr.posy, scr.no, 
+             p->winx+1, p->winy+1, scr.posx+1, scr.posy+1, scr.no, 
              p->trackCursor? 't': ' ',
              prefs.showCursor? (prefs.blinkingCursor? 'B': 'v'):
                                (prefs.blinkingCursor? 'b': ' '),
@@ -453,8 +453,8 @@ showInfo (void) {
       int i;
 
       memset(&dots, 0, 5);
-      setCoordinateUpper(&dots[0], scr.posx, scr.posy);
-      setCoordinateLower(&dots[0], p->winx, p->winy);
+      setCoordinateUpper(&dots[0], scr.posx+1, scr.posy+1);
+      setCoordinateLower(&dots[0], p->winx+1, p->winy+1);
       setStateDots(&dots[4]);
       for (i=5; text[i]; i++) dots[i] = textTable[(unsigned char)text[i]];
       memcpy(brl.buffer, dots, brl.x*brl.y);
