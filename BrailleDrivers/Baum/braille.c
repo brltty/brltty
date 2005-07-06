@@ -34,9 +34,6 @@
 static int logInputPackets = 0;
 static int logOutputPackets = 0;
 
-#define BITS_PER_SECOND 19200
-#define BYTES_PER_SECOND (BITS_PER_SECOND / 10)
-
 #define MAXIMUM_CELLS 85
 #define MAXIMUM_ROUTING_BYTES ((MAXIMUM_CELLS + 7) / 8)
 
@@ -72,6 +69,7 @@ typedef struct {
   int (*writeCells) (BrailleDisplay *brl);
 } ProtocolOperations;
 static const ProtocolOperations *protocol;
+static int charactersPerSecond;
 
 /* Internal Routines */
 
@@ -153,7 +151,7 @@ setRoutingKey (int number, int press, int *pressed) {
 
 static void
 adjustWriteDelay (BrailleDisplay *brl, int bytes) {
-  brl->writeDelay += bytes * 1000 / BYTES_PER_SECOND;
+  brl->writeDelay += bytes * 1000 / charactersPerSecond;
 }
 
 /* Serial IO */
@@ -1291,6 +1289,8 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
     const ProtocolOperations *const *protocolAddress = protocolTable;
 
     while ((protocol = *protocolAddress)) {
+      charactersPerSecond  = protocol->serialBaud / 10;
+
       if (io->openPort(parameters, device)) {
         if (!flushInput()) break;
 
