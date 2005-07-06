@@ -76,6 +76,25 @@ static const ProtocolOperations *protocol;
 /* Internal Routines */
 
 static int
+setFunctionKeys (unsigned int mask, unsigned int keys, int *pressed) {
+  keys |= pressedKeys.function & ~mask;
+  if (keys == pressedKeys.function) return 0;
+
+  if (keys & ~pressedKeys.function) *pressed = 1;
+  pressedKeys.function = keys;
+  return 1;
+}
+
+static int
+setRoutingKey (int number, int press, int *pressed) {
+  unsigned char *state = &pressedKeys.routing[number];
+  if (!press == !*state) return 0;
+
+  if ((*state = !!press)) *pressed = 1;
+  return 1;
+}
+
+static int
 readByte (unsigned char *byte, int wait) {
   int count = io->readBytes(byte, 1, wait);
   if (count > 0) return 1;
@@ -123,32 +142,24 @@ logCellCount (void) {
 static void
 changeCellCount (BrailleDisplay *brl, int count) {
   if (count != cellCount) {
-    if (count > cellCount) clearCells(cellCount, count-cellCount);
+    if (count > cellCount) {
+      clearCells(cellCount, count-cellCount);
+
+      {
+        int number;
+        for (number=cellCount; number<count; ++number) {
+          int pressed;
+          setRoutingKey(number, 0, &pressed);
+        }
+      }
+    }
+
     cellCount = count;
     logCellCount();
 
     brl->x = cellCount;
     brl->resizeRequired = 1;
   }
-}
-
-static int
-setFunctionKeys (unsigned int mask, unsigned int keys, int *pressed) {
-  keys |= pressedKeys.function & ~mask;
-  if (keys == pressedKeys.function) return 0;
-
-  if (keys & ~pressedKeys.function) *pressed = 1;
-  pressedKeys.function = keys;
-  return 1;
-}
-
-static int
-setRoutingKey (int number, int press, int *pressed) {
-  unsigned char *state = &pressedKeys.routing[number];
-  if (!press == !*state) return 0;
-
-  if ((*state = !!press)) *pressed = 1;
-  return 1;
 }
 
 static void
@@ -702,6 +713,9 @@ updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
 
       case BAUM_RSP_SerialNumber:
         logBaumSerialNumber(&packet);
+        continue;
+
+      case BAUM_RSP_CommunicationChannel:
         continue;
 
       {
