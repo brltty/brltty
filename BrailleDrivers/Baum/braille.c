@@ -34,6 +34,9 @@
 static int logInputPackets = 0;
 static int logOutputPackets = 0;
 
+#define BITS_PER_SECOND 19200
+#define BYTES_PER_SECOND (BITS_PER_SECOND / 10)
+
 #define MAXIMUM_CELLS 85
 #define MAXIMUM_ROUTING_BYTES ((MAXIMUM_CELLS + 7) / 8)
 
@@ -69,7 +72,6 @@ typedef struct {
   int (*writeCells) (BrailleDisplay *brl);
 } ProtocolOperations;
 static const ProtocolOperations *protocol;
-static int charactersPerSecond;
 
 /* Internal Routines */
 
@@ -151,7 +153,7 @@ setRoutingKey (int number, int press, int *pressed) {
 
 static void
 adjustWriteDelay (BrailleDisplay *brl, int bytes) {
-  brl->writeDelay += bytes * 1000 / charactersPerSecond;
+  brl->writeDelay += bytes * 1000 / BYTES_PER_SECOND;
 }
 
 /* Serial IO */
@@ -349,6 +351,7 @@ typedef enum {
   BAUM_RSP_RoutingKeys          = 0X22,
   BAUM_RSP_TopKeys              = 0X24,
   BAUM_RSP_FrontKeys            = 0X28,
+  BAUM_RSP_BackKeys             = 0X29,
   BAUM_RSP_CommandKeys          = 0X2B,
   BAUM_RSP_ErrorCode            = 0X40,
   BAUM_RSP_DeviceIdentity       = 0X84,
@@ -382,25 +385,34 @@ typedef enum {
 } BaumPowerdownReason;
 
 typedef enum {
-  BAUM_KEY_TL1 = 0X000001,
-  BAUM_KEY_TL2 = 0X000002,
-  BAUM_KEY_TL3 = 0X000004,
-  BAUM_KEY_TR1 = 0X000008,
-  BAUM_KEY_TR2 = 0X000010,
-  BAUM_KEY_TR3 = 0X000020,
-  BAUM_KEY_FLU = 0X000100,
-  BAUM_KEY_FLD = 0X000200,
-  BAUM_KEY_FMU = 0X000400,
-  BAUM_KEY_FMD = 0X000800,
-  BAUM_KEY_FRU = 0X001000,
-  BAUM_KEY_FRD = 0X002000,
-  BAUM_KEY_CK1 = 0X010000,
-  BAUM_KEY_CK2 = 0X020000,
-  BAUM_KEY_CK3 = 0X040000,
-  BAUM_KEY_CK4 = 0X080000,
-  BAUM_KEY_CK5 = 0X100000,
-  BAUM_KEY_CK6 = 0X200000,
-  BAUM_KEY_CK7 = 0X400000
+  BAUM_KEY_TL1 = 0X00000001,
+  BAUM_KEY_TL2 = 0X00000002,
+  BAUM_KEY_TL3 = 0X00000004,
+  BAUM_KEY_TR1 = 0X00000008,
+  BAUM_KEY_TR2 = 0X00000010,
+  BAUM_KEY_TR3 = 0X00000020,
+
+  BAUM_KEY_FLU = 0X00000100,
+  BAUM_KEY_FLD = 0X00000200,
+  BAUM_KEY_FMU = 0X00000400,
+  BAUM_KEY_FMD = 0X00000800,
+  BAUM_KEY_FRU = 0X00001000,
+  BAUM_KEY_FRD = 0X00002000,
+
+  BAUM_KEY_CK1 = 0X00010000,
+  BAUM_KEY_CK2 = 0X00020000,
+  BAUM_KEY_CK3 = 0X00040000,
+  BAUM_KEY_CK4 = 0X00080000,
+  BAUM_KEY_CK5 = 0X00100000,
+  BAUM_KEY_CK6 = 0X00200000,
+  BAUM_KEY_CK7 = 0X00400000,
+
+  BAUM_KEY_BLU = 0X01000000,
+  BAUM_KEY_BLD = 0X02000000,
+  BAUM_KEY_BMU = 0X04000000,
+  BAUM_KEY_BMD = 0X08000000,
+  BAUM_KEY_BRU = 0X10000000,
+  BAUM_KEY_BRD = 0X20000000
 } BaumKey;
 
 typedef enum {
@@ -441,6 +453,7 @@ typedef union {
       unsigned char routingKeys[MAXIMUM_ROUTING_BYTES];
       unsigned char topKeys;
       unsigned char frontKeys;
+      unsigned char backKeys;
       unsigned char commandKeys;
 
       unsigned char cellCount;
@@ -459,6 +472,46 @@ typedef union {
     } values;
   } data;
 } BaumResponsePacket;
+
+static int
+logBaumDeviceIdentity (const BaumResponsePacket *packet) {
+  int length = sizeof(packet->data.values.deviceIdentity);
+  char identity[length + 1];
+  memcpy(identity, packet->data.values.deviceIdentity, length);
+
+  while (length) {
+    const char byte = identity[length - 1];
+    if ((byte != ' ') && !byte) break;
+    --length;
+  }
+  identity[length] = 0;
+  LogPrint(LOG_INFO, "Baum Device Identity: %s", identity);
+
+  {
+    const char *number = strpbrk(identity, "123456789");
+    if (number) return atoi(number);
+  }
+
+  if (strcmp(identity, "PocketVario") == 0) return 24;
+  if (strcmp(identity, "SuperVario") == 0) return 40;
+  return 0;
+}
+
+static void
+logBaumSerialNumber (const BaumResponsePacket *packet) {
+  int length = sizeof(packet->data.values.serialNumber);
+  unsigned char number[length + 1];
+  memcpy(number, packet->data.values.serialNumber, length);
+
+  while (length) {
+    unsigned char byte = number[length - 1];
+    if ((byte != ' ') && !byte) break;
+    --length;
+  }
+  number[length] = 0;
+
+  LogPrint(LOG_INFO, "Baum Serial Number: %s", number);
+}
 
 static int
 readBaumPacket (unsigned char *packet, int size) {
@@ -503,6 +556,7 @@ readBaumPacket (unsigned char *packet, int size) {
           case BAUM_RSP_PowerdownSignal:
           case BAUM_RSP_TopKeys:
           case BAUM_RSP_FrontKeys:
+          case BAUM_RSP_BackKeys:
           case BAUM_RSP_CommandKeys:
           case BAUM_RSP_ErrorCode:
             length = 2;
@@ -594,19 +648,7 @@ identifyBaumDisplay (BrailleDisplay *brl) {
       BaumResponsePacket response;
       if (getBaumPacket(&response)) {
         if (response.data.code == BAUM_RSP_DeviceIdentity) {
-          int length = BAUM_DEVICE_IDENTITY_LENGTH;
-          char identity[length + 1];
-
-          memcpy(identity, response.data.values.deviceIdentity, length);
-          while (length) {
-            const char byte = identity[--length];
-            if ((byte != ' ') && (byte != 0)) {
-              ++length;
-              break;
-            }
-          }
-          identity[length] = 0;
-          LogPrint(LOG_INFO, "Model Name: %s", identity);
+          cellCount = logBaumDeviceIdentity(&response);
 
           {
             static const char request[] = {BAUM_REQ_DisplayData};
@@ -616,41 +658,22 @@ identifyBaumDisplay (BrailleDisplay *brl) {
             while (io->awaitInput(100)) {
               BaumResponsePacket response;
               int size = getBaumPacket(&response);
-              if (size) {
-                switch (response.data.code) {
-                  case BAUM_RSP_CellCount:
-                    cellCount = response.data.values.cellCount;
-                    return 1;
 
-                  default:
-                    LogBytes("unexpected packet", response.bytes, size);
-                    break;
+              if (size) {
+                if (response.data.code == BAUM_RSP_CellCount) {
+                  cellCount = response.data.values.cellCount;
+                  break;
                 }
+
+                LogBytes("unexpected packet", response.bytes, size);
               } else if (errno != EAGAIN) {
                 goto error;
               }
             }
           }
 
-          {
-            const char *number = strpbrk(identity, "0123456789");
-            if (number) {
-              cellCount = atoi(number);
-              return 1;
-            }
-          }
-
-          if (strcmp(identity, "PocketVario") == 0) {
-            cellCount = 24;
-            return 1;
-          }
-
-          if (strcmp(identity, "SuperVario") == 0) {
-            cellCount = 40;
-            return 1;
-          }
-
-          LogPrint(LOG_WARNING, "unknown cell count: %s", identity);
+          if (cellCount) return 1;
+          LogPrint(LOG_DEBUG, "unknown cell count.");
         }
       }
     }
@@ -673,6 +696,14 @@ updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
         changeCellCount(brl, packet.data.values.cellCount);
         continue;
 
+      case BAUM_RSP_DeviceIdentity:
+        logBaumDeviceIdentity(&packet);
+        continue;
+
+      case BAUM_RSP_SerialNumber:
+        logBaumSerialNumber(&packet);
+        continue;
+
       {
         unsigned int keys;
         unsigned int shift;
@@ -690,6 +721,11 @@ updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
       case BAUM_RSP_CommandKeys:
         keys = packet.data.values.commandKeys;
         shift = 16;
+        goto doKeys;
+
+      case BAUM_RSP_BackKeys:
+        keys = packet.data.values.backKeys;
+        shift = 24;
         goto doKeys;
 
       doKeys:
@@ -880,12 +916,12 @@ findHandyTechModel (unsigned char identity) {
 
   for (model=handyTechModelTable; model->name; ++model) {
     if (identity == model->identity) {
-      LogPrint(LOG_INFO, "HandyTech Model: %02X -> %s", identity, model->name);
+      LogPrint(LOG_INFO, "Baum emulation: HandyTech Model: %02X -> %s", identity, model->name);
       return model;
     }
   }
 
-  LogPrint(LOG_WARNING, "unknown HandyTech identity code: %02X", identity);
+  LogPrint(LOG_WARNING, "Baum emulation: unknown HandyTech identity code: %02X", identity);
   return NULL;
 }
 
@@ -1152,7 +1188,7 @@ identifyPowerBrailleDisplay (BrailleDisplay *brl) {
       if (getPowerBraillePacket(&response)) {
         if (response.data.code == PB_RSP_IDENTITY) {
           const unsigned char *version = response.data.values.identity.version;
-          LogPrint(LOG_INFO, "PowerBraille Version: %c%c%c%c",
+          LogPrint(LOG_INFO, "Baum emulation: PowerBraille Version: %c%c%c%c",
                    version[0], version[1], version[2], version[3]);
           cellCount = response.data.values.identity.cells;
           return 1;
@@ -1289,8 +1325,6 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
     const ProtocolOperations *const *protocolAddress = protocolTable;
 
     while ((protocol = *protocolAddress)) {
-      charactersPerSecond  = protocol->serialBaud / 10;
-
       if (io->openPort(parameters, device)) {
         if (!flushInput()) break;
 
