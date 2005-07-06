@@ -492,7 +492,7 @@ logBaumDeviceIdentity (const BaumResponsePacket *packet) {
 
   while (length) {
     const char byte = identity[length - 1];
-    if ((byte != ' ') && !byte) break;
+    if ((byte != ' ') || !byte) break;
     --length;
   }
   identity[length] = 0;
@@ -516,7 +516,7 @@ logBaumSerialNumber (const BaumResponsePacket *packet) {
 
   while (length) {
     unsigned char byte = number[length - 1];
-    if ((byte != ' ') && !byte) break;
+    if ((byte != ' ') || !byte) break;
     --length;
   }
   number[length] = 0;
