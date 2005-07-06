@@ -995,17 +995,21 @@ static const ProtocolOperations handyTechOperations = {
 
 /* PowerBraille Protocol */
 
-#define PB_BUTTONS0_TL2    0X01 /* left button */
-#define PB_BUTTONS0_TL1    0X02 /* left rocker up */
-#define PB_BUTTONS0_TR2    0X04 /* right button */
-#define PB_BUTTONS0_TL3    0X08 /* left rocker down */
-#define PB_BUTTONS0_TL2TR2 0X10
 #define PB_BUTTONS0_MARKER 0X60
+#define PB1_BUTTONS0_TR3   0X08
+#define PB1_BUTTONS0_TR2   0X04
+#define PB1_BUTTONS0_TR1   0X02
+#define PB1_BUTTONS0_TL2   0X01
+#define PB2_BUTTONS0_TL3   0X08
+#define PB2_BUTTONS0_TR2   0X04
+#define PB2_BUTTONS0_TL1   0X02
+#define PB2_BUTTONS0_TL2   0X01
 
-#define PB_BUTTONS1_TR1    0X02 /* right rocker up */
-#define PB_BUTTONS1_TR3    0X04 /* right rocker down */
-#define PB_BUTTONS1_TL2TR3 0X10
 #define PB_BUTTONS1_MARKER 0XE0
+#define PB1_BUTTONS1_TL3   0X08
+#define PB1_BUTTONS1_TL1   0X02
+#define PB2_BUTTONS1_TR3   0X04
+#define PB2_BUTTONS1_TR1   0X02
 
 typedef enum {
   PB_REQ_WRITE = 0X04,
@@ -1055,6 +1059,7 @@ readPowerBraillePacket (unsigned char *packet, int size) {
       if (offset > 0) LogBytes("Partial Packet", packet, offset);
       return 0;
     }
+  haveByte:
 
     if (offset == 0) {
       if (!byte) {
@@ -1065,7 +1070,14 @@ readPowerBraillePacket (unsigned char *packet, int size) {
         LogBytes("Ignored Byte", &byte, 1);
         continue;
       }
-    } else if (!packet[0]) {
+    } else if (packet[0]) {
+      if ((byte & PB_BUTTONS1_MARKER) != PB_BUTTONS1_MARKER) {
+        LogBytes("Short Packet", packet, offset);
+        offset = 0;
+        length = 0;
+        goto haveByte;
+      }
+    } else {
       if (offset == 1) {
         switch (byte) {
           case PB_RSP_IDENTITY:
@@ -1195,12 +1207,12 @@ updatePowerBrailleKeys (BrailleDisplay *brl, int *keyPressed) {
       }
     } else {
       unsigned int keys = 0;
-      if (packet.buttons[0] & PB_BUTTONS0_TL1) keys |= BAUM_KEY_TL1;
-      if (packet.buttons[0] & PB_BUTTONS0_TL2) keys |= BAUM_KEY_TL2;
-      if (packet.buttons[0] & PB_BUTTONS0_TL3) keys |= BAUM_KEY_TL3;
-      if (packet.buttons[1] & PB_BUTTONS1_TR1) keys |= BAUM_KEY_TR1;
-      if (packet.buttons[0] & PB_BUTTONS0_TR2) keys |= BAUM_KEY_TR2;
-      if (packet.buttons[1] & PB_BUTTONS1_TR3) keys |= BAUM_KEY_TR3;
+      if (packet.buttons[0] & PB2_BUTTONS0_TL1) keys |= BAUM_KEY_TL1;
+      if (packet.buttons[0] & PB2_BUTTONS0_TL2) keys |= BAUM_KEY_TL2;
+      if (packet.buttons[0] & PB2_BUTTONS0_TL3) keys |= BAUM_KEY_TL3;
+      if (packet.buttons[1] & PB2_BUTTONS1_TR1) keys |= BAUM_KEY_TR1;
+      if (packet.buttons[0] & PB2_BUTTONS0_TR2) keys |= BAUM_KEY_TR2;
+      if (packet.buttons[1] & PB2_BUTTONS1_TR3) keys |= BAUM_KEY_TR3;
 
       if (!setFunctionKeys(0XFF, keys, keyPressed)) continue;
       return 1;
