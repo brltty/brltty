@@ -760,6 +760,8 @@ updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
 
       case BAUM_RSP_PowerdownSignal:
         if (logBaumPowerdownReason(packet.data.values.powerdownReason)) {
+          errno = ENODEV;
+          return 0;
         }
         continue;
 
