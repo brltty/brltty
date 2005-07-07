@@ -567,7 +567,7 @@ readBaumPacket (unsigned char *packet, int size) {
   while (1) {
     unsigned char byte;
 
-    if (!readByte(&byte, started)) {
+    if (!readByte(&byte, (started || escape))) {
       if (offset > 0) LogBytes("Partial Packet", packet, offset);
       return 0;
     }
