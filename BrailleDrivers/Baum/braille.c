@@ -36,18 +36,18 @@ static const int logOutputPackets = 0;
 static const int probeLimit = 2;
 static const int probeTimeout = 200;
 
-#define MAXIMUM_CELLS 85
-#define MAXIMUM_ROUTING_BYTES ((MAXIMUM_CELLS + 7) / 8)
+#define MAXIMUM_CELL_COUNT 84
+#define ROUTING_BYTES(cells) (((cells) + 7) / 8)
 
 static int cellCount;
 static int cellsUpdated;
-static unsigned char internalCells[MAXIMUM_CELLS];
-static unsigned char externalCells[MAXIMUM_CELLS];
+static unsigned char internalCells[MAXIMUM_CELL_COUNT];
+static unsigned char externalCells[MAXIMUM_CELL_COUNT];
 static TranslationTable outputTable;
 
 typedef struct {
   unsigned int function;
-  unsigned char routing[MAXIMUM_CELLS];
+  unsigned char routing[MAXIMUM_CELL_COUNT];
 } Keys;
 static Keys activeKeys;
 static Keys pressedKeys;
@@ -471,7 +471,7 @@ typedef union {
     unsigned char code;
 
     union {
-      unsigned char routingKeys[MAXIMUM_ROUTING_BYTES];
+      unsigned char routingKeys[ROUTING_BYTES(MAXIMUM_CELL_COUNT)];
       unsigned char topKeys;
       unsigned char frontKeys;
       unsigned char backKeys;
@@ -607,7 +607,9 @@ readBaumPacket (unsigned char *packet, int size) {
             break;
 
           case BAUM_RSP_RoutingKeys:
-            length = (cellCount > 40)? 11: 6;
+            length = (cellCount > 80)? 12:
+                     (cellCount > 40)? 11:
+                                        6;
             break;
 
           default:
@@ -781,7 +783,8 @@ updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
         int changed = 0;
         int number = 0;
         int index;
-        for (index=0; index<MAXIMUM_ROUTING_BYTES; ++index) {
+        int count = ROUTING_BYTES(cellCount);
+        for (index=0; index<count; ++index) {
           unsigned char byte = packet.data.values.routingKeys[index];
           unsigned char bit;
           for (bit=0X01; bit; bit<<=1) {
@@ -1262,7 +1265,8 @@ updatePowerBrailleKeys (BrailleDisplay *brl, int *keyPressed) {
           int changed = 0;
           int number = 0;
           int index;
-          for (index=0; index<MAXIMUM_ROUTING_BYTES; ++index) {
+          int count = ROUTING_BYTES(cellCount);
+          for (index=0; index<count; ++index) {
             unsigned char byte = packet.data.values.sensors.horizontal[index];
             unsigned char bit;
             for (bit=0X01; bit; bit<<=1) {
