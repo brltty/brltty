@@ -31,11 +31,10 @@
 
 /* Global Definitions */
 
-static int logInputPackets = 0;
-static int logOutputPackets = 0;
-
-#define BITS_PER_SECOND 19200
-#define BYTES_PER_SECOND (BITS_PER_SECOND / 10)
+static const int logInputPackets = 0;
+static const int logOutputPackets = 0;
+static const int probeLimit = 2;
+static const int probeTimeout = 200;
 
 #define MAXIMUM_CELLS 85
 #define MAXIMUM_ROUTING_BYTES ((MAXIMUM_CELLS + 7) / 8)
@@ -67,11 +66,12 @@ typedef struct {
   SerialParity serialParity;
   int (*readPacket) (unsigned char *packet, int size);
   int (*writePacket) (BrailleDisplay *brl, const unsigned char *packet, int length);
-  int (*identifyDisplay) (BrailleDisplay *brl);
+  int (*probeDisplay) (BrailleDisplay *brl);
   int (*updateKeys) (BrailleDisplay *brl, int *keyPressed);
   int (*writeCells) (BrailleDisplay *brl);
 } ProtocolOperations;
 static const ProtocolOperations *protocol;
+static int charactersPerSecond;
 
 /* Internal Routines */
 
@@ -164,7 +164,7 @@ changeCellCount (BrailleDisplay *brl, int count) {
 
 static void
 adjustWriteDelay (BrailleDisplay *brl, int bytes) {
-  brl->writeDelay += bytes * 1000 / BYTES_PER_SECOND;
+  brl->writeDelay += bytes * 1000 / charactersPerSecond;
 }
 
 static void
@@ -323,7 +323,7 @@ writeBluezBytes (const unsigned char *buffer, int length) {
   int count = writeData(bluezConnection, buffer, length);
   if (count != length) {
     if (count == -1) {
-      LogError("Vario Bluetooth write");
+      LogError("Baum Bluetooth write");
     } else {
       LogPrint(LOG_WARNING, "Trunccated bluetooth write: %d < %d", count, length);
     }
@@ -668,8 +668,8 @@ writeBaumPacket (BrailleDisplay *brl, const unsigned char *packet, int length) {
 }
 
 static int
-identifyBaumDisplay (BrailleDisplay *brl) {
-  int tries = 0;
+probeBaumDisplay (BrailleDisplay *brl) {
+  int probes = 0;
   while (1) {
     {
       static const unsigned char request[] = {BAUM_REQ_GetDeviceIdentity};
@@ -687,7 +687,7 @@ identifyBaumDisplay (BrailleDisplay *brl) {
       if (!writeBaumPacket(brl, request, sizeof(request))) break;
     }
 
-    while (io->awaitInput(500)) {
+    while (io->awaitInput(probeTimeout)) {
       BaumResponsePacket response;
       int size = getBaumPacket(&response);
       if (size) {
@@ -713,7 +713,7 @@ identifyBaumDisplay (BrailleDisplay *brl) {
       }
     }
     if (errno != EAGAIN) break;
-    if (++tries == 5) break;
+    if (++probes == probeLimit) break;
   }
 
   return 0;
@@ -820,7 +820,7 @@ writeBaumCells (BrailleDisplay *brl) {
 static const ProtocolOperations baumOperations = {
   19200, SERIAL_PARITY_NONE,
   readBaumPacket, writeBaumPacket,
-  identifyBaumDisplay, updateBaumKeys, writeBaumCells
+  probeBaumDisplay, updateBaumKeys, writeBaumCells
 };
 
 /* HandyTech Protocol */
@@ -970,11 +970,11 @@ findHandyTechModel (unsigned char identity) {
 }
 
 static int
-identifyHandyTechDisplay (BrailleDisplay *brl) {
-  int tries = 0;
+probeHandyTechDisplay (BrailleDisplay *brl) {
+  int probes = 0;
   static const unsigned char request[] = {HT_REQ_RESET};
   while (writeHandyTechPacket(brl, request, sizeof(request))) {
-    while (io->awaitInput(500)) {
+    while (io->awaitInput(probeTimeout)) {
       HandyTechResponsePacket response;
       if (getHandyTechPacket(&response)) {
         if (response.data.code == HT_RSP_IDENTITY) {
@@ -985,7 +985,7 @@ identifyHandyTechDisplay (BrailleDisplay *brl) {
       }
     }
     if (errno != EAGAIN) break;
-    if (++tries == 5) break;
+    if (++probes == probeLimit) break;
   }
 
   return 0;
@@ -1065,7 +1065,7 @@ writeHandyTechCells (BrailleDisplay *brl) {
 static const ProtocolOperations handyTechOperations = {
   19200, SERIAL_PARITY_ODD,
   readHandyTechPacket, writeHandyTechPacket,
-  identifyHandyTechDisplay, updateHandyTechKeys, writeHandyTechCells
+  probeHandyTechDisplay, updateHandyTechKeys, writeHandyTechCells
 };
 
 /* PowerBraille Protocol */
@@ -1223,11 +1223,11 @@ writePowerBraillePacket (BrailleDisplay *brl, const unsigned char *packet, int l
 }
 
 static int
-identifyPowerBrailleDisplay (BrailleDisplay *brl) {
-  int tries = 0;
+probePowerBrailleDisplay (BrailleDisplay *brl) {
+  int probes = 0;
   static const unsigned char request[] = {PB_REQ_RESET};
   while (writePowerBraillePacket(brl, request, sizeof(request))) {
-    while (io->awaitInput(500)) {
+    while (io->awaitInput(probeTimeout)) {
       PowerBrailleResponsePacket response;
       if (getPowerBraillePacket(&response)) {
         if (response.data.code == PB_RSP_IDENTITY) {
@@ -1240,7 +1240,7 @@ identifyPowerBrailleDisplay (BrailleDisplay *brl) {
       }
     }
     if (errno != EAGAIN) break;
-    if (++tries == 5) break;
+    if (++probes == probeLimit) break;
   }
 
   return 0;
@@ -1323,7 +1323,7 @@ writePowerBrailleCells (BrailleDisplay *brl) {
 static const ProtocolOperations powerBrailleOperations = {
   9600, SERIAL_PARITY_NONE,
   readPowerBraillePacket, writePowerBraillePacket,
-  identifyPowerBrailleDisplay, updatePowerBrailleKeys, writePowerBrailleCells
+  probePowerBrailleDisplay, updatePowerBrailleKeys, writePowerBrailleCells
 };
 
 /* Driver Handlers */
@@ -1369,10 +1369,12 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
     const ProtocolOperations *const *protocolAddress = protocolTable;
 
     while ((protocol = *protocolAddress)) {
+      charactersPerSecond = protocol->serialBaud / 10;
+
       if (io->openPort(parameters, device)) {
         if (!flushInput()) break;
 
-        if (protocol->identifyDisplay(brl)) {
+        if (protocol->probeDisplay(brl)) {
           logCellCount();
 
           memset(&activeKeys, 0, sizeof(activeKeys));
