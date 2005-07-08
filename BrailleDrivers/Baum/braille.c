@@ -686,53 +686,52 @@ writeBaumPacket (BrailleDisplay *brl, const unsigned char *packet, int length) {
 static int
 identifyBaumDisplay (BrailleDisplay *brl) {
   int tries = 0;
-  static const unsigned char request[] = {BAUM_REQ_GetDeviceIdentity};
-  while (writeBaumPacket(brl, request, sizeof(request))) {
+  while (1) {
+    {
+      static const unsigned char request[] = {BAUM_REQ_GetDeviceIdentity};
+      if (!writeBaumPacket(brl, request, sizeof(request))) break;
+    }
+
+    {
+      static const unsigned char request[] = {BAUM_REQ_GetSerialNumber};
+      if (!writeBaumPacket(brl, request, sizeof(request))) break;
+    }
+
+    {
+      static const unsigned char request[] = {BAUM_REQ_DisplayData};
+      if (!writeBaumPacket(brl, request, sizeof(request))) break;
+      if (!writeBaumPacket(brl, request, sizeof(request))) break;
+    }
+
     while (io->awaitInput(500)) {
       BaumResponsePacket response;
-      if (getBaumPacket(&response)) {
-        if (response.data.code == BAUM_RSP_DeviceIdentity) {
-          cellCount = logBaumDeviceIdentity(&response);
-
-          {
-            static const char request[] = {BAUM_REQ_DisplayData};
-            if (!writeBaumPacket(brl, request, sizeof(request))) goto error;
-            if (!writeBaumPacket(brl, request, sizeof(request))) goto error;
-
-            while (io->awaitInput(100)) {
-              BaumResponsePacket response;
-              int size = getBaumPacket(&response);
-
-              if (size) {
-                if (response.data.code == BAUM_RSP_CellCount) {
-                  cellCount = response.data.values.cellCount;
-                  break;
-                }
-
-                LogBytes("unexpected packet", response.bytes, size);
-              } else if (errno != EAGAIN) {
-                goto error;
-              }
-            }
-          }
-
-          if (cellCount) {
-            {
-              const char request[] = {BAUM_REQ_GetSerialNumber};
-              if (!writeBaumPacket(brl, request, sizeof(request))) goto error;
-            }
-
+      int size = getBaumPacket(&response);
+      if (size) {
+        switch (response.data.code) {
+          case BAUM_RSP_CellCount:
+            cellCount = response.data.values.cellCount;
             return 1;
-          }
-          LogPrint(LOG_DEBUG, "unknown cell count.");
+
+          case BAUM_RSP_DeviceIdentity:
+            logBaumDeviceIdentity(&response);
+            continue;
+
+          case BAUM_RSP_SerialNumber:
+            logBaumSerialNumber(&response);
+            continue;
+
+          default:
+            LogBytes("unexpected packet", response.bytes, size);
+            continue;
         }
+      } else if (errno != EAGAIN) {
+        break;
       }
     }
     if (errno != EAGAIN) break;
     if (++tries == 5) break;
   }
 
-error:
   return 0;
 }
 
