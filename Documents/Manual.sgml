@@ -4337,6 +4337,10 @@ BRLTTY supports the following braille displays:
       |ABT (3nn)@
       |Delphi (4nn)@
       |Satellite (5nn)@
+    Baum
+      |Vario (Native, HT, PB1, PB2)@
+      |SuperVario@
+      |PocketVario@
     BrailleLite
       |18/40/M20/M40@
     BrailleNote
@@ -4383,10 +4387,6 @@ BRLTTY supports the following braille displays:
       |PowerBraille 40/65/80@
     TTY
       |terminfo@
-    Vario
-      |40/80 (native mode)@
-    VarioHT
-      |40 (Vario in HandyTech emulation mode)@
     VideoBraille
       |40@
     Virtual
@@ -4437,6 +4437,7 @@ BRLTTY supports the following speech synthesizers:
     al|Alva@
     at|Albatross@
     bl|BrailleLite@
+    bm|Baum (Native, HT, PB1, PB2)@
     bn|BrailleNote@
     cb|CombiBraille@
     ec|EcoBraille@
@@ -4459,9 +4460,7 @@ BRLTTY supports the following speech synthesizers:
     th|Theta@
     ts|Telesensory Systems Inc.@
     tt|TTY@
-    va|Vario/RBT (emulation 1)@
     vd|VideoBraille@
-    vh|Vario/RBT (emulation 2)@
     vo|Voyager@
     vr|Virtual@
     vs|VisioBraille@

@@ -36,6 +36,7 @@
 #braille-driver	at	# Albatross
 #braille-driver	bd	# Braudi
 #braille-driver	bl	# BrailleLite
+#braille-driver	bm	# Baum (Native, HT, PB1, PB2)
 #braille-driver	bn	# BrailleNote
 #braille-driver	cb	# CombiBraille
 #braille-driver	ec	# EcoBraille
@@ -49,9 +50,7 @@
 #braille-driver	tb	# TechniBraille
 #braille-driver	ts	# TSI
 #braille-driver	tt	# TTY
-#braille-driver	va	# Vario/RBT (emulation 1)
 #braille-driver	vd	# VideoBraille
-#braille-driver	vh	# Vario/RBT (emulation 2)
 #braille-driver	vo	# Voyager
 #braille-driver	vr	# Virtual
 #braille-driver	vs	# VisioBraille
