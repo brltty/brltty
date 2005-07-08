@@ -167,6 +167,16 @@ adjustWriteDelay (BrailleDisplay *brl, int bytes) {
   brl->writeDelay += bytes * 1000 / BYTES_PER_SECOND;
 }
 
+static void
+logTextField (const char *name, const char *address, int length) {
+  while (length > 0) {
+    const char byte = address[length - 1];
+    if (byte && (byte != ' ')) break;
+    --length;
+  }
+  LogPrint(LOG_INFO, "%s: %.*s", name, length, address);
+}
+
 /* Serial IO */
 #include "Programs/serial.h"
 
@@ -484,44 +494,18 @@ typedef union {
   } data;
 } BaumResponsePacket;
 
-static int
+static void
 logBaumDeviceIdentity (const BaumResponsePacket *packet) {
-  int length = sizeof(packet->data.values.deviceIdentity);
-  char identity[length + 1];
-  memcpy(identity, packet->data.values.deviceIdentity, length);
-
-  while (length) {
-    const char byte = identity[length - 1];
-    if (byte && (byte != ' ')) break;
-    --length;
-  }
-  identity[length] = 0;
-  LogPrint(LOG_INFO, "Baum Device Identity: %s", identity);
-
-  {
-    const char *number = strpbrk(identity, "123456789");
-    if (number) return atoi(number);
-  }
-
-  if (strcmp(identity, "PocketVario") == 0) return 24;
-  if (strcmp(identity, "SuperVario") == 0) return 40;
-  return 0;
+  logTextField("Baum Device Identity",
+               packet->data.values.deviceIdentity,
+               sizeof(packet->data.values.deviceIdentity));
 }
 
 static void
 logBaumSerialNumber (const BaumResponsePacket *packet) {
-  int length = sizeof(packet->data.values.serialNumber);
-  unsigned char number[length + 1];
-  memcpy(number, packet->data.values.serialNumber, length);
-
-  while (length) {
-    unsigned char byte = number[length - 1];
-    if (byte && (byte != ' ')) break;
-    --length;
-  }
-  number[length] = 0;
-
-  LogPrint(LOG_INFO, "Baum Serial Number: %s", number);
+  logTextField("Baum Serial Number",
+               packet->data.values.serialNumber,
+               sizeof(packet->data.values.serialNumber));
 }
 
 static int
