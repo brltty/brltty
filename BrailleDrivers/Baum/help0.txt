@@ -36,7 +36,8 @@ TL1+TL3+TR1: enter/leave the preferences (m)enu
 TL1+TL2+TL3+TR2: (r)ead the preferences from disk
 TL2+TR1+TR2+TR3: (w)rite the preferences to disk
 
-TL1+TL2+TR1: toggle screen freeze mode
+TL1+TR1+TR2: toggle the (d)isplay between text and attributes
+TL1+TL2+TR1: toggle screen (f)reeze mode
 TL1+TL3+TR3: (u)ndo last cursor tracking motion
 TL2+TL3+TR2: switch to (6)-dot braille
 TL2+TL3+TR3: switch to (8)-dot braille

@@ -382,7 +382,7 @@ typedef enum {
 
 typedef enum {
   BAUM_MODE_RoutingEnabled   = 0X08,
-  BAUM_MODE_DisplayReversed  = 0X10,
+  BAUM_MODE_DisplayRotated   = 0X10,
   BAUM_MODE_DisplayEnabled   = 0X20,
   BAUM_MODE_PowerdownEnabled = 0X21,
   BAUM_MODE_PowerdownTime    = 0X22,
@@ -1507,6 +1507,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
       KEY(BAUM_KEY_TL2|BAUM_KEY_TR2, BRL_CMD_CSRTRK);
       KEY(BAUM_KEY_TL1|BAUM_KEY_TL3|BAUM_KEY_TR1|BAUM_KEY_TR3, BRL_CMD_CSRJMP_VERT);
 
+      KEY(BAUM_KEY_TL1|BAUM_KEY_TR1|BAUM_KEY_TR2, BRL_CMD_DISPMD);
       KEY(BAUM_KEY_TL1|BAUM_KEY_TL2|BAUM_KEY_TR1, BRL_CMD_FREEZE);
       KEY(BAUM_KEY_TL1|BAUM_KEY_TL2|BAUM_KEY_TR2, BRL_CMD_HELP);
       KEY(BAUM_KEY_TL1|BAUM_KEY_TL3|BAUM_KEY_TR1, BRL_CMD_PREFMENU);
