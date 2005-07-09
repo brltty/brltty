@@ -783,8 +783,7 @@ updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
         int changed = 0;
         int number = 0;
         int index;
-        int count = ROUTING_BYTES(cellCount);
-        for (index=0; index<count; ++index) {
+        for (index=0; 1; ++index) {
           unsigned char byte = packet.data.values.routingKeys[index];
           unsigned char bit;
           for (bit=0X01; bit; bit<<=1) {
@@ -1265,8 +1264,7 @@ updatePowerBrailleKeys (BrailleDisplay *brl, int *keyPressed) {
           int changed = 0;
           int number = 0;
           int index;
-          int count = ROUTING_BYTES(cellCount);
-          for (index=0; index<count; ++index) {
+          for (index=0; 1; ++index) {
             unsigned char byte = packet.data.values.sensors.horizontal[index];
             unsigned char bit;
             for (bit=0X01; bit; bit<<=1) {
