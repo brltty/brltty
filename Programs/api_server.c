@@ -320,7 +320,7 @@ void resetPacket(Packet *packet)
   packet->state = READING_HEADER;
 #endif /* WINDOWS */
   packet->readBytes = 0;
-  packet->p = (char *) &packet->header;
+  packet->p = (unsigned char *) &packet->header;
   packet->n = sizeof(packet->header);
 #ifdef WINDOWS
   SetEvent(packet->overl.hEvent);
@@ -416,7 +416,7 @@ out:
   return 1;
 }
 
-typedef int(*PacketHandler)(Connection *, brl_type_t, char *, size_t);
+typedef int(*PacketHandler)(Connection *, brl_type_t, unsigned char *, size_t);
 
 typedef struct { /* packet handlers */
   PacketHandler getDriverId;
@@ -689,17 +689,17 @@ static int handleGetDriver(Connection *c, brl_type_t type, size_t size, const ch
   return 0;
 }
 
-static int handleGetDriverId(Connection *c, brl_type_t type, char *packet, size_t size)
+static int handleGetDriverId(Connection *c, brl_type_t type, unsigned char *packet, size_t size)
 {
   return handleGetDriver(c, type, size, braille->code);
 }
 
-static int handleGetDriverName(Connection *c, brl_type_t type, char *packet, size_t size)
+static int handleGetDriverName(Connection *c, brl_type_t type, unsigned char *packet, size_t size)
 {
   return handleGetDriver(c, type, size, braille->name);
 }
 
-static int handleGetDisplaySize(Connection *c, brl_type_t type, char *packet, size_t size)
+static int handleGetDisplaySize(Connection *c, brl_type_t type, unsigned char *packet, size_t size)
 {
   LogPrintRequest(type, c->fd);
   CHECKERR(size==0,BRLERR_INVALID_PACKET);
@@ -708,13 +708,14 @@ static int handleGetDisplaySize(Connection *c, brl_type_t type, char *packet, si
   return 0;
 }
 
-static int handleGetTty(Connection *c, brl_type_t type, char *packet, size_t size)
+static int handleGetTty(Connection *c, brl_type_t type, unsigned char *packet, size_t size)
 {
   uint32_t * ints = (uint32_t *) packet;
   uint32_t nbTtys;
   int how;
   unsigned int n;
-  unsigned char *p = packet, name[BRLAPI_MAXNAMELENGTH+1];
+  unsigned char *p = packet;
+  char name[BRLAPI_MAXNAMELENGTH+1];
   Tty *tty,*tty2,*tty3;
   uint32_t *ptty;
   LogPrintRequest(type, c->fd);
@@ -818,7 +819,7 @@ static int handleGetTty(Connection *c, brl_type_t type, char *packet, size_t siz
   return 0;
 }
 
-static int handleSetFocus(Connection *c, brl_type_t type, char *packet, size_t size)
+static int handleSetFocus(Connection *c, brl_type_t type, unsigned char *packet, size_t size)
 {
   uint32_t * ints = (uint32_t *) packet;
   CHECKEXC(!c->raw,BRLERR_ILLEGAL_INSTRUCTION);
@@ -843,7 +844,7 @@ static void doLeaveTty(Connection *c)
   freeBrailleWindow(&c->brailleWindow);
 }
 
-static int handleLeaveTty(Connection *c, brl_type_t type, char *packet, size_t size)
+static int handleLeaveTty(Connection *c, brl_type_t type, unsigned char *packet, size_t size)
 {
   LogPrintRequest(type, c->fd);
   CHECKERR(!c->raw,BRLERR_ILLEGAL_INSTRUCTION);
@@ -853,7 +854,7 @@ static int handleLeaveTty(Connection *c, brl_type_t type, char *packet, size_t s
   return 0;
 }
 
-static int handleKeyRange(Connection *c, brl_type_t type, char *packet, size_t size)
+static int handleKeyRange(Connection *c, brl_type_t type, unsigned char *packet, size_t size)
 {
   int res;
   brl_keycode_t x,y;
@@ -873,7 +874,7 @@ static int handleKeyRange(Connection *c, brl_type_t type, char *packet, size_t s
   return 0;
 }
 
-static int handleKeySet(Connection *c, brl_type_t type, char *packet, size_t size)
+static int handleKeySet(Connection *c, brl_type_t type, unsigned char *packet, size_t size)
 {
   int i = 0, res = 0;
   unsigned int nbkeys;
@@ -895,7 +896,7 @@ static int handleKeySet(Connection *c, brl_type_t type, char *packet, size_t siz
   return 0;
 }
 
-static int handleWrite(Connection *c, brl_type_t type, char *packet, size_t size)
+static int handleWrite(Connection *c, brl_type_t type, unsigned char *packet, size_t size)
 {
   writeStruct *ws = (writeStruct *) packet;
   unsigned char *text = NULL, *orAttr = NULL, *andAttr = NULL;
@@ -970,7 +971,7 @@ static int handleWrite(Connection *c, brl_type_t type, char *packet, size_t size
   if (text) {
 #ifdef HAVE_ICONV_H
     if (charset) {
-      unsigned char _charset[charsetLen+1];
+      char _charset[charsetLen+1];
       iconv_t conv;
       wchar_t textBuf[rsiz];
       char *in = (char *) text, *out = (char *) textBuf;
@@ -1000,10 +1001,10 @@ static int handleWrite(Connection *c, brl_type_t type, char *packet, size_t size
   return 0;
 }
 
-static int handleGetRaw(Connection *c, brl_type_t type, char *packet, size_t size)
+static int handleGetRaw(Connection *c, brl_type_t type, unsigned char *packet, size_t size)
 {
   getRawPacket_t *getRawPacket = (getRawPacket_t *) packet;
-  unsigned char name[BRLAPI_MAXNAMELENGTH+1];
+  char name[BRLAPI_MAXNAMELENGTH+1];
   LogPrintRequest(type, c->fd);
   CHECKERR(!c->raw, BRLERR_ILLEGAL_INSTRUCTION);
   CHECKERR(size>sizeof(uint32_t), BRLERR_INVALID_PACKET);
@@ -1025,7 +1026,7 @@ static int handleGetRaw(Connection *c, brl_type_t type, char *packet, size_t siz
   return 0;
 }
 
-static int handleLeaveRaw(Connection *c, brl_type_t type, char *packet, size_t size)
+static int handleLeaveRaw(Connection *c, brl_type_t type, unsigned char *packet, size_t size)
 {
   LogPrintRequest(type, c->fd);
   CHECKERR(c->raw,BRLERR_ILLEGAL_INSTRUCTION);
@@ -1038,7 +1039,7 @@ static int handleLeaveRaw(Connection *c, brl_type_t type, char *packet, size_t s
   return 0;
 }
 
-static int handlePacket(Connection *c, brl_type_t type, char *packet, size_t size)
+static int handlePacket(Connection *c, brl_type_t type, unsigned char *packet, size_t size)
 {
   LogPrintRequest(type, c->fd);
   CHECKEXC(c->raw,BRLERR_ILLEGAL_INSTRUCTION);

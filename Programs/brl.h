@@ -39,8 +39,8 @@ typedef enum {
 
 /* Braille information structure. */
 typedef struct {
-  int x, y;			/* the dimensions of the display */
-  int helpPage;			/* the page number within the help file */
+  unsigned int x, y;			/* the dimensions of the display */
+  unsigned int helpPage;			/* the page number within the help file */
   unsigned char *buffer;	/* the contents of the display */
   int cursor;		/* the position of the cursor within the display */
   unsigned isCoreBuffer:1;	/* the core allocated the buffer */

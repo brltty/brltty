@@ -34,7 +34,7 @@ static unsigned char *outputBuffer = NULL;
 static TranslationTable outputTable;
 
 static int
-readBytes (unsigned char *buffer, int size, int *length) {
+readBytes (unsigned char *buffer, int size, size_t *length) {
   *length = 0;
 
   while (*length < size) {
@@ -96,7 +96,7 @@ writeCells (BrailleDisplay *brl) {
 
 static int
 writeString (BrailleDisplay *brl, const char *string) {
-  return writeBytes(brl, string, strlen(string));
+  return writeBytes(brl, (const unsigned char *)string, strlen(string));
 }
 
 static int
@@ -137,7 +137,7 @@ identifyDisplay (BrailleDisplay *brl) {
   if (writeBytes(brl, identify, sizeof(identify))) {
     if (serialAwaitInput(serialDevice, 1000)) {
       unsigned char identity[0X100];
-      int length;
+      size_t length;
 
       if (readBytes(identity, sizeof(identity), &length)) {
         static const unsigned char prefix[] = {'b', 'r', 'a', 'u', 'd', 'i', ' '};
@@ -251,7 +251,7 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) {
 static int
 brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   unsigned char buffer[0X100];
-  int length;
+  size_t length;
 
   while (readBytes(buffer, sizeof(buffer), &length)) {
     const unsigned char *bytes = buffer;

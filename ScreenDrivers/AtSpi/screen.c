@@ -552,7 +552,7 @@ read_AtSpiScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
   memset(buffer,' ',box.height*box.width);
   pthread_mutex_lock(&updateMutex);
   if (!curTerm) {
-    strncpy(buffer, nonatspi+box.left, box.width);
+    strncpy((char *)buffer, nonatspi+box.left, box.width);
     goto out;
   }
   if (box.top+box.height>curNumRows)

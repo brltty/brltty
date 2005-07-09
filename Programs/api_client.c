@@ -731,7 +731,8 @@ int brlapi_writeText(int cursor, const char *str)
   unsigned int min, i;
   unsigned char packet[BRLAPI_MAXPACKETSIZE];
   writeStruct *ws = (writeStruct *) packet;
-  unsigned char *p = &ws->data, *locale;
+  unsigned char *p = &ws->data;
+  char *locale;
   int res;
   if ((dispSize == 0) || (dispSize > BRLAPI_MAXPACKETSIZE/4)) {
     brlapi_errno=BRLERR_INVALID_PARAMETER;
@@ -769,7 +770,7 @@ int brlapi_writeText(int cursor, const char *str)
 	len -= eaten;
       }
 endcount:
-      for (i = min; i<dispSize; i++) p += wcrtomb(p, L' ', &ps);
+      for (i = min; i<dispSize; i++) p += wcrtomb((char *)p, L' ', &ps);
     } else {
       min = MIN(len, dispSize);
       memcpy(p, str, min);
@@ -888,7 +889,7 @@ int brlapi_write(const brlapi_writeStruct *s)
     strLen = strlen(s->charset);
     *p++ = strLen;
     ws->flags |= BRLAPI_WF_CHARSET;
-    strcpy(p, s->charset);
+    strcpy((char *)p, s->charset);
     p += strLen;
   }
   send:
@@ -1130,7 +1131,7 @@ int brlapi_strexception(char *buf, size_t n, int err, brl_type_t type, const voi
   int chars = 16; /* Number of bytes to dump */
   char hexString[3*chars+1];
   int i, nbChars = MIN(chars, size);
-  unsigned char *p = hexString;
+  char *p = hexString;
   brlapi_error_t error = { .brlerrno = err };
   for (i=0; i<nbChars; i++)
     p += sprintf(p, "%02x ", ((char *) packet)[i]);
