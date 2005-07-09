@@ -1100,7 +1100,9 @@ static void error_key_alloc(void)
 brlapi_error_t *brlapi_error_location(void)
 {
   brlapi_error_t *errorp;
+#ifndef WINDOWS
   if (pthread_once && pthread_key_create) {
+#endif /* WINDOWS */
     pthread_once(&error_key_once, error_key_alloc);
     if (pthread_error_ok) {
       if ((errorp=(brlapi_error_t *) pthread_getspecific(error_key)))
@@ -1110,8 +1112,10 @@ brlapi_error_t *brlapi_error_location(void)
         /* on the first time, must allocate it */
         if ((errorp=malloc(sizeof(*errorp))) && !pthread_setspecific(error_key,errorp))
           return errorp;
-      }
     }
+#ifndef WINDOWS
+  }
+#endif /* WINDOWS */
   /* fall-back: shared errno :/ */
   return &brlapi_error;
 }
