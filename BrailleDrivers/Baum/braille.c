@@ -487,9 +487,9 @@ typedef union {
         unsigned char setting;
       } mode;
 
-      unsigned char deviceIdentity[BAUM_DEVICE_IDENTITY_LENGTH];
-      unsigned char serialNumber[BAUM_SERIAL_NUMBER_LENGTH];
-      unsigned char bluetoothName[BAUM_BLUETOOTH_NAME_LENGTH];
+      char deviceIdentity[BAUM_DEVICE_IDENTITY_LENGTH];
+      char serialNumber[BAUM_SERIAL_NUMBER_LENGTH];
+      char bluetoothName[BAUM_BLUETOOTH_NAME_LENGTH];
     } values;
   } data;
 } BaumResponsePacket;
@@ -523,7 +523,7 @@ logBaumPowerdownReason (BaumPowerdownReason reason) {
   };
   const ReasonEntry *entry;
 
-  unsigned char buffer[0X100];
+  char buffer[0X100];
   int length = 0;
   char delimiter = ':';
 
