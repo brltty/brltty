@@ -33,7 +33,9 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <wchar.h>
+#ifndef WINDOWS
 #include <langinfo.h>
+#endif /* WINDOWS */
 #include <locale.h>
 
 #ifdef WINDOWS
@@ -435,7 +437,7 @@ retry:
     if (tryHostName(settings.hostName="127.0.0.1:0")<0
 #ifdef AF_INET6
       && tryHostName(settings.hostName="::1:0")<0
-#endif
+#endif /* AF_INET6 */
       ) {
       brlapi_error = error;
       goto out;
@@ -791,12 +793,21 @@ endcount:
 
   if (locale && strcmp(locale,"C")) {
     /* not default locale, tell charset to server */
+#ifdef WINDOWS
+    UINT CP;
+    if ((CP = GetACP() || (CP = GetOEMCP()))) {
+      *p++ = 'C';
+      *p++ = 'P';
+      p += sprintf(p, "%d", CP);
+    }
+#else /* WINDOWS */
     char *lang = nl_langinfo(CODESET);
     size_t len = strlen(lang);
     ws->flags |= BRLAPI_WF_CHARSET;
     *p++ = len;
     memcpy(p, lang, len);
     p += len;
+#endif /* WINDOWS */
   }
   ws->flags = htonl(ws->flags);
   pthread_mutex_lock(&brlapi_fd_mutex);
@@ -1062,7 +1073,7 @@ void brlapi_perror(const char *s)
 
 #ifdef brlapi_error
 #undef brlapi_error
-#endif
+#endif /* brlapi_error */
 
 brlapi_error_t brlapi_error;
 static int pthread_error_ok;
