@@ -135,7 +135,7 @@ static inline int pthread_mutexattr_settype(pthread_mutexattr_t *attr, int type)
   return 0;
 }
 
-static inline int pthread_mutex_init (pthread_mutex_t *mutex, void *attr) {
+static inline int pthread_mutex_init (pthread_mutex_t *mutex, pthread_mutexattr_t *attr) {
   if (attr && *attr!=PTHREAD_MUTEX_RECURSIVE) {
     errno = EINVAL;
     return -1;
