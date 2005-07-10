@@ -23,6 +23,7 @@
 #include "Programs/scr_driver.h"
 
 static HANDLE consoleOutput = INVALID_HANDLE_VALUE;
+static HANDLE consoleInput = INVALID_HANDLE_VALUE;
 
 static int
 prepare_WindowsScreen (char **parameters) {
@@ -31,8 +32,10 @@ prepare_WindowsScreen (char **parameters) {
 
 static int
 open_WindowsScreen (void) {
-  if (consoleOutput == INVALID_HANDLE_VALUE &&
-    (consoleOutput = CreateFile("CONOUT$",GENERIC_READ|GENERIC_WRITE,FILE_SHARE_READ|FILE_SHARE_WRITE,NULL,OPEN_EXISTING,0,NULL)) == INVALID_HANDLE_VALUE) {
+  if ((consoleOutput == INVALID_HANDLE_VALUE &&
+    (consoleOutput = CreateFile("CONOUT$",GENERIC_READ|GENERIC_WRITE,FILE_SHARE_READ|FILE_SHARE_WRITE,NULL,OPEN_EXISTING,0,NULL)) == INVALID_HANDLE_VALUE)
+    ||(consoleInput == INVALID_HANDLE_VALUE &&
+    (consoleInput = CreateFile("CONIN$",GENERIC_READ|GENERIC_WRITE,FILE_SHARE_READ|FILE_SHARE_WRITE,NULL,OPEN_EXISTING,0,NULL)) == INVALID_HANDLE_VALUE)) {
     LogWindowsError("GetStdHandle");
     return 0;
   }
@@ -113,9 +116,92 @@ read_WindowsScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
   return 1;
 }
 
+static int 
+doinsert(INPUT_RECORD *buf) {
+  DWORD num;
+  if (!(WriteConsoleInputW(consoleInput, buf, 1, &num))) {
+    LogWindowsError("WriteConsoleInput");
+    return 0;
+  }
+  if (num!=1) {
+    LogPrint(LOG_ERR, "inserted only %ld keys, expected 1", num);
+    return 0;
+  }
+  return 1;
+}
+
 static int
 insert_WindowsScreen (ScreenKey key) {
-  return 0;
+  INPUT_RECORD buf;
+  KEY_EVENT_RECORD *keyE = &buf.Event.KeyEvent;
+
+  if (consoleInput == INVALID_HANDLE_VALUE)
+    return 0;
+
+  LogPrint(LOG_DEBUG, "Insert key: %4.4X\n",key);
+  buf.EventType = KEY_EVENT;
+  memset(keyE, 0, sizeof(*keyE));
+  if (key < SCR_KEY_ENTER) {
+    if (key & SCR_KEY_MOD_META) {
+      keyE->dwControlKeyState = LEFT_ALT_PRESSED;
+      key &= ~ SCR_KEY_MOD_META;
+    }
+    if (!(key & 0xE0)) {
+      keyE->dwControlKeyState |= LEFT_CTRL_PRESSED;
+      key |= 0x40;
+    }
+  }
+
+  switch (key) {
+    case SCR_KEY_ENTER:         keyE->wVirtualKeyCode = VK_RETURN; break;
+    case SCR_KEY_TAB:           keyE->wVirtualKeyCode = VK_TAB;    break;
+    case SCR_KEY_BACKSPACE:     keyE->wVirtualKeyCode = VK_BACK;   break;
+    case SCR_KEY_ESCAPE:        keyE->wVirtualKeyCode = VK_ESCAPE; break;
+    case SCR_KEY_CURSOR_LEFT:   keyE->wVirtualKeyCode = VK_LEFT;   break;
+    case SCR_KEY_CURSOR_RIGHT:  keyE->wVirtualKeyCode = VK_RIGHT;  break;
+    case SCR_KEY_CURSOR_UP:     keyE->wVirtualKeyCode = VK_UP;     break;
+    case SCR_KEY_CURSOR_DOWN:   keyE->wVirtualKeyCode = VK_DOWN;   break;
+    case SCR_KEY_PAGE_UP:       keyE->wVirtualKeyCode = VK_PRIOR;  break;
+    case SCR_KEY_PAGE_DOWN:     keyE->wVirtualKeyCode = VK_NEXT;   break;
+    case SCR_KEY_HOME:          keyE->wVirtualKeyCode = VK_HOME;   break;
+    case SCR_KEY_END:           keyE->wVirtualKeyCode = VK_END;    break;
+    case SCR_KEY_INSERT:        keyE->wVirtualKeyCode = VK_INSERT; break;
+    case SCR_KEY_DELETE:        keyE->wVirtualKeyCode = VK_DELETE; break;
+    case SCR_KEY_FUNCTION + 0:  keyE->wVirtualKeyCode = VK_F1;     break;
+    case SCR_KEY_FUNCTION + 1:  keyE->wVirtualKeyCode = VK_F2;     break;
+    case SCR_KEY_FUNCTION + 2:  keyE->wVirtualKeyCode = VK_F3;     break;
+    case SCR_KEY_FUNCTION + 3:  keyE->wVirtualKeyCode = VK_F4;     break;
+    case SCR_KEY_FUNCTION + 4:  keyE->wVirtualKeyCode = VK_F5;     break;
+    case SCR_KEY_FUNCTION + 5:  keyE->wVirtualKeyCode = VK_F6;     break;
+    case SCR_KEY_FUNCTION + 6:  keyE->wVirtualKeyCode = VK_F7;     break;
+    case SCR_KEY_FUNCTION + 7:  keyE->wVirtualKeyCode = VK_F8;     break;
+    case SCR_KEY_FUNCTION + 8:  keyE->wVirtualKeyCode = VK_F9;     break;
+    case SCR_KEY_FUNCTION + 9:  keyE->wVirtualKeyCode = VK_F10;    break;
+    case SCR_KEY_FUNCTION + 10: keyE->wVirtualKeyCode = VK_F11;    break;
+    case SCR_KEY_FUNCTION + 11: keyE->wVirtualKeyCode = VK_F12;    break;
+    case SCR_KEY_FUNCTION + 12: keyE->wVirtualKeyCode = VK_F13;    break;
+    case SCR_KEY_FUNCTION + 13: keyE->wVirtualKeyCode = VK_F14;    break;
+    case SCR_KEY_FUNCTION + 14: keyE->wVirtualKeyCode = VK_F15;    break;
+    case SCR_KEY_FUNCTION + 15: keyE->wVirtualKeyCode = VK_F16;    break;
+    case SCR_KEY_FUNCTION + 16: keyE->wVirtualKeyCode = VK_F17;    break;
+    case SCR_KEY_FUNCTION + 17: keyE->wVirtualKeyCode = VK_F18;    break;
+    case SCR_KEY_FUNCTION + 18: keyE->wVirtualKeyCode = VK_F19;    break;
+    case SCR_KEY_FUNCTION + 19: keyE->wVirtualKeyCode = VK_F20;    break;
+    case SCR_KEY_FUNCTION + 20: keyE->wVirtualKeyCode = VK_F21;    break;
+    case SCR_KEY_FUNCTION + 21: keyE->wVirtualKeyCode = VK_F22;    break;
+    case SCR_KEY_FUNCTION + 22: keyE->wVirtualKeyCode = VK_F23;    break;
+    case SCR_KEY_FUNCTION + 23: keyE->wVirtualKeyCode = VK_F24;    break;
+    default: keyE->uChar.UnicodeChar = key; break;
+  }
+
+  keyE->wRepeatCount = 1;
+  keyE->bKeyDown = TRUE;
+  if (!doinsert(&buf))
+    return -1;
+  keyE->bKeyDown = FALSE;
+  if (!doinsert(&buf))
+    return -1;
+  return 1;
 }
 
 static int
