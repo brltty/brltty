@@ -134,7 +134,7 @@ void vtno(int vtno) {
     fatal_brlapi_errno("unignoreKeyRange",NULL);
 }
 
-void api_setName(const unsigned char *wm_name) {
+void api_setName(const char *wm_name) {
   static char *last_name;
 
   debugf("%s got focus\n",wm_name);
@@ -172,13 +172,13 @@ static volatile int grabFailed;
 static struct window {
   Window win;
   Window root;
-  unsigned char *wm_name;
+  char *wm_name;
   struct window *next;
 } *windows[(1<<WINHASHBITS)];
 
 #define WINHASH(win) windows[(win)>>(32-WINHASHBITS)^(win&((1<<WINHASHBITS)-1))]
 
-static void add_window(Window win, Window root, unsigned char *wm_name) {
+static void add_window(Window win, Window root, char *wm_name) {
   struct window *cur;
   if (!(cur=malloc(sizeof(struct window))))
     fatal_errno("malloc(struct window)",NULL);
@@ -277,7 +277,7 @@ static int grabWindow(Window win,int level) {
   return 1;
 }
 
-static unsigned char *getWindowTitle(Window win) {
+static char *getWindowTitle(Window win) {
   int wm_name_size=32;
   Atom actual_type;
   int actual_format;
@@ -293,7 +293,7 @@ static unsigned char *getWindowTitle(Window win) {
   if (actual_type==None) return NULL;
   else {
     debugf("type %lx name %s",actual_type,wm_name);
-    return wm_name;
+    return (char *) wm_name;
   }
 }
 
