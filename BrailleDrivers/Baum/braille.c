@@ -802,18 +802,37 @@ updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
         continue;
 
       case BAUM_RSP_PowerdownSignal:
-        if (logBaumPowerdownReason(packet.data.values.powerdownReason)) {
-          errno = ENODEV;
-          return 0;
-        }
-        continue;
+        if (!logBaumPowerdownReason(packet.data.values.powerdownReason)) continue;
+        errno = ENODEV;
+        return 0;
 
       {
         unsigned int keys;
         unsigned int shift;
 
       case BAUM_RSP_TopKeys:
-        keys = packet.data.values.topKeys;
+        switch (baumDeviceType) {
+          case BAUM_TYPE_Inka:
+            keys = 0;
+#define KEY(bit,name) if (!(packet.data.values.topKeys & (bit))) keys |= BAUM_KEY_##name
+            KEY(004, TL1);
+            KEY(002, TL2);
+            KEY(001, TL3);
+            KEY(040, TR1);
+            KEY(020, TR2);
+            KEY(010, TR3);
+#undef KEY
+            break;
+
+          case BAUM_TYPE_DM80P:
+            keys = packet.data.values.topKeys ^ 0X7F;
+            break;
+
+          default:
+            keys = packet.data.values.topKeys;
+            break;
+        }
+
         shift = 0;
         goto doKeys;
 
@@ -837,7 +856,9 @@ updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
         return 1;
       }
 
-      case BAUM_RSP_RoutingKeys: {
+      case BAUM_RSP_RoutingKeys:
+        if (baumDeviceType == BAUM_TYPE_Inka) goto doSwitches;
+      case BAUM_RSP_HorizontalSensors: {
         int changed = 0;
         int number = 0;
         int index;
@@ -854,6 +875,10 @@ updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
         if (!changed) continue;
         return 1;
       }
+
+      case BAUM_RSP_Switches:
+      doSwitches:
+        continue;
 
       default:
         LogBytes("unexpected packet", packet.bytes, size);
@@ -1084,7 +1109,7 @@ updateHandyTechKeys (BrailleDisplay *brl, int *keyPressed) {
       } else {
         unsigned int bit;
         switch (key) {
-#define KEY(name) case HT_RSP_KEY_##name: bit = BAUM_KEY_##name; break;
+#define KEY(name) case HT_RSP_KEY_##name: bit = BAUM_KEY_##name; break
           KEY(TL1);
           KEY(TL2);
           KEY(TL3);
