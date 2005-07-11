@@ -369,8 +369,14 @@ typedef enum {
   BAUM_RSP_ModeSetting          = 0X11,
   BAUM_RSP_CommunicationChannel = 0X16,
   BAUM_RSP_PowerdownSignal      = 0X17,
+  BAUM_RSP_HorizontalSensors    = 0X20,
+  BAUM_RSP_VerticalSensors      = 0X21,
   BAUM_RSP_RoutingKeys          = 0X22,
+  BAUM_RSP_Switches             = 0X23,
   BAUM_RSP_TopKeys              = 0X24,
+  BAUM_RSP_HorizontalSensor     = 0X25,
+  BAUM_RSP_VerticalSensor       = 0X26,
+  BAUM_RSP_RoutingKey           = 0X27,
   BAUM_RSP_FrontKeys            = 0X28,
   BAUM_RSP_BackKeys             = 0X29,
   BAUM_RSP_CommandKeys          = 0X2B,
@@ -471,8 +477,17 @@ typedef union {
     unsigned char code;
 
     union {
+      unsigned char horizontalSensors[ROUTING_BYTES(MAXIMUM_CELL_COUNT)];
+      unsigned char verticalSensors[ROUTING_BYTES(64)];
       unsigned char routingKeys[ROUTING_BYTES(MAXIMUM_CELL_COUNT)];
+      unsigned char switches;
       unsigned char topKeys;
+      unsigned char horizontalSensor;
+      union {
+        unsigned char left;
+        unsigned char right;
+      } verticalSensor;
+      unsigned char routingKey;
       unsigned char frontKeys;
       unsigned char backKeys;
       unsigned char commandKeys;
@@ -493,6 +508,18 @@ typedef union {
     } values;
   } data;
 } BaumResponsePacket;
+
+typedef enum {
+  BAUM_TYPE_Inka,
+  BAUM_TYPE_DM80P,
+  BAUM_TYPE_Generic
+} BaumDeviceType;
+static BaumDeviceType baumDeviceType;
+
+static void
+assumeBaumDeviceIdentity (const char *identity) {
+  LogPrint(LOG_INFO, "Baum Device Identity: %s", identity);
+}
 
 static void
 logBaumDeviceIdentity (const BaumResponsePacket *packet) {
@@ -578,11 +605,20 @@ readBaumPacket (unsigned char *packet, int size) {
     if (offset < size) {
       if (offset == 0) {
         switch (byte) {
+          case BAUM_RSP_Switches:
+            if (!cellCount) {
+              assumeBaumDeviceIdentity("DM80P");
+              baumDeviceType = BAUM_TYPE_DM80P;
+              cellCount = 80;
+            }
+
           case BAUM_RSP_CellCount:
           case BAUM_RSP_VersionNumber:
           case BAUM_RSP_CommunicationChannel:
           case BAUM_RSP_PowerdownSignal:
           case BAUM_RSP_TopKeys:
+          case BAUM_RSP_HorizontalSensor:
+          case BAUM_RSP_RoutingKey:
           case BAUM_RSP_FrontKeys:
           case BAUM_RSP_BackKeys:
           case BAUM_RSP_CommandKeys:
@@ -591,9 +627,11 @@ readBaumPacket (unsigned char *packet, int size) {
             break;
 
           case BAUM_RSP_ModeSetting:
+          case BAUM_RSP_VerticalSensor:
             length = 3;
             break;
 
+          case BAUM_RSP_VerticalSensors:
           case BAUM_RSP_SerialNumber:
             length = 9;
             break;
@@ -607,6 +645,18 @@ readBaumPacket (unsigned char *packet, int size) {
             break;
 
           case BAUM_RSP_RoutingKeys:
+            if (!cellCount) {
+              assumeBaumDeviceIdentity("Inka");
+              baumDeviceType = BAUM_TYPE_Inka;
+              cellCount = 40;
+            }
+
+            if (baumDeviceType == BAUM_TYPE_Inka) {
+              length = 2;
+              break;
+            }
+
+          case BAUM_RSP_HorizontalSensors:
             length = (cellCount > 80)? 12:
                      (cellCount > 40)? 11:
                                         6;
@@ -684,11 +734,17 @@ probeBaumDisplay (BrailleDisplay *brl) {
     }
 
     {
-      static const unsigned char request[] = {BAUM_REQ_DisplayData};
-      if (!writeBaumPacket(brl, request, sizeof(request))) break;
+      static const unsigned char request[] = {BAUM_REQ_DisplayData, 0};
       if (!writeBaumPacket(brl, request, sizeof(request))) break;
     }
 
+    {
+      static const unsigned char request[] = {BAUM_REQ_GetKeys};
+      if (!writeBaumPacket(brl, request, sizeof(request))) break;
+    }
+
+    baumDeviceType = BAUM_TYPE_Generic;
+    cellCount = 0;
     while (io->awaitInput(probeTimeout)) {
       BaumResponsePacket response;
       int size = getBaumPacket(&response);
@@ -696,6 +752,8 @@ probeBaumDisplay (BrailleDisplay *brl) {
         switch (response.data.code) {
           case BAUM_RSP_CellCount:
             cellCount = response.data.values.cellCount;
+          case BAUM_RSP_Switches: /* DM80P */
+          case BAUM_RSP_RoutingKeys: /* Inka */
             return 1;
 
           case BAUM_RSP_DeviceIdentity:
@@ -808,10 +866,12 @@ updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
 
 static int
 writeBaumCells (BrailleDisplay *brl) {
-  unsigned char packet[1 + cellCount];
+  unsigned char packet[1 + 1 + cellCount];
   unsigned char *byte = packet;
 
   *byte++ = BAUM_REQ_DisplayData;
+  if ((baumDeviceType == BAUM_TYPE_Inka) || (baumDeviceType == BAUM_TYPE_DM80P))
+    *byte++ = 0;
 
   memcpy(byte, externalCells, cellCount);
   byte += cellCount;
