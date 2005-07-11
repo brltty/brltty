@@ -327,6 +327,7 @@ brl_identify (void) {
    LogPrint(LOG_INFO, "   Copyright (C) 2001 by Dave Mielke <dave@mielke.cc>");
 }
 
+#ifndef __MINGW32__
 static int
 makeFifo (const char *path, mode_t mode) {
    struct stat status;
@@ -344,10 +345,15 @@ makeFifo (const char *path, mode_t mode) {
    }
    return 0;
 }
+#endif /* __MINGW32__ */
 
 static int
 makeDownloadFifo (void) {
+#ifdef __MINGW32__
+   return 0;
+#else /* __MINGW32__ */
    return makeFifo(downloadPath, S_IRUSR|S_IWUSR|S_IWGRP|S_IWOTH);
+#endif /* __MINGW32__ */
 }
 
 static int
