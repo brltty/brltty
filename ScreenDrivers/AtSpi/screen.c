@@ -578,78 +578,81 @@ static int
 insert_AtSpiScreen (ScreenKey key) {
   long keysym;
   int modMeta = 0, modControl=0;
+  int ret;
   LogPrint(LOG_DEBUG, "Insert key: %4.4X", key);
   if (key < SCR_KEY_ENTER) {
     if (key & SCR_KEY_MOD_META) {
-      key &= ~ SCR_KEY_MOD_META;
+      key &= ~SCR_KEY_MOD_META;
       modMeta = 1;
       SPI_generateKeyboardEvent(XK_Meta_L,NULL,SPI_KEY_SYM);
     }
     if (!(key & 0xE0)) {
       key |= 0x40;
+      modControl = 1;
       SPI_generateKeyboardEvent(XK_Control_L,NULL,SPI_KEY_SYM);
+    }
+    keysym = key;
+  } else {
+    switch (key) {
+      case SCR_KEY_ENTER:         keysym = XK_KP_Enter;  break;
+      case SCR_KEY_TAB:           keysym = XK_Tab;       break;
+      case SCR_KEY_BACKSPACE:     keysym = XK_BackSpace; break;
+      case SCR_KEY_ESCAPE:        keysym = XK_Escape;    break;
+      case SCR_KEY_CURSOR_LEFT:   keysym = XK_Left;      break;
+      case SCR_KEY_CURSOR_RIGHT:  keysym = XK_Right;     break;
+      case SCR_KEY_CURSOR_UP:     keysym = XK_Up;        break;
+      case SCR_KEY_CURSOR_DOWN:   keysym = XK_Down;      break;
+      case SCR_KEY_PAGE_UP:       keysym = XK_Page_Up;   break;
+      case SCR_KEY_PAGE_DOWN:     keysym = XK_Page_Down; break;
+      case SCR_KEY_HOME:          keysym = XK_Home;      break;
+      case SCR_KEY_END:           keysym = XK_End;       break;
+      case SCR_KEY_INSERT:        keysym = XK_Insert;    break;
+      case SCR_KEY_DELETE:        keysym = XK_Delete;    break;
+      case SCR_KEY_FUNCTION + 0:  keysym = XK_F1;        break;
+      case SCR_KEY_FUNCTION + 1:  keysym = XK_F2;        break;
+      case SCR_KEY_FUNCTION + 2:  keysym = XK_F3;        break;
+      case SCR_KEY_FUNCTION + 3:  keysym = XK_F4;        break;
+      case SCR_KEY_FUNCTION + 4:  keysym = XK_F5;        break;
+      case SCR_KEY_FUNCTION + 5:  keysym = XK_F6;        break;
+      case SCR_KEY_FUNCTION + 6:  keysym = XK_F7;        break;
+      case SCR_KEY_FUNCTION + 7:  keysym = XK_F8;        break;
+      case SCR_KEY_FUNCTION + 8:  keysym = XK_F9;        break;
+      case SCR_KEY_FUNCTION + 9:  keysym = XK_F10;       break;
+      case SCR_KEY_FUNCTION + 10: keysym = XK_F11;       break;
+      case SCR_KEY_FUNCTION + 11: keysym = XK_F12;       break;
+      case SCR_KEY_FUNCTION + 12: keysym = XK_F13;       break;
+      case SCR_KEY_FUNCTION + 13: keysym = XK_F14;       break;
+      case SCR_KEY_FUNCTION + 14: keysym = XK_F15;       break;
+      case SCR_KEY_FUNCTION + 15: keysym = XK_F16;       break;
+      case SCR_KEY_FUNCTION + 16: keysym = XK_F17;       break;
+      case SCR_KEY_FUNCTION + 17: keysym = XK_F18;       break;
+      case SCR_KEY_FUNCTION + 18: keysym = XK_F19;       break;
+      case SCR_KEY_FUNCTION + 19: keysym = XK_F20;       break;
+      case SCR_KEY_FUNCTION + 20: keysym = XK_F21;       break;
+      case SCR_KEY_FUNCTION + 21: keysym = XK_F22;       break;
+      case SCR_KEY_FUNCTION + 22: keysym = XK_F23;       break;
+      case SCR_KEY_FUNCTION + 23: keysym = XK_F24;       break;
+      case SCR_KEY_FUNCTION + 24: keysym = XK_F25;       break;
+      case SCR_KEY_FUNCTION + 25: keysym = XK_F26;       break;
+      case SCR_KEY_FUNCTION + 26: keysym = XK_F27;       break;
+      case SCR_KEY_FUNCTION + 27: keysym = XK_F28;       break;
+      case SCR_KEY_FUNCTION + 28: keysym = XK_F29;       break;
+      case SCR_KEY_FUNCTION + 29: keysym = XK_F30;       break;
+      case SCR_KEY_FUNCTION + 30: keysym = XK_F31;       break;
+      case SCR_KEY_FUNCTION + 31: keysym = XK_F32;       break;
+      case SCR_KEY_FUNCTION + 32: keysym = XK_F33;       break;
+      case SCR_KEY_FUNCTION + 33: keysym = XK_F34;       break;
+      case SCR_KEY_FUNCTION + 34: keysym = XK_F35;       break;
+      default: LogPrint(LOG_WARNING, "Key %4.4X not suported.", key); break;
     }
   }
 
-  switch (key) {
-    case SCR_KEY_ENTER:         keysym = XK_KP_Enter;  break;
-    case SCR_KEY_TAB:           keysym = XK_Tab;       break;
-    case SCR_KEY_BACKSPACE:     keysym = XK_BackSpace; break;
-    case SCR_KEY_ESCAPE:        keysym = XK_Escape;    break;
-    case SCR_KEY_CURSOR_LEFT:   keysym = XK_Left;      break;
-    case SCR_KEY_CURSOR_RIGHT:  keysym = XK_Right;     break;
-    case SCR_KEY_CURSOR_UP:     keysym = XK_Up;        break;
-    case SCR_KEY_CURSOR_DOWN:   keysym = XK_Down;      break;
-    case SCR_KEY_PAGE_UP:       keysym = XK_Page_Up;   break;
-    case SCR_KEY_PAGE_DOWN:     keysym = XK_Page_Down; break;
-    case SCR_KEY_HOME:          keysym = XK_Home;      break;
-    case SCR_KEY_END:           keysym = XK_End;       break;
-    case SCR_KEY_INSERT:        keysym = XK_Insert;    break;
-    case SCR_KEY_DELETE:        keysym = XK_Delete;    break;
-    case SCR_KEY_FUNCTION + 0:  keysym = XK_F1;        break;
-    case SCR_KEY_FUNCTION + 1:  keysym = XK_F2;        break;
-    case SCR_KEY_FUNCTION + 2:  keysym = XK_F3;        break;
-    case SCR_KEY_FUNCTION + 3:  keysym = XK_F4;        break;
-    case SCR_KEY_FUNCTION + 4:  keysym = XK_F5;        break;
-    case SCR_KEY_FUNCTION + 5:  keysym = XK_F6;        break;
-    case SCR_KEY_FUNCTION + 6:  keysym = XK_F7;        break;
-    case SCR_KEY_FUNCTION + 7:  keysym = XK_F8;        break;
-    case SCR_KEY_FUNCTION + 8:  keysym = XK_F9;        break;
-    case SCR_KEY_FUNCTION + 9:  keysym = XK_F10;       break;
-    case SCR_KEY_FUNCTION + 10: keysym = XK_F11;       break;
-    case SCR_KEY_FUNCTION + 11: keysym = XK_F12;       break;
-    case SCR_KEY_FUNCTION + 12: keysym = XK_F13;       break;
-    case SCR_KEY_FUNCTION + 13: keysym = XK_F14;       break;
-    case SCR_KEY_FUNCTION + 14: keysym = XK_F15;       break;
-    case SCR_KEY_FUNCTION + 15: keysym = XK_F16;       break;
-    case SCR_KEY_FUNCTION + 16: keysym = XK_F17;       break;
-    case SCR_KEY_FUNCTION + 17: keysym = XK_F18;       break;
-    case SCR_KEY_FUNCTION + 18: keysym = XK_F19;       break;
-    case SCR_KEY_FUNCTION + 19: keysym = XK_F20;       break;
-    case SCR_KEY_FUNCTION + 20: keysym = XK_F21;       break;
-    case SCR_KEY_FUNCTION + 21: keysym = XK_F22;       break;
-    case SCR_KEY_FUNCTION + 22: keysym = XK_F23;       break;
-    case SCR_KEY_FUNCTION + 23: keysym = XK_F24;       break;
-    case SCR_KEY_FUNCTION + 24: keysym = XK_F25;       break;
-    case SCR_KEY_FUNCTION + 25: keysym = XK_F26;       break;
-    case SCR_KEY_FUNCTION + 26: keysym = XK_F27;       break;
-    case SCR_KEY_FUNCTION + 27: keysym = XK_F28;       break;
-    case SCR_KEY_FUNCTION + 28: keysym = XK_F29;       break;
-    case SCR_KEY_FUNCTION + 29: keysym = XK_F30;       break;
-    case SCR_KEY_FUNCTION + 30: keysym = XK_F31;       break;
-    case SCR_KEY_FUNCTION + 31: keysym = XK_F32;       break;
-    case SCR_KEY_FUNCTION + 32: keysym = XK_F33;       break;
-    case SCR_KEY_FUNCTION + 33: keysym = XK_F34;       break;
-    case SCR_KEY_FUNCTION + 34: keysym = XK_F35;       break;
-    default: keysym = key; break;
-  }
-
-  SPI_generateKeyboardEvent(keysym,NULL,SPI_KEY_SYM);
+  ret = SPI_generateKeyboardEvent(keysym,NULL,SPI_KEY_SYM);
   if (modControl)
-    SPI_generateKeyboardEvent(XK_Control_L,NULL,SPI_KEY_SYM);
+    ret &= SPI_generateKeyboardEvent(XK_Control_L,NULL,SPI_KEY_SYM);
   if (modMeta)
-    SPI_generateKeyboardEvent(XK_Meta_L,NULL,SPI_KEY_SYM);
-  return 1;
+    ret &= SPI_generateKeyboardEvent(XK_Meta_L,NULL,SPI_KEY_SYM);
+  return ret;
 }
 
 static int
