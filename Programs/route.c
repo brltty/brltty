@@ -74,10 +74,16 @@ getCurrentPosition (CursorRoutingData *crd) {
 
 static void
 insertCursorKey (CursorRoutingData *crd, ScreenKey key) {
+#ifndef __MINGW32__
   sigset_t oldMask;
   sigprocmask(SIG_BLOCK, &crd->signalMask, &oldMask);
+#endif /* __MINGW32__ */
+
   insertKey(key);
+
+#ifndef __MINGW32__
   sigprocmask(SIG_SETMASK, &oldMask, NULL);
+#endif /* __MINGW32__ */
 }
 
 static int
@@ -181,16 +187,15 @@ static int
 doCursorRouting (int column, int row, int screen) {
   CursorRoutingData crd;
 
+#ifndef __MINGW32__
   /* Configure the cursor routing subprocess. */
   nice(CURSOR_ROUTING_NICENESS); /* reduce scheduling priority */
-
-  /* Initialize second thread of screen reading: */
-  if (!openRoutingScreen()) return ROUTE_ERROR;
 
   /* Set up the signal mask. */
   sigemptyset(&crd.signalMask);
   sigaddset(&crd.signalMask, SIGUSR1);
   sigprocmask(SIG_UNBLOCK, &crd.signalMask, NULL);
+#endif /* __MINGW32__ */
 
   /* initialize the routing data structure */
   crd.screenNumber = screen;
@@ -209,7 +214,6 @@ doCursorRouting (int column, int row, int screen) {
     }
   }
 
-  closeRoutingScreen();		/* close second thread of screen reading */
   if (crd.screenNumber != screen) return ROUTE_ERROR;
   if (crd.cury != row) return ROUTE_WRONG_ROW;
   if ((column >= 0) && (crd.curx != column)) return ROUTE_WRONG_COLUMN;
@@ -218,6 +222,10 @@ doCursorRouting (int column, int row, int screen) {
 
 int
 startCursorRouting (int column, int row, int screen) {
+#ifdef __MINGW32__
+  doCursorRouting(column, row, screen);
+  return 1;
+#else /* __MINGW32__ */
   int started = 0;
   sigset_t newMask, oldMask;
 
@@ -241,8 +249,13 @@ startCursorRouting (int column, int row, int screen) {
   }
 
   switch (routingProcess = fork()) {
-    case 0: /* child: cursor routing subprocess */
-      _exit(doCursorRouting(column, row, screen));		/* terminate child process */
+    case 0: { /* child: cursor routing subprocess */
+      int result = ROUTE_ERROR;
+      if (openRoutingScreen())
+        result = doCursorRouting(column, row, screen);		/* terminate child process */
+      closeRoutingScreen();		/* close second thread of screen reading */
+      _exit(result);		/* terminate child process */
+    }
 
     case -1: /* error: fork() failed */
       LogError("fork");
@@ -256,4 +269,5 @@ startCursorRouting (int column, int row, int screen) {
 
   sigprocmask(SIG_SETMASK, &oldMask, NULL); /* unblock SIGCHLD */
   return started;
+#endif /* __MINGW32__ */
 }
