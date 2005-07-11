@@ -192,16 +192,17 @@ insert_WindowsScreen (ScreenKey key) {
       case SCR_KEY_FUNCTION + 22: keyE->wVirtualKeyCode = VK_F23;    break;
       case SCR_KEY_FUNCTION + 23: keyE->wVirtualKeyCode = VK_F24;    break;
       default: LogPrint(LOG_WARNING, "Key %4.4X not suported.", key);
+               return 0;
     }
   }
 
   keyE->wRepeatCount = 1;
   keyE->bKeyDown = TRUE;
   if (!doinsert(&buf))
-    return -1;
+    return 0;
   keyE->bKeyDown = FALSE;
   if (!doinsert(&buf))
-    return -1;
+    return 0;
   return 1;
 }
 
