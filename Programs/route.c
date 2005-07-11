@@ -59,16 +59,16 @@ typedef struct {
 
 static int
 getCurrentPosition (CursorRoutingData *crd) {
-  ScreenDescription scr;
-  describeRoutingScreen(&scr);
+  ScreenDescription description;
+  describeRoutingScreen(&description);
 
-  if (scr.no != crd->screenNumber) {
-    crd->screenNumber = scr.no;
+  if (description.no != crd->screenNumber) {
+    crd->screenNumber = description.no;
     return 0;
   }
 
-  crd->cury = scr.posy;
-  crd->curx = scr.posx;
+  crd->cury = description.posy;
+  crd->curx = description.posx;
   return 1;
 }
 
@@ -111,7 +111,7 @@ static CursorRoutingResult
 adjustCursorPosition (CursorRoutingData *crd, int where, int trgy, int trgx, ScreenKey forward, ScreenKey backward) {
   while (1) {
     int dify = trgy - crd->cury;
-    int difx = (trgx >= 0)? (trgx - crd->curx): 0;
+    int difx = (trgx < 0)? 0: (trgx - crd->curx);
     int dir;
 
     /* determine which direction the cursor needs to move in */
@@ -168,13 +168,13 @@ adjustCursorPosition (CursorRoutingData *crd, int where, int trgy, int trgx, Scr
 }
 
 static CursorRoutingResult
-adjustCursorHorizontally (CursorRoutingData *crd, int where, int trgy, int trgx) {
-  return adjustCursorPosition(crd, where, trgy, trgx, SCR_KEY_CURSOR_RIGHT, SCR_KEY_CURSOR_LEFT);
+adjustCursorHorizontally (CursorRoutingData *crd, int where, int row, int column) {
+  return adjustCursorPosition(crd, where, row, column, SCR_KEY_CURSOR_RIGHT, SCR_KEY_CURSOR_LEFT);
 }
 
 static CursorRoutingResult
-adjustCursorVertically (CursorRoutingData *crd, int where, int trgy) {
-  return adjustCursorPosition(crd, where, trgy, -1, SCR_KEY_CURSOR_DOWN, SCR_KEY_CURSOR_UP);
+adjustCursorVertically (CursorRoutingData *crd, int where, int row) {
+  return adjustCursorPosition(crd, where, row, -1, SCR_KEY_CURSOR_DOWN, SCR_KEY_CURSOR_UP);
 }
 
 static int
@@ -184,18 +184,18 @@ doCursorRouting (int column, int row, int screen) {
   /* Configure the cursor routing subprocess. */
   nice(CURSOR_ROUTING_NICENESS); /* reduce scheduling priority */
 
+  /* Initialize second thread of screen reading: */
+  if (!openRoutingScreen()) return ROUTE_ERROR;
+
   /* Set up the signal mask. */
   sigemptyset(&crd.signalMask);
   sigaddset(&crd.signalMask, SIGUSR1);
   sigprocmask(SIG_UNBLOCK, &crd.signalMask, NULL);
 
-  /* initialize the key response time cache */
+  /* initialize the routing data structure */
+  crd.screenNumber = screen;
   crd.timeSum = CURSOR_ROUTING_TIMEOUT;
   crd.timeCount = 1;
-
-  /* Initialise second thread of screen reading: */
-  if (!openRoutingScreen()) return ROUTE_ERROR;
-  crd.screenNumber = screen;
 
   if (getCurrentPosition(&crd)) {
     if (column < 0) {
