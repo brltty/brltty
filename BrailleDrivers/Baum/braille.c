@@ -508,7 +508,10 @@ typedef union {
 
     union {
       unsigned char horizontalSensors[ROUTING_BYTES(MAXIMUM_CELL_COUNT)];
-      unsigned char verticalSensors[ROUTING_BYTES(64)];
+      union {
+        unsigned char left[ROUTING_BYTES(27)];
+        unsigned char right[ROUTING_BYTES(27)];
+      } verticalSensors;
       unsigned char routingKeys[ROUTING_BYTES(MAXIMUM_CELL_COUNT)];
       unsigned char switches;
       unsigned char topKeys;
@@ -686,10 +689,13 @@ readBaumPacket (unsigned char *packet, int size) {
               break;
             }
 
-          case BAUM_RSP_HorizontalSensors:
             length = (cellCount > 80)? 12:
                      (cellCount > 40)? 11:
                                         6;
+            break;
+
+          case BAUM_RSP_HorizontalSensors:
+            length = (textCount > 40)? 11: 6;
             break;
 
           default:
@@ -888,7 +894,7 @@ updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
 
       case BAUM_RSP_RoutingKeys:
         if (baumDeviceType == BAUM_TYPE_Inka) goto doSwitches;
-        if (updateRoutingKeys(packet.data.values.routingKeys, textCount, keyPressed)) return 1;
+        if (updateRoutingKeys(packet.data.values.routingKeys, cellCount, keyPressed)) return 1;
         continue;
 
       case BAUM_RSP_HorizontalSensors:
