@@ -40,6 +40,8 @@ static const int probeTimeout = 200;
 #define ROUTING_BYTES(cells) (((cells) + 7) / 8)
 
 static int cellCount;
+static int textCount;
+static int statusCount;
 static int cellsUpdated;
 static unsigned char internalCells[MAXIMUM_CELL_COUNT];
 static unsigned char externalCells[MAXIMUM_CELL_COUNT];
@@ -95,6 +97,21 @@ setRoutingKey (int number, int press, int *pressed) {
 }
 
 static int
+updateRoutingKeys (const unsigned char *mask, int size, int *pressed) {
+  int changed = 0;
+  int number = 0;
+  int index;
+  for (index=0; 1; ++index) {
+    unsigned char byte = mask[index];
+    unsigned char bit;
+    for (bit=0X01; bit; bit<<=1) {
+      if (setRoutingKey(number, (byte & bit), pressed)) changed = 1;
+      if (++number == size) return changed;
+    }
+  }
+}
+
+static int
 readByte (unsigned char *byte, int wait) {
   int count = io->readBytes(byte, 1, wait);
   if (count > 0) return 1;
@@ -136,7 +153,16 @@ clearCells (int start, int count) {
 
 static void
 logCellCount (void) {
-  LogPrint(LOG_INFO, "Cell Count: %d", cellCount);
+  switch ((textCount = cellCount)) {
+    case 44:
+    case 84:
+      textCount -= 4;
+      break;
+  }
+  statusCount = cellCount - textCount;
+
+  LogPrint(LOG_INFO, "Cell Count: %d (%d text, %d status)",
+           cellCount, textCount, statusCount);
 }
 
 static void
@@ -148,7 +174,7 @@ changeCellCount (BrailleDisplay *brl, int count) {
       {
         int number;
         for (number=cellCount; number<count; ++number) {
-          int pressed;
+          int pressed = 0;
           setRoutingKey(number, 0, &pressed);
         }
       }
@@ -157,7 +183,7 @@ changeCellCount (BrailleDisplay *brl, int count) {
     cellCount = count;
     logCellCount();
 
-    brl->x = cellCount;
+    brl->x = textCount;
     brl->resizeRequired = 1;
   }
 }
@@ -609,7 +635,7 @@ readBaumPacket (unsigned char *packet, int size) {
             if (!cellCount) {
               assumeBaumDeviceIdentity("DM80P");
               baumDeviceType = BAUM_TYPE_DM80P;
-              cellCount = 80;
+              cellCount = 84;
             }
 
           case BAUM_RSP_CellCount:
@@ -648,7 +674,7 @@ readBaumPacket (unsigned char *packet, int size) {
             if (!cellCount) {
               assumeBaumDeviceIdentity("Inka");
               baumDeviceType = BAUM_TYPE_Inka;
-              cellCount = 40;
+              cellCount = 44;
             }
 
             if (baumDeviceType == BAUM_TYPE_Inka) {
@@ -858,23 +884,12 @@ updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
 
       case BAUM_RSP_RoutingKeys:
         if (baumDeviceType == BAUM_TYPE_Inka) goto doSwitches;
-      case BAUM_RSP_HorizontalSensors: {
-        int changed = 0;
-        int number = 0;
-        int index;
-        for (index=0; 1; ++index) {
-          unsigned char byte = packet.data.values.routingKeys[index];
-          unsigned char bit;
-          for (bit=0X01; bit; bit<<=1) {
-            if (setRoutingKey(number, (byte & bit), keyPressed)) changed = 1;
-            if (++number == cellCount) goto doneRoutingKeys;
-          }
-        }
+        if (updateRoutingKeys(packet.data.values.routingKeys, textCount, keyPressed)) return 1;
+        continue;
 
-      doneRoutingKeys:
-        if (!changed) continue;
-        return 1;
-      }
+      case BAUM_RSP_HorizontalSensors:
+        if (updateRoutingKeys(packet.data.values.horizontalSensors, textCount, keyPressed)) return 1;
+        continue;
 
       case BAUM_RSP_Switches:
       doSwitches:
@@ -929,7 +944,7 @@ typedef enum {
   HT_RSP_RELEASE   = 0X80,
   HT_RSP_IDENTITY  = 0XFE
 } HandyTechResponseCode;
-#define HT_IS_ROUTING_KEY(code) (((code) >= HT_RSP_KEY_CR1) && ((code) < (HT_RSP_KEY_CR1 + cellCount)))
+#define HT_IS_ROUTING_KEY(code) (((code) >= HT_RSP_KEY_CR1) && ((code) < (HT_RSP_KEY_CR1 + textCount)))
 
 typedef union {
   unsigned char bytes[2];
@@ -951,6 +966,10 @@ typedef struct {
 } HandyTechModelEntry;
 
 static const HandyTechModelEntry handyTechModelTable[] = {
+  { "Modular 80",
+    0X88, 80, 4
+  }
+  ,
   { "Modular 40",
     0X89, 40, 4
   }
@@ -1133,7 +1152,7 @@ updateHandyTechKeys (BrailleDisplay *brl, int *keyPressed) {
 
 static int
 writeHandyTechCells (BrailleDisplay *brl) {
-  unsigned char packet[1 + ht->statusCount + cellCount];
+  unsigned char packet[1 + ht->statusCount + ht->textCount];
   unsigned char *byte = packet;
 
   *byte++ = HT_REQ_WRITE;
@@ -1143,8 +1162,8 @@ writeHandyTechCells (BrailleDisplay *brl) {
     while (count-- > 0) *byte++ = 0;
   }
 
-  memcpy(byte, externalCells, cellCount);
-  byte += cellCount;
+  memcpy(byte, externalCells, ht->textCount);
+  byte += ht->textCount;
 
   return writeHandyTechPacket(brl, packet, byte-packet);
 }
@@ -1345,23 +1364,9 @@ updatePowerBrailleKeys (BrailleDisplay *brl, int *keyPressed) {
           changeCellCount(brl, packet.data.values.identity.cells);
           continue;
 
-        case PB_RSP_SENSORS: {
-          int changed = 0;
-          int number = 0;
-          int index;
-          for (index=0; 1; ++index) {
-            unsigned char byte = packet.data.values.sensors.horizontal[index];
-            unsigned char bit;
-            for (bit=0X01; bit; bit<<=1) {
-              if (setRoutingKey(number, (byte & bit), keyPressed)) changed = 1;
-              if (++number == cellCount) goto doneRoutingKeys;
-            }
-          }
-
-        doneRoutingKeys:
-          if (!changed) continue;
-          return 1;
-        }
+        case PB_RSP_SENSORS:
+          if (updateRoutingKeys(packet.data.values.sensors.horizontal, textCount, keyPressed)) return 1;
+          continue;
 
         default:
           LogBytes("unexpected packet", packet.bytes, size);
@@ -1386,19 +1391,19 @@ updatePowerBrailleKeys (BrailleDisplay *brl, int *keyPressed) {
 
 static int
 writePowerBrailleCells (BrailleDisplay *brl) {
-  unsigned char packet[6 + (cellCount * 2)];
+  unsigned char packet[6 + (textCount * 2)];
   unsigned char *byte = packet;
 
   *byte++ = PB_REQ_WRITE;
   *byte++ = 0; /* cursor mode: disabled */
   *byte++ = 0; /* cursor position: nowhere */
   *byte++ = 1; /* cursor type: command */
-  *byte++ = cellCount * 2; /* attribute-data pairs */
+  *byte++ = textCount * 2; /* attribute-data pairs */
   *byte++ = 0; /* start */
 
   {
     int i;
-    for (i=0; i<cellCount; ++i) {
+    for (i=0; i<textCount; ++i) {
       *byte++ = 0; /* attributes */
       *byte++ = externalCells[i]; /* data */
     }
@@ -1470,7 +1475,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
           clearCells(0, cellCount);
           if (!updateCells(brl)) break;
 
-          brl->x = cellCount;
+          brl->x = textCount;
           brl->y = 1;
           brl->helpPage = 0;
           return 1;
@@ -1511,7 +1516,7 @@ brl_reset (BrailleDisplay *brl) {
 static void
 brl_writeWindow (BrailleDisplay *brl) {
   int start = 0;
-  int count = cellCount;
+  int count = textCount;
 
   while (count > 0) {
     if (brl->buffer[count-1] != internalCells[count-1]) break;
@@ -1536,7 +1541,7 @@ static int
 brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   int command;
   int keyPressed = 0;
-  unsigned char routingKeys[cellCount];
+  unsigned char routingKeys[textCount];
   int routingCount = 0;
 
   if (!protocol->updateKeys(brl, &keyPressed)) {
@@ -1549,7 +1554,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 
   {
     int key;
-    for (key=0; key<cellCount; ++key)
+    for (key=0; key<textCount; ++key)
       if (activeKeys.routing[key])
         routingKeys[routingCount++] = key;
   }
