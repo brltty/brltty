@@ -158,6 +158,10 @@ logCellCount (void) {
     case 84:
       textCount -= 4;
       break;
+
+    case 56:
+      textCount -= 16;
+      break;
   }
   statusCount = cellCount - textCount;
 
@@ -674,7 +678,7 @@ readBaumPacket (unsigned char *packet, int size) {
             if (!cellCount) {
               assumeBaumDeviceIdentity("Inka");
               baumDeviceType = BAUM_TYPE_Inka;
-              cellCount = 44;
+              cellCount = 56;
             }
 
             if (baumDeviceType == BAUM_TYPE_Inka) {
