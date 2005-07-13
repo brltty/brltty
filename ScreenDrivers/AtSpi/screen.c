@@ -577,20 +577,19 @@ out:
 static int
 insert_AtSpiScreen (ScreenKey key) {
   long keysym;
-  int modMeta = 0, modControl=0;
-  int ret;
-  LogPrint(LOG_DEBUG, "Insert key: %4.4X", key);
+  int modMeta=0, modControl=0;
+
   if (key < SCR_KEY_ENTER) {
     if (key & SCR_KEY_MOD_META) {
       key &= ~SCR_KEY_MOD_META;
       modMeta = 1;
-      SPI_generateKeyboardEvent(XK_Meta_L,NULL,SPI_KEY_SYM);
     }
+
     if (!(key & 0xE0)) {
       key |= 0x40;
       modControl = 1;
-      SPI_generateKeyboardEvent(XK_Control_L,NULL,SPI_KEY_SYM);
     }
+
     keysym = key;
   } else {
     switch (key) {
@@ -643,16 +642,34 @@ insert_AtSpiScreen (ScreenKey key) {
       case SCR_KEY_FUNCTION + 32: keysym = XK_F33;       break;
       case SCR_KEY_FUNCTION + 33: keysym = XK_F34;       break;
       case SCR_KEY_FUNCTION + 34: keysym = XK_F35;       break;
-      default: LogPrint(LOG_WARNING, "Key %4.4X not suported.", key); break;
+      default: LogPrint(LOG_WARNING, "key not insertable: %04X", key); return 0;
     }
   }
+  LogPrint(LOG_DEBUG, "inserting key: %04X -> %s%s%ld",
+           key,
+           (modMeta? "meta ": ""),
+           (modControl? "control ": ""),
+           keysym);
 
-  ret = SPI_generateKeyboardEvent(keysym,NULL,SPI_KEY_SYM);
-  if (modControl)
-    ret &= SPI_generateKeyboardEvent(XK_Control_L,NULL,SPI_KEY_SYM);
-  if (modMeta)
-    ret &= SPI_generateKeyboardEvent(XK_Meta_L,NULL,SPI_KEY_SYM);
-  return ret;
+  {
+    int ok = 0;
+
+    if (!modMeta || SPI_generateKeyboardEvent(XK_Meta_L,NULL,SPI_KEY_PRESS)) {
+      if (!modControl || SPI_generateKeyboardEvent(XK_Control_L,NULL,SPI_KEY_PRESS)) {
+        if (SPI_generateKeyboardEvent(keysym,NULL,SPI_KEY_SYM)) ok = 1;
+
+        if (modControl)
+          if (!SPI_generateKeyboardEvent(XK_Control_L,NULL,SPI_KEY_RELEASE))
+            ok = 0;
+      }
+
+      if (modMeta)
+        if (!SPI_generateKeyboardEvent(XK_Meta_L,NULL,SPI_KEY_RELEASE))
+          ok = 0;
+    }
+
+    return ok;
+  }
 }
 
 static int
