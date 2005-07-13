@@ -656,16 +656,26 @@ insert_AtSpiScreen (ScreenKey key) {
 
     if (!modMeta || SPI_generateKeyboardEvent(XK_Meta_L,NULL,SPI_KEY_PRESS)) {
       if (!modControl || SPI_generateKeyboardEvent(XK_Control_L,NULL,SPI_KEY_PRESS)) {
-        if (SPI_generateKeyboardEvent(keysym,NULL,SPI_KEY_SYM)) ok = 1;
+        if (SPI_generateKeyboardEvent(keysym,NULL,SPI_KEY_SYM)) {
+          ok = 1;
+        } else {
+          LogPrint(LOG_WARNING, "key insertion failed.");
+        }
 
-        if (modControl)
-          if (!SPI_generateKeyboardEvent(XK_Control_L,NULL,SPI_KEY_RELEASE))
-            ok = 0;
+        if (modControl && !SPI_generateKeyboardEvent(XK_Control_L,NULL,SPI_KEY_RELEASE)) {
+          LogPrint(LOG_WARNING, "control release failed.");
+          ok = 0;
+        }
+      } else {
+        LogPrint(LOG_WARNING, "control press failed.");
       }
 
-      if (modMeta)
-        if (!SPI_generateKeyboardEvent(XK_Meta_L,NULL,SPI_KEY_RELEASE))
-          ok = 0;
+      if (modMeta && !SPI_generateKeyboardEvent(XK_Meta_L,NULL,SPI_KEY_RELEASE)) {
+        LogPrint(LOG_WARNING, "meta release failed.");
+        ok = 0;
+      }
+    } else {
+      LogPrint(LOG_WARNING, "meta press failed.");
     }
 
     return ok;
