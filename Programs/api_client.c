@@ -622,6 +622,15 @@ static int getControllingTty(void)
   if ((env = getenv("WINDOWID")) && sscanf(env, "%u", &tty) == 1) return tty;
   if ((env = getenv("CONTROLVT")) && sscanf(env, "%u", &tty) == 1) return tty;
 
+#ifdef WINDOWS
+  if ((tty = GetActiveWindow()))
+    return tty;
+  if ((tty = GetFocus()))
+    return tty;
+  if ((tty = GetForegroundWindow()))
+    return tty;
+#endif /* WINDOWS */
+
 #ifdef linux
   {
     FILE *stream;

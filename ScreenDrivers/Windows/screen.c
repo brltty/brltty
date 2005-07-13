@@ -60,11 +60,12 @@ describe_WindowsScreen (ScreenDescription *description) {
   description->rows = info.srWindow.Bottom + 1 - info.srWindow.Top;
   description->posx = info.dwCursorPosition.X - info.srWindow.Left;
   description->posy = info.dwCursorPosition.Y - info.srWindow.Top; 
-  description->no = 0;
+  description->no = GetForegroundWindow();
 }
 
 static int
 read_WindowsScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
+  /* TODO: GetConsoleCP */
   int x,y;
   int text = mode == SCR_TEXT;
   unsigned long c;

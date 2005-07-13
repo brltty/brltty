@@ -181,6 +181,7 @@ typedef void *XtPointer;
 	AppendMenu(menu, MF_STRING | (check?MF_CHECKED:0), cb, title)
 #define CHRX 16
 #define CHRY 20
+#define RIGHTMARGIN 100
 #else /* USE_ */
 #error GUI toolkit paradigm either unspecified or unsupported
 #endif /* USE_ */
@@ -731,7 +732,7 @@ static void generateToplevel(void)
       modelHeight = 0;
     }
     if (!(toplevel = CreateWindowEx(WS_EX_TOPMOST, "BRLTTYWClass", "BRLTTY",
-	    WS_POPUP, GetSystemMetrics(SM_CXSCREEN)-modelWidth-60, 0,
+	    WS_POPUP, GetSystemMetrics(SM_CXSCREEN)-modelWidth-RIGHTMARGIN, 0,
 	    modelWidth, lines*CHRY+modelHeight, NULL, NULL, NULL, NULL))) {
       LogWindowsError("CreateWindow");
       exit(1);

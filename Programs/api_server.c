@@ -1250,6 +1250,7 @@ cont:
       close(fd);
       return -1;
     }
+    LogPrint(LOG_DEBUG,"Event -> %p",info->overl.hEvent);
 #endif /* WINDOWS */
 
     return fd;
@@ -1359,6 +1360,7 @@ cont:
     close(fd);
     return -1;
   }
+  LogPrint(LOG_DEBUG,"Event -> %p",info->overl.hEvent);
 #endif /* WINDOWS */
 
   return fd;
@@ -1402,7 +1404,7 @@ static int initializeLocalSocket(struct socketInfo *info)
       LogWindowsError("CreateEvent");
       goto outfd;
     }
-    LogPrint(LOG_DEBUG,"Event -> %d",(int)info->overl.hEvent);
+    LogPrint(LOG_DEBUG,"Event -> %p",info->overl.hEvent);
   }
   if (!(ResetEvent(info->overl.hEvent))) {
     LogWindowsError("ResetEvent");
@@ -1589,7 +1591,7 @@ static void closeSockets(void *arg)
 /* Function: addTtyFds */
 /* recursively add fds of ttys */
 #ifdef WINDOWS
-static void addTtyFds(HANDLE *lpHandles, int *nbAlloc, int *nbHandles, Tty *tty) {
+static void addTtyFds(HANDLE **lpHandles, int *nbAlloc, int *nbHandles, Tty *tty) {
 #else /* WINDOWS */
 static void addTtyFds(fd_set *fds, int *fdmax, Tty *tty) {
 #endif /* WINDOWS */
@@ -1599,9 +1601,9 @@ static void addTtyFds(fd_set *fds, int *fdmax, Tty *tty) {
 #ifdef WINDOWS
       if (*nbHandles == *nbAlloc) {
 	*nbAlloc *= 2;
-	*lpHandles = realloc(lpHandles,*nbAlloc*sizeof(*lpHandles));
+	*lpHandles = realloc(*lpHandles,*nbAlloc*sizeof(**lpHandles));
       }
-      lpHandles[(*nbHandles)++] = (HANDLE) c->packet.overl.hEvent;
+      (*lpHandles)[(*nbHandles)++] = (HANDLE) c->packet.overl.hEvent;
 #else /* WINDOWS */
       if (c->fd>*fdmax) *fdmax = c->fd;
       FD_SET(c->fd,fds);
@@ -1759,8 +1761,8 @@ static void *server(void *arg)
       if ((HANDLE) socketInfo[i].fd != INVALID_HANDLE_VALUE)
 	lpHandles[nbHandles++] = socketInfo[i].overl.hEvent;
     pthread_mutex_lock(&connectionsMutex);
-    addTtyFds(lpHandles, &nbAlloc, &nbHandles, &notty);
-    addTtyFds(lpHandles, &nbAlloc, &nbHandles, &ttys);
+    addTtyFds(&lpHandles, &nbAlloc, &nbHandles, &notty);
+    addTtyFds(&lpHandles, &nbAlloc, &nbHandles, &ttys);
     pthread_mutex_unlock(&connectionsMutex);
     if (!nbHandles) {
       free(lpHandles);
@@ -1769,7 +1771,7 @@ static void *server(void *arg)
     }
     switch (WaitForMultipleObjects(nbHandles, lpHandles, FALSE, 1000)) {
       case WAIT_TIMEOUT: continue;
-      case WAIT_FAILED: LogWindowsError("WaitForMultipleObjects");
+      case WAIT_FAILED:  LogWindowsError("WaitForMultipleObjects");
     }
     free(lpHandles);
 #else /* WINDOWS */
@@ -2153,6 +2155,7 @@ int api_open(BrailleDisplay *brl, char **parameters)
     goto outalloc;
   }
   ttys.connections->prev = ttys.connections->next = ttys.connections;
+  ttys.focus = -1;
 
   if (*parameters[PARM_HOST]) hosts = parameters[PARM_HOST];
 
