@@ -37,6 +37,7 @@ typedef enum {
 } DriverParameter;
 #define BRLPARMS "host", "key", "tty"
 
+#define BRL_HAVE_VISUAL_DISPLAY
 #include "Programs/brl_driver.h"
 
 #define CHECK(cond, label) \
@@ -49,6 +50,8 @@ typedef enum {
 
 static int displaySize;
 static unsigned char *prevData;
+static unsigned char *prevText;
+static int prevCursor;
 static int prevShown;
 
 /* Function : brl_identify */
@@ -77,9 +80,14 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
   displaySize = brl->x*brl->y;
   prevData = malloc(displaySize);
   CHECK((prevData!=NULL), out1);
+  prevText = malloc(displaySize);
+  CHECK((prevText!=NULL), out2);
+  prevShown = 0;
   LogPrint(LOG_DEBUG, "Memory allocated, returning 1");
   return 1;
   
+out2:
+  free(prevData);
 out1:
   brlapi_leaveTty();
 out0:
@@ -94,6 +102,7 @@ out:
 static void brl_close(BrailleDisplay *brl)
 {
   free(prevData);
+  free(prevText);
   brlapi_closeConnection();
 }
 
@@ -113,11 +122,41 @@ static void brl_writeWindow(BrailleDisplay *brl)
     }
     return;
   } else {
+    brlapi_writeStruct ws = BRLAPI_WRITESTRUCT_INITIALIZER;
+    unsigned char and[displaySize];
     if (prevShown && memcmp(prevData,brl->buffer,displaySize)==0) return;
-    if (brlapi_writeDots(brl->buffer)==0) {
+    memset(and,0,sizeof(and));
+    ws.attrAnd = and;
+    ws.attrOr = brl->buffer;
+    if (brlapi_write(&ws)==0) {
       memcpy(prevData,brl->buffer,displaySize);
       prevShown = 1;
-    } else LogPrint(LOG_ERR, "writeDots: %s", brlapi_strerror(&brlapi_error));
+    } else LogPrint(LOG_ERR, "write: %s", brlapi_strerror(&brlapi_error));
+  }
+}
+
+/* function : brl_writeVisual */
+/* Displays a text on the braille window, only if it's different from */
+/* the one already displayed */
+static void brl_writeVisual(BrailleDisplay *brl)
+{
+  int vt;
+  vt = currentVirtualTerminal();
+  if (vt == -1) {
+    /* should leave display */
+    if (prevShown) {
+      brlapi_writeStruct ws = BRLAPI_WRITESTRUCT_INITIALIZER;
+      brlapi_write(&ws);
+      prevShown = 0;
+    }
+    return;
+  } else {
+    if (prevShown && memcmp(prevText,brl->buffer,displaySize)==0 && brl->cursor == prevCursor) return;
+    if (brlapi_writeText(brl->cursor+1,brl->buffer)==0) {
+      memcpy(prevText,brl->buffer,displaySize);
+      prevCursor = brl->cursor;
+      prevShown = 1;
+    } else LogPrint(LOG_ERR, "write: %s", brlapi_strerror(&brlapi_error));
   }
 }
 
