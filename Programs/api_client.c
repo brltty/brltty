@@ -622,12 +622,22 @@ static int getControllingTty(void)
   if ((env = getenv("CONTROLVT")) && sscanf(env, "%u", &tty) == 1) return tty;
 
 #ifdef WINDOWS
-  if ((tty = GetActiveWindow()))
-    return tty;
-  if ((tty = GetFocus()))
-    return tty;
-  if ((tty = GetForegroundWindow()))
-    return tty;
+#if (_WIN32_WINNT >= Windows2000)
+  /* really good guess */
+  if ((tty = (int) GetConsoleWindow())) return tty;
+#endif /* _WIN32_WINNT */
+  if ((tty = (int) GetActiveWindow()) || (tty = (int) GetFocus())) {
+    /* good guess, but need to get back up to parent window */
+    HWND root = GetDesktopWindow();
+    HWND tmp = (HWND) tty;
+    while (1) {
+      tmp = GetParent(tmp);
+      if (!tmp || tmp == root) return tty;
+      tty = (int) tmp;
+    }
+  }
+  /* poor guess: assumes that focus is here */
+  if ((tty = (int) GetForegroundWindow())) return tty;
 #endif /* WINDOWS */
 
 #ifdef linux

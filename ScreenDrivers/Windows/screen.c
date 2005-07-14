@@ -54,13 +54,15 @@ close_WindowsScreen (void) {
 static void
 describe_WindowsScreen (ScreenDescription *description) {
   CONSOLE_SCREEN_BUFFER_INFO info;
+  description->no = GetForegroundWindow();
+  if (consoleOutput == INVALID_HANDLE_VALUE)
+    return;
   if (!(GetConsoleScreenBufferInfo(consoleOutput, &info)))
     return;
   description->cols = info.srWindow.Right + 1 - info.srWindow.Left;
   description->rows = info.srWindow.Bottom + 1 - info.srWindow.Top;
   description->posx = info.dwCursorPosition.X - info.srWindow.Left;
   description->posy = info.dwCursorPosition.Y - info.srWindow.Top; 
-  description->no = GetForegroundWindow();
 }
 
 static int
