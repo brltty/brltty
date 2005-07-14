@@ -1077,7 +1077,7 @@ static void brl_writeWindow(BrailleDisplay *brl)
 static void brl_writeVisual(BrailleDisplay *brl)
 {
   int i;
-  unsigned char data[2];
+  unsigned char data[3];
 
   if (lastcursor != brl->cursor) {
     if (lastcursor>=0) {
@@ -1113,6 +1113,12 @@ static void brl_writeVisual(BrailleDisplay *brl)
   for (i=0;i<brl->y*brl->x;i++) {
     data[0]=brl->buffer[i];
     if (data[0]==0) data[0]=' ';
+#ifdef USE_WINDOWS
+    else if (data[0]=='&') {
+      data[1] = '&';
+      data[2] = 0;
+    } else
+#endif
     data[1]=0;
 
 #if defined(USE_XT)
