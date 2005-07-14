@@ -1380,6 +1380,25 @@ err:
 }
 
 #ifdef PF_LOCAL
+
+#ifndef WINDOWS
+static int readPid(char *path)
+  /* read pid from specified file. Return 0 on any error */
+{
+  char pids[16], *ptr;
+  pid_t pid;
+  int n, fd;
+  fd = open(path, O_RDONLY);
+  n = read(fd, pids, sizeof(pids)-1);
+  close(fd);
+  if (n == -1) return 0;
+  pids[n] = 0;
+  pid = strtol(pids, &ptr, 10);
+  if (ptr != &pids[n]) return 0;
+  return pid;
+}
+#endif /* WINDOWS */
+
 /* Function : initializeLocalSocket */
 /* Creates the listening socket for in-connections */
 /* Returns 1, or 0 if an error occurred */
@@ -1423,6 +1442,13 @@ static int initializeLocalSocket(struct socketInfo *info)
   CloseHandle(info->overl.hEvent);
 #else /* WINDOWS */
   struct sockaddr_un sa;
+  char tmppath[lpath+lport+3];
+  char lockpath[lpath+lport+2];
+  struct stat st;
+  char pids[16];
+  pid_t pid;
+  int lock,n,done,res;
+
   mode_t oldmode;
   if ((fd = socket(PF_LOCAL, SOCK_STREAM, 0))==-1) {
     LogError("socket");
@@ -1442,23 +1468,98 @@ static int initializeLocalSocket(struct socketInfo *info)
       LogError("making socket directory");
       goto outmode;
     }
-    sleep(1);
+    /* read-only, or not mounted yet, wait */
+    approximateDelay(1000);
   }
   memcpy(sa.sun_path,BRLAPI_SOCKETPATH,lpath);
   memcpy(sa.sun_path+lpath,info->port,lport+1);
-  /* hacky, TODO: find a better way to keep secure */
-  unlink(sa.sun_path);
+  memcpy(tmppath, BRLAPI_SOCKETPATH, lpath);
+  tmppath[lpath]='.';
+  memcpy(tmppath+lpath+1, info->port, lport);
+  memcpy(lockpath, tmppath, lpath+1+lport);
+  tmppath[lpath+lport+1]='_';
+  tmppath[lpath+lport+2]=0;
+  lockpath[lpath+lport+1]=0;
+  while ((lock = open(tmppath, O_WRONLY|O_CREAT|O_EXCL, 0644)) == -1) {
+    if (errno == EROFS) {
+      approximateDelay(1000);
+      continue;
+    }
+    if (errno != EEXIST) {
+      LogError("opening local socket lock");
+      goto outmode;
+    }
+    if ((pid = readPid(tmppath)) && pid != getpid()
+	&& (kill(pid, 0) != -1 || errno != ESRCH)) {
+      LogPrint(LOG_ERR,"a BrlAPI server already listens on %s (file %s exists)",info->port, tmppath);
+      goto outmode;
+    }
+    /* bogus file, myself or non-existent process, remove */
+    while (unlink(tmppath)) {
+      if (errno != EROFS) {
+	LogError("removing stale local socket lock");
+	goto outmode;
+      }
+      approximateDelay(1000);
+    }
+  }
+
+  n = snprintf(pids,sizeof(pids),"%d",getpid());
+  done = 0;
+  while ((res = write(lock,pids+done,n)) < n) {
+    if (res == -1) {
+      if (errno != ENOSPC) {
+	LogError("writing pid in local socket lock");
+	goto outtmp;
+      }
+      approximateDelay(1000);
+    } else {
+      done += res;
+      n -= res;
+    }
+  }
+
+  while(1) {
+    if (link(tmppath, lockpath))
+      LogError("linking local socket lock");
+      /* but no action: link() might erroneously return errors, see manpage */
+    if (fstat(lock, &st)) {
+      LogError("checking local socket lock");
+      goto outtmp;
+    }
+    if (st.st_nlink == 2)
+      /* success */
+      break;
+    /* failed to link */
+    if ((pid = readPid(lockpath)) && pid != getpid()
+	&& (kill(pid, 0) != -1 || errno != ESRCH)) {
+      LogPrint(LOG_ERR,"a BrlAPI server already listens on %s (file %s exists)",info->port, lockpath);
+      goto outtmp;
+    }
+    /* bogus file, myself or non-existent process, remove */
+    if (unlink(lockpath)) {
+      LogError("removing stale local socket lock");
+      goto outtmp;
+    }
+  }
+  close(lock);
+  if (unlink(tmppath))
+    LogPrint(LOG_ERR,"removing temp local socket lock");
   if (loopBind(fd, (struct sockaddr *) &sa, sizeof(sa))<0) {
     LogPrint(LOG_WARNING,"bind: %s",strerror(errno));
-    goto outmode;
+    goto outlock;
   }
   umask(oldmode);
   if (listen(fd,1)<0) {
     LogError("listen");
-    goto outfd;
+    goto outlock;
   }
   return fd;
   
+outlock:
+  unlink(lockpath);
+outtmp:
+  unlink(tmppath);
 outmode:
   umask(oldmode);
 #endif /* WINDOWS */
@@ -1561,26 +1662,30 @@ static void closeSockets(void *arg)
       if (close(info->fd))
         LogError("closing socket");
       info->fd=-1;
-    }
 #ifdef WINDOWS
-    if ((info->overl.hEvent)) {
-      CloseHandle(info->overl.hEvent);
-      info->overl.hEvent = NULL;
-    }
+      if ((info->overl.hEvent)) {
+	CloseHandle(info->overl.hEvent);
+	info->overl.hEvent = NULL;
+      }
 #else /* WINDOWS */
 #ifdef PF_LOCAL
-    if (info->addrfamily==PF_LOCAL) {
-      char *path;
-      int lpath=strlen(BRLAPI_SOCKETPATH),lport=strlen(info->port);
-      if ((path=malloc(lpath+lport+1))) {
-        memcpy(path,BRLAPI_SOCKETPATH,lpath);
-        memcpy(path+lpath,info->port,lport+1);
-        if (unlink(path)<0)
-          LogError("unlinking socket");
+      if (info->addrfamily==PF_LOCAL) {
+	char *path;
+	int lpath=strlen(BRLAPI_SOCKETPATH),lport=strlen(info->port);
+	if ((path=malloc(lpath+lport+2))) {
+	  memcpy(path,BRLAPI_SOCKETPATH,lpath);
+	  memcpy(path+lpath,info->port,lport+1);
+	  if (unlink(path))
+	    LogError("unlinking local socket");
+	  path[lpath]='.';
+	  memcpy(path+lpath+1,info->port,lport+1);
+	  if (unlink(path))
+	    LogError("unlinking local socket lock");
+	}
       }
-    }
 #endif /* PF_LOCAL */
 #endif /* WINDOWS */
+    }
     free(info->port);
     info->port = NULL;
     free(info->hostname);
