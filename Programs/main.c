@@ -332,8 +332,8 @@ setStatusCellsAlva (unsigned char *status) {
 
 static void
 setStatusCellsTieman (unsigned char *status) {
-  setCoordinateUpper(&status[0], scr.posx, scr.posy);
-  setCoordinateLower(&status[0], p->winx, p->winy);
+  setCoordinateUpper(&status[0], scr.posx+1, scr.posy+1);
+  setCoordinateLower(&status[0], p->winx+1, p->winy+1);
   setStateDots(&status[4]);
 }
 
@@ -378,12 +378,12 @@ setStatusCellsMDV (unsigned char *status) {
 
 static void
 setStatusCellsVoyager (unsigned char *status) {
-  setNumberVertical(&status[0], p->winy);
-  setNumberVertical(&status[1], scr.posy);
+  setNumberVertical(&status[0], p->winy+1);
+  setNumberVertical(&status[1], scr.posy+1);
   if (isFrozenScreen()) {
     status[2] = textTable['F'];
   } else {
-    setNumberVertical(&status[2], scr.posx);
+    setNumberVertical(&status[2], scr.posx+1);
   }
 }
 
