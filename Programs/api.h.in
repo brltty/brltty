@@ -310,6 +310,19 @@ int brlapi_getDriverInfo(void *buf, size_t count);
  */
 int brlapi_getTty(int tty, const char *how);
 
+/* brlapi_getTtyPath */
+/** Ask for some tty path, with some key mechanism
+ *
+ * \param ttys points on the array of ttys representing the tty path to be got.
+ * Can be NULL if nttys is 0.
+ * \param nttys gives the number of elements in ttys.
+ *
+ * Providing nttys == 0 means to get the root.
+ *
+ * \sa brlapi_getTty()
+ */
+int brlapi_getTtyPath(int *ttys, int nttys, const char *how);
+
 /* brlapi_leaveTty */
 /** Stop controlling the tty
  *

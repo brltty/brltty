@@ -107,7 +107,6 @@ static WSADATA wsadata;
 static unsigned int brlx = 0;
 static unsigned int brly = 0;
 static int fd = -1; /* Descriptor of the socket connected to BrlApi */
-static int truetty = -1;
 
 pthread_mutex_t brlapi_fd_mutex = PTHREAD_MUTEX_INITIALIZER; /* to protect concurrent fd access */
 static int state = 0;
@@ -655,6 +654,21 @@ static int getControllingTty(void)
 /* Takes control of a tty */
 int brlapi_getTty(int tty, const char *how)
 {
+  /* Determine which tty to take control of */
+  if (tty<=0) tty = getControllingTty();
+  /* 0 can be a valid screen WINDOW
+  0xffffffff can not be a valid WINDOWID (top 3 bits guaranteed to be zero) */
+  if (tty<0) { brlapi_errno=BRLERR_UNKNOWNTTY; return -1; }
+  
+  if (brlapi_getTtyPath(&tty, 1, how)) return -1;
+
+  return tty;
+}
+
+/* Function : brlapi_getTtyPath */
+/* Takes control of a tty path */
+int brlapi_getTtyPath(int *ttys, int nttys, const char *how)
+{
   int res;
   unsigned char packet[BRLAPI_MAXPACKETSIZE], *p;
   uint32_t *nbTtys = (uint32_t *) packet, *t = nbTtys+1;
@@ -662,12 +676,6 @@ int brlapi_getTty(int tty, const char *how)
   int ttypath;
   unsigned int n;
 
-  /* Determine which tty to take control of */
-  if (tty<=0) truetty = getControllingTty(); else truetty = tty;
-  /* 0 can be a valid screen WINDOW
-  0xffffffff can not be a valid WINDOWID (top 3 bits guaranteed to be zero) */
-  if (truetty<0) { brlapi_errno=BRLERR_UNKNOWNTTY; return -1; }
-  
   if (brlapi_getDisplaySize(&brlx, &brly)<0) return -1;
   
   /* Clear key buffer before taking the tty, just in case... */
@@ -686,7 +694,9 @@ int brlapi_getTty(int tty, const char *how)
     if (ttytreepathstop==ttytreepath) break;
   }
 
-  *t++ = htonl(truetty); (*nbTtys)++;
+  for (n=0; n<nttys; n++) *t++ = htonl(ttys[n]);
+  (*nbTtys)+=nttys;
+
   *nbTtys = htonl(*nbTtys);
   p = (unsigned char *) t;
   if (how==NULL) n = 0; else n = strlen(how);
@@ -705,7 +715,7 @@ int brlapi_getTty(int tty, const char *how)
   state |= STCONTROLLINGTTY;
   pthread_mutex_unlock(&stateMutex);
 
-  return truetty;
+  return 0;
 }
 
 /* Function : brlapi_leaveTty */
