@@ -192,10 +192,19 @@ AC_SUBST([brltty_item_codes_$1])
 BRLTTY_VAR_TRIM([brltty_item_names_$1])
 AC_SUBST([brltty_item_names_$1])
 
+case "${host_os}"
+in
+   cygwin*|mingw*)
+      brltty_default="all"
+      ;;
+   *)
+      brltty_default="yes"
+      ;;
+esac
 BRLTTY_ARG_WITH(
    [$1-$2], BRLTTY_UPPERCASE([$2]),
    [$1 $2(s) to build in]brltty_item_list_$1,
-   [brltty_items], ["yes"]
+   [brltty_items], ["${brltty_default}"]
 )
 if test "${brltty_items}" = "no"
 then
