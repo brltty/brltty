@@ -26,6 +26,7 @@
 #include "Programs/misc.h"
 #include "Programs/iodefs.h"
 
+#define BRLSTAT ST_TiemanStyle
 #define BRL_HAVE_PACKET_IO
 #include "Programs/brl_driver.h"
 
@@ -1545,6 +1546,11 @@ brl_writeWindow (BrailleDisplay *brl) {
 
 static void
 brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) {
+  unsigned char *cells = &externalCells[textCount];
+  if (memcmp(cells, status, statusCount) != 0) {
+    memcpy(cells, status, statusCount);
+    cellsUpdated = 1;
+  }
 }
 
 static int
