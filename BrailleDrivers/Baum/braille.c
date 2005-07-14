@@ -1546,10 +1546,9 @@ brl_writeWindow (BrailleDisplay *brl) {
 
 static void
 brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) {
-  unsigned char *cells = &externalCells[textCount];
-  if (memcmp(cells, status, statusCount) != 0) {
-    memcpy(cells, status, statusCount);
-    cellsUpdated = 1;
+  if (memcmp(&internalCells[textCount], status, statusCount) != 0) {
+    memcpy(&internalCells[textCount], status, statusCount);
+    translateCells(textCount, statusCount);
   }
 }
 
