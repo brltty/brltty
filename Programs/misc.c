@@ -515,6 +515,11 @@ hasTimedOut (int milliseconds) {
 }
 
 int
+rescaleInteger (int value, int from, int to) {
+  return (to * (value + (from / (to * 2)))) / from;
+}
+
+int
 isInteger (int *value, const char *word) {
   if (*word) {
     char *end;

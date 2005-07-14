@@ -137,8 +137,11 @@ extern char *getDevicePath (const char *path);
 extern int isQualifiedDevice (const char **path, const char *qualifier);
 extern void unsupportedDevice (const char *path);
 
+extern int rescaleInteger (int value, int from, int to);
+
 extern int isInteger (int *value, const char *word);
 extern int isFloat (float *value, const char *word);
+
 extern int validateInteger (int *value, const char *description, const char *word, const int *minimum, const int *maximum);
 extern int validateFloat (float *value, const char *description, const char *word, const float *minimum, const float *maximum);
 extern int validateChoice (unsigned int *value, const char *description, const char *word, const char *const *choices);

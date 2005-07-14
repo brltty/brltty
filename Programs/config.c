@@ -1280,9 +1280,7 @@ updatePreferences (void) {
               if (item->names) {
                 *item->setting = key % (item->maximum + 1);
               } else {
-                unsigned char highestKey = brl.x - 1;
-                unsigned char highestValue = item->maximum - item->minimum;
-                *item->setting = (highestValue * (key + (highestKey / (highestValue * 2))) / highestKey) + item->minimum;
+                *item->setting = rescaleInteger(key, brl.x-1, item->maximum-item->minimum) + item->minimum;
               }
               if (item->changed && !item->changed(*item->setting)) {
                 *item->setting = oldSetting;
