@@ -37,8 +37,9 @@ static const int logOutputPackets = 0;
 static const int probeLimit = 2;
 static const int probeTimeout = 200;
 
+#define KEY_GROUP_SIZE(count) (((count) + 7) / 8)
 #define MAXIMUM_CELL_COUNT 84
-#define ROUTING_BYTES(cells) (((cells) + 7) / 8)
+#define VERTICAL_SENSOR_COUNT 27
 
 static int cellCount;
 static int textCount;
@@ -49,8 +50,11 @@ static unsigned char externalCells[MAXIMUM_CELL_COUNT];
 static TranslationTable outputTable;
 
 typedef struct {
-  unsigned int function;
-  unsigned char routing[MAXIMUM_CELL_COUNT];
+  unsigned int functionKeys;
+  unsigned char routingKeys[KEY_GROUP_SIZE(MAXIMUM_CELL_COUNT)];
+  unsigned char horizontalSensors[KEY_GROUP_SIZE(MAXIMUM_CELL_COUNT)];
+  unsigned char leftVerticalSensors[KEY_GROUP_SIZE(VERTICAL_SENSOR_COUNT)];
+  unsigned char rightVerticalSensors[KEY_GROUP_SIZE(VERTICAL_SENSOR_COUNT)];
 } Keys;
 static Keys activeKeys;
 static Keys pressedKeys;
@@ -80,36 +84,78 @@ static int charactersPerSecond;
 
 static int
 setFunctionKeys (unsigned int mask, unsigned int keys, int *pressed) {
-  keys |= pressedKeys.function & ~mask;
-  if (keys == pressedKeys.function) return 0;
+  keys |= pressedKeys.functionKeys & ~mask;
+  if (keys == pressedKeys.functionKeys) return 0;
 
-  if (keys & ~pressedKeys.function) *pressed = 1;
-  pressedKeys.function = keys;
+  if (keys & ~pressedKeys.functionKeys) *pressed = 1;
+  pressedKeys.functionKeys = keys;
   return 1;
 }
 
-static int
-setRoutingKey (int number, int press, int *pressed) {
-  unsigned char *state = &pressedKeys.routing[number];
-  if (!press == !*state) return 0;
-
-  if ((*state = !!press)) *pressed = 1;
-  return 1;
+static void
+getGroupedKey (unsigned char *keys, int number, unsigned char **address, unsigned char *bit) {
+  *address = &keys[number / 8];
+  *bit = 1 << (number % 8);
 }
 
 static int
-updateRoutingKeys (const unsigned char *mask, int size, int *pressed) {
-  int changed = 0;
-  int number = 0;
-  int index;
-  for (index=0; 1; ++index) {
-    unsigned char byte = mask[index];
-    unsigned char bit;
-    for (bit=0X01; bit; bit<<=1) {
-      if (setRoutingKey(number, (byte & bit), pressed)) changed = 1;
-      if (++number == size) return changed;
-    }
+testGroupedKey (unsigned char *keys, int number) {
+  unsigned char *address;
+  unsigned char bit;
+
+  getGroupedKey(keys, number, &address, &bit);
+  return (*address & bit) != 0;
+}
+
+static int
+setGroupedKey (unsigned char *keys, int number, int press, int *pressed) {
+  unsigned char *address;
+  unsigned char bit;
+
+  getGroupedKey(keys, number, &address, &bit);
+  if (!(*address & bit) == !press) return 0;
+
+  if (press) {
+    *address |= bit;
+    *pressed = 1;
+  } else {
+    *address &= ~bit;
   }
+  return 1;
+}
+
+static void
+clearKeyGroup (unsigned char *keys, int count) {
+  memset(keys, 0, KEY_GROUP_SIZE(count));
+}
+
+static void
+setKeyGroup (unsigned char *keys, int count, int number) {
+  clearKeyGroup(keys, count);
+
+  if (number > 0) {
+    int pressed = 0;
+    setGroupedKey(keys, number-1, 1, &pressed);
+  }
+}
+
+static int
+updateKeyGroup (unsigned char *keys, const unsigned char *new, int count, int *pressed) {
+  int size = KEY_GROUP_SIZE(count);
+  int changed = 0;
+
+  while (size-- > 0) {
+    if (*new != *keys) {
+      changed = 1;
+      if (*new & ~*keys) *pressed = 1;
+      *keys = *new;
+    }
+
+    ++new;
+    ++keys;
+  }
+
+  return changed;
 }
 
 static int
@@ -180,7 +226,8 @@ changeCellCount (BrailleDisplay *brl, int count) {
         int number;
         for (number=cellCount; number<count; ++number) {
           int pressed = 0;
-          setRoutingKey(number, 0, &pressed);
+          setGroupedKey(pressedKeys.routingKeys, number, 0, &pressed);
+          setGroupedKey(pressedKeys.horizontalSensors, number, 0, &pressed);
         }
       }
     }
@@ -508,12 +555,12 @@ typedef union {
     unsigned char code;
 
     union {
-      unsigned char horizontalSensors[ROUTING_BYTES(MAXIMUM_CELL_COUNT)];
+      unsigned char horizontalSensors[KEY_GROUP_SIZE(MAXIMUM_CELL_COUNT)];
       union {
-        unsigned char left[ROUTING_BYTES(27)];
-        unsigned char right[ROUTING_BYTES(27)];
+        unsigned char left[KEY_GROUP_SIZE(VERTICAL_SENSOR_COUNT)];
+        unsigned char right[KEY_GROUP_SIZE(VERTICAL_SENSOR_COUNT)];
       } verticalSensors;
-      unsigned char routingKeys[ROUTING_BYTES(MAXIMUM_CELL_COUNT)];
+      unsigned char routingKeys[KEY_GROUP_SIZE(MAXIMUM_CELL_COUNT)];
       unsigned char switches;
       unsigned char topKeys;
       unsigned char horizontalSensor;
@@ -889,17 +936,39 @@ updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
         goto doKeys;
 
       doKeys:
-        if (!setFunctionKeys((0XFF << shift), (keys << shift), keyPressed)) continue;
-        return 1;
+        if (setFunctionKeys((0XFF << shift), (keys << shift), keyPressed)) return 1;
+        continue;
       }
 
+      case BAUM_RSP_HorizontalSensor:
+        setKeyGroup(packet.data.values.horizontalSensors, textCount, packet.data.values.horizontalSensor);
+      case BAUM_RSP_HorizontalSensors: {
+        unsigned char *keys;
+        if (baumDeviceType == BAUM_TYPE_Inka) {
+          keys = pressedKeys.routingKeys;
+        } else {
+          keys = pressedKeys.horizontalSensors;
+        }
+        if (updateKeyGroup(keys, packet.data.values.horizontalSensors, textCount, keyPressed)) return 1;
+        continue;
+      }
+
+      case BAUM_RSP_VerticalSensor:
+        setKeyGroup(packet.data.values.verticalSensors.left, VERTICAL_SENSOR_COUNT, packet.data.values.verticalSensor.left);
+        setKeyGroup(packet.data.values.verticalSensors.right, VERTICAL_SENSOR_COUNT, packet.data.values.verticalSensor.right);
+      case BAUM_RSP_VerticalSensors: {
+        int changed = 0;
+        if (updateKeyGroup(pressedKeys.leftVerticalSensors, packet.data.values.verticalSensors.left, VERTICAL_SENSOR_COUNT, keyPressed)) changed = 1;
+        if (updateKeyGroup(pressedKeys.rightVerticalSensors, packet.data.values.verticalSensors.right, VERTICAL_SENSOR_COUNT, keyPressed)) changed = 1;
+        if (changed) return 1;
+        continue;
+      }
+
+      case BAUM_RSP_RoutingKey:
+        setKeyGroup(packet.data.values.routingKeys, cellCount, packet.data.values.routingKey);
       case BAUM_RSP_RoutingKeys:
         if (baumDeviceType == BAUM_TYPE_Inka) goto doSwitches;
-        if (updateRoutingKeys(packet.data.values.routingKeys, cellCount, keyPressed)) return 1;
-        continue;
-
-      case BAUM_RSP_HorizontalSensors:
-        if (updateRoutingKeys(packet.data.values.horizontalSensors, textCount, keyPressed)) return 1;
+        if (updateKeyGroup(pressedKeys.routingKeys, packet.data.values.routingKeys, cellCount, keyPressed)) return 1;
         continue;
 
       case BAUM_RSP_Switches:
@@ -1135,7 +1204,7 @@ updateHandyTechKeys (BrailleDisplay *brl, int *keyPressed) {
       int press = (code & HT_RSP_RELEASE) == 0;
 
       if (HT_IS_ROUTING_KEY(key)) {
-        if (!setRoutingKey((key - HT_RSP_KEY_CR1), press, keyPressed)) continue;
+        if (!setGroupedKey(pressedKeys.routingKeys, (key - HT_RSP_KEY_CR1), press, keyPressed)) continue;
       } else {
         unsigned int bit;
         switch (key) {
@@ -1376,7 +1445,7 @@ updatePowerBrailleKeys (BrailleDisplay *brl, int *keyPressed) {
           continue;
 
         case PB_RSP_SENSORS:
-          if (updateRoutingKeys(packet.data.values.sensors.horizontal, textCount, keyPressed)) return 1;
+          if (updateKeyGroup(pressedKeys.routingKeys, packet.data.values.sensors.horizontal, textCount, keyPressed)) return 1;
           continue;
 
         default:
@@ -1570,13 +1639,13 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   {
     int key;
     for (key=0; key<textCount; ++key)
-      if (activeKeys.routing[key])
+      if (testGroupedKey(activeKeys.routingKeys, key))
         routingKeys[routingCount++] = key;
   }
 
 #define KEY(key,cmd) case (key): command = (cmd); break;
   if (routingCount == 0) {
-    switch (activeKeys.function) {
+    switch (activeKeys.functionKeys) {
       KEY(BAUM_KEY_TL2, BRL_CMD_FWINLT);
       KEY(BAUM_KEY_TR2, BRL_CMD_FWINRT);
 
@@ -1634,7 +1703,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
     }
   } else if (routingCount == 1) {
     unsigned char key = routingKeys[0];
-    switch (activeKeys.function) {
+    switch (activeKeys.functionKeys) {
       KEY(0, BRL_BLK_ROUTE+key);
 
       KEY(BAUM_KEY_TL1, BRL_BLK_CUTBEGIN+key);
