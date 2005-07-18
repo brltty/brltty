@@ -1730,8 +1730,9 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   } else if (routingCount == 2) {
     switch (activeKeys.functionKeys) {
       case 0:
+        command = BRL_BLK_CUTBEGIN + routingKeys[0];
         pendingCommand = BRL_BLK_CUTLINE + routingKeys[1];
-        return BRL_BLK_CUTBEGIN + routingKeys[0];
+        break;
 
       default:
         break;
