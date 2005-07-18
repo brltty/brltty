@@ -20,6 +20,7 @@ TL1+CRn: start new cut buffer at character
 TL2+CRn: append to existing cut buffer from character
 TR1+CRn: linear cut to character
 TR2+CRn: rectangular cut to character
+CRn1+CRn2: cut from first character through second character
 TL1+TL2+TL3+TR1: (p)aste (insert cut buffer at cursor)
 
 TL3+CRn: describe characteR

@@ -56,8 +56,10 @@ typedef struct {
   unsigned char leftVerticalSensors[KEY_GROUP_SIZE(VERTICAL_SENSOR_COUNT)];
   unsigned char rightVerticalSensors[KEY_GROUP_SIZE(VERTICAL_SENSOR_COUNT)];
 } Keys;
+
 static Keys activeKeys;
 static Keys pressedKeys;
+static int pendingCommand;
 
 typedef struct {
   int (*openPort) (char **parameters, const char *device);
@@ -82,8 +84,39 @@ static int charactersPerSecond;
 
 /* Internal Routines */
 
+static void
+logTextField (const char *name, const char *address, int length) {
+  while (length > 0) {
+    const char byte = address[length - 1];
+    if (byte && (byte != ' ')) break;
+    --length;
+  }
+  LogPrint(LOG_INFO, "%s: %.*s", name, length, address);
+}
+
 static int
-setFunctionKeys (unsigned int mask, unsigned int keys, int *pressed) {
+readByte (unsigned char *byte, int wait) {
+  int count = io->readBytes(byte, 1, wait);
+  if (count > 0) return 1;
+
+  if (count == 0) errno = EAGAIN;
+  return 0;
+}
+
+static int
+flushInput (void) {
+  unsigned char byte;
+  while (readByte(&byte, 0));
+  return errno == EAGAIN;
+}
+
+static void
+adjustWriteDelay (BrailleDisplay *brl, int bytes) {
+  brl->writeDelay += bytes * 1000 / charactersPerSecond;
+}
+
+static int
+updateFunctionKeys (unsigned int mask, unsigned int keys, int *pressed) {
   keys |= pressedKeys.functionKeys & ~mask;
   if (keys == pressedKeys.functionKeys) return 0;
 
@@ -108,7 +141,7 @@ testGroupedKey (unsigned char *keys, int number) {
 }
 
 static int
-setGroupedKey (unsigned char *keys, int number, int press, int *pressed) {
+setGroupedKey (unsigned char *keys, int number, int press) {
   unsigned char *address;
   unsigned char bit;
 
@@ -117,7 +150,6 @@ setGroupedKey (unsigned char *keys, int number, int press, int *pressed) {
 
   if (press) {
     *address |= bit;
-    *pressed = 1;
   } else {
     *address &= ~bit;
   }
@@ -130,13 +162,9 @@ clearKeyGroup (unsigned char *keys, int count) {
 }
 
 static void
-setKeyGroup (unsigned char *keys, int count, int number) {
+makeKeyGroup (unsigned char *keys, int count, unsigned char key) {
   clearKeyGroup(keys, count);
-
-  if (number > 0) {
-    int pressed = 0;
-    setGroupedKey(keys, number-1, 1, &pressed);
-  }
+  if (key > 0) setGroupedKey(keys, key-1, 1);
 }
 
 static int
@@ -156,22 +184,6 @@ updateKeyGroup (unsigned char *keys, const unsigned char *new, int count, int *p
   }
 
   return changed;
-}
-
-static int
-readByte (unsigned char *byte, int wait) {
-  int count = io->readBytes(byte, 1, wait);
-  if (count > 0) return 1;
-
-  if (count == 0) errno = EAGAIN;
-  return 0;
-}
-
-static int
-flushInput (void) {
-  unsigned char byte;
-  while (readByte(&byte, 0));
-  return errno == EAGAIN;
 }
 
 static int
@@ -225,9 +237,8 @@ changeCellCount (BrailleDisplay *brl, int count) {
       {
         int number;
         for (number=cellCount; number<count; ++number) {
-          int pressed = 0;
-          setGroupedKey(pressedKeys.routingKeys, number, 0, &pressed);
-          setGroupedKey(pressedKeys.horizontalSensors, number, 0, &pressed);
+          setGroupedKey(pressedKeys.routingKeys, number, 0);
+          setGroupedKey(pressedKeys.horizontalSensors, number, 0);
         }
       }
     }
@@ -238,21 +249,6 @@ changeCellCount (BrailleDisplay *brl, int count) {
     brl->x = textCount;
     brl->resizeRequired = 1;
   }
-}
-
-static void
-adjustWriteDelay (BrailleDisplay *brl, int bytes) {
-  brl->writeDelay += bytes * 1000 / charactersPerSecond;
-}
-
-static void
-logTextField (const char *name, const char *address, int length) {
-  while (length > 0) {
-    const char byte = address[length - 1];
-    if (byte && (byte != ' ')) break;
-    --length;
-  }
-  LogPrint(LOG_INFO, "%s: %.*s", name, length, address);
 }
 
 /* Serial IO */
@@ -936,12 +932,12 @@ updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
         goto doKeys;
 
       doKeys:
-        if (setFunctionKeys((0XFF << shift), (keys << shift), keyPressed)) return 1;
+        if (updateFunctionKeys((0XFF << shift), (keys << shift), keyPressed)) return 1;
         continue;
       }
 
       case BAUM_RSP_HorizontalSensor:
-        setKeyGroup(packet.data.values.horizontalSensors, textCount, packet.data.values.horizontalSensor);
+        makeKeyGroup(packet.data.values.horizontalSensors, textCount, packet.data.values.horizontalSensor);
       case BAUM_RSP_HorizontalSensors: {
         unsigned char *keys;
         if (baumDeviceType == BAUM_TYPE_Inka) {
@@ -954,8 +950,8 @@ updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
       }
 
       case BAUM_RSP_VerticalSensor:
-        setKeyGroup(packet.data.values.verticalSensors.left, VERTICAL_SENSOR_COUNT, packet.data.values.verticalSensor.left);
-        setKeyGroup(packet.data.values.verticalSensors.right, VERTICAL_SENSOR_COUNT, packet.data.values.verticalSensor.right);
+        makeKeyGroup(packet.data.values.verticalSensors.left, VERTICAL_SENSOR_COUNT, packet.data.values.verticalSensor.left);
+        makeKeyGroup(packet.data.values.verticalSensors.right, VERTICAL_SENSOR_COUNT, packet.data.values.verticalSensor.right);
       case BAUM_RSP_VerticalSensors: {
         int changed = 0;
         if (updateKeyGroup(pressedKeys.leftVerticalSensors, packet.data.values.verticalSensors.left, VERTICAL_SENSOR_COUNT, keyPressed)) changed = 1;
@@ -965,7 +961,7 @@ updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
       }
 
       case BAUM_RSP_RoutingKey:
-        setKeyGroup(packet.data.values.routingKeys, cellCount, packet.data.values.routingKey);
+        makeKeyGroup(packet.data.values.routingKeys, cellCount, packet.data.values.routingKey);
       case BAUM_RSP_RoutingKeys:
         if (baumDeviceType == BAUM_TYPE_Inka) goto doSwitches;
         if (updateKeyGroup(pressedKeys.routingKeys, packet.data.values.routingKeys, cellCount, keyPressed)) return 1;
@@ -1204,7 +1200,8 @@ updateHandyTechKeys (BrailleDisplay *brl, int *keyPressed) {
       int press = (code & HT_RSP_RELEASE) == 0;
 
       if (HT_IS_ROUTING_KEY(key)) {
-        if (!setGroupedKey(pressedKeys.routingKeys, (key - HT_RSP_KEY_CR1), press, keyPressed)) continue;
+        if (!setGroupedKey(pressedKeys.routingKeys, (key - HT_RSP_KEY_CR1), press)) continue;
+        if (press) *keyPressed = 1;
       } else {
         unsigned int bit;
         switch (key) {
@@ -1221,7 +1218,7 @@ updateHandyTechKeys (BrailleDisplay *brl, int *keyPressed) {
             LogBytes("unexpected packet", packet.bytes, size);
             continue;
         }
-        if (!setFunctionKeys(bit, (press? bit: 0), keyPressed)) continue;
+        if (!updateFunctionKeys(bit, (press? bit: 0), keyPressed)) continue;
       }
       return 1;
     }
@@ -1461,7 +1458,7 @@ updatePowerBrailleKeys (BrailleDisplay *brl, int *keyPressed) {
       if (packet.buttons[0] & PB2_BUTTONS0_TR2) keys |= BAUM_KEY_TR2;
       if (packet.buttons[1] & PB2_BUTTONS1_TR3) keys |= BAUM_KEY_TR3;
 
-      if (!setFunctionKeys(0XFF, keys, keyPressed)) continue;
+      if (!updateFunctionKeys(0XFF, keys, keyPressed)) continue;
       return 1;
     }
   }
@@ -1551,6 +1548,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
 
           memset(&activeKeys, 0, sizeof(activeKeys));
           memset(&pressedKeys, 0, sizeof(pressedKeys));
+          pendingCommand = EOF;
 
           clearCells(0, cellCount);
           if (!updateCells(brl)) break;
@@ -1627,6 +1625,12 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   int keyPressed = 0;
   unsigned char routingKeys[textCount];
   int routingCount = 0;
+
+  if (pendingCommand != EOF) {
+    command = pendingCommand;
+    pendingCommand = EOF;
+    return command;
+  }
 
   if (!protocol->updateKeys(brl, &keyPressed)) {
     if (errno == EAGAIN) return EOF;
@@ -1719,6 +1723,15 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 
       KEY(BAUM_KEY_TR1|BAUM_KEY_TR2, BRL_BLK_PRINDENT+key);
       KEY(BAUM_KEY_TR2|BAUM_KEY_TR3, BRL_BLK_NXINDENT+key);
+
+      default:
+        break;
+    }
+  } else if (routingCount == 2) {
+    switch (activeKeys.functionKeys) {
+      case 0:
+        pendingCommand = BRL_BLK_CUTLINE + routingKeys[1];
+        return BRL_BLK_CUTBEGIN + routingKeys[0];
 
       default:
         break;
