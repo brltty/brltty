@@ -84,6 +84,8 @@
 #include "api.h"
 #include "api_protocol.h"
 #include "brldefs.h"
+
+#define BRLAPI(fun) brlapi_ ## fun
 #include "api_common.h"
 
 #ifndef MIN

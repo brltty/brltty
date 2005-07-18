@@ -89,7 +89,7 @@ adlib.$O:
 
 ###############################################################################
 
-API_LIB_OBJS = api_client.$O api_common.$O
+API_LIB_OBJS = api_client.$O
 API_NAME = $(LIB_PFX)brlapi
 API_LIB = $(API_NAME).$(LIB_EXT)
 API_ARC = $(API_NAME).$(ARC_EXT)
@@ -102,9 +102,6 @@ $(API_LIB): $(API_LIB_OBJS)
 $(API_ARC): $(API_LIB_OBJS)
 	ar rc $@ $(API_LIB_OBJS)
 	$(RANLIB) $@
-
-api_common.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/api_common.c
 
 api_client.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/api_client.c

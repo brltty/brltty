@@ -302,7 +302,7 @@ BRLTTY_ARG_DISABLE(
 [dnl
    BRLTTY_CAP_PTHREADS([dnl
       AC_DEFINE([ENABLE_API])
-      api_objects='api_server.$O api_common.$O rangelist.$O'
+      api_objects='api_server.$O rangelist.$O'
       all_api="all-api"
       install_api="install-api"
       api_libraries="${LIBS}"

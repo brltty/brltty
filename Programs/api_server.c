@@ -58,7 +58,6 @@
 
 #include "api.h"
 #include "api_protocol.h"
-#include "api_common.h"
 #include "rangelist.h"
 #include "brl.h"
 #include "brltty.h"
@@ -115,9 +114,12 @@ if (!( condition )) { \
 #undef brlapi_error
 #endif
 
-brlapi_error_t brlapi_error;
-brlapi_error_t *brlapi_error_location(void) { return &brlapi_error; }
+static brlapi_error_t brlapiserver_error;
+#define brlapi_error brlapiserver_error
 
+#define BRLAPI(fun) brlapiserver_ ## fun
+#include "api_common.h"
+ 
 /** ask for \e brltty commands */
 #define BRL_COMMANDS 0
 /** ask for raw driver keycodes */
@@ -282,7 +284,7 @@ static int isKeyCapable(const BrailleDriver *brl)
 /* Sends an acknowledgement on the given socket */
 static inline void writeAck(int fd)
 {
-  brlapi_writePacket(fd,BRLPACKET_ACK,NULL,0);
+  brlapiserver_writePacket(fd,BRLPACKET_ACK,NULL,0);
 }
 
 /* Function : writeError */
@@ -291,7 +293,7 @@ static void writeError(int fd, unsigned int err)
 {
   uint32_t code = htonl(err);
   LogPrint(LOG_DEBUG,"error %u on fd %d", err, fd);
-  brlapi_writePacket(fd,BRLPACKET_ERROR,&code,sizeof(code));
+  brlapiserver_writePacket(fd,BRLPACKET_ERROR,&code,sizeof(code));
 }
 
 /* Function : writeException */
@@ -307,7 +309,7 @@ static void writeException(int fd, unsigned int err, brl_type_t type, const void
   errorPacket->type = htonl(type);
   esize = MIN(size, BRLAPI_MAXPACKETSIZE-hdrsize);
   if ((packet!=NULL) && (size!=0)) memcpy(&errorPacket->packet, packet, esize);
-  brlapi_writePacket(fd,BRLPACKET_EXCEPTION,epacket, hdrsize+esize);
+  brlapiserver_writePacket(fd,BRLPACKET_EXCEPTION,epacket, hdrsize+esize);
 }
 
 /* Function: resetPacket */
@@ -676,7 +678,7 @@ static inline void freeTty(Tty *tty)
 /* Logs the given request */
 static inline void LogPrintRequest(int type, int fd)
 {
-  LogPrint(LOG_DEBUG, "Received %s request on fd %d", brlapi_packetType(type), fd);  
+  LogPrint(LOG_DEBUG, "Received %s request on fd %d", brlapiserver_packetType(type), fd);  
 }
 
 static int handleGetDriver(Connection *c, brl_type_t type, size_t size, const char *str)
@@ -685,7 +687,7 @@ static int handleGetDriver(Connection *c, brl_type_t type, size_t size, const ch
   LogPrintRequest(type, c->fd);
   CHECKERR(size==0,BRLERR_INVALID_PACKET);
   CHECKERR(!c->raw,BRLERR_ILLEGAL_INSTRUCTION);
-  brlapi_writePacket(c->fd, type, str, len+1);
+  brlapiserver_writePacket(c->fd, type, str, len+1);
   return 0;
 }
 
@@ -704,7 +706,7 @@ static int handleGetDisplaySize(Connection *c, brl_type_t type, unsigned char *p
   LogPrintRequest(type, c->fd);
   CHECKERR(size==0,BRLERR_INVALID_PACKET);
   CHECKERR(!c->raw,BRLERR_ILLEGAL_INSTRUCTION);
-  brlapi_writePacket(c->fd,BRLPACKET_GETDISPLAYSIZE,&displayDimensions[0],sizeof(displayDimensions));
+  brlapiserver_writePacket(c->fd,BRLPACKET_GETDISPLAYSIZE,&displayDimensions[0],sizeof(displayDimensions));
   return 0;
 }
 
@@ -1113,7 +1115,7 @@ static int processRequest(Connection *c, PacketHandlers *handlers)
     }
   }
   if (size>BRLAPI_MAXPACKETSIZE) {
-    LogPrint(LOG_WARNING, "Discarding too large packet of type %s on fd %d",brlapi_packetType(type), c->fd);
+    LogPrint(LOG_WARNING, "Discarding too large packet of type %s on fd %d",brlapiserver_packetType(type), c->fd);
     return 0;    
   }
   switch (type) {
@@ -1828,7 +1830,7 @@ static void *server(void *arg)
 
   pthread_cleanup_push(closeSockets,NULL);
   for (i=0;i<numSockets;i++) {
-    socketInfo[i].addrfamily=brlapi_splitHost(socketHosts[i],&socketInfo[i].hostname,&socketInfo[i].port);
+    socketInfo[i].addrfamily=brlapiserver_splitHost(socketHosts[i],&socketInfo[i].hostname,&socketInfo[i].port);
 #ifdef WINDOWS
     if (socketInfo[i].addrfamily != PF_LOCAL) {
 #endif /* WINDOWS */
@@ -2109,7 +2111,7 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
     if (size<0)
       writeException(rawConnection->fd, BRLERR_DRIVERERROR, BRLPACKET_PACKET, NULL, 0);
     else 
-      brlapi_writePacket(rawConnection->fd,BRLPACKET_PACKET,packet,size);
+      brlapiserver_writePacket(rawConnection->fd,BRLPACKET_PACKET,packet,size);
     pthread_mutex_unlock(&rawMutex);
     goto out;
   }
@@ -2171,12 +2173,12 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
     if (c->how==BRL_KEYCODES) {
       LogPrint(LOG_DEBUG,"Transmitting unmasked key %lu",(unsigned long)keycode);
       keycode = htonl(keycode);
-      brlapi_writePacket(c->fd,BRLPACKET_KEY,&keycode,sizeof(keycode));
+      brlapiserver_writePacket(c->fd,BRLPACKET_KEY,&keycode,sizeof(keycode));
     } else {
       if ((command!=BRL_CMD_NOOP) && (command!=EOF)) {
         LogPrint(LOG_DEBUG,"Transmitting unmasked command %lu",(unsigned long)command);
         keycode = htonl(command);
-        brlapi_writePacket(c->fd,BRLPACKET_KEY,&keycode,sizeof(command));
+        brlapiserver_writePacket(c->fd,BRLPACKET_KEY,&keycode,sizeof(command));
       }
     }
     command = EOF;
@@ -2243,7 +2245,7 @@ int api_open(BrailleDisplay *brl, char **parameters)
   if (!strcmp(keyfile,"none"))
     authKeyLength = 0;
   else {
-    res = brlapi_loadAuthKey(keyfile,&authKeyLength,authKey);
+    res = brlapiserver_loadAuthKey(keyfile,&authKeyLength,authKey);
     if (res==-1) {
       LogPrint(LOG_WARNING,"Unable to load API authentication key from %s: %s in %s, no connections will be accepted. You may use parameter keyfile=none if you don't want any authentication (dangerous)", keyfile, strerror(brlapi_libcerrno), brlapi_errfun);
       goto out;
