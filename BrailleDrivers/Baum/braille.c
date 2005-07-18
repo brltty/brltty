@@ -1742,10 +1742,10 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 
   if (!keyPressed) {
     memset(&activeKeys, 0, sizeof(activeKeys));
-  } else if (pendingCommand == EOF) {
-    command |= BRL_FLG_REPEAT_DELAY;
+  } else if (pendingCommand != EOF) {
+    command = pendingCommand = EOF;
   } else {
-    pendingCommand = EOF;
+    command |= BRL_FLG_REPEAT_DELAY;
   }
 
   return command;
