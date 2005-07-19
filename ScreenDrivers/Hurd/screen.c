@@ -253,26 +253,8 @@ insertMapped (ScreenKey key, int (*byteInserter)(unsigned char byte)) {
     sequence = end = buffer + sizeof(buffer);
     *--sequence = key & 0XFF;
 
-    if (key & SCR_KEY_MOD_META) {
-      long meta;
-      /*TODO: if (controlConsole(KDGKBMETA, &meta) == -1) return 0; */
-
-      switch (meta) {
-	      /*
-        case K_METABIT:
-          *sequence |= 0X80;
-          break;
-
-        case K_ESCPREFIX:
-          *--sequence = 0X1B;
-          break;
-	  */
-
-        default:
-          LogPrint(LOG_WARNING, "Unsupported keyboard meta mode: %ld", meta);
-          return 0;
-      }
-    }
+    if (key & SCR_KEY_MOD_META)
+      *--sequence = 0X1B;
   } else {
     switch (key) {
       case SCR_KEY_ENTER:
