@@ -197,6 +197,12 @@ brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context)
 	    case BRLK_FORWARD:
 	      res = BRL_CMD_FWINRT;
 	      break;
+	    case BRLK_ABOVE:
+	      res = BRL_CMD_LNUP;
+	      break;
+	    case BRLK_BELOW:
+	      res = BRL_CMD_LNDN;
+	      break;
 	    default:
 	      break;
 	    }
