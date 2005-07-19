@@ -125,33 +125,17 @@ updateFunctionKeys (unsigned int mask, unsigned int keys, int *pressed) {
   return 1;
 }
 
-static void
-getGroupedKey (unsigned char *keys, int number, unsigned char **address, unsigned char *bit) {
-  *address = &keys[number / 8];
-  *bit = 1 << (number % 8);
-}
-
-static int
-testGroupedKey (unsigned char *keys, int number) {
-  unsigned char *address;
-  unsigned char bit;
-
-  getGroupedKey(keys, number, &address, &bit);
-  return (*address & bit) != 0;
-}
-
 static int
 setGroupedKey (unsigned char *keys, int number, int press) {
-  unsigned char *address;
-  unsigned char bit;
+  unsigned char *byte = &keys[number / 8];
+  unsigned char bit = 1 << (number % 8);
 
-  getGroupedKey(keys, number, &address, &bit);
-  if (!(*address & bit) == !press) return 0;
+  if (!(*byte & bit) == !press) return 0;
 
   if (press) {
-    *address |= bit;
+    *byte |= bit;
   } else {
-    *address &= ~bit;
+    *byte &= ~bit;
   }
   return 1;
 }
@@ -184,6 +168,34 @@ updateKeyGroup (unsigned char *keys, const unsigned char *new, int count, int *p
   }
 
   return changed;
+}
+
+static int
+getKeyNumbers (const unsigned char *keys, int count, unsigned char *numbers) {
+  int size = KEY_GROUP_SIZE(count);
+  unsigned char *next = numbers;
+  unsigned char number = 0;
+  int index;
+  for (index=0; index<size; ++index) {
+    unsigned char byte = keys[index];
+    if (byte) {
+      unsigned char bit;
+      for (bit=1; bit; bit<<=1) {
+        if (byte & bit) *next++ = number;
+        ++number;
+      }
+    } else {
+      number += 8;
+    }
+  }
+  return next - numbers;
+}
+
+static signed char
+getSensorNumber (const unsigned char *keys, int count) {
+  unsigned char numbers[count];
+  int pressed = getKeyNumbers(keys, count, numbers);
+  return pressed? numbers[0]: -1;
 }
 
 static int
@@ -938,16 +950,9 @@ updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
 
       case BAUM_RSP_HorizontalSensor:
         makeKeyGroup(packet.data.values.horizontalSensors, textCount, packet.data.values.horizontalSensor);
-      case BAUM_RSP_HorizontalSensors: {
-        unsigned char *keys;
-        if (baumDeviceType == BAUM_TYPE_Inka) {
-          keys = pressedKeys.routingKeys;
-        } else {
-          keys = pressedKeys.horizontalSensors;
-        }
-        if (updateKeyGroup(keys, packet.data.values.horizontalSensors, textCount, keyPressed)) return 1;
+      case BAUM_RSP_HorizontalSensors:
+        if (updateKeyGroup(pressedKeys.horizontalSensors, packet.data.values.horizontalSensors, textCount, keyPressed)) return 1;
         continue;
-      }
 
       case BAUM_RSP_VerticalSensor:
         makeKeyGroup(packet.data.values.verticalSensors.left, VERTICAL_SENSOR_COUNT, packet.data.values.verticalSensor.left);
@@ -1623,8 +1628,12 @@ static int
 brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   int command;
   int keyPressed = 0;
+
   unsigned char routingKeys[textCount];
-  int routingCount = 0;
+  int routingKeyCount;
+  signed char horizontalSensor;
+  signed char leftVerticalSensor;
+  signed char rightVerticalSensor;
 
   if (pendingCommand != EOF) {
     command = pendingCommand;
@@ -1640,15 +1649,18 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   if (keyPressed) activeKeys = pressedKeys;
   command = BRL_CMD_NOOP;
 
-  {
-    int key;
-    for (key=0; key<textCount; ++key)
-      if (testGroupedKey(activeKeys.routingKeys, key))
-        routingKeys[routingCount++] = key;
+  if (baumDeviceType == BAUM_TYPE_Inka) {
+    routingKeyCount = getKeyNumbers(activeKeys.horizontalSensors, textCount, routingKeys);
+    horizontalSensor = -1;
+  } else {
+    routingKeyCount = getKeyNumbers(activeKeys.routingKeys, textCount, routingKeys);
+    horizontalSensor = getSensorNumber(activeKeys.horizontalSensors, textCount);
   }
+  leftVerticalSensor = getSensorNumber(activeKeys.leftVerticalSensors, VERTICAL_SENSOR_COUNT);
+  rightVerticalSensor = getSensorNumber(activeKeys.rightVerticalSensors, VERTICAL_SENSOR_COUNT);
 
 #define KEY(key,cmd) case (key): command = (cmd); break;
-  if (routingCount == 0) {
+  if (routingKeyCount == 0) {
     switch (activeKeys.functionKeys) {
       KEY(BAUM_KEY_TL2, BRL_CMD_FWINLT);
       KEY(BAUM_KEY_TR2, BRL_CMD_FWINRT);
@@ -1705,7 +1717,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
       default:
         break;
     }
-  } else if (routingCount == 1) {
+  } else if (routingKeyCount == 1) {
     unsigned char key = routingKeys[0];
     switch (activeKeys.functionKeys) {
       KEY(0, BRL_BLK_ROUTE+key);
@@ -1727,7 +1739,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
       default:
         break;
     }
-  } else if (routingCount == 2) {
+  } else if (routingKeyCount == 2) {
     switch (activeKeys.functionKeys) {
       case 0:
         command = BRL_BLK_CUTBEGIN + routingKeys[0];
@@ -1743,7 +1755,8 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   if (!keyPressed) {
     memset(&activeKeys, 0, sizeof(activeKeys));
   } else if (pendingCommand != EOF) {
-    command = pendingCommand = EOF;
+    command = BRL_CMD_NOOP;
+    pendingCommand = EOF;
   } else {
     command |= BRL_FLG_REPEAT_DELAY;
   }
