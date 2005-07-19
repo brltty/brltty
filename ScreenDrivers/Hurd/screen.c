@@ -403,8 +403,7 @@ insertUtf8 (unsigned char byte) {
 static int
 insert_HurdScreen (ScreenKey key) {
   LogPrint(LOG_DEBUG, "Insert key: %4.4X", key);
-  /*return insertMapped(key, &insertUtf8); */
-  return insertMapped(key, &insertByte);
+  return insertMapped(key, &insertUtf8); 
 }
 
 static int
