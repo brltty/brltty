@@ -1721,13 +1721,11 @@ main (int argc, char *argv[]) {
                   playTune(&tune_command_rejected);
                 }
                 break;
-
               case BRL_BLK_PASSDOTS:
                 if (!insertCharacter(untextTable[arg], flags)) {
                   playTune(&tune_command_rejected);
                 }
                 break;
-
               case BRL_BLK_PASSAT2:
                 if (AT2_interpretCode(&command, arg)) goto doCommand;
                 break;
@@ -1742,6 +1740,7 @@ main (int argc, char *argv[]) {
                 }
                 playTune(&tune_command_rejected);
                 break;
+
               case BRL_BLK_CUTBEGIN:
                 if (arg < brl.x && p->winx+arg < scr.cols) {
                   arg = getOffset(arg, 0);
@@ -1772,6 +1771,7 @@ main (int argc, char *argv[]) {
                 }
                 playTune(&tune_command_rejected);
                 break;
+
               case BRL_BLK_DESCCHAR:
                 if (arg < brl.x && p->winx+arg < scr.cols) {
                   static char *colours[] = {
@@ -1794,6 +1794,7 @@ main (int argc, char *argv[]) {
                 } else
                   playTune(&tune_command_rejected);
                 break;
+
               case BRL_BLK_SETLEFT:
                 if (arg < brl.x && p->winx+arg < scr.cols) {
                   arg = getOffset(arg, 0);
@@ -1801,6 +1802,16 @@ main (int argc, char *argv[]) {
                 } else
                   playTune(&tune_command_rejected);
                 break;
+              case BRL_BLK_GOTOLINE:
+                if (flags & BRL_FLG_LINE_RESCALE) arg = rescaleInteger(arg, BRL_MSK_ARG, scr.rows-brl.y);
+                if (arg < scr.rows) {
+                  slideWindowVertically(arg);
+                  if (flags & BRL_FLG_LINE_LEFT) p->winx = 0;
+                } else {
+                  playTune(&tune_command_rejected);
+                }
+                break;
+
               case BRL_BLK_SETMARK: {
                 ScreenMark *mark = &p->marks[arg];
                 mark->column = p->winx;
@@ -1814,10 +1825,12 @@ main (int argc, char *argv[]) {
                 p->winy = mark->row;
                 break;
               }
+
               case BRL_BLK_SWITCHVT:
-                  if (!switchVirtualTerminal(arg+1))
-                       playTune(&tune_command_rejected);
-                  break;
+                if (!switchVirtualTerminal(arg+1))
+                  playTune(&tune_command_rejected);
+                break;
+
               {
                 int increment;
               case BRL_BLK_PRINDENT:
@@ -1831,6 +1844,7 @@ main (int argc, char *argv[]) {
                         increment, testIndent, NULL);
                 break;
               }
+
               default:
                 playTune(&tune_command_rejected);
                 LogPrint(LOG_WARNING, "unrecognized command: %04X", command);

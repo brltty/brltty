@@ -184,6 +184,10 @@ typedef enum {
 #define BRL_BLK_SETMARK   0XB00 /* remember current window position */
 #define BRL_BLK_GOTOMARK  0XC00 /* go to remembered window position */
 
+#define BRL_BLK_GOTOLINE  0XD00 /* go to line */
+#define BRL_FLG_LINE_RESCALE 0X010000
+#define BRL_FLG_LINE_LEFT    0X020000
+
 /* For entering a special key. */
 #define BRL_BLK_PASSKEY 0X2000
 typedef enum {
