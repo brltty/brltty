@@ -561,7 +561,7 @@ typedef union {
 
     union {
       unsigned char horizontalSensors[KEY_GROUP_SIZE(MAXIMUM_CELL_COUNT)];
-      union {
+      struct {
         unsigned char left[KEY_GROUP_SIZE(VERTICAL_SENSOR_COUNT)];
         unsigned char right[KEY_GROUP_SIZE(VERTICAL_SENSOR_COUNT)];
       } verticalSensors;
@@ -951,9 +951,12 @@ updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
         if (updateKeyGroup(pressedKeys.horizontalSensors, packet.data.values.horizontalSensors, textCount, keyPressed)) return 1;
         continue;
 
-      case BAUM_RSP_VerticalSensor:
-        makeKeyGroup(packet.data.values.verticalSensors.left, VERTICAL_SENSOR_COUNT, packet.data.values.verticalSensor.left);
-        makeKeyGroup(packet.data.values.verticalSensors.right, VERTICAL_SENSOR_COUNT, packet.data.values.verticalSensor.right);
+      case BAUM_RSP_VerticalSensor: {
+        unsigned char left = packet.data.values.verticalSensor.left;
+        unsigned char right = packet.data.values.verticalSensor.right;
+        makeKeyGroup(packet.data.values.verticalSensors.left, VERTICAL_SENSOR_COUNT, left);
+        makeKeyGroup(packet.data.values.verticalSensors.right, VERTICAL_SENSOR_COUNT, right);
+      }
       case BAUM_RSP_VerticalSensors: {
         int changed = 0;
         if (updateKeyGroup(pressedKeys.leftVerticalSensors, packet.data.values.verticalSensors.left, VERTICAL_SENSOR_COUNT, keyPressed)) changed = 1;
@@ -964,8 +967,10 @@ updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
 
       case BAUM_RSP_RoutingKey:
         makeKeyGroup(packet.data.values.routingKeys, cellCount, packet.data.values.routingKey);
+        goto doRoutingKeys;
       case BAUM_RSP_RoutingKeys:
         if (baumDeviceType == BAUM_TYPE_Inka) goto doSwitches;
+      doRoutingKeys:
         if (updateKeyGroup(pressedKeys.routingKeys, packet.data.values.routingKeys, cellCount, keyPressed)) return 1;
         continue;
 

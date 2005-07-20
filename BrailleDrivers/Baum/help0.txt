@@ -2,7 +2,7 @@ Help for Baum Displays
 
 TL2/TR2: go left/right one window
 TL1+TL3 / TR1+TR3: go left/right one character
-TL1+TL2+TL3 / TR1+TR2+TR3: go to beginning/end of line
+TL1+TL2+TL3 / TR1+TR2+TR3: go to beginning/end of current line
 TR1/TR3: go up/down one line
 TL1+TR1 / TL3+TR3: go to top/bottom line
 TL2 + TR1/TR3: go to top-left/bottom-left corner
@@ -49,4 +49,4 @@ TL3+TR1+TR2: speak from top of screen through current line
 TL3+TR2+TR3: speak from current line through bottom of screen
 TL3+TR1+TR3: toggle autospeak mode
 TL3+TR1+TR2+TR3: go to current (most recent) speech position
-TL2+TR1+TR2: restart (s)peech driver
+TL2+TL3+TR1: restart (s)peech driver
