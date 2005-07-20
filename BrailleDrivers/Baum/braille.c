@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <inttypes.h>
 #include <string.h>
 #include <errno.h>
 
@@ -50,7 +51,7 @@ static unsigned char externalCells[MAXIMUM_CELL_COUNT];
 static TranslationTable outputTable;
 
 typedef struct {
-  unsigned int functionKeys;
+  uint64_t functionKeys;
   unsigned char routingKeys[KEY_GROUP_SIZE(MAXIMUM_CELL_COUNT)];
   unsigned char horizontalSensors[KEY_GROUP_SIZE(MAXIMUM_CELL_COUNT)];
   unsigned char leftVerticalSensors[KEY_GROUP_SIZE(VERTICAL_SENSOR_COUNT)];
@@ -59,6 +60,7 @@ typedef struct {
 
 static Keys activeKeys;
 static Keys pressedKeys;
+static uint64_t switchSettings;
 static int pendingCommand;
 
 typedef struct {
@@ -116,13 +118,23 @@ adjustWriteDelay (BrailleDisplay *brl, int bytes) {
 }
 
 static int
-updateFunctionKeys (unsigned int mask, unsigned int keys, int *pressed) {
+updateFunctionKeys (uint64_t mask, uint64_t keys, int *pressed) {
   keys |= pressedKeys.functionKeys & ~mask;
   if (keys == pressedKeys.functionKeys) return 0;
 
   if (keys & ~pressedKeys.functionKeys) *pressed = 1;
   pressedKeys.functionKeys = keys;
   return 1;
+}
+
+static void
+setSwitches (unsigned char switches) {
+  switchSettings = switches;
+}
+
+static void
+setInkaSwitches (unsigned char switches) {
+  setSwitches(switches & 0X0F);
 }
 
 static int
@@ -526,6 +538,11 @@ typedef enum {
 } BaumKey;
 
 typedef enum {
+  BAUM_SWT_SensorsEnabled  = 0X01,
+  BAUM_SWT_VerticalRescale = 0X02
+} BaumSwitch;
+
+typedef enum {
   BAUM_ERR_BluetoothSupport       = 0X0A,
   BAUM_ERR_TransmitOverrun        = 0X10,
   BAUM_ERR_ReceiveOverrun         = 0X11,
@@ -839,10 +856,16 @@ probeBaumDisplay (BrailleDisplay *brl) {
       int size = getBaumPacket(&response);
       if (size) {
         switch (response.data.code) {
-          case BAUM_RSP_CellCount:
-            cellCount = response.data.values.cellCount;
-          case BAUM_RSP_Switches: /* DM80P */
           case BAUM_RSP_RoutingKeys: /* Inka */
+            setInkaSwitches(response.data.values.switches);
+            return 1;
+
+          case BAUM_RSP_Switches: /* DM80P */
+            setSwitches(response.data.values.switches);
+            return 1;
+
+          case BAUM_RSP_CellCount: /* newer models */
+            cellCount = response.data.values.cellCount;
             return 1;
 
           case BAUM_RSP_DeviceIdentity:
@@ -896,7 +919,7 @@ updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
         return 0;
 
       {
-        unsigned int keys;
+        uint64_t keys;
         unsigned int shift;
 
       case BAUM_RSP_TopKeys:
@@ -969,13 +992,17 @@ updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
         makeKeyGroup(packet.data.values.routingKeys, cellCount, packet.data.values.routingKey);
         goto doRoutingKeys;
       case BAUM_RSP_RoutingKeys:
-        if (baumDeviceType == BAUM_TYPE_Inka) goto doSwitches;
+        if (baumDeviceType == BAUM_TYPE_Inka) {
+          setInkaSwitches(packet.data.values.switches);
+          continue;
+        }
+
       doRoutingKeys:
         if (updateKeyGroup(pressedKeys.routingKeys, packet.data.values.routingKeys, cellCount, keyPressed)) return 1;
         continue;
 
       case BAUM_RSP_Switches:
-      doSwitches:
+        setSwitches(packet.data.values.switches);
         continue;
 
       default:
@@ -1210,7 +1237,7 @@ updateHandyTechKeys (BrailleDisplay *brl, int *keyPressed) {
         if (!setGroupedKey(pressedKeys.routingKeys, (key - HT_RSP_KEY_CR1), press)) continue;
         if (press) *keyPressed = 1;
       } else {
-        unsigned int bit;
+        uint64_t bit;
         switch (key) {
 #define KEY(name) case HT_RSP_KEY_##name: bit = BAUM_KEY_##name; break
           KEY(TL1);
@@ -1457,7 +1484,7 @@ updatePowerBrailleKeys (BrailleDisplay *brl, int *keyPressed) {
           continue;
       }
     } else {
-      unsigned int keys = 0;
+      uint64_t keys = 0;
       if (packet.buttons[0] & PB2_BUTTONS0_TL1) keys |= BAUM_KEY_TL1;
       if (packet.buttons[0] & PB2_BUTTONS0_TL2) keys |= BAUM_KEY_TL2;
       if (packet.buttons[0] & PB2_BUTTONS0_TL3) keys |= BAUM_KEY_TL3;
@@ -1555,6 +1582,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
 
           memset(&activeKeys, 0, sizeof(activeKeys));
           memset(&pressedKeys, 0, sizeof(pressedKeys));
+          switchSettings = 0;
           pendingCommand = EOF;
 
           clearCells(0, cellCount);
@@ -1628,7 +1656,7 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) {
 
 static int
 brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
-  int keys;
+  uint64_t keys;
   int command;
   int keyPressed;
 
@@ -1659,16 +1687,18 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   leftVerticalSensor = getSensorNumber(activeKeys.leftVerticalSensors, VERTICAL_SENSOR_COUNT);
   rightVerticalSensor = getSensorNumber(activeKeys.rightVerticalSensors, VERTICAL_SENSOR_COUNT);
 
-  if (baumDeviceType == BAUM_TYPE_Inka) {
-    if (horizontalSensor >= 0) {
-      routingKeys[routingKeyCount++] = horizontalSensor;
-      horizontalSensor = -1;
+  if (switchSettings & BAUM_SWT_SensorsEnabled) {
+    if (baumDeviceType == BAUM_TYPE_Inka) {
+      if (horizontalSensor >= 0) {
+        routingKeys[routingKeyCount++] = horizontalSensor;
+        horizontalSensor = -1;
+      }
     }
-  }
 
-  if (horizontalSensor >= 0) keys |= BAUM_KEY_HRZ;
-  if (leftVerticalSensor >= 0) keys |= BAUM_KEY_VTL;
-  if (rightVerticalSensor >= 0) keys |= BAUM_KEY_VTR;
+    if (horizontalSensor >= 0) keys |= BAUM_KEY_HRZ;
+    if (leftVerticalSensor >= 0) keys |= BAUM_KEY_VTL;
+    if (rightVerticalSensor >= 0) keys |= BAUM_KEY_VTR;
+  }
 
 #define KEY(key,cmd) case (key): command = (cmd); break;
   if (routingKeyCount == 0) {
@@ -1725,8 +1755,30 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
       KEY(BAUM_KEY_TL3|BAUM_KEY_TR1|BAUM_KEY_TR3, BRL_CMD_AUTOSPEAK);
       KEY(BAUM_KEY_TL3|BAUM_KEY_TR1|BAUM_KEY_TR2|BAUM_KEY_TR3, BRL_CMD_SPKHOME);
 
-      KEY(BAUM_KEY_VTL, BRL_BLK_GOTOLINE|BRL_FLG_LINE_LEFT|leftVerticalSensor);
-      KEY(BAUM_KEY_VTR, BRL_BLK_GOTOLINE|rightVerticalSensor);
+      {
+        int arg;
+        int flags;
+
+      case BAUM_KEY_VTL:
+        arg = leftVerticalSensor;
+        flags = BRL_FLG_LINE_LEFT;
+        goto doVerticalSensor;
+
+      case BAUM_KEY_VTR:
+        arg = rightVerticalSensor;
+        flags = 0;
+        goto doVerticalSensor;
+
+      doVerticalSensor:
+        if (switchSettings & BAUM_SWT_VerticalRescale) {
+          flags |= BRL_FLG_LINE_RESCALE;
+          arg = rescaleInteger(arg, VERTICAL_SENSOR_COUNT-1, BRL_MSK_ARG);
+        } else if (arg == 0) {
+          arg = 1;
+        }
+        command = BRL_BLK_GOTOLINE | arg | flags;
+        break;
+      }
 
       default:
         break;
