@@ -1773,8 +1773,8 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
         if (switchSettings & BAUM_SWT_VerticalRescale) {
           flags |= BRL_FLG_LINE_RESCALE;
           arg = rescaleInteger(arg, VERTICAL_SENSOR_COUNT-1, BRL_MSK_ARG);
-        } else if (arg == 0) {
-          arg = 1;
+        } else if (arg > 0) {
+          --arg;
         }
         command = BRL_BLK_GOTOLINE | arg | flags;
         break;
