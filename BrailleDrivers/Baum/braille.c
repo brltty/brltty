@@ -520,12 +520,9 @@ typedef enum {
   BAUM_KEY_CK6 = 0X00200000,
   BAUM_KEY_CK7 = 0X00400000,
 
-  BAUM_KEY_BLU = 0X01000000,
-  BAUM_KEY_BLD = 0X02000000,
-  BAUM_KEY_BMU = 0X04000000,
-  BAUM_KEY_BMD = 0X08000000,
-  BAUM_KEY_BRU = 0X10000000,
-  BAUM_KEY_BRD = 0X20000000
+  BAUM_KEY_HRZ = 0X20000000,
+  BAUM_KEY_VTL = 0X40000000,
+  BAUM_KEY_VTR = 0X80000000
 } BaumKey;
 
 typedef enum {
@@ -1626,8 +1623,9 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) {
 
 static int
 brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
+  int keys;
   int command;
-  int keyPressed = 0;
+  int keyPressed;
 
   unsigned char routingKeys[textCount];
   int routingKeyCount;
@@ -1641,27 +1639,35 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
     return command;
   }
 
+  keyPressed = 0;
   if (!protocol->updateKeys(brl, &keyPressed)) {
     if (errno == EAGAIN) return EOF;
     return BRL_CMD_RESTARTBRL;
   }
 
   if (keyPressed) activeKeys = pressedKeys;
+  keys = activeKeys.functionKeys;
   command = BRL_CMD_NOOP;
 
-  if (baumDeviceType == BAUM_TYPE_Inka) {
-    routingKeyCount = getKeyNumbers(activeKeys.horizontalSensors, textCount, routingKeys);
-    horizontalSensor = -1;
-  } else {
-    routingKeyCount = getKeyNumbers(activeKeys.routingKeys, textCount, routingKeys);
-    horizontalSensor = getSensorNumber(activeKeys.horizontalSensors, textCount);
-  }
+  routingKeyCount = getKeyNumbers(activeKeys.routingKeys, textCount, routingKeys);
+  horizontalSensor = getSensorNumber(activeKeys.horizontalSensors, textCount);
   leftVerticalSensor = getSensorNumber(activeKeys.leftVerticalSensors, VERTICAL_SENSOR_COUNT);
   rightVerticalSensor = getSensorNumber(activeKeys.rightVerticalSensors, VERTICAL_SENSOR_COUNT);
 
+  if (baumDeviceType == BAUM_TYPE_Inka) {
+    if (horizontalSensor >= 0) {
+      routingKeys[routingKeyCount++] = horizontalSensor;
+      horizontalSensor = -1;
+    }
+  }
+
+  if (horizontalSensor >= 0) keys |= BAUM_KEY_HRZ;
+  if (leftVerticalSensor >= 0) keys |= BAUM_KEY_VTL;
+  if (rightVerticalSensor >= 0) keys |= BAUM_KEY_VTR;
+
 #define KEY(key,cmd) case (key): command = (cmd); break;
   if (routingKeyCount == 0) {
-    switch (activeKeys.functionKeys) {
+    switch (keys) {
       KEY(BAUM_KEY_TL2, BRL_CMD_FWINLT);
       KEY(BAUM_KEY_TR2, BRL_CMD_FWINRT);
 
@@ -1714,12 +1720,15 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
       KEY(BAUM_KEY_TL3|BAUM_KEY_TR1|BAUM_KEY_TR3, BRL_CMD_AUTOSPEAK);
       KEY(BAUM_KEY_TL3|BAUM_KEY_TR1|BAUM_KEY_TR2|BAUM_KEY_TR3, BRL_CMD_SPKHOME);
 
+      KEY(BAUM_KEY_VTL, BRL_BLK_GOTOLINE|BRL_FLG_LINE_LEFT|leftVerticalSensor);
+      KEY(BAUM_KEY_VTR, BRL_BLK_GOTOLINE|rightVerticalSensor);
+
       default:
         break;
     }
   } else if (routingKeyCount == 1) {
     unsigned char key = routingKeys[0];
-    switch (activeKeys.functionKeys) {
+    switch (keys) {
       KEY(0, BRL_BLK_ROUTE+key);
 
       KEY(BAUM_KEY_TL1, BRL_BLK_CUTBEGIN+key);
@@ -1740,7 +1749,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
         break;
     }
   } else if (routingKeyCount == 2) {
-    switch (activeKeys.functionKeys) {
+    switch (keys) {
       case 0:
         command = BRL_BLK_CUTBEGIN + routingKeys[0];
         pendingCommand = BRL_BLK_CUTLINE + routingKeys[1];
