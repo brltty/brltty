@@ -1803,11 +1803,11 @@ main (int argc, char *argv[]) {
                   playTune(&tune_command_rejected);
                 break;
               case BRL_BLK_GOTOLINE:
-                if (flags & BRL_FLG_LINE_RESCALE)
+                if (flags & BRL_FLG_LINE_SCALED)
                   arg = rescaleInteger(arg, BRL_MSK_ARG, scr.rows-1);
                 if (arg < scr.rows) {
                   slideWindowVertically(arg);
-                  if (flags & BRL_FLG_LINE_LEFT) p->winx = 0;
+                  if (flags & BRL_FLG_LINE_TOLEFT) p->winx = 0;
                 } else {
                   playTune(&tune_command_rejected);
                 }

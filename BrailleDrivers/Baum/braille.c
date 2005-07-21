@@ -1767,7 +1767,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 
       case BAUM_KEY_VTL:
         arg = leftVerticalSensor;
-        flags = BRL_FLG_LINE_LEFT;
+        flags = BRL_FLG_LINE_TOLEFT;
         goto doVerticalSensor;
 
       case BAUM_KEY_VTR:
@@ -1777,7 +1777,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 
       doVerticalSensor:
         if (switchSettings & BAUM_SWT_VerticalRescale) {
-          flags |= BRL_FLG_LINE_RESCALE;
+          flags |= BRL_FLG_LINE_SCALED;
           arg = rescaleInteger(arg, VERTICAL_SENSOR_COUNT-1, BRL_MSK_ARG);
         } else if (arg > 0) {
           --arg;
