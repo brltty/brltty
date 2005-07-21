@@ -152,7 +152,7 @@ static void brl_writeVisual(BrailleDisplay *brl)
     return;
   } else {
     if (prevShown && memcmp(prevText,brl->buffer,displaySize)==0 && brl->cursor == prevCursor) return;
-    if (brlapi_writeText(brl->cursor+1,brl->buffer)==0) {
+    if (brlapi_writeText(brl->cursor+1,(char *) brl->buffer)==0) {
       memcpy(prevText,brl->buffer,displaySize);
       prevCursor = brl->cursor;
       prevShown = 1;
