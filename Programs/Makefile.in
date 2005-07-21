@@ -218,14 +218,14 @@ usb_libusb.$O:
 
 ###############################################################################
 
-bluez.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/bluez.c
+bluetooth.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/bluetooth.c
 
-bluez_skeleton.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/bluez_skeleton.c
+bluetooth_skeleton.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/bluetooth_skeleton.c
 
-bluez_linux.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/bluez_linux.c
+bluetooth_linux.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/bluetooth_linux.c
 
 ###############################################################################
 

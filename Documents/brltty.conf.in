@@ -63,7 +63,7 @@
 #braille-device	serial:@first_serial_device@	# First serial device.
 #braille-device	usb:		# First USB device matching braille driver.
 #braille-device	usb:nnnnn	# Specific USB device by serial number.
-#braille-device	bluez:xx:xx:xx:xx:xx:xx	# Specific bluetooth device by address.
+#braille-device	bluetooth:xx:xx:xx:xx:xx:xx	# Specific bluetooth device by address.
 
 # The text-table directive specifies which text translation table to
 # use. Relative paths are anchored at "@DATA_DIRECTORY@". If not specified,

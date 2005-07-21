@@ -21,12 +21,15 @@
 #include <unistd.h>
 
 #include "misc.h"
-#include "bluez.h"
-#include "bluez_internal.h"
+#include "bluetooth.h"
+#include "bluetooth_internal.h"
 
 int
 isBluetoothDevice (const char **path) {
-  return isQualifiedDevice(path, "bluez:");
+  if (isQualifiedDevice(path, "bluetooth:")) return 1;
+  if (isQualifiedDevice(path, "bt:")) return 1;
+  if (isQualifiedDevice(path, "bluez:")) return 1;
+  return 0;
 }
 
 int

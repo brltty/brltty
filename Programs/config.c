@@ -63,7 +63,7 @@
 #endif /* ENABLE_USB_SUPPORT */
 
 #ifdef ENABLE_BLUETOOTH_SUPPORT
-#include "bluez.h"
+#include "bluetooth.h"
 #endif /* ENABLE_BLUETOOTH_SUPPORT */
 
 char COPYRIGHT[] = "Copyright (C) 1995-2005 by The BRLTTY Team - all rights reserved.";

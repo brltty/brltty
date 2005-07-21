@@ -4522,7 +4522,8 @@ if the qualifier is omitted then <tt/serial:/ is assumed.
 The following device types are supported:
 <descrip>
   <tag/Bluetooth/
-    For a bluetooth device, specify <tt/bluez:/<em/address/.
+    For a bluetooth device, specify <tt/bluetooth:/<em/address/
+    (<tt/bt:/ and <tt/bluez:/ may also be used).
     The address must be six two-digit hexadecimal numbers separated by colons,
     e.g. <tt/01:23:45:67:89:AB/.
   <tag/Serial/

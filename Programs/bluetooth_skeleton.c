@@ -21,8 +21,8 @@
 #include <unistd.h>
 
 #include "misc.h"
-#include "bluez.h"
-#include "bluez_internal.h"
+#include "bluetooth.h"
+#include "bluetooth_internal.h"
 
 int
 openRfcommConnection (const char *address, unsigned char channel) {

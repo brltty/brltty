@@ -393,32 +393,32 @@ static const InputOutputOperations usbOperations = {
 
 #ifdef ENABLE_BLUETOOTH_SUPPORT
 /* Bluetooth IO */
-#include "Programs/bluez.h"
+#include "Programs/bluetooth.h"
 #include "Programs/iomisc.h"
 
-static int bluezConnection = -1;
+static int bluetoothConnection = -1;
 
 static int
-openBluezPort (char **parameters, const char *device) {
-  return (bluezConnection = openRfcommConnection(device, 1)) != -1;
+openBluetoothPort (char **parameters, const char *device) {
+  return (bluetoothConnection = openRfcommConnection(device, 1)) != -1;
 }
 
 static int
-awaitBluezInput (int milliseconds) {
-  return awaitInput(bluezConnection, milliseconds);
+awaitBluetoothInput (int milliseconds) {
+  return awaitInput(bluetoothConnection, milliseconds);
 }
 
 static int
-readBluezBytes (unsigned char *buffer, int length, int wait) {
+readBluetoothBytes (unsigned char *buffer, int length, int wait) {
   const int timeout = 100;
-  if (!awaitInput(bluezConnection, (wait? timeout: 0)))
+  if (!awaitInput(bluetoothConnection, (wait? timeout: 0)))
     return (errno == EAGAIN)? 0: -1;
-  return readData(bluezConnection, buffer, length, 0, timeout);
+  return readData(bluetoothConnection, buffer, length, 0, timeout);
 }
 
 static int
-writeBluezBytes (const unsigned char *buffer, int length) {
-  int count = writeData(bluezConnection, buffer, length);
+writeBluetoothBytes (const unsigned char *buffer, int length) {
+  int count = writeData(bluetoothConnection, buffer, length);
   if (count != length) {
     if (count == -1) {
       LogError("Baum Bluetooth write");
@@ -430,14 +430,14 @@ writeBluezBytes (const unsigned char *buffer, int length) {
 }
 
 static void
-closeBluezPort (void) {
-  close(bluezConnection);
-  bluezConnection = -1;
+closeBluetoothPort (void) {
+  close(bluetoothConnection);
+  bluetoothConnection = -1;
 }
 
-static const InputOutputOperations bluezOperations = {
-  openBluezPort, closeBluezPort,
-  awaitBluezInput, readBluezBytes, writeBluezBytes
+static const InputOutputOperations bluetoothOperations = {
+  openBluetoothPort, closeBluetoothPort,
+  awaitBluetoothInput, readBluetoothBytes, writeBluetoothBytes
 };
 #endif /* ENABLE_BLUETOOTH_SUPPORT */
 
@@ -1559,7 +1559,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
 
 #ifdef ENABLE_BLUETOOTH_SUPPORT
   } else if (isBluetoothDevice(&device)) {
-    io = &bluezOperations;
+    io = &bluetoothOperations;
 #endif /* ENABLE_BLUETOOTH_SUPPORT */
 
   } else {

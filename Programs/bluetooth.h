@@ -15,8 +15,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_BLUEZ
-#define BRLTTY_INCLUDED_BLUEZ
+#ifndef BRLTTY_INCLUDED_BLUETOOTH
+#define BRLTTY_INCLUDED_BLUETOOTH
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,4 +29,4 @@ extern int openRfcommConnection (const char *address, unsigned char channel);
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_BLUEZ */
+#endif /* BRLTTY_INCLUDED_BLUETOOTH */

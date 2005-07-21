@@ -862,7 +862,7 @@ then
          [],
 [dnl
          AC_DEFINE([ENABLE_BLUETOOTH_SUPPORT])
-         bluetooth_objects="bluez."'$O'" bluez_${bluetooth_object}."'$O'
+         bluetooth_objects="bluetooth."'$O'" bluetooth_${bluetooth_object}."'$O'
 ])
 ])
 fi
