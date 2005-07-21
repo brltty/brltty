@@ -188,6 +188,10 @@ int brlapi_initializeConnection(const brlapi_settings_t *clientSettings, brlapi_
  */
 void brlapi_closeConnection(void);
 
+/* brlapi_splitHost */
+/* splits host into hostname & port, returns address family to use */
+int brlapi_splitHost(const char *host, char **hostname, char **port);
+
 /* brlapi_loadAuthKey */
 /** Load an authentication key from the given file
  *
@@ -316,6 +320,7 @@ int brlapi_getTty(int tty, const char *how);
  * \param ttys points on the array of ttys representing the tty path to be got.
  * Can be NULL if nttys is 0.
  * \param nttys gives the number of elements in ttys.
+ * \param how has the same meaning as in brlapi_getTty()
  *
  * Providing nttys == 0 means to get the root.
  *
@@ -398,8 +403,8 @@ typedef struct {
   unsigned int regionBegin; /** Region of display to update, 1st character of display is 1 */
   unsigned int regionSize; /** Number of caracters held in text, attrAnd and attrOr. For multibyte text, this is the number of \e multibyte caracters. Combining and double-width caracters count for 1 */
   char *text; /** Text to display */
-  char *attrAnd; /** And attributes; applied first */
-  char *attrOr; /** Or attributes; applied \e after ANDing */
+  unsigned char *attrAnd; /** And attributes; applied first */
+  unsigned char *attrOr; /** Or attributes; applied \e after ANDing */
   int cursor; /** -1 == don't touch, 0 == turn off, 1 = 1st char of display, ... */
   char *charset; /** Text charset. NULL or "" means it is assumed to be 8bits, and the same as the server's. */
 } brlapi_writeStruct;
