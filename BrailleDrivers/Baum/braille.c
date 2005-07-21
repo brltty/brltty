@@ -1577,13 +1577,11 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
       if (io->openPort(parameters, device)) {
         if (!flushInput()) break;
 
+        memset(&pressedKeys, 0, sizeof(pressedKeys));
+        switchSettings = 0;
+
         if (protocol->probeDisplay(brl)) {
           logCellCount();
-
-          memset(&activeKeys, 0, sizeof(activeKeys));
-          memset(&pressedKeys, 0, sizeof(pressedKeys));
-          switchSettings = 0;
-          pendingCommand = EOF;
 
           clearCells(0, cellCount);
           if (!updateCells(brl)) break;
@@ -1591,6 +1589,9 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
           brl->x = textCount;
           brl->y = 1;
           brl->helpPage = 0;
+
+          activeKeys = pressedKeys;
+          pendingCommand = EOF;
           return 1;
         }
 
