@@ -50,3 +50,8 @@ TL3+TR2+TR3: speak from current line through bottom of screen
 TL3+TR1+TR3: toggle autospeak mode
 TL3+TR1+TR2+TR3: go to current (most recent) speech position
 TL2+TL3+TR1: restart (s)peech driver
+
+left vertical sensor: go to beginning of selected line
+right vertical sensor: go to selected line
+switch 1: enable/disable horizontal and vertical sensors
+switch 2: scaled/direct line selection via vertical sensors

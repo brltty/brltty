@@ -485,13 +485,18 @@ typedef enum {
 } BaumResponseCode;
 
 typedef enum {
-  BAUM_MODE_RoutingEnabled   = 0X08,
-  BAUM_MODE_DisplayRotated   = 0X10,
-  BAUM_MODE_DisplayEnabled   = 0X20,
-  BAUM_MODE_PowerdownEnabled = 0X21,
-  BAUM_MODE_PowerdownTime    = 0X22,
-  BAUM_MODE_BluetoothEnabled = 0X23,
-  BAUM_MODE_UsbCharge        = 0X24
+  BAUM_MODE_KeyGroupCompressed          = 0X01,
+  BAUM_MODE_HorizontalSensorsEnabled    = 0X06,
+  BAUM_MODE_LeftVerticalSensorsEnabled  = 0X07,
+  BAUM_MODE_RoutingKeysEnabled          = 0X08,
+  BAUM_MODE_RightVerticalSensorsEnabled = 0X09,
+  BAUM_MODE_BackKeysEnabled             = 0X0A,
+  BAUM_MODE_DisplayRotated              = 0X10,
+  BAUM_MODE_DisplayEnabled              = 0X20,
+  BAUM_MODE_PowerdownEnabled            = 0X21,
+  BAUM_MODE_PowerdownTime               = 0X22,
+  BAUM_MODE_BluetoothEnabled            = 0X23,
+  BAUM_MODE_UsbCharge                   = 0X24
 } BaumMode;
 
 typedef enum {
