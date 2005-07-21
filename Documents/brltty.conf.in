@@ -36,7 +36,7 @@
 #braille-driver	at	# Albatross
 #braille-driver	bd	# Braudi
 #braille-driver	bl	# BrailleLite
-#braille-driver	bm	# Baum (Native, HT, PB1, PB2)
+#braille-driver	bm	# Baum
 #braille-driver	bn	# BrailleNote
 #braille-driver	cb	# CombiBraille
 #braille-driver	ec	# EcoBraille

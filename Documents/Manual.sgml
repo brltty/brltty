@@ -3428,12 +3428,12 @@ Notes:
         The status cells contain:
         <descrip>
           <tag/1-2/
-            The columns (counting from zero) of the cursor
+            The columns (counting from 1) of the cursor
             (shown in the top half of the cells)
             and the top-left corner of the braille window
             (shown in the bottom half of the cells).
           <tag/3-4/
-            The rows (counting from zero) of the cursor
+            The rows (counting from 1) of the cursor
             (shown in the top half of the cells)
             and the top-left corner of the braille window
             (shown in the bottom half of the cells).
@@ -3490,16 +3490,16 @@ Notes:
         The status cells contain:
         <descrip>
           <tag/1/
-            The row (counting from 0) corresponding to
+            The row (counting from 1) corresponding to
             the top of the braille window (see below).
           <tag/2/
-            The row (counting from 0) whereon the cursor is (see below).
+            The row (counting from 1) whereon the cursor is (see below).
           <tag/3/
             If the screen is frozen
             (see the <ref id="command-FREEZE" name="FREEZE"> command),
             then the letter <tt/F/.
             If it isn't, then
-            the column (counting from 0) wherein the cursor is (see below).
+            the column (counting from 1) wherein the cursor is (see below).
         </descrip>
         Row and column numbers are shown as two digits within a single cell.
         The tens digit is shown in the top half of the cell,
@@ -3559,10 +3559,10 @@ in order to show the precise column layout.
 <tscreen><em/wx/:<em/wy/ <em/cx/:<em/cy/ <em/vt/ <em/tcmfdu/</tscreen>
 <descrip>
   <tag><em/wx/<tt/:/<em/wy/</tag>
-    The column and row (counting from 0) on the screen corresponding
+    The column and row (counting from 1) on the screen corresponding
     to the top-left corner of the braille window.
   <tag><em/cx/<tt/:/<em/cy/</tag>
-    The column and row (counting from 0) on the screen corresponding
+    The column and row (counting from 1) on the screen corresponding
     to the position of the cursor.
   <tag><em/vt/</tag>
     The number (counting from 1) of the current virtual terminal.
@@ -3619,11 +3619,11 @@ in order to show the precise column layout.
 <tscreen><em/xx/<em/yy/<em/s/ <em/vt/ <em/tcmfdu/</tscreen>
 <descrip>
   <tag><em/xx/</tag>
-    The columns (counting from 0) on the screen corresponding
+    The columns (counting from 1) on the screen corresponding
     to the position of the cursor (shown in the top half of the cells)
     and to the top-left corner of the braille window (shown in the bottom half of the cells).
   <tag><em/yy/</tag>
-    The rows (counting from 0) on the screen corresponding
+    The rows (counting from 1) on the screen corresponding
     to the position of the cursor (shown in the top half of the cells)
     and to the top-left corner of the braille window (shown in the bottom half of the cells).
   <tag><em/s/</tag>
@@ -4338,8 +4338,9 @@ BRLTTY supports the following braille displays:
       |Delphi (4nn)@
       |Satellite (5nn)@
     Baum
-      |Vario (Native, HT, PB1, PB2)@
-      |SuperVario@
+      |Inka@
+      |Vario/RBT@
+      |SuperVario/Brailliant@
       |PocketVario@
     BrailleLite
       |18/40/M20/M40@
