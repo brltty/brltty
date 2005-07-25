@@ -1590,7 +1590,11 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
     const ProtocolOperations *const *protocolAddress = protocolTable;
 
     while ((protocol = *protocolAddress)) {
-      charactersPerSecond = protocol->serialBaud / 10;
+      {
+        int bits = 10;
+        if (protocol->serialParity != SERIAL_PARITY_NONE) ++bits;
+        charactersPerSecond = protocol->serialBaud / bits;
+      }
 
       if (io->openPort(parameters, device)) {
         if (!flushInput()) break;
