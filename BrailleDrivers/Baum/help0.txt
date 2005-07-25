@@ -54,4 +54,5 @@ TL2+TL3+TR1: restart (s)peech driver
 left vertical sensor: go to beginning of selected line
 right vertical sensor: go to selected line
 switch 1: enable/disable horizontal and vertical sensors
-switch 2: scaled/direct line selection via vertical sensors
+switch 2: direct/scaled line selection via vertical sensors
+switch 4 (Inka): qwerty/braille keyboard
