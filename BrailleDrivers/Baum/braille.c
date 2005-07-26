@@ -533,8 +533,9 @@ typedef enum {
 } BaumKey;
 
 typedef enum {
-  BAUM_SWT_SensorsDisabled = 0X01,
-  BAUM_SWT_VerticalScaled  = 0X02,
+  BAUM_SWT_DisableSensors  = 0X01,
+  BAUM_SWT_ScaledVertical  = 0X02,
+  BAUM_SWT_ShowSensor      = 0X40,
   BAUM_SWT_BrailleKeyboard = 0X80
 } BaumSwitch;
 
@@ -726,8 +727,11 @@ readBaumPacket (unsigned char *packet, int size) {
             break;
 
           case BAUM_RSP_ModeSetting:
-          case BAUM_RSP_VerticalSensor:
             length = 3;
+            break;
+
+          case BAUM_RSP_VerticalSensor:
+            length = (baumDeviceType == BAUM_TYPE_Inka)? 2: 3;
             break;
 
           case BAUM_RSP_VerticalSensors:
@@ -832,15 +836,34 @@ setBaumSwitches (BrailleDisplay *brl, unsigned char newSettings, int initialize)
   unsigned char changedSettings = newSettings ^ switchSettings;
   switchSettings = newSettings;
 
-  if (initialize || (changedSettings & BAUM_SWT_BrailleKeyboard))
-    setBaumMode(brl, 0X03,
-                ((switchSettings & BAUM_SWT_BrailleKeyboard)? 3: 0));
+  {
+    typedef struct {
+      unsigned char switchBit;
+      unsigned char modeNumber;
+      unsigned char offValue;
+      unsigned char onValue;
+    } SwitchEntry;
+    static const SwitchEntry switchTable[] = {
+      {BAUM_SWT_ShowSensor, 0X01, 0, 2},
+      {BAUM_SWT_BrailleKeyboard, 0X03, 0, 3},
+      {0}
+    };
+    const SwitchEntry *entry = switchTable;
+
+    while (entry->switchBit) {
+      if (initialize || (changedSettings & entry->switchBit))
+        setBaumMode(brl, entry->modeNumber,
+                    ((switchSettings & entry->switchBit)? entry->onValue:
+                                                          entry->offValue));
+      ++entry;
+    }
+  }
 }
 
 static void
 setInkaSwitches (BrailleDisplay *brl, unsigned char newSettings, int initialize) {
   newSettings ^= 0X0F;
-  setBaumSwitches(brl, ((newSettings & 0X07) | ((newSettings & 0X08) << 4)), initialize);
+  setBaumSwitches(brl, ((newSettings & 0X03) | ((newSettings & 0X0C) << 4)), initialize);
 }
 
 static int
@@ -994,7 +1017,16 @@ updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
 
       case BAUM_RSP_VerticalSensor: {
         unsigned char left = packet.data.values.verticalSensor.left;
-        unsigned char right = packet.data.values.verticalSensor.right;
+        unsigned char right;
+        if (baumDeviceType != BAUM_TYPE_Inka) {
+          right = packet.data.values.verticalSensor.right;
+        } else if (left & 0X40) {
+          left -= 0X40;
+          right = 0;
+        } else {
+          right = left;
+          left = 0;
+        }
         makeKeyGroup(packet.data.values.verticalSensors.left, VERTICAL_SENSOR_COUNT, left);
         makeKeyGroup(packet.data.values.verticalSensors.right, VERTICAL_SENSOR_COUNT, right);
       }
@@ -1710,7 +1742,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   leftVerticalSensor = getSensorNumber(activeKeys.leftVerticalSensors, VERTICAL_SENSOR_COUNT);
   rightVerticalSensor = getSensorNumber(activeKeys.rightVerticalSensors, VERTICAL_SENSOR_COUNT);
 
-  if (!(switchSettings & BAUM_SWT_SensorsDisabled)) {
+  if (!(switchSettings & BAUM_SWT_DisableSensors)) {
     if (baumDeviceType == BAUM_TYPE_Inka) {
       if (horizontalSensor >= 0) {
         routingKeys[routingKeyCount++] = horizontalSensor;
@@ -1793,7 +1825,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
         goto doVerticalSensor;
 
       doVerticalSensor:
-        if (switchSettings & BAUM_SWT_VerticalScaled) {
+        if (switchSettings & BAUM_SWT_ScaledVertical) {
           flags |= BRL_FLG_LINE_SCALED;
           arg = rescaleInteger(arg, VERTICAL_SENSOR_COUNT-1, BRL_MSK_ARG);
         } else if (arg > 0) {
