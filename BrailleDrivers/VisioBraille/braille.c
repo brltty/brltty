@@ -221,7 +221,7 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
     }
     if (i==0) {
       LogPrint(LOG_WARNING,"Unable to identify terminal properly");  
-      if (brl->x<=0) brl->x = BRAILLEDISPLAYSIZE;  
+      if (!brl->x) brl->x = BRAILLEDISPLAYSIZE;  
     } else {
       LogPrint(LOG_INFO,"Braille terminal description:");
       LogPrint(LOG_INFO,"   version=%c%c%c",terminfo.version[0],terminfo.version[1],terminfo.version[2]);
@@ -237,7 +237,7 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
       if (brl->x<=0) brl->x = (terminfo.size[0]-'0')*10 + (terminfo.size[1]-'0');
     }
 #else /* SendIdReq */
-    if (brl->x<=0) brl->x = ds;
+    brl->x = ds;
 #endif /* SendIdReq */
   brl->y=1; 
   return 1;
