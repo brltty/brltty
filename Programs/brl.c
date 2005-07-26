@@ -98,7 +98,7 @@ identifyBrailleDrivers (void) {
 
 void
 initializeBrailleDisplay (BrailleDisplay *brl) {
-   brl->x = brl->y = -1;
+   brl->x = brl->y = 0;
    brl->helpPage = 0;
    brl->buffer = NULL;
    brl->writeDelay = 0;
