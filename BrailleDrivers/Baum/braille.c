@@ -1563,8 +1563,11 @@ updatePowerBrailleKeys (BrailleDisplay *brl, int *keyPressed) {
        * emulation modes (either PB1 or PB2) should simply be avoided
        * whenever possible, and BAUM or HT should be used instead.
        */
-      activeKeys.functionKeys = keys;
-      keyPressed = 0;
+      if (updateFunctionKeys(0XFF, keys, keyPressed)) {
+        if (!*keyPressed) continue;
+        *keyPressed = 0;
+      }
+      activeKeys = pressedKeys;
       return 1;
     }
   }
