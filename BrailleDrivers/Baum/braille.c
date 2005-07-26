@@ -1542,7 +1542,29 @@ updatePowerBrailleKeys (BrailleDisplay *brl, int *keyPressed) {
       if (packet.buttons[0] & PB2_BUTTONS0_TR2) keys |= BAUM_KEY_TR2;
       if (packet.buttons[1] & PB2_BUTTONS1_TR3) keys |= BAUM_KEY_TR3;
 
-      if (!updateFunctionKeys(0XFF, keys, keyPressed)) continue;
+      /*
+       * The PB emulation is deficient as the protocol doesn't report any
+       * key status when all keys are released.  The ability to act on
+       * released keys as needed for multiple key combinations is,
+       * therefore, an unsolvable problem.  The TSI driver works around
+       * this limitation by guessing the "key held" state based on the fact
+       * that native Navigator/PowerBraille displays send repeated key
+       * status for as long as there is at least one key pressed. Baum's PB
+       * emulation, however, doesn't do this.
+       *
+       * Let's make basic functions act on key presses then.  The limited
+       * set of single key bindings will work just fine.  If one is quick
+       * enough to press, then release, combined keys all at the same time
+       * then combined key functions might even work.  The Brailliant display
+       * on which this was tested appears to delay any key update, possibly to
+       * mitigate the issue, making combined keys somewhat usable.
+       *
+       * This is far from perfect, but that's the best we can do. The PB
+       * emulation modes (either PB1 or PB2) should simply be avoided
+       * whenever possible, and BAUM or HT should be used instead.
+       */
+      activeKeys.functionKeys = keys;
+      keyPressed = 0;
       return 1;
     }
   }
