@@ -1523,7 +1523,7 @@ static int initializeLocalSocket(struct socketInfo *info)
 
   while(1) {
     if (link(tmppath, lockpath))
-      LogError("linking local socket lock");
+      LogPrint(LOG_DEBUG,"linking local socket lock: %s", strerror(errno));
       /* but no action: link() might erroneously return errors, see manpage */
     if (fstat(lock, &st)) {
       LogError("checking local socket lock");
