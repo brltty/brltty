@@ -2032,20 +2032,20 @@ main (int argc, char *argv[]) {
                   for (x=newX+1; 1; ++x) {
                     int done = 1;
 
-                    if (x < oldLength) {
+                    if (x < newLength) {
                       if (memcmp(newText+x, oldText+oldX, newWidth-x) == 0) {
-                        column = oldX;
-                        count = x - oldX;
+                        column = newX;
+                        count = x - newX;
                         goto speak;
                       }
 
                       done = 0;
                     }
 
-                    if (x < newLength) {
+                    if (x < oldLength) {
                       if (memcmp(newText+newX, oldText+x, oldWidth-x) == 0) {
-                        column = newX;
-                        count = x - newX;
+                        column = oldX;
+                        count = x - oldX;
                         text = oldText;
                         goto speak;
                       }
