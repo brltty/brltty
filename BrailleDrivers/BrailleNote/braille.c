@@ -27,32 +27,50 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
-#include <fcntl.h>
-
-#ifdef HAVE_LINUX_VT_H
-#include <sys/ioctl.h>
-#include <linux/vt.h>
-#endif /* HAVE_LINUX_VT_H */
-static int displayDescriptor = -1;
-static int displayTerminal;
 
 #include "Programs/misc.h"
 
 typedef enum {
-   PARM_STATUSCELLS
+  PARM_STATUSCELLS
 } DriverParameter;
 #define BRLPARMS "statuscells"
 
 #define BRL_HAVE_PACKET_IO
 #include "Programs/brl_driver.h"
-#include "Programs/tbl.h"
 #include "braille.h"
-#include "Programs/serial.h"
+#include "Programs/tbl.h"
 
 static int logInputPackets = 0;
 static int logOutputPackets = 0;
 
+#include "Programs/serial.h"
 static SerialDevice *serialDevice = NULL;
+static const int serialBaud = 38400;
+static int charactersPerSecond;
+
+typedef union {
+  unsigned char bytes[3];
+  struct {
+    unsigned char code;
+    union {
+      unsigned char dotKeys;
+      unsigned char thumbKeys;
+      unsigned char routingKey;
+      struct {
+        unsigned char statusCells;
+        unsigned char textCells;
+      } description;
+    } values;
+  } data;
+} ResponsePacket;
+
+#ifdef HAVE_LINUX_VT_H
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <linux/vt.h>
+#endif /* HAVE_LINUX_VT_H */
+static int displayDescriptor = -1;
+static int displayTerminal;
 
 static unsigned char *cellBuffer = NULL;
 static unsigned int cellCount = 0;
@@ -62,11 +80,11 @@ static unsigned char *dataArea;
 static int dataCells;
 
 typedef enum {
-   KBM_INPUT,
-   KBM_INPUT_7,
-   KBM_INPUT_78,
-   KBM_INPUT_8,
-   KBM_NAVIGATE
+  KBM_INPUT,
+  KBM_INPUT_7,
+  KBM_INPUT_78,
+  KBM_INPUT_8,
+  KBM_NAVIGATE
 } KeyboardMode;
 static KeyboardMode persistentKeyboardMode;
 static KeyboardMode temporaryKeyboardMode;
@@ -156,7 +174,12 @@ readPacket (unsigned char *packet, int size) {
 }
 
 static int
-writePacket (const unsigned char *packet, int size) {
+getPacket (ResponsePacket *packet) {
+  return readPacket(packet->bytes, sizeof(*packet));
+}
+
+static int
+writePacket (BrailleDisplay *brl, const unsigned char *packet, int size) {
   unsigned char buffer[1 + (size * 2)];
   unsigned char *byte = buffer;
 
@@ -170,12 +193,17 @@ writePacket (const unsigned char *packet, int size) {
   {
     int count = byte - buffer;
     if (logOutputPackets) LogBytes("Output Packet", buffer, count);
-    return serialWriteData(serialDevice, buffer, count);
+
+    {
+      int ok = serialWriteData(serialDevice, buffer, count) != -1;
+      if (ok) brl->writeDelay += count * 1000 / charactersPerSecond;
+      return ok;
+    }
   }
 }
 
 static int
-refreshCells (void) {
+refreshCells (BrailleDisplay *brl) {
   unsigned char buffer[1 + cellCount];
   unsigned char *byte = buffer;
 
@@ -186,11 +214,11 @@ refreshCells (void) {
     for (i=0; i<cellCount; ++i) *byte++ = outputTable[cellBuffer[i]];
   }
 
-  return writePacket(buffer, byte-buffer);
+  return writePacket(brl, buffer, byte-buffer);
 }
 
 static void
-writePrompt (const char *prompt) {
+writePrompt (BrailleDisplay *brl, const char *prompt) {
   int length = strlen(prompt);
   int index = 0;
   if (length > dataCells) length = dataCells;
@@ -199,7 +227,7 @@ writePrompt (const char *prompt) {
      ++index;
   }
   while (index < dataCells) dataArea[index++] = 0;
-  refreshCells();
+  refreshCells(brl);
 }
 
 static unsigned char
@@ -211,7 +239,7 @@ getByte (void) {
 }
 
 static unsigned char
-getCharacter (void) {
+getCharacter (BrailleDisplay *brl) {
   for (;;) {
     switch (getByte()) {
       default:
@@ -243,7 +271,7 @@ getCharacter (void) {
         }
         break;
     }
-    refreshCells();
+    refreshCells(brl);
   }
 }
 
@@ -322,15 +350,14 @@ writeVisualDisplay (unsigned char c) {
 }
 
 static int
-visualDisplay (unsigned char character, BRL_DriverCommandContext context) {
+visualDisplay (BrailleDisplay *brl, unsigned char byte, BRL_DriverCommandContext context) {
   int vt = getVirtualTerminal();
   const unsigned char end[] = {0X1B, 0};
   unsigned int state = 0;
   openVisualDisplay();
   writeVisualDisplay(BNI_DISPLAY);
-  writeVisualDisplay(character);
   for (;;) {
-    character = getByte();
+    unsigned char character = getByte();
     if (character == end[state]) {
       if (++state == sizeof(end)) break;
     } else {
@@ -386,16 +413,17 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
   }
 
   if ((serialDevice = serialOpenDevice(device))) {
-    if (serialRestartDevice(serialDevice, 38400)) {
+    if (serialRestartDevice(serialDevice, serialBaud)) {
       unsigned char request[] = {BNO_DESCRIBE};
-      if (writePacket(request, sizeof(request)) != -1) {
+      charactersPerSecond = serialBaud / 10;
+      if (writePacket(brl, request, sizeof(request)) != -1) {
         while (serialAwaitInput(serialDevice, 100)) {
-          unsigned char response[3];
-          int size = readPacket(response, sizeof(response));
+          ResponsePacket response;
+          int size = getPacket(&response);
           if (size) {
-            if (response[0] == BNI_DESCRIBE) {
-              statusCells = response[1];
-              brl->x = response[2];
+            if (response.data.code == BNI_DESCRIBE) {
+              statusCells = response.data.values.description.statusCells;
+              brl->x = response.data.values.description.textCells;
               brl->y = 1;
               if ((statusCells == 5) && (brl->x == 30)) {
                 statusCells -= 2;
@@ -407,7 +435,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
                 memset(cellBuffer, 0, cellCount);
                 statusArea = cellBuffer;
                 dataArea = statusArea + statusCells;
-                refreshCells();
+                refreshCells(brl);
                 persistentKeyboardMode = KBM_NAVIGATE;
                 temporaryKeyboardMode = persistentKeyboardMode;
                 persistentRoutingOperation = BRL_BLK_ROUTE;
@@ -418,7 +446,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
                 LogError("cell buffer allocation");
               }
             } else {
-              LogBytes("unexpected packet", response, size);
+              LogBytes("unexpected packet", response.bytes, size);
             }
           }
         }
@@ -448,7 +476,7 @@ brl_readPacket (BrailleDisplay *brl, unsigned char *buffer, size_t size) {
 
 static ssize_t
 brl_writePacket (BrailleDisplay *brl, const unsigned char *packet, size_t length) {
-  return writePacket(packet, length)? length: -1;
+  return writePacket(brl, packet, length)? length: -1;
 }
 
 static int
@@ -460,7 +488,7 @@ static void
 brl_writeWindow (BrailleDisplay *brl) {
   if (memcmp(dataArea, brl->buffer, dataCells) != 0) {
     memcpy(dataArea, brl->buffer, dataCells);
-    refreshCells();
+    refreshCells(brl);
   }
 }
 
@@ -475,7 +503,7 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) {
 }
 
 static int
-getDecimalInteger (unsigned int *integer, unsigned int width, const char *description) {
+getDecimalInteger (BrailleDisplay *brl, unsigned int *integer, unsigned int width, const char *description) {
   char buffer[width + 1];
   memset(buffer, '0', width);
   buffer[width] = 0;
@@ -483,8 +511,8 @@ getDecimalInteger (unsigned int *integer, unsigned int width, const char *descri
     unsigned char character;
     char prompt[0X40];
     snprintf(prompt, sizeof(prompt), "%s: %s", description, buffer);
-    writePrompt(prompt);
-    switch (character = getCharacter()) {
+    writePrompt(brl, prompt);
+    switch (character = getCharacter(brl)) {
       default:
         continue;
       case '\r':
@@ -510,14 +538,14 @@ getDecimalInteger (unsigned int *integer, unsigned int width, const char *descri
 }
 
 static int
-getHexadecimalCharacter (unsigned char *character) {
+getHexadecimalCharacter (BrailleDisplay *brl, unsigned char *character) {
   *character = 0X00;
   for (;;) {
     unsigned char digit;
     char prompt[0X40];
     snprintf(prompt, sizeof(prompt), "hex char: %2.2x %c", *character, *character);
-    writePrompt(prompt);
-    switch (getCharacter()) {
+    writePrompt(brl, prompt);
+    switch (getCharacter(brl)) {
       default:
         continue;
       case '\r':
@@ -578,9 +606,9 @@ getHexadecimalCharacter (unsigned char *character) {
 }
 
 static int
-getFunctionKey (void) {
+getFunctionKey (BrailleDisplay *brl) {
   unsigned int keyNumber;
-  if (getDecimalInteger(&keyNumber, 2, "function key")) {
+  if (getDecimalInteger(brl, &keyNumber, 2, "function key")) {
     if (!keyNumber) keyNumber = 0X100 - BRL_KEY_FUNCTION;
     return BRL_BLK_PASSKEY + BRL_KEY_FUNCTION + (keyNumber - 1);
   }
@@ -588,7 +616,7 @@ getFunctionKey (void) {
 }
 
 static int
-interpretNavigation (unsigned char dots, BRL_DriverCommandContext context) {
+interpretNavigation (BrailleDisplay *brl, unsigned char dots, BRL_DriverCommandContext context) {
   switch (dots) {
     default:
       break;
@@ -655,12 +683,12 @@ interpretNavigation (unsigned char dots, BRL_DriverCommandContext context) {
 }
 
 static int
-interpretCharacter (unsigned char dots, BRL_DriverCommandContext context) {
+interpretCharacter (BrailleDisplay *brl, unsigned char dots, BRL_DriverCommandContext context) {
   int mask = 0X00;
-  if (context != BRL_CTX_SCREEN) return interpretNavigation(dots, context);
+  if (context != BRL_CTX_SCREEN) return interpretNavigation(brl, dots, context);
   switch (currentKeyboardMode) {
     case KBM_NAVIGATE:
-      return interpretNavigation(dots, context);
+      return interpretNavigation(brl, dots, context);
     case KBM_INPUT:
       break;
     case KBM_INPUT_7:
@@ -677,7 +705,7 @@ interpretCharacter (unsigned char dots, BRL_DriverCommandContext context) {
 }
 
 static int
-interpretSpaceChord (unsigned char dots, BRL_DriverCommandContext context) {
+interpretSpaceChord (BrailleDisplay *brl, unsigned char dots, BRL_DriverCommandContext context) {
   switch (dots) {
     default:
     /* These are overridden by the Braille Note itself. */
@@ -692,13 +720,13 @@ interpretSpaceChord (unsigned char dots, BRL_DriverCommandContext context) {
     case (BND_1 | BND_2 | BND_3 | BND_4 | BND_5 | BND_6): /* go to main menu */
       break;
     case BNC_SPACE:
-      return interpretCharacter(dots, context);
+      return interpretCharacter(brl, dots, context);
     case BNC_C:
       return BRL_CMD_PREFMENU;
     case BNC_D:
       return BRL_CMD_PREFLOAD;
     case BNC_F:
-      return getFunctionKey();
+      return getFunctionKey(brl);
     case BNC_L:
       temporaryRoutingOperation = BRL_BLK_SETLEFT;
       return BRL_CMD_NOOP;
@@ -714,7 +742,7 @@ interpretSpaceChord (unsigned char dots, BRL_DriverCommandContext context) {
       return BRL_CMD_SAY_LINE;
     case BNC_V: {
       unsigned int vt;
-      if (getDecimalInteger(&vt, 2, "virt term num")) {
+      if (getDecimalInteger(brl, &vt, 2, "virt term num")) {
         if (!vt) vt = 0X100;
         return BRL_BLK_SWITCHVT + (vt - 1);
       }
@@ -724,7 +752,7 @@ interpretSpaceChord (unsigned char dots, BRL_DriverCommandContext context) {
       return BRL_CMD_PREFSAVE;
     case BNC_X: {
       unsigned char character;
-      if (!getHexadecimalCharacter(&character)) return EOF;
+      if (!getHexadecimalCharacter(brl, &character)) return EOF;
       return BRL_BLK_PASSCHAR + character;
     }
     case BNC_LPAREN:
@@ -790,7 +818,7 @@ interpretSpaceChord (unsigned char dots, BRL_DriverCommandContext context) {
 }
 
 static int
-interpretBackspaceChord (unsigned char dots, BRL_DriverCommandContext context) {
+interpretBackspaceChord (BrailleDisplay *brl, unsigned char dots, BRL_DriverCommandContext context) {
   switch (dots & 0X3F) {
     default:
       break;
@@ -832,7 +860,7 @@ interpretBackspaceChord (unsigned char dots, BRL_DriverCommandContext context) {
 }
 
 static int
-interpretEnterChord (unsigned char dots, BRL_DriverCommandContext context) {
+interpretEnterChord (BrailleDisplay *brl, unsigned char dots, BRL_DriverCommandContext context) {
   switch (dots) {
     default:
     /* These are overridden by the Braille Note itself. */
@@ -870,7 +898,7 @@ interpretEnterChord (unsigned char dots, BRL_DriverCommandContext context) {
 }
 
 static int
-interpretThumbKeys (unsigned char keys, BRL_DriverCommandContext context) {
+interpretThumbKeys (BrailleDisplay *brl, unsigned char keys, BRL_DriverCommandContext context) {
   switch (keys) {
     default:
       break;
@@ -899,49 +927,57 @@ interpretThumbKeys (unsigned char keys, BRL_DriverCommandContext context) {
 }
 
 static int
-interpretRoutingKey (unsigned char key, BRL_DriverCommandContext context) {
+interpretRoutingKey (BrailleDisplay *brl, unsigned char key, BRL_DriverCommandContext context) {
   return currentRoutingOperation + key;
 }
 
 static int
 brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
-  unsigned char packet[3];
+  ResponsePacket packet;
   int size;
 
-  while ((size = readPacket(packet, sizeof(packet)))) {
-    int (*handler)(unsigned char, BRL_DriverCommandContext);
+  while ((size = getPacket(&packet))) {
+    int (*handler)(BrailleDisplay *, unsigned char, BRL_DriverCommandContext);
+    unsigned char data;
 
-    switch (packet[0]) {
+    switch (packet.data.code) {
       case BNI_CHARACTER:
         handler = interpretCharacter;
+        data = packet.data.values.dotKeys;
         break;
 
       case BNI_SPACE:
         handler = interpretSpaceChord;
+        data = packet.data.values.dotKeys;
         break;
 
       case BNI_BACKSPACE:
         handler = interpretBackspaceChord;
+        data = packet.data.values.dotKeys;
         break;
 
       case BNI_ENTER:
         handler = interpretEnterChord;
+        data = packet.data.values.dotKeys;
         break;
 
       case BNI_THUMB:
         handler = interpretThumbKeys;
+        data = packet.data.values.thumbKeys;
         break;
 
       case BNI_ROUTE:
         handler = interpretRoutingKey;
+        data = packet.data.values.routingKey;
         break;
 
       case BNI_DISPLAY:
         handler = visualDisplay;
+        data = 0;
         break;
 
       default:
-        LogBytes("unexpected packet", packet, size);
+        LogBytes("unexpected packet", packet.bytes, size);
         continue;
     }
 
@@ -951,7 +987,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
     currentRoutingOperation = temporaryRoutingOperation;
     temporaryRoutingOperation = persistentRoutingOperation;
 
-    return handler(packet[1], context);
+    return handler(brl, data, context);
   }
 
   return (errno == EAGAIN)? EOF: BRL_CMD_RESTARTBRL;
