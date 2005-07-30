@@ -32,18 +32,28 @@ covered by this special exception are:
    Programs/brldefs.h
    BrailleDrivers/VisioBraille/brldefs-vs.h
 
-This software is maintained by Dave Mielke <dave@mielke.cc>.
+This software is maintained by: Dave Mielke <dave@mielke.cc>
 
-If you have any interest in BRLTTY, please drop us a note. We're interested in
-knowing who the BRLTTY users are. Even if all goes well and you have no
-problems with this package, please let us know you're there, and tell us which
-brand of display you use. If you have problems, we'll be happy to help. All
-your comments, suggestions, criticisms, questions, and contributions are
-welcome!
+The members of The BRLTTY Team are:
+
+   Dave Mielke <dave@mielke.cc>
+   Nicolas Pitre <nico@cam.org>
+   Stéphane Doyon <s.doyon@videotron.ca>
+
+-------------------------------------------------------------------------------
+
+Contacting Us
+=============
 
 We recommend that you contact us via BRLTTY's mailing list. You can post to the
-list by sending e-mail to <BRLTTY@mielke.cc>. To subscribe, go to the list's
+list by sending an e-mail to <BRLTTY@mielke.cc>. To subscribe, go to the list's
 Information Page at [http://mielke.cc/mailman/listinfo/brltty].
+
+If you have any interest in BRLTTY, please drop us a note. We're interested in
+knowing who BRLTTY's users are. Even if all goes well and you have no problems
+with this package, please let us know you're there, and tell us which brand of
+display you use. If you have problems, we'll be happy to help. All your
+comments, suggestions, criticisms, questions, and contributions are welcome!
 
 We offer a special invitation to the developers of braille displays. It's our
 goal to support as many models as possible within the Linux/Unix environment.
@@ -51,13 +61,7 @@ While we always do as much as we can toward this end, we'd be even more
 effective with your help. The most important thing we need is the details
 regarding the communication protocol(s) of your braille display(s). If you
 prefer to contact us privately for this sort of thing then we invite you to
-send e-mail to any member(s) of The BRLTTY Team.
-
-The members of The BRLTTY Team are:
-
-   Dave Mielke <dave@mielke.cc>
-   Nicolas Pitre <nico@cam.org>
-   Stéphane Doyon <s.doyon@videotron.ca>
+send e-mail to any member(s) of The BRLTTY Team (see above).
 
 -------------------------------------------------------------------------------
 
