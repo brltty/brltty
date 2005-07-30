@@ -26,20 +26,38 @@ LGPL may be used when redistributing and/or modifying these files. The files
 covered by this special exception are:
 
    Programs/api.h.in
-   Programs/api_client.h
+   Programs/api_protocol.h
+   Programs/api_client.c
    Programs/api_common.h
-   Programs/api_common.c
    Programs/brldefs.h
-   Drivers/VisioBraille/brldefs-vs.h
+   BrailleDrivers/VisioBraille/brldefs-vs.h
 
 This software is maintained by Dave Mielke <dave@mielke.cc>.
 
 If you have any interest in BRLTTY, please drop us a note. We're interested in
-knowing who the BRLTTY users are, and how many there are. Even if all goes well
-and you have no problems with this package, please let us know you're there,
-and tell us which brand of display you use. If you have problems, we will be
-happy to help. If you have suggestions or comments, or if you wish to
-contribute, you're welcome!
+knowing who the BRLTTY users are. Even if all goes well and you have no
+problems with this package, please let us know you're there, and tell us which
+brand of display you use. If you have problems, we'll be happy to help. All
+your comments, suggestions, criticisms, questions, and contributions are
+welcome!
+
+We recommend that you contact us via BRLTTY's mailing list. You can post to the
+list by sending e-mail to <BRLTTY@mielke.cc>. To subscribe, go to the list's
+Information Page at [http://mielke.cc/mailman/listinfo/brltty].
+
+We offer a special invitation to the developers of braille displays. It's our
+goal to support as many models as possible within the Linux/Unix environment.
+While we always do as much as we can toward this end, we'd be even more
+effective with your help. The most important thing we need is the details
+regarding the communication protocol(s) of your braille display(s). If you
+prefer to contact us privately for this sort of thing then we invite you to
+send e-mail to any member(s) of The BRLTTY Team.
+
+The members of The BRLTTY Team are:
+
+   Dave Mielke <dave@mielke.cc>
+   Nicolas Pitre <nico@cam.org>
+   Stéphane Doyon <s.doyon@videotron.ca>
 
 -------------------------------------------------------------------------------
 
@@ -269,37 +287,5 @@ configuration file `brltty.conf' in the `DOCS' subdirectory.
 
 And don't forget to review the notes for your Braille display. See the `README'
 file in its driver's subdirectory.
-
--------------------------------------------------------------------------------
-
-The BRLTTY Team
-===============
-
-Many people have contributed to the development of BRLTTY, most notably:
-
-Dave Mielke <dave@mielke.cc>
-  Current maintainer, run-time loadable driver modules,
-  GenericSay speech driver, Accent/SA support, BrailleNote driver,
-  tunes (sound card, sequencer, OPL3).
-
-Nicolas Pitre <nico@cam.org>
-  Core development, speech framework, Alva driver, EuroBraille driver,
-  Televox speech driver, BrailleLite driver tweaks.
-
-Stéphane Doyon <s.doyon@videotron.ca>
-  TSI drivers (Navigator, PowerBraille), MDV driver, BrailleLite driver tweaks,
-  ExternalSpeech speech driver, core development, cut and paste,
-  tunes (PC speaker).
-
-August Hörandl <august.hoerandl@gmx.at>
-  Papenmeier driver, initial run-time loadable driver module design.
-
-Nikhil Nair <nn201@cus.cam.ac.uk>
-  Project founder, CombiBraille driver, BrailleLite driver.
-
-All other individual driver authors.
-
-Any comments and/or criticisms regarding BRLTTY in general should be addressed
-to Dave Mielke, Nicolas Pitre, and/or Stéphane Doyon.
 
 -------------------------------------------------------------------------------
