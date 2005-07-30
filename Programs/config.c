@@ -1344,7 +1344,7 @@ openBrailleDriver (int verify) {
 
       if (isSerialDevice(&dev)) {
         static const char *const serialCodes[] = {
-          "pm", "ts", "ht", "bn", "bm",
+          "md", "pm", "ts", "ht", "bn", "bm",
           NULL
         };
         code = serialCodes;
