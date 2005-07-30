@@ -337,23 +337,21 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
   sendpacket[OFF_CODE] = QUERY;
   sendpacket[OFF_LEN] = 0;
   put_cksum(sendpacket);
+  if(serialWriteData(serialDevice, sendpacket, PACKET_HDR_LEN+NRCKSUMBYTES)
+     != PACKET_HDR_LEN+NRCKSUMBYTES)
+    goto failure;
+  serialDrainOutput(serialDevice);
   while(1){
-    if(serialWriteData(serialDevice, sendpacket, PACKET_HDR_LEN+NRCKSUMBYTES)
-       != PACKET_HDR_LEN+NRCKSUMBYTES)
+    if(!expect_receive_packet(recvpacket))
       goto failure;
-    serialDrainOutput(serialDevice);
-    while(expect_receive_packet(recvpacket)){
-      if(memcmp(recvpacket, query_reply_packet_hdr, PACKET_HDR_LEN) == 0)
-	goto detected;
-      else if(recvpacket[OFF_CODE] == ACK)
-	LogPrint(LOG_DEBUG,"Skipping probable ACK packet");
-      else LogPrint(LOG_DEBUG,"Skipping invalid response to query");
-    }
-    LogPrint(LOG_DEBUG,"No response to query");
-    approximateDelay(DETECT_DELAY);
+    if(memcmp(recvpacket, query_reply_packet_hdr, PACKET_HDR_LEN) == 0)
+      break;
+    if(recvpacket[OFF_CODE] == ACK)
+      LogPrint(LOG_DEBUG,"Skipping probable ACK packet");
+    else
+      LogPrint(LOG_DEBUG,"Skipping invalid response to query");
   }
 
-detected:
   brl_cols = recvpacket[OFF_NRCONTENTCELLS];
   nrstatcells = recvpacket[OFF_NRSTATCELLS];
   dotspercell = recvpacket[OFF_NRDOTSPERCELL];

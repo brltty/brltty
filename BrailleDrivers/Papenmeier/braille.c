@@ -421,7 +421,7 @@ writeUsbBytes (const void *buffer, int length) {
 }
 
 static const InputOutputOperations usbOperations = {
-  usbBauds, 0, 5,
+  usbBauds, 0, 3,
   openUsbPort, prepareUsbPort, closeUsbPort, flushUsbPort,
   awaitUsbInput, readUsbBytes, writeUsbBytes
 };
@@ -1322,10 +1322,7 @@ identifyTerminal2 (BrailleDisplay *brl) {
     }
     if (errno != EAGAIN) break;
 
-    if (++tries == io->protocol2) {
-      LogPrint(LOG_WARNING, "No response from display.");
-      break;
-    }
+    if (++tries == io->protocol2) break;
   }
   return 0;
 }

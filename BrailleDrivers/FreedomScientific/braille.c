@@ -801,10 +801,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
       }
       if (errno != EAGAIN) break;
 
-      if (++tries == 5) {
-        LogPrint(LOG_WARNING, "No response from display.");
-        break;
-      }
+      if (++tries == 3) break;
     }
 
   failure:
