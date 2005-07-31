@@ -159,8 +159,7 @@ LogError (const char *action) {
 
 #ifdef WINDOWS
 void
-LogWindowsError (const char *action) {
-  DWORD error = GetLastError();
+LogWindowsCodeError (DWORD error, const char *action) {
   char *message;
   FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
                 NULL, error, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
@@ -173,6 +172,16 @@ LogWindowsError (const char *action) {
 
   LogPrint(LOG_ERR, "%s error %ld: %s", action, error, message);
   LocalFree(message);
+}
+void
+LogWindowsError (const char *action) {
+  DWORD error = GetLastError();
+  LogWindowsCodeError(error, action);
+}
+void
+LogWindowsSocketError(const char *action) {
+  DWORD error = WSAGetLastError();
+  LogWindowsCodeError(error, action);
 }
 #endif /* WINDOWS */
 

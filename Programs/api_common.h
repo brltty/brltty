@@ -87,9 +87,10 @@ static ssize_t brlapi_writeFile(int fd, const void *buf, size_t size)
     if ((!WriteFile((HANDLE) fd,buf+n,size-n,&res,&overl)
       && GetLastError() != ERROR_IO_PENDING) ||
       !GetOverlappedResult((HANDLE) fd, &overl, &res, TRUE)) {
-      errno = GetLastError();
+      res = GetLastError();
       CloseHandle(overl.hEvent);
-      res = -1;
+      errno = res;
+      return -1;
     }
     CloseHandle(overl.hEvent);
 #else /* WINDOWS */
@@ -101,7 +102,6 @@ static ssize_t brlapi_writeFile(int fd, const void *buf, size_t size)
         (errno!=EWOULDBLOCK) &&
 #endif /* EWOULDBLOCK */
         (errno!=EAGAIN)) { /* EAGAIN shouldn't happen, but who knows... */
-      LibcError("write in writeFile");
       return res;
     }
   }
@@ -124,9 +124,10 @@ static ssize_t brlapi_readFile(int fd, void *buf, size_t size)
     if ((!ReadFile((HANDLE) fd,buf+n,size-n,&res,&overl)
       && GetLastError() != ERROR_IO_PENDING) ||
       !GetOverlappedResult((HANDLE) fd, &overl, &res, TRUE)) {
-      errno = GetLastError();
+      res = GetLastError();
       CloseHandle(overl.hEvent);
-      res = -1;
+      errno = res;
+      return -1;
     }
     CloseHandle(overl.hEvent);
 #else /* WINDOWS */
@@ -141,7 +142,6 @@ static ssize_t brlapi_readFile(int fd, void *buf, size_t size)
         (errno!=EWOULDBLOCK) &&
 #endif /* EWOULDBLOCK */
         (errno!=EAGAIN)) { /* EAGAIN shouldn't happen, but who knows... */
-      LibcError("read in readFile");
       return -1;
     }
   }
@@ -156,13 +156,17 @@ ssize_t BRLAPI(writePacket)(int fd, brl_type_t type, const void *buf, size_t siz
   ssize_t res;
 
   /* first send packet header (size+type) */
-  if ((res=brlapi_writeFile(fd,&header[0],sizeof(header)))<0)
+  if ((res=brlapi_writeFile(fd,&header[0],sizeof(header)))<0) {
+    LibcError("write in writePacket");
     return res;
+  }
 
   /* eventually data */
   if (size && buf)
-    if ((res=brlapi_writeFile(fd,buf,size))<0)
+    if ((res=brlapi_writeFile(fd,buf,size))<0) {
+      LibcError("write in writePacket");
       return res;
+    }
 
   return 0;
 }
@@ -250,6 +254,7 @@ int BRLAPI(loadAuthKey)(const char *filename, size_t *authlength, void *auth)
   *authlength = brlapi_readFile(get_osfhandle(fd), auth, stsize);
 
   if (*authlength!=(size_t)stsize) {
+    LibcError("read in loadAuthKey");
     close(fd);
     return -1;
   }

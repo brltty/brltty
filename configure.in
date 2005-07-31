@@ -289,6 +289,7 @@ case "${host_os}"
 in
    cygwin*|mingw*)
       AC_HAVE_LIBRARY([wsock32])
+      AC_HAVE_LIBRARY([msvcp60])
       ;;
    *)
       AC_SEARCH_LIBS([socket], [socket])

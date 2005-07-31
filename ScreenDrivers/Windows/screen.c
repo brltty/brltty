@@ -54,7 +54,7 @@ close_WindowsScreen (void) {
 static void
 describe_WindowsScreen (ScreenDescription *description) {
   CONSOLE_SCREEN_BUFFER_INFO info;
-  description->no = GetForegroundWindow();
+  description->no = (int) GetForegroundWindow();
   if (consoleOutput == INVALID_HANDLE_VALUE)
     return;
   if (!(GetConsoleScreenBufferInfo(consoleOutput, &info)))

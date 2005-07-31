@@ -68,6 +68,9 @@
 
 #ifdef WINDOWS
 #define close(fd) CloseHandle((HANDLE)(fd))
+#define LogSocketError(msg) LogWindowsSocketError(msg)
+#else /* WINDOWS */
+#define LogSocketError(msg) LogError(msg)
 #endif /* WINDOWS */
 
 #define UNAUTH_MAX 5
@@ -1193,10 +1196,6 @@ static int initializeTcpSocket(struct socketInfo *info)
   hints.ai_family = PF_UNSPEC;
   hints.ai_socktype = SOCK_STREAM;
 
-#ifdef WINDOWS
-  WSAStartup(MAKEWORD(2,0),&wsadata);
-#endif /* WINDOWS */
-
   err = getaddrinfo(info->hostname, info->port, &hints, &res);
   if (err) {
     LogPrint(LOG_WARNING,"getaddrinfo(%s,%s): "
@@ -1236,8 +1235,8 @@ static int initializeTcpSocket(struct socketInfo *info)
     }
     break;
 cont:
+    LogSocketError(fun);
     close(fd);
-    LogError(fun);
   }
   freeaddrinfo(res);
   if (cur) {
@@ -1263,10 +1262,6 @@ cont:
 
   struct sockaddr_in addr;
   struct hostent *he;
-
-#ifdef WINDOWS
-  WSAStartup(MAKEWORD(1,0),&wsadata);
-#endif /* WINDOWS */
 
   memset(&addr,0,sizeof(addr));
   addr.sin_family = AF_INET;
@@ -1300,7 +1295,7 @@ cont:
 
   if (!info->hostname) {
     addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-  } else {
+  } else if ((addr.sin_addr.s_addr = inet_addr(info->hostname)) == htonl(INADDR_NONE)) {
     if (!(he = gethostbyname(info->hostname))) {
       LogPrint(LOG_ERR,"gethostbyname(%s): "
 #ifdef WINDOWS
@@ -1341,15 +1336,15 @@ cont:
   }
   if (setsockopt(fd,SOL_SOCKET,SO_REUSEADDR,(void*)&yes,sizeof(yes))!=0) {
     fun = "setsockopt";
-    goto errfd;
+    goto err;
   }
   if (loopBind(fd, (struct sockaddr *) &addr, sizeof(addr))<0) {
     fun = "bind";
-    goto errfd;
+    goto err;
   }
   if (listen(fd,1)<0) {
     fun = "listen";
-    goto errfd;
+    goto err;
   }
   free(info->hostname);
   info->hostname = NULL;
@@ -1367,10 +1362,9 @@ cont:
 
   return fd;
 
-errfd:
-  close(fd);
 err:
-  LogError(fun);
+  LogSocketError(fun);
+  if (fd >= 0) close(fd);
 
 #endif /* HAVE_GETADDRINFO */
 
@@ -1458,7 +1452,7 @@ static int initializeLocalSocket(struct socketInfo *info)
   }
   sa.sun_family = AF_LOCAL;
   if (lpath+lport+1>sizeof(sa.sun_path)) {
-    LogError("Unix path too long");
+    LogPrint(LOG_ERR, "Unix path too long");
     goto outfd;
   }
 
@@ -1828,7 +1822,22 @@ static void *server(void *arg)
   for (i=0;i<numSockets;i++)
     socketInfo[i].fd = -1;
 
+#ifdef WINDOWS
+  if (WSAStartup(
+    /* TODO: if UNIMPLEMENTED, tell that some tcp/ip stuff is needed */
+#ifdef HAVE_GETADDRINFO
+	  MAKEWORD(2,0),
+#else /* HAVE_GETADDRINFO */
+	  MAKEWORD(1,1),
+#endif /* HAVE_GETADDRINFO */
+	  &wsadata)) {
+    LogWindowsSocketError("Starting socket library");
+    pthread_exit(NULL);
+  }
+#endif /* WINDOWS */
+
   pthread_cleanup_push(closeSockets,NULL);
+
   for (i=0;i<numSockets;i++) {
     socketInfo[i].addrfamily=brlapiserver_splitHost(socketHosts[i],&socketInfo[i].hostname,&socketInfo[i].port);
 #ifdef WINDOWS

@@ -112,7 +112,9 @@ extern void LogPrint
        ;
 extern void LogError (const char *action);
 #ifdef WINDOWS
+extern void LogWindowsCodeError (DWORD code, const char *action);
 extern void LogWindowsError (const char *action);
+extern void LogWindowsSocketError (const char *action);
 #endif /* WINDOWS */
 extern void LogBytes (const char *description, const unsigned char *data, unsigned int length);
 extern int setLogLevel (int level);

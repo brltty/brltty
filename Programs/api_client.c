@@ -40,12 +40,14 @@
 
 #ifdef WINDOWS
 #include <ws2tcpip.h>
+#include <w32api.h>
 
 #ifdef __MINGW32__
 #include "win_pthread.h"
 #endif /* __MINGW32__ */
 
 #define syslog(level,fmt,...) fprintf(stderr,#level ": " fmt, __VA_ARGS__)
+#define setSocketError() do { errno = WSAGetLastError(); } while (0)
 #else /* WINDOWS */
 #include <sys/socket.h>
 #include <sys/un.h>
@@ -61,6 +63,8 @@
 #else /* HAVE_SYS_SELECT_H */
 #include <sys/time.h>
 #endif /* HAVE_SYS_SELECT_H */
+
+#define setSocketError()
 #endif /* WINDOWS */
 
 #ifdef HAVE_ALLOCA_H
@@ -227,6 +231,17 @@ static int tryHostName(char *hostName) {
   char *hostname = NULL;
   char *port;
 
+#ifdef WINDOWS
+  if (WSAStartup(
+#ifdef HAVE_GETADDRINFO
+	  MAKEWORD(2,0),
+#else /* HAVE_GETADDRINFO */
+	  MAKEWORD(1,1),
+#endif /* HAVE_GETADDRINFO */
+	  &wsadata))
+    return -1;
+#endif /* WINDOWS */
+
   addrfamily = brlapi_splitHost(hostName,&hostname,&port);
 
 #ifdef PF_LOCAL
@@ -259,6 +274,7 @@ static int tryHostName(char *hostName) {
       }
       if ((fd = socket(PF_LOCAL, SOCK_STREAM, 0))<0) {
 	brlapi_errfun="socket";
+	setSocketError();
 	goto outlibc;
       }
       sa.sun_family = AF_LOCAL;
@@ -266,6 +282,7 @@ static int tryHostName(char *hostName) {
       memcpy(sa.sun_path+lpath,port,lport+1);
       if (connect(fd, (struct sockaddr *) &sa, sizeof(sa))<0) {
 	brlapi_errfun="connect";
+	setSocketError();
 	goto outlibc;
       }
     }
@@ -279,10 +296,6 @@ static int tryHostName(char *hostName) {
 
     struct addrinfo *res,*cur;
     struct addrinfo hints;
-
-#ifdef WINDOWS
-    WSAStartup(MAKEWORD(2,0),&wsadata);
-#endif /* WINDOWS */
 
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = PF_UNSPEC;
@@ -314,10 +327,6 @@ static int tryHostName(char *hostName) {
     struct sockaddr_in addr;
     struct hostent *he;
 
-#ifdef WINDOWS
-    WSAStartup(MAKEWORD(1,0),&wsadata);
-#endif /* WINDOWS */
-
     memset(&addr,0,sizeof(addr));
     addr.sin_family = AF_INET;
     if (!port)
@@ -339,7 +348,7 @@ static int tryHostName(char *hostName) {
 
     if (!hostname) {
       addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-    } else {
+    } else if ((addr.sin_addr.s_addr = inet_addr(hostname)) == htonl(INADDR_NONE)) {
       if (!(he = gethostbyname(hostname))) {
 	brlapi_gaierrno = h_errno;
 	brlapi_errno = BRLERR_GAIERR;
@@ -365,10 +374,12 @@ static int tryHostName(char *hostName) {
     fd = socket(addr.sin_family, SOCK_STREAM, 0);
     if (fd<0) {
       brlapi_errfun = "socket";
+      setSocketError();
       goto outlibc;
     }
     if (connect(fd, (struct sockaddr *) &addr, sizeof(addr))<0) {
       brlapi_errfun = "connect";
+      setSocketError();
       goto outlibc;
     }
 

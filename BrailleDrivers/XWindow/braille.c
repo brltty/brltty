@@ -574,8 +574,6 @@ static LRESULT CALLBACK wndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
       /* menu entry */
       GET_ACTIONFUN(wParam)(NULL, (XtPointer)(GET_VALUE(wParam)), NULL);
     }
-    if ((keypressed & BRL_MSK_BLK) == BRL_BLK_ROUTE)
-      lastcursor = -1;
     return 0;
   }
   if (uMsg == WM_CONTEXTMENU) {
