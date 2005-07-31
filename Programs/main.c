@@ -514,7 +514,7 @@ trackCursor (int place) {
     if (scr.posx < (p->winx + trigger))
       p->winx = MAX(scr.posx-reset, 0);
     else if (scr.posx >= (p->winx + brl.x - trigger))
-      p->winx = MAX(MIN(scr.posx+reset+1, scr.cols)-brl.x, 0);
+      p->winx = MAX(MIN(scr.posx+reset+1, scr.cols)-(int)brl.x, 0);
   } else if (scr.posx < p->winx) {
     p->winx -= ((p->winx - scr.posx - 1) / brl.x + 1) * brl.x;
     if (p->winx < 0) p->winx = 0;
@@ -658,7 +658,7 @@ typedef int (*RowTester) (int column, int row, void *data);
 static void
 findRow (int column, int increment, RowTester test, void *data) {
   int row = p->winy + increment;
-  while ((row >= 0) && (row <= scr.rows-brl.y)) {
+  while ((row >= 0) && (row <= scr.rows-(int)brl.y)) {
     if (test(column, row, data)) {
       p->winy = row;
       return;
@@ -1359,7 +1359,7 @@ main (int argc, char *argv[]) {
                 charIndex = MAX(charIndex, scr.posx-p->winx);
               if (charIndex >= 0) {
                 if (prefs.slidingWindow)
-                  p->winx = MAX(p->winx+charIndex-brl.x+1, 0);
+                  p->winx = MAX(p->winx+charIndex-(int)brl.x+1, 0);
                 break;
               }
             }
@@ -1894,7 +1894,7 @@ main (int argc, char *argv[]) {
      * scr.cols may have changed.
      */
     {
-      int maximum = MAX(scr.rows-brl.y, 0);
+      int maximum = MAX(scr.rows-(int)brl.y, 0);
       int *table[] = {&p->winy, &p->moty, NULL};
       int **value = table;
       while (*value) {
