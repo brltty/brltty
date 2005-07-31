@@ -118,8 +118,10 @@
 #include "Programs/brl_driver.h"
 #include "braille.h"
 
-/* Braille display parameters */
+static int logInputPackets = 0;
+static int logOutputPackets = 0;
 
+/* Braille display parameters */
 typedef struct {
   const char *Name;
   unsigned char ID;
@@ -396,10 +398,10 @@ verifyInputPacket (unsigned char *buffer, int *length) {
   if (inputUsed) size = 1;
 #endif /* ! ABT3_OLD_FIRMWARE */
   if (!size) return 0;
-//LogBytes("Input Packet", inputBuffer, size);
+  if (logInputPackets) LogBytes("Input Packet", inputBuffer, size);
 
   if (*length < size) {
-    LogPrint(LOG_WARNING, "Truncted input packet: %d < %d", *length, size);
+    LogPrint(LOG_DEBUG, "truncated input packet: %d < %d", *length, size);
     size = *length;
   } else {
     *length = size;
@@ -465,6 +467,7 @@ readSerialPacket (unsigned char *buffer, int length) {
 
 static int
 writeSerialPacket (const unsigned char *buffer, int length, unsigned int *delay) {
+  if (logOutputPackets) LogBytes("Output Packet", buffer, length);
   if (delay) *delay += length * 1000 / serialCharactersPerSecond;
   return serialWriteData(serialDevice, buffer, length);
 }
@@ -530,6 +533,7 @@ readUsbPacket (unsigned char *buffer, int length) {
 
 static int
 writeUsbPacket (const unsigned char *buffer, int length, unsigned int *delay) {
+  if (logOutputPackets) LogBytes("Output Packet", buffer, length);
   return usbWriteEndpoint(usb->device, usb->definition.outputEndpoint, buffer, length, 1000);
 }
 
