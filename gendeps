@@ -16,8 +16,6 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-package require Tclx
-
 proc getProgramName {} {
    global argv0
    return [file tail $argv0]
@@ -27,9 +25,49 @@ proc writeProgramMessage {message} {
    flush stderr
 }
 
+proc lvarcat {list elements} {
+   uplevel 1 [list lappend $list] $elements
+}
+proc intersect3 {list1 list2} {
+   foreach number {1 2} {
+      set length$number [llength [set list$number [lsort [set list$number]]]]
+      set index$number 0
+      set only$number [list]
+   }
+   set both [list]
+   while {1} {
+      if {$index1 == $length1} {
+         if {$index2 < $length2} {
+            lvarcat only2 [lrange $list2 $index2 end]
+         }
+         break
+      }
+      if {$index2 == $length2} {
+         lvarcat only1 [lrange $list1 $index1 end]
+         break
+      }
+      switch -exact -- [string compare [lindex $list1 $index1] [lindex $list2 $index2]] {
+        -1 {
+            lappend only1 [lindex $list1 $index1]
+            incr index1
+         }
+         1 {
+            lappend only2 [lindex $list2 $index2]
+            incr index2
+         }
+         0 {
+            lappend both [lindex $list1 $index1]
+            incr index1
+            incr index2
+         }
+      }
+   }
+   return [list $only1 $both $only2]
+}
+
 proc getBuildDirectories {{root ""}} {
    set directories [list]
-   if {[clength $root] == 0} {
+   if {[string length $root] == 0} {
       set root .
       set setPath {
          set path $name
@@ -42,7 +80,7 @@ proc getBuildDirectories {{root ""}} {
    if {[file exists [file join $root Makefile.in]]} {
       lappend directories $root
    }
-   foreach name [readdir $root] {
+   foreach name [glob -directory $root -tails -nocomplain *] {
       eval $setPath
       if {[file isdirectory $path]} {
          lvarcat directories [getBuildDirectories $path]
@@ -70,7 +108,7 @@ proc dependencyExists {path} {
    if {[file exists $path.in]} {
       return 1
    }
-   if {[clength [set source [sourceFile $path]]] > 0} {
+   if {[string length [set source [sourceFile $path]]] > 0} {
       if {[file exists $source]} {
          return 1
       }
@@ -85,13 +123,18 @@ proc getDependencies {file} {
          global sourceContext
          set includes [list]
          set stream [open $file {RDONLY}]
-         scanfile $sourceContext $stream
+         set lines [list]
+         while {[gets $stream line] >= 0} {
+            if {[regexp {^ *# *include *"([^"]*)"} $line x header]} {
+               lappend includes $header
+            }
+         }
          close $stream; unset stream
-         if {[cequal [set directory [file dirname $file]] .]} {
+         if {[string equal [set directory [file dirname $file]] .]} {
             set directory ""
          }
          foreach include $includes {
-            if {[cequal [file extension [file rootname $include]] .auto]} {
+            if {[string equal [file extension [file rootname $include]] .auto]} {
                continue
             }
             if {[dependencyExists [set path [file join $directory $include]]]} {
@@ -109,10 +152,6 @@ proc getDependencies {file} {
 
 set sourceExtensions {c cc y}
 set sourceExtensionsGlob "{[join $sourceExtensions ,]}"
-set sourceContext [scancontext create]
-scanmatch $sourceContext {^ *# *include *"([^"]*)"} {
-   lappend includes $matchInfo(submatch0)
-}
 
 foreach buildDirectory [set buildDirectories [getBuildDirectories]] {
    foreach sourceFile [glob -nocomplain [file join $buildDirectory "*.$sourceExtensionsGlob"]] {
@@ -142,15 +181,15 @@ foreach buildDirectory [lsort $buildDirectories] {
          puts $absoluteStream "# Dependencies for $objectFile:"
          puts $relativeStream "# Dependencies for $objectName:"
          foreach dependency $dependencies($sourceFile) {
-            if {[file exists "$dependency.in"] || ([clength [sourceFile $dependency]] > 0)} {
+            if {[file exists "$dependency.in"] || ([string length [sourceFile $dependency]] > 0)} {
                set tree BLD
             } else {
                set tree SRC
             }
             puts $absoluteStream "\$(BLD_TOP)$objectFile: \$(${tree}_TOP)$dependency"
             puts -nonewline $relativeStream "$objectName: "
-            if {[cequal $buildDirectory [file dirname $dependency]]} {
-               if {![cequal $tree BLD]} {
+            if {[string equal $buildDirectory [file dirname $dependency]]} {
+               if {![string equal $tree BLD]} {
                   puts -nonewline $relativeStream "\$(${tree}_DIR)/"
                }
                puts $relativeStream [file tail $dependency]
