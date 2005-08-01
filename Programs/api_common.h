@@ -83,7 +83,7 @@ static ssize_t brlapi_writeFile(int fd, const void *buf, size_t size)
 #endif /* WINDOWS */
   for (n=0;n<size;n+=res) {
 #ifdef WINDOWS
-    OVERLAPPED overl = {0,0,0,0,CreateEvent(NULL,FALSE,FALSE,NULL)};
+    OVERLAPPED overl = {0,0,0,0,CreateEvent(NULL,TRUE,FALSE,NULL)};
     if ((!WriteFile((HANDLE) fd,buf+n,size-n,&res,&overl)
       && GetLastError() != ERROR_IO_PENDING) ||
       !GetOverlappedResult((HANDLE) fd, &overl, &res, TRUE)) {
@@ -95,7 +95,6 @@ static ssize_t brlapi_writeFile(int fd, const void *buf, size_t size)
     CloseHandle(overl.hEvent);
 #else /* WINDOWS */
     res=send(fd,buf+n,size-n,0);
-#endif /* WINDOWS */
     if ((res<0) &&
         (errno!=EINTR) &&
 #ifdef EWOULDBLOCK
@@ -104,8 +103,9 @@ static ssize_t brlapi_writeFile(int fd, const void *buf, size_t size)
         (errno!=EAGAIN)) { /* EAGAIN shouldn't happen, but who knows... */
       return res;
     }
+#endif /* WINDOWS */
   }
-  return 0;
+  return n;
 }
 
 /* brlapi_readFile */
@@ -120,22 +120,19 @@ static ssize_t brlapi_readFile(int fd, void *buf, size_t size)
 #endif /* WINDOWS */
   for (n=0;n<size && res>=0;n+=res) {
 #ifdef WINDOWS
-    OVERLAPPED overl = {0,0,0,0,CreateEvent(NULL,FALSE,FALSE,NULL)};
+    OVERLAPPED overl = {0,0,0,0,CreateEvent(NULL,TRUE,FALSE,NULL)};
     if ((!ReadFile((HANDLE) fd,buf+n,size-n,&res,&overl)
       && GetLastError() != ERROR_IO_PENDING) ||
       !GetOverlappedResult((HANDLE) fd, &overl, &res, TRUE)) {
       res = GetLastError();
       CloseHandle(overl.hEvent);
+      if (res == ERROR_HANDLE_EOF) return n;
       errno = res;
       return -1;
     }
     CloseHandle(overl.hEvent);
 #else /* WINDOWS */
     res=read(fd,buf+n,size-n);
-#endif /* WINDOWS */
-    if (res==0)
-      /* Unexpected end of file ! */
-      return n;
     if ((res<0) &&
         (errno!=EINTR) &&
 #ifdef EWOULDBLOCK
@@ -144,6 +141,10 @@ static ssize_t brlapi_readFile(int fd, void *buf, size_t size)
         (errno!=EAGAIN)) { /* EAGAIN shouldn't happen, but who knows... */
       return -1;
     }
+#endif /* WINDOWS */
+    if (res==0)
+      /* Unexpected end of file ! */
+      break;
   }
   return n;
 }

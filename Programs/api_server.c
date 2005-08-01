@@ -98,7 +98,7 @@ static size_t stackSize;
 Samuel THIBAULT <samuel.thibault@ens-lyon.org>"
 
 /* These CHECK* macros check whether a condition is true, and, if not, */
-/* send back either a non-fatal error, or an excepti)n */
+/* send back either a non-fatal error, or an exception */
 #define CHECKERR(condition, error) \
 if (!( condition )) { \
   writeError(c->fd, error); \
@@ -362,7 +362,7 @@ int readPacket(Connection *c)
     if (!GetOverlappedResult((HANDLE) c->fd,&packet->overl,&res,FALSE)) {
       switch (errno = GetLastError()) {
         case ERROR_IO_PENDING: return 0;
-	case 0:
+	case ERROR_HANDLE_EOF:
 	case ERROR_BROKEN_PIPE: return -2;
 	default: LogWindowsError("GetOverlappedResult"); return -1;
       }
@@ -395,7 +395,7 @@ read:
       packet->n = BRLAPI_MAXPACKETSIZE;
     }
     packet->p = packet->content;
-  } else if (packet->readBytes==packet->header.size) goto out;
+  } else if ((packet->state == READING_CONTENT) && (packet->readBytes==packet->header.size)) goto out;
   else if (packet->state==DISCARDING) {
     packet->p = packet->content;
     packet->n = MIN(packet->header.size-packet->readBytes, BRLAPI_MAXPACKETSIZE);
@@ -405,14 +405,16 @@ read:
   }
 #ifdef WINDOWS
   } else packet->state = READING_HEADER;
+  ResetEvent(packet->overl.hEvent);
   if (!ReadFile((HANDLE)c->fd, packet->p, packet->n, &res, &packet->overl)) {
     switch (errno = GetLastError()) {
       case ERROR_IO_PENDING: return 0;
-      case 0:
+      case ERROR_HANDLE_EOF:
       case ERROR_BROKEN_PIPE: return -2;
       default: LogWindowsError("ReadFile"); return -1;
     }
   }
+  if (res==0) return -2; /* EOF */
 #endif /* WINDOWS */
   goto read;
 
@@ -1097,6 +1099,7 @@ static int processRequest(Connection *c, PacketHandlers *handlers)
       LogPrint(LOG_DEBUG,"Client on fd %d did not give up control of tty %#010x properly",c->fd,c->tty->number);
       doLeaveTty(c);
     }
+    if (c->auth==0) unauthConnections--;
     return 1;
   }
   size = c->packet.header.size;
@@ -1114,6 +1117,7 @@ static int processRequest(Connection *c, PacketHandlers *handlers)
       return 0;
     } else {
       writeError(c->fd, BRLERR_CONNREFUSED);
+      unauthConnections--;
       return 1;
     }
   }
@@ -1926,7 +1930,7 @@ static void *server(void *arg)
 	res = accept(socketInfo[i].fd, (struct sockaddr *) &addr, &addrlen);
 	if (res<0) {
 	  LogPrint(LOG_WARNING,"accept(%d): %s",socketInfo[i].fd,strerror(errno));
-	  break;
+	  continue;
 	}
 #ifdef WINDOWS
       } else /* PF_LOCAL */ {
@@ -1945,7 +1949,6 @@ static void *server(void *arg)
         if (unauthConnLog==0) LogPrint(LOG_WARNING, "Too many simultaneous unauthenticated connections");
         unauthConnLog++;
       } else {
-        unauthConnections++;
 #ifndef WINDOWS
         if (!setBlockingIo(res, 0)) {
           LogPrint(LOG_WARNING, "Failed to switch to non-blocking mode: %s",strerror(errno));
@@ -1957,6 +1960,7 @@ static void *server(void *arg)
           LogPrint(LOG_WARNING,"Failed to create connection structure");
           close(res);
         }
+        unauthConnections++;
 	addConnection(c, notty.connections);
       }
     }
