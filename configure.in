@@ -288,8 +288,8 @@ AC_SUBST([CONFLIBDIR], ["${brltty_cv_prog_conflibdir}"])
 case "${host_os}"
 in
    cygwin*|mingw*)
-      AC_HAVE_LIBRARY([wsock32])
-      AC_HAVE_LIBRARY([msvcp60])
+      BRLTTY_CHECK_DLL([wsock32])
+      BRLTTY_CHECK_DLL([msvcp60])
       ;;
    *)
       AC_SEARCH_LIBS([socket], [socket])

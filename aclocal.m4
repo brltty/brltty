@@ -578,3 +578,20 @@ s/^ */-Wl /
 s/ *$//
 s/  */,/g
 '`])
+
+AC_DEFUN([BRLTTY_CHECK_DLL], [dnl
+AC_CACHE_CHECK(
+   [if the $1 DLL can be loaded],
+   [brltty_cv_dll_$1],
+   [AC_TRY_RUN([
+#include <windows.h>
+int main () {
+   return !LoadLibrary("$1.DLL");
+}
+],
+[brltty_cv_dll_$1=yes],
+[brltty_cv_dll_$1=no])])
+if test "${brltty_cv_dll_$1}" = "yes"
+then
+   AC_HAVE_LIBRARY([$1])
+fi])
