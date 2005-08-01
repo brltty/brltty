@@ -583,7 +583,7 @@ int brlapi_leaveRaw(void);
  * \param buf points on the packet;
  * \param size holds the packet size.
  * \return size on success, -1 on error */
-ssize_t brlapi_sendRaw(const unsigned char *buf, size_t size);
+ssize_t brlapi_sendRaw(const void *buf, size_t size);
 
 /* brlapi_recvRaw */
 /** Get a Raw packet
@@ -592,7 +592,7 @@ ssize_t brlapi_sendRaw(const unsigned char *buf, size_t size);
  * packet;
  * \param size holds the buffer size.
  * \return its size, -1 on error, or -2 on EOF */
-ssize_t brlapi_recvRaw(unsigned char *buf, size_t size);
+ssize_t brlapi_recvRaw(void *buf, size_t size);
 
 /** @} */
 

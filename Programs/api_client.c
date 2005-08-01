@@ -551,7 +551,7 @@ int brlapi_leaveRaw(void)
 
 /* brlapi_sendRaw */
 /* Send a Raw Packet */
-ssize_t brlapi_sendRaw(const unsigned char *buf, size_t size)
+ssize_t brlapi_sendRaw(const void *buf, size_t size)
 {
   ssize_t res;
   pthread_mutex_lock(&brlapi_fd_mutex);
@@ -562,7 +562,7 @@ ssize_t brlapi_sendRaw(const unsigned char *buf, size_t size)
 
 /* brlapi_recvRaw */
 /* Get a Raw packet */
-ssize_t brlapi_recvRaw(unsigned char *buf, size_t size)
+ssize_t brlapi_recvRaw(void *buf, size_t size)
 {
   ssize_t res;
   pthread_mutex_lock(&brlapi_fd_mutex);
