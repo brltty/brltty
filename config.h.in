@@ -269,6 +269,12 @@ extern "C" {
 /* Define this if GPM is to be used. */
 #undef HAVE_LIBGPM
 
+/* Define this if the wsock32 library is available. */
+#undef HAVE_LIBWSOCK32
+
+/* Define this if the msvcp60 library is available. */
+#undef HAVE_LIBMSVCP60
+
 /* Define this if X is not available. */
 #undef X_DISPLAY_MISSING
 
