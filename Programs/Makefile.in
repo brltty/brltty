@@ -190,6 +190,12 @@ sys_hurd.$O:
 sys_darwin.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_darwin.c
 
+sys_cygwin.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_cygwin.c
+
+sys_windows.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_windows.c
+
 ###############################################################################
 
 usb.$O:
