@@ -730,7 +730,7 @@ BRLTTY_ARG_ENABLE(
 AC_CACHE_CHECK([for linkage editor program creation flags], [brltty_cv_prog_ld_flags], [dnl
 case "${host_os}"
 in
-   linux*|gnu*|openbsd*|freebsd*|netbsd*|*qnx*|cygwin*|mingw*)
+   linux*|gnu*|openbsd*|freebsd*|netbsd*|*qnx*)
       brltty_cv_prog_ld_flags="-export-dynamic -rpath ${execute_root}${library_directory}"
       ;;
    solaris*)
@@ -741,6 +741,9 @@ in
       ;;
    osf*)
       brltty_cv_prog_ld_flags="-rpath ${execute_root}${library_directory}"
+      ;;
+   cygwin*|mingw*)
+      brltty_cv_prog_ld_flags="-export-dynamic -rpath ${execute_root}${library_directory} --enable-auto-import"
       ;;
    darwin*)
       brltty_cv_prog_ld_flags=""
