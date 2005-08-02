@@ -540,7 +540,7 @@ void getText(const BrailleWindow *brailleWindow, unsigned char *buf)
 static void handleResize(BrailleDisplay *brl)
 {
   /* TODO: handle resize */
-  LogPrint(LOG_INFO,"BrlAPI resize\n");
+  LogPrint(LOG_INFO,"BrlAPI resize");
 }
 
 /****************************************************************************/
