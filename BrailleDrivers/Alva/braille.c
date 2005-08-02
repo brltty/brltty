@@ -118,8 +118,9 @@
 #include "Programs/brl_driver.h"
 #include "braille.h"
 
-static int logInputPackets = 0;
-static int logOutputPackets = 0;
+static const int logInputBuffer = 0;
+static const int logInputPackets = 0;
+static const int logOutputPackets = 0;
 
 /* Braille display parameters */
 typedef struct {
@@ -219,7 +220,6 @@ static BRLPARAMS Models[] =
 };
 
 
-#define BRLROWS		1
 #define MAX_STCELLS	5	/* hiest number of status cells */
 
 
@@ -346,32 +346,39 @@ typedef struct {
   int (*openPort) (char **parameters, const char *device);
   int (*resetPort) (void);
   void (*closePort) (void);
+  int (*awaitInput) (int milliseconds);
   int (*readPacket) (unsigned char *buffer, int length);
   int (*writePacket) (const unsigned char *buffer, int length, unsigned int *delay);
 } InputOutputOperations;
-
 static const InputOutputOperations *io;
-static unsigned char inputBuffer[0X40];
+
+#define PACKET_SIZE(count) (((count) * 2) + 4)
+#define MAXIMUM_PACKET_SIZE PACKET_SIZE(0XFF)
+static unsigned char inputBuffer[MAXIMUM_PACKET_SIZE];
 static int inputUsed;
 
 static int
 verifyInputPacket (unsigned char *buffer, int *length) {
   int size = 0;
-//LogBytes("Input Buffer", inputBuffer, inputUsed);
+  if (logInputBuffer) LogBytes("Input Buffer", inputBuffer, inputUsed);
+
 #if ! ABT3_OLD_FIRMWARE
   while (inputUsed > 0) {
     if (inputBuffer[0] == 0X7F) {
       if (inputUsed < 3) break;
       if (inputBuffer[2] != 0X7E) goto unrecognized;
       if (inputUsed < 4) break;
+
       {
-        int count = (inputBuffer[3] * 2) + 4;
+        int count = PACKET_SIZE(inputBuffer[3]);
         int complete = inputUsed >= count;
         int index;
+
         if (!complete) count = inputUsed;
         for (index=4; index<count; index+=2)
           if (inputBuffer[index] != 0X7E)
             goto unrecognized;
+
         if (complete) size = count;
         break;
       }
@@ -397,6 +404,7 @@ verifyInputPacket (unsigned char *buffer, int *length) {
 #else /* ABT3_OLD_FIRMWARE */
   if (inputUsed) size = 1;
 #endif /* ! ABT3_OLD_FIRMWARE */
+
   if (!size) return 0;
   if (logInputPackets) LogBytes("Input Packet", inputBuffer, size);
 
@@ -406,8 +414,9 @@ verifyInputPacket (unsigned char *buffer, int *length) {
   } else {
     *length = size;
   }
-  memcpy(buffer, &inputBuffer[0], *length);
-  memcpy(&inputBuffer[0], &inputBuffer[*length], inputUsed-=*length);
+
+  memcpy(buffer, &inputBuffer[0], size);
+  memcpy(&inputBuffer[0], &inputBuffer[size], inputUsed-=size);
   return 1;
 }
 
@@ -452,6 +461,11 @@ closeSerialPort (void) {
 }
 
 static int
+awaitSerialInput (int milliseconds) {
+  return serialAwaitInput(serialDevice, milliseconds);
+}
+
+static int
 readSerialPacket (unsigned char *buffer, int length) {
   while (1) {
     unsigned char byte;
@@ -474,7 +488,7 @@ writeSerialPacket (const unsigned char *buffer, int length, unsigned int *delay)
 
 static const InputOutputOperations serialOperations = {
   openSerialPort, resetSerialPort, closeSerialPort,
-  readSerialPacket, writeSerialPacket
+  awaitSerialInput, readSerialPacket, writeSerialPacket
 };
 
 #ifdef ENABLE_USB_SUPPORT
@@ -511,6 +525,11 @@ closeUsbPort (void) {
 }
 
 static int
+awaitUsbInput (int milliseconds) {
+  return usbAwaitInput(usb->device, usb->definition.inputEndpoint, milliseconds);
+}
+
+static int
 readUsbPacket (unsigned char *buffer, int length) {
   while (1) {
     unsigned char bytes[2];
@@ -539,7 +558,7 @@ writeUsbPacket (const unsigned char *buffer, int length, unsigned int *delay) {
 
 static const InputOutputOperations usbOperations = {
   openUsbPort, resetUsbPort, closeUsbPort,
-  readUsbPacket, writeUsbPacket
+  awaitUsbInput, readUsbPacket, writeUsbPacket
 };
 #endif /* ENABLE_USB_SUPPORT */
 
@@ -588,6 +607,32 @@ reallocateBuffers (BrailleDisplay *brl) {
 }
 
 static int
+updateDisplayConfiguration (BrailleDisplay *brl, const unsigned char *packet, int autodetecting) {
+  int count = packet[3];
+
+  if (count >= 3) {
+    unsigned char cells = packet[9];
+    if (cells != NbStCells) {
+      NbStCells = cells;
+      LogPrint(LOG_INFO, "Status cell count changed to %d.", NbStCells);
+    }
+  }
+
+  if (count >= 4) {
+    unsigned char columns = packet[11];
+    if (columns != brl->x) {
+      brl->x = columns;
+      if (!autodetecting) {
+        if (!reallocateBuffers(brl)) return 0;
+        brl->resizeRequired = 1;
+      }
+    }
+  }
+
+  return 1;
+}
+
+static int
 identifyModel (BrailleDisplay *brl, unsigned char identifier) {
   /* Find out which model we are connected to... */
   for (
@@ -607,39 +652,41 @@ identifyModel (BrailleDisplay *brl, unsigned char identifier) {
 
   /* Set model parameters... */
   brl->x = model->Cols;
-  brl->y = BRLROWS;
+  brl->y = 1;
   brl->helpPage = model->HelpPage;			/* initialise size of display */
   NbStCells = model->NbStCells;
+
+  if (model->Flags & BPF_CONFIGURABLE) {
+    BRLSYMBOL.firmness = brl_firmness;
+
+    writeFunction(brl, 0X07);
+    while (io->awaitInput(200)) {
+      unsigned char packet[MAXIMUM_PACKET_SIZE];
+      int count = io->readPacket(packet, sizeof(packet));
+      if (count == -1) break;
+      if (count == 0) continue;
+
+      if ((packet[0] == 0X7F) && (packet[1] == 0X07)) {
+        updateDisplayConfiguration(brl, packet, 1);
+        break;
+      }
+    }
+
+    writeFunction(brl, 0X0B);
+  } else {
+    BRLSYMBOL.firmness = NULL; 
+  }
 
   /* Allocate space for buffers */
   if (!reallocateBuffers(brl)) return 0;
   rewriteRequired = 1;			/* To write whole display at first time */
   gettimeofday(&rewriteTime, NULL);
 
-  if (model->Flags & BPF_CONFIGURABLE) {
-    BRLSYMBOL.firmness = brl_firmness;
-    writeFunction(brl, 0X07);
-    writeFunction(brl, 0X0B);
-  } else {
-    BRLSYMBOL.firmness = NULL; 
-  }
   return 1;
 }
 
 static int
-getModelIdentifier (unsigned char *identifier) {
-  unsigned char packet[BRL_ID_SIZE];
-  if (io->readPacket(packet, sizeof(packet)) == sizeof(packet)) {
-    if (memcmp(packet, BRL_ID, BRL_ID_LENGTH) == 0) {
-      *identifier = packet[BRL_ID_LENGTH];
-      return 1;
-    }
-  }
-  return 0;
-}
-
-static int brl_open (BrailleDisplay *brl, char **parameters, const char *device)
-{
+brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
   unsigned char ModelID = MODEL;
 
   {
@@ -662,24 +709,29 @@ static int brl_open (BrailleDisplay *brl, char **parameters, const char *device)
   inputUsed = 0;
 
   /* Open the Braille display device */
-  if (!io->openPort(parameters, device)) goto failure;
+  if (io->openPort(parameters, device)) {
+    if (io->resetPort()) {
+      int probes = 0;
+      while (writeFunction(brl, 0X06) != -1) {
+        while (io->awaitInput(200)) {
+          unsigned char packet[MAXIMUM_PACKET_SIZE];
+          if (io->readPacket(packet, sizeof(packet)) > 0) {
+            if (memcmp(packet, BRL_ID, BRL_ID_LENGTH) == 0) {
+              ModelID = packet[BRL_ID_LENGTH];
+              if (identifyModel(brl, ModelID)) {
+                return 1;
+              }
+            }
+          }
+        }
+        if (errno != EAGAIN) break;
+        if (++probes == 3) break;
+      }
+    }
 
-  /* autodetecting ABT model */
-  do {
-    if (!io->resetPort()) goto failure;
-    approximateDelay(1000);		/* delay before 2nd line drop */
-    if (getModelIdentifier(&ModelID)) break;
+    io->closePort();
+  }
 
-    if (writeFunction(brl, 0X06) == -1) goto failure;
-    approximateDelay(200);
-    if (getModelIdentifier(&ModelID)) break;
-  } while (ModelID == ABT_AUTO);
-
-  if (!identifyModel(brl, ModelID)) goto failure;
-  return 1;
-
-failure:
-  brl_close(brl);
   return 0;
 }
 
@@ -767,9 +819,9 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *st)
 
 
 
-static int GetKey (BrailleDisplay *brl, unsigned int *Keys, unsigned int *Pos)
-{
-  unsigned char packet[0X40];
+static int
+GetKey (BrailleDisplay *brl, unsigned int *Keys, unsigned int *Pos) {
+  unsigned char packet[MAXIMUM_PACKET_SIZE];
   int length = io->readPacket(packet, sizeof(packet));
   if (length < 1) return length;
 #if ! ABT3_OLD_FIRMWARE
@@ -835,29 +887,10 @@ static int GetKey (BrailleDisplay *brl, unsigned int *Keys, unsigned int *Pos)
 
     case 0X7F:
       switch (packet[1]) {
-        case 0X07: { /* text/status cells reconfigured */
-          int count = packet[3];
-
-          if (count >= 3) {
-            unsigned char cells = packet[9];
-            if (cells != NbStCells) {
-              NbStCells = cells;
-              LogPrint(LOG_INFO, "Status cell count changed to %d.", NbStCells);
-            }
-          }
-
-          if (count >= 4) {
-            unsigned char columns = packet[11];
-            if (columns != brl->x) {
-              brl->x = columns;
-              if (!reallocateBuffers(brl)) return -1;
-              brl->resizeRequired = 1;
-            }
-          }
-
+        case 0X07: /* text/status cells reconfigured */
+          if (!updateDisplayConfiguration(brl, packet, 0)) return -1;
           rewriteRequired = 1;
           return 0;
-        }
 
         case 0X0B: { /* display parameters reconfigured */
           int count = packet[3];
@@ -921,8 +954,8 @@ static int GetKey (BrailleDisplay *brl, unsigned int *Keys, unsigned int *Pos)
 }
 
 
-static int brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context)
-{
+static int
+brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   static unsigned int CurrentKeys = 0, LastKeys = 0, ReleasedKeys = 0;
   static unsigned int RoutingPos = 0;
   int res = EOF;
