@@ -160,11 +160,6 @@ BRLTTY_SUMMARY_ITEM([init-path], [init_path])
 AC_PROG_MAKE_SET
 
 AC_PROG_CC
-if test "${GCC}" = "yes"
-then
-   CFLAGS="${CFLAGS} -Wall"
-fi
-
 if test -z "${CXX}"
 then
    if test "${GCC}" = "yes"
@@ -181,9 +176,21 @@ then
    fi
 fi
 AC_PROG_CXX
+
+brltty_gcc_options="-Wall"
+case "${build_os} ${host_os}"
+in
+   cygwin*\ mingw*)
+      brltty_gcc_options="${brltty_gcc_options} -mno-cygwin"
+      ;;
+esac
+if test "${GCC}" = "yes"
+then
+   CC="${CC} ${brltty_gcc_options}"
+fi
 if test "$GXX" = "yes"
 then
-   CXXFLAGS="${CXXFLAGS} -Wall -pipe"
+   CXX="${CXX} ${brltty_gcc_options}"
 fi
 
 AC_CHECK_PROGS([LD], [ld], [ld])
@@ -288,8 +295,8 @@ AC_SUBST([CONFLIBDIR], ["${brltty_cv_prog_conflibdir}"])
 case "${host_os}"
 in
    cygwin*|mingw*)
-      BRLTTY_CHECK_DLL([wsock32])
-      BRLTTY_CHECK_DLL([msvcp60])
+      BRLTTY_HAVE_DLL([wsock32])
+      BRLTTY_HAVE_DLL([msvcp60])
       ;;
    *)
       AC_SEARCH_LIBS([socket], [socket])

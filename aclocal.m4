@@ -579,7 +579,7 @@ s/ *$//
 s/  */,/g
 '`])
 
-AC_DEFUN([BRLTTY_CHECK_DLL], [dnl
+AC_DEFUN([BRLTTY_HAVE_DLL], [dnl
 AC_CACHE_CHECK(
    [if the $1 DLL can be loaded],
    [brltty_cv_dll_$1],
