@@ -26,7 +26,6 @@ proc writeProgramMessage {message} {
 }
 
 if {[catch [list package require Tclx] response] != 0} {
-   writeProgramMessage $response
    proc lvarcat {list elements} {
       uplevel 1 [list lappend $list] $elements
    }
