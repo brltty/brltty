@@ -1691,7 +1691,28 @@ exitPidFile (void) {
   unlink(opt_pidFile);
 }
 
-#if defined(HAVE_SYS_WAIT_H)
+#if defined(WINDOWS)
+static void
+background (void) {
+  LPTSTR cmdline = GetCommandLine();
+  int len = strlen(cmdline);
+  char newcmdline[len+4];
+  STARTUPINFO startupinfo;
+  PROCESS_INFORMATION processinfo;
+
+  memset(&startupinfo, 0, sizeof(startupinfo));
+  startupinfo.cb = sizeof(startupinfo);
+
+  memcpy(newcmdline, cmdline, len);
+  memcpy(newcmdline+len, " -n", 4);
+
+  if (CreateProcess(NULL, newcmdline, NULL, NULL, TRUE, CREATE_NEW_PROCESS_GROUP, NULL, NULL, &startupinfo, &processinfo)) {
+    ExitProcess(0);
+  } else {
+    LogWindowsError("CreateProcess");
+  }
+}
+#elif defined(HAVE_SYS_WAIT_H)
 static void
 parentExit0 (int signalNumber) {
   _exit(0);
@@ -1729,27 +1750,6 @@ background (void) {
   if (!opt_standardError) {
     LogClose();
     LogOpen(1);
-  }
-}
-#elif defined(__MINGW32__)
-static void
-background (void) {
-  LPTSTR cmdline = GetCommandLine();
-  int len = strlen(cmdline);
-  char newcmdline[len+4];
-  STARTUPINFO startupinfo;
-  PROCESS_INFORMATION processinfo;
-
-  memset(&startupinfo, 0, sizeof(startupinfo));
-  startupinfo.cb = sizeof(startupinfo);
-
-  memcpy(newcmdline, cmdline, len);
-  memcpy(newcmdline+len, " -n", 4);
-
-  if (CreateProcess(NULL, newcmdline, NULL, NULL, TRUE, CREATE_NEW_PROCESS_GROUP, NULL, NULL, &startupinfo, &processinfo)) {
-    ExitProcess(0);
-  } else {
-    LogWindowsError("CreateProcess");
   }
 }
 #endif /* background() */
@@ -1837,7 +1837,9 @@ startup (int argc, char *argv[]) {
     exit(0);
   }
 
-#if defined(HAVE_SYS_WAIT_H)
+#if defined(WINDOWS)
+  if (!opt_noDaemon) background();
+#elif defined(HAVE_SYS_WAIT_H)
   if (!opt_noDaemon) {
     const int signalNumber = SIGUSR1;
     struct sigaction newAction, oldAction;
@@ -1860,8 +1862,6 @@ startup (int argc, char *argv[]) {
       opt_noDaemon = 1;
     }
   }
-#elif defined(__MINGW32__)
-  if (!opt_noDaemon) background();
 #else /* background() */
   opt_noDaemon = 1;
 #endif /* background() */
