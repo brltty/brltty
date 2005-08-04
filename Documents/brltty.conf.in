@@ -334,4 +334,7 @@
 #screen-parameters lx:DebugSfm=no # [no,yes]
 #screen-parameters lx:DebugCtt=no # [no,yes]
 
+# Windows Screen Driver Parameters
+#screen-parameters wn:Root=no # [no,yes]
+
 

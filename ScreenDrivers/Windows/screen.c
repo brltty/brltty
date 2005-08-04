@@ -20,18 +20,33 @@
 #include "Programs/misc.h"
 #include "Programs/brldefs.h"
 
+typedef enum {
+  PARM_ROOT
+} ScreenParameters;
+#define SCRPARMS "root"
+
 #include "Programs/scr_driver.h"
 
 static HANDLE consoleOutput = INVALID_HANDLE_VALUE;
 static HANDLE consoleInput = INVALID_HANDLE_VALUE;
 
+static unsigned int root;
+
 static int
 prepare_WindowsScreen (char **parameters) {
+  validateYesNo(&root, "disable input simulation and output reading", parameters[PARM_ROOT]);
   return 1;
 }
 
 static int
 open_WindowsScreen (void) {
+  if (root) {
+    if (!FreeConsole()) {
+      LogWindowsError("FreeConsole");
+      return 0;
+    }
+    return 1;
+  }
   if ((consoleOutput == INVALID_HANDLE_VALUE &&
     (consoleOutput = CreateFile("CONOUT$",GENERIC_READ|GENERIC_WRITE,FILE_SHARE_READ|FILE_SHARE_WRITE,NULL,OPEN_EXISTING,0,NULL)) == INVALID_HANDLE_VALUE)
     ||(consoleInput == INVALID_HANDLE_VALUE &&
@@ -49,20 +64,37 @@ setup_WindowsScreen (void) {
 
 static void
 close_WindowsScreen (void) {
+  CloseHandle(consoleInput);
+  consoleInput = INVALID_HANDLE_VALUE;
+  CloseHandle(consoleOutput);
+  consoleOutput = INVALID_HANDLE_VALUE;
 }
+
+static const char noterm [] = "no terminal to read";
 
 static void
 describe_WindowsScreen (ScreenDescription *description) {
   CONSOLE_SCREEN_BUFFER_INFO info;
   description->no = (int) GetForegroundWindow();
   if (consoleOutput == INVALID_HANDLE_VALUE)
-    return;
-  if (!(GetConsoleScreenBufferInfo(consoleOutput, &info)))
-    return;
+    goto error;
+  if (!(GetConsoleScreenBufferInfo(consoleOutput, &info))) {
+    LogWindowsError("GetConsoleScreenBufferInfo");
+    CloseHandle(consoleOutput);
+    consoleOutput = INVALID_HANDLE_VALUE;
+    goto error;
+  }
   description->cols = info.srWindow.Right + 1 - info.srWindow.Left;
   description->rows = info.srWindow.Bottom + 1 - info.srWindow.Top;
   description->posx = info.dwCursorPosition.X - info.srWindow.Left;
   description->posy = info.dwCursorPosition.Y - info.srWindow.Top; 
+  return;
+
+error:
+  description->rows = 1;
+  description->cols = strlen(noterm);
+  description->posx = 0;
+  description->posy = 0;
 }
 
 static int
@@ -79,10 +111,14 @@ read_WindowsScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
   CONSOLE_SCREEN_BUFFER_INFO info;
 
   if (consoleOutput == INVALID_HANDLE_VALUE)
-    return 0;
+    goto error;
 
-  if (!(GetConsoleScreenBufferInfo(consoleOutput, &info)))
-    return 0;
+  if (!(GetConsoleScreenBufferInfo(consoleOutput, &info))) {
+    LogWindowsError("GetConsoleScreenBufferInfo");
+    CloseHandle(consoleOutput);
+    consoleOutput = INVALID_HANDLE_VALUE;
+    goto error;
+  }
 
   coord.X = box.left + info.srWindow.Left;
   coord.Y = box.top + info.srWindow.Top;
@@ -96,12 +132,13 @@ read_WindowsScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
   }
 
   if (!(buf = malloc(box.width*size)))
-    return 0;
+    goto error;
 
   for (y = 0; y < box.height; y++, coord.Y++) {
     if (!fun(consoleOutput, buf, box.width, coord, &read) || read != box.width) {
       LogWindowsError("ReadConsoleOutput");
-      exit(0);
+      free(buf);
+      goto error;
     }
     if (text)
       for (x = 0; x < box.width; x++) {
@@ -117,6 +154,9 @@ read_WindowsScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
   }
   free(buf);
   return 1;
+error:
+  strncpy((char *)buffer, noterm+box.left, box.width);
+  return 0;
 }
 
 static int 
@@ -124,6 +164,8 @@ doinsert(INPUT_RECORD *buf) {
   DWORD num;
   if (!(WriteConsoleInputW(consoleInput, buf, 1, &num))) {
     LogWindowsError("WriteConsoleInput");
+    CloseHandle(consoleInput);
+    consoleInput = INVALID_HANDLE_VALUE;
     return 0;
   }
   if (num!=1) {
