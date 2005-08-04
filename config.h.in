@@ -58,9 +58,16 @@ extern "C" {
 /* Define this if the header file iconv.h exists. */
 #undef HAVE_ICONV_H
 
-#ifndef WINDOWS
+#ifdef WINDOWS
+
+/* Define this if named pipes are supported. */
+#undef WINDOWS_NAMED_PIPES
+
+#else /* WINDOWS */
+
 /* Define this if the header file sys/select.h exists. */
 #undef HAVE_SYS_SELECT_H
+
 #endif /* WINDOWS */
 
 /* Define this if the header file sys/wait.h exists. */

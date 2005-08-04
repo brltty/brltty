@@ -297,6 +297,33 @@ in
    cygwin*|mingw*)
       BRLTTY_HAVE_DLL([wsock32])
       BRLTTY_HAVE_DLL([msvcp60])
+
+      AC_CACHE_CHECK(
+         [if named pipes can be created],
+         [brltty_cv_windows_named_pipes],
+         [AC_TRY_RUN([
+#include <windows.h>
+#include <stdio.h>
+
+int
+main (void) {
+  DWORD ID = GetCurrentProcessId();
+  char path[32];
+  HANDLE res;
+
+  snprintf(path, sizeof(path), "\\\\.\\pipe\\configure-%ld", ID);
+  res = CreateNamedPipe(path, PIPE_ACCESS_DUPLEX,
+                        PIPE_TYPE_BYTE | PIPE_READMODE_BYTE,
+                        PIPE_UNLIMITED_INSTANCES, 0, 0, 0, NULL);
+  return (res == INVALID_HANDLE_VALUE)? 1: 0;
+}
+],
+         [brltty_cv_windows_named_pipes=yes],
+         [brltty_cv_windows_named_pipes=no])])
+      if test "${brltty_cv_windows_named_pipes}" = "yes"
+      then
+         AC_DEFINE([WINDOWS_NAMED_PIPES])
+      fi
       ;;
    *)
       AC_SEARCH_LIBS([socket], [socket])
