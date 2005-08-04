@@ -29,6 +29,7 @@ if {[catch [list package require Tclx] response] != 0} {
    proc lvarcat {list elements} {
       uplevel 1 [list lappend $list] $elements
    }
+
    proc intersect3 {list1 list2} {
       foreach number {1 2} {
          set length$number [llength [set list$number [lsort [set list$number]]]]
@@ -65,8 +66,19 @@ if {[catch [list package require Tclx] response] != 0} {
       }
       return [list $only1 $both $only2]
    }
-   proc readdir {directory} {
-      return [glob -directory $directory -tails -nocomplain *]
+
+   if {$tcl_version < 8.4} {
+      proc readdir {directory} {
+         set workingDirectory [pwd]
+         cd $directory
+         set names [glob -nocomplain *]
+         cd $workingDirectory
+         return $names
+      }
+   } else {
+      proc readdir {directory} {
+         return [glob -directory $directory -tails -nocomplain *]
+      }
    }
 }
 
