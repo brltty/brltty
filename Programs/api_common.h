@@ -39,6 +39,7 @@ extern "C" {
 
 #ifdef WINDOWS
 #include <ws2tcpip.h>
+#include <w32api.h>
 #include <io.h>
 #else /* WINDOWS */
 #include <sys/socket.h>
@@ -50,6 +51,10 @@ extern "C" {
 #if !defined(PF_LOCAL) && defined(PF_UNIX)
 #define PF_LOCAL PF_UNIX
 #endif /* !defined(PF_LOCAL) && defined(PF_UNIX) */
+
+#if defined(WINDOWS) && _WIN32_WINNT >= Windows2000
+#define HAVE_FUNC_CREATENAMEDPIPE
+#endif
 
 #ifndef MIN
 #define MIN(a, b) (((a) < (b))? (a): (b))
@@ -269,7 +274,7 @@ int BRLAPI(loadAuthKey)(const char *filename, size_t *authlength, void *auth)
 int BRLAPI(splitHost)(const char *host, char **hostname, char **port) {
   const char *c;
   if (!host || !*host) {
-#ifdef PF_LOCAL
+#if defined(PF_LOCAL) && (!defined(WINDOWS) || defined(HAVE_FUNC_CREATENAMEDPIPE))
     *hostname = NULL;
     *port = strdup("0");
     return PF_LOCAL;
@@ -289,7 +294,7 @@ int BRLAPI(splitHost)(const char *host, char **hostname, char **port) {
       snprintf(*port,6,"%u",BRLAPI_SOCKETPORTNUM+porti);
       return PF_UNSPEC;
     } else {
-#ifdef PF_LOCAL
+#if defined(PF_LOCAL) && (!defined(WINDOWS) || defined(HAVE_FUNC_CREATENAMEDPIPE))
       *hostname = NULL;
       *port = strdup(c+1);
       return PF_LOCAL;

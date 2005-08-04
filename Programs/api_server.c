@@ -36,6 +36,7 @@
 
 #ifdef WINDOWS
 #include <ws2tcpip.h>
+#include <w32api.h>
 
 #ifdef __MINGW32__
 #include "win_pthread.h"
@@ -1379,7 +1380,7 @@ err:
   return -1;
 }
 
-#ifdef PF_LOCAL
+#if defined(PF_LOCAL) && (!defined(WINDOWS) || defined(HAVE_FUNC_CREATENAMEDPIPE))
 
 #ifndef WINDOWS
 static int readPid(char *path)
@@ -1568,7 +1569,7 @@ outfd:
 out:
   return -1;
 }
-#endif
+#endif /* PF_LOCAL */
 
 static void *establishSocket(void *arg)
 {
@@ -1590,12 +1591,12 @@ static void *establishSocket(void *arg)
   }
 #endif /* WINDOWS */
 
-#if defined(PF_LOCAL)
+#if defined(PF_LOCAL) && (!defined(WINDOWS) || defined(HAVE_FUNC_CREATENAMEDPIPE))
   if ((cinfo->addrfamily==PF_LOCAL && (cinfo->fd=initializeLocalSocket(cinfo))==-1) ||
       (cinfo->addrfamily!=PF_LOCAL && 
-#else
+#else /* PF_LOCAL */
   if ((
-#endif
+#endif /* PF_LOCAL */
 	(cinfo->fd=initializeTcpSocket(cinfo))==-1))
     LogPrint(LOG_WARNING,"Error while initializing socket %d",num);
   else
@@ -1668,7 +1669,7 @@ static void closeSockets(void *arg)
 	info->overl.hEvent = NULL;
       }
 #else /* WINDOWS */
-#ifdef PF_LOCAL
+#if defined(PF_LOCAL) && (!defined(WINDOWS) || defined(HAVE_FUNC_CREATENAMEDPIPE))
       if (info->addrfamily==PF_LOCAL) {
 	char *path;
 	int lpath=strlen(BRLAPI_SOCKETPATH),lport=strlen(info->port);
@@ -1921,7 +1922,9 @@ static void *server(void *arg)
 #ifdef WINDOWS
     if (socketInfo[i].fd != -1 &&
 	WaitForSingleObject(socketInfo[i].overl.hEvent, 0) == WAIT_OBJECT_0) {
+#if defined(HAVE_FUNC_CREATENAMEDPIPE)
       if (socketInfo[i].addrfamily != PF_LOCAL) {
+#endif /* defined(HAVE_FUNC_CREATENAMEDPIPE) */
 	ResetEvent(socketInfo[i].overl.hEvent);
 #else /* WINDOWS */
     if (socketInfo[i].fd>=0 && FD_ISSET(socketInfo[i].fd, &sockset)) {
@@ -1933,6 +1936,7 @@ static void *server(void *arg)
 	  continue;
 	}
 #ifdef WINDOWS
+#if defined(HAVE_FUNC_CREATENAMEDPIPE)
       } else /* PF_LOCAL */ {
         DWORD foo;
 	if (!(GetOverlappedResult((HANDLE) socketInfo[i].fd, &socketInfo[i].overl, &foo, FALSE)))
@@ -1941,6 +1945,7 @@ static void *server(void *arg)
 	if ((socketInfo[i].fd = initializeLocalSocket(&socketInfo[i])) != -1)
 	  LogPrint(LOG_DEBUG,"socket %d re-established (fd %p, was %p)",i,(HANDLE) socketInfo[i].fd,(HANDLE) res);
       }
+#endif /* defined(HAVE_FUNC_CREATENAMEDPIPE) */
 #endif /* WINDOWS */
       LogPrint(LOG_DEBUG,"Connection accepted on fd %d",res);
       if (unauthConnections>=UNAUTH_MAX) {
@@ -1964,12 +1969,12 @@ static void *server(void *arg)
 	addConnection(c, notty.connections);
       }
     }
+    handleTtyFds(&sockset,currentTime,&notty);
+    handleTtyFds(&sockset,currentTime,&ttys);
 #ifdef WINDOWS
     if (!SetEvent(socketSelectEvent))
       LogWindowsError("SetEvent(socketSelectEvent)");
 #endif /* WINDOWS */
-    handleTtyFds(&sockset,currentTime,&notty);
-    handleTtyFds(&sockset,currentTime,&ttys);
   }
   pthread_cleanup_pop(1);
   return NULL;
@@ -2241,11 +2246,11 @@ int api_open(BrailleDisplay *brl, char **parameters)
 {
   int res,i;
   char *hosts=
-#ifdef PF_LOCAL
+#if defined(PF_LOCAL) && (!defined(WINDOWS) || defined(HAVE_FUNC_CREATENAMEDPIPE))
 	":0+127.0.0.1:0";
-#else
+#else /* PF_LOCAL */
 	"127.0.0.1:0";
-#endif
+#endif /* PF_LOCAL */
   char *keyfile = *parameters[PARM_KEYFILE]?parameters[PARM_KEYFILE]:BRLAPI_DEFAUTHPATH;
   pthread_attr_t attr;
   pthread_mutexattr_t mattr;

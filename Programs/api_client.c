@@ -48,6 +48,7 @@
 
 #define syslog(level,fmt,...) fprintf(stderr,#level ": " fmt, __VA_ARGS__)
 #define setSocketError() do { errno = WSAGetLastError(); } while (0)
+
 #else /* WINDOWS */
 #include <sys/socket.h>
 #include <sys/un.h>
@@ -244,7 +245,7 @@ static int tryHostName(char *hostName) {
 
   addrfamily = brlapi_splitHost(hostName,&hostname,&port);
 
-#ifdef PF_LOCAL
+#if defined(PF_LOCAL) && (!defined(WINDOWS) || defined(HAVE_FUNC_CREATENAMEDPIPE))
   if (addrfamily == PF_LOCAL) {
     int lpath = strlen(BRLAPI_SOCKETPATH),lport;
     lport = strlen(port);
@@ -635,10 +636,10 @@ static int getControllingTty(void)
   if ((env = getenv("CONTROLVT")) && sscanf(env, "%u", &tty) == 1) return tty;
 
 #ifdef WINDOWS
-#if (_WIN32_WINNT >= Windows2000)
+#ifdef HAVE_FUNC_GETCONSOLEWINDOW
   /* really good guess */
   if ((tty = (int) GetConsoleWindow())) return tty;
-#endif /* _WIN32_WINNT */
+#endif /* HAVE_FUNC_GETCONSOLEWINDOW */
   if ((tty = (int) GetActiveWindow()) || (tty = (int) GetFocus())) {
     /* good guess, but need to get back up to parent window */
     HWND root = GetDesktopWindow();
@@ -772,7 +773,7 @@ int brlapi_setFocus(int tty)
 int brlapi_writeText(int cursor, const char *str)
 {
   int dispSize = brlx * brly;
-  unsigned int min, i;
+  unsigned int min;
   unsigned char packet[BRLAPI_MAXPACKETSIZE];
   writeStruct *ws = (writeStruct *) packet;
   unsigned char *p = &ws->data;
@@ -791,9 +792,11 @@ int brlapi_writeText(int cursor, const char *str)
     size = (uint32_t *) p;
     p += sizeof(*size);
     len = strlen(str);
+#if !defined(WINDOWS) || defined(HAVE_LIBMSVCP60)
     if (locale && strcmp(locale,"C")) {
       mbstate_t ps;
       size_t eaten;
+      unsigned i;
       memset(&ps,0,sizeof(ps));
       for (min=0;min<dispSize;min++) {
 	eaten = mbrlen(str,len,&ps);
@@ -815,7 +818,9 @@ int brlapi_writeText(int cursor, const char *str)
       }
 endcount:
       for (i = min; i<dispSize; i++) p += wcrtomb((char *)p, L' ', &ps);
-    } else {
+    } else
+#endif /* HAVE_LIBMSVCP60 */
+    {
       min = MIN(len, dispSize);
       memcpy(p, str, min);
       p += min;

@@ -299,8 +299,8 @@ in
       BRLTTY_HAVE_DLL([msvcp60])
 
       AC_CACHE_CHECK(
-         [if named pipes can be created],
-         [brltty_cv_windows_named_pipes],
+         [if the function CreateNamedPipe exists and works],
+         [brltty_cv_function_CreateNamedPipe],
          [AC_TRY_RUN([
 #include <windows.h>
 #include <stdio.h>
@@ -318,11 +318,34 @@ main (void) {
   return (res == INVALID_HANDLE_VALUE)? 1: 0;
 }
 ],
-         [brltty_cv_windows_named_pipes=yes],
-         [brltty_cv_windows_named_pipes=no])])
-      if test "${brltty_cv_windows_named_pipes}" = "yes"
+         [brltty_cv_function_CreateNamedPipe=yes],
+         [brltty_cv_function_CreateNamedPipe=no])])
+      if test "${brltty_cv_function_CreateNamedPipe}" = "yes"
       then
-         AC_DEFINE([WINDOWS_NAMED_PIPES])
+         AC_DEFINE([HAVE_FUNC_CREATENAMEDPIPE])
+      fi
+
+      AC_CACHE_CHECK(
+         [if the function GetConsoleWindow exists and works],
+         [brltty_cv_function_GetConsoleWindow],
+         [AC_TRY_RUN([
+#include <windows.h>
+#include <stdio.h>
+#include <errno.h>
+
+int
+main (void) {
+  HMODULE module;
+  if (!(module = GetModuleHandle("kernel32.dll"))) return 1;
+  if (!(GetProcAddress(module, "GetConsoleWindow"))) return 2;
+  return 0;
+}
+],
+         [brltty_cv_function_GetConsoleWindow=yes],
+         [brltty_cv_function_GetConsoleWindow=no])])
+      if test "${brltty_cv_function_GetConsoleWindow}" = "yes"
+      then
+         AC_DEFINE([HAVE_FUNC_GETCONSOLEWINDOW])
       fi
       ;;
    *)

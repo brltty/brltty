@@ -60,8 +60,11 @@ extern "C" {
 
 #ifdef WINDOWS
 
-/* Define this if named pipes are supported. */
-#undef WINDOWS_NAMED_PIPES
+/* Define this if the function CreateNamedPipe is available. */
+#undef HAVE_FUNC_CREATENAMEDPIPE
+
+/* Define this if the function GetConsoleWindow is available. */
+#undef HAVE_FUNC_GETCONSOLEWINDOW
 
 #else /* WINDOWS */
 
