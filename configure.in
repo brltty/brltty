@@ -311,7 +311,7 @@ main (void) {
   char path[32];
   HANDLE res;
 
-  snprintf(path, sizeof(path), "\\\\.\\pipe\\configure-%ld", ID);
+  snprintf(path, sizeof(path), "\\\\\\\\.\\\\pipe\\\\configure-%ld", ID);
   res = CreateNamedPipe(path, PIPE_ACCESS_DUPLEX,
                         PIPE_TYPE_BYTE | PIPE_READMODE_BYTE,
                         PIPE_UNLIMITED_INSTANCES, 0, 0, 0, NULL);
