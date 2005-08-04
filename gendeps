@@ -25,44 +25,50 @@ proc writeProgramMessage {message} {
    flush stderr
 }
 
-proc lvarcat {list elements} {
-   uplevel 1 [list lappend $list] $elements
-}
-proc intersect3 {list1 list2} {
-   foreach number {1 2} {
-      set length$number [llength [set list$number [lsort [set list$number]]]]
-      set index$number 0
-      set only$number [list]
+if {[catch [list package require Tclx] response] != 0} {
+   writeProgramMessage $response
+   proc lvarcat {list elements} {
+      uplevel 1 [list lappend $list] $elements
    }
-   set both [list]
-   while {1} {
-      if {$index1 == $length1} {
-         if {$index2 < $length2} {
-            lvarcat only2 [lrange $list2 $index2 end]
-         }
-         break
+   proc intersect3 {list1 list2} {
+      foreach number {1 2} {
+         set length$number [llength [set list$number [lsort [set list$number]]]]
+         set index$number 0
+         set only$number [list]
       }
-      if {$index2 == $length2} {
-         lvarcat only1 [lrange $list1 $index1 end]
-         break
+      set both [list]
+      while {1} {
+         if {$index1 == $length1} {
+            if {$index2 < $length2} {
+               lvarcat only2 [lrange $list2 $index2 end]
+            }
+            break
+         }
+         if {$index2 == $length2} {
+            lvarcat only1 [lrange $list1 $index1 end]
+            break
+         }
+         switch -exact -- [string compare [lindex $list1 $index1] [lindex $list2 $index2]] {
+           -1 {
+               lappend only1 [lindex $list1 $index1]
+               incr index1
+            }
+            1 {
+               lappend only2 [lindex $list2 $index2]
+               incr index2
+            }
+            0 {
+               lappend both [lindex $list1 $index1]
+               incr index1
+               incr index2
+            }
+         }
       }
-      switch -exact -- [string compare [lindex $list1 $index1] [lindex $list2 $index2]] {
-        -1 {
-            lappend only1 [lindex $list1 $index1]
-            incr index1
-         }
-         1 {
-            lappend only2 [lindex $list2 $index2]
-            incr index2
-         }
-         0 {
-            lappend both [lindex $list1 $index1]
-            incr index1
-            incr index2
-         }
-      }
+      return [list $only1 $both $only2]
    }
-   return [list $only1 $both $only2]
+   proc readdir {directory} {
+      return [glob -directory $directory -tails -nocomplain *]
+   }
 }
 
 proc getBuildDirectories {{root ""}} {
@@ -80,7 +86,7 @@ proc getBuildDirectories {{root ""}} {
    if {[file exists [file join $root Makefile.in]]} {
       lappend directories $root
    }
-   foreach name [glob -directory $root -tails -nocomplain *] {
+   foreach name [readdir $root] {
       eval $setPath
       if {[file isdirectory $path]} {
          lvarcat directories [getBuildDirectories $path]
