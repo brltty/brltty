@@ -52,10 +52,6 @@ extern "C" {
 #define PF_LOCAL PF_UNIX
 #endif /* !defined(PF_LOCAL) && defined(PF_UNIX) */
 
-#if defined(WINDOWS) && _WIN32_WINNT >= Windows2000
-#define HAVE_FUNC_CREATENAMEDPIPE
-#endif
-
 #ifndef MIN
 #define MIN(a, b) (((a) < (b))? (a): (b))
 #endif /* MIN */
