@@ -262,19 +262,16 @@ static void keypress(Widget w, XEvent *event, String *params, Cardinal *num_para
   keysym = XtGetActionKeysym(event, &modifiers);
   modifiers |= my_modifiers;
   LogPrint(LOG_DEBUG,"keypress(%#lx), modif(%#x)", keysym, modifiers);
-  switch(keysym) {
+  if (keysym<0x100) keypressed = keysym | BRL_BLK_PASSCHAR;
+  else switch(keysym) {
     case XK_Shift_L:
-    case XK_Shift_R:   modifier = ShiftMask; goto modif;
+    case XK_Shift_R:   modifier = ShiftMask;   goto modif;
     case XK_Control_L:
     case XK_Control_R: modifier = ControlMask; goto modif;
     case XK_Alt_L:
     case XK_Alt_R:
     case XK_Meta_L:
-    case XK_Meta_R:    modifier = Mod1Mask; goto modif;
-  }
-  if (event->type == KeyRelease) return;
-  if (keysym<0x100) keypressed = keysym | BRL_BLK_PASSCHAR;
-  else switch(keysym) {
+    case XK_Meta_R:    modifier = Mod1Mask;    goto modif;
     case XK_KP_Enter:
     case XK_Return:       keypressed = BRL_BLK_PASSKEY | BRL_KEY_ENTER;           break;
     case XK_KP_Tab:
@@ -366,6 +363,8 @@ static void keypress(Widget w, XEvent *event, String *params, Cardinal *num_para
     keypressed |= BRL_FLG_CHAR_META;
   if (modifiers & (ShiftMask|LockMask))
     keypressed |= BRL_FLG_CHAR_SHIFT;
+  if (event->type == KeyPress)
+    keypressed |= BRL_FLG_REPEAT_DELAY;
   LogPrint(LOG_DEBUG,"keypressed %#lx", keypressed);
   return;
 
