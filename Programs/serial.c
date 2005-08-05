@@ -29,8 +29,12 @@
 #include <sys/modem.h>
 #endif /* HAVE_SYS_MODEM_H */
 
+#ifdef WINDOWS
 #ifdef __MINGW32__
 #include <io.h>
+#else /* __CYGWIN__ */
+#include <sys/cygwin.h>
+#endif /* __CYGWIN__ */
 
 typedef DCB SerialAttributes;
 typedef DWORD SerialSpeed;
@@ -38,7 +42,7 @@ typedef DWORD SerialSpeed;
 typedef DWORD SerialLines;
 #define SERIAL_LINE_CTS MS_CTS_ON
 #define SERIAL_LINE_DSR MS_DSR_ON
-#else /* __MINGW32__ */
+#else /* WINDOWS */
 #include <sys/ioctl.h>
 #include <termios.h>
 
@@ -48,7 +52,7 @@ typedef speed_t SerialSpeed;
 typedef int SerialLines;
 #define SERIAL_LINE_CTS TIOCM_CTS
 #define SERIAL_LINE_DSR TIOCM_DSR
-#endif /* __MINGW32__ */
+#endif /* WINDOWS */
 
 #include "serial.h"
 #include "iomisc.h"
@@ -61,9 +65,9 @@ struct SerialDeviceStruct {
   SerialAttributes pendingAttributes;
   FILE *stream;
 
-#ifdef __MINGW32__
+#ifdef WINDOWS
   HANDLE fileHandle;
-#endif /* __MINGW32__ */
+#endif /* WINDOWS */
 };
 
 typedef struct {
@@ -71,7 +75,7 @@ typedef struct {
   SerialSpeed speed;
 } BaudEntry;
 static const BaudEntry baudTable[] = {
-#ifdef __MINGW32__
+#ifdef WINDOWS
 
 #ifdef CBR_110
   {110, CBR_110},
@@ -131,7 +135,7 @@ static const BaudEntry baudTable[] = {
 
   {0, 0}
 
-#else /* __MINGW32__ */
+#else /* WINDOWS */
 
 #ifdef B50
   {50, B50},
@@ -255,7 +259,7 @@ static const BaudEntry baudTable[] = {
 
   {0, B0}
 
-#endif /* __MINGW32__ */
+#endif /* WINDOWS */
 };
 
 static const BaudEntry *
@@ -271,7 +275,7 @@ getBaudEntry (int baud) {
 static void
 serialInitializeAttributes (SerialAttributes *attributes) {
   memset(attributes, 0, sizeof(*attributes));
-#ifdef __MINGW32__
+#ifdef WINDOWS
   attributes->DCBlength = sizeof(*attributes);
   attributes->fBinary = TRUE;
   attributes->ByteSize = 8;
@@ -281,7 +285,7 @@ serialInitializeAttributes (SerialAttributes *attributes) {
   attributes->fTXContinueOnXoff = TRUE;
   attributes->XonChar = 0X11;
   attributes->XoffChar = 0X13;
-#else /* __MINGW32__ */
+#else /* WINDOWS */
   attributes->c_cflag = CREAD | CLOCAL | CS8;
   attributes->c_iflag = IGNPAR | IGNBRK;
 
@@ -299,15 +303,15 @@ serialInitializeAttributes (SerialAttributes *attributes) {
     }
   }
 #endif /* _POSIX_VDISABLE */
-#endif /* __MINGW32__ */
+#endif /* WINDOWS */
 }
 
 static int
 serialSetSpeed (SerialDevice *serial, SerialSpeed speed) {
-#ifdef __MINGW32__
+#ifdef WINDOWS
   serial->pendingAttributes.BaudRate = speed;
   return 1;
-#else /* __MINGW32__ */
+#else /* WINDOWS */
   if (cfsetispeed(&serial->pendingAttributes, speed) != -1) {
     if (cfsetospeed(&serial->pendingAttributes, speed) != -1) {
       return 1;
@@ -318,7 +322,7 @@ serialSetSpeed (SerialDevice *serial, SerialSpeed speed) {
     LogError("cfsetispeed");
   }
   return 0;
-#endif /* __MINGW32__ */
+#endif /* WINDOWS */
 }
 
 int
@@ -336,9 +340,9 @@ serialSetBaud (SerialDevice *serial, int baud) {
 
 int
 serialSetDataBits (SerialDevice *serial, int bits) {
-#ifdef __MINGW32__
+#ifdef WINDOWS
   if ((bits < 5) || (bits > 8)) {
-#else /* __MINGW32__ */
+#else /* WINDOWS */
   tcflag_t size;
   switch (bits) {
 #ifdef CS5
@@ -358,35 +362,35 @@ serialSetDataBits (SerialDevice *serial, int bits) {
 #endif /* CS8 */
 
     default:
-#endif /* __MINGW32__ */
+#endif /* WINDOWS */
       LogPrint(LOG_WARNING, "Unknown serial data bit count: %d", bits);
       return 0;
   }
 
-#ifdef __MINGW32__
+#ifdef WINDOWS
   serial->pendingAttributes.ByteSize = bits;
-#else /* __MINGW32__ */
+#else /* WINDOWS */
   serial->pendingAttributes.c_cflag &= ~CSIZE;
   serial->pendingAttributes.c_cflag |= size;
-#endif /* __MINGW32__ */
+#endif /* WINDOWS */
   return 1;
 }
 
 int
 serialSetStopBits (SerialDevice *serial, int bits) {
-#ifdef __MINGW32__
+#ifdef WINDOWS
   if (bits == 1) {
     serial->pendingAttributes.StopBits = ONESTOPBIT;
   } else if (bits == 15) {
     serial->pendingAttributes.StopBits = ONE5STOPBITS;
   } else if (bits == 2) {
     serial->pendingAttributes.StopBits = TWOSTOPBITS;
-#else /* __MINGW32__ */
+#else /* WINDOWS */
   if (bits == 1) {
     serial->pendingAttributes.c_cflag &= ~CSTOPB;
   } else if (bits == 2) {
     serial->pendingAttributes.c_cflag |= CSTOPB;
-#endif /* __MINGW32__ */
+#endif /* WINDOWS */
   } else {
     LogPrint(LOG_WARNING, "Unknown serial stop bit count: %d", bits);
     return 0;
@@ -396,7 +400,7 @@ serialSetStopBits (SerialDevice *serial, int bits) {
 
 int
 serialSetParity (SerialDevice *serial, SerialParity parity) {
-#ifdef __MINGW32__
+#ifdef WINDOWS
   serial->pendingAttributes.fParity = FALSE;
   serial->pendingAttributes.Parity = NOPARITY;
 
@@ -425,7 +429,7 @@ serialSetParity (SerialDevice *serial, SerialParity parity) {
 
     serial->pendingAttributes.fParity = TRUE;
   }
-#else /* __MINGW32__ */
+#else /* WINDOWS */
   serial->pendingAttributes.c_cflag &= ~(PARENB | PARODD);
 
 #ifdef PARSTK
@@ -453,13 +457,13 @@ serialSetParity (SerialDevice *serial, SerialParity parity) {
 
     serial->pendingAttributes.c_cflag |= PARENB;
   }
-#endif /* __MINGW32__ */
+#endif /* WINDOWS */
   return 1;
 }
 
 int
 serialSetFlowControl (SerialDevice *serial, SerialFlowControl flow) {
-#ifdef __MINGW32__
+#ifdef WINDOWS
   if (flow & SERIAL_FLOW_INPUT_RTS) {
     flow &= ~SERIAL_FLOW_INPUT_RTS;
     serial->pendingAttributes.fRtsControl = RTS_CONTROL_HANDSHAKE;
@@ -501,7 +505,7 @@ serialSetFlowControl (SerialDevice *serial, SerialFlowControl flow) {
   } else {
     serial->pendingAttributes.fOutX = FALSE;
   }
-#else /* __MINGW32__ */
+#else /* WINDOWS */
   typedef struct {
     tcflag_t *field;
     tcflag_t flag;
@@ -545,7 +549,7 @@ serialSetFlowControl (SerialDevice *serial, SerialFlowControl flow) {
     }
     ++entry;
   }
-#endif /* __MINGW32__ */
+#endif /* WINDOWS */
 
   if (!flow) return 1;
   LogPrint(LOG_WARNING, "Unknown serial flow control: 0X%02X", flow);
@@ -554,25 +558,25 @@ serialSetFlowControl (SerialDevice *serial, SerialFlowControl flow) {
 
 int
 serialDiscardInput (SerialDevice *serial) {
-#ifdef __MINGW32__
+#ifdef WINDOWS
   if (PurgeComm(serial->fileHandle, PURGE_RXCLEAR)) return 1;
   LogWindowsError("PurgeComm");
-#else /* __MINGW32__ */
+#else /* WINDOWS */
   if (tcflush(serial->fileDescriptor, TCIFLUSH) != -1) return 1;
   LogError("TCIFLUSH");
-#endif /* __MINGW32__ */
+#endif /* WINDOWS */
   return 0;
 }
 
 int
 serialDiscardOutput (SerialDevice *serial) {
-#ifdef __MINGW32__
+#ifdef WINDOWS
   if (PurgeComm(serial->fileHandle, PURGE_TXCLEAR)) return 1;
   LogWindowsError("PurgeComm");
-#else /* __MINGW32__ */
+#else /* WINDOWS */
   if (tcflush(serial->fileDescriptor, TCOFLUSH) != -1) return 1;
   LogError("TCOFLUSH");
-#endif /* __MINGW32__ */
+#endif /* WINDOWS */
   return 0;
 }
 
@@ -591,15 +595,15 @@ int
 serialDrainOutput (SerialDevice *serial) {
   if (!serialFlushOutput(serial)) return 0;
 
-#ifdef __MINGW32__
+#ifdef WINDOWS
   if (FlushFileBuffers(serial->fileHandle)) return 1;
   LogWindowsError("FlushFileBuffers");
-#else /* __MINGW32__ */
+#else /* WINDOWS */
   do {
     if (tcdrain(serial->fileDescriptor) != -1) return 1;
   } while (errno == EINTR);
   LogError("tcdrain");
-#endif /* __MINGW32__ */
+#endif /* WINDOWS */
   return 0;
 }
 
@@ -615,13 +619,13 @@ serialCompareAttributes (const SerialAttributes *attributes, const SerialAttribu
 
 static int
 serialReadAttributes (SerialDevice *serial) {
-#ifdef __MINGW32__
+#ifdef WINDOWS
   if (GetCommState(serial->fileHandle, &serial->currentAttributes)) return 1;
   LogWindowsError("GetCommState");
-#else /* __MINGW32__ */
+#else /* WINDOWS */
   if (tcgetattr(serial->fileDescriptor, &serial->currentAttributes) != -1) return 1;
   LogError("tcgetattr");
-#endif /* __MINGW32__ */
+#endif /* WINDOWS */
   return 0;
 }
 
@@ -630,17 +634,17 @@ serialWriteAttributes (SerialDevice *serial, const SerialAttributes *attributes)
   if (!serialCompareAttributes(attributes, &serial->currentAttributes)) {
     if (!serialDrainOutput(serial)) return 0;
 
-#ifdef __MINGW32__
+#ifdef WINDOWS
     if (!SetCommState(serial->fileHandle, (SerialAttributes *)attributes)) {
       LogWindowsError("SetCommState");
       return 0;
     }
-#else /* __MINGW32__ */
+#else /* WINDOWS */
     if (tcsetattr(serial->fileDescriptor, TCSANOW, attributes) == -1) {
       LogError("tcsetattr");
       return 0;
     }
-#endif /* __MINGW32__ */
+#endif /* WINDOWS */
 
     serialCopyAttributes(&serial->currentAttributes, attributes);
   }
@@ -685,13 +689,13 @@ serialOpenDevice (const char *path) {
   if ((serial = malloc(sizeof(*serial)))) {
     char *device;
     if ((device = getDevicePath(path))) {
-#ifdef __MINGW32__
+#ifdef WINDOWS
       if ((serial->fileHandle = CreateFile(device, GENERIC_READ|GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL)) != INVALID_HANDLE_VALUE) {
         serial->fileDescriptor = -1;
-#else /* __MINGW32__ */
+#else /* WINDOWS */
       if ((serial->fileDescriptor = open(device, O_RDWR|O_NOCTTY|O_NONBLOCK)) != -1) {
         if (isatty(serial->fileDescriptor)) {
-#endif /* __MINGW32__ */
+#endif /* WINDOWS */
           if (serialReadAttributes(serial)) {
             serialCopyAttributes(&serial->originalAttributes, &serial->currentAttributes);
             serialInitializeAttributes(&serial->pendingAttributes);
@@ -700,23 +704,23 @@ serialOpenDevice (const char *path) {
 
             LogPrint(LOG_DEBUG, "serial device opened: %s: fd=%d",
                      device,
-#ifdef __MINGW32__
+#ifdef WINDOWS
 		     (int)serial->fileHandle
-#else /* __MINGW32__ */
+#else /* WINDOWS */
 		     serial->fileDescriptor
-#endif /* __MINGW32__ */
+#endif /* WINDOWS */
 		     );
             free(device);
             return serial;
           }
-#ifdef __MINGW32__
+#ifdef WINDOWS
         CloseHandle(serial->fileHandle);
-#else /* __MINGW32__ */
+#else /* WINDOWS */
         } else {
           LogPrint(LOG_ERR, "Not a serial device: %s", device);
         }
         close(serial->fileDescriptor);
-#endif /* __MINGW32__ */
+#endif /* WINDOWS */
       } else {
         LogPrint(LOG_ERR, "Cannot open '%s': %s", device, strerror(errno));
       }
@@ -738,10 +742,10 @@ serialCloseDevice (SerialDevice *serial) {
   if (serial->stream) {
     fclose(serial->stream);
 
-#ifdef __MINGW32__
+#ifdef WINDOWS
   } else if (serial->fileDescriptor < 0) {
     CloseHandle(serial->fileHandle);
-#endif /* __MINGW32__ */
+#endif /* WINDOWS */
 
   } else {
     close(serial->fileDescriptor);
@@ -753,11 +757,11 @@ serialCloseDevice (SerialDevice *serial) {
 int
 serialRestartDevice (SerialDevice *serial, int baud) {
   if (!serialDiscardOutput(serial)) return 0;
-#ifdef __MINGW32__
+#ifdef WINDOWS
   if (!ClearCommError(serial->fileHandle, NULL, NULL)) return 0;
-#else /* __MINGW32__ */
+#else /* WINDOWS */
   if (!serialSetSpeed(serial, B0)) return 0;
-#endif /* __MINGW32__ */
+#endif /* WINDOWS */
   if (!serialFlushAttributes(serial)) return 0;
 
   approximateDelay(500);
@@ -771,14 +775,19 @@ serialRestartDevice (SerialDevice *serial, int baud) {
 FILE *
 serialGetStream (SerialDevice *serial) {
   if (!serial->stream) {
-#ifdef __MINGW32__
+#ifdef WINDOWS
     if (serial->fileDescriptor < 0) {
+#ifdef __MINGW32__
       if ((serial->fileDescriptor = _open_osfhandle((long)serial->fileHandle, O_RDWR)) < 0) {
         LogError("open_osfhandle");
+#else /* __CYGWIN__ */
+      if ((serial->fileDescriptor = cygwin_attach_handle_to_fd("serialdevice", -1, serial->fileHandle, TRUE, GENERIC_READ|GENERIC_WRITE)) < 0) {
+        LogError("cygwin_attach_handle_to_fd");
+#endif /* __CYGWIN__ */
         return NULL;
       }
     }
-#endif /* __MINGW32__ */
+#endif /* WINDOWS */
 
     if (!(serial->stream = fdopen(serial->fileDescriptor, "ab+"))) {
       LogError("fdopen");
@@ -793,7 +802,7 @@ int
 serialAwaitInput (SerialDevice *serial, int timeout) {
   if (!serialFlushAttributes(serial)) return 0;
 
-#ifdef __MINGW32__
+#ifdef WINDOWS
   COMMTIMEOUTS timeouts = {MAXDWORD, 0, timeout, 0, 0};
   DWORD bytesRead;
   int ret;
@@ -806,9 +815,9 @@ serialAwaitInput (SerialDevice *serial, int timeout) {
   if (!ret)
     LogWindowsError("ReadFile");
   return ret;
-#else /* __MINGW32__ */
+#else /* WINDOWS */
   return awaitInput(serial->fileDescriptor, timeout);
-#endif /* __MINGW32__ */
+#endif /* WINDOWS */
 }
 
 int
@@ -819,7 +828,7 @@ serialReadChunk (
 ) {
   if (!serialFlushAttributes(serial)) return 0;
 
-#ifdef __MINGW32__
+#ifdef WINDOWS
   COMMTIMEOUTS timeouts = {MAXDWORD, 0, initialTimeout, 0, 0};
   DWORD bytesRead;
 
@@ -863,9 +872,9 @@ serialReadChunk (
   LogWindowsError("ReadFile");
   errno = -1;
   return 0;
-#else /* __MINGW32__ */
+#else /* WINDOWS */
   return readChunk(serial->fileDescriptor, buffer, offset, count, initialTimeout, subsequentTimeout);
-#endif /* __MINGW32__ */
+#endif /* WINDOWS */
 }
 
 ssize_t
@@ -874,15 +883,15 @@ serialReadData (
   void *buffer, size_t size,
   int initialTimeout, int subsequentTimeout
 ) {
-#ifdef __MINGW32__
+#ifdef WINDOWS
   size_t length = 0;
   if (serialReadChunk(serial, buffer, &length, size, initialTimeout, subsequentTimeout)) return size;
   if (errno == -2) return length;
   return -1;
-#else /* __MINGW32__ */
+#else /* WINDOWS */
   if (!serialFlushAttributes(serial)) return -1;
   return readData(serial->fileDescriptor, buffer, size, initialTimeout, subsequentTimeout);
-#endif /* __MINGW32__ */
+#endif /* WINDOWS */
 }
 
 ssize_t
@@ -891,7 +900,7 @@ serialWriteData (
   const void *data, size_t size
 ) {
   if (serialFlushAttributes(serial)) {
-#ifdef __MINGW32__
+#ifdef WINDOWS
     COMMTIMEOUTS timeouts = {MAXDWORD, 0, 0, 0, 15000};
     size_t left = size;
     DWORD bytesWritten;
@@ -910,23 +919,23 @@ serialWriteData (
 
     if (!left) return size;
     LogWindowsError("WriteFile");
-#else /* __MINGW32__ */
+#else /* WINDOWS */
     if (writeData(serial->fileDescriptor, data, size) != -1) return size;
     LogError("serial write");
-#endif /* __MINGW32__ */
+#endif /* WINDOWS */
   }
   return -1;
 }
 
 static int
 serialGetLines (SerialDevice *serial, SerialLines *lines) {
-#ifdef __MINGW32__
+#ifdef WINDOWS
   if (GetCommModemStatus(serial->fileHandle, lines)) return 1;
   LogWindowsError("getting modem lines");
-#else /* __MINGW32__ */
+#else /* WINDOWS */
   if (ioctl(serial->fileDescriptor, TIOCMGET, lines) != -1) return 1;
   LogError("TIOCMGET");
-#endif /* __MINGW32__ */
+#endif /* WINDOWS */
   return 0;
 }
 
