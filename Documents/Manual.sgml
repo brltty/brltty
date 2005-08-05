@@ -145,7 +145,7 @@ BRLTTY provides the following capabilities:
 </itemize>
 
 <sect1>System Requirements<p>
-To date, BRLTTY runs under Linux, Solaris, OpenBSD, FreeBSD, and NetBSD.
+To date, BRLTTY runs under Linux, Solaris, OpenBSD, FreeBSD, NetBSD, and Windows.
 While ports to other Unix-like operating systems aren't currently planned,
 we do welcome any interest in such projects.
 
@@ -190,6 +190,8 @@ we do welcome any interest in such projects.
       <item>
         The Intel architecture (release 1.6).
     </itemize>
+  <tag/Windows/
+    This software has been tested on Windows 95, 98, and XP.
 </descrip>
 
 On Linux, BRLTTY can inspect the content of the screen
@@ -4398,6 +4400,7 @@ BRLTTY supports the following braille displays:
       |44/70@
     XWindow
       |X11@
+      |Windows@
   </tabular>
 </table>
 

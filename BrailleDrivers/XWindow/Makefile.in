@@ -17,7 +17,7 @@
 
 DRIVER_CODE = xw
 DRIVER_NAME = XWindow
-DRIVER_COMMENT = X11
+DRIVER_COMMENT = X11, Windows
 HELP_DEPS = $(HELP_TEXT)
 BRL_OBJS = @braille_libraries_xw@
 include $(SRC_TOP)braille.mk
