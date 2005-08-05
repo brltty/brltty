@@ -353,14 +353,15 @@ main (void) {
          [brltty_cv_function_ReadConsoleOutputCharacterW],
          [AC_TRY_RUN([
 #include <windows.h>
-#include <stdio.h>
-#include <errno.h>
 
 int
-main (void) {
-  HMODULE module;
-  if (!(module = GetModuleHandle("kernel32.dll"))) return 1;
-  if (!(GetProcAddress(module, "GetConsoleWindow"))) return 2;
+main(void) {
+  wchar_t buf;
+  COORD coord = {0, 0};
+  DWORD read;
+  HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
+  if (!ReadConsoleOutputCharacterW(h, &buf, 1, coord, &read)) return 1;
+  if (read != 1) return 2;
   return 0;
 }
 ],
