@@ -66,6 +66,9 @@ extern "C" {
 /* Define this if the function GetConsoleWindow is available. */
 #undef HAVE_FUNC_GETCONSOLEWINDOW
 
+/* Define this if the function ReadConsoleOutputCharacterW is available. */
+#undef HAVE_FUNC_READCONSOLEOUTPUTCHARACTERW
+
 #else /* WINDOWS */
 
 /* Define this if the header file sys/select.h exists. */

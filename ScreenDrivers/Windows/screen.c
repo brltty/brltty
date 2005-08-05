@@ -102,7 +102,9 @@ read_WindowsScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
   /* TODO: GetConsoleCP */
   int x,y;
   int text = mode == SCR_TEXT;
-  unsigned long c;
+#ifdef HAVE_FUNC_READCONSOLEOUTPUTCHARACTERW
+  wchar_t c;
+#endif /* HAVE_FUNC_READCONSOLEOUTPUTCHARACTERW */
   COORD coord;
   DWORD read;
   void *buf;
@@ -124,15 +126,25 @@ read_WindowsScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
   coord.Y = box.top + info.srWindow.Top;
 
   if (text) {
+#ifdef HAVE_FUNC_READCONSOLEOUTPUTCHARACTERW
     fun = (typeof(fun)) ReadConsoleOutputCharacterW;
     size = sizeof(wchar_t);
+#else /* HAVE_FUNC_READCONSOLEOUTPUTCHARACTERW */
+    fun = (typeof(fun)) ReadConsoleOutputCharacterA;
+    size = sizeof(char);
+#endif /* HAVE_FUNC_READCONSOLEOUTPUTCHARACTERW */
   } else {
     fun = (typeof(fun)) ReadConsoleOutputAttribute;
     size = sizeof(WORD);
   }
 
-  if (!(buf = malloc(box.width*size)))
-    goto error;
+#ifndef HAVE_FUNC_READCONSOLEOUTPUTCHARACTERW
+  if (text)
+    buf = buffer;
+  else
+#endif /* HAVE_FUNC_READCONSOLEOUTPUTCHARACTERW */
+    if (!(buf = malloc(box.width*size)))
+      goto error;
 
   for (y = 0; y < box.height; y++, coord.Y++) {
     if (!fun(consoleOutput, buf, box.width, coord, &read) || read != box.width) {
@@ -140,7 +152,11 @@ read_WindowsScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
       free(buf);
       goto error;
     }
-    if (text)
+    if (!text)
+      for (x = 0; x < box.width; x++)
+	buffer[y*box.width+x] = ((WORD *)buf)[x];
+#ifdef HAVE_FUNC_READCONSOLEOUTPUTCHARACTERW
+    else
       for (x = 0; x < box.width; x++) {
 	c = ((wchar_t *)buf)[x];
 	if (c<0x100)
@@ -148,11 +164,12 @@ read_WindowsScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
 	else
 	  buffer[y*box.width+x] = '?';
       }
-    else
-      for (x = 0; x < box.width; x++)
-	buffer[y*box.width+x] = ((WORD *)buf)[x];
+#endif /* HAVE_FUNC_READCONSOLEOUTPUTCHARACTERW */
   }
-  free(buf);
+#ifndef HAVE_FUNC_READCONSOLEOUTPUTCHARACTERW
+  if (!text)
+#endif /* HAVE_FUNC_READCONSOLEOUTPUTCHARACTERW */
+    free(buf);
   return 1;
 error:
   strncpy((char *)buffer, noterm+box.left, box.width);
@@ -162,7 +179,7 @@ error:
 static int 
 doinsert(INPUT_RECORD *buf) {
   DWORD num;
-  if (!(WriteConsoleInputW(consoleInput, buf, 1, &num))) {
+  if (!(WriteConsoleInputA(consoleInput, buf, 1, &num))) {
     LogWindowsError("WriteConsoleInput");
     CloseHandle(consoleInput);
     consoleInput = INVALID_HANDLE_VALUE;

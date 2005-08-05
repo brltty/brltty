@@ -347,6 +347,29 @@ main (void) {
       then
          AC_DEFINE([HAVE_FUNC_GETCONSOLEWINDOW])
       fi
+
+      AC_CACHE_CHECK(
+         [if the function ReadConsoleOutputCharacterW exists and works],
+         [brltty_cv_function_ReadConsoleOutputCharacterW],
+         [AC_TRY_RUN([
+#include <windows.h>
+#include <stdio.h>
+#include <errno.h>
+
+int
+main (void) {
+  HMODULE module;
+  if (!(module = GetModuleHandle("kernel32.dll"))) return 1;
+  if (!(GetProcAddress(module, "GetConsoleWindow"))) return 2;
+  return 0;
+}
+],
+         [brltty_cv_function_ReadConsoleOutputCharacterW=yes],
+         [brltty_cv_function_ReadConsoleOutputCharacterW=no])])
+      if test "${brltty_cv_function_ReadConsoleOutputCharacterW}" = "yes"
+      then
+         AC_DEFINE([HAVE_FUNC_READCONSOLEOUTPUTCHARACTERW])
+      fi
       ;;
    *)
       AC_SEARCH_LIBS([socket], [socket])
