@@ -371,6 +371,11 @@ main(void) {
       then
          AC_DEFINE([HAVE_FUNC_READCONSOLEOUTPUTCHARACTERW])
       fi
+
+      cygwin_version="`uname -s`"
+      set -- `echo "${cygwin_version}" | sed -e 's/^.*-//' -e 's/\\./ /g'`
+      winver="`printf 0X%02X%02X $1 $2`"
+      CFLAGS="${CFLAGS} -DWINVER=${winver}"
       ;;
    *)
       AC_SEARCH_LIBS([socket], [socket])
