@@ -148,7 +148,7 @@ static void handle_keycode(brl_keycode_t code)
     pthread_mutex_unlock(&keybuf_mutex);
     syslog(LOG_WARNING,"lost key 0x%x !\n",code);
   } else {
-    keybuf[(keybuf_next+keybuf_nb++)%BRL_KEYBUF_SIZE]=ntohl(code);
+    keybuf[(keybuf_next+keybuf_nb++)%BRL_KEYBUF_SIZE]=code;
     pthread_mutex_unlock(&keybuf_mutex);
   }
 }
