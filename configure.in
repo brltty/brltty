@@ -247,7 +247,7 @@ AC_SUBST([MKMOD], ["${brltty_cv_prog_mkmod}"])
 AC_CACHE_CHECK([for dynamic library creation command], [brltty_cv_prog_mklib], [dnl
 case "${host_os}"
 in
-   linux*|gnu*|openbsd*|freebsd*|netbsd*|*qnx*|cygwin*|mingw*)
+   linux*|gnu*|openbsd*|freebsd*|netbsd*|*qnx*)
       brltty_mklib_ld_make="-shared"
       brltty_mklib_ld_options="-soname"
       ;;
@@ -262,6 +262,10 @@ in
    osf*)
       brltty_mklib_ld_make="-shared"
       brltty_mklib_ld_options="-expect_unresolved '*' -soname"
+      ;;
+   cygwin*|mingw*)
+      brltty_mklib_ld_make="-shared"
+      brltty_mklib_ld_options="--out-implib implib.a -soname"
       ;;
    darwin*)
       brltty_mklib_ld_make="-dylib"
