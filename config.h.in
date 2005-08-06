@@ -106,12 +106,6 @@ extern "C" {
 /* Define this if the header file linux/uinput.h exists. */
 #undef HAVE_LINUX_UINPUT_H
 
-/* Define this if the function endhostent exists. */
-#undef HAVE_ENDHOSTENT
-
-/* Define this if the function endservent exists. */
-#undef HAVE_ENDSERVENT
-
 /* Define this if the function fchdir exists. */
 #undef HAVE_FCHDIR
 
