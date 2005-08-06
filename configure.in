@@ -374,10 +374,10 @@ main(void) {
 
       if test "${build_os}" = "${host_os}"
       then
-         cygwin_version="`uname -s`"
-         set -- `echo "${cygwin_version}" | sed -e 's/^.*-//' -e 's/\\./ /g'`
-         winver="`printf 0X%02d%02d $1 $2`"
-         CFLAGS="${CFLAGS} -DWINVER=${winver}"
+         brltty_uname_system="`uname -s`"
+         set -- `echo "${brltty_uname_system}" | sed -e 's/^.*-//' -e 's/\\./ /g'`
+         brltty_windows_version="`printf 0X%02d%02d $1 $2`"
+         CFLAGS="${CFLAGS} -DWINVER=${brltty_windows_version}"
       fi
       ;;
    *)
