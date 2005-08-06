@@ -211,7 +211,6 @@ static struct socketInfo {
 static int numSockets; /* number of sockets */
 #ifdef WINDOWS
 static pthread_t socketSelectThread;
-static HANDLE socketSelectEvent;
 #endif /* WINDOWS */
 
 /* Protects from connection addition / remove from the server thread */
@@ -406,7 +405,8 @@ read:
   }
 #ifdef WINDOWS
   } else packet->state = READING_HEADER;
-  ResetEvent(packet->overl.hEvent);
+  if (!ResetEvent(packet->overl.hEvent))
+    LogWindowsError("ResetEvent in readPacket");
   if (!ReadFile((HANDLE)c->fd, packet->p, packet->n, &res, &packet->overl)) {
     switch (errno = GetLastError()) {
       case ERROR_IO_PENDING: return 0;
@@ -415,7 +415,6 @@ read:
       default: LogWindowsError("ReadFile"); return -1;
     }
   }
-  if (res==0) return -2; /* EOF */
 #endif /* WINDOWS */
   goto read;
 
@@ -1632,16 +1631,11 @@ static void *socketSelect(void *foo)
       break;
     }
     if (n==0) continue;
-    if (!ResetEvent(socketSelectEvent))
-      LogWindowsError("ResetEvent(socketSelectEvent)");
     for (i=0;i<numSockets;i++)
-      if (socketInfo[i].fd>=0 && FD_ISSET(socketInfo[i].fd, &sockset))
+      if (socketInfo[i].fd>=0 && socketInfo[i].addrfamily != PF_LOCAL
+	  && FD_ISSET(socketInfo[i].fd, &sockset))
 	if (!(SetEvent(socketInfo[i].overl.hEvent)))
 	  LogWindowsError("SetEvent(socketInfo)");
-    if (WaitForSingleObject(socketSelectEvent, INFINITE) == WAIT_FAILED) {
-      LogWindowsError("WaitForSingleObject(socketSelectEvent");
-      break;
-    }
   }
   return NULL;
 }
@@ -1820,7 +1814,9 @@ static void *server(void *arg)
 #endif /* WINDOWS */
 
   pthread_attr_init(&attr);
+#ifndef WINDOWS
   pthread_attr_setdetachstate(&attr,PTHREAD_CREATE_DETACHED);
+#endif /* WINDOWS */
   /* don't care if it fails */
   pthread_attr_setstacksize(&attr,stackSize);
 
@@ -1857,16 +1853,13 @@ static void *server(void *arg)
 #ifdef WINDOWS
     } else {
       /* Windows doesn't have troubles with local sockets on read-only
-       * filesystems, but it has with inter-thread events, so call from here */
+       * filesystems, but it has with inter-thread overlapped operations,
+       * so call from here */
       establishSocket((void *)i);
     }
 #endif /* WINDOWS */
   }
 #ifdef WINDOWS
-  if (!(socketSelectEvent = CreateEvent(NULL,TRUE,TRUE,NULL))) {
-    LogWindowsError("CreateEvent");
-    pthread_exit(NULL);
-  }
   if ((pthread_create(&socketSelectThread, NULL, socketSelect, NULL))) {
     LogWindowsError("pthread_create");
     pthread_exit(NULL);
@@ -1925,7 +1918,8 @@ static void *server(void *arg)
 #if defined(HAVE_FUNC_CREATENAMEDPIPE)
       if (socketInfo[i].addrfamily != PF_LOCAL) {
 #endif /* defined(HAVE_FUNC_CREATENAMEDPIPE) */
-	ResetEvent(socketInfo[i].overl.hEvent);
+	if (!ResetEvent(socketInfo[i].overl.hEvent))
+	  LogWindowsError("ResetEvent in server loop");
 #else /* WINDOWS */
     if (socketInfo[i].fd>=0 && FD_ISSET(socketInfo[i].fd, &sockset)) {
 #endif /* WINDOWS */
@@ -1971,10 +1965,6 @@ static void *server(void *arg)
     }
     handleTtyFds(&sockset,currentTime,&notty);
     handleTtyFds(&sockset,currentTime,&ttys);
-#ifdef WINDOWS
-    if (!SetEvent(socketSelectEvent))
-      LogWindowsError("SetEvent(socketSelectEvent)");
-#endif /* WINDOWS */
   }
   pthread_cleanup_pop(1);
   return NULL;
