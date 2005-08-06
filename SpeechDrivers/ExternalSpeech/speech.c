@@ -29,10 +29,16 @@
 #include <stdarg.h>
 #include <string.h>
 #include <errno.h>
-#include <pwd.h>
-#include <grp.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+
+#ifdef HAVE_PWD_H
+#include <pwd.h>
+#endif /* HAVE_PWD_H */
+
+#ifdef HAVE_GRP_H
+#include <grp.h>
+#endif /* HAVE_GRP_H */
 
 #include "Programs/misc.h"
 
@@ -102,11 +108,15 @@ static int spk_open (char **parameters)
     *s_gid = parameters[PARM_GID];
 
   if(!*extProgPath) extProgPath = HELPER_PROG_PATH;
+
   if(*s_uid) {
+#ifdef HAVE_PWD_H
     struct passwd *pe = getpwnam(s_uid);
     if (pe) {
       uid = pe->pw_uid;
-    } else {
+    } else
+#endif /* HAVE_PWD_H */
+    {
       char *ptr;
       uid = strtol(s_uid, &ptr, 0);
       if(*ptr != 0) {
@@ -115,11 +125,15 @@ static int spk_open (char **parameters)
       }
     }
   }else uid = UID;
+
   if(*s_gid) {
+#ifdef HAVE_GRP_H
     struct group *ge = getgrnam(s_gid);
     if (ge) {
       gid = ge->gr_gid;
-    } else {
+    } else
+#endif /* HAVE_GRP_H */
+    {
       char *ptr;
       gid = strtol(s_gid, &ptr, 0);
       if(*ptr != 0) {

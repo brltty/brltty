@@ -55,8 +55,14 @@ extern "C" {
 /* Define this if the header file glob.h exists. */
 #undef HAVE_GLOB_H
 
+/* Define this if the header file grp.h exists. */
+#undef HAVE_GRP_H
+
 /* Define this if the header file iconv.h exists. */
 #undef HAVE_ICONV_H
+
+/* Define this if the header file pwd.h exists. */
+#undef HAVE_PWD_H
 
 #ifdef WINDOWS
 
