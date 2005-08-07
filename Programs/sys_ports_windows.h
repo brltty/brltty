@@ -59,7 +59,7 @@ disablePorts (unsigned short int base, unsigned short int count) {
 }
 #endif
 
-#ifdef USE_PORTS_X86
+#if defined(USE_PORTS_X86)
 #include "sys_ports_x86.h"
 #else /* USE_PORTS_ */
 #include "sys_ports_none.h"
