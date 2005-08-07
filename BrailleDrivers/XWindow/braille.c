@@ -728,7 +728,8 @@ static void generateToplevel(void)
     } else {
       modelHeight = 0;
     }
-    if (!(toplevel = CreateWindowEx(WS_EX_TOPMOST, "BRLTTYWClass", "BRLTTY",
+    if (!(toplevel = CreateWindowEx(WS_EX_TOPMOST | WS_EX_TOOLWINDOW,
+	    "BRLTTYWClass", "BRLTTY",
 	    WS_POPUP, GetSystemMetrics(SM_CXSCREEN)-modelWidth-RIGHTMARGIN, 0,
 	    modelWidth, lines*CHRY+modelHeight, NULL, NULL, NULL, NULL))) {
       LogWindowsError("CreateWindow");
