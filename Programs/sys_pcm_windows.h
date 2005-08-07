@@ -53,7 +53,7 @@ openPcmDevice (int errorLevel, const char *device) {
     char *end;
     id = strtol(device, &end, 0);
     if (*end || id < 0 || id >= waveOutGetNumDevs()) {
-      LogPrint(errorLevel, "Invalid PCM device number: %u", pcm->deviceID);
+      LogPrint(errorLevel, "invalid PCM device number: %s", device);
       return NULL;
     }
   }
