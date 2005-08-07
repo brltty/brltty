@@ -15,28 +15,25 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#include "prologue.h"
+void *
+loadSharedObject (const char *path) {
+  HMODULE library;
+  if (!(library = LoadLibrary(path)))
+    LogWindowsError("loading library");
+  return library;
+}
 
-#include <stdlib.h>
-#include <unistd.h>
+void 
+unloadSharedObject (void *object) {
+  if (!(FreeLibrary((HMODULE) object)))
+    LogWindowsError("unloading library");
+}
 
-#include "misc.h"
-#include "system.h"
-
-#include "sys_prog_windows.h"
-
-#include "sys_boot_none.h"
-
-#include "sys_shlib_windows.h"
-
-#include "sys_beep_windows.h"
-
-#ifdef ENABLE_PCM_SUPPORT
-#include "sys_pcm_windows.h"
-#endif /* ENABLE_PCM_SUPPORT */
-
-#ifdef ENABLE_MIDI_SUPPORT
-#include "sys_midi_windows.h"
-#endif /* ENABLE_MIDI_SUPPORT */
-
-#include "sys_ports_windows.h"
+int 
+findSharedSymbol (void *object, const char *symbol, void *pointerAddress) {
+  void **address = pointerAddress;
+  if ((*address = GetProcAddress((HMODULE) object, symbol)))
+    return 1;
+  LogWindowsError("looking up symbol in library");
+  return 0;
+}
