@@ -17,7 +17,7 @@
 
 #ifdef HAVE_LIBWINMM
 struct PcmDeviceStruct {
-  HWAVEOUT handler;
+  HWAVEOUT handle;
   UINT deviceID;
   WAVEFORMATEX format;
   HANDLE done;
@@ -39,7 +39,7 @@ static void
 LogWaveOutError(MMRESULT error, int errorLevel, const char *action) {
   char msg[MAXERRORLENGTH];
   waveOutGetErrorText(error, msg, sizeof(msg));
-  LogPrint(LOG_ERR, "%s error %d: %s.", action, error, msg);
+  LogPrint(errorLevel, "%s error %d: %s.", action, error, msg);
 }
 
 PcmDevice *
@@ -133,7 +133,7 @@ openPcmDevice (int errorLevel, const char *device) {
   pcm->waveHdr = initWaveHdr;
   pcm->bufSize = 0;
 
-  if ((mmres = waveOutOpen(&pcm->handler, pcm->deviceID,
+  if ((mmres = waveOutOpen(&pcm->handle, pcm->deviceID,
 	  &pcm->format, (DWORD) pcm->done, 0, CALLBACK_EVENT)) != MMSYSERR_NOERROR) {
     LogWaveOutError(mmres, errorLevel, "opening PCM device");
     goto outEvent;
@@ -151,7 +151,7 @@ static int
 unprepareHeader(PcmDevice *pcm) {
   MMRESULT mmres;
   awaitPcmOutput(pcm);
-  if ((mmres = waveOutUnprepareHeader(pcm->handler, &pcm->waveHdr, sizeof(pcm->waveHdr))) != MMSYSERR_NOERROR) {
+  if ((mmres = waveOutUnprepareHeader(pcm->handle, &pcm->waveHdr, sizeof(pcm->waveHdr))) != MMSYSERR_NOERROR) {
     LogWaveOutError(mmres, LOG_ERR, "unpreparing PCM data header");
     return 0;
   }
@@ -164,9 +164,9 @@ updateWaveOutFormat(PcmDevice *pcm, WAVEFORMATEX *format, const char *errmsg) {
   recomputeWaveOutFormat(format);
   if (!(unprepareHeader(pcm))) return 0;
   if (waveOutOpen(NULL, pcm->deviceID, format, 0, 0, WAVE_FORMAT_QUERY) == MMSYSERR_NOERROR) {
-    waveOutClose(pcm->handler);
-    pcm->handler = INVALID_HANDLE_VALUE;
-    if ((mmres = waveOutOpen(&pcm->handler, pcm->deviceID, format,
+    waveOutClose(pcm->handle);
+    pcm->handle = INVALID_HANDLE_VALUE;
+    if ((mmres = waveOutOpen(&pcm->handle, pcm->deviceID, format,
 	    (DWORD) pcm->done, 0, CALLBACK_EVENT)) == MMSYSERR_NOERROR) {
       pcm->format = *format;
       return 1;
@@ -180,7 +180,7 @@ void
 closePcmDevice (PcmDevice *pcm) {
   CloseHandle(pcm->done);
   unprepareHeader(pcm);
-  waveOutClose(pcm->handler);
+  waveOutClose(pcm->handle);
   free(pcm->waveHdr.lpData);
   free(pcm);
 }
@@ -202,14 +202,14 @@ writePcmData (PcmDevice *pcm, const unsigned char *buffer, int count) {
   }
   awaitPcmOutput(pcm);
   if (!(pcm->waveHdr.dwFlags & WHDR_PREPARED))
-    if ((mmres = waveOutPrepareHeader(pcm->handler, &pcm->waveHdr, sizeof(pcm->waveHdr))) != MMSYSERR_NOERROR) {
+    if ((mmres = waveOutPrepareHeader(pcm->handle, &pcm->waveHdr, sizeof(pcm->waveHdr))) != MMSYSERR_NOERROR) {
       LogWaveOutError(mmres, LOG_ERR, "preparing PCM data header");
       return 0;
     }
   pcm->waveHdr.dwBufferLength = count;
   memcpy(pcm->waveHdr.lpData, buffer, count);
   ResetEvent(pcm->done);
-  if ((mmres = waveOutWrite(pcm->handler, &pcm->waveHdr, sizeof(pcm->waveHdr))) != MMSYSERR_NOERROR) {
+  if ((mmres = waveOutWrite(pcm->handle, &pcm->waveHdr, sizeof(pcm->waveHdr))) != MMSYSERR_NOERROR) {
     SetEvent(pcm->done);
     LogWaveOutError(mmres, LOG_ERR, "writing PCM data");
     return 0;
@@ -285,7 +285,7 @@ awaitPcmOutput (PcmDevice *pcm) {
 
 void
 cancelPcmOutput (PcmDevice *pcm) {
-  waveOutReset(pcm->handler);
+  waveOutReset(pcm->handle);
 }
 #else /* HAVE_LIBWINMM */
 #include "sys_pcm_none.h"
