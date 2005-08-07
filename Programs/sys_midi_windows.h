@@ -31,13 +31,11 @@ MidiDevice *
 openMidiDevice (int errorLevel, const char *device) {
   MidiDevice *midi;
   MMRESULT mmres;
-  long id = 0;
+  int id = 0;
 
   if (device && *device) {
-    char *end;
-    id = strtol(device, &end, 0);
-    if (*end || id < 0 || id >= midiOutGetNumDevs()) {
-      LogPrint(errorLevel, "Invalid MIDI device number: %s", device);
+    if (!isInteger(&id, device) || (id < 0) || (id >= midiOutGetNumDevs())) {
+      LogPrint(errorLevel, "invalid MIDI device number: %s", device);
       return NULL;
     }
   }
