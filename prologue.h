@@ -33,6 +33,10 @@ extern "C" {
 #define Windows95 0x0400
 #endif /* Windows95 */
 
+#ifndef WindowsNT4
+#define WindowsNT4 0x0400
+#endif /* WindowsNT4 */
+
 #ifndef Windows98
 #define Windows98 0x0410
 #endif /* Windows98 */
