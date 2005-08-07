@@ -36,7 +36,6 @@
 
 #ifdef WINDOWS
 #include <ws2tcpip.h>
-#include <w32api.h>
 
 #ifdef __MINGW32__
 #include "win_pthread.h"

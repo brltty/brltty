@@ -15,8 +15,6 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#include <w32api.h>
-
 #if _WIN32_WINNT <= WindowsME
 #include "sys_beep_none.h"
 #else /* _WIN32_WINNT */

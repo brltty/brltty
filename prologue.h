@@ -27,6 +27,20 @@ extern "C" {
 
 #define __USE_W32_SOCKETS
 #include <windows.h>
+#include <w32api.h>
+
+#ifndef Windows95
+#define Windows95 0x0400
+#endif /* Windows95 */
+
+#ifndef Windows98
+#define Windows98 0x0410
+#endif /* Windows98 */
+
+#ifndef WindowsME
+#define WindowsME 0x0500
+#endif /* WindowsME */
+
 #endif /* defined(__CYGWIN32__) || defined(__MINGW32__) */
 #include <sys/types.h>
 

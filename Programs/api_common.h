@@ -39,7 +39,6 @@ extern "C" {
 
 #ifdef WINDOWS
 #include <ws2tcpip.h>
-#include <w32api.h>
 #include <io.h>
 #else /* WINDOWS */
 #include <sys/socket.h>
