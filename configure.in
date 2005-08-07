@@ -302,7 +302,6 @@ in
       BRLTTY_HAVE_DLL([wsock32])
       BRLTTY_HAVE_DLL([msvcp60])
       BRLTTY_HAVE_DLL([winmm])
-      BRLTTY_HAVE_DLL([ntdll])
 
       AC_CACHE_CHECK(
          [if the function CreateNamedPipe exists and works],
@@ -393,6 +392,7 @@ main(void) {
          if test "${brltty_windows_type}" = "NT"
          then
             AC_DEFINE([WINDOWS_NT])
+            BRLTTY_HAVE_DLL([ntdll])
          fi
       fi
       ;;
