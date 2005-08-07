@@ -15,66 +15,62 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#if _WIN32_WINNT >= WindowsNT4
+#if !defined(WINDOWS_NT)
+#define CAN_ACCESS_PORTS
 
-#ifdef HAVE_LIBNTDLL
+int
+enablePorts (int errorLevel, unsigned short int base, unsigned short int count) {
+  return 1;
+}
+
+int
+disablePorts (unsigned short int base, unsigned short int count) {
+  return 1;
+}
+#elif defined(HAVE_LIBNTDLL)
+#define CAN_ACCESS_PORTS
 
 #include <ntdef.h>
 
 typedef enum _PROCESSINFOCLASS {
-    ProcessUserModeIOPL = 16,
+  ProcessUserModeIOPL = 16,
 } PROCESSINFOCLASS, PROCESS_INFORMATION_CLASS;
 
-NTSTATUS WINAPI NtSetInformationProcess(HANDLE,PROCESS_INFORMATION_CLASS,PVOID,ULONG);
+NTSTATUS WINAPI NtSetInformationProcess (HANDLE, PROCESS_INFORMATION_CLASS, PVOID, ULONG);
 
-#include "rangelist.h"
-
-static rangeList *enabledPorts;
+static int portsEnabled = 0;
 
 int
 enablePorts (int errorLevel, unsigned short int base, unsigned short int count) {
-  if (!enabledPorts) {
+  if (!portsEnabled) {
     ULONG Iopl=3;
     if (NtSetInformationProcess(GetCurrentProcess(), ProcessUserModeIOPL,
-	  &Iopl, sizeof(Iopl)) != STATUS_SUCCESS) return 0;
-  }
-  return !addRange(base, base+count, &enabledPorts);
-}
-
-int
-disablePorts (unsigned short int base, unsigned short int count) {
-  if (!enabledPorts)
-    return 1;
-  if (removeRange(base, base+count, &enabledPorts))
-    return 0;
-  if (!enabledPorts) {
-    ULONG Iopl=0;
-    if (NtSetInformationProcess(GetCurrentProcess(), ProcessUserModeIOPL,
-	  &Iopl, sizeof(Iopl)) != STATUS_SUCCESS) return 0;
+                                &Iopl, sizeof(Iopl)) != STATUS_SUCCESS) {
+      return 0;
+    }
+    portsEnabled = 1;
   }
   return 1;
 }
 
-#include "sys_ports_x86.h"
+int
+disablePorts (unsigned short int base, unsigned short int count) {
+  return 1;
+}
+#endif
 
-#else /* HAVE_LIBNTDLL */
+#ifdef CAN_ACCESS_PORTS
+unsigned char
+readPort1 (unsigned short int port) {
+  unsigned char v;
+  __asm__ __volatile__ ("inb %w1,%0" : "=a" (v) : "Nd" (port));
+  return v;
+}
 
+void
+writePort1 (unsigned short int port, unsigned char value) {
+  __asm__ __volatile__ ("outb %b0,%w1" : : "a" (value), "Nd" (port));
+}
+#else /* CAN_ACCESS_PORTS */
 #include "sys_ports_none.h"
-
-#endif /* HAVE_LIBNTDLL */
-
-#else /* _WIN32_WINNT */
-
-int
-enablePorts (int errorLevel, unsigned short int base, unsigned short int count) {
-  return 1;
-}
-
-int
-disablePorts (unsigned short int base, unsigned short int count) {
-  return 1;
-}
-
-#include "sys_ports_x86.h"
-
-#endif /* _WIN32_WINNT */
+#endif /* CAN_ACCESS_PORTS */
