@@ -66,6 +66,9 @@ extern "C" {
 
 #ifdef WINDOWS
 
+/* Define this if Windows NT is being used. */
+#undef WINDOWS_NT
+
 /* Define this if the function CreateNamedPipe is available. */
 #undef HAVE_FUNC_CREATENAMEDPIPE
 
