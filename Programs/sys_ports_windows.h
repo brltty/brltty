@@ -16,7 +16,7 @@
  */
 
 #if !defined(WINDOWS_NT)
-#define CAN_ACCESS_PORTS
+#define USE_PORTS_X86
 
 int
 enablePorts (int errorLevel, unsigned short int base, unsigned short int count) {
@@ -28,7 +28,7 @@ disablePorts (unsigned short int base, unsigned short int count) {
   return 1;
 }
 #elif defined(HAVE_LIBNTDLL)
-#define CAN_ACCESS_PORTS
+#define USE_PORTS_X86
 
 #include <ntdef.h>
 
@@ -59,18 +59,8 @@ disablePorts (unsigned short int base, unsigned short int count) {
 }
 #endif
 
-#ifdef CAN_ACCESS_PORTS
-unsigned char
-readPort1 (unsigned short int port) {
-  unsigned char v;
-  __asm__ __volatile__ ("inb %w1,%0" : "=a" (v) : "Nd" (port));
-  return v;
-}
-
-void
-writePort1 (unsigned short int port, unsigned char value) {
-  __asm__ __volatile__ ("outb %b0,%w1" : : "a" (value), "Nd" (port));
-}
-#else /* CAN_ACCESS_PORTS */
+#ifdef USE_PORTS_X86
+#include "sys_ports_x86.h"
+#else /* USE_PORTS_ */
 #include "sys_ports_none.h"
-#endif /* CAN_ACCESS_PORTS */
+#endif /* USE_PORTS_ */
