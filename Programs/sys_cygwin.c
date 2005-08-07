@@ -32,7 +32,7 @@
 #include "sys_beep_windows.h"
 
 #ifdef ENABLE_PCM_SUPPORT
-#include "sys_pcm_none.h"
+#include "sys_pcm_windows.h"
 #endif /* ENABLE_PCM_SUPPORT */
 
 #ifdef ENABLE_MIDI_SUPPORT

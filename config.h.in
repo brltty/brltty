@@ -288,6 +288,9 @@ extern "C" {
 /* Define this if the msvcp60 library is available. */
 #undef HAVE_LIBMSVCP60
 
+/* Define this if the winmm library is available. */
+#undef HAVE_LIBWINMM
+
 /* Define this if X is not available. */
 #undef X_DISPLAY_MISSING
 

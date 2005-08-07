@@ -301,6 +301,7 @@ in
    cygwin*|mingw*)
       BRLTTY_HAVE_DLL([wsock32])
       BRLTTY_HAVE_DLL([msvcp60])
+      BRLTTY_HAVE_DLL([winmm])
 
       AC_CACHE_CHECK(
          [if the function CreateNamedPipe exists and works],
