@@ -29,7 +29,7 @@
 
 #include "sys_shlib_none.h"
 
-#include "sys_beep_none.h"
+#include "sys_beep_windows.h"
 
 #ifdef ENABLE_PCM_SUPPORT
 #include "sys_pcm_none.h"

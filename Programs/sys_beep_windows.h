@@ -15,27 +15,38 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#include "prologue.h"
+#include <w32api.h>
 
-#include <stdlib.h>
+#if _WIN32_WINNT <= WindowsME
+#include "sys_beep_none.h"
+#else /* _WIN32_WINNT */
 
-#include "misc.h"
-#include "system.h"
+int
+canBeep (void) {
+  return 1;
+}
 
-#include "sys_prog_windows.h"
+int
+asynchronousBeep (unsigned short frequency, unsigned short milliseconds) {
+  return 0;
+}
 
-#include "sys_boot_none.h"
+int
+synchronousBeep (unsigned short frequency, unsigned short milliseconds) {
+  return Beep(frequency, milliseconds);
+}
 
-#include "sys_shlib_none.h"
+int
+startBeep (unsigned short frequency) {
+  return 0;
+}
 
-#include "sys_beep_windows.h"
+int
+stopBeep (void) {
+  return 0;
+}
 
-#ifdef ENABLE_PCM_SUPPORT
-#include "sys_pcm_none.h"
-#endif /* ENABLE_PCM_SUPPORT */
-
-#ifdef ENABLE_MIDI_SUPPORT
-#include "sys_midi_none.h"
-#endif /* ENABLE_MIDI_SUPPORT */
-
-#include "sys_ports_none.h"
+void
+endBeep (void) {
+}
+#endif /* _WIN32_WINNT */
