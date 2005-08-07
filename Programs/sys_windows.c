@@ -38,4 +38,4 @@
 #include "sys_midi_none.h"
 #endif /* ENABLE_MIDI_SUPPORT */
 
-#include "sys_ports_none.h"
+#include "sys_ports_windows.h"

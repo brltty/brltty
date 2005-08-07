@@ -15,28 +15,14 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#include "prologue.h"
+unsigned char
+readPort1 (unsigned short int port) {
+  unsigned char v;
+  __asm__ __volatile__ ("inb %w1,%0" : "=a" (v) : "Nd" (port));
+  return v;
+}
 
-#include <stdlib.h>
-#include <unistd.h>
-
-#include "misc.h"
-#include "system.h"
-
-#include "sys_prog_windows.h"
-
-#include "sys_boot_none.h"
-
-#include "sys_shlib_none.h"
-
-#include "sys_beep_windows.h"
-
-#ifdef ENABLE_PCM_SUPPORT
-#include "sys_pcm_windows.h"
-#endif /* ENABLE_PCM_SUPPORT */
-
-#ifdef ENABLE_MIDI_SUPPORT
-#include "sys_midi_none.h"
-#endif /* ENABLE_MIDI_SUPPORT */
-
-#include "sys_ports_windows.h"
+void
+writePort1 (unsigned short int port, unsigned char value) {
+  __asm__ __volatile__ ("outb %b0,%w1" : : "a" (value), "Nd" (port));
+}

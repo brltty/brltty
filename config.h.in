@@ -291,6 +291,9 @@ extern "C" {
 /* Define this if the winmm library is available. */
 #undef HAVE_LIBWINMM
 
+/* Define this if the ntdll library is available. */
+#undef HAVE_LIBNTDLL
+
 /* Define this if X is not available. */
 #undef X_DISPLAY_MISSING
 
