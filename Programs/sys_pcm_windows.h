@@ -217,7 +217,7 @@ writePcmData (PcmDevice *pcm, const unsigned char *buffer, int count) {
 
 int
 getPcmBlockSize (PcmDevice *pcm) {
-  return pcm->format.nBlockAlign;
+  return 0X10000;
 }
 
 int
