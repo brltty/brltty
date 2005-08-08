@@ -99,7 +99,7 @@ api: $(API_LIB) $(API_ARC)
 $(API_LIB): $(API_LIB_OBJS)
 	-rm -f implib.a
 	$(MKLIB:<name>=${API_LIB}.${API_VERSION}) $@ $(API_LIB_OBJS) $(API_LIBRARIES)
-	[ -f implib.a ] && mv implib.a $@.$(ARC_EXT)
+	[ ! -f implib.a ] || mv implib.a $@.$(ARC_EXT)
 
 $(API_ARC): $(API_LIB_OBJS)
 	ar rc $@ $(API_LIB_OBJS)
