@@ -186,3 +186,6 @@ ALL_API = @all_api@
 INSTALL_API = @install_api@
 API_LIBRARIES = @api_libraries@
 
+ALL_XBRLAPI = @all_xbrlapi@
+INSTALL_XBRLAPI = @install_xbrlapi@
+

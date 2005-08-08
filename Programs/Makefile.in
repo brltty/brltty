@@ -20,7 +20,8 @@ all-brltty: brltty$X $(BRAILLE_DRIVERS) $(BRAILLE_HELP) $(SPEECH_DRIVERS) $(SCRE
 all-brltest: brltest$X $(BRAILLE_DRIVERS)
 all-spktest: spktest$X $(SPEECH_DRIVERS)
 all-scrtest: scrtest$X $(SCREEN_DRIVERS)
-all-api: apitest$X
+all-api: apitest$X $(ALL_XBRLAPI)
+all-xbrlapi: xbrlapi$X
 
 ###############################################################################
 
@@ -418,11 +419,16 @@ check-speech: brltty speech-drivers
 
 install:: install-programs install-help install-tables $(INSTALL_DRIVERS) install-manpages $(INSTALL_API)
 
-install-programs: brltty$X
-	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(PROGRAM_DIRECTORY) 
+install-programs: brltty$X install-program-directory
 	$(INSTALL_PROGRAM) brltty$X $(INSTALL_ROOT)$(PROGRAM_DIRECTORY) 
 	$(INSTALL_DATA) brltty-config $(INSTALL_ROOT)$(PROGRAM_DIRECTORY) 
 	$(INSTALL_SCRIPT) $(SRC_DIR)/brltty-install $(INSTALL_ROOT)$(PROGRAM_DIRECTORY) 
+
+install-xbrlapi: xbrlapi$X install-program-directory
+	$(INSTALL_PROGRAM) xbrlapi$X $(INSTALL_ROOT)$(PROGRAM_DIRECTORY) 
+
+install-program-directory:
+	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(PROGRAM_DIRECTORY) 
 
 install-help: $(BRAILLE_DRIVERS) $(BRAILLE_HELP) install-data-directory
 	$(INSTALL_DATA) $(BLD_TOP)$(DAT_DIR)/* $(INSTALL_ROOT)$(DATA_DIRECTORY) 
@@ -450,7 +456,7 @@ install-manpages:
 	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(MANPAGE_DIRECTORY)/man1
 	$(INSTALL_DATA) $(SRC_TOP)$(DOC_DIR)/*.1 $(INSTALL_ROOT)$(MANPAGE_DIRECTORY)/man1
 
-install-api: install-api-libraries install-api-headers install-api-manpages install-api-key
+install-api: install-api-libraries install-api-headers install-api-manpages install-api-key $(INSTALL_XBRLAPI)
 
 install-api-libraries: $(API_LIB) $(API_ARC)
 	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(libdir)
@@ -458,7 +464,7 @@ install-api-libraries: $(API_LIB) $(API_ARC)
 	$(SYMLINK) -f $(API_LIB).$(API_RELEASE) $(INSTALL_ROOT)$(libdir)/$(API_LIB)
 	$(CONFLIBDIR) $(INSTALL_ROOT)$(libdir)
 	$(INSTALL_DATA) $(API_ARC) $(INSTALL_ROOT)$(libdir)
-	[ -f $(API_LIB).$(ARC_EXT) ] && $(INSTALL_DATA) $(API_LIB).$(ARC_EXT) $(INSTALL_ROOT)$(libdir)
+	[ ! -f $(API_LIB).$(ARC_EXT) ] || $(INSTALL_DATA) $(API_LIB).$(ARC_EXT) $(INSTALL_ROOT)$(libdir)
 
 install-api-headers:
 	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
@@ -484,6 +490,7 @@ uninstall-programs:
 	-rm -f $(INSTALL_ROOT)$(PROGRAM_DIRECTORY)/brltty$X
 	-rm -f $(INSTALL_ROOT)$(PROGRAM_DIRECTORY)/brltty-config$X
 	-rm -f $(INSTALL_ROOT)$(PROGRAM_DIRECTORY)/brltty-install$X
+	-rm -f $(INSTALL_ROOT)$(PROGRAM_DIRECTORY)/xbrlapi$X
 
 uninstall-data:
 	-rm -f $(INSTALL_ROOT)$(DATA_DIRECTORY)/*.tbl

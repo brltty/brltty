@@ -431,6 +431,8 @@ AC_PATH_XTRA
 if test "${no_x}" != "yes"
 then
    LDFLAGS="${LDFLAGS} ${X_LIBS}"
+   AC_SUBST([all_xbrlapi], [all-xbrlapi])
+   AC_SUBST([install_xbrlapi], [install-xbrlapi])
 
    AC_HAVE_LIBRARY([X11], [
       LIBS="${X_EXTRA_LIBS} ${X_PRE_LIBS} -lX11 ${LIBS}"
