@@ -18,6 +18,7 @@
 #ifdef HAVE_LIBWINMM
 struct MidiDeviceStruct {
   HMIDIOUT handle;
+  unsigned char note;
 };
 
 static void
@@ -48,6 +49,7 @@ openMidiDevice (int errorLevel, const char *device) {
     LogMidiOutError(mmres, errorLevel, "opening MIDI device");
     goto out;
   }
+  midi->note = 0;
   return midi;
 
 out:
@@ -92,8 +94,10 @@ endMidiBlock (MidiDevice *midi) {
 int
 startMidiNote (MidiDevice *midi, unsigned char channel, unsigned char note, unsigned char volume) {
   MMRESULT mmres;
-  if ((mmres = midiOutShortMsg(midi->handle, MAKELONG(MAKEWORD(MIDI_NOTEON+channel,note),0x7F*volume/100))) == MMSYSERR_NOERROR)
+  if ((mmres = midiOutShortMsg(midi->handle, MAKELONG(MAKEWORD(MIDI_NOTEON+channel,note),0x7F*volume/100))) == MMSYSERR_NOERROR) {
+    midi->note = note;
     return 1;
+  }
   LogMidiOutError(mmres, LOG_ERR, "starting MIDI note");
   return 0;
 }
@@ -101,8 +105,10 @@ startMidiNote (MidiDevice *midi, unsigned char channel, unsigned char note, unsi
 int
 stopMidiNote (MidiDevice *midi, unsigned char channel) {
   MMRESULT mmres;
-  if ((mmres = midiOutShortMsg(midi->handle, MIDI_NOTEOFF+channel)) == MMSYSERR_NOERROR)
+  if ((mmres = midiOutShortMsg(midi->handle, MAKEWORD(MIDI_NOTEOFF+channel, midi->note))) == MMSYSERR_NOERROR) {
+    midi->note = 0;
     return 1;
+  }
   LogMidiOutError(mmres, LOG_ERR, "stopping MIDI note");
   return 1;
 }
