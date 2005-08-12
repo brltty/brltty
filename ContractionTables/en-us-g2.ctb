@@ -622,8 +622,7 @@ begword renom = renominate
 begword renou 1235-15-1345-1256 renounce
 sufword renown 1235-15-1345-246-1345 renowned
 begword renu = renunciation
-sufword reread 1235-15-1235-2-145
-sufword rerun = reruns
+begword rer 1235-15-1235 reread
 always rever 1235-15-1236-12456
 always reveren 1235-5-15-26 irreverent
 always reverence 1235-5-15-56-15 irreverence
