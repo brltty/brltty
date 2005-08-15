@@ -502,8 +502,8 @@ uninstall:: uninstall-programs uninstall-data uninstall-libraries uninstall-manp
 
 uninstall-programs:
 	-rm -f $(INSTALL_ROOT)$(PROGRAM_DIRECTORY)/brltty$X
-	-rm -f $(INSTALL_ROOT)$(PROGRAM_DIRECTORY)/brltty-config$X
-	-rm -f $(INSTALL_ROOT)$(PROGRAM_DIRECTORY)/brltty-install$X
+	-rm -f $(INSTALL_ROOT)$(PROGRAM_DIRECTORY)/brltty-config
+	-rm -f $(INSTALL_ROOT)$(PROGRAM_DIRECTORY)/brltty-install
 	-rm -f $(INSTALL_ROOT)$(PROGRAM_DIRECTORY)/xbrlapi$X
 
 uninstall-data:
@@ -563,4 +563,4 @@ clean::
 
 distclean::
 	-rm -f api.h
-	-rm -f brltty-config$X
+	-rm -f brltty-config
