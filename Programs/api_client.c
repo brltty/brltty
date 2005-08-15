@@ -902,13 +902,15 @@ int brlapi_writeDots(const unsigned char *dots)
 int brlapi_write(const brlapi_writeStruct *s)
 {
   int dispSize = brlx * brly;
-  unsigned int rbeg = s->regionBegin, rsiz = s->regionSize, strLen;
+  unsigned int rbeg, rsiz, strLen;
   unsigned char packet[BRLAPI_MAXPACKETSIZE];
   writeStruct *ws = (writeStruct *) packet;
   unsigned char *p = &ws->data;
   int res;
   ws->flags = 0;
   if (s==NULL) goto send;
+  rbeg = s->regionBegin;
+  rsiz = s->regionSize;
   if ((1<=rbeg) && (rbeg<=dispSize) && (1<=rbeg+rsiz-1) && (rbeg+rsiz-1<=dispSize)) {
     if (rsiz == 0) return 0;
     ws->flags |= BRLAPI_WF_REGION;
