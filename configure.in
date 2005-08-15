@@ -388,28 +388,31 @@ BRLTTY_ARG_DISABLE(
 [dnl
    BRLTTY_CAP_PTHREADS([dnl
       AC_DEFINE([ENABLE_API])
+      BRLTTY_ARG_PARAMETERS([api])
+
       api_objects='api_server.$O rangelist.$O'
+      api_libraries="${LIBS}"
+
       all_api="all-api"
       install_api="install-api"
+
+      api_dynamic_library="api-dynamic-library"
+      install_api_libraries="install-api-libraries"
       case "${host_os}"
       in
          cygwin*|mingw*)
+            api_dynamic_library="api-dynamic-library-windows"
             install_api_libraries="install-api-libraries-windows"
             ;;
-         *)
-            install_api_libraries="install-api-libraries"
-            ;;
       esac
-
-      api_libraries="${LIBS}"
-      BRLTTY_ARG_PARAMETERS([api])
    ])
 ])
 AC_SUBST([api_objects])
+AC_SUBST([api_libraries])
 AC_SUBST([all_api])
 AC_SUBST([install_api])
+AC_SUBST([api_dynamic_library])
 AC_SUBST([install_api_libraries])
-AC_SUBST([api_libraries])
 AC_SUBST([api_authfile], [brlapi.key])
 BRLTTY_DEFINE_EXPANDED([BRLAPI_AUTHFILE], ["${api_authfile}"])
 

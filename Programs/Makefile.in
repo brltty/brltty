@@ -92,15 +92,22 @@ adlib.$O:
 
 API_LIB_OBJS = api_client.$O
 API_NAME = $(LIB_PFX)brlapi
-API_LIB = $(API_NAME).$(LIB_EXT)
 API_ARC = $(API_NAME).$(ARC_EXT)
+API_LIB = $(API_NAME).$(LIB_EXT)
+API_DLL = $(API_NAME)-$(API_RELEASE).$(LIB_EXT)
+API_IMP = $(API_LIB)-$(API_RELEASE).$(ARC_EXT)
 
-api: $(API_LIB) $(API_ARC)
+api: $(API_DYNAMIC_LIBRARY) $(API_ARC)
+api-dynamic-library: $(API_LIB)
+api-dynamic-library-windows: $(API_DLL)
 
 $(API_LIB): $(API_LIB_OBJS)
+	$(MKLIB:<name>=${API_LIB}.${API_VERSION}) $@ $(API_LIB_OBJS) $(API_LIBRARIES)
+
+$(API_DLL): $(API_LIB_OBJS)
 	-rm -f implib.a
 	$(MKLIB:<name>=${API_LIB}.${API_VERSION}) $@ $(API_LIB_OBJS) $(API_LIBRARIES)
-	[ ! -f implib.a ] || mv implib.a $@.$(ARC_EXT)
+	[ ! -f implib.a ] || mv implib.a $(API_IMP)
 
 $(API_ARC): $(API_LIB_OBJS)
 	ar rc $@ $(API_LIB_OBJS)
@@ -464,10 +471,10 @@ install-api-libraries: $(API_LIB) $(API_ARC) install-libdir-directory
 	$(CONFLIBDIR) $(INSTALL_ROOT)$(libdir)
 	$(INSTALL_DATA) $(API_ARC) $(INSTALL_ROOT)$(libdir)
 
-install-api-libraries-windows: $(API_LIB) $(API_LIB).$(ARC_EXT) $(API_ARC) install-program-directory install-libdir-directory
-	$(INSTALL_PROGRAM) $(API_LIB) $(INSTALL_ROOT)$(PROGRAM_DIRECTORY)
-	$(INSTALL_DATA) $(API_LIB).$(ARC_EXT) $(INSTALL_ROOT)$(libdir)/$(API_LIB)-$(API_RELEASE).$(ARC_EXT)
-	$(SYMLINK) -f $(API_LIB)-$(API_RELEASE).$(ARC_EXT) $(INSTALL_ROOT)$(libdir)/$(API_LIB).$(ARC_EXT)
+install-api-libraries-windows: $(API_DLL) $(API_ARC) install-program-directory install-libdir-directory
+	$(INSTALL_PROGRAM) $(API_DLL) $(INSTALL_ROOT)$(PROGRAM_DIRECTORY)
+	$(INSTALL_DATA) $(API_IMP) $(INSTALL_ROOT)$(libdir)
+	$(SYMLINK) -f $(API_IMP) $(INSTALL_ROOT)$(libdir)/$(API_LIB).$(ARC_EXT)
 	$(INSTALL_DATA) $(API_ARC) $(INSTALL_ROOT)$(libdir)
 
 install-libdir-directory:
@@ -514,8 +521,8 @@ uninstall-libraries:
 	$(CONFLIBDIR) $(INSTALL_ROOT)$(libdir)
 	-rm -f $(INSTALL_ROOT)$(libdir)/$(API_ARC)
 	-rm -f $(INSTALL_ROOT)$(libdir)/$(API_LIB).$(ARC_EXT)
-	-rm -f $(INSTALL_ROOT)$(libdir)/$(API_LIB)-$(API_RELEASE).$(ARC_EXT)
-	-rm -f $(INSTALL_ROOT)$(PROGRAM_DIRECTORY)/$(API_LIB)
+	-rm -f $(INSTALL_ROOT)$(libdir)/$(API_IMP)
+	-rm -f $(INSTALL_ROOT)$(PROGRAM_DIRECTORY)/$(API_DLL)
 
 uninstall-manpages:
 	-for page in $(SRC_TOP)$(DOC_DIR)/*.[1-9]; do \

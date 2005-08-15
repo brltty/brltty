@@ -181,11 +181,12 @@ FM_OBJECTS = @fm_tune_objects@
 API_VERSION = @api_version@
 API_RELEASE = @api_release@
 API_OBJECTS = @api_objects@
-API_AUTHFILE = @api_authfile@
+API_LIBRARIES = @api_libraries@
 ALL_API = @all_api@
 INSTALL_API = @install_api@
+API_DYNAMIC_LIBRARY = @api_dynamic_library@
 INSTALL_API_LIBRARIES = @install_api_libraries@
-API_LIBRARIES = @api_libraries@
+API_AUTHFILE = @api_authfile@
 
 ALL_XBRLAPI = @all_xbrlapi@
 INSTALL_XBRLAPI = @install_xbrlapi@
