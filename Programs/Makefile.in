@@ -456,7 +456,7 @@ install-manpages:
 	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(MANPAGE_DIRECTORY)/man1
 	$(INSTALL_DATA) $(SRC_TOP)$(DOC_DIR)/*.1 $(INSTALL_ROOT)$(MANPAGE_DIRECTORY)/man1
 
-install-api: install-api-libraries install-api-headers install-api-manpages install-api-key $(INSTALL_XBRLAPI)
+install-api: $(INSTALL_API_LIBRARIES) install-api-headers install-api-manpages install-api-key $(INSTALL_XBRLAPI)
 
 install-api-libraries: $(API_LIB) $(API_ARC)
 	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(libdir)
@@ -464,7 +464,12 @@ install-api-libraries: $(API_LIB) $(API_ARC)
 	$(SYMLINK) -f $(API_LIB).$(API_RELEASE) $(INSTALL_ROOT)$(libdir)/$(API_LIB)
 	$(CONFLIBDIR) $(INSTALL_ROOT)$(libdir)
 	$(INSTALL_DATA) $(API_ARC) $(INSTALL_ROOT)$(libdir)
-	[ ! -f $(API_LIB).$(ARC_EXT) ] || $(INSTALL_DATA) $(API_LIB).$(ARC_EXT) $(INSTALL_ROOT)$(libdir)
+
+install-api-libraries-windows: $(API_LIB) $(API_LIB).$(ARC_EXT) $(API_ARC) install-program-directory
+	$(INSTALL_PROGRAM) $(API_LIB) $(INSTALL_ROOT)$(PROGRAM_DIRECTORY)/$(API_LIB)
+	$(INSTALL_DATA) $(API_LIB).$(ARC_EXT) $(INSTALL_ROOT)$(libdir)/$(API_LIB)-$(API_RELEASE).$(ARC_EXT)
+	$(SYMLINK) -f $(API_LIB)-$(API_RELEASE).$(ARC_EXT) $(INSTALL_ROOT)$(libdir)/$(API_LIB).$(ARC_EXT)
+	$(INSTALL_DATA) $(API_ARC) $(INSTALL_ROOT)$(libdir)
 
 install-api-headers:
 	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)

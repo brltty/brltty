@@ -411,6 +411,16 @@ BRLTTY_ARG_DISABLE(
       api_objects='api_server.$O rangelist.$O'
       all_api="all-api"
       install_api="install-api"
+      case "${host_os}"
+      in
+         cygwin*|mingw*)
+	    install_api_libraries="install-api-libraries-windows"
+	    ;;
+	 *)
+	    install_api_libraries="install-api-libraries"
+	    ;;
+      esac
+
       api_libraries="${LIBS}"
       BRLTTY_ARG_PARAMETERS([api])
    ])
@@ -418,6 +428,7 @@ BRLTTY_ARG_DISABLE(
 AC_SUBST([api_objects])
 AC_SUBST([all_api])
 AC_SUBST([install_api])
+AC_SUBST([install_api_libraries])
 AC_SUBST([api_authfile], [brlapi.key])
 AC_SUBST([api_libraries])
 BRLTTY_DEFINE_EXPANDED([BRLAPI_AUTHFILE], ["${api_authfile}"])

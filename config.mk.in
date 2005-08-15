@@ -184,6 +184,7 @@ API_OBJECTS = @api_objects@
 API_AUTHFILE = @api_authfile@
 ALL_API = @all_api@
 INSTALL_API = @install_api@
+INSTALL_API_LIBRARIES = @install_api_libraries@
 API_LIBRARIES = @api_libraries@
 
 ALL_XBRLAPI = @all_xbrlapi@
