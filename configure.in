@@ -437,11 +437,11 @@ BRLTTY_ARG_DISABLE(
       case "${host_os}"
       in
          cygwin*|mingw*)
-	    install_api_libraries="install-api-libraries-windows"
-	    ;;
-	 *)
-	    install_api_libraries="install-api-libraries"
-	    ;;
+            install_api_libraries="install-api-libraries-windows"
+            ;;
+         *)
+            install_api_libraries="install-api-libraries"
+            ;;
       esac
 
       api_libraries="${LIBS}"
@@ -452,8 +452,8 @@ AC_SUBST([api_objects])
 AC_SUBST([all_api])
 AC_SUBST([install_api])
 AC_SUBST([install_api_libraries])
-AC_SUBST([api_authfile], [brlapi.key])
 AC_SUBST([api_libraries])
+AC_SUBST([api_authfile], [brlapi.key])
 BRLTTY_DEFINE_EXPANDED([BRLAPI_AUTHFILE], ["${api_authfile}"])
 
 BRLTTY_PACKAGE_CHOOSE([curses],
