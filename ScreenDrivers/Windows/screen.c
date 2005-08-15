@@ -20,33 +20,28 @@
 #include "Programs/misc.h"
 #include "Programs/brldefs.h"
 
+#ifndef HAVE_FUNC_ATTACHCONSOLE
 typedef enum {
   PARM_ROOT
 } ScreenParameters;
 #define SCRPARMS "root"
+static unsigned int root;
+#endif /* HAVE_FUNC_ATTACHCONSOLE */
 
 #include "Programs/scr_driver.h"
 
 static HANDLE consoleOutput = INVALID_HANDLE_VALUE;
 static HANDLE consoleInput = INVALID_HANDLE_VALUE;
 
-static unsigned int root;
-
 static int
 prepare_WindowsScreen (char **parameters) {
+#ifndef HAVE_FUNC_ATTACHCONSOLE
   validateYesNo(&root, "disable input simulation and output reading", parameters[PARM_ROOT]);
+#endif /* HAVE_FUNC_ATTACHCONSOLE */
   return 1;
 }
 
-static int
-open_WindowsScreen (void) {
-  if (root) {
-    if (!FreeConsole()) {
-      LogWindowsError("FreeConsole");
-      return 0;
-    }
-    return 1;
-  }
+static int openStdHandles(void) {
   if ((consoleOutput == INVALID_HANDLE_VALUE &&
     (consoleOutput = CreateFile("CONOUT$",GENERIC_READ|GENERIC_WRITE,FILE_SHARE_READ|FILE_SHARE_WRITE,NULL,OPEN_EXISTING,0,NULL)) == INVALID_HANDLE_VALUE)
     ||(consoleInput == INVALID_HANDLE_VALUE &&
@@ -57,6 +52,53 @@ open_WindowsScreen (void) {
   return 1;
 }
 
+static void closeStdHandles(void) {
+  CloseHandle(consoleInput);
+  consoleInput = INVALID_HANDLE_VALUE;
+  CloseHandle(consoleOutput);
+  consoleOutput = INVALID_HANDLE_VALUE;
+}
+
+#ifdef HAVE_FUNC_ATTACHCONSOLE
+static int tryToAttach() {
+#define CONSOLEWINDOW "ConsoleWindowClass"
+  HWND win;
+  static char class[strlen(CONSOLEWINDOW)+1];
+  DWORD process;
+  win = GetForegroundWindow();
+  if (GetClassName(win, class, sizeof(class)) != strlen(CONSOLEWINDOW)
+      || memcmp(class,CONSOLEWINDOW,strlen(CONSOLEWINDOW)))
+    return 0;
+  if (!GetWindowThreadProcessId(win, &process))
+    return 0;
+  FreeConsole();
+  if (!AttachConsole(process))
+    return 0;
+  closeStdHandles();
+  return openStdHandles();
+}
+#else /* HAVE_FUNC_ATTACHCONSOLE */
+#define tryToAttach() 1
+#endif /* HAVE_FUNC_ATTACHCONSOLE */
+
+static int
+open_WindowsScreen (void) {
+#ifndef HAVE_FUNC_ATTACHCONSOLE
+  if (root) {
+#endif /* HAVE_FUNC_ATTACH_CONSOLE */
+    /* disable ^C */
+    SetConsoleCtrlHandler(NULL,TRUE);
+    if (!FreeConsole()) {
+      LogWindowsError("FreeConsole");
+      return 0;
+    }
+    return 1;
+#ifndef HAVE_FUNC_ATTACHCONSOLE
+  }
+  return openStdHandles();
+#endif /* HAVE_FUNC_ATTACH_CONSOLE */
+}
+
 static int
 setup_WindowsScreen (void) {
   return 1;
@@ -64,10 +106,7 @@ setup_WindowsScreen (void) {
 
 static void
 close_WindowsScreen (void) {
-  CloseHandle(consoleInput);
-  consoleInput = INVALID_HANDLE_VALUE;
-  CloseHandle(consoleOutput);
-  consoleOutput = INVALID_HANDLE_VALUE;
+  closeStdHandles();
 }
 
 static const char noterm [] = "no terminal to read";
@@ -76,8 +115,8 @@ static void
 describe_WindowsScreen (ScreenDescription *description) {
   CONSOLE_SCREEN_BUFFER_INFO info;
   description->no = (int) GetForegroundWindow();
-  if (consoleOutput == INVALID_HANDLE_VALUE)
-    goto error;
+  if (!tryToAttach()) goto error;
+  if (consoleOutput == INVALID_HANDLE_VALUE) goto error;
   if (!(GetConsoleScreenBufferInfo(consoleOutput, &info))) {
     LogWindowsError("GetConsoleScreenBufferInfo");
     CloseHandle(consoleOutput);
@@ -112,8 +151,8 @@ read_WindowsScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
   size_t size;
   CONSOLE_SCREEN_BUFFER_INFO info;
 
-  if (consoleOutput == INVALID_HANDLE_VALUE)
-    goto error;
+  if (!tryToAttach()) goto error;
+  if (consoleOutput == INVALID_HANDLE_VALUE) goto error;
 
   if (!(GetConsoleScreenBufferInfo(consoleOutput, &info))) {
     LogWindowsError("GetConsoleScreenBufferInfo");
@@ -197,8 +236,8 @@ insert_WindowsScreen (ScreenKey key) {
   INPUT_RECORD buf;
   KEY_EVENT_RECORD *keyE = &buf.Event.KeyEvent;
 
-  if (consoleInput == INVALID_HANDLE_VALUE)
-    return 0;
+  if (!tryToAttach()) return 0;
+  if (consoleInput == INVALID_HANDLE_VALUE) return 0;
 
   LogPrint(LOG_DEBUG, "Insert key: %4.4X",key);
   buf.EventType = KEY_EVENT;

@@ -354,6 +354,29 @@ main (void) {
       fi
 
       AC_CACHE_CHECK(
+         [if the function AttachConsole exists and works],
+         [brltty_cv_function_AttachConsole],
+         [AC_TRY_RUN([
+#include <windows.h>
+#include <stdio.h>
+#include <errno.h>
+
+int
+main (void) {
+  HMODULE module;
+  if (!(module = GetModuleHandle("kernel32.dll"))) return 1;
+  if (!(GetProcAddress(module, "AttachConsole"))) return 2;
+  return 0;
+}
+],
+         [brltty_cv_function_AttachConsole=yes],
+         [brltty_cv_function_AttachConsole=no])])
+      if test "${brltty_cv_function_AttachConsole}" = "yes"
+      then
+         AC_DEFINE([HAVE_FUNC_ATTACHCONSOLE])
+      fi
+
+      AC_CACHE_CHECK(
          [if the function ReadConsoleOutputCharacterW exists and works],
          [brltty_cv_function_ReadConsoleOutputCharacterW],
          [AC_TRY_RUN([
