@@ -579,9 +579,9 @@ s/ *$//
 s/  */,/g
 '`])
 
-AC_DEFUN([BRLTTY_HAVE_DLL], [dnl
+AC_DEFUN([BRLTTY_HAVE_WINDOWS_LIBRARY], [dnl
 AC_CACHE_CHECK(
-   [if the $1 DLL can be loaded],
+   [if DLL $1 can be loaded],
    [brltty_cv_dll_$1],
    [AC_TRY_RUN([
 #include <windows.h>
@@ -595,3 +595,28 @@ if test "${brltty_cv_dll_$1}" = "yes"
 then
    AC_HAVE_LIBRARY([$1])
 fi])
+
+AC_DEFUN([BRLTTY_HAVE_WINDOWS_FUNCTION], [dnl
+AC_CACHE_CHECK(
+   [if function $1 in DLL $2 exists],
+   [brltty_cv_function_$1],
+   [AC_TRY_RUN([
+#include <windows.h>
+#include <stdio.h>
+#include <errno.h>
+
+int
+main (void) {
+  HMODULE module;
+  if (!(module = GetModuleHandle("$2.dll"))) return 1;
+  if (!(GetProcAddress(module, "$1"))) return 2;
+  return 0;
+}
+],
+   [brltty_cv_function_$1=yes],
+   [brltty_cv_function_$1=no])])
+if test "${brltty_cv_function_$1}" = "yes"
+then
+   AC_DEFINE(BRLTTY_UPPERCASE([HAVE_FUNC_$1]))
+fi
+])
