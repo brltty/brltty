@@ -161,10 +161,15 @@ main (int argc, char *argv[]) {
     while (argc) {
       short note = integerArgument(*argv++, 1, 127, "note");
       short duration = integerArgument(*argv++, 1, 255, "duration");
+      TuneElement te = TUNE_NOTE(duration, note);
       argc -= 2;
-      *(element++) = TUNE_NOTE(duration, note);
+      *(element++) = te;
     }
-    *element = TUNE_STOP();
+
+    {
+      TuneElement te = TUNE_STOP();
+      *element = te;
+    }
 
     if (!setTuneDevice(tuneDevice)) {
       LogPrint(LOG_ERR, "unsupported tune device: %s", deviceNames[tuneDevice]);
