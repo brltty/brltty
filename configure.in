@@ -611,39 +611,54 @@ fi])
 LIBCXXFLAGS="${brltty_cv_prog_cxx_libflags}"
 AC_SUBST([LIBCXXFLAGS])
 
-AC_SUBST([library_prefix], [lib])
-AC_CACHE_CHECK([for dynamic library extension], [brltty_cv_ext_lib], [dnl
+AC_SUBST([archive_prefix], [lib])
+AC_SUBST([archive_extension], [a])
+
+case "${host_os}"
+in
+   cygwin*)
+      library_prefix="cyg"
+      ;;
+   mingw*)
+      library_prefix=""
+      ;;
+   *)
+      library_prefix="${archive_prefix}"
+      ;;
+esac
+AC_SUBST([library_prefix])
+
 case "${host_os}"
 in
    hpux*)
-      brltty_cv_ext_lib="sl"
+      library_extension="sl"
       ;;
    cygwin*|mingw*)
-      brltty_cv_ext_lib="dll"
+      library_extension="dll"
       ;;
    darwin*)
-      brltty_cv_ext_lib="dylib"
+      library_extension="dylib"
       ;;
    *)
-      brltty_cv_ext_lib="so"
+      library_extension="so"
       ;;
-esac])
-AC_SUBST([library_extension], ["${brltty_cv_ext_lib}"])
+esac
+AC_SUBST([library_extension])
 AC_DEFINE_UNQUOTED([LIBRARY_EXTENSION], ["${library_extension}"])
 
 AC_SUBST([module_name], ["${library_prefix}${PACKAGE_NAME}"])
 AC_DEFINE_UNQUOTED([MODULE_NAME], ["${module_name}"])
-AC_CACHE_CHECK([for loadable module extension], [brltty_cv_ext_mod], [dnl
+
 case "${host_os}"
 in
    darwin*)
-      brltty_cv_ext_mod="bundle"
+      module_extension="bundle"
       ;;
    *)
-      brltty_cv_ext_mod="${library_extension}"
+      module_extension="${library_extension}"
       ;;
-esac])
-AC_SUBST([module_extension], ["${brltty_cv_ext_mod}"])
+esac
+AC_SUBST([module_extension])
 AC_DEFINE_UNQUOTED([MODULE_EXTENSION], ["${module_extension}"])
 
 AC_CACHE_CHECK([for static archive extension], [brltty_cv_ext_arc], [dnl

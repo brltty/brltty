@@ -90,27 +90,28 @@ adlib.$O:
 
 ###############################################################################
 
-API_LIB_OBJS = api_client.$O
-API_NAME = $(LIB_PFX)brlapi
-API_ARC = $(API_NAME).$(ARC_EXT)
-API_LIB = $(API_NAME).$(LIB_EXT)
-API_DLL = $(API_NAME)-$(API_RELEASE).$(LIB_EXT)
-API_IMP = $(API_LIB)-$(API_RELEASE).$(ARC_EXT)
+API_OBJS = api_client.$O
+API_NAME = brlapi
+API_ARC = $(ARC_PFX)$(API_NAME).$(ARC_EXT)
+API_LIB = $(LIB_PFX)$(API_NAME).$(LIB_EXT)
+API_DLL = $(LIB_PFX)$(API_NAME)-$(API_RELEASE).$(LIB_EXT)
+API_IMPLIB = $(ARC_PFX)$(API_NAME).$(LIB_EXT).$(ARC_EXT)
+API_IMPLIB_VERSIONED = $(ARC_PFX)$(API_NAME)-$(API_RELEASE).$(LIB_EXT).$(ARC_EXT)
 
 api: $(API_DYNAMIC_LIBRARY) $(API_ARC)
+
 api-dynamic-library: $(API_LIB)
+$(API_LIB): $(API_OBJS)
+	$(MKLIB:<name>=${API_LIB}.${API_VERSION}) $@ $(API_OBJS) $(API_LIBRARIES)
+
 api-dynamic-library-windows: $(API_DLL)
-
-$(API_LIB): $(API_LIB_OBJS)
-	$(MKLIB:<name>=${API_LIB}.${API_VERSION}) $@ $(API_LIB_OBJS) $(API_LIBRARIES)
-
-$(API_DLL): $(API_LIB_OBJS)
+$(API_DLL): $(API_OBJS)
 	-rm -f implib.a
-	$(MKLIB:<name>=${API_LIB}.${API_VERSION}) $@ $(API_LIB_OBJS) $(API_LIBRARIES)
-	[ ! -f implib.a ] || mv implib.a $(API_IMP)
+	$(MKLIB:<name>=${API_LIB}.${API_VERSION}) $@ $(API_OBJS) $(API_LIBRARIES)
+	[ ! -f implib.a ] || mv implib.a $(API_IMPLIB)
 
-$(API_ARC): $(API_LIB_OBJS)
-	ar rc $@ $(API_LIB_OBJS)
+$(API_ARC): $(API_OBJS)
+	ar rc $@ $(API_OBJS)
 	$(RANLIB) $@
 
 api_client.$O:
@@ -473,8 +474,8 @@ install-api-libraries: $(API_LIB) $(API_ARC) install-libdir-directory
 
 install-api-libraries-windows: $(API_DLL) $(API_ARC) install-program-directory install-libdir-directory
 	$(INSTALL_PROGRAM) $(API_DLL) $(INSTALL_ROOT)$(PROGRAM_DIRECTORY)
-	$(INSTALL_DATA) $(API_IMP) $(INSTALL_ROOT)$(libdir)
-	$(SYMLINK) -f $(API_IMP) $(INSTALL_ROOT)$(libdir)/$(API_LIB).$(ARC_EXT)
+	$(INSTALL_DATA) $(API_IMPLIB) $(INSTALL_ROOT)$(libdir)/$(API_IMPLIB_VERSIONED)
+	$(SYMLINK) -f $(API_IMPLIB_VERSIONED) $(INSTALL_ROOT)$(libdir)/$(API_IMPLIB)
 	$(INSTALL_DATA) $(API_ARC) $(INSTALL_ROOT)$(libdir)
 
 install-libdir-directory:
@@ -520,8 +521,8 @@ uninstall-libraries:
 	-rm -f $(INSTALL_ROOT)$(libdir)/$(API_LIB).$(API_RELEASE)
 	$(CONFLIBDIR) $(INSTALL_ROOT)$(libdir)
 	-rm -f $(INSTALL_ROOT)$(libdir)/$(API_ARC)
-	-rm -f $(INSTALL_ROOT)$(libdir)/$(API_LIB).$(ARC_EXT)
-	-rm -f $(INSTALL_ROOT)$(libdir)/$(API_IMP)
+	-rm -f $(INSTALL_ROOT)$(libdir)/$(API_IMPLIB)
+	-rm -f $(INSTALL_ROOT)$(libdir)/$(API_IMPLIB_VERSIONED)
 	-rm -f $(INSTALL_ROOT)$(PROGRAM_DIRECTORY)/$(API_DLL)
 
 uninstall-manpages:
@@ -558,7 +559,7 @@ distclean clean::
 
 clean::
 	-rm -f brltty$X xbrlapi$X txt2hlp$X tbl2hex$X *test$X *-static$X
-	-rm -f $(API_LIB) $(API_ARC) $(API_LIB).$(ARC_EXT)
+	-rm -f $(API_LIB) $(API_ARC) $(API_DLL) $(API_IMPLIB)
 	-rm -f $(BLD_TOP)$(DRV_DIR)/* $(BLD_TOP)$(DAT_DIR)/*
 
 distclean::

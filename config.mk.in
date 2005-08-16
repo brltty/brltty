@@ -91,12 +91,13 @@ INSTALL_PROGRAM = $(INSTALL_SCRIPT) -s
 INSTALL_DATA = $(INSTALL) -m 644
 INSTALL_DIRECTORY = $(INSTALL) -d
 
-MOD_NAME = @module_name@
-MOD_EXT = @module_extension@
+ARC_PFX = @archive_prefix@
+ARC_EXT = @archive_extension@
 LIB_PFX = @library_prefix@
 LIB_EXT = @library_extension@
+MOD_NAME = @module_name@
+MOD_EXT = @module_extension@
 LIB_VAR = @libsearch_variable@
-ARC_EXT = @archive_extension@
 
 prefix = @prefix@
 exec_prefix = @exec_prefix@
