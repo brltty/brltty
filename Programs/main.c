@@ -103,15 +103,7 @@ typedef struct {
   int ptrx, ptry;	/* mouse pointer position */
   ScreenMark marks[0X100];
 } ScreenState;
-static const ScreenState initialScreenState = {
-  DEFAULT_TRACK_CURSOR, DEFAULT_HIDE_CURSOR,
-  0, /* showAttributes */
-  0, 0, /* winx/y */
-  0, 0, /* motx/y */
-  0, 0, /* trkx/y */
-  0, 0, /* ptrx/y */
-  {[0X00 ... 0XFF]={0, 0}}
-};
+static ScreenState initialScreenState;
 
 /* 
  * Array definition containing pointers to ScreenState structures for 
@@ -131,9 +123,17 @@ updateScreenAttributes (void) {
   if (scr.no == -1) scr.no = userVirtualTerminal(0);
 
   if (scr.no >= screenCount) {
-    int newCount = (scr.no + 1) | 0XF;
-    screenStates = reallocWrapper(screenStates, newCount*sizeof(*screenStates));
-    while (screenCount < newCount) screenStates[screenCount++] = NULL;
+    if (!screenCount) {
+      memset(&initialScreenState, 0, sizeof(initialScreenState));
+      initialScreenState.trackCursor = DEFAULT_TRACK_CURSOR;
+      initialScreenState.hideCursor = DEFAULT_HIDE_CURSOR;
+    }
+
+    {
+      int newCount = (scr.no + 1) | 0XF;
+      screenStates = reallocWrapper(screenStates, newCount*sizeof(*screenStates));
+      while (screenCount < newCount) screenStates[screenCount++] = NULL;
+    }
   } else if (scr.no == previousScreen) {
     return;
   }
