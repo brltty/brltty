@@ -1132,17 +1132,25 @@ static pthread_key_t error_key;
 /* the key must be created at most once */
 static pthread_once_t error_key_once = PTHREAD_ONCE_INIT;
 
-#ifndef WINDOWS
-/* We need to declare these with __attribute__((weak)) to determine at runtime 
- * whether libpthread is used or not. We can't rely on the functions prototypes,
- * hence the use of typeof
+/* We need to declare these as weak external references to determine at runtime 
+ * whether libpthread is used or not. We also can't rely on the functions prototypes.
  */
+#if defined(WINDOWS)
+
+#elif defined(__GNUC__)
 #define WEAK_REDEFINE(name) extern typeof(name) name __attribute__((weak))
 WEAK_REDEFINE(pthread_key_create);
 WEAK_REDEFINE(pthread_once);
 WEAK_REDEFINE(pthread_getspecific);
 WEAK_REDEFINE(pthread_setspecific);
-#endif /* WINDOWS */
+
+#elif defined(__sun__)
+#pragma weak pthread_key_create
+#pragma weak pthread_once
+#pragma weak pthread_getspecific
+#pragma weak pthread_setspecific
+
+#endif /* weak external references */
 
 static void error_key_free(void *key)
 {
