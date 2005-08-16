@@ -27,7 +27,7 @@ typedef struct {
                            /* 1 through 127 are semitones, 60 is middle C */
    unsigned char duration; /* milliseconds (0 means stop) */
 } TuneElement;
-#define TUNE_NOTE(duration,note) (TuneElement){note, duration}
+#define TUNE_NOTE(duration,note) {note, duration}
 #define TUNE_REST(duration) TUNE_NOTE(duration, 0)
 #define TUNE_STOP() TUNE_REST(0)
 
