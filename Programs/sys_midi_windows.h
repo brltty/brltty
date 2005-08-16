@@ -16,69 +16,141 @@
  */
 
 #ifdef HAVE_LIBWINMM
+
 struct MidiDeviceStruct {
   HMIDIOUT handle;
   unsigned char note;
+  int count;
+  unsigned char buffer[0X80];
 };
 
+typedef enum {
+  MIDI_NoteOff        = 0X80,
+  MIDI_NoteOn         = 0X90,
+  MIDI_KeyPressure    = 0XA0,
+  MIDI_ControlChange  = 0XB0,
+  MIDI_ProgramChange  = 0XC0,
+  MIDI_ChannelPresure = 0XD0,
+  MIDI_PitchBend      = 0XE0,
+  MIDI_SystemPrefix   = 0XF0
+} MidiEvent;
+
 static void
-LogMidiOutError(MMRESULT error, int errorLevel, const char *action) {
-  char msg[MAXERRORLENGTH];
-  midiOutGetErrorText(error, msg, sizeof(msg));
-  LogPrint(errorLevel, "%s error %d: %s.", action, error, msg);
+logMidiOutError (MMRESULT error, int errorLevel, const char *action) {
+  char text[MAXERRORLENGTH];
+  midiOutGetErrorText(error, text, sizeof(text));
+  LogPrint(errorLevel, "%s error %d: %s", action, error, text);
+}
+
+static int
+addMidiMessage (MidiDevice *midi, const char *message, int length) {
+  if ((midi->count + length) > sizeof(midi->buffer))
+    if (!flushMidiDevice(midi))
+      return 0;
+
+  memcpy(&midi->buffer[midi->count], message, length);
+  midi->count += length;
+  return 1;
+}
+
+static int
+writeMidiMessage (MidiDevice *midi, const char *message, int length) {
+  if (!addMidiMessage(midi, message, length)) return 0;
+  if (!flushMidiDevice(midi)) return 0;
+  return 1;
 }
 
 MidiDevice *
 openMidiDevice (int errorLevel, const char *device) {
   MidiDevice *midi;
-  MMRESULT mmres;
+  MMRESULT error;
   int id = 0;
+  static const char *const defaultDevice = "default";
 
-  if (device && *device) {
-    if (!isInteger(&id, device) || (id < 0) || (id >= midiOutGetNumDevs())) {
+  if (!device || !*device) device = defaultDevice;
+
+  if (strcmp(device, defaultDevice) == 0) {
+    id = -1;
+  } else if (!isInteger(&id, device) || (id < 0) || (id >= midiOutGetNumDevs())) {
+    int count = midiOutGetNumDevs();
+    for (id=0; id<count; ++id) {
+      MIDIOUTCAPS cap;
+      if (midiOutGetDevCaps(id, &cap, sizeof(cap)) == MMSYSERR_NOERROR)
+        if (strncasecmp(device, cap.szPname, strlen(device)) == 0)
+          break;
+    }
+
+    if (id == count) {
       LogPrint(errorLevel, "invalid MIDI device number: %s", device);
       return NULL;
     }
   }
-  if (!(midi = malloc(sizeof(*midi)))) {
+
+  if ((midi = malloc(sizeof(*midi)))) {
+    if ((error = midiOutOpen(&midi->handle, id, 0, 0, CALLBACK_NULL)) == MMSYSERR_NOERROR) {
+      midi->note = 0;
+      midi->count = 0;
+      return midi;
+    } else {
+      logMidiOutError(error, errorLevel, "MIDI device open");
+    }
+
+    free(midi);
+  } else {
     LogError("MIDI device allocation");
-    return NULL;
   }
-
-  if ((mmres = midiOutOpen(&midi->handle, id, 0, 0, CALLBACK_NULL))) {
-    LogMidiOutError(mmres, errorLevel, "opening MIDI device");
-    goto out;
-  }
-  midi->note = 0;
-  return midi;
-
-out:
-  free(midi);
   return NULL;
 }
 
 void
 closeMidiDevice (MidiDevice *midi) {
+  flushMidiDevice(midi);
   midiOutClose(midi->handle);
   free(midi);
 }
 
 int
 flushMidiDevice (MidiDevice *midi) {
-  return 1;
-}
+  int ok = 1;
 
-#define MIDI_PGM_CHANGE	0xC0
-#define MIDI_NOTEOFF	0x80
-#define MIDI_NOTEON	0x90
+  if (midi->count > 0) {
+    MMRESULT error;
+    MIDIHDR header;
+    
+    header.lpData = midi->buffer;
+    header.dwBufferLength = midi->count;
+    header.dwFlags = 0;
+
+    if ((error = midiOutPrepareHeader(midi->handle, &header, sizeof(header))) == MMSYSERR_NOERROR) {
+      if ((error = midiOutLongMsg(midi->handle, &header, sizeof(header))) == MMSYSERR_NOERROR) {
+        midi->count = 0;
+      } else {
+        logMidiOutError(error, LOG_ERR, "midiOutLongMsg");
+        ok = 0;
+      }
+
+      while ((error = midiOutUnprepareHeader(midi->handle, &header, sizeof(header))) == MIDIERR_STILLPLAYING) {
+        sleep(1);
+      }
+
+      if (error != MMSYSERR_NOERROR) {
+        logMidiOutError(error, LOG_ERR, "midiOutUnprepareHeader");
+      }
+    } else {
+      logMidiOutError(error, LOG_ERR, "midiOutPrepareHeader");
+      ok = 0;
+    }
+  }
+
+  return ok;
+}
 
 int
 setMidiInstrument (MidiDevice *midi, unsigned char channel, unsigned char instrument) {
-  MMRESULT mmres;
-  if ((mmres = midiOutShortMsg(midi->handle, MAKEWORD(MIDI_PGM_CHANGE+channel,instrument))) == MMSYSERR_NOERROR)
-    return 1;
-  LogMidiOutError(mmres, LOG_ERR, "setting MIDI instrument");
-  return 0;
+  const unsigned char message[] = {
+    MIDI_ProgramChange|channel, instrument
+  };
+  return writeMidiMessage(midi, message, sizeof(message));
 }
 
 int
@@ -93,24 +165,22 @@ endMidiBlock (MidiDevice *midi) {
 
 int
 startMidiNote (MidiDevice *midi, unsigned char channel, unsigned char note, unsigned char volume) {
-  MMRESULT mmres;
-  if ((mmres = midiOutShortMsg(midi->handle, MAKELONG(MAKEWORD(MIDI_NOTEON+channel,note),0x7F*volume/100))) == MMSYSERR_NOERROR) {
-    midi->note = note;
-    return 1;
-  }
-  LogMidiOutError(mmres, LOG_ERR, "starting MIDI note");
-  return 0;
+  const unsigned char message[] = {
+    MIDI_NoteOn|channel, note, (0X7F * volume / 100)
+  };
+  int ok = writeMidiMessage(midi, message, sizeof(message));
+  if (ok) midi->note = note;
+  return ok;
 }
 
 int
 stopMidiNote (MidiDevice *midi, unsigned char channel) {
-  MMRESULT mmres;
-  if ((mmres = midiOutShortMsg(midi->handle, MAKEWORD(MIDI_NOTEOFF+channel, midi->note))) == MMSYSERR_NOERROR) {
-    midi->note = 0;
-    return 1;
-  }
-  LogMidiOutError(mmres, LOG_ERR, "stopping MIDI note");
-  return 1;
+  const unsigned char message[] = {
+    MIDI_NoteOff|channel, midi->note, 0
+  };
+  int ok = writeMidiMessage(midi, message, sizeof(message));
+  if (ok) midi->note = 0;
+  return ok;
 }
 
 int
