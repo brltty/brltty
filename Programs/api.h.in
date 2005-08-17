@@ -33,11 +33,14 @@ extern "C" {
 /* Define this to be a string containing the library version. */
 #undef BRLAPI_RELEASE
 
+/* Types are defined there */
+#include <sys/types.h>
+
 /* this is for UINT32_MAX */
 #include <stdint.h>
 
-/* The type size_t is defined there */
-#include <stddef.h>
+/* NULL is defined there */
+#include <unistd.h>
 
 /** \defgroup brlapi_connection Connecting to BrlAPI
  *
