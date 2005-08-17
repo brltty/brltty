@@ -468,6 +468,10 @@ AC_CHECK_HEADERS([iconv.h], [
 
 AC_CHECK_FUNCS([fchdir fchmod gai_strerror getaddrinfo getopt_long hstrerror realpath shmget shm_open sigaction vsyslog])
 
+AC_CHECK_SIZEOF([key_t], [], [
+#include <sys/ipc.h>
+])
+
 AC_C_BIGENDIAN
 AC_C_CONST
 AC_C_INLINE

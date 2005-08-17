@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <inttypes.h>
 #include <string.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -72,17 +73,17 @@ open_ScreenScreen (void) {
 
   while (keyCount > 0) {
     shmKey = keys[--keyCount];
-    LogPrint(LOG_DEBUG, "Trying shared memory key: 0X%X", shmKey);
+    LogPrint(LOG_DEBUG, "Trying shared memory key: 0X%" PRIX_KEY_T, shmKey);
     if ((shmIdentifier = shmget(shmKey, shmSize, shmMode)) != -1) {
       if ((shmAddress = shmat(shmIdentifier, NULL, 0)) != (char *)-1) {
-        LogPrint(LOG_INFO, "Screen image shared memory key: 0X%X", shmKey);
+        LogPrint(LOG_INFO, "Screen image shared memory key: 0X%" PRIX_KEY_T, shmKey);
         return 1;
       } else {
-        LogPrint(LOG_WARNING, "Cannot attach shared memory segment 0X%X: %s",
+        LogPrint(LOG_WARNING, "Cannot attach shared memory segment 0X%" PRIX_KEY_T ": %s",
                  shmKey, strerror(errno));
       }
     } else {
-      LogPrint(LOG_WARNING, "Cannot access shared memory segment 0X%X: %s",
+      LogPrint(LOG_WARNING, "Cannot access shared memory segment 0X%" PRIX_KEY_T ": %s",
                shmKey, strerror(errno));
     }
   }

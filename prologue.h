@@ -52,6 +52,14 @@ extern "C" {
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
 
+#if SIZEOF_KEY_T == 4
+#define PRIX_KEY_T PRIX32
+#elif SIZEOF_KEY_T == 8
+#define PRIX_KEY_T PRIX64
+#else /* SIZEOF_KEY_T */
+#error unsupported size for type key_t
+#endif /* SIZEOF_KEY_T */
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
