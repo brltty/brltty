@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-. "`dirname "${0}"`/begin.sh"
+. "`dirname "${0}"`/prologue.sh"
 
 [ "${#}" -eq 0 ] && syntaxError "missing source root."
 sourceRoot="${1}"
