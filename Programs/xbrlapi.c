@@ -24,6 +24,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include <inttypes.h>
 #include <getopt.h>
 #include <signal.h>
 #include <string.h>
@@ -537,11 +538,11 @@ void toX_f(const char *display) {
 	      case BRL_KEY_FUNCTION + 33: keysym = XK_F34;       break;
 	      case BRL_KEY_FUNCTION + 34: keysym = XK_F35;       break;
 	      default:
-		fprintf(stderr,"uh, unexpected key %x\n",code);
+		fprintf(stderr,"unexpected key: %" PRIX32 "\n",code);
 		continue;
 	    }
 	  default:
-	    fprintf(stderr,"uh, unexpected block type %x\n",code&BRL_MSK_BLK);
+	    fprintf(stderr,"unexpected block type %" PRIX32 "\n",code&BRL_MSK_BLK);
 	    continue;
 	}
 	keycode = XKeysymToKeycode(dpy,keysym);
