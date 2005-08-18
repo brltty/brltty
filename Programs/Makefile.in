@@ -218,6 +218,9 @@ usb_skeleton.$O:
 usb_linux.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/usb_linux.c
 
+usb_solaris.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/usb_solaris.c
+
 usb_openbsd.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/usb_openbsd.c
 

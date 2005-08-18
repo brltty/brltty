@@ -934,6 +934,9 @@ in
    linux*)
       usb_object="linux"
       ;;
+   solaris*)
+      usb_object="solaris"
+      ;;
    openbsd*)
       usb_object="openbsd"
       ;;
