@@ -52,6 +52,7 @@ extern "C" {
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
 
+#ifdef HAVE_SHMGET
 #if SIZEOF_KEY_T == 4
 #define PRIX_KEY_T PRIX32
 #elif SIZEOF_KEY_T == 8
@@ -59,6 +60,7 @@ extern "C" {
 #else /* SIZEOF_KEY_T */
 #error unsupported size for type key_t
 #endif /* SIZEOF_KEY_T */
+#endif /* HAVE_SHMGET */
 
 #ifdef __cplusplus
 }
