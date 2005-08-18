@@ -42,6 +42,10 @@
 #endif /* HAVE_SYS_SELECT_H */
 #endif /* WINDOWS */
 
+#if !defined(AF_LOCAL) && defined(AF_UNIX)
+#define AF_LOCAL AF_UNIX
+#endif /* !defined(AF_LOCAL) && defined(AF_UNIX) */
+ 
 #if !defined(PF_LOCAL) && defined(PF_UNIX)
 #define PF_LOCAL PF_UNIX
 #endif /* !defined(PF_LOCAL) && defined(PF_UNIX) */
