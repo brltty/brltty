@@ -936,6 +936,7 @@ in
       ;;
    solaris*)
       usb_object="solaris"
+      AC_HAVE_LIBRARY([aio])
       ;;
    openbsd*)
       usb_object="openbsd"

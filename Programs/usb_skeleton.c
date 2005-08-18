@@ -118,7 +118,7 @@ usbSubmitRequest (
   unsigned char endpointAddress,
   void *buffer,
   int length,
-  void *data
+  void *context
 ) {
   errno = ENOSYS;
   LogError("USB request submit");
