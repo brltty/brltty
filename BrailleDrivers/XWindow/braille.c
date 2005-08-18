@@ -30,6 +30,7 @@
 #if defined(HAVE_PKG_XAW)
 #define USE_XAW
 #define USE_XT
+#include <X11/Intrinsic.h>
 #include <X11/Xaw/Form.h>
 #include <X11/Xaw/Paned.h>
 #include <X11/Xaw/Label.h>
@@ -41,6 +42,7 @@
 #elif defined(HAVE_PKG_XAW3D)
 #define USE_XAW
 #define USE_XT
+#include <X11/Intrinsic.h>
 #include <X11/Xaw3d/Form.h>
 #include <X11/Xaw3d/Paned.h>
 #include <X11/Xaw3d/Label.h>
@@ -52,6 +54,7 @@
 #elif defined(HAVE_PKG_NEXTAW)
 #define USE_XAW
 #define USE_XT
+#include <X11/Intrinsic.h>
 #include <X11/neXtaw/Form.h>
 #include <X11/neXtaw/Paned.h>
 #include <X11/neXtaw/Label.h>
@@ -63,6 +66,7 @@
 #elif defined(HAVE_PKG_XAWPLUS)
 #define USE_XAW
 #define USE_XT
+#include <X11/Intrinsic.h>
 #include <X11/XawPlus/Form.h>
 #include <X11/XawPlus/Paned.h>
 #include <X11/XawPlus/Label.h>
@@ -74,6 +78,7 @@
 #elif defined(HAVE_PKG_XM)
 #define USE_XM
 #define USE_XT
+#include <X11/Intrinsic.h>
 #include <Xm/Xm.h>
 #include <Xm/Form.h>
 #include <Xm/PanedW.h>
@@ -90,7 +95,6 @@
 
 #ifdef USE_XT
 #define XK_MISCELLANY
-#include <X11/Intrinsic.h>
 #include <X11/Xlib.h>
 #include <X11/StringDefs.h>
 #include <X11/keysymdef.h>
