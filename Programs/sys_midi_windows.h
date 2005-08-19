@@ -130,7 +130,7 @@ flushMidiDevice (MidiDevice *midi) {
       }
 
       while ((error = midiOutUnprepareHeader(midi->handle, &header, sizeof(header))) == MIDIERR_STILLPLAYING) {
-        sleep(1);
+        Sleep(1);
       }
 
       if (error != MMSYSERR_NOERROR) {
