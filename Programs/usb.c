@@ -678,16 +678,28 @@ usbAwaitInput (
     unsigned char *buffer = malloc(size);
     if (buffer) {
       int count;
-      while ((count = usbReadEndpoint(device, endpointNumber, buffer, size,
-                                      MAX(interval, timeout))) != -1) {
-        if (count) {
+
+      if (timeout) hasTimedOut(0);
+      while (1) {
+        while ((count = usbReadEndpoint(device, endpointNumber, buffer, size,
+                                        MAX(interval, timeout))) != -1) {
+          if (!count) {
+            errno = EAGAIN;
+            break;
+          }
+
           endpoint->direction.input.buffer = buffer;
           endpoint->direction.input.length = count;
           endpoint->direction.input.completed = buffer;
           return 1;
         }
+        if (errno == ETIMEDOUT) errno = EAGAIN;
+
+        if (errno != EAGAIN) break;
+        if (!timeout) break;
+        if (hasTimedOut(timeout)) break;
+        approximateDelay(interval);
       }
-      if (errno == ETIMEDOUT) errno = EAGAIN;
 
       free(buffer);
     }
