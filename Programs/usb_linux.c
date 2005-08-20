@@ -380,23 +380,29 @@ usbReapResponse (
       if (!usbReapUrb(device, wait)) return NULL;
     }
 
-    if (urb->status) {
-      if ((errno = urb->status) < 0) errno = -errno;
+    response->context = urb->usercontext;
+    response->buffer = urb->buffer;
+    response->size = urb->buffer_length;
+
+    if ((response->error = urb->status)) {
+      if (response->error < 0) response->error = -response->error;
+      errno = response->error;
       LogError("USB URB status");
+      response->count = -1;
     } else {
-      int length = urb->actual_length;
+      response->count = urb->actual_length;
 
-      if (usbApplyInputFilters(device, urb->buffer, urb->buffer_length, &length)) {
-        response->buffer = urb->buffer;
-        response->length = length;
-        response->context = urb->usercontext;
-        return urb;
+      switch (USB_ENDPOINT_DIRECTION(endpoint->descriptor)) {
+        case UsbEndpointDirection_Input:
+          if (!usbApplyInputFilters(device, response->buffer, response->size, &response->count)) {
+            response->error = EIO;
+            response->count = -1;
+          }
+          break;
       }
-
-      errno = EIO;
     }
 
-    free(urb);
+    return urb;
   }
 
   return NULL;
@@ -559,17 +565,12 @@ usbReadDeviceDescriptor (UsbDevice *device) {
   return 0;
 }
 
-static void
-usbDeallocateRequest (void *item, void *data) {
-  free(item);
-}
-
 int
 usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
   UsbEndpointExtension *eptx;
 
   if ((eptx = malloc(sizeof(*eptx)))) {
-    if ((eptx->completedRequests = newQueue(usbDeallocateRequest, NULL))) {
+    if ((eptx->completedRequests = newQueue(NULL, NULL))) {
       endpoint->extension = eptx;
       return 1;
     } else {

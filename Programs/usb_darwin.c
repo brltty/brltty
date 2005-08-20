@@ -375,12 +375,6 @@ setInterface (UsbDevice *device, UInt8 number) {
 }
 
 static void
-usbDeallocateAsynchronousRequest (void *item, void *data) {
-  UsbAsynchronousRequest *request = item;
-  free(request);
-}
-
-static void
 usbAsynchronousRequestCallback (void *context, IOReturn result, void *arg) {
   UsbAsynchronousRequest *request = context;
   UsbEndpoint *endpoint = request->endpoint;
@@ -664,19 +658,25 @@ usbReapResponse (
       }
     }
 
+    response->context = request->context;
+    response->buffer = request->buffer;
+    response->size = request->length;
+
     if (request->result == kIOReturnSuccess) {
-      int length = request->count;
-      if (usbApplyInputFilters(device, request->buffer, request->length, &length)) {
-        response->buffer = request->buffer;
-        response->length = length;
-        response->context = request->context;
-        return request;
+      response->error = 0;
+      response->count = request->count;
+
+      if (!usbApplyInputFilters(device, response->buffer, response->size, &response->count)) {
+        response->error = EIO;
+        response->count = -1;
       }
     } else {
       setErrno(request->result, "USB asynchronous response");
+      response->error = errno;
+      response->count = -1;
     }
 
-    free(request);
+    return request;
   }
 
 none:
@@ -809,7 +809,7 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
   UsbEndpointExtension *eptx;
 
   if ((eptx = malloc(sizeof(*eptx)))) {
-    if ((eptx->completedRequests = newQueue(usbDeallocateAsynchronousRequest, NULL))) {
+    if ((eptx->completedRequests = newQueue(NULL, NULL))) {
       IOReturn result;
       unsigned char number = USB_ENDPOINT_NUMBER(endpoint->descriptor);
       unsigned char direction = USB_ENDPOINT_DIRECTION(endpoint->descriptor);

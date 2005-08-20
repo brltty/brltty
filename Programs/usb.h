@@ -394,10 +394,11 @@ extern int usbWriteEndpoint (
 );
 
 typedef struct {
+  void *context;
   void *buffer;
   int size;
-  int length;
-  void *context;
+  int count;
+  int error;
 } UsbResponse;
 extern void *usbSubmitRequest (
   UsbDevice *device,

@@ -723,9 +723,9 @@ usbAwaitInput (
     usbAddPendingInputRequest(endpoint);
     deleteItem(endpoint->direction.input.pending, request);
 
-    if (response.length) {
+    if (response.count > 0) {
       endpoint->direction.input.buffer = response.buffer;
-      endpoint->direction.input.length = response.length;
+      endpoint->direction.input.length = response.count;
       endpoint->direction.input.completed = request;
       return 1;
     }

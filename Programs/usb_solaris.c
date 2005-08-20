@@ -35,6 +35,7 @@ typedef struct {
   char *path;
   int data;
   int status;
+
   unsigned char configuration;
   unsigned char interface;
   unsigned char alternative;
@@ -42,6 +43,7 @@ typedef struct {
 
 typedef struct {
   Queue *requests;
+
   char *name;
   int data;
   int status;
@@ -51,6 +53,7 @@ typedef struct {
   aio_result_t result; /* must be first for aiowait() */
 
   UsbEndpoint *endpoint;
+
   void *context;
   void *buffer;
   int length;
@@ -71,7 +74,7 @@ usbOpenEndpointFiles (
   int *status,
   int flags
 ) {
-  static const char *suffix = "stat";
+  static const char *const suffix = "stat";
   char path[strlen(device) + 1 + strlen(endpoint) + strlen(suffix) + 1];
 
   sprintf(path, "%s/%s", device, endpoint);
@@ -90,12 +93,6 @@ usbOpenEndpointFiles (
   }
 
   return 0;
-}
-
-static void
-usbDeallocateAsynchronousRequest (void *item, void *data) {
-  UsbAsynchronousRequest *request = item;
-  free(request);
 }
 
 int
@@ -189,19 +186,27 @@ usbControlTransfer (
   putLittleEndian(&setup.wLength, length);
 
   switch (direction) {
-    case UsbControlDirection_Input:
-      if (write(devx->data, &setup, sizeof(setup)) != -1) {
-        int count = read(devx->data, buffer, length);
-        if (count != -1) return count;
+    case UsbControlDirection_Input: {
+      int size = sizeof(setup);
+      int count;
+
+      if ((count = write(devx->data, &setup, size)) == -1) {
+        LogError("USB control request");
+      } else if (count != size) {
+        LogPrint(LOG_ERR, "USB truncated control request: %d < %d", count, size);
+        errno = EIO;
+      } else if ((count = read(devx->data, buffer, length)) == -1) {
         LogError("USB control read");
       } else {
-        LogError("USB control request");
+        return count;
       }
       break;
+    }
 
     case UsbControlDirection_Output: {
       unsigned char packet[sizeof(setup) + length];
       int size = 0;
+      int count;
 
       memcpy(&packet[size], &setup, sizeof(setup));
       size += sizeof(setup);
@@ -209,13 +214,19 @@ usbControlTransfer (
       memcpy(&packet[size], buffer, length);
       size += length;
 
-      if (write(devx->data, packet, size) != -1) return size;
-      LogError("USB control write");
+      if ((count = write(devx->data, packet, size)) == -1) {
+        LogError("USB control write");
+      } else if (count != size) {
+        LogPrint(LOG_ERR, "USB truncated control write: %d < %d", count, size);
+        errno = EIO;
+      } else {
+        return size;
+      }
       break;
     }
 
     default:
-      LogPrint(LOG_ERR, "USB unsupported control transfer direction: %02X", direction);
+      LogPrint(LOG_ERR, "USB unsupported control direction: %02X", direction);
       errno = ENOSYS;
       break;
   }
@@ -231,9 +242,9 @@ usbSubmitRequest (
   int length,
   void *context
 ) {
-  UsbEndpoint *endpoint = usbGetEndpoint(device, endpointAddress);
+  UsbEndpoint *endpoint;
 
-  if (endpoint) {
+  if ((endpoint = usbGetEndpoint(device, endpointAddress))) {
     UsbEndpointExtension *eptx = endpoint->extension;
     UsbAsynchronousRequest *request;
 
@@ -258,7 +269,7 @@ usbSubmitRequest (
           break;
 
         default:
-          LogPrint(LOG_ERR, "USB unsupported endpoint transfer direction: %02X", direction);
+          LogPrint(LOG_ERR, "USB unsupported asynchronous direction: %02X", direction);
           errno = ENOSYS;
           break;
       }
@@ -283,8 +294,10 @@ usbCancelRequest (
 
   if (!deleteItem(eptx->requests, req)) {
     if (aiocancel(&req->result) == -1) {
-      LogError("USB asynchronous request cancel");
-      return 0;
+      if ((errno != EINVAL) && (errno != EACCES)) {
+        LogError("USB asynchronous cancel");
+        return 0;
+      }
     }
   }
 
@@ -299,9 +312,9 @@ usbReapResponse (
   UsbResponse *response,
   int wait
 ) {
-  UsbEndpoint *endpoint = usbGetEndpoint(device, endpointAddress);
+  UsbEndpoint *endpoint;
 
-  if (endpoint) {
+  if ((endpoint = usbGetEndpoint(device, endpointAddress))) {
     UsbEndpointExtension *eptx = endpoint->extension;
     struct timeval timeout;
     UsbAsynchronousRequest *request;
@@ -312,17 +325,12 @@ usbReapResponse (
     while (!(request = dequeueItem(eptx->requests))) {
       aio_result_t *result;
 
-    retry:
-      if (request) {
-        free(request);
-        request = NULL;
-      }
-
+    doWait:
       if ((int)(result = aiowait(wait? NULL: &timeout)) == -1) {
-        if (errno == EINTR) goto retry;
+        if (errno == EINTR) goto doWait;
 
         if (errno != EINVAL) {
-          LogError("USB asynchronous request wait");
+          LogError("USB asynchronous wait");
           return NULL;
         }
 
@@ -335,33 +343,35 @@ usbReapResponse (
       }
 
       request = (UsbAsynchronousRequest *)result;
-      if (result->aio_return == -1) {
-        errno = result->aio_errno;
-        LogError("USB asynchronous request completion");
-        goto retry;
-      }
-
-      {
-        int count = result->aio_return;
-
-        if (!usbApplyInputFilters(device, request->buffer, request->length, &count)) goto retry;
-        if (!count) goto retry;
-        request->length = count;
-      }
-
       {
         UsbEndpoint *ep = request->endpoint;
         UsbEndpointExtension *epx = ep->extension;
         if (!enqueueItem(epx->requests, request)) {
-          LogError("USB asynchronous request enqueue");
-          goto retry;
+          LogError("USB asynchronous enqueue");
         }
       }
     }
 
     response->context = request->context;
     response->buffer = request->buffer;
-    response->length = request->length;
+    response->size = request->length;
+    response->count = request->result.aio_return;
+    response->error = request->result.aio_errno;
+
+    if (response->count == -1) {
+      errno = response->error;
+      LogError("USB asynchronous completion");
+    } else {
+      switch (USB_ENDPOINT_DIRECTION(endpoint->descriptor)) {
+        case UsbEndpointDirection_Input:
+          if (!usbApplyInputFilters(device, response->buffer, response->size, &response->count)) {
+            response->error = EIO;
+            response->count = -1;
+          }
+          break;
+      }
+    }
+
     return request;
   }
 
@@ -376,13 +386,15 @@ usbReadEndpoint (
   int length,
   int timeout
 ) {
-  UsbEndpoint *endpoint = usbGetInputEndpoint(device, endpointNumber);
+  UsbEndpoint *endpoint;
 
-  if (endpoint) {
+  if ((endpoint = usbGetInputEndpoint(device, endpointNumber))) {
     UsbEndpointExtension *eptx = endpoint->extension;
-    int count = read(eptx->data, buffer, length);
+    int count;
 
-    if (count == -1) {
+  doRead:
+    if ((count = read(eptx->data, buffer, length)) == -1) {
+      if (errno == EINTR) goto doRead;
       LogError("USB endpoint read");
     } else if (!usbApplyInputFilters(device, buffer, length, &count)) {
       errno = EIO;
@@ -404,16 +416,21 @@ usbWriteEndpoint (
   int length,
   int timeout
 ) {
-  UsbEndpoint *endpoint = usbGetOutputEndpoint(device, endpointNumber);
+  UsbEndpoint *endpoint;
 
-  if (endpoint) {
+  if ((endpoint = usbGetOutputEndpoint(device, endpointNumber))) {
     UsbEndpointExtension *eptx = endpoint->extension;
-    int count = write(eptx->data, buffer, length);
+    int count;
 
-    if (count == length) return count;
-    if (count == -1) {
+  doWrite:
+    if ((count = write(eptx->data, buffer, length)) == -1) {
+      if (errno == EINTR) goto doWrite;
       LogError("USB endpoint write");
+    } else if (count != length) {
+      LogPrint(LOG_ERR, "USB truncated endpoint write: %d < %d", count, length);
+      errno = EIO;
     } else {
+      return count;
     }
   }
 
@@ -432,7 +449,11 @@ usbReadDeviceDescriptor (UsbDevice *device) {
     return 1;
   }
 
-  if (count != -1) LogPrint(LOG_ERR, "USB short device descriptor (%d).", count);
+  if (count != -1) {
+    LogPrint(LOG_ERR, "USB short device descriptor (%d).", count);
+    errno = EIO;
+  }
+
   return 0;
 }
 
@@ -443,7 +464,7 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
   UsbEndpointExtension *eptx;
 
   if ((eptx = malloc(sizeof(*eptx)))) {
-    if ((eptx->requests = newQueue(usbDeallocateAsynchronousRequest, NULL))) {
+    if ((eptx->requests = newQueue(NULL, NULL))) {
       int flags;
   
       {
@@ -470,28 +491,30 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
   
         {
           const UsbEndpointDescriptor *descriptor = endpoint->descriptor;
-          const char *direction;
-          int count;
+          UsbEndpointDirection direction = USB_ENDPOINT_DIRECTION(descriptor);
+          const char *prefix;
   
-          switch (USB_ENDPOINT_DIRECTION(descriptor)) {
+          switch (direction) {
             case UsbEndpointDirection_Input:
-              direction = "in";
+              prefix = "in";
               flags = O_RDONLY;
               break;
   
             case UsbEndpointDirection_Output:
-              direction = "out";
+              prefix = "out";
               flags = O_WRONLY;
               break;
   
             default:
-              direction = "x";
-              flags = O_RDWR;
-              break;
+              LogPrint(LOG_ERR, "USB unsupported endpoint direction: %02X", direction);
+              goto nameError;
           }
   
-          sprintf(&name[length], "%s%d%n", direction, USB_ENDPOINT_NUMBER(descriptor), &count);
-          length += count;
+          {
+            int count;
+            sprintf(&name[length], "%s%d%n", prefix, USB_ENDPOINT_NUMBER(descriptor), &count);
+            length += count;
+          }
         }
   
         eptx->name = strdup(name);
@@ -505,6 +528,7 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
   
         free(eptx->name);
       }
+    nameError:
 
       deallocateQueue(eptx->requests);
     }
@@ -567,7 +591,7 @@ usbDeallocateDeviceExtension (UsbDevice *device) {
 UsbDevice *
 usbFindDevice (UsbDeviceChooser chooser, void *data) {
   UsbDevice *device = NULL;
-  static const char *rootPath = "/dev/usb";
+  static const char *const rootPath = "/dev/usb";
   int rootLength = strlen(rootPath);
   DIR *rootDirectory;
 
