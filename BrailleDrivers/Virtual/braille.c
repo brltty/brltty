@@ -95,13 +95,6 @@ static unsigned char *previousBraille = NULL;
 static unsigned char *previousVisual = NULL;
 static unsigned char previousStatus[BRL_MAX_STATUS_CELL_COUNT];
 
-#ifdef WINDOWS
-static WSADATA wsadata;
-#ifdef HAVE_FUNC_CREATENAMEDPIPE
-static int namedPipe;
-#endif /* HAVE_FUNC_CREATENAMEDPIPE */
-#endif /* WINDOWS */
-
 typedef struct {
 #ifdef AF_LOCAL
   int (*getLocalConnection) (const struct sockaddr_un *address);
@@ -115,8 +108,47 @@ typedef struct {
 } ModeEntry;
 static const ModeEntry *mode;
 
+typedef struct {
+  int (*read) (int descriptor, unsigned char *buffer, int size);
+} OperationsEntry;
+static const OperationsEntry *operations;
+
+static int
+readSocket (int descriptor, unsigned char *buffer, int size) {
+  fd_set readMask;
+  struct timeval timeout;
+
+  FD_ZERO(&readMask);
+  FD_SET(fileDescriptor, &readMask);
+
+  memset(&timeout, 0, sizeof(timeout));
+
+  switch (select(fileDescriptor+1, &readMask, NULL, NULL, &timeout)) {
+    case -1:
+      LogSocketError("select");
+      break;
+
+    case 0:
+      errno = EAGAIN;
+      break;
+  
+    default: {
+      int count = recv(descriptor, buffer, size, 0);
+      if (count != -1) return count;
+      LogSocketError("recv");
+      break;
+    }
+  }
+
+  return -1;
+}
+
+static const OperationsEntry socketOperationsEntry = {
+  readSocket
+};
+
 static char *
-formatAddress (const struct sockaddr *address) {
+formatSocketAddress (const struct sockaddr *address) {
   switch (address->sa_family) {
 #ifdef AF_LOCAL
     case AF_LOCAL: {
@@ -140,7 +172,7 @@ formatAddress (const struct sockaddr *address) {
 }
 
 static int
-acceptConnection (
+acceptSocketConnection (
   int (*getSocket) (void),
   int (*prepareQueue) (int socket),
   void (*unbindAddress) (const struct sockaddr *address),
@@ -157,8 +189,8 @@ acceptConnection (
           int attempts = 0;
 
           {
-            char *address = formatAddress(localAddress);
-            LogPrint(LOG_NOTICE, "Listening on: %s", address);
+            char *address = formatSocketAddress(localAddress);
+            LogPrint(LOG_NOTICE, "listening on: %s", address);
             free(address);
           }
 
@@ -180,15 +212,15 @@ acceptConnection (
                 break;
 
               case 0:
-                LogPrint(LOG_DEBUG, "No connection yet, still waiting (%d).", attempts);
+                LogPrint(LOG_DEBUG, "no connection yet, still waiting (%d).", attempts);
                 continue;
 
               default: {
                 if (!FD_ISSET(queueSocket, &readMask)) continue;
 
                 if ((serverSocket = accept(queueSocket, remoteAddress, remoteSize)) != -1) {
-                  char *address = formatAddress(remoteAddress);
-                  LogPrint(LOG_NOTICE, "Client is: %s", address);
+                  char *address = formatSocketAddress(remoteAddress);
+                  LogPrint(LOG_NOTICE, "client is: %s", address);
                   free(address);
                 } else {
                   LogSocketError("accept");
@@ -212,10 +244,7 @@ acceptConnection (
     LogSocketError("socket");
   }
 
-#ifdef HAVE_FUNC_CREATENAMEDPIPE
-  namedPipe = 0;
-#endif /* HAVE_FUNC_CREATENAMEDPIPE */
-
+  operations = &socketOperationsEntry;
   return serverSocket;
 }
 
@@ -227,22 +256,20 @@ requestConnection (
   int clientSocket;
 
   {
-    char *address = formatAddress(remoteAddress);
-    LogPrint(LOG_DEBUG, "Connecting to: %s", address);
+    char *address = formatSocketAddress(remoteAddress);
+    LogPrint(LOG_DEBUG, "connecting to: %s", address);
     free(address);
   }
 
   if ((clientSocket = getSocket()) != -1) {
     if (connect(clientSocket, remoteAddress, remoteSize) != -1) {
       {
-        char *address = formatAddress(remoteAddress);
-        LogPrint(LOG_NOTICE, "Connected to: %s", address);
+        char *address = formatSocketAddress(remoteAddress);
+        LogPrint(LOG_NOTICE, "connected to: %s", address);
         free(address);
       }
 
-#ifdef HAVE_FUNC_CREATENAMEDPIPE
-      namedPipe = 0;
-#endif /* HAVE_FUNC_CREATENAMEDPIPE */
+      operations = &socketOperationsEntry;
       return clientSocket;
     } else {
       LogPrint(LOG_WARNING, "connect error: %s", strerror(errno));
@@ -257,7 +284,7 @@ requestConnection (
 }
 
 static int
-setReuseAddress (int socket) {
+setSocketReuseAddress (int socket) {
   int yes = 1;
 
   if (setsockopt(socket, SOL_SOCKET, SO_REUSEADDR, (void *)&yes, sizeof(yes)) != -1) {
@@ -304,9 +331,9 @@ acceptLocalConnection (const struct sockaddr_un *localAddress) {
   struct sockaddr_un remoteAddress;
   socklen_t remoteSize = sizeof(remoteAddress);
 
-  return acceptConnection(getLocalSocket, NULL, unbindLocalAddress,
-                          (const struct sockaddr *)localAddress, sizeof(*localAddress),
-                          (struct sockaddr *)&remoteAddress, &remoteSize);
+  return acceptSocketConnection(getLocalSocket, NULL, unbindLocalAddress,
+                                (const struct sockaddr *)localAddress, sizeof(*localAddress),
+                                (struct sockaddr *)&remoteAddress, &remoteSize);
 }
 
 static int
@@ -317,6 +344,48 @@ requestLocalConnection (const struct sockaddr_un *remoteAddress) {
 #endif /* AF_LOCAL */
 
 #ifdef HAVE_FUNC_CREATENAMEDPIPE
+static int
+readNamedPipe (int descriptor, unsigned char *buffer, int size) {
+  {
+    DWORD available;
+
+    if (!PeekNamedPipe((HANDLE)descriptor, NULL, 0, NULL, &available, NULL)) {
+      LogWindowsError("PeekNamedPipe");
+      return 0;
+    }
+
+    if (!available) {
+      errno = EAGAIN;
+      return -1;
+    }
+
+    if (available < size) size = available;
+  }
+
+  {
+    DWORD received;
+    OVERLAPPED overl = {0, 0, 0, 0, NULL};
+    overl.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+
+    if (!ReadFile((HANDLE)descriptor, buffer, size, &received, &overl)) {
+      if (GetLastError() != ERROR_IO_PENDING) {
+        LogWindowsError("ReadPipe");
+        received = 0;
+      } else if (!GetOverlappedResult((HANDLE)descriptor, &overl, &received, TRUE)) {
+        LogWindowsError("GetOverlappedResult");
+        received = 0;
+      }
+    }
+
+    CloseHandle(overl.hEvent);
+    return received;
+  }
+}
+
+static const OperationsEntry namedPipeOperationsEntry = {
+  readNamedPipe
+};
+
 static int
 acceptNamedPipeConnection (const char *path) {
   HANDLE h;
@@ -339,7 +408,7 @@ acceptNamedPipeConnection (const char *path) {
         while ((res = WaitForSingleObject(overl.hEvent, 10000)) != WAIT_OBJECT_0) {
           if (res == WAIT_TIMEOUT) {
             ++attempts;
-            LogPrint(LOG_DEBUG, "No connection yet, still waiting (%d).", attempts);
+            LogPrint(LOG_DEBUG, "no connection yet, still waiting (%d).", attempts);
           } else {
             LogWindowsError("ConnectNamedPipe");
             CloseHandle(h);
@@ -360,7 +429,7 @@ acceptNamedPipeConnection (const char *path) {
   }
 
   CloseHandle(overl.hEvent);
-  namedPipe = 1;
+  operations = &namedPipeOperationsEntry;
   return (int)h;
 }
 
@@ -376,7 +445,7 @@ requestNamedPipeConnection (const char *path) {
     return -1;
   }
 
-  namedPipe = 1;
+  operations = &namedPipeOperationsEntry;
   return (int)h;
 }
 #endif /* HAVE_FUNC_CREATENAMEDPIPE */
@@ -441,8 +510,7 @@ getInetSocket (void) {
 
 static int
 prepareInetQueue (int socket) {
-  if (setReuseAddress(socket))
-    return 1;
+  if (setSocketReuseAddress(socket)) return 1;
   return 0;
 }
 
@@ -451,9 +519,9 @@ acceptInetConnection (const struct sockaddr_in *localAddress) {
   struct sockaddr_in remoteAddress;
   socklen_t remoteSize = sizeof(remoteAddress);
 
-  return acceptConnection(getInetSocket, prepareInetQueue, NULL,
-                          (const struct sockaddr *)localAddress, sizeof(*localAddress),
-                          (struct sockaddr *)&remoteAddress, &remoteSize);
+  return acceptSocketConnection(getInetSocket, prepareInetQueue, NULL,
+                                (const struct sockaddr *)localAddress, sizeof(*localAddress),
+                                (struct sockaddr *)&remoteAddress, &remoteSize);
 }
 
 static int
@@ -477,68 +545,16 @@ copyString (const char *string) {
 
 static int
 fillInputBuffer (void) {
-  if (inputLength >= INPUT_SIZE || inputEnd) return 1;
-
-#ifdef HAVE_FUNC_CREATENAMEDPIPE
-  if (namedPipe) {
-    DWORD avail, received;
-    OVERLAPPED overl = {0,0,0,0,NULL};
-    if (!PeekNamedPipe((HANDLE) fileDescriptor, NULL, 0, NULL, &avail, NULL)) {
-      LogWindowsError("PeekNamedPipe");
+  if ((inputLength < INPUT_SIZE) && !inputEnd) {
+    int count = operations->read(fileDescriptor, &inputBuffer[inputLength], INPUT_SIZE-inputLength);
+    if (!count) {
       inputEnd = 1;
+    } else if (count != -1) {
+      inputLength += count;
+    } else if (errno != EAGAIN) {
       return 0;
     }
-    if (!avail) return 1;
-    avail = min(avail,INPUT_SIZE-inputLength);
-    overl.hEvent = CreateEvent(NULL,TRUE,FALSE,NULL);
-    if ((!ReadFile((HANDLE) fileDescriptor, &inputBuffer[inputLength], avail, &received,&overl)
-      && GetLastError() != ERROR_IO_PENDING) ||
-      !GetOverlappedResult((HANDLE) fileDescriptor, &overl, &received, TRUE)) {
-      LogSocketError("ReadPipe");
-      CloseHandle(overl.hEvent);
-      inputEnd = 1;
-      return 0;
-    }
-    CloseHandle(overl.hEvent);
-    inputLength += received;
-    return 1;
   }
-#endif /* HAVE_FUNC_CREATENAMEDPIPE */
-
-  {
-    fd_set readMask;
-    struct timeval timeout;
-
-    FD_ZERO(&readMask);
-    FD_SET(fileDescriptor, &readMask);
-
-    memset(&timeout, 0, sizeof(timeout));
-
-    switch (select(fileDescriptor+1, &readMask, NULL, NULL, &timeout)) {
-      case -1:
-        LogSocketError("select");
-        return 0;
-
-      case 0:
-        break;
-    
-      default: {
-        int received = recv(fileDescriptor, &inputBuffer[inputLength], INPUT_SIZE-inputLength, 0);
-
-        if (received == -1) {
-          LogSocketError("recv");
-          return 0;
-        }
-
-        if (received)
-          inputLength += received;
-        else
-          inputEnd = 1;
-        break;
-      }
-    }
-  }
-
   return 1;
 }
 
@@ -866,7 +882,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
   outputLength = 0;
 
   if (isQualifiedDevice(&device, "client")) {
-    static const ModeEntry modeEntry = {
+    static const ModeEntry clientModeEntry = {
 #ifdef AF_LOCAL
       requestLocalConnection,
 #endif /* AF_LOCAL */
@@ -877,9 +893,9 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
 
       requestInetConnection
     };
-    mode = &modeEntry;
+    mode = &clientModeEntry;
   } else if (isQualifiedDevice(&device, "server")) {
-    static const ModeEntry modeEntry = {
+    static const ModeEntry serverModeEntry = {
 #ifdef AF_LOCAL
       acceptLocalConnection,
 #endif /* AF_LOCAL */
@@ -890,7 +906,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
 
       acceptInetConnection
     };
-    mode = &modeEntry;
+    mode = &serverModeEntry;
   } else {
     unsupportedDevice(device);
     return 0;
@@ -912,16 +928,18 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
   } else
 #endif /* HAVE_FUNC_CREATENAMEDPIPE */
 
-  {
-    struct sockaddr_in address;
-
 #ifdef WINDOWS
-    if (WSAStartup(MAKEWORD(1,1),&wsadata)) {
+  {
+    static WSADATA wsadata;
+    if (WSAStartup(MAKEWORD(1, 1), &wsadata)) {
       LogWindowsError("socket library start");
       return 0;
     }
+  }
 #endif /* WINDOWS */
 
+  {
+    struct sockaddr_in address;
     if (setInetAddress(device, &address)) {
       fileDescriptor = mode->getInetConnection(&address);
     }
@@ -934,7 +952,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
       if (line) free(line);
       if ((line = readCommandLine())) {
         const char *word;
-        LogPrint(LOG_DEBUG, "Command received: %s", line);
+        LogPrint(LOG_DEBUG, "command received: %s", line);
 
         if ((word = strtok(line, inputDelimiters))) {
           if (testWord(word, "cells")) {
@@ -945,7 +963,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
           } else if (testWord(word, "quit")) {
             break;
           } else {
-            LogPrint(LOG_WARNING, "Unexpected command: %s", word);
+            LogPrint(LOG_WARNING, "unexpected command: %s", word);
           }
         }
       } else {
@@ -1147,7 +1165,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
               }
             }
 
-            LogPrint(LOG_WARNING, "Unknown option: %s", word);
+            LogPrint(LOG_WARNING, "unknown option: %s", word);
           }
 
           if (needsNumber && !numberSpecified) {
@@ -1155,7 +1173,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
             command = EOF;
           }
         } else {
-          LogPrint(LOG_WARNING, "Unknown command: %s", word);
+          LogPrint(LOG_WARNING, "unknown command: %s", word);
         }
       }
     }
