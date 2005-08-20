@@ -21,12 +21,18 @@ This driver supports the following devices:
 
 If the network address isn't specified then the driver's default TCP/IP port on
 the local host is used. The address may be:
-   /path/to/unix-socket-file
+   On Unix systems: /path/to/unix-socket-file
       If the address starts with a slash (/) then it's interpreted as the path 
       to a Unix socket file. If the driver is the client then the socket file 
       must already exist. If the driver is the server then the socket file is 
       created by the driver and must not already exist.
-   [host][:[port]]
+   On Windows NT/2000/XP/2003 systems: \\.\pipe\pipename
+      If the address starts with a backslash (\) then it's interpreted as the
+      path to a named pipe. If the driver is the client, then the named pipe
+      must already exist. If the driver is the server then the named pipe is
+      created by the driver and must not already exist. Beware of the shell's
+      interpretation of backslashes.
+   On all systems: [host][:[port]]
       A TCP/IP address. Both the host and port components of the address are 
       optional. The delimiting colon (:) is only required if the port is being 
       specified. The host may be a name, an alias, or an IPV4 address (in 
