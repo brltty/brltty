@@ -2210,8 +2210,20 @@ main (int argc, char *argv[]) {
 
       if (!contracted) {
         int winlen = MIN(brl.x, scr.cols-p->winx);
+
         readScreen(p->winx, p->winy, winlen, brl.y, brl.buffer,
                    p->showAttributes? SCR_ATTRIB: SCR_TEXT);
+        if (winlen < brl.x) {
+          /* We got a rectangular piece of text with readScreen but the display
+           * is in an off-right position with some cells at the end blank
+           * so we'll insert these cells and blank them.
+           */
+          for (i=brl.y-1; i>0; i--)
+            memmove(brl.buffer+i*brl.x, brl.buffer+i*winlen, winlen);
+          for (i=0; i<brl.y; i++)
+            memset(brl.buffer+i*brl.x+winlen, ' ', brl.x-winlen);
+        }
+
         /*
          * If the cursor is visible and in range, and help is off: 
          */
@@ -2223,7 +2235,7 @@ main (int argc, char *argv[]) {
 
         /* blank out capital letters if they're blinking and should be off */
         if (prefs.blinkingCapitals && !capitalsState)
-          for (i=0; i<winlen*brl.y; i++)
+          for (i=0; i<brl.x*brl.y; i++)
             if (BRL_ISUPPER(brl.buffer[i]))
               brl.buffer[i] = ' ';
 
@@ -2231,25 +2243,15 @@ main (int argc, char *argv[]) {
         if ((translationTable == attributesTable) || !prefs.textStyle) {
           for (
             i = 0;
-            i < (winlen * brl.y);
+            i < (brl.x * brl.y);
             brl.buffer[i] = translationTable[brl.buffer[i]], i++
           );
         } else {
           for (
             i = 0;
-            i < (winlen * brl.y);
+            i < (brl.x * brl.y);
             brl.buffer[i] = translationTable[brl.buffer[i]] & (BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT4 | BRL_DOT5 | BRL_DOT6), i++
           );
-        }
-
-        if (winlen < brl.x) {
-          /* We got a rectangular piece of text with readScreen but the display
-             is in an off-right position with some cells at the end blank
-             so we'll insert these cells and blank them. */
-          for (i=brl.y-1; i>0; i--)
-            memmove(brl.buffer+i*brl.x, brl.buffer+i*winlen, winlen);
-          for (i=0; i<brl.y; i++)
-            memset(brl.buffer+i*brl.x+winlen, 0, brl.x-winlen);
         }
 
         /* Attribute underlining: if viewing text (not attributes), attribute
