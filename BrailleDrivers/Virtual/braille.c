@@ -1082,12 +1082,15 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *st) {
             [BRL_GSC_AUTOREPEAT] = "AUTOREPEAT",
             [BRL_GSC_AUTOSPEAK] = "AUTOSPEAK"
           };
-          const char *name = names[i];
+          const int nameCount = sizeof(names) / sizeof(names[0]);
 
-          if (name) {
-            char buffer[0X40];
-            snprintf(buffer, sizeof(buffer), "%s %d\n", name, value);
-            writeString(buffer);
+          if (i < nameCount) {
+            const char *name = names[i];
+            if (name) {
+              char buffer[0X40];
+              snprintf(buffer, sizeof(buffer), "%s %d\n", name, value);
+              writeString(buffer);
+            }
           }
         }
       }
