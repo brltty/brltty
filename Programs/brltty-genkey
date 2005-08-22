@@ -20,19 +20,17 @@
 # Usage: brltty-genkey [/path/to/file]
 
 programName="${0}"
-programMessage()
-{
+programMessage() {
    echo "${programName}: ${1}"
 }
-syntaxError()
-{
+syntaxError() {
    programMessage "${1}"
    exit 2
 }
 
 if [ "${#}" -eq 0 ]
 then
-   . "`dirname "${0}"`/brltty-config" || exit "${?}" || exit "${?}"
+   . "`dirname "${0}"`/brltty-config" || exit "${?}"
    file="${BRLTTY_EXECUTE_ROOT}${sysconfdir}/${BRLAPI_KEYFILE}"
 elif [ "${#}" -eq 1 ]
 then
@@ -51,6 +49,11 @@ do
       dd if="${device}" of="${file}" bs=32 count=1 2>/dev/null && exit 0
    }
 done
+
+key="${RANDOM}"
+[ -n "${key}" ] && {
+   echo >"${file}" "${key}" && exit 0
+}
 
 programMessage "no known mechanism is supported."
 exit 3
