@@ -50,6 +50,8 @@
 int updateInterval = DEFAULT_UPDATE_INTERVAL;
 int messageDelay = DEFAULT_MESSAGE_DELAY;
 
+static int terminationSignal = 0;
+
 /*
  * Misc param variables
  */
@@ -222,7 +224,7 @@ terminateProgram (int quickly) {
 
 static void 
 terminationHandler (int signalNumber) {
-  terminateProgram(signalNumber == SIGINT);
+  terminationSignal = signalNumber;
 }
 
 #ifdef SIGCHLD
@@ -946,7 +948,7 @@ main (int argc, char *argv[]) {
    * Main program loop 
    */
   resetBlinkingStates();
-  while (1) {
+  while (!terminationSignal) {
     int pointerMoved = 0;
 
     /* The braille display can stick out by brl.x-offr columns from the
@@ -2278,7 +2280,7 @@ main (int argc, char *argv[]) {
     updateIntervals++;
   }
 
-  terminateProgram(0);
+  terminateProgram(terminationSignal == SIGINT);
   return 0;
 }
 
