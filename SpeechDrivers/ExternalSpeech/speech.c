@@ -40,6 +40,10 @@
 #include <grp.h>
 #endif /* HAVE_GRP_H */
 
+#ifdef __MINGW32__
+#include <io.h>
+#endif /* __MINGW32__ */
+
 #include "Programs/misc.h"
 
 typedef enum {
@@ -100,14 +104,49 @@ static void myperror(char *fmt, ...)
 
 static int spk_open (char **parameters)
 {
+  char *extProgPath = parameters[PARM_PROGRAM];
+
+  if(!*extProgPath) extProgPath = HELPER_PROG_PATH;
+
+#ifdef __MINGW32__
+  STARTUPINFO startupinfo;
+  PROCESS_INFORMATION processinfo;
+  SECURITY_ATTRIBUTES attributes;
+  HANDLE fd1R,fd1W,fd2R,fd2W;
+
+  memset(&attributes, 0, sizeof(attributes));
+  attributes.nLength = sizeof(attributes);
+  attributes.bInheritHandle = TRUE;
+
+  if (!CreatePipe(&fd1R,&fd1W,&attributes,0)
+      ||!CreatePipe(&fd2R,&fd2W,&attributes,0)) {
+    LogWindowsError("CreatePipe");
+    return 0;
+  }
+
+  memset(&startupinfo, 0, sizeof(startupinfo));
+  startupinfo.cb = sizeof(startupinfo);
+  startupinfo.dwFlags = STARTF_USESTDHANDLES;
+  startupinfo.hStdInput = fd2R;
+  startupinfo.hStdOutput = fd1W;
+  if (!CreateProcess(NULL, extProgPath, NULL, NULL, TRUE, CREATE_NEW_PROCESS_GROUP, NULL, NULL, &startupinfo, &processinfo)) {
+    LogWindowsError("CreateProcess");
+    return 0;
+  }
+  if ((helper_fd_in = _open_osfhandle((long)fd1R, O_RDONLY)) < 0) {
+    LogError("open_osfhandle");
+    return 0;
+  }
+  if ((helper_fd_out = _open_osfhandle((long)fd2W, O_WRONLY)) < 0) {
+    LogError("open_osfhandle");
+    return 0;
+  }
+#else /* __MINGW32__ */
   int fd1[2], fd2[2];
   uid_t uid, gid;
   char
-    *extProgPath = parameters[PARM_PROGRAM],
     *s_uid = parameters[PARM_UID],
     *s_gid = parameters[PARM_GID];
-
-  if(!*extProgPath) extProgPath = HELPER_PROG_PATH;
 
   if(*s_uid) {
 #ifdef HAVE_PWD_H
@@ -195,6 +234,7 @@ static int spk_open (char **parameters)
       return 0;
     }
   };
+#endif /* __MINGW32__ */
 
   LogPrint(LOG_INFO,"Opened pipe to external speech program '%s'",
 	   extProgPath);
