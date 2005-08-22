@@ -64,6 +64,12 @@ extern "C" {
 /* Define this if the header file pwd.h exists. */
 #undef HAVE_PWD_H
 
+/* Define this if the header file regex.h exists. */
+#undef HAVE_REGEX_H
+
+/* Define this if the header file syslog.h exists. */
+#undef HAVE_SYSLOG_H
+
 #ifdef WINDOWS
 
 /* Define this if Windows NT is being used. */
@@ -90,9 +96,6 @@ extern "C" {
 
 /* Define this if the header file sys/wait.h exists. */
 #undef HAVE_SYS_WAIT_H
-
-/* Define this if the header file syslog.h exists. */
-#undef HAVE_SYSLOG_H
 
 /* Define this if the header file sys/io.h exists. */
 #undef HAVE_SYS_IO_H

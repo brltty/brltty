@@ -22,9 +22,12 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
-#include <regex.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+
+#ifdef HAVE_REGEX_H
+#include <regex.h>
+#endif /* HAVE_REGEX_H */
 
 #include "misc.h"
 #include "usb.h"
@@ -171,6 +174,8 @@ usbStringEquals (const char *reference, const char *value) {
 int
 usbStringMatches (const char *reference, const char *value) {
   int ok = 0;
+
+#ifdef HAVE_REGEX_H
   regex_t expression;
   if (regcomp(&expression, value, REG_EXTENDED|REG_NOSUB) == 0) {
     if (regexec(&expression, reference, 0, NULL, 0) == 0) {
@@ -178,6 +183,8 @@ usbStringMatches (const char *reference, const char *value) {
     }
     regfree(&expression);
   }
+#endif /* HAVE_REGEX_H */
+
   return ok;
 }
 
