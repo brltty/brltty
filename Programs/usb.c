@@ -700,7 +700,9 @@ usbAwaitInput (
           endpoint->direction.input.completed = buffer;
           return 1;
         }
+#ifdef ETIMEDOUT
         if (errno == ETIMEDOUT) errno = EAGAIN;
+#endif /* ETIMEDOUT */
 
         if (errno != EAGAIN) break;
         if (!timeout) break;
