@@ -453,7 +453,11 @@ void
 approximateDelay (int milliseconds) {
   if (milliseconds > 0) {
 #ifdef WINDOWS
+#ifdef __CYGWIN__
+    usleep(milliseconds*1000);
+#else /* __CYGWIN__ */
     Sleep(milliseconds);
+#endif /* __CYGWIN__ */
 #else /* WINDOWS */
     struct timeval timeout;
     timeout.tv_sec = milliseconds / 1000;

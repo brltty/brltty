@@ -130,7 +130,7 @@ flushMidiDevice (MidiDevice *midi) {
       }
 
       while ((error = midiOutUnprepareHeader(midi->handle, &header, sizeof(header))) == MIDIERR_STILLPLAYING) {
-        Sleep(1);
+        approximateDelay(1);
       }
 
       if (error != MMSYSERR_NOERROR) {
@@ -185,7 +185,7 @@ stopMidiNote (MidiDevice *midi, unsigned char channel) {
 
 int
 insertMidiWait (MidiDevice *midi, int duration) {
-  Sleep(duration);
+  approximateDelay(duration);
   return 1;
 }
 #else /* HAVE_LIBWINMM */

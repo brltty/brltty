@@ -1622,7 +1622,7 @@ static void *socketSelect(void *foo)
     tv.tv_sec = 1; tv.tv_usec = 0;
     if (fdmax == 0) {
       /* still no server socket */
-      Sleep(1000);
+      approximateDelay(1000);
       continue;
     }
     if ((n=select(fdmax+1, &sockset, NULL, NULL, &tv))<0) {
@@ -1879,7 +1879,7 @@ static void *server(void *arg)
     pthread_mutex_unlock(&connectionsMutex);
     if (!nbHandles) {
       free(lpHandles);
-      Sleep(1000);
+      approximateDelay(1000);
       continue;
     }
     switch (WaitForMultipleObjects(nbHandles, lpHandles, FALSE, 1000)) {
@@ -2289,7 +2289,9 @@ int api_open(BrailleDisplay *brl, char **parameters)
   }
 
   pthread_attr_init(&attr);
+#ifndef WINDOWS
   pthread_attr_setdetachstate(&attr,PTHREAD_CREATE_DETACHED);
+#endif /* WINDOWS */
   /* don't care if it fails */
   pthread_attr_setstacksize(&attr,stackSize);
 

@@ -110,7 +110,7 @@ static inline int pthread_join (pthread_t thread, void **res) {
       return 0;
     }
     win_pthread_assert(GetLastError() == STILL_ACTIVE);
-    Sleep(1);
+    approximateDelay(1);
   }
 }
 
