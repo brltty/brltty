@@ -806,12 +806,13 @@ serialAwaitInput (SerialDevice *serial, int timeout) {
   COMMTIMEOUTS timeouts = {MAXDWORD, 0, timeout, 0, 0};
   DWORD bytesRead;
   int ret;
+  char c;
   if (!(SetCommTimeouts(serial->fileHandle, &timeouts))) {
     LogWindowsError("SetCommTimeouts serialAwaitInput");
     return 0;
   }
 
-  ret = ReadFile(serial->fileHandle, NULL, 0, &bytesRead, NULL);
+  ret = ReadFile(serial->fileHandle, &c, 0, &bytesRead, NULL);
   if (!ret)
     LogWindowsError("ReadFile");
   return ret;
