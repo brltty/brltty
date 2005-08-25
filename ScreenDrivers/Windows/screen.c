@@ -88,10 +88,8 @@ open_WindowsScreen (void) {
 #endif /* HAVE_FUNC_ATTACH_CONSOLE */
     /* disable ^C */
     SetConsoleCtrlHandler(NULL,TRUE);
-    if (!FreeConsole()) {
+    if (!FreeConsole() && GetLastError() != ERROR_INVALID_PARAMETER)
       LogWindowsError("FreeConsole");
-      return 0;
-    }
     return 1;
 #ifndef HAVE_FUNC_ATTACHCONSOLE
   }
@@ -191,11 +189,8 @@ read_WindowsScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
       free(buf);
       goto error;
     }
-    if (!text)
-      for (x = 0; x < box.width; x++)
-	buffer[y*box.width+x] = ((WORD *)buf)[x];
+    if (text)
 #ifdef HAVE_FUNC_READCONSOLEOUTPUTCHARACTERW
-    else
       for (x = 0; x < box.width; x++) {
 	c = ((wchar_t *)buf)[x];
 	if (c<0x100)
@@ -203,7 +198,12 @@ read_WindowsScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
 	else
 	  buffer[y*box.width+x] = '?';
       }
+#else
+      buf += box.width;
 #endif /* HAVE_FUNC_READCONSOLEOUTPUTCHARACTERW */
+    else
+      for (x = 0; x < box.width; x++)
+	buffer[y*box.width+x] = ((WORD *)buf)[x];
   }
 #ifndef HAVE_FUNC_READCONSOLEOUTPUTCHARACTERW
   if (!text)
