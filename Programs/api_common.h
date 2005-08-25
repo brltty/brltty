@@ -93,7 +93,7 @@ static ssize_t brlapi_writeFile(int fd, const void *buf, size_t size)
       !GetOverlappedResult((HANDLE) fd, &overl, &res, TRUE)) {
       res = GetLastError();
       CloseHandle(overl.hEvent);
-      errno = res;
+      errno = EIO;
       return -1;
     }
     CloseHandle(overl.hEvent);
@@ -131,7 +131,7 @@ static ssize_t brlapi_readFile(int fd, void *buf, size_t size)
       res = GetLastError();
       CloseHandle(overl.hEvent);
       if (res == ERROR_HANDLE_EOF) return n;
-      errno = res;
+      errno = EIO;
       return -1;
     }
     CloseHandle(overl.hEvent);

@@ -835,18 +835,18 @@ serialReadChunk (
 
   if (!(SetCommTimeouts(serial->fileHandle, &timeouts))) {
     LogWindowsError("SetCommTimeouts serialReadChunk1");
-    errno = -1;
+    errno = EIO;
     return 0;
   }
 
   if (!ReadFile(serial->fileHandle, buffer+*offset, count, &bytesRead, NULL)) {
     LogWindowsError("ReadFile");
-    errno = -1;
+    errno = EIO;
     return 0;
   }
 
   if (!bytesRead) {
-    errno = -2;
+    errno = EAGAIN;
     return 0;
   }
 
@@ -855,13 +855,13 @@ serialReadChunk (
   timeouts.ReadTotalTimeoutConstant = subsequentTimeout;
   if (!(SetCommTimeouts(serial->fileHandle, &timeouts))) {
     LogWindowsError("SetCommTimeouts serialReadChunk2");
-    errno = -1;
+    errno = EIO;
     return 0;
   }
 
   while (count && ReadFile(serial->fileHandle, buffer+*offset, count, &bytesRead, NULL)) {
     if (!bytesRead) {
-      errno = -2;
+      errno = EAGAIN;
       return 0;
     }
 
@@ -871,7 +871,7 @@ serialReadChunk (
 
   if (!count) return 1;
   LogWindowsError("ReadFile");
-  errno = -1;
+  errno = EIO;
   return 0;
 #else /* WINDOWS */
   return readChunk(serial->fileDescriptor, buffer, offset, count, initialTimeout, subsequentTimeout);
@@ -887,7 +887,7 @@ serialReadData (
 #ifdef WINDOWS
   size_t length = 0;
   if (serialReadChunk(serial, buffer, &length, size, initialTimeout, subsequentTimeout)) return size;
-  if (errno == -2) return length;
+  if (errno == EAGAIN) return length;
   return -1;
 #else /* WINDOWS */
   if (!serialFlushAttributes(serial)) return -1;
@@ -908,7 +908,7 @@ serialWriteData (
 
     if (!(SetCommTimeouts(serial->fileHandle, &timeouts))) {
       LogWindowsError("SetCommTimeouts serialWriteData");
-      errno = -1;
+      errno = EIO;
       return -1;
     }
 

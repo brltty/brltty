@@ -359,11 +359,11 @@ int readPacket(Connection *c)
   if (packet->state!=READY) {
     /* pending read */
     if (!GetOverlappedResult((HANDLE) c->fd,&packet->overl,&res,FALSE)) {
-      switch (errno = GetLastError()) {
+      switch (GetLastError()) {
         case ERROR_IO_PENDING: return 0;
 	case ERROR_HANDLE_EOF:
 	case ERROR_BROKEN_PIPE: return -2;
-	default: LogWindowsError("GetOverlappedResult"); return -1;
+	default: LogWindowsError("GetOverlappedResult"); errno = EIO; return -1;
       }
     }
 read:
@@ -407,11 +407,11 @@ read:
   if (!ResetEvent(packet->overl.hEvent))
     LogWindowsError("ResetEvent in readPacket");
   if (!ReadFile((HANDLE)c->fd, packet->p, packet->n, &res, &packet->overl)) {
-    switch (errno = GetLastError()) {
+    switch (GetLastError()) {
       case ERROR_IO_PENDING: return 0;
       case ERROR_HANDLE_EOF:
       case ERROR_BROKEN_PIPE: return -2;
-      default: LogWindowsError("ReadFile"); return -1;
+      default: LogWindowsError("ReadFile"); errno = EIO; return -1;
     }
   }
 #endif /* WINDOWS */

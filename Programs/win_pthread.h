@@ -30,7 +30,7 @@ extern "C" {
 #include <windows.h>
 #include <stdio.h>
 #include <errno.h>
-#define win_pthread_assert(expr) do { if (!(expr)) { errno = -1; return -1; } } while (0)
+#define win_pthread_assert(expr) do { if (!(expr)) { errno = EIO; return -1; } } while (0)
 
 /***********
  * threads *
@@ -164,7 +164,7 @@ again:
   switch (WaitForSingleObject(*vmutex, INFINITE)) {
     default:
     case WAIT_FAILED:
-      errno = -1;
+      errno = EIO;
       return -1;
     case WAIT_ABANDONED:
     case WAIT_OBJECT_0:
@@ -212,7 +212,7 @@ again:
   switch (WaitForSingleObject(cond->sem, time->tv_sec*1000+time->tv_nsec/1000)) {
     default:
     case WAIT_FAILED:
-      errno = -1;
+      errno = EIO;
       return -1;
     case WAIT_TIMEOUT:
       goto again;
@@ -231,7 +231,7 @@ static inline int pthread_cond_wait (pthread_cond_t *cond, pthread_mutex_t *mute
 again:
   switch (WaitForSingleObject(cond->sem, INFINITE)) {
     case WAIT_FAILED:
-      errno = -1;
+      errno = EIO;
       return -1;
     case WAIT_TIMEOUT:
       goto again;
@@ -286,7 +286,7 @@ static inline int pthread_key_create (pthread_key_t *key, void (*freefun)(void *
 static inline void *pthread_getspecific (pthread_key_t key) {
   void * res = TlsGetValue(key);
   if (!res)
-    errno = -1;
+    errno = EIO;
   return res;
 }
 
