@@ -326,3 +326,31 @@ and then rebuild Gnopernicus.
    BRL_CMD_SAY_SLOWER  L08K04   Decrease speech rate
    BRL_CMD_SAY_FASTER  L08K06   Increase speech rate
    BRL_BLK_ROUTE       HMSnn    Route (bring) cursor to character
+
+
+Getting the Routing Keys to Work
+--------------------------------
+
+The routing keys won't work until their action has been configured. To
+configure them, do the following:
+
+Go to Gnopernicus's "Preferences" dialog (option 2 in its main menu).
+
+Choose "Braille Preferences" (option 2 in the Preferences dialog).
+
+Choose "Braille key mapping" (option 5 in the Braille Preferences dialog).
+
+You will now be on the "Position Sensors" page tab. Press the radio button
+which says "Position sensors move caret" (which should be the fifth radio
+button).
+
+Select "Apply" followed by "OK" to close the dialog.
+
+You will be back in the Braille Preferences dialog. Click its "Close" button to
+close it. 
+
+You will be back in the main Preferences dialog. Click its "Close" button to 
+close it.
+
+Be aware that your routing keys will only work in those contexts which actually
+have a caret.
