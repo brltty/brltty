@@ -245,9 +245,9 @@ insertByte (unsigned char byte) {
 
 static int
 insertMapped (ScreenKey key, int (*byteInserter)(unsigned char byte)) {
-  unsigned char buffer[2];
-  unsigned char *sequence;
-  unsigned char *end;
+  char buffer[2];
+  char *sequence;
+  char *end;
 
   if (key < SCR_KEY_ENTER) {
     sequence = end = buffer + sizeof(buffer);
