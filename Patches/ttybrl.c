@@ -138,16 +138,25 @@ brltty_brl_glib_cb (GIOChannel   *source,
                     GIOCondition condition, 
                     gpointer     data)
 {
-    brl_keycode_t        keypress;
+    brl_keycode_t        key;
 
     BRLEventCode         bec;
     BRLEventData         bed;
 
-    while (brlapi_readKey(0, &keypress) == 1) 
+    while (brlapi_readKey(0, &key) == 1) 
     {
-        if (keypress & BRL_FLG_REPEAT_INITIAL) {
-            keypress &= ~(BRL_FLG_REPEAT_INITIAL | BRL_FLG_REPEAT_DELAY);
-        } else if (keypress & BRL_FLG_REPEAT_DELAY) {
+        /* handle the repeat flags */
+        if (key & BRL_FLG_REPEAT_INITIAL) {
+            /* Key press for a command which is to begin repeating immediately.
+             * The corresponding key release will be a no-op so Just get rid of
+             * all the repeat flags.
+             */
+            key &= ~(BRL_FLG_REPEAT_INITIAL | BRL_FLG_REPEAT_DELAY);
+        } else if (key & BRL_FLG_REPEAT_DELAY) {
+            /* Key press for a command which is to begin repeating aftger a
+             * delay. The corresponding key release will be the very same
+             * command with no repeat flags set so just ignore this key press.
+             */
             continue;
         }
 
@@ -157,11 +166,8 @@ brltty_brl_glib_cb (GIOChannel   *source,
          * If the user undefines the Gnopernicus key, the BRLTTY
          * command will stop working.
          */
-        switch (keypress & BRL_MSK_CMD) 
+        switch (key & BRL_MSK_CMD) 
         {
-            case BRL_CMD_NOOP:
-                continue;
-
             /*goto title*/
             case BRL_CMD_TOP_LEFT:
                 send_key(0, 7);
@@ -269,10 +275,10 @@ brltty_brl_glib_cb (GIOChannel   *source,
                     
             default:
             {
-                gint key = keypress & BRL_MSK_BLK;
-                gint arg = keypress & BRL_MSK_ARG;
+                gint blk = key & BRL_MSK_BLK;
+                gint arg = key & BRL_MSK_ARG;
 
-                switch (key) 
+                switch (blk) 
                 {
                     case BRL_BLK_ROUTE:
                         sprintf(&dd.sensor_codes[0], "HMS%02d", arg);
@@ -282,13 +288,16 @@ brltty_brl_glib_cb (GIOChannel   *source,
                         break;
                     default:
                         //to be translated
-                        fprintf(stderr, "BRLTTY command code not bound to Gnopernicus key code: 0X%04X\n", keypress);
+                        fprintf(stderr, "BRLTTY command code not bound to Gnopernicus key code: 0X%04X\n", key);
                         break;
                 }
-                break;
             }
+
+            case BRL_CMD_NOOP:
+                break;
         }
     }
+
     return TRUE;
 }
 
