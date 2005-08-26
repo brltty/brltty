@@ -138,12 +138,14 @@ brltty_brl_glib_cb (GIOChannel   *source,
                     GIOCondition condition, 
                     gpointer     data)
 {
-    brl_keycode_t        key;
+    brl_keycode_t key;
 
-    BRLEventCode         bec;
-    BRLEventData         bed;
+    BRLEventCode bec;
+    BRLEventData bed;
 
-    while (brlapi_readKey(0, &key) == 1) 
+    int result;
+
+    while ((result = brlapi_readKey(0, &key)) == 1) 
     {
         /* handle the repeat flags */
         if (key & BRL_FLG_REPEAT_INITIAL) {
@@ -296,6 +298,12 @@ brltty_brl_glib_cb (GIOChannel   *source,
             case BRL_CMD_NOOP:
                 break;
         }
+    }
+
+    if (result == -1)
+    {
+        brlapi_perror("brlapi_readKey");
+        return FALSE;
     }
 
     return TRUE;
