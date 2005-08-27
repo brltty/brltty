@@ -2042,6 +2042,7 @@ startup (int argc, char *argv[]) {
         LogWindowsError("Creating event for background synchronization");
       } else {
         SetEvent(event);
+        CloseHandle(event);
       }
     }
 #elif defined(HAVE_SYS_WAIT_H)
