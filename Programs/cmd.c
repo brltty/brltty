@@ -113,3 +113,91 @@ describeCommand (int command, char *buffer, int size) {
     }
   }
 }
+
+static int repeatTimer;
+static int repeatStarted;
+
+void
+resetRepeatState (void) {
+  repeatTimer = 0;
+  repeatStarted = 0;
+}
+
+int
+handleRepeatFlags (
+  int *command, int nextCommand, int updateInterval,
+  int enabled, int repeatDelay, int repeatInterval
+) {
+  if (enabled) {
+    if (nextCommand == EOF) {
+      if (!repeatTimer) return 0;
+      if ((repeatTimer -= updateInterval) > 0) return 0;
+      repeatTimer = repeatInterval;
+      repeatStarted = 1;
+    } else {
+      int repeatFlags = nextCommand & BRL_FLG_REPEAT_MASK;
+      nextCommand &= ~BRL_FLG_REPEAT_MASK;
+
+      switch (nextCommand & BRL_MSK_BLK) {
+        default:
+          switch (nextCommand & BRL_MSK_CMD) {
+            default:
+              if (IS_DELAYED_COMMAND(repeatFlags)) nextCommand = BRL_CMD_NOOP;
+              repeatFlags = 0;
+
+            case BRL_CMD_LNUP:
+            case BRL_CMD_LNDN:
+            case BRL_CMD_PRDIFLN:
+            case BRL_CMD_NXDIFLN:
+            case BRL_CMD_CHRLT:
+            case BRL_CMD_CHRRT:
+
+            case BRL_CMD_MENU_PREV_ITEM:
+            case BRL_CMD_MENU_NEXT_ITEM:
+            case BRL_CMD_MENU_PREV_SETTING:
+            case BRL_CMD_MENU_NEXT_SETTING:
+
+            case BRL_BLK_PASSKEY + BRL_KEY_BACKSPACE:
+            case BRL_BLK_PASSKEY + BRL_KEY_DELETE:
+            case BRL_BLK_PASSKEY + BRL_KEY_PAGE_UP:
+            case BRL_BLK_PASSKEY + BRL_KEY_PAGE_DOWN:
+            case BRL_BLK_PASSKEY + BRL_KEY_CURSOR_UP:
+            case BRL_BLK_PASSKEY + BRL_KEY_CURSOR_DOWN:
+            case BRL_BLK_PASSKEY + BRL_KEY_CURSOR_LEFT:
+            case BRL_BLK_PASSKEY + BRL_KEY_CURSOR_RIGHT:
+              break;
+          }
+
+        case BRL_BLK_PASSCHAR:
+        case BRL_BLK_PASSDOTS:
+          break;
+      }
+
+      if (repeatStarted) {
+        repeatStarted = 0;
+
+        if (nextCommand == *command) {
+          nextCommand = BRL_CMD_NOOP;
+          repeatFlags = 0;
+        }
+      }
+      *command = nextCommand;
+
+      if (repeatFlags & BRL_FLG_REPEAT_DELAY) {
+        repeatTimer = repeatDelay;
+        if (!(repeatFlags & BRL_FLG_REPEAT_INITIAL)) return 0;
+        repeatStarted = 1;
+      } else if (repeatFlags & BRL_FLG_REPEAT_INITIAL) {
+        repeatTimer = repeatInterval;
+        repeatStarted = 1;
+      } else {
+        repeatTimer = 0;
+      }     
+    }
+  } else {      
+    if (nextCommand == EOF) return 0;
+    *command = IS_DELAYED_COMMAND(nextCommand)? BRL_CMD_NOOP: (nextCommand & ~BRL_FLG_REPEAT_MASK);
+  }
+
+  return 1;
+}

@@ -165,6 +165,7 @@ typedef enum {
 #define BRL_FLG_REPEAT_INITIAL 0x800000
 #define BRL_FLG_REPEAT_DELAY   0x400000
 #define BRL_FLG_REPEAT_MASK    (BRL_FLG_REPEAT_INITIAL | BRL_FLG_REPEAT_DELAY)
+#define IS_DELAYED_COMMAND(cmd) (((cmd) & BRL_FLG_REPEAT_DELAY) && !((cmd) & BRL_FLG_REPEAT_INITIAL))
   
 /* cursor routing keys block offset values */
 /*

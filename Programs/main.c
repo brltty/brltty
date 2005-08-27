@@ -38,6 +38,7 @@
 #include "ctb.h"
 #include "route.h"
 #include "cut.h"
+#include "cmd.h"
 #include "at2.h"
 #include "scr.h"
 #include "brl.h"
@@ -944,10 +945,9 @@ main (int argc, char *argv[]) {
   if (prefs.pointerFollowsWindow) setPointer(p->winx, p->winy);
   getPointer(&p->ptrx, &p->ptry);
 
-  /*
-   * Main program loop 
-   */
   resetBlinkingStates();
+  if (prefs.autorepeat) resetRepeatState();
+
   while (!terminationSignal) {
     int pointerMoved = 0;
 
@@ -982,102 +982,47 @@ main (int argc, char *argv[]) {
       int oldmoty = p->winy;
 
       {
-        static int repeatTimer = 0;
-        static int repeatStarted = 0;
         int next = readBrailleCommand(&brl,
                                       infoMode? BRL_CTX_STATUS:
                                       isHelpScreen()? BRL_CTX_HELP:
                                       BRL_CTX_SCREEN);
-        if (!prefs.autorepeat) repeatTimer = 0;
-        if (!repeatTimer) repeatStarted = 0;
 
-        if (next == EOF) {
-          if (!repeatTimer) break;
-          if ((repeatTimer -= updateInterval) > 0) break;
-          repeatTimer = PREFERENCES_TIME(prefs.autorepeatInterval);
-          repeatStarted = 1;
-        } else {
-          int repeatFlags = next & BRL_FLG_REPEAT_MASK;
-          LogPrint(LOG_DEBUG, "command: %06X", next);
-          next &= ~BRL_FLG_REPEAT_MASK;
+        if (next != EOF) {
+          int real = next;
 
           if (prefs.skipIdenticalLines) {
-            int real;
             switch (next & BRL_MSK_CMD) {
-              default:
-                real = next;
-                break;
               case BRL_CMD_LNUP:
                 real = BRL_CMD_PRDIFLN;
                 break;
+
               case BRL_CMD_LNDN:
                 real = BRL_CMD_NXDIFLN;
                 break;
+
               case BRL_CMD_PRDIFLN:
                 real = BRL_CMD_LNUP;
                 break;
+
               case BRL_CMD_NXDIFLN:
                 real = BRL_CMD_LNDN;
                 break;
             }
-            if (real != next) next = (next & ~BRL_MSK_CMD) | real;
           }
 
-          switch (next & BRL_MSK_BLK) {
-            default:
-              switch (next & BRL_MSK_CMD) {
-                default:
-                  if (IS_DELAYED_COMMAND(repeatFlags)) next = BRL_CMD_NOOP;
-                  repeatFlags = 0;
-
-                case BRL_CMD_LNUP:
-                case BRL_CMD_LNDN:
-                case BRL_CMD_PRDIFLN:
-                case BRL_CMD_NXDIFLN:
-                case BRL_CMD_CHRLT:
-                case BRL_CMD_CHRRT:
-
-                case BRL_CMD_MENU_PREV_ITEM:
-                case BRL_CMD_MENU_NEXT_ITEM:
-                case BRL_CMD_MENU_PREV_SETTING:
-                case BRL_CMD_MENU_NEXT_SETTING:
-
-                case BRL_BLK_PASSKEY + BRL_KEY_BACKSPACE:
-                case BRL_BLK_PASSKEY + BRL_KEY_DELETE:
-                case BRL_BLK_PASSKEY + BRL_KEY_PAGE_UP:
-                case BRL_BLK_PASSKEY + BRL_KEY_PAGE_DOWN:
-                case BRL_BLK_PASSKEY + BRL_KEY_CURSOR_UP:
-                case BRL_BLK_PASSKEY + BRL_KEY_CURSOR_DOWN:
-                case BRL_BLK_PASSKEY + BRL_KEY_CURSOR_LEFT:
-                case BRL_BLK_PASSKEY + BRL_KEY_CURSOR_RIGHT:
-                  break;
-              }
-
-            case BRL_BLK_PASSCHAR:
-            case BRL_BLK_PASSDOTS:
-              break;
-          }
-
-          if (repeatStarted) {
-            repeatStarted = 0;
-            if (next == command) {
-              next = BRL_CMD_NOOP;
-              repeatFlags = 0;
-            }
-          }
-          command = next;
-
-          if (repeatFlags & BRL_FLG_REPEAT_DELAY) {
-            repeatTimer = PREFERENCES_TIME(prefs.autorepeatDelay);
-            if (!(repeatFlags & BRL_FLG_REPEAT_INITIAL)) break;
-            repeatStarted = 1;
-          } else if (repeatFlags & BRL_FLG_REPEAT_INITIAL) {
-            repeatTimer = PREFERENCES_TIME(prefs.autorepeatInterval);
-            repeatStarted = 1;
+          if (real == next) {
+            LogPrint(LOG_DEBUG, "command: %06X", next);
           } else {
-            repeatTimer = 0;
-          }     
+            real |= (next & ~BRL_MSK_CMD);
+            LogPrint(LOG_DEBUG, "command: %06X -> %06X", next, real);
+            next = real;
+          }
         }
+
+        if (!handleRepeatFlags(&command, next, updateInterval, prefs.autorepeat,
+                               PREFERENCES_TIME(prefs.autorepeatDelay),
+                               PREFERENCES_TIME(prefs.autorepeatInterval)))
+          break;
       }
 
     doCommand:
@@ -1537,7 +1482,7 @@ main (int argc, char *argv[]) {
             break;
 
           case BRL_CMD_AUTOREPEAT:
-            TOGGLE_PLAY(prefs.autorepeat);
+            if (TOGGLE_PLAY(prefs.autorepeat)) resetRepeatState();
             break;
           case BRL_CMD_TUNES:
             TOGGLE_PLAY(prefs.alertTunes);        /* toggle sound on/off */
