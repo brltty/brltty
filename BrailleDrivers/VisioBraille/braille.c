@@ -39,7 +39,7 @@ typedef enum {
 #include "Programs/brl_driver.h"
 #include "braille.h"
 #include "brldefs-vs.h"
-#include "Programs/serial.h"
+#include "Programs/io_serial.h"
 
 #define MAXPKTLEN 512
 

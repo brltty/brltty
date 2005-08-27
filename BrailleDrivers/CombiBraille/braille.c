@@ -33,7 +33,7 @@
 #define BRLSTAT ST_TiemanStyle
 #include "Programs/brl_driver.h"
 #include "braille.h"
-#include "Programs/serial.h"
+#include "Programs/io_serial.h"
 
 /* Command translation table: */
 static int cmdtrans[0X100] = {

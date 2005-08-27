@@ -34,7 +34,7 @@ static TranslationTable inputTable;
 static unsigned char brailleCells[0XFF];
 static unsigned char visualCells[0XFF];
 
-#include "Programs/serial.h"
+#include "Programs/io_serial.h"
 static SerialDevice *serialDevice = NULL;
 static int charactersPerSecond;
 

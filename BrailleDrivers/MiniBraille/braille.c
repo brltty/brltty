@@ -41,7 +41,7 @@
 #include "Programs/brl_driver.h"
 #include "braille.h"
 #include "minibraille.h"
-#include "Programs/serial.h"
+#include "Programs/io_serial.h"
 
 /* types */
 enum mode_t { NORMAL_MODE, F1_MODE, F2_MODE, MANAGE_MODE, CLOCK_MODE };

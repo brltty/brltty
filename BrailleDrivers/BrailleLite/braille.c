@@ -46,7 +46,7 @@ typedef enum {
 #include "Programs/brl_driver.h"
 #include "Programs/tbl.h"
 #include "braille.h"
-#include "Programs/serial.h"
+#include "Programs/io_serial.h"
 
 #define BL_NEED_ARRAYS
 #include "bindings.h"		/* for keybindings */

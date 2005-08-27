@@ -23,7 +23,7 @@
 #include <errno.h>
 
 #include "misc.h"
-#include "usb.h"
+#include "io_usb.h"
 #include "usb_internal.h"
 
 int

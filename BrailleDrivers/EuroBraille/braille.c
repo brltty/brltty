@@ -42,7 +42,7 @@
 #define BRL_HAVE_VISUAL_DISPLAY
 #include "Programs/brl_driver.h"
 #include "braille.h"
-#include "Programs/serial.h"
+#include "Programs/io_serial.h"
 
 /*
 ** For debugging only

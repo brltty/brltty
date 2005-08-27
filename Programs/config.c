@@ -56,14 +56,14 @@
 #include "options.h"
 #include "brltty.h"
 #include "defaults.h"
-#include "serial.h"
+#include "io_serial.h"
 
 #ifdef ENABLE_USB_SUPPORT
-#include "usb.h"
+#include "io_usb.h"
 #endif /* ENABLE_USB_SUPPORT */
 
 #ifdef ENABLE_BLUETOOTH_SUPPORT
-#include "bluetooth.h"
+#include "io_bluetooth.h"
 #endif /* ENABLE_BLUETOOTH_SUPPORT */
 
 char COPYRIGHT[] = "Copyright (C) 1995-2005 by The BRLTTY Team - all rights reserved.";

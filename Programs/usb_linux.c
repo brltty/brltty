@@ -42,7 +42,7 @@
 #endif /* USBDEVFS_CONNECT */
 
 #include "misc.h"
-#include "usb.h"
+#include "io_usb.h"
 #include "usb_internal.h"
 
 typedef struct {

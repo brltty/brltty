@@ -15,7 +15,7 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#include "iomisc.h"
+#include "io_misc.h"
 
 struct MidiDeviceStruct {
   int fileDescriptor;

@@ -22,10 +22,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
-#include </usr/include/usb.h>
+#include <usb.h>
 
 #include "misc.h"
-#include "usb.h"
+#include "io_usb.h"
 #include "usb_internal.h"
 
 typedef struct {

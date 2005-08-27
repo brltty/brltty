@@ -23,7 +23,7 @@
 #include <sys/socket.h>
 
 #include "misc.h"
-#include "bluetooth.h"
+#include "io_bluetooth.h"
 #include "bluetooth_internal.h"
 
 #include <bluetooth/rfcomm.h>

@@ -432,7 +432,7 @@ writeParameter (BrailleDisplay *brl, unsigned char parameter, unsigned char sett
   return io->writePacket(bytes, sizeof(bytes), &brl->writeDelay);
 }
 
-#include "Programs/serial.h"
+#include "Programs/io_serial.h"
 static SerialDevice *serialDevice = NULL;
 static int serialCharactersPerSecond;
 
@@ -492,7 +492,7 @@ static const InputOutputOperations serialOperations = {
 };
 
 #ifdef ENABLE_USB_SUPPORT
-#include "Programs/usb.h"
+#include "Programs/io_usb.h"
 
 static UsbChannel *usb = NULL;
 

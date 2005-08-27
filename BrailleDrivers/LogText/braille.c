@@ -37,7 +37,7 @@
 #include "Programs/brl_driver.h"
 #include "Programs/tbl.h"
 #include "braille.h"
-#include "Programs/serial.h"
+#include "Programs/io_serial.h"
 
 static SerialDevice *serialDevice = NULL;
 

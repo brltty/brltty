@@ -15,8 +15,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_USB
-#define BRLTTY_INCLUDED_USB
+#ifndef BRLTTY_INCLUDED_IO_USB
+#define BRLTTY_INCLUDED_IO_USB
 
 #include "prologue.h"
 
@@ -30,7 +30,7 @@ extern "C" {
 
 #include <inttypes.h>
 
-#include "iodefs.h"
+#include "io_defs.h"
 
 /* Descriptor types. */
 typedef enum {
@@ -482,4 +482,4 @@ extern int isUsbDevice (const char **path);
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_USB */
+#endif /* BRLTTY_INCLUDED_IO_USB */

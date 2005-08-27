@@ -17,7 +17,7 @@
 
 #include <sys/asoundlib.h>
 
-#include "iomisc.h"
+#include "io_misc.h"
 
 struct PcmDeviceStruct {
   int card;

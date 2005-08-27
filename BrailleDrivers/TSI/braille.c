@@ -92,7 +92,7 @@
 #define BRLSTAT ST_PB80Style
 #include "Programs/brl_driver.h"
 #include "braille.h"
-#include "Programs/serial.h"
+#include "Programs/io_serial.h"
 
 /* Braille display parameters that do not change */
 #define BRLROWS 1		/* only one row on braille display */

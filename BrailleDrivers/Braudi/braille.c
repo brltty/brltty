@@ -26,7 +26,7 @@
 #include "Programs/misc.h"
 
 #include "Programs/brl_driver.h"
-#include "Programs/serial.h"
+#include "Programs/io_serial.h"
 
 static SerialDevice *serialDevice = NULL;
 static int charactersPerSecond;

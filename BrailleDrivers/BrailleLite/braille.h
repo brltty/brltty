@@ -22,7 +22,7 @@
  */
 
 /* used by speech.c */
-#include "Programs/serial.h"
+#include "Programs/io_serial.h"
 extern SerialDevice *BL_serialDevice;
 
 /* We always expect 8 data bits, no parity, 1 stop bit. */

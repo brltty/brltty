@@ -84,7 +84,7 @@ typedef struct {
 static const InputOutputOperations *io;
 
 
-#include "Programs/serial.h"
+#include "Programs/io_serial.h"
 
 static SerialDevice *serialDevice = NULL;
 static const char *serialDeviceNames[] = {"Adapter", "Base"};
@@ -351,7 +351,7 @@ static const InputOutputOperations serialOperations = {
 
 
 #ifdef ENABLE_USB_SUPPORT
-#include "Programs/usb.h"
+#include "Programs/io_usb.h"
 
 /* Workarounds for control transfer flakiness (at least in this demo model) */
 #define USB_RETRIES 6

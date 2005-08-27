@@ -28,7 +28,7 @@
 #include <sys/usb/clients/ugen/usb_ugen.h>
 
 #include "misc.h"
-#include "usb.h"
+#include "io_usb.h"
 #include "usb_internal.h"
 
 typedef struct {

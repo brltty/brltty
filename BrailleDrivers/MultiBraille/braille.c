@@ -64,7 +64,7 @@
 #include "Programs/brl_driver.h"
 #include "braille.h"
 #include "tables.h"		/* for keybindings */
-#include "Programs/serial.h"
+#include "Programs/io_serial.h"
 
 #define ESC '\033'
 #define CR '\015'

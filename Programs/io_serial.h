@@ -15,8 +15,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_SERIAL
-#define BRLTTY_INCLUDED_SERIAL
+#ifndef BRLTTY_INCLUDED_IO_SERIAL
+#define BRLTTY_INCLUDED_IO_SERIAL
 
 #ifdef __cplusplus
 extern "C" {
@@ -25,7 +25,7 @@ extern "C" {
 #include <unistd.h>
 #include <stdio.h>
 
-#include "iodefs.h"
+#include "io_defs.h"
 
 typedef struct SerialDeviceStruct SerialDevice;
 
@@ -71,4 +71,4 @@ extern int serialTestLineDSR (SerialDevice *serial);
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_SERIAL */
+#endif /* BRLTTY_INCLUDED_IO_SERIAL */

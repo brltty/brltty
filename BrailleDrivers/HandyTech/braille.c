@@ -181,7 +181,7 @@ static const int baud = 19200;
 static int charactersPerSecond;
 
 /* Serial IO */
-#include "Programs/serial.h"
+#include "Programs/io_serial.h"
 
 static SerialDevice *serialDevice = NULL;			/* file descriptor for Braille display */
 
@@ -234,7 +234,7 @@ static const InputOutputOperations serialOperations = {
 
 #ifdef ENABLE_USB_SUPPORT
 /* USB IO */
-#include "Programs/usb.h"
+#include "Programs/io_usb.h"
 
 static UsbChannel *usb = NULL;
 
@@ -290,8 +290,8 @@ static const InputOutputOperations usbOperations = {
 
 #ifdef ENABLE_BLUETOOTH_SUPPORT
 /* Bluetooth IO */
-#include "Programs/bluetooth.h"
-#include "Programs/iomisc.h"
+#include "Programs/io_bluetooth.h"
+#include "Programs/io_misc.h"
 
 static int bluetoothConnection = -1;
 

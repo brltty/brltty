@@ -32,7 +32,7 @@
 
 #include "Programs/brl_driver.h"
 #include "braille.h"
-#include "Programs/serial.h"
+#include "Programs/io_serial.h"
 
 #define LOWER_ROUTING_DEFAULT BRL_BLK_ROUTE
 #define UPPER_ROUTING_DEFAULT BRL_BLK_DESCCHAR

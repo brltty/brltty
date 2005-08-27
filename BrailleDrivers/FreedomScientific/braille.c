@@ -53,7 +53,7 @@ static const InputOutputOperations *io;
 static unsigned int debugPackets = 0;
 static int outputPayloadLimit;
 
-#include "Programs/serial.h"
+#include "Programs/io_serial.h"
 static SerialDevice *serialDevice = NULL;
 static int serialCharactersPerSecond;
 
@@ -104,7 +104,7 @@ static const InputOutputOperations serialOperations = {
 };
 
 #ifdef ENABLE_USB_SUPPORT
-#include "Programs/usb.h"
+#include "Programs/io_usb.h"
 
 static UsbChannel *usb = NULL;
 

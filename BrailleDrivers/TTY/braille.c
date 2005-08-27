@@ -90,7 +90,7 @@ typedef enum {
 #define BRL_HAVE_VISUAL_DISPLAY
 #include "Programs/brl_driver.h"
 #include "braille.h"
-#include "Programs/serial.h"
+#include "Programs/io_serial.h"
 
 #define MAX_WINDOW_HEIGHT 3
 #define MAX_WINDOW_WIDTH 80

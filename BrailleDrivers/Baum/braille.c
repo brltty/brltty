@@ -25,7 +25,7 @@
 #include <errno.h>
 
 #include "Programs/misc.h"
-#include "Programs/iodefs.h"
+#include "Programs/io_defs.h"
 
 #define BRLSTAT ST_TiemanStyle
 #define BRL_HAVE_PACKET_IO
@@ -266,7 +266,7 @@ changeCellCount (BrailleDisplay *brl, int count) {
 }
 
 /* Serial IO */
-#include "Programs/serial.h"
+#include "Programs/io_serial.h"
 
 static SerialDevice *serialDevice = NULL;
 
@@ -318,7 +318,7 @@ static const InputOutputOperations serialOperations = {
 
 #ifdef ENABLE_USB_SUPPORT
 /* USB IO */
-#include "Programs/usb.h"
+#include "Programs/io_usb.h"
 
 static UsbChannel *usb = NULL;
 
@@ -383,8 +383,8 @@ static const InputOutputOperations usbOperations = {
 
 #ifdef ENABLE_BLUETOOTH_SUPPORT
 /* Bluetooth IO */
-#include "Programs/bluetooth.h"
-#include "Programs/iomisc.h"
+#include "Programs/io_bluetooth.h"
+#include "Programs/io_misc.h"
 
 static int bluetoothConnection = -1;
 

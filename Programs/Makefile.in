@@ -125,7 +125,7 @@ rangelist.$O:
 
 ###############################################################################
 
-BRLTTY_OBJECTS = main.$O config.$O options.$O misc.$O $(SYSTEM_OBJECT) iomisc.$O sysmisc.$O queue.$O cut.$O route.$O cmd.$O at2.$O $(TBL_OBJECTS) $(CTB_OBJECTS) serial.$O $(USB_OBJECTS) $(BLUETOOTH_OBJECTS) brl.$O $(BRAILLE_DRIVER_OBJECTS) $(SPEECH_OBJECT) $(SPEECH_DRIVER_OBJECTS) $(SCREEN_OBJECTS) $(SCREEN_DRIVER_OBJECTS) $(TUNE_OBJECTS) $(API_OBJECTS)
+BRLTTY_OBJECTS = main.$O config.$O options.$O misc.$O $(SYSTEM_OBJECT) io_misc.$O sysmisc.$O queue.$O cut.$O route.$O cmd.$O at2.$O $(TBL_OBJECTS) $(CTB_OBJECTS) serial.$O $(USB_OBJECTS) $(BLUETOOTH_OBJECTS) brl.$O $(BRAILLE_DRIVER_OBJECTS) $(SPEECH_OBJECT) $(SPEECH_DRIVER_OBJECTS) $(SCREEN_OBJECTS) $(SCREEN_DRIVER_OBJECTS) $(TUNE_OBJECTS) $(API_OBJECTS)
 
 brltty$X: $(BRLTTY_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(SPEECH_DRIVER_LIBRARIES) $(SCREEN_DRIVER_LIBRARIES) $(LDLIBS)
@@ -154,8 +154,8 @@ cmd.$O: cmds.auto.h
 at2.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/at2.c
 
-iomisc.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/iomisc.c
+io_misc.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/io_misc.c
 
 serial.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/serial.c
@@ -249,7 +249,7 @@ bluetooth_linux.$O:
 
 ###############################################################################
 
-BRLTEST_OBJECTS = brltest.$O options.$O misc.$O $(SYSTEM_OBJECT) iomisc.$O sysmisc.$O queue.$O tbl.$O cmd.$O at2.$O brl.$O $(BRAILLE_DRIVER_OBJECTS) serial.$O $(USB_OBJECTS) $(BLUETOOTH_OBJECTS)
+BRLTEST_OBJECTS = brltest.$O options.$O misc.$O $(SYSTEM_OBJECT) io_misc.$O sysmisc.$O queue.$O tbl.$O cmd.$O at2.$O brl.$O $(BRAILLE_DRIVER_OBJECTS) serial.$O $(USB_OBJECTS) $(BLUETOOTH_OBJECTS)
 
 brltest$X: $(BRLTEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTEST_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(LDLIBS)
@@ -259,7 +259,7 @@ brltest.$O:
 
 ###############################################################################
 
-SPKTEST_OBJECTS = spktest.$O options.$O misc.$O $(SYSTEM_OBJECT) iomisc.$O sysmisc.$O queue.$O spk.$O $(SPEECH_DRIVER_OBJECTS)
+SPKTEST_OBJECTS = spktest.$O options.$O misc.$O $(SYSTEM_OBJECT) io_misc.$O sysmisc.$O queue.$O spk.$O $(SPEECH_DRIVER_OBJECTS)
 
 spktest$X: $(SPKTEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(SPKTEST_OBJECTS) $(SPEECH_DRIVER_LIBRARIES) $(LDLIBS)
@@ -269,7 +269,7 @@ spktest.$O:
 
 ###############################################################################
 
-SCRTEST_OBJECTS = scrtest.$O options.$O misc.$O $(SYSTEM_OBJECT) iomisc.$O sysmisc.$O route.$O $(SCREEN_OBJECTS) $(SCREEN_DRIVER_OBJECTS)
+SCRTEST_OBJECTS = scrtest.$O options.$O misc.$O $(SYSTEM_OBJECT) io_misc.$O sysmisc.$O route.$O $(SCREEN_OBJECTS) $(SCREEN_DRIVER_OBJECTS)
 
 scrtest$X: $(SCRTEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(SCRTEST_OBJECTS) $(SCREEN_DRIVER_LIBRARIES) $(LDLIBS)
@@ -279,7 +279,7 @@ scrtest.$O:
 
 ###############################################################################
 
-TBLTEST_OBJECTS = tbltest.$O options.$O misc.$O $(SYSTEM_OBJECT) iomisc.$O tbl.$O
+TBLTEST_OBJECTS = tbltest.$O options.$O misc.$O $(SYSTEM_OBJECT) io_misc.$O tbl.$O
 
 tbltest$X: $(TBLTEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(TBLTEST_OBJECTS) $(LDLIBS)
@@ -289,7 +289,7 @@ tbltest.$O:
 
 ###############################################################################
 
-CTBTEST_OBJECTS = ctbtest.$O options.$O misc.$O $(SYSTEM_OBJECT) iomisc.$O ctb_compile.$O ctb_translate.$O tbl.$O
+CTBTEST_OBJECTS = ctbtest.$O options.$O misc.$O $(SYSTEM_OBJECT) io_misc.$O ctb_compile.$O ctb_translate.$O tbl.$O
 
 ctbtest$X: $(CTBTEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(CTBTEST_OBJECTS) $(LDLIBS)
@@ -299,7 +299,7 @@ ctbtest.$O:
 
 ###############################################################################
 
-TUNETEST_OBJECTS = tunetest.$O options.$O misc.$O $(SYSTEM_OBJECT) iomisc.$O $(TUNE_OBJECTS)
+TUNETEST_OBJECTS = tunetest.$O options.$O misc.$O $(SYSTEM_OBJECT) io_misc.$O $(TUNE_OBJECTS)
 
 tunetest$X: $(TUNETEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(TUNETEST_OBJECTS) $(LDLIBS)
@@ -309,7 +309,7 @@ tunetest.$O:
 
 ###############################################################################
 
-APITEST_OBJECTS = apitest.$O cmd.$O options.$O misc.$O $(SYSTEM_OBJECT) iomisc.$O
+APITEST_OBJECTS = apitest.$O cmd.$O options.$O misc.$O $(SYSTEM_OBJECT) io_misc.$O
 
 apitest$X: $(APITEST_OBJECTS) api
 	$(CC) $(LDFLAGS) -o $@ $(APITEST_OBJECTS) -L$(BLD_DIR) -lbrlapi $(LDLIBS)
@@ -376,8 +376,8 @@ host_misc.$O: misc.$O
 host_sys.$O: $(SYSTEM_OBJECT)
 	$(HOSTCC) $(HOSTCFLAGS) -o $@ -c $(SRC_DIR)/$(SYSTEM_OBJECT:.${O}=.c)
 
-host_io.$O: iomisc.$O
-	$(HOSTCC) $(HOSTCFLAGS) -o $@ -c $(SRC_DIR)/iomisc.c
+host_io.$O: io_misc.$O
+	$(HOSTCC) $(HOSTCFLAGS) -o $@ -c $(SRC_DIR)/io_misc.c
 
 ###############################################################################
 

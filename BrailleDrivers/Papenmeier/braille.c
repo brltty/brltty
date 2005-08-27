@@ -307,7 +307,7 @@ static int charactersPerSecond;
 
 /*--- Serial Operations ---*/
 
-#include "Programs/serial.h"
+#include "Programs/io_serial.h"
 static SerialDevice *serialDevice = NULL;
 static const int serialBauds[] = {19200, 38400, 0};
 
@@ -366,7 +366,7 @@ static const InputOutputOperations serialOperations = {
 /*--- USB Operations ---*/
 
 #ifdef ENABLE_USB_SUPPORT
-#include "Programs/usb.h"
+#include "Programs/io_usb.h"
 static UsbChannel *usb = NULL;
 static const int usbBauds[] = {57600, 0};
 

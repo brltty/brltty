@@ -54,8 +54,8 @@ typedef int SerialLines;
 #define SERIAL_LINE_DSR TIOCM_DSR
 #endif /* WINDOWS */
 
-#include "serial.h"
-#include "iomisc.h"
+#include "io_serial.h"
+#include "io_misc.h"
 #include "misc.h"
 
 struct SerialDeviceStruct {

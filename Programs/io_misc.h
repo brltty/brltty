@@ -15,8 +15,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_IOMISC
-#define BRLTTY_INCLUDED_IOMISC
+#ifndef BRLTTY_INCLUDED_IO_MISC
+#define BRLTTY_INCLUDED_IO_MISC
 
 #ifdef __cplusplus
 extern "C" {
@@ -47,4 +47,4 @@ extern int setCloseOnExec (int fileDescriptor, int state);
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_IOMISC */
+#endif /* BRLTTY_INCLUDED_IO_MISC */

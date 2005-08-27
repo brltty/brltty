@@ -28,7 +28,7 @@
 #include <dev/usb/usb.h>
 
 #include "misc.h"
-#include "usb.h"
+#include "io_usb.h"
 #include "usb_internal.h"
 
 #define USB_CONTROL_PATH_FORMAT "/dev/%s"

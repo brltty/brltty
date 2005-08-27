@@ -27,7 +27,7 @@
 #include <IOKit/usb/IOUSBLib.h>
 
 #include "misc.h"
-#include "usb.h"
+#include "io_usb.h"
 #include "usb_internal.h"
 
 typedef struct {

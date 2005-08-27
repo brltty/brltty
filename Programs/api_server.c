@@ -62,7 +62,7 @@
 #include "brl.h"
 #include "brltty.h"
 #include "misc.h"
-#include "iomisc.h"
+#include "io_misc.h"
 #include "scr.h"
 #include "tunes.h"
 

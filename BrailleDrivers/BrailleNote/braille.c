@@ -43,7 +43,7 @@ typedef enum {
 static int logInputPackets = 0;
 static int logOutputPackets = 0;
 
-#include "Programs/serial.h"
+#include "Programs/io_serial.h"
 static SerialDevice *serialDevice = NULL;
 static const int serialBaud = 38400;
 static int charactersPerSecond;
