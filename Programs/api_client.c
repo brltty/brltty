@@ -195,7 +195,7 @@ readNextPacket:
     handle_keycode(ntohl(*code));
     goto readNextPacket;
   }
-  syslog(LOG_ERR,"(brlapi_waitForPacket) Received unexpected packet of type %s and size %d\n",brlapi_packetType(type),res);
+  syslog(LOG_ERR,"(brlapi_waitForPacket) Received unexpected packet of type %s and size %ld\n",brlapi_packetType(type),(long)res);
   goto readNextPacket;
 
 out:
