@@ -1699,6 +1699,13 @@ background (void) {
   char newcmdline[len+4];
   STARTUPINFO startupinfo;
   PROCESS_INFORMATION processinfo;
+  HANDLE event;
+  DWORD res;
+  
+  if (!(event = CreateEvent(NULL, TRUE, FALSE, "BRLTTY background event"))) {
+    LogWindowsError("Creating event for background synchronization");
+    exit(10);
+  }
 
   memset(&startupinfo, 0, sizeof(startupinfo));
   startupinfo.cb = sizeof(startupinfo);
@@ -1706,11 +1713,25 @@ background (void) {
   memcpy(newcmdline, cmdline, len);
   memcpy(newcmdline+len, " -n", 4);
 
-  if (CreateProcess(NULL, newcmdline, NULL, NULL, TRUE, CREATE_NEW_PROCESS_GROUP, NULL, NULL, &startupinfo, &processinfo)) {
-    ExitProcess(0);
-  } else {
+  if (!CreateProcess(NULL, newcmdline, NULL, NULL, TRUE, CREATE_NEW_PROCESS_GROUP, NULL, NULL, &startupinfo, &processinfo)) {
     LogWindowsError("CreateProcess");
+    exit(10);
   }
+  /* wait at most for 100ms, then check whether it's still alive */
+  while ((res = WaitForSingleObject(event, 100)) != WAIT_OBJECT_0) {
+    if (res == WAIT_FAILED) {
+      LogWindowsError("Waiting for synchronization event");
+      exit(11);
+    }
+    if (!GetExitCodeProcess(processinfo.hProcess, &res)) {
+      LogWindowsError("Getting result code from processus");
+      exit(12);
+    }
+    if (res != STILL_ACTIVE)
+      _exit(res);
+  }
+  CloseHandle(event);
+  _exit(0);
 }
 #elif defined(HAVE_SYS_WAIT_H)
 static void
@@ -1838,7 +1859,12 @@ startup (int argc, char *argv[]) {
   }
 
 #if defined(WINDOWS)
-  if (!opt_noDaemon) background();
+  if (!opt_noDaemon) {
+    background();
+  } else if (!opt_standardError) {
+    LogClose();
+    LogOpen(1);
+  }
 #elif defined(HAVE_SYS_WAIT_H)
   if (!opt_noDaemon) {
     const int signalNumber = SIGUSR1;
@@ -1971,8 +1997,12 @@ startup (int argc, char *argv[]) {
     atexit(exitScreen);
   }
   
-#ifdef HAVE_SYS_WAIT_H
-  if (!(opt_noDaemon || opt_verify)) {
+#if defined(HAVE_SYS_WAIT_H) || defined(WINDOWS)
+  if (!(
+#ifndef WINDOWS
+        opt_noDaemon || 
+#endif /* WINDOWS */
+        opt_verify)) {
     setPrintOff();
 
     {
@@ -1986,6 +2016,35 @@ startup (int argc, char *argv[]) {
       }
     }
 
+#ifdef WINDOWS
+    {
+      HANDLE h = CreateFile("NUL", GENERIC_READ|GENERIC_WRITE,
+                            FILE_SHARE_READ|FILE_SHARE_WRITE,
+                            NULL, OPEN_EXISTING, 0, NULL);
+      if (!h) {
+        LogWindowsError("opening NUL device");
+      } else {
+        SetStdHandle(STD_INPUT_HANDLE, h);
+        SetStdHandle(STD_OUTPUT_HANDLE, h);
+        if (opt_standardError) {
+          fflush(stderr);
+        } else {
+          SetStdHandle(STD_ERROR_HANDLE, h);
+        }
+      }
+    }
+#endif /* WINDOWS */
+
+#if defined(WINDOWS)
+    {
+      HANDLE event;
+      if (!(event = CreateEvent(NULL, TRUE, FALSE, "BRLTTY background event"))) {
+        LogWindowsError("Creating event for background synchronization");
+      } else {
+        SetEvent(event);
+      }
+    }
+#elif defined(HAVE_SYS_WAIT_H)
     /* tell the parent process to exit */
     if (kill(getppid(), SIGUSR1) == -1) {
       LogPrint(LOG_CRIT, "stop parent error: %s", strerror(errno));
@@ -1997,8 +2056,9 @@ startup (int argc, char *argv[]) {
       LogPrint(LOG_CRIT, "session creation error: %s", strerror(errno));
       exit(13);
     }
+#endif /* detach */
   }
-#endif /* HAVE_SYS_WAIT_H */
+#endif /* HAVE_SYS_WAIT_H || WINDOWS */
 
   /*
    * From this point, all IO functions as printf, puts, perror, etc. can't be
