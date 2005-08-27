@@ -465,6 +465,7 @@ int
 getCommand (BRL_DriverCommandContext context) {
   while (1) {
     int command = readCommand(context);
+    testProgramTermination();
     if (command == EOF) {
       drainBrailleOutput(&brl, updateInterval);
       closeTuneDevice(0);
@@ -1492,6 +1493,7 @@ closeBrailleDriver (void) {
 static void
 startBrailleDriver (void) {
   while (1) {
+    testProgramTermination();
     if (openBrailleDriver(0)) {
       if (allocateBrailleBuffer(&brl)) {
         braille = brailleDriver;

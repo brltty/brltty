@@ -109,6 +109,7 @@ extern short vwinshift;			/* Window vertical distance */
 extern int updateInterval;
 extern int messageDelay;
 
+extern void testProgramTermination (void);
 extern void startup (int argc, char *argv[]);
 extern int loadPreferences (int change);
 extern int savePreferences (void);

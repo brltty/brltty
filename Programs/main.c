@@ -51,7 +51,7 @@
 int updateInterval = DEFAULT_UPDATE_INTERVAL;
 int messageDelay = DEFAULT_MESSAGE_DELAY;
 
-static int terminationSignal = 0;
+static volatile int terminationSignal = 0;
 
 /*
  * Misc param variables
@@ -192,35 +192,38 @@ handleSignal (int number, void (*handler) (int)) {
 #endif /* HAVE_SIGACTION */
 }
 
-static void
-terminateProgram (int quickly) {
-  int flags = MSG_NODELAY;
+void
+testProgramTermination (void) {
+  if (terminationSignal) {
+    int quickly = terminationSignal == SIGINT;
+    int flags = MSG_NODELAY;
 
 #ifdef ENABLE_SPEECH_SUPPORT
-  int silently = quickly;
-  if (speech == &noSpeech) silently = 1;
-  if (silently) flags |= MSG_SILENT;
+    int silently = quickly;
+    if (speech == &noSpeech) silently = 1;
+    if (silently) flags |= MSG_SILENT;
 #endif /* ENABLE_SPEECH_SUPPORT */
 
-  clearStatusCells(&brl);
-  message("BRLTTY exiting.", flags);
+    clearStatusCells(&brl);
+    message("BRLTTY exiting.", flags);
 
 #ifdef ENABLE_SPEECH_SUPPORT
-  if (!silently) {
-    int awaitSilence = speech->isSpeaking();
-    int i;
-    for (i=0; i<messageDelay; i+=updateInterval) {
-      approximateDelay(updateInterval);
-      if (readCommand(BRL_CTX_MESSAGE) != EOF) break;
-      if (awaitSilence) {
-        speech->doTrack();
-        if (!speech->isSpeaking()) break;
+    if (!silently) {
+      int awaitSilence = speech->isSpeaking();
+      int i;
+      for (i=0; i<messageDelay; i+=updateInterval) {
+        approximateDelay(updateInterval);
+        if (readCommand(BRL_CTX_MESSAGE) != EOF) break;
+        if (awaitSilence) {
+          speech->doTrack();
+          if (!speech->isSpeaking()) break;
+        }
       }
     }
-  }
 #endif /* ENABLE_SPEECH_SUPPORT */
 
-  exit(0);
+    exit(0);
+  }
 }
 
 static void 
@@ -948,7 +951,7 @@ main (int argc, char *argv[]) {
   resetBlinkingStates();
   if (prefs.autorepeat) resetRepeatState();
 
-  while (!terminationSignal) {
+  while (1) {
     int pointerMoved = 0;
 
     /* The braille display can stick out by brl.x-offr columns from the
@@ -957,6 +960,7 @@ main (int argc, char *argv[]) {
     short offr = scr.cols % brl.x;
     if (!offr) offr = brl.x;
 
+    testProgramTermination();
     closeTuneDevice(0);
 
     if (routingStatus >= 0) {
@@ -980,6 +984,7 @@ main (int argc, char *argv[]) {
       static int command = EOF;
       int oldmotx = p->winx;
       int oldmoty = p->winy;
+      testProgramTermination();
 
       {
         int next = readBrailleCommand(&brl,
@@ -2225,7 +2230,6 @@ main (int argc, char *argv[]) {
     updateIntervals++;
   }
 
-  terminateProgram(terminationSignal == SIGINT);
   return 0;
 }
 
