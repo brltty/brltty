@@ -31,7 +31,7 @@ extern "C" {
 #include <stdio.h>
 #include <errno.h>
 #include "misc.h"
-#define winPthreadAssertWindows(expr) do { if (!(expr)) { setErrno(); return -1; } } while (0)
+#define winPthreadAssertWindows(expr) do { if (!(expr)) { setSystemErrno(); return -1; } } while (0)
 #define winPthreadAssert(expr) do { if (!(expr)) return -1; } while (0)
 
 /***********
@@ -166,7 +166,7 @@ again:
   switch (WaitForSingleObject(*vmutex, INFINITE)) {
     default:
     case WAIT_FAILED:
-      setErrno();
+      setSystemErrno();
       return -1;
     case WAIT_ABANDONED:
     case WAIT_OBJECT_0:
@@ -214,7 +214,7 @@ again:
   switch (WaitForSingleObject(cond->sem, time->tv_sec*1000+time->tv_nsec/1000)) {
     default:
     case WAIT_FAILED:
-      setErrno();
+      setSystemErrno();
       return -1;
     case WAIT_TIMEOUT:
       goto again;
@@ -233,7 +233,7 @@ static inline int pthread_cond_wait (pthread_cond_t *cond, pthread_mutex_t *mute
 again:
   switch (WaitForSingleObject(cond->sem, INFINITE)) {
     case WAIT_FAILED:
-      setErrno();
+      setSystemErrno();
       return -1;
     case WAIT_TIMEOUT:
       goto again;

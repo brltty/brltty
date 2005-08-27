@@ -363,7 +363,7 @@ int readPacket(Connection *c)
         case ERROR_IO_PENDING: return 0;
         case ERROR_HANDLE_EOF:
         case ERROR_BROKEN_PIPE: return -2;
-        default: LogWindowsError("GetOverlappedResult"); setErrno(); return -1;
+        default: LogWindowsError("GetOverlappedResult"); setSystemErrno(); return -1;
       }
     }
 read:
@@ -411,7 +411,7 @@ read:
       case ERROR_IO_PENDING: return 0;
       case ERROR_HANDLE_EOF:
       case ERROR_BROKEN_PIPE: return -2;
-      default: LogWindowsError("ReadFile"); setErrno(); return -1;
+      default: LogWindowsError("ReadFile"); setSystemErrno(); return -1;
     }
   }
 #endif /* WINDOWS */

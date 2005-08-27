@@ -64,18 +64,24 @@ extern "C" {
 #define STRINGIFY(a) _STRINGIFY(a)
 
 #ifdef WINDOWS
+#define getSystemError() GetLastError()
+#define getSocketError() WSAGetLastError()
+
 #ifdef __CYGWIN__
 #include <sys/cygwin.h>
-#define setSystemErrno(error) do { errno = cygwin_internal(CW_GET_ERRNO_FROM_WINERROR, (error)); } while (0)
+#define setErrno(error) errno = cygwin_internal(CW_GET_ERRNO_FROM_WINERROR, (error))
 #else /* __CYGWIN__ */
-#define setSystemErrno(error) do { errno = EIO; } while (0)
+#define setErrno(error) errno = EIO
 #endif /* __CYGWIN__ */
 #else /* WINDOWS */
-#define setSystemErrno(error)
+#define getSystemError() errno
+#define getSocketError() errno
+
+#define setErrno(error)
 #endif /* WINDOWS */
 
-#define setErrno() setSystemErrno(GetLastError())
-#define setSocketErrno() setSystemErrno(WSAGetLastError())
+#define setSystemErrno() setErrno(getSystemError())
+#define setSocketErrno() setErrno(getSocketError())
 
 extern char **splitString (const char *string, char delimiter, int *count);
 extern void deallocateStrings (char **array);
