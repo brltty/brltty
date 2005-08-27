@@ -1731,7 +1731,7 @@ background (void) {
       _exit(res);
   }
   CloseHandle(event);
-  _exit(0);
+  ExitProcess(0);
 }
 #elif defined(HAVE_SYS_WAIT_H)
 static void
