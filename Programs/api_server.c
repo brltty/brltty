@@ -361,9 +361,9 @@ int readPacket(Connection *c)
     if (!GetOverlappedResult((HANDLE) c->fd,&packet->overl,&res,FALSE)) {
       switch (GetLastError()) {
         case ERROR_IO_PENDING: return 0;
-	case ERROR_HANDLE_EOF:
-	case ERROR_BROKEN_PIPE: return -2;
-	default: LogWindowsError("GetOverlappedResult"); errno = EIO; return -1;
+        case ERROR_HANDLE_EOF:
+        case ERROR_BROKEN_PIPE: return -2;
+        default: LogWindowsError("GetOverlappedResult"); setErrno(); return -1;
       }
     }
 read:
@@ -411,7 +411,7 @@ read:
       case ERROR_IO_PENDING: return 0;
       case ERROR_HANDLE_EOF:
       case ERROR_BROKEN_PIPE: return -2;
-      default: LogWindowsError("ReadFile"); errno = EIO; return -1;
+      default: LogWindowsError("ReadFile"); setErrno(); return -1;
     }
   }
 #endif /* WINDOWS */
@@ -1219,6 +1219,7 @@ static int initializeTcpSocket(struct socketInfo *info)
   for (cur = res; cur; cur = cur->ai_next) {
     fd = socket(cur->ai_family, cur->ai_socktype, cur->ai_protocol);
     if (fd<0) {
+      setSocketErrno();
       if (errno != EAFNOSUPPORT)
         LogPrint(LOG_WARNING,"socket: %s",strerror(errno));
       continue;
@@ -1626,6 +1627,7 @@ static void *socketSelect(void *foo)
       continue;
     }
     if ((n=select(fdmax+1, &sockset, NULL, NULL, &tv))<0) {
+      setSocketErrno();
       LogPrint(LOG_WARNING,"select: %s",strerror(errno));
       break;
     }
@@ -1922,12 +1924,13 @@ static void *server(void *arg)
 #else /* WINDOWS */
     if (socketInfo[i].fd>=0 && FD_ISSET(socketInfo[i].fd, &sockset)) {
 #endif /* WINDOWS */
-	addrlen = sizeof(addr);
-	res = accept(socketInfo[i].fd, (struct sockaddr *) &addr, &addrlen);
-	if (res<0) {
-	  LogPrint(LOG_WARNING,"accept(%d): %s",socketInfo[i].fd,strerror(errno));
-	  continue;
-	}
+        addrlen = sizeof(addr);
+        res = accept(socketInfo[i].fd, (struct sockaddr *) &addr, &addrlen);
+        if (res<0) {
+          setSocketErrno();
+          LogPrint(LOG_WARNING,"accept(%d): %s",socketInfo[i].fd,strerror(errno));
+          continue;
+        }
 #ifdef WINDOWS
 #if defined(HAVE_FUNC_CREATENAMEDPIPE)
       } else /* PF_LOCAL */ {

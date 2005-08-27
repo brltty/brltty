@@ -30,7 +30,9 @@ extern "C" {
 #include <windows.h>
 #include <stdio.h>
 #include <errno.h>
-#define win_pthread_assert(expr) do { if (!(expr)) { errno = EIO; return -1; } } while (0)
+#include "misc.h"
+#define winPthreadAssertWindows(expr) do { if (!(expr)) { setErrno(); return -1; } } while (0)
+#define winPthreadAssert(expr) do { if (!(expr)) return -1; } while (0)
 
 /***********
  * threads *
@@ -82,7 +84,7 @@ static inline int pthread_create (
     errno = EINVAL;
     return -1;
   }
-  win_pthread_assert(*thread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE) fun, arg, 0, NULL));
+  winPthreadAssertWindows(*thread = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE) fun, arg, 0, NULL));
   return 0;
 }
 
@@ -93,7 +95,7 @@ static inline int pthread_setcancelstate (int state, int *oldstate) {
 
 static inline int pthread_cancel (pthread_t thread) {
   /* This is quite harsh :( */
-  win_pthread_assert(TerminateThread(thread, 0));
+  winPthreadAssertWindows(TerminateThread(thread, 0));
   return 0;
 }
 
@@ -109,7 +111,7 @@ static inline int pthread_join (pthread_t thread, void **res) {
       if (res) *res = (void *)_res;
       return 0;
     }
-    win_pthread_assert(GetLastError() == STILL_ACTIVE);
+    winPthreadAssertWindows(GetLastError() == STILL_ACTIVE);
     approximateDelay(1);
   }
 }
@@ -140,12 +142,12 @@ static inline int pthread_mutex_init (pthread_mutex_t *mutex, pthread_mutexattr_
     errno = EINVAL;
     return -1;
   }
-  win_pthread_assert(*mutex = CreateMutex(NULL, FALSE, NULL));
+  winPthreadAssertWindows(*mutex = CreateMutex(NULL, FALSE, NULL));
   return 0;
 }
 
 static inline int pthread_mutex_unlock (pthread_mutex_t *mutex) {
-  win_pthread_assert(ReleaseMutex(*mutex));
+  winPthreadAssertWindows(ReleaseMutex(*mutex));
   return 0;
 }
 
@@ -153,18 +155,18 @@ static inline int pthread_mutex_lock (pthread_mutex_t *mutex) {
   volatile pthread_mutex_t *vmutex = mutex;
   if (!*vmutex) {
     HANDLE mutex_init_mutex;
-    win_pthread_assert((mutex_init_mutex = CreateMutex(NULL, FALSE, "BRLTTY mutex init")));
-    win_pthread_assert(!pthread_mutex_lock(&mutex_init_mutex));
+    winPthreadAssertWindows((mutex_init_mutex = CreateMutex(NULL, FALSE, "BRLTTY mutex init")));
+    winPthreadAssert(!pthread_mutex_lock(&mutex_init_mutex));
     if (!*vmutex)
-      win_pthread_assert(!pthread_mutex_init((pthread_mutex_t *) vmutex,NULL));
-    win_pthread_assert(!pthread_mutex_unlock(&mutex_init_mutex));
-    win_pthread_assert(CloseHandle(mutex_init_mutex));
+      winPthreadAssert(!pthread_mutex_init((pthread_mutex_t *) vmutex,NULL));
+    winPthreadAssert(!pthread_mutex_unlock(&mutex_init_mutex));
+    winPthreadAssertWindows(CloseHandle(mutex_init_mutex));
   }
 again:
   switch (WaitForSingleObject(*vmutex, INFINITE)) {
     default:
     case WAIT_FAILED:
-      errno = EIO;
+      setErrno();
       return -1;
     case WAIT_ABANDONED:
     case WAIT_OBJECT_0:
@@ -175,7 +177,7 @@ again:
 }
 
 static inline int pthread_mutex_destroy (pthread_mutex_t *mutex) {
-  win_pthread_assert(CloseHandle(*mutex));
+  winPthreadAssertWindows(CloseHandle(*mutex));
   return 0;
 }
 
@@ -200,19 +202,19 @@ static inline int pthread_cond_init (pthread_cond_t *cond, const pthread_condatt
     errno = EINVAL;
     return -1;
   }
-  win_pthread_assert(cond->sem = CreateSemaphore(NULL, 1, 1, NULL));
+  winPthreadAssertWindows(cond->sem = CreateSemaphore(NULL, 1, 1, NULL));
   cond->nbwait = 0;
   return 0;
 }
 
 static inline int pthread_cond_timedwait (pthread_cond_t *cond, pthread_mutex_t *mutex, const struct timespec *time) {
   cond->nbwait++;
-  win_pthread_assert(pthread_mutex_unlock(mutex));
+  winPthreadAssert(pthread_mutex_unlock(mutex));
 again:
   switch (WaitForSingleObject(cond->sem, time->tv_sec*1000+time->tv_nsec/1000)) {
     default:
     case WAIT_FAILED:
-      errno = EIO;
+      setErrno();
       return -1;
     case WAIT_TIMEOUT:
       goto again;
@@ -220,18 +222,18 @@ again:
     case WAIT_OBJECT_0:
       break;
   }
-  win_pthread_assert(pthread_mutex_lock(mutex));
+  winPthreadAssert(pthread_mutex_lock(mutex));
   cond->nbwait--;
   return 0;
 }
 
 static inline int pthread_cond_wait (pthread_cond_t *cond, pthread_mutex_t *mutex) {
   cond->nbwait++;
-  win_pthread_assert(pthread_mutex_unlock(mutex));
+  winPthreadAssert(pthread_mutex_unlock(mutex));
 again:
   switch (WaitForSingleObject(cond->sem, INFINITE)) {
     case WAIT_FAILED:
-      errno = EIO;
+      setErrno();
       return -1;
     case WAIT_TIMEOUT:
       goto again;
@@ -239,7 +241,7 @@ again:
     case WAIT_OBJECT_0:
       break;
   }
-  win_pthread_assert(pthread_mutex_lock(mutex));
+  winPthreadAssert(pthread_mutex_lock(mutex));
   cond->nbwait--;
   return 0;
 }
@@ -251,7 +253,7 @@ static inline int pthread_cond_signal (pthread_cond_t *cond) {
 }
 
 static inline int pthread_cond_destroy (pthread_cond_t *cond) {
-  win_pthread_assert(CloseHandle(cond->sem));
+  winPthreadAssertWindows(CloseHandle(cond->sem));
   return 0;
 }
 
@@ -278,7 +280,7 @@ static inline int pthread_once (pthread_once_t *once, void (*oncefun)(void)) {
 
 static inline int pthread_key_create (pthread_key_t *key, void (*freefun)(void *)) {
   DWORD res;
-  win_pthread_assert((res = TlsAlloc()) != 0xFFFFFFFF);
+  winPthreadAssertWindows((res = TlsAlloc()) != 0xFFFFFFFF);
   *key = res;
   return 0;
 }
@@ -291,7 +293,7 @@ static inline void *pthread_getspecific (pthread_key_t key) {
 }
 
 static inline int pthread_setspecific (pthread_key_t key, const void *data) {
-  win_pthread_assert(TlsSetValue(key, (LPVOID) data));
+  winPthreadAssertWindows(TlsSetValue(key, (LPVOID) data));
   return 0;
 }
 

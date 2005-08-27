@@ -45,8 +45,9 @@
 #include "win_pthread.h"
 #endif /* __MINGW32__ */
 
+#include "misc.h"
+
 #define syslog(level,fmt,...) fprintf(stderr,#level ": " fmt, __VA_ARGS__)
-#define setSocketError() do { errno = WSAGetLastError(); } while (0)
 
 #else /* WINDOWS */
 #include <sys/socket.h>
@@ -64,7 +65,7 @@
 #include <sys/time.h>
 #endif /* HAVE_SYS_SELECT_H */
 
-#define setSocketError()
+#define setSocketErrno()
 #endif /* WINDOWS */
 
 #ifdef HAVE_ALLOCA_H
@@ -273,17 +274,17 @@ static int tryHostName(char *hostName) {
 	goto out;
       }
       if ((fd = socket(PF_LOCAL, SOCK_STREAM, 0))<0) {
-	brlapi_errfun="socket";
-	setSocketError();
-	goto outlibc;
+        brlapi_errfun="socket";
+        setSocketErrno();
+        goto outlibc;
       }
       sa.sun_family = AF_LOCAL;
       memcpy(sa.sun_path,BRLAPI_SOCKETPATH,lpath);
       memcpy(sa.sun_path+lpath,port,lport+1);
       if (connect(fd, (struct sockaddr *) &sa, sizeof(sa))<0) {
-	brlapi_errfun="connect";
-	setSocketError();
-	goto outlibc;
+        brlapi_errfun="connect";
+        setSocketErrno();
+        goto outlibc;
       }
     }
 #endif /* WINDOWS */
@@ -374,12 +375,12 @@ static int tryHostName(char *hostName) {
     fd = socket(addr.sin_family, SOCK_STREAM, 0);
     if (fd<0) {
       brlapi_errfun = "socket";
-      setSocketError();
+      setSocketErrno();
       goto outlibc;
     }
     if (connect(fd, (struct sockaddr *) &addr, sizeof(addr))<0) {
       brlapi_errfun = "connect";
-      setSocketError();
+      setSocketErrno();
       goto outlibc;
     }
 
