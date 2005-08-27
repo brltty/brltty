@@ -32,7 +32,7 @@ CROSSCOMP = @compiler_prefix@
 INSTALL_ROOT = @install_root@
 EXECUTE_ROOT = @execute_root@
 
-EXTRACFLAGS = -I$(BLD_DIR) -I$(BLD_TOP) -I$(SRC_DIR) -I$(SRC_TOP) @SYSCFLAGS@ @DEFS@
+EXTRACFLAGS = -I$(BLD_DIR) -I$(BLD_TOP:/=) -I$(SRC_DIR) -I$(SRC_TOP:/=) @SYSCFLAGS@ @DEFS@
 YCFLAGS = @YCFLAGS@
 
 HOSTCC = @CC@
