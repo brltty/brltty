@@ -1692,6 +1692,7 @@ exitPidFile (void) {
 }
 
 #if defined(WINDOWS)
+#define BACKGROUND_EVENT_PREFIX "BRLTTY background "
 static void
 background (void) {
   LPTSTR cmdline = GetCommandLine();
@@ -1701,12 +1702,8 @@ background (void) {
   PROCESS_INFORMATION processinfo;
   HANDLE event;
   DWORD res;
+  char name[] = BACKGROUND_EVENT_PREFIX "XXXXXXXX";
   
-  if (!(event = CreateEvent(NULL, TRUE, FALSE, "BRLTTY background event"))) {
-    LogWindowsError("Creating event for background synchronization");
-    exit(10);
-  }
-
   memset(&startupinfo, 0, sizeof(startupinfo));
   startupinfo.cb = sizeof(startupinfo);
 
@@ -1717,20 +1714,24 @@ background (void) {
     LogWindowsError("CreateProcess");
     exit(10);
   }
+  snprintf(name, sizeof(name), BACKGROUND_EVENT_PREFIX "%8lx", processinfo.dwProcessId);
+  if (!(event = CreateEvent(NULL, TRUE, FALSE, name))) {
+    LogWindowsError("Creating event for background synchronization");
+    exit(11);
+  }
   /* wait at most for 100ms, then check whether it's still alive */
   while ((res = WaitForSingleObject(event, 100)) != WAIT_OBJECT_0) {
     if (res == WAIT_FAILED) {
       LogWindowsError("Waiting for synchronization event");
-      exit(11);
+      exit(12);
     }
     if (!GetExitCodeProcess(processinfo.hProcess, &res)) {
       LogWindowsError("Getting result code from processus");
-      exit(12);
+      exit(13);
     }
     if (res != STILL_ACTIVE)
       _exit(res);
   }
-  CloseHandle(event);
   ExitProcess(0);
 }
 #elif defined(HAVE_SYS_WAIT_H)
@@ -2037,12 +2038,13 @@ startup (int argc, char *argv[]) {
 
 #if defined(WINDOWS)
     {
+      char name[] = BACKGROUND_EVENT_PREFIX "XXXXXXXX";
       HANDLE event;
-      if (!(event = CreateEvent(NULL, TRUE, FALSE, "BRLTTY background event"))) {
+      snprintf(name, sizeof(name), BACKGROUND_EVENT_PREFIX "%8lx", GetCurrentProcessId());
+      if (!(event = CreateEvent(NULL, TRUE, FALSE, name))) {
         LogWindowsError("Creating event for background synchronization");
       } else {
         SetEvent(event);
-        CloseHandle(event);
       }
     }
 #elif defined(HAVE_SYS_WAIT_H)
