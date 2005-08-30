@@ -329,7 +329,7 @@
 #screen-parameters driver:parameter=setting,...
 
 # AtSpi Screen Driver Parameters
-#screen-parameters as:Read=text+terminal # [text,terminal,any]
+#screen-parameters as:Type=text+terminal # [text,terminal,all]
 
 # Linux Screen Driver Parameters
 #screen-parameters lx:Acm=auto # [auto,iso01,vt100,cp437,user]

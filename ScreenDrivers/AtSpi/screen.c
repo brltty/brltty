@@ -38,14 +38,13 @@
 #include "Programs/brldefs.h"
 
 typedef enum {
-  PARM_READ
+  PARM_TYPE
 } ScreenParameters;
-#define SCRPARMS "read"
-
-static int readText = 1, readTerminal = 1, readAny = 0;
+#define SCRPARMS "type"
 
 #include "Programs/scr_driver.h"
 
+static int typeText = 1, typeTerminal = 1, typeAll = 0;
 static AccessibleText *curTerm;
 static Accessible *curFocus;
 
@@ -203,23 +202,39 @@ static void delRows(long pos, long num) {
 
 static int
 prepare_AtSpiScreen (char **parameters) {
-  if (*parameters[PARM_READ]) {
-    static const char *choices[] = { "text", "terminal", "any" }; 
-    char **reads;
-    int i, nb;
-    unsigned int choice;
-    readText = readTerminal = readAny = 0;
-    reads = splitString(parameters[PARM_READ],'+',&nb);
-    for (i = 0; i < nb; i++)
-      if (validateChoice(&choice, "widgets to be read", reads[i], choices))
-	switch(choice) {
-	  case 0: readText = 1; break;
-	  case 1: readTerminal = 1; break;
-	  case 2: readAny = 1; break;
-	  default: LogPrint(LOG_ERR, "choice of widgets to be read out of range"); break;
-	}
-    deallocateStrings(reads);
+  if (*parameters[PARM_TYPE]) {
+    static const char *const choices[] = {"text"   , "terminal"   , "all"   , NULL}; 
+    static       int  *const flags  [] = {&typeText, &typeTerminal, &typeAll, NULL};
+    int count;
+    char **types = splitString(parameters[PARM_TYPE], '+', &count);
+
+    {
+      int *const *flag = flags;
+      while (*flag) **flag++ = 0;
+    }
+
+    {
+      int index;
+      for (index=0; index<count; index++) {
+        const char *type = types[index];
+        int choice;
+
+        if (validateChoice(&choice, "widget type", type, choices)) {
+          int *flag = flags[choice];
+          if ((flag == &typeAll) && (index > 0)) {
+            LogPrint(LOG_WARNING, "widget type is mutually exclusive: %s", type);
+          } else if (*flag || typeAll) {
+            LogPrint(LOG_WARNING, "widget type specified more than once: %s", type);
+          } else {
+            *flag = 1;
+          }
+        }
+      }
+    }
+
+    deallocateStrings(types);
   }
+
   return 1;
 }
 
@@ -359,11 +374,11 @@ static void evListenerCB(const AccessibleEvent *event, void *user_data) {
 	  if (curFocus) finiTerm();
 	} else {
           AccessibleRole role = Accessible_getRole(event->source);
-	  if (readAny ||
-	      (readTerminal && (role == SPI_ROLE_TERMINAL)) ||
-	      (readText && ((role == SPI_ROLE_TEXT) || (role == SPI_ROLE_PASSWORD_TEXT))))
+	  if (typeAll ||
+	      (typeText && ((role == SPI_ROLE_TEXT) || (role == SPI_ROLE_PASSWORD_TEXT) || (role == SPI_ROLE_PARAGRAPH))) ||
+	      (typeTerminal && (role == SPI_ROLE_TERMINAL))) {
 	    restartTerm(event->source, newText);
-	  else {
+	  } else {
 	    LogPrint(LOG_DEBUG,"AT SPI widget not for us");
 	    if (curFocus) finiTerm();
 	  }
