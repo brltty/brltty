@@ -34,8 +34,12 @@ extern void describeCommand (int command, char *buffer, int size);
 
 extern void resetRepeatState (void);
 extern int handleRepeatFlags (
-  int *command, int nextCommand, int updateInterval,
-  int enabled, int repeatDelay, int repeatInterval
+  int *currentCommand,
+  int nextCommand,
+  int enabled,
+  int updateInterval,
+  int repeatDelay,
+  int repeatInterval
 );
 
 #ifdef __cplusplus

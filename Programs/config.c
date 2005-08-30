@@ -44,6 +44,7 @@
 #endif /* ENABLE_TABLE_SELECTION */
 #endif /* ENABLE_PREFERENCES_MENU */
 
+#include "cmd.h"
 #include "brl.h"
 #include "spk.h"
 #include "scr.h"
@@ -462,17 +463,11 @@ readCommand (BRL_DriverCommandContext context) {
 }
 
 int
-getCommand (BRL_DriverCommandContext context) {
-  while (1) {
-    int command = readCommand(context);
-    testProgramTermination();
-    if (command == EOF) {
-      drainBrailleOutput(&brl, updateInterval);
-      closeTuneDevice(0);
-    } else if (command != BRL_CMD_NOOP) {
-      return command;
-    }
-  }
+handleAutorepeat (int *currentCommand, int nextCommand) {
+  return handleRepeatFlags(currentCommand, nextCommand,
+                           prefs.autorepeat, updateInterval,
+                           PREFERENCES_TIME(prefs.autorepeatDelay),
+                           PREFERENCES_TIME(prefs.autorepeatInterval));
 }
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
@@ -945,6 +940,12 @@ testAutorepeat (void) {
 }
 
 static int
+changedAutorepeat (unsigned char setting) {
+  if (setting) resetRepeatState();
+  return 1;
+}
+
+static int
 testShowCursor (void) {
   return prefs.showCursor;
 }
@@ -1061,7 +1062,7 @@ updatePreferences (void) {
        BOOLEAN_ITEM(prefs.slidingWindow, NULL, NULL, "Sliding Window"),
        BOOLEAN_ITEM(prefs.eagerSlidingWindow, NULL, testSlidingWindow, "Eager Sliding Window"),
        NUMERIC_ITEM(prefs.windowOverlap, changedWindowOverlap, NULL, "Window Overlap", 0, 20, 1),
-       BOOLEAN_ITEM(prefs.autorepeat, NULL, NULL, "Autorepeat"),
+       BOOLEAN_ITEM(prefs.autorepeat, changedAutorepeat, NULL, "Autorepeat"),
        TIME_ITEM(prefs.autorepeatDelay, NULL, testAutorepeat, "Autorepeat Delay"),
        TIME_ITEM(prefs.autorepeatInterval, NULL, testAutorepeat, "Autorepeat Interval"),
        BOOLEAN_ITEM(prefs.showCursor, NULL, NULL, "Show Cursor"),
@@ -1117,17 +1118,20 @@ updatePreferences (void) {
     int settingChanged = 0;                        /* 1 when item's value has changed */
 
     Preferences oldPreferences = prefs;        /* backup preferences */
-    int command;                                /* readbrl() value */
+    int command = EOF;                                /* readbrl() value */
 
     /* status cells */
     setStatusText(&brl, "prf");
     message("Preferences Menu", 0);
+
+    if (prefs.autorepeat) resetRepeatState();
 
     while (1) {
       MenuItem *item = &menu[menuIndex];
       char valueBuffer[0X10];
       const char *value;
 
+      testProgramTermination();
       closeTuneDevice(0);
 
       if (!item->names) {
@@ -1165,154 +1169,159 @@ updatePreferences (void) {
         drainBrailleOutput(&brl, updateInterval);
 
         /* Now process any user interaction */
-        switch (command = getCommand(BRL_CTX_PREFS)) {
-          case BRL_CMD_HELP:
-            /* This is quick and dirty... Something more intelligent 
-             * and friendly needs to be done here...
-             */
-            message( 
-                "Press UP and DOWN to select an item, "
-                "HOME to toggle the setting. "
-                "Routing keys are available too! "
-                "Press PREFS again to quit.", MSG_WAITKEY|MSG_NODELAY);
-            break;
+        if (handleAutorepeat(&command, readBrailleCommand(&brl, BRL_CTX_PREFS))) {
+          switch (command) {
+            case BRL_CMD_NOOP:
+              continue;
 
-          case BRL_BLK_PASSKEY+BRL_KEY_HOME:
-          case BRL_CMD_PREFLOAD:
-            prefs = oldPreferences;
-            changedPreferences();
-            message("changes discarded", 0);
-            break;
-          case BRL_BLK_PASSKEY+BRL_KEY_ENTER:
-          case BRL_CMD_PREFSAVE:
-            exitSave = 1;
-            goto exitMenu;
+            case BRL_CMD_HELP:
+              /* This is quick and dirty... Something more intelligent 
+               * and friendly needs to be done here...
+               */
+              message( 
+                  "Press UP and DOWN to select an item, "
+                  "HOME to toggle the setting. "
+                  "Routing keys are available too! "
+                  "Press PREFS again to quit.", MSG_WAITKEY|MSG_NODELAY);
+              break;
 
-          case BRL_CMD_TOP:
-          case BRL_CMD_TOP_LEFT:
-          case BRL_BLK_PASSKEY+BRL_KEY_PAGE_UP:
-          case BRL_CMD_MENU_FIRST_ITEM:
-            menuIndex = lineIndent = 0;
-            break;
-          case BRL_CMD_BOT:
-          case BRL_CMD_BOT_LEFT:
-          case BRL_BLK_PASSKEY+BRL_KEY_PAGE_DOWN:
-          case BRL_CMD_MENU_LAST_ITEM:
-            menuIndex = menuSize - 1;
-            lineIndent = 0;
-            break;
+            case BRL_BLK_PASSKEY+BRL_KEY_HOME:
+            case BRL_CMD_PREFLOAD:
+              prefs = oldPreferences;
+              changedPreferences();
+              message("changes discarded", 0);
+              break;
+            case BRL_BLK_PASSKEY+BRL_KEY_ENTER:
+            case BRL_CMD_PREFSAVE:
+              exitSave = 1;
+              goto exitMenu;
 
-          case BRL_CMD_LNUP:
-          case BRL_CMD_PRDIFLN:
-          case BRL_BLK_PASSKEY+BRL_KEY_CURSOR_UP:
-          case BRL_CMD_MENU_PREV_ITEM:
-            do {
-              if (menuIndex == 0) menuIndex = menuSize;
-              --menuIndex;
-            } while (menu[menuIndex].test && !menu[menuIndex].test());
-            lineIndent = 0;
-            break;
-          case BRL_CMD_LNDN:
-          case BRL_CMD_NXDIFLN:
-          case BRL_BLK_PASSKEY+BRL_KEY_CURSOR_DOWN:
-          case BRL_CMD_MENU_NEXT_ITEM:
-            do {
-              if (++menuIndex == menuSize) menuIndex = 0;
-            } while (menu[menuIndex].test && !menu[menuIndex].test());
-            lineIndent = 0;
-            break;
+            case BRL_CMD_TOP:
+            case BRL_CMD_TOP_LEFT:
+            case BRL_BLK_PASSKEY+BRL_KEY_PAGE_UP:
+            case BRL_CMD_MENU_FIRST_ITEM:
+              menuIndex = lineIndent = 0;
+              break;
+            case BRL_CMD_BOT:
+            case BRL_CMD_BOT_LEFT:
+            case BRL_BLK_PASSKEY+BRL_KEY_PAGE_DOWN:
+            case BRL_CMD_MENU_LAST_ITEM:
+              menuIndex = menuSize - 1;
+              lineIndent = 0;
+              break;
 
-          case BRL_CMD_FWINLT:
-            if (lineIndent > 0)
-              lineIndent -= MIN(brl.x*brl.y, lineIndent);
-            else
-              playTune(&tune_bounce);
-            break;
-          case BRL_CMD_FWINRT:
-            if (lineLength-lineIndent > brl.x*brl.y)
-              lineIndent += brl.x*brl.y;
-            else
-              playTune(&tune_bounce);
-            break;
+            case BRL_CMD_LNUP:
+            case BRL_CMD_PRDIFLN:
+            case BRL_BLK_PASSKEY+BRL_KEY_CURSOR_UP:
+            case BRL_CMD_MENU_PREV_ITEM:
+              do {
+                if (menuIndex == 0) menuIndex = menuSize;
+                --menuIndex;
+              } while (menu[menuIndex].test && !menu[menuIndex].test());
+              lineIndent = 0;
+              break;
+            case BRL_CMD_LNDN:
+            case BRL_CMD_NXDIFLN:
+            case BRL_BLK_PASSKEY+BRL_KEY_CURSOR_DOWN:
+            case BRL_CMD_MENU_NEXT_ITEM:
+              do {
+                if (++menuIndex == menuSize) menuIndex = 0;
+              } while (menu[menuIndex].test && !menu[menuIndex].test());
+              lineIndent = 0;
+              break;
 
-          {
-            void (*adjust) (MenuItem *item);
-            int count;
-          case BRL_CMD_WINUP:
-          case BRL_CMD_CHRLT:
-          case BRL_BLK_PASSKEY+BRL_KEY_CURSOR_LEFT:
-          case BRL_CMD_BACK:
-          case BRL_CMD_MENU_PREV_SETTING:
-            adjust = previousSetting;
-            goto adjustSetting;
-          case BRL_CMD_WINDN:
-          case BRL_CMD_CHRRT:
-          case BRL_BLK_PASSKEY+BRL_KEY_CURSOR_RIGHT:
-          case BRL_CMD_HOME:
-          case BRL_CMD_RETURN:
-          case BRL_CMD_MENU_NEXT_SETTING:
-            adjust = nextSetting;
-          adjustSetting:
-            count = item->maximum - item->minimum + 1;
-            do {
-              adjust(item);
-              if (!--count) break;
-            } while ((*item->setting % item->divisor) || (item->changed && !item->changed(*item->setting)));
-            if (count)
-              settingChanged = 1;
-            else
-              playTune(&tune_command_rejected);
-            break;
-          }
+            case BRL_CMD_FWINLT:
+              if (lineIndent > 0)
+                lineIndent -= MIN(brl.x*brl.y, lineIndent);
+              else
+                playTune(&tune_bounce);
+              break;
+            case BRL_CMD_FWINRT:
+              if (lineLength-lineIndent > brl.x*brl.y)
+                lineIndent += brl.x*brl.y;
+              else
+                playTune(&tune_bounce);
+              break;
 
-  #ifdef ENABLE_SPEECH_SUPPORT
-          case BRL_CMD_SAY_LINE:
-            speech->say((unsigned char *)line, lineLength);
-            break;
-          case BRL_CMD_MUTE:
-            speech->mute();
-            break;
-  #endif /* ENABLE_SPEECH_SUPPORT */
-
-          default:
-            if (command >= BRL_BLK_ROUTE && command < BRL_BLK_ROUTE+brl.x) {
-              unsigned char oldSetting = *item->setting;
-              int key = command - BRL_BLK_ROUTE;
-              if (item->names) {
-                *item->setting = key % (item->maximum + 1);
-              } else {
-                *item->setting = rescaleInteger(key, brl.x-1, item->maximum-item->minimum) + item->minimum;
-              }
-              if (item->changed && !item->changed(*item->setting)) {
-                *item->setting = oldSetting;
-                playTune(&tune_command_rejected);
-              } else if (*item->setting != oldSetting) {
+            {
+              void (*adjust) (MenuItem *item);
+              int count;
+            case BRL_CMD_WINUP:
+            case BRL_CMD_CHRLT:
+            case BRL_BLK_PASSKEY+BRL_KEY_CURSOR_LEFT:
+            case BRL_CMD_BACK:
+            case BRL_CMD_MENU_PREV_SETTING:
+              adjust = previousSetting;
+              goto adjustSetting;
+            case BRL_CMD_WINDN:
+            case BRL_CMD_CHRRT:
+            case BRL_BLK_PASSKEY+BRL_KEY_CURSOR_RIGHT:
+            case BRL_CMD_HOME:
+            case BRL_CMD_RETURN:
+            case BRL_CMD_MENU_NEXT_SETTING:
+              adjust = nextSetting;
+            adjustSetting:
+              count = item->maximum - item->minimum + 1;
+              do {
+                adjust(item);
+                if (!--count) break;
+              } while ((*item->setting % item->divisor) || (item->changed && !item->changed(*item->setting)));
+              if (count)
                 settingChanged = 1;
-              }
+              else
+                playTune(&tune_command_rejected);
               break;
             }
 
-            /* For any other keystroke, we exit */
-            playTune(&tune_command_rejected);
-          case BRL_BLK_PASSKEY+BRL_KEY_ESCAPE:
-          case BRL_BLK_PASSKEY+BRL_KEY_END:
-          case BRL_CMD_PREFMENU:
-          exitMenu:
-            if (exitSave) {
-              if (savePreferences()) {
-                playTune(&tune_command_done);
+    #ifdef ENABLE_SPEECH_SUPPORT
+            case BRL_CMD_SAY_LINE:
+              speech->say((unsigned char *)line, lineLength);
+              break;
+            case BRL_CMD_MUTE:
+              speech->mute();
+              break;
+    #endif /* ENABLE_SPEECH_SUPPORT */
+
+            default:
+              if (command >= BRL_BLK_ROUTE && command < BRL_BLK_ROUTE+brl.x) {
+                unsigned char oldSetting = *item->setting;
+                int key = command - BRL_BLK_ROUTE;
+                if (item->names) {
+                  *item->setting = key % (item->maximum + 1);
+                } else {
+                  *item->setting = rescaleInteger(key, brl.x-1, item->maximum-item->minimum) + item->minimum;
+                }
+                if (item->changed && !item->changed(*item->setting)) {
+                  *item->setting = oldSetting;
+                  playTune(&tune_command_rejected);
+                } else if (*item->setting != oldSetting) {
+                  settingChanged = 1;
+                }
+                break;
               }
-            }
 
-  #ifdef ENABLE_TABLE_SELECTION
-            globEnd(&glob_textTable);
-            globEnd(&glob_attributesTable);
-  #ifdef ENABLE_CONTRACTED_BRAILLE
-            globEnd(&glob_contractionTable);
-  #endif /* ENABLE_CONTRACTED_BRAILLE */
-  #endif /* ENABLE_TABLE_SELECTION */
+              /* For any other keystroke, we exit */
+              playTune(&tune_command_rejected);
+            case BRL_BLK_PASSKEY+BRL_KEY_ESCAPE:
+            case BRL_BLK_PASSKEY+BRL_KEY_END:
+            case BRL_CMD_PREFMENU:
+            exitMenu:
+              if (exitSave) {
+                if (savePreferences()) {
+                  playTune(&tune_command_done);
+                }
+              }
 
-            return;
+    #ifdef ENABLE_TABLE_SELECTION
+              globEnd(&glob_textTable);
+              globEnd(&glob_attributesTable);
+    #ifdef ENABLE_CONTRACTED_BRAILLE
+              globEnd(&glob_contractionTable);
+    #endif /* ENABLE_CONTRACTED_BRAILLE */
+    #endif /* ENABLE_TABLE_SELECTION */
+
+              return;
+          }
         }
       }
     }

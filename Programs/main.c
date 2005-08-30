@@ -1024,10 +1024,7 @@ main (int argc, char *argv[]) {
           }
         }
 
-        if (!handleRepeatFlags(&command, next, updateInterval, prefs.autorepeat,
-                               PREFERENCES_TIME(prefs.autorepeatDelay),
-                               PREFERENCES_TIME(prefs.autorepeatInterval)))
-          break;
+        if (!handleAutorepeat(&command, next)) break;
       }
 
     doCommand:
@@ -2269,11 +2266,21 @@ message (const char *text, short flags) {
       writeBrailleBuffer(&brl);
 
       if (flags & MSG_WAITKEY) {
-        getCommand(BRL_CTX_MESSAGE);
+        while (1) {
+          int command = readCommand(BRL_CTX_MESSAGE);
+          testProgramTermination();
+          if (command == EOF) {
+            drainBrailleOutput(&brl, updateInterval);
+            closeTuneDevice(0);
+          } else if (command != BRL_CMD_NOOP) {
+            break;
+          }
+        }
       } else if (length || !(flags & MSG_NODELAY)) {
         int i;
         for (i=0; i<messageDelay; i+=updateInterval) {
           int command;
+          testProgramTermination();
           drainBrailleOutput(&brl, updateInterval);
           while ((command = readCommand(BRL_CTX_MESSAGE)) == BRL_CMD_NOOP);
           if (command != EOF) break;

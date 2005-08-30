@@ -125,8 +125,12 @@ resetRepeatState (void) {
 
 int
 handleRepeatFlags (
-  int *command, int nextCommand, int updateInterval,
-  int enabled, int repeatDelay, int repeatInterval
+  int *currentCommand,
+  int nextCommand,
+  int enabled,
+  int updateInterval,
+  int repeatDelay,
+  int repeatInterval
 ) {
   if (enabled) {
     if (nextCommand == EOF) {
@@ -176,12 +180,12 @@ handleRepeatFlags (
       if (repeatStarted) {
         repeatStarted = 0;
 
-        if (nextCommand == *command) {
+        if (nextCommand == *currentCommand) {
           nextCommand = BRL_CMD_NOOP;
           repeatFlags = 0;
         }
       }
-      *command = nextCommand;
+      *currentCommand = nextCommand;
 
       if (repeatFlags & BRL_FLG_REPEAT_DELAY) {
         repeatTimer = repeatDelay;
@@ -196,7 +200,7 @@ handleRepeatFlags (
     }
   } else {      
     if (nextCommand == EOF) return 0;
-    *command = IS_DELAYED_COMMAND(nextCommand)? BRL_CMD_NOOP: (nextCommand & ~BRL_FLG_REPEAT_MASK);
+    *currentCommand = IS_DELAYED_COMMAND(nextCommand)? BRL_CMD_NOOP: (nextCommand & ~BRL_FLG_REPEAT_MASK);
   }
 
   return 1;
