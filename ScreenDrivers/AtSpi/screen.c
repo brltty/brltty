@@ -37,6 +37,13 @@
 #include "Programs/misc.h"
 #include "Programs/brldefs.h"
 
+typedef enum {
+  PARM_READ
+} ScreenParameters;
+#define SCRPARMS "read"
+
+static int readText = 1, readTerminal = 1, readAny = 0;
+
 #include "Programs/scr_driver.h"
 
 static AccessibleText *curTerm;
@@ -196,6 +203,23 @@ static void delRows(long pos, long num) {
 
 static int
 prepare_AtSpiScreen (char **parameters) {
+  if (*parameters[PARM_READ]) {
+    static const char *choices[] = { "text", "terminal", "any" }; 
+    char **reads;
+    int i, nb;
+    unsigned int choice;
+    readText = readTerminal = readAny = 0;
+    reads = splitString(parameters[PARM_READ],'+',&nb);
+    for (i = 0; i < nb; i++)
+      if (validateChoice(&choice, "widgets to be read", reads[i], choices))
+	switch(choice) {
+	  case 0: readText = 1; break;
+	  case 1: readTerminal = 1; break;
+	  case 2: readAny = 1; break;
+	  default: LogPrint(LOG_ERR, "choice of widgets to be read out of range"); break;
+	}
+    deallocateStrings(reads);
+  }
   return 1;
 }
 
@@ -237,7 +261,7 @@ static void finiTerm(void) {
   curPosX = curPosY = 0;
 }
 
-static void restartTerm(Accessible *newTerm) {
+static void restartTerm(Accessible *newTerm, AccessibleText *newTextTerm) {
   char *c,*d;
   const char *e;
   long i,len;
@@ -246,7 +270,7 @@ static void restartTerm(Accessible *newTerm) {
   if (curFocus)
     finiTerm();
   Accessible_ref(curFocus = newTerm);
-  curTerm = Accessible_getText(newTerm);
+  curTerm = newTextTerm;
   LogPrint(LOG_DEBUG,"new term %p",curTerm);
   text = AccessibleText_getText(curTerm,0,LONG_MAX);
   curNumRows = 0;
@@ -306,6 +330,7 @@ static void evListenerCB(const AccessibleEvent *event, void *user_data) {
   static int running = 0;
   struct evList *ev = malloc(sizeof(*ev));
   AccessibleEvent_ref(event);
+  AccessibleText *newText;
   ev->next = evs;
   ev->ev = event;
   evs = ev;
@@ -330,22 +355,33 @@ static void evListenerCB(const AccessibleEvent *event, void *user_data) {
 	if (event->source == curFocus)
 	  finiTerm();
       } else if (!strcmp(event->type,"focus:") || (state_changed_focused && event->detail1)) {
-	if (Accessible_getRole(event->source) != SPI_ROLE_TERMINAL) {
-	  if (curFocus)
-	    finiTerm();
-	} else if (event->source != curFocus)
-	  restartTerm(event->source);
+	if (!(newText = Accessible_getText(event->source))) {
+	  if (curFocus) finiTerm();
+	} else {
+          AccessibleRole role = Accessible_getRole(event->source);
+	  if (readAny ||
+	      (readTerminal && (role == SPI_ROLE_TERMINAL)) ||
+	      (readText && ((role == SPI_ROLE_TEXT) || (role == SPI_ROLE_PASSWORD_TEXT))))
+	    restartTerm(event->source, newText);
+	  else {
+	    LogPrint(LOG_DEBUG,"AT SPI widget not for us");
+	    if (curFocus) finiTerm();
+	  }
+	}
       } else if (!strcmp(event->type,"object:text-caret-moved")) {
 	if (event->source != curFocus) continue;
+	LogPrint(LOG_DEBUG,"caret move to %lu",event->detail1);
 	caretPosition(event->detail1);
       } else if (!strcmp(event->type,"object:text-changed:delete")) {
 	long x,y,toDelete = event->detail2;
-	long length, toCopy;
+	long length = 0, toCopy;
 	long downTo; /* line that will provide what will follow x */
+	LogPrint(LOG_DEBUG,"delete %lu from %lu",event->detail2,event->detail1);
 	if (event->source != curFocus) continue;
 	findPosition(event->detail1,&x,&y);
 	downTo = y;
-	length = curRowLengths[downTo];
+	if (downTo < curNumRows)
+		length = curRowLengths[downTo];
 	while (x+toDelete >= length) {
 	  downTo++;
 	  if (downTo <= curNumRows - 1)
@@ -376,15 +412,16 @@ static void evListenerCB(const AccessibleEvent *event, void *user_data) {
 	  /* kills this line as well ! */
 	  y--;
 	}
-	if (downTo==curNumRows)
-	  /* imaginary extra line needs not be deleted */
-	  downTo--;
+	if (downTo>=curNumRows)
+	  /* imaginary extra lines don't need to be deleted */
+	  downTo=curNumRows-1;
 	delRows(y+1,downTo-y);
 	caretPosition(AccessibleText_getCaretOffset(curTerm));
       } else if (!strcmp(event->type,"object:text-changed:insert")) {
 	long len=event->detail2,semilen,x,y;
 	char *added;
 	const char *adding,*c;
+	LogPrint(LOG_DEBUG,"insert %lu from %lu",event->detail2,event->detail1);
 	if (event->source != curFocus) continue;
 	findPosition(event->detail1,&x,&y);
 	adding = c = added = AccessibleTextChangedEvent_getChangeString(event);
@@ -520,7 +557,7 @@ currentvt_AtSpiScreen (void) {
   return curTerm? 0: -1;
 }
 
-static const char nonatspi [] = "not an AT-SPI terminal widget";
+static const char nonatspi [] = "not an AT-SPI text widget";
 
 static void
 describe_AtSpiScreen (ScreenDescription *description) {

@@ -328,6 +328,9 @@
 # (can be overridden with the -X [--screen-parameters=] option)
 #screen-parameters driver:parameter=setting,...
 
+# AtSpi Screen Driver Parameters
+#screen-parameters as:Read=text+terminal # [text,terminal,any]
+
 # Linux Screen Driver Parameters
 #screen-parameters lx:Acm=auto # [auto,iso01,vt100,cp437,user]
 #screen-parameters lx:DebugAcm=no # [no,yes]
