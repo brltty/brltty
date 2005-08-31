@@ -147,7 +147,11 @@ brltty_brl_glib_cb (GIOChannel   *source,
 
     while ((result = brlapi_readKey(0, &key)) == 1) 
     {
-        /* handle the repeat flags */
+        /* This code supports older versions of BrlAPI which don't support the
+         * autorepeat feature. It ensures that all of the autorepeat flags are
+         * cleared and makes this client behave as though the feature has been
+         * turned off.
+         */
         if (key & BRL_FLG_REPEAT_INITIAL) {
             /* Key press for a command which is to begin repeating immediately.
              * The corresponding key release will be a no-op so Just get rid of
