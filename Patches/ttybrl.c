@@ -318,33 +318,6 @@ ignore_block (gint block)
     }
 }
 
-static void
-ignore_input (gint block)
-{
-    static const gint flags[] = {
-                             0 |                      0 |                    0 |                    0,
-                         0 |                       0 |                  0 | BRL_FLG_CHAR_CONTROL,
-                             0 |                       0 | BRL_FLG_CHAR_META |                    0,
-                         0 |                       0 | BRL_FLG_CHAR_META | BRL_FLG_CHAR_CONTROL,
-                             0 | BRL_FLG_CHAR_UPPER |                  0 |                    0,
-                             0 | BRL_FLG_CHAR_UPPER |                  0 | BRL_FLG_CHAR_CONTROL,
-                         0 | BRL_FLG_CHAR_UPPER | BRL_FLG_CHAR_META |                     0,
-                             0 | BRL_FLG_CHAR_UPPER | BRL_FLG_CHAR_META | BRL_FLG_CHAR_CONTROL,
-        BRL_FLG_CHAR_SHIFT |                       0 |                  0 |                    0,
-        BRL_FLG_CHAR_SHIFT |                       0 |                  0 | BRL_FLG_CHAR_CONTROL,
-        BRL_FLG_CHAR_SHIFT |                       0 | BRL_FLG_CHAR_META |                    0,
-        BRL_FLG_CHAR_SHIFT |                         0 | BRL_FLG_CHAR_META | BRL_FLG_CHAR_CONTROL,
-        BRL_FLG_CHAR_SHIFT | BRL_FLG_CHAR_UPPER |                  0 |                    0,
-        BRL_FLG_CHAR_SHIFT | BRL_FLG_CHAR_UPPER |                  0 | BRL_FLG_CHAR_CONTROL,
-        BRL_FLG_CHAR_SHIFT | BRL_FLG_CHAR_UPPER | BRL_FLG_CHAR_META |                    0,
-        BRL_FLG_CHAR_SHIFT | BRL_FLG_CHAR_UPPER | BRL_FLG_CHAR_META | BRL_FLG_CHAR_CONTROL
-    };
-    const gint *flag = flags + (sizeof(flags) / sizeof(*flag));
-    do {
-        ignore_block(block | *--flag);
-    } while (*flag);
-}
-
 gint
 brltty_brl_open_device (gchar*                         device_name, 
                         gshort                         port,
@@ -460,8 +433,8 @@ gettty:
         return 0;
     }
 
-    ignore_input(BRL_BLK_PASSCHAR);
-    ignore_input(BRL_BLK_PASSDOTS);
+    ignore_block(BRL_BLK_PASSCHAR);
+    ignore_block(BRL_BLK_PASSDOTS);
     ignore_block(BRL_BLK_PASSKEY);
 
     return 1;
