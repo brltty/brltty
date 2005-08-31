@@ -114,39 +114,36 @@ describeCommand (int command, char *buffer, int size) {
   }
 }
 
-static int repeatTimer;
-static int repeatStarted;
-
 void
-resetRepeatState (void) {
-  repeatTimer = 0;
-  repeatStarted = 0;
+resetRepeatState (RepeatState *state) {
+  state->command = EOF;
+  state->timer = 0;
+  state->started = 0;
 }
 
 int
 handleRepeatFlags (
-  int *currentCommand,
-  int nextCommand,
-  int enabled,
+  int command,
+  RepeatState *state,
   int updateInterval,
   int repeatDelay,
   int repeatInterval
 ) {
-  if (enabled) {
-    if (nextCommand == EOF) {
-      if (!repeatTimer) return 0;
-      if ((repeatTimer -= updateInterval) > 0) return 0;
-      repeatTimer = repeatInterval;
-      repeatStarted = 1;
+  if (state) {
+    if (command == EOF) {
+      if (!state->timer) return EOF;
+      if ((state->timer -= updateInterval) > 0) return EOF;
+      state->timer = repeatInterval;
+      state->started = 1;
     } else {
-      int repeatFlags = nextCommand & BRL_FLG_REPEAT_MASK;
-      nextCommand &= ~BRL_FLG_REPEAT_MASK;
+      int repeatFlags = command & BRL_FLG_REPEAT_MASK;
+      command &= ~BRL_FLG_REPEAT_MASK;
 
-      switch (nextCommand & BRL_MSK_BLK) {
+      switch (command & BRL_MSK_BLK) {
         default:
-          switch (nextCommand & BRL_MSK_CMD) {
+          switch (command & BRL_MSK_CMD) {
             default:
-              if (IS_DELAYED_COMMAND(repeatFlags)) nextCommand = BRL_CMD_NOOP;
+              if (IS_DELAYED_COMMAND(repeatFlags)) command = BRL_CMD_NOOP;
               repeatFlags = 0;
 
             case BRL_CMD_LNUP:
@@ -177,31 +174,33 @@ handleRepeatFlags (
           break;
       }
 
-      if (repeatStarted) {
-        repeatStarted = 0;
+      if (state->started) {
+        state->started = 0;
 
-        if (nextCommand == *currentCommand) {
-          nextCommand = BRL_CMD_NOOP;
+        if (command == state->command) {
+          command = BRL_CMD_NOOP;
           repeatFlags = 0;
         }
       }
-      *currentCommand = nextCommand;
+      state->command = command;
 
       if (repeatFlags & BRL_FLG_REPEAT_DELAY) {
-        repeatTimer = repeatDelay;
-        if (!(repeatFlags & BRL_FLG_REPEAT_INITIAL)) return 0;
-        repeatStarted = 1;
+        state->timer = repeatDelay;
+        if (!(repeatFlags & BRL_FLG_REPEAT_INITIAL)) return EOF;
+        state->started = 1;
       } else if (repeatFlags & BRL_FLG_REPEAT_INITIAL) {
-        repeatTimer = repeatInterval;
-        repeatStarted = 1;
+        state->timer = repeatInterval;
+        state->started = 1;
       } else {
-        repeatTimer = 0;
+        state->timer = 0;
       }     
     }
-  } else {      
-    if (nextCommand == EOF) return 0;
-    *currentCommand = IS_DELAYED_COMMAND(nextCommand)? BRL_CMD_NOOP: (nextCommand & ~BRL_FLG_REPEAT_MASK);
+
+    return state->command;
   }
 
-  return 1;
+  if (command != EOF)
+    command = IS_DELAYED_COMMAND(command)? BRL_CMD_NOOP:
+                                           (command & ~BRL_FLG_REPEAT_MASK);
+  return command;
 }

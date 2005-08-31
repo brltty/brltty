@@ -869,6 +869,23 @@ insertCharacter (unsigned char character, int flags) {
   }
 }
 
+static RepeatState repeatState;
+void
+resetAutorepeat (void) {
+  resetRepeatState(&repeatState);
+}
+int
+handleAutorepeat (int command, RepeatState *state) {
+  if (!prefs.autorepeat) {
+    state = NULL;
+  } else if (!state) {
+    state = &repeatState;
+  }
+  return handleRepeatFlags(command, state, updateInterval,
+                           PREFERENCES_TIME(prefs.autorepeatDelay),
+                           PREFERENCES_TIME(prefs.autorepeatInterval));
+}
+
 int
 main (int argc, char *argv[]) {
   short oldwinx, oldwiny;
@@ -949,7 +966,7 @@ main (int argc, char *argv[]) {
   getPointer(&p->ptrx, &p->ptry);
 
   resetBlinkingStates();
-  if (prefs.autorepeat) resetRepeatState();
+  if (prefs.autorepeat) resetAutorepeat();
 
   while (1) {
     int pointerMoved = 0;
@@ -981,51 +998,49 @@ main (int argc, char *argv[]) {
      * Process any Braille input 
      */
     while (1) {
-      static int command = EOF;
+      int command;
       int oldmotx = p->winx;
       int oldmoty = p->winy;
       testProgramTermination();
 
-      {
-        int next = readBrailleCommand(&brl,
-                                      infoMode? BRL_CTX_STATUS:
-                                      isHelpScreen()? BRL_CTX_HELP:
-                                      BRL_CTX_SCREEN);
+      command = readBrailleCommand(&brl,
+                                   infoMode? BRL_CTX_STATUS:
+                                   isHelpScreen()? BRL_CTX_HELP:
+                                   BRL_CTX_SCREEN);
 
-        if (next != EOF) {
-          int real = next;
+      if (command != EOF) {
+        int real = command;
 
-          if (prefs.skipIdenticalLines) {
-            switch (next & BRL_MSK_CMD) {
-              case BRL_CMD_LNUP:
-                real = BRL_CMD_PRDIFLN;
-                break;
+        if (prefs.skipIdenticalLines) {
+          switch (command & BRL_MSK_CMD) {
+            case BRL_CMD_LNUP:
+              real = BRL_CMD_PRDIFLN;
+              break;
 
-              case BRL_CMD_LNDN:
-                real = BRL_CMD_NXDIFLN;
-                break;
+            case BRL_CMD_LNDN:
+              real = BRL_CMD_NXDIFLN;
+              break;
 
-              case BRL_CMD_PRDIFLN:
-                real = BRL_CMD_LNUP;
-                break;
+            case BRL_CMD_PRDIFLN:
+              real = BRL_CMD_LNUP;
+              break;
 
-              case BRL_CMD_NXDIFLN:
-                real = BRL_CMD_LNDN;
-                break;
-            }
-          }
-
-          if (real == next) {
-            LogPrint(LOG_DEBUG, "command: %06X", next);
-          } else {
-            real |= (next & ~BRL_MSK_CMD);
-            LogPrint(LOG_DEBUG, "command: %06X -> %06X", next, real);
-            next = real;
+            case BRL_CMD_NXDIFLN:
+              real = BRL_CMD_LNDN;
+              break;
           }
         }
 
-        if (!handleAutorepeat(&command, next)) break;
+        if (real == command) {
+          LogPrint(LOG_DEBUG, "command: %06X", command);
+        } else {
+          real |= (command & ~BRL_MSK_CMD);
+          LogPrint(LOG_DEBUG, "command: %06X -> %06X", command, real);
+          command = real;
+        }
       }
+
+      if ((command = handleAutorepeat(command, NULL)) == EOF) break;
 
     doCommand:
       if (!executeScreenCommand(command)) {
@@ -1484,7 +1499,7 @@ main (int argc, char *argv[]) {
             break;
 
           case BRL_CMD_AUTOREPEAT:
-            if (TOGGLE_PLAY(prefs.autorepeat)) resetRepeatState();
+            if (TOGGLE_PLAY(prefs.autorepeat)) resetAutorepeat();
             break;
           case BRL_CMD_TUNES:
             TOGGLE_PLAY(prefs.alertTunes);        /* toggle sound on/off */

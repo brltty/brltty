@@ -462,14 +462,6 @@ readCommand (BRL_DriverCommandContext context) {
   return command;
 }
 
-int
-handleAutorepeat (int *currentCommand, int nextCommand) {
-  return handleRepeatFlags(currentCommand, nextCommand,
-                           prefs.autorepeat, updateInterval,
-                           PREFERENCES_TIME(prefs.autorepeatDelay),
-                           PREFERENCES_TIME(prefs.autorepeatInterval));
-}
-
 #ifdef ENABLE_CONTRACTED_BRAILLE
 static void
 exitContractionTable (void) {
@@ -941,7 +933,7 @@ testAutorepeat (void) {
 
 static int
 changedAutorepeat (unsigned char setting) {
-  if (setting) resetRepeatState();
+  if (setting) resetAutorepeat();
   return 1;
 }
 
@@ -1125,7 +1117,7 @@ updatePreferences (void) {
     setStatusText(&brl, "prf");
     message("Preferences Menu", 0);
 
-    if (prefs.autorepeat) resetRepeatState();
+    if (prefs.autorepeat) resetAutorepeat();
 
     while (1) {
       MenuItem *item = &menu[menuIndex];
@@ -1181,7 +1173,7 @@ updatePreferences (void) {
         drainBrailleOutput(&brl, updateInterval);
 
         /* Now process any user interaction */
-        if (handleAutorepeat(&command, readBrailleCommand(&brl, BRL_CTX_PREFS))) {
+        if ((command = handleAutorepeat(readBrailleCommand(&brl, BRL_CTX_PREFS), NULL)) != EOF) {
           switch (command) {
             case BRL_CMD_NOOP:
               continue;

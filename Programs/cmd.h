@@ -32,11 +32,15 @@ extern const CommandEntry commandTable[];
 
 extern void describeCommand (int command, char *buffer, int size);
 
-extern void resetRepeatState (void);
+typedef struct {
+  int command;
+  int timer;
+  int started;
+} RepeatState;
+extern void resetRepeatState (RepeatState *state);
 extern int handleRepeatFlags (
-  int *currentCommand,
-  int nextCommand,
-  int enabled,
+  int command,
+  RepeatState *state,
   int updateInterval,
   int repeatDelay,
   int repeatInterval

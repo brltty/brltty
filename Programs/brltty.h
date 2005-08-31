@@ -24,6 +24,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#include "cmd.h"
 #include "brl.h"
 
 typedef enum {
@@ -119,7 +120,8 @@ extern void restartBrailleDriver (void);
 extern void restartSpeechDriver (void);
 
 extern int readCommand (BRL_DriverCommandContext context);
-extern int handleAutorepeat (int *currentCommand, int nextCommand);
+extern void resetAutorepeat (void);
+extern int handleAutorepeat (int command, RepeatState *state);
 
 extern void api_identify (void);
 extern int api_open (BrailleDisplay *brl, char **parameters);

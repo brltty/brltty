@@ -59,6 +59,7 @@
 #include "api.h"
 #include "api_protocol.h"
 #include "rangelist.h"
+#include "cmd.h"
 #include "brl.h"
 #include "brltty.h"
 #include "misc.h"
@@ -243,7 +244,7 @@ static uint32_t displayDimensions[2] = { 0, 0 };
 static unsigned int displaySize = 0;
 
 static BrailleDisplay *disp; /* Parameter to pass to braille drivers */
-static int currentCommand;
+static RepeatState repeatState;
 
 static size_t authKeyLength = 0;
 static unsigned char authKey[BRLAPI_MAXPACKETSIZE];
@@ -2179,17 +2180,15 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
     keycode = htonl(keycode);
     brlapiserver_writePacket(c->fd,BRLPACKET_KEY,&keycode,sizeof(keycode));
     command = EOF;
-  } else if (handleAutorepeat(&currentCommand, command)) {
+  } else if ((command = handleAutorepeat(command, &repeatState)) != EOF) {
     /* nobody needs the raw code */
-    command = currentCommand;
-    if (command != EOF && command != BRL_CMD_NOOP
-        && (c = whoGetsKey(&ttys,command&BRL_MSK_CMD,BRL_COMMANDS))) {
+    if ((command != BRL_CMD_NOOP) && (c = whoGetsKey(&ttys,command&BRL_MSK_CMD,BRL_COMMANDS))) {
       LogPrint(LOG_DEBUG,"Transmitting unmasked command %lu",(unsigned long)command);
       command = htonl(command);
       brlapiserver_writePacket(c->fd,BRLPACKET_KEY,&command,sizeof(command));
       command = EOF;
     }
-  } else command = EOF;
+  }
   pthread_mutex_unlock(&connectionsMutex);
 out:
   return command;
@@ -2204,7 +2203,7 @@ void api_flush(BrailleDisplay *brl, BRL_DriverCommandContext caller) {
 /* writes from brltty */
 void api_link(void)
 {
-  currentCommand=EOF;
+  resetRepeatState(&repeatState);
   trueBraille=braille;
   memcpy(&ApiBraille,braille,sizeof(BrailleDriver));
   ApiBraille.writeWindow=api_writeWindow;
