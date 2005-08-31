@@ -1002,6 +1002,8 @@ int brlapi_readKey(int block, brl_keycode_t *code)
   if (!block) {
     res = packetReady(fd);
     if (res<=0) {
+      if (res<0)
+	brlapi_errno = BRLERR_LIBCERR;
       pthread_mutex_unlock(&brlapi_fd_mutex);
       return res;
     }
