@@ -2086,7 +2086,7 @@ static Connection *whoGetsKey(Tty *tty, brl_keycode_t code, unsigned int how)
   int masked;
   for (c=tty->connections->next; c!=tty->connections; c = c->next) {
     pthread_mutex_lock(&c->maskMutex);
-    if (c->how==how) masked = (contains(c->unmaskedKeys,code) == NULL);
+    masked = (c->how==how) && (contains(c->unmaskedKeys,code) == NULL);
     pthread_mutex_unlock(&c->maskMutex);
     if (!masked) goto found;
   }
