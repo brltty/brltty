@@ -66,7 +66,7 @@ END_OPTION_TABLE
 
 static int
 sayLine (char *line, void *data) {
-  sayString(line);
+  sayString(line, 0);
   return 1;
 }
 
@@ -153,7 +153,7 @@ main (int argc, char *argv[]) {
         if (speech->volume) speech->volume(speechVolume);
 
         if (opt_textString) {
-          sayString(opt_textString);
+          sayString(opt_textString, 0);
         } else {
           processLines(stdin, sayLine, NULL);
         }

@@ -1115,6 +1115,7 @@ updatePreferences (void) {
     static int menuIndex = 0;                        /* current menu item */
 
     int lineIndent = 0;                                /* braille window pos in buffer */
+    int indexChanged = 1;
     int settingChanged = 0;                        /* 1 when item's value has changed */
 
     Preferences oldPreferences = prefs;        /* backup preferences */
@@ -1154,6 +1155,16 @@ updatePreferences (void) {
         snprintf(line,  sizeof(line), "%s%s%s",
                  label, delimiter, value);
 
+#ifdef ENABLE_SPEECH_SUPPORT
+        if (prefs.autospeak) {
+          if (indexChanged) {
+            sayString(line, 1);
+          } else if (settingChanged) {
+            sayString(value, 1);
+          }
+        }
+#endif /* ENABLE_SPEECH_SUPPORT */
+
         /* Next we deal with the braille window position in the buffer.
          * This is intended for small displays and/or long item descriptions 
          */
@@ -1163,6 +1174,7 @@ updatePreferences (void) {
           if ((lineLength-lineIndent > brl.x*brl.y) && (lineIndent < settingIndent))
             lineIndent = settingIndent;
         }
+        indexChanged = 0;
 
         /* Then draw the braille window */
         writeBrailleText(&brl, &line[lineIndent], MAX(0, lineLength-lineIndent));
@@ -1201,6 +1213,7 @@ updatePreferences (void) {
             case BRL_BLK_PASSKEY+BRL_KEY_PAGE_UP:
             case BRL_CMD_MENU_FIRST_ITEM:
               menuIndex = lineIndent = 0;
+              indexChanged = 1;
               break;
             case BRL_CMD_BOT:
             case BRL_CMD_BOT_LEFT:
@@ -1208,6 +1221,7 @@ updatePreferences (void) {
             case BRL_CMD_MENU_LAST_ITEM:
               menuIndex = menuSize - 1;
               lineIndent = 0;
+              indexChanged = 1;
               break;
 
             case BRL_CMD_LNUP:
@@ -1219,6 +1233,7 @@ updatePreferences (void) {
                 --menuIndex;
               } while (menu[menuIndex].test && !menu[menuIndex].test());
               lineIndent = 0;
+              indexChanged = 1;
               break;
             case BRL_CMD_LNDN:
             case BRL_CMD_NXDIFLN:
@@ -1228,6 +1243,7 @@ updatePreferences (void) {
                 if (++menuIndex == menuSize) menuIndex = 0;
               } while (menu[menuIndex].test && !menu[menuIndex].test());
               lineIndent = 0;
+              indexChanged = 1;
               break;
 
             case BRL_CMD_FWINLT:

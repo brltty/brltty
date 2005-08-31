@@ -87,7 +87,8 @@ identifySpeechDrivers (void) {
 }
 
 void
-sayString (const char *string) {
+sayString (const char *string, int mute) {
+  if (mute) speech->mute();
   speech->say((unsigned char *)string, strlen(string));
 }
 
@@ -95,8 +96,7 @@ static void
 saySpeechSetting (int setting, const char *name) {
   char phrase[0X40];
   snprintf(phrase, sizeof(phrase), "%s %d", name, setting);
-  speech->mute();
-  sayString(phrase);
+  sayString(phrase, 1);
 }
 
 void

@@ -58,7 +58,7 @@ extern void identifySpeechDrivers (void);
 extern const SpeechDriver *speech;
 extern const SpeechDriver noSpeech;
 
-extern void sayString (const char *string);
+extern void sayString (const char *string, int mute);
 
 extern void setSpeechRate (int setting, int say);
 #define SPK_DEFAULT_RATE 10
