@@ -2195,6 +2195,10 @@ out:
   return command;
 }
 
+void api_flush(BrailleDisplay *brl, BRL_DriverCommandContext caller) {
+  (void) api_readCommand(brl, caller);
+}
+
 /* Function : api_link */
 /* Does all the link stuff to let api get events from the driver and */
 /* writes from brltty */
