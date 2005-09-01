@@ -195,11 +195,10 @@ handleSignal (int number, void (*handler) (int)) {
 void
 testProgramTermination (void) {
   if (terminationSignal) {
-    int quickly = terminationSignal == SIGINT;
     int flags = MSG_NODELAY;
 
 #ifdef ENABLE_SPEECH_SUPPORT
-    int silently = quickly;
+    int silently = terminationSignal == SIGINT;
     if (speech == &noSpeech) silently = 1;
     if (silently) flags |= MSG_SILENT;
 #endif /* ENABLE_SPEECH_SUPPORT */
