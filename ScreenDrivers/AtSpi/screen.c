@@ -217,7 +217,7 @@ prepare_AtSpiScreen (char **parameters) {
       int index;
       for (index=0; index<count; index++) {
         const char *type = types[index];
-        int choice;
+        unsigned int choice;
 
         if (validateChoice(&choice, "widget type", type, choices)) {
           int *flag = flags[choice];
