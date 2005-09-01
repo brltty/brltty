@@ -10,14 +10,19 @@ Note: this file is in reversed chronological order (bottom to top).
    hasTimedOut(0) should return true in order to handle a timeout of 0.
    Create the rescaleInteger() function from in-line preferences menu code.
    Define and implement BRL_BLK_GOTOLINE.
+   NULs are written to the end of the visual display if it's off the end of the screen.
+   Termination signals should just set a flag and let brltty terminate safely.
    Change all "bluez" uses to "bluetooth".
+   Split the autorepeat code out into a separate function.
    Autospeak sometimes decides that characters have been deleted when, in fact, they've been replaced.
+   Enable autorepeat and autospeak for the preferences menu.
    Write debug logs for braille and speech setting changes.
    The coordinates on the status line should start from 1 rather than from 0.
    Generate lower status digits symbolically rather than mathematically.
    Operate serial devices in true nonblocking mode.
    Give better names to serialTestLines()'s arguments.
-   en-g2-us contraction table fixes: [had]rian, hid[ea]way.
+   Text table renames: fr -> fr_CA, fr-iso01 -> fr_FR
+   en-g2-us contraction table fixes: [had]rian, hid[ea]way, r[er]egister, un[con]genial.
    Force OSS PCM output to be blocking.
       There appears to be a bug in ALSA OSS simulation.
       Output is nonblocking if snd_seq_oss is loaded with nonblock_open=1.
@@ -65,6 +70,7 @@ Note: this file is in reversed chronological order (bottom to top).
       Build even if no curses package is available.
    Virtual braille driver changes:
       Use PF_LOCAL/AF_LOCAL instead of PF_UNIX/AF_UNIX.
+      Don't index the names array beyond its size.
    VisioBraille braille driver changes:
       Redefine the output table in terms of braille dot constants.
    Voyager braille driver changes:
@@ -81,6 +87,8 @@ Note: this file is in reversed chronological order (bottom to top).
       change the size and model of the emulated braille device.
       Keep the window on top.
       Add a setup menu.
+      Add support for command autorepeating.
+      Include X11/Intrinsic.h in more places to keep Solaris happy.
    ExternalSpeech speech driver changes:
       Allow names, rather than just numbers, to be passed to the uid/gid parameters.
    Swift speech driver changes:
@@ -144,6 +152,11 @@ Note: this file is in reversed chronological order (bottom to top).
       Provide public access to brlapi_splitHost().
       Dot masks should be unsigned.
       Remove the trailing newline from the "BrlAPI resize" log.
+      "code" has already been converted to host byte order by the caller.
+      Add some synchronisation cleanups.
+      Allow users to call brlapi_write(NULL).
+      api.h should internally include what it depends on.
+      Preprocess the autorepeat flags.
    apitest changes:
       Add the -d [--dots] option.
       Exit show dots mode when a braille display key (rather than a keyboard key) is pressed.
@@ -173,6 +186,8 @@ Note: this file is in reversed chronological order (bottom to top).
       Calculate timeouts more accurately.
       Make device closing more robust.
       Check for a serial adapter even if configuration data for it isn't supplied.
+      Fix the bulk input loop.
+      Asynchronous errors should always be passed back to the caller.
       Code restructuring:
          Reorder the platform-dependent function definitions.
          Group the global internal function definitions by where they need to be implemented.
@@ -202,6 +217,8 @@ Note: this file is in reversed chronological order (bottom to top).
       Rename ctb_definitions.h to ctb_internal.h.
       Remove dummy timezone parameters to gettimeofday().
       Rename infmode to infoMode.
+      Remove tests for and calls to endhostent() and endservent().
+      Ensure that all I/O headers are prefixed with "io_" (primarily because of <usb.h>.
    General driver changes:
       Define opt_pcmDevice as external for those speech drivers which need it.
       Change the speech rate,volume handlers to take a floating-point multiplier.
@@ -226,13 +243,25 @@ Note: this file is in reversed chronological order (bottom to top).
       Add the uservt() method to the Screen screen driver.
       Add the currentvt() method to the FrozenScreen object.
       Correctly detect when the Linux console switches between text and graphics mode.
+   Solaris changes:
+      Define AF_LOCAL to be AF_INET.
+      Define _XOPEN_SOURCE=500 and __EXTENSIONS__.
+      Add native USB support.
+      Remove the use of "[from ... to] =" initializers.
+      Remove the use of type-casted tuples.
+      Remove the use of __label__ declarations.
+      "#pragma weak", rather than "__attributes__((weak))", is needed on Solaris.
    Build changes:
-      Remove the need for TclX from gendeps.
+      gendeps changes:
+         Remove the need for TclX.
+         Search for tclsh rather than hard-code its path.
       Rename the "aux" subdirectory to "acdir" (for Cygwin).
+      Don't build spktest automatically.
+      Build/install/uninstall xbrlapi.
       Pass the list of needed libraries to the linking of the API server library.
       Link the API client library with only those dependencies which it actually needs.
-      Add autoconf detection for endhostent(), endservent(), gai_strerror(), and hstrerror().
-      EAFNOSUPORT isn't defined on all platforms.
+      Add build-time detection for: pwd.h, grp.h, regex.h, gai_strerror(), hstrerror().
+      Add compile-time detection for: ETIMEDOUT, EAFNOSUPORT.
       Explicitly test for libX11, libXt, and the xt toolkit library.
       Separate the concepts of dynamic library and loadable module.
       Use <NAME> rather than <SONAME> in the MKLIB macro.
@@ -246,9 +275,10 @@ Note: this file is in reversed chronological order (bottom to top).
       "make all" in the "Documents/" subdirectory should make the man3 files.
       Add the make file targets tar,gz,bz2,rpm.
       Fix the hard-coded dependencies which allow the VideoBraille braille driver to be built-in.
-      needTemporaryDirectory (in begin.sh) should return the exit code of mktemp/cd instead of 3.
       Split the non-config parts of config.h into prologue.h and include the former from the latter.
       Remove the leading ./ from config.h in make file dependency lists.
+      Some compilers don't like trailing slashes on directory paths.
+      Use the shell variable $RANDOM as a last resort when generating the API key.
    rhmkiso chagnes:
       Build in the Linux screen driver, and don't build any other screen drivers.
       Add support for making a braillified Fedora Core 4 installer image.
@@ -260,10 +290,16 @@ Note: this file is in reversed chronological order (bottom to top).
          Improve the BRLTTY command to Gnopernicus key mappings.
          Use Gnopernicus layer-key codes rather than Baum key codes.
          Move all key code generation into a common routine.
+         Rename key to blk and keypress to key.
+         Ignore BRL_CMD_NOOP.
+         Handle the autorepeat flags.
+         Check for errors in the command read loop.
+         ignore_input() is no longer needed because flags aren't taken into account when ignoring commands.
          Adapt to BrlAPI 0.4.0.
       README.Gnopernicus:
          Add a note about using BRLTTY's Patches/ttybrl.c.
          Document the latest BRLTTY command to Gnopernicus key mappings.
+         Document how to get the routing keys to work.
    Initial support for the Hurd platform.
    Initial support for the Mac OS X (Darwin) platform.
    Initial support for the Cygwin platform.
