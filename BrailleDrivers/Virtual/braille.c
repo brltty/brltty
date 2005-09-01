@@ -109,12 +109,12 @@ typedef struct {
 static const ModeEntry *mode;
 
 typedef struct {
-  int (*read) (int descriptor, unsigned char *buffer, int size);
+  int (*read) (int descriptor, void *buffer, int size);
 } OperationsEntry;
 static const OperationsEntry *operations;
 
 static int
-readSocket (int descriptor, unsigned char *buffer, int size) {
+readSocket (int descriptor, void *buffer, int size) {
   fd_set readMask;
   struct timeval timeout;
 
@@ -345,7 +345,7 @@ requestLocalConnection (const struct sockaddr_un *remoteAddress) {
 
 #ifdef HAVE_FUNC_CREATENAMEDPIPE
 static int
-readNamedPipe (int descriptor, unsigned char *buffer, int size) {
+readNamedPipe (int descriptor, void *buffer, int size) {
   {
     DWORD available;
 
