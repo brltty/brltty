@@ -307,6 +307,9 @@ extern "C" {
 /* Define this if X is not available. */
 #undef X_DISPLAY_MISSING
 
+/* Define this if the header file X11/extensions/XTest.h exists. */
+#undef HAVE_X11_EXTENSIONS_XTEST_H
+
 /* Define only one of the following curses packages. */
 #undef HAVE_PKG_CURSES
 #undef HAVE_PKG_NCURSES

@@ -428,6 +428,8 @@ then
    AC_SUBST([all_xbrlapi], [all-xbrlapi])
    AC_SUBST([install_xbrlapi], [install-xbrlapi])
 
+   AC_CHECK_HEADERS([X11/extensions/XTest.h])
+
    AC_HAVE_LIBRARY([X11], [
       LIBS="${X_EXTRA_LIBS} ${X_PRE_LIBS} -lX11 ${LIBS}"
 

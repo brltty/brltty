@@ -42,7 +42,11 @@
 #include <X11/X.h>
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
+#ifdef HAVE_X11_EXTENSIONS_XTEST_H
 #include <X11/extensions/XTest.h>
+#else /* HAVE_X11_EXTENSIONS_XTEST_H */
+#warning <X11/extensions/XTest.h> not available: keypress simulation not supported
+#endif /* HAVE_X11_EXTENSIONS_XTEST_H */
 #include <X11/XKBlib.h>
 #include <X11/keysym.h>
 
@@ -133,10 +137,12 @@ void vtno(int vtno) {
     fatal_brlapi_errno("getTty",_("getting tty %d\n"),vtno);
   if (brlapi_ignoreKeyRange(0,BRL_KEYCODE_MAX)<0)
     fatal_brlapi_errno("ignoreKeys",_("ignoring every key %d\n"),vtno);
+#ifdef HAVE_X11_EXTENSIONS_XTEST_H
   if (brlapi_unignoreKeyRange(BRL_BLK_PASSCHAR,BRL_BLK_PASSCHAR|BRL_MSK_ARG))
     fatal_brlapi_errno("unignoreKeyRange",NULL);
   if (brlapi_unignoreKeyRange(BRL_BLK_PASSKEY, BRL_BLK_PASSKEY |BRL_MSK_ARG))
     fatal_brlapi_errno("unignoreKeyRange",NULL);
+#endif /* HAVE_X11_EXTENSIONS_XTEST_H */
 }
 
 void api_setName(const char *wm_name) {
@@ -347,12 +353,15 @@ static void setFocus(Window win) {
 void toX_f(const char *display) {
   Window root;
   XEvent ev;
-  int i,res;
+  int i;
   int X_fd;
   fd_set fds,readfds;
   int maxfd;
+#ifdef HAVE_X11_EXTENSIONS_XTEST_H
+  int res;
   brl_keycode_t code;
   unsigned int keysym, keycode, modifiers;
+#endif /* HAVE_X11_EXTENSIONS_XTEST_H */
 
   Xdisplay = display;
   if (!Xdisplay) Xdisplay=getenv("DISPLAY");
@@ -469,6 +478,7 @@ void toX_f(const char *display) {
       default: fprintf(stderr,_("unhandled %d type\n"),ev.type); break;
       }
     }
+#ifdef HAVE_X11_EXTENSIONS_XTEST_H
     if (FD_ISSET(brlapi_fd,&readfds)) {
       while ((res = brlapi_readKey(0, &code)==1)) {
 	modifiers = 0;
@@ -557,6 +567,7 @@ void toX_f(const char *display) {
       if (res<0)
 	fatal_brlapi_errno("brlapi_readKey",NULL);
     }
+#endif /* HAVE_X11_EXTENSIONS_XTEST_H */
   }
 }
 
