@@ -2184,7 +2184,7 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
     handleAutorepeat(&command, &repeatState);
     if (command != EOF) {
       /* nobody needs the raw code */
-      if ((command != BRL_CMD_NOOP) && (c = whoGetsKey(&ttys,command&BRL_MSK_CMD,BRL_COMMANDS))) {
+      if ((c = whoGetsKey(&ttys,command&BRL_MSK_CMD,BRL_COMMANDS))) {
         LogPrint(LOG_DEBUG,"Transmitting unmasked command %lu",(unsigned long)command);
         command = htonl(command);
         brlapiserver_writePacket(c->fd,BRLPACKET_KEY,&command,sizeof(command));
