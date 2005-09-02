@@ -1173,7 +1173,9 @@ updatePreferences (void) {
         drainBrailleOutput(&brl, updateInterval);
 
         /* Now process any user interaction */
-        if ((command = handleAutorepeat(readBrailleCommand(&brl, BRL_CTX_PREFS), NULL)) != EOF) {
+        command = readBrailleCommand(&brl, BRL_CTX_PREFS);
+        handleAutorepeat(&command, NULL);
+        if (command != EOF) {
           switch (command) {
             case BRL_CMD_NOOP:
               continue;

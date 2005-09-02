@@ -18,6 +18,8 @@
 #ifndef BRLTTY_INCLUDED_CMD
 #define BRLTTY_INCLUDED_CMD
 
+#include <sys/time.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -34,17 +36,12 @@ extern void describeCommand (int command, char *buffer, int size);
 
 typedef struct {
   int command;
-  int timer;
+  int timeout;
   int started;
+  struct timeval time;
 } RepeatState;
 extern void resetRepeatState (RepeatState *state);
-extern int handleRepeatFlags (
-  int command,
-  RepeatState *state,
-  int updateInterval,
-  int repeatDelay,
-  int repeatInterval
-);
+extern void handleRepeatFlags (int *command, RepeatState *state, int delay, int interval);
 
 #ifdef __cplusplus
 }

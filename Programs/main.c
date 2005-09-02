@@ -873,16 +873,16 @@ void
 resetAutorepeat (void) {
   resetRepeatState(&repeatState);
 }
-int
-handleAutorepeat (int command, RepeatState *state) {
+void
+handleAutorepeat (int *command, RepeatState *state) {
   if (!prefs.autorepeat) {
     state = NULL;
   } else if (!state) {
     state = &repeatState;
   }
-  return handleRepeatFlags(command, state, updateInterval,
-                           PREFERENCES_TIME(prefs.autorepeatDelay),
-                           PREFERENCES_TIME(prefs.autorepeatInterval));
+  handleRepeatFlags(command, state,
+                    PREFERENCES_TIME(prefs.autorepeatDelay),
+                    PREFERENCES_TIME(prefs.autorepeatInterval));
 }
 
 int
@@ -1039,7 +1039,8 @@ main (int argc, char *argv[]) {
         }
       }
 
-      if ((command = handleAutorepeat(command, NULL)) == EOF) break;
+      handleAutorepeat(&command, NULL);
+      if (command == EOF) break;
 
     doCommand:
       if (!executeScreenCommand(command)) {

@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "misc.h"
 #include "brldefs.h"
 #include "cmd.h"
 
@@ -117,34 +118,34 @@ describeCommand (int command, char *buffer, int size) {
 void
 resetRepeatState (RepeatState *state) {
   state->command = EOF;
-  state->timer = 0;
+  state->timeout = 0;
   state->started = 0;
 }
 
-int
-handleRepeatFlags (
-  int command,
-  RepeatState *state,
-  int updateInterval,
-  int repeatDelay,
-  int repeatInterval
-) {
+void
+handleRepeatFlags (int *command, RepeatState *state, int delay, int interval) {
   if (state) {
-    if (command == EOF) {
-      if (!state->timer) return EOF;
-      if ((state->timer -= updateInterval) > 0) return EOF;
-      state->timer = repeatInterval;
-      state->started = 1;
+    if (*command == EOF) {
+      if (state->timeout) {
+        struct timeval now;
+        gettimeofday(&now, NULL);
+        if (millisecondsBetween(&state->time, &now) >= state->timeout) {
+          *command = state->command;
+          state->time = now;
+          state->timeout = interval;
+          state->started = 1;
+        }
+      }
     } else {
-      int repeatFlags = command & BRL_FLG_REPEAT_MASK;
-      command &= ~BRL_FLG_REPEAT_MASK;
+      int flags = *command & BRL_FLG_REPEAT_MASK;
+      *command &= ~BRL_FLG_REPEAT_MASK;
 
-      switch (command & BRL_MSK_BLK) {
+      switch (*command & BRL_MSK_BLK) {
         default:
-          switch (command & BRL_MSK_CMD) {
+          switch (*command & BRL_MSK_CMD) {
             default:
-              if (IS_DELAYED_COMMAND(repeatFlags)) command = BRL_CMD_NOOP;
-              repeatFlags = 0;
+              if (IS_DELAYED_COMMAND(flags)) *command = BRL_CMD_NOOP;
+              flags = 0;
 
             case BRL_CMD_LNUP:
             case BRL_CMD_LNDN:
@@ -177,30 +178,34 @@ handleRepeatFlags (
       if (state->started) {
         state->started = 0;
 
-        if (command == state->command) {
-          command = BRL_CMD_NOOP;
-          repeatFlags = 0;
+        if (*command == state->command) {
+          *command = BRL_CMD_NOOP;
+          flags = 0;
         }
       }
-      state->command = command;
+      state->command = *command;
 
-      if (repeatFlags & BRL_FLG_REPEAT_DELAY) {
-        state->timer = repeatDelay;
-        if (!(repeatFlags & BRL_FLG_REPEAT_INITIAL)) return EOF;
-        state->started = 1;
-      } else if (repeatFlags & BRL_FLG_REPEAT_INITIAL) {
-        state->timer = repeatInterval;
+      if (flags & BRL_FLG_REPEAT_DELAY) {
+        gettimeofday(&state->time, NULL);
+        state->timeout = delay;
+        if (flags & BRL_FLG_REPEAT_INITIAL) {
+          state->started = 1;
+        } else {
+          *command = BRL_CMD_NOOP;
+        }
+      } else if (flags & BRL_FLG_REPEAT_INITIAL) {
+        gettimeofday(&state->time, NULL);
+        state->timeout = interval;
         state->started = 1;
       } else {
-        state->timer = 0;
+        state->timeout = 0;
       }     
     }
-
-    return state->command;
+  } else if (*command != EOF) {
+    if (IS_DELAYED_COMMAND(*command)) {
+      *command = BRL_CMD_NOOP;
+    } else {
+      *command &= ~BRL_FLG_REPEAT_MASK;
+    }
   }
-
-  if (command != EOF)
-    command = IS_DELAYED_COMMAND(command)? BRL_CMD_NOOP:
-                                           (command & ~BRL_FLG_REPEAT_MASK);
-  return command;
 }
