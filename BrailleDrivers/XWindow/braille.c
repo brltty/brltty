@@ -369,6 +369,8 @@ static void keypress(Widget w, XEvent *event, String *params, Cardinal *num_para
     keypressed |= BRL_FLG_CHAR_SHIFT;
   if (event->type == KeyPress)
     keypressed |= BRL_FLG_REPEAT_DELAY | BRL_FLG_REPEAT_INITIAL;
+  else
+    keypressed = BRL_CMD_NOOP;
   LogPrint(LOG_DEBUG,"keypressed %#lx", keypressed);
   return;
 
@@ -614,9 +616,9 @@ static int brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context
       brl->y = lines;
       brl->resizeRequired = 1;
     }
-    if (keypressed) {
+    if (keypressed!=EOF) {
       res=keypressed;
-      keypressed=BRL_CMD_NOOP;
+      keypressed=EOF;
       break;
     }
   }
