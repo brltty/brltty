@@ -15,6 +15,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
+#include "prologue.h"
+
 #include "Programs/cmd.h"
 #include "config.tab.c"
 
