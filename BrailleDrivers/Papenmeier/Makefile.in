@@ -28,7 +28,7 @@ braille.$O:
 
 READ_CONFIG_OBJECTS = read_config.$O $(BLD_TOP)$(PGM_DIR)/cmd.$O $(BLD_TOP)$(PGM_DIR)/misc.$O
 read_config$X: $(READ_CONFIG_OBJECTS)
-	$(HOSTCC) $(HOSTLDFLAGS) -o $@ $(READ_CONFIG_OBJECTS)
+	$(HOSTCC) $(HOSTLDFLAGS) -o $@ $(READ_CONFIG_OBJECTS) $(LDLIBS)
 
 read_config.$O:
 	$(HOSTCC) $(HOSTCFLAGS) $(YCFLAGS) -c $(SRC_DIR)/read_config.c
