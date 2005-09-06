@@ -41,29 +41,28 @@ USB Support
 USB devices are supported thanks to the libusb-win32 package. This means that,
 _before_ compiling BRLTTY, you need to:
 
-- Download the libusb-win32 installer. As of the time of this writing, you can 
-  get it from [http://libusb-win32.sourceforge.net/]. The file will be called 
-  something like libusb-win32-filter-bin-<version>.exe, and should be available 
-  on [http://sourceforge.net/project/showfiles.php?group_id=78138].
+1) Download the libusb-win32 installer. As of the time of this writing, you can
+   get it from [http://libusb-win32.sourceforge.net/]. The file will be called
+   something like libusb-win32-filter-bin-<version>.exe, and should be
+   available on [http://sourceforge.net/project/showfiles.php?group_id=78138].
 
-- Run the installer. Remember where you install the package, for example:
-  C:\Program Files\LibUSB-Win32-<version>
+2) Run the installer. Remember where you install the package, for example:
 
-- Symlink the header and library files to your Cygwin/MinGW installation. If 
-  you have Cygwin, run:
+      C:\Program Files\LibUSB-Win32-<version>
 
-    ln -s "/cygdrive/c/Program Files/LibUSB-Win32-<version>/include/usb.h" 
-          /usr/include/
-    ln -s "/cygdrive/c/Program Files/LibUSB-Win32-<version>/lib/gcc/libusb.a" 
-          /usr/lib/
+3) Symlink the header and library files to your Cygwin/MinGW installation.
+   *  If you have Cygwin, run:
+      +  ln -s "/cygdrive/c/Program Files/LibUSB-Win32-<version>/include/usb.h" 
+               /usr/include/
+      +  ln -s "/cygdrive/c/Program Files/LibUSB-Win32-<version>/lib/gcc/libusb.a" 
+               /usr/lib/
 
-  If you have MinGW, run:
+   *  If you have MinGW, run:
+      +  ln -s "/c/Program Files/LibUSB-Win32-someversion/include/usb.h"
+               /mingw/include/
+      +  ln -s "/c/Program Files/LibUSB-Win32-someversion/lib/gcc/libusb.a"
+               /mingw/lib/
 
-    ln -s "/c/Program Files/LibUSB-Win32-someversion/include/usb.h"
-          /mingw/include/
-    ln -s "/c/Program Files/LibUSB-Win32-someversion/lib/gcc/libusb.a"
-          /mingw/lib/
-
-- Configure, compile, install, and run BRLTTY as usual.
+4) Configure, compile, install, and run BRLTTY as usual.
 
 ------------------------------------------------------------------------------
