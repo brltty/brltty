@@ -128,7 +128,7 @@ writeTable_bin (const char *path, FILE *file, const TranslationTable table, void
   {
     int character;
     for (character=0; character<TRANSLATION_TABLE_SIZE; ++character) {
-      unsigned char cell = character;
+      unsigned char cell = table[character];
       if (data) cell = mapDots(cell, dotsInternal, data);
       if (fputc(cell, file) == EOF) {
         LogPrint(LOG_ERR, "output error: %s: %s", path, strerror(errno));
