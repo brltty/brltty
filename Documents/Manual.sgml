@@ -4115,6 +4115,10 @@ Now, finally, here are the opcode descriptions themselves:
   <tag><tt/largesign/ <em/characters/ <em/dots/<label id="contraction-opcode-largesign"></tag>
     Translate the characters no matter where they appear.
     Remove white-space between consecutive words matched by this opcode.
+  <tag><tt/lastlargesign/ <em/characters/ <em/dots/<label id="contraction-opcode-lastlargesign"></tag>
+    Translate the characters no matter where they appear.
+    Remove preceding white-space if the previous word was matched by the
+    <ref id="contraction-opcode-largesign" name="largesign"> opcode.
   <tag><tt/word/ <em/characters/ <em/dots/<label id="contraction-opcode-word"></tag>
     Translate the characters if they're a word.
   <tag><tt/joinword/ <em/characters/ <em/dots/<label id="contraction-opcode-joinword"></tag>

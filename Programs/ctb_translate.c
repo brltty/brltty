@@ -89,6 +89,7 @@ selectRule (int length) { /*check for valid contractions */
           case CTO_Literal:
             return 1;
           case CTO_LargeSign:
+          case CTO_LastLargeSign:
             if (!CTC(before, CTC_Space) || !CTC(after, CTC_Space))
               currentOpcode = CTO_Always;
             return 1;
@@ -316,6 +317,7 @@ contractText (void *contractionTable,
       /* pre processing */
       switch (currentOpcode) {
         case CTO_LargeSign:
+        case CTO_LastLargeSign:
           if (previousOpcode == CTO_LargeSign) {
             int srcoff = src - srcmin;
             int destlen;

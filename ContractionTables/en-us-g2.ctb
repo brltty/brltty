@@ -38,7 +38,7 @@ always 9 24
 always 0 245
 
 # the letter a
-largesign a 1
+lastlargesign a 1
 always a 1
 always A 1
 always about 1-12

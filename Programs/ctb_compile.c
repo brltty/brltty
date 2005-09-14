@@ -77,6 +77,7 @@ static const char *const opcodeNames[CTO_None] = {
   "repeated",
 
   "largesign",
+  "lastlargesign",
   "word",
   "joinword",
   "lowword",
@@ -597,6 +598,7 @@ doOpcode:
 
     case CTO_Always:
     case CTO_LargeSign:
+    case CTO_LastLargeSign:
     case CTO_WholeWord:
     case CTO_JoinableWord:
     case CTO_LowWord:
