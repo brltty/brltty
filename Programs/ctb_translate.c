@@ -101,7 +101,8 @@ selectRule (int length) { /*check for valid contractions */
             break;
           case CTO_LowWord:
             if (CTC(before, CTC_Space) && CTC(after, CTC_Space) &&
-                (previousOpcode != CTO_JoinableWord))
+                (previousOpcode != CTO_JoinableWord) &&
+                ((dest == destmin) || !dest[-1]))
               return 1;
             break;
           case CTO_JoinableWord:
