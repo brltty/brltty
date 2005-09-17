@@ -1,4 +1,4 @@
-.TH "BRLTTY" "1" "October 2004" "brltty 3.6" "The BRLTTY Project"
+.TH "BRLTTY" "1" "September 2005" "brltty 3.7" "The BRLTTY Project"
 .SH NAME
 brltty \- refreshable braille display driver for Linux/Unix
 .SH SYNOPSIS
@@ -293,15 +293,8 @@ The built-in default is
 .B 400
 (4 seconds).
 .TP
-\fB-N\fR (\fB--no-speech\fR)
-Don't automatically start the speech synthesizer driver.
-It can still be manually started with the
-.B "restart speech"
-command at any time.
-This option should only be used if
-.B brltty
-is started before the sound subsystem of the kernel is initialized
-and problems with sound are encountered.
+\fB-N\fR (\fB--no-api\fR)
+Don't start the application programming interface.
 .TP
 \fB-P \fIfile\fR (\fB--pid-file=\fR)
 The full path to the process identifier file.

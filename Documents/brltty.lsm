@@ -1,7 +1,7 @@
 Begin4
 Title: brltty
-Version: 3.6
-Entered-date: 2004/10/11
+Version: 3.7
+Entered-date: 2005/09/17
 Description: Braille Display Driver for Linux/Unix
              BRLTTY is a background process (daemon) which provides access
              to the console screen (when in text mode) for a blind person
@@ -15,11 +15,11 @@ Author: dave@mielke.cc (Dave Mielke)
         nn201@cus.cam.ac.uk (Nikhil Nair)
 Maintained-by: dave@mielke.cc (Dave Mielke)
 Primary-site: ftp.ibiblio.org /pub/Linux/system/access
-              1060KB brltty-3.6.tar.gz
-               780KB brltty-3.6-1.i386.rpm
-              1080KB brltty-3.6-1.src.rpm
-                13KB brltty-3.6.README
-                 3KB brltty-3.6.lsm
+              1205KB brltty-3.7.tar.gz
+               815KB brltty-3.7-1.i386.rpm
+              1230KB brltty-3.7-1.src.rpm
+                13KB brltty-3.7.README
+                 3KB brltty-3.7.lsm
 Alternate-site: ftp://leb.net /pub/blinux/brltty
 Original-site:
 Platforms: Linux (kernel 1.1.92 or later)
@@ -33,6 +33,7 @@ Platforms: Linux (kernel 1.1.92 or later)
            - Baum [Inka, Vario/RBT, SuperVario/Brailliant, PocketVario]
            - BrailleLite [18/40/M20/M40]
            - BrailleNote [18/32]
+           - BrlAPI
            - CombiBraille [25/45/85]
            - EcoBraille [20/40/80]
            - EuroBraille [AzerBraille, Clio, Iris, NoteBraille, Scriba]

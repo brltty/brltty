@@ -1,6 +1,7 @@
 Note: this file is in reversed chronological order (bottom to top).
 
 
+September 17, 2005:
  - BRLTTY 3.7 released:
    Change the dot-to-bit mapping to comply with ISO/TR 11548-1.
    New cursor routing algorithm (works with editors with wrapped lines).
@@ -22,7 +23,6 @@ Note: this file is in reversed chronological order (bottom to top).
    Operate serial devices in true nonblocking mode.
    Give better names to serialTestLines()'s arguments.
    Text table renames: fr -> fr_CA, fr-iso01 -> fr_FR
-   en-g2-us contraction table fixes: [had]rian, hid[ea]way, r[er]egister, un[con]genial.
    Force OSS PCM output to be blocking.
       There appears to be a bug in ALSA OSS simulation.
       Output is nonblocking if snd_seq_oss is loaded with nonblock_open=1.
@@ -65,6 +65,9 @@ Note: this file is in reversed chronological order (bottom to top).
       Reduce the USB retry count from 5 to 3.
       Remove the "no response from display" warning.
       Add automatic cursor routing to horizontal combined mode bindings.
+      read_config:
+         Include prologue.h.
+         Link with $(LDLIBS).
    TTY braille driver changes:
       Position the cursor correctly.
       Build even if no curses package is available.
@@ -157,6 +160,7 @@ Note: this file is in reversed chronological order (bottom to top).
       Allow users to call brlapi_write(NULL).
       api.h should internally include what it depends on.
       Preprocess the autorepeat flags.
+      Let the clients see BRL_CMD_NOOP.
    apitest changes:
       Add the -d [--dots] option.
       Exit show dots mode when a braille display key (rather than a keyboard key) is pressed.
@@ -172,6 +176,10 @@ Note: this file is in reversed chronological order (bottom to top).
       Add support for writing tables.
       Add support for .a2b (Gnopernicus) braille tables.
       Interpret - as standard input.
+   en-us-g2 contraction table fixes:
+      [had]rian, hid[ea]way, r[er]egister, un[con]genial.
+      Don't remove space after "a" if before "and", "for", "of", "the", or "with".
+      Don't contract the word "in" after a dash.
    USB changes:
       Remove the assumption that a USB device maps to a file system object.
       A device should point to the proper descriptor for the current interface alternative.
@@ -208,7 +216,7 @@ Note: this file is in reversed chronological order (bottom to top).
       Change the nested inclusion protection convention from _NAME_H to BRLTTY_INCLUDED_NAME.
       <sys/types.h> needs to be included before almost any other header  on some BSD systems.
       gcc-3.3 (at least on cygwin) doesn't like apostrophes in #error directives.
-      gcc-4 does a lot more checking for matching signnedness.
+      gcc-4 does a lot more checking for matching signedness.
       gcc-4 doesn't allow a variable to be declared global and then static.
       Remove the casts from the results of malloc() calls.
       Clean up the passing of TranslationTable and DotsTable parameters.

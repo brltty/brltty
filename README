@@ -2,7 +2,7 @@ BRLTTY is a background process (daemon) providing access to the Linux/Unix
 console (when in text mode) for a blind person using a refreshable braille
 display.
 
-Version 3.6, October 2004
+Version 3.7, September 2005
 
 Copyright (C) 1995-2005 by The BRLTTY Team - All Rights Reserved.
 
@@ -166,6 +166,7 @@ The following braille displays are supported:
 -  Baum [Inka, Vario/RBT, SuperVario/Brailliant, PocketVario]
 -  BrailleLite [18/40/M20/M40]
 -  BrailleNote [18/32]
+-  BrlAPI
 -  CombiBraille [25/45/85]
 -  EcoBraille [20/40/80]
 -  EuroBraille [AzerBraille, Clio, Iris, NoteBraille, Scriba]

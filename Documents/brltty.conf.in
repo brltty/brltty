@@ -34,6 +34,7 @@
 # (can be overridden with the -b [--braille-driver=] option)
 #braille-driver	al	# Alva
 #braille-driver	at	# Albatross
+#braille-driver	ba	# BrlAPI
 #braille-driver	bd	# Braudi
 #braille-driver	bl	# BrailleLite
 #braille-driver	bm	# Baum
@@ -41,13 +42,15 @@
 #braille-driver	cb	# CombiBraille
 #braille-driver	ec	# EcoBraille
 #braille-driver	eu	# EuroBraille
+#braille-driver	fs	# FreedomScientific
 #braille-driver	ht	# HandyTech
+#braille-driver	lb	# Libbraille
 #braille-driver	lt	# LogText
 #braille-driver	mb	# MultiBraille
 #braille-driver	md	# MDV (protocol 5)
 #braille-driver	mn	# MiniBraille
 #braille-driver	pm	# Papenmeier
-#braille-driver	tb	# TechniBraille
+#braille-driver	tn	# TechniBraille
 #braille-driver	ts	# TSI
 #braille-driver	tt	# TTY
 #braille-driver	vd	# VideoBraille
