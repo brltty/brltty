@@ -294,8 +294,7 @@ contractText (void *contractionTable,
             (currentOpcode != CTO_EndNum && CTC(before, CTC_Digit)) ||
             (currentOpcode == CTO_Always && currentFindLength == 1 && CTC(before, CTC_Space) &&
              (src + 1 == srcmax || CTC(src[1], CTC_Space) ||
-              (CTC(src[1], CTC_Punctuation) &&
-              !(src + 2 < srcmax && src[1] == '.' && CTC(src[2], CTC_Letter)))))) {
+              (CTC(src[1], CTC_Punctuation) && (src[1] != '.'))))) {
           if (!putSequence(table->englishLetterSign)) break;
         }
       }
