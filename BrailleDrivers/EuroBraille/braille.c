@@ -363,14 +363,14 @@ static int WriteToBrlDisplay (BrailleDisplay *brl, int len, const unsigned char 
    write(logfd, "\n", 1);
    close(logfd);
 #endif
-   return (serialWriteData(serialDevice, buf, p - buf));
+   return (serialWriteData(serialDevice, buf, p - buf) == p - buf);
 }
 
 static ssize_t brl_writePacket(BrailleDisplay *brl, const unsigned char *p, size_t sz)
 {
-  if (!WriteToBrlDisplay(brl, sz, p))
+  if (!p)
     return 0;
-  return sz;
+  return (WriteToBrlDisplay(brl, sz, p));
 }
 
 static int brl_reset(BrailleDisplay *brl)
@@ -900,33 +900,48 @@ static int	key_handle(BrailleDisplay *brl, unsigned char *buf)
 
 static ssize_t brl_readPacket(BrailleDisplay *brl, unsigned char *bp, size_t size)
 {
-  int           i = 0; /* cpt to build the received packet */
-  char          start = 0;  /* a flag */
-  size_t        offset = 0;
-  unsigned char         par = 0;
-  int           j = 0;
-  int           k = 0; /* cpt to build the returned buffer (bp) */
-  unsigned char c;
-  unsigned char buf[512];
-  
-  while (serialReadChunk(serialDevice, &c, &offset, 1, 1000, 0))
+  static int		i = 0; /* cpt to build the received packet */
+  size_t		offset = 0; /* offset to use serialReadChunk */
+  static char		apacket = 0;  /* =1 when packet starts */
+  static unsigned char	par = 0; /* parity */
+  int			j = 0; /* cpt to parse the read buffer */
+  int			k = 0; /* cpt to build the returned buffer (bp) */
+  unsigned char		c; /* the read char */
+  static unsigned char	buf[512];  /* buffer to store read chars */
+  static unsigned char	end = 0; /* = 1 when end of packet */
+  static unsigned char prefix = 0; /* =1 when escape code detected */
+
+  if ((bp==NULL) || (size<2) || (size>512))
+    return 0;
+  while (serialReadChunk(serialDevice, &c, &offset, 1, 0, 0))
     {
-      if (c == SOH)
-        start = 1;
-      if (c == EOT && buf[i - 1] != DLE)
-        {
-          buf[i++] = EOT;
-          break;
-        }
-      if (start) {
-        buf[i++] = c;
-      }
+      if (!apacket && c == SOH)
+	{
+	  end = 0;
+	  apacket = 1;
+	  i = 0;
+	  buf[i++] = SOH;
+	  par = 0;
+	}
+      else if (apacket)
+	{
+	  if (c == EOT && !prefix)
+	    {
+	      apacket = 0;
+	      buf[i++] = EOT;
+	      end = 1;
+	      break;
+	    }
+	  if (c == DLE && !prefix)
+	    prefix = 1;
+	  else
+	    prefix = 0;
+	  buf[i++] = c;
+	}
       offset = 0;
     }
-  if (i == 0) /* no character, timeout */
-    {
-      return 0;
-    }
+  if (!end) /* either nothing read or not end of packet */
+    return 0;
   for (j = 1, k = 0; j < i - 2 && k < size ; j++) {
     if (buf[j] != DLE || (buf[j - 1] == DLE))
       {
@@ -935,14 +950,17 @@ static ssize_t brl_readPacket(BrailleDisplay *brl, unsigned char *bp, size_t siz
 	k++;
       }
   }
+  end = 0;
   if (par == buf[i - 2])
     {
       sendbyte(ACK);
+      serialDiscardInput(serialDevice);
       return k - 1;
     }
   /* if bad parity */
+  serialDiscardInput(serialDevice);
   sendbyte(NACK);
-  sendbyte(1); /* error code of a parity error */
+  sendbyte(PRT_E_PAR); /* error code of a parity error */
   return 0;
 }
 
