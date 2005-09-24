@@ -716,12 +716,114 @@ findBytes (const unsigned char **address, size_t *length, const unsigned char *b
   return 0;
 }
 
-static int
-getRightShift (void) {
 #ifdef ENABLE_CONTRACTED_BRAILLE
-  if (contracted) return contractedLength;
+static int
+isContracting (void) {
+  return prefs.textStyle && contractionTable;
+}
+
+static int
+getCursorOffset (int x, int y) {
+  if ((scr.posy == y) && (scr.posx >= x)) return scr.posx - x;
+  return -1;
+}
+
+static int
+getContractedLength (int x, int y) {
+  int inputLength = scr.cols - x;
+  int outputLength = brl.x * brl.y;
+  unsigned char inputBuffer[inputLength];
+  unsigned char outputBuffer[outputLength];
+  int outputOffsets[inputLength];
+  readScreen(x, y, inputLength, 1, inputBuffer, SCR_TEXT);
+  if (!contractText(contractionTable,
+                    inputBuffer, &inputLength,
+                    outputBuffer, &outputLength,
+                    outputOffsets, getCursorOffset(x, y))) return 0;
+  return inputLength;
+}
 #endif /* ENABLE_CONTRACTED_BRAILLE */
-  return fwinshift;
+
+static int
+shiftWindowLeft (void) {
+  if (p->winx > 0) {
+    int shift;
+
+#ifdef ENABLE_CONTRACTED_BRAILLE
+    if (isContracting()) {
+      int minimum = 0;
+      int maximum = p->winx - 1;
+      while (minimum <= maximum) {
+        int current = (minimum + maximum) / 2;
+        int length = getContractedLength(current, p->winy);
+        if ((current + length) < p->winx) {
+          minimum = current + 1;
+        } else {
+          maximum = current - 1;
+        }
+      }
+      shift = p->winx - minimum;
+    } else
+#endif /* ENABLE_CONTRACTED_BRAILLE */
+    {
+      shift = MIN(fwinshift, p->winx);
+    }
+
+    p->winx -= shift;
+    return 1;
+  }
+
+  return 0;
+}
+
+static int
+shiftWindowRight (void) {
+  int shift;
+
+#ifdef ENABLE_CONTRACTED_BRAILLE
+  if (isContracting()) {
+    shift = getContractedLength(p->winx, p->winy);
+  } else
+#endif /* ENABLE_CONTRACTED_BRAILLE */
+  {
+    shift = fwinshift;
+  }
+
+  if (p->winx >= (scr.cols - shift)) return 0;
+  p->winx += shift;
+  return 1;
+}
+
+static void
+placeRightEdge (int column) {
+#if ENABLE_CONTRACTED_BRAILLE
+  if (isContracting()) {
+    p->winx = 0;
+    while (1) {
+      int length = getContractedLength(p->winx, p->winy);
+      int end = p->winx + length;
+      if (end > column) break;
+      p->winx = end;
+    }
+  } else
+#endif /* ENABLE_CONTRACTED_BRAILLE */
+  {
+    p->winx = column / brl.x * brl.x;
+  }
+}
+
+static void
+placeWindowRight (void) {
+  placeRightEdge(scr.cols-1);
+}
+
+static int
+getWindowLength (void) {
+#if ENABLE_CONTRACTED_BRAILLE
+  if (isContracting()) return getContractedLength(p->winx, p->winy);
+#endif /* ENABLE_CONTRACTED_BRAILLE */
+
+  return brl.x;
 }
 
 static int
@@ -1244,11 +1346,9 @@ main (int argc, char *argv[]) {
           case BRL_CMD_FWINLT:
             if (!(prefs.skipBlankWindows && (prefs.blankWindowsSkipMode == sbwAll))) {
               int oldX = p->winx;
-              if (p->winx > 0) {
-                p->winx = MAX(p->winx-fwinshift, 0);
+              if (shiftWindowLeft()) {
                 if (prefs.skipBlankWindows) {
-                  if (prefs.blankWindowsSkipMode == sbwEndOfLine)
-                    goto skipEndOfLine;
+                  if (prefs.blankWindowsSkipMode == sbwEndOfLine) goto skipEndOfLine;
                   if (!prefs.showCursor ||
                       (scr.posy != p->winy) ||
                       (scr.posx >= (p->winx + brl.x))) {
@@ -1259,8 +1359,7 @@ main (int argc, char *argv[]) {
                     for (charIndex=0; charIndex<charCount; ++charIndex)
                       if ((buffer[charIndex] != ' ') && (buffer[charIndex] != 0))
                         break;
-                    if (charIndex == charCount)
-                      goto wrapUp;
+                    if (charIndex == charCount) goto wrapUp;
                   }
                 }
                 break;
@@ -1272,8 +1371,8 @@ main (int argc, char *argv[]) {
                 break;
               }
               playTune(&tune_wrap_up);
-              p->winx = MAX((scr.cols-offr)/fwinshift*fwinshift, 0);
               upLine(SCR_TEXT);
+              placeWindowRight();
             skipEndOfLine:
               if (prefs.skipBlankWindows && (prefs.blankWindowsSkipMode == sbwEndOfLine)) {
                 int charIndex;
@@ -1285,8 +1384,7 @@ main (int argc, char *argv[]) {
                 if (prefs.showCursor && (scr.posy == p->winy))
                   charIndex = MAX(charIndex, scr.posx);
                 charIndex = MAX(charIndex, 0);
-                if (charIndex < p->winx)
-                  p->winx = charIndex / fwinshift * fwinshift;
+                if (charIndex < p->winx) placeRightEdge(charIndex);
               }
               break;
             }
@@ -1298,21 +1396,19 @@ main (int argc, char *argv[]) {
             int charIndex;
             unsigned char buffer[scr.cols];
             while (1) {
-              if (p->winx > 0) {
-                p->winx = MAX(p->winx-fwinshift, 0);
-              } else {
+              if (!shiftWindowLeft()) {
                 if (p->winy == 0) {
                   playTune(&tune_bounce);
                   p->winx = oldX;
                   p->winy = oldY;
                   break;
                 }
-                if (tuneLimit-- > 0)
-                  playTune(&tune_wrap_up);
-                p->winx = MAX((scr.cols-offr)/fwinshift*fwinshift, 0);
+                if (tuneLimit-- > 0) playTune(&tune_wrap_up);
                 upLine(SCR_TEXT);
+                placeWindowRight();
               }
-              charCount = MIN(brl.x, scr.cols-p->winx);
+              charCount = getWindowLength();
+              charCount = MIN(charCount, scr.cols-p->winx);
               readScreen(p->winx, p->winy, charCount, 1, buffer, SCR_TEXT);
               for (charIndex=(charCount-1); charIndex>=0; charIndex--)
                 if ((buffer[charIndex] != ' ') && (buffer[charIndex] != 0))
@@ -1333,9 +1429,7 @@ main (int argc, char *argv[]) {
           case BRL_CMD_FWINRT:
             if (!(prefs.skipBlankWindows && (prefs.blankWindowsSkipMode == sbwAll))) {
               int oldX = p->winx;
-              int rwinshift = getRightShift();
-              if (p->winx < (scr.cols - rwinshift)) {
-                p->winx += rwinshift;
+              if (shiftWindowRight()) {
                 if (prefs.skipBlankWindows) {
                   if (!prefs.showCursor ||
                       (scr.posy != p->winy) ||
@@ -1347,8 +1441,7 @@ main (int argc, char *argv[]) {
                     for (charIndex=0; charIndex<charCount; ++charIndex)
                       if ((buffer[charIndex] != ' ') && (buffer[charIndex] != 0))
                         break;
-                    if (charIndex == charCount)
-                      goto wrapDown;
+                    if (charIndex == charCount) goto wrapDown;
                   }
                 }
                 break;
@@ -1360,8 +1453,8 @@ main (int argc, char *argv[]) {
                 break;
               }
               playTune(&tune_wrap_down);
-              p->winx = 0;
               downLine(SCR_TEXT);
+              p->winx = 0;
               break;
             }
           case BRL_CMD_FWINRTSKIP: {
@@ -1372,22 +1465,19 @@ main (int argc, char *argv[]) {
             int charIndex;
             unsigned char buffer[scr.cols];
             while (1) {
-              int rwinshift = getRightShift();
-              if (p->winx < (scr.cols - rwinshift)) {
-                p->winx += rwinshift;
-              } else {
+              if (!shiftWindowRight()) {
                 if (p->winy >= (scr.rows - brl.y)) {
                   playTune(&tune_bounce);
                   p->winx = oldX;
                   p->winy = oldY;
                   break;
                 }
-                if (tuneLimit-- > 0)
-                  playTune(&tune_wrap_down);
-                p->winx = 0;
+                if (tuneLimit-- > 0) playTune(&tune_wrap_down);
                 downLine(SCR_TEXT);
+                p->winx = 0;
               }
-              charCount = MIN(brl.x, scr.cols-p->winx);
+              charCount = getWindowLength();
+              charCount = MIN(charCount, scr.cols-p->winx);
               readScreen(p->winx, p->winy, charCount, 1, buffer, SCR_TEXT);
               for (charIndex=0; charIndex<charCount; charIndex++)
                 if ((buffer[charIndex] != ' ') && (buffer[charIndex] != 0))
@@ -2079,7 +2169,7 @@ main (int argc, char *argv[]) {
       contracted = 0;
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
-      if (prefs.textStyle && contractionTable) {
+      if (isContracting()) {
         int windowLength = brl.x * brl.y;
         while (1) {
           int cursorOffset = brl.cursor;
