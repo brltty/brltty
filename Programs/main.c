@@ -1417,11 +1417,7 @@ main (int argc, char *argv[]) {
                   (scr.posy == p->winy) &&
                   (scr.posx < (p->winx + charCount)))
                 charIndex = MAX(charIndex, scr.posx-p->winx);
-              if (charIndex >= 0) {
-                if (prefs.slidingWindow)
-                  p->winx = MAX(p->winx+charIndex-(int)brl.x+1, 0);
-                break;
-              }
+              if (charIndex >= 0) break;
             }
             break;
           }
@@ -1486,11 +1482,7 @@ main (int argc, char *argv[]) {
                   (scr.posy == p->winy) &&
                   (scr.posx >= p->winx))
                 charIndex = MIN(charIndex, scr.posx-p->winx);
-              if (charIndex < charCount) {
-                if (prefs.slidingWindow)
-                  p->winx = MIN(p->winx+charIndex, scr.cols-offr);
-                break;
-              }
+              if (charIndex < charCount) break;
             }
             break;
           }
