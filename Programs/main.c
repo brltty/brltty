@@ -744,56 +744,6 @@ getContractedLength (int x, int y) {
 }
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
-static int
-shiftWindowLeft (void) {
-  if (p->winx > 0) {
-    int shift;
-
-#ifdef ENABLE_CONTRACTED_BRAILLE
-    if (isContracting()) {
-      int minimum = 0;
-      int maximum = p->winx - 1;
-      while (minimum <= maximum) {
-        int current = (minimum + maximum) / 2;
-        int length = getContractedLength(current, p->winy);
-        if ((current + length) < p->winx) {
-          minimum = current + 1;
-        } else {
-          maximum = current - 1;
-        }
-      }
-      shift = p->winx - minimum;
-    } else
-#endif /* ENABLE_CONTRACTED_BRAILLE */
-    {
-      shift = MIN(fwinshift, p->winx);
-    }
-
-    p->winx -= shift;
-    return 1;
-  }
-
-  return 0;
-}
-
-static int
-shiftWindowRight (void) {
-  int shift;
-
-#ifdef ENABLE_CONTRACTED_BRAILLE
-  if (isContracting()) {
-    shift = getContractedLength(p->winx, p->winy);
-  } else
-#endif /* ENABLE_CONTRACTED_BRAILLE */
-  {
-    shift = fwinshift;
-  }
-
-  if (p->winx >= (scr.cols - shift)) return 0;
-  p->winx += shift;
-  return 1;
-}
-
 static void
 placeRightEdge (int column) {
 #if ENABLE_CONTRACTED_BRAILLE
@@ -815,6 +765,40 @@ placeRightEdge (int column) {
 static void
 placeWindowRight (void) {
   placeRightEdge(scr.cols-1);
+}
+
+static int
+shiftWindowLeft (void) {
+  if (p->winx == 0) return 0;
+
+#ifdef ENABLE_CONTRACTED_BRAILLE
+  if (isContracting()) {
+    placeRightEdge(p->winx-1);
+  } else
+#endif /* ENABLE_CONTRACTED_BRAILLE */
+  {
+    p->winx -= MIN(fwinshift, p->winx);
+  }
+
+  return 1;
+}
+
+static int
+shiftWindowRight (void) {
+  int shift;
+
+#ifdef ENABLE_CONTRACTED_BRAILLE
+  if (isContracting()) {
+    shift = getContractedLength(p->winx, p->winy);
+  } else
+#endif /* ENABLE_CONTRACTED_BRAILLE */
+  {
+    shift = fwinshift;
+  }
+
+  if (p->winx >= (scr.cols - shift)) return 0;
+  p->winx += shift;
+  return 1;
 }
 
 static int
