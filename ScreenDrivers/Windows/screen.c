@@ -109,10 +109,25 @@ close_WindowsScreen (void) {
 
 static const char noterm [] = "no terminal to read";
 
+static int
+selectvt_WindowsScreen (int vt) {
+  return 0;
+}
+
+static int
+switchvt_WindowsScreen (int vt) {
+  return 0;
+}
+
+static int
+currentvt_WindowsScreen (void) {
+  return (int)GetForegroundWindow();
+}
+
 static void
 describe_WindowsScreen (ScreenDescription *description) {
   CONSOLE_SCREEN_BUFFER_INFO info;
-  description->no = (int) GetForegroundWindow();
+  description->no = currentvt_WindowsScreen();
   if (!tryToAttach()) goto error;
   if (consoleOutput == INVALID_HANDLE_VALUE) goto error;
   if (!(GetConsoleScreenBufferInfo(consoleOutput, &info))) {
@@ -139,9 +154,6 @@ read_WindowsScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
   /* TODO: GetConsoleCP */
   int x,y;
   int text = mode == SCR_TEXT;
-#ifdef HAVE_FUNC_READCONSOLEOUTPUTCHARACTERW
-  wchar_t c;
-#endif /* HAVE_FUNC_READCONSOLEOUTPUTCHARACTERW */
   COORD coord;
   DWORD read;
   void *buf;
@@ -176,42 +188,53 @@ read_WindowsScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
   }
 
 #ifndef HAVE_FUNC_READCONSOLEOUTPUTCHARACTERW
-  if (text)
+  if (text) {
     buf = buffer;
-  else
+  } else
 #endif /* HAVE_FUNC_READCONSOLEOUTPUTCHARACTERW */
-    if (!(buf = malloc(box.width*size)))
-      goto error;
-
-  for (y = 0; y < box.height; y++, coord.Y++) {
-    if (!fun(consoleOutput, buf, box.width, coord, &read) || read != box.width) {
-      LogWindowsError("ReadConsoleOutput");
-      free(buf);
+    if (!(buf = malloc(box.width*size))) {
       goto error;
     }
-    if (text)
+
+  for (y = 0; y < box.height; y++, coord.Y++) {
+    if (!fun(consoleOutput, buf, box.width, coord, &read)) {
+      LogWindowsError("ReadConsoleOutput");
+      break;
+    }
+    if (read != box.width) {
+      LogWindowsError("ReadConsoleOutput");
+      break;
+    }
+    if (text) {
 #ifdef HAVE_FUNC_READCONSOLEOUTPUTCHARACTERW
       for (x = 0; x < box.width; x++) {
-	c = ((wchar_t *)buf)[x];
-	if (c<0x100)
-	  buffer[y*box.width+x] = c;
-	else
-	  buffer[y*box.width+x] = '?';
+        wchar_t c;
+	if ((c = ((wchar_t *)buf)[x]) >= 0X100) c = '?';
+	buffer[y*box.width+x] = c;
       }
-#else
+#else /* HAVE_FUNC_READCONSOLEOUTPUTCHARACTERW */
       buf += box.width;
 #endif /* HAVE_FUNC_READCONSOLEOUTPUTCHARACTERW */
-    else
-      for (x = 0; x < box.width; x++)
+    } else {
+      for (x = 0; x < box.width; x++) {
 	buffer[y*box.width+x] = ((WORD *)buf)[x];
+      }
+    }
   }
 #ifndef HAVE_FUNC_READCONSOLEOUTPUTCHARACTERW
   if (!text)
 #endif /* HAVE_FUNC_READCONSOLEOUTPUTCHARACTERW */
     free(buf);
-  return 1;
+  if (y == box.height) return 1;
 error:
-  strncpy((char *)buffer, noterm+box.left, box.width);
+  if (text) {
+    int offset = strlen(noterm);
+    if (box.left < offset) offset = box.left;
+    memset(buffer, ' ', box.width*box.height);
+    strncpy((char *)buffer, noterm+offset, box.width);
+  } else {
+    memset(buffer, 0X07, box.width*box.height);
+  }
   return 0;
 }
 
@@ -308,23 +331,6 @@ insert_WindowsScreen (ScreenKey key) {
 }
 
 static int
-selectvt_WindowsScreen (int vt) {
-  return 0;
-}
-
-static int
-switchvt_WindowsScreen (int vt) {
-  return 0;
-}
-
-static int
-currentvt_WindowsScreen (void) {
-  ScreenDescription description;
-  describe_WindowsScreen(&description);
-  return description.no;
-}
-
-static int
 execute_WindowsScreen (int command) {
   int blk = command & BRL_MSK_BLK;
   int arg
@@ -343,12 +349,12 @@ execute_WindowsScreen (int command) {
 static void
 scr_initialize (MainScreen *main) {
   initializeRealScreen(main);
-  main->base.describe = describe_WindowsScreen;
-  main->base.read = read_WindowsScreen;
-  main->base.insert = insert_WindowsScreen;
   main->base.selectvt = selectvt_WindowsScreen;
   main->base.switchvt = switchvt_WindowsScreen;
   main->base.currentvt = currentvt_WindowsScreen;
+  main->base.describe = describe_WindowsScreen;
+  main->base.read = read_WindowsScreen;
+  main->base.insert = insert_WindowsScreen;
   main->base.execute = execute_WindowsScreen;
   main->prepare = prepare_WindowsScreen;
   main->open = open_WindowsScreen;
