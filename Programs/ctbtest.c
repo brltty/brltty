@@ -40,7 +40,7 @@ static char *opt_outputWidth;
 
 BEGIN_OPTION_TABLE
   {"contraction-table", "file", 'c', 0, 0,
-   &opt_contractionTable, "en-us-g2.ctb",
+   &opt_contractionTable, "en-us-g2",
    "Path to contraction table file."},
 
   {"text-table", "file", 't', 0, 0,
@@ -151,10 +151,12 @@ main (int argc, char *argv[]) {
   {
     char *contractionTablePath;
 
+    fixContractionTablePath(&opt_contractionTable);
     if ((contractionTablePath = makePath(opt_dataDirectory, opt_contractionTable))) {
       if ((contractionTable = compileContractionTable(contractionTablePath))) {
         char *textTablePath;
 
+        fixTextTablePath(&opt_textTable);
         if ((textTablePath = makePath(opt_dataDirectory, opt_textTable))) {
           if (loadTranslationTable(textTablePath, NULL, textTable, 0)) {
             reverseTranslationTable(textTable, untextTable);

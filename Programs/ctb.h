@@ -34,6 +34,8 @@ extern int contractText (
   int cursorOffset /* Position of coursor in source */
 );
 
+extern void fixContractionTablePath (char **path);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

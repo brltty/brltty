@@ -328,6 +328,40 @@ makePath (const char *directory, const char *file) {
   return path;
 }
 
+void
+fixPath (char **path, const char *extension, const char *prefix) {
+  const unsigned int prefixLength = strlen(prefix);
+  const unsigned int pathLength = strlen(*path);
+  const unsigned int extensionLength = strlen(extension);
+  char buffer[prefixLength + pathLength + extensionLength + 1];
+  unsigned int length = 0;
+
+  if (prefixLength) {
+    if (!strchr(*path, '/')) {
+      if (strncmp(*path, prefix, prefixLength) != 0) {
+        memcpy(&buffer[length], prefix, prefixLength);
+        length += prefixLength;
+      }
+    }
+  }
+
+  memcpy(&buffer[length], *path, pathLength);
+  length += pathLength;
+
+  if (extensionLength) {
+    if ((pathLength < extensionLength) ||
+        (memcmp(&buffer[length-extensionLength], extension, extensionLength) != 0)) {
+      memcpy(&buffer[length], extension, extensionLength);
+      length += extensionLength;
+    }
+  }
+
+  if (length > pathLength) {
+    buffer[length] = 0;
+    *path = strdupWrapper(buffer);
+  }
+}
+
 int
 makeDirectory (const char *path) {
   struct stat status;

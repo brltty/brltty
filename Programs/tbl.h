@@ -36,6 +36,9 @@ extern int loadTranslationTable (
 );
 extern void reverseTranslationTable (TranslationTable from, TranslationTable to);
 
+extern void fixTextTablePath (char **path);
+extern void fixAttributesTablePath (char **path);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

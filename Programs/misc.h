@@ -153,6 +153,7 @@ extern char *strdupWrapper (const char *string);
 
 extern char *getWorkingDirectory (void);
 extern char *makePath (const char *directory, const char *file);
+extern void fixPath (char **path, const char *extension, const char *prefix);
 extern int makeDirectory (const char *path);
 
 extern char *getDevicePath (const char *path);

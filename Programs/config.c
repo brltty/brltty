@@ -412,45 +412,6 @@ replaceAttributesTable (const char *file) {
   return replaceTranslationTable(attributesTable, file, "attributes");
 }
 
-static void
-fixFilePath (char **path, const char *extension, const char *prefix) {
-  const unsigned int prefixLength = strlen(prefix);
-  const unsigned int pathLength = strlen(*path);
-  const unsigned int extensionLength = strlen(extension);
-  char buffer[prefixLength + pathLength + extensionLength + 1];
-  unsigned int length = 0;
-
-  if (prefixLength) {
-    if (!strchr(*path, '/')) {
-      if (strncmp(*path, prefix, prefixLength) != 0) {
-        memcpy(&buffer[length], prefix, prefixLength);
-        length += prefixLength;
-      }
-    }
-  }
-
-  memcpy(&buffer[length], *path, pathLength);
-  length += pathLength;
-
-  if (extensionLength) {
-    if ((pathLength < extensionLength) ||
-        (memcmp(&buffer[length-extensionLength], extension, extensionLength) != 0)) {
-      memcpy(&buffer[length], extension, extensionLength);
-      length += extensionLength;
-    }
-  }
-
-  if (length > pathLength) {
-    buffer[length] = 0;
-    *path = strdupWrapper(buffer);
-  }
-}
-
-static void
-fixTranslationTablePath (char **path, const char *prefix) {
-  fixFilePath(path, TRANSLATION_TABLE_EXTENSION, prefix);
-}
-
 int
 readCommand (BRL_DriverCommandContext context) {
   int command = readBrailleCommand(&brl, context);
@@ -1955,7 +1916,7 @@ startup (int argc, char *argv[]) {
   LogPrint(LOG_INFO, "Tables Directory: %s", opt_tablesDirectory);
 
   if (opt_textTable) {
-    fixTranslationTablePath(&opt_textTable, TEXT_TABLE_PREFIX);
+    fixTextTablePath(&opt_textTable);
     if (!replaceTextTable(opt_textTable)) opt_textTable = NULL;
   }
   if (!opt_textTable) {
@@ -1972,7 +1933,7 @@ startup (int argc, char *argv[]) {
 #endif /* ENABLE_PREFERENCES_MENU */
 
   if (opt_attributesTable) {
-    fixTranslationTablePath(&opt_attributesTable, ATTRIBUTES_TABLE_PREFIX);
+    fixAttributesTablePath(&opt_attributesTable);
     replaceAttributesTable(opt_attributesTable);
   } else {
     opt_attributesTable = ATTRIBUTES_TABLE;
@@ -1989,7 +1950,7 @@ startup (int argc, char *argv[]) {
 #ifdef ENABLE_CONTRACTED_BRAILLE
   LogPrint(LOG_INFO, "Contractions Directory: %s", opt_contractionsDirectory);
   if (opt_contractionTable) {
-    fixFilePath(&opt_contractionTable, CONTRACTION_TABLE_EXTENSION, CONTRACTION_TABLE_PREFIX);
+    fixContractionTablePath(&opt_contractionTable);
     loadContractionTable(opt_contractionTable);
   }
   atexit(exitContractionTable);

@@ -934,3 +934,8 @@ destroyContractionTable (void *contractionTable) {
   free(table);
   return 1;
 }
+
+void
+fixContractionTablePath (char **path) {
+  fixPath(path, CONTRACTION_TABLE_EXTENSION, CONTRACTION_TABLE_PREFIX);
+}
