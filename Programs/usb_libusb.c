@@ -241,7 +241,7 @@ usbWriteEndpoint (
   UsbDeviceExtension *devx = device->extension;
   const UsbEndpoint *endpoint;
 
-  if ((endpoint = usbGetInputEndpoint(device, endpointNumber))) {
+  if ((endpoint = usbGetOutputEndpoint(device, endpointNumber))) {
     const UsbEndpointDescriptor *descriptor = endpoint->descriptor;
     UsbEndpointTransfer transfer = USB_ENDPOINT_TRANSFER(descriptor);
     int result = -1;
