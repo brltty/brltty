@@ -455,7 +455,10 @@ readLine (FILE *file, char **buffer, size_t *size) {
       line = *buffer; /* Point to the beginning of the line. */
     }
 
-    line[--length] = 0; /* Remove trailing new-line. */
+    if (--length > 0)
+      if (line[length-1] == '\r')
+        --length;
+    line[length] = 0; /* Remove trailing new-line. */
     return 1;
   } else if (ferror(file)) {
     LogError("read");
