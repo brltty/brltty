@@ -168,7 +168,8 @@ main (int argc, char *argv[]) {
                   FILE *file = fopen(path, "r");
                   if (file) {
                     status = contractFile(file);
-                  } else{
+                    fclose(file);
+                  } else {
                     LogPrint(LOG_ERR, "cannot open input file: %s: %s",
                              path, strerror(errno));
                     status = 6;
