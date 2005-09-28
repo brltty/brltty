@@ -152,89 +152,114 @@ error:
 static int
 read_WindowsScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
   /* TODO: GetConsoleCP */
-  int x,y;
   int text = mode == SCR_TEXT;
+  int x, y;
   COORD coord;
-  DWORD read;
-  void *buf;
+
   BOOL (*fun) (HANDLE, void*, DWORD, COORD, LPDWORD);
+  const char *name;
   size_t size;
-  CONSOLE_SCREEN_BUFFER_INFO info;
+  void *buf;
 
   if (!tryToAttach()) goto error;
   if (consoleOutput == INVALID_HANDLE_VALUE) goto error;
 
-  if (!(GetConsoleScreenBufferInfo(consoleOutput, &info))) {
-    LogWindowsError("GetConsoleScreenBufferInfo");
-    CloseHandle(consoleOutput);
-    consoleOutput = INVALID_HANDLE_VALUE;
-    goto error;
+  {
+    CONSOLE_SCREEN_BUFFER_INFO info;
+
+    if (!(GetConsoleScreenBufferInfo(consoleOutput, &info))) {
+      LogWindowsError("GetConsoleScreenBufferInfo");
+      CloseHandle(consoleOutput);
+      consoleOutput = INVALID_HANDLE_VALUE;
+      goto error;
+    }
+
+    coord.X = box.left + info.srWindow.Left;
+    coord.Y = box.top + info.srWindow.Top;
+    if (!validateScreenBox(&box,
+                           info.srWindow.Right - info.srWindow.Left + 1,
+                           info.srWindow.Bottom - info.srWindow.Top + 1))
+      goto error;
   }
 
-  coord.X = box.left + info.srWindow.Left;
-  coord.Y = box.top + info.srWindow.Top;
-
+#define USE(f, t) (fun = (typeof(fun))f, name = #f, size = sizeof(t))
   if (text) {
 #ifdef HAVE_FUNC_READCONSOLEOUTPUTCHARACTERW
-    fun = (typeof(fun)) ReadConsoleOutputCharacterW;
-    size = sizeof(wchar_t);
+    USE(ReadConsoleOutputCharacterW, wchar_t);
 #else /* HAVE_FUNC_READCONSOLEOUTPUTCHARACTERW */
-    fun = (typeof(fun)) ReadConsoleOutputCharacterA;
-    size = sizeof(char);
+    USE(ReadConsoleOutputCharacterA, char);
 #endif /* HAVE_FUNC_READCONSOLEOUTPUTCHARACTERW */
   } else {
-    fun = (typeof(fun)) ReadConsoleOutputAttribute;
-    size = sizeof(WORD);
+    USE(ReadConsoleOutputAttribute, WORD);
   }
+#undef USE
 
 #ifndef HAVE_FUNC_READCONSOLEOUTPUTCHARACTERW
   if (text) {
     buf = buffer;
   } else
 #endif /* HAVE_FUNC_READCONSOLEOUTPUTCHARACTERW */
+  {
     if (!(buf = malloc(box.width*size))) {
+      LogError("malloc");
       goto error;
     }
+  }
 
-  for (y = 0; y < box.height; y++, coord.Y++) {
+  for (y=0; y<box.height; y++, coord.Y++) {
+    DWORD read;
+
     if (!fun(consoleOutput, buf, box.width, coord, &read)) {
-      LogWindowsError("ReadConsoleOutput");
+      LogWindowsError(name);
       break;
     }
+
     if (read != box.width) {
-      LogWindowsError("ReadConsoleOutput");
+      LogPrint(LOG_ERR, "wrong number of items read: %s: %ld != %d",
+               name, read, box.width);
       break;
     }
+
     if (text) {
 #ifdef HAVE_FUNC_READCONSOLEOUTPUTCHARACTERW
-      for (x = 0; x < box.width; x++) {
-        wchar_t c;
-	if ((c = ((wchar_t *)buf)[x]) >= 0X100) c = '?';
+      for (x=0; x<box.width; x++) {
+        wchar_t c = ((wchar_t *)buf)[x];
+	if (c >= 0X100) c = '?';
 	buffer[y*box.width+x] = c;
       }
 #else /* HAVE_FUNC_READCONSOLEOUTPUTCHARACTERW */
       buf += box.width;
 #endif /* HAVE_FUNC_READCONSOLEOUTPUTCHARACTERW */
     } else {
-      for (x = 0; x < box.width; x++) {
+      for (x=0; x<box.width; x++) {
 	buffer[y*box.width+x] = ((WORD *)buf)[x];
       }
     }
   }
+
 #ifndef HAVE_FUNC_READCONSOLEOUTPUTCHARACTERW
   if (!text)
 #endif /* HAVE_FUNC_READCONSOLEOUTPUTCHARACTERW */
+  {
     free(buf);
-  if (y == box.height) return 1;
-error:
-  if (text) {
-    int offset = strlen(noterm);
-    if (box.left < offset) offset = box.left;
-    memset(buffer, ' ', box.width*box.height);
-    strncpy((char *)buffer, noterm+offset, box.width);
-  } else {
-    memset(buffer, 0X07, box.width*box.height);
   }
+
+  if (y == box.height) return 1;
+
+error:
+  {
+    int count = box.width * box.height;
+    if (text) {
+      int length = strlen(noterm) - box.left;
+      if (length < 0) length = 0;
+      if (length > count) length = count;
+      memset(buffer, ' ', count);
+      if (length > 0) memcpy(buffer, noterm+box.left, length);
+    } else {
+      memset(buffer, 0X07, count);
+    }
+  }
+
   return 0;
 }
 
