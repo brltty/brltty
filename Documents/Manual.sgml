@@ -1623,20 +1623,35 @@ This utility tests a translation table
 <sect2>ctbtest<label id="utility-ctbtest"><p>
 This utility tests a contraction table
 (see section <ref id="contraction" name="Contracted Braille">).
-The text read from standard input is rewritten to standard output as contracted braille.
-<tscreen>ctbtest -<em/option/ ... <em/contraction-table/</tscreen>
+The text read from the input files (or standard input)
+is rewritten to standard output as contracted braille.
+<tscreen>ctbtest -<em/option/ ... <em/input-file/ ...</tscreen>
 <descrip>
-  <tag><em/contraction-table/</tag>
+  <tag><em/input-file/</tag>
+    The list of files to be processed.
+    Any number of files may be specified.
+    They're processed from left to right.
+    The special file name <tt/-/ is interpreted to mean standard input.
+    If no files are specified then standard input is processed.
+  <tag><tt/-c/<em/file/ <tt/--contraction-table=/<em/file/</tag>
     The file system path to the contraction table.
     If it's relative then it's anchored at the directory configured via the
     <ref id="build-data-directory" name="--with-data-directory"> build option.
+    The <tt/.ctb/ extension is optional.
+    If this option isn't supplied then <tt/en-us-g2/ is assumed.
   <tag><tt/-t/<em/file/ <tt/--text-table=/<em/file/</tag>
     The file system path to the text translation table to use.
     If it's relative then it's anchored at the directory configured via the
     <ref id="build-data-directory" name="--with-data-directory"> build option.
+    The <tt/.tbl/ extension and the <tt/text./ prefix are both optional.
     If this option isn't supplied then the table defined via the
     <ref id="build-text-table" name="--with-text-table">
     build option is assumed.
+  <tag><tt/-w/<em/columns/ <tt/--output-width=/<em/columns/</tag>
+    The maximum length of an output line.
+    Each contracted input line is wrapped into as many output lines as necessary.
+    If this option isn't specified then there's no limit,
+    and there's a one-to-one correspondance between input and output lines.
   <tag><tt/-h/ <tt/--help/</tag>
     Display a summary of the command line options, and then exit.
 </descrip>
