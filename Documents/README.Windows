@@ -1,8 +1,31 @@
+Compilation
+===========
+
+In order to build BRLTTY from a supplied tarball, you need either Cygwin (see 
+http://www.cygwin.com/) or MinGW (see http://mingw.sourceforge.net/). You also
+need the following packages:
+*  gcc
+*  make
+*  w32api
+*  yacc or bison
+
+If you'd like to build BRLTTY from its source repository rather than from one
+of the supplied tarballs then you'll also need these additional packages:
+*  autoconf
+*  tcl
+
+In order to prepare the documentation (do make within the Documents
+subdirectory) then you'll need these packages:
+*  linuxdoc-tools
+*  doxygen
+
+------------------------------------------------------------------------------
+
 Windows 95, 98, and Me Limitation
 =================================
 
 On Windows versions 2000, XP, 2003, and later, BRLTTY automatically accesses
-the Windows terminal which you're currenlty using as you switch between them.
+the Windows terminal which you're currently using as you switch between them.
 This isn't possible on earlier versions. One way to achieve this
 functionality, however, is to run one BRLTTY (which directly accesses your
 braille display) on the root window and another one (which indirectly accesses
