@@ -21,6 +21,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <unistd.h>
 #include <string.h>
 #include <locale.h>
@@ -492,7 +493,7 @@ static struct model models[] = {
 
 static void setModel(Widget w, XtPointer closure, XtPointer data)
 {
-  int newModel = (int) closure;
+  intptr_t newModel = (intptr_t) closure;
   if (newModel == XtNumber(models))
     keyModel = NULL;
   else
@@ -526,14 +527,14 @@ static struct radioInt linesRadio [] = {
 
 static void setWidth(Widget w, XtPointer closure, XtPointer data)
 {
-  int newCols = (int) closure;
+  intptr_t newCols = (intptr_t) closure;
   cols = newCols;
   regenerate = 1;
 }
 
 static void setHeight(Widget w, XtPointer closure, XtPointer data)
 {
-  int newLines = (int) closure;
+  intptr_t newLines = (intptr_t) closure;
   lines = newLines;
   regenerate = 1;
 }
@@ -556,7 +557,7 @@ static actionfun_t actionfun[] = {
 #define SET_ACTION(cb, set) \
   (cb)[0].callback = (XtCallbackProc) actionfun[set]
 #define SET_VALUE(cb, value) \
-  (cb)[0].closure = (caddr_t) (value)
+  (cb)[0].closure = (caddr_t)(intptr_t) (value)
 #elif defined(USE_WINDOWS)
 #define SET_ACTION(cb, set) \
   (cb) = (set) << 8

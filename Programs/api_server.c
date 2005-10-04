@@ -23,6 +23,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <stddef.h>
+#include <stdint.h>
 #include <string.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -30,6 +31,7 @@
 #include <signal.h>
 #include <time.h>
 #include <wchar.h>
+#include <inttypes.h>
 #ifdef HAVE_ICONV_H
 #include <iconv.h>
 #endif /* HAVE_ICONV_H */
@@ -1574,7 +1576,7 @@ out:
 
 static void *establishSocket(void *arg)
 {
-  int num = (int) arg;
+  intptr_t num = (intptr_t) arg;
   struct socketInfo *cinfo = &socketInfo[num];
 #ifndef WINDOWS
   int res;
@@ -1599,9 +1601,9 @@ static void *establishSocket(void *arg)
   if ((
 #endif /* PF_LOCAL */
 	(cinfo->fd=initializeTcpSocket(cinfo))==-1))
-    LogPrint(LOG_WARNING,"Error while initializing socket %d",num);
+    LogPrint(LOG_WARNING,"Error while initializing socket %"PRIdPTR,num);
   else
-    LogPrint(LOG_DEBUG,"socket %d established (fd %d)",num,cinfo->fd);
+    LogPrint(LOG_DEBUG,"socket %"PRIdPTR" established (fd %d)",num,cinfo->fd);
   return NULL;
 }
 
@@ -1847,7 +1849,7 @@ static void *server(void *arg)
 #ifdef WINDOWS
     if (socketInfo[i].addrfamily != PF_LOCAL) {
 #endif /* WINDOWS */
-      if ((res = pthread_create(&socketThreads[i],&attr,establishSocket,(void *)i)) != 0) {
+      if ((res = pthread_create(&socketThreads[i],&attr,establishSocket,(void *)(intptr_t)i)) != 0) {
 	LogPrint(LOG_WARNING,"pthread_create: %s",strerror(res));
 	for (i--;i>=0;i--)
 	  pthread_cancel(socketThreads[i]);
