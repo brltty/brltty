@@ -94,7 +94,7 @@ readChunk (
     noInput:
       if ((timeout = *offset? subsequentTimeout: initialTimeout)) {
         if (awaitInput(fileDescriptor, timeout)) continue;
-        LogPrint(LOG_WARNING, "Input byte missing at offset %d.", *offset);
+        LogPrint(LOG_WARNING, "Input byte missing at offset %d.", (int)*offset);
       } else {
         errno = EAGAIN;
       }

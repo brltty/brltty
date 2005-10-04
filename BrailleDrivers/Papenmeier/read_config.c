@@ -291,10 +291,10 @@ void terminals(int help, int verbose)
                     const char *slash = memchr(description, '/', firstBlank-description);
                     if (slash) {
                       if (on) {
-                        fprintf(fh, "%.*s", slash-description, description);
+                        fprintf(fh, "%.*s", (int)(slash-description), description);
                       } else {
                         slash++;
-                        fprintf(fh, "%.*s", firstBlank-slash, slash);
+                        fprintf(fh, "%.*s", (int)(firstBlank-slash), slash);
                       }
                       fprintf(fh, "%s", firstBlank);
                       goto toggle_done;
@@ -310,9 +310,9 @@ void terminals(int help, int verbose)
                       if (lastWord) {
                         const char *slash = strchr(++lastWord, '/');
                         if (slash) {
-                          fprintf(fh, "set%.*s", lastWord-firstBlank, firstBlank);
+                          fprintf(fh, "set%.*s", (int)(lastWord-firstBlank), firstBlank);
                           if (on) {
-                            fprintf(fh, "%.*s", slash-lastWord, lastWord);
+                            fprintf(fh, "%.*s", (int)(slash-lastWord), lastWord);
                           } else {
                             fprintf(fh, "%s", slash+1);
                           }

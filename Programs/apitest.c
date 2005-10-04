@@ -116,7 +116,7 @@ void showDots(void)
     exit(1);
   }
   if (x*y<DOTS_TOTALLEN) {
-    fprintf(stderr,"can't show dots with a braille display with less than %d cells\n",DOTS_TOTALLEN);
+    fprintf(stderr,"can't show dots with a braille display with less than %d cells\n",(int)DOTS_TOTALLEN);
     exit(1);
   }
   {

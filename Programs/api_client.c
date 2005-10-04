@@ -1212,7 +1212,7 @@ int brlapi_strexception(char *buf, size_t n, int err, brl_type_t type, const voi
   p--; /* Don't keep last space */
   *p = '\0';
   return snprintf(buf, n, "%s on %s request of size %d (%s)",
-    brlapi_strerror(&error), brlapi_packetType(type), size, hexString);
+    brlapi_strerror(&error), brlapi_packetType(type), (int)size, hexString);
 }
 
 void brlapi_defaultExceptionHandler(int err, brl_type_t type, const void *packet, size_t size)

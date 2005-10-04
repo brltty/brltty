@@ -1269,7 +1269,7 @@ brl_readPacket (BrailleDisplay *brl, unsigned char *buffer, size_t length) {
   if (count > 0) {
     if (count > sizeof(packet.header)) count--;
     if (length < count) {
-      LogPrint(LOG_WARNING, "Input packet buffer too small: %d < %d", length, count);
+      LogPrint(LOG_WARNING, "Input packet buffer too small: %d < %d", (int)length, count);
       count = length;
     }
     memcpy(buffer, &packet, count);
@@ -1289,12 +1289,12 @@ brl_writePacket (BrailleDisplay *brl, const unsigned char *buffer, size_t length
     if (length >= size) {
       if (length > size)
         LogPrint(LOG_WARNING, "Output packet buffer larger than necessary: %d > %d",
-                 length, size);
+                 (int)length, size);
       return writePacket(brl, buffer[0], buffer[1], buffer[2], buffer[3],
                          (hasPayload? &buffer[4]: NULL));
     }
   }
-  LogPrint(LOG_WARNING, "Output packet buffer too small: %d < %d", length, size);
+  LogPrint(LOG_WARNING, "Output packet buffer too small: %d < %d", (int)length, size);
   return 0;
 }
 
