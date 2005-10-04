@@ -715,7 +715,7 @@ getConsoleDescription (ScreenDescription *description) {
   }
 
   {
-    long mode;
+    int mode;
     if (controlConsole(KDGETMODE, &mode) == -1) {
       LogError("ioctl KDGETMODE");
     } else if (mode == KD_TEXT) {
@@ -1007,7 +1007,7 @@ insertMapped (ScreenKey key, int (*byteInserter)(unsigned char byte)) {
     *--sequence = key & 0XFF;
 
     if (key & SCR_KEY_MOD_META) {
-      long meta;
+      int meta;
       if (controlConsole(KDGKBMETA, &meta) == -1) return 0;
 
       switch (meta) {
@@ -1020,7 +1020,7 @@ insertMapped (ScreenKey key, int (*byteInserter)(unsigned char byte)) {
           break;
 
         default:
-          LogPrint(LOG_WARNING, "Unsupported keyboard meta mode: %ld", meta);
+          LogPrint(LOG_WARNING, "Unsupported keyboard meta mode: %d", meta);
           return 0;
       }
     }
@@ -1156,7 +1156,7 @@ insert_LinuxScreen (ScreenKey key) {
   int ok = 0;
   LogPrint(LOG_DEBUG, "Insert key: %4.4X", key);
   if (rebindConsole()) {
-    long mode;
+    int mode;
     if (controlConsole(KDGKBMODE, &mode) != -1) {
       switch (mode) {
         case K_RAW:
@@ -1172,7 +1172,7 @@ insert_LinuxScreen (ScreenKey key) {
           if (insertMapped(key, &insertUtf8)) ok = 1;
           break;
         default:
-          LogPrint(LOG_WARNING, "Unsupported keyboard mode: %ld", mode);
+          LogPrint(LOG_WARNING, "Unsupported keyboard mode: %d", mode);
           break;
       }
     } else {
