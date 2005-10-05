@@ -1803,7 +1803,10 @@ Use the regular motion keys (as described below) to navigate the help page,
 and press the <tt/help/ key again to quit.
 
 <sect2>Vertical Motion<label id="vertical"><p>
-See also the <ref id="command-PRINDENT-NXINDENT" name="PRINDENT/NXINDENT"> routing key commands.
+See also
+the <ref id="command-PRINDENT-NXINDENT" name="PRINDENT/NXINDENT">,
+and the <ref id="command-PRDIFCHAR-NXDIFCHAR" name="PRDIFCHAR/NXDIFCHAR">
+routing key commands.
 <descrip>
   <tag>LNUP/LNDN<label id="command-LNUP-LNDN"></tag>
     Go up/down one line.
@@ -2219,6 +2222,9 @@ See also the <ref id="command-SWITCHVT" name="SWITCHVT"> routing key command.
     (see the <ref id="command-SETMARK" name="SETMARK"> command)
     with the same routing key.
     This feature only affects the current virtual terminal.
+  <tag>PRDIFCHAR/NXDIFCHAR<label id="command-PRDIFCHAR-NXDIFCHAR"></tag>
+    Go up/down to the nearest line which has a different character
+    in the column associated with the routing key.
 </descrip>
 
 <sect1>The Configuration File<label id="configure"><p>
