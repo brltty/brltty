@@ -252,6 +252,7 @@ static size_t authKeyLength = 0;
 static unsigned char authKey[BRLAPI_MAXPACKETSIZE];
 
 static Connection *last_conn_write;
+static int refresh;
 
 #ifdef WINDOWS
 static WSADATA wsadata;
@@ -2106,7 +2107,7 @@ found:
 /* Function : api_readCommand */
 static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
 {
-  int res, refresh = 0;
+  int res;
   ssize_t size;
   Connection *c;
   unsigned char packet[BRLAPI_MAXPACKETSIZE];
@@ -2150,6 +2151,7 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
       pthread_mutex_unlock(&driverMutex);
       disp->buffer = oldbuf;
       c->brlbufstate = FULL;
+      refresh=0;
     }
     pthread_mutex_unlock(&c->brlMutex);
   }
@@ -2210,6 +2212,7 @@ void api_link(void)
 {
   resetRepeatState(&repeatState);
   trueBraille=braille;
+  refresh=1;
   memcpy(&ApiBraille,braille,sizeof(BrailleDriver));
   ApiBraille.writeWindow=api_writeWindow;
   ApiBraille.writeVisual=api_writeVisual;
