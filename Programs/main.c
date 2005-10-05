@@ -2313,16 +2313,17 @@ main (int argc, char *argv[]) {
 
 void 
 message (const char *text, short flags) {
-  int length = strlen(text);
-
 #ifdef ENABLE_SPEECH_SUPPORT
-  if (prefs.alertTunes && !(flags & MSG_SILENT)) {
-    speech->mute();
-    speech->say((unsigned char *)text, length);
-  }
+  if (prefs.alertTunes && !(flags & MSG_SILENT)) sayString(text, 1);
 #endif /* ENABLE_SPEECH_SUPPORT */
 
   if (braille && brl.buffer) {
+    int length = strlen(text);
+
+#ifdef ENABLE_API
+  if (apiOpened) api_unlink();
+#endif /* ENABLE_API */
+
     while (length) {
       int count;
       int index;
@@ -2368,6 +2369,10 @@ message (const char *text, short flags) {
         }
       }
     }
+
+#ifdef ENABLE_API
+  if (apiOpened) api_link();
+#endif /* ENABLE_API */
   }
 }
 

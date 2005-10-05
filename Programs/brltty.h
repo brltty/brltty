@@ -130,6 +130,7 @@ extern void api_link (void);
 extern void api_unlink (void);
 extern void api_flush (BrailleDisplay *brl, BRL_DriverCommandContext caller);
 extern const char *const api_parameters[];
+extern int apiOpened;
 
 #ifdef __cplusplus
 }

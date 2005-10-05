@@ -109,7 +109,7 @@ static char *opt_contractionTable;
 static int opt_noApi;
 static char *opt_apiParameters;
 static char **apiParameters = NULL;
-static int apiOpened;
+int apiOpened;
 #endif /* ENABLE_API */
 
 #ifdef ENABLE_SPEECH_SUPPORT
