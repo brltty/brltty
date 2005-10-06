@@ -124,8 +124,8 @@ extern void resetAutorepeat (void);
 extern void handleAutorepeat (int *command, RepeatState *state);
 
 extern void api_identify (void);
-extern int api_open (BrailleDisplay *brl, char **parameters);
-extern void api_close (BrailleDisplay *brl);
+extern int api_start (BrailleDisplay *brl, char **parameters);
+extern void api_stop (BrailleDisplay *brl);
 extern void api_link (void);
 extern void api_unlink (void);
 extern void api_flush (BrailleDisplay *brl, BRL_DriverCommandContext caller);

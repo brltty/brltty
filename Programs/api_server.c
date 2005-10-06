@@ -2239,11 +2239,11 @@ void api_identify(void)
   LogPrint(LOG_INFO,   COPYRIGHT);
 }
 
-/* Function : api_open */
+/* Function : api_start */
 /* Initializes BrlApi */
 /* One first initialize the driver */
 /* Then one creates the communication socket */
-int api_open(BrailleDisplay *brl, char **parameters)
+int api_start(BrailleDisplay *brl, char **parameters)
 {
   int res,i;
   char *hosts=
@@ -2327,11 +2327,11 @@ out:
   return 0;
 }
 
-/* Function : api_close */
+/* Function : api_stop */
 /* End of BrlApi session. Closes the listening socket */
 /* destroys opened connections and associated resources */
 /* Closes the driver */
-void api_close(BrailleDisplay *brl)
+void api_stop(BrailleDisplay *brl)
 {
   terminationHandler();
 }

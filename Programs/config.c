@@ -1530,7 +1530,7 @@ exitBrailleDriver (void) {
 #ifdef ENABLE_API
 static void
 exitApi (void) {
-  api_close(&brl);
+  api_stop(&brl);
   apiOpened = 0;
 }
 #endif /* ENABLE_API */
@@ -2077,7 +2077,7 @@ startup (int argc, char *argv[]) {
                                       opt_apiParameters);
     logParameters(api_parameters, apiParameters, "API");
     if (!opt_verify) {
-      if (api_open(&brl, apiParameters)) {
+      if (api_start(&brl, apiParameters)) {
         atexit(exitApi);
         apiOpened = 1;
       }
