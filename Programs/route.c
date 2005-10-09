@@ -19,6 +19,7 @@
 
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 #include <sys/time.h>
 #include <signal.h>
 
@@ -50,6 +51,12 @@ typedef struct {
   sigset_t signalMask;
 
   int screenNumber;
+  int screenRows;
+  int screenColumns;
+
+  int verticalDelta;
+  unsigned char *rowBuffer;
+
   int cury, curx;
   int oldy, oldx;
 
@@ -58,18 +65,38 @@ typedef struct {
 } CursorRoutingData;
 
 static int
+readRow (CursorRoutingData *crd, unsigned char *buffer, int row) {
+  if (!buffer) buffer = crd->rowBuffer;
+  return readScreen(0, row, crd->screenColumns, 1, buffer, SCR_TEXT);
+}
+
+static int
 getCurrentPosition (CursorRoutingData *crd) {
   ScreenDescription description;
-  describeRoutingScreen(&description);
+  describeScreen(&description);
 
   if (description.no != crd->screenNumber) {
     crd->screenNumber = description.no;
     return 0;
   }
 
-  crd->cury = description.posy;
+  if (!crd->rowBuffer) {
+    crd->screenRows = description.rows;
+    crd->screenColumns = description.cols;
+    crd->verticalDelta = 0;
+    if (!(crd->rowBuffer = malloc(crd->screenColumns))) goto error;
+  } else if ((crd->screenRows != description.rows) ||
+             (crd->screenColumns != description.cols)) {
+    goto error;
+  }
+
+  crd->cury = description.posy - crd->verticalDelta;
   crd->curx = description.posx;
-  return 1;
+  if (readRow(crd, NULL, description.posy)) return 1;
+
+error:
+  crd->screenNumber = -1;
+  return 0;
 }
 
 static void
@@ -87,7 +114,7 @@ insertCursorKey (CursorRoutingData *crd, ScreenKey key) {
 }
 
 static int
-awaitCursorMotion (CursorRoutingData *crd) {
+awaitCursorMotion (CursorRoutingData *crd, int direction) {
   long timeout = crd->timeSum / crd->timeCount;
   struct timeval start;
   gettimeofday(&start, NULL);
@@ -96,6 +123,42 @@ awaitCursorMotion (CursorRoutingData *crd) {
     long time;
     approximateDelay(CURSOR_ROUTING_INTERVAL);
     time = millisecondsSince(&start) + 1;
+
+    {
+      int row = crd->cury + crd->verticalDelta;
+      int bestRow = row;
+      int bestLength = 0;
+
+      do {
+        unsigned char buffer[crd->screenColumns];
+        if (!readRow(crd, buffer, row)) break;
+
+        {
+          int before = crd->curx;
+          int after = before;
+
+          while (buffer[before] == crd->rowBuffer[before])
+            if (--before < 0)
+              break;
+
+          while (buffer[after] == crd->rowBuffer[after])
+            if (++after >= crd->screenColumns)
+              break;
+
+          {
+            int length = after - before - 1;
+            if (length > bestLength) {
+              bestRow = row;
+              if ((bestLength = length) == crd->screenColumns) break;
+            }
+          }
+        }
+
+        row -= direction;
+      } while ((row >= 0) && (row < crd->screenRows));
+
+      crd->verticalDelta = bestRow - crd->cury;
+    }
 
     crd->oldy = crd->cury;
     crd->oldx = crd->curx;
@@ -131,7 +194,7 @@ adjustCursorPosition (CursorRoutingData *crd, int where, int trgy, int trgx, Scr
 
     /* tell the cursor to move in the needed direction */
     insertCursorKey(crd, ((dir > 0)? forward: backward));
-    if (!awaitCursorMotion(crd)) return CRR_FAIL;
+    if (!awaitCursorMotion(crd, dir)) return CRR_FAIL;
 
     if (crd->cury != crd->oldy) {
       if (crd->oldy != trgy) {
@@ -169,7 +232,7 @@ adjustCursorPosition (CursorRoutingData *crd, int where, int trgy, int trgx, Scr
      * the nearest ever reached.
      */
     insertCursorKey(crd, ((dir > 0)? backward: forward));
-    return awaitCursorMotion(crd)? CRR_NEAR: CRR_FAIL;
+    return awaitCursorMotion(crd, -dir)? CRR_NEAR: CRR_FAIL;
   }
 }
 
@@ -199,6 +262,7 @@ doCursorRouting (int column, int row, int screen) {
 
   /* initialize the routing data structure */
   crd.screenNumber = screen;
+  crd.rowBuffer = NULL;
   crd.timeSum = CURSOR_ROUTING_TIMEOUT;
   crd.timeCount = 1;
 
@@ -213,6 +277,8 @@ doCursorRouting (int column, int row, int screen) {
               adjustCursorHorizontally(&crd, 0, row, column);
     }
   }
+
+  if (crd.rowBuffer) free(crd.rowBuffer);
 
   if (crd.screenNumber != screen) return ROUTE_ERROR;
   if (crd.cury != row) return ROUTE_WRONG_ROW;

@@ -242,11 +242,6 @@ openRoutingScreen (void) {
 }
 
 void
-describeRoutingScreen (ScreenDescription *desscription) {
-  mainScreen.base.describe(desscription);
-}
-
-void
 closeRoutingScreen (void) {
   mainScreen.close();
 }

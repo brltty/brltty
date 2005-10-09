@@ -104,7 +104,6 @@ extern int openMainScreen (char **parameters);			/* initialise screen reading fu
  * file descriptors.  A readScreen equivalent is not needed.
  */
 extern int openRoutingScreen (void);
-extern void describeRoutingScreen (ScreenDescription *);
 extern void closeRoutingScreen (void);
 
 /* Routines which apply to the help screen. */
