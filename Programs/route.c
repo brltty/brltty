@@ -289,7 +289,7 @@ doCursorRouting (int column, int row, int screen) {
 int
 startCursorRouting (int column, int row, int screen) {
 #ifdef __MINGW32__
-  doCursorRouting(column, row, screen);
+  routingStatus = doCursorRouting(column, row, screen);
   return 1;
 #else /* __MINGW32__ */
   int started = 0;
