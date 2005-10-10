@@ -251,9 +251,6 @@ doCursorRouting (int column, int row, int screen) {
   CursorRoutingData crd;
 
 #ifndef __MINGW32__
-  /* Configure the cursor routing subprocess. */
-  nice(CURSOR_ROUTING_NICENESS); /* reduce scheduling priority */
-
   /* Set up the signal mask. */
   sigemptyset(&crd.signalMask);
   sigaddset(&crd.signalMask, SIGUSR1);
@@ -317,6 +314,7 @@ startCursorRouting (int column, int row, int screen) {
   switch (routingProcess = fork()) {
     case 0: { /* child: cursor routing subprocess */
       int result = ROUTE_ERROR;
+      nice(CURSOR_ROUTING_NICENESS);
       if (openRoutingScreen())
         result = doCursorRouting(column, row, screen);		/* terminate child process */
       closeRoutingScreen();		/* close second thread of screen reading */
