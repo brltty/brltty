@@ -39,7 +39,7 @@
 #define CURSOR_ROUTING_TIMEOUT	2000	/* max wait for response to key press */
 
 volatile pid_t routingProcess = 0;
-volatile int routingStatus = -1;
+volatile RoutingStatus routingStatus = ROUTE_NONE;
 
 typedef enum {
   CRR_DONE,
@@ -283,7 +283,7 @@ doCursorRouting (int column, int row, int screen) {
   if (crd.screenNumber != screen) return ROUTE_ERROR;
   if (crd.cury != row) return ROUTE_WRONG_ROW;
   if ((column >= 0) && (crd.curx != column)) return ROUTE_WRONG_COLUMN;
-  return ROUTE_OK;
+  return ROUTE_DONE;
 }
 
 int
@@ -311,7 +311,7 @@ startCursorRouting (int column, int row, int screen) {
     do {
       sigsuspend(&oldMask);
     } while (routingProcess);
-    routingStatus = -1;
+    routingStatus = ROUTE_NONE;
   }
 
   switch (routingProcess = fork()) {

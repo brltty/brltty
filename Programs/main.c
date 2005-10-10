@@ -231,7 +231,7 @@ terminationHandler (int signalNumber) {
 }
 
 #ifdef SIGCHLD
-static void 
+static void
 childDeathHandler (int signalNumber) {
   pid_t process;
   int status;
@@ -243,6 +243,21 @@ childDeathHandler (int signalNumber) {
   }
 }
 #endif /* SIGCHLD */
+
+static int
+testRoutingStatus (RoutingStatus ok) {
+  if (routingStatus != ROUTE_NONE) {
+    playTune((routingStatus > ok)? &tune_routing_failed: &tune_routing_succeeded);
+    routingStatus = ROUTE_NONE;
+    return 1;
+  }
+  return 0;
+}
+
+static void
+awaitRoutingStatus (RoutingStatus ok) {
+  while (!testRoutingStatus(ok)) pause();
+}
 
 static void
 setDigitUpper (unsigned char *cell, int digit) {
@@ -1075,20 +1090,7 @@ main (int argc, char *argv[]) {
 
     testProgramTermination();
     closeTuneDevice(0);
-
-    if (routingStatus >= 0) {
-      const TuneDefinition *tune;
-      switch (routingStatus) {
-        default:
-          tune = &tune_routing_failed;
-          break;
-        case ROUTE_OK:
-          tune = &tune_routing_succeeded;
-          break;
-      }
-      playTune(tune);
-      routingStatus = -1;
-    }
+    testRoutingStatus(ROUTE_DONE);
 
     /*
      * Process any Braille input 
@@ -1919,9 +1921,12 @@ main (int argc, char *argv[]) {
       if (command & BRL_FLG_ROUTE) {
         int column = MIN(MAX(scr.posx, p->winx), p->winx+brl.x-1);
         int row = MIN(MAX(scr.posy, p->winy), p->winy+brl.y-1);
-        if ((column != scr.posx) || (row != scr.posy))
-          if (routeCursor(column, row, scr.no))
+        if ((column != scr.posx) || (row != scr.posy)) {
+          if (routeCursor(column, row, scr.no)) {
             playTune(&tune_routing_started);
+            awaitRoutingStatus(ROUTE_WRONG_COLUMN);
+          }
+        }
       }
     }
         

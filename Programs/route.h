@@ -22,16 +22,17 @@
 extern "C" {
 #endif /* __cplusplus */
 
-extern int startCursorRouting (int column, int row, int screen);
-extern volatile pid_t routingProcess;
-extern volatile int routingStatus;
-
 typedef enum {
-  ROUTE_OK,
+  ROUTE_NONE,
+  ROUTE_DONE,
   ROUTE_WRONG_COLUMN,
   ROUTE_WRONG_ROW,
   ROUTE_ERROR
 } RoutingStatus;
+
+extern int startCursorRouting (int column, int row, int screen);
+extern volatile pid_t routingProcess;
+extern volatile RoutingStatus routingStatus;
 
 #ifdef __cplusplus
 }
