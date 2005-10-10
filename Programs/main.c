@@ -1919,17 +1919,34 @@ main (int argc, char *argv[]) {
       }
 
       if (command & BRL_FLG_ROUTE) {
-        int column = MIN(MAX(scr.posx, p->winx), p->winx+brl.x-1);
-        int row = MIN(MAX(scr.posy, p->winy), p->winy+brl.y-1);
-        if ((column != scr.posx) || (row != scr.posy)) {
-          if (routeCursor(column, row, scr.no)) {
+        int left = p->winx;
+        int right = left + brl.x - 1;
+
+        int top = p->winy;
+        int bottom = top + brl.y - 1;
+
+        if ((scr.posx < left) || (scr.posx > right) ||
+            (scr.posy < top) || (scr.posy > bottom)) {
+          if (routeCursor(MIN(MAX(scr.posx, left), right),
+                          MIN(MAX(scr.posy, top), bottom),
+                          scr.no)) {
             playTune(&tune_routing_started);
             awaitRoutingStatus(ROUTE_WRONG_COLUMN);
+
+            {
+              ScreenDescription description;
+              describeScreen(&description);
+
+              if (description.no == scr.no) {
+                slideWindowVertically(description.posy);
+                placeWindowHorizontally(description.posx);
+              }
+            }
           }
         }
       }
     }
-        
+
     /*
      * Update blink counters: 
      */
