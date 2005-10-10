@@ -30,7 +30,6 @@ typedef enum {
   ROUTE_ERROR
 } RoutingStatus;
 
-extern int doCursorRouting (int column, int row, int screen);
 extern int startCursorRouting (int column, int row, int screen);
 
 extern volatile pid_t routingProcess;

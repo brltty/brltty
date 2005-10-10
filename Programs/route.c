@@ -246,7 +246,7 @@ adjustCursorVertically (CursorRoutingData *crd, int where, int row) {
   return adjustCursorPosition(crd, where, row, -1, SCR_KEY_CURSOR_DOWN, SCR_KEY_CURSOR_UP);
 }
 
-int
+static RoutingStatus
 doCursorRouting (int column, int row, int screen) {
   CursorRoutingData crd;
 
