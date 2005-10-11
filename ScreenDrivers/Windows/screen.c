@@ -156,7 +156,7 @@ read_WindowsScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
   int x, y;
   COORD coord;
 
-  BOOL (*fun) (HANDLE, void*, DWORD, COORD, LPDWORD);
+  BOOL WINAPI (*fun) (HANDLE, void*, DWORD, COORD, LPDWORD);
   const char *name;
   size_t size;
   void *buf;
