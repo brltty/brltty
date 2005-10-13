@@ -295,7 +295,7 @@ insert_WindowsScreen (ScreenKey key) {
       keyE->dwControlKeyState |= LEFT_ALT_PRESSED;
       key &= ~ SCR_KEY_MOD_META;
     }
-    keyE->uChar.UnicodeChar = key;
+    keyE->uChar.AsciiChar = key;
   } else {
     switch (key) {
       case SCR_KEY_ENTER:         keyE->wVirtualKeyCode = VK_RETURN; break;
