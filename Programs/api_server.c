@@ -79,8 +79,6 @@
 #define UNAUTH_MAX 5
 #define UNAUTH_DELAY 30
 
-#define BRAILLE_UNICODE_ROW 0x2800
-
 #define OUR_STACK_MIN 0X10000
 #ifndef PTHREAD_STACK_MIN
 #define PTHREAD_STACK_MIN OUR_STACK_MIN
@@ -509,7 +507,7 @@ void getDots(const BrailleWindow *brailleWindow, unsigned char *buf)
     if ((wc = brailleWindow->text[i]) < 0x100)
       buf[i] = textTable[wc];
     else
-      if (wc >= BRAILLE_UNICODE_ROW && wc < BRAILLE_UNICODE_ROW + 0x100)
+      if ((wc >= BRL_UC_ROW) && (wc <= (BRL_UC_ROW | 0XFF)))
 	buf[i] =
 	  (wc&(1<<(1-1))?BRL_DOT1:0) |
 	  (wc&(1<<(2-1))?BRL_DOT2:0) |
