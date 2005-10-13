@@ -295,10 +295,6 @@ insert_WindowsScreen (ScreenKey key) {
       keyE->dwControlKeyState |= LEFT_ALT_PRESSED;
       key &= ~ SCR_KEY_MOD_META;
     }
-    if (!(key & 0xE0)) {
-      keyE->dwControlKeyState |= LEFT_CTRL_PRESSED;
-      key |= 0x40;
-    }
     keyE->uChar.UnicodeChar = key;
   } else {
     switch (key) {
