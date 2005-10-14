@@ -89,7 +89,6 @@ deallocateStrings (char **array) {
 static int logLevel = LOG_INFO;
 static const char *printPrefix = NULL;
 static int printLevel = LOG_NOTICE;
-int loggedProblemCount = 0;
 
 void
 LogOpen (int toConsole) {
@@ -116,7 +115,6 @@ LogClose (void) {
 void
 LogPrint (int level, char *format, ...) {
   va_list argp;
-  if (level <= LOG_ERR) ++loggedProblemCount;
 
   if (level <= logLevel) {
 #ifdef HAVE_SYSLOG_H

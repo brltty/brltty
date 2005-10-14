@@ -1772,14 +1772,19 @@ validateInterval (int *value, const char *description, const char *word) {
 
 void
 startup (int argc, char *argv[]) {
-  processOptions(optionTable, optionCount,
-                 "brltty", &argc, &argv,
-                 &opt_bootParameters, &opt_environmentVariables, &opt_configurationFile,
-                 NULL);
-  if (argc) LogPrint(LOG_ERR, "excess parameter: %s", argv[0]);
+  int problemCount = processOptions(optionTable, optionCount,
+                                    "brltty", &argc, &argv,
+                                    &opt_bootParameters,
+                                    &opt_environmentVariables,
+                                    &opt_configurationFile,
+                                    NULL);
+  if (argc) {
+    LogPrint(LOG_ERR, "excess parameter: %s", argv[0]);
+    ++problemCount;
+  }
 
-  validateInterval(&updateInterval, "update interval", opt_updateInterval);
-  validateInterval(&messageDelay, "message delay", opt_messageDelay);
+  if (!validateInterval(&updateInterval, "update interval", opt_updateInterval)) ++problemCount;
+  if (!validateInterval(&messageDelay, "message delay", opt_messageDelay)) ++problemCount;
 
   /* Set logging levels. */
   {
@@ -1813,6 +1818,7 @@ startup (int argc, char *argv[]) {
       }
 
       LogPrint(LOG_ERR, "invalid log level: %s", opt_logLevel);
+      ++problemCount;
     }
   setLevel:
 
@@ -2111,11 +2117,11 @@ startup (int argc, char *argv[]) {
     message(buffer, 0);        /* display initialization message */
   }
 
-  if (loggedProblemCount) {
+  if (problemCount) {
     char buffer[0X40];
     snprintf(buffer, sizeof(buffer), "%d startup problem%s",
-             loggedProblemCount,
-             (loggedProblemCount==1? "": "s"));
+             problemCount,
+             (problemCount==1? "": "s"));
     message(buffer, MSG_WAITKEY);
   }
 }

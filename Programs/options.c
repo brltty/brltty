@@ -336,12 +336,12 @@ processCommandLine (
 #endif /* HAVE_GETOPT_LONG */
 
       case '?':
-        LogPrint(LOG_ERR, "Unknown option: -%c", optopt);
+        LogPrint(LOG_ERR, "unknown option: -%c", optopt);
         info->errorCount++;
         break;
 
       case ':': /* An invalid option has been specified. */
-        LogPrint(LOG_ERR, "Missing operand: -%c", optopt);
+        LogPrint(LOG_ERR, "missing operand: -%c", optopt);
         info->errorCount++;
         break;
 
@@ -477,17 +477,17 @@ processConfigurationLine (
           const char *operand = strtok(NULL, delimiters);
 
           if (!operand) {
-            LogPrint(LOG_ERR, "Operand not supplied for configuration directive: %s", line);
+            LogPrint(LOG_ERR, "operand not supplied for configuration directive: %s", line);
             conf->info->errorCount++;
           } else if (strtok(NULL, delimiters)) {
             while (strtok(NULL, delimiters));
-            LogPrint(LOG_ERR, "Too many operands for configuration directive: %s", line);
+            LogPrint(LOG_ERR, "too many operands for configuration directive: %s", line);
             conf->info->errorCount++;
           } else {
             char **setting = &conf->settings[optionIndex];
 
             if (*setting && !(option->argument && (option->flags & OPT_Extend))) {
-              LogPrint(LOG_ERR, "Configuration directive specified more than once: %s", line);
+              LogPrint(LOG_ERR, "configuration directive specified more than once: %s", line);
               conf->info->errorCount++;
               free(*setting);
               *setting = NULL;
@@ -504,7 +504,7 @@ processConfigurationLine (
         }
       }
     }
-    LogPrint(LOG_ERR, "Unknown configuration directive: %s", line);
+    LogPrint(LOG_ERR, "unknown configuration directive: %s", line);
     conf->info->errorCount++;
   }
   return 1;
@@ -540,12 +540,12 @@ processConfigurationFile (
 
     fclose(file);
     if (processed) return 1;
-    LogPrint(LOG_ERR, "File '%s' processing error.", path);
+    LogPrint(LOG_ERR, "file '%s' processing error.", path);
     info->errorCount++;
   } else {
     int ok = optional && (errno == ENOENT);
     LogPrint((ok? LOG_DEBUG: LOG_ERR),
-             "Cannot open configuration file: %s: %s",
+             "cannot open configuration file: %s: %s",
              path, strerror(errno));
     if (ok) return 1;
     info->errorCount++;
@@ -617,7 +617,7 @@ processOptions (
     setDefaultOptions(&info, 1);
   }
 
-  return info.errorCount == 0;
+  return info.errorCount;
 }
 
 float

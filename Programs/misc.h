@@ -141,7 +141,6 @@ extern int setLogLevel (int level);
 extern const char *setPrintPrefix (const char *prefix);
 extern int setPrintLevel (int level);
 extern int setPrintOff (void);
-extern int loggedProblemCount;
 
 extern int getConsole (void);
 extern int writeConsole (const unsigned char *address, size_t count);
