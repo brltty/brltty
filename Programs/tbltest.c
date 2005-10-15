@@ -30,6 +30,7 @@
 
 static char *opt_inputFormat;
 static char *opt_outputFormat;
+static int opt_translate;
 static char *opt_dataDirectory;
 
 BEGIN_OPTION_TABLE
@@ -40,6 +41,10 @@ BEGIN_OPTION_TABLE
   {"output-format", "format", 'o', 0, 0,
    &opt_outputFormat, NULL,
    "Format of output file."},
+
+  {"translate", NULL, 't', 0, 0,
+   &opt_translate, NULL,
+   "Translate."},
 
   {"data-directory", "file", 'D', 0, OPT_Hidden,
    &opt_dataDirectory, DATA_DIRECTORY,
@@ -189,11 +194,33 @@ getFormatEntry (const char *name, const char *path, const char *description) {
   exit(2);
 }
 
+static FILE *
+openTable (const char **file, const char *mode, const char *directory, FILE *stdStream, const char *stdName) {
+  if (stdStream) {
+    if (strcmp(*file, "-") == 0) {
+      *file = stdName;
+      return stdStream;
+    }
+  }
+
+  if (directory) {
+    const char *path = makePath(directory, *file);
+    if (!path) return NULL;
+    *file = path;
+  }
+
+  {
+    FILE *stream = fopen(*file, mode);
+    if (!stream) LogPrint(LOG_ERR, "table open error: %s: %s", *file, strerror(errno));
+    return stream;
+  }
+}
+
 int
 main (int argc, char *argv[]) {
   int status;
-  char *inputPath;
-  char *outputPath;
+  const char *inputPath;
+  const char *outputPath;
   const FormatEntry *inputFormat;
   const FormatEntry *outputFormat;
 
@@ -207,72 +234,90 @@ main (int argc, char *argv[]) {
     exit(2);
   }
   inputPath = *argv++, argc--;
-  inputFormat = getFormatEntry(opt_inputFormat, inputPath, "input");
 
   if (argc > 0) {
     outputPath = *argv++, argc--;
   } else if (opt_outputFormat && *opt_outputFormat) {
-    if (strcmp(opt_outputFormat, inputFormat->name) == 0) {
-      LogPrint(LOG_ERR, "same input and output formats: %s", opt_outputFormat);
-      exit(2);
-    }
-
-    {
-      const char *extension = findFileExtension(inputPath);
-      int prefix = extension? (extension - inputPath): strlen(inputPath);
-      char buffer[prefix + 1 + strlen(opt_outputFormat) + 1];
-      snprintf(buffer, sizeof(buffer), "%.*s.%s", prefix, inputPath, opt_outputFormat);
-      outputPath = strdupWrapper(buffer);
-    }
+    const char *extension = findFileExtension(inputPath);
+    int prefix = extension? (extension - inputPath): strlen(inputPath);
+    char buffer[prefix + 1 + strlen(opt_outputFormat) + 1];
+    snprintf(buffer, sizeof(buffer), "%.*s.%s", prefix, inputPath, opt_outputFormat);
+    outputPath = strdupWrapper(buffer);
   } else {
     outputPath = NULL;
   }
+
+  if (argc > 0) {
+    LogPrint(LOG_ERR, "too many parameters.");
+    exit(2);
+  }
+
+  inputFormat = getFormatEntry(opt_inputFormat, inputPath, "input");
   if (outputPath) {
     outputFormat = getFormatEntry(opt_outputFormat, outputPath, "output");
   } else {
     outputFormat = NULL;
   }
 
-  {
-    FILE *inputFile;
-
-    if (strcmp(inputPath, "-") == 0) {
-      inputFile = stdin;
-      inputPath = "<standard-input>";
-    } else if (!(inputPath = makePath(opt_dataDirectory, inputPath))) {
-      inputFile = NULL;
-    } else if (!(inputFile = fopen(inputPath, "r"))) {
-      LogPrint(LOG_ERR, "cannot open input table: %s: %s", inputPath, strerror(errno));
-    }
+  if (opt_translate) {
+    FILE *inputFile = openTable(&inputPath, "r", opt_dataDirectory, NULL, NULL);
 
     if (inputFile) {
-      TranslationTable table;
+      TranslationTable inputTable;
 
-      if (inputFormat->read(inputPath, inputFile, table, inputFormat->data)) {
+      if (inputFormat->read(inputPath, inputFile, inputTable, inputFormat->data)) {
         if (outputPath) {
-          FILE *outputFile;
-
-          if (strcmp(outputPath, "-") == 0) {
-            outputFile = stdout;
-            outputPath = "<standard-output>";
-          } else {
-            outputFile = fopen(outputPath, "w");
-          }
+          FILE *outputFile = openTable(&outputPath, "r", opt_dataDirectory, NULL, NULL);
 
           if (outputFile) {
-            if (outputFormat->write(outputPath, outputFile, table, outputFormat->data)) {
+            TranslationTable outputTable;
+
+            if (outputFormat->read(outputPath, outputFile, outputTable, outputFormat->data)) {
+              TranslationTable table;
+
+              {
+                TranslationTable unoutputTable;
+                int byte;
+                reverseTranslationTable(outputTable, unoutputTable);
+                memset(&table, 0, sizeof(table));
+                for (byte=TRANSLATION_TABLE_SIZE-1; byte>=0; byte--)
+                  table[byte] = unoutputTable[inputTable[byte]];
+              }
+
               status = 0;
+              while (1) {
+                int character;
+
+                if ((character = fgetc(stdin)) == EOF) {
+                  if (ferror(stdin)) {
+                    LogPrint(LOG_ERR, "input error: %s", strerror(errno));
+                    status = 6;
+                  }
+                  break;
+                }
+
+                if (fputc(table[character], stdout) == EOF) {
+                  LogPrint(LOG_ERR, "output error: %s", strerror(errno));
+                  status = 7;
+                  break;
+                }
+              }
             } else {
-              status = 6;
+              status = 4;
             }
 
-            fclose(outputFile);
+            if (fclose(outputFile) == EOF) {
+              if (!status) {
+                LogPrint(LOG_ERR, "output error: %s", strerror(errno));
+                status = 7;
+              }
+            }
           } else {
-            LogPrint(LOG_ERR, "cannot open output table: %s: %s", outputPath, strerror(errno));
-            status = 5;
+            status = 3;
           }
         } else {
-          status = 0;
+          LogPrint(LOG_ERR, "output table not specified.");
+          status = 2;
         }
       } else {
         status = 4;
@@ -281,6 +326,43 @@ main (int argc, char *argv[]) {
       fclose(inputFile);
     } else {
       status = 3;
+    }
+  } else {
+    if (outputFormat != inputFormat) {
+      FILE *inputFile = openTable(&inputPath, "r", opt_dataDirectory, stdin, "<standard-input>");
+
+      if (inputFile) {
+        TranslationTable table;
+
+        if (inputFormat->read(inputPath, inputFile, table, inputFormat->data)) {
+          if (outputPath) {
+            FILE *outputFile = openTable(&outputPath, "w", NULL, stdout, "<standard-output>");
+
+            if (outputFile) {
+              if (outputFormat->write(outputPath, outputFile, table, outputFormat->data)) {
+                status = 0;
+              } else {
+                status = 6;
+              }
+
+              fclose(outputFile);
+            } else {
+              status = 5;
+            }
+          } else {
+            status = 0;
+          }
+        } else {
+          status = 4;
+        }
+
+        fclose(inputFile);
+      } else {
+        status = 3;
+      }
+    } else {
+      LogPrint(LOG_ERR, "same input and output formats: %s", outputFormat->name);
+      status = 2;
     }
   }
 
