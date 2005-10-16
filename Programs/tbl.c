@@ -54,14 +54,16 @@ typedef struct {
 
 static void
 reportError (InputData *input, const char *format, ...) {
-  va_list args;
   char message[0X100];
 
-  va_start(args, format);
-  formatInputError(message, sizeof(message),
-                   input->file, (input->line? &input->line: NULL),
-                   format, args);
-  va_end(args);
+  {
+    va_list args;
+    va_start(args, format);
+    formatInputError(message, sizeof(message),
+                     input->file, (input->line? &input->line: NULL),
+                     format, args);
+    va_end(args);
+  }
 
   LogPrint(LOG_ERR, "%s", message);
   input->ok = 0;
