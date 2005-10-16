@@ -58,16 +58,13 @@ reportError (InputData *input, const char *format, ...) {
   char message[0X100];
 
   va_start(args, format);
-  vsnprintf(message, sizeof(message), format, args);
+  formatInputError(message, sizeof(message),
+                   input->file, (input->line? &input->line: NULL),
+                   format, args);
   va_end(args);
 
   LogPrint(LOG_ERR, "%s", message);
   input->ok = 0;
-}
-
-static void
-syntaxError (InputData *input, const char *problem) {
-  reportError(input, "%s[%d]: %s", input->file, input->line, problem);
 }
 
 static void
@@ -128,7 +125,7 @@ getBit (InputData *input, unsigned char *set, unsigned char *mask) {
   int length = findSpace(input) - location;
 
   if (!*location) {
-    syntaxError(input, "missing bit state");
+    reportError(input, "missing bit state");
     return 0;
   }
 
@@ -176,7 +173,7 @@ getBit (InputData *input, unsigned char *set, unsigned char *mask) {
     }
 
     if (!*mask) {
-      syntaxError(input, "invalid bit state");
+      reportError(input, "invalid bit state");
       return 0;
     }
   }
@@ -196,7 +193,7 @@ getByte (InputData *input, unsigned char *byte) {
     case '\\':
       switch (*location++) {
         default:
-          syntaxError(input, "invalid special byte");
+          reportError(input, "invalid special byte");
           return 0;
 
         case 'X':
@@ -206,7 +203,7 @@ getByte (InputData *input, unsigned char *byte) {
           while (count--) {
             unsigned char digit;
             if (!testHexadecimalDigit(tolower(*location++), &digit)) {
-              syntaxError(input, "invalid hexadecimal byte");
+              reportError(input, "invalid hexadecimal byte");
               return 0;
             }
             *byte = (*byte << 4) | digit;
@@ -226,12 +223,12 @@ getByte (InputData *input, unsigned char *byte) {
       break;
 
     case 0:
-      syntaxError(input, "missing byte");
+      reportError(input, "missing byte");
       return 0;
   }
 
   if (*location && !isspace(*location)) {
-    syntaxError(input, "invalid byte");
+    reportError(input, "invalid byte");
     return 0;
   }
 
@@ -250,7 +247,7 @@ getCell (InputData *input, unsigned char *cell) {
   if (enclosed) {
     ++location;
   } else if (!*location) {
-    syntaxError(input, "missing cell");
+    reportError(input, "missing cell");
     return 0;
   } else if (memchr(noDots, *location, sizeof(noDots))) {
     ++location;
@@ -275,14 +272,14 @@ getCell (InputData *input, unsigned char *cell) {
     {
       unsigned char dot;
       if (none || !testDotNumber(character, &dot)) {
-        syntaxError(input, "invalid dot number");
+        reportError(input, "invalid dot number");
         return 0;
       }
 
       {
         unsigned char bit = DOT_BIT(dot);
         if (*cell & bit) {
-          syntaxError(input, "duplicate dot number");
+          reportError(input, "duplicate dot number");
           return 0;
         }
         *cell |= bit;
@@ -291,7 +288,7 @@ getCell (InputData *input, unsigned char *cell) {
   }
 
   if (enclosed) {
-    syntaxError(input, "incomplete cell");
+    reportError(input, "incomplete cell");
     return 0;
   }
 
@@ -302,13 +299,13 @@ getCell (InputData *input, unsigned char *cell) {
 static int
 getDot (InputData *input, unsigned char *dot) {
   if (!*input->location) {
-    syntaxError(input, "missing dot number");
+    reportError(input, "missing dot number");
     return 0;
   }
 
   if (!testDotNumber(*input->location, dot) ||
       ((findSpace(input) - input->location) != 1)) {
-    syntaxError(input, "invalid dot number");
+    reportError(input, "invalid dot number");
     return 0;
   }
 
@@ -336,7 +333,7 @@ processByteDirective (InputData *input) {
           byte->cell = cell;
           byte->defined = 1;
         } else {
-          syntaxError(input, "duplicate byte");
+          reportError(input, "duplicate byte");
         }
       }
     }
@@ -477,6 +474,8 @@ loadTranslationTable (
 
   if (opened || (file = fopen(path, "r"))) {
     if (processLines(file, processTableLine, &input)) {
+      input.line = 0;
+
       if (input.ok) {
         setTable(&input, table);
         ok = 1;
@@ -485,8 +484,7 @@ loadTranslationTable (
 
     if (!opened) fclose(file);
   } else {
-    reportError(&input, "Cannot open translation table '%s': %s",
-                path, strerror(errno));
+    reportError(&input, "open error: %s", strerror(errno));
   }
 
   return ok;

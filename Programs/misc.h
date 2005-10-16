@@ -86,16 +86,24 @@ extern "C" {
 extern char **splitString (const char *string, char delimiter, int *count);
 extern void deallocateStrings (char **array);
 
-/* Process each line of an input text file safely.
- * This routine handles the actual reading of the file,
- * insuring that the input buffer is always big enough,
- * and calls a caller-supplied handler once for each line in the file.
- * The caller-supplied data pointer is passed straight through to the handler.
- */
-extern int processLines (FILE *file, /* The input file. */
-                         int (*handler) (char *line, void *data), /* The input line handler. */
-		         void *data); /* A pointer to caller-specific data. */
-extern int readLine (FILE *file, char **buffer, size_t *size);
+extern int processLines (
+  FILE *file,
+  int (*handler) (char *line, void *data),
+  void *data
+);
+extern int readLine (
+  FILE *file,
+  char **buffer,
+  size_t *size
+);
+extern void formatInputError (
+  char *buffer,
+  int size,
+  const char *file,
+  const int *line,
+  const char *format,
+  va_list argp
+);
 
 #ifdef __MINGW32__
 extern void gettimeofday (struct timeval *tvp, void *tzp);
