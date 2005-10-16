@@ -114,17 +114,26 @@ typedef struct {
 
 static void
 compileError (FileData *data, char *format, ...) {
-  char buffer[0X100];
-  va_list arguments;
-  va_start(arguments, format);
-  vsnprintf(buffer, sizeof(buffer), format, arguments);
-  va_end(arguments);
+  char message[0X100];
 
-  if (data)
-    LogPrint(LOG_WARNING, "File %s line %d: %s",
-             data->fileName, data->lineNumber, buffer);
-  else
-    LogPrint(LOG_WARNING, "%s", buffer);
+  {
+    const char *file = NULL;
+    const int *line = NULL;
+    va_list args;
+
+    if (data) {
+      file = data->fileName;
+      if (data->lineNumber) line = &data->lineNumber;
+    }
+
+    va_start(args, format);
+    formatInputError(message, sizeof(message),
+                     file, line,
+                     format, args);
+    va_end(args);
+  }
+
+  LogPrint(LOG_WARNING, "%s", message);
   errorCount++;
 }
 
