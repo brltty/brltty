@@ -514,6 +514,7 @@ struct radioInt {
 
 static struct radioInt colsRadio [] = {
   { "80", 80 },
+  { "60", 60 },
   { "40", 40 },
   { "20", 20 },
   { "8",  8  },
