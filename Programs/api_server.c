@@ -70,9 +70,10 @@
 #include "tunes.h"
 
 #ifdef WINDOWS
-#define close(fd) CloseHandle((HANDLE)(fd))
+#define closeFd(fd) CloseHandle((HANDLE)(fd))
 #define LogSocketError(msg) LogWindowsSocketError(msg)
 #else /* WINDOWS */
+#define closeFd(fd) close(fd)
 #define LogSocketError(msg) LogError(msg)
 #endif /* WINDOWS */
 
@@ -629,7 +630,7 @@ outmalloc:
   free(c);
 out:
   writeError(fd,BRLERR_NOMEM);
-  close(fd);
+  closeFd(fd);
   return NULL;
 }
 
@@ -637,7 +638,7 @@ out:
 /* Frees all resources associated to a connection */
 static void freeConnection(Connection *c)
 {
-  if (c->fd>=0) close(c->fd);
+  if (c->fd>=0) closeFd(c->fd);
   pthread_mutex_destroy(&c->brlMutex);
   pthread_mutex_destroy(&c->maskMutex);
   freeBrailleWindow(&c->brailleWindow);
@@ -1301,7 +1302,7 @@ static int initializeTcpSocket(struct socketInfo *info)
     break;
 cont:
     LogSocketError(fun);
-    close(fd);
+    closeFd(fd);
   }
   freeaddrinfo(res);
   if (cur) {
@@ -1313,7 +1314,7 @@ cont:
 #ifdef WINDOWS
     if (!(info->overl.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL))) {
       LogWindowsError("CreateEvent");
-      close(fd);
+      closeFd(fd);
       return -1;
     }
     LogPrint(LOG_DEBUG,"Event -> %p",info->overl.hEvent);
@@ -1419,7 +1420,7 @@ cont:
 #ifdef WINDOWS
   if (!(info->overl.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL))) {
     LogWindowsError("CreateEvent");
-    close(fd);
+    closeFd(fd);
     return -1;
   }
   LogPrint(LOG_DEBUG,"Event -> %p",info->overl.hEvent);
@@ -1429,7 +1430,7 @@ cont:
 
 err:
   LogSocketError(fun);
-  if (fd >= 0) close(fd);
+  if (fd >= 0) closeFd(fd);
 
 #endif /* HAVE_GETADDRINFO */
 
@@ -1451,7 +1452,7 @@ static int readPid(char *path)
   int n, fd;
   fd = open(path, O_RDONLY);
   n = read(fd, pids, sizeof(pids)-1);
-  close(fd);
+  closeFd(fd);
   if (n == -1) return 0;
   pids[n] = 0;
   pid = strtol(pids, &ptr, 10);
@@ -1603,7 +1604,7 @@ static int initializeLocalSocket(struct socketInfo *info)
       goto outtmp;
     }
   }
-  close(lock);
+  closeFd(lock);
   if (unlink(tmppath))
     LogPrint(LOG_ERR,"removing temp local socket lock");
   if (loopBind(fd, (struct sockaddr *) &sa, sizeof(sa))<0) {
@@ -1625,7 +1626,7 @@ outmode:
   umask(oldmode);
 #endif /* WINDOWS */
 outfd:
-  close(fd);
+  closeFd(fd);
 out:
   return -1;
 }
@@ -1716,7 +1717,7 @@ static void closeSockets(void *arg)
     pthread_cancel(socketThreads[i]);
     info=&socketInfo[i];
     if (info->fd>=0) {
-      if (close(info->fd))
+      if (closeFd(info->fd))
         LogError("closing socket");
       info->fd=-1;
 #ifdef WINDOWS
@@ -2007,7 +2008,7 @@ static void *server(void *arg)
       LogPrint(LOG_DEBUG,"Connection accepted on fd %d",res);
       if (unauthConnections>=UNAUTH_MAX) {
         writeError(res, BRLERR_CONNREFUSED);
-        close(res);
+        closeFd(res);
         if (unauthConnLog==0) LogPrint(LOG_WARNING, "Too many simultaneous unauthenticated connections");
         unauthConnLog++;
       } else {
@@ -2020,7 +2021,7 @@ static void *server(void *arg)
         c = createConnection(res, currentTime);
         if (c==NULL) {
           LogPrint(LOG_WARNING,"Failed to create connection structure");
-          close(res);
+          closeFd(res);
         }
         unauthConnections++;
 	addConnection(c, notty.connections);
