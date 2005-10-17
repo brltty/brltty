@@ -506,13 +506,11 @@ typedef struct { /* packet handlers */
 /* Returns to report success, -1 on errors */
 int allocBrailleWindow(BrailleWindow *brailleWindow)
 {
-  int i;
   if (!(brailleWindow->text = malloc(displaySize*sizeof(wchar_t)))) goto out;
   if (!(brailleWindow->andAttr = malloc(displaySize))) goto outText;
   if (!(brailleWindow->orAttr = malloc(displaySize))) goto outAnd;
 
-  for (i=0;i<displaySize;i++)
-    brailleWindow->text[i]=L' ';
+  wmemset(brailleWindow->text, L' ', displaySize);
   memset(brailleWindow->andAttr, 0xFF, displaySize);
   memset(brailleWindow->orAttr, 0x00, displaySize);
   brailleWindow->cursor = 0;
