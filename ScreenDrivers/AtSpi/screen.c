@@ -595,7 +595,7 @@ describe_AtSpiScreen (ScreenDescription *description) {
     description->posy = 0;
   }
   pthread_mutex_unlock(&updateMutex);
-  description->no = currentvt_AtSpiScreen();
+  description->number = currentvt_AtSpiScreen();
 }
 
 static int

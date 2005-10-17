@@ -49,7 +49,7 @@ describe_BaseScreen (ScreenDescription *description) {
   description->cols = strlen(text_BaseScreen);
   description->posx = 0;
   description->posy = 0;
-  description->no = currentvt_BaseScreen();
+  description->number = currentvt_BaseScreen();
 }
 
 static int

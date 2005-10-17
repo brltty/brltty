@@ -120,12 +120,12 @@ ScreenDescription scr;          /* For screen state infos */
 
 static void
 updateScreenAttributes (void) {
-  int previousScreen = scr.no;
+  int previousScreen = scr.number;
 
   describeScreen(&scr);
-  if (scr.no == -1) scr.no = userVirtualTerminal(0);
+  if (scr.number == -1) scr.number = userVirtualTerminal(0);
 
-  if (scr.no >= screenCount) {
+  if (scr.number >= screenCount) {
     if (!screenCount) {
       memset(&initialScreenState, 0, sizeof(initialScreenState));
       initialScreenState.trackCursor = DEFAULT_TRACK_CURSOR;
@@ -133,16 +133,16 @@ updateScreenAttributes (void) {
     }
 
     {
-      int newCount = (scr.no + 1) | 0XF;
+      int newCount = (scr.number + 1) | 0XF;
       screenStates = reallocWrapper(screenStates, newCount*sizeof(*screenStates));
       while (screenCount < newCount) screenStates[screenCount++] = NULL;
     }
-  } else if (scr.no == previousScreen) {
+  } else if (scr.number == previousScreen) {
     return;
   }
 
   {
-    ScreenState **state = &screenStates[scr.no];
+    ScreenState **state = &screenStates[scr.number];
     if (!*state) {
       *state = mallocWrapper(sizeof(**state));
       **state = initialScreenState;
@@ -369,7 +369,7 @@ setStatusCellsGeneric (unsigned char *status) {
   status[BRL_GSC_BRLROW] = p->winy+1;
   status[BRL_GSC_CSRCOL] = scr.posx+1;
   status[BRL_GSC_CSRROW] = scr.posy+1;
-  status[BRL_GSC_SCRNUM] = scr.no;
+  status[BRL_GSC_SCRNUM] = scr.number;
   status[BRL_GSC_FREEZE] = isFrozenScreen();
   status[BRL_GSC_DISPMD] = p->showAttributes;
   status[BRL_GSC_SIXDOTS] = prefs.textStyle;
@@ -442,7 +442,7 @@ showInfo (void) {
 
   if (brl.x*brl.y >= 21) {
     snprintf(text, sizeof(text), "%02d:%02d %02d:%02d %02d %c%c%c%c%c%c",
-             p->winx+1, p->winy+1, scr.posx+1, scr.posy+1, scr.no, 
+             p->winx+1, p->winy+1, scr.posx+1, scr.posy+1, scr.number, 
              p->trackCursor? 't': ' ',
              prefs.showCursor? (prefs.blinkingCursor? 'B': 'v'):
                                (prefs.blinkingCursor? 'b': ' '),
@@ -454,7 +454,7 @@ showInfo (void) {
   } else {
     brl.cursor = -1;
     snprintf(text, sizeof(text), "xxxxx %02d %c%c%c%c%c%c     ",
-             scr.no,
+             scr.number,
              p->trackCursor? 't': ' ',
              prefs.showCursor? (prefs.blinkingCursor? 'B': 'v'):
                                (prefs.blinkingCursor? 'b': ' '),
@@ -577,7 +577,7 @@ sayRegion (int left, int top, int width, int height, int track, SayMode mode) {
   }
 
   speechTracking = track;
-  speechScreen = scr.no;
+  speechScreen = scr.number;
   speechLine = top;
 }
 
@@ -1505,7 +1505,7 @@ main (int argc, char *argv[]) {
             playTune(&tune_command_rejected);
             break;
           case BRL_CMD_CSRJMP_VERT:
-            playTune(routeCursor(-1, p->winy, scr.no)?
+            playTune(routeCursor(-1, p->winy, scr.number)?
                      &tune_routing_started:
                      &tune_command_rejected);
             break;
@@ -1630,11 +1630,11 @@ main (int argc, char *argv[]) {
 #endif /* ENABLE_LEARN_MODE */
 
           case BRL_CMD_SWITCHVT_PREV:
-            if (!switchVirtualTerminal(scr.no-1))
+            if (!switchVirtualTerminal(scr.number-1))
               playTune(&tune_command_rejected);
             break;
           case BRL_CMD_SWITCHVT_NEXT:
-            if (!switchVirtualTerminal(scr.no+1))
+            if (!switchVirtualTerminal(scr.number+1))
               playTune(&tune_command_rejected);
             break;
 
@@ -1643,7 +1643,7 @@ main (int argc, char *argv[]) {
             restartSpeechDriver();
             break;
           case BRL_CMD_SPKHOME:
-            if (scr.no == speechScreen) {
+            if (scr.number == speechScreen) {
               trackSpeech(speech->getTrack());
             } else {
               playTune(&tune_command_rejected);
@@ -1776,7 +1776,7 @@ main (int argc, char *argv[]) {
               case BRL_BLK_ROUTE:
                 if (arg < brl.x) {
                   arg = getOffset(arg, 0);
-                  if (routeCursor(MIN(p->winx+arg, scr.cols-1), p->winy, scr.no)) {
+                  if (routeCursor(MIN(p->winx+arg, scr.cols-1), p->winy, scr.number)) {
                     playTune(&tune_routing_started);
                     break;
                   }
@@ -1929,7 +1929,7 @@ main (int argc, char *argv[]) {
             (scr.posy < top) || (scr.posy > bottom)) {
           if (routeCursor(MIN(MAX(scr.posx, left), right),
                           MIN(MAX(scr.posy, top), bottom),
-                          scr.no)) {
+                          scr.number)) {
             playTune(&tune_routing_started);
             awaitRoutingStatus(ROUTE_WRONG_COLUMN);
 
@@ -1937,7 +1937,7 @@ main (int argc, char *argv[]) {
               ScreenDescription description;
               describeScreen(&description);
 
-              if (description.no == scr.no) {
+              if (description.number == scr.number) {
                 slideWindowVertically(description.posy);
                 placeWindowHorizontally(description.posx);
               }
@@ -1996,7 +1996,7 @@ main (int argc, char *argv[]) {
     if (p->trackCursor) {
 #ifdef ENABLE_SPEECH_SUPPORT
       if (speechTracking) {
-        if ((scr.no == speechScreen) && speech->isSpeaking()) {
+        if ((scr.number == speechScreen) && speech->isSpeaking()) {
           int index = speech->getTrack();
           if (index != speechIndex) {
             trackSpeech(speechIndex = index);
@@ -2056,7 +2056,7 @@ main (int argc, char *argv[]) {
       static int oldWidth = 0;
       static unsigned char *oldText = NULL;
 
-      int newScreen = scr.no;
+      int newScreen = scr.number;
       int newX = scr.posx;
       int newY = scr.posy;
       int newWidth = scr.cols;

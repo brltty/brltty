@@ -75,8 +75,8 @@ getCurrentPosition (CursorRoutingData *crd) {
   ScreenDescription description;
   describeScreen(&description);
 
-  if (description.no != crd->screenNumber) {
-    crd->screenNumber = description.no;
+  if (description.number != crd->screenNumber) {
+    crd->screenNumber = description.number;
     return 0;
   }
 

@@ -127,7 +127,7 @@ currentvt_WindowsScreen (void) {
 static void
 describe_WindowsScreen (ScreenDescription *description) {
   CONSOLE_SCREEN_BUFFER_INFO info;
-  description->no = currentvt_WindowsScreen();
+  description->number = currentvt_WindowsScreen();
   if (!tryToAttach()) goto error;
   if (consoleOutput == INVALID_HANDLE_VALUE) goto error;
   if (!(GetConsoleScreenBufferInfo(consoleOutput, &info))) {

@@ -124,7 +124,7 @@ describe_ScreenScreen (ScreenDescription *description) {
   description->rows = shmAddress[1];
   description->posx = shmAddress[2];
   description->posy = shmAddress[3];
-  description->no = currentvt_ScreenScreen();
+  description->number = currentvt_ScreenScreen();
 }
 
 static int

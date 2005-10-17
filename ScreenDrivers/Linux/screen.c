@@ -696,22 +696,22 @@ getScreenDescription (ScreenDescription *description) {
 static int
 getConsoleDescription (ScreenDescription *description) {
   if (virtualTerminal) {
-    description->no = virtualTerminal;
+    description->number = virtualTerminal;
   } else {
     struct vt_stat state;
     if (controlConsole(VT_GETSTATE, &state) == -1) {
       LogError("ioctl VT_GETSTATE");
-      description->no = 0;
+      description->number = 0;
       problemText = "can't get virtual terminal number";
       return 0;
     }
-    description->no = state.v_active;
+    description->number = state.v_active;
 
-    if (currentConsoleNumber && (description->no != currentConsoleNumber) && !rebindConsole()) {
+    if (currentConsoleNumber && (description->number != currentConsoleNumber) && !rebindConsole()) {
       problemText = "can't access console";
       return 0;
     }
-    currentConsoleNumber = description->no;
+    currentConsoleNumber = description->number;
   }
 
   {
@@ -1215,7 +1215,7 @@ static int
 currentvt_LinuxScreen (void) {
   ScreenDescription description;
   getConsoleDescription(&description);
-  return description.no;
+  return description.number;
 }
 
 #ifdef HAVE_LINUX_INPUT_H

@@ -86,7 +86,7 @@ read_FrozenScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
 
 static int
 currentvt_FrozenScreen (void) {
-  return screenDescription.no;
+  return screenDescription.number;
 }
 
 void

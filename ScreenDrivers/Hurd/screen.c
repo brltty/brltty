@@ -213,9 +213,9 @@ static int
 read_HurdScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
   ScreenDescription description;
   describe_HurdScreen(&description);
-  if (lastReadVt != description.no) {
-    openScreen(description.no);
-    lastReadVt = description.no;
+  if (lastReadVt != description.number) {
+    openScreen(description.number);
+    lastReadVt = description.number;
   }
   if (validateScreenBox(&box, description.cols, description.rows)) {
     uint32_t lines, start, row, col;
@@ -421,7 +421,7 @@ static int
 currentvt_HurdScreen (void) {
   ScreenDescription description;
   getConsoleDescription(&description);
-  return description.no;
+  return description.number;
 }
 
 static int

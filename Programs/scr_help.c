@@ -230,7 +230,7 @@ describe_HelpScreen (ScreenDescription *description) {
   description->posy = cursorRow;
   description->cols = getBigEndian(page->width);
   description->rows = getBigEndian(page->height);
-  description->no = currentvt_HelpScreen();
+  description->number = currentvt_HelpScreen();
 }
 
 static int

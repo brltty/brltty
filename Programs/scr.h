@@ -34,7 +34,7 @@ typedef enum {
 typedef struct {
   short rows, cols;	/* screen dimensions */
   short posx, posy;	/* cursor position */
-  int no;		      /* screen number */
+  int number;		      /* screen number */
 } ScreenDescription;
 
 typedef struct {
