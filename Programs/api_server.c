@@ -2334,6 +2334,8 @@ void api_unlink(void)
 {
   braille=trueBraille;
   trueBraille=&noBraille;
+  if (!coreActive && driverOpened)
+    driverSuspend(disp);
 }
 
 /* Function : api_identify */

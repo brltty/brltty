@@ -1462,14 +1462,14 @@ closeBrailleDriver (void) {
   closeHelpScreen();
 
   if (brailleDriver) {
+    drainBrailleOutput(&brl, 0);
+    braille->close(&brl);
+
 #ifdef ENABLE_API
     if (apiStarted) api_unlink();
 #endif /* ENABLE_API */
 
-    drainBrailleOutput(&brl, 0);
-    braille->close(&brl);
     braille = &noBraille;
-
     brailleDevice = NULL;
     brailleDriver = NULL;
   }
@@ -1629,8 +1629,8 @@ static void
 closeSpeechDriver (void) {
   if (speechDriver) {
     speech->close();
-    speech = &noSpeech;
 
+    speech = &noSpeech;
     speechDriver = NULL;
   }
 
