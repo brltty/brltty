@@ -133,7 +133,7 @@ extern int hasTimedOut (int milliseconds);	/* test timeout condition */
 extern void LogOpen(int toConsole);
 extern void LogClose(void);
 extern void LogPrint
-       (int level, char *format, ...)
+       (int level, const char *format, ...)
 #ifdef HAVE_ATTRIBUTE_FORMAT_PRINTF
        __attribute__((format(printf, 2, 3)))
 #endif /* HAVE_ATTRIBUTE_FORMAT_PRINTF */

@@ -113,7 +113,7 @@ LogClose (void) {
 }
 
 void
-LogPrint (int level, char *format, ...) {
+LogPrint (int level, const char *format, ...) {
   va_list argp;
 
   if (level <= logLevel) {
