@@ -1377,10 +1377,20 @@ openBrailleDriver (int verify) {
             LogPrint(LOG_DEBUG, "initializing braille driver: %s -> %s",
                      driver->code, *device);
             initializeBraille();
-            if (driver->open(&brl, parameters, *device)) {
+
+            braille = driver;
+#ifdef ENABLE_API
+            if (apiOpened) api_link();
+#endif /* ENABLE_API */
+            if (braille->open(&brl, parameters, *device)) {
               opened = 1;
               brailleDriver = driver;
               brailleObject = object;
+            } else {
+#ifdef ENABLE_API
+              if (apiOpened) api_unlink();
+#endif /* ENABLE_API */
+              braille = &noBraille;
             }
           }
 
@@ -1450,6 +1460,10 @@ closeBrailleDriver (void) {
   if (brailleDriver) {
     drainBrailleOutput(&brl, 0);
 
+#ifdef ENABLE_API
+    if (apiOpened) api_unlink();
+#endif /* ENABLE_API */
+
     brailleDriver->close(&brl);
     brailleDriver = NULL;
 
@@ -1476,8 +1490,6 @@ startBrailleDriver (void) {
     testProgramTermination();
     if (openBrailleDriver(0)) {
       if (allocateBrailleBuffer(&brl)) {
-        braille = brailleDriver;
-
         getPreferences();
         setBraillePreferences();
 
@@ -1496,28 +1508,21 @@ startBrailleDriver (void) {
 
 static void
 stopBrailleDriver (void) {
-  braille = &noBraille;
   if (brl.isCoreBuffer) {
     free(brl.buffer);
     brl.buffer = NULL;
   }
+
   closeBrailleDriver();
+  braille = &noBraille;
   playTune(&tune_braille_off);
 }
 
 void
 restartBrailleDriver (void) {
-#ifdef ENABLE_API
-  if (apiOpened) api_unlink();
-#endif /* ENABLE_API */
-
   stopBrailleDriver();
   LogPrint(LOG_INFO, "reinitializing braille driver.");
   startBrailleDriver();
-
-#ifdef ENABLE_API
-  if (apiOpened) api_link();
-#endif /* ENABLE_API */
 }
 
 static void
@@ -2057,22 +2062,6 @@ startup (int argc, char *argv[]) {
    * be used instead.
    */
 
-  /* The device(s) the braille display might be connected to. */
-  if (!*opt_brailleDevice) {
-    LogPrint(LOG_CRIT, "braille device not specified.");
-    exit(4);
-  }
-  brailleDevices = splitString(opt_brailleDevice, ',', NULL);
-
-  /* Activate the braille display. */
-  brailleDrivers = splitString(opt_brailleDriver? opt_brailleDriver: "", ',', NULL);
-  if (opt_verify) {
-    if (openBrailleDriver(1)) closeBrailleDriver();
-  } else {
-    atexit(exitBrailleDriver);
-    startBrailleDriver();
-  }
-
 #ifdef ENABLE_API
   apiOpened = 0;
   if (!opt_noApi) {
@@ -2090,6 +2079,22 @@ startup (int argc, char *argv[]) {
     }
   }
 #endif /* ENABLE_API */
+
+  /* The device(s) the braille display might be connected to. */
+  if (!*opt_brailleDevice) {
+    LogPrint(LOG_CRIT, "braille device not specified.");
+    exit(4);
+  }
+  brailleDevices = splitString(opt_brailleDevice, ',', NULL);
+
+  /* Activate the braille display. */
+  brailleDrivers = splitString(opt_brailleDriver? opt_brailleDriver: "", ',', NULL);
+  if (opt_verify) {
+    if (openBrailleDriver(1)) closeBrailleDriver();
+  } else {
+    atexit(exitBrailleDriver);
+    startBrailleDriver();
+  }
 
 #ifdef ENABLE_SPEECH_SUPPORT
   /* Activate the speech synthesizer. */

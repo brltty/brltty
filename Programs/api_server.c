@@ -232,7 +232,35 @@ static Tty ttys;
 static unsigned int unauthConnections;
 static unsigned int unauthConnLog = 0;
 
-/* Pointer to subroutines of the real braille driver */
+/*
+ * API states are
+ * - stopped: No thread is running (hence no connection allowed).
+ *   started: The server thread is running, accepting connections.
+ * - unlinked: TrueBraille == &noBraille: API has no control on the driver.
+ *   linked: TrueBraille != &noBraille: API controls the driver.
+ * - core suspended: The core asked to keep the device closed.
+ *   core active: The core asked has opened the device.
+ * - device closed: API keeps the device closed.
+ *   device opened: API has really opened the device.
+ *
+ * Combinations can be:
+ * - initial: API stopped, unlinked, core suspended and device closed.
+ * - started: API started, unlinked, core suspended and device closed.
+ * - normal: API started, linked, core active and device opened.
+ * - core suspend: API started, linked, core suspended but device opened.
+ *   (BrlAPI-only output).
+ * - full suspend: API started, linked, core suspended and device closed.
+ * - brltty control: API started, core active and device opened, but unlinked.
+ *
+ * Other states don't make sense, since
+ * - api needs to be started before being linked,
+ * - the device can't remain closed if core is active,
+ * - the core must resume before unlinking api (so as to let the api re-open
+ *   the driver if necessary)
+ */
+
+/* Pointer to subroutines of the real braille driver, &noBraille when API is
+ * unlinked  */
 static const BrailleDriver *trueBraille;
 static BrailleDriver ApiBraille;
 
@@ -245,6 +273,12 @@ static unsigned int displaySize = 0;
 
 static BrailleDisplay *disp; /* Parameter to pass to braille drivers */
 static RepeatState repeatState;
+
+static int coreActive; /* Whether core is active */
+static int driverOpened; /* Whether device is really opened, protected by driverMutex */
+
+static char **trueBrailleParameters;
+static const char *trueBrailleDevice;
 
 static size_t authKeyLength = 0;
 static unsigned char authKey[BRLAPI_MAXPACKETSIZE];
@@ -279,6 +313,24 @@ static int isRawCapable(const BrailleDriver *brl)
 static int isKeyCapable(const BrailleDriver *brl)
 {
   return ((brl->readKey!=NULL) && (brl->keyToCommand!=NULL));
+}
+
+/* Function : driverSuspend */
+/* Close driver */
+static void driverSuspend(BrailleDisplay *brl) {
+  if (trueBraille == &noBraille) return;
+  LogPrint(LOG_DEBUG,"driver suspended");
+  driverOpened = 0;
+  trueBraille->close(brl);
+}
+
+/* Function : driverResume */
+/* Re-open driver */
+static int driverResume(BrailleDisplay *brl) {
+  if (trueBraille == &noBraille || !trueBrailleParameters) return 0;
+  driverOpened = trueBraille->open(brl, trueBrailleParameters, trueBrailleDevice);
+  if (driverOpened) LogPrint(LOG_DEBUG,"driver resumed");
+  return driverOpened;
 }
 
 /****************************************************************************/
@@ -1028,6 +1080,14 @@ static int handleGetRaw(Connection *c, brl_type_t type, unsigned char *packet, s
   CHECKERR(((!strcmp(name, trueBraille->name)) && isRawCapable(trueBraille)), BRLERR_OPNOTSUPP);
   CHECKERR(rawConnection==NULL,BRLERR_RAWMODEBUSY);
   pthread_mutex_lock(&rawMutex);
+  pthread_mutex_lock(&driverMutex);
+  if (!driverOpened && !driverResume(disp)) {
+    WERR(c->fd, BRLERR_DRIVERERROR);
+    pthread_mutex_unlock(&driverMutex);
+    pthread_mutex_unlock(&rawMutex);
+    return 0;
+  }
+  pthread_mutex_unlock(&driverMutex);
   c->raw = 1;
   rawConnection = c;
   writeAck(c->fd);
@@ -2015,7 +2075,6 @@ static void terminationHandler(void)
       LogPrint(LOG_WARNING,"pthread_cancel: %s",strerror(res));
     ttyTerminationHandler(&notty);
     ttyTerminationHandler(&ttys);
-    api_unlink();
 #ifdef WINDOWS
     WSACleanup();
 #endif /* WINDOWS */
@@ -2111,6 +2170,7 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
   unsigned char packet[BRLAPI_MAXPACKETSIZE];
   brl_keycode_t keycode, command = EOF;
 
+  pthread_mutex_lock(&connectionsMutex);
   pthread_mutex_lock(&rawMutex);
   if (rawConnection!=NULL) {
     pthread_mutex_lock(&driverMutex);
@@ -2123,9 +2183,7 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
     pthread_mutex_unlock(&rawMutex);
     goto out;
   }
-  pthread_mutex_unlock(&rawMutex);
   setCurrentRootTty();
-  pthread_mutex_lock(&connectionsMutex);
   c = whoFillsTty(&ttys);
   if (c && last_conn_write!=c) {
     last_conn_write=c;
@@ -2133,6 +2191,17 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
   }
   if (c) {
     pthread_mutex_lock(&c->brlMutex);
+    pthread_mutex_lock(&driverMutex);
+    if (!driverOpened) {
+      if (!driverResume(brl)) {
+	pthread_mutex_unlock(&driverMutex);
+	pthread_mutex_unlock(&c->brlMutex);
+        pthread_mutex_unlock(&rawMutex);
+	goto out;
+      }
+      refresh=1;
+    }
+    pthread_mutex_unlock(&driverMutex);
     if ((c->brlbufstate==TODISPLAY) || (refresh)) {
       unsigned char *oldbuf = disp->buffer, buf[displaySize];
       disp->buffer = buf;
@@ -2152,15 +2221,23 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
       refresh=0;
     }
     pthread_mutex_unlock(&c->brlMutex);
+  } else {
+    /* no RAW, no connection filling tty, hence suspend if needed */
+    pthread_mutex_lock(&driverMutex);
+    if (!coreActive) {
+      if (driverOpened) driverSuspend(brl);
+      pthread_mutex_unlock(&driverMutex);
+      pthread_mutex_unlock(&rawMutex);
+      goto out;
+    }
+    pthread_mutex_unlock(&driverMutex);
   }
-  pthread_mutex_unlock(&connectionsMutex);
   if (trueBraille->readKey) {
     pthread_mutex_lock(&driverMutex);
     res = trueBraille->readKey(brl);
     pthread_mutex_unlock(&driverMutex);
     if (brl->resizeRequired)
       handleResize(brl);
-    if (res==EOF) goto out;
     keycode = (brl_keycode_t) res;
     pthread_mutex_lock(&driverMutex);
     command = trueBraille->keyToCommand(brl,caller,keycode);
@@ -2172,11 +2249,12 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
     pthread_mutex_unlock(&driverMutex);
     if (brl->resizeRequired)
       handleResize(brl);
-    keycode = 0;
+    keycode = EOF;
     command = (brl_keycode_t) res;
   }
-  pthread_mutex_lock(&connectionsMutex);
-  if (trueBraille->readKey && (c = whoGetsKey(&ttys,keycode,BRL_KEYCODES))) {
+  /* some client may get raw mode only from now */
+  pthread_mutex_unlock(&rawMutex);
+  if (trueBraille->readKey && keycode != EOF && (c = whoGetsKey(&ttys,keycode,BRL_KEYCODES))) {
     /* somebody gets the raw code */
     LogPrint(LOG_DEBUG,"Transmitting unmasked key %lu",(unsigned long)keycode);
     keycode = htonl(keycode);
@@ -2194,13 +2272,40 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
       }
     }
   }
-  pthread_mutex_unlock(&connectionsMutex);
 out:
+  pthread_mutex_unlock(&connectionsMutex);
   return command;
 }
 
 void api_flush(BrailleDisplay *brl, BRL_DriverCommandContext caller) {
   (void) api_readCommand(brl, caller);
+}
+
+static int api_open(BrailleDisplay *brl, char **parameters, const char *device) {
+  /* core is resuming or opening the device for the first time, let's try to go
+   * to normal state */
+  if (parameters) {
+    trueBrailleParameters = parameters;
+    trueBrailleDevice = device;
+  }
+  if (!driverOpened) driverResume(brl);
+  if (driverOpened) {
+    /* TODO: handle clients' resize */
+    displayDimensions[0] = htonl(brl->x);
+    displayDimensions[1] = htonl(brl->y);
+    displaySize = brl->x * brl->y;
+    disp = brl;
+  }
+  return (coreActive = driverOpened);
+}
+
+static void api_close(BrailleDisplay *brl) {
+  /* core is suspending, going to core suspend state, we let api_flush() go to
+   * full suspend state */
+  coreActive = 0;
+
+  // to be removed when the core calls api_flush itself.
+  api_flush(brl, BRL_CTX_SCREEN);
 }
 
 /* Function : api_link */
@@ -2215,6 +2320,8 @@ void api_link(void)
   ApiBraille.writeWindow=api_writeWindow;
   ApiBraille.writeVisual=api_writeVisual;
   ApiBraille.readCommand=api_readCommand;
+  ApiBraille.open = api_open;
+  ApiBraille.close = api_close;
   ApiBraille.readKey = NULL;
   ApiBraille.keyToCommand = NULL;
   ApiBraille.readPacket = NULL;
@@ -2227,6 +2334,7 @@ void api_link(void)
 void api_unlink(void)
 {
   braille=trueBraille;
+  trueBraille=&noBraille;
 }
 
 /* Function : api_identify */
@@ -2254,10 +2362,7 @@ int api_start(BrailleDisplay *brl, char **parameters)
   pthread_attr_t attr;
   pthread_mutexattr_t mattr;
 
-  displayDimensions[0] = htonl(brl->x);
-  displayDimensions[1] = htonl(brl->y);
-  displaySize = brl->x * brl->y;
-  disp = brl;
+  coreActive=driverOpened=0;
 
   if (!strcmp(keyfile,"none"))
     authKeyLength = 0;
@@ -2305,14 +2410,13 @@ int api_start(BrailleDisplay *brl, char **parameters)
   /* don't care if it fails */
   pthread_attr_setstacksize(&attr,stackSize);
 
-  trueBraille=braille;
+  trueBraille=&noBraille;
   if ((res = pthread_create(&serverThread,&attr,server,hosts)) != 0) {
     LogPrint(LOG_WARNING,"pthread_create: %s",strerror(res));
     for (i=0;i<numSockets;i++)
       pthread_cancel(socketThreads[i]);
     goto outallocs;
   }
-  api_link();
   connectionsAllowed = 1;
   return 1;
   
