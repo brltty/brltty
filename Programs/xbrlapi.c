@@ -156,7 +156,7 @@ void api_setName(const char *wm_name) {
   if (!(last_name=strdup(wm_name))) fatal_errno("strdup(wm_name)",NULL);
 
   if (brlapi_writeText(0,wm_name)<0) {
-    brlapi_perror("writeBrl");
+    brlapi_perror("writeText");
     fprintf(stderr,_("setting name %s\n"),wm_name);
   }
 }
