@@ -540,8 +540,9 @@ open_AtSpiScreen (void) {
     LogPrint(LOG_ERR,"main SPI thread failed to be launched");
     return 0;
   }
-  errno = 0;
-  while (sem_wait(&SPI_init_sem) == -1 && errno == EINTR);
+  do {
+    errno = 0;
+  } while (sem_wait(&SPI_init_sem) == -1 && errno == EINTR);
   if (errno) {
     LogError("SPI initialization wait failed");
     return 0;
