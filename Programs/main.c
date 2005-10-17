@@ -2367,7 +2367,7 @@ message (const char *text, short flags) {
     int length = strlen(text);
 
 #ifdef ENABLE_API
-  if (apiOpened) api_unlink();
+  if (apiStarted) api_unlink();
 #endif /* ENABLE_API */
 
     while (length) {
@@ -2417,7 +2417,7 @@ message (const char *text, short flags) {
     }
 
 #ifdef ENABLE_API
-  if (apiOpened) api_link();
+  if (apiStarted) api_link();
 #endif /* ENABLE_API */
   }
 }

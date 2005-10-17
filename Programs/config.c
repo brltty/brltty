@@ -109,7 +109,7 @@ static char *opt_contractionTable;
 static int opt_noApi;
 static char *opt_apiParameters;
 static char **apiParameters = NULL;
-int apiOpened;
+int apiStarted;
 #endif /* ENABLE_API */
 
 #ifdef ENABLE_SPEECH_SUPPORT
@@ -1380,7 +1380,7 @@ openBrailleDriver (int verify) {
 
             braille = driver;
 #ifdef ENABLE_API
-            if (apiOpened) api_link();
+            if (apiStarted) api_link();
 #endif /* ENABLE_API */
             if (braille->open(&brl, parameters, *device)) {
               opened = 1;
@@ -1388,7 +1388,7 @@ openBrailleDriver (int verify) {
               brailleObject = object;
             } else {
 #ifdef ENABLE_API
-              if (apiOpened) api_unlink();
+              if (apiStarted) api_unlink();
 #endif /* ENABLE_API */
               braille = &noBraille;
             }
@@ -1458,12 +1458,12 @@ closeBrailleDriver (void) {
   closeHelpScreen();
 
   if (brailleDriver) {
-    drainBrailleOutput(&brl, 0);
-
 #ifdef ENABLE_API
-    if (apiOpened) api_unlink();
+    if (apiStarted) api_unlink();
 #endif /* ENABLE_API */
+    braille = &noBraille;
 
+    drainBrailleOutput(&brl, 0);
     brailleDriver->close(&brl);
     brailleDriver = NULL;
 
@@ -1508,13 +1508,13 @@ startBrailleDriver (void) {
 
 static void
 stopBrailleDriver (void) {
+  closeBrailleDriver();
+
   if (brl.isCoreBuffer) {
     free(brl.buffer);
     brl.buffer = NULL;
   }
 
-  closeBrailleDriver();
-  braille = &noBraille;
   playTune(&tune_braille_off);
 }
 
@@ -1536,7 +1536,7 @@ exitBrailleDriver (void) {
 static void
 exitApi (void) {
   api_stop(&brl);
-  apiOpened = 0;
+  apiStarted = 0;
 }
 #endif /* ENABLE_API */
 
@@ -2063,7 +2063,7 @@ startup (int argc, char *argv[]) {
    */
 
 #ifdef ENABLE_API
-  apiOpened = 0;
+  apiStarted = 0;
   if (!opt_noApi) {
     api_identify();
     apiParameters = processParameters(api_parameters,
@@ -2074,7 +2074,7 @@ startup (int argc, char *argv[]) {
     if (!opt_verify) {
       if (api_start(&brl, apiParameters)) {
         atexit(exitApi);
-        apiOpened = 1;
+        apiStarted = 1;
       }
     }
   }
