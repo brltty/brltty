@@ -117,7 +117,12 @@ extern int savePreferences (void);
 extern void updatePreferences (void);
 
 extern void restartBrailleDriver (void);
+extern int openBrailleDriver (void);
+extern void closeBrailleDriver (void);
+
 extern void restartSpeechDriver (void);
+extern int openSpeechDriver (void);
+extern void closeSpeechDriver (void);
 
 extern int readCommand (BRL_DriverCommandContext context);
 extern void resetAutorepeat (void);

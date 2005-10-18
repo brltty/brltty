@@ -1308,8 +1308,39 @@ initializeBraille (void) {
   brl.dataDirectory = opt_dataDirectory;
 }
 
+int
+openBrailleDriver (void) {
+  initializeBraille();
+
+  if (braille->open(&brl, brailleParameters, brailleDevice)) {
+    if (allocateBrailleBuffer(&brl)) {
+      return 1;
+    } else {
+      LogPrint(LOG_DEBUG, "braille buffer allocation failed.");
+    }
+
+    braille->close(&brl);
+  } else {
+    LogPrint(LOG_DEBUG, "braille driver initialization failed: %s -> %s",
+             braille->code, brailleDevice);
+  }
+
+  return 0;
+}
+
+void
+closeBrailleDriver (void) {
+  drainBrailleOutput(&brl, 0);
+  braille->close(&brl);
+
+  if (brl.isCoreBuffer) {
+    free(brl.buffer);
+    brl.buffer = NULL;
+  }
+}
+
 static int
-openBrailleDriver (int verify) {
+attachBrailleDriver (int verify) {
   int oneDevice = brailleDevices[0] && !brailleDevices[1];
   int oneDriver = brailleDrivers[0] && !brailleDrivers[1];
   int autodetect = oneDriver && (strcmp(brailleDrivers[0], "auto") == 0);
@@ -1382,8 +1413,7 @@ openBrailleDriver (int verify) {
             if (apiStarted) api_link();
 #endif /* ENABLE_API */
 
-            initializeBraille();
-            if (braille->open(&brl, brailleParameters, brailleDevice)) {
+            if (openBrailleDriver()) {
               opened = 1;
               brailleDriver = braille;
             } else {
@@ -1427,9 +1457,6 @@ openBrailleDriver (int verify) {
             LogPrint(LOG_INFO, "Preferences File: %s", preferencesFile);
 
             return 1;
-          } else {
-            LogPrint(LOG_DEBUG, "braille driver initialization failed: %s -> %s",
-                     braille->code, brailleDevice);
           }
 
           deallocateStrings(brailleParameters);
@@ -1458,12 +1485,11 @@ openBrailleDriver (int verify) {
 }
 
 static void
-closeBrailleDriver (void) {
+detachBrailleDriver (void) {
   closeHelpScreen();
 
   if (brailleDriver) {
-    drainBrailleOutput(&brl, 0);
-    braille->close(&brl);
+    closeBrailleDriver();
 
 #ifdef ENABLE_API
     if (apiStarted) api_unlink();
@@ -1494,33 +1520,25 @@ static void
 startBrailleDriver (void) {
   while (1) {
     testProgramTermination();
-    if (openBrailleDriver(0)) {
-      if (allocateBrailleBuffer(&brl)) {
-        getPreferences();
-        setBraillePreferences();
 
-        clearStatusCells(&brl);
-        setHelpPageNumber(brl.helpPage);
-        playTune(&tune_braille_on);
-        return;
-      } else {
-        LogPrint(LOG_DEBUG, "braille buffer allocation failed.");
-      }
-      closeBrailleDriver();
+    if (attachBrailleDriver(0)) {
+      getPreferences();
+      setBraillePreferences();
+
+      clearStatusCells(&brl);
+      setHelpPageNumber(brl.helpPage);
+
+      playTune(&tune_braille_on);
+      return;
     }
+
     approximateDelay(5000);
   }
 }
 
 static void
 stopBrailleDriver (void) {
-  closeBrailleDriver();
-
-  if (brl.isCoreBuffer) {
-    free(brl.buffer);
-    brl.buffer = NULL;
-  }
-
+  detachBrailleDriver();
   playTune(&tune_braille_off);
 }
 
@@ -1551,8 +1569,27 @@ void
 initializeSpeech (void) {
 }
 
+int
+openSpeechDriver (void) {
+  initializeSpeech();
+
+  if (speech->open(speechParameters)) {
+    return 1;
+  } else {
+    LogPrint(LOG_DEBUG, "speech driver initialization failed: %s",
+             speech->code);
+  }
+
+  return 0;
+}
+
+void
+closeSpeechDriver (void) {
+  speech->close();
+}
+
 static int
-openSpeechDriver (int verify) {
+attachSpeechDriver (int verify) {
   int oneDriver = speechDrivers[0] && !speechDrivers[1];
   int autodetect = oneDriver && (strcmp(speechDrivers[0], "auto") == 0);
   const char *const *code;
@@ -1585,8 +1622,7 @@ openSpeechDriver (int verify) {
           LogPrint(LOG_DEBUG, "initializing speech driver: %s",
                    speech->code);
 
-          initializeSpeech();
-          if (speech->open(speechParameters)) {
+          if (openSpeechDriver()) {
             opened = 1;
             speechDriver = speech;
           }
@@ -1600,9 +1636,6 @@ openSpeechDriver (int verify) {
           logParameters(speech->parameters, speechParameters, "Speech");
 
           return 1;
-        } else {
-          LogPrint(LOG_DEBUG, "speech driver initialization failed: %s",
-                   speech->code);
         }
 
         deallocateStrings(speechParameters);
@@ -1626,9 +1659,9 @@ openSpeechDriver (int verify) {
 }
 
 static void
-closeSpeechDriver (void) {
+detachSpeechDriver (void) {
   if (speechDriver) {
-    speech->close();
+    closeSpeechDriver();
 
     speech = &noSpeech;
     speechDriver = NULL;
@@ -1647,7 +1680,7 @@ closeSpeechDriver (void) {
 
 static void
 startSpeechDriver (void) {
-  if (openSpeechDriver(0)) {
+  if (attachSpeechDriver(0)) {
     setSpeechPreferences();
   }
 }
@@ -1655,7 +1688,7 @@ startSpeechDriver (void) {
 static void
 stopSpeechDriver (void) {
   speech->mute();
-  closeSpeechDriver();
+  detachSpeechDriver();
 }
 
 void
@@ -2098,7 +2131,7 @@ startup (int argc, char *argv[]) {
   /* Activate the braille display. */
   brailleDrivers = splitString(opt_brailleDriver? opt_brailleDriver: "", ',', NULL);
   if (opt_verify) {
-    if (openBrailleDriver(1)) closeBrailleDriver();
+    if (attachBrailleDriver(1)) detachBrailleDriver();
   } else {
     atexit(exitBrailleDriver);
     startBrailleDriver();
@@ -2108,7 +2141,7 @@ startup (int argc, char *argv[]) {
   /* Activate the speech synthesizer. */
   speechDrivers = splitString(opt_speechDriver? opt_speechDriver: "", ',', NULL);
   if (opt_verify) {
-    if (openSpeechDriver(1)) closeSpeechDriver();
+    if (attachSpeechDriver(1)) detachSpeechDriver();
   } else {
     atexit(exitSpeechDriver);
     startSpeechDriver();
