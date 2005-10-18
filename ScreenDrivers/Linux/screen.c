@@ -175,18 +175,18 @@ findDevicePath (const char *paths, const char *description, int mode) {
   while ((device = strtok(tokens, delimiters))) {
     tokens = NULL;
     device = strdupWrapper(device);
-    LogPrint(LOG_DEBUG, "Checking %s Device: %s",
+    LogPrint(LOG_DEBUG, "checking %s device: %s",
              description, device);
     if (access(device, mode) == -1) {
-      LogPrint(LOG_DEBUG, "%s Device access error: %s: %s",
+      LogPrint(LOG_DEBUG, "%s device access error: %s: %s",
                description, device, strerror(errno));
     } else {
       struct stat status;
       if (stat(device, &status) == -1) {
-        LogPrint(LOG_ERR, "%s Device stat error: %s: %s",
+        LogPrint(LOG_ERR, "%s device stat error: %s: %s",
                  description, device, strerror(errno));
       } else if (!S_ISCHR(status.st_mode)) {
-        LogPrint(LOG_ERR, "%s Device not character special: %s",
+        LogPrint(LOG_ERR, "%s device not character special: %s",
                  description, device);
       } else {
         if (path) free(path);
@@ -215,12 +215,12 @@ findDevicePath (const char *paths, const char *description, int mode) {
 
 static int
 setDevicePath (const char **path, const char *paths, const char *description, int mode) {
-  LogPrint(LOG_DEBUG, "%s Device List: %s", description, paths);
+  LogPrint(LOG_DEBUG, "%s device list: %s", description, paths);
   if ((*path = findDevicePath(paths, description, mode))) {
-    LogPrint(LOG_INFO, "%s Device: %s", description, *path);
+    LogPrint(LOG_INFO, "%s device: %s", description, *path);
     return 1;
   } else {
-    LogPrint(LOG_ERR, "%s Device not specified.", description);
+    LogPrint(LOG_ERR, "%s device not specified.", description);
   }
   return 0;
 }
@@ -241,25 +241,25 @@ vtPath (const char *base, unsigned char vt) {
 static int
 openDevice (const char *path, const char *description, int flags, int major, int minor) {
   int file;
-  LogPrint(LOG_DEBUG, "Opening %s device: %s", description, path);
+  LogPrint(LOG_DEBUG, "opening %s device: %s", description, path);
   if ((file = open(path, flags)) == -1) {
-    LogPrint(LOG_ERR, "Cannot open %s device: %s: %s",
+    LogPrint(LOG_ERR, "cannot open %s device: %s: %s",
              description, path, strerror(errno));
     if (errno == ENOENT) {
       mode_t mode = S_IFCHR | S_IRUSR | S_IWUSR;
-      LogPrint(LOG_NOTICE, "Creating %s device: %s mode=%06o major=%d minor=%d",
+      LogPrint(LOG_NOTICE, "creating %s device: %s mode=%06o major=%d minor=%d",
                description, path, mode, major, minor);
       if (mknod(path, mode, makedev(major, minor)) == -1) {
-        LogPrint(LOG_ERR, "Cannot create %s device: %s: %s",
+        LogPrint(LOG_ERR, "cannot create %s device: %s: %s",
                  description, path, strerror(errno));
       } else if ((file = open(path, flags)) == -1) {
-        LogPrint(LOG_ERR, "Cannot open %s device: %s: %s",
+        LogPrint(LOG_ERR, "cannot open %s device: %s: %s",
                  description, path, strerror(errno));
         if (unlink(path) == -1)
-          LogPrint(LOG_ERR, "Cannot remove %s device: %s: %s",
+          LogPrint(LOG_ERR, "cannot remove %s device: %s: %s",
                    description, path, strerror(errno));
         else
-          LogPrint(LOG_NOTICE, "Removed %s device: %s",
+          LogPrint(LOG_NOTICE, "removed %s device: %s",
                    description, path);
       }
     }
@@ -272,16 +272,16 @@ static int consoleDescriptor;
 
 static int
 setConsolePath (void) {
-  return setDevicePath(&consolePath, LINUX_CONSOLE_DEVICES, "Console", R_OK|W_OK);
+  return setDevicePath(&consolePath, LINUX_CONSOLE_DEVICES, "console", R_OK|W_OK);
 }
 
 static void
 closeConsole (void) {
   if (consoleDescriptor != -1) {
     if (close(consoleDescriptor) == -1) {
-      LogError("Console close");
+      LogError("console close");
     }
-    LogPrint(LOG_DEBUG, "Console closed: fd=%d", consoleDescriptor);
+    LogPrint(LOG_DEBUG, "console closed: fd=%d", consoleDescriptor);
     consoleDescriptor = -1;
   }
 }
@@ -294,7 +294,7 @@ openConsole (unsigned char vt) {
     if (console != -1) {
       closeConsole();
       consoleDescriptor = console;
-      LogPrint(LOG_DEBUG, "Console opened: %s: fd=%d", path, consoleDescriptor);
+      LogPrint(LOG_DEBUG, "console opened: %s: fd=%d", path, consoleDescriptor);
       free(path);
       return 1;
     }
@@ -309,16 +309,16 @@ static unsigned char virtualTerminal;
 
 static int
 setScreenPath (void) {
-  return setDevicePath(&screenPath, LINUX_SCREEN_DEVICES, "Screen", R_OK|W_OK);
+  return setDevicePath(&screenPath, LINUX_SCREEN_DEVICES, "screen", R_OK|W_OK);
 }
 
 static void
 closeScreen (void) {
   if (screenDescriptor != -1) {
     if (close(screenDescriptor) == -1) {
-      LogError("Screen close");
+      LogError("screen close");
     }
-    LogPrint(LOG_DEBUG, "Screen closed: fd=%d", screenDescriptor);
+    LogPrint(LOG_DEBUG, "screen closed: fd=%d", screenDescriptor);
     screenDescriptor = -1;
   }
 }
@@ -329,7 +329,7 @@ openScreen (unsigned char vt) {
   if (path) {
     int screen = openDevice(path, "screen", O_RDWR, 7, 0X80|vt);
     if (screen != -1) {
-      LogPrint(LOG_DEBUG, "Screen opened: %s: fd=%d", path, screenDescriptor);
+      LogPrint(LOG_DEBUG, "screen opened: %s: fd=%d", path, screen);
       if (openConsole(vt)) {
         closeScreen();
         screenDescriptor = screen;
@@ -338,7 +338,7 @@ openScreen (unsigned char vt) {
         return 1;
       }
       close(screen);
-      LogPrint(LOG_DEBUG, "Screen closed: fd=%d", screen);
+      LogPrint(LOG_DEBUG, "screen closed: fd=%d", screen);
     }
     free(path);
   }
@@ -389,7 +389,7 @@ getUserAcm (int force) {
   if (controlConsole(GIO_UNISCRNMAP, &map) != -1) {
     if (force || (memcmp(applicationCharacterMap, map, sizeof(applicationCharacterMap)) != 0)) {
       memcpy(applicationCharacterMap, map, sizeof(applicationCharacterMap));
-      if (!force) LogPrint(LOG_DEBUG, "User application character map changed.");
+      if (!force) LogPrint(LOG_DEBUG, "user application character map changed.");
       logApplicationCharacterMap();
       return 1;
     }
@@ -434,7 +434,7 @@ setScreenFontMap (int force) {
   while (1) {
     sfm.entry_ct = size;
     if (!(sfm.entries = malloc(sfm.entry_ct * sizeof(*sfm.entries)))) {
-      LogError("Screen font map allocation");
+      LogError("screen font map allocation");
       return 0;
     }
     if (controlConsole(GIO_UNIMAP, &sfm) != -1) break;
@@ -444,7 +444,7 @@ setScreenFontMap (int force) {
       return 0;
     }
     if (!(size <<= 1)) {
-      LogPrint(LOG_ERR, "Screen font map too big.");
+      LogPrint(LOG_ERR, "screen font map too big.");
       return 0;
     }
   }
@@ -617,12 +617,12 @@ setTranslationTable (int force) {
          }
          if (position < 0) {
            if (debugCharacterTranslationTable) {
-             LogPrint(LOG_DEBUG, "No character mapping: char=%2.2X unum=%4.4X", character, unicode);
+             LogPrint(LOG_DEBUG, "no character mapping: char=%2.2X unum=%4.4X", character, unicode);
            }
          } else {
            translationTable[position] = character;
            if (debugCharacterTranslationTable) {
-             LogPrint(LOG_DEBUG, "Character mapping: char=%2.2X unum=%4.4X fpos=%2.2X",
+             LogPrint(LOG_DEBUG, "character mapping: char=%2.2X unum=%4.4X fpos=%2.2X",
                       character, unicode, position);
            }
          }
@@ -675,14 +675,14 @@ getScreenDescription (ScreenDescription *description) {
         description->posy = buffer[3];
         return 1;
       } else if (count == -1) {
-        LogError("Screen header read");
+        LogError("screen header read");
       } else {
         long int expected = sizeof(buffer);
-        LogPrint(LOG_ERR, "Truncated screen header: expected %ld bytes, read %d.",
+        LogPrint(LOG_ERR, "truncated screen header: expected %ld bytes, read %d.",
                  expected, count);
       }
     } else {
-      LogError("Screen seek");
+      LogError("screen seek");
     }
     problemText = "screen header read error";
   }
@@ -753,11 +753,7 @@ read_LinuxScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
     int text = mode == SCR_TEXT;
 
     if (problemText) {
-      if (text) {
-        memcpy(buffer, problemText+box.left, box.width);
-      } else {
-        memset(buffer, 0X07, box.width);
-      }
+      setScreenMessage(&box, buffer, mode, problemText);
       return 1;
     }
 
@@ -775,7 +771,7 @@ read_LinuxScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
 
           if (row) {
             if (lseek(screenDescriptor, increment, SEEK_CUR) == -1) {
-              LogError("Screen seek");
+              LogError("screen seek");
               return 0;
             }
           }
@@ -783,9 +779,9 @@ read_LinuxScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
           count = read(screenDescriptor, line, length);
           if (count != length) {
             if (count == -1) {
-              LogError("Screen data read");
+              LogError("screen data read");
             } else {
-              LogPrint(LOG_ERR, "Truncated screen data: expected %d bytes, read %d.",
+              LogPrint(LOG_ERR, "truncated screen data: expected %d bytes, read %d.",
                        length, count);
             }
             return 0;
@@ -825,11 +821,11 @@ read_LinuxScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
         }
         return 1;
       } else {
-        LogError("Screen seek");
+        LogError("screen seek");
       }
     }
   } else {
-    LogPrint(LOG_ERR, "Invalid screen area: cols=%d left=%d width=%d rows=%d top=%d height=%d",
+    LogPrint(LOG_ERR, "invalid screen area: cols=%d left=%d width=%d rows=%d top=%d height=%d",
              description.cols, box.left, box.width,
              description.rows, box.top, box.height);
   }
@@ -949,7 +945,7 @@ insertCode (ScreenKey key, int raw) {
           case SCR_KEY_CURSOR_DOWN:  code = 0X50; break;
           case SCR_KEY_CURSOR_RIGHT: code = 0X4D; break;
           default:
-            LogPrint(LOG_WARNING, "Key %4.4X not suported in scancode mode.", key);
+            LogPrint(LOG_WARNING, "key %4.4X not suported in scancode mode.", key);
             return 0;
         }
       } else {
@@ -965,7 +961,7 @@ insertCode (ScreenKey key, int raw) {
           case SCR_KEY_CURSOR_DOWN:  code = 0X6C; break;
           case SCR_KEY_CURSOR_RIGHT: code = 0X6A; break;
           default:
-            LogPrint(LOG_WARNING, "Key %4.4X not suported in keycode mode.", key);
+            LogPrint(LOG_WARNING, "key %4.4X not suported in keycode mode.", key);
             return 0;
         }
       }
@@ -1020,7 +1016,7 @@ insertMapped (ScreenKey key, int (*byteInserter)(unsigned char byte)) {
           break;
 
         default:
-          LogPrint(LOG_WARNING, "Unsupported keyboard meta mode: %d", meta);
+          LogPrint(LOG_WARNING, "unsupported keyboard meta mode: %d", meta);
           return 0;
       }
     }
@@ -1129,7 +1125,7 @@ insertMapped (ScreenKey key, int (*byteInserter)(unsigned char byte)) {
         sequence = "\x1b[34~";
         break;
       default:
-        LogPrint(LOG_WARNING, "Key %4.4X not suported in ANSI mode.", key);
+        LogPrint(LOG_WARNING, "key %4.4X not suported in ANSI mode.", key);
         return 0;
     }
     end = sequence + strlen(sequence);
@@ -1154,7 +1150,7 @@ insertUtf8 (unsigned char byte) {
 static int
 insert_LinuxScreen (ScreenKey key) {
   int ok = 0;
-  LogPrint(LOG_DEBUG, "Insert key: %4.4X", key);
+  LogPrint(LOG_DEBUG, "insert key: %4.4X", key);
   if (rebindConsole()) {
     int mode;
     if (controlConsole(KDGKBMODE, &mode) != -1) {
@@ -1172,7 +1168,7 @@ insert_LinuxScreen (ScreenKey key) {
           if (insertMapped(key, &insertUtf8)) ok = 1;
           break;
         default:
-          LogPrint(LOG_WARNING, "Unsupported keyboard mode: %d", mode);
+          LogPrint(LOG_WARNING, "unsupported keyboard mode: %d", mode);
           break;
       }
     } else {
@@ -1185,7 +1181,7 @@ insert_LinuxScreen (ScreenKey key) {
 static int
 validateVt (int vt) {
   if ((vt >= 1) && (vt <= 0X3F)) return 1;
-  LogPrint(LOG_DEBUG, "Virtual terminal %d is out of range.", vt);
+  LogPrint(LOG_DEBUG, "virtual terminal out of range: %d", vt);
   return 0;
 }
 
@@ -1201,7 +1197,7 @@ switchvt_LinuxScreen (int vt) {
   if (validateVt(vt)) {
     if (selectvt_LinuxScreen(0)) {
       if (ioctl(consoleDescriptor, VT_ACTIVATE, vt) != -1) {
-        LogPrint(LOG_DEBUG, "Switched to virtual tertminal %d.", vt);
+        LogPrint(LOG_DEBUG, "switched to virtual tertminal %d.", vt);
         return 1;
       } else {
         LogError("ioctl VT_ACTIVATE");

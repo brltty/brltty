@@ -41,7 +41,9 @@ typedef struct {
   short left, top;	/* top-left corner (offset from 0) */
   short width, height;	/* dimensions */
 } ScreenBox;
+
 extern int validateScreenBox (const ScreenBox *box, int columns, int rows);
+extern void setScreenMessage (const ScreenBox *box, unsigned char *buffer, ScreenMode mode, const char *message);
 
 #define SCR_KEY_MOD_META 0X100
 typedef enum {

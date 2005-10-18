@@ -133,6 +133,22 @@ validateScreenBox (const ScreenBox *box, int columns, int rows) {
 }
 
 void
+setScreenMessage (const ScreenBox *box, unsigned char *buffer, ScreenMode mode, const char *message) {
+  int count = box->width * box->height;
+
+  if (mode == SCR_TEXT) {
+    int length = strlen(message) - box->left;
+    if (length < 0) length = 0;
+    if (length > box->width) length = box->width;
+
+    memset(buffer, ' ', count);
+    if (length) memcpy(buffer, message+box->left, length);
+  } else {
+    memset(buffer, 0X07, count);
+  }
+}
+
+void
 describeScreen (ScreenDescription *description) {
   currentScreen->describe(description);
 }
