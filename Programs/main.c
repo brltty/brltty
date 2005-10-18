@@ -1087,6 +1087,34 @@ main (int argc, char *argv[]) {
     testRoutingStatus(ROUTE_DONE);
 
     /*
+     * Update Braille display and screen information.  Switch screen 
+     * state if screen number has changed.
+     */
+    updateScreenAttributes();
+
+    /* NB: This should also accomplish screen resizing: scr.rows and
+     * scr.cols may have changed.
+     */
+    {
+      int maximum = MAX(scr.rows-(int)brl.y, 0);
+      int *table[] = {&p->winy, &p->moty, NULL};
+      int **value = table;
+      while (*value) {
+        if (**value > maximum) **value = maximum;
+        ++value;
+      }
+    }
+    {
+      int maximum = MAX(scr.cols-1, 0);
+      int *table[] = {&p->winx, &p->motx, NULL};
+      int **value = table;
+      while (*value) {
+        if (**value > maximum) **value = maximum;
+        ++value;
+      }
+    }
+
+    /*
      * Process any Braille input 
      */
     while (1) {
@@ -1954,34 +1982,6 @@ main (int argc, char *argv[]) {
       if ((capitalsTimer -= updateInterval) <= 0)
         setBlinkingCapitals(!capitalsState);
 
-    /*
-     * Update Braille display and screen information.  Switch screen 
-     * state if screen number has changed.
-     */
-    updateScreenAttributes();
-
-    /* NB: This should also accomplish screen resizing: scr.rows and
-     * scr.cols may have changed.
-     */
-    {
-      int maximum = MAX(scr.rows-(int)brl.y, 0);
-      int *table[] = {&p->winy, &p->moty, NULL};
-      int **value = table;
-      while (*value) {
-        if (**value > maximum) **value = maximum;
-        ++value;
-      }
-    }
-    {
-      int maximum = MAX(scr.cols-1, 0);
-      int *table[] = {&p->winx, &p->motx, NULL};
-      int **value = table;
-      while (*value) {
-        if (**value > maximum) **value = maximum;
-        ++value;
-      }
-    }
-
 #ifdef ENABLE_SPEECH_SUPPORT
     /* called continually even if we're not tracking so that the pipe doesn't fill up. */
     speech->doTrack();
@@ -2155,8 +2155,6 @@ main (int argc, char *argv[]) {
       oldX = newX;
       oldY = newY;
     }
-
-    processSpeechFifo();
 #endif /* ENABLE_SPEECH_SUPPORT */
 
     /* There are a few things to take care of if the display has moved. */
@@ -2343,6 +2341,10 @@ main (int argc, char *argv[]) {
       setStatusCells();
       braille->writeWindow(&brl);
     }
+
+#ifdef ENABLE_SPEECH_SUPPORT
+    processSpeechFifo();
+#endif /* ENABLE_SPEECH_SUPPORT */
 
     drainBrailleOutput(&brl, updateInterval);
     updateIntervals++;
