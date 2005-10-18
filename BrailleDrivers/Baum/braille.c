@@ -1621,18 +1621,21 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
   
   if (isSerialDevice(&device)) {
     io = &serialOperations;
+  } else
 
 #ifdef ENABLE_USB_SUPPORT
-  } else if (isUsbDevice(&device)) {
+  if (isUsbDevice(&device)) {
     io = &usbOperations;
+  } else
 #endif /* ENABLE_USB_SUPPORT */
 
 #ifdef ENABLE_BLUETOOTH_SUPPORT
-  } else if (isBluetoothDevice(&device)) {
+  if (isBluetoothDevice(&device)) {
     io = &bluetoothOperations;
+  } else
 #endif /* ENABLE_BLUETOOTH_SUPPORT */
 
-  } else {
+  {
     unsupportedDevice(device);
     return 0;
   }
