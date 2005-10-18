@@ -1087,34 +1087,6 @@ main (int argc, char *argv[]) {
     testRoutingStatus(ROUTE_DONE);
 
     /*
-     * Update Braille display and screen information.  Switch screen 
-     * state if screen number has changed.
-     */
-    updateScreenAttributes();
-
-    /* NB: This should also accomplish screen resizing: scr.rows and
-     * scr.cols may have changed.
-     */
-    {
-      int maximum = MAX(scr.rows-(int)brl.y, 0);
-      int *table[] = {&p->winy, &p->moty, NULL};
-      int **value = table;
-      while (*value) {
-        if (**value > maximum) **value = maximum;
-        ++value;
-      }
-    }
-    {
-      int maximum = MAX(scr.cols-1, 0);
-      int *table[] = {&p->winx, &p->motx, NULL};
-      int **value = table;
-      while (*value) {
-        if (**value > maximum) **value = maximum;
-        ++value;
-      }
-    }
-
-    /*
      * Process any Braille input 
      */
     while (1) {
@@ -2348,6 +2320,34 @@ main (int argc, char *argv[]) {
 
     drainBrailleOutput(&brl, updateInterval);
     updateIntervals++;
+
+    /*
+     * Update Braille display and screen information.  Switch screen 
+     * state if screen number has changed.
+     */
+    updateScreenAttributes();
+
+    /* NB: This should also accomplish screen resizing: scr.rows and
+     * scr.cols may have changed.
+     */
+    {
+      int maximum = MAX(scr.rows-(int)brl.y, 0);
+      int *table[] = {&p->winy, &p->moty, NULL};
+      int **value = table;
+      while (*value) {
+        if (**value > maximum) **value = maximum;
+        ++value;
+      }
+    }
+    {
+      int maximum = MAX(scr.cols-1, 0);
+      int *table[] = {&p->winx, &p->motx, NULL};
+      int **value = table;
+      while (*value) {
+        if (**value > maximum) **value = maximum;
+        ++value;
+      }
+    }
   }
 
   return 0;
