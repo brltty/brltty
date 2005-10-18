@@ -1082,12 +1082,6 @@ main (int argc, char *argv[]) {
   while (1) {
     int pointerMoved = 0;
 
-    /* The braille display can stick out by brl.x-offr columns from the
-     * right edge of the screen.
-     */
-    short offr = scr.cols % brl.x;
-    if (!offr) offr = brl.x;
-
     testProgramTermination();
     closeTuneDevice(0);
     testRoutingStatus(ROUTE_DONE);

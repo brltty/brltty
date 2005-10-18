@@ -1340,7 +1340,7 @@ closeBrailleDriver (void) {
 }
 
 static int
-attachBrailleDriver (int verify) {
+activateBrailleDriver (int verify) {
   int oneDevice = brailleDevices[0] && !brailleDevices[1];
   int oneDriver = brailleDrivers[0] && !brailleDrivers[1];
   int autodetect = oneDriver && (strcmp(brailleDrivers[0], "auto") == 0);
@@ -1485,7 +1485,7 @@ attachBrailleDriver (int verify) {
 }
 
 static void
-detachBrailleDriver (void) {
+deactivateBrailleDriver (void) {
   closeHelpScreen();
 
   if (brailleDriver) {
@@ -1521,7 +1521,7 @@ startBrailleDriver (void) {
   while (1) {
     testProgramTermination();
 
-    if (attachBrailleDriver(0)) {
+    if (activateBrailleDriver(0)) {
       getPreferences();
       setBraillePreferences();
 
@@ -1538,7 +1538,7 @@ startBrailleDriver (void) {
 
 static void
 stopBrailleDriver (void) {
-  detachBrailleDriver();
+  deactivateBrailleDriver();
   playTune(&tune_braille_off);
 }
 
@@ -1589,7 +1589,7 @@ closeSpeechDriver (void) {
 }
 
 static int
-attachSpeechDriver (int verify) {
+activateSpeechDriver (int verify) {
   int oneDriver = speechDrivers[0] && !speechDrivers[1];
   int autodetect = oneDriver && (strcmp(speechDrivers[0], "auto") == 0);
   const char *const *code;
@@ -1659,7 +1659,7 @@ attachSpeechDriver (int verify) {
 }
 
 static void
-detachSpeechDriver (void) {
+deactivateSpeechDriver (void) {
   if (speechDriver) {
     closeSpeechDriver();
 
@@ -1680,7 +1680,7 @@ detachSpeechDriver (void) {
 
 static void
 startSpeechDriver (void) {
-  if (attachSpeechDriver(0)) {
+  if (activateSpeechDriver(0)) {
     setSpeechPreferences();
   }
 }
@@ -1688,7 +1688,7 @@ startSpeechDriver (void) {
 static void
 stopSpeechDriver (void) {
   speech->mute();
-  detachSpeechDriver();
+  deactivateSpeechDriver();
 }
 
 void
@@ -2131,7 +2131,7 @@ startup (int argc, char *argv[]) {
   /* Activate the braille display. */
   brailleDrivers = splitString(opt_brailleDriver? opt_brailleDriver: "", ',', NULL);
   if (opt_verify) {
-    if (attachBrailleDriver(1)) detachBrailleDriver();
+    if (activateBrailleDriver(1)) deactivateBrailleDriver();
   } else {
     atexit(exitBrailleDriver);
     startBrailleDriver();
@@ -2141,7 +2141,7 @@ startup (int argc, char *argv[]) {
   /* Activate the speech synthesizer. */
   speechDrivers = splitString(opt_speechDriver? opt_speechDriver: "", ',', NULL);
   if (opt_verify) {
-    if (attachSpeechDriver(1)) detachSpeechDriver();
+    if (activateSpeechDriver(1)) deactivateSpeechDriver();
   } else {
     atexit(exitSpeechDriver);
     startSpeechDriver();
