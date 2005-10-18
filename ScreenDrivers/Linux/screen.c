@@ -730,7 +730,7 @@ getConsoleDescription (ScreenDescription *description) {
 static void
 describe_LinuxScreen (ScreenDescription *description) {
   getConsoleDescription(description);
-  getScreenDescription(description);
+  description->unreadable = !getScreenDescription(description);
 
   /* Periodically recalculate font mapping. I don't know any way to be
    * notified when it changes, and the recalculation is not too
