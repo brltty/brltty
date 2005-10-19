@@ -152,6 +152,7 @@ void
 describeScreen (ScreenDescription *description) {
   description->unreadable = 0;
   currentScreen->describe(description);
+  if (description->number == -1) description->unreadable = 1;
 }
 
 int
