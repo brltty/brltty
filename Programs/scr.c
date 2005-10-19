@@ -150,9 +150,11 @@ setScreenMessage (const ScreenBox *box, unsigned char *buffer, ScreenMode mode, 
 
 void
 describeScreen (ScreenDescription *description) {
-  description->unreadable = 0;
+  description->unreadable = NULL;
   currentScreen->describe(description);
-  if (description->number == -1) description->unreadable = 1;
+  if (description->number == -1)
+    if (!description->unreadable)
+      description->unreadable = "unreadable screen";
 }
 
 int

@@ -1087,9 +1087,11 @@ main (int argc, char *argv[]) {
     closeTuneDevice(0);
     testRoutingStatus(ROUTE_DONE);
 
-    if (0) {
+    if (1) {
       if (scr.unreadable) {
         if (!suspended) {
+          clearStatusCells(&brl);
+          writeBrailleString(&brl, scr.unreadable);
           closeBrailleDriver();
           suspended = 1;
         }
