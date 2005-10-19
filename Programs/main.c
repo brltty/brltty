@@ -1090,7 +1090,7 @@ main (int argc, char *argv[]) {
     if (1) {
       if (scr.unreadable) {
         if (!suspended) {
-          clearStatusCells(&brl);
+          setStatusCells();
           writeBrailleString(&brl, scr.unreadable);
           closeBrailleDriver();
           suspended = 1;
