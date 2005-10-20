@@ -551,8 +551,17 @@ Alva
 .B at
 Albatross
 .TP 4
+.B ba
+BrlAPI
+.TP 4
+.B bd
+Braudi
+.TP 4
 .B bl
 BrailleLite
+.TP 4
+.B bm
+Baum
 .TP 4
 .B bn
 BrailleNote
@@ -584,6 +593,9 @@ GenericSay
 .B ht
 HandyTech
 .TP 4
+.B lb
+Libbraille
+.TP 4
 .B lt
 LogText
 .TP 4
@@ -605,8 +617,14 @@ no driver
 .B pm
 Papenmeier
 .TP 4
+.B sw
+Swift
+.TP 4
 .B th
 Theta
+.TP 4
+.B tn
+TechniBraille Systems Inc.
 .TP 4
 .B ts
 Telesensory Systems Inc.
@@ -614,14 +632,8 @@ Telesensory Systems Inc.
 .B tt
 TTY
 .TP 4
-.B va
-Vario/RBT (emulation 1)
-.TP 4
 .B vd
 VideoBraille
-.TP 4
-.B vh
-Vario/RBT (emulation 2)
 .TP 4
 .B vo
 Voyager
