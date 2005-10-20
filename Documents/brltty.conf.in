@@ -17,7 +17,7 @@
 # processing is not case sensitive. Examples of valid entries are:
 #
 #	Braille-Driver	pm	# Papenmeier braille displays.
-#	braille-device	ttyS0	# The first Linux serial device.
+#	braille-device	serial:@first_serial_device@	# The first serial device.
 #	SPEECH-DRIVER	fv	# The Festival Text to Speech System.
 
 # The default settings given within the following descriptions assume no
@@ -60,8 +60,13 @@
 #braille-driver	xw	# XWindow
 
 # The braille-device directive specifies the device to which the braille
-# display is connected. Relative paths are anchored at "/dev". If not
-# specified, "@braille_device@" will be used.
+# display is connected. The generic syntax is type:device. The device
+# type is optional, and, for backward compatibility, defaults to serial.
+# The following devices are supported (brackets indicate optionality):
+#    serial:path (relative paths are anchored at "/dev")
+#    usb:[serial-number]
+#    bluetooth:address
+# If not specified, "@braille_device@" will be used.
 # (can be overridden with the -d [--braille-device=] option)
 #braille-device	serial:@first_serial_device@	# First serial device.
 #braille-device	usb:		# First USB device matching braille driver.

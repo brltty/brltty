@@ -64,8 +64,9 @@ extension is optional.
 .TP
 \fB-d \fIdevice\fB,\fR... (\fB--braille-device=\fR)
 The device to which the braille display is connected.
-The built-in default is
-the primary (first) serial port of the system.
+The built-in default is \fBusb:\fR.
+If USB support is not available then it is
+the primary (first) serial port (device) if not.
 .RS
 .PP
 The general form of a braille device specification is
@@ -90,11 +91,11 @@ If a relative path is given then it's anchored at
 .B /dev/
 (the usual location where devices are defined on a Unix-like system).
 The following device specifications all refer
-to the primary serial device on Linux:
-.BR "serial:/dev/ttyS0" ","
-.BR "serial:ttyS0" ","
-.BR "/dev/ttyS0" ","
-.BR "ttyS0" "."
+to the primary serial device:
+.BR "serial:/dev/@first_serial_device@" ","
+.BR "serial:@first_serial_device@" ","
+.BR "/dev/@first_serial_device@" ","
+.BR "@first_serial_device@" "."
 .TP
 .B USB
 For a USB device, specify \fBusb:\fR.

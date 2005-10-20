@@ -499,8 +499,9 @@ for any additional display-specific instructions.
     Specify the default device to which the braille display is connected
     (see section <ref id="operand-braille-device" name="Braille Device Specification">).
     If this option isn't specified,
-    then an operating system appropriate path
-    for the primary serial port is assumed.
+    then <tt/usb:/ is assumed if USB support is available,
+    and an operating system appropriate path
+    for the primary (first) serial port (device) is assumed if not.
     See the <ref id="configure-braille-device" name="braille-device"> configuration file directive
     and the <ref id="options-braille-device" name="-d"> command line option
     for run-time selection.
