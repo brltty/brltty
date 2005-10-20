@@ -64,9 +64,7 @@ extension is optional.
 .TP
 \fB-d \fIdevice\fB,\fR... (\fB--braille-device=\fR)
 The device to which the braille display is connected.
-The built-in default is \fBusb:\fR.
-If USB support is not available then it is
-the primary (first) serial port (device) if not.
+The built-in default is \fB@braille_device@\fR.
 .RS
 .PP
 The general form of a braille device specification is
