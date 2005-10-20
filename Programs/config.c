@@ -141,7 +141,7 @@ BEGIN_OPTION_TABLE
    "Path to attributes translation table file."},
 
   {"braille-driver", "driver", 'b', 1, OPT_Config | OPT_Environ,
-   &opt_brailleDriver, NULL,
+   &opt_brailleDriver, "auto",
    "Braille driver: one of {" BRAILLE_DRIVER_CODES "}"},
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
@@ -188,7 +188,7 @@ BEGIN_OPTION_TABLE
 
 #ifdef ENABLE_SPEECH_SUPPORT
   {"speech-driver", "driver", 's', 0, OPT_Config | OPT_Environ,
-   &opt_speechDriver, NULL,
+   &opt_speechDriver, "auto",
    "Speech driver: one of {" SPEECH_DRIVER_CODES "}"},
 #endif /* ENABLE_SPEECH_SUPPORT */
 
@@ -1463,7 +1463,6 @@ activateBrailleDriver (int verify) {
           brailleParameters = NULL;
         }
 
-        braille = &noBraille;
         if (brailleObject) {
           unloadSharedObject(brailleObject);
           brailleObject = NULL;
@@ -1471,6 +1470,7 @@ activateBrailleDriver (int verify) {
       } else {
         LogPrint(LOG_ERR, "braille driver not loadable: %s", *code);
       }
+      braille = &noBraille;
 
       ++code;
     }
@@ -1598,7 +1598,6 @@ activateSpeechDriver (int verify) {
 
   if (autodetect) {
     static const char *const speechCodes[] = {
-      "al", "bl", "cb",
       NULL
     };
     code = speechCodes;
@@ -1642,7 +1641,6 @@ activateSpeechDriver (int verify) {
         speechParameters = NULL;
       }
 
-      speech = &noSpeech;
       if (speechObject) {
         unloadSharedObject(speechObject);
         speechObject = NULL;
@@ -1650,6 +1648,7 @@ activateSpeechDriver (int verify) {
     } else {
       LogPrint(LOG_ERR, "speech driver not loadable: %s", *code);
     }
+    speech = &noSpeech;
 
     ++code;
   }

@@ -31,7 +31,9 @@
 
 # The braille-driver directive specifies the two-letter driver
 # identification code of the driver for the braille display.
+# If not specified, autodetection will be performed.
 # (can be overridden with the -b [--braille-driver=] option)
+#braille-driver	auto	# autodetect
 #braille-driver	al	# Alva
 #braille-driver	at	# Albatross
 #braille-driver	ba	# BrlAPI
@@ -176,7 +178,9 @@
 
 # The speech-driver directive specifies the two-letter driver
 # identification code of the driver for the speech synthesizer.
+# If not specified, autodetection will be performed.
 # (can be overridden with the -s [--speech-driver=] option)
+#speech-driver	auto	# autodetect
 #speech-driver	al	# Alva
 #speech-driver	bl	# BrailleLite
 #speech-driver	cb	# CombiBraille

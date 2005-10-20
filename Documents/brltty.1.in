@@ -51,8 +51,7 @@ The built-in default is
 \fB-b \fIdriver\fB,\fR...|\fBauto\fR (\fB--braille-driver=\fR)
 The driver for the braille display
 (see Driver Specification).
-The built-in default is
-the first braille driver which was configured in at build-time.
+The built-in default is \fBauto\fR.
 .TP
 \fB-c \fItable\fR (\fB--contraction-table=\fR)
 The path to the contraction table.
@@ -224,8 +223,7 @@ is also specified).
 \fB-s \fIdriver\fB,\fR...|\fBauto\fR (\fB--speech-driver=\fR)
 The driver for the speech synthesizer
 (see Driver Specification).
-The built-in default is
-the first speech driver which was configured in at build-time.
+The built-in default is \fBauto\fR.
 .TP
 \fB-t \fItable\fR (\fB--text-table=\fR)
 The path to the text translation table.
