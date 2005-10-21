@@ -217,6 +217,7 @@ else
    brltty_external_names_$1=" ${brltty_item_names_$1} "
    brltty_internal_codes_$1=""
    brltty_internal_names_$1=""
+
    if test "${brltty_items}" != "yes"
    then
       while :
@@ -309,16 +310,21 @@ changequote([, ])dnl
          test "${brltty_delimiter}" -eq 0 && break
       done
    fi
+
    BRLTTY_VAR_TRIM([brltty_external_codes_$1])
    BRLTTY_VAR_TRIM([brltty_external_names_$1])
    BRLTTY_VAR_TRIM([brltty_internal_codes_$1])
    BRLTTY_VAR_TRIM([brltty_internal_names_$1])
 fi
+
 AC_SUBST([brltty_external_codes_$1])
 AC_SUBST([brltty_external_names_$1])
 AC_SUBST([brltty_internal_codes_$1])
 AC_SUBST([brltty_internal_names_$1])
-AC_DEFINE_UNQUOTED(BRLTTY_UPPERCASE([$1_$2_codes]), ["${brltty_item_codes_$1}"])
+
+set -- ${brltty_internal_codes_$1} ${brltty_external_codes_$1}
+brltty_default_code_$1="${1}"
+AC_DEFINE_UNQUOTED(BRLTTY_UPPERCASE([$1_$2_codes]), ["${*}"])
 
 $1_driver_libraries=""
 if test -n "${brltty_internal_codes_$1}"
@@ -361,10 +367,6 @@ changequote([, ])dnl
    BRLTTY_SUMMARY_ITEM([internal-$1-drivers], [brltty_internal_codes_$1])
    BRLTTY_ARG_PARAMETERS([$1])
 fi
-
-set -- ${brltty_internal_codes_$1}
-test ${#} -eq 0 && set -- ${brltty_external_codes_$1}
-brltty_default_code_$1="${1}"
 
 for brltty_driver in ${brltty_item_names_$1}
 do
