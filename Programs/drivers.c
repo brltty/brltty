@@ -26,6 +26,22 @@
 #include "system.h"
 #include "drivers.h"
 
+int
+haveDriver (const char *codes, const char *code) {
+  int length = strlen(code);
+  const char *string;
+
+  while ((string = strstr(codes, code))) {
+    if ((string == codes) || (string[-1] == ' '))
+      if (!string[length] || (string[length] == ' '))
+        return 1;
+
+    string += length;
+  }
+
+  return 0;
+}
+
 const void *
 loadDriver (
   const char *driverCode, void **driverObject,

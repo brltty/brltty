@@ -1395,6 +1395,7 @@ activateBrailleDriver (int verify) {
     }
 
     while (*code) {
+      if (autodetect && !haveBrailleDriver(*code)) continue;
       LogPrint(LOG_DEBUG, "checking for '%s' braille display.", *code);
 
       if ((braille = loadBrailleDriver(*code, &brailleObject, opt_libraryDirectory))) {
@@ -1607,6 +1608,7 @@ activateSpeechDriver (int verify) {
   LogPrint(LOG_DEBUG, "looking for speech synthesizer.");
 
   while (*code) {
+    if (autodetect && !haveSpeechDriver(*code)) continue;
     LogPrint(LOG_DEBUG, "checking for '%s' speech synthesizer.", *code);
 
     if ((speech = loadSpeechDriver(*code, &speechObject, opt_libraryDirectory))) {

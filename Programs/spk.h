@@ -53,6 +53,7 @@ typedef struct {
   void (*volume) (float setting);
 } SpeechDriver;
 
+extern int haveSpeechDriver (const char *code);
 extern const SpeechDriver *loadSpeechDriver (const char *code, void **driverObject, const char *driverDirectory);
 extern void identifySpeechDrivers (void);
 extern const SpeechDriver *speech;

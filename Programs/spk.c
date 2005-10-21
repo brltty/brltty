@@ -69,6 +69,11 @@ static const float spkRateTable[] = {
   3.0000
 };
 
+int
+haveSpeechDriver (const char *code) {
+  return haveDriver(SPEECH_DRIVER_CODES, code);
+}
+
 const SpeechDriver *
 loadSpeechDriver (const char *code, void **driverObject, const char *driverDirectory) {
   return loadDriver(code, driverObject,

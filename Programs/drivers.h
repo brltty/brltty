@@ -27,6 +27,8 @@ typedef struct {
   const char *const *code;
 } DriverEntry;
 
+extern int haveDriver (const char *codes, const char *code);
+
 extern const void *loadDriver (
   const char *driverCode, void **driverObject,
   const char *driverDirectory, const DriverEntry *driverTable,

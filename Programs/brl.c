@@ -79,6 +79,11 @@ TranslationTable attributesTable = {
 
 void *contractionTable = NULL;
 
+int
+haveBrailleDriver (const char *code) {
+  return haveDriver(BRAILLE_DRIVER_CODES, code);
+}
+
 const BrailleDriver *
 loadBrailleDriver (const char *code, void **driverObject, const char *driverDirectory) {
   return loadDriver(code, driverObject,
