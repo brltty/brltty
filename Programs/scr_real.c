@@ -30,7 +30,7 @@
 #endif /* HAVE_SYS_SELECT_H */
 
 #include "misc.h"
-#include "sysmisc.h"
+#include "drivers.h"
 #include "scr.h"
 #include "scr_real.h"
 #include "scr.auto.h"

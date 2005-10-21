@@ -25,8 +25,8 @@
 #include <fcntl.h>
 
 #include "misc.h"
-#include "sysmisc.h"
 #include "message.h"
+#include "drivers.h"
 #include "brl.h"
 #include "tbl.h"
 #include "brl.auto.h"

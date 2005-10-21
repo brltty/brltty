@@ -26,7 +26,7 @@
 #include <sys/stat.h>
 
 #include "misc.h"
-#include "sysmisc.h"
+#include "drivers.h"
 #include "spk.h"
 #include "spk.auto.h"
 

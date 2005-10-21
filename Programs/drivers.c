@@ -24,7 +24,7 @@
 
 #include "misc.h"
 #include "system.h"
-#include "sysmisc.h"
+#include "drivers.h"
 
 const void *
 loadDriver (
