@@ -61,16 +61,18 @@ setAfter (int length) {
 static int
 selectRule (int length) { /*check for valid contractions */
   int ruleOffset;
-  int maximumLength = 0;
+  int maximumLength;
 
   if (length < 1) return 0;
   if (length == 1) {
     ruleOffset = table->characters[CTL(*src)].rules;
+    maximumLength = 1;
   } else {
     BYTE bytes[2];
     bytes[0] = CTL(src[0]);
     bytes[1] = CTL(src[1]);
     ruleOffset = table->rules[hash(bytes)];
+    maximumLength = 0;
   }
 
   while (ruleOffset) {
@@ -88,18 +90,21 @@ selectRule (int length) { /*check for valid contractions */
 
         int state = STATE(before);
         int i;
-        maximumLength = length;
+        maximumLength = currentFindLength;
 
         for (i=0; i<currentFindLength; ++i) {
           unsigned char byte = src[i];
           int next = STATE(byte);
 
-          if ((state > 0) && (next == 1)) {
-            state = 2;
-          } else if (((state == 2) && (next == 0)) ||
-                     ((state == 0) && (next == 1) && (i > 0))) {
+          if ((i > 0) &&
+              (((state == 0) && (next == 1)) ||
+               ((state == 2) && (next == 0)))) {
             maximumLength = i;
             break;
+          }
+
+          if ((state > 0) && (next == 1)) {
+            state = 2;
           } else {
             state = next;
           }
@@ -108,7 +113,7 @@ selectRule (int length) { /*check for valid contractions */
 #undef STATE
       }
 
-      if ((!maximumLength || (currentFindLength <= maximumLength)) &&
+      if ((currentFindLength <= maximumLength) &&
           (!currentRule->after || CTC(before, currentRule->after)) &&
           (!currentRule->before || CTC(after, currentRule->before))) {
         switch (currentOpcode) {
