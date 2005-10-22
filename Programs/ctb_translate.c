@@ -61,6 +61,7 @@ setAfter (int length) {
 static int
 selectRule (int length) { /*check for valid contractions */
   int ruleOffset;
+  int maximumLength = 0;
 
   if (length < 1) return 0;
   if (length == 1) {
@@ -71,18 +72,46 @@ selectRule (int length) { /*check for valid contractions */
     bytes[1] = CTL(src[1]);
     ruleOffset = table->rules[hash(bytes)];
   }
+
   while (ruleOffset) {
     currentRule = CTR(table, ruleOffset);
     currentOpcode = currentRule->opcode;
     currentFindLength = currentRule->findlen;
+
     if ((length == 1) ||
         ((currentFindLength <= length) &&
          compareBytes(src, currentRule->findrep, currentFindLength))) {
-      /* check this rule */
       setAfter(currentFindLength);
-      if ((!currentRule->after || CTC(before, currentRule->after)) &&
-        (!currentRule->before || CTC(after, currentRule->before))) {
-        switch (currentOpcode) { /*check validity of this contraction */
+
+      if (!maximumLength) {
+#define STATE(c) (CTC((c), CTC_UpperCase)? 1: CTC((c), CTC_LowerCase)? 0: -1)
+
+        int state = STATE(before);
+        int i;
+        maximumLength = length;
+
+        for (i=0; i<currentFindLength; ++i) {
+          unsigned char byte = src[i];
+          int next = STATE(byte);
+
+          if ((state > 0) && (next == 1)) {
+            state = 2;
+          } else if (((state == 2) && (next == 0)) ||
+                     ((state == 0) && (next == 1) && (i > 0))) {
+            maximumLength = i;
+            break;
+          } else {
+            state = next;
+          }
+        }
+
+#undef STATE
+      }
+
+      if ((!maximumLength || (currentFindLength <= maximumLength)) &&
+          (!currentRule->after || CTC(before, currentRule->after)) &&
+          (!currentRule->before || CTC(after, currentRule->before))) {
+        switch (currentOpcode) {
           case CTO_Always:
           case CTO_Repeated:
           case CTO_Replace:
@@ -203,8 +232,10 @@ selectRule (int length) { /*check for valid contractions */
         }
       }
     }				/*Done with checking this rule */
+
     ruleOffset = currentRule->next;
   }
+
   return 0;
 }
 
@@ -298,6 +329,7 @@ contractText (void *contractionTable,
           if (!putSequence(table->englishLetterSign)) break;
         }
       }
+
       if (CTC(*src, CTC_UpperCase)) {
         if (!CTC(before, CTC_UpperCase)) {
           if (table->beginCapitalSign &&
