@@ -2299,12 +2299,9 @@ static int api_open(BrailleDisplay *brl, char **parameters, const char *device) 
 }
 
 static void api_close(BrailleDisplay *brl) {
-  /* core is suspending, going to core suspend state, we let api_flush() go to
-   * full suspend state */
+  /* core is suspending, going to core suspend state */
   coreActive = 0;
-
-  // to be removed when the core calls api_flush itself.
-  api_flush(brl, BRL_CTX_SCREEN);
+  /* we let core's call to api_flush() go to full suspend state */
 }
 
 /* Function : api_link */
