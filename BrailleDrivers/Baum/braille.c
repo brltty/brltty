@@ -870,6 +870,8 @@ static int
 probeBaumDisplay (BrailleDisplay *brl) {
   int probes = 0;
   while (1) {
+    int assumedCellCount = 0;
+
     {
       static const unsigned char request[] = {BAUM_REQ_GetDeviceIdentity};
       if (!writeBaumPacket(brl, request, sizeof(request))) break;
@@ -911,6 +913,17 @@ probeBaumDisplay (BrailleDisplay *brl) {
 
           case BAUM_RSP_DeviceIdentity:
             logBaumDeviceIdentity(&response);
+            {
+              const int length = sizeof(response.data.values.deviceIdentity);
+              char buffer[length+1];
+              memcpy(buffer, response.data.values.deviceIdentity, length);
+              buffer[length] = 0;
+
+              {
+                char *digits = strpbrk(buffer, "123456789");
+                if (digits) assumedCellCount = atoi(digits);
+              }
+            }
             continue;
 
           case BAUM_RSP_SerialNumber:
@@ -926,6 +939,10 @@ probeBaumDisplay (BrailleDisplay *brl) {
       }
     }
     if (errno != EAGAIN) break;
+    if (assumedCellCount) {
+      cellCount = assumedCellCount;
+      return 1;
+    }
     if (++probes == probeLimit) break;
   }
 
