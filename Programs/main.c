@@ -1103,7 +1103,9 @@ main (int argc, char *argv[]) {
     }
 
     if (suspended) {
-      api_flush(&brl, BRL_CTX_SCREEN);
+#ifdef ENABLE_API
+      if (apiStarted) api_flush(&brl, BRL_CTX_SCREEN);
+#endif /* ENABLE_API */
     } else {
       /*
        * Process any Braille input 
