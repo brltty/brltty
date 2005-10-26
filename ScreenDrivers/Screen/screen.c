@@ -20,11 +20,14 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <stdarg.h>
 #include <inttypes.h>
 #include <string.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+#include <signal.h>
+#include <sys/wait.h>
 
 #ifdef HAVE_SHMGET
 #include <sys/ipc.h>
@@ -144,6 +147,189 @@ read_ScreenScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
   return 0;
 }
 
+static int
+doScreenCommand (const char *command, ...) {
+  va_list args;
+  int count = 0;
+
+  va_start(args, command);
+  while (va_arg(args, char *)) ++count;
+  va_end(args);
+
+  {
+    const char *argv[count + 4];
+    const char **arg = argv;
+    const char *program = "screen";
+
+    *arg++ = program;
+    *arg++ = "-X";
+    *arg++ = command;
+
+    va_start(args, command);
+    while ((*arg++ = va_arg(args, char *)));
+    va_end(args);
+
+    {
+      int ok = 0;
+      sigset_t newMask, oldMask;
+      pid_t pid;
+
+      sigemptyset(&newMask);
+      sigaddset(&newMask, SIGCHLD);
+      sigprocmask(SIG_BLOCK, &newMask, &oldMask);
+
+      switch ((pid = fork())) {
+        case -1: /* error */
+          LogError("fork");
+          break;
+
+        case 0: /* child */
+          sigprocmask(SIG_SETMASK, &oldMask, NULL);
+          execvp(program, (char *const*)argv);
+          LogError("execvp");
+          _exit(1);
+
+        default: { /* parent */
+          int status;
+          if (waitpid(pid, &status, 0) == -1) {
+            LogError("waitpid");
+          } else if (WIFEXITED(status)) {
+            ok = 1;
+          } else if (WIFSIGNALED(status)) {
+          } else if (WIFSTOPPED(status)) {
+          }
+        }
+      }
+
+      sigprocmask(SIG_SETMASK, &oldMask, NULL);
+      return ok;
+    }
+  }
+}
+
+static int
+insert_ScreenScreen (ScreenKey key) {
+  char buffer[3];
+  char *sequence;
+
+  LogPrint(LOG_DEBUG, "insert key: %4.4X", key);
+  if (key < SCR_KEY_ENTER) {
+    sequence = buffer + sizeof(buffer);
+    *--sequence = 0;
+    *--sequence = key & 0XFF;
+    if (key & SCR_KEY_MOD_META) *--sequence = 0X1B;
+  } else {
+    switch (key) {
+      case SCR_KEY_ENTER:
+        sequence = "\r";
+        break;
+      case SCR_KEY_TAB:
+        sequence = "\t";
+        break;
+      case SCR_KEY_BACKSPACE:
+        sequence = "\x7f";
+        break;
+      case SCR_KEY_ESCAPE:
+        sequence = "\x1b";
+        break;
+      case SCR_KEY_CURSOR_LEFT:
+        sequence = "\x1b[D";
+        break;
+      case SCR_KEY_CURSOR_RIGHT:
+        sequence = "\x1b[C";
+        break;
+      case SCR_KEY_CURSOR_UP:
+        sequence = "\x1b[A";
+        break;
+      case SCR_KEY_CURSOR_DOWN:
+        sequence = "\x1b[B";
+        break;
+      case SCR_KEY_PAGE_UP:
+        sequence = "\x1b[5~";
+        break;
+      case SCR_KEY_PAGE_DOWN:
+        sequence = "\x1b[6~";
+        break;
+      case SCR_KEY_HOME:
+        sequence = "\x1b[1~";
+        break;
+      case SCR_KEY_END:
+        sequence = "\x1b[4~";
+        break;
+      case SCR_KEY_INSERT:
+        sequence = "\x1b[2~";
+        break;
+      case SCR_KEY_DELETE:
+        sequence = "\x1b[3~";
+        break;
+      case SCR_KEY_FUNCTION + 0:
+        sequence = "\x1bOP";
+        break;
+      case SCR_KEY_FUNCTION + 1:
+        sequence = "\x1bOQ";
+        break;
+      case SCR_KEY_FUNCTION + 2:
+        sequence = "\x1bOR";
+        break;
+      case SCR_KEY_FUNCTION + 3:
+        sequence = "\x1bOS";
+        break;
+      case SCR_KEY_FUNCTION + 4:
+        sequence = "\x1b[15~";
+        break;
+      case SCR_KEY_FUNCTION + 5:
+        sequence = "\x1b[17~";
+        break;
+      case SCR_KEY_FUNCTION + 6:
+        sequence = "\x1b[18~";
+        break;
+      case SCR_KEY_FUNCTION + 7:
+        sequence = "\x1b[19~";
+        break;
+      case SCR_KEY_FUNCTION + 8:
+        sequence = "\x1b[20~";
+        break;
+      case SCR_KEY_FUNCTION + 9:
+        sequence = "\x1b[21~";
+        break;
+      case SCR_KEY_FUNCTION + 10:
+        sequence = "\x1b[23~";
+        break;
+      case SCR_KEY_FUNCTION + 11:
+        sequence = "\x1b[24~";
+        break;
+      case SCR_KEY_FUNCTION + 12:
+        sequence = "\x1b[25~";
+        break;
+      case SCR_KEY_FUNCTION + 13:
+        sequence = "\x1b[26~";
+        break;
+      case SCR_KEY_FUNCTION + 14:
+        sequence = "\x1b[28~";
+        break;
+      case SCR_KEY_FUNCTION + 15:
+        sequence = "\x1b[29~";
+        break;
+      case SCR_KEY_FUNCTION + 16:
+        sequence = "\x1b[31~";
+        break;
+      case SCR_KEY_FUNCTION + 17:
+        sequence = "\x1b[32~";
+        break;
+      case SCR_KEY_FUNCTION + 18:
+        sequence = "\x1b[33~";
+        break;
+      case SCR_KEY_FUNCTION + 19:
+        sequence = "\x1b[34~";
+        break;
+      default:
+        LogPrint(LOG_WARNING, "unsuported key: %4.4X", key);
+        return 0;
+    }
+  }
+  return doScreenCommand("stuff", sequence, NULL);
+}
+
 static void
 close_ScreenScreen (void) {
 #ifdef HAVE_SHMGET
@@ -169,6 +355,7 @@ scr_initialize (MainScreen *main) {
   main->base.currentvt = currentvt_ScreenScreen;
   main->base.describe = describe_ScreenScreen;
   main->base.read = read_ScreenScreen;
+  main->base.insert = insert_ScreenScreen;
   main->open = open_ScreenScreen;
   main->close = close_ScreenScreen;
   main->uservt = uservt_ScreenScreen;
