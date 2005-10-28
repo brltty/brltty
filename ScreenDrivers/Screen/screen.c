@@ -52,59 +52,142 @@ static const mode_t shmMode = S_IRWXU;
 static const int shmSize = 4 + ((66 * 132) * 2);
 
 static int
+doHostCommand (const char *const *arguments) {
+  int result = 0XFF;
+  sigset_t newMask, oldMask;
+  pid_t pid;
+
+  sigemptyset(&newMask);
+  sigaddset(&newMask, SIGCHLD);
+  sigprocmask(SIG_BLOCK, &newMask, &oldMask);
+
+  switch ((pid = fork())) {
+    case -1: /* error */
+      LogError("fork");
+      break;
+
+    case 0: /* child */
+setgid(500);
+setuid(500);
+      sigprocmask(SIG_SETMASK, &oldMask, NULL);
+      execvp(arguments[0], (char *const*)arguments);
+      LogError("execvp");
+      _exit(1);
+
+    default: { /* parent */
+      int status;
+      if (waitpid(pid, &status, 0) == -1) {
+        LogError("waitpid");
+      } else if (WIFEXITED(status)) {
+        result = WEXITSTATUS(status);
+        LogPrint(LOG_DEBUG, "exit status: %d", result);
+      } else if (WIFSIGNALED(status)) {
+        result = WTERMSIG(status);
+        LogPrint(LOG_DEBUG, "termination signal: %d", result);
+        result += 0X80;
+      } else if (WIFSTOPPED(status)) {
+        result = WSTOPSIG(status);
+        LogPrint(LOG_DEBUG, "stop signal: %d", result);
+        result += 0X80;
+      } else {
+        LogPrint(LOG_DEBUG, "unknown status: 0X%X", status);
+      }
+    }
+  }
+
+  sigprocmask(SIG_SETMASK, &oldMask, NULL);
+  return result;
+}
+
+static int
+doScreenCommand (const char *command, ...) {
+  va_list args;
+  int count = 0;
+
+  va_start(args, command);
+  while (va_arg(args, char *)) ++count;
+  va_end(args);
+
+  {
+    const char *argv[count + 4];
+    const char **arg = argv;
+
+    *arg++ = "screen";
+    *arg++ = "-X";
+    *arg++ = command;
+
+    va_start(args, command);
+    while ((*arg++ = va_arg(args, char *)));
+    va_end(args);
+
+    {
+      int result = doHostCommand(argv);
+      if (result == 0) return 1;
+      LogPrint(LOG_ERR, "screen error: %d", result);
+    }
+  }
+
+  return 0;
+}
+
+static int
 open_ScreenScreen (void) {
 #ifdef HAVE_SHMGET
-  key_t keys[2];
-  int keyCount = 0;
-
-  /* The original, static key. */
-  keys[keyCount++] = 0xBACD072F;
-
-  /* The new, dynamically generated, per user key. */
   {
-    int project = 'b';
-    const char *path = getenv("HOME");
-    if (!path || !*path) path = "/";
-    LogPrint(LOG_DEBUG, "Shared memory file system object: %s", path);
-    if ((keys[keyCount] = ftok(path, project)) != -1) {
-      keyCount++;
-    } else {
-      LogPrint(LOG_WARNING, "Per user shared memory key not generated: %s",
-               strerror(errno));
-    }
-  }
+    key_t keys[2];
+    int keyCount = 0;
 
-  while (keyCount > 0) {
-    shmKey = keys[--keyCount];
-    LogPrint(LOG_DEBUG, "Trying shared memory key: 0X%" PRIX_KEY_T, shmKey);
-    if ((shmIdentifier = shmget(shmKey, shmSize, shmMode)) != -1) {
-      if ((shmAddress = shmat(shmIdentifier, NULL, 0)) != (char *)-1) {
-        LogPrint(LOG_INFO, "Screen image shared memory key: 0X%" PRIX_KEY_T, shmKey);
-        return 1;
+    /* The original, static key. */
+    keys[keyCount++] = 0xBACD072F;
+
+    /* The new, dynamically generated, per user key. */
+    {
+      int project = 'b';
+      const char *path = getenv("HOME");
+      if (!path || !*path) path = "/";
+      LogPrint(LOG_DEBUG, "Shared memory file system object: %s", path);
+      if ((keys[keyCount] = ftok(path, project)) != -1) {
+        keyCount++;
       } else {
-        LogPrint(LOG_WARNING, "Cannot attach shared memory segment 0X%" PRIX_KEY_T ": %s",
+        LogPrint(LOG_WARNING, "Per user shared memory key not generated: %s",
+                 strerror(errno));
+      }
+    }
+
+    while (keyCount > 0) {
+      shmKey = keys[--keyCount];
+      LogPrint(LOG_DEBUG, "Trying shared memory key: 0X%" PRIX_KEY_T, shmKey);
+      if ((shmIdentifier = shmget(shmKey, shmSize, shmMode)) != -1) {
+        if ((shmAddress = shmat(shmIdentifier, NULL, 0)) != (char *)-1) {
+          LogPrint(LOG_INFO, "Screen image shared memory key: 0X%" PRIX_KEY_T, shmKey);
+          return 1;
+        } else {
+          LogPrint(LOG_WARNING, "Cannot attach shared memory segment 0X%" PRIX_KEY_T ": %s",
+                   shmKey, strerror(errno));
+        }
+      } else {
+        LogPrint(LOG_WARNING, "Cannot access shared memory segment 0X%" PRIX_KEY_T ": %s",
                  shmKey, strerror(errno));
       }
-    } else {
-      LogPrint(LOG_WARNING, "Cannot access shared memory segment 0X%" PRIX_KEY_T ": %s",
-               shmKey, strerror(errno));
     }
+    shmIdentifier = -1;
   }
-  shmIdentifier = -1;
 #endif /* HAVE_SHMGET */
 
 #ifdef HAVE_SHM_OPEN
-  if ((shmFileDescriptor = shm_open(shmPath, O_RDONLY, shmMode)) != -1) {
-    if ((shmAddress = mmap(0, shmSize, PROT_READ, MAP_SHARED, shmFileDescriptor, 0)) != MAP_FAILED) {
-      return 1;
-    } else {
-      LogError("mmap");
-    }
+  {
+    if ((shmFileDescriptor = shm_open(shmPath, O_RDONLY, shmMode)) != -1) {
+      if ((shmAddress = mmap(0, shmSize, PROT_READ, MAP_SHARED, shmFileDescriptor, 0)) != MAP_FAILED) {
+        return 1;
+      } else {
+        LogError("mmap");
+      }
 
-    close(shmFileDescriptor);
-    shmFileDescriptor = -1;
-  } else {
-    LogError("shm_open");
+      close(shmFileDescriptor);
+      shmFileDescriptor = -1;
+    } else {
+      LogError("shm_open");
+    }
   }
 #endif /* HAVE_SHM_OPEN */
 
@@ -145,66 +228,6 @@ read_ScreenScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
     return 1;
   }
   return 0;
-}
-
-static int
-doScreenCommand (const char *command, ...) {
-  va_list args;
-  int count = 0;
-
-  va_start(args, command);
-  while (va_arg(args, char *)) ++count;
-  va_end(args);
-
-  {
-    const char *argv[count + 4];
-    const char **arg = argv;
-    const char *program = "screen";
-
-    *arg++ = program;
-    *arg++ = "-X";
-    *arg++ = command;
-
-    va_start(args, command);
-    while ((*arg++ = va_arg(args, char *)));
-    va_end(args);
-
-    {
-      int ok = 0;
-      sigset_t newMask, oldMask;
-      pid_t pid;
-
-      sigemptyset(&newMask);
-      sigaddset(&newMask, SIGCHLD);
-      sigprocmask(SIG_BLOCK, &newMask, &oldMask);
-
-      switch ((pid = fork())) {
-        case -1: /* error */
-          LogError("fork");
-          break;
-
-        case 0: /* child */
-          sigprocmask(SIG_SETMASK, &oldMask, NULL);
-          execvp(program, (char *const*)argv);
-          LogError("execvp");
-          _exit(1);
-
-        default: { /* parent */
-          int status;
-          if (waitpid(pid, &status, 0) == -1) {
-            LogError("waitpid");
-          } else if (WIFEXITED(status)) {
-            ok = 1;
-          } else if (WIFSIGNALED(status)) {
-          } else if (WIFSTOPPED(status)) {
-          }
-        }
-      }
-
-      sigprocmask(SIG_SETMASK, &oldMask, NULL);
-      return ok;
-    }
-  }
 }
 
 static int
