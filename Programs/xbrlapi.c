@@ -361,6 +361,8 @@ void toX_f(const char *display) {
   int res;
   brl_keycode_t code;
   unsigned int keysym, keycode, modifiers;
+  Bool haveXTest;
+  int eventBase, errorBase, majorVersion, minorVersion;
 #endif /* HAVE_X11_EXTENSIONS_XTEST_H */
 
   Xdisplay = display;
@@ -368,6 +370,10 @@ void toX_f(const char *display) {
   if (!(dpy=XOpenDisplay(Xdisplay))) fatal(_("couldn't connect to %s\n"),Xdisplay);
 
   if (!XSetErrorHandler(ErrorHandler)) fatal(_("strange old error handler\n"));
+
+#ifdef HAVE_X11_EXTENSIONS_XTEST_H
+  haveXTest = XTestQueryExtension(dpy, &eventBase, &errorBase, &majorVersion, &minorVersion);
+#endif /* HAVE_X11_EXTENSIONS_XTEST_H */
 
   X_fd = XConnectionNumber(dpy);
   FD_ZERO(&fds);
@@ -479,7 +485,7 @@ void toX_f(const char *display) {
       }
     }
 #ifdef HAVE_X11_EXTENSIONS_XTEST_H
-    if (FD_ISSET(brlapi_fd,&readfds)) {
+    if (haveXTest && FD_ISSET(brlapi_fd,&readfds)) {
       while ((res = brlapi_readKey(0, &code)==1)) {
 	modifiers = 0;
 	if (code & BRL_FLG_CHAR_CONTROL) modifiers |= ControlMask;
