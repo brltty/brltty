@@ -158,7 +158,9 @@
 #braille-parameters tt:Width=40 # [1-80]
 
 # VisioBraille Braille Driver Parameters
+#braille-parameters vs:Baud=57600 # 
 #braille-parameters vs:DisplaySize=40 # [20-40]
+#braille-parameters vs:PromVersion=4 # [3-6]
 
 # Voyager Braille Driver Parameters
 #braille-parameters vo:InputMode=no # [no,yes]

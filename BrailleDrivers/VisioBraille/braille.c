@@ -15,7 +15,7 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 #define VS_VERSION "BRLTTY driver for VisioBraille, version 0.2, 2002"
-#define VS_COPYRIGHT "Copyright Sebastien HINDERER <Sebastien.Hinderer@libertysurf.fr"
+#define VS_COPYRIGHT "Copyright Sébastien Hinderer <Sebastien.Hinderer@ens-lyon.org>"
 
 #include "prologue.h"
 
@@ -30,9 +30,10 @@
 
 typedef enum {
   PARM_DISPSIZE=0,
-  PARM_PROMVER=1
+  PARM_PROMVER=1,
+  PARM_BAUD=2
 } DriverParameter;
-#define BRLPARMS "displaysize", "promVersion"
+#define BRLPARMS "displaysize", "promversion", "baud"
 
 #define BRL_HAVE_PACKET_IO
 #define BRL_HAVE_KEY_CODES
@@ -189,6 +190,7 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
 #endif /* SendIdReq */
   int ds = BRAILLEDISPLAYSIZE;
   int promVersion = 4;
+  int ttyBaud = 57600;
   if (*parameters[PARM_DISPSIZE]) {
     int dsmin=20, dsmax=40;
     validateInteger(&ds, "Size of braille display",parameters[PARM_DISPSIZE],&dsmin,&dsmax);
@@ -196,6 +198,12 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
   if (*parameters[PARM_PROMVER]) {
     int pvmin=3, pvmax=6;
     validateInteger(&promVersion, "PROM version",parameters[PARM_PROMVER],&pvmin,&pvmax);
+  }
+  if (*parameters[PARM_BAUD]) {
+    int baud;
+    if (serialValidateBaud(&baud, "TTY baud", parameters[PARM_BAUD], NULL)) {
+      ttyBaud = baud;
+    }
   }
 
   if (!isSerialDevice(&device)) {
@@ -205,7 +213,7 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
   if (!(serialDevice = serialOpenDevice(device))) return 0;
   serialSetParity(serialDevice, SERIAL_PARITY_ODD);
   if (promVersion<4) serialSetFlowControl(serialDevice, SERIAL_FLOW_INPUT_CTS);
-  serialRestartDevice(serialDevice,57600); 
+  serialRestartDevice(serialDevice,ttyBaud); 
 #ifdef SendIdReq
   {
     brl_writePacket(brl,(unsigned char *) &ch,1); 

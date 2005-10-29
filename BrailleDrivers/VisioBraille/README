@@ -5,8 +5,8 @@ Ce pilote a été testé avec succès avec les terminaux équipés de PROMs 0.0g et
 5.0q-fr. Il est vraisemblable que toutes les PROMs de version >=4
 soient supportées par le présent pilote.
 
-Auteur et mainteneur actuel: Sébastien HINDERER
-<sebastien.hinderer@libertysurf.fr>
+Auteur et mainteneur actuel:
+Sébastien Hinderer <Sebastien.Hinderer@ens-lyon.org>
 
 Bien que ce pilote soit utilisé de manière intensive, il n'est pas impossible
 que certaines erreurs subsistent.
@@ -20,12 +20,25 @@ Une table braille compatible avec celle fournie en standard dans le TVB
 (basée sur la table SAGEM) est disponible, dans le fichier text.visiob.tbl du
 répertoire ../../BrailleTables
 
-Le pilote VisioBraille accepte un paramètre displaysize= qui permet de
-spécifier la taille de la plage tactile.
+Paramètres acceptés par ce pilote :
 
-Pour des informations sur la manière de passer ce paramètre au pilote, ou
+- displaysize : permet de spécifier la taille de la plage tactile.
+
+- promversion: permet de spécifier la version de PROM utilisée.
+Ce paramètre n'est nécessaire que pour des PROMs de version inférieure ou
+égale à 3. Le support de ces PROMs n'étant disponible que pour Linux, et
+moyennant une modification du noyau, merci de contacter directement l'auteur
+si vous souhaitez utiliser une telle PROM.
+
+- baud: permet de spécifier la vitesse de la communication série.
+Ce parmètre n'est pas nécessaire pour les terminaux VisioBraille et
+n'est fourni que pour permettre l'utilisation d'émulateurs de terminaux qui
+ne pourraient pas communiquer à une vitesse suffisante. Par conséquent,
+n'utilisez pas ce paramètre, à moins de savoir ce que vous faites.
+
+Pour des informations sur la manière de passer des paramètres au pilote, ou
 pour toute autre précision concernant l'installation et l'utilisation de
-brltty, merci de voir la documentation du répertoire ../../Documents
+brltty, merci de consulter la documentation du répertoire ../../Documents
 
 Notes pour l'utilisation. 
 =========================
@@ -45,18 +58,24 @@ auxiliaires ainsi qu'aux commandes ploc-ploc.
 ~~u page up
 
 Clavier auxiliaire: 
-Les touches A1,A2,A3,A6,A7,A8 permettent d'activer les 6 premières consoles
-virtuelles (correspond à alt-f1 à alt-f6).
+Sous Linux, les touches A1,A2,A3,A6,A7,A8 permettent d'activer les
+6 premières consoles virtuelles (correspond à alt-f1 à alt-f6).
+L'action de ces touches n'est pas définie sur les autres systèmes
+d'exploitation.
 B6 coin supérieur gauche de l'écran
 D6 coin inférieur gauche de l'écran
-A4 précédente fenêtre non vide 
-A5 prochaine fenêtre non vide
-B7 Affiche la ligne précédente
-D7 Affiche la ligne suivante
-C6/C8 Fenêtre précédente/suivante
-C7 Fenêtre contenant le curseur
-C1/C3/B2/D2 flèches de direction
-B3 Inverse la visibilité du curseur
+A4 fenêtre non vide précédente
+A5 fenêtre non vide suivante
+B7 ligne précédente
+D7 ligne suivante
+C6 fenêtre précédente
+C8 fenêtre suivante
+C7 fenêtre contenant le curseur
+C1 flèche gauche
+C3 flèche droite
+B2 flèche haut
+D2 flèche bas
+B3 curseur on/off
 D1 delete
 
   En outre, les touches backspace, tab, ctrl, alt... sont siulées de la même
@@ -78,4 +97,5 @@ d'inclure la possibilité de reprohrammer les touches, un peu comme cela se
 fait sous DOS avec la commande ~~f.
 
 
-Sébastien HINDERER <sebastien.hinderer@libertysurf.fr>
+-- 
+Sébastien Hinderer <Sebastien.Hinderer@ens-lyon.org>
