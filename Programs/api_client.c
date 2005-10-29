@@ -407,10 +407,11 @@ out:
 /* Function: tryAuthKey */
 /* Tries to authenticate to server with the given key. */
 static int tryAuthKey(authStruct *auth, size_t authKeyLength) {
-  if ((brlapi_writePacket(fd, BRLPACKET_AUTHKEY, auth, sizeof(auth->protocolVersion)+authKeyLength))<0)
-    return -1;
-  if ((brlapi_waitForAck())<0)
-    return -1;
+  int res;
+  res = brlapi_writePacket(fd, BRLPACKET_AUTHKEY, auth, sizeof(auth->protocolVersion)+authKeyLength);
+  memset(&auth->key, 0, authKeyLength); /* Forget authorization key ASAP */
+  if (res<0) return -1;
+  if ((brlapi_waitForAck())<0) return -1;
   return 0;
 }
 
