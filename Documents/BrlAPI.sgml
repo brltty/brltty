@@ -46,7 +46,7 @@ of time and questions later.
 
 <descrip>
 
-<tag/Authentication key/
+<tag/Authorization key/
 A file containing arbitrary data, that has to be sent to the server by the
 client, to prove it is allowed to establish a connection and then control
 the braille terminal.
@@ -245,7 +245,7 @@ step allows the client application to let the server know about its
 presence. At this stage, nothing special is done on <em/brltty/'s
 side.
 
-<sect2>Authentication.
+<sect2>Authorization.
 
 <p>Since Unix is designed to allow many users to work on the
 same machine, it's quite possible that there are more than one
@@ -259,15 +259,15 @@ provide a way to determine whether a user who established a
 connection is really allowed to communicate with the braille
 terminal. To achieve this, <em/BrlAPI/ requires that each
 application that wants to control a braille terminal sends an
-authentication key before doing anything else. The control of
+authorization key before doing anything else. The control of
 the braille terminal will only be possible for the client once
-it has sent the proper authentication key. What is called
-authentication key is in fact a Unix file containing data (it
+it has sent the proper authorization key. What is called
+authorization key is in fact a Unix file containing data (it
 must be non-empty) on your system. All the things you have to do is to give
 read permissions on this file to users that are allowed to
 communicate with the braille terminal, and only to them. This
 way, only authorized users will have access to the
-authentication key and then be able to send it to <em/BrlAPI/.
+authorization key and then be able to send it to <em/BrlAPI/.
 To see how to do that, please see chapter <ref id="sec-install" name="Installation and configuration">.
 
 At the end of this step, the user is authorized to take
@@ -277,7 +277,7 @@ but this has no user-level side-effect.
 
 <sect2>Real use of the braille terminal.
 
-<p>Once the client is properly connected and authenticated,
+<p>Once the client is properly connected and authorized,
 there are two possible types of communication with the braille
 terminal. The chosen type of communication depends on what the
 client plans to do. If its purpose is to display information on
@@ -536,7 +536,7 @@ be).
 <!-- an installation and configuration documentation -->
 <p>
 <tt/make install/ will install libbrlapi.so in /lib, and include files in
-/usr/include/brltty. An authentication key will also typically be set in
+/usr/include/brltty. An authorization key will also typically be set in
 /etc/brlapi.key, but won't be readable by anybody else than root. It is up
 to you to define a group of users who will have the right to read it and hence
 be able to connect to the server. For instance, you may want to do:
@@ -1194,12 +1194,12 @@ The connection between the client and the server can be in either of the
 four following modes:
 
 <itemize>
-<item>authentication mode: this is the initial mode, when the client hasn't
-authenticated itself to the server yet. Only one <tt/BRLPACKET_AUTHKEY/ packet
+<item>authorization mode: this is the initial mode, when the client hasn't
+got the authorization to use the server yet. Only one <tt/BRLPACKET_AUTHKEY/ packet
 will be accepted, which makes the connection enter normal mode.
 
 
-<item>normal mode: the client is authenticated, but didn't ask for a tty
+<item>normal mode: the client is authorized to use the server, but didn't ask for a tty
 or raw mode. The client can send either of these types of packet:
   <itemize>
   <item><tt/BRLPACKET_GETDRIVERID/, <tt/BRLPACKET_GETDRIVERNAME/
@@ -1254,19 +1254,19 @@ online manual page as well will hence be of good help for understanding.
 <sect2><tt/BRLPACKET_AUTHKEY/ (see <em/brlapi_loadAuthKey()/)
 <p>
 This must be the first packet ever transmitted from the client to the
-server. It lets the client authenticate itself to the server. Data is
-first an integer indicating a protocol version, then comes the authentication
+server. It lets the client ask an authorization to the server. Data is
+first an integer indicating a protocol version, then comes the authorization
 key itself.
 
 If the protocol version is not the same as the server's, a 
 <tt/BRLERR_PROTOCOL_VERSION/ error packet is returned and the connection is
 closed.
 
-If the authentication key matches the servers', it is acknowledged, and
+If the authorization key matches the servers', it is acknowledged, and
 other types of packets might be used, other <tt/BRLPACKET_AUTHKEY/ shouldn't
 be sent by the client.
 
-If the authentication key doesn't match, the server sends a
+If the authorization key doesn't match, the server sends a
 <tt/BRLERR_CONNREFUSED/ and closes the connection.
 
 <sect2><tt/BRLPACKET_GETDRIVERID/ (see <em/brlapi_getDriverId()/)

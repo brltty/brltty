@@ -43,7 +43,7 @@ BEGIN_OPTION_TABLE
 
   {"brlapi-key", "file", 'k', 0, 0,
    &settings.authKey, NULL,
-   "Path to file containing BrlAPI's authentication key."},
+   "Path to file containing BrlAPI's authorization key."},
 
   {"learn", NULL, 'l', 0, 0,
    &opt_learnMode, NULL,

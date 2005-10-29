@@ -2009,7 +2009,7 @@ static void *server(void *arg)
       if (unauthConnections>=UNAUTH_MAX) {
         writeError(res, BRLERR_CONNREFUSED);
         closeFd(res);
-        if (unauthConnLog==0) LogPrint(LOG_WARNING, "Too many simultaneous unauthenticated connections");
+        if (unauthConnLog==0) LogPrint(LOG_WARNING, "Too many simultaneous unauthorized connections");
         unauthConnLog++;
       } else {
 #ifndef WINDOWS
@@ -2367,10 +2367,10 @@ int api_start(BrailleDisplay *brl, char **parameters)
   else {
     res = brlapiserver_loadAuthKey(keyfile,&authKeyLength,authKey);
     if (res==-1) {
-      LogPrint(LOG_WARNING,"Unable to load API authentication key from %s: %s in %s, no connections will be accepted. You may use parameter keyfile=none if you don't want any authentication (dangerous)", keyfile, strerror(brlapi_libcerrno), brlapi_errfun);
+      LogPrint(LOG_WARNING,"Unable to load API authorization key from %s: %s in %s, no connections will be accepted. You may use parameter keyfile=none if you don't want any authorization (dangerous)", keyfile, strerror(brlapi_libcerrno), brlapi_errfun);
       goto out;
     }
-    LogPrint(LOG_DEBUG, "Authentication key loaded");
+    LogPrint(LOG_DEBUG, "Authorization key loaded");
   }
   if ((notty.connections = createConnection(-1,0)) == NULL) {
     LogPrint(LOG_WARNING, "Unable to create connections list");

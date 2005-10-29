@@ -405,7 +405,7 @@ out:
 }
 
 /* Function: tryAuthKey */
-/* Tries to authenticate to server with the given key. */
+/* Tries to get authorization from server with the given key. */
 static int tryAuthKey(authStruct *auth, size_t authKeyLength) {
   int res;
   res = brlapi_writePacket(fd, BRLPACKET_AUTHKEY, auth, sizeof(auth->protocolVersion)+authKeyLength);
@@ -461,7 +461,7 @@ retry:
 
   auth->protocolVersion = htonl(BRLAPI_PROTOCOL_VERSION);
 
-  /* try with an empty key as well, in case no authentication is needed */
+  /* try with an empty key as well, in case no authorization is needed */
   if (!settings.authKey) {
     if (tryAuthKey(auth,0)<0)
       goto outfd;

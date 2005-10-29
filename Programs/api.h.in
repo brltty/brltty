@@ -72,22 +72,22 @@ extern "C" {
 
 /** \e brltty 's settings directory
  *
- * This is where authentication key and driver-dependent key names are found
+ * This is where authorization key and driver-dependent key names are found
  * for instance. */
 #undef BRLAPI_ETCDIR
 
-/** Default name of the file containing \e BrlAPI 's authentication key
+/** Default name of the file containing \e BrlAPI 's authorization key
  *
  * This name is relative to BRLAPI_ETCDIR */
 #undef BRLAPI_AUTHFILE
 
-/** Final path for default authentication key file */
+/** Final path for default authorization key file */
 #define BRLAPI_DEFAUTHPATH BRLAPI_ETCDIR "/" BRLAPI_AUTHFILE
 
 /** \brief Settings structure for \e BrlAPI connection
  *
  * This structure holds every parameter needed to connect to \e BrlAPI: which
- * file the authentication key can be found in and which computer to connect to.
+ * file the authorization key can be found in and which computer to connect to.
  *
  * \par Examples:
  * \code
@@ -97,7 +97,7 @@ extern "C" {
  * settings.hostName="foo";
  * \endcode
  *
- * \e libbrlapi will read authentication key from file \p /etc/brlapi.key
+ * \e libbrlapi will read authorization key from file \p /etc/brlapi.key
  * and connect to the machine called "foo", on the default TCP port.
  *
  * \code
@@ -115,7 +115,7 @@ extern "C" {
  * \sa brlapi_initializeConnection() brlapi_loadAuthKey()
  */
 typedef struct {
-  /** To get authenticated, \e libbrlapi has to tell the \e BrlAPI server a
+  /** To get authorized to connect, \e libbrlapi has to tell the \e BrlAPI server a
    * secret key, for security reasons. This is the path to the file which
    * holds it; it will hence have to be readable by the application.
    *
@@ -137,9 +137,9 @@ typedef struct {
 /* brlapi_initializeConnection */
 /** Open a socket and connect it to \e BrlAPI 's server
  *
- * This function first loads an authentication key as specified in settings.
+ * This function first loads an authorization key as specified in settings.
  * It then creates a TCP socket and connects it to the specified machine, on
- * the specified port. It writes the authentication key on the socket and
+ * the specified port. It writes the authorization key on the socket and
  * waits for acknowledgement.
  *
  * \return the file descriptor, or -1 on error
@@ -162,7 +162,7 @@ typedef struct {
  *
  * \par Errors:
  * \e BrlAPI might not be on this TCP port, the host name might not be
- * resolvable, the authentication may fail,...
+ * resolvable, the authorization may fail,...
  *
  * \param clientSettings this gives the connection parameters, as described
  * in brlapi_settings_t. If \c NULL, defaults values are used, so that it is
@@ -196,14 +196,14 @@ void brlapi_closeConnection(void);
 int brlapi_splitHost(const char *host, char **hostname, char **port);
 
 /* brlapi_loadAuthKey */
-/** Load an authentication key from the given file
+/** Load an authorization key from the given file
  *
  * Calling this function shouldn't be needed if brlapi_initializeConnection()
  * is used.
  *
  * \param filename gives the full path of the file;
  * \param authlength gives the size of the \e auth buffer;
- * \param auth is a buffer where the function will store the authentication key.
+ * \param auth is a buffer where the function will store the authorization key.
  *
  * \return 0, -1 on error
  *
@@ -309,7 +309,7 @@ int brlapi_getDriverInfo(void *buf, size_t count);
  * CONTROLVT="$(grep "using VT number" "/var/log/XFree86.$(echo "$DISPLAY" | sed -e "s/^.*::*\([0-9]*\).*$/\1/").log" | sed -e "s/^.*using VT number \([0-9]*\).*$/\1/")"
  *
  * CONTROLVT should also be propagated when running remote applications via ssh,
- * for instance, along with BRLAPI_HOSTNAME and the authentication key.
+ * for instance, along with BRLAPI_HOSTNAME and the authorization key.
  *
  * \return the used tty number on success, -1 on error
  *

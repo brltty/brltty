@@ -14,7 +14,7 @@ Gnopernicus uses BrlAPI (a general-purpose braille-enabling application
 programming interface).
 
 After installation, but *before* launching the new BRLTTY, please check that a
-BrlAPI authentication key has been defined. If the file /etc/brlapi.key either
+BrlAPI authorization key has been defined. If the file /etc/brlapi.key either
 doesn't exist or is empty then you need to generate a key. The easiest way to
 do this is:
 
@@ -34,7 +34,7 @@ If you have the dd command and the /dev/random device then you can do:
 
 If there's the slightest possibility that even just one untrustworthy user can
 access your system then you should seriously consider ensuring that the file
-containing the authentication key for BrlAPI can only be accessed by those
+containing the authorization key for BrlAPI can only be accessed by those
 users who actually need to use the braille display. If there's only one braille
 user then it's easy.  Just make him the owner of the file and ensure that noone
 else can access it.

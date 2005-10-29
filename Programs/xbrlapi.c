@@ -594,7 +594,7 @@ static struct option longopts[] = {
 static void usage(const char *name) {
   printf(_("usage: %s [opts...]\n"),name);
   printf(_("  --help                   get what you're reading\n"));
-  printf(_("  --keypath path           set path to authentication key\n"));
+  printf(_("  --keypath path           set path to authorization key\n"));
   printf(_("  --hostname [host][:port] set local hostname and port to connect to\n"));
   printf(_("  --display display        set display\n"));
 }
