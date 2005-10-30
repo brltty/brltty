@@ -49,7 +49,7 @@ set -e
 cp -p -r -- "${sourceRoot}" "${archiveName}"
 cd "${archiveName}"
 
-./autogen.sh
+./autogen
 ./configure --quiet
 
 cd Documents
