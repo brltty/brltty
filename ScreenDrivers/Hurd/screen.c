@@ -197,7 +197,7 @@ getScreenDescription (ScreenDescription *description) {
 
 static void
 getConsoleDescription (ScreenDescription *description) {
-  description -> no = virtualTerminal ? virtualTerminal : currentVt();
+  description->number = virtualTerminal ? virtualTerminal : currentVt();
 }
 
 static void
