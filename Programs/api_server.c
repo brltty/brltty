@@ -192,8 +192,6 @@ typedef struct Tty {
   struct Tty *subttys; /* children */
 } Tty;
 
-static int connectionsAllowed = 0;
-
 #define MAXSOCKETS 4 /* who knows what users want to do... */
 
 /* Pointer to the connection accepter thread */
@@ -281,8 +279,8 @@ static int driverOpened; /* Whether device is really opened, protected by driver
 static char **trueBrailleParameters;
 static const char *trueBrailleDevice;
 
-static size_t authKeyLength = 0;
-static unsigned char authKey[BRLAPI_MAXPACKETSIZE];
+static int unauthorizedConnectionsAllowed = 0;
+static char *keyfile;
 
 static Connection *last_conn_write;
 static int refresh;
@@ -1125,6 +1123,49 @@ static PacketHandlers packetHandlers = {
   handleGetRaw, handleLeaveRaw, handlePacket  
 };
 
+/* Function : handleUnauthorizedConnection */
+/* Returns 0 if connection is authorized */
+/* Returns 1 if connection has to be removed */
+static int handleUnauthorizedConnection(Connection *c, brl_type_t type, unsigned char *packet, size_t size)
+{
+  size_t authKeyLength = 0;
+  unsigned char authKey[BRLAPI_MAXPACKETSIZE];
+  int authKeyCorrect = 0;
+  authStruct *auth = (authStruct *) packet;
+
+  if (type!=BRLPACKET_AUTHKEY) {
+    WERR(c->fd, BRLERR_CONNREFUSED);
+    return 1;
+  }
+
+  if ((size<sizeof(auth->protocolVersion))||(ntohl(auth->protocolVersion)!=BRLAPI_PROTOCOL_VERSION)) {
+    writeError(c->fd, BRLERR_PROTOCOL_VERSION);
+    return 1;
+  }
+  size -= sizeof(auth->protocolVersion);
+
+  if (!unauthorizedConnectionsAllowed) {
+    if (brlapiserver_loadAuthKey(keyfile,&authKeyLength,authKey)==-1) {
+      LogPrint(LOG_WARNING,"Unable to load API authorization key from %s: %s in %s. You may use parameter keyfile=none if you don't want any authorization (dangerous)", keyfile, strerror(brlapi_libcerrno), brlapi_errfun);
+      return 1;
+    }
+    LogPrint(LOG_DEBUG, "Authorization key loaded");
+  }
+
+  authKeyCorrect = (size==authKeyLength) && (!memcmp(&auth->key, authKey, authKeyLength));
+  memset(authKey, 0, authKeyLength);
+  memset(&auth->key, 0, authKeyLength);
+  unauthConnections--;
+  if (!authKeyCorrect) {
+    writeError(c->fd, BRLERR_CONNREFUSED);
+    return 1;
+  }
+
+  writeAck(c->fd);
+  c->auth = 1;
+  return 0;
+}
+
 /* Function : processRequest */
 /* Reads a packet fro c->fd and processes it */
 /* Returns 1 if connection has to be removed */
@@ -1135,7 +1176,6 @@ static int processRequest(Connection *c, PacketHandlers *handlers)
   int res;
   ssize_t size;
   unsigned char *packet = c->packet.content;
-  authStruct *auth = (authStruct *) packet;
   brl_type_t type;
   res = readPacket(c);
   if (res==0) return 0; /* No packet ready */
@@ -1166,22 +1206,8 @@ static int processRequest(Connection *c, PacketHandlers *handlers)
   size = c->packet.header.size;
   type = c->packet.header.type;
   
-  if (c->auth==0) {
-    if (ntohl(auth->protocolVersion)!=BRLAPI_PROTOCOL_VERSION) {
-      writeError(c->fd, BRLERR_PROTOCOL_VERSION);
-      return 1;
-    }
-    if ((type==BRLPACKET_AUTHKEY) && (size==sizeof(auth->protocolVersion)+authKeyLength) && (!memcmp(&auth->key, authKey, authKeyLength))) {
-      writeAck(c->fd);
-      c->auth = 1;
-      unauthConnections--;
-      return 0;
-    } else {
-      writeError(c->fd, BRLERR_CONNREFUSED);
-      unauthConnections--;
-      return 1;
-    }
-  }
+  if (c->auth==0) return handleUnauthorizedConnection(c, type, packet, size);
+
   if (size>BRLAPI_MAXPACKETSIZE) {
     LogPrint(LOG_WARNING, "Discarding too large packet of type %s on fd %d",brlapiserver_packetType(type), c->fd);
     return 0;    
@@ -2069,15 +2095,13 @@ static void ttyTerminationHandler(Tty *tty)
 static void terminationHandler(void)
 {
   int res;
-  if (connectionsAllowed!=0) {
-    if ((res = pthread_cancel(serverThread)) != 0 )
-      LogPrint(LOG_WARNING,"pthread_cancel: %s",strerror(res));
-    ttyTerminationHandler(&notty);
-    ttyTerminationHandler(&ttys);
+  if ((res = pthread_cancel(serverThread)) != 0 )
+    LogPrint(LOG_WARNING,"pthread_cancel: %s",strerror(res));
+  ttyTerminationHandler(&notty);
+  ttyTerminationHandler(&ttys);
 #ifdef WINDOWS
-    WSACleanup();
+  WSACleanup();
 #endif /* WINDOWS */
-  }
 }
 
 /* Function: whoFillsTty */
@@ -2356,22 +2380,14 @@ int api_start(BrailleDisplay *brl, char **parameters)
 #else /* PF_LOCAL */
 	"127.0.0.1:0";
 #endif /* PF_LOCAL */
-  char *keyfile = *parameters[PARM_KEYFILE]?parameters[PARM_KEYFILE]:BRLAPI_DEFAUTHPATH;
+  keyfile = *parameters[PARM_KEYFILE]?parameters[PARM_KEYFILE]:BRLAPI_DEFAUTHPATH;
   pthread_attr_t attr;
   pthread_mutexattr_t mattr;
 
   coreActive=driverOpened=0;
 
-  if (!strcmp(keyfile,"none"))
-    authKeyLength = 0;
-  else {
-    res = brlapiserver_loadAuthKey(keyfile,&authKeyLength,authKey);
-    if (res==-1) {
-      LogPrint(LOG_WARNING,"Unable to load API authorization key from %s: %s in %s, no connections will be accepted. You may use parameter keyfile=none if you don't want any authorization (dangerous)", keyfile, strerror(brlapi_libcerrno), brlapi_errfun);
-      goto out;
-    }
-    LogPrint(LOG_DEBUG, "Authorization key loaded");
-  }
+  if (!strcmp(keyfile,"none")) unauthorizedConnectionsAllowed = 1;
+
   if ((notty.connections = createConnection(-1,0)) == NULL) {
     LogPrint(LOG_WARNING, "Unable to create connections list");
     goto out;
@@ -2415,7 +2431,7 @@ int api_start(BrailleDisplay *brl, char **parameters)
       pthread_cancel(socketThreads[i]);
     goto outallocs;
   }
-  connectionsAllowed = 1;
+
   return 1;
   
 outallocs:
@@ -2423,7 +2439,6 @@ outallocs:
 outalloc:
   freeConnection(notty.connections);
 out:
-  connectionsAllowed = 0;
   return 0;
 }
 
