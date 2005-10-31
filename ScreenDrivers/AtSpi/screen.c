@@ -589,6 +589,7 @@ describe_AtSpiScreen (ScreenDescription *description) {
     description->posx = curPosX;
     description->posy = curPosY;
   } else {
+    description->unreadable = nonatspi;
     description->rows = 1;
     description->cols = strlen(nonatspi);
     description->posx = 0;
@@ -610,7 +611,7 @@ read_AtSpiScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
   memset(buffer,' ',box.height*box.width);
   pthread_mutex_lock(&updateMutex);
   if (!curTerm) {
-    strncpy((char *)buffer, nonatspi+box.left, box.width);
+    setScreenMessage(&box, buffer, mode, nonatspi);
     goto out;
   }
   if (box.top+box.height>curNumRows)
