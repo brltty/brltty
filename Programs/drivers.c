@@ -27,19 +27,35 @@
 #include "drivers.h"
 
 int
-haveDriver (const char *codes, const char *code) {
+isDriverAvailable (const char *code, const char *codes) {
   int length = strlen(code);
   const char *string;
 
   while ((string = strstr(codes, code))) {
-    if ((string == codes) || (string[-1] == ' '))
-      if (!string[length] || (string[length] == ' '))
-        return 1;
+    if (((string == codes) || (string[-1] == ' ')) &&
+        (!string[length] || (string[length] == ' '))) {
+      return 1;
+    }
 
     string += length;
   }
 
   return 0;
+}
+
+int
+isDriverIncluded (const char *code, const DriverEntry *table) {
+  while (table->address) {
+    if (strcmp(code, *table->code) == 0) return 1;
+    ++table;
+  }
+  return 0;
+}
+
+int
+haveDriver (const char *code, const char *codes, const DriverEntry *table) {
+  return (table && table->address)? isDriverIncluded(code, table):
+                                    isDriverAvailable(code, codes);
 }
 
 const void *

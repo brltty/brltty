@@ -81,7 +81,7 @@ void *contractionTable = NULL;
 
 int
 haveBrailleDriver (const char *code) {
-  return haveDriver(BRAILLE_DRIVER_CODES, code);
+  return haveDriver(code, BRAILLE_DRIVER_CODES, driverTable);
 }
 
 const BrailleDriver *

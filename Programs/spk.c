@@ -71,7 +71,7 @@ static const float spkRateTable[] = {
 
 int
 haveSpeechDriver (const char *code) {
-  return haveDriver(SPEECH_DRIVER_CODES, code);
+  return haveDriver(code, SPEECH_DRIVER_CODES, driverTable);
 }
 
 const SpeechDriver *

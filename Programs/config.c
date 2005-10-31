@@ -1395,83 +1395,84 @@ activateBrailleDriver (int verify) {
     }
 
     while (*code) {
-      if (autodetect && !haveBrailleDriver(*code)) continue;
-      LogPrint(LOG_DEBUG, "checking for '%s' braille display.", *code);
+      if (!autodetect || haveBrailleDriver(*code)) {
+        LogPrint(LOG_DEBUG, "checking for '%s' braille display.", *code);
 
-      if ((braille = loadBrailleDriver(*code, &brailleObject, opt_libraryDirectory))) {
-        brailleParameters = processParameters(braille->parameters,
-                                              "braille driver",
-                                              braille->code,
-                                              opt_brailleParameters);
-        if (brailleParameters) {
-          int opened = verify;
+        if ((braille = loadBrailleDriver(*code, &brailleObject, opt_libraryDirectory))) {
+          brailleParameters = processParameters(braille->parameters,
+                                                "braille driver",
+                                                braille->code,
+                                                opt_brailleParameters);
+          if (brailleParameters) {
+            int opened = verify;
 
-          if (!opened) {
-            LogPrint(LOG_DEBUG, "initializing braille driver: %s -> %s",
-                     braille->code, brailleDevice);
+            if (!opened) {
+              LogPrint(LOG_DEBUG, "initializing braille driver: %s -> %s",
+                       braille->code, brailleDevice);
 
 #ifdef ENABLE_API
-            if (apiStarted) api_link();
+              if (apiStarted) api_link();
 #endif /* ENABLE_API */
 
-            if (openBrailleDriver()) {
-              opened = 1;
-              brailleDriver = braille;
-            } else {
+              if (openBrailleDriver()) {
+                opened = 1;
+                brailleDriver = braille;
+              } else {
 #ifdef ENABLE_API
-              if (apiStarted) api_unlink();
+                if (apiStarted) api_unlink();
 #endif /* ENABLE_API */
-            }
-          }
-
-          if (opened) {
-            LogPrint(LOG_INFO, "Braille Driver: %s [%s] (compiled on %s at %s)",
-                     braille->code, braille->name,
-                     braille->date, braille->time);
-            braille->identify();
-            logParameters(braille->parameters, brailleParameters, "Braille");
-            LogPrint(LOG_INFO, "Braille Device: %s", brailleDevice);
-
-            /* Initialize the braille driver's help screen. */
-            LogPrint(LOG_INFO, "Help File: %s",
-                     braille->helpFile? braille->helpFile: "none");
-            {
-              char *path = makePath(opt_dataDirectory, braille->helpFile);
-              if (path) {
-                if (verify || openHelpScreen(path)) {
-                  LogPrint(LOG_INFO, "Help Page: %s[%d]", path, getHelpPageNumber());
-                } else {
-                  LogPrint(LOG_WARNING, "cannot open help file: %s", path);
-                }
-                free(path);
               }
             }
 
-            {
-              const char *part1 = CONFIGURATION_DIRECTORY "/brltty-";
-              const char *part2 = braille->code;
-              const char *part3 = ".prefs";
-              char *path = mallocWrapper(strlen(part1) + strlen(part2) + strlen(part3) + 1);
-              sprintf(path, "%s%s%s", part1, part2, part3);
-              preferencesFile = path;
-            }
-            LogPrint(LOG_INFO, "Preferences File: %s", preferencesFile);
+            if (opened) {
+              LogPrint(LOG_INFO, "Braille Driver: %s [%s] (compiled on %s at %s)",
+                       braille->code, braille->name,
+                       braille->date, braille->time);
+              braille->identify();
+              logParameters(braille->parameters, brailleParameters, "Braille");
+              LogPrint(LOG_INFO, "Braille Device: %s", brailleDevice);
 
-            return 1;
+              /* Initialize the braille driver's help screen. */
+              LogPrint(LOG_INFO, "Help File: %s",
+                       braille->helpFile? braille->helpFile: "none");
+              {
+                char *path = makePath(opt_dataDirectory, braille->helpFile);
+                if (path) {
+                  if (verify || openHelpScreen(path)) {
+                    LogPrint(LOG_INFO, "Help Page: %s[%d]", path, getHelpPageNumber());
+                  } else {
+                    LogPrint(LOG_WARNING, "cannot open help file: %s", path);
+                  }
+                  free(path);
+                }
+              }
+
+              {
+                const char *part1 = CONFIGURATION_DIRECTORY "/brltty-";
+                const char *part2 = braille->code;
+                const char *part3 = ".prefs";
+                char *path = mallocWrapper(strlen(part1) + strlen(part2) + strlen(part3) + 1);
+                sprintf(path, "%s%s%s", part1, part2, part3);
+                preferencesFile = path;
+              }
+              LogPrint(LOG_INFO, "Preferences File: %s", preferencesFile);
+
+              return 1;
+            }
+
+            deallocateStrings(brailleParameters);
+            brailleParameters = NULL;
           }
 
-          deallocateStrings(brailleParameters);
-          brailleParameters = NULL;
+          if (brailleObject) {
+            unloadSharedObject(brailleObject);
+            brailleObject = NULL;
+          }
+        } else {
+          LogPrint(LOG_ERR, "braille driver not loadable: %s", *code);
         }
-
-        if (brailleObject) {
-          unloadSharedObject(brailleObject);
-          brailleObject = NULL;
-        }
-      } else {
-        LogPrint(LOG_ERR, "braille driver not loadable: %s", *code);
+        braille = &noBraille;
       }
-      braille = &noBraille;
 
       ++code;
     }
@@ -1608,49 +1609,50 @@ activateSpeechDriver (int verify) {
   LogPrint(LOG_DEBUG, "looking for speech synthesizer.");
 
   while (*code) {
-    if (autodetect && !haveSpeechDriver(*code)) continue;
-    LogPrint(LOG_DEBUG, "checking for '%s' speech synthesizer.", *code);
+    if (!autodetect || haveSpeechDriver(*code)) {
+      LogPrint(LOG_DEBUG, "checking for '%s' speech synthesizer.", *code);
 
-    if ((speech = loadSpeechDriver(*code, &speechObject, opt_libraryDirectory))) {
-      speechParameters = processParameters(speech->parameters,
-                                           "speech driver",
-                                           speech->code,
-                                           opt_speechParameters);
-      if (speechParameters) {
-        int opened = verify;
+      if ((speech = loadSpeechDriver(*code, &speechObject, opt_libraryDirectory))) {
+        speechParameters = processParameters(speech->parameters,
+                                             "speech driver",
+                                             speech->code,
+                                             opt_speechParameters);
+        if (speechParameters) {
+          int opened = verify;
 
-        if (!opened) {
-          LogPrint(LOG_DEBUG, "initializing speech driver: %s",
-                   speech->code);
+          if (!opened) {
+            LogPrint(LOG_DEBUG, "initializing speech driver: %s",
+                     speech->code);
 
-          if (openSpeechDriver()) {
-            opened = 1;
-            speechDriver = speech;
+            if (openSpeechDriver()) {
+              opened = 1;
+              speechDriver = speech;
+            }
           }
+
+          if (opened) {
+            LogPrint(LOG_INFO, "Speech Driver: %s [%s] (compiled on %s at %s)",
+                     speech->code, speech->name,
+                     speech->date, speech->time);
+            speech->identify();
+            logParameters(speech->parameters, speechParameters, "Speech");
+
+            return 1;
+          }
+
+          deallocateStrings(speechParameters);
+          speechParameters = NULL;
         }
 
-        if (opened) {
-          LogPrint(LOG_INFO, "Speech Driver: %s [%s] (compiled on %s at %s)",
-                   speech->code, speech->name,
-                   speech->date, speech->time);
-          speech->identify();
-          logParameters(speech->parameters, speechParameters, "Speech");
-
-          return 1;
+        if (speechObject) {
+          unloadSharedObject(speechObject);
+          speechObject = NULL;
         }
-
-        deallocateStrings(speechParameters);
-        speechParameters = NULL;
+      } else {
+        LogPrint(LOG_ERR, "speech driver not loadable: %s", *code);
       }
-
-      if (speechObject) {
-        unloadSharedObject(speechObject);
-        speechObject = NULL;
-      }
-    } else {
-      LogPrint(LOG_ERR, "speech driver not loadable: %s", *code);
+      speech = &noSpeech;
     }
-    speech = &noSpeech;
 
     ++code;
   }
