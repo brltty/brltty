@@ -107,8 +107,6 @@ close_WindowsScreen (void) {
   closeStdHandles();
 }
 
-static const char noterm [] = "no terminal to read";
-
 static int
 selectvt_WindowsScreen (int vt) {
   return 0;
@@ -128,12 +126,20 @@ static void
 describe_WindowsScreen (ScreenDescription *description) {
   CONSOLE_SCREEN_BUFFER_INFO info;
   description->number = currentvt_WindowsScreen();
-  if (!tryToAttach()) goto error;
-  if (consoleOutput == INVALID_HANDLE_VALUE) goto error;
+  description->unreadable = NULL;
+  if (!tryToAttach()) {
+    description->unreadable = "no terminal to read";
+    goto error;
+  }
+  if (consoleOutput == INVALID_HANDLE_VALUE) {
+    description->unreadable = "can't open terminal output";
+    goto error;
+  }
   if (!(GetConsoleScreenBufferInfo(consoleOutput, &info))) {
     LogWindowsError("GetConsoleScreenBufferInfo");
     CloseHandle(consoleOutput);
     consoleOutput = INVALID_HANDLE_VALUE;
+    description->unreadable = "can't read terminal information";
     goto error;
   }
   description->cols = info.srWindow.Right + 1 - info.srWindow.Left;
@@ -144,7 +150,7 @@ describe_WindowsScreen (ScreenDescription *description) {
 
 error:
   description->rows = 1;
-  description->cols = strlen(noterm);
+  description->cols = strlen(description->unreadable);
   description->posx = 0;
   description->posy = 0;
 }
@@ -155,14 +161,19 @@ read_WindowsScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
   int text = mode == SCR_TEXT;
   int x, y;
   COORD coord;
+  ScreenDescription scr;
 
   BOOL WINAPI (*fun) (HANDLE, void*, DWORD, COORD, LPDWORD);
   const char *name;
   size_t size;
   void *buf;
 
-  if (!tryToAttach()) goto error;
-  if (consoleOutput == INVALID_HANDLE_VALUE) goto error;
+  describe_WindowsScreen(&scr);
+  if (scr.unreadable) {
+    setScreenMessage(&box, buffer, mode, scr.unreadable);
+    return 1;
+  }
+  if (!validateScreenBox(&box, scr.cols, scr.rows)) return 0;
 
   {
     CONSOLE_SCREEN_BUFFER_INFO info;
@@ -171,15 +182,11 @@ read_WindowsScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
       LogWindowsError("GetConsoleScreenBufferInfo");
       CloseHandle(consoleOutput);
       consoleOutput = INVALID_HANDLE_VALUE;
-      goto error;
+      return 0;
     }
 
     coord.X = box.left + info.srWindow.Left;
     coord.Y = box.top + info.srWindow.Top;
-    if (!validateScreenBox(&box,
-                           info.srWindow.Right - info.srWindow.Left + 1,
-                           info.srWindow.Bottom - info.srWindow.Top + 1))
-      goto error;
   }
 
 #define USE(f, t) (fun = (typeof(fun))f, name = #f, size = sizeof(t))
@@ -201,8 +208,8 @@ read_WindowsScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
 #endif /* HAVE_FUNC_READCONSOLEOUTPUTCHARACTERW */
   {
     if (!(buf = malloc(box.width*size))) {
-      LogError("malloc");
-      goto error;
+      LogError("malloc for Windows console reading");
+      return 0;
     }
   }
 
@@ -244,23 +251,7 @@ read_WindowsScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
     free(buf);
   }
 
-  if (y == box.height) return 1;
-
-error:
-  {
-    int count = box.width * box.height;
-    if (text) {
-      int length = strlen(noterm) - box.left;
-      if (length < 0) length = 0;
-      if (length > count) length = count;
-      memset(buffer, ' ', count);
-      if (length > 0) memcpy(buffer, noterm+box.left, length);
-    } else {
-      memset(buffer, 0X07, count);
-    }
-  }
-
-  return 0;
+  return (y == box.height);
 }
 
 static int 
