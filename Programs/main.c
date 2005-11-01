@@ -2447,6 +2447,7 @@ message (const char *text, short flags) {
 
 #ifdef ENABLE_API
   if (api) api_link(&brl);
+  apiStarted = api;
 #endif /* ENABLE_API */
   }
 }
