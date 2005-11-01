@@ -1411,8 +1411,12 @@ activateBrailleDriver (int verify) {
                        braille->code, brailleDevice);
 
               if (openBrailleDriver()) {
-                opened = 1;
+#ifdef ENABLE_API
+                if (apiStarted) api_link(&brl);
+#endif /* ENABLE_API */
+
                 brailleDriver = braille;
+                opened = 1;
               }
             }
 
@@ -1423,10 +1427,6 @@ activateBrailleDriver (int verify) {
               braille->identify();
               logParameters(braille->parameters, brailleParameters, "Braille");
               LogPrint(LOG_INFO, "Braille Device: %s", brailleDevice);
-
-#ifdef ENABLE_API
-              if (apiStarted) api_link(&brl);
-#endif /* ENABLE_API */
 
               /* Initialize the braille driver's help screen. */
               LogPrint(LOG_INFO, "Help File: %s",
