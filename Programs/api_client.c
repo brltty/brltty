@@ -305,6 +305,7 @@ static int tryHostName(char *hostName) {
     brlapi_gaierrno = getaddrinfo(hostname, port, &hints, &res);
     if (brlapi_gaierrno) {
       brlapi_errno=BRLERR_GAIERR;
+      brlapi_libcerrno=errno;
       goto out;
     }
     for(cur = res; cur; cur = cur->ai_next) {
@@ -1097,19 +1098,26 @@ const char *brlapi_strerror(const brlapi_error_t *error)
   if (error->brlerrno>=brlapi_nerr)
     return "Unknown error";
   else if (error->brlerrno==BRLERR_GAIERR) {
-    snprintf(errmsg,sizeof(errmsg),"resolve: "
-#if defined(HAVE_GETADDRINFO) && defined(HAVE_GAI_STRERROR)
-	"%s\n", gai_strerror(error->exterrno.gaierrno)
-#elif defined(HAVE_HSTRERROR) && !defined(WINDOWS)
-	"%s\n", hstrerror(error->exterrno.gaierrno)
+    if (error->gaierrno != EAI_SYSTEM)
+      snprintf(errmsg,sizeof(errmsg),"resolve: "
+#if defined(HAVE_GETADDRINFO)
+#if defined(HAVE_GAI_STRERROR)
+	"%s\n", gai_strerror(error->gaierrno)
 #else
-	"%x\n", error->exterrno.gaierrno
+	"%d\n", error->gaierrno
+#endif
+#elif defined(HAVE_HSTRERROR) && !defined(WINDOWS)
+	"%s\n", hstrerror(error->gaierrno)
+#else
+	"%x\n", error->gaierrno
 #endif
 	);
+    else
+      snprintf(errmsg,sizeof(errmsg),"resolve: %s", strerror(error->libcerrno));
     return errmsg;
   }
   else if (error->brlerrno==BRLERR_LIBCERR) {
-    snprintf(errmsg,sizeof(errmsg),"%s: %s", error->errfun, strerror(error->exterrno.libcerrno));
+    snprintf(errmsg,sizeof(errmsg),"%s: %s", error->errfun, strerror(error->libcerrno));
     return errmsg;
   } else
     return brlapi_errlist[error->brlerrno];

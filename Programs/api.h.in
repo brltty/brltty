@@ -662,10 +662,8 @@ void brlapi_perror(const char *s);
 /** All information that is needed to describe brlapi errors */
 typedef struct {
   int brlerrno;
-  union {
-    int libcerrno;
-    int gaierrno;
-  } exterrno;
+  int libcerrno;
+  int gaierrno;
   const char *errfun;
 } brlapi_error_t;
 
@@ -691,9 +689,9 @@ extern brlapi_error_t brlapi_error;
 
 /** Shorthand for brlapi_error.errno */
 extern int brlapi_errno;
-/** Shorthand for brlapi_error.exterrno.libcerrno */
+/** Shorthand for brlapi_error.libcerrno */
 extern int brlapi_libcerrno;
-/** Shorthand for brlapi_error.exterrno.gaierrno */
+/** Shorthand for brlapi_error.gaierrno */
 extern int brlapi_gaierrno;
 /** Shorthand for brlapi_error.errfun */
 extern const char *brlapi_errfun;
@@ -703,9 +701,9 @@ extern const char *brlapi_errfun;
 /** Cheat about the brlapi_errno C token */
 #define brlapi_errno (brlapi_error.brlerrno)
 /** Cheat about the brlapi_libcerrno C token */
-#define brlapi_libcerrno (brlapi_error.exterrno.libcerrno)
+#define brlapi_libcerrno (brlapi_error.libcerrno)
 /** Cheat about the brlapi_gaierrno C token */
-#define brlapi_gaierrno (brlapi_error.exterrno.gaierrno)
+#define brlapi_gaierrno (brlapi_error.gaierrno)
 /** Cheat about the brlapi_errfun C token */
 #define brlapi_errfun (brlapi_error.errfun)
 
