@@ -276,9 +276,6 @@ static RepeatState repeatState;
 static int coreActive; /* Whether core is active */
 static int driverOpened; /* Whether device is really opened, protected by driverMutex */
 
-static char **trueBrailleParameters;
-static const char *trueBrailleDevice;
-
 static int unauthorizedConnectionsAllowed = 0;
 static char *keyfile;
 
@@ -317,17 +314,17 @@ static int isKeyCapable(const BrailleDriver *brl)
 /* Function : driverSuspend */
 /* Close driver */
 static void driverSuspend(BrailleDisplay *brl) {
-  if (trueBraille == &noBraille) return;
+  if (trueBraille == &noBraille) return; /* core unlinked api */
   LogPrint(LOG_DEBUG,"driver suspended");
   driverOpened = 0;
-  trueBraille->close(brl);
+  closeBrailleDriver();
 }
 
 /* Function : driverResume */
 /* Re-open driver */
 static int driverResume(BrailleDisplay *brl) {
-  if (trueBraille == &noBraille || !trueBrailleParameters) return 0;
-  driverOpened = trueBraille->open(brl, trueBrailleParameters, trueBrailleDevice);
+  if (trueBraille == &noBraille) return 0; /* core unlinked api */
+  driverOpened = openBrailleDriver();
   if (driverOpened) LogPrint(LOG_DEBUG,"driver resumed");
   return driverOpened;
 }
@@ -2304,25 +2301,23 @@ void api_flush(BrailleDisplay *brl, BRL_DriverCommandContext caller) {
   (void) api_readCommand(brl, caller);
 }
 
-static int api_open(BrailleDisplay *brl, char **parameters, const char *device) {
+int api_resume(BrailleDisplay *brl) {
   /* core is resuming or opening the device for the first time, let's try to go
    * to normal state */
-  if (parameters) {
-    trueBrailleParameters = parameters;
-    trueBrailleDevice = device;
-  }
-  if (!driverOpened) driverResume(brl);
-  if (driverOpened) {
-    /* TODO: handle clients' resize */
-    displayDimensions[0] = htonl(brl->x);
-    displayDimensions[1] = htonl(brl->y);
-    displaySize = brl->x * brl->y;
-    disp = brl;
+  if (!driverOpened) {
+    driverResume(brl);
+    if (driverOpened) {
+      /* TODO: handle clients' resize */
+      displayDimensions[0] = htonl(brl->x);
+      displayDimensions[1] = htonl(brl->y);
+      displaySize = brl->x * brl->y;
+      disp = brl;
+    }
   }
   return (coreActive = driverOpened);
 }
 
-static void api_close(BrailleDisplay *brl) {
+void api_suspend(BrailleDisplay *brl) {
   /* core is suspending, going to core suspend state */
   coreActive = 0;
   /* we let core's call to api_flush() go to full suspend state */
@@ -2331,8 +2326,9 @@ static void api_close(BrailleDisplay *brl) {
 /* Function : api_link */
 /* Does all the link stuff to let api get events from the driver and */
 /* writes from brltty */
-void api_link(void)
+void api_link(BrailleDisplay *brl)
 {
+  LogPrint(LOG_DEBUG, "api link");
   resetRepeatState(&repeatState);
   trueBraille=braille;
   refresh=1;
@@ -2340,19 +2336,23 @@ void api_link(void)
   ApiBraille.writeWindow=api_writeWindow;
   ApiBraille.writeVisual=api_writeVisual;
   ApiBraille.readCommand=api_readCommand;
-  ApiBraille.open = api_open;
-  ApiBraille.close = api_close;
   ApiBraille.readKey = NULL;
   ApiBraille.keyToCommand = NULL;
   ApiBraille.readPacket = NULL;
   ApiBraille.writePacket = NULL;
   braille=&ApiBraille;
+  /* TODO: handle clients' resize */
+  displayDimensions[0] = htonl(brl->x);
+  displayDimensions[1] = htonl(brl->y);
+  displaySize = brl->x * brl->y;
+  disp = brl;
 }
 
 /* Function : api_unlink */
 /* Does all the unlink stuff to remove api from the picture */
-void api_unlink(void)
+void api_unlink(BrailleDisplay *brl)
 {
+  LogPrint(LOG_DEBUG, "api unlink");
   braille=trueBraille;
   trueBraille=&noBraille;
   if (!coreActive && driverOpened)
@@ -2384,7 +2384,7 @@ int api_start(BrailleDisplay *brl, char **parameters)
   pthread_attr_t attr;
   pthread_mutexattr_t mattr;
 
-  coreActive=driverOpened=0;
+  coreActive=driverOpened=1;
 
   if (!strcmp(keyfile,"none")) unauthorizedConnectionsAllowed = 1;
 

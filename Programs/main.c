@@ -1092,12 +1092,21 @@ main (int argc, char *argv[]) {
         if (!suspended) {
           setStatusCells();
           writeBrailleString(&brl, scr.unreadable);
-          closeBrailleDriver();
+#ifdef ENABLE_API
+          if (apiStarted)
+            api_suspend(&brl);
+          else
+#endif /* ENABLE_API */
+            closeBrailleDriver();
           suspended = 1;
         }
       } else {
         if (suspended) {
-          if (openBrailleDriver()) suspended = 0;
+          suspended = !(
+#ifdef ENABLE_API
+            apiStarted? api_resume(&brl):
+#endif /* ENABLE_API */
+            openBrailleDriver());
         }
       }
     }
@@ -2385,7 +2394,7 @@ message (const char *text, short flags) {
     int length = strlen(text);
 
 #ifdef ENABLE_API
-  if (apiStarted) api_unlink();
+  if (apiStarted) api_unlink(&brl);
 #endif /* ENABLE_API */
 
     while (length) {
@@ -2435,7 +2444,7 @@ message (const char *text, short flags) {
     }
 
 #ifdef ENABLE_API
-  if (apiStarted) api_link();
+  if (apiStarted) api_link(&brl);
 #endif /* ENABLE_API */
   }
 }
