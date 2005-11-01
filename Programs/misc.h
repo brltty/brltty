@@ -163,7 +163,8 @@ extern char *makePath (const char *directory, const char *file);
 extern void fixPath (char **path, const char *extension, const char *prefix);
 extern int makeDirectory (const char *path);
 
-extern char *getDevicePath (const char *path);
+extern const char *getDeviceDirectory (void);
+extern char *getDevicePath (const char *device);
 extern int isQualifiedDevice (const char **path, const char *qualifier);
 extern void unsupportedDevice (const char *path);
 

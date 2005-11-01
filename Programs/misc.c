@@ -380,30 +380,65 @@ makeDirectory (const char *path) {
   return 0;
 }
 
-char *
-getDevicePath (const char *path) {
-  const char *prefix = DEVICE_DIRECTORY;
-  const unsigned int prefixLength = strlen(prefix);
-  const unsigned int pathLength = strlen(path);
+const char *
+getDeviceDirectory (void) {
+  static const char *deviceDirectory = NULL;
 
-  if (prefixLength) {
-    if (*path != '/') {
-      char buffer[prefixLength + 1 +  pathLength + 1];
+  if (!deviceDirectory) {
+    const char *directory = DEVICE_DIRECTORY;
+    const unsigned int directoryLength = strlen(directory);
+
+    static const char *const variables[] = {"DTDEVROOT", "UTDEVROOT", NULL};
+    const char *const*variable = variables;
+
+    while (*variable) {
+      const char *root = getenv(*variable);
+
+      if (root && *root) {
+        const unsigned int rootLength = strlen(root);
+        char path[rootLength + directoryLength + 1];
+        snprintf(path, sizeof(path), "%s%s", root, directory);
+        if ((access(path, F_OK) != -1) || (errno != ENOENT)) {
+          deviceDirectory = strdupWrapper(path);
+          goto found;
+        }
+      }
+
+      ++variable;
+    }
+
+    deviceDirectory = directory;
+  found:
+    LogPrint(LOG_DEBUG, "device directory: %s", deviceDirectory);
+  }
+
+  return deviceDirectory;
+}
+
+char *
+getDevicePath (const char *device) {
+  const char *directory = getDeviceDirectory();
+  const unsigned int directoryLength = strlen(directory);
+  const unsigned int deviceLength = strlen(device);
+
+  if (directoryLength) {
+    if (*device != '/') {
+      char path[directoryLength + 1 +  deviceLength + 1];
       unsigned int length = 0;
 
-      memcpy(&buffer[length], prefix, prefixLength);
-      length += prefixLength;
+      memcpy(&path[length], directory, directoryLength);
+      length += directoryLength;
 
-      if (buffer[length-1] != '/') buffer[length++] = '/';
+      if (path[length-1] != '/') path[length++] = '/';
 
-      memcpy(&buffer[length], path, pathLength);
-      length += pathLength;
+      memcpy(&path[length], device, deviceLength);
+      length += deviceLength;
 
-      buffer[length] = 0;
-      return strdupWrapper(buffer);
+      path[length] = 0;
+      return strdupWrapper(path);
     }
   }
-  return strdupWrapper(path);
+  return strdupWrapper(device);
 }
 
 int
