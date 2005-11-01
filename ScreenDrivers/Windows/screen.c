@@ -60,12 +60,10 @@ static void closeStdHandles(void) {
 }
 
 #ifdef HAVE_FUNC_ATTACHCONSOLE
-static int tryToAttach() {
+static int tryToAttach(HWND win) {
 #define CONSOLEWINDOW "ConsoleWindowClass"
-  HWND win;
   static char class[strlen(CONSOLEWINDOW)+1];
   DWORD process;
-  win = GetForegroundWindow();
   if (GetClassName(win, class, sizeof(class)) != strlen(CONSOLEWINDOW)
       || memcmp(class,CONSOLEWINDOW,strlen(CONSOLEWINDOW)))
     return 0;
@@ -78,7 +76,7 @@ static int tryToAttach() {
   return openStdHandles();
 }
 #else /* HAVE_FUNC_ATTACHCONSOLE */
-#define tryToAttach() 1
+#define tryToAttach(win) 1
 #endif /* HAVE_FUNC_ATTACHCONSOLE */
 
 static int
@@ -94,7 +92,7 @@ open_WindowsScreen (void) {
 #ifndef HAVE_FUNC_ATTACHCONSOLE
   }
   return openStdHandles();
-#endif /* HAVE_FUNC_ATTACH_CONSOLE */
+#endif /* HAVE_FUNC_ATTACHCONSOLE */
 }
 
 static int
@@ -117,42 +115,56 @@ switchvt_WindowsScreen (int vt) {
   return 0;
 }
 
+static CONSOLE_SCREEN_BUFFER_INFO info;
+static const char *unreadable;
+static int cols;
+static int rows;
+
 static int
 currentvt_WindowsScreen (void) {
-  return (int)GetForegroundWindow();
-}
-
-static void
-describe_WindowsScreen (ScreenDescription *description) {
-  CONSOLE_SCREEN_BUFFER_INFO info;
-  description->number = currentvt_WindowsScreen();
-  description->unreadable = NULL;
-  if (!tryToAttach()) {
-    description->unreadable = "no terminal to read";
+  HWND win;
+  win = GetForegroundWindow();
+  unreadable = NULL;
+#ifndef HAVE_FUNC_ATTACHCONSOLE
+  if (root) {
+    unreadable = "root BRLTTY";
+    goto error;
+  }
+#endif /* HAVE_FUNC_ATTACHCONSOLE */
+  if (!tryToAttach(win)) {
+    unreadable = "no terminal to read";
     goto error;
   }
   if (consoleOutput == INVALID_HANDLE_VALUE) {
-    description->unreadable = "can't open terminal output";
+    unreadable = "can't open terminal output";
     goto error;
   }
   if (!(GetConsoleScreenBufferInfo(consoleOutput, &info))) {
     LogWindowsError("GetConsoleScreenBufferInfo");
     CloseHandle(consoleOutput);
     consoleOutput = INVALID_HANDLE_VALUE;
-    description->unreadable = "can't read terminal information";
+    unreadable = "can't read terminal information";
     goto error;
   }
-  description->cols = info.srWindow.Right + 1 - info.srWindow.Left;
-  description->rows = info.srWindow.Bottom + 1 - info.srWindow.Top;
-  description->posx = info.dwCursorPosition.X - info.srWindow.Left;
-  description->posy = info.dwCursorPosition.Y - info.srWindow.Top; 
-  return;
-
 error:
-  description->rows = 1;
-  description->cols = strlen(description->unreadable);
-  description->posx = 0;
-  description->posy = 0;
+  return (int)win;
+}
+
+static void
+describe_WindowsScreen (ScreenDescription *description) {
+  description->number = (int) currentvt_WindowsScreen();
+  description->unreadable = unreadable;
+  if (unreadable) {
+    description->rows = 1;
+    description->cols = strlen(unreadable);
+    description->posx = 0;
+    description->posy = 0;
+  } else {
+    description->cols = cols = info.srWindow.Right + 1 - info.srWindow.Left;
+    description->rows = rows = info.srWindow.Bottom + 1 - info.srWindow.Top;
+    description->posx = info.dwCursorPosition.X - info.srWindow.Left;
+    description->posy = info.dwCursorPosition.Y - info.srWindow.Top; 
+  }
 }
 
 static int
@@ -161,33 +173,21 @@ read_WindowsScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
   int text = mode == SCR_TEXT;
   int x, y;
   COORD coord;
-  ScreenDescription scr;
 
   BOOL WINAPI (*fun) (HANDLE, void*, DWORD, COORD, LPDWORD);
   const char *name;
   size_t size;
   void *buf;
 
-  describe_WindowsScreen(&scr);
-  if (scr.unreadable) {
-    setScreenMessage(&box, buffer, mode, scr.unreadable);
+  if (consoleOutput == INVALID_HANDLE_VALUE) return 0;
+  if (unreadable) {
+    setScreenMessage(&box, buffer, mode, unreadable);
     return 1;
   }
-  if (!validateScreenBox(&box, scr.cols, scr.rows)) return 0;
+  if (!validateScreenBox(&box, cols, rows)) return 0;
 
-  {
-    CONSOLE_SCREEN_BUFFER_INFO info;
-
-    if (!(GetConsoleScreenBufferInfo(consoleOutput, &info))) {
-      LogWindowsError("GetConsoleScreenBufferInfo");
-      CloseHandle(consoleOutput);
-      consoleOutput = INVALID_HANDLE_VALUE;
-      return 0;
-    }
-
-    coord.X = box.left + info.srWindow.Left;
-    coord.Y = box.top + info.srWindow.Top;
-  }
+  coord.X = box.left + info.srWindow.Left;
+  coord.Y = box.top + info.srWindow.Top;
 
 #define USE(f, t) (fun = (typeof(fun))f, name = #f, size = sizeof(t))
   if (text) {
@@ -275,7 +275,6 @@ insert_WindowsScreen (ScreenKey key) {
   INPUT_RECORD buf;
   KEY_EVENT_RECORD *keyE = &buf.Event.KeyEvent;
 
-  if (!tryToAttach()) return 0;
   if (consoleInput == INVALID_HANDLE_VALUE) return 0;
 
   LogPrint(LOG_DEBUG, "Insert key: %4.4X",key);
