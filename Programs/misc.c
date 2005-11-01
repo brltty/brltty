@@ -398,10 +398,14 @@ getDeviceDirectory (void) {
         const unsigned int rootLength = strlen(root);
         char path[rootLength + directoryLength + 1];
         snprintf(path, sizeof(path), "%s%s", root, directory);
-        if ((access(path, F_OK) != -1) || (errno != ENOENT)) {
+        if (access(path, F_OK) != -1) {
           deviceDirectory = strdupWrapper(path);
           goto found;
         }
+
+        if (errno != ENOENT)
+          LogPrint(LOG_ERR, "device directory error: %s (%s): %s",
+                   path, *variable, strerror(errno));
       }
 
       ++variable;
