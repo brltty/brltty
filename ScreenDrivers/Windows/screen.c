@@ -115,6 +115,17 @@ switchvt_WindowsScreen (int vt) {
   return 0;
 }
 
+static ALTTABINFO altTabInfo;
+static HWND altTab;
+static char altTabName[128];
+static BOOL CALLBACK findAltTab(HWND win, LPARAM lparam) {
+  if (GetAltTabInfo(win, -1, &altTabInfo, NULL, 0)) {
+    altTab = win;
+    return FALSE;
+  }
+  return TRUE;
+}
+
 static CONSOLE_SCREEN_BUFFER_INFO info;
 static const char *unreadable;
 static int cols;
@@ -123,6 +134,23 @@ static int rows;
 static int
 currentvt_WindowsScreen (void) {
   HWND win;
+  altTab = NULL;
+#ifndef HAVE_FUNC_ATTACHCONSOLE
+  if (root)
+#endif /* HAVE_FUNC_ATTACHCONSOLE */
+  {
+    BOOL ret;
+    altTabInfo.cbSize = sizeof(altTabInfo);
+    EnumWindows(findAltTab, 0);
+    if (altTab) {
+      if (!(GetAltTabInfo(altTab,
+	      altTabInfo.iColFocus + altTabInfo.iRowFocus * altTabInfo.cColumns,
+	      &altTabInfo, altTabName, sizeof(altTabName))))
+	altTab = NULL;
+      else
+	return (int)altTab;
+    }
+  }
   win = GetForegroundWindow();
   unreadable = NULL;
 #ifndef HAVE_FUNC_ATTACHCONSOLE
@@ -154,7 +182,12 @@ static void
 describe_WindowsScreen (ScreenDescription *description) {
   description->number = (int) currentvt_WindowsScreen();
   description->unreadable = unreadable;
-  if (unreadable) {
+  if (altTab) {
+    description->rows = 1;
+    description->cols = strlen(altTabName);
+    description->posx = 0;
+    description->posy = 0;
+  } else if (unreadable) {
     description->rows = 1;
     description->cols = strlen(unreadable);
     description->posx = 0;
@@ -179,6 +212,10 @@ read_WindowsScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
   size_t size;
   void *buf;
 
+  if (altTab) {
+    setScreenMessage(&box, buffer, mode, altTabName);
+    return 1;
+  }
   if (consoleOutput == INVALID_HANDLE_VALUE) return 0;
   if (unreadable) {
     setScreenMessage(&box, buffer, mode, unreadable);
