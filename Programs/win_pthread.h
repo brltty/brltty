@@ -182,6 +182,45 @@ static inline int pthread_mutex_destroy (pthread_mutex_t *mutex) {
 }
 
 /**************
+ * semaphores *
+ **************/
+
+typedef HANDLE sem_t;
+
+static inline int sem_init(sem_t *sem, int pshared, unsigned int value) {
+  winPthreadAssertWindows(*sem = CreateSemaphore(NULL, value, MAXLONG, NULL));
+  return 0;
+}
+
+static inline int do_sem_wait(sem_t *sem, DWORD timeout) {
+  switch (WaitForSingleObject(*sem, timeout)) {
+    default:
+    case WAIT_FAILED:
+      setSystemErrno();
+      return -1;
+    case WAIT_TIMEOUT:
+      errno = EAGAIN;
+      return -1;
+    case WAIT_ABANDONED:
+    case WAIT_OBJECT_0:
+      return 0;
+  }
+}
+
+#define sem_wait(sem) do_sem_wait(sem, INFINITE)
+#define sem_trywait(sem) do_sem_wait(sem, 0)
+
+static inline int sem_post(sem_t *sem) {
+  winPthreadAssertWindows(ReleaseSemaphore(*sem, 0, NULL));
+  return 0;
+}
+
+static inline int sem_destry(sem_t *sem) {
+  winPthreadAssertWindows(CloseHandle(*sem));
+  return 0;
+}
+
+/**************
  * conditions *
  **************/
 

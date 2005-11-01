@@ -27,8 +27,12 @@
 #include <pthread.h>
 #include <limits.h>
 #include <langinfo.h>
-#include <semaphore.h>
 #include <locale.h>
+#ifdef __MINGW32__
+#include "win_pthread.h"
+#else /* __MINGW32__ */
+#include <semaphore.h>
+#endif /* __MINGW32__ */
 
 #include <cspi/spi.h>
 #include <X11/keysym.h>
