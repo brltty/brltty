@@ -74,6 +74,11 @@ haveSpeechDriver (const char *code) {
   return haveDriver(code, SPEECH_DRIVER_CODES, driverTable);
 }
 
+const char *
+getDefaultSpeechDriver (void) {
+  return getDefaultDriver(driverTable);
+}
+
 const SpeechDriver *
 loadSpeechDriver (const char *code, void **driverObject, const char *driverDirectory) {
   return loadDriver(code, driverObject,

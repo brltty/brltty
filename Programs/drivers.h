@@ -30,6 +30,7 @@ typedef struct {
 extern int isDriverAvailable (const char *code, const char *codes);
 extern int isDriverIncluded (const char *code, const DriverEntry *table);
 extern int haveDriver (const char *code, const char *codes, const DriverEntry *table);
+extern const char *getDefaultDriver (const DriverEntry *table);
 
 extern const void *loadDriver (
   const char *driverCode, void **driverObject,

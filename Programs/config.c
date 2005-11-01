@@ -1345,14 +1345,21 @@ activateBrailleDriver (int verify) {
   int oneDriver = brailleDrivers[0] && !brailleDrivers[1];
   int autodetect = oneDriver && (strcmp(brailleDrivers[0], "auto") == 0);
   const char *const *device = (const char *const *)brailleDevices;
+  const char *defaultCodes[] = {getDefaultBrailleDriver(), NULL};
 
   if (!oneDevice || !oneDriver || autodetect) verify = 0;
 
   while (*device) {
     const char *const *code;
-    brailleDevice = *device;
 
-    if (autodetect) {
+    brailleDevice = *device;
+    LogPrint(LOG_DEBUG, "checking braille device: %s", brailleDevice);
+
+    if (!autodetect) {
+      code = (const char *const *)brailleDrivers;
+    } else if (defaultCodes[0]) {
+      code = defaultCodes;
+    } else {
       const char *type;
       const char *dev = brailleDevice;
 
@@ -1363,35 +1370,35 @@ activateBrailleDriver (int verify) {
         };
         code = serialCodes;
         type = "serial";
+      } else
 
 #ifdef ENABLE_USB_SUPPORT
-      } else if (isUsbDevice(&dev)) {
+      if (isUsbDevice(&dev)) {
         static const char *const usbCodes[] = {
           "al", "bm", "fs", "ht", "pm", "vo",
           NULL
         };
         code = usbCodes;
         type = "USB";
+      } else
 #endif /* ENABLE_USB_SUPPORT */
 
 #ifdef ENABLE_BLUETOOTH_SUPPORT
-      } else if (isBluetoothDevice(&dev)) {
+      if (isBluetoothDevice(&dev)) {
         static const char *bluetoothCodes[] = {
           "ht", "bm",
           NULL
         };
         code = bluetoothCodes;
         type = "bluetooth";
+      } else
 #endif /* ENABLE_BLUETOOTH_SUPPORT */
 
-      } else {
+      {
         LogPrint(LOG_WARNING, "braille display autodetection not supported for device '%s'.", dev);
         goto nextDevice;
       }
-      LogPrint(LOG_DEBUG, "looking for %s braille display on '%s'.", type, brailleDevice);
-    } else {
-      code = (const char *const *)brailleDrivers;
-      LogPrint(LOG_DEBUG, "looking for braille display on '%s'.", brailleDevice);
+      LogPrint(LOG_DEBUG, "performing %s braille display autodetection.", type);
     }
 
     while (*code) {
@@ -1589,17 +1596,20 @@ static int
 activateSpeechDriver (int verify) {
   int oneDriver = speechDrivers[0] && !speechDrivers[1];
   int autodetect = oneDriver && (strcmp(speechDrivers[0], "auto") == 0);
+  const char *defaultCodes[] = {getDefaultSpeechDriver(), NULL};
   const char *const *code;
 
   if (!oneDriver || autodetect) verify = 0;
 
-  if (autodetect) {
+  if (!autodetect) {
+    code = (const char *const *)speechDrivers;
+  } else if (defaultCodes[0]) {
+    code = defaultCodes;
+  } else {
     static const char *const speechCodes[] = {
       NULL
     };
     code = speechCodes;
-  } else {
-    code = (const char *const *)speechDrivers;
   }
   LogPrint(LOG_DEBUG, "looking for speech synthesizer.");
 

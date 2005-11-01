@@ -84,6 +84,11 @@ haveBrailleDriver (const char *code) {
   return haveDriver(code, BRAILLE_DRIVER_CODES, driverTable);
 }
 
+const char *
+getDefaultBrailleDriver (void) {
+  return getDefaultDriver(driverTable);
+}
+
 const BrailleDriver *
 loadBrailleDriver (const char *code, void **driverObject, const char *driverDirectory) {
   return loadDriver(code, driverObject,

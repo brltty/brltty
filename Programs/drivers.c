@@ -58,6 +58,11 @@ haveDriver (const char *code, const char *codes, const DriverEntry *table) {
                                     isDriverAvailable(code, codes);
 }
 
+const char *
+getDefaultDriver (const DriverEntry *table) {
+  return (table && table[0].address && !table[1].address)? *table[0].code: NULL;
+}
+
 const void *
 loadDriver (
   const char *driverCode, void **driverObject,
