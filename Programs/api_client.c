@@ -1098,7 +1098,11 @@ const char *brlapi_strerror(const brlapi_error_t *error)
   if (error->brlerrno>=brlapi_nerr)
     return "Unknown error";
   else if (error->brlerrno==BRLERR_GAIERR) {
-    if (error->gaierrno != EAI_SYSTEM)
+#if defined(EAI_SYSTEM)
+    if (error->gaierrno == EAI_SYSTEM)
+      snprintf(errmsg,sizeof(errmsg),"resolve: %s", strerror(error->libcerrno));
+    else
+#endif /* EAI_SYSTEM */
       snprintf(errmsg,sizeof(errmsg),"resolve: "
 #if defined(HAVE_GETADDRINFO)
 #if defined(HAVE_GAI_STRERROR)
@@ -1112,8 +1116,6 @@ const char *brlapi_strerror(const brlapi_error_t *error)
 	"%x\n", error->gaierrno
 #endif
 	);
-    else
-      snprintf(errmsg,sizeof(errmsg),"resolve: %s", strerror(error->libcerrno));
     return errmsg;
   }
   else if (error->brlerrno==BRLERR_LIBCERR) {
