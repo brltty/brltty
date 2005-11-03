@@ -1998,7 +1998,8 @@ static void *server(void *arg)
     }
 #endif /* WINDOWS */
     time(&currentTime);
-    for (i=0;i<numSockets;i++)
+    for (i=0;i<numSockets;i++) {
+      char source[0X100];
 #ifdef WINDOWS
     if (socketInfo[i].fd != -1 &&
 	WaitForSingleObject(socketInfo[i].overl.hEvent, 0) == WAIT_OBJECT_0) {
@@ -2017,6 +2018,26 @@ static void *server(void *arg)
           LogPrint(LOG_WARNING,"accept(%d): %s",socketInfo[i].fd,strerror(errno));
           continue;
         }
+
+        switch (addr.ss_family) {
+#ifndef WINDOWS
+          case AF_LOCAL: {
+            const struct sockaddr_un *local = (const struct sockaddr_un *)&addr;
+            snprintf(source, sizeof(source), "local %s", local->sun_path);
+            break;
+          }
+#endif /* WINDOWS */
+
+          case AF_INET: {
+            const struct sockaddr_in *inet = (const struct sockaddr_in *)&addr;
+            snprintf(source, sizeof(source), "inet %s:%d", inet_ntoa(inet->sin_addr), ntohs(inet->sin_port));
+            break;
+          }
+
+          default:
+            snprintf(source, sizeof(source), "address family %d", addr.ss_family);
+            break;
+        }
 #ifdef WINDOWS
 #if defined(HAVE_FUNC_CREATENAMEDPIPE)
       } else /* PF_LOCAL */ {
@@ -2026,37 +2047,12 @@ static void *server(void *arg)
         res = socketInfo[i].fd;
 	if ((socketInfo[i].fd = initializeLocalSocket(&socketInfo[i])) != -1)
 	  LogPrint(LOG_DEBUG,"socket %d re-established (fd %p, was %p)",i,(HANDLE) socketInfo[i].fd,(HANDLE) res);
+        snprintf(source, sizeof(source), "local");
       }
 #endif /* defined(HAVE_FUNC_CREATENAMEDPIPE) */
 #endif /* WINDOWS */
 
-      {
-        char source[0X100];
-        switch (addr.ss_family) {
-#ifdef AF_LOCAL
-          case AF_LOCAL: {
-            const struct sockaddr_un *local = (const struct sockaddr_un *)&addr;
-            snprintf(source, sizeof(source), "local %s", local->sun_path);
-            break;
-          }
-#endif /* AF_LOCAL */
-
-#ifdef AF_INET
-          case AF_INET: {
-            const struct sockaddr_in *inet = (const struct sockaddr_in *)&addr;
-            snprintf(source, sizeof(source), "inet %s:%d", inet_ntoa(inet->sin_addr), ntohs(inet->sin_port));
-            break;
-          }
-#endif /* AF_INET */
-
-          default: {
-            snprintf(source, sizeof(source), "address family %d", addr.ss_family);
-            break;
-          }
-        }
-        LogPrint(LOG_NOTICE, "BrlAPI connection fd=%d accepted: %s", res, source);
-      }
-
+      LogPrint(LOG_NOTICE, "BrlAPI connection fd=%d accepted: %s", res, source);
       if (unauthConnections>=UNAUTH_MAX) {
         writeError(res, BRLERR_CONNREFUSED);
         closeFd(res);
@@ -2077,6 +2073,7 @@ static void *server(void *arg)
         unauthConnections++;
 	addConnection(c, notty.connections);
       }
+    }
     }
     handleTtyFds(&sockset,currentTime,&notty);
     handleTtyFds(&sockset,currentTime,&ttys);
