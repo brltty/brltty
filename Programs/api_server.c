@@ -2028,7 +2028,34 @@ static void *server(void *arg)
       }
 #endif /* defined(HAVE_FUNC_CREATENAMEDPIPE) */
 #endif /* WINDOWS */
-      LogPrint(LOG_DEBUG,"Connection accepted on fd %d",res);
+
+      {
+        char source[0X100];
+        switch (addr.ss_family) {
+#ifdef AF_LOCAL
+          case AF_LOCAL: {
+            const struct sockaddr_un *local = (const struct sockaddr_un *)&addr;
+            snprintf(source, sizeof(source), "local %s", local->sun_path);
+            break;
+          }
+#endif /* AF_LOCAL */
+
+#ifdef AF_INET
+          case AF_INET: {
+            const struct sockaddr_in *inet = (const struct sockaddr_in *)&addr;
+            snprintf(source, sizeof(source), "inet %s:%d", inet_ntoa(inet->sin_addr), ntohs(inet->sin_port));
+            break;
+          }
+#endif /* AF_INET */
+
+          default: {
+            snprintf(source, sizeof(source), "address family %d", addr.ss_family);
+            break;
+          }
+        }
+        LogPrint(LOG_NOTICE, "BrlAPI connection accepted: %s", source);
+      }
+
       if (unauthConnections>=UNAUTH_MAX) {
         writeError(res, BRLERR_CONNREFUSED);
         closeFd(res);
