@@ -2005,55 +2005,55 @@ static void *server(void *arg)
       if (socketInfo[i].fd != -1 &&
           WaitForSingleObject(socketInfo[i].overl.hEvent, 0) == WAIT_OBJECT_0) {
 #if defined(HAVE_FUNC_CREATENAMEDPIPE)
-      if (socketInfo[i].addrfamily != PF_LOCAL) {
+        if (socketInfo[i].addrfamily == PF_LOCAL) {
+          DWORD foo;
+          if (!(GetOverlappedResult((HANDLE) socketInfo[i].fd, &socketInfo[i].overl, &foo, FALSE)))
+            LogWindowsError("GetOverlappedResult");
+          res = socketInfo[i].fd;
+          if ((socketInfo[i].fd = initializeLocalSocket(&socketInfo[i])) != -1)
+            LogPrint(LOG_DEBUG,"socket %d re-established (fd %p, was %p)",i,(HANDLE) socketInfo[i].fd,(HANDLE) res);
+          snprintf(source, sizeof(source), "local");
+        } else {
 #endif /* defined(HAVE_FUNC_CREATENAMEDPIPE) */
-	if (!ResetEvent(socketInfo[i].overl.hEvent))
-	  LogWindowsError("ResetEvent in server loop");
+          if (!ResetEvent(socketInfo[i].overl.hEvent))
+            LogWindowsError("ResetEvent in server loop");
 #else /* WINDOWS */
       if (socketInfo[i].fd>=0 && FD_ISSET(socketInfo[i].fd, &sockset)) {
 #endif /* WINDOWS */
-        addrlen = sizeof(addr);
-        res = accept(socketInfo[i].fd, (struct sockaddr *) &addr, &addrlen);
-        if (res<0) {
-          setSocketErrno();
-          LogPrint(LOG_WARNING,"accept(%d): %s",socketInfo[i].fd,strerror(errno));
-          continue;
-        }
-
-        switch (addr.ss_family) {
-#ifndef WINDOWS
-          case AF_LOCAL: {
-            const struct sockaddr_un *local = (const struct sockaddr_un *)&addr;
-            snprintf(source, sizeof(source), "local %s", local->sun_path);
-            break;
+          addrlen = sizeof(addr);
+          res = accept(socketInfo[i].fd, (struct sockaddr *) &addr, &addrlen);
+          if (res<0) {
+            setSocketErrno();
+            LogPrint(LOG_WARNING,"accept(%d): %s",socketInfo[i].fd,strerror(errno));
+            continue;
           }
+
+          switch (addr.ss_family) {
+#ifndef WINDOWS
+            case AF_LOCAL: {
+              const struct sockaddr_un *local = (const struct sockaddr_un *)&addr;
+              snprintf(source, sizeof(source), "local %s", local->sun_path);
+              break;
+            }
 #endif /* WINDOWS */
 
-          case AF_INET: {
-            const struct sockaddr_in *inet = (const struct sockaddr_in *)&addr;
-            snprintf(source, sizeof(source), "inet %s:%d", inet_ntoa(inet->sin_addr), ntohs(inet->sin_port));
-            break;
-          }
+            case AF_INET: {
+              const struct sockaddr_in *inet = (const struct sockaddr_in *)&addr;
+              snprintf(source, sizeof(source), "inet %s:%d", inet_ntoa(inet->sin_addr), ntohs(inet->sin_port));
+              break;
+            }
 
-          default:
-            snprintf(source, sizeof(source), "address family %d", addr.ss_family);
-            break;
-        }
+            default:
+              snprintf(source, sizeof(source), "address family %d", addr.ss_family);
+              break;
+          }
 #ifdef WINDOWS
 #if defined(HAVE_FUNC_CREATENAMEDPIPE)
-      } else /* PF_LOCAL */ {
-        DWORD foo;
-	if (!(GetOverlappedResult((HANDLE) socketInfo[i].fd, &socketInfo[i].overl, &foo, FALSE)))
-	  LogWindowsError("GetOverlappedResult");
-        res = socketInfo[i].fd;
-	if ((socketInfo[i].fd = initializeLocalSocket(&socketInfo[i])) != -1)
-	  LogPrint(LOG_DEBUG,"socket %d re-established (fd %p, was %p)",i,(HANDLE) socketInfo[i].fd,(HANDLE) res);
-        snprintf(source, sizeof(source), "local");
-      }
+        }
 #endif /* defined(HAVE_FUNC_CREATENAMEDPIPE) */
 #endif /* WINDOWS */
-
         LogPrint(LOG_NOTICE, "BrlAPI connection fd=%d accepted: %s", res, source);
+
         if (unauthConnections>=UNAUTH_MAX) {
           writeError(res, BRLERR_CONNREFUSED);
           closeFd(res);
@@ -2066,19 +2066,23 @@ static void *server(void *arg)
             break;
           }
 #endif /* WINDOWS */
+
           c = createConnection(res, currentTime);
           if (c==NULL) {
             LogPrint(LOG_WARNING,"Failed to create connection structure");
             closeFd(res);
           }
+
           unauthConnections++;
           addConnection(c, notty.connections);
         }
       }
     }
+
     handleTtyFds(&sockset,currentTime,&notty);
     handleTtyFds(&sockset,currentTime,&ttys);
   }
+
   pthread_cleanup_pop(1);
   return NULL;
 }
