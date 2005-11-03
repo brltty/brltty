@@ -139,7 +139,6 @@ currentvt_WindowsScreen (void) {
   if (root)
 #endif /* HAVE_FUNC_ATTACHCONSOLE */
   {
-    BOOL ret;
     altTabInfo.cbSize = sizeof(altTabInfo);
     EnumWindows(findAltTab, 0);
     if (altTab) {
