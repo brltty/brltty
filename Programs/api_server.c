@@ -1155,6 +1155,7 @@ static int handleUnauthorizedConnection(Connection *c, brl_type_t type, unsigned
   unauthConnections--;
   if (!authKeyCorrect) {
     writeError(c->fd, BRLERR_CONNREFUSED);
+    LogPrint(LOG_WARNING, "BrlAPI connection fd=%d failed authorization", c->fd);
     return 1;
   }
 
@@ -2053,7 +2054,7 @@ static void *server(void *arg)
             break;
           }
         }
-        LogPrint(LOG_NOTICE, "BrlAPI connection accepted: %s", source);
+        LogPrint(LOG_NOTICE, "BrlAPI connection fd=%d accepted: %s", res, source);
       }
 
       if (unauthConnections>=UNAUTH_MAX) {
