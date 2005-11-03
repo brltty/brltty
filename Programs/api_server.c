@@ -2000,16 +2000,17 @@ static void *server(void *arg)
     time(&currentTime);
     for (i=0;i<numSockets;i++) {
       char source[0X100];
+
 #ifdef WINDOWS
-    if (socketInfo[i].fd != -1 &&
-	WaitForSingleObject(socketInfo[i].overl.hEvent, 0) == WAIT_OBJECT_0) {
+      if (socketInfo[i].fd != -1 &&
+          WaitForSingleObject(socketInfo[i].overl.hEvent, 0) == WAIT_OBJECT_0) {
 #if defined(HAVE_FUNC_CREATENAMEDPIPE)
       if (socketInfo[i].addrfamily != PF_LOCAL) {
 #endif /* defined(HAVE_FUNC_CREATENAMEDPIPE) */
 	if (!ResetEvent(socketInfo[i].overl.hEvent))
 	  LogWindowsError("ResetEvent in server loop");
 #else /* WINDOWS */
-    if (socketInfo[i].fd>=0 && FD_ISSET(socketInfo[i].fd, &sockset)) {
+      if (socketInfo[i].fd>=0 && FD_ISSET(socketInfo[i].fd, &sockset)) {
 #endif /* WINDOWS */
         addrlen = sizeof(addr);
         res = accept(socketInfo[i].fd, (struct sockaddr *) &addr, &addrlen);
@@ -2052,28 +2053,28 @@ static void *server(void *arg)
 #endif /* defined(HAVE_FUNC_CREATENAMEDPIPE) */
 #endif /* WINDOWS */
 
-      LogPrint(LOG_NOTICE, "BrlAPI connection fd=%d accepted: %s", res, source);
-      if (unauthConnections>=UNAUTH_MAX) {
-        writeError(res, BRLERR_CONNREFUSED);
-        closeFd(res);
-        if (unauthConnLog==0) LogPrint(LOG_WARNING, "Too many simultaneous unauthorized connections");
-        unauthConnLog++;
-      } else {
-#ifndef WINDOWS
-        if (!setBlockingIo(res, 0)) {
-          LogPrint(LOG_WARNING, "Failed to switch to non-blocking mode: %s",strerror(errno));
-          break;
-        }
-#endif /* WINDOWS */
-        c = createConnection(res, currentTime);
-        if (c==NULL) {
-          LogPrint(LOG_WARNING,"Failed to create connection structure");
+        LogPrint(LOG_NOTICE, "BrlAPI connection fd=%d accepted: %s", res, source);
+        if (unauthConnections>=UNAUTH_MAX) {
+          writeError(res, BRLERR_CONNREFUSED);
           closeFd(res);
+          if (unauthConnLog==0) LogPrint(LOG_WARNING, "Too many simultaneous unauthorized connections");
+          unauthConnLog++;
+        } else {
+#ifndef WINDOWS
+          if (!setBlockingIo(res, 0)) {
+            LogPrint(LOG_WARNING, "Failed to switch to non-blocking mode: %s",strerror(errno));
+            break;
+          }
+#endif /* WINDOWS */
+          c = createConnection(res, currentTime);
+          if (c==NULL) {
+            LogPrint(LOG_WARNING,"Failed to create connection structure");
+            closeFd(res);
+          }
+          unauthConnections++;
+          addConnection(c, notty.connections);
         }
-        unauthConnections++;
-	addConnection(c, notty.connections);
       }
-    }
     }
     handleTtyFds(&sockset,currentTime,&notty);
     handleTtyFds(&sockset,currentTime,&ttys);
