@@ -1634,7 +1634,11 @@ static int initializeLocalSocket(struct socketInfo *info)
   }
   closeFd(lock);
   if (unlink(tmppath))
-    LogPrint(LOG_ERR,"removing temp local socket lock");
+    LogError("removing temp local socket lock");
+  if (unlink(sa.sun_path) && errno != ENOENT) {
+    LogError("removing old socket");
+    goto outtmp;
+  }
   if (loopBind(fd, (struct sockaddr *) &sa, sizeof(sa))<0) {
     LogPrint(LOG_WARNING,"bind: %s",strerror(errno));
     goto outlock;
@@ -1645,7 +1649,7 @@ static int initializeLocalSocket(struct socketInfo *info)
     goto outlock;
   }
   return fd;
-  
+
 outlock:
   unlink(lockpath);
 outtmp:
