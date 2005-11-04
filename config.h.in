@@ -124,6 +124,9 @@ extern "C" {
 /* Define this if the function getaddrinfo exists. */
 #undef HAVE_GETADDRINFO
 
+/* Define this if the function getnameinfo exists. */
+#undef HAVE_GETNAMEINFO
+
 /* Define this if the function gai_strerror exists. */
 #undef HAVE_GAI_STRERROR
 

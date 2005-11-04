@@ -299,7 +299,9 @@ AC_SUBST([CONFLIBDIR], ["${brltty_cv_prog_conflibdir}"])
 case "${host_os}"
 in
    cygwin*|mingw*)
-      BRLTTY_HAVE_WINDOWS_LIBRARY([wsock32])
+      BRLTTY_HAVE_WINDOWS_LIBRARY([ws2_32], [], [
+         BRLTTY_HAVE_WINDOWS_LIBRARY([wsock32])
+      ])
       BRLTTY_HAVE_WINDOWS_LIBRARY([msvcp60])
       BRLTTY_HAVE_WINDOWS_LIBRARY([winmm])
 
@@ -475,7 +477,22 @@ AC_CHECK_HEADERS([iconv.h], [
    AC_HAVE_LIBRARY([iconv])
 ])
 
-AC_CHECK_FUNCS([fchdir fchmod gai_strerror getaddrinfo getopt_long hstrerror realpath shmget shm_open sigaction vsyslog])
+AC_CHECK_FUNCS([fchdir fchmod getopt_long hstrerror realpath shmget shm_open sigaction vsyslog])
+
+case "${host_os}"
+in
+   cygwin*|mingw*)
+      if test "${brltty_cv_dll_ws2_32}" = "yes"
+      then
+         BRLTTY_HAVE_WINDOWS_FUNCTION([getaddrinfo], [ws2_32], [AC_DEFINE(HAVE_GETADDRINFO)])
+         BRLTTY_HAVE_WINDOWS_FUNCTION([getnameinfo], [ws2_32], [AC_DEFINE(HAVE_GETNAMEINFO)])
+         AC_CHECK_FUNCS([gai_strerror])
+      fi
+      ;;
+   *)
+      AC_CHECK_FUNCS([gai_strerror getaddrinfo getnameinfo])
+      ;;
+esac
 
 AC_CHECK_SIZEOF([key_t], [], [
 #include <sys/ipc.h>

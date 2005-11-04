@@ -1295,7 +1295,11 @@ static int initializeTcpSocket(struct socketInfo *info)
 #endif /* HAVE_GAI_STRERROR */
 	,info->hostname,info->port
 #ifdef HAVE_GAI_STRERROR
-	,gai_strerror(err)
+	,
+#ifdef EAI_SYSTEM
+	err == EAI_SYSTEM ? strerror(errno) :
+#endif /* EAI_SYSTEM */
+	gai_strerror(err)
 #else /* HAVE_GAI_STRERROR */
 	,err
 #endif /* HAVE_GAI_STRERROR */
@@ -2012,7 +2016,7 @@ static void *server(void *arg)
           res = socketInfo[i].fd;
           if ((socketInfo[i].fd = initializeLocalSocket(&socketInfo[i])) != -1)
             LogPrint(LOG_DEBUG,"socket %d re-established (fd %p, was %p)",i,(HANDLE) socketInfo[i].fd,(HANDLE) res);
-          snprintf(source, sizeof(source), "local");
+          snprintf(source, sizeof(source), BRLAPI_SOCKETPATH "%s", socketInfo[i].port);
         } else {
 #endif /* defined(HAVE_FUNC_CREATENAMEDPIPE) */
           if (!ResetEvent(socketInfo[i].overl.hEvent))
@@ -2028,6 +2032,31 @@ static void *server(void *arg)
             continue;
           }
 
+#if defined(HAVE_GETNAMEINFO) && !defined(WINDOWS)
+          {
+            char host[NI_MAXHOST];
+            char service[NI_MAXSERV];
+            int err;
+
+            if (!(err = getnameinfo((const struct sockaddr *)&addr, addrlen,
+                                    host, sizeof(host), service, sizeof(service),
+                                    NI_NUMERICHOST | NI_NUMERICSERV))) {
+              snprintf(source, sizeof(source), "%d %s:%s", addr.ss_family, host, service);
+            } else {
+#ifdef HAVE_GAI_STRERROR
+              snprintf(source, sizeof(source), "reverse lookup error for address family %d: %s", 
+                       addr.ss_family,
+#ifdef EAI_SYSTEM
+                       (err == EAI_SYSTEM)? strerror(errno):
+#endif /* EAI_SYSTEM */
+                       gai_strerror(err));
+#else /* HAVE_GAI_STRERROR */
+              snprintf(source, sizeof(source), "reverse lookup error %d for address family %d.",
+                       err, addr.ss_family);
+#endif /* HAVE_GAI_STRERROR */
+            }
+          }
+#else /* HAVE_GETNAMEINFO */
           switch (addr.ss_family) {
 #ifndef WINDOWS
             case AF_LOCAL: {
@@ -2047,6 +2076,7 @@ static void *server(void *arg)
               snprintf(source, sizeof(source), "address family %d", addr.ss_family);
               break;
           }
+#endif /* GETNAMEINFO */
 #ifdef WINDOWS
 #if defined(HAVE_FUNC_CREATENAMEDPIPE)
         }

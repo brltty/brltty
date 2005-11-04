@@ -596,6 +596,10 @@ int main () {
 if test "${brltty_cv_dll_$1}" = "yes"
 then
    AC_HAVE_LIBRARY([$1])
+   $2
+else
+   :
+   $3
 fi])
 
 AC_DEFUN([BRLTTY_HAVE_WINDOWS_FUNCTION], [dnl
@@ -610,8 +614,10 @@ AC_CACHE_CHECK(
 int
 main (void) {
   HMODULE module;
-  if (!(module = GetModuleHandle("$2.dll"))) return 1;
-  if (!(GetProcAddress(module, "$1"))) return 2;
+  HINSTANCE instance;
+  if (!(instance = LoadLibrary("$2.dll"))) return 1;
+  if (!(module = GetModuleHandle("$2.dll"))) return 2;
+  if (!(GetProcAddress(module, "$1"))) return 3;
   return 0;
 }
 ],
@@ -620,5 +626,9 @@ main (void) {
 if test "${brltty_cv_function_$1}" = "yes"
 then
    AC_DEFINE(BRLTTY_UPPERCASE([HAVE_FUNC_$1]))
+   $3
+else
+   :
+   $4
 fi
 ])
