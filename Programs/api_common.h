@@ -273,7 +273,7 @@ int BRLAPI(loadAuthKey)(const char *filename, size_t *authlength, void *auth)
 int BRLAPI(splitHost)(const char *host, char **hostname, char **port) {
   const char *c;
   if (!host || !*host) {
-#if defined(PF_LOCAL) && (!defined(WINDOWS) || defined(HAVE_FUNC_CREATENAMEDPIPE))
+#if defined(PF_LOCAL) && (!defined(WINDOWS) || defined(HAVE_CREATENAMEDPIPE))
     *hostname = NULL;
     *port = strdup("0");
     return PF_LOCAL;
@@ -293,7 +293,7 @@ int BRLAPI(splitHost)(const char *host, char **hostname, char **port) {
       snprintf(*port,6,"%u",BRLAPI_SOCKETPORTNUM+porti);
       return PF_UNSPEC;
     } else {
-#if defined(PF_LOCAL) && (!defined(WINDOWS) || defined(HAVE_FUNC_CREATENAMEDPIPE))
+#if defined(PF_LOCAL) && (!defined(WINDOWS) || defined(HAVE_CREATENAMEDPIPE))
       *hostname = NULL;
       *port = strdup(c+1);
       return PF_LOCAL;

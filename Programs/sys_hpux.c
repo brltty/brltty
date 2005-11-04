@@ -22,9 +22,9 @@
 #include <string.h>
 #include <errno.h>
 
-#ifdef HAVE_FUNC_SHL_LOAD
+#ifdef HAVE_SHL_LOAD
 #  include <dl.h>
-#endif /* HAVE_FUNC_SHL_LOAD */
+#endif /* HAVE_SHL_LOAD */
 
 #ifdef HAVE_HPUX_AUDIO
 #  include <Alib.h>
@@ -41,32 +41,32 @@
 
 void *
 loadSharedObject (const char *path) {
-#ifdef HAVE_FUNC_SHL_LOAD
+#ifdef HAVE_SHL_LOAD
   shl_t object = shl_load(path, BIND_IMMEDIATE|BIND_VERBOSE|DYNAMIC_PATH, 0L);
   if (object) return object;
   LogPrint(LOG_ERR, "Shared library '%s' not loaded: %s",
            path, strerror(errno));
-#endif /* HAVE_HPUX_AUDIO */
+#endif /* HAVE_SHL_LOAD */
   return NULL;
 }
 
 void 
 unloadSharedObject (void *object) {
-#ifdef HAVE_FUNC_SHL_LOAD
+#ifdef HAVE_SHL_LOAD
   if (shl_unload(object) == -1)
     LogPrint(LOG_ERR, "Shared library unload error: %s",
              strerror(errno));
-#endif /* HAVE_HPUX_AUDIO */
+#endif /* HAVE_SHL_LOAD */
 }
 
 int 
 findSharedSymbol (void *object, const char *symbol, const void **address) {
-#ifdef HAVE_FUNC_SHL_LOAD
+#ifdef HAVE_SHL_LOAD
   shl_t handle = object;
   if (shl_findsym(&handle, symbol, TYPE_UNDEFINED, address) != -1) return 1;
   LogPrint(LOG_ERR, "Shared symbol '%s' not found: %s",
            symbol, strerror(errno));
-#endif /* HAVE_HPUX_AUDIO */
+#endif /* HAVE_SHL_LOAD */
   return 0;
 }
 

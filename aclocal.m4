@@ -2,7 +2,7 @@ AC_DEFUN([BRLTTY_UPPERCASE], [translit([$1], [a-z], [A-Z])])
 
 AC_DEFUN([BRLTTY_SEARCH_LIBS], [dnl
 brltty_uc="`echo "$1" | sed -e 'y%abcdefghijklmnopqrstuvwxyz%ABCDEFGHIJKLMNOPQRSTUVWXYZ%'`"
-AC_SEARCH_LIBS([$1], [$2], [AC_DEFINE_UNQUOTED(HAVE_FUNC_${brltty_uc})])])
+AC_SEARCH_LIBS([$1], [$2], [AC_DEFINE_UNQUOTED(HAVE_${brltty_uc})])])
 
 AC_DEFUN([BRLTTY_VAR_TRIM], [dnl
 changequote(, )dnl
@@ -625,7 +625,7 @@ main (void) {
    [brltty_cv_function_$1=no])])
 if test "${brltty_cv_function_$1}" = "yes"
 then
-   AC_DEFINE(BRLTTY_UPPERCASE([HAVE_FUNC_$1]))
+   AC_DEFINE(BRLTTY_UPPERCASE([HAVE_$1]))
    $3
 else
    :

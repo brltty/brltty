@@ -76,16 +76,16 @@ extern "C" {
 #undef WINDOWS_NT
 
 /* Define this if the function CreateNamedPipe is available. */
-#undef HAVE_FUNC_CREATENAMEDPIPE
+#undef HAVE_CREATENAMEDPIPE
 
 /* Define this if the function GetConsoleWindow is available. */
-#undef HAVE_FUNC_GETCONSOLEWINDOW
+#undef HAVE_GETCONSOLEWINDOW
 
 /* Define this if the function AttachConsole is available. */
-#undef HAVE_FUNC_ATTACHCONSOLE
+#undef HAVE_ATTACHCONSOLE
 
 /* Define this if the function ReadConsoleOutputCharacterW is available. */
-#undef HAVE_FUNC_READCONSOLEOUTPUTCHARACTERW
+#undef HAVE_READCONSOLEOUTPUTCHARACTERW
 
 #else /* WINDOWS */
 
@@ -153,10 +153,10 @@ extern "C" {
 #undef HAVE_VSYSLOG
 
 /* Define this if the function dlopen is available. */
-#undef HAVE_FUNC_DLOPEN
+#undef HAVE_DLOPEN
 
 /* Define this if the function shl_load is available. */
-#undef HAVE_FUNC_SHL_LOAD
+#undef HAVE_SHL_LOAD
 
 /* Define this to be a string containing the package name. */
 #undef PACKAGE_NAME

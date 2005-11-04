@@ -329,7 +329,7 @@ main (void) {
          [brltty_cv_function_CreateNamedPipe=no])])
       if test "${brltty_cv_function_CreateNamedPipe}" = "yes"
       then
-         AC_DEFINE([HAVE_FUNC_CREATENAMEDPIPE])
+         AC_DEFINE([HAVE_CREATENAMEDPIPE])
       fi
 
       BRLTTY_HAVE_WINDOWS_FUNCTION([GetConsoleWindow], [kernel32])
@@ -359,7 +359,7 @@ main(void) {
          [brltty_cv_function_ReadConsoleOutputCharacterW=no])])
       if test "${brltty_cv_function_ReadConsoleOutputCharacterW}" = "yes"
       then
-         AC_DEFINE([HAVE_FUNC_READCONSOLEOUTPUTCHARACTERW])
+         AC_DEFINE([HAVE_READCONSOLEOUTPUTCHARACTERW])
       fi
 
       if test "${build_os}" = "${host_os}"
@@ -484,8 +484,8 @@ in
    cygwin*|mingw*)
       if test "${brltty_cv_dll_ws2_32}" = "yes"
       then
-         BRLTTY_HAVE_WINDOWS_FUNCTION([getaddrinfo], [ws2_32], [AC_DEFINE(HAVE_GETADDRINFO)])
-         BRLTTY_HAVE_WINDOWS_FUNCTION([getnameinfo], [ws2_32], [AC_DEFINE(HAVE_GETNAMEINFO)])
+         BRLTTY_HAVE_WINDOWS_FUNCTION([getaddrinfo], [ws2_32])
+         BRLTTY_HAVE_WINDOWS_FUNCTION([getnameinfo], [ws2_32])
          AC_CHECK_FUNCS([gai_strerror])
       fi
       ;;

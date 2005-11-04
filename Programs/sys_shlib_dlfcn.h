@@ -15,32 +15,32 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifdef HAVE_FUNC_DLOPEN 
+#ifdef HAVE_DLOPEN 
 #include <dlfcn.h>
-#else /* HAVE_FUNC_DLOPEN */
+#else /* HAVE_DLOPEN */
 #warning shared object support not available on this installation: no <dlfcn.h>
-#endif /* HAVE_FUNC_DLOPEN */
+#endif /* HAVE_DLOPEN */
 
 void *
 loadSharedObject (const char *path) {
-#ifdef HAVE_FUNC_DLOPEN 
+#ifdef HAVE_DLOPEN 
   void *object = dlopen(path, SHARED_OBJECT_LOAD_FLAGS);
   if (object) return object;
   LogPrint(LOG_ERR, "%s", dlerror());
-#endif /* HAVE_FUNC_DLOPEN */
+#endif /* HAVE_DLOPEN */
   return NULL;
 }
 
 void 
 unloadSharedObject (void *object) {
-#ifdef HAVE_FUNC_DLOPEN 
+#ifdef HAVE_DLOPEN 
   dlclose((void *)object);
-#endif /* HAVE_FUNC_DLOPEN */
+#endif /* HAVE_DLOPEN */
 }
 
 int 
 findSharedSymbol (void *object, const char *symbol, void *pointerAddress) {
-#ifdef HAVE_FUNC_DLOPEN 
+#ifdef HAVE_DLOPEN 
   void **address = pointerAddress;
   *address = dlsym(object, symbol);
 
@@ -49,6 +49,6 @@ findSharedSymbol (void *object, const char *symbol, void *pointerAddress) {
     if (!error) return 1;
     LogPrint(LOG_ERR, "%s", error);
   }
-#endif /* HAVE_FUNC_DLOPEN */
+#endif /* HAVE_DLOPEN */
   return 0;
 }

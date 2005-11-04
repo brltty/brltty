@@ -20,13 +20,13 @@
 #include "Programs/misc.h"
 #include "Programs/brldefs.h"
 
-#ifndef HAVE_FUNC_ATTACHCONSOLE
+#ifndef HAVE_ATTACHCONSOLE
 typedef enum {
   PARM_ROOT
 } ScreenParameters;
 #define SCRPARMS "root"
 static unsigned int root;
-#endif /* HAVE_FUNC_ATTACHCONSOLE */
+#endif /* HAVE_ATTACHCONSOLE */
 
 #include "Programs/scr_driver.h"
 
@@ -35,9 +35,9 @@ static HANDLE consoleInput = INVALID_HANDLE_VALUE;
 
 static int
 prepare_WindowsScreen (char **parameters) {
-#ifndef HAVE_FUNC_ATTACHCONSOLE
+#ifndef HAVE_ATTACHCONSOLE
   validateYesNo(&root, "disable input simulation and output reading", parameters[PARM_ROOT]);
-#endif /* HAVE_FUNC_ATTACHCONSOLE */
+#endif /* HAVE_ATTACHCONSOLE */
   return 1;
 }
 
@@ -59,7 +59,7 @@ static void closeStdHandles(void) {
   consoleOutput = INVALID_HANDLE_VALUE;
 }
 
-#ifdef HAVE_FUNC_ATTACHCONSOLE
+#ifdef HAVE_ATTACHCONSOLE
 static int tryToAttach(HWND win) {
 #define CONSOLEWINDOW "ConsoleWindowClass"
   static char class[strlen(CONSOLEWINDOW)+1];
@@ -75,24 +75,24 @@ static int tryToAttach(HWND win) {
   closeStdHandles();
   return openStdHandles();
 }
-#else /* HAVE_FUNC_ATTACHCONSOLE */
+#else /* HAVE_ATTACHCONSOLE */
 #define tryToAttach(win) 1
-#endif /* HAVE_FUNC_ATTACHCONSOLE */
+#endif /* HAVE_ATTACHCONSOLE */
 
 static int
 open_WindowsScreen (void) {
-#ifndef HAVE_FUNC_ATTACHCONSOLE
+#ifndef HAVE_ATTACHCONSOLE
   if (root) {
-#endif /* HAVE_FUNC_ATTACH_CONSOLE */
+#endif /* HAVE_ATTACHCONSOLE */
     /* disable ^C */
     SetConsoleCtrlHandler(NULL,TRUE);
     if (!FreeConsole() && GetLastError() != ERROR_INVALID_PARAMETER)
       LogWindowsError("FreeConsole");
     return 1;
-#ifndef HAVE_FUNC_ATTACHCONSOLE
+#ifndef HAVE_ATTACHCONSOLE
   }
   return openStdHandles();
-#endif /* HAVE_FUNC_ATTACHCONSOLE */
+#endif /* HAVE_ATTACHCONSOLE */
 }
 
 static int
@@ -135,9 +135,9 @@ static int
 currentvt_WindowsScreen (void) {
   HWND win;
   altTab = NULL;
-#ifndef HAVE_FUNC_ATTACHCONSOLE
+#ifndef HAVE_ATTACHCONSOLE
   if (root)
-#endif /* HAVE_FUNC_ATTACHCONSOLE */
+#endif /* HAVE_ATTACHCONSOLE */
   {
     altTabInfo.cbSize = sizeof(altTabInfo);
     EnumWindows(findAltTab, 0);
@@ -152,12 +152,12 @@ currentvt_WindowsScreen (void) {
   }
   win = GetForegroundWindow();
   unreadable = NULL;
-#ifndef HAVE_FUNC_ATTACHCONSOLE
+#ifndef HAVE_ATTACHCONSOLE
   if (root) {
     unreadable = "root BRLTTY";
     goto error;
   }
-#endif /* HAVE_FUNC_ATTACHCONSOLE */
+#endif /* HAVE_ATTACHCONSOLE */
   if (!tryToAttach(win)) {
     unreadable = "no terminal to read";
     goto error;
@@ -227,21 +227,21 @@ read_WindowsScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
 
 #define USE(f, t) (fun = (typeof(fun))f, name = #f, size = sizeof(t))
   if (text) {
-#ifdef HAVE_FUNC_READCONSOLEOUTPUTCHARACTERW
+#ifdef HAVE_READCONSOLEOUTPUTCHARACTERW
     USE(ReadConsoleOutputCharacterW, wchar_t);
-#else /* HAVE_FUNC_READCONSOLEOUTPUTCHARACTERW */
+#else /* HAVE_READCONSOLEOUTPUTCHARACTERW */
     USE(ReadConsoleOutputCharacterA, char);
-#endif /* HAVE_FUNC_READCONSOLEOUTPUTCHARACTERW */
+#endif /* HAVE_READCONSOLEOUTPUTCHARACTERW */
   } else {
     USE(ReadConsoleOutputAttribute, WORD);
   }
 #undef USE
 
-#ifndef HAVE_FUNC_READCONSOLEOUTPUTCHARACTERW
+#ifndef HAVE_READCONSOLEOUTPUTCHARACTERW
   if (text) {
     buf = buffer;
   } else
-#endif /* HAVE_FUNC_READCONSOLEOUTPUTCHARACTERW */
+#endif /* HAVE_READCONSOLEOUTPUTCHARACTERW */
   {
     if (!(buf = malloc(box.width*size))) {
       LogError("malloc for Windows console reading");
@@ -264,15 +264,15 @@ read_WindowsScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
     }
 
     if (text) {
-#ifdef HAVE_FUNC_READCONSOLEOUTPUTCHARACTERW
+#ifdef HAVE_READCONSOLEOUTPUTCHARACTERW
       for (x=0; x<box.width; x++) {
         wchar_t c = ((wchar_t *)buf)[x];
 	if (c >= 0X100) c = '?';
 	buffer[y*box.width+x] = c;
       }
-#else /* HAVE_FUNC_READCONSOLEOUTPUTCHARACTERW */
+#else /* HAVE_READCONSOLEOUTPUTCHARACTERW */
       buf += box.width;
-#endif /* HAVE_FUNC_READCONSOLEOUTPUTCHARACTERW */
+#endif /* HAVE_READCONSOLEOUTPUTCHARACTERW */
     } else {
       for (x=0; x<box.width; x++) {
 	buffer[y*box.width+x] = ((WORD *)buf)[x];
@@ -280,9 +280,9 @@ read_WindowsScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
     }
   }
 
-#ifndef HAVE_FUNC_READCONSOLEOUTPUTCHARACTERW
+#ifndef HAVE_READCONSOLEOUTPUTCHARACTERW
   if (!text)
-#endif /* HAVE_FUNC_READCONSOLEOUTPUTCHARACTERW */
+#endif /* HAVE_READCONSOLEOUTPUTCHARACTERW */
   {
     free(buf);
   }

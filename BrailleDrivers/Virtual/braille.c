@@ -100,9 +100,9 @@ typedef struct {
   int (*getLocalConnection) (const struct sockaddr_un *address);
 #endif /* AF_LOCAL */
 
-#ifdef HAVE_FUNC_CREATENAMEDPIPE
+#ifdef HAVE_CREATENAMEDPIPE
   int (*getNamedPipeConnection) (const char *path);
-#endif /* HAVE_FUNC_CREATENAMEDPIPE */
+#endif /* HAVE_CREATENAMEDPIPE */
 
   int (*getInetConnection) (const struct sockaddr_in *address);
 } ModeEntry;
@@ -343,7 +343,7 @@ requestLocalConnection (const struct sockaddr_un *remoteAddress) {
 }
 #endif /* AF_LOCAL */
 
-#ifdef HAVE_FUNC_CREATENAMEDPIPE
+#ifdef HAVE_CREATENAMEDPIPE
 static int
 readNamedPipe (int descriptor, void *buffer, int size) {
   {
@@ -448,7 +448,7 @@ requestNamedPipeConnection (const char *path) {
   operations = &namedPipeOperationsEntry;
   return (int)h;
 }
-#endif /* HAVE_FUNC_CREATENAMEDPIPE */
+#endif /* HAVE_CREATENAMEDPIPE */
 
 static int
 setInetAddress (const char *string, struct sockaddr_in *address) {
@@ -615,7 +615,7 @@ flushOutput (void) {
   size_t length = outputLength;
 
   while (length) {
-#ifdef HAVE_FUNC_CREATENAMEDPIPE
+#ifdef HAVE_CREATENAMEDPIPE
     OVERLAPPED overl = {0,0,0,0,CreateEvent(NULL,TRUE,FALSE,NULL)};
     DWORD sent;
     if ((!WriteFile((HANDLE) fileDescriptor, buffer, length, &sent, &overl)
@@ -627,7 +627,7 @@ flushOutput (void) {
         return 0;
       }
       CloseHandle(overl.hEvent);
-#else /* HAVE_FUNC_CREATENAMEDPIPE */
+#else /* HAVE_CREATENAMEDPIPE */
     int sent = send(fileDescriptor, buffer, length, 0);
 
     if (sent == -1) {
@@ -636,7 +636,7 @@ flushOutput (void) {
       memmove(outputBuffer, buffer, (outputLength = length));
       return 0;
     }
-#endif /* HAVE_FUNC_CREATENAMEDPIPE */
+#endif /* HAVE_CREATENAMEDPIPE */
 
     buffer += sent;
     length -= sent;
@@ -887,9 +887,9 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
       requestLocalConnection,
 #endif /* AF_LOCAL */
 
-#ifdef HAVE_FUNC_CREATENAMEDPIPE
+#ifdef HAVE_CREATENAMEDPIPE
       requestNamedPipeConnection,
-#endif /* HAVE_FUNC_CREATENAMEDPIPE */
+#endif /* HAVE_CREATENAMEDPIPE */
 
       requestInetConnection
     };
@@ -900,9 +900,9 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
       acceptLocalConnection,
 #endif /* AF_LOCAL */
 
-#ifdef HAVE_FUNC_CREATENAMEDPIPE
+#ifdef HAVE_CREATENAMEDPIPE
       acceptNamedPipeConnection,
-#endif /* HAVE_FUNC_CREATENAMEDPIPE */
+#endif /* HAVE_CREATENAMEDPIPE */
 
       acceptInetConnection
     };
@@ -922,11 +922,11 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
   } else
 #endif /* AF_LOCAL */
 
-#ifdef HAVE_FUNC_CREATENAMEDPIPE
+#ifdef HAVE_CREATENAMEDPIPE
   if (device[0] == '\\') {
     fileDescriptor = mode->getNamedPipeConnection(device);
   } else
-#endif /* HAVE_FUNC_CREATENAMEDPIPE */
+#endif /* HAVE_CREATENAMEDPIPE */
 
 #ifdef WINDOWS
   {

@@ -245,7 +245,7 @@ static int tryHostName(char *hostName) {
 
   addrfamily = brlapi_splitHost(hostName,&hostname,&port);
 
-#if defined(PF_LOCAL) && (!defined(WINDOWS) || defined(HAVE_FUNC_CREATENAMEDPIPE))
+#if defined(PF_LOCAL) && (!defined(WINDOWS) || defined(HAVE_CREATENAMEDPIPE))
   if (addrfamily == PF_LOCAL) {
     int lpath = strlen(BRLAPI_SOCKETPATH),lport;
     lport = strlen(port);
@@ -638,10 +638,10 @@ static int getControllingTty(void)
   if ((env = getenv("CONTROLVT")) && sscanf(env, "%u", &tty) == 1) return tty;
 
 #ifdef WINDOWS
-#ifdef HAVE_FUNC_GETCONSOLEWINDOW
+#ifdef HAVE_GETCONSOLEWINDOW
   /* really good guess */
   if ((tty = (int) GetConsoleWindow())) return tty;
-#endif /* HAVE_FUNC_GETCONSOLEWINDOW */
+#endif /* HAVE_GETCONSOLEWINDOW */
   if ((tty = (int) GetActiveWindow()) || (tty = (int) GetFocus())) {
     /* good guess, but need to get back up to parent window */
     HWND root = GetDesktopWindow();

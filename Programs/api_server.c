@@ -1469,7 +1469,7 @@ err:
   return -1;
 }
 
-#if defined(PF_LOCAL) && (!defined(WINDOWS) || defined(HAVE_FUNC_CREATENAMEDPIPE))
+#if defined(PF_LOCAL) && (!defined(WINDOWS) || defined(HAVE_CREATENAMEDPIPE))
 
 #ifndef WINDOWS
 static int readPid(char *path)
@@ -1680,7 +1680,7 @@ static void *establishSocket(void *arg)
   }
 #endif /* WINDOWS */
 
-#if defined(PF_LOCAL) && (!defined(WINDOWS) || defined(HAVE_FUNC_CREATENAMEDPIPE))
+#if defined(PF_LOCAL) && (!defined(WINDOWS) || defined(HAVE_CREATENAMEDPIPE))
   if ((cinfo->addrfamily==PF_LOCAL && (cinfo->fd=initializeLocalSocket(cinfo))==-1) ||
       (cinfo->addrfamily!=PF_LOCAL && 
 #else /* PF_LOCAL */
@@ -1754,7 +1754,7 @@ static void closeSockets(void *arg)
 	info->overl.hEvent = NULL;
       }
 #else /* WINDOWS */
-#if defined(PF_LOCAL) && (!defined(WINDOWS) || defined(HAVE_FUNC_CREATENAMEDPIPE))
+#if defined(PF_LOCAL) && (!defined(WINDOWS) || defined(HAVE_CREATENAMEDPIPE))
       if (info->addrfamily==PF_LOCAL) {
 	char *path;
 	int lpath=strlen(BRLAPI_SOCKETPATH),lport=strlen(info->port);
@@ -2008,7 +2008,7 @@ static void *server(void *arg)
 #ifdef WINDOWS
       if (socketInfo[i].fd != -1 &&
           WaitForSingleObject(socketInfo[i].overl.hEvent, 0) == WAIT_OBJECT_0) {
-#if defined(HAVE_FUNC_CREATENAMEDPIPE)
+#if defined(HAVE_CREATENAMEDPIPE)
         if (socketInfo[i].addrfamily == PF_LOCAL) {
           DWORD foo;
           if (!(GetOverlappedResult((HANDLE) socketInfo[i].fd, &socketInfo[i].overl, &foo, FALSE)))
@@ -2018,7 +2018,7 @@ static void *server(void *arg)
             LogPrint(LOG_DEBUG,"socket %d re-established (fd %p, was %p)",i,(HANDLE) socketInfo[i].fd,(HANDLE) res);
           snprintf(source, sizeof(source), BRLAPI_SOCKETPATH "%s", socketInfo[i].port);
         } else {
-#endif /* defined(HAVE_FUNC_CREATENAMEDPIPE) */
+#endif /* defined(HAVE_CREATENAMEDPIPE) */
           if (!ResetEvent(socketInfo[i].overl.hEvent))
             LogWindowsError("ResetEvent in server loop");
 #else /* WINDOWS */
@@ -2078,9 +2078,9 @@ static void *server(void *arg)
           }
 #endif /* GETNAMEINFO */
 #ifdef WINDOWS
-#if defined(HAVE_FUNC_CREATENAMEDPIPE)
+#if defined(HAVE_CREATENAMEDPIPE)
         }
-#endif /* defined(HAVE_FUNC_CREATENAMEDPIPE) */
+#endif /* defined(HAVE_CREATENAMEDPIPE) */
 #endif /* WINDOWS */
         LogPrint(LOG_NOTICE, "BrlAPI connection fd=%d accepted: %s", res, source);
 
@@ -2435,7 +2435,7 @@ int api_start(BrailleDisplay *brl, char **parameters)
 {
   int res,i;
   char *hosts=
-#if defined(PF_LOCAL) && (!defined(WINDOWS) || defined(HAVE_FUNC_CREATENAMEDPIPE))
+#if defined(PF_LOCAL) && (!defined(WINDOWS) || defined(HAVE_CREATENAMEDPIPE))
 	":0+127.0.0.1:0";
 #else /* PF_LOCAL */
 	"127.0.0.1:0";
