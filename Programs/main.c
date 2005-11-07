@@ -194,35 +194,7 @@ handleSignal (int number, void (*handler) (int)) {
 
 void
 testProgramTermination (void) {
-  if (terminationSignal) {
-    int flags = MSG_NODELAY;
-
-#ifdef ENABLE_SPEECH_SUPPORT
-    int silently = terminationSignal == SIGINT;
-    if (speech == &noSpeech) silently = 1;
-    if (silently) flags |= MSG_SILENT;
-#endif /* ENABLE_SPEECH_SUPPORT */
-
-    clearStatusCells(&brl);
-    message("BRLTTY exiting.", flags);
-
-#ifdef ENABLE_SPEECH_SUPPORT
-    if (!silently) {
-      int awaitSilence = speech->isSpeaking();
-      int i;
-      for (i=0; i<messageDelay; i+=updateInterval) {
-        approximateDelay(updateInterval);
-        if (readCommand(BRL_CTX_MESSAGE) != EOF) break;
-        if (awaitSilence) {
-          speech->doTrack();
-          if (!speech->isSpeaking()) break;
-        }
-      }
-    }
-#endif /* ENABLE_SPEECH_SUPPORT */
-
-    exit(0);
-  }
+  if (terminationSignal) exit(0);
 }
 
 static void 
