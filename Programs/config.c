@@ -88,6 +88,7 @@ static char *opt_libraryDirectory;
 static char *opt_brailleDevice;
 static char **brailleDevices;
 static const char *brailleDevice = NULL;
+static int brailleOpened;
 
 static char *opt_brailleDriver;
 static char **brailleDrivers;
@@ -1314,6 +1315,7 @@ openBrailleDriver (void) {
 
   if (braille->open(&brl, brailleParameters, brailleDevice)) {
     if (allocateBrailleBuffer(&brl)) {
+      brailleOpened = 1;
       return 1;
     } else {
       LogPrint(LOG_DEBUG, "braille buffer allocation failed.");
@@ -1330,6 +1332,7 @@ openBrailleDriver (void) {
 
 void
 closeBrailleDriver (void) {
+  brailleOpened = 0;
   drainBrailleOutput(&brl, 0);
   braille->close(&brl);
 
@@ -1498,7 +1501,7 @@ deactivateBrailleDriver (void) {
     if (apiStarted) api_unlink(&brl);
 #endif /* ENABLE_API */
 
-    closeBrailleDriver();
+    if (brailleOpened) closeBrailleDriver();
     braille = &noBraille;
     brailleDevice = NULL;
     brailleDriver = NULL;
@@ -2138,6 +2141,7 @@ startup (int argc, char *argv[]) {
 
   /* Activate the braille display. */
   brailleDrivers = splitString(opt_brailleDriver? opt_brailleDriver: "", ',', NULL);
+  brailleOpened = 0;
   if (opt_verify) {
     if (activateBrailleDriver(1)) deactivateBrailleDriver();
   } else {
