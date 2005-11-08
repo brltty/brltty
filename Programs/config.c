@@ -2028,21 +2028,6 @@ startup (int argc, char *argv[]) {
 #endif /* ENABLE_PREFERENCES_MENU */
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
-  /* initialize screen driver */
-  initializeAllScreens(opt_screenDriver, opt_libraryDirectory);
-  screenParameters = processParameters(getScreenParameters(),
-                                       "screen driver",
-                                       getScreenDriverCode(),
-                                       opt_screenParameters);
-  logParameters(getScreenParameters(), screenParameters, "Screen");
-  if (!opt_verify) {
-    if (!openMainScreen(screenParameters)) {                                
-      LogPrint(LOG_CRIT, "cannot read screen.");
-      exit(7);
-    }
-    atexit(exitScreen);
-  }
-  
 #if defined(HAVE_SYS_WAIT_H) || defined(WINDOWS)
   if (!(
 #ifndef WINDOWS
@@ -2114,6 +2099,21 @@ startup (int argc, char *argv[]) {
    * be used instead.
    */
 
+  /* initialize screen driver */
+  initializeAllScreens(opt_screenDriver, opt_libraryDirectory);
+  screenParameters = processParameters(getScreenParameters(),
+                                       "screen driver",
+                                       getScreenDriverCode(),
+                                       opt_screenParameters);
+  logParameters(getScreenParameters(), screenParameters, "Screen");
+  if (!opt_verify) {
+    if (!openMainScreen(screenParameters)) {                                
+      LogPrint(LOG_CRIT, "cannot read screen.");
+      exit(7);
+    }
+    atexit(exitScreen);
+  }
+  
 #ifdef ENABLE_API
   apiStarted = 0;
   if (!opt_noApi) {
