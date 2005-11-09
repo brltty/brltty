@@ -944,7 +944,7 @@ int brlapi_writeDots(const unsigned char *dots)
   }
   ws.displayNumber = -1;
   ws.regionBegin = 0; ws.regionSize = 0;
-  ws.text = malloc(size);
+  ws.text = malloc(size+1);
   if (ws.text==NULL) {
     brlapi_errno = BRLERR_NOMEM;
     return -1;
@@ -955,7 +955,8 @@ int brlapi_writeDots(const unsigned char *dots)
     brlapi_errno = BRLERR_NOMEM;
     return -1;
   }
-  memset(ws.text, 0, size);
+  memset(ws.text, ' ', size);
+  ws.text[size] = 0;
   memcpy(ws.attrOr, dots, size);
   ws.attrAnd = NULL;
   ws.cursor = 0;
@@ -989,7 +990,7 @@ int brlapi_write(const brlapi_writeStruct *s)
     rbeg = 1; rsiz = dispSize;
   }
   if (s->text) {
-    strLen = rsiz;
+    strLen = strlen(s->text);
     *((uint32_t *) p) = htonl(strLen); p += sizeof(uint32_t);
     ws->flags |= BRLAPI_WF_TEXT;
     memcpy(p, s->text, strLen);
@@ -1017,7 +1018,7 @@ int brlapi_write(const brlapi_writeStruct *s)
     strLen = strlen(s->charset);
     *p++ = strLen;
     ws->flags |= BRLAPI_WF_CHARSET;
-    strcpy((char *)p, s->charset);
+    memcpy(p, s->charset, strLen);
     p += strLen;
   }
   send:
