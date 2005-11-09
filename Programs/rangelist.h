@@ -26,50 +26,50 @@ extern "C" {
 
 #include <inttypes.h>
 
-typedef struct rangeList {
+typedef struct RangeList {
   uint32_t x, y;
-  struct rangeList *next;
-} rangeList;
+  struct RangeList *next;
+} RangeList;
 
 /* Function : createRange */
 /* Creates an item of a range list */
 /* Specify the range, a pointer to previous and next item */
 /* Returns the adress of the newly created range, NULL if not enough memory */
-extern rangeList *createRange(rangeList *p, uint32_t x, uint32_t y, rangeList *n);
+extern RangeList *createRange(RangeList *p, uint32_t x, uint32_t y, RangeList *n);
 
 /* Function : freeRange */
 /* Destroys an item of a range list */
 /* If provided, the previous item will be linked to the next item */
-extern void freeRange(rangeList *p, rangeList *c);
+extern void freeRange(RangeList *p, RangeList *c);
 
-/* Function : fHreeRangeList */
+/* Function : freeRangeList */
 /* Frees a whole list */
 /* If you wan to destroy a whole list, call this function, rather than */
 /* calling freeRange on each element, since th latter cares about links */
 /* and hence is slower */
-extern void freeRangeList(rangeList **l);
+extern void freeRangeList(RangeList **l);
 
-/* Function : contains */
+/* Function : inRangeList */
 /* Determines if the range list l contains x */
 /* If yes, returns the adress of the cell [a..b] such that a<=x<=b */
 /* If no, returns NULL */
-extern rangeList *contains(rangeList *l, uint32_t n);
+extern RangeList *inRangeList(RangeList *l, uint32_t n);
 
 /* Function : displayRangeList */
 /* Prints a range list on stdout */
 /* This is for debugging only */
-extern void displayRangeList(rangeList *l);
+extern void displayRangeList(RangeList *l);
 
 /* Function : addRange */
 /* Adds a range to a range list */
 /* We have to keep a sorted list of [disjoints] ranges */
 /* Return 0 if success, -1 if an error occurs */
-extern int addRange(uint32_t x0, uint32_t y0, rangeList **l);
+extern int addRange(uint32_t x0, uint32_t y0, RangeList **l);
 
 /* Function : removeRange */
 /* Removes a range from a range list */
 /* Returns 0 if success, -1 if failure */
-extern int removeRange(uint32_t x0, uint32_t y0, rangeList **l);
+extern int removeRange(uint32_t x0, uint32_t y0, RangeList **l);
 
 #ifdef __cplusplus
 }

@@ -24,9 +24,9 @@
 #include "misc.h"
 
 /* Function : createRange */
-rangeList *createRange(rangeList *p, uint32_t x, uint32_t y, rangeList *n)
+RangeList *createRange(RangeList *p, uint32_t x, uint32_t y, RangeList *n)
 {
-  rangeList *c = malloc(sizeof(rangeList));
+  RangeList *c = malloc(sizeof(RangeList));
   if (c==NULL) return NULL;
   c->x = x; c->y = y; c->next = n;
   if (p!=NULL) p->next = c;
@@ -34,7 +34,7 @@ rangeList *createRange(rangeList *p, uint32_t x, uint32_t y, rangeList *n)
 }
 
 /* Function : freeRange */
-void freeRange(rangeList *p, rangeList *c)
+void freeRange(RangeList *p, RangeList *c)
 {
   if (c==NULL) return;
   if (p!=NULL) p->next = c->next;
@@ -42,9 +42,9 @@ void freeRange(rangeList *p, rangeList *c)
 }
 
 /* Function : freeRangeList */
-void freeRangeList(rangeList **l)
+void freeRangeList(RangeList **l)
 {
-  rangeList *p1, *p2;
+  RangeList *p1, *p2;
   if (l==NULL) return;
   p2 = *l;
   while (p2!=NULL) {
@@ -55,10 +55,10 @@ void freeRangeList(rangeList **l)
   *l = NULL;
 }
 
-/* Function : contains */
-rangeList *contains(rangeList *l, uint32_t n)
+/* Function : inRangeList */
+RangeList *inRangeList(RangeList *l, uint32_t n)
 {
-  rangeList *c = l;
+  RangeList *c = l;
   while (c!=NULL) {
     if (c->x>n) return NULL; /* the list is sorted! */
     if (n<=c->y) return c;
@@ -68,11 +68,11 @@ rangeList *contains(rangeList *l, uint32_t n)
 }
 
 /* Function : DisplayRangeList */
-void DisplayRangeList(rangeList *l)
+void DisplayRangeList(RangeList *l)
 {
   if (l==NULL) printf("emptyset");
   else {
-    rangeList *c = l;
+    RangeList *c = l;
     while (1) {
       printf("[%lu..%lu]",(unsigned long)c->x,(unsigned long)c->y);
       if (c->next==NULL) break;
@@ -84,10 +84,10 @@ void DisplayRangeList(rangeList *l)
 }
 
 /* Function : addRange */
-int addRange(uint32_t x0, uint32_t y0, rangeList **l)
+int addRange(uint32_t x0, uint32_t y0, RangeList **l)
 {
   uint32_t x,y;
-  rangeList *p, *c, *tmp;
+  RangeList *p, *c, *tmp;
   x = MIN(x0,y0); y = MAX(x0,y0);
   if (*l == NULL) {
     if ((*l = createRange(NULL,x,y,NULL)) == NULL) return -1;
@@ -141,11 +141,11 @@ int addRange(uint32_t x0, uint32_t y0, rangeList **l)
   }
 }
 
-int removeRange(uint32_t x0, uint32_t y0, rangeList **l)
+int removeRange(uint32_t x0, uint32_t y0, RangeList **l)
 {
   int z;
   uint32_t x, y;
-  rangeList *p, *c, *tmp;
+  RangeList *p, *c, *tmp;
 
   if ((l==NULL) || (*l==NULL)) return 0;
 

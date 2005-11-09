@@ -175,7 +175,7 @@ typedef struct Connection {
   BrailleWindow brailleWindow;
   BrlBufState brlbufstate;
   pthread_mutex_t brlMutex;
-  rangeList *unmaskedKeys;
+  RangeList *unmaskedKeys;
   pthread_mutex_t maskMutex;
   time_t upTime;
   Packet packet;
@@ -932,7 +932,7 @@ static int handleKeySet(Connection *c, brl_type_t type, unsigned char *packet, s
   int i = 0, res = 0;
   unsigned int nbkeys;
   brl_keycode_t *k = (brl_keycode_t *) packet;
-  int (*fptr)(uint32_t, uint32_t, rangeList **);
+  int (*fptr)(uint32_t, uint32_t, RangeList **);
   LogPrintRequest(type, c->fd);
   if (type==BRLPACKET_IGNOREKEYSET) fptr = removeRange; else fptr = addRange;
   CHECKERR(( (!c->raw) && c->tty ),BRLERR_ILLEGAL_INSTRUCTION);
@@ -2229,7 +2229,7 @@ static Connection *whoGetsKey(Tty *tty, brl_keycode_t code, unsigned int how)
   int masked;
   for (c=tty->connections->next; c!=tty->connections; c = c->next) {
     pthread_mutex_lock(&c->maskMutex);
-    masked = (c->how==how) && (contains(c->unmaskedKeys,code) == NULL);
+    masked = (c->how==how) && (inRangeList(c->unmaskedKeys,code) == NULL);
     pthread_mutex_unlock(&c->maskMutex);
     if (!masked) goto found;
   }
