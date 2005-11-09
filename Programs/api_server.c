@@ -2226,12 +2226,12 @@ static Connection *whoGetsKey(Tty *tty, brl_keycode_t code, unsigned int how)
 {
   Connection *c;
   Tty *t;
-  int masked;
+  int passKey;
   for (c=tty->connections->next; c!=tty->connections; c = c->next) {
     pthread_mutex_lock(&c->maskMutex);
-    masked = (c->how==how) && (inRangeList(c->unmaskedKeys,code) == NULL);
+    passKey = (c->how==how) && (inRangeList(c->unmaskedKeys,code) != NULL);
     pthread_mutex_unlock(&c->maskMutex);
-    if (!masked) goto found;
+    if (passKey) goto found;
   }
   c = NULL;
 found:
@@ -2250,7 +2250,8 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
   ssize_t size;
   Connection *c;
   unsigned char packet[BRLAPI_MAXPACKETSIZE];
-  brl_keycode_t keycode, command = EOF;
+  int keycode, command = EOF;
+  brl_keycode_t clientCode;
 
   pthread_mutex_lock(&connectionsMutex);
   pthread_mutex_lock(&rawMutex);
@@ -2320,7 +2321,7 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
     pthread_mutex_unlock(&driverMutex);
     if (brl->resizeRequired)
       handleResize(brl);
-    keycode = (brl_keycode_t) res;
+    keycode = res;
     pthread_mutex_lock(&driverMutex);
     command = trueBraille->keyToCommand(brl,caller,keycode);
     pthread_mutex_unlock(&driverMutex);
@@ -2332,15 +2333,15 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
     if (brl->resizeRequired)
       handleResize(brl);
     keycode = EOF;
-    command = (brl_keycode_t) res;
+    command = res;
   }
   /* some client may get raw mode only from now */
   pthread_mutex_unlock(&rawMutex);
   if (trueBraille->readKey && keycode != EOF && (c = whoGetsKey(&ttys,keycode,BRL_KEYCODES))) {
     /* somebody gets the raw code */
     LogPrint(LOG_DEBUG,"Transmitting unmasked key %lu",(unsigned long)keycode);
-    keycode = htonl(keycode);
-    brlapiserver_writePacket(c->fd,BRLPACKET_KEY,&keycode,sizeof(keycode));
+    clientCode = htonl(keycode);
+    brlapiserver_writePacket(c->fd,BRLPACKET_KEY,&clientCode,sizeof(clientCode));
     command = EOF;
   } else {
     handleAutorepeat(&command, &repeatState);
@@ -2348,8 +2349,8 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
       /* nobody needs the raw code */
       if ((c = whoGetsKey(&ttys,command&BRL_MSK_CMD,BRL_COMMANDS))) {
         LogPrint(LOG_DEBUG,"Transmitting unmasked command %lu",(unsigned long)command);
-        command = htonl(command);
-        brlapiserver_writePacket(c->fd,BRLPACKET_KEY,&command,sizeof(command));
+        clientCode = htonl(command);
+        brlapiserver_writePacket(c->fd,BRLPACKET_KEY,&clientCode,sizeof(clientCode));
         command = EOF;
       }
     }
