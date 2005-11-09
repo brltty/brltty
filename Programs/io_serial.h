@@ -22,7 +22,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#include <unistd.h>
+#include "prologue.h"
+
 #include <stdio.h>
 
 #include "io_defs.h"

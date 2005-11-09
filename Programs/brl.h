@@ -22,7 +22,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#include <unistd.h>
+#include "prologue.h"
 
 #include "brldefs.h"
 

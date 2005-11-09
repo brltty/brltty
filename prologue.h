@@ -45,8 +45,11 @@ extern "C" {
 #define WindowsME 0x0500
 #endif /* WindowsME */
 
-#endif /* defined(__CYGWIN32__) || defined(__MINGW32__) */
+#endif /* WINDOWS */
+
 #include <sys/types.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"

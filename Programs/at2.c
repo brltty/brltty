@@ -17,7 +17,6 @@
 
 #include "prologue.h"
 
-#include <stdlib.h>
 #include <inttypes.h>
 
 #include "at2.h"

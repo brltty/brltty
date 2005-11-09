@@ -19,17 +19,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_API_COMMON
-#define BRLTTY_INCLUDED_API_COMMON
-
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-
 /* api_common.h - private definitions shared by both server & client */
 
-#include <stdlib.h>
-#include <unistd.h>
 #include <stdio.h>
 #include <stddef.h>
 #include <string.h>
@@ -347,8 +338,3 @@ const char *BRLAPI(packetType)(brl_type_t ptype)
     if (ptype==p->type) return p->name;
   return "Unknown";
 }
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
-
-#endif /* BRLTTY_INCLUDED_API_COMMON */

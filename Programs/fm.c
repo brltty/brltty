@@ -17,9 +17,6 @@
 
 #include "prologue.h"
 
-#include <stdlib.h>
-#include <unistd.h>
-
 #include "brltty.h"
 #include "misc.h"
 #include "notes.h"

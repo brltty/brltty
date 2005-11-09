@@ -18,13 +18,12 @@
 #ifndef BRLTTY_INCLUDED_MISC
 #define BRLTTY_INCLUDED_MISC
 
-#include "prologue.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-#include <unistd.h>
+#include "prologue.h"
+
 #include <stdio.h>
 #include <sys/time.h>
 

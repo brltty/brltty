@@ -17,8 +17,6 @@
 
 #include "prologue.h"
 
-#include <stdlib.h>
-#include <unistd.h>
 #include <stdio.h>
 #include <stdarg.h>
 #include <locale.h>

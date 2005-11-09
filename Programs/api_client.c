@@ -23,8 +23,6 @@
 
 #include "prologue.h"
 
-#include <stdlib.h>
-#include <unistd.h>
 #include <stdio.h>
 #include <stddef.h>
 #include <inttypes.h>

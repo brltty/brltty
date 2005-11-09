@@ -27,9 +27,6 @@
 
 #include "prologue.h"
 
-#include <stdlib.h>
-#include <unistd.h>  
-
 #include "misc.h"
 #include "system.h"
 #include "adlib.h"

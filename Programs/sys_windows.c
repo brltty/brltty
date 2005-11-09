@@ -17,8 +17,6 @@
 
 #include "prologue.h"
 
-#include <stdlib.h>
-
 #include "misc.h"
 #include "system.h"
 

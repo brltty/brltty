@@ -24,8 +24,6 @@ extern "C" {
 
 /* Header file for the range list management module */
 
-#include <stdlib.h>
-#include <stdio.h>
 #include <inttypes.h>
 
 typedef struct rangeList {

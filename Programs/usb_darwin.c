@@ -17,8 +17,6 @@
 
 #include "prologue.h"
 
-#include <stdlib.h>
-#include <unistd.h>
 #include <stdio.h>
 #include <errno.h>
 #include <mach/mach.h>

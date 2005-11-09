@@ -21,8 +21,6 @@
 
 #include "prologue.h"
 
-#include <stdlib.h>
-#include <unistd.h>
 #include <stdio.h>
 
 #include "options.h"
