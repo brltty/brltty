@@ -35,41 +35,41 @@ typedef struct rangeList {
 /* Creates an item of a range list */
 /* Specify the range, a pointer to previous and next item */
 /* Returns the adress of the newly created range, NULL if not enough memory */
-rangeList *createRange(rangeList *p, uint32_t x, uint32_t y, rangeList *n);
+extern rangeList *createRange(rangeList *p, uint32_t x, uint32_t y, rangeList *n);
 
 /* Function : freeRange */
 /* Destroys an item of a range list */
 /* If provided, the previous item will be linked to the next item */
-void freeRange(rangeList *p, rangeList *c);
+extern void freeRange(rangeList *p, rangeList *c);
 
 /* Function : fHreeRangeList */
 /* Frees a whole list */
 /* If you wan to destroy a whole list, call this function, rather than */
 /* calling freeRange on each element, since th latter cares about links */
 /* and hence is slower */
-void freeRangeList(rangeList **l);
+extern void freeRangeList(rangeList **l);
 
 /* Function : contains */
 /* Determines if the range list l contains x */
 /* If yes, returns the adress of the cell [a..b] such that a<=x<=b */
 /* If no, returns NULL */
-rangeList *contains(rangeList *l, uint32_t n);
+extern rangeList *contains(rangeList *l, uint32_t n);
 
 /* Function : displayRangeList */
 /* Prints a range list on stdout */
 /* This is for debugging only */
-void displayRangeList(rangeList *l);
+extern void displayRangeList(rangeList *l);
 
 /* Function : addRange */
 /* Adds a range to a range list */
 /* We have to keep a sorted list of [disjoints] ranges */
 /* Return 0 if success, -1 if an error occurs */
-int addRange(uint32_t x0, uint32_t y0, rangeList **l);
+extern int addRange(uint32_t x0, uint32_t y0, rangeList **l);
 
 /* Function : removeRange */
 /* Removes a range from a range list */
 /* Returns 0 if success, -1 if failure */
-int removeRange(uint32_t x0, uint32_t y0, rangeList **l);
+extern int removeRange(uint32_t x0, uint32_t y0, rangeList **l);
 
 #ifdef __cplusplus
 }
