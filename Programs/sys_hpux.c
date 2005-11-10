@@ -37,6 +37,8 @@
 
 #include "sys_boot_none.h"
 
+#include "sys_exec_unix.h"
+
 void *
 loadSharedObject (const char *path) {
 #ifdef HAVE_SHL_LOAD

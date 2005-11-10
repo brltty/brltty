@@ -26,6 +26,8 @@ extern char *getProgramPath (void);
 
 extern char *getBootParameters (const char *name);
 
+extern int executeHostCommand (const char *const *arguments);
+
 extern void *loadSharedObject (const char *path);
 extern void unloadSharedObject (void *object);
 extern int findSharedSymbol (void *object, const char *symbol, void *pointerAddress);

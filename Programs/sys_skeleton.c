@@ -24,6 +24,8 @@
 
 #include "sys_boot_none.h"
 
+#include "sys_exec_none.h"
+
 #include "sys_shlib_none.h"
 
 #include "sys_beep_none.h"

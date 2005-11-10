@@ -86,6 +86,8 @@ getBootParameters (const char *name) {
   return NULL;
 }
 
+#include "sys_exec_unix.h"
+
 #define SHARED_OBJECT_LOAD_FLAGS (RTLD_NOW | RTLD_GLOBAL)
 #include "sys_shlib_dlfcn.h"
 

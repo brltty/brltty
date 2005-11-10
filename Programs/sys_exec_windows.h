@@ -15,29 +15,9 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#include "prologue.h"
+#warning host command execution not available on this platform
 
-#include <string.h>
-
-#include "misc.h"
-#include "system.h"
-
-#include "sys_prog_none.h"
-
-#include "sys_boot_none.h"
-
-#include "sys_exec_unix.h"
-
-#include "sys_shlib_dyld.h"
-
-#include "sys_beep_none.h"
-
-#ifdef ENABLE_PCM_SUPPORT
-#include "sys_pcm_none.h"
-#endif /* ENABLE_PCM_SUPPORT */
-
-#ifdef ENABLE_MIDI_SUPPORT
-#include "sys_midi_none.h"
-#endif /* ENABLE_MIDI_SUPPORT */
-
-#include "sys_ports_none.h"
+int
+executeHostCommand (const char *const *arguments) {
+  return 1;
+}
