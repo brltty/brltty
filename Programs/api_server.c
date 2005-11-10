@@ -1308,7 +1308,9 @@ static int initializeTcpSocket(struct socketInfo *info)
     fd = socket(cur->ai_family, cur->ai_socktype, cur->ai_protocol);
     if (fd<0) {
       setSocketErrno();
+#ifdef EAFNOSUPPORT
       if (errno != EAFNOSUPPORT)
+#endif /* EAFNOSUPPORT */
         LogPrint(LOG_WARNING,"socket: %s",strerror(errno));
       continue;
     }
