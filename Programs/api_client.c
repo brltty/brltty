@@ -41,11 +41,14 @@
 
 #ifdef __MINGW32__
 #include "win_pthread.h"
+#else /* __MINGW32__ */
+#include <pthread.h>
+#include <semaphore.h>
 #endif /* __MINGW32__ */
 
 #include "misc.h"
 
-#define syslog(level,fmt,...) fprintf(stderr,#level ": " fmt, __VA_ARGS__)
+#define syslog(level,fmt,...) fprintf(stderr,#level ": " fmt, ## __VA_ARGS__)
 
 #else /* WINDOWS */
 #include <sys/socket.h>
