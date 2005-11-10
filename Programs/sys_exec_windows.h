@@ -20,6 +20,7 @@ addWindowsCommandLineCharacter (char **buffer, int *size, int *length, char char
   if (*length == *size) {
     char *newBuffer = realloc(*buffer, (*size = *size? *size<<1: 0X1));
     if (!newBuffer) {
+      LogError("realloc");
       return 0;
     }
     *buffer = newBuffer;
@@ -82,6 +83,7 @@ makeWindowsCommandLine (const char *const *arguments) {
   {
     char *line = realloc(buffer, length);
     if (line) return line;
+    LogError("realloc");
   }
 
 error:
@@ -91,11 +93,41 @@ error:
 
 int
 executeHostCommand (const char *const *arguments) {
-  int result = 1;
-  const char *command = *arguments;
+  int result = 0XFF;
   char *line;
 
   if ((line = makeWindowsCommandLine(arguments))) {
+    STARTUPINFO startup;
+    PROCESS_INFORMATION process;
+
+    memset(&startup, 0, sizeof(startup));
+    startup.cb = sizeof(startup);
+
+    memset(&process, 0, sizeof(process));
+
+    LogPrint(LOG_DEBUG, "host command: %s", line);
+    if (CreateProcess(NULL, line, NULL, NULL, TRUE,
+                      CREATE_NEW_PROCESS_GROUP,
+                      NULL, NULL, &startup, &process)) {
+      DWORD status;
+      while ((status = WaitForSingleObject(process.hProcess, INFINITE)) == WAIT_TIMEOUT);
+      if (status == WAIT_OBJECT_0) {
+        DWORD code;
+        if (GetExitCodeProcess(process.hProcess, &code)) {
+          result = code;
+        } else {
+          LogWindowsError("GetExitCodeProcess");
+        }
+      } else {
+        LogWindowsError("WaitForSingleObject");
+      }
+
+      CloseHandle(process.hProcess);
+      CloseHandle(process.hThread);
+    } else {
+      LogWindowsError("CreateProcess");
+    }
+
     free(line);
   }
 
