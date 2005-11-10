@@ -169,7 +169,7 @@ exitLog (void) {
    */
   LogOpen(0);
   setPrintOff();
-  LogPrint(LOG_INFO, "terminated.");
+  LogPrint(LOG_INFO, gettext("terminated."));
   LogClose();
 }
 
@@ -408,7 +408,7 @@ showInfo (void) {
    * are very small, and others (e.g. Bookworm) are even smaller.
    */
   char text[22];
-  setStatusText(&brl, "info");
+  setStatusText(&brl, gettext("info"));
 
   if (brl.x*brl.y >= 21) {
     snprintf(text, sizeof(text), "%02d:%02d %02d:%02d %02d %c%c%c%c%c%c",
@@ -975,19 +975,19 @@ main (int argc, char *argv[]) {
 
 #ifdef INIT_PATH
   if ((getpid() == 1) || (strstr(argv[0], "linuxrc") != NULL)) {
-    fprintf(stderr, "BRLTTY started as %s\n", argv[0]);
+    fprintf(stderr, gettext("BRLTTY started as %s\n"), argv[0]);
     fflush(stderr);
     switch (fork()) {
       case -1: /* failed */
-        fprintf(stderr, "Fork for BRLTTY failed: %s\n", strerror(errno));
+        fprintf(stderr, gettext("BRLTTY fork failed: %s\n"), strerror(errno));
         fflush(stderr);
       default: /* parent */
-        fprintf(stderr, "Executing the real INIT: %s\n", INIT_PATH);
+        fprintf(stderr, gettext("Executing INIT: %s\n"), INIT_PATH);
         fflush(stderr);
       exec_init:
         execv(INIT_PATH, argv);
         /* execv() shouldn't return */
-        fprintf(stderr, "Execution of the real INIT failed: %s\n", strerror(errno));
+        fprintf(stderr, gettext("INIT execution failed: %s\n"), strerror(errno));
         fflush(stderr);
         exit(1);
       case 0: { /* child */
@@ -1009,7 +1009,7 @@ main (int argc, char *argv[]) {
 
   /* Open the system log. */
   LogOpen(0);
-  LogPrint(LOG_INFO, "starting.");
+  LogPrint(LOG_INFO, gettext("starting."));
   atexit(exitLog);
 
 #ifdef SIGPIPE
@@ -1606,7 +1606,7 @@ main (int argc, char *argv[]) {
               if (isHelpScreen()) {
                 deactivateHelpScreen();
               } else if (!activateHelpScreen()) {
-                message("help not available", 0);
+                message(gettext("help not available"), 0);
               }
               break;
             case BRL_CMD_INFO:
@@ -1808,21 +1808,52 @@ main (int argc, char *argv[]) {
                 case BRL_BLK_DESCCHAR:
                   if (arg < brl.x && p->winx+arg < scr.cols) {
                     static char *colours[] = {
-                      "black",     "blue",          "green",       "cyan",
-                      "red",       "magenta",       "brown",       "light grey",
-                      "dark grey", "light blue",    "light green", "light cyan",
-                      "light red", "light magenta", "yellow",      "white"
+                      strtext("black"),
+                      strtext("blue"),
+                      strtext("green"),
+                      strtext("cyan"),
+                      strtext("red"),
+                      strtext("magenta"),
+                      strtext("brown"),
+                      strtext("light grey"),
+                      strtext("dark grey"),
+                      strtext("light blue"),
+                      strtext("light green"),
+                      strtext("light cyan"),
+                      strtext("light red"),
+                      strtext("light magenta"),
+                      strtext("yellow"),
+                      strtext("white")
                     };
                     char buffer[0X40];
+                    int size = sizeof(buffer);
+                    int length = 0;
                     unsigned char character, attributes;
+
                     arg = getOffset(arg, 0);
                     readScreen(p->winx+arg, p->winy, 1, 1, &character, SCR_TEXT);
                     readScreen(p->winx+arg, p->winy, 1, 1, &attributes, SCR_ATTRIB);
-                    sprintf(buffer, "char %d (0x%02x): %s on %s",
-                            character, character,
-                            colours[attributes & 0X0F],
-                            colours[(attributes & 0X70) >> 4]);
-                    if (attributes & 0X80) strcat(buffer, " blink");
+
+                    {
+                      int count;
+                      snprintf(&buffer[length], size-length,
+                               "char %d (0x%02x): %s on %s%n",
+                               character, character,
+                               gettext(colours[attributes & 0X0F]),
+                               gettext(colours[(attributes & 0X70) >> 4]),
+                               &count);
+                      length += count;
+                    }
+
+                    if (attributes & 0X80) {
+                      int count;
+                      snprintf(&buffer[length], size-length,
+                               " %s%n",
+                               gettext("blink"),
+                               &count);
+                      length += count;
+                    }
+
                     message(buffer, 0);
                   } else
                     playTune(&tune_command_rejected);
@@ -1894,7 +1925,7 @@ main (int argc, char *argv[]) {
 
                 default:
                   playTune(&tune_command_rejected);
-                  LogPrint(LOG_WARNING, "unrecognized command: %04X", command);
+                  LogPrint(LOG_WARNING, gettext("unrecognized command: %04X"), command);
               }
               break;
             }

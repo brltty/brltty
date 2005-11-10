@@ -55,6 +55,14 @@ extern "C" {
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
 
+#ifdef ENABLE_I18N_SUPPORT
+#include <libintl.h>
+#else /* ENABLE_I18N_SUPPORT */
+#define gettext(string) (string)
+#define ngettext(singular, plural, count) (((count) == 1)? (singular): (plural))
+#endif /* ENABLE_I18N_SUPPORT */
+#define strtext(string) string
+
 #ifdef HAVE_SHMGET
 #if SIZEOF_KEY_T == 4
 #define PRIX_KEY_T PRIX32

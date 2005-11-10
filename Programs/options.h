@@ -44,11 +44,11 @@ typedef struct {
 #define END_OPTION_TABLE \
   {"help", NULL, 'h', 0, 0, \
    NULL, NULL, \
-   "Print a usage summary and exit."}, \
+   strtext("Print a usage summary and exit.")}, \
 \
   {"full-help", NULL, 'H', 0, OPT_Hidden, \
    NULL, NULL, \
-   "Print a full usage summary and exit."} \
+   strtext("Print a full usage summary and exit.")} \
 }; \
 static unsigned int optionCount = sizeof(optionTable) / sizeof(optionTable[0]);
 

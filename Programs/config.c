@@ -135,143 +135,143 @@ char *opt_midiDevice;
 #endif /* ENABLE_MIDI_SUPPORT */
 
 BEGIN_OPTION_TABLE
-  {"attributes-table", "file", 'a', 0, OPT_Config | OPT_Environ,
+  {"attributes-table", strtext("file"), 'a', 0, OPT_Config | OPT_Environ,
    &opt_attributesTable, NULL,
-   "Path to attributes translation table file."},
+   strtext("Path to attributes translation table file.")},
 
-  {"braille-driver", "driver", 'b', 1, OPT_Config | OPT_Environ,
+  {"braille-driver", strtext("driver"), 'b', 1, OPT_Config | OPT_Environ,
    &opt_brailleDriver, "auto",
-   "Braille driver: one of {" BRAILLE_DRIVER_CODES "}"},
+   strtext("Braille driver: one of {" BRAILLE_DRIVER_CODES "}")},
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
-  {"contraction-table", "file", 'c', 0, OPT_Config | OPT_Environ,
+  {"contraction-table", strtext("file"), 'c', 0, OPT_Config | OPT_Environ,
    &opt_contractionTable, NULL,
-   "Path to contraction table file."},
+   strtext("Path to contraction table file.")},
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
-  {"braille-device", "device", 'd', 2, OPT_Config | OPT_Environ,
+  {"braille-device", strtext("device"), 'd', 2, OPT_Config | OPT_Environ,
    &opt_brailleDevice, BRAILLE_DEVICE,
-   "Path to device for accessing braille display."},
+   strtext("Path to device for accessing braille display.")},
 
   {"standard-error", NULL, 'e', 0, 0,
    &opt_standardError, NULL,
-   "Log to standard error rather than to syslog."},
+   strtext("Log to standard error rather than to syslog.")},
 
-  {"configuration-file", "file", 'f', 0, OPT_Environ,
+  {"configuration-file", strtext("file"), 'f', 0, OPT_Environ,
    &opt_configurationFile, CONFIGURATION_DIRECTORY "/" CONFIGURATION_FILE,
-   "Path to default parameters file."},
+   strtext("Path to default parameters file.")},
 
-  {"log-level", "level", 'l', 0, 0,
+  {"log-level", strtext("level"), 'l', 0, 0,
    &opt_logLevel, NULL,
-   "Diagnostic logging level: 0-7 [5], or one of {emergency alert critical error warning [notice] information debug}"},
+   strtext("Diagnostic logging level: 0-7 [5], or one of {emergency alert critical error warning [notice] information debug}")},
 
 #ifdef ENABLE_MIDI_SUPPORT
-  {"midi-device", "device", 'm', 0, OPT_Config | OPT_Environ,
+  {"midi-device", strtext("device"), 'm', 0, OPT_Config | OPT_Environ,
    &opt_midiDevice, NULL,
-   "Device specifier for the Musical Instrument Digital Interface."},
+   strtext("Device specifier for the Musical Instrument Digital Interface.")},
 #endif /* ENABLE_MIDI_SUPPORT */
 
   {"no-daemon", NULL, 'n', 0, 0,
    &opt_noDaemon, NULL,
-   "Remain a foreground process."},
+   strtext("Remain a foreground process.")},
 
 #ifdef ENABLE_PCM_SUPPORT
-  {"pcm-device", "device", 'p', 0, OPT_Config | OPT_Environ,
+  {"pcm-device", strtext("device"), 'p', 0, OPT_Config | OPT_Environ,
    &opt_pcmDevice, NULL,
-   "Device specifier for soundcard digital audio."},
+   strtext("Device specifier for soundcard digital audio.")},
 #endif /* ENABLE_PCM_SUPPORT */
 
   {"quiet", NULL, 'q', 0, 0,
    &opt_quiet, NULL,
-   "Suppress start-up messages."},
+   strtext("Suppress start-up messages.")},
 
 #ifdef ENABLE_SPEECH_SUPPORT
-  {"speech-driver", "driver", 's', 0, OPT_Config | OPT_Environ,
+  {"speech-driver", strtext("driver"), 's', 0, OPT_Config | OPT_Environ,
    &opt_speechDriver, "auto",
-   "Speech driver: one of {" SPEECH_DRIVER_CODES "}"},
+   strtext("Speech driver: one of {" SPEECH_DRIVER_CODES "}")},
 #endif /* ENABLE_SPEECH_SUPPORT */
 
-  {"text-table", "file", 't', 3, OPT_Config | OPT_Environ,
+  {"text-table", strtext("file"), 't', 3, OPT_Config | OPT_Environ,
    &opt_textTable, NULL,
-   "Path to text translation table file."},
+   strtext("Path to text translation table file.")},
 
   {"verify", NULL, 'v', 0, 0,
    &opt_verify, NULL,
-   "Print start-up messages and exit."},
+   strtext("Print start-up messages and exit.")},
 
-  {"screen-driver", "driver", 'x', 0, OPT_Config | OPT_Environ,
+  {"screen-driver", strtext("driver"), 'x', 0, OPT_Config | OPT_Environ,
    &opt_screenDriver, SCREEN_DRIVER,
-   "Screen driver: one of {" SCREEN_DRIVER_CODES "}"},
+   strtext("Screen driver: one of {" SCREEN_DRIVER_CODES "}")},
 
 #ifdef ENABLE_API
-  {"api-parameters", "arg,...", 'A', 0, OPT_Extend | OPT_Config | OPT_Environ,
+  {"api-parameters", strtext("arg,..."), 'A', 0, OPT_Extend | OPT_Config | OPT_Environ,
    &opt_apiParameters, API_PARAMETERS,
-   "Parameters for the application programming interface."},
+   strtext("Parameters for the application programming interface.")},
 #endif /* ENABLE_API */
 
-  {"braille-parameters", "arg,...", 'B', 0, OPT_Extend | OPT_Config | OPT_Environ,
+  {"braille-parameters", strtext("arg,..."), 'B', 0, OPT_Extend | OPT_Config | OPT_Environ,
    &opt_brailleParameters, BRAILLE_PARAMETERS,
-   "Parameters for the braille driver."},
+   strtext("Parameters for the braille driver.")},
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
-  {"contractions-directory", "directory", 'C', 0, OPT_Hidden | OPT_Config | OPT_Environ,
+  {"contractions-directory", strtext("directory"), 'C', 0, OPT_Hidden | OPT_Config | OPT_Environ,
    &opt_contractionsDirectory, DATA_DIRECTORY,
-   "Path to directory for contractions tables."},
+   strtext("Path to directory for contractions tables.")},
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
-  {"data-directory", "directory", 'D', 0, OPT_Hidden | OPT_Config | OPT_Environ,
+  {"data-directory", strtext("directory"), 'D', 0, OPT_Hidden | OPT_Config | OPT_Environ,
    &opt_dataDirectory, DATA_DIRECTORY,
-   "Path to directory for driver help and configuration files."},
+   strtext("Path to directory for driver help and configuration files.")},
 
   {"environment-variables", NULL, 'E', 0, 0,
    &opt_environmentVariables, NULL,
-   "Recognize environment variables."},
+   strtext("Recognize environment variables.")},
 
 #ifdef ENABLE_SPEECH_SUPPORT
-  {"speech-fifo", "file", 'F', 0, OPT_Config | OPT_Environ,
+  {"speech-fifo", strtext("file"), 'F', 0, OPT_Config | OPT_Environ,
    &opt_speechFifo, NULL,
-   "Path to speech pass-through FIFO."},
+   strtext("Path to speech pass-through FIFO.")},
 #endif /* ENABLE_SPEECH_SUPPORT */
 
-  {"library-directory", "directory", 'L', 0, OPT_Hidden | OPT_Config | OPT_Environ,
+  {"library-directory", strtext("directory"), 'L', 0, OPT_Hidden | OPT_Config | OPT_Environ,
    &opt_libraryDirectory, LIBRARY_DIRECTORY,
-   "Path to directory for loading drivers."},
+   strtext("Path to directory for loading drivers.")},
 
-  {"message-delay", "csecs", 'M', 0, 0,
+  {"message-delay", strtext("csecs"), 'M', 0, 0,
    &opt_messageDelay, NULL,
-   "Message hold time [400]."},
+   strtext("Message hold time [400].")},
 
 #ifdef ENABLE_API
   {"no-api", NULL, 'N', 0, 0,
    &opt_noApi, NULL,
-   "Disable the application programming interface."},
+   strtext("Disable the application programming interface.")},
 #endif /* ENABLE_API */
 
-  {"pid-file", "file", 'P', 0, 0,
+  {"pid-file", strtext("file"), 'P', 0, 0,
    &opt_pidFile, NULL,
-   "Path to process identifier file."},
+   strtext("Path to process identifier file.")},
 
 #ifdef ENABLE_SPEECH_SUPPORT
-  {"speech-parameters", "arg,...", 'S', 0, OPT_Extend | OPT_Config | OPT_Environ,
+  {"speech-parameters", strtext("arg,..."), 'S', 0, OPT_Extend | OPT_Config | OPT_Environ,
    &opt_speechParameters, SPEECH_PARAMETERS,
-   "Parameters for the speech driver."},
+   strtext("Parameters for the speech driver.")},
 #endif /* ENABLE_SPEECH_SUPPORT */
 
-  {"tables-directory", "directory", 'T', 0, OPT_Hidden | OPT_Config | OPT_Environ,
+  {"tables-directory", strtext("directory"), 'T', 0, OPT_Hidden | OPT_Config | OPT_Environ,
    &opt_tablesDirectory, DATA_DIRECTORY,
-   "Path to directory for text and attributes tables."},
+   strtext("Path to directory for text and attributes tables.")},
 
-  {"update-interval", "csecs", 'U', 0, 0,
+  {"update-interval", strtext("csecs"), 'U', 0, 0,
    &opt_updateInterval, NULL,
-   "Braille window update interval [4]."},
+   strtext("Braille window update interval [4].")},
 
   {"version", NULL, 'V', 0, 0,
    &opt_version, NULL,
-   "Print the versions of the core, API, and built-in drivers, and then exit."},
+   strtext("Print the versions of the core, API, and built-in drivers, and then exit.")},
 
-  {"screen-parameters", "arg,...", 'X', 0, OPT_Extend | OPT_Config | OPT_Environ,
+  {"screen-parameters", strtext("arg,..."), 'X', 0, OPT_Extend | OPT_Config | OPT_Environ,
    &opt_screenParameters, SCREEN_PARAMETERS,
-   "Parameters for the screen driver."},
+   strtext("Parameters for the screen driver.")},
 END_OPTION_TABLE
 
 static void
@@ -294,11 +294,11 @@ parseParameters (
       if (*name) {
         char *value = strchr(name, '=');
         if (!value) {
-          LogPrint(LOG_ERR, "missing %s parameter value: %s",
+          LogPrint(LOG_ERR, gettext("missing %s parameter value: %s"),
                    description, name);
         } else if (value == name) {
         noName:
-          LogPrint(LOG_ERR, "missing %s parameter name: %s",
+          LogPrint(LOG_ERR, gettext("missing %s parameter name: %s"),
                    description, name);
         } else {
           int nameLength = value++ - name;
@@ -311,7 +311,7 @@ parseParameters (
               int nameAdjustment = qualifierLength + 1;
               eligible = 0;
               if (!qualifierLength) {
-                LogPrint(LOG_ERR, "missing %s code: %s",
+                LogPrint(LOG_ERR, gettext("missing %s code: %s"),
                          description, name);
               } else if (!(nameLength -= nameAdjustment)) {
                 goto noName;
@@ -335,7 +335,7 @@ parseParameters (
             }
 
             if (!names[index]) {
-              LogPrint(LOG_ERR, "unsupported %s parameter: %s", description, name);
+              LogPrint(LOG_ERR, gettext("unsupported %s parameter: %s"), description, name);
             }
           }
         }
@@ -379,7 +379,7 @@ static void
 logParameters (const char *const *names, char **values, char *description) {
   if (names && values) {
     while (*names) {
-      LogPrint(LOG_INFO, "%s Parameter: %s=%s", description, *names, *values);
+      LogPrint(LOG_INFO, gettext("%s Parameter: %s=%s"), description, *names, *values);
       ++names;
       ++values;
     }
@@ -396,20 +396,20 @@ replaceTranslationTable (TranslationTable table, const char *file, const char *t
     }
     free(path);
   }
-  if (!ok) LogPrint(LOG_ERR, "cannot load %s table: %s", type, file);
+  if (!ok) LogPrint(LOG_ERR, gettext("cannot load %s table: %s"), type, file);
   return ok;
 }
 
 static int
 replaceTextTable (const char *file) {
-  if (!replaceTranslationTable(textTable, file, "text")) return 0;
+  if (!replaceTranslationTable(textTable, file, gettext("text"))) return 0;
   makeUntextTable();
   return 1;
 }
 
 static int
 replaceAttributesTable (const char *file) {
-  return replaceTranslationTable(attributesTable, file, "attributes");
+  return replaceTranslationTable(attributesTable, file, gettext("attributes"));
 }
 
 int
@@ -440,7 +440,7 @@ loadContractionTable (const char *file) {
     LogPrint(LOG_DEBUG, "compiling contraction table: %s", file);
     if (path) {
       if (!(table = compileContractionTable(path))) {
-        LogPrint(LOG_ERR, "cannot compile contraction table: %s", path);
+        LogPrint(LOG_ERR, gettext("cannot compile contraction table: %s"), path);
       }
       free(path);
     }
@@ -547,19 +547,19 @@ loadPreferences (int change) {
 
         if (change) changedPreferences();
       } else
-        LogPrint(LOG_ERR, "invalid preferences file: %s", preferencesFile);
+        LogPrint(LOG_ERR, gettext("invalid preferences file: %s"), preferencesFile);
     } else if (length == -1) {
-      LogPrint(LOG_ERR, "cannot read preferences file: %s: %s",
+      LogPrint(LOG_ERR, gettext("cannot read preferences file: %s: %s"),
                preferencesFile, strerror(errno));
     } else {
       long int actualSize = sizeof(newPreferences);
-      LogPrint(LOG_ERR, "preferences file '%s' has incorrect size %d (should be %ld).",
+      LogPrint(LOG_ERR, gettext("preferences file '%s' has incorrect size %d (should be %ld)."),
                preferencesFile, length, actualSize);
     }
     close(fd);
   } else
     LogPrint((errno==ENOENT? LOG_DEBUG: LOG_ERR),
-             "Cannot open preferences file: %s: %s",
+             gettext("cannot open preferences file: %s: %s"),
              preferencesFile, strerror(errno));
   return ok;
 }
@@ -639,16 +639,16 @@ savePreferences (void) {
     if (write(fd, &prefs, sizeof(prefs)) == sizeof(prefs)) {
       ok = 1;
     } else {
-      LogPrint(LOG_ERR, "cannot write to preferences file: %s: %s",
+      LogPrint(LOG_ERR, gettext("cannot write to preferences file: %s: %s"),
                preferencesFile, strerror(errno));
     }
     close(fd);
   } else {
-    LogPrint(LOG_ERR, "cannot open preferences file: %s: %s",
+    LogPrint(LOG_ERR, gettext("cannot open preferences file: %s: %s"),
              preferencesFile, strerror(errno));
   }
   if (!ok)
-    message("not saved", 0);
+    message(gettext("not saved"), 0);
   return ok;
 }
 
@@ -785,10 +785,10 @@ globBegin (GlobData *data) {
 #else /* HAVE_FCHDIR */
         if (chdir(originalDirectory) == -1) {
 #endif /* HAVE_FCHDIR */
-          LogError("working directory restore");
+          LogError(gettext("working directory restore"));
         }
       } else {
-        LogPrint(LOG_ERR, "cannot set working directory: %s: %s",
+        LogPrint(LOG_ERR, gettext("cannot set working directory: %s: %s"),
                  data->directory, strerror(errno));
       }
 
@@ -799,9 +799,9 @@ globBegin (GlobData *data) {
 #endif /* HAVE_FCHDIR */
     } else {
 #ifdef HAVE_FCHDIR
-      LogError("working directory open");
+      LogError(gettext("working directory open"));
 #else /* HAVE_FCHDIR */
-      LogError("working directory determination");
+      LogError(gettext("working directory determination"));
 #endif /* HAVE_FCHDIR */
     }
   }
@@ -847,7 +847,7 @@ globChanged (GlobData *data) {
     free(data->current);
     return data->current = path;
   } else {
-    LogError("Memory allocation");
+    LogError(gettext("memory allocation"));
   }
   return NULL;
 }
@@ -956,47 +956,81 @@ updatePreferences (void) {
 
   {
     static unsigned char exitSave = 0;                /* 1 == save preferences on exit */
-    static const char *booleanValues[] = {"No", "Yes"};
-    static const char *cursorStyles[] = {"Underline", "Block"};
-    static const char *firmnessLevels[] = {"Minimum", "Low", "Medium", "High", "Maximum"};
-    static const char *skipBlankWindowsModes[] = {"All", "End of Line", "Rest of Line"};
-    static const char *statusStyles[] = {"None", "Alva", "Tieman", "PowerBraille 80", "Generic", "MDV", "Voyager"};
-    static const char *textStyles[] = {"8-dot", "6-dot"};
+    static const char *booleanValues[] = {
+      strtext("No"),
+      strtext("Yes")
+    };
+    static const char *cursorStyles[] = {
+      strtext("Underline"),
+      strtext("Block")
+    };
+    static const char *firmnessLevels[] = {
+      strtext("Minimum"),
+      strtext("Low"),
+      strtext("Medium"),
+      strtext("High"),
+      strtext("Maximum")
+    };
+    static const char *skipBlankWindowsModes[] = {
+      strtext("All"),
+      strtext("End of Line"),
+      strtext("Rest of Line")
+    };
+    static const char *statusStyles[] = {
+      strtext("None"),
+      "Alva",
+      "Tieman",
+      "PowerBraille 80",
+      strtext("Generic"),
+      "MDV",
+      "Voyager"
+    };
+    static const char *textStyles[] = {
+      "8-dot",
+      "6-dot"
+    };
     static const char *tuneDevices[] = {
-      "Beeper ("
+      "Beeper"
+        " ("
 #ifdef ENABLE_BEEPER_SUPPORT
-        "console tone generator"
+        strtext("console tone generator")
 #else /* ENABLE_BEEPER_SUPPORT */
-        "unsupported"
+        strtext("unsupported")
 #endif /* ENABLE_BEEPER_SUPPORT */
         ")",
 
-      "PCM ("
+      "PCM"
+        " ("
 #ifdef ENABLE_PCM_SUPPORT
-        "soundcard digital audio"
+        strtext("soundcard digital audio")
 #else /* ENABLE_PCM_SUPPORT */
-        "unsupported"
+        strtext("unsupported")
 #endif /* ENABLE_PCM_SUPPORT */
         ")",
 
-      "MIDI ("
+      "MIDI"
+        " ("
 #ifdef ENABLE_MIDI_SUPPORT
-        "Musical Instrument Digital Interface"
+        strtext("Musical Instrument Digital Interface")
 #else /* ENABLE_MIDI_SUPPORT */
-        "unsupported"
+        strtext("unsupported")
 #endif /* ENABLE_MIDI_SUPPORT */
         ")",
 
-      "FM ("
+      "FM"
+        " ("
 #ifdef ENABLE_FM_SUPPORT
-        "soundcard synthesizer"
+        strtext("soundcard synthesizer")
 #else /* ENABLE_FM_SUPPORT */
-        "unsupported"
+        strtext("unsupported")
 #endif /* ENABLE_FM_SUPPORT */
         ")"
     };
 #ifdef ENABLE_SPEECH_SUPPORT
-    static const char *sayModes[] = {"Immediate", "Enqueue"};
+    static const char *sayModes[] = {
+      strtext("Immediate"),
+      strtext("Enqueue")
+    };
 #endif /* ENABLE_SPEECH_SUPPORT */
     #define MENU_ITEM(setting, changed, test, label, values, minimum, maximum, divisor) {&setting, changed, test, label, values, minimum, maximum, divisor}
     #define NUMERIC_ITEM(setting, changed, test, label, minimum, maximum, divisor) MENU_ITEM(setting, changed, test, label, NULL, minimum, maximum, divisor)
@@ -1007,60 +1041,60 @@ updatePreferences (void) {
     #define BOOLEAN_ITEM(setting, changed, test, label) SYMBOLIC_ITEM(setting, changed, test, label, booleanValues)
     #define GLOB_ITEM(data, changed, test, label) TEXT_ITEM(data.setting, changed, test, label, data.paths, data.count)
     MenuItem menu[] = {
-       BOOLEAN_ITEM(exitSave, NULL, NULL, "Save on Exit"),
-       SYMBOLIC_ITEM(prefs.textStyle, NULL, NULL, "Text Style", textStyles),
-       BOOLEAN_ITEM(prefs.skipIdenticalLines, NULL, NULL, "Skip Identical Lines"),
-       BOOLEAN_ITEM(prefs.skipBlankWindows, NULL, NULL, "Skip Blank Windows"),
-       SYMBOLIC_ITEM(prefs.blankWindowsSkipMode, NULL, testSkipBlankWindows, "Which Blank Windows", skipBlankWindowsModes),
-       BOOLEAN_ITEM(prefs.slidingWindow, NULL, NULL, "Sliding Window"),
-       BOOLEAN_ITEM(prefs.eagerSlidingWindow, NULL, testSlidingWindow, "Eager Sliding Window"),
-       NUMERIC_ITEM(prefs.windowOverlap, changedWindowOverlap, NULL, "Window Overlap", 0, 20, 1),
-       BOOLEAN_ITEM(prefs.autorepeat, changedAutorepeat, NULL, "Autorepeat"),
-       TIME_ITEM(prefs.autorepeatDelay, NULL, testAutorepeat, "Autorepeat Delay"),
-       TIME_ITEM(prefs.autorepeatInterval, NULL, testAutorepeat, "Autorepeat Interval"),
-       BOOLEAN_ITEM(prefs.showCursor, NULL, NULL, "Show Cursor"),
-       SYMBOLIC_ITEM(prefs.cursorStyle, NULL, testShowCursor, "Cursor Style", cursorStyles),
-       BOOLEAN_ITEM(prefs.blinkingCursor, NULL, testShowCursor, "Blinking Cursor"),
-       TIME_ITEM(prefs.cursorVisibleTime, NULL, testBlinkingCursor, "Cursor Visible Time"),
-       TIME_ITEM(prefs.cursorInvisibleTime, NULL, testBlinkingCursor, "Cursor Invisible Time"),
-       BOOLEAN_ITEM(prefs.showAttributes, NULL, NULL, "Show Attributes"),
-       BOOLEAN_ITEM(prefs.blinkingAttributes, NULL, testShowAttributes, "Blinking Attributes"),
-       TIME_ITEM(prefs.attributesVisibleTime, NULL, testBlinkingAttributes, "Attributes Visible Time"),
-       TIME_ITEM(prefs.attributesInvisibleTime, NULL, testBlinkingAttributes, "Attributes Invisible Time"),
-       BOOLEAN_ITEM(prefs.blinkingCapitals, NULL, NULL, "Blinking Capitals"),
-       TIME_ITEM(prefs.capitalsVisibleTime, NULL, testBlinkingCapitals, "Capitals Visible Time"),
-       TIME_ITEM(prefs.capitalsInvisibleTime, NULL, testBlinkingCapitals, "Capitals Invisible Time"),
-       SYMBOLIC_ITEM(prefs.brailleFirmness, changedBrailleFirmness, testBrailleFirmness, "Braille Firmness", firmnessLevels),
+      BOOLEAN_ITEM(exitSave, NULL, NULL, strtext("Save on Exit")),
+      SYMBOLIC_ITEM(prefs.textStyle, NULL, NULL, strtext("Text Style"), textStyles),
+      BOOLEAN_ITEM(prefs.skipIdenticalLines, NULL, NULL, strtext("Skip Identical Lines")),
+      BOOLEAN_ITEM(prefs.skipBlankWindows, NULL, NULL, strtext("Skip Blank Windows")),
+      SYMBOLIC_ITEM(prefs.blankWindowsSkipMode, NULL, testSkipBlankWindows, strtext("Which Blank Windows"), skipBlankWindowsModes),
+      BOOLEAN_ITEM(prefs.slidingWindow, NULL, NULL, strtext("Sliding Window")),
+      BOOLEAN_ITEM(prefs.eagerSlidingWindow, NULL, testSlidingWindow, strtext("Eager Sliding Window")),
+      NUMERIC_ITEM(prefs.windowOverlap, changedWindowOverlap, NULL, strtext("Window Overlap"), 0, 20, 1),
+      BOOLEAN_ITEM(prefs.autorepeat, changedAutorepeat, NULL, strtext("Autorepeat")),
+      TIME_ITEM(prefs.autorepeatDelay, NULL, testAutorepeat, strtext("Autorepeat Delay")),
+      TIME_ITEM(prefs.autorepeatInterval, NULL, testAutorepeat, strtext("Autorepeat Interval")),
+      BOOLEAN_ITEM(prefs.showCursor, NULL, NULL, strtext("Show Cursor")),
+      SYMBOLIC_ITEM(prefs.cursorStyle, NULL, testShowCursor, strtext("Cursor Style"), cursorStyles),
+      BOOLEAN_ITEM(prefs.blinkingCursor, NULL, testShowCursor, strtext("Blinking Cursor")),
+      TIME_ITEM(prefs.cursorVisibleTime, NULL, testBlinkingCursor, strtext("Cursor Visible Time")),
+      TIME_ITEM(prefs.cursorInvisibleTime, NULL, testBlinkingCursor, strtext("Cursor Invisible Time")),
+      BOOLEAN_ITEM(prefs.showAttributes, NULL, NULL, strtext("Show Attributes")),
+      BOOLEAN_ITEM(prefs.blinkingAttributes, NULL, testShowAttributes, strtext("Blinking Attributes")),
+      TIME_ITEM(prefs.attributesVisibleTime, NULL, testBlinkingAttributes, strtext("Attributes Visible Time")),
+      TIME_ITEM(prefs.attributesInvisibleTime, NULL, testBlinkingAttributes, strtext("Attributes Invisible Time")),
+      BOOLEAN_ITEM(prefs.blinkingCapitals, NULL, NULL, strtext("Blinking Capitals")),
+      TIME_ITEM(prefs.capitalsVisibleTime, NULL, testBlinkingCapitals, strtext("Capitals Visible Time")),
+      TIME_ITEM(prefs.capitalsInvisibleTime, NULL, testBlinkingCapitals, strtext("Capitals Invisible Time")),
+      SYMBOLIC_ITEM(prefs.brailleFirmness, changedBrailleFirmness, testBrailleFirmness, strtext("Braille Firmness"), firmnessLevels),
 #ifdef HAVE_LIBGPM
-       BOOLEAN_ITEM(prefs.windowFollowsPointer, NULL, NULL, "Window Follows Pointer"),
-       BOOLEAN_ITEM(prefs.pointerFollowsWindow, NULL, NULL, "Pointer Follows Window"),
+      BOOLEAN_ITEM(prefs.windowFollowsPointer, NULL, NULL, strtext("Window Follows Pointer")),
+      BOOLEAN_ITEM(prefs.pointerFollowsWindow, NULL, NULL, strtext("Pointer Follows Window")),
 #endif /* HAVE_LIBGPM */
-       BOOLEAN_ITEM(prefs.alertTunes, NULL, NULL, "Alert Tunes"),
-       SYMBOLIC_ITEM(prefs.tuneDevice, changedTuneDevice, testTunes, "Tune Device", tuneDevices),
+      BOOLEAN_ITEM(prefs.alertTunes, NULL, NULL, strtext("Alert Tunes")),
+      SYMBOLIC_ITEM(prefs.tuneDevice, changedTuneDevice, testTunes, strtext("Tune Device"), tuneDevices),
 #ifdef ENABLE_PCM_SUPPORT
-       VOLUME_ITEM(prefs.pcmVolume, NULL, testTunesPcm, "PCM Volume"),
+      VOLUME_ITEM(prefs.pcmVolume, NULL, testTunesPcm, strtext("PCM Volume")),
 #endif /* ENABLE_PCM_SUPPORT */
 #ifdef ENABLE_MIDI_SUPPORT
-       VOLUME_ITEM(prefs.midiVolume, NULL, testTunesMidi, "MIDI Volume"),
-       TEXT_ITEM(prefs.midiInstrument, NULL, testTunesMidi, "MIDI Instrument", midiInstrumentTable, midiInstrumentCount),
+      VOLUME_ITEM(prefs.midiVolume, NULL, testTunesMidi, strtext("MIDI Volume")),
+      TEXT_ITEM(prefs.midiInstrument, NULL, testTunesMidi, strtext("MIDI Instrument"), midiInstrumentTable, midiInstrumentCount),
 #endif /* ENABLE_MIDI_SUPPORT */
 #ifdef ENABLE_FM_SUPPORT
-       VOLUME_ITEM(prefs.fmVolume, NULL, testTunesFm, "FM Volume"),
+      VOLUME_ITEM(prefs.fmVolume, NULL, testTunesFm, strtext("FM Volume")),
 #endif /* ENABLE_FM_SUPPORT */
-       BOOLEAN_ITEM(prefs.alertDots, NULL, NULL, "Alert Dots"),
-       BOOLEAN_ITEM(prefs.alertMessages, NULL, NULL, "Alert Messages"),
+      BOOLEAN_ITEM(prefs.alertDots, NULL, NULL, strtext("Alert Dots")),
+      BOOLEAN_ITEM(prefs.alertMessages, NULL, NULL, strtext("Alert Messages")),
 #ifdef ENABLE_SPEECH_SUPPORT
-       SYMBOLIC_ITEM(prefs.sayLineMode, NULL, NULL, "Say-Line Mode", sayModes),
-       BOOLEAN_ITEM(prefs.autospeak, NULL, NULL, "Autospeak"),
-       NUMERIC_ITEM(prefs.speechRate, changedSpeechRate, testSpeechRate, "Speech Rate", 0, SPK_MAXIMUM_RATE, 1),
-       NUMERIC_ITEM(prefs.speechVolume, changedSpeechVolume, testSpeechVolume, "Speech Volume", 0, SPK_MAXIMUM_VOLUME, 1),
+      SYMBOLIC_ITEM(prefs.sayLineMode, NULL, NULL, strtext("Say-Line Mode"), sayModes),
+      BOOLEAN_ITEM(prefs.autospeak, NULL, NULL, strtext("Autospeak")),
+      NUMERIC_ITEM(prefs.speechRate, changedSpeechRate, testSpeechRate, strtext("Speech Rate"), 0, SPK_MAXIMUM_RATE, 1),
+      NUMERIC_ITEM(prefs.speechVolume, changedSpeechVolume, testSpeechVolume, strtext("Speech Volume"), 0, SPK_MAXIMUM_VOLUME, 1),
 #endif /* ENABLE_SPEECH_SUPPORT */
-       SYMBOLIC_ITEM(prefs.statusStyle, NULL, NULL, "Status Style", statusStyles),
+      SYMBOLIC_ITEM(prefs.statusStyle, NULL, NULL, strtext("Status Style"), statusStyles),
 #ifdef ENABLE_TABLE_SELECTION
-       GLOB_ITEM(glob_textTable, changedTextTable, NULL, "Text Table"),
-       GLOB_ITEM(glob_attributesTable, changedAttributesTable, NULL, "Attributes Table"),
+      GLOB_ITEM(glob_textTable, changedTextTable, NULL, strtext("Text Table")),
+      GLOB_ITEM(glob_attributesTable, changedAttributesTable, NULL, strtext("Attributes Table")),
 #ifdef ENABLE_CONTRACTED_BRAILLE
-       GLOB_ITEM(glob_contractionTable, changedContractionTable, NULL, "Contraction Table")
+      GLOB_ITEM(glob_contractionTable, changedContractionTable, NULL, strtext("Contraction Table"))
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 #endif /* ENABLE_TABLE_SELECTION */
     };
@@ -1076,7 +1110,7 @@ updatePreferences (void) {
 
     /* status cells */
     setStatusText(&brl, "prf");
-    message("Preferences Menu", 0);
+    message(gettext("Preferences Menu"), 0);
 
     if (prefs.autorepeat) resetAutorepeat();
 
@@ -1089,15 +1123,15 @@ updatePreferences (void) {
       closeTuneDevice(0);
 
       if (!item->names) {
-        snprintf(valueBuffer, sizeof(valueBuffer),
-                 "%d", *item->setting);
+        snprintf(valueBuffer, sizeof(valueBuffer), "%d", *item->setting);
         value = valueBuffer;
-      } else if (!*(value = item->names[*item->setting - item->minimum])) {
-        value = "<off>";
+      } else {
+        if (!*(value = item->names[*item->setting - item->minimum])) value = strtext("<off>");
+        value = gettext(value);
       }
 
       {
-        const char *label = item->label;
+        const char *label = gettext(item->label);
         const char *delimiter = ": ";
         int settingIndent = strlen(label) + strlen(delimiter);
         int valueLength = strlen(value);
@@ -1156,7 +1190,7 @@ updatePreferences (void) {
             case BRL_CMD_PREFLOAD:
               prefs = oldPreferences;
               changedPreferences();
-              message("changes discarded", 0);
+              message(gettext("changes discarded"), 0);
               break;
             case BRL_BLK_PASSKEY+BRL_KEY_ENTER:
             case BRL_CMD_PREFSAVE:
@@ -1316,12 +1350,12 @@ openBrailleDriver (void) {
       brailleOpened = 1;
       return 1;
     } else {
-      LogPrint(LOG_DEBUG, "braille buffer allocation failed.");
+      LogPrint(LOG_DEBUG, gettext("braille buffer allocation failed."));
     }
 
     braille->close(&brl);
   } else {
-    LogPrint(LOG_DEBUG, "braille driver initialization failed: %s -> %s",
+    LogPrint(LOG_DEBUG, gettext("braille driver initialization failed: %s -> %s"),
              braille->code, brailleDevice);
   }
 
@@ -1396,7 +1430,7 @@ activateBrailleDriver (int verify) {
 #endif /* ENABLE_BLUETOOTH_SUPPORT */
 
       {
-        LogPrint(LOG_WARNING, "braille display autodetection not supported for device '%s'.", dev);
+        LogPrint(LOG_WARNING, gettext("braille display autodetection not supported for device '%s'."), dev);
         goto nextDevice;
       }
       LogPrint(LOG_DEBUG, "performing %s braille display autodetection.", type);
@@ -1408,7 +1442,7 @@ activateBrailleDriver (int verify) {
 
         if ((braille = loadBrailleDriver(*code, &brailleObject, opt_libraryDirectory))) {
           brailleParameters = processParameters(braille->parameters,
-                                                "braille driver",
+                                                gettext("braille driver"),
                                                 braille->code,
                                                 opt_brailleParameters);
           if (brailleParameters) {
@@ -1429,23 +1463,23 @@ activateBrailleDriver (int verify) {
             }
 
             if (opened) {
-              LogPrint(LOG_INFO, "Braille Driver: %s [%s] (compiled on %s at %s)",
+              LogPrint(LOG_INFO, gettext("Braille Driver: %s [%s] (compiled on %s at %s)"),
                        braille->code, braille->name,
                        braille->date, braille->time);
               braille->identify();
-              logParameters(braille->parameters, brailleParameters, "Braille");
-              LogPrint(LOG_INFO, "Braille Device: %s", brailleDevice);
+              logParameters(braille->parameters, brailleParameters, gettext("Braille"));
+              LogPrint(LOG_INFO, gettext("Braille Device: %s"), brailleDevice);
 
               /* Initialize the braille driver's help screen. */
-              LogPrint(LOG_INFO, "Help File: %s",
-                       braille->helpFile? braille->helpFile: "none");
+              LogPrint(LOG_INFO, gettext("Help File: %s"),
+                       braille->helpFile? braille->helpFile: gettext("none"));
               {
                 char *path = makePath(opt_dataDirectory, braille->helpFile);
                 if (path) {
                   if (verify || openHelpScreen(path)) {
-                    LogPrint(LOG_INFO, "Help Page: %s[%d]", path, getHelpPageNumber());
+                    LogPrint(LOG_INFO, gettext("Help Page: %s[%d]"), path, getHelpPageNumber());
                   } else {
-                    LogPrint(LOG_WARNING, "cannot open help file: %s", path);
+                    LogPrint(LOG_WARNING, gettext("cannot open help file: %s"), path);
                   }
                   free(path);
                 }
@@ -1459,7 +1493,7 @@ activateBrailleDriver (int verify) {
                 sprintf(path, "%s%s%s", part1, part2, part3);
                 preferencesFile = path;
               }
-              LogPrint(LOG_INFO, "Preferences File: %s", preferencesFile);
+              LogPrint(LOG_INFO, gettext("Preferences File: %s"), preferencesFile);
 
               return 1;
             }
@@ -1473,7 +1507,7 @@ activateBrailleDriver (int verify) {
             brailleObject = NULL;
           }
         } else {
-          LogPrint(LOG_ERR, "braille driver not loadable: %s", *code);
+          LogPrint(LOG_ERR, gettext("braille driver not loadable: %s"), *code);
         }
         braille = &noBraille;
       }
@@ -1550,14 +1584,14 @@ stopBrailleDriver (void) {
 void
 restartBrailleDriver (void) {
   stopBrailleDriver();
-  LogPrint(LOG_INFO, "reinitializing braille driver.");
+  LogPrint(LOG_INFO, gettext("reinitializing braille driver."));
   startBrailleDriver();
 }
 
 static void
 exitBrailleDriver (void) {
   clearStatusCells(&brl);
-  message("BRLTTY terminated.", MSG_NODELAY|MSG_SILENT);
+  message(gettext("BRLTTY terminated."), MSG_NODELAY|MSG_SILENT);
   stopBrailleDriver();
 }
 
@@ -1620,7 +1654,7 @@ activateSpeechDriver (int verify) {
 
       if ((speech = loadSpeechDriver(*code, &speechObject, opt_libraryDirectory))) {
         speechParameters = processParameters(speech->parameters,
-                                             "speech driver",
+                                             gettext("speech driver"),
                                              speech->code,
                                              opt_speechParameters);
         if (speechParameters) {
@@ -1637,11 +1671,11 @@ activateSpeechDriver (int verify) {
           }
 
           if (opened) {
-            LogPrint(LOG_INFO, "Speech Driver: %s [%s] (compiled on %s at %s)",
+            LogPrint(LOG_INFO, gettext("Speech Driver: %s [%s] (compiled on %s at %s)"),
                      speech->code, speech->name,
                      speech->date, speech->time);
             speech->identify();
-            logParameters(speech->parameters, speechParameters, "Speech");
+            logParameters(speech->parameters, speechParameters, gettext("Speech"));
 
             return 1;
           }
@@ -1655,7 +1689,7 @@ activateSpeechDriver (int verify) {
           speechObject = NULL;
         }
       } else {
-        LogPrint(LOG_ERR, "speech driver not loadable: %s", *code);
+        LogPrint(LOG_ERR, gettext("speech driver not loadable: %s"), *code);
       }
       speech = &noSpeech;
     }
@@ -1703,7 +1737,7 @@ stopSpeechDriver (void) {
 void
 restartSpeechDriver (void) {
   stopSpeechDriver();
-  LogPrint(LOG_INFO, "reinitializing speech driver.");
+  LogPrint(LOG_INFO, gettext("reinitializing speech driver."));
   startSpeechDriver();
 }
 
@@ -1753,17 +1787,17 @@ background (void) {
   }
   snprintf(name, sizeof(name), BACKGROUND_EVENT_PREFIX "%8lx", processinfo.dwProcessId);
   if (!(event = CreateEvent(NULL, TRUE, FALSE, name))) {
-    LogWindowsError("Creating event for background synchronization");
+    LogWindowsError(gettext("background synchronization event creation"));
     exit(11);
   }
   /* wait at most for 100ms, then check whether it's still alive */
   while ((res = WaitForSingleObject(event, 100)) != WAIT_OBJECT_0) {
     if (res == WAIT_FAILED) {
-      LogWindowsError("Waiting for synchronization event");
+      LogWindowsError(gettext("background synchronization event wait"));
       exit(12);
     }
     if (!GetExitCodeProcess(processinfo.hProcess, &res)) {
-      LogWindowsError("Getting result code from processus");
+      LogWindowsError(gettext("process result retrieval"));
       exit(13);
     }
     if (res != STILL_ACTIVE)
@@ -1786,7 +1820,7 @@ background (void) {
 
   switch (child = fork()) {
     case -1: /* error */
-      LogPrint(LOG_CRIT, "process creation error: %s", strerror(errno));
+      LogPrint(LOG_CRIT, gettext("process creation error: %s"), strerror(errno));
       exit(10);
 
     case 0: /* child */
@@ -1797,7 +1831,7 @@ background (void) {
         int status;
         if (waitpid(child, &status, 0) == -1) {
           if (errno == EINTR) continue;
-          LogPrint(LOG_CRIT, "waitpid error: %s", strerror(errno));
+          LogPrint(LOG_CRIT, gettext("waitpid error: %s"), strerror(errno));
           _exit(11);
         }
 
@@ -1834,12 +1868,12 @@ startup (int argc, char *argv[]) {
                                     &opt_configurationFile,
                                     NULL);
   if (argc) {
-    LogPrint(LOG_ERR, "excess parameter: %s", argv[0]);
+    LogPrint(LOG_ERR, gettext("excess parameter: %s"), argv[0]);
     ++problemCount;
   }
 
-  if (!validateInterval(&updateInterval, "update interval", opt_updateInterval)) ++problemCount;
-  if (!validateInterval(&messageDelay, "message delay", opt_messageDelay)) ++problemCount;
+  if (!validateInterval(&updateInterval, gettext("update interval"), opt_updateInterval)) ++problemCount;
+  if (!validateInterval(&messageDelay, gettext("message delay"), opt_messageDelay)) ++problemCount;
 
   /* Set logging levels. */
   {
@@ -1872,7 +1906,7 @@ startup (int argc, char *argv[]) {
         }
       }
 
-      LogPrint(LOG_ERR, "invalid log level: %s", opt_logLevel);
+      LogPrint(LOG_ERR, gettext("invalid log level: %s"), opt_logLevel);
       ++problemCount;
     }
   setLevel:
@@ -1928,7 +1962,7 @@ startup (int argc, char *argv[]) {
       sigprocmask(SIG_SETMASK, &oldMask, NULL);
       sigaction(signalNumber, &oldAction, NULL);
     } else {
-      LogError("signal set");
+      LogError("sigaction");
       opt_noDaemon = 1;
     }
   }
@@ -1945,7 +1979,7 @@ startup (int argc, char *argv[]) {
       fclose(stream);
       atexit(exitPidFile);
     } else {
-      LogPrint(LOG_ERR, "cannot open process identifier file: %s: %s",
+      LogPrint(LOG_ERR, gettext("cannot open process identifier file: %s: %s"),
                opt_pidFile, strerror(errno));
     }
   }
@@ -1955,7 +1989,7 @@ startup (int argc, char *argv[]) {
     const char **directory = directories;
     while (*directory) {
       if (chdir(*directory) != -1) break;                /* * change to directory containing data files  */
-      LogPrint(LOG_WARNING, "cannot change working directory to '%s': %s",
+      LogPrint(LOG_WARNING, gettext("cannot change working directory to '%s': %s"),
                *directory, strerror(errno));
       ++directory;
     }
@@ -1964,17 +1998,17 @@ startup (int argc, char *argv[]) {
   {
     char *directory;
     if ((directory = getWorkingDirectory())) {
-      LogPrint(LOG_INFO, "Working Directory: %s", directory);
+      LogPrint(LOG_INFO, gettext("Working Directory: %s"), directory);
       free(directory);
     } else {
-      LogPrint(LOG_ERR, "cannot determine working directory: %s", strerror(errno));
+      LogPrint(LOG_ERR, gettext("cannot determine working directory: %s"), strerror(errno));
     }
   }
 
-  LogPrint(LOG_INFO, "Configuration File: %s", opt_configurationFile);
-  LogPrint(LOG_INFO, "Data Directory: %s", opt_dataDirectory);
-  LogPrint(LOG_INFO, "Library Directory: %s", opt_libraryDirectory);
-  LogPrint(LOG_INFO, "Tables Directory: %s", opt_tablesDirectory);
+  LogPrint(LOG_INFO, gettext("Configuration File: %s"), opt_configurationFile);
+  LogPrint(LOG_INFO, gettext("Data Directory: %s"), opt_dataDirectory);
+  LogPrint(LOG_INFO, gettext("Library Directory: %s"), opt_libraryDirectory);
+  LogPrint(LOG_INFO, gettext("Tables Directory: %s"), opt_tablesDirectory);
 
   if (opt_textTable) {
     fixTextTablePath(&opt_textTable);
@@ -1984,7 +2018,7 @@ startup (int argc, char *argv[]) {
     opt_textTable = TEXT_TABLE;
     makeUntextTable();
   }
-  LogPrint(LOG_INFO, "Text Table: %s", opt_textTable);
+  LogPrint(LOG_INFO, gettext("Text Table: %s"), opt_textTable);
 #ifdef ENABLE_PREFERENCES_MENU
 #ifdef ENABLE_TABLE_SELECTION
   globPrepare(&glob_textTable, opt_tablesDirectory,
@@ -1999,7 +2033,7 @@ startup (int argc, char *argv[]) {
   } else {
     opt_attributesTable = ATTRIBUTES_TABLE;
   }
-  LogPrint(LOG_INFO, "Attributes Table: %s", opt_attributesTable);
+  LogPrint(LOG_INFO, gettext("Attributes Table: %s"), opt_attributesTable);
 #ifdef ENABLE_PREFERENCES_MENU
 #ifdef ENABLE_TABLE_SELECTION
   globPrepare(&glob_attributesTable, opt_tablesDirectory,
@@ -2009,14 +2043,14 @@ startup (int argc, char *argv[]) {
 #endif /* ENABLE_PREFERENCES_MENU */
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
-  LogPrint(LOG_INFO, "Contractions Directory: %s", opt_contractionsDirectory);
+  LogPrint(LOG_INFO, gettext("Contractions Directory: %s"), opt_contractionsDirectory);
   if (opt_contractionTable) {
     fixContractionTablePath(&opt_contractionTable);
     loadContractionTable(opt_contractionTable);
   }
   atexit(exitContractionTable);
-  LogPrint(LOG_INFO, "Contraction Table: %s",
-           opt_contractionTable? opt_contractionTable: "none");
+  LogPrint(LOG_INFO, gettext("Contraction Table: %s"),
+           opt_contractionTable? opt_contractionTable: gettext("none"));
 #ifdef ENABLE_PREFERENCES_MENU
 #ifdef ENABLE_TABLE_SELECTION
   globPrepare(&glob_contractionTable, opt_contractionsDirectory,
@@ -2051,7 +2085,7 @@ startup (int argc, char *argv[]) {
                             FILE_SHARE_READ|FILE_SHARE_WRITE,
                             NULL, OPEN_EXISTING, 0, NULL);
       if (!h) {
-        LogWindowsError("opening NUL device");
+        LogWindowsError(gettext("NUL device open"));
       } else {
         SetStdHandle(STD_INPUT_HANDLE, h);
         SetStdHandle(STD_OUTPUT_HANDLE, h);
@@ -2070,7 +2104,7 @@ startup (int argc, char *argv[]) {
       HANDLE event;
       snprintf(name, sizeof(name), BACKGROUND_EVENT_PREFIX "%8lx", GetCurrentProcessId());
       if (!(event = CreateEvent(NULL, TRUE, FALSE, name))) {
-        LogWindowsError("Creating event for background synchronization");
+        LogWindowsError(gettext("background synchronization event creation"));
       } else {
         SetEvent(event);
       }
@@ -2078,13 +2112,13 @@ startup (int argc, char *argv[]) {
 #elif defined(HAVE_SYS_WAIT_H)
     /* tell the parent process to exit */
     if (kill(getppid(), SIGUSR1) == -1) {
-      LogPrint(LOG_CRIT, "stop parent error: %s", strerror(errno));
+      LogPrint(LOG_CRIT, gettext("parent stop error: %s"), strerror(errno));
       exit(12);
     }
 
     /* request a new session (job control) */
     if (setsid() == -1) {                        
-      LogPrint(LOG_CRIT, "session creation error: %s", strerror(errno));
+      LogPrint(LOG_CRIT, gettext("session creation error: %s"), strerror(errno));
       exit(13);
     }
 #endif /* detach */
@@ -2100,13 +2134,13 @@ startup (int argc, char *argv[]) {
   /* initialize screen driver */
   initializeAllScreens(opt_screenDriver, opt_libraryDirectory);
   screenParameters = processParameters(getScreenParameters(),
-                                       "screen driver",
+                                       gettext("screen driver"),
                                        getScreenDriverCode(),
                                        opt_screenParameters);
-  logParameters(getScreenParameters(), screenParameters, "Screen");
+  logParameters(getScreenParameters(), screenParameters, gettext("Screen"));
   if (!opt_verify) {
     if (!openMainScreen(screenParameters)) {                                
-      LogPrint(LOG_CRIT, "cannot read screen.");
+      LogPrint(LOG_CRIT, gettext("cannot read screen."));
       exit(7);
     }
     atexit(exitScreen);
@@ -2117,10 +2151,10 @@ startup (int argc, char *argv[]) {
   if (!opt_noApi) {
     api_identify();
     apiParameters = processParameters(api_parameters,
-                                      "application programming interface",
+                                      gettext("application programming interface"),
                                       NULL,
                                       opt_apiParameters);
-    logParameters(api_parameters, apiParameters, "API");
+    logParameters(api_parameters, apiParameters, gettext("API"));
     if (!opt_verify) {
       if (api_start(&brl, apiParameters)) {
         atexit(exitApi);
@@ -2132,7 +2166,7 @@ startup (int argc, char *argv[]) {
 
   /* The device(s) the braille display might be connected to. */
   if (!*opt_brailleDevice) {
-    LogPrint(LOG_CRIT, "braille device not specified.");
+    LogPrint(LOG_CRIT, gettext("braille device not specified."));
     exit(4);
   }
   brailleDevices = splitString(opt_brailleDevice, ',', NULL);
@@ -2158,8 +2192,8 @@ startup (int argc, char *argv[]) {
   }
 
   /* Create the speech pass-through FIFO. */
-  LogPrint(LOG_INFO, "Speech FIFO: %s",
-           opt_speechFifo? opt_speechFifo: "none");
+  LogPrint(LOG_INFO, gettext("Speech FIFO: %s"),
+           opt_speechFifo? opt_speechFifo: gettext("none"));
   if (!opt_verify) {
     if (opt_speechFifo) openSpeechFifo(opt_dataDirectory, opt_speechFifo);
   }
@@ -2175,9 +2209,9 @@ startup (int argc, char *argv[]) {
 
   if (problemCount) {
     char buffer[0X40];
-    snprintf(buffer, sizeof(buffer), "%d startup problem%s",
+    snprintf(buffer, sizeof(buffer), "%d %s",
              problemCount,
-             (problemCount==1? "": "s"));
+             ngettext("startup problem", "startup problems", problemCount));
     message(buffer, MSG_WAITKEY);
   }
 }

@@ -88,14 +88,14 @@ ensureSetting (
         } else if (strcasecmp(value, "off") == 0) {
           *setting = 0;
         } else if (!(option->flags & OPT_Extend)) {
-          LogPrint(LOG_ERR, "invalid flag setting: %s", value);
+          LogPrint(LOG_ERR, gettext("invalid flag setting: %s"), value);
           info->errorCount++;
         } else {
           int count;
           if (isInteger(&count, value) && (count >= 0)) {
             *setting = count;
           } else {
-            LogPrint(LOG_ERR, "invalid counter setting: %s", value);
+            LogPrint(LOG_ERR, gettext("invalid counter setting: %s"), value);
             info->errorCount++;
           }
         }
@@ -130,9 +130,11 @@ printHelp (
     if (option->argument) argumentWidth = MAX(argumentWidth, strlen(option->argument));
   }
 
-  fprintf(outputStream, "Usage: %s", programName);
+  fprintf(outputStream, gettext("Usage: %s"), programName);
   if (info->optionCount)
-    fprintf(outputStream, " [option ...]");
+    fputs(" [", outputStream);
+    fputs(gettext("option"), outputStream);
+    fputs(" ...]", outputStream);
   if (argumentsSummary && *argumentsSummary)
     fprintf(outputStream, " %s", argumentsSummary);
   fprintf(outputStream, "\n");
@@ -178,7 +180,7 @@ printHelp (
     {
       unsigned int headerWidth = lineLength;
       unsigned int descriptionWidth = lineWidth - headerWidth;
-      const char *description = option->description;
+      const char *description = gettext(option->description);
       unsigned int charsLeft = strlen(description);
 
       while (1) {
@@ -334,12 +336,12 @@ processCommandLine (
 #endif /* HAVE_GETOPT_LONG */
 
       case '?':
-        LogPrint(LOG_ERR, "unknown option: -%c", optopt);
+        LogPrint(LOG_ERR, gettext("unknown option: -%c"), optopt);
         info->errorCount++;
         break;
 
       case ':': /* An invalid option has been specified. */
-        LogPrint(LOG_ERR, "missing operand: -%c", optopt);
+        LogPrint(LOG_ERR, gettext("missing operand: -%c"), optopt);
         info->errorCount++;
         break;
 
@@ -475,17 +477,17 @@ processConfigurationLine (
           const char *operand = strtok(NULL, delimiters);
 
           if (!operand) {
-            LogPrint(LOG_ERR, "operand not supplied for configuration directive: %s", line);
+            LogPrint(LOG_ERR, gettext("operand not supplied for configuration directive: %s"), line);
             conf->info->errorCount++;
           } else if (strtok(NULL, delimiters)) {
             while (strtok(NULL, delimiters));
-            LogPrint(LOG_ERR, "too many operands for configuration directive: %s", line);
+            LogPrint(LOG_ERR, gettext("too many operands for configuration directive: %s"), line);
             conf->info->errorCount++;
           } else {
             char **setting = &conf->settings[optionIndex];
 
             if (*setting && !(option->argument && (option->flags & OPT_Extend))) {
-              LogPrint(LOG_ERR, "configuration directive specified more than once: %s", line);
+              LogPrint(LOG_ERR, gettext("configuration directive specified more than once: %s"), line);
               conf->info->errorCount++;
               free(*setting);
               *setting = NULL;
@@ -502,7 +504,7 @@ processConfigurationLine (
         }
       }
     }
-    LogPrint(LOG_ERR, "unknown configuration directive: %s", line);
+    LogPrint(LOG_ERR, gettext("unknown configuration directive: %s"), line);
     conf->info->errorCount++;
   }
   return 1;
@@ -538,12 +540,12 @@ processConfigurationFile (
 
     fclose(file);
     if (processed) return 1;
-    LogPrint(LOG_ERR, "file '%s' processing error.", path);
+    LogPrint(LOG_ERR, gettext("file '%s' processing error."), path);
     info->errorCount++;
   } else {
     int ok = optional && (errno == ENOENT);
     LogPrint((ok? LOG_DEBUG: LOG_ERR),
-             "cannot open configuration file: %s: %s",
+             gettext("cannot open configuration file: %s: %s"),
              path, strerror(errno));
     if (ok) return 1;
     info->errorCount++;
@@ -565,6 +567,11 @@ processOptions (
 ) {
   OptionProcessingInformation info;
   int index;
+
+#ifdef ENABLE_I18N_SUPPORT
+  setlocale(LC_ALL, "");
+  textdomain(PACKAGE_NAME);
+#endif /* ENABLE_I18N_SUPPORT */
 
   info.optionTable = optionTable;
   info.optionCount = optionCount;
@@ -628,11 +635,11 @@ floatArgument (
   char *end;
   double value = strtod(argument, &end);
   if ((end == argument) || *end) {
-    LogPrint(LOG_ERR, "invalid %s: %s", name, argument);
+    LogPrint(LOG_ERR, gettext("invalid %s: %s"), name, argument);
   } else if (value < minimum) {
-    LogPrint(LOG_ERR, "%s is less than %g: %g", name, minimum, value);
+    LogPrint(LOG_ERR, gettext("%s is less than %g: %g"), name, minimum, value);
   } else if (value > maximum) {
-    LogPrint(LOG_ERR, "%s is greater than %g: %g", name, maximum, value);
+    LogPrint(LOG_ERR, gettext("%s is greater than %g: %g"), name, maximum, value);
   } else {
     return value;
   }
@@ -649,11 +656,11 @@ integerArgument (
   char *end;
   long int value = strtol(argument, &end, 0);
   if ((end == argument) || *end) {
-    LogPrint(LOG_ERR, "invalid %s: %s", name, argument);
+    LogPrint(LOG_ERR, gettext("invalid %s: %s"), name, argument);
   } else if (value < minimum) {
-    LogPrint(LOG_ERR, "%s is less than %d: %ld", name, minimum, value);
+    LogPrint(LOG_ERR, gettext("%s is less than %d: %ld"), name, minimum, value);
   } else if (value > maximum) {
-    LogPrint(LOG_ERR, "%s is greater than %d: %ld", name, maximum, value);
+    LogPrint(LOG_ERR, gettext("%s is greater than %d: %ld"), name, maximum, value);
   } else {
     return value;
   }
@@ -672,6 +679,6 @@ wordArgument (
     if (strncasecmp(argument, *choice, length) == 0) return choice - choices;
     ++choice;
   }
-  LogPrint(LOG_ERR, "invalid %s: %s", name, argument);
+  LogPrint(LOG_ERR, gettext("invalid %s: %s"), name, argument);
   exit(2);
 }

@@ -274,6 +274,9 @@ extern "C" {
 /* Define this to be a string containing the path to the root of the ViaVoice package. */
 #undef VIAVOICE_ROOT
 
+/* Define this if internationalization support is to be included. */
+#undef ENABLE_I18N_SUPPORT
+
 /* Define this if the application programming interface is to be included. */
 #undef ENABLE_API
 

@@ -384,6 +384,17 @@ main(void) {
 esac
 
 BRLTTY_ARG_DISABLE(
+   [i18n],
+   [support for internationalization],
+   [],
+[dnl
+   AC_CHECK_HEADER([libintl.h], [dnl
+      AC_HAVE_LIBRARY([intl])
+      AC_DEFINE([ENABLE_I18N_SUPPORT])
+   ])
+])
+
+BRLTTY_ARG_DISABLE(
    [api],
    [the application programming interface],
    [],
