@@ -45,11 +45,12 @@ makeWindowsCommandLine (const char *const *arguments) {
     int needQuotes = 0;
     int start = length;
 
-    while (1) {
+    while (*character) {
       if (*character == backslash) {
         ++backslashCount;
       } else {
         if (*character == quote) {
+          needQuotes = 1;
           backslashCount = (backslashCount * 2) + 1;
         } else if ((*character == ' ') || (*character == '\t')) {
           needQuotes = 1;
@@ -60,11 +61,16 @@ makeWindowsCommandLine (const char *const *arguments) {
           --backslashCount;
         }
 
-        if (!*character) break;
         ADD(*character);
       }
 
       ++character;
+    }
+
+    if (needQuotes) backslashCount *= 2;
+    while (backslashCount > 0) {
+      ADD(backslash);
+      --backslashCount;
     }
 
     if (needQuotes) {
