@@ -16,7 +16,7 @@
  */
 
 static int
-addHostCommandLineCharacter (char **buffer, int *size, int *length, char character) {
+addWindowsCommandLineCharacter (char **buffer, int *size, int *length, char character) {
   if (*length == *size) {
     char *newBuffer = realloc(*buffer, (*size = *size? *size<<1: 0X1));
     if (!newBuffer) {
@@ -29,24 +29,22 @@ addHostCommandLineCharacter (char **buffer, int *size, int *length, char charact
   return 1;
 }
 
-int
-executeHostCommand (const char *const *arguments) {
+static char *
+makeWindowsCommandLine (const char *const *arguments) {
   const char backslash = '\\';
   const char quote = '"';
-  int result = 1;
-  const char *command = *arguments;
-  char *line = NULL;
+  char *buffer = NULL;
   int size = 0;
   int length = 0;
 
-#define ADD(c) if (!addHostCommandLineCharacter(&line, &size, &length, (c))) goto error
+#define ADD(c) if (!addWindowsCommandLineCharacter(&buffer, &size, &length, (c))) goto error
   while (*arguments) {
     const char *character = *arguments;
     int backslashCount = 0;
     int needQuotes = 0;
     int start = length;
 
-    while (*character) {
+    while (1) {
       if (*character == backslash) {
         ++backslashCount;
       } else {
@@ -61,6 +59,7 @@ executeHostCommand (const char *const *arguments) {
           --backslashCount;
         }
 
+        if (!*character) break;
         ADD(*character);
       }
 
@@ -70,17 +69,35 @@ executeHostCommand (const char *const *arguments) {
     if (needQuotes) {
       ADD(quote);
       ADD(quote);
-      memmove(&line[start+1], &line[start], length-start-1);
-      line[start] = quote;
+      memmove(&buffer[start+1], &buffer[start], length-start-1);
+      buffer[start] = quote;
     }
 
     ADD(' ');
     ++arguments;
   }
-  line[length-1] = 0;
 #undef ADD
 
+  buffer[length-1] = 0;
+  {
+    char *line = realloc(buffer, length);
+    if (line) return line;
+  }
+
 error:
-  if (line) free(line);
+  if (buffer) free(buffer);
+  return NULL;
+}
+
+int
+executeHostCommand (const char *const *arguments) {
+  int result = 1;
+  const char *command = *arguments;
+  char *line;
+
+  if ((line = makeWindowsCommandLine(arguments))) {
+    free(line);
+  }
+
   return result;
 }
