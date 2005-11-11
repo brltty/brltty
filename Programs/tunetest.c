@@ -78,8 +78,8 @@ END_OPTION_TABLE
 static const char *deviceNames[] = {"beeper", "pcm", "midi", "fm", NULL};
 
 #ifdef ENABLE_MIDI_SUPPORT
-static unsigned char
-instrumentArgument (const char *argument) {
+static int
+validateInstrument (unsigned char *value, const char *argument) {
   size_t argumentLength = strlen(argument);
   unsigned char instrument;
   for (instrument=0; instrument<midiInstrumentCount; ++instrument) {
@@ -94,7 +94,10 @@ instrumentArgument (const char *argument) {
     while (1) {
       while (*component == ' ') component++, componentLeft--;
       if ((componentLeft == 0) != (wordLeft == 0)) break; 
-      if (!componentLeft) return instrument;
+      if (!componentLeft) {
+        *value = instrument;
+        return 1;
+      }
       {
         size_t wordLength = wordLeft;
         size_t componentLength = componentLeft;
@@ -108,8 +111,7 @@ instrumentArgument (const char *argument) {
       }
     }
   }
-  LogPrint(LOG_ERR, "invalid instrument: %s", argument);
-  exit(2);
+  return 0;
 }
 #endif /* ENABLE_MIDI_SUPPORT */
 
@@ -128,40 +130,85 @@ main (int argc, char *argv[]) {
                  "{note duration} ...");
 
   if (opt_tuneDevice && *opt_tuneDevice) {
-    tuneDevice = wordArgument(opt_tuneDevice, deviceNames, "device");
+    unsigned int device;
+    if (!validateChoice(&device, opt_tuneDevice, deviceNames)) {
+      LogPrint(LOG_ERR, "%s: %s", "invalid tune device", opt_tuneDevice);
+      exit(2);
+    }
+    tuneDevice = device;
   } else {
     tuneDevice = getDefaultTuneDevice();
   }
 
 #ifdef ENABLE_MIDI_SUPPORT
   if (opt_midiInstrument && *opt_midiInstrument) {
-    midiInstrument = instrumentArgument(opt_midiInstrument);
+    if (!validateInstrument(&midiInstrument, opt_midiInstrument)) {
+      LogPrint(LOG_ERR, "%s: %s", "invalid musical instrument", opt_midiInstrument);
+      exit(2);
+    }
   } else {
     midiInstrument = 0;
   }
 #endif /* ENABLE_MIDI_SUPPORT */
 
   if (opt_outputVolume && *opt_outputVolume) {
-    outputVolume = integerArgument(opt_outputVolume, 0, 100, "level");
+    static const int minimum = 0;
+    static const int maximum = 100;
+    int volume;
+    if (!validateInteger(&volume, opt_outputVolume, &minimum, &maximum)) {
+      LogPrint(LOG_ERR, "%s: %s", "invalid volume percentage", opt_outputVolume);
+      exit(2);
+    }
+    outputVolume = volume;
   } else {
     outputVolume = 50;
   }
 
   if (!argc) {
     LogPrint(LOG_ERR, "missing tune.");
-  } else if (argc % 2) {
-    LogPrint(LOG_ERR, "missing duration.");
-  } else {
+    exit(2);
+  }
+
+  if (argc % 2) {
+    LogPrint(LOG_ERR, "missing note duration.");
+    exit(2);
+  }
+
+  {
     unsigned int count = argc / 2;
     TuneElement *elements = mallocWrapper((sizeof(*elements) * count) + 1);
     TuneElement *element = elements;
 
     while (argc) {
-      short note = integerArgument(*argv++, 1, 127, "note");
-      short duration = integerArgument(*argv++, 1, 255, "duration");
-      TuneElement te = TUNE_NOTE(duration, note);
-      argc -= 2;
-      *(element++) = te;
+      int note;
+      int duration;
+
+      {
+        static const int minimum = 0X01;
+        static const int maximum = 0X7F;
+        const char *argument = *argv++;
+        if (!validateInteger(&note, argument, &minimum, &maximum)) {
+          LogPrint(LOG_ERR, "%s: %s", "invalid note number", argument);
+          exit(2);
+        }
+        --argc;
+      }
+
+      {
+        static const int minimum = 1;
+        static const int maximum = 255;
+        const char *argument = *argv++;
+        if (!validateInteger(&duration, argument, &minimum, &maximum)) {
+          LogPrint(LOG_ERR, "%s: %s", "invalid note duration", argument);
+          exit(2);
+        }
+        --argc;
+      }
+
+      {
+        TuneElement te = TUNE_NOTE(duration, note);
+        *(element++) = te;
+      }
     }
 
     {
@@ -201,9 +248,8 @@ main (int argc, char *argv[]) {
     }
 
     free(elements);
-    return 0;
   }
-  return 2;
+  return 0;
 }
 
 void

@@ -81,16 +81,24 @@ main (int argc, char *argv[]) {
                  NULL, NULL, NULL,
                  "[driver [parameter=value ...]]");
 
+  speechRate = 1.0;
   if (opt_speechRate && *opt_speechRate) {
-    speechRate = floatArgument(opt_speechRate, 0.1, 10.0, "multiplier");
-  } else {
-    speechRate = 1.0;
+    static const float minimum = 0.1;
+    static const float maximum = 10.0;
+    if (!validateFloat(&speechRate, opt_speechRate, &minimum, &maximum)) {
+      LogPrint(LOG_ERR, "%s: %s", "invalid rate multiplier", opt_speechRate);
+      exit(2);
+    }
   }
 
+  speechVolume = 1.0;
   if (opt_speechVolume && *opt_speechVolume) {
-    speechVolume = floatArgument(opt_speechVolume, 0.0, 200.0, "multiplier");
-  } else {
-    speechVolume = 1.0;
+    static const float minimum = 0.0;
+    static const float maximum = 2.0;
+    if (!validateFloat(&speechVolume, opt_speechVolume, &minimum, &maximum)) {
+      LogPrint(LOG_ERR, "%s: %s", "invalid volume multiplier", opt_speechVolume);
+      exit(2);
+    }
   }
 
   if (argc) {

@@ -64,20 +64,38 @@ BEGIN_OPTION_TABLE
 END_OPTION_TABLE
 
 static void
-setRegion (short *offsetValue, const char *offsetOption, short offsetDefault, const char *offsetName,
-           short *sizeValue, const char *sizeOption, short sizeLimit, const char *sizeName) {
+setRegion (int *offsetValue, const char *offsetOption, int offsetDefault, const char *offsetName,
+           int *sizeValue, const char *sizeOption, int sizeLimit, const char *sizeName) {
   if (offsetOption) {
-    *offsetValue = integerArgument(offsetOption, 0, sizeLimit-1, offsetName);
+    {
+      const int minimum = 0;
+      const int maximum = sizeLimit - 1;
+      if (!validateInteger(offsetValue, offsetOption, &minimum, &maximum)) {
+        LogPrint(LOG_ERR, "invalid %s: %s", offsetName, offsetOption);
+        exit(2);
+      }
+    }
+
     if (sizeOption) {
-      *sizeValue = integerArgument(sizeOption, 1, sizeLimit-*offsetValue, sizeName);
+      const int minimum = 1;
+      const int maximum = sizeLimit - *offsetValue;
+      if (!validateInteger(sizeValue, sizeOption, &minimum, &maximum)) {
+        LogPrint(LOG_ERR, "invalid %s: %s", sizeName, sizeOption);
+        exit(2);
+      }
       return;
     }
   } else if (sizeOption) {
-    *sizeValue = integerArgument(sizeOption, 1, sizeLimit, sizeName);
+    const int minimum = 1;
+    const int maximum = sizeLimit;
+    if (!validateInteger(sizeValue, sizeOption, &minimum, &maximum)) {
+      LogPrint(LOG_ERR, "invalid %s: %s", sizeName, sizeOption);
+      exit(2);
+    }
     *offsetValue = (sizeLimit - *sizeValue) / 2;
     return;
   } else {
-    short offsetLimit = (sizeLimit - 1) / 2;
+    int offsetLimit = (sizeLimit - 1) / 2;
     if ((*offsetValue = offsetDefault) > offsetLimit) *offsetValue = offsetLimit;
   }
   if ((*sizeValue = sizeLimit - (*offsetValue * 2)) < 1) *sizeValue = 1;
@@ -142,7 +160,7 @@ main (int argc, char *argv[]) {
 
   if (openMainScreen(parameterSettings)) {
     ScreenDescription description;
-    short left, top, width, height;
+    int left, top, width, height;
     unsigned char buffer[0X800];
 
     describeScreen(&description);
