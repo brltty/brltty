@@ -24,6 +24,10 @@
 #include <errno.h>
 #include <limits.h>
 
+#ifdef ENABLE_I18N_SUPPORT
+#include <locale.h>
+#endif /* ENABLE_I18N_SUPPORT */
+
 #include "options.h"
 #include "misc.h"
 #include "system.h"
