@@ -192,11 +192,11 @@ typedef void *XtPointer;
 typedef enum {
   PARM_TKPARMS,
   PARM_LINES,
-  PARM_COLS,
+  PARM_COLUMNS,
   PARM_MODEL,
   PARM_INPUT
 } DriverParameter;
-#define BRLPARMS "tkparms", "lines", "cols", "model", "input"
+#define BRLPARMS "tkparms", "lines", "columns", "model", "input"
 
 #define BRL_HAVE_VISUAL_DISPLAY
 #include "Programs/brl_driver.h"
@@ -980,14 +980,14 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
   }
 
   cols=40;
-  if (*parameters[PARM_COLS]) {
+  if (*parameters[PARM_COLUMNS]) {
     static const int minimum = 1;
     static const int maximum = MAXCOLS;
     int value;
-    if (validateInteger(&value, parameters[PARM_COLS], &minimum, &maximum)) {
+    if (validateInteger(&value, parameters[PARM_COLUMNS], &minimum, &maximum)) {
       cols=value;
     } else {
-      LogPrint(LOG_WARNING, "%s: %s", "invalid column count", parameters[PARM_COLS]);
+      LogPrint(LOG_WARNING, "%s: %s", "invalid column count", parameters[PARM_COLUMNS]);
     }
   }
 

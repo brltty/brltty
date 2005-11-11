@@ -73,8 +73,8 @@ typedef enum {
 #ifdef USE_CURSES
   PARM_TERM,
 #endif /* USE_CURSES */
-  PARM_HEIGHT,
-  PARM_WIDTH,
+  PARM_LINES,
+  PARM_COLUMNS,
 
 #ifdef HAVE_ICONV_H
   PARM_CHARSET,
@@ -82,7 +82,7 @@ typedef enum {
 
   PARM_LOCALE
 } DriverParameter;
-#define BRLPARMS "baud", BRLPARM_TERM "height", "width", BRLPARM_CHARSET "locale"
+#define BRLPARMS "baud", BRLPARM_TERM "lines", "columns", BRLPARM_CHARSET "locale"
 
 #define BRL_HAVE_KEY_CODES
 #define BRL_HAVE_VISUAL_DISPLAY
@@ -90,9 +90,9 @@ typedef enum {
 #include "braille.h"
 #include "Programs/io_serial.h"
 
-#define MAX_WINDOW_HEIGHT 3
-#define MAX_WINDOW_WIDTH 80
-#define MAX_WINDOW_SIZE (MAX_WINDOW_HEIGHT * MAX_WINDOW_WIDTH)
+#define MAX_WINDOW_LINES 3
+#define MAX_WINDOW_COLUMNS 80
+#define MAX_WINDOW_SIZE (MAX_WINDOW_LINES * MAX_WINDOW_COLUMNS)
 
 static SerialDevice *ttyDevice = NULL;
 static FILE *ttyStream = NULL;
@@ -112,8 +112,8 @@ static int
 brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
   int ttyBaud = 9600;
   char *ttyType = "vt100";
-  int windowHeight = 1;
-  int windowWidth = 40;
+  int windowLines = 1;
+  int windowColumns = 40;
 
 #ifdef HAVE_ICONV_H
   char *characterSet = "ISO8859-1";
@@ -132,23 +132,23 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
 
   {
     static const int minimum = 1;
-    static const int maximum = MAX_WINDOW_HEIGHT;
-    int height = windowHeight;
-    if (validateInteger(&height, parameters[PARM_HEIGHT], &minimum, &maximum)) {
-      windowHeight = height;
+    static const int maximum = MAX_WINDOW_LINES;
+    int lines = windowLines;
+    if (validateInteger(&lines, parameters[PARM_LINES], &minimum, &maximum)) {
+      windowLines = lines;
     } else {
-      LogPrint(LOG_WARNING, "%s: %s", "invalid window height (line count)", parameters[PARM_HEIGHT]);
+      LogPrint(LOG_WARNING, "%s: %s", "invalid line count", parameters[PARM_LINES]);
     }
   }
 
   {
     static const int minimum = 1;
-    static const int maximum = MAX_WINDOW_WIDTH;
-    int width = windowWidth;
-    if (validateInteger(&width, parameters[PARM_WIDTH], &minimum, &maximum)) {
-      windowWidth = width;
+    static const int maximum = MAX_WINDOW_COLUMNS;
+    int columns = windowColumns;
+    if (validateInteger(&columns, parameters[PARM_COLUMNS], &minimum, &maximum)) {
+      windowColumns = columns;
     } else {
-      LogPrint(LOG_WARNING, "%s: %s", "invalid window width (column count)", parameters[PARM_WIDTH]);
+      LogPrint(LOG_WARNING, "%s: %s", "invalid column count", parameters[PARM_COLUMNS]);
     }
   }
 
@@ -180,11 +180,11 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
             refresh();
 #endif /* USE_CURSES */
 
-            brl->x = windowWidth;
-            brl->y = windowHeight; 
+            brl->x = windowColumns;
+            brl->y = windowLines; 
 
             LogPrint(LOG_INFO, "TTY: type=%s baud=%d size=%dx%d",
-                     ttyType, ttyBaud, windowWidth, windowHeight);
+                     ttyType, ttyBaud, windowColumns, windowLines);
             return 1;
 #ifdef USE_CURSES
           } else {
