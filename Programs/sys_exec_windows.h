@@ -18,7 +18,7 @@
 static int
 addWindowsCommandLineCharacter (char **buffer, int *size, int *length, char character) {
   if (*length == *size) {
-    char *newBuffer = realloc(*buffer, (*size = *size? *size<<1: 0X1));
+    char *newBuffer = realloc(*buffer, (*size = *size? *size<<1: 0X80));
     if (!newBuffer) {
       LogError("realloc");
       return 0;
