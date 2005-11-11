@@ -88,14 +88,14 @@ ensureSetting (
         } else if (strcasecmp(value, "off") == 0) {
           *setting = 0;
         } else if (!(option->flags & OPT_Extend)) {
-          LogPrint(LOG_ERR, gettext("invalid flag setting: %s"), value);
+          LogPrint(LOG_ERR, "%s: %s", gettext("invalid flag setting"), value);
           info->errorCount++;
         } else {
           int count;
           if (isInteger(&count, value) && (count >= 0)) {
             *setting = count;
           } else {
-            LogPrint(LOG_ERR, gettext("invalid counter setting: %s"), value);
+            LogPrint(LOG_ERR, "%s: %s", gettext("invalid counter setting"), value);
             info->errorCount++;
           }
         }
@@ -130,7 +130,8 @@ printHelp (
     if (option->argument) argumentWidth = MAX(argumentWidth, strlen(option->argument));
   }
 
-  fprintf(outputStream, gettext("Usage: %s"), programName);
+  fputs(gettext("Usage"), outputStream);
+  fprintf(outputStream, ": %s", programName);
   if (info->optionCount)
     fputs(" [", outputStream);
     fputs(gettext("option"), outputStream);
@@ -336,12 +337,12 @@ processCommandLine (
 #endif /* HAVE_GETOPT_LONG */
 
       case '?':
-        LogPrint(LOG_ERR, gettext("unknown option: -%c"), optopt);
+        LogPrint(LOG_ERR, "%s: -%c", gettext("unknown option"), optopt);
         info->errorCount++;
         break;
 
       case ':': /* An invalid option has been specified. */
-        LogPrint(LOG_ERR, gettext("missing operand: -%c"), optopt);
+        LogPrint(LOG_ERR, "%s: -%c", gettext("missing operand"), optopt);
         info->errorCount++;
         break;
 
@@ -477,17 +478,17 @@ processConfigurationLine (
           const char *operand = strtok(NULL, delimiters);
 
           if (!operand) {
-            LogPrint(LOG_ERR, gettext("operand not supplied for configuration directive: %s"), line);
+            LogPrint(LOG_ERR, "%s: %s", gettext("operand not supplied for configuration directive"), line);
             conf->info->errorCount++;
           } else if (strtok(NULL, delimiters)) {
             while (strtok(NULL, delimiters));
-            LogPrint(LOG_ERR, gettext("too many operands for configuration directive: %s"), line);
+            LogPrint(LOG_ERR, "%s: %s", gettext("too many operands for configuration directive"), line);
             conf->info->errorCount++;
           } else {
             char **setting = &conf->settings[optionIndex];
 
             if (*setting && !(option->argument && (option->flags & OPT_Extend))) {
-              LogPrint(LOG_ERR, gettext("configuration directive specified more than once: %s"), line);
+              LogPrint(LOG_ERR, "%s: %s", gettext("configuration directive specified more than once"), line);
               conf->info->errorCount++;
               free(*setting);
               *setting = NULL;
@@ -504,7 +505,7 @@ processConfigurationLine (
         }
       }
     }
-    LogPrint(LOG_ERR, gettext("unknown configuration directive: %s"), line);
+    LogPrint(LOG_ERR, "%s: %s", gettext("unknown configuration directive"), line);
     conf->info->errorCount++;
   }
   return 1;
@@ -544,8 +545,8 @@ processConfigurationFile (
     info->errorCount++;
   } else {
     int ok = optional && (errno == ENOENT);
-    LogPrint((ok? LOG_DEBUG: LOG_ERR),
-             gettext("cannot open configuration file: %s: %s"),
+    LogPrint((ok? LOG_DEBUG: LOG_ERR), "%s: %s: %s",
+             gettext("cannot open configuration file"),
              path, strerror(errno));
     if (ok) return 1;
     info->errorCount++;
