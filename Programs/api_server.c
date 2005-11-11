@@ -2473,13 +2473,18 @@ int api_start(BrailleDisplay *brl, char **parameters)
   pthread_mutex_init(&driverMutex,&mattr);
   pthread_mutex_init(&rawMutex,&mattr);
 
+  stackSize = MAX(PTHREAD_STACK_MIN, OUR_STACK_MIN);
   {
-    int size;
-    static const int minSize = PTHREAD_STACK_MIN;
-    if (*parameters[PARM_STACKSIZE] && validateInteger(&size, "stack size", parameters[PARM_STACKSIZE], &minSize, NULL))
-      stackSize = size;
-    else
-      stackSize = MAX(PTHREAD_STACK_MIN,OUR_STACK_MIN);
+    const char *operand = parameters[PARM_STACKSIZE];
+    if (*operand) {
+      int size;
+      static const int minSize = PTHREAD_STACK_MIN;
+      if (validateInteger(&size, operand, &minSize, NULL)) {
+        stackSize = size;
+      } else {
+        LogPrint(LOG_WARNING, "%s: %s", "invalid thread stack size", operand);
+      }
+    }
   }
 
   pthread_attr_init(&attr);

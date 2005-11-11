@@ -191,11 +191,13 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
   int ttyBaud = 57600;
   if (*parameters[PARM_DISPSIZE]) {
     int dsmin=20, dsmax=40;
-    validateInteger(&ds, "Size of braille display",parameters[PARM_DISPSIZE],&dsmin,&dsmax);
+    if (!validateInteger(&ds, parameters[PARM_DISPSIZE], &dsmin, &dsmax))
+      LogPrint(LOG_WARNING, "%s: %s", "invalid braille display size", parameters[PARM_DISPSIZE]);
   }
   if (*parameters[PARM_PROMVER]) {
     int pvmin=3, pvmax=6;
-    validateInteger(&promVersion, "PROM version",parameters[PARM_PROMVER],&pvmin,&pvmax);
+    if (!validateInteger(&promVersion, parameters[PARM_PROMVER], &pvmin, &pvmax))
+      LogPrint(LOG_WARNING, "%s: %s", "invalid PROM version", parameters[PARM_PROMVER]);
   }
   if (*parameters[PARM_BAUD]) {
     int baud;

@@ -639,7 +639,8 @@ brl_identify (void) {
 
 static int
 brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
-  validateYesNo(&debugPackets, "debug packets", parameters[PARM_DEBUGPACKETS]);
+  if (!validateYesNo(&debugPackets, parameters[PARM_DEBUGPACKETS]))
+    LogPrint(LOG_WARNING, "%s: %s", "invalid debug packets setting", parameters[PARM_DEBUGPACKETS]);
 
   if (isSerialDevice(&device)) {
     io = &serialOperations;
@@ -743,8 +744,10 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
                   int maximum = textCells / 2;
                   int minimum = -maximum;
                   int value;
-                  if (validateInteger(&value, "status cells specification", word, &minimum, &maximum)) {
+                  if (validateInteger(&value, word, &minimum, &maximum)) {
                     cells = value;
+                  } else {
+                    LogPrint(LOG_WARNING, "%s: %s", "invalid status cells specification", word);
                   }
                 }
 

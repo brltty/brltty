@@ -1344,9 +1344,14 @@ identifyTerminal (BrailleDisplay *brl) {
 
 static int
 brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
-  validateYesNo(&debugKeys, "debug keys flag", parameters[PARM_DEBUGKEYS]);
-  validateYesNo(&debugReads, "debug reads flag", parameters[PARM_DEBUGREADS]);
-  validateYesNo(&debugWrites, "debug writes flag", parameters[PARM_DEBUGWRITES]);
+  if (!validateYesNo(&debugKeys, parameters[PARM_DEBUGKEYS]))
+    LogPrint(LOG_WARNING, "%s: %s", "invalid debug keys setting", parameters[PARM_DEBUGKEYS]);
+
+  if (!validateYesNo(&debugReads, parameters[PARM_DEBUGREADS]))
+    LogPrint(LOG_WARNING, "%s: %s", "invalid debug reads setting", parameters[PARM_DEBUGREADS]);
+
+  if (!validateYesNo(&debugWrites, parameters[PARM_DEBUGWRITES]))
+    LogPrint(LOG_WARNING, "%s: %s", "invalid debug writes setting", parameters[PARM_DEBUGWRITES]);
 
 #ifdef ENABLE_PM_CONFIGURATION_FILE
   {

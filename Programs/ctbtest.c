@@ -142,7 +142,10 @@ main (int argc, char *argv[]) {
     outputWidth = 0X80;
   } else {
     static const int minimum = 1;
-    if (!validateInteger(&outputWidth, "output width", opt_outputWidth, &minimum, NULL)) exit(2);
+    if (!validateInteger(&outputWidth, opt_outputWidth, &minimum, NULL)) {
+      LogPrint(LOG_ERR, "%s: %s", "invalid output width", opt_outputWidth);
+      exit(2);
+    }
   }
   outputBuffer = NULL;
 

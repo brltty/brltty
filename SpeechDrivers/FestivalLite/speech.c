@@ -67,11 +67,11 @@ spk_open (char **parameters)
   voice = REGISTER_VOX(NULL);
 
   {
-    int pitch, minpitch = 50, maxpitch = 200;
-    if (!*parameters[PARM_pitch] ||
-        !validateInteger(&pitch, "pitch", parameters[PARM_pitch],
-                         &minpitch, &maxpitch))
-      pitch = 100;
+    int pitch = 100, minpitch = 50, maxpitch = 200;
+    if (*parameters[PARM_pitch])
+      if (!validateInteger(&pitch, parameters[PARM_pitch], &minpitch, &maxpitch))
+        LogPrint(LOG_WARNING, "%s: %s", "invalid pitch specification", parameters[PARM_pitch]);
+      pitch;
     feat_set_int(voice->features, "int_f0_target_mean", pitch);
   }
 

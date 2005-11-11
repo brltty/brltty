@@ -302,8 +302,8 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
     baudrate = BAUDRATE;
 
   if (*parameters[PARM_KBEMU])
-    validateYesNo(&kbemu, "keyboard emulation initial state",
-		  parameters[PARM_KBEMU]);
+    if (!validateYesNo(&kbemu, parameters[PARM_KBEMU]))
+      LogPrint(LOG_WARNING, "%s: %s", "invalid keyboard emulation setting", parameters[PARM_KBEMU]);
   kbemu = !!kbemu;
 
   {

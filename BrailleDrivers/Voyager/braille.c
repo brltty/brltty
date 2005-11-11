@@ -593,8 +593,10 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
           int maximum = textCells / 2;
           int minimum = -maximum;
           int value = cells;
-          if (validateInteger(&value, "status cells specification", word, &minimum, &maximum)) {
+          if (validateInteger(&value, word, &minimum, &maximum)) {
             cells = value;
+          } else {
+            LogPrint(LOG_WARNING, "%s: %s", "invalid status cells specification", word);
           }
         }
 
@@ -637,8 +639,8 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
 
             inputMode = 0;
             if (*parameters[PARM_INPUTMODE])
-              validateYesNo(&inputMode, "Allow braille input",
-                            parameters[PARM_INPUTMODE]);
+              if (!validateYesNo(&inputMode, parameters[PARM_INPUTMODE]))
+                LogPrint(LOG_WARNING, "%s: %s", "invalid input setting", parameters[PARM_INPUTMODE]);
 
             firstRead = 1;
             if (io->preparePort()) return 1;

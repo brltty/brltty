@@ -68,7 +68,8 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
   brlapi_settings_t settings;
   settings.hostName = parameters[PARM_HOSTNAME];
   settings.authKey = parameters[PARM_AUTHKEY];
-  validateInteger(&tty, "Tty to grab", parameters[PARM_TTY], &ttyMin, NULL);
+  if (!validateInteger(&tty, parameters[PARM_TTY], &ttyMin, NULL))
+    LogPrint(LOG_WARNING, "%s: %s", "invalid TTY", parameters[PARM_TTY]);
   CHECK((brlapi_initializeConnection(&settings, &settings)>=0), out);
   LogPrint(LOG_DEBUG, "Connected to %s using %s", settings.hostName, settings.authKey);
   CHECK((brlapi_getTty(tty, NULL)>=0), out0);

@@ -36,7 +36,8 @@ static HANDLE consoleInput = INVALID_HANDLE_VALUE;
 static int
 prepare_WindowsScreen (char **parameters) {
 #ifndef HAVE_ATTACHCONSOLE
-  validateYesNo(&root, "disable input simulation and output reading", parameters[PARM_ROOT]);
+  if (!validateYesNo(&root, parameters[PARM_ROOT]))
+    LogPrint(LOG_WARNING, "%s: %s", "invalid root setting", parameters[PARM_ROOT]);
 #endif /* HAVE_ATTACHCONSOLE */
   return 1;
 }

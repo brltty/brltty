@@ -93,8 +93,11 @@ spk_open (char **parameters) {
   if (*parameters[PARM_GENDER]) {
     const char *const choices[] = {"male", "female", "neuter", NULL};
     unsigned int choice;
-    if (validateChoice(&choice, "gender", parameters[PARM_GENDER], choices))
+    if (validateChoice(&choice, parameters[PARM_GENDER], choices)) {
       criteria.gender = (char *)choices[choice];
+    } else {
+      LogPrint(LOG_WARNING, "%s: %s", "invalid gender specification", parameters[PARM_GENDER]);
+    }
   }
 
   if (*parameters[PARM_LANGUAGE]) criteria.lang = parameters[PARM_LANGUAGE];
@@ -106,9 +109,11 @@ spk_open (char **parameters) {
     static const int minimumAge = 1;
     static const int maximumAge = 99;
     if ((younger = word[0] == '-') && word[1]) ++word;
-    if (validateInteger(&value, "age", word, &minimumAge, &maximumAge)) {
+    if (validateInteger(&value, word, &minimumAge, &maximumAge)) {
       if (younger) value = -value;
       criteria.age = value;
+    } else {
+      LogPrint(LOG_WARNING, "%s: %s", "invalid age specification", word);
     }
   }
 
@@ -141,9 +146,11 @@ spk_open (char **parameters) {
       float pitch = 0.0;
       static const float minimumPitch = -2.0;
       static const float maximumPitch = 2.0;
-      if (validateFloat(&pitch, "pitch shift", parameters[PARM_PITCH],
-                        &minimumPitch, &maximumPitch))
+      if (validateFloat(&pitch, parameters[PARM_PITCH], &minimumPitch, &maximumPitch)) {
         theta_set_pitch_shift(voice, pitch, NULL);
+      } else {
+        LogPrint(LOG_WARNING, "%s: %s", "invalid pitch shift specification", parameters[PARM_PITCH]);
+      }
     }
 
     return 1;

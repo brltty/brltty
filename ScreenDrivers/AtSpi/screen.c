@@ -221,7 +221,7 @@ prepare_AtSpiScreen (char **parameters) {
         const char *type = types[index];
         unsigned int choice;
 
-        if (validateChoice(&choice, "widget type", type, choices)) {
+        if (validateChoice(&choice, type, choices)) {
           int *flag = flags[choice];
           if ((flag == &typeAll) && (index > 0)) {
             LogPrint(LOG_WARNING, "widget type is mutually exclusive: %s", type);
@@ -230,6 +230,8 @@ prepare_AtSpiScreen (char **parameters) {
           } else {
             *flag = 1;
           }
+        } else {
+          LogPrint(LOG_WARNING, "%s: %s", "invalid widget type", type);
         }
       }
     }

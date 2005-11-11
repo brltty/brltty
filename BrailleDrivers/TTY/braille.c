@@ -134,18 +134,22 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
     static const int minimum = 1;
     static const int maximum = MAX_WINDOW_HEIGHT;
     int height = windowHeight;
-    if (validateInteger(&height, "window height (lines)",
-                        parameters[PARM_HEIGHT], &minimum, &maximum))
+    if (validateInteger(&height, parameters[PARM_HEIGHT], &minimum, &maximum)) {
       windowHeight = height;
+    } else {
+      LogPrint(LOG_WARNING, "%s: %s", "invalid window height (line count)", parameters[PARM_HEIGHT]);
+    }
   }
 
   {
     static const int minimum = 1;
     static const int maximum = MAX_WINDOW_WIDTH;
     int width = windowWidth;
-    if (validateInteger(&width, "window width (columns)",
-                        parameters[PARM_WIDTH], &minimum, &maximum))
+    if (validateInteger(&width, parameters[PARM_WIDTH], &minimum, &maximum)) {
       windowWidth = width;
+    } else {
+      LogPrint(LOG_WARNING, "%s: %s", "invalid window width (column count)", parameters[PARM_WIDTH]);
+    }
   }
 
 #ifdef HAVE_ICONV_H

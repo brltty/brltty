@@ -524,14 +524,20 @@ setVgaCharacterCount (int force) {
 
 static int
 prepare_LinuxScreen (char **parameters) {
-  validateYesNo(&debugApplicationCharacterMap, "debug application character map flag", parameters[PARM_DEBUGACM]);
-  validateYesNo(&debugScreenFontMap, "debug screen font map flag", parameters[PARM_DEBUGSFM]);
-  validateYesNo(&debugCharacterTranslationTable, "debug character translation table flag", parameters[PARM_DEBUGCTT]);
+  if (!validateYesNo(&debugApplicationCharacterMap, parameters[PARM_DEBUGACM]))
+    LogPrint(LOG_WARNING, "%s: %s", "invalid application character map debug setting", parameters[PARM_DEBUGACM]);
+
+  if (!validateYesNo(&debugScreenFontMap, parameters[PARM_DEBUGSFM]))
+    LogPrint(LOG_WARNING, "%s: %s", "invalid screen font map debug setting", parameters[PARM_DEBUGSFM]);
+
+  if (!validateYesNo(&debugCharacterTranslationTable, parameters[PARM_DEBUGCTT]))
+    LogPrint(LOG_WARNING, "%s: %s", "invalid character translation table debug setting", parameters[PARM_DEBUGCTT]);
+
   setApplicationCharacterMap = &determineApplicationCharacterMap;
   {
     static const char *choices[] = {"auto", "iso01", "vt100", "cp437", "user", NULL};
     unsigned int choice;
-    if (validateChoice(&choice, "character set", parameters[PARM_ACM], choices)) {
+    if (validateChoice(&choice, parameters[PARM_ACM], choices)) {
       if (choice) {
         static const unsigned short *maps[] = {iso01Map, vt100Map, cp437Map, NULL};
         const unsigned short *map = maps[choice-1];
@@ -543,6 +549,8 @@ prepare_LinuxScreen (char **parameters) {
           setApplicationCharacterMap = &getUserAcm;
         }
       }
+    } else {
+      LogPrint(LOG_WARNING, "%s: %s", "invalid application character map", parameters[PARM_ACM]);
     }
   }
   if (setScreenPath()) {

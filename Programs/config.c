@@ -1848,12 +1848,12 @@ background (void) {
 #endif /* background() */
 
 static int
-validateInterval (int *value, const char *description, const char *word) {
+validateInterval (int *value, const char *word) {
   if (!word || !*word) return 1;
 
   {
     static const int minimum = 1;
-    int ok = validateInteger(value, description, word, &minimum, NULL);
+    int ok = validateInteger(value, word, &minimum, NULL);
     if (ok) *value *= 10;
     return ok;
   }
@@ -1872,8 +1872,15 @@ startup (int argc, char *argv[]) {
     ++problemCount;
   }
 
-  if (!validateInterval(&updateInterval, gettext("update interval"), opt_updateInterval)) ++problemCount;
-  if (!validateInterval(&messageDelay, gettext("message delay"), opt_messageDelay)) ++problemCount;
+  if (!validateInterval(&updateInterval, opt_updateInterval)) {
+    LogPrint(LOG_ERR, "%s: %s", gettext("invalid update interval"), opt_updateInterval);
+    ++problemCount;
+  }
+
+  if (!validateInterval(&messageDelay, opt_messageDelay)) {
+    LogPrint(LOG_ERR, "%s: %s", gettext("invalid message delay"), opt_messageDelay);
+    ++problemCount;
+  }
 
   /* Set logging levels. */
   {

@@ -972,8 +972,11 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
     static const int minimum = 1;
     static const int maximum = MAXLINES;
     int value;
-    if (validateInteger(&value, "lines", parameters[PARM_LINES], &minimum, &maximum))
+    if (validateInteger(&value, parameters[PARM_LINES], &minimum, &maximum)) {
       lines=value;
+    } else {
+      LogPrint(LOG_WARNING, "%s: %s", "invalid line count", parameters[PARM_LINES]);
+    }
   }
 
   cols=40;
@@ -981,14 +984,20 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
     static const int minimum = 1;
     static const int maximum = MAXCOLS;
     int value;
-    if (validateInteger(&value, "cols", parameters[PARM_COLS], &minimum, &maximum))
+    if (validateInteger(&value, parameters[PARM_COLS], &minimum, &maximum)) {
       cols=value;
+    } else {
+      LogPrint(LOG_WARNING, "%s: %s", "invalid column count", parameters[PARM_COLS]);
+    }
   }
 
   if (*parameters[PARM_INPUT]) {
     unsigned int value;
-    if (validateFlag(&value, "input", parameters[PARM_INPUT], "on", "off"))
+    if (validateFlag(&value, parameters[PARM_INPUT], "on", "off")) {
       input = value;
+    } else {
+      LogPrint(LOG_WARNING, "%s: %s", "invalid input setting", parameters[PARM_INPUT]);
+    }
   }
 
   if (*parameters[PARM_TKPARMS]) {

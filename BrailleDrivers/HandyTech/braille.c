@@ -551,8 +551,8 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
           if (memcmp(response, HandyDescription, sizeof(HandyDescription)) == 0) {
             if (identifyModel(brl, response[sizeof(HandyDescription)])) {
               if (*parameters[PARM_INPUTMODE])
-                validateYesNo(&inputMode, "input mode",
-                              parameters[PARM_INPUTMODE]);
+                if (!validateYesNo(&inputMode, parameters[PARM_INPUTMODE]))
+                  LogPrint(LOG_WARNING, "%s: %s", "invalid input setting", parameters[PARM_INPUTMODE]);
 
               return 1;
             }

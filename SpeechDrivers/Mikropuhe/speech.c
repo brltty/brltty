@@ -418,10 +418,12 @@ spk_open (char **parameters) {
             int setting = 0;
             static const int minimum = -10;
             static const int maximum = 10;
-            if (validateInteger(&setting, "pitch", pitch, &minimum, &maximum)) {
+            if (validateInteger(&setting, pitch, &minimum, &maximum)) {
               char tag[0X100];
               snprintf(tag, sizeof(tag), "<pitch absmiddle=\"%d\"/>", setting);
               enqueueTag(tag);
+            } else {
+              LogPrint(LOG_WARNING, "%s: %s", "invalid pitch specification", pitch);
             }
           }
         }

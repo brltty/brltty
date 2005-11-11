@@ -388,11 +388,13 @@ adjustStatusCells (BrailleDisplay *brl, const char *parameter) {
   if (*parameter) {
     const int minimum = 0;
     const int maximum = MIN(BRL_MAX_STATUS_CELL_COUNT, brl->x-1);
-    if (validateInteger(&statusCells, "status cell count", parameter, &minimum, &maximum)) {
+    if (validateInteger(&statusCells, parameter, &minimum, &maximum)) {
       statusArea = dataArea;
       dataArea = statusArea + statusCells;
       brl->x -= statusCells;
       dataCells -= statusCells;
+    } else {
+      LogPrint(LOG_WARNING, "%s: %s", "invalid status cell count", parameter);
     }
   }
 }
