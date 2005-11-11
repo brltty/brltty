@@ -975,19 +975,21 @@ main (int argc, char *argv[]) {
 
 #ifdef INIT_PATH
   if ((getpid() == 1) || (strstr(argv[0], "linuxrc") != NULL)) {
-    fprintf(stderr, gettext("BRLTTY started as %s\n"), argv[0]);
+    fprintf(stderr, "%s %s %s\n",
+            PACKAGE_TITLE, gettext("started as"), argv[0]);
     fflush(stderr);
     switch (fork()) {
       case -1: /* failed */
-        fprintf(stderr, gettext("BRLTTY fork failed: %s\n"), strerror(errno));
+        fprintf(stderr, "%s %s: %s\n",
+                PACKAGE_TITLE, gettext("fork failed"), strerror(errno));
         fflush(stderr);
       default: /* parent */
-        fprintf(stderr, gettext("Executing INIT: %s\n"), INIT_PATH);
+        fprintf(stderr, "%s: %s\n", gettext("Executing INIT"), INIT_PATH);
         fflush(stderr);
       exec_init:
         execv(INIT_PATH, argv);
         /* execv() shouldn't return */
-        fprintf(stderr, gettext("INIT execution failed: %s\n"), strerror(errno));
+        fprintf(stderr, "%s: %s\n", gettext("INIT execution failed"), strerror(errno));
         fflush(stderr);
         exit(1);
       case 0: { /* child */
@@ -1925,7 +1927,7 @@ main (int argc, char *argv[]) {
 
                 default:
                   playTune(&tune_command_rejected);
-                  LogPrint(LOG_WARNING, gettext("unrecognized command: %04X"), command);
+                  LogPrint(LOG_WARNING, "%s: %04X", gettext("unrecognized command"), command);
               }
               break;
             }
