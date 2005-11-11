@@ -1921,8 +1921,13 @@ startup (int argc, char *argv[]) {
   atexit(exitTunes);
   suppressTuneDeviceOpenErrors();
 
-  LogPrint(LOG_NOTICE, "%s %s", PACKAGE_TITLE, PACKAGE_VERSION);
+  {
+    const char *prefix = setPrintPrefix(NULL);
+    LogPrint(LOG_NOTICE, "%s %s", PACKAGE_TITLE, PACKAGE_VERSION);
+    setPrintPrefix(prefix);
+  }
   LogPrint(LOG_INFO, "%s", COPYRIGHT);
+
   if (opt_version) {
 #ifdef ENABLE_API
     api_identify();
