@@ -169,7 +169,7 @@ exitLog (void) {
    */
   LogOpen(0);
   setPrintOff();
-  LogPrint(LOG_INFO, gettext("terminated."));
+  LogPrint(LOG_INFO, gettext("terminated"));
   LogClose();
 }
 
@@ -975,21 +975,20 @@ main (int argc, char *argv[]) {
 
 #ifdef INIT_PATH
   if ((getpid() == 1) || (strstr(argv[0], "linuxrc") != NULL)) {
-    fprintf(stderr, "%s %s %s\n",
-            PACKAGE_TITLE, gettext("started as"), argv[0]);
+    fprintf(stderr, gettext("%s started as %s\n"), PACKAGE_TITLE, argv[0]);
     fflush(stderr);
     switch (fork()) {
       case -1: /* failed */
-        fprintf(stderr, "%s %s: %s\n",
-                PACKAGE_TITLE, gettext("fork failed"), strerror(errno));
+        fprintf(stderr, gettext("Fork of %s failed: %s\n"),
+                PACKAGE_TITLE, strerror(errno));
         fflush(stderr);
       default: /* parent */
-        fprintf(stderr, "%s: %s\n", gettext("Executing INIT"), INIT_PATH);
+        fprintf(stderr, gettext("Executing %s (from %s)\n"), "INIT", INIT_PATH);
         fflush(stderr);
       exec_init:
         execv(INIT_PATH, argv);
         /* execv() shouldn't return */
-        fprintf(stderr, "%s: %s\n", gettext("INIT execution failed"), strerror(errno));
+        fprintf(stderr, gettext("Execution of %s failed: %s\n"), "INIT", strerror(errno));
         fflush(stderr);
         exit(1);
       case 0: { /* child */
@@ -1011,7 +1010,7 @@ main (int argc, char *argv[]) {
 
   /* Open the system log. */
   LogOpen(0);
-  LogPrint(LOG_INFO, gettext("starting."));
+  LogPrint(LOG_INFO, gettext("starting"));
   atexit(exitLog);
 
 #ifdef SIGPIPE
