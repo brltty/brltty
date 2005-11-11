@@ -132,12 +132,14 @@ choiceEnvironmentParameter (ECIHand eci, const char *description, const char *va
    int assume = 1;
    if (*value) {
       unsigned int setting;
-      if (validateChoice(&setting, description, value, choices)) {
+      if (validateChoice(&setting, value, choices)) {
 	 if (map) setting = map[setting];
          if (setEnvironmentParameter(eci, description, parameter, setting)) {
 	    ok = 1;
 	    assume = setting;
 	 }
+      } else {
+        LogPrint(LOG_WARNING, "invalid %s setting: %s", description, value);
       }
    }
    reportEnvironmentParameter(eci, description, parameter, assume, choices, map);
@@ -153,11 +155,13 @@ rangeEnvironmentParameter (ECIHand eci, const char *description, const char *val
    int assume = 1;
    if (*value) {
       int setting;
-      if (validateInteger(&setting, description, value, &minimum, &maximum)) {
+      if (validateInteger(&setting, value, &minimum, &maximum)) {
          if (setEnvironmentParameter(eci, description, parameter, setting)) {
 	    ok = 1;
 	    assume = setting;
 	 }
+      } else {
+        LogPrint(LOG_WARNING, "invalid %s setting: %s", description, value);
       }
    }
    reportEnvironmentParameter(eci, description, parameter, assume, NULL, NULL);
@@ -179,11 +183,13 @@ choiceVoiceParameter (ECIHand eci, const char *description, const char *value, E
    int ok = 0;
    if (*value) {
       unsigned int setting;
-      if (validateChoice(&setting, description, value, choices)) {
+      if (validateChoice(&setting, value, choices)) {
 	 if (map) setting = map[setting];
          if (setVoiceParameter(eci, description, parameter, setting)) {
 	    ok = 1;
 	 }
+      } else {
+        LogPrint(LOG_WARNING, "invalid %s setting: %s", description, value);
       }
    }
    reportVoiceParameter(eci, description, parameter, choices, map);
@@ -195,10 +201,12 @@ rangeVoiceParameter (ECIHand eci, const char *description, const char *value, EC
    int ok = 0;
    if (*value) {
       int setting;
-      if (validateInteger(&setting, description, value, &minimum, &maximum)) {
+      if (validateInteger(&setting, value, &minimum, &maximum)) {
          if (setVoiceParameter(eci, description, parameter, setting)) {
 	    ok = 1;
 	 }
+      } else {
+        LogPrint(LOG_WARNING, "invalid %s setting: %s", description, value);
       }
    }
    reportVoiceParameter(eci, description, parameter, NULL, NULL);
