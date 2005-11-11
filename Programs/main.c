@@ -226,7 +226,24 @@ testRoutingStatus (RoutingStatus ok) {
 
 static void
 awaitRoutingStatus (RoutingStatus ok) {
-  while (!testRoutingStatus(ok)) pause();
+#ifdef SIGCHLD
+  sigset_t newMask, oldMask;
+  sigemptyset(&newMask);
+  sigaddset(&newMask, SIGCHLD);
+  sigprocmask(SIG_BLOCK, &newMask, &oldMask);
+#endif /* SIGCHLD */
+
+  while (!testRoutingStatus(ok)) {
+#ifdef SIGCHLD
+    sigsuspend(&oldMask);
+#else /* SIGCHLD */
+    approximateDelay(100);
+#endif /* SIGCHLD */
+  }
+
+#ifdef SIGCHLD
+  sigprocmask(SIG_SETMASK, &oldMask, NULL);
+#endif /* SIGCHLD */
 }
 
 static void
