@@ -79,14 +79,14 @@ static const char *deviceNames[] = {"beeper", "pcm", "midi", "fm", NULL};
 
 #ifdef ENABLE_MIDI_SUPPORT
 static int
-validateInstrument (unsigned char *value, const char *argument) {
-  size_t argumentLength = strlen(argument);
+validateInstrument (unsigned char *value, const char *string) {
+  size_t stringLength = strlen(string);
   unsigned char instrument;
   for (instrument=0; instrument<midiInstrumentCount; ++instrument) {
     const char *component = midiInstrumentTable[instrument];
     size_t componentLeft = strlen(component);
-    const char *word = argument;
-    size_t wordLeft = argumentLength;
+    const char *word = string;
+    size_t wordLeft = stringLength;
     {
       const char *delimiter = memchr(component, '(', componentLeft);
       if (delimiter) componentLeft = delimiter - component;

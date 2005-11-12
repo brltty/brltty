@@ -630,51 +630,51 @@ rescaleInteger (int value, int from, int to) {
 }
 
 int
-isInteger (int *value, const char *word) {
-  if (*word) {
+isInteger (int *value, const char *string) {
+  if (*string) {
     char *end;
-    *value = strtol(word, &end, 0);
+    *value = strtol(string, &end, 0);
     if (!*end) return 1;
   }
   return 0;
 }
 
 int
-isFloat (float *value, const char *word) {
-  if (*word) {
+isFloat (float *value, const char *string) {
+  if (*string) {
     char *end;
-    *value = strtod(word, &end);
+    *value = strtod(string, &end);
     if (!*end) return 1;
   }
   return 0;
 }
 
 int
-validateInteger (int *value, const char *word, const int *minimum, const int *maximum) {
-  if (*word && !isInteger(value, word)) return 0;
+validateInteger (int *value, const char *string, const int *minimum, const int *maximum) {
+  if (*string && !isInteger(value, string)) return 0;
   if (minimum && (*value < *minimum)) return 0;
   if (maximum && (*value > *maximum)) return 0;
   return 1;
 }
 
 int
-validateFloat (float *value, const char *word, const float *minimum, const float *maximum) {
-  if (*word && !isFloat(value, word)) return 0;
+validateFloat (float *value, const char *string, const float *minimum, const float *maximum) {
+  if (*string && !isFloat(value, string)) return 0;
   if (minimum && (*value < *minimum)) return 0;
   if (maximum && (*value > *maximum)) return 0;
   return 1;
 }
 
 int
-validateChoice (unsigned int *value, const char *word, const char *const *choices) {
-  int length = strlen(word);
+validateChoice (unsigned int *value, const char *string, const char *const *choices) {
+  int length = strlen(string);
   *value = 0;
   if (!length) return 1;
 
   {
     int index = 0;
     while (choices[index]) {
-      if (strncasecmp(word, choices[index], length) == 0) {
+      if (strncasecmp(string, choices[index], length) == 0) {
         *value = index;
         return 1;
       }
@@ -686,17 +686,17 @@ validateChoice (unsigned int *value, const char *word, const char *const *choice
 }
 
 int
-validateFlag (unsigned int *value, const char *word, const char *on, const char *off) {
+validateFlag (unsigned int *value, const char *string, const char *on, const char *off) {
   const char *choices[] = {off, on, NULL};
-  return validateChoice(value, word, choices);
+  return validateChoice(value, string, choices);
 }
 
 int
-validateOnOff (unsigned int *value, const char *word) {
-  return validateFlag(value, word, "on", "off");
+validateOnOff (unsigned int *value, const char *string) {
+  return validateFlag(value, string, "on", "off");
 }
 
 int
-validateYesNo (unsigned int *value, const char *word) {
-  return validateFlag(value, word, "yes", "no");
+validateYesNo (unsigned int *value, const char *string) {
+  return validateFlag(value, string, "yes", "no");
 }
