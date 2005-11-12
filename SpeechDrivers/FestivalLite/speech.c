@@ -71,7 +71,6 @@ spk_open (char **parameters)
     if (*parameters[PARM_pitch])
       if (!validateInteger(&pitch, parameters[PARM_pitch], &minpitch, &maxpitch))
         LogPrint(LOG_WARNING, "%s: %s", "invalid pitch specification", parameters[PARM_pitch]);
-      pitch;
     feat_set_int(voice->features, "int_f0_target_mean", pitch);
   }
 
