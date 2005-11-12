@@ -99,16 +99,16 @@ error:
 
 static void
 insertCursorKey (CursorRoutingData *crd, ScreenKey key) {
-#ifndef __MINGW32__
+#ifdef SIGCHLD
   sigset_t oldMask;
   sigprocmask(SIG_BLOCK, &crd->signalMask, &oldMask);
-#endif /* __MINGW32__ */
+#endif /* SIGCHLD */
 
   insertKey(key);
 
-#ifndef __MINGW32__
+#ifdef SIGCHLD
   sigprocmask(SIG_SETMASK, &oldMask, NULL);
-#endif /* __MINGW32__ */
+#endif /* SIGCHLD */
 }
 
 static int
@@ -248,12 +248,12 @@ static RoutingStatus
 doCursorRouting (int column, int row, int screen) {
   CursorRoutingData crd;
 
-#ifndef __MINGW32__
+#ifdef SIGCHLD
   /* Set up the signal mask. */
   sigemptyset(&crd.signalMask);
   sigaddset(&crd.signalMask, SIGUSR1);
   sigprocmask(SIG_UNBLOCK, &crd.signalMask, NULL);
-#endif /* __MINGW32__ */
+#endif /* SIGCHLD */
 
   /* initialize the routing data structure */
   crd.screenNumber = screen;
@@ -283,16 +283,13 @@ doCursorRouting (int column, int row, int screen) {
 
 int
 startCursorRouting (int column, int row, int screen) {
-#ifdef __MINGW32__
-  routingStatus = doCursorRouting(column, row, screen);
-  return 1;
-#else /* __MINGW32__ */
+#ifdef SIGCHLD
   int started = 0;
   sigset_t newMask, oldMask;
 
   sigemptyset(&newMask);
   sigaddset(&newMask, SIGCHLD);
-  sigprocmask(SIG_BLOCK, &newMask, &oldMask);	/* block SIGUSR1 */
+  sigprocmask(SIG_BLOCK, &newMask, &oldMask);
 
   /*
    * First, we must check if a subprocess is already running. 
@@ -331,5 +328,8 @@ startCursorRouting (int column, int row, int screen) {
 
   sigprocmask(SIG_SETMASK, &oldMask, NULL); /* unblock SIGCHLD */
   return started;
-#endif /* __MINGW32__ */
+#else /* SIGCHLD */
+  routingStatus = doCursorRouting(column, row, screen);
+  return 1;
+#endif /* SIGCHLD */
 }
