@@ -34,13 +34,14 @@ static int opt_showDots;
 static int opt_showIdentifier;
 static int opt_showName;
 static int opt_showSize;
+static int opt_showKeyCodes;
 
 BEGIN_OPTION_TABLE
   {"identifier", NULL, 'i', 0, 0,
    &opt_showIdentifier, NULL,
    "Show the driver's identifier."},
 
-  {"brlapi-key", "file", 'k', 0, 0,
+  {"brlapi-key", "file", 'K', 0, 0,
    &settings.authKey, NULL,
    "Path to file containing BrlAPI's authorization key."},
 
@@ -56,13 +57,17 @@ BEGIN_OPTION_TABLE
    &opt_showName, NULL,
    "Show the driver's name."},
 
-  {"brlapi-server", "[host][:port]", 's', 0, 0,
+  {"brlapi-server", "[host][:port]", 'S', 0, 0,
    &settings.hostName, NULL,
    "Host name (or address) and port of the BrlAPI server."},
 
   {"window", NULL, 'w', 0, 0,
    &opt_showSize, NULL,
    "Show the braille window's size."},
+
+  {"keycodes", NULL, 'k', 0, 0,
+   &opt_showKeyCodes, NULL,
+   "Show key codes."}, 
 END_OPTION_TABLE
 
 void showDisplaySize(void)
@@ -153,7 +158,7 @@ void enterLearnMode(void)
   fprintf(stderr,"Entering learn mode\n");
   if (brlapi_getTty(-1, NULL)<0) {
     brlapi_perror("getTty");
-    exit(1);
+    return;
   }
 
   if (brlapi_writeText(0, "command learn mode")<0) {
@@ -166,6 +171,40 @@ void enterLearnMode(void)
     brlapi_writeText(0, buf);
     fprintf(stderr, "%s\n", buf);
     if (cmd==BRL_CMD_LEARN) return;
+  }
+  brlapi_perror("brlapi_readKey");
+}
+
+void showKeyCodes(void)
+{
+  int res;
+  brl_keycode_t cmd;
+  char buf[0X100];
+
+  fprintf(stderr,"Entering learn mode\n");
+  if (brlapi_getDriverName(buf, sizeof(buf))==-1) {
+    brlapi_perror("getDriverName");
+    return;
+  }
+  if (brlapi_getTty(-1, buf)<0) {
+    brlapi_perror("getTty");
+    return;
+  }
+
+  if (brlapi_unignoreKeyRange(0, BRL_KEYCODE_MAX)==-1) {
+    brlapi_perror("unignoreKeyRange");
+    return;
+  }
+
+  if (brlapi_writeText(0, "show key codes")<0) {
+    brlapi_perror("brlapi_writeText");
+    exit(1);
+  }
+
+  while ((res = brlapi_readKey(1, &cmd)) != -1) {
+    sprintf(buf, "0x%x (%d)",cmd, cmd);
+    brlapi_writeText(0, buf);
+    fprintf(stderr, "%s\n", buf);
   }
   brlapi_perror("brlapi_readKey");
 }
@@ -204,6 +243,10 @@ int main(int argc, char *argv[])
 
     if (opt_learnMode) {
       enterLearnMode();
+    }
+
+    if (opt_showKeyCodes) {
+      showKeyCodes();
     }
 
     brlapi_closeConnection();
