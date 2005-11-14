@@ -301,7 +301,6 @@ static void
 parseParameters (
   char **values,
   const char *const *names,
-  const char *description,
   const char *qualifier,
   const char *parameters
 ) {
@@ -317,12 +316,10 @@ parseParameters (
       if (*name) {
         char *value = strchr(name, '=');
         if (!value) {
-          LogPrint(LOG_ERR, gettext("missing %s parameter value: %s"),
-                   description, name);
+          LogPrint(LOG_ERR, "%s: %s", gettext("missing parameter value"), name);
         } else if (value == name) {
         noName:
-          LogPrint(LOG_ERR, gettext("missing %s parameter name: %s"),
-                   description, name);
+          LogPrint(LOG_ERR, "%s: %s", gettext("missing parameter name"), name);
         } else {
           int nameLength = value++ - name;
           int eligible = 1;
@@ -334,8 +331,7 @@ parseParameters (
               int nameAdjustment = qualifierLength + 1;
               eligible = 0;
               if (!qualifierLength) {
-                LogPrint(LOG_ERR, gettext("missing %s code: %s"),
-                         description, name);
+                LogPrint(LOG_ERR, "%s: %s", gettext("missing parameter qualifier"), name);
               } else if (!(nameLength -= nameAdjustment)) {
                 goto noName;
               } else if ((qualifierLength == strlen(qualifier)) &&
@@ -358,7 +354,7 @@ parseParameters (
             }
 
             if (!names[index]) {
-              LogPrint(LOG_ERR, gettext("unsupported %s parameter: %s"), description, name);
+              LogPrint(LOG_ERR, "%s: %s", gettext("unsupported parameter"), name);
             }
           }
         }
@@ -375,7 +371,6 @@ parseParameters (
 static char **
 processParameters (
   const char *const *names,
-  const char *description,
   const char *qualifier,
   const char *parameters
 ) {
@@ -394,7 +389,7 @@ processParameters (
     while (count--) values[count] = strdupWrapper("");
   }
 
-  parseParameters(values, names, description, qualifier, parameters);
+  parseParameters(values, names, qualifier, parameters);
   return values;
 }
 
@@ -402,7 +397,7 @@ static void
 logParameters (const char *const *names, char **values, char *description) {
   if (names && values) {
     while (*names) {
-      LogPrint(LOG_INFO, gettext("%s Parameter: %s=%s"), description, *names, *values);
+      LogPrint(LOG_INFO, "%s: %s=%s", description, *names, *values);
       ++names;
       ++values;
     }
@@ -410,29 +405,27 @@ logParameters (const char *const *names, char **values, char *description) {
 }
 
 static int
-replaceTranslationTable (TranslationTable table, const char *file, const char *type) {
+replaceTranslationTable (TranslationTable table, const char *file) {
   int ok = 0;
   char *path = makePath(opt_tablesDirectory, file);
   if (path) {
-    if (loadTranslationTable(path, NULL, table, 0)) {
-      ok = 1;
-    }
+    if (loadTranslationTable(path, NULL, table, 0)) ok = 1;
     free(path);
   }
-  if (!ok) LogPrint(LOG_ERR, gettext("cannot load %s table: %s"), type, file);
+  if (!ok) LogPrint(LOG_ERR, "%s: %s", gettext("cannot load translation table"), file);
   return ok;
 }
 
 static int
 replaceTextTable (const char *file) {
-  if (!replaceTranslationTable(textTable, file, gettext("text"))) return 0;
+  if (!replaceTranslationTable(textTable, file)) return 0;
   makeUntextTable();
   return 1;
 }
 
 static int
 replaceAttributesTable (const char *file) {
-  return replaceTranslationTable(attributesTable, file, gettext("attributes"));
+  return replaceTranslationTable(attributesTable, file);
 }
 
 int
@@ -463,7 +456,7 @@ loadContractionTable (const char *file) {
     LogPrint(LOG_DEBUG, "compiling contraction table: %s", file);
     if (path) {
       if (!(table = compileContractionTable(path))) {
-        LogPrint(LOG_ERR, gettext("cannot compile contraction table: %s"), path);
+        LogPrint(LOG_ERR, "%s: %s", gettext("cannot compile contraction table"), path);
       }
       free(path);
     }
@@ -520,70 +513,66 @@ loadPreferences (int change) {
   if (fd != -1) {
     Preferences newPreferences;
     int length = read(fd, &newPreferences, sizeof(newPreferences));
-    if (length >= 40) {
-      if ((newPreferences.magic[0] == (PREFS_MAGIC_NUMBER & 0XFF)) &&
-          (newPreferences.magic[1] == (PREFS_MAGIC_NUMBER >> 8))) {
-        prefs = newPreferences;
-        ok = 1;
-
-        if (prefs.version == 0) {
-          prefs.version++;
-          prefs.pcmVolume = DEFAULT_PCM_VOLUME;
-          prefs.midiVolume = DEFAULT_MIDI_VOLUME;
-          prefs.fmVolume = DEFAULT_FM_VOLUME;
-        }
-
-        if (prefs.version == 1) {
-          prefs.version++;
-          prefs.sayLineMode = DEFAULT_SAY_LINE_MODE;
-          prefs.autospeak = DEFAULT_AUTOSPEAK;
-        }
-
-        if (prefs.version == 2) {
-          prefs.version++;
-          prefs.autorepeat = DEFAULT_AUTOREPEAT;
-          prefs.autorepeatDelay = DEFAULT_AUTOREPEAT_DELAY;
-          prefs.autorepeatInterval = DEFAULT_AUTOREPEAT_INTERVAL;
-
-          prefs.cursorVisibleTime *= 4;
-          prefs.cursorInvisibleTime *= 4;
-          prefs.attributesVisibleTime *= 4;
-          prefs.attributesInvisibleTime *= 4;
-          prefs.capitalsVisibleTime *= 4;
-          prefs.capitalsInvisibleTime *= 4;
-        }
-
-        if (length == 40) {
-          length++;
-          prefs.speechRate = SPK_DEFAULT_RATE;
-        }
-
-        if (length == 41) {
-          length++;
-          prefs.speechVolume = SPK_DEFAULT_VOLUME;
-        }
-
-        if (length == 42) {
-          length++;
-          prefs.brailleFirmness = DEFAULT_BRAILLE_FIRMNESS;
-        }
-
-        if (change) changedPreferences();
-      } else
-        LogPrint(LOG_ERR, gettext("invalid preferences file: %s"), preferencesFile);
-    } else if (length == -1) {
-      LogPrint(LOG_ERR, gettext("cannot read preferences file: %s: %s"),
-               preferencesFile, strerror(errno));
+    if (length == -1) {
+      LogPrint(LOG_ERR, "%s: %s: %s",
+               gettext("cannot read preferences file"), preferencesFile, strerror(errno));
+    } else if ((length < 40) ||
+               (newPreferences.magic[0] != (PREFS_MAGIC_NUMBER & 0XFF)) ||
+               (newPreferences.magic[1] != (PREFS_MAGIC_NUMBER >> 8))) {
+      LogPrint(LOG_ERR, "%s: %s", gettext("invalid preferences file"), preferencesFile);
     } else {
-      long int actualSize = sizeof(newPreferences);
-      LogPrint(LOG_ERR, gettext("preferences file '%s' has incorrect size %d (should be %ld)."),
-               preferencesFile, length, actualSize);
+      prefs = newPreferences;
+      ok = 1;
+
+      if (prefs.version == 0) {
+        prefs.version++;
+        prefs.pcmVolume = DEFAULT_PCM_VOLUME;
+        prefs.midiVolume = DEFAULT_MIDI_VOLUME;
+        prefs.fmVolume = DEFAULT_FM_VOLUME;
+      }
+
+      if (prefs.version == 1) {
+        prefs.version++;
+        prefs.sayLineMode = DEFAULT_SAY_LINE_MODE;
+        prefs.autospeak = DEFAULT_AUTOSPEAK;
+      }
+
+      if (prefs.version == 2) {
+        prefs.version++;
+        prefs.autorepeat = DEFAULT_AUTOREPEAT;
+        prefs.autorepeatDelay = DEFAULT_AUTOREPEAT_DELAY;
+        prefs.autorepeatInterval = DEFAULT_AUTOREPEAT_INTERVAL;
+
+        prefs.cursorVisibleTime *= 4;
+        prefs.cursorInvisibleTime *= 4;
+        prefs.attributesVisibleTime *= 4;
+        prefs.attributesInvisibleTime *= 4;
+        prefs.capitalsVisibleTime *= 4;
+        prefs.capitalsInvisibleTime *= 4;
+      }
+
+      if (length == 40) {
+        length++;
+        prefs.speechRate = SPK_DEFAULT_RATE;
+      }
+
+      if (length == 41) {
+        length++;
+        prefs.speechVolume = SPK_DEFAULT_VOLUME;
+      }
+
+      if (length == 42) {
+        length++;
+        prefs.brailleFirmness = DEFAULT_BRAILLE_FIRMNESS;
+      }
+
+      if (change) changedPreferences();
     }
     close(fd);
-  } else
-    LogPrint((errno==ENOENT? LOG_DEBUG: LOG_ERR),
-             gettext("cannot open preferences file: %s: %s"),
-             preferencesFile, strerror(errno));
+  } else {
+    LogPrint((errno==ENOENT? LOG_DEBUG: LOG_ERR), "%s: %s: %s",
+             gettext("cannot open preferences file"), preferencesFile, strerror(errno));
+  }
   return ok;
 }
 
@@ -654,24 +643,20 @@ savePreferences (void) {
   int ok = 0;
   int fd = open(preferencesFile, O_WRONLY | O_CREAT | O_TRUNC);
   if (fd != -1) {
-#ifdef HAVE_FCHMOD
-    fchmod(fd, S_IRUSR | S_IWUSR);
-#else /* HAVE_FCHMOD */
-    chmod(preferencesFile, S_IRUSR | S_IWUSR);
-#endif /* HAVE_FCHMOD */
-    if (write(fd, &prefs, sizeof(prefs)) == sizeof(prefs)) {
+    int length = write(fd, &prefs, sizeof(prefs));
+    if (length == sizeof(prefs)) {
       ok = 1;
     } else {
-      LogPrint(LOG_ERR, gettext("cannot write to preferences file: %s: %s"),
-               preferencesFile, strerror(errno));
+      if (length != -1) errno = ENODATA;
+      LogPrint(LOG_ERR, "%s: %s: %s",
+               gettext("cannot write to preferences file"), preferencesFile, strerror(errno));
     }
     close(fd);
   } else {
-    LogPrint(LOG_ERR, gettext("cannot open preferences file: %s: %s"),
-             preferencesFile, strerror(errno));
+    LogPrint(LOG_ERR, "%s: %s: %s",
+             gettext("cannot open preferences file"), preferencesFile, strerror(errno));
   }
-  if (!ok)
-    message(gettext("not saved"), 0);
+  if (!ok) message(gettext("not saved"), 0);
   return ok;
 }
 
@@ -804,15 +789,13 @@ globBegin (GlobData *data) {
 #endif /* HAVE_GLOB_H */
 
 #ifdef HAVE_FCHDIR
-        if (fchdir(originalDirectory) == -1) {
+        if (fchdir(originalDirectory) == -1) LogError("fchdir");
 #else /* HAVE_FCHDIR */
-        if (chdir(originalDirectory) == -1) {
+        if (chdir(originalDirectory) == -1) LogError("chdir");
 #endif /* HAVE_FCHDIR */
-          LogError(gettext("working directory restore"));
-        }
       } else {
-        LogPrint(LOG_ERR, gettext("cannot set working directory: %s: %s"),
-                 data->directory, strerror(errno));
+        LogPrint(LOG_ERR, "%s: %s: %s",
+                 gettext("cannot set working directory"), data->directory, strerror(errno));
       }
 
 #ifdef HAVE_FCHDIR
@@ -822,9 +805,10 @@ globBegin (GlobData *data) {
 #endif /* HAVE_FCHDIR */
     } else {
 #ifdef HAVE_FCHDIR
-      LogError(gettext("working directory open"));
+      LogPrint(LOG_ERR, "%s: %s",
+               gettext("cannot open working directory"), strerror(errno));
 #else /* HAVE_FCHDIR */
-      LogError(gettext("working directory determination"));
+      LogPrint(LOG_ERR, "%s", gettext("cannot determine working directory"));
 #endif /* HAVE_FCHDIR */
     }
   }
@@ -870,7 +854,7 @@ globChanged (GlobData *data) {
     free(data->current);
     return data->current = path;
   } else {
-    LogError(gettext("memory allocation"));
+    LogError("strdup");
   }
   return NULL;
 }
@@ -1372,13 +1356,12 @@ openBrailleDriver (void) {
     if (allocateBrailleBuffer(&brl)) {
       brailleOpened = 1;
       return 1;
-    } else {
-      LogPrint(LOG_DEBUG, gettext("braille buffer allocation failed."));
     }
 
     braille->close(&brl);
   } else {
-    LogPrint(LOG_DEBUG, gettext("braille driver initialization failed: %s -> %s"),
+    LogPrint(LOG_DEBUG, "%s: %s -> %s",
+             gettext("braille driver initialization failed"),
              braille->code, brailleDevice);
   }
 
@@ -1453,7 +1436,7 @@ activateBrailleDriver (int verify) {
 #endif /* ENABLE_BLUETOOTH_SUPPORT */
 
       {
-        LogPrint(LOG_WARNING, gettext("braille display autodetection not supported for device '%s'."), dev);
+        LogPrint(LOG_WARNING, gettext("braille display autodetection is not supported for device '%s'."), dev);
         goto nextDevice;
       }
       LogPrint(LOG_DEBUG, "performing %s braille display autodetection.", type);
@@ -1465,7 +1448,6 @@ activateBrailleDriver (int verify) {
 
         if ((braille = loadBrailleDriver(*code, &brailleObject, opt_libraryDirectory))) {
           brailleParameters = processParameters(braille->parameters,
-                                                gettext("braille driver"),
                                                 braille->code,
                                                 opt_brailleParameters);
           if (brailleParameters) {
@@ -1486,23 +1468,23 @@ activateBrailleDriver (int verify) {
             }
 
             if (opened) {
-              LogPrint(LOG_INFO, gettext("Braille Driver: %s [%s] (compiled on %s at %s)"),
-                       braille->code, braille->name,
-                       braille->date, braille->time);
+              LogPrint(LOG_INFO, "%s: %s [%s]",
+                       gettext("Braille Driver"), braille->code, braille->name);
               braille->identify();
-              logParameters(braille->parameters, brailleParameters, gettext("Braille"));
-              LogPrint(LOG_INFO, gettext("Braille Device: %s"), brailleDevice);
+              logParameters(braille->parameters, brailleParameters,
+                            gettext("Braille Parameter"));
+              LogPrint(LOG_INFO, "%s: %s", gettext("Braille Device"), brailleDevice);
 
               /* Initialize the braille driver's help screen. */
-              LogPrint(LOG_INFO, gettext("Help File: %s"),
+              LogPrint(LOG_INFO, "%s: %s", gettext("Help File"),
                        braille->helpFile? braille->helpFile: gettext("none"));
               {
                 char *path = makePath(opt_dataDirectory, braille->helpFile);
                 if (path) {
                   if (verify || openHelpScreen(path)) {
-                    LogPrint(LOG_INFO, gettext("Help Page: %s[%d]"), path, getHelpPageNumber());
+                    LogPrint(LOG_INFO, "%s: %s[%d]", gettext("Help Page"), path, getHelpPageNumber());
                   } else {
-                    LogPrint(LOG_WARNING, gettext("cannot open help file: %s"), path);
+                    LogPrint(LOG_WARNING, "%s: %s", gettext("cannot open help file"), path);
                   }
                   free(path);
                 }
@@ -1516,7 +1498,7 @@ activateBrailleDriver (int verify) {
                 sprintf(path, "%s%s%s", part1, part2, part3);
                 preferencesFile = path;
               }
-              LogPrint(LOG_INFO, gettext("Preferences File: %s"), preferencesFile);
+              LogPrint(LOG_INFO, "%s: %s", gettext("Preferences File"), preferencesFile);
 
               return 1;
             }
@@ -1530,7 +1512,7 @@ activateBrailleDriver (int verify) {
             brailleObject = NULL;
           }
         } else {
-          LogPrint(LOG_ERR, gettext("braille driver not loadable: %s"), *code);
+          LogPrint(LOG_ERR, "%s: %s", gettext("braille driver not loadable"), *code);
         }
         braille = &noBraille;
       }
@@ -1607,14 +1589,14 @@ stopBrailleDriver (void) {
 void
 restartBrailleDriver (void) {
   stopBrailleDriver();
-  LogPrint(LOG_INFO, gettext("reinitializing braille driver."));
+  LogPrint(LOG_INFO, gettext("reinitializing braille driver"));
   startBrailleDriver();
 }
 
 static void
 exitBrailleDriver (void) {
   clearStatusCells(&brl);
-  message(gettext("BRLTTY terminated."), MSG_NODELAY|MSG_SILENT);
+  message(gettext("BRLTTY terminated"), MSG_NODELAY|MSG_SILENT);
   stopBrailleDriver();
 }
 
@@ -1677,7 +1659,6 @@ activateSpeechDriver (int verify) {
 
       if ((speech = loadSpeechDriver(*code, &speechObject, opt_libraryDirectory))) {
         speechParameters = processParameters(speech->parameters,
-                                             gettext("speech driver"),
                                              speech->code,
                                              opt_speechParameters);
         if (speechParameters) {
@@ -1694,11 +1675,11 @@ activateSpeechDriver (int verify) {
           }
 
           if (opened) {
-            LogPrint(LOG_INFO, gettext("Speech Driver: %s [%s] (compiled on %s at %s)"),
-                     speech->code, speech->name,
-                     speech->date, speech->time);
+            LogPrint(LOG_INFO, "%s: %s [%s]",
+                     gettext("Speech Driver"), speech->code, speech->name);
             speech->identify();
-            logParameters(speech->parameters, speechParameters, gettext("Speech"));
+            logParameters(speech->parameters, speechParameters,
+                          gettext("Speech Parameter"));
 
             return 1;
           }
@@ -1712,7 +1693,7 @@ activateSpeechDriver (int verify) {
           speechObject = NULL;
         }
       } else {
-        LogPrint(LOG_ERR, gettext("speech driver not loadable: %s"), *code);
+        LogPrint(LOG_ERR, "%s: %s", gettext("speech driver not loadable"), *code);
       }
       speech = &noSpeech;
     }
@@ -1760,7 +1741,7 @@ stopSpeechDriver (void) {
 void
 restartSpeechDriver (void) {
   stopSpeechDriver();
-  LogPrint(LOG_INFO, gettext("reinitializing speech driver."));
+  LogPrint(LOG_INFO, gettext("reinitializing speech driver"));
   startSpeechDriver();
 }
 
@@ -1810,17 +1791,17 @@ background (void) {
   }
   snprintf(name, sizeof(name), BACKGROUND_EVENT_PREFIX "%8lx", processinfo.dwProcessId);
   if (!(event = CreateEvent(NULL, TRUE, FALSE, name))) {
-    LogWindowsError(gettext("background synchronization event creation"));
+    LogWindowsError("CreateEvent");
     exit(11);
   }
   /* wait at most for 100ms, then check whether it's still alive */
   while ((res = WaitForSingleObject(event, 100)) != WAIT_OBJECT_0) {
     if (res == WAIT_FAILED) {
-      LogWindowsError(gettext("background synchronization event wait"));
+      LogWindowsError("WaitForSingleObject");
       exit(12);
     }
     if (!GetExitCodeProcess(processinfo.hProcess, &res)) {
-      LogWindowsError(gettext("process result retrieval"));
+      LogWindowsError("GetExitCodeProcess");
       exit(13);
     }
     if (res != STILL_ACTIVE)
@@ -1843,7 +1824,7 @@ background (void) {
 
   switch (child = fork()) {
     case -1: /* error */
-      LogPrint(LOG_CRIT, gettext("process creation error: %s"), strerror(errno));
+      LogError("fork");
       exit(10);
 
     case 0: /* child */
@@ -1854,7 +1835,7 @@ background (void) {
         int status;
         if (waitpid(child, &status, 0) == -1) {
           if (errno == EINTR) continue;
-          LogPrint(LOG_CRIT, gettext("waitpid error: %s"), strerror(errno));
+          LogError("waitpid");
           _exit(11);
         }
 
@@ -1871,12 +1852,12 @@ background (void) {
 #endif /* background() */
 
 static int
-validateInterval (int *value, const char *word) {
-  if (!word || !*word) return 1;
+validateInterval (int *value, const char *string) {
+  if (!string || !*string) return 1;
 
   {
     static const int minimum = 1;
-    int ok = validateInteger(value, word, &minimum, NULL);
+    int ok = validateInteger(value, string, &minimum, NULL);
     if (ok) *value *= 10;
     return ok;
   }
@@ -1891,7 +1872,7 @@ startup (int argc, char *argv[]) {
                                     &opt_configurationFile,
                                     NULL);
   if (argc) {
-    LogPrint(LOG_ERR, gettext("excess parameter: %s"), argv[0]);
+    LogPrint(LOG_ERR, "%s: %s", gettext("excess argument"), argv[0]);
     ++problemCount;
   }
 
@@ -1936,7 +1917,7 @@ startup (int argc, char *argv[]) {
         }
       }
 
-      LogPrint(LOG_ERR, gettext("invalid log level: %s"), opt_logLevel);
+      LogPrint(LOG_ERR, "%s: %s", gettext("invalid log level"), opt_logLevel);
       ++problemCount;
     }
   setLevel:
@@ -2120,7 +2101,7 @@ startup (int argc, char *argv[]) {
                             FILE_SHARE_READ|FILE_SHARE_WRITE,
                             NULL, OPEN_EXISTING, 0, NULL);
       if (!h) {
-        LogWindowsError(gettext("NUL device open"));
+        LogWindowsError("NUL");
       } else {
         SetStdHandle(STD_INPUT_HANDLE, h);
         SetStdHandle(STD_OUTPUT_HANDLE, h);
@@ -2139,7 +2120,7 @@ startup (int argc, char *argv[]) {
       HANDLE event;
       snprintf(name, sizeof(name), BACKGROUND_EVENT_PREFIX "%8lx", GetCurrentProcessId());
       if (!(event = CreateEvent(NULL, TRUE, FALSE, name))) {
-        LogWindowsError(gettext("background synchronization event creation"));
+        LogWindowsError("CreateEvent");
       } else {
         SetEvent(event);
       }
@@ -2169,10 +2150,10 @@ startup (int argc, char *argv[]) {
   /* initialize screen driver */
   initializeAllScreens(opt_screenDriver, opt_libraryDirectory);
   screenParameters = processParameters(getScreenParameters(),
-                                       gettext("screen driver"),
                                        getScreenDriverCode(),
                                        opt_screenParameters);
-  logParameters(getScreenParameters(), screenParameters, gettext("Screen"));
+  logParameters(getScreenParameters(), screenParameters,
+                gettext("Screen Parameter"));
   if (!opt_verify) {
     if (!openMainScreen(screenParameters)) {                                
       LogPrint(LOG_CRIT, gettext("cannot read screen."));
@@ -2186,10 +2167,10 @@ startup (int argc, char *argv[]) {
   if (!opt_noApi) {
     api_identify();
     apiParameters = processParameters(api_parameters,
-                                      gettext("application programming interface"),
                                       NULL,
                                       opt_apiParameters);
-    logParameters(api_parameters, apiParameters, gettext("API"));
+    logParameters(api_parameters, apiParameters,
+                  gettext("API Parameter"));
     if (!opt_verify) {
       if (api_start(&brl, apiParameters)) {
         atexit(exitApi);
