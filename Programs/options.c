@@ -186,28 +186,48 @@ printHelp (
       unsigned int headerWidth = lineLength;
       unsigned int descriptionWidth = lineWidth - headerWidth;
       const char *description = gettext(option->description);
-      unsigned int charsLeft = strlen(description);
+      char buffer[0X100];
 
-      while (1) {
-        unsigned int charCount = charsLeft;
-        if (charCount > descriptionWidth) {
-          charCount = descriptionWidth;
-          while (description[charCount] != ' ') --charCount;
-          while (description[charCount] == ' ') --charCount;
-          ++charCount;
+      if (option->strings) {
+        int index = 0;
+        int count = 4;
+        const char *strings[count];
+
+        while (option->strings[index]) {
+          strings[index] = option->strings[index];
+          ++index;
         }
-        memcpy(line+lineLength, description, charCount);
-        lineLength += charCount;
 
-        line[lineLength] = 0;
-        fprintf(outputStream, "%s\n", line);
+        while (index < count) strings[index++] = NULL;
+        snprintf(buffer, sizeof(buffer), gettext(option->description),
+                 strings[0], strings[1], strings[2], strings[3]);
+        description = buffer;
+      }
 
-        while (description[charCount] == ' ') ++charCount;
-        if (!(charsLeft -= charCount)) break;
-        description += charCount;
+      {
+        unsigned int charsLeft = strlen(description);
 
-        lineLength = 0;
-        while (lineLength < headerWidth) line[lineLength++] = ' ';
+        while (1) {
+          unsigned int charCount = charsLeft;
+          if (charCount > descriptionWidth) {
+            charCount = descriptionWidth;
+            while (description[charCount] != ' ') --charCount;
+            while (description[charCount] == ' ') --charCount;
+            ++charCount;
+          }
+          memcpy(line+lineLength, description, charCount);
+          lineLength += charCount;
+
+          line[lineLength] = 0;
+          fprintf(outputStream, "%s\n", line);
+
+          while (description[charCount] == ' ') ++charCount;
+          if (!(charsLeft -= charCount)) break;
+          description += charCount;
+
+          lineLength = 0;
+          while (lineLength < headerWidth) line[lineLength++] = ' ';
+        }
       }
     }
   }

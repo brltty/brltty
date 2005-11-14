@@ -134,144 +134,167 @@ char *opt_pcmDevice;
 char *opt_midiDevice;
 #endif /* ENABLE_MIDI_SUPPORT */
 
+static const char *const optionStrings_LogLevel[] = {
+  "0-7 [5]",
+  "emergency alert critical error warning [notice] information debug",
+  NULL
+};
+
+static const char *const optionStrings_BrailleDriver[] = {
+  BRAILLE_DRIVER_CODES,
+  NULL
+};
+
+static const char *const optionStrings_ScreenDriver[] = {
+  SCREEN_DRIVER_CODES,
+  NULL
+};
+
+#ifdef ENABLE_SPEECH_SUPPORT
+static const char *const optionStrings_SpeechDriver[] = {
+  SPEECH_DRIVER_CODES,
+  NULL
+};
+#endif /* ENABLE_SPEECH_SUPPORT */
+
 BEGIN_OPTION_TABLE
   {"attributes-table", strtext("file"), 'a', 0, OPT_Config | OPT_Environ,
    &opt_attributesTable, NULL,
-   strtext("Path to attributes translation table file.")},
+   strtext("Path to attributes translation table file."), NULL},
 
   {"braille-driver", strtext("driver"), 'b', 1, OPT_Config | OPT_Environ,
    &opt_brailleDriver, "auto",
-   strtext("Braille driver: one of {" BRAILLE_DRIVER_CODES "}")},
+   strtext("Braille driver: one of {%s}"), optionStrings_BrailleDriver},
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
   {"contraction-table", strtext("file"), 'c', 0, OPT_Config | OPT_Environ,
    &opt_contractionTable, NULL,
-   strtext("Path to contraction table file.")},
+   strtext("Path to contraction table file."), NULL},
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
   {"braille-device", strtext("device"), 'd', 2, OPT_Config | OPT_Environ,
    &opt_brailleDevice, BRAILLE_DEVICE,
-   strtext("Path to device for accessing braille display.")},
+   strtext("Path to device for accessing braille display."), NULL},
 
   {"standard-error", NULL, 'e', 0, 0,
    &opt_standardError, NULL,
-   strtext("Log to standard error rather than to syslog.")},
+   strtext("Log to standard error rather than to syslog."), NULL},
 
   {"configuration-file", strtext("file"), 'f', 0, OPT_Environ,
    &opt_configurationFile, CONFIGURATION_DIRECTORY "/" CONFIGURATION_FILE,
-   strtext("Path to default parameters file.")},
+   strtext("Path to default parameters file."), NULL},
 
   {"log-level", strtext("level"), 'l', 0, 0,
    &opt_logLevel, NULL,
-   strtext("Diagnostic logging level: 0-7 [5], or one of {emergency alert critical error warning [notice] information debug}")},
+   strtext("Diagnostic logging level: %s, or one of {%s}"), optionStrings_LogLevel},
 
 #ifdef ENABLE_MIDI_SUPPORT
   {"midi-device", strtext("device"), 'm', 0, OPT_Config | OPT_Environ,
    &opt_midiDevice, NULL,
-   strtext("Device specifier for the Musical Instrument Digital Interface.")},
+   strtext("Device specifier for the Musical Instrument Digital Interface."), NULL},
 #endif /* ENABLE_MIDI_SUPPORT */
 
   {"no-daemon", NULL, 'n', 0, 0,
    &opt_noDaemon, NULL,
-   strtext("Remain a foreground process.")},
+   strtext("Remain a foreground process."), NULL},
 
 #ifdef ENABLE_PCM_SUPPORT
   {"pcm-device", strtext("device"), 'p', 0, OPT_Config | OPT_Environ,
    &opt_pcmDevice, NULL,
-   strtext("Device specifier for soundcard digital audio.")},
+   strtext("Device specifier for soundcard digital audio."), NULL},
 #endif /* ENABLE_PCM_SUPPORT */
 
   {"quiet", NULL, 'q', 0, 0,
    &opt_quiet, NULL,
-   strtext("Suppress start-up messages.")},
+   strtext("Suppress start-up messages."), NULL},
 
 #ifdef ENABLE_SPEECH_SUPPORT
   {"speech-driver", strtext("driver"), 's', 0, OPT_Config | OPT_Environ,
    &opt_speechDriver, "auto",
-   strtext("Speech driver: one of {" SPEECH_DRIVER_CODES "}")},
+   strtext("Speech driver: one of {%s}"), optionStrings_SpeechDriver},
 #endif /* ENABLE_SPEECH_SUPPORT */
 
   {"text-table", strtext("file"), 't', 3, OPT_Config | OPT_Environ,
    &opt_textTable, NULL,
-   strtext("Path to text translation table file.")},
+   strtext("Path to text translation table file."), NULL},
 
   {"verify", NULL, 'v', 0, 0,
    &opt_verify, NULL,
-   strtext("Print start-up messages and exit.")},
+   strtext("Print start-up messages and exit."), NULL},
 
   {"screen-driver", strtext("driver"), 'x', 0, OPT_Config | OPT_Environ,
    &opt_screenDriver, SCREEN_DRIVER,
-   strtext("Screen driver: one of {" SCREEN_DRIVER_CODES "}")},
+   strtext("Screen driver: one of {%s}"), optionStrings_ScreenDriver},
 
 #ifdef ENABLE_API
   {"api-parameters", strtext("arg,..."), 'A', 0, OPT_Extend | OPT_Config | OPT_Environ,
    &opt_apiParameters, API_PARAMETERS,
-   strtext("Parameters for the application programming interface.")},
+   strtext("Parameters for the application programming interface."), NULL},
 #endif /* ENABLE_API */
 
   {"braille-parameters", strtext("arg,..."), 'B', 0, OPT_Extend | OPT_Config | OPT_Environ,
    &opt_brailleParameters, BRAILLE_PARAMETERS,
-   strtext("Parameters for the braille driver.")},
+   strtext("Parameters for the braille driver."), NULL},
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
   {"contractions-directory", strtext("directory"), 'C', 0, OPT_Hidden | OPT_Config | OPT_Environ,
    &opt_contractionsDirectory, DATA_DIRECTORY,
-   strtext("Path to directory for contractions tables.")},
+   strtext("Path to directory for contractions tables."), NULL},
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
   {"data-directory", strtext("directory"), 'D', 0, OPT_Hidden | OPT_Config | OPT_Environ,
    &opt_dataDirectory, DATA_DIRECTORY,
-   strtext("Path to directory for driver help and configuration files.")},
+   strtext("Path to directory for driver help and configuration files."), NULL},
 
   {"environment-variables", NULL, 'E', 0, 0,
    &opt_environmentVariables, NULL,
-   strtext("Recognize environment variables.")},
+   strtext("Recognize environment variables."), NULL},
 
 #ifdef ENABLE_SPEECH_SUPPORT
   {"speech-fifo", strtext("file"), 'F', 0, OPT_Config | OPT_Environ,
    &opt_speechFifo, NULL,
-   strtext("Path to speech pass-through FIFO.")},
+   strtext("Path to speech pass-through FIFO."), NULL},
 #endif /* ENABLE_SPEECH_SUPPORT */
 
   {"library-directory", strtext("directory"), 'L', 0, OPT_Hidden | OPT_Config | OPT_Environ,
    &opt_libraryDirectory, LIBRARY_DIRECTORY,
-   strtext("Path to directory for loading drivers.")},
+   strtext("Path to directory for loading drivers."), NULL},
 
   {"message-delay", strtext("csecs"), 'M', 0, 0,
    &opt_messageDelay, NULL,
-   strtext("Message hold time [400].")},
+   strtext("Message hold time [400]."), NULL},
 
 #ifdef ENABLE_API
   {"no-api", NULL, 'N', 0, 0,
    &opt_noApi, NULL,
-   strtext("Disable the application programming interface.")},
+   strtext("Disable the application programming interface."), NULL},
 #endif /* ENABLE_API */
 
   {"pid-file", strtext("file"), 'P', 0, 0,
    &opt_pidFile, NULL,
-   strtext("Path to process identifier file.")},
+   strtext("Path to process identifier file."), NULL},
 
 #ifdef ENABLE_SPEECH_SUPPORT
   {"speech-parameters", strtext("arg,..."), 'S', 0, OPT_Extend | OPT_Config | OPT_Environ,
    &opt_speechParameters, SPEECH_PARAMETERS,
-   strtext("Parameters for the speech driver.")},
+   strtext("Parameters for the speech driver."), NULL},
 #endif /* ENABLE_SPEECH_SUPPORT */
 
   {"tables-directory", strtext("directory"), 'T', 0, OPT_Hidden | OPT_Config | OPT_Environ,
    &opt_tablesDirectory, DATA_DIRECTORY,
-   strtext("Path to directory for text and attributes tables.")},
+   strtext("Path to directory for text and attributes tables."), NULL},
 
   {"update-interval", strtext("csecs"), 'U', 0, 0,
    &opt_updateInterval, NULL,
-   strtext("Braille window update interval [4].")},
+   strtext("Braille window update interval [4]."), NULL},
 
   {"version", NULL, 'V', 0, 0,
    &opt_version, NULL,
-   strtext("Print the versions of the core, API, and built-in drivers, and then exit.")},
+   strtext("Print the versions of the core, API, and built-in drivers, and then exit."), NULL},
 
   {"screen-parameters", strtext("arg,..."), 'X', 0, OPT_Extend | OPT_Config | OPT_Environ,
    &opt_screenParameters, SCREEN_PARAMETERS,
-   strtext("Parameters for the screen driver.")},
+   strtext("Parameters for the screen driver."), NULL},
 END_OPTION_TABLE
 
 static void

@@ -38,6 +38,7 @@ typedef struct {
   const char *defaultSetting;
 
   const char *description;
+  const char *const *strings;
 } OptionEntry;
 
 #define BEGIN_OPTION_TABLE static const OptionEntry optionTable[] = {
