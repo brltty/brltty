@@ -1046,7 +1046,7 @@ static int handleWrite(Connection *c, brl_type_t type, unsigned char *packet, si
         c->brailleWindow.text[rbeg-1+i] = text[i];
     }
   } else pthread_mutex_lock(&c->brlMutex);
-  if (andAttr) memcpy(c->brailleWindow.orAttr+rbeg-1,andAttr,rsiz);
+  if (andAttr) memcpy(c->brailleWindow.andAttr+rbeg-1,andAttr,rsiz);
   if (orAttr) memcpy(c->brailleWindow.orAttr+rbeg-1,orAttr,rsiz);
   if (cursor>=0) c->brailleWindow.cursor = cursor;
   c->brlbufstate = TODISPLAY;
