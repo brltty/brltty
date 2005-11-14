@@ -41,33 +41,33 @@ BEGIN_OPTION_TABLE
    &opt_showIdentifier, NULL,
    "Show the driver's identifier."},
 
-  {"brlapi-key", "file", 'K', 0, 0,
-   &settings.authKey, NULL,
-   "Path to file containing BrlAPI's authorization key."},
-
-  {"learn", NULL, 'l', 0, 0,
-   &opt_learnMode, NULL,
-   "Enter interactive command learn mode."},
-
-  {"dots", NULL, 'd', 0, 0,
-   &opt_showDots, NULL,
-   "Show dot pattern."},
-
   {"name", NULL, 'n', 0, 0,
    &opt_showName, NULL,
    "Show the driver's name."},
-
-  {"brlapi-server", "[host][:port]", 'S', 0, 0,
-   &settings.hostName, NULL,
-   "Host name (or address) and port of the BrlAPI server."},
 
   {"window", NULL, 'w', 0, 0,
    &opt_showSize, NULL,
    "Show the braille window's size."},
 
+  {"dots", NULL, 'd', 0, 0,
+   &opt_showDots, NULL,
+   "Show dot pattern."},
+
+  {"learn", NULL, 'l', 0, 0,
+   &opt_learnMode, NULL,
+   "Enter interactive command learn mode."},
+
   {"keycodes", NULL, 'k', 0, 0,
    &opt_showKeyCodes, NULL,
-   "Show key codes."}, 
+   "Enter interactive keycode learn mode."}, 
+
+  {"brlapi-server", "[host][:port]", 'S', 0, 0,
+   &settings.hostName, NULL,
+   "The host name (or address) and port of the BrlAPI server."},
+
+  {"brlapi-key", "file", 'K', 0, 0,
+   &settings.authKey, NULL,
+   "The path to the file containing BrlAPI's authorization key."},
 END_OPTION_TABLE
 
 void showDisplaySize(void)
@@ -155,7 +155,7 @@ void enterLearnMode(void)
   brl_keycode_t cmd;
   char buf[0X100];
 
-  fprintf(stderr,"Entering learn mode\n");
+  fprintf(stderr,"Entering command learn mode\n");
   if (brlapi_getTty(-1, NULL)<0) {
     brlapi_perror("getTty");
     return;
@@ -181,7 +181,7 @@ void showKeyCodes(void)
   brl_keycode_t cmd;
   char buf[0X100];
 
-  fprintf(stderr,"Entering learn mode\n");
+  fprintf(stderr,"Entering keycode learn mode\n");
   if (brlapi_getDriverName(buf, sizeof(buf))==-1) {
     brlapi_perror("getDriverName");
     return;
