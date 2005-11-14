@@ -1266,8 +1266,10 @@ brlapi_error_t *brlapi_error_location(void)
         return errorp;
       else
         /* on the first time, must allocate it */
-        if ((errorp=malloc(sizeof(*errorp))) && !pthread_setspecific(error_key,errorp))
+        if ((errorp=malloc(sizeof(*errorp))) && !pthread_setspecific(error_key,errorp)) {
+	  memset(errorp,0,sizeof(*errorp));
           return errorp;
+	}
     }
 #ifndef WINDOWS
   }
