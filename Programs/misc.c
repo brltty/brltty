@@ -633,8 +633,11 @@ int
 isInteger (int *value, const char *string) {
   if (*string) {
     char *end;
-    *value = strtol(string, &end, 0);
-    if (!*end) return 1;
+    long l = strtol(string, &end, 0);
+    if (!*end) {
+      *value = l;
+      return 1;
+    }
   }
   return 0;
 }
@@ -643,25 +646,32 @@ int
 isFloat (float *value, const char *string) {
   if (*string) {
     char *end;
-    *value = strtod(string, &end);
-    if (!*end) return 1;
+    double d = strtod(string, &end);
+    if (!*end) {
+      *value = d;
+      return 1;
+    }
   }
   return 0;
 }
 
 int
 validateInteger (int *value, const char *string, const int *minimum, const int *maximum) {
-  if (*string && !isInteger(value, string)) return 0;
+  int i;
+  if (*string && !isInteger(&i, string)) return 0;
   if (minimum && (*value < *minimum)) return 0;
   if (maximum && (*value > *maximum)) return 0;
+  *value = i;
   return 1;
 }
 
 int
 validateFloat (float *value, const char *string, const float *minimum, const float *maximum) {
-  if (*string && !isFloat(value, string)) return 0;
+  float f;
+  if (*string && !isFloat(&f, string)) return 0;
   if (minimum && (*value < *minimum)) return 0;
   if (maximum && (*value > *maximum)) return 0;
+  *value = f;
   return 1;
 }
 
