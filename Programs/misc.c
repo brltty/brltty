@@ -657,21 +657,25 @@ isFloat (float *value, const char *string) {
 
 int
 validateInteger (int *value, const char *string, const int *minimum, const int *maximum) {
-  int i;
-  if (*string && !isInteger(&i, string)) return 0;
-  if (minimum && (*value < *minimum)) return 0;
-  if (maximum && (*value > *maximum)) return 0;
-  *value = i;
+  if (*string) {
+    int i;
+    if (!isInteger(&i, string)) return 0;
+    if (minimum && (i < *minimum)) return 0;
+    if (maximum && (i > *maximum)) return 0;
+    *value = i;
+  }
   return 1;
 }
 
 int
 validateFloat (float *value, const char *string, const float *minimum, const float *maximum) {
-  float f;
-  if (*string && !isFloat(&f, string)) return 0;
-  if (minimum && (*value < *minimum)) return 0;
-  if (maximum && (*value > *maximum)) return 0;
-  *value = f;
+  if (*string) {
+    float f;
+    if (!isFloat(&f, string)) return 0;
+    if (minimum && (f < *minimum)) return 0;
+    if (maximum && (f > *maximum)) return 0;
+    *value = f;
+  }
   return 1;
 }
 
