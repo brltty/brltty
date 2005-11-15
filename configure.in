@@ -437,10 +437,13 @@ BRLTTY_PACKAGE_CHOOSE([curses],
 AC_PATH_XTRA
 if test "${no_x}" != "yes"
 then
-   LDFLAGS="${LDFLAGS} ${X_LIBS}"
    AC_SUBST([all_xbrlapi], [all-xbrlapi])
    AC_SUBST([install_xbrlapi], [install-xbrlapi])
 
+   brltty_x_ldflags_save="${LDFLAGS}"
+   LDFLAGS="${LDFLAGS} ${X_LIBS}"
+
+   brltty_x_libs_save="${LIBS}"
    AC_HAVE_LIBRARY([X11], [
       LIBS="${X_EXTRA_LIBS} ${X_PRE_LIBS} -lX11 ${LIBS}"
 
@@ -463,6 +466,12 @@ then
             [Xm Xm/Xm.h Xm/Form.h Xm/PanedW.h Xm/Label.h Xm/PushB.h])
       ])
    ])
+
+   brltty_libs_x="${LDFLAGS#${brltty_x_ldflags_save}} ${LIBS%${brltty_x_libs_save}}"
+   AC_SUBST([brltty_libs_x])
+
+   LIBS="${brltty_x_libs_save}"
+   LDFLAGS="${brltty_x_ldflags_save}"
 fi
 
 test -z "$brltty_package_gui_toolkit" && {
@@ -1067,7 +1076,7 @@ BRLTTY_BRAILLE_DRIVER([vo], [Voyager])
 BRLTTY_BRAILLE_DRIVER([vr], [Virtual])
 BRLTTY_BRAILLE_DRIVER([vs], [VisioBraille])
 test -n "${brltty_package_gui_toolkit}" && {
-   BRLTTY_BRAILLE_DRIVER([xw], [XWindow])
+   BRLTTY_BRAILLE_DRIVER([xw], [XWindow], [$(XLIBS)])
 }
 BRLTTY_ARG_DRIVER([braille], [BrailleDrivers])
 
