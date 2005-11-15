@@ -1995,7 +1995,8 @@ startup (int argc, char *argv[]) {
       fclose(stream);
       atexit(exitPidFile);
     } else {
-      LogPrint(LOG_ERR, gettext("cannot open process identifier file: %s: %s"),
+      LogPrint(LOG_ERR, "%s: %s: %s",
+               gettext("cannot open process identifier file"),
                opt_pidFile, strerror(errno));
     }
   }
@@ -2005,7 +2006,8 @@ startup (int argc, char *argv[]) {
     const char **directory = directories;
     while (*directory) {
       if (chdir(*directory) != -1) break;                /* * change to directory containing data files  */
-      LogPrint(LOG_WARNING, gettext("cannot change working directory to '%s': %s"),
+      LogPrint(LOG_WARNING, "%s: %s: %s",
+               gettext("cannot set working directory"),
                *directory, strerror(errno));
       ++directory;
     }
@@ -2014,17 +2016,17 @@ startup (int argc, char *argv[]) {
   {
     char *directory;
     if ((directory = getWorkingDirectory())) {
-      LogPrint(LOG_INFO, gettext("Working Directory: %s"), directory);
+      LogPrint(LOG_INFO, "%s: %s", gettext("Working Directory"), directory);
       free(directory);
     } else {
-      LogPrint(LOG_ERR, gettext("cannot determine working directory: %s"), strerror(errno));
+      LogPrint(LOG_ERR, "%s: %s", gettext("cannot determine working directory"), strerror(errno));
     }
   }
 
-  LogPrint(LOG_INFO, gettext("Configuration File: %s"), opt_configurationFile);
-  LogPrint(LOG_INFO, gettext("Data Directory: %s"), opt_dataDirectory);
-  LogPrint(LOG_INFO, gettext("Library Directory: %s"), opt_libraryDirectory);
-  LogPrint(LOG_INFO, gettext("Tables Directory: %s"), opt_tablesDirectory);
+  LogPrint(LOG_INFO, "%s: %s", gettext("Configuration File"), opt_configurationFile);
+  LogPrint(LOG_INFO, "%s: %s", gettext("Data Directory"), opt_dataDirectory);
+  LogPrint(LOG_INFO, "%s: %s", gettext("Library Directory"), opt_libraryDirectory);
+  LogPrint(LOG_INFO, "%s: %s", gettext("Tables Directory"), opt_tablesDirectory);
 
   if (opt_textTable) {
     fixTextTablePath(&opt_textTable);
@@ -2034,7 +2036,7 @@ startup (int argc, char *argv[]) {
     opt_textTable = TEXT_TABLE;
     makeUntextTable();
   }
-  LogPrint(LOG_INFO, gettext("Text Table: %s"), opt_textTable);
+  LogPrint(LOG_INFO, "%s: %s", gettext("Text Table"), opt_textTable);
 #ifdef ENABLE_PREFERENCES_MENU
 #ifdef ENABLE_TABLE_SELECTION
   globPrepare(&glob_textTable, opt_tablesDirectory,
@@ -2049,7 +2051,7 @@ startup (int argc, char *argv[]) {
   } else {
     opt_attributesTable = ATTRIBUTES_TABLE;
   }
-  LogPrint(LOG_INFO, gettext("Attributes Table: %s"), opt_attributesTable);
+  LogPrint(LOG_INFO, "%s: %s", gettext("Attributes Table"), opt_attributesTable);
 #ifdef ENABLE_PREFERENCES_MENU
 #ifdef ENABLE_TABLE_SELECTION
   globPrepare(&glob_attributesTable, opt_tablesDirectory,
@@ -2059,13 +2061,13 @@ startup (int argc, char *argv[]) {
 #endif /* ENABLE_PREFERENCES_MENU */
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
-  LogPrint(LOG_INFO, gettext("Contractions Directory: %s"), opt_contractionsDirectory);
+  LogPrint(LOG_INFO, "%s: %s", gettext("Contractions Directory"), opt_contractionsDirectory);
   if (opt_contractionTable) {
     fixContractionTablePath(&opt_contractionTable);
     loadContractionTable(opt_contractionTable);
   }
   atexit(exitContractionTable);
-  LogPrint(LOG_INFO, gettext("Contraction Table: %s"),
+  LogPrint(LOG_INFO, "%s: %s", gettext("Contraction Table"),
            opt_contractionTable? opt_contractionTable: gettext("none"));
 #ifdef ENABLE_PREFERENCES_MENU
 #ifdef ENABLE_TABLE_SELECTION
@@ -2101,7 +2103,7 @@ startup (int argc, char *argv[]) {
                             FILE_SHARE_READ|FILE_SHARE_WRITE,
                             NULL, OPEN_EXISTING, 0, NULL);
       if (!h) {
-        LogWindowsError("NUL");
+        LogWindowsError("CreateFile[NUL]");
       } else {
         SetStdHandle(STD_INPUT_HANDLE, h);
         SetStdHandle(STD_OUTPUT_HANDLE, h);
@@ -2128,13 +2130,13 @@ startup (int argc, char *argv[]) {
 #elif defined(HAVE_SYS_WAIT_H)
     /* tell the parent process to exit */
     if (kill(getppid(), SIGUSR1) == -1) {
-      LogPrint(LOG_CRIT, gettext("parent stop error: %s"), strerror(errno));
+      LogError("kill");
       exit(12);
     }
 
     /* request a new session (job control) */
     if (setsid() == -1) {                        
-      LogPrint(LOG_CRIT, gettext("session creation error: %s"), strerror(errno));
+      LogError("setsid");
       exit(13);
     }
 #endif /* detach */
@@ -2156,7 +2158,7 @@ startup (int argc, char *argv[]) {
                 gettext("Screen Parameter"));
   if (!opt_verify) {
     if (!openMainScreen(screenParameters)) {                                
-      LogPrint(LOG_CRIT, gettext("cannot read screen."));
+      LogPrint(LOG_ERR, gettext("cannot read screen"));
       exit(7);
     }
     atexit(exitScreen);
@@ -2182,7 +2184,7 @@ startup (int argc, char *argv[]) {
 
   /* The device(s) the braille display might be connected to. */
   if (!*opt_brailleDevice) {
-    LogPrint(LOG_CRIT, gettext("braille device not specified."));
+    LogPrint(LOG_ERR, gettext("braille device not specified"));
     exit(4);
   }
   brailleDevices = splitString(opt_brailleDevice, ',', NULL);
@@ -2208,7 +2210,7 @@ startup (int argc, char *argv[]) {
   }
 
   /* Create the speech pass-through FIFO. */
-  LogPrint(LOG_INFO, gettext("Speech FIFO: %s"),
+  LogPrint(LOG_INFO, "%s: %s", gettext("Speech FIFO"),
            opt_speechFifo? opt_speechFifo: gettext("none"));
   if (!opt_verify) {
     if (opt_speechFifo) openSpeechFifo(opt_dataDirectory, opt_speechFifo);
@@ -2225,9 +2227,9 @@ startup (int argc, char *argv[]) {
 
   if (problemCount) {
     char buffer[0X40];
-    snprintf(buffer, sizeof(buffer), "%d %s",
-             problemCount,
-             ngettext("startup problem", "startup problems", problemCount));
+    snprintf(buffer, sizeof(buffer),
+             ngettext("%d startup problem", "%d startup problems", problemCount),
+             problemCount);
     message(buffer, MSG_WAITKEY);
   }
 }
