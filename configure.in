@@ -429,10 +429,14 @@ AC_SUBST([install_api_libraries])
 AC_SUBST([api_authfile], [brlapi.key])
 BRLTTY_DEFINE_EXPANDED([BRLAPI_AUTHFILE], ["${api_authfile}"])
 
+brltty_curses_libs_save="${LIBS}"
 BRLTTY_PACKAGE_CHOOSE([curses],
    [ncursesw ncurses.h],
    [ncurses ncurses.h],
    [curses curses.h])
+brltty_libs_curses="${LIBS%${brltty_curses_libs_save}}"
+LIBS="${brltty_curses_libs_save}"
+AC_SUBST([brltty_libs_curses])
 
 AC_PATH_XTRA
 if test "${no_x}" != "yes"
@@ -1070,7 +1074,7 @@ BRLTTY_BRAILLE_DRIVER([mn], [MiniBraille])
 BRLTTY_BRAILLE_DRIVER([pm], [Papenmeier])
 BRLTTY_BRAILLE_DRIVER([tn], [TechniBraille])
 BRLTTY_BRAILLE_DRIVER([ts], [TSI])
-BRLTTY_BRAILLE_DRIVER([tt], [TTY])
+BRLTTY_BRAILLE_DRIVER([tt], [TTY], [$(CLIBS)])
 BRLTTY_BRAILLE_DRIVER([vd], [VideoBraille])
 BRLTTY_BRAILLE_DRIVER([vo], [Voyager])
 BRLTTY_BRAILLE_DRIVER([vr], [Virtual])
