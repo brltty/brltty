@@ -55,12 +55,10 @@
 //#define DEBUG
 #ifdef DEBUG
 #define debugf(fmt, ...) fprintf(stderr, fmt, ## __VA_ARGS__)
-#else
+#else /* DEBUG */
 #define debugf(fmt, ...) (void)0
-#endif
+#endif /* DEBUG */
 
-#define _(s) (s)
-#define _n(s,sp,n) ((n)>1?(sp):(s))
 /******************************************************************************
  * error handling
  */
@@ -125,7 +123,7 @@ void tobrltty_init(char *authKey, char *hostName) {
   signal(SIGPIPE,api_cleanExit);
 
   if ((brlapi_fd = brlapi_initializeConnection(&settings,&settings))<0)
-    fatal_brlapi_errno("initializeConnection",_("couldn't connect to brltty at %s\n"),settings.hostName);
+    fatal_brlapi_errno("initializeConnection",gettext("cannot connect to brltty at %s\n"),settings.hostName);
 
   if (brlapi_getDisplaySize(&x,&y)<0)
     fatal_brlapi_errno("getDisplaySize",NULL);
@@ -133,9 +131,9 @@ void tobrltty_init(char *authKey, char *hostName) {
 
 void vtno(int vtno) {
   if (brlapi_getTty(vtno,NULL)<0)
-    fatal_brlapi_errno("getTty",_("getting tty %d\n"),vtno);
+    fatal_brlapi_errno("getTty",gettext("cannot get tty %d\n"),vtno);
   if (brlapi_ignoreKeyRange(0,BRL_KEYCODE_MAX)<0)
-    fatal_brlapi_errno("ignoreKeys",_("ignoring every key %d\n"),vtno);
+    fatal_brlapi_errno("ignoreKeys",gettext("cannot ignore keys on tty %d\n"),vtno);
 #ifdef HAVE_X11_EXTENSIONS_XTEST_H
   if (brlapi_unignoreKeyRange(BRL_BLK_PASSCHAR,BRL_BLK_PASSCHAR|BRL_MSK_ARG))
     fatal_brlapi_errno("unignoreKeyRange",NULL);
@@ -156,14 +154,14 @@ void api_setName(const char *wm_name) {
 
   if (brlapi_writeText(0,wm_name)<0) {
     brlapi_perror("writeText");
-    fprintf(stderr,_("setting name %s\n"),wm_name);
+    fprintf(stderr,gettext("cannot write window name %s\n"),wm_name);
   }
 }
 
 void api_setFocus(int win) {
   debugf("%#010x (%d) got focus\n",win,win);
   if (brlapi_setFocus(win)<0)
-    fatal_brlapi_errno("setFocus",_("setting focus to %#010x\n"),win);
+    fatal_brlapi_errno("setFocus",gettext("cannot set focus to %#010x\n"),win);
 }
 
 /******************************************************************************
@@ -227,8 +225,8 @@ static int ErrorHandler(Display *dpy, XErrorEvent *ev) {
   }
   if (!XGetErrorText(dpy, ev->error_code, buffer, sizeof(buffer)))
     fatal("XGetErrorText");
-  fprintf(stderr,_("X Error %d, %s on display %s\n"), ev->type, buffer, XDisplayName(Xdisplay));
-  fprintf(stderr,_("resource %#010lx, req %u:%u\n"),ev->resourceid,ev->request_code,ev->minor_code);
+  fprintf(stderr,gettext("X Error %d, %s on display %s\n"), ev->type, buffer, XDisplayName(Xdisplay));
+  fprintf(stderr,gettext("resource %#010lx, req %u:%u\n"),ev->resourceid,ev->request_code,ev->minor_code);
   exit(1);
 }
 
@@ -244,16 +242,16 @@ static void getVTnb(void) {
   root=DefaultRootWindow(dpy);
 
   if ((property=XInternAtom(dpy,"XFree86_VT",False))==None)
-    fatal(_("no XFree86_VT atom\n"));
+    fatal(gettext("no XFree86_VT atom\n"));
   
   if (XGetWindowProperty(dpy,root,property,0,1,False,AnyPropertyType,
     &actual_type, &actual_format, &nitems, &bytes_after, &buf))
-    fatal(_("couldn't get root window XFree86_VT property\n"));
+    fatal(gettext("cannot get root window XFree86_VT property\n"));
 
   if (nitems<1)
-    fatal(_("no items for VT number\n"));
+    fatal(gettext("no items for VT number\n"));
   if (nitems>1)
-    fprintf(stderr,_("several items for VT number ?!\n"));
+    fprintf(stderr,gettext("more than one item for VT number\n"));
   switch (actual_type) {
   case XA_CARDINAL:
   case XA_INTEGER:
@@ -262,10 +260,10 @@ static void getVTnb(void) {
     case 8:  vtno(*(uint8_t *)buf); break;
     case 16: vtno(*(uint16_t *)buf); break;
     case 32: vtno(*(uint32_t *)buf); break;
-    default: fatal(_("Bad format for VT number\n"));
+    default: fatal(gettext("bad format for VT number\n"));
     }
     break;
-  default: fatal(_("Bad type for VT number\n"));
+  default: fatal(gettext("bad type for VT number\n"));
   }
   if (!XFree(buf)) fatal("XFree(VTnobuf)");
 }
@@ -344,7 +342,7 @@ static void setFocus(Window win) {
   api_setFocus((uint32_t)win);
 
   if (!(window=window_of_Window(win))) {
-    fprintf(stderr,_("didn't grab window %#010lx but got focus !\n"),win);
+    fprintf(stderr,gettext("didn't grab window %#010lx but got focus\n"),win);
     api_setName("unknown");
   } else setName(window);
 }
@@ -366,9 +364,9 @@ void toX_f(const char *display) {
 
   Xdisplay = display;
   if (!Xdisplay) Xdisplay=getenv("DISPLAY");
-  if (!(dpy=XOpenDisplay(Xdisplay))) fatal(_("couldn't connect to %s\n"),Xdisplay);
+  if (!(dpy=XOpenDisplay(Xdisplay))) fatal(gettext("cannot connect to display %s\n"),Xdisplay);
 
-  if (!XSetErrorHandler(ErrorHandler)) fatal(_("strange old error handler\n"));
+  if (!XSetErrorHandler(ErrorHandler)) fatal(gettext("strange old error handler\n"));
 
 #ifdef HAVE_X11_EXTENSIONS_XTEST_H
   haveXTest = XTestQueryExtension(dpy, &eventBase, &errorBase, &majorVersion, &minorVersion);
@@ -384,14 +382,14 @@ void toX_f(const char *display) {
   
   for (i=0;i<ScreenCount(dpy);i++) {
     root=RootWindow(dpy,i);
-    if (!grabWindows(root,0)) fatal(_("Couldn't grab windows on screen %d\n"),i);
+    if (!grabWindows(root,0)) fatal(gettext("cannot grab windows on screen %d\n"),i);
   }
 
   {
     Window win;
     int revert_to;
     if (!XGetInputFocus(dpy,&win,&revert_to))
-      fatal(_("failed to get first Focus\n"));
+      fatal(gettext("failed to get first focus\n"));
     setFocus(win);
   }
   while(1) {
@@ -438,7 +436,7 @@ void toX_f(const char *display) {
 	if (!grabWindow(win,0)) break; /* window already disappeared ! */
 	debugf("win %#010lx created\n",win);
 	if (!(window = window_of_Window(ev.xcreatewindow.parent))) {
-	  fprintf(stderr,_("didn't grab parent of %#010lx ?!\n"),win);
+	  fprintf(stderr,gettext("didn't grab parent of %#010lx\n"),win);
 	  add_window(win,None,getWindowTitle(win));
 	} else add_window(win,window->root,getWindowTitle(win));
       } break;
@@ -455,15 +453,15 @@ void toX_f(const char *display) {
 	  debugf("WM_NAME property of %#010lx changed\n",win);
 	  struct window *window;
 	  if (!(window=window_of_Window(win))) {
-	    fprintf(stderr,_("didn't grab window %#010lx\n"),win);
+	    fprintf(stderr,gettext("didn't grab window %#010lx\n"),win);
 	    add_window(win,None,getWindowTitle(win));
 	  } else {
 	    if (window->wm_name)
-	      if (!XFree(window->wm_name)) fatal(_("XFree(wm_name) for change"));
+	      if (!XFree(window->wm_name)) fatal(gettext("XFree(wm_name) for change"));
 	    if ((window->wm_name=getWindowTitle(win))) {
 	      if (win==curWindow)
 		api_setName(window->wm_name);
-	    } else fprintf(stderr,_("uhu, window %#010lx changed to NULL name ?!\n"),win);
+	    } else fprintf(stderr,gettext("window %#010lx changed to NULL name\n"),win);
 	  }
 	}
 	break;
@@ -480,7 +478,7 @@ void toX_f(const char *display) {
 	break;
 
       /* "shouldn't happen" events */
-      default: fprintf(stderr,_("unhandled %d type\n"),ev.type); break;
+      default: fprintf(stderr,gettext("unhandled event type: %d\n"),ev.type); break;
       }
     }
 #ifdef HAVE_X11_EXTENSIONS_XTEST_H
@@ -591,11 +589,11 @@ static struct option longopts[] = {
 };
 
 static void usage(const char *name) {
-  printf(_("usage: %s [opts...]\n"),name);
-  printf(_("  --help                   get what you're reading\n"));
-  printf(_("  --keypath path           set path to authorization key\n"));
-  printf(_("  --hostname [host][:port] set local hostname and port to connect to\n"));
-  printf(_("  --display display        set display\n"));
+  printf(gettext("Usage: %s [opts...]\n"),name);
+  printf(gettext("  --help                   display this usage summary\n"));
+  printf(gettext("  --keypath path           set path to file containing authorization key\n"));
+  printf(gettext("  --hostname [host][:port] set brltty server host and port to connect to\n"));
+  printf(gettext("  --display display        set X display to connect to\n"));
 }
 
 int main(int argc, char *argv[]) {
@@ -617,11 +615,11 @@ int main(int argc, char *argv[]) {
     display=optarg;
     break;
   case ':':
-    fprintf(stderr,_("missing argument to -%c\n"),optopt);
+    fprintf(stderr,gettext("missing argument to -%c\n"),optopt);
     usage(argv[0]);
     exit(1);
   case '?':
-    fprintf(stderr,_("bad option %c\n"),optopt);
+    fprintf(stderr,gettext("bad option -%c\n"),optopt);
     usage(argv[0]);
     exit(1);
   }
