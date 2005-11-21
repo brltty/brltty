@@ -261,7 +261,7 @@ brlttyInstallRoot="${temporaryDirectory}/install"
    trap "" 0
    cd "${brlttyBuildRoot}"
 
-   ./autogen.sh
+   ./autogen
    ./configure --quiet --with-install-root="${brlttyInstallRoot}" \
 	       --with-init-path="${initPath}" \
                --with-screen-driver="lx,-all" \
