@@ -771,16 +771,17 @@ static int handleGetTty(Connection *c, brl_type_t type, unsigned char *packet, s
   char name[BRLAPI_MAXNAMELENGTH+1];
   Tty *tty,*tty2,*tty3;
   uint32_t *ptty;
+  size_t remaining = size;
   LogPrintRequest(type, c->fd);
   CHECKERR((!c->raw),BRLERR_ILLEGAL_INSTRUCTION);
-  CHECKERR(size>=sizeof(uint32_t), BRLERR_INVALID_PACKET);
-  p += sizeof(uint32_t); size -= sizeof(uint32_t);
+  CHECKERR(remaining>=sizeof(uint32_t), BRLERR_INVALID_PACKET);
+  p += sizeof(uint32_t); remaining -= sizeof(uint32_t);
   nbTtys = ntohl(ints[0]);
-  CHECKERR(size>=nbTtys*sizeof(uint32_t), BRLERR_INVALID_PACKET);
-  p += nbTtys*sizeof(uint32_t); size -= nbTtys*sizeof(uint32_t);
+  CHECKERR(remaining>=nbTtys*sizeof(uint32_t), BRLERR_INVALID_PACKET);
+  p += nbTtys*sizeof(uint32_t); remaining -= nbTtys*sizeof(uint32_t);
   CHECKERR(*p<=BRLAPI_MAXNAMELENGTH, BRLERR_INVALID_PARAMETER);
-  n = *p; p++; size--;
-  CHECKERR(size==n, BRLERR_INVALID_PACKET);
+  n = *p; p++; remaining--;
+  CHECKERR(remaining==n, BRLERR_INVALID_PACKET);
   memcpy(name, p, n);
   name[n] = '\0';
   if (!*name) how = BRL_COMMANDS; else {
@@ -956,26 +957,27 @@ static int handleWrite(Connection *c, brl_type_t type, unsigned char *packet, si
   unsigned int rbeg, rsiz, textLen = 0;
   int cursor = -1;
   unsigned char *p = &ws->data;
+  int remaining = size;
 #ifdef HAVE_ICONV_H
   unsigned char *charset = NULL;
   unsigned int charsetLen = 0;
 #endif /* HAVE_ICONV_H */
   LogPrintRequest(type, c->fd);
-  CHECKEXC(size>=sizeof(ws->flags), BRLERR_INVALID_PACKET);
+  CHECKEXC(remaining>=sizeof(ws->flags), BRLERR_INVALID_PACKET);
   CHECKEXC(((!c->raw)&&c->tty),BRLERR_ILLEGAL_INSTRUCTION);
   ws->flags = ntohl(ws->flags);
-  if ((size==sizeof(ws->flags))&&(ws->flags==0)) {
+  if ((remaining==sizeof(ws->flags))&&(ws->flags==0)) {
     c->brlbufstate = EMPTY;
     return 0;
   }
-  size -= sizeof(ws->flags); /* flags */
+  remaining -= sizeof(ws->flags); /* flags */
   CHECKEXC((ws->flags & BRLAPI_WF_DISPLAYNUMBER)==0, BRLERR_OPNOTSUPP);
   if (ws->flags & BRLAPI_WF_REGION) {
-    CHECKEXC(size>2*sizeof(uint32_t), BRLERR_INVALID_PACKET);
+    CHECKEXC(remaining>2*sizeof(uint32_t), BRLERR_INVALID_PACKET);
     rbeg = ntohl( *((uint32_t *) p) );
-    p += sizeof(uint32_t); size -= sizeof(uint32_t); /* region begin */
+    p += sizeof(uint32_t); remaining -= sizeof(uint32_t); /* region begin */
     rsiz = ntohl( *((uint32_t *) p) );
-    p += sizeof(uint32_t); size -= sizeof(uint32_t); /* region size */
+    p += sizeof(uint32_t); remaining -= sizeof(uint32_t); /* region size */
     CHECKEXC(
       (1<=rbeg) && (rsiz>0) && (rbeg+rsiz-1<=displaySize),
       BRLERR_INVALID_PARAMETER);
@@ -984,42 +986,42 @@ static int handleWrite(Connection *c, brl_type_t type, unsigned char *packet, si
     rsiz = displaySize;
   }
   if (ws->flags & BRLAPI_WF_TEXT) {
-    CHECKEXC(size>=sizeof(uint32_t), BRLERR_INVALID_PACKET);
+    CHECKEXC(remaining>=sizeof(uint32_t), BRLERR_INVALID_PACKET);
     textLen = ntohl( *((uint32_t *) p) );
-    p += sizeof(uint32_t); size -= sizeof(uint32_t); /* text size */
-    CHECKEXC(size>=textLen, BRLERR_INVALID_PACKET);
+    p += sizeof(uint32_t); remaining -= sizeof(uint32_t); /* text size */
+    CHECKEXC(remaining>=textLen, BRLERR_INVALID_PACKET);
     text = p;
-    p += textLen; size -= textLen; /* text */
+    p += textLen; remaining -= textLen; /* text */
   }
   if (ws->flags & BRLAPI_WF_ATTR_AND) {
-    CHECKEXC(size>=rsiz, BRLERR_INVALID_PACKET);
+    CHECKEXC(remaining>=rsiz, BRLERR_INVALID_PACKET);
     andAttr = p;
-    p += rsiz; size -= rsiz; /* and attributes */
+    p += rsiz; remaining -= rsiz; /* and attributes */
   }
   if (ws->flags & BRLAPI_WF_ATTR_OR) {
-    CHECKEXC(size>=rsiz, BRLERR_INVALID_PACKET);
+    CHECKEXC(remaining>=rsiz, BRLERR_INVALID_PACKET);
     orAttr = p;
-    p += rsiz; size -= rsiz; /* or attributes */
+    p += rsiz; remaining -= rsiz; /* or attributes */
   }
   if (ws->flags & BRLAPI_WF_CURSOR) {
-    CHECKEXC(size>=sizeof(uint32_t), BRLERR_INVALID_PACKET);
+    CHECKEXC(remaining>=sizeof(uint32_t), BRLERR_INVALID_PACKET);
     cursor = ntohl( *((uint32_t *) p) );
-    p += sizeof(uint32_t); size -= sizeof(uint32_t); /* cursor */
+    p += sizeof(uint32_t); remaining -= sizeof(uint32_t); /* cursor */
     CHECKEXC(cursor<=displaySize, BRLERR_INVALID_PACKET);
   }
 #ifdef HAVE_ICONV_H
   if (ws->flags & BRLAPI_WF_CHARSET) {
     CHECKEXC(ws->flags & BRLAPI_WF_TEXT, BRLERR_INVALID_PACKET);
-    CHECKEXC(size>=1, BRLERR_INVALID_PACKET);
-    charsetLen = *p++; size--; /* charset length */
-    CHECKEXC(size>=charsetLen, BRLERR_INVALID_PACKET);
+    CHECKEXC(remaining>=1, BRLERR_INVALID_PACKET);
+    charsetLen = *p++; remaining--; /* charset length */
+    CHECKEXC(remaining>=charsetLen, BRLERR_INVALID_PACKET);
     charset = p;
-    p += charsetLen; size -= charsetLen; /* charset name */
+    p += charsetLen; remaining -= charsetLen; /* charset name */
   }
 #else /* HAVE_ICONV_H */
   CHECKEXC(!(ws->flags & BRLAPI_WF_CHARSET), BRLERR_OPNOTSUPP);
 #endif /* HAVE_ICONV_H */
-  CHECKEXC(size==0, BRLERR_INVALID_PACKET);
+  CHECKEXC(remaining==0, BRLERR_INVALID_PACKET);
   /* Here the whole packet has been checked */
   if (text) {
 #ifdef HAVE_ICONV_H
@@ -1034,7 +1036,7 @@ static int handleWrite(Connection *c, brl_type_t type, unsigned char *packet, si
       CHECKEXC((conv = iconv_open("WCHAR_T",_charset)) != (iconv_t)(-1), BRLERR_INVALID_PACKET);
       res = iconv(conv,&in,&sin,&out,&sout);
       iconv_close(conv);
-      CHECKEXC(res == 0 && !sin && !sout, BRLERR_INVALID_PACKET);
+      CHECKEXC(res != (size_t) -1 && !sin && !sout, BRLERR_INVALID_PACKET);
       pthread_mutex_lock(&c->brlMutex);
       memcpy(c->brailleWindow.text+rbeg-1,textBuf,rsiz*sizeof(wchar_t));
     } else
@@ -1058,15 +1060,16 @@ static int handleGetRaw(Connection *c, brl_type_t type, unsigned char *packet, s
 {
   getRawPacket_t *getRawPacket = (getRawPacket_t *) packet;
   char name[BRLAPI_MAXNAMELENGTH+1];
+  int remaining = size;
   LogPrintRequest(type, c->fd);
   CHECKERR(!c->raw, BRLERR_ILLEGAL_INSTRUCTION);
-  CHECKERR(size>sizeof(uint32_t), BRLERR_INVALID_PACKET);
-  size -= sizeof(uint32_t);
+  CHECKERR(remaining>sizeof(uint32_t), BRLERR_INVALID_PACKET);
+  remaining -= sizeof(uint32_t);
   getRawPacket->magic = ntohl(getRawPacket->magic);
   CHECKERR(getRawPacket->magic==BRLRAW_MAGIC,BRLERR_INVALID_PARAMETER);
   CHECKERR(getRawPacket->nameLength<=BRLAPI_MAXNAMELENGTH, BRLERR_INVALID_PARAMETER);
-  size--;
-  CHECKERR(size==getRawPacket->nameLength, BRLERR_INVALID_PACKET);
+  remaining--;
+  CHECKERR(remaining==getRawPacket->nameLength, BRLERR_INVALID_PACKET);
   memcpy(name, &getRawPacket->name, getRawPacket->nameLength);
   name[getRawPacket->nameLength] = '\0';
   CHECKERR(((!strcmp(name, trueBraille->name)) && isRawCapable(trueBraille)), BRLERR_OPNOTSUPP);
@@ -1127,17 +1130,18 @@ static int handleUnauthorizedConnection(Connection *c, brl_type_t type, unsigned
   unsigned char authKey[BRLAPI_MAXPACKETSIZE];
   int authKeyCorrect = 0;
   authStruct *auth = (authStruct *) packet;
+  int remaining = size;
 
   if (type!=BRLPACKET_AUTHKEY) {
     WERR(c->fd, BRLERR_CONNREFUSED);
     return 1;
   }
 
-  if ((size<sizeof(auth->protocolVersion))||(ntohl(auth->protocolVersion)!=BRLAPI_PROTOCOL_VERSION)) {
+  if ((remaining<sizeof(auth->protocolVersion))||(ntohl(auth->protocolVersion)!=BRLAPI_PROTOCOL_VERSION)) {
     writeError(c->fd, BRLERR_PROTOCOL_VERSION);
     return 1;
   }
-  size -= sizeof(auth->protocolVersion);
+  remaining -= sizeof(auth->protocolVersion);
 
   if (!unauthorizedConnectionsAllowed) {
     if (brlapiserver_loadAuthKey(keyfile,&authKeyLength,authKey)==-1) {
@@ -1147,7 +1151,7 @@ static int handleUnauthorizedConnection(Connection *c, brl_type_t type, unsigned
     LogPrint(LOG_DEBUG, "Authorization key loaded");
   }
 
-  authKeyCorrect = (size==authKeyLength) && (!memcmp(&auth->key, authKey, authKeyLength));
+  authKeyCorrect = (remaining==authKeyLength) && (!memcmp(&auth->key, authKey, authKeyLength));
   memset(authKey, 0, authKeyLength);
   memset(&auth->key, 0, authKeyLength);
   unauthConnections--;
