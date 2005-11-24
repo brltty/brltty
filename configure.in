@@ -414,6 +414,7 @@ BRLTTY_ARG_DISABLE(
       case "${host_os}"
       in
          cygwin*|mingw*)
+            AC_DEFINE([BRLAPI_WIN32])
             api_dynamic_library="api-dynamic-library-windows"
             install_api_libraries="install-api-libraries-windows"
             ;;

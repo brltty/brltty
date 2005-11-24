@@ -766,6 +766,21 @@ void brlapi_defaultExceptionHandler(int err, brl_type_t type, const void *buf, s
 
 /** @} */
 
+#undef BRLAPI_WIN32
+
+/* Windows-specific tricks - don't look at this */
+#ifdef BRLAPI_WIN32
+int brlapi_writeTextWin(int cursor, const void *str, int wide);
+int brlapi_writeWin(const brlapi_writeStruct *s, int wide);
+#ifdef UNICODE
+#define brlapi_writeText(cursor, str) brlapi_writeTextWin(cursor, str, 1)
+#define brlapi_write(s) brlapi_writeWin(s, 1)
+#else /* UNICODE */
+#define brlapi_writeText(cursor, str) brlapi_writeTextWin(cursor, str, 0)
+#define brlapi_write(s) brlapi_writeWin(s, 0)
+#endif /* UNICODE */
+#endif /* BRLAPI_WIN32 */
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

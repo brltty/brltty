@@ -841,7 +841,11 @@ int brlapi_setFocus(int tty)
 
 /* Function : brlapi_writeText */
 /* Writes a string to the braille display */
+#ifdef WINDOWS
+int brlapi_writeTextWin(int cursor, const void *str, int wide)
+#else /* WINDOWS */
 int brlapi_writeText(int cursor, const char *str)
+#endif /* WINDOWS */
 {
   int dispSize = brlx * brly;
   unsigned int min;
@@ -850,6 +854,7 @@ int brlapi_writeText(int cursor, const char *str)
   unsigned char *p = &ws->data;
   char *locale;
   int res;
+  size_t len;
   if ((dispSize == 0) || (dispSize > BRLAPI_MAXPACKETSIZE/4)) {
     brlapi_errno=BRLERR_INVALID_PARAMETER;
     return -1;
@@ -857,12 +862,16 @@ int brlapi_writeText(int cursor, const char *str)
   locale = setlocale(LC_CTYPE,NULL);
   ws->flags = 0;
   if (str) {
-    size_t len;
     uint32_t *size;
     ws->flags |= BRLAPI_WF_TEXT;
     size = (uint32_t *) p;
     p += sizeof(*size);
-    len = strlen(str);
+#ifdef WINDOWS
+    if (wide)
+      len = sizeof(wchar_t) * wcslen(str);
+    else
+#endif /* WINDOWS */
+      len = strlen(str);
 #if !defined(WINDOWS) || defined(HAVE_LIBMSVCP60)
     if (locale && strcmp(locale,"C")) {
       mbstate_t ps;
@@ -891,6 +900,17 @@ endcount:
       for (i = min; i<dispSize; i++) p += wcrtomb((char *)p, L' ', &ps);
     } else
 #endif /* HAVE_LIBMSVCP60 */
+#ifdef WINDOWS
+    if (wide) {
+      int extra;
+      min = MIN(len, sizeof(wchar_t) * dispSize);
+      extra = dispSize - min / sizeof(wchar_t);
+      memcpy(p, str, min);
+      p += min;
+      wmemset((wchar_t *) p, L' ', extra);
+      p += sizeof(wchar_t) * extra;
+    } else
+#endif /* WINDOWS */
     {
       min = MIN(len, dispSize);
       memcpy(p, str, min);
@@ -909,18 +929,30 @@ endcount:
     return -1;
   }
 
+#ifdef WINDOWS
+#define WIN_WCHAR_T "UCS-2LE"
+  if (wide) {
+    ws->flags |= BRLAPI_WF_CHARSET;
+    *p++ = strlen(WIN_WCHAR_T);
+    strcpy(p, WIN_WCHAR_T);
+    p += strlen(WIN_WCHAR_T);
+  } else
+#endif /* WINDOWS */
   if (locale && strcmp(locale,"C")) {
     /* not default locale, tell charset to server */
 #ifdef WINDOWS
     UINT CP;
     if ((CP = GetACP() || (CP = GetOEMCP()))) {
+      ws->flags |= BRLAPI_WF_CHARSET;
+      len = sprintf(p+3, "%d", CP);
+      *p++ = 2 + len;
       *p++ = 'C';
       *p++ = 'P';
-      p += sprintf(p, "%d", CP);
+      p += len;
     }
 #else /* WINDOWS */
     char *lang = nl_langinfo(CODESET);
-    size_t len = strlen(lang);
+    len = strlen(lang);
     ws->flags |= BRLAPI_WF_CHARSET;
     *p++ = len;
     memcpy(p, lang, len);
@@ -972,7 +1004,11 @@ int brlapi_writeDots(const unsigned char *dots)
 
 /* Function : brlapi_write */
 /* Extended writes on braille displays */
+#ifdef WINDOWS
+int brlapi_writeWin(const brlapi_writeStruct *s, int wide)
+#else /* WINDOWS */
 int brlapi_write(const brlapi_writeStruct *s)
+#endif /* WINDOWS */
 {
   int dispSize = brlx * brly;
   unsigned int rbeg, rsiz, strLen;
@@ -993,7 +1029,12 @@ int brlapi_write(const brlapi_writeStruct *s)
     rbeg = 1; rsiz = dispSize;
   }
   if (s->text) {
-    strLen = strlen(s->text);
+#ifdef WINDOWS
+    if (wide)
+      strLen = sizeof(wchar_t) * wcslen((wchar_t *) s->text);
+    else
+#endif /* WINDOWS */
+      strLen = strlen(s->text);
     *((uint32_t *) p) = htonl(strLen); p += sizeof(uint32_t);
     ws->flags |= BRLAPI_WF_TEXT;
     memcpy(p, s->text, strLen);
@@ -1024,7 +1065,7 @@ int brlapi_write(const brlapi_writeStruct *s)
     memcpy(p, s->charset, strLen);
     p += strLen;
   }
-  send:
+send:
   ws->flags = htonl(ws->flags);
   pthread_mutex_lock(&brlapi_fd_mutex);
   res = brlapi_writePacket(fd,BRLPACKET_WRITE,packet,sizeof(ws->flags)+(p-&ws->data));
