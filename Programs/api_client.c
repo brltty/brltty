@@ -930,7 +930,11 @@ endcount:
   }
 
 #ifdef WINDOWS
+#ifdef WORDS_BIGENDIAN
+#define WIN_WCHAR_T "UCS-2BE"
+#else /* WORDS_BIGENDIAN */
 #define WIN_WCHAR_T "UCS-2LE"
+#endif /* WORDS_BIGENDIAN */
   if (wide) {
     ws->flags |= BRLAPI_WF_CHARSET;
     *p++ = strlen(WIN_WCHAR_T);
