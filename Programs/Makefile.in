@@ -404,7 +404,7 @@ host_tbl.$O: tbl.$O
 
 ###############################################################################
 
-XBRLAPI_OBJECTS = xbrlapi.$O
+XBRLAPI_OBJECTS = xbrlapi.$O options.$O misc.$O $(SYSTEM_OBJECT) io_misc.$O
 
 xbrlapi$X: $(XBRLAPI_OBJECTS) api
 	$(CC) $(LDFLAGS) -o $@ $(XBRLAPI_OBJECTS) -L. -lbrlapi $(XLIBS) $(LDLIBS)

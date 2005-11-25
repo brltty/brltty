@@ -24,14 +24,15 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <inttypes.h>
-#include <getopt.h>
 #include <signal.h>
 #include <string.h>
+
 #ifdef WINDOWS
 #include <ws2tcpip.h>
 #else /* WINDOWS */
 #include <netinet/in.h>
 #endif /* WINDOWS */
+
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #else /* HAVE_SYS_SELECT_H */
@@ -41,16 +42,19 @@
 #include <X11/X.h>
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
+#include <X11/XKBlib.h>
+#include <X11/keysym.h>
+
 #ifdef HAVE_X11_EXTENSIONS_XTEST_H
 #include <X11/extensions/XTest.h>
 #else /* HAVE_X11_EXTENSIONS_XTEST_H */
 #warning <X11/extensions/XTest.h> not available: keypress simulation not supported
 #endif /* HAVE_X11_EXTENSIONS_XTEST_H */
-#include <X11/XKBlib.h>
-#include <X11/keysym.h>
 
 #include "api.h"
 #include "brldefs.h"
+#include "misc.h"
+#include "options.h"
 
 //#define DEBUG
 #ifdef DEBUG
@@ -58,6 +62,28 @@
 #else /* DEBUG */
 #define debugf(fmt, ...) (void)0
 #endif /* DEBUG */
+
+/******************************************************************************
+ * option handling
+ */
+
+static char *keyFile;
+static char *brlttyServer;
+static char *xDisplay;
+
+BEGIN_OPTION_TABLE
+  {"keyfile", strtext("file"), 'k', 0, 0,
+   &keyFile, NULL,
+   strtext("set path to file containing authorization key"), NULL},
+
+  {"server", strtext("[host][:port]"), 's', 0, 0,
+   &brlttyServer, NULL,
+   strtext("set brltty server (host and/or port) to connect to"), NULL},
+
+  {"display", strtext("display"), 'd', 0, 0,
+   &xDisplay, NULL,
+   strtext("set X display to connect to"), NULL},
+END_OPTION_TABLE
 
 /******************************************************************************
  * error handling
@@ -578,55 +604,15 @@ void toX_f(const char *display) {
  * main 
  */
 
-static char *keypath=NULL,*hostname=NULL;
-
-static struct option longopts[] = {
-  { "help",	0, NULL, 'h' },
-  { "keypath",  1, NULL, 'k' },
-  { "hostname", 1, NULL, 'H' },
-  { "display",  1, NULL, 'd' },
-  { NULL,       0, NULL,  0  },
-};
-
-static void usage(const char *name) {
-  printf(gettext("Usage: %s [opts...]\n"),name);
-  printf(gettext("  --help                   display this usage summary\n"));
-  printf(gettext("  --keypath path           set path to file containing authorization key\n"));
-  printf(gettext("  --hostname [host][:port] set brltty server host and port to connect to\n"));
-  printf(gettext("  --display display        set X display to connect to\n"));
-}
-
 int main(int argc, char *argv[]) {
-  int c;
-  const char *display = NULL;
+  processOptions(optionTable, optionCount,
+                 "xbrlapi", &argc, &argv,
+                 NULL, NULL, NULL,
+                 NULL);
 
-  while ((c=getopt_long(argc,argv,":h:H:k:d:f",longopts,NULL))!=EOF)
-  switch (c) {
-  case 'h':
-    usage(argv[0]);
-    exit(0);
-  case 'k':
-    keypath=optarg;
-    break;
-  case 'H':
-    hostname=optarg;
-    break;
-  case 'd':
-    display=optarg;
-    break;
-  case ':':
-    fprintf(stderr,gettext("missing argument to -%c\n"),optopt);
-    usage(argv[0]);
-    exit(1);
-  case '?':
-    fprintf(stderr,gettext("bad option -%c\n"),optopt);
-    usage(argv[0]);
-    exit(1);
-  }
+  tobrltty_init(keyFile,brlttyServer);
 
-  tobrltty_init(keypath,hostname);
-
-  toX_f(display);
+  toX_f(xDisplay);
 
   return 0;
 }
