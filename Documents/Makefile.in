@@ -15,19 +15,10 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-ABS_SRC_DIR = @abs_srcdir@
-
 all clean distclean::
-	for directory in $(MANUAL_DIRECTORIES); do (cd $(BLD_TOP)$(MANUAL_DIRECTORIES) && $(MAKE) $@) || exit 1; done
+	for directory in $(MANUAL_DIRECTORIES); do (cd $(BLD_TOP)$$directory && $(MAKE) $@) || exit 1; done
 
-all:: Manual BrlAPI $(ALL_API)
-
-LOCALE = C
-SETLOCALE = LC_ALL=$(LOCALE)
-
-Manual: Manual.txt Manual.made
-
-BrlAPI: BrlAPI.txt BrlAPI.made
+all:: $(ALL_API)
 
 all-api: BrlAPIref.made
 
@@ -36,16 +27,8 @@ BrlAPIref.made: $(BLD_TOP)$(PGM_DIR)/api.h $(SRC_TOP)$(PGM_DIR)/api_protocol.h B
 	ln -sf man3/brlapi_*.3 .
 	touch $@
 
-%.txt: $(SRC_DIR)/%.sgml
-	$(SETLOCALE) sgml2txt -l english -c latin $<
-
-%.made: $(ABS_SRC_DIR)/%.sgml
-	$(INSTALL_DIRECTORY) $*-HTML
-	cd $*-HTML && $(SETLOCALE) sgml2html -l english -c ascii $<
-	touch $@
-
 clean::
-	-rm -f *.made *.txt brlapi_*.3
+	-rm -f *.made brlapi_*.3
 	-rm -fr *-HTML man?
 
 distclean::
