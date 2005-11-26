@@ -1,0 +1,115 @@
+<!doctype linuxdoc system[
+
+<!ENTITY introduction 	SYSTEM "1-Introduction.sgml">
+<!ENTITY compilation 	SYSTEM "2-Compilation.sgml">
+<!ENTITY utilisation 	SYSTEM "3-Utilisation.sgml">
+<!ENTITY features 	SYSTEM "4-Features.sgml">
+<!ENTITY translation 	SYSTEM "5-Translation.sgml">
+<!ENTITY contraction 	SYSTEM "6-Contraction.sgml">
+<!ENTITY advanced 	SYSTEM "7-Advanced.sgml">
+<!ENTITY displays 	SYSTEM "8-Displays.sgml">
+<!ENTITY synthesizers 	SYSTEM "9-Synthesizers.sgml">
+<!ENTITY drivers 	SYSTEM "10-Drivers.sgml">
+<!ENTITY syntaxe 	SYSTEM "11-Syntaxe.sgml">
+<!ENTITY dots 		SYSTEM "12-Dots.sgml">
+<!ENTITY midi 		SYSTEM "13-Midi.sgml">
+<!ENTITY nabcc 		SYSTEM "14-nabcc.sgml">
+]>
+<article>
+
+<titlepag>
+  <title>BRLTTY
+    <subtitle>Accès à une console Linux/Unix pour les personnes non-voyantes utilisant des afficheurs braille
+  <author>
+    <name>Nikhil Nair <tt><htmlurl url="mailto:nn201@cus.cam.ac.uk" name="&lt;nn201@cus.cam.ac.uk&gt;"></tt>
+  <and>
+    <name>Nicolas Pitre <tt><htmlurl url="mailto:nico@cam.org" name="&lt;nico@cam.org&gt;"></tt>
+  <and>
+    <name>Stéphane Doyon <tt><htmlurl url="mailto:s.doyon@videotron.ca" name="&lt;s.doyon@videotron.ca&gt;"></tt>
+  <and>
+    <name>Dave Mielke <tt><htmlurl url="mailto:dave@mielke.cc" name="&lt;dave@mielke.cc&gt;"></tt>
+  <and>
+    <name>Traduction française
+  <and>
+    <name>Jean-Philippe Mengual <tt><htmlurl url="mailto:mengualjeanphi@free.fr" name="&lt;mengualjeanphi@free.fr&gt;"></tt>
+  <date>Version 3.6, Octobre 2004
+  <abstract>
+    Copyright &copy; 1995-2004 by L'Equipe BRLTTY - Tous Droits Réservés.
+    BRLTTY est un logiciel libre, et n'est fourni avec AUCUNE
+    GARANTIE. Il est placé sous les termes de la version 2 ou
+    ultérieure de la <bf>GNU General Public License</bf> publiée par
+    <bf>The Free Software Foundation</bf>.
+  </abstract>
+</titlepag>
+
+<toc>
+<lof>
+<lot>
+
+<sect>Préambule<p>
+
+<sect1>Licence<p>
+Ce programme est un logiciel libre. Vous pouvez le redistribuer et/ou
+le modifier sous les termes de la <htmlurl url="http://www.gnu.org/licenses/licenses.html#GPL" name="GNU General Public License">
+stipulé par la <htmlurl url="http://www.gnu.org/fsf/fsf.html" name="Free Software Foundation">. Vous pouvez utiliser une version 2 (ou supérieure) de la licence.
+
+Vous devriez avoir reçu une copie de la licence avec le
+programme. Elle devrait être dans le fichier <tt>COPYING</tt> du
+répertoire principal. Si ce n'est pas le cas, écrivez à la Free Software
+Foundation Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+<sect1>Mise en garde<p>
+Ce programme est distribué avec l'espoir d'être utile, mais SANS
+AUCUNE GARANTIE, même pas celle impliquée par une VALEUR MARCHANDE ou
+de SOLIDITÉ pour un BUT PARTICULIER. Voir la <bf>GNU General
+Public License</bf> pour plus de détails.
+
+<sect1>Contacts<label id="contact"><p>
+BRLTTY est le travail d'une équipe. Pour des informations actualisées,
+voyez la page Web de BRLTTY sur [<htmlurl url="http://mielke.cc/brltty/" name="http://mielke.cc/brltty/">]. Ont
+participé à ce document et au logiciel:
+<itemize>
+  <item>
+    <htmlurl url="http://mielke.cc/" name="Dave Mielke">
+    <tt><htmlurl url="mailto:dave@mielke.cc" name="&lt;dave@mielke.cc&gt;"></tt>
+    (maintaineur actuel, dévelopeur actif)
+  <item>
+    <htmlurl url="http://www.cam.org/~nico/" name="Nicolas Pitre">
+    <tt><htmlurl url="mailto:nico@cam.org" name="&lt;nico@cam.org&gt;"></tt>
+    (dévelopeur actif)
+  <item>
+    <htmlurl url="http://pages.infinit.net/sdoyon/" name="Stéphane Doyon">
+    <tt><htmlurl url="mailto:s.doyon@videotron.ca" name="&lt;s.doyon@videotron.ca&gt;"></tt>
+    (dévelopeur actif)
+  <item>
+    Nikhil Nair 
+    <tt><htmlurl url="mailto:nn201@cus.cam.ac.uk" name="&lt;nn201@cus.cam.ac.uk&gt;"></tt>
+    (auteur originel, n'est plus actif)
+</itemize>
+
+Tous les commentaires, suggestions, critiques et contributions sont
+les bienvenus. Nous essaierons de répondre rapidement aux mails
+(pertinents) mais ne pouvons le garantir. En général, nous vous
+recommandons d'envoyer les messages à tous les développeurs actifs. Si
+vous avez des questions sur un type d'afficheur particulier supporté par
+BRLTTY, il se peut que vous souhaitiez contacter l'auteur de son pilote (voir
+le fichier <tt>README</tt> dans son sous-répertoire pour plus de
+détails).
+
+&introduction
+&compilation
+&utilisation
+&features
+&translation
+&contraction
+&advanced
+
+&displays
+&synthesizers
+&drivers
+&syntaxe
+&dots
+&nabcc
+&midi
+
+</article>

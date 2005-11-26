@@ -1,0 +1,880 @@
+<sect>Utilisation de BRLTTY<p>
+Avant de démarrer BRLTTY, vous avez besoin d'installer votre afficheur
+braille. Dans la plupart des cas, cela se fait simplement en le
+connectant sur un port série disponible, puis en le mettant sous
+tension. Après avoir installé votre afficheur, exécutez simplement
+BRLTTY en tapant la commande BRLTTY sur une invite du shell (vous
+devez faire cela en tant que root). Intéressez-vous à l'option <ref id="options-braille-device" name="-d">
+en ligne de commande, à la ligne <ref id="configure-braille-device" name="braille-device"> du fichier de
+configuration, et à l'option de compilation <ref id="build-braille-device" name="--with-braille-device">
+pour d'autres moyens de dire à BRLTTY à quel périphérique votre
+afficheur est connecté. Regardez l'option <ref id="options-braille-driver" name="-b"> en ligne de commande,
+la ligne <ref id="configure-braille-driver" name="braille-driver"> du fichier de configuration, et l'option
+de compilation <ref id="configure-braille-driver" name="--with-braille-driver"> pour d'autres possibilités
+concernant la manière de dire à BRLTTY quel type d'afficheur braille
+vous avez. Observez l'option <ref id="options-braille-parameters" name="-B"> en ligne de commande, et la ligne
+de commande <ref id="configure-braille-parameters" name="braille-parameters"> du fichier de configuration pour
+d'autres possibilités concernant la manière de passer les paramètres
+au pilote de votre afficheur braille. Un message donnant le nom du
+programme (BRLTTY) et son numéro de version apparaîtront brièvement
+(voir l'option <ref id="options-message-delay" name="-M"> en ligne de commande) sur l'afficheur braille.
+L'afficheur montrera alors une petite zone de l'écran contenant le
+curseur. Par défaut, le curseur est représenté par les points 7 et 8
+superposés sur le caractère où il est.
+
+Toute activité de l'écran sera affichée sur l'afficheur
+braille. L'afficheur suivra aussi la progression du curseur sur
+l'écran. Cette caractéristique est connue en tant que <bf>cursor tracking</bf>.
+
+Toutefois, le fait de simplement taper sur le clavier et lire
+l'afficheur ne suffit pas. Essayez d'entrer une commande qui
+provoquera une erreur, et de taper <tt>entrée</tt>. L'erreur
+apparaît sur l'écran mais, sauf si vous avez un afficheur à plusieurs
+lignes, il y a des chances qu'elle ne soit pas visible sur l'afficheur
+braille. Vous n'y voyez qu'un invite du shell. Vous avez donc besoin,
+à présent, d'un moyen de déplacer la <tt>fenêtre</tt> braille à
+travers l'écran. Les touches de l'afficheur braille lui-même peuvent
+être utilisées pour envoyer les commandes à BRLTTY qui, entre autres
+choses, peut s'en occuper.
+
+<sect1>Commandes<p>
+Malheureusement, les différents afficheurs braille n'offre pas des
+touches de contrôle standard. Certains ont des touches standard six
+points, certains en ont huit, et d'autres n'en ont pas. Certains ont
+des touches au niveau des pouces, mais il n'y en a pas beaucoup en
+standard. Certains ont un bouton au-dessus de chaque cellule
+braille. Certains ont des boutons qu'il faut pousser. D'autres ont une
+barre facile d'accès fonctionnant beaucoup comme une manette de
+jeu. La plupart ont des combinaisons variées des éléments ci-dessus. A
+cause de la nature et de la disposition si différente entre chaque
+afficheur, reportez-vous à la documentation de votre afficheur
+personnel pour trouver ce que fait exactement chaque touche.
+
+Les commandes de BRLTTY sont identifiées par leur nom dans ce
+manuel. Si vous oubliez la/les touche(s) de votre afficheur braille à
+utiliser pour une commande particulière, reportez-vous à la page
+d'aide de son pilote. Par conséquent, la touche que vous devriez 
+mémoriser immédiatement est celle de la commande
+<ref id="command-HELP" name="HELP">. Utilisez les routines habituelles (comme
+décrit ci-dessous) pour naviguer dans la page d'aide, puis pressez de
+nouveau la touche d'aide pour quitter.
+
+<sect2>Déplacement vertical<label id="vertical"><p>
+Voir aussi les commandes de routines <ref id="command-PRINDENT-NXINDENT" name="PRINDENT/NXINDENT">.
+<descrip>
+  <tag>LNUP/LNDN<label id="command-LNUP-LNDN"></tag>
+    Monte/descend d'une ligne. Si le saut des lignes identiques a été
+    activée (voir la commande <ref id="command-SKPIDLNS" name="SKPIDLNS">), ces commandes, au lieu de
+    se déplacer exactement d'une ligne à l'autre, sont des alias pour
+    les commandes <ref id="command-PRDIFLN-NXDIFLN" name="PRDIFLN/NXDIFLN">.
+  <tag>WINUP/WINDN<label id="command-WINUP-WINDN"></tag>
+    Monte/descend d'un écran. Si l'écran n'est plus haut qu'une ligne,
+    elle déplace alors de 5 lignes.
+  <tag>PRDIFLN/NXDIFLN<label id="command-PRDIFLN-NXDIFLN"></tag>
+    Monte/descend à la ligne la plus proche ayant un contenu
+    différent. Si le saut de lignes identique a été activé (voir les
+    commandes <ref id="command-SKPIDLNS" name="SKPIDLNS">), ces commandes, plutôt que de sauter des
+    lignes identiques, sont des alias pour les commandes <ref id="command-LNUP-LNDN" name="LNUP/LNDN"> commands.
+  <tag>ATTRUP/ATTRDN<label id="command-ATTRUP-ATTRDN"></tag>
+    Monte/descend à la ligne la plus proche avec des attributs
+    différents (mise en valeur de caractère).
+  <tag>TOP/BOT<label id="command-TOP-BOT"></tag>
+    Va au début ou à la fin de la ligne.
+  <tag>TOP_LEFT/BOT_LEFT<label id="command-TOP_LEFT-BOT_LEFT"></tag>
+    Va au coin en haut à gauche ou en bas à gauche.
+  <tag>PRPGRPH/NXPGRPH<label id="command-PRPGRPH-NXPGRPH"></tag>
+    Va à la ligne la plus proche du paragraphe précédent/suivant (la
+    première ligne non vide après la ligne vide la plus proche). La
+    ligne courante est incluse dans la recherche de l'espace entre les
+    paragraphes.
+  <tag>PRPROMPT/NXPROMPT<label id="command-PRPROMPT-NXPROMPT"></tag>
+    Va à l'invite de commande suivant/précédent.
+  <tag>PRSEARCH/NXSEARCH<label id="command-PRSEARCH-NXSEARCH"></tag>
+    Recherche avant/arrière de l'occurrence la plus proche de la
+    chaîne de caractères du tampon coupé (voir <ref id="cut" name="Couper-coller">) qui
+    n'est pas dans la fenêtre braille. La recherche se fait à
+    gauche/droite, et commence au caractère immédiatement à
+    gauche/droite de la fenêtre, et en englobant le bord de
+    l'écran. La recherche ne tient pas compte de la casse.
+</descrip>
+
+<sect2>Déplacement horizontal<label id="horizontal"><p>
+Voir aussi la commande de la routine <ref id="command-SETLEFT" name="SETLEFT">.
+<descrip>
+  <tag>CHRLT/CHRRT<label id="command-CHRLT-CHRRT"></tag>
+    Va à gauche/droite d'un caractère.
+  <tag>HWINLT/HWINRT<label id="command-HWINLT-HWINRT"></tag>
+    Va à gauche/droite de la moitié de la fenêtre.
+  <tag>FWINLT/FWINRT<label id="command-FWINLT-FWINRT"></tag>
+    Va à gauche/droite d'une fenêtre. Ces commandes sont
+    particulièrement utile parce qu'elles débordent automatiquement
+    quand elles atteignent le bord de l'écran. Les autres
+    caractéristiques, comme celles de sauter les fenêtres vides (voir
+    la commande <ref id="command-SKPBLNKWINS" name="SKPBLNKWINS">), accroissent
+    leur maniabilité.
+  <tag>FWINLTSKIP/FWINRTSKIP<label id="command-FWINLTSKIP-FWINRTSKIP"></tag>
+    Va à gauche/droite à la fenêtre non-vide la plus proche.
+  <tag>LNBEG/LNEND<label id="command-LNBEG-LNEND"></tag>
+    Va au début/fin de la ligne.
+</descrip>
+
+<sect2>Déplacement implicite<p>
+Voir aussi la commande de routine <ref id="command-GOTOMARK" name="GOTOMARK">.
+<descrip>
+  <tag>HOME<label id="command-HOME"></tag>
+    Va à l'endroit où se trouve le curseur d'écran.
+  <tag>BACK<label id="command-BACK"></tag>
+    Revient là où la commande de déplacement la plus récente a mis la
+    fenêtre braille. C'est une façon facile de retourner à droite de là
+    où vous lisiez, après un événement imprévu (comme une poursuite du
+    curseur) qui déplace la fenêtre braille à un moment inapproprié.
+  <tag>RETURN<label id="command-RETURN"></tag>
+    <itemize>
+      <item>
+        Si le déplacement le plus récent de la fenêtre braille
+        était automatique, comme le résultat d'une poursuite du
+        curseur, revient là où la commande de déplacement la plus
+        récente l'a mise (voir la commande <ref id="command-BACK" name="BACK">).
+      <item>
+        Si le curseur n'est pas dans la fenêtre braille, va où se
+        trouve le curseur (voir la commande <ref id="command-HOME" name="HOME">).
+    </itemize>
+</descrip>
+
+<sect2>Caractéristiques de l'activation<p>
+Chacune de ces commandes a trois modes: <bf>activate</bf>
+(déclenche la fonction), <bf>deactivate</bf> (annule la fonction),
+et <bf>toggle</bf> (si la fonction est inhibée, la déclenche, et
+vis versa). Sauf si cela est explicitement dit, chacune de ces
+fonctions est initiallement à <tt>off</tt>, et, quand elle est
+<bf>on</bf>, cela agit sur l'exécution de BRLTTY tout entier. Le
+paramètre initial de certaines des fonctionnalités peut être changée
+par le <ref id="preferences-menu" name="menu préférences">.
+<descrip>
+  <tag>FREEZE<label id="command-FREEZE"></tag>
+    Gèle l'image de l'écran. BRLTTY fait une copie de l'écran (contenu
+    et attributs) comme au moment où l'image de l'écran est
+    raffraîchie, et ignore dès lors toute mise à jour de l'écran
+    jusqu'à ce qu'il soit réactualisé. Par exemple, cette
+    fonctionnalité facilite la lecture de la sortie d'une application
+    qui écrit beaucoup trop rapidement.
+  <tag>DISPMD<label id="command-DISPMD"></tag>
+    Montre les mises en relief (attributs) de chaque caractère dans la
+    fenêtre braille, plutôt que les caractères eux-mêmes (le
+    contenu). Par exemple, cette fonctionnalité est utile si vous
+    devez mettre en valeur un item. Quand elle montre le contenu de
+    l'écran, la table de traduction de texte est utilisée (voir
+    l'option <ref id="options-text-table" name="-t"> en ligne de commande, la ligne <ref id="configure-text-table" name="text-table"> du
+    fichier de configuration et l'option de compilation
+    <ref id="build-text-table" name="--with-text-table">).  Quand elle montre les attributs de
+    l'écran, la table de traduction des attributs est utilisée (voir
+    l'option ``-a'' en ligne de commande, la ligne
+    <ref id="build-attributes-table" name="attributes-table"> du fichier de configuration, et l'option de
+    compilation ``--with-attributes-table'').  Cette fonctionnalité ne
+    s'applique qu'au terminal virtuel courant.
+  <tag>SIXDOTS<label id="command-SIXDOTS"></tag>
+    Montre les caractères brailles sous la forme 6-points et non
+    8-points. Les points 7 et 8 sont encore utilisés par d'autres
+    fonctionnalités telles que la représentation du curseur et le
+    soulignement des caractères mis en relief. Si une table de braille
+    abrégé a été sélectionnée (voir l'option <ref id="options-contraction-table" name="-c"> en ligne de
+    commande, et la ligne <ref id="configure-contraction-table" name="contraction-table"> du fichier de
+    configuration), elle est utilisée. Vous pouvez aussi changer ce
+    paramètre avec la préférence <ref id="preference-text-style" name="Text Style">.
+  <tag>SLIDEWIN<label id="command-SLIDEWIN"></tag>
+    Si le suivit (tracking) du curseur (voir la commande <ref
+    id="command-CSRTRK" name="CSRTRK">) est  <bf>on</bf>, chaque fois que
+    le curseur se déplace de façon trop limitée (ou pas assez) au-delà
+    de la fin de la fenêtre braille, elle repositionne
+    horizontalement la fenêtre braille, de sorte que le curseur,
+    tant qu'il reste de ce côté, soit plus proche du centre. Si cette
+    caractéristique est <bf>off</bf>, la fenêtre braille est toujours
+    positionné de façon à ce que sont côté gauche soit un multiple de
+    de sa largeur depuis le bord gauche de l'écran.
+
+    Vous pouvez aussi modifier ce paramètre avec la préférence <ref id="preference-sliding-window" name="Sliding Window">.
+  <tag>SKPIDLNS<label id="command-SKPIDLNS"></tag>
+    Au lieu de déplacer exactement d'une ligne en haut ou en bas,
+    saute les lignes déjà lues qui ont le même contenu que la ligne
+    courante. Cette caractéristiques influence les commandes <ref id="command-LNUP-LNDN" name="LNUP/LNDN">,
+    autant que la ligne englobant la caractéristique des commandes
+  <ref id="command-FWINLT-FWINRT" name="FWINLT/FWINRT"> et <ref id="command-FWINLTSKIP-FWINRTSKIP" name="FWINLTSKIP/FWINRTSKIP">.
+    Vous pouvez aussi changer ce paramètre avec la préférence <ref id="preference-skip-identical-lines" name="Skip Identical Lines">.
+  <tag>SKPBLNKWINS<label id="command-SKPBLNKWINS"></tag>
+    Saute les lignes vides déjà passées lors d'une lecture en avant ou
+    en arrière. Cette caractéristique influence les commandes <ref id="command-FWINLT-FWINRT" name="FWINLT/FWINRT">.
+    Vous pouvez aussi changer ce paramètre avec la préférence 
+<ref id="preference-skip-blank-windows" name="Skip Blank Windows">.
+  <tag>CSRVIS<label id="command-CSRVIS"></tag>
+    Montre le curseur en superposant un modèle de point (voir la
+    commande <ref id="command-CSRSIZE" name="CSRSIZE">) au-dessus du
+    caractère où il se trouve. A l'origine, cette caractéristique est <bf>on</bf>.
+    Vous pouvez aussi changer ce paramètre avec la préférence <ref id="preference-show-cursor" name="Show Cursor">.
+  <tag>CSRHIDE<label id="command-CSRHIDE"></tag>
+    Rend le curseur invisible (voir la commande <ref
+    id="command-CSRVIS" name="CSRVIS"> ) de façon à lire précisément le
+    caractère sous lui. Cette caractéristique n'affecte que la console
+  virtuelle courante.
+  <tag>CSRTRK<label id="command-CSRTRK"></tag>
+    Poursuite du curseur. Si le curseur se déplace à un
+    endroit qui n'est pas à l'intérieur de la fenêtre braille, il
+    déplace automatiquement la fenêtre braille vers la nouvelle
+    position du curseur. Vous voudrez en principe que cette
+    caractéristique soit active, puisque cela minimise les effets du défilement
+    de l'écran, et puisque, lorsque vous entrez quelque chose, la
+    région à l'intérieur de laquelle vous écrivez actuellement est
+    toujours visible. 
+    Si cette option fait sauter la fenêtre braille à un moment
+    inadéquat, utilisez la commande <ref id="command-BACK" name="BACK">
+    pour revenir là où vous étiez en train de lire.
+    Il se peut que vous deviez
+    désactiver cette option lorsque vous utilisez une application qui
+    raffraîchit en permanence l'écran tant qu'est maintenu une base
+   d'organisation réparée. A l'origine, cette caractéristique est <bf>on</bf>.
+  <tag>CSRSIZE<label id="command-CSRSIZE"></tag>
+    Représente le curseur avec les huit points (un bloc complet), au
+    lieu de n'afficher que les points 7 et 8 (un soulignement). Vous
+  pouvez aussi changer ce paramètre avec la préférence <ref id="preference-cursor-style" name="Cursor Style">.
+  <tag>CSRBLINK<label id="command-CSRBLINK"></tag>
+    Cache (active et la désactive en fonction d'un intervalle
+    prédéfini) le symbole représentant le curseur (voir la commande <ref id="command-CSRVIS" name="CSRVIS">).
+    Vous pouvez changer ce paramètre avec la préférence <ref id="preference-blinking-cursor" name="Blinking Cursor">.
+  <tag>ATTRVIS<label id="command-ATTRVIS"></tag>
+    Souligne (avec la combinaison des points 7 et 8) les caractères à
+    mettre en évidence.
+    <descrip>
+      <tag>no underline</tag>
+        Blanc sur noir (normal),
+        Gris sur noir,
+        Blanc sur bleu,
+        Noir sur cyan.
+      <tag>dots 7 and 8</tag>
+        Noir sur blanc (vidéo inversée).
+      <tag>dot 8</tag>
+        Tout le reste.
+    </descrip>
+    Vous pouvez aussi changer ce paramètre avec la préférence <ref id="preference-show-attributes" name="Show Attributes">.
+  <tag>ATTRBLINK<label id="command-ATTRBLINK"></tag>
+    Masque (active ou désactive selon un intervalle prédéfini)
+    l'attribut souligné (voir la commande <ref id="command-ATTRVIS" name="ATTRVIS"> command).
+    A l'origine, cette caractéristique est <bf>on</bf>.
+    Vous pouvez aussi changer ce paramètre avec la préférence <ref id="preference-blinking-attributes" name="Blinking Attributes">.
+  <tag>CAPBLINK<label id="command-CAPBLINK"></tag>
+    Masque (active ou désactive selon un intervalle prédéfini) les
+    lettres en majuscule. Vous pouvez aussi changer ce paramètre avec
+    la préférence <ref id="preference-blinking-capitals" name="Blinking Capitals">.
+  <tag>TUNES<label id="command-TUNES"></tag>
+    Joue un son court prédéfini (voir <ref id="tunes" name="Alert
+    Tunes">) chaque fois qu'un événement significatif se produit. A
+    l'origine, cette caractéristique est <bf>on</bf>.
+    Vous pouvez aussi changer ce paramètre avec la préférence <ref id="preference-alert-tunes" name="Alert Tunes">.
+  <tag>AUTOREPEAT<label id="command-AUTOREPEAT"></tag>
+    Répète automatiquement une commande à un intervalle régulier après
+    un délai initial tant que sa touche (combinaison) reste
+    appuyée. Seuls certains pilotes supportent cette fonctionnalité,
+    la principale limite étant que la plupart des afficheurs braille
+    ne signalent pas en même temps les touches pressées et les touches
+    exécutées comme des événements distinctement séparés. A l'origine,
+    cette caractéristique est <bf>off</bf>.
+    Vous pouvez aussi changer ce paramètre avec la préférence <ref id="preference-autorepeat" name="Autorepeat">.
+  <tag>AUTOSPEAK<label id="command-AUTOSPEAK"></tag>
+    Dit automatiquement:
+    <itemize>
+      <item>la nouvelle ligne quand la fenêtre braille est déplacée verticalement
+      <item>les caractères que vous entrez ou que vous effacez.
+      <item>le caractère vers lequel vous déplacez le curseur.
+    </itemize>
+    A l'origine, cette caractéristique est <bf>off</bf>.
+    Vous pouvez aussi changer ce paramètre avec la préférence <ref id="preference-autospeak" name="Autospeak">.
+</descrip>
+
+<sect2>Mode Sélection<p>
+<descrip>
+  <tag>HELP<label id="command-HELP"></tag>
+    Se déplace à la page d'aide du pilote d'un afficheur braille. C'est
+    là que vous pouvez trouver un résumé en ligne de choses telles que
+    ce que font les touches de votre afficheur braille, et comment
+    interpréter ses cellules d'état.
+    Utilisez les commandes <ref id="vertical" name="vertical">
+    et <ref id="horizontal" name="horizontal"> pour naviguer
+    dans la page d'aide. Appelez la commande <tt>help</tt> de nouveau pour
+    revenir à l'écran.
+  <tag>INFO<label id="command-INFO"></tag>
+    Va à l'affichage des états (voir la section <ref id="status"
+    name="Affichage des Statuts"> pour des détails complets). Cela
+    présente un résumé comprenant la position du curseur, la position
+    de la fenêtre braille, et l'état d'un certain nombre de
+    caractéristiques de BRLTTY. Appelez de nouveau
+    cette commande pour revenir à l'écran.
+  <tag>LEARN<label id="command-LEARN"></tag>
+    Entre dans le mode d'apprentissage de commande (voir la section <ref id="learn"
+    name="Mode Appresntissage Commande"> pour des détails complets). C'est ainsi
+    que vous pouvez apprendre de façon interactive ce que font les
+    touches de votre afficheur braille. Rappelez cette commande pour
+    revenir à l'écran. Cette commande n'est pas disponible si l'option
+    de compilation <ref id="build-learn-mode"
+    name="--disable-learn-mode"> a été spécifiée.
+</descrip>
+
+<sect2>Maintenance des préférences<p>
+<descrip>
+  <tag>PREFMENU<label id="command-PREFMENU"></tag>
+    Accès au menu des préférences (voir <ref id="preferences-menu" name="Le
+    Preferences Menu"> pour des détails complets). Rappelez cette
+    commande pour revenir à l'écran. Cette commande n'est pas
+    disponible si l'option de compilation <ref
+    id="build-preferences-menu" name="--disable-preferences-menu"> a
+    été spécifiée.
+  <tag>PREFSAVE<label id="command-PREFSAVE"></tag>
+    Enregistre les paramètres de préférence courants (voir <ref
+    id="preferences" name="Preferences"> pour des détails complets).
+  <tag>PREFLOAD<label id="command-PREFLOAD"></tag>
+    Recharge les derniers paramètres de préférence sauvegardés
+    (voir <ref id="preferences" name="Preferences"> pour des
+    détails complets).
+</descrip>
+
+<sect2>Navigation dans le menu<label id="menu"><p>
+<descrip>
+  <tag>MENU_FIRST_ITEM/MENU_LAST_ITEM<label id="command-MENU_FIRST_ITEM-MENU_LAST_ITEM"></tag>
+    Va au premier/dernier élément du menu.
+  <tag>MENU_PREV_ITEMMENU_NEXT_ITEM/<label id="command-MENU_PREV_ITEM-MENU_NEXT_ITEM"></tag>
+    Va à l'élément précédent/suivant du menu.
+  <tag>MENU_PREV_SETTING/MENU_NEXT_SETTING<label id="command-MENU_PREV_SETTING-MENU_NEXT_SETTING"></tag>
+    Remonte/descend le paramètre des éléments du menu courant.
+</descrip>
+
+<sect2>Contrôles de la verbosité<label id="speech"><p>
+<descrip>
+  <tag>SAY_LINE<label id="command-SAY_LINE"></tag>
+    Dit la ligne courante. La préférence <ref
+    id="preference-sayline-mode" name="Say-Line Mode"> détermine si le
+    message en attente est proposé en premier.
+  <tag>SAY_ABOVE<label id="command-SAY_ABOVE"></tag>
+    Dit la portion en haut de l'écran (fin à la ligne courante).
+  <tag>SAY_BELOW<label id="command-SAY_BELOW"></tag>
+    Dit la portion en bas de l'écran (début à la ligne courante).
+  <tag>MUTE<label id="command-MUTE"></tag>
+    Arrête immédiatement la parole.
+  <tag>SPKHOME<label id="command-SPKHOME"></tag>
+    Va où se trouve le curseur parlant.
+  <tag>SAY_SLOWER/SAY_FASTER<label id="command-SAY_SLOWER-SAY_FASTER"></tag>
+    Diminue/accélère le débit de parole (voir aussi la péférence <ref id="preference-speech-rate" name="Débit de parole">).
+    Cette commande n'est disponible que si un pilote qui la supporte est utilisé.
+  <tag>SAY_SOFTER/SAY_LOUDER<label id="command-SAY_SOFTER-SAY_LOUDER"></tag>
+    Diminue/augmente le volume de la parole (voir aussi la préférence <ref id="preference-speech-volume" name="Volume de la parole">).
+    Cette commande n'est disponible que si un pilote qui la supporte est utilisé.
+</descrip>
+
+<sect2>Aller à un terminal virtuel<p>
+Voir aussi la commande de touche de chemin <ref id="command-SWITCHVT" name="SWITCHVT">.
+<descrip>
+  <tag>SWITCHVT_PREV/SWITCHVT_NEXT<label id="command-SWITCHVT_PREV-SWITCHVT_NEXT"></tag>
+    Va à la console précédente/suivante.
+</descrip>
+
+<sect2>Autres Commandes<p>
+<descrip>
+  <tag>CSRJMP_VERT<label id="command-CSRJMP_VERT"></tag>
+    Amène le curseur n'importe où sur la première ligne de la fenêtre
+    braille (voir <ref id="routing" name="Déplacement du Curseur"> pour des détails complets).
+    Le curseur se déplace grâce à la simulation de l'appui sur les touches de direction verticales.
+    Cette commande ne fonctionne pas toujours car certaines applications,
+    soit déplace le curseur sans vraiment avertir, soit utilisent
+    les flèches de direction à d'autres fins que le déplacement du curseur.
+    C'est toutefois un peu plus sûr que les autres commandes de déplacement du
+    curseur car cette commande ne tente pas de simuler les flèches gauche et
+    droite.
+  <tag>PASTE<label id="command-PASTE"></tag>
+    Insère les caractères du tampon coupé à la place courante du curseur.
+    (voir <ref id="cut" name="Couper-coller"> pour des détails complets).
+  <tag>RESTARTBRL<label id="command-RESTARTBRL"></tag>
+    Arrête puis relance le pilote de l'afficheur braille.
+  <tag>RESTARTSPEECH<label id="command-RESTARTSPEECH"></tag>
+    Arrête puis relance le pilote de la synthèse vocale.
+</descrip>
+
+<sect2>Les routines<p>
+<descrip>
+  <tag>ROUTE<label id="command-ROUTE"></tag>
+    Déplace le curseur au caractère associé à la routine
+    (voir <ref id="routing" name="Déplacement du Curseur"> pour des
+    détails complets).
+    Le curseur se déplace grâce à la simulation de l'appui sur les touches de direction verticales.
+    Cette commande ne fonctionne pas toujours car certaines applications,
+    soit déplace le curseur sans vraiment avertir, soit utilisent
+    les flèches de direction à d'autres fins que le déplacement du curseur.
+  <tag>CUTBEGIN<label id="command-CUTBEGIN"></tag>
+    Positionne le début du bloc coupé au caractère associé à la routine-curseur.
+    (voir <ref id="cut" name="Copier-coller"> pour des détails complets).
+    Cette commande vide le tampon coupé.
+  <tag>CUTAPPEND<label id="command-CUTAPPEND"></tag>
+    Positionne le début du bloc coupé au caractère associé à la routine
+    (voir <ref id="cut" name="Copier-coller"> pour des détails complets).
+    Cette commande ne vide pas le tampon coupé.
+  <tag>CUTRECT<label id="command-CUTRECT"></tag>
+    Fixe la fin du bloc coupé au caractère associé à la touche de direction,
+    et place la région rectangulaire sur le tampon coupé (voir
+    <ref id="cut" name="Cut and Paste"> pour des détails complets).
+  <tag>CUTLINE<label id="command-CUTLINE"></tag>
+    Fixe la fin du bloc coupé au caractère associé à la touche de
+    direction, et place la partie linéaire sur le bloc coupé (voir
+    <ref id="cut" name="Cut and Paste"> pour des détails complets).
+  <tag>SWITCHVT<label id="command-SWITCHVT"></tag>
+    Va au terminal virtuel dont le numéro (démarrant à 1) correspond à
+    celui de la routine. Voir aussi les commandes de
+    déplacement dans les terminaux virtuels <ref id="command-SWITCHVT_PREV-SWITCHVT_NEXT"
+    name="SWITCHVT_PREV/SWITCHVT_NEXT">.
+  <tag>PRINDENT/NXINDENT<label id="command-PRINDENT-NXINDENT"></tag>
+    Monte/descend à la ligne la plus proche qui n'est pas indentée plus
+    que la colonne associée à la routine.
+  <tag>DESCCHAR<label id="command-DESCCHAR"></tag>
+    Affiche momentanément (voir l'option <ref
+    id="options-message-delay" name="-M">
+    en ligne de commande) un message décrivant le caractère associé à
+    la routine. Cela montre les valeurs décimales et
+    hexadécimales du caractère, les couleurs de fond et de premier
+    plan, et, lorsqu'ils sont présents, les attributs spéciaux
+    (<tt>bright</tt> et <tt>blink</tt>). Le message ressemble à cela:
+    <tscreen>char 65 (0x41): white on black bright blink</tscreen>
+  <tag>SETLEFT<label id="command-SETLEFT"></tag>
+    Replace horrizontalement la fenêtre braille de façon à ce que son
+    côté gauche soit à la colonne associée à la touche de
+    déplacement. Cette caractéristique rend très facile l'action de
+    mettre la fenêtre précisément là où il faut et, donc, pour les
+    afficheurs qui ont des touches routines, élimine presque la
+    nécessité pour beaucoup de déplacement élémentaires de la fenêtre
+    (comme les commandes <ref id="command-CHRLT-CHRRT"
+    name="CHRLT/CHRRT"> et <ref id="command-HWINLT-HWINRT" name="HWINLT/HWINRT">).
+  <tag>SETMARK<label id="command-SETMARK"></tag>
+    Marque la position courante de la fenêtre braille dans
+    une mémoire associée à la routine. Voir la commande <ref id="command-GOTOMARK" name="GOTOMARK">.
+    Cette caractéristique n'affecte que le terminal virtuel courant.
+  <tag>GOTOMARK<label id="command-GOTOMARK"></tag>
+    Déplace la fenêtre braille à la position précédemment marquée
+    (voir la commande <ref id="command-SETMARK" name="SETMARK">) avec
+    la même routine.
+    Cette caractéristique n'affecte que le terminal virtuel courant.
+</descrip>
+
+<sect1>The fichier de configuration<label id="configure"><p>
+
+Des valeurs système par défaut pour certains paramètres peuvent être
+établis dans un fichier de configuration. Le nom par défaut de ce
+fichier est <tt>/etc/brltty.conf</tt>, même s'il peut être contourné
+par l'option en ligne de commande <ref id="options-configuration-file" name="-f">.
+Son existence n'est pas indispensable.
+Vous pouvez trouver un ficher type dans le sous-répertoire
+<tt>DOCS</tt>
+
+Les lignes vides sont ignorées.
+Un commentaire commence par un signe nombre (<tt>&num;</tt>), et continue jusqu'à
+la fin de la ligne.
+Les lignes de commande suivantes sont reconnues:
+<descrip>
+  <tag><tt>api-parameters</tt> <em>name</em><tt>=</tt><em>valeur</em><tt>,</tt>...<label id="configure-api-parameters"></tag>
+    Spécifie les paramètres pour l'API.
+    Si vous spécifiez le même paramètre plus d'une fois, sa
+    valeur située le plus à droite est utilisée. Pour une description
+    des paramètres acceptés par l'interface, voyez le manuel de
+    référence <bf>BrlAPI</bf>. Voir l'option de compilation <ref id="build-api-parameters" name="--with-api-parameters">
+    pour les paramètres par défaut établis lors de la procédure de
+    compilation. Cette ligne de commande peut être évitée avec
+    l'option de ligne de commande <ref id="options-api-parameters" name="-A">.
+  <tag><tt>attributes-table</tt> <em>fichier</em><label id="configure-attributes-table"></tag>
+    Spécifie la table de traduction des attributs (voir la section
+    <ref id="translation" name="Translation Tables"> pour des détails).
+    Si vous fournissez un chemin relatif, il est déterminé par rapport à <tt>/etc/brltty</tt>
+    (voir les options de compilation <ref id="build-data-directory" name="--with-data-directory">
+    et <ref id="build-execute-root" name="--with-execute-root">
+    pour plus de détails).
+    L'extension <tt>.tbl</tt> est facultative.
+    Voir l'option de compilation <ref id="build-attributes-table" name="--with-attributes-table">
+    pour les paramètres par défaut établis pendant la procédure de compilation.
+    Vous pouvez vous passer de cette ligne de commande avec l'option
+    en ligne de commande <ref id="options-attributes-table" name="-a">.
+  <tag><tt>braille-device</tt> <em>device</em><tt>,</tt>...<label id="configure-braille-device"></tag>
+    Spécifie le périphérique auquel l'afficheur braille est connecté
+    (voir la section <ref id="operand-braille-device" name="Spécification du périphérique braille">).
+    Voir l'option de compilation <ref id="build-braille-device" name="--with-braille-device">
+    pour les paramètres par défaut établis durant la procédure de compilation.
+    Vous pouvez vous passer de cette ligne de commande avec
+    l'option <ref id="options-braille-device" name="-d">.
+  <tag><tt>braille-driver</tt> <em>driver</em><tt>,</tt>...|<tt>auto</tt><label id="configure-braille-driver"></tag>
+    Spécifie le pilote de l'afficheur braille (voir la section
+    <ref id="operand-driver" name="Spécification du pilote">).
+    Voir l'option de compilation <ref id="build-braille-driver" name="--with-braille-driver">
+    pour les paramètres par défaut établis lors de la procédure de
+    compilation.
+    Vous pouvez éviter cette ligne avec l'option en ligne de commande 
+    <ref id="options-braille-driver" name="-b">.
+  <tag><tt>braille-parameters</tt> [<em>pilote</em><tt>:</tt>]<em>nom</em><tt>=</tt><em>valeur</em><tt>,</tt>...<label id="configure-braille-parameters"></tag>
+    Spécifie les paramètres pour les pilotes de l'afficheur
+    braille. Si vous spécifiez le même paramètre plus d'une fois,
+    c'est sa valeur placée le plus à droite qui est utilisée. Si le
+    nom d'un paramètre est qualifié par celui d'un pilote (voir la
+    section <ref id="drivers" name="Codes d'identification de pilote">)
+    ce paramètre ne s'applique qu'à ce pilote; sinon il s'applique à
+    tous les pilotes.
+    Pour une description des paramètres acceptés par un pilote en
+    particulier, voyez la documentation de ce pilote.
+    Voir l'option de compilation <ref id="build-braille-parameters" name="--with-braille-parameters">
+    pour les paramètres par défaut établis lors de la procédure de
+    compilation.
+    Vous pouvez éviter cette ligne avec l'option en ligne de commande
+    <ref id="options-braille-parameters" name="-B">.
+  <tag><tt>contraction-table</tt> <em>fichier</em><label id="configure-contraction-table"></tag>
+    Spécifie la table abrégé (voir la section <ref id="contraction"
+    name="Braille abrégé"> pour des détails).
+    Si vous fournissez un chemin relatif, il est fdéterminé par rapport à <tt>/etc/brltty</tt>
+    (voir les options de compilation <ref id="build-data-directory" name="--with-data-directory">
+    et <ref id="build-execute-root" name="--with-execute-root"> pour
+    plus de détails.
+    L'extension <tt>.ctb</tt> est facultative.
+    La table d'abrégé est utilisée quand la caractéristique braille
+    6-points est activée (voir la commande <ref id="command-SIXDOTS" name="SIXDOTS">
+    et la préférence <ref id="preference-text-style" name="Text Style">).
+    Par défaut, affiche le braille 6 points intégral.
+    Vous pouvez éviter cette ligne avec l'option en ligne de commande
+    <ref id="options-contraction-table" name="-c">.
+    Elle n'est pas disponible si l'option de compilation <ref
+    id="build-contracted-braille" name="--disable-contracted-braille">
+    a été spécifiée.
+  <tag><tt>midi-device</tt> <em>device</em><label id="configure-midi-device"></tag>
+    Spécifie le périphérique à utiliser pour l'interface MIDI
+    (voir la section <ref id="operand-midi-device"
+    name="Spécification du périphérique MIDI">).
+    Vous pouvez éviter cette ligne avec l'option en ligne de commande
+    <ref id="options-midi-device" name="-m">.
+    Elle n'est pas disponible si vous avez spécifié l'option de
+    compilation <ref id="build-midi-support" name="--disable-midi-support">.
+  <tag><tt>pcm-device</tt> <em>device</em><label id="configure-pcm-device"></tag>
+    Spécifie le périphérique à utiliser pour l'audio (voir la
+    section <ref id="operand-pcm-device" name="Spécification du
+    périphérique PCM">).
+    Vous pouvez éviter cette ligne avec l'option en ligne de commande
+    <ref id="options-pcm-device" name="-p">.
+    Elle n'est pas disponible si vous avez spécifié l'option de
+    compilation <ref id="build-pcm-support" name="--disable-pcm-support">.
+  <tag><tt>screen-parameters</tt> <em>name</em><tt>=</tt><em>value</em><tt>.</tt>...<label id="configure-screen-parameters"></tag>
+    Spécifie les paramètres pour le pilote d'écran.
+    Si le même paramètre est spéciié plus d'une fois, sa valeur la
+    plus à droite est utilisée. Pour une description des paramètres
+    acceptés par un pilote en particulier, voyez la documentation de
+    ce pilote. Voir l'option de compilation <ref id="build-screen-parameters" name="--with-screen-parameters">
+    pour les paramètres par défaut établis pendant la procédure de
+    compilation.
+    Vous pouvez éviter cette ligne avec l'option en ligne de commande
+    <ref id="options-screen-parameters" name="-X">.
+  <tag><tt>speech-driver</tt> <em>driver</em><tt>.</tt>...|<tt>auto</tt><label id="configure-speech-driver"></tag>
+    Spécifie le pilote de synthèse vocales (voir la section 
+    <ref id="operand-driver" name="Spécification du pilote de synthèse">).
+    Voir l'option de compilation <ref id="build-speech-driver" name="--with-speech-driver">
+    pour les paramètres par défaut établis lors de la procédure de
+    compilation.
+    Vous pouvez éviter cette ligne avec l'option en ligne de commande
+    <ref id="options-speech-driver" name="-s">.
+    Elle n'est pas disponible si vous avez spécifié l'option de
+    compilation <ref id="build-speech-support" name="--disable-speech-support">.
+  <tag><tt>speech-fifo</tt> <em>file</em><label id="configure-speech-fifo"></tag>
+    Spécifie le FIFO (un fichier spécial qui fonctionne comme un
+    tuyau en mode "first in first out", premier entré premier sorti) qui doit être
+    utilisé par les autres applications voulant
+    accéder au pilote de la synthèse de BRLTTY.
+    Vous pouvez éviter cette ligne avec l'option en ligne de commande
+    <ref id="options-speech-fifo" name="-F">.
+    Elle n'est pas disponible si vous avez spécifié <ref id="build-speech-support" name="--disable-speech-support">.
+  <tag><tt>speech-parameters</tt> [<em>driver</em><tt>:</tt>]<em>name</em><tt>=</tt><em>value</em><tt>.</tt>...<label id="configure-speech-parameters"></tag>
+    Spécifie les paramètres pour les pilotes de synthèse vocale. Si
+    vous spécifiez plus d'une fois le paramètre, c'est sa valeur le
+    plus à droite qui est utilisée. 
+    Si le nom d'un paramètre est qualifié par le nom d'un pilote (voir
+    la section <ref id="drivers" name="Codes d'identification de pilote">)
+    ce paramètre s'applique seulement à ce pilote; sinon il s'applique
+    pour tous les pilotes.
+    Pour une description des paramètres acceptés par un pilote en
+    particulier, voyez la documentation de ce pilote. Voir l'option de
+    compilation <ref id="build-speech-parameters" name="--with-speech-parameters">
+    pour les paramètres par défaut établis durant la procédure de compilation.
+    Vous pouvez éviter cette ligne avec l'option en ligne de commande
+    <ref id="options-speech-parameters" name="-S">.
+  <tag><tt>text-table</tt> <em>file</em><label id="configure-text-table"></tag>
+    Spécifie la table de traduction de texte (voir la section <ref
+    id="translation" name="Tables de traduction"> pour les détails).
+    Si vous fournissez un chemin relatif, il est déterminé par rapport à <tt>/etc/brltty</tt>
+    (voir les options de compilation <ref id="build-data-directory" name="--with-data-directory">
+    et <ref id="build-execute-root" name="--with-execute-root">.
+    pour plus de détails).
+    L'extension <tt>.tbl</tt> est facultative.
+    Pour un nom de fichier simple, le préfixe <tt>text.</tt> est facultatif.
+    Voir l'option de compilation <ref id="build-text-table" name="--with-text-table">
+    pour les paramètres par défaut établis lors de la procédure de
+    compilation.
+    Vous pouvez éviter cette ligne avec l'option en ligne de commande
+    <ref id="options-text-table" name="-t">.
+</descrip>
+
+<sect1>Options en ligne de commande<label id="options"><p>
+Un grand nombre de paramètres peuvent être spécifiés explicitement
+lorsque vous appelez BRLTTY. La commande <tt>brltty</tt> accepte les options
+suivantes:
+<descrip>
+  <tag><tt>-a</tt><em>file</em> <tt>--attributes-table=</tt><em>fichier</em><label id="options-attributes-table"></tag>
+    Spécifie la table de traduction des attributs (voir la section
+    <ref id="translation" name="Tables de traduction"> pour les détails).
+    Si vous fournissez un chemin relatif, il est déterminé par rapport à <tt>/etc/brltty</tt>
+    (voir les options de compilation <ref id="build-data-directory" name="--with-data-directory">
+    et <ref id="build-execute-root" name="--with-execute-root">
+    pour plus de détails).
+    L'extension <tt>.tbl</tt> est facultative.
+    Voir la ligne <ref id="configure-attributes-table" name="attributes-table">
+    du fichier de configuration pour la sélection des paramètres par défaut
+    lors de l'exécution.
+    Vous pouvez changer ce paramètre avec la préférence <ref id="preference-attributes-table" name="Attributes Table">.
+  <tag><tt>-b</tt><em>driver</em><tt>.</tt>...|<tt>auto</tt> <tt>--braille-driver=</tt><em>driver</em><tt>.</tt>...|<tt>auto</tt><label id="options-braille-driver"></tag>
+    Spécifie le pilote de l'afficheur braille (voir la section
+    <ref id="operand-driver" name="Spécification du pilote">).
+    Voir la ligne <ref id="configure-braille-driver" name="braille-driver">
+    du fichier de configuration pour les paramètres par défaut
+    à l'exécution.
+  <tag><tt>-c</tt><em>fichier</em> <tt>--contraction-table=</tt><em>fichier</em><label id="options-contraction-table"></tag>
+    Spécifie la table d'abrégé (voir la section <ref id="contraction" name="Braille abrégé">
+    pour les détails).
+    Si vous fournissez un chemin relatif, il est rattaché à <tt>/etc/brltty</tt>.
+    (voir les options de compilation <ref id="build-data-directory" name="--with-data-directory">
+    et <ref id="build-execute-root" name="--with-execute-root"> pour plus de
+    détails).
+    L'extension <tt>.ctb</tt> est facultative.
+    La table d'abrégé est utilisée lorsque la caractéristiques braille 6
+    points est activée (voir la commande <ref id="command-SIXDOTS" name="SIXDOTS">
+    et la préférence <ref id="preference-text-style" name="Text Style">).
+    Voir la ligne <ref id="configure-contraction-table" name="contraction-table">
+    du fichier de configuration pour les paramètres par défaut à l'exécution.
+    Vous pouvez changer ce paramètre avec
+    la préférence <ref id="preference-contraction-table" name="Contraction Table">.
+    Cette option n'est pas disponible si l'option de compilation 
+    <ref id="build-contracted-braille" name="--disable-contracted-braille">
+    a été spécifiée.
+  <tag><tt>-d</tt><em>peripherique</em><tt>.</tt>... <tt>--braille-device=</tt><em>device</em><tt>.</tt>...<label id="options-braille-device"></tag>
+    Spécifie le périphérique auquel l'afficheur braille est connecté (voir la
+    section <ref id="operand-braille-device" name="Spécification du périphérique braille">).
+    Voir la ligne <ref id="configure-braille-device" name="braille-device">
+    du fichier de configuration pour les paramètres par défaut à
+    l'exécution.
+  <tag><tt>-e</tt> <tt>--standard-error</tt><label id="options-standard-error"></tag>
+    Ecrit les messages de diagnostic sur la console d'erreur standard (stderr).
+    Par défaut, ils s'enregistrent dans <tt>syslog</tt>.
+  <tag><tt>-f</tt><em>fichier</em> <tt>--configuration-file=</tt><em>file</em><label id="options-configuration-file"></tag>
+    Spécifie l'emplacement du <ref id="configure" name="fichier de configuration">
+    qui doit être utilisé pour l'établissement des paramètres par défaut à l'exécution.
+  <tag><tt>-h</tt> <tt>--help</tt><label id="options-help"></tag>
+    Affiche un résumé des options de la ligne de commande acceptées par BRLTTY,
+    puis quitte.
+  <tag><tt>-l</tt><em>niveau</em> <tt>--log-level=</tt><em>level</em><label id="options-log-level"></tag>
+    Spécifie le niveau de sécurité pour l'émission des messages de diagnostique.
+    Les niveaux suivants sont reconnus.
+    <descrip>
+      <tag>0</tag>emergency (urgence)
+      <tag>1</tag>alert (alerte)
+      <tag>2</tag>critical (critique)
+      <tag>3</tag>error (erreur)
+      <tag>4</tag>warning (attention)
+      <tag>5</tag>notice (note)
+      <tag>6</tag>information
+      <tag>7</tag>debug (mise au point)
+    </descrip>
+    Vous pouvez fournir soit le numéro soit le nom, et vous pouvez abréger le nom.
+    Si vous ne spécifiez pas cela, c'est <tt>information</tt> qui est utilisé
+    (voir l'option <ref id="options-quiet" name="-q"> pour plus de détails).
+  <tag><tt>-m</tt><em>périphérique</em> <tt>--midi-device=</tt><em>device</em><label id="options-midi-device"></tag>
+    Spécifie le pilote à utiliser pour l'interface MIDI.
+    (voir la section <ref id="operand-midi-device" name="Spécification du périphérique MIDI">).
+    Voir la ligne <ref id="configure-midi-device" name="midi-device">
+    du fichier de configuration pour les paramètres par défaut à l'exécution.
+    Cette option n'est pas disponible si vous avez spécifié l'option de
+    compilation <ref id="build-midi-support" name="--disable-midi-support">.
+  <tag><tt>-n</tt> <tt>--no-daemon</tt><label id="options-no-daemon"></tag>
+    Indique à BRLTTY qu'il doit rester au premier plan.
+    Si cette option n'est pas spéciiée, BRLTTY devient un processus en
+    arrière-plan (démon) après s'être initialisé mais avant de démarrer tous
+    les pilotes sélectionnés.
+  <tag><tt>-p</tt><em>périphérique</em> <tt>--pcm-device=</tt><em>device</em><label id="options-pcm-device"></tag>
+    Spécifie le périphérique à utiliser pour l'audio (voir la section
+    (<ref id="operand-pcm-device" name="Spécification du périphérique PCM">).
+    Voir la ligne <ref id="configure-pcm-device" name="pcm-device">
+    du fichier de configuration pour les paramètres par défaut à l'exécution.
+    Cette option n'est pas disponible si vous avez spécifié l'option de 
+    compilation <ref id="build-pcm-support" name="--disable-pcm-support">.
+  <tag><tt>-q</tt> <tt>--quiet</tt><label id="options-quiet"></tag>
+    Met moins d'informations dans le log. Cette option passe le niveau de
+    journalisation (voir l'option <ref id="options-log-level" name="-l">
+    à <tt>notice</tt> si vous avez spécifié l'option <ref id="options-verify" name="-v">
+    ou <ref id="options-version" name="-V">,
+    et, sinon, à <tt>warning</tt>.
+  <tag><tt>-s</tt><em>périphérique</em><tt>.</tt>...|<tt>auto</tt> <tt>--speech-driver=</tt><em>driver</em><tt>.</tt>...|<tt>auto</tt><label id="options-speech-driver"></tag>
+    Spécifie le pilote de la synthèse vocale (voir la section 
+    <ref id="operand-driver" name="Spécification de pilote">).
+    Voir la ligne <ref id="configure-speech-driver" name="speech-driver">
+    du fichier de configuration pour les paramètres par défaut à l'exécution.
+    Cette option n'est pas disponible si vous avez spécifié l'option de compilation
+    <ref id="build-speech-support" name="--disable-speech-support">.
+  <tag><tt>-t</tt><em>fichier</em> <tt>--text-table=</tt><em>file</em><label id="options-text-table"></tag>
+    Spécifie la table de traduction de texte (voir la section
+    <ref id="translation" name="Tables de traduction"> pour les détails).
+    Si vous fournissez un chemin relatif, il est rattaché à <tt>/etc/brltty</tt>
+    (voir les options de compilation <ref id="build-data-directory" name="--with-data-directory">
+    et <ref id="build-execute-root" name="--with-execute-root"> pour plus de
+    détails).
+    L'extension <tt>.tbl</tt> est facultative.
+    Pour un nom de fichier simple, le péfixe <tt>text.</tt> est facultatif.
+    Voir la ligne <ref id="configure-text-table" name="text-table">
+    du fichier de configureation pour les paramètres par défaut à l'exécution.
+    Vous pouvez changer ce paramètre avec la préférence <ref id="preference-text-table" name="Text Table">.
+  <tag><tt>-v</tt> <tt>--verify</tt><label id="options-verify"></tag>
+    Affiche les versions courantes de BRLTTY, du côté serveur de son
+    API, et des pilotes de synthèse
+    et de braille sélectionnés, puis quitte.
+    Si l'option <ref id="options-quiet" name="-q"> n'est pas spéciifiée,
+    affiche aussi les informations légales, ainsi que les valeurs des
+    options après que toutes les sources aient été examinées.
+    Si vous avez spécifié plus d'un pilote braille (voir l'option en ligne de
+    commande <ref id="options-braille-driver" name="-b">) et/ou plus d'un
+    périphérique braille (voir l'option en ligne de commande <ref id="options-braille-device" name="-d">),
+    une autodétection de l'afficheur braille est entreprise.
+    Si vous avez spécifié plus d'un pilote de synthèse (voir l'option en ligne
+    de commande <ref id="options-speech-driver" name="-s">), une autodétection
+    de la synthèse vocale est entreprise.
+  <tag><tt>-A</tt><em>nom</em><tt>=</tt><em>valeur</em><tt>.</tt>... <tt>--api-parameters=</tt><em>name</em><tt>=</tt><em>value</em><tt>.</tt>...<label id="options-api-parameters"></tag>
+    Spécifie les paramètres pour l'API.
+    Si vous spécifiez le même paramètre plus d'une fois, c'est sa valeur la
+    plus à droite qui est utilisée. Pour une description des paramètres acceptés
+    par l'interface, reportez-vous au manuel de référence <bf>BrlAPI</bf>.
+    Voir la ligne <ref id="configure-api-parameters" name="api-parameters">
+    du fichier de configuration pour les paramètres par défaut à l'exécution.
+  <tag><tt>-B</tt>[<em>pilote</em><tt>:</tt>]<em>nom</em><tt>=</tt><em>valeur</em><tt>.</tt>... <tt>--braille-parameters=</tt>[<em>driver</em><tt>:</tt>]<em>name</em><tt>=</tt><em>value</em><tt>.</tt>...<label id="options-braille-parameters"></tag>
+    Spécifie les paramètres pour les pilotes des afficheurs braille. 
+    Si vous spécifiez le même paramètre plus d'une fois, c'est sa valeur le
+    plus à droite qui est utilisée. Si vous qualifiez le nom d'un paramètre par un pilote, (voir
+    la section <ref id="drivers" name="Codes d'identification des pilotes">) ce paramètre
+    ne s'applique qu'à ce pilote; sinon il s'applique à tous les pilotes.
+    Pour une description des paramètres acceptés par un pilote en particulier,
+    reportez-vous à la documentation de ce pilote.
+    Voir la ligne <ref id="configure-braille-parameters" name="braille-parameters">
+    du fichier de configuration pour les paramètres par défaut à l'exécution.
+  <tag><tt>-E</tt> <tt>--environment-variables</tt><label id="options-environment-variables"></tag>
+    Reconnaît les variables d'environnement quand les paramètres par défaut
+    pour des options en ligne de commande non spécifiées sont déterminés.
+    (voir la section <ref id="options" name="Options en ligne de commande">).
+    Si vous spécifiez cette option, et si vous définissez une variable
+    d'environnement associée à une option non spécifiée, c'est la valeur de cette variable d'environnement qui est
+    utilisée. Les noms de ces variables d'environnement sont basés sur les noms
+    longs des options auxquelles elles correspondent:
+    <itemize>   
+      <item>Toutes les lettres sont en majuscule.
+      <item>Les soulignements (<tt>_</tt>) sont utilisés au lieu du signe moins
+      (<tt>-</tt>).
+      <item>Le préfixe <tt>BRLTTY_</tt> est ajouté.
+    </itemize>   
+    Cette option est particulièrement utile sur les systèmes d'exploitation
+    Linux dans le sens où elle permet de passer des paramètres par défaut à BRLTTY
+    via les paramètres du boot. Les variables d'environnement suivantes sont
+    supportées:
+    <descrip>
+      <tag><tt>BRLTTY_API_PARAMETERS</tt></tag>
+        Paramètres pour l'API (voir l'option
+        en ligne de commande <ref id="options-api-parameters" name="-A">).
+      <tag><tt>BRLTTY_ATTRIBUTES_TABLE</tt></tag>
+        La table de traduction des attributs (voir l'option en ligne de
+        commande <ref id="options-attributes-table" name="-a">).
+      <tag><tt>BRLTTY_BRAILLE_DEVICE</tt></tag>
+        Le périphérique de l'afficheur braille (voir l'option en ligne de commande
+        <ref id="options-braille-device" name="-d">).
+      <tag><tt>BRLTTY_BRAILLE_DRIVER</tt></tag>
+        Le pilote de l'afficheur braille (voir l'option en ligne de commande
+        <ref id="options-braille-driver" name="-b">).
+      <tag><tt>BRLTTY_BRAILLE_PARAMETERS</tt></tag>
+        Paramètres pour le pilote de l'afficheur braille (voir l'option en ligne
+        de commande <ref id="options-braille-parameters" name="-B">).
+      <tag><tt>BRLTTY_CONFIGURATION_FILE</tt></tag>
+        Le fichier de configuration (voir l'option 
+        <ref id="options-configuration-file" name="-f"> de la ligne de commande).
+      <tag><tt>BRLTTY_CONTRACTION_TABLE</tt></tag>
+        La table d'abrégé (voir l'option <ref id="options-contraction-table" name="-c">
+       en ligne de commande).
+      <tag><tt>BRLTTY_MIDI_DEVICE</tt></tag>
+        Le périphérique pour l'interface MIDI (voir 
+        l'option <ref id="options-midi-device" name="-m"> en ligne de commande).
+      <tag><tt>BRLTTY_PCM_DEVICE</tt></tag>
+        Le périphérique audio (voir l'option <ref id="options-pcm-device" name="-p">
+        en ligne de commande).
+      <tag><tt>BRLTTY_SCREEN_PARAMETERS</tt></tag>
+        Paramètres pour le pilote d'écran (voir l'option <ref id="options-screen-parameters" name="-X">
+        en ligne de commande).
+      <tag><tt>BRLTTY_SPEECH_DRIVER</tt></tag>
+        Le pilote de la synthèse vocale (voir l'option <ref id="options-speech-driver" name="-s">
+        en ligne de commande).
+      <tag><tt>BRLTTY_SPEECH_FIFO</tt></tag>
+        Le pont de passage de la synthèse FIFO (voir l'option 
+        <ref id="options-speech-fifo" name="-F"> en ligne de commande).
+      <tag><tt>BRLTTY_SPEECH_PARAMETERS</tt></tag>
+        Paramètres pour le pilote de la synthèse vocale (voir l'option 
+        <ref id="options-speech-parameters" name="-S"> en ligne de commande).
+      <tag><tt>BRLTTY_TEXT_TABLE</tt></tag>
+        La table de traduction de texte (voir l'optien
+        <ref id="options-text-table" name="-a"> en ligne de commande).
+    </descrip>
+  <tag><tt>-F</tt><em>fichier</em> <tt>--speech-fifo=</tt><em>file</em><label id="options-speech-fifo"></tag>
+    Spécifie le FIFO (un fichier spécial qui fonctionne comme un tube)
+    qui doit être utilisé par les autres applications souhaitant avoir
+    accès au pilote de synthèse de BRLTTY. Si ce n'est pas spécifié,
+    aucun FIFO n'est créé. Voir la ligne 
+    <ref id="configure-speech-fifo" name="speech-fifo"> du fichier de
+    configuration pour les paramètres par défaut à l'exécution.
+    Cette option n'est pas disponible si vous avez spécifié l'option
+    de compilation 
+    <ref id="build-speech-support" name="--disable-speech-support">.
+  <tag><tt>-M</tt><em>csecs</em> <tt>--message-delay=</tt><em>csecs</em><label id="options-message-delay"></tag>
+    Spécifie le temps (en centièmes de seconde) que prend ÁRLTTY pour
+    afficher ses propres messages internes sur l'afficheur braille. Si
+    ce n'est pas spécifié, c'est <tt>400</tt> (4 secondes) qui est utlisé.
+  <tag><tt>-N</tt> <tt>--no-speech</tt><label id="options-no-speech"></tag>
+    Ne démarre pas automatiquement les pilotes de synthèse vocale.
+    Malheureusement, cette option est parfois nécessaire sur certains
+    systèmes, quand BRLTTY démarre avant que le son du système à
+    l'intérieur du noyau n'ait été initialisé.
+  <tag><tt>-P</tt><em>fichier</em> <tt>--pid-file=</tt><em>fichier</em><label id="options-pid-file"></tag>
+    Spécifie le fichier à l'intérieur duquel BRLTTY doit écrire ses
+    identifiants de processus (pid). Si cela n'est pas spécifié,
+    BRLTTY écrit ses identifiants de processus nulle part.
+  <tag><tt>-S</tt>[<em>driver</em><tt>:</tt>]<em>name</em><tt>=</tt><em>value</em><tt>.</tt>...
+   <tt>--speech-parameters=</tt>[<em>driver</em><tt>:</tt>]<em>name</em><tt>=</tt><em>value</em><tt>.</tt>...<label id="options-speech-parameters"></tag>
+    Spécifie les paramètres pour les pilotes de synthèse vocale.
+    Si vous spécifiez plus d'une fois le même paramètre, c'est sa
+    valeur la plus à droite qui est utilisée. Si un nom de paramètre
+    est qualifié par un pilote (voir la section
+    <ref id="drivers" name="Code d'identification de pilote">)
+    ce paramètre ne s'applique qu'à ce pilote; sinon il s'applique à
+    tous les pilotes. Pour une description des paramètres acceptés par
+    un pilote en particulier, voyez la documentation de ce pilote.
+    Voir la ligne <ref id="configure-speech-parameters" name="speech-parameters">
+    du fichier de configuration pour les paramètres par défaut à l'exécution.
+  <tag><tt>-U</tt><em>csecs</em> <tt>--update-interval=</tt><em>csecs</em><label id="options-update-interval"></tag>
+    Spécifie l'intervalle (en centièmes de secondes) auquel la fenêtre
+    braille est synchronisée avec le nouveau contenu de l'écran. Si ce
+    n'est pas spécifié, c'est <tt>4</tt> (40 millisecondes) qui est utilisé.
+  <tag><tt>-V</tt> <tt>--version</tt><label id="options-version"></tag>
+    Affiche les versions courantes de BRLTTY lui-même, de la partie
+    serveur de son API, et des
+    pilotes qui ont été liés à son binaire, puis quitte. Si vous
+    ne spécifiez pas l'option <ref id="options-quiet" name="-q">,
+    affiche aussi les informations légales.
+  <tag><tt>-X</tt><em>nom</em><tt>=</tt><em>valeur</em><tt>.</tt>...
+   <tt>--screen-parameters=</tt><em>name</em><tt>=</tt><em>value</em><tt>.</tt>...<label id="options-screen-parameters"></tag>
+    Spécifie les paramètres pour le pilote d'écran.
+        Si vous spécifiez plus d'une fois le même paramètre, c'est sa
+    valeur la plus à droite qui est utilisé. Pour une description des
+    paramètres acceptés par un pilote en particulier, reportez-vous à
+    sa documentation. Voir la ligne <ref id="configure-screen-parameters" name="screen-parameters">
+    du fichier de configuration pour la sélection des paramètres par
+    défaut à l'exécution.
+</descrip>

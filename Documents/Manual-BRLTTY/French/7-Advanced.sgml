@@ -1,0 +1,135 @@
+<sect>Sujets avancés<p>
+
+<sect1>Installation de plusieurs versions<label id="multiple"><p>
+Il est facile d'avoir plus d'une version de BRLTTY installée sur le le même
+système en même temps. Cette possibilité vous permet de tester une nouvelle
+version avant de supprimer l'ancienne.
+
+L'option de compilation <ref id="build-execute-root" name="--with-execute-root">
+vous permet d'installer la <ref id="hierarchy" name="hiérarchie des fichiers installés"> complète là où
+vous le voulez de sorte qu'elle soit totalement autonome dans son contenu.
+Tout en vous rappelant qu'il vaut mieux prendre tous les composants de
+BRLTTY dans le système de fichier racine, vous pouvez le compiler ainsi:
+<tscreen><verb>
+./configure --with-execute-root=/brltty-3.1
+make install
+</verb></tscreen>
+Vous pouvez alors l'exécuter ainsi:
+<tscreen>/brltty-3.1/bin/brltty</tscreen>
+Quand vous avez fait la version 3.2, installez-la simplement dans un
+emplacement différent et exécutez le nouvel exécutable à partir de là.
+<tscreen><verb>
+./configure --with-execute-root=/brltty-3.2
+make install
+/brltty-3.2/bin/brltty
+</verb></tscreen>
+
+Jusque-là, tout cela est quelque peu maladroit pour au moins deux raisons.
+La première est que ces longs chemins sont trop difficiles à taper, et l'autre
+est que vous ne voulez pas bricoler avec
+la séquence de démarrage de votre système chaque fois que vous souhaitez aller
+à une version différente de BRLTTY.
+Ces problèmes se résolvent facilement en ajoutant un lien symbolique pour
+l'exécutable.
+<tscreen>ln -s /brltty-3.1/bin/brltty /bin/brltty</tscreen>
+Quand il est temps d'utiliser la version la plus récente, pointez de nouveau
+simplement le lien symbolique.
+<tscreen>ln -s /brltty-3.2/bin/brltty /bin/brltty</tscreen>
+
+Si vous aimez vraiment faire de la fantaisie, introduisez un autre niveau
+de redirection de façon à rendre tous les fichiers de chaque version de BRLTTY
+tels qu'ils sont dans tous les emplacements standards.
+D'abord, créez un lien symbolique à travers un emplacement où on peut
+repointer aisément à partir de chacun des emplacements standard de BRLTTY.
+<tscreen><verb>
+ln -s /brltty/bin/brltty /bin/brltty
+ln -s /brltty/etc/brltty /etc/brltty
+ln -s /brltty/lib/brltty /lib/brltty
+</verb></tscreen>
+Ensuite, tout ce que vous devez faire est de pointer <tt>/brltty</tt> vers la
+version désirée.
+<tscreen>ln -s /brltty-3.1 /brltty</tscreen>
+
+<sect1>Disques racine d'Installation/Secours pour Linux<p>
+BRLTTY peut s'exécuter comme un seul exécutable. Tout ce qu'il a besoin de
+savoir peut être configuré explicitement lors de la compilation (voir
+<ref id="build" name="Options de compilation">).
+Si le répertoire de données (voir les options de compilation
+<ref id="build-data-directory" name="--with-data-directory"> et
+<ref id="build-execute-root" name="--with-execute-root">) n'existe pas, BRLTTY
+cherche dans <tt>/etc</tt> les fichiers dont il a besoin.
+Même si un de ces fichiers n'existe pas, BRLTTY fonctionne encore!
+
+Si, pour une raison quelconque, vous avez déjà créé le répertoire de données
+(habituellement, <tt>/etc/brltty</tt>) à la main, il est important de régler
+ses permissions de telle sorte que seul le super-utilisateur puisse y créer des
+fichiers.
+<tscreen>chmod 755 /etc/brltty</tscreen>
+
+Le périphérique d'inspection du contenu de l'écran (habituellement
+<tt>/dev/vcsa</tt>) est nécessaire. Il devrait déjà exister, à moins que votre
+distribution de Linux ne soit trop vieille. Si nécessaire, vous pouvez le créer
+avec:
+<tscreen><verb>
+mknod /dev/vcsa c 7 128
+chmod 660 /dev/vcsa
+chown root.tty /dev/vcsa
+</verb></tscreen>
+
+Un problème souvent rencontré lorsqu'on essaie d'utiliser BRLTTY dans un
+environnement instable, comme un disque racine ou un système incomplet, est
+qu'il pourrait ne pas trouver les bibliothèques partagées (ou des parties
+de celles-ci) dont il a besoin.
+Les disques racines utilisent souvent des versions des bibliothèques
+sous-paramétrées et/ou non à jour qui peuvent être inadéquates. La solution est de configurer BRLTTY avec l'optfon de
+compilation <ref id="build-standalone-programs" name="--enable-standalone-programs">.
+Cela supprime toutes les dépendances des bibliothèques partagées, mais
+malheureusement, crée aussi un exécutable plus gros.
+Il y a un certain nombre d'options de compilation que vous pouvez utiliser
+pour supprimer de façon sélective les possibilitéés de BRLTTY dont vous n'avez pas
+besoin de façon à atténuer ce problème (voir la section
+<ref id="build-features" name="possibilitéés de la compilation">).
+
+L'exécutable est nettoyé pendant le
+<ref id="make-install" name="make install">. Cela réduit de façon
+significative sa taille en supprimant sa table symbole.
+Vous obtiendrez un exécutable beaucoup plus petit, puis copiez-le de son emplacement
+d'installation.
+Cependant, si vous le copiez depuis le répertoire de compilation, n'oubliez pas de le nettoyer.
+<tscreen>strip brltty</tscreen>
+
+<sect1>Avancées futures<p>
+Outre la réparation de bugs et le support de plus de types d'afficheurs
+braille, nous espérons, si le temps nous le permet, travailler sur:
+<descrip>
+  <tag>Meilleure prise en main des attributs</tag>
+    <itemize>
+      <item>Suivi des attribut.
+      <item>Mode mixte texte et attribut.
+    </itemize>
+  <tag>Suivi du défilement</tag>
+     Allignement de la fenêtre braille sur une ligne alors qu'elle défile à
+     l'écran.
+  <tag>Meilleur support de voix</tag>
+    <itemize>
+      <item>Braille et voix mélangés pour une lecture plus rapide du texte.
+      <item>Meilleur navigation parlée.
+      <item>Plus de synthèses vocales.
+    </itemize>
+  <tag>Sous-régions sur l'écran</tag>
+    Ignorer le déplacement du curseur hors de la région, et rendre fluide les
+    limites de navigation aux bords de la région.
+</descrip>
+Voir le fichier <tt>TODO</tt> pour une liste plus complète.
+
+<sect1>Bugs connus<p>
+A l'heure où nous écrivons (décembre 2001), les problèmes suivants sont
+connus.
+
+La routine-curseur est considérée comme un sous-processus en boucle qui s'exécute
+avec une priorité réduite pour éviter de trop utiliser le temps cpu.
+Les chargements de système différent nécessitent des réglages différents de
+ses paramètres. Ceux par défaut fonctionnent très bien dans un éditeur Unix
+classique sur un système chargé normalement, mais très mal dans d'autres
+situations, par exemple sur une liaison série lente vers un nom de machine
+supprimé.

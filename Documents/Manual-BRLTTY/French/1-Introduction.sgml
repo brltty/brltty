@@ -1,0 +1,192 @@
+<sect>Introduction<p>
+BRLTTY donne à un utilisateur brailliste un accès aux consoles texte
+d'un système Linux/Unix. Il exécute un processus en arrière-plan
+(démon) qui fait fonctionner l'afficheur braille, et
+peut être démarré très tôt dans la séquence de démarrage du
+système. Ainsi, il permet à un utilisateur brailliste, de prendre en main
+facilement et de façon indépendante des aspects de l'administration du
+système, comme l'entrée en mode mono-utilisateur, la restauration de systèmes de fichiers, et
+l'analyse de problèmes de démarrage. Il facilite aussi beaucoup des
+opérations de bases telles que l'identification.
+
+BRLTTY reproduit une portion rectangulaire de l'écran (appelée
+dans ce document `la fenêtre') en un texte braille sur l'afficheur.
+Vous pouvez utiliser des contrôles de l'affichage pour déplacer la fenêtre sur
+l'écran, pour activer et désactiver des options de revue
+variées, et pour exécuter des fonctions spéciales.
+
+<sect1>Résumé des possibilités<p>
+BRLTTY donne les possibilités suivantes:
+<itemize>
+  <item>
+    Totale mise en oeuvre des facilités de revue d'écran habituelles.
+  <item>
+    Choix d'un curseur en forme de <tt>bloc</tt>, <tt>souligné</tt>, ou
+<tt>aucun</tt>.
+  <item>
+    <tt>Soulignement</tt> possible pour indiquer un texte particulièrement
+    en surbrillance.
+  <item>
+    Utilisation possible du <tt>clignotement</tt> (fréquences réglables
+    individuellement) pour le curseur, le soulignement des caractères en
+    surbrillance, et/ou les lettres en majuscule.
+  <item>
+    Gel de l'écran pour en faire une relecture plus lente.
+  <item>
+    Routine-curseur intillegente, permettant un rapide
+    rapatriment du curseur dans les éditeurs de texte, les navigateurs
+    web, etc., sans bouger les mains de l'afficheur braille.
+  <item>
+    Une fonction couper-et-coller, (linéaire ou rectangulaire) qui est
+    particulièrement utile pour la copie de longs noms de fichier, de
+    texte entre des terminaux virtuels, la saisie de commandes
+    compliquées, etc.
+  <item>
+    Gestion des tables abrégé (fourni en anglais niveau 2).
+  <item>
+    Support pour de multiples codes braille.
+  <item>
+    Possibilité d'identifier un caractère inconnu.
+  <item>
+    Possibilité d'inspecter un caractère en surbrillance.
+  <item>
+    Une facilité dans l'aide en ligne pour les commandes de
+    l'afficheur braille.
+  <item>
+    Un menu préférences.
+  <item>
+    Support de synthèses basiques.
+  <item>
+    Une conception en modules permettant d'ajouter relativement
+    facilement d'autres afficheurs braille et d'autres synthèses
+    vocales.
+  <item>
+    Une Interface Programmatique de l'Application.
+</itemize>
+
+<sect1>Système requis<p>
+Actuellement, BRLTTY fonctionne sur Linux, Solaris, OpenBSD, FreeBSD,
+et NetBSD. Les transpositions pour d'autres systèmes d'exploitation
+dérivés de Unix ne sont pas encore prévues, nous apprécierions vraiment
+tout intérêt pour de tels projets.
+
+<descrip>
+  <tag>Linux</tag>
+    Ce logiciel a été testé sur un grand nombre de systèmes Linux:
+    <itemize>
+      <item>
+        Ordinateurs de bureau, portables, et quelques PDAs.
+      <item>
+        Des processeurs 386SX20 à Pentium.
+      <item>
+        Une large échelle de capacité de mémoire.
+      <item>
+        Plusieurs distributions dont Debian, Red Hat, Slackware et SuSE.
+      <item>
+        La plupart des noyaux, dont les 1.2.13, 2.0, 2.2, et 2.4.
+    </itemize>
+  <tag>Solaris</tag>
+    Ce logiciel a été testé sur les systèmes Solaris suivants:
+    <itemize>
+      <item>
+        L'architecture Sparc (versions 7, 8, et 9).
+      <item>
+        L'architecture Intel (version 9).
+    </itemize>
+  <tag>OpenBSD</tag>
+    Ce logiciel a été testé sur les systèmes OpenBSD suivants:
+    <itemize>
+      <item>
+        L'architecture Intel (version 3.4).
+    </itemize>
+  <tag>FreeBSD</tag>
+    Ce logiciel a été testé sur les systèmes FreeBSD suivants:
+    <itemize>
+      <item>
+        L'architecture Intel (version 5.1).
+    </itemize>
+  <tag>NetBSD</tag>
+    Ce logiciel a été testé sur les systèmes NetBSD suivants:
+    <itemize>
+      <item>
+        L'architecture Intel (version 1.6).
+    </itemize>
+</descrip>
+
+Sur Linux, BRLTTY peut inspecter le contenu de l'écran de façon
+totalement indépendante de l'utilisateur. Cela est possible
+grâce à l'utilisation d'un périphérique spécial offrant un accès
+facile aux contenus de la console virtuelle courante. Ce périphérique
+a été ajouté à la version 1.1.92 du noyau Linux, et s'appelle
+normalement <tt>/dev/vcsa</tt> ou <tt>/dev/vcsa0</tt> (sur les systèmes
+avec <tt>devfs</tt>, il s'appelle <tt>/dev/vcc/a</tt>). C'est pourquoi le noyau
+Linux 1.1.92 ou supérieur est nécessaire si BRLTTY est utilisé de
+cette façon. Cette possibilité:
+<itemize>
+  <item>
+    Permet à BRLTTY d'être démarré très tôt dans le séquence de
+    démarrage du système.
+  <item>
+    Active l'afficheur braille pour qu'il soit totalement opérationnel
+    à l'invite de logging.
+  <item>
+    Facilite fortement pour un utilisateur brailliste
+    des tâches d'administration lors du démarrage.
+</itemize>
+
+Un patch pour le programme <tt>d'écran</tt> est fourni (voir le sous-répertoire
+<tt>Patches</tt>). Il permet à BRLTTY d'accéder à l'image d'un écran
+via une mémoire partagée, et, ainsi, permet à BRLTTY d'être utilisé
+beaucoup plus efficacement sur des plateformes qui n'ont pas leurs
+propres facilité d'inspection du contenu de leur écran. La faiblesse
+principale de cette approche de l'écran est que BRLTTY ne peut être
+démarré tant que l'utilisateur n'est pas connecté.
+
+Pour que BRLTTY communique avec succès avec un afficheur braille
+actualisable, le bon pilote (série, parallèle, USB ou bluetooth) doit être
+configuré dans le noyau. Si le pilote requiert des options spéciales,
+elles doivent être fournies. S'il est compilé en dur dans le noyau,
+ses options doivent être:
+<descrip>
+  <tag>Linux</tag>
+    <itemize>
+      <item>
+        Installées pendant la procédure de configuration du noyau.
+      <item>
+        Fournies à l'invite de démarrage de LILO
+      <item>
+        Spécifiées sur une ligne <tt>append</tt> dans <tt>/etc/lilo.conf</tt>.
+    </itemize>
+</descrip>
+Si le pilote est un module, alors ses options doivent être:
+<descrip>
+  <tag>Linux</tag>
+    <itemize>
+      <item>
+        Fournies en tant qu'options à la commande <tt>modprobe</tt> (ou
+        la commande <tt>insmod</tt>).
+      <item>
+        Spécifiées sur une ligne <tt>options</tt>  dans <tt>/etc/modules.conf</tt>
+        (nommé <tt>/etc/conf.modules</tt> dans de vieilles distributions).
+    </itemize>
+</descrip>
+
+BRLTTY ne fonctionne qu'avec des consoles et des applications basées
+sur du texte. Il peut être utilisé avec les applications basées sur
+<tt>curses</tt>, mais pas avec une application utilisant des caractéristiques
+spéciales VGA ou qui requièrent une console graphique (comme le système X
+Window).
+
+Bien entendu, vous devez aussi posséder un afficheur braille supporté
+(voir la section <ref id="displays" name="Afficheurs braille
+supportés"> pour la liste complète). Nous espérons que des afficheurs
+supplémentaires seront supportés dans le futur, donc si vous disposez de quelques
+vagues informations de programmation techniques pour un pilote que
+vous aimeriez voir supporté, faites-le nous savoir (voir la section
+<ref id="contact" name="Contacts">).
+
+Enfin, vous avez besoin d'outils pour compiler l'exécutable depuis le
+source, <tt>make</tt>, les compilateurs <tt>C</tt> et <tt>C++</tt>, <tt>yacc</tt>,
+<tt>awk</tt>, etc. Les outils de développement fournis avec les
+distributions Unix standards devraient suffir. Si vous rencontrez des
+problèmes, contactez-nous et nous vous compilerons un exécutable.

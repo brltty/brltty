@@ -1,0 +1,27 @@
+<sect>Synthèses vocales supportées<label id="synthesizers"><p>
+BRLTTY supporte les synthèses vocales suivantes:
+<table loc="h">
+  <tabular ca="ll">
+    Nom|Modèles@<hline>
+    Alva
+      |Delphi (4nn)@
+    BrailleLite
+      |@
+    CombiBraille
+      |@
+    ExternalSpeech
+      |exécute /usr/local/bin/externalspeech@
+    Festival
+      |text to speech engine@
+    FestivalLite
+      |text to speech engine@
+    GenericSay
+      |tubes vers /usr/local/bin/say@
+    Mikropuhe
+      |text to speech engine@
+    Theta
+      |text to speech engine@
+    ViaVoice
+      |text to speech engine@
+  </tabular>
+</table>

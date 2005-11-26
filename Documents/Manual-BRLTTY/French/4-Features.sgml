@@ -1,0 +1,1085 @@
+<sect>Description des possibilités<p>
+
+<sect1>Routine curseur<label id="routing"><p>
+Lorsque vous déplacez la fenêtre braille sur l'écran alors que vous
+examinez le texte, dans un éditeur, vous avez souvent besoin d'amener
+le curseur à un caractère en particulier à l'intérieur de la fenêtre braille.
+Vous trouverez que c'est une tâche plutôt difficile pour un certain nombre de
+raisons. L'une d'entre elles est qu'il se peut que vous ne sachiez pas où se
+trouve le curseur, et vous avez peut-être perdu votre position en essayant de le
+trouver. 
+Une autre est que le curseur peut se déplacer de façon imprévisible lorsque
+vous appuyez sur les flèches de direction (certains éditeurs, par exemple,
+n'autorisent pas le curseur à aller plus à droite que la fin de la ligne où il
+se trouve).
+La routine-curseur fournit cette possibilité en sachant où se trouve le curseur,
+en simulant les mêmes appuis sur les flèches de direction que vous devriez
+entrer manuellement, et en affichant l'évolution du curseur pendant qu'il se
+dépasse.
+
+Certains afficheurs braille ont un bouton, appelé routine-curseur, au-dessus de
+chaque cellule. Ces touches utilisent la commande
+<ref id="command-ROUTE" name="ROUTE"> pour amener le curseur précisément à 
+l'emplacement désiré.
+
+La routine-curseur, bien que très pratique et très efficace, n'est pas,
+à proprement parler, totalement fiable. Une des raisons de cela est que sa
+conception courante utilise des séquences d'échappement de touches du curseur
+VT100.
+
+Une autre est que certaines applications font des choses non standard pour
+réagir lorsqu'ils détectent l'appui sur les touches du curseur.
+Un problème mineur trouvé à l'intérieur de certains éditeurs (comme <tt>vi</tt>),
+comme mentionné ci-dessus, est qu'ils se précipitent dans un déplacement
+vertical imprévisible lorsque vous demandez un déplacement vertical, car elles
+n'autorisent pas le curseur à se placer à droite de la fin d'une ligne.
+Un problème majeur trouvé dans certains navigateurs web (comme
+<tt>lynx</tt>), est que les flèches haut et bas sont utilisées pour se déplacer
+parmi les liens (ce qui peut sauter des lignes et/ou déplacer horrizontalement
+le curseur mais rarement déplacer le curseur d'une ligne dans la direction
+désirée), et que les flèches gauche et droite sont utilisées pour sélectionner
+les liens (ce qui n'a absolument rien à voir avec une quelconque forme de
+déplacement de curseur, et qui change même totalement le contenu de l'écran).
+
+Il se peut que la routine curseur ne fonctionne pas très bien sur les systèmes
+lourds à se charger, et elle ne fonctionnera certainement pas très bien
+lorsqu'elle tournera sous un vieux système ayant des liaisons lentes. Il en est
+ainsi car tous les tests qui doivent être faits pendant le processus de façon à
+traiter les mouvements imprévisibles du curseur et afin de s'assurer
+qu'une erreur a au moins une chance d'être corrigée.
+Bien que BRLTTY s'efforce d'être assez intelligent, il doit attendre encore
+de voir ce qu'il se passe après chaque appui simulé sur une flèche de direction. 
+
+Une fois qu'une demande de routine-curseur a été faite, BRLTTY essaie d'amener
+le curseur à la position désirée durant un certain délai avant
+que le curseur n'atteigne cette position, le curseur semblant se déplacer dans la
+mauvaise direction, ou vous passez à un terminal différent.
+En premier, un effort est fait pour utiliser le déplacement vertical pour
+amener le curseur à la bonne ligne, puis, uniquement si cela réussit, un effort
+est fait pour utiliser le déplacement horizontal pour amener le curseur à la
+bonne colonne. Si vous faites une autre demande alors qu'routine est en train de
+s'effectuer, la première est annulée et la deuxième est démarrée. 
+
+Une commande de routine curseur plus sûre mais moins puissante, 
+<ref id="command-CSRJMP_VERT" name="CSRJMP_VERT">, utilise le déplacement
+vertical pour amener le curseur n'importe où sur la première ligne de la
+fenêtre braille. Elle est surtout utile, jointe à certaines applications
+(comme <tt>lynx</tt>), dans lesquelles le déplacement du curseur à l'horrizontal
+ne doit jamais être tenté.
+
+<sect1>Couper-coller<label id="cut"><p>
+Cette possibilitéé vous permet d'extraire un texte qui est déjà sur l'écran
+et de le réentrer à la position courante du curseur. Son utilisation vous fait
+gagner du temps, et permet d'éviter les erreurs lorsque vous avez besoin de copier un
+texte long et/ou compliqué, et même quand vous avez besoin de copier plusieurs
+fois le même texte court et simple. Elle est particulièrement utile pour des
+choses telles que les noms de fichier longs, les lignes de commande compliquées,
+les adresses mail, et les URLS. Couper et coller du texte passe par trois
+étapes simples:
+<enum>
+  <item>
+    Marquer le coin en haut à gauche de la zone rectangulaire ou le début de la
+    zone linéaire sur l'écran, qui sera extraite (coupée). Si votre afficheur a
+    des routines-curseur, déplacez la fenêtre braille de façon à ce que le
+    premier caractère à couper apparaisse quelque part à l'intérieur, puis:
+    <itemize>
+      <item>
+        appelez la commande <ref id="command-CUTBEGIN" name="CUTBEGIN"> pour
+	démarrer un nouveau tampon
+      <item>
+        appelez la commande <ref id="command-CUTAPPEND" name="CUTAPPEND"> pour
+	marquer le tampon coupé existant.
+    </itemize>
+    en pressant la/les touche(s) associée(s) à cela, puis en appuyant sur la
+    routine-curseur associée au caractère
+  <item>
+    Marquer le coin en bas à droite de la zone rectangulaire ou la fin de
+    la zone linéaire sur l'écran qui doit être extraite (coupée).
+    Si votre afficheur a des routine-curseur, déplacez la fenêtre braille
+    de telle sorte que le dernier caractère à couper apparaisse quelque part
+    à l'intérieur, puis
+    <itemize>
+      <item>
+        appelez la commande <ref id="command-CUTRECT" name="CUTRECT"> pour
+	couper une zone rectangulaire.
+      <item>
+        appelez la commande <ref id="command-CUTLINE" name="CUTLINE"> pour
+	couper une zone linéaire.
+    </itemize>
+    en pressant le/la touche(s) associée(s) puis en pressant la routine-curseur
+    associée au caractère. Le marquage
+    de la fin de la région coupée dépose le contenu d'un écran coupé dans le
+    tampon mémoire.
+    Les espaces superflus sont supprimés en fin de chaque ligne dans le
+    tampon mémoire de façon à ce que les espaces non désirés qui en découlent ne
+    soient pas collées.
+    Les caractères de contrôle sont remplacées par des espaces.
+  <item>
+    Insérer (coller) le texte où vous avez besoin. Placez le curseur après le
+    caractère où le texte doit être inséré, et appelez la commande
+    <ref id="command-PASTE" name="PASTE">. Vous pouvez copier le même texte
+    autant de fois que vous le voulez sans le couper à nouveau.
+    Cette description suppose que vous êtes déjà dans un mode d'entrée. Si vous
+    collez alors que vous êtes dans un autre type de mode (comme le
+    mode commande de <tt>vi</tt>), vous devez alors bien être conscient de ce que
+    les caractères du tampon mémoire pourront faire.
+    </enum>
+
+
+Le tampon coupé est utilisé aussi par les commandes
+<ref id="command-PRSEARCH-NXSEARCH" name="PRSEARCH/NXSEARCH">.
+
+<sect1>Support du pointeur (souris) via GPM<label id="gpm"><p>
+Si BRLTTY est configuré avec l'option de compilation,
+<ref id="gpm" name="--enable-gpm"> sur un système où l'application
+<tt>gpm</tt> a été installée, il réagira au pointeur (souris).
+
+Le fait de bouger la fenêtre braille déplace le pointeur (voir la préférence
+<ref id="preference-pointer-follows-window" name="Pointer Follows Window">).
+Le déplacement de la fenêtre braille (manuel, par recherche du curseur etc.),
+est appliqué non seulement quand il se déplace en réponse à un mouvement du pointeur, mais il
+déplace aussi le pointeur au caractère à l'écran qui correspond au coin en haut à
+gauche de la fenêtre braille. Cela permet à une personne voyante de voir où se
+trouve la fenêtre braille et donc, de savoir ce que l'utilisateur brailliste
+est en train de lire. Cela récupère aussi le pointeur dans la fenêtre
+braille de sorte que vous pouvez le
+trouver facilement et que le périphérique du pointeur peut toujours être
+utilisé comme un autre moyen de déplacer la fenêtre braille. 
+
+Le déplacement du pointeur emmène la fenêtre braille (voir la préférence
+<ref id="preference-window-follows-pointer" name="Window Follows Pointer">).
+Chaque fois que vous déplacez le pointeur au-delà du bord de la fenêtre
+braille, la fenêtre braille est emmenée tout au long du déplacement (un
+caractère à la fois).
+Cela donne à l'utilisateur braille une autre manière à deux dimensions
+d'inspecter le contenu de l'écran ou de déplacer rapidement la fenêtre braille
+sur un emplacement désiré. Cela donne aussi à l'utilisateur voyant une façon
+simple de déplacer la fenêtre braille sur quelque chose qu'il aimerait que
+l'utilisateur brailliste lise.
+
+<tt>gpm</tt> utilise la vidéo inversée pour montrer où se trouve le pointeur.
+Le soulignement des caractères en surbrillance devrait donc être activée (voir
+la commande <ref id="command-ATTRVIS" name="ATTRVIS"> pour des  détails) quand 
+l'utilisateur brailliste veut utiliser le pointeur.
+
+Cette caractéristique donne aussi à l'utilisateur braille au accès à la
+fonction couper-coller de <tt>gpm</tt>. Bien que vous devriez lire la documentation
+spécifique de <tt>gpm</tt>, voici quelques remarques sur son fonctionnement.
+<itemize>
+  <item>
+    Copiez le caractère courant dans le presse-papier par un simple clic sur le
+    bouton gauche.
+  <item>
+    Copiez le mot courant (délimité par un espace) dans le presse-papier en
+    cliquant deux fois sur le bouton gauche.
+  <item>
+    Copiez la ligne courante dans le presse papier en cliquant trois fois sur
+    le bouton gauche.
+  <item>
+    Copiez une région linéaire vers le presse-papier comme suit:
+    <enum>
+      <item>
+        Placez le curseur sur le premier caractère de la région.
+      <item>
+        Pressez (et maintenez) le bouton gauche.
+      <item>
+        Déplacez le curseur au dernier caractère de la région (tous les
+	caractères sélectionnés sont maintenant en surbrillance).
+      <item>
+        Lâchez le bouton gauche.
+    </enum>
+  <item>
+    Collez (insérez) le contenu courant du presse papier en cliquant sur le
+    bouton central d'une souris à trois boutons, ou en cliquant sur le bouton
+    droit d'une souris à deux boutons.
+  <item>
+    Marquez le presse-papier en utilisant le bouton droit d'une souris à trois
+    boutons.
+</itemize>
+
+<sect1>Sons d'alerte<label id="tunes"><p>
+BRLTTY vous avertit de l'exécution d'événements significatifs en jouant un son
+bref prédéfini. Cette caractéristique peut être activée et désactivée avec la
+commande
+<ref id="command-TUNES" name="TUNES"> ou la préférence
+<ref id="preference-alert-tunes" name="Alert Tunes">.
+Les sons sont joués par le synthétiseur interne par défaut, mais vous pouvez
+sélectionner d'autres alternatives avec la préférence
+<ref id="preference-tune-device" name="Tune Device">.
+
+Chaque événement significatif est associé, de la priorité la plus haute à la
+plus faible), à un ou plusieurs des éléments suivants:
+<descrip>
+  <tag>un son</tag>
+    Si vous avez associé un nom à l'événement, si la préférence
+    <ref id="preference-alert-tunes" name="Alert Tunes"> (voir aussi la
+    commande <ref id="command-TUNES" name="TUNES">) est active, et si le
+    périphérique de son sélectionné (voir la préférence <ref id="preference-tune-device" name="Tune Device">)
+    peut être ouvert, le son est joué.
+  <tag>un schéma de points</tag>
+    Si un type de signe a été associé à un événement, et si la préférence
+    <ref id="preference-alert-dots" name="Alert Dots"> est active, le signe
+    est brièvement affiché sur chaque cellule braille.
+    Certains afficheurs braille ne réagissent pas assez vite pour que ce
+    système fonctionne efficacement.
+  <tag>un message</tag>
+    Si un message a été associé à l'événement, et si la préférence
+    <ref id="preference-alert-messages" name="Alert Messages"> est active,
+    il est affiché pendant quelques secondes (voir l'option <ref id="options-message-delay" name="-M">
+    en ligne de commande.
+</descrip>
+
+Ces événements incluent:
+<itemize>
+  <item>
+    Le moment où le pilote de l'afficheur braille démarre ou s'arrête.
+  <item>
+    Le moment où une commande longue est terminée.
+  <item>
+    Le moment où une commande peut être exécutée.
+  <item>
+    Le moment où un repère est posé.
+  <item>
+    Le moment où le début ou la fin du presse-papier est posé.
+  <item>
+    Le moment où une caractéristique est activée ou désactivée.
+  <item>
+    Le moment où le suivi du curseur est activée ou désactivée.
+  <item>
+    Le moment où l'image de l'écran est gelée ou rafraîchie.
+  <item>
+    Le moment où la fenêtre braille entraîne la fenêtre braille en bas au début de la
+    ligne suivante, ou en haut à la fin de la ligne précédente.
+  <item>
+    Le moment où des lignes identiques sont sautées.
+  <item>
+    Le moment où un déplacement demandé ne peut être effectué.
+  <item>
+    Le moment où la routines-curseur commence, s'achève ou échoue.
+</itemize>
+
+<sect1>Paramètres de préférence<label id="preferences"><p>
+Quand BRLTTY démarre, il charge un fichier qui contient vos paramètres de
+préférence. Il n'est pas indispensable que le fichier existe, et il est créé la
+première fois que les paramètres sont sauvegardés avec la commande
+<ref id="command-PREFSAVE" name="PREFSAVE">.
+Les paramètres sauvegardés le plus récemment peuvent être restaurés n'importe
+quand par la commande <ref id="command-PREFLOAD" name="PREFLOAD">.
+
+Le nom de ce fichier est <tt>/etc/brltty-</tt><em>pilote</em><tt>.prefs</tt>.
+où <em>pilote</em> correspond aux deux lettres du
+<ref id="drivers" name="code d'identification de pilote">.
+
+<sect2>Le menu Preferences<label id="preferences-menu"><p>
+Les paramètres de préférence sont sauvegardés sous forme de données binaires,
+que vous ne pouvez donc pas éditer à la main.
+Cependant, BRLTTY a un menu simple à partir duquel vous pouvez facilement les
+changer. Cette caractéristique n'est pas disponible si vous avez spécifié
+l'option de compilation  <ref id="build-preferences-menu" name="--disable-preferences-menu">.
+
+le menu est activé par la commande <ref id="command-PREFMENU" name="PREFMENU">.
+L'afficheur braille affiche brièvement (voir l'option
+<ref id="options-message-delay" name="-M"> en ligne de commande) le titre du
+menu, puis présente l'item du paramètre courant.
+
+<Sect3>Navigation dans le Menu<p>
+Voir <ref id="menu" name="Commandes de navigation dans le menu "> pour la
+liste des commandes qui vous permettent de sélectionner l'item, et de changer
+la valeur, dans le menu.
+Par soucis de compatibilité avec les vieux pilotes, les commandes
+de déplacement dans la fenêtre, qui ont changé de sens dans ce contexte,
+peuvent être aussi utilisées.
+<descrip>
+  <tag><tt>Début</tt>/<tt>Fin</tt>, <tt>Haut-Gauche</tt>/<tt>Bas-Gauche</tt>, <tt>PAGE_PRECEDENTE</tt>/<tt>PAGE_SUIVANTE</tt></tag>
+    Va au premier/dernier item du menu (comme 
+    <ref id="command-MENU_FIRST_ITEM-MENU_LAST_ITEM" name="MENU_FIRST_ITEM/MENU_LAST_ITEM">).
+  <tag><tt>FH</tt>/<tt>FB</tt>, <tt>LIGNPRECEDENTE</tt>/<tt>LNSUIV</tt>, <tt>CURSEUR_HAUT</tt>/<tt>CURSEUR_BAS</tt></tag>
+    Va à l'item précédent/suivant du menu (comme
+    <ref id="command-MENU_PREV_ITEM-MENU_NEXT_ITEM" name="MENU_PREV_ITEM/MENU_NEXT_ITEM">).
+  <tag><tt>FENETREPRECEDENTE</tt>/<tt>FENSUIV</tt>, <tt>CARGAUCH</tt>/<tt>CADROITE</tt>, <tt>CURSEUR_GAUCHE</tt>/<tt>CURSEUR_DROITE</tt>, <tt>DEBUT</tt>/<tt>HOME</tt></tag>
+    Déroule ou "enroule" la valeur de l'item courant dans le menu (comme
+    <ref id="command-MENU_PREV_SETTING-MENU_NEXT_SETTING" name="MENU_PREV_SETTING/MENU_NEXT_SETTING">).
+</descrip>
+
+Remarques:
+<itemize>
+  <item>
+    Vous pouvez aussi utiliser les routine-curseur pour sélectionner une valeur
+    pour l'item courant. Si un item a des valeurs numériques, toute la rangée
+    de routine-curseur agit comme une barre de défilement qui couvre toute la
+    gamme des valeurs valides. Si un item a une valeur nominale,
+    les routine-curseurs correspondent normalement aux valeurs.
+  <item>
+    Utilisez la commande <tt>PREFLOAD</tt> pour annuler tous les changements
+    qui ont été fait depuis que vous êtes dans le menu.
+  <item>
+    Utilisez la commande <tt>PREFMENU</tt> (encore) pour quitter
+    effectivement les nouvelles valeurs., sortir du menu et faire des
+    opération normale. De plus, si vous avez sélectionner l'option <tt>Save Settings on Exit</tt>, les
+    nouvelles valeurs sont sauvegardées dans le fichier des préférences.
+    Toute commande non reconnue par le système du menu fait la même chose.
+</itemize>
+
+<sect3>Les items du menu<p>
+<descrip>
+  <tag>Save on Exit<label id="preference-save-on-exit"></tag>
+      Lors de la sortie du menu de préférences:
+    <descrip>
+      <tag>No</tag>
+        Ne sauvegarde pas automatiquement les paramètres de préférences.
+      <tag>Yes</tag>
+        Sauvegarde automatiquement les paramètres de préférence.
+    </descrip>
+    Le paramètre par défaut est <tt>No</tt>.
+  <tag>Text Style<label id="preference-text-style"></tag>
+    Lors de l'affichage du contenu de l'écran (voir la commande
+    <ref id="command-DISPMD" name="DISPMD">), montre les caractères:
+    <descrip>
+      <tag>8-dot</tag>
+        Avec les huit points.
+      <tag>6-dot</tag>
+        Avec 6 points seulement.
+	Si vous avez sélectionné une table abrégé (voir l'option
+	<ref id="options-contraction-table" name="-c"> en ligne de commande et
+	la ligne <ref id="configure-contraction-table" name="contraction-table">
+	du fichier de configuration), elle est utilisée.
+    </descrip>
+    Vous pouvez aussi changer ce paramètre par la commande
+    <ref id="command-SIXDOTS" name="SIXDOTS">.
+  <tag>Skip Identical Lines<label id="preference-skip-identical-lines"></tag>
+    Quand vous vous déplacez de ligne en ligne en haut ou en bas avec les
+    commandes <ref id="command-LNUP-LNDN" name="LNUP/LNDN">,
+    ou pour la caractéristique de fonctionnement des commandes
+    <ref id="command-FWINLT-FWINRT" name="FWINLT/FWINRT"> et
+    <ref id="command-FWINLTSKIP-FWINRTSKIP" name="FWINLTSKIP/FWINRTSKIP">:
+    <descrip>
+      <tag>No</tag>
+        Ne saute pas les lignes qui ont le même contenu que la ligne courante.
+      <tag>Yes</tag>
+        Saute les lignes qui ont le même contenu que la ligne courante.
+    </descrip>
+    Vous pouvez aussi changer ce paramètre avec la commande
+    <ref id="command-SKPIDLNS" name="SKPIDLNS">.
+  <tag>Skip Blank Windows<label id="preference-skip-blank-windows"></tag>
+    Lors d'un déplacement à gauche ou à droite avec les commandes
+    <ref id="command-FWINLT-FWINRT" name="FWINLT/FWINRT">:
+    <descrip>
+      <tag>No</tag>
+        Ne saute pas les fenêtres vides.
+      <tag>Yes</tag>
+        Saute les fenêtres vides.
+    </descrip>
+    Vous pouvez aussi changer ce paramètre avec la commande
+    <ref id="command-SKPBLNKWINS" name="SKPBLNKWINS">.
+  <tag>Which Blank Windows<label id="preference-which-blank-windows"></tag>
+    Si les fenêtres vides doivent être sautées:
+    <descrip>
+      <tag>All</tag>
+        Les saute toutes.
+      <tag>End of Line</tag>
+        Ne saute que celles qui sont à la fin (sur le côté droit) de l'écran.
+      <tag>Rest of Line</tag>
+        Ne saute que celles qui sont à la fin (sur le côté droit) d'une ligne lors d'une lecture
+	vers l'avant, et au début (sur le côté gauche) d'une ligne lors d'une
+	lecture à reculon.
+    </descrip>
+  <tag>Sliding Window<label id="preference-sliding-window"></tag>
+    Si le curseur est suivi (voir la commande
+    <ref id="command-CSRTRK" name="CSRTRK">),
+    et que le curseur est trop enfermé (ou trop à l'extérieur) à la fin d'une fenêtre braille:
+    <descrip>
+      <tag>No</tag>
+        Repositionne la fenêtre horizontalement de sorte que son bord gauche
+	soit un multiple de sa largeur à partir du bord gauche de l'écran.
+      <tag>Yes</tag>
+        Repositionne la fenêtre horizontalement de façon à ce que le curseur,
+	tout en restant sur ce côté de la fenêtre, soit plus proche du centre.	
+    </descrip>
+    Vous pouvez aussi changer ce paramètre avec la commande
+    <ref id="command-SLIDEWIN" name="SLIDEWIN">.
+  <tag>Eager Sliding Window<label id="preference-eager-sliding-window"></tag>
+    Si la fenêtre braille doit glisser:
+    <descrip>
+      <tag>No</tag>
+        La repositionne chaque fois que le curseur va au-delà de la fin.
+      <tag>Yes</tag>
+        La repositionne chaque fois que le curseur va trop à l'intérieur près
+	de la fin.
+    </descrip>
+    Le paramètre initial est à <tt>off</tt>.
+  <tag>Window Overlap<label id="preference-window-overlap"></tag>
+    Lors d'un déplacement à gauche ou à droite avec les commandes
+    <ref id="command-FWINLT-FWINRT" name="FWINLT/FWINRT">, ce paramètre
+    spécifie de combien de caractères adjacents horizontalement dans
+    la fenêtre braille doivent-ils se recouvrir.
+    Le paramètre initial est <tt>0</tt>.
+  <tag>Autorepeat<label id="preference-autorepeat"></tag>
+    Tandis que la touche (la combinaison) d'une commande reste appuyée:
+    <descrip>
+      <tag>No</tag>
+        Ne répète pas automatiquement la commande.
+      <tag>Yes</tag>
+        Répète automatiquement la commande selon un intervalle régulier après
+	un délai initial.
+    </descrip>
+    Les commandes suivantes peuvent être répétées automatiquement:
+    <itemize>
+      <item>
+        Les commandes <ref id="command-LNUP-LNDN" name="LNUP/LNDN">.
+      <item>
+        Les commandes <ref id="command-PRDIFLN-NXDIFLN" name="PRDIFLN/NXDIFLN">.
+      <item>
+        Les commandes <ref id="command-CHRLT-CHRRT" name="CHRLT/CHRRT">.
+      <item>
+        Les opérations Page Précédente Page suivante.
+      <item>
+        Les opérations curseur sur ligne précédente et ligne suivante.
+      <item>
+        Les opérations curseur à gauche et curseur à droite.
+      <item>
+        Les opérations Effacer et Supprimer.
+      <item>
+        L'entrée d'un caractère.
+    </itemize>
+    Seuls certains pilotes supportent cette fonctionnalité, la première
+    limite étant que beaucoup d'afficheurs braille ne signalent pas
+    les appuis sur une touche et les fonctions d'une touche comme des
+    événements distinctement séparés.
+    Vous pouvez aussi changer ce paramètre avec la commande
+    <ref id="command-AUTOREPEAT" name="AUTOREPEAT">.
+    Le paramètre initial est <tt>off</tt>.
+  <tag>Autorepeat Delay<label id="preference-autorepeat-delay"></tag>
+    Lorsqu'un caractère doit être autorépété, ce paramètre spécifie la valeur
+    du temps (voir la remarque sur <ref id="time-settings" name="time settings"> ci-dessous)
+    qui doit s'écouler avant de commencer la répétition automatique.
+    Le paramètre initial est <tt>50</tt>.
+  <tag>Autorepeat Interval<label id="preference-autorepeat-interval"></tag>
+    Lorsqu'un caractère doit être autorépété, ce paramètre spécifie la valeur
+    de temps (voir la remarque à propos de <ref id="time-settings" name="time settings"> ci-dessous)
+    entre chaque réexécution.
+    La valeur initiale est <tt>10</tt>.
+  <tag>Show Cursor<label id="preference-show-cursor"></tag>
+    Lors de l'affichage du contenu de l'écran, (voir la commande
+    <ref id="command-DISPMD" name="DISPMD">):
+    <descrip>
+      <tag>No</tag>
+        Ne montre pas le curseur.
+      <tag>Yes</tag>
+        Montre le curseur.
+    </descrip>
+    Vous pouvez aussi changer ce paramètre avec la commande
+    <ref id="command-CSRVIS" name="CSRVIS">.
+    La valeur initiale est <tt>Yes</tt>.
+  <tag>Cursor Style<label id="preference-cursor-style"></tag>
+    Lorsque le curseur est affiché, le représente:
+    <descrip>
+      <tag>Underline</tag>
+        (souligné) Avec les points 7 et 8.
+      <tag>Block</tag>
+      (un bloc) Avec les huit points.
+    </descrip>
+    Vous pouvez aussi changer ce paramètre avec la commande
+    <ref id="command-CSRSIZE" name="CSRSIZE">.
+  <tag>Blinking Cursor<label id="preference-blinking-cursor"></tag>
+    Lorsque le curseur doit être montré:
+    <descrip>
+      <tag>No</tag>
+        Le rend visible tout le temps.
+      <tag>Yes</tag>
+        Le rend alternativement visible et invisible selon un intervalle
+	prédéfini.
+    </descrip>
+    Vous pouvez aussi changer ce paramètre avec la commande
+    <ref id="command-CSRBLINK" name="CSRBLINK">.
+  <tag>Cursor Visible Time<label id="preference-cursor-visible-time"></tag>
+    Quand le curseur doit être masqué, ce paramètre spécifie la durée (voir
+    la remarque à propos de <ref id="time-settings" name="time settings">
+    ci-dessous) de chaque cycle pendant lesquels il doit être visible.
+    La valeur par défaut est <tt>40</tt>.
+  <tag>Cursor Invisible Time<label id="preference-cursor-invisible-time"></tag>
+    Lorsque le curseur doit être masqué, ce paramètre spécifie la durée (voir
+    la remarque à propos de <ref id="time-settings" name="time settings">
+    ci-dessous) de chaque cycle au cours desquels il est invisible.
+    La valeur initiale est <tt>40</tt>.
+  <tag>Show Attributes<label id="preference-show-attributes"></tag>
+    Lors de l'affichage du contenu de l'écran (voir la commande
+    <ref id="command-DISPMD" name="DISPMD">):
+    <descrip>
+      <tag>No</tag>
+        Ne souligne pas les caractères en surbrillance.
+      <tag>Yes</tag>
+        Souligne les caractères en surbrillance.
+    </descrip>
+    Vous pouvez aussi changer ce paramètre avec la commande
+    <ref id="command-ATTRVIS" name="ATTRVIS">.
+  <tag>Blinking Attributes<label id="preference-blinking-attributes"></tag>
+    Lorsque les caractères en surbrillance doivent être soulignés:
+    <descrip>
+      <tag>No</tag>
+        Laisse l'indicateur visible tout le temps.
+      <tag>Yes</tag>
+        Rend l'indicateur alternativement visible et invisible selon un
+	intervalle prédéfini.
+    </descrip>
+    Vous pouvez aussi changer ce paramètre avec la commande
+    <ref id="command-ATTRBLINK" name="ATTRBLINK">.
+  <tag>Attributes Visible Time<label id="preference-attributes-visible-time"></tag>
+    Quand le soulignement des caractères en surbrillance doit être masqué,
+    ce paramètre spécifie la durée (voir la remarque à propos de
+    <ref id="time-settings" name="time settings"> ci-dessous) de chaque
+    cycle au cours de laquelle il doit être visible.
+    La valeur initiale est <tt>20</tt>.
+  <tag>Attributes Invisible Time<label id="preference-attributes-invisible-time"></tag>
+    Quand le soulignement des caractères en surbrillance doit être masqué,
+    ce paramètre spécifie la durée (voir la remarque à propos de
+    <ref id="time-settings" name="time settings"> ci-dessous) de chaque
+    cycle au cours de laquelle il doit être invisible.
+    La valeur initiale est <tt>60</tt>.
+  <tag>Blinking Capitals<label id="preference-blinking-capitals"></tag>
+    Lors de l'affichage du contenu de l'écran (voir la commande
+    <ref id="command-DISPMD" name="DISPMD">):
+    <descrip>
+      <tag>No</tag>
+        Laisse les lettres en majuscules visibles tout le temps.
+      <tag>Yes</tag>
+        Rend les lettres en majuscule alternativement visible et invisible
+	selon un intervalle prédéfini.
+    </descrip>
+    Vous pouvez aussi changer ce paramètre avec la commande
+    <ref id="command-CAPBLINK" name="CAPBLINK">.
+  <tag>Capitals Visible Time<label id="preference-capitals-visible-time"></tag>
+    Lorsque les lettres en majuscule doivent être masquées, ce paramètre
+    spécifie la durée (voir la remarque à propos de 
+    <ref id="time-settings" name="time settings"> ci-dessous) de chaque cycle
+    pendant laquelle elles doivent être visibles.
+    La valeur par défaut est <tt>60</tt>.
+  <tag>Capitals Invisible Time<label id="preference-capitals-invisible-time"></tag>
+    Lorsque les lettres en majuscule doivent être masquées, ce paramètre
+    spécifie la durée (voir la remarque à propos de 
+    <ref id="time-settings" name="time settings"> ci-dessous) de chaque cycle
+    pendant laquelle elles doivent être invisibles.
+    La valeur par défaut est <tt>20</tt>.
+  <tag>Braille Firmness<label id="preference-braille-firmness"></tag>
+    Règle la fermeté (ou la rigidité) des points braille.
+    Elle peut être réglée à:
+    <itemize>
+      <item>Maximum (maximum)
+      <item>High (haut)
+      <item>Medium (moyen)
+      <item>Low (bas)
+      <item>Minimum (minimum)
+    </itemize>
+    Cette préférence n'est disponible que si vous utilisez un pilote qui
+    la supporte. La valeur initiale est <tt>Medium</tt>.
+  <tag>Window Follows Pointer<label id="preference-window-follows-pointer"></tag>
+    Lors du déplacement du pointeur (souris):
+    <descrip>
+      <tag>No</tag>
+        N'emmène pas la fenêtre braille.
+      <tag>Yes</tag>
+        Emmène la fenêtre braille.
+    </descrip>
+    Cette préférence n'est présentée que si l'option de compilation
+    <ref id="gpm" name="--enable-gpm"> a été spécifiée.
+  <tag>Pointer Follows Window<label id="preference-pointer-follows-window"></tag>
+    Lors du déplacement de la fenêtre braille:
+    <descrip>
+      <tag>No</tag>
+        Ne déplace pas le pointeur (Souris).
+      <tag>Yes</tag>
+        Déplace le pointeur (la souris) sur le caractère à l'écran au coin en
+	haut à gauche de la fenêtre braille.
+    </descrip>
+    Cette préférence n'est présentée que si l'option de compilation 
+    <ref id="gpm" name="--enable-gpm"> a été spécifiée.
+  <tag>Alert Tunes<label id="preference-alert-tunes"></tag>
+    Chaque fois qu'un événement significatif avec un son associé se produit,
+    (voir <ref id="tunes" name="Alert Tunes">):
+    <descrip>
+      <tag>No</tag>
+        Ne joue pas le son.
+      <tag>Yes</tag>
+        Joue le son.
+    </descrip>
+    Vous pouvez aussi changer ce paramètre avec la commande
+    <ref id="command-TUNES" name="TUNES">.
+    La valeur initiale est <tt>on</tt>.
+  <tag>Tune Device<label id="preference-tune-device"></tag>
+    Joue les beeps d'alerte via:
+    <descrip>
+      <tag>Beeper</tag>
+        Le beeper interne (générateur de sons de la console).
+	Cette valeur est supportée sur Linux, OpenBSD, FreeBSD, et
+	NetBSD. Elle est toujours sûre dans son utilisation, bien qu'elle
+	soit peut-être quelque peu rustique. Ce périphérique n'est pas
+	disponible si vous avez spécifié l'option de compilation
+        <ref id="build-beeper-support" name="--disable-beeper-support">.
+      <tag>PCM</tag>
+        L'interface audio de la carte son.
+        Cette valeur est supportée sous Linux (via  <tt>/dev/dsp</tt>),
+	Solaris (via <tt>/dev/audio</tt>), OpenBSD (via <tt>/dev/audio0</tt>),
+        FreeBSD (via <tt>/dev/dsp</tt>), et NetBSD
+	(via <tt>/dev/audio0</tt>).
+	Ne fonctionne pas quand ce périphérique doit déjà être utilisé par
+	une autre application.
+	Ce périphérique n'est pas disponible si vous avez spécifié l'option de
+	compilation <ref id="build-pcm-support" name="--disable-pcm-support">.
+      <tag>MIDI</tag>
+        L'interface MIDI de la carte son. Cette valeur
+	est supportée sous Linux (via <tt>/dev/sequencer</tt>).
+	Ne fonctionne pas quand ce périphérique est déjà utilisé par une
+	autre application.
+        Ce périphérique n'est pas disponible si vous avez spécifié l'option de
+	compilation <ref id="build-midi-support" name="--disable-midi-support">.
+      <tag>FM</tag>
+        La synthèse FM sur une carte son AdLib, OPL3, Sound Blaster, ou
+	équivalente. Cette valeur est supportée sous Linux. Elle fonctionne
+	même si une synthèse FM est déjà utilisée par une autre application.
+	Les résultats sont imprévisibles, et peuvent ne pas être bons, si elle
+	est utilisée avec une carte son ne supportant pas cette caractéristique.
+        Ce périphérique n'est pas disponible si vous avez spécifié l'option de
+	compilation <ref id="build-fm-support" name="--disable-fm-support">.
+    </descrip>
+    La valeur initiale est <tt>beeper</tt> sur les plateformes supportant cela,
+    et <tt>PCM</tt> sur les autres.
+  <tag>MIDI Instrument<label id="preference-midi-instrument"></tag>
+    Si l'interface MIDI de la carte son est
+    utilisé pour jouer les sons d'alerte, ce paramètre spécifie quel instrument doit être
+    utilisé (voir <ref id="operand-midi-device" name="MIDI Instrument Table">).
+    La valeur initiale est <tt>Acoustic Grand Piano</tt>.
+  <tag>Alert Dots<label id="preference-alert-dots"></tag>
+    Chaque fois qu'un événement avec un type de point associé se produit (voir
+    <ref id="tunes" name="Alert Tunes">):
+    <descrip>
+      <tag>No</tag>
+        N'affiche pas les points.
+      <tag>Yes</tag>
+        Affiche brièvement les points.
+    </descrip>
+    Si les sons d'alerte doivent être jouées (voir la commande
+    <ref id="command-TUNES" name="TUNES"> et la préférence
+    <ref id="preference-alert-tunes" name="Alert Tunes">), si un son a été
+    associé à l'événement, et si le périphérique de son sélectionné peut être
+    ouvert, alors sans s'occuper de la valeur de cette préférence, les points ne sont pas affichés.
+  <tag>Alert Messages<label id="preference-alert-messages"></tag>
+    Chaque fois qu'un événement significatif avec un message associé se produit
+    (voir <ref id="tunes" name="Sons d'alerte">):
+    <descrip>
+      <tag>No</tag>
+        N'affiche pas le message.
+      <tag>Yes</tag>
+        Affiche le message.
+    </descrip>
+    Si des sons d'alerte doivent être joués (voir la commande
+    <ref id="command-TUNES" name="TUNES">, et la préférence
+    <ref id="preference-alert-tunes" name="Alert Tunes">), si un son a été
+    associé à l'événement, et si le périphérique de son sélectionné peut être
+    ouvert, ou si des points d'alerte doivent être affichés (voir la préférence
+    <ref id="preference-alert-dots" name="Alert Dots">) et si des points ont
+    été associés à l'événement, sans se soucier de la valeur de cette préférence,
+    le message n'est pas affiché.
+  <tag>Say-Line Mode<label id="preference-sayline-mode"></tag>
+    Lors de l'utilisation de la commande 
+    <ref id="command-SAY_LINE" name="SAY_LINE">:
+    <descrip>
+      <tag>Immediate</tag>
+        Suspend la parole.
+      <tag>Enqueue</tag>
+        Ne suspend pas la parole.
+    </descrip>
+    La valeur initiale est <tt>immediate</tt>.
+  <tag>Autospeak<label id="preference-autospeak"></tag>
+    <descrip>
+      <tag>No</tag>
+        Ne parle que quand vous le demandez explicitement.
+      <tag>Yes</tag>
+        Parle automatiquement:
+        <itemize>
+          <item>la nouvelle ligne lorsque vous déplacez la fenêtre braille
+	  verticalement.
+          <item>les caractères qui sont entrés ou effacés.
+          <item>le caractère sur lequel vous déplacez le curseur.
+        </itemize>
+    </descrip>
+    Vous pouvez aussi changer ce paramètre avec la commande
+    <ref id="command-AUTOSPEAK" name="AUTOSPEAK">.
+    La valeur initiale est <tt>off</tt>.
+  <tag>Speech Rate<label id="preference-speech-rate"></tag>
+    Ajuste le débit de parole (<tt>0</tt> est le plus lent, <tt>20</tt> est le plus
+    rapide). Cette préférence n'est disponible que si vous utilisez un pilote
+    la supportant.
+    Vous pouvez aussi changer ce paramètre avec la commande
+    <ref id="command-SAY_SLOWER-SAY_FASTER" name="SAY_SLOWER/SAY_FASTER">.
+    La valeur initiale est <tt>10</tt>.
+  <tag>Speech Volume<label id="preference-speech-volume"></tag>
+    Ajuste le volume de la parole (<tt>0</tt> est le plus bas, <tt>20</tt> le plus
+    fort). Cette préférence n'est disponible que si vous utilisez un pilote
+    la supportant.
+    Vous pouvez aussi changer ce paramètre avec la commande
+    <ref id="command-SAY_SOFTER-SAY_LOUDER" name="SAY_SOFTER/SAY_LOUDER">.
+    La valeur initiale est <tt>10</tt>.
+  <tag>Status Style<label id="preference-status-style"></tag>
+    Ce paramètre spécifie la façon dont les cellules de statut doivent être
+    utilisées. Normalement, vous ne devriez pas avoir besoin de jouer avec ça.
+    Cela permet aux développeurs de BRLTTY de tester les configurations des
+    cellules de statut pour les afficheurs braille qu'ils n'ont pas avec eux.
+    <descrip>
+      <tag>None</tag>
+        N'utilise pas les cellules de statut.
+	Cette valeur est toujours sûre, mais elle est aussi totalement inutile.
+      <tag>Alva</tag>
+        Les cellules de statut contiennent:
+        <descrip>
+          <tag>1</tag>
+            La place du curseur (voir ci-dessous).
+          <tag>2</tag>
+            La place du coin en haut à gauche de la fenêtre braille (voir
+	    ci-dessous).
+          <tag>3</tag>
+            Une lettre indiquant l'état de BRLTTY.
+            Dans l'ordre de rangement:
+            <descrip>
+              <tag>a</tag>
+	        Les attributs de l'écran sont montrés (voir la commande
+		<ref id="command-DISPMD" name="DISPMD">).
+              <tag>f</tag>
+	        L'image de l'écran est gelée (voir la commande
+		<ref id="command-FREEZE" name="FREEZE">).
+              <tag>f</tag>
+	        Le curseur est suivi (voir la commande
+		<ref id="command-CSRTRK" name="CSRTRK">).
+              <tag><em>blank</em></tag>
+                Rien de spécial.
+            </descrip>
+        </descrip>
+	Les emplacements du curseur et de la fenêtre braille sont présentés de
+	façon intéressante. Les points 1 à 6 représentent le numéro de la ligne
+	avec une lettre de <tt>a</tt> (pour 1) à <tt>y</tt> (pour 25).
+	Les points 7 et 8 (les deux points supplémentaires sur l'arrière)
+	représentent le numéro de la fenêtre braille horrizontal comme suit:
+	<descrip>
+          <tag>Aucun points</tag>La première fenêtre (la plus à gauche).
+          <tag>Point 7</tag>La seconde fenêtre.
+          <tag>Point 8</tag>La troisième fenêtre.
+          <tag>Points 7 et 8</tag>La quatrième fenêtre.
+        </descrip>
+	Dans les deux cas, les indicateurs incluent:
+	la ligne 26 est représentée par la lettre <tt>a</tt>, et la cinquième
+	fenêtre braille horrizontale est représentée avec aucun point derrière.
+      <tag>Tieman</tag>
+        Les cellules de statut contiennent:
+        <descrip>
+          <tag>1-2</tag>
+	    Les colonnes (en partant de zéro) du curseur (montrées dans la
+	    première moitié des cellules et du coin haut à gauche de la
+	    fenêtre braille (montré dans la partie arrière des cellules).
+          <tag>3-4</tag>
+	    Les rangées (en partant de zéro) du curseur montrées dans la
+	    première moitié des cellules et du coin haut à gauche de la
+	    fenêtre braille (montré dans la partie arrière des cellules).
+          <tag>5</tag>
+	    Chaque point indique si une caractéristique est active comme suit:
+            <descrip>
+              <tag>point 1</tag>
+                L'image de l'écran est gelée (voir la commande
+		<ref id="command-FREEZE" name="FREEZE">).
+              <tag>Point 2</tag>
+                Les attributs de l'écran sont affichés (voir la commande
+                <ref id="command-DISPMD" name="DISPMD">).
+              <tag>Point 3</tag>
+                Les sons d'alerte sont joués (voir la commande
+                <ref id="command-TUNES" name="TUNES">).
+              <tag>Point 4</tag>
+                Le curseur est montré (voir la commande
+                <ref id="command-CSRVIS" name="CSRVIS">).
+              <tag>Point 5</tag>
+                Le curseur est un bloc entier (voir la commande
+                <ref id="command-CSRSIZE" name="CSRSIZE">).
+              <tag>Point 6</tag>
+                Le curseur est masqué (voir la commande
+                <ref id="command-CSRBLINK" name="CSRBLINK">).
+              <tag>Point 7</tag>
+                Le curseur est poursuivi (voir la commande
+                <ref id="command-CSRTRK" name="CSRTRK">).
+              <tag>Point 8</tag>
+                La fenêtre braille glissera (voir la commande
+                <ref id="command-SLIDEWIN" name="SLIDEWIN">).
+            </descrip>
+        </descrip>
+      <tag>PowerBraille 80</tag>
+        Les cellules de statut contiennent:
+        <descrip>
+          <tag>1</tag>
+	    La rangée (en partant de 1) correspondant au haut de la fenêtre
+	    braille. La partie des dizaines est montrée dans la moitié supérieure
+	    de la cellule, et celle des unités est montrée dans la moitié
+	    arrière de la cellule.
+        </descrip>
+      <tag>Generic</tag>
+        Ce paramètre transmet beaucoup d'informations au pilote braille, et le
+	pilote lui-même décide comment les présenter.
+      <tag>MDV</tag>
+        Les cellules de statut contiennent:
+        <descrip>
+          <tag>1-2</tag>
+	    L'emplacement du coin en haut à gauche de la fenêtre braille.
+	    La rangée (en partant de 1) est montrée dans la moitié supérieure
+	    des cellules, et la colonne (en partant de 1) est montrée dans la
+	    moitié arrière des cellules.
+        </descrip>
+      <tag>Voyager</tag>
+        Les cellules de statut contiennent:
+        <descrip>
+          <tag>1</tag>
+	    La rangée (en partant de 0) correspondant au haut de la fenêtre
+	    braille (voir ci-dessous).
+          <tag>2</tag>
+            La rangée (en partant de 0) sur laquelle se trouve le curseur (voir
+	    ci-dessous).
+          <tag>3</tag>
+	    Si l'écran est gelé (voir la commande
+	    <ref id="command-FREEZE" name="FREEZE">), la lettre <tt>F</tt>.
+            Sinon, la colonne (en partant de 0) dans laquelle se trouve le
+	    curseur (voir ci-dessous).
+        </descrip>
+	Les numéros de rangée et de colonne sont montrés comme deux cases dans
+	une seule cellule. Les dizaine est montré dans la moitié haute de la
+	cellule, et les unités sont montrées dans la moitié arrière de la
+	cellule.
+    </descrip>
+    La valeur initiale dépend du pilote de l'afficheur braille.
+  <tag>Text Table<label id="preference-text-table"></tag>
+    Sélectionnez la table de traduction de texte. Voir la section
+    <ref id="translation-text" name="Traduction de texte"> pour des détails.
+    Voir l'option <ref id="options-text-table" name="-t"> en ligne de
+    commande pour la valeur initiale.
+    Cette préférence n'est pas sauvegardée. Elle n'est pas présentée si vous
+    avez spécifié l'option de compilation
+    <ref id="build-table-selection" name="--disable-table-selection">
+  <tag>Attributesw Table<label id="preference-attributes-table"></tag>
+    Sélectionnez la table de traduction des attributs. Voir la section
+    <ref id="translation-attributes" name="Traduction des attributs"> pour
+    des détails. Voir l'option <ref id="options-attributes-table" name="-a">
+    en ligne de commande pour la valeur initiale.
+    Cette préférence n'est pas sauvegardée. Elle n'est pas présentée si vous
+    avez spécifié l'option de compilation 
+    <ref id="build-table-selection" name="--disable-table-selection">.
+  <tag>Contraction Table<label id="preference-contraction-table"></tag>
+    Sélectionnez la table d'abrégé. Voir la section
+    <ref id="contraction" name="Braille abrégé"> pour des détails. Voir l'option
+    <ref id="options-contraction-table" name="-c"> en ligne de commande
+    pour la valeur initiale.
+    Cette préférence n'est pas sauvegardée. Elle n'est pas présentée si vous
+    avez spécifié l'option de compilation
+    <ref id="build-table-selection" name="--disable-table-selection">.
+</descrip>
+
+Remarques:
+<itemize>
+  <item><label id="time-settings">
+    Tous les paramètres de temps sont en centièmes de seconde. Ce sont des
+    multiples de la fréquence de mise à jour de la fenêtre braille (voir l'option
+    <ref id="options-update-interval" name="-U"> en ligne de commande)
+    dans un intervalle de 1 à 100.
+</itemize>
+
+<sect1>L'affichage des états<label id="status"><p>
+L'affichage des états est un résumé de l'état courant de BRLTTY qui s'adapte
+totalement à l'intérieur de la fenêtre braille. Certains afficheurs braille ont
+un type de cellules d'état qui sont utilisées pour afficher en permanence
+certaines de ces informations de la même façon (voir la documentation du
+pilote de votre afficheur).
+La donnée présentée par cet affichage n'est pas statique, et peut changer
+à n'importe quel moment, en réaction aux mises à jour de l'écran et/ou aux
+commandes BRLTTY.
+
+Utilisez la commande <ref id="command-INFO" name="INFO"> pour aller à
+l'affichage des états, et utilisez-la de nouveau pour revenir à l'écran.
+La présentation des informations contenu à l'intérieur dépend de la taille de
+la fenêtre braille.
+
+<sect2>Afficheurs à 21 cellules ou plus<p>
+De courtes symboliques ont été utilisées, bien qu'elles s'aparentent à un code
+crypté, de façon à montrer la présentation en colonne précise.
+<tscreen><em>wx</em>:<em>wy</em> <em>cx</em>:<em>cy</em> <em>vt</em> <em>tcmfdu</em></tscreen>
+<descrip>
+  <tag><em>wx</em><tt>:</tt><em>wy</em></tag>
+    La colonne et la rangée (en partant de 0) sur l'écran correspondant au
+    coin en haut à gauche de la fenêtre braille.
+  <tag><em>cx</em><tt>:</tt><em>cy</em></tag>
+    La colonne et la rangée (en partant de 0) sur l'écran correspondant à la
+    position du curseur.
+  <tag><em>vt</em></tag>
+    Le numéro (en partant de 1) de la console virtuelle courante.
+  <tag><em>t</em></tag>
+    L'état de la caractéristique de suivi du curseur (voir la commande
+    <ref id="command-CSRTRK" name="CSRTRK"> command).
+    <descrip>
+      <tag>vide</tag>Le suivi du curseur est inactif.
+      <tag><tt>t</tt></tag>Le suivi du curseur est actif.
+    </descrip>
+  <tag><em>c</em></tag>
+    L'état des caractéristiques de visibilité du curseur (voir les commandes
+    <ref id="command-CSRVIS" name="CSRVIS"> et
+    <ref id="command-CSRBLINK" name="CSRBLINK">).
+    <descrip>
+      <tag>vide</tag>Le curseur n'est pas visible et ne masquera pas quand il
+      sera visible.
+      <tag><tt>b</tt></tag>Le curseur n'est pas visible, et masquera lorsqu'il
+      sera visible.
+      <tag><tt>v</tt></tag>Le curseur est visible et non masquable.
+      <tag><tt>B</tt></tag>Le curseur et visible et masquable.
+    </descrip>
+  <tag><em>m</em></tag>
+    Le mode d'affichage courant (voir la commande
+    <ref id="command-DISPMD" name="DISPMD">).
+    <descrip>
+      <tag><tt>t</tt></tag>Le contenu de l'écran (texte) est affiché.
+      <tag><tt>a</tt></tag>La surbrillance à l'écran (les attributs) est affichée.
+    </descrip>
+  <tag><em>f</em></tag>
+    L'état de la caractéristique de gel de l'écran (voir la commande
+    <ref id="command-FREEZE" name="FREEZE">).
+    <descrip>
+      <tag>vide</tag>L'écran n'est pas gelé.
+      <tag><tt>f</tt></tag>L'écran est gelé.
+    </descrip>
+  <tag><em>d</em></tag>
+    Le nombre de points braille utilisés pour afficher chaque caractère (voir
+    la commande <ref id="command-SIXDOTS" name="SIXDOTS">).
+    <descrip>
+      <tag><tt>8</tt></tag>Les huit points sont utilisés.
+      <tag><tt>6</tt></tag>Seuls 6 points sont utilisés.
+    </descrip>
+  <tag><em>u</em></tag>
+    L'état des caractéristiques d'affichage des lettres majuscules (voir la
+    commande <ref id="command-CAPBLINK" name="CAPBLINK">).
+    <descrip>
+      <tag>vide</tag>Les lettres en majuscule ne clignotent pas.
+      <tag><tt>B</tt></tag>Les lettres en majuscule clignotent.
+    </descrip>
+</descrip>
+
+<sect2>Afficheurs à 20 cellules ou moins<p>
+De courtes symboliques ont été utilisées, bien qu'elles s'apparentent à un code
+crypté, de façon à montrer la présentation en colonne précise.
+<tscreen><em>xx</em><em>yy</em><em>s</em> <em>vt</em> <em>tcmfdu</em></tscreen>
+<descrip>
+  <tag><em>xx</em></tag>
+    Les colonnes (en partant de 0) sur l'écran correspondant à la position du
+    curseur (affichée dans la moitié supérieure des cellules) et au coin en
+    haut à gauche de l'afficheur braille (montré dans la moitié arrière des
+    cellules).
+  <tag><em>yy</em></tag>
+    Les rangées (en partant de 0) sur l'écran correspondant à la position du
+    curseur (affichée dans la moitié supérieure des cellules) et au coin en
+    haut à gauche de l'afficheur braille (montré dans la moitié arrière des
+    cellules).
+  <tag><em>s</em></tag>
+    Les valeurs de certaines caractéristiques de BRLTTY.
+    Une caractéristique est active si le point lui correspondant est élevé.
+    <descrip>
+      <tag>Point 1</tag>
+        L'image de l'écran gelée (voir la commande
+	<ref id="command-FREEZE" name="FREEZE">).
+      <tag>Point 2</tag>
+        Affichage des attributs (voir la commande
+	<ref id="command-DISPMD" name="DISPMD">).
+      <tag>Point 3</tag>
+        Les sons d'alerte (voir la commande
+	<ref id="command-TUNES" name="TUNES">).
+      <tag>Point 4</tag>
+        Curseur visible (voir la commande
+	<ref id="command-CSRVIS" name="CSRVIS">).
+      <tag>Point 5</tag>
+        Curseur en bloc (voir la commande
+	<ref id="command-CSRSIZE" name="CSRSIZE">).
+      <tag>Point 6</tag>
+        Clignotement du curseur (voir la commande
+	<ref id="command-CSRBLINK" name="CSRBLINK">).
+      <tag>Point 7</tag>
+        Poursuite du curseur (voir la commande
+	<ref id="command-CSRTRK" name="CSRTRK">).
+      <tag>Dot 8</tag>
+        Glissement de la fenêtre (voir la commande
+	<ref id="command-SLIDEWIN" name="SLIDEWIN">).
+    </descrip>
+  <tag><em>vt</em></tag>
+    Le numéro (partant de 1) de la console virtuelle courante.
+  <tag><em>t</em></tag>
+    L'état de la caractéristique de suivi du curseur (voir la commande
+    <ref id="command-CSRTRK" name="CSRTRK"> command).
+    <descrip>
+      <tag>vide</tag>Le suivi du curseur est inactif.
+      <tag><tt>t</tt></tag>Le suivi du curseur est actif.
+    </descrip>
+  <tag><em>c</em></tag>
+    L'état des caractéristiques de visibilité du curseur (voir les commandes
+    <ref id="command-CSRVIS" name="CSRVIS"> et
+    <ref id="command-CSRBLINK" name="CSRBLINK">).
+    <descrip>
+      <tag>vide</tag>Le curseur n'est pas visible et ne masquera pas quand il
+      sera visible.
+      <tag><tt>b</tt></tag>Le curseur n'est pas visible, et masquera lorsqu'il
+      sera visible.
+      <tag><tt>v</tt></tag>Le curseur est visible et non masquable.
+      <tag><tt>B</tt></tag>Le curseur et visible et masquable.
+    </descrip>
+  <tag><em>m</em></tag>
+    Le mode d'affichage courant (voir la commande
+    <ref id="command-DISPMD" name="DISPMD">).
+    <descrip>
+      <tag><tt>t</tt></tag>Le contenu de l'écran (texte) est affiché.
+      <tag><tt>a</tt></tag>La surbrillance à l'écran (les attributs) est affichée.
+    </descrip>
+  <tag><em>f</em></tag>
+    L'état de la caractéristique de gel de l'écran (voir la commande
+    <ref id="command-FREEZE" name="FREEZE">).
+    <descrip>
+      <tag>vide</tag>L'écran n'est pas gelé.
+      <tag><tt>f</tt></tag>L'écran est gelé.
+    </descrip>
+  <tag><em>d</em></tag>
+    Le nombre de points braille utilisés pour afficher chaque caractère (voir
+    la commande <ref id="command-SIXDOTS" name="SIXDOTS">).
+    <descrip>
+      <tag><tt>8</tt></tag>Les huit points sont utilisés.
+      <tag><tt>6</tt></tag>Seuls 6 points sont utilisés.
+    </descrip>
+  <tag><em>u</em></tag>
+    L'état des caractéristiques d'affichage des lettres majuscules (voir la
+    commande <ref id="command-CAPBLINK" name="CAPBLINK">).
+    <descrip>
+      <tag>vide</tag>Les lettres en majuscule ne clignotent pas.
+      <tag><tt>B</tt></tag>Les lettres en majuscule clignotent.
+    </descrip>
+</descrip>
+
+<sect1>Mode Apprentissage des commandes<label id="learn"><p>
+Le Mode Apprentissage des commandes est une façon interactive d'apprendre
+ce que les touches de l'afficheur braille font. Vous pouvez y accéder soit
+par la commande <ref id="command-LEARN" name="LEARN"> ou via l'utilitaire
+<ref id="utility-brltest" name="brltest">.
+Cette caractéristique n'est pas disponible si vous avez spécifié l'option de
+compilation <ref id="build-learn-mode" name="--disable-learn-mode">.
+
+Lorsque vous êtes entré dans ce mode, le message <tt>command learn mode</tt>
+est écrit sur l'afficheur braille.
+Alors, dès que vous pressez une touche (ou une combinaison de touches) de
+l'afficheur, un court message décrivant sa fonction dans BRLTTY est écrit.
+Vous quitterez immédiatement ce mode si vous pressez la touche (ou la
+combinaison de touches) pour la commande <ref id="command-LEARN" name="LEARN">.
+Vous sortez automatiquement, et le message <tt>done</tt> s'inscrit, si un
+de temps de 10 secondes s'écoule sans qu'une touche de l'afficheur ne soit
+pressée.
+Remarquez que certains afficheurs ne se signalent pas au pilote et/ou certains
+afficheurs ne se signalent pas à BRLTTY jusqu'à ce que toutes les touches soient
+faites.
+
+Si un message est plus long que la largeur de l'afficheur braille, il est
+affiché en segments. La longueur d'un segment est de un soustrait à
+la largeur de l'afficheur braillle, avec le caractère le plus à droite sur
+l'afficheur qui affiche le signe moins.
+Chaque segment reste sur l'afficheur, soit pendant quelques secondes (voir
+l'option <ref id="options-message-delay" name="-M"> en ligne de commande)
+soit jusqu'à ce qu'une touche de l'afficheur soit pressée.

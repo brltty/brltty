@@ -1,0 +1,279 @@
+<sect>Braille abrégé<label id="contraction"><p>
+BRLTTY peut afficher le braille abrégé sur la ligne. IL le fait si:
+<itemize>
+  <item>
+    Une table d'abrégé a été sélectionnée.
+    Voir l'option <ref id="options-contraction-table" name="-c"> en ligne
+    de commande et la ligne
+    <ref id="configure-contraction-table" name="contraction-table"> du
+    fichier de configuration pour des détails.
+  <item>
+    La possibilité braille 6 points a été activée. Voir la commande
+    <ref id="command-SIXDOTS" name="SIXDOTS"> et la préférence
+    <ref id="preference-text-style" name="Text Style"> pour des détails.
+</itemize>
+Cette possibilité n'est pas disponible si vous avez spécifié l'option de
+compilation
+<ref id="build-contracted-braille" name="--disable-contracted-braille">.
+
+Les tables d'abrégé suivantes sont fournies:
+<descrip>
+  <tag>big5</tag>Chinois
+  <tag>compress</tag>Enlève les blancs en trop
+  <tag>en-us-g2</tag>Anglais Américain 2ème degré
+  <tag>fr-abrege</tag>Français unifié abrégé
+  <tag>fr-integral</tag>Français unifié désabrégé
+</descrip>
+
+<sect1>Format de fichier<p>
+Les lignes vides sont ignorées.
+Tout espace au début ou à la fin (n'importe quel nombre d'espaces ou tabulations)
+est ignoré.
+Les lignes commençant par un dièse (<tt>&num;</tt>) sont ignorées, 
+ce sont des commentaires.
+<tscreen>&num; C'est un commentaire.</tscreen>
+Toutes les autres lignes définissent des entrées de table.
+
+La forme générale d'une entrée de table est un opcode, suivi de ses opérateurs.
+Le opcode et son opérateur sont séparés par des espaces.
+Chaque opcode a un nombre spécifique d'opérateurs, et tout texte suivant son
+dernier opérateur est traité comme un commentaire.
+<tscreen><em>opcode</em> <em>operateur</em> ... <em>commentaire</em></tscreen>
+
+Les types d'opérateur suivant sont supportés:
+<descrip>
+  <tag>string</tag>
+    Une séquence de caractères différent d'un espace (qui finit la chaîne) et
+    d'une barre oblique inversée (<tt>&bsol;</tt>).
+    Les représentations spéciales suivantes sont aussi supportées:
+    <descrip>
+      <tag><tt>&bsol;&bsol;</tt></tag>barre oblique inversée
+      <tag><tt>&bsol;f</tt></tag>form feed
+      <tag><tt>&bsol;n</tt></tag>nouvelle ligne
+      <tag><tt>&bsol;o</tt><em>ooo</em></tag>valeur d'octet sur 3 chiffres
+      <tag><tt>&bsol;r</tt></tag>retour chariot
+      <tag><tt>&bsol;s</tt></tag>vide (espace)
+      <tag><tt>&bsol;t</tt></tag>tabulation horizontale
+      <tag><tt>&bsol;v</tt></tag>tabulation verticale
+      <tag><tt>&bsol;x</tt><em>xx</em></tag>valeur hexadecimale
+    </descrip>
+  <tag>number</tag>
+    Un entier. Il peut être spécifié d'une des façons suivantes:
+    <descrip>
+      <tag>decimal</tag>
+        Une séquence de chiffres décimaux (<tt>0</tt>-<tt>9</tt>), le premier chiffre
+	étant différent de zéro (<tt>1</tt>-<tt>9</tt>).
+      <tag>hexadecimal</tag>
+        Une séquence de chiffres hexadécimaux 	(<tt>0</tt>-<tt>9</tt>, et soit
+	<tt>a</tt>-<tt>f</tt> soit <tt>A</tt>-<tt>F</tt>), précédé soit par <tt>0x</tt> soit par
+	<tt>0X</tt>.
+      <tag>octal</tag>
+        Une séquence de chiffres en octet (<tt>0</tt>-<tt>7</tt>), le premier chiffre
+	étant zéro  (<tt>0</tt>).
+    </descrip>
+  <tag>dots</tag>
+    Un symbole braille. Les points braille doivent être spécifiés par leur
+    numéro standard (voir la 
+    <ref id="dots" name="Convention du nombre de points braille Standard">),
+    et, pour un symbole multicellules, les spécifications de la cellule doivent
+    être séparés par un tiret (<tt>-</tt>).
+    Par exemple, l'abréviation du mot anglais <tt>lord</tt> (la lettre <tt>l</tt>
+    précédée du point 5) serait spécifiée comme <tt>5-123</tt>.
+    Vous pouvez spécifier un espace avec le numéro de point spécial <tt>0</tt>.
+</descrip>
+
+<sect1>Opcodes<label id="contraction-opcodes"><p>
+Un opcode est un mot-clé qui dit au traducteur comment interpréter les
+opérateurs. Les opcodes sont groupés ici par leur fonction.
+
+<sect2>Administration de la table<label id="contraction-opcodes-administration"><p>
+Ces opérateurs facilitent l'écriture des tables d'abrégé.
+Ils n'ont pas d'effet direct sur la traduction de caractère.
+<descrip>
+  <tag><tt>include</tt> <em>path</em><label id="contraction-opcode-include"></tag>
+    Inclut le contenu d'un autre fichier.
+    L'inclusion peut se faire à n'importe quel niveau.
+    Les chemins relatifs sont déterminés par rapport au répertoire du fichier inclu.
+  <tag><tt>locale</tt> <em>locale</em><label id="contraction-opcode-locale"></tag>
+    Définit la locale pour l'interprétation d'un caractère (minuscule,
+    majuscule, numérique, etc). La locale peut être définie comme:
+    <descrip>
+      <tag><em>langue</em>[<tt>_</tt><em>pays</em>][<tt>.</tt><em>charset</em>][<tt>@</tt><em>modifier</em>]</tag>
+        La composante <em>langue</em> est requise et devrait être un code de
+	langue à deux lettres <tt>ISO-639</tt>.
+        La composante <em>pays</em> est facultative et devrait être un code de
+	pays à deux lettres <tt>ISO-3166</tt>.
+        La composante <em>charset</em> est optionnelle est devrait être le nom
+	d'une table de caractères, comme <tt>ISO-8859-1</tt>.
+      <tag>C</tag>
+        7-bit ASCII.
+      <tag>-</tag>
+        Aucune locale.
+    </descrip>
+    La dernière spécification de locale s'applique à toute la table. Si
+    vous n'utilisez pas cet opcode, la locale <tt>C</tt> est utilisée.
+</descrip>
+
+<sect2>Définition de caractères spéciaux<label id="contraction-opcodes-symbols"><p>
+Ces opcodes définissent les caractères spéciaux qui doivent être insérés dans
+le texte braille afin de le rendre plus clair.
+<descrip>
+  <tag><tt>capsign</tt> <em>points</em><label id="contraction-opcode-capsign"></tag>
+    Le symbole qui met en majuscule une seule lettre.
+  <tag><tt>begcaps</tt> <em>points</em><label id="contraction-opcode-begcaps"></tag>
+    Le symbole qui commence un bloc de lettres en majuscule à l'intérieur d'un
+    mot.
+  <tag><tt>endcaps</tt> <em>points</em><label id="contraction-opcode-endcaps"></tag>
+    Le symbole qui termine un bloc de lettres en majuscules à l'intérieur
+    d'un mot.
+  <tag><tt>letsign</tt> <em>points</em><label id="contraction-opcode-letsign"></tag>
+    Le symbole qui désigne une lettre ne faisant pas partie du mot.
+  <tag><tt>numsign</tt> <em>points</em><label id="contraction-opcode-numsign"></tag>
+    Le symbole marquant le début d'un nombre.
+</descrip>
+
+<sect2>Traduction de caractère<label id="contraction-opcodes-translation"><p>
+Ces opcodes définissent les représentations braille des séquences de caractères.
+Chacun d'eux définit une entrée à l'intérieur de la table d'abrégé.
+Ces entrées peuvent être définit dans n'importe quel ordre, sauf, comme
+remarqué ci-dessous, lorsqu'elles définissent des représentations
+alternatives de la même séquence de caractères.
+
+Chacun de ces opcodes a un opérateurs <em>caractères</em> (qui doit être
+spécifié comme une <em>chaîne</em>), et une condition de configuration dirigeant
+son utilisation.
+Le texte est traduit strictement de la gauche vers la droite, caractère par
+caractère, avec l'entrée la plus acceptable pour chaque position utilisée.
+S'il y a plus d'une entrée acceptable pour une position donnée, celle ayant la
+chaîne de caractères la plus longue est utilisée. S'il y a plus d'une
+entrée acceptable pour la même chaîne de caractères, celle définie le plus
+au début de la table est utilisée (c'est la seule dépendance de l'ordre).
+
+Beaucoup de ces opcodes ont un opérateur <em>points</em> qui définit la représentation
+braille de son opérateur <em>caractères</em>.
+Il peut être aussi spécifiée comme un signe égal (<tt>=</tt>), au quel cas il
+signifie l'une des deux choses.
+Si l'entrée est pour un seul caractère, cela signifie que la représentation
+du braille informatique sélectionnée (voir l'option
+<ref id="options-text-table" name="-t"> en ligne de commande et la ligne
+<ref id="configure-text-table" name="text-table"> du fichier de configuration)
+de ce caractère doit être utilisée.
+Si c'est pour une séquence multi-caractères, la représentation par défaut de
+chaque caractère (voir <ref id="contraction-opcode-always" name="always">) dans
+une séquence doit être utilisée.
+
+Certains termes spéciaux sont utilisés à l'intérieur des descriptions de ces
+opcodes.
+<descrip>
+  <tag>word</tag>
+    Une séquence maximale d'une ou plusieurs lettres à la suite.
+</descrip>
+
+Enfin, voici maintenant la description des opcodes eux-mêmes:
+<descrip>
+  <tag><tt>literal</tt> <em>caractères</em><label id="contraction-opcode-literal"></tag>
+    Traduit ce qui est lié à l'espace et qui contient une séquence de
+    caractères en braille informatique (voir l'option
+    <ref id="options-text-table" name="-t"> en ligne de commande et la ligne
+    <ref id="configure-text-table" name="text-table"> du fichier de
+     configuration).
+  <tag><tt>replace</tt> <em>caractères</em> <em>caractères</em><label id="contraction-opcode-replace"></tag>
+    Remplace la première valeur des caractères, quelque soit l'endroit où ils
+    apparaissent, par la seconde. Les caractères remplacés ne sont pas
+    réinsérés.
+  <tag><tt>always</tt> <em>caractères</em> <em>points</em><label id="contraction-opcode-always"></tag>
+    Traduit les caractères quelque soit l'endroit où ils apparaissent.
+    S'il n'y a qu'un caractère, alors, en plus, définit la représentation par
+    défaut de ce caractère.
+  <tag><tt>repeated</tt> <em>caractères</em> <em>points</em><label id="contraction-opcode-repeated"></tag>
+    Traduit les caractères quelque soit l'endroit où ils apparaissent. Ignore toute
+    répétition immédiate de la même séquence.
+  <tag><tt>largesign</tt> <em>caractères</em> <em>points</em><label id="contraction-opcode-largesign"></tag>
+    Traduit les caractères quelque soit l'endroit où ils apparaissent. Supprime les
+    espaces entre les mots qui se suivent et qui sont gérés par cet opcode.
+  <tag><tt>word</tt> <em>caractères</em> <em>points</em><label id="contraction-opcode-word"></tag>
+    Traduit les caractères s'ils forment un mot.
+  <tag><tt>joinword</tt> <em>caractères</em> <em>points</em><label id="contraction-opcode-joinword"></tag>
+    Traduit les caractères s'ils forment un mot. Supprime l'espace suivant si
+    le premier caractère le suit est une lettre.
+  <tag><tt>lowword</tt> <em>caractères</em> <em>points</em><label id="contraction-opcode-lowword"></tag>
+    Traduit les caractères s'ils forment un mot lié à un espace. 
+  <tag><tt>contraction</tt> <em>caractères</em><label id="contraction-opcode-contraction"></tag>
+    Fait précéder les caractères d'un signe-lettre (voir
+    <ref id="contraction-opcode-letsign" name="letsign">) s'ils forment un mot.
+  <tag><tt>sufword</tt> <em>caractères</em> <em>points</em><label id="contraction-opcode-sufword"></tag>
+    Traduit les caractères s'ils forment soit un mot, soit s'ils sont au
+    début d'un mot.
+  <tag><tt>prfword</tt> <em>caractères</em> <em>points</em><label id="contraction-opcode-prfword"></tag>
+    Traduit les caractères s'ils forment soit un mot, soit s'ils sont à la
+        fin d'un mot.
+  <tag><tt>begword</tt> <em>caractères</em> <em>points</em><label id="contraction-opcode-begword"></tag>
+    Traduit les caractères s'ils sont au début d'un mot.
+  <tag><tt>begmidword</tt> <em>caractères</em> <em>points</em><label id="contraction-opcode-begmidword"></tag>
+    Traduit les caractères s'ils sont au début ou au milieu d'un mot.
+  <tag><tt>midword</tt> <em>caractères</em> <em>points</em><label id="contraction-opcode-midword"></tag>
+    Traduit les caractères s'ils sont au milieu d'un mot.
+  <tag><tt>midendword</tt> <em>caractères</em> <em>points</em><label id="contraction-opcode-midendword"></tag>
+    Traduit les caractères s'ils sont au milieu ou à la fin d'un mot.
+  <tag><tt>endword</tt> <em>caractères</em> <em>points</em><label id="contraction-opcode-endword"></tag>
+    Traduit les caractères s'ils sont à la fin d'un mot.
+  <tag><tt>prepunc</tt> <em>caractères</em> <em>points</em><label id="contraction-opcode-prepunc"></tag>
+    Traduit les caractères s'ils font partie de la ponctuation au début d'un
+    mot.
+  <tag><tt>postpunc</tt> <em>caractères</em> <em>points</em><label id="contraction-opcode-postpunc"></tag>
+    Traduit les caractères s'ils font partie de la ponctuation à la fin d'un
+    mot.
+  <tag><tt>begnum</tt> <em>caractères</em> <em>points</em><label id="contraction-opcode-begnum"></tag>
+    Traduit les caractères s'ils sont au début d'un nombre.
+  <tag><tt>midnum</tt> <em>caractères</em> <em>points</em><label id="contraction-opcode-midnum"></tag>
+    Traduit les caractères s'ils sont au milieu d'un nombre.
+  <tag><tt>endnum</tt> <em>caractères</em> <em>points</em><label id="contraction-opcode-endnum"></tag>
+    Traduit les caractères s'ils sont à la fin d'un nombre.
+</descrip>
+
+<sect2>Classes de caractère<label id="contraction-opcodes-classes"><p>
+Ces opcodes définissent et utilisent des classes de caractère. Une classe de
+caractère associe un type de caractère à un nom. Le nom se réfère alors à
+n'importe quel caractère à l'intérieur de la classe. Un caractère peut
+appartenir à plus d'une classe.
+
+Les classes de caractère suivantes sont automatiquement prédéfinies, basées sur
+la locale sélectionnée.
+<descrip>
+  <tag>digit</tag>
+    Caractères numériques.
+  <tag>letter</tag>
+    Les caractères alphabétiques majuscule ou minuscule.
+    Certaines locales ont des lettres supplémentaires qui ne sont ni en majuscule
+    ni en minuscule.
+  <tag>lowercase</tag>
+    Les caractères alphabétiques minuscules.
+  <tag>punctuation</tag>
+    Caractères imprimables qui ne sont ni des espaces ni alphanumériques.
+  <tag>space</tag>
+    Caractères d'espacement.
+    Dans la locale par défaut, il s'agit de: espace, tabulation horizontale, tabulation
+    verticale, retour chariot, nouvelle ligne, saut de page.
+  <tag>uppercase</tag>
+    Caractères alphabétiques en majuscules.
+</descrip>
+
+Les opcodes qui définissent et utilisent des classes de caractères sont:
+<descrip>
+  <tag><tt>class</tt> <em>nom</em> <em>caractères</em><label id="contraction-opcode-class"></tag>
+    Définit une nouvelle classe de caractère. L'opérateur <em>caractères</em>
+    doit être spécifié comme une <em>chaîne</em>. Une classe de caractère ne peut
+    pas être utilisée tant qu'elle n'est pas définie.
+  <tag><tt>after</tt> <em>class</em> <em>opcode</em> ...<label id="contraction-opcode-after"></tag>
+    L'opcode spécifié est assez contraint dans le sens où la séquence de
+    caractères adéquat doit être immédiatement précédée par un caractère
+    appartenant à la classe spécifiée.
+    Si vous utilisez plus d'une fois cet opcode sur la même ligne, l'union des
+    caractères de toute la classe est utilisée.
+  <tag><tt>before</tt> <em>class</em> <em>opcode</em> ...<label id="contraction-opcode-before"></tag>
+    L'opcode spécifié est assez contraint dans le sens où la séquence de
+    caractères adéquat doit être immédiatement suivie par un caractère
+    appartenant à la classe spécifiée.
+    Si vous utilisez plus d'une fois cet opcode sur la même ligne, l'union des
+    caractères de toute la classe est utilisée.
+</descrip>

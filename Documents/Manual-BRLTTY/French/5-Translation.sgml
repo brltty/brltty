@@ -1,0 +1,192 @@
+<sect>Tables de traduction<label id="translation"><p>
+BRLTTY utilise deux <bf>tables de traduction</bf> pour gérer la représentation
+des octets en combinaisons de points.
+
+<sect1>Traduction de texte<label id="translation-text"><p>
+La première, et la plus importante, est la table de traduction de texte. BRLTTY
+est initialement configuré pour utiliser le <ref id="nabcc" name="North American Braille Computer Code"> (NABCC), donc
+le code informatique braille nord-américain. En plus de cette table de
+traduction de texte par défaut, plusieurs alternatives sont fournies:
+<descrip>
+  <tag>brf</tag>bonne pour voir des fichiers <tt>.brf</tt> dans un éditeur de texte
+  ou un visualiseur
+  <tag>cz</tag>Tchèque (iso-8859-2)
+  <tag>da</tag>Danois (iso-8859-1)
+  <tag>de</tag>Allemand (iso-8859-1)
+  <tag>es</tag>Espagnol (iso-8859-1)
+  <tag>fi1</tag>Finois (iso-8859-1)
+  <tag>fi2</tag>Finois (iso-8859-1)
+  <tag>fr</tag>Français (iso-8859-1)
+  <tag>fr-cbifs</tag>Code Braille Informatique Français Standard (iso-8859-1)
+  <tag>it</tag>Italien (iso-8859-1)
+  <tag>nabcc</tag>Code informatique braille nord-américain (iso-8859-1)
+  <tag>no-h</tag>Norvégien et allemand (iso-8859-1)
+  <tag>no-p</tag>Norvégien (iso-8859-1)
+  <tag>pl</tag>Polonais (iso-8859-2)
+  <tag>ru</tag>Russe (koi8-r)
+  <tag>se1</tag>Suédois (iso-8859-1)
+  <tag>se2</tag>Suédois (iso-8859-1)
+  <tag>uk</tag>Anglais Royaume-Uni (iso-8859-1)
+  <tag>us</tag>Anglais américain (iso-8859-1)
+  <tag>vni</tag>Vietnamien (iso-8859-1)
+</descrip>
+Voir l'option <ref id="options-text-table" name="-t"> en ligne de commande,
+la ligne <ref id="configure-text-table" name="text-table"> du fichier de
+configuration, et l'option de compilation
+<ref id="build-text-table" name="--with-text-table"> pour des détails
+concernant la façon d'utiliser et de changer de table de traduction de texte.
+
+<sect1>Traduction d'attributs<label id="translation-attributes"><p>
+La table de traduction des attributs est utilisée lorsque BRLTTY affiche les
+attributs de l'écran au lieu du contenu de l'écran (voir la commande
+<ref id="command-DISPMD" name="DISPMD">).
+Chacun des huit points braille représente l'un des huit bits d'attributs
+<tt>VGA</tt>.
+Les tables de traduction d'attributs suivantes sont fournies:
+<descrip>
+  <tag>attributes</tag>
+    La colonne à gauche représente les couleurs de premier plan:
+    <descrip>
+      <tag>Point 1</tag>Rouge
+      <tag>Dot 2</tag>Green
+      <tag>Point 3</tag>Bleu
+      <tag>Point 7</tag>Brillant
+    </descrip>
+    La colonne à droite représente les couleurs de fond:
+    <descrip>
+      <tag>Point 4</tag>Rouge
+      <tag>Point 5</tag>Vert
+      <tag>Point 6</tag>Bleu
+      <tag>Point 8</tag>Clignotant
+    </descrip>
+    Un point est affiché quand son bit d'attribut correspondant est actif.
+    C'est la Table de traduction d'attributs par défaut car c'est la plus
+    intuitive. Cependant, l'un de ses problèmes est qu'il est difficile de
+    distinguer la différence entre la vidéo normale (noir sur blanc) et inversée
+    (blanc sur noir).
+  <tag>attrib</tag>
+    La colonne à gauche représente les couleurs de premier plan: 
+    <descrip>
+      <tag>Point 1</tag>Rouge
+      <tag>Point 2</tag>Vert
+      <tag>Point 3</tag>Bleu
+      <tag>Point 7</tag>Brillant
+    </descrip>
+    La colonne à droite représente les couleurs de fond:
+    <descrip>
+      <tag>Point 4</tag>Rouge
+      <tag>Point 5</tag>Vert
+      <tag>Point 6</tag>Bleu
+      <tag>Point 8</tag>Clignotant
+    </descrip>
+    Un bit de fond est actif pour générer ses points correspondant, tandis
+    qu'un bit de premier plan est inactif pour générer son point correspondant.
+    Cette logique non intuitive facilite en fait la lecture de la plupart des
+    combinaisons d'attributs communément utilisées.
+</descrip>
+Voir l'option <ref id="options-attributes-table" name="-a"> en ligne de
+commande, la ligne <ref id="configure-attributes-table" name="attributes-table">
+du fichier de configuration, et l'option de compilation
+<ref id="build-attributes-table" name="--with-attributes-table"> pour des
+détails concernant l'utilisation et le changement de table de
+traduction.
+
+<sect1>Format des tables<p>
+Une table de traduction est une séquence de lignes de commande, avec une
+commande par ligne, qui définit comment doit être représenté en braille chaque
+caractère.
+Les espaces blancs (les vides, tabulations) au début d'une ligne, ou avant
+et/ou après l'opérateur d'une ligne de commande, sont ignorés.
+Les lignes ne contenant que des espaces sont ignorées.
+Si le premier caractère non-blanc d'une ligne est "&num;" cette ligne est un
+commentaire et est ignorée.
+
+Les lignes de commande suivantes sont fournies:
+<descrip>
+  <tag><tt>byte</tt> <em>octet</em> <em>dots</em> &num; <em>comment</em></tag>
+    Utilisez l'instruction <tt>byte</tt> pour spécifier comment un octet (caractère)
+    doit être représenté en braille.
+    Voir les tables de traduction de texte pour des exemples de son utilisation.
+    Comme c'est de loin l'instruction la plus utilisée, le mot-clé <tt>byte</tt> lui-même est optionnel.
+    <descrip>
+      <tag><em>octet</em></tag>
+        L'octet à définir. Il peut être:
+        <itemize>
+          <item>
+            N'importe quel caractère autre qu'une barre oblique inversée ou
+	    un espace.
+          <item>
+            Un caractère spécial précédé d'une barre oblique inversée.
+            Ils sont:
+            <descrip>
+              <tag>\\</tag>Une barre oblique inversée littérale.
+              <tag>\&num;</tag>Un signe de nombre littéral
+              <tag>\x&num;&num;</tag>La représentation à deux colonnes hexadecimal
+	      d'un caractère.
+              <tag>\X&num;&num;</tag>... (la casse du X and et des colonnes
+	      n'est pas significative)
+            </descrip>
+        </itemize>
+      <tag><em>dots</em></tag>
+        La représentation braille de l'octet. C'est un séquence de un à huit
+	numéros de points. Si la séquence de nombre de point est entourée de
+	parenthèses, les numéros de points peuvent être séparés par des espaces.
+	Un numéro de point est un combinaison dans une gamme de <tt>1</tt>-<tt>8</tt>
+	comme défini par
+	<ref id="dots" name="la Convention du nombre de points braille
+	standard">. Le numéro spécial de point <tt>0</tt> est reconnu lorsqu'il
+	n'est pas entouré de parenthèses, et signifie aucun point, il ne peut
+	être utilisé en conjonction à un autre numéro de point.
+    </descrip>
+
+    Exemples:
+    <itemize>
+      <item>byte a 1
+      <item>b 12
+      <item>c (14)
+      <item>d ( 1  4   5    )
+      <item>\\ 12567
+      <item>\x20 0
+    </itemize>
+  <tag><tt>dot</tt> <em>point</> <em>etat</em> &num; <em>commentaire</em></tag>
+    Utilisez l'instruction <tt>dot</tt> pour spécifier comment les octets non définis doivent être représentés en
+    braille. Voir les tables de traduction des attributs pour des exemples
+    de son utilisation. Par défaut, tous les points sont <tt>on</tt>.
+
+    <descrip>
+      <tag><em>point</em></tag>
+        Le point qui est défini. C'est une seule case allant de 
+        <tt>1</tt> à <tt>8</tt> comme défini par la
+	<ref id="dots" name="Convention du nombre de points braille standard">.
+      <tag><em>état</em></tag>
+        Lorsque le point s'élève. Il peut être:
+        <descrip>
+          <tag><tt>on</tt></tag>Le point est élevé.
+          <tag><tt>off</tt></tag>Le point n'est pas élevé.
+          <tag><tt>=</tt><em>bit</></tag>Le point est élevé si le bit nommé est
+	  actif (assigné à 1).
+          <tag><tt>&tilde;</tt><em>bit</em></tag>Le point est élevé si le bit nommé est
+	  inactif (assigné à 0).
+        </descrip>
+
+        Les noms des bits sont:
+        <descrip>
+          <tag>0X01</tag>bleu premier-plan
+          <tag>0X02</tag>vert premier-plan
+          <tag>0X04</tag>rouge premier-plan
+          <tag>0X08</tag>brillant premier-plan
+          <tag>0X10</tag>fond bleu
+          <tag>0X20</tag>fond vert
+          <tag>0X40</tag>fond rouge
+          <tag>0X80</tag>fond clignotant
+        </descrip>
+    </descrip>
+
+    Exemples:
+    <itemize>
+      <item>dot 1 on
+      <item>dot 2 off
+      <item>dot 3 =fg-red
+      <item>dot 4 &tilde;bg-blue
+    </itemize>
+</descrip>

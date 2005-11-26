@@ -1,0 +1,37 @@
+<sect>Codes d'Identification de pilote<label id="drivers"><p>
+<table loc="h">
+  <tabular ca="ll">
+    Code|Nom@<hline>
+    al|Alva@
+    at|Albatross@
+    bl|BrailleLite@
+    bn|BrailleNote@
+    cb|CombiBraille@
+    ec|EcoBraille@
+    es|ExternalSpeech@
+    eu|EuroBraille@
+    fl|FestivalLite@
+    fs|FreedomScientific@
+    fv|Festival@
+    gs|GenericSay@
+    ht|HandyTech@
+    lt|LogText@
+    mb|MultiBraille@
+    md|MDV@
+    mn|MiniBraille@
+    mp|Mikropuhe@
+    no|no driver@
+    pm|Papenmeier@
+    th|Theta@
+    ts|Telesensory Systems Inc.@
+    tt|TTY@
+    va|Vario/RBT (emulation 1)@
+    vd|VideoBraille@
+    vh|Vario/RBT (emulation 2)@
+    vo|Voyager@
+    vr|Virtual@
+    vs|VisioBraille@
+    vv|ViaVoice@
+    xw|XWindow@
+  </tabular>
+</table>
