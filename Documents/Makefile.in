@@ -18,7 +18,7 @@
 ABS_SRC_DIR = @abs_srcdir@
 
 all clean distclean::
-	for directory in $(MANUAL_DIRECTORIES); do cd $(BLD_TOP)$(MANUAL_DIRECTORIES) && $(MAKE) $@; done
+	for directory in $(MANUAL_DIRECTORIES); do (cd $(BLD_TOP)$(MANUAL_DIRECTORIES) && $(MAKE) $@) || exit 1; done
 
 all:: Manual BrlAPI $(ALL_API)
 
