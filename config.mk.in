@@ -122,6 +122,8 @@ DATA_DIRECTORY = @data_directory@
 MANPAGE_DIRECTORY = @manpage_directory@
 INCLUDE_DIRECTORY = @include_directory@
 
+MANUAL_DIRECTORIES = @brltty_manual_directories@
+
 BRAILLE_DRIVER_CODES = @brltty_item_codes_braille@
 BRAILLE_DRIVER_OBJECTS = @braille_driver_objects@
 BRAILLE_DRIVER_LIBRARIES = @braille_driver_libraries@

@@ -1,0 +1,5 @@
+Makefile
+reldeps.mk
+*.txt
+*.html
+*.made

@@ -17,7 +17,10 @@
 
 ABS_SRC_DIR = @abs_srcdir@
 
-all: Manual BrlAPI $(ALL_API)
+all clean distclean::
+	for directory in $(MANUAL_DIRECTORIES); do cd $(BLD_TOP)$(MANUAL_DIRECTORIES) && $(MAKE) $@; done
+
+all:: Manual BrlAPI $(ALL_API)
 
 LOCALE = C
 SETLOCALE = LC_ALL=$(LOCALE)
