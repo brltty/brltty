@@ -156,8 +156,13 @@ void tobrltty_init(char *authKey, char *hostName) {
 }
 
 void vtno(int vtno) {
-  if (brlapi_getTty(vtno,NULL)<0)
-    fatal_brlapi_errno("getTty",gettext("cannot get tty %d\n"),vtno);
+  if (getenv("WINDOWSPATH")) {
+    if (brlapi_getTtyPath(NULL,0,NULL)<0)
+      fatal_brlapi_errno("getTtyPath",gettext("cannot get tty\n"));
+  } else {
+    if (brlapi_getTty(vtno,NULL)<0)
+      fatal_brlapi_errno("getTty",gettext("cannot get tty %d\n"),vtno);
+  }
   if (brlapi_ignoreKeyRange(0,BRL_KEYCODE_MAX)<0)
     fatal_brlapi_errno("ignoreKeys",gettext("cannot ignore keys on tty %d\n"),vtno);
 #ifdef HAVE_X11_EXTENSIONS_XTEST_H
