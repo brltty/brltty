@@ -105,7 +105,7 @@ static ssize_t brlapi_writeFile(int fd, const void *buf, size_t size)
 
 /* brlapi_readFile */
 /* Reads a buffer from a file */
-static ssize_t brlapi_readFile(int fd, void *buf, size_t size)
+static ssize_t brlapi_readFile(int fd, void *buf, size_t size, int loop)
 {
   size_t n;
 #ifdef WINDOWS
@@ -128,13 +128,16 @@ static ssize_t brlapi_readFile(int fd, void *buf, size_t size)
     CloseHandle(overl.hEvent);
 #else /* WINDOWS */
     res=read(fd,buf+n,size-n);
-    if ((res<0) &&
-        (errno!=EINTR) &&
+    if (res<0) {
+      if ((errno!=EINTR) &&
 #ifdef EWOULDBLOCK
         (errno!=EWOULDBLOCK) &&
 #endif /* EWOULDBLOCK */
         (errno!=EAGAIN)) { /* EAGAIN shouldn't happen, but who knows... */
-      return -1;
+	return -1;
+      }
+      if (!loop && !n) return -1; /* Nothing read yet, report EINTR */
+      /* else, continue reading */
     }
 #endif /* WINDOWS */
     if (res==0)
@@ -173,8 +176,9 @@ ssize_t BRLAPI(readPacketHeader)(int fd, brl_type_t *packetType)
 {
   uint32_t header[2];
   ssize_t res;
-  if ((res=brlapi_readFile(fd,header,sizeof(header))) != sizeof(header)) {
+  if ((res=brlapi_readFile(fd,header,sizeof(header),0)) != sizeof(header)) {
     if (res<0) {
+      /* reports EINTR too */
       LibcError("read in brlapi_readPacketHeader");
       return -1;    
     } else return -2;
@@ -192,13 +196,13 @@ ssize_t BRLAPI(readPacketContent)(int fd, size_t packetSize, void *buf, size_t b
 {
   ssize_t res;
   char foo[BRLAPI_MAXPACKETSIZE];
-  if ((res = brlapi_readFile(fd,buf,MIN(bufSize,packetSize))) <0) goto out;
+  if ((res = brlapi_readFile(fd,buf,MIN(bufSize,packetSize),1)) < 0) goto out;
   if (res<packetSize) return -2; /* pkt smaller than announced => EOF */
   if (packetSize>bufSize) {
     size_t discard = packetSize-bufSize;
     for (res=0; res<discard / sizeof(foo); res++)
-      brlapi_readFile(fd,foo,sizeof(foo));
-    brlapi_readFile(fd,foo,discard % sizeof(foo));
+      brlapi_readFile(fd,foo,sizeof(foo),1);
+    brlapi_readFile(fd,foo,discard % sizeof(foo),1);
   }
   return packetSize;
 
@@ -216,7 +220,7 @@ out:
 ssize_t BRLAPI(readPacket)(int fd, brl_type_t *packetType, void *buf, size_t size)
 {
   ssize_t res = BRLAPI(readPacketHeader)(fd, packetType);
-  if (res<0) return res;
+  if (res<0) return res; /* reports EINTR too */
   return BRLAPI(readPacketContent)(fd, res, buf, size);
 }
 
@@ -247,7 +251,7 @@ int BRLAPI(loadAuthKey)(const char *filename, size_t *authlength, void *auth)
     return -1;
   }
 
-  *authlength = brlapi_readFile(get_osfhandle(fd), auth, stsize);
+  *authlength = brlapi_readFile(get_osfhandle(fd), auth, stsize, 1);
 
   if (*authlength!=(size_t)stsize) {
     LibcError("read in loadAuthKey");

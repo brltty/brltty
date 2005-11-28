@@ -127,7 +127,7 @@ typedef struct {
  *
  * The syntax is the same as write()'s.
  *
- * \return 0 on success, -1 on failure
+ * \return 0 on success, -1 on failure.
  *
  * \sa brlapi_readPacketHeader()
  * brlapi_readPacketContent()
@@ -145,8 +145,9 @@ ssize_t brlapi_writePacket(int fd, brl_type_t type, const void *buf, size_t size
  * be one of the above defined BRLPACKET_* (or else something very nasty must
  * have happened :/).
  *
- * \return packet's size, -2 if \c EOF occurred, -1 on error.
-
+ * \return packet's size, -2 if \c EOF occurred, -1 on error or signal
+ * interruption.
+ *
  * \sa brlapi_writePacket()
  * brlapi_readPacketContent
  * brlapi_readPacket
@@ -164,6 +165,7 @@ ssize_t brlapi_readPacketHeader(int fd, brl_type_t *packetType);
  * \e bufSize is the size of \e buf
  *
  * \return packetSize, -2 if \c EOF occurred, -1 on error.
+ *
  * If the packet is larger than the supplied buffer, the buffer will be
  * filled with the beginning of the packet, the rest of the packet being
  * discarded. This follows the semantics of the recv system call when the
@@ -187,7 +189,9 @@ ssize_t brlapi_readPacketContent(int fd, size_t packetSize, void *buf, size_t bu
  *
  * The syntax is the same as read()'s.
  *
- * \return packet's size, -2 if \c EOF occurred, -1 on error.
+ * \return packet's size, -2 if \c EOF occurred, -1 on error or signal
+ * interruption.
+ *
  * If the packet is larger than the supplied buffer, the buffer will be
  * filled with the beginning of the packet, the rest of the packet being
  * discarded. This follows the semantics of the recv system call when the

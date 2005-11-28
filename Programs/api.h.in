@@ -495,8 +495,8 @@ typedef uint32_t brl_keycode_t;
  *  or should only probe key presses (0);
  * \param code holds the key code if a key press is indeed read.
  *
- * \return -1 on error and *code is then undefined, 0 if block was 0 and no
- *  key was pressed so far, or 1 and *code holds the key code.
+ * \return -1 on error or signal interrupt and *code is then undefined, 0 if
+ * block was 0 and no key was pressed so far, or 1 and *code holds the key code.
  */
 int brlapi_readKey(int block, brl_keycode_t *code);
 
@@ -594,7 +594,7 @@ ssize_t brlapi_sendRaw(const void *buf, size_t size);
  * \param buf points on a buffer where the function will store the received
  * packet;
  * \param size holds the buffer size.
- * \return its size, -1 on error, or -2 on EOF */
+ * \return its size, -1 on error or signal interruption */
 ssize_t brlapi_recvRaw(void *buf, size_t size);
 
 /** @} */

@@ -169,7 +169,7 @@ static pthread_mutex_t brlapi_exceptionHandler_mutex = PTHREAD_MUTEX_INITIALIZER
 /* If the right packet type arrives, returns its size */
 /* Returns -1 if a non-fatal error is encountered */
 /* Returns -2 on end of file */
-/* Returns -3 if no packet was available (not for us) */
+/* Returns -3 if the available packet was not for us */
 /* Calls the exception handler if an exception is encountered */
 static ssize_t brlapi_doWaitForPacket(brl_type_t expectedPacketType, void *packet, size_t size)
 {
@@ -181,7 +181,7 @@ static ssize_t brlapi_doWaitForPacket(brl_type_t expectedPacketType, void *packe
   int hdrSize = sizeof(errorPacket->code)+sizeof(errorPacket->type);
 
   res = brlapi_readPacketHeader(fd, &type);
-  if (res<0) return res;
+  if (res<0) return res; /* reports EINTR too */
   if (type==expectedPacketType)
     /* For us, just read */
     return brlapi_readPacketContent(fd, res, packet, size);
@@ -230,7 +230,7 @@ static ssize_t brlapi_doWaitForPacket(brl_type_t expectedPacketType, void *packe
   return -3;
 }
 
-/* brlapi_doWaitForPacket */
+/* brlapi_WaitForPacket */
 /* same as brlapi_waitForPacket, but sleeps instead of reading if another
  * thread is already reading. Never returns -2. If loop is 1, never returns -3.
  */
@@ -256,7 +256,14 @@ again:
   }
   pthread_mutex_unlock(&brlapi_read_mutex);
   if (doread) {
-    res = brlapi_doWaitForPacket(expectedPacketType, packet, size);
+    do {
+      res = brlapi_doWaitForPacket(expectedPacketType, packet, size);
+    } while (loop && res == -1 && brlapi_errno == BRLERR_LIBCERR && (
+	  brlapi_libcerrno == EINTR ||
+#ifdef EWOULDBLOCK
+	  brlapi_libcerrno == EWOULDBLOCK ||
+#endif /* EWOULDBLOCK */
+	  brlapi_libcerrno == EAGAIN));
     pthread_mutex_lock(&brlapi_read_mutex);
     if (altSem) {
       *altRes = -3; /* no packet for him */
@@ -639,7 +646,13 @@ ssize_t brlapi_sendRaw(const void *buf, size_t size)
 ssize_t brlapi_recvRaw(void *buf, size_t size)
 {
   ssize_t res;
-  res = brlapi_waitForPacket(BRLPACKET_PACKET, buf, size, 1);
+  res = brlapi_waitForPacket(BRLPACKET_PACKET, buf, size, 0);
+  if (res == -3) {
+    brlapi_libcerrno = EINTR;
+    brlapi_errno = BRLERR_LIBCERR;
+    brlapi_errfun = "waitForPacket";
+    res = -1;
+  }
   return res;
 }
 
@@ -1097,7 +1110,6 @@ int brlapi_readKey(int block, brl_keycode_t *code)
 {
   ssize_t res;
 
-again:
   pthread_mutex_lock(&stateMutex);
   if (!(state & STCONTROLLINGTTY)) {
     pthread_mutex_unlock(&stateMutex);
@@ -1129,8 +1141,11 @@ again:
   res=brlapi_waitForPacket(BRLPACKET_KEY, code, sizeof(*code), 0);
   pthread_mutex_unlock(&brlapi_key_mutex);
   if (res == -3) {
-    if (block) goto again;
-    else return 0;
+    if (!block) return 0;
+    brlapi_libcerrno = block?EINTR:EAGAIN;
+    brlapi_errno = BRLERR_LIBCERR;
+    brlapi_errfun = "waitForPacket";
+    return -1;
   }
   if (res < 0) return -1;
   *code = ntohl(*code);
