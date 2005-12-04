@@ -63,6 +63,7 @@
 #include "brl.h"
 #include "brltty.h"
 #include "misc.h"
+#include "auth.h"
 #include "io_misc.h"
 #include "scr.h"
 #include "tunes.h"
@@ -1122,74 +1123,7 @@ static PacketHandlers packetHandlers = {
   handleGetRaw, handleLeaveRaw, handlePacket  
 };
 
-typedef struct {
-  const char *scheme;
-  int (*prepare) (const char *parameter);
-  void (*release) (void);
-  int (*check) (int fd);
-} AuthEntry;
-
-static int authNone_prepare (const char *parameter) {
-  if (!*parameter) return 1;
-  LogPrint(LOG_WARNING, "data supplied for scheme none: %s", parameter);
-  return 0;
-}
-static int authNone_check (int fd) {
-  return 1;
-}
-
-static const char *authKey_path;
-static int authKey_prepare (const char *parameter) {
-  if (*parameter) {
-    authKey_path = parameter;
-    return 1;
-  } else {
-    LogPrint(LOG_ERR, "path to key file not specified");
-  }
-  return 0;
-}
-static int authKey_check (int fd) {
-  return 1;
-}
-
-static int authUnknown_check (int fd) {
-  return 0;
-}
-
-static const AuthEntry authTable[] = {
-  {"none", authNone_prepare, NULL, authNone_check},
-  {"key", authKey_prepare, NULL, authKey_check},
-  /* this one must be last */
-  {NULL, NULL, NULL, authUnknown_check}
-};
-static const AuthEntry *auth;
-
-static int authPrepare (const char *parameter) {
-  const char *scheme;
-  int schemeLength;
-
-  if (!parameter) parameter = "";
-  if (!*parameter) parameter = "key:" BRLAPI_DEFAUTHPATH;
-
-  if ((parameter = strchr(scheme=parameter, ':'))) {
-    schemeLength = parameter++ - scheme;
-  } else {
-    schemeLength = strlen(scheme);
-    parameter = "";
-  }
-
-  auth = authTable;
-  while (auth->scheme) {
-    if ((schemeLength == strlen(auth->scheme)) &&
-        (strncmp(scheme, auth->scheme, schemeLength) == 0)) {
-      return auth->prepare(parameter);
-    }
-    ++auth;
-  }
-
-  LogPrint(LOG_WARNING, "unknown authentication/authorization scheme: %.*s", schemeLength, scheme);
-  return 0;
-}
+static AuthDescriptor *authDescriptor;
 
 /* Function : handleUnauthorizedConnection */
 /* Returns 0 if connection is authorized */
@@ -2155,11 +2089,17 @@ static void *server(void *arg)
               break;
           }
 #endif /* GETNAMEINFO */
+
 #ifdef WINDOWS
 #if defined(HAVE_CREATENAMEDPIPE)
         }
 #endif /* defined(HAVE_CREATENAMEDPIPE) */
 #endif /* WINDOWS */
+
+        if (authDescriptor && !authPerform(authDescriptor, res)) {
+          closeFd(res);
+          continue;
+        }
         LogPrint(LOG_NOTICE, "BrlAPI connection fd=%d accepted: %s", res, source);
 
         if (unauthConnections>=UNAUTH_MAX) {
@@ -2234,7 +2174,8 @@ static void terminationHandler(void)
     LogPrint(LOG_WARNING,"pthread_cancel: %s",strerror(res));
   ttyTerminationHandler(&notty);
   ttyTerminationHandler(&ttys);
-  if (auth->release) auth->release();
+  authEnd(authDescriptor);
+  authDescriptor = NULL;
 #ifdef WINDOWS
   WSACleanup();
 #endif /* WINDOWS */
@@ -2522,7 +2463,12 @@ int api_start(BrailleDisplay *brl, char **parameters)
 	"127.0.0.1:0";
 #endif /* PF_LOCAL */
 
-  authPrepare(parameters[PARM_AUTH]);
+  {
+    const char *parameter = parameters[PARM_AUTH];
+    if (!parameter) parameter = "";
+    if (!*parameter) parameter = "keyfile:" BRLAPI_DEFAUTHPATH;
+    if (!(authDescriptor = authBeginServer(parameter))) return 0;
+  }
 
   keyfile = *parameters[PARM_KEYFILE]?parameters[PARM_KEYFILE]:BRLAPI_DEFAUTHPATH;
   pthread_attr_t attr;
@@ -2588,6 +2534,8 @@ outallocs:
 outalloc:
   freeConnection(notty.connections);
 out:
+  authEnd(authDescriptor);
+  authDescriptor = NULL;
   return 0;
 }
 
