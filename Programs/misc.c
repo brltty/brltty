@@ -42,20 +42,22 @@ splitString (const char *string, char delimiter, int *count) {
       const char *start = string;
       int index = 0;
 
-      while (1) {
-        const char *end = strchr(start, delimiter);
-        int length = end? end-start: strlen(start);
+      if (*start) {
+        while (1) {
+          const char *end = strchr(start, delimiter);
+          int length = end? end-start: strlen(start);
 
-        if (array) {
-          char *element = mallocWrapper(length+1);
-          memcpy(element, start, length);
-          element[length] = 0;
-          array[index] = element;
+          if (array) {
+            char *element = mallocWrapper(length+1);
+            memcpy(element, start, length);
+            element[length] = 0;
+            array[index] = element;
+          }
+          index++;
+
+          if (!end) break;
+          start = end + 1;
         }
-        index++;
-
-        if (!end) break;
-        start = end + 1;
       }
 
       if (array) {
