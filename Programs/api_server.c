@@ -2069,8 +2069,11 @@ static void *server(void *arg)
                 if (!(err = getnameinfo((const struct sockaddr *)&addr, addrlen,
                                         host, sizeof(host), service, sizeof(service),
                                         NI_NUMERICHOST | NI_NUMERICSERV))) {
-                  snprintf(source, sizeof(source), "%d %s:%s", addr.ss_family, host, service);
-                } else {
+                  snprintf(source, sizeof(source), "af=%d %s:%s", addr.ss_family, host, service);
+                  break;
+                }
+
+                if (err != EAI_FAMILY) {
 #ifdef HAVE_GAI_STRERROR
                   snprintf(source, sizeof(source), "reverse lookup error for address family %d: %s", 
                            addr.ss_family,
@@ -2082,11 +2085,26 @@ static void *server(void *arg)
                   snprintf(source, sizeof(source), "reverse lookup error %d for address family %d.",
                            err, addr.ss_family);
 #endif /* HAVE_GAI_STRERROR */
+                  break;
                 }
               }
-#else /* HAVE_GETNAMEINFO */
-              snprintf(source, sizeof(source), "address family %d", addr.ss_family);
 #endif /* GETNAMEINFO */
+
+              {
+                int length;
+                snprintf(source, sizeof(source), "address family %d:%n", addr.ss_family, &length);
+
+                {
+                  const unsigned char *byte = (unsigned char *)&addr;
+                  const unsigned char *end = byte + addrlen;
+                  while (byte < end) {
+                    int count;
+                    snprintf(&source[length], sizeof(source)-length,
+                             " %02X%n", *byte++, &count);
+                    length += count;
+                  }
+                }
+              }
               break;
           }
 
