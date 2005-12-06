@@ -26,7 +26,61 @@
 
 #include <sys/socket.h>
 
-#if defined(SO_PEERCRED)
+#if defined(HAVE_GETPEERUCRED)
+
+#include <ucred.h>
+
+#ifdef HAVE_GETZONEID
+#include <zone.h>
+#endif /* HAVE_GETZONEID */
+
+typedef ucred_t *PeerCredentials;
+
+static int
+initializePeerCredentials (PeerCredentials *credentials, int fd) {
+  *credentials = NULL;
+  if (getpeerucred(fd, credentials) == -1) {
+    LogError("getpeerucred");
+    return 0;
+  }
+
+#ifdef HAVE_GETZONEID
+  if (ucred_getzoneid(*credentials) != getzoneid()) {
+    ucred_free(*credentials);
+    return 0;
+  }
+#endif /* HAVE_GETZONEID */
+
+  return 1;
+}
+
+static void
+releasePeerCredentials (PeerCredentials *credentials) {
+  ucred_free(*credentials);
+}
+
+static int
+checkPeerUser (PeerCredentials *credentials, uid_t user) {
+  if (user == ucred_geteuid(*credentials)) return 1;
+  return 0;
+}
+
+static int
+checkPeerGroup (PeerCredentials *credentials, gid_t group) {
+  if (group == ucred_getegid(*credentials)) return 1;
+
+  {
+    const gid_t *groups;
+    int count = ucred_getgroups(*credentials, &groups);
+    while (count > 0)
+      if (group == groups[--count])
+        return 1;
+  }
+
+  return 0;
+}
+
+#elif defined(SO_PEERCRED)
 
 typedef struct ucred PeerCredentials;
 
