@@ -31,11 +31,15 @@
 typedef struct ucred PeerCredentials;
 
 static int
-obtainPeerCredentials (PeerCredentials *credentials, int fd) {
+initializePeerCredentials (PeerCredentials *credentials, int fd) {
   size_t length = sizeof(*credentials);
   if (getsockopt(fd, SOL_SOCKET, SO_PEERCRED, credentials, &length) != -1) return 1;
   LogError("getsockopt[SO_PEERCRED]");
   return 0;
+}
+
+static void
+releasePeerCredentials (PeerCredentials *credentials) {
 }
 
 static int
@@ -54,8 +58,12 @@ checkPeerGroup (PeerCredentials *credentials, gid_t group) {
 typedef void *PeerCredentials;
 
 static int
-obtainPeerCredentials (PeerCredentials *credentials, int fd) {
+initializePeerCredentials (PeerCredentials *credentials, int fd) {
   return 0;
+}
+
+static void
+releasePeerCredentials (PeerCredentials *credentials) {
 }
 
 static int
@@ -106,7 +114,7 @@ struct AuthDescriptorStruct {
 static int
 getPeerCredentials (AuthDescriptor *auth, int fd) {
   if (auth->peerCredentialsState == PCS_NEED) {
-    if (!obtainPeerCredentials(&auth->peerCredentials, fd)) return 0;
+    if (!initializePeerCredentials(&auth->peerCredentials, fd)) return 0;
     auth->peerCredentialsState = PCS_HAVE;
   }
   return 1;
@@ -210,8 +218,7 @@ authUser_server (AuthDescriptor *auth, int fd, void *data) {
   MethodDescriptor_user *user = data;
   if (auth->peerCredentialsState != PCS_GOOD) {
     if (!getPeerCredentials(auth, fd)) return 0;
-    if (!checkPeerUser(&auth->peerCredentials, user->id)) return 0;
-    auth->peerCredentialsState = PCS_GOOD;
+    if (checkPeerUser(&auth->peerCredentials, user->id)) auth->peerCredentialsState = PCS_GOOD;
   }
   return 1;
 }
@@ -270,8 +277,7 @@ authGroup_server (AuthDescriptor *auth, int fd, void *data) {
   MethodDescriptor_group *group = data;
   if (auth->peerCredentialsState != PCS_GOOD) {
     if (!getPeerCredentials(auth, fd)) return 0;
-    if (!checkPeerGroup(&auth->peerCredentials, group->id)) return 0;
-    auth->peerCredentialsState = PCS_GOOD;
+    if (checkPeerGroup(&auth->peerCredentials, group->id)) auth->peerCredentialsState = PCS_GOOD;
   }
   return 1;
 }
@@ -412,11 +418,25 @@ authEnd (AuthDescriptor *auth) {
 
 int
 authPerform (AuthDescriptor *auth, int fd) {
-  int index;
+  int ok = 1;
   auth->peerCredentialsState = PCS_NEED;
-  for (index=0; index<auth->count; ++index) {
-    const MethodDescriptor *method = &auth->methods[index];
-    if (!method->perform(auth, fd, method->data)) return 0;
+
+  {
+    int index;
+    for (index=0; index<auth->count; ++index) {
+      const MethodDescriptor *method = &auth->methods[index];
+      if (!method->perform(auth, fd, method->data)) {
+        ok = 0;
+        break;
+      }
+    }
   }
-  return 1;
+
+  if (auth->peerCredentialsState == PCS_HAVE) {
+    LogPrint(LOG_ERR, "no matching user or group");
+    ok = 0;
+  }
+  if (auth->peerCredentialsState != PCS_NEED) releasePeerCredentials(&auth->peerCredentials);
+
+  return ok;
 }
