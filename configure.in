@@ -393,6 +393,7 @@ main(void) {
       ;;
    *)
       AC_SEARCH_LIBS([socket], [socket])
+      AC_SEARCH_LIBS([inet_ntoa], [nsl])
       ;;
 esac
 
