@@ -2044,31 +2044,6 @@ static void *server(void *arg)
             continue;
           }
 
-#if defined(HAVE_GETNAMEINFO) && !defined(WINDOWS)
-          {
-            char host[NI_MAXHOST];
-            char service[NI_MAXSERV];
-            int err;
-
-            if (!(err = getnameinfo((const struct sockaddr *)&addr, addrlen,
-                                    host, sizeof(host), service, sizeof(service),
-                                    NI_NUMERICHOST | NI_NUMERICSERV))) {
-              snprintf(source, sizeof(source), "%d %s:%s", addr.ss_family, host, service);
-            } else {
-#ifdef HAVE_GAI_STRERROR
-              snprintf(source, sizeof(source), "reverse lookup error for address family %d: %s", 
-                       addr.ss_family,
-#ifdef EAI_SYSTEM
-                       (err == EAI_SYSTEM)? strerror(errno):
-#endif /* EAI_SYSTEM */
-                       gai_strerror(err));
-#else /* HAVE_GAI_STRERROR */
-              snprintf(source, sizeof(source), "reverse lookup error %d for address family %d.",
-                       err, addr.ss_family);
-#endif /* HAVE_GAI_STRERROR */
-            }
-          }
-#else /* HAVE_GETNAMEINFO */
           switch (addr.ss_family) {
 #ifndef WINDOWS
             case AF_LOCAL: {
@@ -2085,10 +2060,35 @@ static void *server(void *arg)
             }
 
             default:
+#if defined(HAVE_GETNAMEINFO) && !defined(WINDOWS)
+              {
+                char host[NI_MAXHOST];
+                char service[NI_MAXSERV];
+                int err;
+
+                if (!(err = getnameinfo((const struct sockaddr *)&addr, addrlen,
+                                        host, sizeof(host), service, sizeof(service),
+                                        NI_NUMERICHOST | NI_NUMERICSERV))) {
+                  snprintf(source, sizeof(source), "%d %s:%s", addr.ss_family, host, service);
+                } else {
+#ifdef HAVE_GAI_STRERROR
+                  snprintf(source, sizeof(source), "reverse lookup error for address family %d: %s", 
+                           addr.ss_family,
+#ifdef EAI_SYSTEM
+                           (err == EAI_SYSTEM)? strerror(errno):
+#endif /* EAI_SYSTEM */
+                           gai_strerror(err));
+#else /* HAVE_GAI_STRERROR */
+                  snprintf(source, sizeof(source), "reverse lookup error %d for address family %d.",
+                           err, addr.ss_family);
+#endif /* HAVE_GAI_STRERROR */
+                }
+              }
+#else /* HAVE_GETNAMEINFO */
               snprintf(source, sizeof(source), "address family %d", addr.ss_family);
+#endif /* GETNAMEINFO */
               break;
           }
-#endif /* GETNAMEINFO */
 
 #ifdef WINDOWS
 #if defined(HAVE_CREATENAMEDPIPE)
