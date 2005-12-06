@@ -22,6 +22,98 @@
 #include "misc.h"
 #include "auth.h"
 
+/* peer credentials */
+
+#include <sys/socket.h>
+
+#if defined(SO_PEERCRED)
+
+typedef struct ucred PeerCredentials;
+
+static int
+obtainPeerCredentials (PeerCredentials *credentials, int fd) {
+  size_t length = sizeof(*credentials);
+  if (getsockopt(fd, SOL_SOCKET, SO_PEERCRED, credentials, &length) != -1) return 1;
+  LogError("getsockopt[SO_PEERCRED]");
+  return 0;
+}
+
+static int
+checkPeerUser (PeerCredentials *credentials, uid_t user) {
+  return user == credentials->uid;
+}
+
+static int
+checkPeerGroup (PeerCredentials *credentials, gid_t group) {
+  return group == credentials->gid;
+}
+
+#else /* peer credentials method */
+#warning peer credentials support not available on this platform
+
+typedef void *PeerCredentials;
+
+static int
+obtainPeerCredentials (PeerCredentials *credentials, int fd) {
+  return 0;
+}
+
+static int
+checkPeerUser (PeerCredentials *credentials, uid_t user) {
+  return 0;
+}
+
+static int
+checkPeerGroup (PeerCredentials *credentials, gid_t group) {
+  return 0;
+}
+
+#endif /* peer credentials method */
+
+/* general type definitions */
+
+typedef int (*MethodPerformer) (AuthDescriptor *auth, int fd, void *data);
+
+typedef struct {
+  const char *name;
+  void *(*initialize) (const char *parameter);
+  void (*release) (void *data);
+  MethodPerformer client;
+  MethodPerformer server;
+} MethodDefinition;
+
+typedef struct {
+  const MethodDefinition *definition;
+  MethodPerformer perform;
+  void *data;
+} MethodDescriptor;
+
+typedef enum {
+  PCS_NEED,
+  PCS_HAVE,
+  PCS_GOOD
+} PeerCredentialsState;
+
+struct AuthDescriptorStruct {
+  int count;
+  char **parameters;
+  MethodDescriptor *methods;
+
+  PeerCredentialsState peerCredentialsState;
+  PeerCredentials peerCredentials;
+};
+
+static int
+getPeerCredentials (AuthDescriptor *auth, int fd) {
+  if (auth->peerCredentialsState == PCS_NEED) {
+    if (!obtainPeerCredentials(&auth->peerCredentials, fd)) return 0;
+    auth->peerCredentialsState = PCS_HAVE;
+  }
+  return 1;
+}
+
+/* the keyfile method */
+
 typedef struct {
   const char *path;
 } MethodDescriptor_keyfile;
@@ -53,26 +145,138 @@ authKeyfile_release (void *data) {
 }
 
 static int
-authKeyfile_client (int fd, void *data) {
+authKeyfile_client (AuthDescriptor *auth, int fd, void *data) {
   return 1;
 }
 
 static int
-authKeyfile_server (int fd, void *data) {
+authKeyfile_server (AuthDescriptor *auth, int fd, void *data) {
   MethodDescriptor_keyfile *keyfile = data;
   LogPrint(LOG_DEBUG, "checking key file: %s", keyfile->path);
   return 1;
 }
 
-typedef int (*MethodPerformHandler) (int fd, void *data);
+/* the user method */
+
+#include <pwd.h>
 
 typedef struct {
-  const char *name;
-  void *(*initialize) (const char *parameter);
-  void (*release) (void *data);
-  MethodPerformHandler client;
-  MethodPerformHandler server;
-} MethodDefinition;
+  uid_t id;
+} MethodDescriptor_user;
+
+static void *
+authUser_initialize (const char *parameter) {
+  MethodDescriptor_user *user;
+
+  if ((user = malloc(sizeof(*user)))) {
+    if (!*parameter) {
+      user->id = geteuid();
+      return user;
+    }
+
+    {
+      int value;
+      if (isInteger(&value, parameter)) {
+        user->id = value;
+        return user;
+      }
+    }
+
+    {
+      const struct passwd *p = getpwnam(parameter);
+      if (p) {
+        user->id = p->pw_uid;
+        return user;
+      }
+    }
+
+    LogPrint(LOG_ERR, "unknown user: %s", parameter);
+    free(user);
+  } else {
+    LogError("malloc");
+  }
+
+  return NULL;
+}
+
+static void
+authUser_release (void *data) {
+  MethodDescriptor_user *user = data;
+  free(user);
+}
+
+static int
+authUser_server (AuthDescriptor *auth, int fd, void *data) {
+  MethodDescriptor_user *user = data;
+  if (auth->peerCredentialsState != PCS_GOOD) {
+    if (!getPeerCredentials(auth, fd)) return 0;
+    if (!checkPeerUser(&auth->peerCredentials, user->id)) return 0;
+    auth->peerCredentialsState = PCS_GOOD;
+  }
+  return 1;
+}
+
+/* the group method */
+
+#include <grp.h>
+
+typedef struct {
+  gid_t id;
+} MethodDescriptor_group;
+
+static void *
+authGroup_initialize (const char *parameter) {
+  MethodDescriptor_group *group;
+
+  if ((group = malloc(sizeof(*group)))) {
+    if (!*parameter) {
+      group->id = getegid();
+      return group;
+    }
+
+    {
+      int value;
+      if (isInteger(&value, parameter)) {
+        group->id = value;
+        return group;
+      }
+    }
+
+    {
+      const struct group *g = getgrnam(parameter);
+      if (g) {
+        group->id = g->gr_gid;
+        return group;
+      }
+    }
+
+    LogPrint(LOG_ERR, "unknown group: %s", parameter);
+    free(group);
+  } else {
+    LogError("malloc");
+  }
+
+  return NULL;
+}
+
+static void
+authGroup_release (void *data) {
+  MethodDescriptor_group *group = data;
+  free(group);
+}
+
+static int
+authGroup_server (AuthDescriptor *auth, int fd, void *data) {
+  MethodDescriptor_group *group = data;
+  if (auth->peerCredentialsState != PCS_GOOD) {
+    if (!getPeerCredentials(auth, fd)) return 0;
+    if (!checkPeerGroup(&auth->peerCredentials, group->id)) return 0;
+    auth->peerCredentialsState = PCS_GOOD;
+  }
+  return 1;
+}
+
+/* general functions */
 
 static const MethodDefinition methodDefinitions[] = {
   { "keyfile",
@@ -80,19 +284,17 @@ static const MethodDefinition methodDefinitions[] = {
     authKeyfile_client, authKeyfile_server
   },
 
+  { "user",
+    authUser_initialize, authUser_release,
+    NULL, authUser_server
+  },
+
+  { "group",
+    authGroup_initialize, authGroup_release,
+    NULL, authGroup_server
+  },
+
   {NULL}
-};
-
-typedef struct {
-  const MethodDefinition *definition;
-  MethodPerformHandler perform;
-  void *data;
-} MethodDescriptor;
-
-struct AuthDescriptorStruct {
-  int count;
-  char **parameters;
-  MethodDescriptor *methods;
 };
 
 static void
@@ -122,13 +324,18 @@ initializeMethodDescriptor (MethodDescriptor *method, const char *parameter, int
   {
     const MethodDefinition *definition = methodDefinitions;
     while (definition->name) {
-      MethodPerformHandler perform = client? definition->client: definition->server;
+      MethodPerformer perform = client? definition->client: definition->server;
       if (perform &&
           (nameLength == strlen(definition->name)) &&
           (strncmp(name, definition->name, nameLength) == 0)) {
-        method->definition = definition;
-        method->perform = perform;
-        return (method->data = definition->initialize(parameter)) != NULL;
+        void *data;
+        if ((data = definition->initialize(parameter))) {
+          method->definition = definition;
+          method->perform = perform;
+          method->data = data;
+          return 1;
+        }
+        return 0;
       }
       ++definition;
     }
@@ -156,6 +363,13 @@ authBegin (const char *parameter, int client) {
   AuthDescriptor *auth;
 
   if ((auth = malloc(sizeof(*auth)))) {
+    if (!parameter) parameter = "";
+    if (!*parameter) {
+      parameter = client? "": "user";
+    } else if (strcmp(parameter, "none") == 0) {
+      parameter = "";
+    }
+
     if ((auth->parameters = splitString(parameter, '+', &auth->count))) {
       if ((auth->methods = malloc(auth->count * sizeof(*auth->methods)))) {
         if (initializeMethodDescriptors(auth, client)) {
@@ -163,12 +377,16 @@ authBegin (const char *parameter, int client) {
         }
 
         free(auth->methods);
+      } else {
+        LogError("malloc");
       }
 
       deallocateStrings(auth->parameters);
     }
 
     free(auth);
+  } else {
+    LogError("malloc");
   }
 
   return NULL;
@@ -195,9 +413,10 @@ authEnd (AuthDescriptor *auth) {
 int
 authPerform (AuthDescriptor *auth, int fd) {
   int index;
+  auth->peerCredentialsState = PCS_NEED;
   for (index=0; index<auth->count; ++index) {
-    MethodDescriptor *method = &auth->methods[index];
-    if (!method->perform(fd, method->data)) return 0;
+    const MethodDescriptor *method = &auth->methods[index];
+    if (!method->perform(auth, fd, method->data)) return 0;
   }
   return 1;
 }
