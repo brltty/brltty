@@ -2466,7 +2466,7 @@ int api_start(BrailleDisplay *brl, char **parameters)
   {
     const char *parameter = parameters[PARM_AUTH];
     if (!parameter) parameter = "";
-    if (!*parameter) parameter = "keyfile:" BRLAPI_DEFAUTHPATH;
+    if (!*parameter) parameter = "none";
     if (!(authDescriptor = authBeginServer(parameter))) return 0;
   }
 
