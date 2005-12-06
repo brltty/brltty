@@ -133,6 +133,12 @@ extern "C" {
 /* Define this if the function getopt_long exists. */
 #undef HAVE_GETOPT_LONG
 
+/* Define this if the function getpeereid exists. */
+#undef HAVE_GETPEEREID
+
+/* Define this if the function getpeerucred exists. */
+#undef HAVE_GETPEERUCRED
+
 /* Define this if the function hstrerror exists. */
 #undef HAVE_HSTRERROR
 
