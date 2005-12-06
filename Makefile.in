@@ -18,6 +18,11 @@
 all install uninstall install-programs install-help install-tables install-drivers:
 	cd $(PGM_DIR) && $(MAKE) $@
 
+POT_FILE = $(PACKAGE_NAME).pot
+$(POT_FILE):
+	$(SRC_TOP)mkpot $(SRC_TOP) $(PACKAGE_NAME) $@
+pot: $(POT_FILE)
+
 ARCHIVE_NAME = $(PACKAGE_NAME)-$(PACKAGE_VERSION)
 
 TAR_FILE = $(ARCHIVE_NAME).tar
@@ -41,7 +46,7 @@ rpm: $(GZIP_FILE)
 ITERATE = -for directory in $(PGM_DIR); do (cd $$directory && $(MAKE) $@); done
 clean::
 	$(ITERATE)
-	-rm -f -- *.tar *.gz *.bz2 *.rpm
+	-rm -f -- *.pot *.tar *.gz *.bz2 *.rpm
 distclean:: clean
 	-cd $(DOC_DIR) && $(MAKE) $@
 	$(ITERATE)

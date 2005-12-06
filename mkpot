@@ -1,0 +1,53 @@
+#!/bin/sh
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2005 by The BRLTTY Team. All rights reserved.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU General Public License, as published by the Free Software
+# Foundation.  Please see the file COPYING for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+. "`dirname "${0}"`/prologue.sh"
+
+[ "${#}" -eq 0 ] && syntaxError "missing source root."
+sourceRoot="${1}"
+shift
+cd "${sourceRoot}" || exit "${?}"
+sourceRoot="`pwd`"
+
+if [ "${#}" -eq 0 ]
+then
+   packageName="`basename "${sourceRoot}"`"
+else
+   packageName="${1}"
+   shift
+fi
+
+if [ "${#}" -eq 0 ]
+then
+   potFile="${packageName}.pot"
+else
+   potFile="${1}"
+   shift
+fi
+[ "${potFile#/}" = "${potFile}" ] && potFile="${initialDirectory}/${potFile}"
+
+[ "${#}" -eq 0 ] || syntaxError "too many parameters."
+
+xgettext -o - \
+   --msgid-bugs-address=dave@mielke.cc --copyright-holder="The BRLTTY Team" \
+   --keyword=strtext:1 --flag=LogPrint:2:c-format \
+   `find . -name '*.c' -print` |
+sed >"${potFile}" -e "
+s/PACKAGE/${packageName}/
+"
+exit $?
