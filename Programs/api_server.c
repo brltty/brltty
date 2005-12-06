@@ -2043,70 +2043,7 @@ static void *server(void *arg)
             LogPrint(LOG_WARNING,"accept(%d): %s",socketInfo[i].fd,strerror(errno));
             continue;
           }
-
-          switch (addr.ss_family) {
-#ifndef WINDOWS
-            case AF_LOCAL: {
-              const struct sockaddr_un *local = (const struct sockaddr_un *)&addr;
-              snprintf(source, sizeof(source), "local %s", local->sun_path);
-              break;
-            }
-#endif /* WINDOWS */
-
-            case AF_INET: {
-              const struct sockaddr_in *inet = (const struct sockaddr_in *)&addr;
-              snprintf(source, sizeof(source), "inet %s:%d", inet_ntoa(inet->sin_addr), ntohs(inet->sin_port));
-              break;
-            }
-
-            default:
-#if defined(HAVE_GETNAMEINFO) && !defined(WINDOWS)
-              {
-                char host[NI_MAXHOST];
-                char service[NI_MAXSERV];
-                int err;
-
-                if (!(err = getnameinfo((const struct sockaddr *)&addr, addrlen,
-                                        host, sizeof(host), service, sizeof(service),
-                                        NI_NUMERICHOST | NI_NUMERICSERV))) {
-                  snprintf(source, sizeof(source), "af=%d %s:%s", addr.ss_family, host, service);
-                  break;
-                }
-
-                if (err != EAI_FAMILY) {
-#ifdef HAVE_GAI_STRERROR
-                  snprintf(source, sizeof(source), "reverse lookup error for address family %d: %s", 
-                           addr.ss_family,
-#ifdef EAI_SYSTEM
-                           (err == EAI_SYSTEM)? strerror(errno):
-#endif /* EAI_SYSTEM */
-                           gai_strerror(err));
-#else /* HAVE_GAI_STRERROR */
-                  snprintf(source, sizeof(source), "reverse lookup error %d for address family %d.",
-                           err, addr.ss_family);
-#endif /* HAVE_GAI_STRERROR */
-                  break;
-                }
-              }
-#endif /* GETNAMEINFO */
-
-              {
-                int length;
-                snprintf(source, sizeof(source), "address family %d:%n", addr.ss_family, &length);
-
-                {
-                  const unsigned char *byte = (unsigned char *)&addr;
-                  const unsigned char *end = byte + addrlen;
-                  while (byte < end) {
-                    int count;
-                    snprintf(&source[length], sizeof(source)-length,
-                             " %02X%n", *byte++, &count);
-                    length += count;
-                  }
-                }
-              }
-              break;
-          }
+          formatAddress(source, sizeof(source), &addr, addrlen);
 
 #ifdef WINDOWS
 #if defined(HAVE_CREATENAMEDPIPE)

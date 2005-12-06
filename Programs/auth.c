@@ -18,13 +18,22 @@
 #include "prologue.h"
 
 #include <string.h>
+#include <errno.h>
+
+#ifdef WINDOWS
+#include <ws2tcpip.h>
+#else /* WINDOWS */
+#include <sys/socket.h>
+#include <sys/un.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#endif /* WINDOWS */
 
 #include "misc.h"
 #include "auth.h"
 
 /* peer credentials */
-
-#include <sys/socket.h>
 
 #if defined(HAVE_GETPEERUCRED)
 
@@ -493,4 +502,72 @@ authPerform (AuthDescriptor *auth, int fd) {
   if (auth->peerCredentialsState != PCS_NEED) releasePeerCredentials(&auth->peerCredentials);
 
   return ok;
+}
+
+void
+formatAddress (char *buffer, int bufferSize, const void *address, int addressSize) {
+  const struct sockaddr *sa = address;
+  switch (sa->sa_family) {
+#ifndef WINDOWS
+    case AF_LOCAL: {
+      const struct sockaddr_un *local = address;
+      snprintf(buffer, bufferSize, "local %s", local->sun_path);
+      break;
+    }
+#endif /* WINDOWS */
+
+    case AF_INET: {
+      const struct sockaddr_in *inet = address;
+      snprintf(buffer, bufferSize, "inet %s:%d", inet_ntoa(inet->sin_addr), ntohs(inet->sin_port));
+      break;
+    }
+
+    default:
+#if defined(HAVE_GETNAMEINFO) && !defined(WINDOWS)
+      {
+        char host[NI_MAXHOST];
+        char service[NI_MAXSERV];
+        int err;
+
+        if (!(err = getnameinfo(address, addressSize,
+                                host, sizeof(host), service, sizeof(service),
+                                NI_NUMERICHOST | NI_NUMERICSERV))) {
+          snprintf(buffer, bufferSize, "af=%d %s:%s", sa->sa_family, host, service);
+          break;
+        }
+
+        if (err != EAI_FAMILY) {
+#ifdef HAVE_GAI_STRERROR
+          snprintf(buffer, bufferSize, "reverse lookup error for address family %d: %s", 
+                   sa->sa_family,
+#ifdef EAI_SYSTEM
+                   (err == EAI_SYSTEM)? strerror(errno):
+#endif /* EAI_SYSTEM */
+                   gai_strerror(err));
+#else /* HAVE_GAI_STRERROR */
+          snprintf(buffer, bufferSize, "reverse lookup error %d for address family %d.",
+                   err, sa->sa_family);
+#endif /* HAVE_GAI_STRERROR */
+          break;
+        }
+      }
+#endif /* GETNAMEINFO */
+
+      {
+        int length;
+        snprintf(buffer, bufferSize, "address family %d:%n", sa->sa_family, &length);
+
+        {
+          const unsigned char *byte = address;
+          const unsigned char *end = byte + addressSize;
+          while (byte < end) {
+            int count;
+            snprintf(&buffer[length], bufferSize-length,
+                     " %02X%n", *byte++, &count);
+            length += count;
+          }
+        }
+      }
+      break;
+  }
 }
