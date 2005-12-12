@@ -36,7 +36,7 @@ AC_SUBST([brltty_manual_directories])
 brltty_build_directories="${brltty_build_directories} ${brltty_manual_directories}"
 
 AC_SUBST([api_major], [0])
-AC_SUBST([api_minor], [4])
+AC_SUBST([api_minor], [5])
 AC_SUBST([api_revision], [0])
 AC_SUBST([api_version], [${api_major}.${api_minor}])
 AC_SUBST([api_release], [${api_version}.${api_revision}])
