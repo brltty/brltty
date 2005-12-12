@@ -536,8 +536,11 @@ int
 isInteger (int *value, const char *word) {
   if (*word) {
     char *end;
-    *value = strtol(word, &end, 0);
-    if (!*end) return 1;
+    long l = strtol(word, &end, 0);
+    if (!*end) {
+      *value = l;
+      return 1;
+    }
   }
   return 0;
 }
@@ -546,34 +549,43 @@ int
 isFloat (float *value, const char *word) {
   if (*word) {
     char *end;
-    *value = strtod(word, &end);
-    if (!*end) return 1;
+    double d = strtod(word, &end);
+    if (!*end) {
+      *value = d;
+      return 1;
+    }
   }
   return 0;
 }
 
 int
 validateInteger (int *value, const char *description, const char *word, const int *minimum, const int *maximum) {
-  if (*word && !isInteger(value, word)) {
-    LogPrint(LOG_ERR, "The %s must be an integer: %s",
-             description, word);
-    return 0;
-  }
+  if (*word) {
+    int i;
 
-  if (minimum) {
-    if (*value < *minimum) {
-      LogPrint(LOG_ERR, "The %s must not be less than %d: %d",
-               description, *minimum, *value);
+    if (!isInteger(&i, word)) {
+      LogPrint(LOG_ERR, "The %s must be an integer: %s",
+               description, word);
       return 0;
     }
-  }
 
-  if (maximum) {
-    if (*value > *maximum) {
-      LogPrint(LOG_ERR, "The %s must not be greater than %d: %d",
-               description, *maximum, *value);
-      return 0;
+    if (minimum) {
+      if (i < *minimum) {
+        LogPrint(LOG_ERR, "The %s must not be less than %d: %d",
+                 description, *minimum, i);
+        return 0;
+      }
     }
+
+    if (maximum) {
+      if (i > *maximum) {
+        LogPrint(LOG_ERR, "The %s must not be greater than %d: %d",
+                 description, *maximum, i);
+        return 0;
+      }
+    }
+
+    *value = i;
   }
 
   return 1;
@@ -581,26 +593,32 @@ validateInteger (int *value, const char *description, const char *word, const in
 
 int
 validateFloat (float *value, const char *description, const char *word, const float *minimum, const float *maximum) {
-  if (*word && !isFloat(value, word)) {
-    LogPrint(LOG_ERR, "The %s must be a floating-point number: %s",
-             description, word);
-    return 0;
-  }
+  if (*word) {
+    float f;
 
-  if (minimum) {
-    if (*value < *minimum) {
-      LogPrint(LOG_ERR, "The %s must not be less than %g: %g",
-               description, *minimum, *value);
+    if (!isFloat(&f, word)) {
+      LogPrint(LOG_ERR, "The %s must be a floating-point number: %s",
+               description, word);
       return 0;
     }
-  }
 
-  if (maximum) {
-    if (*value > *maximum) {
-      LogPrint(LOG_ERR, "The %s must not be greater than %g: %g",
-               description, *maximum, *value);
-      return 0;
+    if (minimum) {
+      if (f < *minimum) {
+        LogPrint(LOG_ERR, "The %s must not be less than %g: %g",
+                 description, *minimum, f);
+        return 0;
+      }
     }
+
+    if (maximum) {
+      if (f > *maximum) {
+        LogPrint(LOG_ERR, "The %s must not be greater than %g: %g",
+                 description, *maximum, f);
+        return 0;
+      }
+    }
+
+    *value = f;
   }
 
   return 1;

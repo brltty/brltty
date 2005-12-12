@@ -189,6 +189,9 @@ typedef enum {
 #define BRL_FLG_LINE_SCALED 0X010000
 #define BRL_FLG_LINE_TOLEFT 0X020000
 
+#define BRL_BLK_PRDIFCHAR 0XE00 /* go up to nearest line with different character */
+#define BRL_BLK_NXDIFCHAR 0XF00 /* go down to nearest line with different character */
+
 /* For entering a special key. */
 #define BRL_BLK_PASSKEY 0X2000
 typedef enum {

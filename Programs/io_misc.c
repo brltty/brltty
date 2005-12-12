@@ -154,6 +154,7 @@ ssize_t
 writeData (int fileDescriptor, const void *buffer, size_t size) {
   const unsigned char *address = buffer;
 
+canWrite:
   while (size > 0) {
     ssize_t count = write(fileDescriptor, address, size);
 
@@ -168,9 +169,11 @@ writeData (int fileDescriptor, const void *buffer, size_t size) {
     }
 
     if (!count) {
+      errno = EAGAIN;
+
     noOutput:
       do {
-        if (awaitOutput(fileDescriptor, 15000)) continue;
+        if (awaitOutput(fileDescriptor, 15000)) goto canWrite;
       } while (errno == EAGAIN);
 
       return -1;

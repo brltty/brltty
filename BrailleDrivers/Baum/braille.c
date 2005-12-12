@@ -870,6 +870,8 @@ static int
 probeBaumDisplay (BrailleDisplay *brl) {
   int probes = 0;
   while (1) {
+    int assumedCellCount = 0;
+
     {
       static const unsigned char request[] = {BAUM_REQ_GetDeviceIdentity};
       if (!writeBaumPacket(brl, request, sizeof(request))) break;
@@ -911,6 +913,17 @@ probeBaumDisplay (BrailleDisplay *brl) {
 
           case BAUM_RSP_DeviceIdentity:
             logBaumDeviceIdentity(&response);
+            {
+              const int length = sizeof(response.data.values.deviceIdentity);
+              char buffer[length+1];
+              memcpy(buffer, response.data.values.deviceIdentity, length);
+              buffer[length] = 0;
+
+              {
+                char *digits = strpbrk(buffer, "123456789");
+                if (digits) assumedCellCount = atoi(digits);
+              }
+            }
             continue;
 
           case BAUM_RSP_SerialNumber:
@@ -926,6 +939,10 @@ probeBaumDisplay (BrailleDisplay *brl) {
       }
     }
     if (errno != EAGAIN) break;
+    if (assumedCellCount) {
+      cellCount = assumedCellCount;
+      return 1;
+    }
     if (++probes == probeLimit) break;
   }
 
@@ -1876,11 +1893,14 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
       KEY(BAUM_KEY_TL3, BRL_BLK_DESCCHAR+key);
       KEY(BAUM_KEY_TR3, BRL_BLK_SETLEFT+key);
 
-      KEY(BAUM_KEY_TL1|BAUM_KEY_TL2, BRL_BLK_SETMARK+key);
-      KEY(BAUM_KEY_TL2|BAUM_KEY_TL3, BRL_BLK_GOTOMARK+key);
+      KEY(BAUM_KEY_TL2|BAUM_KEY_TL1, BRL_BLK_PRINDENT+key);
+      KEY(BAUM_KEY_TL2|BAUM_KEY_TL3, BRL_BLK_NXINDENT+key);
 
-      KEY(BAUM_KEY_TR1|BAUM_KEY_TR2, BRL_BLK_PRINDENT+key);
-      KEY(BAUM_KEY_TR2|BAUM_KEY_TR3, BRL_BLK_NXINDENT+key);
+      KEY(BAUM_KEY_TR2|BAUM_KEY_TR1, BRL_BLK_PRDIFCHAR+key);
+      KEY(BAUM_KEY_TR2|BAUM_KEY_TR3, BRL_BLK_NXDIFCHAR+key);
+
+      KEY(BAUM_KEY_TL1|BAUM_KEY_TL3, BRL_BLK_SETMARK+key);
+      KEY(BAUM_KEY_TR1|BAUM_KEY_TR3, BRL_BLK_GOTOMARK+key);
 
       default:
         break;

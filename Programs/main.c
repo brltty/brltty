@@ -573,18 +573,19 @@ sayLines (int line, int count, int track, SayMode mode) {
 #endif /* ENABLE_SPEECH_SUPPORT */
 
 static int
-toDifferentLine (short mode, int (*canMove) (void), int amount) {
+toDifferentLine (ScreenMode mode, int (*canMove) (void), int amount, int from, int width) {
   if (canMove()) {
-    unsigned char buffer1[scr.cols], buffer2[scr.cols];
+    unsigned char buffer1[width], buffer2[width];
     int skipped = 0;
 
     if ((mode == SCR_TEXT) && p->showAttributes) mode = SCR_ATTRIB;
-    readScreen(0, p->winy, scr.cols, 1, buffer1, mode);
+    readScreen(from, p->winy, width, 1, buffer1, mode);
 
     do {
-      readScreen(0, p->winy+=amount, scr.cols, 1, buffer2, mode);
-      if ((memcmp(buffer1, buffer2, scr.cols) != 0) ||
-          ((mode == SCR_TEXT) && prefs.showCursor && (p->winy == scr.posy)))
+      readScreen(from, p->winy+=amount, width, 1, buffer2, mode);
+      if ((memcmp(buffer1, buffer2, width) != 0) ||
+          ((mode == SCR_TEXT) && prefs.showCursor && (scr.posy == p->winy) &&
+           (scr.posx >= from) && (scr.posx < (from + width))))
         return 1;
 
       /* lines are identical */
@@ -614,17 +615,27 @@ canMoveDown (void) {
 }
 
 static int
-upDifferentLine (short mode) {
-  return toDifferentLine(mode, canMoveUp, -1);
+upDifferentLine (ScreenMode mode) {
+  return toDifferentLine(mode, canMoveUp, -1, 0, scr.cols);
 }
 
 static int
-downDifferentLine (short mode) {
-  return toDifferentLine(mode, canMoveDown, 1);
+downDifferentLine (ScreenMode mode) {
+  return toDifferentLine(mode, canMoveDown, 1, 0, scr.cols);
+}
+
+static int
+upDifferentCharacter (ScreenMode mode, int column) {
+  return toDifferentLine(mode, canMoveUp, -1, column, 1);
+}
+
+static int
+downDifferentCharacter (ScreenMode mode, int column) {
+  return toDifferentLine(mode, canMoveDown, 1, column, 1);
 }
 
 static void
-upOneLine (short mode) {
+upOneLine (ScreenMode mode) {
   if (p->winy > 0) {
     p->winy--;
   } else {
@@ -633,7 +644,7 @@ upOneLine (short mode) {
 }
 
 static void
-downOneLine (short mode) {
+downOneLine (ScreenMode mode) {
   if (p->winy < (scr.rows - brl.y)) {
     p->winy++;
   } else {
@@ -642,7 +653,7 @@ downOneLine (short mode) {
 }
 
 static void
-upLine (short mode) {
+upLine (ScreenMode mode) {
   if (prefs.skipIdenticalLines) {
     upDifferentLine(mode);
   } else {
@@ -651,7 +662,7 @@ upLine (short mode) {
 }
 
 static void
-downLine (short mode) {
+downLine (ScreenMode mode) {
   if (prefs.skipIdenticalLines) {
     downDifferentLine(mode);
   } else {
@@ -1809,6 +1820,19 @@ main (int argc, char *argv[]) {
                         increment, testIndent, NULL);
                 break;
               }
+
+              case BRL_BLK_PRDIFCHAR:
+                if (arg < brl.x && p->winx+arg < scr.cols)
+                  upDifferentCharacter(SCR_TEXT, getOffset(arg, 0));
+                else
+                  playTune(&tune_command_rejected);
+                break;
+              case BRL_BLK_NXDIFCHAR:
+                if (arg < brl.x && p->winx+arg < scr.cols)
+                  downDifferentCharacter(SCR_TEXT, getOffset(arg, 0));
+                else
+                  playTune(&tune_command_rejected);
+                break;
 
               default:
                 playTune(&tune_command_rejected);

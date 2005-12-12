@@ -407,7 +407,7 @@ host_tbl.$O: tbl.$O
 XBRLAPI_OBJECTS = xbrlapi.$O
 
 xbrlapi$X: $(XBRLAPI_OBJECTS) api
-	$(CC) $(LDFLAGS) -o $@ $(XBRLAPI_OBJECTS) -L. -lbrlapi -lXtst $(X_LIBS) -lX11 $(LDLIBS)
+	$(CC) $(LDFLAGS) -o $@ $(XBRLAPI_OBJECTS) -L. -lbrlapi $(XLIBS) $(LDLIBS)
 
 xbrlapi.$O: $(SRC_DIR)/xbrlapi.c
 	$(CC) $(CFLAGS) $(X_CFLAGS) -c $(SRC_DIR)/xbrlapi.c
@@ -546,19 +546,19 @@ uninstall-headers:
 
 install uninstall::
 	-set -- $(BRAILLE_EXTERNAL_DRIVER_NAMES); \
-	for driver; do (cd $(BLD_TOP)$(BRL_DIR)/$$driver && $(MAKE) $@); done
+	for driver do (cd $(BLD_TOP)$(BRL_DIR)/$$driver && $(MAKE) $@); done
 	-set -- $(SPEECH_EXTERNAL_DRIVER_NAMES); \
-	for driver; do (cd $(BLD_TOP)$(SPK_DIR)/$$driver && $(MAKE) $@); done
+	for driver do (cd $(BLD_TOP)$(SPK_DIR)/$$driver && $(MAKE) $@); done
 	-set -- $(SCREEN_EXTERNAL_DRIVER_NAMES); \
-	for driver; do (cd $(BLD_TOP)$(SCR_DIR)/$$driver && $(MAKE) $@); done
+	for driver do (cd $(BLD_TOP)$(SCR_DIR)/$$driver && $(MAKE) $@); done
 
 distclean clean::
 	-set -- $(BRAILLE_EXTERNAL_DRIVER_NAMES) $(BRAILLE_INTERNAL_DRIVER_NAMES); \
-	for driver; do (cd $(BLD_TOP)$(BRL_DIR)/$$driver && $(MAKE) $@); done
+	for driver do (cd $(BLD_TOP)$(BRL_DIR)/$$driver && $(MAKE) $@); done
 	-set -- $(SPEECH_EXTERNAL_DRIVER_NAMES) $(SPEECH_INTERNAL_DRIVER_NAMES); \
-	for driver; do (cd $(BLD_TOP)$(SPK_DIR)/$$driver && $(MAKE) $@); done
+	for driver do (cd $(BLD_TOP)$(SPK_DIR)/$$driver && $(MAKE) $@); done
 	-set -- $(SCREEN_EXTERNAL_DRIVER_NAMES) $(SCREEN_INTERNAL_DRIVER_NAMES); \
-	for driver; do (cd $(BLD_TOP)$(SCR_DIR)/$$driver && $(MAKE) $@); done
+	for driver do (cd $(BLD_TOP)$(SCR_DIR)/$$driver && $(MAKE) $@); done
 
 clean::
 	-rm -f brltty$X xbrlapi$X txt2hlp$X tbl2hex$X *test$X *-static$X

@@ -1001,7 +1001,7 @@ static int handleWrite(Connection *c, brl_type_t type, unsigned char *packet, si
         c->brailleWindow.text[rbeg-1+i] = text[i];
     }
   } else pthread_mutex_lock(&c->brlMutex);
-  if (andAttr) memcpy(c->brailleWindow.orAttr+rbeg-1,andAttr,rsiz);
+  if (andAttr) memcpy(c->brailleWindow.andAttr+rbeg-1,andAttr,rsiz);
   if (orAttr) memcpy(c->brailleWindow.orAttr+rbeg-1,orAttr,rsiz);
   if (cursor>=0) c->brailleWindow.cursor = cursor;
   c->brlbufstate = TODISPLAY;
@@ -1546,7 +1546,11 @@ static int initializeLocalSocket(struct socketInfo *info)
   }
   close(lock);
   if (unlink(tmppath))
-    LogPrint(LOG_ERR,"removing temp local socket lock");
+    LogError("removing temp local socket lock");
+  if (unlink(sa.sun_path) && errno != ENOENT) {
+    LogError("removing old socket");
+    goto outtmp;
+  }
   if (loopBind(fd, (struct sockaddr *) &sa, sizeof(sa))<0) {
     LogPrint(LOG_WARNING,"bind: %s",strerror(errno));
     goto outlock;
@@ -1557,7 +1561,7 @@ static int initializeLocalSocket(struct socketInfo *info)
     goto outlock;
   }
   return fd;
-  
+
 outlock:
   unlink(lockpath);
 outtmp:

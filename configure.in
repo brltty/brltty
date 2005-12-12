@@ -17,14 +17,14 @@ dnl Process this file with autoconf 2.53 to produce a configure script.
 ###############################################################################
 
 AC_PREREQ([2.53])
-AC_INIT([brltty], [3.7], [http://mielke.cc/brltty/])
+AC_INIT([brltty], [3.7.1], [http://mielke.cc/brltty/])
 AC_CONFIG_SRCDIR([Programs/brltty.h])
 BRLTTY_SUMMARY_BEGIN
 brltty_build_directories=". Programs Documents"
 
 AC_SUBST([api_major], [0])
 AC_SUBST([api_minor], [4])
-AC_SUBST([api_revision], [0])
+AC_SUBST([api_revision], [1])
 AC_SUBST([api_version], [${api_major}.${api_minor}])
 AC_SUBST([api_release], [${api_version}.${api_revision}])
 AC_DEFINE_UNQUOTED([BRLAPI_RELEASE], ["${api_release}"])
@@ -416,22 +416,35 @@ AC_SUBST([install_api_libraries])
 AC_SUBST([api_authfile], [brlapi.key])
 BRLTTY_DEFINE_EXPANDED([BRLAPI_AUTHFILE], ["${api_authfile}"])
 
+brltty_curses_libs_save="${LIBS}"
 BRLTTY_PACKAGE_CHOOSE([curses],
    [ncursesw ncurses.h],
    [ncurses ncurses.h],
    [curses curses.h])
+brltty_libs_curses="${LIBS%${brltty_curses_libs_save}}"
+LIBS="${brltty_curses_libs_save}"
+AC_SUBST([brltty_libs_curses])
 
 AC_PATH_XTRA
 if test "${no_x}" != "yes"
 then
-   LDFLAGS="${LDFLAGS} ${X_LIBS}"
    AC_SUBST([all_xbrlapi], [all-xbrlapi])
    AC_SUBST([install_xbrlapi], [install-xbrlapi])
 
-   AC_CHECK_HEADERS([X11/extensions/XTest.h])
+   brltty_x_ldflags_save="${LDFLAGS}"
+   LDFLAGS="${LDFLAGS} ${X_LIBS}"
 
+   brltty_x_libs_save="${LIBS}"
    AC_HAVE_LIBRARY([X11], [
       LIBS="${X_EXTRA_LIBS} ${X_PRE_LIBS} -lX11 ${LIBS}"
+
+      AC_HAVE_LIBRARY([Xext], [
+         LIBS="-lXext ${LIBS}"
+         AC_HAVE_LIBRARY([Xtst], [
+            LIBS="-lXtst ${LIBS}"
+            AC_CHECK_HEADERS([X11/extensions/XTest.h])
+         ])
+      ])
 
       AC_HAVE_LIBRARY([Xt], [
          LIBS="-lXt ${LIBS}"
@@ -444,6 +457,12 @@ then
             [Xm Xm/Xm.h Xm/Form.h Xm/PanedW.h Xm/Label.h Xm/PushB.h])
       ])
    ])
+
+   brltty_libs_x="${LDFLAGS#${brltty_x_ldflags_save}} ${LIBS%${brltty_x_libs_save}}"
+   AC_SUBST([brltty_libs_x])
+
+   LIBS="${brltty_x_libs_save}"
+   LDFLAGS="${brltty_x_ldflags_save}"
 fi
 
 test -z "$brltty_package_gui_toolkit" && {
@@ -1027,13 +1046,13 @@ BRLTTY_BRAILLE_DRIVER([mn], [MiniBraille])
 BRLTTY_BRAILLE_DRIVER([pm], [Papenmeier])
 BRLTTY_BRAILLE_DRIVER([tn], [TechniBraille])
 BRLTTY_BRAILLE_DRIVER([ts], [TSI])
-BRLTTY_BRAILLE_DRIVER([tt], [TTY])
+BRLTTY_BRAILLE_DRIVER([tt], [TTY], [$(CLIBS)])
 BRLTTY_BRAILLE_DRIVER([vd], [VideoBraille])
 BRLTTY_BRAILLE_DRIVER([vo], [Voyager])
 BRLTTY_BRAILLE_DRIVER([vr], [Virtual])
 BRLTTY_BRAILLE_DRIVER([vs], [VisioBraille])
 test -n "${brltty_package_gui_toolkit}" && {
-   BRLTTY_BRAILLE_DRIVER([xw], [XWindow])
+   BRLTTY_BRAILLE_DRIVER([xw], [XWindow], [$(XLIBS)])
 }
 BRLTTY_ARG_DRIVER([braille], [BrailleDrivers])
 

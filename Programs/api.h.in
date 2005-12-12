@@ -255,10 +255,6 @@ int brlapi_getDriverName(char *name, size_t n);
 /** Return the size of the braille display */
 int brlapi_getDisplaySize(unsigned int *x, unsigned int *y);
 
-/* brlapi_getDriverInfo */
-/** Return specific driverinformation */
-int brlapi_getDriverInfo(void *buf, size_t count);
-
 /** @} */
 
 /** \defgroup brlapi_tty Tty getting & leaving

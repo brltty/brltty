@@ -32,6 +32,7 @@ size_t cutLength = 0;
 
 static int beginColumn = 0;
 static int beginRow = 0;
+static int beginOffset = -1;
 
 static unsigned char *
 cut (size_t *length, int fromColumn, int fromRow, int toColumn, int toRow) {
@@ -39,7 +40,7 @@ cut (size_t *length, int fromColumn, int fromRow, int toColumn, int toRow) {
   int columns = toColumn - fromColumn + 1;
   int rows = toRow - fromRow + 1;
 
-  if ((columns >= 1) && (rows >= 1)) {
+  if ((columns >= 1) && (rows >= 1) && (beginOffset >= 0)) {
     unsigned char *fromBuffer = malloc(rows * columns);
     if (fromBuffer) {
       unsigned char *toBuffer = malloc(rows * (columns + 1));
@@ -94,12 +95,12 @@ cut (size_t *length, int fromColumn, int fromRow, int toColumn, int toRow) {
 static int
 append (unsigned char *buffer, size_t length) {
   if (cutBuffer) {
-    size_t newLength = cutLength + length;
+    size_t newLength = beginOffset + length;
     unsigned char *newBuffer = malloc(newLength);
     if (!newBuffer) return 0;
 
-    memcpy(newBuffer, cutBuffer, cutLength);
-    memcpy(newBuffer+cutLength, buffer, length);
+    memcpy(newBuffer, cutBuffer, beginOffset);
+    memcpy(newBuffer+beginOffset, buffer, length);
 
     free(buffer);
     free(cutBuffer);
@@ -130,6 +131,7 @@ void
 cutAppend (int column, int row) {
   beginColumn = column;
   beginRow = row;
+  beginOffset = cutLength;
   playTune(&tune_cut_begin);
 }
 
