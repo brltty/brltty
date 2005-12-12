@@ -1,6 +1,43 @@
 Note: this file is in reversed chronological order (bottom to top).
 
 
+December 12, 2005:
+ - BRLTTY 3.7.1 released:
+   (is|validate)(Integer|Float) should only modify *value when returning true.
+   usbWriteEndpoint() in usb_libusb.c called usbGetInputEndpoint().
+   KDGETMODE, KDGKBMETA and KDGKBMODE need an int (not a long) operand.
+   Add the BRL_BLK_(PR|NX)DIFCHAR functions.
+   Allow the end of the cut region to be corrected.
+   Fix a call to brlapi_perror() within xbrlapi.
+   Waiting for output to unblock wasn't being done correctly.
+   English grade 2 contraction table changes:
+      Don't use a letter sign when a letter is followed by a period.
+      Handle "by-and-by" as a special case.
+      Don't use a contraction if a capitalization state change within it needs clarification.
+      Use "ed" for "redolent".
+   Baum braille driver changes:
+      A Vario 40 can return device identity but not cell count.
+      Add a few more "words of wisdom" to README.Inka.
+      Binding changes:
+         Function  Old         New
+         SETMARK   TL1+TL2+CRn TL1+TL3+CRn
+         GOTOMARK  TL2+TL3+CRn TR1+TR3+CRn
+         PRINDENT  TR2+TR1+CRn TL2+TL1+CRn
+         NXINDENT  TR2+TR3+CRn TL2+TL3+CRn
+         PRDIFCHAR -           TR2+TR1+CRn
+         NXDIFCHAR -           TR2+TR3+CRn
+   API changes:
+      Correct the documentation for the BRLPACKET_WRITE packet.
+      Remove the prototype of brlapi_getDriverInfo() from api.h.
+      An API client should forget the authorization key as soon as it's been sent to the server.
+      Ensure that the Unix-domain socket is removed before binding to it.
+      Fix the behaviour of the "and" dot mask.
+   Build changes:
+      Check for -lXtst and -lXext.
+      Move the X dependencies from the executables to the components which need them.
+      Move the curses dependency from the executables to the TTY braille driver.
+      Some shells don't like the semicolon in "for i; do".
+
 September 17, 2005:
  - BRLTTY 3.7 released:
    Change the dot-to-bit mapping to comply with ISO/TR 11548-1.
