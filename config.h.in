@@ -139,6 +139,9 @@ extern "C" {
 /* Define this if the function getpeerucred exists. */
 #undef HAVE_GETPEERUCRED
 
+/* Define this if the function getzoneid exists. */
+#undef HAVE_GETZONEID
+
 /* Define this if the function hstrerror exists. */
 #undef HAVE_HSTRERROR
 
