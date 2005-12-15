@@ -45,11 +45,13 @@
 #include <X11/XKBlib.h>
 #include <X11/keysym.h>
 
-#ifdef HAVE_X11_EXTENSIONS_XTEST_H
+#undef CAN_SIMULATE_KEY_PRESSES
+#if defined(HAVE_X11_EXTENSIONS_XTEST_H) && defined(HAVE_X11_EXTENSIONS_XKB_H)
 #include <X11/extensions/XTest.h>
-#else /* HAVE_X11_EXTENSIONS_XTEST_H */
-#warning <X11/extensions/XTest.h> not available: keypress simulation not supported
-#endif /* HAVE_X11_EXTENSIONS_XTEST_H */
+#define CAN_SIMULATE_KEY_PRESSES
+#else /* HAVE_X11_EXTENSIONS_XTEST_H && HAVE_X11_EXTENSIONS_XKB_H */
+#warning key press simulation not supported on this installation
+#endif /* HAVE_X11_EXTENSIONS_XTEST_H && HAVE_X11_EXTENSIONS_XKB_H */
 
 #include "api.h"
 #include "brldefs.h"
@@ -165,12 +167,12 @@ void vtno(int vtno) {
   }
   if (brlapi_ignoreKeyRange(0,BRL_KEYCODE_MAX)<0)
     fatal_brlapi_errno("ignoreKeys",gettext("cannot ignore keys on tty %d\n"),vtno);
-#ifdef HAVE_X11_EXTENSIONS_XTEST_H
+#ifdef CAN_SIMULATE_KEY_PRESSES
   if (brlapi_unignoreKeyRange(BRL_BLK_PASSCHAR,BRL_BLK_PASSCHAR|BRL_MSK_ARG))
     fatal_brlapi_errno("unignoreKeyRange",NULL);
   if (brlapi_unignoreKeyRange(BRL_BLK_PASSKEY, BRL_BLK_PASSKEY |BRL_MSK_ARG))
     fatal_brlapi_errno("unignoreKeyRange",NULL);
-#endif /* HAVE_X11_EXTENSIONS_XTEST_H */
+#endif /* CAN_SIMULATE_KEY_PRESSES */
 }
 
 void api_setName(const char *wm_name) {
@@ -385,13 +387,13 @@ void toX_f(const char *display) {
   int X_fd;
   fd_set fds,readfds;
   int maxfd;
-#ifdef HAVE_X11_EXTENSIONS_XTEST_H
+#ifdef CAN_SIMULATE_KEY_PRESSES
   int res;
   brl_keycode_t code;
   unsigned int keysym, keycode, modifiers;
   Bool haveXTest;
   int eventBase, errorBase, majorVersion, minorVersion;
-#endif /* HAVE_X11_EXTENSIONS_XTEST_H */
+#endif /* CAN_SIMULATE_KEY_PRESSES */
 
   Xdisplay = display;
   if (!Xdisplay) Xdisplay=getenv("DISPLAY");
@@ -399,9 +401,9 @@ void toX_f(const char *display) {
 
   if (!XSetErrorHandler(ErrorHandler)) fatal(gettext("strange old error handler\n"));
 
-#ifdef HAVE_X11_EXTENSIONS_XTEST_H
+#ifdef CAN_SIMULATE_KEY_PRESSES
   haveXTest = XTestQueryExtension(dpy, &eventBase, &errorBase, &majorVersion, &minorVersion);
-#endif /* HAVE_X11_EXTENSIONS_XTEST_H */
+#endif /* CAN_SIMULATE_KEY_PRESSES */
 
   X_fd = XConnectionNumber(dpy);
   FD_ZERO(&fds);
@@ -512,7 +514,7 @@ void toX_f(const char *display) {
       default: fprintf(stderr,gettext("unhandled event type: %d\n"),ev.type); break;
       }
     }
-#ifdef HAVE_X11_EXTENSIONS_XTEST_H
+#ifdef CAN_SIMULATE_KEY_PRESSES
     if (haveXTest && FD_ISSET(brlapi_fd,&readfds)) {
       while ((res = brlapi_readKey(0, &code)==1)) {
 	modifiers = 0;
@@ -601,7 +603,7 @@ void toX_f(const char *display) {
       if (res<0)
 	fatal_brlapi_errno("brlapi_readKey",NULL);
     }
-#endif /* HAVE_X11_EXTENSIONS_XTEST_H */
+#endif /* CAN_SIMULATE_KEY_PRESSES */
   }
 }
 
