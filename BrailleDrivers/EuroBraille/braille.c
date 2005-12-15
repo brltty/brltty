@@ -374,12 +374,13 @@ static ssize_t brl_writePacket(BrailleDisplay *brl, const unsigned char *p, size
 static int brl_reset(BrailleDisplay *brl)
 {
   static const unsigned char packet[] = {0X02, 'S', 'I'};
+  LogPrint(LOG_INFO, "EuroBraille: Reset hardware asked.\n");
   return (brl_writePacket(brl, packet, sizeof(packet)) == sizeof(packet));
 }
 
 static void brl_identify (void)
 {
-   LogPrint(LOG_NOTICE, "EuroBraille driver, version 1.3.3");
+   LogPrint(LOG_NOTICE, "EuroBraille driver, version 1.3.4");
    LogPrint(LOG_INFO, "  Copyright (C) 1997-2003");
    LogPrint(LOG_INFO, "      - Yannick PLASSIARD <plassi_y@epitech.net>");
    LogPrint(LOG_INFO, "      - Nicolas PITRE <nico@cam.org>");
@@ -426,6 +427,7 @@ static int brl_open (BrailleDisplay *brl, char **parameters, const char *device)
 
    ReWrite = 1;  /* To write whole display at first time */
    ReWrite_LCD = 1;
+   LogPrint(LOG_INFO, "EuroBraille Display detection successfull, cols=%d", NbCols);
    return 1;
 }
 
@@ -451,6 +453,8 @@ static void brl_close (BrailleDisplay *brl)
        serialCloseDevice (serialDevice);
        serialDevice = NULL;
      }
+   NbCols = 0;
+   strcpy(version_ID, "Unknown");
 }
 
 static void brl_writeWindow (BrailleDisplay *brl)
@@ -1136,7 +1140,7 @@ static int readbrlkey(BrailleDisplay *brl)
 		    model_ID = 5;
 		  else
 		    model_ID = 0;
-		  if (strncmp(version_ID, (char *)(buf + p + 2), 3))
+		  //		  if (strncmp(version_ID, (char *)(buf + p + 2), 3))
 		    {
 		      strncpy(version_ID, (char *)(buf + p + 2), 20);
 		      NbCols = (buf[p + 4] - '0') * 10;

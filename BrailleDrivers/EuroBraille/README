@@ -1,4 +1,4 @@
-This is the EuroBraille family driver for BRLTTY, version 1.3.3
+This is the EuroBraille family driver for BRLTTY, version 1.3.4
 
 Initial writing by Nicolas Pitre <nico@cam.org>, Copyright 1997-1998.
 
@@ -17,12 +17,15 @@ on the following hardware:
    - an Azerbraille 40 and 80 display;
    - a Clio-PupiBraille display (80 cells)
    - an IRIS display (Iris-S20, Iris-S32 and Iris-40).
-   - The driver is although tested with a NoteBraille display in order to 
+   - The driver is also tested with a NoteBraille display in order to 
      maintain backward compatibility.
 
 
 FIXES/ADDITIONS
 ===============
+Version 1.3.4:
+	- Support the suspend/resume BRLTTY feature.
+
 Version 1.3.3:
 	- Corrected several bugs in write/read operations;
 	- Corrected several key bugs on Iris models.
@@ -105,4 +108,4 @@ EuroBraille version of BRLTTY in the world so if you use this driver, just
 e-mail me what are your suggestions for next versions.
 
 Yannick Plassiard <yan@mistigri.org>
-    November 02 2003
+    December 15 2005
