@@ -15,6 +15,9 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
+#include <string.h>
+#include <errno.h>
+
 #ifdef HAVE_SYS_IO_H
 #include <sys/io.h>
 #endif /* HAVE_SYS_IO_H */
