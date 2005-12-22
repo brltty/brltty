@@ -115,6 +115,34 @@ checkPeerGroup (PeerCredentials *credentials, gid_t group) {
   return group == credentials->gid;
 }
 
+#elif defined(HAVE_GETPEEREID)
+
+typedef struct {
+  uid_t euid;
+  gid_t egid;
+} PeerCredentials;
+
+static int
+initializePeerCredentials (PeerCredentials *credentials, int fd) {
+  if (getpeereid(fd, &credentials->euid, &credentials->egid) != -1) return 1;
+  LogError("getpeereid");
+  return 0;
+}
+
+static void
+releasePeerCredentials (PeerCredentials *credentials) {
+}
+
+static int
+checkPeerUser (PeerCredentials *credentials, uid_t user) {
+  return user == credentials->euid;
+}
+
+static int
+checkPeerGroup (PeerCredentials *credentials, gid_t group) {
+  return group == credentials->egid;
+}
+
 #else /* peer credentials method */
 #warning peer credentials support not available on this platform
 
