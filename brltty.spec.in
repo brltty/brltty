@@ -135,6 +135,15 @@ rm -fr "${RPM_BUILD_ROOT}"
 %doc Documents/BrlAPIref-HTML
 
 %changelog
+* Mon Dec 26 2005 Dave Mielke <dave@mielke.cc> 3.7.2
++  The AtSpi screen driver doesn't load due to a missing Xt dependency.
++  Check for X11/extensions/XKB.h.
++  Swedish text translation table changes:
+      Add text.se.tbl (1996 standard).
+      Rename text.se2.tbl to text.se-old.tbl (1989 standard).
+      Remove text.se1.tbl (modified english table).
++  English grade 2 contraction table changes:
+      The "m-st" contraction should always be used when "must" is the root word.
 * Mon Dec 12 2005 Dave Mielke <dave@mielke.cc> 3.7.1
 +  (is|validate)(Integer|Float) should only modify *value when returning true.
 +  usbWriteEndpoint() in usb_libusb.c called usbGetInputEndpoint().

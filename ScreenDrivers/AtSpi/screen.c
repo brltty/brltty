@@ -32,7 +32,7 @@
 
 #include <cspi/spi.h>
 #include <X11/keysym.h>
-#include <X11/Intrinsic.h>
+#include <X11/Xlib.h>
 
 #include "Programs/misc.h"
 #include "Programs/brldefs.h"
@@ -535,7 +535,7 @@ static int
 open_AtSpiScreen (void) {
   sem_t SPI_init_sem;
   sem_init(&SPI_init_sem,0,0);
-  XtToolkitThreadInitialize();
+  XInitThreads();
   if (pthread_create(&SPI_main_thread,NULL,doAtSpiScreenOpen,(void *)&SPI_init_sem)) {
     LogPrint(LOG_ERR,"main SPI thread failed to be launched");
     return 0;

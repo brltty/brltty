@@ -15,7 +15,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# BRLTTY Text Translation Table - Swedish (iso-8859-1)
+# BRLTTY Text Translation Table - Swedish (1989 standard)
 
 \X00 (        )  # null
 \X01 (1     78)  # start of heading

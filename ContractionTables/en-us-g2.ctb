@@ -462,7 +462,9 @@ always much 134-16
 word mch =
 word must 134-34
 word mst =
-word mustn 134-34-1345
+begword musti 134-34-24 mustiness
+word mustn 134-34-1345 mustn't
+word musty 134-34-13456
 begword myo = myofibroblasts
 word myself 134-13456-124
 contraction myf

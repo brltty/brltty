@@ -310,6 +310,9 @@ extern "C" {
 /* Define this if the header file X11/extensions/XTest.h exists. */
 #undef HAVE_X11_EXTENSIONS_XTEST_H
 
+/* Define this if the header file X11/extensions/XKB.h exists. */
+#undef HAVE_X11_EXTENSIONS_XKB_H
+
 /* Define only one of the following curses packages. */
 #undef HAVE_PKG_CURSES
 #undef HAVE_PKG_NCURSES

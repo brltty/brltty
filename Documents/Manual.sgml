@@ -12,7 +12,7 @@
     <name>Stéphane Doyon <tt><htmlurl url="mailto:s.doyon@videotron.ca" name="&lt;s.doyon@videotron.ca&gt;"></tt>
   <and>
     <name>Dave Mielke <tt><htmlurl url="mailto:dave@mielke.cc" name="&lt;dave@mielke.cc&gt;"></tt>
-  <date>Version 3.7.1, December 2005
+  <date>Version 3.7.2, December 2005
   <abstract>
     Copyright &copy; 1995-2005 by The BRLTTY Team - All Rights Reserved.
     BRLTTY is free software,
@@ -3769,8 +3769,8 @@ several alternatives are provided:
   <tag/no-p/Norwegian (iso-8859-1)
   <tag/pl/Polish (iso-8859-2)
   <tag/ru/Russian (koi8-r)
-  <tag/se1/Swedish (iso-8859-1)
-  <tag/se2/Swedish (iso-8859-1)
+  <tag/se/Swedish (1996 standard)
+  <tag/se-old/Swedish (1989 standard)
   <tag/uk/United Kingdom English (iso-8859-1)
   <tag/us/American English (iso-8859-1)
   <tag/vni/Vietnamese (iso-8859-1)

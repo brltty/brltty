@@ -17,7 +17,7 @@ dnl Process this file with autoconf 2.53 to produce a configure script.
 ###############################################################################
 
 AC_PREREQ([2.53])
-AC_INIT([brltty], [3.7.1], [http://mielke.cc/brltty/])
+AC_INIT([brltty], [3.7.2], [http://mielke.cc/brltty/])
 AC_CONFIG_SRCDIR([Programs/brltty.h])
 BRLTTY_SUMMARY_BEGIN
 brltty_build_directories=". Programs Documents"
@@ -443,6 +443,7 @@ then
          AC_HAVE_LIBRARY([Xtst], [
             LIBS="-lXtst ${LIBS}"
             AC_CHECK_HEADERS([X11/extensions/XTest.h])
+            AC_CHECK_HEADERS([X11/extensions/XKB.h])
          ])
       ])
 
@@ -1145,8 +1146,8 @@ BRLTTY_TEXT_TABLE([no-h], [Norwegian and German (iso-8859-1)])
 BRLTTY_TEXT_TABLE([no-p], [Norwegian (iso-8859-1)])
 BRLTTY_TEXT_TABLE([pl], [Polish (iso-8859-2)])
 BRLTTY_TEXT_TABLE([ru], [Russian (koi8-r)])
-BRLTTY_TEXT_TABLE([se1], [Swedish (iso-8859-1)])
-BRLTTY_TEXT_TABLE([se2], [Swedish (iso-8859-1)])
+BRLTTY_TEXT_TABLE([se], [Swedish (1996 standard)])
+BRLTTY_TEXT_TABLE([se-old], [Swedish (1989 standard)])
 BRLTTY_TEXT_TABLE([uk], [United Kingdom English (iso-8859-1)])
 BRLTTY_TEXT_TABLE([us], [American English (iso-8859-1)])
 BRLTTY_TEXT_TABLE([vni], [Vietnamese (iso-8859-1)])
