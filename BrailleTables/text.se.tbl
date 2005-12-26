@@ -1,0 +1,215 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2005 by The BRLTTY Team. All rights reserved.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU General Public License, as published by the Free Software
+# Foundation.  Please see the file COPYING for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+# BRLTTY Text Translation Table - Swedish (1996 standard)
+
+# This file contains the ISO-8859-1 compatible version of the Swedish 8-dot
+# braille standard as it was defined by the Swedish Braille Authority
+# (www.punktskriftsnamnden.se) on October 8, 1996. As of December 2005, this
+# is the most current braille standard in Sweden.
+
+\X20 (        )  # blanktecken, mellanslag
+\X21 ( 23 5   )  # utropstecken
+\X22 (    56  )  # rakt citattecken
+\X23 (  3456  )  # nummertecken, "fyrkant" (#)
+\X24 ( 23 5  8)  # dollartecken ($)
+\X25 (   4 678)  # procenttecken
+\X26 (  34 6 8)  # et-tecken, och-tecken (&)
+\X27 (    5   )  # rak apostrof
+\X28 ( 23  6  )  # vänsterparentes
+\X29 (  3 56  )  # högerparentes
+\X2A (  3 5   )  # asterisk, stjärna
+\X2B ( 2  56  )  # plustecken
+\X2C ( 2      )  # kommatecken
+\X2D (  3  6  )  # bindestreck, minustecken
+\X2E (  3     )  # punkt
+\X2F (  34    )  # snedstreck, slash
+\X30 ( 2 45  8)  # siffran 0 (noll)
+\X31 (1      8)  # siffran 1 (ett)
+\X32 (12     8)  # siffran 2 (två)
+\X33 (1  4   8)  # siffran 3 (tre)
+\X34 (1  45  8)  # siffran 4 (fyra)
+\X35 (1   5  8)  # siffran 5 (fem)
+\X36 (12 4   8)  # siffran 6 (sex)
+\X37 (12 45  8)  # siffran 7 (sju)
+\X38 (12  5  8)  # siffran 8 (åtta)
+\X39 ( 2 4   8)  # siffran 9 (nio)
+\X3A ( 2  5   )  # kolon
+\X3B ( 23     )  # semikolon
+\X3C (  3 5  8)  # mindre än-tecken, vänster hake (<)
+\X3D ( 23 56  )  # lika med-tecken
+\X3E ( 2   67 )  # större än-tecken, höger hake (>)
+\X3F ( 2   6  )  # frågetecken
+\X40 (   4   8)  # snabel-a, at sign (@)
+\X41 (1     7 )  # versalt a
+\X42 (12    7 )  # versalt b
+\X43 (1  4  7 )  # versalt c
+\X44 (1  45 7 )  # versalt d
+\X45 (1   5 7 )  # versalt e
+\X46 (12 4  7 )  # versalt f
+\X47 (12 45 7 )  # versalt g
+\X48 (12  5 7 )  # versalt h
+\X49 ( 2 4  7 )  # versalt i
+\X4A ( 2 45 7 )  # versalt j
+\X4B (1 3   7 )  # versalt k
+\X4C (123   7 )  # versalt l
+\X4D (1 34  7 )  # versalt m
+\X4E (1 345 7 )  # versalt n
+\X4F (1 3 5 7 )  # versalt o
+\X50 (1234  7 )  # versalt p
+\X51 (12345 7 )  # versalt q
+\X52 (123 5 7 )  # versalt r
+\X53 ( 234  7 )  # versalt s
+\X54 ( 2345 7 )  # versalt t
+\X55 (1 3  67 )  # versalt u
+\X56 (123  67 )  # versalt v
+\X57 ( 2 4567 )  # versalt w
+\X58 (1 34 67 )  # versalt x
+\X59 (1 34567 )  # versalt y
+\X5A (1 3 567 )  # versalt z
+\X5B (123 56 8)  # vänster hakparentes ([)
+\X5C (1    6 8)  # backstreck, backslash, omvänt snedstreck (\)
+\X5D ( 23456 8)  # höger hakparentes (])
+\X5E (    5 78)  # fristående cirkumflex (^)
+\X5F (     6  )  # fristående understreck, understrykning (_)
+\X60 (   4 6  )  # fristående grav accent (`)
+\X61 (1       )  # gement a
+\X62 (12      )  # gement b
+\X63 (1  4    )  # gement c
+\X64 (1  45   )  # gement d
+\X65 (1   5   )  # gement e
+\X66 (12 4    )  # gement f
+\X67 (12 45   )  # gement g
+\X68 (12  5   )  # gement h
+\X69 ( 2 4    )  # gement i
+\X6A ( 2 45   )  # gement j
+\X6B (1 3     )  # gement k
+\X6C (123     )  # gement l
+\X6D (1 34    )  # gement m
+\X6E (1 345   )  # gement n
+\X6F (1 3 5   )  # gement o
+\X70 (1234    )  # gement p
+\X71 (12345   )  # gement q
+\X72 (123 5   )  # gement r
+\X73 ( 234    )  # gement s
+\X74 ( 2345   )  # gement t
+\X75 (1 3  6  )  # gement u
+\X76 (123  6  )  # gement v
+\X77 ( 2 456  )  # gement w
+\X78 (1 34 6  )  # gement x
+\X79 (1 3456  )  # gement y
+\X7A (1 3 56  )  # gement z
+\X7B ( 23  678)  # vänsterklammer ({)
+\X7C (   456 8)  # lodstreck, rörtecken (|)
+\X7D (  3 5678)  # högerklammer (})
+\X7E ( 2   6 8)  # fristående tilde (~)
+\XA0 (12345678)  # hårt blanktecken ( )
+\XA1 (  3  67 )  # omvänt utropstecken (¡)
+\XA2 ( 234 6 8)  # cent (¢)
+\XA3 (123    8)  # pund (£)
+\XA4 ( 2 4  78)  # valutatecken (¤)
+\XA5 ( 2 4 678)  # yen (¥)
+\XA6 (12   678)  # delat lodstreck (¦)
+\XA7 (  34 6  )  # paragraftecken (§)
+\XA8 (  3  678)  # fristående trema (¨)
+\XA9 (1  456 8)  # copyright (©)
+\XAA ( 2345678)  # upphöjt gement a (ª)
+\XAB ( 23   78)  # vänster citattecken, vänster gåsöga («)
+\XAC (1 345  8)  # icke-tecken, inverterare (¬)
+\XAD ( 23 56 8)  # mjukt bindestreck (­)
+\XAE (12 4 6 8)  # registreringstecken (®)
+\XAF (1   5 78)  # fristående makron (¯)
+\XB0 (1   5678)  # grad-tecken (°)
+\XB1 (1234 6 8)  # plus/minus (±)
+\XB2 (  3   7 )  # upphöjd tvåa (²)
+\XB3 ( 2  567 )  # upphöjd trea (³)
+\XB4 ( 2  5  8)  # fristående akut accent (´)
+\XB5 (1 34  78)  # mikrotecken, my (µ)
+\XB6 (12   67 )  # stycketecken (¶)
+\XB7 (       8)  # mittställd punkt (·)
+\XB8 (12  56 8)  # fristående cedilj (¸)
+\XB9 (1  4 6 8)  # upphöjd etta (¹)
+\XBA (1 3 5  8)  # upphöjt gement o (º)
+\XBB (    5678)  # höger citattecken, höger gåsöga (»)
+\XBC (123 5  8)  # kvartstecken, en fjärdedel (¼)
+\XBD (1 3  6 8)  # halvtecken, en halv (½)
+\XBE (  3 5 78)  # trekvartstecken, tre fjärdedelar (¾)
+\XBF (  3    8)  # omvänt frågetecken (¿)
+\XC0 (1  4 67 )  # versalt a med grav accent (À)
+\XC1 (1 3 5678)  # versalt a med akut accent (Á)
+\XC2 ( 2 45 78)  # versalt a med cirkumflex (Â)
+\XC3 (1 3 5 78)  # versalt a med tilde (Ã)
+\XC4 (  345 7 )  # versalt ä
+\XC5 (1    67 )  # versalt å
+\XC6 (  345 78)  # versalt danskt ä (Æ)
+\XC7 (1234 67 )  # versalt c med cedilj (Ç)
+\XC8 (123   78)  # versalt e med grav accent (È)
+\XC9 (1234567 )  # versalt e med akut accent (É)
+\XCA (     6 8)  # versalt e med cirkumflex (Ê)
+\XCB ( 2    7 )  # versalt e med trema (Ë)
+\XCC (   45 7 )  # versalt i med grav accent (Ì)
+\XCD (1 34   8)  # versalt i med akut accent (Í)
+\XCE (   45  8)  # versalt i med cirkumflex (Î)
+\XCF (     67 )  # versalt i med trema (Ï)
+\XD0 ( 234 67 )  # versalt stunget d (Ð)
+\XD1 (12 4567 )  # versalt muljerat n (Ñ)
+\XD2 (1234  78)  # versalt o med grav accent (Ò)
+\XD3 (1     78)  # versalt o med akut accent (Ó)
+\XD4 (12 45 78)  # versalt o med cirkumflex (Ô)
+\XD5 ( 234  78)  # versalt o med tilde (Õ)
+\XD6 ( 2 4 67 )  # versalt ö
+\XD7 (1 34 6 8)  # kryss (×)
+\XD8 (1   567 )  # versalt danskt ö (Ø)
+\XD9 (1  45 78)  # versalt u med grav accent (Ù)
+\XDA (12  5 78)  # versalt u med akut accent (Ú)
+\XDB ( 2 45678)  # versalt u med cirkumflex (Û)
+\XDC (12  567 )  # versalt u med trema, tyskt u (Ü)
+\XDD (12 4  78)  # versalt y med akut accent (Ý)
+\XDE (1234 678)  # versalt thorn (Þ)
+\XDF (12    78)  # gement tyskt dubbel-s (ß)
+\XE0 (123 56  )  # gement a med grav accent (à)
+\XE1 (123 5678)  # gement a med akut accent (á)
+\XE2 (1    678)  # gement a med cirkumflex (â)
+\XE3 (1 3  678)  # gement a med tilde (ã)
+\XE4 (  345   )  # gement ä
+\XE5 (1    6  )  # gement å
+\XE6 (  345  8)  # gement danskt ä (æ)
+\XE7 (1234 6  )  # gement c med cedilj (ç)
+\XE8 ( 234 6  )  # gement e med grav accent (è)
+\XE9 (123456  )  # gement e med akut accent (é)
+\XEA (12   6  )  # gement e med cirkumflex (ê)
+\XEB (12 4 6  )  # gement e med trema (ë)
+\XEC (  34  78)  # gement i med grav accent (ì)
+\XED (  34   8)  # gement i med akut accent (í)
+\XEE (1  4 6  )  # gement i med cirkumflex (î)
+\XEF (12 456  )  # gement i med trema (ï)
+\XF0 (    56 8)  # gement stunget d (ð)
+\XF1 (12 456 8)  # gement muljerat n (ñ)
+\XF2 (  34 678)  # gement o med grav accent (ò)
+\XF3 (  34 67 )  # gement o med akut accent (ó)
+\XF4 (1  456  )  # gement o med cirkumflex (ô)
+\XF5 ( 234   8)  # gement o med tilde (ö)
+\XF6 ( 2 4 6  )  # gement ö
+\XF7 ( 2  56 8)  # delbar med, avgår (÷)
+\XF8 (   45 78)  # gement danskt ö (ø)
+\XF9 ( 23456  )  # gement u med grav accent (ù)
+\XFA ( 2  5678)  # gement u med akut accent (ú)
+\XFB (1   56  )  # gement u med cirkumflex (û)
+\XFC (12  56  )  # gement u med trema, tyskt u (ü)
+\XFD (  3456 8)  # gement y med akut accent (ý)
+\XFE ( 2345 78)  # gement thorn (þ)
+\XFF (12   6 8)  # gement y med trema (ÿ)
