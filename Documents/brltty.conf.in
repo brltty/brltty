@@ -82,6 +82,8 @@
 #text-table	cz	# Czech (iso-8859-2)
 #text-table	da	# Danish
 #text-table	de	# German
+#text-table	en_UK	# English (United Kingdom)
+#text-table	en_US	# English (United States)
 #text-table	es	# Spanish
 #text-table	fr_CA	# French (Canada)
 #text-table	fr_FR	# French (France)
@@ -94,8 +96,6 @@
 #text-table	ru	# Russian (koi8-r)
 #text-table	se	# Swedish (1996 standard)
 #text-table	se-old	# Swedish (1989 standard)
-#text-table	uk	# United Kingdom English
-#text-table	us	# American English
 #text-table	vni	# Vietnamese
 
 # The attributes-table directive specifies which attributes translation

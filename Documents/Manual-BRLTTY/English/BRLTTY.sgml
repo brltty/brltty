@@ -3771,6 +3771,8 @@ several alternatives are provided:
   <tag/cz/Czech (iso-8859-2)
   <tag/da/Danish (iso-8859-1)
   <tag/de/German (iso-8859-1)
+  <tag/en_UK/English (United Kingdom)
+  <tag/en_US/English (United States)
   <tag/es/Spanish (iso-8859-1)
   <tag/fi1/Finnish (iso-8859-1)
   <tag/fi2/Finnish (iso-8859-1)
@@ -3785,8 +3787,6 @@ several alternatives are provided:
   <tag/ru/Russian (koi8-r)
   <tag/se/Swedish (1996 standard)
   <tag/se-old/Swedish (1989 standard)
-  <tag/uk/United Kingdom English (iso-8859-1)
-  <tag/us/American English (iso-8859-1)
   <tag/vni/Vietnamese (iso-8859-1)
 </descrip>
 See the <ref id="options-text-table" name="-t"> command line option,

@@ -15,9 +15,9 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# BRLTTY Text Translation Table - United Kingdom English (iso-8859-1)
+# BRLTTY Text Translation Table - English (United States)
 
-\X00 ( 234 678)  # null
+\X00 (   4  78)  # null
 \X01 (1     78)  # start of heading
 \X02 (12    78)  # start of text
 \X03 (1  4  78)  # end of text
@@ -44,44 +44,44 @@
 \X18 (1 34 678)  # cancel
 \X19 (1 345678)  # end of medium
 \X1A (1 3 5678)  # substitute
-\X1B (123 5678)  # escape
-\X1C (  34 678)  # file separator
-\X1D ( 2345678)  # group separator
-\X1E (     678)  # record separator
-\X1F (    5 78)  # unit separator
+\X1B ( 2 4 678)  # escape
+\X1C (12  5678)  # file separator
+\X1D (12 45678)  # group separator
+\X1E (   45 78)  # record separator
+\X1F (   45678)  # unit separator
 \X20 (        )  # space
-\X21 (  3456  )  # exclamation mark
-\X22 (   4    )  # quotation mark
-\X23 (    56  )  # number sign
-\X24 (   456  )  # dollar sign
-\X25 (   4 6  )  # percent sign
+\X21 ( 234 6  )  # exclamation mark
+\X22 (    5   )  # quotation mark
+\X23 (  3456  )  # number sign
+\X24 (12 4 6  )  # dollar sign
+\X25 (1  4 6  )  # percent sign
 \X26 (1234 6  )  # ampersand
 \X27 (  3     )  # apostrophe
-\X28 (   45   )  # left parenthesis
-\X29 (  345   )  # right parenthesis
-\X2A (  3 5   )  # asterisk
-\X2B ( 23 5   )  # plus sign
-\X2C ( 2      )  # comma
+\X28 (123 56  )  # left parenthesis
+\X29 ( 23456  )  # right parenthesis
+\X2A (1    6  )  # asterisk
+\X2B (  34 6  )  # plus sign
+\X2C (     6  )  # comma
 \X2D (  3  6  )  # hyphen-minus
-\X2E ( 2  56  )  # full stop
+\X2E (   4 6  )  # full stop
 \X2F (  34    )  # solidus
-\X30 (123456  )  # digit zero
-\X31 (1    6  )  # digit one
-\X32 (12   6  )  # digit two
-\X33 (1  4 6  )  # digit three
-\X34 (1  456  )  # digit four
-\X35 (1   56  )  # digit five
-\X36 (12 4 6  )  # digit six
-\X37 (12 456  )  # digit seven
-\X38 (12  56  )  # digit eight
-\X39 ( 2 4 6  )  # digit nine
-\X3A ( 2  5   )  # colon
-\X3B ( 23     )  # semicolon
-\X3C ( 23  6  )  # less-than sign
-\X3D ( 23 56  )  # equals sign
-\X3E (  3 56  )  # greater-than sign
-\X3F ( 2   6  )  # question mark
-\X40 ( 234 67 )  # commercial at
+\X30 (  3 56  )  # digit zero
+\X31 ( 2      )  # digit one
+\X32 ( 23     )  # digit two
+\X33 ( 2  5   )  # digit three
+\X34 ( 2  56  )  # digit four
+\X35 ( 2   6  )  # digit five
+\X36 ( 23 5   )  # digit six
+\X37 ( 23 56  )  # digit seven
+\X38 ( 23  6  )  # digit eight
+\X39 (  3 5   )  # digit nine
+\X3A (1   56  )  # colon
+\X3B (    56  )  # semicolon
+\X3C (12   6  )  # less-than sign
+\X3D (123456  )  # equals sign
+\X3E (  345   )  # greater-than sign
+\X3F (1  456  )  # question mark
+\X40 (   4  7 )  # commercial at
 \X41 (1     7 )  # latin capital letter a
 \X42 (12    7 )  # latin capital letter b
 \X43 (1  4  7 )  # latin capital letter c
@@ -108,12 +108,12 @@
 \X58 (1 34 67 )  # latin capital letter x
 \X59 (1 34567 )  # latin capital letter y
 \X5A (1 3 567 )  # latin capital letter z
-\X5B (123 567 )  # left square bracket
-\X5C (  34 67 )  # reverse solidus
-\X5D ( 234567 )  # right square bracket
-\X5E (     67 )  # circumflex accent
-\X5F (    5   )  # low line
-\X60 ( 234 6  )  # grave accent
+\X5B ( 2 4 67 )  # left square bracket
+\X5C (12  567 )  # reverse solidus
+\X5D (12 4567 )  # right square bracket
+\X5E (   45 7 )  # circumflex accent
+\X5F (   456  )  # low line
+\X60 (   4    )  # grave accent
 \X61 (1       )  # latin small letter a
 \X62 (12      )  # latin small letter b
 \X63 (1  4    )  # latin small letter c
@@ -140,11 +140,11 @@
 \X78 (1 34 6  )  # latin small letter x
 \X79 (1 3456  )  # latin small letter y
 \X7A (1 3 56  )  # latin small letter z
-\X7B (123 56  )  # left curly bracket
-\X7C (  34 6  )  # vertical line
-\X7D ( 23456  )  # right curly bracket
-\X7E (     6  )  # tilde
-\X7F (    5 7 )  # delete
+\X7B ( 2 4 6  )  # left curly bracket
+\X7C (12  56  )  # vertical line
+\X7D (12 456  )  # right curly bracket
+\X7E (   45   )  # tilde
+\X7F (   4567 )  # delete
 \X80 ( 2   67 )  # <control>
 \X81 (1 34 6 8)  # <control>
 \X82 ( 2  56 8)  # break permitted here
@@ -156,25 +156,25 @@
 \X88 (  3 56 8)  # character tabulation set
 \X89 (1  45  8)  # character tabulation with justification
 \X8A ( 23 5  8)  # line tabulation set
-\X8B (  345 78)  # partial line down
+\X8B (    5 78)  # partial line down
 \X8C (1   5  8)  # partial line up
-\X8D ( 2 4 67 )  # reverse line feed
-\X8E (   4567 )  # single shift two
+\X8D ( 234 678)  # reverse line feed
+\X8E (     67 )  # single shift two
 \X8F (12 4 67 )  # single shift three
 \X90 ( 23 567 )  # device control string
 \X91 ( 2   6 8)  # private use one
 \X92 (     6 8)  # private use two
-\X93 (12   67 )  # set transmit state
+\X93 (  34  7 )  # set transmit state
 \X94 (  3 5 78)  # cancel character
 \X95 (   45  8)  # message waiting
 \X96 (1  4 67 )  # start of guarded area
 \X97 (   4   8)  # end of guarded area
-\X98 (12 4567 )  # start of string
+\X98 ( 234567 )  # start of string
 \X99 (1 3 5  8)  # <control>
-\X9A (12  567 )  # single character introducer
+\X9A (12   67 )  # single character introducer
 \X9B (    56 8)  # control sequence introducer
 \X9C (  3  6 8)  # string terminator
-\X9D (  34  7 )  # operating system command
+\X9D (  34 67 )  # operating system command
 \X9E ( 23 5 7 )  # privacy message
 \X9F (12 4 678)  # application program command
 \XA0 (      7 )  # no-break space
@@ -188,9 +188,9 @@
 \XA8 ( 2    78)  # diaeresis
 \XA9 (1  4567 )  # copyright sign
 \XAA (12  5  8)  # feminine ordinal indicator
-\XAB (    5678)  # left-pointing double angle quotation mark
+\XAB (123 5678)  # left-pointing double angle quotation mark
 \XAC ( 2  5678)  # not sign
-\XAD (12 4   8)  # soft hyphen
+\XAD ( 234 67 )  # soft hyphen
 \XAE (   4 678)  # registered sign
 \XAF (12 45  8)  # macron
 \XB0 (   456 8)  # degree sign
@@ -202,12 +202,12 @@
 \XB6 (12345678)  # pilcrow sign
 \XB7 (  3   7 )  # middle dot
 \XB8 (1  4   8)  # cedilla
-\XB9 (   45 7 )  # superscript one
+\XB9 (123 567 )  # superscript one
 \XBA ( 2 45  8)  # masculine ordinal indicator
-\XBB (   45 78)  # right-pointing double angle quotation mark
+\XBB ( 2345678)  # right-pointing double angle quotation mark
 \XBC (1 3  6 8)  # vulgar fraction one quarter
 \XBD (123  6 8)  # vulgar fraction one half
-\XBE (  34  78)  # vulgar fraction three quarters
+\XBE (  34 678)  # vulgar fraction three quarters
 \XBF (  3    8)  # inverted question mark
 \XC0 (  3   78)  # latin capital letter a with grave
 \XC1 ( 2    7 )  # latin capital letter a with acute
@@ -215,26 +215,26 @@
 \XC3 ( 23  67 )  # latin capital letter a with tilde
 \XC4 (    567 )  # latin capital letter a with diaeresis
 \XC5 (  34567 )  # latin capital letter a with ring above
-\XC6 (   4  7 )  # latin capital letter ae
+\XC6 (  345 7 )  # latin capital letter ae
 \XC7 (1234 67 )  # latin capital letter c with cedilla
 \XC8 ( 23   78)  # latin capital letter e with grave
 \XC9 ( 23    8)  # latin capital letter e with acute
 \XCA (       8)  # latin capital letter e with circumflex
 \XCB (12345  8)  # latin capital letter e with diaeresis
-\XCC (123    8)  # latin capital letter i with grave
+\XCC (12 4   8)  # latin capital letter i with grave
 \XCD ( 2  5 78)  # latin capital letter i with acute
-\XCE (12 45678)  # latin capital letter i with circumflex
+\XCE (    5678)  # latin capital letter i with circumflex
 \XCF (1    67 )  # latin capital letter i with diaeresis
-\XD0 (  345 7 )  # latin capital letter eth
+\XD0 (    5 7 )  # latin capital letter eth
 \XD1 ( 2  567 )  # latin capital letter n with tilde
 \XD2 ( 2     8)  # latin capital letter o with grave
-\XD3 ( 2 4 678)  # latin capital letter o with acute
+\XD3 (123    8)  # latin capital letter o with acute
 \XD4 ( 2 4   8)  # latin capital letter o with circumflex
 \XD5 (1234 6 8)  # latin capital letter o with tilde
 \XD6 (  3 5  8)  # latin capital letter o with diaeresis
 \XD7 (123 5  8)  # multiplication sign
 \XD8 (  3 567 )  # latin capital letter o with stroke
-\XD9 (   45678)  # latin capital letter u with grave
+\XD9 (     678)  # latin capital letter u with grave
 \XDA ( 2  5 7 )  # latin capital letter u with acute
 \XDB (12345678)  # latin capital letter u with circumflex
 \XDC ( 23  6 8)  # latin capital letter u with diaeresis
@@ -247,7 +247,7 @@
 \XE3 (1234   8)  # latin small letter a with tilde
 \XE4 (  345  8)  # latin small letter a with diaeresis
 \XE5 (  345678)  # latin small letter a with ring above
-\XE6 (   4  78)  # latin small letter ae
+\XE6 (  345 78)  # latin small letter ae
 \XE7 (1234 678)  # latin small letter c with cedilla
 \XE8 ( 234 6 8)  # latin small letter e with grave
 \XE9 (12   6 8)  # latin small letter e with acute
@@ -264,7 +264,7 @@
 \XF4 (1  45678)  # latin small letter o with circumflex
 \XF5 (1   567 )  # latin small letter o with tilde
 \XF6 ( 2 4 6 8)  # latin small letter o with diaeresis
-\XF7 (12  5678)  # division sign
+\XF7 (  34  78)  # division sign
 \XF8 (      78)  # latin small letter o with stroke
 \XF9 ( 23456 8)  # latin small letter u with grave
 \XFA (1   56 8)  # latin small letter u with acute
