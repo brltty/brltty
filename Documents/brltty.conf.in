@@ -91,8 +91,8 @@
 #text-table	no-p	# Norwegian
 #text-table	pl	# Polish (iso-8859-2)
 #text-table	ru	# Russian (koi8-r)
-#text-table	se1	# Swedish
-#text-table	se2	# Swedish
+#text-table	se	# Swedish (1996 standard)
+#text-table	se-old	# Swedish (1989 standard)
 #text-table	uk	# United Kingdom English
 #text-table	us	# American English
 #text-table	vni	# Vietnamese
