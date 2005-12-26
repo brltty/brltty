@@ -83,7 +83,8 @@
 #text-table	da	# Danish
 #text-table	de	# German
 #text-table	es	# Spanish
-#text-table	fr	# French
+#text-table	fr_CA	# French (Canada)
+#text-table	fr_FR	# French (France)
 #text-table	fr-cbifs	# French (Code Braille Informatique Français Standard)
 #text-table	it	# Italian
 #text-table	nabcc	# North American Braille Computer Code
