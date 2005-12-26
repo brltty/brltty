@@ -1,6 +1,17 @@
 Note: this file is in reversed chronological order (bottom to top).
 
 
+December 26, 2005:
+ - BRLTTY 3.7.2 released:
+   The AtSpi screen driver doesn't load due to a missing Xt dependency.
+   Check for X11/extensions/XKB.h.
+   Swedish text translation table changes:
+      Add text.se.tbl (1996 standard).
+      Rename text.se2.tbl to text.se-old.tbl (1989 standard).
+      Remove text.se1.tbl (modified english table).
+   English grade 2 contraction table changes:
+      The "m-st" contraction should always be used when "must" is the root word.
+
 December 12, 2005:
  - BRLTTY 3.7.1 released:
    (is|validate)(Integer|Float) should only modify *value when returning true.
