@@ -112,7 +112,7 @@ flushInput (void) {
 
 static void
 adjustWriteDelay (BrailleDisplay *brl, int bytes) {
-  brl->writeDelay += bytes * 1000 / charactersPerSecond;
+  brl->writeDelay += (bytes * 1000 / charactersPerSecond) + 1;
 }
 
 static int

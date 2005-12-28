@@ -92,7 +92,7 @@ readSerialBytes (void *buffer, int length) {
 static int
 writeSerialPacket (const void *buffer, int length, unsigned int *delay) {
   int written = serialWriteData(serialDevice, buffer, length);
-  if (delay && (written != -1)) *delay += length * 1000 / serialCharactersPerSecond;
+  if (delay && (written != -1)) *delay += (length * 1000 / serialCharactersPerSecond) + 1;
   return written;
 }
 

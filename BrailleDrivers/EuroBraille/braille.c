@@ -353,7 +353,7 @@ static int WriteToBrlDisplay (BrailleDisplay *brl, int len, const unsigned char 
 	*p++ = parity;
      }
    *p++ = EOT;
-   brl->writeDelay += (p - buf) * 1000 / chars_per_sec;
+   brl->writeDelay += ((p - buf) * 1000 / chars_per_sec) + 1;
 #ifdef		LOG_IO
    logfd = open("/tmp/eb-log.out", O_CREAT | O_APPEND | O_WRONLY, 0600);
    write(logfd, "WritePacket: ", 13);
@@ -405,7 +405,7 @@ static int brl_open (BrailleDisplay *brl, char **parameters, const char *device)
    serialSetParity(serialDevice, SERIAL_PARITY_EVEN);
 
   /* set speed */
-   chars_per_sec = BAUDRATE / 10;
+   chars_per_sec = BAUDRATE / 11;
    serialRestartDevice(serialDevice, BAUDRATE);
 
   /* Set model params... */

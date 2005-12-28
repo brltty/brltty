@@ -230,7 +230,7 @@ brl_writeWindow (BrailleDisplay *brl)
 	  rawlen += post_data[0];
 	}
       serialWriteData (CB_serialDevice, rawdata, rawlen);
-      brl->writeDelay += rawlen * 1000 / CB_charactersPerSecond;
+      brl->writeDelay += (rawlen * 1000 / CB_charactersPerSecond) + 1;
     }
 }
 

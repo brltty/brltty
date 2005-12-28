@@ -61,7 +61,7 @@ static int
 writeBytes (BrailleDisplay *brl, const unsigned char *bytes, int count) {
   LogBytes("Write", bytes, count);
   if (serialWriteData(serialDevice, bytes, count) == -1) return 0;
-  brl->writeDelay += count * 1000 / charactersPerSecond;
+  brl->writeDelay += (count * 1000 / charactersPerSecond) + 1;
   return 1;
 }
 

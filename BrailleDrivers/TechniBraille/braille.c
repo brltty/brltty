@@ -100,7 +100,7 @@ writePacket (BrailleDisplay *brl, unsigned char function, unsigned char *data, u
   {
     int size = byte - buffer;
   //LogBytes("Output Packet", buffer, size);
-    brl->writeDelay += count * 1000 / charactersPerSecond;
+    brl->writeDelay += (count * 1000 / charactersPerSecond) + 1;
     if (serialWriteData(serialDevice, buffer, size) != -1) return 1;
   }
 
@@ -151,7 +151,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
 
   if ((serialDevice = serialOpenDevice(device))) {
     int baud = 19200;
-    charactersPerSecond = baud / 10;
+    charactersPerSecond = baud / 11;
 
     if (serialRestartDevice(serialDevice, baud)) {
       if (serialSetParity(serialDevice, SERIAL_PARITY_EVEN)) {

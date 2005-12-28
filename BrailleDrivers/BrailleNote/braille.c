@@ -194,7 +194,7 @@ writePacket (BrailleDisplay *brl, const unsigned char *packet, int size) {
 
     {
       int ok = serialWriteData(serialDevice, buffer, count) != -1;
-      if (ok) brl->writeDelay += count * 1000 / charactersPerSecond;
+      if (ok) brl->writeDelay += (count * 1000 / charactersPerSecond) + 1;
       return ok;
     }
   }

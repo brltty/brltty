@@ -480,7 +480,7 @@ readSerialPacket (unsigned char *buffer, int length) {
 static int
 writeSerialPacket (const unsigned char *buffer, int length, unsigned int *delay) {
   if (logOutputPackets) LogBytes("Output Packet", buffer, length);
-  if (delay) *delay += length * 1000 / serialCharactersPerSecond;
+  if (delay) *delay += (length * 1000 / serialCharactersPerSecond) + 1;
   return serialWriteData(serialDevice, buffer, length);
 }
 

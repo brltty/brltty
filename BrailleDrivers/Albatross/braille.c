@@ -70,7 +70,7 @@ awaitByte (unsigned char *byte) {
 
 static int
 writeBytes (BrailleDisplay *brl, unsigned char *bytes, int count) {
-  brl->writeDelay += count * 1000 / charactersPerSecond;
+  brl->writeDelay += (count * 1000 / charactersPerSecond) + 1;
   if (serialWriteData(serialDevice, bytes, count) != -1) return 1;
   LogError("Albatross write");
   return 0;

@@ -445,7 +445,7 @@ static int
 writeBytes (BrailleDisplay *brl, const unsigned char *bytes, int count) {
   if (debugWrites) LogBytes("Write", bytes, count);
   if (io->writeBytes(bytes, count) != -1) {
-    brl->writeDelay += count * 1000 / charactersPerSecond;
+    brl->writeDelay += (count * 1000 / charactersPerSecond) + 1;
     return 1;
   } else {
     LogError("Write");

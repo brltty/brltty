@@ -213,7 +213,7 @@ readSerialBytes (unsigned char *buffer, int count, int wait) {
 static int
 writeSerialBytes (const unsigned char *buffer, int length, unsigned int *delay) {
   int count = serialWriteData(serialDevice, buffer, length);
-  if (delay && (count != -1)) *delay += length * 1000 / charactersPerSecond;
+  if (delay && (count != -1)) *delay += (length * 1000 / charactersPerSecond) + 1;
   return count;
 }
 
@@ -268,7 +268,7 @@ readUsbBytes (unsigned char *buffer, int length, int wait) {
 
 static int
 writeUsbBytes (const unsigned char *buffer, int length, unsigned int *delay) {
-  if (delay) *delay += length * 1000 / charactersPerSecond;
+  if (delay) *delay += (length * 1000 / charactersPerSecond) + 1;
   return usbWriteEndpoint(usb->device, usb->definition.outputEndpoint, buffer, length, 1000);
 }
 
@@ -314,7 +314,7 @@ readBluetoothBytes (unsigned char *buffer, int length, int wait) {
 static int
 writeBluetoothBytes (const unsigned char *buffer, int length, unsigned int *delay) {
   int count = writeData(bluetoothConnection, buffer, length);
-  if (delay) *delay += length * 1000 / charactersPerSecond;
+  if (delay) *delay += (length * 1000 / charactersPerSecond) + 1;
   if (count != length) {
     if (count == -1) {
       LogError("HandyTech Bluetooth write");
@@ -540,7 +540,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
   }
 
   rawData = prevData = NULL;		/* clear pointers */
-  charactersPerSecond = baud / 10;
+  charactersPerSecond = baud / 11;
 
   if (io->openPort(parameters, device)) {
     int tries = 0;
