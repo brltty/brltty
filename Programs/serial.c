@@ -435,9 +435,7 @@ serialSetParity (SerialDevice *serial, SerialParity parity) {
 #endif /* PARSTK */
 
   if (parity != SERIAL_PARITY_NONE) {
-    if (parity == SERIAL_PARITY_EVEN) {
-
-    } else if (parity == SERIAL_PARITY_ODD) {
+    if (parity == SERIAL_PARITY_ODD) {
       serial->pendingAttributes.c_cflag |= PARODD;
 
 #ifdef PARSTK
@@ -448,7 +446,7 @@ serialSetParity (SerialDevice *serial, SerialParity parity) {
       serial->pendingAttributes.c_cflag |= PARSTK | PARODD;
 #endif /* PARSTK */
 
-    } else {
+    } else if (parity != SERIAL_PARITY_EVEN) {
       LogPrint(LOG_WARNING, "Unknown serial parity: %d", parity);
       return 0;
     }
@@ -552,6 +550,45 @@ serialSetFlowControl (SerialDevice *serial, SerialFlowControl flow) {
   if (!flow) return 1;
   LogPrint(LOG_WARNING, "Unknown serial flow control: 0X%02X", flow);
   return 0;
+}
+
+int
+serialGetCharacterBits (SerialDevice *serial) {
+  int bits = 2; /* 1 start bit + 1 stop bit */
+
+#ifdef WINDOWS
+  bits += serial->pendingAttributes.ByteSize;
+  if (serial->pendingAttributes.fParity && (serial->pendingAttributes.Parity != NOPARITY)) ++bits;
+#else /* WINDOWS */
+  {
+    tcflag_t size = serial->pendingAttributes.c_cflag & CSIZE;
+    switch (size) {
+  #ifdef CS5
+      case CS5: bits += 5; break;
+  #endif /* CS5 */
+
+  #ifdef CS6
+      case CS6: bits += 6; break;
+  #endif /* CS6 */
+
+  #ifdef CS7
+      case CS7: bits += 7; break;
+  #endif /* CS7 */
+
+  #ifdef CS8
+      case CS8: bits += 8; break;
+  #endif /* CS8 */
+
+      default:
+        LogPrint(LOG_WARNING, "Unknown serial data bits value: %X", size);
+        break;
+    }
+  }
+
+  if (serial->pendingAttributes.c_cflag & PARENB) ++bits;
+#endif /* WINDOWS */
+
+  return bits;
 }
 
 int
