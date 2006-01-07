@@ -2,7 +2,7 @@ AC_DEFUN([BRLTTY_UPPERCASE], [translit([$1], [a-z], [A-Z])])
 
 AC_DEFUN([BRLTTY_SEARCH_LIBS], [dnl
 brltty_uc="`echo "$1" | sed -e 'y%abcdefghijklmnopqrstuvwxyz%ABCDEFGHIJKLMNOPQRSTUVWXYZ%'`"
-AC_SEARCH_LIBS([$1], [$2], [AC_DEFINE_UNQUOTED(HAVE_${brltty_uc})])])
+AC_SEARCH_LIBS([$1], [$2], [AC_DEFINE_UNQUOTED(HAVE_${brltty_uc}, [1], [Define this if the function $1 is available.])])])
 
 AC_DEFUN([BRLTTY_VAR_TRIM], [dnl
 changequote(, )dnl
@@ -14,12 +14,12 @@ eval '$1="'"$2"'"'])
 
 AC_DEFUN([BRLTTY_DEFINE_EXPANDED], [dnl
 BRLTTY_VAR_EXPAND([brltty_expanded], [$2])
-AC_DEFINE_UNQUOTED([$1], ["${brltty_expanded}"])])
+AC_DEFINE_UNQUOTED([$1], ["${brltty_expanded}"], [$3])])
 
 AC_DEFUN([BRLTTY_DEFINE_DIRECTORY], [dnl
 BRLTTY_VAR_EXPAND([$1], [$2])
 AC_SUBST([$1])
-BRLTTY_DEFINE_EXPANDED([$1], ["${$1}"])])
+BRLTTY_DEFINE_EXPANDED([$1], ["${$1}"], [$3])])
 
 AC_DEFUN([BRLTTY_ARG_WITH], [dnl
 AC_ARG_WITH([$1], BRLTTY_HELP_STRING([--with-$1=$2], [$3]), [$4="${withval}"], [$4=$5])])
@@ -55,7 +55,8 @@ fi
 AC_SUBST([install_$1_tables])
 BRLTTY_FILE_PATH([$1_table], [tbl], [$3])
 BRLTTY_SUMMARY_ITEM([$1-table], [$1_table])
-AC_DEFINE_UNQUOTED(BRLTTY_UPPERCASE([$1_table]), ["${$1_table}"])
+AC_DEFINE_UNQUOTED(BRLTTY_UPPERCASE([$1_table]), ["${$1_table}"],
+                   [Define this to be a string containing the path to the default $1 table.])
 BRLTTY_FILE_PATH([$1_table], [], [], [$(SRC_TOP)$(TBL_DIR)])
 AC_SUBST([$1_table])])
 
@@ -72,7 +73,8 @@ elif test "${$1_parameters}" = "yes"
 then
    $1_parameters=""
 fi
-AC_DEFINE_UNQUOTED(BRLTTY_UPPERCASE([$1_parameters]), ["${$1_parameters}"])
+AC_DEFINE_UNQUOTED(BRLTTY_UPPERCASE([$1_parameters]), ["${$1_parameters}"],
+                   [Define this to be a string containing the default $2 parameters.])
 BRLTTY_SUMMARY_ITEM([$1-parameters], [$1_parameters])])
 
 AC_DEFUN([BRLTTY_ARG_ENABLE], [dnl
@@ -324,7 +326,8 @@ AC_SUBST([brltty_internal_names_$1])
 
 set -- ${brltty_internal_codes_$1} ${brltty_external_codes_$1}
 brltty_default_code_$1="${1}"
-AC_DEFINE_UNQUOTED(BRLTTY_UPPERCASE([$1_$2_codes]), ["${*}"])
+AC_DEFINE_UNQUOTED(BRLTTY_UPPERCASE([$1_$2_codes]), ["${*}"], 
+                   [Define this to be a string containing a list of the $1 $2 codes.])
 
 $1_driver_libraries=""
 if test -n "${brltty_internal_codes_$1}"
@@ -365,7 +368,7 @@ changequote([, ])dnl
    fi
 
    BRLTTY_SUMMARY_ITEM([internal-$1-drivers], [brltty_internal_codes_$1])
-   BRLTTY_ARG_PARAMETERS([$1])
+   BRLTTY_ARG_PARAMETERS([$1], [$1 driver])
 fi
 
 for brltty_driver in ${brltty_item_names_$1}
@@ -483,7 +486,8 @@ AC_SUBST([$2_root])
 BRLTTY_SUMMARY_ITEM([$2-root], [$2_root])
 if test -n "${$2_root}"
 then
-   AC_DEFINE_UNQUOTED(BRLTTY_UPPERCASE([$2_root]), ["${$2_root}"])
+   AC_DEFINE_UNQUOTED(BRLTTY_UPPERCASE([$2_root]), ["${$2_root}"],
+                      [Define this to be a string containing the path to the root of the $1 package.])
    $4
 fi])
 
@@ -625,7 +629,8 @@ main (void) {
    [brltty_cv_function_$1=no])])
 if test "${brltty_cv_function_$1}" = "yes"
 then
-   AC_DEFINE(BRLTTY_UPPERCASE([HAVE_$1]))
+   AC_DEFINE(BRLTTY_UPPERCASE([HAVE_$1]), [1],
+             [Define this if the function $1 is available.])
    $3
 else
    :

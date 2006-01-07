@@ -40,10 +40,12 @@ AC_SUBST([api_minor], [5])
 AC_SUBST([api_revision], [0])
 AC_SUBST([api_version], [${api_major}.${api_minor}])
 AC_SUBST([api_release], [${api_version}.${api_revision}])
-AC_DEFINE_UNQUOTED([BRLAPI_RELEASE], ["${api_release}"])
+AC_DEFINE_UNQUOTED([BRLAPI_RELEASE], ["${api_release}"],
+                   [Define this to be a string containing the API library version.])
 
 AC_SUBST([PACKAGE_TITLE], ["`echo "${PACKAGE_NAME}" | sed -e 'y%abcdefghijklmnopqrstuvwxyz%ABCDEFGHIJKLMNOPQRSTUVWXYZ%'`"])
-AC_DEFINE_UNQUOTED([PACKAGE_TITLE], ["${PACKAGE_TITLE}"])
+AC_DEFINE_UNQUOTED([PACKAGE_TITLE], ["${PACKAGE_TITLE}"],
+                   [Define this to be a string containing the package title.])
 
 AC_SUBST([package_date], ["`date "+%Y/%m/%d"`"])
 
@@ -86,7 +88,8 @@ AC_SUBST([install_root])
 BRLTTY_SUMMARY_ITEM([install-root], [install_root])
 
 AC_SUBST([configuration_file], ["${PACKAGE_NAME}.conf"])
-BRLTTY_DEFINE_EXPANDED([CONFIGURATION_FILE], ["${configuration_file}"])
+BRLTTY_DEFINE_EXPANDED([CONFIGURATION_FILE], ["${configuration_file}"],
+                       [Define this to be a string containing the name of the default configuration file.])
 
 BRLTTY_PORTABLE_DIRECTORY([includedir], [/usr])
 BRLTTY_PORTABLE_DIRECTORY([mandir], [/usr/share])
@@ -128,10 +131,14 @@ original_prefix="${prefix}"
 test "${prefix}" = "NONE" && prefix=""
 original_exec_prefix="${exec_prefix}"
 test "${exec_prefix}" = "NONE" && exec_prefix="${prefix}"
-BRLTTY_DEFINE_DIRECTORY([DATA_DIRECTORY], [${execute_root}${data_directory}])
-BRLTTY_DEFINE_DIRECTORY([LIBRARY_DIRECTORY], [${execute_root}${library_directory}])
-BRLTTY_DEFINE_DIRECTORY([CONFIGURATION_DIRECTORY], [${sysconfdir}])
-BRLTTY_DEFINE_EXPANDED([BRLAPI_ETCDIR], ["${CONFIGURATION_DIRECTORY}"])
+BRLTTY_DEFINE_DIRECTORY([DATA_DIRECTORY], [${execute_root}${data_directory}],
+                        [Define this to be a string containing the desired working directory.])
+BRLTTY_DEFINE_DIRECTORY([LIBRARY_DIRECTORY], [${execute_root}${library_directory}],
+                        [Define this to be a string containing the path to the library directory.])
+BRLTTY_DEFINE_DIRECTORY([CONFIGURATION_DIRECTORY], [${sysconfdir}],
+                        [Define this to be a string containing the path to the configuration directory.])
+BRLTTY_DEFINE_EXPANDED([BRLAPI_ETCDIR], ["${CONFIGURATION_DIRECTORY}"],
+                       [Define this to be a string containing the path to the directory where the authorization key and driver-dependent key names are found.])
 prefix="${original_prefix}"
 exec_prefix="${original_exec_prefix}"
 
@@ -166,7 +173,8 @@ then
 fi
 if test -n "${init_path}"
 then
-   AC_DEFINE_UNQUOTED([INIT_PATH], ["${init_path}"])
+   AC_DEFINE_UNQUOTED([INIT_PATH], ["${init_path}"],
+                      [Define this if BRLTTY is to be run as init.])
 fi
 BRLTTY_SUMMARY_ITEM([init-path], [init_path])
 
@@ -342,7 +350,8 @@ main (void) {
          [brltty_cv_function_CreateNamedPipe=no])])
       if test "${brltty_cv_function_CreateNamedPipe}" = "yes"
       then
-         AC_DEFINE([HAVE_CREATENAMEDPIPE])
+         AC_DEFINE([HAVE_CREATENAMEDPIPE], [1],
+                   [Define this if the function CreateNamedPipe is available.])
       fi
 
       BRLTTY_HAVE_WINDOWS_FUNCTION([GetConsoleWindow], [kernel32])
@@ -372,7 +381,8 @@ main(void) {
          [brltty_cv_function_ReadConsoleOutputCharacterW=no])])
       if test "${brltty_cv_function_ReadConsoleOutputCharacterW}" = "yes"
       then
-         AC_DEFINE([HAVE_READCONSOLEOUTPUTCHARACTERW])
+         AC_DEFINE([HAVE_READCONSOLEOUTPUTCHARACTERW], [1],
+                   [Define this if the function ReadConsoleOutputCharacterW is available.])
       fi
 
       if test "${build_os}" = "${host_os}"
@@ -386,7 +396,8 @@ main(void) {
          brltty_windows_type="`echo "${brltty_uname_system}" | sed -e 's/^.*_//' -e 's/-.*$//'`"
          if test "${brltty_windows_type}" = "NT"
          then
-            AC_DEFINE([WINDOWS_NT])
+            AC_DEFINE([WINDOWS_NT], [1],
+                      [Define this if Windows NT is being used.])
             BRLTTY_HAVE_WINDOWS_LIBRARY([ntdll])
          fi
       fi
@@ -404,7 +415,8 @@ BRLTTY_ARG_DISABLE(
 [dnl
    AC_CHECK_HEADER([libintl.h], [dnl
       AC_HAVE_LIBRARY([intl])
-      AC_DEFINE([ENABLE_I18N_SUPPORT])
+      AC_DEFINE([ENABLE_I18N_SUPPORT], [1],
+                [Define this if internationalization support is to be included.])
    ])
 ])
 
@@ -414,8 +426,9 @@ BRLTTY_ARG_DISABLE(
    [],
 [dnl
    BRLTTY_CAP_PTHREADS([dnl
-      AC_DEFINE([ENABLE_API])
-      BRLTTY_ARG_PARAMETERS([api])
+      AC_DEFINE([ENABLE_API], [1],
+                [Define this if the application programming interface is to be included.])
+      BRLTTY_ARG_PARAMETERS([api], [application programming interface])
 
       api_objects='api_server.$O rangelist.$O'
       api_libraries="${LIBS}"
@@ -428,7 +441,8 @@ BRLTTY_ARG_DISABLE(
       case "${host_os}"
       in
          cygwin*|mingw*)
-            AC_DEFINE([BRLAPI_WIN32])
+            AC_DEFINE([BRLAPI_WIN32], [1],
+                      [Define this if the Win32 programming interface is available.])
             api_dynamic_library="api-dynamic-library-windows"
             install_api_libraries="install-api-libraries-windows"
             ;;
@@ -442,7 +456,8 @@ AC_SUBST([install_api])
 AC_SUBST([api_dynamic_library])
 AC_SUBST([install_api_libraries])
 AC_SUBST([api_authfile], [brlapi.key])
-BRLTTY_DEFINE_EXPANDED([BRLAPI_AUTHFILE], ["${api_authfile}"])
+BRLTTY_DEFINE_EXPANDED([BRLAPI_AUTHFILE], ["${api_authfile}"],
+                       [Define this to be a string containing the name of the file containing the authorization key.])
 
 brltty_curses_libs_save="${LIBS}"
 BRLTTY_PACKAGE_CHOOSE([curses],
@@ -558,7 +573,8 @@ int b = __alignof__(a);
 [brltty_cv_c_operator_alignof=no])])
 if test "${brltty_cv_c_operator_alignof}" = "yes"
 then
-   AC_DEFINE([HAVE_OPERATOR_ALIGNOF])
+   AC_DEFINE([HAVE_OPERATOR_ALIGNOF],  [1],
+             [Define this if the __alignof__ operator is supported.])
 fi
 
 AC_CACHE_CHECK(
@@ -573,7 +589,8 @@ extern void conf_attribute_format_printf(const char *format, ...)
 [brltty_cv_c_attribute_format_printf=no])])
 if test "${brltty_cv_c_attribute_format_printf}" = "yes"
 then
-   AC_DEFINE([HAVE_ATTRIBUTE_FORMAT_PRINTF])
+   AC_DEFINE([HAVE_ATTRIBUTE_FORMAT_PRINTF], [1],
+             [Define this if the printf format attribute is supported.])
 fi
 
 AC_CACHE_CHECK(
@@ -590,7 +607,8 @@ typedef struct {
 [brltty_cv_c_attribute_packed=no])])
 if test "${brltty_cv_c_attribute_packed}" = "yes"
 then
-   AC_DEFINE([HAVE_ATTRIBUTE_PACKED])
+   AC_DEFINE([HAVE_ATTRIBUTE_PACKED], [1],
+             [Define this if the packed attribute is supported.])
 fi
 
 AC_CACHE_CHECK(
@@ -605,7 +623,8 @@ static void conf_attribute_unused (void)
 [brltty_cv_c_attribute_unused=no])])
 if test "${brltty_cv_c_attribute_unused}" = "yes"
 then
-   AC_DEFINE([HAVE_ATTRIBUTE_UNUSED])
+   AC_DEFINE([HAVE_ATTRIBUTE_UNUSED], [1],
+             [Define this if the unused attribute is supported.])
 fi
 
 AC_CACHE_CHECK([for system-dependent compilation flags], [brltty_cv_prog_cc_sysflags], [dnl
@@ -719,10 +738,12 @@ in
       ;;
 esac
 AC_SUBST([library_extension])
-AC_DEFINE_UNQUOTED([LIBRARY_EXTENSION], ["${library_extension}"])
+AC_DEFINE_UNQUOTED([LIBRARY_EXTENSION], ["${library_extension}"],
+                   [Define this to be a string containing the library extension.])
 
 AC_SUBST([module_name], ["${library_prefix}${PACKAGE_NAME}"])
-AC_DEFINE_UNQUOTED([MODULE_NAME], ["${module_name}"])
+AC_DEFINE_UNQUOTED([MODULE_NAME], ["${module_name}"],
+                   [Define this to be a string containing the base module name.])
 
 case "${host_os}"
 in
@@ -734,7 +755,8 @@ in
       ;;
 esac
 AC_SUBST([module_extension])
-AC_DEFINE_UNQUOTED([MODULE_EXTENSION], ["${module_extension}"])
+AC_DEFINE_UNQUOTED([MODULE_EXTENSION], ["${module_extension}"],
+                   [Define this to be a string containing the module extension.])
 
 AC_CACHE_CHECK([for static archive extension], [brltty_cv_ext_arc], [dnl
 case "${host_os}"
@@ -787,7 +809,8 @@ in
       then
          SYSCFLAGS="${SYSCFLAGS} -I/opt/audio/include"
          LIBS="-L/opt/audio/lib -lAlib ${LIBS}"
-         AC_DEFINE([HAVE_HPUX_AUDIO])
+         AC_DEFINE([HAVE_HPUX_AUDIO], [1],
+                   [Define this if HP-UX audio support is available.])
       fi
       ;;
    openbsd*)
@@ -828,7 +851,8 @@ BRLTTY_ARG_DISABLE(
    [the preferences menu],
    [],
 [dnl
-   AC_DEFINE([ENABLE_PREFERENCES_MENU])
+   AC_DEFINE([ENABLE_PREFERENCES_MENU], [1],
+             [Define this to include the preferences menu.])
 ])
 
 BRLTTY_ARG_DISABLE(
@@ -836,7 +860,8 @@ BRLTTY_ARG_DISABLE(
    [text/attribute/contraction table selection in preferences menu],
    [],
 [dnl
-   AC_DEFINE([ENABLE_TABLE_SELECTION])
+   AC_DEFINE([ENABLE_TABLE_SELECTION], [1],
+             [Define this to include table selection within the preferences menu.])
 ])
 translation_table_objects='tbl.$O'
 AC_SUBST([translation_table_objects])
@@ -846,7 +871,8 @@ BRLTTY_ARG_DISABLE(
    [interactive command learn mode],
    [],
 [dnl
-   AC_DEFINE([ENABLE_LEARN_MODE])
+   AC_DEFINE([ENABLE_LEARN_MODE], [1],
+             [Define this to include command learn mode.])
 ])
 
 BRLTTY_ARG_DISABLE(
@@ -854,7 +880,8 @@ BRLTTY_ARG_DISABLE(
    [in-line contracted braille],
    [],
 [dnl
-   AC_DEFINE([ENABLE_CONTRACTED_BRAILLE])
+   AC_DEFINE([ENABLE_CONTRACTED_BRAILLE], [1],
+             [Define this to include contraction table support.])
    contracted_braille_objects='ctb_compile.$O ctb_translate.$O'
    install_contraction_tables=install-contraction-tables
 ])
@@ -866,7 +893,8 @@ BRLTTY_ARG_DISABLE(
    [support for the console tone generator],
    [],
 [dnl
-   AC_DEFINE([ENABLE_BEEPER_SUPPORT])
+   AC_DEFINE([ENABLE_BEEPER_SUPPORT], [1],
+             [Define this to include beeper (console tone generator) support.])
    beeper_tune_objects='beeper.$O'
 ])
 AC_SUBST([beeper_tune_objects])
@@ -876,7 +904,8 @@ BRLTTY_ARG_DISABLE(
    [support for soundcard digital audio],
    [${brltty_pcm_interfaces}],
 [dnl
-   AC_DEFINE([ENABLE_PCM_SUPPORT])
+   AC_DEFINE([ENABLE_PCM_SUPPORT], [1],
+             [Define this to include PCM (soundcard audio) support.])
    pcm_tune_objects='pcm.$O'
 ])
 AC_SUBST([pcm_tune_objects])
@@ -886,7 +915,8 @@ BRLTTY_ARG_DISABLE(
    [support for the Musical Instrument Digital Interface],
    [${brltty_midi_interfaces}],
 [dnl
-   AC_DEFINE([ENABLE_MIDI_SUPPORT])
+   AC_DEFINE([ENABLE_MIDI_SUPPORT], [1],
+             [Define this to include MIDI (Musical Instrument Digital Interface) support.])
    midi_tune_objects='midi.$O'
 ])
 AC_SUBST([midi_tune_objects])
@@ -896,7 +926,8 @@ BRLTTY_ARG_DISABLE(
    [support for the soundcard synthesizer],
    [],
 [dnl
-   AC_DEFINE([ENABLE_FM_SUPPORT])
+   AC_DEFINE([ENABLE_FM_SUPPORT], [1],
+             [Define this to include FM (soundcard synthesizer) support.])
    fm_tune_objects='fm.$O adlib.$O'
 ])
 AC_SUBST([fm_tune_objects])
@@ -906,7 +937,8 @@ BRLTTY_ARG_DISABLE(
    [user customization of Papenmeier driver],
    [],
 [dnl
-   AC_DEFINE([ENABLE_PM_CONFIGURATION_FILE])
+   AC_DEFINE([ENABLE_PM_CONFIGURATION_FILE], [1],
+             [Define this to include Papenmeier configuration file support.])
    PM_CONFIGFILE_DEPENDENCY=configuration-file
 ])
 AC_SUBST([PM_CONFIGFILE_DEPENDENCY])
@@ -1030,7 +1062,8 @@ then
       [support for the Universal Serial Bus],
       [],
 [dnl
-      AC_DEFINE([ENABLE_USB_SUPPORT])
+      AC_DEFINE([ENABLE_USB_SUPPORT], [1],
+                [Define this if Universal Serial Bus support is to be included.])
       case "${usb_object}"
       in
          libusb)
@@ -1062,7 +1095,8 @@ then
          [support for bluetooth capable devices],
          [],
 [dnl
-         AC_DEFINE([ENABLE_BLUETOOTH_SUPPORT])
+         AC_DEFINE([ENABLE_BLUETOOTH_SUPPORT], [1],
+                   [Define this if bluetooth support is to be included.])
          bluetooth_objects="bluetooth."'$O'" bluetooth_${bluetooth_object}."'$O'
 ])
 ])
@@ -1113,7 +1147,8 @@ in
       brltty_cv_device_directory="/dev"
       ;;
 esac])
-AC_DEFINE_UNQUOTED([DEVICE_DIRECTORY], ["${brltty_cv_device_directory}"])
+AC_DEFINE_UNQUOTED([DEVICE_DIRECTORY], ["${brltty_cv_device_directory}"],
+                   [Define this to be a string containing the path to the directory containing the devices.])
 
 AC_CACHE_CHECK([for first serial device], [brltty_cv_device_serial_first], [dnl
 case "${host_os}"
@@ -1179,7 +1214,8 @@ then
    fi
 fi
 AC_SUBST([braille_device])
-AC_DEFINE_UNQUOTED([BRAILLE_DEVICE], ["${braille_device}"])
+AC_DEFINE_UNQUOTED([BRAILLE_DEVICE], ["${braille_device}"],
+                   [Define this to be a string containing the path to the default braille device.])
 BRLTTY_SUMMARY_ITEM([braille-device], [braille_device])
 
 BRLTTY_TEXT_TABLE([cz], [Czech (iso-8859-2)])
@@ -1213,7 +1249,8 @@ BRLTTY_ARG_DISABLE(
    [support for speech synthesizers],
    [],
 [dnl
-   AC_DEFINE([ENABLE_SPEECH_SUPPORT])
+   AC_DEFINE([ENABLE_SPEECH_SUPPORT], [1],
+             [Define this to include speech synthesizer support.])
    speech_support_object='spk.$O'
 
    BRLTTY_SPEECH_DRIVER([al], [Alva])
@@ -1286,7 +1323,8 @@ AC_SUBST([cspi_libdirs])
 AC_SUBST([cspi_libraries])
 
 BRLTTY_ARG_DRIVER([screen], [ScreenDrivers])
-AC_DEFINE_UNQUOTED([SCREEN_DRIVER], ["${brltty_default_code_screen}"])
+AC_DEFINE_UNQUOTED([SCREEN_DRIVER], ["${brltty_default_code_screen}"],
+                   [Define this to be a string containing the default screen driver code.])
 BRLTTY_SUMMARY_ITEM([screen-driver], [brltty_default_code_screen])
 
 AC_SUBST([install_drivers])
