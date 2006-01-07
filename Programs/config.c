@@ -647,7 +647,7 @@ savePreferences (void) {
     if (length == sizeof(prefs)) {
       ok = 1;
     } else {
-      if (length != -1) errno = ENODATA;
+      if (length != -1) errno = EIO;
       LogPrint(LOG_ERR, "%s: %s: %s",
                gettext("cannot write to preferences file"), preferencesFile, strerror(errno));
     }
