@@ -1955,6 +1955,11 @@ main (int argc, char *argv[]) {
           p->motx = p->winx;
           p->moty = p->winy;
           contracted = 0;
+
+          if (p->trackCursor && speechTracking && speech->isSpeaking()) {
+            p->trackCursor = 0;
+            playTune(&tune_cursor_unlinked);
+          }
         }
 
         if (command & BRL_FLG_ROUTE) {
