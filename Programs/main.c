@@ -1956,10 +1956,12 @@ main (int argc, char *argv[]) {
           p->moty = p->winy;
           contracted = 0;
 
+#ifdef ENABLE_SPEECH_SUPPORT
           if (p->trackCursor && speechTracking && speech->isSpeaking()) {
             p->trackCursor = 0;
             playTune(&tune_cursor_unlinked);
           }
+#endif /* ENABLE_SPEECH_SUPPORT */
         }
 
         if (command & BRL_FLG_ROUTE) {
