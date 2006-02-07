@@ -60,23 +60,8 @@ usbResetDevice (UsbDevice *device) {
   return 0;
 }
 
-int
-usbSetConfiguration (
-  UsbDevice *device,
-  unsigned char configuration
-) {
-  UsbDeviceExtension *devx = device->extension;
-  unsigned int arg = configuration;
-  if (ioctl(devx->file, USBDEVFS_SETCONFIGURATION, &arg) != -1) return 1;
-  LogError("USB configuration set");
-  return 0;
-}
-
 static char *
-usbGetDriver (
-  UsbDevice *device,
-  unsigned char interface
-) {
+usbGetDriver (UsbDevice *device, unsigned char interface) {
   UsbDeviceExtension *devx = device->extension;
   struct usbdevfs_getdriver arg;
   memset(&arg, 0, sizeof(arg));
@@ -104,15 +89,66 @@ usbControlDriver (
 }
 
 static int
-usbDisconnectDriver (
-  UsbDevice *device,
-  unsigned char interface
-) {
+usbDisconnectDriver (UsbDevice *device, unsigned char interface) {
 #ifdef USBDEVFS_DISCONNECT
   if (usbControlDriver(device, interface, USBDEVFS_DISCONNECT, NULL)) return 1;
 #else /* USBDEVFS_DISCONNECT */
   LogPrint(LOG_WARNING, "USB driver disconnection not available.");
 #endif /* USBDEVFS_DISCONNECT */
+  return 0;
+}
+
+static int
+usbDisconnectInterface (UsbDevice *device, unsigned char interface) {
+  char *driver = usbGetDriver(device, interface);
+
+  if (driver) {
+    LogPrint(LOG_WARNING, "USB interface in use: %s", driver);
+    free(driver);
+
+    if (usbDisconnectDriver(device, interface)) return 1;
+  }
+
+  return 0;
+}
+
+static int
+usbDisconnectInterfaces (UsbDevice *device) {
+  const UsbDescriptor *descriptor = NULL;
+  int disconnected = 0;
+
+  while (usbNextDescriptor(device, &descriptor)) {
+    if (descriptor->interface.bDescriptorType == UsbDescriptorType_Interface) {
+      if (usbDisconnectInterface(device, descriptor->interface.bInterfaceNumber)) disconnected = 1;
+    }
+  }
+
+  return disconnected;
+}
+
+int
+usbSetConfiguration (
+  UsbDevice *device,
+  unsigned char configuration
+) {
+  UsbDeviceExtension *devx = device->extension;
+  int disconnected = 0;
+
+  while (1) {
+    unsigned int arg = configuration;
+
+    if (ioctl(devx->file, USBDEVFS_SETCONFIGURATION, &arg) != -1) return 1;
+    if (errno != EBUSY) break;
+    if (disconnected) break;
+
+    if (!usbDisconnectInterfaces(device)) {
+      errno = EBUSY;
+      break;
+    }
+    disconnected = 1;
+  }
+
+  LogError("USB configuration set");
   return 0;
 }
 
@@ -122,23 +158,20 @@ usbClaimInterface (
   unsigned char interface
 ) {
   UsbDeviceExtension *devx = device->extension;
-  unsigned int arg = interface;
   int disconnected = 0;
-claim:
-  if (ioctl(devx->file, USBDEVFS_CLAIMINTERFACE, &arg) != -1) return 1;
 
-  if (errno == EBUSY) {
-    char *driver = usbGetDriver(device, interface);
-    if (driver) {
-      LogPrint(LOG_WARNING, "USB interface in use: %s", driver);
-      free(driver);
+  while (1) {
+    unsigned int arg = interface;
 
-      if (!disconnected) {
-        disconnected = 1;
-        if (usbDisconnectDriver(device, interface)) goto claim;
-      }
+    if (ioctl(devx->file, USBDEVFS_CLAIMINTERFACE, &arg) != -1) return 1;
+    if (errno != EBUSY) break;
+    if (disconnected) break;
+
+    if (!usbDisconnectInterface(device, interface)) {
+      errno = EBUSY;
+      break;
     }
-    errno = EBUSY;
+    disconnected = 1;
   }
 
   LogError("USB interface claim");
