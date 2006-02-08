@@ -23,7 +23,7 @@
 # Although it is a bit old, VisioBraille users may find this table more
 # comfortable than standard French braille tables.
 
-\X00 (        )  # null
+\X00 (  345 78)  # null
 \X01 (1      8)  # start of heading
 \X02 (12     8)  # start of text
 \X03 (1  4   8)  # end of text
