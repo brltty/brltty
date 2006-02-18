@@ -157,16 +157,19 @@ void tobrltty_init(char *authKey, char *hostName) {
     fatal_brlapi_errno("getDisplaySize",NULL);
 }
 
-void vtno(int vtno) {
+static int getXVTnb(void);
+
+void getVT(void) {
   if (getenv("WINDOWSPATH")) {
     if (brlapi_getTtyPath(NULL,0,NULL)<0)
       fatal_brlapi_errno("getTtyPath",gettext("cannot get tty\n"));
   } else {
+    int vtno = getXVTnb();
     if (brlapi_getTty(vtno,NULL)<0)
       fatal_brlapi_errno("getTty",gettext("cannot get tty %d\n"),vtno);
   }
   if (brlapi_ignoreKeyRange(0,BRL_KEYCODE_MAX)<0)
-    fatal_brlapi_errno("ignoreKeys",gettext("cannot ignore keys on tty %d\n"),vtno);
+    fatal_brlapi_errno("ignoreKeys",gettext("cannot ignore keys\n"));
 #ifdef CAN_SIMULATE_KEY_PRESSES
   if (brlapi_unignoreKeyRange(BRL_BLK_PASSCHAR,BRL_BLK_PASSCHAR|BRL_MSK_ARG))
     fatal_brlapi_errno("unignoreKeyRange",NULL);
@@ -263,7 +266,7 @@ static int ErrorHandler(Display *dpy, XErrorEvent *ev) {
   exit(1);
 }
 
-static void getVTnb(void) {
+static int getXVTnb(void) {
   Window root;
   Atom property;
   Atom actual_type;
@@ -271,6 +274,7 @@ static void getVTnb(void) {
   unsigned long nitems;
   unsigned long bytes_after;
   unsigned char *buf;
+  int vt = -1;
 
   root=DefaultRootWindow(dpy);
 
@@ -290,15 +294,16 @@ static void getVTnb(void) {
   case XA_INTEGER:
   case XA_WINDOW:
     switch (actual_format) {
-    case 8:  vtno(*(uint8_t *)buf); break;
-    case 16: vtno(*(uint16_t *)buf); break;
-    case 32: vtno(*(uint32_t *)buf); break;
+    case 8:  vt = (*(uint8_t *)buf); break;
+    case 16: vt = (*(uint16_t *)buf); break;
+    case 32: vt = (*(uint32_t *)buf); break;
     default: fatal(gettext("bad format for VT number\n"));
     }
     break;
   default: fatal(gettext("bad type for VT number\n"));
   }
   if (!XFree(buf)) fatal("XFree(VTnobuf)");
+  return vt;
 }
 
 static int grabWindow(Window win,int level) {
@@ -411,7 +416,7 @@ void toX_f(const char *display) {
   FD_SET(X_fd, &fds);
   maxfd = X_fd>brlapi_fd ? X_fd+1 : brlapi_fd+1;
 
-  getVTnb();
+  getVT();
   
   for (i=0;i<ScreenCount(dpy);i++) {
     root=RootWindow(dpy,i);
