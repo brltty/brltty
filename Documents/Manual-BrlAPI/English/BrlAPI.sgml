@@ -416,6 +416,7 @@ automatically shown according to rather natural rules.
 
 <sect1>A pile of "paper sheets"
 
+<p>
 Let's look at VT 2 by itself. What is shown on the braille display can be seen
 as the result of a pile of two paper sheets.  <em/brltty/ is represented by the
 bottom sheet on which its screen reading is written, and client <em/A/ by the
