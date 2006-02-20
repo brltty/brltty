@@ -864,12 +864,6 @@ dimensionsChanged (BrailleDisplay *brl) {
   return 0;
 }
 
-static void
-brl_identify (void) {
-  LogPrint(LOG_NOTICE, "Virtual Braille Driver: version 0.1");
-  LogPrint(LOG_INFO,   "  Copyright (C) 2003 by Mario Lang <mlang@delysid.org>");
-}
-
 static int
 brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
   allocateCommandDescriptors();

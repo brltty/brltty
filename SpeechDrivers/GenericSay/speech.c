@@ -37,12 +37,6 @@ typedef enum {
 static const char *commandPath;	/* default full path for the say command */
 static FILE *commandStream = NULL;
 
-static void
-spk_identify (void)
-{
-  LogPrint(LOG_NOTICE, "Generic Say Driver");
-}
-
 static int
 spk_open (char **parameters)
 {

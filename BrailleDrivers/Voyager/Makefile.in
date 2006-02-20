@@ -18,6 +18,8 @@
 DRIVER_CODE = vo
 DRIVER_NAME = Voyager
 DRIVER_COMMENT = 44/70
+DRIVER_VERSION = 0.21 (January 2005)
+DRIVER_COPYRIGHT = Copyright (C) 2005 by Stéphane Doyon <s.doyon@videotron.ca>
 HELP_DEPS = $(HELP_TEXT)
 include $(SRC_TOP)braille.mk
 

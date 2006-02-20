@@ -15,9 +15,6 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#define TS_VERSION "BRLTTY driver for TSI displays, version 2.74 (April 2004)"
-#define TS_COPYRIGHT "Copyright (C) 1996-2004 by Stéphane Doyon " \
-                  "<s.doyon@videotron.ca>"
 /* TSI/braille.c - Braille display driver for TSI displays
  *
  * Written by Stéphane Doyon (s.doyon@videotron.ca)
@@ -299,14 +296,6 @@ static unsigned char has_sw,    /* flag: has routing keys or not */
 static char disp_ver[Q_VER_LENGTH]; /* version of the hardware */
 
 static enum { NAV20_40=0, NAV80, PB40, PB65_80} displayType;
-
-static void 
-brl_identify (void)
-{
-  LogPrint(LOG_NOTICE, TS_VERSION);
-  LogPrint(LOG_INFO, "   "TS_COPYRIGHT);
-}
-
 
 static int
 myread(void *buf, unsigned len)

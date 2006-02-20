@@ -86,11 +86,13 @@ setEnvironmentVariable (const char *name, const char *value) {
   return 0;
 }
 
+/*
 static void
 spk_identify (void) {
   LogPrint(LOG_NOTICE, "Swift Speech Driver [using %s (for %s), version %s, %s].",
            swift_engine_name, swift_platform, swift_version, swift_date);
 }
+*/
 
 static int
 spk_open (char **parameters) {

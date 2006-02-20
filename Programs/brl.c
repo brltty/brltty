@@ -33,13 +33,11 @@
 #define BRLSYMBOL noBraille
 #define BRLNAME NoBraille
 #define BRLCODE no
-#define BRLCOMMENT ""
+#define BRLCOMMENT "No braille support."
+#define BRLVERSION ""
+#define BRLCOPYRIGHT ""
 #define BRLHELP "/dev/null"
 #include "brl_driver.h"
-static void
-brl_identify (void) {
-  LogPrint(LOG_NOTICE, "No braille support.");
-}
 static int
 brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
   brl->x = 80;
@@ -96,11 +94,21 @@ loadBrailleDriver (const char *code, void **driverObject, const char *driverDire
 }
 
 void
+identifyBrailleDriver(const BrailleDriver *brailleDriver) {
+  if (brailleDriver->version && *brailleDriver->version)
+    LogPrint(LOG_NOTICE,"%s braille driver version %s, compiled on %s at %s",brailleDriver->name, brailleDriver->version, brailleDriver->date, brailleDriver->time);
+  else
+    LogPrint(LOG_NOTICE,"%s braille driver, compiled on %s at %s",brailleDriver->name, brailleDriver->date, brailleDriver->time);
+  if (brailleDriver->copyright && *brailleDriver->copyright)
+    LogPrint(LOG_INFO,"   %s",brailleDriver->copyright);
+}
+
+void
 identifyBrailleDrivers (void) {
   const DriverEntry *entry = driverTable;
   while (entry->address) {
     const BrailleDriver *driver = entry++->address;
-    driver->identify();
+    identifyBrailleDriver(driver);
   }
 }
 

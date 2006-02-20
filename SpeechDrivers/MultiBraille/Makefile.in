@@ -18,6 +18,8 @@
 DRIVER_CODE = mb
 DRIVER_NAME = MultiBraille
 DRIVER_COMMENT = 
+DRIVER_VERSION = 
+DRIVER_COPYRIGHT = 
 include $(SRC_TOP)speech.mk
 
 speech.$O:

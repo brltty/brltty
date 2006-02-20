@@ -14,8 +14,6 @@
  *
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
-#define XW_VERSION "BRLTTY driver for X, version 0.1, 2004"
-#define XW_COPYRIGHT "Copyright Samuel Thibault <samuel.thibault@ens-lyon.org>"
 
 #include "prologue.h"
 
@@ -640,12 +638,6 @@ static char *fallback_resources[] = {
   NULL
 };
 #endif /* USE_XT */
-
-static void brl_identify()
-{
-  LogPrint(LOG_NOTICE, XW_VERSION);
-  LogPrint(LOG_INFO,   "   "XW_COPYRIGHT);
-}
 
 #ifdef USE_XM
 static void popup(Widget w, XEvent *event, String *params, Cardinal *num_params)

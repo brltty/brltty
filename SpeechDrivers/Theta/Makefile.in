@@ -18,6 +18,8 @@
 DRIVER_CODE = th
 DRIVER_NAME = Theta
 DRIVER_COMMENT = text to speech engine
+DRIVER_VERSION = 
+DRIVER_COPYRIGHT = 
 SPK_OBJS = @speech_libraries_th@
 include $(SRC_TOP)speech.mk
 

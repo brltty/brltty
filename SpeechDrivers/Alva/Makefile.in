@@ -18,6 +18,8 @@
 DRIVER_CODE = al
 DRIVER_NAME = Alva
 DRIVER_COMMENT = Delphi(4nn)
+DRIVER_VERSION = 
+DRIVER_COPYRIGHT = 
 include $(SRC_TOP)speech.mk
 
 speech.$O:

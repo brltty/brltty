@@ -319,12 +319,6 @@ static TranslationTable outputTable = {
 };
 static TranslationTable inputTable;
 
-static void
-brl_identify (void) {
-   LogPrint(LOG_NOTICE, "LogText Driver");
-   LogPrint(LOG_INFO, "   Copyright (C) 2001 by Dave Mielke <dave@mielke.cc>");
-}
-
 #ifndef __MINGW32__
 static int
 makeFifo (const char *path, mode_t mode) {

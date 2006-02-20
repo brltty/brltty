@@ -407,12 +407,6 @@ static unsigned char updateRequired = 0;
 #define BWK_FORWARD  0X08
 
 static void
-brl_identify (void) {
-  LogPrint(LOG_NOTICE, "Handy Tech Driver, version 0.3");
-  LogPrint(LOG_INFO, "  Copyright (C) 2000 by Andreas Gross <andi.gross@gmx.de>");
-}
-
-static void
 setState (BrailleDisplayState state) {
   if (state == currentState) {
     ++retryCount;

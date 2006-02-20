@@ -378,14 +378,6 @@ static int brl_reset(BrailleDisplay *brl)
   return (brl_writePacket(brl, packet, sizeof(packet)) == sizeof(packet));
 }
 
-static void brl_identify (void)
-{
-   LogPrint(LOG_NOTICE, "EuroBraille driver, version 1.3.4");
-   LogPrint(LOG_INFO, "  Copyright (C) 1997-2003");
-   LogPrint(LOG_INFO, "      - Yannick PLASSIARD <plassi_y@epitech.net>");
-   LogPrint(LOG_INFO, "      - Nicolas PITRE <nico@cam.org>");
-}
-
 static int brl_open (BrailleDisplay *brl, char **parameters, const char *device)
 {
    {

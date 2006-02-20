@@ -385,11 +385,6 @@ loadSynthesisLibrary (void) {
   }
 }
 
-static void
-spk_identify (void) {
-  LogPrint(LOG_NOTICE, "Mikropuhe text to speech engine.");
-}
-
 static int
 spk_open (char **parameters) {
   int code;

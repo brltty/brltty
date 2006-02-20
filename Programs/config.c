@@ -1470,7 +1470,7 @@ activateBrailleDriver (int verify) {
             if (opened) {
               LogPrint(LOG_INFO, "%s: %s [%s]",
                        gettext("Braille Driver"), braille->code, braille->name);
-              braille->identify();
+              identifyBrailleDriver(braille);
               logParameters(braille->parameters, brailleParameters,
                             gettext("Braille Parameter"));
               LogPrint(LOG_INFO, "%s: %s", gettext("Braille Device"), brailleDevice);
@@ -1677,7 +1677,7 @@ activateSpeechDriver (int verify) {
           if (opened) {
             LogPrint(LOG_INFO, "%s: %s [%s]",
                      gettext("Speech Driver"), speech->code, speech->name);
-            speech->identify();
+            identifySpeechDriver(speech);
             logParameters(speech->parameters, speechParameters,
                           gettext("Speech Parameter"));
 

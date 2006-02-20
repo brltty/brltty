@@ -29,10 +29,6 @@
 
 static TranslationTable outputTable;
 
-static void
-brl_identify (void) {
-}
-
 static int
 brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
   {

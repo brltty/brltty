@@ -15,7 +15,6 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#define VERSION "BRLTTY driver for MDV MB408S, version 0.8 (August 2000)"
 /* MDV/braille.c - Braille display driver for MDV displays.
  *
  * Written by Stéphane Doyon (s.doyon@videotron.ca) in collaboration with
@@ -196,15 +195,6 @@ static unsigned char packet_to_process = 1, /* flag: if a packet is received whi
                                                have been pressed since the last time
                                                they were all unpressed. */
                      *which_routing_keys; /* ordered list of pressed routing keys */
-
-
-static void 
-brl_identify (void)
-{
-  LogPrint(LOG_NOTICE, VERSION);
-  LogPrint(LOG_INFO, "   Copyright (C) 1996-2000 by Stéphane Doyon <s.doyon@videotron.ca>.");
-}
-
 
 static int
 myread(void *buf, unsigned len)

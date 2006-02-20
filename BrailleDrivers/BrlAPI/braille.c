@@ -15,10 +15,6 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#define BA_VERSION "BRLTTY driver for BrlAPI, version 0.1, 2005"
-#define BA_COPYRIGHT "   Copyright Sebastien HINDERER <Sebastien.Hinderer@ens-lyon.org>, \
-Samuel THIBAULT <samuel.thibault@ens-lyon.org>"
-
 #include "prologue.h"
 
 #include <stdio.h>
@@ -51,14 +47,6 @@ static unsigned char *prevData;
 static unsigned char *prevText;
 static int prevCursor;
 static int prevShown;
-
-/* Function : brl_identify */
-/* Prints information about the driver in the system log and on stderr */
-static void brl_identify(void)
-{
-  LogPrint(LOG_NOTICE, BA_VERSION);
-  LogPrint(LOG_INFO, "   " BA_COPYRIGHT);
-}
 
 /* Function : brl_open */
 /* Opens a connection with BrlAPI's server */

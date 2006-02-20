@@ -51,6 +51,7 @@ static	int		fds[2];
 static	int		*const readfd	= &fds[0];
 static	int		*const writefd	= &fds[1];
 
+/*
 static void
 spk_identify (void)
 {
@@ -58,6 +59,7 @@ spk_identify (void)
 	   FLITE_PROJECT_VERSION, FLITE_PROJECT_STATE,
 	   FLITE_PROJECT_DATE);
 }
+*/
 
 static int
 spk_open (char **parameters)

@@ -54,14 +54,6 @@ static unsigned char latin2cp437[128] =
    240, 164, 149, 162, 147, 245, 148, 246,
    176, 151, 163, 150, 129, 178, 254, 152};
 
-
-static void
-spk_identify (void)
-{
-  puts ("Using the MultiBraille's in-built speech.\n");
-}
-
-
 static int
 spk_open (char **parameters)
 {

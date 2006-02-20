@@ -56,14 +56,6 @@ static unsigned char latin2cp437[128] =
    176, 151, 163, 150, 129, 178, 254, 152};
 #endif /* 0 */
 
-
-static void
-spk_identify (void)
-{
-  LogPrint(LOG_NOTICE, "Using the Braille Lite's built-in speech.");
-}
-
-
 static int
 spk_open (char **parameters)
 {

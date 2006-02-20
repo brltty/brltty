@@ -50,15 +50,6 @@ static short rawlen;			/* length of rawdata buffer */
 /* Function prototypes: */
 static int getbrlkey (void);		/* get a keystroke from the CombiBraille */
 
-
-static void
-brl_identify (void)
-{
-  LogPrint(LOG_NOTICE, "Tieman B.V. CombiBraille driver");
-  LogPrint(LOG_INFO, "   Copyright (C) 1995, 1996 by Nikhil Nair.");
-}
-
-
 static int
 brl_open (BrailleDisplay *brl, char **parameters, const char *device)
 {

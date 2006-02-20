@@ -30,7 +30,6 @@ extern "C" {
 #include "spk.h"
 
 /* Routines provided by this speech driver. */
-static void spk_identify (void);
 static int spk_open (char **parameters);
 static void spk_say (const unsigned char *buffer, int len);
 static void spk_mute (void);
@@ -75,6 +74,8 @@ SPKCONST SpeechDriver SPKSYMBOL = {
   STRINGIFY(SPKNAME),
   STRINGIFY(SPKCODE),
   SPKCOMMENT,
+  SPKVERSION,
+  SPKCOPYRIGHT,
   __DATE__,
   __TIME__,
 
@@ -84,7 +85,6 @@ SPKCONST SpeechDriver SPKSYMBOL = {
   NULL,
 #endif /* SPKPARMS */
 
-  spk_identify,
   spk_open,
   spk_close,
   spk_say,

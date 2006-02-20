@@ -44,13 +44,6 @@ typedef enum {
 static TranslationTable outputTable;
 static TranslationTable inputTable;
 
-static void
-brl_identify(void)
-{
-  LogPrint(LOG_NOTICE, "BRLTTY driver for Libbraille");
-  LogPrint(LOG_INFO, "   Copyright (C) 2004 by Sébastien Sablé <sable@users.sourceforge.net>");
-}
-
 static int
 brl_open(BrailleDisplay *brl, char **parameters, const char *device)
 {

@@ -80,6 +80,8 @@ typedef struct {
   const char *name;
   const char *code;
   const char *comment;
+  const char *version;
+  const char *copyright;
   const char *date;
   const char *time;
   const char *const *parameters;
@@ -87,7 +89,6 @@ typedef struct {
   int statusStyle;
 
   /* Routines provided by the braille driver library: */
-  void (*identify) (void);
   int (*open) (BrailleDisplay *, char **parameters, const char *);
   void (*close) (BrailleDisplay *);
   int (*readCommand) (BrailleDisplay *, BRL_DriverCommandContext);
@@ -113,6 +114,7 @@ typedef struct {
 extern int haveBrailleDriver (const char *code);
 extern const char *getDefaultBrailleDriver (void);
 extern const BrailleDriver *loadBrailleDriver (const char *code, void **driverObject, const char *driverDirectory);
+extern void identifyBrailleDriver(const BrailleDriver *);
 extern void identifyBrailleDrivers (void);
 extern const BrailleDriver *braille;
 extern const BrailleDriver noBraille;

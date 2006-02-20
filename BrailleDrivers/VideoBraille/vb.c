@@ -32,10 +32,6 @@
 
 static unsigned char lastbuff[40];
 
-static void brl_identify(void) {
-  LogPrint(LOG_NOTICE, "VideoBraille Driver");
-}
-
 static int brl_open(BrailleDisplay *brl, char **parameters, const char *dev) {
   /*	Seems to signal en error */ 
   if (!vbinit()) {

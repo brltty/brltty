@@ -151,7 +151,7 @@ main (int argc, char *argv[]) {
       makeUntextTable();
       initializeBrailleDisplay(&brl);
       brl.dataDirectory = opt_dataDirectory;
-      braille->identify();		/* start-up messages */
+      identifyBrailleDriver(braille);		/* start-up messages */
       if (braille->open(&brl, parameterSettings, opt_brailleDevice)) {
         if (allocateBrailleBuffer(&brl)) {
 #ifdef ENABLE_LEARN_MODE

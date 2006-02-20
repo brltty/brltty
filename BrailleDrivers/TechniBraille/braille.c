@@ -130,12 +130,6 @@ clearVisualCells (BrailleDisplay *brl) {
   return writeVisualCells(brl);
 }
 
-static void
-brl_identify (void) {
-  LogPrint(LOG_NOTICE, "TechniBraille Driver");
-  LogPrint(LOG_INFO, "   Copyright (C) 2004 by Dave Mielke <dave@mielke.cc>");
-}
-
 static int
 brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
   {

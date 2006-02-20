@@ -64,12 +64,6 @@ static void beep(void)
 };
 
 /* interface */
-static void brl_identify(void)
-{
-	LogPrint(LOG_NOTICE, "Tieman B.V. MiniBraille driver");
-	LogPrint(LOG_INFO, "   Copyright (C) 2000 by Brailcom o.p.s. <technik@brailcom.cz>"); 
-}
-
 static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
 {
 	{

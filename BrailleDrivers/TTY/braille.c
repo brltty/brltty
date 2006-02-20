@@ -15,10 +15,6 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#define TT_VERSION "0.2"
-#define TT_DATE "August, 2004"
-#define TT_COPYRIGHT "Copyright Samuel Thibault <samuel.thibault@ens-lyon.org>"
-
 #include "prologue.h"
 
 #include <stdio.h>
@@ -101,12 +97,6 @@ static char *classificationLocale = NULL;
 #ifdef USE_CURSES
 static SCREEN *ttyScreen = NULL;
 #endif /* USE_CURSES */
-
-static void
-brl_identify (void) {
-  LogPrint(LOG_NOTICE, "TTY Driver: version " TT_VERSION " (" TT_DATE ")");
-  LogPrint(LOG_INFO,   "   "TT_COPYRIGHT);
-}
 
 static int
 brl_open (BrailleDisplay *brl, char **parameters, const char *device) {

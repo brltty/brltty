@@ -14,9 +14,7 @@
  *
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
-#define ES_VERSION "BRLTTY External Speech driver, version 0.8 (September 2004)"
-#define ES_COPYRIGHT "Copyright (C) 2000-2001,2004 by Stéphane Doyon " \
-                  "<s.doyon@videotron.ca>"
+
 /* ExternalSpeech/speech.c - Speech library (driver)
  * For external programs, using my own protocol. Features indexing.
  * Stéphane Doyon <s.doyon@videotron.ca>
@@ -59,12 +57,6 @@ typedef enum {
 static int helper_fd_in = -1, helper_fd_out = -1;
 static unsigned short lastIndex, finalIndex;
 static char speaking = 0;
-
-static void spk_identify (void)
-{
-  LogPrint(LOG_NOTICE, ES_VERSION);
-  LogPrint(LOG_INFO, "   "ES_COPYRIGHT);
-}
 
 #define ERRBUFLEN 200
 static void myerror(char *fmt, ...)

@@ -299,11 +299,6 @@ static const char *wordTable[] = {
 
 static FILE *festival = NULL;
 
-static void
-spk_identify (void) {
-  LogPrint(LOG_NOTICE, "Festival text to speech engine.");
-}
-
 static int
 spk_open (char **parameters) {
   const char *command = parameters[PARM_COMMAND];

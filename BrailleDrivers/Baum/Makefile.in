@@ -18,6 +18,8 @@
 DRIVER_CODE = bm
 DRIVER_NAME = Baum
 DRIVER_COMMENT = 
+DRIVER_VERSION = 
+DRIVER_COPYRIGHT = Copyright (C) 2005 by Dave Mielke <dave@mielke.cc>
 HELP_DEPS = $(HELP_TEXT)
 include $(SRC_TOP)braille.mk
 

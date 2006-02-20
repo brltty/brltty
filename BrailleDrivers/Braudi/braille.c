@@ -175,12 +175,6 @@ setTable (BrailleDisplay *brl, int table) {
   return writeString(brl, buffer);
 }
 
-static void
-brl_identify (void) {
-  LogPrint(LOG_NOTICE, "Braudi Driver");
-  LogPrint(LOG_INFO, "   Copyright (C) 2005 by Dave Mielke <dave@mielke.cc>");
-}
-
 static int
 brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
   {

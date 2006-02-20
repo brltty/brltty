@@ -631,12 +631,6 @@ getPacket (BrailleDisplay *brl, Packet *packet) {
   }
 }
 
-static void
-brl_identify (void) {
-  LogPrint(LOG_NOTICE, "Freedom Scientific Driver");
-  LogPrint(LOG_INFO, "   Copyright (C) 2004 by Dave Mielke <dave@mielke.cc>");
-}
-
 static int
 brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
   if (!validateYesNo(&debugPackets, parameters[PARM_DEBUGPACKETS]))

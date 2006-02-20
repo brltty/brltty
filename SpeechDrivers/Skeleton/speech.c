@@ -27,10 +27,6 @@
 //#define SPK_HAVE_VOLUME
 #include "Programs/spk_driver.h"
 
-static void
-spk_identify (void) {
-}
-
 static int
 spk_open (char **parameters) {
   return 0;

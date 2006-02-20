@@ -15,7 +15,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-SPK_DEFS ='-DSPKNAME=$(DRIVER_NAME)' '-DSPKCODE=$(DRIVER_CODE)' '-DSPKCOMMENT="$(DRIVER_COMMENT)"'
+SPK_DEFS ='-DSPKNAME=$(DRIVER_NAME)' '-DSPKCODE=$(DRIVER_CODE)' '-DSPKCOMMENT="$(DRIVER_COMMENT)"' '-DSPKVERSION="$(DRIVER_VERSION)"' '-DSPKCOPYRIGHT="$(DRIVER_COPYRIGHT)"'
 SPK_CFLAGS = $(LIBCFLAGS) $(SPK_DEFS)
 SPK_CXXFLAGS = $(LIBCXXFLAGS) $(SPK_DEFS)
 SPK_MOD_NAME = $(BLD_TOP)$(DRV_DIR)/$(MOD_NAME)s$(DRIVER_CODE)

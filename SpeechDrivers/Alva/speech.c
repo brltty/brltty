@@ -51,15 +51,6 @@ static unsigned char latin2cp437[128] =
    138, 130, 136, 137, 141, 161, 140, 139,
    240, 164, 149, 162, 147, 245, 148, 246,
    176, 151, 163, 150, 129, 178, 254, 152};
-
-
-static void
-spk_identify (void)
-{
-  LogPrint(LOG_NOTICE, "Using the Alva Delphi's built-in speech.");
-}
-
-
 static int
 spk_open (char **parameters)
 {

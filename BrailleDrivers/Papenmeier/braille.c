@@ -1327,14 +1327,6 @@ identifyTerminal2 (BrailleDisplay *brl) {
 
 /*--- Driver Operations ---*/
 
-static void
-brl_identify (void) {
-  LogPrint(LOG_NOTICE, "Papenmeier Driver (compiled on %s at %s)", __DATE__, __TIME__);
-  LogPrint(LOG_INFO, "   Copyright (C) 1998-2001 by The BRLTTY Team.");
-  LogPrint(LOG_INFO, "                 August Hörandl <august.hoerandl@gmx.at>");
-  LogPrint(LOG_INFO, "                 Heimo Schön <heimo.schoen@gmx.at>");
-}
-
 static int
 identifyTerminal (BrailleDisplay *brl) {
   if (io->protocol1 && identifyTerminal1(brl)) return 1;

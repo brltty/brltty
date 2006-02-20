@@ -90,13 +90,6 @@ typedef struct KeyStroke {
 /* Function prototypes: */
 static struct KeyStroke getbrlkey (void);		/* get a keystroke from the MultiBraille */
 
-
-static void brl_identify (void) {
-	LogPrint(LOG_NOTICE, "Tieman B.V. MultiBraille driver");
-	LogPrint(LOG_INFO, "   Copyright (C) 2000 by Wolfgang Astleitner."); 
-}
-
-
 static int brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
 	short n, success;		/* loop counters, flags, etc. */
 	unsigned char *init_seq = (unsigned char *)"\002\0330";	/* string to send to Braille to initialise: [ESC][0] */

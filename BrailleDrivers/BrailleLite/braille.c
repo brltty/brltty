@@ -24,9 +24,6 @@
  * Some additions by: Dave Mielke <dave@mielke.cc>
  */
 
-#define VERSION \
-"Braille Lite driver, version 0.6.0 (June 2003)"
-
 #include "prologue.h"
 
 #include <stdio.h>
@@ -257,17 +254,6 @@ qflush (void)
 {
   qfill();
   qlen = 0;
-}
-
-
-static void
-brl_identify (void)
-{
-  LogPrint(LOG_NOTICE, VERSION);
-  /* I don't mean to take away anyone's copyright, but now that significant
-     modifs have been made in more recent years by 2-3 others... it'd become
-     bulky IMHO so let's just live without the copyright notice. */
-  /*LogPrint(LOG_INFO, "   Copyright (C) 1998 by Nikhil Nair.");*/
 }
 
 static int

@@ -18,6 +18,8 @@
 DRIVER_CODE = eu
 DRIVER_NAME = EuroBraille
 DRIVER_COMMENT = AzerBraille, Clio, Iris, NoteBraille, Scriba
+DRIVER_VERSION = 1.3.4
+DRIVER_COPYRIGHT = Copyright (C) 1997-2003 Yannick PLASSIARD <plassi_y@epitech.net>, Nicolas PITRE <nico@cam.org>
 HELP_DEPS = $(HELP_TEXT)
 include $(SRC_TOP)braille.mk
 

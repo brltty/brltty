@@ -29,10 +29,11 @@ typedef struct {
   const char *name;
   const char *code;
   const char *comment;
+  const char *version;
+  const char *copyright;
   const char *date;
   const char *time;
   const char *const *parameters;
-  void (*identify) (void);
   int (*open) (char **parameters);
   void (*close) (void);
   void (*say) (const unsigned char *buffer, int len);
@@ -56,6 +57,7 @@ typedef struct {
 extern int haveSpeechDriver (const char *code);
 extern const char *getDefaultSpeechDriver (void);
 extern const SpeechDriver *loadSpeechDriver (const char *code, void **driverObject, const char *driverDirectory);
+extern void identifySpeechDriver(const SpeechDriver *);
 extern void identifySpeechDrivers (void);
 extern const SpeechDriver *speech;
 extern const SpeechDriver noSpeech;

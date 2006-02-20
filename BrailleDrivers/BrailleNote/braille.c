@@ -378,12 +378,6 @@ visualDisplay (BrailleDisplay *brl, unsigned char byte, BRL_DriverCommandContext
 }
 
 static void
-brl_identify (void) {
-  LogPrint(LOG_NOTICE, "BrailleNote Driver, version 1.0");
-  LogPrint(LOG_INFO, "   Copyright (C) 2001 by Dave Mielke <dave@mielke.cc>");
-}
-
-static void
 adjustStatusCells (BrailleDisplay *brl, const char *parameter) {
   if (*parameter) {
     const int minimum = 0;

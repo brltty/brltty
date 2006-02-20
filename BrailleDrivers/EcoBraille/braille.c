@@ -161,14 +161,6 @@ static int WriteToBrlDisplay(unsigned char *Data)
 return(0);
 }
 
-
-static void brl_identify(void)
-{
-  LogPrint(LOG_NOTICE, "EcoBraille driver, version 1.00");
-  LogPrint(LOG_INFO, "   Copyright (C) 1999 by Oscar Fernandez <ofa@once.es>.");
-}
-
-
 static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
 {
   short ModelID = MODEL;

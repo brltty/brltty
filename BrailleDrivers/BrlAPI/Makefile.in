@@ -18,6 +18,8 @@
 DRIVER_CODE = ba
 DRIVER_NAME = BrlAPI
 DRIVER_COMMENT = 
+DRIVER_VERSION = 0.1, 2005
+DRIVER_COPYRIGHT = Copyright Sebastien Hinderer <Sebastien.Hinderer@ens-lyon.org>, Samuel Thibault <samuel.thibault@ens-lyon.org>
 HELP_DEPS = $(HELP_TEXT)
 BRL_OBJS = @braille_libraries_ba@
 include $(SRC_TOP)braille.mk

@@ -18,6 +18,8 @@
 DRIVER_CODE = gs
 DRIVER_NAME = GenericSay
 DRIVER_COMMENT = pipes to /usr/local/bin/say
+DRIVER_VERSION = 
+DRIVER_COPYRIGHT = 
 include $(SRC_TOP)speech.mk
 
 speech.$O:
