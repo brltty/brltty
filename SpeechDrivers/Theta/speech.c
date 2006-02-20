@@ -66,12 +66,6 @@ initializeTheta (void) {
 }
 
 static void
-spk_identify (void) {
-  initializeTheta();
-  LogPrint(LOG_NOTICE, "Theta [%s] text to speech engine.", theta_version);
-}
-
-static void
 loadVoice (theta_voice_desc *descriptor) {
   if ((voice = theta_load_voice(descriptor))) {
     LogPrint(LOG_INFO, "Voice: %s(%s,%d)",
@@ -153,6 +147,7 @@ spk_open (char **parameters) {
       }
     }
 
+    LogPrint(LOG_INFO, "Theta Engine: version %s", theta_version);
     return 1;
   }
 

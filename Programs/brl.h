@@ -114,7 +114,7 @@ typedef struct {
 extern int haveBrailleDriver (const char *code);
 extern const char *getDefaultBrailleDriver (void);
 extern const BrailleDriver *loadBrailleDriver (const char *code, void **driverObject, const char *driverDirectory);
-extern void identifyBrailleDriver(const BrailleDriver *);
+extern void identifyBrailleDriver (const BrailleDriver *driver);
 extern void identifyBrailleDrivers (void);
 extern const BrailleDriver *braille;
 extern const BrailleDriver noBraille;

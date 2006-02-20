@@ -19,7 +19,7 @@ DRIVER_CODE = cb
 DRIVER_NAME = CombiBraille
 DRIVER_COMMENT = 
 DRIVER_VERSION = 
-DRIVER_COPYRIGHT =
+DRIVER_COPYRIGHT = 
 include $(SRC_TOP)speech.mk
 
 speech.$O:

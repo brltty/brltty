@@ -31,7 +31,7 @@
 #define SPKSYMBOL noSpeech
 #define SPKNAME NoSpeech
 #define SPKCODE no
-#define SPKCOMMENT "No speech support."
+#define SPKCOMMENT "no speech support"
 #define SPKVERSION ""
 #define SPKCOPYRIGHT ""
 #include "spk_driver.h"
@@ -85,13 +85,8 @@ loadSpeechDriver (const char *code, void **driverObject, const char *driverDirec
 }
 
 void
-identifySpeechDriver(const SpeechDriver *speechDriver) {
-  if (speechDriver->version && *speechDriver->version)
-    LogPrint(LOG_NOTICE,"%s speech driver version %s, compiled on %s at %s",speechDriver->name, speechDriver->version, speechDriver->date, speechDriver->time);
-  else
-    LogPrint(LOG_NOTICE,"%s speech driver, compiled on %s at %s",speechDriver->name, speechDriver->date, speechDriver->time);
-  if (speechDriver->copyright && *speechDriver->copyright)
-    LogPrint(LOG_INFO,"   %s",speechDriver->copyright);
+identifySpeechDriver (const SpeechDriver *driver) {
+  identifyDriver("speech", driver->name, driver->version, driver->date, driver->time, driver->copyright);
 }
 
 void

@@ -134,3 +134,17 @@ loadDriver (
 
   return driverAddress;
 }
+
+void
+identifyDriver (
+  const char *type,
+  const char *name, const char *version,
+  const char *date, const char *time,
+  const char *copyright
+) {
+  if (version && *version)
+    LogPrint(LOG_NOTICE, "%s %s driver version %s, compiled on %s at %s", name, type, version, date, time);
+  else
+    LogPrint(LOG_NOTICE, "%s %s driver, compiled on %s at %s", name, type, date, time);
+  if (copyright && *copyright) LogPrint(LOG_INFO, "   %s", copyright);
+}

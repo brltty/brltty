@@ -51,16 +51,6 @@ static	int		fds[2];
 static	int		*const readfd	= &fds[0];
 static	int		*const writefd	= &fds[1];
 
-/*
-static void
-spk_identify (void)
-{
-  LogPrint(LOG_NOTICE, "Festival Lite [%s-%s %s] text to speech engine.",
-	   FLITE_PROJECT_VERSION, FLITE_PROJECT_STATE,
-	   FLITE_PROJECT_DATE);
-}
-*/
-
 static int
 spk_open (char **parameters)
 {
@@ -76,6 +66,9 @@ spk_open (char **parameters)
     feat_set_int(voice->features, "int_f0_target_mean", pitch);
   }
 
+  LogPrint(LOG_INFO, "Festival Lite Engine: version %s-%s, %s",
+	   FLITE_PROJECT_VERSION, FLITE_PROJECT_STATE,
+	   FLITE_PROJECT_DATE);
   return 1;
 }
 

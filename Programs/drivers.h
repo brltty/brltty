@@ -39,6 +39,13 @@ extern const void *loadDriver (
   const void *nullAddress, const char *nullCode
 );
 
+extern void identifyDriver (
+  const char *type,
+  const char *name, const char *version,
+  const char *date, const char *time,
+  const char *copyright
+);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

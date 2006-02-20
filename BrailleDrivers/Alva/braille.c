@@ -560,26 +560,6 @@ static const InputOutputOperations usbOperations = {
 };
 #endif /* ENABLE_USB_SUPPORT */
 
-/* static void */
-/* brl_identify (void) */
-/* { */
-/*  LogPrint(LOG_NOTICE, "Alva driver, version 2.2"); */
-/*  LogPrint(LOG_INFO, "   Copyright (C) 1995-2004 by Nicolas Pitre <nico@cam.org>."); */
-/*  LogPrint(LOG_INFO, "   Compiled for %s with %s version.", */
-/* #if MODEL == ABT_AUTO */
-/*	  "terminal autodetection", */
-/* #else */ /* MODEL == ABT_AUTO */
-/*	  Models[MODEL].Name, */
-/* #endif */ /* MODEL == ABT_AUTO */
-/* #if ABT3_OLD_FIRMWARE */
-/*	  "old firmware" */
-/* #else */ /* ABT3_OLD_FIRMWARE */
-/*	  "new firmware" */
-/* #endif */ /* ABT3_OLD_FIRMWARE */
-/*    ); */
-/* } */
-
-
 int AL_writeData( unsigned char *data, int len )
 {
   if (io->writePacket(data, len, NULL) == len) return 1;

@@ -213,15 +213,6 @@ rangeVoiceParameter (ECIHand eci, const char *description, const char *value, EC
    return ok;
 }
 
-static void
-spk_identify (void) {
-   {
-      char version[0X80];
-      eciVersion(version);
-      LogPrint(LOG_INFO, "ViaVoice [%s] text to speech engine.", version);
-   }
-}
-
 static int
 setIni (const char *path) {
    const char *variable = INI_VARIABLE;
@@ -272,6 +263,11 @@ spk_open (char **parameters) {
 	       rangeVoiceParameter(eci, "pitch baseline", parameters[PARM_PitchBaseline], eciPitchBaseline, 0, 100);
 	       rangeVoiceParameter(eci, "pitch fluctuation", parameters[PARM_PitchFluctuation], eciPitchFluctuation, 0, 100);
 	       rangeVoiceParameter(eci, "roughness", parameters[PARM_Roughness], eciRoughness, 0, 100);
+               {
+                  char version[0X80];
+                  eciVersion(version);
+                  LogPrint(LOG_INFO, "ViaVoice Engine: version %s", version);
+               }
                return 1;
 	    } else {
 	       reportError(eci, "eciSetOutputDevice");

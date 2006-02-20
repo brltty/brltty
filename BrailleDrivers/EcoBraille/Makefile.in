@@ -19,7 +19,7 @@ DRIVER_CODE = ec
 DRIVER_NAME = EcoBraille
 DRIVER_COMMENT = 20/40/80
 DRIVER_VERSION = 1.00
-DRIVER_COPYRIGHT = Copyright (C) 1999 by Oscar Fernandez <ofa@once.es>.
+DRIVER_COPYRIGHT = Copyright (C) 1999 by Oscar Fernandez <ofa@once.es>
 HELP_DEPS = $(HELP_TEXT)
 include $(SRC_TOP)braille.mk
 

@@ -19,7 +19,7 @@ DRIVER_CODE = pm
 DRIVER_NAME = Papenmeier
 DRIVER_COMMENT = Tiny, Compact, 2D Lite/Screen, EL2D 40/66/80, EL 40/80, EL 40 P, Elba 20/32, IB 80, II EL 40/66/80 S
 DRIVER_VERSION = 
-DRIVER_COPYRIGHT = Copyright (C) 1998-2001 August Hörandl <august.hoerandl@gmx.at>, Heimo Schön <heimo.schoen@gmx.at>
+DRIVER_COPYRIGHT = Copyright (C) 1998-2001 by August Hörandl <august.hoerandl@gmx.at>, Heimo Schön <heimo.schoen@gmx.at>
 HELP_DEPS = $(HELP_TEXT)
 include $(SRC_TOP)braille.mk
 

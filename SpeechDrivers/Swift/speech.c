@@ -86,14 +86,6 @@ setEnvironmentVariable (const char *name, const char *value) {
   return 0;
 }
 
-/*
-static void
-spk_identify (void) {
-  LogPrint(LOG_NOTICE, "Swift Speech Driver [using %s (for %s), version %s, %s].",
-           swift_engine_name, swift_platform, swift_version, swift_date);
-}
-*/
-
 static int
 spk_open (char **parameters) {
   swift_result_t result;
@@ -123,6 +115,9 @@ spk_open (char **parameters) {
           }
 
           setStringParameter("tts/content-type", "text/plain");
+
+          LogPrint(LOG_INFO, "Swift Engine: %s for %s, version %s, %s",
+                   swift_engine_name, swift_platform, swift_version, swift_date);
           return 1;
         } else {
           LogPrint(LOG_ERR, "Swift port open error.");
