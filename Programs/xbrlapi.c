@@ -114,12 +114,13 @@ void fatal_errno(const char *msg, const char *fmt, ...) {
 }
 
 void fatal(const char *fmt, ...) {
-  va_list va;
-  va_start(va,fmt);
-  if (fmt)
+  if (fmt) {
+    va_list va;
+    va_start(va,fmt);
     vfprintf(stderr,fmt,va);
+    va_end(va);
+  }
   exit(1);
-  va_end(va);
 }
 
 /******************************************************************************
