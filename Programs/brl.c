@@ -95,7 +95,7 @@ loadBrailleDriver (const char *code, void **driverObject, const char *driverDire
 
 void
 identifyBrailleDriver (const BrailleDriver *driver) {
-  identifyDriver("braille", driver->name, driver->version, driver->date, driver->time, driver->copyright);
+  identifyDriver("Braille", driver->name, driver->version, driver->date, driver->time, driver->copyright);
 }
 
 void

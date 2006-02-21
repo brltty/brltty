@@ -28,6 +28,8 @@ typedef struct {
   const char *name;
   const char *code;
   const char *comment;
+  const char *version;
+  const char *copyright;
   const char *date;
   const char *time;
   const char *const *parameters;

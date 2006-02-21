@@ -15,7 +15,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-SCR_DEFS ='-DSCRNAME=$(DRIVER_NAME)' '-DSCRCODE=$(DRIVER_CODE)' '-DSCRCOMMENT="$(DRIVER_COMMENT)"'
+SCR_DEFS ='-DSCRNAME=$(DRIVER_NAME)' '-DSCRCODE=$(DRIVER_CODE)' '-DSCRCOMMENT="$(DRIVER_COMMENT)"' '-DSCRVERSION="$(DRIVER_VERSION)"' '-DSCRCOPYRIGHT="$(DRIVER_COPYRIGHT)"'
 SCR_CFLAGS = $(LIBCFLAGS) $(SCR_DEFS)
 SCR_CXXFLAGS = $(LIBCXXFLAGS) $(SCR_DEFS)
 SCR_MOD_NAME = $(BLD_TOP)$(DRV_DIR)/$(MOD_NAME)x$(DRIVER_CODE)

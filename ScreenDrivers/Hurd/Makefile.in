@@ -18,6 +18,8 @@
 DRIVER_CODE = hd
 DRIVER_NAME = Hurd
 DRIVER_COMMENT = 
+DRIVER_VERSION = 
+DRIVER_COPYRIGHT = 
 include $(SRC_TOP)screen.mk
 
 screen.$O:

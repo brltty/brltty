@@ -18,6 +18,8 @@
 DRIVER_CODE = lx
 DRIVER_NAME = Linux
 DRIVER_COMMENT = 
+DRIVER_VERSION = 
+DRIVER_COPYRIGHT = 
 include $(SRC_TOP)screen.mk
 
 screen.$O:

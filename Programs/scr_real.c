@@ -37,7 +37,9 @@
 #define SCRSYMBOL noScreen
 #define SCRNAME NoScreen
 #define SCRCODE no
-#define SCRCOMMENT ""
+#define SCRCOMMENT "no screen support"
+#define SCRVERSION ""
+#define SCRCOPYRIGHT ""
 #include "scr_driver.h"
 
 static void
@@ -55,7 +57,7 @@ loadScreenDriver (const char *code, void **driverObject, const char *driverDirec
 
 void
 identifyScreenDriver (const ScreenDriver *driver) {
-  LogPrint(LOG_NOTICE, "%s Screen Driver", driver->name);
+  identifyDriver("Screen", driver->name, driver->version, driver->date, driver->time, driver->copyright);
 }
 
 void

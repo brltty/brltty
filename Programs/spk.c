@@ -86,7 +86,7 @@ loadSpeechDriver (const char *code, void **driverObject, const char *driverDirec
 
 void
 identifySpeechDriver (const SpeechDriver *driver) {
-  identifyDriver("speech", driver->name, driver->version, driver->date, driver->time, driver->copyright);
+  identifyDriver("Speech", driver->name, driver->version, driver->date, driver->time, driver->copyright);
 }
 
 void

@@ -143,8 +143,8 @@ identifyDriver (
   const char *copyright
 ) {
   if (version && *version)
-    LogPrint(LOG_NOTICE, "%s %s driver version %s, compiled on %s at %s", name, type, version, date, time);
+    LogPrint(LOG_NOTICE, "%s %s Driver: version %s, compiled on %s at %s", name, type, version, date, time);
   else
-    LogPrint(LOG_NOTICE, "%s %s driver, compiled on %s at %s", name, type, date, time);
+    LogPrint(LOG_NOTICE, "%s %s Driver: compiled on %s at %s", name, type, date, time);
   if (copyright && *copyright) LogPrint(LOG_INFO, "   %s", copyright);
 }
