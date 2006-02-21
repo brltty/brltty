@@ -96,8 +96,8 @@ const char *const api_parameters[] = { "auth", "host", "keyfile", "stacksize", N
 static size_t stackSize;
 
 #define RELEASE "BRLTTY API Library: release " BRLAPI_RELEASE
-#define COPYRIGHT "   Copyright Sebastien HINDERER <Sebastien.Hinderer@ens-lyon.org>, \
-Samuel THIBAULT <samuel.thibault@ens-lyon.org>"
+#define COPYRIGHT "   Copyright (C) 2002-2006 by Sebastien Hinderer <Sebastien.Hinderer@ens-lyon.org>, \
+Samuel Thibault <samuel.thibault@ens-lyon.org>"
 
 /* These CHECK* macros check whether a condition is true, and, if not, */
 /* send back either a non-fatal error, or an exception */

@@ -19,7 +19,7 @@ DRIVER_CODE = vs
 DRIVER_NAME = VisioBraille
 DRIVER_COMMENT = 20/40
 DRIVER_VERSION = 0.2 (2002)
-DRIVER_COPYRIGHT = Copyright (C) by Sébastien Hinderer <Sebastien.Hinderer@ens-lyon.org>
+DRIVER_COPYRIGHT = Copyright (C) 2001-2006 by Sébastien Hinderer <Sebastien.Hinderer@ens-lyon.org>
 HELP_DEPS = $(HELP_TEXT)
 include $(SRC_TOP)braille.mk
 
