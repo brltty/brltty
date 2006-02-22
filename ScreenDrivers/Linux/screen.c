@@ -1036,12 +1036,12 @@ insertCode (ScreenKey key, int raw) {
   int modControl = 0;
   int modMeta = 0;
 
-  if (key < SCR_KEY_ENTER) {
-    if (key & SCR_KEY_MOD_META) {
-      key &= ~SCR_KEY_MOD_META;
-      modMeta = 1;
-    }
+  if (key & SCR_KEY_MOD_META) {
+    key &= ~SCR_KEY_MOD_META;
+    modMeta = 1;
+  }
 
+  if (key < SCR_KEY_ENTER) {
     if ((key >= 'A') && (key <= 'Z')) {
       key = (key - 'A') + 'a';
       modShift = 1;
