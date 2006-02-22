@@ -1761,6 +1761,8 @@ main (int argc, char *argv[]) {
                       key = SCR_KEY_FUNCTION + (arg - BRL_KEY_FUNCTION);
                       break;
                   }
+                  if (flags & BRL_FLG_CHAR_META)
+                    key |= SCR_KEY_MOD_META;
                   if (!insertKey(key))
                   badKey:
                     playTune(&tune_command_rejected);

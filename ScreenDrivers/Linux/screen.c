@@ -649,6 +649,48 @@ setTranslationTable (int force) {
   return 0;
 }
 
+#ifdef HAVE_LINUX_UINPUT_H
+#include <linux/input.h>
+#include <linux/uinput.h>
+
+static int uinputDevice = -1;
+
+static int
+openUinputDevice (void) {
+  if (uinputDevice != -1) return 1;
+
+  if ((uinputDevice = openDevice("/dev/uinput", "uinput", O_WRONLY, 10, 223)) != -1) {
+    struct uinput_user_dev device;
+    
+    memset(&device, 0, sizeof(device));
+    strcpy(device.name, "brltty");
+    if (write(uinputDevice, &device, sizeof(device)) == sizeof(device)) {
+      ioctl(uinputDevice, UI_SET_EVBIT, EV_KEY);
+      ioctl(uinputDevice, UI_SET_EVBIT, EV_REP);
+      {
+        int key;
+        for (key=KEY_RESERVED; key<KEY_MAX; key++) {
+          ioctl(uinputDevice, UI_SET_KEYBIT, key);
+        }
+      }
+
+      if (ioctl(uinputDevice, UI_DEV_CREATE) != -1) {
+        return 1;
+      } else {
+        LogError("ioctl UI_DEV_CREATE");
+      }
+    } else {
+      LogError("uinput_user_dev write");
+    }
+
+    close(uinputDevice);
+    uinputDevice = -1;
+  }
+  LogError("opening Uinput");
+  return 0;
+}
+#endif /* HAVE_LINUX_UINPUT_H */
+
 static int
 setup_LinuxScreen (void) {
   if (setTranslationTable(1)) {
@@ -840,6 +882,133 @@ read_LinuxScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
 }
 
 static int
+insertUinputCode (ScreenKey key, int modShift, int modControl, int modMeta) {
+#ifdef HAVE_LINUX_INPUT_H
+  int code;
+  switch (key) {
+    default:                    code = KEY_RESERVED;   break;
+    case SCR_KEY_ESCAPE:        code = KEY_ESC;        break;
+    case '1':                   code = KEY_1;          break;
+    case '2':                   code = KEY_2;          break;
+    case '3':                   code = KEY_3;          break;
+    case '4':                   code = KEY_4;          break;
+    case '5':                   code = KEY_5;          break;
+    case '6':                   code = KEY_6;          break;
+    case '7':                   code = KEY_7;          break;
+    case '8':                   code = KEY_8;          break;
+    case '9':                   code = KEY_9;          break;
+    case '0':                   code = KEY_0;          break;
+    case '-':                   code = KEY_MINUS;      break;
+    case '=':                   code = KEY_EQUAL;      break;
+    case SCR_KEY_BACKSPACE:     code = KEY_BACKSPACE;  break;
+    case SCR_KEY_TAB:           code = KEY_TAB;        break;
+    case 'q':                   code = KEY_Q;          break;
+    case 'w':                   code = KEY_W;          break;
+    case 'e':                   code = KEY_E;          break;
+    case 'r':                   code = KEY_R;          break;
+    case 't':                   code = KEY_T;          break;
+    case 'y':                   code = KEY_Y;          break;
+    case 'u':                   code = KEY_U;          break;
+    case 'i':                   code = KEY_I;          break;
+    case 'o':                   code = KEY_O;          break;
+    case 'p':                   code = KEY_P;          break;
+    case '[':                   code = KEY_LEFTBRACE;  break;
+    case ']':                   code = KEY_RIGHTBRACE; break;
+    case SCR_KEY_ENTER:         code = KEY_ENTER;      break;
+                                    /* KEY_LEFTCTRL */
+    case 'a':                   code = KEY_A;          break;
+    case 's':                   code = KEY_S;          break;
+    case 'd':                   code = KEY_D;          break;
+    case 'f':                   code = KEY_F;          break;
+    case 'g':                   code = KEY_G;          break;
+    case 'h':                   code = KEY_H;          break;
+    case 'j':                   code = KEY_J;          break;
+    case 'k':                   code = KEY_K;          break;
+    case 'l':                   code = KEY_L;          break;
+    case ';':                   code = KEY_SEMICOLON;  break;
+    case '\'':                  code = KEY_APOSTROPHE; break;
+    case '`':                   code = KEY_GRAVE;      break;
+                                    /* KEY_LEFTSHIFT */
+    case '\\':                  code = KEY_BACKSLASH;  break;
+    case 'z':                   code = KEY_Z;          break;
+    case 'x':                   code = KEY_X;          break;
+    case 'c':                   code = KEY_C;          break;
+    case 'v':                   code = KEY_V;          break;
+    case 'b':                   code = KEY_B;          break;
+    case 'n':                   code = KEY_N;          break;
+    case 'm':                   code = KEY_M;          break;
+    case ',':                   code = KEY_COMMA;      break;
+    case '.':                   code = KEY_DOT;        break;
+    case '/':                   code = KEY_SLASH;      break;
+                                    /* KEY_RIGHTSHIFT */
+                                    /* KEY_KPASTERISK */
+                                    /* KEY_LEFTALT */
+    case ' ':                   code = KEY_SPACE;      break;
+                                    /* KEY_CAPSLOCK */
+    case SCR_KEY_FUNCTION +  0: code = KEY_F1;         break;
+    case SCR_KEY_FUNCTION +  1: code = KEY_F2;         break;
+    case SCR_KEY_FUNCTION +  2: code = KEY_F3;         break;
+    case SCR_KEY_FUNCTION +  3: code = KEY_F4;         break;
+    case SCR_KEY_FUNCTION +  4: code = KEY_F5;         break;
+    case SCR_KEY_FUNCTION +  5: code = KEY_F6;         break;
+    case SCR_KEY_FUNCTION +  6: code = KEY_F7;         break;
+    case SCR_KEY_FUNCTION +  7: code = KEY_F8;         break;
+    case SCR_KEY_FUNCTION +  8: code = KEY_F9;         break;
+    case SCR_KEY_FUNCTION +  9: code = KEY_F10;        break;
+
+    case SCR_KEY_FUNCTION + 10: code = KEY_F11;        break;
+    case SCR_KEY_FUNCTION + 11: code = KEY_F12;        break;
+
+    case SCR_KEY_HOME:          code = KEY_HOME;       break;
+    case SCR_KEY_CURSOR_UP:     code = KEY_UP;         break;
+    case SCR_KEY_PAGE_UP:       code = KEY_PAGEUP;     break;
+    case SCR_KEY_CURSOR_LEFT:   code = KEY_LEFT;       break;
+    case SCR_KEY_CURSOR_RIGHT:  code = KEY_RIGHT;      break;
+    case SCR_KEY_END:           code = KEY_END;        break;
+    case SCR_KEY_CURSOR_DOWN:   code = KEY_DOWN;       break;
+    case SCR_KEY_PAGE_DOWN:     code = KEY_PAGEDOWN;   break;
+    case SCR_KEY_INSERT:        code = KEY_INSERT;     break;
+    case SCR_KEY_DELETE:        code = KEY_DELETE;     break;
+
+    case SCR_KEY_FUNCTION + 12: code = KEY_F13;        break;
+    case SCR_KEY_FUNCTION + 13: code = KEY_F14;        break;
+    case SCR_KEY_FUNCTION + 14: code = KEY_F15;        break;
+    case SCR_KEY_FUNCTION + 15: code = KEY_F16;        break;
+    case SCR_KEY_FUNCTION + 16: code = KEY_F17;        break;
+    case SCR_KEY_FUNCTION + 17: code = KEY_F18;        break;
+    case SCR_KEY_FUNCTION + 18: code = KEY_F19;        break;
+    case SCR_KEY_FUNCTION + 19: code = KEY_F20;        break;
+    case SCR_KEY_FUNCTION + 20: code = KEY_F21;        break;
+    case SCR_KEY_FUNCTION + 21: code = KEY_F22;        break;
+    case SCR_KEY_FUNCTION + 22: code = KEY_F23;        break;
+    case SCR_KEY_FUNCTION + 23: code = KEY_F24;        break;
+  }
+  if (code != KEY_RESERVED && openUinputDevice()) {
+    struct input_event event;
+    event.type = EV_KEY;
+#define SENDEVENT(__code, __value) { \
+      event.code = __code; \
+      event.value = __value; \
+      if (write(uinputDevice, &event, sizeof(event)) == -1) { \
+	LogError("writing to Uinput device"); \
+	return 0; \
+      } \
+    }
+    if (modControl) SENDEVENT(KEY_LEFTCTRL, 1);
+    if (modMeta) SENDEVENT(KEY_LEFTALT, 1);
+    if (modShift) SENDEVENT(KEY_LEFTSHIFT, 1);
+    SENDEVENT(code, 1);
+    SENDEVENT(code, 0);
+    if (modShift) SENDEVENT(KEY_LEFTSHIFT, 0);
+    if (modMeta) SENDEVENT(KEY_LEFTALT, 0);
+    if (modControl) SENDEVENT(KEY_LEFTCTRL, 0);
+    return 1;
+  }
+#endif /* HAVE_LINUX_INPUT_H */
+  return 0;
+}
+
+static int
 insertByte (unsigned char byte) {
   if (controlConsole(TIOCSTI, &byte) != -1) {
     return 1;
@@ -952,6 +1121,7 @@ insertCode (ScreenKey key, int raw) {
           case SCR_KEY_CURSOR_DOWN:  code = 0X50; break;
           case SCR_KEY_CURSOR_RIGHT: code = 0X4D; break;
           default:
+            if (insertUinputCode(key, modShift, modControl, modMeta)) return 1;
             LogPrint(LOG_WARNING, "key %4.4X not suported in scancode mode.", key);
             return 0;
         }
@@ -968,6 +1138,7 @@ insertCode (ScreenKey key, int raw) {
           case SCR_KEY_CURSOR_DOWN:  code = 0X6C; break;
           case SCR_KEY_CURSOR_RIGHT: code = 0X6A; break;
           default:
+            if (insertUinputCode(key, modShift, modControl, modMeta)) return 1;
             LogPrint(LOG_WARNING, "key %4.4X not suported in keycode mode.", key);
             return 0;
         }
@@ -1132,6 +1303,8 @@ insertMapped (ScreenKey key, int (*byteInserter)(unsigned char byte)) {
         sequence = "\x1b[34~";
         break;
       default:
+	if (insertUinputCode(key & ~SCR_KEY_MOD_META, 0, 0,
+	      !!(key & SCR_KEY_MOD_META))) return 1;
         LogPrint(LOG_WARNING, "key %4.4X not suported in ANSI mode.", key);
         return 0;
     }
@@ -1345,46 +1518,6 @@ static const unsigned char *at2Keys;
 static int at2Pressed;
 #endif /* HAVE_LINUX_INPUT_H */
 
-#ifdef HAVE_LINUX_UINPUT_H
-#include <linux/uinput.h>
-
-static int uinputDevice = -1;
-
-static int
-openUinputDevice (void) {
-  if (uinputDevice != -1) return 1;
-
-  if ((uinputDevice = openDevice("/dev/uinput", "uinput", O_WRONLY, 10, 223)) != -1) {
-    struct uinput_user_dev device;
-    
-    memset(&device, 0, sizeof(device));
-    strcpy(device.name, "brltty");
-    if (write(uinputDevice, &device, sizeof(device)) == sizeof(device)) {
-      ioctl(uinputDevice, UI_SET_EVBIT, EV_KEY);
-      ioctl(uinputDevice, UI_SET_EVBIT, EV_REP);
-      {
-        int key;
-        for (key=KEY_RESERVED; key<KEY_UNKNOWN; key++) {
-          ioctl(uinputDevice, UI_SET_KEYBIT, key);
-        }
-      }
-
-      if (ioctl(uinputDevice, UI_DEV_CREATE) != -1) {
-        return 1;
-      } else {
-        LogError("ioctl UI_DEV_CREATE");
-      }
-    } else {
-      LogError("uinput_user_dev write");
-    }
-
-    close(uinputDevice);
-    uinputDevice = -1;
-  }
-  return 0;
-}
-#endif /* HAVE_LINUX_UINPUT_H */
-
 static int
 execute_LinuxScreen (int command) {
   int blk = command & BRL_MSK_BLK;
@@ -1419,7 +1552,10 @@ execute_LinuxScreen (int command) {
             event.type = EV_KEY;
             event.code = key;
             event.value = pressed;
-            write(uinputDevice, &event, sizeof(event));
+            if (write(uinputDevice, &event, sizeof(event)) == -1) {
+              LogError("writing to Uinput device");
+              return 0;
+            }
             return 1;
           }
 #endif /* HAVE_LINUX_UINPUT_H */
