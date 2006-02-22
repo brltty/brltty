@@ -664,7 +664,7 @@ openUinputDevice (void) {
     
     memset(&device, 0, sizeof(device));
     strcpy(device.name, "brltty");
-    if (write(uinputDevice, &device, sizeof(device)) == sizeof(device)) {
+    if (write(uinputDevice, &device, sizeof(device)) != -1) {
       ioctl(uinputDevice, UI_SET_EVBIT, EV_KEY);
       ioctl(uinputDevice, UI_SET_EVBIT, EV_REP);
       {
@@ -686,7 +686,19 @@ openUinputDevice (void) {
     close(uinputDevice);
     uinputDevice = -1;
   }
-  LogError("opening Uinput");
+
+  LogPrint(LOG_WARNING, "uinput device not opened");
+  return 0;
+}
+
+static int
+writeUinputKey (int code, int value) {
+  struct input_event event;
+  event.type = EV_KEY;
+  event.code = code;
+  event.value = value;
+  if (write(uinputDevice, &event, sizeof(event)) != -1) return 1;
+  LogError("uinput write");
   return 0;
 }
 #endif /* HAVE_LINUX_UINPUT_H */
@@ -883,8 +895,9 @@ read_LinuxScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
 
 static int
 insertUinputCode (ScreenKey key, int modShift, int modControl, int modMeta) {
-#ifdef HAVE_LINUX_INPUT_H
+#ifdef HAVE_LINUX_UINPUT_H
   int code;
+
   switch (key) {
     default:                    code = KEY_RESERVED;   break;
     case SCR_KEY_ESCAPE:        code = KEY_ESC;        break;
@@ -983,28 +996,25 @@ insertUinputCode (ScreenKey key, int modShift, int modControl, int modMeta) {
     case SCR_KEY_FUNCTION + 22: code = KEY_F23;        break;
     case SCR_KEY_FUNCTION + 23: code = KEY_F24;        break;
   }
-  if (code != KEY_RESERVED && openUinputDevice()) {
-    struct input_event event;
-    event.type = EV_KEY;
-#define SENDEVENT(__code, __value) { \
-      event.code = __code; \
-      event.value = __value; \
-      if (write(uinputDevice, &event, sizeof(event)) == -1) { \
-	LogError("writing to Uinput device"); \
-	return 0; \
-      } \
-    }
-    if (modControl) SENDEVENT(KEY_LEFTCTRL, 1);
-    if (modMeta) SENDEVENT(KEY_LEFTALT, 1);
-    if (modShift) SENDEVENT(KEY_LEFTSHIFT, 1);
-    SENDEVENT(code, 1);
-    SENDEVENT(code, 0);
-    if (modShift) SENDEVENT(KEY_LEFTSHIFT, 0);
-    if (modMeta) SENDEVENT(KEY_LEFTALT, 0);
-    if (modControl) SENDEVENT(KEY_LEFTCTRL, 0);
+
+  if ((code != KEY_RESERVED) && openUinputDevice()) {
+#define SEND_KEY(__code, __value) { if (!writeUinputKey(__code, __value)) return 0; }
+    if (modControl) SEND_KEY(KEY_LEFTCTRL, 1);
+    if (modMeta) SEND_KEY(KEY_LEFTALT, 1);
+    if (modShift) SEND_KEY(KEY_LEFTSHIFT, 1);
+
+    SEND_KEY(code, 1);
+    SEND_KEY(code, 0);
+
+    if (modShift) SEND_KEY(KEY_LEFTSHIFT, 0);
+    if (modMeta) SEND_KEY(KEY_LEFTALT, 0);
+    if (modControl) SEND_KEY(KEY_LEFTCTRL, 0);
+#undef SEND_KEY
+
     return 1;
   }
-#endif /* HAVE_LINUX_INPUT_H */
+#endif /* HAVE_LINUX_UINPUT_H */
+
   return 0;
 }
 
@@ -1548,15 +1558,7 @@ execute_LinuxScreen (int command) {
         if (key) {
 #ifdef HAVE_LINUX_UINPUT_H
           if (openUinputDevice()) {
-            struct input_event event;
-            event.type = EV_KEY;
-            event.code = key;
-            event.value = pressed;
-            if (write(uinputDevice, &event, sizeof(event)) == -1) {
-              LogError("writing to Uinput device");
-              return 0;
-            }
-            return 1;
+            return writeUinputKey(key, pressed);
           }
 #endif /* HAVE_LINUX_UINPUT_H */
         }
