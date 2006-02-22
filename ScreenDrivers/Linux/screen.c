@@ -649,8 +649,131 @@ setTranslationTable (int force) {
   return 0;
 }
 
-#ifdef HAVE_LINUX_UINPUT_H
+#ifdef HAVE_LINUX_INPUT_H
 #include <linux/input.h>
+
+typedef unsigned char At2KeyTable[0X100];
+
+static const At2KeyTable at2KeysOriginal = {
+  [0X76] = KEY_ESC,
+  [0X05] = KEY_F1,
+  [0X06] = KEY_F2,
+  [0X04] = KEY_F3,
+  [0X0C] = KEY_F4,
+  [0X03] = KEY_F5,
+  [0X0B] = KEY_F6,
+  [0X83] = KEY_F7,
+  [0X0A] = KEY_F8,
+  [0X01] = KEY_F9,
+  [0X09] = KEY_F10,
+  [0X78] = KEY_F11,
+  [0X07] = KEY_F12,
+  [0X7E] = KEY_SCROLLLOCK,
+
+  [0X0E] = KEY_GRAVE,
+  [0X16] = KEY_1,
+  [0X1E] = KEY_2,
+  [0X26] = KEY_3,
+  [0X25] = KEY_4,
+  [0X2E] = KEY_5,
+  [0X36] = KEY_6,
+  [0X3D] = KEY_7,
+  [0X3E] = KEY_8,
+  [0X46] = KEY_9,
+  [0X45] = KEY_0,
+  [0X4E] = KEY_MINUS,
+  [0X55] = KEY_EQUAL,
+  [0X66] = KEY_BACKSPACE,
+
+  [0X0D] = KEY_TAB,
+  [0X15] = KEY_Q,
+  [0X1D] = KEY_W,
+  [0X24] = KEY_E,
+  [0X2D] = KEY_R,
+  [0X2C] = KEY_T,
+  [0X35] = KEY_Y,
+  [0X3C] = KEY_U,
+  [0X43] = KEY_I,
+  [0X44] = KEY_O,
+  [0X4D] = KEY_P,
+  [0X54] = KEY_LEFTBRACE,
+  [0X5B] = KEY_RIGHTBRACE,
+  [0X5D] = KEY_BACKSLASH,
+
+  [0X58] = KEY_CAPSLOCK,
+  [0X1C] = KEY_A,
+  [0X1B] = KEY_S,
+  [0X23] = KEY_D,
+  [0X2B] = KEY_F,
+  [0X34] = KEY_G,
+  [0X33] = KEY_H,
+  [0X3B] = KEY_J,
+  [0X42] = KEY_K,
+  [0X4B] = KEY_L,
+  [0X4C] = KEY_SEMICOLON,
+  [0X52] = KEY_APOSTROPHE,
+  [0X5A] = KEY_ENTER,
+
+  [0X12] = KEY_LEFTSHIFT,
+  [0X61] = KEY_102ND,
+  [0X1A] = KEY_Z,
+  [0X22] = KEY_X,
+  [0X21] = KEY_C,
+  [0X2A] = KEY_V,
+  [0X32] = KEY_B,
+  [0X31] = KEY_N,
+  [0X3A] = KEY_M,
+  [0X41] = KEY_COMMA,
+  [0X49] = KEY_DOT,
+  [0X4A] = KEY_SLASH,
+  [0X59] = KEY_RIGHTSHIFT,
+
+  [0X14] = KEY_LEFTCTRL,
+  [0X11] = KEY_LEFTALT,
+  [0X29] = KEY_SPACE,
+
+  [0X77] = KEY_NUMLOCK,
+  [0X7C] = KEY_KPASTERISK,
+  [0X7B] = KEY_KPMINUS,
+  [0X79] = KEY_KPPLUS,
+  [0X71] = KEY_KPDOT,
+  [0X70] = KEY_KP0,
+  [0X69] = KEY_KP1,
+  [0X72] = KEY_KP2,
+  [0X7A] = KEY_KP3,
+  [0X6B] = KEY_KP4,
+  [0X73] = KEY_KP5,
+  [0X74] = KEY_KP6,
+  [0X6C] = KEY_KP7,
+  [0X75] = KEY_KP8,
+  [0X7D] = KEY_KP9
+};
+
+static const At2KeyTable at2KeysE0 = {
+  [0X1F] = KEY_LEFTMETA,
+  [0X11] = KEY_RIGHTALT,
+  [0X27] = KEY_RIGHTMETA,
+  [0X2F] = KEY_COMPOSE,
+  [0X14] = KEY_RIGHTCTRL,
+  [0X70] = KEY_INSERT,
+  [0X71] = KEY_DELETE,
+  [0X6C] = KEY_HOME,
+  [0X69] = KEY_END,
+  [0X7D] = KEY_PAGEUP,
+  [0X7A] = KEY_PAGEDOWN,
+  [0X75] = KEY_UP,
+  [0X6B] = KEY_LEFT,
+  [0X72] = KEY_DOWN,
+  [0X74] = KEY_RIGHT,
+  [0X4A] = KEY_KPSLASH,
+  [0X5A] = KEY_KPENTER
+};
+
+static const unsigned char *at2Keys;
+static int at2Pressed;
+#endif /* HAVE_LINUX_INPUT_H */
+
+#ifdef HAVE_LINUX_UINPUT_H
 #include <linux/uinput.h>
 
 static int uinputDevice = -1;
@@ -894,8 +1017,8 @@ read_LinuxScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
 }
 
 static int
-insertUinputCode (ScreenKey key, int modShift, int modControl, int modMeta) {
-#ifdef HAVE_LINUX_UINPUT_H
+insertUinputKey (ScreenKey key, int modShift, int modControl, int modMeta) {
+#ifdef HAVE_LINUX_INPUT_H
   int code;
 
   switch (key) {
@@ -997,23 +1120,27 @@ insertUinputCode (ScreenKey key, int modShift, int modControl, int modMeta) {
     case SCR_KEY_FUNCTION + 23: code = KEY_F24;        break;
   }
 
-  if ((code != KEY_RESERVED) && openUinputDevice()) {
+  if (code != KEY_RESERVED) {
+#ifdef HAVE_LINUX_UINPUT_H
+    if (openUinputDevice()) {
 #define SEND_KEY(__code, __value) { if (!writeUinputKey(__code, __value)) return 0; }
-    if (modControl) SEND_KEY(KEY_LEFTCTRL, 1);
-    if (modMeta) SEND_KEY(KEY_LEFTALT, 1);
-    if (modShift) SEND_KEY(KEY_LEFTSHIFT, 1);
+      if (modControl) SEND_KEY(KEY_LEFTCTRL, 1);
+      if (modMeta) SEND_KEY(KEY_LEFTALT, 1);
+      if (modShift) SEND_KEY(KEY_LEFTSHIFT, 1);
 
-    SEND_KEY(code, 1);
-    SEND_KEY(code, 0);
+      SEND_KEY(code, 1);
+      SEND_KEY(code, 0);
 
-    if (modShift) SEND_KEY(KEY_LEFTSHIFT, 0);
-    if (modMeta) SEND_KEY(KEY_LEFTALT, 0);
-    if (modControl) SEND_KEY(KEY_LEFTCTRL, 0);
+      if (modShift) SEND_KEY(KEY_LEFTSHIFT, 0);
+      if (modMeta) SEND_KEY(KEY_LEFTALT, 0);
+      if (modControl) SEND_KEY(KEY_LEFTCTRL, 0);
 #undef SEND_KEY
 
-    return 1;
-  }
+      return 1;
+    }
 #endif /* HAVE_LINUX_UINPUT_H */
+  }
+#endif /* HAVE_LINUX_INPUT_H */
 
   return 0;
 }
@@ -1026,6 +1153,15 @@ insertByte (unsigned char byte) {
     LogError("ioctl TIOCSTI");
   }
   return 0;
+}
+
+static int
+insertUtf8 (unsigned char byte) {
+  if (byte & 0X80) {
+    if (!insertByte(0XC0 | (byte >> 6))) return 0;
+    byte &= 0XBF;
+  }
+  return insertByte(byte);
 }
 
 static int
@@ -1131,7 +1267,7 @@ insertCode (ScreenKey key, int raw) {
           case SCR_KEY_CURSOR_DOWN:  code = 0X50; break;
           case SCR_KEY_CURSOR_RIGHT: code = 0X4D; break;
           default:
-            if (insertUinputCode(key, modShift, modControl, modMeta)) return 1;
+            if (insertUinputKey(key, modShift, modControl, modMeta)) return 1;
             LogPrint(LOG_WARNING, "key %4.4X not suported in scancode mode.", key);
             return 0;
         }
@@ -1148,7 +1284,7 @@ insertCode (ScreenKey key, int raw) {
           case SCR_KEY_CURSOR_DOWN:  code = 0X6C; break;
           case SCR_KEY_CURSOR_RIGHT: code = 0X6A; break;
           default:
-            if (insertUinputCode(key, modShift, modControl, modMeta)) return 1;
+            if (insertUinputKey(key, modShift, modControl, modMeta)) return 1;
             LogPrint(LOG_WARNING, "key %4.4X not suported in keycode mode.", key);
             return 0;
         }
@@ -1313,8 +1449,8 @@ insertMapped (ScreenKey key, int (*byteInserter)(unsigned char byte)) {
         sequence = "\x1b[34~";
         break;
       default:
-	if (insertUinputCode(key & ~SCR_KEY_MOD_META, 0, 0,
-	      !!(key & SCR_KEY_MOD_META))) return 1;
+	if (insertUinputKey(key & ~SCR_KEY_MOD_META, 0, 0,
+                            !!(key & SCR_KEY_MOD_META))) return 1;
         LogPrint(LOG_WARNING, "key %4.4X not suported in ANSI mode.", key);
         return 0;
     }
@@ -1324,16 +1460,6 @@ insertMapped (ScreenKey key, int (*byteInserter)(unsigned char byte)) {
   while (sequence != end)
     if (!byteInserter(*sequence++))
       return 0;
-  return 1;
-}
-
-static int
-insertUtf8 (unsigned char byte) {
-  if (byte & 0X80) {
-    if (!insertByte(0XC0 | (byte >> 6))) return 0;
-    byte &= 0XBF;
-  }
-  if (!insertByte(byte)) return 0;
   return 1;
 }
 
@@ -1406,126 +1532,6 @@ currentvt_LinuxScreen (void) {
 
 #ifdef HAVE_LINUX_INPUT_H
 #include <linux/input.h>
-
-typedef unsigned char At2KeyTable[0X100];
-
-static const At2KeyTable at2KeysOriginal = {
-  [0X76] = KEY_ESC,
-  [0X05] = KEY_F1,
-  [0X06] = KEY_F2,
-  [0X04] = KEY_F3,
-  [0X0C] = KEY_F4,
-  [0X03] = KEY_F5,
-  [0X0B] = KEY_F6,
-  [0X83] = KEY_F7,
-  [0X0A] = KEY_F8,
-  [0X01] = KEY_F9,
-  [0X09] = KEY_F10,
-  [0X78] = KEY_F11,
-  [0X07] = KEY_F12,
-  [0X7E] = KEY_SCROLLLOCK,
-
-  [0X0E] = KEY_GRAVE,
-  [0X16] = KEY_1,
-  [0X1E] = KEY_2,
-  [0X26] = KEY_3,
-  [0X25] = KEY_4,
-  [0X2E] = KEY_5,
-  [0X36] = KEY_6,
-  [0X3D] = KEY_7,
-  [0X3E] = KEY_8,
-  [0X46] = KEY_9,
-  [0X45] = KEY_0,
-  [0X4E] = KEY_MINUS,
-  [0X55] = KEY_EQUAL,
-  [0X66] = KEY_BACKSPACE,
-
-  [0X0D] = KEY_TAB,
-  [0X15] = KEY_Q,
-  [0X1D] = KEY_W,
-  [0X24] = KEY_E,
-  [0X2D] = KEY_R,
-  [0X2C] = KEY_T,
-  [0X35] = KEY_Y,
-  [0X3C] = KEY_U,
-  [0X43] = KEY_I,
-  [0X44] = KEY_O,
-  [0X4D] = KEY_P,
-  [0X54] = KEY_LEFTBRACE,
-  [0X5B] = KEY_RIGHTBRACE,
-  [0X5D] = KEY_BACKSLASH,
-
-  [0X58] = KEY_CAPSLOCK,
-  [0X1C] = KEY_A,
-  [0X1B] = KEY_S,
-  [0X23] = KEY_D,
-  [0X2B] = KEY_F,
-  [0X34] = KEY_G,
-  [0X33] = KEY_H,
-  [0X3B] = KEY_J,
-  [0X42] = KEY_K,
-  [0X4B] = KEY_L,
-  [0X4C] = KEY_SEMICOLON,
-  [0X52] = KEY_APOSTROPHE,
-  [0X5A] = KEY_ENTER,
-
-  [0X12] = KEY_LEFTSHIFT,
-  [0X61] = KEY_102ND,
-  [0X1A] = KEY_Z,
-  [0X22] = KEY_X,
-  [0X21] = KEY_C,
-  [0X2A] = KEY_V,
-  [0X32] = KEY_B,
-  [0X31] = KEY_N,
-  [0X3A] = KEY_M,
-  [0X41] = KEY_COMMA,
-  [0X49] = KEY_DOT,
-  [0X4A] = KEY_SLASH,
-  [0X59] = KEY_RIGHTSHIFT,
-
-  [0X14] = KEY_LEFTCTRL,
-  [0X11] = KEY_LEFTALT,
-  [0X29] = KEY_SPACE,
-
-  [0X77] = KEY_NUMLOCK,
-  [0X7C] = KEY_KPASTERISK,
-  [0X7B] = KEY_KPMINUS,
-  [0X79] = KEY_KPPLUS,
-  [0X71] = KEY_KPDOT,
-  [0X70] = KEY_KP0,
-  [0X69] = KEY_KP1,
-  [0X72] = KEY_KP2,
-  [0X7A] = KEY_KP3,
-  [0X6B] = KEY_KP4,
-  [0X73] = KEY_KP5,
-  [0X74] = KEY_KP6,
-  [0X6C] = KEY_KP7,
-  [0X75] = KEY_KP8,
-  [0X7D] = KEY_KP9
-};
-
-static const At2KeyTable at2KeysE0 = {
-  [0X1F] = KEY_LEFTMETA,
-  [0X11] = KEY_RIGHTALT,
-  [0X27] = KEY_RIGHTMETA,
-  [0X2F] = KEY_COMPOSE,
-  [0X14] = KEY_RIGHTCTRL,
-  [0X70] = KEY_INSERT,
-  [0X71] = KEY_DELETE,
-  [0X6C] = KEY_HOME,
-  [0X69] = KEY_END,
-  [0X7D] = KEY_PAGEUP,
-  [0X7A] = KEY_PAGEDOWN,
-  [0X75] = KEY_UP,
-  [0X6B] = KEY_LEFT,
-  [0X72] = KEY_DOWN,
-  [0X74] = KEY_RIGHT,
-  [0X4A] = KEY_KPSLASH,
-  [0X5A] = KEY_KPENTER
-};
-
-static const unsigned char *at2Keys;
-static int at2Pressed;
 #endif /* HAVE_LINUX_INPUT_H */
 
 static int
@@ -1566,6 +1572,7 @@ execute_LinuxScreen (int command) {
 #endif /* HAVE_LINUX_INPUT_H */
       break;
   }
+
   return 0;
 }
 
