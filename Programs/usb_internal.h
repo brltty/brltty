@@ -42,6 +42,7 @@ typedef struct {
     } input;
 
     struct {
+      int structMayNotBeEmpty;
     } output;
   } direction;
 } UsbEndpoint;

@@ -336,7 +336,9 @@ static char *getWindowTitle(Window win) {
       &actual_type,&actual_format,&nitems,&bytes_after,&wm_name))
       return NULL; /* window disappeared */
     wm_name_size+=bytes_after;
-  } while (bytes_after && ({if (!XFree(wm_name)) fatal("tempo_XFree(wm_name)"); 1;}));
+    if (!bytes_after) break;
+    if (!XFree(wm_name)) fatal("tempo_XFree(wm_name)");
+  } while (1);
   if (actual_type==None) return NULL;
   else {
     debugf("type %lx name %s",actual_type,wm_name);

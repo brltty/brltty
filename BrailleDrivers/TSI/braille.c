@@ -139,22 +139,22 @@ static TranslationTable outputTable;
 #define BAUD_DELAY (100)
 
 /* Communication codes */
-static char BRL_QUERY[] = {0xFF, 0xFF, 0x0A};
+static unsigned char BRL_QUERY[] = {0xFF, 0xFF, 0x0A};
 #define DIM_BRL_QUERY 3
-static char BRL_TYPEMATIC[] = {0xFF, 0xFF, 0x0D};
+static unsigned char BRL_TYPEMATIC[] = {0xFF, 0xFF, 0x0D};
 #define DIM_BRL_TYPEMATIC 3
 #ifdef HIGHBAUD
 /* Command to put the PB at 19200baud */
-static char BRL_UART192[] = {0xFF, 0xFF, 0x05, 0x04};
+static unsigned char BRL_UART192[] = {0xFF, 0xFF, 0x05, 0x04};
 #define DIM_BRL_UART192 4
 #endif /* HIGHBAUD */
 #if 0
 /* Activate handshake ? */
-static char BRL_UART_HANDSHAK[] = {0xFF, 0xFF, 0x05, 0x01};
+static unsigned char BRL_UART_HANDSHAK[] = {0xFF, 0xFF, 0x05, 0x01};
 #define DIM_BRL_UART_HANDSHAK 4
 #endif /* 0 */
 /* Normal header for sending dots, with cursor always off */
-static char BRL_SEND_HEAD[] = {0xFF, 0xFF, 0x04, 0x00, 0x00, 0x01};
+static unsigned char BRL_SEND_HEAD[] = {0xFF, 0xFF, 0x04, 0x00, 0x00, 0x01};
 #define DIM_BRL_SEND_FIXED 6
 #define DIM_BRL_SEND 8
 /* Two extra bytes for lenght and offset */

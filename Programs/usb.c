@@ -885,7 +885,8 @@ static int
 usbFtdiInputFilter (UsbInputFilterData *data) {
   const int count = 2;
   if (data->length > count) {
-    memmove(data->buffer, data->buffer+count, data->length-=count);
+    unsigned char *buffer = data->buffer;
+    memmove(buffer, buffer+count, data->length-=count);
   } else {
     data->length = 0;
   }
@@ -1104,7 +1105,7 @@ usbGetSerialOperations (UsbDevice *device) {
       usbFtdiInputFilter
     }
     ,
-    {}
+    {0, 0}
   };
   const UsbSerialAdapter *sa = usbSerialAdapters;
   while (sa->vendor) {

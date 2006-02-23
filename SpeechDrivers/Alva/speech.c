@@ -104,7 +104,6 @@ spk_mute (void)
   static unsigned char *mute_seq = (unsigned char *)MUTE_SEQ;
   unsigned char buffer[32];
 
-return;
   memcpy (buffer, mute_seq + 1, mute_seq[0]);
   AL_writeData (buffer, mute_seq[0]);
 }

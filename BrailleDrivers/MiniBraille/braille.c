@@ -59,9 +59,9 @@ static enum mode_t mode = NORMAL_MODE;
 static void beep(void)
 {
 	AFTER_CMD_DELAY;
-	serialWriteData(serialDevice, "\eB\r", 3);
+	serialWriteData(serialDevice, "\x1b" "B\r", 3);
 	AFTER_CMD_DELAY;
-};
+}
 
 /* interface */
 static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
@@ -111,7 +111,7 @@ static void refresh(void)
 	serialWriteData(serialDevice, status, sizeof status);
 	serialWriteData(serialDevice, xlated, sizeof xlated);
 	serialWriteData(serialDevice, datae, sizeof datae);
-};
+}
 
 static void brl_writeWindow(BrailleDisplay *brl)
 {

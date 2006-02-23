@@ -818,7 +818,6 @@ interpretBackspaceChord (BrailleDisplay *brl, unsigned char dots, BRL_DriverComm
       break;
     case BNC_SPACE:
       return BRL_BLK_PASSKEY + BRL_KEY_BACKSPACE;
-      return EOF;
     case BNC_A:
       return BRL_CMD_DISPMD | BRL_FLG_TOGGLE_ON;
     case BNC_B:
@@ -871,7 +870,6 @@ interpretEnterChord (BrailleDisplay *brl, unsigned char dots, BRL_DriverCommandC
       break;
     case BNC_SPACE:
       return BRL_BLK_PASSKEY + BRL_KEY_ENTER;
-      return EOF;
     case BNC_B:
       return BRL_CMD_SKPBLNKWINS | BRL_FLG_TOGGLE_ON;
     case BNC_F:

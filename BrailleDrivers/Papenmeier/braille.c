@@ -295,8 +295,8 @@ typedef struct {
   void (*closePort) (void);
   void (*flushPort) (BrailleDisplay *brl);
   int (*awaitInput) (int milliseconds);
-  int (*readBytes) (void *buffer, size_t *offset, size_t length, int timeout);
-  int (*writeBytes) (const void *buffer, int length);
+  int (*readBytes) (unsigned char *buffer, size_t *offset, size_t length, int timeout);
+  int (*writeBytes) (const unsigned char *buffer, int length);
 } InputOutputOperations;
 
 static const InputOutputOperations *io;
@@ -346,12 +346,12 @@ awaitSerialInput (int milliseconds) {
 }
 
 static int
-readSerialBytes (void *buffer, size_t *offset, size_t length, int timeout) {
+readSerialBytes (unsigned char *buffer, size_t *offset, size_t length, int timeout) {
   return serialReadChunk(serialDevice, buffer, offset, length, 0, timeout);
 }
 
 static int
-writeSerialBytes (const void *buffer, int length) {
+writeSerialBytes (const unsigned char *buffer, int length) {
   return serialWriteData(serialDevice, buffer, length);
 }
 
@@ -405,7 +405,7 @@ awaitUsbInput (int milliseconds) {
 }
 
 static int
-readUsbBytes (void *buffer, size_t *offset, size_t length, int timeout) {
+readUsbBytes (unsigned char *buffer, size_t *offset, size_t length, int timeout) {
   int count = usbReapInput(usb->device, usb->definition.inputEndpoint, buffer+*offset, length, 
                            (*offset? timeout: 0), timeout);
   if (count == -1) return 0;
@@ -414,7 +414,7 @@ readUsbBytes (void *buffer, size_t *offset, size_t length, int timeout) {
 }
 
 static int
-writeUsbBytes (const void *buffer, int length) {
+writeUsbBytes (const unsigned char *buffer, int length) {
   return usbWriteEndpoint(usb->device, usb->definition.outputEndpoint, buffer, length, 1000);
 }
 

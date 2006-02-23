@@ -266,10 +266,10 @@ static union {
 } inputBuffer;
 static int inputCount;
 
-static int realKeys;
-static int virtualKeys;
-static int pressedKeys;
-static int activeKeys;
+static unsigned int realKeys;
+static unsigned int virtualKeys;
+static unsigned int pressedKeys;
+static unsigned int activeKeys;
 #define KEY_DOT1            0X00000001
 #define KEY_DOT2            0X00000002
 #define KEY_DOT3            0X00000004
@@ -830,7 +830,7 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) {
 
 static int
 interpretKeys (void) {
-  int keys = realKeys | virtualKeys;
+  unsigned int keys = realKeys | virtualKeys;
   int press = (keys & pressedKeys) != keys;
   int command = BRL_CMD_NOOP;
   int flags = 0;
@@ -1072,7 +1072,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
         int command = BRL_CMD_NOOP;
 
         if (row == model->hotkeysRow) {
-          static int keys[] = {
+          static unsigned int keys[] = {
             KEY_GDF_LEFT,
             KEY_HOT1, KEY_HOT2, KEY_HOT3, KEY_HOT4,
             KEY_HOT5, KEY_HOT6, KEY_HOT7, KEY_HOT8,
@@ -1080,7 +1080,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
           };
           static const int keyCount = sizeof(keys) / sizeof(keys[0]);
 
-          int key;
+          unsigned int key;
           button -= (model->totalCells - keyCount) / 2;
 
           if (button < 0) {

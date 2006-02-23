@@ -353,7 +353,7 @@ static unsigned char updateRequired = 0;
 #define KEY_RELEASE 0X80
 #define KEY_ROUTING 0X20
 #define KEY_STATUS  0X70
-#define KEY(code)   (1 << (code))
+#define KEY(code)   (1U << (code))
 
 /* modular front keys */
 #define KEY_B1              KEY(0X03)

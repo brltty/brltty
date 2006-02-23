@@ -68,8 +68,9 @@
 
 /* brlapi_writeFile */
 /* Writes a buffer to a file */
-static ssize_t brlapi_writeFile(int fd, const void *buf, size_t size)
+static ssize_t brlapi_writeFile(int fd, const void *buffer, size_t size)
 {
+  const unsigned char *buf = buffer;
   size_t n;
 #ifdef WINDOWS
   DWORD res=0;
@@ -105,8 +106,9 @@ static ssize_t brlapi_writeFile(int fd, const void *buf, size_t size)
 
 /* brlapi_readFile */
 /* Reads a buffer from a file */
-static ssize_t brlapi_readFile(int fd, void *buf, size_t size, int loop)
+static ssize_t brlapi_readFile(int fd, void *buffer, size_t size, int loop)
 {
+  unsigned char *buf = buffer;
   size_t n;
 #ifdef WINDOWS
   DWORD res=0;
