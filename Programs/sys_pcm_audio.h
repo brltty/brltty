@@ -15,6 +15,9 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
+#include <sys/audio.h>
+#include <stropts.h>
+
 #include "io_misc.h"
 
 struct PcmDeviceStruct {
@@ -76,7 +79,7 @@ getPcmAudioInfo (PcmDevice *pcm, audio_info_t *info) {
 int
 getPcmBlockSize (PcmDevice *pcm) {
   audio_info_t info;
-  if (getPcmAudioInfo(pcm, &info)) return info.play.buffer_size;
+  if (getPcmAudioInfo(pcm, &info)) return (info.play.precision / 8 * info.play.channels) * 0X400;
   return 0X100;
 }
 
@@ -111,20 +114,35 @@ getPcmAmplitudeFormat (PcmDevice *pcm) {
     switch (info.play.encoding) {
       default:
         break;
-#ifdef AUDIO_ENCODING_SLINEAR
+
+#ifdef AUDIO_ENCODING_SLINEAR_BE
+      case AUDIO_ENCODING_SLINEAR_BE:
+        if (info.play.precision == 8) return PCM_FMT_S8;
+        if (info.play.precision == 16) return PCM_FMT_S16B;
+        break;
+#endif /* AUDIO_ENCODING_SLINEAR_BE */
+
+#ifdef AUDIO_ENCODING_SLINEAR_LE
       case AUDIO_ENCODING_SLINEAR_LE:
         if (info.play.precision == 8) return PCM_FMT_S8;
         if (info.play.precision == 16) return PCM_FMT_S16L;
         break;
-      case AUDIO_ENCODING_SLINEAR_BE:
-#else /* AUDIO_ENCODING_SLINEAR */
+#endif /* AUDIO_ENCODING_SLINEAR_LE */
+
+#ifdef AUDIO_ENCODING_LINEAR
       case AUDIO_ENCODING_LINEAR:
-#endif /* AUDIO_ENCODING_SLINEAR */
         if (info.play.precision == 8) return PCM_FMT_S8;
+#ifdef WORDS_BIGENDIAN
         if (info.play.precision == 16) return PCM_FMT_S16B;
+#else /* WORDS_BIGENDIAN */
+        if (info.play.precision == 16) return PCM_FMT_S16L;
+#endif /* WORDS_BIGENDIAN */
         break;
+#endif /* AUDIO_ENCODING_LINEAR */
+
       case AUDIO_ENCODING_ULAW:
         return PCM_FMT_ULAW;
+
       case AUDIO_ENCODING_LINEAR8:
         return PCM_FMT_U8;
     }
@@ -143,8 +161,10 @@ forcePcmOutput (PcmDevice *pcm) {
 
 void
 awaitPcmOutput (PcmDevice *pcm) {
+  ioctl(pcm->fileDescriptor, AUDIO_DRAIN);
 }
 
 void
 cancelPcmOutput (PcmDevice *pcm) {
+  ioctl(pcm->fileDescriptor, I_FLUSH);
 }

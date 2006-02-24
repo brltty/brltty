@@ -20,7 +20,6 @@
 #include <string.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <sys/audioio.h>
 
 #include "misc.h"
 #include "system.h"
