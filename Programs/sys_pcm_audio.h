@@ -117,34 +117,35 @@ getPcmAmplitudeFormat (PcmDevice *pcm) {
 
 #ifdef AUDIO_ENCODING_SLINEAR_BE
       case AUDIO_ENCODING_SLINEAR_BE:
-        if (info.play.precision == 8) return PCM_FMT_S8;
         if (info.play.precision == 16) return PCM_FMT_S16B;
-        break;
+        goto testLinearSigned8;
 #endif /* AUDIO_ENCODING_SLINEAR_BE */
 
 #ifdef AUDIO_ENCODING_SLINEAR_LE
       case AUDIO_ENCODING_SLINEAR_LE:
-        if (info.play.precision == 8) return PCM_FMT_S8;
         if (info.play.precision == 16) return PCM_FMT_S16L;
-        break;
+        goto testLinearSigned8;
 #endif /* AUDIO_ENCODING_SLINEAR_LE */
 
 #ifdef AUDIO_ENCODING_LINEAR
       case AUDIO_ENCODING_LINEAR:
-        if (info.play.precision == 8) return PCM_FMT_S8;
 #ifdef WORDS_BIGENDIAN
         if (info.play.precision == 16) return PCM_FMT_S16B;
 #else /* WORDS_BIGENDIAN */
         if (info.play.precision == 16) return PCM_FMT_S16L;
 #endif /* WORDS_BIGENDIAN */
-        break;
+        goto testLinearSigned8;
 #endif /* AUDIO_ENCODING_LINEAR */
 
-      case AUDIO_ENCODING_ULAW:
-        return PCM_FMT_ULAW;
+      testLinearSigned8:
+        if (info.play.precision == 8) return PCM_FMT_S8;
+        break;
 
       case AUDIO_ENCODING_LINEAR8:
         return PCM_FMT_U8;
+
+      case AUDIO_ENCODING_ULAW:
+        return PCM_FMT_ULAW;
     }
   }
   return PCM_FMT_UNKNOWN;
