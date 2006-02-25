@@ -48,6 +48,7 @@ typedef enum {
   PCM_FMT_U16L,
   PCM_FMT_S16L,
   PCM_FMT_ULAW,
+  PCM_FMT_ALAW,
   PCM_FMT_UNKNOWN
 } PcmAmplitudeFormat;
 extern PcmDevice *openPcmDevice (int errorLevel, const char *device);

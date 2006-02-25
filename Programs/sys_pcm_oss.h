@@ -109,6 +109,7 @@ static const AmplitudeFormatEntry amplitudeFormatTable[] = {
   {PCM_FMT_U16L   , AFMT_U16_LE},
   {PCM_FMT_S16L   , AFMT_S16_LE},
   {PCM_FMT_ULAW   , AFMT_MU_LAW},
+  {PCM_FMT_ALAW   , AFMT_A_LAW},
   {PCM_FMT_UNKNOWN, AFMT_QUERY }
 };
 

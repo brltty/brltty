@@ -113,14 +113,34 @@ static int writeAmplitude (int amplitude) {
          int negative = amplitude < 0;
          int exponent = 0X7;
          unsigned char value;
+         const unsigned int bias = 0X84;
+         const unsigned int clip = 0X7FFF - bias;
+         if (negative) amplitude = -amplitude;
+         if (amplitude > clip) amplitude = clip;
+         amplitude += bias;
+         while ((exponent > 0) && !(amplitude & 0X4000)) {
+            amplitude <<= 1;
+            --exponent;
+         }
+         value = (exponent << 4) | ((amplitude >> 10) & 0X0F);
+         if (negative) value |= 0X80;
+         sample[0] = ~value;
+         length = 1;
+         break;
+      }
+      case PCM_FMT_ALAW: {
+         int negative = amplitude < 0;
+         int exponent = 0X7;
+         unsigned char value;
          if (negative) amplitude = -amplitude;
          while ((exponent > 0) && !(amplitude & 0X4000)) {
             amplitude <<= 1;
             --exponent;
          }
-         value = (exponent << 4) | ((amplitude >> 10) & 0XF);
+         if (!exponent) amplitude >>= 1;
+         value = (exponent << 4) | ((amplitude >> 10) & 0X0F);
          if (negative) value |= 0X80;
-         sample[0] = ~value;
+         sample[0] = value ^ 0X55;
          length = 1;
          break;
       }
