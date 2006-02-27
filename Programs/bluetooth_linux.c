@@ -45,7 +45,7 @@ openRfcommConnection (const char *address, unsigned char channel) {
         bacpy(&remote.rc_bdaddr, &bda);
         if (connect(connection, (struct sockaddr *)&remote, sizeof(remote)) != -1) {
           return connection;
-        } else if (errno != EHOSTDOWN) {
+        } else if ((errno != EHOSTDOWN) && (errno != EHOSTUNREACH)) {
           LogError("RFCOMM socket connection");
         }
       } else {
