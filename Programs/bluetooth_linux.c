@@ -27,37 +27,32 @@
 #include <bluetooth/rfcomm.h>
 
 int
-openRfcommConnection (const char *address, unsigned char channel) {
-  bdaddr_t bda;
-  if (parseBluetoothAddress(&bda, address)) {
-    int connection;
-    if ((connection = socket(PF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM)) != -1) {
-      struct sockaddr_rc local;
-      local.rc_family = AF_BLUETOOTH;
-      local.rc_channel = 0;
-      bacpy(&local.rc_bdaddr, BDADDR_ANY); /* Any HCI. No support for explicit
-                                            * interface specification yet.
-                                            */
-      if (bind(connection, (struct sockaddr *)&local, sizeof(local)) != -1) {
-        struct sockaddr_rc remote;
-        remote.rc_family = AF_BLUETOOTH;
-        remote.rc_channel = channel;
-        bacpy(&remote.rc_bdaddr, &bda);
-        if (connect(connection, (struct sockaddr *)&remote, sizeof(remote)) != -1) {
-          return connection;
-        } else if ((errno != EHOSTDOWN) && (errno != EHOSTUNREACH)) {
-          LogError("RFCOMM socket connection");
-        }
-      } else {
-        LogError("RFCOMM socket bind");
+btConnect (bdaddr_t address, unsigned char channel) {
+  int connection;
+  if ((connection = socket(PF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM)) != -1) {
+    struct sockaddr_rc local;
+    local.rc_family = AF_BLUETOOTH;
+    local.rc_channel = 0;
+    bacpy(&local.rc_bdaddr, BDADDR_ANY); /* Any HCI. No support for explicit
+                                          * interface specification yet.
+                                          */
+    if (bind(connection, (struct sockaddr *)&local, sizeof(local)) != -1) {
+      struct sockaddr_rc remote;
+      remote.rc_family = AF_BLUETOOTH;
+      remote.rc_channel = channel;
+      bacpy(&remote.rc_bdaddr, &address);
+      if (connect(connection, (struct sockaddr *)&remote, sizeof(remote)) != -1) {
+        return connection;
+      } else if ((errno != EHOSTDOWN) && (errno != EHOSTUNREACH)) {
+        LogError("RFCOMM socket connect");
       }
-
-      close(connection);
     } else {
-      LogError("RFCOMM socket creation");
+      LogError("RFCOMM socket bind");
     }
+
+    close(connection);
   } else {
-    LogPrint(LOG_ERR, "Invalid Bluetooth address: %s", address);
+    LogError("RFCOMM socket allocate");
   }
   return -1;
 }

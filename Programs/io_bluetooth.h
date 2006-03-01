@@ -23,7 +23,10 @@ extern "C" {
 #endif /* __cplusplus */
 
 extern int isBluetoothDevice (const char **path);
-extern int openRfcommConnection (const char *address, unsigned char channel);
+
+extern void btForgetConnectErrors (void);
+
+extern int btOpenConnection (const char *address, unsigned char channel, int force);
 
 #ifdef __cplusplus
 }

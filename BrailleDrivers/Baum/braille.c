@@ -388,7 +388,7 @@ static int bluetoothConnection = -1;
 
 static int
 openBluetoothPort (char **parameters, const char *device) {
-  return (bluetoothConnection = openRfcommConnection(device, 1)) != -1;
+  return (bluetoothConnection = btOpenConnection(device, 1, 0)) != -1;
 }
 
 static int

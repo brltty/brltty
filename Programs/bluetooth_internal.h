@@ -24,7 +24,7 @@ extern "C" {
 
 #include <bluetooth/bluetooth.h>
 
-extern int parseBluetoothAddress (bdaddr_t *address, const char *string);
+extern int btConnect (bdaddr_t address, unsigned char channel);
 
 #ifdef __cplusplus
 }

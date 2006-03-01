@@ -1565,6 +1565,10 @@ startBrailleDriver (void) {
   while (1) {
     testProgramTermination();
 
+#ifdef ENABLE_BLUETOOTH_SUPPORT
+    btForgetConnectErrors();
+#endif /* ENABLE_BLUETOOTH_SUPPORT */
+
     if (activateBrailleDriver(0)) {
       getPreferences();
       setBraillePreferences();
