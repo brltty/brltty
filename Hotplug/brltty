@@ -1,0 +1,47 @@
+#!/bin/sh
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2006 by The BRLTTY Team. All rights reserved.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU General Public License, as published by the Free Software
+# Foundation.  Please see the file COPYING for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+programName="${0##*/}"
+programMessage() {
+   echo >&2 "${programName}: ${1}"
+}
+programError() {
+   [ -n "${1}" ] && programMessage "${1}"
+   exit "${2:-2}"
+}
+
+[ -n "${ACTION}" ] || programError "action not specified."
+case "${ACTION}"
+in
+   add)
+      driver="${programName#*-}"
+
+      device=usb:
+
+      echo -b"${driver}" -d"${device}"  && {
+         [ -n "${REMOVER}" ] && ln -s -f -- "${0}" "${REMOVER}"
+      }
+      ;;
+
+   remove)
+      ;;
+
+   *) programError "action not supported: ${ACTION}"
+esac
+
+exit 0
