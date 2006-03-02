@@ -361,10 +361,15 @@ usbCancelRequest (
   void *request
 ) {
   UsbDeviceExtension *devx = device->extension;
+  int reap = 1;
 
-  if (ioctl(devx->file, USBDEVFS_DISCARDURB, request) == -1)
-    if (errno != EINVAL)
+  if (ioctl(devx->file, USBDEVFS_DISCARDURB, request) == -1) {
+    if (errno == ENODEV)  {
+      reap = 0;
+    } else if (errno != EINVAL) {
       LogError("USB URB discard");
+    }
+  }
   
   {
     struct usbdevfs_urb *urb = request;
@@ -375,6 +380,7 @@ usbCancelRequest (
       int found = 1;
 
       while (!deleteItem(eptx->completedRequests, request)) {
+        if (!reap) break;
         if (!usbReapUrb(device, 0)) {
           found = 0;
           break;
