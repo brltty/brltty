@@ -226,14 +226,25 @@ done
 rm "${linuxrcPath}"
 ln -s /bin/brltty "${linuxrcPath}"
 
+devices=""
+addDevices() {
+   typeset prefix="${1}"
+   typeset last="${2}"
+   typeset suffix="${3}"
+   typeset number
+   while (( number <= last ))
+   do
+      devices="${devices} ${prefix}${suffix}"
+      suffix=$(( ++number ))
+   done
+}
+addDevices vcs 12
+addDevices vcsa 12
+addDevices ttyS 3 0
+addDevices ttyUSB 1 0
+
 deviceDirectory="${initrdRoot}/dev"
-shopt -u nullglob
-for device in /dev/vcs*
-do
-   deviceName="${device##*/}"
-   [ -e "${deviceDirectory}/${deviceName}" ] && continue
-   cp -a "${device}" "${deviceDirectory}"
-done
+MAKEDEV -d "${deviceDirectory}" -D "${deviceDirectory}" -x ${devices}
 
 case "${brlttyArchive}"
 in
@@ -261,7 +272,13 @@ brlttyInstallRoot="${temporaryDirectory}/install"
    trap "" 0
    cd "${brlttyBuildRoot}"
 
-   ./autogen
+   shopt -s nullglob
+   set -- ./autogen*
+   for autogen
+   do
+      [ -f "${autogen}" -a -r "${autogen}"  -a -x "${autogen}" ]  && "${autogen}"
+   done
+
    ./configure --quiet --with-install-root="${brlttyInstallRoot}" \
 	       --with-init-path="${initPath}" \
                --with-screen-driver="lx,-all" \
