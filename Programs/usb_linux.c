@@ -186,6 +186,7 @@ usbReleaseInterface (
   UsbDeviceExtension *devx = device->extension;
   unsigned int arg = interface;
   if (ioctl(devx->file, USBDEVFS_RELEASEINTERFACE, &arg) != -1) return 1;
+  if (errno == ENODEV) return 1;
   LogError("USB interface release");
   return 0;
 }
