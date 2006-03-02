@@ -1534,7 +1534,7 @@ main (int argc, char *argv[]) {
             case BRL_CMD_CSRTRK:
               if (TOGGLE(p->trackCursor, &tune_cursor_unlinked, &tune_cursor_linked)) {
 #ifdef ENABLE_SPEECH_SUPPORT
-                if (speech->isSpeaking()) {
+                if (speechTracking && (scr.number == speechScreen)) {
                   speechIndex = -1;
                 } else
 #endif /* ENABLE_SPEECH_SUPPORT */
@@ -1959,7 +1959,7 @@ main (int argc, char *argv[]) {
           contracted = 0;
 
 #ifdef ENABLE_SPEECH_SUPPORT
-          if (p->trackCursor && speechTracking && speech->isSpeaking()) {
+          if (p->trackCursor && speechTracking && (scr.number == speechScreen)) {
             p->trackCursor = 0;
             playTune(&tune_cursor_unlinked);
           }
@@ -2011,21 +2011,16 @@ main (int argc, char *argv[]) {
 #ifdef ENABLE_SPEECH_SUPPORT
       /* called continually even if we're not tracking so that the pipe doesn't fill up. */
       speech->doTrack();
+
+      if (speechTracking && !speech->isSpeaking()) speechTracking = 0;
 #endif /* ENABLE_SPEECH_SUPPORT */
 
       if (p->trackCursor) {
 #ifdef ENABLE_SPEECH_SUPPORT
-        if (speechTracking) {
-          if ((scr.number == speechScreen) && speech->isSpeaking()) {
-            int index = speech->getTrack();
-            if (index != speechIndex) {
-              trackSpeech(speechIndex = index);
-            }
-          } else {
-            speechTracking = 0;
-          }
-        }
-        if (!speechTracking)
+        if (speechTracking && (scr.number == speechScreen)) {
+          int index = speech->getTrack();
+          if (index != speechIndex) trackSpeech(speechIndex = index);
+        } else
 #endif /* ENABLE_SPEECH_SUPPORT */
         {
           /* If cursor moves while blinking is on */
