@@ -1136,30 +1136,48 @@ interpretBrailleStarKeys (BRL_DriverCommandContext context, const Keys *keys, in
         *command = BRL_CMD_FWINRT;
         return 1;
       case (ROCKER_LEFT_MIDDLE | ROCKER_RIGHT_MIDDLE):
+      case (ROCKER_LEFT_MIDDLE | KEY_B3):
+      case (KEY_B6 | ROCKER_RIGHT_MIDDLE):
         *command = BRL_CMD_HOME;
         return 1;
       case (ROCKER_RIGHT_MIDDLE | ROCKER_LEFT_TOP):
+      case (ROCKER_RIGHT_MIDDLE | KEY_B5):
+      case (KEY_B3 | ROCKER_LEFT_TOP):
         *command = BRL_CMD_TOP_LEFT;
         return 1;
       case (ROCKER_RIGHT_MIDDLE | ROCKER_LEFT_BOTTOM):
+      case (ROCKER_RIGHT_MIDDLE | KEY_B7):
+      case (KEY_B3 | ROCKER_LEFT_BOTTOM):
         *command = BRL_CMD_BOT_LEFT;
         return 1;
       case (ROCKER_LEFT_MIDDLE | ROCKER_RIGHT_TOP):
+      case (ROCKER_LEFT_MIDDLE | KEY_B4):
+      case (KEY_B6 | ROCKER_RIGHT_TOP):
         *command = BRL_CMD_TOP;
         return 1;
       case (ROCKER_LEFT_MIDDLE | ROCKER_RIGHT_BOTTOM):
+      case (ROCKER_LEFT_MIDDLE | KEY_B2):
+      case (KEY_B6 | ROCKER_RIGHT_BOTTOM):
         *command = BRL_CMD_BOT;
         return 1;
       case (ROCKER_LEFT_TOP | ROCKER_RIGHT_TOP):
+      case (ROCKER_LEFT_TOP | KEY_B4):
+      case (KEY_B5 | ROCKER_RIGHT_TOP):
         *command = BRL_CMD_PRDIFLN;
         return 1;
       case (ROCKER_LEFT_TOP | ROCKER_RIGHT_BOTTOM):
+      case (ROCKER_LEFT_TOP | KEY_B2):
+      case (KEY_B5 | ROCKER_RIGHT_BOTTOM):
         *command = BRL_CMD_NXDIFLN;
         return 1;
       case (ROCKER_LEFT_BOTTOM | ROCKER_RIGHT_TOP):
+      case (ROCKER_LEFT_BOTTOM | KEY_B4):
+      case (KEY_B7 | ROCKER_RIGHT_TOP):
         *command = BRL_CMD_ATTRUP;
         return 1;
       case (ROCKER_LEFT_BOTTOM | ROCKER_RIGHT_BOTTOM):
+      case (ROCKER_LEFT_BOTTOM | KEY_B2):
+      case (KEY_B7 | ROCKER_RIGHT_BOTTOM):
         *command = BRL_CMD_ATTRDN;
         return 1;
     }
