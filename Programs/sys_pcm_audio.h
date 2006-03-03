@@ -146,6 +146,9 @@ getPcmAmplitudeFormat (PcmDevice *pcm) {
 
       case AUDIO_ENCODING_ULAW:
         return PCM_FMT_ULAW;
+
+      case AUDIO_ENCODING_ALAW:
+        return PCM_FMT_ALAW;
     }
   }
   return PCM_FMT_UNKNOWN;
