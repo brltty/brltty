@@ -37,9 +37,9 @@ typedef enum {
 /* Communication codes */
 static unsigned char HandyDescribe[] = {0XFF};
 static unsigned char HandyDescription[] = {0XFE};
-static unsigned char HandyBrailleStart[] = {0X01};	/* general header to display braille */
+static unsigned char HandyBrailleBegin[] = {0X01};	/* general header to display braille */
 static unsigned char BookwormBrailleEnd[] = {0X16};	/* bookworm trailer to display braille */
-static unsigned char BookwormStop[] = {0X05, 0X07};	/* bookworm trailer to display braille */
+static unsigned char BookwormSessionEnd[] = {0X05, 0X07};	/* bookworm trailer to display braille */
 
 typedef struct {
   unsigned long int front;
@@ -59,18 +59,21 @@ static KeysInterpreter interpretBrailleWaveKeys;
 static KeysInterpreter interpretBrailleStarKeys;
 typedef struct {
   const char *name;
+  ByteInterpreter *interpretByte;
+  KeysInterpreter *interpretKeys;
+
+  unsigned char *brailleBeginAddress;
+  unsigned char *brailleEndAddress;
+  unsigned char *sessionEndAddress;
+
   unsigned char identifier;
   unsigned char columns;
   unsigned char statusCells;
   unsigned char helpPage;
-  ByteInterpreter *interpretByte;
-  KeysInterpreter *interpretKeys;
-  unsigned char *brailleStartAddress;
-  unsigned char *brailleEndAddress;
-  unsigned char *stopAddress;
-  unsigned char brailleStartLength;
+
+  unsigned char brailleBeginLength;
   unsigned char brailleEndLength;
-  unsigned char stopLength;
+  unsigned char sessionEndLength;
 } ModelEntry;
 
 #define HT_BYTE_SEQUENCE(name,bytes) .name##Address = bytes, .name##Length = sizeof(bytes)
@@ -82,7 +85,7 @@ static const ModelEntry modelTable[] = {
     .helpPage = 0,
     .interpretByte = interpretKeyByte,
     .interpretKeys = interpretModularKeys,
-    HT_BYTE_SEQUENCE(brailleStart, HandyBrailleStart)
+    HT_BYTE_SEQUENCE(brailleBegin, HandyBrailleBegin)
   }
   ,
   { .identifier = 0X89,
@@ -92,7 +95,7 @@ static const ModelEntry modelTable[] = {
     .helpPage = 0,
     .interpretByte = interpretKeyByte,
     .interpretKeys = interpretModularKeys,
-    HT_BYTE_SEQUENCE(brailleStart, HandyBrailleStart)
+    HT_BYTE_SEQUENCE(brailleBegin, HandyBrailleBegin)
   }
   ,
   { .identifier = 0X88,
@@ -102,7 +105,7 @@ static const ModelEntry modelTable[] = {
     .helpPage = 0,
     .interpretByte = interpretKeyByte,
     .interpretKeys = interpretModularKeys,
-    HT_BYTE_SEQUENCE(brailleStart, HandyBrailleStart)
+    HT_BYTE_SEQUENCE(brailleBegin, HandyBrailleBegin)
   }
   ,
   { .identifier = 0X05,
@@ -112,7 +115,7 @@ static const ModelEntry modelTable[] = {
     .helpPage = 0,
     .interpretByte = interpretKeyByte,
     .interpretKeys = interpretBrailleWaveKeys,
-    HT_BYTE_SEQUENCE(brailleStart, HandyBrailleStart)
+    HT_BYTE_SEQUENCE(brailleBegin, HandyBrailleBegin)
   }
   ,
   { .identifier = 0X90,
@@ -121,9 +124,9 @@ static const ModelEntry modelTable[] = {
     .statusCells = 0,
     .helpPage = 1,
     .interpretByte = interpretBookwormByte,
-    HT_BYTE_SEQUENCE(brailleStart, HandyBrailleStart),
+    HT_BYTE_SEQUENCE(brailleBegin, HandyBrailleBegin),
     HT_BYTE_SEQUENCE(brailleEnd, BookwormBrailleEnd),
-    HT_BYTE_SEQUENCE(stop, BookwormStop)
+    HT_BYTE_SEQUENCE(sessionEnd, BookwormSessionEnd)
   }
   ,
   { .identifier = 0X72,
@@ -133,7 +136,7 @@ static const ModelEntry modelTable[] = {
     .helpPage = 2,
     .interpretByte = interpretKeyByte,
     .interpretKeys = interpretBrailleStarKeys,
-    HT_BYTE_SEQUENCE(brailleStart, HandyBrailleStart)
+    HT_BYTE_SEQUENCE(brailleBegin, HandyBrailleBegin)
   }
   ,
   { .identifier = 0X74,
@@ -143,7 +146,7 @@ static const ModelEntry modelTable[] = {
     .helpPage = 2,
     .interpretByte = interpretKeyByte,
     .interpretKeys = interpretBrailleStarKeys,
-    HT_BYTE_SEQUENCE(brailleStart, HandyBrailleStart)
+    HT_BYTE_SEQUENCE(brailleBegin, HandyBrailleBegin)
   }
   ,
   { .identifier = 0X78,
@@ -153,7 +156,7 @@ static const ModelEntry modelTable[] = {
     .helpPage = 3,
     .interpretByte = interpretKeyByte,
     .interpretKeys = interpretBrailleStarKeys,
-    HT_BYTE_SEQUENCE(brailleStart, HandyBrailleStart)
+    HT_BYTE_SEQUENCE(brailleBegin, HandyBrailleBegin)
   }
   ,
   { /* end of table */
@@ -582,8 +585,8 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
 
 static void
 brl_close (BrailleDisplay *brl) {
-  if (model->stopLength) {
-    io->writeBytes(model->stopAddress, model->stopLength, NULL);
+  if (model->sessionEndLength) {
+    io->writeBytes(model->sessionEndAddress, model->sessionEndLength, NULL);
   }
   io->closePort();
 
@@ -598,12 +601,12 @@ brl_close (BrailleDisplay *brl) {
 static int
 updateBrailleCells (BrailleDisplay *brl) {
   if (updateRequired && (currentState == BDS_READY)) {
-    unsigned char buffer[model->brailleStartLength + model->statusCells + model->columns + model->brailleEndLength];
+    unsigned char buffer[model->brailleBeginLength + model->statusCells + model->columns + model->brailleEndLength];
     int count = 0;
 
-    if (model->brailleStartLength) {
-      memcpy(buffer+count, model->brailleStartAddress, model->brailleStartLength);
-      count += model->brailleStartLength;
+    if (model->brailleBeginLength) {
+      memcpy(buffer+count, model->brailleBeginAddress, model->brailleBeginLength);
+      count += model->brailleBeginLength;
     }
 
     memcpy(buffer+count, rawStatus, model->statusCells);
