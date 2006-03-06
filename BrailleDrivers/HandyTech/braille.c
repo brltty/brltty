@@ -172,7 +172,9 @@ static const ModelDescription Models[] = {
     .brailleStartLength = sizeof(HandyBrailleStart)
   }
   ,
-  { /* end of table */ }
+  { /* end of table */
+    .name = NULL
+  }
 };
 
 #define BRLROWS		1
