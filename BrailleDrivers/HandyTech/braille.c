@@ -74,76 +74,105 @@ typedef struct {
 } ModelDescription;
 static const ModelDescription Models[] = {
   {
-    "Modular 20+4", 0X80,
-    20, 4, 0,
-    interpretKeyByte, interpretModularKeys,
-    HandyBrailleStart,         NULL, NULL,
-    sizeof(HandyBrailleStart), 0,    0
+    .name = "Modular 20+4",
+    .identifier = 0X80,
+    .columns = 20,
+    .statusCells = 4,
+    .helpPage = 0,
+    .interpretByte = interpretKeyByte,
+    .interpretKeys = interpretModularKeys,
+    .brailleStartAddress = HandyBrailleStart,
+    .brailleStartLength = sizeof(HandyBrailleStart)
   }
   ,
   {
-    "Modular 40+4", 0X89,
-    40, 4, 0,
-    interpretKeyByte, interpretModularKeys,
-    HandyBrailleStart,         NULL, NULL,
-    sizeof(HandyBrailleStart), 0,    0
+    .name = "Modular 40+4",
+    .identifier = 0X89,
+    .columns = 40,
+    .statusCells = 4,
+    .helpPage = 0,
+    .interpretByte = interpretKeyByte,
+    .interpretKeys = interpretModularKeys,
+    .brailleStartAddress = HandyBrailleStart,
+    .brailleStartLength = sizeof(HandyBrailleStart)
   }
   ,
   {
-    "Modular 80+4", 0X88,
-    80, 4, 0,
-    interpretKeyByte, interpretModularKeys,
-    HandyBrailleStart,         NULL, NULL,
-    sizeof(HandyBrailleStart), 0,    0
+    .name = "Modular 80+4",
+    .identifier = 0X88,
+    .columns = 80,
+    .statusCells = 4,
+    .helpPage = 0,
+    .interpretByte = interpretKeyByte,
+    .interpretKeys = interpretModularKeys,
+    .brailleStartAddress = HandyBrailleStart,
+    .brailleStartLength = sizeof(HandyBrailleStart)
   }
   ,
   {
-    "Braille Wave 40", 0X05,
-    40, 0, 0,
-    interpretKeyByte, interpretBrailleWaveKeys,
-    HandyBrailleStart,         NULL, NULL,
-    sizeof(HandyBrailleStart), 0,    0
+    .name = "Braille Wave 40",
+    .identifier = 0X05,
+    .columns = 40,
+    .statusCells = 0,
+    .helpPage = 0,
+    .interpretByte = interpretKeyByte,
+    .interpretKeys = interpretBrailleWaveKeys,
+    .brailleStartAddress = HandyBrailleStart,
+    .brailleStartLength = sizeof(HandyBrailleStart)
   }
   ,
   {
-    "Bookworm", 0X90,
-    8, 0, 1,
-    interpretBookwormByte, NULL,
-    HandyBrailleStart,         BookwormBrailleEnd,         BookwormStop,
-    sizeof(HandyBrailleStart), sizeof(BookwormBrailleEnd), sizeof(BookwormStop)
+    .name = "Bookworm",
+    .identifier = 0X90,
+    .columns = 8,
+    .statusCells = 0,
+    .helpPage = 1,
+    .interpretByte = interpretBookwormByte,
+    .brailleStartAddress = HandyBrailleStart,
+    .brailleStartLength = sizeof(HandyBrailleStart),
+    .brailleEndAddress = BookwormBrailleEnd,
+    .brailleEndLength = sizeof(BookwormBrailleEnd),
+    .stopAddress = BookwormStop,
+    .stopLength = sizeof(BookwormStop)
   }
   ,
   {
-    "Braillino 20", 0X72,
-    20, 0, 2,
-    interpretKeyByte, interpretBrailleStarKeys,
-    HandyBrailleStart,         NULL, NULL,
-    sizeof(HandyBrailleStart), 0,    0 
+    .name = "Braillino 20",
+    .identifier = 0X72,
+    .columns = 20,
+    .statusCells = 0,
+    .helpPage = 2,
+    .interpretByte = interpretKeyByte,
+    .interpretKeys = interpretBrailleStarKeys,
+    .brailleStartAddress = HandyBrailleStart,
+    .brailleStartLength = sizeof(HandyBrailleStart)
   }
   ,
   {
-    "Braille Star 40", 0X74,
-    40, 0, 2,
-    interpretKeyByte, interpretBrailleStarKeys,
-    HandyBrailleStart,         NULL, NULL,
-    sizeof(HandyBrailleStart), 0,    0
+    .name = "Braille Star 40",
+    .identifier = 0X74,
+    .columns = 40,
+    .statusCells = 0,
+    .helpPage = 2,
+    .interpretByte = interpretKeyByte,
+    .interpretKeys = interpretBrailleStarKeys,
+    .brailleStartAddress = HandyBrailleStart,
+    .brailleStartLength = sizeof(HandyBrailleStart)
   }
   ,
   {
-    "Braille Star 80", 0X78,
-    80, 0, 3,
-    interpretKeyByte, interpretBrailleStarKeys,
-    HandyBrailleStart,         NULL, NULL,
-    sizeof(HandyBrailleStart), 0,    0
+    .name = "Braille Star 80",
+    .identifier = 0X78,
+    .columns = 80,
+    .statusCells = 0,
+    .helpPage = 3,
+    .interpretByte = interpretKeyByte,
+    .interpretKeys = interpretBrailleStarKeys,
+    .brailleStartAddress = HandyBrailleStart,
+    .brailleStartLength = sizeof(HandyBrailleStart)
   }
   ,
-  { /* end of table */
-    NULL, 0,
-    0, 0, 0,
-    NULL, NULL,
-    NULL, NULL, NULL,
-    0,    0,    0
-  }
+  { /* end of table */ }
 };
 
 #define BRLROWS		1
