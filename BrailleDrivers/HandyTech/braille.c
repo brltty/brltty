@@ -71,111 +71,96 @@ typedef struct {
   unsigned char brailleStartLength;
   unsigned char brailleEndLength;
   unsigned char stopLength;
-} ModelDescription;
-static const ModelDescription Models[] = {
-  {
+} ModelEntry;
+
+#define HT_BYTE_SEQUENCE(name,bytes) .name##Address = bytes, .name##Length = sizeof(bytes)
+static const ModelEntry modelTable[] = {
+  { .identifier = 0X80,
     .name = "Modular 20+4",
-    .identifier = 0X80,
     .columns = 20,
     .statusCells = 4,
     .helpPage = 0,
     .interpretByte = interpretKeyByte,
     .interpretKeys = interpretModularKeys,
-    .brailleStartAddress = HandyBrailleStart,
-    .brailleStartLength = sizeof(HandyBrailleStart)
+    HT_BYTE_SEQUENCE(brailleStart, HandyBrailleStart)
   }
   ,
-  {
+  { .identifier = 0X89,
     .name = "Modular 40+4",
-    .identifier = 0X89,
     .columns = 40,
     .statusCells = 4,
     .helpPage = 0,
     .interpretByte = interpretKeyByte,
     .interpretKeys = interpretModularKeys,
-    .brailleStartAddress = HandyBrailleStart,
-    .brailleStartLength = sizeof(HandyBrailleStart)
+    HT_BYTE_SEQUENCE(brailleStart, HandyBrailleStart)
   }
   ,
-  {
+  { .identifier = 0X88,
     .name = "Modular 80+4",
-    .identifier = 0X88,
     .columns = 80,
     .statusCells = 4,
     .helpPage = 0,
     .interpretByte = interpretKeyByte,
     .interpretKeys = interpretModularKeys,
-    .brailleStartAddress = HandyBrailleStart,
-    .brailleStartLength = sizeof(HandyBrailleStart)
+    HT_BYTE_SEQUENCE(brailleStart, HandyBrailleStart)
   }
   ,
-  {
+  { .identifier = 0X05,
     .name = "Braille Wave 40",
-    .identifier = 0X05,
     .columns = 40,
     .statusCells = 0,
     .helpPage = 0,
     .interpretByte = interpretKeyByte,
     .interpretKeys = interpretBrailleWaveKeys,
-    .brailleStartAddress = HandyBrailleStart,
-    .brailleStartLength = sizeof(HandyBrailleStart)
+    HT_BYTE_SEQUENCE(brailleStart, HandyBrailleStart)
   }
   ,
-  {
+  { .identifier = 0X90,
     .name = "Bookworm",
-    .identifier = 0X90,
     .columns = 8,
     .statusCells = 0,
     .helpPage = 1,
     .interpretByte = interpretBookwormByte,
-    .brailleStartAddress = HandyBrailleStart,
-    .brailleStartLength = sizeof(HandyBrailleStart),
-    .brailleEndAddress = BookwormBrailleEnd,
-    .brailleEndLength = sizeof(BookwormBrailleEnd),
-    .stopAddress = BookwormStop,
-    .stopLength = sizeof(BookwormStop)
+    HT_BYTE_SEQUENCE(brailleStart, HandyBrailleStart),
+    HT_BYTE_SEQUENCE(brailleEnd, BookwormBrailleEnd),
+    HT_BYTE_SEQUENCE(stop, BookwormStop)
   }
   ,
-  {
+  { .identifier = 0X72,
     .name = "Braillino 20",
-    .identifier = 0X72,
     .columns = 20,
     .statusCells = 0,
     .helpPage = 2,
     .interpretByte = interpretKeyByte,
     .interpretKeys = interpretBrailleStarKeys,
-    .brailleStartAddress = HandyBrailleStart,
-    .brailleStartLength = sizeof(HandyBrailleStart)
+    HT_BYTE_SEQUENCE(brailleStart, HandyBrailleStart)
   }
   ,
-  {
+  { .identifier = 0X74,
     .name = "Braille Star 40",
-    .identifier = 0X74,
     .columns = 40,
     .statusCells = 0,
     .helpPage = 2,
     .interpretByte = interpretKeyByte,
     .interpretKeys = interpretBrailleStarKeys,
-    .brailleStartAddress = HandyBrailleStart,
-    .brailleStartLength = sizeof(HandyBrailleStart)
+    HT_BYTE_SEQUENCE(brailleStart, HandyBrailleStart)
   }
   ,
-  {
+  { .identifier = 0X78,
     .name = "Braille Star 80",
-    .identifier = 0X78,
     .columns = 80,
     .statusCells = 0,
     .helpPage = 3,
     .interpretByte = interpretKeyByte,
     .interpretKeys = interpretBrailleStarKeys,
-    .brailleStartAddress = HandyBrailleStart,
-    .brailleStartLength = sizeof(HandyBrailleStart)
+    HT_BYTE_SEQUENCE(brailleStart, HandyBrailleStart)
   }
   ,
   { /* end of table */
     .name = NULL
   }
 };
+#undef HT_BYTE_SEQUENCE
 
 #define BRLROWS		1
 #define MAX_STCELLS	4	/* highest number of status cells */
@@ -191,7 +176,7 @@ static unsigned char *rawData = NULL;		/* translated data to send to Braille */
 static unsigned char *prevData = NULL;	/* previously sent raw data */
 static unsigned char rawStatus[MAX_STCELLS];		/* to hold status info */
 static unsigned char prevStatus[MAX_STCELLS];	/* to hold previous status */
-static const ModelDescription *model;		/* points to terminal model config struct */
+static const ModelEntry *model;		/* points to terminal model config struct */
 
 static unsigned char *at2Buffer;
 static int at2Size;
@@ -492,14 +477,14 @@ reallocateBuffer (unsigned char **buffer, size_t size) {
 static int
 identifyModel (BrailleDisplay *brl, unsigned char identifier) {
   for (
-    model = Models;
+    model = modelTable;
     model->name && (model->identifier != identifier);
     model++
   );
   if (!model->name) {
     LogPrint(LOG_ERR, "Detected unknown HandyTech model with ID %02X.",
              identifier);
-    LogPrint(LOG_WARNING, "Please fix Models[] in HandyTech/braille.c and notify the maintainer.");
+    LogPrint(LOG_WARNING, "Please fix modelTable[] in HandyTech/braille.c and notify the maintainer.");
     return 0;
   }
   LogPrint(LOG_INFO, "Detected %s: %d data %s, %d status %s.",
