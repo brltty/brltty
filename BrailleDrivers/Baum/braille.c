@@ -1702,14 +1702,14 @@ brl_close (BrailleDisplay *brl) {
 }
 
 static ssize_t
-brl_readPacket (BrailleDisplay *brl, unsigned char *buffer, size_t size) {
+brl_readPacket (BrailleDisplay *brl, void *buffer, size_t size) {
   int count = protocol->readPacket(buffer, size);
   if (!count) count = -1;
   return count;
 }
 
 static ssize_t
-brl_writePacket (BrailleDisplay *brl, const unsigned char *packet, size_t length) {
+brl_writePacket (BrailleDisplay *brl, const void *packet, size_t length) {
   return protocol->writePacket(brl, packet, length)? length: -1;
 }
 

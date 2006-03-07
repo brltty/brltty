@@ -364,7 +364,7 @@ static int WriteToBrlDisplay (BrailleDisplay *brl, int len, const unsigned char 
    return (serialWriteData(serialDevice, buf, p - buf) == p - buf);
 }
 
-static ssize_t brl_writePacket(BrailleDisplay *brl, const unsigned char *p, size_t sz)
+static ssize_t brl_writePacket(BrailleDisplay *brl, const void *p, size_t sz)
 {
   if (!p)
     return 0;
@@ -892,8 +892,9 @@ static int	key_handle(BrailleDisplay *brl, unsigned char *buf)
 
 #ifdef		BRL_HAVE_PACKET_IO
 
-static ssize_t brl_readPacket(BrailleDisplay *brl, unsigned char *bp, size_t size)
+static ssize_t brl_readPacket(BrailleDisplay *brl, void *packet, size_t size)
 {
+  unsigned char *bp = (unsigned char *) packet;
   static int		i = 0; /* cpt to build the received packet */
   size_t		offset = 0; /* offset to use serialReadChunk */
   static char		apacket = 0;  /* =1 when packet starts */

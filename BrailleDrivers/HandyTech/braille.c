@@ -1488,11 +1488,11 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 }
 
 static ssize_t
-brl_readPacket (BrailleDisplay *brl, unsigned char *bytes, size_t count) {
+brl_readPacket (BrailleDisplay *brl, void *bytes, size_t count) {
   return io->readBytes(bytes, count, 0);
 }
 
 static ssize_t
-brl_writePacket (BrailleDisplay *brl, const unsigned char *data, size_t length) {
+brl_writePacket (BrailleDisplay *brl, const void *data, size_t length) {
   return io->writeBytes(data, length, &brl->writeDelay);
 }

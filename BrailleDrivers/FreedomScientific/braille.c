@@ -1260,7 +1260,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 }
 
 static ssize_t
-brl_readPacket (BrailleDisplay *brl, unsigned char *buffer, size_t length) {
+brl_readPacket (BrailleDisplay *brl, void *buffer, size_t length) {
   Packet packet;
   int count = readPacket(brl, &packet);
   if (count > 0) {
@@ -1275,7 +1275,8 @@ brl_readPacket (BrailleDisplay *brl, unsigned char *buffer, size_t length) {
 }
 
 static ssize_t
-brl_writePacket (BrailleDisplay *brl, const unsigned char *buffer, size_t length) {
+brl_writePacket (BrailleDisplay *brl, const void *packet, size_t length) {
+  unsigned char *buffer = (unsigned char *) packet;
   int size = 4;
   if (length >= size) {
     int hasPayload = 0;

@@ -42,8 +42,8 @@ static void brl_writeStatus (BrailleDisplay *brl, const unsigned char *);
 #endif /* BRL_HAVE_VISUAL_DISPLAY */
 
 #ifdef BRL_HAVE_PACKET_IO
-  static ssize_t brl_readPacket (BrailleDisplay *, unsigned char *, size_t);
-  static ssize_t brl_writePacket (BrailleDisplay *, const unsigned char *, size_t);
+  static ssize_t brl_readPacket (BrailleDisplay *, void *, size_t);
+  static ssize_t brl_writePacket (BrailleDisplay *, const void *, size_t);
   static int brl_reset (BrailleDisplay *);
 #endif /* BRL_HAVE_PACKET_IO */
 
