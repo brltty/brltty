@@ -87,7 +87,7 @@ unmount_cpio() {
    [ -n "${2}" ] && {
       find . -print |
       sed -e '/^\.$/d' -e 's/^\.\///' |
-      cpio --quiet -o -O "${2}" -c
+      cpio --quiet -o -H newc -O "${2}"
    }
    rm -f -r -- $(ls -1 -A)
    cd "${workingDirectory}"
