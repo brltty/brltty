@@ -1276,20 +1276,20 @@ brl_readPacket (BrailleDisplay *brl, void *buffer, size_t length) {
 
 static ssize_t
 brl_writePacket (BrailleDisplay *brl, const void *packet, size_t length) {
-  unsigned char *buffer = (unsigned char *) packet;
+  const unsigned char *bytes = packet;
   int size = 4;
   if (length >= size) {
     int hasPayload = 0;
-    if (buffer[0] & 0X80) {
-      size += buffer[1];
+    if (bytes[0] & 0X80) {
+      size += bytes[1];
       hasPayload = 1;
     }
     if (length >= size) {
       if (length > size)
         LogPrint(LOG_WARNING, "Output packet buffer larger than necessary: %d > %d",
                  (int)length, size);
-      return writePacket(brl, buffer[0], buffer[1], buffer[2], buffer[3],
-                         (hasPayload? &buffer[4]: NULL));
+      return writePacket(brl, bytes[0], bytes[1], bytes[2], bytes[3],
+                         (hasPayload? &bytes[4]: NULL));
     }
   }
   LogPrint(LOG_WARNING, "Output packet buffer too small: %d < %d", (int)length, size);
