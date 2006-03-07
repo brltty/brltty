@@ -894,7 +894,7 @@ static int	key_handle(BrailleDisplay *brl, unsigned char *buf)
 
 static ssize_t brl_readPacket(BrailleDisplay *brl, void *packet, size_t size)
 {
-  unsigned char *bp = (unsigned char *) packet;
+  unsigned char *bp = packet;
   static int		i = 0; /* cpt to build the received packet */
   size_t		offset = 0; /* offset to use serialReadChunk */
   static char		apacket = 0;  /* =1 when packet starts */
