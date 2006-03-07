@@ -281,15 +281,14 @@ doCursorRouting (int column, int row, int screen) {
   return ROUTE_DONE;
 }
 
-int
-startCursorRouting (int column, int row, int screen) {
 #ifdef SIGCHLD
-  int started = 0;
-  sigset_t newMask, oldMask;
+static void
+preCursorRouting (sigset_t *oldMask) {
+  sigset_t newMask;
 
   sigemptyset(&newMask);
   sigaddset(&newMask, SIGCHLD);
-  sigprocmask(SIG_BLOCK, &newMask, &oldMask);
+  sigprocmask(SIG_BLOCK, &newMask, oldMask);
 
   /*
    * First, we must check if a subprocess is already running. 
@@ -301,11 +300,37 @@ startCursorRouting (int column, int row, int screen) {
   if (routingProcess) {
     kill(routingProcess, SIGUSR1);
     do {
-      sigsuspend(&oldMask);
+      sigsuspend(oldMask);
     } while (routingProcess);
     routingStatus = ROUTE_NONE;
   }
+}
 
+static void
+postCursorRouting (const sigset_t *oldMask) {
+  sigprocmask(SIG_SETMASK, oldMask, NULL); /* unblock SIGCHLD */
+}
+
+static void
+stopCursorRouting (void) {
+  sigset_t originalSignalMask;
+  preCursorRouting(&originalSignalMask);
+  postCursorRouting(&originalSignalMask);
+}
+
+static void
+exitCursorRouting (void) {
+  stopCursorRouting();
+}
+#endif /* SIGCHLD */
+
+int
+startCursorRouting (int column, int row, int screen) {
+#ifdef SIGCHLD
+  int started = 0;
+  sigset_t originalSignalMask;
+
+  preCursorRouting(&originalSignalMask);
   switch (routingProcess = fork()) {
     case 0: { /* child: cursor routing subprocess */
       int result = ROUTE_ERROR;
@@ -322,11 +347,19 @@ startCursorRouting (int column, int row, int screen) {
       break;
 
     default: /* parent: continue while cursor is being routed */
+      {
+        static int first = 1;
+        if (first) {
+          first = 0;
+          atexit(exitCursorRouting);
+        }
+      }
+
       started = 1;
       break;
   }
+  postCursorRouting(&originalSignalMask);
 
-  sigprocmask(SIG_SETMASK, &oldMask, NULL); /* unblock SIGCHLD */
   return started;
 #else /* SIGCHLD */
   routingStatus = doCursorRouting(column, row, screen);
