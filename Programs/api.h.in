@@ -53,8 +53,8 @@ extern "C" {
  * @{ */
 
 /** Default port number on which connections to \e BrlAPI can be established */
-#define BRLAPI_SOCKETPORTNUM 35751
-#define BRLAPI_SOCKETPORT "35751"
+#define BRLAPI_SOCKETPORTNUM 4101 
+#define BRLAPI_SOCKETPORT "4101"
 
 /** Maximum packet size for packets exchanged on sockets and with braille
  * terminal */
