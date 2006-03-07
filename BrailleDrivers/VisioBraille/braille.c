@@ -64,7 +64,7 @@ static int printcode = 0;
 /* Returns 0 if everything is right, -1 if an error occured while sending */
 static ssize_t brl_writePacket(BrailleDisplay *brl, const void *packet, size_t size)
 {
-  unsigned char *p = (unsigned char *) packet;
+  const unsigned char *p = packet;
   int lgtho = 1;
   static unsigned char obuf[MAXPKTLEN] = { 02 };
   const unsigned char *x;
