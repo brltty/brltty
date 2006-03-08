@@ -226,25 +226,26 @@ done
 rm "${linuxrcPath}"
 ln -s /bin/brltty "${linuxrcPath}"
 
-devices=""
-addDevices() {
-   typeset prefix="${1}"
-   typeset last="${2}"
-   typeset suffix="${3}"
-   typeset number
-   while (( number <= last ))
+deviceDirectory="${initrdRoot}/dev"
+ensureDevices() {
+   typeset type="${1}"
+   typeset major="${2}"
+   typeset minor="${3}"
+   typeset prefix="${4}"
+   typeset last="${5}"
+   typeset suffix="${6}"
+   typeset number=0
+   while ((number <= last))
    do
-      devices="${devices} ${prefix}${suffix}"
-      suffix=$(( ++number ))
+      typeset path="${deviceDirectory}/${prefix}${suffix}"
+      [ -e "${path}" ] || mknod -m 600 "${path}" "${type}" "${major}" "$((minor++))"
+      suffix=$((++number))
    done
 }
-addDevices vcs 12
-addDevices vcsa 12
-addDevices ttyS 3 0
-addDevices ttyUSB 1 0
-
-deviceDirectory="${initrdRoot}/dev"
-MAKEDEV -d "${deviceDirectory}" -D "${deviceDirectory}" -x ${devices}
+ensureDevices c 7 0 vcs 12
+ensureDevices c 7 128 vcsa 12
+ensureDevices c 4 64 ttyS 3 0
+ensureDevices c 188 0 ttyUSB 1 0
 
 case "${brlttyArchive}"
 in
