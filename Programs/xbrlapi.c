@@ -172,9 +172,11 @@ void getVT(void) {
   if (brlapi_ignoreKeyRange(0,BRL_KEYCODE_MAX)<0)
     fatal_brlapi_errno("ignoreKeys",gettext("cannot ignore keys\n"));
 #ifdef CAN_SIMULATE_KEY_PRESSES
+  if (brlapi_unignoreKeyRange(BRL_BLK_PASSKEY, BRL_BLK_PASSKEY |BRL_MSK_ARG))
+    fatal_brlapi_errno("unignoreKeyRange",NULL);
   if (brlapi_unignoreKeyRange(BRL_BLK_PASSCHAR,BRL_BLK_PASSCHAR|BRL_MSK_ARG))
     fatal_brlapi_errno("unignoreKeyRange",NULL);
-  if (brlapi_unignoreKeyRange(BRL_BLK_PASSKEY, BRL_BLK_PASSKEY |BRL_MSK_ARG))
+  if (brlapi_unignoreKeyRange(BRL_BLK_PASSDOTS,BRL_BLK_PASSDOTS|BRL_MSK_ARG))
     fatal_brlapi_errno("unignoreKeyRange",NULL);
 #endif /* CAN_SIMULATE_KEY_PRESSES */
 }
@@ -532,12 +534,21 @@ void toX_f(const char *display) {
 	if (code & BRL_FLG_CHAR_SHIFT) modifiers |= ShiftMask;
 
 	switch (code&BRL_MSK_BLK) {
-	  case BRL_BLK_PASSCHAR:
-	    if (((code&BRL_MSK_ARG) >= 'A') && ((code&BRL_MSK_ARG) <= 'Z')) {
-	      code = code + 'a' - 'A';
+	  case BRL_BLK_PASSCHAR: {
+	    unsigned char byte = code&BRL_MSK_ARG;
+	    if ((byte >= 'A') && (byte <= 'Z')) {
+	      byte = byte + 'a' - 'A';
 	      modifiers |= ShiftMask;
+	    } else if (byte < 0X20) {
+	      byte |= 0X60;
+	      modifiers |= ControlMask;
 	    }
 	    keysym = code&BRL_MSK_ARG;
+	    break;
+	 }
+
+	  case BRL_BLK_PASSDOTS:
+	    keysym = 0x1000000|BRL_UC_ROW|(code&BRL_MSK_ARG);
 	    break;
 
 	  case BRL_BLK_PASSKEY:

@@ -264,6 +264,8 @@ static void keypress(Widget w, XEvent *event, String *params, Cardinal *num_para
   modifiers |= my_modifiers;
   LogPrint(LOG_DEBUG,"keypress(%#lx), modif(%#x)", keysym, modifiers);
   if (keysym<0x100) keypressed = keysym | BRL_BLK_PASSCHAR;
+  else if ((keysym&~0xfful) == (0x1000000|BRL_UC_ROW))
+    keypressed = (keysym&0xff) | BRL_BLK_PASSDOTS;
   else switch(keysym) {
     case XK_Shift_L:
     case XK_Shift_R:   modifier = ShiftMask;   goto modif;
@@ -356,7 +358,7 @@ static void keypress(Widget w, XEvent *event, String *params, Cardinal *num_para
     case XK_KP_7:         keypressed = BRL_BLK_PASSCHAR | '7'; break;
     case XK_KP_8:         keypressed = BRL_BLK_PASSCHAR | '8'; break;
     case XK_KP_9:         keypressed = BRL_BLK_PASSCHAR | '9'; break;
-    default: return;
+    default: LogPrint(LOG_DEBUG,"unsupported keysym %lx\n",keysym); return;
   }
   if (modifiers & ControlMask)
     keypressed |= BRL_FLG_CHAR_CONTROL;
@@ -440,6 +442,8 @@ static struct button buttons_simple[] = {
   { "ctrl-a", BRL_FLG_CHAR_CONTROL | BRL_BLK_PASSCHAR | 'a', 0, 1, 3 },
   { "a",      BRL_BLK_PASSCHAR                        | 'a', 0, 2, 3 },
   { "A",      BRL_BLK_PASSCHAR                        | 'A', 0, 3, 3 },
+  { "Alt-F1", BRL_FLG_CHAR_META | BRL_KEY_FUNCTION | BRL_BLK_PASSKEY , 0, 4, 3 },
+  { "Dot1",   BRL_BLK_PASSDOTS  | BRL_DOT1  , 0, 5, 3 },
   { NULL,     0,              0, 0, 0},
 };
 
