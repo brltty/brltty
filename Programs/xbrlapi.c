@@ -508,6 +508,9 @@ void toX_f(const char *display) {
 	  }
 	}
 	break;
+      case MappingNotify:
+	XRefreshKeyboardMapping(&ev.xmapping);
+	break;
       /* ignored events */
       case UnmapNotify:
       case MapNotify:
@@ -612,7 +615,7 @@ void toX_f(const char *display) {
 	}
 	keycode = XKeysymToKeycode(dpy,keysym);
 	if (keycode == NoSymbol) {
-	  fprintf(stderr,"Couldn't translate keysym %" PRIX32 " to keycode.",keysym);
+	  fprintf(stderr,"Couldn't translate keysym %" PRIX32 " to keycode.\n",keysym);
 	  continue;
 	}
 	if (modifiers)
