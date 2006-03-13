@@ -706,6 +706,7 @@ static void generateToplevel(void)
     &argc, argv, fallback_resources,
     sessionShellWidgetClass,
     XtNallowShellResize, True,
+    XtNinput, input ? True : False,
     NULL);
 
   XtAppAddActions(app_con,actions,XtNumber(actions));
