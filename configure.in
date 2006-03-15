@@ -955,19 +955,19 @@ AC_CACHE_CHECK([for linkage editor program creation flags], [brltty_cv_prog_ld_f
 case "${host_os}"
 in
    linux*|gnu*|openbsd*|freebsd*|netbsd*|*qnx*)
-      brltty_cv_prog_ld_flags="-export-dynamic -rpath ${execute_root}${library_directory}"
+      brltty_cv_prog_ld_flags="-export-dynamic"
       ;;
    solaris*)
-      brltty_cv_prog_ld_flags="-R ${execute_root}${library_directory}"
+      brltty_cv_prog_ld_flags=""
       ;;
    hpux*)
-      brltty_cv_prog_ld_flags="-E +s +b ${execute_root}${library_directory}"
+      brltty_cv_prog_ld_flags="-E +s"
       ;;
    osf*)
-      brltty_cv_prog_ld_flags="-rpath ${execute_root}${library_directory}"
+      brltty_cv_prog_ld_flags=""
       ;;
    cygwin*|mingw*)
-      brltty_cv_prog_ld_flags="-export-dynamic -rpath ${execute_root}${library_directory} --enable-auto-import"
+      brltty_cv_prog_ld_flags="-export-dynamic --enable-auto-import"
       ;;
    darwin*)
       brltty_cv_prog_ld_flags=""
