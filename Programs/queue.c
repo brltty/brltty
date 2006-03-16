@@ -140,6 +140,16 @@ dequeueItem (Queue *queue) {
 }
 
 Queue *
+getElementQueue (Element *element) {
+  return element->queue;
+}
+
+void *
+getElementItem (Element *element) {
+  return element->item;
+}
+
+Queue *
 newQueue (ItemDeallocator deallocate, ItemComparator compare) {
   Queue *queue;
   if ((queue = malloc(sizeof(*queue)))) {

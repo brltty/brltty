@@ -29,20 +29,24 @@ typedef int (*ItemComparator) (const void *item1, const void *item2, void *data)
 
 extern Queue *newQueue (ItemDeallocator deallocate, ItemComparator compare);
 extern void deallocateQueue (Queue *queue);
+
 extern int getQueueSize (Queue *queue);
 extern void *getQueueData (Queue *queue);
 extern void *setQueueData (Queue *queue, void *data);
 
-typedef int (*ItemProcessor) (void *item, void *data);
-extern Element *processQueue (Queue *queue, ItemProcessor processItem, void *data);
-extern void *findItem (Queue *queue, ItemProcessor testItem, void *data);
+extern Element *enqueueItem (Queue *queue, void *item);
+extern void *dequeueItem (Queue *queue);
+
+extern Queue *getElementQueue (Element *element);
+extern void *getElementItem (Element *element);
 
 extern void deleteElements (Queue *queue);
 extern void deleteElement (Element *element);
-
-extern Element *enqueueItem (Queue *queue, void *item);
-extern void *dequeueItem (Queue *queue);
 extern int deleteItem (Queue *queue, void *item);
+
+typedef int (*ItemProcessor) (void *item, void *data);
+extern Element *processQueue (Queue *queue, ItemProcessor processItem, void *data);
+extern void *findItem (Queue *queue, ItemProcessor testItem, void *data);
 
 #ifdef __cplusplus
 }
