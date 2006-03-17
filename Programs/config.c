@@ -1940,7 +1940,7 @@ startup (int argc, char *argv[]) {
     setPrintPrefix(prefix);
   }
 
-  LogPrint(LOG_NOTICE, "Maintained By: %s <%s> [%s]",
+  LogPrint(LOG_NOTICE, "Maintained by %s: <%s>, [%s]",
            BRLTTY_MAINTAINER, BRLTTY_EMAIL, BRLTTY_URL);
 
   if (opt_version) {
@@ -1956,6 +1956,7 @@ startup (int argc, char *argv[]) {
     identifySpeechDrivers(1);
 #endif /* ENABLE_SPEECH_SUPPORT */
 
+    identifyScreenDrivers(1);
     exit(0);
   }
 

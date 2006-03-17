@@ -66,6 +66,7 @@ typedef enum {
 } ScreenKey;
 
 /* Routines which apply to all screens. */
+extern void identifyScreenDrivers (int full);
 extern void initializeAllScreens (const char *identifier, const char *driverDirectory);		/* close screen reading */
 extern void closeAllScreens (void);		/* close screen reading */
 
