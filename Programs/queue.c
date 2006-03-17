@@ -113,17 +113,27 @@ deleteElement (Element *element) {
   discardElement(element);
 }
 
+static void
+enqueueElement (Element *element) {
+  Queue *queue = element->queue;
+  if (queue->head) {
+    linkAdditionalElement(queue->head, element);
+  } else {
+    linkFirstElement(element);
+  }
+}
+
 Element *
 enqueueItem (Queue *queue, void *item) {
   Element *element = newElement(queue, item);
-  if (element) {
-    if (queue->head) {
-      linkAdditionalElement(queue->head, element);
-    } else {
-      linkFirstElement(element);
-    }
-  }
+  if (element) enqueueElement(element);
   return element;
+}
+
+void
+requeueElement (Element *element) {
+  unlinkElement(element);
+  enqueueElement(element);
 }
 
 void *

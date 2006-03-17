@@ -36,13 +36,14 @@ extern void *setQueueData (Queue *queue, void *data);
 
 extern Element *enqueueItem (Queue *queue, void *item);
 extern void *dequeueItem (Queue *queue);
+extern int deleteItem (Queue *queue, void *item);
 
 extern Queue *getElementQueue (Element *element);
 extern void *getElementItem (Element *element);
 
 extern void deleteElements (Queue *queue);
 extern void deleteElement (Element *element);
-extern int deleteItem (Queue *queue, void *item);
+extern void requeueElement (Element *element);
 
 typedef int (*ItemProcessor) (void *item, void *data);
 extern Element *processQueue (Queue *queue, ItemProcessor processItem, void *data);
