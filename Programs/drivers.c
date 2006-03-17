@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the console screen (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2006 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2006 by The BRLTTY Developers.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -140,11 +140,15 @@ identifyDriver (
   const char *type,
   const char *name, const char *version,
   const char *date, const char *time,
-  const char *copyright
+  const char *copyright,
+  int full
 ) {
   if (version && *version)
     LogPrint(LOG_NOTICE, "%s %s Driver: version %s, compiled on %s at %s", name, type, version, date, time);
   else
     LogPrint(LOG_NOTICE, "%s %s Driver: compiled on %s at %s", name, type, date, time);
-  if (copyright && *copyright) LogPrint(LOG_INFO, "   %s", copyright);
+
+  if (full) {
+    if (copyright && *copyright) LogPrint(LOG_INFO, "   %s", copyright);
+  }
 }

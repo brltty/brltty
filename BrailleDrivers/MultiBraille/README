@@ -2,9 +2,9 @@ Version V1.0, March/April 2000
 
 Driver for Tieman B.V.'s MultiBraille series
 
-Copyright (C) 2000 by Wolfgang Astleitner.  All rights reserved.
+Copyright (C) 2000 by Wolfgang Astleitner.
 ( Modification of CombiBraille-driver: 
-  Copyright (C) 1995, 1996 by Nikhil Nair.  All rights reserved.
+  Copyright (C) 1995, 1996 by Nikhil Nair.
 )
 
 This driver is part of BRLTTY, and as such it is placed under the

@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the console screen (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2006 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2006 by The BRLTTY Developers.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -57,8 +57,8 @@ typedef struct {
 extern int haveSpeechDriver (const char *code);
 extern const char *getDefaultSpeechDriver (void);
 extern const SpeechDriver *loadSpeechDriver (const char *code, void **driverObject, const char *driverDirectory);
-extern void identifySpeechDriver (const SpeechDriver *driver);
-extern void identifySpeechDrivers (void);
+extern void identifySpeechDriver (const SpeechDriver *driver, int full);
+extern void identifySpeechDrivers (int full);
 extern const SpeechDriver *speech;
 extern const SpeechDriver noSpeech;
 

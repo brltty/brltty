@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the console screen (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2006 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2006 by The BRLTTY Developers.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -64,8 +64,6 @@
 #ifdef ENABLE_BLUETOOTH_SUPPORT
 #include "io_bluetooth.h"
 #endif /* ENABLE_BLUETOOTH_SUPPORT */
-
-char COPYRIGHT[] = "Copyright (C) 1995-2006 by The BRLTTY Team - all rights reserved.";
 
 static int opt_version;
 static int opt_verify;
@@ -1470,7 +1468,7 @@ activateBrailleDriver (int verify) {
             if (opened) {
               LogPrint(LOG_INFO, "%s: %s [%s]",
                        gettext("Braille Driver"), braille->code, braille->name);
-              identifyBrailleDriver(braille);
+              identifyBrailleDriver(braille, 0);
               logParameters(braille->parameters, brailleParameters,
                             gettext("Braille Parameter"));
               LogPrint(LOG_INFO, "%s: %s", gettext("Braille Device"), brailleDevice);
@@ -1681,7 +1679,7 @@ activateSpeechDriver (int verify) {
           if (opened) {
             LogPrint(LOG_INFO, "%s: %s [%s]",
                      gettext("Speech Driver"), speech->code, speech->name);
-            identifySpeechDriver(speech);
+            identifySpeechDriver(speech, 0);
             logParameters(speech->parameters, speechParameters,
                           gettext("Speech Parameter"));
 
@@ -1941,18 +1939,23 @@ startup (int argc, char *argv[]) {
     LogPrint(LOG_NOTICE, "%s %s", PACKAGE_TITLE, PACKAGE_VERSION);
     setPrintPrefix(prefix);
   }
-  LogPrint(LOG_INFO, "%s", COPYRIGHT);
+
+  LogPrint(LOG_NOTICE, "Maintained By: %s <%s> [%s]",
+           BRLTTY_MAINTAINER, BRLTTY_EMAIL, BRLTTY_URL);
 
   if (opt_version) {
+    LogPrint(LOG_INFO, "%s", BRLTTY_COPYRIGHT);
+
 #ifdef ENABLE_API
-    api_identify();
+    api_identify(1);
 #endif /* ENABLE_API */
 
-    identifyBrailleDrivers();
+    identifyBrailleDrivers(1);
 
 #ifdef ENABLE_SPEECH_SUPPORT
-    identifySpeechDrivers();
+    identifySpeechDrivers(1);
 #endif /* ENABLE_SPEECH_SUPPORT */
+
     exit(0);
   }
 
@@ -2171,7 +2174,7 @@ startup (int argc, char *argv[]) {
 #ifdef ENABLE_API
   apiStarted = 0;
   if (!opt_noApi) {
-    api_identify();
+    api_identify(0);
     apiParameters = processParameters(api_parameters,
                                       NULL,
                                       opt_apiParameters);

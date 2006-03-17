@@ -4,7 +4,6 @@
  * Copyright (C) 2002-2006 by
  *   Samuel Thibault <Samuel.Thibault@ens-lyon.org>
  *   Sébastien Hinderer <Sebastien.Hinderer@ens-lyon.org>
- * All rights reserved.
  *
  * libbrlapi comes with ABSOLUTELY NO WARRANTY.
  *

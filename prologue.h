@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the console screen (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2006 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2006 by The BRLTTY Developers.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -21,6 +21,11 @@
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
+
+#define BRLTTY_COPYRIGHT "Copyright (C) 1995-2006 by The BRLTTY Developers."
+#define BRLTTY_MAINTAINER "Dave Mielke"
+#define BRLTTY_EMAIL "dave@mielke.cc"
+#define BRLTTY_URL "http://mielke.cc/brltty/"
 
 #if defined(__CYGWIN32__) || defined(__MINGW32__)
 #define WINDOWS

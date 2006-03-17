@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the console screen (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2006 by The BRLTTY Team. All rights reserved.
+ * Copyright (C) 1995-2006 by The BRLTTY Developers.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -2397,10 +2397,12 @@ void api_unlink(BrailleDisplay *brl)
 
 /* Function : api_identify */
 /* Identifies BrlApi */
-void api_identify(void)
+void api_identify(int full)
 {
   LogPrint(LOG_NOTICE, RELEASE);
-  LogPrint(LOG_INFO,   COPYRIGHT);
+  if (full) {
+    LogPrint(LOG_INFO, COPYRIGHT);
+  }
 }
 
 /* Function : api_start */
