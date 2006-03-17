@@ -1937,11 +1937,10 @@ startup (int argc, char *argv[]) {
   {
     const char *prefix = setPrintPrefix(NULL);
     LogPrint(LOG_NOTICE, "%s %s", PACKAGE_TITLE, PACKAGE_VERSION);
+    LogPrint(LOG_NOTICE, "Maintained by %s: <%s>, [%s]",
+             BRLTTY_MAINTAINER, BRLTTY_EMAIL, BRLTTY_URL);
     setPrintPrefix(prefix);
   }
-
-  LogPrint(LOG_NOTICE, "Maintained by %s: <%s>, [%s]",
-           BRLTTY_MAINTAINER, BRLTTY_EMAIL, BRLTTY_URL);
 
   if (opt_version) {
     LogPrint(LOG_INFO, "%s", BRLTTY_COPYRIGHT);
