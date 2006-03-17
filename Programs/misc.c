@@ -86,7 +86,7 @@ deallocateStrings (char **array) {
    #include <syslog.h>
    static int syslogOpened = 0;
 #endif /* HAVE_SYSLOG_H */
-static int logLevel = LOG_INFO;
+static int logLevel = LOG_NOTICE;
 static const char *printPrefix = NULL;
 static int printLevel = LOG_NOTICE;
 
