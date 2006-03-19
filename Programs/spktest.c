@@ -153,7 +153,7 @@ main (int argc, char *argv[]) {
     }
 
     if (chdir(opt_dataDirectory) != -1) {
-      identifySpeechDriver(speech);		/* start-up messages */
+      identifySpeechDriver(speech, 0);		/* start-up messages */
       if (speech->open(parameterSettings)) {
         if (speech->rate) speech->rate(speechRate);
         if (speech->volume) speech->volume(speechVolume);
