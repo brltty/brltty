@@ -1936,9 +1936,7 @@ startup (int argc, char *argv[]) {
 
   {
     const char *prefix = setPrintPrefix(NULL);
-    LogPrint(LOG_NOTICE, "%s %s", PACKAGE_TITLE, PACKAGE_VERSION);
-    LogPrint(LOG_NOTICE, "Maintained by %s: <%s>, [%s]",
-             BRLTTY_MAINTAINER, BRLTTY_EMAIL, BRLTTY_URL);
+    LogPrint(LOG_NOTICE, "%s %s [%s]", PACKAGE_TITLE, PACKAGE_VERSION, BRLTTY_URL);
     setPrintPrefix(prefix);
   }
 

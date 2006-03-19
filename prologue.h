@@ -23,8 +23,6 @@ extern "C" {
 #endif /* __cplusplus */
 
 #define BRLTTY_COPYRIGHT "Copyright (C) 1995-2006 by The BRLTTY Developers."
-#define BRLTTY_MAINTAINER "Dave Mielke"
-#define BRLTTY_EMAIL "dave@mielke.cc"
 #define BRLTTY_URL "http://mielke.cc/brltty/"
 
 #if defined(__CYGWIN32__) || defined(__MINGW32__)
