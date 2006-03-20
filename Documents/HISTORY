@@ -1,0 +1,36 @@
+The BRLTTY project started in July, 1995. The initial team consisted of Nikhil
+Nair and James Bowden.
+
+The first version ran with Blazie Engineering's Braille Lite. Since, at that
+time, the Braille Lite wasn't designed to be a dedicated refreshable braille
+display for a computer, its response time was far too slow. This situation has
+now been corrected.
+
+The second version, BRLTTY-0.22-BETA, was released in September of 1995. It was
+the first to be released publicly. As well as the Braille Lite, it also
+supported Tieman B.V.'s CombiBraille series.
+
+James Bowden stopped being an active developer, although his continued help in
+other areas (including documentation) was much appreciated. Two new members,
+Nicolas Pitre and Stéphane Doyon, joined the team. They added support for Alva
+and Telesensory Systems Inc. displays, as well as many excellent features for
+the system as a whole.
+
+A stable version (1.0) was released sometime around the end of 1996.
+
+Support for Papenmeier displays was contributed by a team from The Technical
+High School, Department of Electrical Engineering, Vienna, Austria. Support for
+the TSI displays was completed, and support for the EuroBraille brand was
+added. New features were also continually being added to the system.
+
+Regretably, Nikhil Nair stopped working on the BRLTTY project. Nicolas Pitre
+assumed the job of maintainer.
+
+Version 2.0 was released during the summer of 1998, and version 2.1 was
+released in March of 1999. It added support for EcoBraille (thanks to Oscar
+Fernandez), Alva Delphi (thanks to Terry Barnaby), and Braille Lite 18 (from
+Nikhil Nair), as well as Some small improvements and fixes.
+
+Dave Mielke began to submit fixes and enhancements during 2000,
+and joined the team as the next maintainer in June of 2001.
+
