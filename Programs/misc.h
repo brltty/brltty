@@ -25,6 +25,7 @@ extern "C" {
 #include "prologue.h"
 
 #include <stdio.h>
+#include <stdarg.h>
 #include <sys/time.h>
 
 #ifndef MIN
