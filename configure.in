@@ -421,6 +421,16 @@ BRLTTY_ARG_DISABLE(
 ])
 
 BRLTTY_ARG_DISABLE(
+   [iconv],
+   [support for character encoding conversion],
+   [],
+[dnl
+   AC_CHECK_HEADERS([iconv.h], [
+      AC_HAVE_LIBRARY([iconv])
+   ])
+])
+
+BRLTTY_ARG_DISABLE(
    [api],
    [the application programming interface],
    [],
@@ -527,10 +537,6 @@ AC_CHECK_HEADERS([linux/input.h], [
    AC_CHECK_HEADERS([linux/uinput.h], [], [], [
 #include <linux/input.h>
 ])])
-
-AC_CHECK_HEADERS([iconv.h], [
-   AC_HAVE_LIBRARY([iconv])
-])
 
 AC_CHECK_FUNCS([fchdir fchmod getopt_long hstrerror realpath sigaction vsyslog])
 AC_CHECK_FUNCS([shmget shm_open])
