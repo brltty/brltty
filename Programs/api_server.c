@@ -1779,6 +1779,7 @@ static void closeSockets(void *arg)
 	  memcpy(path+lpath+1,info->port,lport+1);
 	  if (unlink(path))
 	    LogError("unlinking local socket lock");
+	  free(path);
 	}
       }
 #endif /* PF_LOCAL */
