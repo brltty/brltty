@@ -709,6 +709,8 @@ static void generateToplevel(void)
     XtNinput, input ? True : False,
     NULL);
 
+  free(argv);
+
   XtAppAddActions(app_con,actions,XtNumber(actions));
 
 #elif defined(USE_WINDOWS)
