@@ -215,7 +215,7 @@ static inline int sem_post(sem_t *sem) {
   return 0;
 }
 
-static inline int sem_destry(sem_t *sem) {
+static inline int sem_destroy(sem_t *sem) {
   winPthreadAssertWindows(CloseHandle(*sem));
   return 0;
 }
