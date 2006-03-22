@@ -42,8 +42,10 @@
 #include "auth.h"
 
 /* peer credentials */
+#undef CAN_CHECK_CREDENTIALS
 
 #if defined(HAVE_GETPEERUCRED)
+#define CAN_CHECK_CREDENTIALS
 
 #include <ucred.h>
 
@@ -98,6 +100,7 @@ checkPeerGroup (PeerCredentials *credentials, gid_t group) {
 }
 
 #elif defined(SO_PEERCRED)
+#define CAN_CHECK_CREDENTIALS
 
 typedef struct ucred PeerCredentials;
 
@@ -124,6 +127,7 @@ checkPeerGroup (PeerCredentials *credentials, gid_t group) {
 }
 
 #elif defined(HAVE_GETPEEREID)
+#define CAN_CHECK_CREDENTIALS
 
 typedef struct {
   uid_t euid;
@@ -153,28 +157,6 @@ checkPeerGroup (PeerCredentials *credentials, gid_t group) {
 
 #else /* peer credentials method */
 #warning peer credentials support not available on this platform
-
-typedef void *PeerCredentials;
-
-static int
-initializePeerCredentials (PeerCredentials *credentials, int fd) {
-  return 0;
-}
-
-static void
-releasePeerCredentials (PeerCredentials *credentials) {
-}
-
-static int
-checkPeerUser (PeerCredentials *credentials, uid_t user) {
-  return 0;
-}
-
-static int
-checkPeerGroup (PeerCredentials *credentials, gid_t group) {
-  return 0;
-}
-
 #endif /* peer credentials method */
 
 /* general type definitions */
@@ -195,29 +177,24 @@ typedef struct {
   void *data;
 } MethodDescriptor;
 
+#ifdef CAN_CHECK_CREDENTIALS
 typedef enum {
   PCS_NEED,
   PCS_HAVE,
   PCS_GOOD
 } PeerCredentialsState;
+#endif /* CAN_CHECK_CREDENTIALS */
 
 struct AuthDescriptorStruct {
   int count;
   char **parameters;
   MethodDescriptor *methods;
 
+#ifdef CAN_CHECK_CREDENTIALS
   PeerCredentialsState peerCredentialsState;
   PeerCredentials peerCredentials;
+#endif /* CAN_CHECK_CREDENTIALS */
 };
-
-static int
-getPeerCredentials (AuthDescriptor *auth, int fd) {
-  if (auth->peerCredentialsState == PCS_NEED) {
-    if (!initializePeerCredentials(&auth->peerCredentials, fd)) return 0;
-    auth->peerCredentialsState = PCS_HAVE;
-  }
-  return 1;
-}
 
 /* the keyfile method */
 
@@ -260,6 +237,16 @@ static int
 authKeyfile_server (AuthDescriptor *auth, int fd, void *data) {
   MethodDescriptor_keyfile *keyfile = data;
   LogPrint(LOG_DEBUG, "checking key file: %s", keyfile->path);
+  return 1;
+}
+
+#ifdef CAN_CHECK_CREDENTIALS
+static int
+getPeerCredentials (AuthDescriptor *auth, int fd) {
+  if (auth->peerCredentialsState == PCS_NEED) {
+    if (!initializePeerCredentials(&auth->peerCredentials, fd)) return 0;
+    auth->peerCredentialsState = PCS_HAVE;
+  }
   return 1;
 }
 
@@ -380,6 +367,7 @@ authGroup_server (AuthDescriptor *auth, int fd, void *data) {
   }
   return 1;
 }
+#endif /* CAN_CHECK_CREDENTIALS */
 
 /* general functions */
 
@@ -389,6 +377,7 @@ static const MethodDefinition methodDefinitions[] = {
     authKeyfile_client, authKeyfile_server
   },
 
+#ifdef CAN_CHECK_CREDENTIALS
   { "user",
     authUser_initialize, authUser_release,
     NULL, authUser_server
@@ -398,6 +387,7 @@ static const MethodDefinition methodDefinitions[] = {
     authGroup_initialize, authGroup_release,
     NULL, authGroup_server
   },
+#endif /* CAN_CHECK_CREDENTIALS */
 
   {NULL}
 };
@@ -518,7 +508,10 @@ authEnd (AuthDescriptor *auth) {
 int
 authPerform (AuthDescriptor *auth, int fd) {
   int ok = 1;
+
+#ifdef CAN_CHECK_CREDENTIALS
   auth->peerCredentialsState = PCS_NEED;
+#endif /* CAN_CHECK_CREDENTIALS */
 
   {
     int index;
@@ -531,11 +524,13 @@ authPerform (AuthDescriptor *auth, int fd) {
     }
   }
 
+#ifdef CAN_CHECK_CREDENTIALS
   if (auth->peerCredentialsState == PCS_HAVE) {
     LogPrint(LOG_ERR, "no matching user or group");
     ok = 0;
   }
   if (auth->peerCredentialsState != PCS_NEED) releasePeerCredentials(&auth->peerCredentials);
+#endif /* CAN_CHECK_CREDENTIALS */
 
   return ok;
 }
