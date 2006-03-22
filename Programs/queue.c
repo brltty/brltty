@@ -184,6 +184,11 @@ deallocateQueue (Queue *queue) {
   free(queue);
 }
 
+Element *
+getQueueHead (Queue *queue) {
+  return queue->head;
+}
+
 int
 getQueueSize (Queue *queue) {
   return queue->size;
