@@ -376,7 +376,7 @@ int main(int argc, char* argv[])
 
   configurationFile = stdin;
   memset(pmTerminalTable, 0, sizeof(pmTerminalTable));
-  parse ();
+  parseConfigurationFile();
   terminals(0, 1);
   return 0;
 }

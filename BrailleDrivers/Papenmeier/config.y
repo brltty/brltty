@@ -608,8 +608,8 @@ int yylex ()
 
 /* --------------------------------------------------------------- */
 
-int
-parse (void) {
+void
+deallocateTerminalTable (void) {
   if (pmTerminalsAllocated) {
     while (pmTerminalCount) {
       TerminalDefinition *terminal = &pmTerminals[--pmTerminalCount];
@@ -629,6 +629,11 @@ parse (void) {
     pmTerminals = NULL;
     pmTerminalsAllocated = 1;
   }
+}
+
+int
+parseConfigurationFile (void) {
+  deallocateTerminalTable();
 
   lineNumber = 1;
   terminalsSize = 0;

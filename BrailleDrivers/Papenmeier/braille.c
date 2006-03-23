@@ -69,7 +69,7 @@ static void
 loadConfigurationFile (const char *path) {
   LogPrint(LOG_DEBUG, "Loading Papenmeier configuration file: %s", path);
   if ((configurationFile = fopen(path, "r")) != NULL) {
-    parse();
+    parseConfigurationFile();
     fclose(configurationFile);
     configurationFile = NULL;
   } else {
@@ -1405,6 +1405,10 @@ static void
 brl_close (BrailleDisplay *brl) {
   io->closePort();
   protocol->releaseResources();
+
+#ifdef ENABLE_PM_CONFIGURATION_FILE
+  deallocateTerminalTable();
+#endif /* ENABLE_PM_CONFIGURATION_FILE */
 }
 
 static void
