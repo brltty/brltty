@@ -792,6 +792,14 @@ allocateCommandDescriptors (void) {
   }
 }
 
+static void
+deallocateCommandDescriptors (void) {
+  if (commandDescriptors) {
+    free(commandDescriptors);
+    commandDescriptors = NULL;
+  }
+}
+
 static int
 compareCommandName (const void *key, const void *item) {
   const char *name = key;
@@ -901,7 +909,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
     mode = &serverModeEntry;
   } else {
     unsupportedDevice(device);
-    return 0;
+    goto failed;
   }
   if (!*device) device = VR_DEFAULT_SOCKET;
 
@@ -925,7 +933,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
     static WSADATA wsadata;
     if (WSAStartup(MAKEWORD(1, 1), &wsadata)) {
       LogWindowsError("socket library start");
-      return 0;
+      goto failed;
     }
   }
 #endif /* WINDOWS */
@@ -968,6 +976,8 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
     fileDescriptor = -1;
   }
 
+failed:
+  deallocateCommandDescriptors();
   return 0;
 }
 
@@ -987,6 +997,8 @@ brl_close (BrailleDisplay *brl) {
     close(fileDescriptor);
     fileDescriptor = -1;
   }
+
+  deallocateCommandDescriptors();
 }
 
 static void
