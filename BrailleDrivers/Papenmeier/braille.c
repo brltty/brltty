@@ -1334,6 +1334,16 @@ identifyTerminal (BrailleDisplay *brl) {
   return 0;
 }
 
+static void
+resetTerminalTable (void) {
+  if (pmTerminalsAllocated) {
+    deallocateTerminalTable();
+    pmTerminals = pmTerminalTable;
+    pmTerminalCount = PM_COUNT(pmTerminalTable);
+    pmTerminalsAllocated = 0;
+  }
+}
+
 static int
 brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
   if (!validateYesNo(&debugKeys, parameters[PARM_DEBUGKEYS]))
@@ -1376,7 +1386,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
 
   {
     unsupportedDevice(device);
-    return 0;
+    goto failed;
   }
 
   baud = io->bauds;
@@ -1398,6 +1408,8 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
     ++baud;
   }
 
+failed:
+  resetTerminalTable();
   return 0;
 }
 
@@ -1405,10 +1417,7 @@ static void
 brl_close (BrailleDisplay *brl) {
   io->closePort();
   protocol->releaseResources();
-
-#ifdef ENABLE_PM_CONFIGURATION_FILE
-  deallocateTerminalTable();
-#endif /* ENABLE_PM_CONFIGURATION_FILE */
+  resetTerminalTable();
 }
 
 static void

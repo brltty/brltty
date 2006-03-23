@@ -610,30 +610,30 @@ int yylex ()
 
 void
 deallocateTerminalTable (void) {
-  if (pmTerminalsAllocated) {
-    while (pmTerminalCount) {
-      TerminalDefinition *terminal = &pmTerminals[--pmTerminalCount];
-      if (terminal->name) free(terminal->name);
-      if (terminal->helpFile) free(terminal->helpFile);
-      if (terminal->statusCells) free(terminal->statusCells);
-      if (terminal->modifiers) free(terminal->modifiers);
-      if (terminal->commands) free(terminal->commands);
-    }
+  while (pmTerminalCount) {
+    TerminalDefinition *terminal = &pmTerminals[--pmTerminalCount];
+    if (terminal->name) free(terminal->name);
+    if (terminal->helpFile) free(terminal->helpFile);
+    if (terminal->statusCells) free(terminal->statusCells);
+    if (terminal->modifiers) free(terminal->modifiers);
+    if (terminal->commands) free(terminal->commands);
+  }
 
-    if (pmTerminals) {
-      free(pmTerminals);
-      pmTerminals = NULL;
-    }
-  } else {
-    pmTerminalCount = 0;
+  if (pmTerminals) {
+    free(pmTerminals);
     pmTerminals = NULL;
-    pmTerminalsAllocated = 1;
   }
 }
 
 int
 parseConfigurationFile (void) {
-  deallocateTerminalTable();
+  if (pmTerminalsAllocated) {
+    deallocateTerminalTable();
+  } else {
+    pmTerminalCount = 0;
+    pmTerminals = NULL;
+    pmTerminalsAllocated = 1;
+  }
 
   lineNumber = 1;
   terminalsSize = 0;
