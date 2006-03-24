@@ -484,10 +484,14 @@ then
    AC_SUBST([all_xbrlapi], [all-xbrlapi])
    AC_SUBST([install_xbrlapi], [install-xbrlapi])
 
+   brltty_x_cppflags_save="${CPPFLAGS}"
+   CPPFLAGS="${CPPFLAGS} ${X_CFLAGS}"
+
    brltty_x_ldflags_save="${LDFLAGS}"
    LDFLAGS="${LDFLAGS} ${X_LIBS}"
 
    brltty_x_libs_save="${LIBS}"
+
    AC_HAVE_LIBRARY([X11], [
       LIBS="${X_EXTRA_LIBS} ${X_PRE_LIBS} -lX11 ${LIBS}"
 
@@ -517,6 +521,7 @@ then
 
    LIBS="${brltty_x_libs_save}"
    LDFLAGS="${brltty_x_ldflags_save}"
+   CPPFLAGS="${brltty_x_cppflags_save}"
 fi
 
 test -z "$brltty_package_gui_toolkit" && {
