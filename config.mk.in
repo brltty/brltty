@@ -85,7 +85,7 @@ X_PRE_LIBS = @X_PRE_LIBS@
 X_EXTRA_LIBS = @X_EXTRA_LIBS@
 
 CURSES_LIB = @brltty_package_curses@
-XT_TOOLKIT_LIB = @brltty_package_xt_toolkit@
+GUI_TOOLKIT_LIB = @brltty_package_gui_toolkit@
 
 INSTALL = @INSTALL@
 INSTALL_SCRIPT = $(INSTALL)
