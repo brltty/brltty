@@ -1337,7 +1337,9 @@ identifyTerminal (BrailleDisplay *brl) {
 static void
 resetTerminalTable (void) {
   if (pmTerminalsAllocated) {
+#ifdef ENABLE_PM_CONFIGURATION_FILE
     deallocateTerminalTable();
+#endif /* ENABLE_PM_CONFIGURATION_FILE */
     pmTerminals = pmTerminalTable;
     pmTerminalCount = PM_COUNT(pmTerminalTable);
     pmTerminalsAllocated = 0;
