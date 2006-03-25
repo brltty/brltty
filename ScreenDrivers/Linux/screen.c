@@ -162,7 +162,7 @@ static const ApplicationCharacterMap cp437Map = {
   0x00b0, 0x2219, 0x00b7, 0x221a, 0x207f, 0x00b2, 0x25a0, 0x00a0
 };
 
-static const char *
+static char *
 findDevicePath (const char *paths, const char *description, int mode) {
   char *devices = strdupWrapper(paths);
   char *tokens = devices;
@@ -212,7 +212,7 @@ findDevicePath (const char *paths, const char *description, int mode) {
 }
 
 static int
-setDevicePath (const char **path, const char *paths, const char *description, int mode) {
+setDevicePath (char **path, const char *paths, const char *description, int mode) {
   LogPrint(LOG_DEBUG, "%s device list: %s", description, paths);
   if ((*path = findDevicePath(paths, description, mode))) {
     LogPrint(LOG_INFO, "%s device: %s", description, *path);
@@ -265,7 +265,7 @@ openDevice (const char *path, const char *description, int flags, int major, int
   return file;
 }
 
-static const char *consolePath;
+static char *consolePath = NULL;
 static int consoleDescriptor;
 
 static int
@@ -281,6 +281,11 @@ closeConsole (void) {
     }
     LogPrint(LOG_DEBUG, "console closed: fd=%d", consoleDescriptor);
     consoleDescriptor = -1;
+  }
+
+  if (consolePath) {
+    free(consolePath);
+    consolePath = NULL;
   }
 }
 
@@ -301,7 +306,7 @@ openConsole (unsigned char vt) {
   return 0;
 }
 
-static const char *screenPath;
+static char *screenPath = NULL;
 static int screenDescriptor;
 static unsigned char virtualTerminal;
 
@@ -318,6 +323,11 @@ closeScreen (void) {
     }
     LogPrint(LOG_DEBUG, "screen closed: fd=%d", screenDescriptor);
     screenDescriptor = -1;
+  }
+
+  if (screenPath) {
+    free(screenPath);
+    screenPath = NULL;
   }
 }
 
@@ -421,9 +431,9 @@ determineApplicationCharacterMap (int force) {
   return 1;
 }
 
-static struct unipair *screenFontMapTable;
+static struct unipair *screenFontMapTable = NULL;
+static unsigned short screenFontMapSize = 0;
 static unsigned short screenFontMapCount;
-static unsigned short screenFontMapSize;
 static int
 setScreenFontMap (int force) {
   struct unimapdesc sfm;
@@ -474,6 +484,17 @@ setScreenFontMap (int force) {
     }
   }
   return 1;
+}
+
+static void
+deallocateScreenFontMap (void) {
+  if (screenFontMapTable) {
+    free(screenFontMapTable);
+    screenFontMapTable = NULL;
+  }
+
+  screenFontMapSize = 0;
+  screenFontMapCount = 0;
 }
 
 static int vgaCharacterCount;
@@ -838,6 +859,7 @@ static void
 close_LinuxScreen (void) {
   closeConsole();
   closeScreen();
+  deallocateScreenFontMap();
 }
 
 static int
