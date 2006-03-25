@@ -1359,7 +1359,8 @@ fit the braille display ie hold <em/height/*<em/width/
 bytes, where <em/height/ and <em/width/ must be got by sending a
 <tt/BRLPACKET_GETDISPLAYSIZE/ packet.
 <item> The text to display can then be given, preceded by its size in bytes
-expressed as an integer.
+expressed as an integer. It will erase the corresponding region in the AND and
+OR fields.
 <item> Then an AND field can be given, one byte per character: the 8-dot
 representation of the above text will be AND-ed with this field, hence allowing
 to erase some unwanted parts of characters. Dots are coded as described in

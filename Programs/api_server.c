@@ -1049,6 +1049,8 @@ static int handleWrite(Connection *c, brl_type_t type, unsigned char *packet, si
       for (i=0; i<rsiz; i++)
         c->brailleWindow.text[rbeg-1+i] = text[i];
     }
+    if (!andAttr) memset(c->brailleWindow.andAttr+rbeg-1,0xFF,rsiz);
+    if (!orAttr)  memset(c->brailleWindow.orAttr+rbeg-1,0x00,rsiz);
   } else pthread_mutex_lock(&c->brlMutex);
   if (andAttr) memcpy(c->brailleWindow.andAttr+rbeg-1,andAttr,rsiz);
   if (orAttr) memcpy(c->brailleWindow.orAttr+rbeg-1,orAttr,rsiz);
