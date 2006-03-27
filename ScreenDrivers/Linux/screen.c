@@ -553,21 +553,25 @@ prepare_LinuxScreen (char **parameters) {
       LogPrint(LOG_WARNING, "%s: %s", "invalid application character map", parameters[PARM_ACM]);
     }
   }
-  if (setScreenPath()) {
-    screenDescriptor = -1;
-    if (setConsolePath()) {
-      consoleDescriptor = -1;
-      return 1;
-    }
-  }
-  return 0;
+
+  return 1;
 }
 
 static int currentConsoleNumber;
 static int
 open_LinuxScreen (void) {
-  currentConsoleNumber = 0;
-  return openScreen(0);
+  if (setScreenPath()) {
+    screenDescriptor = -1;
+
+    if (setConsolePath()) {
+      consoleDescriptor = -1;
+
+      if (openScreen(currentConsoleNumber=0)) {
+        return 1;
+      }
+    }
+  }
+  return 0;
 }
 
 /* 
