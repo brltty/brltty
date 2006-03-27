@@ -1,13 +1,13 @@
 Compilation
 ===========
 
-In order to build BRLTTY from a supplied tarball, you need either Cygwin (see 
-http://www.cygwin.com/) or MinGW (see http://mingw.sourceforge.net/). You also
-need the following packages:
+In order to build BRLTTY from a supplied tarball, you need either Cygwin (see
+http://www.cygwin.com/) or MinGW (see http://mingw.sourceforge.net/). In both
+cases, you also need the following additional packages:
 *  gcc
 *  make
-*  w32api
-*  yacc or bison
+*  w32api (version 3.6 or later)
+*  yacc or bison (for the Papenmeier braille driver)
 
 If you'd like to build BRLTTY from its source repository rather than from one
 of the supplied tarballs then you'll also need these additional packages:
