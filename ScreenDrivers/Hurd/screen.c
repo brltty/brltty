@@ -164,13 +164,13 @@ openScreen (unsigned char vt) {
 
 static int
 prepare_HurdScreen (char **parameters) {
-  screenDescriptor = -1;
-  consoleDescriptor = -1;
   return 1;
 }
 
 static int
 open_HurdScreen (void) {
+  screenDescriptor = -1;
+  consoleDescriptor = -1;
   return openScreen(0);
 }
 
