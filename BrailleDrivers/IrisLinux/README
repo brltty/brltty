@@ -1,0 +1,52 @@
+This is the EuroBraille-IRIS specific driver for BRLTTY, version 0.3
+
+Copyright (C) 2004-2006 Yannick PLASSIARD (yan@mistigri.org).
+
+This code is copyrighted under the GNU Public License.  See the file
+COPYING included with BRLTTY for details.
+
+This driver is currently maintained by Yannick Plassiard 
+	<yan@mistigri.org>
+
+SUPPORTED HARDWARE
+==================
+
+This driver was developped to make the new Iris protocol being used into 
+BRLTTY. This is a really specific stuff for now, it is designed to 
+allow someone to put a Lioux distribution into his/her Iris. 
+
+WARNING!!!!!! :
+	You're __NOT ENCOURAGED__ to put a Linux distribution into your Iris
+for several reasons :
+	* Neither me, or EuroBRAILLE sa, are responsible for all things that 
+	  could happen to your flash card, usb key, or any other device;
+	* There is no user interface for now, do not expect to find the same
+	  interface as you find into the official Iris software.
+	* And to conclude, this is ALPHA STAGE, so it may contains bugs,
+	  can crash your system...
+
+
+FIXES/ADDITIONS
+===============
+Version 0.3:
+	- Rewritten IO stuff, to be compatible with the HAVE_KEYCODES stuff;
+	  This was done to make the "pcb" application usable.
+	- Partially debug some keypress bugs, not perfect yet. 
+	  Please Do NOT USE the Level keys (Level 1 to 4).
+
+Version 0.2:
+	- Combined keys works for linear keyboards.
+	- LCD Display support (for IRIS 20/40).
+
+Version 0.1:
+	- Initial release;
+	- Braille keyboard and cursor routing works, commands are only 
+	  ''one key at a time''.
+
+Comments are strongly welcomed, because I don't know how many people use the 
+EuroBraille version of BRLTTY in the world so if you use this driver, just 
+e-mail me what are your suggestions for next versions.
+
+Yannick Plassiard <yan@mistigri.org>
+    March 27 2006
+

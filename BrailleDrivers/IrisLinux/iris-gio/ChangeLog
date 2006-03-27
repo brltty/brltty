@@ -1,0 +1,5 @@
+2004-09-23  yan  <yan@mistigri.org>
+
+	* iris_gio.c (device_open): Remove unused variable
+	* Inital release
+

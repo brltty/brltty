@@ -1,0 +1,57 @@
+INSTALLATION INSTRUCTIONS FOR IRISLINUX:
+	Before using the driver, you will need little installation.
+	The IrisLinux driver software uses a kernel-level driver to communicate
+	with a chicp into the Iris PDA. There is a "iris_gio" subdirectory,
+	which contains the driver's source to be compiled into the kernel.
+	To compile it, do the following:
+1) Install a kernel sourcetree into a directory:
+	If you plan to use a little capacity CompactFlash card, you can compile
+	it from a PC (the target processor is Pentium-Classic).
+	- IDE Driver: Cyrix Corp. 8530 Dri2er.
+	- USB: OHCI-HCD Driver (no USB 2.0).
+	- LAN: DaviCom dmfe module, present into the "Tulip" series;
+	- MODEM: no drived needed, accessible with a Serial port (/dev/ttyS2).
+	- Serial: 16550A UART, generic.
+	- CompactFlash: seen as IDE devices, no driver needed.
+	- AUDIO: OSS -> 100% Compatible Sound Blaster 16: io=220, irq=5, 
+	  dma=1, dma16=5
+	- Power Management: None.
+
+	After configuring and making your kernel, it's time to compile
+	our iris_gio specific stuff.
+
+2) Compiling
+	To compile it, jo into your IrisLinux/iris_gio subdirectory :
+	$ cd brltty/BrailleDrivers/IrisLinux/iris_gio/ 
+
+	And start the make program replacing kernel-source with 
+	the path where you uncompressed your kernel in stage 1.
+	$ make -C /path/to/kernel/source SUBDIRS=$PWD
+	
+	This will compile the driver and create a "iris_gio.ko" file.
+
+3) Install
+	Then, after doing a "make modules_install" into the kernel sourcetree,
+	do a :
+
+	# make -C /path/to/kernel/source SUBDIRS=$PWD modules_install
+
+	And you're done!
+
+4) Post-Install
+	Before starting brltty, you'll need to do two things:
+	1) Create the iris-gio character device:
+	# mknod /dev/iris c 254 0
+	(Needed only once).
+
+	2) Each time you boot, or reboot, you'll need to do a :
+	# modprobe iris-gio
+
+	You can consider adding "iris-gio" into the /etc/modules file but take
+	care that the module must be inserted into the kernel before brltty 
+	is started.
+
+
+Do Not hesitate to contact me if you have any question about this procedure.
+And keep in mind this a specific stuff, so do not attempt for now any script
+that would to the things for you: I don't have enough time to create them.
