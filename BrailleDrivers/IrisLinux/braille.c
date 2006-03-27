@@ -500,8 +500,6 @@ static int brl_readKey(BrailleDisplay *brl)
 
 static int brl_keyToCommand(BrailleDisplay *brl, BRL_DriverCommandContext key_context, int code)
 {
-  int		i;
-
   if (code & 0x00010000)
     {
       code &= 0x00003fff;
@@ -531,11 +529,6 @@ static int brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext key_con
 
   key = readbrlkey(brl, CTX_COMMANDS);
   return (key);
-}
-
-static int enter_routing(BrailleDisplay *brl)
-{
-  return (routing(brl, 0x83, CTX_COMMANDS));
 }
 
 static int routing(BrailleDisplay *brl, int routekey, char ctx)

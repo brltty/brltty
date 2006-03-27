@@ -120,5 +120,4 @@ static int	handle_routekey(BrailleDisplay *, int);
 static int	Program(BrailleDisplay *brl);
 static int	SynthControl(BrailleDisplay *brl);
 static int	ViewOn(BrailleDisplay *);
-static int	enter_routing(BrailleDisplay *brl);
 static int	routing(BrailleDisplay *brl, int key, char);
