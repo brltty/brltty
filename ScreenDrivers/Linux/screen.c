@@ -231,9 +231,9 @@ vtPath (const char *base, unsigned char vt) {
     if (base[length-1] == '0') --length;
     strncpy(buffer, base, length);
     sprintf(buffer+length,  "%u", vt);
-    return strdup(buffer);
+    return strdupWrapper(buffer);
   }
-  return strdup(base);
+  return strdupWrapper(base);
 }
 
 static int
@@ -282,11 +282,6 @@ closeConsole (void) {
     LogPrint(LOG_DEBUG, "console closed: fd=%d", consoleDescriptor);
     consoleDescriptor = -1;
   }
-
-  if (consolePath) {
-    free(consolePath);
-    consolePath = NULL;
-  }
 }
 
 static int
@@ -323,11 +318,6 @@ closeScreen (void) {
     }
     LogPrint(LOG_DEBUG, "screen closed: fd=%d", screenDescriptor);
     screenDescriptor = -1;
-  }
-
-  if (screenPath) {
-    free(screenPath);
-    screenPath = NULL;
   }
 }
 
@@ -484,17 +474,6 @@ setScreenFontMap (int force) {
     }
   }
   return 1;
-}
-
-static void
-deallocateScreenFontMap (void) {
-  if (screenFontMapTable) {
-    free(screenFontMapTable);
-    screenFontMapTable = NULL;
-  }
-
-  screenFontMapSize = 0;
-  screenFontMapCount = 0;
 }
 
 static int vgaCharacterCount;
@@ -859,7 +838,23 @@ static void
 close_LinuxScreen (void) {
   closeConsole();
   closeScreen();
-  deallocateScreenFontMap();
+
+  if (consolePath) {
+    free(consolePath);
+    consolePath = NULL;
+  }
+
+  if (screenPath) {
+    free(screenPath);
+    screenPath = NULL;
+  }
+
+  if (screenFontMapTable) {
+    free(screenFontMapTable);
+    screenFontMapTable = NULL;
+  }
+  screenFontMapSize = 0;
+  screenFontMapCount = 0;
 }
 
 static int
