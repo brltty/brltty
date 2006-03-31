@@ -152,31 +152,7 @@ m4_text_wrap([$3], [      ], [- $2  ], brltty_help_width)])dnl
 brltty_item_entries_$1="${brltty_item_entries_$1} $2-$3"
 brltty_item_codes_$1="${brltty_item_codes_$1} $2"
 brltty_item_names_$1="${brltty_item_names_$1} $3"
-$1_libraries_$2='$4'
-if test "${brltty_standalone_programs}" != "yes"
-then
-   case "${host_os}"
-   in
-      linux*)
-         brltty_ld_runpath="-rpath"
-         ;;
-      *)
-         brltty_ld_runpath=""
-         ;;
-   esac
-changequote(, )dnl
-   if test -n "${brltty_ld_runpath}"
-   then
-      if test "${GCC}" = "yes"
-      then
-         $1_libraries_$2="`echo "${$1_libraries_$2}" | sed -e 's%\(-L *\)\([^ ]*\)%-Wl,'"${brltty_ld_runpath}"',\2 \1\2%g'`"
-      else
-         $1_libraries_$2="`echo "${$1_libraries_$2}" | sed -e 's%\(-L *\)\([^ ]*\)%'"${brltty_ld_runpath}"' \2 \1\2%g'`"
-      fi
-   fi
-changequote([, ])
-fi
-AC_SUBST([$1_libraries_$2])])
+AC_SUBST([$1_libraries_$2], ['$4'])])
 
 AC_DEFUN([BRLTTY_BRAILLE_DRIVER], [dnl
 BRLTTY_ITEM([braille], [$1], [$2], [$3])])
