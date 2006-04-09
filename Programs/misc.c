@@ -114,6 +114,7 @@ LogClose (void) {
 
 void
 LogPrint (int level, const char *format, ...) {
+  int reason = errno;
   va_list argp;
 
   if (level <= logLevel) {
@@ -148,6 +149,8 @@ done:
     fprintf(stream, "\n");
     fflush(stream);
   }
+
+  errno = reason;
 }
 
 void
