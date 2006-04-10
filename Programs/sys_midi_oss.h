@@ -15,6 +15,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
+#include <sys/soundcard.h>
+
 #include "io_misc.h"
 
 struct MidiDeviceStruct {

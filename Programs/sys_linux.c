@@ -22,7 +22,6 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <linux/kd.h>
-#include <linux/soundcard.h>
 
 #include "misc.h"
 #include "system.h"
