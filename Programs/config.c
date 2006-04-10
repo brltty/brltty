@@ -1360,7 +1360,7 @@ openBrailleDriver (void) {
   } else {
     LogPrint(LOG_DEBUG, "%s: %s -> %s",
              gettext("braille driver initialization failed"),
-             braille->code, brailleDevice);
+             braille->definition.code, brailleDevice);
   }
 
   return 0;
@@ -1446,14 +1446,14 @@ activateBrailleDriver (int verify) {
 
         if ((braille = loadBrailleDriver(*code, &brailleObject, opt_libraryDirectory))) {
           brailleParameters = processParameters(braille->parameters,
-                                                braille->code,
+                                                braille->definition.code,
                                                 opt_brailleParameters);
           if (brailleParameters) {
             int opened = verify;
 
             if (!opened) {
               LogPrint(LOG_DEBUG, "initializing braille driver: %s -> %s",
-                       braille->code, brailleDevice);
+                       braille->definition.code, brailleDevice);
 
               if (openBrailleDriver()) {
 #ifdef ENABLE_API
@@ -1467,7 +1467,7 @@ activateBrailleDriver (int verify) {
 
             if (opened) {
               LogPrint(LOG_INFO, "%s: %s [%s]",
-                       gettext("Braille Driver"), braille->code, braille->name);
+                       gettext("Braille Driver"), braille->definition.code, braille->definition.name);
               identifyBrailleDriver(braille, 0);
               logParameters(braille->parameters, brailleParameters,
                             gettext("Braille Parameter"));
@@ -1490,7 +1490,7 @@ activateBrailleDriver (int verify) {
 
               {
                 const char *part1 = CONFIGURATION_DIRECTORY "/brltty-";
-                const char *part2 = braille->code;
+                const char *part2 = braille->definition.code;
                 const char *part3 = ".prefs";
                 char *path = mallocWrapper(strlen(part1) + strlen(part2) + strlen(part3) + 1);
                 sprintf(path, "%s%s%s", part1, part2, part3);
@@ -1623,7 +1623,7 @@ openSpeechDriver (void) {
     return 1;
   } else {
     LogPrint(LOG_DEBUG, "speech driver initialization failed: %s",
-             speech->code);
+             speech->definition.code);
   }
 
   return 0;
@@ -1661,14 +1661,14 @@ activateSpeechDriver (int verify) {
 
       if ((speech = loadSpeechDriver(*code, &speechObject, opt_libraryDirectory))) {
         speechParameters = processParameters(speech->parameters,
-                                             speech->code,
+                                             speech->definition.code,
                                              opt_speechParameters);
         if (speechParameters) {
           int opened = verify;
 
           if (!opened) {
             LogPrint(LOG_DEBUG, "initializing speech driver: %s",
-                     speech->code);
+                     speech->definition.code);
 
             if (openSpeechDriver()) {
               opened = 1;
@@ -1678,7 +1678,7 @@ activateSpeechDriver (int verify) {
 
           if (opened) {
             LogPrint(LOG_INFO, "%s: %s [%s]",
-                     gettext("Speech Driver"), speech->code, speech->name);
+                     gettext("Speech Driver"), speech->definition.code, speech->definition.name);
             identifySpeechDriver(speech, 0);
             logParameters(speech->parameters, speechParameters,
                           gettext("Speech Parameter"));

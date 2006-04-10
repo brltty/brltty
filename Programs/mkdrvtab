@@ -43,10 +43,11 @@ for driverCode
 do
    echo "extern const ${driverType} ${symbolPrefix}${driverCode};"
 done
+
 echo "static const DriverEntry driverTable[] = {"
 for driverCode
 do
-   echo "  {&${symbolPrefix}${driverCode}, &${symbolPrefix}${driverCode}.code},"
+   echo "  {&${symbolPrefix}${driverCode}, &${symbolPrefix}${driverCode}.definition},"
 done
 echo "  {NULL, NULL}"
 echo "};"

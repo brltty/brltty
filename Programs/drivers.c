@@ -44,7 +44,7 @@ isDriverAvailable (const char *code, const char *codes) {
 int
 isDriverIncluded (const char *code, const DriverEntry *table) {
   while (table->address) {
-    if (strcmp(code, *table->code) == 0) return 1;
+    if (strcmp(code, table->definition->code) == 0) return 1;
     ++table;
   }
   return 0;
@@ -58,7 +58,7 @@ haveDriver (const char *code, const char *codes, const DriverEntry *table) {
 
 const char *
 getDefaultDriver (const DriverEntry *table) {
-  return (table && table[0].address && !table[1].address)? *table[0].code: NULL;
+  return (table && table[0].address && !table[1].address)? table[0].definition->code: NULL;
 }
 
 const void *
@@ -66,7 +66,7 @@ loadDriver (
   const char *driverCode, void **driverObject,
   const char *driverDirectory, const DriverEntry *driverTable,
   const char *driverType, char driverCharacter, const char *driverSymbol,
-  const void *nullAddress, const char *nullCode
+  const void *nullAddress, const DriverDefinition *nullDefinition
 ) {
   const void *driverAddress = NULL;
   *driverObject = NULL;
@@ -78,12 +78,12 @@ loadDriver (
     return nullAddress;
   }
 
-  if (strcmp(driverCode, nullCode) == 0) return nullAddress;
+  if (strcmp(driverCode, nullDefinition->code) == 0) return nullAddress;
 
   if (driverTable) {
     const DriverEntry *driverEntry = driverTable;
     while (driverEntry->address) {
-      if (strcmp(driverCode, *driverEntry->code) == 0) {
+      if (strcmp(driverCode, driverEntry->definition->code) == 0) {
         return driverEntry->address;
       }
       ++driverEntry;
@@ -138,17 +138,15 @@ loadDriver (
 void
 identifyDriver (
   const char *type,
-  const char *name, const char *version,
-  const char *date, const char *time,
-  const char *copyright,
+  const DriverDefinition *definition,
   int full
 ) {
-  if (version && *version)
-    LogPrint(LOG_NOTICE, "%s %s Driver: version %s, compiled on %s at %s", name, type, version, date, time);
+  if (definition->version && *definition->version)
+    LogPrint(LOG_NOTICE, "%s %s Driver: version %s, compiled on %s at %s", definition->name, type, definition->version, definition->date, definition->time);
   else
-    LogPrint(LOG_NOTICE, "%s %s Driver: compiled on %s at %s", name, type, date, time);
+    LogPrint(LOG_NOTICE, "%s %s Driver: compiled on %s at %s", definition->name, type, definition->date, definition->time);
 
   if (full) {
-    if (copyright && *copyright) LogPrint(LOG_INFO, "   %s", copyright);
+    if (definition->copyright && *definition->copyright) LogPrint(LOG_INFO, "   %s", definition->copyright);
   }
 }

@@ -22,9 +22,11 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#include "driver.h"
+
 typedef struct {
   const void *address;
-  const char *const *code;
+  const DriverDefinition *definition;
 } DriverEntry;
 
 extern int isDriverAvailable (const char *code, const char *codes);
@@ -36,14 +38,12 @@ extern const void *loadDriver (
   const char *driverCode, void **driverObject,
   const char *driverDirectory, const DriverEntry *driverTable,
   const char *driverType, char driverCharacter, const char *driverSymbol,
-  const void *nullAddress, const char *nullCode
+  const void *nullAddress, const DriverDefinition *nullDefinition
 );
 
 extern void identifyDriver (
   const char *type,
-  const char *name, const char *version,
-  const char *date, const char *time,
-  const char *copyright,
+  const DriverDefinition *definition,
   int full
 );
 

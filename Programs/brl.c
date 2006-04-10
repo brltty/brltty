@@ -31,11 +31,11 @@
 #include "cmd.h"
 
 #define BRLSYMBOL noBraille
-#define BRLNAME NoBraille
-#define BRLCODE no
-#define BRLCOMMENT "no braille support"
-#define BRLVERSION ""
-#define BRLCOPYRIGHT ""
+#define DRIVER_NAME NoBraille
+#define DRIVER_CODE no
+#define DRIVER_COMMENT "no braille support"
+#define DRIVER_VERSION ""
+#define DRIVER_COPYRIGHT ""
 #define BRLHELP "/dev/null"
 #include "brl_driver.h"
 static int
@@ -90,12 +90,12 @@ loadBrailleDriver (const char *code, void **driverObject, const char *driverDire
   return loadDriver(code, driverObject,
                     driverDirectory, driverTable,
                     "braille", 'b', "brl_driver",
-                    &noBraille, noBraille.code);
+                    &noBraille, &noBraille.definition);
 }
 
 void
 identifyBrailleDriver (const BrailleDriver *driver, int full) {
-  identifyDriver("Braille", driver->name, driver->version, driver->date, driver->time, driver->copyright, full);
+  identifyDriver("Braille", &driver->definition, full);
 }
 
 void

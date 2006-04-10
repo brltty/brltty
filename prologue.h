@@ -25,6 +25,12 @@ extern "C" {
 #define BRLTTY_COPYRIGHT "Copyright (C) 1995-2006 by The BRLTTY Developers."
 #define BRLTTY_URL "http://mielke.cc/brltty/"
 
+#define _CONCATENATE(a,b) a##b
+#define CONCATENATE(a,b) _CONCATENATE(a,b)
+
+#define _STRINGIFY(a) #a
+#define STRINGIFY(a) _STRINGIFY(a)
+
 #if defined(__CYGWIN32__) || defined(__MINGW32__)
 #define WINDOWS
 

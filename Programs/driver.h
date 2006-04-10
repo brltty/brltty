@@ -15,32 +15,37 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_SCR_REAL
-#define BRLTTY_INCLUDED_SCR_REAL
+#ifndef BRLTTY_INCLUDED_DRIVER
+#define BRLTTY_INCLUDED_DRIVER
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-#include "driver.h"
-#include "scr_main.h"
-
 typedef struct {
-  DRIVER_DEFINITION_DECLARATION;
-  const char *const *parameters;
+  const char *name;
+  const char *code;
+  const char *comment;
+  const char *version;
+  const char *copyright;
+  const char *date;
+  const char *time;
+} DriverDefinition;
 
-  void (*initialize) (MainScreen *main);		/* initialize speech device */
-} ScreenDriver;
+#define DRIVER_DEFINITION_DECLARATION const DriverDefinition definition
 
-extern void initializeRealScreen (MainScreen *);
-
-extern const ScreenDriver noScreen;
-extern const ScreenDriver *loadScreenDriver (const char *code, void **driverObject, const char *driverDirectory);
-extern void identifyScreenDrivers (int full);
-extern void identifyScreenDriver (const ScreenDriver *driver, int full);
+#define DRIVER_DEFINITION_INITIALIZER .definition = { \
+  .name = STRINGIFY(DRIVER_NAME), \
+  .code = STRINGIFY(DRIVER_CODE), \
+  .comment = DRIVER_COMMENT, \
+  .version = DRIVER_VERSION, \
+  .copyright = DRIVER_COPYRIGHT, \
+  .date = __DATE__, \
+  .time = __TIME__ \
+}
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_SCR_REAL */
+#endif /* BRLTTY_INCLUDED_DRIVER */

@@ -24,6 +24,7 @@ extern "C" {
 
 #include "prologue.h"
 
+#include "driver.h"
 #include "brldefs.h"
 
 /* status cell styles */
@@ -77,13 +78,7 @@ typedef enum {
  * with pointers to all the functions and variables.
  */
 typedef struct {
-  const char *name;
-  const char *code;
-  const char *comment;
-  const char *version;
-  const char *copyright;
-  const char *date;
-  const char *time;
+  DRIVER_DEFINITION_DECLARATION;
   const char *const *parameters;
   const char *helpFile;
   int statusStyle;

@@ -22,17 +22,10 @@
 extern "C" {
 #endif /* __cplusplus */
 
-/* spk.h - Header file for the speech library
- */
+#include "driver.h"
 
 typedef struct {
-  const char *name;
-  const char *code;
-  const char *comment;
-  const char *version;
-  const char *copyright;
-  const char *date;
-  const char *time;
+  DRIVER_DEFINITION_DECLARATION;
   const char *const *parameters;
   int (*open) (char **parameters);
   void (*close) (void);

@@ -746,12 +746,12 @@ static int handleGetDriver(Connection *c, brl_type_t type, size_t size, const ch
 
 static int handleGetDriverId(Connection *c, brl_type_t type, unsigned char *packet, size_t size)
 {
-  return handleGetDriver(c, type, size, braille->code);
+  return handleGetDriver(c, type, size, braille->definition.code);
 }
 
 static int handleGetDriverName(Connection *c, brl_type_t type, unsigned char *packet, size_t size)
 {
-  return handleGetDriver(c, type, size, braille->name);
+  return handleGetDriver(c, type, size, braille->definition.name);
 }
 
 static int handleGetDisplaySize(Connection *c, brl_type_t type, unsigned char *packet, size_t size)
@@ -787,7 +787,7 @@ static int handleGetTty(Connection *c, brl_type_t type, unsigned char *packet, s
   memcpy(name, p, n);
   name[n] = '\0';
   if (!*name) how = BRL_COMMANDS; else {
-    if ((!strcmp(name, trueBraille->name)) && (isKeyCapable(trueBraille)))
+    if ((!strcmp(name, trueBraille->definition.name)) && (isKeyCapable(trueBraille)))
       how = BRL_KEYCODES;
     else how = -1;
   }
@@ -1076,7 +1076,7 @@ static int handleGetRaw(Connection *c, brl_type_t type, unsigned char *packet, s
   CHECKERR(remaining==getRawPacket->nameLength, BRLERR_INVALID_PACKET);
   memcpy(name, &getRawPacket->name, getRawPacket->nameLength);
   name[getRawPacket->nameLength] = '\0';
-  CHECKERR(((!strcmp(name, trueBraille->name)) && isRawCapable(trueBraille)), BRLERR_OPNOTSUPP);
+  CHECKERR(((!strcmp(name, trueBraille->definition.name)) && isRawCapable(trueBraille)), BRLERR_OPNOTSUPP);
   CHECKERR(rawConnection==NULL,BRLERR_RAWMODEBUSY);
   pthread_mutex_lock(&rawMutex);
   pthread_mutex_lock(&driverMutex);

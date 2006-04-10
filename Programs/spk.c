@@ -29,11 +29,11 @@
 #include "spk.auto.h"
 
 #define SPKSYMBOL noSpeech
-#define SPKNAME NoSpeech
-#define SPKCODE no
-#define SPKCOMMENT "no speech support"
-#define SPKVERSION ""
-#define SPKCOPYRIGHT ""
+#define DRIVER_NAME NoSpeech
+#define DRIVER_CODE no
+#define DRIVER_COMMENT "no speech support"
+#define DRIVER_VERSION ""
+#define DRIVER_COPYRIGHT ""
 #include "spk_driver.h"
 static int spk_open (char **parameters) { return 1; }
 static void spk_close (void) { }
@@ -81,12 +81,12 @@ loadSpeechDriver (const char *code, void **driverObject, const char *driverDirec
   return loadDriver(code, driverObject,
                     driverDirectory, driverTable,
                     "speech", 's', "spk_driver",
-                    &noSpeech, noSpeech.code);
+                    &noSpeech, &noSpeech.definition);
 }
 
 void
 identifySpeechDriver (const SpeechDriver *driver, int full) {
-  identifyDriver("Speech", driver->name, driver->version, driver->date, driver->time, driver->copyright, full);
+  identifyDriver("Speech", &driver->definition, full);
 }
 
 void

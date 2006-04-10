@@ -24,8 +24,6 @@ extern "C" {
 
 /* this header file is used to create the driver structure
  * for a dynamically loadable screen driver.
- * The following symbols must be defined (see driver make file):
- *    SCRNAME, SCRCODE, SCRCOMMENT, SCRVERSION, SCRCOPYRIGHT
  */
 
 #include "scr.h"
@@ -39,7 +37,7 @@ static void scr_initialize (MainScreen *main);
 #endif /* SCRPARMS */
 
 #ifndef SCRSYMBOL
-#  define SCRSYMBOL CONCATENATE(scr_driver_,SCRCODE)
+#  define SCRSYMBOL CONCATENATE(scr_driver_,DRIVER_CODE)
 #endif /* SCRSYMBOL */
 
 #ifndef SCRCONST
@@ -48,13 +46,7 @@ static void scr_initialize (MainScreen *main);
 
 extern SCRCONST ScreenDriver SCRSYMBOL;
 SCRCONST ScreenDriver SCRSYMBOL = {
-  STRINGIFY(SCRNAME),
-  STRINGIFY(SCRCODE),
-  SCRCOMMENT,
-  SCRVERSION,
-  SCRCOPYRIGHT,
-  __DATE__,
-  __TIME__,
+  DRIVER_DEFINITION_INITIALIZER,
 
 #ifdef SCRPARMS
   scr_parameters,

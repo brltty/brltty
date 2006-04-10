@@ -231,7 +231,7 @@ getScreenParameters (void) {
 
 const char *
 getScreenDriverCode (void) {
-  return screenDriver->code;
+  return screenDriver->definition.code;
 }
 
 int
