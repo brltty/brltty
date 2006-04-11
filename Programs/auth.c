@@ -106,7 +106,7 @@ typedef struct ucred PeerCredentials;
 
 static int
 initializePeerCredentials (PeerCredentials *credentials, int fd) {
-  size_t length = sizeof(*credentials);
+  socklen_t length = sizeof(*credentials);
   if (getsockopt(fd, SOL_SOCKET, SO_PEERCRED, credentials, &length) != -1) return 1;
   LogError("getsockopt[SO_PEERCRED]");
   return 0;
