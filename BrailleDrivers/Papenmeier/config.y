@@ -37,9 +37,9 @@
 #include "brl-cfg.h"
 
 #define YYERROR_VERBOSE
-static int yylex(void);
-static int yyerror(char*);    
-static int yyparse();
+static int yylex (void);
+static int yyerror (char*);    
+int yyparse (void);
 
 /* to be called: */
 static int parse (void);
