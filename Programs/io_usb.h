@@ -155,11 +155,7 @@ typedef enum {
 typedef struct {
   uint8_t bLength;         /* Descriptor size in bytes. */
   uint8_t bDescriptorType; /* Descriptor type. */
-}
-#ifdef HAVE_ATTRIBUTE_PACKED
-  __attribute__((packed))
-#endif /* HAVE_ATTRIBUTE_PACKED */
-  UsbDescriptorHeader;
+} PACKED UsbDescriptorHeader;
 
 typedef struct {
   uint8_t bLength;            /* Descriptor size in bytes (18). */
@@ -176,11 +172,7 @@ typedef struct {
   uint8_t iProduct;           /* String index for product description. */
   uint8_t iSerialNumber;      /* String index for serial number. */
   uint8_t bNumConfigurations; /* Number of configurations. */
-}
-#ifdef HAVE_ATTRIBUTE_PACKED
-  __attribute__((packed))
-#endif /* HAVE_ATTRIBUTE_PACKED */
-  UsbDeviceDescriptor;
+} PACKED UsbDeviceDescriptor;
 
 typedef struct {
   uint8_t bLength;             /* Descriptor size in bytes (9). */
@@ -191,21 +183,13 @@ typedef struct {
   uint8_t iConfiguration;      /* String index for configuration description. */
   uint8_t bmAttributes;        /* Configuration attributes. */
   uint8_t bMaxPower;           /* Maximum power in 2 milliamp units. */
-}
-#ifdef HAVE_ATTRIBUTE_PACKED
-  __attribute__((packed))
-#endif /* HAVE_ATTRIBUTE_PACKED */
-  UsbConfigurationDescriptor;
+} PACKED UsbConfigurationDescriptor;
 
 typedef struct {
   uint8_t bLength;         /* Descriptor size in bytes (2 + numchars/2). */
   uint8_t bDescriptorType; /* Descriptor type (3 == string). */
   uint16_t wData[127];     /* 16-bit characters. */
-}
-#ifdef HAVE_ATTRIBUTE_PACKED
-  __attribute__((packed))
-#endif /* HAVE_ATTRIBUTE_PACKED */
-  UsbStringDescriptor;
+} PACKED UsbStringDescriptor;
 
 typedef struct {
   uint8_t bLength;            /* Descriptor size in bytes (9). */
@@ -217,11 +201,7 @@ typedef struct {
   uint8_t bInterfaceSubClass; /* Interface subclass. */
   uint8_t bInterfaceProtocol; /* Interface protocol. */
   uint8_t iInterface;         /* String index for interface description. */
-}
-#ifdef HAVE_ATTRIBUTE_PACKED
-  __attribute__((packed))
-#endif /* HAVE_ATTRIBUTE_PACKED */
-  UsbInterfaceDescriptor;
+} PACKED UsbInterfaceDescriptor;
 
 typedef struct {
   uint8_t bLength;          /* Descriptor size in bytes (7, 9 for audio). */
@@ -232,11 +212,7 @@ typedef struct {
   uint8_t bInterval;        /* Maximum interval in milliseconds between transfers. */
   uint8_t bRefresh;
   uint8_t bSynchAddress;
-}
-#ifdef HAVE_ATTRIBUTE_PACKED
-  __attribute__((packed))
-#endif /* HAVE_ATTRIBUTE_PACKED */
-  UsbEndpointDescriptor;
+} PACKED UsbEndpointDescriptor;
 
 typedef union {
   UsbDescriptorHeader header;
@@ -254,11 +230,7 @@ typedef struct {
   uint16_t wValue;      /* Request value. */
   uint16_t wIndex;      /* Recipient number (language for strings). */
   uint16_t wLength;     /* Data length in bytes. */
-}
-#ifdef HAVE_ATTRIBUTE_PACKED
-  __attribute__((packed))
-#endif /* HAVE_ATTRIBUTE_PACKED */
-  UsbSetupPacket;
+} PACKED UsbSetupPacket;
 
 typedef struct UsbDeviceStruct UsbDevice;
 typedef int (*UsbDeviceChooser) (UsbDevice *device, void *data);

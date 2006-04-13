@@ -64,6 +64,12 @@ extern "C" {
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
 
+#ifdef HAVE_ATTRIBUTE_PACKED
+#define PACKED __attribute__((packed))
+#else /* HAVE_ATTRIBUTE_PACKED */
+#define PACKED
+#endif /* HAVE_ATTRIBUTE_PACKED */
+
 #ifdef ENABLE_I18N_SUPPORT
 #include <libintl.h>
 #else /* ENABLE_I18N_SUPPORT */

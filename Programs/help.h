@@ -40,20 +40,12 @@ extern "C" {
 typedef struct {
   unsigned char pages;
   unsigned char unused;
-}
-#ifdef HAVE_ATTRIBUTE_PACKED
-  __attribute__((packed))
-#endif /* HAVE_ATTRIBUTE_PACKED */
-  HelpFileHeader;
+} PACKED HelpFileHeader;
 
 typedef struct {
   uint16_t height;
   uint16_t width;
-}
-#ifdef HAVE_ATTRIBUTE_PACKED
-  __attribute__((packed))
-#endif /* HAVE_ATTRIBUTE_PACKED */
-  HelpPageEntry;
+} PACKED HelpPageEntry;
 
 #ifdef __cplusplus
 }

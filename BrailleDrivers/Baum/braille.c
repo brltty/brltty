@@ -17,12 +17,6 @@
 
 #include "prologue.h"
 
-#ifdef HAVE_ATTRIBUTE_PACKED
-#define PACKED __attribute__((packed))
-#else /* HAVE_ATTRIBUTE_PACKED */
-#define PACKED
-#endif /* HAVE_ATTRIBUTE_PACKED */
-
 #include <stdio.h>
 #include <inttypes.h>
 #include <string.h>
