@@ -748,11 +748,7 @@ insert_AtSpiScreen (ScreenKey key) {
 static int
 execute_AtSpiScreen (int command) {
   int blk = command & BRL_MSK_BLK;
-  int arg
-#ifdef HAVE_ATTRIBUTE_UNUSED
-      __attribute__((unused))
-#endif /* HAVE_ATTRIBUTE_UNUSED */
-      = command & BRL_MSK_ARG;
+  int arg UNUSED = command & BRL_MSK_ARG;
 
   switch (blk) {
     case BRL_BLK_PASSAT2:

@@ -146,9 +146,7 @@ choiceEnvironmentParameter (ECIHand eci, const char *description, const char *va
    return ok;
 }
 
-#ifdef HAVE_ATTRIBUTE_UNUSED
-static int rangeEnvironmentParameter (ECIHand eci, const char *description, const char *value, ECIParam parameter, int minimum, int maximum) __attribute__((unused));
-#endif /* HAVE_ATTRIBUTE_UNUSED */
+static int rangeEnvironmentParameter (ECIHand eci, const char *description, const char *value, ECIParam parameter, int minimum, int maximum) UNUSED;
 static int
 rangeEnvironmentParameter (ECIHand eci, const char *description, const char *value, ECIParam parameter, int minimum, int maximum) {
    int ok = 0;

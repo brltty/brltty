@@ -70,6 +70,18 @@ extern "C" {
 #define PACKED
 #endif /* HAVE_ATTRIBUTE_PACKED */
 
+#ifdef HAVE_ATTRIBUTE_FORMAT_PRINTF
+#define PRINTF(fmt,var) __attribute__((format(printf, fmt, var)))
+#else /* HAVE_ATTRIBUTE_FORMAT_PRINTF */
+#define PRINTF(fmt,var)
+#endif /* HAVE_ATTRIBUTE_FORMAT_PRINTF */
+
+#ifdef HAVE_ATTRIBUTE_UNUSED
+#define UNUSED __attribute__((unused))
+#else /* HAVE_ATTRIBUTE_UNUSED */
+#define UNUSED
+#endif /* HAVE_ATTRIBUTE_UNUSED */
+
 #ifdef ENABLE_I18N_SUPPORT
 #include <libintl.h>
 #else /* ENABLE_I18N_SUPPORT */

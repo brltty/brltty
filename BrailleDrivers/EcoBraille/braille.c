@@ -92,11 +92,7 @@ static char BRL_ID[] = "\x10\x02\xF1";
 #define DIM_BRL_ID 3
 static unsigned char SYS_READY[] = {0X10, 0X02, 0XF1, 0X57, 0X57, 0X57, 0X10, 0X03};
 #define DIM_SYS_READY sizeof(SYS_READY)
-static char BRL_READY[]
-#ifdef HAVE_ATTRIBUTE_UNUSED
-       __attribute__((unused))
-#endif /* HAVE_ATTRIBUTE_UNUSED */
-       = "\x10\x02\x2E";
+static char BRL_READY[] UNUSED = "\x10\x02\x2E";
 #define DIM_BRL_READY 3
 static char BRL_WRITE_PREFIX[] = "\x61\x10\x02\xBC";
 #define DIM_BRL_WRITE_PREFIX 4

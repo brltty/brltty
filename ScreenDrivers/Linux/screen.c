@@ -1558,11 +1558,7 @@ currentvt_LinuxScreen (void) {
 static int
 execute_LinuxScreen (int command) {
   int blk = command & BRL_MSK_BLK;
-  int arg
-#ifdef HAVE_ATTRIBUTE_UNUSED
-      __attribute__((unused))
-#endif /* HAVE_ATTRIBUTE_UNUSED */
-      = command & BRL_MSK_ARG;
+  int arg UNUSED = command & BRL_MSK_ARG;
 
   switch (blk) {
     case BRL_BLK_PASSAT2:
@@ -1573,11 +1569,7 @@ execute_LinuxScreen (int command) {
         at2Keys = at2KeysE0;
       } else {
         unsigned char key = at2Keys[arg];
-        int pressed
-#ifdef HAVE_ATTRIBUTE_UNUSED
-            __attribute__((unused))
-#endif /* HAVE_ATTRIBUTE_UNUSED */
-            = at2Pressed;
+        int pressed UNUSED = at2Pressed;
 
         at2Keys = at2KeysOriginal;
         at2Pressed = 1;
