@@ -17,6 +17,12 @@
 
 #include "prologue.h"
 
+#ifdef HAVE_ATTRIBUTE_PACKED
+#define PACKED __attribute__((packed))
+#else /* HAVE_ATTRIBUTE_PACKED */
+#define PACKED
+#endif /* HAVE_ATTRIBUTE_PACKED */
+
 #include <stdio.h>
 #include <inttypes.h>
 #include <string.h>
@@ -576,7 +582,7 @@ typedef union {
       struct {
         unsigned char left[KEY_GROUP_SIZE(VERTICAL_SENSOR_COUNT)];
         unsigned char right[KEY_GROUP_SIZE(VERTICAL_SENSOR_COUNT)];
-      } verticalSensors;
+      } PACKED verticalSensors;
       unsigned char routingKeys[KEY_GROUP_SIZE(MAXIMUM_CELL_COUNT)];
       unsigned char switches;
       unsigned char topKeys;
@@ -584,7 +590,7 @@ typedef union {
       union {
         unsigned char left;
         unsigned char right;
-      } verticalSensor;
+      } PACKED verticalSensor;
       unsigned char routingKey;
       unsigned char frontKeys;
       unsigned char backKeys;
@@ -598,14 +604,14 @@ typedef union {
       struct {
         unsigned char identifier;
         unsigned char setting;
-      } mode;
+      } PACKED mode;
 
       char deviceIdentity[BAUM_DEVICE_IDENTITY_LENGTH];
       char serialNumber[BAUM_SERIAL_NUMBER_LENGTH];
       char bluetoothName[BAUM_BLUETOOTH_NAME_LENGTH];
-    } values;
-  } data;
-} BaumResponsePacket;
+    } PACKED values;
+  } PACKED data;
+} PACKED BaumResponsePacket;
 
 typedef enum {
   BAUM_TYPE_Inka,
@@ -1129,9 +1135,9 @@ typedef union {
 
     union {
       unsigned char identity;
-    } values;
-  } data;
-} HandyTechResponsePacket;
+    } PACKED values;
+  } PACKED data;
+} PACKED HandyTechResponsePacket;
 
 typedef struct {
   const char *name;
@@ -1393,16 +1399,16 @@ typedef union {
         unsigned char dots;
         unsigned char version[4];
         unsigned char checksum[4];
-      } identity;
+      } PACKED identity;
 
       struct {
         unsigned char count;
         unsigned char vertical[4];
         unsigned char horizontal[10];
-      } sensors;
-    } values;
-  } data;
-} PowerBrailleResponsePacket;
+      } PACKED sensors;
+    } PACKED values;
+  } PACKED data;
+} PACKED PowerBrailleResponsePacket;
 
 static int
 readPowerBraillePacket (unsigned char *packet, int size) {
