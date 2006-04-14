@@ -241,9 +241,11 @@ openDevice (const char *path, const char *description, int flags, int major, int
   int file;
   LogPrint(LOG_DEBUG, "opening %s device: %s", description, path);
   if ((file = open(path, flags)) == -1) {
-    LogPrint(LOG_ERR, "cannot open %s device: %s: %s",
+    int create = errno == ENOENT;
+    LogPrint(create? LOG_WARNING: LOG_ERR, 
+             "cannot open %s device: %s: %s",
              description, path, strerror(errno));
-    if (errno == ENOENT) {
+    if (create) {
       mode_t mode = S_IFCHR | S_IRUSR | S_IWUSR;
       LogPrint(LOG_NOTICE, "creating %s device: %s mode=%06o major=%d minor=%d",
                description, path, mode, major, minor);
