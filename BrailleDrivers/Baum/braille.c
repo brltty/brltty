@@ -61,6 +61,19 @@ static Keys pressedKeys;
 static unsigned char switchSettings;
 static int pendingCommand;
 
+static int currentModifiers;
+#define MOD_INPUT      0X0001
+#define MOD_INPUT_ONCE 0X0002
+#define MOD_CHORD      0X0004
+#define MOD_DOT7       0X0010
+#define MOD_DOT7_LOCK  0X0020
+#define MOD_DOT8       0X0040
+#define MOD_DOT8_LOCK  0X0080
+#define MOD_UPPER      0X0100
+#define MOD_UPPER_LOCK 0X0200
+#define MOD_META       0X0400
+#define MOD_CONTROL    0X0800
+
 typedef struct {
   int (*openPort) (char **parameters, const char *device);
   void (*closePort) ();
@@ -1683,6 +1696,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
 
           activeKeys = pressedKeys;
           pendingCommand = EOF;
+          currentModifiers = 0;
           return 1;
         }
 
@@ -1751,6 +1765,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   uint64_t keys;
   int command;
   int keyPressed;
+  int newModifiers = 0;
 
   unsigned char routingKeys[textCount];
   int routingKeyCount;
@@ -1793,7 +1808,168 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   }
 
 #define KEY(key,cmd) case (key): command = (cmd); break;
-  if (routingKeyCount == 0) {
+  if (currentModifiers & MOD_INPUT) {
+#define DOT1 BAUM_KEY_TL1
+#define DOT2 BAUM_KEY_TL2
+#define DOT3 BAUM_KEY_TL3
+#define DOT4 BAUM_KEY_TR1
+#define DOT5 BAUM_KEY_TR2
+#define DOT6 BAUM_KEY_TR3
+
+    newModifiers = currentModifiers & (MOD_INPUT | MOD_INPUT_ONCE |
+                                       MOD_DOT7_LOCK | MOD_DOT8_LOCK |
+                                       MOD_UPPER_LOCK);
+    if ((currentModifiers & MOD_INPUT_ONCE) && (keys || routingKeyCount))
+      newModifiers &= ~MOD_INPUT;
+
+    if ((routingKeyCount == 0) && keys) {
+      if (currentModifiers & MOD_CHORD) {
+      doChord:
+        switch (keys) {
+          KEY(DOT1, BRL_BLK_PASSKEY+BRL_KEY_BACKSPACE);
+          KEY(DOT4|DOT6, BRL_BLK_PASSKEY+BRL_KEY_ENTER);
+
+          KEY(DOT4, BRL_BLK_PASSKEY+BRL_KEY_CURSOR_UP);
+          KEY(DOT6, BRL_BLK_PASSKEY+BRL_KEY_CURSOR_DOWN);
+
+          KEY(DOT2, BRL_BLK_PASSKEY+BRL_KEY_CURSOR_LEFT);
+          KEY(DOT5, BRL_BLK_PASSKEY+BRL_KEY_CURSOR_RIGHT);
+
+          KEY(DOT4|DOT5, BRL_BLK_PASSKEY+BRL_KEY_PAGE_UP);
+          KEY(DOT5|DOT6, BRL_BLK_PASSKEY+BRL_KEY_PAGE_DOWN);
+
+          KEY(DOT1|DOT2, BRL_BLK_PASSKEY+BRL_KEY_HOME);
+          KEY(DOT2|DOT3, BRL_BLK_PASSKEY+BRL_KEY_END);
+
+          KEY(DOT1|DOT4|DOT5, BRL_BLK_PASSKEY+BRL_KEY_DELETE);
+          KEY(DOT1|DOT5, BRL_BLK_PASSKEY+BRL_KEY_ESCAPE);
+          KEY(DOT2|DOT4, BRL_BLK_PASSKEY+BRL_KEY_INSERT);
+          KEY(DOT2|DOT3|DOT4|DOT5, BRL_BLK_PASSKEY+BRL_KEY_TAB);
+        }
+
+        if (command != BRL_CMD_NOOP) {
+          if (currentModifiers & (MOD_UPPER | MOD_UPPER_LOCK)) command |= BRL_FLG_CHAR_SHIFT;
+          if (currentModifiers & MOD_META) command |= BRL_FLG_CHAR_META;
+          if (currentModifiers & MOD_CONTROL) command |= BRL_FLG_CHAR_CONTROL;
+        }
+      } else {
+      doCharacter:
+        command = BRL_BLK_PASSDOTS;
+
+        if (keys & DOT1) command |= BRL_DOT1;
+        if (keys & DOT2) command |= BRL_DOT2;
+        if (keys & DOT3) command |= BRL_DOT3;
+        if (keys & DOT4) command |= BRL_DOT4;
+        if (keys & DOT5) command |= BRL_DOT5;
+        if (keys & DOT6) command |= BRL_DOT6;
+
+        if (currentModifiers & (MOD_DOT7 | MOD_DOT7_LOCK)) command |= BRL_DOT7;
+        if (currentModifiers & (MOD_DOT8 | MOD_DOT8_LOCK)) command |= BRL_DOT8;
+
+        if (currentModifiers & (MOD_UPPER | MOD_UPPER_LOCK)) command |= BRL_FLG_CHAR_UPPER;
+        if (currentModifiers & MOD_META) command |= BRL_FLG_CHAR_META;
+        if (currentModifiers & MOD_CONTROL) command |= BRL_FLG_CHAR_CONTROL;
+      }
+    } else if (routingKeyCount == 1) {
+      unsigned char key1 = routingKeys[0];
+
+      if ((key1 == 0) || (key1 == textCount-1)) {
+        if (keys) goto doChord;
+        newModifiers |= MOD_CHORD;
+      } else if (key1 == 1) {
+        if (keys) {
+          currentModifiers |= MOD_DOT7;
+          goto doCharacter;
+        }
+
+        if (currentModifiers & MOD_DOT7_LOCK)
+          newModifiers &= ~MOD_DOT7_LOCK;
+        else if (currentModifiers & MOD_DOT7)
+          newModifiers |= MOD_DOT7_LOCK | MOD_DOT7;
+        else 
+          newModifiers |= MOD_DOT7;
+      } else if (key1 == textCount-2) {
+        if (keys) {
+          currentModifiers |= MOD_DOT8;
+          goto doCharacter;
+        }
+
+        if (currentModifiers & MOD_DOT8_LOCK)
+          newModifiers &= ~MOD_DOT8_LOCK;
+        else if (currentModifiers & MOD_DOT8)
+          newModifiers |= MOD_DOT8_LOCK | MOD_DOT8;
+        else
+          newModifiers |= MOD_DOT8;
+      } else if (key1 == 2) {
+        if (keys) {
+          currentModifiers |= MOD_UPPER;
+          goto doCharacter;
+        }
+
+        if (currentModifiers & MOD_UPPER_LOCK)
+          newModifiers &= ~MOD_UPPER_LOCK;
+        else if (currentModifiers & MOD_UPPER)
+          newModifiers |= MOD_UPPER_LOCK | MOD_UPPER;
+        else
+          newModifiers |= MOD_UPPER;
+      } else if (key1 == textCount-3) {
+        if (keys) {
+          currentModifiers |= MOD_META;
+          goto doCharacter;
+        }
+
+        newModifiers |= MOD_META;
+      }
+    } else if (routingKeyCount == 2) {
+      unsigned char key1 = routingKeys[0];
+      unsigned char key2 = routingKeys[1];
+
+      if (keys == 0) {
+        if ((key1 == textCount-2) && (key2 == textCount-1))
+          command = BRL_BLK_PASSDOTS; /* space */
+        else if ((key1 == 0) && (key2 == textCount-1))
+          newModifiers &= ~(MOD_CHORD |
+                            MOD_DOT7 | MOD_DOT7_LOCK |
+                            MOD_DOT8 | MOD_DOT8_LOCK |
+                            MOD_UPPER | MOD_UPPER_LOCK |
+                            MOD_META | MOD_CONTROL);
+        else if ((key1 == 1) && (key2 == textCount-2))
+          newModifiers |= MOD_DOT7 | MOD_DOT8;
+        else if ((key1 == 2) && (key2 == textCount-3))
+          newModifiers |= MOD_CONTROL;
+      } else {
+        if ((key1 == textCount-2) && (key2 == textCount-1)) {
+          switch (keys) {
+            case BAUM_KEY_TL1:
+              newModifiers = 0;
+              command = BRL_CMD_NOOP | BRL_FLG_TOGGLE_OFF;
+              break;
+
+            case BAUM_KEY_TL2:
+              newModifiers |= MOD_INPUT_ONCE;
+              break;
+
+            case BAUM_KEY_TL1|BAUM_KEY_TL2:
+              /* already in input mode */
+              command = BRL_CMD_NOOP | BRL_FLG_TOGGLE_ON;
+              break;
+          }
+        }
+      }
+    }
+
+    if ((currentModifiers & MOD_INPUT_ONCE) &&
+        (newModifiers & (MOD_CHORD | MOD_DOT7 | MOD_DOT8 |
+                         MOD_UPPER | MOD_META | MOD_CONTROL)))
+      newModifiers |= MOD_INPUT;
+
+#undef DOT1
+#undef DOT2
+#undef DOT3
+#undef DOT4
+#undef DOT5
+#undef DOT6
+  } else if (routingKeyCount == 0) {
     switch (keys) {
       KEY(BAUM_KEY_TL2, BRL_CMD_FWINLT);
       KEY(BAUM_KEY_TR2, BRL_CMD_FWINRT);
@@ -1916,6 +2092,23 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
       switch (keys) {
         KEY(BAUM_KEY_TR1, BRL_BLK_PRINDENT+routingKeys[0]);
         KEY(BAUM_KEY_TR3, BRL_BLK_NXINDENT+routingKeys[0]);
+
+        default:
+          if (routingKeys[1] == textCount-1) {
+            switch (keys) {
+              KEY(BAUM_KEY_TL1, BRL_CMD_NOOP|BRL_FLG_TOGGLE_OFF);
+                /* already out of input mode */ 
+
+              case BAUM_KEY_TL2:
+                newModifiers = MOD_INPUT | MOD_INPUT_ONCE;
+                break;
+
+              case BAUM_KEY_TL1|BAUM_KEY_TL2:
+                newModifiers = MOD_INPUT;
+                command = BRL_CMD_NOOP | BRL_FLG_TOGGLE_ON;
+                break;
+            }
+          }
       }
     }
   }
@@ -1923,6 +2116,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 
   if (!keyPressed) {
     memset(&activeKeys, 0, sizeof(activeKeys));
+    currentModifiers = newModifiers;
   } else if (pendingCommand != EOF) {
     command = BRL_CMD_NOOP;
     pendingCommand = EOF;

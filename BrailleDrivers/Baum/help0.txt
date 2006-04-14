@@ -64,3 +64,31 @@ switch 1: disable all sensors
 switch 2: scaled vertical sensor line selection
 switch 3 (Inka): show selected horizontal sensor (all dots raised)
 switch 4 (Inka): braille keyboard
+
+Braille Input Mode:
+CR(max)+CR(max-1) + TL1+TL2: enter input mode
+CR(max)+CR(max-1) + TL1: leave input mode
+CR(max)+CR(max-1) + TL2: enter input mode for one character
+TL1,TL2,TL3,TR1,TR2,TR3: dots 1,2,3,4,5,6
+CR2: add dot 7 to next braille pattern, repeat to lock
+CR(max-1): add dot 8 to next braille pattern, repeat to lock
+CR2+CR(max-1): add dots 7-8 to next braille pattern
+CR3: make next character uppercase, repeat to lock
+CR(max-2): make next character META
+CR3+CR(max-2): make next character CONTROL
+CR1+CR(max): cancel all modifiers
+You can also press CR2 or CR(max-1) or both at the same time as
+a dot pattern, instead of preceeding it.
+CR(max-1)+CR(max): space
+Either CR1 or CR(max), preceeding or at the same time as a dot pattern,
+produces a special character:
+  DOT1: backspace
+  DOT4+DOT6: RETURN/ENTER
+  DOT4/DOT6: arrow key up/down
+  DOT2/DOT5: arrow key left/right
+  DOT4+DOT5 / DOT5+DOT6: page-up/down
+  DOT1+DOT2 / DOT2+DOT3: home / end
+  d: delete
+  e: escape
+  i: insert
+  t: tab
