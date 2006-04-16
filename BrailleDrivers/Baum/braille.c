@@ -1941,17 +1941,17 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
         if ((key1 == textCount-2) && (key2 == textCount-1)) {
           switch (keys) {
             case BAUM_KEY_TL1:
-              newModifiers = 0;
-              command = BRL_CMD_NOOP | BRL_FLG_TOGGLE_OFF;
+              /* already in input mode */
+              command = BRL_CMD_NOOP | BRL_FLG_TOGGLE_ON;
               break;
 
             case BAUM_KEY_TL2:
               newModifiers |= MOD_INPUT_ONCE;
               break;
 
-            case BAUM_KEY_TL1|BAUM_KEY_TL2:
-              /* already in input mode */
-              command = BRL_CMD_NOOP | BRL_FLG_TOGGLE_ON;
+            case BAUM_KEY_TL3:
+              newModifiers = 0;
+              command = BRL_CMD_NOOP | BRL_FLG_TOGGLE_OFF;
               break;
           }
         }
@@ -2096,17 +2096,17 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
         default:
           if (routingKeys[1] == textCount-1) {
             switch (keys) {
-              KEY(BAUM_KEY_TL1, BRL_CMD_NOOP|BRL_FLG_TOGGLE_OFF);
-                /* already out of input mode */ 
+              case BAUM_KEY_TL1:
+                newModifiers = MOD_INPUT;
+                command = BRL_CMD_NOOP | BRL_FLG_TOGGLE_ON;
+                break;
 
               case BAUM_KEY_TL2:
                 newModifiers = MOD_INPUT | MOD_INPUT_ONCE;
                 break;
 
-              case BAUM_KEY_TL1|BAUM_KEY_TL2:
-                newModifiers = MOD_INPUT;
-                command = BRL_CMD_NOOP | BRL_FLG_TOGGLE_ON;
-                break;
+              KEY(BAUM_KEY_TL3, BRL_CMD_NOOP|BRL_FLG_TOGGLE_OFF);
+                /* already out of input mode */ 
             }
           }
       }

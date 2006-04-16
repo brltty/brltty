@@ -66,9 +66,9 @@ switch 3 (Inka): show selected horizontal sensor (all dots raised)
 switch 4 (Inka): braille keyboard
 
 Braille Input Mode:
-CR(max)+CR(max-1) + TL1+TL2: enter input mode
-CR(max)+CR(max-1) + TL1: leave input mode
-CR(max)+CR(max-1) + TL2: enter input mode for one character
+CR(max)+CR(max-1) + TL1: enter input mode
+CR(max)+CR(max-1) + TL2: temporarily enter input mode (for one character)
+CR(max)+CR(max-1) + TL3: leave input mode
 TL1,TL2,TL3,TR1,TR2,TR3: dots 1,2,3,4,5,6
 CR2: add dot 7 to next braille pattern, repeat to lock
 CR(max-1): add dot 8 to next braille pattern, repeat to lock
