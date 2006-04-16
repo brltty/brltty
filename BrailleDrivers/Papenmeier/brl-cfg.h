@@ -111,14 +111,13 @@ typedef struct {
   CommandDefinition *commands;
 } TerminalDefinition; 
 
-#define PM_COUNT(array) (sizeof((array)) / sizeof((array)[0]))
 #define PM_TERMINAL(identifier, signature, name, columns, rows, front, eab, ls, rs, lk, rk) \
 { \
   identifier, name, "brltty-pm-" #signature ".hlp", \
   columns, rows, front, eab, ls, rs, lk, rk, \
-  PM_COUNT(pm_status_##signature), \
-  PM_COUNT(pm_modifiers_##signature), \
-  PM_COUNT(pm_commands_##signature), \
+  ARRAY_COUNT(pm_status_##signature), \
+  ARRAY_COUNT(pm_modifiers_##signature), \
+  ARRAY_COUNT(pm_commands_##signature), \
   pm_status_##signature, \
   pm_modifiers_##signature, \
   pm_commands_##signature \
@@ -845,5 +844,5 @@ static TerminalDefinition pmTerminalTable[] = {
 };
 
 static TerminalDefinition *pmTerminals = pmTerminalTable;
-static int pmTerminalCount = PM_COUNT(pmTerminalTable);
+static int pmTerminalCount = ARRAY_COUNT(pmTerminalTable);
 static int pmTerminalsAllocated = 0;

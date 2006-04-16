@@ -1341,7 +1341,7 @@ resetTerminalTable (void) {
     deallocateTerminalTable();
 #endif /* ENABLE_PM_CONFIGURATION_FILE */
     pmTerminals = pmTerminalTable;
-    pmTerminalCount = PM_COUNT(pmTerminalTable);
+    pmTerminalCount = ARRAY_COUNT(pmTerminalTable);
     pmTerminalsAllocated = 0;
   }
 }

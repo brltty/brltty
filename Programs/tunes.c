@@ -430,7 +430,7 @@ const float noteFrequencies[] = {
    /* 126 +5F# */ 11839.822,
    /* 127 +5G  */ 12543.854
 };
-const unsigned int noteCount = sizeof(noteFrequencies) / sizeof(noteFrequencies[0]);
+const unsigned int noteCount = ARRAY_COUNT(noteFrequencies);
 
 static const NoteGenerator *noteGenerator = NULL;
 static unsigned int closeTimer = 0;

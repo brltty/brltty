@@ -757,7 +757,7 @@ globBegin (GlobData *data) {
   int index;
 
   data->paths = data->pathsArea;
-  data->count = (sizeof(data->pathsArea) / sizeof(data->pathsArea[0])) - 1;
+  data->count = ARRAY_COUNT(data->pathsArea) - 1;
   data->paths[data->count] = NULL;
   index = data->count;
 
@@ -1042,7 +1042,7 @@ updatePreferences (void) {
     #define TIME_ITEM(setting, changed, test, label) NUMERIC_ITEM(setting, changed, test, label, 1, 100, updateInterval/10)
     #define VOLUME_ITEM(setting, changed, test, label) NUMERIC_ITEM(setting, changed, test, label, 0, 100, 5)
     #define TEXT_ITEM(setting, changed, test, label, names, count) MENU_ITEM(setting, changed, test, label, names, 0, count-1, 1)
-    #define SYMBOLIC_ITEM(setting, changed, test, label, names) TEXT_ITEM(setting, changed, test, label, names, ((sizeof(names) / sizeof(names[0]))))
+    #define SYMBOLIC_ITEM(setting, changed, test, label, names) TEXT_ITEM(setting, changed, test, label, names, ARRAY_COUNT(names))
     #define BOOLEAN_ITEM(setting, changed, test, label) SYMBOLIC_ITEM(setting, changed, test, label, booleanValues)
     #define GLOB_ITEM(data, changed, test, label) TEXT_ITEM(data.setting, changed, test, label, data.paths, data.count)
     MenuItem menu[] = {
@@ -1103,7 +1103,7 @@ updatePreferences (void) {
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 #endif /* ENABLE_TABLE_SELECTION */
     };
-    int menuSize = sizeof(menu) / sizeof(menu[0]);
+    int menuSize = ARRAY_COUNT(menu);
     static int menuIndex = 0;                        /* current menu item */
 
     int lineIndent = 0;                                /* braille window pos in buffer */
@@ -1897,7 +1897,7 @@ startup (int argc, char *argv[]) {
         "emergency", "alert", "critical", "error",
         "warning", "notice", "information", "debug"
       };
-      static unsigned int count = sizeof(words) / sizeof(words[0]);
+      static unsigned int count = ARRAY_COUNT(words);
 
       {
         int length = strlen(opt_logLevel);

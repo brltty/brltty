@@ -1078,7 +1078,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
             KEY_HOT5, KEY_HOT6, KEY_HOT7, KEY_HOT8,
             KEY_GDF_RIGHT
           };
-          static const int keyCount = sizeof(keys) / sizeof(keys[0]);
+          static const int keyCount = ARRAY_COUNT(keys);
 
           unsigned int key;
           button -= (model->totalCells - keyCount) / 2;

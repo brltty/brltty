@@ -408,7 +408,7 @@ static const StatusStyleEntry statusStyleTable[] = {
   {setStatusCellsMDV, 2},
   {setStatusCellsVoyager, 3}
 };
-static const int statusStyleCount = sizeof(statusStyleTable) / sizeof(statusStyleTable[0]);
+static const int statusStyleCount = ARRAY_COUNT(statusStyleTable);
 
 static void
 setStatusCells (void) {
@@ -1011,7 +1011,7 @@ main (int argc, char *argv[]) {
       case 0: { /* child */
         static char *arguments[] = {"brltty", "-E", "-n", "-e", "-linfo", NULL};
         argv = arguments;
-        argc = (sizeof(arguments) / sizeof(arguments[0])) - 1;
+        argc = ARRAY_COUNT(arguments) - 1;
         break;
       }
     }

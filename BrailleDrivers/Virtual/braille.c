@@ -1086,7 +1086,7 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *st) {
             [BRL_GSC_AUTOREPEAT] = "AUTOREPEAT",
             [BRL_GSC_AUTOSPEAK] = "AUTOSPEAK"
           };
-          const int nameCount = sizeof(names) / sizeof(names[0]);
+          const int nameCount = ARRAY_COUNT(names);
 
           if (i < nameCount) {
             const char *name = names[i];

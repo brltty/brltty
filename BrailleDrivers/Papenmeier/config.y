@@ -531,7 +531,7 @@ int yylex ()
 {
   int c;
   static char symbuf[40] = { 0 };
-  const int length = sizeof(symbuf)/sizeof(symbuf[0]);
+  const int length = ARRAY_COUNT(symbuf);
 
   /* Ignore whitespace, get first nonwhite character.  */
   while ((c = getc(configurationFile)) == ' ' || c == '\t')

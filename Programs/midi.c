@@ -174,7 +174,7 @@ const char *midiInstrumentTable[] = {
   /* 7E */ "Applause",
   /* 7F */ "Gunshot"
 };
-const unsigned int midiInstrumentCount = sizeof(midiInstrumentTable) / sizeof(midiInstrumentTable[0]);
+const unsigned int midiInstrumentCount = ARRAY_COUNT(midiInstrumentTable);
 
 static int openMidi (int errorLevel) {
    if (!midi) {

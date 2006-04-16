@@ -51,7 +51,7 @@ typedef struct {
    NULL, NULL, \
    strtext("Print a full usage summary and exit.")} \
 }; \
-static unsigned int optionCount = sizeof(optionTable) / sizeof(optionTable[0]);
+static unsigned int optionCount = ARRAY_COUNT(optionTable);
 
 extern int processOptions (
   const OptionEntry *optionTable,

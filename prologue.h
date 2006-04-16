@@ -31,6 +31,9 @@ extern "C" {
 #define _STRINGIFY(a) #a
 #define STRINGIFY(a) _STRINGIFY(a)
 
+#define ARRAY_COUNT(array) (sizeof((array)) / sizeof((array)[0]))
+#define ARRAY_SIZE(pointer, count) ((count) * sizeof(*(pointer)))
+
 #if defined(__CYGWIN32__) || defined(__MINGW32__)
 #define WINDOWS
 
