@@ -65,7 +65,11 @@ USB devices are supported thanks to the libusb-win32 package. This means that,
 _before_ compiling BRLTTY, you need to:
 
 either
-*  For Cygwin, install the libusb-win32 package.
+*  For Cygwin:
+   1) Install the libusb-win32 package.
+   2) Activate the kernel driver by running /usr/sbin/libusb-install. You must
+      also do this each time you upgrade libusb-win32 in order to
+      reactivate the driver.
 
 or
 1) Download the libusb-win32 installer. As of the time of this writing, you can
