@@ -8,7 +8,7 @@ TL1+TR1 / TL3+TR3: go to top/bottom line
 TL2 + TR1/TR3: go to top-left/bottom-left corner
 TR2 + TR1/TR3: go up/down to nearest line with different content
 TL2 + TL1/TL3: go up/down to nearest line with different highlighting
-+TL2++TR2 + TL1+TR1/TL3+TR3: go up/down to nearest command prompt
+TL2+TR2 + TL1+TR1/TL3+TR3: go up/down to nearest command prompt
 TL2+TR2 + TR1/TR3: go up/down to next paragraph (blank line)
 TL2+TR1+TR3 + TL1/TL3: search backward/forward for text from cut buffer
 
