@@ -35,24 +35,23 @@ typedef struct pollfd InputOutputMonitor;
 typedef struct InputOutputEntryStruct InputOutputEntry;
 
 typedef struct {
+  InputOutputEntry *io;
+
   InputOutputListener respond;
   void *data;
+
+  size_t error;
+  size_t count;
+
   size_t size;
-  size_t offset;
-
-#ifdef WINDOWS
-  OVERLAPPED ol;
-#else /* WINDOWS */
-  short events;
-#endif /* WINDOWS */
-
   unsigned char buffer[1];
 } InputOutputOperation;
 
 typedef struct {
-  int (*prepareOperation) (InputOutputOperation *op);
-  ssize_t (*startOperation) (int fileDescriptor, void *buffer, size_t size);
-  ssize_t (*finishOperation) (int fileDescriptor, void *buffer, size_t size);
+  void (*prepareEntry) (InputOutputEntry *io);
+
+  void (*startOperation) (InputOutputOperation *op);
+  void (*finishOperation) (InputOutputOperation *op);
 
   void (*initializeMonitor) (InputOutputMonitor *monitor, const InputOutputEntry *io, const InputOutputOperation *op);
   int (*testMonitor) (const InputOutputMonitor *monitor);
@@ -62,6 +61,12 @@ struct InputOutputEntryStruct {
   int fileDescriptor;
   const InputOutputMethods *methods;
   Queue *operations;
+
+#ifdef WINDOWS
+  OVERLAPPED ol;
+#else /* WINDOWS */
+  short events;
+#endif /* WINDOWS */
 };
 
 typedef struct {
@@ -70,39 +75,63 @@ typedef struct {
 } InputOutputKey;
 
 #ifdef WINDOWS
+static int
+monitorEvents (InputOutputMonitor *monitorArray, int monitorCount, int timeout) {
+  return 0;
+}
 #else /* WINDOWS */
-static int
-prepareUnixInputOperation (InputOutputOperation *op) {
-  op->events = POLLIN;
-  return 1;
+static void
+prepareUnixInputEntry (InputOutputEntry *io) {
+  io->events = POLLIN;
 }
 
-static int
-prepareUnixOutputOperation (InputOutputOperation *op) {
-  op->events = POLLOUT;
-  return 1;
+static void
+prepareUnixOutputEntry (InputOutputEntry *io) {
+  io->events = POLLOUT;
 }
 
-static ssize_t
-finishUnixRead (int fileDescriptor, void *buffer, size_t size) {
-  return read(fileDescriptor, buffer, size);
+static void
+finishUnixRead (InputOutputOperation *op) {
+  int result = read(op->io->fileDescriptor, op->buffer, op->size);
+  if (result == -1) {
+    op->error = errno;
+  } else {
+    op->count = result;
+  }
 }
 
-static ssize_t
-finishUnixWrite (int fileDescriptor, void *buffer, size_t size) {
-  return write(fileDescriptor, buffer, size);
+static void
+finishUnixWrite (InputOutputOperation *op) {
+  int result = write(op->io->fileDescriptor, op->buffer, op->size);
+  if (result == -1) {
+    op->error = errno;
+  } else {
+    op->count = result;
+  }
 }
 
 static void
 initializeUnixInputOutputMonitor (InputOutputMonitor *monitor, const InputOutputEntry *io, const InputOutputOperation *op) {
   monitor->fd = io->fileDescriptor;
-  monitor->events = op->events;
+  monitor->events = io->events;
   monitor->revents = 0;
 }
 
 static int
 testUnixInputOutputMonitor (const InputOutputMonitor *monitor) {
   return monitor->revents != 0;
+}
+
+static int
+monitorEvents (InputOutputMonitor *monitorArray, int monitorCount, int timeout) {
+  int result = poll(monitorArray, monitorCount, timeout);
+  if (result > 0) return 1;
+
+  if (result == -1) {
+    LogError("poll");
+  }
+
+  return 0;
 }
 #endif /* WINDOWS */
 
@@ -164,7 +193,7 @@ getInputOutputElement (int fileDescriptor, const InputOutputMethods *methods, in
         io->methods = methods;
 
         if ((io->operations = newQueue(deallocateInputOutputOperation, NULL))) {
-          setQueueData(io->operations, io);
+          if (methods->prepareEntry) methods->prepareEntry(io);
 
           {
             Element *element = enqueueItem(entries, io);
@@ -182,6 +211,16 @@ getInputOutputElement (int fileDescriptor, const InputOutputMethods *methods, in
   return NULL;
 }
 
+static void
+startInputOutputOperation (InputOutputOperation *op) {
+  if (op->io->methods->startOperation) op->io->methods->startOperation(op);
+}
+
+static void
+finishInputOutputOperation (InputOutputOperation *op) {
+  if (op->io->methods->finishOperation) op->io->methods->finishOperation(op);
+}
+
 static int
 createInputOutputOperation (
   int fileDescriptor,
@@ -196,25 +235,25 @@ createInputOutputOperation (
 
     if ((ioElement = getInputOutputElement(fileDescriptor, methods, 1))) {
       InputOutputEntry *io = getElementItem(ioElement);
+      int new = !getQueueSize(io->operations);
       Element *opElement;
 
       if ((opElement = enqueueItem(io->operations, op))) {
+        op->io = io;
         op->respond = respond;
         op->data = data;
+        op->error = 0;
+        op->count = 0;
         op->size = size;
-        op->offset = 0;
         if (buffer) memcpy(op->buffer, buffer, size);
-
-        if (!methods->prepareOperation || methods->prepareOperation(op)) return 1;
-
-        deleteElement(opElement);
-        op = NULL;
+        if (new) startInputOutputOperation(op);
+        return 1;
       }
 
-      if (!getQueueSize(io->operations)) deleteElement(ioElement);
+      if (new) deleteElement(ioElement);
     }
 
-    if (op) free(op);
+    free(op);
   }
 
   return 0;
@@ -233,7 +272,7 @@ asyncRead (
   static const InputOutputMethods methods = {
 #ifdef WINDOWS
 #else /* WINDOWS */
-    .prepareOperation = prepareUnixInputOperation,
+    .prepareEntry = prepareUnixInputEntry,
     .finishOperation = finishUnixRead,
     .initializeMonitor = initializeUnixInputOutputMonitor,
     .testMonitor = testUnixInputOutputMonitor
@@ -250,7 +289,7 @@ asyncWrite (
   static const InputOutputMethods methods = {
 #ifdef WINDOWS
 #else /* WINDOWS */
-    .prepareOperation = prepareUnixOutputOperation,
+    .prepareEntry = prepareUnixOutputEntry,
     .finishOperation = finishUnixWrite,
     .initializeMonitor = initializeUnixInputOutputMonitor,
     .testMonitor = testUnixInputOutputMonitor
@@ -293,7 +332,7 @@ findInputOutputMonitor (void *item, void *data) {
 }
 
 void
-processEvents (int milliseconds) {
+processEvents (int timeout) {
   struct timeval start;
   gettimeofday(&start, NULL);
 
@@ -307,79 +346,38 @@ processEvents (int milliseconds) {
         AddInputOutputMonitorData add;
         add.monitor = monitorArray;
         processQueue(ioEntries, addInputOutputMonitor, &add);
+        monitorCount = add.monitor - monitorArray;
       } else {
         monitorCount = 0;
       }
     }
 
-    {
-      int posted = 0;
+    if (monitorEvents(monitorArray, monitorCount, timeout)) {
+      FindInputOutputMonitorData find;
+      find.monitor = monitorArray;
+      find.io = NULL;
 
-#ifdef WINDOWS
-#else /* WINDOWS */
       {
-        int count = poll(monitorArray, monitorCount, milliseconds);
-        if (count == -1) {
-          LogError("poll");
-          milliseconds = 0;
-        } else if (count > 0) {
-          posted = 1;
-        }
-      }
-#endif /* WINDOWS */
+        Element *ioElement = processQueue(ioEntries, findInputOutputMonitor, &find);
+        if (ioElement) {
+          InputOutputEntry *io = find.io;
+          Element *opElement = getQueueHead(io->operations);
 
-      if (posted) {
-        FindInputOutputMonitorData find;
-        find.monitor = monitorArray;
-        find.io = NULL;
+          if (opElement) {
+            InputOutputOperation *op = getElementItem(opElement);
+            finishInputOutputOperation(op);
+          }
 
-        {
-          Element *ioElement = processQueue(ioEntries, findInputOutputMonitor, &find);
-          if (ioElement) {
-            InputOutputEntry *io = find.io;
-            Element *opElement = getQueueHead(io->operations);
-
-            if (opElement) {
-              InputOutputOperation *op = getElementItem(opElement);
-              int respond = 0;
-              InputOutputResponse response;
-
-              response.error = 0;
-
-              if (op->offset < op->size) {
-                ssize_t opCount = io->methods->finishOperation(io->fileDescriptor,
-                                                                  &op->buffer[op->offset],
-                                                                  op->size - op->offset);
-
-                if (opCount > 0) {
-                  op->offset += opCount;
-                } else {
-                  if (opCount == -1) response.error = errno;
-                  respond = 1;
-                }
-              }
-
-              if (respond || (op->offset == op->size)) {
-                response.data = op->data;
-                response.buffer = (response.size = op->size)? op->buffer: NULL;
-                response.count = op->offset;
-
-                deleteElement(opElement);
-                op->respond(&response);
-              }
-            }
-
-            if (getQueueSize(io->operations)) {
-              requeueElement(ioElement);
-            } else {
-              deleteElement(ioElement);
-            }
+          if (getQueueSize(io->operations)) {
+            requeueElement(ioElement);
+          } else {
+            deleteElement(ioElement);
           }
         }
       }
     }
 
     if (monitorArray) free(monitorArray);
-  } while ((milliseconds > 0) &&
-           (millisecondsSince(&start) < milliseconds));
+  } while ((timeout > 0) &&
+           (millisecondsSince(&start) < timeout));
 }
