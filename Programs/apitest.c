@@ -21,6 +21,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <inttypes.h>
 
 #include "options.h"
 #include "api.h"
@@ -202,7 +203,7 @@ void showKeyCodes(void)
   }
 
   while ((res = brlapi_readKey(1, &cmd)) != -1) {
-    sprintf(buf, "0x%x (%d)",cmd, cmd);
+    sprintf(buf, "0X%" PRIX32 " (%" PRIu32 ")",cmd, cmd);
     brlapi_writeText(0, buf);
     fprintf(stderr, "%s\n", buf);
   }

@@ -614,7 +614,7 @@ void toX_f(const char *display) {
 	}
 	keycode = XKeysymToKeycode(dpy,keysym);
 	if (keycode == NoSymbol) {
-	  fprintf(stderr,"Couldn't translate keysym %" PRIX32 " to keycode.\n",keysym);
+	  fprintf(stderr,"Couldn't translate keysym %08X to keycode.\n",keysym);
 	  continue;
 	}
 	if (modifiers)
