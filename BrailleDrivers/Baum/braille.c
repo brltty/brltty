@@ -72,7 +72,7 @@ static int currentModifiers;
 #define MOD_UPPER      0X0100
 #define MOD_UPPER_LOCK 0X0200
 #define MOD_META       0X0400
-#define MOD_CONTROL    0X0800
+#define MOD_CNTRL      0X0800
 
 typedef struct {
   int (*openPort) (char **parameters, const char *device);
@@ -1850,7 +1850,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
         if (command != BRL_CMD_NOOP) {
           if (currentModifiers & (MOD_UPPER | MOD_UPPER_LOCK)) command |= BRL_FLG_CHAR_SHIFT;
           if (currentModifiers & MOD_META) command |= BRL_FLG_CHAR_META;
-          if (currentModifiers & MOD_CONTROL) command |= BRL_FLG_CHAR_CONTROL;
+          if (currentModifiers & MOD_CNTRL) command |= BRL_FLG_CHAR_CONTROL;
         }
       } else {
       doCharacter:
@@ -1868,7 +1868,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 
         if (currentModifiers & (MOD_UPPER | MOD_UPPER_LOCK)) command |= BRL_FLG_CHAR_UPPER;
         if (currentModifiers & MOD_META) command |= BRL_FLG_CHAR_META;
-        if (currentModifiers & MOD_CONTROL) command |= BRL_FLG_CHAR_CONTROL;
+        if (currentModifiers & MOD_CNTRL) command |= BRL_FLG_CHAR_CONTROL;
       }
     } else if (routingKeyCount == 1) {
       unsigned char key1 = routingKeys[0];
@@ -1932,11 +1932,11 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
                             MOD_DOT7 | MOD_DOT7_LOCK |
                             MOD_DOT8 | MOD_DOT8_LOCK |
                             MOD_UPPER | MOD_UPPER_LOCK |
-                            MOD_META | MOD_CONTROL);
+                            MOD_META | MOD_CNTRL);
         else if ((key1 == 1) && (key2 == textCount-2))
           newModifiers |= MOD_DOT7 | MOD_DOT8;
         else if ((key1 == 2) && (key2 == textCount-3))
-          newModifiers |= MOD_CONTROL;
+          newModifiers |= MOD_CNTRL;
       } else {
         if ((key1 == textCount-2) && (key2 == textCount-1)) {
           switch (keys) {
@@ -1960,7 +1960,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 
     if ((currentModifiers & MOD_INPUT_ONCE) &&
         (newModifiers & (MOD_CHORD | MOD_DOT7 | MOD_DOT8 |
-                         MOD_UPPER | MOD_META | MOD_CONTROL)))
+                         MOD_UPPER | MOD_META | MOD_CNTRL)))
       newModifiers |= MOD_INPUT;
 
 #undef DOT1
