@@ -59,7 +59,7 @@ typedef struct {
 } InputOutputMethods;
 
 struct InputOutputEntryStruct {
-  int fileDescriptor;
+  FileDescriptor fileDescriptor;
   const InputOutputMethods *methods;
   Queue *operations;
 
@@ -71,7 +71,7 @@ struct InputOutputEntryStruct {
 };
 
 typedef struct {
-  int fileDescriptor;
+  FileDescriptor fileDescriptor;
   const InputOutputMethods *methods;
 } InputOutputKey;
 
@@ -279,7 +279,7 @@ getInputOutputEntries (int create) {
 }
 
 static Element *
-getInputOutputElement (int fileDescriptor, const InputOutputMethods *methods, int create) {
+getInputOutputElement (FileDescriptor fileDescriptor, const InputOutputMethods *methods, int create) {
   Queue *entries = getInputOutputEntries(create);
   if (entries) {
     {
@@ -331,7 +331,7 @@ finishInputOutputOperation (InputOutputOperation *op) {
 
 static int
 createInputOutputOperation (
-  int fileDescriptor,
+  FileDescriptor fileDescriptor,
   const InputOutputMethods *methods,
   InputOutputCallback callback, void *data,
   size_t size, const void *buffer
@@ -379,7 +379,8 @@ getInputOutputOperation (const InputOutputEntry *io) {
 
 int
 asyncRead (
-  int fileDescriptor, size_t size,
+  FileDescriptor fileDescriptor,
+  size_t size,
   InputOutputCallback callback, void *data
 ) {
   static const InputOutputMethods methods = {
@@ -401,7 +402,8 @@ asyncRead (
 
 int
 asyncWrite (
-  int fileDescriptor, const void *buffer, size_t size,
+  FileDescriptor fileDescriptor,
+  const void *buffer, size_t size,
   InputOutputCallback callback, void *data
 ) {
   static const InputOutputMethods methods = {

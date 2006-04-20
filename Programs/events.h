@@ -33,12 +33,14 @@ typedef struct {
 typedef void (*InputOutputCallback) (const InputOutputResult *result);
 
 extern int asyncRead (
-  int fileDescriptor, size_t size,
+  FileDescriptor fileDescriptor,
+  size_t size,
   InputOutputCallback callback, void *data
 );
 
 extern int asyncWrite (
-  int fileDescriptor, const void *buffer, size_t size,
+  FileDescriptor fileDescriptor,
+  const void *buffer, size_t size,
   InputOutputCallback callback, void *data
 );
 

@@ -63,6 +63,12 @@ extern "C" {
 #include <stdlib.h>
 #include <unistd.h>
 
+#ifdef WINDOWS
+typedef HANDLE FileDescriptor;
+#else /* WINDOWS */
+typedef int FileDescriptor;
+#endif /* WINDOWS */
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
