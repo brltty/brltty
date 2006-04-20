@@ -36,12 +36,13 @@ typedef struct InputOutputEntryStruct InputOutputEntry;
 
 typedef struct {
   InputOutputEntry *io;
+  unsigned finished:1;
+
+  int error;
+  size_t count;
 
   InputOutputListener respond;
   void *data;
-
-  size_t error;
-  size_t count;
 
   size_t size;
   unsigned char buffer[1];
@@ -75,8 +76,111 @@ typedef struct {
 } InputOutputKey;
 
 #ifdef WINDOWS
+static void
+prepareWindowsInputOutputEntry (InputOutputEntry *io) {
+  ZeroMemory(&io->ol, sizeof(io->ol));
+  io->ol.hEvent = INVALID_HANDLE_VALUE;
+}
+
 static int
-monitorEvents (InputOutputMonitor *monitorArray, int monitorCount, int timeout) {
+allocateWindowsInputOutputResources (InputOutputEntry *io) {
+  {
+    HANDLE *event = &io->ol.hEvent;
+
+    if (*event == INVALID_HANDLE_VALUE) {
+      HANDLE handle;
+
+      if (!(handle = CreateEvent(NULL, TRUE, FALSE, NULL))) {
+        LogWindowsError("CreateEvent");
+        return 0;
+      }
+
+      *event = handle;
+    }
+
+    if (!ResetEvent(*event)) {
+      LogWindowsError("ResetEvent");
+      return 0;
+    }
+  }
+
+  return 1;
+}
+
+static int
+setInputOutputResult (InputOutputOperation *op, DWORD success, DWORD count) {
+  if (success) {
+    op->count = count;
+  } else {
+    DWORD error = GetLastError();
+    if (error == ERROR_IO_PENDING) return 0;
+
+    if ((error == ERROR_HANDLE_EOF) || (error == ERROR_BROKEN_PIPE)) {
+      op->count = 0;
+    } else {
+      op->error = error;
+    }
+  }
+
+  op->finished = 1;
+  return 1;
+}
+
+static void
+startWindowsRead (InputOutputOperation *op) {
+  InputOutputEntry *io = op->io;
+
+  if (allocateWindowsInputOutputResources(io)) {
+    DWORD count;
+    DWORD success = ReadFile(io->fileDescriptor, op->buffer, op->size, &count, &io->ol);
+    setInputOutputResult(op, success, count);
+  }
+}
+
+static void
+startWindowsWrite (InputOutputOperation *op) {
+  InputOutputEntry *io = op->io;
+  if (allocateWindowsInputOutputResources(io)) {
+    DWORD count;
+    DWORD success = WriteFile(io->fileDescriptor, op->buffer, op->size, &count, &io->ol);
+    setInputOutputResult(op, success, count);
+  }
+}
+
+static void
+finishWindowsInputOutputOperation (InputOutputOperation *op) {
+  InputOutputEntry *io = op->io;
+  DWORD count;
+  DWORD success = GetOverlappedResult(io->fileDescriptor, &io->ol, &count, FALSE);
+  setInputOutputResult(op, success, count);
+}
+
+static void
+initializeWindowsInputOutputMonitor (InputOutputMonitor *monitor, const InputOutputEntry *io, const InputOutputOperation *op) {
+  *monitor = io->ol.hEvent;
+}
+
+static int
+testWindowsInputOutputMonitor (const InputOutputMonitor *monitor) {
+  DWORD result = WaitForSingleObject(*monitor, 0);
+  if (result == WAIT_OBJECT_0) return 1;
+
+  if (result == WAIT_FAILED) {
+    LogWindowsError("WaitForSingleObject");
+  }
+
+  return 0;
+}
+
+static int
+monitorEvents (InputOutputMonitor *monitors, int count, int timeout) {
+  DWORD result = WaitForMultipleObjects(count, monitors, FALSE, timeout);
+  if ((result >= WAIT_OBJECT_0) && (result < (WAIT_OBJECT_0 + count))) return 1;
+
+  if (result == WAIT_FAILED) {
+    LogWindowsError("WaitForMultipleObjects");
+  }
+
   return 0;
 }
 #else /* WINDOWS */
@@ -123,8 +227,8 @@ testUnixInputOutputMonitor (const InputOutputMonitor *monitor) {
 }
 
 static int
-monitorEvents (InputOutputMonitor *monitorArray, int monitorCount, int timeout) {
-  int result = poll(monitorArray, monitorCount, timeout);
+monitorEvents (InputOutputMonitor *monitors, int count, int timeout) {
+  int result = poll(monitors, count, timeout);
   if (result > 0) return 1;
 
   if (result == -1) {
@@ -240,12 +344,17 @@ createInputOutputOperation (
 
       if ((opElement = enqueueItem(io->operations, op))) {
         op->io = io;
-        op->respond = respond;
-        op->data = data;
+        op->finished = 0;
+
         op->error = 0;
         op->count = 0;
+
+        op->respond = respond;
+        op->data = data;
+
         op->size = size;
         if (buffer) memcpy(op->buffer, buffer, size);
+
         if (new) startInputOutputOperation(op);
         return 1;
       }
@@ -271,6 +380,11 @@ asyncRead (
 ) {
   static const InputOutputMethods methods = {
 #ifdef WINDOWS
+    .prepareEntry = prepareWindowsInputOutputEntry,
+    .startOperation = startWindowsRead,
+    .finishOperation = finishWindowsInputOutputOperation,
+    .initializeMonitor = initializeWindowsInputOutputMonitor,
+    .testMonitor = testWindowsInputOutputMonitor
 #else /* WINDOWS */
     .prepareEntry = prepareUnixInputEntry,
     .finishOperation = finishUnixRead,
@@ -288,6 +402,11 @@ asyncWrite (
 ) {
   static const InputOutputMethods methods = {
 #ifdef WINDOWS
+    .prepareEntry = prepareWindowsInputOutputEntry,
+    .startOperation = startWindowsWrite,
+    .finishOperation = finishWindowsInputOutputOperation,
+    .initializeMonitor = initializeWindowsInputOutputMonitor,
+    .testMonitor = testWindowsInputOutputMonitor
 #else /* WINDOWS */
     .prepareEntry = prepareUnixOutputEntry,
     .finishOperation = finishUnixWrite,
