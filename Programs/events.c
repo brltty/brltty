@@ -41,7 +41,7 @@ typedef struct {
   int error;
   size_t count;
 
-  InputOutputListener respond;
+  InputOutputCallback callback;
   void *data;
 
   size_t size;
@@ -108,7 +108,7 @@ allocateWindowsInputOutputResources (InputOutputEntry *io) {
 }
 
 static int
-setInputOutputResult (InputOutputOperation *op, DWORD success, DWORD count) {
+setWindowsInputOutputResult (InputOutputOperation *op, DWORD success, DWORD count) {
   if (success) {
     op->count = count;
   } else {
@@ -133,7 +133,7 @@ startWindowsRead (InputOutputOperation *op) {
   if (allocateWindowsInputOutputResources(io)) {
     DWORD count;
     DWORD success = ReadFile(io->fileDescriptor, op->buffer, op->size, &count, &io->ol);
-    setInputOutputResult(op, success, count);
+    setWindowsInputOutputResult(op, success, count);
   }
 }
 
@@ -143,7 +143,7 @@ startWindowsWrite (InputOutputOperation *op) {
   if (allocateWindowsInputOutputResources(io)) {
     DWORD count;
     DWORD success = WriteFile(io->fileDescriptor, op->buffer, op->size, &count, &io->ol);
-    setInputOutputResult(op, success, count);
+    setWindowsInputOutputResult(op, success, count);
   }
 }
 
@@ -152,7 +152,7 @@ finishWindowsInputOutputOperation (InputOutputOperation *op) {
   InputOutputEntry *io = op->io;
   DWORD count;
   DWORD success = GetOverlappedResult(io->fileDescriptor, &io->ol, &count, FALSE);
-  setInputOutputResult(op, success, count);
+  setWindowsInputOutputResult(op, success, count);
 }
 
 static void
@@ -194,24 +194,28 @@ prepareUnixOutputEntry (InputOutputEntry *io) {
   io->events = POLLOUT;
 }
 
+static int
+setUnixInputOutputResult (InputOutputOperation *op, ssize_t count) {
+  if (count != -1) {
+    op->count = count;
+  } else {
+    op->error = errno;
+  }
+
+  op->finished = 1;
+  return 1;
+}
+
 static void
 finishUnixRead (InputOutputOperation *op) {
   int result = read(op->io->fileDescriptor, op->buffer, op->size);
-  if (result == -1) {
-    op->error = errno;
-  } else {
-    op->count = result;
-  }
+  setUnixInputOutputResult(op, result);
 }
 
 static void
 finishUnixWrite (InputOutputOperation *op) {
   int result = write(op->io->fileDescriptor, op->buffer, op->size);
-  if (result == -1) {
-    op->error = errno;
-  } else {
-    op->count = result;
-  }
+  setUnixInputOutputResult(op, result);
 }
 
 static void
@@ -329,7 +333,7 @@ static int
 createInputOutputOperation (
   int fileDescriptor,
   const InputOutputMethods *methods,
-  InputOutputListener respond, void *data,
+  InputOutputCallback callback, void *data,
   size_t size, const void *buffer
 ) {
   InputOutputOperation *op;
@@ -349,7 +353,7 @@ createInputOutputOperation (
         op->error = 0;
         op->count = 0;
 
-        op->respond = respond;
+        op->callback = callback;
         op->data = data;
 
         op->size = size;
@@ -376,7 +380,7 @@ getInputOutputOperation (const InputOutputEntry *io) {
 int
 asyncRead (
   int fileDescriptor, size_t size,
-  InputOutputListener respond, void *data
+  InputOutputCallback callback, void *data
 ) {
   static const InputOutputMethods methods = {
 #ifdef WINDOWS
@@ -392,13 +396,13 @@ asyncRead (
     .testMonitor = testUnixInputOutputMonitor
 #endif /* WINDOWS */
   };
-  return createInputOutputOperation(fileDescriptor, &methods, respond, data, size, NULL);
+  return createInputOutputOperation(fileDescriptor, &methods, callback, data, size, NULL);
 }
 
 int
 asyncWrite (
   int fileDescriptor, const void *buffer, size_t size,
-  InputOutputListener respond, void *data
+  InputOutputCallback callback, void *data
 ) {
   static const InputOutputMethods methods = {
 #ifdef WINDOWS
@@ -414,7 +418,7 @@ asyncWrite (
     .testMonitor = testUnixInputOutputMonitor
 #endif /* WINDOWS */
   };
-  return createInputOutputOperation(fileDescriptor, &methods, respond, data, size, buffer);
+  return createInputOutputOperation(fileDescriptor, &methods, callback, data, size, buffer);
 }
 
 typedef struct {
@@ -425,26 +429,22 @@ static int
 addInputOutputMonitor (void *item, void *data) {
   const InputOutputEntry *io = item;
   AddInputOutputMonitorData *add = data;
+  InputOutputOperation *op = getInputOutputOperation(io);
+  if (op->finished) return 1;
 
-  io->methods->initializeMonitor(add->monitor++, io, getInputOutputOperation(io));
+  io->methods->initializeMonitor(add->monitor++, io, op);
   return 0;
 }
 
 typedef struct {
   const InputOutputMonitor *monitor;
-  InputOutputEntry *io;
 } FindInputOutputMonitorData;
 
 static int
 findInputOutputMonitor (void *item, void *data) {
   InputOutputEntry *io = item;
   FindInputOutputMonitorData *find = data;
-  int posted = io->methods->testMonitor(find->monitor);
-
-  if (posted) {
-    find->io = io;
-    return 1;
-  }
+  if (io->methods->testMonitor(find->monitor)) return 1;
 
   find->monitor++;
   return 0;
@@ -459,40 +459,53 @@ processEvents (int timeout) {
     Queue *ioEntries = getInputOutputEntries(0);
     int monitorCount = ioEntries? getQueueSize(ioEntries): 0;
     InputOutputMonitor *monitorArray = NULL;
+    Element *ioElement = NULL;
 
     if (monitorCount) {
       if ((monitorArray = malloc(ARRAY_SIZE(monitorArray, monitorCount)))) {
         AddInputOutputMonitorData add;
         add.monitor = monitorArray;
-        processQueue(ioEntries, addInputOutputMonitor, &add);
-        monitorCount = add.monitor - monitorArray;
+        ioElement = processQueue(ioEntries, addInputOutputMonitor, &add);
+        if (!(monitorCount = add.monitor - monitorArray)) {
+          free(monitorArray);
+          monitorArray = NULL;
+        }
       } else {
         monitorCount = 0;
       }
     }
 
-    if (monitorEvents(monitorArray, monitorCount, timeout)) {
-      FindInputOutputMonitorData find;
-      find.monitor = monitorArray;
-      find.io = NULL;
+    if (!ioElement) {
+      if (monitorEvents(monitorArray, monitorCount, timeout)) {
+        FindInputOutputMonitorData find;
+        find.monitor = monitorArray;
+        ioElement = processQueue(ioEntries, findInputOutputMonitor, &find);
+      }
+    }
 
+    if (ioElement) {
+      InputOutputEntry *io = getElementItem(ioElement);
+      Element *opElement = getQueueHead(io->operations);
+      InputOutputOperation *op = getElementItem(opElement);
+
+      if (!op->finished) finishInputOutputOperation(op);
       {
-        Element *ioElement = processQueue(ioEntries, findInputOutputMonitor, &find);
-        if (ioElement) {
-          InputOutputEntry *io = find.io;
-          Element *opElement = getQueueHead(io->operations);
+        InputOutputResult result;
+        result.data = op->data;
+        result.buffer = op->buffer;
+        result.size = op->size;
+        result.error = op->error;
+        result.count = op->count;
+        op->callback(&result);
+      }
+      deleteElement(opElement);
 
-          if (opElement) {
-            InputOutputOperation *op = getElementItem(opElement);
-            finishInputOutputOperation(op);
-          }
-
-          if (getQueueSize(io->operations)) {
-            requeueElement(ioElement);
-          } else {
-            deleteElement(ioElement);
-          }
-        }
+      if ((opElement = getQueueHead(io->operations))) {
+        op = getElementItem(opElement);
+        startInputOutputOperation(op);
+        requeueElement(ioElement);
+      } else {
+        deleteElement(ioElement);
       }
     }
 

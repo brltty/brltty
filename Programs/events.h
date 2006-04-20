@@ -26,23 +26,23 @@ typedef struct {
   void *data;
   const void *buffer;
   size_t size;
-  ssize_t count;
   int error;
-} InputOutputResponse;
+  size_t count;
+} InputOutputResult;
 
-typedef void (*InputOutputListener) (const InputOutputResponse *response);
+typedef void (*InputOutputCallback) (const InputOutputResult *result);
 
 extern int asyncRead (
   int fileDescriptor, size_t size,
-  InputOutputListener respond, void *data
+  InputOutputCallback callback, void *data
 );
 
 extern int asyncWrite (
   int fileDescriptor, const void *buffer, size_t size,
-  InputOutputListener respond, void *data
+  InputOutputCallback callback, void *data
 );
 
-extern void processEvents (int milliseconds);
+extern void processEvents (int timeout);
 
 #ifdef __cplusplus
 }
