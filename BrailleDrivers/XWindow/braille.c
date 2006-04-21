@@ -24,7 +24,9 @@
 
 #include "Programs/misc.h"
 
-#if defined(HAVE_PKG_XAW)
+#if defined(WINDOWS)
+#define USE_WINDOWS
+#elif defined(HAVE_PKG_XAW)
 #define USE_XAW
 #define USE_XT
 #include <X11/Intrinsic.h>
@@ -84,8 +86,6 @@
 #include <Xm/ToggleB.h>
 #include <Xm/RowColumn.h>
 #include <Xm/MenuShell.h>
-#elif defined(WINDOWS)
-#define USE_WINDOWS
 #else /* HAVE_PKG_ */
 #error GUI toolkit either unspecified or unsupported
 #endif /* HAVE_PKG_ */
