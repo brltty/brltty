@@ -15,8 +15,6 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#include "sys_windows.h"
-
 struct MidiDeviceStruct {
   HMIDIOUT handle;
   unsigned char note;
@@ -38,7 +36,7 @@ typedef enum {
 static void
 logMidiOutError (MMRESULT error, int errorLevel, const char *action) {
   char text[MAXERRORLENGTH];
-  midiOutGetErrorTextAProc(error, text, sizeof(text));
+  midiOutGetErrorText(error, text, sizeof(text));
   LogPrint(errorLevel, "%s error %d: %s", action, error, text);
 }
 
@@ -67,17 +65,15 @@ openMidiDevice (int errorLevel, const char *device) {
   int id = 0;
   static const char *const defaultDevice = "default";
 
-  if (!have_winmm) return NULL;
-
   if (!device || !*device) device = defaultDevice;
 
   if (strcmp(device, defaultDevice) == 0) {
     id = -1;
-  } else if (!isInteger(&id, device) || (id < 0) || (id >= midiOutGetNumDevsProc())) {
-    int count = midiOutGetNumDevsProc();
+  } else if (!isInteger(&id, device) || (id < 0) || (id >= midiOutGetNumDevs())) {
+    int count = midiOutGetNumDevs();
     for (id=0; id<count; ++id) {
       MIDIOUTCAPS cap;
-      if (midiOutGetDevCapsAProc(id, &cap, sizeof(cap)) == MMSYSERR_NOERROR)
+      if (midiOutGetDevCaps(id, &cap, sizeof(cap)) == MMSYSERR_NOERROR)
         if (strncasecmp(device, cap.szPname, strlen(device)) == 0)
           break;
     }
@@ -89,7 +85,7 @@ openMidiDevice (int errorLevel, const char *device) {
   }
 
   if ((midi = malloc(sizeof(*midi)))) {
-    if ((error = midiOutOpenProc(&midi->handle, id, 0, 0, CALLBACK_NULL)) == MMSYSERR_NOERROR) {
+    if ((error = midiOutOpen(&midi->handle, id, 0, 0, CALLBACK_NULL)) == MMSYSERR_NOERROR) {
       midi->note = 0;
       midi->count = 0;
       return midi;
@@ -107,7 +103,7 @@ openMidiDevice (int errorLevel, const char *device) {
 void
 closeMidiDevice (MidiDevice *midi) {
   flushMidiDevice(midi);
-  midiOutCloseProc(midi->handle);
+  midiOutClose(midi->handle);
   free(midi);
 }
 
@@ -123,15 +119,15 @@ flushMidiDevice (MidiDevice *midi) {
     header.dwBufferLength = midi->count;
     header.dwFlags = 0;
 
-    if ((error = midiOutPrepareHeaderProc(midi->handle, &header, sizeof(header))) == MMSYSERR_NOERROR) {
-      if ((error = midiOutLongMsgProc(midi->handle, &header, sizeof(header))) == MMSYSERR_NOERROR) {
+    if ((error = midiOutPrepareHeader(midi->handle, &header, sizeof(header))) == MMSYSERR_NOERROR) {
+      if ((error = midiOutLongMsg(midi->handle, &header, sizeof(header))) == MMSYSERR_NOERROR) {
         midi->count = 0;
       } else {
         logMidiOutError(error, LOG_ERR, "midiOutLongMsg");
         ok = 0;
       }
 
-      while ((error = midiOutUnprepareHeaderProc(midi->handle, &header, sizeof(header))) == MIDIERR_STILLPLAYING) {
+      while ((error = midiOutUnprepareHeader(midi->handle, &header, sizeof(header))) == MIDIERR_STILLPLAYING) {
         approximateDelay(1);
       }
 

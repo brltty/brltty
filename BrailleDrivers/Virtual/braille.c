@@ -348,7 +348,7 @@ readNamedPipe (int descriptor, void *buffer, int size) {
   {
     DWORD available;
 
-    if (!PeekNamedPipeProc((HANDLE)descriptor, NULL, 0, NULL, &available, NULL)) {
+    if (!PeekNamedPipe((HANDLE)descriptor, NULL, 0, NULL, &available, NULL)) {
       LogWindowsError("PeekNamedPipe");
       return 0;
     }
@@ -392,7 +392,7 @@ acceptNamedPipeConnection (const char *path) {
   DWORD res;
   int attempts = 0;
 
-  if ((h = CreateNamedPipeAProc(path, 
+  if ((h = CreateNamedPipe(path, 
                                 PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED,
                                 PIPE_TYPE_BYTE | PIPE_READMODE_BYTE,
                                 1, 0, 0, 0, NULL)) == INVALID_HANDLE_VALUE) {
@@ -401,7 +401,7 @@ acceptNamedPipeConnection (const char *path) {
   }
 
   overl.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
-  if (!ConnectNamedPipeProc(h, &overl)) {
+  if (!ConnectNamedPipe(h, &overl)) {
     switch (GetLastError()) {
       case ERROR_IO_PENDING:
         while ((res = WaitForSingleObject(overl.hEvent, 10000)) != WAIT_OBJECT_0) {
@@ -616,31 +616,27 @@ flushOutput (void) {
   while (length) {
 #ifdef WINDOWS
     DWORD sent;
-    if (CreateNamedPipeAProc) {
-      OVERLAPPED overl = {0,0,0,0,CreateEvent(NULL,TRUE,FALSE,NULL)};
-      if ((!WriteFile((HANDLE) fileDescriptor, buffer, length, &sent, &overl)
-        && GetLastError() != ERROR_IO_PENDING) ||
-        !GetOverlappedResult((HANDLE) fileDescriptor, &overl, &sent, TRUE)) {
-          LogSocketError("WriteFile");
-          CloseHandle(overl.hEvent);
-          memmove(outputBuffer, buffer, (outputLength = length));
-          return 0;
-        }
+    OVERLAPPED overl = {0,0,0,0,CreateEvent(NULL,TRUE,FALSE,NULL)};
+    if ((!WriteFile((HANDLE) fileDescriptor, buffer, length, &sent, &overl)
+      && GetLastError() != ERROR_IO_PENDING) ||
+      !GetOverlappedResult((HANDLE) fileDescriptor, &overl, &sent, TRUE)) {
+        LogSocketError("WriteFile");
         CloseHandle(overl.hEvent);
-    } else
-#else /* WINDOWS */
-    int sent;
-#endif /* WINDOWS */
-    {
-      sent = send(fileDescriptor, buffer, length, 0);
-
-      if (sent == -1) {
-        if (errno == EINTR) continue;
-        LogSocketError("send");
         memmove(outputBuffer, buffer, (outputLength = length));
         return 0;
       }
+    CloseHandle(overl.hEvent);
+#else /* WINDOWS */
+    int sent;
+    sent = send(fileDescriptor, buffer, length, 0);
+
+    if (sent == -1) {
+      if (errno == EINTR) continue;
+      LogSocketError("send");
+      memmove(outputBuffer, buffer, (outputLength = length));
+      return 0;
     }
+#endif /* WINDOWS */
 
     buffer += sent;
     length -= sent;
@@ -929,7 +925,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
 #endif /* AF_LOCAL */
 
 #ifdef WINDOWS
-  if (CreateNamedPipeAProc && (device[0] == '\\')) {
+  if (device[0] == '\\') {
     fileDescriptor = mode->getNamedPipeConnection(device);
   } else {
     static WSADATA wsadata;

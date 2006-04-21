@@ -208,9 +208,6 @@ static struct socketInfo {
 #endif /* WINDOWS */
 } socketInfo[MAXSOCKETS]; /* information for cleaning sockets */
 static int numSockets; /* number of sockets */
-#ifdef WINDOWS
-static pthread_t socketSelectThread;
-#endif /* WINDOWS */
 
 /* Protects from connection addition / remove from the server thread */
 static pthread_mutex_t connectionsMutex;
@@ -1358,6 +1355,7 @@ cont:
       return -1;
     }
     LogPrint(LOG_DEBUG,"Event -> %p",info->overl.hEvent);
+    WSAEventSelect(fd, info->overl.hEvent, FD_ACCEPT);
 #endif /* WINDOWS */
 
     return fd;
@@ -1467,6 +1465,7 @@ cont:
     return -1;
   }
   LogPrint(LOG_DEBUG,"Event -> %p",info->overl.hEvent);
+  WSAEventSelect(fd, info->overl.hEvent, FD_ACCEPT);
 #endif /* WINDOWS */
 
   return fd;
@@ -1516,10 +1515,9 @@ static int initializeLocalSocket(struct socketInfo *info)
   int fd;
 #ifdef WINDOWS
   char path[lpath+lport+1];
-  if (!CreateNamedPipeAProc || !ConnectNamedPipeProc) goto out;
   memcpy(path,BRLAPI_SOCKETPATH,lpath);
   memcpy(path+lpath,info->port,lport+1);
-  if ((HANDLE) (fd = (int) CreateNamedPipeAProc(path,
+  if ((HANDLE) (fd = (int) CreateNamedPipe(path,
 	  PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED,
 	  PIPE_TYPE_BYTE | PIPE_READMODE_BYTE,
 	  PIPE_UNLIMITED_INSTANCES, 0, 0, 0, NULL)) == INVALID_HANDLE_VALUE) {
@@ -1539,7 +1537,7 @@ static int initializeLocalSocket(struct socketInfo *info)
     LogWindowsError("ResetEvent");
     goto outfd;
   }
-  if (ConnectNamedPipeProc((HANDLE) fd, &info->overl)) {
+  if (ConnectNamedPipe((HANDLE) fd, &info->overl)) {
     LogPrint(LOG_DEBUG,"already connected !");
     return fd;
   }
@@ -1717,54 +1715,11 @@ static void *establishSocket(void *arg)
   return NULL;
 }
 
-#ifdef WINDOWS
-static void *socketSelect(void *foo)
-{
-  fd_set sockset;
-  int fdmax;
-  struct timeval tv;
-  int n,i;
-
-  while(1) {
-    FD_ZERO(&sockset);
-    fdmax=0;
-    for (i=0;i<numSockets;i++)
-      if (socketInfo[i].fd>=0 && socketInfo[i].addrfamily != PF_LOCAL) {
-	FD_SET(socketInfo[i].fd, &sockset);
-	if (socketInfo[i].fd>fdmax)
-	  fdmax = socketInfo[i].fd;
-      }
-    tv.tv_sec = 1; tv.tv_usec = 0;
-    if (fdmax == 0) {
-      /* still no server socket */
-      approximateDelay(1000);
-      continue;
-    }
-    if ((n=select(fdmax+1, &sockset, NULL, NULL, &tv))<0) {
-      setSocketErrno();
-      LogPrint(LOG_WARNING,"select: %s",strerror(errno));
-      break;
-    }
-    if (n==0) continue;
-    for (i=0;i<numSockets;i++)
-      if (socketInfo[i].fd>=0 && socketInfo[i].addrfamily != PF_LOCAL
-	  && FD_ISSET(socketInfo[i].fd, &sockset))
-	if (!(SetEvent(socketInfo[i].overl.hEvent)))
-	  LogWindowsError("SetEvent(socketInfo)");
-  }
-  return NULL;
-}
-#endif /* WINDOWS */
-
 static void closeSockets(void *arg)
 {
   int i;
   struct socketInfo *info;
   
-#ifdef WINDOWS
-  pthread_cancel(socketSelectThread);
-#endif /* WINDOWS */
-
   for (i=0;i<numSockets;i++) {
     pthread_cancel(socketThreads[i]);
     info=&socketInfo[i];
@@ -1940,14 +1895,8 @@ static void *server(void *arg)
     socketInfo[i].fd = -1;
 
 #ifdef WINDOWS
-  if (WSAStartup(
-    /* TODO: if UNIMPLEMENTED, tell that some tcp/ip stuff is needed */
-#ifdef HAVE_GETADDRINFO
-	  MAKEWORD(2,0),
-#else /* HAVE_GETADDRINFO */
-	  MAKEWORD(1,1),
-#endif /* HAVE_GETADDRINFO */
-	  &wsadata)) {
+  if ((getaddrinfoProc && WSAStartup(MAKEWORD(2,0), &wsadata))
+	|| (!getaddrinfoProc && WSAStartup(MAKEWORD(1,1), &wsadata))) {
     LogWindowsSocketError("Starting socket library");
     pthread_exit(NULL);
   }
@@ -1975,12 +1924,6 @@ static void *server(void *arg)
     }
 #endif /* WINDOWS */
   }
-#ifdef WINDOWS
-  if ((pthread_create(&socketSelectThread, NULL, socketSelect, NULL))) {
-    LogWindowsError("pthread_create");
-    pthread_exit(NULL);
-  }
-#endif /* WINDOWS */
 
   unauthConnections = 0; unauthConnLog = 0;
   while (1) {

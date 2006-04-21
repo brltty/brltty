@@ -128,13 +128,7 @@ static void* GetProc(const char *library, const char *fun) {
 
 static WIN_PROC_STUB(GetConsoleWindow);
 
-static WIN_PROC_STUB(mbrlen);
-#define mbrlen(str,size,st) mbrlenProc(str,size,st)
-static WIN_PROC_STUB(wcrtomb);
-#define wcrtomb(s,wc,st) wcrtombProc(s,wc,st)
 static WIN_PROC_STUB(wcslen);
-
-static WIN_PROC_STUB(WaitNamedPipeA);
 
 static WIN_PROC_STUB(getaddrinfo);
 #define getaddrinfo(host,port,hints,res) getaddrinfoProc(host,port,hints,res)
@@ -358,11 +352,7 @@ static int tryHostName(char *hostName) {
   addrfamily = brlapi_splitHost(hostName,&hostname,&port);
 
 #if defined(PF_LOCAL)
-  if (addrfamily == PF_LOCAL
-#ifdef WINDOWS
-      && CHECKGETPROC("kernel32.dll", WaitNamedPipeA)
-#endif
-      ) {
+  if (addrfamily == PF_LOCAL) {
     int lpath = strlen(BRLAPI_SOCKETPATH),lport;
     lport = strlen(port);
 #ifdef WINDOWS
@@ -377,7 +367,7 @@ static int tryHostName(char *hostName) {
 	  brlapi_errfun="CreateFile";
 	  goto outlibc;
 	}
-	WaitNamedPipeAProc(path,NMPWAIT_WAIT_FOREVER);
+	WaitNamedPipe(path,NMPWAIT_WAIT_FOREVER);
       }
     }
 #else /* WINDOWS */
@@ -929,12 +919,7 @@ int brlapi_writeText(int cursor, const char *str)
     else
 #endif /* WINDOWS */
       len = strlen(str);
-    if (
-#ifdef WINDOWS
-	CHECKGETPROC("msvcp60.dll", mbrlen) &&
-	CHECKGETPROC("msvcp60.dll", wcrtomb) &&
-#endif /* WINDOWS */
-        locale && strcmp(locale,"C")) {
+    if (locale && strcmp(locale,"C")) {
       mbstate_t ps;
       size_t eaten;
       unsigned i;

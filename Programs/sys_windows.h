@@ -27,31 +27,6 @@ extern "C" {
 #define WIN_PROC_STUB(name) typeof(name) (*name##Proc)
 
 
-/* winmm.dll */
-extern int have_winmm;
-
-/* winmm.dll: pcm */
-extern WIN_PROC_STUB(waveOutGetErrorTextA);
-extern WIN_PROC_STUB(waveOutGetNumDevs);
-extern WIN_PROC_STUB(waveOutGetDevCapsA);
-extern WIN_PROC_STUB(waveOutOpen);
-extern WIN_PROC_STUB(waveOutClose);
-extern WIN_PROC_STUB(waveOutWrite);
-extern WIN_PROC_STUB(waveOutReset);
-extern WIN_PROC_STUB(waveOutPrepareHeader);
-extern WIN_PROC_STUB(waveOutUnprepareHeader);
-
-/* winmm.dll: midi */
-extern WIN_PROC_STUB(midiOutGetErrorTextA);
-extern WIN_PROC_STUB(midiOutGetNumDevs);
-extern WIN_PROC_STUB(midiOutGetDevCapsA);
-extern WIN_PROC_STUB(midiOutOpen);
-extern WIN_PROC_STUB(midiOutClose);
-extern WIN_PROC_STUB(midiOutLongMsg);
-extern WIN_PROC_STUB(midiOutPrepareHeader);
-extern WIN_PROC_STUB(midiOutUnprepareHeader);
-
-
 /* ntdll.dll */
 #include <ntdef.h>
 
@@ -65,11 +40,6 @@ extern WIN_PROC_STUB(NtSetInformationProcess);
 
 /* kernel32.dll: console */
 extern WIN_PROC_STUB(AttachConsole);
-
-/* kernel32.dll: named pipe */
-extern WIN_PROC_STUB(CreateNamedPipeA);
-extern WIN_PROC_STUB(ConnectNamedPipe);
-extern WIN_PROC_STUB(PeekNamedPipe);
 
 
 /* user32.dll */
