@@ -174,11 +174,15 @@ testWindowsInputOutputMonitor (const InputOutputMonitor *monitor) {
 
 static int
 monitorEvents (InputOutputMonitor *monitors, int count, int timeout) {
-  DWORD result = WaitForMultipleObjects(count, monitors, FALSE, timeout);
-  if ((result >= WAIT_OBJECT_0) && (result < (WAIT_OBJECT_0 + count))) return 1;
+  if (count) {
+    DWORD result = WaitForMultipleObjects(count, monitors, FALSE, timeout);
+    if ((result >= WAIT_OBJECT_0) && (result < (WAIT_OBJECT_0 + count))) return 1;
 
-  if (result == WAIT_FAILED) {
-    LogWindowsError("WaitForMultipleObjects");
+    if (result == WAIT_FAILED) {
+      LogWindowsError("WaitForMultipleObjects");
+    }
+  } else {
+    approximateDelay(timeout);
   }
 
   return 0;
@@ -468,6 +472,7 @@ processEvents (int timeout) {
         AddInputOutputMonitorData add;
         add.monitor = monitorArray;
         ioElement = processQueue(ioEntries, addInputOutputMonitor, &add);
+
         if (!(monitorCount = add.monitor - monitorArray)) {
           free(monitorArray);
           monitorArray = NULL;
