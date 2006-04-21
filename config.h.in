@@ -72,21 +72,6 @@ extern "C" {
 
 #ifdef WINDOWS
 
-/* Define this if Windows NT is being used. */
-#undef WINDOWS_NT
-
-/* Define this if the function CreateNamedPipe is available. */
-#undef HAVE_CREATENAMEDPIPE
-
-/* Define this if the function GetConsoleWindow is available. */
-#undef HAVE_GETCONSOLEWINDOW
-
-/* Define this if the function AttachConsole is available. */
-#undef HAVE_ATTACHCONSOLE
-
-/* Define this if the function ReadConsoleOutputCharacterW is available. */
-#undef HAVE_READCONSOLEOUTPUTCHARACTERW
-
 #else /* WINDOWS */
 
 /* Define this if the header file sys/select.h exists. */
@@ -309,15 +294,6 @@ extern "C" {
 
 /* Define this if the wsock32 library is available. */
 #undef HAVE_LIBWSOCK32
-
-/* Define this if the msvcp60 library is available. */
-#undef HAVE_LIBMSVCP60
-
-/* Define this if the winmm library is available. */
-#undef HAVE_LIBWINMM
-
-/* Define this if the ntdll library is available. */
-#undef HAVE_LIBNTDLL
 
 /* Define this if X is not available. */
 #undef X_DISPLAY_MISSING

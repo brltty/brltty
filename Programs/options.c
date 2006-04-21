@@ -578,6 +578,9 @@ processConfigurationFile (
   return 0;
 }
 
+#ifdef WINDOWS
+#include "sys_windows.h"
+#endif /* WINDOWS */
 int
 processOptions (
   const OptionEntry *optionTable,
@@ -592,6 +595,10 @@ processOptions (
 ) {
   OptionProcessingInformation info;
   int index;
+
+#ifdef WINDOWS
+  sysInit();
+#endif /* WINDOWS */
 
 #ifdef ENABLE_I18N_SUPPORT
   setlocale(LC_ALL, "");

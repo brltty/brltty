@@ -26,6 +26,7 @@
 
 #ifdef WINDOWS
 #include <ws2tcpip.h>
+#include "Programs/sys_windows.h"
 #else /* WINDOWS */
 #include <sys/socket.h>
 #include <sys/un.h>
@@ -98,9 +99,9 @@ typedef struct {
   int (*getLocalConnection) (const struct sockaddr_un *address);
 #endif /* AF_LOCAL */
 
-#ifdef HAVE_CREATENAMEDPIPE
+#ifdef WINDOWS
   int (*getNamedPipeConnection) (const char *path);
-#endif /* HAVE_CREATENAMEDPIPE */
+#endif /* WINDOWS */
 
   int (*getInetConnection) (const struct sockaddr_in *address);
 } ModeEntry;
@@ -341,13 +342,13 @@ requestLocalConnection (const struct sockaddr_un *remoteAddress) {
 }
 #endif /* AF_LOCAL */
 
-#ifdef HAVE_CREATENAMEDPIPE
+#ifdef WINDOWS
 static int
 readNamedPipe (int descriptor, void *buffer, int size) {
   {
     DWORD available;
 
-    if (!PeekNamedPipe((HANDLE)descriptor, NULL, 0, NULL, &available, NULL)) {
+    if (!PeekNamedPipeProc((HANDLE)descriptor, NULL, 0, NULL, &available, NULL)) {
       LogWindowsError("PeekNamedPipe");
       return 0;
     }
@@ -391,16 +392,16 @@ acceptNamedPipeConnection (const char *path) {
   DWORD res;
   int attempts = 0;
 
-  if ((h = CreateNamedPipe(path, 
-                           PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED,
-                           PIPE_TYPE_BYTE | PIPE_READMODE_BYTE,
-                           1, 0, 0, 0, NULL)) == INVALID_HANDLE_VALUE) {
+  if ((h = CreateNamedPipeAProc(path, 
+                                PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED,
+                                PIPE_TYPE_BYTE | PIPE_READMODE_BYTE,
+                                1, 0, 0, 0, NULL)) == INVALID_HANDLE_VALUE) {
     LogWindowsError("CreateNamedPipe");
     return -1;
   }
 
   overl.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
-  if (!ConnectNamedPipe(h, &overl)) {
+  if (!ConnectNamedPipeProc(h, &overl)) {
     switch (GetLastError()) {
       case ERROR_IO_PENDING:
         while ((res = WaitForSingleObject(overl.hEvent, 10000)) != WAIT_OBJECT_0) {
@@ -446,7 +447,7 @@ requestNamedPipeConnection (const char *path) {
   operations = &namedPipeOperationsEntry;
   return (int)h;
 }
-#endif /* HAVE_CREATENAMEDPIPE */
+#endif /* WINDOWS */
 
 static int
 setInetAddress (const char *string, struct sockaddr_in *address) {
@@ -613,28 +614,33 @@ flushOutput (void) {
   size_t length = outputLength;
 
   while (length) {
-#ifdef HAVE_CREATENAMEDPIPE
-    OVERLAPPED overl = {0,0,0,0,CreateEvent(NULL,TRUE,FALSE,NULL)};
+#ifdef WINDOWS
     DWORD sent;
-    if ((!WriteFile((HANDLE) fileDescriptor, buffer, length, &sent, &overl)
-      && GetLastError() != ERROR_IO_PENDING) ||
-      !GetOverlappedResult((HANDLE) fileDescriptor, &overl, &sent, TRUE)) {
-        LogSocketError("WriteFile");
+    if (CreateNamedPipeAProc) {
+      OVERLAPPED overl = {0,0,0,0,CreateEvent(NULL,TRUE,FALSE,NULL)};
+      if ((!WriteFile((HANDLE) fileDescriptor, buffer, length, &sent, &overl)
+        && GetLastError() != ERROR_IO_PENDING) ||
+        !GetOverlappedResult((HANDLE) fileDescriptor, &overl, &sent, TRUE)) {
+          LogSocketError("WriteFile");
+          CloseHandle(overl.hEvent);
+          memmove(outputBuffer, buffer, (outputLength = length));
+          return 0;
+        }
         CloseHandle(overl.hEvent);
+    } else
+#else /* WINDOWS */
+    int sent;
+#endif /* WINDOWS */
+    {
+      sent = send(fileDescriptor, buffer, length, 0);
+
+      if (sent == -1) {
+        if (errno == EINTR) continue;
+        LogSocketError("send");
         memmove(outputBuffer, buffer, (outputLength = length));
         return 0;
       }
-      CloseHandle(overl.hEvent);
-#else /* HAVE_CREATENAMEDPIPE */
-    int sent = send(fileDescriptor, buffer, length, 0);
-
-    if (sent == -1) {
-      if (errno == EINTR) continue;
-      LogSocketError("send");
-      memmove(outputBuffer, buffer, (outputLength = length));
-      return 0;
     }
-#endif /* HAVE_CREATENAMEDPIPE */
 
     buffer += sent;
     length -= sent;
@@ -887,9 +893,9 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
       requestLocalConnection,
 #endif /* AF_LOCAL */
 
-#ifdef HAVE_CREATENAMEDPIPE
+#ifdef WINDOWS
       requestNamedPipeConnection,
-#endif /* HAVE_CREATENAMEDPIPE */
+#endif /* WINDOWS */
 
       requestInetConnection
     };
@@ -900,9 +906,9 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
       acceptLocalConnection,
 #endif /* AF_LOCAL */
 
-#ifdef HAVE_CREATENAMEDPIPE
+#ifdef WINDOWS
       acceptNamedPipeConnection,
-#endif /* HAVE_CREATENAMEDPIPE */
+#endif /* WINDOWS */
 
       acceptInetConnection
     };
@@ -922,14 +928,10 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
   } else
 #endif /* AF_LOCAL */
 
-#ifdef HAVE_CREATENAMEDPIPE
-  if (device[0] == '\\') {
-    fileDescriptor = mode->getNamedPipeConnection(device);
-  } else
-#endif /* HAVE_CREATENAMEDPIPE */
-
 #ifdef WINDOWS
-  {
+  if (CreateNamedPipeAProc && (device[0] == '\\')) {
+    fileDescriptor = mode->getNamedPipeConnection(device);
+  } else {
     static WSADATA wsadata;
     if (WSAStartup(MAKEWORD(1, 1), &wsadata)) {
       LogWindowsError("socket library start");

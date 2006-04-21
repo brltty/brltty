@@ -323,84 +323,9 @@ in
       BRLTTY_HAVE_WINDOWS_LIBRARY([ws2_32], [], [
          BRLTTY_HAVE_WINDOWS_LIBRARY([wsock32])
       ])
-      BRLTTY_HAVE_WINDOWS_LIBRARY([msvcp60])
-      BRLTTY_HAVE_WINDOWS_LIBRARY([winmm])
 
-      AC_CACHE_CHECK(
-         [if function CreateNamedPipe exists and works],
-         [brltty_cv_function_CreateNamedPipe],
-         [AC_TRY_RUN([
-#include <windows.h>
-#include <stdio.h>
-
-int
-main (void) {
-  DWORD ID = GetCurrentProcessId();
-  char path[32];
-  HANDLE res;
-
-  snprintf(path, sizeof(path), "\\\\\\\\.\\\\pipe\\\\configure-%ld", ID);
-  res = CreateNamedPipe(path, PIPE_ACCESS_DUPLEX,
-                        PIPE_TYPE_BYTE | PIPE_READMODE_BYTE,
-                        PIPE_UNLIMITED_INSTANCES, 0, 0, 0, NULL);
-  return (res == INVALID_HANDLE_VALUE)? 1: 0;
-}
-],
-         [brltty_cv_function_CreateNamedPipe=yes],
-         [brltty_cv_function_CreateNamedPipe=no])])
-      if test "${brltty_cv_function_CreateNamedPipe}" = "yes"
-      then
-         AC_DEFINE([HAVE_CREATENAMEDPIPE], [1],
-                   [Define this if the function CreateNamedPipe is available.])
-      fi
-
-      BRLTTY_HAVE_WINDOWS_FUNCTION([GetConsoleWindow], [kernel32])
-      BRLTTY_HAVE_WINDOWS_FUNCTION([AttachConsole], [kernel32])
-
-      AC_CACHE_CHECK(
-         [if function ReadConsoleOutputCharacterW exists and works],
-         [brltty_cv_function_ReadConsoleOutputCharacterW],
-         [AC_TRY_RUN([
-#include <windows.h>
-
-int
-main(void) {
-  wchar_t buf;
-  COORD coord = {0, 0};
-  DWORD read;
-  HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
-  if (!ReadConsoleOutputCharacterW(h, &buf, 1, coord, &read)) {
-    if (GetLastError() == ERROR_CALL_NOT_IMPLEMENTED) return 1;
-  } else {
-    if (read != 1) return 2;
-  }
-  return 0;
-}
-],
-         [brltty_cv_function_ReadConsoleOutputCharacterW=yes],
-         [brltty_cv_function_ReadConsoleOutputCharacterW=no])])
-      if test "${brltty_cv_function_ReadConsoleOutputCharacterW}" = "yes"
-      then
-         AC_DEFINE([HAVE_READCONSOLEOUTPUTCHARACTERW], [1],
-                   [Define this if the function ReadConsoleOutputCharacterW is available.])
-      fi
-
-      if test "${build_os}" = "${host_os}"
-      then
-         brltty_uname_system="`uname -s`"
-
-         set -- `echo "${brltty_uname_system}" | sed -e 's/^.*-//' -e 's/\\./ /g'`
-         brltty_windows_version="`printf 0X%02d%02d $1 $2`"
-         CFLAGS="${CFLAGS} -DWINVER=${brltty_windows_version}"
-
-         brltty_windows_type="`echo "${brltty_uname_system}" | sed -e 's/^.*_//' -e 's/-.*$//'`"
-         if test "${brltty_windows_type}" = "NT"
-         then
-            AC_DEFINE([WINDOWS_NT], [1],
-                      [Define this if Windows NT is being used.])
-            BRLTTY_HAVE_WINDOWS_LIBRARY([ntdll])
-         fi
-      fi
+      # We're using up to Windows XP features
+      CFLAGS="${CFLAGS} -DWINVER=0X0501"
       ;;
    *)
       AC_SEARCH_LIBS([socket], [socket])
@@ -840,10 +765,7 @@ in
       system_object="qnx"
       AC_CHECK_LIB([asound], [snd_pcm_open])
       ;;
-   cygwin*)
-      system_object="cygwin"
-      ;;
-   mingw*)
+   cygwin*|mingw*)
       system_object="windows"
       ;;
    darwin*)

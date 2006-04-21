@@ -35,7 +35,7 @@
 #endif /* HAVE_ICONV_H */
 
 #ifdef WINDOWS
-#include <ws2tcpip.h>
+#include "sys_windows.h"
 
 #ifdef __MINGW32__
 #include "win_pthread.h"
@@ -1282,8 +1282,10 @@ static int initializeTcpSocket(struct socketInfo *info)
   const char *fun;
   int yes=1;
 
-#ifdef HAVE_GETADDRINFO
-
+#ifdef WINDOWS
+  if (getaddrinfoProc) {
+#endif
+#if defined(HAVE_GETADDRINFO) || defined(WINDOWS)
   int err;
   struct addrinfo *res,*cur;
   struct addrinfo hints;
@@ -1361,8 +1363,11 @@ cont:
     return fd;
   }
   LogPrint(LOG_WARNING,"unable to find a local TCP port %s:%s !",info->hostname,info->port);
-
-#else /* HAVE_GETADDRINFO */
+#endif /* HAVE_GETADDRINFO */
+#ifdef WINDOWS
+  } else {
+#endif /* WINDOWS */
+#if !defined(HAVE_GETADDRINFO) || defined(WINDOWS)
 
   struct sockaddr_in addr;
   struct hostent *he;
@@ -1470,7 +1475,10 @@ err:
   LogSocketError(fun);
   if (fd >= 0) closeFd(fd);
 
-#endif /* HAVE_GETADDRINFO */
+#endif /* !HAVE_GETADDRINFO */
+#ifdef WINDOWS
+  }
+#endif /* WINDOWS */
 
   free(info->hostname);
   info->hostname = NULL;
@@ -1479,7 +1487,7 @@ err:
   return -1;
 }
 
-#if defined(PF_LOCAL) && (!defined(WINDOWS) || defined(HAVE_CREATENAMEDPIPE))
+#if defined(PF_LOCAL)
 
 #ifndef WINDOWS
 static int readPid(char *path)
@@ -1508,13 +1516,15 @@ static int initializeLocalSocket(struct socketInfo *info)
   int fd;
 #ifdef WINDOWS
   char path[lpath+lport+1];
+  if (!CreateNamedPipeAProc || !ConnectNamedPipeProc) goto out;
   memcpy(path,BRLAPI_SOCKETPATH,lpath);
   memcpy(path+lpath,info->port,lport+1);
-  if ((HANDLE) (fd = (int) CreateNamedPipe(path,
+  if ((HANDLE) (fd = (int) CreateNamedPipeAProc(path,
 	  PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED,
 	  PIPE_TYPE_BYTE | PIPE_READMODE_BYTE,
 	  PIPE_UNLIMITED_INSTANCES, 0, 0, 0, NULL)) == INVALID_HANDLE_VALUE) {
-    LogWindowsError("CreateNamedPipe");
+    if (GetLastError() != ERROR_CALL_NOT_IMPLEMENTED)
+      LogWindowsError("CreateNamedPipe");
     goto out;
   }
   LogPrint(LOG_DEBUG,"CreateFile -> %p",(HANDLE) fd);
@@ -1529,7 +1539,7 @@ static int initializeLocalSocket(struct socketInfo *info)
     LogWindowsError("ResetEvent");
     goto outfd;
   }
-  if (ConnectNamedPipe((HANDLE) fd, &info->overl)) {
+  if (ConnectNamedPipeProc((HANDLE) fd, &info->overl)) {
     LogPrint(LOG_DEBUG,"already connected !");
     return fd;
   }
@@ -1694,7 +1704,7 @@ static void *establishSocket(void *arg)
   }
 #endif /* WINDOWS */
 
-#if defined(PF_LOCAL) && (!defined(WINDOWS) || defined(HAVE_CREATENAMEDPIPE))
+#if defined(PF_LOCAL)
   if ((cinfo->addrfamily==PF_LOCAL && (cinfo->fd=initializeLocalSocket(cinfo))==-1) ||
       (cinfo->addrfamily!=PF_LOCAL && 
 #else /* PF_LOCAL */
@@ -1768,7 +1778,7 @@ static void closeSockets(void *arg)
 	info->overl.hEvent = NULL;
       }
 #else /* WINDOWS */
-#if defined(PF_LOCAL) && (!defined(WINDOWS) || defined(HAVE_CREATENAMEDPIPE))
+#if defined(PF_LOCAL)
       if (info->addrfamily==PF_LOCAL) {
 	char *path;
 	int lpath=strlen(BRLAPI_SOCKETPATH),lport=strlen(info->port);
@@ -2023,7 +2033,6 @@ static void *server(void *arg)
 #ifdef WINDOWS
       if (socketInfo[i].fd != -1 &&
           WaitForSingleObject(socketInfo[i].overl.hEvent, 0) == WAIT_OBJECT_0) {
-#if defined(HAVE_CREATENAMEDPIPE)
         if (socketInfo[i].addrfamily == PF_LOCAL) {
           DWORD foo;
           if (!(GetOverlappedResult((HANDLE) socketInfo[i].fd, &socketInfo[i].overl, &foo, FALSE)))
@@ -2033,7 +2042,6 @@ static void *server(void *arg)
             LogPrint(LOG_DEBUG,"socket %d re-established (fd %p, was %p)",i,(HANDLE) socketInfo[i].fd,(HANDLE) res);
           snprintf(source, sizeof(source), BRLAPI_SOCKETPATH "%s", socketInfo[i].port);
         } else {
-#endif /* defined(HAVE_CREATENAMEDPIPE) */
           if (!ResetEvent(socketInfo[i].overl.hEvent))
             LogWindowsError("ResetEvent in server loop");
 #else /* WINDOWS */
@@ -2049,9 +2057,7 @@ static void *server(void *arg)
           formatAddress(source, sizeof(source), &addr, addrlen);
 
 #ifdef WINDOWS
-#if defined(HAVE_CREATENAMEDPIPE)
         }
-#endif /* defined(HAVE_CREATENAMEDPIPE) */
 #endif /* WINDOWS */
 
         if (authDescriptor && !authPerform(authDescriptor, res)) {
@@ -2417,7 +2423,7 @@ int api_start(BrailleDisplay *brl, char **parameters)
   int res,i;
 
   char *hosts=
-#if defined(PF_LOCAL) && (!defined(WINDOWS) || defined(HAVE_CREATENAMEDPIPE))
+#if defined(PF_LOCAL)
 	":0+127.0.0.1:0";
 #else /* PF_LOCAL */
 	"127.0.0.1:0";

@@ -109,6 +109,37 @@
 
 #ifdef WINDOWS
 static WSADATA wsadata;
+
+static void* GetProc(const char *library, const char *fun) {
+  HMODULE module;
+  void *ret;
+  if (!(module = LoadLibrary(library))) return (void*)(-1);
+  if ((ret = GetProcAddress(module, fun))) return ret;
+  FreeLibrary(module);
+  return (void*)(-1);
+}
+
+#define CHECKPROC(library, name) \
+  	(name##Proc && name##Proc != (void*)(-1))
+#define CHECKGETPROC(library, name) \
+  	(name##Proc != (void*)(-1) && (name##Proc || (name##Proc = GetProc(library,#name)) != (void*)(-1)))
+#define WIN_PROC_STUB(name) typeof(name) (*name##Proc);
+
+
+static WIN_PROC_STUB(GetConsoleWindow);
+
+static WIN_PROC_STUB(mbrlen);
+#define mbrlen(str,size,st) mbrlenProc(str,size,st)
+static WIN_PROC_STUB(wcrtomb);
+#define wcrtomb(s,wc,st) wcrtombProc(s,wc,st)
+static WIN_PROC_STUB(wcslen);
+
+static WIN_PROC_STUB(WaitNamedPipeA);
+
+static WIN_PROC_STUB(getaddrinfo);
+#define getaddrinfo(host,port,hints,res) getaddrinfoProc(host,port,hints,res)
+static WIN_PROC_STUB(freeaddrinfo);
+#define freeaddrinfo(res) freeaddrinfoProc(res)
 #endif /* WINDOWS */
 
 /* Some useful global variables */
@@ -326,8 +357,12 @@ static int tryHostName(char *hostName) {
 
   addrfamily = brlapi_splitHost(hostName,&hostname,&port);
 
-#if defined(PF_LOCAL) && (!defined(WINDOWS) || defined(HAVE_CREATENAMEDPIPE))
-  if (addrfamily == PF_LOCAL) {
+#if defined(PF_LOCAL)
+  if (addrfamily == PF_LOCAL
+#ifdef WINDOWS
+      && CHECKGETPROC("kernel32.dll", WaitNamedPipeA)
+#endif
+      ) {
     int lpath = strlen(BRLAPI_SOCKETPATH),lport;
     lport = strlen(port);
 #ifdef WINDOWS
@@ -342,7 +377,7 @@ static int tryHostName(char *hostName) {
 	  brlapi_errfun="CreateFile";
 	  goto outlibc;
 	}
-	WaitNamedPipe(path,NMPWAIT_WAIT_FOREVER);
+	WaitNamedPipeAProc(path,NMPWAIT_WAIT_FOREVER);
       }
     }
 #else /* WINDOWS */
@@ -374,7 +409,11 @@ static int tryHostName(char *hostName) {
   if (0) {} else {
 #endif /* PF_LOCAL */
 
-#ifdef HAVE_GETADDRINFO
+#ifdef WINDOWS
+    if (CHECKGETPROC("ws2_32.dll",getaddrinfo)
+	&& CHECKGETPROC("ws2_32.dll",freeaddrinfo)) {
+#endif /* WINDOWS */
+#if defined(HAVE_GETADDRINFO) || defined(WINDOWS)
 
     struct addrinfo *res,*cur;
     struct addrinfo hints;
@@ -405,7 +444,11 @@ static int tryHostName(char *hostName) {
       goto out;
     }
 
-#else /* HAVE_GETADDRINFO */
+#endif /* HAVE_GETADDRINFO */
+#ifdef WINDOWS
+    } else {
+#endif /* WINDOWS */
+#if !defined(HAVE_GETADDRINFO) || defined(WINDOWS)
 
     struct sockaddr_in addr;
     struct hostent *he;
@@ -466,7 +509,10 @@ static int tryHostName(char *hostName) {
       goto outlibc;
     }
 
-#endif /* HAVE_GETADDRINFO */
+#endif /* !HAVE_GETADDRINFO */
+#ifdef WINDOWS
+    }
+#endif /* WINDOWS */
 
   }
   free(hostname);
@@ -719,10 +765,9 @@ static int getControllingTty(void)
   if ((env = getenv("CONTROLVT")) && sscanf(env, "%u", &tty) == 1) return tty;
 
 #ifdef WINDOWS
-#ifdef HAVE_GETCONSOLEWINDOW
-  /* really good guess */
-  if ((tty = (int) GetConsoleWindow())) return tty;
-#endif /* HAVE_GETCONSOLEWINDOW */
+  if (CHECKGETPROC("kernel32.dll", GetConsoleWindow))
+    /* really good guess */
+    if ((tty = (int) GetConsoleWindowProc())) return tty;
   if ((tty = (int) GetActiveWindow()) || (tty = (int) GetFocus())) {
     /* good guess, but need to get back up to parent window */
     HWND root = GetDesktopWindow();
@@ -879,13 +924,17 @@ int brlapi_writeText(int cursor, const char *str)
     size = (uint32_t *) p;
     p += sizeof(*size);
 #ifdef WINDOWS
-    if (wide)
-      len = sizeof(wchar_t) * wcslen(str);
+    if (CHECKGETPROC("ntdll.dll", wcslen) && wide)
+      len = sizeof(wchar_t) * wcslenProc(str);
     else
 #endif /* WINDOWS */
       len = strlen(str);
-#if !defined(WINDOWS) || defined(HAVE_LIBMSVCP60)
-    if (locale && strcmp(locale,"C")) {
+    if (
+#ifdef WINDOWS
+	CHECKGETPROC("msvcp60.dll", mbrlen) &&
+	CHECKGETPROC("msvcp60.dll", wcrtomb) &&
+#endif /* WINDOWS */
+        locale && strcmp(locale,"C")) {
       mbstate_t ps;
       size_t eaten;
       unsigned i;
@@ -911,7 +960,6 @@ int brlapi_writeText(int cursor, const char *str)
 endcount:
       for (i = min; i<dispSize; i++) p += wcrtomb((char *)p, L' ', &ps);
     } else
-#endif /* HAVE_LIBMSVCP60 */
 #ifdef WINDOWS
     if (wide) {
       int extra;
@@ -947,7 +995,7 @@ endcount:
 #else /* WORDS_BIGENDIAN */
 #define WIN_WCHAR_T "UCS-2LE"
 #endif /* WORDS_BIGENDIAN */
-  if (wide) {
+  if (CHECKPROC("ntdll.dll", wcslen) && wide) {
     ws->flags |= BRLAPI_WF_CHARSET;
     *p++ = strlen(WIN_WCHAR_T);
     strcpy(p, WIN_WCHAR_T);
@@ -1046,8 +1094,8 @@ int brlapi_write(const brlapi_writeStruct *s)
   }
   if (s->text) {
 #ifdef WINDOWS
-    if (wide)
-      strLen = sizeof(wchar_t) * wcslen((wchar_t *) s->text);
+    if (CHECKGETPROC("ntdll.dll", wcslen) && wide)
+      strLen = sizeof(wchar_t) * wcslenProc((wchar_t *) s->text);
     else
 #endif /* WINDOWS */
       strLen = strlen(s->text);
