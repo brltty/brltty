@@ -145,10 +145,16 @@ void tobrltty_init(char *authKey, char *hostName) {
   settings.authKey=authKey;
 
   signal(SIGTERM,api_cleanExit);
-  signal(SIGHUP,api_cleanExit);
   signal(SIGINT,api_cleanExit);
+#ifdef SIGHUP
+  signal(SIGHUP,api_cleanExit);
+#endif /* SIGHUP */
+#ifdef SIGQUIT
   signal(SIGQUIT,api_cleanExit);
+#endif /* SIGQUIT */
+#ifdef SIGPIPE
   signal(SIGPIPE,api_cleanExit);
+#endif /* SIGPIPE */
 
   if ((brlapi_fd = brlapi_initializeConnection(&settings,&settings))<0)
     fatal_brlapi_errno("initializeConnection",gettext("cannot connect to brltty at %s\n"),settings.hostName);
