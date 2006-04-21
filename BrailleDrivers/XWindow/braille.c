@@ -565,7 +565,7 @@ static actionfun_t actionfun[] = {
 #define SET_ACTION(cb, set) \
   (cb)[0].callback = (XtCallbackProc) actionfun[set]
 #define SET_VALUE(cb, value) \
-  (cb)[0].closure = (caddr_t)(intptr_t) (value)
+  (cb)[0].closure = (void*)(intptr_t) (value)
 #elif defined(USE_WINDOWS)
 #define SET_ACTION(cb, set) \
   (cb) = (set) << 8
