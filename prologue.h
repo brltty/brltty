@@ -37,25 +37,11 @@ extern "C" {
 #if defined(__CYGWIN32__) || defined(__MINGW32__)
 #define WINDOWS
 
+#include <w32api.h>
+#define WINVER WindowsXP
+
 #define __USE_W32_SOCKETS
 #include <windows.h>
-#include <w32api.h>
-
-#ifndef Windows95
-#define Windows95 0x0400
-#endif /* Windows95 */
-
-#ifndef WindowsNT4
-#define WindowsNT4 0x0400
-#endif /* WindowsNT4 */
-
-#ifndef Windows98
-#define Windows98 0x0410
-#endif /* Windows98 */
-
-#ifndef WindowsME
-#define WindowsME 0x0500
-#endif /* WindowsME */
 
 #endif /* WINDOWS */
 

@@ -323,9 +323,6 @@ in
       BRLTTY_HAVE_WINDOWS_LIBRARY([ws2_32], [], [
          BRLTTY_HAVE_WINDOWS_LIBRARY([wsock32])
       ])
-
-      # We're using up to Windows XP features
-      CFLAGS="${CFLAGS} -DWINVER=0X0501"
       ;;
    *)
       AC_SEARCH_LIBS([socket], [socket])
