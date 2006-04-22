@@ -2007,7 +2007,7 @@ startup (int argc, char *argv[]) {
   }
 
   {
-    const char *directories[] = {DATA_DIRECTORY, "/etc", "/", NULL};
+    const char *directories[] = {programPath, "/", NULL};
     const char **directory = directories;
     while (*directory) {
       if (chdir(*directory) != -1) break;                /* * change to directory containing data files  */
