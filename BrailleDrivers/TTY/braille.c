@@ -230,6 +230,26 @@ brl_writeWindow (BrailleDisplay *brl) {
 }
 
 static void
+writeText (const unsigned char *buffer, int columns) {
+  int column;
+  for (column=0; column<columns; column++) {
+    char c = buffer[column];
+#ifdef HAVE_ICONV_H
+    char *pc = &c;
+    size_t sc = 1;
+    char d[MB_MAX_LEN+1];
+    char *pd = d;
+    size_t sd = MB_MAX_LEN;
+    if (iconv(conversionDescriptor, &pc, &sc, &pd, &sd) >= 0) {
+      *pd = 0;
+      addstr(d);
+    } else
+#endif /* HAVE_ICONV_H */
+      addch(c);
+  }
+}
+
+static void
 brl_writeVisual (BrailleDisplay *brl) {
   static unsigned char previousContent[MAX_WINDOW_SIZE];
   char *previousLocale;
@@ -246,29 +266,16 @@ brl_writeVisual (BrailleDisplay *brl) {
 
 #ifdef USE_CURSES
   clear();
+#else /* USE_CURSES */
+  addstr("\r\n");
 #endif /* USE_CURSES */
 
   {
     int row;
     for (row=0; row<brl->y; row++) {
-      int column;
-      for (column=0; column<brl->x; column++) {
-        char c = brl->buffer[row*brl->x+column];
-#ifdef HAVE_ICONV_H
-        char *pc = &c;
-        size_t sc = 1;
-        char d[MB_MAX_LEN+1];
-        char *pd = d;
-        size_t sd = MB_MAX_LEN;
-        if (iconv(conversionDescriptor, &pc, &sc, &pd, &sd) >= 0) {
-          *pd = 0;
-          addstr(d);
-	} else
-#endif /* HAVE_ICONV_H */
-          addch(c);
-      }
-
-      addch('\n');
+      writeText(&brl->buffer[row*brl->x], brl->x);
+      if (row < brl->y-1)
+        addstr("\r\n");
     }
   }
 
@@ -276,6 +283,13 @@ brl_writeVisual (BrailleDisplay *brl) {
   if ((brl->cursor >= 0) && (brl->cursor < (brl->x * brl->y)))
     move(brl->cursor/brl->x, brl->cursor%brl->x);
   refresh();
+#else /* USE_CURSES */
+  if ((brl->y == 1) && (brl->cursor >= 0) && (brl->cursor < brl->x)) {
+    addch('\r');
+    writeText(brl->buffer, brl->cursor);
+  } else {
+    addstr("\r\n");
+  }
 #endif /* USE_CURSES */
 
   if (previousLocale) setlocale(LC_CTYPE, previousLocale);
