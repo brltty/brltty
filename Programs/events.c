@@ -50,6 +50,7 @@ typedef struct {
 
 typedef struct {
   void (*prepareEntry) (InputOutputEntry *io);
+  void (*cleanupEntry) (InputOutputEntry *io);
 
   void (*startOperation) (InputOutputOperation *op);
   void (*finishOperation) (InputOutputOperation *op);
@@ -80,6 +81,17 @@ static void
 prepareWindowsInputOutputEntry (InputOutputEntry *io) {
   ZeroMemory(&io->ol, sizeof(io->ol));
   io->ol.hEvent = INVALID_HANDLE_VALUE;
+}
+
+static void
+cleanupWindowsInputOutputEntry (InputOutputEntry *io) {
+  {
+    HANDLE *event = &io->ol.hEvent;
+    if (*event != INVALID_HANDLE_VALUE) {
+      CloseHandle(*event);
+      *event = INVALID_HANDLE_VALUE;
+    }
+  }
 }
 
 static int
@@ -251,6 +263,7 @@ static void
 deallocateInputOutputEntry (void *item, void *data) {
   InputOutputEntry *io = item;
   if (io->operations) deallocateQueue(io->operations);
+  if (io->methods->cleanupEntry) io->methods->cleanupEntry(io);
   free(io);
 }
 
@@ -390,6 +403,7 @@ asyncRead (
   static const InputOutputMethods methods = {
 #ifdef WINDOWS
     .prepareEntry = prepareWindowsInputOutputEntry,
+    .cleanupEntry = cleanupWindowsInputOutputEntry,
     .startOperation = startWindowsRead,
     .finishOperation = finishWindowsInputOutputOperation,
     .initializeMonitor = initializeWindowsInputOutputMonitor,
@@ -413,6 +427,7 @@ asyncWrite (
   static const InputOutputMethods methods = {
 #ifdef WINDOWS
     .prepareEntry = prepareWindowsInputOutputEntry,
+    .cleanupEntry = cleanupWindowsInputOutputEntry,
     .startOperation = startWindowsWrite,
     .finishOperation = finishWindowsInputOutputOperation,
     .initializeMonitor = initializeWindowsInputOutputMonitor,
