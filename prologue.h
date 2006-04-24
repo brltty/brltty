@@ -51,8 +51,10 @@ extern "C" {
 
 #ifdef WINDOWS
 typedef HANDLE FileDescriptor;
+#define PRIFD "p"
 #else /* WINDOWS */
 typedef int FileDescriptor;
+#define PRIFD "d"
 #endif /* WINDOWS */
 
 #ifdef HAVE_CONFIG_H
