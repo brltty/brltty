@@ -194,8 +194,8 @@ startWindowsWrite (OperationEntry *operation) {
 
   if (allocateWindowsResources(operation)) {
     DWORD count;
-    DWORD success = WriteFile(function->fileDescriptor[extension->count],
-                              &extension->buffer,
+    DWORD success = WriteFile(function->fileDescriptor,
+                              &extension->buffer[extension->count],
                               extension->size - extension->count,
                               &count, &function->ol);
     setWindowsTransferResult(operation, success, count);
