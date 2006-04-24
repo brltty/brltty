@@ -107,46 +107,36 @@ testMonitor (const MonitorEntry *monitor) {
   return 0;
 }
 
-static void
-beginWindowsFunction (FunctionEntry *function) {
-  ZeroMemory(&function->ol, sizeof(function->ol));
-  function->ol.hEvent = INVALID_HANDLE_VALUE;
+static int
+allocateWindowsEvent (HANDLE *event) {
+  if (*event == INVALID_HANDLE_VALUE) {
+    HANDLE handle = CreateEvent(NULL, TRUE, FALSE, NULL);
+    if (!handle) return 0;
+    *event = handle;
+  }
+
+  return ResetEvent(*event);
 }
 
 static void
-endWindowsFunction (FunctionEntry *function) {
-  {
-    HANDLE *event = &function->ol.hEvent;
-    if (*event != INVALID_HANDLE_VALUE) {
-      CloseHandle(*event);
-      *event = INVALID_HANDLE_VALUE;
-    }
+deallocateWindowsEvent (HANDLE *event) {
+  if (*event != INVALID_HANDLE_VALUE) {
+    CloseHandle(*event);
+    *event = INVALID_HANDLE_VALUE;
   }
 }
 
 static int
-allocateWindowsResources (FunctionEntry *function) {
-  {
-    HANDLE *event = &function->ol.hEvent;
+allocateWindowsResources (OperationEntry *operation) {
+  FunctionEntry *function = operation->function;
 
-    if (*event == INVALID_HANDLE_VALUE) {
-      HANDLE handle;
-
-      if (!(handle = CreateEvent(NULL, TRUE, FALSE, NULL))) {
-        LogWindowsError("CreateEvent");
-        return 0;
-      }
-
-      *event = handle;
-    }
-
-    if (!ResetEvent(*event)) {
-      LogWindowsError("ResetEvent");
-      return 0;
-    }
+  if (allocateWindowsEvent(&function->ol.hEvent)) {
+    return 1;
   }
 
-  return 1;
+  operation->finished = 1;
+  operation->error = GetLastError();
+  return 0;
 }
 
 static int
@@ -169,10 +159,21 @@ setWindowsResult (OperationEntry *operation, DWORD success, DWORD count) {
 }
 
 static void
+beginWindowsFunction (FunctionEntry *function) {
+  ZeroMemory(&function->ol, sizeof(function->ol));
+  function->ol.hEvent = INVALID_HANDLE_VALUE;
+}
+
+static void
+endWindowsFunction (FunctionEntry *function) {
+  deallocateWindowsEvent(&function->ol.hEvent);
+}
+
+static void
 startWindowsRead (OperationEntry *operation) {
   FunctionEntry *function = operation->function;
 
-  if (allocateWindowsResources(function)) {
+  if (allocateWindowsResources(operation)) {
     DWORD count;
     DWORD success = ReadFile(function->fileDescriptor, operation->buffer, operation->size, &count, &function->ol);
     setWindowsResult(operation, success, count);
@@ -182,7 +183,7 @@ startWindowsRead (OperationEntry *operation) {
 static void
 startWindowsWrite (OperationEntry *operation) {
   FunctionEntry *function = operation->function;
-  if (allocateWindowsResources(function)) {
+  if (allocateWindowsResources(operation)) {
     DWORD count;
     DWORD success = WriteFile(function->fileDescriptor, operation->buffer, operation->size, &count, &function->ol);
     setWindowsResult(operation, success, count);
