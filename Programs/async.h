@@ -28,20 +28,20 @@ typedef struct {
   size_t size;
   int error;
   size_t count;
-} InputOutputResult;
+} TransferResult;
 
-typedef void (*InputOutputCallback) (const InputOutputResult *result);
+typedef size_t (*TransferCallback) (const TransferResult *result);
 
 extern int asyncRead (
   FileDescriptor fileDescriptor,
   size_t size,
-  InputOutputCallback callback, void *data
+  TransferCallback callback, void *data
 );
 
 extern int asyncWrite (
   FileDescriptor fileDescriptor,
   const void *buffer, size_t size,
-  InputOutputCallback callback, void *data
+  TransferCallback callback, void *data
 );
 
 extern void asyncWait (int timeout);

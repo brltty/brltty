@@ -35,25 +35,26 @@ typedef struct pollfd MonitorEntry;
 typedef struct FunctionEntryStruct FunctionEntry;
 
 typedef struct {
-  FunctionEntry *function;
-  unsigned finished:1;
-
-  int error;
-  size_t count;
-
-  InputOutputCallback callback;
-  void *data;
-
+  TransferCallback callback;
   size_t size;
-  unsigned char buffer[1];
+  size_t count;
+  unsigned char buffer[];
+} TransferExtension;
+
+typedef struct {
+  FunctionEntry *function;
+  void *extension;
+  void *data;
+  unsigned finished:1;
+  int error;
 } OperationEntry;
 
 typedef struct {
   void (*beginFunction) (FunctionEntry *function);
   void (*endFunction) (FunctionEntry *function);
-
   void (*startOperation) (OperationEntry *operation);
   void (*finishOperation) (OperationEntry *operation);
+  int (*invokeCallback) (OperationEntry *operation);
 } FunctionMethods;
 
 struct FunctionEntryStruct {
@@ -140,15 +141,17 @@ allocateWindowsResources (OperationEntry *operation) {
 }
 
 static int
-setWindowsResult (OperationEntry *operation, DWORD success, DWORD count) {
+setWindowsTransferResult (OperationEntry *operation, DWORD success, DWORD count) {
+  TransferExtension *extension = operation->extension;
+
   if (success) {
-    operation->count = count;
+    extension->count = count;
   } else {
     DWORD error = GetLastError();
     if (error == ERROR_IO_PENDING) return 0;
 
     if ((error == ERROR_HANDLE_EOF) || (error == ERROR_BROKEN_PIPE)) {
-      operation->count = 0;
+      extension->count = 0;
     } else {
       operation->error = error;
     }
@@ -172,30 +175,39 @@ endWindowsFunction (FunctionEntry *function) {
 static void
 startWindowsRead (OperationEntry *operation) {
   FunctionEntry *function = operation->function;
+  TransferExtension *extension = operation->extension;
 
   if (allocateWindowsResources(operation)) {
     DWORD count;
-    DWORD success = ReadFile(function->fileDescriptor, operation->buffer, operation->size, &count, &function->ol);
-    setWindowsResult(operation, success, count);
+    DWORD success = ReadFile(function->fileDescriptor,
+                             &extension->buffer[extension->count],
+                             extension->size - extension->count,
+                             &count, &function->ol);
+    setWindowsTransferResult(operation, success, count);
   }
 }
 
 static void
 startWindowsWrite (OperationEntry *operation) {
   FunctionEntry *function = operation->function;
+  TransferExtension *extension = operation->extension;
+
   if (allocateWindowsResources(operation)) {
     DWORD count;
-    DWORD success = WriteFile(function->fileDescriptor, operation->buffer, operation->size, &count, &function->ol);
-    setWindowsResult(operation, success, count);
+    DWORD success = WriteFile(function->fileDescriptor[extension->count],
+                              &extension->buffer,
+                              extension->size - extension->count,
+                              &count, &function->ol);
+    setWindowsTransferResult(operation, success, count);
   }
 }
 
 static void
-finishWindowsOperation (OperationEntry *operation) {
+finishWindowsTransferOperation (OperationEntry *operation) {
   FunctionEntry *function = operation->function;
   DWORD count;
   DWORD success = GetOverlappedResult(function->fileDescriptor, &function->ol, &count, FALSE);
-  setWindowsResult(operation, success, count);
+  setWindowsTransferResult(operation, success, count);
 }
 #else /* WINDOWS */
 static int
@@ -234,8 +246,10 @@ beginUnixOutputFunction (FunctionEntry *function) {
 
 static int
 setUnixResult (OperationEntry *operation, ssize_t count) {
+  TransferExtension *extension = operation->extension;
+
   if (count != -1) {
-    operation->count = count;
+    extension->count = count;
   } else {
     operation->error = errno;
   }
@@ -246,16 +260,53 @@ setUnixResult (OperationEntry *operation, ssize_t count) {
 
 static void
 finishUnixRead (OperationEntry *operation) {
-  int result = read(operation->function->fileDescriptor, operation->buffer, operation->size);
+  FunctionEntry *function = operation->function;
+  TransferExtension *extension = operation->extension;
+  int result = read(function->fileDescriptor,
+                    &extension->buffer[extension->count],
+                    extension->size - extension->count);
   setUnixResult(operation, result);
 }
 
 static void
 finishUnixWrite (OperationEntry *operation) {
-  int result = write(operation->function->fileDescriptor, operation->buffer, operation->size);
+  FunctionEntry *function = operation->function;
+  TransferExtension *extension = operation->extension;
+  int result = write(function->fileDescriptor,
+                     &extension->buffer[extension->count],
+                     extension->size - extension->count);
   setUnixResult(operation, result);
 }
 #endif /* WINDOWS */
+
+static int
+invokeTransferCallback (OperationEntry *operation) {
+  TransferExtension *extension = operation->extension;
+
+  if (extension->callback) {
+    TransferResult result;
+    result.data = operation->data;
+    result.buffer = extension->buffer;
+    result.size = extension->size;
+    result.error = operation->error;
+    result.count = extension->count;
+
+    {
+      size_t count = extension->callback(&result);
+
+      if (count < extension->count) {
+        if (count) {
+          memmove(extension->buffer, &extension->buffer[count], 
+                  extension->count -= count);
+        }
+
+        return 1;
+      }
+    }
+  }
+
+  return 0;
+}
 
 static void
 deallocateFunctionEntry (void *item, void *data) {
@@ -276,6 +327,7 @@ testFunctionEntry (void *item, void *data) {
 static void
 deallocateOperationEntry (void *item, void *data) {
   OperationEntry *operation = item;
+  if (operation->extension) free(operation->extension);
   free(operation);
 }
 
@@ -348,12 +400,12 @@ static int
 createOperation (
   FileDescriptor fileDescriptor,
   const FunctionMethods *methods,
-  InputOutputCallback callback, void *data,
-  size_t size, const void *buffer
+  void *extension,
+  void *data
 ) {
   OperationEntry *operation;
 
-  if ((operation = malloc(sizeof(*operation) - sizeof(operation->buffer) + size))) {
+  if ((operation = malloc(sizeof(*operation)))) {
     Element *functionElement;
 
     if ((functionElement = getFunctionElement(fileDescriptor, methods, 1))) {
@@ -363,16 +415,10 @@ createOperation (
 
       if ((operationElement = enqueueItem(function->operations, operation))) {
         operation->function = function;
-        operation->finished = 0;
-
-        operation->error = 0;
-        operation->count = 0;
-
-        operation->callback = callback;
+        operation->extension = extension;
         operation->data = data;
-
-        operation->size = size;
-        if (buffer) memcpy(operation->buffer, buffer, size);
+        operation->finished = 0;
+        operation->error = 0;
 
         if (new) startOperation(operation);
         return 1;
@@ -387,6 +433,31 @@ createOperation (
   return 0;
 }
 
+static int
+createTransferOperation (
+  FileDescriptor fileDescriptor,
+  const FunctionMethods *methods,
+  TransferCallback callback, void *data,
+  size_t size, const void *buffer
+) {
+  TransferExtension *extension;
+
+  if ((extension = malloc(sizeof(*extension)))) {
+    extension->callback = callback;
+    extension->size = size;
+    extension->count = 0;
+    if (buffer) memcpy(extension->buffer, buffer, size);
+
+    if (createOperation(fileDescriptor, methods, extension, data)) {
+      return 1;
+    }
+
+    free(extension);
+  }
+
+  return 0;
+}
+
 static OperationEntry *
 getFirstOperation (const FunctionEntry *function) {
   return getElementItem(getQueueHead(function->operations));
@@ -396,42 +467,44 @@ int
 asyncRead (
   FileDescriptor fileDescriptor,
   size_t size,
-  InputOutputCallback callback, void *data
+  TransferCallback callback, void *data
 ) {
   static const FunctionMethods methods = {
 #ifdef WINDOWS
     .beginFunction = beginWindowsFunction,
     .endFunction = endWindowsFunction,
     .startOperation = startWindowsRead,
-    .finishOperation = finishWindowsOperation,
+    .finishOperation = finishWindowsTransferOperation,
 #else /* WINDOWS */
     .beginFunction = beginUnixInputFunction,
     .finishOperation = finishUnixRead,
 #endif /* WINDOWS */
+    .invokeCallback = invokeTransferCallback
   };
 
-  return createOperation(fileDescriptor, &methods, callback, data, size, NULL);
+  return createTransferOperation(fileDescriptor, &methods, callback, data, size, NULL);
 }
 
 int
 asyncWrite (
   FileDescriptor fileDescriptor,
   const void *buffer, size_t size,
-  InputOutputCallback callback, void *data
+  TransferCallback callback, void *data
 ) {
   static const FunctionMethods methods = {
 #ifdef WINDOWS
     .beginFunction = beginWindowsFunction,
     .endFunction = endWindowsFunction,
     .startOperation = startWindowsWrite,
-    .finishOperation = finishWindowsOperation,
+    .finishOperation = finishWindowsTransferOperation,
 #else /* WINDOWS */
     .beginFunction = beginUnixOutputFunction,
     .finishOperation = finishUnixWrite,
 #endif /* WINDOWS */
+    .invokeCallback = invokeTransferCallback
   };
 
-  return createOperation(fileDescriptor, &methods, callback, data, size, buffer);
+  return createTransferOperation(fileDescriptor, &methods, callback, data, size, buffer);
 }
 
 typedef struct {
@@ -504,16 +577,12 @@ asyncWait (int timeout) {
       OperationEntry *operation = getElementItem(operationElement);
 
       if (!operation->finished) finishOperation(operation);
-      {
-        InputOutputResult result;
-        result.data = operation->data;
-        result.buffer = operation->buffer;
-        result.size = operation->size;
-        result.error = operation->error;
-        result.count = operation->count;
-        operation->callback(&result);
+      if (function->methods->invokeCallback(operation)) {
+        operation->finished = 0;
+        operation->error = 0;
+      } else {
+        deleteElement(operationElement);
       }
-      deleteElement(operationElement);
 
       if ((operationElement = getQueueHead(function->operations))) {
         operation = getElementItem(operationElement);
