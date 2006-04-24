@@ -15,8 +15,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_EVENTS
-#define BRLTTY_INCLUDED_EVENTS
+#ifndef BRLTTY_INCLUDED_ASYNC
+#define BRLTTY_INCLUDED_ASYNC
 
 #ifdef __cplusplus
 extern "C" {
@@ -44,10 +44,10 @@ extern int asyncWrite (
   InputOutputCallback callback, void *data
 );
 
-extern void processEvents (int timeout);
+extern void asyncWait (int timeout);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_EVENTS */
+#endif /* BRLTTY_INCLUDED_ASYNC */
