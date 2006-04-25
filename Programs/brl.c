@@ -23,6 +23,7 @@
 #include <fcntl.h>
 
 #include "misc.h"
+#include "async.h"
 #include "message.h"
 #include "drivers.h"
 #include "brl.h"
@@ -122,7 +123,7 @@ drainBrailleOutput (BrailleDisplay *brl, int minimumDelay) {
   int duration = brl->writeDelay + 1;
   if (duration < minimumDelay) duration = minimumDelay;
   brl->writeDelay = 0;
-  approximateDelay(duration);
+  asyncWait(duration);
   return duration;
 }
 
