@@ -1054,21 +1054,24 @@ serialTestLineDSR (SerialDevice *serial) {
 
 static int
 serialDefineWaitLines (SerialDevice *serial, SerialLines lines) {
+  if (lines != serial->waitLines) {
 #ifdef WINDOWS
-  DWORD eventMask = 0;
+    DWORD eventMask = 0;
 
-  if (lines & SERIAL_LINE_CTS) eventMask |= EV_CTS;
-  if (lines & SERIAL_LINE_DSR) eventMask |= EV_DSR;
-  if (lines & SERIAL_LINE_RNG) eventMask |= EV_RING;
-  if (lines & SERIAL_LINE_CAR) eventMask |= EV_RLSD;
+    if (lines & SERIAL_LINE_CTS) eventMask |= EV_CTS;
+    if (lines & SERIAL_LINE_DSR) eventMask |= EV_DSR;
+    if (lines & SERIAL_LINE_RNG) eventMask |= EV_RING;
+    if (lines & SERIAL_LINE_CAR) eventMask |= EV_RLSD;
 
-  if (!SetCommMask(serial->fileHandle, eventMask)) {
-    LogWindowsError("SetCommMask");
-    return 0;
-  }
+    if (!SetCommMask(serial->fileHandle, eventMask)) {
+      LogWindowsError("SetCommMask");
+      return 0;
+    }
 #endif /* WINDOWS */
 
-  serial->waitLines = lines;
+    serial->waitLines = lines;
+  }
+
   return 1;
 }
 
@@ -1100,23 +1103,34 @@ serialMonitorWaitLines (SerialDevice *serial) {
 static int
 serialWaitLines (SerialDevice *serial, SerialLines high, SerialLines low) {
   SerialLines lines = high | low;
-  if (!serialDefineWaitLines(serial, lines)) return 0;
-  while (!serialTestLines(serial, high, low))
-    if (!serialMonitorWaitLines(serial))
-      return 0;
+  int ok = 0;
+
+  if (serialDefineWaitLines(serial, lines)) {
+    while (!serialTestLines(serial, high, low))
+      if (!serialMonitorWaitLines(serial))
+        goto done;
+    ok = 1;
+  }
+
+done:
   serialDefineWaitLines(serial, 0);
-  return 1;
+  return ok;
 }
 
 static int
 serialWaitFlank (SerialDevice *serial, SerialLines line, int up) {
-  if (!serialDefineWaitLines(serial, line)) return 0;
-  while (!serialTestLines(serial, up?0:line, up?line:0))
-    if (!serialMonitorWaitLines(serial))
-      return 0;
-  if (!serialMonitorWaitLines(serial)) return 0;
+  int ok = 0;
+
+  if (serialDefineWaitLines(serial, line)) {
+    while (!serialTestLines(serial, up?0:line, up?line:0))
+      if (!serialMonitorWaitLines(serial))
+        goto done;
+    if (serialMonitorWaitLines(serial)) ok = 1;
+  }
+
+done:
   serialDefineWaitLines(serial, 0);
-  return 1;
+  return ok;
 }
 
 int
