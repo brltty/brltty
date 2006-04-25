@@ -29,6 +29,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#include <brltty/api.h>
+
 /* this is for UINT32_MAX */
 #include <inttypes.h>
 #ifndef UINT32_MAX
@@ -132,7 +134,7 @@ typedef struct {
  * brlapi_readPacketContent()
  * brlapi_readPacket()
  */
-ssize_t brlapi_writePacket(int fd, brl_type_t type, const void *buf, size_t size);
+ssize_t brlapi_writePacket(brlapi_fileDescriptor fd, brl_type_t type, const void *buf, size_t size);
 
 /* brlapi_readPacketHeader */
 /** Read the header (type+size) of a packet from \e BrlAPI server
@@ -151,7 +153,7 @@ ssize_t brlapi_writePacket(int fd, brl_type_t type, const void *buf, size_t size
  * brlapi_readPacketContent
  * brlapi_readPacket
  */
-ssize_t brlapi_readPacketHeader(int fd, brl_type_t *packetType);
+ssize_t brlapi_readPacketHeader(brlapi_fileDescriptor fd, brl_type_t *packetType);
 
 /* brlapi_readPacketContent */
 /** Read the content of a packet from \e BrlAPI server
@@ -174,7 +176,7 @@ ssize_t brlapi_readPacketHeader(int fd, brl_type_t *packetType);
  * brlapi_readPacketHeader()
  * brlapi_readPacket()
  */
-ssize_t brlapi_readPacketContent(int fd, size_t packetSize, void *buf, size_t bufSize);
+ssize_t brlapi_readPacketContent(brlapi_fileDescriptor fd, size_t packetSize, void *buf, size_t bufSize);
 
 /* brlapi_readPacket */
 /** Read a packet from \e BrlAPI server
@@ -198,7 +200,7 @@ ssize_t brlapi_readPacketContent(int fd, size_t packetSize, void *buf, size_t bu
  *
  * \sa brlapi_writePacket()
  */
-ssize_t brlapi_readPacket(int fd, brl_type_t *type, void *buf, size_t size);
+ssize_t brlapi_readPacket(brlapi_fileDescriptor fd, brl_type_t *type, void *buf, size_t size);
 
 /* brlapi_fd_mutex */
 /** Mutex for protecting concurrent fd access

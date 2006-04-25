@@ -139,7 +139,7 @@ static WIN_PROC_STUB(freeaddrinfo);
 /* Some useful global variables */
 static unsigned int brlx = 0;
 static unsigned int brly = 0;
-static int fd = -1; /* Descriptor of the socket connected to BrlApi */
+static brlapi_fileDescriptor fd = -1; /* Descriptor of the socket connected to BrlApi */
 
 /* to protect concurrent fd write operations */
 pthread_mutex_t brlapi_fd_mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -318,7 +318,7 @@ static int brlapi_waitForAck(void)
 
 /* brlapi_writePacketWaitForAck */
 /* write a packet and wait for an acknowledgement */
-static int brlapi_writePacketWaitForAck(int fd, brl_type_t type, const void *buf, size_t size)
+static int brlapi_writePacketWaitForAck(brlapi_fileDescriptor fd, brl_type_t type, const void *buf, size_t size)
 {
   ssize_t res;
   pthread_mutex_lock(&brlapi_req_mutex);
@@ -360,7 +360,7 @@ static int tryHostName(char *hostName) {
       char path[lpath+lport+1];
       memcpy(path,BRLAPI_SOCKETPATH,lpath);
       memcpy(path+lpath,port,lport+1);
-      while ((HANDLE) (fd = (int)CreateFile(path,GENERIC_READ|GENERIC_WRITE,
+      while ((HANDLE) (fd = CreateFile(path,GENERIC_READ|GENERIC_WRITE,
 	      FILE_SHARE_READ|FILE_SHARE_WRITE,NULL,OPEN_EXISTING,0,NULL))
 	  == INVALID_HANDLE_VALUE) {
 	if (GetLastError() != ERROR_PIPE_BUSY) {
@@ -547,7 +547,7 @@ static void updateSettings(brlapi_settings_t *s1, const brlapi_settings_t *s2)
 
 /* Function: brlapi_initializeConnection
  * Creates a socket to connect to BrlApi */
-int brlapi_initializeConnection(const brlapi_settings_t *clientSettings, brlapi_settings_t *usedSettings)
+brlapi_fileDescriptor brlapi_initializeConnection(const brlapi_settings_t *clientSettings, brlapi_settings_t *usedSettings)
 {
   unsigned char packet[BRLAPI_MAXPACKETSIZE];
   authStruct *auth = (authStruct *) packet;
@@ -1126,7 +1126,7 @@ send:
 /* Tests wether a packet is ready on file descriptor fd */
 /* Returns -1 if an error occurs, 0 if no packet is ready, 1 if there is a */
 /* packet ready to be read */
-static int packetReady(int fd)
+static int packetReady(brlapi_fileDescriptor fd)
 {
   fd_set set;
   struct timeval timeout;

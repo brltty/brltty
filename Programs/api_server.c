@@ -69,7 +69,7 @@
 #include "tunes.h"
 
 #ifdef WINDOWS
-#define closeFd(fd) CloseHandle((HANDLE)(fd))
+#define closeFd(fd) CloseHandle(fd)
 #define LogSocketError(msg) LogWindowsSocketError(msg)
 #else /* WINDOWS */
 #define closeFd(fd) close(fd)
@@ -169,7 +169,7 @@ typedef struct {
 
 typedef struct Connection {
   struct Connection *prev, *next;
-  int fd;
+  FileDescriptor fd;
   int auth;
   struct Tty *tty;
   int raw;
@@ -200,7 +200,7 @@ static pthread_t socketThreads[MAXSOCKETS]; /* socket binding threads */
 static char **socketHosts; /* socket local hosts */
 static struct socketInfo {
   int addrfamily;
-  int fd;
+  FileDescriptor fd;
   char *hostname;
   char *port;
 #ifdef WINDOWS
@@ -332,28 +332,28 @@ static int driverResume(BrailleDisplay *brl) {
 
 /* Function : writeAck */
 /* Sends an acknowledgement on the given socket */
-static inline void writeAck(int fd)
+static inline void writeAck(FileDescriptor fd)
 {
   brlapiserver_writePacket(fd,BRLPACKET_ACK,NULL,0);
 }
 
 /* Function : writeError */
 /* Sends the given non-fatal error on the given socket */
-static void writeError(int fd, unsigned int err)
+static void writeError(FileDescriptor fd, unsigned int err)
 {
   uint32_t code = htonl(err);
-  LogPrint(LOG_DEBUG,"error %u on fd %d", err, fd);
+  LogPrint(LOG_DEBUG,"error %u on fd %"PRIFD, err, fd);
   brlapiserver_writePacket(fd,BRLPACKET_ERROR,&code,sizeof(code));
 }
 
 /* Function : writeException */
 /* Sends the given error code on the given socket */
-static void writeException(int fd, unsigned int err, brl_type_t type, const void *packet, size_t size)
+static void writeException(FileDescriptor fd, unsigned int err, brl_type_t type, const void *packet, size_t size)
 {
   int hdrsize, esize;
   unsigned char epacket[BRLAPI_MAXPACKETSIZE];
   errorPacket_t * errorPacket = (errorPacket_t *) epacket;
-  LogPrint(LOG_DEBUG,"exception %u for packet type %lu on fd %d", err, (unsigned long)type, fd);
+  LogPrint(LOG_DEBUG,"exception %u for packet type %lu on fd %"PRIFD, err, (unsigned long)type, fd);
   hdrsize = sizeof(errorPacket->code)+sizeof(errorPacket->type);
   errorPacket->code = htonl(err);
   errorPacket->type = htonl(type);
@@ -406,7 +406,7 @@ int readPacket(Connection *c)
   DWORD res;
   if (packet->state!=READY) {
     /* pending read */
-    if (!GetOverlappedResult((HANDLE) c->fd,&packet->overl,&res,FALSE)) {
+    if (!GetOverlappedResult(c->fd,&packet->overl,&res,FALSE)) {
       switch (GetLastError()) {
         case ERROR_IO_PENDING: return 0;
         case ERROR_HANDLE_EOF:
@@ -454,7 +454,7 @@ read:
   } else packet->state = READING_HEADER;
   if (!ResetEvent(packet->overl.hEvent))
     LogWindowsError("ResetEvent in readPacket");
-  if (!ReadFile((HANDLE)c->fd, packet->p, packet->n, &res, &packet->overl)) {
+  if (!ReadFile(c->fd, packet->p, packet->n, &res, &packet->overl)) {
     switch (GetLastError()) {
       case ERROR_IO_PENDING: return 0;
       case ERROR_HANDLE_EOF:
@@ -594,7 +594,7 @@ static void handleResize(BrailleDisplay *brl)
 
 /* Function : createConnection */
 /* Creates a connectiN */
-static Connection *createConnection(int fd, time_t currentTime)
+static Connection *createConnection(FileDescriptor fd, time_t currentTime)
 {
   pthread_mutexattr_t mattr;
   Connection *c =  malloc(sizeof(Connection));
@@ -726,9 +726,9 @@ static inline void freeTty(Tty *tty)
 
 /* Function LogPrintRequest */
 /* Logs the given request */
-static inline void LogPrintRequest(int type, int fd)
+static inline void LogPrintRequest(int type, FileDescriptor fd)
 {
-  LogPrint(LOG_DEBUG, "Received %s request on fd %d", brlapiserver_packetType(type), fd);  
+  LogPrint(LOG_DEBUG, "Received %s request on fd %"PRIFD, brlapiserver_packetType(type), fd);  
 }
 
 static int handleGetDriver(Connection *c, brl_type_t type, size_t size, const char *str)
@@ -1160,7 +1160,7 @@ static int handleUnauthorizedConnection(Connection *c, brl_type_t type, unsigned
   unauthConnections--;
   if (!authKeyCorrect) {
     writeError(c->fd, BRLERR_CONNREFUSED);
-    LogPrint(LOG_WARNING, "BrlAPI connection fd=%d failed authorization", c->fd);
+    LogPrint(LOG_WARNING, "BrlAPI connection fd=%"PRIFD" failed authorization", c->fd);
     return 1;
   }
 
@@ -1183,14 +1183,14 @@ static int processRequest(Connection *c, PacketHandlers *handlers)
   res = readPacket(c);
   if (res==0) return 0; /* No packet ready */
   if (res<0) {
-    if (res==-1) LogPrint(LOG_WARNING,"read : %s (connection on fd %d)",strerror(errno),c->fd);
+    if (res==-1) LogPrint(LOG_WARNING,"read : %s (connection on fd %"PRIFD")",strerror(errno),c->fd);
     else {
-      LogPrint(LOG_DEBUG,"Closing connection on fd %d",c->fd);
+      LogPrint(LOG_DEBUG,"Closing connection on fd %"PRIFD,c->fd);
     }
     if (c->raw) {
       c->raw = 0;
       rawConnection = NULL;
-      LogPrint(LOG_WARNING,"Client on fd %d did not give up raw mode properly",c->fd);
+      LogPrint(LOG_WARNING,"Client on fd %"PRIFD" did not give up raw mode properly",c->fd);
       LogPrint(LOG_WARNING,"Trying to reset braille terminal");
       pthread_mutex_lock(&driverMutex);
       if (trueBraille->reset && !trueBraille->reset(disp)) {
@@ -1200,7 +1200,7 @@ static int processRequest(Connection *c, PacketHandlers *handlers)
       pthread_mutex_unlock(&driverMutex);
     }
     if (c->tty) {
-      LogPrint(LOG_DEBUG,"Client on fd %d did not give up control of tty %#010x properly",c->fd,c->tty->number);
+      LogPrint(LOG_DEBUG,"Client on fd %"PRIFD" did not give up control of tty %#010x properly",c->fd,c->tty->number);
       doLeaveTty(c);
     }
     if (c->auth==0) unauthConnections--;
@@ -1212,7 +1212,7 @@ static int processRequest(Connection *c, PacketHandlers *handlers)
   if (c->auth==0) return handleUnauthorizedConnection(c, type, packet, size);
 
   if (size>BRLAPI_MAXPACKETSIZE) {
-    LogPrint(LOG_WARNING, "Discarding too large packet of type %s on fd %d",brlapiserver_packetType(type), c->fd);
+    LogPrint(LOG_WARNING, "Discarding too large packet of type %s on fd %"PRIFD,brlapiserver_packetType(type), c->fd);
     return 0;    
   }
   switch (type) {
@@ -1252,7 +1252,7 @@ static int processRequest(Connection *c, PacketHandlers *handlers)
 
 /* Function: loopBind */
 /* tries binding while temporary errors occur */
-static int loopBind(int fd, struct sockaddr *addr, socklen_t len)
+static int loopBind(FileDescriptor fd, struct sockaddr *addr, socklen_t len)
 {
   while (bind(fd, addr, len)<0) {
     if (
@@ -1273,9 +1273,9 @@ static int loopBind(int fd, struct sockaddr *addr, socklen_t len)
 /* Function : initializeTcpSocket */
 /* Creates the listening socket for in-connections */
 /* Returns the descriptor, or -1 if an error occurred */
-static int initializeTcpSocket(struct socketInfo *info)
+static FileDescriptor initializeTcpSocket(struct socketInfo *info)
 {
-  int fd=-1;
+  FileDescriptor fd=-1;
   const char *fun;
   int yes=1;
 
@@ -1494,7 +1494,8 @@ static int readPid(char *path)
 {
   char pids[16], *ptr;
   pid_t pid;
-  int n, fd;
+  int n;
+  FileDescriptor fd;
   fd = open(path, O_RDONLY);
   n = read(fd, pids, sizeof(pids)-1);
   closeFd(fd);
@@ -1509,15 +1510,15 @@ static int readPid(char *path)
 /* Function : initializeLocalSocket */
 /* Creates the listening socket for in-connections */
 /* Returns 1, or 0 if an error occurred */
-static int initializeLocalSocket(struct socketInfo *info)
+static FileDescriptor initializeLocalSocket(struct socketInfo *info)
 {
   int lpath=strlen(BRLAPI_SOCKETPATH),lport=strlen(info->port);
-  int fd;
+  FileDescriptor fd;
 #ifdef WINDOWS
   char path[lpath+lport+1];
   memcpy(path,BRLAPI_SOCKETPATH,lpath);
   memcpy(path+lpath,info->port,lport+1);
-  if ((HANDLE) (fd = (int) CreateNamedPipe(path,
+  if ((fd = CreateNamedPipe(path,
 	  PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED,
 	  PIPE_TYPE_BYTE | PIPE_READMODE_BYTE,
 	  PIPE_UNLIMITED_INSTANCES, 0, 0, 0, NULL)) == INVALID_HANDLE_VALUE) {
@@ -1525,7 +1526,7 @@ static int initializeLocalSocket(struct socketInfo *info)
       LogWindowsError("CreateNamedPipe");
     goto out;
   }
-  LogPrint(LOG_DEBUG,"CreateFile -> %p",(HANDLE) fd);
+  LogPrint(LOG_DEBUG,"CreateFile -> %"PRIFD,fd);
   if (!info->overl.hEvent) {
     if (!(info->overl.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL))) {
       LogWindowsError("CreateEvent");
@@ -1537,7 +1538,7 @@ static int initializeLocalSocket(struct socketInfo *info)
     LogWindowsError("ResetEvent");
     goto outfd;
   }
-  if (ConnectNamedPipe((HANDLE) fd, &info->overl)) {
+  if (ConnectNamedPipe(fd, &info->overl)) {
     LogPrint(LOG_DEBUG,"already connected !");
     return fd;
   }
@@ -1711,7 +1712,7 @@ static void *establishSocket(void *arg)
 	(cinfo->fd=initializeTcpSocket(cinfo))==-1))
     LogPrint(LOG_WARNING,"Error while initializing socket %"PRIdPTR,num);
   else
-    LogPrint(LOG_DEBUG,"socket %"PRIdPTR" established (fd %d)",num,cinfo->fd);
+    LogPrint(LOG_DEBUG,"socket %"PRIdPTR" established (fd %"PRIFD")",num,cinfo->fd);
   return NULL;
 }
 
@@ -1774,7 +1775,7 @@ static void addTtyFds(fd_set *fds, int *fdmax, Tty *tty) {
 	*nbAlloc *= 2;
 	*lpHandles = realloc(*lpHandles,*nbAlloc*sizeof(**lpHandles));
       }
-      (*lpHandles)[(*nbHandles)++] = (HANDLE) c->packet.overl.hEvent;
+      (*lpHandles)[(*nbHandles)++] = c->packet.overl.hEvent;
 #else /* WINDOWS */
       if (c->fd>*fdmax) *fdmax = c->fd;
       FD_SET(c->fd,fds);
@@ -1846,6 +1847,7 @@ static void *server(void *arg)
   Connection *c;
   time_t currentTime;
   fd_set sockset;
+  FileDescriptor resfd;
 #ifdef WINDOWS
   HANDLE *lpHandles;
   int nbAlloc;
@@ -1931,7 +1933,7 @@ static void *server(void *arg)
     lpHandles = malloc(nbAlloc * sizeof(*lpHandles));
     nbHandles = 0;
     for (i=0;i<numSockets;i++)
-      if ((HANDLE) socketInfo[i].fd != INVALID_HANDLE_VALUE)
+      if (socketInfo[i].fd != INVALID_HANDLE_VALUE)
 	lpHandles[nbHandles++] = socketInfo[i].overl.hEvent;
     pthread_mutex_lock(&connectionsMutex);
     addTtyFds(&lpHandles, &nbAlloc, &nbHandles, &notty);
@@ -1978,11 +1980,11 @@ static void *server(void *arg)
           WaitForSingleObject(socketInfo[i].overl.hEvent, 0) == WAIT_OBJECT_0) {
         if (socketInfo[i].addrfamily == PF_LOCAL) {
           DWORD foo;
-          if (!(GetOverlappedResult((HANDLE) socketInfo[i].fd, &socketInfo[i].overl, &foo, FALSE)))
+          if (!(GetOverlappedResult(socketInfo[i].fd, &socketInfo[i].overl, &foo, FALSE)))
             LogWindowsError("GetOverlappedResult");
-          res = socketInfo[i].fd;
+          resfd = socketInfo[i].fd;
           if ((socketInfo[i].fd = initializeLocalSocket(&socketInfo[i])) != -1)
-            LogPrint(LOG_DEBUG,"socket %d re-established (fd %p, was %p)",i,(HANDLE) socketInfo[i].fd,(HANDLE) res);
+            LogPrint(LOG_DEBUG,"socket %d re-established (fd %"PRIFD", was %"PRIFD")",i,socketInfo[i].fd,resfd);
           snprintf(source, sizeof(source), BRLAPI_SOCKETPATH "%s", socketInfo[i].port);
         } else {
           if (!ResetEvent(socketInfo[i].overl.hEvent))
@@ -1991,10 +1993,10 @@ static void *server(void *arg)
       if (socketInfo[i].fd>=0 && FD_ISSET(socketInfo[i].fd, &sockset)) {
 #endif /* WINDOWS */
           addrlen = sizeof(addr);
-          res = accept(socketInfo[i].fd, (struct sockaddr *) &addr, &addrlen);
-          if (res<0) {
+          resfd = accept(socketInfo[i].fd, (struct sockaddr *) &addr, &addrlen);
+          if (resfd<0) {
             setSocketErrno();
-            LogPrint(LOG_WARNING,"accept(%d): %s",socketInfo[i].fd,strerror(errno));
+            LogPrint(LOG_WARNING,"accept(%"PRIFD"): %s",socketInfo[i].fd,strerror(errno));
             continue;
           }
           formatAddress(source, sizeof(source), &addr, addrlen);
@@ -2003,29 +2005,29 @@ static void *server(void *arg)
         }
 #endif /* WINDOWS */
 
-        if (authDescriptor && !authPerform(authDescriptor, res)) {
-          closeFd(res);
+        if (authDescriptor && !authPerform(authDescriptor, resfd)) {
+          closeFd(resfd);
           continue;
         }
-        LogPrint(LOG_NOTICE, "BrlAPI connection fd=%d accepted: %s", res, source);
+        LogPrint(LOG_NOTICE, "BrlAPI connection fd=%"PRIFD" accepted: %s", resfd, source);
 
         if (unauthConnections>=UNAUTH_MAX) {
-          writeError(res, BRLERR_CONNREFUSED);
-          closeFd(res);
+          writeError(resfd, BRLERR_CONNREFUSED);
+          closeFd(resfd);
           if (unauthConnLog==0) LogPrint(LOG_WARNING, "Too many simultaneous unauthorized connections");
           unauthConnLog++;
         } else {
 #ifndef WINDOWS
-          if (!setBlockingIo(res, 0)) {
+          if (!setBlockingIo(resfd, 0)) {
             LogPrint(LOG_WARNING, "Failed to switch to non-blocking mode: %s",strerror(errno));
             break;
           }
 #endif /* WINDOWS */
 
-          c = createConnection(res, currentTime);
+          c = createConnection(resfd, currentTime);
           if (c==NULL) {
             LogPrint(LOG_WARNING,"Failed to create connection structure");
-            closeFd(res);
+            closeFd(resfd);
           }
 
           unauthConnections++;

@@ -83,6 +83,15 @@ extern "C" {
 /** Final path for default authorization key file */
 #define BRLAPI_DEFAUTHPATH BRLAPI_ETCDIR "/" BRLAPI_AUTHFILE
 
+#undef BRLAPI_WIN32
+
+#ifdef BRLAPI_WIN32
+#include <windows.h>
+typedef HANDLE brlapi_fileDescriptor;
+#else
+typedef int brlapi_fileDescriptor;
+#endif
+
 /** \brief Settings structure for \e BrlAPI connection
  *
  * This structure holds every parameter needed to connect to \e BrlAPI: which
@@ -179,7 +188,7 @@ typedef struct {
  * brlapi_readPacketContent()
  * brlapi_readPacket()
  */
-int brlapi_initializeConnection(const brlapi_settings_t *clientSettings, brlapi_settings_t *usedSettings);
+brlapi_fileDescriptor brlapi_initializeConnection(const brlapi_settings_t *clientSettings, brlapi_settings_t *usedSettings);
 
 /* brlapi_closeConnection */
 /** Cleanly close the socket
@@ -760,8 +769,6 @@ brlapi_exceptionHandler_t brlapi_setExceptionHandler(brlapi_exceptionHandler_t h
 void brlapi_defaultExceptionHandler(int err, brl_type_t type, const void *buf, size_t size);
 
 /** @} */
-
-#undef BRLAPI_WIN32
 
 /* Windows-specific tricks - don't look at this */
 #ifdef BRLAPI_WIN32

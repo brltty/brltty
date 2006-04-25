@@ -66,7 +66,7 @@
 
 /* brlapi_writeFile */
 /* Writes a buffer to a file */
-static ssize_t brlapi_writeFile(int fd, const void *buffer, size_t size)
+static ssize_t brlapi_writeFile(brlapi_fileDescriptor fd, const void *buffer, size_t size)
 {
   const unsigned char *buf = buffer;
   size_t n;
@@ -78,9 +78,9 @@ static ssize_t brlapi_writeFile(int fd, const void *buffer, size_t size)
   for (n=0;n<size;n+=res) {
 #ifdef WINDOWS
     OVERLAPPED overl = {0,0,0,0,CreateEvent(NULL,TRUE,FALSE,NULL)};
-    if ((!WriteFile((HANDLE) fd,buf+n,size-n,&res,&overl)
+    if ((!WriteFile(fd,buf+n,size-n,&res,&overl)
       && GetLastError() != ERROR_IO_PENDING) ||
-      !GetOverlappedResult((HANDLE) fd, &overl, &res, TRUE)) {
+      !GetOverlappedResult(fd, &overl, &res, TRUE)) {
       res = GetLastError();
       CloseHandle(overl.hEvent);
       setErrno(res);
@@ -104,7 +104,7 @@ static ssize_t brlapi_writeFile(int fd, const void *buffer, size_t size)
 
 /* brlapi_readFile */
 /* Reads a buffer from a file */
-static ssize_t brlapi_readFile(int fd, void *buffer, size_t size, int loop)
+static ssize_t brlapi_readFile(brlapi_fileDescriptor fd, void *buffer, size_t size, int loop)
 {
   unsigned char *buf = buffer;
   size_t n;
@@ -116,9 +116,9 @@ static ssize_t brlapi_readFile(int fd, void *buffer, size_t size, int loop)
   for (n=0;n<size && res>=0;n+=res) {
 #ifdef WINDOWS
     OVERLAPPED overl = {0,0,0,0,CreateEvent(NULL,TRUE,FALSE,NULL)};
-    if ((!ReadFile((HANDLE) fd,buf+n,size-n,&res,&overl)
+    if ((!ReadFile(fd,buf+n,size-n,&res,&overl)
       && GetLastError() != ERROR_IO_PENDING) ||
-      !GetOverlappedResult((HANDLE) fd, &overl, &res, TRUE)) {
+      !GetOverlappedResult(fd, &overl, &res, TRUE)) {
       res = GetLastError();
       CloseHandle(overl.hEvent);
       if (res == ERROR_HANDLE_EOF) return n;
@@ -149,7 +149,7 @@ static ssize_t brlapi_readFile(int fd, void *buffer, size_t size, int loop)
 
 /* brlapi_writePacket */
 /* Write a packet on the socket */
-ssize_t BRLAPI(writePacket)(int fd, brl_type_t type, const void *buf, size_t size)
+ssize_t BRLAPI(writePacket)(brlapi_fileDescriptor fd, brl_type_t type, const void *buf, size_t size)
 {
   uint32_t header[2] = { htonl(size), htonl(type) };
   ssize_t res;
@@ -172,7 +172,7 @@ ssize_t BRLAPI(writePacket)(int fd, brl_type_t type, const void *buf, size_t siz
 
 /* brlapi_readPacketHeader */
 /* Read a packet's header and return packet's size */
-ssize_t BRLAPI(readPacketHeader)(int fd, brl_type_t *packetType)
+ssize_t BRLAPI(readPacketHeader)(brlapi_fileDescriptor fd, brl_type_t *packetType)
 {
   uint32_t header[2];
   ssize_t res;
@@ -192,7 +192,7 @@ ssize_t BRLAPI(readPacketHeader)(int fd, brl_type_t *packetType)
 /* If the packet is too large, the buffer is filled with the */
 /* beginning of the packet, the rest of the packet being discarded */
 /* Returns packet size, -1 on failure, -2 on EOF */
-ssize_t BRLAPI(readPacketContent)(int fd, size_t packetSize, void *buf, size_t bufSize)
+ssize_t BRLAPI(readPacketContent)(brlapi_fileDescriptor fd, size_t packetSize, void *buf, size_t bufSize)
 {
   ssize_t res;
   char foo[BRLAPI_MAXPACKETSIZE];
@@ -217,7 +217,7 @@ out:
 /* If the packet is larger than the supplied buffer, then */
 /* the packet is truncated to buffer's size, like in the recv system call */
 /* with option MSG_TRUNC (rest of the pcket is read but discarded) */
-ssize_t BRLAPI(readPacket)(int fd, brl_type_t *packetType, void *buf, size_t size)
+ssize_t BRLAPI(readPacket)(brlapi_fileDescriptor fd, brl_type_t *packetType, void *buf, size_t size)
 {
   ssize_t res = BRLAPI(readPacketHeader)(fd, packetType);
   if (res<0) return res; /* reports EINTR too */
@@ -230,7 +230,7 @@ ssize_t BRLAPI(readPacket)(int fd, brl_type_t *packetType, void *buf, size_t siz
 /* If the file is too big, non-existant or unreadable, returns -1 */
 int BRLAPI(loadAuthKey)(const char *filename, size_t *authlength, void *auth)
 {
-  int fd;
+  brlapi_fileDescriptor fd;
   off_t stsize;
   struct stat statbuf;
   if (stat(filename, &statbuf)<0) {
