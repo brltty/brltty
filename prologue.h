@@ -51,9 +51,11 @@ extern "C" {
 
 #ifdef WINDOWS
 typedef HANDLE FileDescriptor;
+#define INVALID_FILE_DESCRIPTOR INVALID_HANDLE_VALUE
 #define PRIFD "p"
 #else /* WINDOWS */
 typedef int FileDescriptor;
+#define INVALID_FILE_DESCRIPTOR -1
 #define PRIFD "d"
 #endif /* WINDOWS */
 
