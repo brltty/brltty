@@ -66,8 +66,14 @@ extern int serialDiscardOutput (SerialDevice *serial);
 extern int serialFlushOutput (SerialDevice *serial);
 extern int serialDrainOutput (SerialDevice *serial);
 
+extern int serialSetLineRTS (SerialDevice *serial, int up);
+extern int serialSetLineDTR (SerialDevice *serial, int up);
+
 extern int serialTestLineCTS (SerialDevice *serial);
 extern int serialTestLineDSR (SerialDevice *serial);
+
+extern int serialWaitLineCTS (SerialDevice *serial, int up, int flank);
+extern int serialWaitLineDSR (SerialDevice *serial, int up, int flank);
 
 #ifdef __cplusplus
 }

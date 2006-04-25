@@ -22,6 +22,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+#include <sched.h>
 
 #ifdef HAVE_SYS_MODEM_H
 #include <sys/modem.h>
@@ -38,8 +39,12 @@ typedef DCB SerialAttributes;
 typedef DWORD SerialSpeed;
 
 typedef DWORD SerialLines;
+#define SERIAL_LINE_RTS 1
+#define SERIAL_LINE_DTR 2
 #define SERIAL_LINE_CTS MS_CTS_ON
 #define SERIAL_LINE_DSR MS_DSR_ON
+#define SERIAL_LINE_RNG MS_RING_ON
+#define SERIAL_LINE_CAR MS_RLSD_ON
 #else /* WINDOWS */
 #include <sys/ioctl.h>
 #include <termios.h>
@@ -48,8 +53,12 @@ typedef struct termios SerialAttributes;
 typedef speed_t SerialSpeed;
 
 typedef int SerialLines;
+#define SERIAL_LINE_RTS TIOCM_RTS
+#define SERIAL_LINE_DTR TIOCM_DTR
 #define SERIAL_LINE_CTS TIOCM_CTS
 #define SERIAL_LINE_DSR TIOCM_DSR
+#define SERIAL_LINE_RNG TIOCM_RNG
+#define SERIAL_LINE_CAR TIOCM_CAR
 #endif /* WINDOWS */
 
 #include "io_serial.h"
@@ -62,6 +71,7 @@ struct SerialDeviceStruct {
   SerialAttributes currentAttributes;
   SerialAttributes pendingAttributes;
   FILE *stream;
+  SerialLines waitLines;
 
 #ifdef WINDOWS
   HANDLE fileHandle;
@@ -736,6 +746,7 @@ serialOpenDevice (const char *path) {
             serialInitializeAttributes(&serial->pendingAttributes);
 
             serial->stream = NULL;
+            serial->waitLines = 0;
 
             LogPrint(LOG_DEBUG, "serial device opened: %s: fd=%d",
                      device,
@@ -967,12 +978,59 @@ static int
 serialGetLines (SerialDevice *serial, SerialLines *lines) {
 #ifdef WINDOWS
   if (GetCommModemStatus(serial->fileHandle, lines)) return 1;
-  LogWindowsError("getting modem lines");
+  LogWindowsError("GetCommModemStatus");
 #else /* WINDOWS */
   if (ioctl(serial->fileDescriptor, TIOCMGET, lines) != -1) return 1;
   LogError("TIOCMGET");
 #endif /* WINDOWS */
   return 0;
+}
+
+static int
+serialSetLines (SerialDevice *serial, SerialLines high, SerialLines low) {
+#ifdef WINDOWS
+  DCB dcb;
+  if (GetCommState(serial->fileHandle, &dcb)) {
+    if (low & SERIAL_LINE_RTS)
+      dcb.fRtsControl = RTS_CONTROL_DISABLE;
+    else if (high & SERIAL_LINE_RTS)
+      dcb.fRtsControl = RTS_CONTROL_ENABLE;
+
+    if (low & SERIAL_LINE_DTR)
+      dcb.fDtrControl = DTR_CONTROL_DISABLE;
+    else if (high & SERIAL_LINE_DTR)
+      dcb.fDtrControl = DTR_CONTROL_ENABLE;
+
+    if (SetCommState(serial->fileHandle, &dcb)) return 1;
+    LogWindowsError("SetCommState");
+  } else {
+    LogWindowsError("GetCommState");
+  }
+#else /* WINDOWS */
+  int status;
+  if (serialGetLines(serial, &status) != -1) {
+    status |= high;
+    status &= ~low;
+    if (ioctl(serial->fileDescriptor, TIOCMSET, &status) != -1) return 1;
+    LogError("TIOCMSET");
+  }
+#endif /* WINDOWS */
+  return 0;
+}
+
+static int
+serialSetLine (SerialDevice *serial, SerialLines line, int up) {
+  return serialSetLines(serial, up?line:0, up?0:line);
+}
+
+int
+serialSetLineRTS (SerialDevice *serial, int up) {
+  return serialSetLine(serial, SERIAL_LINE_RTS, up);
+}
+
+int
+serialSetLineDTR (SerialDevice *serial, int up) {
+  return serialSetLine(serial, SERIAL_LINE_DTR, up);
 }
 
 static int
@@ -992,4 +1050,87 @@ serialTestLineCTS (SerialDevice *serial) {
 int
 serialTestLineDSR (SerialDevice *serial) {
   return serialTestLines(serial, SERIAL_LINE_DSR, 0);
+}
+
+static int
+serialDefineWaitLines (SerialDevice *serial, SerialLines lines) {
+#ifdef WINDOWS
+  DWORD eventMask = 0;
+
+  if (lines & SERIAL_LINE_CTS) eventMask |= EV_CTS;
+  if (lines & SERIAL_LINE_DSR) eventMask |= EV_DSR;
+  if (lines & SERIAL_LINE_RNG) eventMask |= EV_RING;
+  if (lines & SERIAL_LINE_CAR) eventMask |= EV_RLSD;
+
+  if (!SetCommMask(serial->fileHandle, eventMask)) {
+    LogWindowsError("SetCommMask");
+    return 0;
+  }
+#endif /* WINDOWS */
+
+  serial->waitLines = lines;
+  return 1;
+}
+
+static int
+serialMonitorWaitLines (SerialDevice *serial) {
+#if defined(WINDOWS)
+  DWORD event;
+  if (WaitCommEvent(serial->fileHandle, &event, NULL)) return 1;
+  LogWindowsError("WaitCommEvent");
+#elif defined(TIOCMIWAIT)
+  if (ioctl(serial->fileDescriptor, TIOCMIWAIT, serial->waitLines) != -1) return 1;
+  LogError("TIOCMIWAIT");
+#else
+  SerialLines old;
+  if (serialGetLines(serial, &old)) {
+    old &= serial->waitLines;
+
+    while (1) {
+      SerialLines new;
+      sched_yield();
+      if (!serialGetLines(serial, &new)) break;
+      if ((new & serial->waitLines) != old) return 1;
+    }
+  }
+#endif
+  return 0;
+}
+
+static int
+serialWaitLines (SerialDevice *serial, SerialLines high, SerialLines low) {
+  SerialLines lines = high | low;
+  if (!serialDefineWaitLines(serial, lines)) return 0;
+  while (!serialTestLines(serial, high, low))
+    if (!serialMonitorWaitLines(serial))
+      return 0;
+  serialDefineWaitLines(serial, 0);
+  return 1;
+}
+
+static int
+serialWaitFlank (SerialDevice *serial, SerialLines line, int up) {
+  if (!serialDefineWaitLines(serial, line)) return 0;
+  while (!serialTestLines(serial, up?0:line, up?line:0))
+    if (!serialMonitorWaitLines(serial))
+      return 0;
+  if (!serialMonitorWaitLines(serial)) return 0;
+  serialDefineWaitLines(serial, 0);
+  return 1;
+}
+
+int
+serialWaitLine (SerialDevice *serial, SerialLines line, int up, int flank) {
+  return flank? serialWaitFlank(serial, line, up):
+                serialWaitLines(serial, up?line:0, up?0:line);
+}
+
+int
+serialWaitLineCTS (SerialDevice *serial, int up, int flank) {
+  return serialWaitLine(serial, SERIAL_LINE_CTS, up, flank);
+}
+
+int
+serialWaitLineDSR (SerialDevice *serial, int up, int flank) {
+  return serialWaitLine(serial, SERIAL_LINE_DSR, up, flank);
 }
