@@ -408,7 +408,7 @@ static int tryHostName(char *hostName) {
 
     struct addrinfo *res,*cur;
     struct addrinfo hints;
-    SocketDescriptor sockfd;
+    SocketDescriptor sockfd = -1;
 
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = PF_UNSPEC;
