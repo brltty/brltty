@@ -230,7 +230,7 @@ ssize_t BRLAPI(readPacket)(brlapi_fileDescriptor fd, brl_type_t *packetType, voi
 /* If the file is too big, non-existant or unreadable, returns -1 */
 int BRLAPI(loadAuthKey)(const char *filename, size_t *authlength, void *auth)
 {
-  brlapi_fileDescriptor fd;
+  int fd;
   off_t stsize;
   struct stat statbuf;
   if (stat(filename, &statbuf)<0) {
@@ -251,7 +251,13 @@ int BRLAPI(loadAuthKey)(const char *filename, size_t *authlength, void *auth)
     return -1;
   }
 
-  *authlength = brlapi_readFile(get_osfhandle(fd), auth, stsize, 1);
+  *authlength = brlapi_readFile(
+#ifdef WINDOWS
+		  (HANDLE) get_osfhandle(fd),
+#else /* WINDOWS */
+		  fd,
+#endif /* WINDOWS */
+		  auth, stsize, 1);
 
   if (*authlength!=(size_t)stsize) {
     LibcError("read in loadAuthKey");

@@ -139,7 +139,8 @@ static WIN_PROC_STUB(freeaddrinfo);
 /* Some useful global variables */
 static unsigned int brlx = 0;
 static unsigned int brly = 0;
-static brlapi_fileDescriptor fd = -1; /* Descriptor of the socket connected to BrlApi */
+static brlapi_fileDescriptor fd = INVALID_FILE_DESCRIPTOR; /* Descriptor of the socket connected to BrlApi */
+static int addrfamily; /* Address family of the socket */
 
 /* to protect concurrent fd write operations */
 pthread_mutex_t brlapi_fd_mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -334,9 +335,9 @@ static int brlapi_writePacketWaitForAck(brlapi_fileDescriptor fd, brl_type_t typ
 /* Function: tryHostName */
 /* Tries to connect to the given hostname. */
 static int tryHostName(char *hostName) {
-  int addrfamily;
   char *hostname = NULL;
   char *port;
+  SocketDescriptor sockfd = -1;
 
 #ifdef WINDOWS
   if (WSAStartup(
@@ -360,7 +361,7 @@ static int tryHostName(char *hostName) {
       char path[lpath+lport+1];
       memcpy(path,BRLAPI_SOCKETPATH,lpath);
       memcpy(path+lpath,port,lport+1);
-      while ((HANDLE) (fd = CreateFile(path,GENERIC_READ|GENERIC_WRITE,
+      while ((fd = CreateFile(path,GENERIC_READ|GENERIC_WRITE,
 	      FILE_SHARE_READ|FILE_SHARE_WRITE,NULL,OPEN_EXISTING,0,NULL))
 	  == INVALID_HANDLE_VALUE) {
 	if (GetLastError() != ERROR_PIPE_BUSY) {
@@ -379,7 +380,7 @@ static int tryHostName(char *hostName) {
 	brlapi_errno = BRLERR_LIBCERR;
 	goto out;
       }
-      if ((fd = socket(PF_LOCAL, SOCK_STREAM, 0))<0) {
+      if ((sockfd = socket(PF_LOCAL, SOCK_STREAM, 0))<0) {
         brlapi_errfun="socket";
         setSocketErrno();
         goto outlibc;
@@ -387,7 +388,7 @@ static int tryHostName(char *hostName) {
       sa.sun_family = AF_LOCAL;
       memcpy(sa.sun_path,BRLAPI_SOCKETPATH,lpath);
       memcpy(sa.sun_path+lpath,port,lport+1);
-      if (connect(fd, (struct sockaddr *) &sa, sizeof(sa))<0) {
+      if (connect(sockfd, (struct sockaddr *) &sa, sizeof(sa))<0) {
         brlapi_errfun="connect";
         setSocketErrno();
         goto outlibc;
@@ -407,6 +408,7 @@ static int tryHostName(char *hostName) {
 
     struct addrinfo *res,*cur;
     struct addrinfo hints;
+    SocketDescriptor sockfd;
 
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = PF_UNSPEC;
@@ -419,11 +421,10 @@ static int tryHostName(char *hostName) {
       goto out;
     }
     for(cur = res; cur; cur = cur->ai_next) {
-      fd = socket(cur->ai_family, cur->ai_socktype, cur->ai_protocol);
-      if (fd<0) continue;
-      if (connect(fd, cur->ai_addr, cur->ai_addrlen)<0) {
-        close(fd);
-        fd = -1;
+      sockfd = socket(cur->ai_family, cur->ai_socktype, cur->ai_protocol);
+      if (sockfd<0) continue;
+      if (connect(sockfd, cur->ai_addr, cur->ai_addrlen)<0) {
+        closeSocketDescriptor(sockfd);
         continue;
       }
       break;
@@ -487,13 +488,13 @@ static int tryHostName(char *hostName) {
       memcpy(&addr.sin_addr,he->h_addr,he->h_length);
     }
     
-    fd = socket(addr.sin_family, SOCK_STREAM, 0);
-    if (fd<0) {
+    sockfd = socket(addr.sin_family, SOCK_STREAM, 0);
+    if (sockfd<0) {
       brlapi_errfun = "socket";
       setSocketErrno();
       goto outlibc;
     }
-    if (connect(fd, (struct sockaddr *) &addr, sizeof(addr))<0) {
+    if (connect(sockfd, (struct sockaddr *) &addr, sizeof(addr))<0) {
       brlapi_errfun = "connect";
       setSocketErrno();
       goto outlibc;
@@ -504,6 +505,7 @@ static int tryHostName(char *hostName) {
     }
 #endif /* WINDOWS */
 
+    fd = (FileDescriptor) sockfd;
   }
   free(hostname);
   free(port);
@@ -512,10 +514,8 @@ static int tryHostName(char *hostName) {
 outlibc:
   brlapi_errno = BRLERR_LIBCERR;
   brlapi_libcerrno = errno;
-  if (fd>=0) {
-    close(fd);
-    fd = -1;
-  }
+  if (sockfd>=0)
+    closeSocketDescriptor(sockfd);
 out:
   free(hostname);
   free(port);
@@ -592,9 +592,9 @@ retry:
   } else if (tryAuthKey(auth,authKeyLength)<0) {
     if (brlapi_errno != BRLERR_CONNREFUSED)
       goto outfd;
-    if (fd>=0) {
-      close(fd);
-      fd = -1;
+    if (fd!=INVALID_FILE_DESCRIPTOR) {
+      closeFileDescriptor(fd);
+      fd = INVALID_FILE_DESCRIPTOR;
     }
     settings.authKey = NULL;
     goto retry;
@@ -606,12 +606,12 @@ retry:
   return fd;
 
 outfd:
-  if (fd>=0) {
-    close(fd);
-    fd = -1;
+  if (fd!=INVALID_FILE_DESCRIPTOR) {
+    closeFileDescriptor(fd);
+    fd = INVALID_FILE_DESCRIPTOR;
   }
 out:
-  return -1;
+  return INVALID_FILE_DESCRIPTOR;
 }
 
 /* brlapi_closeConnection */
@@ -622,8 +622,8 @@ void brlapi_closeConnection(void)
   state = 0;
   pthread_mutex_unlock(&stateMutex);
   pthread_mutex_lock(&brlapi_fd_mutex);
-  close(fd);
-  fd = -1;
+  closeFileDescriptor(fd);
+  fd = INVALID_FILE_DESCRIPTOR;
   pthread_mutex_unlock(&brlapi_fd_mutex);
 #ifdef WINDOWS
   WSACleanup();
@@ -1126,14 +1126,32 @@ send:
 /* Tests wether a packet is ready on file descriptor fd */
 /* Returns -1 if an error occurs, 0 if no packet is ready, 1 if there is a */
 /* packet ready to be read */
-static int packetReady(brlapi_fileDescriptor fd)
+static int packetReady(brlapi_fileDescriptor osfd)
 {
+#ifdef WINDOWS
+  if (addrfamily == PF_LOCAL) {
+    DWORD avail;
+    if (!PeekNamedPipe(fd, NULL, 0, NULL, &avail, NULL)) {
+      brlapi_errfun = "packetReady";
+      brlapi_errno = BRLERR_LIBCERR;
+      brlapi_libcerrno = errno;
+      return -1;
+    }
+    return avail!=0;
+  } else {
+    SOCKET fd = (SOCKET) osfd;
+#else /* WINDOWS */
+  int fd = osfd;
+#endif /* WINDOWS */
   fd_set set;
   struct timeval timeout;
   memset(&timeout, 0, sizeof(timeout));
   FD_ZERO(&set);
   FD_SET(fd, &set);
   return select(fd+1, &set, NULL, NULL, &timeout);
+#ifdef WINDOWS
+  }
+#endif /* WINDOWS */
 }
 
 /* Function : brlapi_readKey */

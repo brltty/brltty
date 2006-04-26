@@ -26,7 +26,7 @@ typedef struct AuthDescriptorStruct AuthDescriptor;
 extern AuthDescriptor *authBeginClient (const char *parameter);
 extern AuthDescriptor *authBeginServer (const char *parameter);
 extern void authEnd (AuthDescriptor *auth);
-extern int authPerform (AuthDescriptor *auth, int fd);
+extern int authPerform (AuthDescriptor *auth, FileDescriptor fd);
 
 extern void formatAddress (char *buffer, int bufferSize, const void *address, int addressSize);
 

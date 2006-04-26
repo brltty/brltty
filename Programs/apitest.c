@@ -213,7 +213,7 @@ void showKeyCodes(void)
 int main(int argc, char *argv[])
 {
   int status = 0;
-  int fd;
+  brlapi_fileDescriptor fd;
   settings.hostName = NULL; settings.authKey = NULL;
 
   processOptions(optionTable, optionCount,

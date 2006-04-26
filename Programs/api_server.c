@@ -69,10 +69,8 @@
 #include "tunes.h"
 
 #ifdef WINDOWS
-#define closeFd(fd) CloseHandle(fd)
 #define LogSocketError(msg) LogWindowsSocketError(msg)
 #else /* WINDOWS */
-#define closeFd(fd) close(fd)
 #define LogSocketError(msg) LogError(msg)
 #endif /* WINDOWS */
 
@@ -622,7 +620,7 @@ outmalloc:
   free(c);
 out:
   writeError(fd,BRLERR_NOMEM);
-  closeFd(fd);
+  closeFileDescriptor(fd);
   return NULL;
 }
 
@@ -630,7 +628,7 @@ out:
 /* Frees all resources associated to a connection */
 static void freeConnection(Connection *c)
 {
-  if (c->fd>=0) closeFd(c->fd);
+  if (c->fd>=0) closeFileDescriptor(c->fd);
   pthread_mutex_destroy(&c->brlMutex);
   pthread_mutex_destroy(&c->maskMutex);
   freeBrailleWindow(&c->brailleWindow);
@@ -686,7 +684,7 @@ static inline Tty *newTty(Tty *father, int number)
 {
   Tty *tty;
   if (!(tty = calloc(1,sizeof(*tty)))) goto out;
-  if (!(tty->connections = createConnection(-1,0))) goto outtty;
+  if (!(tty->connections = createConnection(INVALID_FILE_DESCRIPTOR,0))) goto outtty;
   tty->connections->next = tty->connections->prev = tty->connections;
   tty->number = number;
   tty->focus = -1;
@@ -1252,7 +1250,7 @@ static int processRequest(Connection *c, PacketHandlers *handlers)
 
 /* Function: loopBind */
 /* tries binding while temporary errors occur */
-static int loopBind(FileDescriptor fd, struct sockaddr *addr, socklen_t len)
+static int loopBind(SocketDescriptor fd, struct sockaddr *addr, socklen_t len)
 {
   while (bind(fd, addr, len)<0) {
     if (
@@ -1275,7 +1273,11 @@ static int loopBind(FileDescriptor fd, struct sockaddr *addr, socklen_t len)
 /* Returns the descriptor, or -1 if an error occurred */
 static FileDescriptor initializeTcpSocket(struct socketInfo *info)
 {
-  FileDescriptor fd=-1;
+#ifdef WINDOWS
+  SOCKET fd=INVALID_SOCKET;
+#else /* WINDOWS */
+  int fd=-1;
+#endif /* WINDOWS */
   const char *fun;
   int yes=1;
 
@@ -1311,7 +1313,7 @@ static FileDescriptor initializeTcpSocket(struct socketInfo *info)
 	,err
 #endif /* HAVE_GAI_STRERROR */
     );
-    return -1;
+    return INVALID_FILE_DESCRIPTOR;
   }
   for (cur = res; cur; cur = cur->ai_next) {
     fd = socket(cur->ai_family, cur->ai_socktype, cur->ai_protocol);
@@ -1339,7 +1341,7 @@ static FileDescriptor initializeTcpSocket(struct socketInfo *info)
     break;
 cont:
     LogSocketError(fun);
-    closeFd(fd);
+    closeSocketDescriptor(fd);
   }
   freeaddrinfo(res);
   if (cur) {
@@ -1351,14 +1353,14 @@ cont:
 #ifdef WINDOWS
     if (!(info->overl.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL))) {
       LogWindowsError("CreateEvent");
-      closeFd(fd);
-      return -1;
+      closeSocketDescriptor(fd);
+      return INVALID_FILE_DESCRIPTOR;
     }
     LogPrint(LOG_DEBUG,"Event -> %p",info->overl.hEvent);
     WSAEventSelect(fd, info->overl.hEvent, FD_ACCEPT);
 #endif /* WINDOWS */
 
-    return fd;
+    return (FileDescriptor)fd;
   }
   LogPrint(LOG_WARNING,"unable to find a local TCP port %s:%s !",info->hostname,info->port);
 #endif /* HAVE_GETADDRINFO */
@@ -1394,7 +1396,7 @@ cont:
 	  hstrerror(h_errno)
 #endif /* WINDOWS */
 	  );
-	return -1;
+	return INVALID_FILE_DESCRIPTOR;
       }
       addr.sin_port = se->s_port;
     }
@@ -1417,7 +1419,7 @@ cont:
 	hstrerror(h_errno)
 #endif /* WINDOWS */
 	);
-      return -1;
+      return INVALID_FILE_DESCRIPTOR;
     }
     if (he->h_addrtype != AF_INET) {
 #ifdef EAFNOSUPPORT
@@ -1426,12 +1428,12 @@ cont:
       errno = EINVAL;
 #endif /* EAFNOSUPPORT */
       LogPrint(LOG_ERR,"unknown address type %d",he->h_addrtype);
-      return -1;
+      return INVALID_FILE_DESCRIPTOR;
     }
     if (he->h_length > sizeof(addr.sin_addr)) {
       errno = EINVAL;
       LogPrint(LOG_ERR,"too big address: %d",he->h_length);
-      return -1;
+      return INVALID_FILE_DESCRIPTOR;
     }
     memcpy(&addr.sin_addr,he->h_addr,he->h_length);
   }
@@ -1461,18 +1463,18 @@ cont:
 #ifdef WINDOWS
   if (!(info->overl.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL))) {
     LogWindowsError("CreateEvent");
-    closeFd(fd);
-    return -1;
+    closeSocketDescriptor(fd);
+    return INVALID_FILE_DESCRIPTOR;
   }
   LogPrint(LOG_DEBUG,"Event -> %p",info->overl.hEvent);
   WSAEventSelect(fd, info->overl.hEvent, FD_ACCEPT);
 #endif /* WINDOWS */
 
-  return fd;
+  return (FileDescriptor)fd;
 
 err:
   LogSocketError(fun);
-  if (fd >= 0) closeFd(fd);
+  if (fd >= 0) closeSocketDescriptor(fd);
 
 #endif /* !HAVE_GETADDRINFO */
 #ifdef WINDOWS
@@ -1483,7 +1485,7 @@ err:
   info->hostname = NULL;
   free(info->port);
   info->port = NULL;
-  return -1;
+  return INVALID_FILE_DESCRIPTOR;
 }
 
 #if defined(PF_LOCAL)
@@ -1498,7 +1500,7 @@ static int readPid(char *path)
   FileDescriptor fd;
   fd = open(path, O_RDONLY);
   n = read(fd, pids, sizeof(pids)-1);
-  closeFd(fd);
+  closeFileDescriptor(fd);
   if (n == -1) return 0;
   pids[n] = 0;
   pid = strtol(pids, &ptr, 10);
@@ -1651,7 +1653,7 @@ static FileDescriptor initializeLocalSocket(struct socketInfo *info)
       goto outtmp;
     }
   }
-  closeFd(lock);
+  closeFileDescriptor(lock);
   if (unlink(tmppath))
     LogError("removing temp local socket lock");
   if (unlink(sa.sun_path) && errno != ENOENT) {
@@ -1677,9 +1679,9 @@ outmode:
   umask(oldmode);
 #endif /* WINDOWS */
 outfd:
-  closeFd(fd);
+  closeFileDescriptor(fd);
 out:
-  return -1;
+  return INVALID_FILE_DESCRIPTOR;
 }
 #endif /* PF_LOCAL */
 
@@ -1704,12 +1706,12 @@ static void *establishSocket(void *arg)
 #endif /* WINDOWS */
 
 #if defined(PF_LOCAL)
-  if ((cinfo->addrfamily==PF_LOCAL && (cinfo->fd=initializeLocalSocket(cinfo))==-1) ||
+  if ((cinfo->addrfamily==PF_LOCAL && (cinfo->fd=initializeLocalSocket(cinfo))==INVALID_FILE_DESCRIPTOR) ||
       (cinfo->addrfamily!=PF_LOCAL && 
 #else /* PF_LOCAL */
   if ((
 #endif /* PF_LOCAL */
-	(cinfo->fd=initializeTcpSocket(cinfo))==-1))
+	(cinfo->fd=initializeTcpSocket(cinfo))==INVALID_FILE_DESCRIPTOR))
     LogPrint(LOG_WARNING,"Error while initializing socket %"PRIdPTR,num);
   else
     LogPrint(LOG_DEBUG,"socket %"PRIdPTR" established (fd %"PRIFD")",num,cinfo->fd);
@@ -1725,9 +1727,9 @@ static void closeSockets(void *arg)
     pthread_cancel(socketThreads[i]);
     info=&socketInfo[i];
     if (info->fd>=0) {
-      if (closeFd(info->fd))
+      if (closeFileDescriptor(info->fd))
         LogError("closing socket");
-      info->fd=-1;
+      info->fd=INVALID_FILE_DESCRIPTOR;
 #ifdef WINDOWS
       if ((info->overl.hEvent)) {
 	CloseHandle(info->overl.hEvent);
@@ -1894,7 +1896,7 @@ static void *server(void *arg)
   pthread_attr_setstacksize(&attr,stackSize);
 
   for (i=0;i<numSockets;i++)
-    socketInfo[i].fd = -1;
+    socketInfo[i].fd = INVALID_FILE_DESCRIPTOR;
 
 #ifdef WINDOWS
   if ((getaddrinfoProc && WSAStartup(MAKEWORD(2,0), &wsadata))
@@ -1976,14 +1978,14 @@ static void *server(void *arg)
       char source[0X100];
 
 #ifdef WINDOWS
-      if (socketInfo[i].fd != -1 &&
+      if (socketInfo[i].fd != INVALID_FILE_DESCRIPTOR &&
           WaitForSingleObject(socketInfo[i].overl.hEvent, 0) == WAIT_OBJECT_0) {
         if (socketInfo[i].addrfamily == PF_LOCAL) {
           DWORD foo;
           if (!(GetOverlappedResult(socketInfo[i].fd, &socketInfo[i].overl, &foo, FALSE)))
             LogWindowsError("GetOverlappedResult");
           resfd = socketInfo[i].fd;
-          if ((socketInfo[i].fd = initializeLocalSocket(&socketInfo[i])) != -1)
+          if ((socketInfo[i].fd = initializeLocalSocket(&socketInfo[i])) != INVALID_FILE_DESCRIPTOR)
             LogPrint(LOG_DEBUG,"socket %d re-established (fd %"PRIFD", was %"PRIFD")",i,socketInfo[i].fd,resfd);
           snprintf(source, sizeof(source), BRLAPI_SOCKETPATH "%s", socketInfo[i].port);
         } else {
@@ -1993,8 +1995,8 @@ static void *server(void *arg)
       if (socketInfo[i].fd>=0 && FD_ISSET(socketInfo[i].fd, &sockset)) {
 #endif /* WINDOWS */
           addrlen = sizeof(addr);
-          resfd = accept(socketInfo[i].fd, (struct sockaddr *) &addr, &addrlen);
-          if (resfd<0) {
+          resfd = (FileDescriptor)accept((SocketDescriptor)socketInfo[i].fd, (struct sockaddr *) &addr, &addrlen);
+          if (resfd == INVALID_FILE_DESCRIPTOR) {
             setSocketErrno();
             LogPrint(LOG_WARNING,"accept(%"PRIFD"): %s",socketInfo[i].fd,strerror(errno));
             continue;
@@ -2006,14 +2008,14 @@ static void *server(void *arg)
 #endif /* WINDOWS */
 
         if (authDescriptor && !authPerform(authDescriptor, resfd)) {
-          closeFd(resfd);
+          closeFileDescriptor(resfd);
           continue;
         }
         LogPrint(LOG_NOTICE, "BrlAPI connection fd=%"PRIFD" accepted: %s", resfd, source);
 
         if (unauthConnections>=UNAUTH_MAX) {
           writeError(resfd, BRLERR_CONNREFUSED);
-          closeFd(resfd);
+          closeFileDescriptor(resfd);
           if (unauthConnLog==0) LogPrint(LOG_WARNING, "Too many simultaneous unauthorized connections");
           unauthConnLog++;
         } else {
@@ -2027,7 +2029,7 @@ static void *server(void *arg)
           c = createConnection(resfd, currentTime);
           if (c==NULL) {
             LogPrint(LOG_WARNING,"Failed to create connection structure");
-            closeFd(resfd);
+            closeFileDescriptor(resfd);
           }
 
           unauthConnections++;
@@ -2389,12 +2391,12 @@ int api_start(BrailleDisplay *brl, char **parameters)
 
   if (!strcmp(keyfile,"none")) unauthorizedConnectionsAllowed = 1;
 
-  if ((notty.connections = createConnection(-1,0)) == NULL) {
+  if ((notty.connections = createConnection(INVALID_FILE_DESCRIPTOR,0)) == NULL) {
     LogPrint(LOG_WARNING, "Unable to create connections list");
     goto out;
   }
   notty.connections->prev = notty.connections->next = notty.connections;
-  if ((ttys.connections = createConnection(-1, 0)) == NULL) {
+  if ((ttys.connections = createConnection(INVALID_FILE_DESCRIPTOR, 0)) == NULL) {
     LogPrint(LOG_WARNING, "Unable to create ttys' connections list");
     goto outalloc;
   }

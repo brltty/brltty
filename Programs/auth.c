@@ -22,6 +22,11 @@
 
 #ifdef WINDOWS
 #include <ws2tcpip.h>
+#ifdef __MINGW32__
+#include <io.h>
+#else /* __MINGW32__ */
+#include <sys/cygwin.h>
+#endif /* __MINGW32__ */
 #else /* WINDOWS */
 #include <sys/socket.h>
 #include <sys/un.h>
@@ -161,7 +166,7 @@ checkPeerGroup (PeerCredentials *credentials, gid_t group) {
 
 /* general type definitions */
 
-typedef int (*MethodPerformer) (AuthDescriptor *auth, int fd, void *data);
+typedef int (*MethodPerformer) (AuthDescriptor *auth, FileDescriptor fd, void *data);
 
 typedef struct {
   const char *name;
@@ -229,12 +234,12 @@ authKeyfile_release (void *data) {
 }
 
 static int
-authKeyfile_client (AuthDescriptor *auth, int fd, void *data) {
+authKeyfile_client (AuthDescriptor *auth, FileDescriptor fd, void *data) {
   return 1;
 }
 
 static int
-authKeyfile_server (AuthDescriptor *auth, int fd, void *data) {
+authKeyfile_server (AuthDescriptor *auth, FileDescriptor fd, void *data) {
   MethodDescriptor_keyfile *keyfile = data;
   LogPrint(LOG_DEBUG, "checking key file: %s", keyfile->path);
   return 1;
@@ -300,8 +305,17 @@ authUser_release (void *data) {
 }
 
 static int
-authUser_server (AuthDescriptor *auth, int fd, void *data) {
+authUser_server (AuthDescriptor *auth, FileDescriptor osfd, void *data) {
   MethodDescriptor_user *user = data;
+#ifdef WINDOWS
+#ifdef __MINGW32__
+  int fd = _open_osfhandle((long)osfd, O_RDWR);
+#else /* __MINGW32__ */
+  int fd = cygwin_attach_handle_to_fd("auth descriptor", 1, osfd, TRUE, GENERIC_READ|GENERIC_WRITE);
+#endif /* __MINGW32__ */
+#else /* WINDOWS */
+  int fd = osfd;
+#endif /* WINDOWS */
   if (auth->peerCredentialsState != PCS_GOOD) {
     if (!getPeerCredentials(auth, fd)) return 0;
     if (checkPeerUser(&auth->peerCredentials, user->id)) auth->peerCredentialsState = PCS_GOOD;
@@ -359,8 +373,17 @@ authGroup_release (void *data) {
 }
 
 static int
-authGroup_server (AuthDescriptor *auth, int fd, void *data) {
+authGroup_server (AuthDescriptor *auth, FileDescriptor osfd, void *data) {
   MethodDescriptor_group *group = data;
+#ifdef WINDOWS
+#ifdef __MINGW32__
+  int fd = _open_osfhandle((long)osfd, O_RDWR);
+#else /* __MINGW32__ */
+  int fd = cygwin_attach_handle_to_fd("auth descriptor", 1, osfd, TRUE, GENERIC_READ|GENERIC_WRITE);
+#endif /* __MINGW32__ */
+#else /* WINDOWS */
+  int fd = osfd;
+#endif /* WINDOWS */
   if (auth->peerCredentialsState != PCS_GOOD) {
     if (!getPeerCredentials(auth, fd)) return 0;
     if (checkPeerGroup(&auth->peerCredentials, group->id)) auth->peerCredentialsState = PCS_GOOD;
@@ -506,7 +529,7 @@ authEnd (AuthDescriptor *auth) {
 }
 
 int
-authPerform (AuthDescriptor *auth, int fd) {
+authPerform (AuthDescriptor *auth, FileDescriptor fd) {
   int ok = 1;
 
 #ifdef CAN_CHECK_CREDENTIALS

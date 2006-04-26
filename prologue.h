@@ -53,10 +53,22 @@ extern "C" {
 typedef HANDLE FileDescriptor;
 #define INVALID_FILE_DESCRIPTOR INVALID_HANDLE_VALUE
 #define PRIFD "p"
+#define closeFileDescriptor(fd) CloseHandle(fd)
+
+typedef SOCKET SocketDescriptor;
+#define INVALID_SOCKET_DESCRIPTOR -1
+#define PRISD "d"
+#define closeSocketDescriptor(sd) closesocket(sd)
 #else /* WINDOWS */
 typedef int FileDescriptor;
 #define INVALID_FILE_DESCRIPTOR -1
 #define PRIFD "d"
+#define closeFileDescriptor(fd) close(fd)
+
+typedef int SocketDescriptor;
+#define INVALID_SOCKET_DESCRIPTOR -1
+#define PRISD "d"
+#define closeSocketDescriptor(sd) close(sd)
 #endif /* WINDOWS */
 
 #ifdef HAVE_CONFIG_H
