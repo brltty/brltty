@@ -22,7 +22,6 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/stat.h>
-#include <sched.h>
 
 #ifdef HAVE_SYS_MODEM_H
 #include <sys/modem.h>
@@ -1091,7 +1090,6 @@ serialMonitorWaitLines (SerialDevice *serial) {
 
     while (1) {
       SerialLines new;
-      sched_yield();
       if (!serialGetLines(serial, &new)) break;
       if ((new & serial->waitLines) != old) return 1;
     }
