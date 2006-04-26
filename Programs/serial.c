@@ -70,6 +70,7 @@ struct SerialDeviceStruct {
   SerialAttributes currentAttributes;
   SerialAttributes pendingAttributes;
   FILE *stream;
+  SerialLines linesState;
   SerialLines waitLines;
 
 #ifdef WINDOWS
@@ -745,6 +746,7 @@ serialOpenDevice (const char *path) {
             serialInitializeAttributes(&serial->pendingAttributes);
 
             serial->stream = NULL;
+            serial->linesState = 0;
             serial->waitLines = 0;
 
             LogPrint(LOG_DEBUG, "serial device opened: %s: fd=%d",
@@ -976,13 +978,19 @@ serialWriteData (
 static int
 serialGetLines (SerialDevice *serial, SerialLines *lines) {
 #ifdef WINDOWS
-  if (GetCommModemStatus(serial->fileHandle, lines)) return 1;
-  LogWindowsError("GetCommModemStatus");
+  if (!GetCommModemStatus(serial->fileHandle, &serial->linesState)) {
+    LogWindowsError("GetCommModemStatus");
+    return 0;
+  }
 #else /* WINDOWS */
-  if (ioctl(serial->fileDescriptor, TIOCMGET, lines) != -1) return 1;
-  LogError("TIOCMGET");
+  if (ioctl(serial->fileDescriptor, TIOCMGET, &serial->linesState) == -1) {
+    LogError("TIOCMGET");
+    return 0;
+  }
 #endif /* WINDOWS */
-  return 0;
+
+  *lines = serial->linesState;
+  return 1;
 }
 
 static int
@@ -1084,16 +1092,12 @@ serialMonitorWaitLines (SerialDevice *serial) {
   if (ioctl(serial->fileDescriptor, TIOCMIWAIT, serial->waitLines) != -1) return 1;
   LogError("TIOCMIWAIT");
 #else
-  SerialLines old;
-  if (serialGetLines(serial, &old)) {
-    old &= serial->waitLines;
+  SerialLines old = serial->linesState & serial->waitLines;
+  SerialLines new;
 
-    while (1) {
-      SerialLines new;
-      if (!serialGetLines(serial, &new)) break;
-      if ((new & serial->waitLines) != old) return 1;
-    }
-  }
+  while (serialGetLines(serial, &new))
+    if ((new & serial->waitLines) != old)
+      return 1;
 #endif
   return 0;
 }
