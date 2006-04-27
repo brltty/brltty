@@ -491,7 +491,7 @@ flowInputCtsProc (void *arg) {
 
 static int
 serialStartFlowControlThread (SerialDevice *serial) {
-  if (!serial->flowControlRunning) {
+  if (!serial->flowControlRunning && serial->currentFlowControlProc) {
     pthread_t thread;
     pthread_attr_t attributes;
 
@@ -886,7 +886,6 @@ serialCloseDevice (SerialDevice *serial) {
 int
 serialRestartDevice (SerialDevice *serial, int baud) {
   if (!serialDiscardOutput(serial)) return 0;
-  serialStopFlowControlThread(serial);
 
 #ifdef WINDOWS
   if (!ClearCommError(serial->fileHandle, NULL, NULL)) return 0;
@@ -895,12 +894,12 @@ serialRestartDevice (SerialDevice *serial, int baud) {
 #endif /* WINDOWS */
 
   if (!serialFlushAttributes(serial)) return 0;
+  serialStopFlowControlThread(serial);
   approximateDelay(500);
   if (!serialDiscardInput(serial)) return 0;
 
   if (!serialSetBaud(serial, baud)) return 0;
   if (!serialFlushAttributes(serial)) return 0;
-  if (!serialStartFlowControlThread(serial)) return 0;
   return 1;
 }
 
