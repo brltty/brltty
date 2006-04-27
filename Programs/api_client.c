@@ -380,7 +380,7 @@ static int tryHostName(char *hostName) {
 	brlapi_errno = BRLERR_LIBCERR;
 	goto out;
       }
-      if ((sockfd = socket(PF_LOCAL, SOCK_STREAM, 0))<0) {
+      if ((fd = socket(PF_LOCAL, SOCK_STREAM, 0))<0) {
         brlapi_errfun="socket";
         setSocketErrno();
         goto outlibc;
@@ -388,7 +388,7 @@ static int tryHostName(char *hostName) {
       sa.sun_family = AF_LOCAL;
       memcpy(sa.sun_path,BRLAPI_SOCKETPATH,lpath);
       memcpy(sa.sun_path+lpath,port,lport+1);
-      if (connect(sockfd, (struct sockaddr *) &sa, sizeof(sa))<0) {
+      if (connect(fd, (struct sockaddr *) &sa, sizeof(sa))<0) {
         brlapi_errfun="connect";
         setSocketErrno();
         goto outlibc;
