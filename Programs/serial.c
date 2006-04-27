@@ -30,8 +30,10 @@
 #ifdef WINDOWS
 #ifdef __MINGW32__
 #include <io.h>
+#include "win_pthread.h"
 #else /* __CYGWIN__ */
 #include <sys/cygwin.h>
+#include <pthread.h>
 #endif /* __CYGWIN__ */
 
 typedef DCB SerialAttributes;
@@ -47,6 +49,7 @@ typedef DWORD SerialLines;
 #else /* WINDOWS */
 #include <sys/ioctl.h>
 #include <termios.h>
+#include <pthread.h>
 
 typedef struct termios SerialAttributes;
 typedef speed_t SerialSpeed;
@@ -72,6 +75,11 @@ struct SerialDeviceStruct {
   FILE *stream;
   SerialLines linesState;
   SerialLines waitLines;
+  SerialFlowControl flow;
+  SerialFlowControl pendingFlow;
+#if !defined(CTVB) || defined(WINDOWS)
+  pthread_t flowInputCtsThread;
+#endif /* !CTVB || WINDOWS */
 
 #ifdef WINDOWS
   HANDLE fileHandle;
@@ -467,12 +475,31 @@ serialSetParity (SerialDevice *serial, SerialParity parity) {
   return 1;
 }
 
+#if !defined(CTVB) || defined(WINDOWS)
+static void *
+flowInputCtsProc(void *arg) {
+  SerialDevice *serial = arg;
+  int up = serialTestLineCTS(serial);
+
+  while (1) {
+    serialSetLineRTS(serial, up);
+    serialWaitLineCTS(serial, (up = !up), 0);
+  }
+
+  return NULL;
+}
+#endif /* !CTVB || WINDOWS */
+
 int
 serialSetFlowControl (SerialDevice *serial, SerialFlowControl flow) {
+  serial->pendingFlow = flow;
+
 #ifdef WINDOWS
   if (flow & SERIAL_FLOW_INPUT_RTS) {
     flow &= ~SERIAL_FLOW_INPUT_RTS;
     serial->pendingAttributes.fRtsControl = RTS_CONTROL_HANDSHAKE;
+  } else if (flow & SERIAL_FLOW_INPUT_CTS) {
+    flow &= ~SERIAL_FLOW_INPUT_CTS;
   } else {
     serial->pendingAttributes.fRtsControl = RTS_CONTROL_ENABLE;
   }
@@ -538,9 +565,9 @@ serialSetFlowControl (SerialDevice *serial, SerialFlowControl flow) {
     {&serial->pendingAttributes.c_iflag, IXON, SERIAL_FLOW_OUTPUT_XON},
 #endif /* IXON */
 
-#ifdef linux
-    {&serial->pendingAttributes.c_cflag, 0x20000000, SERIAL_FLOW_INPUT_CTS},
-#endif /* linux */
+#ifdef CTVB
+    {&serial->pendingAttributes.c_cflag, CTVB, SERIAL_FLOW_INPUT_CTS},
+#endif /* CTVB */
 
     {NULL, 0, 0}
   };
@@ -555,6 +582,13 @@ serialSetFlowControl (SerialDevice *serial, SerialFlowControl flow) {
     }
     ++entry;
   }
+
+#if !defined(CTVB)
+  if (flow & (SERIAL_FLOW_INPUT_CTS)) {
+    flow &= ~(SERIAL_FLOW_INPUT_CTS);
+    serial->pendingAttributes.c_cflag &= ~CLOCAL;
+  }
+#endif /* !CTVB */
 #endif /* WINDOWS */
 
   if (!flow) return 1;
@@ -698,7 +732,28 @@ serialWriteAttributes (SerialDevice *serial, const SerialAttributes *attributes)
 
 static int
 serialFlushAttributes (SerialDevice *serial) {
-  return serialWriteAttributes(serial, &serial->pendingAttributes);
+#if !defined(CTVB) || defined(WINDOWS)
+  if ((serial->flow & SERIAL_FLOW_INPUT_CTS) && !(serial->pendingFlow & SERIAL_FLOW_INPUT_CTS)) {
+    pthread_cancel(serial->flowInputCtsThread);
+  }
+#endif /* !CTVB || WINDOWS */
+
+  if (!serialWriteAttributes(serial, &serial->pendingAttributes)) return 0;
+
+#if !defined(CTVB) || defined(WINDOWS)
+  if (!(serial->flow & SERIAL_FLOW_INPUT_CTS) && (serial->pendingFlow & SERIAL_FLOW_INPUT_CTS)) {
+    pthread_attr_t attr;
+    pthread_attr_init(&attr);
+    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+    if (pthread_create(&serial->flowInputCtsThread, &attr, flowInputCtsProc, serial)) {
+      LogError("creating CTS Input Flow Control thread");
+      return 0;
+    }
+  }
+#endif /* !CTVB || WINDOWS */
+
+  serial->flow = serial->pendingFlow;
+  return 1;
 }
 
 int
@@ -786,6 +841,12 @@ void
 serialCloseDevice (SerialDevice *serial) {
   serialWriteAttributes(serial, &serial->originalAttributes);
 
+#if !defined(CTVB) || defined(WINDOWS)
+  if (serial->flow & SERIAL_FLOW_INPUT_CTS) {
+    pthread_cancel(serial->flowInputCtsThread);
+  }
+#endif /* !CTVB || WINDOWS */
+
   if (serial->stream) {
     fclose(serial->stream);
 
@@ -803,20 +864,26 @@ serialCloseDevice (SerialDevice *serial) {
 
 int
 serialRestartDevice (SerialDevice *serial, int baud) {
+  SerialFlowControl flow = serial->pendingFlow;
   if (!serialDiscardOutput(serial)) return 0;
 #ifdef WINDOWS
   if (!ClearCommError(serial->fileHandle, NULL, NULL)) return 0;
 #else /* WINDOWS */
   if (!serialSetSpeed(serial, B0)) return 0;
 #endif /* WINDOWS */
+  serial->pendingFlow = 0;
   if (!serialFlushAttributes(serial)) return 0;
 
   approximateDelay(500);
-  if (!serialDiscardInput(serial)) return 0;
+  if (!serialDiscardInput(serial)) goto out;
 
-  if (!serialSetBaud(serial, baud)) return 0;
+  if (!serialSetBaud(serial, baud)) goto out;
+  serial->pendingFlow = flow;
   if (!serialFlushAttributes(serial)) return 0;
   return 1;
+out:
+  serial->pendingFlow = flow;
+  return 0;
 }
 
 FILE *
