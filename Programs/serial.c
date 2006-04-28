@@ -67,6 +67,8 @@ typedef int SerialLines;
 #include "io_misc.h"
 #include "misc.h"
 
+typedef void * (*FlowControlProc) (void *arg);
+
 struct SerialDeviceStruct {
   int fileDescriptor;
   SerialAttributes originalAttributes;
@@ -77,8 +79,8 @@ struct SerialDeviceStruct {
   SerialLines linesState;
   SerialLines waitLines;
 
-  void * (*currentFlowControlProc) (void *arg);
-  void * (*pendingFlowControlProc) (void *arg);
+  FlowControlProc currentFlowControlProc;
+  FlowControlProc pendingFlowControlProc;
   pthread_t flowControlThread;
   unsigned flowControlRunning:1;
 
@@ -885,6 +887,8 @@ serialCloseDevice (SerialDevice *serial) {
 
 int
 serialRestartDevice (SerialDevice *serial, int baud) {
+  FlowControlProc flowControlProc = serial->pendingFlowControlProc;
+
   if (!serialDiscardOutput(serial)) return 0;
 
 #ifdef WINDOWS
@@ -893,13 +897,16 @@ serialRestartDevice (SerialDevice *serial, int baud) {
   if (!serialSetSpeed(serial, B0)) return 0;
 #endif /* WINDOWS */
 
+  serial->pendingFlowControlProc = NULL;
   if (!serialFlushAttributes(serial)) return 0;
-  serialStopFlowControlThread(serial);
+
   approximateDelay(500);
   if (!serialDiscardInput(serial)) return 0;
 
   if (!serialSetBaud(serial, baud)) return 0;
+  serial->pendingFlowControlProc = flowControlProc;
   if (!serialFlushAttributes(serial)) return 0;
+
   return 1;
 }
 
