@@ -479,7 +479,7 @@ serialSetParity (SerialDevice *serial, SerialParity parity) {
 }
 
 static void *
-flowInputCtsProc (void *arg) {
+flowControlProc_InputCts (void *arg) {
   SerialDevice *serial = arg;
   int up = serialTestLineCTS(serial);
 
@@ -613,7 +613,7 @@ serialSetFlowControl (SerialDevice *serial, SerialFlowControl flow) {
 
   if (flow & SERIAL_FLOW_INPUT_CTS) {
     flow &= ~SERIAL_FLOW_INPUT_CTS;
-    serial->pendingFlowControlProc = flowInputCtsProc;
+    serial->pendingFlowControlProc = flowControlProc_InputCts;
   } else {
     serial->pendingFlowControlProc = NULL;
   }
