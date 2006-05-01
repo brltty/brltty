@@ -27,8 +27,9 @@ typedef struct {
   void *data;
   const void *buffer;
   size_t size;
+  size_t length;
   int error;
-  size_t count;
+  unsigned end:1;
 } InputResult;
 
 typedef size_t (*InputCallback) (const InputResult *result);

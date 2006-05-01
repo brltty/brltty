@@ -300,8 +300,9 @@ invokeInputCallback (OperationEntry *operation) {
     result.data = operation->data;
     result.buffer = extension->buffer;
     result.size = extension->size;
+    result.length = extension->length;
     result.error = operation->error;
-    result.count = extension->length;
+    result.end = extension->direction.input.end;
     count = extension->direction.input.callback(&result);
   } else {
     count = extension->length;
@@ -332,7 +333,8 @@ invokeOutputCallback (OperationEntry *operation) {
   }
 
   if (operation->error) return 0;
-  return (extension->length < extension->size);
+  operation->finished = 0;
+  return extension->length < extension->size;
 }
 
 static void
@@ -470,7 +472,7 @@ createTransferOperation (
 ) {
   TransferExtension *extension;
 
-  if ((extension = malloc(sizeof(*extension)))) {
+  if ((extension = malloc(sizeof(*extension) + size))) {
     extension->direction = *direction;
     extension->size = size;
     extension->length = 0;
@@ -631,7 +633,6 @@ asyncWait (int timeout) {
 
       if (!operation->finished) finishOperation(operation);
       if (function->methods->invokeCallback(operation)) {
-        operation->finished = 0;
         operation->error = 0;
       } else {
         deleteElement(operationElement);
