@@ -34,10 +34,21 @@ typedef struct pollfd MonitorEntry;
 
 typedef struct FunctionEntryStruct FunctionEntry;
 
+typedef union {
+  struct {
+    InputCallback callback;
+    unsigned end:1;
+  } input;
+
+  struct {
+    OutputCallback callback;
+  } output;
+} TransferDirectionUnion;
+
 typedef struct {
-  TransferCallback callback;
+  TransferDirectionUnion direction;
   size_t size;
-  size_t count;
+  size_t length;
   unsigned char buffer[];
 } TransferExtension;
 
@@ -140,25 +151,24 @@ allocateWindowsResources (OperationEntry *operation) {
   return 0;
 }
 
-static int
+static void
 setWindowsTransferResult (OperationEntry *operation, DWORD success, DWORD count) {
   TransferExtension *extension = operation->extension;
 
   if (success) {
-    extension->count = count;
+    extension->length += count;
   } else {
     DWORD error = GetLastError();
-    if (error == ERROR_IO_PENDING) return 0;
+    if (error == ERROR_IO_PENDING) return;
 
     if ((error == ERROR_HANDLE_EOF) || (error == ERROR_BROKEN_PIPE)) {
-      extension->count = 0;
+      extension->direction.input.end = 1;
     } else {
       operation->error = error;
     }
   }
 
   operation->finished = 1;
-  return 1;
 }
 
 static void
@@ -180,8 +190,8 @@ startWindowsRead (OperationEntry *operation) {
   if (allocateWindowsResources(operation)) {
     DWORD count;
     DWORD success = ReadFile(function->fileDescriptor,
-                             &extension->buffer[extension->count],
-                             extension->size - extension->count,
+                             &extension->buffer[extension->length],
+                             extension->size - extension->length,
                              &count, &function->ol);
     setWindowsTransferResult(operation, success, count);
   }
@@ -195,8 +205,8 @@ startWindowsWrite (OperationEntry *operation) {
   if (allocateWindowsResources(operation)) {
     DWORD count;
     DWORD success = WriteFile(function->fileDescriptor,
-                              &extension->buffer[extension->count],
-                              extension->size - extension->count,
+                              &extension->buffer[extension->length],
+                              extension->size - extension->length,
                               &count, &function->ol);
     setWindowsTransferResult(operation, success, count);
   }
@@ -244,18 +254,19 @@ beginUnixOutputFunction (FunctionEntry *function) {
   function->events = POLLOUT;
 }
 
-static int
-setUnixResult (OperationEntry *operation, ssize_t count) {
+static void
+setUnixTransferResult (OperationEntry *operation, ssize_t count) {
   TransferExtension *extension = operation->extension;
 
-  if (count != -1) {
-    extension->count = count;
-  } else {
+  if (count == -1) {
     operation->error = errno;
+  } else if (count == 0) {
+    extension->direction.input.end = 1;
+  } else {
+    extension->length += count;
   }
 
   operation->finished = 1;
-  return 1;
 }
 
 static void
@@ -263,9 +274,9 @@ finishUnixRead (OperationEntry *operation) {
   FunctionEntry *function = operation->function;
   TransferExtension *extension = operation->extension;
   int result = read(function->fileDescriptor,
-                    &extension->buffer[extension->count],
-                    extension->size - extension->count);
-  setUnixResult(operation, result);
+                    &extension->buffer[extension->length],
+                    extension->size - extension->length);
+  setUnixTransferResult(operation, result);
 }
 
 static void
@@ -273,39 +284,55 @@ finishUnixWrite (OperationEntry *operation) {
   FunctionEntry *function = operation->function;
   TransferExtension *extension = operation->extension;
   int result = write(function->fileDescriptor,
-                     &extension->buffer[extension->count],
-                     extension->size - extension->count);
-  setUnixResult(operation, result);
+                     &extension->buffer[extension->length],
+                     extension->size - extension->length);
+  setUnixTransferResult(operation, result);
 }
 #endif /* WINDOWS */
 
 static int
-invokeTransferCallback (OperationEntry *operation) {
+invokeInputCallback (OperationEntry *operation) {
   TransferExtension *extension = operation->extension;
+  size_t count;
 
-  if (extension->callback) {
-    TransferResult result;
+  if (extension->direction.input.callback) {
+    InputResult result;
     result.data = operation->data;
     result.buffer = extension->buffer;
     result.size = extension->size;
     result.error = operation->error;
-    result.count = extension->count;
-
-    {
-      size_t count = extension->callback(&result);
-
-      if (count < extension->count) {
-        if (count) {
-          memmove(extension->buffer, &extension->buffer[count], 
-                  extension->count -= count);
-        }
-
-        return 1;
-      }
-    }
+    result.count = extension->length;
+    count = extension->direction.input.callback(&result);
+  } else {
+    count = extension->length;
   }
 
-  return 0;
+  if (count) {
+    memmove(extension->buffer, &extension->buffer[count],
+            extension->length -= count);
+  }
+
+  if (operation->error) return 0;
+  if (!extension->length) return 0;
+  return 1;
+}
+
+static int
+invokeOutputCallback (OperationEntry *operation) {
+  TransferExtension *extension = operation->extension;
+
+  if (extension->direction.output.callback) {
+    OutputResult result;
+    result.data = operation->data;
+    result.buffer = extension->buffer;
+    result.size = extension->size;
+    result.error = operation->error;
+    result.count = extension->length;
+    extension->direction.output.callback(&result);
+  }
+
+  if (operation->error) return 0;
+  return (extension->length < extension->size);
 }
 
 static void
@@ -437,25 +464,51 @@ static int
 createTransferOperation (
   FileDescriptor fileDescriptor,
   const FunctionMethods *methods,
-  TransferCallback callback, void *data,
-  size_t size, const void *buffer
+  const TransferDirectionUnion *direction,
+  size_t size, const void *buffer,
+  void *data
 ) {
   TransferExtension *extension;
 
   if ((extension = malloc(sizeof(*extension)))) {
-    extension->callback = callback;
+    extension->direction = *direction;
     extension->size = size;
-    extension->count = 0;
+    extension->length = 0;
     if (buffer) memcpy(extension->buffer, buffer, size);
 
-    if (createOperation(fileDescriptor, methods, extension, data)) {
-      return 1;
-    }
+    if (createOperation(fileDescriptor, methods, extension, data)) return 1;
 
     free(extension);
   }
 
   return 0;
+}
+
+static int
+createInputOperation (
+  FileDescriptor fileDescriptor,
+  const FunctionMethods *methods,
+  InputCallback callback,
+  size_t size,
+  void *data
+) {
+  TransferDirectionUnion direction;
+  direction.input.callback = callback;
+  direction.input.end = 0;
+  return createTransferOperation(fileDescriptor, methods, &direction, size, NULL, data);
+}
+
+static int
+createOutputOperation (
+  FileDescriptor fileDescriptor,
+  const FunctionMethods *methods,
+  OutputCallback callback,
+  size_t size, const void *buffer,
+  void *data
+) {
+  TransferDirectionUnion direction;
+  direction.output.callback = callback;
+  return createTransferOperation(fileDescriptor, methods, &direction, size, buffer, data);
 }
 
 static OperationEntry *
@@ -467,7 +520,7 @@ int
 asyncRead (
   FileDescriptor fileDescriptor,
   size_t size,
-  TransferCallback callback, void *data
+  InputCallback callback, void *data
 ) {
   static const FunctionMethods methods = {
 #ifdef WINDOWS
@@ -479,17 +532,17 @@ asyncRead (
     .beginFunction = beginUnixInputFunction,
     .finishOperation = finishUnixRead,
 #endif /* WINDOWS */
-    .invokeCallback = invokeTransferCallback
+    .invokeCallback = invokeInputCallback
   };
 
-  return createTransferOperation(fileDescriptor, &methods, callback, data, size, NULL);
+  return createInputOperation(fileDescriptor, &methods, callback, size, data);
 }
 
 int
 asyncWrite (
   FileDescriptor fileDescriptor,
   const void *buffer, size_t size,
-  TransferCallback callback, void *data
+  OutputCallback callback, void *data
 ) {
   static const FunctionMethods methods = {
 #ifdef WINDOWS
@@ -501,10 +554,10 @@ asyncWrite (
     .beginFunction = beginUnixOutputFunction,
     .finishOperation = finishUnixWrite,
 #endif /* WINDOWS */
-    .invokeCallback = invokeTransferCallback
+    .invokeCallback = invokeOutputCallback
   };
 
-  return createTransferOperation(fileDescriptor, &methods, callback, data, size, buffer);
+  return createOutputOperation(fileDescriptor, &methods, callback, size, buffer, data);
 }
 
 typedef struct {

@@ -22,29 +22,44 @@
 extern "C" {
 #endif /* __cplusplus */
 
+
 typedef struct {
   void *data;
   const void *buffer;
   size_t size;
   int error;
   size_t count;
-} TransferResult;
+} InputResult;
 
-typedef size_t (*TransferCallback) (const TransferResult *result);
+typedef size_t (*InputCallback) (const InputResult *result);
+
+
+typedef struct {
+  void *data;
+  const void *buffer;
+  size_t size;
+  int error;
+  size_t count;
+} OutputResult;
+
+typedef void (*OutputCallback) (const OutputResult *result);
+
 
 extern int asyncRead (
   FileDescriptor fileDescriptor,
   size_t size,
-  TransferCallback callback, void *data
+  InputCallback callback, void *data
 );
 
 extern int asyncWrite (
   FileDescriptor fileDescriptor,
   const void *buffer, size_t size,
-  TransferCallback callback, void *data
+  OutputCallback callback, void *data
 );
 
+
 extern void asyncWait (int timeout);
+
 
 #ifdef __cplusplus
 }
