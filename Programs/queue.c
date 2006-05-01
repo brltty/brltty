@@ -113,11 +113,41 @@ deleteElement (Element *element) {
   discardElement(element);
 }
 
+typedef struct {
+  Queue *queue;
+  void *item;
+} FindReferenceElementData;
+
+static int
+findReferenceElement (void *item, void *data) {
+  FindReferenceElementData *fre = data;
+  return fre->queue->compare(fre->item, item, fre->queue->data);
+}
+
 static void
 enqueueElement (Element *element) {
   Queue *queue = element->queue;
+
   if (queue->head) {
-    linkAdditionalElement(queue->head, element);
+    Element *reference;
+    int newHead = 0;
+
+    if (queue->compare) {
+      FindReferenceElementData fre;
+      fre.queue = queue;
+      fre.item = element->item;
+
+      if (!(reference = processQueue(queue, findReferenceElement, &fre))) {
+        reference = queue->head;
+      } else if (reference == queue->head) {
+        newHead = 1;
+      }
+    } else {
+      reference = queue->head;
+    }
+
+    linkAdditionalElement(reference, element);
+    if (newHead) queue->head = element;
   } else {
     linkFirstElement(element);
   }
