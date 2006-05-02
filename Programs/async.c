@@ -563,6 +563,66 @@ asyncWrite (
 }
 
 typedef struct {
+  struct timeval time;
+  AlarmCallback callback;
+  void *data;
+} AlarmEntry;
+
+static void
+deallocateAlarmEntry (void *item, void *data) {
+  AlarmEntry *alarm = item;
+  free(alarm);
+}
+
+static int
+compareAlarmEntries (const void *item1, const void *item2, void *data) {
+  const AlarmEntry *alarm1 = item1;
+  const AlarmEntry *alarm2 = item2;
+  if (alarm2->time.tv_sec < alarm1->time.tv_sec) return 0;
+  if (alarm2->time.tv_sec > alarm1->time.tv_sec) return 1;
+  return alarm2->time.tv_usec > alarm1->time.tv_usec;
+}
+
+static Queue *
+getAlarmQueue (int create) {
+  static Queue *alarms = NULL;
+
+  if (!alarms) {
+    if (create) {
+      if ((alarms = newQueue(deallocateAlarmEntry, compareAlarmEntries))) {
+      }
+    }
+  }
+
+  return alarms;
+}
+
+int
+asyncAlarm (
+  const struct timeval *time,
+  AlarmCallback callback,
+  void *data
+) {
+  Queue *alarms;
+
+  if ((alarms = getAlarmQueue(1))) {
+    AlarmEntry *alarm;
+
+    if ((alarm = malloc(sizeof(*alarm)))) {
+      alarm->time = *time;
+      alarm->callback = callback;
+      alarm->data = data;
+
+      if (enqueueItem(alarms, alarm)) return 1;
+
+      free(alarm);
+    }
+  }
+
+  return 0;
+}
+
+typedef struct {
   MonitorEntry *monitor;
 } AddMonitorData;
 
@@ -592,16 +652,35 @@ findMonitor (void *item, void *data) {
 }
 
 void
-asyncWait (int timeout) {
+asyncWait (int duration) {
   long int elapsed = 0;
   struct timeval start;
   gettimeofday(&start, NULL);
 
   do {
+    long int timeout = duration;
     Queue *functions = getFunctionQueue(0);
     int monitorCount = functions? getQueueSize(functions): 0;
     MonitorEntry *monitorArray = NULL;
     Element *functionElement = NULL;
+
+    {
+      Queue *alarms = getAlarmQueue(0);
+      if (alarms) {
+        Element *element = getQueueHead(alarms);
+        if (element) {
+          AlarmEntry *alarm = getElementItem(element);
+          long int milliseconds = millisecondsBetween(&start, &alarm->time);
+          if (milliseconds <= elapsed) {
+            alarm->callback(alarm->data);
+            deleteElement(element);
+            continue;
+          }
+
+          if (milliseconds < timeout) timeout = milliseconds;
+        }
+      }
+    }
 
     if (monitorCount) {
       if ((monitorArray = malloc(ARRAY_SIZE(monitorArray, monitorCount)))) {
@@ -648,5 +727,5 @@ asyncWait (int timeout) {
     }
 
     if (monitorArray) free(monitorArray);
-  } while ((elapsed = millisecondsSince(&start)) < timeout);
+  } while ((elapsed = millisecondsSince(&start)) < duration);
 }

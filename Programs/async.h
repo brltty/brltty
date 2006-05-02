@@ -59,7 +59,15 @@ extern int asyncWrite (
 );
 
 
-extern void asyncWait (int timeout);
+typedef void (*AlarmCallback) (void *data);
+extern int asyncAlarm (
+  const struct timeval *time,
+  AlarmCallback callback,
+  void *data
+);
+
+
+extern void asyncWait (int duration);
 
 
 #ifdef __cplusplus
