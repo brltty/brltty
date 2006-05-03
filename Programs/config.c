@@ -52,6 +52,7 @@
 #include "message.h"
 #include "misc.h"
 #include "system.h"
+#include "async.h"
 #include "options.h"
 #include "brltty.h"
 #include "defaults.h"
@@ -1727,10 +1728,19 @@ deactivateSpeechDriver (void) {
   }
 }
 
+static void startSpeechDriver (int retry);
+
 static void
-startSpeechDriver (void) {
+retrySpeechDriver (void *data) {
+  if (!speechDriver) startSpeechDriver(1);
+}
+
+static void
+startSpeechDriver (int retry) {
   if (activateSpeechDriver(0)) {
     setSpeechPreferences();
+  } else if (retry) {
+    asyncRelativeAlarm(5000, retrySpeechDriver, NULL);
   }
 }
 
@@ -1744,7 +1754,7 @@ void
 restartSpeechDriver (void) {
   stopSpeechDriver();
   LogPrint(LOG_INFO, gettext("reinitializing speech driver"));
-  startSpeechDriver();
+  startSpeechDriver(0);
 }
 
 static void
@@ -2211,7 +2221,7 @@ startup (int argc, char *argv[]) {
     if (activateSpeechDriver(1)) deactivateSpeechDriver();
   } else {
     atexit(exitSpeechDriver);
-    startSpeechDriver();
+    startSpeechDriver(1);
   }
 
   /* Create the speech pass-through FIFO. */
