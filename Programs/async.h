@@ -60,8 +60,15 @@ extern int asyncWrite (
 
 
 typedef void (*AlarmCallback) (void *data);
-extern int asyncAlarm (
+extern int asyncAbsoluteAlarm (
   const struct timeval *time,
+  AlarmCallback callback,
+  void *data
+);
+
+extern int
+asyncRelativeAlarm (
+  int interval,
   AlarmCallback callback,
   void *data
 );

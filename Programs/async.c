@@ -597,8 +597,25 @@ getAlarmQueue (int create) {
   return alarms;
 }
 
+static void
+normalizeTime (struct timeval *time) {
+  time->tv_sec += time->tv_usec / 1000000;
+  time->tv_usec = time->tv_usec % 1000000;
+}
+
+static void
+adjustTime (struct timeval *time, int amount) {
+  int quotient = amount / 1000;
+  int remainder = amount % 1000;
+
+  if (remainder < 0) remainder += 1000, --quotient;
+  time->tv_sec += quotient;
+  time->tv_usec += remainder * 1000;
+  normalizeTime(time);
+}
+
 int
-asyncAlarm (
+asyncAbsoluteAlarm (
   const struct timeval *time,
   AlarmCallback callback,
   void *data
@@ -620,6 +637,18 @@ asyncAlarm (
   }
 
   return 0;
+}
+
+int
+asyncRelativeAlarm (
+  int interval,
+  AlarmCallback callback,
+  void *data
+) {
+  struct timeval time;
+  gettimeofday(&time, NULL);
+  adjustTime(&time, interval);
+  return asyncAbsoluteAlarm(&time, callback, data);
 }
 
 typedef struct {
