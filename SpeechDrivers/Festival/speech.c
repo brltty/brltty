@@ -297,74 +297,119 @@ static const char *wordTable[] = {
   /* 255 FF  ÿ ydieresis       */ NULL
 };
 
-static FILE *festival = NULL;
+static char **festivalParameters = NULL;
+static FILE *festivalStream = NULL;
+static float festivalRate;
+
+static int writeCommand (const char *command, int reopen);
 
 static int
-spk_open (char **parameters) {
-  const char *command = parameters[PARM_COMMAND];
+setRate (float setting, int reopen) {
+  char command[0X40];
+  snprintf(command, sizeof(command), "(Parameter.set 'Duration_Stretch %f)", 1.0/setting);
+  return writeCommand(command, reopen);
+}
+
+static void
+closeStream (void) {
+  LogPrint(LOG_DEBUG, "stopping festival");
+  pclose(festivalStream);
+  festivalStream = NULL;
+}
+
+static int
+openStream (void) {
+  const char *command = festivalParameters[PARM_COMMAND];
   if (!command || !*command) command = "festival";
-  if ((festival = popen(command, "w"))) {
-    fputs("(audio_mode 'async)\n", festival);
-    fputs("(Parameter.set 'Audio_Method 'netaudio)\n", festival);
+
+  LogPrint(LOG_DEBUG, "starting festival: command=%s", command);
+  if ((festivalStream = popen(command, "w"))) {
+    setvbuf(festivalStream, NULL, _IOLBF, 0X1000);
+
+    if (!writeCommand("(audio_mode 'async)", 0)) return 0;
+    if (!writeCommand("(Parameter.set 'Audio_Method 'netaudio)", 0)) return 0;
 
     {
-      const char *name = parameters[PARM_NAME];
+      const char *name = festivalParameters[PARM_NAME];
       if (name && *name) {
         if (strcasecmp(name, "Kevin") == 0) {
-          fputs("(voice_ked_diphone)\n", festival);
+          if (!writeCommand("(voice_ked_diphone)", 0)) return 0;
         } else if (strcasecmp(name, "Kal") == 0) {
-          fputs("(voice_kal_diphone)\n", festival);
+          if (!writeCommand("(voice_kal_diphone)", 0)) return 0;
         } else {
           LogPrint(LOG_WARNING, "Unknown Festival voice name: %s", name);
         }
       }
     }
 
-    fflush(festival);
+    if (festivalRate != 0.0)
+      if (!setRate(festivalRate, 0))
+        return 0;
+
     return 1;
   }
+
   return 0;
+}
+
+static int
+writeString (const char *string, int reopen) {
+  if (!festivalStream) {
+    if (!reopen) return 0;
+    if (!openStream()) return 0;
+  }
+
+  fputs(string, festivalStream);
+  if (!ferror(festivalStream)) return 1;
+
+  LogError("fputs");
+  closeStream();
+  return 0;
+}
+
+static int
+writeCommand (const char *command, int reopen) {
+  return writeString(command, reopen) && writeString("\n", 0);
+}
+
+static int
+spk_open (char **parameters) {
+  festivalParameters = parameters;
+  festivalRate = 0.0;
+  return openStream();
 }
 
 static void
 spk_close (void) {
-  if (festival) {
-    fputs("(quit)\n", festival);
-    fflush(festival);
-    pclose(festival);
-    festival = NULL;
-  }
+  if (writeCommand("(quit)", 0)) closeStream();
+  festivalParameters = NULL;
 }
 
 static void
 spk_say (const unsigned char *buffer, int length) {
-  int index;
-
-  fputs("(SayText \"", festival);
-  for (index=0; index<length; index++) {
-    unsigned char byte = buffer[index];
-    const char *word = wordTable[byte];
-    if (word) {
-      fputs(word, festival);
-    } else {
-      fwrite(&byte, 1, 1, festival);
+  if (writeString("(SayText \"", 1)) {
+    int index;
+    for (index=0; index<length; index++) {
+      unsigned char byte = buffer[index];
+      const char *word = wordTable[byte];
+      if (word) {
+        if (!writeString(word, 0)) return;
+      } else {
+        char string[] = {byte, 0};
+        if (!writeString(string, 0)) return;
+      }
     }
+
+    if (!writeString("\")\n", 0)) return;
   }
-  fputs("\")\n", festival);
-  fflush(festival);
 }
 
 static void
 spk_mute (void) {
-  fputs("(audio_mode 'shutup)\n", festival);
-  fflush(festival);
+  writeCommand("(audio_mode 'shutup)", 0);
 }
 
 static void
 spk_rate (float setting) {
-  char command[0X40];
-  snprintf(command, sizeof(command), "(Parameter.set 'Duration_Stretch %f)\n",
-           1.0/setting);
-  fputs(command, festival);
-  fflush(festival);
+  setRate(festivalRate=setting, 1);
 }
