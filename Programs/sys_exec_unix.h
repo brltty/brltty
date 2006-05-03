@@ -34,8 +34,6 @@ executeHostCommand (const char *const *arguments) {
       break;
 
     case 0: /* child */
-setgid(500);
-setuid(500);
       sigprocmask(SIG_SETMASK, &oldMask, NULL);
       execvp(arguments[0], (char *const*)arguments);
       LogError("execvp");
