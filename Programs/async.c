@@ -226,7 +226,7 @@ awaitOperation (MonitorEntry *monitors, int count, int timeout) {
   if (result > 0) return 1;
 
   if (result == -1) {
-    LogError("poll");
+    if (errno != EINTR) LogError("poll");
   }
 
   return 0;
