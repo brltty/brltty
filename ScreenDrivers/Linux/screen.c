@@ -28,6 +28,7 @@
 #include <linux/kd.h>
 
 #include "Programs/misc.h"
+#include "Programs/system.h"
 #include "Programs/brldefs.h"
 
 typedef enum {
@@ -785,9 +786,18 @@ static int at2Pressed;
 static int uinputDevice = -1;
 
 static int
+installKernelModule (const char *name) {
+  const char *const arguments[] = {"modprobe", "-q", name, NULL};
+  int ok = executeHostCommand(arguments) == 0;
+  if (!ok) LogPrint(LOG_WARNING, "kernel module not installed: %s", name);
+  return ok;
+}
+
+static int
 openUinputDevice (void) {
   if (uinputDevice != -1) return 1;
 
+  installKernelModule("uinput");
   if ((uinputDevice = openDevice("/dev/uinput", "uinput", O_WRONLY, 10, 223)) != -1) {
     struct uinput_user_dev device;
     
