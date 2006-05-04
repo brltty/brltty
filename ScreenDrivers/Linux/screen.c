@@ -787,10 +787,27 @@ static int uinputDevice = -1;
 
 static int
 installKernelModule (const char *name) {
-  const char *const arguments[] = {"modprobe", "-q", name, NULL};
-  int ok = executeHostCommand(arguments) == 0;
-  if (!ok) LogPrint(LOG_WARNING, "kernel module not installed: %s", name);
-  return ok;
+  const char *command = "modprobe";
+  char buffer[0X100];
+
+  {
+    const char *path = "/proc/sys/kernel/modprobe";
+    FILE *stream = fopen(path, "r");
+    if (stream) {
+      const char *line = fgets(buffer, sizeof(buffer), stream);
+      if (line && *line) command = strdupWrapper(line);
+      fclose(stream);
+    } else {
+      LogPrint(LOG_WARNING, "cannot open %s: %s", path, strerror(errno));
+    }
+  }
+
+  {
+    const char *const arguments[] = {command, "-q", name, NULL};
+    int ok = executeHostCommand(arguments) == 0;
+    if (!ok) LogPrint(LOG_WARNING, "kernel module not installed: %s", name);
+    return ok;
+  }
 }
 
 static int
