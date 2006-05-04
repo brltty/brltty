@@ -795,7 +795,7 @@ installKernelModule (const char *name) {
     FILE *stream = fopen(path, "r");
     if (stream) {
       const char *line = fgets(buffer, sizeof(buffer), stream);
-      if (line && *line) command = strdupWrapper(line);
+      if (line && *line) command = line;
       fclose(stream);
     } else {
       LogPrint(LOG_WARNING, "cannot open %s: %s", path, strerror(errno));
