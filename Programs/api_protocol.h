@@ -29,7 +29,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#include <brltty/api.h>
+#include "api.h"
 
 /* this is for UINT32_MAX */
 #include <inttypes.h>
