@@ -793,9 +793,16 @@ installKernelModule (const char *name) {
   {
     const char *path = "/proc/sys/kernel/modprobe";
     FILE *stream = fopen(path, "r");
+
     if (stream) {
-      const char *line = fgets(buffer, sizeof(buffer), stream);
-      if (line && *line) command = line;
+      char *line = fgets(buffer, sizeof(buffer), stream);
+
+      if (line) {
+        size_t length = strlen(line);
+        if (length && (line[length-1] == '\n')) line[--length] = 0;
+        if (length) command = line;
+      }
+
       fclose(stream);
     } else {
       LogPrint(LOG_WARNING, "cannot open %s: %s", path, strerror(errno));
