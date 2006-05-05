@@ -1042,13 +1042,13 @@ main (int argc, char *argv[]) {
   handleSignal(SIGTERM, terminationHandler);
   handleSignal(SIGINT, terminationHandler);
 
+  /* Setup everything required on startup */
+  startup(argc, argv);
+
 #ifdef SIGCHLD
   /* Install the handler which monitors the death of child processes. */
   handleSignal(SIGCHLD, childDeathHandler);
 #endif /* SIGCHLD */
-
-  /* Setup everything required on startup */
-  startup(argc, argv);
 
   atexit(exitScreenStates);
   updateScreenAttributes();
