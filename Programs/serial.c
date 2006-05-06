@@ -27,14 +27,20 @@
 #include <sys/modem.h>
 #endif /* HAVE_SYS_MODEM_H */
 
+#ifdef HAVE_POSIX_THREADS
+#ifdef __MINGW32__
+#include "win_pthread.h"
+#else /* __MINGW32__ */
+#include <pthread.h>
+#endif /* __MINGW32__ */
+#endif /* HAVE_POSIX_THREADS */
+
 #ifdef WINDOWS
 #ifdef __MINGW32__
 #include <io.h>
-#include "win_pthread.h"
-#else /* __CYGWIN__ */
+#else /* __MINGW32__ */
 #include <sys/cygwin.h>
-#include <pthread.h>
-#endif /* __CYGWIN__ */
+#endif /* __MINGW32__ */
 
 typedef DCB SerialAttributes;
 typedef DWORD SerialSpeed;
@@ -49,7 +55,6 @@ typedef DWORD SerialLines;
 #else /* WINDOWS */
 #include <sys/ioctl.h>
 #include <termios.h>
-#include <pthread.h>
 
 typedef struct termios SerialAttributes;
 typedef speed_t SerialSpeed;
@@ -79,10 +84,12 @@ struct SerialDeviceStruct {
   SerialLines linesState;
   SerialLines waitLines;
 
+#ifdef HAVE_POSIX_THREADS
   FlowControlProc currentFlowControlProc;
   FlowControlProc pendingFlowControlProc;
   pthread_t flowControlThread;
   unsigned flowControlRunning:1;
+#endif /* HAVE_POSIX_THREADS */
 
 #ifdef WINDOWS
   HANDLE fileHandle;
@@ -478,6 +485,7 @@ serialSetParity (SerialDevice *serial, SerialParity parity) {
   return 1;
 }
 
+#ifdef HAVE_POSIX_THREADS
 static void *
 flowControlProc_InputCts (void *arg) {
   SerialDevice *serial = arg;
@@ -519,6 +527,7 @@ serialStopFlowControlThread (SerialDevice *serial) {
     serial->flowControlRunning = 0;
   }
 }
+#endif /* HAVE_POSIX_THREADS */
 
 int
 serialSetFlowControl (SerialDevice *serial, SerialFlowControl flow) {
@@ -611,6 +620,7 @@ serialSetFlowControl (SerialDevice *serial, SerialFlowControl flow) {
   }
 #endif /* WINDOWS */
 
+#ifdef HAVE_POSIX_THREADS
   if (flow & SERIAL_FLOW_INPUT_CTS) {
     flow &= ~SERIAL_FLOW_INPUT_CTS;
     serial->pendingFlowControlProc = flowControlProc_InputCts;
@@ -625,6 +635,7 @@ serialSetFlowControl (SerialDevice *serial, SerialFlowControl flow) {
     serial->pendingAttributes.c_cflag |= CLOCAL;
   }
 #endif /* WINDOWS */
+#endif /* HAVE_POSIX_THREADS */
 
   if (!flow) return 1;
   LogPrint(LOG_WARNING, "Unknown serial flow control: 0X%02X", flow);
@@ -767,13 +778,20 @@ serialWriteAttributes (SerialDevice *serial, const SerialAttributes *attributes)
 
 static int
 serialFlushAttributes (SerialDevice *serial) {
+#ifdef HAVE_POSIX_THREADS
   int restartFlowControlThread = serial->pendingFlowControlProc != serial->currentFlowControlProc;
   if (restartFlowControlThread) serialStopFlowControlThread(serial);
+#endif /* HAVE_POSIX_THREADS */
+
   if (!serialWriteAttributes(serial, &serial->pendingAttributes)) return 0;
+
+#ifdef HAVE_POSIX_THREADS
   if (restartFlowControlThread) {
     serial->currentFlowControlProc = serial->pendingFlowControlProc;
     if (!serialStartFlowControlThread(serial)) return 0;
   }
+#endif /* HAVE_POSIX_THREADS */
+
   return 1;
 }
 
@@ -826,9 +844,11 @@ serialOpenDevice (const char *path) {
             serial->linesState = 0;
             serial->waitLines = 0;
 
+#ifdef HAVE_POSIX_THREADS
             serial->currentFlowControlProc = NULL;
             serial->pendingFlowControlProc = NULL;
             serial->flowControlRunning = 0;
+#endif /* HAVE_POSIX_THREADS */
 
             LogPrint(LOG_DEBUG, "serial device opened: %s: fd=%d",
                      device,
@@ -865,7 +885,10 @@ serialOpenDevice (const char *path) {
 
 void
 serialCloseDevice (SerialDevice *serial) {
+#ifdef HAVE_POSIX_THREADS
   serialStopFlowControlThread(serial);
+#endif /* HAVE_POSIX_THREADS */
+
   serialWriteAttributes(serial, &serial->originalAttributes);
 
   if (serial->stream) {
@@ -887,7 +910,9 @@ serialCloseDevice (SerialDevice *serial) {
 
 int
 serialRestartDevice (SerialDevice *serial, int baud) {
+#ifdef HAVE_POSIX_THREADS
   FlowControlProc flowControlProc = serial->pendingFlowControlProc;
+#endif /* HAVE_POSIX_THREADS */
 
   if (!serialDiscardOutput(serial)) return 0;
 
@@ -897,14 +922,18 @@ serialRestartDevice (SerialDevice *serial, int baud) {
   if (!serialSetSpeed(serial, B0)) return 0;
 #endif /* WINDOWS */
 
+#ifdef HAVE_POSIX_THREADS
   serial->pendingFlowControlProc = NULL;
+#endif /* HAVE_POSIX_THREADS */
   if (!serialFlushAttributes(serial)) return 0;
 
   approximateDelay(500);
   if (!serialDiscardInput(serial)) return 0;
-
   if (!serialSetBaud(serial, baud)) return 0;
+
+#ifdef HAVE_POSIX_THREADS
   serial->pendingFlowControlProc = flowControlProc;
+#endif /* HAVE_POSIX_THREADS */
   if (!serialFlushAttributes(serial)) return 0;
 
   return 1;
