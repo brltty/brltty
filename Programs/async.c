@@ -21,12 +21,35 @@
 #include <errno.h>
 #include <sys/time.h>
 
-#ifdef WINDOWS
+#if defined(WINDOWS)
+
 typedef HANDLE MonitorEntry;
-#else /* WINDOWS */
+
+#elif defined(HAVE_SYS_POLL_H)
+
 #include <sys/poll.h>
 typedef struct pollfd MonitorEntry;
-#endif /* WINDOWS */
+
+#else /* monitor definitions */
+
+#ifdef HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif /* HAVE_SYS_SELECT_H */
+
+typedef struct {
+  int size;
+  fd_set bits;
+} SelectMask;
+
+static SelectMask readMask;
+static SelectMask writeMask;
+
+typedef struct { 
+  fd_set *mask;
+  FileDescriptor fileDescriptor;
+} MonitorEntry;
+
+#endif /* monitor definitions */
 
 #include "misc.h"
 #include "queue.h"
@@ -73,11 +96,13 @@ struct FunctionEntryStruct {
   const FunctionMethods *methods;
   Queue *operations;
 
-#ifdef WINDOWS
+#if defined(WINDOWS)
   OVERLAPPED ol;
-#else /* WINDOWS */
+#elif defined(HAVE_SYS_POLL_H)
   short events;
-#endif /* WINDOWS */
+#else /* monitor definitions */
+  SelectMask *mask;
+#endif /* monitor definitions */
 };
 
 typedef struct {
@@ -86,6 +111,10 @@ typedef struct {
 } FunctionKey;
 
 #ifdef WINDOWS
+static void
+prepareMonitors (void) {
+}
+
 static int
 awaitOperation (MonitorEntry *monitors, int count, int timeout) {
   if (count) {
@@ -220,6 +249,11 @@ finishWindowsTransferOperation (OperationEntry *operation) {
   setWindowsTransferResult(operation, success, count);
 }
 #else /* WINDOWS */
+#ifdef HAVE_SYS_POLL_H
+static void
+prepareMonitors (void) {
+}
+
 static int
 awaitOperation (MonitorEntry *monitors, int count, int timeout) {
   int result = poll(monitors, count, timeout);
@@ -253,6 +287,64 @@ static void
 beginUnixOutputFunction (FunctionEntry *function) {
   function->events = POLLOUT;
 }
+#else /* HAVE_SYS_POLL_H */
+static void
+prepareSelectMask (SelectMask *mask) {
+  FD_ZERO(&mask->bits);
+  mask->size = 0;
+}
+
+static void
+prepareMonitors (void) {
+  prepareSelectMask(&readMask);
+  prepareSelectMask(&writeMask);
+}
+
+static int
+awaitOperation (MonitorEntry *monitors, int count, int timeout) {
+  struct timeval time;
+  time.tv_sec = timeout / 1000;
+  time.tv_usec = timeout % 1000 * 1000;
+
+  {
+    int result = select(MAX(readMask.size, writeMask.size),
+                        readMask.size? &readMask.bits: NULL,
+                        writeMask.size? &writeMask.bits: NULL,
+                        NULL, &time);
+    if (result > 0) return 1;
+
+    if (result == -1) {
+      if (errno != EINTR) LogError("select");
+    }
+
+    return 0;
+  }
+}
+
+static void
+initializeMonitor (MonitorEntry *monitor, const FunctionEntry *function, const OperationEntry *operation) {
+  monitor->mask = &function->mask->bits;
+  monitor->fileDescriptor = function->fileDescriptor;
+
+  FD_SET(function->fileDescriptor, &function->mask->bits);
+  if (function->fileDescriptor >= function->mask->size) function->mask->size = function->fileDescriptor + 1;
+}
+
+static int
+testMonitor (const MonitorEntry *monitor) {
+  return FD_ISSET(monitor->fileDescriptor, monitor->mask);
+}
+
+static void
+beginUnixInputFunction (FunctionEntry *function) {
+  function->mask = &readMask;
+}
+
+static void
+beginUnixOutputFunction (FunctionEntry *function) {
+  function->mask = &writeMask;
+}
+#endif /* HAVE_SYS_POLL_H */
 
 static void
 setUnixTransferResult (OperationEntry *operation, ssize_t count) {
@@ -711,6 +803,7 @@ asyncWait (int duration) {
       }
     }
 
+    prepareMonitors();
     if (monitorCount) {
       if ((monitorArray = malloc(ARRAY_SIZE(monitorArray, monitorCount)))) {
         AddMonitorData add;

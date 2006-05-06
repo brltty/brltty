@@ -74,6 +74,9 @@ extern "C" {
 
 #else /* WINDOWS */
 
+/* Define this if the header file sys/poll.h exists. */
+#undef HAVE_SYS_POLL_H
+
 /* Define this if the header file sys/select.h exists. */
 #undef HAVE_SYS_SELECT_H
 
