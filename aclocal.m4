@@ -467,34 +467,33 @@ then
    $4
 fi])
 
-AC_DEFUN([BRLTTY_CAP_PTHREADS], [dnl
-   AC_CACHE_CHECK([if pthreads are available], [brltty_cv_cap_pthreads], [dnl
+AC_DEFUN([BRLTTY_HAVE_PTHREADS], [dnl
+   AC_CACHE_CHECK([if pthreads are available], [brltty_cv_have_pthreads], [dnl
       case "${host_os}"
       in
          mingw32*)
-            brltty_cv_cap_pthreads=yes
+            brltty_cv_have_pthreads=yes
             ;;
          *)
+            brltty_cv_have_pthreads=no
             AC_CHECK_HEADER([pthread.h], [dnl
-               brltty_cv_cap_pthreads=yes
                case "${host_os}"
                in
-                  solaris*) AC_SEARCH_LIBS([_getfp], [pthread]);;
-                  hpux*) AC_SEARCH_LIBS([__pthread_cancel_stack], [pthread]);;
-                  *) AC_SEARCH_LIBS([pthread_create], [pthread c_r]);;
+                  solaris*) AC_SEARCH_LIBS([_getfp], [pthread], [brltty_cv_have_pthreads=yes]);;
+                  hpux*) AC_SEARCH_LIBS([__pthread_cancel_stack], [pthread], [brltty_cv_have_pthreads=yes]);;
+                  *) AC_SEARCH_LIBS([pthread_create], [pthread c_r], [brltty_cv_have_pthreads=yes]);;
                esac
-            ], [dnl
-               brltty_cv_cap_pthreads=no
             ])
             ;;
       esac
    ])
-ifelse(len([$1]), 0, [], [dnl
-   test "${brltty_cv_cap_pthreads}" = "yes" && {
-      $1
-   }
-])dnl
 ])
+
+AC_DEFUN([BRLTTY_IF_PTHREADS], [dnl
+AC_REQUIRE([BRLTTY_HAVE_PTHREADS])
+test "${brltty_cv_have_pthreads}" = "yes" && {
+   $1
+}])
 
 AC_DEFUN([BRLTTY_PACKAGE_CHOOSE], [dnl
 BRLTTY_ARG_WITH(
