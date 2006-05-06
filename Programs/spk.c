@@ -189,7 +189,7 @@ openSpeechFifo (const char *directory, const char *path) {
 
     if (ret != -1) {
       chmod(speechFifoPath, S_IRUSR|S_IWUSR|S_IWGRP|S_IWOTH);
-      if ((speechFifoDescriptor = open(speechFifoPath, O_RDONLY|O_NDELAY)) != -1) {
+      if ((speechFifoDescriptor = open(speechFifoPath, O_RDONLY|O_NONBLOCK)) != -1) {
         LogPrint(LOG_DEBUG, "Speech FIFO created: %s: fd=%d",
                  speechFifoPath, speechFifoDescriptor);
         return 1;

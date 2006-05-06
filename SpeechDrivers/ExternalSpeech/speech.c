@@ -218,9 +218,9 @@ static int spk_open (char **parameters)
     helper_fd_out = fd2[1];
     close(fd1[1]);
     close(fd2[0]);
-    if(fcntl(helper_fd_in, F_SETFL,O_NDELAY) < 0
-       || fcntl(helper_fd_out, F_SETFL,O_NDELAY) < 0) {
-      myperror("fcntl F_SETFL O_NDELAY");
+    if(fcntl(helper_fd_in, F_SETFL,O_NONBLOCK) < 0
+       || fcntl(helper_fd_out, F_SETFL,O_NONBLOCK) < 0) {
+      myperror("fcntl F_SETFL O_NONBLOCK");
       return 0;
     }
   };
