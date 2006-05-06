@@ -21,7 +21,6 @@
 
 #include <stdio.h>
 #include <stddef.h>
-#include <stdint.h>
 #include <string.h>
 #include <errno.h>
 #include <fcntl.h>
