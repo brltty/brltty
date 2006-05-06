@@ -22,7 +22,6 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#include <inttypes.h>
 #define BYTE unsigned char
 
 #define CTA(table, offset) (((BYTE *)(table)) + (offset))

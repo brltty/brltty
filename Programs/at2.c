@@ -17,8 +17,6 @@
 
 #include "prologue.h"
 
-#include <inttypes.h>
-
 #include "at2.h"
 #include "brldefs.h"
 

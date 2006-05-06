@@ -253,6 +253,11 @@ in
       brltty_mkmod_ld_options="-flat_namespace -undefined suppress"
       brltty_mkmod_gcc_make="-bundle"
       ;;
+   msdos*)
+      brltty_mkmod_ld_make="not_supported_on_msdos"
+      brltty_mkmod_ld_options="not_supported_on_msdos"
+      brltty_mkmod_gcc_make="not_supported_on_msdos"
+      ;;
    *)
       AC_MSG_ERROR([loadable module creation command not configured for ${host_os}])
       ;;
@@ -287,6 +292,11 @@ in
    cygwin*|mingw*)
       brltty_mklib_ld_make="-shared"
       brltty_mklib_ld_options="--out-implib implib.a -soname"
+      ;;
+   msdos*)
+      brltty_mklib_ld_make="not_supported_on_msdos"
+      brltty_mklib_ld_options="not_supported_on_msdos"
+      brltty_mklib_gcc_make="not_supported_on_msdos"
       ;;
    darwin*)
       brltty_mklib_ld_make="-dylib"
@@ -610,6 +620,9 @@ then
       cygwin*|mingw*)
          brltty_cv_prog_cc_libflags=""
          ;;
+      msdos*)
+         brltty_cv_prog_cc_libflags=""
+         ;;
       darwin*)
          brltty_cv_prog_cc_libflags=""
          ;;
@@ -770,6 +783,9 @@ in
    cygwin*|mingw*)
       system_object="windows"
       ;;
+   msdos*)
+      system_object="msdos"
+      ;;
    darwin*)
       system_object="darwin"
       LIBS="-lIOKit -framework CoreFoundation ${LIBS}"
@@ -903,6 +919,9 @@ in
       ;;
    cygwin*|mingw*)
       brltty_cv_prog_ld_flags="-export-dynamic --enable-auto-import"
+      ;;
+   msdos*)
+      brltty_cv_prog_ld_flags=""
       ;;
    darwin*)
       brltty_cv_prog_ld_flags=""
@@ -1127,7 +1146,7 @@ in
    *qnx*)
       brltty_cv_device_serial_first="ser1"
       ;;
-   cygwin*|mingw*)
+   cygwin*|mingw*|msdos*)
       brltty_cv_device_serial_first="COM1"
       ;;
    *)

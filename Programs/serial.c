@@ -46,8 +46,8 @@ typedef DCB SerialAttributes;
 typedef DWORD SerialSpeed;
 
 typedef DWORD SerialLines;
-#define SERIAL_LINE_RTS 1
-#define SERIAL_LINE_DTR 2
+#define SERIAL_LINE_RTS 0X01
+#define SERIAL_LINE_DTR 0X02
 #define SERIAL_LINE_CTS MS_CTS_ON
 #define SERIAL_LINE_DSR MS_DSR_ON
 #define SERIAL_LINE_RNG MS_RING_ON
@@ -60,12 +60,21 @@ typedef struct termios SerialAttributes;
 typedef speed_t SerialSpeed;
 
 typedef int SerialLines;
+#ifdef __MSDOS__
+#define SERIAL_LINE_CTS 0X01
+#define SERIAL_LINE_DSR 0X02
+#define SERIAL_LINE_RNG 0X04
+#define SERIAL_LINE_CAR 0X08
+#define SERIAL_LINE_RTS 0X10
+#define SERIAL_LINE_DTR 0X20
+#else /* __MSDOS__ */
 #define SERIAL_LINE_RTS TIOCM_RTS
 #define SERIAL_LINE_DTR TIOCM_DTR
 #define SERIAL_LINE_CTS TIOCM_CTS
 #define SERIAL_LINE_DSR TIOCM_DSR
 #define SERIAL_LINE_RNG TIOCM_RNG
 #define SERIAL_LINE_CAR TIOCM_CAR
+#endif /* __MSDOS__ */
 #endif /* WINDOWS */
 
 #include "io_serial.h"
@@ -1103,10 +1112,15 @@ serialGetLines (SerialDevice *serial, SerialLines *lines) {
     return 0;
   }
 #else /* WINDOWS */
+#ifdef TIOCMGET
   if (ioctl(serial->fileDescriptor, TIOCMGET, &serial->linesState) == -1) {
     LogError("TIOCMGET");
     return 0;
   }
+#else /* TIOCMGET */
+#warning getting modem lines not supported on this platform
+  serial->linesState = SERIAL_LINE_CTS | SERIAL_LINE_DSR | SERIAL_LINE_CAR;
+#endif /* TIOCMGET */
 #endif /* WINDOWS */
 
   *lines = serial->linesState;
@@ -1134,6 +1148,7 @@ serialSetLines (SerialDevice *serial, SerialLines high, SerialLines low) {
     LogWindowsError("GetCommState");
   }
 #else /* WINDOWS */
+#ifdef TIOCMSET
   int status;
   if (serialGetLines(serial, &status) != -1) {
     status |= high;
@@ -1141,6 +1156,9 @@ serialSetLines (SerialDevice *serial, SerialLines high, SerialLines low) {
     if (ioctl(serial->fileDescriptor, TIOCMSET, &status) != -1) return 1;
     LogError("TIOCMSET");
   }
+#else /* TIOCMSET */
+#warning setting modem lines not supported on this platform
+#endif /* TIOCMSET */
 #endif /* WINDOWS */
   return 0;
 }

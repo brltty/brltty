@@ -49,6 +49,26 @@ extern "C" {
 #include <stdlib.h>
 #include <unistd.h>
 
+#ifdef __MSDOS__
+#include <stdarg.h>
+
+extern int snprintf (char *str, size_t size, const char *format, ...);
+extern int vsnprintf (char *str, size_t size, const char *format, va_list ap);
+
+#define lstat(file_name, buf) stat(file_name, buf)
+
+typedef unsigned char		uint8_t;
+typedef unsigned short		uint16_t;
+typedef unsigned long		uint32_t;
+typedef unsigned long long	uint64_t;
+typedef signed char		int8_t;
+typedef signed short		int16_t;
+typedef signed long		int32_t;
+typedef signed long long	int64_t;
+#else /* __MSDOS__ */
+#include <inttypes.h>
+#endif /* __MSDOS__ */
+
 #ifdef WINDOWS
 typedef HANDLE FileDescriptor;
 #define INVALID_FILE_DESCRIPTOR INVALID_HANDLE_VALUE

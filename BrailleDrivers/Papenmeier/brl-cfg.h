@@ -24,7 +24,7 @@
  *  some defines and the big config table
  */
 
-#include <inttypes.h>
+#include "prologue.h"
 
 #include "Programs/brl.h"
 typedef enum {

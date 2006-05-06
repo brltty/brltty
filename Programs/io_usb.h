@@ -28,8 +28,6 @@ extern "C" {
 #undef interface
 #endif /* interface */
 
-#include <inttypes.h>
-
 #include "io_defs.h"
 
 /* Descriptor types. */

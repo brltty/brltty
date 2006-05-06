@@ -19,7 +19,6 @@
 
 #include <stdio.h>
 #include <stdarg.h>
-#include <inttypes.h>
 #include <string.h>
 #include <errno.h>
 #include <fcntl.h>

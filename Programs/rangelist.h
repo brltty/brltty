@@ -24,7 +24,7 @@ extern "C" {
 
 /* Header file for the range list management module */
 
-#include <inttypes.h>
+#include "prologue.h"
 
 typedef struct RangeList {
   uint32_t x, y;

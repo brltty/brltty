@@ -24,8 +24,6 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#include <inttypes.h>
-
 /* help.h - describes the helpfile format
  * $Id: help.h,v 1.3 1996/09/24 01:04:26 nn201 Exp $
  */
