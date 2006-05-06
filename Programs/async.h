@@ -30,9 +30,9 @@ typedef struct {
   size_t length;
   int error;
   unsigned end:1;
-} InputResult;
+} AsyncInputResult;
 
-typedef size_t (*InputCallback) (const InputResult *result);
+typedef size_t (*AsyncInputCallback) (const AsyncInputResult *result);
 
 
 typedef struct {
@@ -41,35 +41,35 @@ typedef struct {
   size_t size;
   int error;
   size_t count;
-} OutputResult;
+} AsyncOutputResult;
 
-typedef void (*OutputCallback) (const OutputResult *result);
+typedef void (*AsyncOutputCallback) (const AsyncOutputResult *result);
 
 
 extern int asyncRead (
   FileDescriptor fileDescriptor,
   size_t size,
-  InputCallback callback, void *data
+  AsyncInputCallback callback, void *data
 );
 
 extern int asyncWrite (
   FileDescriptor fileDescriptor,
   const void *buffer, size_t size,
-  OutputCallback callback, void *data
+  AsyncOutputCallback callback, void *data
 );
 
 
-typedef void (*AlarmCallback) (void *data);
+typedef void (*AsyncAlarmCallback) (void *data);
+
 extern int asyncAbsoluteAlarm (
   const struct timeval *time,
-  AlarmCallback callback,
+  AsyncAlarmCallback callback,
   void *data
 );
 
-extern int
-asyncRelativeAlarm (
+extern int asyncRelativeAlarm (
   int interval,
-  AlarmCallback callback,
+  AsyncAlarmCallback callback,
   void *data
 );
 

@@ -59,12 +59,12 @@ typedef struct FunctionEntryStruct FunctionEntry;
 
 typedef union {
   struct {
-    InputCallback callback;
+    AsyncInputCallback callback;
     unsigned end:1;
   } input;
 
   struct {
-    OutputCallback callback;
+    AsyncOutputCallback callback;
   } output;
 } TransferDirectionUnion;
 
@@ -388,7 +388,7 @@ invokeInputCallback (OperationEntry *operation) {
   size_t count;
 
   if (extension->direction.input.callback) {
-    InputResult result;
+    AsyncInputResult result;
     result.data = operation->data;
     result.buffer = extension->buffer;
     result.size = extension->size;
@@ -415,7 +415,7 @@ invokeOutputCallback (OperationEntry *operation) {
   TransferExtension *extension = operation->extension;
 
   if (extension->direction.output.callback) {
-    OutputResult result;
+    AsyncOutputResult result;
     result.data = operation->data;
     result.buffer = extension->buffer;
     result.size = extension->size;
@@ -582,7 +582,7 @@ static int
 createInputOperation (
   FileDescriptor fileDescriptor,
   const FunctionMethods *methods,
-  InputCallback callback,
+  AsyncInputCallback callback,
   size_t size,
   void *data
 ) {
@@ -596,7 +596,7 @@ static int
 createOutputOperation (
   FileDescriptor fileDescriptor,
   const FunctionMethods *methods,
-  OutputCallback callback,
+  AsyncOutputCallback callback,
   size_t size, const void *buffer,
   void *data
 ) {
@@ -614,7 +614,7 @@ int
 asyncRead (
   FileDescriptor fileDescriptor,
   size_t size,
-  InputCallback callback, void *data
+  AsyncInputCallback callback, void *data
 ) {
   static const FunctionMethods methods = {
 #ifdef WINDOWS
@@ -636,7 +636,7 @@ int
 asyncWrite (
   FileDescriptor fileDescriptor,
   const void *buffer, size_t size,
-  OutputCallback callback, void *data
+  AsyncOutputCallback callback, void *data
 ) {
   static const FunctionMethods methods = {
 #ifdef WINDOWS
@@ -656,7 +656,7 @@ asyncWrite (
 
 typedef struct {
   struct timeval time;
-  AlarmCallback callback;
+  AsyncAlarmCallback callback;
   void *data;
 } AlarmEntry;
 
@@ -709,7 +709,7 @@ adjustTime (struct timeval *time, int amount) {
 int
 asyncAbsoluteAlarm (
   const struct timeval *time,
-  AlarmCallback callback,
+  AsyncAlarmCallback callback,
   void *data
 ) {
   Queue *alarms;
@@ -734,7 +734,7 @@ asyncAbsoluteAlarm (
 int
 asyncRelativeAlarm (
   int interval,
-  AlarmCallback callback,
+  AsyncAlarmCallback callback,
   void *data
 ) {
   struct timeval time;
