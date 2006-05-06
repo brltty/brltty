@@ -85,6 +85,9 @@ extern "C" {
 /* Define this if the header file sys/wait.h exists. */
 #undef HAVE_SYS_WAIT_H
 
+/* Define this if posix threads are supported. */
+#undef HAVE_POSIX_THREADS
+
 /* Define this if the header file sys/io.h exists. */
 #undef HAVE_SYS_IO_H
 
