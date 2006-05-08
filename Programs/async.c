@@ -774,9 +774,8 @@ findMonitor (void *item, void *data) {
 
 void
 asyncWait (int duration) {
-  long int elapsed = 0;
+  long int elapsed = -1;
   struct timeval start;
-  gettimeofday(&start, NULL);
 
   do {
     long int timeout = duration;
@@ -784,6 +783,11 @@ asyncWait (int duration) {
     int monitorCount = functions? getQueueSize(functions): 0;
     MonitorEntry *monitorArray = NULL;
     Element *functionElement = NULL;
+
+    if (elapsed < 0) {
+      elapsed = 0;
+      gettimeofday(&start, NULL);
+    }
 
     {
       Queue *alarms = getAlarmQueue(0);
