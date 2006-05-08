@@ -44,9 +44,9 @@ static iconv_t conversionDescriptor = NULL;
 #include <ncurses.h>
 #else /* HAVE_PKG_ */
 #warning curses package either unspecified or unsupported
-#define addstr(string) fputs(string, ttyStream)
-#define addch(character) fputc(character, ttyStream)
-#define getch() fgetc(ttyStream)
+#define addstr(string) serialWriteData(ttyDevice, string, strlen(string))
+#define addch(character) do { unsigned char __c = (character); serialWriteData(ttyDevice, &__c, 1); } while(0)
+#define getch() my_getch()
 #endif /* HAVE_PKG_CURSES */
 
 #include "Programs/misc.h"
@@ -69,6 +69,7 @@ typedef enum {
 #ifdef USE_CURSES
   PARM_TERM,
 #endif /* USE_CURSES */
+
   PARM_LINES,
   PARM_COLUMNS,
 
@@ -96,6 +97,13 @@ static char *classificationLocale = NULL;
 
 #ifdef USE_CURSES
 static SCREEN *ttyScreen = NULL;
+#else /* USE_CURSES */
+static inline int
+my_getch (void) {
+  unsigned char c;
+  if (serialReadData(ttyDevice, &c, 1, 0, 0) == 1) return c;
+  return EOF;
+}
 #endif /* USE_CURSES */
 
 static int
@@ -155,8 +163,8 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
 #endif /* HAVE_ICONV_H */
     if ((ttyDevice = serialOpenDevice(device))) {
       if (serialRestartDevice(ttyDevice, ttyBaud)) {
-        if ((ttyStream = serialGetStream(ttyDevice))) {
 #ifdef USE_CURSES
+        if ((ttyStream = serialGetStream(ttyDevice))) {
           if ((ttyScreen = newterm(ttyType, ttyStream, ttyStream))) {
             cbreak();
             noecho();
@@ -180,10 +188,10 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
           } else {
             LogError("newterm");
           }
-#endif /* USE_CURSES */
 
           ttyStream = NULL;
         }
+#endif /* USE_CURSES */
       }
 
       serialCloseDevice(ttyDevice);
@@ -252,10 +260,13 @@ writeText (const unsigned char *buffer, int columns) {
 static void
 brl_writeVisual (BrailleDisplay *brl) {
   static unsigned char previousContent[MAX_WINDOW_SIZE];
+  static int previousCursor = -1;
   char *previousLocale;
 
-  if (memcmp(previousContent, brl->buffer, brl->x*brl->y) == 0) return;
+  if (memcmp(previousContent, brl->buffer, brl->x*brl->y) == 0
+      && brl->cursor == previousCursor) return;
   memcpy(previousContent, brl->buffer, brl->x*brl->y);
+  previousCursor = brl->cursor;
 
   if (classificationLocale) {
     previousLocale = setlocale(LC_CTYPE, NULL);
