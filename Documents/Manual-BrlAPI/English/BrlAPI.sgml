@@ -9,7 +9,7 @@ name="&lt;Sebastien.Hinderer@ens-lyon.org&gt;"></tt><newline></name>
 <name>Samuel Thibault <tt><htmlurl url="mailto:Samuel.Thibault@ens-lyon.org"
 name="&lt;Samuel.Thibault@ens-lyon.org&gt;"></tt><newline></name>
 </author>
-<date>V1.3, May 2005
+<date>V1.4, May 2006
 <abstract>
 This document describes <tt>BrlAPI</tt>.
 </abstract>
@@ -102,6 +102,10 @@ functionalities of the driver's communication protocol.
 <tag/Server/
 The part of <em/brltty/ that controls incoming connections and communication
 between clients and braille drivers.
+
+<tag/Suspend mode/
+Mode in which the server keeps the device driver closed, so that the client
+can connect directly to the device.
 
 <tag/Tty/
 Synonym for console, terminal, ...  Linux' console consist of several Virtual
@@ -321,21 +325,28 @@ client that is in raw mode are passed to the driver which is
 expected to deliver them to the braille terminal without any
 modification.
 
+<sect3>Suspend Mode.
+
+<p>Only one client can be in suspend mode at the same time. This mode is also
+exclusive with raw mode. In this mode, the server keeps the device driver
+closed, and thus the client can open the device directly by itself.
+
+<p><bf/This mode is not recommended/, since the client will then have to
+reimplement device access. Raw mode should really be preferred, since it lets
+the client take advantage of server's ability to talk with the device
+(USB/bluetooth support for instance).
+
 <sect3>Remarks.
 
 <p>
 
 <itemize>
 
-<item>The operations described in the two previous
+<item>The operations described in the three previous
 subsections are not completely mutually exclusive. An
-application that controls its current tty can enter raw
+application that controls its current tty can enter raw or suspend
 mode, provided that no other application already is in this
-mode. However, the contrary is not possible: an application
-which has entered raw mode cannot take control of its tty
-before having left raw mode. Indeed, it would make no sense
-to take control of a tty during raw mode since in this mode,
-braille display and reading of braille keys are impossible.
+mode.
 
 <item>Not every braille driver supports raw mode. It has
 to be specially (re)written to support it, since it has
@@ -1238,6 +1249,10 @@ terminal. Only these types of packet will be accepted.
   </itemize>
 And the server might send <tt/BRLPACKET_PACKET/ packets to give received packets
 from the terminal to the client.
+
+<item>suspend mode: the client wants to completely drive the braille terminal.
+The device driver is hence kept closed. No type of packet is allowed except
+<tt/BRLPACKET_RESUME/
 </itemize>
 
 Termination of the connection is initiated by the client in normal mode by
@@ -1388,9 +1403,10 @@ A <tt/BRLPACKET_WRITE/ packet without any flag (and hence no data) means a
 <p>
 To enter raw mode, the client must send a <tt/BRLPACKET_GETRAW/ packet,
 which is acknowledged. Once in raw mode, no other packet than
-<tt/BRLPACKET_LEAVERAW/ or <tt/BRLPACKET_PACKET/ will be accepted. The data must
-hold the special value <tt/BRLRAW_MAGIC/: <tt/0xdeadbeef/, to avoid erroneous
-raw mode activating.
+<tt/BRLPACKET_LEAVERAW/ or <tt/BRLPACKET_PACKET/ will be accepted.
+The data must hold the special value <tt/BRLDEVICE_MAGIC/: <tt/0xdeadbeef/, then
+the name of the driver (one byte for the length, then the name) to avoid
+erroneous raw mode activating.
 
 <sect2><tt/BRLPACKET_LEAVERAW/ (see <em/brlapi_leaveRaw()/)
 <p>
@@ -1407,10 +1423,14 @@ send to the terminal. Whenever its receives a packet from the terminal, the
 server does exactly the same, so that packet exchanges between the terminal and
 the server are exactly reproduced between the server and the client.
 
-Packets' content depends on the braille driver, so that the client should
-check for its id or name thanks to a <tt/BRLPACKET_GETDRIVERID/ packet or
-a <tt/BRLPACKET_GETDRIVERNAME/ packet, prior to sending any
-<tt/BRLPACKET_GETRAW/ packet.
+<sect2><tt/BRLPACKET_SUSPEND/ (see <em/brlapi_suspend()/)
+<p>
+To enter suspend mode, the client must send a <tt/BRLPACKET_SUSPEND/ packet,
+which is acknowledge. Once in suspend mode, no other packet than
+<tt/BRLPACKET_RESUME/ will be accepted.
+The data must hold the special value <tt/BRLDEVICE_MAGIC/: <tt/0xdeadbeef/,
+then the name of the driver (one byte for the length, then the name) to avoid
+erroneous raw mode activating.
 
 
 </article>

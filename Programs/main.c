@@ -1099,7 +1099,11 @@ main (int argc, char *argv[]) {
       }
     }
 
-    if (!suspended) {
+    if (!suspended
+#ifdef ENABLE_API
+	&& api_claimDriver(&brl)
+#endif /* ENABLE_API */
+	) {
       /*
        * Process any Braille input 
        */
@@ -2363,6 +2367,7 @@ main (int argc, char *argv[]) {
         braille->writeWindow(&brl);
       }
 #ifdef ENABLE_API
+      api_releaseDriver(&brl);
     } else if (apiStarted) {
       api_flush(&brl, BRL_CTX_SCREEN);
 #endif /* ENABLE_API */

@@ -21,6 +21,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <signal.h>
 
 #include "options.h"
 #include "api.h"
@@ -35,6 +36,7 @@ static int opt_showIdentifier;
 static int opt_showName;
 static int opt_showSize;
 static int opt_showKeyCodes;
+static int opt_suspendMode;
 
 BEGIN_OPTION_TABLE
   {"identifier", NULL, 'i', 0, 0,
@@ -60,6 +62,10 @@ BEGIN_OPTION_TABLE
   {"keycodes", NULL, 'k', 0, 0,
    &opt_showKeyCodes, NULL,
    "Enter interactive keycode learn mode."}, 
+
+  {"suspend", NULL, 's', 0, 0,
+   &opt_suspendMode, NULL,
+   "Suspend driver (press ^C on the PC keyboard or send SIGUSR1 to get back braille)."},
 
   {"brlapi-server", "[host][:port]", 'S', 0, 0,
    &settings.hostName, NULL,
@@ -209,6 +215,31 @@ void showKeyCodes(void)
   brlapi_perror("brlapi_readKey");
 }
 
+void foo(int sig) { }
+
+void suspend(void)
+{
+  char name[30];
+  fprintf(stderr, "Getting driver name: ");
+  if (brlapi_getDriverName(name, sizeof(name))<0) {
+    brlapi_perror("failed");
+    exit(1);
+  }
+  fprintf(stderr, "%s\n", name);
+  fprintf(stderr, "Suspending\n");
+  if (brlapi_suspend(name)) {
+    brlapi_perror("suspend");
+  } else {
+    signal(SIGUSR1,foo);
+    fprintf(stderr, "Sleeping\n");
+    pause();
+    fprintf(stderr, "Resuming\n");
+    signal(SIGUSR1,SIG_DFL);
+    if (brlapi_resume())
+      brlapi_perror("resume");
+  }
+}
+
 int main(int argc, char *argv[])
 {
   int status = 0;
@@ -247,6 +278,10 @@ int main(int argc, char *argv[])
 
     if (opt_showKeyCodes) {
       showKeyCodes();
+    }
+
+    if (opt_suspendMode) {
+      suspend();
     }
 
     brlapi_closeConnection();

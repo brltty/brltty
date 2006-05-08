@@ -95,21 +95,27 @@ static size_t stackSize;
 #define COPYRIGHT "   Copyright (C) 2002-2006 by Sebastien Hinderer <Sebastien.Hinderer@ens-lyon.org>, \
 Samuel Thibault <samuel.thibault@ens-lyon.org>"
 
+#define WERR(x, y, msg, ...) do { \
+  LogPrint(LOG_DEBUG, "writing error %d due to " msg, y, ## __VA_ARGS__); \
+  writeError(x, y); \
+} while(0)
+#define WEXC(x, y, type, packet, size, msg, ...) do { \
+  LogPrint(LOG_DEBUG, "writing exception %d due to " msg, y, ## __VA_ARGS__); \
+  writeException(x, y, type, packet, size); \
+} while(0)
+
 /* These CHECK* macros check whether a condition is true, and, if not, */
 /* send back either a non-fatal error, or an exception */
 #define CHECKERR(condition, error) \
 if (!( condition )) { \
-  writeError(c->fd, error); \
+  WERR(c->fd, error, "%s not met", #condition); \
   return 0; \
 } else { }
 #define CHECKEXC(condition, error) \
 if (!( condition )) { \
-  writeException(c->fd, error, type, packet, size); \
+  WEXC(c->fd, error, type, packet, size, "%s not met", #condition); \
   return 0; \
 } else { }
-
-#define WERR(x, y) writeError(x, y)
-#define WEXC(x, y) writeException(x, y, type, packet, size)
 
 #ifdef brlapi_error
 #undef brlapi_error
@@ -168,7 +174,7 @@ typedef struct Connection {
   FileDescriptor fd;
   int auth;
   struct Tty *tty;
-  int raw;
+  int raw, suspend;
   unsigned int how; /* how keys must be delivered to clients */
   BrailleWindow brailleWindow;
   BrlBufState brlbufstate;
@@ -214,6 +220,7 @@ static pthread_mutex_t driverMutex;
 /* Which connection currently has raw mode */
 static pthread_mutex_t rawMutex;
 static Connection *rawConnection = NULL;
+static Connection *suspendConnection = NULL;
 
 /* mutex lock order is connectionsMutex first, then rawMutex, then (maskMutex
  * or brlMutex) then driverMutex */
@@ -268,6 +275,7 @@ static RepeatState repeatState;
 
 static int coreActive; /* Whether core is active */
 static int driverOpened; /* Whether device is really opened, protected by driverMutex */
+static pthread_mutex_t suspendMutex; /* Protects use of driverOpened state */
 
 static int unauthorizedConnectionsAllowed = 0;
 static char *keyfile;
@@ -309,16 +317,20 @@ static int isKeyCapable(const BrailleDriver *brl)
 static void driverSuspend(BrailleDisplay *brl) {
   if (trueBraille == &noBraille) return; /* core unlinked api */
   LogPrint(LOG_DEBUG,"driver suspended");
+  pthread_mutex_lock(&suspendMutex);
   driverOpened = 0;
   closeBrailleDriver();
+  pthread_mutex_unlock(&suspendMutex);
 }
 
 /* Function : driverResume */
 /* Re-open driver */
 static int driverResume(BrailleDisplay *brl) {
   if (trueBraille == &noBraille) return 0; /* core unlinked api */
+  pthread_mutex_lock(&suspendMutex);
   driverOpened = openBrailleDriver();
   if (driverOpened) LogPrint(LOG_DEBUG,"driver resumed");
+  pthread_mutex_unlock(&suspendMutex);
   return driverOpened;
 }
 
@@ -483,6 +495,8 @@ typedef struct { /* packet handlers */
   PacketHandler getRaw;  
   PacketHandler leaveRaw;
   PacketHandler packet;
+  PacketHandler suspend;
+  PacketHandler resume;
 } PacketHandlers;
 
 /****************************************************************************/
@@ -790,7 +804,7 @@ static int handleGetTty(Connection *c, brl_type_t type, unsigned char *packet, s
   if ((initializeUnmaskedKeys(c)==-1) || (allocBrailleWindow(&c->brailleWindow)==-1)) {
     LogPrint(LOG_WARNING,"Failed to allocate some ressources");
     freeRangeList(&c->unmaskedKeys);
-    WERR(c->fd,BRLERR_NOMEM);
+    WERR(c->fd,BRLERR_NOMEM, "no memory for unmasked keys");
     return 0;
   }
   pthread_mutex_lock(&connectionsMutex);
@@ -807,7 +821,7 @@ static int handleGetTty(Connection *c, brl_type_t type, unsigned char *packet, s
       /* uhu, we already got a tty, but not this one, since the path
        * doesn't exist yet. This is forbidden. */
       pthread_mutex_unlock(&connectionsMutex);
-      WERR(c->fd, BRLERR_INVALID_PARAMETER);
+      WERR(c->fd, BRLERR_INVALID_PARAMETER, "already having another tty");
       freeBrailleWindow(&c->brailleWindow);
       return 0;
     }
@@ -815,7 +829,7 @@ static int handleGetTty(Connection *c, brl_type_t type, unsigned char *packet, s
     /* we lock the entire subtree for easier cleanup */
     if (!(tty2 = newTty(tty,ntohl(*ptty)))) {
       pthread_mutex_unlock(&connectionsMutex);
-      WERR(c->fd,BRLERR_NOMEM);
+      WERR(c->fd,BRLERR_NOMEM, "no memory for new tty");
       freeBrailleWindow(&c->brailleWindow);
       return 0;
     }
@@ -829,7 +843,7 @@ static int handleGetTty(Connection *c, brl_type_t type, unsigned char *packet, s
           freeTty(tty2);
         }
         pthread_mutex_unlock(&connectionsMutex);
-        WERR(c->fd,BRLERR_NOMEM);
+        WERR(c->fd,BRLERR_NOMEM, "no memory for new tty");
         freeBrailleWindow(&c->brailleWindow);
   	return 0;
       }
@@ -841,21 +855,19 @@ static int handleGetTty(Connection *c, brl_type_t type, unsigned char *packet, s
     pthread_mutex_unlock(&connectionsMutex);
     if (c->tty == tty) {
       if (c->how==how) {
-        LogPrint(LOG_WARNING,"One already controls tty %#010x !",c->tty->number);
-        WERR(c->fd, BRLERR_ILLEGAL_INSTRUCTION);
+	WERR(c->fd, BRLERR_ILLEGAL_INSTRUCTION, "already controlling tty %#010x", c->tty->number);
       } else {
         /* Here one is in the case where the client tries to change */
         /* from BRL_KEYCODES to BRL_COMMANDS, or something like that */
         /* For the moment this operation is not supported */
         /* A client that wants to do that should first LeaveTty() */
         /* and then get it again, risking to lose it */
-        LogPrint(LOG_INFO,"Switching from BRL_KEYCODES to BRL_COMMANDS not supported yet");
-        WERR(c->fd,BRLERR_OPNOTSUPP);
+        WERR(c->fd,BRLERR_OPNOTSUPP, "Switching from BRL_KEYCODES to BRL_COMMANDS not supported yet");
       }
       return 0;
     } else {
       /* uhu, we already got a tty, but not this one: this is forbidden. */
-      WERR(c->fd, BRLERR_INVALID_PARAMETER);
+      WERR(c->fd, BRLERR_INVALID_PARAMETER, "already having a tty");
       return 0;
     }
   }
@@ -918,7 +930,7 @@ static int handleKeyRange(Connection *c, brl_type_t type, unsigned char *packet,
   if (type==BRLPACKET_IGNOREKEYRANGE) res = removeRange(x,y,&c->unmaskedKeys);
   else res = addRange(x,y,&c->unmaskedKeys);
   pthread_mutex_unlock(&c->maskMutex);
-  if (res==-1) WERR(c->fd,BRLERR_NOMEM);
+  if (res==-1) WERR(c->fd,BRLERR_NOMEM,"no memory for key range");
   else writeAck(c->fd);
   return 0;
 }
@@ -940,7 +952,7 @@ static int handleKeySet(Connection *c, brl_type_t type, unsigned char *packet, s
     i++;
   }
   pthread_mutex_unlock(&c->maskMutex);
-  if (res==-1) WERR(c->fd,BRLERR_NOMEM);
+  if (res==-1) WERR(c->fd,BRLERR_NOMEM,"no memory for key set");
   else writeAck(c->fd);
   return 0;
 }
@@ -1053,28 +1065,35 @@ static int handleWrite(Connection *c, brl_type_t type, unsigned char *packet, si
   return 0;
 }
 
-static int handleGetRaw(Connection *c, brl_type_t type, unsigned char *packet, size_t size)
+static int checkDriverSpecificModePacket(Connection *c, unsigned char *packet, size_t size)
 {
-  getRawPacket_t *getRawPacket = (getRawPacket_t *) packet;
-  char name[BRLAPI_MAXNAMELENGTH+1];
+  getDriveSpecificModePacket_t *getDevicePacket = (getDriveSpecificModePacket_t *) packet;
   int remaining = size;
-  LogPrintRequest(type, c->fd);
-  CHECKERR(!c->raw, BRLERR_ILLEGAL_INSTRUCTION);
   CHECKERR(remaining>sizeof(uint32_t), BRLERR_INVALID_PACKET);
   remaining -= sizeof(uint32_t);
-  getRawPacket->magic = ntohl(getRawPacket->magic);
-  CHECKERR(getRawPacket->magic==BRLRAW_MAGIC,BRLERR_INVALID_PARAMETER);
-  CHECKERR(getRawPacket->nameLength<=BRLAPI_MAXNAMELENGTH, BRLERR_INVALID_PARAMETER);
+  CHECKERR(ntohl(getDevicePacket->magic)==BRLDEVICE_MAGIC,BRLERR_INVALID_PARAMETER);
   remaining--;
-  CHECKERR(remaining==getRawPacket->nameLength, BRLERR_INVALID_PACKET);
-  memcpy(name, &getRawPacket->name, getRawPacket->nameLength);
-  name[getRawPacket->nameLength] = '\0';
-  CHECKERR(((!strcmp(name, trueBraille->definition.name)) && isRawCapable(trueBraille)), BRLERR_OPNOTSUPP);
-  CHECKERR(rawConnection==NULL,BRLERR_RAWMODEBUSY);
+  CHECKERR(getDevicePacket->nameLength<=BRLAPI_MAXNAMELENGTH && getDevicePacket->nameLength == strlen(trueBraille->definition.name), BRLERR_INVALID_PARAMETER);
+  CHECKERR(remaining==getDevicePacket->nameLength, BRLERR_INVALID_PACKET);
+  CHECKERR(((!strncmp(&getDevicePacket->name, trueBraille->definition.name, remaining))), BRLERR_INVALID_PARAMETER);
+  return 1;
+}
+
+static int handleGetRaw(Connection *c, brl_type_t type, unsigned char *packet, size_t size)
+{
+  LogPrintRequest(type, c->fd);
+  CHECKERR(!c->raw, BRLERR_ILLEGAL_INSTRUCTION);
+  CHECKERR(isRawCapable(trueBraille), BRLERR_OPNOTSUPP);
+  if (!checkDriverSpecificModePacket(c, packet, size)) return 0;
   pthread_mutex_lock(&rawMutex);
+  if (rawConnection || suspendConnection) {
+    WERR(c->fd,BRLERR_DEVICEBUSY,"driver busy (%s)", rawConnection?"raw":"suspend");
+    pthread_mutex_unlock(&rawMutex);
+    return 0;
+  }
   pthread_mutex_lock(&driverMutex);
   if (!driverOpened && !driverResume(disp)) {
-    WERR(c->fd, BRLERR_DRIVERERROR);
+    WERR(c->fd, BRLERR_DRIVERERROR,"driver resume error");
     pthread_mutex_unlock(&driverMutex);
     pthread_mutex_unlock(&rawMutex);
     return 0;
@@ -1082,8 +1101,8 @@ static int handleGetRaw(Connection *c, brl_type_t type, unsigned char *packet, s
   pthread_mutex_unlock(&driverMutex);
   c->raw = 1;
   rawConnection = c;
-  writeAck(c->fd);
   pthread_mutex_unlock(&rawMutex);
+  writeAck(c->fd);
   return 0;
 }
 
@@ -1095,8 +1114,8 @@ static int handleLeaveRaw(Connection *c, brl_type_t type, unsigned char *packet,
   pthread_mutex_lock(&rawMutex);
   c->raw = 0;
   rawConnection = NULL;
-  writeAck(c->fd);
   pthread_mutex_unlock(&rawMutex);
+  writeAck(c->fd);
   return 0;
 }
 
@@ -1110,12 +1129,48 @@ static int handlePacket(Connection *c, brl_type_t type, unsigned char *packet, s
   return 0;
 }
 
+static int handleSuspend(Connection *c, brl_type_t type, unsigned char *packet, size_t size)
+{
+  LogPrintRequest(type, c->fd);
+  CHECKERR(!c->suspend,BRLERR_ILLEGAL_INSTRUCTION);
+  if (!checkDriverSpecificModePacket(c, packet, size)) return 0;
+  pthread_mutex_lock(&rawMutex);
+  if (suspendConnection || rawConnection) {
+    WERR(c->fd, BRLERR_DEVICEBUSY,"driver busy (%s)", rawConnection?"raw":"suspend");
+    pthread_mutex_unlock(&rawMutex);
+    return 0;
+  }
+  c->suspend = 1;
+  suspendConnection = c;
+  pthread_mutex_unlock(&rawMutex);
+  pthread_mutex_lock(&driverMutex);
+  if (driverOpened) driverSuspend(disp);
+  pthread_mutex_unlock(&driverMutex);
+  writeAck(c->fd);
+  return 0;
+}
+
+static int handleResume(Connection *c, brl_type_t type, unsigned char *packet, size_t size)
+{
+  LogPrintRequest(type, c->fd);
+  CHECKERR(c->suspend,BRLERR_ILLEGAL_INSTRUCTION);
+  pthread_mutex_lock(&rawMutex);
+  c->suspend = 0;
+  suspendConnection = NULL;
+  pthread_mutex_unlock(&rawMutex);
+  pthread_mutex_lock(&driverMutex);
+  if (!driverOpened) driverResume(disp);
+  pthread_mutex_unlock(&driverMutex);
+  writeAck(c->fd);
+  return 0;
+}
+
 static PacketHandlers packetHandlers = {
   handleGetDriverId, handleGetDriverName, handleGetDisplaySize,
   handleGetTty, handleSetFocus, handleLeaveTty,
   handleKeyRange, handleKeyRange, handleKeySet, handleKeySet,
   handleWrite,
-  handleGetRaw, handleLeaveRaw, handlePacket  
+  handleGetRaw, handleLeaveRaw, handlePacket, handleSuspend, handleResume
 };
 
 static AuthDescriptor *authDescriptor;
@@ -1132,7 +1187,7 @@ static int handleUnauthorizedConnection(Connection *c, brl_type_t type, unsigned
   int remaining = size;
 
   if (type!=BRLPACKET_AUTHKEY) {
-    WERR(c->fd, BRLERR_CONNREFUSED);
+    WERR(c->fd, BRLERR_CONNREFUSED, "wrong packet type (should be authkey)");
     return 1;
   }
 
@@ -1184,16 +1239,34 @@ static int processRequest(Connection *c, PacketHandlers *handlers)
       LogPrint(LOG_DEBUG,"Closing connection on fd %"PRIFD,c->fd);
     }
     if (c->raw) {
+      pthread_mutex_lock(&rawMutex);
       c->raw = 0;
       rawConnection = NULL;
       LogPrint(LOG_WARNING,"Client on fd %"PRIFD" did not give up raw mode properly",c->fd);
-      LogPrint(LOG_WARNING,"Trying to reset braille terminal");
       pthread_mutex_lock(&driverMutex);
-      if (trueBraille->reset && !trueBraille->reset(disp)) {
-        LogPrint(LOG_WARNING,"Reset failed. Restarting braille driver");
+      LogPrint(LOG_WARNING,"Trying to reset braille terminal");
+      if (!trueBraille->reset || !trueBraille->reset(disp)) {
+	if (trueBraille->reset)
+          LogPrint(LOG_WARNING,"Reset failed. Restarting braille driver");
         restartBrailleDriver();
       }
       pthread_mutex_unlock(&driverMutex);
+      pthread_mutex_unlock(&rawMutex);
+    } else if (c->suspend) {
+      pthread_mutex_lock(&rawMutex);
+      c->suspend = 0;
+      suspendConnection = NULL;
+      LogPrint(LOG_WARNING,"Client on fd %"PRIFD" did not give up suspended mode properly",c->fd);
+      pthread_mutex_lock(&driverMutex);
+      if (!driverOpened) driverResume(disp);
+      LogPrint(LOG_WARNING,"Trying to reset braille terminal");
+      if (!trueBraille->reset || !trueBraille->reset(disp)) {
+	if (trueBraille->reset)
+          LogPrint(LOG_WARNING,"Reset failed. Restarting braille driver");
+        restartBrailleDriver();
+      }
+      pthread_mutex_unlock(&driverMutex);
+      pthread_mutex_unlock(&rawMutex);
     }
     if (c->tty) {
       LogPrint(LOG_DEBUG,"Client on fd %"PRIFD" did not give up control of tty %#010x properly",c->fd,c->tty->number);
@@ -1226,9 +1299,11 @@ static int processRequest(Connection *c, PacketHandlers *handlers)
     case BRLPACKET_GETRAW: p = handlers->getRaw; break;
     case BRLPACKET_LEAVERAW: p = handlers->leaveRaw; break;
     case BRLPACKET_PACKET: p = handlers->packet; break;
+    case BRLPACKET_SUSPEND: p = handlers->suspend; break;
+    case BRLPACKET_RESUME: p = handlers->resume; break;
   }
   if (p!=NULL) p(c, type, packet, size);
-  else WEXC(c->fd,BRLERR_UNKNOWN_INSTRUCTION);
+  else WEXC(c->fd,BRLERR_UNKNOWN_INSTRUCTION, type, packet, size, "unknown packet type");
   return 0;
 }
 
@@ -2117,35 +2192,33 @@ static inline void setCurrentRootTty(void) {
 static void api_writeWindow(BrailleDisplay *brl)
 {
   setCurrentRootTty();
-  if (rawConnection!=NULL) return;
   pthread_mutex_lock(&connectionsMutex);
-  if (whoFillsTty(&ttys)!=NULL) {
-    pthread_mutex_unlock(&connectionsMutex);
-    return;
+  pthread_mutex_lock(&rawMutex);
+  if (!suspendConnection && !rawConnection && !whoFillsTty(&ttys)) {
+    last_conn_write=NULL;
+    pthread_mutex_lock(&driverMutex);
+    trueBraille->writeWindow(brl);
+    pthread_mutex_unlock(&driverMutex);
   }
+  pthread_mutex_unlock(&rawMutex);
   pthread_mutex_unlock(&connectionsMutex);
-  last_conn_write=NULL;
-  pthread_mutex_lock(&driverMutex);
-  trueBraille->writeWindow(brl);
-  pthread_mutex_unlock(&driverMutex);
 }
 
 /* Function : api_writeVisual */
 static void api_writeVisual(BrailleDisplay *brl)
 {
   setCurrentRootTty();
-  if (!trueBraille->writeVisual) return;
-  if (rawConnection!=NULL) return;
   pthread_mutex_lock(&connectionsMutex);
-  if (whoFillsTty(&ttys)!=NULL) {
-    pthread_mutex_unlock(&connectionsMutex);
-    return;
+  pthread_mutex_lock(&rawMutex);
+  if (trueBraille->writeVisual &&
+      !suspendConnection && !rawConnection && !whoFillsTty(&ttys)) {
+    last_conn_write=NULL;
+    pthread_mutex_lock(&driverMutex);
+    trueBraille->writeVisual(brl);
+    pthread_mutex_unlock(&driverMutex);
   }
+  pthread_mutex_unlock(&rawMutex);
   pthread_mutex_unlock(&connectionsMutex);
-  last_conn_write=NULL;
-  pthread_mutex_lock(&driverMutex);
-  trueBraille->writeVisual(brl);
-  pthread_mutex_unlock(&driverMutex);
 }
 
 /* Function: whoGetsKey */
@@ -2183,13 +2256,17 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
 
   pthread_mutex_lock(&connectionsMutex);
   pthread_mutex_lock(&rawMutex);
+  if (suspendConnection) {
+    pthread_mutex_unlock(&rawMutex);
+    goto out;
+  }
   if (rawConnection!=NULL) {
     pthread_mutex_lock(&driverMutex);
     size = trueBraille->readPacket(brl, packet,BRLAPI_MAXPACKETSIZE);
     pthread_mutex_unlock(&driverMutex);
     if (size<0)
       writeException(rawConnection->fd, BRLERR_DRIVERERROR, BRLPACKET_PACKET, NULL, 0);
-    else 
+    else if (size)
       brlapiserver_writePacket(rawConnection->fd,BRLPACKET_PACKET,packet,size);
     pthread_mutex_unlock(&rawMutex);
     goto out;
@@ -2295,7 +2372,9 @@ void api_flush(BrailleDisplay *brl, BRL_DriverCommandContext caller) {
 int api_resume(BrailleDisplay *brl) {
   /* core is resuming or opening the device for the first time, let's try to go
    * to normal state */
-  if (!driverOpened) {
+  pthread_mutex_lock(&rawMutex);
+  pthread_mutex_lock(&driverMutex);
+  if (!suspendConnection && !driverOpened) {
     driverResume(brl);
     if (driverOpened) {
       /* TODO: handle clients' resize */
@@ -2305,7 +2384,23 @@ int api_resume(BrailleDisplay *brl) {
       disp = brl;
     }
   }
+  pthread_mutex_unlock(&driverMutex);
+  pthread_mutex_unlock(&rawMutex);
   return (coreActive = driverOpened);
+}
+
+/* try to get access to device. If suspended, returns 0 */
+int api_claimDriver (BrailleDisplay *brl)
+{
+  pthread_mutex_lock(&suspendMutex);
+  if (driverOpened) return 1;
+  pthread_mutex_unlock(&suspendMutex);
+  return 0;
+}
+
+void api_releaseDriver(BrailleDisplay *brl)
+{
+  pthread_mutex_unlock(&suspendMutex);
 }
 
 void api_suspend(BrailleDisplay *brl) {
@@ -2346,8 +2441,10 @@ void api_unlink(BrailleDisplay *brl)
   LogPrint(LOG_DEBUG, "api unlink");
   braille=trueBraille;
   trueBraille=&noBraille;
+  pthread_mutex_lock(&driverMutex);
   if (!coreActive && driverOpened)
     driverSuspend(disp);
+  pthread_mutex_unlock(&driverMutex);
 }
 
 /* Function : api_identify */
@@ -2409,6 +2506,7 @@ int api_start(BrailleDisplay *brl, char **parameters)
   pthread_mutex_init(&connectionsMutex,&mattr);
   pthread_mutex_init(&driverMutex,&mattr);
   pthread_mutex_init(&rawMutex,&mattr);
+  pthread_mutex_init(&suspendMutex,&mattr);
 
   stackSize = MAX(PTHREAD_STACK_MIN, OUR_STACK_MIN);
   {

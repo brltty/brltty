@@ -71,9 +71,11 @@ extern "C" {
 #define BRLPACKET_ACK               'A'    /**< Acknowledgement             */
 #define BRLPACKET_ERROR             'e'    /**< non-fatal error             */
 #define BRLPACKET_EXCEPTION         'E'    /**< Exception                   */
+#define BRLPACKET_SUSPEND           'S'    /**< Suspend driver              */
+#define BRLPACKET_RESUME            'R'    /**< Resume driver              */
 
-/** Magic number to give when sending a BRLPACKET_GETRAW packet */
-#define BRLRAW_MAGIC (0xdeadbeefL)
+/** Magic number to give when sending a BRLPACKET_GETRAW or BRLPACKET_SUSPEND packet */
+#define BRLDEVICE_MAGIC (0xdeadbeefL)
 
 /** Structure of packets headers */
 typedef struct {
@@ -96,12 +98,12 @@ typedef struct {
   unsigned char packet;
 } errorPacket_t;
 
-/** Structure of getRaw packets */
+/** Structure of getRaw / suspend packets */
 typedef struct {
   uint32_t magic;
   unsigned char nameLength;
-  unsigned char name;
-} getRawPacket_t;
+  char name;
+} getDriveSpecificModePacket_t;
 
 /** Flags for writing */
 #define BRLAPI_WF_DISPLAYNUMBER 0X01    /**< Display number                 */

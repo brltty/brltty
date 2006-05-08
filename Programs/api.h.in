@@ -554,8 +554,8 @@ int brlapi_unignoreKeySet(const brl_keycode_t *s, unsigned int n);
 
 /** @} */
 
-/** \defgroup brlapi_raw Raw Mode
- * \brief Raw Mode mechanism
+/** \defgroup brlapi_driverspecific Driver-Specific modes
+ * \brief Raw and Suspend Modes mechanism
  *
  * If the application wants to directly talk to the braille terminal, it should
  * use Raw Mode. In this special mode, the driver gives the whole control of the
@@ -568,6 +568,11 @@ int brlapi_unignoreKeySet(const brl_keycode_t *s, unsigned int n);
  * Special care of the terminal should be taken, since one might completely
  * trash the terminal's data, or even lock it! The application should always
  * check for terminal's type thanks to brlapi_getDriverId().
+ *
+ * The client can also make brltty close the driver by using brlapi_suspend(),
+ * and resume it again with brlapi_resume().  This should not be used if
+ * possible: raw mode should be sufficient for any use.  If not, please ask for
+ * features :)
  *
  * @{
  */
@@ -585,21 +590,34 @@ int brlapi_getRaw(const char *driver);
 int brlapi_leaveRaw(void);
 
 /* brlapi_sendRaw */
-/** Send a Raw Packet
+/** Send Raw data
  *
- * \param buf points on the packet;
+ * \param buf points on the data;
  * \param size holds the packet size.
  * \return size on success, -1 on error */
 ssize_t brlapi_sendRaw(const void *buf, size_t size);
 
 /* brlapi_recvRaw */
-/** Get a Raw packet
+/** Get Raw data
  *
  * \param buf points on a buffer where the function will store the received
- * packet;
+ * data;
  * \param size holds the buffer size.
  * \return its size, -1 on error or signal interruption */
 ssize_t brlapi_recvRaw(void *buf, size_t size);
+
+/* brlapi_suspend */
+/** Suspend braille driver
+ * \param driver Specifies the name of the driver which will be suspended.
+ * \return -1 on error
+ */
+int brlapi_suspend(const char *driver);
+
+/* brlapi_resume */
+/** Resume braille driver
+ * \return -1 on error
+ */
+int brlapi_resume(void);
 
 /** @} */
 
@@ -629,7 +647,7 @@ ssize_t brlapi_recvRaw(void *buf, size_t size);
 #define BRLERR_SUCCESS                  0  /**< Success */
 #define BRLERR_NOMEM                    1  /**< Not enough memory */
 #define BRLERR_TTYBUSY                  2  /**< A connection is already running in this tty */
-#define BRLERR_RAWMODEBUSY              3  /**< A connection is already using RAW mode */
+#define BRLERR_DEVICEBUSY               3  /**< A connection is already using RAW or suspend mode */
 #define BRLERR_UNKNOWN_INSTRUCTION      4  /**< Not implemented in protocol */
 #define BRLERR_ILLEGAL_INSTRUCTION      5  /**< Forbiden in current mode */
 #define BRLERR_INVALID_PARAMETER        6  /**< Out of range or have no sense */

@@ -104,7 +104,8 @@
 /* API states */
 #define STCONNECTED 1
 #define STRAW 2
-#define STCONTROLLINGTTY 4
+#define STSUSPEND 4
+#define STCONTROLLINGTTY 8
 
 #ifdef WINDOWS
 static WSADATA wsadata;
@@ -629,39 +630,54 @@ void brlapi_closeConnection(void)
 #endif /* WINDOWS */
 }
 
-/* brlapi_getRaw */
-/* Switch to Raw mode */
-int brlapi_getRaw(const char *driver)
+/* brlapi_getDriverSpecific */
+/* Switch to device specific mode */
+static int brlapi_getDriverSpecific(const char *driver, brl_type_t type, int st)
 {
   int res;
   unsigned char packet[BRLAPI_MAXPACKETSIZE];
-  getRawPacket_t *rawPacket = (getRawPacket_t *) packet;
+  getDriveSpecificModePacket_t *driverPacket = (getDriveSpecificModePacket_t *) packet;
   unsigned int n = strlen(driver);
   if (n>BRLAPI_MAXNAMELENGTH) {
     brlapi_errno = BRLERR_INVALID_PARAMETER;
     return -1;
   }
-  rawPacket->magic = htonl(BRLRAW_MAGIC);
-  rawPacket->nameLength = n;
-  memcpy(&rawPacket->name, driver, n);
-  res = brlapi_writePacketWaitForAck(fd, BRLPACKET_GETRAW, packet, sizeof(uint32_t)+1+n);
+  driverPacket->magic = htonl(BRLDEVICE_MAGIC);
+  driverPacket->nameLength = n;
+  memcpy(&driverPacket->name, driver, n);
+  res = brlapi_writePacketWaitForAck(fd, type, packet, sizeof(uint32_t)+1+n);
   if (res!=-1) {
     pthread_mutex_lock(&stateMutex);
-    state |= STRAW;
+    state |= st;
     pthread_mutex_unlock(&stateMutex);
   }
   return res;
+}
+
+/* brlapi_leaveDriverSpecific */
+/* Leave device specific mode */
+int brlapi_leaveDriverSpecific(brl_type_t type, int st)
+{
+  int res = brlapi_writePacketWaitForAck(fd, type, NULL, 0);
+  if (res) return res;
+  pthread_mutex_lock(&stateMutex);
+  state &= ~st;
+  pthread_mutex_unlock(&stateMutex);
+  return res;
+}
+
+/* brlapi_getRaw */
+/* Switch to Raw mode */
+int brlapi_getRaw(const char *driver)
+{
+  return brlapi_getDriverSpecific(driver, BRLPACKET_GETRAW, STRAW);
 }
 
 /* brlapi_leaveRaw */
 /* Leave Raw mode */
 int brlapi_leaveRaw(void)
 {
-  int res = brlapi_writePacketWaitForAck(fd, BRLPACKET_LEAVERAW, NULL, 0);
-  pthread_mutex_lock(&stateMutex);
-  state &= ~STRAW;
-  pthread_mutex_unlock(&stateMutex);
-  return res;
+  return brlapi_leaveDriverSpecific(BRLPACKET_LEAVERAW, STRAW);
 }
 
 /* brlapi_sendRaw */
@@ -688,6 +704,18 @@ ssize_t brlapi_recvRaw(void *buf, size_t size)
     res = -1;
   }
   return res;
+}
+
+/* brlapi_suspend */
+int brlapi_suspend(const char *driver)
+{
+  return brlapi_getDriverSpecific(driver, BRLPACKET_SUSPEND, STSUSPEND);
+}
+
+/* brlapi_resume */
+int brlapi_resume(void)
+{
+  return brlapi_leaveDriverSpecific(BRLPACKET_RESUME, STSUSPEND);
 }
 
 /* Function brlapi_request */
@@ -1256,7 +1284,7 @@ const char *brlapi_errlist[] = {
   "Success",                            /* BRLERR_SUCESS */
   "Not enough memory",                  /* BRLERR_NOMEM */
   "Tty Busy",                           /* BRLERR_TTYBUSY */
-  "Raw mode busy",                      /* BRLERR_RAWMODEBUSY */
+  "Device busy",                        /* BRLERR_DEVICEBUSY */
   "Unknown instruction",                /* BRLERR_UNKNOWN_INSTRUCTION */
   "Illegal instruction",                /* BRLERR_ILLEGAL_INSTRUCTION */
   "Invalid parameter",                  /* BRLERR_INVALID_PARAMETER */

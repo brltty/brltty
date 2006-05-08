@@ -335,6 +335,8 @@ static brlapi_packetType_t brlapi_packetTypes[] = {
   { BRLPACKET_GETRAW, "GetRaw" },
   { BRLPACKET_LEAVERAW, "LeaveRaw" },
   { BRLPACKET_PACKET, "Packet" },
+  { BRLPACKET_SUSPEND, "Suspend" },
+  { BRLPACKET_RESUME, "Resume" },
   { BRLPACKET_ACK, "Ack" },
   { BRLPACKET_ERROR, "Error" },
   { BRLPACKET_EXCEPTION, "Exception" },
