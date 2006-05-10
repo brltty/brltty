@@ -133,8 +133,8 @@ LogPrint (int level, const char *format, ...) {
 #endif /* HAVE_VSYSLOG */
       goto done;
     }
-    level = printLevel;
 #endif /* HAVE_SYSLOG_H */
+    level = printLevel;
   }
 #ifdef HAVE_SYSLOG_H
 done:
