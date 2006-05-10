@@ -613,6 +613,7 @@ static Connection *createConnection(FileDescriptor fd, time_t currentTime)
   c->fd = fd;
   c->tty = NULL;
   c->raw = 0;
+  c->suspend = 0;
   c->brlbufstate = EMPTY;
   pthread_mutexattr_init(&mattr);
   pthread_mutexattr_settype(&mattr, PTHREAD_MUTEX_RECURSIVE);
@@ -1258,12 +1259,12 @@ static int processRequest(Connection *c, PacketHandlers *handlers)
       suspendConnection = NULL;
       LogPrint(LOG_WARNING,"Client on fd %"PRIFD" did not give up suspended mode properly",c->fd);
       pthread_mutex_lock(&driverMutex);
-      if (!driverOpened) driverResume(disp);
-      LogPrint(LOG_WARNING,"Trying to reset braille terminal");
-      if (!trueBraille->reset || !trueBraille->reset(disp)) {
-	if (trueBraille->reset)
-          LogPrint(LOG_WARNING,"Reset failed. Restarting braille driver");
-        restartBrailleDriver();
+      if (!driverOpened && !driverResume(disp))
+	LogPrint(LOG_WARNING,"Couldn't resume braille driver");
+      if (driverOpened && trueBraille->reset) {
+        LogPrint(LOG_DEBUG,"Trying to reset braille terminal");
+	if (!trueBraille->reset(disp))
+	  LogPrint(LOG_WARNING,"Resetting braille terminal failed, hoping it's ok");
       }
       pthread_mutex_unlock(&driverMutex);
       pthread_mutex_unlock(&rawMutex);
