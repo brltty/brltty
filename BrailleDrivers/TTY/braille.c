@@ -117,6 +117,11 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
   char *characterSet = "ISO8859-1";
 #endif /* HAVE_ICONV_H */
 
+  if (!isSerialDevice(&device)) {
+    unsupportedDevice(device);
+    return 0;
+  }
+
   {
     int baud = ttyBaud;
     if (serialValidateBaud(&baud, "TTY baud", parameters[PARM_BAUD], NULL))
