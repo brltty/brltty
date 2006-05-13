@@ -281,6 +281,46 @@ strdupWrapper (const char *string) {
   return address;
 }
 
+static int
+isPathDelimiter (const char character) {
+  return character == '/';
+}
+
+static size_t
+stripPathDelimiter (const char *path, size_t length) {
+  while (length) {
+    if (!isPathDelimiter(path[length-1])) break;
+    --length;
+  }
+  return length;
+}
+
+char *
+getPathDirectory (const char *path) {
+  size_t length = strlen(path);
+  size_t end = stripPathDelimiter(path, length);
+
+  if (end) {
+    while (--end)
+      if (isPathDelimiter(path[end-1]))
+        break;
+
+    if ((length = end))
+      if ((end = stripPathDelimiter(path, length)))
+        length = end;
+  }
+
+  if (!length) length = strlen(path = ".");
+  {
+    char *directory = mallocWrapper(length + 1);
+    if (directory) {
+      memcpy(directory, path, length);
+      directory[length] = 0;
+    }
+    return directory;
+  }
+}
+
 char *
 getWorkingDirectory (void) {
   size_t size = 0X80;

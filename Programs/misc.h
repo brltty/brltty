@@ -148,6 +148,8 @@ extern void *mallocWrapper (size_t size);
 extern void *reallocWrapper (void *address, size_t size);
 extern char *strdupWrapper (const char *string);
 
+extern char *getPathDirectory (const char *path);
+
 extern char *getWorkingDirectory (void);
 extern char *makePath (const char *directory, const char *file);
 extern void fixPath (char **path, const char *extension, const char *prefix);
