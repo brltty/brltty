@@ -65,6 +65,8 @@ extern int processOptions (
   const char *argumentsSummary
 );
 
+extern void fixInstallPaths (char **const *paths);
+
 extern const char *programPath;
 extern const char *programName;
 

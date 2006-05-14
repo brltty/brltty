@@ -634,6 +634,7 @@ processOptions (
       free(directory);
     }
   }
+
   programName = strrchr(programPath, '/');
   programName = programName? programName+1: programPath;
   setPrintPrefix(programName);
@@ -655,4 +656,14 @@ processOptions (
   }
 
   return info.errorCount;
+}
+
+void
+fixInstallPaths (char **const *paths) {
+  char *programDirectory = getPathDirectory(programPath);
+  while (*paths) {
+    **paths = makePath(programDirectory, **paths);
+    ++paths;
+  }
+  free(programDirectory);
 }

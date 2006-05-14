@@ -1883,9 +1883,20 @@ startup (int argc, char *argv[]) {
                                     &opt_environmentVariables,
                                     &opt_configurationFile,
                                     NULL);
+
   if (argc) {
     LogPrint(LOG_ERR, "%s: %s", gettext("excess argument"), argv[0]);
     ++problemCount;
+  }
+
+  {
+    char **const paths[] = {
+      &opt_configurationFile,
+      &opt_dataDirectory,
+      &opt_libraryDirectory,
+      NULL
+    };
+    fixInstallPaths(paths);
   }
 
   if (!validateInterval(&updateInterval, opt_updateInterval)) {
@@ -2017,7 +2028,7 @@ startup (int argc, char *argv[]) {
   }
 
   {
-    const char *directories[] = {programPath, "/", NULL};
+    const char *directories[] = {opt_dataDirectory, "/", NULL};
     const char **directory = directories;
     while (*directory) {
       if (chdir(*directory) != -1) break;                /* * change to directory containing data files  */
