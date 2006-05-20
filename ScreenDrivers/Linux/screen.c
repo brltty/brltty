@@ -29,6 +29,7 @@
 
 #include "Programs/misc.h"
 #include "Programs/system.h"
+#include "Programs/sys_linux.h"
 #include "Programs/brldefs.h"
 
 typedef enum {
@@ -786,42 +787,14 @@ static int at2Pressed;
 static int uinputDevice = -1;
 
 static int
-installKernelModule (const char *name) {
-  const char *command = "modprobe";
-  char buffer[0X100];
-
-  {
-    const char *path = "/proc/sys/kernel/modprobe";
-    FILE *stream = fopen(path, "r");
-
-    if (stream) {
-      char *line = fgets(buffer, sizeof(buffer), stream);
-
-      if (line) {
-        size_t length = strlen(line);
-        if (length && (line[length-1] == '\n')) line[--length] = 0;
-        if (length) command = line;
-      }
-
-      fclose(stream);
-    } else {
-      LogPrint(LOG_WARNING, "cannot open %s: %s", path, strerror(errno));
-    }
-  }
-
-  {
-    const char *const arguments[] = {command, "-q", name, NULL};
-    int ok = executeHostCommand(arguments) == 0;
-    if (!ok) LogPrint(LOG_WARNING, "kernel module not installed: %s", name);
-    return ok;
-  }
-}
-
-static int
 openUinputDevice (void) {
   if (uinputDevice != -1) return 1;
 
-  installKernelModule("uinput");
+  {
+    static int installed = 0;
+    installLinuxKernelModule("uinput", &installed);
+  }
+
   if ((uinputDevice = openDevice("/dev/uinput", "uinput", O_WRONLY, 10, 223)) != -1) {
     struct uinput_user_dev device;
     
