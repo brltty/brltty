@@ -36,7 +36,7 @@ typedef enum {
 
 #define CHECK(cond, label) \
   do { \
-    if (!(cond)<0) { \
+    if (!(cond)) { \
       LogPrint(LOG_ERR, "%s", brlapi_strerror(&brlapi_error)); \
       goto label; \
     } \
@@ -47,6 +47,8 @@ static unsigned char *prevData;
 static unsigned char *prevText;
 static int prevCursor;
 static int prevShown;
+
+static int restart;
 
 /* Function : brl_open */
 /* Opens a connection with BrlAPI's server */
@@ -70,6 +72,7 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
   prevText = malloc(displaySize);
   CHECK((prevText!=NULL), out2);
   prevShown = 0;
+  restart = 0;
   LogPrint(LOG_DEBUG, "Memory allocated, returning 1");
   return 1;
   
@@ -118,7 +121,10 @@ static void brl_writeWindow(BrailleDisplay *brl)
     if (brlapi_write(&ws)==0) {
       memcpy(prevData,brl->buffer,displaySize);
       prevShown = 1;
-    } else LogPrint(LOG_ERR, "write: %s", brlapi_strerror(&brlapi_error));
+    } else {
+      LogPrint(LOG_ERR, "write: %s", brlapi_strerror(&brlapi_error));
+      restart = 1;
+    }
   }
 }
 
@@ -143,7 +149,10 @@ static void brl_writeVisual(BrailleDisplay *brl)
       memcpy(prevText,brl->buffer,displaySize);
       prevCursor = brl->cursor;
       prevShown = 1;
-    } else LogPrint(LOG_ERR, "write: %s", brlapi_strerror(&brlapi_error));
+    } else {
+      LogPrint(LOG_ERR, "write: %s", brlapi_strerror(&brlapi_error));
+      restart = 1;
+    }
   }
 }
 
@@ -158,6 +167,10 @@ static void brl_writeStatus(BrailleDisplay *brl, const unsigned char *s)
 static int brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context)
 {
   brl_keycode_t command;
-  if (brlapi_readKey(0, &command)==1) return command;
-  return EOF;
+  if (restart) return BRL_CMD_RESTARTBRL;
+  switch (brlapi_readKey(0, &command)) {
+    case 0: return EOF;
+    case 1: return command;
+    default: return BRL_CMD_RESTARTBRL;
+  }
 }
