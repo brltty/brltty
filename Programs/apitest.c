@@ -215,7 +215,9 @@ void showKeyCodes(void)
   brlapi_perror("brlapi_readKey");
 }
 
-void foo(int sig) { }
+#ifdef SIGUSR1
+void emptySignalHandler(int sig) { }
+#endif /* SIGUSR1 */
 
 void suspend(void)
 {
@@ -230,11 +232,17 @@ void suspend(void)
   if (brlapi_suspend(name)) {
     brlapi_perror("suspend");
   } else {
-    signal(SIGUSR1,foo);
+#ifdef SIGUSR1
+    signal(SIGUSR1,emptySignalHandler);
+#endif /* SIGUSR1 */
     fprintf(stderr, "Sleeping\n");
+#ifndef __MINGW32__
     pause();
+#endif /* __MINGW32__ */
     fprintf(stderr, "Resuming\n");
+#ifdef SIGUSR1
     signal(SIGUSR1,SIG_DFL);
+#endif /* SIGUSR1 */
     if (brlapi_resume())
       brlapi_perror("resume");
   }
