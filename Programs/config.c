@@ -1490,12 +1490,22 @@ activateBrailleDriver (int verify) {
               }
 
               {
-                const char *part1 = CONFIGURATION_DIRECTORY "/brltty-";
-                const char *part2 = braille->definition.code;
-                const char *part3 = ".prefs";
-                char *path = mallocWrapper(strlen(part1) + strlen(part2) + strlen(part3) + 1);
-                sprintf(path, "%s%s%s", part1, part2, part3);
-                preferencesFile = path;
+                {
+                  const char *part1 = CONFIGURATION_DIRECTORY "/brltty-";
+                  const char *part2 = braille->definition.code;
+                  const char *part3 = ".prefs";
+                  char *path = mallocWrapper(strlen(part1) + strlen(part2) + strlen(part3) + 1);
+                  sprintf(path, "%s%s%s", part1, part2, part3);
+                  preferencesFile = path;
+                }
+
+                {
+                  char **const paths[] = {
+                    &preferencesFile,
+                    NULL
+                  };
+                  fixInstallPaths(paths);
+                }
               }
               LogPrint(LOG_INFO, "%s: %s", gettext("Preferences File"), preferencesFile);
 
@@ -1893,7 +1903,13 @@ startup (int argc, char *argv[]) {
     char **const paths[] = {
       &opt_configurationFile,
       &opt_dataDirectory,
+      &opt_tablesDirectory,
       &opt_libraryDirectory,
+
+#ifdef ENABLE_CONTRACTED_BRAILLE
+      &opt_contractionsDirectory,
+#endif /* ENABLE_CONTRACTED_BRAILLE */
+
       NULL
     };
     fixInstallPaths(paths);
