@@ -16,10 +16,20 @@ AC_DEFUN([BRLTTY_DEFINE_EXPANDED], [dnl
 BRLTTY_VAR_EXPAND([brltty_expanded], [$2])
 AC_DEFINE_UNQUOTED([$1], ["${brltty_expanded}"], [$3])])
 
+AC_DEFUN([BRLTTY_RELATIVE_PATH], [dnl
+AC_REQUIRE([AC_PROG_AWK])
+eval '$1="`"${AWK}" -v path="'"$2"'" -v reference="'"$3"'" -f "${srcdir}/relpath.awk"`"'])
+
 AC_DEFUN([BRLTTY_DEFINE_DIRECTORY], [dnl
 BRLTTY_VAR_EXPAND([$1], [$2])
 AC_SUBST([$1])
-BRLTTY_DEFINE_EXPANDED([$1], ["${$1}"], [$3])])
+if test "${brltty_enabled_relocatable_install}" = "yes"
+then
+   BRLTTY_RELATIVE_PATH([brltty_path], [${$1}], [${brltty_reference_directory}])
+else
+   brltty_path="${$1}"
+fi
+BRLTTY_DEFINE_EXPANDED([$1], [${brltty_path}], [$3])])
 
 AC_DEFUN([BRLTTY_ARG_WITH], [dnl
 AC_ARG_WITH([$1], BRLTTY_HELP_STRING([--with-$1=$2], [$3]), [$4="${withval}"], [$4=$5])])
