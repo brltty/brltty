@@ -21,6 +21,7 @@
 #include <stdarg.h>
 #include <string.h>
 #include <strings.h>
+#include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/stat.h>
@@ -286,6 +287,17 @@ isPathDelimiter (const char character) {
   return character == '/';
 }
 
+int
+isAbsolutePath (const char *path) {
+  if (isPathDelimiter(path[0])) return 1;
+
+#if defined(WINDOWS) || defined(__MSDOS__)
+  if (strchr("ABCDEFGHIJKLMNOPQRSTUVWXYZ", toupper(path[0])) && (path[1] == ':')) return 1;
+#endif /* defined(WINDOWS) || defined(__MSDOS__) */
+
+  return 0;
+}
+
 static size_t
 stripPathDelimiter (const char *path, size_t length) {
   while (length) {
@@ -347,7 +359,7 @@ makePath (const char *directory, const char *file) {
   int index;
   char *path;
   components[last] = file;
-  if (file[0] != '/') {
+  if (!isAbsolutePath(file)) {
     if (directory && *directory) {
       if (directory[strlen(directory)-1] != '/') components[--first] = "/";
       components[--first] = directory;

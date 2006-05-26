@@ -148,6 +148,7 @@ extern void *mallocWrapper (size_t size);
 extern void *reallocWrapper (void *address, size_t size);
 extern char *strdupWrapper (const char *string);
 
+extern int isAbsolutePath (const char *path);
 extern char *getPathDirectory (const char *path);
 
 extern char *getWorkingDirectory (void);

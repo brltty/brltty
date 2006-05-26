@@ -626,7 +626,7 @@ processOptions (
     }
 #endif /* defined(HAVE_REALPATH) && defined(PATH_MAX) */
 
-    if (*programPath != '/') {
+    if (!isAbsolutePath(programPath)) {
       char *directory = getWorkingDirectory();
       char buffer[strlen(directory) + 1 + strlen(programPath) + 1];
       sprintf(buffer, "%s/%s", directory, programPath);
