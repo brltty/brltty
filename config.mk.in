@@ -103,6 +103,7 @@ LIB_VAR = @libsearch_variable@
 
 prefix = @prefix@
 exec_prefix = @exec_prefix@
+datarootdir = @datarootdir@
 bindir = @bindir@
 sbindir = @sbindir@
 libexecdir = @libexecdir@
