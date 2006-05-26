@@ -236,9 +236,9 @@ void suspend(void)
     signal(SIGUSR1,emptySignalHandler);
 #endif /* SIGUSR1 */
     fprintf(stderr, "Sleeping\n");
-#ifndef __MINGW32__
+#ifdef HAVE_PAUSE
     pause();
-#endif /* __MINGW32__ */
+#endif /* HAVE_PAUSE */
     fprintf(stderr, "Resuming\n");
 #ifdef SIGUSR1
     signal(SIGUSR1,SIG_DFL);
