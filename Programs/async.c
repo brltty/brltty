@@ -38,14 +38,14 @@ typedef struct pollfd MonitorEntry;
 
 typedef struct {
   int size;
-  fd_set bits;
-} SelectMask;
+  fd_set set;
+} SelectDescriptor;
 
-static SelectMask readMask;
-static SelectMask writeMask;
+static SelectDescriptor selectDescriptor_read;
+static SelectDescriptor selectDescriptor_write;
 
-typedef struct { 
-  fd_set *mask;
+typedef struct {
+  fd_set *selectSet;
   FileDescriptor fileDescriptor;
 } MonitorEntry;
 
@@ -99,9 +99,9 @@ struct FunctionEntryStruct {
 #if defined(WINDOWS)
   OVERLAPPED ol;
 #elif defined(HAVE_SYS_POLL_H)
-  short events;
+  short pollEvents;
 #else /* monitor definitions */
-  SelectMask *mask;
+  SelectDescriptor *selectDescriptor;
 #endif /* monitor definitions */
 };
 
@@ -269,7 +269,7 @@ awaitOperation (MonitorEntry *monitors, int count, int timeout) {
 static void
 initializeMonitor (MonitorEntry *monitor, const FunctionEntry *function, const OperationEntry *operation) {
   monitor->fd = function->fileDescriptor;
-  monitor->events = function->events;
+  monitor->events = function->pollEvents;
   monitor->revents = 0;
 }
 
@@ -280,37 +280,40 @@ testMonitor (const MonitorEntry *monitor) {
 
 static void
 beginUnixInputFunction (FunctionEntry *function) {
-  function->events = POLLIN;
+  function->pollEvents = POLLIN;
 }
 
 static void
 beginUnixOutputFunction (FunctionEntry *function) {
-  function->events = POLLOUT;
+  function->pollEvents = POLLOUT;
 }
 #else /* HAVE_SYS_POLL_H */
 static void
-prepareSelectMask (SelectMask *mask) {
-  FD_ZERO(&mask->bits);
-  mask->size = 0;
+prepareSelectDescriptor (SelectDescriptor *descriptor) {
+  FD_ZERO(&descriptor->set);
+  descriptor->size = 0;
 }
 
 static void
 prepareMonitors (void) {
-  prepareSelectMask(&readMask);
-  prepareSelectMask(&writeMask);
+  prepareSelectDescriptor(&selectDescriptor_read);
+  prepareSelectDescriptor(&selectDescriptor_write);
+}
+
+static fd_set *
+getSelectSet (SelectDescriptor *descriptor) {
+  return descriptor->size? &descriptor->set: NULL;
 }
 
 static int
-awaitOperation (MonitorEntry *monitors, int count, int timeout) {
+doSelect (int setSize, fd_set *readSet, fd_set *writeSet, int timeout) {
   struct timeval time;
+
   time.tv_sec = timeout / 1000;
   time.tv_usec = timeout % 1000 * 1000;
 
   {
-    int result = select(MAX(readMask.size, writeMask.size),
-                        readMask.size? &readMask.bits: NULL,
-                        writeMask.size? &writeMask.bits: NULL,
-                        NULL, &time);
+    int result = select(setSize, readSet, writeSet, NULL, &time);
     if (result > 0) return 1;
 
     if (result == -1) {
@@ -321,28 +324,56 @@ awaitOperation (MonitorEntry *monitors, int count, int timeout) {
   }
 }
 
+static int
+awaitOperation (MonitorEntry *monitors, int count, int timeout) {
+  int setSize = MAX(selectDescriptor_read.size, selectDescriptor_write.size);
+  fd_set *readSet = getSelectSet(&selectDescriptor_read);
+  fd_set *writeSet = getSelectSet(&selectDescriptor_write);
+
+#ifdef __MSDOS__
+  int elapsed = 0;
+
+  do {
+    fd_set readSet1, writeSet1;
+
+    if (readSet) readSet1 = *readSet;
+    if (writeSet) writeSet1 = *writeSet;
+
+    if (doSelect(setSize, (readSet? &readSet1: NULL), (writeSet? &writeSet1: NULL), 0)) {
+      if (readSet) *readSet = readSet1;
+      if (writeSet) *writeSet = writeSet1;
+      return 1;
+    }
+  } while ((elapsed += tsr_usleep(1000)) < timeout);
+#else /* __MSDOS__ */
+  if (doSelect(setSize, readSet, writeSet, timeout)) return 1;
+#endif /* __MSDOS__ */
+
+  return 0;
+}
+
 static void
 initializeMonitor (MonitorEntry *monitor, const FunctionEntry *function, const OperationEntry *operation) {
-  monitor->mask = &function->mask->bits;
+  monitor->selectSet = &function->selectDescriptor->set;
   monitor->fileDescriptor = function->fileDescriptor;
 
-  FD_SET(function->fileDescriptor, &function->mask->bits);
-  if (function->fileDescriptor >= function->mask->size) function->mask->size = function->fileDescriptor + 1;
+  FD_SET(function->fileDescriptor, &function->selectDescriptor->set);
+  if (function->fileDescriptor >= function->selectDescriptor->size) function->selectDescriptor->size = function->fileDescriptor + 1;
 }
 
 static int
 testMonitor (const MonitorEntry *monitor) {
-  return FD_ISSET(monitor->fileDescriptor, monitor->mask);
+  return FD_ISSET(monitor->fileDescriptor, monitor->selectSet);
 }
 
 static void
 beginUnixInputFunction (FunctionEntry *function) {
-  function->mask = &readMask;
+  function->selectDescriptor = &selectDescriptor_read;
 }
 
 static void
 beginUnixOutputFunction (FunctionEntry *function) {
-  function->mask = &writeMask;
+  function->selectDescriptor = &selectDescriptor_write;
 }
 #endif /* HAVE_SYS_POLL_H */
 
