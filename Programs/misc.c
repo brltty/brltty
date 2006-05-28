@@ -34,6 +34,10 @@
 
 #include "misc.h"
 
+#ifdef __MSDOS__
+#include "sys_msdos.h"
+#endif /* __MSDOS__ */
+
 char **
 splitString (const char *string, char delimiter, int *count) {
   char **array = NULL;
@@ -606,18 +610,18 @@ formatInputError (char *buffer, int size, const char *file, const int *line, con
 void
 approximateDelay (int milliseconds) {
   if (milliseconds > 0) {
-#ifdef WINDOWS
-#ifdef __CYGWIN__
+#if defined(__CYGWIN__)
     usleep(milliseconds*1000);
-#else /* __CYGWIN__ */
+#elif defined(WINDOWS)
     Sleep(milliseconds);
-#endif /* __CYGWIN__ */
-#else /* WINDOWS */
+#elif defined(__MSDOS__)
+    tsr_usleep(milliseconds*1000);
+#else /* delay */
     struct timeval timeout;
     timeout.tv_sec = milliseconds / 1000;
     timeout.tv_usec = (milliseconds % 1000) * 1000;
     select(0, NULL, NULL, NULL, &timeout);
-#endif /* WINDOWS */
+#endif /* delay */
   }
 }
 
@@ -662,13 +666,20 @@ accurateDelay (int milliseconds) {
     tickLength = 1000 / CLK_TCK;
 #elif defined(HZ)
     tickLength = 1000 / HZ;
-#else
+#else /* tick length */
 #error cannot determine tick length
 #endif /* tick length */
     if (!tickLength) tickLength = 1;
   }
   if (milliseconds >= tickLength) approximateDelay(milliseconds / tickLength * tickLength);
-  while (millisecondsSince(&start) < milliseconds);
+  while (millisecondsSince(&start) < milliseconds) {
+#ifdef __MSDOS__
+    /* We're executing as a system clock interrupt TSR so we need to allow
+     * them to occur in order for gettimeofday() to change.
+     */
+    tsr_usleep(1);
+#endif /* __MSDOS__ */
+  }
 }
 
 int
