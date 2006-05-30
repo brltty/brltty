@@ -10,7 +10,7 @@ INSTALLATION INSTRUCTIONS FOR IRISLINUX:
 	- IDE Driver: Cyrix Corp. 8530 Dri2er.
 	- USB: OHCI-HCD Driver (no USB 2.0).
 	- LAN: DaviCom dmfe module, present into the "Tulip" series;
-	- MODEM: no drived needed, accessible with a Serial port (/dev/ttyS2).
+	- MODEM: no driver needed, accessible with a Serial port (/dev/ttyS2).
 	- Serial: 16550A UART, generic.
 	- CompactFlash: seen as IDE devices, no driver needed.
 	- AUDIO: OSS -> 100% Compatible Sound Blaster 16: io=220, irq=5, 
