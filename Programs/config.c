@@ -1901,7 +1901,6 @@ startup (int argc, char *argv[]) {
 
   {
     char **const paths[] = {
-      &opt_configurationFile,
       &opt_dataDirectory,
       &opt_tablesDirectory,
       &opt_libraryDirectory,

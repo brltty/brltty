@@ -650,8 +650,14 @@ processOptions (
       processEnvironmentVariables(&info, applicationName);
 
     setDefaultOptions(&info, 0);
-    if (configurationFile && *configurationFile)
+    if (configurationFile && *configurationFile) {
+      char **const paths[] = {
+        configurationFile,
+        NULL
+      };
+      fixInstallPaths(paths);
       processConfigurationFile(&info, *configurationFile, !configurationFileSpecified);
+    }
     setDefaultOptions(&info, 1);
   }
 
