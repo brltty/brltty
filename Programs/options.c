@@ -49,6 +49,22 @@ typedef struct {
   int errorCount;
 } OptionProcessingInformation;
 
+void
+fixInstallPaths (char **const *paths) {
+  char *programDirectory = getPathDirectory(programPath);
+  while (*paths) {
+    **paths = makePath(programDirectory, **paths);
+    ++paths;
+  }
+  free(programDirectory);
+}
+
+void
+fixInstallPath (char **path) {
+  char **const paths[] = {path, NULL};
+  fixInstallPaths(paths);
+}
+
 static void
 extendSetting (char **setting, const char *value, int prepend) {
   if (value && *value) {
@@ -651,25 +667,11 @@ processOptions (
 
     setDefaultOptions(&info, 0);
     if (configurationFile && *configurationFile) {
-      char **const paths[] = {
-        configurationFile,
-        NULL
-      };
-      fixInstallPaths(paths);
+      fixInstallPath(configurationFile);
       processConfigurationFile(&info, *configurationFile, !configurationFileSpecified);
     }
     setDefaultOptions(&info, 1);
   }
 
   return info.errorCount;
-}
-
-void
-fixInstallPaths (char **const *paths) {
-  char *programDirectory = getPathDirectory(programPath);
-  while (*paths) {
-    **paths = makePath(programDirectory, **paths);
-    ++paths;
-  }
-  free(programDirectory);
 }

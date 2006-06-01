@@ -1499,13 +1499,7 @@ activateBrailleDriver (int verify) {
                   preferencesFile = path;
                 }
 
-                {
-                  char **const paths[] = {
-                    &preferencesFile,
-                    NULL
-                  };
-                  fixInstallPaths(paths);
-                }
+                fixInstallPath(&preferencesFile);
               }
               LogPrint(LOG_INFO, "%s: %s", gettext("Preferences File"), preferencesFile);
 
