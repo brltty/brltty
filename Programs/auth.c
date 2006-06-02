@@ -22,10 +22,15 @@
 
 #ifdef WINDOWS
 #include <ws2tcpip.h>
+
 #ifdef __MINGW32__
 #include <io.h>
+
+#define OS_FILE_DESCRIPTOR(fd) (_open_osfhandle((long)(fd), O_RDWR))
 #else /* __MINGW32__ */
 #include <sys/cygwin.h>
+
+#define OS_FILE_DESCRIPTOR(fd) (cygwin_attach_handle_to_fd("auth descriptor", 1, (fd), TRUE, GENERIC_READ|GENERIC_WRITE))
 #endif /* __MINGW32__ */
 #else /* WINDOWS */
 #include <sys/socket.h>
@@ -33,6 +38,8 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+
+#define OS_FILE_DESCRIPTOR(fd) (fd)
 #endif /* WINDOWS */
 
 #if !defined(AF_LOCAL) && defined(AF_UNIX)
@@ -185,8 +192,8 @@ typedef struct {
 #ifdef CAN_CHECK_CREDENTIALS
 typedef enum {
   PCS_NEED,
-  PCS_HAVE,
-  PCS_GOOD
+  PCS_CANT,
+  PCS_HAVE
 } PeerCredentialsState;
 #endif /* CAN_CHECK_CREDENTIALS */
 
@@ -249,10 +256,9 @@ authKeyfile_server (AuthDescriptor *auth, FileDescriptor fd, void *data) {
 static int
 getPeerCredentials (AuthDescriptor *auth, int fd) {
   if (auth->peerCredentialsState == PCS_NEED) {
-    if (!initializePeerCredentials(&auth->peerCredentials, fd)) return 0;
-    auth->peerCredentialsState = PCS_HAVE;
+    auth->peerCredentialsState = initializePeerCredentials(&auth->peerCredentials, fd)? PCS_HAVE: PCS_CANT;
   }
-  return 1;
+  return auth->peerCredentialsState == PCS_HAVE;
 }
 
 /* the user method */
@@ -305,22 +311,10 @@ authUser_release (void *data) {
 }
 
 static int
-authUser_server (AuthDescriptor *auth, FileDescriptor osfd, void *data) {
+authUser_server (AuthDescriptor *auth, FileDescriptor fd, void *data) {
   MethodDescriptor_user *user = data;
-#ifdef WINDOWS
-#ifdef __MINGW32__
-  int fd = _open_osfhandle((long)osfd, O_RDWR);
-#else /* __MINGW32__ */
-  int fd = cygwin_attach_handle_to_fd("auth descriptor", 1, osfd, TRUE, GENERIC_READ|GENERIC_WRITE);
-#endif /* __MINGW32__ */
-#else /* WINDOWS */
-  int fd = osfd;
-#endif /* WINDOWS */
-  if (auth->peerCredentialsState != PCS_GOOD) {
-    if (!getPeerCredentials(auth, fd)) return 0;
-    if (checkPeerUser(&auth->peerCredentials, user->id)) auth->peerCredentialsState = PCS_GOOD;
-  }
-  return 1;
+  return getPeerCredentials(auth, OS_FILE_DESCRIPTOR(fd)) &&
+         checkPeerUser(&auth->peerCredentials, user->id);
 }
 
 /* the group method */
@@ -373,22 +367,10 @@ authGroup_release (void *data) {
 }
 
 static int
-authGroup_server (AuthDescriptor *auth, FileDescriptor osfd, void *data) {
+authGroup_server (AuthDescriptor *auth, FileDescriptor fd, void *data) {
   MethodDescriptor_group *group = data;
-#ifdef WINDOWS
-#ifdef __MINGW32__
-  int fd = _open_osfhandle((long)osfd, O_RDWR);
-#else /* __MINGW32__ */
-  int fd = cygwin_attach_handle_to_fd("auth descriptor", 1, osfd, TRUE, GENERIC_READ|GENERIC_WRITE);
-#endif /* __MINGW32__ */
-#else /* WINDOWS */
-  int fd = osfd;
-#endif /* WINDOWS */
-  if (auth->peerCredentialsState != PCS_GOOD) {
-    if (!getPeerCredentials(auth, fd)) return 0;
-    if (checkPeerGroup(&auth->peerCredentials, group->id)) auth->peerCredentialsState = PCS_GOOD;
-  }
-  return 1;
+  return getPeerCredentials(auth, OS_FILE_DESCRIPTOR(fd)) &&
+         checkPeerGroup(&auth->peerCredentials, group->id);
 }
 #endif /* CAN_CHECK_CREDENTIALS */
 
@@ -446,15 +428,15 @@ initializeMethodDescriptor (MethodDescriptor *method, const char *parameter, int
       if (perform &&
           (nameLength == strlen(definition->name)) &&
           (strncmp(name, definition->name, nameLength) == 0)) {
-        void *data;
-        if ((data = definition->initialize(parameter))) {
-          method->definition = definition;
-          method->perform = perform;
-          method->data = data;
-          return 1;
-        }
-        return 0;
+        void *data = definition->initialize(parameter);
+        if (!data) return 0;
+
+        method->definition = definition;
+        method->perform = perform;
+        method->data = data;
+        return 1;
       }
+
       ++definition;
     }
   }
@@ -489,7 +471,7 @@ authBegin (const char *parameter, int client) {
     }
 
     if ((auth->parameters = splitString(parameter, '+', &auth->count))) {
-      if ((auth->methods = malloc(auth->count * sizeof(*auth->methods)))) {
+      if ((auth->methods = malloc(ARRAY_SIZE(auth->methods, auth->count)))) {
         if (initializeMethodDescriptors(auth, client)) {
           return auth;
         }
@@ -530,7 +512,7 @@ authEnd (AuthDescriptor *auth) {
 
 int
 authPerform (AuthDescriptor *auth, FileDescriptor fd) {
-  int ok = 1;
+  int ok = 0;
 
 #ifdef CAN_CHECK_CREDENTIALS
   auth->peerCredentialsState = PCS_NEED;
@@ -540,19 +522,18 @@ authPerform (AuthDescriptor *auth, FileDescriptor fd) {
     int index;
     for (index=0; index<auth->count; ++index) {
       const MethodDescriptor *method = &auth->methods[index];
-      if (!method->perform(auth, fd, method->data)) {
-        ok = 0;
+      if (method->perform(auth, fd, method->data)) {
+        ok = 1;
         break;
       }
     }
   }
 
 #ifdef CAN_CHECK_CREDENTIALS
-  if (auth->peerCredentialsState == PCS_HAVE) {
-    LogPrint(LOG_ERR, "no matching user or group");
-    ok = 0;
+  if (auth->peerCredentialsState != PCS_NEED) {
+    if (auth->peerCredentialsState == PCS_HAVE) releasePeerCredentials(&auth->peerCredentials);
+    if (!ok) LogPrint(LOG_ERR, "no matching user or group");
   }
-  if (auth->peerCredentialsState != PCS_NEED) releasePeerCredentials(&auth->peerCredentials);
 #endif /* CAN_CHECK_CREDENTIALS */
 
   return ok;
