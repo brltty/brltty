@@ -418,7 +418,9 @@ invokeInputCallback (OperationEntry *operation) {
   TransferExtension *extension = operation->extension;
   size_t count;
 
-  if (extension->direction.input.callback) {
+  if (!extension->direction.input.callback) return 0;
+
+  {
     AsyncInputResult result;
     result.data = operation->data;
     result.buffer = extension->buffer;
@@ -427,17 +429,14 @@ invokeInputCallback (OperationEntry *operation) {
     result.error = operation->error;
     result.end = extension->direction.input.end;
     count = extension->direction.input.callback(&result);
-  } else {
-    count = extension->length;
-  }
-
-  if (count) {
-    memmove(extension->buffer, &extension->buffer[count],
-            extension->length -= count);
   }
 
   if (operation->error) return 0;
-  if (!extension->length) return 0;
+  if (extension->direction.input.end) return 0;
+
+  if (count)
+    memmove(extension->buffer, &extension->buffer[count],
+            extension->length -= count);
   return 1;
 }
 
@@ -445,19 +444,18 @@ static int
 invokeOutputCallback (OperationEntry *operation) {
   TransferExtension *extension = operation->extension;
 
+  if (!operation->error && (extension->length < extension->size)) return 1;
+
   if (extension->direction.output.callback) {
     AsyncOutputResult result;
     result.data = operation->data;
     result.buffer = extension->buffer;
     result.size = extension->size;
     result.error = operation->error;
-    result.count = extension->length;
     extension->direction.output.callback(&result);
   }
 
-  if (operation->error) return 0;
-  operation->finished = 0;
-  return extension->length < extension->size;
+  return 0;
 }
 
 static void
@@ -869,6 +867,7 @@ asyncWait (int duration) {
 
       if (!operation->finished) finishOperation(operation);
       if (function->methods->invokeCallback(operation)) {
+        operation->finished = 0;
         operation->error = 0;
       } else {
         deleteElement(operationElement);

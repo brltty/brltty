@@ -40,7 +40,6 @@ typedef struct {
   const void *buffer;
   size_t size;
   int error;
-  size_t count;
 } AsyncOutputResult;
 
 typedef void (*AsyncOutputCallback) (const AsyncOutputResult *result);
