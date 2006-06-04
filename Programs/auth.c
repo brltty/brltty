@@ -26,11 +26,11 @@
 #ifdef __MINGW32__
 #include <io.h>
 
-#define OS_FILE_DESCRIPTOR(fd) (_open_osfhandle((long)(fd), O_RDWR))
+#define GET_INT_FD(fd) (_open_osfhandle((long)(fd), O_RDWR))
 #else /* __MINGW32__ */
 #include <sys/cygwin.h>
 
-#define OS_FILE_DESCRIPTOR(fd) (cygwin_attach_handle_to_fd("auth descriptor", 1, (fd), TRUE, GENERIC_READ|GENERIC_WRITE))
+#define GET_INT_FD(fd) (cygwin_attach_handle_to_fd("auth descriptor", 1, (fd), TRUE, GENERIC_READ|GENERIC_WRITE))
 #endif /* __MINGW32__ */
 #else /* WINDOWS */
 #include <sys/socket.h>
@@ -39,7 +39,7 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 
-#define OS_FILE_DESCRIPTOR(fd) (fd)
+#define GET_INT_FD(fd) (fd)
 #endif /* WINDOWS */
 
 #if !defined(AF_LOCAL) && defined(AF_UNIX)
@@ -68,7 +68,7 @@
 typedef ucred_t *PeerCredentials;
 
 static int
-initializePeerCredentials (PeerCredentials *credentials, int fd) {
+retrievePeerCredentials (PeerCredentials *credentials, int fd) {
   *credentials = NULL;
   if (getpeerucred(fd, credentials) == -1) {
     LogError("getpeerucred");
@@ -117,7 +117,7 @@ checkPeerGroup (PeerCredentials *credentials, gid_t group) {
 typedef struct ucred PeerCredentials;
 
 static int
-initializePeerCredentials (PeerCredentials *credentials, int fd) {
+retrievePeerCredentials (PeerCredentials *credentials, int fd) {
   socklen_t length = sizeof(*credentials);
   if (getsockopt(fd, SOL_SOCKET, SO_PEERCRED, credentials, &length) != -1) return 1;
   LogError("getsockopt[SO_PEERCRED]");
@@ -147,7 +147,7 @@ typedef struct {
 } PeerCredentials;
 
 static int
-initializePeerCredentials (PeerCredentials *credentials, int fd) {
+retrievePeerCredentials (PeerCredentials *credentials, int fd) {
   if (getpeereid(fd, &credentials->euid, &credentials->egid) != -1) return 1;
   LogError("getpeereid");
   return 0;
@@ -254,9 +254,9 @@ authKeyfile_server (AuthDescriptor *auth, FileDescriptor fd, void *data) {
 
 #ifdef CAN_CHECK_CREDENTIALS
 static int
-getPeerCredentials (AuthDescriptor *auth, int fd) {
+getPeerCredentials (AuthDescriptor *auth, FileDescriptor fd) {
   if (auth->peerCredentialsState == PCS_NEED) {
-    auth->peerCredentialsState = initializePeerCredentials(&auth->peerCredentials, fd)? PCS_HAVE: PCS_CANT;
+    auth->peerCredentialsState = retrievePeerCredentials(&auth->peerCredentials, GET_INT_FD(fd))? PCS_HAVE: PCS_CANT;
   }
   return auth->peerCredentialsState == PCS_HAVE;
 }
@@ -313,7 +313,7 @@ authUser_release (void *data) {
 static int
 authUser_server (AuthDescriptor *auth, FileDescriptor fd, void *data) {
   MethodDescriptor_user *user = data;
-  return getPeerCredentials(auth, OS_FILE_DESCRIPTOR(fd)) &&
+  return getPeerCredentials(auth, fd) &&
          checkPeerUser(&auth->peerCredentials, user->id);
 }
 
@@ -369,7 +369,7 @@ authGroup_release (void *data) {
 static int
 authGroup_server (AuthDescriptor *auth, FileDescriptor fd, void *data) {
   MethodDescriptor_group *group = data;
-  return getPeerCredentials(auth, OS_FILE_DESCRIPTOR(fd)) &&
+  return getPeerCredentials(auth, fd) &&
          checkPeerGroup(&auth->peerCredentials, group->id);
 }
 #endif /* CAN_CHECK_CREDENTIALS */
