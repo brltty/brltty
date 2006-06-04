@@ -30,7 +30,7 @@
 #else /* __MINGW32__ */
 #include <sys/cygwin.h>
 
-#define GET_INT_FD(fd) (cygwin_attach_handle_to_fd("auth descriptor", 1, (fd), TRUE, GENERIC_READ|GENERIC_WRITE))
+#define GET_INT_FD(fd) (cygwin_attach_handle_to_fd("auth", -1, (fd), TRUE, GENERIC_READ|GENERIC_WRITE))
 #endif /* __MINGW32__ */
 #else /* WINDOWS */
 #include <sys/socket.h>
