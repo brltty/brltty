@@ -4467,6 +4467,7 @@ BRLTTY supports the following speech synthesizers:
     Code|Name@<hline>
     al|Alva@
     at|Albatross@
+    ba|BrlAPI@
     bl|BrailleLite@
     bm|Baum (Native, HT, PB1, PB2)@
     bn|BrailleNote@
