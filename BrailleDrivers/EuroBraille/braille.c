@@ -309,6 +309,9 @@ static int sendbyte(unsigned char c)
 
 static int WriteToBrlDisplay (BrailleDisplay *brl, int len, const unsigned char *data)
 {
+  static const unsigned char needsEscape[0X100] = {
+    [SOH] = 1, [EOT] = 1, [DLE] = 1, [ACK] = 1, [NACK] = 1
+  };
   unsigned char	buf[1024];
   unsigned char		*p = buf;
   unsigned char parity = 0;
@@ -322,36 +325,16 @@ static int WriteToBrlDisplay (BrailleDisplay *brl, int len, const unsigned char 
    *p++ = SOH;
    while (len--)
      {
-	switch (*data)
-	  {
-	   case SOH:
-	   case EOT:
-	   case ACK:
-	   case DLE:
-	   case NACK:
-	     *p++ = DLE;
-	  /* no break */
-	   default:
-	     *p++ = *data;
-	     parity ^= *data++;
-	  }
+	if (needsEscape[*data]) *p++ = DLE;
+        *p++ = *data;
+	parity ^= *data++;
      }
-   *p++ = PktNbr;
+   *p++ = PktNbr; /* Doesn't need to be prefixed since greater than 128 */
    parity ^= PktNbr;
    if (++PktNbr >= 256)
      PktNbr = 128;
-   switch (parity)
-     {
-      case SOH:
-      case EOT:
-      case ACK:
-      case DLE:
-      case NACK:
-	*p++ = DLE;
-      /* no break */
-      default:
-	*p++ = parity;
-     }
+   if (needsEscape[parity]) *p++ = DLE;
+   *p++ = parity;
    *p++ = EOT;
    brl->writeDelay += ((p - buf) * 1000 / chars_per_sec) + 1;
 #ifdef		LOG_IO
