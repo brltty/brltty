@@ -307,11 +307,12 @@ static int sendbyte(unsigned char c)
   return (serialWriteData(serialDevice, &c, 1));
 }
 
-static int WriteToBrlDisplay (BrailleDisplay *brl, int len, const unsigned char *data)
+static ssize_t brl_writePacket(BrailleDisplay *brl, const void *packet, size_t packetSize)
 {
   static const unsigned char needsEscape[0X100] = {
     [SOH] = 1, [EOT] = 1, [DLE] = 1, [ACK] = 1, [NACK] = 1
   };
+  const unsigned char *data = packet;
   unsigned char	buf[1024];
   unsigned char		*p = buf;
   unsigned char parity = 0;
@@ -319,11 +320,8 @@ static int WriteToBrlDisplay (BrailleDisplay *brl, int len, const unsigned char 
   int		logfd;
 #endif
 
-   if (!len)
-     return 1;
-
    *p++ = SOH;
-   while (len--)
+   while (packetSize--)
      {
 	if (needsEscape[*data]) *p++ = DLE;
         *p++ = *data;
@@ -345,13 +343,6 @@ static int WriteToBrlDisplay (BrailleDisplay *brl, int len, const unsigned char 
    close(logfd);
 #endif
    return (serialWriteData(serialDevice, buf, p - buf) == p - buf);
-}
-
-static ssize_t brl_writePacket(BrailleDisplay *brl, const void *p, size_t sz)
-{
-  if (!p)
-    return 0;
-  return (WriteToBrlDisplay(brl, sz, p));
 }
 
 static int brl_reset(BrailleDisplay *brl)
@@ -390,7 +381,7 @@ static int brl_open (BrailleDisplay *brl, char **parameters, const char *device)
      {
 	int i = 0;
 	unsigned char AskIdent[] = "\x2SI";
-	WriteToBrlDisplay (brl, sizeof(AskIdent), AskIdent);
+	brl_writePacket (brl, AskIdent, sizeof(AskIdent));
 	while (!NbCols)
 	  {
 	     drainBrailleOutput (brl, 100);
@@ -459,7 +450,7 @@ static void brl_writeWindow (BrailleDisplay *brl)
 	     for (j = 0;
 		  j < i;
 		  *p++ = outputTable[(prevdata[j++] = brl->buffer[j])]);
-	     WriteToBrlDisplay (brl, p - OutBuf, OutBuf);
+	     brl_writePacket (brl, OutBuf, p - OutBuf);
 	     ReWrite = 0;
 	  }
      }
@@ -492,7 +483,7 @@ static void	brl_writeVisual(BrailleDisplay *brl)
       *p++ = 'L';
       for (j = 0; j < i; j++)
 	*p++ = brl->buffer[j];
-      WriteToBrlDisplay(brl, p - OutBuf, OutBuf);
+      brl_writePacket(brl, OutBuf, p - OutBuf);
       ReWrite_LCD = 0;
     }
 }
@@ -1056,7 +1047,7 @@ static int readbrlkey(BrailleDisplay *brl)
 		    unsigned char AskIdent[] = {2, 'S', 'I'};
 
 		    LogPrint(LOG_INFO, "EuroBraille terminal came in PC mode.");
-		    WriteToBrlDisplay(brl, sizeof(AskIdent), AskIdent);
+		    brl_writePacket(brl, AskIdent, sizeof(AskIdent));
 		    JustIdentified = 0;
 		    ReWrite = 1; /* to refresh display */
 		    context = 0;
