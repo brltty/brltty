@@ -277,7 +277,7 @@ static int	alt = 0;
 #define EOT     0x04
 #define ACK     0x06
 #define DLE     0x10
-#define NACK    0x15
+#define NAK    0x15
 
 #define PRT_E_PAR 0x01		/* parity error */
 #define PRT_E_NUM 0x02		/* frame numver error */
@@ -310,10 +310,10 @@ static int sendbyte(unsigned char c)
 static ssize_t brl_writePacket(BrailleDisplay *brl, const void *packet, size_t packetSize)
 {
   static const unsigned char needsEscape[0X100] = {
-    [SOH] = 1, [EOT] = 1, [DLE] = 1, [ACK] = 1, [NACK] = 1
+    [SOH] = 1, [EOT] = 1, [DLE] = 1, [ACK] = 1, [NAK] = 1
   };
   const unsigned char *data = packet;
-  unsigned char	buf[1024];
+  unsigned char	buf[(packetSize + 3) * 2];
   unsigned char		*p = buf;
   unsigned char parity = 0;
 #ifdef	LOG_IO
@@ -348,7 +348,7 @@ static ssize_t brl_writePacket(BrailleDisplay *brl, const void *packet, size_t p
 static int brl_reset(BrailleDisplay *brl)
 {
   static const unsigned char packet[] = {0X02, 'S', 'I'};
-  LogPrint(LOG_INFO, "EuroBraille: Reset hardware asked.\n");
+  LogPrint(LOG_INFO, "EuroBraille: hardware reset requested");
   return (brl_writePacket(brl, packet, sizeof(packet)) == sizeof(packet));
 }
 
@@ -380,8 +380,7 @@ static int brl_open (BrailleDisplay *brl, char **parameters, const char *device)
    while (!NbCols)
      {
 	int i = 0;
-	unsigned char AskIdent[] = "\x2SI";
-	brl_writePacket (brl, AskIdent, sizeof(AskIdent));
+	brl_reset(brl);
 	while (!NbCols)
 	  {
 	     drainBrailleOutput (brl, 100);
@@ -928,7 +927,7 @@ static ssize_t brl_readPacket(BrailleDisplay *brl, void *packet, size_t size)
     }
   /* if bad parity */
   serialDiscardInput(serialDevice);
-  sendbyte(NACK);
+  sendbyte(NAK);
   sendbyte(PRT_E_PAR); /* error code of a parity error */
   return 0;
 }
@@ -968,7 +967,7 @@ static int readbrlkey(BrailleDisplay *brl)
       else
 	switch (c)
 	  {
-	  case NACK:
+	  case NAK:
 	    ErrFlag = 1;
 	    /* no break */
 	  case ACK:
@@ -989,7 +988,7 @@ static int readbrlkey(BrailleDisplay *brl)
 		parity ^= buf[i];
 	      if (parity != buf[pos - 1])
 		{
-		  sendbyte (NACK);
+		  sendbyte (NAK);
 		  sendbyte (PRT_E_PAR);
 		}
 	      else if (buf[pos - 2] == old_pktnbr)
@@ -1044,10 +1043,8 @@ static int readbrlkey(BrailleDisplay *brl)
 		case 'B': /* PC-BRAILLE mode */
 		  if (JustIdentified == 0)
 		  {
-		    unsigned char AskIdent[] = {2, 'S', 'I'};
-
 		    LogPrint(LOG_INFO, "EuroBraille terminal came in PC mode.");
-		    brl_writePacket(brl, AskIdent, sizeof(AskIdent));
+		    brl_reset(brl);
 		    JustIdentified = 0;
 		    ReWrite = 1; /* to refresh display */
 		    context = 0;
