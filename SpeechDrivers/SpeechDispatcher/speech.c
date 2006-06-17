@@ -22,6 +22,11 @@
 
 #include "Programs/misc.h"
 
+typedef enum {
+  PARM_PORT
+} DriverParameter;
+#define SPKPARMS "port"
+
 //#define SPK_HAVE_EXPRESS
 //#define SPK_HAVE_TRACK
 #define SPK_HAVE_RATE
@@ -34,6 +39,20 @@ static SPDConnection *connection = NULL;
 
 static int
 spk_open (char **parameters) {
+  if (parameters[PARM_PORT] && *parameters[PARM_PORT]) {
+    static const int minimumPort = 0X1;
+    static const int maximumPort = 0XFFFF;
+    int port = 0;
+
+    if (validateInteger(&port, parameters[PARM_PORT], &minimumPort, &maximumPort)) {
+      char number[0X10];
+      snprintf(number, sizeof(number), "%d", port);
+      setenv("SPEECHD_PORT", number, 1);
+    } else {
+      LogPrint(LOG_WARNING, "%s: %s", "invalid port number", parameters[PARM_PORT]);
+    }
+  }
+
   if ((connection = spd_open("brltty", "driver", NULL, SPD_MODE_THREADED))) {
     return 1;
   } else {

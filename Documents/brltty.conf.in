@@ -232,6 +232,9 @@
 #speech-parameters mp:Name= # [/path/to/mikropuhe/name.pu5]
 #speech-parameters mp:Pitch=0 # [-10-10]
 
+# SpeechDispatcher Speech Driver Parameters
+#speech-parameters sd:Port=6560 # [1-65535] # [1-65535]
+
 # Swift Speech Driver Parameters
 #speech-parameters sw:Name= # [voice,/path/to/voice]
 

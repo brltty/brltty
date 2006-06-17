@@ -1,0 +1,21 @@
+This directory contains the BRLTTY speech driver for the SpeechDispatcher text
+to speech server [http://www.freebsoft.org/speechd]. It was implemented, and is
+being maintained, by Dave Mielke <dave@mielke.cc>.
+
+BRLTTY's configure script automatically includes this driver if Speech
+Dispatcher has been installed. The default is to check the directories /usr,
+/usr/local, /usr/local/speech-dispatcher, /usr/local/speechd,
+/opt/speech-dispatcher, and /opt/speechd. The actual location can be explicitly
+specified via --with-speechd.
+
+If this driver is built as a dynamically loaded shared object (the default),
+i.e. it isn't linked into BRLTTY's binary via --with-speech-driver, then the
+directory $SPEECHD_HOME/lib must be added to the colon-delimited list of
+directories in the LD_LIBRARY_PATH environment variable before BRLTTY is
+started because Speech Dispatcher's own shared objects don't contain run-time
+search paths for their internal dependencies.
+
+This driver recognizes the following parameters:
+
+   Parameter Settings
+   port      1-65535
