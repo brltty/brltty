@@ -1,0 +1,28 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2006 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU General Public License, as published by the Free Software
+# Foundation.  Please see the file COPYING for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+DRIVER_CODE = sd
+DRIVER_NAME = SpeechDispatcher
+DRIVER_COMMENT = text to speech server
+DRIVER_VERSION = 
+DRIVER_COPYRIGHT = 
+SPK_OBJS = @speech_libraries_sd@
+include $(SRC_TOP)speech.mk
+
+speech.$O:
+	$(CC) $(SPK_CFLAGS) -I$(SPEECHD_ROOT)/include -c $(SRC_DIR)/speech.c
+

@@ -192,6 +192,7 @@
 #speech-driver	fv	# Festival (text to speech engine)
 #speech-driver	gs	# GenericSay (pipes to /usr/local/bin/say)
 #speech-driver	mp	# Mikropuhe (text to speech engine)
+#speech-driver	sd	# SpeechDispatcher (text to speech server)
 #speech-driver	sw	# Swift (text to speech engine)
 #speech-driver	th	# Theta (text to speech engine)
 #speech-driver	vv	# ViaVoice (text to speech engine)

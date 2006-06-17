@@ -649,6 +649,24 @@ for any additional display-specific instructions.
         or <tt>/opt/mikropuhe</>.
         This is equivalent to specifying <tt/--with-mikropuhe/.
     </descrip>
+  <tag><tt/--with-speechd=/<em/directory/<label id="build-speechd"></tag>
+    Specify the installed location of the speech-dispatcher text-to-speech package,
+    and build the speech-dispatcher speech synthesizer driver.
+    Any of the following words can also be used as the operand of this option:
+    <descrip>
+      <tag/no/
+        Don't build the driver.
+        This is equivalent to specifying <tt/--without-speechd/.
+      <tag/yes/
+        Build the driver if the package can be found in
+        <tt>/usr</>,
+        <tt>/usr/local</>,
+        <tt>/usr/local/speech-dispatcher</>,
+        <tt>/usr/local/speechd</>,
+        <tt>/opt/speech-dispatcher</>,
+        or <tt>/opt/speechd</>.
+        This is equivalent to specifying <tt/--with-speechd/.
+    </descrip>
   <tag><tt/--with-swift=/<em/directory/<label id="build-swift"></tag>
     Specify the installed location of the Swift text-to-speech package,
     and build the Swift speech synthesizer driver.
