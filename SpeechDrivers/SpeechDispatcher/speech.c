@@ -23,9 +23,12 @@
 #include "Programs/misc.h"
 
 typedef enum {
-  PARM_PORT
+  PARM_PORT,
+  PARM_MODULE,
+  PARM_LANGUAGE,
+  PARM_VOICE
 } DriverParameter;
-#define SPKPARMS "port"
+#define SPKPARMS "port", "module", "language", "voice"
 
 //#define SPK_HAVE_EXPRESS
 //#define SPK_HAVE_TRACK
@@ -54,6 +57,37 @@ spk_open (char **parameters) {
   }
 
   if ((connection = spd_open("brltty", "driver", NULL, SPD_MODE_THREADED))) {
+    if (parameters[PARM_MODULE] && *parameters[PARM_MODULE]) {
+      spd_set_output_module(connection, parameters[PARM_MODULE]);
+    }
+
+    if (parameters[PARM_LANGUAGE] && *parameters[PARM_LANGUAGE]) {
+      spd_set_language(connection, parameters[PARM_LANGUAGE]);
+    }
+
+    if (parameters[PARM_VOICE] && *parameters[PARM_VOICE]) {
+      static const SPDVoiceType voices[] = {
+        SPD_MALE1, SPD_FEMALE1,
+        SPD_MALE2, SPD_FEMALE2,
+        SPD_MALE3, SPD_FEMALE3,
+        SPD_CHILD_MALE, SPD_CHILD_FEMALE
+      };
+      static const char *choices[] = {
+        "male1", "female1",
+        "male2", "female2",
+        "male3", "female3",
+        "child_male", "child_female",
+        NULL
+      };
+      unsigned int choice = 0;
+
+      if (validateChoice(&choice, parameters[PARM_VOICE], choices)) {
+        spd_set_voice_type(connection, voices[choice]);
+      } else {
+        LogPrint(LOG_WARNING, "%s: %s", "invalid voice type", parameters[PARM_VOICE]);
+      }
+    }
+
     return 1;
   } else {
     LogPrint(LOG_ERR, "speech dispatcher open failure");
