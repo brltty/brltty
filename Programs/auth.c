@@ -173,19 +173,18 @@ checkPeerGroup (PeerCredentials *credentials, gid_t group) {
 
 /* general type definitions */
 
-typedef int (*MethodPerformer) (AuthDescriptor *auth, FileDescriptor fd, void *data);
+typedef int (*MethodPerform) (AuthDescriptor *auth, FileDescriptor fd, void *data);
 
 typedef struct {
   const char *name;
   void *(*initialize) (const char *parameter);
   void (*release) (void *data);
-  MethodPerformer client;
-  MethodPerformer server;
+  MethodPerform client;
+  MethodPerform server;
 } MethodDefinition;
 
 typedef struct {
   const MethodDefinition *definition;
-  MethodPerformer perform;
   void *data;
 } MethodDescriptor;
 
@@ -197,10 +196,13 @@ typedef enum {
 } PeerCredentialsState;
 #endif /* CAN_CHECK_CREDENTIALS */
 
+typedef int (*AuthPerform) (AuthDescriptor *auth, FileDescriptor fd);
+
 struct AuthDescriptorStruct {
   int count;
   char **parameters;
   MethodDescriptor *methods;
+  AuthPerform perform;
 
 #ifdef CAN_CHECK_CREDENTIALS
   PeerCredentialsState peerCredentialsState;
@@ -411,7 +413,7 @@ releaseMethodDescriptors (AuthDescriptor *auth, int count) {
 }
 
 static int
-initializeMethodDescriptor (MethodDescriptor *method, const char *parameter, int client) {
+initializeMethodDescriptor (MethodDescriptor *method, const char *parameter) {
   const char *name;
   int nameLength;
 
@@ -424,15 +426,12 @@ initializeMethodDescriptor (MethodDescriptor *method, const char *parameter, int
   {
     const MethodDefinition *definition = methodDefinitions;
     while (definition->name) {
-      MethodPerformer perform = client? definition->client: definition->server;
-      if (perform &&
-          (nameLength == strlen(definition->name)) &&
+      if ((nameLength == strlen(definition->name)) &&
           (strncmp(name, definition->name, nameLength) == 0)) {
         void *data = definition->initialize(parameter);
         if (!data) return 0;
 
         method->definition = definition;
-        method->perform = perform;
         method->data = data;
         return 1;
       }
@@ -446,10 +445,10 @@ initializeMethodDescriptor (MethodDescriptor *method, const char *parameter, int
 }
 
 static int
-initializeMethodDescriptors (AuthDescriptor *auth, int client) {
+initializeMethodDescriptors (AuthDescriptor *auth) {
   int index = 0;
   while (index < auth->count) {
-    if (!initializeMethodDescriptor(&auth->methods[index], auth->parameters[index], client)) {
+    if (!initializeMethodDescriptor(&auth->methods[index], auth->parameters[index])) {
       releaseMethodDescriptors(auth, index);
       return 0;
     }
@@ -459,13 +458,15 @@ initializeMethodDescriptors (AuthDescriptor *auth, int client) {
 }
 
 static AuthDescriptor *
-authBegin (const char *parameter, int client) {
+authBegin (const char *parameter, const char *defaultParameter, AuthPerform perform) {
   AuthDescriptor *auth;
 
   if ((auth = malloc(sizeof(*auth)))) {
+    auth->perform = perform;
+
     if (!parameter) parameter = "";
     if (!*parameter) {
-      parameter = client? "": "user";
+      parameter = defaultParameter;
     } else if (strcmp(parameter, "none") == 0) {
       parameter = "";
     }
@@ -477,7 +478,7 @@ authBegin (const char *parameter, int client) {
       }
 
       if ((auth->methods = malloc(ARRAY_SIZE(auth->methods, auth->count)))) {
-        if (initializeMethodDescriptors(auth, client)) return auth;
+        if (initializeMethodDescriptors(auth)) return auth;
 
         free(auth->methods);
       } else {
@@ -495,26 +496,18 @@ authBegin (const char *parameter, int client) {
   return NULL;
 }
 
+static int
+authPerformClient (AuthDescriptor *auth, FileDescriptor fd) {
+  return 1;
+}
+
 AuthDescriptor *
 authBeginClient (const char *parameter) {
-  return authBegin(parameter, 1);
+  return authBegin(parameter, "", authPerformClient);
 }
 
-AuthDescriptor *
-authBeginServer (const char *parameter) {
-  return authBegin(parameter, 0);
-}
-
-void
-authEnd (AuthDescriptor *auth) {
-  releaseMethodDescriptors(auth, auth->count);
-  if (auth->methods) free(auth->methods);
-  deallocateStrings(auth->parameters);
-  free(auth);
-}
-
-int
-authPerform (AuthDescriptor *auth, FileDescriptor fd) {
+static int
+authPerformServer (AuthDescriptor *auth, FileDescriptor fd) {
   int ok = 0;
 
   if (!auth->count) return 1;
@@ -527,7 +520,11 @@ authPerform (AuthDescriptor *auth, FileDescriptor fd) {
     int index;
     for (index=0; index<auth->count; ++index) {
       const MethodDescriptor *method = &auth->methods[index];
-      if (method->perform(auth, fd, method->data)) {
+
+      if (!method->definition->server) continue;
+      if (method->definition->client) continue;
+
+      if (method->definition->server(auth, fd, method->data)) {
         ok = 1;
         break;
       }
@@ -541,7 +538,35 @@ authPerform (AuthDescriptor *auth, FileDescriptor fd) {
   }
 #endif /* CAN_CHECK_CREDENTIALS */
 
+  if (!ok) {
+    int index;
+    for (index=0; index<auth->count; ++index) {
+      const MethodDescriptor *method = &auth->methods[index];
+
+      if (!method->definition->server) continue;
+      if (!method->definition->client) continue;
+    }
+  }
+
   return ok;
+}
+
+AuthDescriptor *
+authBeginServer (const char *parameter) {
+  return authBegin(parameter, "user", authPerformServer);
+}
+
+void
+authEnd (AuthDescriptor *auth) {
+  releaseMethodDescriptors(auth, auth->count);
+  if (auth->methods) free(auth->methods);
+  deallocateStrings(auth->parameters);
+  free(auth);
+}
+
+int
+authPerform (AuthDescriptor *auth, FileDescriptor fd) {
+  return auth->perform(auth, fd);
 }
 
 void
