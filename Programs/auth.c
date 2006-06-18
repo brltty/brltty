@@ -471,10 +471,13 @@ authBegin (const char *parameter, int client) {
     }
 
     if ((auth->parameters = splitString(parameter, '+', &auth->count))) {
+      if (!auth->count) {
+        auth->methods = NULL;
+        return auth;
+      }
+
       if ((auth->methods = malloc(ARRAY_SIZE(auth->methods, auth->count)))) {
-        if (initializeMethodDescriptors(auth, client)) {
-          return auth;
-        }
+        if (initializeMethodDescriptors(auth, client)) return auth;
 
         free(auth->methods);
       } else {
@@ -505,7 +508,7 @@ authBeginServer (const char *parameter) {
 void
 authEnd (AuthDescriptor *auth) {
   releaseMethodDescriptors(auth, auth->count);
-  free(auth->methods);
+  if (auth->methods) free(auth->methods);
   deallocateStrings(auth->parameters);
   free(auth);
 }
@@ -513,6 +516,8 @@ authEnd (AuthDescriptor *auth) {
 int
 authPerform (AuthDescriptor *auth, FileDescriptor fd) {
   int ok = 0;
+
+  if (!auth->count) return 1;
 
 #ifdef CAN_CHECK_CREDENTIALS
   auth->peerCredentialsState = PCS_NEED;
