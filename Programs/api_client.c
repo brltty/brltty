@@ -386,7 +386,7 @@ static int tryHostName(char *hostName) {
       char path[lpath+lport+1];
       memcpy(path,BRLAPI_SOCKETPATH,lpath);
       memcpy(path+lpath,port,lport+1);
-      while ((fd = CreateFile(path,GENERIC_READ|GENERIC_WRITE,
+      while ((defaultHandle.fileDescriptor = CreateFile(path,GENERIC_READ|GENERIC_WRITE,
 	      FILE_SHARE_READ|FILE_SHARE_WRITE,NULL,OPEN_EXISTING,0,NULL))
 	  == INVALID_HANDLE_VALUE) {
 	if (GetLastError() != ERROR_PIPE_BUSY) {
@@ -1184,7 +1184,7 @@ static int packetReady(brlapi_fileDescriptor osfd)
 #ifdef WINDOWS
   if (defaultHandle.addrfamily == PF_LOCAL) {
     DWORD avail;
-    if (!PeekNamedPipe(fd, NULL, 0, NULL, &avail, NULL)) {
+    if (!PeekNamedPipe(osfd, NULL, 0, NULL, &avail, NULL)) {
       brlapi_errfun = "packetReady";
       brlapi_errno = BRLERR_LIBCERR;
       brlapi_libcerrno = errno;
