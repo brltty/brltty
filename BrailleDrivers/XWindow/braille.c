@@ -364,7 +364,7 @@ static void keypress(Widget w, XEvent *event, String *params, Cardinal *num_para
   if (modifiers & Mod1Mask)
     keypressed |= BRL_FLG_CHAR_META;
   if (modifiers & (ShiftMask|LockMask))
-    keypressed |= BRL_FLG_CHAR_SHIFT;
+    keypressed |= BRL_FLG_CHAR_UPPER;
   if (event->type == KeyPress)
     keypressed |= BRL_FLG_REPEAT_DELAY | BRL_FLG_REPEAT_INITIAL;
   else
