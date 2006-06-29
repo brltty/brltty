@@ -560,7 +560,7 @@ void toX_f(const char *display) {
 
 	  case BRL_BLK_PASSKEY:
 	    switch (code&BRL_MSK_ARG) {
-	      case BRL_KEY_ENTER:         keysym = XK_KP_Enter;  break;
+	      case BRL_KEY_ENTER:         keysym = XK_Return;    break;
 	      case BRL_KEY_TAB:           keysym = XK_Tab;       break;
 	      case BRL_KEY_BACKSPACE:     keysym = XK_BackSpace; break;
 	      case BRL_KEY_ESCAPE:        keysym = XK_Escape;    break;
@@ -613,6 +613,7 @@ void toX_f(const char *display) {
 		fprintf(stderr,"unexpected key: %" PRIX32 "\n",code);
 		continue;
 	    }
+	    break;
 	  default:
 	    fprintf(stderr,"unexpected block type %" PRIX32 "\n",code&BRL_MSK_BLK);
 	    continue;
