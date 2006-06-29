@@ -26,10 +26,9 @@
 
 typedef enum {
   PARM_HOSTNAME=0,
-  PARM_AUTHKEY=1,
-  PARM_TTY=2
+  PARM_AUTHKEY=1
 } DriverParameter;
-#define BRLPARMS "host", "key", "tty"
+#define BRLPARMS "host", "key"
 
 #define BRL_HAVE_VISUAL_DISPLAY
 #include "Programs/brl_driver.h"
@@ -54,15 +53,12 @@ static int restart;
 /* Opens a connection with BrlAPI's server */
 static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
 {
-  int ttyMin = -1, tty = -1;
   brlapi_settings_t settings;
   settings.hostName = parameters[PARM_HOSTNAME];
   settings.authKey = parameters[PARM_AUTHKEY];
-  if (!validateInteger(&tty, parameters[PARM_TTY], &ttyMin, NULL))
-    LogPrint(LOG_WARNING, "%s: %s", "invalid TTY", parameters[PARM_TTY]);
   CHECK((brlapi_initializeConnection(&settings, &settings)>=0), out);
   LogPrint(LOG_DEBUG, "Connected to %s using %s", settings.hostName, settings.authKey);
-  CHECK((brlapi_getTty(tty, NULL)>=0), out0);
+  CHECK((brlapi_getTtyPath(NULL, 0, NULL)>=0), out0);
   LogPrint(LOG_DEBUG, "Got tty successfully");
   CHECK((brlapi_getDisplaySize(&brl->x, &brl->y)==0), out1);
   LogPrint(LOG_DEBUG,"Found out display size: %dx%d", brl->x, brl->y);
