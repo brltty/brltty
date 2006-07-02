@@ -19,7 +19,7 @@ SRC_TOP = @top_srcdir@/
 SRC_DIR = @srcdir@
 # VPATH = @srcdir@
 
-BLD_TOP = @top_builddir@
+BLD_TOP = ./@top_builddir@/
 BLD_DIR = @builddir@
 
 O = @OBJEXT@
