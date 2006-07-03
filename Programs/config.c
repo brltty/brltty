@@ -640,7 +640,9 @@ getPreferences (void) {
 int 
 savePreferences (void) {
   int ok = 0;
-  int fd = open(preferencesFile, O_WRONLY | O_CREAT | O_TRUNC);
+  int fd = open(preferencesFile,
+                O_WRONLY | O_CREAT | O_TRUNC,
+                S_IRUSR | S_IWUSR);
   if (fd != -1) {
     int length = write(fd, &prefs, sizeof(prefs));
     if (length == sizeof(prefs)) {
