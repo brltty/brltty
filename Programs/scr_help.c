@@ -63,7 +63,17 @@ loadPages (const char *file) {
   unsigned long characterCount = 0;
   int bytesRead;
 
-  if ((fileDescriptor = open(file, O_RDONLY)) == -1) {
+  {
+    int flags = O_RDONLY;
+
+#ifdef O_BINARY
+    flags |= O_BINARY;
+#endif /* O_BINARY */
+
+    fileDescriptor = open(file, flags);
+  }
+
+  if (fileDescriptor == -1) {
     LogError("Help file open");
     goto failure;
   }
