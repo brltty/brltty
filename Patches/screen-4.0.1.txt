@@ -53,7 +53,7 @@ Instructions
    make
 
 
-7. Now you can run brltty and then screen
+7. Now you can run screen and then brltty
 
 
 Notes:
