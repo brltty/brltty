@@ -30,6 +30,10 @@
 #include <sys/stat.h>
 #include <limits.h>
 
+#ifndef O_BINARY
+#define O_BINARY 0
+#endif /* O_BINARY */
+
 #ifdef HAVE_SYS_WAIT_H
 #include <sys/wait.h>
 #endif /* HAVE_SYS_WAIT_H */
@@ -508,7 +512,7 @@ changedPreferences (void) {
 int
 loadPreferences (int change) {
   int ok = 0;
-  int fd = open(preferencesFile, O_RDONLY);
+  int fd = open(preferencesFile, O_RDONLY|O_BINARY);
   if (fd != -1) {
     Preferences newPreferences;
     int length = read(fd, &newPreferences, sizeof(newPreferences));
@@ -641,7 +645,7 @@ int
 savePreferences (void) {
   int ok = 0;
   int fd = open(preferencesFile,
-                O_WRONLY | O_CREAT | O_TRUNC,
+                O_WRONLY | O_CREAT | O_TRUNC | O_BINARY,
                 S_IRUSR | S_IWUSR);
   if (fd != -1) {
     int length = write(fd, &prefs, sizeof(prefs));

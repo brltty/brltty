@@ -22,6 +22,10 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
+#ifndef O_BINARY
+#define O_BINARY 0
+#endif /* O_BINARY */
+
 #include "misc.h"
 #include "scr.h"
 #include "scr_help.h"
@@ -63,17 +67,7 @@ loadPages (const char *file) {
   unsigned long characterCount = 0;
   int bytesRead;
 
-  {
-    int flags = O_RDONLY;
-
-#ifdef O_BINARY
-    flags |= O_BINARY;
-#endif /* O_BINARY */
-
-    fileDescriptor = open(file, flags);
-  }
-
-  if (fileDescriptor == -1) {
+  if ((fileDescriptor = open(file, O_RDONLY|O_BINARY)) == -1) {
     LogError("Help file open");
     goto failure;
   }
