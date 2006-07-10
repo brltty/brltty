@@ -58,6 +58,10 @@ static const DotsTable dots12345678 = {
   0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80
 };
 
+static const DotsTable dots14253678 = {
+  0X01, 0X04, 0X10, 0X02, 0X08, 0X20, 0X40, 0X80
+};
+
 static unsigned char
 mapDots (unsigned char input, const DotsTable from, const DotsTable to) {
   unsigned char output = 0;
@@ -154,6 +158,7 @@ typedef struct {
 static const FormatEntry formatEntries[] = {
   {"tbl", readTable_tbl, writeTable_tbl, NULL},
   {"a2b", readTable_bin, writeTable_bin, &dots12345678},
+  {"sbl", readTable_bin, writeTable_bin, &dots14253678},
   {NULL}
 };
 
