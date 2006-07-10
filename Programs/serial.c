@@ -374,6 +374,27 @@ serialSetBaud (SerialDevice *serial, int baud) {
 }
 
 int
+serialValidateBaud (int *baud, const char *description, const char *word, const int *choices) {
+  if (!*word || isInteger(baud, word)) {
+    const BaudEntry *entry = getBaudEntry(*baud);
+    if (entry) {
+      if (!choices) return 1;
+
+      while (*choices) {
+        if (*baud == *choices) return 1;
+        ++choices;
+      }
+
+      LogPrint(LOG_ERR, "Unsupported %s: %d", description, *baud);
+      return 0;
+    }
+  }
+
+  LogPrint(LOG_ERR, "Invalid %s: %d", description, *baud);
+  return 0;
+}
+
+int
 serialSetDataBits (SerialDevice *serial, int bits) {
 #ifdef WINDOWS
   if ((bits < 5) || (bits > 8)) {
@@ -805,176 +826,6 @@ serialFlushAttributes (SerialDevice *serial) {
 }
 
 int
-isSerialDevice (const char **path) {
-  if (isQualifiedDevice(path, "serial")) return 1;
-  return !isQualifiedDevice(path, NULL);
-}
-
-int
-serialValidateBaud (int *baud, const char *description, const char *word, const int *choices) {
-  if (!*word || isInteger(baud, word)) {
-    const BaudEntry *entry = getBaudEntry(*baud);
-    if (entry) {
-      if (!choices) return 1;
-
-      while (*choices) {
-        if (*baud == *choices) return 1;
-        ++choices;
-      }
-
-      LogPrint(LOG_ERR, "Unsupported %s: %d", description, *baud);
-      return 0;
-    }
-  }
-
-  LogPrint(LOG_ERR, "Invalid %s: %d", description, *baud);
-  return 0;
-}
-
-SerialDevice *
-serialOpenDevice (const char *path) {
-  SerialDevice *serial;
-  if ((serial = malloc(sizeof(*serial)))) {
-    char *device;
-    if ((device = getDevicePath(path))) {
-#ifdef WINDOWS
-      if ((serial->fileHandle = CreateFile(device, GENERIC_READ|GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL)) != INVALID_HANDLE_VALUE) {
-        serial->fileDescriptor = -1;
-#else /* WINDOWS */
-      if ((serial->fileDescriptor = open(device, O_RDWR|O_NOCTTY|O_NONBLOCK)) != -1) {
-        if (isatty(serial->fileDescriptor)) {
-#endif /* WINDOWS */
-          if (serialReadAttributes(serial)) {
-            serialCopyAttributes(&serial->originalAttributes, &serial->currentAttributes);
-            serialInitializeAttributes(&serial->pendingAttributes);
-
-            serial->stream = NULL;
-
-            serial->linesState = 0;
-            serial->waitLines = 0;
-
-#ifdef HAVE_POSIX_THREADS
-            serial->currentFlowControlProc = NULL;
-            serial->pendingFlowControlProc = NULL;
-            serial->flowControlRunning = 0;
-#endif /* HAVE_POSIX_THREADS */
-
-            LogPrint(LOG_DEBUG, "serial device opened: %s: fd=%d",
-                     device,
-#ifdef WINDOWS
-		     (int)serial->fileHandle
-#else /* WINDOWS */
-		     serial->fileDescriptor
-#endif /* WINDOWS */
-		     );
-            free(device);
-            return serial;
-          }
-#ifdef WINDOWS
-        CloseHandle(serial->fileHandle);
-#else /* WINDOWS */
-        } else {
-          LogPrint(LOG_ERR, "Not a serial device: %s", device);
-        }
-        close(serial->fileDescriptor);
-#endif /* WINDOWS */
-      } else {
-        LogPrint(LOG_ERR, "Cannot open '%s': %s", device, strerror(errno));
-      }
-
-      free(device);
-    }
-
-    free(serial);
-  } else {
-    LogError("serial device allocation");
-  }
-  return NULL;
-}
-
-void
-serialCloseDevice (SerialDevice *serial) {
-#ifdef HAVE_POSIX_THREADS
-  serialStopFlowControlThread(serial);
-#endif /* HAVE_POSIX_THREADS */
-
-  serialWriteAttributes(serial, &serial->originalAttributes);
-
-  if (serial->stream) {
-    fclose(serial->stream);
-  }
-
-#ifdef WINDOWS
-  else if (serial->fileDescriptor < 0) {
-    CloseHandle(serial->fileHandle);
-  }
-#endif /* WINDOWS */
-
-  else {
-    close(serial->fileDescriptor);
-  }
-
-  free(serial);
-}
-
-int
-serialRestartDevice (SerialDevice *serial, int baud) {
-#ifdef HAVE_POSIX_THREADS
-  FlowControlProc flowControlProc = serial->pendingFlowControlProc;
-#endif /* HAVE_POSIX_THREADS */
-
-  if (!serialDiscardOutput(serial)) return 0;
-
-#ifdef WINDOWS
-  if (!ClearCommError(serial->fileHandle, NULL, NULL)) return 0;
-#else /* WINDOWS */
-  if (!serialSetSpeed(serial, B0)) return 0;
-#endif /* WINDOWS */
-
-#ifdef HAVE_POSIX_THREADS
-  serial->pendingFlowControlProc = NULL;
-#endif /* HAVE_POSIX_THREADS */
-  if (!serialFlushAttributes(serial)) return 0;
-
-  approximateDelay(500);
-  if (!serialDiscardInput(serial)) return 0;
-  if (!serialSetBaud(serial, baud)) return 0;
-
-#ifdef HAVE_POSIX_THREADS
-  serial->pendingFlowControlProc = flowControlProc;
-#endif /* HAVE_POSIX_THREADS */
-  if (!serialFlushAttributes(serial)) return 0;
-
-  return 1;
-}
-
-FILE *
-serialGetStream (SerialDevice *serial) {
-  if (!serial->stream) {
-#ifdef WINDOWS
-    if (serial->fileDescriptor < 0) {
-#ifdef __MINGW32__
-      if ((serial->fileDescriptor = _open_osfhandle((long)serial->fileHandle, O_RDWR)) < 0) {
-        LogError("open_osfhandle");
-#else /* __CYGWIN__ */
-      if ((serial->fileDescriptor = cygwin_attach_handle_to_fd("serialdevice", -1, serial->fileHandle, TRUE, GENERIC_READ|GENERIC_WRITE)) < 0) {
-        LogError("cygwin_attach_handle_to_fd");
-#endif /* __CYGWIN__ */
-        return NULL;
-      }
-    }
-#endif /* WINDOWS */
-
-    if (!(serial->stream = fdopen(serial->fileDescriptor, "ab+"))) {
-      LogError("fdopen");
-      return NULL;
-    }
-  }
-
-  return serial->stream;
-}
-
-int
 serialAwaitInput (SerialDevice *serial, int timeout) {
   if (!serialFlushAttributes(serial)) return 0;
 
@@ -1287,4 +1138,185 @@ serialWaitLineCTS (SerialDevice *serial, int up, int flank) {
 int
 serialWaitLineDSR (SerialDevice *serial, int up, int flank) {
   return serialWaitLine(serial, SERIAL_LINE_DSR, up, flank);
+}
+
+SerialDevice *
+serialOpenDevice (const char *path) {
+  SerialDevice *serial;
+  if ((serial = malloc(sizeof(*serial)))) {
+    char *device;
+    if ((device = getDevicePath(path))) {
+#ifdef WINDOWS
+      if ((serial->fileHandle = CreateFile(device, GENERIC_READ|GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL)) != INVALID_HANDLE_VALUE) {
+        serial->fileDescriptor = -1;
+#else /* WINDOWS */
+      if ((serial->fileDescriptor = open(device, O_RDWR|O_NOCTTY|O_NONBLOCK)) != -1) {
+        if (isatty(serial->fileDescriptor)) {
+#endif /* WINDOWS */
+          if (serialReadAttributes(serial)) {
+            serialCopyAttributes(&serial->originalAttributes, &serial->currentAttributes);
+            serialInitializeAttributes(&serial->pendingAttributes);
+
+            serial->stream = NULL;
+
+            serial->linesState = 0;
+            serial->waitLines = 0;
+
+#ifdef HAVE_POSIX_THREADS
+            serial->currentFlowControlProc = NULL;
+            serial->pendingFlowControlProc = NULL;
+            serial->flowControlRunning = 0;
+#endif /* HAVE_POSIX_THREADS */
+
+            LogPrint(LOG_DEBUG, "serial device opened: %s: fd=%d",
+                     device,
+#ifdef WINDOWS
+		     (int)serial->fileHandle
+#else /* WINDOWS */
+		     serial->fileDescriptor
+#endif /* WINDOWS */
+		     );
+            free(device);
+            return serial;
+          }
+#ifdef WINDOWS
+        CloseHandle(serial->fileHandle);
+#else /* WINDOWS */
+        } else {
+          LogPrint(LOG_ERR, "Not a serial device: %s", device);
+        }
+        close(serial->fileDescriptor);
+#endif /* WINDOWS */
+      } else {
+        LogPrint(LOG_ERR, "Cannot open '%s': %s", device, strerror(errno));
+      }
+
+      free(device);
+    }
+
+    free(serial);
+  } else {
+    LogError("serial device allocation");
+  }
+  return NULL;
+}
+
+void
+serialCloseDevice (SerialDevice *serial) {
+#ifdef HAVE_POSIX_THREADS
+  serialStopFlowControlThread(serial);
+#endif /* HAVE_POSIX_THREADS */
+
+  serialWriteAttributes(serial, &serial->originalAttributes);
+
+  if (serial->stream) {
+    fclose(serial->stream);
+  }
+
+#ifdef WINDOWS
+  else if (serial->fileDescriptor < 0) {
+    CloseHandle(serial->fileHandle);
+  }
+#endif /* WINDOWS */
+
+  else {
+    close(serial->fileDescriptor);
+  }
+
+  free(serial);
+}
+
+int
+serialRestartDevice (SerialDevice *serial, int baud) {
+#ifdef HAVE_POSIX_THREADS
+  FlowControlProc flowControlProc = serial->pendingFlowControlProc;
+#endif /* HAVE_POSIX_THREADS */
+
+#ifdef WINDOWS
+  static const SerialLines linesTable[] = {SERIAL_LINE_DTR, SERIAL_LINE_RTS, 0};
+  SerialLines linesState;
+#endif /* WINDOWS */
+
+#ifdef WINDOWS
+  if (!ClearCommError(serial->fileHandle, NULL, NULL)) return 0;
+#endif /* WINDOWS */
+
+  if (serial->stream) clearerr(serial->stream);
+  if (!serialDiscardOutput(serial)) return 0;
+
+#ifdef WINDOWS
+  if (!serialGetLines(serial, &linesState)) return 0;
+  {
+    SerialLines lines = 0;
+    const SerialLines *line = linesTable;
+    while (*line) lines |= *line++;
+    if (!serialSetLines(serial, 0, lines)) return 0;
+  }
+#else /* WINDOWS */
+  if (!serialSetSpeed(serial, B0)) return 0;
+#endif /* WINDOWS */
+
+#ifdef HAVE_POSIX_THREADS
+  serial->pendingFlowControlProc = NULL;
+#endif /* HAVE_POSIX_THREADS */
+
+  if (!serialFlushAttributes(serial)) return 0;
+  approximateDelay(500);
+  if (!serialDiscardInput(serial)) return 0;
+
+#ifdef WINDOWS
+  {
+    SerialLines high = 0;
+    SerialLines low = 0;
+    const SerialLines *line = linesTable;
+
+    while (*line) {
+      *((linesState & *line)? &high: &low) |= *line;
+      line++;
+    }
+
+    if (!serialSetLines(serial, high, low)) return 0;
+  }
+#endif /* WINDOWS */
+
+  if (!serialSetBaud(serial, baud)) return 0;
+
+#ifdef HAVE_POSIX_THREADS
+  serial->pendingFlowControlProc = flowControlProc;
+#endif /* HAVE_POSIX_THREADS */
+
+  if (!serialFlushAttributes(serial)) return 0;
+  return 1;
+}
+
+FILE *
+serialGetStream (SerialDevice *serial) {
+  if (!serial->stream) {
+#ifdef WINDOWS
+    if (serial->fileDescriptor < 0) {
+#ifdef __MINGW32__
+      if ((serial->fileDescriptor = _open_osfhandle((long)serial->fileHandle, O_RDWR)) < 0) {
+        LogError("open_osfhandle");
+#else /* __CYGWIN__ */
+      if ((serial->fileDescriptor = cygwin_attach_handle_to_fd("serialdevice", -1, serial->fileHandle, TRUE, GENERIC_READ|GENERIC_WRITE)) < 0) {
+        LogError("cygwin_attach_handle_to_fd");
+#endif /* __CYGWIN__ */
+        return NULL;
+      }
+    }
+#endif /* WINDOWS */
+
+    if (!(serial->stream = fdopen(serial->fileDescriptor, "ab+"))) {
+      LogError("fdopen");
+      return NULL;
+    }
+  }
+
+  return serial->stream;
+}
+
+int
+isSerialDevice (const char **path) {
+  if (isQualifiedDevice(path, "serial")) return 1;
+  return !isQualifiedDevice(path, NULL);
 }
