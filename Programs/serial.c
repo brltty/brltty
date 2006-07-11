@@ -1228,7 +1228,6 @@ serialCloseDevice (SerialDevice *serial) {
 
 int
 serialRestartDevice (SerialDevice *serial, int baud) {
-  static const SerialLines linesTable[] = {SERIAL_LINE_DTR, SERIAL_LINE_RTS, 0};
   SerialLines highLines = 0;
   SerialLines lowLines = 0;
   int usingB0;
@@ -1267,6 +1266,7 @@ serialRestartDevice (SerialDevice *serial, int baud) {
     if (!serialGetLines(serial, &lines)) return 0;
 
     {
+      static const SerialLines linesTable[] = {SERIAL_LINE_DTR, SERIAL_LINE_RTS, 0};
       const SerialLines *line = linesTable;
       while (*line) {
         *((lines & *line)? &highLines: &lowLines) |= *line;
@@ -1275,7 +1275,7 @@ serialRestartDevice (SerialDevice *serial, int baud) {
     }
 
     if (highLines)
-      if (!serialSetLines(serial, 0, highLines))
+      if (!serialSetLines(serial, 0, highLines|lowLines))
         return 0;
   }
 
