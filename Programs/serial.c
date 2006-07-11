@@ -168,8 +168,6 @@ static const BaudEntry baudTable[] = {
   {256000, CBR_256000},
 #endif /* CBR_256000 */
 
-  {0, 0}
-
 #else /* WINDOWS */
 
 #ifdef B50
@@ -292,9 +290,9 @@ static const BaudEntry baudTable[] = {
   {4000000, B4000000},
 #endif /* B4000000 */
 
-  {0}
-
 #endif /* WINDOWS */
+
+  {0}
 };
 
 static const BaudEntry *
