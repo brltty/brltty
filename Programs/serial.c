@@ -35,15 +35,16 @@
 #endif /* __MINGW32__ */
 #endif /* HAVE_POSIX_THREADS */
 
-#ifdef WINDOWS
+#if defined(WINDOWS)
+
 #ifdef __MINGW32__
 #include <io.h>
 #else /* __MINGW32__ */
 #include <sys/cygwin.h>
 #endif /* __MINGW32__ */
 
-typedef DCB SerialAttributes;
 typedef DWORD SerialSpeed;
+typedef DCB SerialAttributes;
 
 typedef DWORD SerialLines;
 #define SERIAL_LINE_RTS 0X01
@@ -52,30 +53,76 @@ typedef DWORD SerialLines;
 #define SERIAL_LINE_DSR MS_DSR_ON
 #define SERIAL_LINE_RNG MS_RING_ON
 #define SERIAL_LINE_CAR MS_RLSD_ON
-#else /* WINDOWS */
+
+#elif defined(__MSDOS__)
+
+#include <dos.h>
+#include <dpmi.h>
+#include <bios.h>
+#include <go32.h>
+#include <sys/farptr.h>
+#include "system.h"
+
+typedef struct {
+  unsigned short divisor;
+  unsigned short bios;
+} SerialSpeed;
+
+#define SERIAL_DIVISOR(baud) (115200 / (baud))
+#define SERIAL_SPEED(baud, bios) {SERIAL_DIVISOR((baud)), (bios)}
+#define SERIAL_SPEED_110    SERIAL_SPEED(   110,  0)
+#define SERIAL_SPEED_150    SERIAL_SPEED(   150,  1)
+#define SERIAL_SPEED_300    SERIAL_SPEED(   300,  2)
+#define SERIAL_SPEED_600    SERIAL_SPEED(   600,  3)
+#define SERIAL_SPEED_1200   SERIAL_SPEED(  1200,  4)
+#define SERIAL_SPEED_2400   SERIAL_SPEED(  2400,  5)
+#define SERIAL_SPEED_4800   SERIAL_SPEED(  4800,  6)
+#define SERIAL_SPEED_9600   SERIAL_SPEED(  9600,  7)
+#define SERIAL_SPEED_19200  SERIAL_SPEED( 19200,  8)
+#define SERIAL_SPEED_38400  SERIAL_SPEED( 38400,  9)
+#define SERIAL_SPEED_57600  SERIAL_SPEED( 57600, 10)
+#define SERIAL_SPEED_115200 SERIAL_SPEED(115200, 11)
+
+typedef struct SerialConfig {
+  unsigned bits:2;
+  unsigned stop:1;
+  unsigned parity:2;
+  unsigned bps:3;
+  SerialSpeed speed;
+} SerialAttributes;
+
+typedef unsigned char SerialLines;
+#define SERIAL_LINE_DTR 0X01
+#define SERIAL_LINE_RTS 0X02
+#define SERIAL_LINE_CTS 0X10
+#define SERIAL_LINE_DSR 0X20
+#define SERIAL_LINE_RNG 0X40
+#define SERIAL_LINE_CAR 0X80
+
+#define UART_DLL 0
+#define UART_DLH 1
+#define UART_LCR 3
+#define UART_LCR_DLAB 0X80
+#define UART_MCR 4
+#define UART_MSR 6
+
+#else /* UNIX */
+
 #include <sys/ioctl.h>
 #include <termios.h>
 
-typedef struct termios SerialAttributes;
 typedef speed_t SerialSpeed;
+typedef struct termios SerialAttributes;
 
 typedef int SerialLines;
-#ifdef __MSDOS__
-#define SERIAL_LINE_CTS 0X01
-#define SERIAL_LINE_DSR 0X02
-#define SERIAL_LINE_RNG 0X04
-#define SERIAL_LINE_CAR 0X08
-#define SERIAL_LINE_RTS 0X10
-#define SERIAL_LINE_DTR 0X20
-#else /* __MSDOS__ */
 #define SERIAL_LINE_RTS TIOCM_RTS
 #define SERIAL_LINE_DTR TIOCM_DTR
 #define SERIAL_LINE_CTS TIOCM_CTS
 #define SERIAL_LINE_DSR TIOCM_DSR
 #define SERIAL_LINE_RNG TIOCM_RNG
 #define SERIAL_LINE_CAR TIOCM_CAR
-#endif /* __MSDOS__ */
-#endif /* WINDOWS */
+
+#endif /* definitions */
 
 #include "io_serial.h"
 #include "io_misc.h"
@@ -103,6 +150,10 @@ struct SerialDeviceStruct {
 #ifdef WINDOWS
   HANDLE fileHandle;
 #endif /* WINDOWS */
+
+#ifdef __MSDOS__
+  int port;
+#endif /* __MSDOS__ */
 };
 
 typedef struct {
@@ -110,7 +161,7 @@ typedef struct {
   SerialSpeed speed;
 } BaudEntry;
 static const BaudEntry baudTable[] = {
-#ifdef WINDOWS
+#if defined(WINDOWS)
 
 #ifdef CBR_110
   {110, CBR_110},
@@ -168,7 +219,22 @@ static const BaudEntry baudTable[] = {
   {256000, CBR_256000},
 #endif /* CBR_256000 */
 
-#else /* WINDOWS */
+#elif defined(__MSDOS__)
+
+  {110, SERIAL_SPEED_110},
+  {150, SERIAL_SPEED_150},
+  {300, SERIAL_SPEED_300},
+  {600, SERIAL_SPEED_600},
+  {1200, SERIAL_SPEED_1200},
+  {2400, SERIAL_SPEED_2400},
+  {4800, SERIAL_SPEED_4800},
+  {9600, SERIAL_SPEED_9600},
+  {19200, SERIAL_SPEED_19200},
+  {38400, SERIAL_SPEED_38400},
+  {57600, SERIAL_SPEED_57600},
+  {115200, SERIAL_SPEED_115200},
+
+#else /* UNIX */
 
 #ifdef B50
   {50, B50},
@@ -290,7 +356,7 @@ static const BaudEntry baudTable[] = {
   {4000000, B4000000},
 #endif /* B4000000 */
 
-#endif /* WINDOWS */
+#endif /* baud table */
 
   {0}
 };
@@ -305,10 +371,27 @@ getBaudEntry (int baud) {
   return NULL;
 }
 
+#ifdef __MSDOS__
+static unsigned short
+serialPortBase (SerialDevice *serial) {
+  return _farpeekw(_dos_ds, 0X0400 + 2*serial->port);
+}
+
+static unsigned char
+serialReadPort (SerialDevice *serial, unsigned char port) {
+  return readPort1(serialPortBase(serial)+port);
+}
+
+static void
+serialWritePort (SerialDevice *serial, unsigned char port, unsigned char value) {
+  writePort1(serialPortBase(serial)+port, value);
+}
+#endif /* __MSDOS__ */
+
 static void
 serialInitializeAttributes (SerialAttributes *attributes) {
   memset(attributes, 0, sizeof(*attributes));
-#ifdef WINDOWS
+#if defined(WINDOWS)
   attributes->DCBlength = sizeof(*attributes);
   attributes->fBinary = TRUE;
   attributes->ByteSize = 8;
@@ -318,12 +401,16 @@ serialInitializeAttributes (SerialAttributes *attributes) {
   attributes->fTXContinueOnXoff = TRUE;
   attributes->XonChar = 0X11;
   attributes->XoffChar = 0X13;
-#else /* WINDOWS */
+#elif defined(__MSDOS__)
+  attributes->bits = 8 - 5;
+  attributes->speed = SERIAL_SPEED_9600;
+  attributes->bps = attributes->speed.bios;
+#else /* UNIX */
   attributes->c_cflag = CREAD | CLOCAL | CS8;
   attributes->c_iflag = IGNPAR | IGNBRK;
 
 #ifdef IEXTEN
-  attributes->c_lflag = IEXTEN;
+  attributes->c_lflag |= IEXTEN;
 #endif /* IEXTEN */
 
 #ifdef _POSIX_VDISABLE
@@ -336,26 +423,30 @@ serialInitializeAttributes (SerialAttributes *attributes) {
     }
   }
 #endif /* _POSIX_VDISABLE */
-#endif /* WINDOWS */
+#endif /* initialize attributes */
 }
 
 static int
 serialSetSpeed (SerialDevice *serial, SerialSpeed speed) {
-#ifdef WINDOWS
+#if defined(WINDOWS)
   serial->pendingAttributes.BaudRate = speed;
   return 1;
-#else /* WINDOWS */
-  if (cfsetispeed(&serial->pendingAttributes, speed) != -1) {
-    if (cfsetospeed(&serial->pendingAttributes, speed) != -1) {
+#elif defined(__MSDOS__)
+  serial->pendingAttributes.speed = speed;
+  serial->pendingAttributes.bps = serial->pendingAttributes.speed.bios;
+  return 1;
+#else /* UNIX */
+  if (cfsetospeed(&serial->pendingAttributes, speed) != -1) {
+    if (cfsetispeed(&serial->pendingAttributes, speed) != -1) {
       return 1;
     } else {
-      LogError("cfsetospeed");
+      LogError("cfsetispeed");
     }
   } else {
-    LogError("cfsetispeed");
+    LogError("cfsetospeed");
   }
   return 0;
-#endif /* WINDOWS */
+#endif /* set speed */
 }
 
 int
