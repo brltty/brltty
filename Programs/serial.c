@@ -1228,14 +1228,14 @@ serialCloseDevice (SerialDevice *serial) {
 
 int
 serialRestartDevice (SerialDevice *serial, int baud) {
+  static const SerialLines linesTable[] = {SERIAL_LINE_DTR, SERIAL_LINE_RTS, 0};
+  SerialLines highLines = 0;
+  SerialLines lowLines = 0;
+  int usingB0;
+
 #ifdef HAVE_POSIX_THREADS
   FlowControlProc flowControlProc = serial->pendingFlowControlProc;
 #endif /* HAVE_POSIX_THREADS */
-
-#ifdef WINDOWS
-  static const SerialLines linesTable[] = {SERIAL_LINE_DTR, SERIAL_LINE_RTS, 0};
-  SerialLines linesState;
-#endif /* WINDOWS */
 
 #ifdef WINDOWS
   if (!ClearCommError(serial->fileHandle, NULL, NULL)) return 0;
@@ -1244,47 +1244,53 @@ serialRestartDevice (SerialDevice *serial, int baud) {
   if (serial->stream) clearerr(serial->stream);
   if (!serialDiscardOutput(serial)) return 0;
 
-#ifdef WINDOWS
-  if (!serialGetLines(serial, &linesState)) return 0;
-  {
-    SerialLines lines = 0;
-    const SerialLines *line = linesTable;
-    while (*line) lines |= *line++;
-    if (!serialSetLines(serial, 0, lines)) return 0;
-  }
-#else /* WINDOWS */
-  if (!serialSetSpeed(serial, B0)) return 0;
-#endif /* WINDOWS */
-
 #ifdef HAVE_POSIX_THREADS
   serial->pendingFlowControlProc = NULL;
 #endif /* HAVE_POSIX_THREADS */
 
-  if (!serialFlushAttributes(serial)) return 0;
+#ifdef B0
+  if (!serialSetSpeed(serial, B0)) return 0;
+  usingB0 = 1;
+#else /* B0 */
+  usingB0 = 0;
+#endif /* B0 */
+
+  if (!serialFlushAttributes(serial)) {
+    if (!usingB0) return 0;
+    if (!serialSetBaud(serial, baud)) return 0;
+    if (!serialFlushAttributes(serial)) return 0;
+    usingB0 = 0;
+  }
+
+  if (!usingB0) {
+    SerialLines lines;
+    if (!serialGetLines(serial, &lines)) return 0;
+
+    {
+      const SerialLines *line = linesTable;
+      while (*line) {
+        *((lines & *line)? &highLines: &lowLines) |= *line;
+        line++;
+      }
+    }
+
+    if (highLines)
+      if (!serialSetLines(serial, 0, highLines))
+        return 0;
+  }
+
   approximateDelay(500);
   if (!serialDiscardInput(serial)) return 0;
 
-#ifdef WINDOWS
-  {
-    SerialLines high = 0;
-    SerialLines low = 0;
-    const SerialLines *line = linesTable;
-
-    while (*line) {
-      *((linesState & *line)? &high: &low) |= *line;
-      line++;
-    }
-
-    if (!serialSetLines(serial, high, low)) return 0;
-  }
-#endif /* WINDOWS */
-
-  if (!serialSetBaud(serial, baud)) return 0;
+  if (!usingB0)
+    if (!serialSetLines(serial, highLines, lowLines))
+      return 0;
 
 #ifdef HAVE_POSIX_THREADS
   serial->pendingFlowControlProc = flowControlProc;
 #endif /* HAVE_POSIX_THREADS */
 
+  if (!serialSetBaud(serial, baud)) return 0;
   if (!serialFlushAttributes(serial)) return 0;
   return 1;
 }
