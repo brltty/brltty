@@ -292,7 +292,7 @@ static const BaudEntry baudTable[] = {
   {4000000, B4000000},
 #endif /* B4000000 */
 
-  {0, B0}
+  {0}
 
 #endif /* WINDOWS */
 };
