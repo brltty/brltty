@@ -68,7 +68,8 @@ typedef struct {
   unsigned short biosBPS;
 } SerialSpeed;
 
-#define SERIAL_DIVISOR(baud) (115200 / (baud))
+#define SERIAL_DIVISOR_BASE 115200
+#define SERIAL_DIVISOR(baud) (SERIAL_DIVISOR_BASE / (baud))
 #define SERIAL_SPEED(baud, bios) (SerialSpeed){SERIAL_DIVISOR((baud)), (bios)}
 #define SERIAL_SPEED_110    SERIAL_SPEED(   110,  0)
 #define SERIAL_SPEED_150    SERIAL_SPEED(   150,  1)
@@ -924,8 +925,27 @@ serialReadAttributes (SerialDevice *serial) {
   if (GetCommState(serial->fileHandle, &serial->currentAttributes)) return 1;
   LogWindowsError("GetCommState");
 #elif defined(__MSDOS__)
-  LogPrint(LOG_DEBUG, "function not supported: %s", __func__);
-  serial->currentAttributes.bios.byte = 0;
+  int interruptsWereEnabled = disable();
+  unsigned char oldLCR = serialReadPort(serial, SERIAL_PORT_LCR);
+  int divisor;
+  const BaudEntry *baud;
+
+  serialWritePort(serial, SERIAL_PORT_LCR,
+                  oldLCR | SERIAL_FLAG_LCR_DLAB);
+  divisor = (serialReadPort(serial, SERIAL_PORT_DLH) << 8) |
+             serialReadPort(serial, SERIAL_PORT_DLL);
+  serialWritePort(serial, SERIAL_PORT_LCR, oldLCR);
+  if (interruptsWereEnabled) enable();
+
+  serial->currentAttributes.bios.byte = oldLCR;
+  if ((baud = getBaudEntry(SERIAL_DIVISOR_BASE/divisor))) {
+    serial->currentAttributes.speed = baud->speed;
+    serial->currentAttributes.bios.fields.bps = baud->speed.biosBPS;
+  } else {
+    memset(&serial->currentAttributes.speed, 0,
+           sizeof(serial->currentAttributes.speed));
+    serial->currentAttributes.bios.fields.bps = 0;
+  }
   return 1;
 #else /* UNIX */
   if (tcgetattr(serial->fileDescriptor, &serial->currentAttributes) != -1) return 1;
@@ -962,9 +982,7 @@ serialWriteAttributes (SerialDevice *serial, const SerialAttributes *attributes)
                         attributes->speed.divisor & 0XFF);
         serialWritePort(serial, SERIAL_PORT_DLH,
                         attributes->speed.divisor >> 8);
-        serialWritePort(serial, SERIAL_PORT_LCR,
-                        oldLCR.byte);
-
+        serialWritePort(serial, SERIAL_PORT_LCR, oldLCR.byte);
         if (interruptsWereEnabled) enable();
       }
     }
@@ -1178,7 +1196,6 @@ serialSetLines (SerialDevice *serial, SerialLines high, SerialLines low) {
 
   serialWritePort(serial, SERIAL_PORT_MCR,
                   (oldMCR | high) & ~low);
-
   if (interruptsWereEnabled) enable();
 #elif defined(TIOCMSET)
   int status;
