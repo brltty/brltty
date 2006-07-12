@@ -82,8 +82,12 @@ extern "C" {
 
 #endif /* WINDOWS */
 
-/* Define this if the header file sys/wait.h exists. */
+/* Define this if the header file sys/wait.h exists,
+ * but not for DOS since it wouldn't make sense. 
+ */
+#ifndef __MSDOS__
 #undef HAVE_SYS_WAIT_H
+#endif /* __MSDOS__ */
 
 /* Define this if posix threads are supported. */
 #undef HAVE_POSIX_THREADS
