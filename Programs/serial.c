@@ -106,13 +106,17 @@ typedef unsigned char SerialLines;
 #define SERIAL_LINE_RNG 0X40
 #define SERIAL_LINE_CAR 0X80
 
-#define SERIAL_PORT_UART_DLL 0
-#define SERIAL_PORT_UART_DLH 1
-#define SERIAL_PORT_UART_LCR 3
-#define SERIAL_PORT_UART_MCR 4
-#define SERIAL_PORT_UART_MSR 6
+#define SERIAL_PORT_RBR 0 /* receive buffered register */
+#define SERIAL_PORT_THR 0 /* transmit holding register */
+#define SERIAL_PORT_DLL 0 /* divisor latch low */
+#define SERIAL_PORT_IER 1 /* interrupt enable register */
+#define SERIAL_PORT_DLH 1 /* divisor latch high */
+#define SERIAL_PORT_IIR 2 /* interrupt id register */
+#define SERIAL_PORT_LCR 3 /* line control register */
+#define SERIAL_PORT_MCR 4 /* modem control register */
+#define SERIAL_PORT_MSR 6 /* modem status register */
 
-#define SERIAL_FLAG_UART_LCR_DLAB 0X80
+#define SERIAL_FLAG_LCR_DLAB 0X80 /* data latch access bit */
 
 #else /* UNIX */
 
@@ -952,13 +956,13 @@ serialWriteAttributes (SerialDevice *serial, const SerialAttributes *attributes)
         SerialBiosConfiguration oldLCR = attributes->bios;
         oldLCR.fields.bps = 0;
 
-        serialWritePort(serial, SERIAL_PORT_UART_LCR,
-                        oldLCR.byte | SERIAL_FLAG_UART_LCR_DLAB);
-        serialWritePort(serial, SERIAL_PORT_UART_DLL,
+        serialWritePort(serial, SERIAL_PORT_LCR,
+                        oldLCR.byte | SERIAL_FLAG_LCR_DLAB);
+        serialWritePort(serial, SERIAL_PORT_DLL,
                         attributes->speed.divisor & 0XFF);
-        serialWritePort(serial, SERIAL_PORT_UART_DLH,
+        serialWritePort(serial, SERIAL_PORT_DLH,
                         attributes->speed.divisor >> 8);
-        serialWritePort(serial, SERIAL_PORT_UART_LCR,
+        serialWritePort(serial, SERIAL_PORT_LCR,
                         oldLCR.byte);
 
         if (interruptsWereEnabled) enable();
@@ -1133,7 +1137,7 @@ serialGetLines (SerialDevice *serial, SerialLines *lines) {
     return 0;
   }
 #elif defined(__MSDOS__)
-  serial->linesState = serialReadPort(serial, SERIAL_PORT_UART_MSR) & 0XF0;
+  serial->linesState = serialReadPort(serial, SERIAL_PORT_MSR) & 0XF0;
 #elif defined(TIOCMGET)
   if (ioctl(serial->fileDescriptor, TIOCMGET, &serial->linesState) == -1) {
     LogError("TIOCMGET");
@@ -1170,9 +1174,9 @@ serialSetLines (SerialDevice *serial, SerialLines high, SerialLines low) {
   }
 #elif defined(__MSDOS__)
   int interruptsWereEnabled = disable();
-  unsigned char oldMCR = serialReadPort(serial, SERIAL_PORT_UART_MCR);
+  unsigned char oldMCR = serialReadPort(serial, SERIAL_PORT_MCR);
 
-  serialWritePort(serial, SERIAL_PORT_UART_MCR,
+  serialWritePort(serial, SERIAL_PORT_MCR,
                   (oldMCR | high) & ~low);
 
   if (interruptsWereEnabled) enable();
@@ -1328,11 +1332,11 @@ serialOpenDevice (const char *path) {
 #else /* WINDOWS */
       if ((serial->fileDescriptor = open(device, O_RDWR|O_NOCTTY|O_NONBLOCK)) != -1) {
 #ifdef __MSDOS__
-	char *truePath, *com;
+        char *truePath, *com;
 
-	if ((truePath = _truename(path, NULL)) &&
+        if ((truePath = _truename(path, NULL)) &&
             (com = strstr(truePath,"COM"))) {
-	  serial->port = atoi(com+3) - 1;
+          serial->port = atoi(com+3) - 1;
 #else /* __MSDOS__ */
         if (isatty(serial->fileDescriptor)) {
 #endif /* __MSDOS__ */
@@ -1356,11 +1360,11 @@ serialOpenDevice (const char *path) {
             LogPrint(LOG_DEBUG, "serial device opened: %s: fd=%d",
                      device,
 #ifdef WINDOWS
-		     (int)serial->fileHandle
+                     (int)serial->fileHandle
 #else /* WINDOWS */
-		     serial->fileDescriptor
+                     serial->fileDescriptor
 #endif /* WINDOWS */
-		     );
+                     );
             free(device);
             return serial;
           }
@@ -1370,10 +1374,10 @@ serialOpenDevice (const char *path) {
 #else /* WINDOWS */
 #ifdef __MSDOS__
         } else {
-	  LogPrint(LOG_ERR, "could not determine port number: %s", device);
+          LogPrint(LOG_ERR, "could not determine port number: %s", device);
         }
 
-	if (truePath) free(truePath);
+        if (truePath) free(truePath);
 #else /* __MSDOS__ */
         } else {
           LogPrint(LOG_ERR, "not a serial device: %s", device);
