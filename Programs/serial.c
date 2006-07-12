@@ -69,7 +69,7 @@ typedef struct {
 } SerialSpeed;
 
 #define SERIAL_DIVISOR(baud) (115200 / (baud))
-#define SERIAL_SPEED(baud, bios) {SERIAL_DIVISOR((baud)), (bios)}
+#define SERIAL_SPEED(baud, bios) (SerialSpeed){SERIAL_DIVISOR((baud)), (bios)}
 #define SERIAL_SPEED_110    SERIAL_SPEED(   110,  0)
 #define SERIAL_SPEED_150    SERIAL_SPEED(   150,  1)
 #define SERIAL_SPEED_300    SERIAL_SPEED(   300,  2)
@@ -106,12 +106,13 @@ typedef unsigned char SerialLines;
 #define SERIAL_LINE_RNG 0X40
 #define SERIAL_LINE_CAR 0X80
 
-#define UART_DLL 0
-#define UART_DLH 1
-#define UART_LCR 3
-#define UART_LCR_DLAB 0X80
-#define UART_MCR 4
-#define UART_MSR 6
+#define SERIAL_PORT_UART_DLL 0
+#define SERIAL_PORT_UART_DLH 1
+#define SERIAL_PORT_UART_LCR 3
+#define SERIAL_PORT_UART_MCR 4
+#define SERIAL_PORT_UART_MSR 6
+
+#define SERIAL_FLAG_UART_LCR_DLAB 0X80
 
 #else /* UNIX */
 
@@ -778,13 +779,15 @@ serialSetFlowControl (SerialDevice *serial, SerialFlowControl flow) {
     serial->pendingFlowControlProc = NULL;
   }
 
-#ifndef WINDOWS
+#if defined(WINDOWS)
+#elif defined(__MSDOS__)
+#else /* UNIX */
   if (serial->pendingFlowControlProc) {
     serial->pendingAttributes.c_cflag &= ~CLOCAL;
   } else {
     serial->pendingAttributes.c_cflag |= CLOCAL;
   }
-#endif /* WINDOWS */
+#endif /* adjust attributes */
 #endif /* HAVE_POSIX_THREADS */
 
   if (!flow) return 1;
@@ -946,12 +949,17 @@ serialWriteAttributes (SerialDevice *serial, const SerialAttributes *attributes)
         }
       } else {
         int interruptsWereEnabled = disable();
-        unsigned char oldLCR = attributes->bios.byte & 0X1F;
+        SerialBiosConfiguration oldLCR = attributes->bios;
+        oldLCR.fields.bps = 0;
 
-        writeSerialPort(serial, UART_LCR, oldLCR | UART_LCR_DLAB);
-        writeSerialPort(serial, UART_DLL, attributes->speed.divisor & 0XFF);
-        writeSerialPort(serial, UART_DLH, attributes->speed.divisor >> 8);
-        writeSerialPort(serial, UART_LCR, oldLCR);
+        serialWritePort(serial, SERIAL_PORT_UART_LCR,
+                        oldLCR.byte | SERIAL_FLAG_UART_LCR_DLAB);
+        serialWritePort(serial, SERIAL_PORT_UART_DLL,
+                        attributes->speed.divisor & 0XFF);
+        serialWritePort(serial, SERIAL_PORT_UART_DLH,
+                        attributes->speed.divisor >> 8);
+        serialWritePort(serial, SERIAL_PORT_UART_LCR,
+                        oldLCR.byte);
 
         if (interruptsWereEnabled) enable();
       }
@@ -1125,7 +1133,7 @@ serialGetLines (SerialDevice *serial, SerialLines *lines) {
     return 0;
   }
 #elif defined(__MSDOS__)
-  serial->linesState = readSerialPort(serial, UART_MSR) & 0XF0;
+  serial->linesState = serialReadPort(serial, SERIAL_PORT_UART_MSR) & 0XF0;
 #elif defined(TIOCMGET)
   if (ioctl(serial->fileDescriptor, TIOCMGET, &serial->linesState) == -1) {
     LogError("TIOCMGET");
@@ -1162,9 +1170,10 @@ serialSetLines (SerialDevice *serial, SerialLines high, SerialLines low) {
   }
 #elif defined(__MSDOS__)
   int interruptsWereEnabled = disable();
-  unsigned char oldMCR = readSerialPort(serial, UART_MCR);
+  unsigned char oldMCR = serialReadPort(serial, SERIAL_PORT_UART_MCR);
 
-  writeSerialPort(serial, UART_MCR, (oldMCR | high) & ~low);
+  serialWritePort(serial, SERIAL_PORT_UART_MCR,
+                  (oldMCR | high) & ~low);
 
   if (interruptsWereEnabled) enable();
 #elif defined(TIOCMSET)
