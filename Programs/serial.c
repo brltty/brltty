@@ -926,23 +926,25 @@ serialReadAttributes (SerialDevice *serial) {
   LogWindowsError("GetCommState");
 #elif defined(__MSDOS__)
   int interruptsWereEnabled = disable();
-  unsigned char oldLCR = serialReadPort(serial, SERIAL_PORT_LCR);
+  unsigned char lcr = serialReadPort(serial, SERIAL_PORT_LCR);
   int divisor;
-  const BaudEntry *baud;
 
   serialWritePort(serial, SERIAL_PORT_LCR,
-                  oldLCR | SERIAL_FLAG_LCR_DLAB);
+                  lcr | SERIAL_FLAG_LCR_DLAB);
   divisor = (serialReadPort(serial, SERIAL_PORT_DLH) << 8) |
             serialReadPort(serial, SERIAL_PORT_DLL);
-  serialWritePort(serial, SERIAL_PORT_LCR, oldLCR);
+  serialWritePort(serial, SERIAL_PORT_LCR, lcr);
   if (interruptsWereEnabled) enable();
 
-  serial->currentAttributes.bios.byte = oldLCR;
-  if ((baud = getBaudEntry(SERIAL_DIVISOR_BASE/divisor))) {
-    serial->currentAttributes.speed = baud->speed;
-  } else {
-    memset(&serial->currentAttributes.speed, 0,
-           sizeof(serial->currentAttributes.speed));
+  serial->currentAttributes.bios.byte = lcr;
+  {
+    const BaudEntry *baud = getBaudEntry(SERIAL_DIVISOR_BASE/divisor);
+    if (baud) {
+      serial->currentAttributes.speed = baud->speed;
+    } else {
+      memset(&serial->currentAttributes.speed, 0,
+             sizeof(serial->currentAttributes.speed));
+    }
   }
   serial->currentAttributes.bios.fields.bps = serial->currentAttributes.speed.biosBPS;
 
@@ -973,16 +975,16 @@ serialWriteAttributes (SerialDevice *serial, const SerialAttributes *attributes)
         }
       } else {
         int interruptsWereEnabled = disable();
-        SerialBiosConfiguration oldLCR = attributes->bios;
-        oldLCR.fields.bps = 0;
+        SerialBiosConfiguration lcr = attributes->bios;
+        lcr.fields.bps = 0;
 
         serialWritePort(serial, SERIAL_PORT_LCR,
-                        oldLCR.byte | SERIAL_FLAG_LCR_DLAB);
+                        lcr.byte | SERIAL_FLAG_LCR_DLAB);
         serialWritePort(serial, SERIAL_PORT_DLL,
                         attributes->speed.divisor & 0XFF);
         serialWritePort(serial, SERIAL_PORT_DLH,
                         attributes->speed.divisor >> 8);
-        serialWritePort(serial, SERIAL_PORT_LCR, oldLCR.byte);
+        serialWritePort(serial, SERIAL_PORT_LCR, lcr.byte);
         if (interruptsWereEnabled) enable();
       }
     }
