@@ -911,19 +911,21 @@ serialCompareAttributes (const SerialAttributes *attributes, const SerialAttribu
   return memcmp(attributes, reference, sizeof(*attributes)) == 0;
 }
 
-#ifndef __MSDOS__
 static int
 serialReadAttributes (SerialDevice *serial) {
-#ifdef WINDOWS
+#if defined(WINDOWS)
   if (GetCommState(serial->fileHandle, &serial->currentAttributes)) return 1;
   LogWindowsError("GetCommState");
-#else /* WINDOWS */
+#elif defined(__MSDOS__)
+  LogPrint(LOG_DEBUG, "function not supported: %s", __func__);
+  serial->currentAttributes.bios.byte = 0;
+  return 1;
+#else /* UNIX */
   if (tcgetattr(serial->fileDescriptor, &serial->currentAttributes) != -1) return 1;
   LogError("tcgetattr");
-#endif /* WINDOWS */
+#endif /* read attributes */
   return 0;
 }
-#endif /* __MSDOS__ */
 
 static int
 serialWriteAttributes (SerialDevice *serial, const SerialAttributes *attributes) {
@@ -1316,8 +1318,17 @@ serialOpenDevice (const char *path) {
         serial->fileDescriptor = -1;
 #else /* WINDOWS */
       if ((serial->fileDescriptor = open(device, O_RDWR|O_NOCTTY|O_NONBLOCK)) != -1) {
+#ifdef __MSDOS__
+	char *truePath, *com;
+
+	if ((truePath = _truename(path, NULL)) &&
+            (com = strstr(truePath,"COM"))) {
+	  serial->port = atoi(com+3) - 1;
+#else /* __MSDOS__ */
         if (isatty(serial->fileDescriptor)) {
+#endif /* __MSDOS__ */
 #endif /* WINDOWS */
+
           if (serialReadAttributes(serial)) {
             serialCopyAttributes(&serial->originalAttributes, &serial->currentAttributes);
             serialInitializeAttributes(&serial->pendingAttributes);
@@ -1344,16 +1355,26 @@ serialOpenDevice (const char *path) {
             free(device);
             return serial;
           }
+
 #ifdef WINDOWS
         CloseHandle(serial->fileHandle);
 #else /* WINDOWS */
+#ifdef __MSDOS__
         } else {
-          LogPrint(LOG_ERR, "Not a serial device: %s", device);
+	  LogPrint(LOG_ERR, "could not determine port number: %s", device);
         }
+
+	if (truePath) free(truePath);
+#else /* __MSDOS__ */
+        } else {
+          LogPrint(LOG_ERR, "not a serial device: %s", device);
+        }
+#endif /* __MSDOS__ */
+
         close(serial->fileDescriptor);
 #endif /* WINDOWS */
       } else {
-        LogPrint(LOG_ERR, "Cannot open '%s': %s", device, strerror(errno));
+        LogPrint(LOG_ERR, "cannot open '%s': %s", device, strerror(errno));
       }
 
       free(device);
@@ -1361,8 +1382,9 @@ serialOpenDevice (const char *path) {
 
     free(serial);
   } else {
-    LogError("serial device allocation");
+    LogError("malloc");
   }
+
   return NULL;
 }
 
