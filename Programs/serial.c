@@ -117,7 +117,7 @@ typedef unsigned char SerialLines;
 #define SERIAL_PORT_MCR 4 /* modem control register */
 #define SERIAL_PORT_MSR 6 /* modem status register */
 
-#define SERIAL_FLAG_LCR_DLAB 0X80 /* data latch access bit */
+#define SERIAL_FLAG_LCR_DLAB 0X80 /* divisor latch access bit */
 
 #else /* UNIX */
 
