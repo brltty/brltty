@@ -83,11 +83,14 @@ typedef struct {
 #define SERIAL_SPEED_57600  SERIAL_SPEED( 57600, 10)
 #define SERIAL_SPEED_115200 SERIAL_SPEED(115200, 11)
 
-typedef struct {
-  unsigned bits:2;
-  unsigned stop:1;
-  unsigned parity:2;
-  unsigned bps:3;
+typedef union {
+  unsigned char byte;
+  struct {
+    unsigned bits:2;
+    unsigned stop:1;
+    unsigned parity:2;
+    unsigned bps:3;
+  } fields;
 } SerialBiosConfiguration;
 
 typedef struct {
@@ -406,9 +409,9 @@ serialInitializeAttributes (SerialAttributes *attributes) {
   attributes->XonChar = 0X11;
   attributes->XoffChar = 0X13;
 #elif defined(__MSDOS__)
-  attributes->bits = 8 - 5;
   attributes->speed = SERIAL_SPEED_9600;
-  attributes->bios.bps = attributes->speed.biosBPS;
+  attributes->bios.fields.bps = attributes->speed.biosBPS;
+  attributes->bios.fields.bits = 8 - 5;
 #else /* UNIX */
   attributes->c_cflag = CREAD | CLOCAL | CS8;
   attributes->c_iflag = IGNPAR | IGNBRK;
@@ -437,7 +440,7 @@ serialSetSpeed (SerialDevice *serial, SerialSpeed speed) {
   return 1;
 #elif defined(__MSDOS__)
   serial->pendingAttributes.speed = speed;
-  serial->pendingAttributes.bios.bps = serial->pendingAttributes.speed.biosBPS;
+  serial->pendingAttributes.bios.fields.bps = serial->pendingAttributes.speed.biosBPS;
   return 1;
 #else /* UNIX */
   if (cfsetospeed(&serial->pendingAttributes, speed) != -1) {
@@ -519,7 +522,7 @@ serialSetDataBits (SerialDevice *serial, int bits) {
 #if defined(WINDOWS)
   serial->pendingAttributes.ByteSize = bits;
 #elif defined(__MSDOS__)
-  serial->pendingAttributes.bits = bits - 5;
+  serial->pendingAttributes.bios.fields.bits = bits - 5;
 #else /* UNIX */
   serial->pendingAttributes.c_cflag &= ~CSIZE;
   serial->pendingAttributes.c_cflag |= size;
@@ -538,9 +541,9 @@ serialSetStopBits (SerialDevice *serial, int bits) {
     serial->pendingAttributes.StopBits = TWOSTOPBITS;
 #elif defined(__MSDOS__)
   if (bits == 1) {
-    serial->pendingAttributes.stop = 0;
+    serial->pendingAttributes.bios.fields.stop = 0;
   } else if (bits == 15 || bits == 2) {
-    serial->pendingAttributes.stop = 1;
+    serial->pendingAttributes.bios.fields.stop = 1;
 #else /* UNIX */
   if (bits == 1) {
     serial->pendingAttributes.c_cflag &= ~CSTOPB;
@@ -587,15 +590,15 @@ serialSetParity (SerialDevice *serial, SerialParity parity) {
 #elif defined(__MSDOS__)
   switch (parity) {
     case SERIAL_PARITY_NONE:
-      serial->pendingAttributes.parity = 0;
+      serial->pendingAttributes.bios.fields.parity = 0;
       break;
 
     case SERIAL_PARITY_ODD:
-      serial->pendingAttributes.parity = 1;
+      serial->pendingAttributes.bios.fields.parity = 1;
       break;
 
     case SERIAL_PARITY_EVEN:
-      serial->pendingAttributes.parity = 2;
+      serial->pendingAttributes.bios.fields.parity = 2;
       break;
 
     default:
@@ -802,9 +805,9 @@ serialGetCharacterBits (SerialDevice *serial) {
     LogPrint(LOG_WARNING, "unsupported serial stop bits value: %X", serial->pendingAttributes.StopBits);
   }
 #elif defined(__MSDOS__)
-  bits += serial->pendingAttributes.bits + 5;
-  if (serial->pendingAttributes.parity) ++bits;
-  if (serial->pendingAttributes.stop) ++bits;
+  bits += serial->pendingAttributes.bios.fields.bits + 5;
+  if (serial->pendingAttributes.bios.fields.parity) ++bits;
+  if (serial->pendingAttributes.bios.fields.stop) ++bits;
 #else /* UNIX */
   {
     tcflag_t size = serial->pendingAttributes.c_cflag & CSIZE;
@@ -883,15 +886,18 @@ int
 serialDrainOutput (SerialDevice *serial) {
   if (!serialFlushOutput(serial)) return 0;
 
-#ifdef WINDOWS
+#if defined(WINDOWS)
   if (FlushFileBuffers(serial->fileHandle)) return 1;
   LogWindowsError("FlushFileBuffers");
-#else /* WINDOWS */
+#elif defined(__MSDOS__)
+  LogPrint(LOG_DEBUG, "function not supported: %s", __func__);
+  return 1;
+#else /* UNIX */
   do {
     if (tcdrain(serial->fileDescriptor) != -1) return 1;
   } while (errno == EINTR);
   LogError("tcdrain");
-#endif /* WINDOWS */
+#endif /* drain output */
   return 0;
 }
 
@@ -905,6 +911,7 @@ serialCompareAttributes (const SerialAttributes *attributes, const SerialAttribu
   return memcmp(attributes, reference, sizeof(*attributes)) == 0;
 }
 
+#ifndef __MSDOS__
 static int
 serialReadAttributes (SerialDevice *serial) {
 #ifdef WINDOWS
@@ -916,23 +923,43 @@ serialReadAttributes (SerialDevice *serial) {
 #endif /* WINDOWS */
   return 0;
 }
+#endif /* __MSDOS__ */
 
 static int
 serialWriteAttributes (SerialDevice *serial, const SerialAttributes *attributes) {
   if (!serialCompareAttributes(attributes, &serial->currentAttributes)) {
     if (!serialDrainOutput(serial)) return 0;
 
-#ifdef WINDOWS
+#if defined(WINDOWS)
     if (!SetCommState(serial->fileHandle, (SerialAttributes *)attributes)) {
       LogWindowsError("SetCommState");
       return 0;
     }
-#else /* WINDOWS */
+#elif defined(__MSDOS__)
+    {
+      if (attributes->speed.biosBPS <= 7) {
+        if (bioscom(0, attributes->bios.byte, serial->port) & 0X0700) {
+          LogPrint(LOG_ERR, "serialWriteAttributes failed");
+          return 0;
+        }
+      } else {
+        int interruptsWereEnabled = disable();
+        unsigned char oldLCR = attributes->bios.byte & 0X1F;
+
+        writeSerialPort(serial, UART_LCR, oldLCR | UART_LCR_DLAB);
+        writeSerialPort(serial, UART_DLL, attributes->speed.divisor & 0XFF);
+        writeSerialPort(serial, UART_DLH, attributes->speed.divisor >> 8);
+        writeSerialPort(serial, UART_LCR, oldLCR);
+
+        if (interruptsWereEnabled) enable();
+      }
+    }
+#else /* UNIX */
     if (tcsetattr(serial->fileDescriptor, TCSANOW, attributes) == -1) {
       LogError("tcsetattr");
       return 0;
     }
-#endif /* WINDOWS */
+#endif /* write attributes */
 
     serialCopyAttributes(&serial->currentAttributes, attributes);
   }
