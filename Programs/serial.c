@@ -1117,22 +1117,22 @@ serialWriteData (
 
 static int
 serialGetLines (SerialDevice *serial, SerialLines *lines) {
-#ifdef WINDOWS
+#if defined(WINDOWS)
   if (!GetCommModemStatus(serial->fileHandle, &serial->linesState)) {
     LogWindowsError("GetCommModemStatus");
     return 0;
   }
-#else /* WINDOWS */
-#ifdef TIOCMGET
+#elif defined(__MSDOS__)
+  serial->linesState = readSerialPort(serial, UART_MSR) & 0XF0;
+#elif defined(TIOCMGET)
   if (ioctl(serial->fileDescriptor, TIOCMGET, &serial->linesState) == -1) {
     LogError("TIOCMGET");
     return 0;
   }
-#else /* TIOCMGET */
+#else /* get lines */
 #warning getting modem lines not supported on this platform
   serial->linesState = SERIAL_LINE_CTS | SERIAL_LINE_DSR | SERIAL_LINE_CAR;
-#endif /* TIOCMGET */
-#endif /* WINDOWS */
+#endif /* get lines */
 
   *lines = serial->linesState;
   return 1;
@@ -1140,7 +1140,7 @@ serialGetLines (SerialDevice *serial, SerialLines *lines) {
 
 static int
 serialSetLines (SerialDevice *serial, SerialLines high, SerialLines low) {
-#ifdef WINDOWS
+#if defined(WINDOWS)
   DCB dcb;
   if (GetCommState(serial->fileHandle, &dcb)) {
     if (low & SERIAL_LINE_RTS)
@@ -1158,8 +1158,14 @@ serialSetLines (SerialDevice *serial, SerialLines high, SerialLines low) {
   } else {
     LogWindowsError("GetCommState");
   }
-#else /* WINDOWS */
-#ifdef TIOCMSET
+#elif defined(__MSDOS__)
+  int interruptsWereEnabled = disable();
+  unsigned char oldMCR = readSerialPort(serial, UART_MCR);
+
+  writeSerialPort(serial, UART_MCR, (oldMCR | high) & ~low);
+
+  if (interruptsWereEnabled) enable();
+#elif defined(TIOCMSET)
   int status;
   if (serialGetLines(serial, &status) != -1) {
     status |= high;
@@ -1167,10 +1173,9 @@ serialSetLines (SerialDevice *serial, SerialLines high, SerialLines low) {
     if (ioctl(serial->fileDescriptor, TIOCMSET, &status) != -1) return 1;
     LogError("TIOCMSET");
   }
-#else /* TIOCMSET */
+#else /* set lines */
 #warning setting modem lines not supported on this platform
-#endif /* TIOCMSET */
-#endif /* WINDOWS */
+#endif /* set lines */
   return 0;
 }
 
