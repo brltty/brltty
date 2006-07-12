@@ -933,19 +933,19 @@ serialReadAttributes (SerialDevice *serial) {
   serialWritePort(serial, SERIAL_PORT_LCR,
                   oldLCR | SERIAL_FLAG_LCR_DLAB);
   divisor = (serialReadPort(serial, SERIAL_PORT_DLH) << 8) |
-             serialReadPort(serial, SERIAL_PORT_DLL);
+            serialReadPort(serial, SERIAL_PORT_DLL);
   serialWritePort(serial, SERIAL_PORT_LCR, oldLCR);
   if (interruptsWereEnabled) enable();
 
   serial->currentAttributes.bios.byte = oldLCR;
   if ((baud = getBaudEntry(SERIAL_DIVISOR_BASE/divisor))) {
     serial->currentAttributes.speed = baud->speed;
-    serial->currentAttributes.bios.fields.bps = baud->speed.biosBPS;
   } else {
     memset(&serial->currentAttributes.speed, 0,
            sizeof(serial->currentAttributes.speed));
-    serial->currentAttributes.bios.fields.bps = 0;
   }
+  serial->currentAttributes.bios.fields.bps = serial->currentAttributes.speed.biosBPS;
+
   return 1;
 #else /* UNIX */
   if (tcgetattr(serial->fileDescriptor, &serial->currentAttributes) != -1) return 1;
