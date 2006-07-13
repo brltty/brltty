@@ -304,7 +304,7 @@ setInterface (UsbDevice *device, UInt8 number) {
   UsbDeviceExtension *devx = device->extension;
   int found = 0;
   IOReturn result;
-  io_iterator_t iterator = NULL;
+  io_iterator_t iterator = 0;
 
   if (devx->interface)
     if (isInterface(devx->interface, number))
@@ -333,7 +333,7 @@ setInterface (UsbDevice *device, UInt8 number) {
                                                  kIOCFPlugInInterfaceID,
                                                  &plugin, &score);
       IOObjectRelease(service);
-      service = NULL;
+      service = 0;
 
       if ((result == kIOReturnSuccess) && plugin) {
         IOUSBInterfaceInterface190 **interface = NULL;
@@ -364,7 +364,7 @@ setInterface (UsbDevice *device, UInt8 number) {
     if (!found) LogPrint(LOG_ERR, "USB interface not found: %d", number);
 
     IOObjectRelease(iterator);
-    iterator = NULL;
+    iterator = 0;
   } else {
     setUnixError(result, "USB interface iterator create");
   }
@@ -894,7 +894,7 @@ usbFindDevice (UsbDeviceChooser chooser, void *data) {
     CFMutableDictionaryRef dictionary;
 
     if ((dictionary = IOServiceMatching(kIOUSBDeviceClassName))) {
-      io_iterator_t iterator = NULL;
+      io_iterator_t iterator = 0;
 
       kernelResult = IOServiceGetMatchingServices(port, dictionary, &iterator);
       dictionary = NULL;
@@ -911,7 +911,7 @@ usbFindDevice (UsbDeviceChooser chooser, void *data) {
                                                        kIOCFPlugInInterfaceID,
                                                        &plugin, &score);
           IOObjectRelease(service);
-          service = NULL;
+          service = 0;
 
           if ((ioResult == kIOReturnSuccess) && plugin) {
             IOUSBDeviceInterface182 **interface = NULL;
@@ -954,7 +954,7 @@ usbFindDevice (UsbDeviceChooser chooser, void *data) {
         }
 
         IOObjectRelease(iterator);
-        iterator = NULL;
+        iterator = 0;
       } else {
         setUnixError(kernelResult, "USB device iterator create");
       }

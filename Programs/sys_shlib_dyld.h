@@ -24,7 +24,7 @@ logDyldError (const char *action) {
   const char *file;
   const char *message;
   NSLinkEditError(&errors, &number, &file, &message);
-  LogPrint(LOG_ERR, "%.*s", strlen(message)-1, message);
+  LogPrint(LOG_ERR, "%.*s", (int)(strlen(message)-1), message);
 }
 
 void *
