@@ -257,7 +257,7 @@ changequote(, )dnl
             if test -n "${brltty_item_entry}"
             then
                brltty_item_code="${brltty_item}"
-               brltty_item_name="`expr "${brltty_item_entry}" : '[^-]*-\(.*\)$'`"
+               brltty_item_name="`expr "${brltty_item_entry}" : '[^[.-.]]*-\(.*\)$'`"
                brltty_item_unknown=false
             else
                brltty_item_entry="`expr "${brltty_item_entries_$1}" : '.* \([^- ]*-'"${brltty_item}"'[^ ]*\)'`"
@@ -272,8 +272,8 @@ changequote(, )dnl
                fi
                if test -n "${brltty_item_entry}"
                then
-                  brltty_item_code="`expr "${brltty_item_entry}" : '\([^-]*\)'`"
-                  brltty_item_name="`expr "${brltty_item_entry}" : '[^-]*-\(.*\)$'`"
+                  brltty_item_code="`expr "${brltty_item_entry}" : '\([^[.-.]]*\)'`"
+                  brltty_item_name="`expr "${brltty_item_entry}" : '[^[.-.]]*-\(.*\)$'`"
                   brltty_item_unknown=false
                fi
             fi
