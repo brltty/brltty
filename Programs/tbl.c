@@ -472,7 +472,7 @@ loadTranslationTable (
   input.line = 0;
   input.undefined = 0XFF;
 
-  if (opened || (file = fopen(path, "r"))) {
+  if (opened || (file = openDataFile(path, "r"))) {
     if (processLines(file, processTableLine, &input)) {
       input.line = 0;
 

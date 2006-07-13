@@ -286,7 +286,7 @@ strdupWrapper (const char *string) {
   return address;
 }
 
-static int
+int
 isPathDelimiter (const char character) {
   return character == '/';
 }
@@ -337,19 +337,18 @@ getPathDirectory (const char *path) {
   }
 }
 
-char *
-getWorkingDirectory (void) {
-  size_t size = 0X80;
-  char *buffer = NULL;
+const char *
+locatePathName (const char *path) {
+  const char *name = path + strlen(path);
 
-  do {
-    buffer = reallocWrapper(buffer, size<<=1);
+  while (name != path) {
+    if (isPathDelimiter(*--name)) {
+      ++name;
+      break;
+    }
+  }
 
-    if (getcwd(buffer, size)) return buffer;
-  } while (errno == ERANGE);
-
-  if (buffer) free(buffer);
-  return NULL;
+  return name;
 }
 
 char *
@@ -362,18 +361,20 @@ makePath (const char *directory, const char *file) {
   int length = 0;
   int index;
   char *path;
+
   components[last] = file;
   if (!isAbsolutePath(file)) {
     if (directory && *directory) {
-      if (directory[strlen(directory)-1] != '/') components[--first] = "/";
+      if (!isPathDelimiter(directory[strlen(directory)-1])) components[--first] = "/";
       components[--first] = directory;
     }
   }
+
   for (index=first; index<=last; ++index) {
     length += lengths[index] = strlen(components[index]);
   }
-  path = mallocWrapper(length+1);
-  {
+
+  if ((path = malloc(length+1))) {
     char *target = path;
     for (index=first; index<=last; ++index) {
       length = lengths[index];
@@ -424,19 +425,56 @@ makeDirectory (const char *path) {
   struct stat status;
   if (stat(path, &status) != -1) {
     if (S_ISDIR(status.st_mode)) return 1;
-    LogPrint(LOG_ERR, "Not a directory: %s", path);
+    LogPrint(LOG_ERR, "not a directory: %s", path);
   } else if (errno != ENOENT) {
-    LogPrint(LOG_ERR, "Directory status error: %s: %s", path, strerror(errno));
+    LogPrint(LOG_ERR, "directory status error: %s: %s", path, strerror(errno));
   } else {
-    LogPrint(LOG_NOTICE, "Creating directory: %s", path);
+    LogPrint(LOG_NOTICE, "creating directory: %s", path);
     if (mkdir(path
 #ifndef __MINGW32__
               , S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH
 #endif /* __MINGW32__ */
              ) != -1) return 1;
-    LogPrint(LOG_ERR, "Directory creation error: %s: %s", path, strerror(errno));
+    LogPrint(LOG_ERR, "directory creation error: %s: %s", path, strerror(errno));
   }
   return 0;
+}
+
+char *
+getWorkingDirectory (void) {
+  size_t size = 0X80;
+  char *buffer = NULL;
+
+  do {
+    {
+      char *newBuffer = realloc(buffer, size<<=1);
+      if (!newBuffer) break;
+      buffer = newBuffer;
+    }
+
+    if (getcwd(buffer, size)) return buffer;
+  } while (errno == ERANGE);
+
+  if (buffer) free(buffer);
+  return NULL;
+}
+
+char *
+getHomeDirectory (void) {
+  char *path = getenv("HOME");
+  if (!path || !*path) return NULL;
+  return strdup(path);
+}
+
+char *
+getUserDirectory (void) {
+  char *home = getHomeDirectory();
+  if (home) {
+    char *directory = makePath(home, "." PACKAGE_NAME);
+    if (directory) return directory;
+    free(home);
+  }
+  return NULL;
 }
 
 const char *
@@ -521,6 +559,54 @@ isQualifiedDevice (const char **path, const char *qualifier) {
 void
 unsupportedDevice (const char *path) {
   LogPrint(LOG_WARNING, "Unsupported device: %s", path);
+}
+
+FILE *
+openFile (const char *path, const char *mode) {
+  FILE *file = fopen(path, mode);
+  if (file) {
+    LogPrint(LOG_DEBUG, "file opened: %s fd=%d", path, fileno(file));
+  } else {
+    LogPrint((errno == ENOENT)? LOG_DEBUG: LOG_ERR,
+             "file open error: %s: %s", path, strerror(errno));
+  }
+  return file;
+}
+
+FILE *
+openDataFile (const char *path, const char *mode) {
+  static const char *userDirectory = NULL;
+  const char *name = locatePathName(path);
+  char *userPath;
+  FILE *file;
+
+  if (!userDirectory) {
+    if ((userDirectory = getUserDirectory())) {
+      LogPrint(LOG_DEBUG, "user directory: %s", userDirectory);
+    } else {
+      LogPrint(LOG_DEBUG, "no user directory");
+      userDirectory = "";
+    }
+  }
+
+  if (!*userDirectory) {
+    userPath = NULL;
+  } else if ((userPath = makePath(userDirectory, name))) {
+    if (access(userPath, F_OK) != -1) {
+      file = openFile(userPath, mode);
+      goto done;
+    }
+  }
+
+  if (!(file = openFile(path, mode))) {
+    if (((*mode == 'w') || (*mode == 'a')) && (errno == EACCES) && userPath) {
+      if (makeDirectory(userDirectory)) file = openFile(userPath, mode);
+    }
+  }
+
+done:
+  if (userPath) free(userPath);
+  return file;
 }
 
 int

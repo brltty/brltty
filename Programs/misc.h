@@ -80,6 +80,9 @@ extern "C" {
 extern char **splitString (const char *string, char delimiter, int *count);
 extern void deallocateStrings (char **array);
 
+extern FILE *openFile (const char *path, const char *mode);
+extern FILE *openDataFile (const char *path, const char *mode);
+
 extern int processLines (
   FILE *file,
   int (*handler) (char *line, void *data),
@@ -148,13 +151,18 @@ extern void *mallocWrapper (size_t size);
 extern void *reallocWrapper (void *address, size_t size);
 extern char *strdupWrapper (const char *string);
 
+extern int isPathDelimiter (const char character);
 extern int isAbsolutePath (const char *path);
 extern char *getPathDirectory (const char *path);
+extern const char *locatePathName (const char *path);
 
-extern char *getWorkingDirectory (void);
 extern char *makePath (const char *directory, const char *file);
 extern void fixPath (char **path, const char *extension, const char *prefix);
 extern int makeDirectory (const char *path);
+
+extern char *getWorkingDirectory (void);
+extern char *getHomeDirectory (void);
+extern char *getUserDirectory (void);
 
 extern const char *getDeviceDirectory (void);
 extern char *getDevicePath (const char *device);

@@ -557,7 +557,7 @@ processConfigurationFile (
   const char *path,
   int optional
 ) {
-  FILE *file = fopen(path, "r");
+  FILE *file = openDataFile(path, "r");
   if (file != NULL) { /* The configuration file has been successfully opened. */
     int processed;
 
@@ -651,8 +651,7 @@ processOptions (
     }
   }
 
-  programName = strrchr(programPath, '/');
-  programName = programName? programName+1: programPath;
+  programName = locatePathName(programPath);
   setPrintPrefix(programName);
 
   processCommandLine(&info, argumentCount, argumentVector, argumentsSummary);

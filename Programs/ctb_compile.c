@@ -752,7 +752,7 @@ processFile (const char *fileName) {
   data.lineNumber = 0;
   LogPrint(LOG_DEBUG, "Including contraction table: %s", fileName);
 
-  if ((stream = fopen(data.fileName, "r"))) {
+  if ((stream = openDataFile(data.fileName, "r"))) {
     int size = 0X80;
     char *buffer = malloc(size);
     if (buffer) {
