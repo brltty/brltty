@@ -512,11 +512,11 @@ changedPreferences (void) {
 int
 loadPreferences (int change) {
   int ok = 0;
-  int fd = open(preferencesFile, O_RDONLY|O_BINARY);
-  if (fd != -1) {
+  FILE *file = openDataFile(preferencesFile, "rb");
+  if (file) {
     Preferences newPreferences;
-    int length = read(fd, &newPreferences, sizeof(newPreferences));
-    if (length == -1) {
+    size_t length = fread(&newPreferences, 1, sizeof(newPreferences), file);
+    if (ferror(file)) {
       LogPrint(LOG_ERR, "%s: %s: %s",
                gettext("cannot read preferences file"), preferencesFile, strerror(errno));
     } else if ((length < 40) ||
@@ -571,10 +571,7 @@ loadPreferences (int change) {
 
       if (change) changedPreferences();
     }
-    close(fd);
-  } else {
-    LogPrint((errno==ENOENT? LOG_DEBUG: LOG_ERR), "%s: %s: %s",
-             gettext("cannot open preferences file"), preferencesFile, strerror(errno));
+    fclose(file);
   }
   return ok;
 }
@@ -644,22 +641,17 @@ getPreferences (void) {
 int 
 savePreferences (void) {
   int ok = 0;
-  int fd = open(preferencesFile,
-                O_WRONLY | O_CREAT | O_TRUNC | O_BINARY,
-                S_IRUSR | S_IWUSR);
-  if (fd != -1) {
-    int length = write(fd, &prefs, sizeof(prefs));
+  FILE *file = openDataFile(preferencesFile, "w+");
+  if (file) {
+    size_t length = fwrite(&prefs, 1, sizeof(prefs), file);
     if (length == sizeof(prefs)) {
       ok = 1;
     } else {
-      if (length != -1) errno = EIO;
+      if (!ferror(file)) errno = EIO;
       LogPrint(LOG_ERR, "%s: %s: %s",
                gettext("cannot write to preferences file"), preferencesFile, strerror(errno));
     }
-    close(fd);
-  } else {
-    LogPrint(LOG_ERR, "%s: %s: %s",
-             gettext("cannot open preferences file"), preferencesFile, strerror(errno));
+    fclose(file);
   }
   if (!ok) message(gettext("not saved"), 0);
   return ok;
