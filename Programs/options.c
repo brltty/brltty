@@ -644,10 +644,17 @@ processOptions (
 
     if (!isAbsolutePath(programPath)) {
       char *directory = getWorkingDirectory();
-      char buffer[strlen(directory) + 1 + strlen(programPath) + 1];
-      sprintf(buffer, "%s/%s", directory, programPath);
-      programPath = strdupWrapper(buffer);
-      free(directory);
+      if (directory) {
+        char buffer[strlen(directory) + 1 + strlen(programPath) + 1];
+        sprintf(buffer, "%s/%s", directory, programPath);
+
+        {
+          char *newPath = strdup(buffer);
+          if (newPath) programPath = newPath;
+        }
+
+        free(directory);
+      }
     }
   }
 

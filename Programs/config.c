@@ -30,10 +30,6 @@
 #include <sys/stat.h>
 #include <limits.h>
 
-#ifndef O_BINARY
-#define O_BINARY 0
-#endif /* O_BINARY */
-
 #ifdef HAVE_SYS_WAIT_H
 #include <sys/wait.h>
 #endif /* HAVE_SYS_WAIT_H */

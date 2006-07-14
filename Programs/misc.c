@@ -429,7 +429,7 @@ makeDirectory (const char *path) {
   } else if (errno != ENOENT) {
     LogPrint(LOG_ERR, "directory status error: %s: %s", path, strerror(errno));
   } else {
-    LogPrint(LOG_NOTICE, "creating directory: %s", path);
+    LogPrint(LOG_DEBUG, "creating directory: %s", path);
     if (mkdir(path
 #ifndef __MINGW32__
               , S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH
@@ -568,7 +568,7 @@ openFile (const char *path, const char *mode) {
     LogPrint(LOG_DEBUG, "file opened: %s fd=%d", path, fileno(file));
   } else {
     LogPrint((errno == ENOENT)? LOG_DEBUG: LOG_ERR,
-             "file open error: %s: %s", path, strerror(errno));
+             "cannot open file: %s: %s", path, strerror(errno));
   }
   return file;
 }

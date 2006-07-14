@@ -177,7 +177,7 @@ openSpeechFifo (const char *directory, const char *path) {
                speechFifoPath, (unsigned)speechFifoHandle);
       return 1;
     } else {
-      LogWindowsError("Speech FIFO creation");
+      LogWindowsError("CreateNamedPipe");
     }
 #else /* __MINGW32__ */
     int ret = mkfifo(speechFifoPath, 0);
@@ -194,13 +194,13 @@ openSpeechFifo (const char *directory, const char *path) {
                  speechFifoPath, speechFifoDescriptor);
         return 1;
       } else {
-        LogPrint(LOG_ERR, "Cannot open speech FIFO: %s: %s",
+        LogPrint(LOG_ERR, "cannot open speech FIFO: %s: %s",
                  speechFifoPath, strerror(errno));
       }
 
       unlink(speechFifoPath);
     } else {
-      LogPrint(LOG_ERR, "Cannot create speech FIFO: %s: %s",
+      LogPrint(LOG_ERR, "cannot create speech FIFO: %s: %s",
                speechFifoPath, strerror(errno));
     }
 #endif /* __MINGW32__ */
@@ -208,6 +208,7 @@ openSpeechFifo (const char *directory, const char *path) {
     free(speechFifoPath);
     speechFifoPath = NULL;
   }
+
   return 0;
 }
 
