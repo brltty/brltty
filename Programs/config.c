@@ -1880,11 +1880,6 @@ startup (int argc, char *argv[]) {
                                     &opt_configurationFile,
                                     NULL);
 
-  if (argc) {
-    LogPrint(LOG_ERR, "%s: %s", gettext("excess argument"), argv[0]);
-    ++problemCount;
-  }
-
   {
     char **const paths[] = {
       &opt_dataDirectory,
@@ -1898,6 +1893,11 @@ startup (int argc, char *argv[]) {
       NULL
     };
     fixInstallPaths(paths);
+  }
+
+  if (argc) {
+    LogPrint(LOG_ERR, "%s: %s", gettext("excess argument"), argv[0]);
+    ++problemCount;
   }
 
   if (!validateInterval(&updateInterval, opt_updateInterval)) {

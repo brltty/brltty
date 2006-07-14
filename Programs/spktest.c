@@ -81,6 +81,15 @@ main (int argc, char *argv[]) {
                  NULL, NULL, NULL,
                  "[driver [parameter=value ...]]");
 
+  {
+    char **const paths[] = {
+      &opt_libraryDirectory,
+      &opt_dataDirectory,
+      NULL
+    };
+    fixInstallPaths(paths);
+  }
+
   speechRate = 1.0;
   if (opt_speechRate && *opt_speechRate) {
     static const float minimum = 0.1;

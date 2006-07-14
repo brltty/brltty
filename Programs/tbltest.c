@@ -232,6 +232,14 @@ main (int argc, char *argv[]) {
                  NULL, NULL, NULL,
                  "input-table [output-table]");
 
+  {
+    char **const paths[] = {
+      &opt_dataDirectory,
+      NULL
+    };
+    fixInstallPaths(paths);
+  }
+
   if (argc == 0) {
     LogPrint(LOG_ERR, "missing input table.");
     exit(2);

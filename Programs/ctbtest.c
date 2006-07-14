@@ -138,6 +138,14 @@ main (int argc, char *argv[]) {
                  NULL, NULL, NULL,
                  "contraction-table");
 
+  {
+    char **const paths[] = {
+      &opt_dataDirectory,
+      NULL
+    };
+    fixInstallPaths(paths);
+  }
+
   if ((outputExtend = !*opt_outputWidth)) {
     outputWidth = 0X80;
   } else {

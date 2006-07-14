@@ -113,6 +113,14 @@ main (int argc, char *argv[]) {
                  NULL, NULL, NULL,
                  "[parameter=value ...]");
 
+  {
+    char **const paths[] = {
+      &opt_libraryDirectory,
+      NULL
+    };
+    fixInstallPaths(paths);
+  }
+
   initializeAllScreens(opt_screenDriver, opt_libraryDirectory);
   if (!(parameterNames = getScreenParameters())) {
     static const char *const noNames[] = {NULL};

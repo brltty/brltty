@@ -95,6 +95,15 @@ main (int argc, char *argv[]) {
                  NULL, NULL, NULL,
                  "[driver [parameter=value ...]]");
 
+  {
+    char **const paths[] = {
+      &opt_libraryDirectory,
+      &opt_dataDirectory,
+      NULL
+    };
+    fixInstallPaths(paths);
+  }
+
   if (argc) {
     driver = *argv++;
     --argc;
