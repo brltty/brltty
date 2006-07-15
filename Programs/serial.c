@@ -1199,6 +1199,7 @@ serialSetLines (SerialDevice *serial, SerialLines high, SerialLines low) {
   serialWritePort(serial, SERIAL_PORT_MCR,
                   (oldMCR | high) & ~low);
   if (interruptsWereEnabled) enable();
+  return 1;
 #elif defined(TIOCMSET)
   int status;
   if (serialGetLines(serial, &status) != -1) {
