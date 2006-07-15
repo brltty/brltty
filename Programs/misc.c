@@ -351,6 +351,11 @@ locatePathName (const char *path) {
   return name;
 }
 
+int
+isExplicitPath (const char *path) {
+  return locatePathName(path) != path;
+}
+
 char *
 makePath (const char *directory, const char *file) {
   const int count = 3;
@@ -427,15 +432,16 @@ makeDirectory (const char *path) {
     if (S_ISDIR(status.st_mode)) return 1;
     LogPrint(LOG_ERR, "not a directory: %s", path);
   } else if (errno != ENOENT) {
-    LogPrint(LOG_ERR, "directory status error: %s: %s", path, strerror(errno));
-  } else {
-    LogPrint(LOG_DEBUG, "creating directory: %s", path);
-    if (mkdir(path
+    LogPrint(LOG_ERR, "cannot access directory: %s: %s", path, strerror(errno));
+  } else if (mkdir(path
 #ifndef __MINGW32__
-              , S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH
+                  ,S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH
 #endif /* __MINGW32__ */
-             ) != -1) return 1;
-    LogPrint(LOG_ERR, "directory creation error: %s: %s", path, strerror(errno));
+                  ) != -1) {
+    LogPrint(LOG_DEBUG, "directory created: %s", path);
+    return 1;
+  } else {
+    LogPrint(LOG_ERR, "cannot create directory: %s: %s", path, strerror(errno));
   }
   return 0;
 }

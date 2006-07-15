@@ -51,12 +51,28 @@ typedef struct {
 
 void
 fixInstallPaths (char **const *paths) {
-  char *programDirectory = getPathDirectory(programPath);
+  static const char *programDirectory = NULL;
+
+  if (!programDirectory) {
+    if (!(programDirectory = getPathDirectory(programPath))) {
+      LogPrint(LOG_WARNING, gettext("cannot determine program directory"));
+      programDirectory = ".";
+    }
+
+    LogPrint(LOG_DEBUG, "program directory: %s", programDirectory);
+  }
+
   while (*paths) {
-    **paths = makePath(programDirectory, **paths);
+    char *newPath = makePath(programDirectory, **paths);
+
+    if (!newPath) {
+      LogPrint(LOG_WARNING, "%s: %s", gettext("cannot fix install path"), **paths);
+    } else if (!isAbsolutePath(**paths=newPath)) {
+      LogPrint(LOG_WARNING, "%s: %s", gettext("install path not absolute"), **paths);
+    }
+
     ++paths;
   }
-  free(programDirectory);
 }
 
 void
@@ -629,31 +645,33 @@ processOptions (
   if (!(programPath = getProgramPath())) {
     programPath = **argumentVector;
 
+    if (isExplicitPath(programPath)) {
 #if defined(HAVE_REALPATH) && defined(PATH_MAX)
-    {
-      char buffer[PATH_MAX];
-      char *path = realpath(programPath, buffer);
+      {
+        char buffer[PATH_MAX];
+        char *path = realpath(programPath, buffer);
 
-      if (path) {
-        programPath = strdupWrapper(path);
-      } else {
-        LogError("realpath");
+        if (path) {
+          programPath = strdupWrapper(path);
+        } else {
+          LogError("realpath");
+        }
       }
-    }
 #endif /* defined(HAVE_REALPATH) && defined(PATH_MAX) */
 
-    if (!isAbsolutePath(programPath)) {
-      char *directory = getWorkingDirectory();
-      if (directory) {
-        char buffer[strlen(directory) + 1 + strlen(programPath) + 1];
-        sprintf(buffer, "%s/%s", directory, programPath);
+      if (!isAbsolutePath(programPath)) {
+        char *directory = getWorkingDirectory();
+        if (directory) {
+          char buffer[strlen(directory) + 1 + strlen(programPath) + 1];
+          sprintf(buffer, "%s/%s", directory, programPath);
 
-        {
-          char *newPath = strdup(buffer);
-          if (newPath) programPath = newPath;
+          {
+            char *newPath = strdup(buffer);
+            if (newPath) programPath = newPath;
+          }
+
+          free(directory);
         }
-
-        free(directory);
       }
     }
   }
