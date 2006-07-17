@@ -95,11 +95,13 @@ typedef int SocketDescriptor;
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
 
+#ifndef PACKED
 #ifdef HAVE_ATTRIBUTE_PACKED
 #define PACKED __attribute__((packed))
 #else /* HAVE_ATTRIBUTE_PACKED */
 #define PACKED
 #endif /* HAVE_ATTRIBUTE_PACKED */
+#endif /* PACKED */
 
 #ifdef HAVE_ATTRIBUTE_FORMAT_PRINTF
 #define PRINTF(fmt,var) __attribute__((format(printf, fmt, var)))
