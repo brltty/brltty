@@ -610,6 +610,44 @@ processConfigurationFile (
   return 0;
 }
 
+char *
+testProgram (const char *directory, const char *name) {
+  char *path;
+
+  if ((path = makePath(directory, name))) {
+    if (access(path, X_OK) != -1) return path;
+
+    free(path);
+  }
+
+  return NULL;
+}
+
+char *
+findProgram (const char *name) {
+  char *path = NULL;
+  const char *string;
+
+  if ((string = getenv("PATH"))) {
+    int count;
+    char **array;
+
+    if ((array = splitString(string, ':', &count))) {
+      int index;
+
+      for (index=0; index<count; ++index) {
+        const char *directory = array[index];
+        if (!*directory) directory = ".";
+        if ((path = testProgram(directory, name))) break;
+      }
+
+      deallocateStrings(array);
+    }
+  }
+
+  return path;
+}
+
 #ifdef WINDOWS
 #include "sys_windows.h"
 #endif /* WINDOWS */
@@ -642,36 +680,35 @@ processOptions (
   for (index=0; index<0X100; ++index) info.ensuredSettings[index] = 0;
   info.errorCount = 0;
 
-  if (!(programPath = getProgramPath())) {
-    programPath = **argumentVector;
+  if (!(programPath = getProgramPath())) programPath = **argumentVector;
 
-    if (isExplicitPath(programPath)) {
+  if (!isExplicitPath(programPath)) {
+    char *path = findProgram(programPath);
+    if (!path) path = testProgram(".", programPath);
+    if (path) programPath = path;
+  }
+
+  if (isExplicitPath(programPath)) {
 #if defined(HAVE_REALPATH) && defined(PATH_MAX)
-      {
-        char buffer[PATH_MAX];
-        char *path = realpath(programPath, buffer);
+    if (!isAbsolutePath(programPath)) {
+      char buffer[PATH_MAX];
+      char *path = realpath(programPath, buffer);
 
-        if (path) {
-          programPath = strdupWrapper(path);
-        } else {
-          LogError("realpath");
-        }
+      if (path) {
+        programPath = strdupWrapper(path);
+      } else {
+        LogError("realpath");
       }
+    }
 #endif /* defined(HAVE_REALPATH) && defined(PATH_MAX) */
 
-      if (!isAbsolutePath(programPath)) {
-        char *directory = getWorkingDirectory();
-        if (directory) {
-          char buffer[strlen(directory) + 1 + strlen(programPath) + 1];
-          sprintf(buffer, "%s/%s", directory, programPath);
+    if (!isAbsolutePath(programPath)) {
+      char *directory;
 
-          {
-            char *newPath = strdup(buffer);
-            if (newPath) programPath = newPath;
-          }
-
-          free(directory);
-        }
+      if ((directory = getWorkingDirectory())) {
+        char *path;
+        if ((path = makePath(directory, programPath))) programPath = path;
+        free(directory);
       }
     }
   }
