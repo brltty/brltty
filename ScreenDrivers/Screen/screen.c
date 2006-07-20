@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
+#include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/stat.h>
@@ -190,115 +191,79 @@ insert_ScreenScreen (ScreenKey key) {
     *--sequence = key & 0XFF;
     if (key & SCR_KEY_MOD_META) *--sequence = 0X1B;
   } else {
+#define KEY(key,string) case (key): sequence = (string); break
     switch (key) {
-      case SCR_KEY_ENTER:
-        sequence = "\r";
-        break;
-      case SCR_KEY_TAB:
-        sequence = "\t";
-        break;
-      case SCR_KEY_BACKSPACE:
-        sequence = "\x7f";
-        break;
-      case SCR_KEY_ESCAPE:
-        sequence = "\x1b";
-        break;
-      case SCR_KEY_CURSOR_LEFT:
-        sequence = "\x1b[D";
-        break;
-      case SCR_KEY_CURSOR_RIGHT:
-        sequence = "\x1b[C";
-        break;
-      case SCR_KEY_CURSOR_UP:
-        sequence = "\x1b[A";
-        break;
-      case SCR_KEY_CURSOR_DOWN:
-        sequence = "\x1b[B";
-        break;
-      case SCR_KEY_PAGE_UP:
-        sequence = "\x1b[5~";
-        break;
-      case SCR_KEY_PAGE_DOWN:
-        sequence = "\x1b[6~";
-        break;
-      case SCR_KEY_HOME:
-        sequence = "\x1b[1~";
-        break;
-      case SCR_KEY_END:
-        sequence = "\x1b[4~";
-        break;
-      case SCR_KEY_INSERT:
-        sequence = "\x1b[2~";
-        break;
-      case SCR_KEY_DELETE:
-        sequence = "\x1b[3~";
-        break;
-      case SCR_KEY_FUNCTION + 0:
-        sequence = "\x1bOP";
-        break;
-      case SCR_KEY_FUNCTION + 1:
-        sequence = "\x1bOQ";
-        break;
-      case SCR_KEY_FUNCTION + 2:
-        sequence = "\x1bOR";
-        break;
-      case SCR_KEY_FUNCTION + 3:
-        sequence = "\x1bOS";
-        break;
-      case SCR_KEY_FUNCTION + 4:
-        sequence = "\x1b[15~";
-        break;
-      case SCR_KEY_FUNCTION + 5:
-        sequence = "\x1b[17~";
-        break;
-      case SCR_KEY_FUNCTION + 6:
-        sequence = "\x1b[18~";
-        break;
-      case SCR_KEY_FUNCTION + 7:
-        sequence = "\x1b[19~";
-        break;
-      case SCR_KEY_FUNCTION + 8:
-        sequence = "\x1b[20~";
-        break;
-      case SCR_KEY_FUNCTION + 9:
-        sequence = "\x1b[21~";
-        break;
-      case SCR_KEY_FUNCTION + 10:
-        sequence = "\x1b[23~";
-        break;
-      case SCR_KEY_FUNCTION + 11:
-        sequence = "\x1b[24~";
-        break;
-      case SCR_KEY_FUNCTION + 12:
-        sequence = "\x1b[25~";
-        break;
-      case SCR_KEY_FUNCTION + 13:
-        sequence = "\x1b[26~";
-        break;
-      case SCR_KEY_FUNCTION + 14:
-        sequence = "\x1b[28~";
-        break;
-      case SCR_KEY_FUNCTION + 15:
-        sequence = "\x1b[29~";
-        break;
-      case SCR_KEY_FUNCTION + 16:
-        sequence = "\x1b[31~";
-        break;
-      case SCR_KEY_FUNCTION + 17:
-        sequence = "\x1b[32~";
-        break;
-      case SCR_KEY_FUNCTION + 18:
-        sequence = "\x1b[33~";
-        break;
-      case SCR_KEY_FUNCTION + 19:
-        sequence = "\x1b[34~";
-        break;
+      KEY(SCR_KEY_ENTER, "\r");
+      KEY(SCR_KEY_TAB, "\t");
+      KEY(SCR_KEY_BACKSPACE, "\x7f");
+      KEY(SCR_KEY_ESCAPE, "\x1b");
+      KEY(SCR_KEY_CURSOR_LEFT, "\x1b[D");
+      KEY(SCR_KEY_CURSOR_RIGHT, "\x1b[C");
+      KEY(SCR_KEY_CURSOR_UP, "\x1b[A");
+      KEY(SCR_KEY_CURSOR_DOWN, "\x1b[B");
+      KEY(SCR_KEY_PAGE_UP, "\x1b[5~");
+      KEY(SCR_KEY_PAGE_DOWN, "\x1b[6~");
+      KEY(SCR_KEY_HOME, "\x1b[1~");
+      KEY(SCR_KEY_END, "\x1b[4~");
+      KEY(SCR_KEY_INSERT, "\x1b[2~");
+      KEY(SCR_KEY_DELETE, "\x1b[3~");
+      KEY(SCR_KEY_FUNCTION+0, "\x1bOP");
+      KEY(SCR_KEY_FUNCTION+1, "\x1bOQ");
+      KEY(SCR_KEY_FUNCTION+2, "\x1bOR");
+      KEY(SCR_KEY_FUNCTION+3, "\x1bOS");
+      KEY(SCR_KEY_FUNCTION+4, "\x1b[15~");
+      KEY(SCR_KEY_FUNCTION+5, "\x1b[17~");
+      KEY(SCR_KEY_FUNCTION+6, "\x1b[18~");
+      KEY(SCR_KEY_FUNCTION+7, "\x1b[19~");
+      KEY(SCR_KEY_FUNCTION+8, "\x1b[20~");
+      KEY(SCR_KEY_FUNCTION+9, "\x1b[21~");
+      KEY(SCR_KEY_FUNCTION+10, "\x1b[23~");
+      KEY(SCR_KEY_FUNCTION+11, "\x1b[24~");
+      KEY(SCR_KEY_FUNCTION+12, "\x1b[25~");
+      KEY(SCR_KEY_FUNCTION+13, "\x1b[26~");
+      KEY(SCR_KEY_FUNCTION+14, "\x1b[28~");
+      KEY(SCR_KEY_FUNCTION+15, "\x1b[29~");
+      KEY(SCR_KEY_FUNCTION+16, "\x1b[31~");
+      KEY(SCR_KEY_FUNCTION+17, "\x1b[32~");
+      KEY(SCR_KEY_FUNCTION+18, "\x1b[33~");
+      KEY(SCR_KEY_FUNCTION+19, "\x1b[34~");
+
       default:
         LogPrint(LOG_WARNING, "unsuported key: %4.4X", key);
         return 0;
     }
+#undef KEY
   }
-  return doScreenCommand("stuff", sequence, NULL);
+
+  {
+    size_t count = strlen(sequence);
+    char buffer[(count * 4) + 3];
+    char *byte = buffer;
+    const char quote = '"';
+    const char escape = '\\';
+
+    *byte++ = quote;
+    {
+      size_t index;
+      for (index=0; index<count; ++index) {
+        char character = sequence[index];
+        if ((character == quote) || (character == escape)) {
+          *byte++ = escape;
+          *byte++ = character;
+        } else if (isascii(character) && isprint(character)) {
+          *byte++ = character;
+        } else {
+          *byte++ = escape;
+          sprintf(byte, "%.3o", character&0XFF);
+          byte += 3;
+        }
+      }
+    }
+    *byte++ = quote;
+    *byte++ = 0;
+
+    return doScreenCommand("stuff", buffer, NULL);
+  }
 }
 
 static void
