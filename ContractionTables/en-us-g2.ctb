@@ -901,7 +901,6 @@ always ] 456-23456
 always { 46-12356
 always } 46-23456
 always -com =
-endword -to = pointed-to resource
 always _ 78
 prepunc `` 236
 prepunc ` 6-236

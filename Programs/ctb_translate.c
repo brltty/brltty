@@ -139,6 +139,7 @@ selectRule (int length) { /*check for valid contractions */
             break;
           case CTO_JoinableWord:
             if (CTC(before, CTC_Space|CTC_Punctuation) &&
+                (before != '-') &&
                 CTC(after, CTC_Space) &&
                 (dest + currentRule->replen < destmax)) {
               const BYTE *ptr = src + currentFindLength + 1;
