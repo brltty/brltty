@@ -49,37 +49,6 @@ static const mode_t shmMode = S_IRWXU;
 static const int shmSize = 4 + ((66 * 132) * 2);
 
 static int
-doScreenCommand (const char *command, ...) {
-  va_list args;
-  int count = 0;
-
-  va_start(args, command);
-  while (va_arg(args, char *)) ++count;
-  va_end(args);
-
-  {
-    const char *argv[count + 4];
-    const char **arg = argv;
-
-    *arg++ = "screen";
-    *arg++ = "-X";
-    *arg++ = command;
-
-    va_start(args, command);
-    while ((*arg++ = va_arg(args, char *)));
-    va_end(args);
-
-    {
-      int result = executeHostCommand(argv);
-      if (result == 0) return 1;
-      LogPrint(LOG_ERR, "screen error: %d", result);
-    }
-  }
-
-  return 0;
-}
-
-static int
 open_ScreenScreen (void) {
 #ifdef HAVE_SHMGET
   {
@@ -145,6 +114,43 @@ open_ScreenScreen (void) {
 
 static int
 currentvt_ScreenScreen (void) {
+  return shmAddress[4 + (shmAddress[0] * shmAddress[1] * 2)];
+}
+
+static int
+doScreenCommand (const char *command, ...) {
+  va_list args;
+  int count = 0;
+
+  va_start(args, command);
+  while (va_arg(args, char *)) ++count;
+  va_end(args);
+
+  {
+    char window[0X10];
+    const char *argv[count + 6];
+    const char **arg = argv;
+
+    *arg++ = "screen";
+
+    *arg++ = "-p";
+    snprintf(window, sizeof(window), "%d", currentvt_ScreenScreen());
+    *arg++ = window;
+
+    *arg++ = "-X";
+    *arg++ = command;
+
+    va_start(args, command);
+    while ((*arg++ = va_arg(args, char *)));
+    va_end(args);
+
+    {
+      int result = executeHostCommand(argv);
+      if (result == 0) return 1;
+      LogPrint(LOG_ERR, "screen error: %d", result);
+    }
+  }
+
   return 0;
 }
 
@@ -235,35 +241,8 @@ insert_ScreenScreen (ScreenKey key) {
 #undef KEY
   }
 
-  {
-    size_t count = strlen(sequence);
-    char buffer[(count * 4) + 3];
-    char *byte = buffer;
-    const char quote = '"';
-    const char escape = '\\';
-
-    *byte++ = quote;
-    {
-      size_t index;
-      for (index=0; index<count; ++index) {
-        char character = sequence[index];
-        if ((character == quote) || (character == escape)) {
-          *byte++ = escape;
-          *byte++ = character;
-        } else if (isascii(character) && isprint(character)) {
-          *byte++ = character;
-        } else {
-          *byte++ = escape;
-          sprintf(byte, "%.3o", character&0XFF);
-          byte += 3;
-        }
-      }
-    }
-    *byte++ = quote;
-    *byte++ = 0;
-
-    return doScreenCommand("stuff", buffer, NULL);
-  }
+LogPrint(LOG_NOTICE, "key=%x seq=%s", key, sequence+1);
+  return doScreenCommand("stuff", sequence, NULL);
 }
 
 static void
