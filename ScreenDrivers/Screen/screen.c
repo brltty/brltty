@@ -20,7 +20,6 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
-#include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/stat.h>
@@ -241,7 +240,6 @@ insert_ScreenScreen (ScreenKey key) {
 #undef KEY
   }
 
-LogPrint(LOG_NOTICE, "key=%x seq=%s", key, sequence+1);
   return doScreenCommand("stuff", sequence, NULL);
 }
 
