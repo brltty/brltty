@@ -46,14 +46,14 @@
  
  SHELL=/bin/sh
 --- extern.h.orig	2003-08-22 08:27:57.000000000 -0400
-+++ extern.h	2006-07-24 05:52:52.000000000 -0400
++++ extern.h	2006-07-24 13:48:24.000000000 -0400
 @@ -139,6 +139,12 @@
  extern void  FreePseudowin __P((struct win *));
  #endif
  extern void  nwin_compose __P((struct NewWindow *, struct NewWindow *, struct NewWindow *));
 +
 +#ifdef IPC_EXPORT_IMAGE
-+extern void  setWinImage __P((const char *, unsigned char *));
++extern void  SetWinImage __P((const char *, unsigned char *));
 +extern void  CopyWinImage __P((struct win *, unsigned char *));
 +#endif
 +
@@ -74,7 +74,7 @@
   * windowlist orders
   */
 --- screen.c.orig	2003-09-08 10:26:41.000000000 -0400
-+++ screen.c	2006-07-24 06:00:12.000000000 -0400
++++ screen.c	2006-07-24 13:48:36.000000000 -0400
 @@ -71,6 +71,14 @@
  #if (defined(AUX) || defined(_AUX_SOURCE)) && defined(POSIX)
  # include <compat.h>
@@ -149,7 +149,7 @@
 +      }
 +
 +    /* put valid data into the image */
-+    setWinImage( "screen is initializing...", shm );
++    SetWinImage( "screen is initializing...", shm );
 +  }
 +#endif
 +
@@ -182,8 +182,8 @@
  	timeoutev = calctimo();
        if (timeoutev)
 --- window.c.orig	2003-12-05 08:45:41.000000000 -0500
-+++ window.c	2006-07-24 06:38:35.000000000 -0400
-@@ -1993,6 +1993,88 @@
++++ window.c	2006-07-24 15:04:41.000000000 -0400
+@@ -1993,6 +1993,107 @@
      }
  }
  
@@ -191,7 +191,7 @@
 +#ifdef IPC_EXPORT_IMAGE
 +
 +void
-+setWinImage( msg, dest )
++SetWinImage( msg, dest )
 +const char *msg;
 +unsigned char *dest;
 +{
@@ -240,7 +240,7 @@
 +        {
 +          s = p->w_mlines[y].image;
 +          x = p->w_width;
-+          if( st && y == STATLINE )
++          if( st && (y == STATLINE) )
 +            for( m = D_status_lastmsg; *m && x; *d++ = *m++, s++, x-- );
 +          for( ; x; *d++ = *s++, x-- );
 +        }
@@ -249,11 +249,30 @@
 +#ifdef COLOR
 +      for( y = 0; y < p->w_height; y++ )
 +        {
-+          s = p->w_mlines[y].color;
-+          x = p->w_width;
-+          if( st && y == STATLINE )
-+            for( ; x; *d++ = 0, s++, x-- );
-+          for( ; x; *d++ = *s++, x-- );
++          struct mline *ml = &p->w_mlines[y];
++          x = 0;
++          if( st && (y == STATLINE) )
++            for( ; x<p->w_width; *d++ = 0X70, x++ );
++          for( ; x<p->w_width; x++ )
++            {
++              static const unsigned char tr[] =
++                {
++                  0X0, 0X4, 0X2, 0X6, 0X1, 0X5, 0X3, 0X7,
++                  0X8, 0XC, 0XA, 0XE, 0X9, 0XD, 0XB, 0XF
++                };
++
++              struct mchar mc;
++              int fg;
++              int bg;
++
++              copy_mline2mchar( &mc, ml, x );
++              fg = rend_getfg(&mc);
++              bg = rend_getbg(&mc);
++
++              fg = fg? tr[coli2e(fg) & 0XF]: 0X7;
++              bg = bg? tr[coli2e(bg) & 0XF]: 0X0;
++              *d++ = fg | (bg << 4);
++            }
 +        }
 +#endif /* COLOR */
 +
@@ -262,7 +281,7 @@
 +  else
 +    {
 +      /* no window pointer */
-+      setWinImage( "no active scren", dest );
++      SetWinImage( "no active scren", dest );
 +    }
 +}
 +
