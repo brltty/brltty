@@ -74,7 +74,7 @@
   * windowlist orders
   */
 --- screen.c.orig	2003-09-08 10:26:41.000000000 -0400
-+++ screen.c	2006-07-24 13:48:36.000000000 -0400
++++ screen.c	2006-07-25 10:55:24.000000000 -0400
 @@ -71,6 +71,14 @@
  #if (defined(AUX) || defined(_AUX_SOURCE)) && defined(POSIX)
  # include <compat.h>
@@ -125,7 +125,7 @@
 +    key_t key;
 +    int shmid;
 +
-+    /* allow for header, text, attributes, and trailer
++    /* allow for the header, text, attributes, and auxiliary data
 +     * (assuming no screen will be bigger than 132x66)
 +     */
 +    size_t size = 18000; /*  */
@@ -182,8 +182,8 @@
  	timeoutev = calctimo();
        if (timeoutev)
 --- window.c.orig	2003-12-05 08:45:41.000000000 -0500
-+++ window.c	2006-07-24 21:46:33.000000000 -0400
-@@ -1993,6 +1993,107 @@
++++ window.c	2006-07-25 10:36:10.000000000 -0400
+@@ -1993,6 +1993,113 @@
      }
  }
  
@@ -215,6 +215,7 @@
 +  }
 +
 +  *d++ = 0;    /* window number */
++  *d++ = 0;    /* flags */
 +}
 +
 +
@@ -276,7 +277,12 @@
 +        }
 +#endif /* COLOR */
 +
-+      *d++ = p->w_number;                       /* window number */
++      *d++ = p->w_number;  /* window number */
++
++      *d = 0;  /* flags */
++      if (p->w_cursorkeys) *d |= 0X01; /* cursor keys are in application mode */
++      if (p->w_keypad) *d |= 0X02; /* keypad is in application mode */
++      d++;
 +    }
 +  else
 +    {
