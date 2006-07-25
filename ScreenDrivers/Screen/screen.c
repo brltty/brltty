@@ -111,9 +111,14 @@ open_ScreenScreen (void) {
   return 0;
 }
 
+static const unsigned char *
+getAuxiliaryData (void) {
+  return &shmAddress[4 + (shmAddress[0] * shmAddress[1] * 2)];
+}
+
 static int
 currentvt_ScreenScreen (void) {
-  return shmAddress[4 + (shmAddress[0] * shmAddress[1] * 2)];
+  return getAuxiliaryData()[0];
 }
 
 static int
@@ -186,6 +191,7 @@ read_ScreenScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
 
 static int
 insert_ScreenScreen (ScreenKey key) {
+  unsigned char flags = getAuxiliaryData()[1];
   char buffer[3];
   char *sequence;
 
@@ -197,15 +203,18 @@ insert_ScreenScreen (ScreenKey key) {
     if (key & SCR_KEY_MOD_META) *--sequence = 0X1B;
   } else {
 #define KEY(key,string) case (key): sequence = (string); break
+#define CURSOR_KEY(key,string1,string2) KEY((key), ((flags & 0X01)? (string1): (string2)))
     switch (key) {
       KEY(SCR_KEY_ENTER, "\r");
       KEY(SCR_KEY_TAB, "\t");
       KEY(SCR_KEY_BACKSPACE, "\x7f");
       KEY(SCR_KEY_ESCAPE, "\x1b");
-      KEY(SCR_KEY_CURSOR_LEFT, "\x1b[D");
-      KEY(SCR_KEY_CURSOR_RIGHT, "\x1b[C");
-      KEY(SCR_KEY_CURSOR_UP, "\x1b[A");
-      KEY(SCR_KEY_CURSOR_DOWN, "\x1b[B");
+
+      CURSOR_KEY(SCR_KEY_CURSOR_LEFT , "\x1bOD", "\x1b[D");
+      CURSOR_KEY(SCR_KEY_CURSOR_RIGHT, "\x1bOC", "\x1b[C");
+      CURSOR_KEY(SCR_KEY_CURSOR_UP   , "\x1bOA", "\x1b[A");
+      CURSOR_KEY(SCR_KEY_CURSOR_DOWN , "\x1bOB", "\x1b[B");
+
       KEY(SCR_KEY_PAGE_UP, "\x1b[5~");
       KEY(SCR_KEY_PAGE_DOWN, "\x1b[6~");
       KEY(SCR_KEY_HOME, "\x1b[1~");
@@ -237,6 +246,7 @@ insert_ScreenScreen (ScreenKey key) {
         LogPrint(LOG_WARNING, "unsuported key: %4.4X", key);
         return 0;
     }
+#undef CURSOR_KEY
 #undef KEY
   }
 
