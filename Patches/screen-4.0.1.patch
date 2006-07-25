@@ -182,7 +182,7 @@
  	timeoutev = calctimo();
        if (timeoutev)
 --- window.c.orig	2003-12-05 08:45:41.000000000 -0500
-+++ window.c	2006-07-24 15:04:41.000000000 -0400
++++ window.c	2006-07-24 21:46:33.000000000 -0400
 @@ -1993,6 +1993,107 @@
      }
  }
@@ -225,7 +225,7 @@
 +{
 +  register unsigned char *s, *d = dest, *m;
 +  register int x, y;
-+  struct display *display = p->w_pdisplay;
++  struct display *display = p->w_lastdisp;
 +  int st = (display) ? D_status : 0;
 +
 +  if( p && p->w_mlines )
