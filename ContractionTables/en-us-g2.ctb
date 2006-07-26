@@ -589,6 +589,7 @@ sufword raw = rawhide
 endnum rd 1235-145
 begword reab = reabsorbed
 always react =
+always reaction 1235-15-1-14-56-1345
 always reach 1235-2-16
 begword readj = readjust
 begword readm = readmit
