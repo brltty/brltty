@@ -107,6 +107,7 @@ begword beda 23-145-1 bedazzle
 begword bede 23-145-15 bedevil
 word bede 12-1246-15 bede (a name)
 begword bedi 23-145-24 bedizzened
+begword bedra 23-145-1235-1 bedraggled
 word bee 12-15-15
 begword bee 12-15-15
 always been 12-15-26
@@ -126,10 +127,11 @@ begword belm = Belmont
 always belt =
 begword belw = belwether
 always ben 12-26
+begword benef 23-1345-15-124 beneficent
+begword benev 23-1345-15-1236 benevolent
 begword beni 12-26-24
 begword benif 23-1345-24-124 benificient
 sufword benign 23-1345-24-1245-1345 benignity
-begword benov 23-1345-135-1236 benovolent
 begword benu 23-1345-136 benumbed
 begword ber 12-12456
 begword bera 23-1235-1 berating
@@ -218,6 +220,7 @@ sufword clever 14-123-5-15 cleverest
 # the letter d
 always d 145
 always D 145
+begword dared 145-345-15-145 daredevil
 always day 5-145
 begword deact = deactivation
 begword deall = deallocate
@@ -308,6 +311,7 @@ begword erec = erect
 begword ero 15-1235-135
 midendword eroom = storeroom
 begword eru = erupt
+always ethole 15-2345-125-135-123-15 bullethole
 always ever 5-15
 midendword evere 15-1236-12456-15 Everest
 always evered 15-1236-12456-1246
@@ -543,6 +547,7 @@ contraction pd
 always part 5-1234
 begword parta 1234-345-2345-1 partake
 begword parto 1234-345-2345-135
+begword peacen 1234-2-14-15-1345 peacenik
 word people 1234
 always perceive 1234-12456-14-1236
 word percv =
@@ -556,6 +561,9 @@ word percvg =
 always perhaps 1234-12456-125
 word perh =
 always pher 1234-125-12456 cyphered
+begword pinea 1234-35-15-1 pineapple
+sufword poleax =
+begword portho = porthole
 begword potho = pothole pothook
 begword pre =
 always preach 1234-1235-2-16
@@ -580,7 +588,7 @@ word rather 1235
 sufword raw = rawhide
 endnum rd 1235-145
 begword reab = reabsorbed
-always reac =
+always react =
 always reach 1235-2-16
 begword readj = readjust
 begword readm = readmit
@@ -692,6 +700,8 @@ word th =
 always th 1456
 always thand 2345-125-12346 shorthand
 word that 2345
+always theap 2345-125-2-1234 antheap
+always thill 2345-125-24-123-123 anthill
 word this 1456
 word thyself 1456-13456-124
 word thyf =
