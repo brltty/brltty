@@ -89,11 +89,7 @@ typedef struct {
   unsigned char speechRate;
   unsigned char speechVolume;
   unsigned char brailleFirmness;
-}
-#ifdef HAVE_ATTRIBTE_PACKED
-  __attribute__((packed))
-#endif /* HAVE_ATTRIBTE_PACKED */
-  Preferences;
+} PACKED Preferences;
 extern Preferences prefs;		/* current preferences settings */
 #define PREFERENCES_TIME(time) ((time) * 10)
 
