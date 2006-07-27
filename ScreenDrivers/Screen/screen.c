@@ -43,7 +43,7 @@ static int shmFileDescriptor = -1;
 #include "Programs/scr_driver.h"
 #include "screen.h"
 
-static char *shmAddress = NULL;
+static unsigned char *shmAddress = NULL;
 static const mode_t shmMode = S_IRWXU;
 static const int shmSize = 4 + ((66 * 132) * 2);
 
@@ -75,7 +75,7 @@ open_ScreenScreen (void) {
       shmKey = keys[--keyCount];
       LogPrint(LOG_DEBUG, "Trying shared memory key: 0X%" PRIX_KEY_T, shmKey);
       if ((shmIdentifier = shmget(shmKey, shmSize, shmMode)) != -1) {
-        if ((shmAddress = shmat(shmIdentifier, NULL, 0)) != (char *)-1) {
+        if ((shmAddress = shmat(shmIdentifier, NULL, 0)) != (unsigned char *)-1) {
           LogPrint(LOG_INFO, "Screen image shared memory key: 0X%" PRIX_KEY_T, shmKey);
           return 1;
         } else {
