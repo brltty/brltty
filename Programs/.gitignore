@@ -4,6 +4,7 @@ api.h
 *.auto.h
 *.a
 *.so
+*.dylib
 brltty
 brltty-config
 apitest
