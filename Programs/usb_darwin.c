@@ -235,7 +235,7 @@ openDevice (UsbDevice *device, int seize) {
       level = LOG_NOTICE;
     }
 
-    LogPrint(level, "USB device %s: vendor=%04X product=%4X",
+    LogPrint(level, "USB device %s: vendor=%04X product=%04X",
              action, device->descriptor.idVendor, device->descriptor.idProduct);
     devx->deviceOpened = 1;
   }
@@ -462,9 +462,18 @@ usbSetAlternative (
 
   if (setInterface(device, interface)) {
     UInt8 arg = alternative;
-    IOReturn result = (*devx->interface)->SetAlternateInterface(devx->interface, arg);
-    if (result == kIOReturnSuccess) return 1;
-    setUnixError(result, "USB alternative set");
+    IOReturn result;
+
+    result = (*devx->interface)->GetAlternateSetting(devx->interface, &arg);
+    if (result == kIOReturnSuccess) {
+      if (arg == alternative) return 1;
+
+      result = (*devx->interface)->SetAlternateInterface(devx->interface, arg);
+      if (result == kIOReturnSuccess) return 1;
+      setUnixError(result, "USB alternative set");
+    } else {
+      setUnixError(result, "USB alternative get");
+    }
   }
 
   return 0;
