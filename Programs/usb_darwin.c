@@ -461,13 +461,14 @@ usbSetAlternative (
   UsbDeviceExtension *devx = device->extension;
 
   if (setInterface(device, interface)) {
-    UInt8 arg = alternative;
     IOReturn result;
+    UInt8 arg;
 
     result = (*devx->interface)->GetAlternateSetting(devx->interface, &arg);
     if (result == kIOReturnSuccess) {
       if (arg == alternative) return 1;
 
+      arg = alternative;
       result = (*devx->interface)->SetAlternateInterface(devx->interface, arg);
       if (result == kIOReturnSuccess) return 1;
       setUnixError(result, "USB alternative set");
