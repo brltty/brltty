@@ -182,8 +182,8 @@
  	timeoutev = calctimo();
        if (timeoutev)
 --- window.c.orig	2003-12-05 08:45:41.000000000 -0500
-+++ window.c	2006-07-25 10:36:10.000000000 -0400
-@@ -1993,6 +1993,113 @@
++++ window.c	2006-07-30 10:37:53.000000000 -0400
+@@ -1993,6 +1993,115 @@
      }
  }
  
@@ -275,6 +275,8 @@
 +              *d++ = fg | (bg << 4);
 +            }
 +        }
++#else /* COLOR */
++      *d += p->w_width * p->w_height;
 +#endif /* COLOR */
 +
 +      *d++ = p->w_number;  /* window number */
