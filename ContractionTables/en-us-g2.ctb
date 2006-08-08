@@ -127,7 +127,8 @@ begword belm = Belmont
 always belt =
 begword belw = belwether
 always ben 12-26
-begword benef 23-1345-15-124 beneficent
+sufword beneficence 23-1345-15-124-24-14-56-15
+sufword beneficent 23-1345-15-124-24-14-26-2345
 begword benev 23-1345-15-1236 benevolent
 begword beni 12-26-24
 begword benif 23-1345-24-124 benificient
@@ -631,7 +632,8 @@ word rjcth =
 always rejoicing 1235-245-14-1245
 contraction rjcg
 sufword renaming 1235-15-1345-1-134-346 renamings
-begword rene =
+begword rene = renegotiate
+begword renegad 1235-26-15-1245-1-145 renegade
 begword renom = renominate
 begword renou 1235-15-1345-1256 renounce
 sufword renown 1235-15-1345-246-1345 renowned
