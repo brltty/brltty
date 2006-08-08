@@ -182,8 +182,8 @@
  	timeoutev = calctimo();
        if (timeoutev)
 --- window.c.orig	2003-12-05 08:45:41.000000000 -0500
-+++ window.c	2006-07-30 10:37:53.000000000 -0400
-@@ -1993,6 +1993,115 @@
++++ window.c	2006-08-08 10:39:45.000000000 -0400
+@@ -1993,6 +1993,130 @@
      }
  }
  
@@ -227,23 +227,30 @@
 +  register unsigned char *s, *d = dest, *m;
 +  register int x, y;
 +  struct display *display = p->w_lastdisp;
-+  int st = (display) ? D_status : 0;
++  int st = (display && D_status) ? 1 : 0;
 +
 +  if( p && p->w_mlines )
 +    {
 +      *d++ = p->w_width;                        /* screen width */
-+      *d++ = p->w_height;                       /* screen height */
++      *d++ = p->w_height + st;                  /* screen height */
 +      *d++ = (st) ? D_status_len : p->w_x;      /* cursor column */
-+      *d++ = (st) ? STATLINE : p->w_y;          /* cursor row */
++      *d++ = (st) ? p->w_height : p->w_y;       /* cursor row */
 +
 +      /* copy window image to buffer */
 +      for( y = 0; y < p->w_height; y++ )
 +        {
 +          s = p->w_mlines[y].image;
 +          x = p->w_width;
-+          if( st && (y == STATLINE) )
-+            for( m = D_status_lastmsg; *m && x; *d++ = *m++, s++, x-- );
 +          for( ; x; *d++ = *s++, x-- );
++        }
++
++      /* copy status line to buffer */
++      if( st )
++        {
++          s = D_status_lastmsg;
++          x = p->w_width;
++          for( ; *s && x; *d++ = *s++, x-- );
++          for( ; x; *d++ = ' ', x-- );
 +        }
 +
 +      /* copy attributes from window image to buffer */
@@ -252,8 +259,6 @@
 +        {
 +          struct mline *ml = &p->w_mlines[y];
 +          x = 0;
-+          if( st && (y == STATLINE) )
-+            for( ; x<p->w_width; *d++ = 0X70, x++ );
 +          for( ; x<p->w_width; x++ )
 +            {
 +              static const unsigned char tr[] =
@@ -275,8 +280,18 @@
 +              *d++ = fg | (bg << 4);
 +            }
 +        }
++
++      if( st )
++        {
++          memset(d, 0X70, p->w_width);
++          d += p->w_width;
++        }
 +#else /* COLOR */
-+      *d += p->w_width * p->w_height;
++      {
++        int count = dest[0] * dest[1];
++        memset(d, 0X07, count);
++        d += count;
++      }
 +#endif /* COLOR */
 +
 +      *d++ = p->w_number;  /* window number */
