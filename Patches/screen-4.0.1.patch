@@ -46,16 +46,19 @@
  
  SHELL=/bin/sh
 --- extern.h.orig	2003-08-22 08:27:57.000000000 -0400
-+++ extern.h	2006-07-24 13:48:24.000000000 -0400
-@@ -139,6 +139,12 @@
++++ extern.h	2006-08-09 11:35:42.000000000 -0400
+@@ -139,6 +139,15 @@
  extern void  FreePseudowin __P((struct win *));
  #endif
  extern void  nwin_compose __P((struct NewWindow *, struct NewWindow *, struct NewWindow *));
 +
 +#ifdef IPC_EXPORT_IMAGE
-+extern void  SetWinImage __P((const char *, unsigned char *));
-+extern void  CopyWinImage __P((struct win *, unsigned char *));
-+#endif
++extern void SetWinImage __P((const char *, unsigned char *));
++extern void CopyWinImage __P((struct win *, unsigned char *));
++extern int IsInputLayer __P((struct layer *));
++extern int GetInputPosition __P((struct layer *));
++extern void CopyInputLine __P((struct layer *, char *, int));
++#endif /* IPC_EXPORT_IMAGE */
 +
  extern int   DoStartLog __P((struct win *, char *, int));
  extern int   ReleaseAutoWritelock __P((struct display *, struct win *));
@@ -181,9 +184,61 @@
        if (calctimeout)
  	timeoutev = calctimo();
        if (timeoutev)
+--- input.c.orig	2006-08-09 10:40:10.000000000 -0400
++++ input.c	2006-08-09 11:42:39.000000000 -0400
+@@ -400,3 +400,49 @@
+   return 0;
+ }
+ 
++#ifdef IPC_EXPORT_IMAGE
++int
++IsInputLayer(l)
++struct layer *l;
++{
++  return l->l_layfn == &InpLf;
++}
++
++int
++GetInputPosition(l)
++struct layer *l;
++{
++  struct inpdata *inpdata = (struct inpdata *)l->l_data;
++  return inpdata->inpstringlen + inpdata->inp.pos;
++}
++
++void
++CopyInputLine(l, dest, width)
++struct layer *l;
++char *dest;
++int width;
++{
++  struct inpdata *inpdata = (struct inpdata *)l->l_data;
++  char *src;
++  int len;
++
++  for
++  ( 
++    src = inpdata->inpstring, len = inpdata->inpstringlen;
++    width && len;
++    *dest++ = *src++, len--, width--
++  );
++
++  if( !(inpdata->inpmode & INP_NOECHO) )
++    {
++      for
++      ( 
++        src = inpdata->inp.buf, len = inpdata->inp.len;
++        width && len;
++        *dest++ = *src++, len--, width--
++      );
++    }
++
++  while( width ) *dest++ = ' ', width--;
++}
++#endif	/* IPC_EXPORT_IMAGE */
 --- window.c.orig	2003-12-05 08:45:41.000000000 -0500
-+++ window.c	2006-08-08 10:39:45.000000000 -0400
-@@ -1993,6 +1993,130 @@
++++ window.c	2006-08-09 11:34:20.000000000 -0400
+@@ -1993,6 +1993,138 @@
      }
  }
  
@@ -228,13 +283,16 @@
 +  register int x, y;
 +  struct display *display = p->w_lastdisp;
 +  int st = (display && D_status) ? 1 : 0;
++  int in = IsInputLayer(p->w_savelayer) ? 1 : 0;
 +
 +  if( p && p->w_mlines )
 +    {
 +      *d++ = p->w_width;                        /* screen width */
-+      *d++ = p->w_height + st;                  /* screen height */
-+      *d++ = (st) ? D_status_len : p->w_x;      /* cursor column */
-+      *d++ = (st) ? p->w_height : p->w_y;       /* cursor row */
++      *d++ = p->w_height + (st | in);                  /* screen height */
++      *d++ = st? D_status_len:                  /* cursor column */
++             in? GetInputPosition(p->w_savelayer):
++                 p->w_x;
++      *d++ = (st || in)? p->w_height: p->w_y;       /* cursor row */
 +
 +      /* copy window image to buffer */
 +      for( y = 0; y < p->w_height; y++ )
@@ -251,6 +309,11 @@
 +          x = p->w_width;
 +          for( ; *s && x; *d++ = *s++, x-- );
 +          for( ; x; *d++ = ' ', x-- );
++        }
++      else if (in)
++        {
++          CopyInputLine(p->w_savelayer, d, p->w_width);
++          d += p->w_width;
 +        }
 +
 +      /* copy attributes from window image to buffer */
@@ -281,9 +344,9 @@
 +            }
 +        }
 +
-+      if( st )
++      if( st || in )
 +        {
-+          memset(d, 0X70, p->w_width);
++          memset(d, (st ? 0X70 : 0X07), p->w_width);
 +          d += p->w_width;
 +        }
 +#else /* COLOR */
