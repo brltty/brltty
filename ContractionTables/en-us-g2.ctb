@@ -127,6 +127,7 @@ begword belm = Belmont
 always belt =
 begword belw = belwether
 always ben 12-26
+word benefic 23-1345-15-124-24-14
 sufword beneficence 23-1345-15-124-24-14-56-15
 sufword beneficent 23-1345-15-124-24-14-26-2345
 begword benev 23-1345-15-1236 benevolent
@@ -610,7 +611,8 @@ word redo =
 begword redol 1235-1246-135-123 redolent
 word redone 1235-15-145-5-135
 begword redou 1235-15-145-1256 redouble redoubt 
-always redu =
+always redu = reduce redundant reduplicate
+always redul 1235-1246-136-123 incredulous
 always receive 1235-14-1236
 contraction rcv
 contraction rcvd
@@ -780,6 +782,7 @@ lowword were 2356
 always where 5-156
 word whereupon 5-156-45-136
 word wherever 156-12456-5-15
+sufword wiseacre =
 largesign with 23456
 always word 45-2456
 word whose 45-156
