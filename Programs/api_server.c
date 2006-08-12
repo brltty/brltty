@@ -95,12 +95,14 @@ static size_t stackSize;
 #define COPYRIGHT "   Copyright (C) 2002-2006 by Sebastien Hinderer <Sebastien.Hinderer@ens-lyon.org>, \
 Samuel Thibault <samuel.thibault@ens-lyon.org>"
 
-#define WERR(x, y, msg, ...) do { \
-  LogPrint(LOG_DEBUG, "writing error %d due to " msg, y, ## __VA_ARGS__); \
+#define WERR(x, y, ...) do { \
+  LogPrint(LOG_DEBUG, "writing error %d", y); \
+  LogPrint(LOG_DEBUG, __VA_ARGS__); \
   writeError(x, y); \
 } while(0)
-#define WEXC(x, y, type, packet, size, msg, ...) do { \
-  LogPrint(LOG_DEBUG, "writing exception %d due to " msg, y, ## __VA_ARGS__); \
+#define WEXC(x, y, type, packet, size, ...) do { \
+  LogPrint(LOG_DEBUG, "writing exception %d", y); \
+  LogPrint(LOG_DEBUG, __VA_ARGS__); \
   writeException(x, y, type, packet, size); \
 } while(0)
 
