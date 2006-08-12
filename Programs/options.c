@@ -610,7 +610,7 @@ processConfigurationFile (
   return 0;
 }
 
-char *
+static char *
 testProgram (const char *directory, const char *name) {
   char *path;
 
@@ -623,7 +623,7 @@ testProgram (const char *directory, const char *name) {
   return NULL;
 }
 
-char *
+static char *
 findProgram (const char *name) {
   char *path = NULL;
   const char *string;
