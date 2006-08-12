@@ -653,8 +653,6 @@ flowControlProc_InputCts (void *arg) {
     serialSetLineRTS(serial, up);
     serialWaitLineCTS(serial, (up = !up), 0);
   }
-
-  return NULL;
 }
 
 static int
