@@ -24,7 +24,34 @@
 #include "misc.h"
 #include "system.h"
 
-#include "sys_prog_none.h"
+char *
+getProgramPath (void) {
+  char *path = NULL;
+  size_t size = 0X80;
+  char *buffer = NULL;
+
+  while (1) {
+    buffer = reallocWrapper(buffer, size<<=1);
+
+    {
+      int length = readlink("/proc/self/path/a.out", buffer, size);
+
+      if (length == -1) {
+        if (errno != ENOENT) LogError("readlink");
+        break;
+      }
+
+      if (length < size) {
+        buffer[length] = 0;
+        path = strdupWrapper(buffer);
+        break;
+      }
+    }
+  }
+
+  free(buffer);
+  return path;
+}
 
 #include "sys_boot_none.h"
 
@@ -33,7 +60,66 @@
 #define SHARED_OBJECT_LOAD_FLAGS (RTLD_NOW | RTLD_GLOBAL)
 #include "sys_shlib_dlfcn.h"
 
+#include <sys/kbio.h>
+#include <sys/kbd.h>
+
+#if 0
+static int
+getKeyboard (void) {
+  static int keyboard = -1;
+  if (keyboard == -1) {
+    if ((keyboard = open("/dev/kbd", O_WRONLY)) != -1) {
+      LogPrint(LOG_DEBUG, "keyboard opened: fd=%d", keyboard);
+    } else {
+      LogError("keyboard open");
+    }
+  }
+  return keyboard;
+}
+
+int
+canBeep (void) {
+  return getKeyboard() != -1;
+}
+
+int
+asynchronousBeep (unsigned short frequency, unsigned short milliseconds) {
+  return 0;
+}
+
+int
+synchronousBeep (unsigned short frequency, unsigned short milliseconds) {
+  return 0;
+}
+
+int
+startBeep (unsigned short frequency) {
+  int keyboard = getKeyboard();
+  if (keyboard != -1) {
+    int command = KBD_CMD_BELL;
+    if (ioctl(keyboard, KIOCCMD, &command) != -1) return 1;
+    LogError("ioctl KIOCCMD KBD_CMD_BELL");
+  }
+  return 0;
+}
+
+int
+stopBeep (void) {
+  int keyboard = getKeyboard();
+  if (keyboard != -1) {
+    int command = KBD_CMD_NOBELL;
+    if (ioctl(keyboard, KIOCCMD, &command) != -1) return 1;
+    LogError("ioctl KIOCCMD KBD_CMD_NOBELL");
+  }
+  return 0;
+}
+
+void
+endBeep (void) {
+}
+#else /* beep support */
 #include "sys_beep_none.h"
+#endif /* beep support */
 
 #ifdef ENABLE_PCM_SUPPORT
 #define PCM_AUDIO_DEVICE_PATH "/dev/audio"
