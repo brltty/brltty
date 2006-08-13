@@ -41,7 +41,7 @@ fi
 
 umask 077
 
-mcookie >"${file}" 2>/dev/null && exit 0
+(mcookie >"${file}"; exit "${?}") 2>/dev/null && exit 0
 
 for device in "/dev/urandom" "/dev/random"
 do
