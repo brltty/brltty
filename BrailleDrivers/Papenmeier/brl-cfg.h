@@ -117,15 +117,159 @@ typedef struct {
   columns, rows, front, eab, ls, rs, lk, rk, \
   status, \
   ARRAY_COUNT(pmModifiers_##modifiers), \
-  ARRAY_COUNT(pmCommands_##model), \
+  ARRAY_COUNT(pmCommands_##modifiers##_Status##status), \
   pmStatus_##status, \
   pmModifiers_##modifiers, \
-  pmCommands_##model \
+  pmCommands_##modifiers##_Status##status \
 }
 
 /* some macros for terminals with the same layout -
  * named after there usage
  */
+
+
+#define BEGIN_STATUS(count) static uint16_t pmStatus_##count[] = {
+#define END_STATUS };
+
+#define pmStatus_0 NULL
+
+BEGIN_STATUS(2)
+  OFFS_NUMBER + BRL_GSC_BRLROW,
+  OFFS_NUMBER + BRL_GSC_CSRROW
+END_STATUS
+
+BEGIN_STATUS(4)
+  OFFS_NUMBER + BRL_GSC_BRLROW,
+  OFFS_NUMBER + BRL_GSC_CSRROW,
+  OFFS_NUMBER + BRL_GSC_CSRCOL,
+  OFFS_FLAG   + BRL_GSC_DISPMD
+END_STATUS
+
+BEGIN_STATUS(13)
+  OFFS_HORIZ + BRL_GSC_BRLROW,
+  OFFS_EMPTY,
+  OFFS_HORIZ + BRL_GSC_CSRROW,
+  OFFS_HORIZ + BRL_GSC_CSRCOL,
+  OFFS_EMPTY,
+  OFFS_FLAG  + BRL_GSC_CSRTRK,
+  OFFS_FLAG  + BRL_GSC_DISPMD,
+  OFFS_FLAG  + BRL_GSC_FREEZE,
+  OFFS_EMPTY,
+  OFFS_EMPTY,
+  OFFS_FLAG  + BRL_GSC_CSRVIS,
+  OFFS_FLAG  + BRL_GSC_ATTRVIS,
+  OFFS_EMPTY
+END_STATUS
+
+BEGIN_STATUS(20)
+  OFFS_HORIZ + BRL_GSC_BRLROW,
+  OFFS_EMPTY,
+  OFFS_HORIZ + BRL_GSC_CSRROW,
+  OFFS_HORIZ + BRL_GSC_CSRCOL,
+  OFFS_EMPTY,
+  OFFS_FLAG  + BRL_GSC_CSRTRK,
+  OFFS_FLAG  + BRL_GSC_DISPMD,
+  OFFS_FLAG  + BRL_GSC_FREEZE,
+  OFFS_EMPTY,
+  OFFS_HORIZ + BRL_GSC_SCRNUM,
+  OFFS_EMPTY,
+  OFFS_FLAG  + BRL_GSC_CSRVIS,
+  OFFS_FLAG  + BRL_GSC_ATTRVIS,
+  OFFS_FLAG  + BRL_GSC_CAPBLINK,
+  OFFS_FLAG  + BRL_GSC_SIXDOTS,
+  OFFS_FLAG  + BRL_GSC_SKPIDLNS,
+  OFFS_FLAG  + BRL_GSC_TUNES,
+  OFFS_FLAG  + BRL_GSC_AUTOSPEAK,
+  OFFS_FLAG  + BRL_GSC_AUTOREPEAT,
+  OFFS_EMPTY
+END_STATUS
+
+BEGIN_STATUS(22)
+  OFFS_HORIZ + BRL_GSC_BRLROW,
+  OFFS_EMPTY,
+  OFFS_HORIZ + BRL_GSC_CSRROW,
+  OFFS_HORIZ + BRL_GSC_CSRCOL,
+  OFFS_EMPTY,
+  OFFS_FLAG  + BRL_GSC_CSRTRK,
+  OFFS_FLAG  + BRL_GSC_DISPMD,
+  OFFS_FLAG  + BRL_GSC_FREEZE,
+  OFFS_EMPTY,
+  OFFS_HORIZ + BRL_GSC_SCRNUM,
+  OFFS_EMPTY,
+  OFFS_FLAG  + BRL_GSC_CSRVIS,
+  OFFS_FLAG  + BRL_GSC_ATTRVIS,
+  OFFS_FLAG  + BRL_GSC_CAPBLINK,
+  OFFS_FLAG  + BRL_GSC_SIXDOTS,
+  OFFS_FLAG  + BRL_GSC_SKPIDLNS,
+  OFFS_FLAG  + BRL_GSC_TUNES,
+  OFFS_EMPTY,
+  OFFS_FLAG  + BRL_GSC_INPUT,
+  OFFS_FLAG  + BRL_GSC_AUTOSPEAK,
+  OFFS_FLAG  + BRL_GSC_AUTOREPEAT,
+  OFFS_EMPTY
+END_STATUS
+
+
+#define BEGIN_MODIFIERS(name) static int16_t pmModifiers_##name[] = {
+#define END_MODIFIERS };
+
+BEGIN_MODIFIERS(Front9)
+  OFFS_FRONT + 1,
+  OFFS_FRONT + 9,
+  OFFS_FRONT + 2,
+  OFFS_FRONT + 8
+END_MODIFIERS
+
+BEGIN_MODIFIERS(Front13)
+  OFFS_FRONT +  4,
+  OFFS_FRONT +  3,
+  OFFS_FRONT +  2,
+  OFFS_FRONT + 10,
+  OFFS_FRONT + 11,
+  OFFS_FRONT + 12,
+  OFFS_FRONT +  1,
+  OFFS_FRONT + 13
+END_MODIFIERS
+
+BEGIN_MODIFIERS(Easy)
+  OFFS_SWITCH + SWITCH_LEFT_REAR,
+  OFFS_SWITCH + SWITCH_LEFT_FRONT,
+  OFFS_SWITCH + SWITCH_RIGHT_REAR,
+  OFFS_SWITCH + SWITCH_RIGHT_FRONT,
+  OFFS_SWITCH + KEY_LEFT_REAR,
+  OFFS_SWITCH + KEY_LEFT_FRONT,
+  OFFS_SWITCH + KEY_RIGHT_REAR,
+  OFFS_SWITCH + KEY_RIGHT_FRONT,
+  OFFS_EASY   + EASY_U1,
+  OFFS_EASY   + EASY_D1,
+  OFFS_EASY   + EASY_L1,
+  OFFS_EASY   + EASY_R1,
+  OFFS_EASY   + EASY_U2,
+  OFFS_EASY   + EASY_D2,
+  OFFS_EASY   + EASY_L2,
+  OFFS_EASY   + EASY_R2
+END_MODIFIERS
+#define pmModifiers_EasySim pmModifiers_Easy
+
+#define MOD_EASY_SLC 0X0000
+#define MOD_EASY_SLR 0X0001
+#define MOD_EASY_SLF 0X0002
+#define MOD_EASY_SRC 0X0000
+#define MOD_EASY_SRR 0X0004
+#define MOD_EASY_SRF 0X0008
+#define MOD_EASY_KLR 0X0010
+#define MOD_EASY_KLF 0X0020
+#define MOD_EASY_KRR 0X0040
+#define MOD_EASY_KRF 0X0080
+#define MOD_EASY_BU1 0X0100
+#define MOD_EASY_BD1 0X0200
+#define MOD_EASY_BL1 0X0400
+#define MOD_EASY_BR1 0X0800
+#define MOD_EASY_BU2 0X1000
+#define MOD_EASY_BD2 0X2000
+#define MOD_EASY_BL2 0X4000
+#define MOD_EASY_BR2 0X8000
+
 
 #define CHGONOFF(cmd, offs, on, off) \
       { cmd                 , offs, 0  }, \
@@ -133,7 +277,6 @@ typedef struct {
       { cmd | BRL_FLG_TOGGLE_ON , offs, on }
 
 
-/* modifiers for 9 front keys */
 /* commands for 9 front keys */
 #define CMDS_FRONT_9 \
      { BRL_CMD_FWINLT     , NOKEY         , 0X1 }, \
@@ -175,7 +318,6 @@ typedef struct {
      { BRL_CMD_PASTE      , NOKEY         , 0X3 }
 
 
-/* modifiers for 13 front keys */
 /* commands for 13 front keys */
 #define CMDS_FRONT_13 \
       { BRL_CMD_HOME                    , OFFS_FRONT +  7, 0000 }, \
@@ -324,157 +466,12 @@ typedef struct {
 #define CMDS_EASY_SWSIM CMDS_EASY_COMMON(CMDS_EASY_COMMON_SWSIM)
 
 
-/* what to show in the status cells */
-#define BEGIN_STATUS(count) static uint16_t pmStatus_##count[] = {
-#define END_STATUS };
-
-#define pmStatus_0 NULL
-
-BEGIN_STATUS(2)
-  OFFS_NUMBER + BRL_GSC_BRLROW,
-  OFFS_NUMBER + BRL_GSC_CSRROW
-END_STATUS
-
-BEGIN_STATUS(4)
-  OFFS_NUMBER + BRL_GSC_BRLROW,
-  OFFS_NUMBER + BRL_GSC_CSRROW,
-  OFFS_NUMBER + BRL_GSC_CSRCOL,
-  OFFS_FLAG   + BRL_GSC_DISPMD
-END_STATUS
-
-BEGIN_STATUS(13)
-  OFFS_HORIZ + BRL_GSC_BRLROW,
-  OFFS_EMPTY,
-  OFFS_HORIZ + BRL_GSC_CSRROW,
-  OFFS_HORIZ + BRL_GSC_CSRCOL,
-  OFFS_EMPTY,
-  OFFS_FLAG  + BRL_GSC_CSRTRK,
-  OFFS_FLAG  + BRL_GSC_DISPMD,
-  OFFS_FLAG  + BRL_GSC_FREEZE,
-  OFFS_EMPTY,
-  OFFS_EMPTY,
-  OFFS_FLAG  + BRL_GSC_CSRVIS,
-  OFFS_FLAG  + BRL_GSC_ATTRVIS,
-  OFFS_EMPTY
-END_STATUS
-
-BEGIN_STATUS(20)
-  OFFS_HORIZ + BRL_GSC_BRLROW,
-  OFFS_EMPTY,
-  OFFS_HORIZ + BRL_GSC_CSRROW,
-  OFFS_HORIZ + BRL_GSC_CSRCOL,
-  OFFS_EMPTY,
-  OFFS_FLAG  + BRL_GSC_CSRTRK,
-  OFFS_FLAG  + BRL_GSC_DISPMD,
-  OFFS_FLAG  + BRL_GSC_FREEZE,
-  OFFS_EMPTY,
-  OFFS_HORIZ + BRL_GSC_SCRNUM,
-  OFFS_EMPTY,
-  OFFS_FLAG  + BRL_GSC_CSRVIS,
-  OFFS_FLAG  + BRL_GSC_ATTRVIS,
-  OFFS_FLAG  + BRL_GSC_CAPBLINK,
-  OFFS_FLAG  + BRL_GSC_SIXDOTS,
-  OFFS_FLAG  + BRL_GSC_SKPIDLNS,
-  OFFS_FLAG  + BRL_GSC_TUNES,
-  OFFS_FLAG  + BRL_GSC_AUTOSPEAK,
-  OFFS_FLAG  + BRL_GSC_AUTOREPEAT,
-  OFFS_EMPTY
-END_STATUS
-
-BEGIN_STATUS(22)
-  OFFS_HORIZ + BRL_GSC_BRLROW,
-  OFFS_EMPTY,
-  OFFS_HORIZ + BRL_GSC_CSRROW,
-  OFFS_HORIZ + BRL_GSC_CSRCOL,
-  OFFS_EMPTY,
-  OFFS_FLAG  + BRL_GSC_CSRTRK,
-  OFFS_FLAG  + BRL_GSC_DISPMD,
-  OFFS_FLAG  + BRL_GSC_FREEZE,
-  OFFS_EMPTY,
-  OFFS_HORIZ + BRL_GSC_SCRNUM,
-  OFFS_EMPTY,
-  OFFS_FLAG  + BRL_GSC_CSRVIS,
-  OFFS_FLAG  + BRL_GSC_ATTRVIS,
-  OFFS_FLAG  + BRL_GSC_CAPBLINK,
-  OFFS_FLAG  + BRL_GSC_SIXDOTS,
-  OFFS_FLAG  + BRL_GSC_SKPIDLNS,
-  OFFS_FLAG  + BRL_GSC_TUNES,
-  OFFS_EMPTY,
-  OFFS_FLAG  + BRL_GSC_INPUT,
-  OFFS_FLAG  + BRL_GSC_AUTOSPEAK,
-  OFFS_FLAG  + BRL_GSC_AUTOREPEAT,
-  OFFS_EMPTY
-END_STATUS
-
-
-#define BEGIN_MODIFIERS(style) static int16_t pmModifiers_##style[] = {
-#define END_MODIFIERS };
-
-BEGIN_MODIFIERS(Front9)
-  OFFS_FRONT + 1,
-  OFFS_FRONT + 9,
-  OFFS_FRONT + 2,
-  OFFS_FRONT + 8
-END_MODIFIERS
-
-BEGIN_MODIFIERS(Front13)
-  OFFS_FRONT +  4,
-  OFFS_FRONT +  3,
-  OFFS_FRONT +  2,
-  OFFS_FRONT + 10,
-  OFFS_FRONT + 11,
-  OFFS_FRONT + 12,
-  OFFS_FRONT +  1,
-  OFFS_FRONT + 13
-END_MODIFIERS
-
-BEGIN_MODIFIERS(Easy)
-  OFFS_SWITCH + SWITCH_LEFT_REAR,
-  OFFS_SWITCH + SWITCH_LEFT_FRONT,
-  OFFS_SWITCH + SWITCH_RIGHT_REAR,
-  OFFS_SWITCH + SWITCH_RIGHT_FRONT,
-  OFFS_SWITCH + KEY_LEFT_REAR,
-  OFFS_SWITCH + KEY_LEFT_FRONT,
-  OFFS_SWITCH + KEY_RIGHT_REAR,
-  OFFS_SWITCH + KEY_RIGHT_FRONT,
-  OFFS_EASY   + EASY_U1,
-  OFFS_EASY   + EASY_D1,
-  OFFS_EASY   + EASY_L1,
-  OFFS_EASY   + EASY_R1,
-  OFFS_EASY   + EASY_U2,
-  OFFS_EASY   + EASY_D2,
-  OFFS_EASY   + EASY_L2,
-  OFFS_EASY   + EASY_R2
-END_MODIFIERS
-
-#define MOD_EASY_SLC 0X0000
-#define MOD_EASY_SLR 0X0001
-#define MOD_EASY_SLF 0X0002
-#define MOD_EASY_SRC 0X0000
-#define MOD_EASY_SRR 0X0004
-#define MOD_EASY_SRF 0X0008
-#define MOD_EASY_KLR 0X0010
-#define MOD_EASY_KLF 0X0020
-#define MOD_EASY_KRR 0X0040
-#define MOD_EASY_KRF 0X0080
-#define MOD_EASY_BU1 0X0100
-#define MOD_EASY_BD1 0X0200
-#define MOD_EASY_BL1 0X0400
-#define MOD_EASY_BR1 0X0800
-#define MOD_EASY_BU2 0X1000
-#define MOD_EASY_BD2 0X2000
-#define MOD_EASY_BL2 0X4000
-#define MOD_EASY_BR2 0X8000
-
-
-
 /* commands for 2 status keys */
 #define CMDS_STAT_2 \
       { BRL_CMD_HELP , OFFS_STAT + 1, 0 }, \
       { BRL_CMD_LEARN, OFFS_STAT + 2, 0 }
 
 
-/* what to show for 4 status cells */
 /* commands for 4 status keys */
 #define CMDS_STAT_4 \
       { BRL_CMD_HELP       , OFFS_STAT + 1, 0 }, \
@@ -483,7 +480,6 @@ END_MODIFIERS
       { BRL_CMD_DISPMD     , OFFS_STAT + 4, 0 }
 
 
-/* what to show for 13 status cells */
 /* commands for 13 status keys */
 #define CMDS_STAT_13(on, off) \
       CHGONOFF( BRL_CMD_HELP       , OFFS_STAT +  1, on, off), \
@@ -501,7 +497,6 @@ END_MODIFIERS
               { BRL_CMD_PASTE      , OFFS_STAT + 13, 0      }
 
 
-/* what to show for 20 status cells */
 /* commands for 20 status keys */
 #define CMDS_STAT_20(on, off) \
       CHGONOFF( BRL_CMD_HELP       , OFFS_STAT +  1, on, off ), \
@@ -526,7 +521,6 @@ END_MODIFIERS
               { BRL_CMD_PASTE      , OFFS_STAT + 20, 0X0000  }
 
 
-/* what to show for 22 status cells */
 /* commands for 22 status keys */
 #define CMDS_STAT_22(on, off) \
       CHGONOFF( BRL_CMD_HELP       , OFFS_STAT +  1, on, off ), \
@@ -552,84 +546,59 @@ END_MODIFIERS
       CHGONOFF( BRL_CMD_AUTOREPEAT , OFFS_STAT + 21, on, off ), \
               { BRL_CMD_PASTE      , OFFS_STAT + 22, 0X0000  }
 
-#define PM_BEGIN_COMMANDS(model) static CommandDefinition pmCommands_##model[] = {
-#define PM_END_COMMANDS };
 
-PM_BEGIN_COMMANDS(c_486)
+#define BEGIN_COMMANDS(name) static CommandDefinition pmCommands_##name[] = {
+#define END_COMMANDS };
+
+BEGIN_COMMANDS(Front9_Status0)
   CMDS_FRONT_9
-PM_END_COMMANDS
+END_COMMANDS
 
-PM_BEGIN_COMMANDS(2d_l)
+BEGIN_COMMANDS(Front9_Status13)
   CMDS_FRONT_9,
   CMDS_STAT_13(0X2, 0X1)
-PM_END_COMMANDS
+END_COMMANDS
 
-PM_BEGIN_COMMANDS(c)
-  CMDS_FRONT_9
-PM_END_COMMANDS
-
-PM_BEGIN_COMMANDS(2d_s)
+BEGIN_COMMANDS(Front13_Status22)
   CMDS_FRONT_13,
   CMDS_STAT_22(0X80, 0X40)
-PM_END_COMMANDS
+END_COMMANDS
 
-PM_BEGIN_COMMANDS(ib_80)
+BEGIN_COMMANDS(Front9_Status4)
   CMDS_FRONT_9,
   CMDS_STAT_4
-PM_END_COMMANDS
+END_COMMANDS
 
-PM_BEGIN_COMMANDS(el_2d_40)
+BEGIN_COMMANDS(Easy_Status13)
   CMDS_EASY_ALL,
   CMDS_STAT_13(0X8000, 0X4000)
-PM_END_COMMANDS
+END_COMMANDS
 
-PM_BEGIN_COMMANDS(el_2d_66)
-  CMDS_EASY_ALL,
-  CMDS_STAT_13(0X8000, 0X4000)
-PM_END_COMMANDS
-
-PM_BEGIN_COMMANDS(el_80)
+BEGIN_COMMANDS(Easy_Status2)
   CMDS_EASY_ALL,
   CMDS_STAT_2
-PM_END_COMMANDS
+END_COMMANDS
 
-PM_BEGIN_COMMANDS(el_2d_80)
+BEGIN_COMMANDS(Easy_Status20)
   CMDS_EASY_ALL,
   CMDS_STAT_20(0X8000, 0X4000)
-PM_END_COMMANDS
+END_COMMANDS
 
-PM_BEGIN_COMMANDS(el_40_p)
+BEGIN_COMMANDS(Easy_Status0)
   CMDS_EASY_ALL
-PM_END_COMMANDS
+END_COMMANDS
 
-PM_BEGIN_COMMANDS(elba_32)
-  CMDS_EASY_ALL
-PM_END_COMMANDS
-
-PM_BEGIN_COMMANDS(elba_20)
-  CMDS_EASY_ALL
-PM_END_COMMANDS
-
-PM_BEGIN_COMMANDS(el_40s)
+BEGIN_COMMANDS(EasySim_Status0)
   CMDS_EASY_ALL,
   CMDS_EASY_SWSIM
-PM_END_COMMANDS
+END_COMMANDS
 
-PM_BEGIN_COMMANDS(el_80_ii)
+BEGIN_COMMANDS(EasySim_Status2)
   CMDS_EASY_ALL,
   CMDS_STAT_2,
   CMDS_EASY_SWSIM
-PM_END_COMMANDS
+END_COMMANDS
 
-PM_BEGIN_COMMANDS(el_66s)
-  CMDS_EASY_ALL,
-  CMDS_EASY_SWSIM
-PM_END_COMMANDS
-
-PM_BEGIN_COMMANDS(el_80s)
-  CMDS_EASY_ALL,
-  CMDS_EASY_SWSIM
-PM_END_COMMANDS
 
 static TerminalDefinition pmTerminalTable[] = {
   PM_TERMINAL(
@@ -745,7 +714,7 @@ static TerminalDefinition pmTerminalTable[] = {
     el_40s,		/* filename of local helpfile */
     "BrailleX EL 40s",		/* name of terminal */
     40, 1, 0,			/* size of display */
-    0, Easy,			/* number of front keys */
+    0, EasySim,			/* number of front keys */
     1, 0, 0, 1, 1		/* terminal has an easy bar */
   )
   ,
@@ -754,7 +723,7 @@ static TerminalDefinition pmTerminalTable[] = {
     el_80_ii,		/* filename of local helpfile */
     "BrailleX EL 80 II",		/* name of terminal */
     80, 1, 2,			/* size of display */
-    0, Easy,			/* number of front keys */
+    0, EasySim,			/* number of front keys */
     1, 0, 0, 1, 1		/* terminal has an easy bar */
   )
   ,
@@ -763,7 +732,7 @@ static TerminalDefinition pmTerminalTable[] = {
     el_66s,		/* filename of local helpfile */
     "BrailleX EL 66s",		/* name of terminal */
     66, 1, 0,			/* size of display */
-    0, Easy,			/* number of front keys */
+    0, EasySim,			/* number of front keys */
     1, 0, 0, 1, 1		/* terminal has an easy bar */
   )
   ,
@@ -772,7 +741,7 @@ static TerminalDefinition pmTerminalTable[] = {
     el_80s,		/* filename of local helpfile */
     "BrailleX EL 80s",		/* name of terminal */
     80, 1, 0,			/* size of display */
-    0, Easy,			/* number of front keys */
+    0, EasySim,			/* number of front keys */
     1, 0, 0, 1, 1		/* terminal has an easy bar */
   )
 };
