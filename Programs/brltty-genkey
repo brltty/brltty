@@ -28,6 +28,10 @@ syntaxError() {
    exit 2
 }
 
+try() {
+   ("${@}"; exit "${?}") 2>/dev/null && exit 0
+}
+
 if [ "${#}" -eq 0 ]
 then
    . "`dirname "${0}"`/brltty-config" || exit "${?}"
@@ -41,19 +45,20 @@ fi
 
 umask 077
 
-(mcookie >"${file}"; exit "${?}") 2>/dev/null && exit 0
+try mcookie >"${file}"
 
 for device in "/dev/urandom" "/dev/random"
 do
    [ -c "${device}" -a -r "${device}" ] && {
-      dd if="${device}" of="${file}" bs=32 count=1 2>/dev/null && exit 0
+      try dd if="${device}" of="${file}" bs=32 count=1
    }
 done
 
 key="${RANDOM}"
 [ -n "${key}" ] && {
-   echo >"${file}" "${key}" && exit 0
+   try echo >"${file}" "${key}"
 }
 
 programMessage "no known mechanism is supported."
+rm -f -- "${file}"
 exit 3
