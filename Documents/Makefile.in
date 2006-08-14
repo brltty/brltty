@@ -24,12 +24,11 @@ all-api: BrlAPIref.made
 
 BrlAPIref.made: $(BLD_TOP)$(PGM_DIR)/api.h $(SRC_TOP)$(PGM_DIR)/api_protocol.h BrlAPIref.doxy
 	doxygen BrlAPIref.doxy
-	ln -sf man3/brlapi_*.3 .
 	touch $@
 
 clean::
-	-rm -f *.made brlapi_*.3
-	-rm -fr *-HTML man?
+	-rm -f *.made
+	-rm -fr */html/* */man/*
 
 distclean::
 	-rm -f brltty.conf brltty.1 BrlAPIref.doxy

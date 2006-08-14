@@ -2,9 +2,6 @@ Makefile
 reldeps.mk
 *.made
 brltty.conf
-brltty.1
 BrlAPIref.doxy
-man?
-brlapi_*.3
+BrlAPIref
 *.txt
-*-HTML
