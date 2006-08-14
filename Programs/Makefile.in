@@ -535,11 +535,8 @@ uninstall-libraries:
 	-rm -f $(INSTALL_ROOT)$(PROGRAM_DIRECTORY)/$(API_DLL)
 
 uninstall-manpages:
-	-for page in $(SRC_TOP)$(DOC_DIR)/*.[1-9]; do \
-	   section=$${page##*.} && \
-	   directory=$(INSTALL_ROOT)$(MANPAGE_DIRECTORY)/man$${section} && \
-	   rm -f $${directory}/$${page##*/}; \
-	done
+	-rm -f $(INSTALL_ROOT)$(MANPAGE_DIRECTORY)/man1/brltty.1
+	-rm -f $(INSTALL_ROOT)$(MANPAGE_DIRECTORY)/man3/brlapi_*.3
 
 uninstall-headers:
 	-rm -f $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)/api.h
