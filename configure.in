@@ -227,6 +227,17 @@ AC_PROG_LN_S
 AC_PROG_INSTALL
 BRLTTY_EXECUTABLE_PATH([INSTALL])
 
+case "${host_os}"
+in
+   darwin*)
+      INSTALL_OPTION_STRIP=""
+      ;;
+   *)
+      INSTALL_OPTION_STRIP="-s"
+      ;;
+esac
+AC_SUBST([INSTALL_OPTION_STRIP])
+
 AC_CACHE_CHECK([for make relocatable object command], [brltty_cv_prog_mkobj], [dnl
 case "${host_os}"
 in
