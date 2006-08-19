@@ -641,8 +641,6 @@ static int brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context
 }
 
 #ifdef USE_XT
-static XrmOptionDescRec optionDescList[] = { };
-
 static char *fallback_resources[] = {
   "*display.background: lightgreen",
 #ifdef USE_XAW
@@ -708,7 +706,7 @@ static void generateToplevel(void)
 
   /* toplevel */
   toplevel = XtVaOpenApplication(&app_con, "Brltty",
-    optionDescList, XtNumber(optionDescList),
+    NULL, 0,
     &argc, argv, fallback_resources,
     sessionShellWidgetClass,
     XtNallowShellResize, True,
