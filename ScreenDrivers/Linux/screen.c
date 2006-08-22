@@ -33,13 +33,13 @@
 #include "Programs/brldefs.h"
 
 typedef enum {
-  PARM_TYPE,
+  PARM_HFB,
   PARM_ACM,
   PARM_DEBUGACM,
   PARM_DEBUGSFM,
   PARM_DEBUGCTT
 } ScreenParameters;
-#define SCRPARMS "type", "acm", "debugacm", "debugsfm", "debugctt"
+#define SCRPARMS "hfb", "acm", "debugacm", "debugsfm", "debugctt"
 
 #include "Programs/scr_driver.h"
 #include "screen.h"
@@ -364,11 +364,19 @@ controlConsole (int operation, void *argument) {
 }
 
 static unsigned char highFontBit;
+static unsigned char highFontUnshiftedBits;
+static unsigned char highFontShiftedBits;
 
 static void
 setHighFontBit (unsigned char bit) {
   highFontBit = bit;
-  LogPrint(LOG_DEBUG, "High Font Bit: %02X", highFontBit);
+  highFontUnshiftedBits = (((highFontBit & 0XF0) - 0X10) & 0XF0) |
+                          (((highFontBit & 0X0F) - 0X01) & 0X0F);
+  highFontShiftedBits = ((~((highFontBit & 0XF0) - 0X10) << 1) & 0XE0) |
+                        ((~((highFontBit & 0X0F) - 0X01) << 1) & 0X0E);
+  LogPrint(LOG_DEBUG, "high font: bit=%02X unshifted=%02X shifted=%02X",
+           highFontBit, highFontUnshiftedBits, highFontShiftedBits);
+exit(0);
 }
 
 static int
@@ -522,6 +530,7 @@ setScreenFontMap (int force) {
 
 static int vgaCharacterCount;
 static int vgaLargeTable;
+
 static int
 setVgaCharacterCount (int force) {
   int oldCount = vgaCharacterCount;
@@ -582,16 +591,19 @@ prepare_LinuxScreen (char **parameters) {
     LogPrint(LOG_WARNING, "%s: %s", "invalid character translation table debug setting", parameters[PARM_DEBUGCTT]);
 
   highFontBit = 0;
-  {
+  if (parameters[PARM_HFB] && *parameters[PARM_HFB]) {
+    int bit = 0;
+    static const int minimum = 0;
+    static const int maximum = 7;
     static const char *choices[] = {"auto", "vga", "fb", NULL};
     unsigned int choice;
-    if (validateChoice(&choice, parameters[PARM_TYPE], choices)) {
-      if (choice) {
-        static const unsigned char bits[] = {0X08, 0X01};
-        setHighFontBit(bits[choice-1]);
-      }
-    } else {
-      LogPrint(LOG_WARNING, "%s: %s", "invalid console type", parameters[PARM_TYPE]);
+    if (validateInteger(&bit, parameters[PARM_HFB], &minimum, &maximum)) {
+      setHighFontBit(1<<bit);
+    } else if (!validateChoice(&choice, parameters[PARM_HFB], choices)) {
+      LogPrint(LOG_WARNING, "%s: %s", "invalid high font bit", parameters[PARM_HFB]);
+    } else if (choice) {
+      static const unsigned char bits[] = {0X08, 0X01};
+      setHighFontBit(bits[choice-1]);
     }
   }
 
@@ -1086,13 +1098,9 @@ read_LinuxScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
             source++;
             for (column=0; column<box.width; ++column) {
               unsigned char bits = *source;
-              if (vgaLargeTable) {
-                if (highFontBit == 0X01) {
-                  bits = (bits & 0XF0) | ((bits & 0X0E) >> 1);
-                } else {
-                  bits &= ~highFontBit;
-                }
-              }
+              if (vgaLargeTable)
+                bits = (bits & highFontUnshiftedBits) |
+                       ((bits & highFontShiftedBits) >> 1);
               *target++ = bits;
               source += 2;
             }
