@@ -376,7 +376,6 @@ setHighFontBit (unsigned char bit) {
                         ((~((highFontBit & 0X0F) - 0X01) << 1) & 0X0E);
   LogPrint(LOG_DEBUG, "high font: bit=%02X unshifted=%02X shifted=%02X",
            highFontBit, highFontUnshiftedBits, highFontShiftedBits);
-exit(0);
 }
 
 static int
