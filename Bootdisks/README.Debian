@@ -1,0 +1,35 @@
+Debian Installer feat. BRLTTY
+-----------------------------
+
+Debian Installer natively supports BRLTTY since its beta 3 for Debian
+Etch, see official announcement at [1].  If your Braille display is
+connected by USB, simply press ENTER at syslinux prompt (at the very
+beginning of the installation process), your display should be
+autodetected.  Otherwise, if either your display is connected by
+serial port or you want to set a particular Braille table, give the
+following line at syslinux prompt before pressing ENTER (you may be
+careful as the keyboard layout is qwerty at this step):
+
+install brltty=drv,dev,tbl
+
+"drv" stands for the BRLTTY code of your Braille display, "dev" stands
+for the device your Braille display is connected to (e.g. ttyS0, usb:,
+...)  and "tbl" stands for the code of the Braille table to be set.
+For example, this is the line that enables BRLTTY for a BAUM
+SuperVario 40 Braille display connected by USB with default Braille
+table:
+
+install brltty=bm,usb:
+
+Supported Braille displays and Braille tables are listed along with
+corresponding codes in the BRLTTY manual, see [2].  Details about
+installing Debian are available at [3].  Please also consider joining
+Debian Accessibility mailing list at [4].
+
+Footnotes:
+[1]  http://www.debian.org/devel/debian-installer/News/2006/20060811
+[2]  http://mielke.cc/brltty/doc/Manual-BRLTTY/English/BRLTTY.html
+[3]  http://www.debian.org/releases/stable/installmanual
+[4]  http://lists.debian.org/debian-accessibility/
+
+ -- Boris Daix <Boris.Daix@alysse.org>  Sun, 27 Aug 2006 23:10:15 +0200
