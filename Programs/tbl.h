@@ -24,6 +24,8 @@ extern "C" {
 
 #include <stdio.h>
 
+#include "brl.h"
+
 #define TBL_UNDEFINED 0X1
 #define TBL_DUPLICATE 0X2
 #define TBL_UNUSED    0X4
@@ -34,6 +36,7 @@ extern int loadTranslationTable (
   TranslationTable table,
   int options
 );
+
 extern void reverseTranslationTable (TranslationTable from, TranslationTable to);
 
 extern void fixTextTablePath (char **path);
