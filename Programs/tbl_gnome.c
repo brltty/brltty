@@ -143,7 +143,7 @@ gbProcessUcsCharDirective (TblInputData *input) {
     return 1;
   }
 
-  if ((wcdots & ~0xfful) != 0x2800) {
+  if ((wcdots & ~0xfful) != BRL_UC_ROW) {
     tblReportError(input, "%s is not a dot pattern", input->location);
     return 1;
   }
@@ -191,7 +191,7 @@ gbProcessUnicodeCharDirective (TblInputData *input) {
     return 1;
   }
   input->location += 2;
-  wc = strtol((char*) input->location, (char**) &err, 16);
+  wc = strtol((char*) input->location, (void*) &err, 16);
   if (err == input->location) {
     tblReportError(input, "expected character number at %s", input->location);
     return 1;
@@ -204,13 +204,13 @@ gbProcessUnicodeCharDirective (TblInputData *input) {
     return 1;
   }
   input->location += 2;
-  wcdots = strtol((char*) input->location, (char**) &err, 16);
+  wcdots = strtol((char*) input->location, (void*) &err, 16);
   if (err == input->location) {
     tblReportError(input, "expected dot pattern number at %s", input->location);
     return 1;
   }
 
-  if ((wcdots & ~0xfful) != 0x2800) {
+  if ((wcdots & ~0xfful) != BRL_UC_ROW) {
     tblReportError(input, "%s is not a dot pattern", input->location);
     return 1;
   }
