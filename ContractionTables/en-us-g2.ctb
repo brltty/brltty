@@ -562,6 +562,11 @@ always perceiving 1234-12456-14-1236-1245
 word percvg =
 always perhaps 1234-12456-125
 word perh =
+sufword perseverance 1234-12456-234-15-1236-12456-46-15
+sufword persevere 1234-12456-234-15-1236-12456-15
+sufword persevered 1234-12456-234-15-1236-12456-1246
+sufword perseverer 1234-12456-234-15-1236-12456-12456
+sufword persevering 1234-12456-234-15-1236-12456-346
 always pher 1234-125-12456 cyphered
 begword pinea 1234-35-15-1 pineapple
 sufword poleax =
@@ -657,8 +662,11 @@ sufword saw = sawhorse
 sufword screw = screwhole
 always sedu =
 always sent 234-26-2345 sentimental
-always sever 234-15-1236-12456 perseverance 
-always several 234-5-15-1-123 severally
+sufword severe 234-15-1236-12456-15
+always severed 234-5-15-1246
+always severer 234-5-15-12456
+always severit 234-15-1236-12456-24-2345
+always severity 234-15-1236-12456-56-13456
 word shall 146
 word sh =
 always sh 146
