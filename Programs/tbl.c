@@ -40,7 +40,7 @@ const unsigned char tblDotNumbers[TBL_DOT_COUNT] = {'1', '2', '3', '4', '5', '6'
 const unsigned char tblNoDots[] = {'0'};
 const unsigned char tblNoDotsSize = sizeof(tblNoDots);
 
-const char *tblCharset = "ISO-8859-1";
+const char *tblCharset = NULL;
 
 static void
 tblReportProblem (TblInputData *input, int level, const char *format, va_list args) {
@@ -327,38 +327,44 @@ tblIconvOpen (iconv_t *handle, const char *from, const char *to) {
 
 int
 tblSetCharset (const char *charset) {
-#ifdef HAVE_ICONV_H
-  typedef struct {
-    const char *fromCharset;
-    const char *toCharset;
-    iconv_t *handle;
-    iconv_t newHandle;
-  } ConvEntry;
-  ConvEntry convTable[] = {
-    {charset, utf8Charset, &iconvCharToUtf8},
-    {utf8Charset, charset, &iconvUtf8ToChar},
-    {charset, wcharCharset, &iconvCharToWchar},
-    {wcharCharset, charset, &iconvWcharToChar},
-    {NULL, NULL, NULL}
-  };
-  ConvEntry *conv = convTable;
+  if (!(charset = strdup(charset))) return 0;
 
-  while (conv->handle) {
-    if (!tblIconvOpen(&conv->newHandle, conv->fromCharset, conv->toCharset)) {
-      while (conv != convTable) iconv_close((--conv)->newHandle);
-      return 0;
+#ifdef HAVE_ICONV_H
+  {
+    typedef struct {
+      const char *fromCharset;
+      const char *toCharset;
+      iconv_t *handle;
+      iconv_t newHandle;
+    } ConvEntry;
+    ConvEntry convTable[] = {
+      {charset, utf8Charset, &iconvCharToUtf8},
+      {utf8Charset, charset, &iconvUtf8ToChar},
+      {charset, wcharCharset, &iconvCharToWchar},
+      {wcharCharset, charset, &iconvWcharToChar},
+      {NULL, NULL, NULL}
+    };
+    ConvEntry *conv = convTable;
+
+    while (conv->handle) {
+      if (!tblIconvOpen(&conv->newHandle, conv->fromCharset, conv->toCharset)) {
+        while (conv != convTable) iconv_close((--conv)->newHandle);
+        free((void *)charset);
+        return 0;
+      }
+
+      ++conv;
     }
 
-    ++conv;
-  }
-
-  while (conv != convTable) {
-    --conv;
-    if (*conv->handle != TBL_ICONV_NULL) iconv_close(*conv->handle);
-    *conv->handle = conv->newHandle;
+    while (conv != convTable) {
+      --conv;
+      if (*conv->handle != TBL_ICONV_NULL) iconv_close(*conv->handle);
+      *conv->handle = conv->newHandle;
+    }
   }
 #endif /* HAVE_ICONV_H */
 
+  if (tblCharset) free((void *)tblCharset);
   tblCharset = charset;
   return 1;
 }
@@ -367,11 +373,18 @@ int
 tblInit (void) {
   int ok = 1;
   const char *locale = setlocale(LC_ALL, "");
-  if ((MB_CUR_MAX == 1) &&
-      (strcmp(locale, "C") != 0) &&
-      (strcmp(locale, "POSIX") != 0)) {
-    /* some 8bit locale is set, assume its charset is correct */
-    if (!tblSetCharset(nl_langinfo(CODESET))) ok = 0;
+
+  {
+    const char *charset;
+    if ((MB_CUR_MAX == 1) &&
+        (strcmp(locale, "C") != 0) &&
+        (strcmp(locale, "POSIX") != 0)) {
+      /* some 8-bit locale is set, assume its charset is correct */
+      charset = nl_langinfo(CODESET);
+    } else {
+      charset = "ISO-8859-1";
+    }
+    if (!tblSetCharset(charset)) ok = 0;
   }
 
 #ifdef HAVE_ICONV_H
