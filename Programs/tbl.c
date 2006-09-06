@@ -23,6 +23,13 @@
 #include <ctype.h>
 #include <errno.h>
 #include <stdarg.h>
+#include <locale.h>
+#include <langinfo.h>
+#include <wchar.h>
+
+#ifdef HAVE_ICONV_H
+#include <iconv.h>
+#endif /* HAVE_ICONV_H */
 
 #include "misc.h"
 #include "tbl.h"
@@ -32,6 +39,8 @@ const unsigned char tblDotBits[TBL_DOT_COUNT] = {BRL_DOT1, BRL_DOT2, BRL_DOT3, B
 const unsigned char tblDotNumbers[TBL_DOT_COUNT] = {'1', '2', '3', '4', '5', '6', '7', '8'};
 const unsigned char tblNoDots[] = {'0'};
 const unsigned char tblNoDotsSize = sizeof(tblNoDots);
+
+const char *tblCharset = "ISO-8859-1";
 
 static void
 tblReportProblem (TblInputData *input, int level, const char *format, va_list args) {
@@ -244,4 +253,133 @@ fixTextTablePath (char **path) {
 void
 fixAttributesTablePath (char **path) {
   fixTranslationTablePath(path, ATTRIBUTES_TABLE_PREFIX);
+}
+
+#ifdef HAVE_ICONV_H
+#define TBL_ICONV_NULL ((iconv_t)-1)
+
+#define TBL_ICONV_HANDLE(name) iconv_t iconv##name = TBL_ICONV_NULL
+static TBL_ICONV_HANDLE(CharToUtf8);
+static TBL_ICONV_HANDLE(Utf8ToChar);
+static TBL_ICONV_HANDLE(WcharToUtf8);
+static TBL_ICONV_HANDLE(Utf8ToWchar);
+static TBL_ICONV_HANDLE(CharToWchar);
+static TBL_ICONV_HANDLE(WcharToChar);
+
+static const char *const utf8Charset = "UTF-8";
+static const char *const wcharCharset = "WCHAR_T";
+
+#define TBL_UTF8_TO_TYPE(name, type, ret, eof) \
+ret tbl##name (char **utf8, size_t *utfs) { \
+  type c; \
+  type *cp = &c; \
+  size_t cs = sizeof(c); \
+  if ((iconv(iconv##name, utf8, utfs, (void *)&cp, &cs) == -1) && (errno != E2BIG)) { \
+    LogError("iconv (UTF-8 -> " #type ")"); \
+    return eof; \
+  } \
+  return c; \
+}
+TBL_UTF8_TO_TYPE(Utf8ToWchar, wchar_t, wint_t, WEOF)
+TBL_UTF8_TO_TYPE(Utf8ToChar, char, int, EOF)
+#undef TBL_UTF8_TO_TYPE
+
+#define TBL_TYPE_TO_UTF8(name, type) \
+int tbl##name (type c, Utf8Buffer utf8) { \
+  type *cp = &c; \
+  size_t cs = sizeof(c); \
+  size_t utfs = MB_LEN_MAX; \
+  if (iconv(iconv##name, (void *)&cp, &cs, &utf8, &utfs) == -1) { \
+    LogError("iconv (" #type " -> UTF-8)"); \
+    return 0; \
+  } \
+  *utf8 = 0; \
+  return 1; \
+}
+TBL_TYPE_TO_UTF8(WcharToUtf8, wchar_t)
+TBL_TYPE_TO_UTF8(CharToUtf8, char)
+#undef TBL_TYPE_TO_UTF8
+
+#define TBL_TYPE_TO_TYPE(name, from, to, ret, eof) \
+ret tbl##name (from f) { \
+  from *fp = &f; \
+  size_t fs = sizeof(f); \
+  to t; \
+  to *tp = &t; \
+  size_t ts = sizeof(t); \
+  if (iconv(iconv##name, (void *)&fp, &fs, (void *)&tp, &ts) == -1) { \
+    LogError("iconv (" #from " -> " #to ")"); \
+    return eof; \
+  } \
+  return t; \
+}
+TBL_TYPE_TO_TYPE(CharToWchar, char, wchar_t, wint_t, WEOF)
+TBL_TYPE_TO_TYPE(WcharToChar, wchar_t, char, int, EOF)
+#undef TBL_TYPE_TO_TYPE
+
+static int
+tblIconvOpen (iconv_t *handle, const char *from, const char *to) {
+  if ((*handle = iconv_open(to, from)) != TBL_ICONV_NULL) return 1;
+  LogError("iconv_open");
+  return 0;
+}
+#endif /* HAVE_ICONV_H */
+
+int
+tblSetCharset (const char *charset) {
+#ifdef HAVE_ICONV_H
+  typedef struct {
+    const char *fromCharset;
+    const char *toCharset;
+    iconv_t *handle;
+    iconv_t newHandle;
+  } ConvEntry;
+  ConvEntry convTable[] = {
+    {charset, utf8Charset, &iconvCharToUtf8},
+    {utf8Charset, charset, &iconvUtf8ToChar},
+    {charset, wcharCharset, &iconvCharToWchar},
+    {wcharCharset, charset, &iconvWcharToChar},
+    {NULL, NULL, NULL}
+  };
+  ConvEntry *conv = convTable;
+
+  while (conv->handle) {
+    if (!tblIconvOpen(&conv->newHandle, conv->fromCharset, conv->toCharset)) {
+      while (conv != convTable) iconv_close((--conv)->newHandle);
+      return 0;
+    }
+
+    ++conv;
+  }
+
+  while (conv != convTable) {
+    --conv;
+    if (*conv->handle != TBL_ICONV_NULL) iconv_close(*conv->handle);
+    *conv->handle = conv->newHandle;
+  }
+#endif /* HAVE_ICONV_H */
+
+  tblCharset = charset;
+  return 1;
+}
+
+int
+tblInit (void) {
+  int ok = 1;
+  const char *locale = setlocale(LC_ALL, "");
+  if ((MB_CUR_MAX == 1) &&
+      (strcmp(locale, "C") != 0) &&
+      (strcmp(locale, "POSIX") != 0)) {
+    /* some 8bit locale is set, assume its charset is correct */
+    if (!tblSetCharset(nl_langinfo(CODESET))) ok = 0;
+  }
+
+#ifdef HAVE_ICONV_H
+#define TBL_ICONV_OPEN(name, from, to) if (!tblIconvOpen(&iconv##name, from, to)) ok = 0
+  TBL_ICONV_OPEN(Utf8ToWchar, utf8Charset, wcharCharset);
+  TBL_ICONV_OPEN(WcharToUtf8, wcharCharset, utf8Charset);
+#undef TBL_ICONV_OPEN
+#endif /* HAVE_ICONV_H */
+
+  return ok;
 }
