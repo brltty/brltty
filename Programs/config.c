@@ -47,6 +47,7 @@
 #include "spk.h"
 #include "scr.h"
 #include "tbl.h"
+#include "tbl_internal.h"
 #include "ctb.h"
 #include "tunes.h"
 #include "message.h"
@@ -1953,9 +1954,6 @@ startup (int argc, char *argv[]) {
     if (opt_standardError) LogClose();
   }
 
-  atexit(exitTunes);
-  suppressTuneDeviceOpenErrors();
-
   {
     const char *prefix = setPrintPrefix(NULL);
     LogPrint(LOG_NOTICE, "%s %s [%s]", PACKAGE_TITLE, PACKAGE_VERSION, BRLTTY_URL);
@@ -1978,6 +1976,11 @@ startup (int argc, char *argv[]) {
     identifyScreenDrivers(1);
     exit(0);
   }
+
+  tblInit();
+
+  atexit(exitTunes);
+  suppressTuneDeviceOpenErrors();
 
 #if defined(WINDOWS)
   if (!opt_noDaemon) {

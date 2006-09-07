@@ -304,6 +304,8 @@ main (int argc, char *argv[]) {
     outputFormat = NULL;
   }
 
+  tblInit();
+
   if (opt_translate) {
     FILE *inputFile = openTable(&inputPath, "r", opt_dataDirectory, NULL, NULL);
 

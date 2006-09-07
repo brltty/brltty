@@ -29,6 +29,7 @@
 #include "options.h"
 #include "brl.h"
 #include "tbl.h"
+#include "tbl_internal.h"
 #include "misc.h"
 #include "message.h"
 #include "scr.h"
@@ -109,6 +110,8 @@ main (int argc, char *argv[]) {
     --argc;
   }
   if (!opt_brailleDevice) opt_brailleDevice = BRAILLE_DEVICE;
+
+  tblInit();
 
   if ((braille = loadBrailleDriver(driver, &object, opt_libraryDirectory))) {
     const char *const *parameterNames = braille->parameters;

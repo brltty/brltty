@@ -30,6 +30,7 @@
 #include "brl.h"
 #include "ctb.h"
 #include "tbl.h"
+#include "tbl_internal.h"
 
 static char *opt_dataDirectory;
 static char *opt_contractionTable;
@@ -156,6 +157,8 @@ main (int argc, char *argv[]) {
     }
   }
   outputBuffer = NULL;
+
+  tblInit();
 
   {
     char *contractionTablePath;
