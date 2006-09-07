@@ -22,6 +22,7 @@
 #include <errno.h>
 
 #include "misc.h"
+#include "charset.h"
 #include "tbl.h"
 #include "tbl_internal.h"
 
@@ -63,8 +64,8 @@ gbProcessUcsCharDirective (TblInputData *input) {
 
   pos = input->location;
   length = strlen((const char *) input->location);
-  if ((c = tblUtf8ToChar((char **) &input->location, &length)) == EOF) {
-    tblReportWarning(input, "while converting UTF-8 character %s into %s", pos, tblGetCharset());
+  if ((c = convertUtf8ToChar((char **) &input->location, &length)) == EOF) {
+    tblReportWarning(input, "while converting UTF-8 character %s into %s", pos, getCharset());
     return 1;
   }
 
@@ -80,7 +81,7 @@ gbProcessUcsCharDirective (TblInputData *input) {
   pos = input->location;
   tblSkipSpace(input);
   length -= input->location - pos;
-  if ((wcdots = tblUtf8ToWchar((char **) &input->location, &length)) == EOF
+  if ((wcdots = convertUtf8ToWchar((char **) &input->location, &length)) == EOF
     || (wcdots & ~0xffu) != BRL_UC_ROW) {
     tblReportError(input, "expected dot pattern in %s", input->location);
     return 1;
@@ -149,7 +150,7 @@ gbProcessUnicodeCharDirective (TblInputData *input) {
     return 1;
   }
 
-  if ((c = tblWcharToChar(wc)) == EOF)
+  if ((c = convertWcharToChar(wc)) == EOF)
     return 1;
 
   input->bytes[(unsigned char) c].cell = wcdots & 0xffu;

@@ -65,7 +65,7 @@
 #include "io_misc.h"
 #include "scr.h"
 #include "tunes.h"
-#include "tbl_internal.h"
+#include "charset.h"
 
 #ifdef WINDOWS
 #define LogSocketError(msg) LogWindowsSocketError(msg)
@@ -572,7 +572,7 @@ void getDots(const BrailleWindow *brailleWindow, unsigned char *buf)
 	(wc&(1<<(7-1))?BRL_DOT7:0) |
 	(wc&(1<<(8-1))?BRL_DOT8:0);
     else
-      if ((c = tblWcharToChar(wc)) != EOF)
+      if ((c = convertWcharToChar(wc)) != EOF)
         buf[i] = textTable[c];
       else
         /* TODO: "invalid" pattern */
@@ -1040,7 +1040,7 @@ static int handleWrite(Connection *c, brl_type_t type, unsigned char *packet, si
 #ifdef HAVE_ICONV_H
     if (charset)
       charset[charsetLen] = 0; /* we have room for this */
-    if (charset || (charset = (char *) tblGetCharset())) {
+    if (charset || (charset = (char *) getCharset())) {
       iconv_t conv;
       wchar_t textBuf[rsiz];
       char *in = (char *) text, *out = (char *) textBuf;

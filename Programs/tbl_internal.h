@@ -22,12 +22,6 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#include <wchar.h>
-#include <limits.h>
-
-extern const char *tblSetCharset (const char *name);
-extern const char *tblGetCharset (void);
-
 #define TBL_DOT_COUNT 8
 
 extern const unsigned char tblDotBits[TBL_DOT_COUNT];
@@ -73,17 +67,6 @@ extern int tblTestWord (const unsigned char *location, int length, const char *w
 
 extern void tblSetByte (TblInputData *input, unsigned char index, unsigned char cell);
 extern void tblSetTable (TblInputData *input, TranslationTable table);
-
-#ifdef HAVE_ICONV_H
-typedef char Utf8Buffer[MB_LEN_MAX+1];
-
-extern wint_t tblUtf8ToWchar (char **utf8, size_t *utfs);
-extern int tblUtf8ToChar (char **utf8, size_t *utfs);
-extern int tblWcharToUtf8 (wchar_t wc, Utf8Buffer utf8);
-extern int tblCharToUtf8 (char c, Utf8Buffer utf8);
-extern wint_t tblCharToWchar (char c);
-extern int tblWcharToChar (wchar_t wc);
-#endif /* HAVE_ICONV_H */
 
 typedef int TblLoader (const char *path, FILE *file, TranslationTable table, int options);
 extern TblLoader tblLoad_Native;
