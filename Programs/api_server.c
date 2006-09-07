@@ -560,6 +560,7 @@ void getDots(const BrailleWindow *brailleWindow, unsigned char *buf)
   int i, c;
   wchar_t wc;
   for (i=0; i<displaySize; i++) {
+    wc = brailleWindow->text[i];
     if ((wc >= BRL_UC_ROW) && (wc <= (BRL_UC_ROW | 0XFF)))
       buf[i] =
 	(wc&(1<<(1-1))?BRL_DOT1:0) |
@@ -571,7 +572,7 @@ void getDots(const BrailleWindow *brailleWindow, unsigned char *buf)
 	(wc&(1<<(7-1))?BRL_DOT7:0) |
 	(wc&(1<<(8-1))?BRL_DOT8:0);
     else
-      if ((c = tblWcharToChar(brailleWindow->text[i])) != EOF)
+      if ((c = tblWcharToChar(wc)) != EOF)
         buf[i] = textTable[c];
       else
         /* TODO: "invalid" pattern */
