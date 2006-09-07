@@ -370,10 +370,11 @@ int tbl##name (type c, Utf8Buffer utf8) { \
   if (tblGetCharset()) { \
     type *cp = &c; \
     size_t cs = sizeof(c); \
-    size_t utfs = MB_LEN_MAX; \
+    size_t utfm = MB_LEN_MAX; \
+    size_t utfs = utfm; \
     if (iconv(iconv##name, (void *)&cp, &cs, &utf8, &utfs) != -1) { \
       *utf8 = 0; \
-      return 1; \
+      return utfm - utfs; \
     } \
     LogError("iconv (" #type " -> UTF-8)"); \
   } \
