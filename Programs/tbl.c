@@ -281,7 +281,7 @@ ret tbl##name (char **utf8, size_t *utfs) { \
   return c; \
 }
 TBL_UTF8_TO_TYPE(Utf8ToWchar, wchar_t, wint_t, WEOF)
-TBL_UTF8_TO_TYPE(Utf8ToChar, char, int, EOF)
+TBL_UTF8_TO_TYPE(Utf8ToChar, unsigned char, int, EOF)
 #undef TBL_UTF8_TO_TYPE
 
 #define TBL_TYPE_TO_UTF8(name, type) \
@@ -314,7 +314,7 @@ ret tbl##name (from f) { \
   return t; \
 }
 TBL_TYPE_TO_TYPE(CharToWchar, char, wchar_t, wint_t, WEOF)
-TBL_TYPE_TO_TYPE(WcharToChar, wchar_t, char, int, EOF)
+TBL_TYPE_TO_TYPE(WcharToChar, wchar_t, unsigned char, int, EOF)
 #undef TBL_TYPE_TO_TYPE
 
 static int
@@ -376,7 +376,7 @@ tblInit (void) {
 
   {
     const char *charset;
-    if ((MB_CUR_MAX == 1) &&
+    if (locale && (MB_CUR_MAX == 1) &&
         (strcmp(locale, "C") != 0) &&
         (strcmp(locale, "POSIX") != 0)) {
       /* some 8-bit locale is set, assume its charset is correct */
