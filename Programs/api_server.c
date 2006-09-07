@@ -65,6 +65,7 @@
 #include "io_misc.h"
 #include "scr.h"
 #include "tunes.h"
+#include "tbl_internal.h"
 
 #ifdef WINDOWS
 #define LogSocketError(msg) LogWindowsSocketError(msg)
@@ -161,7 +162,7 @@ typedef enum {
 
 typedef struct {
   header_t header;
-  unsigned char content[BRLAPI_MAXPACKETSIZE];
+  unsigned char content[BRLAPI_MAXPACKETSIZE+1]; /* +1 for additional \0 */
   PacketState state;
   int readBytes; /* Already read bytes */
   unsigned char *p; /* Where read() should load datas */
@@ -556,23 +557,24 @@ void copyBrailleWindow(BrailleWindow *dest, const BrailleWindow *src)
 /* No allocation of buf is performed */
 void getDots(const BrailleWindow *brailleWindow, unsigned char *buf)
 {
-  int i;
+  int i, c;
   wchar_t wc;
   for (i=0; i<displaySize; i++) {
-    if ((wc = brailleWindow->text[i]) < 0x100)
-      buf[i] = textTable[wc];
+    if ((wc >= BRL_UC_ROW) && (wc <= (BRL_UC_ROW | 0XFF)))
+      buf[i] =
+	(wc&(1<<(1-1))?BRL_DOT1:0) |
+	(wc&(1<<(2-1))?BRL_DOT2:0) |
+	(wc&(1<<(3-1))?BRL_DOT3:0) |
+	(wc&(1<<(4-1))?BRL_DOT4:0) |
+	(wc&(1<<(5-1))?BRL_DOT5:0) |
+	(wc&(1<<(6-1))?BRL_DOT6:0) |
+	(wc&(1<<(7-1))?BRL_DOT7:0) |
+	(wc&(1<<(8-1))?BRL_DOT8:0);
     else
-      if ((wc >= BRL_UC_ROW) && (wc <= (BRL_UC_ROW | 0XFF)))
-	buf[i] =
-	  (wc&(1<<(1-1))?BRL_DOT1:0) |
-	  (wc&(1<<(2-1))?BRL_DOT2:0) |
-	  (wc&(1<<(3-1))?BRL_DOT3:0) |
-	  (wc&(1<<(4-1))?BRL_DOT4:0) |
-	  (wc&(1<<(5-1))?BRL_DOT5:0) |
-	  (wc&(1<<(6-1))?BRL_DOT6:0) |
-	  (wc&(1<<(7-1))?BRL_DOT7:0) |
-	  (wc&(1<<(8-1))?BRL_DOT8:0);
+      if ((c = tblWcharToChar(brailleWindow->text[i])) != EOF)
+        buf[i] = textTable[c];
       else
+        /* TODO: "invalid" pattern */
         buf[i] = textTable[(unsigned char) '?'];
     buf[i] = (buf[i] & brailleWindow->andAttr[i]) | brailleWindow->orAttr[i];
   }
@@ -969,7 +971,7 @@ static int handleWrite(Connection *c, brl_type_t type, unsigned char *packet, si
   unsigned char *p = &ws->data;
   int remaining = size;
 #ifdef HAVE_ICONV_H
-  unsigned char *charset = NULL;
+  char *charset = NULL;
   unsigned int charsetLen = 0;
 #endif /* HAVE_ICONV_H */
   LogPrintRequest(type, c->fd);
@@ -1025,7 +1027,7 @@ static int handleWrite(Connection *c, brl_type_t type, unsigned char *packet, si
     CHECKEXC(remaining>=1, BRLERR_INVALID_PACKET);
     charsetLen = *p++; remaining--; /* charset length */
     CHECKEXC(remaining>=charsetLen, BRLERR_INVALID_PACKET);
-    charset = p;
+    charset = (char *) p;
     p += charsetLen; remaining -= charsetLen; /* charset name */
   }
 #else /* HAVE_ICONV_H */
@@ -1035,15 +1037,14 @@ static int handleWrite(Connection *c, brl_type_t type, unsigned char *packet, si
   /* Here the whole packet has been checked */
   if (text) {
 #ifdef HAVE_ICONV_H
-    if (charset) {
-      char _charset[charsetLen+1];
+    if (charset)
+      charset[charsetLen] = 0; /* we have room for this */
+    if (charset || (charset = (char *) tblGetCharset())) {
       iconv_t conv;
       wchar_t textBuf[rsiz];
       char *in = (char *) text, *out = (char *) textBuf;
       size_t sin = textLen, sout = sizeof(textBuf), res;
-      memcpy(_charset,charset,charsetLen);
-      _charset[charsetLen] = '\0';
-      CHECKEXC((conv = iconv_open("WCHAR_T",_charset)) != (iconv_t)(-1), BRLERR_INVALID_PACKET);
+      CHECKEXC((conv = iconv_open("WCHAR_T",charset)) != (iconv_t)(-1), BRLERR_INVALID_PACKET);
       res = iconv(conv,&in,&sin,&out,&sout);
       iconv_close(conv);
       CHECKEXC(res != (size_t) -1 && !sin && !sout, BRLERR_INVALID_PACKET);
@@ -1055,6 +1056,7 @@ static int handleWrite(Connection *c, brl_type_t type, unsigned char *packet, si
       int i;
       pthread_mutex_lock(&c->brlMutex);
       for (i=0; i<rsiz; i++)
+	/* assume latin1 */
         c->brailleWindow.text[rbeg-1+i] = text[i];
     }
     if (!andAttr) memset(c->brailleWindow.andAttr+rbeg-1,0xFF,rsiz);
