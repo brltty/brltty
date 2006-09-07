@@ -486,9 +486,9 @@ A <em/BrlAPI/ client <em/C/ running in some <em/screen/ window number 1 would
 then have to get the Tty path "VT 3 then window 1", which is merely expressed as
 "3 1".  The window number is available in the <tt/WINDOW/ environment variable,
 set by <em/screen/. The VT number, which actually represents the "path to
-screen's output" should be available in the <tt/WINDOWSPATH/ environment
+screen's output" should be available in the <tt/WINDOWPATH/ environment
 variable, also set by <em/screen/.  The client can thus merely concatenates the
-content of <tt/WINDOWSPATH/ (which could hold many levels of window numbers) and
+content of <tt/WINDOWPATH/ (which could hold many levels of window numbers) and
 of <tt/WINDOW/ and give the result as tty path to the <em/BrlAPI/ server, which
 then knows precisely where the client's usual output resides.
 
@@ -523,11 +523,11 @@ key presses and simulate them.
 
 <p>
 The user should also set in his <tt>~/.xsession</tt>, <tt>~/.xinitrc</tt>,
-<tt>~/.gdmrc</tt>... the <tt/WINDOWSPATH/ environment variable to "7", so that
+<tt>~/.gdmrc</tt>... the <tt/WINDOWPATH/ environment variable to "7", so that
 clients running in xterms will be able to prepend it to the content of the
 <tt/WINDOWID/ variable (set by xterms) and give this Tty path to the <em/BrlAPI/
 server.  Any <em/screen/ run in some xterm should then concatenate these
-<tt/WINDOWSPATH/ and <tt/WINDOWID/ variables to form a new <tt/WINDOWSPATH/
+<tt/WINDOWPATH/ and <tt/WINDOWID/ variables to form a new <tt/WINDOWSPATH/
 variable to give to sessions running in it.
 
 <sect1>Detaching

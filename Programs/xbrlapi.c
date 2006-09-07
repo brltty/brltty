@@ -165,7 +165,7 @@ void tobrltty_init(char *authKey, char *hostName) {
 static int getXVTnb(void);
 
 void getVT(void) {
-  if (getenv("WINDOWSPATH")) {
+  if (getenv("WINDOWPATH")) {
     if (brlapi_getTtyPath(NULL,0,NULL)<0)
       fatal_brlapi_errno("getTtyPath",gettext("cannot get tty\n"));
   } else {

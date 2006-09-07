@@ -880,7 +880,7 @@ int brlapi_getTtyPath(int *ttys, int nttys, const char *how)
 
   /* OK, Now we know where we are, so get the effective control of the terminal! */
   *nbTtys = 0;
-  ttytreepath = getenv("WINDOWSPATH");
+  ttytreepath = getenv("WINDOWPATH");
   if (ttytreepath)
   for(; *ttytreepath && t-(nbTtys+1)<=BRLAPI_MAXPACKETSIZE/sizeof(uint32_t);
     *t++ = htonl(ttypath), (*nbTtys)++, ttytreepath = ttytreepathstop+1) {
