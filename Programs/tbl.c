@@ -40,7 +40,7 @@ const unsigned char tblDotNumbers[TBL_DOT_COUNT] = {'1', '2', '3', '4', '5', '6'
 const unsigned char tblNoDots[] = {'0'};
 const unsigned char tblNoDotsSize = sizeof(tblNoDots);
 
-const char *tblCharset = NULL;
+static char *tblCharset = NULL;
 
 static void
 tblReportProblem (TblInputData *input, int level, const char *format, va_list args) {
@@ -266,9 +266,6 @@ static TBL_ICONV_HANDLE(Utf8ToWchar);
 static TBL_ICONV_HANDLE(CharToWchar);
 static TBL_ICONV_HANDLE(WcharToChar);
 
-static const char *const utf8Charset = "UTF-8";
-static const char *const wcharCharset = "WCHAR_T";
-
 #define TBL_UTF8_TO_TYPE(name, type, ret, eof) \
 ret tbl##name (char **utf8, size_t *utfs) { \
   type c; \
@@ -316,98 +313,88 @@ ret tbl##name (from f) { \
 TBL_TYPE_TO_TYPE(CharToWchar, char, wchar_t, wint_t, WEOF)
 TBL_TYPE_TO_TYPE(WcharToChar, wchar_t, unsigned char, int, EOF)
 #undef TBL_TYPE_TO_TYPE
-
-static int
-tblIconvOpen (iconv_t *handle, const char *from, const char *to) {
-  if ((*handle = iconv_open(to, from)) != TBL_ICONV_NULL) return 1;
-  LogError("iconv_open");
-  return 0;
-}
-
-static void
-tblIconvClose (iconv_t *handle) {
-  if (*handle != TBL_ICONV_NULL) {
-    iconv_close(*handle);
-    *handle = TBL_ICONV_NULL;
-  }
-}
 #endif /* HAVE_ICONV_H */
 
-int
-tblSetCharset (const char *charset) {
-  if (!(charset = strdup(charset))) return 0;
+const char *
+tblSetCharset (const char *name) {
+  char *charset;
+
+  if (name) {
+    if (tblCharset && (strcmp(tblCharset, name) == 0)) return tblCharset;
+  } else if (tblCharset) {
+    return tblCharset;
+  } else {
+    const char *locale = setlocale(LC_ALL, "");
+
+    if (locale && (MB_CUR_MAX == 1) &&
+        (strcmp(locale, "C") != 0) &&
+        (strcmp(locale, "POSIX") != 0)) {
+      /* some 8-bit locale is set, assume its charset is correct */
+      name = nl_langinfo(CODESET);
+    } else {
+      name = "ISO-8859-1";
+    }
+  }
+  if (!(charset = strdup(name))) return NULL;
 
 #ifdef HAVE_ICONV_H
   {
+    static const char *const utf8Charset = "UTF-8";
+    static const char *const wcharCharset = "WCHAR_T";
+
     typedef struct {
+      iconv_t *handle;
       const char *fromCharset;
       const char *toCharset;
-      iconv_t *handle;
+      unsigned permanent:1;
       iconv_t newHandle;
     } ConvEntry;
+
     ConvEntry convTable[] = {
-      {charset, utf8Charset, &iconvCharToUtf8},
-      {utf8Charset, charset, &iconvUtf8ToChar},
-      {charset, wcharCharset, &iconvCharToWchar},
-      {wcharCharset, charset, &iconvWcharToChar},
-      {NULL, NULL, NULL}
+      {&iconvCharToUtf8, charset, utf8Charset, 0},
+      {&iconvUtf8ToChar, utf8Charset, charset, 0},
+      {&iconvCharToWchar, charset, wcharCharset, 0},
+      {&iconvWcharToChar, wcharCharset, charset, 0},
+      {&iconvWcharToUtf8, wcharCharset, utf8Charset, 1},
+      {&iconvUtf8ToWchar, utf8Charset, wcharCharset, 1},
+      {NULL, NULL, NULL, 1}
     };
     ConvEntry *conv = convTable;
 
     while (conv->handle) {
-      if (!tblIconvOpen(&conv->newHandle, conv->fromCharset, conv->toCharset)) {
-        while (conv != convTable) iconv_close((--conv)->newHandle);
-        free((void *)charset);
-        return 0;
+      if ((*conv->handle != TBL_ICONV_NULL) && conv->permanent) {
+        conv->newHandle = TBL_ICONV_NULL;
+      } else if ((conv->newHandle = iconv_open(conv->toCharset, conv->fromCharset)) == TBL_ICONV_NULL) {
+        LogError("iconv_open");
+        while (conv != convTable)
+          if ((--conv)->newHandle != TBL_ICONV_NULL)
+            iconv_close(conv->newHandle);
+        free(charset);
+        return NULL;
       }
 
       ++conv;
     }
 
     while (conv != convTable) {
-      --conv;
-      if (*conv->handle != TBL_ICONV_NULL) iconv_close(*conv->handle);
-      *conv->handle = conv->newHandle;
+      if ((--conv)->newHandle != TBL_ICONV_NULL) {
+        if (*conv->handle != TBL_ICONV_NULL) iconv_close(*conv->handle);
+        *conv->handle = conv->newHandle;
+      }
     }
   }
 #endif /* HAVE_ICONV_H */
 
-  if (tblCharset) free((void *)tblCharset);
-  tblCharset = charset;
-  return 1;
+  if (tblCharset) free(tblCharset);
+  return tblCharset = charset;
+}
+
+const char *
+tblGetCharset (void) {
+  return tblSetCharset(NULL);
 }
 
 int
 tblInit (void) {
-  if (tblCharset) return 1;
-
-  {
-    const char *locale = setlocale(LC_ALL, "");
-    const char *charset;
-
-    if (locale && (MB_CUR_MAX == 1) &&
-        (strcmp(locale, "C") != 0) &&
-        (strcmp(locale, "POSIX") != 0)) {
-      /* some 8-bit locale is set, assume its charset is correct */
-      charset = nl_langinfo(CODESET);
-    } else {
-      charset = "ISO-8859-1";
-    }
-
-#ifdef HAVE_ICONV_H
-    if (tblIconvOpen(&iconvUtf8ToWchar, utf8Charset, wcharCharset)) {
-      if (tblIconvOpen(&iconvWcharToUtf8, wcharCharset, utf8Charset)) {
-#endif /* HAVE_ICONV_H */
-        if (tblSetCharset(charset)) return 1;
-#ifdef HAVE_ICONV_H
-
-        tblIconvClose(&iconvWcharToUtf8);
-      }
-
-      tblIconvClose(&iconvUtf8ToWchar);
-    }
-#endif /* HAVE_ICONV_H */
-  }
-
-  return 0;
+  return tblGetCharset() != NULL;
 }

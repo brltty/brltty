@@ -27,8 +27,8 @@ extern "C" {
 
 extern int tblInit (void);
 
-extern const char *tblCharset;
-extern int tblSetCharset (const char *charset);
+extern const char *tblSetCharset (const char *name);
+extern const char *tblGetCharset (void);
 
 #define TBL_DOT_COUNT 8
 
