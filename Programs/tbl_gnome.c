@@ -19,65 +19,14 @@
 
 #include <string.h>
 #include <ctype.h>
-#include <wchar.h>
-#include <locale.h>
-#include <langinfo.h>
 #include <errno.h>
 
+#include "misc.h"
 #include "tbl.h"
 #include "tbl_internal.h"
 
-static char *gbUserLocale;
-static char *gbUtf8Locale;
+#ifdef HAVE_ICONV_H
 static int gbInUcsBlock;
-
-static char *
-gbSetLocale (const char *locale) {
-  return setlocale(LC_CTYPE, locale);
-}
-
-static int
-gbBeginLocales (void) {
-  const char *c;
-  const char *modifier;
-  int n, m = 0;
-  gbUserLocale = gbSetLocale("");
-  if (!gbUserLocale) return 0;
-  gbUserLocale = strdup(gbUserLocale);
-  if ((modifier = strchr(gbUserLocale, '@')))
-    m = strlen(modifier);
-  if ((c = strchr(gbUserLocale, '.')))
-    n = c - gbUserLocale;
-  else {
-    if (modifier)
-      n = modifier - gbUserLocale;
-    else
-      n = strlen(gbUserLocale);
-  }
-  gbUtf8Locale = malloc(n + 6 + m + 1);
-  memcpy(gbUtf8Locale, gbUserLocale, n);
-  memcpy(gbUtf8Locale + n, ".UTF-8", 6);
-  if (modifier)
-    memcpy(gbUtf8Locale + n + 6, modifier, m);
-  gbUtf8Locale[n + 6 + m] = '\0';
-  if (!gbSetLocale(gbUtf8Locale))
-    return 0;
-  return 1;
-}
-
-static void
-gbEndLocales (void) {
-  if (gbUtf8Locale) {
-    free(gbUtf8Locale);
-    gbUtf8Locale = NULL;
-  }
-
-  if (gbUserLocale) {
-    gbSetLocale(gbUserLocale);
-    free(gbUserLocale);
-    gbUserLocale = NULL;
-  }
-}
 
 static int
 gbProcessEncodingDirective (TblInputData *input) {
@@ -95,7 +44,7 @@ gbProcessUcsBlockDirective (TblInputData *input) {
   tblSkipSpace(input);
   length = tblFindSpace(input) - input->location;
   if (!tblTestWord(input->location, length, "START")) {
-    tblReportError(input, "expected START on line %s", input->line);
+    tblReportError(input, "expected START in %s", input->location);
     return 0;
   } else {
     gbInUcsBlock = 1;
@@ -105,57 +54,41 @@ gbProcessUcsBlockDirective (TblInputData *input) {
 
 static int
 gbProcessUcsCharDirective (TblInputData *input) {
-  int length;
-  int n;
-  wchar_t wc, wcdots;
-  char c;
+  size_t length;
+  int c;
+  wint_t wcdots;
+  const unsigned char *pos;
 
   tblSkipSpace(input);
-  gbSetLocale(gbUtf8Locale);
-  length = strlen((char *) input->location);
 
-  n = mbtowc(&wc, (char *) input->location, length);
-  if (n == -1) {
-    tblReportError(input, "error %s while reading UTF-8 character %s", strerror(errno), input->location);
+  pos = input->location;
+  length = strlen((const char *) input->location);
+  if ((c = tblUtf8ToChar((char **) &input->location, &length)) == EOF) {
+    tblReportWarning(input, "while converting UTF-8 character %s into %s", pos, tblGetCharset());
     return 1;
   }
-  input->location += n;
-  length -= n;
 
   if (!(*input->location)) {
-    tblReportError(input, "expected dot pattern on line %s", input->line);
+    tblReportError(input, "expected dot pattern in %s", input->location);
     return 1;
   }
   if (!isspace(*input->location)) {
-    tblReportError(input, "can't handle multi-character translations");
+    tblReportError(input, "can't handle multi-character translations: %s", input->location);
     return 1;
   }
 
+  pos = input->location;
   tblSkipSpace(input);
-  n = mbtowc(&wcdots, (char *) input->location, length);
-  if (n == -1) {
-    tblReportError(input, "error %s while reading UTF-8 dot pattern %s", strerror(errno), input->location);
-    return 1;
-  }
-
-  if (input->location[n]) {
-    tblReportError(input, "can't handle multi-dot pattern translations");
-    return 1;
-  }
-
-  if ((wcdots & ~0xfful) != BRL_UC_ROW) {
-    tblReportError(input, "%s is not a dot pattern", input->location);
-    return 1;
-  }
-
-  gbSetLocale(gbUserLocale);
-  if (wctomb(&c, wc) != 1) {
-    tblReportWarning(input, "unicode character U+%04lx can't be represented in current locale %s", wc, gbUserLocale);
+  length -= input->location - pos;
+  if ((wcdots = tblUtf8ToWchar((char **) &input->location, &length)) == EOF
+    || (wcdots & ~0xffu) != BRL_UC_ROW) {
+    tblReportError(input, "expected dot pattern in %s", input->location);
     return 1;
   }
 
   input->bytes[(unsigned char) c].cell = wcdots & 0xffu;
   input->bytes[(unsigned char) c].defined = 1;
+
   return 1;
 }
 
@@ -169,7 +102,7 @@ gbProcessUcsBlockLine (TblInputData *input) {
     input->location += length;
     tblSkipSpace(input);
     if (!tblTestWord(input->location, tblFindSpace(input) - input->location, "END"))
-      tblReportError(input, "expected END on line %s", input->location);
+      tblReportError(input, "expected END in %s", input->location);
     gbInUcsBlock = 0;
     return 0;
   }
@@ -182,8 +115,9 @@ gbProcessUcsBlockLine (TblInputData *input) {
 static int
 gbProcessUnicodeCharDirective (TblInputData *input) {
   unsigned char *err;
-  wchar_t wc, wcdots;
-  char c;
+  wchar_t wcdots;
+  wint_t wc;
+  int c;
 
   tblSkipSpace(input);
   if (input->location[0] != 'U' || input->location[1] != '+') {
@@ -215,11 +149,8 @@ gbProcessUnicodeCharDirective (TblInputData *input) {
     return 1;
   }
 
-  gbSetLocale(gbUserLocale);
-  if (wctomb(&c, wc) != 1) {
-    tblReportError(input, "unicode character U+%04lx can't be represented in current locale %s", wc, gbUserLocale);
+  if ((c = tblWcharToChar(wc)) == EOF)
     return 1;
-  }
 
   input->bytes[(unsigned char) c].cell = wcdots & 0xffu;
   input->bytes[(unsigned char) c].defined = 1;
@@ -279,10 +210,13 @@ gbProcessLine (TblInputData *input) {
 int
 tblLoad_Gnome (const char *path, FILE *file, TranslationTable table, int options) {
   int ok = 0;
-  if (gbBeginLocales()) {
-    gbInUcsBlock = 0;
-    if (tblProcessLines(path, file, table, gbProcessLine, options)) ok = 1;
-    gbEndLocales();
-  }
+  gbInUcsBlock = 0;
+  if (tblProcessLines(path, file, table, gbProcessLine, options)) ok = 1;
   return ok;
 }
+#else
+int
+tblLoad_Gnome (const char *path, FILE *file, TranslationTable table, int options) {
+  return 0;
+}
+#endif
