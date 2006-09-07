@@ -323,6 +323,14 @@ tblIconvOpen (iconv_t *handle, const char *from, const char *to) {
   LogError("iconv_open");
   return 0;
 }
+
+static void
+tblIconvClose (iconv_t *handle) {
+  if (*handle != TBL_ICONV_NULL) {
+    iconv_close(*handle);
+    *handle = TBL_ICONV_NULL;
+  }
+}
 #endif /* HAVE_ICONV_H */
 
 int
@@ -371,11 +379,12 @@ tblSetCharset (const char *charset) {
 
 int
 tblInit (void) {
-  int ok = 1;
-  const char *locale = setlocale(LC_ALL, "");
+  if (tblCharset) return 1;
 
   {
+    const char *locale = setlocale(LC_ALL, "");
     const char *charset;
+
     if (locale && (MB_CUR_MAX == 1) &&
         (strcmp(locale, "C") != 0) &&
         (strcmp(locale, "POSIX") != 0)) {
@@ -384,15 +393,21 @@ tblInit (void) {
     } else {
       charset = "ISO-8859-1";
     }
-    if (!tblSetCharset(charset)) ok = 0;
-  }
 
 #ifdef HAVE_ICONV_H
-#define TBL_ICONV_OPEN(name, from, to) if (!tblIconvOpen(&iconv##name, from, to)) ok = 0
-  TBL_ICONV_OPEN(Utf8ToWchar, utf8Charset, wcharCharset);
-  TBL_ICONV_OPEN(WcharToUtf8, wcharCharset, utf8Charset);
-#undef TBL_ICONV_OPEN
+    if (tblIconvOpen(&iconvUtf8ToWchar, utf8Charset, wcharCharset)) {
+      if (tblIconvOpen(&iconvWcharToUtf8, wcharCharset, utf8Charset)) {
 #endif /* HAVE_ICONV_H */
+        if (tblSetCharset(charset)) return 1;
+#ifdef HAVE_ICONV_H
 
-  return ok;
+        tblIconvClose(&iconvWcharToUtf8);
+      }
+
+      tblIconvClose(&iconvUtf8ToWchar);
+    }
+#endif /* HAVE_ICONV_H */
+  }
+
+  return 0;
 }
