@@ -27,7 +27,6 @@
 #include "misc.h"
 #include "brl.h"
 #include "tbl.h"
-#include "tbl_internal.h"
 
 BEGIN_OPTION_TABLE
 END_OPTION_TABLE
@@ -48,8 +47,6 @@ main (int argc, char *argv[]) {
     exit(2);
   }
   path = *argv++, argc--;
-
-  tblInit();
 
   if (loadTranslationTable(path, NULL, table, 0)) {
     unsigned int columns = 8;

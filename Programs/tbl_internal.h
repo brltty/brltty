@@ -25,8 +25,6 @@ extern "C" {
 #include <wchar.h>
 #include <limits.h>
 
-extern int tblInit (void);
-
 extern const char *tblSetCharset (const char *name);
 extern const char *tblGetCharset (void);
 

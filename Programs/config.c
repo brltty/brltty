@@ -47,7 +47,6 @@
 #include "spk.h"
 #include "scr.h"
 #include "tbl.h"
-#include "tbl_internal.h"
 #include "ctb.h"
 #include "tunes.h"
 #include "message.h"
@@ -1976,8 +1975,6 @@ startup (int argc, char *argv[]) {
     identifyScreenDrivers(1);
     exit(0);
   }
-
-  tblInit();
 
   atexit(exitTunes);
   suppressTuneDeviceOpenErrors();

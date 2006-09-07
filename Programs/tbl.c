@@ -265,54 +265,6 @@ static TBL_ICONV_HANDLE(WcharToUtf8);
 static TBL_ICONV_HANDLE(Utf8ToWchar);
 static TBL_ICONV_HANDLE(CharToWchar);
 static TBL_ICONV_HANDLE(WcharToChar);
-
-#define TBL_UTF8_TO_TYPE(name, type, ret, eof) \
-ret tbl##name (char **utf8, size_t *utfs) { \
-  type c; \
-  type *cp = &c; \
-  size_t cs = sizeof(c); \
-  if ((iconv(iconv##name, utf8, utfs, (void *)&cp, &cs) == -1) && (errno != E2BIG)) { \
-    LogError("iconv (UTF-8 -> " #type ")"); \
-    return eof; \
-  } \
-  return c; \
-}
-TBL_UTF8_TO_TYPE(Utf8ToWchar, wchar_t, wint_t, WEOF)
-TBL_UTF8_TO_TYPE(Utf8ToChar, unsigned char, int, EOF)
-#undef TBL_UTF8_TO_TYPE
-
-#define TBL_TYPE_TO_UTF8(name, type) \
-int tbl##name (type c, Utf8Buffer utf8) { \
-  type *cp = &c; \
-  size_t cs = sizeof(c); \
-  size_t utfs = MB_LEN_MAX; \
-  if (iconv(iconv##name, (void *)&cp, &cs, &utf8, &utfs) == -1) { \
-    LogError("iconv (" #type " -> UTF-8)"); \
-    return 0; \
-  } \
-  *utf8 = 0; \
-  return 1; \
-}
-TBL_TYPE_TO_UTF8(WcharToUtf8, wchar_t)
-TBL_TYPE_TO_UTF8(CharToUtf8, char)
-#undef TBL_TYPE_TO_UTF8
-
-#define TBL_TYPE_TO_TYPE(name, from, to, ret, eof) \
-ret tbl##name (from f) { \
-  from *fp = &f; \
-  size_t fs = sizeof(f); \
-  to t; \
-  to *tp = &t; \
-  size_t ts = sizeof(t); \
-  if (iconv(iconv##name, (void *)&fp, &fs, (void *)&tp, &ts) == -1) { \
-    LogError("iconv (" #from " -> " #to ")"); \
-    return eof; \
-  } \
-  return t; \
-}
-TBL_TYPE_TO_TYPE(CharToWchar, char, wchar_t, wint_t, WEOF)
-TBL_TYPE_TO_TYPE(WcharToChar, wchar_t, unsigned char, int, EOF)
-#undef TBL_TYPE_TO_TYPE
 #endif /* HAVE_ICONV_H */
 
 const char *
@@ -371,6 +323,9 @@ tblSetCharset (const char *name) {
             iconv_close(conv->newHandle);
         free(charset);
         return NULL;
+      } else if (conv->permanent) {
+        *conv->handle = conv->newHandle;
+        conv->newHandle = TBL_ICONV_NULL;
       }
 
       ++conv;
@@ -394,7 +349,54 @@ tblGetCharset (void) {
   return tblSetCharset(NULL);
 }
 
-int
-tblInit (void) {
-  return tblGetCharset() != NULL;
+#ifdef HAVE_ICONV_H
+#define TBL_ICONV_UTF8_TO_TYPE(name, type, ret, eof) \
+ret tbl##name (char **utf8, size_t *utfs) { \
+  if (tblGetCharset()) { \
+    type c; \
+    type *cp = &c; \
+    size_t cs = sizeof(c); \
+    if ((iconv(iconv##name, utf8, utfs, (void *)&cp, &cs) != -1) || (errno == E2BIG)) return c; \
+    LogError("iconv (UTF-8 -> " #type ")"); \
+  } \
+  return eof; \
 }
+TBL_ICONV_UTF8_TO_TYPE(Utf8ToWchar, wchar_t, wint_t, WEOF)
+TBL_ICONV_UTF8_TO_TYPE(Utf8ToChar, unsigned char, int, EOF)
+#undef TBL_ICONV_UTF8_TO_TYPE
+
+#define TBL_ICONV_TYPE_TO_UTF8(name, type) \
+int tbl##name (type c, Utf8Buffer utf8) { \
+  if (tblGetCharset()) { \
+    type *cp = &c; \
+    size_t cs = sizeof(c); \
+    size_t utfs = MB_LEN_MAX; \
+    if (iconv(iconv##name, (void *)&cp, &cs, &utf8, &utfs) != -1) { \
+      *utf8 = 0; \
+      return 1; \
+    } \
+    LogError("iconv (" #type " -> UTF-8)"); \
+  } \
+  return 0; \
+}
+TBL_ICONV_TYPE_TO_UTF8(WcharToUtf8, wchar_t)
+TBL_ICONV_TYPE_TO_UTF8(CharToUtf8, char)
+#undef TBL_ICONV_TYPE_TO_UTF8
+
+#define TBL_ICONV_TYPE_TO_TYPE(name, from, to, ret, eof) \
+ret tbl##name (from f) { \
+  if (tblGetCharset()) { \
+    from *fp = &f; \
+    size_t fs = sizeof(f); \
+    to t; \
+    to *tp = &t; \
+    size_t ts = sizeof(t); \
+    if (iconv(iconv##name, (void *)&fp, &fs, (void *)&tp, &ts) != -1) return t; \
+    LogError("iconv (" #from " -> " #to ")"); \
+  } \
+  return eof; \
+}
+TBL_ICONV_TYPE_TO_TYPE(CharToWchar, char, wchar_t, wint_t, WEOF)
+TBL_ICONV_TYPE_TO_TYPE(WcharToChar, wchar_t, unsigned char, int, EOF)
+#undef TBL_ICONV_TYPE_TO_TYPE
+#endif /* HAVE_ICONV_H */
