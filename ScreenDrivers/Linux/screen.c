@@ -378,8 +378,26 @@ setHighFontBit (unsigned char bit) {
            highFontBit, unshiftedAttributeBits, shiftedAttributeBits);
 }
 
+#ifndef VT_GETHIFONTMASK
+#define VT_GETHIFONTMASK 0X560D
+#endif /* VT_GETHIFONTMASK */
+
 static int
 determineHighFontBit (void) {
+  {
+    unsigned short mask;
+    if (controlConsole(VT_GETHIFONTMASK, &mask) != -1) {
+      if (mask & 0XFF) {
+        LogPrint(LOG_ERR, "high font mask has bit set in low-order byte: %04X", mask);
+      } else {
+        setHighFontBit(mask >> 8);
+        return 1;
+      }
+    } else if (errno != EINVAL) {
+      LogError("ioctl[VT_GETHIFONTMASK]");
+    }
+  }
+
   if (lseek(screenDescriptor, 0, SEEK_SET) != -1) {
     unsigned char attributes[4];
 
@@ -406,6 +424,7 @@ determineHighFontBit (void) {
   } else {
     LogError("lseek");
   }
+
   return 0;
 }
 
