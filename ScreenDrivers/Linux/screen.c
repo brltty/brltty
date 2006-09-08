@@ -364,18 +364,18 @@ controlConsole (int operation, void *argument) {
 }
 
 static unsigned char highFontBit;
-static unsigned char highFontUnshiftedBits;
-static unsigned char highFontShiftedBits;
+static unsigned char unshiftedAttributeBits;
+static unsigned char shiftedAttributeBits;
 
 static void
 setHighFontBit (unsigned char bit) {
   highFontBit = bit;
-  highFontUnshiftedBits = (((highFontBit & 0XF0) - 0X10) & 0XF0) |
-                          (((highFontBit & 0X0F) - 0X01) & 0X0F);
-  highFontShiftedBits = ((~((highFontBit & 0XF0) - 0X10) << 1) & 0XE0) |
-                        ((~((highFontBit & 0X0F) - 0X01) << 1) & 0X0E);
+  unshiftedAttributeBits = (((highFontBit & 0XF0) - 0X10) & 0XF0) |
+                           (((highFontBit & 0X0F) - 0X01) & 0X0F);
+  shiftedAttributeBits = ((~((highFontBit & 0XF0) - 0X10) << 1) & 0XE0) |
+                         ((~((highFontBit & 0X0F) - 0X01) << 1) & 0X0E);
   LogPrint(LOG_DEBUG, "high font: bit=%02X unshifted=%02X shifted=%02X",
-           highFontBit, highFontUnshiftedBits, highFontShiftedBits);
+           highFontBit, unshiftedAttributeBits, shiftedAttributeBits);
 }
 
 static int
@@ -1098,8 +1098,8 @@ read_LinuxScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
             for (column=0; column<box.width; ++column) {
               unsigned char bits = *source;
               if (vgaLargeTable)
-                bits = (bits & highFontUnshiftedBits) |
-                       ((bits & highFontShiftedBits) >> 1);
+                bits = (bits & unshiftedAttributeBits) |
+                       ((bits & shiftedAttributeBits) >> 1);
               *target++ = bits;
               source += 2;
             }
