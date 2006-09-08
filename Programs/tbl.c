@@ -92,17 +92,19 @@ tblSetByte (TblInputData *input, unsigned char index, unsigned char cell) {
   }
 }
 
-static void
-tblPutCell (unsigned char cell, char *buffer, int *count) {
-  *count = 0;
-  if (cell) {
-    int dotIndex;
-    for (dotIndex=0; dotIndex<TBL_DOT_COUNT; ++dotIndex)
-      if (cell & tblDotBit(dotIndex))
-        buffer[(*count)++] = tblDotNumbers[dotIndex];
+size_t
+tblPutDots (unsigned char dots, TblDotsBuffer buffer) {
+  size_t count = 0;
+  if (dots) {
+    int dot;
+    for (dot=0; dot<TBL_DOT_COUNT; ++dot)
+      if (dots & tblDotBit(dot))
+        buffer[count++] = tblDotNumbers[dot];
   } else {
-    buffer[(*count)++] = tblNoDots[0];
+    buffer[count++] = tblNoDots[0];
   }
+  buffer[count] = 0;
+  return count;
 }
 
 void
@@ -121,10 +123,9 @@ tblSetTable (TblInputData *input, TranslationTable table) {
         if (!dotsDefined[byte->cell]) {
           dotsDefined[byte->cell] = 1;
         } else if (input->options & TBL_DUPLICATE) {
-          char dotsBuffer[TBL_DOT_COUNT];
-          int dotCount;
-          tblPutCell(byte->cell, dotsBuffer, &dotCount);
-          tblReportWarning(input, "duplicate dots: %.*s [\\X%02X]", dotCount, dotsBuffer, byteIndex);
+          TblDotsBuffer dotsBuffer;
+          tblPutDots(byte->cell, dotsBuffer);
+          tblReportWarning(input, "duplicate dots: %s [\\X%02X]", dotsBuffer, byteIndex);
         }
       } else {
         int dotIndex;
@@ -152,10 +153,9 @@ tblSetTable (TblInputData *input, TranslationTable table) {
     int cell;
     for (cell=0; cell<TRANSLATION_TABLE_SIZE; ++cell) {
       if (!dotsDefined[cell]) {
-        char dotsBuffer[TBL_DOT_COUNT];
-        int dotCount;
-        tblPutCell(cell, dotsBuffer, &dotCount);
-        tblReportWarning(input, "unused dots: %.*s", dotCount, dotsBuffer);
+        TblDotsBuffer dotsBuffer;
+        tblPutDots(cell, dotsBuffer);
+        tblReportWarning(input, "unused dots: %s", dotsBuffer);
       }
     }
   }

@@ -31,6 +31,9 @@ extern const unsigned char tblDotNumbers[TBL_DOT_COUNT];
 extern const unsigned char tblNoDots[];
 extern const unsigned char tblNoDotsSize;
 
+typedef char TblDotsBuffer[TBL_DOT_COUNT + 1];
+extern size_t tblPutDots (unsigned char dots, TblDotsBuffer buffer);
+
 typedef struct {
   unsigned char cell;
   unsigned char defined;
