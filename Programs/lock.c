@@ -82,7 +82,7 @@ obtainLock (LockDescriptor *lock, LockOptions options) {
   pthread_mutex_lock(&lock->mutex);
 
   if (options & LOCK_WRITE) {
-    if (lock->count) {
+    while (lock->count) {
       if (options & LOCK_NO_WAIT) goto done;
       ++lock->writers;
       pthread_cond_wait(&lock->write, &lock->mutex);
