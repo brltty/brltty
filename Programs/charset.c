@@ -184,21 +184,20 @@ CHARSET_CONVERT_TYPE_TO_TYPE(WcharToChar, wchar_t, unsigned char, int, EOF)
 #endif /* HAVE_ICONV_H */
 
 static LockDescriptor *
-getLock (void) {
+getCharsetLock (void) {
   static LockDescriptor *lock = NULL;
-  if (!lock) lock = newLockDescriptor();
-  return lock;
+  return getLockDescriptor(&lock);
 }
 
 int
 lockCharset (LockOptions options) {
-  LockDescriptor *lock = getLock();
+  LockDescriptor *lock = getCharsetLock();
   if (!lock) return 0;
   return obtainLock(lock, options);
 }
 
 void
 unlockCharset (void) {
-  LockDescriptor *lock = getLock();
+  LockDescriptor *lock = getCharsetLock();
   if (lock) releaseLock(lock);
 }
