@@ -28,6 +28,9 @@ all-xbrlapi: xbrlapi$X
 options.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/options.c
 
+lock.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/lock.c
+
 charset.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/charset.c
 
@@ -134,7 +137,7 @@ rangelist.$O:
 
 ###############################################################################
 
-BRLTTY_OBJECTS = main.$O config.$O options.$O misc.$O $(SYSTEM_OBJECT) io_misc.$O queue.$O async.$O auth.$O cut.$O cmd.$O at2.$O charset.$O $(TBL_OBJECTS) $(CTB_OBJECTS) serial.$O $(USB_OBJECTS) $(BLUETOOTH_OBJECTS) drivers.$O $(SCREEN_OBJECTS) $(SCREEN_DRIVER_OBJECTS) route.$O brl.$O $(BRAILLE_DRIVER_OBJECTS) $(SPEECH_OBJECT) $(SPEECH_DRIVER_OBJECTS) $(TUNE_OBJECTS) $(API_OBJECTS)
+BRLTTY_OBJECTS = main.$O config.$O options.$O misc.$O $(SYSTEM_OBJECT) io_misc.$O queue.$O async.$O auth.$O cut.$O cmd.$O at2.$O lock.$O charset.$O $(TBL_OBJECTS) $(CTB_OBJECTS) serial.$O $(USB_OBJECTS) $(BLUETOOTH_OBJECTS) drivers.$O $(SCREEN_OBJECTS) $(SCREEN_DRIVER_OBJECTS) route.$O brl.$O $(BRAILLE_DRIVER_OBJECTS) $(SPEECH_OBJECT) $(SPEECH_DRIVER_OBJECTS) $(TUNE_OBJECTS) $(API_OBJECTS)
 
 brltty$X: $(BRLTTY_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(SPEECH_DRIVER_LIBRARIES) $(SCREEN_DRIVER_LIBRARIES) $(LDLIBS)
@@ -294,7 +297,7 @@ scrtest.$O:
 
 ###############################################################################
 
-TBLTEST_OBJECTS = tbltest.$O options.$O misc.$O $(SYSTEM_OBJECT) io_misc.$O charset.$O tbl.$O tbl_native.$O tbl_gnome.$O
+TBLTEST_OBJECTS = tbltest.$O options.$O misc.$O $(SYSTEM_OBJECT) io_misc.$O lock.$O charset.$O tbl.$O tbl_native.$O tbl_gnome.$O
 
 tbltest$X: $(TBLTEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(TBLTEST_OBJECTS) $(LDLIBS)

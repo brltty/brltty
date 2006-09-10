@@ -25,6 +25,8 @@ extern "C" {
 #include <wchar.h>
 #include <limits.h>
 
+#include "lock.h"
+
 extern const char *setCharset (const char *name);
 extern const char *getCharset (void);
 
@@ -40,6 +42,9 @@ extern wint_t convertUtf8ToWchar (char **utf8, size_t *utfs);
 extern wint_t convertCharToWchar (char c);
 extern int convertWcharToChar (wchar_t wc);
 #endif /* HAVE_ICONV_H */
+
+extern int lockCharset (LockOptions options);
+extern void unlockCharset (void);
 
 #ifdef __cplusplus
 }

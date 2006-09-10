@@ -31,6 +31,7 @@
 #endif /* HAVE_ICONV_H */
 
 #include "misc.h"
+#include "lock.h"
 #include "charset.h"
 
 static char *currentCharset = NULL;
@@ -181,3 +182,23 @@ CHARSET_CONVERT_TYPE_TO_TYPE(CharToWchar, char, wchar_t, wint_t, WEOF)
 CHARSET_CONVERT_TYPE_TO_TYPE(WcharToChar, wchar_t, unsigned char, int, EOF)
 #undef CHARSET_CONVERT_TYPE_TO_TYPE
 #endif /* HAVE_ICONV_H */
+
+static LockDescriptor *
+getLock (void) {
+  static LockDescriptor *lock = NULL;
+  if (!lock) lock = newLockDescriptor();
+  return lock;
+}
+
+int
+lockCharset (LockOptions options) {
+  LockDescriptor *lock = getLock();
+  if (!lock) return 0;
+  return obtainLock(lock, options);
+}
+
+void
+unlockCharset (void) {
+  LockDescriptor *lock = getLock();
+  if (lock) releaseLock(lock);
+}
