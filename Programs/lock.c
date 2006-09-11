@@ -23,6 +23,49 @@
 #include "misc.h"
 #include "lock.h"
 
+#ifdef PTHREAD_RWLOCK_INITIALIZER
+struct LockDescriptorStruct {
+  pthread_rwlock_t lock;
+};
+
+LockDescriptor *
+newLockDescriptor (void) {
+  LockDescriptor *lock;
+  int result;
+
+  if ((lock = malloc(sizeof(*lock)))) {
+    if (!(result = pthread_rwlock_init(&lock->lock, NULL))) {
+      return lock;
+    }
+    free(lock);
+  }
+
+  return NULL;
+}
+
+void
+freeLockDescriptor (LockDescriptor *lock) {
+  pthread_rwlock_destroy(&lock->lock);
+  free(lock);
+}
+
+int
+obtainLock (LockDescriptor *lock, LockOptions options) {
+  if (options & LOCK_WRITE) {
+    if (options & LOCK_NO_WAIT) return !pthread_rwlock_trywrlock(&lock->lock);
+    pthread_rwlock_wrlock(&lock->lock);
+  } else {
+    if (options & LOCK_NO_WAIT) return !pthread_rwlock_tryrdlock(&lock->lock);
+    pthread_rwlock_rdlock(&lock->lock);
+  }
+  return 1;
+}
+
+void
+releaseLock (LockDescriptor *lock) {
+  pthread_rwlock_unlock(&lock->lock);
+}
+#else /* PTHREAD_RWLOCK_INITIALIZER */
 struct LockDescriptorStruct {
   pthread_mutex_t mutex;
   pthread_cond_t read;
@@ -55,17 +98,6 @@ newLockDescriptor (void) {
   }
 
   return NULL;
-}
-
-LockDescriptor *
-getLockDescriptor (LockDescriptor **lock) {
-  if (!*lock) {
-    static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-    pthread_mutex_lock(&mutex);
-    if (!*lock) *lock = newLockDescriptor();
-    pthread_mutex_unlock(&mutex);
-  }
-  return *lock;
 }
 
 void
@@ -121,4 +153,16 @@ releaseLock (LockDescriptor *lock) {
 
 done:
   pthread_mutex_unlock(&lock->mutex);
+}
+#endif /* PTHREAD_RWLOCK_INITIALIZER */
+
+LockDescriptor *
+getLockDescriptor (LockDescriptor **lock) {
+  if (!*lock) {
+    static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+    pthread_mutex_lock(&mutex);
+    if (!*lock) *lock = newLockDescriptor();
+    pthread_mutex_unlock(&mutex);
+  }
+  return *lock;
 }
