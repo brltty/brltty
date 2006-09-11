@@ -64,7 +64,7 @@ gbProcessUcsCharDirective (TblInputData *input) {
 
   pos = input->location;
   length = strlen((const char *) input->location);
-  if ((c = convertUtf8ToChar((char **) &input->location, &length)) == EOF) {
+  if ((c = convertUtf8ToChar((void *)&input->location, &length)) == EOF) {
     tblReportWarning(input, "while converting UTF-8 character %s into %s", pos, getCharset());
     return 1;
   }
@@ -81,7 +81,7 @@ gbProcessUcsCharDirective (TblInputData *input) {
   pos = input->location;
   tblSkipSpace(input);
   length -= input->location - pos;
-  if ((wcdots = convertUtf8ToWchar((char **) &input->location, &length)) == EOF
+  if ((wcdots = convertUtf8ToWchar((void *)&input->location, &length)) == EOF
     || (wcdots & ~0xffu) != BRL_UC_ROW) {
     tblReportError(input, "expected dot pattern in %s", input->location);
     return 1;
