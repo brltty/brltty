@@ -972,7 +972,7 @@ static int handleWrite(Connection *c, brl_type_t type, unsigned char *packet, si
   unsigned char *p = &ws->data;
   int remaining = size;
 #ifdef HAVE_ICONV_H
-  char *charset = NULL;
+  char *charset = NULL, *coreCharset = NULL;
   unsigned int charsetLen = 0;
 #endif /* HAVE_ICONV_H */
   LogPrintRequest(type, c->fd);
@@ -1038,9 +1038,15 @@ static int handleWrite(Connection *c, brl_type_t type, unsigned char *packet, si
   /* Here the whole packet has been checked */
   if (text) {
 #ifdef HAVE_ICONV_H
-    if (charset)
+    if (charset) {
       charset[charsetLen] = 0; /* we have room for this */
-    if (charset || (charset = (char *) getCharset())) {
+    } else {
+      lockCharset(0);
+      charset = coreCharset = (char *) getCharset();
+      if (!coreCharset)
+        unlockCharset();
+    }
+    if (charset) {
       iconv_t conv;
       wchar_t textBuf[rsiz];
       char *in = (char *) text, *out = (char *) textBuf;
@@ -1049,6 +1055,7 @@ static int handleWrite(Connection *c, brl_type_t type, unsigned char *packet, si
       res = iconv(conv,&in,&sin,&out,&sout);
       iconv_close(conv);
       CHECKEXC(res != (size_t) -1 && !sin && !sout, BRLERR_INVALID_PACKET);
+      if (coreCharset) unlockCharset();
       pthread_mutex_lock(&c->brlMutex);
       memcpy(c->brailleWindow.text+rbeg-1,textBuf,rsiz*sizeof(wchar_t));
     } else
