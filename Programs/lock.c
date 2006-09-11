@@ -51,11 +51,11 @@ freeLockDescriptor (LockDescriptor *lock) {
 
 int
 obtainLock (LockDescriptor *lock, LockOptions options) {
-  if (options & LOCK_EXCLUSIVE) {
-    if (options & LOCK_NO_WAIT) return !pthread_rwlock_trywrlock(&lock->lock);
+  if (options & LOCK_Exclusive) {
+    if (options & LOCK_NoWait) return !pthread_rwlock_trywrlock(&lock->lock);
     pthread_rwlock_wrlock(&lock->lock);
   } else {
-    if (options & LOCK_NO_WAIT) return !pthread_rwlock_tryrdlock(&lock->lock);
+    if (options & LOCK_NoWait) return !pthread_rwlock_tryrdlock(&lock->lock);
     pthread_rwlock_rdlock(&lock->lock);
   }
   return 1;
@@ -113,9 +113,9 @@ obtainLock (LockDescriptor *lock, LockOptions options) {
   int locked = 0;
   pthread_mutex_lock(&lock->mutex);
 
-  if (options & LOCK_EXCLUSIVE) {
+  if (options & LOCK_Exclusive) {
     while (lock->count) {
-      if (options & LOCK_NO_WAIT) goto done;
+      if (options & LOCK_NoWait) goto done;
       ++lock->writers;
       pthread_cond_wait(&lock->write, &lock->mutex);
       --lock->writers;
@@ -123,7 +123,7 @@ obtainLock (LockDescriptor *lock, LockOptions options) {
     lock->count = -1;
   } else {
     while (lock->count < 0) {
-      if (options & LOCK_NO_WAIT) goto done;
+      if (options & LOCK_NoWait) goto done;
       pthread_cond_wait(&lock->read, &lock->mutex);
     }
     ++lock->count;
