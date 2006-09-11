@@ -26,7 +26,7 @@ typedef struct LockDescriptorStruct LockDescriptor;
 
 typedef enum {
   LOCK_Exclusive = 0X1,
-  LOCK_NoWait   = 0X2
+  LOCK_NoWait    = 0X2
 } LockOptions;
 
 extern LockDescriptor *newLockDescriptor (void);
