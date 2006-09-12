@@ -45,6 +45,10 @@ extern "C" {
 
 #endif /* WINDOWS */
 
+#ifdef __MINGW32__
+#include <_mingw.h>
+#endif /* __MINGW32__ */
+
 #include <sys/types.h>
 #include <stdlib.h>
 #include <unistd.h>

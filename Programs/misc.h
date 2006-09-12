@@ -103,7 +103,7 @@ extern void formatInputError (
 );
 
 #ifdef __MINGW32__
-extern void gettimeofday (struct timeval *tvp, void *tzp);
+extern int gettimeofday (struct timeval *tvp, void *tzp);
 extern void usleep (int usec);
 #endif /* __MINGW32__ */
 

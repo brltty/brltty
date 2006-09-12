@@ -718,13 +718,16 @@ approximateDelay (int milliseconds) {
 }
 
 #ifdef __MINGW32__
-void
+#if (__MINGW32_MAJOR_VERSION < 3) || ((__MINGW32_MAJOR_VERSION == 3) && (__MINGW32_MINOR_VERSION < 10))
+int
 gettimeofday (struct timeval *tvp, void *tzp) {
   DWORD time = GetTickCount();
   /* this is not 49.7 days-proof ! */
   tvp->tv_sec = time / 1000;
   tvp->tv_usec = (time % 1000) * 1000;
+  return 0;
 }
+#endif /* gettimeofday */
 
 void
 usleep (int usec) {
