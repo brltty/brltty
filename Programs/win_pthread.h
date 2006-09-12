@@ -291,6 +291,11 @@ static inline int pthread_cond_signal (pthread_cond_t *cond) {
   return 0;
 }
 
+static inline int pthread_cond_broadcast (pthread_cond_t *cond) {
+  ReleaseSemaphore(cond->sem, cond->nbwait, NULL);
+  return 0;
+}
+
 static inline int pthread_cond_destroy (pthread_cond_t *cond) {
   winPthreadAssertWindows(CloseHandle(cond->sem));
   return 0;
