@@ -22,9 +22,12 @@
 #include <strings.h>
 #include <ctype.h>
 #include <errno.h>
-#include <locale.h>
-#include <langinfo.h>
 #include <wchar.h>
+#include <locale.h>
+
+#ifndef WINDOWS
+#include <langinfo.h>
+#endif /* WINDOWS */
 
 #ifdef HAVE_ICONV_H
 #include <iconv.h>
@@ -48,6 +51,25 @@ static CHARSET_ICONV_HANDLE(CharToWchar);
 static CHARSET_ICONV_HANDLE(WcharToChar);
 #endif /* HAVE_ICONV_H */
 
+static const char *
+getLocaleCharset (void) {
+  const char *locale = setlocale(LC_ALL, "");
+
+  if (locale && (MB_CUR_MAX == 1) &&
+      (strcmp(locale, "C") != 0) &&
+      (strcmp(locale, "POSIX") != 0)) {
+    /* some 8-bit locale is set, assume its charset is correct */
+#ifdef WINDOWS
+    static char codepage[8] = {'C', 'P'};
+    GetLocaleInfo(GetThreadLocale(), LOCALE_IDEFAULTANSICODEPAGE, codepage+2, sizeof(codepage)-2);
+    return codepage;
+#else /* WINDOWS */
+    return nl_langinfo(CODESET);
+#endif /* WINDOWS */
+  }
+  return "ISO-8859-1";
+}
+
 const char *
 setCharset (const char *name) {
   char *charset;
@@ -57,16 +79,7 @@ setCharset (const char *name) {
   } else if (currentCharset) {
     return currentCharset;
   } else {
-    const char *locale = setlocale(LC_ALL, "");
-
-    if (locale && (MB_CUR_MAX == 1) &&
-        (strcmp(locale, "C") != 0) &&
-        (strcmp(locale, "POSIX") != 0)) {
-      /* some 8-bit locale is set, assume its charset is correct */
-      name = nl_langinfo(CODESET);
-    } else {
-      name = "ISO-8859-1";
-    }
+    name = getLocaleCharset();
   }
   if (!(charset = strdup(name))) return NULL;
 
@@ -95,7 +108,7 @@ setCharset (const char *name) {
     ConvEntry *conv = convTable;
 
     while (conv->handle) {
-      if ((*conv->handle != CHARSET_ICONV_NULL) && conv->permanent) {
+      if (conv->permanent && (*conv->handle != CHARSET_ICONV_NULL)) {
         conv->newHandle = CHARSET_ICONV_NULL;
       } else if ((conv->newHandle = iconv_open(conv->toCharset, conv->fromCharset)) == CHARSET_ICONV_NULL) {
         LogError("iconv_open");
