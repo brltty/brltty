@@ -22,9 +22,12 @@ all:: $(ALL_API)
 
 all-api: BrlAPIref.made
 
-BrlAPIref.made: $(BLD_TOP)$(PGM_DIR)/api.h $(SRC_TOP)$(PGM_DIR)/api_protocol.h BrlAPIref.doxy
+BrlAPIref.made: BrlAPIref $(BLD_TOP)$(PGM_DIR)/api.h $(SRC_TOP)$(PGM_DIR)/api_protocol.h BrlAPIref.doxy
 	doxygen BrlAPIref.doxy
 	touch $@
+
+BrlAPIref:
+	mkdir BrlAPIref
 
 clean::
 	-rm -f *.made
