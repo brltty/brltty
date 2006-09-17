@@ -132,7 +132,7 @@ rm -fr "${RPM_BUILD_ROOT}"
 %{_libdir}/libbrlapi.so
 %{_includedir}/brltty
 %doc %{_mandir}/man3/*
-%doc Documents/BrlAPIref-HTML
+%doc Documents/BrlAPIref
 
 %changelog
 * Sat Sep 17 2005 Dave Mielke <dave@mielke.cc> 3.7
