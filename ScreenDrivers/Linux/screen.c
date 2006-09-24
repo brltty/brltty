@@ -1153,18 +1153,18 @@ insertUinputKey (ScreenKey key, int modShift, int modControl, int modMeta) {
   }
 
   if (code != KEY_RESERVED) {
-#define KEY(__code, __value) { if (!writeKeyEvent(__code, __value)) return 0; }
-    if (modControl) KEY(KEY_LEFTCTRL, 1);
-    if (modMeta) KEY(KEY_LEFTALT, 1);
-    if (modShift) KEY(KEY_LEFTSHIFT, 1);
+#define KEY_EVENT(k,p) { if (!writeKeyEvent((k), (p))) return 0; }
+    if (modControl) KEY_EVENT(KEY_LEFTCTRL, 1);
+    if (modMeta) KEY_EVENT(KEY_LEFTALT, 1);
+    if (modShift) KEY_EVENT(KEY_LEFTSHIFT, 1);
 
-    KEY(code, 1);
-    KEY(code, 0);
+    KEY_EVENT(code, 1);
+    KEY_EVENT(code, 0);
 
-    if (modShift) KEY(KEY_LEFTSHIFT, 0);
-    if (modMeta) KEY(KEY_LEFTALT, 0);
-    if (modControl) KEY(KEY_LEFTCTRL, 0);
-#undef KEY
+    if (modShift) KEY_EVENT(KEY_LEFTSHIFT, 0);
+    if (modMeta) KEY_EVENT(KEY_LEFTALT, 0);
+    if (modControl) KEY_EVENT(KEY_LEFTCTRL, 0);
+#undef KEY_EVENT
 
     return 1;
   }
