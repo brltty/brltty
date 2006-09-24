@@ -206,3 +206,109 @@ installLinuxKernelModule (const char *name, int *installed) {
 
   return 1;
 }
+
+int
+openCharacterDevice (const char *path, const char *description, int flags, int major, int minor) {
+  int file;
+  LogPrint(LOG_DEBUG, "opening %s device: %s", description, path);
+  if ((file = open(path, flags)) == -1) {
+    int create = errno == ENOENT;
+    LogPrint(create? LOG_WARNING: LOG_ERR, 
+             "cannot open %s device: %s: %s",
+             description, path, strerror(errno));
+    if (create) {
+      mode_t mode = S_IFCHR | S_IRUSR | S_IWUSR;
+      LogPrint(LOG_NOTICE, "creating %s device: %s mode=%06o major=%d minor=%d",
+               description, path, mode, major, minor);
+      if (mknod(path, mode, makedev(major, minor)) == -1) {
+        LogPrint(LOG_ERR, "cannot create %s device: %s: %s",
+                 description, path, strerror(errno));
+      } else if ((file = open(path, flags)) == -1) {
+        LogPrint(LOG_ERR, "cannot open %s device: %s: %s",
+                 description, path, strerror(errno));
+        if (unlink(path) == -1)
+          LogPrint(LOG_ERR, "cannot remove %s device: %s: %s",
+                   description, path, strerror(errno));
+        else
+          LogPrint(LOG_NOTICE, "removed %s device: %s",
+                   description, path);
+      }
+    }
+  }
+  return file;
+}
+
+#ifdef HAVE_LINUX_INPUT_H
+#include <linux/input.h>
+#endif /* HAVE_LINUX_INPUT_H */
+
+#ifdef HAVE_LINUX_UINPUT_H
+#include <linux/uinput.h>
+#endif /* HAVE_LINUX_UINPUT_H */
+
+int
+getUinputDevice (void) {
+  static int uinput = -1;
+
+#ifdef HAVE_LINUX_UINPUT_H
+  if (uinput == -1) {
+    int device;
+
+    {
+      static int installed = 0;
+      installLinuxKernelModule("uinput", &installed);
+    }
+
+    if ((device = openCharacterDevice("/dev/uinput", "uinput", O_WRONLY, 10, 223)) != -1) {
+      struct uinput_user_dev description;
+      
+      memset(&description, 0, sizeof(description));
+      strcpy(description.name, "brltty");
+
+      if (write(device, &description, sizeof(description)) != -1) {
+        ioctl(device, UI_SET_EVBIT, EV_KEY);
+        ioctl(device, UI_SET_EVBIT, EV_REP);
+
+        {
+          int key;
+          for (key=KEY_RESERVED; key<KEY_MAX; key++) {
+            ioctl(device, UI_SET_KEYBIT, key);
+          }
+        }
+
+        if (ioctl(device, UI_DEV_CREATE) != -1) {
+          uinput = device;
+        } else {
+          LogError("ioctl[UI_DEV_CREATE]");
+        }
+      } else {
+        LogError("write(struct uinput_user_dev)");
+      }
+
+      if (device != uinput) close(device);
+    }
+  }
+#endif /* HAVE_LINUX_UINPUT_H */
+
+  return uinput;
+}
+
+int
+writeKeyEvent (int key, int press) {
+  int device = getUinputDevice();
+
+  if (device != -1) {
+#ifdef HAVE_LINUX_INPUT_H
+    struct input_event event;
+
+    event.type = EV_KEY;
+    event.code = key;
+    event.value = press;
+
+    if (write(device, &event, sizeof(event)) != -1) return 1;
+    LogError("write(struct input_event)");
+#endif /* HAVE_LINUX_INPUT_H */
+  }
+
+  return 0;
+}

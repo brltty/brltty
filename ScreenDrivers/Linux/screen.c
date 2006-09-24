@@ -239,37 +239,6 @@ vtPath (const char *base, unsigned char vt) {
   return strdupWrapper(base);
 }
 
-static int
-openDevice (const char *path, const char *description, int flags, int major, int minor) {
-  int file;
-  LogPrint(LOG_DEBUG, "opening %s device: %s", description, path);
-  if ((file = open(path, flags)) == -1) {
-    int create = errno == ENOENT;
-    LogPrint(create? LOG_WARNING: LOG_ERR, 
-             "cannot open %s device: %s: %s",
-             description, path, strerror(errno));
-    if (create) {
-      mode_t mode = S_IFCHR | S_IRUSR | S_IWUSR;
-      LogPrint(LOG_NOTICE, "creating %s device: %s mode=%06o major=%d minor=%d",
-               description, path, mode, major, minor);
-      if (mknod(path, mode, makedev(major, minor)) == -1) {
-        LogPrint(LOG_ERR, "cannot create %s device: %s: %s",
-                 description, path, strerror(errno));
-      } else if ((file = open(path, flags)) == -1) {
-        LogPrint(LOG_ERR, "cannot open %s device: %s: %s",
-                 description, path, strerror(errno));
-        if (unlink(path) == -1)
-          LogPrint(LOG_ERR, "cannot remove %s device: %s: %s",
-                   description, path, strerror(errno));
-        else
-          LogPrint(LOG_NOTICE, "removed %s device: %s",
-                   description, path);
-      }
-    }
-  }
-  return file;
-}
-
 static char *consolePath = NULL;
 static int consoleDescriptor;
 
@@ -293,7 +262,7 @@ static int
 openConsole (unsigned char vt) {
   char *path = vtPath(consolePath, vt);
   if (path) {
-    int console = openDevice(path, "console", O_RDWR|O_NOCTTY, 4, vt);
+    int console = openCharacterDevice(path, "console", O_RDWR|O_NOCTTY, 4, vt);
     if (console != -1) {
       closeConsole();
       consoleDescriptor = console;
@@ -330,7 +299,7 @@ static int
 openScreen (unsigned char vt) {
   char *path = vtPath(screenPath, vt);
   if (path) {
-    int screen = openDevice(path, "screen", O_RDWR, 7, 0X80|vt);
+    int screen = openCharacterDevice(path, "screen", O_RDWR, 7, 0X80|vt);
     if (screen != -1) {
       LogPrint(LOG_DEBUG, "screen opened: %s: fd=%d", path, screen);
       if (openConsole(vt)) {
@@ -869,64 +838,6 @@ static const unsigned char *at2Keys;
 static int at2Pressed;
 #endif /* HAVE_LINUX_INPUT_H */
 
-#ifdef HAVE_LINUX_UINPUT_H
-#include <linux/uinput.h>
-
-static int uinputDevice = -1;
-
-static int
-openUinputDevice (void) {
-  if (uinputDevice != -1) return 1;
-
-  {
-    static int installed = 0;
-    installLinuxKernelModule("uinput", &installed);
-  }
-
-  if ((uinputDevice = openDevice("/dev/uinput", "uinput", O_WRONLY, 10, 223)) != -1) {
-    struct uinput_user_dev device;
-    
-    memset(&device, 0, sizeof(device));
-    strcpy(device.name, "brltty");
-    if (write(uinputDevice, &device, sizeof(device)) != -1) {
-      ioctl(uinputDevice, UI_SET_EVBIT, EV_KEY);
-      ioctl(uinputDevice, UI_SET_EVBIT, EV_REP);
-      {
-        int key;
-        for (key=KEY_RESERVED; key<KEY_MAX; key++) {
-          ioctl(uinputDevice, UI_SET_KEYBIT, key);
-        }
-      }
-
-      if (ioctl(uinputDevice, UI_DEV_CREATE) != -1) {
-        return 1;
-      } else {
-        LogError("ioctl UI_DEV_CREATE");
-      }
-    } else {
-      LogError("uinput_user_dev write");
-    }
-
-    close(uinputDevice);
-    uinputDevice = -1;
-  }
-
-  LogPrint(LOG_WARNING, "uinput device not opened");
-  return 0;
-}
-
-static int
-writeUinputKey (int code, int value) {
-  struct input_event event;
-  event.type = EV_KEY;
-  event.code = code;
-  event.value = value;
-  if (write(uinputDevice, &event, sizeof(event)) != -1) return 1;
-  LogError("uinput write");
-  return 0;
-}
-#endif /* HAVE_LINUX_UINPUT_H */
-
 static int
 setup_LinuxScreen (void) {
   if (setTranslationTable(1)) {
@@ -1242,24 +1153,20 @@ insertUinputKey (ScreenKey key, int modShift, int modControl, int modMeta) {
   }
 
   if (code != KEY_RESERVED) {
-#ifdef HAVE_LINUX_UINPUT_H
-    if (openUinputDevice()) {
-#define SEND_KEY(__code, __value) { if (!writeUinputKey(__code, __value)) return 0; }
-      if (modControl) SEND_KEY(KEY_LEFTCTRL, 1);
-      if (modMeta) SEND_KEY(KEY_LEFTALT, 1);
-      if (modShift) SEND_KEY(KEY_LEFTSHIFT, 1);
+#define KEY(__code, __value) { if (!writeKeyEvent(__code, __value)) return 0; }
+    if (modControl) KEY(KEY_LEFTCTRL, 1);
+    if (modMeta) KEY(KEY_LEFTALT, 1);
+    if (modShift) KEY(KEY_LEFTSHIFT, 1);
 
-      SEND_KEY(code, 1);
-      SEND_KEY(code, 0);
+    KEY(code, 1);
+    KEY(code, 0);
 
-      if (modShift) SEND_KEY(KEY_LEFTSHIFT, 0);
-      if (modMeta) SEND_KEY(KEY_LEFTALT, 0);
-      if (modControl) SEND_KEY(KEY_LEFTCTRL, 0);
-#undef SEND_KEY
+    if (modShift) KEY(KEY_LEFTSHIFT, 0);
+    if (modMeta) KEY(KEY_LEFTALT, 0);
+    if (modControl) KEY(KEY_LEFTCTRL, 0);
+#undef KEY
 
-      return 1;
-    }
-#endif /* HAVE_LINUX_UINPUT_H */
+    return 1;
   }
 #endif /* HAVE_LINUX_INPUT_H */
 
@@ -1651,10 +1558,6 @@ currentvt_LinuxScreen (void) {
   return description.number;
 }
 
-#ifdef HAVE_LINUX_INPUT_H
-#include <linux/input.h>
-#endif /* HAVE_LINUX_INPUT_H */
-
 static int
 execute_LinuxScreen (int command) {
   int blk = command & BRL_MSK_BLK;
@@ -1669,18 +1572,12 @@ execute_LinuxScreen (int command) {
         at2Keys = at2KeysE0;
       } else {
         unsigned char key = at2Keys[arg];
-        int pressed UNUSED = at2Pressed;
+        int pressed = at2Pressed;
 
         at2Keys = at2KeysOriginal;
         at2Pressed = 1;
 
-        if (key) {
-#ifdef HAVE_LINUX_UINPUT_H
-          if (openUinputDevice()) {
-            return writeUinputKey(key, pressed);
-          }
-#endif /* HAVE_LINUX_UINPUT_H */
-        }
+        if (key) return writeKeyEvent(key, pressed);
       }
 #endif /* HAVE_LINUX_INPUT_H */
       break;
