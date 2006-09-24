@@ -92,7 +92,7 @@ getBootParameters (const char *name) {
 static void
 enableBeeps (void) {
   static int installed = 0;
-  installLinuxKernelModule("pcspkr", &installed);
+  installKernelModule("pcspkr", &installed);
 }
 
 int
@@ -167,7 +167,7 @@ endBeep (void) {
 #include "sys_ports_glibc.h"
 
 int
-installLinuxKernelModule (const char *name, int *installed) {
+installKernelModule (const char *name, int *installed) {
   if (!installed || !*installed) {
     const char *command = "modprobe";
     char buffer[0X100];
@@ -208,34 +208,40 @@ installLinuxKernelModule (const char *name, int *installed) {
 }
 
 int
-openCharacterDevice (const char *path, const char *description, int flags, int major, int minor) {
-  int file;
-  LogPrint(LOG_DEBUG, "opening %s device: %s", description, path);
-  if ((file = open(path, flags)) == -1) {
+openCharacterDevice (const char *path, int flags, int major, int minor) {
+  int descriptor;
+
+  LogPrint(LOG_DEBUG, "opening device: %s", path);
+  if ((descriptor = open(path, flags)) == -1) {
     int create = errno == ENOENT;
+
     LogPrint(create? LOG_WARNING: LOG_ERR, 
-             "cannot open %s device: %s: %s",
-             description, path, strerror(errno));
+             "cannot open device: %s: %s",
+             path, strerror(errno));
+
     if (create) {
       mode_t mode = S_IFCHR | S_IRUSR | S_IWUSR;
-      LogPrint(LOG_NOTICE, "creating %s device: %s mode=%06o major=%d minor=%d",
-               description, path, mode, major, minor);
+
+      LogPrint(LOG_NOTICE, "creating device: %s mode=%06o major=%d minor=%d",
+               path, mode, major, minor);
       if (mknod(path, mode, makedev(major, minor)) == -1) {
-        LogPrint(LOG_ERR, "cannot create %s device: %s: %s",
-                 description, path, strerror(errno));
-      } else if ((file = open(path, flags)) == -1) {
-        LogPrint(LOG_ERR, "cannot open %s device: %s: %s",
-                 description, path, strerror(errno));
-        if (unlink(path) == -1)
-          LogPrint(LOG_ERR, "cannot remove %s device: %s: %s",
-                   description, path, strerror(errno));
-        else
-          LogPrint(LOG_NOTICE, "removed %s device: %s",
-                   description, path);
+        LogPrint(LOG_ERR, "cannot create device: %s: %s",
+                 path, strerror(errno));
+      } else if ((descriptor = open(path, flags)) == -1) {
+        LogPrint(LOG_ERR, "cannot open device: %s: %s",
+                 path, strerror(errno));
+
+        if (unlink(path) == -1) {
+          LogPrint(LOG_ERR, "cannot remove device: %s: %s",
+                   path, strerror(errno));
+        } else {
+          LogPrint(LOG_NOTICE, "device removed: %s", path);
+        }
       }
     }
   }
-  return file;
+
+  return descriptor;
 }
 
 #ifdef HAVE_LINUX_INPUT_H
@@ -256,10 +262,10 @@ getUinputDevice (void) {
 
     {
       static int installed = 0;
-      installLinuxKernelModule("uinput", &installed);
+      installKernelModule("uinput", &installed);
     }
 
-    if ((device = openCharacterDevice("/dev/uinput", "uinput", O_WRONLY, 10, 223)) != -1) {
+    if ((device = openCharacterDevice("/dev/uinput", O_WRONLY, 10, 223)) != -1) {
       struct uinput_user_dev description;
       
       memset(&description, 0, sizeof(description));

@@ -262,7 +262,7 @@ static int
 openConsole (unsigned char vt) {
   char *path = vtPath(consolePath, vt);
   if (path) {
-    int console = openCharacterDevice(path, "console", O_RDWR|O_NOCTTY, 4, vt);
+    int console = openCharacterDevice(path, O_RDWR|O_NOCTTY, 4, vt);
     if (console != -1) {
       closeConsole();
       consoleDescriptor = console;
@@ -299,7 +299,7 @@ static int
 openScreen (unsigned char vt) {
   char *path = vtPath(screenPath, vt);
   if (path) {
-    int screen = openCharacterDevice(path, "screen", O_RDWR, 7, 0X80|vt);
+    int screen = openCharacterDevice(path, O_RDWR, 7, 0X80|vt);
     if (screen != -1) {
       LogPrint(LOG_DEBUG, "screen opened: %s: fd=%d", path, screen);
       if (openConsole(vt)) {

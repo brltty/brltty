@@ -22,8 +22,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
-extern int installLinuxKernelModule (const char *name, int *installed);
-extern int openCharacterDevice (const char *path, const char *description, int flags, int major, int minor);
+extern int installKernelModule (const char *name, int *installed);
+extern int openCharacterDevice (const char *path, int flags, int major, int minor);
 extern int getUinputDevice (void);
 extern int writeKeyEvent (int key, int press);
 
