@@ -75,6 +75,7 @@
 #ifdef linux
 #include <linux/major.h>
 #include <linux/tty.h>
+#include <linux/vt.h>
 #define MAXIMUM_VIRTUAL_CONSOLE MAX_NR_CONSOLES
 #endif /* linux */
 
@@ -1459,7 +1460,7 @@ int brlapi_strexception(char *buf, size_t n, int err, brl_type_t type, const voi
   char *p = hexString;
   brlapi_error_t error = { .brlerrno = err };
   for (i=0; i<nbChars; i++)
-    p += sprintf(p, "%02x ", ((char *) packet)[i]);
+    p += sprintf(p, "%02x ", ((unsigned char *) packet)[i]);
   p--; /* Don't keep last space */
   *p = '\0';
   return snprintf(buf, n, "%s on %s request of size %d (%s)",

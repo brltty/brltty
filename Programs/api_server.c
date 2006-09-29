@@ -608,7 +608,7 @@ static void handleResize(BrailleDisplay *brl)
 /****************************************************************************/
 
 /* Function : createConnection */
-/* Creates a connectiN */
+/* Creates a connection */
 static Connection *createConnection(FileDescriptor fd, time_t currentTime)
 {
   pthread_mutexattr_t mattr;
@@ -1051,10 +1051,13 @@ static int handleWrite(Connection *c, brl_type_t type, unsigned char *packet, si
       wchar_t textBuf[rsiz];
       char *in = (char *) text, *out = (char *) textBuf;
       size_t sin = textLen, sout = sizeof(textBuf), res;
+      LogPrint(LOG_DEBUG,"charset %s", charset);
       CHECKEXC((conv = iconv_open("WCHAR_T",charset)) != (iconv_t)(-1), BRLERR_INVALID_PACKET);
       res = iconv(conv,&in,&sin,&out,&sout);
       iconv_close(conv);
-      CHECKEXC(res != (size_t) -1 && !sin && !sout, BRLERR_INVALID_PACKET);
+      CHECKEXC(res != (size_t) -1, BRLERR_INVALID_PACKET);
+      CHECKEXC(!sin, BRLERR_INVALID_PACKET);
+      CHECKEXC(!sout, BRLERR_INVALID_PACKET);
       if (coreCharset) unlockCharset();
       pthread_mutex_lock(&c->brlMutex);
       memcpy(c->brailleWindow.text+rbeg-1,textBuf,rsiz*sizeof(wchar_t));
