@@ -104,7 +104,7 @@ static const InputMode inputMode_f1_f1 = {
   BIND_COMMAND(up, PREFLOAD),
   BIND_COMMAND(down, PREFMENU),
   BIND_COMMAND(center, PREFSAVE),
-  .name = "f1-f1"
+  .name = "F1-F1"
 };
 
 static const InputMode inputMode_f1_f2 = {
@@ -115,15 +115,15 @@ static const InputMode inputMode_f1_f2 = {
   BIND_COMMAND(up, SKPBLNKWINS),
   BIND_COMMAND(down, SKPIDLNS),
   BIND_COMMAND(center, SIXDOTS),
-  .name = "f1-f2"
+  .name = "F1-F2"
 };
 
 static const InputMode inputMode_f1_left = {
-  .name = "f1-left"
+  .name = "F1-Left"
 };
 
 static const InputMode inputMode_f1_right = {
-  .name = "f1-right"
+  .name = "F1-Right"
 };
 
 static const InputMode inputMode_f1_up = {
@@ -134,7 +134,7 @@ static const InputMode inputMode_f1_up = {
   BIND_COMMAND(up, PRPGRPH),
   BIND_COMMAND(down, NXPGRPH),
   BIND_COMMAND(center, CSRJMP_VERT),
-  .name = "f1-up"
+  .name = "F1-Up"
 };
 
 static const InputMode inputMode_f1_down = {
@@ -145,11 +145,11 @@ static const InputMode inputMode_f1_down = {
   BIND_COMMAND(up, PRDIFLN),
   BIND_COMMAND(down, NXDIFLN),
   BIND_COMMAND(center, BACK),
-  .name = "f1-down"
+  .name = "F1-Down"
 };
 
 static const InputMode inputMode_f1_center = {
-  .name = "f1-center"
+  .name = "F1-Center"
 };
 
 static const InputMode inputMode_f1 = {
@@ -160,7 +160,7 @@ static const InputMode inputMode_f1 = {
   BIND_SUBMODE(up, f1_up),
   BIND_SUBMODE(down, f1_down),
   BIND_SUBMODE(center, f1_center),
-  .name = "f1"
+  .name = "F1"
 };
 
 static const InputMode inputMode_f2 = {
@@ -171,7 +171,7 @@ static const InputMode inputMode_f2 = {
   BIND_COMMAND(up, TOP),
   BIND_COMMAND(down, BOT),
   BIND_COMMAND(center, CSRTRK),
-  .name = "f2"
+  .name = "F2"
 };
 
 static const InputMode inputMode_basic = {
@@ -182,7 +182,7 @@ static const InputMode inputMode_basic = {
   BIND_COMMAND(up, LNUP),
   BIND_COMMAND(down, LNDN),
   BIND_COMMAND(center, HOME),
-  .name = "basic"
+  .name = "Basic"
 };
 
 static const InputMode *inputMode;
@@ -364,12 +364,15 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
     case IBT_function:
       return binding->value.function(brl);
 
-    case IBT_submode:
+    case IBT_submode: {
+      char title[20 + 1];
       mode = binding->value.submode;
-      message(mode->name, MSG_NODELAY|MSG_SILENT);
+      snprintf(title, sizeof(title), "%s Mode", mode->name);
+      message(title, MSG_NODELAY|MSG_SILENT);
       inputMode = mode;
       gettimeofday(&inputTime, NULL);
       break;
+    }
 
     default:
       LogPrint(LOG_WARNING, "unhandled input binding type: %02X", binding->type);

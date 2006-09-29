@@ -1,67 +1,47 @@
----BRLTTY MiniBraille Key Bindings help---
+MiniBraille Help
 
-This help: F1+F1+F1
+Keys (from left to right): F1 F2 Left Up Center Down Right
 
-Used keys from left:
-  F1 F2 Left Up C Down Right
+Basic Mode:
+F1: initiate two-level mode selection (next key selects mode)
+F2: select F2 mode
+Left/Right: go left/right one window
+Up/Down: go up/down one line
+Center: go to cursor
 
-Modes:
-  Basic (activated after start)
-  F1 mode (use F1 from basic mode)
-  F2 mode (use F2 from basic mode)
-  Management mode (F1+F1)
-  Clock mode (F1+F1+Right)
+F2 Mode:
+F1/F2: go to beginning of top/bottom line
+Left/Right: go to beginning/end of current line
+Up/Down: go to top/bottom line
+Center: toggle cursor tracking
 
-Movement: (from basic mode)
-  Move cursor 20 chars left: Left
-  Move cursor 20 chars right: Right
-  Move cursor line up: Up
-  Move cursor line down: Down
-  Begin of line: F1+Left
-  End of line: F1+Right
-  Top of screen: F1+Up
-  Bottom of screen: F1+Down
+F1-F1 Mode;
+F1: toggle help screen
+F2: toggle learn mode
+Left: toggle status line
+Up: restore preferences from disk
+Center: save preferences to disk
+Down: enter/leave preferences menu
+Right: show date and time
 
-Basic mode:
-F1: goto F1 mode
-F2: goto F2 mode
-Left: 20 chars left
-Up: line up
-C: goto cursor
-Down: line down
-Right: 20 chars right
+F1-F2 Mode:
+F1: toggle frozen screen
+F2: toggle text/attributes display
+Left: toggle attribute underlining
+Up: toggle skip blank windows
+Center: toggle six-dot braille
+Down: toggle skip identical lines
+Right: toggle cursor visibility
 
-F1 mode:
-F1: goto management mode
-F2: toggle cursor visibility
-Left: begin of line
-Up: top of screen (leftmost)
-C: toggle blinking of capitals
-Down: bottom of screen (leftmost)
-Right: end of line
+F1-Up Mode:
+F1/F2: search screen backward/forward for cut text
+Left/Right: go to previous/next line wit different highlighting
+Up/Down: go to previous/next paragraph (blank line separation)
+Center: route cursor to current line
 
-F2 mode:
-F1: toggle size of cursor
-F2: toggle skipping of identical line
-Left: show info
-Up: freeze screen
-C: track cursor
-Down: toggle attribute/text
-Right: toggle 6/8 dots display
-
-Management mode:
-F1: help
-F2: show info
-Left: restart driver
-Up: enter preferences menu
-C: reset to preferences
-Down: save preferences
-Right: goto CLOCK mode
-
-Clock mode:
-The display shows current date and time in this mode.
-Use any key to leave this mode.
-
-End of help.
-
+F1-Down Mode:
+F1/F2: go to previous/next prompt (same prompt as current line)
+Left/Right: go to previous/next non-blank window
+Up/Down: go to previous/next line with different content
+Center: undo unexpected cursor tracking motion
 
