@@ -726,16 +726,28 @@ static char *
 usbMakeRoot (void) {
   const char *type = "usbfs";
   const char *name = type;
-  char *directory = makePath(DATA_DIRECTORY, type);
+  char *directory = NULL;
+
+  {
+    char *workingDirectory = getWorkingDirectory();
+    if (workingDirectory) {
+      directory = makePath(workingDirectory, type);
+      free(workingDirectory);
+    }
+  }
+
   if (directory) {
     if (makeDirectory(directory)) {
       if (usbTestPath(directory)) return directory;
-      LogPrint(LOG_NOTICE, "Mounting USBFS: %s", directory);
+
+      LogPrint(LOG_NOTICE, "mounting USBFS: %s", directory);
       if (mount(name, directory, type, 0, NULL) != -1) return directory;
       LogPrint(LOG_ERR, "USBFS mount error: %s: %s", directory, strerror(errno));
     }
+
     free(directory);
   }
+
   return NULL;
 }
 
