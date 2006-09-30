@@ -7,7 +7,7 @@ F1: initiate two-level mode selection (next key selects mode)
 F2: select F2 mode
 Left/Right: go left/right one window
 Up/Down: go up/down one line
-Center: go to cursor
+Center: go to cursor or undo unexpected cursor tracking motion
 
 F2 Mode:
 F1/F2: go to beginning of top/bottom line
@@ -43,5 +43,18 @@ F1-Down Mode:
 F1/F2: go to previous/next prompt (same prompt as current line)
 Left/Right: go to previous/next non-blank window
 Up/Down: go to previous/next line with different content
-Center: undo unexpected cursor tracking motion
+Center: paste cut text at cursor
 
+F1-Center (Char) Mode
+F1: select Char-F1 mode
+Left/Right: move character selection cursor left/right one position
+Up/Down: go up/down one line
+
+Char-F1 Mode
+F1: position left end of window at selected character
+F2: describe selected character
+Left: append to existing cut buffer from selected character
+Up: start new cut buffer at selected character
+Center: route cursor to selected character
+Down: rectangular cut to selected character
+Right: linear cut to selected character

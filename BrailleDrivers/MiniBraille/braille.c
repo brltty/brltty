@@ -56,138 +56,6 @@ static int serialCharactersPerSecond;
 
 #define AFTER_CMD_DELAY 30
 
-static int
-inputFunction_showTime (BrailleDisplay *brl) {
-  time_t clock = time(NULL);
-  const struct tm *local = localtime(&clock);
-  char text[200];
-  strftime(text, sizeof(text), "%Y-%m-%d %H:%M:%S", local);
-  message(text, 0);
-  return BRL_CMD_NOOP;
-}
-
-typedef struct InputModeStruct InputMode;
-
-typedef enum {
-  IBT_unbound = 0, /* automatically set if not explicitly initialized */
-  IBT_command,
-  IBT_function,
-  IBT_submode
-} InputBindingType;
-
-typedef union {
-  int command;
-  int (*function) (BrailleDisplay *brl);
-  const InputMode *submode;
-} InputBindingValue;
-
-typedef struct {
-  InputBindingType type;
-  InputBindingValue value;
-} InputBinding;
-
-struct InputModeStruct {
-  const char *name;
-  InputBinding f1, f2, left, up, center, down, right;
-};
-
-#define BIND(k,t,v) .k = {.type = IBT_##t, .value.t = (v)}
-#define BIND_COMMAND(k,c) BIND(k, command, BRL_CMD_##c)
-#define BIND_FUNCTION(k,f) BIND(k, function, inputFunction_##f)
-#define BIND_SUBMODE(k,m) BIND(k, submode, &inputMode_##m)
-
-static const InputMode inputMode_f1_f1 = {
-  BIND_COMMAND(f1, HELP),
-  BIND_COMMAND(f2, LEARN),
-  BIND_COMMAND(left, INFO),
-  BIND_FUNCTION(right, showTime),
-  BIND_COMMAND(up, PREFLOAD),
-  BIND_COMMAND(down, PREFMENU),
-  BIND_COMMAND(center, PREFSAVE),
-  .name = "F1-F1"
-};
-
-static const InputMode inputMode_f1_f2 = {
-  BIND_COMMAND(f1, FREEZE),
-  BIND_COMMAND(f2, DISPMD),
-  BIND_COMMAND(left, ATTRVIS),
-  BIND_COMMAND(right, CSRVIS),
-  BIND_COMMAND(up, SKPBLNKWINS),
-  BIND_COMMAND(down, SKPIDLNS),
-  BIND_COMMAND(center, SIXDOTS),
-  .name = "F1-F2"
-};
-
-static const InputMode inputMode_f1_left = {
-  .name = "F1-Left"
-};
-
-static const InputMode inputMode_f1_right = {
-  .name = "F1-Right"
-};
-
-static const InputMode inputMode_f1_up = {
-  BIND_COMMAND(f1, PRSEARCH),
-  BIND_COMMAND(f2, NXSEARCH),
-  BIND_COMMAND(left, ATTRUP),
-  BIND_COMMAND(right, ATTRDN),
-  BIND_COMMAND(up, PRPGRPH),
-  BIND_COMMAND(down, NXPGRPH),
-  BIND_COMMAND(center, CSRJMP_VERT),
-  .name = "F1-Up"
-};
-
-static const InputMode inputMode_f1_down = {
-  BIND_COMMAND(f1, PRPROMPT),
-  BIND_COMMAND(f2, NXPROMPT),
-  BIND_COMMAND(left, FWINLTSKIP),
-  BIND_COMMAND(right, FWINRTSKIP),
-  BIND_COMMAND(up, PRDIFLN),
-  BIND_COMMAND(down, NXDIFLN),
-  BIND_COMMAND(center, BACK),
-  .name = "F1-Down"
-};
-
-static const InputMode inputMode_f1_center = {
-  .name = "F1-Center"
-};
-
-static const InputMode inputMode_f1 = {
-  BIND_SUBMODE(f1, f1_f1),
-  BIND_SUBMODE(f2, f1_f2),
-  BIND_SUBMODE(left, f1_left),
-  BIND_SUBMODE(right, f1_right),
-  BIND_SUBMODE(up, f1_up),
-  BIND_SUBMODE(down, f1_down),
-  BIND_SUBMODE(center, f1_center),
-  .name = "F1"
-};
-
-static const InputMode inputMode_f2 = {
-  BIND_COMMAND(f1, TOP_LEFT),
-  BIND_COMMAND(f2, BOT_LEFT),
-  BIND_COMMAND(left, LNBEG),
-  BIND_COMMAND(right, LNEND),
-  BIND_COMMAND(up, TOP),
-  BIND_COMMAND(down, BOT),
-  BIND_COMMAND(center, CSRTRK),
-  .name = "F2"
-};
-
-static const InputMode inputMode_basic = {
-  BIND_SUBMODE(f1, f1),
-  BIND_SUBMODE(f2, f2),
-  BIND_COMMAND(left, FWINLT),
-  BIND_COMMAND(right, FWINRT),
-  BIND_COMMAND(up, LNUP),
-  BIND_COMMAND(down, LNDN),
-  BIND_COMMAND(center, HOME),
-  .name = "Basic"
-};
-
-static const InputMode *inputMode;
-static struct timeval inputTime;
-
 static TranslationTable outputTable;
 static unsigned char textCells[20];
 static unsigned char statusCells[2];
@@ -249,6 +117,201 @@ beep (BrailleDisplay *brl) {
 }
 
 static int
+inputFunction_showTime (BrailleDisplay *brl) {
+  time_t clock = time(NULL);
+  const struct tm *local = localtime(&clock);
+  char text[sizeof(textCells) + 1];
+  strftime(text, sizeof(text), "%Y-%m-%d %H:%M:%S", local);
+  message(text, 0);
+  return BRL_CMD_NOOP;
+}
+
+static unsigned char cursorDots;
+static unsigned char cursorOffset;
+
+static void
+putCursor (BrailleDisplay *brl) {
+  brl->buffer[cursorOffset] = cursorDots;
+}
+
+static int
+inputFunction_incrementCursor (BrailleDisplay *brl) {
+  if (++cursorOffset < sizeof(textCells)) return BRL_CMD_NOOP;
+
+  cursorOffset = 0;
+  return BRL_CMD_FWINRT;
+}
+
+static int
+inputFunction_decrementCursor (BrailleDisplay *brl) {
+  if (cursorOffset) {
+    --cursorOffset;
+    return BRL_CMD_NOOP;
+  }
+
+  cursorOffset = sizeof(textCells) - 1;
+  return BRL_CMD_FWINLT;
+}
+
+typedef struct InputModeStruct InputMode;
+
+typedef enum {
+  IBT_unbound = 0, /* automatically set if not explicitly initialized */
+  IBT_command,
+  IBT_block,
+  IBT_function,
+  IBT_submode
+} InputBindingType;
+
+typedef union {
+  int command;
+  int block;
+  int (*function) (BrailleDisplay *brl);
+  const InputMode *submode;
+} InputBindingValue;
+
+typedef struct {
+  InputBindingType type;
+  InputBindingValue value;
+} InputBinding;
+
+struct InputModeStruct {
+  const char *name;
+  InputBinding keyF1, keyF2, keyLeft, keyUp, keyCenter, keyDown, keyRight;
+  void (*modifyWindow) (BrailleDisplay *brl);
+};
+
+#define BIND(k,t,v) .key##k = {.type = IBT_##t, .value.t = (v)}
+#define BIND_COMMAND(k,c) BIND(k, command, BRL_CMD_##c)
+#define BIND_BLOCK(k,b) BIND(k, block, BRL_BLK_##b)
+#define BIND_FUNCTION(k,f) BIND(k, function, inputFunction_##f)
+#define BIND_SUBMODE(k,m) BIND(k, submode, &inputMode_##m)
+
+static const InputMode inputMode_char_f1 = {
+  BIND_BLOCK(F1, SETLEFT),
+  BIND_BLOCK(F2, DESCCHAR),
+  BIND_BLOCK(Left, CUTAPPEND),
+  BIND_BLOCK(Up, CUTBEGIN),
+  BIND_BLOCK(Center, ROUTE),
+  BIND_BLOCK(Down, CUTRECT),
+  BIND_BLOCK(Right, CUTLINE),
+  .name = "Char-F1"
+};
+
+static const InputMode inputMode_f1_f1 = {
+  BIND_COMMAND(F1, HELP),
+  BIND_COMMAND(F2, LEARN),
+  BIND_COMMAND(Left, INFO),
+  BIND_FUNCTION(Right, showTime),
+  BIND_COMMAND(Up, PREFLOAD),
+  BIND_COMMAND(Down, PREFMENU),
+  BIND_COMMAND(Center, PREFSAVE),
+  .name = "F1-F1"
+};
+
+static const InputMode inputMode_f1_f2 = {
+  BIND_COMMAND(F1, FREEZE),
+  BIND_COMMAND(F2, DISPMD),
+  BIND_COMMAND(Left, ATTRVIS),
+  BIND_COMMAND(Right, CSRVIS),
+  BIND_COMMAND(Up, SKPBLNKWINS),
+  BIND_COMMAND(Down, SKPIDLNS),
+  BIND_COMMAND(Center, SIXDOTS),
+  .name = "F1-F2"
+};
+
+static const InputMode inputMode_f1_left = {
+  .name = "F1-Left"
+};
+
+static const InputMode inputMode_f1_right = {
+  .name = "F1-Right"
+};
+
+static const InputMode inputMode_f1_up = {
+  BIND_COMMAND(F1, PRSEARCH),
+  BIND_COMMAND(F2, NXSEARCH),
+  BIND_COMMAND(Left, ATTRUP),
+  BIND_COMMAND(Right, ATTRDN),
+  BIND_COMMAND(Up, PRPGRPH),
+  BIND_COMMAND(Down, NXPGRPH),
+  BIND_COMMAND(Center, CSRJMP_VERT),
+  .name = "F1-Up"
+};
+
+static const InputMode inputMode_f1_down = {
+  BIND_COMMAND(F1, PRPROMPT),
+  BIND_COMMAND(F2, NXPROMPT),
+  BIND_COMMAND(Left, FWINLTSKIP),
+  BIND_COMMAND(Right, FWINRTSKIP),
+  BIND_COMMAND(Up, PRDIFLN),
+  BIND_COMMAND(Down, NXDIFLN),
+  BIND_COMMAND(Center, PASTE),
+  .name = "F1-Down"
+};
+
+static const InputMode inputMode_f1_center = {
+  BIND_SUBMODE(F1, char_f1),
+  BIND_FUNCTION(Left, decrementCursor),
+  BIND_FUNCTION(Right, incrementCursor),
+  BIND_COMMAND(Up, LNUP),
+  BIND_COMMAND(Down, LNDN),
+  .modifyWindow = putCursor
+};
+
+static const InputMode inputMode_f1 = {
+  BIND_SUBMODE(F1, f1_f1),
+  BIND_SUBMODE(F2, f1_f2),
+  BIND_SUBMODE(Left, f1_left),
+  BIND_SUBMODE(Right, f1_right),
+  BIND_SUBMODE(Up, f1_up),
+  BIND_SUBMODE(Down, f1_down),
+  BIND_SUBMODE(Center, f1_center),
+  .name = "F1"
+};
+
+static const InputMode inputMode_f2 = {
+  BIND_COMMAND(F1, TOP_LEFT),
+  BIND_COMMAND(F2, BOT_LEFT),
+  BIND_COMMAND(Left, LNBEG),
+  BIND_COMMAND(Right, LNEND),
+  BIND_COMMAND(Up, TOP),
+  BIND_COMMAND(Down, BOT),
+  BIND_COMMAND(Center, CSRTRK),
+  .name = "F2"
+};
+
+static const InputMode inputMode_basic = {
+  BIND_SUBMODE(F1, f1),
+  BIND_SUBMODE(F2, f2),
+  BIND_COMMAND(Left, FWINLT),
+  BIND_COMMAND(Right, FWINRT),
+  BIND_COMMAND(Up, LNUP),
+  BIND_COMMAND(Down, LNDN),
+  BIND_COMMAND(Center, RETURN)
+};
+
+static const InputMode *inputMode;
+static struct timeval inputTime;
+
+static void
+setInputMode (const InputMode *mode) {
+  if (mode->name) {
+    char title[sizeof(textCells) + 1];
+    snprintf(title, sizeof(title), "%s Mode", mode->name);
+    message(title, MSG_NODELAY|MSG_SILENT);
+  }
+
+  inputMode = mode;
+  gettimeofday(&inputTime, NULL);
+}
+
+static void
+resetInputMode (void) {
+  setInputMode(&inputMode_basic);
+}
+
+static int
 brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
   {
     static const DotsTable dots = {0X01, 0X02, 0X04, 0X80, 0X40, 0X20, 0X08, 0X10};
@@ -273,9 +336,12 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
 
       clearCells(textCells,  sizeof(textCells));
       clearCells(statusCells,  sizeof(statusCells));
-      inputMode = &inputMode_basic;
+      resetInputMode();
 
-      brl->x = 20;
+      cursorDots = 0XFF;
+      cursorOffset = sizeof(textCells) / 2;
+
+      brl->x = sizeof(textCells);
       brl->y = 1;
 
       beep(brl);
@@ -297,8 +363,9 @@ brl_close (BrailleDisplay *brl) {
 
 static void
 brl_writeWindow (BrailleDisplay *brl) {
+  if (inputMode->modifyWindow) inputMode->modifyWindow(brl);
   updateCells(textCells, brl->buffer, sizeof(textCells));
-  if (refreshNeeded && (inputMode == &inputMode_basic)) {
+  if (refreshNeeded && !inputMode->name) {
     writeCells(brl);
     refreshNeeded = 0;
   }
@@ -319,11 +386,9 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
     int result = serialReadData(serialDevice, &byte, 1, 0, 0);
 
     if (result == 0) {
-      if (inputMode != &inputMode_basic) {
-        struct timeval now;
-        gettimeofday(&now, NULL);
-        if (millisecondsBetween(&inputTime, &now) > 3000) inputMode = &inputMode_basic;
-      }
+      if (inputMode->name)
+        if (millisecondsSince(&inputTime) > 3000)
+          resetInputMode();
 
       return EOF;
     }
@@ -335,16 +400,16 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   }
 
   mode = inputMode;
-  inputMode = &inputMode_basic;
+  if (mode->name) resetInputMode();
 
   switch (byte) {
-    case KEY_F1:     binding = &mode->f1;     break;
-    case KEY_F2:     binding = &mode->f2;     break;
-    case KEY_LEFT:   binding = &mode->left;   break;
-    case KEY_RIGHT:  binding = &mode->right;  break;
-    case KEY_UP:     binding = &mode->up;     break;
-    case KEY_DOWN:   binding = &mode->down;   break;
-    case KEY_CENTER: binding = &mode->center; break;
+    case KEY_F1:     binding = &mode->keyF1;     break;
+    case KEY_F2:     binding = &mode->keyF2;     break;
+    case KEY_LEFT:   binding = &mode->keyLeft;   break;
+    case KEY_RIGHT:  binding = &mode->keyRight;  break;
+    case KEY_UP:     binding = &mode->keyUp;     break;
+    case KEY_DOWN:   binding = &mode->keyDown;   break;
+    case KEY_CENTER: binding = &mode->keyCenter; break;
 
     default:
       LogPrint(LOG_WARNING, "unhandled key: %02X (%s)", byte, mode->name);
@@ -361,16 +426,14 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
     case IBT_command:
       return binding->value.command;
 
+    case IBT_block:
+      return binding->value.block + cursorOffset;
+
     case IBT_function:
       return binding->value.function(brl);
 
     case IBT_submode: {
-      char title[20 + 1];
-      mode = binding->value.submode;
-      snprintf(title, sizeof(title), "%s Mode", mode->name);
-      message(title, MSG_NODELAY|MSG_SILENT);
-      inputMode = mode;
-      gettimeofday(&inputTime, NULL);
+      setInputMode(binding->value.submode);
       break;
     }
 
