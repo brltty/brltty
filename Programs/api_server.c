@@ -1680,7 +1680,8 @@ static FileDescriptor initializeLocalSocket(struct socketInfo *info)
   tmppath[lpath+lport+1]='_';
   tmppath[lpath+lport+2]=0;
   lockpath[lpath+lport+1]=0;
-  while ((lock = open(tmppath, O_WRONLY|O_CREAT|O_EXCL, 0644)) == -1) {
+  while ((lock = open(tmppath, O_WRONLY|O_CREAT|O_EXCL, 
+                      S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)) == -1) {
     if (errno == EROFS) {
       approximateDelay(1000);
       continue;
@@ -1691,7 +1692,7 @@ static FileDescriptor initializeLocalSocket(struct socketInfo *info)
     }
     if ((pid = readPid(tmppath)) && pid != getpid()
 	&& (kill(pid, 0) != -1 || errno != ESRCH)) {
-      LogPrint(LOG_ERR,"a BrlAPI server already listens on %s (file %s exists)",info->port, tmppath);
+      LogPrint(LOG_ERR,"a BrlAPI server is already listening on %s (file %s exists)",info->port, tmppath);
       goto outmode;
     }
     /* bogus file, myself or non-existent process, remove */
