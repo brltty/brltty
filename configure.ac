@@ -132,7 +132,7 @@ test "${prefix}" = "NONE" && prefix=""
 original_exec_prefix="${exec_prefix}"
 test "${exec_prefix}" = "NONE" && exec_prefix="${prefix}"
 BRLTTY_VAR_EXPAND([brltty_reference_directory], [${execute_root}${program_directory}])
-BRLTTY_ARG_DISABLE(
+BRLTTY_ARG_ENABLE(
    [relocatable-install],
    [installation using paths relative to the program directory])
 BRLTTY_DEFINE_DIRECTORY([DATA_DIRECTORY], [${execute_root}${data_directory}],
