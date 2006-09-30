@@ -1,71 +1,66 @@
-Shared memory is an other method for BRLTTY to get the content of the
-screen. For this methods you need to parts: 
+Introduction
+============
 
-1. BRLTTY needs to receive the information. Tis is done by scr_shm.cc.
-2. An other program needs to send the screen image. 
+Shared memory is another method for BRLTTY to get the content of the screen.
+For this method you need two components:
 
-Such modifications have been made to the screen package. The original
-purpose of screen was to run different "screens" on a single terminal. It
-also supports things like copy and paste etc. Scrren runs on lots of
-terminals, especialy in XTERM. This is important, because it runs under
-X-Windows. X-Windows is part of most unixes.
+*  Some other application needs to maintain the shared screen image. This can 
+   be done via the screen program when augmented by a BRLTTY-supplied patch.
+*  BRLTTY needs to be able to view the shared screen image. This is done via
+   its Screen screen driver.
 
-So - theoretically - by applying the modifications to the screen package and
-compiling brltty and screen, you should be able to use brltty on something
-else but linux.
+The original purpose of screen was to run different "screens" on a single
+terminal. It also supports features like copy-and-paste, a scrollback buffer,
+etc. Screen supports lots of terminal types, especially XTERM. This is
+important because it runs under X-Windows which is part of most unixes.
 
 
 Instructions
+============
 
-1. Set the screen driver in the Makefile to scr_shm (inted of scr_linux).
-   You can do this by just adding and removing comment signs (#)
+1) Build and install BRLTTY:
 
-2. Run 
+      ./configure
+      make
+      make install
+   
+   BRLTTY's Screen screen driver will be built by default. Be sure not to 
+   explicitly exclude it via, for example, a configure option like:
 
-   make all
+      --with-screen-drivers=-sc
 
-   to build brltty
+2) Get the source for screen from: 
 
-3. Get the screen sourcecode from 
+      ftp://ftp.uni-erlangen.de/pub/utilities/screen/screen-4.0.1.tar.gz
 
-   ftp://ftp.uni-erlangen.de/pub/utilities/screen/screen-4.0.1.tar.gz
+3) Unpack the source:
 
-   It's important, that you get THIS release (4.0.1), because the patch
-   doesn't fit on anything else without extra work.
+      tar xzf /path/to/screen-4.0.1.tar.gz
 
-4. Unpack the source 
+4) Change to the source tree:
 
-   tar zxfv screen-4.0.1.tar.gz
+      cd screen-4.0.1
 
-   and change to the source directory
+5) Apply the patch: 
 
-   cd screen-4.0.1
+      patch -p0 </path/to/brltty/Patches/screen-4.0.1.patch
 
-5. Apply the patch: 
+6) Build screen:
 
-   cat <brlttydir>/Patches/screen-4.0.1.patch | patch
+      ./configure
+      make
+      make install
 
-6. Build screen:
+7) Run screen, and then brltty (specifying its Screen screen driver): 
 
-   To build screen type:
+      screen
+      brltty -x sc
 
-   ./configure
-   make
-
-
-7. Now you can run screen and then brltty
-
-
-Notes:
-* Cursor routing and brltty's copy/paste don't work, because feeding
-  something into the keyboard buffer is not yet possible. Screen has it's own
-  keyboard feeding mechanism, but there's no interface yet.
-* the status messages of screen don't appear on the braille display.
-* I tried the patch on SuSE Linux 7.3, in an XTERM window in KDE. I didn't
-  have opportunity to test in on any other unix system.
-* The patch for screen-4.0.1 is based on that for version 3.7.2. The update
-  was necessary, because screen-3.7.2 doesn't compile any more with modern
-  c-libraries.
+   The only order dependency is that screen must be run first the first time in
+   order to get the shared memory segment created. Although brltty can be run
+   first from then on, the shared memory image will, of course, be stale until
+   screen is started.
 
 
-Contact: rudolf.weeber@gmx.de
+BRLTTY's screen patch was originally developed by Rudolf Weeber
+<rudolf.weeber@gmx.de>.
