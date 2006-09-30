@@ -83,6 +83,7 @@ static char *opt_dataDirectory;
 static char *opt_libraryDirectory;
 
 static char *opt_brailleDevice;
+int opt_releaseDevice;
 static char **brailleDevices;
 static const char *brailleDevice = NULL;
 static int brailleOpened;
@@ -206,6 +207,10 @@ BEGIN_OPTION_TABLE
   {"quiet", NULL, 'q', 0, 0,
    &opt_quiet, NULL,
    strtext("Suppress start-up messages."), NULL},
+
+  {"release-device", NULL, 'r', 0, OPT_Config | OPT_Environ,
+   &opt_releaseDevice, NULL,
+   strtext("Release braille device when screen is unreadable."), NULL},
 
 #ifdef ENABLE_SPEECH_SUPPORT
   {"speech-driver", strtext("driver"), 's', 0, OPT_Config | OPT_Environ,
@@ -1594,8 +1599,11 @@ restartBrailleDriver (void) {
 
 static void
 exitBrailleDriver (void) {
-  clearStatusCells(&brl);
-  message(gettext("BRLTTY terminated"), MSG_NODELAY|MSG_SILENT);
+  if (brailleOpened) {
+    clearStatusCells(&brl);
+    message(gettext("BRLTTY terminated"), MSG_NODELAY|MSG_SILENT);
+  }
+
   stopBrailleDriver();
 }
 

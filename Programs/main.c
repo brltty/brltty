@@ -1075,7 +1075,7 @@ main (int argc, char *argv[]) {
     closeTuneDevice(0);
     testRoutingStatus(ROUTE_DONE);
 
-    if (1) {
+    if (opt_releaseDevice) {
       if (scr.unreadable) {
         if (!suspended) {
           setStatusCells();
