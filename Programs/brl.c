@@ -110,12 +110,12 @@ identifyBrailleDrivers (int full) {
 
 void
 initializeBrailleDisplay (BrailleDisplay *brl) {
-   brl->x = brl->y = 0;
-   brl->helpPage = 0;
-   brl->buffer = NULL;
-   brl->writeDelay = 0;
-   brl->bufferResized = NULL;
-   brl->dataDirectory = NULL;
+  brl->x = brl->y = 0;
+  brl->helpPage = 0;
+  brl->buffer = NULL;
+  brl->writeDelay = 0;
+  brl->bufferResized = NULL;
+  brl->dataDirectory = NULL;
 }
 
 unsigned int
