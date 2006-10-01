@@ -27,7 +27,7 @@ Instructions
    BRLTTY's Screen screen driver will be built by default. Be sure not to 
    explicitly exclude it via, for example, a configure option like:
 
-      --with-screen-drivers=-sc
+      --with-screen-driver=-sc
 
 2) Get the source for screen from: 
 
