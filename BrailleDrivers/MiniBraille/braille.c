@@ -54,7 +54,7 @@ static int serialCharactersPerSecond;
 #define KEY_DOWN   0x20
 #define KEY_RIGHT  0x40
 
-#define AFTER_CMD_DELAY 30
+#define POST_COMMAND_DELAY 30
 
 static TranslationTable outputTable;
 static unsigned char textCells[20];
@@ -71,7 +71,7 @@ writeData (BrailleDisplay *brl, const unsigned char *bytes, int count) {
   }
 
   drainBrailleOutput(brl, 0);
-  brl->writeDelay += (result * 1000 / serialCharactersPerSecond) + AFTER_CMD_DELAY;
+  brl->writeDelay += (result * 1000 / serialCharactersPerSecond) + POST_COMMAND_DELAY;
   return 1;
 }
 
@@ -352,13 +352,15 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
     serialDevice = NULL;
   }
 
-  LogPrint(LOG_ERR, "cannot initialize MiniBraille");
   return 0;
 }
 
 static void
 brl_close (BrailleDisplay *brl) {
-  serialCloseDevice(serialDevice);
+  if (serialDevice) {
+    serialCloseDevice(serialDevice);
+    serialDevice = NULL;
+  }
 }
 
 static void
