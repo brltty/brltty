@@ -176,9 +176,11 @@ typedef struct {
 } InputBinding;
 
 struct InputModeStruct {
-  const char *name;
   InputBinding keyF1, keyF2, keyLeft, keyUp, keyCenter, keyDown, keyRight;
+
+  unsigned temporary:1;
   void (*modifyWindow) (BrailleDisplay *brl);
+  const char *name;
 };
 
 #define BIND(k,t,v) .key##k = {.type = IBT_##t, .value.t = (v)}
@@ -195,6 +197,8 @@ static const InputMode inputMode_char_f1 = {
   BIND_BLOCK(Center, ROUTE),
   BIND_BLOCK(Down, CUTRECT),
   BIND_BLOCK(Right, CUTLINE),
+
+  .temporary = 1,
   .name = "Char-F1"
 };
 
@@ -206,6 +210,8 @@ static const InputMode inputMode_f1_f1 = {
   BIND_COMMAND(Up, PREFLOAD),
   BIND_COMMAND(Down, PREFMENU),
   BIND_COMMAND(Center, PREFSAVE),
+
+  .temporary = 1,
   .name = "F1-F1"
 };
 
@@ -217,14 +223,20 @@ static const InputMode inputMode_f1_f2 = {
   BIND_COMMAND(Up, SKPBLNKWINS),
   BIND_COMMAND(Down, SKPIDLNS),
   BIND_COMMAND(Center, SIXDOTS),
+
+  .temporary = 1,
   .name = "F1-F2"
 };
 
 static const InputMode inputMode_f1_left = {
+
+  .temporary = 1,
   .name = "F1-Left"
 };
 
 static const InputMode inputMode_f1_right = {
+
+  .temporary = 1,
   .name = "F1-Right"
 };
 
@@ -236,6 +248,8 @@ static const InputMode inputMode_f1_up = {
   BIND_COMMAND(Up, PRPGRPH),
   BIND_COMMAND(Down, NXPGRPH),
   BIND_COMMAND(Center, CSRJMP_VERT),
+
+  .temporary = 1,
   .name = "F1-Up"
 };
 
@@ -247,6 +261,8 @@ static const InputMode inputMode_f1_down = {
   BIND_COMMAND(Up, PRDIFLN),
   BIND_COMMAND(Down, NXDIFLN),
   BIND_COMMAND(Center, PASTE),
+
+  .temporary = 1,
   .name = "F1-Down"
 };
 
@@ -256,7 +272,10 @@ static const InputMode inputMode_f1_center = {
   BIND_FUNCTION(Right, incrementCursor),
   BIND_COMMAND(Up, LNUP),
   BIND_COMMAND(Down, LNDN),
-  .modifyWindow = putCursor
+
+  .temporary = 0,
+  .modifyWindow = putCursor,
+  .name = "F1-Center"
 };
 
 static const InputMode inputMode_f1 = {
@@ -267,6 +286,8 @@ static const InputMode inputMode_f1 = {
   BIND_SUBMODE(Up, f1_up),
   BIND_SUBMODE(Down, f1_down),
   BIND_SUBMODE(Center, f1_center),
+
+  .temporary = 1,
   .name = "F1"
 };
 
@@ -278,6 +299,8 @@ static const InputMode inputMode_f2 = {
   BIND_COMMAND(Up, TOP),
   BIND_COMMAND(Down, BOT),
   BIND_COMMAND(Center, CSRTRK),
+
+  .temporary = 1,
   .name = "F2"
 };
 
@@ -288,7 +311,10 @@ static const InputMode inputMode_basic = {
   BIND_COMMAND(Right, FWINRT),
   BIND_COMMAND(Up, LNUP),
   BIND_COMMAND(Down, LNDN),
-  BIND_COMMAND(Center, RETURN)
+  BIND_COMMAND(Center, RETURN),
+
+  .temporary = 0,
+  .name = "Basic"
 };
 
 static const InputMode *inputMode;
@@ -296,7 +322,7 @@ static struct timeval inputTime;
 
 static void
 setInputMode (const InputMode *mode) {
-  if (mode->name) {
+  if (mode->temporary) {
     char title[sizeof(textCells) + 1];
     snprintf(title, sizeof(title), "%s Mode", mode->name);
     message(title, MSG_NODELAY|MSG_SILENT);
@@ -367,7 +393,7 @@ static void
 brl_writeWindow (BrailleDisplay *brl) {
   if (inputMode->modifyWindow) inputMode->modifyWindow(brl);
   updateCells(textCells, brl->buffer, sizeof(textCells));
-  if (refreshNeeded && !inputMode->name) {
+  if (refreshNeeded && !inputMode->temporary) {
     writeCells(brl);
     refreshNeeded = 0;
   }
@@ -388,7 +414,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
     int result = serialReadData(serialDevice, &byte, 1, 0, 0);
 
     if (result == 0) {
-      if (inputMode->name)
+      if (inputMode->temporary)
         if (millisecondsSince(&inputTime) > 3000)
           resetInputMode();
 
@@ -402,7 +428,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   }
 
   mode = inputMode;
-  if (mode->name) resetInputMode();
+  if (mode->temporary) resetInputMode();
 
   switch (byte) {
     case KEY_F1:     binding = &mode->keyF1;     break;
@@ -414,7 +440,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
     case KEY_CENTER: binding = &mode->keyCenter; break;
 
     default:
-      LogPrint(LOG_WARNING, "unhandled key: %02X (%s)", byte, mode->name);
+      LogPrint(LOG_WARNING, "unhandled key: %s -> %02X", mode->name, byte);
       beep(brl);
       return EOF;
   }
