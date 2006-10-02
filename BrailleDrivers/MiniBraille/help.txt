@@ -45,6 +45,14 @@ Left/Right: go to previous/next non-blank window
 Up/Down: go to previous/next line with different content
 Center: paste cut text at cursor
 
+F1-Right (Speech) Mode
+F2: toggle autospeak
+Left: speak from top of screen to current line
+Up: stop speaking
+Center: go to current (most recent) speech position
+Down: speak current line
+Right: speak from current line to bottom of screen
+
 F1-Center (Char) Mode
 F1: select Char-F1 mode
 Left/Right: move character selection cursor left/right one position

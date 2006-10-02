@@ -235,6 +235,12 @@ static const InputMode inputMode_f1_left = {
 };
 
 static const InputMode inputMode_f1_right = {
+  BIND_COMMAND(F2, AUTOSPEAK),
+  BIND_COMMAND(Left, SAY_ABOVE),
+  BIND_COMMAND(Right, SAY_BELOW),
+  BIND_COMMAND(Up, MUTE),
+  BIND_COMMAND(Down, SAY_LINE),
+  BIND_COMMAND(Center, SPKHOME),
 
   .temporary = 1,
   .name = "F1-Right"
