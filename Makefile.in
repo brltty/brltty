@@ -43,6 +43,11 @@ bzip2: $(BZIP2_FILE)
 rpm: $(GZIP_FILE)
 	$(SRC_TOP)mkrpm $(GZIP_FILE)
 
+ZIP_FILE = $(ARCHIVE_NAME).zip
+$(ZIP_FILE):
+	$(SRC_TOP)mkzip $(SRC_TOP) $(ARCHIVE_NAME) $@
+zip: $(ZIP_FILE)
+
 ITERATE = -for directory in $(PGM_DIR); do (cd $$directory && $(MAKE) $@); done
 clean::
 	$(ITERATE)
