@@ -30,7 +30,6 @@ extern "C" {
 extern const char *setCharset (const char *name);
 extern const char *getCharset (void);
 
-#ifdef HAVE_ICONV_H
 typedef char Utf8Buffer[MB_LEN_MAX+1];
 
 extern int convertCharToUtf8 (char c, Utf8Buffer utf8);
@@ -41,7 +40,6 @@ extern wint_t convertUtf8ToWchar (char **utf8, size_t *utfs);
 
 extern wint_t convertCharToWchar (char c);
 extern int convertWcharToChar (wchar_t wc);
-#endif /* HAVE_ICONV_H */
 
 extern int lockCharset (LockOptions options);
 extern void unlockCharset (void);
