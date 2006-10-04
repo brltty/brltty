@@ -39,6 +39,7 @@ extern "C" {
 /* Initialisation of BRLTTY environment settings: */
 
 #define DEFAULT_AUTOREPEAT 1		/* 1 for on, 0 for off */
+#define DEFAULT_AUTOREPEAT_PANNING 0	/* 1 for on, 0 for off */
 #define DEFAULT_AUTOREPEAT_DELAY 50	/* hundredths of a second */
 #define DEFAULT_AUTOREPEAT_INTERVAL 10	/* hundredths of a second */
 

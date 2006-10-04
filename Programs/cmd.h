@@ -41,7 +41,7 @@ typedef struct {
   struct timeval time;
 } RepeatState;
 extern void resetRepeatState (RepeatState *state);
-extern void handleRepeatFlags (int *command, RepeatState *state, int delay, int interval);
+extern void handleRepeatFlags (int *command, RepeatState *state, int panning, int delay, int interval);
 
 #ifdef __cplusplus
 }

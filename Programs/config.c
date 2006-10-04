@@ -570,6 +570,11 @@ loadPreferences (int change) {
         prefs.brailleFirmness = DEFAULT_BRAILLE_FIRMNESS;
       }
 
+      if (prefs.version == 3) {
+        prefs.version++;
+        prefs.autorepeatPanning = DEFAULT_AUTOREPEAT_PANNING;
+      }
+
       if (change) changedPreferences();
     }
     fclose(file);
@@ -584,9 +589,10 @@ getPreferences (void) {
 
     prefs.magic[0] = PREFS_MAGIC_NUMBER & 0XFF;
     prefs.magic[1] = PREFS_MAGIC_NUMBER >> 8;
-    prefs.version = 3;
+    prefs.version = 4;
 
     prefs.autorepeat = DEFAULT_AUTOREPEAT;
+    prefs.autorepeatPanning = DEFAULT_AUTOREPEAT_PANNING;
     prefs.autorepeatDelay = DEFAULT_AUTOREPEAT_DELAY;
     prefs.autorepeatInterval = DEFAULT_AUTOREPEAT_INTERVAL;
 
@@ -1055,6 +1061,7 @@ updatePreferences (void) {
       BOOLEAN_ITEM(prefs.eagerSlidingWindow, NULL, testSlidingWindow, strtext("Eager Sliding Window")),
       NUMERIC_ITEM(prefs.windowOverlap, changedWindowOverlap, NULL, strtext("Window Overlap"), 0, 20, 1),
       BOOLEAN_ITEM(prefs.autorepeat, changedAutorepeat, NULL, strtext("Autorepeat")),
+      BOOLEAN_ITEM(prefs.autorepeatPanning, NULL, testAutorepeat, strtext("Autorepeat Panning")),
       TIME_ITEM(prefs.autorepeatDelay, NULL, testAutorepeat, strtext("Autorepeat Delay")),
       TIME_ITEM(prefs.autorepeatInterval, NULL, testAutorepeat, strtext("Autorepeat Interval")),
       BOOLEAN_ITEM(prefs.showCursor, NULL, NULL, strtext("Show Cursor")),

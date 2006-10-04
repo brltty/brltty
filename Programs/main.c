@@ -979,7 +979,7 @@ handleAutorepeat (int *command, RepeatState *state) {
   } else if (!state) {
     state = &repeatState;
   }
-  handleRepeatFlags(command, state,
+  handleRepeatFlags(command, state, prefs.autorepeatPanning,
                     PREFERENCES_TIME(prefs.autorepeatDelay),
                     PREFERENCES_TIME(prefs.autorepeatInterval));
 }

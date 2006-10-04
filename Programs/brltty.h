@@ -73,7 +73,7 @@ typedef struct {
   unsigned char attributesInvisibleTime;
   unsigned char windowFollowsPointer;
   unsigned char textStyle;
-  unsigned char spare1;
+  unsigned char autorepeatPanning;
   unsigned char slidingWindow;
   unsigned char eagerSlidingWindow;
   unsigned char alertTunes;
