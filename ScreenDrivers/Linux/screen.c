@@ -332,71 +332,6 @@ controlConsole (int operation, void *argument) {
   return result;
 }
 
-static unsigned char highFontBit;
-static unsigned char unshiftedAttributeBits;
-static unsigned char shiftedAttributeBits;
-
-static void
-setHighFontBit (unsigned char bit) {
-  highFontBit = bit;
-  unshiftedAttributeBits = (((highFontBit & 0XF0) - 0X10) & 0XF0) |
-                           (((highFontBit & 0X0F) - 0X01) & 0X0F);
-  shiftedAttributeBits = ((~((highFontBit & 0XF0) - 0X10) << 1) & 0XE0) |
-                         ((~((highFontBit & 0X0F) - 0X01) << 1) & 0X0E);
-  LogPrint(LOG_DEBUG, "high font: bit=%02X unshifted=%02X shifted=%02X",
-           highFontBit, unshiftedAttributeBits, shiftedAttributeBits);
-}
-
-#ifndef VT_GETHIFONTMASK
-#define VT_GETHIFONTMASK 0X560D
-#endif /* VT_GETHIFONTMASK */
-
-static int
-determineHighFontBit (void) {
-  {
-    unsigned short mask;
-    if (controlConsole(VT_GETHIFONTMASK, &mask) != -1) {
-      if (mask & 0XFF) {
-        LogPrint(LOG_ERR, "high font mask has bit set in low-order byte: %04X", mask);
-      } else {
-        setHighFontBit(mask >> 8);
-        return 1;
-      }
-    } else if (errno != EINVAL) {
-      LogError("ioctl[VT_GETHIFONTMASK]");
-    }
-  }
-
-  if (lseek(screenDescriptor, 0, SEEK_SET) != -1) {
-    unsigned char attributes[4];
-
-    if (read(screenDescriptor, attributes, sizeof(attributes)) != -1) {
-      const size_t count = attributes[0] * attributes[1];
-      const size_t size = count * 2;
-      unsigned char buffer[size];
-
-      if (read(screenDescriptor, buffer, sizeof(buffer)) != -1) {
-        int counts[0X10];
-        int index;
-
-        memset(counts, 0, sizeof(counts));
-        for (index=1; index<size; index+=2) ++counts[buffer[index] & 0X0F];
-
-        setHighFontBit((counts[0XE] > counts[0X7])? 0X01: 0X08);
-        return 1;
-      } else {
-        LogError("read");
-      }
-    } else {
-      LogError("read");
-    }
-  } else {
-    LogError("lseek");
-  }
-
-  return 0;
-}
-
 static ApplicationCharacterMap applicationCharacterMap;
 static int (*setApplicationCharacterMap) (int force);
 
@@ -560,10 +495,77 @@ setVgaCharacterCount (int force) {
            vgaCharacterCount,
            vgaLargeTable? "large": "small");
 
-  if (vgaLargeTable && !highFontBit)
-    determineHighFontBit();
-
   return 1;
+}
+
+static unsigned char highFontBit;
+static unsigned char fontAttributesMask;
+static unsigned char unshiftedAttributesMask;
+static unsigned char shiftedAttributesMask;
+
+static void
+setAttributesMasks (unsigned char bit) {
+  fontAttributesMask = bit;
+  unshiftedAttributesMask = (((bit & 0XF0) - 0X10) & 0XF0) |
+                            (((bit & 0X0F) - 0X01) & 0X0F);
+  shiftedAttributesMask = ((~((bit & 0XF0) - 0X10) << 1) & 0XE0) |
+                          ((~((bit & 0X0F) - 0X01) << 1) & 0X0E);
+  LogPrint(LOG_DEBUG, "attributes masks: font=%02X unshifted=%02X shifted=%02X",
+           fontAttributesMask, unshiftedAttributesMask, shiftedAttributesMask);
+}
+
+#ifndef VT_GETHIFONTMASK
+#define VT_GETHIFONTMASK 0X560D
+#endif /* VT_GETHIFONTMASK */
+
+static int
+determineAttributesMasks (void) {
+  if (!vgaLargeTable) {
+    setAttributesMasks(0);
+  } else if (highFontBit) {
+    setAttributesMasks(highFontBit);
+  } else {
+    {
+      unsigned short mask;
+      if (controlConsole(VT_GETHIFONTMASK, &mask) == -1) {
+        if (errno != EINVAL) LogError("ioctl[VT_GETHIFONTMASK]");
+      } else if (mask & 0XFF) {
+        LogPrint(LOG_ERR, "high font mask has bit set in low-order byte: %04X", mask);
+      } else {
+        setAttributesMasks(mask >> 8);
+        return 1;
+      }
+    }
+
+    if (lseek(screenDescriptor, 0, SEEK_SET) != -1) {
+      unsigned char attributes[4];
+
+      if (read(screenDescriptor, attributes, sizeof(attributes)) != -1) {
+        const size_t count = attributes[0] * attributes[1];
+        const size_t size = count * 2;
+        unsigned char buffer[size];
+
+        if (read(screenDescriptor, buffer, sizeof(buffer)) != -1) {
+          int counts[0X10];
+          int index;
+
+          memset(counts, 0, sizeof(counts));
+          for (index=1; index<size; index+=2) ++counts[buffer[index] & 0X0F];
+
+          setAttributesMasks((counts[0XE] > counts[0X7])? 0X01: 0X08);
+          return 1;
+        } else {
+          LogError("read");
+        }
+      } else {
+        LogError("read");
+      }
+    } else {
+      LogError("lseek");
+    }
+  }
+
+  return 0;
 }
 
 static int
@@ -585,12 +587,12 @@ prepare_LinuxScreen (char **parameters) {
     static const char *choices[] = {"auto", "vga", "fb", NULL};
     unsigned int choice;
     if (validateInteger(&bit, parameters[PARM_HFB], &minimum, &maximum)) {
-      setHighFontBit(1<<bit);
+      highFontBit = 1 << bit;
     } else if (!validateChoice(&choice, parameters[PARM_HFB], choices)) {
       LogPrint(LOG_WARNING, "%s: %s", "invalid high font bit", parameters[PARM_HFB]);
     } else if (choice) {
       static const unsigned char bits[] = {0X08, 0X01};
-      setHighFontBit(bits[choice-1]);
+      highFontBit = bits[choice-1];
     }
   }
 
@@ -627,9 +629,7 @@ open_LinuxScreen (void) {
     if (setConsolePath()) {
       consoleDescriptor = -1;
 
-      if (openScreen(currentConsoleNumber=0)) {
-        return 1;
-      }
+      if (openScreen(currentConsoleNumber=0)) return 1;
     }
   }
   return 0;
@@ -655,6 +655,8 @@ setTranslationTable (int force) {
   int acmChanged = setApplicationCharacterMap && setApplicationCharacterMap(force);
   int sfmChanged = setScreenFontMap(force);
   int vccChanged = (sfmChanged || force)? setVgaCharacterCount(force): 0;
+
+  if (vccChanged || force) determineAttributesMasks();
 
   if (acmChanged || sfmChanged || vccChanged) {
     unsigned short directPosition = 0XFF;
@@ -923,7 +925,11 @@ getConsoleDescription (ScreenDescription *description) {
       problemText = "can't access console";
       return 0;
     }
+  }
+
+  if (currentConsoleNumber != description->number) {
     currentConsoleNumber = description->number;
+    setTranslationTable(1);
   }
 
   {
@@ -1007,11 +1013,8 @@ read_LinuxScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
             int column;
             for (column=0; column<box.width; ++column) {
               int position = *source;
-              if (vgaLargeTable)
-                if (source[1] & highFontBit)
-                  position |= 0X100;
+              if (source[1] & fontAttributesMask) position |= 0X100;
               src[column] = *source;
-
               *target++ = translationTable[position];
               source += 2;
             }
@@ -1026,11 +1029,8 @@ read_LinuxScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
             int column;
             source++;
             for (column=0; column<box.width; ++column) {
-              unsigned char bits = *source;
-              if (vgaLargeTable)
-                bits = (bits & unshiftedAttributeBits) |
-                       ((bits & shiftedAttributeBits) >> 1);
-              *target++ = bits;
+              *target++ = (*source & unshiftedAttributesMask) |
+                          ((*source & shiftedAttributesMask) >> 1);
               source += 2;
             }
           }
