@@ -141,6 +141,14 @@ handleRepeatFlags (int *command, RepeatState *state, int panning, int delay, int
       switch (*command & BRL_MSK_BLK) {
         default:
           switch (*command & BRL_MSK_CMD) {
+            case BRL_CMD_FWINLT:
+            case BRL_CMD_FWINRT:
+              if (panning) break;
+
+            default:
+              if (IS_DELAYED_COMMAND(flags)) *command = BRL_CMD_NOOP;
+              flags = 0;
+
             case BRL_CMD_LNUP:
             case BRL_CMD_LNDN:
             case BRL_CMD_PRDIFLN:
@@ -161,15 +169,6 @@ handleRepeatFlags (int *command, RepeatState *state, int panning, int delay, int
             case BRL_BLK_PASSKEY + BRL_KEY_CURSOR_DOWN:
             case BRL_BLK_PASSKEY + BRL_KEY_CURSOR_LEFT:
             case BRL_BLK_PASSKEY + BRL_KEY_CURSOR_RIGHT:
-              break;
-
-            case BRL_CMD_FWINLT:
-            case BRL_CMD_FWINRT:
-              if (panning) break;
-
-            default:
-              if (IS_DELAYED_COMMAND(flags)) *command = BRL_CMD_NOOP;
-              flags = 0;
               break;
           }
 
