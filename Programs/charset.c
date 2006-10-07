@@ -101,6 +101,12 @@ CHARSET_CONVERT_TYPE_TO_TYPE(WcharToChar, wchar_t, unsigned char, int, EOF)
 
 #elif defined(WINDOWS)
 
+#if defined(CP_THREAD_ACP)
+#define CURRENT_CODEPAGE CP_THREAD_ACP
+#else /* CURRENT_CODEPAGE */
+#define CURRENT_CODEPAGE CP_ACP
+#endif /* CURRENT_CODEPAGE */
+
 int
 convertWcharToUtf8 (wchar_t wc, Utf8Buffer utf8) {
   int result = WideCharToMultiByte(CP_UTF8, 0,
@@ -138,21 +144,21 @@ convertUtf8ToWchar (char **utf8, size_t *utfs) {
 wint_t
 convertCharToWchar (char c) {
   wchar_t wc;
-  int result = MultiByteToWideChar(CP_THREAD_ACP, MB_ERR_INVALID_CHARS,
+  int result = MultiByteToWideChar(CURRENT_CODEPAGE, MB_ERR_INVALID_CHARS,
                                    &c, 1,  &wc, 1);
   if (result) return wc;
-  LogWindowsError("MultiByteToWideChar[CP_THREAD_ACP]");
+  LogWindowsError("MultiByteToWideChar[" STRINGIFY(CURRENT_CODEPAGE) "]");
   return WEOF;
 }
 
 int
 convertWcharToChar (wchar_t wc) {
   unsigned char c;
-  int result = WideCharToMultiByte(CP_THREAD_ACP, WC_NO_BEST_FIT_CHARS /* WC_ERR_INVALID_CHARS */,
+  int result = WideCharToMultiByte(CURRENT_CODEPAGE, WC_NO_BEST_FIT_CHARS /* WC_ERR_INVALID_CHARS */,
                                    &wc, 1, &c, 1,
                                    NULL, NULL);
   if (result) return c;
-  LogWindowsError("WideCharToMultiByte[CP_THREAD_ACP]");
+  LogWindowsError("WideCharToMultiByte[" STRINGIFY(CURRENT_CODEPAGE) "]");
   return EOF;
 }
 
