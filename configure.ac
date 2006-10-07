@@ -182,6 +182,26 @@ then
 fi
 BRLTTY_SUMMARY_ITEM([init-path], [init_path])
 
+brltty_default_stderr_path=/tmp/brltty.log
+BRLTTY_ARG_WITH(
+   [stderr-path], [FILE],
+   [path to standard error log file],
+   [stderr_path], [""]
+)
+if test "${stderr_path}" = "no"
+then
+   stderr_path=""
+elif test "${stderr_path}" = "yes"
+then
+   stderr_path="${brltty_default_stderr_path}"
+fi
+if test -n "${stderr_path}"
+then
+   AC_DEFINE_UNQUOTED([STDERR_PATH], ["${stderr_path}"],
+                      [Define this if standard error is to be redirected to a file.])
+fi
+BRLTTY_SUMMARY_ITEM([stderr-path], [stderr_path])
+
 AC_PROG_MAKE_SET
 
 AC_PROG_CC

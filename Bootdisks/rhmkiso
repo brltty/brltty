@@ -281,7 +281,7 @@ brlttyInstallRoot="${temporaryDirectory}/install"
    done
 
    ./configure --quiet --with-install-root="${brlttyInstallRoot}" \
-	       --with-init-path="${initPath}" \
+	       --with-init-path="${initPath}" --with-stderr-path="/dev/tty5" \
                --with-screen-driver="lx,-all" \
 	       --with-braille-driver="-tt,-vr,${brailleDrivers}" \
 	       --with-text-table="${textTable}" \

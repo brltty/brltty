@@ -177,6 +177,9 @@ extern "C" {
 /* Define this if BRLTTY is to be run as init. */
 #undef INIT_PATH
 
+/* Define this if standard error is to be redirected to a file. */
+#undef STDERR_PATH
+
 /* Define this to be a string containing the desired working directory. */
 #undef DATA_DIRECTORY
 

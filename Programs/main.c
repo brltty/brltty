@@ -1025,6 +1025,10 @@ main (int argc, char *argv[]) {
   }
 #endif /* INIT_PATH */
 
+#ifdef STDERR_PATH
+  freopen(STDERR_PATH, "a", stderr);
+#endif /* STDERR_PATH */
+
   /* Open the system log. */
   LogOpen(0);
   LogPrint(LOG_INFO, gettext("starting"));
