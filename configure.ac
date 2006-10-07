@@ -367,7 +367,6 @@ in
    cygwin*|mingw*)
       BRLTTY_HAVE_WINDOWS_LIBRARY([ws2_32])
       BRLTTY_HAVE_WINDOWS_LIBRARY([winmm])
-      BRLTTY_HAVE_WINDOWS_LIBRARY([msvcp60])
       ;;
    *)
       AC_SEARCH_LIBS([socket], [socket])
