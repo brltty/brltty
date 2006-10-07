@@ -56,7 +56,7 @@
 
 #include "api.h"
 #include "api_protocol.h"
-#include "rangelist.h"
+#include "keyrangelist.h"
 #include "cmd.h"
 #include "brl.h"
 #include "brltty.h"
@@ -182,7 +182,7 @@ typedef struct Connection {
   BrailleWindow brailleWindow;
   BrlBufState brlbufstate;
   pthread_mutex_t brlMutex;
-  RangeList *unmaskedKeys;
+  KeyrangeList *unmaskedKeys;
   pthread_mutex_t maskMutex;
   time_t upTime;
   Packet packet;
@@ -373,6 +373,14 @@ static void writeException(FileDescriptor fd, unsigned int err, brl_type_t type,
   brlapiserver_writePacket(fd,BRLPACKET_EXCEPTION,epacket, hdrsize+esize);
 }
 
+static void writeKey(FileDescriptor fd, brl_keycode_t key) {
+  uint32_t buf[2];
+  buf[0] = htonl(key >> 32);
+  buf[1] = htonl(key & 0xffffffff);
+  LogPrint(LOG_DEBUG,"writing key %08"PRIx32" %08"PRIx32,buf[0],buf[1]);
+  brlapiserver_writePacket(fd,BRLPACKET_KEY,&buf,sizeof(buf));
+}
+
 /* Function: resetPacket */
 /* Resets a Packet structure */
 void resetPacket(Packet *packet)
@@ -561,16 +569,16 @@ void getDots(const BrailleWindow *brailleWindow, unsigned char *buf)
   wchar_t wc;
   for (i=0; i<displaySize; i++) {
     wc = brailleWindow->text[i];
-    if ((wc >= BRL_UC_ROW) && (wc <= (BRL_UC_ROW | 0XFF)))
+    if ((wc >= BRLAPI_UC_ROW) && (wc <= (BRLAPI_UC_ROW | 0XFF)))
       buf[i] =
-	(wc&(1<<(1-1))?BRL_DOT1:0) |
-	(wc&(1<<(2-1))?BRL_DOT2:0) |
-	(wc&(1<<(3-1))?BRL_DOT3:0) |
-	(wc&(1<<(4-1))?BRL_DOT4:0) |
-	(wc&(1<<(5-1))?BRL_DOT5:0) |
-	(wc&(1<<(6-1))?BRL_DOT6:0) |
-	(wc&(1<<(7-1))?BRL_DOT7:0) |
-	(wc&(1<<(8-1))?BRL_DOT8:0);
+	(wc&(1<<(1-1))?BRLAPI_DOT1:0) |
+	(wc&(1<<(2-1))?BRLAPI_DOT2:0) |
+	(wc&(1<<(3-1))?BRLAPI_DOT3:0) |
+	(wc&(1<<(4-1))?BRLAPI_DOT4:0) |
+	(wc&(1<<(5-1))?BRLAPI_DOT5:0) |
+	(wc&(1<<(6-1))?BRLAPI_DOT6:0) |
+	(wc&(1<<(7-1))?BRLAPI_DOT7:0) |
+	(wc&(1<<(8-1))?BRLAPI_DOT8:0);
     else
       if ((c = convertWcharToChar(wc)) != EOF)
         buf[i] = textTable[c];
@@ -650,7 +658,7 @@ static void freeConnection(Connection *c)
   pthread_mutex_destroy(&c->brlMutex);
   pthread_mutex_destroy(&c->maskMutex);
   freeBrailleWindow(&c->brailleWindow);
-  freeRangeList(&c->unmaskedKeys);
+  freeKeyrangeList(&c->unmaskedKeys);
   free(c);
 }
 
@@ -809,7 +817,7 @@ static int handleGetTty(Connection *c, brl_type_t type, unsigned char *packet, s
   freeBrailleWindow(&c->brailleWindow); /* In case of multiple gettty requests */
   if ((initializeUnmaskedKeys(c)==-1) || (allocBrailleWindow(&c->brailleWindow)==-1)) {
     LogPrint(LOG_WARNING,"Failed to allocate some ressources");
-    freeRangeList(&c->unmaskedKeys);
+    freeKeyrangeList(&c->unmaskedKeys);
     WERR(c->fd,BRLERR_NOMEM, "no memory for unmasked keys");
     return 0;
   }
@@ -907,7 +915,7 @@ static void doLeaveTty(Connection *c)
   __removeConnection(c);
   __addConnection(c,notty.connections);
   pthread_mutex_unlock(&connectionsMutex);
-  freeRangeList(&c->unmaskedKeys);
+  freeKeyrangeList(&c->unmaskedKeys);
   freeBrailleWindow(&c->brailleWindow);
 }
 
@@ -929,12 +937,12 @@ static int handleKeyRange(Connection *c, brl_type_t type, unsigned char *packet,
   LogPrintRequest(type, c->fd);
   CHECKERR(( (!c->raw) && c->tty ),BRLERR_ILLEGAL_INSTRUCTION);
   CHECKERR(size==2*sizeof(brl_keycode_t),BRLERR_INVALID_PACKET);
-  x = ntohl(ints[0]);
-  y = ntohl(ints[1]);
-  LogPrint(LOG_DEBUG,"range: [%lu..%lu]",(unsigned long)x,(unsigned long)y);
+  x = ((brl_keycode_t)ntohl(ints[0]) << 32) | ntohl(ints[1]);
+  y = ((brl_keycode_t)ntohl(ints[2]) << 32) | ntohl(ints[3]);
+  LogPrint(LOG_DEBUG,"range: [%016"BRLAPI_PRIxKEYCODE"..%016"BRLAPI_PRIxKEYCODE"]",x,y);
   pthread_mutex_lock(&c->maskMutex);
-  if (type==BRLPACKET_IGNOREKEYRANGE) res = removeRange(x,y,&c->unmaskedKeys);
-  else res = addRange(x,y,&c->unmaskedKeys);
+  if (type==BRLPACKET_IGNOREKEYRANGE) res = removeKeyrange(x,y,&c->unmaskedKeys);
+  else res = addKeyrange(x,y,&c->unmaskedKeys);
   pthread_mutex_unlock(&c->maskMutex);
   if (res==-1) WERR(c->fd,BRLERR_NOMEM,"no memory for key range");
   else writeAck(c->fd);
@@ -945,16 +953,18 @@ static int handleKeySet(Connection *c, brl_type_t type, unsigned char *packet, s
 {
   int i = 0, res = 0;
   unsigned int nbkeys;
-  brl_keycode_t *k = (brl_keycode_t *) packet;
-  int (*fptr)(uint32_t, uint32_t, RangeList **);
+  uint32_t *k = (uint32_t *) packet;
+  int (*fptr)(KeyrangeElem, KeyrangeElem, KeyrangeList **);
+  brl_keycode_t code;
   LogPrintRequest(type, c->fd);
-  if (type==BRLPACKET_IGNOREKEYSET) fptr = removeRange; else fptr = addRange;
+  if (type==BRLPACKET_IGNOREKEYSET) fptr = removeKeyrange; else fptr = addKeyrange;
   CHECKERR(( (!c->raw) && c->tty ),BRLERR_ILLEGAL_INSTRUCTION);
   CHECKERR(size % sizeof(brl_keycode_t)==0,BRLERR_INVALID_PACKET);
   nbkeys = size/sizeof(brl_keycode_t);
   pthread_mutex_lock(&c->maskMutex);
   while ((res!=-1) && (i<nbkeys)) {
-    res = fptr(k[i],k[i],&c->unmaskedKeys);
+    code = ((brl_keycode_t)ntohl(k[2*i]) << 32) | ntohl(k[2*i+1]);
+    res = fptr(code,code,&c->unmaskedKeys);
     i++;
   }
   pthread_mutex_unlock(&c->maskMutex);
@@ -2151,11 +2161,11 @@ static int initializeUnmaskedKeys(Connection *c)
 {
   if (c==NULL) return 0;
   if (c->how==BRL_KEYCODES) return 0;
-  if (addRange(0,BRL_KEYCODE_MAX,&c->unmaskedKeys)==-1) return -1;
-  if (removeRange(BRL_CMD_SWITCHVT_PREV,BRL_CMD_SWITCHVT_NEXT,&c->unmaskedKeys)==-1) return -1;
-  if (removeRange(BRL_CMD_RESTARTBRL,BRL_CMD_RESTARTSPEECH,&c->unmaskedKeys)==-1) return -1;
-  if (removeRange(BRL_BLK_SWITCHVT,BRL_BLK_SWITCHVT|BRL_MSK_ARG,&c->unmaskedKeys)==-1) return -1;
-  if (removeRange(BRL_BLK_PASSAT2,BRL_BLK_PASSAT2|BRL_MSK_ARG,&c->unmaskedKeys)==-1) return -1;
+  if (addKeyrange(0,BRLAPI_KEYCODE_MAX,&c->unmaskedKeys)==-1) return -1;
+  if (removeKeyrange(BRLAPI_KEY_CMD_SWITCHVT_PREV,BRLAPI_KEY_CMD_SWITCHVT_NEXT|BRLAPI_KEY_FLAGS_MASK,&c->unmaskedKeys)==-1) return -1;
+  if (removeKeyrange(BRLAPI_KEY_CMD_RESTARTBRL,BRLAPI_KEY_CMD_RESTARTSPEECH|BRLAPI_KEY_FLAGS_MASK,&c->unmaskedKeys)==-1) return -1;
+  if (removeKeyrange(BRLAPI_KEY_CMD_SWITCHVT,BRLAPI_KEY_CMD_SWITCHVT|BRLAPI_KEY_CMD_ARG_MASK|BRLAPI_KEY_FLAGS_MASK,&c->unmaskedKeys)==-1) return -1;
+  if (removeKeyrange(BRLAPI_KEY_CMD_PASSAT2,BRLAPI_KEY_CMD_PASSAT2|BRLAPI_KEY_CMD_ARG_MASK|BRLAPI_KEY_FLAGS_MASK,&c->unmaskedKeys)==-1) return -1;
   return 0;
 }
 
@@ -2238,6 +2248,71 @@ static void api_writeVisual(BrailleDisplay *brl)
   pthread_mutex_unlock(&connectionsMutex);
 }
 
+brl_keycode_t coreToClient(unsigned long keycode, int how) {
+  if (how == BRL_KEYCODES) {
+    return keycode;
+  } else {
+    brl_keycode_t code;
+    switch (keycode & BRL_MSK_BLK) {
+    case BRL_BLK_PASSCHAR: {
+      wchar_t wc = convertCharToWchar(keycode & BRL_MSK_ARG);
+      if (wc < 0x100)
+        /* latin1 character */
+        code = wc;
+      else
+        /* unicode character */
+        code = BRLAPI_KEY_UC | wc;
+      break;
+    }
+    case BRL_BLK_PASSKEY:
+      switch (keycode & BRL_MSK_ARG) {
+      case BRL_KEY_ENTER:		code = BRLAPI_KEY_ENTER;	break;
+      case BRL_KEY_TAB:			code = BRLAPI_KEY_TAB;		break;
+      case BRL_KEY_BACKSPACE:		code = BRLAPI_KEY_BACKSPACE;	break;
+      case BRL_KEY_ESCAPE:		code = BRLAPI_KEY_ESCAPE;	break;
+      case BRL_KEY_CURSOR_LEFT:		code = BRLAPI_KEY_CURSOR_LEFT;	break;
+      case BRL_KEY_CURSOR_RIGHT:	code = BRLAPI_KEY_CURSOR_RIGHT;	break;
+      case BRL_KEY_CURSOR_UP:		code = BRLAPI_KEY_CURSOR_UP;	break;
+      case BRL_KEY_CURSOR_DOWN:		code = BRLAPI_KEY_CURSOR_DOWN;	break;
+      case BRL_KEY_PAGE_UP:		code = BRLAPI_KEY_PAGE_UP;	break;
+      case BRL_KEY_PAGE_DOWN:		code = BRLAPI_KEY_PAGE_DOWN;	break;
+      case BRL_KEY_HOME:		code = BRLAPI_KEY_HOME;		break;
+      case BRL_KEY_END:			code = BRLAPI_KEY_END;		break;
+      case BRL_KEY_INSERT:		code = BRLAPI_KEY_INSERT;	break;
+      case BRL_KEY_DELETE:		code = BRLAPI_KEY_DELETE;	break;
+      default: code = BRLAPI_KEY_FUNCTION + (keycode & BRL_MSK_ARG) - BRL_KEY_FUNCTION; break;
+      }
+      break;
+    default:
+      code = BRLAPI_KEY_TYPE_CMD | ((keycode & BRL_MSK_BLK) << 8)
+        | (keycode & BRL_MSK_ARG);
+      break;
+    }
+    if ((keycode & BRL_MSK_BLK) == BRL_BLK_GOTOLINE)
+      code = code
+      | (keycode & BRL_FLG_LINE_SCALED	? BRLAPI_KEY_FLG_LINE_SCALED	: 0)
+      | (keycode & BRL_FLG_LINE_TOLEFT	? BRLAPI_KEY_FLG_LINE_TOLEFT	: 0)
+        ;
+    if ((keycode & BRL_MSK_BLK) == BRL_BLK_PASSCHAR
+     || (keycode & BRL_MSK_BLK) == BRL_BLK_PASSKEY)
+      code = code
+      | (keycode & BRL_FLG_CHAR_CONTROL	? BRLAPI_KEY_FLG_CONTROL	: 0)
+      | (keycode & BRL_FLG_CHAR_META	? BRLAPI_KEY_FLG_META		: 0)
+      | (keycode & BRL_FLG_CHAR_UPPER	? BRLAPI_KEY_FLG_UPPER		: 0)
+      | (keycode & BRL_FLG_CHAR_SHIFT	? BRLAPI_KEY_FLG_SHIFT		: 0)
+        ;
+    else
+      code = code
+      | (keycode & BRL_FLG_TOGGLE_ON	? BRLAPI_KEY_FLG_TOGGLE_ON	: 0)
+      | (keycode & BRL_FLG_TOGGLE_OFF	? BRLAPI_KEY_FLG_TOGGLE_OFF	: 0)
+      | (keycode & BRL_FLG_ROUTE	? BRLAPI_KEY_FLG_ROUTE		: 0)
+        ;
+    return code
+    | (keycode & BRL_FLG_REPEAT_INITIAL	? BRLAPI_KEY_FLG_REPEAT_INITIAL	: 0)
+    | (keycode & BRL_FLG_REPEAT_DELAY	? BRLAPI_KEY_FLG_REPEAT_DELAY	: 0)
+      ;
+  }
+}
 /* Function: whoGetsKey */
 /* Returns the connection which gets that key */
 static Connection *whoGetsKey(Tty *tty, brl_keycode_t code, unsigned int how)
@@ -2247,7 +2322,7 @@ static Connection *whoGetsKey(Tty *tty, brl_keycode_t code, unsigned int how)
   int passKey;
   for (c=tty->connections->next; c!=tty->connections; c = c->next) {
     pthread_mutex_lock(&c->maskMutex);
-    passKey = (c->how==how) && (inRangeList(c->unmaskedKeys,code) != NULL);
+    passKey = (c->how==how) && (inKeyrangeList(c->unmaskedKeys,code) != NULL);
     pthread_mutex_unlock(&c->maskMutex);
     if (passKey) goto found;
   }
@@ -2359,20 +2434,21 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
   }
   /* some client may get raw mode only from now */
   pthread_mutex_unlock(&rawMutex);
-  if (trueBraille->readKey && keycode != EOF && (c = whoGetsKey(&ttys,keycode,BRL_KEYCODES))) {
+  clientCode = coreToClient(keycode, BRL_KEYCODES);
+  if (trueBraille->readKey && keycode != EOF && (c = whoGetsKey(&ttys,clientCode,BRL_KEYCODES))) {
     /* somebody gets the raw code */
     LogPrint(LOG_DEBUG,"Transmitting unmasked key %lu",(unsigned long)keycode);
-    clientCode = htonl(keycode);
-    brlapiserver_writePacket(c->fd,BRLPACKET_KEY,&clientCode,sizeof(clientCode));
+    writeKey(c->fd,clientCode);
     command = EOF;
   } else {
     handleAutorepeat(&command, &repeatState);
     if (command != EOF) {
+      clientCode = coreToClient(command, BRL_COMMANDS);
+      LogPrint(LOG_DEBUG,"client code %016"BRLAPI_PRIxKEYCODE, clientCode);
       /* nobody needs the raw code */
-      if ((c = whoGetsKey(&ttys,command&BRL_MSK_CMD,BRL_COMMANDS))) {
-        LogPrint(LOG_DEBUG,"Transmitting unmasked command %lu",(unsigned long)command);
-        clientCode = htonl(command);
-        brlapiserver_writePacket(c->fd,BRLPACKET_KEY,&clientCode,sizeof(clientCode));
+      if ((c = whoGetsKey(&ttys,clientCode,BRL_COMMANDS))) {
+        LogPrint(LOG_DEBUG,"Transmitting unmasked command %lx",(unsigned long)command);
+	writeKey(c->fd,clientCode);
         command = EOF;
       }
     }

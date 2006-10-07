@@ -52,7 +52,6 @@
 #endif /* HAVE_X11_EXTENSIONS_XTEST_H && HAVE_X11_EXTENSIONS_XKB_H */
 
 #include "api.h"
-#include "brldefs.h"
 #include "misc.h"
 #include "options.h"
 
@@ -173,14 +172,11 @@ void getVT(void) {
     if (brlapi_getTty(vtno,NULL)<0)
       fatal_brlapi_errno("getTty",gettext("cannot get tty %d\n"),vtno);
   }
-  if (brlapi_ignoreKeyRange(0,BRL_KEYCODE_MAX)<0)
+  if (brlapi_ignoreKeyRange(0,BRLAPI_KEYCODE_MAX)<0)
     fatal_brlapi_errno("ignoreKeys",gettext("cannot ignore keys\n"));
 #ifdef CAN_SIMULATE_KEY_PRESSES
-  if (brlapi_unignoreKeyRange(BRL_BLK_PASSKEY, BRL_BLK_PASSKEY |BRL_MSK_ARG))
-    fatal_brlapi_errno("unignoreKeyRange",NULL);
-  if (brlapi_unignoreKeyRange(BRL_BLK_PASSCHAR,BRL_BLK_PASSCHAR|BRL_MSK_ARG))
-    fatal_brlapi_errno("unignoreKeyRange",NULL);
-  if (brlapi_unignoreKeyRange(BRL_BLK_PASSDOTS,BRL_BLK_PASSDOTS|BRL_MSK_ARG))
+  /* All X keysyms with any modifier */
+  if (brlapi_unignoreKeyRange(BRLAPI_KEY_TYPE_X, BRLAPI_KEY_TYPE_X|BRLAPI_KEY_CODE_MASK|BRLAPI_KEY_FLG(0xFF)))
     fatal_brlapi_errno("unignoreKeyRange",NULL);
 #endif /* CAN_SIMULATE_KEY_PRESSES */
 }
@@ -534,90 +530,13 @@ void toX_f(const char *display) {
 #ifdef CAN_SIMULATE_KEY_PRESSES
     if (haveXTest && FD_ISSET(brlapi_fd,&readfds)) {
       while ((res = brlapi_readKey(0, &code)==1)) {
-	modifiers = 0;
-	if (code & BRL_FLG_CHAR_CONTROL) modifiers |= ControlMask;
-	if (code & BRL_FLG_CHAR_META) modifiers |= Mod1Mask;
-	if (code & BRL_FLG_CHAR_UPPER) modifiers |= ShiftMask;
-	if (code & BRL_FLG_CHAR_SHIFT) modifiers |= ShiftMask;
-
-	switch (code&BRL_MSK_BLK) {
-	  case BRL_BLK_PASSCHAR: {
-	    unsigned char byte = code&BRL_MSK_ARG;
-	    if ((byte >= 'A') && (byte <= 'Z')) {
-	      byte = byte + 'a' - 'A';
-	      modifiers |= ShiftMask;
-	    } else if (byte < 0X20) {
-	      byte |= 0X60;
-	      modifiers |= ControlMask;
-	    }
-	    keysym = code&BRL_MSK_ARG;
-	    break;
-	 }
-
-	  case BRL_BLK_PASSDOTS:
-	    keysym = 0x1000000|BRL_UC_ROW|(code&BRL_MSK_ARG);
-	    break;
-
-	  case BRL_BLK_PASSKEY:
-	    switch (code&BRL_MSK_ARG) {
-	      case BRL_KEY_ENTER:         keysym = XK_Return;    break;
-	      case BRL_KEY_TAB:           keysym = XK_Tab;       break;
-	      case BRL_KEY_BACKSPACE:     keysym = XK_BackSpace; break;
-	      case BRL_KEY_ESCAPE:        keysym = XK_Escape;    break;
-	      case BRL_KEY_CURSOR_LEFT:   keysym = XK_Left;      break;
-	      case BRL_KEY_CURSOR_RIGHT:  keysym = XK_Right;     break;
-	      case BRL_KEY_CURSOR_UP:     keysym = XK_Up;        break;
-	      case BRL_KEY_CURSOR_DOWN:   keysym = XK_Down;      break;
-	      case BRL_KEY_PAGE_UP:       keysym = XK_Page_Up;   break;
-	      case BRL_KEY_PAGE_DOWN:     keysym = XK_Page_Down; break;
-	      case BRL_KEY_HOME:          keysym = XK_Home;      break;
-	      case BRL_KEY_END:           keysym = XK_End;       break;
-	      case BRL_KEY_INSERT:        keysym = XK_Insert;    break;
-	      case BRL_KEY_DELETE:        keysym = XK_Delete;    break;
-	      case BRL_KEY_FUNCTION + 0:  keysym = XK_F1;        break;
-	      case BRL_KEY_FUNCTION + 1:  keysym = XK_F2;        break;
-	      case BRL_KEY_FUNCTION + 2:  keysym = XK_F3;        break;
-	      case BRL_KEY_FUNCTION + 3:  keysym = XK_F4;        break;
-	      case BRL_KEY_FUNCTION + 4:  keysym = XK_F5;        break;
-	      case BRL_KEY_FUNCTION + 5:  keysym = XK_F6;        break;
-	      case BRL_KEY_FUNCTION + 6:  keysym = XK_F7;        break;
-	      case BRL_KEY_FUNCTION + 7:  keysym = XK_F8;        break;
-	      case BRL_KEY_FUNCTION + 8:  keysym = XK_F9;        break;
-	      case BRL_KEY_FUNCTION + 9:  keysym = XK_F10;       break;
-	      case BRL_KEY_FUNCTION + 10: keysym = XK_F11;       break;
-	      case BRL_KEY_FUNCTION + 11: keysym = XK_F12;       break;
-	      case BRL_KEY_FUNCTION + 12: keysym = XK_F13;       break;
-	      case BRL_KEY_FUNCTION + 13: keysym = XK_F14;       break;
-	      case BRL_KEY_FUNCTION + 14: keysym = XK_F15;       break;
-	      case BRL_KEY_FUNCTION + 15: keysym = XK_F16;       break;
-	      case BRL_KEY_FUNCTION + 16: keysym = XK_F17;       break;
-	      case BRL_KEY_FUNCTION + 17: keysym = XK_F18;       break;
-	      case BRL_KEY_FUNCTION + 18: keysym = XK_F19;       break;
-	      case BRL_KEY_FUNCTION + 19: keysym = XK_F20;       break;
-	      case BRL_KEY_FUNCTION + 20: keysym = XK_F21;       break;
-	      case BRL_KEY_FUNCTION + 21: keysym = XK_F22;       break;
-	      case BRL_KEY_FUNCTION + 22: keysym = XK_F23;       break;
-	      case BRL_KEY_FUNCTION + 23: keysym = XK_F24;       break;
-	      case BRL_KEY_FUNCTION + 24: keysym = XK_F25;       break;
-	      case BRL_KEY_FUNCTION + 25: keysym = XK_F26;       break;
-	      case BRL_KEY_FUNCTION + 26: keysym = XK_F27;       break;
-	      case BRL_KEY_FUNCTION + 27: keysym = XK_F28;       break;
-	      case BRL_KEY_FUNCTION + 28: keysym = XK_F29;       break;
-	      case BRL_KEY_FUNCTION + 29: keysym = XK_F30;       break;
-	      case BRL_KEY_FUNCTION + 30: keysym = XK_F31;       break;
-	      case BRL_KEY_FUNCTION + 31: keysym = XK_F32;       break;
-	      case BRL_KEY_FUNCTION + 32: keysym = XK_F33;       break;
-	      case BRL_KEY_FUNCTION + 33: keysym = XK_F34;       break;
-	      case BRL_KEY_FUNCTION + 34: keysym = XK_F35;       break;
-	      default:
-		fprintf(stderr,"unexpected key: %" PRIX32 "\n",code);
-		continue;
-	    }
-	    break;
-	  default:
-	    fprintf(stderr,"unexpected block type %" PRIX32 "\n",code&BRL_MSK_BLK);
-	    continue;
+	if (((code & BRLAPI_KEY_TYPE_MASK) != BRLAPI_KEY_TYPE_X)) {
+	  fprintf(stderr,"unexpected block type %" BRLAPI_PRIxKEYCODE "\n",code);
+	  continue;
 	}
+
+	modifiers = ((code & BRLAPI_KEY_FLAGS_MASK) >> BRLAPI_KEY_FLAGS_SHIFT) & 0xFF;
+	keysym = code & BRLAPI_KEY_CODE_MASK;
 	keycode = XKeysymToKeycode(dpy,keysym);
 	if (keycode == NoSymbol) {
 	  fprintf(stderr,"Couldn't translate keysym %08X to keycode.\n",keysym);
@@ -625,7 +544,7 @@ void toX_f(const char *display) {
 	}
 	if (modifiers)
 	  XkbLockModifiers(dpy, XkbUseCoreKbd, modifiers, modifiers);
-	debugf("key %x\n",code);
+	debugf("key %x\n",keysym);
 	XTestFakeKeyEvent(dpy,keycode,True,CurrentTime);
 	XTestFakeKeyEvent(dpy,keycode,False,CurrentTime);
 	if (modifiers)

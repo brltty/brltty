@@ -26,50 +26,47 @@ extern "C" {
 
 #include "prologue.h"
 
-typedef struct RangeList {
-  uint32_t x, y;
-  struct RangeList *next;
-} RangeList;
+typedef uint64_t KeyrangeElem;
 
-/* Function : createRange */
-/* Creates an item of a range list */
-/* Specify the range, a pointer to previous and next item */
-/* Returns the adress of the newly created range, NULL if not enough memory */
-extern RangeList *createRange(RangeList *p, uint32_t x, uint32_t y, RangeList *n);
+#define KeyrangeFlags(v) (((v) >> 32) & 0xffffffffull)
+#define KeyrangeVal(v) ((v) & 0xffffffffull)
 
-/* Function : freeRange */
-/* Destroys an item of a range list */
-/* If provided, the previous item will be linked to the next item */
-extern void freeRange(RangeList *p, RangeList *c);
+#define KeyrangeElem(flags,val) (((KeyrangeElem)(flags) << 32) | (val))
+	
 
-/* Function : freeRangeList */
+typedef struct KeyrangeList {
+  uint32_t minFlags, maxFlags;
+  uint32_t minVal, maxVal;
+  struct KeyrangeList *next;
+} KeyrangeList;
+
+/* Function : freeKeyrangeList */
 /* Frees a whole list */
-/* If you wan to destroy a whole list, call this function, rather than */
-/* calling freeRange on each element, since th latter cares about links */
+/* If you want to destroy a whole list, call this function, rather than */
+/* calling freeKeyrange on each element, since th latter cares about links */
 /* and hence is slower */
-extern void freeRangeList(RangeList **l);
+extern void freeKeyrangeList(KeyrangeList **l);
 
-/* Function : inRangeList */
+/* Function : inKeyrangeList */
 /* Determines if the range list l contains x */
 /* If yes, returns the adress of the cell [a..b] such that a<=x<=b */
 /* If no, returns NULL */
-extern RangeList *inRangeList(RangeList *l, uint32_t n);
+extern KeyrangeList *inKeyrangeList(KeyrangeList *l, KeyrangeElem n);
 
-/* Function : displayRangeList */
+/* Function : displayKeyrangeList */
 /* Prints a range list on stdout */
 /* This is for debugging only */
-extern void displayRangeList(RangeList *l);
+extern void displayKeyrangeList(KeyrangeList *l);
 
-/* Function : addRange */
+/* Function : addKeyrange */
 /* Adds a range to a range list */
-/* We have to keep a sorted list of [disjoints] ranges */
 /* Return 0 if success, -1 if an error occurs */
-extern int addRange(uint32_t x0, uint32_t y0, RangeList **l);
+extern int addKeyrange(KeyrangeElem x0, KeyrangeElem y0, KeyrangeList **l);
 
-/* Function : removeRange */
+/* Function : removeKeyrange */
 /* Removes a range from a range list */
 /* Returns 0 if success, -1 if failure */
-extern int removeRange(uint32_t x0, uint32_t y0, RangeList **l);
+extern int removeKeyrange(KeyrangeElem x0, KeyrangeElem y0, KeyrangeList **l);
 
 #ifdef __cplusplus
 }

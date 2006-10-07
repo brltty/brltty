@@ -711,7 +711,7 @@ a key press (a command here, which is driver-independent) may be waited for:
 <tscreen><code>
    fprintf(stderr,"Waiting until a braille key is pressed to continue... ");
    if (brlapi_readKey(1,&amp;key)>0)
-    fprintf(stderr,"got it! (code=%d)\n",key);
+    fprintf(stderr,"got it! (code=%"BRLAPI_PRIxKEYCODE")\n",key);
 </code></tscreen>
 
 The command code is returned, as described in <tt>&lt;brltty/brldefs.h></tt>.
@@ -809,7 +809,7 @@ int main()
 /* Wait for a key press */
    fprintf(stderr,"Waiting until a braille key is pressed to continue... ");
    if (brlapi_readKey(1,&amp;key)>0)
-    fprintf(stderr,"got it! (code=%d)\n",key);
+    fprintf(stderr,"got it! (code=%"BRLAPI_PRIxKEYCODE")\n",key);
    else brlapi_perror("brlapi_readKey");
 
   } else brlapi_perror("brlapi_writeText");
@@ -1318,8 +1318,9 @@ As soon as the client gets a tty, it must be prepared to handle
 <tt/BRLPACKET_KEY/ incoming packets
 at any time (as soon as the key
 was pressed on the braille terminal, hopefuly).
-The data holds the key or command code
-as an integer, depending on what has been request in the
+The data holds a key code as 2 integers, or
+the key flags then the command code
+as 2 integers, depending on what has been request in the
 <tt/BRLPACKET_GETTTY/ packet.
 
 <sect2><tt/BRLPACKET_SETFOCUS/ (see <em/brlapi_setFocus()/)
@@ -1339,7 +1340,7 @@ This is acknowledged by the server.
 
 <sect2><tt/BRLPACKET_IGNOREKEYRANGE/, <tt/BRLPACKET_UNIGNOREKEYRANGE/,
 <tt/BRLPACKET_IGNOREKEYSET/ and <tt/BRLPACKET_UNIGNOREKEYSET/ (see
-<em/brlapi_ignoreKeyRange()/, <em/brlapi_unignoreKeyRange/,
+<em/brlapi_ignoreKeyRange()/, <em/brlapi_unignoreKeyRange()/,
 <em/brlapi_ignoreKeySet()/, and <em/brlapi_unignoreKeySet()/)
 <p>
 If the client doesn't want every key press to be signaled to it, but some of
@@ -1351,9 +1352,9 @@ sent to it, but given to <tt/brltty/, and <tt/BRLPACKET_UNIGNOREKEYRANGE/
 of key codes which should be sent to it, and not given to
 <tt/brltty/. The server keeps a dynamic list of ranges, so that arbitrary
 sequences of such packets can be sent.
-For ranges, Data are 2 integers: the lower and the
+For ranges, Data are 2 pairs of integers: the lower and the
 upper boundaries; lower and upper must be equal to tell one key, for instance.
-For Sets, Data simply consists of integers, one per key in the set.
+For Sets, Data simply consists of pairs of integers, one per key in the set.
 
 <sect2><tt/BRLPACKET_WRITE/ (see <em/brlapi_write()/)
 <p>

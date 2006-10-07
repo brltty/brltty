@@ -132,8 +132,8 @@ api_client.$O:
 api_server.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/api_server.c
 
-rangelist.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/rangelist.c
+keyrangelist.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/keyrangelist.c
 
 ###############################################################################
 
@@ -509,7 +509,7 @@ install-api-headers:
 	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
 	$(INSTALL_DATA) api.h $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
 	$(INSTALL_DATA) $(SRC_DIR)/api_protocol.h $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
-	$(INSTALL_DATA) $(SRC_DIR)/brldefs.h $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
+	$(INSTALL_DATA) $(SRC_DIR)/api_brldefs.h $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)/brldefs.h
 
 install-api-manpages:
 	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(MANPAGE_DIRECTORY)/man3

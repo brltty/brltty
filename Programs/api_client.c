@@ -227,9 +227,8 @@ static ssize_t brlapi_doWaitForPacket(brl_type_t expectedPacketType, void *packe
   static unsigned char localPacket[BRLAPI_MAXPACKETSIZE];
   brl_type_t type;
   ssize_t res;
-  brl_keycode_t *code = (brl_keycode_t *) localPacket;
+  uint32_t *code = (uint32_t *) localPacket;
   errorPacket_t *errorPacket = (errorPacket_t *) localPacket;
-  int hdrSize = sizeof(errorPacket->code)+sizeof(errorPacket->type);
 
   res = brlapi_readPacketHeader(defaultHandle.fileDescriptor, &type);
   if (res<0) return res; /* reports EINTR too */
@@ -256,9 +255,9 @@ static ssize_t brlapi_doWaitForPacket(brl_type_t expectedPacketType, void *packe
   if ((type==BRLPACKET_KEY) && (defaultHandle.state & STCONTROLLINGTTY) && (res==sizeof(brl_keycode_t))) {
     /* keypress, buffer it */
     if (defaultHandle.keybuf_nb>=BRL_KEYBUF_SIZE) {
-      syslog(LOG_WARNING,"lost key: 0X%" PRIX32,*code);
+      syslog(LOG_WARNING,"lost key: 0X%8"PRIx32"%8"PRIx32"\n",ntohl(code[0]),ntohl(code[1]));
     } else {
-      defaultHandle.keybuf[(defaultHandle.keybuf_next+defaultHandle.keybuf_nb++)%BRL_KEYBUF_SIZE]=ntohl(*code);
+      defaultHandle.keybuf[(defaultHandle.keybuf_next+defaultHandle.keybuf_nb++)%BRL_KEYBUF_SIZE] = ((brl_keycode_t)ntohl(code[0]) << 32) | ntohl(code[1]);
     }
     pthread_mutex_unlock(&defaultHandle.read_mutex);
     return -3;
@@ -268,11 +267,12 @@ static ssize_t brlapi_doWaitForPacket(brl_type_t expectedPacketType, void *packe
   /* else this is an error */
 
   if (type==BRLPACKET_ERROR) {
-    brlapi_errno = ntohl(*code);
+    brlapi_errno = ntohl(errorPacket->code);
     return -1;
   }
   if (type==BRLPACKET_EXCEPTION) {
     size_t esize;
+    int hdrSize = sizeof(errorPacket->code)+sizeof(errorPacket->type);
     if (res<hdrSize) esize = 0; else esize = res-hdrSize;
     defaultHandle.exceptionHandler(ntohl(errorPacket->code), ntohl(errorPacket->type), &errorPacket->packet, esize);
     return -3;
@@ -1213,6 +1213,7 @@ static int packetReady(brlapi_fileDescriptor osfd)
 int brlapi_readKey(int block, brl_keycode_t *code)
 {
   ssize_t res;
+  uint32_t buf[2];
 
   pthread_mutex_lock(&defaultHandle.state_mutex);
   if (!(defaultHandle.state & STCONTROLLINGTTY)) {
@@ -1242,7 +1243,7 @@ int brlapi_readKey(int block, brl_keycode_t *code)
       return res;
     }
   }
-  res=brlapi_waitForPacket(BRLPACKET_KEY, code, sizeof(*code), 0);
+  res=brlapi_waitForPacket(BRLPACKET_KEY, buf, sizeof(buf), 0);
   pthread_mutex_unlock(&defaultHandle.key_mutex);
   if (res == -3) {
     if (!block) return 0;
@@ -1252,7 +1253,7 @@ int brlapi_readKey(int block, brl_keycode_t *code)
     return -1;
   }
   if (res < 0) return -1;
-  *code = ntohl(*code);
+  *code = ((brl_keycode_t)ntohl(buf[0]) << 32) | ntohl(buf[1]);
   return 1;
 }
 
@@ -1261,7 +1262,10 @@ int brlapi_readKey(int block, brl_keycode_t *code)
 /* what = 0 for ignoring !0 for unignoring */
 static int ignore_unignore_key_range(int what, brl_keycode_t x, brl_keycode_t y)
 {
-  brl_keycode_t ints[2] = { htonl(x), htonl(y) };
+  uint32_t ints[4] = {
+    htonl(x >> 32), htonl(x & 0xffffffff),
+    htonl(y >> 32), htonl(y & 0xffffffff),
+  };
 
   return brlapi_writePacketWaitForAck(defaultHandle.fileDescriptor,(what ? BRLPACKET_UNIGNOREKEYRANGE : BRLPACKET_IGNOREKEYRANGE),ints,sizeof(ints));
 }
@@ -1283,13 +1287,17 @@ int brlapi_unignoreKeyRange(brl_keycode_t x, brl_keycode_t y)
 /* what = 0 for ignoring !0 for unignoring */
 static int ignore_unignore_key_set(int what, const brl_keycode_t *s, unsigned int n)
 {
-  size_t size;
+  uint32_t buf[2*n];
+  int i;
   if (n>BRLAPI_MAXKEYSETSIZE) {
     brlapi_errno = BRLERR_INVALID_PARAMETER;
     return -1;
   }
-  size = n*sizeof(brl_keycode_t);
-  return brlapi_writePacketWaitForAck(defaultHandle.fileDescriptor,(what ? BRLPACKET_UNIGNOREKEYSET : BRLPACKET_IGNOREKEYSET),s,size);
+  for (i=0;i<n;i++) {
+    buf[2*i+0] = htonl(s[i] >> 32);
+    buf[2*i+1] = htonl(s[i] & 0xffffffff);
+  }
+  return brlapi_writePacketWaitForAck(defaultHandle.fileDescriptor,(what ? BRLPACKET_UNIGNOREKEYSET : BRLPACKET_IGNOREKEYSET),buf,sizeof(buf));
 }
 
 /* Function : brlapi_ignoreKeySet */
