@@ -1,32 +1,106 @@
-Compilation
-===========
+System Requirements
+===================
+
+The earliest release of Windows which is supported by BRLTTY is Windows 98.
 
 In order to build BRLTTY from a supplied tarball, you need either Cygwin (see
-http://www.cygwin.com/) or MinGW (see http://mingw.sourceforge.net/). In both
-cases, you also need the following additional packages:
+[http://www.cygwin.com/]) or MinGW (see [http://mingw.sourceforge.net/]). In 
+both cases, you also need the following additional packages:
 *  gcc
 *  make
 *  w32api (version 3.6 or later)
-*  yacc or bison (for the Papenmeier braille driver)
+*  yacc or bison
 
 If you'd like to build BRLTTY from its source repository rather than from one
 of the supplied tarballs then you'll also need these additional packages:
 *  autoconf
 *  tcl
 
-In order to prepare the documentation (do make within the Documents
-subdirectory) then you'll need these packages:
+In order to prepare the documentation (do make within the Documents/
+subdirectory) you'll need these packages:
 *  linuxdoc-tools
 *  doxygen
 
 ------------------------------------------------------------------------------
 
-Windows 95, 98, and Me Limitation
+USB Support
+===========
+
+USB devices are supported thanks to the libusb-win32 package. This means that,
+_before_ compiling BRLTTY, you need to:
+
+either
+*  For Cygwin:
+   1) Install the libusb-win32 package.
+   2) Activate the kernel driver by running /usr/sbin/libusb-install. You must
+      also do this each time you upgrade libusb-win32 in order to
+      reactivate the driver.
+
+or
+1) Download the libusb-win32 installer. As of the time of this writing, you can
+   get it from [http://libusb-win32.sourceforge.net/]. The file will be called
+   something like "libusb-win32-filter-bin-<version>.exe", and should be
+   available on [http://sourceforge.net/project/showfiles.php?group_id=78138].
+
+2) Run the installer. Remember where you install the package, for example:
+
+      C:\Program Files\LibUSB-Win32-<version>
+
+3) Symlink the header and library files to your Cygwin/MinGW installation.
+   *  For Cygwin, run:
+      +  ln -s "/cygdrive/c/Program Files/LibUSB-Win32-<version>/include/usb.h" 
+               /usr/include/
+      +  ln -s "/cygdrive/c/Program Files/LibUSB-Win32-<version>/lib/gcc/libusb.a" 
+               /usr/lib/
+
+   *  For MinGW, run:
+      +  ln -s "/c/Program Files/LibUSB-Win32-someversion/include/usb.h"
+               /mingw/include/
+      +  ln -s "/c/Program Files/LibUSB-Win32-someversion/lib/gcc/libusb.a"
+               /mingw/lib/
+
+Then you can configure, compile, install, and run BRLTTY as usual.
+
+------------------------------------------------------------------------------
+
+Configuring BRLTTY
+==================
+
+Some of BRLTTY's configure options are of particular interest to users of the 
+Windows platform:
+
+--enable-relocatable-install: The default is for BRLTTY to refer to its
+components via absolute paths. On the Windows platform, however, the convention
+is for a package to use relative paths so that it can be installed into an
+arbitrary directory and so that it can be moved around thereafter as well. This
+option builds BRLTTY such that relative paths are used.
+
+------------------------------------------------------------------------------
+
+Sharing the Braille Display with Other Screen Readers
+=====================================================
+
+When you're not on a window which BRLTTY can handle its default action is to
+retain control of the braille display and to present a brief message explaining
+the problem. If you have another braille-capable screen reader and would like
+it to take over instead then both BRLTTY and that other screen reader must be
+instructed to share the braille display.
+
+BRLTTY can be instructed to share the braille display via its --release-device
+option; the short form of this option is -r. When this option is in effect
+BRLTTY releases the braille display when you move onto a window which it cannot
+handle and tries to regain control of the braille display when you move onto a
+window which it can handle. Note that these actions take a noticeable amount of
+time so you should only use this option if it's actually needed.
+
+------------------------------------------------------------------------------
+
+Windows 98 and Me Limitation
 =================================
 
 On Windows versions 2000, XP, 2003, and later, BRLTTY automatically accesses
 the Windows terminal which you're currently using as you switch between them.
-This isn't possible on earlier versions. One way to achieve this
+This isn't possible on earlier versions. One way to still achieve this
 functionality, however, is to run one BRLTTY (which directly accesses your
 braille display) on the root window and another one (which indirectly accesses
 your braille display via BrlAPI) on each terminal. This scheme may sound
@@ -58,42 +132,3 @@ to BrlAPI.
 
 ------------------------------------------------------------------------------
 
-USB Support
-===========
-
-USB devices are supported thanks to the libusb-win32 package. This means that,
-_before_ compiling BRLTTY, you need to:
-
-either
-*  For Cygwin:
-   1) Install the libusb-win32 package.
-   2) Activate the kernel driver by running /usr/sbin/libusb-install. You must
-      also do this each time you upgrade libusb-win32 in order to
-      reactivate the driver.
-
-or
-1) Download the libusb-win32 installer. As of the time of this writing, you can
-   get it from [http://libusb-win32.sourceforge.net/]. The file will be called
-   something like libusb-win32-filter-bin-<version>.exe, and should be
-   available on [http://sourceforge.net/project/showfiles.php?group_id=78138].
-
-2) Run the installer. Remember where you install the package, for example:
-
-      C:\Program Files\LibUSB-Win32-<version>
-
-3) Symlink the header and library files to your Cygwin/MinGW installation.
-   *  For Cygwin, run:
-      +  ln -s "/cygdrive/c/Program Files/LibUSB-Win32-<version>/include/usb.h" 
-               /usr/include/
-      +  ln -s "/cygdrive/c/Program Files/LibUSB-Win32-<version>/lib/gcc/libusb.a" 
-               /usr/lib/
-
-   *  For MinGW, run:
-      +  ln -s "/c/Program Files/LibUSB-Win32-someversion/include/usb.h"
-               /mingw/include/
-      +  ln -s "/c/Program Files/LibUSB-Win32-someversion/lib/gcc/libusb.a"
-               /mingw/lib/
-
-Then you can configure, compile, install, and run BRLTTY as usual.
-
-------------------------------------------------------------------------------
