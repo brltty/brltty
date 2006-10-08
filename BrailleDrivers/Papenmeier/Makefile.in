@@ -26,14 +26,14 @@ include $(SRC_TOP)braille.mk
 PM_CMD_SOURCES = $(SRC_TOP)$(PGM_DIR)/brldefs.h $(SRC_DIR)/brl-cfg.h
 
 braille.$O:
-	$(CC) $(BRL_CFLAGS) $(YCFLAGS) -c $(SRC_DIR)/braille.c
+	$(CC) $(BRL_CFLAGS) $(YACC_CFLAGS) -c $(SRC_DIR)/braille.c
 
 READ_CONFIG_OBJECTS = read_config.$O $(BLD_TOP)$(PGM_DIR)/cmd.$O $(BLD_TOP)$(PGM_DIR)/misc.$O
 read_config$X: $(READ_CONFIG_OBJECTS)
 	$(HOSTCC) $(HOSTLDFLAGS) -o $@ $(READ_CONFIG_OBJECTS) $(LDLIBS)
 
 read_config.$O:
-	$(HOSTCC) $(HOSTCFLAGS) $(YCFLAGS) -c $(SRC_DIR)/read_config.c
+	$(HOSTCC) $(HOSTCFLAGS) $(YACC_CFLAGS) -c $(SRC_DIR)/read_config.c
 
 config.tab.c: cmd.auto.h hlp.auto.h
 	$(YACC) -b config -v $(SRC_DIR)/config.y
