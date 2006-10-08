@@ -137,13 +137,13 @@ keyrangelist.$O:
 
 ###############################################################################
 
-api_python.$(LIB_EXT): api_python.$O
-	$(MKLIB:<name>=brlapi) $@ api_python.$O $(PYTHON_LDFLAGS) -lbrlapi
+api_python.$(LIB_EXT): api_python.$O api
+	$(MKLIB:<name>=brlapi) $@ api_python.$O $(PYTHON_LDFLAGS) -L. -lbrlapi
 
 api_python.$O: api_python.c
 	$(CC) $(LIBCFLAGS) $(PYTHON_CPPFLAGS) -c api_python.c
 
-api_python.c: $(SRC_TOP)$(PYT_DIR)/brlapi.pyx
+api_python.c: $(SRC_TOP)$(PYT_DIR)/brlapi.pyx $(SRC_TOP)$(PYT_DIR)/c_brlapi.pxd
 	$(PYREXC) -o $@ $(SRC_TOP)$(PYT_DIR)/brlapi.pyx
 
 ###############################################################################

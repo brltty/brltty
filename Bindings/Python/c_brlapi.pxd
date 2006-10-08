@@ -2,7 +2,7 @@
 
 # File binding C functions
 
-cdef extern from "brltty/api.h":
+cdef extern from "Programs/api.h":
 	ctypedef struct brlapi_settings_t:
 		char *authKey
 		char *hostName
