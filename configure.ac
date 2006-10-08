@@ -661,7 +661,7 @@ AC_SUBST([YACC_CFLAGS], ["${brltty_cv_prog_cc_yaccflags}"])
 AC_CACHE_CHECK([for c compiler python source flags], [brltty_cv_prog_cc_pyrexcflags], [dnl
 if test "${GCC}" = "yes"
 then
-   brltty_cv_prog_cc_pyrexcflags="-Wno-unused"
+   brltty_cv_prog_cc_pyrexcflags="-Wno-unused -fno-strict-aliasing"
 else
    case "${host_os}"
    in
