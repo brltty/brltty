@@ -423,10 +423,21 @@ BRLTTY_ARG_DISABLE(
             install_api_libraries="install-api-libraries-windows"
             ;;
       esac
+
+      m4_include([ac_python_devel.m4])
+      AC_PATH_PROG([PYREXC], [pyrexc])
+      if test -n "${PYREXC}"
+      then
+         AC_PYTHON_DEVEL()
+         api_bindings="${api_bindings} api_python.so"
+         install_api_bindings="${install_api_bindings} install-api-python"
+      fi
    ])
 ])
 AC_SUBST([api_objects])
 AC_SUBST([api_libraries])
+AC_SUBST([api_bindings])
+AC_SUBST([install_api_bindings])
 AC_SUBST([all_api])
 AC_SUBST([install_api])
 AC_SUBST([api_dynamic_library])

@@ -20,7 +20,7 @@ all-brltty: brltty$X $(BRAILLE_DRIVERS) $(BRAILLE_HELP) $(SPEECH_DRIVERS) $(SCRE
 all-brltest: brltest$X $(BRAILLE_DRIVERS)
 all-spktest: spktest$X $(SPEECH_DRIVERS)
 all-scrtest: scrtest$X $(SCREEN_DRIVERS)
-all-api: apitest$X $(ALL_XBRLAPI)
+all-api: apitest$X $(API_BINDINGS) $(ALL_XBRLAPI)
 all-xbrlapi: xbrlapi$X
 
 ###############################################################################
@@ -134,6 +134,17 @@ api_server.$O:
 
 keyrangelist.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/keyrangelist.c
+
+###############################################################################
+
+api_python.$(LIB_EXT): api_python.$O
+	$(MKLIB:<name>=brlapi) $@ api_python.$O $(PYTHON_LDFLAGS) -lbrlapi
+
+api_python.$O: api_python.c
+	$(CC) $(CFLAGS) $(PYTHON_CPPFLAGS) -c api_python.c
+
+api_python.c: $(SRC_TOP)$(PYT_DIR)/brlapi.pyx
+	$(PYREXC) -o $@ $(SRC_TOP)$(PYT_DIR)/brlapi.pyx
 
 ###############################################################################
 
@@ -488,7 +499,7 @@ install-manpages:
 	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(MANPAGE_DIRECTORY)/man1
 	$(INSTALL_DATA) $(BLD_TOP)$(DOC_DIR)/*.1 $(INSTALL_ROOT)$(MANPAGE_DIRECTORY)/man1
 
-install-api: $(INSTALL_API_LIBRARIES) install-api-headers install-api-manpages install-api-key $(INSTALL_XBRLAPI)
+install-api: $(INSTALL_API_LIBRARIES) install-api-headers install-api-manpages install-api-key $(INSTALL_XBRLAPI) $(INSTALL_API_BINDINGS)
 
 install-api-libraries: $(API_LIB) $(API_ARC) install-libdir-directory
 	$(INSTALL_PROGRAM) $(API_LIB) $(INSTALL_ROOT)$(libdir)/$(API_LIB).$(API_RELEASE)
@@ -520,6 +531,10 @@ install-api-key:
 	file=$(sysconfdir)/$(API_AUTHFILE) && \
 	if test ! -f $$file -a -w $(sysconfdir) -a -z "$(INSTALL_ROOT)"; \
 	then umask 077 && $(SRC_DIR)/brltty-genkey $$file; fi
+
+install-api-python:
+	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(PYTHON_SITE_PKG)
+	$(INSTALL_PROGRAM) api_python.so $(INSTALL_ROOT)$(PYTHON_SITE_PKG)/brlapi.so
 
 ###############################################################################
 

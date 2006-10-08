@@ -27,6 +27,8 @@ SPK_DIR = SpeechDrivers
 SCR_DIR = ScreenDrivers
 DRV_DIR = lib
 DAT_DIR = data
+BND_DIR = Bindings
+PYT_DIR = $(BND_DIR)/Python
 
 CROSSCOMP = @compiler_prefix@
 INSTALL_ROOT = @install_root@
@@ -76,6 +78,11 @@ RANLIB = $(CROSSCOMP)$(HOSTRANLIB)
 YACC = @YACC@
 
 AWK = @AWK@
+
+PYREXC = @PYREXC@
+PYTHON_CPPFLAGS = @PYTHON_CPPFLAGS@
+PYTHON_LDFLAGS = @PYTHON_LDFLAGS@
+PYTHON_SITE_PKG = @PYTHON_SITE_PKG@
 
 SYMLINK = @LN_S@
 
@@ -189,6 +196,8 @@ API_VERSION = @api_version@
 API_RELEASE = @api_release@
 API_OBJECTS = @api_objects@
 API_LIBRARIES = @api_libraries@
+API_BINDINGS = @api_bindings@
+INSTALL_API_BINDINGS = @install_api_bindings@
 ALL_API = @all_api@
 INSTALL_API = @install_api@
 API_DYNAMIC_LIBRARY = @api_dynamic_library@

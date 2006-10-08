@@ -20,7 +20,7 @@ set -e
 cd `dirname "${0}"`
 ./gendeps
 [ -f Makefile ] && make -s distclean
-"${BRLTTY_AUTOCONF:-autoconf}"
+"${BRLTTY_AUTOCONF:-autoconf}" -I acdir
 rm -fr autom4te*.cache || :
 [ "${#}" -gt 0 ] && ./configure "${@}"
 exit 0
