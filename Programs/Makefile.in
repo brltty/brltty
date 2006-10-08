@@ -532,9 +532,9 @@ install-api-key:
 	if test ! -f $$file -a -w $(sysconfdir) -a -z "$(INSTALL_ROOT)"; \
 	then umask 077 && $(SRC_DIR)/brltty-genkey $$file; fi
 
-install-api-python:
+install-api-python: api_python.$(LIB_EXT)
 	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(PYTHON_SITE_PKG)
-	$(INSTALL_PROGRAM) api_python.so $(INSTALL_ROOT)$(PYTHON_SITE_PKG)/brlapi.so
+	$(INSTALL_PROGRAM) api_python.$(LIB_EXT) $(INSTALL_ROOT)$(PYTHON_SITE_PKG)/brlapi.$(LIB_EXT)
 
 ###############################################################################
 
