@@ -141,7 +141,7 @@ api_python.$(LIB_EXT): api_python.$O
 	$(MKLIB:<name>=brlapi) $@ api_python.$O $(PYTHON_LDFLAGS) -lbrlapi
 
 api_python.$O: api_python.c
-	$(CC) $(CFLAGS) $(PYTHON_CPPFLAGS) -c api_python.c
+	$(CC) $(LIBCFLAGS) $(PYTHON_CPPFLAGS) -c api_python.c
 
 api_python.c: $(SRC_TOP)$(PYT_DIR)/brlapi.pyx
 	$(PYREXC) -o $@ $(SRC_TOP)$(PYT_DIR)/brlapi.pyx
