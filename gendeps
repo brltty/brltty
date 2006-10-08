@@ -107,6 +107,9 @@ proc getBuildDirectories {{root ""}} {
 }
 
 proc skipFile {path} {
+   if {[string equal [file extension [file rootname $path]] .auto]} {
+      return 1
+   }
    if {[string match *.tab.c $path]} {
       return 1
    }

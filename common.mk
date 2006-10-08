@@ -24,7 +24,7 @@ $(BLD_TOP)$(BRL_DIR)/VideoBraille/braille.$O: $(BLD_TOP)$(BRL_DIR)/VideoBraille/
 	cd $(@D) && $(MAKE) $(@F)
 
 clean::
-	-rm -f *.$O *.auto.h core implib.a
+	-rm -f *.$O *.auto.h *.auto.c core implib.a
 
 distclean::
 	-rm -f *~ *orig \#*\# *.rej ? a.out

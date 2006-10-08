@@ -2,9 +2,12 @@ Makefile
 reldeps.mk
 api.h
 *.auto.h
+*.auto.c
 *.a
 *.so
 *.dylib
+*.dll
+*.exe
 brltty
 brltty-config
 apitest

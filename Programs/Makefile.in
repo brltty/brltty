@@ -137,13 +137,16 @@ keyrangelist.$O:
 
 ###############################################################################
 
-api_python.$(LIB_EXT): api_python.$O api
+PYTHON_LIB = api_python.$(LIB_EXT)
+PYTHON_API = brlapi.$(LIB_EXT)
+
+$(PYTHON_LIB): api_python.$O api
 	$(MKLIB:<name>=brlapi) $@ api_python.$O $(PYTHON_LDFLAGS) -L. -lbrlapi
 
-api_python.$O: api_python.c
-	$(CC) $(LIBCFLAGS) $(PYREXC_CFLAGS) $(PYTHON_CPPFLAGS) -c api_python.c
+api_python.$O: api_python.auto.c api.h
+	$(CC) $(LIBCFLAGS) $(PYREXC_CFLAGS) $(PYTHON_CPPFLAGS) -o $@ -c api_python.auto.c
 
-api_python.c: $(SRC_TOP)$(PYT_DIR)/brlapi.pyx $(SRC_TOP)$(PYT_DIR)/c_brlapi.pxd
+api_python.auto.c: $(SRC_TOP)$(PYT_DIR)/brlapi.pyx $(SRC_TOP)$(PYT_DIR)/c_brlapi.pxd
 	$(PYREXC) -o $@ $(SRC_TOP)$(PYT_DIR)/brlapi.pyx
 
 ###############################################################################
@@ -532,9 +535,9 @@ install-api-key:
 	if test ! -f $$file -a -w $(sysconfdir) -a -z "$(INSTALL_ROOT)"; \
 	then umask 077 && $(SRC_DIR)/brltty-genkey $$file; fi
 
-install-api-python: api_python.$(LIB_EXT)
+install-api-python: $(PYTHON_LIB)
 	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(PYTHON_SITE_PKG)
-	$(INSTALL_PROGRAM) api_python.$(LIB_EXT) $(INSTALL_ROOT)$(PYTHON_SITE_PKG)/brlapi.$(LIB_EXT)
+	$(INSTALL_PROGRAM) $(PYTHON_LIB) $(INSTALL_ROOT)$(PYTHON_SITE_PKG)/$(PYTHON_API)
 
 ###############################################################################
 
@@ -563,6 +566,7 @@ uninstall-libraries:
 	-rm -f $(INSTALL_ROOT)$(libdir)/$(API_IMPLIB)
 	-rm -f $(INSTALL_ROOT)$(libdir)/$(API_IMPLIB_VERSIONED)
 	-rm -f $(INSTALL_ROOT)$(PROGRAM_DIRECTORY)/$(API_DLL)
+	-rm -f $(INSTALL_ROOT)$(PYTHON_SITE_PKG)/$(PYTHON_API)
 
 uninstall-manpages:
 	-rm -f $(INSTALL_ROOT)$(MANPAGE_DIRECTORY)/man1/brltty.1
@@ -595,7 +599,7 @@ distclean clean::
 
 clean::
 	-rm -f brltty$X xbrlapi$X txt2hlp$X tbl2hex$X *test$X *-static$X
-	-rm -f $(API_LIB) $(API_ARC) $(API_DLL) $(API_IMPLIB)
+	-rm -f $(API_LIB) $(API_ARC) $(API_DLL) $(API_IMPLIB) $(PYTHON_LIB)
 	-rm -f $(BLD_TOP)$(DRV_DIR)/* $(BLD_TOP)$(DAT_DIR)/*
 
 distclean::
