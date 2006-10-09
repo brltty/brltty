@@ -424,14 +424,23 @@ BRLTTY_ARG_DISABLE(
             ;;
       esac
 
-      m4_include([ac_python_devel.m4])
-      AC_PATH_PROG([PYREXC], [pyrexc])
-      if test -n "${PYREXC}"
-      then
-         AC_PYTHON_DEVEL()
-         api_bindings="${api_bindings} api_python.so"
-         install_api_bindings="${install_api_bindings} install-api-python"
-      fi
+      BRLTTY_ARG_DISABLE(
+         [python-bindings],
+         [Python bindings for BrlAPI],
+         [],
+         [
+            m4_include([ac_python_devel.m4])
+            AC_PATH_PROG([PYREXC], [pyrexc])
+            if test -n "${PYREXC}"
+            then
+               AC_PYTHON_DEVEL()
+               api_bindings="${api_bindings} api_python.so"
+               install_api_bindings="${install_api_bindings} install-api-python"
+            else
+               AC_MSG_WARN([Python BrlAPI bindings not included: pyrexc not found])
+            fi
+         ]
+      )
    ])
 ])
 AC_SUBST([api_objects])
