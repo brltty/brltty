@@ -125,6 +125,7 @@ begword belk = Belkin
 always bell =
 begword belm = Belmont
 always belt =
+begword belv = belvedere
 begword belw = belwether
 always ben 12-26
 word benefic 23-1345-15-124-24-14
@@ -443,6 +444,7 @@ always little 123-123
 contraction ll
 sufword lone 123-5-135 lonely
 always lord 5-123
+word lucknow =
 
 # the letter m
 always m 134
