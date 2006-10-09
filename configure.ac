@@ -644,33 +644,33 @@ esac])
 SYSCFLAGS="${brltty_cv_prog_cc_sysflags}"
 AC_SUBST([SYSCFLAGS])
 
-AC_CACHE_CHECK([for c compiler yacc source flags], [brltty_cv_prog_cc_yaccflags], [dnl
+AC_CACHE_CHECK([for c compiler yacc source flags], [brltty_cv_prog_cc_flags_yacc], [dnl
 if test "${GCC}" = "yes"
 then
-   brltty_cv_prog_cc_yaccflags="-Wno-parentheses -Wno-unused -Wno-uninitialized -Wno-unknown-pragmas"
+   brltty_cv_prog_cc_flags_yacc="-Wno-parentheses -Wno-unused -Wno-uninitialized -Wno-unknown-pragmas"
 else
    case "${host_os}"
    in
       *)
-         brltty_cv_prog_cc_yaccflags=""
+         brltty_cv_prog_cc_flags_yacc=""
          ;;
    esac
 fi])
-AC_SUBST([YACC_CFLAGS], ["${brltty_cv_prog_cc_yaccflags}"])
+AC_SUBST([YACC_CFLAGS], ["${brltty_cv_prog_cc_flags_yacc}"])
 
-AC_CACHE_CHECK([for c compiler python source flags], [brltty_cv_prog_cc_pyrexcflags], [dnl
+AC_CACHE_CHECK([for c compiler python source flags], [brltty_cv_prog_cc_flags_pyrexc], [dnl
 if test "${GCC}" = "yes"
 then
-   brltty_cv_prog_cc_pyrexcflags="-Wno-unused -fno-strict-aliasing"
+   brltty_cv_prog_cc_flags_pyrexc="-Wno-unused -fno-strict-aliasing -U_POSIX_C_SOURCE -U_XOPEN_SOURCE"
 else
    case "${host_os}"
    in
       *)
-         brltty_cv_prog_cc_pyrexcflags=""
+         brltty_cv_prog_cc_flags_pyrexc=""
          ;;
    esac
 fi])
-AC_SUBST([PYREXC_CFLAGS], ["${brltty_cv_prog_cc_pyrexcflags}"])
+AC_SUBST([PYREXC_CFLAGS], ["${brltty_cv_prog_cc_flags_pyrexc}"])
 
 AC_CACHE_CHECK([for c compiler shared object flags], [brltty_cv_prog_cc_libflags], [dnl
 if test "${GCC}" = "yes"
