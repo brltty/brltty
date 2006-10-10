@@ -1,6 +1,6 @@
 # Copyright (C) 2005 Alexis ROBERT
 
-# File binding C functions
+# File binding C functions
 
 cdef extern from "Programs/api.h":
 	ctypedef struct brlapi_settings_t:

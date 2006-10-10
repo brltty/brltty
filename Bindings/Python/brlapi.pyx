@@ -46,7 +46,7 @@ cdef class Write:
 		self.props.regionBegin = 0
 		self.props.regionSize = 0
 		self.props.text = ""
-		#�I must add attrAnd & attrOr
+		# I must add attrAnd & attrOr
 		self.props.cursor = 0
 		self.props.charset = ""
 
@@ -194,7 +194,7 @@ cdef class Bridge:
 			else:
 				return id
 
-	#�TODO: getDriverInfo
+	# TODO: getDriverInfo
 	
 	property drivername:
 		"""Get the complete name of the driver used by BrlTTY"""
@@ -283,7 +283,12 @@ cdef class Bridge:
 
 		By default, all the keypresses will be passed to the client, none will go through brltty, so the application will have to handle console switching itself for instance."""
 		cdef unsigned long long code
-		retval = c_brlapi.brlapi_readKey(block, <unsigned long long*>&code)
+		if block == 1:
+			PY_BEGIN_ALLOW_THREADS
+			retval = c_brlapi.brlapi_readKey(block, <unsigned long long*>&code)
+			PY_END_ALLOW_THREADS
+		else:
+			retval = c_brlapi.brlapi_readKey(block, <unsigned long long*>&code)
 		if retval == -1:
 			raise OperationError(returnerrno())
 		elif retval <= 0 and block == False:
