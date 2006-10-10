@@ -35,9 +35,9 @@ typedef enum {
 
 /* Global Definitions */
 
-static int useVarioKeys;
-static const int logInputPackets = 0;
-static const int logOutputPackets = 0;
+static unsigned int useVarioKeys;
+static const unsigned int logInputPackets = 0;
+static const unsigned int logOutputPackets = 0;
 static const int probeLimit = 2;
 static const int probeTimeout = 200;
 
