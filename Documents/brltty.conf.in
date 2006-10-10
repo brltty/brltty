@@ -362,6 +362,7 @@
 #screen-parameters lx:DebugAcm=no # [no,yes]
 #screen-parameters lx:DebugSfm=no # [no,yes]
 #screen-parameters lx:DebugCtt=no # [no,yes]
+#screen-parameters lx:Hfb=auto # [auto,vga,fb,0-7]
 
 # Windows Screen Driver Parameters
 #screen-parameters wn:Root=no # [no,yes]
