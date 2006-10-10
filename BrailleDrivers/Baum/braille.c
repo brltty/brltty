@@ -24,12 +24,18 @@
 #include "Programs/misc.h"
 #include "Programs/io_defs.h"
 
+typedef enum {
+  PARM_VARIOKEYS
+} DriverParameter;
+#define BRLPARMS "variokeys"
+
 #define BRLSTAT ST_TiemanStyle
 #define BRL_HAVE_PACKET_IO
 #include "Programs/brl_driver.h"
 
 /* Global Definitions */
 
+static int useVarioKeys;
 static const int logInputPackets = 0;
 static const int logOutputPackets = 0;
 static const int probeLimit = 2;
@@ -1670,6 +1676,10 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
     };
     const ProtocolOperations *const *protocolAddress = protocolTable;
 
+    useVarioKeys = 0;
+    if (!validateYesNo(&useVarioKeys, parameters[PARM_VARIOKEYS]))
+      LogPrint(LOG_WARNING, "%s: %s", "invalid vario keys setting", parameters[PARM_VARIOKEYS]);
+
     while ((protocol = *protocolAddress)) {
       {
         int bits = 10;
@@ -1691,7 +1701,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
 
           brl->x = textCount;
           brl->y = 1;
-          brl->helpPage = 0;
+          brl->helpPage = useVarioKeys? 1: 0;
 
           activeKeys = pressedKeys;
           pendingCommand = EOF;
@@ -1807,6 +1817,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   }
 
 #define KEY(key,cmd) case (key): command = (cmd); break;
+#define KEYv(key,baumCmd,varioCmd) case (key): command = useVarioKeys? (varioCmd): (baumCmd); break;
   if (currentModifiers & MOD_INPUT) {
 #define DOT1 BAUM_KEY_TL1
 #define DOT2 BAUM_KEY_TL2
@@ -1973,26 +1984,26 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
       KEY(BAUM_KEY_TL2, BRL_CMD_FWINLT);
       KEY(BAUM_KEY_TR2, BRL_CMD_FWINRT);
 
-      KEY(BAUM_KEY_TL1|BAUM_KEY_TL3, BRL_CMD_CHRLT);
-      KEY(BAUM_KEY_TR1|BAUM_KEY_TR3, BRL_CMD_CHRRT);
+      KEYv(BAUM_KEY_TL1|BAUM_KEY_TL3, BRL_CMD_CHRLT, BRL_CMD_HOME);
+      KEYv(BAUM_KEY_TR1|BAUM_KEY_TR3, BRL_CMD_CHRRT, BRL_CMD_CSRTRK);
 
-      KEY(BAUM_KEY_TL1|BAUM_KEY_TL2|BAUM_KEY_TL3, BRL_CMD_LNBEG);
-      KEY(BAUM_KEY_TR1|BAUM_KEY_TR2|BAUM_KEY_TR3, BRL_CMD_LNEND);
+      KEYv(BAUM_KEY_TL1|BAUM_KEY_TL2|BAUM_KEY_TL3, BRL_CMD_LNBEG, BRL_CMD_CHRLT);
+      KEYv(BAUM_KEY_TR1|BAUM_KEY_TR2|BAUM_KEY_TR3, BRL_CMD_LNEND, BRL_CMD_CHRRT);
 
-      KEY(BAUM_KEY_TR1, BRL_CMD_LNUP);
-      KEY(BAUM_KEY_TR3, BRL_CMD_LNDN);
+      KEYv(BAUM_KEY_TR1, BRL_CMD_LNUP, BRL_CMD_PRDIFLN);
+      KEYv(BAUM_KEY_TR3, BRL_CMD_LNDN, BRL_CMD_NXDIFLN);
 
       KEY(BAUM_KEY_TL1|BAUM_KEY_TR1, BRL_CMD_TOP);
       KEY(BAUM_KEY_TL3|BAUM_KEY_TR3, BRL_CMD_BOT);
 
-      KEY(BAUM_KEY_TL2|BAUM_KEY_TR1, BRL_CMD_TOP_LEFT);
-      KEY(BAUM_KEY_TL2|BAUM_KEY_TR3, BRL_CMD_BOT_LEFT);
+      KEYv(BAUM_KEY_TL2|BAUM_KEY_TR1, BRL_CMD_TOP_LEFT, BRL_CMD_INFO);
+      KEYv(BAUM_KEY_TL2|BAUM_KEY_TR3, BRL_CMD_BOT_LEFT, BRL_CMD_NOOP);
 
-      KEY(BAUM_KEY_TR2|BAUM_KEY_TR1, BRL_CMD_PRDIFLN);
-      KEY(BAUM_KEY_TR2|BAUM_KEY_TR3, BRL_CMD_NXDIFLN);
+      KEYv(BAUM_KEY_TR2|BAUM_KEY_TR1, BRL_CMD_PRDIFLN, BRL_CMD_ATTRUP);
+      KEYv(BAUM_KEY_TR2|BAUM_KEY_TR3, BRL_CMD_NXDIFLN, BRL_CMD_ATTRDN);
 
-      KEY(BAUM_KEY_TL2|BAUM_KEY_TL1, BRL_CMD_ATTRUP);
-      KEY(BAUM_KEY_TL2|BAUM_KEY_TL3, BRL_CMD_ATTRDN);
+      KEYv(BAUM_KEY_TL2|BAUM_KEY_TL1, BRL_CMD_ATTRUP, BRL_CMD_TOP_LEFT);
+      KEYv(BAUM_KEY_TL2|BAUM_KEY_TL3, BRL_CMD_ATTRDN, BRL_CMD_BOT_LEFT);
 
       KEY(BAUM_KEY_TL2|BAUM_KEY_TR2|BAUM_KEY_TL1|BAUM_KEY_TR1, BRL_CMD_PRPROMPT);
       KEY(BAUM_KEY_TL2|BAUM_KEY_TR2|BAUM_KEY_TL3|BAUM_KEY_TR3, BRL_CMD_NXPROMPT);
@@ -2003,14 +2014,14 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
       KEY(BAUM_KEY_TL2|BAUM_KEY_TR1|BAUM_KEY_TR3|BAUM_KEY_TL1, BRL_CMD_PRSEARCH);
       KEY(BAUM_KEY_TL2|BAUM_KEY_TR1|BAUM_KEY_TR3|BAUM_KEY_TL3, BRL_CMD_NXSEARCH);
 
-      KEY(BAUM_KEY_TL1, BRL_CMD_CSRTRK|BRL_FLG_TOGGLE_ON);
-      KEY(BAUM_KEY_TL3, BRL_CMD_CSRTRK|BRL_FLG_TOGGLE_OFF);
+      KEYv(BAUM_KEY_TL1, BRL_CMD_CSRTRK|BRL_FLG_TOGGLE_ON, BRL_CMD_LNUP);
+      KEYv(BAUM_KEY_TL3, BRL_CMD_CSRTRK|BRL_FLG_TOGGLE_OFF, BRL_CMD_LNDN);
 
-      KEY(BAUM_KEY_TL2|BAUM_KEY_TR1|BAUM_KEY_TR3, BRL_CMD_HOME);
-      KEY(BAUM_KEY_TL1|BAUM_KEY_TL3|BAUM_KEY_TR2, BRL_CMD_SPKHOME);
+      KEYv(BAUM_KEY_TL2|BAUM_KEY_TR1|BAUM_KEY_TR3, BRL_CMD_HOME, BRL_CMD_LNBEG);
+      KEYv(BAUM_KEY_TL1|BAUM_KEY_TL3|BAUM_KEY_TR2, BRL_CMD_SPKHOME, BRL_CMD_LNEND);
 
       KEY(BAUM_KEY_TL1|BAUM_KEY_TL3|BAUM_KEY_TR1|BAUM_KEY_TR3, BRL_CMD_CSRJMP_VERT);
-      KEY(BAUM_KEY_TL2|BAUM_KEY_TR2, BRL_CMD_INFO);
+      KEYv(BAUM_KEY_TL2|BAUM_KEY_TR2, BRL_CMD_INFO, BRL_CMD_SKPBLNKWINS);
 
       KEY(BAUM_KEY_TL1|BAUM_KEY_TR1|BAUM_KEY_TR2, BRL_CMD_DISPMD);
       KEY(BAUM_KEY_TL1|BAUM_KEY_TL2|BAUM_KEY_TR1, BRL_CMD_FREEZE);
@@ -2111,6 +2122,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
       }
     }
   }
+#undef KEYv
 #undef KEY
 
   if (!keyPressed) {

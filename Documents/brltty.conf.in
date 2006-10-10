@@ -133,6 +133,9 @@
 #braille-parameters bl:BaudRate=9600 # [300,600,1200,2400,4800,9600,19200,38400]
 #braille-parameters bl:KbEmu=yes # [yes,no]
 
+# Baum Braille Driver Parameters
+#braille-parameters bm:VarioKeys=no # [no,yes]
+
 # BrailleNote Braille Driver Parameters
 #braille-parameters bn:StatusCells=0
 

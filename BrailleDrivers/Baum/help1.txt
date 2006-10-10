@@ -1,22 +1,22 @@
-Help for Baum Displays
+Help for Baum Displays with VarioKeys=yes
+(for users familiar with BRLTTY's old Vario driver)
 
 TL2/TR2: go left/right one window
-TL1+TL3 / TR1+TR3: go left/right one character
-TL1+TL2+TL3 / TR1+TR2+TR3: go to beginning/end of current line
-TR1/TR3: go up/down one line
+TL2+TR2: toggle skip blank windows
+TL1+TL2+TL3 / TR1+TR2+TR3: go left/right one character
+TL2+TR1+TR3 / TL1+TL3+TR2: go to beginning/end of current line
+TL1/TL3: go up/down one line
 TL1+TR1 / TL3+TR3: go to top/bottom line
-TL2 + TR1/TR3: go to beginning of top/bottom line
-TR2 + TR1/TR3: go up/down to nearest line with different content
-TL2 + TL1/TL3: go up/down to nearest line with different highlighting
+TL2 + TL1/TL3: go to beginning of top/bottom line
+TR1/TR3: go up/down to nearest line with different content
+TR2 + TR1/TR3: go up/down to nearest line with different highlighting
 TL2+TR2 + TL1+TR1/TL3+TR3: go up/down to nearest command prompt
 TL2+TR2 + TR1/TR3: go up/down to next paragraph (blank line)
 TL2+TR1+TR3 + TL1/TL3: search backward/forward for text from cut buffer
 
-TL1: go to cursor and enable cursor tracking
-TL3: disable cursor tracking
-TL2+TR1+TR3: go to cursor
-TL1+TL3+TR2: go to current (most recent) speech position
-TL2+TR2: switch to/from the status line
+TL1+TL3: go to cursor
+TR1+TR3: toggle cursor tracking
+TL2+TR1: switch to/from the status line
 
 CRn: bring cursor to character
 TL1+TL3+TR1+TR3: bring cursor to current line (no horizontal motion)
