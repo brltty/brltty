@@ -53,8 +53,8 @@ cdef extern from "Programs/api.h":
 	int brlapi_writeDots(unsigned char*)
 	int brlapi_writeText(int, char*)
 
-	int brlapi_ignoreKeyRange(unsigned int, unsigned int)
-	int brlapi_unignoreKeyRange(unsigned int, unsigned int)
+	int brlapi_ignoreKeyRange(unsigned long long, unsigned long long)
+	int brlapi_unignoreKeyRange(unsigned long long, unsigned long long)
 	int brlapi_readKey(int, unsigned long long*)
 
 	int brlapi_getRaw(char*)
@@ -64,3 +64,8 @@ cdef extern from "Programs/api.h":
 
 	brlapi_error_t* brlapi_error_location()
 	char* brlapi_strerror(brlapi_error_t*)
+
+cdef extern from "Python.h":
+	# these are macros, we just need to make Pyrex aware of them
+	int Py_BEGIN_ALLOW_THREADS
+	int Py_END_ALLOW_THREADS

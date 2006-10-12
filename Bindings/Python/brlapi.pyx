@@ -162,6 +162,7 @@ cdef class Bridge:
 
 		cdef c_brlapi.brlapi_settings_t *client
 		cdef c_brlapi.brlapi_settings_t *used
+		cdef int retval
 
 		# Fix segmentation fault
 		if clientSettings == None:
@@ -174,7 +175,9 @@ cdef class Bridge:
 		else:
 			used = &usedSettings.props
 
+		c_brlapi.Py_BEGIN_ALLOW_THREADS
 		retval = c_brlapi.brlapi_initializeConnection(client, used)
+		c_brlapi.Py_END_ALLOW_THREADS
 		if retval == -1:
 			if clientSettings == None:
 				hostname = "localhost"
@@ -194,7 +197,10 @@ cdef class Bridge:
 		def __get__(self):
 			cdef unsigned int x
 			cdef unsigned int y
+			cdef int retval
+			c_brlapi.Py_BEGIN_ALLOW_THREADS
 			retval = c_brlapi.brlapi_getDisplaySize(&x, &y)
+			c_brlapi.Py_END_ALLOW_THREADS
 			if retval == -1:
 				raise OperationError(returnerrno())
 			else:
@@ -204,7 +210,10 @@ cdef class Bridge:
 		"""Identify the driver used by BrlTTY"""
 		def __get__(self):
 			cdef char id[3]
+			cdef int retval
+			c_brlapi.Py_BEGIN_ALLOW_THREADS
 			retval = c_brlapi.brlapi_getDriverId(id, sizeof(id))
+			c_brlapi.Py_END_ALLOW_THREADS
 			if retval == -1:
 				raise OperationError(returnerrno())
 			else:
@@ -216,7 +225,10 @@ cdef class Bridge:
 		"""Get the complete name of the driver used by BrlTTY"""
 		def __get__(self):
 			cdef char name[21]
+			cdef int retval
+			c_brlapi.Py_BEGIN_ALLOW_THREADS
 			retval = c_brlapi.brlapi_getDriverName(name, sizeof(name))
+			c_brlapi.Py_END_ALLOW_THREADS
 			if retval == -1:
 				raise OperationError(returnerrno())
 			else:
@@ -227,10 +239,17 @@ cdef class Bridge:
 		* tty : If tty >= 0, application takes control of the specified tty
 			If tty == -1, the library first tries to get the tty number from the WINDOWID environment variable (form xterm case), then the CONTROLVT variable, and at last reads /proc/self/stat (on linux)
 		* how : Tells how the application wants readKey() to return key presses. None or "" means BrlTTY commands are required, whereas a driver name means that raw key codes returned by this driver are expected."""
+		cdef int retval
+		cdef int c_tty
+		cdef char *c_how
+		c_tty = tty
 		if not how:
-			retval = c_brlapi.brlapi_getTty(tty, NULL)
+			c_how = NULL
 		else:
-			retval = c_brlapi.brlapi_getTty(tty, how)
+			c_how = how
+		c_brlapi.Py_BEGIN_ALLOW_THREADS
+		retval = c_brlapi.brlapi_getTty(c_tty, c_how)
+		c_brlapi.Py_END_ALLOW_THREADS
 		if retval == -1:
 			raise OperationError(returnerrno())
 		else:
@@ -238,7 +257,10 @@ cdef class Bridge:
 
 	def leaveTty(self):
 		"""Stop controlling the tty"""
+		cdef int retval
+		c_brlapi.Py_BEGIN_ALLOW_THREADS
 		retval = c_brlapi.brlapi_leaveTty()
+		c_brlapi.Py_END_ALLOW_THREADS
 		if retval == -1:
 			raise OperationError(returnerrno())
 		else:
@@ -250,7 +272,12 @@ cdef class Bridge:
 	def setFocus(self, tty):
 		"""Tell the current tty to brltty.
 		This is intended for focus tellers, such as brltty, xbrlapi, screen, ... getTty() must have been called before hand to tell where this focus applies in the tty tree."""
-		retval = c_brlapi.brlapi_setFocus(tty)
+		cdef int retval
+		cdef int c_tty
+		c_tty = tty
+		c_brlapi.Py_BEGIN_ALLOW_THREADS
+		retval = c_brlapi.brlapi_setFocus(c_tty)
+		c_brlapi.Py_END_ALLOW_THREADS
 		if retval == -1:
 			raise OperationError(returnerrno())
 		else:
@@ -259,7 +286,10 @@ cdef class Bridge:
 	def write(self, Write writeStruct):
 		"""Update a specific region of the braille display and apply and/or masks.
 		* s : gives information necessary for the update"""
+		cdef int retval
+		c_brlapi.Py_BEGIN_ALLOW_THREADS
 		retval = c_brlapi.brlapi_write(&writeStruct.props)
+		c_brlapi.Py_END_ALLOW_THREADS
 		if retval == -1:
 			raise OperationError(returnerrno())
 		else:
@@ -268,7 +298,12 @@ cdef class Bridge:
 	def writeDots(self, dots):
 		"""Write the given dots array to the display.
 		* dots : points on an array of dot information, one per character. Its size must hence be the same as what displaysize provides."""
-		retval = c_brlapi.brlapi_writeDots(<unsigned char*>dots)
+		cdef int retval
+		cdef unsigned char *c_dots
+		c_dots = <unsigned char *> dots
+		c_brlapi.Py_BEGIN_ALLOW_THREADS
+		retval = c_brlapi.brlapi_writeDots(c_dots)
+		c_brlapi.Py_END_ALLOW_THREADS
 		if retval == -1:
 			raise OperationError(returnerrno())
 		else:
@@ -280,7 +315,14 @@ cdef class Bridge:
 
 		* cursor : gives the cursor position; if equal to 0, no cursor is shown at all; if cursor == -1, the cursor is left where it is
 		* str : points to the string to be displayed"""
-		retval = c_brlapi.brlapi_writeText(cursor, str)
+		cdef int retval
+		cdef int c_cursor
+		cdef char *c_str
+		c_cursor = cursor
+		c_str = str
+		c_brlapi.Py_BEGIN_ALLOW_THREADS
+		retval = c_brlapi.brlapi_writeText(c_cursor, c_str)
+		c_brlapi.Py_END_ALLOW_THREADS
 		if retval == -1:
 			raise OperationError(returnerrno())
 		else:
@@ -299,7 +341,12 @@ cdef class Bridge:
 
 		By default, all the keypresses will be passed to the client, none will go through brltty, so the application will have to handle console switching itself for instance."""
 		cdef unsigned long long code
-		retval = c_brlapi.brlapi_readKey(block, <unsigned long long*>&code)
+		cdef int retval
+		cdef int c_block
+		c_block = block
+		c_brlapi.Py_BEGIN_ALLOW_THREADS
+		retval = c_brlapi.brlapi_readKey(c_block, <unsigned long long*>&code)
+		c_brlapi.Py_END_ALLOW_THREADS
 		if retval == -1:
 			raise OperationError(returnerrno())
 		elif retval <= 0 and block == False:
@@ -313,7 +360,13 @@ cdef class Bridge:
 		This function asks the server to give keys between x and y to brltty, rather than returning them to the application via readKey().
 
 		Note: The given codes are either raw keycodes if some driver name was given to getTty(), or brltty commands if None or "" was given."""
-		retval = c_brlapi.brlapi_ignoreKeyRange(range[0], range[1])
+		cdef int retval
+		cdef unsigned long long x,y
+		x = range[0]
+		y = range[1]
+		c_brlapi.Py_BEGIN_ALLOW_THREADS
+		retval = c_brlapi.brlapi_ignoreKeyRange(x, y)
+		c_brlapi.Py_END_ALLOW_THREADS
 		if retval == -1:
 			raise OperationError(returnerrno())
 		else:
@@ -327,7 +380,13 @@ cdef class Bridge:
 		This function asks the server to return keys between x and y to the application, and not give them to brltty.
 
 		Note: You shouldn't ask the server to give you key presses which are usually used to switch between TTYs, unless you really know what you are doing ! The given codes are either raw keycodes if some driver name was given to getTty(), or brltty commands if None or "" was given."""
-		retval = c_brlapi.brlapi_unignoreKeyRange(range[0], range[1])
+		cdef int retval
+		cdef unsigned long long x,y
+		x = range[0]
+		y = range[1]
+		c_brlapi.Py_BEGIN_ALLOW_THREADS
+		retval = c_brlapi.brlapi_unignoreKeyRange(x, y)
+		c_brlapi.Py_END_ALLOW_THREADS
 		if retval == -1:
 			raise OperationError(returnerror())
 		else:
@@ -337,7 +396,12 @@ cdef class Bridge:
 		"""Switch to Raw mode
 		
 		* driver : Specifies the name of the driver for which the raw communication will be established"""
-		retval = c_brlapi.brlapi_getRaw(drivername)
+		cdef int retval
+		cdef char *c_drivername
+		c_drivername = drivername
+		c_brlapi.Py_BEGIN_ALLOW_THREADS
+		retval = c_brlapi.brlapi_getRaw(c_drivername)
+		c_brlapi.Py_END_ALLOW_THREADS
 		if retval == -1:
 			raise OperationError(returnerror())
 		else:
