@@ -1,0 +1,40 @@
+brlapi <function> [<arg> ...]
+   connect [<option> ...]
+      host <host>
+      keyFile <file>
+   parseHost <host>
+   parseCommand <key>
+   makeDots <dots-list>
+
+brlapi0 function [arg ...]
+   host
+   keyFile
+   fileDescriptor
+   driverIdentifier
+   driverName
+   displaySize
+   claimTty [<option> ...]
+      tty {<number> | default}
+      commands
+      raw <driver-identifier>
+   releaseTty
+   setCommands
+   setRaw <driver-identifier>
+   setFocus <tty-number>
+   readKey <boolean>
+   acceptKeys {<key-list> | <first-key> <last-key>}
+   ignoreKeys {<key-list> | <first-key> <last-key>}
+   readRaw <maximum-length>
+   writeText <string> [<option> ...]
+      and <cells>
+      or <cells>
+      start <offset>
+      cursor {<offset> | off | leave}
+      display <number>
+      charset <name>
+   writeDots <cells>
+   writeRaw <packet>
+   suspend <driver-name>
+   resume
+   disconnect
+

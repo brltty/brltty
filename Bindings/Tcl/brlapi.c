@@ -105,12 +105,8 @@ typedef struct {
   const char *help;
 } OptionEntry;
 
-static int
-processOptions (
-  Tcl_Interp *interp, void *data,
-  Tcl_Obj *const objv[], int objc, int start,
-  const OptionEntry *options, const char ***names
-) {
+static void
+makeOptionNames (const OptionEntry *options, const char ***names) {
   if (!*names) {
     const OptionEntry *option = options;
     const char **name;
@@ -120,6 +116,15 @@ processOptions (
     while (option->name) *name++ = option++->name;
     *name = NULL;
   }
+}
+
+static int
+processOptions (
+  Tcl_Interp *interp, void *data,
+  Tcl_Obj *const objv[], int objc, int start,
+  const OptionEntry *options, const char ***names
+) {
+  makeOptionNames(options, names);
 
   objv += start;
   objc -= start;
@@ -187,7 +192,7 @@ OPTION_HANDLER(session, claimTty, tty) {
   Tcl_Obj *obj = objv[1];
   const char *string = Tcl_GetString(obj);
 
-  if (strcmp(string, "control") == 0) {
+  if (strcmp(string, "default") == 0) {
     options->tty = NULL;
   } else {
     options->tty = obj;
@@ -311,7 +316,7 @@ brlapiSessionCommand (data, interp, objc, objv)
     "claimTty",
     "disconnect",
     "displaySize",
-    "driverCode",
+    "driverIdentifier",
     "driverName",
     "fileDescriptor",
     "host",
@@ -336,7 +341,7 @@ brlapiSessionCommand (data, interp, objc, objv)
     FCN_claimTty,
     FCN_disconnect,
     FCN_displaySize,
-    FCN_driverCode,
+    FCN_driverIdentifier,
     FCN_driverName,
     FCN_fileDescriptor,
     FCN_host,
@@ -359,7 +364,7 @@ brlapiSessionCommand (data, interp, objc, objv)
   int function;
 
   if (objc < 2) {
-    Tcl_WrongNumArgs(interp, 1, objv, "function ?arg ...?");
+    Tcl_WrongNumArgs(interp, 1, objv, "<function> [<arg> ...]");
     return TCL_ERROR;
   }
 
@@ -399,7 +404,7 @@ brlapiSessionCommand (data, interp, objc, objv)
       return TCL_OK;
     }
 
-    case FCN_driverCode: {
+    case FCN_driverIdentifier: {
       size_t size = 0X10;
 
       if (objc != 2) {
@@ -488,12 +493,12 @@ brlapiSessionCommand (data, interp, objc, objv)
         ,
         {
           OPTION(session, claimTty, raw),
-          OPERANDS(1, "driver")
+          OPERANDS(1, "<driver-identifier>")
         }
         ,
         {
           OPTION(session, claimTty, tty),
-          OPERANDS(1, "{number | control}")
+          OPERANDS(1, "{<number> | default}")
         }
       END_OPTIONS(2)
 
@@ -556,7 +561,7 @@ brlapiSessionCommand (data, interp, objc, objv)
 
     case FCN_setRaw: {
       if (objc != 3) {
-        Tcl_WrongNumArgs(interp, 2, objv, "driver");
+        Tcl_WrongNumArgs(interp, 2, objv, "<driver-identifier>");
         return TCL_ERROR;
       }
 
@@ -573,7 +578,7 @@ brlapiSessionCommand (data, interp, objc, objv)
       int tty;
 
       if (objc != 3) {
-        Tcl_WrongNumArgs(interp, 2, objv, "tty");
+        Tcl_WrongNumArgs(interp, 2, objv, "<tty-number>");
         return TCL_ERROR;
       }
 
@@ -591,7 +596,7 @@ brlapiSessionCommand (data, interp, objc, objv)
       int block;
 
       if (objc != 3) {
-        Tcl_WrongNumArgs(interp, 2, objv, "boolean");
+        Tcl_WrongNumArgs(interp, 2, objv, "<boolean>");
         return TCL_ERROR;
       }
 
@@ -680,7 +685,7 @@ brlapiSessionCommand (data, interp, objc, objv)
         }
       }
 
-      Tcl_WrongNumArgs(interp, 2, objv, "{key-list | first-key last-key}");
+      Tcl_WrongNumArgs(interp, 2, objv, "{<key-list> | <first-key> <last-key>}");
       return TCL_ERROR;
     }
 
@@ -688,7 +693,7 @@ brlapiSessionCommand (data, interp, objc, objv)
       int size;
 
       if (objc != 3) {
-        Tcl_WrongNumArgs(interp, 2, objv, "size");
+        Tcl_WrongNumArgs(interp, 2, objv, "<maximum-length>");
         return TCL_ERROR;
       }
 
@@ -718,7 +723,7 @@ brlapiSessionCommand (data, interp, objc, objv)
       };
 
       if (objc < 3) {
-        Tcl_WrongNumArgs(interp, 2, objv, "text ?option ...?");
+        Tcl_WrongNumArgs(interp, 2, objv, "<text> [<option> ...]");
         return TCL_ERROR;
       }
 
@@ -743,22 +748,22 @@ brlapiSessionCommand (data, interp, objc, objv)
         ,
         {
           OPTION(session, writeText, cursor),
-          OPERANDS(1, "{number | off | leave}")
+          OPERANDS(1, "{<offset> | off | leave}")
         }
         ,
         {
           OPTION(session, writeText, display),
-          OPERANDS(1, "{number | default}")
+          OPERANDS(1, "{<number> | default}")
         }
         ,
         {
           OPTION(session, writeText, or),
-          OPERANDS(1, "cells")
+          OPERANDS(1, "<cells>")
         }
         ,
         {
           OPTION(session, writeText, start),
-          OPERANDS(1, "offset")
+          OPERANDS(1, "<offset>")
         }
       END_OPTIONS(3)
 
@@ -769,7 +774,7 @@ brlapiSessionCommand (data, interp, objc, objv)
 
     case FCN_writeDots: {
       if (objc != 3) {
-        Tcl_WrongNumArgs(interp, 2, objv, "cells");
+        Tcl_WrongNumArgs(interp, 2, objv, "<cells>");
         return TCL_ERROR;
       }
 
@@ -785,7 +790,7 @@ brlapiSessionCommand (data, interp, objc, objv)
 
     case FCN_writeRaw: {
       if (objc != 3) {
-        Tcl_WrongNumArgs(interp, 2, objv, "bytes");
+        Tcl_WrongNumArgs(interp, 2, objv, "<packet>");
         return TCL_ERROR;
       }
 
@@ -801,7 +806,7 @@ brlapiSessionCommand (data, interp, objc, objv)
 
     case FCN_suspend: {
       if (objc != 3) {
-        Tcl_WrongNumArgs(interp, 2, objv, "driver");
+        Tcl_WrongNumArgs(interp, 2, objv, "<driver-name>");
         return TCL_ERROR;
       }
 
@@ -878,7 +883,7 @@ brlapiGeneralCommand (data, interp, objc, objv)
   int function;
 
   if (objc < 2) {
-    Tcl_WrongNumArgs(interp, 1, objv, "function ?arg ...?");
+    Tcl_WrongNumArgs(interp, 1, objv, "<function> [<arg> ...]");
     return TCL_ERROR;
   }
 
@@ -899,12 +904,12 @@ brlapiGeneralCommand (data, interp, objc, objv)
       BEGIN_OPTIONS
         {
           OPTION(general, connect, host),
-          OPERANDS(1, "[host][:port]")
+          OPERANDS(1, "<host>")
         }
         ,
         {
           OPTION(general, connect, keyFile),
-          OPERANDS(1, "file")
+          OPERANDS(1, "<file>")
         }
       END_OPTIONS(2)
 
@@ -934,7 +939,7 @@ brlapiGeneralCommand (data, interp, objc, objv)
 
     case FCN_parseHost: {
       if (objc != 3) {
-        Tcl_WrongNumArgs(interp, 2, objv, "host");
+        Tcl_WrongNumArgs(interp, 2, objv, "<host>");
         return TCL_ERROR;
       }
 
@@ -957,7 +962,7 @@ brlapiGeneralCommand (data, interp, objc, objv)
       Tcl_WideInt command;
 
       if (objc != 3) {
-        Tcl_WrongNumArgs(interp, 2, objv, "command");
+        Tcl_WrongNumArgs(interp, 2, objv, "<key>");
         return TCL_ERROR;
       }
 
@@ -983,7 +988,7 @@ brlapiGeneralCommand (data, interp, objc, objv)
       int elementCount;
 
       if (objc != 3) {
-        Tcl_WrongNumArgs(interp, 2, objv, "dots-list");
+        Tcl_WrongNumArgs(interp, 2, objv, "<dots-list>");
         return TCL_ERROR;
       }
 
