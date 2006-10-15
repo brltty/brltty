@@ -53,6 +53,9 @@ typedef struct {
   int result = processOptions(interp, &options, objv, objc, (start), optionTable, &optionNames); \
   if (result != TCL_OK) return result; \
 }
+#define OPTION(command,function,option) \
+  .name = #option, \
+  .handler = OPTION_HANDLER_NAME(command,function,option)
 
 static void
 setIntResult (Tcl_Interp *interp, int value) {
@@ -475,24 +478,21 @@ brlapiSessionCommand (data, interp, objc, objv)
 
       BEGIN_OPTIONS
         {
-          .name = "commands",
+          OPTION(session,claimTty,commands),
           .operands = 0,
-          .help = NULL,
-          .handler = OPTION_HANDLER_NAME(session,claimTty,commands)
+          .help = NULL
         }
         ,
         {
-          .name = "raw",
+          OPTION(session,claimTty,raw),
           .operands = 1,
-          .help = "driver",
-          .handler = OPTION_HANDLER_NAME(session,claimTty,raw)
+          .help = "driver"
         }
         ,
         {
-          .name = "tty",
+          OPTION(session,claimTty,tty),
           .operands = 1,
-          .help = "{number | control}",
-          .handler = OPTION_HANDLER_NAME(session,claimTty,tty)
+          .help = "{number | control}"
         }
       END_OPTIONS(2)
 
@@ -731,45 +731,39 @@ brlapiSessionCommand (data, interp, objc, objv)
 
       BEGIN_OPTIONS
         {
-          .name = "and",
+          OPTION(session,writeText,and),
           .operands = 1,
-          .help = "cells",
-          .handler = OPTION_HANDLER_NAME(session,writeText,and)
+          .help = "cells"
         }
         ,
         {
-          .name = "charset",
+          OPTION(session,writeText,charset),
           .operands = 1,
-          .help = "name",
-          .handler = OPTION_HANDLER_NAME(session,writeText,charset)
+          .help = "name"
         }
         ,
         {
-          .name = "cursor",
+          OPTION(session,writeText,cursor),
           .operands = 1,
-          .help = "{number | off | leave}",
-          .handler = OPTION_HANDLER_NAME(session,writeText,cursor)
+          .help = "{number | off | leave}"
         }
         ,
         {
-          .name = "display",
+          OPTION(session,writeText,display),
           .operands = 1,
-          .help = "{number | default}",
-          .handler = OPTION_HANDLER_NAME(session,writeText,display)
+          .help = "{number | default}"
         }
         ,
         {
-          .name = "or",
+          OPTION(session,writeText,or),
           .operands = 1,
-          .help = "cells",
-          .handler = OPTION_HANDLER_NAME(session,writeText,or)
+          .help = "cells"
         }
         ,
         {
-          .name = "start",
+          OPTION(session,writeText,start),
           .operands = 1,
-          .help = "offset",
-          .handler = OPTION_HANDLER_NAME(session,writeText,start)
+          .help = "offset"
         }
       END_OPTIONS(3)
 
@@ -909,17 +903,15 @@ brlapiGeneralCommand (data, interp, objc, objv)
 
       BEGIN_OPTIONS
         {
-          .name = "host",
+          OPTION(general,connect,host),
           .operands = 1,
-          .help = "[host][:port]",
-          .handler = OPTION_HANDLER_NAME(general,connect,host)
+          .help = "[host][:port]"
         }
         ,
         {
-          .name = "keyFile",
+          OPTION(general,connect,keyFile),
           .operands = 1,
-          .help = "file",
-          .handler = OPTION_HANDLER_NAME(general,connect,keyFile)
+          .help = "file"
         }
       END_OPTIONS(2)
 
