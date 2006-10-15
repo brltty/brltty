@@ -76,11 +76,38 @@ setByteArrayResult (Tcl_Interp *interp, const unsigned char *bytes, int count) {
 
 static void
 setBrlapiError (Tcl_Interp *interp) {
-  const char *message = brlapi_strerror(&brlapi_error);
-  char brlerrno[0X20];
-  snprintf(brlerrno, sizeof(brlerrno), "%d", brlapi_error.brlerrno);
-  Tcl_SetErrorCode(interp, "BrlAPI", brlerrno, message, NULL);
-  setStringResult(interp, message, -1);
+  const char *text = brlapi_strerror(&brlapi_error);
+  const char *name;
+  int number;
+
+  switch (brlapi_error.brlerrno) {
+    case BRLERR_LIBCERR:
+      name = "LIBC";
+      number = brlapi_error.libcerrno;
+      break;
+
+    case BRLERR_GAIERR:
+      name = "GAI";
+      number = brlapi_error.gaierrno;
+      break;
+
+    default:
+      name = "BRL";
+      number = brlapi_error.brlerrno;
+      break;
+  }
+
+  {
+    Tcl_Obj *const elements[] = {
+      Tcl_NewStringObj("BrlAPI", -1),
+      Tcl_NewStringObj(name, -1),
+      Tcl_NewIntObj(number),
+      Tcl_NewStringObj(text, -1)
+    };
+    Tcl_SetObjErrorCode(interp, Tcl_NewListObj(4, elements));
+  }
+
+  setStringResult(interp, text, -1);
 }
 
 static int
