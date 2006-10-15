@@ -32,31 +32,6 @@ typedef struct {
   int fileDescriptor;
 } BrlapiSession;
 
-#define OPTION_HANDLER_RETURN int
-#define OPTION_HANDLER_PARAMETERS (Tcl_Interp *interp, Tcl_Obj *const objv[], void *data)
-#define OPTION_HANDLER_NAME(command,function,option) optionHandler_##command##_##function##_##option
-#define OPTION_HANDLER(command,function,option) static OPTION_HANDLER_RETURN OPTION_HANDLER_NAME(command,function,option) OPTION_HANDLER_PARAMETERS
-
-typedef OPTION_HANDLER_RETURN (*OptionHandler) OPTION_HANDLER_PARAMETERS;
-
-typedef struct {
-  const char *name;
-  OptionHandler handler;
-  int operands;
-  const char *help;
-} OptionEntry;
-
-#define BEGIN_OPTIONS { static const OptionEntry optionTable[] = {
-#define END_OPTIONS(start) \
-  , {.name = NULL} }; \
-  static const char **optionNames = NULL; \
-  int result = processOptions(interp, &options, objv, objc, (start), optionTable, &optionNames); \
-  if (result != TCL_OK) return result; \
-}
-#define OPTION(command,function,option) \
-  .name = #option, \
-  .handler = OPTION_HANDLER_NAME(command,function,option)
-
 static void
 setIntResult (Tcl_Interp *interp, int value) {
   Tcl_SetIntObj(Tcl_GetObjResult(interp), value);
@@ -113,6 +88,23 @@ setBrlapiError (Tcl_Interp *interp) {
   setStringResult(interp, text, -1);
 }
 
+#define OPTION_HANDLER_RETURN int
+#define OPTION_HANDLER_PARAMETERS (Tcl_Interp *interp, Tcl_Obj *const objv[], void *data)
+#define OPTION_HANDLER_NAME(command,function,option) optionHandler_##command##_##function##_##option
+#define OPTION_HANDLER(command,function,option) \
+  static OPTION_HANDLER_RETURN \
+  OPTION_HANDLER_NAME(command, function, option) \
+  OPTION_HANDLER_PARAMETERS
+
+typedef OPTION_HANDLER_RETURN (*OptionHandler) OPTION_HANDLER_PARAMETERS;
+
+typedef struct {
+  const char *name;
+  OptionHandler handler;
+  int operands;
+  const char *help;
+} OptionEntry;
+
 static int
 processOptions (
   Tcl_Interp *interp, void *data,
@@ -161,24 +153,36 @@ processOptions (
   return TCL_OK;
 }
 
+#define BEGIN_OPTIONS { static const OptionEntry optionTable[] = {
+#define END_OPTIONS(start) \
+  , {.name = NULL} }; \
+  static const char **optionNames = NULL; \
+  int result = processOptions(interp, &options, objv, objc, (start), optionTable, &optionNames); \
+  if (result != TCL_OK) return result; \
+}
+#define OPTION(command,function,option) \
+  .name = #option, .handler = OPTION_HANDLER_NAME(command, function, option)
+#define OPERANDS(count,text) \
+  .operands = (count), .help = ((count)? (text): NULL)
+
 typedef struct {
   Tcl_Obj *tty;
   const char *how;
 } FunctionData_session_claimTty;
 
-OPTION_HANDLER(session,claimTty,commands) {
+OPTION_HANDLER(session, claimTty, commands) {
   FunctionData_session_claimTty *options = data;
   options->how = NULL;
   return TCL_OK;
 }
 
-OPTION_HANDLER(session,claimTty,raw) {
+OPTION_HANDLER(session, claimTty, raw) {
   FunctionData_session_claimTty *options = data;
   options->how = Tcl_GetString(objv[1]);
   return TCL_OK;
 }
 
-OPTION_HANDLER(session,claimTty,tty) {
+OPTION_HANDLER(session, claimTty, tty) {
   FunctionData_session_claimTty *options = data;
   Tcl_Obj *obj = objv[1];
   const char *string = Tcl_GetString(obj);
@@ -196,7 +200,7 @@ typedef struct {
   brlapi_writeStruct arguments;
 } FunctionData_session_writeText;
 
-OPTION_HANDLER(session,writeText,and) {
+OPTION_HANDLER(session, writeText, and) {
   FunctionData_session_writeText *options = data;
   int count;
   char *cells = Tcl_GetByteArrayFromObj(objv[1], &count);
@@ -213,13 +217,13 @@ OPTION_HANDLER(session,writeText,and) {
   return TCL_OK;
 }
 
-OPTION_HANDLER(session,writeText,charset) {
+OPTION_HANDLER(session, writeText, charset) {
   FunctionData_session_writeText *options = data;
   options->arguments.charset = Tcl_GetString(objv[1]);
   return TCL_OK;
 }
 
-OPTION_HANDLER(session,writeText,cursor) {
+OPTION_HANDLER(session, writeText, cursor) {
   FunctionData_session_writeText *options = data;
   Tcl_Obj *obj = objv[1];
   const char *string = Tcl_GetString(obj);
@@ -239,7 +243,7 @@ OPTION_HANDLER(session,writeText,cursor) {
   return TCL_OK;
 }
 
-OPTION_HANDLER(session,writeText,display) {
+OPTION_HANDLER(session, writeText, display) {
   FunctionData_session_writeText *options = data;
   Tcl_Obj *obj = objv[1];
   const char *string = Tcl_GetString(obj);
@@ -257,7 +261,7 @@ OPTION_HANDLER(session,writeText,display) {
   return TCL_OK;
 }
 
-OPTION_HANDLER(session,writeText,or) {
+OPTION_HANDLER(session, writeText, or) {
   FunctionData_session_writeText *options = data;
   int count;
   char *cells = Tcl_GetByteArrayFromObj(objv[1], &count);
@@ -274,7 +278,7 @@ OPTION_HANDLER(session,writeText,or) {
   return TCL_OK;
 }
 
-OPTION_HANDLER(session,writeText,start) {
+OPTION_HANDLER(session, writeText, start) {
   FunctionData_session_writeText *options = data;
   int offset;
 
@@ -478,21 +482,18 @@ brlapiSessionCommand (data, interp, objc, objv)
 
       BEGIN_OPTIONS
         {
-          OPTION(session,claimTty,commands),
-          .operands = 0,
-          .help = NULL
+          OPTION(session, claimTty, commands),
+          OPERANDS(0, "")
         }
         ,
         {
-          OPTION(session,claimTty,raw),
-          .operands = 1,
-          .help = "driver"
+          OPTION(session, claimTty, raw),
+          OPERANDS(1, "driver")
         }
         ,
         {
-          OPTION(session,claimTty,tty),
-          .operands = 1,
-          .help = "{number | control}"
+          OPTION(session, claimTty, tty),
+          OPERANDS(1, "{number | control}")
         }
       END_OPTIONS(2)
 
@@ -731,39 +732,33 @@ brlapiSessionCommand (data, interp, objc, objv)
 
       BEGIN_OPTIONS
         {
-          OPTION(session,writeText,and),
-          .operands = 1,
-          .help = "cells"
+          OPTION(session, writeText, and),
+          OPERANDS(1, "cells")
         }
         ,
         {
-          OPTION(session,writeText,charset),
-          .operands = 1,
-          .help = "name"
+          OPTION(session, writeText, charset),
+          OPERANDS(1, "name")
         }
         ,
         {
-          OPTION(session,writeText,cursor),
-          .operands = 1,
-          .help = "{number | off | leave}"
+          OPTION(session, writeText, cursor),
+          OPERANDS(1, "{number | off | leave}")
         }
         ,
         {
-          OPTION(session,writeText,display),
-          .operands = 1,
-          .help = "{number | default}"
+          OPTION(session, writeText, display),
+          OPERANDS(1, "{number | default}")
         }
         ,
         {
-          OPTION(session,writeText,or),
-          .operands = 1,
-          .help = "cells"
+          OPTION(session, writeText, or),
+          OPERANDS(1, "cells")
         }
         ,
         {
-          OPTION(session,writeText,start),
-          .operands = 1,
-          .help = "offset"
+          OPTION(session, writeText, start),
+          OPERANDS(1, "offset")
         }
       END_OPTIONS(3)
 
@@ -846,13 +841,13 @@ typedef struct {
   brlapi_settings_t settings;
 } FunctionData_general_connect;
 
-OPTION_HANDLER(general,connect,host) {
+OPTION_HANDLER(general, connect, host) {
   FunctionData_general_connect *options = data;
   options->settings.hostName = Tcl_GetString(objv[1]);
   return TCL_OK;
 }
 
-OPTION_HANDLER(general,connect,keyFile) {
+OPTION_HANDLER(general, connect, keyFile) {
   FunctionData_general_connect *options = data;
   options->settings.authKey = Tcl_GetString(objv[1]);
   return TCL_OK;
@@ -903,15 +898,13 @@ brlapiGeneralCommand (data, interp, objc, objv)
 
       BEGIN_OPTIONS
         {
-          OPTION(general,connect,host),
-          .operands = 1,
-          .help = "[host][:port]"
+          OPTION(general, connect, host),
+          OPERANDS(1, "[host][:port]")
         }
         ,
         {
-          OPTION(general,connect,keyFile),
-          .operands = 1,
-          .help = "file"
+          OPTION(general, connect, keyFile),
+          OPERANDS(1, "file")
         }
       END_OPTIONS(2)
 
