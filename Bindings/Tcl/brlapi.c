@@ -874,6 +874,7 @@ brlapiGeneralCommand (data, interp, objc, objv)
   static const char *functions[] = {
     "connect",
     "makeDots",
+    "parseCommand",
     "parseHost",
     NULL
   };
@@ -881,6 +882,7 @@ brlapiGeneralCommand (data, interp, objc, objv)
   typedef enum {
     FCN_connect,
     FCN_makeDots,
+    FCN_parseCommand,
     FCN_parseHost
   } Function;
 
@@ -959,6 +961,31 @@ brlapiGeneralCommand (data, interp, objc, objv)
           Tcl_NewStringObj(name, -1),
           Tcl_NewStringObj(port, -1),
           Tcl_NewIntObj(family)
+        };
+
+        Tcl_SetObjResult(interp, Tcl_NewListObj(3, elements));
+        return TCL_OK;
+      }
+    }
+
+    case FCN_parseCommand: {
+      Tcl_WideInt command;
+
+      if (objc != 3) {
+        Tcl_WrongNumArgs(interp, 2, objv, "command");
+        return TCL_ERROR;
+      }
+
+      {
+        int result = Tcl_GetWideIntFromObj(interp, objv[2], &command);
+        if (result != TCL_OK) return result;
+      }
+
+      {
+        Tcl_Obj *elements[] = {
+          Tcl_NewWideIntObj((command & BRLAPI_KEY_TYPE_MASK) >> BRLAPI_KEY_TYPE_SHIFT),
+          Tcl_NewWideIntObj((command & BRLAPI_KEY_CODE_MASK) >> 0),
+          Tcl_NewWideIntObj((command & BRLAPI_KEY_FLAGS_MASK) >> BRLAPI_KEY_FLAGS_SHIFT)
         };
 
         Tcl_SetObjResult(interp, Tcl_NewListObj(3, elements));
