@@ -208,12 +208,12 @@ typedef struct {
 OPTION_HANDLER(session, writeText, and) {
   FunctionData_session_writeText *options = data;
   int count;
-  char *cells = Tcl_GetByteArrayFromObj(objv[1], &count);
+  char *mask = Tcl_GetByteArrayFromObj(objv[1], &count);
 
   if (!count) {
     options->arguments.attrAnd = NULL;
   } else if (count == options->arguments.regionSize) {
-    options->arguments.attrAnd = cells;
+    options->arguments.attrAnd = mask;
   } else {
     setStringResult(interp, "wrong and mask length", -1);
     return TCL_ERROR;
@@ -269,12 +269,12 @@ OPTION_HANDLER(session, writeText, display) {
 OPTION_HANDLER(session, writeText, or) {
   FunctionData_session_writeText *options = data;
   int count;
-  char *cells = Tcl_GetByteArrayFromObj(objv[1], &count);
+  char *mask = Tcl_GetByteArrayFromObj(objv[1], &count);
 
   if (!count) {
     options->arguments.attrOr = NULL;
   } else if (count == options->arguments.regionSize) {
-    options->arguments.attrOr = cells;
+    options->arguments.attrOr = mask;
   } else {
     setStringResult(interp, "wrong or mask length", -1);
     return TCL_ERROR;
@@ -330,7 +330,7 @@ brlapiSessionCommand (data, interp, objc, objv)
     "setFocus",
     "setRaw",
     "suspend",
-    "writeDots",
+    "writeCells",
     "writeRaw",
     "writeText",
     NULL
@@ -355,7 +355,7 @@ brlapiSessionCommand (data, interp, objc, objv)
     FCN_setFocus,
     FCN_setRaw,
     FCN_suspend,
-    FCN_writeDots,
+    FCN_writeCells,
     FCN_writeRaw,
     FCN_writeText
   } Function;
@@ -493,7 +493,7 @@ brlapiSessionCommand (data, interp, objc, objv)
         ,
         {
           OPTION(session, claimTty, raw),
-          OPERANDS(1, "<driver-identifier>")
+          OPERANDS(1, "<driverIdentifier>")
         }
         ,
         {
@@ -561,7 +561,7 @@ brlapiSessionCommand (data, interp, objc, objv)
 
     case FCN_setRaw: {
       if (objc != 3) {
-        Tcl_WrongNumArgs(interp, 2, objv, "<driver-identifier>");
+        Tcl_WrongNumArgs(interp, 2, objv, "<driverIdentifier>");
         return TCL_ERROR;
       }
 
@@ -578,7 +578,7 @@ brlapiSessionCommand (data, interp, objc, objv)
       int tty;
 
       if (objc != 3) {
-        Tcl_WrongNumArgs(interp, 2, objv, "<tty-number>");
+        Tcl_WrongNumArgs(interp, 2, objv, "<ttyNumber>");
         return TCL_ERROR;
       }
 
@@ -593,21 +593,21 @@ brlapiSessionCommand (data, interp, objc, objv)
     }
 
     case FCN_readKey: {
-      int block;
+      int wait;
 
       if (objc != 3) {
-        Tcl_WrongNumArgs(interp, 2, objv, "<boolean>");
+        Tcl_WrongNumArgs(interp, 2, objv, "<wait>");
         return TCL_ERROR;
       }
 
       {
-        int result = Tcl_GetBooleanFromObj(interp, objv[2], &block);
+        int result = Tcl_GetBooleanFromObj(interp, objv[2], &wait);
         if (result != TCL_OK) return result;
       }
 
       {
         brl_keycode_t key;
-        int result = brlapi_readKey(block, &key);
+        int result = brlapi_readKey(wait, &key);
 
         if (result == -1) {
           setBrlapiError(interp);
@@ -685,7 +685,7 @@ brlapiSessionCommand (data, interp, objc, objv)
         }
       }
 
-      Tcl_WrongNumArgs(interp, 2, objv, "{<key-list> | <first-key> <last-key>}");
+      Tcl_WrongNumArgs(interp, 2, objv, "{<keyList> | <firstKey> <lastKey>}");
       return TCL_ERROR;
     }
 
@@ -693,7 +693,7 @@ brlapiSessionCommand (data, interp, objc, objv)
       int size;
 
       if (objc != 3) {
-        Tcl_WrongNumArgs(interp, 2, objv, "<maximum-length>");
+        Tcl_WrongNumArgs(interp, 2, objv, "<maximumLength>");
         return TCL_ERROR;
       }
 
@@ -738,12 +738,12 @@ brlapiSessionCommand (data, interp, objc, objv)
       BEGIN_OPTIONS
         {
           OPTION(session, writeText, and),
-          OPERANDS(1, "cells")
+          OPERANDS(1, "<mask>")
         }
         ,
         {
           OPTION(session, writeText, charset),
-          OPERANDS(1, "name")
+          OPERANDS(1, "<name>")
         }
         ,
         {
@@ -758,7 +758,7 @@ brlapiSessionCommand (data, interp, objc, objv)
         ,
         {
           OPTION(session, writeText, or),
-          OPERANDS(1, "<cells>")
+          OPERANDS(1, "<mask>")
         }
         ,
         {
@@ -772,7 +772,7 @@ brlapiSessionCommand (data, interp, objc, objv)
       return TCL_ERROR;
     }
 
-    case FCN_writeDots: {
+    case FCN_writeCells: {
       if (objc != 3) {
         Tcl_WrongNumArgs(interp, 2, objv, "<cells>");
         return TCL_ERROR;
@@ -780,9 +780,9 @@ brlapiSessionCommand (data, interp, objc, objv)
 
       {
         int count;
-        const char *bytes = Tcl_GetByteArrayFromObj(objv[2], &count);
+        const char *cells = Tcl_GetByteArrayFromObj(objv[2], &count);
 
-        if (brlapi_writeDots(bytes) != -1) return TCL_OK;
+        if (brlapi_writeDots(cells) != -1) return TCL_OK;
         setBrlapiError(interp);
         return TCL_ERROR;
       }
@@ -806,7 +806,7 @@ brlapiSessionCommand (data, interp, objc, objv)
 
     case FCN_suspend: {
       if (objc != 3) {
-        Tcl_WrongNumArgs(interp, 2, objv, "<driver-name>");
+        Tcl_WrongNumArgs(interp, 2, objv, "<driverName>");
         return TCL_ERROR;
       }
 
@@ -867,7 +867,7 @@ brlapiGeneralCommand (data, interp, objc, objv)
 {
   static const char *functions[] = {
     "connect",
-    "makeDots",
+    "makeCells",
     "parseCommand",
     "parseHost",
     NULL
@@ -875,7 +875,7 @@ brlapiGeneralCommand (data, interp, objc, objv)
 
   typedef enum {
     FCN_connect,
-    FCN_makeDots,
+    FCN_makeCells,
     FCN_parseCommand,
     FCN_parseHost
   } Function;
@@ -904,7 +904,7 @@ brlapiGeneralCommand (data, interp, objc, objv)
       BEGIN_OPTIONS
         {
           OPTION(general, connect, host),
-          OPERANDS(1, "<host>")
+          OPERANDS(1, "<hostSpec>")
         }
         ,
         {
@@ -939,7 +939,7 @@ brlapiGeneralCommand (data, interp, objc, objv)
 
     case FCN_parseHost: {
       if (objc != 3) {
-        Tcl_WrongNumArgs(interp, 2, objv, "<host>");
+        Tcl_WrongNumArgs(interp, 2, objv, "<hostSpec>");
         return TCL_ERROR;
       }
 
@@ -983,12 +983,12 @@ brlapiGeneralCommand (data, interp, objc, objv)
       }
     }
 
-    case FCN_makeDots: {
+    case FCN_makeCells: {
       Tcl_Obj **elements;
       int elementCount;
 
       if (objc != 3) {
-        Tcl_WrongNumArgs(interp, 2, objv, "<dots-list>");
+        Tcl_WrongNumArgs(interp, 2, objv, "<dotsList>");
         return TCL_ERROR;
       }
 

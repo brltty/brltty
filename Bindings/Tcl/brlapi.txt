@@ -1,10 +1,10 @@
 brlapi <function> [<arg> ...]
    connect [<option> ...]
-      host <host>
+      host <hostSpec>
       keyFile <file>
-   parseHost <host>
+   parseHost <hostSpec>
    parseCommand <key>
-   makeDots <dots-list>
+   makeCells <dotsList>
 
 brlapi0 function [arg ...]
    host
@@ -16,25 +16,25 @@ brlapi0 function [arg ...]
    claimTty [<option> ...]
       tty {<number> | default}
       commands
-      raw <driver-identifier>
+      raw <driverIdentifier>
    releaseTty
    setCommands
-   setRaw <driver-identifier>
-   setFocus <tty-number>
-   readKey <boolean>
-   acceptKeys {<key-list> | <first-key> <last-key>}
-   ignoreKeys {<key-list> | <first-key> <last-key>}
-   readRaw <maximum-length>
+   setRaw <driverIdentifier>
+   setFocus <ttyNumber>
+   readKey <wait>
+   acceptKeys {<keyList> | <firstKey> <lastKey>}
+   ignoreKeys {<keyList> | <firstKey> <lastKey>}
+   readRaw <maximumLength>
    writeText <string> [<option> ...]
-      and <cells>
-      or <cells>
+      and <mask>
+      or <mask>
       start <offset>
       cursor {<offset> | off | leave}
       display <number>
       charset <name>
-   writeDots <cells>
+   writeCells <cells>
    writeRaw <packet>
-   suspend <driver-name>
+   suspend <driverName>
    resume
    disconnect
 
