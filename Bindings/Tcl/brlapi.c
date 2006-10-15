@@ -18,8 +18,10 @@
 
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 
 #include <tcl.h>
+#include "Programs/brldefs.h"
 #include "Programs/api.h"
 
 #define allocateMemory(size) ((void *)ckalloc((size)))
@@ -850,12 +852,14 @@ brlapiGeneralCommand (data, interp, objc, objv)
 {
   static const char *functions[] = {
     "connect",
+    "makeDots",
     "parseHost",
     NULL
   };
 
   typedef enum {
     FCN_connect,
+    FCN_makeDots,
     FCN_parseHost
   } Function;
 
@@ -948,6 +952,69 @@ brlapiGeneralCommand (data, interp, objc, objv)
         Tcl_SetObjResult(interp, Tcl_NewListObj(3, elements));
         return TCL_OK;
       }
+    }
+
+    case FCN_makeDots: {
+      Tcl_Obj **elements;
+      int elementCount;
+
+      if (objc != 3) {
+        Tcl_WrongNumArgs(interp, 2, objv, "dots-list");
+        return TCL_ERROR;
+      }
+
+      {
+        int result = Tcl_ListObjGetElements(interp, objv[2], &elementCount, &elements);
+        if (result != TCL_OK) return result;
+      }
+
+      if (elementCount) {
+        unsigned char cells[elementCount];
+        int elementIndex;
+
+        for (elementIndex=0; elementIndex<elementCount; ++elementIndex) {
+          Tcl_Obj *element = elements[elementIndex];
+          unsigned char *cell = &cells[elementIndex];
+
+          int dotCount;
+          const char *dots = Tcl_GetStringFromObj(element, &dotCount);
+          int dotIndex;
+
+          *cell = 0;
+          if ((dotCount != 1) || (dots[0] != '0')) {
+            for (dotIndex=0; dotIndex<dotCount; ++dotIndex) {
+              static const char dotNumbers[] = {
+                '1', '2', '3', '4', '5', '6', '7', '8'
+              };
+              unsigned char dotNumber = dots[dotIndex];
+
+              static const unsigned char dotBits[] = {
+                BRL_DOT1, BRL_DOT2, BRL_DOT3, BRL_DOT4,
+                BRL_DOT5, BRL_DOT6, BRL_DOT7, BRL_DOT8
+              };
+              unsigned char dotBit;
+
+              const char *dot = memchr(dotNumbers, dotNumber, sizeof(dotNumbers));
+
+              if (!dot) {
+                setStringResult(interp, "invalid dot number", -1);
+                return TCL_ERROR;
+              }
+              dotBit = dotBits[dot - dotNumbers];
+
+              if (*cell & dotBit) {
+                setStringResult(interp, "duplicate dot number", -1);
+                return TCL_ERROR;
+              }
+              *cell |= dotBit;
+            }
+          }
+        }
+
+        setByteArrayResult(interp, cells, elementCount);
+      }
+
+      return TCL_OK;
     }
   }
 }
