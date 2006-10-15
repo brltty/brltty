@@ -34,8 +34,8 @@ typedef struct {
 
 #define OPTION_HANDLER_RETURN int
 #define OPTION_HANDLER_PARAMETERS (Tcl_Interp *interp, Tcl_Obj *const objv[], void *data)
-#define OPTION_HANDLER_NAME(function,option) optionHandler_##function##option
-#define OPTION_HANDLER(function,option) static OPTION_HANDLER_RETURN OPTION_HANDLER_NAME(function,option) OPTION_HANDLER_PARAMETERS
+#define OPTION_HANDLER_NAME(command,function,option) optionHandler_##command##_##function##_##option
+#define OPTION_HANDLER(command,function,option) static OPTION_HANDLER_RETURN OPTION_HANDLER_NAME(command,function,option) OPTION_HANDLER_PARAMETERS
 
 typedef OPTION_HANDLER_RETURN (*OptionHandler) OPTION_HANDLER_PARAMETERS;
 
@@ -45,6 +45,14 @@ typedef struct {
   int operands;
   const char *help;
 } OptionEntry;
+
+#define BEGIN_OPTIONS { static const OptionEntry optionTable[] = {
+#define END_OPTIONS(start) \
+  , {.name = NULL} }; \
+  static const char **optionNames = NULL; \
+  int result = processOptions(interp, &options, objv, objc, (start), optionTable, &optionNames); \
+  if (result != TCL_OK) return result; \
+}
 
 static void
 setIntResult (Tcl_Interp *interp, int value) {
@@ -78,7 +86,7 @@ setBrlapiError (Tcl_Interp *interp) {
 static int
 processOptions (
   Tcl_Interp *interp, void *data,
-  Tcl_Obj *const objv[], int objc, int skip,
+  Tcl_Obj *const objv[], int objc, int start,
   const OptionEntry *options, const char ***names
 ) {
   if (!*names) {
@@ -91,8 +99,8 @@ processOptions (
     *name = NULL;
   }
 
-  objv += skip;
-  objc -= skip;
+  objv += start;
+  objc -= start;
 
   while (objc > 0) {
     int index;
@@ -126,29 +134,29 @@ processOptions (
 typedef struct {
   Tcl_Obj *tty;
   const char *how;
-} FunctionData_claimTty;
+} FunctionData_session_claimTty;
 
-OPTION_HANDLER(claimTty,commands) {
-  FunctionData_claimTty *claimTty = data;
-  claimTty->how = NULL;
+OPTION_HANDLER(session,claimTty,commands) {
+  FunctionData_session_claimTty *options = data;
+  options->how = NULL;
   return TCL_OK;
 }
 
-OPTION_HANDLER(claimTty,raw) {
-  FunctionData_claimTty *claimTty = data;
-  claimTty->how = Tcl_GetString(objv[1]);
+OPTION_HANDLER(session,claimTty,raw) {
+  FunctionData_session_claimTty *options = data;
+  options->how = Tcl_GetString(objv[1]);
   return TCL_OK;
 }
 
-OPTION_HANDLER(claimTty,tty) {
-  FunctionData_claimTty *claimTty = data;
+OPTION_HANDLER(session,claimTty,tty) {
+  FunctionData_session_claimTty *options = data;
   Tcl_Obj *obj = objv[1];
   const char *string = Tcl_GetString(obj);
 
   if (strcmp(string, "control") == 0) {
-    claimTty->tty = NULL;
+    options->tty = NULL;
   } else {
-    claimTty->tty = obj;
+    options->tty = obj;
   }
 
   return TCL_OK;
@@ -156,17 +164,17 @@ OPTION_HANDLER(claimTty,tty) {
 
 typedef struct {
   brlapi_writeStruct arguments;
-} FunctionData_writeText;
+} FunctionData_session_writeText;
 
-OPTION_HANDLER(writeText,and) {
-  FunctionData_writeText *writeText = data;
+OPTION_HANDLER(session,writeText,and) {
+  FunctionData_session_writeText *options = data;
   int count;
   char *cells = Tcl_GetByteArrayFromObj(objv[1], &count);
 
   if (!count) {
-    writeText->arguments.attrAnd = NULL;
-  } else if (count == writeText->arguments.regionSize) {
-    writeText->arguments.attrAnd = cells;
+    options->arguments.attrAnd = NULL;
+  } else if (count == options->arguments.regionSize) {
+    options->arguments.attrAnd = cells;
   } else {
     setStringResult(interp, "wrong and mask length", -1);
     return TCL_ERROR;
@@ -175,59 +183,59 @@ OPTION_HANDLER(writeText,and) {
   return TCL_OK;
 }
 
-OPTION_HANDLER(writeText,charset) {
-  FunctionData_writeText *writeText = data;
-  writeText->arguments.charset = Tcl_GetString(objv[1]);
+OPTION_HANDLER(session,writeText,charset) {
+  FunctionData_session_writeText *options = data;
+  options->arguments.charset = Tcl_GetString(objv[1]);
   return TCL_OK;
 }
 
-OPTION_HANDLER(writeText,cursor) {
-  FunctionData_writeText *writeText = data;
+OPTION_HANDLER(session,writeText,cursor) {
+  FunctionData_session_writeText *options = data;
   Tcl_Obj *obj = objv[1];
   const char *string = Tcl_GetString(obj);
 
   if (strcmp(string, "off") == 0) {
-    writeText->arguments.cursor = 0;
+    options->arguments.cursor = 0;
   } else if (strcmp(string, "leave") == 0) {
-    writeText->arguments.cursor = -1;
+    options->arguments.cursor = -1;
   } else {
     int number;
     int result = Tcl_GetIntFromObj(interp, obj, &number);
     if (result != TCL_OK) return result;
     if (number < 0) number = 0;
-    writeText->arguments.cursor = number + 1;
+    options->arguments.cursor = number + 1;
   }
 
   return TCL_OK;
 }
 
-OPTION_HANDLER(writeText,display) {
-  FunctionData_writeText *writeText = data;
+OPTION_HANDLER(session,writeText,display) {
+  FunctionData_session_writeText *options = data;
   Tcl_Obj *obj = objv[1];
   const char *string = Tcl_GetString(obj);
 
   if (strcmp(string, "default") == 0) {
-    writeText->arguments.displayNumber = -1;
+    options->arguments.displayNumber = -1;
   } else {
     int number;
     int result = Tcl_GetIntFromObj(interp, obj, &number);
     if (result != TCL_OK) return result;
     if (number < 0) number = 0;
-    writeText->arguments.displayNumber = number;
+    options->arguments.displayNumber = number;
   }
 
   return TCL_OK;
 }
 
-OPTION_HANDLER(writeText,or) {
-  FunctionData_writeText *writeText = data;
+OPTION_HANDLER(session,writeText,or) {
+  FunctionData_session_writeText *options = data;
   int count;
   char *cells = Tcl_GetByteArrayFromObj(objv[1], &count);
 
   if (!count) {
-    writeText->arguments.attrOr = NULL;
-  } else if (count == writeText->arguments.regionSize) {
-    writeText->arguments.attrOr = cells;
+    options->arguments.attrOr = NULL;
+  } else if (count == options->arguments.regionSize) {
+    options->arguments.attrOr = cells;
   } else {
     setStringResult(interp, "wrong or mask length", -1);
     return TCL_ERROR;
@@ -236,8 +244,8 @@ OPTION_HANDLER(writeText,or) {
   return TCL_OK;
 }
 
-OPTION_HANDLER(writeText,start) {
-  FunctionData_writeText *writeText = data;
+OPTION_HANDLER(session,writeText,start) {
+  FunctionData_session_writeText *options = data;
   int offset;
 
   {
@@ -246,7 +254,7 @@ OPTION_HANDLER(writeText,start) {
   }
 
   if (offset < 0) offset = 0;
-  writeText->arguments.regionBegin = offset + 1;
+  options->arguments.regionBegin = offset + 1;
   return TCL_OK;
 }
 
@@ -433,49 +441,40 @@ brlapiSessionCommand (data, interp, objc, objv)
     }
 
     case FCN_claimTty: {
-      FunctionData_claimTty claimTty = {
+      FunctionData_session_claimTty options = {
         .tty = NULL,
         .how = NULL
       };
 
-      {
-        static const OptionEntry options[] = {
-          {
-            .name = "commands",
-            .operands = 0,
-            .help = NULL,
-            .handler = OPTION_HANDLER_NAME(claimTty,commands)
-          }
-          ,
-          {
-            .name = "raw",
-            .operands = 1,
-            .help = "driver",
-            .handler = OPTION_HANDLER_NAME(claimTty,raw)
-          }
-          ,
-          {
-            .name = "tty",
-            .operands = 1,
-            .help = "{number | control}",
-            .handler = OPTION_HANDLER_NAME(claimTty,tty)
-          }
-          ,
-          {
-            .name = NULL
-          }
-        };
-        static const char **names = NULL;
-        int result = processOptions(interp, &claimTty, objv, objc, 2, options, &names);
-        if (result != TCL_OK) return result;
-      }
+      BEGIN_OPTIONS
+        {
+          .name = "commands",
+          .operands = 0,
+          .help = NULL,
+          .handler = OPTION_HANDLER_NAME(session,claimTty,commands)
+        }
+        ,
+        {
+          .name = "raw",
+          .operands = 1,
+          .help = "driver",
+          .handler = OPTION_HANDLER_NAME(session,claimTty,raw)
+        }
+        ,
+        {
+          .name = "tty",
+          .operands = 1,
+          .help = "{number | control}",
+          .handler = OPTION_HANDLER_NAME(session,claimTty,tty)
+        }
+      END_OPTIONS(2)
 
-      if (claimTty.tty) {
+      if (options.tty) {
         Tcl_Obj **elements;
         int count;
 
         {
-          int result = Tcl_ListObjGetElements(interp, claimTty.tty, &count, &elements);
+          int result = Tcl_ListObjGetElements(interp, options.tty, &count, &elements);
           if (result != TCL_OK) return result;
         }
 
@@ -488,12 +487,12 @@ brlapiSessionCommand (data, interp, objc, objv)
             if (result != TCL_OK) return result;
           }
 
-          if (brlapi_getTtyPath(ttys, count, claimTty.how) != -1) return TCL_OK;
-        } else if (brlapi_getTtyPath(NULL, 0, claimTty.how) != -1) {
+          if (brlapi_getTtyPath(ttys, count, options.how) != -1) return TCL_OK;
+        } else if (brlapi_getTtyPath(NULL, 0, options.how) != -1) {
           return TCL_OK;
         }
       } else {
-        int result = brlapi_getTty(-1, claimTty.how);
+        int result = brlapi_getTty(-1, options.how);
 
         if (result != -1) {
           setIntResult(interp, result);
@@ -685,7 +684,7 @@ brlapiSessionCommand (data, interp, objc, objv)
     }
 
     case FCN_writeText: {
-      FunctionData_writeText writeText = {
+      FunctionData_session_writeText options = {
         .arguments = BRLAPI_WRITESTRUCT_INITIALIZER,
         .arguments.regionBegin = 1
       };
@@ -699,64 +698,55 @@ brlapiSessionCommand (data, interp, objc, objv)
         int length;
         char *string = Tcl_GetStringFromObj(objv[2], &length);
 
-        writeText.arguments.text = length? string: NULL;
-        writeText.arguments.regionSize = length;
+        options.arguments.text = length? string: NULL;
+        options.arguments.regionSize = length;
       }
 
-      {
-        static const OptionEntry options[] = {
-          {
-            .name = "and",
-            .operands = 1,
-            .help = "cells",
-            .handler = OPTION_HANDLER_NAME(writeText,and)
-          }
-          ,
-          {
-            .name = "charset",
-            .operands = 1,
-            .help = "name",
-            .handler = OPTION_HANDLER_NAME(writeText,charset)
-          }
-          ,
-          {
-            .name = "cursor",
-            .operands = 1,
-            .help = "{number | off | leave}",
-            .handler = OPTION_HANDLER_NAME(writeText,cursor)
-          }
-          ,
-          {
-            .name = "display",
-            .operands = 1,
-            .help = "{number | default}",
-            .handler = OPTION_HANDLER_NAME(writeText,display)
-          }
-          ,
-          {
-            .name = "or",
-            .operands = 1,
-            .help = "cells",
-            .handler = OPTION_HANDLER_NAME(writeText,or)
-          }
-          ,
-          {
-            .name = "start",
-            .operands = 1,
-            .help = "offset",
-            .handler = OPTION_HANDLER_NAME(writeText,start)
-          }
-          ,
-          {
-            .name = NULL
-          }
-        };
-        static const char **names = NULL;
-        int result = processOptions(interp, &writeText, objv, objc, 3, options, &names);
-        if (result != TCL_OK) return result;
-      }
+      BEGIN_OPTIONS
+        {
+          .name = "and",
+          .operands = 1,
+          .help = "cells",
+          .handler = OPTION_HANDLER_NAME(session,writeText,and)
+        }
+        ,
+        {
+          .name = "charset",
+          .operands = 1,
+          .help = "name",
+          .handler = OPTION_HANDLER_NAME(session,writeText,charset)
+        }
+        ,
+        {
+          .name = "cursor",
+          .operands = 1,
+          .help = "{number | off | leave}",
+          .handler = OPTION_HANDLER_NAME(session,writeText,cursor)
+        }
+        ,
+        {
+          .name = "display",
+          .operands = 1,
+          .help = "{number | default}",
+          .handler = OPTION_HANDLER_NAME(session,writeText,display)
+        }
+        ,
+        {
+          .name = "or",
+          .operands = 1,
+          .help = "cells",
+          .handler = OPTION_HANDLER_NAME(session,writeText,or)
+        }
+        ,
+        {
+          .name = "start",
+          .operands = 1,
+          .help = "offset",
+          .handler = OPTION_HANDLER_NAME(session,writeText,start)
+        }
+      END_OPTIONS(3)
 
-      if (brlapi_write(&writeText.arguments) != -1) return TCL_OK;
+      if (brlapi_write(&options.arguments) != -1) return TCL_OK;
       setBrlapiError(interp);
       return TCL_ERROR;
     }
@@ -833,17 +823,17 @@ brlapiSessionCommand (data, interp, objc, objv)
 
 typedef struct {
   brlapi_settings_t settings;
-} FunctionData_connect;
+} FunctionData_general_connect;
 
-OPTION_HANDLER(connect,host) {
-  FunctionData_connect *connect = data;
-  connect->settings.hostName = Tcl_GetString(objv[1]);
+OPTION_HANDLER(general,connect,host) {
+  FunctionData_general_connect *options = data;
+  options->settings.hostName = Tcl_GetString(objv[1]);
   return TCL_OK;
 }
 
-OPTION_HANDLER(connect,keyFile) {
-  FunctionData_connect *connect = data;
-  connect->settings.authKey = Tcl_GetString(objv[1]);
+OPTION_HANDLER(general,connect,keyFile) {
+  FunctionData_general_connect *options = data;
+  options->settings.authKey = Tcl_GetString(objv[1]);
   return TCL_OK;
 }
 
@@ -881,41 +871,32 @@ brlapiGeneralCommand (data, interp, objc, objv)
 
   switch (function) {
     case FCN_connect: {
-      FunctionData_connect connect = {
+      FunctionData_general_connect options = {
         .settings = {
           .authKey = NULL,
           .hostName = NULL
         }
       };
 
-      {
-        static const OptionEntry options[] = {
-          {
-            .name = "host",
-            .operands = 1,
-            .help = "[host][:port]",
-            .handler = OPTION_HANDLER_NAME(connect,host)
-          }
-          ,
-          {
-            .name = "keyFile",
-            .operands = 1,
-            .help = "file",
-            .handler = OPTION_HANDLER_NAME(connect,keyFile)
-          }
-          ,
-          {
-            .name = NULL
-          }
-        };
-        static const char **names = NULL;
-        int result = processOptions(interp, &connect, objv, objc, 2, options, &names);
-        if (result != TCL_OK) return result;
-      }
+      BEGIN_OPTIONS
+        {
+          .name = "host",
+          .operands = 1,
+          .help = "[host][:port]",
+          .handler = OPTION_HANDLER_NAME(general,connect,host)
+        }
+        ,
+        {
+          .name = "keyFile",
+          .operands = 1,
+          .help = "file",
+          .handler = OPTION_HANDLER_NAME(general,connect,keyFile)
+        }
+      END_OPTIONS(2)
 
       {
         BrlapiSession *session = allocateMemory(sizeof(*session));
-        int result = brlapi_initializeConnection(&connect.settings, &session->settings);
+        int result = brlapi_initializeConnection(&options.settings, &session->settings);
         if (result != -1) {
           session->fileDescriptor = result;
 
