@@ -68,7 +68,11 @@ setByteArrayResult (Tcl_Interp *interp, const unsigned char *bytes, int count) {
 
 static void
 setBrlapiError (Tcl_Interp *interp) {
-  setStringResult(interp, brlapi_strerror(&brlapi_error), -1);
+  const char *message = brlapi_strerror(&brlapi_error);
+  char brlerrno[0X20];
+  snprintf(brlerrno, sizeof(brlerrno), "%d", brlapi_error.brlerrno);
+  Tcl_SetErrorCode(interp, "BrlAPI", brlerrno, message, NULL);
+  setStringResult(interp, message, -1);
 }
 
 static int
@@ -973,40 +977,38 @@ brlapiGeneralCommand (data, interp, objc, objv)
         int elementIndex;
 
         for (elementIndex=0; elementIndex<elementCount; ++elementIndex) {
-          Tcl_Obj *element = elements[elementIndex];
           unsigned char *cell = &cells[elementIndex];
-
+          Tcl_Obj *element = elements[elementIndex];
           int dotCount;
           const char *dots = Tcl_GetStringFromObj(element, &dotCount);
-          int dotIndex;
 
           *cell = 0;
           if ((dotCount != 1) || (dots[0] != '0')) {
+            int dotIndex;
             for (dotIndex=0; dotIndex<dotCount; ++dotIndex) {
-              static const char dotNumbers[] = {
-                '1', '2', '3', '4', '5', '6', '7', '8'
-              };
               unsigned char dotNumber = dots[dotIndex];
-
-              static const unsigned char dotBits[] = {
-                BRL_DOT1, BRL_DOT2, BRL_DOT3, BRL_DOT4,
-                BRL_DOT5, BRL_DOT6, BRL_DOT7, BRL_DOT8
-              };
-              unsigned char dotBit;
-
+              static const char dotNumbers[] = {'1', '2', '3', '4', '5', '6', '7', '8'};
               const char *dot = memchr(dotNumbers, dotNumber, sizeof(dotNumbers));
 
               if (!dot) {
                 setStringResult(interp, "invalid dot number", -1);
                 return TCL_ERROR;
               }
-              dotBit = dotBits[dot - dotNumbers];
 
-              if (*cell & dotBit) {
-                setStringResult(interp, "duplicate dot number", -1);
-                return TCL_ERROR;
+              {
+                static const unsigned char dotBits[] = {
+                  BRL_DOT1, BRL_DOT2, BRL_DOT3, BRL_DOT4,
+                  BRL_DOT5, BRL_DOT6, BRL_DOT7, BRL_DOT8
+                };
+                unsigned char dotBit = dotBits[dot - dotNumbers];
+
+                if (*cell & dotBit) {
+                  setStringResult(interp, "duplicate dot number", -1);
+                  return TCL_ERROR;
+                }
+
+                *cell |= dotBit;
               }
-              *cell |= dotBit;
             }
           }
         }
