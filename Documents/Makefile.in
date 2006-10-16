@@ -31,7 +31,7 @@ BrlAPIref:
 
 clean::
 	-rm -f *.made
-	-rm -fr */html/* */man/*
+	-rm -f -r BrlAPIref
 
 distclean::
 	-rm -f brltty.conf brltty.1 BrlAPIref.doxy
