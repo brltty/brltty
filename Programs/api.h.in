@@ -163,7 +163,7 @@ typedef struct {
  * \code
  * if (brlapi_initializeConnection(&settings,&settings)<0) {
  *  fprintf(stderr,"couldn't connect to BrlAPI at %s: %s\n",
- *   settings.hostName, brlapi_strerror(brlapi_errno));
+ *   settings.hostName, brlapi_strerror(&brlapi_error));
  *  exit(1);
  * }
  * \endcode
@@ -409,7 +409,7 @@ typedef struct {
   int displayNumber; /** Display number -1 == unspecified */
   unsigned int regionBegin; /** Region of display to update, 1st character of display is 1 */
   unsigned int regionSize; /** Number of caracters held in text, attrAnd and attrOr. For multibyte text, this is the number of \e multibyte caracters. Combining and double-width caracters count for 1 */
-  char *text; /** Text to display */
+  char *text; /** Text to display, must hold as many characters as the region fields expresses. */
   unsigned char *attrAnd; /** And attributes; applied first */
   unsigned char *attrOr; /** Or attributes; applied \e after ANDing */
   int cursor; /** -1 == don't touch, 0 == turn off, 1 = 1st char of display, ... */
@@ -425,7 +425,7 @@ typedef struct {
  * cursor = -1; (don't touch cursor)
 */
 #define BRLAPI_WRITESTRUCT_INITIALIZER \
-  { -1, 0, 0, NULL, NULL, NULL, -1, NULL };
+  { -1, 0, 0, NULL, NULL, NULL, -1, NULL }
 
 /* brlapi_write */
 /** Update a specific region of the braille display and apply and/or masks

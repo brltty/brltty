@@ -280,8 +280,8 @@ static ssize_t brlapi_doWaitForPacket(brl_type_t expectedPacketType, void *packe
   return -3;
 }
 
-/* brlapi_WaitForPacket */
-/* same as brlapi_waitForPacket, but sleeps instead of reading if another
+/* brlapi_waitForPacket */
+/* same as brlapi_doWaitForPacket, but sleeps instead of reading if another
  * thread is already reading. Never returns -2. If loop is 1, never returns -3.
  */
 static ssize_t brlapi_waitForPacket(brl_type_t expectedPacketType, void *packet, size_t size, int loop) {
