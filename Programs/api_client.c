@@ -986,13 +986,10 @@ int brlapi__getTtyPath(brlapi_handle_t *handle, int *ttys, int nttys, const char
   p++;
   memcpy(p, how, n);
   p += n;
-  if ((res=brlapi__writePacketWaitForAck(handle,BRLPACKET_GETTTY,packet,(p-packet)))<0)
-    return res;
-
-  handle->state |= STCONTROLLINGTTY;
+  if ((res=brlapi__writePacketWaitForAck(handle,BRLPACKET_GETTTY,packet,(p-packet))) == 0)
+    handle->state |= STCONTROLLINGTTY;
   pthread_mutex_unlock(&handle->state_mutex);
-
-  return 0;
+  return res;
 }
 
 int brlapi_getTtyPath(int *ttys, int nttys, const char *how)
