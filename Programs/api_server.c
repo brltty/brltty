@@ -808,12 +808,10 @@ static int handleGetTty(Connection *c, brl_type_t type, unsigned char *packet, s
   memcpy(name, p, n);
   name[n] = '\0';
   if (!*name) how = BRL_COMMANDS; else {
-    if ((!strcmp(name, trueBraille->definition.name)) && (isKeyCapable(trueBraille)))
-      how = BRL_KEYCODES;
-    else how = -1;
+    CHECKERR(!strcmp(name, trueBraille->definition.name), BRLERR_INVALID_PARAMETER);
+    CHECKERR(isKeyCapable(trueBraille), BRLERR_OPNOTSUPP);
+    how = BRL_KEYCODES;
   }
-  CHECKERR(((how == BRL_KEYCODES) || (how == BRL_COMMANDS)),BRLERR_OPNOTSUPP);
-  c->how = how;
   freeBrailleWindow(&c->brailleWindow); /* In case of multiple gettty requests */
   if ((initializeUnmaskedKeys(c)==-1) || (allocBrailleWindow(&c->brailleWindow)==-1)) {
     LogPrint(LOG_WARNING,"Failed to allocate some ressources");
@@ -886,6 +884,7 @@ static int handleGetTty(Connection *c, brl_type_t type, unsigned char *packet, s
     }
   }
   c->tty = tty;
+  c->how = how;
   __removeConnection(c);
   __addConnection(c,tty->connections);
   pthread_mutex_unlock(&connectionsMutex);
@@ -1109,8 +1108,8 @@ static int handleGetRaw(Connection *c, brl_type_t type, unsigned char *packet, s
 {
   LogPrintRequest(type, c->fd);
   CHECKERR(!c->raw, BRLERR_ILLEGAL_INSTRUCTION);
-  CHECKERR(isRawCapable(trueBraille), BRLERR_OPNOTSUPP);
   if (!checkDriverSpecificModePacket(c, packet, size)) return 0;
+  CHECKERR(isRawCapable(trueBraille), BRLERR_OPNOTSUPP);
   pthread_mutex_lock(&rawMutex);
   if (rawConnection || suspendConnection) {
     WERR(c->fd,BRLERR_DEVICEBUSY,"driver busy (%s)", rawConnection?"raw":"suspend");
@@ -1158,8 +1157,8 @@ static int handlePacket(Connection *c, brl_type_t type, unsigned char *packet, s
 static int handleSuspend(Connection *c, brl_type_t type, unsigned char *packet, size_t size)
 {
   LogPrintRequest(type, c->fd);
-  CHECKERR(!c->suspend,BRLERR_ILLEGAL_INSTRUCTION);
   if (!checkDriverSpecificModePacket(c, packet, size)) return 0;
+  CHECKERR(!c->suspend,BRLERR_ILLEGAL_INSTRUCTION);
   pthread_mutex_lock(&rawMutex);
   if (suspendConnection || rawConnection) {
     WERR(c->fd, BRLERR_DEVICEBUSY,"driver busy (%s)", rawConnection?"raw":"suspend");
