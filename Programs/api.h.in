@@ -142,6 +142,11 @@ typedef struct {
   char *hostName;
 } brlapi_settings_t;
 
+/* BRLAPI_SETTINGS_INITIALIZER */
+/** Allows to initialize a structure of type \e brlapi_settings_t *
+ * with default values. */
+#define BRLAPI_SETTINGS_INITIALIZER { NULL, NULL }
+
 /* brlapi_initializeConnection */
 /** Open a socket and connect it to \e BrlAPI 's server
  *
