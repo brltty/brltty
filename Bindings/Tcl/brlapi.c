@@ -172,18 +172,18 @@ processOptions (
 
 typedef struct {
   Tcl_Obj *tty;
-  const char *how;
+  const char *driver;
 } FunctionData_session_claimTty;
 
 OPTION_HANDLER(session, claimTty, commands) {
   FunctionData_session_claimTty *options = data;
-  options->how = NULL;
+  options->driver = NULL;
   return TCL_OK;
 }
 
-OPTION_HANDLER(session, claimTty, raw) {
+OPTION_HANDLER(session, claimTty, events) {
   FunctionData_session_claimTty *options = data;
-  options->how = Tcl_GetString(objv[1]);
+  options->driver = Tcl_GetString(objv[1]);
   return TCL_OK;
 }
 
@@ -318,17 +318,17 @@ brlapiSessionCommand (data, interp, objc, objv)
     "displaySize",
     "driverIdentifier",
     "driverName",
+    "enterRawMode",
     "fileDescriptor",
     "host",
     "ignoreKeys",
     "keyFile",
+    "leaveRawMode",
     "readKey",
     "readRaw",
     "releaseTty",
     "resume",
-    "setCommands",
     "setFocus",
-    "setRaw",
     "suspend",
     "writeCells",
     "writeRaw",
@@ -343,17 +343,17 @@ brlapiSessionCommand (data, interp, objc, objv)
     FCN_displaySize,
     FCN_driverIdentifier,
     FCN_driverName,
+    FCN_enterRawMode,
     FCN_fileDescriptor,
     FCN_host,
     FCN_ignoreKeys,
     FCN_keyFile,
+    FCN_leaveRawMode,
     FCN_readKey,
     FCN_readRaw,
     FCN_releaseTty,
     FCN_resume,
-    FCN_setCommands,
     FCN_setFocus,
-    FCN_setRaw,
     FCN_suspend,
     FCN_writeCells,
     FCN_writeRaw,
@@ -482,7 +482,7 @@ brlapiSessionCommand (data, interp, objc, objv)
     case FCN_claimTty: {
       FunctionData_session_claimTty options = {
         .tty = NULL,
-        .how = NULL
+        .driver = NULL
       };
 
       BEGIN_OPTIONS
@@ -492,13 +492,13 @@ brlapiSessionCommand (data, interp, objc, objv)
         }
         ,
         {
-          OPTION(session, claimTty, raw),
-          OPERANDS(1, "<driverIdentifier>")
+          OPTION(session, claimTty, events),
+          OPERANDS(1, "<driver>")
         }
         ,
         {
           OPTION(session, claimTty, tty),
-          OPERANDS(1, "{<number> | default}")
+          OPERANDS(1, "{default | <number>}")
         }
       END_OPTIONS(2)
 
@@ -520,12 +520,12 @@ brlapiSessionCommand (data, interp, objc, objv)
             if (result != TCL_OK) return result;
           }
 
-          if (brlapi_getTtyPath(ttys, count, options.how) != -1) return TCL_OK;
-        } else if (brlapi_getTtyPath(NULL, 0, options.how) != -1) {
+          if (brlapi_getTtyPath(ttys, count, options.driver) != -1) return TCL_OK;
+        } else if (brlapi_getTtyPath(NULL, 0, options.driver) != -1) {
           return TCL_OK;
         }
       } else {
-        int result = brlapi_getTty(-1, options.how);
+        int result = brlapi_getTty(-1, options.driver);
 
         if (result != -1) {
           setIntResult(interp, result);
@@ -546,32 +546,6 @@ brlapiSessionCommand (data, interp, objc, objv)
       if (brlapi_leaveTty() != -1) return TCL_OK;
       setBrlapiError(interp);
       return TCL_ERROR;
-    }
-
-    case FCN_setCommands: {
-      if (objc != 2) {
-        Tcl_WrongNumArgs(interp, 2, objv, NULL);
-        return TCL_ERROR;
-      }
-
-      if (brlapi_leaveRaw() != -1) return TCL_OK;
-      setBrlapiError(interp);
-      return TCL_ERROR;
-    }
-
-    case FCN_setRaw: {
-      if (objc != 3) {
-        Tcl_WrongNumArgs(interp, 2, objv, "<driverIdentifier>");
-        return TCL_ERROR;
-      }
-
-      {
-        const char *driver = Tcl_GetString(objv[2]);
-
-        if (brlapi_getRaw(driver) != -1) return TCL_OK;
-        setBrlapiError(interp);
-        return TCL_ERROR;
-      }
     }
 
     case FCN_setFocus: {
@@ -689,33 +663,6 @@ brlapiSessionCommand (data, interp, objc, objv)
       return TCL_ERROR;
     }
 
-    case FCN_readRaw: {
-      int size;
-
-      if (objc != 3) {
-        Tcl_WrongNumArgs(interp, 2, objv, "<maximumLength>");
-        return TCL_ERROR;
-      }
-
-      {
-        int result = Tcl_GetIntFromObj(interp, objv[2], &size);
-        if (result != TCL_OK) return result;
-      }
-
-      {
-        unsigned char buffer[size];
-        int result = brlapi_recvRaw(buffer, size);
-
-        if (result != -1) {
-          setByteArrayResult(interp, buffer, result);
-          return TCL_OK;
-        }
-
-        setBrlapiError(interp);
-        return TCL_ERROR;
-      }
-    }
-
     case FCN_writeText: {
       FunctionData_session_writeText options = {
         .arguments = BRLAPI_WRITESTRUCT_INITIALIZER,
@@ -748,12 +695,12 @@ brlapiSessionCommand (data, interp, objc, objv)
         ,
         {
           OPTION(session, writeText, cursor),
-          OPERANDS(1, "{<offset> | off | leave}")
+          OPERANDS(1, "{leave | off | <offset>}")
         }
         ,
         {
           OPTION(session, writeText, display),
-          OPERANDS(1, "{<number> | default}")
+          OPERANDS(1, "{default | <number>}")
         }
         ,
         {
@@ -767,6 +714,7 @@ brlapiSessionCommand (data, interp, objc, objv)
         }
       END_OPTIONS(3)
 
+      if (!options.arguments.regionSize) return TCL_OK;
       if (brlapi_write(&options.arguments) != -1) return TCL_OK;
       setBrlapiError(interp);
       return TCL_ERROR;
@@ -783,6 +731,59 @@ brlapiSessionCommand (data, interp, objc, objv)
         const char *cells = Tcl_GetByteArrayFromObj(objv[2], &count);
 
         if (brlapi_writeDots(cells) != -1) return TCL_OK;
+        setBrlapiError(interp);
+        return TCL_ERROR;
+      }
+    }
+
+    case FCN_enterRawMode: {
+      if (objc != 3) {
+        Tcl_WrongNumArgs(interp, 2, objv, "<driver>");
+        return TCL_ERROR;
+      }
+
+      {
+        const char *driver = Tcl_GetString(objv[2]);
+
+        if (brlapi_getRaw(driver) != -1) return TCL_OK;
+        setBrlapiError(interp);
+        return TCL_ERROR;
+      }
+    }
+
+    case FCN_leaveRawMode: {
+      if (objc != 2) {
+        Tcl_WrongNumArgs(interp, 2, objv, NULL);
+        return TCL_ERROR;
+      }
+
+      if (brlapi_leaveRaw() != -1) return TCL_OK;
+      setBrlapiError(interp);
+      return TCL_ERROR;
+    }
+
+    case FCN_readRaw: {
+      int size;
+
+      if (objc != 3) {
+        Tcl_WrongNumArgs(interp, 2, objv, "<maximumLength>");
+        return TCL_ERROR;
+      }
+
+      {
+        int result = Tcl_GetIntFromObj(interp, objv[2], &size);
+        if (result != TCL_OK) return result;
+      }
+
+      {
+        unsigned char buffer[size];
+        int result = brlapi_recvRaw(buffer, size);
+
+        if (result != -1) {
+          setByteArrayResult(interp, buffer, result);
+          return TCL_OK;
+        }
+
         setBrlapiError(interp);
         return TCL_ERROR;
       }
@@ -806,7 +807,7 @@ brlapiSessionCommand (data, interp, objc, objv)
 
     case FCN_suspend: {
       if (objc != 3) {
-        Tcl_WrongNumArgs(interp, 2, objv, "<driverName>");
+        Tcl_WrongNumArgs(interp, 2, objv, "<driver>");
         return TCL_ERROR;
       }
 
@@ -867,17 +868,17 @@ brlapiGeneralCommand (data, interp, objc, objv)
 {
   static const char *functions[] = {
     "connect",
+    "expandCommand",
+    "expandHost",
     "makeCells",
-    "parseCommand",
-    "parseHost",
     NULL
   };
 
   typedef enum {
     FCN_connect,
-    FCN_makeCells,
-    FCN_parseCommand,
-    FCN_parseHost
+    FCN_expandCommand,
+    FCN_expandHost,
+    FCN_makeCells
   } Function;
 
   int function;
@@ -895,10 +896,7 @@ brlapiGeneralCommand (data, interp, objc, objv)
   switch (function) {
     case FCN_connect: {
       FunctionData_general_connect options = {
-        .settings = {
-          .authKey = NULL,
-          .hostName = NULL
-        }
+        .settings = BRLAPI_SETTINGS_INITIALIZER
       };
 
       BEGIN_OPTIONS
@@ -937,7 +935,7 @@ brlapiGeneralCommand (data, interp, objc, objv)
       return TCL_ERROR;
     }
 
-    case FCN_parseHost: {
+    case FCN_expandHost: {
       if (objc != 3) {
         Tcl_WrongNumArgs(interp, 2, objv, "<hostSpec>");
         return TCL_ERROR;
@@ -958,8 +956,8 @@ brlapiGeneralCommand (data, interp, objc, objv)
       }
     }
 
-    case FCN_parseCommand: {
-      Tcl_WideInt command;
+    case FCN_expandCommand: {
+      Tcl_WideInt key;
 
       if (objc != 3) {
         Tcl_WrongNumArgs(interp, 2, objv, "<key>");
@@ -967,15 +965,15 @@ brlapiGeneralCommand (data, interp, objc, objv)
       }
 
       {
-        int result = Tcl_GetWideIntFromObj(interp, objv[2], &command);
+        int result = Tcl_GetWideIntFromObj(interp, objv[2], &key);
         if (result != TCL_OK) return result;
       }
 
       {
         Tcl_Obj *elements[] = {
-          Tcl_NewWideIntObj((command & BRLAPI_KEY_TYPE_MASK) >> BRLAPI_KEY_TYPE_SHIFT),
-          Tcl_NewWideIntObj((command & BRLAPI_KEY_CODE_MASK) >> 0),
-          Tcl_NewWideIntObj((command & BRLAPI_KEY_FLAGS_MASK) >> BRLAPI_KEY_FLAGS_SHIFT)
+          Tcl_NewWideIntObj((key & BRLAPI_KEY_TYPE_MASK) >> BRLAPI_KEY_TYPE_SHIFT),
+          Tcl_NewWideIntObj((key & BRLAPI_KEY_CODE_MASK) >> BRLAPI_KEY_CODE_SHIFT),
+          Tcl_NewWideIntObj((key & BRLAPI_KEY_FLAGS_MASK) >> BRLAPI_KEY_FLAGS_SHIFT)
         };
 
         Tcl_SetObjResult(interp, Tcl_NewListObj(3, elements));

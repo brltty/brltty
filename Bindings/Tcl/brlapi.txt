@@ -2,8 +2,8 @@ brlapi <function> [<arg> ...]
    connect [<option> ...]
       host <hostSpec>
       keyFile <file>
-   parseHost <hostSpec>
-   parseCommand <key>
+   expandHost <hostSpec>
+   expandCommand <key>
    makeCells <dotsList>
 
 brlapi0 function [arg ...]
@@ -14,27 +14,27 @@ brlapi0 function [arg ...]
    driverName
    displaySize
    claimTty [<option> ...]
-      tty {<number> | default}
+      tty {default | <number>}
       commands
-      raw <driverIdentifier>
+      events <driver>
    releaseTty
-   setCommands
-   setRaw <driverIdentifier>
    setFocus <ttyNumber>
    readKey <wait>
    acceptKeys {<keyList> | <firstKey> <lastKey>}
    ignoreKeys {<keyList> | <firstKey> <lastKey>}
-   readRaw <maximumLength>
    writeText <string> [<option> ...]
       and <mask>
       or <mask>
       start <offset>
-      cursor {<offset> | off | leave}
-      display <number>
+      cursor {leave | off | <offset>}
+      display {default | <number>}
       charset <name>
    writeCells <cells>
+   enterRawMode <driver>
+   leaveRawMode
+   readRaw <maximumLength>
    writeRaw <packet>
-   suspend <driverName>
+   suspend <driver>
    resume
    disconnect
 
