@@ -413,7 +413,7 @@ int brlapi_writeDots(const unsigned char *dots);
 typedef struct {
   int displayNumber; /** Display number -1 == unspecified */
   unsigned int regionBegin; /** Region of display to update, 1st character of display is 1 */
-  unsigned int regionSize; /** Number of caracters held in text, attrAnd and attrOr. For multibyte text, this is the number of \e multibyte caracters. Combining and double-width caracters count for 1 */
+  unsigned int regionSize; /** Number of caracters held in text, attrAnd and attrOr. */
   char *text; /** Text to display, must hold as many characters as the region fields expresses. */
   unsigned char *attrAnd; /** And attributes; applied first */
   unsigned char *attrOr; /** Or attributes; applied \e after ANDing */
@@ -435,7 +435,28 @@ typedef struct {
 /* brlapi_write */
 /** Update a specific region of the braille display and apply and/or masks
  *
- * \param s gives information necesarry for the update
+ * \param s gives information necessary for the update
+ *
+ * If \e both regionBegin and regionSize are valid (>=1 and <= size of the
+ * display), then only part of the display will be updated.  Else the whole
+ * display will be updated.
+ *
+ * If given, the "text" field holds the text that will be displayed in the
+ * region.  The char string must hold exactly as many characters as the region
+ * fields express.  For multibyte text, this is the number of \e multibyte
+ * caracters.  Notably, combining and double-width caracters count for 1.  The
+ * actual length of the text in \e bytes will be computed thanks to strlen().
+ *
+ * The "attrAnd" and "attrOr" masks, if present, are then applied on top of the
+ * text.  This hence permits the superimposing of attributes over the text.
+ *
+ * The "charset" field, if present, specifies the charset of the "text" field.
+ * Else, the 8-bit charset of the server is assumed.
+ *
+ * A special invocation is with an unmodified initialized structure: this clears
+ * the client's whole display, letting the display of other applications on
+ * the same tty or of applications "under" the tty appear. See Concurrency
+ * management section of the BrlAPI documentation for more details.
  *
  * \return 0 on success, -1 on error.
  */
