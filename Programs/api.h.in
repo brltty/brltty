@@ -41,6 +41,21 @@ extern "C" {
 /* NULL is defined there */
 #include <unistd.h>
 
+/**
+ * Each function provided by BrlAPI comes in two versions.
+ *
+ * 1. A version whose name is prefixed by brlapi_ for clients opening only
+ * one simultaneous connection with BrlAPI (most frequen case)
+ *
+ * 2. A version whose name is prefixed by brlapi__ for use by clients
+ * wishing to open more than one connection to BrlAPI.
+ *
+ * A function called brlapi__foo is used in exactly the same way as its
+ * brlapi_foo counterpart, except that it takes an additional argument
+ * (the first one), which is a handle letting the client refer to a given
+ * connection in a similar manner to what file descriptors do. */
+typedef struct brlapi_handle_t brlapi_handle_t;
+
 /** \defgroup brlapi_connection Connecting to BrlAPI
  *
  * Before calling any other function of the library, calling
@@ -194,6 +209,7 @@ typedef struct {
  * brlapi_readPacket()
  */
 brlapi_fileDescriptor brlapi_initializeConnection(const brlapi_settings_t *clientSettings, brlapi_settings_t *usedSettings);
+brlapi_fileDescriptor brlapi__initializeConnection(brlapi_handle_t *handle, const brlapi_settings_t *clientSettings, brlapi_settings_t *usedSettings);
 
 /* brlapi_closeConnection */
 /** Cleanly close the socket
@@ -203,6 +219,7 @@ brlapi_fileDescriptor brlapi_initializeConnection(const brlapi_settings_t *clien
  * brlapi_initializeConnection() gave has no meaning any more
  */
 void brlapi_closeConnection(void);
+void brlapi__closeConnection(brlapi_handle_t *handle);
 
 /* brlapi_splitHost */
 /* splits host into hostname & port, returns address family to use */
@@ -249,6 +266,7 @@ int brlapi_loadAuthKey(const char *filename, size_t *authlength, void *auth);
  * buffer, if the supplied one is to small (same as snprintf()).
 */
 int brlapi_getDriverId(char *id, size_t n);
+int brlapi__getDriverId(brlapi_handle_t *handle, char *id, size_t n);
 
 /* brlapi_getDriverName */
 /** Return the complete name of the driver used by \e brltty
@@ -263,10 +281,12 @@ int brlapi_getDriverId(char *id, size_t n);
  * buffer, if the supplied one is to small (same as snprintf()).
 */
 int brlapi_getDriverName(char *name, size_t n);
+int brlapi__getDriverName(brlapi_handle_t *handle, char *name, size_t n);
 
 /* brlapi_getDisplaySize */
 /** Return the size of the braille display */
 int brlapi_getDisplaySize(unsigned int *x, unsigned int *y);
+int brlapi__getDisplaySize(brlapi_handle_t *handle, unsigned int *x, unsigned int *y);
 
 /** @} */
 
@@ -325,6 +345,7 @@ int brlapi_getDisplaySize(unsigned int *x, unsigned int *y);
  * \sa brlapi_leaveTty() brlapi_readKey()
  */
 int brlapi_getTty(int tty, const char *how);
+int brlapi__getTty(brlapi_handle_t *handle, int tty, const char *how);
 
 /* brlapi_getTtyPath */
 /** Ask for some tty path, with some key mechanism
@@ -339,6 +360,7 @@ int brlapi_getTty(int tty, const char *how);
  * \sa brlapi_getTty()
  */
 int brlapi_getTtyPath(int *ttys, int nttys, const char *how);
+int brlapi__getTtyPath(brlapi_handle_t *handle, int *ttys, int nttys, const char *how);
 
 /* brlapi_leaveTty */
 /** Stop controlling the tty
@@ -348,6 +370,7 @@ int brlapi_getTtyPath(int *ttys, int nttys, const char *how);
  * \sa brlapi_getTty()
  */
 int brlapi_leaveTty(void);
+int brlapi__leaveTty(brlapi_handle_t *handle);
 
 /* brlapi_setFocus */
 /** Tell the current tty to brltty
@@ -361,6 +384,7 @@ int brlapi_leaveTty(void);
  * \sa brlapi_getTty() brlapi_leaveTty()
  */
 int brlapi_setFocus(int tty);
+int brlpi__setFocus(brlapi_handle_t *handle, int tty);
 
 /** @} */
 
@@ -397,6 +421,7 @@ int brlapi_setFocus(int tty);
  * \return 0 on success, -1 on error.
  */
 int brlapi_writeText(int cursor, const char *str);
+int brlapi__writeText(brlapi_handle_t *handle, int cursor, const char *str);
 
 /* brlapi_writeDots */
 /** Write the given dots array to the display
@@ -407,6 +432,7 @@ int brlapi_writeText(int cursor, const char *str);
  * \return 0 on success, -1 on error.
  */
 int brlapi_writeDots(const unsigned char *dots);
+int brlapi__writeDots(brlapi_handle_t *handle, const unsigned char *dots);
 
 /* brlapi_writeStruct */
 /** Structure containing arguments to be given to brlapi_write() */
@@ -461,6 +487,7 @@ typedef struct {
  * \return 0 on success, -1 on error.
  */
 int brlapi_write(const brlapi_writeStruct *s);
+int brlapi__write(brlapi_handle_t *handle, const brlapi_writeStruct *s);
 
 /** @} */
 
@@ -778,6 +805,7 @@ enum brlapi_key_cmd_e {
  * block was 0 and no key was pressed so far, or 1 and *code holds the key code.
  */
 int brlapi_readKey(int block, brl_keycode_t *code);
+int brlapi__readKey(brlapi_handle_t *handle, int block, brl_keycode_t *code);
 
 /* brlapi_ignoreKeyRange */
 /** Ignore some key presses from the braille keyboard
@@ -789,6 +817,7 @@ int brlapi_readKey(int block, brl_keycode_t *code);
  * \note The given codes are either raw keycodes if some driver name was given
  * to brlapi_getTty(), or \e brltty commands if NULL or "" was given. */
 int brlapi_ignoreKeyRange(brl_keycode_t x, brl_keycode_t y);
+int brlapi__ignoreKeyRange(brlapi_handle_t *handle, brl_keycode_t x, brl_keycode_t y);
 
 /* brlapi_ignoreKeySet */
 /** Ignore some key presses from the braille keyboard
@@ -800,6 +829,7 @@ int brlapi_ignoreKeyRange(brl_keycode_t x, brl_keycode_t y);
  * \note The given codes are either raw keycodes if some driver name was given
  * to brlapi_getTty(), or \e brltty commands if NULL or "" was given. */
 int brlapi_ignoreKeySet(const brl_keycode_t *s, unsigned int n);
+int brlapi__ignoreKeySet(brlapi_handle_t *handle, const brl_keycode_t *s, unsigned int n);
 
 /* brlapi_unignoreKeyRange */
 /** Unignore some key presses from the braille keyboard
@@ -813,6 +843,7 @@ int brlapi_ignoreKeySet(const brl_keycode_t *s, unsigned int n);
  * \note The given codes are either raw keycodes if some driver name was given
  * to brlapi_getTty(), or \e brltty commands if NULL or "" was given. */
 int brlapi_unignoreKeyRange(brl_keycode_t x, brl_keycode_t y);
+int brlapi__unignoreKeyRange(brlapi_handle_t *handle, brl_keycode_t x, brl_keycode_t y);
 
 /* brlapi_unignoreKeySet */
 /** Unignore some key presses from the braille keyboard
@@ -826,6 +857,7 @@ int brlapi_unignoreKeyRange(brl_keycode_t x, brl_keycode_t y);
  * \note The given codes are either raw keycodes if some driver name was given
  * to brlapi_getTty(), or \e brltty commands if NULL or "" was given. */
 int brlapi_unignoreKeySet(const brl_keycode_t *s, unsigned int n);
+int brlapi__unignoreKeySet(brlapi_handle_t *handle, const brl_keycode_t *s, unsigned int n);
 
 /** @} */
 
@@ -858,11 +890,13 @@ int brlapi_unignoreKeySet(const brl_keycode_t *s, unsigned int n);
  * communication will be established.
  * \return 0 on success, -1 on error */
 int brlapi_getRaw(const char *driver);
+int brlapi__getRaw(brlapi_handle_t *handle, const char *driver);
 
 /* brlapi_leaveRaw */
 /** Leave Raw mode
  * \return 0 on success, -1 on error */
 int brlapi_leaveRaw(void);
+int brlapi__leaveRaw(brlapi_handle_t *handle);
 
 /* brlapi_sendRaw */
 /** Send Raw data
@@ -871,6 +905,7 @@ int brlapi_leaveRaw(void);
  * \param size holds the packet size.
  * \return size on success, -1 on error */
 ssize_t brlapi_sendRaw(const void *buf, size_t size);
+ssize_t brapi__sendRaw(brlapi_handle_t *handle, const void *buf, size_t size);
 
 /* brlapi_recvRaw */
 /** Get Raw data
@@ -880,6 +915,7 @@ ssize_t brlapi_sendRaw(const void *buf, size_t size);
  * \param size holds the buffer size.
  * \return its size, -1 on error or signal interruption */
 ssize_t brlapi_recvRaw(void *buf, size_t size);
+ssize_t brlapi__recvRaw(brlapi_handle_t *handle, void *buf, size_t size);
 
 /* brlapi_suspend */
 /** Suspend braille driver
@@ -887,12 +923,14 @@ ssize_t brlapi_recvRaw(void *buf, size_t size);
  * \return -1 on error
  */
 int brlapi_suspend(const char *driver);
+int brlapi__suspend(brlapi_handle_t *handle, const char *driver);
 
 /* brlapi_resume */
 /** Resume braille driver
  * \return -1 on error
  */
 int brlapi_resume(void);
+int brlapi__resume(brlapi_handle_t *handle);
 
 /** @} */
 
@@ -1059,6 +1097,7 @@ size);
  * The default handler just prints the exception and exit()s.
  */
 brlapi_exceptionHandler_t brlapi_setExceptionHandler(brlapi_exceptionHandler_t handler);
+brlapi_exceptionHandler_t brlapi__setExceptionHandler(brlapi_handle_t *handle, brlapi_exceptionHandler_t handler);
 void brlapi_defaultExceptionHandler(int err, brl_type_t type, const void *buf, size_t size);
 
 /** @} */
@@ -1066,7 +1105,9 @@ void brlapi_defaultExceptionHandler(int err, brl_type_t type, const void *buf, s
 /* Windows-specific tricks - don't look at this */
 #ifdef BRLAPI_WIN32
 int brlapi_writeTextWin(int cursor, const void *str, int wide);
+int brlapi__writeTextWin(brlapi_handle_t *handle, int cursor, const void *str, int wide);
 int brlapi_writeWin(const brlapi_writeStruct *s, int wide);
+int brlapi__writeWin(brlapi_handle_t *handle, const brlapi_writeStruct *s, int wide);
 #ifdef UNICODE
 #define brlapi_writeText(cursor, str) brlapi_writeTextWin(cursor, str, 1)
 #define brlapi_write(s) brlapi_writeWin(s, 1)

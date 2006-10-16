@@ -145,7 +145,7 @@ static WIN_PROC_STUB(freeaddrinfo);
 */
 #define BRL_KEYBUF_SIZE 256
 
-typedef struct brlapi_handle_t { /* Connection-specific information */
+struct brlapi_handle_t { /* Connection-specific information */
   unsigned int brlx;
   unsigned int brly;
   brlapi_fileDescriptor fileDescriptor; /* Descriptor of the socket connected to BrlApi */
@@ -159,7 +159,7 @@ typedef struct brlapi_handle_t { /* Connection-specific information */
   /* to protect concurrent fd key events and request answers, also protects the
    * key buffer */
   /* Only two threads might want to take it: one that already got
-  * brlapi_req_mutex, or one that got defaultHandle.key_mutex */
+  * brlapi_req_mutex, or one that got key_mutex */
   pthread_mutex_t read_mutex;
   /* when someone is already reading (reading==1), put expected type,
    * address/size of buffer, and address of return value, then wait on semaphore,
@@ -181,7 +181,7 @@ typedef struct brlapi_handle_t { /* Connection-specific information */
   unsigned keybuf_nb;
   brlapi_exceptionHandler_t exceptionHandler;
   pthread_mutex_t exceptionHandler_mutex;
-} brlapi_handle_t;
+};
 
 static brlapi_handle_t defaultHandle;
 
@@ -221,7 +221,7 @@ static void brlapi_initializeHandle(brlapi_handle_t *handle)
 /* Returns -2 on end of file */
 /* Returns -3 if the available packet was not for us */
 /* Calls the exception handler if an exception is encountered */
-static ssize_t brlapi_doWaitForPacket(brl_type_t expectedPacketType, void *packet, size_t size)
+static ssize_t brlapi__doWaitForPacket(brlapi_handle_t *handle, brl_type_t expectedPacketType, void *packet, size_t size)
 {
   static unsigned char localPacket[BRLAPI_MAXPACKETSIZE];
   brl_type_t type;
@@ -229,39 +229,39 @@ static ssize_t brlapi_doWaitForPacket(brl_type_t expectedPacketType, void *packe
   uint32_t *code = (uint32_t *) localPacket;
   errorPacket_t *errorPacket = (errorPacket_t *) localPacket;
 
-  res = brlapi_readPacketHeader(defaultHandle.fileDescriptor, &type);
+  res = brlapi_readPacketHeader(handle->fileDescriptor, &type);
   if (res<0) return res; /* reports EINTR too */
   if (type==expectedPacketType)
     /* For us, just read */
-    return brlapi_readPacketContent(defaultHandle.fileDescriptor, res, packet, size);
+    return brlapi_readPacketContent(handle->fileDescriptor, res, packet, size);
 
   /* Not for us. For alternate reader? */
-  pthread_mutex_lock(&defaultHandle.read_mutex);
-  if (defaultHandle.altSem && type==defaultHandle.altExpectedPacketType) {
+  pthread_mutex_lock(&handle->read_mutex);
+  if (handle->altSem && type==handle->altExpectedPacketType) {
     /* Yes, put packet content there */
-    *defaultHandle.altRes = res = brlapi_readPacketContent(defaultHandle.fileDescriptor, res, defaultHandle.altPacket, defaultHandle.altSize);
-    sem_post(defaultHandle.altSem);
-    defaultHandle.altSem = NULL;
-    pthread_mutex_unlock(&defaultHandle.read_mutex);
+    *handle->altRes = res = brlapi_readPacketContent(handle->fileDescriptor, res, handle->altPacket, handle->altSize);
+    sem_post(handle->altSem);
+    handle->altSem = NULL;
+    pthread_mutex_unlock(&handle->read_mutex);
     if (res < 0) return res;
     return -3;
   }
   /* No alternate reader, read it locally... */
-  if ((res = brlapi_readPacketContent(defaultHandle.fileDescriptor, res, localPacket, sizeof(localPacket))) < 0) {
-    pthread_mutex_unlock(&defaultHandle.read_mutex);
+  if ((res = brlapi_readPacketContent(handle->fileDescriptor, res, localPacket, sizeof(localPacket))) < 0) {
+    pthread_mutex_unlock(&handle->read_mutex);
     return res;
   }
-  if ((type==BRLPACKET_KEY) && (defaultHandle.state & STCONTROLLINGTTY) && (res==sizeof(brl_keycode_t))) {
+  if ((type==BRLPACKET_KEY) && (handle->state & STCONTROLLINGTTY) && (res==sizeof(brl_keycode_t))) {
     /* keypress, buffer it */
-    if (defaultHandle.keybuf_nb>=BRL_KEYBUF_SIZE) {
+    if (handle->keybuf_nb>=BRL_KEYBUF_SIZE) {
       syslog(LOG_WARNING,"lost key: 0X%8"PRIx32"%8"PRIx32"\n",ntohl(code[0]),ntohl(code[1]));
     } else {
-      defaultHandle.keybuf[(defaultHandle.keybuf_next+defaultHandle.keybuf_nb++)%BRL_KEYBUF_SIZE] = ((brl_keycode_t)ntohl(code[0]) << 32) | ntohl(code[1]);
+      handle->keybuf[(handle->keybuf_next+handle->keybuf_nb++)%BRL_KEYBUF_SIZE]=ntohl(*code);
     }
-    pthread_mutex_unlock(&defaultHandle.read_mutex);
+    pthread_mutex_unlock(&handle->read_mutex);
     return -3;
   }
-  pthread_mutex_unlock(&defaultHandle.read_mutex);
+  pthread_mutex_unlock(&handle->read_mutex);
 
   /* else this is an error */
 
@@ -273,7 +273,7 @@ static ssize_t brlapi_doWaitForPacket(brl_type_t expectedPacketType, void *packe
     size_t esize;
     int hdrSize = sizeof(errorPacket->code)+sizeof(errorPacket->type);
     if (res<hdrSize) esize = 0; else esize = res-hdrSize;
-    defaultHandle.exceptionHandler(ntohl(errorPacket->code), ntohl(errorPacket->type), &errorPacket->packet, esize);
+    handle->exceptionHandler(ntohl(errorPacket->code), ntohl(errorPacket->type), &errorPacket->packet, esize);
     return -3;
   }
   syslog(LOG_ERR,"(brlapi_waitForPacket) Received unexpected packet of type %s and size %ld\n",brlapi_packetType(type),(long)res);
@@ -284,44 +284,44 @@ static ssize_t brlapi_doWaitForPacket(brl_type_t expectedPacketType, void *packe
 /* same as brlapi_doWaitForPacket, but sleeps instead of reading if another
  * thread is already reading. Never returns -2. If loop is 1, never returns -3.
  */
-static ssize_t brlapi_waitForPacket(brl_type_t expectedPacketType, void *packet, size_t size, int loop) {
+static ssize_t brlapi__waitForPacket(brlapi_handle_t *handle, brl_type_t expectedPacketType, void *packet, size_t size, int loop) {
   int doread = 0;
   ssize_t res;
   sem_t sem;
 again:
-  pthread_mutex_lock(&defaultHandle.read_mutex);
-  if (!defaultHandle.reading) doread = defaultHandle.reading = 1;
+  pthread_mutex_lock(&handle->read_mutex);
+  if (!handle->reading) doread = handle->reading = 1;
   else {
-    if (defaultHandle.altSem) {
+    if (handle->altSem) {
       syslog(LOG_ERR,"third call to brlapi_waitForPacket !");
       brlapi_errno = BRLERR_ILLEGAL_INSTRUCTION;
       return -1;
     }
-    defaultHandle.altExpectedPacketType = expectedPacketType;
-    defaultHandle.altPacket = packet;
-    defaultHandle.altSize = size;
-    defaultHandle.altRes = &res;
+    handle->altExpectedPacketType = expectedPacketType;
+    handle->altPacket = packet;
+    handle->altSize = size;
+    handle->altRes = &res;
     sem_init(&sem, 0, 0);
-    defaultHandle.altSem = &sem;
+    handle->altSem = &sem;
   }
-  pthread_mutex_unlock(&defaultHandle.read_mutex);
+  pthread_mutex_unlock(&handle->read_mutex);
   if (doread) {
     do {
-      res = brlapi_doWaitForPacket(expectedPacketType, packet, size);
+      res = brlapi__doWaitForPacket(handle, expectedPacketType, packet, size);
     } while (loop && res == -1 && brlapi_errno == BRLERR_LIBCERR && (
 	  brlapi_libcerrno == EINTR ||
 #ifdef EWOULDBLOCK
 	  brlapi_libcerrno == EWOULDBLOCK ||
 #endif /* EWOULDBLOCK */
 	  brlapi_libcerrno == EAGAIN));
-    pthread_mutex_lock(&defaultHandle.read_mutex);
-    if (defaultHandle.altSem) {
-      *defaultHandle.altRes = -3; /* no packet for him */
-      sem_post(defaultHandle.altSem);
-      defaultHandle.altSem = NULL;
+    pthread_mutex_lock(&handle->read_mutex);
+    if (handle->altSem) {
+      *handle->altRes = -3; /* no packet for him */
+      sem_post(handle->altSem);
+      handle->altSem = NULL;
     }
-    defaultHandle.reading = 0;
-    pthread_mutex_unlock(&defaultHandle.read_mutex);
+    handle->reading = 0;
+    pthread_mutex_unlock(&handle->read_mutex);
   } else {
     sem_wait(&sem);
     sem_destroy(&sem);
@@ -337,29 +337,29 @@ again:
 
 /* brlapi_waitForAck */
 /* Wait for an acknowledgement, must be called with brlapi_req_mutex locked */
-static int brlapi_waitForAck(void)
+static int brlapi__waitForAck(brlapi_handle_t *handle)
 {
-  return brlapi_waitForPacket(BRLPACKET_ACK, NULL, 0, 1);
+  return brlapi__waitForPacket(handle, BRLPACKET_ACK, NULL, 0, 1);
 }
 
 /* brlapi_writePacketWaitForAck */
 /* write a packet and wait for an acknowledgement */
-static int brlapi_writePacketWaitForAck(brlapi_fileDescriptor fd, brl_type_t type, const void *buf, size_t size)
+static int brlapi__writePacketWaitForAck(brlapi_handle_t *handle, brl_type_t type, const void *buf, size_t size)
 {
   ssize_t res;
-  pthread_mutex_lock(&defaultHandle.req_mutex);
-  if ((res=brlapi_writePacket(fd,type,buf,size))<0) {
-    pthread_mutex_unlock(&defaultHandle.req_mutex);
+  pthread_mutex_lock(&handle->req_mutex);
+  if ((res=brlapi_writePacket(handle->fileDescriptor, type,buf,size))<0) {
+    pthread_mutex_unlock(&handle->req_mutex);
     return res;
   }
-  res=brlapi_waitForAck();
-  pthread_mutex_unlock(&defaultHandle.req_mutex);
+  res=brlapi__waitForAck(handle);
+  pthread_mutex_unlock(&handle->req_mutex);
   return res;
 }
 
 /* Function: tryHostName */
 /* Tries to connect to the given hostname. */
-static int tryHostName(char *hostName) {
+static int tryHostName(brlapi_handle_t *handle, char *hostName) {
   char *hostname = NULL;
   char *port;
   SocketDescriptor sockfd = -1;
@@ -375,10 +375,10 @@ static int tryHostName(char *hostName) {
     return -1;
 #endif /* WINDOWS */
 
-  defaultHandle.addrfamily = brlapi_splitHost(hostName,&hostname,&port);
+  handle->addrfamily = brlapi_splitHost(hostName,&hostname,&port);
 
 #if defined(PF_LOCAL)
-  if (defaultHandle.addrfamily == PF_LOCAL) {
+  if (handle->addrfamily == PF_LOCAL) {
     int lpath = strlen(BRLAPI_SOCKETPATH),lport;
     lport = strlen(port);
 #ifdef WINDOWS
@@ -386,7 +386,7 @@ static int tryHostName(char *hostName) {
       char path[lpath+lport+1];
       memcpy(path,BRLAPI_SOCKETPATH,lpath);
       memcpy(path+lpath,port,lport+1);
-      while ((defaultHandle.fileDescriptor = CreateFile(path,GENERIC_READ|GENERIC_WRITE,
+      while ((handle->fileDescriptor = CreateFile(path,GENERIC_READ|GENERIC_WRITE,
 	      FILE_SHARE_READ|FILE_SHARE_WRITE,NULL,OPEN_EXISTING,0,NULL))
 	  == INVALID_HANDLE_VALUE) {
 	if (GetLastError() != ERROR_PIPE_BUSY) {
@@ -405,7 +405,7 @@ static int tryHostName(char *hostName) {
 	brlapi_errno = BRLERR_LIBCERR;
 	goto out;
       }
-      if ((defaultHandle.fileDescriptor = socket(PF_LOCAL, SOCK_STREAM, 0))<0) {
+      if ((handle->fileDescriptor = socket(PF_LOCAL, SOCK_STREAM, 0))<0) {
         brlapi_errfun="socket";
         setSocketErrno();
         goto outlibc;
@@ -413,7 +413,7 @@ static int tryHostName(char *hostName) {
       sa.sun_family = AF_LOCAL;
       memcpy(sa.sun_path,BRLAPI_SOCKETPATH,lpath);
       memcpy(sa.sun_path+lpath,port,lport+1);
-      if (connect(defaultHandle.fileDescriptor, (struct sockaddr *) &sa, sizeof(sa))<0) {
+      if (connect(handle->fileDescriptor, (struct sockaddr *) &sa, sizeof(sa))<0) {
         brlapi_errfun="connect";
         setSocketErrno();
         goto outlibc;
@@ -530,7 +530,7 @@ static int tryHostName(char *hostName) {
     }
 #endif /* WINDOWS */
 
-    defaultHandle.fileDescriptor = (FileDescriptor) sockfd;
+    handle->fileDescriptor = (FileDescriptor) sockfd;
   }
   free(hostname);
   free(port);
@@ -549,12 +549,12 @@ out:
 
 /* Function: tryAuthKey */
 /* Tries to get authorization from server with the given key. */
-static int tryAuthKey(authStruct *auth, size_t authKeyLength) {
+static int tryAuthKey(brlapi_handle_t *handle, authStruct *auth, size_t authKeyLength) {
   int res;
-  res = brlapi_writePacket(defaultHandle.fileDescriptor, BRLPACKET_AUTHKEY, auth, sizeof(auth->protocolVersion)+authKeyLength);
+  res = brlapi_writePacket(handle->fileDescriptor, BRLPACKET_AUTHKEY, auth, sizeof(auth->protocolVersion)+authKeyLength);
   memset(&auth->key, 0, authKeyLength); /* Forget authorization key ASAP */
   if (res<0) return -1;
-  if ((brlapi_waitForAck())<0) return -1;
+  if ((brlapi__waitForAck(handle))<0) return -1;
   return 0;
 }
 
@@ -572,7 +572,7 @@ static void updateSettings(brlapi_settings_t *s1, const brlapi_settings_t *s2)
 
 /* Function: brlapi_initializeConnection
  * Creates a socket to connect to BrlApi */
-brlapi_fileDescriptor brlapi_initializeConnection(const brlapi_settings_t *clientSettings, brlapi_settings_t *usedSettings)
+brlapi_fileDescriptor brlapi__initializeConnection(brlapi_handle_t *handle, const brlapi_settings_t *clientSettings, brlapi_settings_t *usedSettings)
 {
   unsigned char packet[BRLAPI_MAXPACKETSIZE];
   authStruct *auth = (authStruct *) packet;
@@ -585,14 +585,14 @@ brlapi_fileDescriptor brlapi_initializeConnection(const brlapi_settings_t *clien
   updateSettings(&settings, &envsettings);
   updateSettings(&settings, clientSettings);
   if (usedSettings!=NULL) updateSettings(usedSettings, &settings);
-  brlapi_initializeHandle(&defaultHandle);
+  brlapi_initializeHandle(handle);
 
 retry:
-  if (tryHostName(settings.hostName)<0) {
+  if (tryHostName(handle, settings.hostName)<0) {
     brlapi_error_t error = brlapi_error;
-    if (tryHostName(settings.hostName="127.0.0.1:0")<0
+    if (tryHostName(handle, settings.hostName="127.0.0.1:0")<0
 #ifdef AF_INET6
-      && tryHostName(settings.hostName="::1:0")<0
+      && tryHostName(handle, settings.hostName="::1:0")<0
 #endif /* AF_INET6 */
       ) {
       brlapi_error = error;
@@ -605,60 +605,70 @@ retry:
 
   /* try with an empty key as well, in case no authorization is needed */
   if (!settings.authKey) {
-    if (tryAuthKey(auth,0)<0)
+    if (tryAuthKey(handle, auth,0)<0)
       goto outfd;
     if (usedSettings) usedSettings->authKey = "none";
   } else if (brlapi_loadAuthKey(settings.authKey,&authKeyLength,(void *) &auth->key)<0) {
     brlapi_error_t error = brlapi_error;
-    if (tryAuthKey(auth,0)<0) {
+    if (tryAuthKey(handle, auth,0)<0) {
       brlapi_error = error;
       goto outfd;
     }
     if (usedSettings) usedSettings->authKey = "none";
-  } else if (tryAuthKey(auth,authKeyLength)<0) {
+  } else if (tryAuthKey(handle, auth,authKeyLength)<0) {
     if (brlapi_errno != BRLERR_CONNREFUSED)
       goto outfd;
-    if (defaultHandle.fileDescriptor!=INVALID_FILE_DESCRIPTOR) {
-      closeFileDescriptor(defaultHandle.fileDescriptor);
-      defaultHandle.fileDescriptor = INVALID_FILE_DESCRIPTOR;
+    if (handle->fileDescriptor!=INVALID_FILE_DESCRIPTOR) {
+      closeFileDescriptor(handle->fileDescriptor);
+      handle->fileDescriptor = INVALID_FILE_DESCRIPTOR;
     }
     settings.authKey = NULL;
     goto retry;
   }
 
-  pthread_mutex_lock(&defaultHandle.state_mutex);
-  defaultHandle.state = STCONNECTED;
-  pthread_mutex_unlock(&defaultHandle.state_mutex);
-  return defaultHandle.fileDescriptor;
+  pthread_mutex_lock(&handle->state_mutex);
+  handle->state = STCONNECTED;
+  pthread_mutex_unlock(&handle->state_mutex);
+  return handle->fileDescriptor;
 
 outfd:
-  if (defaultHandle.fileDescriptor!=INVALID_FILE_DESCRIPTOR) {
-    closeFileDescriptor(defaultHandle.fileDescriptor);
-    defaultHandle.fileDescriptor = INVALID_FILE_DESCRIPTOR;
+  if (handle->fileDescriptor!=INVALID_FILE_DESCRIPTOR) {
+    closeFileDescriptor(handle->fileDescriptor);
+    handle->fileDescriptor = INVALID_FILE_DESCRIPTOR;
   }
 out:
   return INVALID_FILE_DESCRIPTOR;
 }
 
+brlapi_fileDescriptor brlapi_initializeConnection(const brlapi_settings_t *clientSettings, brlapi_settings_t *usedSettings)
+{
+  return brlapi__initializeConnection(&defaultHandle, clientSettings, usedSettings);
+}
+
 /* brlapi_closeConnection */
 /* Cleanly close the socket */
-void brlapi_closeConnection(void)
+void brlapi__closeConnection(brlapi_handle_t *handle)
 {
-  pthread_mutex_lock(&defaultHandle.state_mutex);
-  defaultHandle.state = 0;
-  pthread_mutex_unlock(&defaultHandle.state_mutex);
-  pthread_mutex_lock(&defaultHandle.fileDescriptor_mutex);
-  closeFileDescriptor(defaultHandle.fileDescriptor);
-  defaultHandle.fileDescriptor = INVALID_FILE_DESCRIPTOR;
-  pthread_mutex_unlock(&defaultHandle.fileDescriptor_mutex);
+  pthread_mutex_lock(&handle->state_mutex);
+  handle->state = 0;
+  pthread_mutex_unlock(&handle->state_mutex);
+  pthread_mutex_lock(&handle->fileDescriptor_mutex);
+  closeFileDescriptor(handle->fileDescriptor);
+  handle->fileDescriptor = INVALID_FILE_DESCRIPTOR;
+  pthread_mutex_unlock(&handle->fileDescriptor_mutex);
 #ifdef WINDOWS
   WSACleanup();
 #endif /* WINDOWS */
 }
 
+void brlapi_closeConnection(void)
+{
+  brlapi__closeConnection(&defaultHandle);
+}
+
 /* brlapi_getDriverSpecific */
 /* Switch to device specific mode */
-static int brlapi_getDriverSpecific(const char *driver, brl_type_t type, int st)
+static int brlapi__getDriverSpecific(brlapi_handle_t *handle, const char *driver, brl_type_t type, int st)
 {
   int res;
   unsigned char packet[BRLAPI_MAXPACKETSIZE];
@@ -677,68 +687,83 @@ static int brlapi_getDriverSpecific(const char *driver, brl_type_t type, int st)
   driverPacket->magic = htonl(BRLDEVICE_MAGIC);
   driverPacket->nameLength = n;
   memcpy(&driverPacket->name, driver, n);
-  res = brlapi_writePacketWaitForAck(defaultHandle.fileDescriptor, type, packet, sizeof(uint32_t)+1+n);
+  res = brlapi__writePacketWaitForAck(handle, type, packet, sizeof(uint32_t)+1+n);
   if (res!=-1)
-    defaultHandle.state |= st;
+    handle->state |= st;
 out:
-  pthread_mutex_unlock(&defaultHandle.state_mutex);
+  pthread_mutex_unlock(&handle->state_mutex);
   return res;
 }
 
 /* brlapi_leaveDriverSpecific */
 /* Leave device specific mode */
-static int brlapi_leaveDriverSpecific(brl_type_t type, int st)
+static int brlapi__leaveDriverSpecific(brlapi_handle_t *handle, brl_type_t type, int st)
 {
   int res;
-  pthread_mutex_lock(&defaultHandle.state_mutex);
-  if (!(defaultHandle.state & st)) {
+  pthread_mutex_lock(&handle->state_mutex);
+  if (!(handle->state & st)) {
     brlapi_errno = BRLERR_ILLEGAL_INSTRUCTION;
     res = -1;
     goto out;
   }
-  res = brlapi_writePacketWaitForAck(defaultHandle.fileDescriptor, type, NULL, 0);
+  res = brlapi__writePacketWaitForAck(handle, type, NULL, 0);
   if (res) return res;
-  defaultHandle.state &= ~st;
+  handle->state &= ~st;
 out:
-  pthread_mutex_unlock(&defaultHandle.state_mutex);
+  pthread_mutex_unlock(&handle->state_mutex);
   return res;
 }
 
 /* brlapi_getRaw */
 /* Switch to Raw mode */
+int brlapi__getRaw(brlapi_handle_t *handle, const char *driver)
+{
+  return brlapi__getDriverSpecific(handle, driver, BRLPACKET_GETRAW, STRAW);
+}
+
 int brlapi_getRaw(const char *driver)
 {
-  return brlapi_getDriverSpecific(driver, BRLPACKET_GETRAW, STRAW);
+  return brlapi__getRaw(&defaultHandle, driver);
 }
 
 /* brlapi_leaveRaw */
 /* Leave Raw mode */
+int brlapi__leaveRaw(brlapi_handle_t *handle)
+{
+  return brlapi__leaveDriverSpecific(handle, BRLPACKET_LEAVERAW, STRAW);
+}
+
 int brlapi_leaveRaw(void)
 {
-  return brlapi_leaveDriverSpecific(BRLPACKET_LEAVERAW, STRAW);
+  return brlapi__leaveRaw(&defaultHandle);
 }
 
 /* brlapi_sendRaw */
 /* Send a Raw Packet */
-ssize_t brlapi_sendRaw(const void *buf, size_t size)
+ssize_t brlapi__sendRaw(brlapi_handle_t *handle, const void *buf, size_t size)
 {
   ssize_t res;
-  pthread_mutex_lock(&defaultHandle.fileDescriptor_mutex);
-  res=brlapi_writePacket(defaultHandle.fileDescriptor, BRLPACKET_PACKET, buf, size);
-  pthread_mutex_unlock(&defaultHandle.fileDescriptor_mutex);
+  pthread_mutex_lock(&handle->fileDescriptor_mutex);
+  res=brlapi_writePacket(handle->fileDescriptor, BRLPACKET_PACKET, buf, size);
+  pthread_mutex_unlock(&handle->fileDescriptor_mutex);
   return res;
+}
+
+ssize_t brlapi_sendRaw(const void *buf, size_t size)
+{
+  return brlapi__sendRaw(&defaultHandle, buf, size);
 }
 
 /* brlapi_recvRaw */
 /* Get a Raw packet */
-ssize_t brlapi_recvRaw(void *buf, size_t size)
+ssize_t brlapi__recvRaw(brlapi_handle_t *handle, void *buf, size_t size)
 {
   ssize_t res;
-  if (!(defaultHandle.state & STRAW)) {
+  if (!(handle->state & STRAW)) {
     brlapi_errno = BRLERR_ILLEGAL_INSTRUCTION;
     return -1;
   }
-  res = brlapi_waitForPacket(BRLPACKET_PACKET, buf, size, 0);
+  res = brlapi__waitForPacket(handle, BRLPACKET_PACKET, buf, size, 0);
   if (res == -3) {
     brlapi_libcerrno = EINTR;
     brlapi_errno = BRLERR_LIBCERR;
@@ -748,67 +773,97 @@ ssize_t brlapi_recvRaw(void *buf, size_t size)
   return res;
 }
 
+ssize_t brlapi_recvRaw(void *buf, size_t size)
+{
+  return brlapi__recvRaw(&defaultHandle, buf, size);
+}
+
 /* brlapi_suspend */
+int brlapi__suspend(brlapi_handle_t *handle, const char *driver)
+{
+  return brlapi__getDriverSpecific(handle, driver, BRLPACKET_SUSPEND, STSUSPEND);
+}
+
 int brlapi_suspend(const char *driver)
 {
-  return brlapi_getDriverSpecific(driver, BRLPACKET_SUSPEND, STSUSPEND);
+  return brlapi__suspend(&defaultHandle, driver);
 }
 
 /* brlapi_resume */
+int brlapi__resume(brlapi_handle_t *handle)
+{
+  return brlapi__leaveDriverSpecific(handle, BRLPACKET_RESUME, STSUSPEND);
+}
+
 int brlapi_resume(void)
 {
-  return brlapi_leaveDriverSpecific(BRLPACKET_RESUME, STSUSPEND);
+  return brlapi__resume(&defaultHandle);
 }
 
 /* Function brlapi_request */
 /* Sends a request to the API and waits for the answer */
 /* The answer is put in the given packet */
-static ssize_t brlapi_request(brl_type_t request, void *packet, size_t size)
+static ssize_t brlapi__request(brlapi_handle_t *handle, brl_type_t request, void *packet, size_t size)
 {
   ssize_t res;
-  pthread_mutex_lock(&defaultHandle.req_mutex);
-  res = brlapi_writePacket(defaultHandle.fileDescriptor, request, NULL, 0);
+  pthread_mutex_lock(&handle->req_mutex);
+  res = brlapi_writePacket(handle->fileDescriptor, request, NULL, 0);
   if (res==-1) {
-    pthread_mutex_unlock(&defaultHandle.req_mutex);
+    pthread_mutex_unlock(&handle->req_mutex);
     return -1;
   }
-  res = brlapi_waitForPacket(request, packet, size, 1);
-  pthread_mutex_unlock(&defaultHandle.req_mutex);
+  res = brlapi__waitForPacket(handle, request, packet, size, 1);
+  pthread_mutex_unlock(&handle->req_mutex);
   return res;
 }
 
 /* Function : brlapi_getDriverId */
 /* Identify the driver used by brltty */
-int brlapi_getDriverId(char *id, size_t n)
+int brlapi__getDriverId(brlapi_handle_t *handle, char *id, size_t n)
 {
-  ssize_t res = brlapi_request(BRLPACKET_GETDRIVERID, id, n);
+  ssize_t res = brlapi__request(handle, BRLPACKET_GETDRIVERID, id, n);
   if ((res>0) && (res<=n)) id[res-1] = '\0';
   return res; 
 }
 
+int brlapi_getDriverId(char *id, size_t n)
+{
+  return brlapi__getDriverId(&defaultHandle, id, n);
+}
+
 /* Function : brlapi_getDriverName */
 /* Name of the driver used by brltty */
-int brlapi_getDriverName(char *name, size_t n)
+int brlapi__getDriverName(brlapi_handle_t *handle, char *name, size_t n)
 {
-  ssize_t res = brlapi_request(BRLPACKET_GETDRIVERNAME, name, n);
+  ssize_t res = brlapi__request(handle, BRLPACKET_GETDRIVERNAME, name, n);
   if ((res>0) && (res<=n)) name[res-1] = '\0';
   return res;
 }
 
+int brlapi_getDriverName(char *name, size_t n)
+{
+  return brlapi__getDriverName(&defaultHandle, name, n);
+}
+
 /* Function : brlapi_getDisplaySize */
 /* Returns the size of the braille display */
-int brlapi_getDisplaySize(unsigned int *x, unsigned int *y)
+int brlapi__getDisplaySize(brlapi_handle_t *handle, unsigned int *x, unsigned int *y)
 {
   uint32_t displaySize[2];
   ssize_t res;
 
-  if (defaultHandle.brlx*defaultHandle.brly) { *x = defaultHandle.brlx; *y = defaultHandle.brly; return 0; }
-  res = brlapi_request(BRLPACKET_GETDISPLAYSIZE, displaySize, sizeof(displaySize));
+  if (handle->brlx*handle->brly) { *x = handle->brlx; *y = handle->brly; return 0; }
+  res = brlapi__request(handle, BRLPACKET_GETDISPLAYSIZE, displaySize, sizeof(displaySize));
   if (res==-1) { return -1; }
-  defaultHandle.brlx = ntohl(displaySize[0]);
-  defaultHandle.brly = ntohl(displaySize[1]);
-  *x = defaultHandle.brlx; *y = defaultHandle.brly;
+  handle->brlx = ntohl(displaySize[0]);
+  handle->brly = ntohl(displaySize[1]);
+  *x = handle->brlx; *y = handle->brly;
   return 0;
+}
+
+int brlapi_getDisplaySize(unsigned int *x, unsigned int *y)
+{
+  return brlapi__getDisplaySize(&defaultHandle, x, y);
 }
 
 /* Function : getControllingTty */
@@ -863,7 +918,7 @@ static int getControllingTty(void)
 
 /* Function : brlapi_getTty */
 /* Takes control of a tty */
-int brlapi_getTty(int tty, const char *how)
+int brlapi__getTty(brlapi_handle_t *handle, int tty, const char *how)
 {
   /* Determine which tty to take control of */
   if (tty<=0) tty = getControllingTty();
@@ -871,14 +926,19 @@ int brlapi_getTty(int tty, const char *how)
   0xffffffff can not be a valid WINDOWID (top 3 bits guaranteed to be zero) */
   if (tty<0) { brlapi_errno=BRLERR_UNKNOWNTTY; return -1; }
   
-  if (brlapi_getTtyPath(&tty, 1, how)) return -1;
+  if (brlapi__getTtyPath(handle, &tty, 1, how)) return -1;
 
   return tty;
 }
 
+int brlapi_getTty(int tty, const char *how)
+{
+  return brlapi__getTty(&defaultHandle, tty, how);
+}
+
 /* Function : brlapi_getTtyPath */
 /* Takes control of a tty path */
-int brlapi_getTtyPath(int *ttys, int nttys, const char *how)
+int brlapi__getTtyPath(brlapi_handle_t *handle, int *ttys, int nttys, const char *how)
 {
   int res;
   unsigned char packet[BRLAPI_MAXPACKETSIZE], *p;
@@ -887,19 +947,19 @@ int brlapi_getTtyPath(int *ttys, int nttys, const char *how)
   int ttypath;
   unsigned int n;
 
-  pthread_mutex_lock(&defaultHandle.state_mutex);
-  if ((defaultHandle.state & STCONTROLLINGTTY)) {
-    pthread_mutex_unlock(&defaultHandle.state_mutex);
+  pthread_mutex_lock(&handle->state_mutex);
+  if ((handle->state & STCONTROLLINGTTY)) {
+    pthread_mutex_unlock(&handle->state_mutex);
     brlapi_errno = BRLERR_ILLEGAL_INSTRUCTION;
     return -1;
   }
 
-  if (brlapi_getDisplaySize(&defaultHandle.brlx, &defaultHandle.brly)<0) return -1;
+  if (brlapi__getDisplaySize(handle, &handle->brlx, &handle->brly)<0) return -1;
   
   /* Clear key buffer before taking the tty, just in case... */
-  pthread_mutex_lock(&defaultHandle.read_mutex);
-  defaultHandle.keybuf_next = defaultHandle.keybuf_nb = 0;
-  pthread_mutex_unlock(&defaultHandle.read_mutex);
+  pthread_mutex_lock(&handle->read_mutex);
+  handle->keybuf_next = handle->keybuf_nb = 0;
+  pthread_mutex_unlock(&handle->read_mutex);
 
   /* OK, Now we know where we are, so get the effective control of the terminal! */
   *nbTtys = 0;
@@ -926,56 +986,71 @@ int brlapi_getTtyPath(int *ttys, int nttys, const char *how)
   p++;
   memcpy(p, how, n);
   p += n;
-  if ((res=brlapi_writePacketWaitForAck(defaultHandle.fileDescriptor,BRLPACKET_GETTTY,packet,(p-packet)))<0)
+  if ((res=brlapi__writePacketWaitForAck(handle,BRLPACKET_GETTTY,packet,(p-packet)))<0)
     return res;
 
-  defaultHandle.state |= STCONTROLLINGTTY;
-  pthread_mutex_unlock(&defaultHandle.state_mutex);
+  handle->state |= STCONTROLLINGTTY;
+  pthread_mutex_unlock(&handle->state_mutex);
 
   return 0;
 }
 
+int brlapi_getTtyPath(int *ttys, int nttys, const char *how)
+{
+  return brlapi__getTtyPath(&defaultHandle, ttys, nttys, how);
+}
+
 /* Function : brlapi_leaveTty */
 /* Gives back control of our tty to brltty */
-int brlapi_leaveTty(void)
+int brlapi__leaveTty(brlapi_handle_t *handle)
 {
   int res;
-  pthread_mutex_lock(&defaultHandle.state_mutex);
-  if (!(defaultHandle.state & STCONTROLLINGTTY)) {
+  pthread_mutex_lock(&handle->state_mutex);
+  if (!(handle->state & STCONTROLLINGTTY)) {
     brlapi_errno = BRLERR_ILLEGAL_INSTRUCTION;
     res = -1;
     goto out;
   }
-  defaultHandle.brlx = 0; defaultHandle.brly = 0;
-  res = brlapi_writePacketWaitForAck(defaultHandle.fileDescriptor,BRLPACKET_LEAVETTY,NULL,0);
-  defaultHandle.state &= ~STCONTROLLINGTTY;
+  handle->brlx = 0; handle->brly = 0;
+  res = brlapi__writePacketWaitForAck(handle,BRLPACKET_LEAVETTY,NULL,0);
+  handle->state &= ~STCONTROLLINGTTY;
 out:
-  pthread_mutex_unlock(&defaultHandle.state_mutex);
+  pthread_mutex_unlock(&handle->state_mutex);
   return res;
+}
+
+int brlapi_leaveTty(void)
+{
+  return brlapi__leaveTty(&defaultHandle);
 }
 
 /* Function : brlapi_setFocus */
 /* sends the current focus to brltty */
-int brlapi_setFocus(int tty)
+int brlapi__setFocus(brlapi_handle_t *handle, int tty)
 {
   uint32_t utty;
   int res;
   utty = htonl(tty);
-  pthread_mutex_lock(&defaultHandle.fileDescriptor_mutex);
-  res = brlapi_writePacket(defaultHandle.fileDescriptor, BRLPACKET_SETFOCUS, &utty, sizeof(utty));
-  pthread_mutex_unlock(&defaultHandle.fileDescriptor_mutex);
+  pthread_mutex_lock(&handle->fileDescriptor_mutex);
+  res = brlapi_writePacket(handle->fileDescriptor, BRLPACKET_SETFOCUS, &utty, sizeof(utty));
+  pthread_mutex_unlock(&handle->fileDescriptor_mutex);
   return res;
+}
+
+int brlapi_setFocus(int tty)
+{
+  return brlapi__setFocus(&defaultHandle, tty);
 }
 
 /* Function : brlapi_writeText */
 /* Writes a string to the braille display */
 #ifdef WINDOWS
-int brlapi_writeTextWin(int cursor, const void *str, int wide)
+int brlapi__writeTextWin(brlapi_handle_t *handle, int cursor, const void *str, int wide)
 #else /* WINDOWS */
-int brlapi_writeText(int cursor, const char *str)
+int brlapi__writeText(brlapi_handle_t *handle, int cursor, const char *str)
 #endif /* WINDOWS */
 {
-  int dispSize = defaultHandle.brlx * defaultHandle.brly;
+  int dispSize = handle->brlx * handle->brly;
   unsigned int min;
   unsigned char packet[BRLAPI_MAXPACKETSIZE];
   writeStruct *ws = (writeStruct *) packet;
@@ -1090,18 +1165,30 @@ endcount:
 #endif /* WINDOWS */
   }
   ws->flags = htonl(ws->flags);
-  pthread_mutex_lock(&defaultHandle.fileDescriptor_mutex);
-  res = brlapi_writePacket(defaultHandle.fileDescriptor,BRLPACKET_WRITE,packet,sizeof(ws->flags)+(p-&ws->data));
-  pthread_mutex_unlock(&defaultHandle.fileDescriptor_mutex);
+  pthread_mutex_lock(&handle->fileDescriptor_mutex);
+  res = brlapi_writePacket(handle->fileDescriptor,BRLPACKET_WRITE,packet,sizeof(ws->flags)+(p-&ws->data));
+  pthread_mutex_unlock(&handle->fileDescriptor_mutex);
   return res;
 }
 
+#ifdef WINDOWS
+int brlapi_writeTextWin(int cursor, const void *str, int wide)
+{
+  return brlapi__writeTextWin(&defaultHandle, cursor, str, wide);
+}
+#else /* WINDOWS */
+int brlapi_writeText(int cursor, const char *str)
+{
+  return brlapi__writeText(&defaultHandle, cursor, str);
+}
+#endif /* WINDOWS */
+
 /* Function : brlapi_writeDots */
 /* Writes dot-matrix to the braille display */
-int brlapi_writeDots(const unsigned char *dots)
+int brlapi__writeDots(brlapi_handle_t *handle, const unsigned char *dots)
 {
   int res;
-  unsigned int size = defaultHandle.brlx * defaultHandle.brly;
+  unsigned int size = handle->brlx * handle->brly;
   brlapi_writeStruct ws;
   if (size == 0) {
     brlapi_errno=BRLERR_INVALID_PARAMETER;
@@ -1126,21 +1213,26 @@ int brlapi_writeDots(const unsigned char *dots)
   ws.attrAnd = NULL;
   ws.cursor = 0;
   ws.charset = NULL;
-  res = brlapi_write(&ws);
+  res = brlapi__write(handle,&ws);
   free(ws.text);
   free(ws.attrOr);
   return res;
 }
 
+int brlapi_writeDots(const unsigned char *dots)
+{
+  return brlapi__writeDots(&defaultHandle, dots);
+}
+
 /* Function : brlapi_write */
 /* Extended writes on braille displays */
 #ifdef WINDOWS
-int brlapi_writeWin(const brlapi_writeStruct *s, int wide)
+int brlapi__writeWin(brlapi_handle_t *handle, const brlapi_writeStruct *s, int wide)
 #else /* WINDOWS */
-int brlapi_write(const brlapi_writeStruct *s)
+int brlapi__write(brlapi_handle_t *handle, const brlapi_writeStruct *s)
 #endif /* WINDOWS */
 {
-  int dispSize = defaultHandle.brlx * defaultHandle.brly;
+  int dispSize = handle->brlx * handle->brly;
   unsigned int rbeg, rsiz, strLen;
   unsigned char packet[BRLAPI_MAXPACKETSIZE];
   writeStruct *ws = (writeStruct *) packet;
@@ -1197,11 +1289,23 @@ int brlapi_write(const brlapi_writeStruct *s)
   }
 send:
   ws->flags = htonl(ws->flags);
-  pthread_mutex_lock(&defaultHandle.fileDescriptor_mutex);
-  res = brlapi_writePacket(defaultHandle.fileDescriptor,BRLPACKET_WRITE,packet,sizeof(ws->flags)+(p-&ws->data));
-  pthread_mutex_unlock(&defaultHandle.fileDescriptor_mutex);
+  pthread_mutex_lock(&handle->fileDescriptor_mutex);
+  res = brlapi_writePacket(handle->fileDescriptor,BRLPACKET_WRITE,packet,sizeof(ws->flags)+(p-&ws->data));
+  pthread_mutex_unlock(&handle->fileDescriptor_mutex);
   return res;
 }
+
+#ifdef WINDOWS
+int brlapi_writeWin(const brlapi_writeStruct *s, int wide)
+{
+  return brlapi__writeWin(&defaultHandle, s, wide);
+}
+#else /* WINDOWS */
+int brlapi_write(const brlapi_writeStruct *s)
+{
+  return brlapi__write(&defaultHandle, s);
+}
+#endif /* WINDOWS */
 
 /* Function : packetReady */
 /* Tests wether a packet is ready on file descriptor fd */
@@ -1210,7 +1314,7 @@ send:
 static int packetReady(brlapi_fileDescriptor osfd)
 {
 #ifdef WINDOWS
-  if (defaultHandle.addrfamily == PF_LOCAL) {
+  if (handle->addrfamily == PF_LOCAL) {
     DWORD avail;
     if (!PeekNamedPipe(osfd, NULL, 0, NULL, &avail, NULL)) {
       brlapi_errfun = "packetReady";
@@ -1237,41 +1341,41 @@ static int packetReady(brlapi_fileDescriptor osfd)
 
 /* Function : brlapi_readKey */
 /* Reads a key from the braille keyboard */
-int brlapi_readKey(int block, brl_keycode_t *code)
+int brlapi__readKey(brlapi_handle_t *handle, int block, brl_keycode_t *code)
 {
   ssize_t res;
   uint32_t buf[2];
 
-  pthread_mutex_lock(&defaultHandle.state_mutex);
-  if (!(defaultHandle.state & STCONTROLLINGTTY)) {
-    pthread_mutex_unlock(&defaultHandle.state_mutex);
+  pthread_mutex_lock(&handle->state_mutex);
+  if (!(handle->state & STCONTROLLINGTTY)) {
+    pthread_mutex_unlock(&handle->state_mutex);
     brlapi_errno = BRLERR_ILLEGAL_INSTRUCTION;
     return -1;
   }
-  pthread_mutex_unlock(&defaultHandle.state_mutex);
+  pthread_mutex_unlock(&handle->state_mutex);
 
-  pthread_mutex_lock(&defaultHandle.read_mutex);
-  if (defaultHandle.keybuf_nb>0) {
-    *code=defaultHandle.keybuf[defaultHandle.keybuf_next];
-    defaultHandle.keybuf_next=(defaultHandle.keybuf_next+1)%BRL_KEYBUF_SIZE;
-    defaultHandle.keybuf_nb--;
-    pthread_mutex_unlock(&defaultHandle.read_mutex);
+  pthread_mutex_lock(&handle->read_mutex);
+  if (handle->keybuf_nb>0) {
+    *code=handle->keybuf[handle->keybuf_next];
+    handle->keybuf_next=(handle->keybuf_next+1)%BRL_KEYBUF_SIZE;
+    handle->keybuf_nb--;
+    pthread_mutex_unlock(&handle->read_mutex);
     return 1;
   }
-  pthread_mutex_unlock(&defaultHandle.read_mutex);
+  pthread_mutex_unlock(&handle->read_mutex);
 
-  pthread_mutex_lock(&defaultHandle.key_mutex);
+  pthread_mutex_lock(&handle->key_mutex);
   if (!block) {
-    res = packetReady(defaultHandle.fileDescriptor);
+    res = packetReady(handle->fileDescriptor);
     if (res<=0) {
       if (res<0)
 	brlapi_errno = BRLERR_LIBCERR;
-      pthread_mutex_unlock(&defaultHandle.key_mutex);
+      pthread_mutex_unlock(&handle->key_mutex);
       return res;
     }
   }
-  res=brlapi_waitForPacket(BRLPACKET_KEY, buf, sizeof(buf), 0);
-  pthread_mutex_unlock(&defaultHandle.key_mutex);
+  res=brlapi__waitForPacket(handle,BRLPACKET_KEY, buf, sizeof(buf), 0);
+  pthread_mutex_unlock(&handle->key_mutex);
   if (res == -3) {
     if (!block) return 0;
     brlapi_libcerrno = block?EINTR:EAGAIN;
@@ -1284,35 +1388,50 @@ int brlapi_readKey(int block, brl_keycode_t *code)
   return 1;
 }
 
+int brlapi_readKey(int block, brl_keycode_t *code)
+{
+  return brlapi__readKey(&defaultHandle, block, code) ;
+}
+
 /* Function : ignore_unignore_key_range */
 /* Common tasks for ignoring and unignoring key ranges */
 /* what = 0 for ignoring !0 for unignoring */
-static int ignore_unignore_key_range(int what, brl_keycode_t x, brl_keycode_t y)
+static int ignore_unignore_key_range(brlapi_handle_t *handle, int what, brl_keycode_t x, brl_keycode_t y)
 {
   uint32_t ints[4] = {
     htonl(x >> 32), htonl(x & 0xffffffff),
     htonl(y >> 32), htonl(y & 0xffffffff),
   };
 
-  return brlapi_writePacketWaitForAck(defaultHandle.fileDescriptor,(what ? BRLPACKET_UNIGNOREKEYRANGE : BRLPACKET_IGNOREKEYRANGE),ints,sizeof(ints));
+  return brlapi__writePacketWaitForAck(handle,(what ? BRLPACKET_UNIGNOREKEYRANGE : BRLPACKET_IGNOREKEYRANGE),ints,sizeof(ints));
 }
 
 /* Function : brlapi_ignoreKeyRange */
+int brlapi__ignoreKeyRange(brlapi_handle_t *handle, brl_keycode_t x, brl_keycode_t y)
+{
+  return ignore_unignore_key_range(handle, 0,x,y);
+}
+
 int brlapi_ignoreKeyRange(brl_keycode_t x, brl_keycode_t y)
 {
-  return ignore_unignore_key_range(0,x,y);
+  return brlapi__ignoreKeyRange(&defaultHandle, x, y);
 }
 
 /* Function : brlapi_unignoreKeyRange */
+int brlapi__unignoreKeyRange(brlapi_handle_t *handle, brl_keycode_t x, brl_keycode_t y)
+{
+  return ignore_unignore_key_range(handle, !0,x,y);
+}
+
 int brlapi_unignoreKeyRange(brl_keycode_t x, brl_keycode_t y)
 {
-  return ignore_unignore_key_range(!0,x,y);
+  return brlapi__unignoreKeyRange(&defaultHandle, x, y);
 }
 
 /* Function : ignore_unignore_key_set */
 /* Common tasks for ignoring and unignoring key sets */
 /* what = 0 for ignoring !0 for unignoring */
-static int ignore_unignore_key_set(int what, const brl_keycode_t *s, unsigned int n)
+static int ignore_unignore_key_set(brlapi_handle_t *handle, int what, const brl_keycode_t *s, unsigned int n)
 {
   uint32_t buf[2*n];
   int i;
@@ -1324,19 +1443,29 @@ static int ignore_unignore_key_set(int what, const brl_keycode_t *s, unsigned in
     buf[2*i+0] = htonl(s[i] >> 32);
     buf[2*i+1] = htonl(s[i] & 0xffffffff);
   }
-  return brlapi_writePacketWaitForAck(defaultHandle.fileDescriptor,(what ? BRLPACKET_UNIGNOREKEYSET : BRLPACKET_IGNOREKEYSET),buf,sizeof(buf));
+  return brlapi__writePacketWaitForAck(handle,(what ? BRLPACKET_UNIGNOREKEYSET : BRLPACKET_IGNOREKEYSET),buf,sizeof(buf));
 }
 
 /* Function : brlapi_ignoreKeySet */
+int brlapi__ignoreKeySet(brlapi_handle_t *handle, const brl_keycode_t *s, unsigned int n)
+{
+  return ignore_unignore_key_set(handle, 0,s,n);
+}
+
 int brlapi_ignoreKeySet(const brl_keycode_t *s, unsigned int n)
 {
-  return ignore_unignore_key_set(0,s,n);
+  return brlapi__ignoreKeySet(&defaultHandle, s, n);
 }
 
 /* Function : brlapi_unignoreKeySet */
+int brlapi__unignoreKeySet(brlapi_handle_t *handle, const brl_keycode_t *s, unsigned int n)
+{
+  return ignore_unignore_key_set(handle, !0,s,n);
+}
+
 int brlapi_unignoreKeySet(const brl_keycode_t *s, unsigned int n)
 {
-  return ignore_unignore_key_set(!0,s,n);
+  return brlapi__unignoreKeySet(&defaultHandle, s, n);
 }
 
 /* Error code handling */
@@ -1477,14 +1606,19 @@ brlapi_error_t *brlapi_error_location(void)
   return &brlapi_error;
 }
 
-brlapi_exceptionHandler_t brlapi_setExceptionHandler(brlapi_exceptionHandler_t new)
+brlapi_exceptionHandler_t brlapi__setExceptionHandler(brlapi_handle_t *handle, brlapi_exceptionHandler_t new)
 {
   brlapi_exceptionHandler_t tmp;
-  pthread_mutex_lock(&defaultHandle.exceptionHandler_mutex);
-  tmp = defaultHandle.exceptionHandler;
-  if (new!=NULL) defaultHandle.exceptionHandler = new;
-  pthread_mutex_unlock(&defaultHandle.exceptionHandler_mutex);
+  pthread_mutex_lock(&handle->exceptionHandler_mutex);
+  tmp = handle->exceptionHandler;
+  if (new!=NULL) handle->exceptionHandler = new;
+  pthread_mutex_unlock(&handle->exceptionHandler_mutex);
   return tmp;
+}
+
+brlapi_exceptionHandler_t brlapi_setExceptionHandler(brlapi_exceptionHandler_t new)
+{
+  return brlapi__setExceptionHandler(&defaultHandle, new);
 }
 
 int brlapi_strexception(char *buf, size_t n, int err, brl_type_t type, const void *packet, size_t size)
