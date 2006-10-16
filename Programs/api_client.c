@@ -668,26 +668,38 @@ static int brlapi_getDriverSpecific(const char *driver, brl_type_t type, int st)
     brlapi_errno = BRLERR_INVALID_PARAMETER;
     return -1;
   }
+  pthread_mutex_lock(&defaultHandle.state_mutex);
+  if ((defaultHandle.state & st)) {
+    brlapi_errno = BRLERR_ILLEGAL_INSTRUCTION;
+    res = -1;
+    goto out;
+  }
   driverPacket->magic = htonl(BRLDEVICE_MAGIC);
   driverPacket->nameLength = n;
   memcpy(&driverPacket->name, driver, n);
   res = brlapi_writePacketWaitForAck(defaultHandle.fileDescriptor, type, packet, sizeof(uint32_t)+1+n);
-  if (res!=-1) {
-    pthread_mutex_lock(&defaultHandle.state_mutex);
+  if (res!=-1)
     defaultHandle.state |= st;
-    pthread_mutex_unlock(&defaultHandle.state_mutex);
-  }
+out:
+  pthread_mutex_unlock(&defaultHandle.state_mutex);
   return res;
 }
 
 /* brlapi_leaveDriverSpecific */
 /* Leave device specific mode */
-int brlapi_leaveDriverSpecific(brl_type_t type, int st)
+static int brlapi_leaveDriverSpecific(brl_type_t type, int st)
 {
-  int res = brlapi_writePacketWaitForAck(defaultHandle.fileDescriptor, type, NULL, 0);
-  if (res) return res;
+  int res;
   pthread_mutex_lock(&defaultHandle.state_mutex);
+  if (!(defaultHandle.state & st)) {
+    brlapi_errno = BRLERR_ILLEGAL_INSTRUCTION;
+    res = -1;
+    goto out;
+  }
+  res = brlapi_writePacketWaitForAck(defaultHandle.fileDescriptor, type, NULL, 0);
+  if (res) return res;
   defaultHandle.state &= ~st;
+out:
   pthread_mutex_unlock(&defaultHandle.state_mutex);
   return res;
 }
@@ -722,6 +734,10 @@ ssize_t brlapi_sendRaw(const void *buf, size_t size)
 ssize_t brlapi_recvRaw(void *buf, size_t size)
 {
   ssize_t res;
+  if (!(defaultHandle.state & STRAW)) {
+    brlapi_errno = BRLERR_ILLEGAL_INSTRUCTION;
+    return -1;
+  }
   res = brlapi_waitForPacket(BRLPACKET_PACKET, buf, size, 0);
   if (res == -3) {
     brlapi_libcerrno = EINTR;
@@ -871,6 +887,13 @@ int brlapi_getTtyPath(int *ttys, int nttys, const char *how)
   int ttypath;
   unsigned int n;
 
+  pthread_mutex_lock(&defaultHandle.state_mutex);
+  if ((defaultHandle.state & STCONTROLLINGTTY)) {
+    pthread_mutex_unlock(&defaultHandle.state_mutex);
+    brlapi_errno = BRLERR_ILLEGAL_INSTRUCTION;
+    return -1;
+  }
+
   if (brlapi_getDisplaySize(&defaultHandle.brlx, &defaultHandle.brly)<0) return -1;
   
   /* Clear key buffer before taking the tty, just in case... */
@@ -906,7 +929,6 @@ int brlapi_getTtyPath(int *ttys, int nttys, const char *how)
   if ((res=brlapi_writePacketWaitForAck(defaultHandle.fileDescriptor,BRLPACKET_GETTTY,packet,(p-packet)))<0)
     return res;
 
-  pthread_mutex_lock(&defaultHandle.state_mutex);
   defaultHandle.state |= STCONTROLLINGTTY;
   pthread_mutex_unlock(&defaultHandle.state_mutex);
 
@@ -918,11 +940,17 @@ int brlapi_getTtyPath(int *ttys, int nttys, const char *how)
 int brlapi_leaveTty(void)
 {
   int res;
+  pthread_mutex_lock(&defaultHandle.state_mutex);
+  if (!(defaultHandle.state & STCONTROLLINGTTY)) {
+    brlapi_errno = BRLERR_ILLEGAL_INSTRUCTION;
+    res = -1;
+    goto out;
+  }
   defaultHandle.brlx = 0; defaultHandle.brly = 0;
   res = brlapi_writePacketWaitForAck(defaultHandle.fileDescriptor,BRLPACKET_LEAVETTY,NULL,0);
-  pthread_mutex_lock(&defaultHandle.state_mutex);
   defaultHandle.state &= ~STCONTROLLINGTTY;
-  pthread_mutex_unlock(&defaultHandle.state_mutex);  
+out:
+  pthread_mutex_unlock(&defaultHandle.state_mutex);
   return res;
 }
 
