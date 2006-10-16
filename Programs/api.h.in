@@ -1110,10 +1110,14 @@ int brlapi_writeWin(const brlapi_writeStruct *s, int wide);
 int brlapi__writeWin(brlapi_handle_t *handle, const brlapi_writeStruct *s, int wide);
 #ifdef UNICODE
 #define brlapi_writeText(cursor, str) brlapi_writeTextWin(cursor, str, 1)
+#define brlapi__writeText(handle, cursor, str) brlapi__writeTextWin(handle, cursor, str, 1)
 #define brlapi_write(s) brlapi_writeWin(s, 1)
+#define brlapi__write(handle, s) brlapi__writeWin(handle, s, 1)
 #else /* UNICODE */
 #define brlapi_writeText(cursor, str) brlapi_writeTextWin(cursor, str, 0)
+#define brlapi__writeText(handle, cursor, str) brlapi__writeTextWin(handle, cursor, str, 0)
 #define brlapi_write(s) brlapi_writeWin(s, 0)
+#define brlapi__write(handle, s) brlapi__writeWin(handle, s, 0)
 #endif /* UNICODE */
 #endif /* BRLAPI_WIN32 */
 
