@@ -1308,12 +1308,12 @@ int brlapi_write(const brlapi_writeStruct *s)
 /* Tests wether a packet is ready on file descriptor fd */
 /* Returns -1 if an error occurs, 0 if no packet is ready, 1 if there is a */
 /* packet ready to be read */
-static int packetReady(brlapi_fileDescriptor osfd)
+static int packetReady(brlapi_handle_t *handle)
 {
 #ifdef WINDOWS
   if (handle->addrfamily == PF_LOCAL) {
     DWORD avail;
-    if (!PeekNamedPipe(osfd, NULL, 0, NULL, &avail, NULL)) {
+    if (!PeekNamedPipe(handle->fileDescriptor, NULL, 0, NULL, &avail, NULL)) {
       brlapi_errfun = "packetReady";
       brlapi_errno = BRLERR_LIBCERR;
       brlapi_libcerrno = errno;
@@ -1321,9 +1321,9 @@ static int packetReady(brlapi_fileDescriptor osfd)
     }
     return avail!=0;
   } else {
-    SOCKET fd = (SOCKET) osfd;
+    SOCKET fd = (SOCKET) handle->fileDescriptor;
 #else /* WINDOWS */
-  int fd = osfd;
+  int fd = handle->fileDescriptor;
 #endif /* WINDOWS */
   fd_set set;
   struct timeval timeout;
@@ -1363,7 +1363,7 @@ int brlapi__readKey(brlapi_handle_t *handle, int block, brl_keycode_t *code)
 
   pthread_mutex_lock(&handle->key_mutex);
   if (!block) {
-    res = packetReady(handle->fileDescriptor);
+    res = packetReady(handle);
     if (res<=0) {
       if (res<0)
 	brlapi_errno = BRLERR_LIBCERR;
