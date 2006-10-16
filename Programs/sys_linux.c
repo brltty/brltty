@@ -91,8 +91,8 @@ getBootParameters (const char *name) {
 
 static void
 enableBeeps (void) {
-  static int installed = 0;
-  installKernelModule("pcspkr", &installed);
+  static int status = 0;
+  installKernelModule("pcspkr", &status);
 }
 
 int
@@ -167,10 +167,11 @@ endBeep (void) {
 #include "sys_ports_glibc.h"
 
 int
-installKernelModule (const char *name, int *installed) {
-  if (!installed || !*installed) {
+installKernelModule (const char *name, int *status) {
+  if (!status || !*status) {
     const char *command = "modprobe";
     char buffer[0X100];
+    if (status) ++*status;
 
     {
       const char *path = "/proc/sys/kernel/modprobe";
@@ -200,7 +201,7 @@ installKernelModule (const char *name, int *installed) {
         return 0;
       }
 
-      if (installed) *installed = 1;
+      if (status) ++*status;
     }
   }
 
@@ -261,8 +262,8 @@ getUinputDevice (void) {
     int device;
 
     {
-      static int installed = 0;
-      installKernelModule("uinput", &installed);
+      static int status = 0;
+      installKernelModule("uinput", &status);
     }
 
     if ((device = openCharacterDevice("/dev/uinput", O_WRONLY, 10, 223)) != -1) {
