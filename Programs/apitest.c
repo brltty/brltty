@@ -179,7 +179,7 @@ void enterLearnMode(void)
     case BRLAPI_KEY_TYPE_CMD:
       cmd = ((code&BRLAPI_KEY_CMD_BLK_MASK)>>8)|(code&BRLAPI_KEY_CMD_ARG_MASK);
       break;
-    case BRLAPI_KEY_TYPE_X: {
+    case BRLAPI_KEY_TYPE_SYM: {
         unsigned long keysym;
         keysym = code & BRLAPI_KEY_CODE_MASK;
 	switch (keysym) {

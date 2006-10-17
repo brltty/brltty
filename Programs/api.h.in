@@ -580,7 +580,7 @@ typedef uint64_t brl_keycode_t;
 /** Braille command brl_keycode_t */
 #define BRLAPI_KEY_TYPE_CMD		0x0000000020000000ULL
 /** X Keysym brl_keycode_t */
-#define BRLAPI_KEY_TYPE_X		0x0000000000000000ULL
+#define BRLAPI_KEY_TYPE_SYM		0x0000000000000000ULL
 
 /**
  * Mask for code of brl_keycode_t

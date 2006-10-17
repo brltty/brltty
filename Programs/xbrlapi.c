@@ -176,7 +176,7 @@ void getVT(void) {
     fatal_brlapi_errno("ignoreKeys",gettext("cannot ignore keys\n"));
 #ifdef CAN_SIMULATE_KEY_PRESSES
   /* All X keysyms with any modifier */
-  if (brlapi_unignoreKeyRange(BRLAPI_KEY_TYPE_X, BRLAPI_KEY_TYPE_X|BRLAPI_KEY_CODE_MASK|BRLAPI_KEY_FLG(0xFF)))
+  if (brlapi_unignoreKeyRange(BRLAPI_KEY_TYPE_SYM, BRLAPI_KEY_TYPE_SYM|BRLAPI_KEY_CODE_MASK|BRLAPI_KEY_FLG(0xFF)))
     fatal_brlapi_errno("unignoreKeyRange",NULL);
 #endif /* CAN_SIMULATE_KEY_PRESSES */
 }
@@ -530,7 +530,7 @@ void toX_f(const char *display) {
 #ifdef CAN_SIMULATE_KEY_PRESSES
     if (haveXTest && FD_ISSET(brlapi_fd,&readfds)) {
       while ((res = brlapi_readKey(0, &code)==1)) {
-	if (((code & BRLAPI_KEY_TYPE_MASK) != BRLAPI_KEY_TYPE_X)) {
+	if (((code & BRLAPI_KEY_TYPE_MASK) != BRLAPI_KEY_TYPE_SYM)) {
 	  fprintf(stderr,"unexpected block type %" BRLAPI_PRIxKEYCODE "\n",code);
 	  continue;
 	}
