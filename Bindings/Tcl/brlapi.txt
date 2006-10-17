@@ -3,10 +3,10 @@ brlapi <function> [<arg> ...]
       host <hostSpec>
       keyFile <file>
    expandHost <hostSpec>
-   expandCommand <key>
+   expandKey <key>
    makeCells <dotsList>
 
-brlapi0 function [arg ...]
+brlapi<sessionNumber> function [arg ...]
    host
    keyFile
    fileDescriptor

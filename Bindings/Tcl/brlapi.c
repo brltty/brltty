@@ -909,16 +909,16 @@ brlapiGeneralCommand (data, interp, objc, objv)
 {
   static const char *functions[] = {
     "connect",
-    "expandCommand",
     "expandHost",
+    "expandKey",
     "makeCells",
     NULL
   };
 
   typedef enum {
     FCN_connect,
-    FCN_expandCommand,
     FCN_expandHost,
+    FCN_expandKey,
     FCN_makeCells
   } Function;
 
@@ -997,8 +997,14 @@ brlapiGeneralCommand (data, interp, objc, objv)
       }
     }
 
-    case FCN_expandCommand: {
-      Tcl_WideInt key;
+#define STRING(string) Tcl_NewStringObj((string), -1)
+#define FLAG(name,string) if (flagsField & BRLAPI_KEY_FLG_##name) Tcl_ListObjAppendElement(interp, flagsObject, STRING((string)))
+    case FCN_expandKey: {
+      Tcl_WideInt key, typeField, codeField, argField, flagsField;
+      Tcl_Obj *typeObject = NULL;
+      Tcl_Obj *codeObject = NULL;
+      Tcl_Obj *argObject = NULL;
+      Tcl_Obj *flagsObject = NULL;
 
       if (objc != 3) {
         Tcl_WrongNumArgs(interp, 2, objv, "<key>");
@@ -1010,17 +1016,65 @@ brlapiGeneralCommand (data, interp, objc, objv)
         if (result != TCL_OK) return result;
       }
 
-      {
-        Tcl_Obj *elements[] = {
-          Tcl_NewWideIntObj((key & BRLAPI_KEY_TYPE_MASK) >> BRLAPI_KEY_TYPE_SHIFT),
-          Tcl_NewWideIntObj((key & BRLAPI_KEY_CODE_MASK) >> BRLAPI_KEY_CODE_SHIFT),
-          Tcl_NewWideIntObj((key & BRLAPI_KEY_FLAGS_MASK) >> BRLAPI_KEY_FLAGS_SHIFT)
-        };
+      typeField = key & BRLAPI_KEY_TYPE_MASK;
+      codeField = key & BRLAPI_KEY_CODE_MASK;
+      argField = 0;
+      flagsField = key & BRLAPI_KEY_FLAGS_MASK;
 
-        Tcl_SetObjResult(interp, Tcl_NewListObj(3, elements));
+      flagsObject = Tcl_NewListObj(0, NULL);
+      FLAG(SHIFT, "shift");
+      FLAG(UPPER, "upper");
+      FLAG(CONTROL, "control");
+      FLAG(META, "meta");
+
+      switch (typeField) {
+        case BRLAPI_KEY_TYPE_X: {
+          if (codeField & BRLAPI_KEY_UC) {
+            codeObject = STRING("unicode");
+            argField = codeField & ~BRLAPI_KEY_UC;
+          } else {
+          }
+
+          typeObject = STRING("xkeysym");
+          break;
+        }
+
+        case BRLAPI_KEY_TYPE_CMD: {
+          int block = codeField & BRLAPI_KEY_CMD_BLK_MASK;
+
+          if (!block) {
+            FLAG(TOGGLE_ON, "on");
+            FLAG(TOGGLE_OFF, "off");
+            FLAG(ROUTE, "route");
+          } else {
+            argField = codeField & BRLAPI_KEY_CMD_ARG_MASK;
+            codeField = block;
+
+            switch (block) {
+              case BRLAPI_KEY_CMD_GOTOLINE:
+                FLAG(LINE_SCALED, "scaled");
+                FLAG(LINE_TOLEFT, "toleft");
+                break;
+            }
+          }
+
+          typeObject = STRING("command");
+          break;
+        }
+      }
+
+      if (!typeObject) typeObject = Tcl_NewWideIntObj(typeField >> BRLAPI_KEY_TYPE_SHIFT);
+      if (!codeObject) codeObject = Tcl_NewWideIntObj(codeField >> BRLAPI_KEY_CODE_SHIFT);
+      if (!argObject) argObject = Tcl_NewWideIntObj(argField);
+
+      {
+        Tcl_Obj *elements[] = {typeObject, codeObject, argObject, flagsObject};
+        Tcl_SetObjResult(interp, Tcl_NewListObj(4, elements));
         return TCL_OK;
       }
     }
+#undef FLAG
+#undef STRING
 
     case FCN_makeCells: {
       Tcl_Obj **elements;
