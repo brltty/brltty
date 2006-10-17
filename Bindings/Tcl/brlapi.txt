@@ -13,11 +13,11 @@ brlapi0 function [arg ...]
    driverIdentifier
    driverName
    displaySize
-   claimTty [<option> ...]
+   enterTtyMode [<option> ...]
       tty {default | <number>}
       commands
       events <driver>
-   releaseTty
+   leaveTtyMode
    setFocus <ttyNumber>
    readKey <wait>
    acceptKeys {<keyList> | <firstKey> <lastKey>}
@@ -30,10 +30,11 @@ brlapi0 function [arg ...]
       display {default | <number>}
       charset <name>
    writeCells <cells>
+   erase
    enterRawMode <driver>
    leaveRawMode
-   readRaw <maximumLength>
-   writeRaw <packet>
+   recvRaw <maximumLength>
+   sendRaw <packet>
    suspend <driver>
    resume
    disconnect

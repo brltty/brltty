@@ -29,7 +29,8 @@
 
 typedef struct {
   brlapi_settings_t settings;
-  int fileDescriptor;
+  brlapi_handle_t *handle;
+  brlapi_fileDescriptor fileDescriptor;
 } BrlapiSession;
 
 static void
@@ -86,6 +87,13 @@ setBrlapiError (Tcl_Interp *interp) {
   }
 
   setStringResult(interp, text, -1);
+}
+
+static int
+getDisplaySize (Tcl_Interp *interp, BrlapiSession *session, int *width, int *height) {
+  if (brlapi_getDisplaySize(width, height) != -1) return TCL_OK;
+  setBrlapiError(interp);
+  return TCL_ERROR;
 }
 
 #define OPTION_HANDLER_RETURN int
@@ -173,22 +181,22 @@ processOptions (
 typedef struct {
   Tcl_Obj *tty;
   const char *driver;
-} FunctionData_session_claimTty;
+} FunctionData_session_enterTtyMode;
 
-OPTION_HANDLER(session, claimTty, commands) {
-  FunctionData_session_claimTty *options = data;
+OPTION_HANDLER(session, enterTtyMode, commands) {
+  FunctionData_session_enterTtyMode *options = data;
   options->driver = NULL;
   return TCL_OK;
 }
 
-OPTION_HANDLER(session, claimTty, events) {
-  FunctionData_session_claimTty *options = data;
+OPTION_HANDLER(session, enterTtyMode, events) {
+  FunctionData_session_enterTtyMode *options = data;
   options->driver = Tcl_GetString(objv[1]);
   return TCL_OK;
 }
 
-OPTION_HANDLER(session, claimTty, tty) {
-  FunctionData_session_claimTty *options = data;
+OPTION_HANDLER(session, enterTtyMode, tty) {
+  FunctionData_session_enterTtyMode *options = data;
   Tcl_Obj *obj = objv[1];
   const char *string = Tcl_GetString(obj);
 
@@ -313,50 +321,52 @@ brlapiSessionCommand (data, interp, objc, objv)
 {
   static const char *functions[] = {
     "acceptKeys",
-    "claimTty",
     "disconnect",
     "displaySize",
     "driverIdentifier",
     "driverName",
     "enterRawMode",
+    "enterTtyMode",
+    "erase",
     "fileDescriptor",
     "host",
     "ignoreKeys",
     "keyFile",
     "leaveRawMode",
+    "leaveTtyMode",
     "readKey",
-    "readRaw",
-    "releaseTty",
+    "recvRaw",
     "resume",
+    "sendRaw",
     "setFocus",
     "suspend",
     "writeCells",
-    "writeRaw",
     "writeText",
     NULL
   };
 
   typedef enum {
     FCN_acceptKeys,
-    FCN_claimTty,
     FCN_disconnect,
     FCN_displaySize,
     FCN_driverIdentifier,
     FCN_driverName,
     FCN_enterRawMode,
+    FCN_enterTtyMode,
+    FCN_erase,
     FCN_fileDescriptor,
     FCN_host,
     FCN_ignoreKeys,
     FCN_keyFile,
     FCN_leaveRawMode,
+    FCN_leaveTtyMode,
     FCN_readKey,
-    FCN_readRaw,
-    FCN_releaseTty,
+    FCN_recvRaw,
     FCN_resume,
+    FCN_sendRaw,
     FCN_setFocus,
     FCN_suspend,
     FCN_writeCells,
-    FCN_writeRaw,
     FCN_writeText
   } Function;
 
@@ -464,9 +474,9 @@ brlapiSessionCommand (data, interp, objc, objv)
         return TCL_ERROR;
       }
 
-      if (brlapi_getDisplaySize(&width, &height) == -1) {
-        setBrlapiError(interp);
-        return TCL_ERROR;
+      {
+        int result = getDisplaySize(interp, session, &width, &height);
+        if (result != TCL_OK) return result;
       }
 
       {
@@ -479,25 +489,25 @@ brlapiSessionCommand (data, interp, objc, objv)
       return TCL_OK;
     }
 
-    case FCN_claimTty: {
-      FunctionData_session_claimTty options = {
+    case FCN_enterTtyMode: {
+      FunctionData_session_enterTtyMode options = {
         .tty = NULL,
         .driver = NULL
       };
 
       BEGIN_OPTIONS
         {
-          OPTION(session, claimTty, commands),
+          OPTION(session, enterTtyMode, commands),
           OPERANDS(0, "")
         }
         ,
         {
-          OPTION(session, claimTty, events),
+          OPTION(session, enterTtyMode, events),
           OPERANDS(1, "<driver>")
         }
         ,
         {
-          OPTION(session, claimTty, tty),
+          OPTION(session, enterTtyMode, tty),
           OPERANDS(1, "{default | <number>}")
         }
       END_OPTIONS(2)
@@ -537,7 +547,7 @@ brlapiSessionCommand (data, interp, objc, objv)
       return TCL_ERROR;
     }
 
-    case FCN_releaseTty: {
+    case FCN_leaveTtyMode: {
       if (objc != 2) {
         Tcl_WrongNumArgs(interp, 2, objv, NULL);
         return TCL_ERROR;
@@ -721,16 +731,47 @@ brlapiSessionCommand (data, interp, objc, objv)
     }
 
     case FCN_writeCells: {
+      int size;
+
       if (objc != 3) {
         Tcl_WrongNumArgs(interp, 2, objv, "<cells>");
         return TCL_ERROR;
       }
 
       {
+        int width, height;
+        int result = getDisplaySize(interp, session, &width, &height);
+        if (result != TCL_OK) return result;
+        size = width * height;
+      }
+
+      {
+        unsigned char buffer[size];
         int count;
         const char *cells = Tcl_GetByteArrayFromObj(objv[2], &count);
 
+        if (count < size) {
+          memcpy(buffer, cells, count);
+          memset(&buffer[count], 0, size-count);
+          cells = buffer;
+        }
+
         if (brlapi_writeDots(cells) != -1) return TCL_OK;
+        setBrlapiError(interp);
+        return TCL_ERROR;
+      }
+    }
+
+    case FCN_erase: {
+      if (objc != 2) {
+        Tcl_WrongNumArgs(interp, 2, objv, NULL);
+        return TCL_ERROR;
+      }
+
+      {
+        brlapi_writeStruct arguments = BRLAPI_WRITESTRUCT_INITIALIZER;
+        int result = brlapi_write(&arguments);
+        if (result != -1) return TCL_OK;
         setBrlapiError(interp);
         return TCL_ERROR;
       }
@@ -762,7 +803,7 @@ brlapiSessionCommand (data, interp, objc, objv)
       return TCL_ERROR;
     }
 
-    case FCN_readRaw: {
+    case FCN_recvRaw: {
       int size;
 
       if (objc != 3) {
@@ -789,7 +830,7 @@ brlapiSessionCommand (data, interp, objc, objv)
       }
     }
 
-    case FCN_writeRaw: {
+    case FCN_sendRaw: {
       if (objc != 3) {
         Tcl_WrongNumArgs(interp, 2, objv, "<packet>");
         return TCL_ERROR;
