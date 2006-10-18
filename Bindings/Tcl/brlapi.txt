@@ -3,7 +3,7 @@ brlapi <function> [<arg> ...]
       host <hostSpec>
       keyFile <file>
    expandHost <hostSpec>
-   expandKey <key>
+   expandKeyCode <keyCode>
    makeCells <dotsList>
 
 brlapi<sessionNumber> function [arg ...]
@@ -15,7 +15,7 @@ brlapi<sessionNumber> function [arg ...]
    displaySize
    enterTtyMode [<option> ...]
       tty {default | <number>}
-      commands
+      keyCodes
       events <driver>
    leaveTtyMode
    setFocus <ttyNumber>
