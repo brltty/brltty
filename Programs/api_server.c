@@ -2261,26 +2261,26 @@ brl_keycode_t coreToClient(unsigned long keycode, int how) {
         code = wc;
       else
         /* unicode character */
-        code = BRLAPI_KEY_UC | wc;
+        code = BRLAPI_KEY_SYM_UC | wc;
       break;
     }
     case BRL_BLK_PASSKEY:
       switch (keycode & BRL_MSK_ARG) {
-      case BRL_KEY_ENTER:		code = BRLAPI_KEY_ENTER;	break;
-      case BRL_KEY_TAB:			code = BRLAPI_KEY_TAB;		break;
-      case BRL_KEY_BACKSPACE:		code = BRLAPI_KEY_BACKSPACE;	break;
-      case BRL_KEY_ESCAPE:		code = BRLAPI_KEY_ESCAPE;	break;
-      case BRL_KEY_CURSOR_LEFT:		code = BRLAPI_KEY_CURSOR_LEFT;	break;
-      case BRL_KEY_CURSOR_RIGHT:	code = BRLAPI_KEY_CURSOR_RIGHT;	break;
-      case BRL_KEY_CURSOR_UP:		code = BRLAPI_KEY_CURSOR_UP;	break;
-      case BRL_KEY_CURSOR_DOWN:		code = BRLAPI_KEY_CURSOR_DOWN;	break;
-      case BRL_KEY_PAGE_UP:		code = BRLAPI_KEY_PAGE_UP;	break;
-      case BRL_KEY_PAGE_DOWN:		code = BRLAPI_KEY_PAGE_DOWN;	break;
-      case BRL_KEY_HOME:		code = BRLAPI_KEY_HOME;		break;
-      case BRL_KEY_END:			code = BRLAPI_KEY_END;		break;
-      case BRL_KEY_INSERT:		code = BRLAPI_KEY_INSERT;	break;
-      case BRL_KEY_DELETE:		code = BRLAPI_KEY_DELETE;	break;
-      default: code = BRLAPI_KEY_FUNCTION + (keycode & BRL_MSK_ARG) - BRL_KEY_FUNCTION; break;
+      case BRL_KEY_ENTER:		code = BRLAPI_KEY_SYM_ENTER;	break;
+      case BRL_KEY_TAB:			code = BRLAPI_KEY_SYM_TAB;	break;
+      case BRL_KEY_BACKSPACE:		code = BRLAPI_KEY_SYM_BACKSPACE;break;
+      case BRL_KEY_ESCAPE:		code = BRLAPI_KEY_SYM_ESCAPE;	break;
+      case BRL_KEY_CURSOR_LEFT:		code = BRLAPI_KEY_SYM_CURSOR_LEFT;break;
+      case BRL_KEY_CURSOR_RIGHT:	code = BRLAPI_KEY_SYM_CURSOR_RIGHT;break;
+      case BRL_KEY_CURSOR_UP:		code = BRLAPI_KEY_SYM_CURSOR_UP;break;
+      case BRL_KEY_CURSOR_DOWN:		code = BRLAPI_KEY_SYM_CURSOR_DOWN;break;
+      case BRL_KEY_PAGE_UP:		code = BRLAPI_KEY_SYM_PAGE_UP;	break;
+      case BRL_KEY_PAGE_DOWN:		code = BRLAPI_KEY_SYM_PAGE_DOWN;break;
+      case BRL_KEY_HOME:		code = BRLAPI_KEY_SYM_HOME;	break;
+      case BRL_KEY_END:			code = BRLAPI_KEY_SYM_END;	break;
+      case BRL_KEY_INSERT:		code = BRLAPI_KEY_SYM_INSERT;	break;
+      case BRL_KEY_DELETE:		code = BRLAPI_KEY_SYM_DELETE;	break;
+      default: code = BRLAPI_KEY_SYM_FUNCTION + (keycode & BRL_MSK_ARG) - BRL_KEY_FUNCTION; break;
       }
       break;
     default:
