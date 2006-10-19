@@ -1637,6 +1637,6 @@ void brlapi_defaultExceptionHandler(int err, brl_type_t type, const void *packet
 {
   char str[0X100];
   brlapi_strexception(str,0X100, err, type, packet, size);
-  fprintf(stderr, "BrlAPI exception: %s\n", str);
+  fprintf(stderr, "BrlAPI exception: %s\nYou may want to add option -l 7 to the brltty command line for getting debugging information in the system log\n", str);
   abort();
 }
