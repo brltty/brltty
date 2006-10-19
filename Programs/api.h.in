@@ -555,21 +555,6 @@ typedef uint64_t brl_keycode_t;
 /** Mod5 modifier (usually Alt-Gr) */
 #define BRLAPI_KEY_FLG_MOD5		BRLAPI_KEY_FLG(0x00000080)
 
-/** Explicitely toggle key on */
-#define BRLAPI_KEY_FLG_TOGGLE_ON	BRLAPI_KEY_FLG(0x00000100)
-/** Explicitely toggle key off */
-#define BRLAPI_KEY_FLG_TOGGLE_OFF	BRLAPI_KEY_FLG(0x00000200)
-/** Mask for toggle on/off */
-#define BRLAPI_KEY_FLG_TOGGLE_MASK	(BRLAPI_KEY_FLG_TOGGLE_ON|BRLAPI_KEY_FLG_TOGGLE_OFF)
-
-/** Automatic cursor routing */
-#define BRLAPI_KEY_FLG_ROUTE		BRLAPI_KEY_FLG(0x00000400)
-
-#define BRLAPI_KEY_FLG_REPEAT_INITIAL	BRLAPI_KEY_FLG(0x00008000)
-#define BRLAPI_KEY_FLG_REPEAT_DELAY	BRLAPI_KEY_FLG(0x00004000)
-#define BRLAPI_KEY_FLG_REPEAT_MASK	(BRLAPI_KEY_FLG_REPEAT_INITIAL|BRLAPI_KEY_FLG_REPEAT_DELAY)
-#define BRLAPI_KEY_FLG_IS_DELAYED(v)	(((v) & BRLAPI_KEY_FLG_REPEAT_DELAY) && !((v) & BRLAPI_KEY_FLG_REPEAT_INITIAL))
-
 
 /**
  * Mask for type of brl_keycode_t
@@ -594,45 +579,6 @@ typedef uint64_t brl_keycode_t;
 #define BRLAPI_KEY_CMD_BLK_MASK		0X1FFF0000ULL
 /** Mask for braille command value */
 #define BRLAPI_KEY_CMD_ARG_MASK		0X0000FFFFULL
-/** Bring cursor to character */
-#define BRLAPI_KEY_CMD_ROUTE		BRLAPI_KEY_CMD(0x01)
-/** Start new cut buffer at character */
-#define BRLAPI_KEY_CMD_CUTBEGIN		BRLAPI_KEY_CMD(0x02)
-/** Append to existing cut buffer from character */
-#define BRLAPI_KEY_CMD_CUTAPPEND	BRLAPI_KEY_CMD(0x03)
-/** Rectangular cut to character */
-#define BRLAPI_KEY_CMD_CUTRECT		BRLAPI_KEY_CMD(0x04)
-/** Linear cut to character */
-#define BRLAPI_KEY_CMD_CUTLINE		BRLAPI_KEY_CMD(0x05)
-/** Switch to virtual terminal */
-#define BRLAPI_KEY_CMD_SWITCHVT		BRLAPI_KEY_CMD(0x06)
-/** Go up to nearest line without greater indent */
-#define BRLAPI_KEY_CMD_PRINDENT		BRLAPI_KEY_CMD(0x07)
-/** Go down to nearest line without greater indent */
-#define BRLAPI_KEY_CMD_NXINDENT		BRLAPI_KEY_CMD(0x08)
-/** Describe character */
-#define BRLAPI_KEY_CMD_DESCCHAR		BRLAPI_KEY_CMD(0x09)
-/** Position left end of window at character */
-#define BRLAPI_KEY_CMD_SETLEFT		BRLAPI_KEY_CMD(0x0A)
-/** Remember current window position */
-#define BRLAPI_KEY_CMD_SETMARK		BRLAPI_KEY_CMD(0x0B)
-/** Go to remembered window position */
-#define BRLAPI_KEY_CMD_GOTOMARK		BRLAPI_KEY_CMD(0x0C)
-
-/** Go to line */
-#define BRLAPI_KEY_CMD_GOTOLINE		BRLAPI_KEY_CMD(0x0D)
-#define BRLAPI_KEY_FLG_LINE_SCALED	BRLAPI_KEY_FLG(0x0100)
-#define BRLAPI_KEY_FLG_LINE_TOLEFT	BRLAPI_KEY_FLG(0x0200)
-
-/** Go up to nearest line with different character */
-#define BRLAPI_KEY_CMD_PRDIFCHAR	BRLAPI_KEY_CMD(0x0E)
-/** Go down to nearest line with different character */
-#define BRLAPI_KEY_CMD_NXDIFCHAR	BRLAPI_KEY_CMD(0x0F)
-
-/** Input character as braille dots */
-#define BRLAPI_KEY_CMD_PASSDOTS		BRLAPI_KEY_CMD(0x22)
-/** Input AT set 2 keyboard scan code */
-#define BRLAPI_KEY_CMD_PASSAT2		BRLAPI_KEY_CMD(0x23)
 
 /* Standard X keysyms */
 #define BRLAPI_KEY_SYM_BACKSPACE	0x0000FF08ULL
@@ -652,114 +598,7 @@ typedef uint64_t brl_keycode_t;
 #define BRLAPI_KEY_SYM_DELETE		0x0000FFFFULL
 #define BRLAPI_KEY_SYM_UC		0x01000000ULL
 
-/** Braille commands */
-enum brlapi_key_cmd_e {
-  BRLAPI_KEY_CMD_NOOP = BRLAPI_KEY_TYPE_CMD,
-  /* vertical motion */
-  BRLAPI_KEY_CMD_LNUP,		/** go up one line */
-  BRLAPI_KEY_CMD_LNDN,		/** go down one line */
-  BRLAPI_KEY_CMD_WINUP,		/** go up several lines */
-  BRLAPI_KEY_CMD_WINDN,		/** go down several lines */
-  BRLAPI_KEY_CMD_PRDIFLN,	/** go up to nearest line with different content */
-  BRLAPI_KEY_CMD_NXDIFLN,	/** go down to nearest line with different content */
-  BRLAPI_KEY_CMD_ATTRUP,	/** go up to nearest line with different highlighting */
-  BRLAPI_KEY_CMD_ATTRDN,	/** go down to nearest line with different highlighting */
-  BRLAPI_KEY_CMD_TOP,		/** go to top line */
-  BRLAPI_KEY_CMD_BOT,		/** go to bottom line */
-  BRLAPI_KEY_CMD_TOP_LEFT,	/** go to top-left corner */
-  BRLAPI_KEY_CMD_BOT_LEFT,	/** go to bottom-left corner */
-  BRLAPI_KEY_CMD_PRPGRPH,	/** go up to last line of previous paragraph */
-  BRLAPI_KEY_CMD_NXPGRPH,	/** go down to first line of next paragraph */
-  BRLAPI_KEY_CMD_PRPROMPT,	/** go up to previous command prompt */
-  BRLAPI_KEY_CMD_NXPROMPT,	/** go down to next command prompt */
-  BRLAPI_KEY_CMD_PRSEARCH,	/** search backward for content of cut buffer */
-  BRLAPI_KEY_CMD_NXSEARCH,	/** search forward for content of cut buffer */
-
-  /* horizontal motion */
-  BRLAPI_KEY_CMD_CHRLT,		/** go left one character */
-  BRLAPI_KEY_CMD_CHRRT,		/** go right one character */
-  BRLAPI_KEY_CMD_HWINLT,	/** go left half a window */
-  BRLAPI_KEY_CMD_HWINRT,	/** go right half a window */
-  BRLAPI_KEY_CMD_FWINLT,	/** go left one window */
-  BRLAPI_KEY_CMD_FWINRT,	/** go right one window */
-  BRLAPI_KEY_CMD_FWINLTSKIP,	/** go left to nearest non-blank window */
-  BRLAPI_KEY_CMD_FWINRTSKIP,	/** go right to nearest non-blank window */
-  BRLAPI_KEY_CMD_LNBEG,		/** go to beginning of line */
-  BRLAPI_KEY_CMD_LNEND,		/** go to end of line */
-
-  /* implicit motion */
-  BRLAPI_KEY_CMD_HOME,		/** go to cursor */
-  BRLAPI_KEY_CMD_BACK,		/** go back (undo unexpected cursor tracking motion) */
-  BRLAPI_KEY_CMD_RETURN,	/** go back (after cursor tracking) or to cursor (cursor not in window) */
-
-  /* feature activation and deactivation */
-  BRLAPI_KEY_CMD_FREEZE,	/** toggle screen mode frozen/live */
-  BRLAPI_KEY_CMD_DISPMD,	/** toggle display mode attributes/text */
-  BRLAPI_KEY_CMD_SIXDOTS,	/** toggle text style 6-dot/8-dot */
-  BRLAPI_KEY_CMD_SLIDEWIN,	/** toggle sliding window on/off */
-  BRLAPI_KEY_CMD_SKPIDLNS,	/** toggle skipping of lines with identical content on/off */
-  BRLAPI_KEY_CMD_SKPBLNKWINS,	/** toggle skipping of blank windows on/off */
-  BRLAPI_KEY_CMD_CSRVIS,	/** toggle cursor visibility on/off */
-  BRLAPI_KEY_CMD_CSRHIDE,	/** toggle hidden cursor on/off */
-  BRLAPI_KEY_CMD_CSRTRK,	/** toggle cursor tracking on/off */
-  BRLAPI_KEY_CMD_CSRSIZE,	/** toggle cursor style block/underline */
-  BRLAPI_KEY_CMD_CSRBLINK,	/** toggle cursor blinking on/off */
-  BRLAPI_KEY_CMD_ATTRVIS,	/** toggle attribute underlining on/off */
-  BRLAPI_KEY_CMD_ATTRBLINK,	/** toggle attribute blinking on/off */
-  BRLAPI_KEY_CMD_CAPBLINK,	/** toggle capital letter blinking on/off */
-  BRLAPI_KEY_CMD_TUNES,		/** toggle alert tunes on/off */
-  BRLAPI_KEY_CMD_AUTOREPEAT,	/** toggle autorepeat on/off */
-  BRLAPI_KEY_CMD_AUTOSPEAK,	/** toggle autospeak on/off */
- 
-  /** mode selection */
-  BRLAPI_KEY_CMD_HELP,		/** enter/leave help display */
-  BRLAPI_KEY_CMD_INFO,		/** enter/leave status display */
-  BRLAPI_KEY_CMD_LEARN,		/** enter/leave command learn mode */
-  
-  /** preference setting */
-  BRLAPI_KEY_CMD_PREFMENU,	/** enter/leave preferences menu */
-  BRLAPI_KEY_CMD_PREFSAVE,	/** save current preferences */
-  BRLAPI_KEY_CMD_PREFLOAD,	/** restore saved preferences */
-  
-  /** menu navigation */
-  BRLAPI_KEY_CMD_MENU_FIRST_ITEM,	/** go to first item in menu */
-  BRLAPI_KEY_CMD_MENU_LAST_ITEM,	/** go to last item in menu */
-  BRLAPI_KEY_CMD_MENU_PREV_ITEM,	/** go to previous item in menu */
-  BRLAPI_KEY_CMD_MENU_NEXT_ITEM,	/** go to next item in menu */
-  BRLAPI_KEY_CMD_MENU_PREV_SETTING,	/** change current item in menu to previous choice */
-  BRLAPI_KEY_CMD_MENU_NEXT_SETTING,	/** change current item in menu to next choice */
- 
-  /** speech controls */
-  BRLAPI_KEY_CMD_MUTE,		/** stop speaking immediately */
-  BRLAPI_KEY_CMD_SPKHOME,	/** go to current (most recent) speech position */
-  BRLAPI_KEY_CMD_SAY_LINE,	/** speak current line */
-  BRLAPI_KEY_CMD_SAY_ABOVE,	/** speak from top of screen through current line */
-  BRLAPI_KEY_CMD_SAY_BELOW,	/** speak from current line through bottom of screen */
-  BRLAPI_KEY_CMD_SAY_SLOWER,	/** decrease speech rate */
-  BRLAPI_KEY_CMD_SAY_FASTER,	/** increase speech rate */
-  BRLAPI_KEY_CMD_SAY_SOFTER,	/** decrease speech volume */
-  BRLAPI_KEY_CMD_SAY_LOUDER,	/** increase speech volume */
-  
-  /** virtual terminal switching */
-  BRLAPI_KEY_CMD_SWITCHVT_PREV,	/** switch to previous virtual terminal */
-  BRLAPI_KEY_CMD_SWITCHVT_NEXT,	/** switch to next virtual terminal */
-  
-  /** miscellaneous */
-  BRLAPI_KEY_CMD_CSRJMP_VERT,	/** bring cursor to line (no horizontal motion) */
-  BRLAPI_KEY_CMD_PASTE,		/** insert cut buffer at cursor */
-  BRLAPI_KEY_CMD_RESTARTBRL,	/** reinitialize braille driver */
-  BRLAPI_KEY_CMD_RESTARTSPEECH,	/** reinitialize speech driver */
-};
-
-/* ISO/TR 11548-1 standard codes */
-#define BRLAPI_DOT1	0001U
-#define BRLAPI_DOT2	0002U
-#define BRLAPI_DOT3	0004U
-#define BRLAPI_DOT4	0010U
-#define BRLAPI_DOT5	0020U
-#define BRLAPI_DOT6	0040U
-#define BRLAPI_DOT7	0100U
-#define BRLAPI_DOT8	0200U
+#include "api_cmddefs.h"
 
 /* Unicode braille row */
 #define BRLAPI_UC_ROW	0x2800UL

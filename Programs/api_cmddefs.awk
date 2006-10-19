@@ -15,28 +15,43 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-function writeCommandEntry(name, symbol, help) {
-  print "{"
-  print "  .name = \"" name "\","
-  print "  .code = " symbol ","
-  print "  .description = \"" help "\""
-  print "},"
+BEGIN {
+  writeHeaderPrologue("BRLAPI_INCLUDED_API_CMDDEFS", "api.h")
+}
+
+END {
+  writeHeaderEpilogue()
 }
 
 function brlCommand(name, symbol, value, help) {
-  writeCommandEntry(name, symbol, help)
+  writeMacroDefinition("BRLAPI_KEY_CMD_" name, "(BRLAPI_KEY_CMD(0) + " value ")", help)
 }
 
 function brlBlock(name, symbol, value, help) {
-  writeCommandEntry(name, symbol, help)
+  if (name == "PASSCHAR") return
+  if (name == "PASSKEY") return
+
+  if (value ~ /^0[xX][0-9a-fA-F]+00$/) {
+    writeMacroDefinition("BRLAPI_KEY_CMD_" name, "BRLAPI_KEY_CMD(" substr(value, 1, length(value)-2) ")", help)
+  }
 }
 
 function brlKey(name, symbol, value, help) {
-  writeCommandEntry(name, "BRL_BLK_PASSKEY+" symbol, help)
 }
 
 function brlFlag(name, symbol, value, help) {
+  if (name ~ /^CHAR_/) return
+
+  if (value ~ /^0[xX][0-9a-fA-F]+0000$/) {
+    value = "BRLAPI_KEY_FLG(" substr(value, 1, length(value)-4) " * 0X100)"
+  } else if (value ~ /^\(/) {
+    gsub("BRL_FLG_", "BRLAPI_KEY_FLG_", value)
+  } else {
+    return
+  }
+  writeMacroDefinition("BRLAPI_KEY_FLG_" name, value, help)
 }
 
 function brlDot(number, symbol, value, help) {
+  writeMacroDefinition("BRLAPI_DOT" number, value, help)
 }

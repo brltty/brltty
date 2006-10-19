@@ -1,3 +1,20 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2006 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU General Public License, as published by the Free Software
+# Foundation.  Please see the file COPYING for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
 BEGIN {
   writeHeaderPrologue("BRLAPI_INCLUDED_BRLDEFS", "api.h")
 }
@@ -19,11 +36,11 @@ function writeSymbolDefinition(name, brlPrefix, brlSuffix, apiPrefix, apiSuffix,
   writeMacroDefinition(brlPrefix name brlSuffix, apiPrefix name apiSuffix, help)
 }
 
-function brlCommand(name, value, help) {
+function brlCommand(name, symbol, value, help) {
   writeSymbolDefinition(name, "BRL_CMD_", "", "BRLAPI_KEY_CMD_", "", help)
 }
 
-function brlBlock(name, value, help) {
+function brlBlock(name, symbol, value, help) {
   if (name == "PASSCHAR") {
     writeMacroDefinition("BRL_KEY_" name, "(BRLAPI_KEY_TYPE_SYM | 0X0000)", help)
   } else if (name == "PASSKEY") {
@@ -33,11 +50,11 @@ function brlBlock(name, value, help) {
   }
 }
 
-function brlKey(name, value, help) {
+function brlKey(name, symbol, value, help) {
   writeMacroDefinition("BRL_KEY_" name, "(BRLAPI_KEY_SYM_" name " & 0XFF)", help)
 }
 
-function brlFlag(name, value, help) {
+function brlFlag(name, symbol, value, help) {
   if (match(name, "^[^_]*_")) {
     type = substr(name, 1, RLENGTH-1)
     if (type == "CHAR") {
@@ -49,6 +66,6 @@ function brlFlag(name, value, help) {
   writeSymbolDefinition(name, "BRL_FLG_", "", "BRLAPI_KEY_FLG_", "", help)
 }
 
-function brlDot(number, value, help) {
+function brlDot(number, symbol, value, help) {
   writeSymbolDefinition(number, "BRL_DOT", "", "BRLAPI_DOT", "", help)
 }

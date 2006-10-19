@@ -153,15 +153,15 @@ typedef enum {
 #define BRL_MSK_CMD (BRL_MSK_BLK | BRL_MSK_ARG)
   
 /* For explicitly setting toggles on/off. */
-#define BRL_FLG_TOGGLE_ON   0x010000 /* enable feature */
-#define BRL_FLG_TOGGLE_OFF  0x020000 /* disable feature */
+#define BRL_FLG_TOGGLE_ON   0X010000 /* enable feature */
+#define BRL_FLG_TOGGLE_OFF  0X020000 /* disable feature */
 #define BRL_FLG_TOGGLE_MASK (BRL_FLG_TOGGLE_ON | BRL_FLG_TOGGLE_OFF) /* mask for all toggle flags */
 
 /* For automatic cursor routing. */
-#define BRL_FLG_ROUTE 0x040000 /* bring cursor into window after function */
+#define BRL_FLG_ROUTE 0X040000 /* bring cursor into window after function */
 
-#define BRL_FLG_REPEAT_INITIAL 0x800000 /* execute command on key press */
-#define BRL_FLG_REPEAT_DELAY   0x400000 /* wait before repeating */
+#define BRL_FLG_REPEAT_INITIAL 0X800000 /* execute command on key press */
+#define BRL_FLG_REPEAT_DELAY   0X400000 /* wait before repeating */
 #define BRL_FLG_REPEAT_MASK    (BRL_FLG_REPEAT_INITIAL | BRL_FLG_REPEAT_DELAY) /* mask for all repeat flags */
 #define IS_DELAYED_COMMAND(cmd) (((cmd) & BRL_FLG_REPEAT_DELAY) && !((cmd) & BRL_FLG_REPEAT_INITIAL))
   
@@ -170,28 +170,28 @@ typedef enum {
  * Please comment all BRL_BLK_* definitions. They are
  * used during automatic help file generation.
  */
-#define BRL_BLK_ROUTE     0X100 /* bring cursor to character */
-#define BRL_BLK_CUTBEGIN  0X200 /* start new cut buffer at character */
-#define BRL_BLK_CUTAPPEND 0X300 /* append to existing cut buffer from character */
-#define BRL_BLK_CUTRECT   0X400 /* rectangular cut to character */
-#define BRL_BLK_CUTLINE   0X500 /* linear cut to character */
-#define BRL_BLK_SWITCHVT  0X600 /* switch to virtual terminal */
-#define BRL_BLK_PRINDENT  0X700 /* go up to nearest line without greater indent */
-#define BRL_BLK_NXINDENT  0X800 /* go down to nearest line without greater indent */
-#define BRL_BLK_DESCCHAR  0X900 /* describe character */
-#define BRL_BLK_SETLEFT   0XA00 /* position left end of window at character */
-#define BRL_BLK_SETMARK   0XB00 /* remember current window position */
-#define BRL_BLK_GOTOMARK  0XC00 /* go to remembered window position */
+#define BRL_BLK_ROUTE     0X0100 /* bring cursor to character */
+#define BRL_BLK_CUTBEGIN  0X0200 /* start new cut buffer at character */
+#define BRL_BLK_CUTAPPEND 0X0300 /* append to existing cut buffer from character */
+#define BRL_BLK_CUTRECT   0X0400 /* rectangular cut to character */
+#define BRL_BLK_CUTLINE   0X0500 /* linear cut to character */
+#define BRL_BLK_SWITCHVT  0X0600 /* switch to virtual terminal */
+#define BRL_BLK_PRINDENT  0X0700 /* go up to nearest line without greater indent */
+#define BRL_BLK_NXINDENT  0X0800 /* go down to nearest line without greater indent */
+#define BRL_BLK_DESCCHAR  0X0900 /* describe character */
+#define BRL_BLK_SETLEFT   0X0A00 /* position left end of window at character */
+#define BRL_BLK_SETMARK   0X0B00 /* remember current window position */
+#define BRL_BLK_GOTOMARK  0X0C00 /* go to remembered window position */
 
-#define BRL_BLK_GOTOLINE  0XD00 /* go to line */
+#define BRL_BLK_GOTOLINE  0X0D00 /* go to line */
 #define BRL_FLG_LINE_SCALED 0X010000 /* scale arg=0X00-0XFF to screen height */
 #define BRL_FLG_LINE_TOLEFT 0X020000 /* go to beginning of line */
 
-#define BRL_BLK_PRDIFCHAR 0XE00 /* go up to nearest line with different character */
-#define BRL_BLK_NXDIFCHAR 0XF00 /* go down to nearest line with different character */
+#define BRL_BLK_PRDIFCHAR 0X0E00 /* go up to nearest line with different character */
+#define BRL_BLK_NXDIFCHAR 0X0F00 /* go down to nearest line with different character */
 
 /* For entering a special key. */
-#define BRL_BLK_PASSKEY 0X2000 /* simulate press of functional key */
+#define BRL_BLK_PASSKEY 0X2000 /* simulate pressing a functional key */
 typedef enum {
   BRL_KEY_ENTER,
   BRL_KEY_TAB,
@@ -212,8 +212,6 @@ typedef enum {
 
 #define BRL_BLK_PASSCHAR 0X2100 /* input character by value */
 #define BRL_BLK_PASSDOTS 0X2200 /* input character as braille dots */
-
-/* For modifying a character to be typed. */
 #define BRL_FLG_CHAR_CONTROL 0X010000 /* control key pressed */
 #define BRL_FLG_CHAR_META    0X020000 /* meta key pressed */
 #define BRL_FLG_CHAR_UPPER   0X040000 /* convert to uppercase */

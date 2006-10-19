@@ -129,6 +129,9 @@ $(API_ARC): $(API_OBJS)
 api_client.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/api_client.c
 
+api_cmddefs.h: $(SRC_DIR)/brldefs.h $(SRC_DIR)/brldefs.awk $(SRC_DIR)/api_cmddefs.awk
+	$(AWK) -f $(SRC_DIR)/brldefs.awk -f $(SRC_DIR)/api_cmddefs.awk $(SRC_DIR)/brldefs.h >$@
+
 api_brldefs.auto.h: $(SRC_DIR)/brldefs.h $(SRC_DIR)/brldefs.awk $(SRC_DIR)/api_brldefs.awk
 	$(AWK) -f $(SRC_DIR)/brldefs.awk -f $(SRC_DIR)/api_brldefs.awk $(SRC_DIR)/brldefs.h >$@
 
@@ -522,10 +525,11 @@ install-api-libraries-windows: $(API_DLL) $(API_ARC) install-program-directory i
 install-libdir-directory:
 	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(libdir)
 
-install-api-headers: api_brldefs.auto.h
+install-api-headers: api_cmddefs.h api_brldefs.auto.h
 	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
 	$(INSTALL_DATA) api.h $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
 	$(INSTALL_DATA) $(SRC_DIR)/api_protocol.h $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
+	$(INSTALL_DATA) $(SRC_DIR)/api_cmddefs.h $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
 	$(INSTALL_DATA) $(SRC_DIR)/api_brldefs.auto.h $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)/brldefs.h
 
 install-api-manpages:
@@ -602,7 +606,8 @@ distclean clean::
 
 clean::
 	-rm -f brltty$X xbrlapi$X txt2hlp$X tbl2hex$X *test$X *-static$X
-	-rm -f $(API_LIB) $(API_ARC) $(API_DLL) $(API_IMPLIB) $(PYTHON_LIB)
+	-rm -f $(API_LIB) $(API_ARC) $(API_DLL) $(API_IMPLIB) api_cmddefs.h
+	-rm -f $(PYTHON_LIB)
 	-rm -f $(BLD_TOP)$(DRV_DIR)/* $(BLD_TOP)$(DAT_DIR)/*
 
 distclean::
