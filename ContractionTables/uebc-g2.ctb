@@ -1,0 +1,415 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2006 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU General Public License, as published by the Free Software
+# Foundation.  Please see the file COPYING for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+#Unified English Braille Code, brltty grade 2 contraction table
+#By Michael Curran <mick@kulgan.net>
+
+#This is by no means complete, but at least all the important ascii symbols and general grade 2 contractions are here.
+#I am trying to compress space as much as possible so a lot of syllable boundary rules havn't been included.
+
+#Special braille signs
+capsign 6
+begcaps 6-6
+endcaps 6-3
+letsign 56
+numsign 3456
+midnum . 256
+
+#Largest contractions
+word a =
+word about 1-12
+contraction ab
+word above 1-12-1236
+contraction abv
+sufword according 1-14
+contraction ac
+word across 1-14-1235
+contraction acr
+word after 1-124
+contraction af
+sufword afterward 1-124-2456
+contraction afw
+sufword afternoon 1-124-1345
+contraction afn
+word again 1-1245
+contraction ag
+word against 1-1245-34
+contraction agst
+word almost 1-123-134
+contraction alm
+word already 1-123-1235
+contraction alr
+word also 1-123
+contraction al
+word although 1-123-1456
+word alth =
+word altogether 1-123-2345-1245
+contraction altg
+word always 1-123-2456
+contraction alw
+word as 1356
+contraction as
+word be 23
+contraction be
+word because 23-14
+word bec =
+word before 23-124
+word bef =
+word behind 23-125
+word beh =
+word below 23-123
+word bel =
+word beneath 23-1345
+sufword beside 23-234
+sufword bes =
+sufword between 23-2345
+sufword bet =
+word beyond 23-13456
+word bey =
+sufword blind 12-123
+contraction bl
+sufword braille 12-1235-123
+contraction brl
+word but 12
+contraction b
+word can 14
+contraction c
+sufword conceive 25-14-1236
+contraction rcv
+word could 14-145
+contraction cd
+word cannot 456-14
+sufword character 5-16
+word children 16-1345
+word chn =
+always deceive 145-14-1236
+contraction dcv
+word declare 145-14-123
+contraction dcl
+word do 145
+contraction d
+word either 15-24
+contraction ei
+lowword enough 26
+contraction en
+word every 15
+contraction e
+always father 5-124
+always first 124-34
+always fst =
+word from 124
+contraction f
+always friend 124-1235
+contraction fr
+word go 1245
+contraction g
+always good 1245-145
+contraction gd
+word great 1245-1235-2345
+contraction grt
+word had 456-125
+word have 125
+contraction h
+always here 5-125
+word herself 125-12456-124
+contraction herf
+word him 125-134
+contraction hm
+word himself 125-134-124
+contraction hmf
+lowword his 236
+word i =
+sufword immediate 24-134-134
+contraction imm
+word it 1346
+contraction x
+word its 1346-234
+contraction xs
+word itself 1346-124
+contraction xf
+word just 245
+contraction j
+word knowledge 13
+contraction k
+always know 5-13
+sufword letter 123-1235
+contraction lr
+word like 123
+contraction l
+word little 123-123
+contraction ll
+sufword lord 5-123
+word more 134
+contraction m
+sufword mother 5-134
+sufword much 134-16
+contraction mch
+word must 134-34
+contraction mst
+word myself 134-13456-124
+contraction myf
+sufword name 5-1345
+sufword necessary 1345-15-14
+contraction nec
+word neither 1345-15-24
+contraction nei
+word not 1345
+contraction n
+word ourselves 1256-1235-1236-234
+contraction ourvs
+word paid 1234-145
+contraction pd
+word people 1234
+contraction p
+word perhaps 1234-12456-125
+contraction perh
+sufword quick 12345-13
+contraction qk
+word quite 12345
+contraction q
+always question 5-12345
+word rather 1235
+contraction r
+always receive 1235-14-1236
+contraction rcv
+always rejoice 1235-245-14
+contraction rjc
+word so 234
+contraction s
+word said 234-145
+contraction sd
+word shall 146
+contraction sh
+always should 146-145
+contraction shd
+word so 234
+contraction s
+always some 5-234
+always spirit 456-234
+word still 34
+contraction st
+word such 234-16
+contraction sch
+word that 2345
+contraction t
+word this 1456
+contraction th
+word thyself 1456-13456-124
+contraction thyf
+word today 2345-145
+contraction td
+word tomorrow 2345-134
+contraction tm
+word tonight 2345-1345
+contraction tn
+word themselves 2346-134-1236-234
+contraction themvs
+always their 456-2346
+always there 5-2346
+sufword time 5-2345
+word these 45-2346
+always through 5-1456
+always together 2345-1245-1235
+contraction tgr
+word those 45-1456
+word upon 45-136
+word us 136
+contraction u
+always under 5-136
+word very 1236
+contraction v
+lowword was 356
+word which 156
+contraction wh
+word will 2456
+contraction w
+lowword were 2356
+always where 5-156
+always with 23456
+always word 45-2456
+word whose 45-156
+always work 5-2456
+always would 2456-145
+contraction wd
+always world 456-2456
+word you 13456
+contraction y
+always young 5-13456
+word your 13456-1235
+contraction yr
+word yours 13456-1235-234
+contraction yrs
+word yourself 13456-1235-124
+contraction yrf
+word yourselves 13456-1235-1236-234
+contraction yrvs
+
+#Smaller contractions
+midendword ally 6-13456
+midendword ance 46-15
+always ever 5-15
+always for 123456
+midendword ful 56-123
+midendword ing 346
+midendword ity 56-13456
+midendword less 46-234
+always many 456-134
+midendword ment 56-2345
+midendword iness 24-56-234
+midendword ness 56-234
+midendword ong 56-1245
+midendword  ound 46-145
+midendword ount 46-2345
+always ought 5-1256
+always part 5-1234
+always right 5-1235
+midendword sion 46-1345
+always the 2346
+midendword tion 56-1345
+
+#Smallist contractions
+always and 12346
+always ar 345
+always ch 16
+midword ea 2
+always ed 1246
+always en 26
+always er 12456
+midword gg 2356
+always gh 126
+always in 35
+always of 12356
+always one 5-135
+always ou 1256
+always ow 246
+always sh 146
+always st 34
+always th 1456
+always wh 156
+
+#single symbols
+always \x20 0  
+repeated \x20\x20 0-0
+always 1 1
+always 2 12
+always 3 14
+always 4 145
+always 5 15
+always 6 124
+always 7 1245
+always 8 125
+always 9 24
+always 0 245
+always a 1
+always A 1
+always b 12
+always B 12
+always c 14
+always C 14
+always d 145
+always D 145
+always e 15
+always E 15
+always f 124
+always F 124
+always g 1245
+always G 1245
+always h 125
+always H 125
+always i 24
+always I 24
+always j 245
+always J 245
+always k 13
+always K 13
+always l 123
+always L 123
+always m 134
+always M 134
+always n 1345
+always N 1345
+always o 135
+always O 135
+always p 1234
+always P 1234
+always q 12345
+always Q 12345
+always r 1235
+always R 1235
+always s 234
+always S 234
+always t 2345
+always T 2345
+always u 136
+always U 136
+always v 1236
+always V 1236
+always w 2456
+always W 2456
+always x 1346
+always X 1346
+always y 13456
+always Y 13456
+always z 1356
+always Z 1356
+always " 6-2356
+always ' 3
+always / 456-34
+always & 4-12346
+always * 5-35
+always { 456-126
+always } 456-345
+always ( 5-126
+always ) 5-345
+always [ 46-126
+always ] 46-345
+always , 2
+always ; 23
+always : 25
+always . 256
+always ! 235
+always ? 236
+always <= 456-4-126
+always >= 456-4-345
+always + 5-235
+always < 4-126
+always > 4-345
+always = 5-2356
+always % 456-356
+always | 456-1256
+always ^ 4-26
+always ~ 4-35
+always @ 4-1
+always \\ 456-16
+always # 456-1456
+always - 36
+always _ 46-36
+always ` 46-16
+always \t 456-2345
+always $ 4-234
+
+# other special characters
+always © 2356-6-14-2356 copyright
+always ¶ 4-1234-345 paragraph
+always § 4-234-3 section
+always ° 45-46-16 degrees
+always ¢ 4-14 cents
+always £ 4-123 pounds
+always ¥ 4-13456 yen
+always µ 46-134 mu
+
+
