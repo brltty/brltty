@@ -129,6 +129,9 @@ $(API_ARC): $(API_OBJS)
 api_client.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/api_client.c
 
+api_brldefs.auto.h: $(SRC_DIR)/brldefs.h $(SRC_DIR)/brldefs.awk $(SRC_DIR)/api_brldefs.awk
+	$(AWK) -f $(SRC_DIR)/brldefs.awk -f $(SRC_DIR)/api_brldefs.awk $(SRC_DIR)/brldefs.h >$@
+
 api_server.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/api_server.c
 
@@ -383,8 +386,8 @@ text.auto.h: $(TEXT_TABLE) tbl2hex$X
 attrib.auto.h: $(ATTRIBUTES_TABLE) tbl2hex$X
 	./tbl2hex$X $(ATTRIBUTES_TABLE) >$@
 
-cmds.auto.h: $(SRC_DIR)/brldefs.h $(SRC_DIR)/cmds.awk
-	$(AWK) -f $(SRC_DIR)/cmds.awk $(SRC_DIR)/brldefs.h >$@
+cmds.auto.h: $(SRC_DIR)/brldefs.h $(SRC_DIR)/brldefs.awk $(SRC_DIR)/cmds.awk
+	$(AWK) -f $(SRC_DIR)/brldefs.awk -f $(SRC_DIR)/cmds.awk $(SRC_DIR)/brldefs.h >$@
 
 brl.auto.h: $(SRC_DIR)/mkdrvtab
 	$(SRC_DIR)/mkdrvtab BrailleDriver brl_driver_ $(BRAILLE_INTERNAL_DRIVER_CODES) >$@
@@ -519,11 +522,11 @@ install-api-libraries-windows: $(API_DLL) $(API_ARC) install-program-directory i
 install-libdir-directory:
 	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(libdir)
 
-install-api-headers:
+install-api-headers: api_brldefs.auto.h
 	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
 	$(INSTALL_DATA) api.h $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
 	$(INSTALL_DATA) $(SRC_DIR)/api_protocol.h $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
-	$(INSTALL_DATA) $(SRC_DIR)/api_brldefs.h $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)/brldefs.h
+	$(INSTALL_DATA) $(SRC_DIR)/api_brldefs.auto.h $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)/brldefs.h
 
 install-api-manpages:
 	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(MANPAGE_DIRECTORY)/man3

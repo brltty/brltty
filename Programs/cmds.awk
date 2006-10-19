@@ -1,22 +1,25 @@
-BEGIN {
-  OFS = ""
+function writeCommandEntry(name, value, help) {
+  print "{"
+  print "  .name = \"" name "\","
+  print "  .code = " value ","
+  print "  .description = \"" help "\""
+  print "},"
 }
-/^ *BRL_CMD_/ {
-  if (x = match($0, "/.*/")) {
-    print "{", $1, ", \"", substr($1,9), "\", \"", substr($0, RSTART+3, RLENGTH-6), "\"},"
-  }
-  next
+
+function brlCommand(name, value, help) {
+  writeCommandEntry(name, value, help)
 }
-/#define[ \t]*BRL_BLK_/ {
-  if (x = match($0, "/.*/")) {
-    print "{", $2, ", \"", substr($2,9), "\", \"", substr($0, RSTART+3, RLENGTH-6), "\"},"
-  }
-  next
+
+function brlBlock(name, value, help) {
+  writeCommandEntry(name, value, help)
 }
-/^ *BRL_KEY_/ {
-  gsub(",", "", $1)
-  key = tolower(substr($1, 9))
-  gsub("_", "-", key)
-  print "{BRL_BLK_PASSKEY+", $1, ", \"", substr($1,9), "\", \"send ", key, " key\"},"
-  next
+
+function brlKey(name, value, help) {
+  writeCommandEntry(name, value, help)
+}
+
+function brlFlag(name, value, help) {
+}
+
+function brlDot(number, value, help) {
 }

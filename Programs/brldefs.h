@@ -153,16 +153,16 @@ typedef enum {
 #define BRL_MSK_CMD (BRL_MSK_BLK | BRL_MSK_ARG)
   
 /* For explicitly setting toggles on/off. */
-#define BRL_FLG_TOGGLE_ON   0x010000
-#define BRL_FLG_TOGGLE_OFF  0x020000
-#define BRL_FLG_TOGGLE_MASK (BRL_FLG_TOGGLE_ON | BRL_FLG_TOGGLE_OFF)
+#define BRL_FLG_TOGGLE_ON   0x010000 /* enable feature */
+#define BRL_FLG_TOGGLE_OFF  0x020000 /* disable feature */
+#define BRL_FLG_TOGGLE_MASK (BRL_FLG_TOGGLE_ON | BRL_FLG_TOGGLE_OFF) /* mask for all toggle flags */
 
 /* For automatic cursor routing. */
-#define BRL_FLG_ROUTE 0x040000
+#define BRL_FLG_ROUTE 0x040000 /* bring cursor into window after function */
 
-#define BRL_FLG_REPEAT_INITIAL 0x800000
-#define BRL_FLG_REPEAT_DELAY   0x400000
-#define BRL_FLG_REPEAT_MASK    (BRL_FLG_REPEAT_INITIAL | BRL_FLG_REPEAT_DELAY)
+#define BRL_FLG_REPEAT_INITIAL 0x800000 /* execute command on key press */
+#define BRL_FLG_REPEAT_DELAY   0x400000 /* wait before repeating */
+#define BRL_FLG_REPEAT_MASK    (BRL_FLG_REPEAT_INITIAL | BRL_FLG_REPEAT_DELAY) /* mask for all repeat flags */
 #define IS_DELAYED_COMMAND(cmd) (((cmd) & BRL_FLG_REPEAT_DELAY) && !((cmd) & BRL_FLG_REPEAT_INITIAL))
   
 /* cursor routing keys block offset values */
@@ -184,14 +184,14 @@ typedef enum {
 #define BRL_BLK_GOTOMARK  0XC00 /* go to remembered window position */
 
 #define BRL_BLK_GOTOLINE  0XD00 /* go to line */
-#define BRL_FLG_LINE_SCALED 0X010000
-#define BRL_FLG_LINE_TOLEFT 0X020000
+#define BRL_FLG_LINE_SCALED 0X010000 /* scale arg=0X00-0XFF to screen height */
+#define BRL_FLG_LINE_TOLEFT 0X020000 /* go to beginning of line */
 
 #define BRL_BLK_PRDIFCHAR 0XE00 /* go up to nearest line with different character */
 #define BRL_BLK_NXDIFCHAR 0XF00 /* go down to nearest line with different character */
 
 /* For entering a special key. */
-#define BRL_BLK_PASSKEY 0X2000
+#define BRL_BLK_PASSKEY 0X2000 /* simulate press of functional key */
 typedef enum {
   BRL_KEY_ENTER,
   BRL_KEY_TAB,
@@ -214,10 +214,10 @@ typedef enum {
 #define BRL_BLK_PASSDOTS 0X2200 /* input character as braille dots */
 
 /* For modifying a character to be typed. */
-#define BRL_FLG_CHAR_CONTROL 0X010000
-#define BRL_FLG_CHAR_META    0X020000
-#define BRL_FLG_CHAR_UPPER   0X040000
-#define BRL_FLG_CHAR_SHIFT   0X080000
+#define BRL_FLG_CHAR_CONTROL 0X010000 /* control key pressed */
+#define BRL_FLG_CHAR_META    0X020000 /* meta key pressed */
+#define BRL_FLG_CHAR_UPPER   0X040000 /* convert to uppercase */
+#define BRL_FLG_CHAR_SHIFT   0X080000 /* shift key pressed */
 
 #define BRL_BLK_PASSAT2 0X2300 /* input AT set 2 keyboard scan code */
 
@@ -282,14 +282,14 @@ typedef enum {
  *     3  6     2  5    004  040
  *     7  8     6  7    100  200
  */
-#define BRL_DOT1 0001
-#define BRL_DOT2 0002
-#define BRL_DOT3 0004
-#define BRL_DOT4 0010
-#define BRL_DOT5 0020
-#define BRL_DOT6 0040
-#define BRL_DOT7 0100
-#define BRL_DOT8 0200
+#define BRL_DOT1 0001 /* upper-left dot of standard braille cell */
+#define BRL_DOT2 0002 /* middle-left dot of standard braille cell */
+#define BRL_DOT3 0004 /* lower-left dot of standard braille cell */
+#define BRL_DOT4 0010 /* upper-right dot of standard braille cell */
+#define BRL_DOT5 0020 /* middle-right dot of standard braille cell */
+#define BRL_DOT6 0040 /* lower-right dot of standard braille cell */
+#define BRL_DOT7 0100 /* lower-left dot of computer braille cell */
+#define BRL_DOT8 0200 /* lower-right dot of computer braille cell */
 
 #ifdef __cplusplus
 }
