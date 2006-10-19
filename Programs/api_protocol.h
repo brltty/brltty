@@ -22,8 +22,8 @@
  * \brief types and constants for \e BrlAPI's protocol
  */
 
-#ifndef BRLTTY_INCLUDED_API_PROTOCOL
-#define BRLTTY_INCLUDED_API_PROTOCOL
+#ifndef BRLAPI_INCLUDED_API_PROTOCOL
+#define BRLAPI_INCLUDED_API_PROTOCOL
 
 #ifdef __cplusplus
 extern "C" {
@@ -244,4 +244,4 @@ extern pthread_mutex_t brlapi_fd_mutex;
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_API_PROTOCOL */
+#endif /* BRLAPI_INCLUDED_API_PROTOCOL */

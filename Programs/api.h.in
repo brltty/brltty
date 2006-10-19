@@ -22,8 +22,8 @@
  * \brief Types, defines and functions prototypes for \e BrlAPI's library
  */
 
-#ifndef BRLTTY_INCLUDED_API
-#define BRLTTY_INCLUDED_API
+#ifndef BRLAPI_INCLUDED_API
+#define BRLAPI_INCLUDED_API
 
 #ifdef __cplusplus
 extern "C" {
@@ -1125,4 +1125,4 @@ int brlapi__writeWin(brlapi_handle_t *handle, const brlapi_writeStruct *s, int w
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_API */
+#endif /* BRLAPI_INCLUDED_API */
