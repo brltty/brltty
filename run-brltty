@@ -16,12 +16,14 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
+set -e
 cd "`dirname "${0}"`"
-rootDirectory="`pwd`"
-exec "${rootDirectory}/Programs/brltty" \
-   -L "${rootDirectory}/lib" \
-   -D "${rootDirectory}/data" \
-   -T "${rootDirectory}/BrailleTables" \
-   -C "${rootDirectory}/ContractionTables" \
-   "$@"
+
+BRLTTY_LIBRARY_DIRECTORY="../lib"
+BRLTTY_DATA_DIRECTORY="../data"
+BRLTTY_TABLES_DIRECTORY="../BrailleTables"
+BRLTTY_CONTRACTIONS_DIRECTORY="../ContractionTables"
+export BRLTTY_LIBRARY_DIRECTORY BRLTTY_DATA_DIRECTORY BRLTTY_TABLES_DIRECTORY BRLTTY_CONTRACTIONS_DIRECTORY
+
+exec "Programs/brltty" -E "$@"
 exit "${?}"
