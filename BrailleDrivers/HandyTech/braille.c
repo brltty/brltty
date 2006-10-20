@@ -35,13 +35,13 @@ typedef enum {
 #include "braille.h"
 
 /* Communication codes */
-static unsigned char HandyDescribe[] = {0XFF};
-static unsigned char HandyDescription[] = {0XFE};
-static unsigned char HandyBrailleBegin[] = {0X01};	/* general header to display braille */
-static unsigned char HandyME6Begin[] = {0X79, 0X36, 0X41, 0X01};	/* general header to display braille */
-static unsigned char HandyME8Begin[] = {0X79, 0X38, 0X59, 0X01};	/* general header to display braille */
-static unsigned char BookwormBrailleEnd[] = {0X16};	/* bookworm trailer to display braille */
-static unsigned char BookwormSessionEnd[] = {0X05, 0X07};	/* bookworm trailer to display braille */
+static const unsigned char HandyDescribe[] = {0XFF};
+static const unsigned char HandyDescription[] = {0XFE};
+static const unsigned char HandyBrailleBegin[] = {0X01};	/* general header to display braille */
+static const unsigned char HandyME6Begin[] = {0X79, 0X36, 0X41, 0X01};	/* general header to display braille */
+static const unsigned char HandyME8Begin[] = {0X79, 0X38, 0X59, 0X01};	/* general header to display braille */
+static const unsigned char BookwormBrailleEnd[] = {0X16};	/* bookworm trailer to display braille */
+static const unsigned char BookwormSessionEnd[] = {0X05, 0X07};	/* bookworm trailer to display braille */
 
 typedef struct {
   unsigned long int front;
@@ -64,9 +64,9 @@ typedef struct {
   ByteInterpreter *interpretByte;
   KeysInterpreter *interpretKeys;
 
-  unsigned char *brailleBeginAddress;
-  unsigned char *brailleEndAddress;
-  unsigned char *sessionEndAddress;
+  const unsigned char *brailleBeginAddress;
+  const unsigned char *brailleEndAddress;
+  const unsigned char *sessionEndAddress;
 
   unsigned char identifier;
   unsigned char columns;
