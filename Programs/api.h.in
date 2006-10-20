@@ -600,6 +600,16 @@ typedef uint64_t brl_keycode_t;
 
 #include "api_cmddefs.h"
 
+typedef struct {
+  brl_keycode_t key;
+  const char *name;
+} brlapi_keyEntry_t;
+extern const brlapi_keyEntry_t keyTable[];
+
+#define brlapi_dotCount 8
+extern unsigned char brlapi_dotNumbers[brlapi_dotCount];
+extern unsigned char brlapi_dotBits[brlapi_dotCount];
+
 /* Unicode braille row */
 #define BRLAPI_UC_ROW	0x2800UL
 

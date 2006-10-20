@@ -1640,3 +1640,17 @@ void brlapi_defaultExceptionHandler(int err, brl_type_t type, const void *packet
   fprintf(stderr, "BrlAPI exception: %s\nYou may want to add option -l 7 to the brltty command line for getting debugging information in the system log\n", str);
   abort();
 }
+
+const brlapi_keyEntry_t keyTable[] = {
+#include "api_keytab.auto.h"
+  {.name = NULL}
+};
+
+unsigned char brlapi_dotNumbers[brlapi_dotCount] = {
+  '1', '2', '3', '4', '5', '6', '7', '8'
+};
+
+unsigned char brlapi_dotBits[brlapi_dotCount] = {
+  BRLAPI_DOT1, BRLAPI_DOT2, BRLAPI_DOT3, BRLAPI_DOT4,
+  BRLAPI_DOT5, BRLAPI_DOT6, BRLAPI_DOT7, BRLAPI_DOT8
+};
