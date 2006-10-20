@@ -38,6 +38,8 @@ typedef enum {
 static unsigned char HandyDescribe[] = {0XFF};
 static unsigned char HandyDescription[] = {0XFE};
 static unsigned char HandyBrailleBegin[] = {0X01};	/* general header to display braille */
+static unsigned char HandyME6Begin[] = {0X79, 0X36, 0X41, 0X01};	/* general header to display braille */
+static unsigned char HandyME8Begin[] = {0X79, 0X38, 0X59, 0X01};	/* general header to display braille */
 static unsigned char BookwormBrailleEnd[] = {0X16};	/* bookworm trailer to display braille */
 static unsigned char BookwormSessionEnd[] = {0X05, 0X07};	/* bookworm trailer to display braille */
 
@@ -108,6 +110,28 @@ static const ModelEntry modelTable[] = {
     HT_BYTE_SEQUENCE(brailleBegin, HandyBrailleBegin)
   }
   ,
+  { .identifier = 0X36,
+    .name = "Modular Evolution 64",
+    .columns = 60,
+    .statusCells = 4,
+    .helpPage = 0,
+    .interpretByte = interpretKeyByte,
+    .interpretKeys = interpretModularKeys,
+    HT_BYTE_SEQUENCE(brailleBegin, HandyME6Begin),
+    HT_BYTE_SEQUENCE(brailleEnd, BookwormBrailleEnd)
+  }
+  ,
+  { .identifier = 0X38,
+    .name = "Modular Evolution 88",
+    .columns = 80,
+    .statusCells = 8,
+    .helpPage = 0,
+    .interpretByte = interpretKeyByte,
+    .interpretKeys = interpretBrailleStarKeys,
+    HT_BYTE_SEQUENCE(brailleBegin, HandyME8Begin),
+    HT_BYTE_SEQUENCE(brailleEnd, BookwormBrailleEnd)
+  }
+  ,
   { .identifier = 0X05,
     .name = "Braille Wave 40",
     .columns = 40,
@@ -166,7 +190,7 @@ static const ModelEntry modelTable[] = {
 #undef HT_BYTE_SEQUENCE
 
 #define BRLROWS		1
-#define MAX_STCELLS	4	/* highest number of status cells */
+#define MAX_STCELLS	8	/* highest number of status cells */
 
 
 
@@ -562,7 +586,17 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
         unsigned char response[sizeof(HandyDescription) + 1];
         if (io->readBytes(response, sizeof(response), 0) == sizeof(response)) {
           if (memcmp(response, HandyDescription, sizeof(HandyDescription)) == 0) {
-            if (identifyModel(brl, response[sizeof(HandyDescription)])) {
+            unsigned char identity = response[sizeof(HandyDescription)];
+            if (identifyModel(brl, identity)) {
+              if ((identity == 0X36) ||
+                  (identity == 0X38)) {
+                // unsigned char packetMode[] = {0X79, identity, 0X02, 0X51, 0X46, 0X16};
+                unsigned char atc[] = {0X79, identity, 0X02, 0X50, 0X01, 0X16};
+                // io->writeBytes(packetMode, sizeof(packetMode), NULL);
+                /* Switch on Active Touch Control */
+                io->writeBytes(atc, sizeof(atc), NULL);
+              }
+
               if (*parameters[PARM_INPUTMODE])
                 if (!validateYesNo(&inputMode, parameters[PARM_INPUTMODE]))
                   LogPrint(LOG_WARNING, "%s: %s", "invalid input setting", parameters[PARM_INPUTMODE]);
@@ -1397,6 +1431,18 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
                     length--;
 
                     switch (data[0]) {
+                      case 0X04: {
+                        int command;
+                        if (model->interpretByte(context, *bytes, &command)) {
+                          updateBrailleCells(brl);
+                          return command;
+                        }
+                        break;
+                      }
+                      case 0X07: {
+                        setState(BDS_READY);
+                        break;
+                      }
                       case 0X09: {
                         if (length) {
                           unsigned char code = *bytes++;
@@ -1412,6 +1458,14 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
                           }
                           return BRL_BLK_PASSAT2 + code;
                         }
+                        break;
+                      }
+                      case 0X52: {
+                        LogBytes("ATC", bytes, length);			break;
+                      }
+                      default: {
+                        LogPrint(LOG_WARNING, "Unhandled packet type %X", data[0]);
+                        LogBytes("Packet", bytes, length);
                         break;
                       }
                     }
