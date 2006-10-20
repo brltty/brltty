@@ -98,10 +98,6 @@ function writeMacroDefinition(name, definition, help) {
   print statement
 }
 
-function makeDoxygenComment(text) {
-  return "/** " text " */"
-}
-
 function getComment(line) {
   if (!match(line, "/\\*.*\\*/")) return ""
   line = substr(line, RSTART+2, RLENGTH-4)
@@ -117,4 +113,26 @@ function getDefineValue() {
   if ($3 !~ "^\\(") return $3
   if (match($0, "\\([^)]*\\)")) return substr($0, RSTART, RLENGTH)
   return ""
+}
+
+function makeDoxygenComment(text) {
+  return "/** " text " */"
+}
+
+function beginDoxygenFile(brief) {
+  print "/** \\file"
+  print " * \\brief " brief
+  print " */"
+  print ""
+}
+
+function beginDoxygenGroup(name, brief) {
+  print "/** \\defgroup " name " " brief
+  print " * @{ */"
+  print ""
+}
+
+function endDoxygenGroup() {
+  print "/** @} */"
+  print ""
 }

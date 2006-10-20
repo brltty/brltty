@@ -17,9 +17,12 @@
 
 BEGIN {
   writeHeaderPrologue("BRLAPI_INCLUDED_API_CMDDEFS", "api.h")
+  beginDoxygenFile("BrlAPI Commans")
+  beginDoxygenGroup("brlapi_commands", "Defines for BrlAPI Commands")
 }
 
 END {
+  endDoxygenGroup()
   writeHeaderEpilogue()
 }
 
