@@ -29,6 +29,9 @@ BrlAPIref.made: BrlAPIref $(BLD_TOP)$(PGM_DIR)/api.h $(SRC_TOP)$(PGM_DIR)/api_pr
 BrlAPIref:
 	mkdir BrlAPIref
 
+$(BLD_TOP)$(PGM_DIR)/api_cmddefs.h:
+	cd $(@D) && $(MAKE) $(@F)
+
 clean::
 	-rm -f *.made
 	-rm -f -r BrlAPIref
