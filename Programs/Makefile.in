@@ -126,10 +126,10 @@ $(API_ARC): $(API_OBJS)
 	ar rc $@ $(API_OBJS)
 	$(RANLIB) $@
 
-api_client.$O: api_keytab.auto.h
+api_client.$O: api_cmddefs.auto.h api_keytab.auto.h
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/api_client.c
 
-api_cmddefs.h: $(SRC_DIR)/brldefs.h $(SRC_DIR)/brldefs.awk $(SRC_DIR)/api_cmddefs.awk
+api_cmddefs.auto.h: $(SRC_DIR)/brldefs.h $(SRC_DIR)/brldefs.awk $(SRC_DIR)/api_cmddefs.awk
 	$(AWK) -f $(SRC_DIR)/brldefs.awk -f $(SRC_DIR)/api_cmddefs.awk $(SRC_DIR)/brldefs.h >$@
 
 api_keytab.auto.h: $(SRC_DIR)/brldefs.h $(SRC_DIR)/brldefs.awk $(SRC_DIR)/api_keytab.awk
@@ -138,7 +138,7 @@ api_keytab.auto.h: $(SRC_DIR)/brldefs.h $(SRC_DIR)/brldefs.awk $(SRC_DIR)/api_ke
 api_brldefs.auto.h: $(SRC_DIR)/brldefs.h $(SRC_DIR)/brldefs.awk $(SRC_DIR)/api_brldefs.awk
 	$(AWK) -f $(SRC_DIR)/brldefs.awk -f $(SRC_DIR)/api_brldefs.awk $(SRC_DIR)/brldefs.h >$@
 
-api_server.$O:
+api_server.$O: api_cmddefs.auto.h
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/api_server.c
 
 keyrangelist.$O:
@@ -355,7 +355,7 @@ APITEST_OBJECTS = apitest.$O cmd.$O options.$O misc.$O $(SYSTEM_OBJECT) io_misc.
 apitest$X: $(APITEST_OBJECTS) api
 	$(CC) $(LDFLAGS) -o $@ $(APITEST_OBJECTS) -L$(BLD_DIR) -lbrlapi $(LDLIBS)
 
-apitest.$O:
+apitest.$O: api_cmddefs.auto.h
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/apitest.c
 
 ###############################################################################
@@ -453,7 +453,7 @@ XBRLAPI_OBJECTS = xbrlapi.$O options.$O misc.$O $(SYSTEM_OBJECT) io_misc.$O
 xbrlapi$X: $(XBRLAPI_OBJECTS) api
 	$(CC) $(LDFLAGS) -o $@ $(XBRLAPI_OBJECTS) -L. -lbrlapi $(XLIBS) $(LDLIBS)
 
-xbrlapi.$O: $(SRC_DIR)/xbrlapi.c
+xbrlapi.$O: api_cmddefs.auto.h
 	$(CC) $(CFLAGS) $(X_CFLAGS) -c $(SRC_DIR)/xbrlapi.c
 
 ###############################################################################
@@ -528,11 +528,11 @@ install-api-libraries-windows: $(API_DLL) $(API_ARC) install-program-directory i
 install-libdir-directory:
 	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(libdir)
 
-install-api-headers: api_cmddefs.h api_brldefs.auto.h
+install-api-headers: api_cmddefs.auto.h api_brldefs.auto.h
 	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
 	$(INSTALL_DATA) api.h $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
 	$(INSTALL_DATA) $(SRC_DIR)/api_protocol.h $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
-	$(INSTALL_DATA) $(SRC_DIR)/api_cmddefs.h $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
+	$(INSTALL_DATA) $(SRC_DIR)/api_cmddefs.auto.h $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)/api_cmddefs.h
 	$(INSTALL_DATA) $(SRC_DIR)/api_brldefs.auto.h $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)/brldefs.h
 
 install-api-manpages:
@@ -609,7 +609,7 @@ distclean clean::
 
 clean::
 	-rm -f brltty$X xbrlapi$X txt2hlp$X tbl2hex$X *test$X *-static$X
-	-rm -f $(API_LIB) $(API_ARC) $(API_DLL) $(API_IMPLIB) api_cmddefs.h
+	-rm -f $(API_LIB) $(API_ARC) $(API_DLL) $(API_IMPLIB)
 	-rm -f $(PYTHON_LIB)
 	-rm -f $(BLD_TOP)$(DRV_DIR)/* $(BLD_TOP)$(DAT_DIR)/*
 

@@ -27,6 +27,9 @@ include $(SRC_TOP)braille.mk
 api:
 	cd $(BLD_TOP)$(PGM_DIR) && $(MAKE) $@
 
-braille.$O: api
+braille.$O: $(BLD_TOP)$(PGM_DIR)/api_cmddefs.auto.h api
 	$(CC) $(BRL_CFLAGS) -c $(SRC_DIR)/braille.c
+
+$(BLD_TOP)$(PGM_DIR)/api_cmddefs.auto.h:
+	cd $(@D) && $(MAKE) $(@F)
 

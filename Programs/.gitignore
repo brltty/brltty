@@ -1,7 +1,6 @@
 Makefile
 reldeps.mk
 api.h
-api_cmddefs.h
 *.auto.h
 *.auto.c
 *.a

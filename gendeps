@@ -20,6 +20,7 @@ proc getProgramName {} {
    global argv0
    return [file tail $argv0]
 }
+
 proc writeProgramMessage {message} {
    puts stderr "[getProgramName]: $message"
    flush stderr
@@ -37,6 +38,7 @@ if {[catch [list package require Tclx] response] != 0} {
          set only$number [list]
       }
       set both [list]
+
       while {1} {
          if {$index1 == $length1} {
             if {$index2 < $length2} {
@@ -44,19 +46,23 @@ if {[catch [list package require Tclx] response] != 0} {
             }
             break
          }
+
          if {$index2 == $length2} {
             lvarcat only1 [lrange $list1 $index1 end]
             break
          }
+
          switch -exact -- [string compare [lindex $list1 $index1] [lindex $list2 $index2]] {
            -1 {
                lappend only1 [lindex $list1 $index1]
                incr index1
             }
+
             1 {
                lappend only2 [lindex $list2 $index2]
                incr index2
             }
+
             0 {
                lappend both [lindex $list1 $index1]
                incr index1
@@ -64,6 +70,7 @@ if {[catch [list package require Tclx] response] != 0} {
             }
          }
       }
+
       return [list $only1 $both $only2]
    }
 
@@ -84,6 +91,7 @@ if {[catch [list package require Tclx] response] != 0} {
 
 proc getBuildDirectories {{root ""}} {
    set directories [list]
+
    if {[string length $root] == 0} {
       set root .
       set setPath {
@@ -94,79 +102,96 @@ proc getBuildDirectories {{root ""}} {
          set path [file join $root $name]
       }
    }
+
    if {[file exists [file join $root Makefile.in]]} {
       lappend directories $root
    }
+
    foreach name [readdir $root] {
       eval $setPath
       if {[file isdirectory $path]} {
          lvarcat directories [getBuildDirectories $path]
       }
    }
+
    return $directories
 }
 
-proc skipFile {path} {
-   if {[string equal [file extension [file rootname $path]] .auto]} {
+proc skipFile {file} {
+   if {[string equal [file extension [file rootname $file]] .auto]} {
       return 1
    }
-   if {[string match *.tab.c $path]} {
-      return 1
-   }
+
    return 0
 }
-proc sourceFile {name} {
-   if {[regexp {^(.*)\.tab\.c$} $name x base]} {
+
+proc sourceFile {file} {
+   if {[file exists [set path "$file.in"]]} {
+      return $path
+   }
+
+   if {[regexp {^(.*)\.tab\.c$} $file x base]} {
       return "$base.y"
    }
+
    return ""
 }
-proc dependencyExists {path} {
-   if {[file exists $path]} {
+
+proc dependencyExists {file} {
+   if {[file exists $file]} {
       return 1
    }
-   if {[file exists $path.in]} {
-      return 1
-   }
-   if {[string length [set source [sourceFile $path]]] > 0} {
+
+   if {[string length [set source [sourceFile $file]]] > 0} {
       if {[file exists $source]} {
          return 1
       }
    }
+
    return 0
 }
+
 proc getDependencies {file} {
    upvar #0 dependencies($file) dependencies
+
    if {![info exists dependencies]} {
       lappend dependencies $file
-      if {[file exists $file] && ![skipFile $file]} {
-         global sourceContext
+
+      if {![skipFile $file]} {
+         if {[string length [set source [sourceFile $file]]] == 0} {
+            set source $file
+         }
+         set stream [open $source {RDONLY}]
+
          set includes [list]
-         set stream [open $file {RDONLY}]
-         set lines [list]
          while {[gets $stream line] >= 0} {
             if {[regexp {^ *# *include *"([^"]*)"} $line x header]} {
                lappend includes $header
             }
          }
          close $stream; unset stream
+
          if {[string equal [set directory [file dirname $file]] .]} {
             set directory ""
          }
+
          foreach include $includes {
-            if {[string equal [file extension [file rootname $include]] .auto]} {
+            if {[skipFile $include]} {
                continue
             }
+
             if {[dependencyExists [set path [file join $directory $include]]]} {
                set include $path
             } elseif {![dependencyExists $include]} {
                writeProgramMessage "missing dependency: $file includes $include"
                continue
             }
+
             lvarcat dependencies [lindex [intersect3 $dependencies [getDependencies $include]] 2]
          }
       }
    }
+
    return $dependencies
 }
 
@@ -186,28 +211,35 @@ foreach buildDirectory [set buildDirectories [getBuildDirectories]] {
 set absoluteStream [open absdeps.mk {WRONLY CREAT TRUNC}]
 foreach buildDirectory [lsort $buildDirectories] {
    set relativeStream [open [file join $buildDirectory reldeps.mk] {WRONLY CREAT TRUNC}]
+
    if {[info exists sourceFiles($buildDirectory)]} {
       foreach sourceFile [lsort $sourceFiles($buildDirectory)] {
          switch -exact -- [file extension $sourceFile] {
             ".y" {
                set objectExtension ".tab.c"
             }
+
             default {
                set objectExtension ".\$O"
             }
          }
+
          set objectFile "[file rootname $sourceFile]$objectExtension"
          set objectName [file tail $objectFile]
+
          puts $absoluteStream "# Dependencies for $objectFile:"
          puts $relativeStream "# Dependencies for $objectName:"
+
          foreach dependency $dependencies($sourceFile) {
             if {[file exists "$dependency.in"] || ([string length [sourceFile $dependency]] > 0)} {
                set tree BLD
             } else {
                set tree SRC
             }
+
             puts $absoluteStream "\$(BLD_TOP)$objectFile: \$(${tree}_TOP)$dependency"
             puts -nonewline $relativeStream "$objectName: "
+
             if {[string equal $buildDirectory [file dirname $dependency]]} {
                if {![string equal $tree BLD]} {
                   puts -nonewline $relativeStream "\$(${tree}_DIR)/"
@@ -217,11 +249,13 @@ foreach buildDirectory [lsort $buildDirectories] {
                puts $relativeStream "\$(${tree}_TOP)$dependency"
             }
          }
+
          puts $absoluteStream "\tcd \$(@D) && \$(MAKE) \$(@F)"
          puts $absoluteStream ""
          puts $relativeStream ""
       }
    }
+
    close $relativeStream; unset relativeStream
 }
 close $absoluteStream; unset absoluteStream
