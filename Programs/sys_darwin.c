@@ -37,7 +37,7 @@
 #endif /* ENABLE_PCM_SUPPORT */
 
 #ifdef ENABLE_MIDI_SUPPORT
-#include "sys_midi_none.h"
+#include "sys_midi_darwin.h"
 #endif /* ENABLE_MIDI_SUPPORT */
 
 #include "sys_ports_none.h"

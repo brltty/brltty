@@ -857,7 +857,7 @@ in
       ;;
    darwin*)
       system_object="darwin"
-      LIBS="-lIOKit -framework CoreFoundation ${LIBS}"
+      LIBS="-lIOKit -framework CoreFoundation -framework AudioUnit -framework AudioToolbox ${LIBS}"
       ;;
    *)
       AC_MSG_ERROR([no system object available for ${host_os}])
