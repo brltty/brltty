@@ -1646,11 +1646,23 @@ const brlapi_keyEntry_t keyTable[] = {
   {.name = NULL}
 };
 
-unsigned char brlapi_dotNumbers[brlapi_dotCount] = {
+const unsigned char brlapi_dotNumbers[brlapi_dotCount] = {
   '1', '2', '3', '4', '5', '6', '7', '8'
 };
 
-unsigned char brlapi_dotBits[brlapi_dotCount] = {
+const unsigned char brlapi_dotBits[brlapi_dotCount] = {
   BRLAPI_DOT1, BRLAPI_DOT2, BRLAPI_DOT3, BRLAPI_DOT4,
   BRLAPI_DOT5, BRLAPI_DOT6, BRLAPI_DOT7, BRLAPI_DOT8
 };
+
+unsigned char
+brlapi_dotNumberToBit (unsigned char number) {
+  const unsigned char *byte = memchr(brlapi_dotNumbers, number, brlapi_dotCount);
+  return byte? brlapi_dotBits[byte - brlapi_dotNumbers]: 0;
+}
+
+unsigned char
+brlapi_dotBitToNumber (unsigned char bit) {
+  const unsigned char *byte = memchr(brlapi_dotBits, bit, brlapi_dotCount);
+  return byte? brlapi_dotNumbers[byte - brlapi_dotBits]: 0;
+}

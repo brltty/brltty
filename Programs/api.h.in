@@ -607,8 +607,10 @@ typedef struct {
 extern const brlapi_keyEntry_t keyTable[];
 
 #define brlapi_dotCount 8
-extern unsigned char brlapi_dotNumbers[brlapi_dotCount];
-extern unsigned char brlapi_dotBits[brlapi_dotCount];
+extern const unsigned char brlapi_dotNumbers[brlapi_dotCount];
+extern const unsigned char brlapi_dotBits[brlapi_dotCount];
+extern unsigned char brlapi_dotNumberToBit (unsigned char number);
+extern unsigned char brlapi_dotBitToNumber (unsigned char bit);
 
 /* Unicode braille row */
 #define BRLAPI_UC_ROW	0x2800UL
