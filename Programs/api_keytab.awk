@@ -45,9 +45,9 @@ function writeSimpleKey(type, name) {
   writeComplexKey(name, "BRLAPI_KEY_" type "_" name)
 }
 
-function writeComplexKey(name, key) {
+function writeComplexKey(name, code) {
   print "{"
   print "  .name = \"" name "\","
-  print "  .key = " key
+  print "  .code = " code
   print "},"
 }

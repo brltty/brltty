@@ -1641,10 +1641,30 @@ void brlapi_defaultExceptionHandler(int err, brl_type_t type, const void *packet
   abort();
 }
 
-const brlapi_keyEntry_t keyTable[] = {
+const brlapi_keyEntry_t brlapi_keyTable[] = {
 #include "api_keytab.auto.h"
   {.name = NULL}
 };
+
+const brlapi_keyEntry_t *
+brlapi_findKeyByCode (brl_keycode_t code) {
+  const brlapi_keyEntry_t *key = brlapi_keyTable;
+  while (key->name) {
+    if (code == key->code) return key;
+    ++key;
+  }
+  return NULL;
+}
+
+const brlapi_keyEntry_t *
+brlapi_findKeyByName (const char *name) {
+  const brlapi_keyEntry_t *key = brlapi_keyTable;
+  while (key->name) {
+    if (strcasecmp(name, key->name) == 0) return key;
+    ++key;
+  }
+  return NULL;
+}
 
 const unsigned char brlapi_dotNumbers[brlapi_dotCount] = {
   '1', '2', '3', '4', '5', '6', '7', '8'

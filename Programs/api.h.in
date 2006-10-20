@@ -601,10 +601,12 @@ typedef uint64_t brl_keycode_t;
 #include "api_cmddefs.h"
 
 typedef struct {
-  brl_keycode_t key;
+  brl_keycode_t code;
   const char *name;
 } brlapi_keyEntry_t;
-extern const brlapi_keyEntry_t keyTable[];
+extern const brlapi_keyEntry_t brlapi_keyTable[];
+extern const brlapi_keyEntry_t *brlapi_findKeyByCode (brl_keycode_t code);
+extern const brlapi_keyEntry_t *brlapi_findKeyByName (const char *name);
 
 #define brlapi_dotCount 8
 extern const unsigned char brlapi_dotNumbers[brlapi_dotCount];
