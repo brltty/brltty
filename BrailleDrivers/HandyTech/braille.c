@@ -69,7 +69,7 @@ typedef struct {
   const unsigned char *sessionEndAddress;
 
   unsigned char identifier;
-  unsigned char columns;
+  unsigned char textCells;
   unsigned char statusCells;
   unsigned char helpPage;
 
@@ -77,14 +77,14 @@ typedef struct {
   unsigned char brailleEndLength;
   unsigned char sessionEndLength;
 
-  unsigned hasATC:1;
+  unsigned hasATC:1; /* Active Touch Control */
 } ModelEntry;
 
 #define HT_BYTE_SEQUENCE(name,bytes) .name##Address = bytes, .name##Length = sizeof(bytes)
 static const ModelEntry modelTable[] = {
   { .identifier = 0X80,
     .name = "Modular 20+4",
-    .columns = 20,
+    .textCells = 20,
     .statusCells = 4,
     .helpPage = 0,
     .interpretByte = interpretKeyByte,
@@ -94,7 +94,7 @@ static const ModelEntry modelTable[] = {
   ,
   { .identifier = 0X89,
     .name = "Modular 40+4",
-    .columns = 40,
+    .textCells = 40,
     .statusCells = 4,
     .helpPage = 0,
     .interpretByte = interpretKeyByte,
@@ -104,7 +104,7 @@ static const ModelEntry modelTable[] = {
   ,
   { .identifier = 0X88,
     .name = "Modular 80+4",
-    .columns = 80,
+    .textCells = 80,
     .statusCells = 4,
     .helpPage = 0,
     .interpretByte = interpretKeyByte,
@@ -114,7 +114,7 @@ static const ModelEntry modelTable[] = {
   ,
   { .identifier = 0X36,
     .name = "Modular Evolution 64",
-    .columns = 60,
+    .textCells = 60,
     .statusCells = 4,
     .helpPage = 0,
     .interpretByte = interpretKeyByte,
@@ -126,7 +126,7 @@ static const ModelEntry modelTable[] = {
   ,
   { .identifier = 0X38,
     .name = "Modular Evolution 88",
-    .columns = 80,
+    .textCells = 80,
     .statusCells = 8,
     .helpPage = 0,
     .interpretByte = interpretKeyByte,
@@ -138,7 +138,7 @@ static const ModelEntry modelTable[] = {
   ,
   { .identifier = 0X05,
     .name = "Braille Wave 40",
-    .columns = 40,
+    .textCells = 40,
     .statusCells = 0,
     .helpPage = 0,
     .interpretByte = interpretKeyByte,
@@ -148,7 +148,7 @@ static const ModelEntry modelTable[] = {
   ,
   { .identifier = 0X90,
     .name = "Bookworm",
-    .columns = 8,
+    .textCells = 8,
     .statusCells = 0,
     .helpPage = 1,
     .interpretByte = interpretBookwormByte,
@@ -159,7 +159,7 @@ static const ModelEntry modelTable[] = {
   ,
   { .identifier = 0X72,
     .name = "Braillino 20",
-    .columns = 20,
+    .textCells = 20,
     .statusCells = 0,
     .helpPage = 2,
     .interpretByte = interpretKeyByte,
@@ -169,7 +169,7 @@ static const ModelEntry modelTable[] = {
   ,
   { .identifier = 0X74,
     .name = "Braille Star 40",
-    .columns = 40,
+    .textCells = 40,
     .statusCells = 0,
     .helpPage = 2,
     .interpretByte = interpretKeyByte,
@@ -179,7 +179,7 @@ static const ModelEntry modelTable[] = {
   ,
   { .identifier = 0X78,
     .name = "Braille Star 80",
-    .columns = 80,
+    .textCells = 80,
     .statusCells = 0,
     .helpPage = 3,
     .interpretByte = interpretKeyByte,
@@ -522,11 +522,11 @@ identifyModel (BrailleDisplay *brl, unsigned char identifier) {
 
   LogPrint(LOG_INFO, "Detected %s: %d data %s, %d status %s.",
            model->name,
-           model->columns, (model->columns == 1)? "cell": "cells",
+           model->textCells, (model->textCells == 1)? "cell": "cells",
            model->statusCells, (model->statusCells == 1)? "cell": "cells");
 
   brl->helpPage = model->helpPage;		/* position in the model list */
-  brl->x = model->columns;			/* initialise size of display */
+  brl->x = model->textCells;			/* initialise size of display */
   brl->y = BRLROWS;
 
   if (!reallocateBuffer(&rawData, brl->x*brl->y)) return 0;
@@ -539,7 +539,7 @@ identifyModel (BrailleDisplay *brl, unsigned char identifier) {
   inputMode = 0;
 
   memset(rawStatus, 0, model->statusCells);
-  memset(rawData, 0, model->columns);
+  memset(rawData, 0, model->textCells);
 
   retryCount = 0;
   updateRequired = 0;
@@ -639,7 +639,7 @@ brl_close (BrailleDisplay *brl) {
 static int
 updateBrailleCells (BrailleDisplay *brl) {
   if (updateRequired && (currentState == BDS_READY)) {
-    unsigned char buffer[model->brailleBeginLength + model->statusCells + model->columns + model->brailleEndLength];
+    unsigned char buffer[model->brailleBeginLength + model->statusCells + model->textCells + model->brailleEndLength];
     int count = 0;
 
     if (model->brailleBeginLength) {
@@ -650,8 +650,8 @@ updateBrailleCells (BrailleDisplay *brl) {
     memcpy(buffer+count, rawStatus, model->statusCells);
     count += model->statusCells;
 
-    memcpy(buffer+count, rawData, model->columns);
-    count += model->columns;
+    memcpy(buffer+count, rawData, model->textCells);
+    count += model->textCells;
 
     if (model->brailleEndLength) {
       memcpy(buffer+count, model->brailleEndAddress, model->brailleEndLength);
@@ -671,9 +671,9 @@ updateBrailleCells (BrailleDisplay *brl) {
 
 static void
 brl_writeWindow (BrailleDisplay *brl) {
-  if (memcmp(brl->buffer, prevData, model->columns) != 0) {
+  if (memcmp(brl->buffer, prevData, model->textCells) != 0) {
     int i;
-    for (i=0; i<model->columns; ++i) {
+    for (i=0; i<model->textCells; ++i) {
       rawData[i] = outputTable[(prevData[i] = brl->buffer[i])];
     }
     updateRequired = 1;
@@ -701,7 +701,7 @@ interpretKeyByte (BRL_DriverCommandContext context, unsigned char byte, int *com
   currentKeys.status = -1;
 
   if ((byte >= KEY_ROUTING) &&
-      (byte < (KEY_ROUTING + model->columns))) {
+      (byte < (KEY_ROUTING + model->textCells))) {
     *command = BRL_CMD_NOOP;
     if (!release) {
       currentKeys.column = byte - KEY_ROUTING;
