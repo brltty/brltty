@@ -76,6 +76,8 @@ typedef struct {
   unsigned char brailleBeginLength;
   unsigned char brailleEndLength;
   unsigned char sessionEndLength;
+
+  unsigned hasATC:1;
 } ModelEntry;
 
 #define HT_BYTE_SEQUENCE(name,bytes) .name##Address = bytes, .name##Length = sizeof(bytes)
@@ -116,7 +118,8 @@ static const ModelEntry modelTable[] = {
     .statusCells = 4,
     .helpPage = 0,
     .interpretByte = interpretKeyByte,
-    .interpretKeys = interpretModularKeys,
+    .interpretKeys = interpretBrailleStarKeys,
+    .hasATC = 1,
     HT_BYTE_SEQUENCE(brailleBegin, HandyME6Begin),
     HT_BYTE_SEQUENCE(brailleEnd, BookwormBrailleEnd)
   }
@@ -128,6 +131,7 @@ static const ModelEntry modelTable[] = {
     .helpPage = 0,
     .interpretByte = interpretKeyByte,
     .interpretKeys = interpretBrailleStarKeys,
+    .hasATC = 1,
     HT_BYTE_SEQUENCE(brailleBegin, HandyME8Begin),
     HT_BYTE_SEQUENCE(brailleEnd, BookwormBrailleEnd)
   }
@@ -508,12 +512,14 @@ identifyModel (BrailleDisplay *brl, unsigned char identifier) {
     model->name && (model->identifier != identifier);
     model++
   );
+
   if (!model->name) {
     LogPrint(LOG_ERR, "Detected unknown HandyTech model with ID %02X.",
              identifier);
     LogPrint(LOG_WARNING, "Please fix modelTable[] in HandyTech/braille.c and notify the maintainer.");
     return 0;
   }
+
   LogPrint(LOG_INFO, "Detected %s: %d data %s, %d status %s.",
            model->name,
            model->columns, (model->columns == 1)? "cell": "cells",
@@ -586,12 +592,10 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
         unsigned char response[sizeof(HandyDescription) + 1];
         if (io->readBytes(response, sizeof(response), 0) == sizeof(response)) {
           if (memcmp(response, HandyDescription, sizeof(HandyDescription)) == 0) {
-            unsigned char identity = response[sizeof(HandyDescription)];
-            if (identifyModel(brl, identity)) {
-              if ((identity == 0X36) ||
-                  (identity == 0X38)) {
-                // unsigned char packetMode[] = {0X79, identity, 0X02, 0X51, 0X46, 0X16};
-                unsigned char atc[] = {0X79, identity, 0X02, 0X50, 0X01, 0X16};
+            if (identifyModel(brl, response[sizeof(HandyDescription)])) {
+              if (model->hasATC) {
+                // const unsigned char packetMode[] = {0X79, model->identifier, 0X02, 0X51, 0X46, 0X16};
+                const unsigned char atc[] = {0X79, model->identifier, 0X02, 0X50, 0X01, 0X16};
                 // io->writeBytes(packetMode, sizeof(packetMode), NULL);
                 /* Switch on Active Touch Control */
                 io->writeBytes(atc, sizeof(atc), NULL);
