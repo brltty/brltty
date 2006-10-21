@@ -1381,7 +1381,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
       if (count == 0) break;
     }
     timedOut = 0;
-    /* LogPrint(LOG_DEBUG, "Read: %02X", byte); */
+    /* LogPrint(LOG_DEBUG, "read: %02X", byte); */
 
     if (byte == 0X06) {
       if (currentState != BDS_OFF) {
@@ -1443,10 +1443,12 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
                         }
                         break;
                       }
+
                       case 0X07: {
                         setState(BDS_READY);
                         break;
                       }
+
                       case 0X09: {
                         if (length) {
                           unsigned char code = *bytes++;
@@ -1464,17 +1466,20 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
                         }
                         break;
                       }
+
                       case 0X52: {
                         LogBytes("ATC", bytes, length);			break;
+                        break;
                       }
+
                       default: {
-                        LogPrint(LOG_WARNING, "Unhandled packet type %X", data[0]);
-                        LogBytes("Packet", bytes, length);
+                        LogPrint(LOG_WARNING, "extended packet type not supported: %02X", data[0]);
+                        LogBytes("packet content", bytes, length);
                         break;
                       }
                     }
                   } else {
-                    LogBytes("Malformed keycode packet", data, sizeof(data));
+                    LogBytes("malformed extended packet", data, sizeof(data));
                   }
                 } else {
                   LogError("Keycode packet ID mismatch");
