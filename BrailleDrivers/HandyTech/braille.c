@@ -1552,7 +1552,76 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 
 static ssize_t
 brl_readPacket (BrailleDisplay *brl, void *buffer, size_t size) {
-  return io->readBytes(buffer, size, 0);
+  static const int logInputPackets = 0;
+  unsigned char *packet = buffer;
+  int offset = 0;
+  int length = 0;
+
+  while (1) {
+    unsigned char byte;
+
+    {
+      int started = offset > 0;
+      int count = io->readBytes(&byte, 1, started);
+
+      if (count != 1) {
+        if (!count && started) LogBytes("Partial Packet", packet, offset);
+        return count;
+      }
+    }
+
+    if (offset == 0) {
+      switch (byte) {
+        case 0X79:
+        case 0XFE:
+          length = 2;
+          break;
+
+        default:
+          length = 1;
+          break;
+      }
+    } else {
+      switch (packet[0]) {
+        case 0X79:
+          length += byte + 1;
+          break;
+      }
+    }
+
+    if (offset < size) {
+      packet[offset] = byte;
+    } else {
+      if (offset == size) LogBytes("Truncated Packet", packet, offset);
+      LogBytes("Discarded Byte", &byte, 1);
+    }
+
+    if (++offset == length) {
+      if (offset <= size) {
+        int ok = 0;
+
+        switch (packet[0]) {
+          case 0X79:
+            if (packet[length-1] == 0X16) ok = 1;
+            break;
+
+          default:
+            ok = 1;
+            break;
+        }
+
+        if (ok) {
+          if (logInputPackets) LogBytes("Input Packet", packet, offset);
+          return length;
+        }
+
+        LogBytes("Malformed Packet", packet, offset);
+      }
+
+      offset = 0;
+      length = 0;
+    }
+  }
 }
 
 static ssize_t
