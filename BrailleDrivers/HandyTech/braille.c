@@ -384,6 +384,21 @@ static const InputOutputOperations bluetoothOperations = {
 };
 #endif /* ENABLE_BLUETOOTH_SUPPORT */
 
+typedef union {
+  unsigned char bytes[3 + 0XFF + 1];
+
+  struct {
+    unsigned char class;
+    unsigned char model;
+    unsigned char length;
+    unsigned char type;
+
+    union {
+      unsigned char bytes[0XFF];
+    } payload;
+  } PACKED fields;
+} HandyTechPacket;
+
 typedef enum {
   BDS_OFF,
   BDS_RESETTING,
