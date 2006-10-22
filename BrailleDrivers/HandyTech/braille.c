@@ -1459,10 +1459,15 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
                         break;
                       }
 
-                      case 0X07: {
-                        setState(BDS_READY);
+                      case 0X07:
+                        switch (*bytes) {
+                          case 0X7D:
+                            updateRequired = 1;
+                          case 0X7E:
+                            setState(BDS_READY);
+                            continue;
+                        }
                         break;
-                      }
 
                       case 0X09: {
                         if (length) {
