@@ -385,19 +385,28 @@ static const InputOutputOperations bluetoothOperations = {
 #endif /* ENABLE_BLUETOOTH_SUPPORT */
 
 typedef union {
-  unsigned char bytes[3 + 0XFF + 1];
+  unsigned char bytes[4 + 0XFF];
 
   struct {
-    unsigned char class;
-    unsigned char model;
-    unsigned char length;
     unsigned char type;
 
     union {
-      unsigned char bytes[0XFF];
-    } payload;
+      struct {
+        unsigned char model;
+      } PACKED ok;
+
+      struct {
+        unsigned char model;
+        unsigned char length;
+        unsigned char type;
+
+        union {
+          unsigned char bytes[0XFF];
+        } data;
+      } PACKED extended;
+    } data;
   } PACKED fields;
-} HandyTechPacket;
+} HT_Packet;
 
 typedef enum {
   BDS_OFF,
