@@ -35,7 +35,6 @@ typedef enum {
 #include "braille.h"
 
 /* Communication codes */
-static const unsigned char HandyDescribe[] = {0XFF};
 static const unsigned char HandyDescription[] = {0XFE};
 static const unsigned char HandyBrailleBegin[] = {0X01};	/* general header to display braille */
 static const unsigned char HandyME6Begin[] = {0X79, 0X36, 0X41, 0X01};	/* general header to display braille */
@@ -411,7 +410,6 @@ typedef union {
 typedef enum {
   BDS_OFF,
   BDS_RESETTING,
-  BDS_IDENTIFYING,
   BDS_READY,
   BDS_WRITING
 } BrailleDisplayState;
@@ -490,18 +488,9 @@ setState (BrailleDisplayState state) {
 }
 
 static int
-readByte (BrailleDisplay *brl, unsigned char *byte, int wait) {
-  return io->readBytes(byte, sizeof(*byte), wait);
-}
-
-static int
 brl_reset (BrailleDisplay *brl) {
-  return 0;
-}
-
-static int
-writeDescribe (BrailleDisplay *brl) {
-  return io->writeBytes(HandyDescribe, sizeof(HandyDescribe), &brl->writeDelay) != -1;
+  static const unsigned char packet[] = {0XFF};
+  return io->writeBytes(packet, sizeof(packet), &brl->writeDelay) != -1;
 }
 
 static void
@@ -611,7 +600,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
 
   if (io->openPort(parameters, device)) {
     int tries = 0;
-    while (writeDescribe(brl)) {
+    while (brl_reset(brl)) {
       while (io->awaitInput(100)) {
         unsigned char response[sizeof(HandyDescription) + 1];
         if (io->readBytes(response, sizeof(response), 0) == sizeof(response)) {
@@ -1398,16 +1387,18 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   }
 
   while (1) {
-    unsigned char byte;
+    HT_Packet packet;
+
     {
-      int count = readByte(brl, &byte, 0);
-      if (count == -1) return BRL_CMD_RESTARTBRL;
-      if (count == 0) break;
+      static const int logInputPackets = 0;
+      int size = brl_readPacket(brl, &packet, sizeof(packet));
+      if (size == -1) return BRL_CMD_RESTARTBRL;
+      if (size == 0) break;
+      if (logInputPackets) LogBytes("Input Packet", packet.bytes, size);
     }
     timedOut = 0;
-    /* LogPrint(LOG_DEBUG, "read: %02X", byte); */
 
-    if (byte == 0X06) {
+    if (packet.fields.type == 0X06) {
       if (currentState != BDS_OFF) {
         if (io->awaitInput(10)) {
           setState(BDS_OFF);
@@ -1417,108 +1408,87 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
       }
     }
 
-    switch (byte) {
+    switch (packet.fields.type) {
       case 0XFE:
-        setState(BDS_IDENTIFYING);
-        continue;
+        if (packet.fields.data.ok.model == model->identifier) {
+          setState(BDS_READY);
+          updateRequired = 1;
+          currentKeys = pressedKeys = nullKeys;
+          continue;
+        }
+        break;
+
       default:
         switch (currentState) {
           case BDS_OFF:
             continue;
+
           case BDS_RESETTING:
             break;
-          case BDS_IDENTIFYING:
-            if (byte == model->identifier) {
-              setState(BDS_READY);
-              updateRequired = 1;
-              currentKeys = pressedKeys = nullKeys;
-              continue;
-            }
-            break;
+
           case BDS_WRITING:
-            switch (byte) {
+            switch (packet.fields.type) {
               case 0X7D:
                 updateRequired = 1;
               case 0X7E:
                 setState(BDS_READY);
                 continue;
-              default:
-                break;
             }
+
           case BDS_READY:
-            switch (byte) {
+            switch (packet.fields.type) {
               case 0X79: {
-                unsigned char header[2];
-                io->readBytes(header, sizeof(header), 1);
-                if (header[0] == model->identifier) {
-                  unsigned char length = header[1];
-                  unsigned char data[length+1];
-                  io->readBytes(data, sizeof(data), 1);
-                  if (data[length] == 0X16) {
-                    const unsigned char *bytes = data + 1;
-                    length--;
+                unsigned char length = packet.fields.data.extended.length - 1;
+                const unsigned char *bytes = &packet.fields.data.extended.data.bytes[0];
 
-                    switch (data[0]) {
-                      case 0X04: {
-                        int command;
-                        if (model->interpretByte(context, *bytes, &command)) {
-                          updateBrailleCells(brl);
-                          return command;
-                        }
-                        break;
-                      }
-
-                      case 0X07:
-                        switch (*bytes) {
-                          case 0X7D:
-                            updateRequired = 1;
-                          case 0X7E:
-                            setState(BDS_READY);
-                            continue;
-                        }
-                        break;
-
-                      case 0X09: {
-                        if (length) {
-                          unsigned char code = *bytes++;
-                          if (--length) {
-                            int newCount = at2Count + length;
-                            if (newCount > at2Size) {
-                              int newSize = (newCount | 0XF) + 1;
-                              at2Buffer = reallocWrapper(at2Buffer, newSize);
-                              at2Size = newSize;
-                            }
-                            memcpy(at2Buffer+at2Count, bytes, length);
-                            at2Count = newCount;
-                          }
-                          return BRL_BLK_PASSAT2 + code;
-                        }
-                        break;
-                      }
-
-                      case 0X52: {
-                        LogBytes("ATC", bytes, length);			break;
-                        break;
-                      }
-
-                      default: {
-                        LogPrint(LOG_WARNING, "extended packet type not supported: %02X", data[0]);
-                        LogBytes("packet content", bytes, length);
-                        break;
-                      }
+                switch (packet.fields.data.extended.type) {
+                  case 0X04: {
+                    int command;
+                    if (model->interpretByte(context, bytes[0], &command)) {
+                      updateBrailleCells(brl);
+                      return command;
                     }
-                  } else {
-                    LogBytes("malformed extended packet", data, sizeof(data));
+                    break;
                   }
-                } else {
-                  LogError("Keycode packet ID mismatch");
+
+                  case 0X07:
+                    switch (bytes[0]) {
+                      case 0X7D:
+                        updateRequired = 1;
+                      case 0X7E:
+                        setState(BDS_READY);
+                        continue;
+                    }
+                    break;
+
+                  case 0X09: {
+                    if (length) {
+                      unsigned char code = bytes++[0];
+                      if (--length) {
+                        int newCount = at2Count + length;
+                        if (newCount > at2Size) {
+                          int newSize = (newCount | 0XF) + 1;
+                          at2Buffer = reallocWrapper(at2Buffer, newSize);
+                          at2Size = newSize;
+                        }
+                        memcpy(at2Buffer+at2Count, bytes, length);
+                        at2Count = newCount;
+                      }
+                      return BRL_BLK_PASSAT2 + code;
+                    }
+                    break;
+                  }
+
+                  case 0X52:
+                    LogBytes("ATC", bytes, length);			break;
+                    continue;
                 }
-                continue;
+                break;
               }
 
               default: {
                 int command;
-                if (model->interpretByte(context, byte, &command)) {
+                if (model->interpretByte(context, packet.fields.type, &command)) {
                   updateBrailleCells(brl);
                   return command;
                 }
@@ -1530,39 +1500,33 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
         break;
     }
 
-    LogPrint(LOG_WARNING, "Unexpected byte: %02X (state %d)", byte, currentState);
+    LogPrint(LOG_WARNING, "Unexpected Packet: %02X (state %d)", packet.fields.type, currentState);
   }
 
   if (timedOut) {
     switch (currentState) {
       case BDS_OFF:
         break;
+
       case BDS_RESETTING:
         if (millisecondsSince(&stateTime) > 3000) {
           if (retryCount > 3) {
             setState(BDS_OFF);
-          } else if (writeDescribe(brl)) {
+          } else if (brl_reset(brl)) {
             setState(BDS_RESETTING);
           } else {
             setState(BDS_OFF);
           }
         }
         break;
-      case BDS_IDENTIFYING:
-        if (millisecondsSince(&stateTime) > 1000) {
-          if (writeDescribe(brl)) {
-            setState(BDS_RESETTING);
-          } else {
-            setState(BDS_OFF);
-          }
-        }
-        break;
+
       case BDS_READY:
         break;
+
       case BDS_WRITING:
         if (millisecondsSince(&stateTime) > 1000) {
           if (retryCount > 3) {
-            if (writeDescribe(brl)) {
+            if (brl_reset(brl)) {
               setState(BDS_RESETTING);
             } else {
               setState(BDS_OFF);
