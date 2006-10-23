@@ -34,8 +34,7 @@ typedef enum {
 #include "Programs/brl_driver.h"
 #include "braille.h"
 
-/* Communication codes */
-static const unsigned char HandyDescription[] = {0XFE};
+/* packets */
 static const unsigned char HandyBrailleBegin[] = {0X01};	/* general header to display braille */
 static const unsigned char HandyME6Begin[] = {0X79, 0X36, 0X41, 0X01};	/* general header to display braille */
 static const unsigned char HandyME8Begin[] = {0X79, 0X38, 0X59, 0X01};	/* general header to display braille */
@@ -408,6 +407,14 @@ typedef union {
 } HT_Packet;
 
 typedef enum {
+  HT_PKT_Extended = 0X79,
+  HT_PKT_NAK      = 0X7D,
+  HT_PKT_ACK      = 0X7E,
+  HT_PKT_OK       = 0XFE,
+  HT_PKT_Reset    = 0XFF
+} HT_PacketType;
+
+typedef enum {
   BDS_OFF,
   BDS_RESETTING,
   BDS_READY,
@@ -489,7 +496,7 @@ setState (BrailleDisplayState state) {
 
 static int
 brl_reset (BrailleDisplay *brl) {
-  static const unsigned char packet[] = {0XFF};
+  static const unsigned char packet[] = {HT_PKT_Reset};
   return io->writeBytes(packet, sizeof(packet), &brl->writeDelay) != -1;
 }
 
@@ -602,13 +609,13 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
     int tries = 0;
     while (brl_reset(brl)) {
       while (io->awaitInput(100)) {
-        unsigned char response[sizeof(HandyDescription) + 1];
-        if (io->readBytes(response, sizeof(response), 0) == sizeof(response)) {
-          if (memcmp(response, HandyDescription, sizeof(HandyDescription)) == 0) {
-            if (identifyModel(brl, response[sizeof(HandyDescription)])) {
+        HT_Packet response;
+        if (brl_readPacket(brl, &response, sizeof(response)) > 0) {
+          if (response.fields.type == HT_PKT_OK) {
+            if (identifyModel(brl, response.fields.data.ok.model)) {
               if (model->hasATC) {
-                // const unsigned char packetMode[] = {0X79, model->identifier, 0X02, 0X51, 0X46, 0X16};
-                const unsigned char atc[] = {0X79, model->identifier, 0X02, 0X50, 0X01, 0X16};
+                // const unsigned char packetMode[] = {HT_PKT_Extended, model->identifier, 0X02, 0X51, 0X46, 0X16};
+                const unsigned char atc[] = {HT_PKT_Extended, model->identifier, 0X02, 0X50, 0X01, 0X16};
                 // io->writeBytes(packetMode, sizeof(packetMode), NULL);
                 /* Switch on Active Touch Control */
                 io->writeBytes(atc, sizeof(atc), NULL);
@@ -1409,7 +1416,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
     }
 
     switch (packet.fields.type) {
-      case 0XFE:
+      case HT_PKT_OK:
         if (packet.fields.data.ok.model == model->identifier) {
           setState(BDS_READY);
           updateRequired = 1;
@@ -1428,16 +1435,16 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 
           case BDS_WRITING:
             switch (packet.fields.type) {
-              case 0X7D:
+              case HT_PKT_NAK:
                 updateRequired = 1;
-              case 0X7E:
+              case HT_PKT_ACK:
                 setState(BDS_READY);
                 continue;
             }
 
           case BDS_READY:
             switch (packet.fields.type) {
-              case 0X79: {
+              case HT_PKT_Extended: {
                 unsigned char length = packet.fields.data.extended.length - 1;
                 const unsigned char *bytes = &packet.fields.data.extended.data.bytes[0];
 
@@ -1453,9 +1460,9 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 
                   case 0X07:
                     switch (bytes[0]) {
-                      case 0X7D:
+                      case HT_PKT_NAK:
                         updateRequired = 1;
-                      case 0X7E:
+                      case HT_PKT_ACK:
                         setState(BDS_READY);
                         continue;
                     }
@@ -1569,17 +1576,17 @@ brl_readPacket (BrailleDisplay *brl, void *buffer, size_t size) {
           length = 1;
           break;
 
-        case 0XFE:
+        case HT_PKT_OK:
           length = 2;
           break;
 
-        case 0X79:
+        case HT_PKT_Extended:
           length = 4;
           break;
       }
     } else {
       switch (packet[0]) {
-        case 0X79:
+        case HT_PKT_Extended:
           if (offset == 2) length += byte;
           break;
       }
@@ -1597,7 +1604,7 @@ brl_readPacket (BrailleDisplay *brl, void *buffer, size_t size) {
         int ok = 0;
 
         switch (packet[0]) {
-          case 0X79:
+          case HT_PKT_Extended:
             if (packet[length-1] == 0X16) ok = 1;
             break;
 
