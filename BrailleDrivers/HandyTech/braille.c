@@ -1610,13 +1610,13 @@ brl_readPacket (BrailleDisplay *brl, void *buffer, size_t size) {
           break;
 
         case 0X79:
-          length = 3;
+          length = 4;
           break;
       }
     } else {
       switch (packet[0]) {
         case 0X79:
-          if (offset == 1) length += byte;
+          if (offset == 2) length += byte;
           break;
       }
     }
