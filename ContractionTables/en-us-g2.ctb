@@ -410,7 +410,6 @@ always iness 24-56-234
 midendword ing 346
 midword inga 35-1245-1 nightingale
 always ingar 35-1245-345 Weingarten
-midword ingen 35-1245-26 palingenesis (new birth)
 midword ingi 35-1245-24 meningitis
 midendword inging 346-346 bringing
 joinword into 35-235
@@ -444,7 +443,7 @@ always little 123-123
 contraction ll
 sufword lone 123-5-135 lonely
 always lord 5-123
-word lucknow =
+word lucknow 123-136-14-13-1345-246
 
 # the letter m
 always m 134
@@ -550,6 +549,7 @@ always p 1234
 always P 1234
 always paid 1234-145
 contraction pd
+begword palingen 1234-1-123-35-1245-26 palingenesis (new birth)
 always part 5-1234
 begword parta 1234-345-2345-1 partake
 begword parto 1234-345-2345-135
@@ -705,7 +705,6 @@ always sthood 34-125-135-135-145 priesthood
 word still 34
 always stime 234-5-2345
 midendword stown 234-2345-246-1345 Pickstown
-begword stringen 34-1235-35-1245-26 stringent stringency
 begword styro 34-13456-1235-135 styrofoam
 always shead 234-125-2-145
 always sheart 124-125-15-345-2345
