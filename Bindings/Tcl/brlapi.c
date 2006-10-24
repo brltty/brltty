@@ -313,12 +313,7 @@ endSession (ClientData data) {
 }
 
 static int
-brlapiSessionCommand (data, interp, objc, objv)
-  ClientData data;
-  Tcl_Interp *interp;
-  int objc;
-  Tcl_Obj *const objv[];
-{
+brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
   static const char *functions[] = {
     "acceptKeys",
     "disconnect",
@@ -901,12 +896,7 @@ OPTION_HANDLER(general, connect, keyFile) {
 }
 
 static int
-brlapiGeneralCommand (data, interp, objc, objv)
-  ClientData data;
-  Tcl_Interp *interp;
-  int objc;
-  Tcl_Obj *const objv[];
-{
+brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
   static const char *functions[] = {
     "connect",
     "expandHost",
@@ -1000,11 +990,8 @@ brlapiGeneralCommand (data, interp, objc, objv)
 #define STRING(string) Tcl_NewStringObj((string), -1)
 #define FLAG(name,string) if (flagsField & BRLAPI_KEY_FLG_##name) Tcl_ListObjAppendElement(interp, flagsObject, STRING((string)))
     case FCN_expandKeyCode: {
-      Tcl_WideInt keyCode, typeField, codeField, argField, flagsField;
-      Tcl_Obj *typeObject = NULL;
-      Tcl_Obj *codeObject = NULL;
-      Tcl_Obj *argObject = NULL;
-      Tcl_Obj *flagsObject = NULL;
+      Tcl_WideInt keyCode;
+      unsigned int command, argument, flags;
 
       if (objc != 3) {
         Tcl_WrongNumArgs(interp, 2, objv, "<keyCode>");
@@ -1016,170 +1003,21 @@ brlapiGeneralCommand (data, interp, objc, objv)
         if (result != TCL_OK) return result;
       }
 
-      typeField = keyCode & BRLAPI_KEY_TYPE_MASK;
-      codeField = keyCode & BRLAPI_KEY_CODE_MASK;
-      argField = 0;
-      flagsField = keyCode & BRLAPI_KEY_FLAGS_MASK;
-
-      flagsObject = Tcl_NewListObj(0, NULL);
-      FLAG(SHIFT, "SHIFT");
-      FLAG(UPPER, "UPPER");
-      FLAG(CONTROL, "CONTROL");
-      FLAG(META, "META");
-
-      switch (typeField) {
-        case BRLAPI_KEY_TYPE_SYM: {
-#define BYTE(n) ((codeField >> ((n) * 8)) & 0XFF)
-          switch (BYTE(3)) {
-            case 0X00:
-              switch (BYTE(2)) {
-                case 0X00:
-                  switch (BYTE(1)) {
-                    case 0X00:
-                      codeObject = STRING("LATIN1");
-                      break;
-
-                    case 0X01:
-                      codeObject = STRING("LATIN2");
-                      break;
-
-                    case 0X02:
-                      codeObject = STRING("LATIN3");
-                      break;
-
-                    case 0X03:
-                      codeObject = STRING("LATIN4");
-                      break;
-
-                    case 0X04:
-                      codeObject = STRING("KATAKANA");
-                      break;
-
-                    case 0X05:
-                      codeObject = STRING("ARABIC");
-                      break;
-
-                    case 0X06:
-                      codeObject = STRING("CYRILLIC");
-                      break;
-
-                    case 0X07:
-                      codeObject = STRING("GREEK");
-                      break;
-
-                    case 0X08:
-                      codeObject = STRING("TECHNICAL");
-                      break;
-
-                    case 0X09:
-                      codeObject = STRING("SPECIAL");
-                      break;
-
-                    case 0X0A:
-                      codeObject = STRING("PUBLISHING");
-                      break;
-
-                    case 0X0B:
-                      codeObject = STRING("APL");
-                      break;
-
-                    case 0X0C:
-                      codeObject = STRING("HEBREW");
-                      break;
-
-                    case 0X0D:
-                      codeObject = STRING("THAI");
-                      break;
-
-                    case 0X0E:
-                      codeObject = STRING("KOREAN");
-                      break;
-
-                    case 0X14:
-                      codeObject = STRING("ARMENIAN");
-                      break;
-
-                    case 0X15:
-                      codeObject = STRING("GEORGIAN");
-                      break;
-
-                    case 0X16:
-                      codeObject = STRING("CAUCASUS");
-                      break;
-
-                    case 0X1E:
-                      codeObject = STRING("VIETNAMESE");
-                      break;
-
-                    case 0X20:
-                      codeObject = STRING("CURRENCY");
-                      break;
-
-                    case 0XFD:
-                      codeObject = STRING("IBM3270");
-                      break;
-
-                    case 0XFE:
-                      codeObject = STRING("ISO9995");
-                      break;
-
-                    case 0XFF:
-                      codeObject = STRING("KEY");
-                      break;
-                  }
-
-                  if (codeObject) argField = codeField & 0XFF;
-                  break;
-              }
-              break;
-
-            case 0X01:
-              argField = codeField & 0XFFFFFF;
-              codeObject = STRING("UNICODE");
-              break;
-          }
-#undef BYTE
-
-          typeObject = STRING("KEYSYM");
-          break;
-        }
-
-        case BRLAPI_KEY_TYPE_CMD: {
-          int block = codeField & BRLAPI_KEY_CMD_BLK_MASK;
-
-          if (!block) {
-            FLAG(TOGGLE_ON, "ON");
-            FLAG(TOGGLE_OFF, "OFF");
-            FLAG(ROUTE, "ROUTE");
-          } else {
-            argField = codeField & BRLAPI_KEY_CMD_ARG_MASK;
-            codeField = block;
-
-            switch (block) {
-              case BRLAPI_KEY_CMD_GOTOLINE:
-                FLAG(LINE_SCALED, "SCALED");
-                FLAG(LINE_TOLEFT, "TOLEFT");
-                break;
-            }
-          }
-
-          typeObject = STRING("COMMAND");
-          break;
-        }
+      if (!brlapi_expandKeyCode(keyCode, &command, &argument, &flags)) {
+        setStringResult(interp, "invalid key code", -1);
+        return TCL_ERROR;
       }
 
-      if (!typeObject) typeObject = Tcl_NewWideIntObj(typeField >> BRLAPI_KEY_TYPE_SHIFT);
-      if (!codeObject) codeObject = Tcl_NewWideIntObj(codeField >> BRLAPI_KEY_CODE_SHIFT);
-      if (!argObject) argObject = Tcl_NewWideIntObj(argField);
-
       {
-        Tcl_Obj *elements[] = {typeObject, codeObject, argObject, flagsObject};
-        Tcl_SetObjResult(interp, Tcl_NewListObj(4, elements));
+        Tcl_Obj *elements[] = {
+          Tcl_NewIntObj(command),
+          Tcl_NewIntObj(argument),
+          Tcl_NewIntObj(flags)
+        };
+        Tcl_SetObjResult(interp, Tcl_NewListObj(3, elements));
         return TCL_OK;
       }
     }
-#undef FLAG
-#undef STRING
 
     case FCN_makeCells: {
       Tcl_Obj **elements;
