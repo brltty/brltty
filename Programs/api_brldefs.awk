@@ -51,7 +51,7 @@ function brlBlock(name, symbol, value, help) {
 }
 
 function brlKey(name, symbol, value, help) {
-  writeMacroDefinition("BRL_KEY_" name, "(BRLAPI_KEY_SYM_" name " & 0XFF)", help)
+  writeMacroDefinition("BRL_KEY_" name, "(BRLAPI_KEY_SYM_" getBrlapiKeyName(name) " & 0XFF)", help)
 }
 
 function brlFlag(name, symbol, value, help) {

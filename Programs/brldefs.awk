@@ -136,3 +136,9 @@ function endDoxygenGroup() {
   print "/** @} */"
   print ""
 }
+
+function getBrlapiKeyName(name) {
+  if (name == "ENTER") return "LINEFEED"
+  if (name ~ /^CURSOR_/) return substr(name, 8)
+  return name
+}

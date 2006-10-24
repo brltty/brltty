@@ -31,7 +31,7 @@ function brlKey(name, symbol, value, help) {
       writeComplexKey("F" functionNumber, "BRLAPI_KEY_SYM_FUNCTION+" (functionNumber - 1))
     }
   } else {
-    writeSimpleKey("SYM", name)
+    writeSimpleKey("SYM", getBrlapiKeyName(name))
   }
 }
 
