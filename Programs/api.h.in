@@ -56,6 +56,9 @@ extern "C" {
  * connection in a similar manner to what file descriptors do. */
 typedef struct brlapi_handle_t brlapi_handle_t;
 
+/** Returns the size of an object of type brlapi_handle_t in bytes */
+int brlapi_getHandleSize(void);
+
 /** \defgroup brlapi_connection Connecting to BrlAPI
  *
  * Before calling any other function of the library, calling
