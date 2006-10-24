@@ -387,7 +387,7 @@ int brlapi__leaveTty(brlapi_handle_t *handle);
  * \sa brlapi_getTty() brlapi_leaveTty()
  */
 int brlapi_setFocus(int tty);
-int brlpi__setFocus(brlapi_handle_t *handle, int tty);
+int brlapi__setFocus(brlapi_handle_t *handle, int tty);
 
 /** @} */
 
@@ -765,7 +765,7 @@ int brlapi__leaveRaw(brlapi_handle_t *handle);
  * \param size holds the packet size.
  * \return size on success, -1 on error */
 ssize_t brlapi_sendRaw(const void *buf, size_t size);
-ssize_t brapi__sendRaw(brlapi_handle_t *handle, const void *buf, size_t size);
+ssize_t brlapi__sendRaw(brlapi_handle_t *handle, const void *buf, size_t size);
 
 /* brlapi_recvRaw */
 /** Get Raw data
