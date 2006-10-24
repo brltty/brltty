@@ -1641,7 +1641,7 @@ void brlapi_defaultExceptionHandler(int err, brl_type_t type, const void *packet
   abort();
 }
 
-const brlapi_keyEntry_t brlapi_keyTable[] = {
+static const brlapi_keyEntry_t brlapi_keyTable[] = {
 #include "api_keytab.auto.h"
   {.name = NULL}
 };
@@ -1666,11 +1666,67 @@ brlapi_findKeyByName (const char *name) {
   return NULL;
 }
 
-const unsigned char brlapi_dotNumbers[brlapi_dotCount] = {
+int
+brlapi_expandKeyCode (
+  brl_keycode_t keyCode,
+  unsigned int *command,
+  unsigned int *argument,
+  unsigned int *flags
+) {
+  brl_keycode_t type = keyCode & BRLAPI_KEY_TYPE_MASK;
+  brl_keycode_t code = keyCode & BRLAPI_KEY_CODE_MASK;
+
+  switch (type) {
+    default:
+      return 0;
+
+    case BRLAPI_KEY_TYPE_SYM:
+      switch (code & 0XFF000000U) {
+        default:
+          return 0;
+
+        case 0X00000000U:
+          switch (code & 0XFF0000U) {
+            default:
+              return 0;
+
+            case 0X000000U:
+              *command = code & 0XFF00U;
+              *argument = code & 0XFFU;
+              break;
+          }
+          break;
+
+        case 0X01000000U:
+          *command = code & 0XFF000000U;
+          *argument = code & 0XFFFFFFU;
+          break;
+      }
+      break;
+
+    case BRLAPI_KEY_TYPE_CMD:
+      *command = code & BRLAPI_KEY_CMD_BLK_MASK;
+      *argument = code & BRLAPI_KEY_CMD_ARG_MASK;
+
+      if (!*command) {
+        *command |= *argument;
+        *argument = 0;
+      }
+      break;
+  }
+
+  *command |= type;
+  *flags = (keyCode & BRLAPI_KEY_FLAGS_MASK) >> BRLAPI_KEY_FLAGS_SHIFT;
+  return 1;
+}
+
+#define brlapi_dotCount 8
+
+static const unsigned char brlapi_dotNumbers[brlapi_dotCount] = {
   '1', '2', '3', '4', '5', '6', '7', '8'
 };
 
-const unsigned char brlapi_dotBits[brlapi_dotCount] = {
+static const unsigned char brlapi_dotBits[brlapi_dotCount] = {
   BRLAPI_DOT1, BRLAPI_DOT2, BRLAPI_DOT3, BRLAPI_DOT4,
   BRLAPI_DOT5, BRLAPI_DOT6, BRLAPI_DOT7, BRLAPI_DOT8
 };
