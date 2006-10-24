@@ -91,7 +91,7 @@ setBrlapiError (Tcl_Interp *interp) {
 
 static int
 getDisplaySize (Tcl_Interp *interp, BrlapiSession *session, int *width, int *height) {
-  if (brlapi_getDisplaySize(width, height) != -1) return TCL_OK;
+  if (brlapi__getDisplaySize(session->handle, width, height) != -1) return TCL_OK;
   setBrlapiError(interp);
   return TCL_ERROR;
 }
@@ -308,7 +308,8 @@ OPTION_HANDLER(session, writeText, start) {
 static void
 endSession (ClientData data) {
   BrlapiSession *session = data;
-  brlapi_closeConnection();
+  brlapi__closeConnection(session->handle);
+  deallocateMemory(session->handle);
   deallocateMemory(session);
 }
 
@@ -419,7 +420,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
       while (1) {
         char buffer[size];
-        int result = brlapi_getDriverId(buffer, size);
+        int result = brlapi__getDriverId(session->handle, buffer, size);
 
         if (result == -1) {
           setBrlapiError(interp);
@@ -445,7 +446,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
       while (1) {
         char buffer[size];
-        int result = brlapi_getDriverName(buffer, size);
+        int result = brlapi__getDriverName(session->handle, buffer, size);
 
         if (result == -1) {
           setBrlapiError(interp);
@@ -525,12 +526,12 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
             if (result != TCL_OK) return result;
           }
 
-          if (brlapi_getTtyPath(ttys, count, options.driver) != -1) return TCL_OK;
-        } else if (brlapi_getTtyPath(NULL, 0, options.driver) != -1) {
+          if (brlapi__getTtyPath(session->handle, ttys, count, options.driver) != -1) return TCL_OK;
+        } else if (brlapi__getTtyPath(session->handle, NULL, 0, options.driver) != -1) {
           return TCL_OK;
         }
       } else {
-        int result = brlapi_getTty(-1, options.driver);
+        int result = brlapi__getTty(session->handle, -1, options.driver);
 
         if (result != -1) {
           setIntResult(interp, result);
@@ -548,7 +549,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
         return TCL_ERROR;
       }
 
-      if (brlapi_leaveTty() != -1) return TCL_OK;
+      if (brlapi__leaveTty(session->handle) != -1) return TCL_OK;
       setBrlapiError(interp);
       return TCL_ERROR;
     }
@@ -566,7 +567,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
         if (result != TCL_OK) return result;
       }
 
-      if (brlapi_setFocus(tty) != -1) return TCL_OK;
+      if (brlapi__setFocus(session->handle, tty) != -1) return TCL_OK;
       setBrlapiError(interp);
       return TCL_ERROR;
     }
@@ -586,7 +587,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
       {
         brl_keycode_t key;
-        int result = brlapi_readKey(wait, &key);
+        int result = brlapi__readKey(session->handle, wait, &key);
 
         if (result == -1) {
           setBrlapiError(interp);
@@ -630,8 +631,8 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
           }
 
           {
-            int result = ignore? brlapi_ignoreKeySet(keys, count):
-                                 brlapi_unignoreKeySet(keys, count);
+            int result = ignore? brlapi__ignoreKeySet(session->handle, keys, count):
+                                 brlapi__unignoreKeySet(session->handle, keys, count);
             if (result == -1) {
               setBrlapiError(interp);
               return TCL_ERROR;
@@ -656,8 +657,8 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
         }
 
         {
-          int result = ignore? brlapi_ignoreKeyRange(keys[0], keys[1]):
-                               brlapi_unignoreKeyRange(keys[0], keys[1]);
+          int result = ignore? brlapi__ignoreKeyRange(session->handle, keys[0], keys[1]):
+                               brlapi__unignoreKeyRange(session->handle, keys[0], keys[1]);
           if (result != -1) return TCL_OK;
           setBrlapiError(interp);
           return TCL_ERROR;
@@ -720,7 +721,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
       END_OPTIONS(3)
 
       if (!options.arguments.regionSize) return TCL_OK;
-      if (brlapi_write(&options.arguments) != -1) return TCL_OK;
+      if (brlapi__write(session->handle, &options.arguments) != -1) return TCL_OK;
       setBrlapiError(interp);
       return TCL_ERROR;
     }
@@ -751,7 +752,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
           cells = buffer;
         }
 
-        if (brlapi_writeDots(cells) != -1) return TCL_OK;
+        if (brlapi__writeDots(session->handle, cells) != -1) return TCL_OK;
         setBrlapiError(interp);
         return TCL_ERROR;
       }
@@ -765,7 +766,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
       {
         brlapi_writeStruct arguments = BRLAPI_WRITESTRUCT_INITIALIZER;
-        int result = brlapi_write(&arguments);
+        int result = brlapi__write(session->handle, &arguments);
         if (result != -1) return TCL_OK;
         setBrlapiError(interp);
         return TCL_ERROR;
@@ -781,7 +782,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
       {
         const char *driver = Tcl_GetString(objv[2]);
 
-        if (brlapi_getRaw(driver) != -1) return TCL_OK;
+        if (brlapi__getRaw(session->handle, driver) != -1) return TCL_OK;
         setBrlapiError(interp);
         return TCL_ERROR;
       }
@@ -793,7 +794,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
         return TCL_ERROR;
       }
 
-      if (brlapi_leaveRaw() != -1) return TCL_OK;
+      if (brlapi__leaveRaw(session->handle) != -1) return TCL_OK;
       setBrlapiError(interp);
       return TCL_ERROR;
     }
@@ -813,7 +814,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
       {
         unsigned char buffer[size];
-        int result = brlapi_recvRaw(buffer, size);
+        int result = brlapi__recvRaw(session->handle, buffer, size);
 
         if (result != -1) {
           setByteArrayResult(interp, buffer, result);
@@ -835,7 +836,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
         int count;
         const char *bytes = Tcl_GetByteArrayFromObj(objv[2], &count);
 
-        if (brlapi_sendRaw(bytes, count) != -1) return TCL_OK;
+        if (brlapi__sendRaw(session->handle, bytes, count) != -1) return TCL_OK;
         setBrlapiError(interp);
         return TCL_ERROR;
       }
@@ -850,7 +851,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
       {
         const char *driver = Tcl_GetString(objv[2]);
 
-        if (brlapi_suspend(driver) != -1) return TCL_OK;
+        if (brlapi__suspend(session->handle, driver) != -1) return TCL_OK;
         setBrlapiError(interp);
         return TCL_ERROR;
       }
@@ -862,7 +863,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
         return TCL_ERROR;
       }
 
-      if (brlapi_resume() != -1) return TCL_OK;
+      if (brlapi__resume(session->handle) != -1) return TCL_OK;
       setBrlapiError(interp);
       return TCL_ERROR;
     }
@@ -944,7 +945,8 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
       {
         BrlapiSession *session = allocateMemory(sizeof(*session));
-        int result = brlapi_initializeConnection(&options.settings, &session->settings);
+        session->handle = allocateMemory(brlapi_getHandleSize());
+        int result = brlapi__initializeConnection(session->handle, &options.settings, &session->settings);
         if (result != -1) {
           session->fileDescriptor = result;
 
@@ -961,6 +963,7 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
           setBrlapiError(interp);
         }
 
+        deallocateMemory(session->handle);
         deallocateMemory(session);
       }
       return TCL_ERROR;
