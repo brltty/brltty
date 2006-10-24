@@ -713,8 +713,8 @@ static int brlapi__leaveDriverSpecific(brlapi_handle_t *handle, brl_type_t type,
     goto out;
   }
   res = brlapi__writePacketWaitForAck(handle, type, NULL, 0);
-  if (res) return res;
-  handle->state &= ~st;
+  if (!res)
+    handle->state &= ~st;
 out:
   pthread_mutex_unlock(&handle->state_mutex);
   return res;
