@@ -12,7 +12,7 @@
 ;;;; Library loading
 
 (define-foreign-library libbrlapi
-  (:unix (:or "libbrlapi.so.0.4.1" "libbrlapi.so"))
+  (:unix (:or "libbrlapi.so.0.5.0" "libbrlapi.so"))
   (t (:default "libbrlapi")))
 (use-foreign-library libbrlapi)
 
@@ -80,9 +80,9 @@
 
 (defun get-tty (tty &optional how)
   (unless (stringp how) (setf how ""))
-  (foreign-funcall "brlapi_getTty" :int tty :string how brlapi-code))
+  (foreign-funcall "brlapi_enterTtyMode" :int tty :string how brlapi-code))
 
-(defcfun ("brlapi_leaveTty" leave-tty) brlapi-code)
+(defcfun ("brlapi_leaveTtyMode" leave-tty) brlapi-code)
 
 
 ;;;; Output
@@ -110,4 +110,9 @@
   (with-foreign-object (key 'key-code)
     (case (foreign-funcall "brlapi_readKey" :boolean block :pointer key brlapi-code)
       (0 nil)
-      (1 (mem-ref key 'key-code)))))
+      (1 (with-foreign-objects ((command :int) (args :int) (flags :int))
+           (foreign-funcall "brlapi_expandKeyCode"
+                            key-code (mem-ref key 'key-code)
+                            :pointer command :pointer args :pointer flags
+                            :int)
+           (list (mem-ref command :int) (mem-ref args :int) (mem-ref flags :int)))))))
