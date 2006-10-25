@@ -189,12 +189,6 @@ int brlapi_getHandleSize(void)
   return sizeof(brlapi_handle_t);
 }
 
-/* Function brlapi_getHandleSize */
-int brlapi_getHandleSize(void)
-{
-  return sizeof(brlapi_handle_t);
-}
-
 static brlapi_handle_t defaultHandle;
 
 /* brlapi_initializeHandle */

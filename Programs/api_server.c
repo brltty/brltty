@@ -2269,14 +2269,14 @@ brl_keycode_t coreToClient(unsigned long keycode, int how) {
     }
     case BRL_BLK_PASSKEY:
       switch (keycode & BRL_MSK_ARG) {
-      case BRL_KEY_ENTER:		code = BRLAPI_KEY_SYM_ENTER;	break;
+      case BRL_KEY_ENTER:		code = BRLAPI_KEY_SYM_LINEFEED;break;
       case BRL_KEY_TAB:			code = BRLAPI_KEY_SYM_TAB;	break;
       case BRL_KEY_BACKSPACE:		code = BRLAPI_KEY_SYM_BACKSPACE;break;
       case BRL_KEY_ESCAPE:		code = BRLAPI_KEY_SYM_ESCAPE;	break;
-      case BRL_KEY_CURSOR_LEFT:		code = BRLAPI_KEY_SYM_CURSOR_LEFT;break;
-      case BRL_KEY_CURSOR_RIGHT:	code = BRLAPI_KEY_SYM_CURSOR_RIGHT;break;
-      case BRL_KEY_CURSOR_UP:		code = BRLAPI_KEY_SYM_CURSOR_UP;break;
-      case BRL_KEY_CURSOR_DOWN:		code = BRLAPI_KEY_SYM_CURSOR_DOWN;break;
+      case BRL_KEY_CURSOR_LEFT:		code = BRLAPI_KEY_SYM_LEFT;	break;
+      case BRL_KEY_CURSOR_RIGHT:	code = BRLAPI_KEY_SYM_RIGHT;	break;
+      case BRL_KEY_CURSOR_UP:		code = BRLAPI_KEY_SYM_UP;	break;
+      case BRL_KEY_CURSOR_DOWN:		code = BRLAPI_KEY_SYM_DOWN;	break;
       case BRL_KEY_PAGE_UP:		code = BRLAPI_KEY_SYM_PAGE_UP;	break;
       case BRL_KEY_PAGE_DOWN:		code = BRLAPI_KEY_SYM_PAGE_DOWN;break;
       case BRL_KEY_HOME:		code = BRLAPI_KEY_SYM_HOME;	break;

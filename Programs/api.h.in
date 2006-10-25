@@ -59,9 +59,6 @@ typedef struct brlapi_handle_t brlapi_handle_t;
 /** Returns the size of an object of type brlapi_handle_t in bytes */
 int brlapi_getHandleSize(void);
 
-/** Returns the size of an object of type brlapi_handle_t in bytes */
-int brlapi_getHandleSize(void);
-
 /** \defgroup brlapi_connection Connecting to BrlAPI
  *
  * Before calling any other function of the library, calling
@@ -351,7 +348,7 @@ int brlapi__getDisplaySize(brlapi_handle_t *handle, unsigned int *x, unsigned in
  * \sa brlapi_leaveTtyMode() brlapi_readKey()
  */
 int brlapi_enterTtyMode(int tty, const char *driverName);
-#define blapi_getTty(tty, driverName) enterTtyMode(tty, driverName)
+#define brlapi_getTty(tty, driverName) brlapi_enterTtyMode(tty, driverName)
 int brlapi__enterTtyMode(brlapi_handle_t *handle, int tty, const char *driverName);
 
 /* brlapi_getTtyPath */
@@ -377,7 +374,7 @@ int brlapi__getTtyPath(brlapi_handle_t *handle, int *ttys, int nttys, const char
  * \sa brlapi_enterTtyMode()
  */
 int brlapi_leaveTtyMode(void);
-#define brlapi_leveTty brlapi_leaveTtyMode
+#define brlapi_leaveTty brlapi_leaveTtyMode
 int brlapi__leaveTtyMode(brlapi_handle_t *handle);
 
 /* brlapi_setFocus */

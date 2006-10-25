@@ -75,7 +75,7 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
 out2:
   free(prevData);
 out1:
-  brlapi_leaveTty();
+  brlapi_leaveTtyMode();
 out0:
   brlapi_closeConnection();
 out:
