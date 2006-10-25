@@ -605,20 +605,14 @@ typedef uint64_t brl_keycode_t;
 
 #include "api_cmddefs.h"
 
-typedef struct {
-  brl_keycode_t code;
-  const char *name;
-} brlapi_keyEntry_t;
-
-extern const brlapi_keyEntry_t *brlapi_findKeyByCode (brl_keycode_t code);
-extern const brlapi_keyEntry_t *brlapi_findKeyByName (const char *name);
-
 extern int brlapi_expandKeyCode (
   brl_keycode_t keyCode,
   unsigned int *command,
   unsigned int *argument,
   unsigned int *flags
 );
+
+extern const char *brlapi_getKeyName (unsigned int command, unsigned int argument);
 
 extern unsigned char brlapi_dotNumberToBit (unsigned char number);
 extern unsigned char brlapi_dotBitToNumber (unsigned char bit);

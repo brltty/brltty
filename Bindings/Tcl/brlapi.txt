@@ -4,6 +4,7 @@ brlapi <function> [<arg> ...]
       keyFile <file>
    expandHost <hostSpec>
    expandKeyCode <keyCode>
+   getKeyName <command> [<argument>]
    makeCells <dotsList>
 
 brlapi<sessionNumber> function [arg ...]

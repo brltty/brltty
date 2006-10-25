@@ -1647,30 +1647,42 @@ void brlapi_defaultExceptionHandler(int err, brl_type_t type, const void *packet
   abort();
 }
 
+typedef struct {
+  brl_keycode_t code;
+  const char *name;
+} brlapi_keyEntry_t;
+
 static const brlapi_keyEntry_t brlapi_keyTable[] = {
 #include "api_keytab.auto.h"
+
+  {.code = 0X0000U, .name = "LATIN1"},
+  {.code = 0X0100U, .name = "LATIN2"},
+  {.code = 0X0200U, .name = "LATIN3"},
+  {.code = 0X0300U, .name = "LATIN4"},
+  {.code = 0X0400U, .name = "KATAKANA"},
+  {.code = 0X0500U, .name = "ARABIC"},
+  {.code = 0X0600U, .name = "CYRILLIC"},
+  {.code = 0X0700U, .name = "GREEK"},
+  {.code = 0X0800U, .name = "TECHNICAL"},
+  {.code = 0X0900U, .name = "SPECIAL"},
+  {.code = 0X0A00U, .name = "PUBLISHING"},
+  {.code = 0X0B00U, .name = "APL"},
+  {.code = 0X0C00U, .name = "HEBREW"},
+  {.code = 0X0D00U, .name = "THAI"},
+  {.code = 0X0E00U, .name = "KOREAN"},
+  {.code = 0X1200U, .name = "LATIN8"},
+  {.code = 0X1300U, .name = "LATIN9"},
+  {.code = 0X1400U, .name = "ARMENIAN"},
+  {.code = 0X1500U, .name = "GEORGIAN"},
+  {.code = 0X1600U, .name = "CAUCASUS"},
+  {.code = 0X1E00U, .name = "VIETNAMESE"},
+  {.code = 0X2000U, .name = "CURRENCY"},
+  {.code = 0XFD00U, .name = "3270"},
+  {.code = 0XFE00U, .name = "XKB"},
+  {.code = 0X01000000U, .name = "UNICODE"},
+
   {.name = NULL}
 };
-
-const brlapi_keyEntry_t *
-brlapi_findKeyByCode (brl_keycode_t code) {
-  const brlapi_keyEntry_t *key = brlapi_keyTable;
-  while (key->name) {
-    if (code == key->code) return key;
-    ++key;
-  }
-  return NULL;
-}
-
-const brlapi_keyEntry_t *
-brlapi_findKeyByName (const char *name) {
-  const brlapi_keyEntry_t *key = brlapi_keyTable;
-  while (key->name) {
-    if (strcasecmp(name, key->name) == 0) return key;
-    ++key;
-  }
-  return NULL;
-}
 
 int
 brlapi_expandKeyCode (
@@ -1724,6 +1736,19 @@ brlapi_expandKeyCode (
   *command |= type;
   *flags = (keyCode & BRLAPI_KEY_FLAGS_MASK) >> BRLAPI_KEY_FLAGS_SHIFT;
   return 1;
+}
+
+const char *
+brlapi_getKeyName (unsigned int command, unsigned int argument) {
+  unsigned int code = command | argument;
+  const brlapi_keyEntry_t *key = brlapi_keyTable;
+
+  while (key->name) {
+    if ((command == key->code) || (code == key->code)) return key->name;
+    ++key;
+  }
+
+  return NULL;
 }
 
 #define brlapi_dotCount 8

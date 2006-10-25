@@ -902,6 +902,7 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     "connect",
     "expandHost",
     "expandKeyCode",
+    "getKeyName",
     "makeCells",
     NULL
   };
@@ -910,6 +911,7 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     FCN_connect,
     FCN_expandHost,
     FCN_expandKeyCode,
+    FCN_getKeyName,
     FCN_makeCells
   } Function;
 
@@ -1018,6 +1020,39 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
           Tcl_NewIntObj(flags)
         };
         Tcl_SetObjResult(interp, Tcl_NewListObj(3, elements));
+        return TCL_OK;
+      }
+    }
+
+    case FCN_getKeyName: {
+      int command, argument;
+
+      if ((objc < 3) || (objc > 4)) {
+        Tcl_WrongNumArgs(interp, 2, objv, "<command> [<argument>]");
+        return TCL_ERROR;
+      }
+
+      {
+        int result = Tcl_GetIntFromObj(interp, objv[2], &command);
+        if (result != TCL_OK) return result;
+      }
+
+      if (objc < 4) {
+        argument = 0;
+      } else {
+        int result = Tcl_GetIntFromObj(interp, objv[3], &argument);
+        if (result != TCL_OK) return result;
+      }
+
+      {
+        const char *name = brlapi_getKeyName(command, argument);
+
+        if (!name) {
+          setStringResult(interp, "unknown command", -1);
+          return TCL_ERROR;
+        }
+
+        setStringResult(interp, name, -1);
         return TCL_OK;
       }
     }
