@@ -649,11 +649,11 @@ checked to be sure everything will hold on it:
 
 <tscreen><code>
  fprintf(stderr,"Trying to enter in raw mode... ");
- if (brlapi_getRaw()<0)
-  brlapi_perror("brlapi_getRaw");
+ if (brlapi_enterRawMode()<0)
+  brlapi_perror("brlapi_enterRawMode");
  else {
   fprintf(stderr,"Ok, leaving raw mode immediately\n");
-  brlapi_leaveRaw();
+  brlapi_leaveRawMode();
  }
 </code></tscreen>
 
@@ -671,7 +671,7 @@ first:
 
 <tscreen><code>
  fprintf(stderr,"Taking control of the tty... ");
- if (brlapi_getTty(-1,NULL)>=0)
+ if (brlapi_enterTtyMode(-1,NULL)>=0)
  {
   printf("Ok\n");
 </code></tscreen>
@@ -726,12 +726,12 @@ The first parameter tells the lib to block until a key press is indeed read.
 
 <tscreen><code>
   fprintf(stderr,"Leaving tty... ");
-  if (brlapi_leaveTty()>=0)
+  if (brlapi_leaveTtyMode()>=0)
    fprintf(stderr,"Ok\n");
 </code></tscreen>
 
 But control of another tty can still be get for instance, by calling
-<tt>brlapi_getTty()</tt> again...
+<tt>brlapi_enterTtyMode()</tt> again...
 
 <sect1>Disconnecting from <em/BrlAPI/
 
@@ -787,16 +787,16 @@ int main()
 
 /* Try entering raw mode, immediately go out from raw mode */
  printf("Trying to enter in raw mode... ");
- if (brlapi_getRaw()<0)
-  brlapi_perror("brlapi_getRaw");
+ if (brlapi_enterRawMode()<0)
+  brlapi_perror("brlapi_enterRawMode");
  else {
   printf("Ok, leaving raw mode immediately\n");
-  brlapi_leaveRaw();
+  brlapi_leaveRawMode();
  }
 
 /* Get tty control */
  printf("Taking control of the tty... ");
- if (brlapi_getTty(-1,NULL)>=0)
+ if (brlapi_enterTtyMode(-1,NULL)>=0)
  {
   printf("Ok\n");
 
@@ -816,11 +816,11 @@ int main()
 
 /* Leave tty control */
   fprintf(stderr,"Leaving tty... ");
-  if (brlapi_leaveTty()>=0)
+  if (brlapi_leaveTtyMode()>=0)
    fprintf(stderr,"Ok\n");
-  else brlapi_perror("brlapi_leaveTty");
+  else brlapi_perror("brlapi_leaveTtyMode");
 
- } else brlapi_perror("brlapi_getTty");
+ } else brlapi_perror("brlapi_enterTtyMode");
 
 /* Disconnect from BrlAPI */
  brlapi_closeConnection();
@@ -1216,8 +1216,8 @@ or raw mode. The client can send either of these types of packet:
   <itemize>
   <item><tt/BRLPACKET_GETDRIVERID/, <tt/BRLPACKET_GETDRIVERNAME/
   or <tt/BRLPACKET_GETDISPLAYSIZE/ to get pieces of information from the server,
-  <item><tt/BRLPACKET_GETTTY/ to enter tty handling mode,
-  <item><tt/BRLPACKET_GETRAW/ to enter raw mode,
+  <item><tt/BRLPACKET_ENTERTTY/MODE to enter tty handling mode,
+  <item><tt/BRLPACKET_ENTERRAWMODE/ to enter raw mode,
   </itemize>
 
 
@@ -1225,15 +1225,15 @@ or raw mode. The client can send either of these types of packet:
 no power on it any more, masked keys excepted. It's up to the client to manage
 display and keypresses. For this, it can send either of these types of packet:
   <itemize>
-  <item><tt/BRLPACKET_GETTTY/ to switch to another tty, but how key presses
+  <item><tt/BRLPACKET_ENTERTY/MODE to switch to another tty, but how key presses
   should be sent mustn't change,
-  <item><tt/BRLPACKET_LEAVETTY/ to leave tty handling mode and go back to
+  <item><tt/BRLPACKET_LEAVETTYMODE/ to leave tty handling mode and go back to
   normal mode,
   <item><tt/BRLPACKET_IGNOREKEYRANGE/, <tt/BRLPACKET_UNIGNOREKEYRANGE/,
   <tt/BRLPACKET_IGNOREKEYSET/, <tt/BRLPACKET_UNIGNOREKEYSET/ to mask and unmask
   keys,
   <item><tt/BRLPACKET_WRITE/ to display text on this tty,
-  <item><tt/BRLPACKET_GETRAW/ to enter raw mode,
+  <item><tt/BRLPACKET_ENTERRAWMODE/ to enter raw mode,
   <item><tt/BRLPACKET_GETDRIVERID/, <tt/BRLPACKET_GETDRIVERNAME/
   or <tt/BRLPACKET_GETDISPLAYSIZE/ to get pieces of information from the server,
   </itemize>
@@ -1243,7 +1243,7 @@ And the server might send <tt/BRLPACKET_KEY/ packets to signal key presses.
 <item>raw mode: the client wants to exchange packets directly with the braille
 terminal. Only these types of packet will be accepted.
   <itemize>
-  <item><tt/BRLPACKET_LEAVERAW/ to get back to previous mode, either normal or
+  <item><tt/BRLPACKET_LEAVERAWMODE/ to get back to previous mode, either normal or
   tty handling mode.
   <item><tt/BRLPACKET_PACKET/ to send a packet to the braille terminal.
   </itemize>
@@ -1300,7 +1300,7 @@ the current <tt/brltty/ driver. The returned string is \0 terminated.
 This should be sent by the client when it needs to know the braille display
 size. The returned data are two integers: width and then height.
 
-<sect2><tt/BRLPACKET_GETTTY/ (see <em/brlapi_getTty()/)
+<sect2><tt/BRLPACKET_ENTERTTYMODE/ (see <em/brlapi_enterTtyMode()/)
 <p>
 This should be sent by the client to get control of a tty. Sent data are
 first a series of integers: the first one gives the number of following
@@ -1321,7 +1321,7 @@ was pressed on the braille terminal, hopefuly).
 The data holds a key code as 2 integers, or
 the key flags then the command code
 as 2 integers, depending on what has been request in the
-<tt/BRLPACKET_GETTTY/ packet.
+<tt/BRLPACKET_ENTERTTYMODE/ packet.
 
 <sect2><tt/BRLPACKET_SETFOCUS/ (see <em/brlapi_setFocus()/)
 
@@ -1329,11 +1329,11 @@ as 2 integers, depending on what has been request in the
 For the server to know which tty is active, one particular client is responsible
 for sending <tt/BRLPACKET_SETFOCUS/ packets. They hold a single integer telling
 the new current tty. For instance, when running an X server on VT 7, the
-<tt/xbrlapi/ client would have sent a <tt/BRLPACKET_GETTTY(7)/ and will send
+<tt/xbrlapi/ client would have sent a <tt/BRLPACKET_ENTERTTYMODE(7)/ and will send
 window IDs whenever X focus changes, allowing display and keypresses switching
 between xterms.
 
-<sect2><tt/BRLPACKET_LEAVETTY/ (see <em/brlapi_leaveTty()/)
+<sect2><tt/BRLPACKET_LEAVETTYMODE/ (see <em/brlapi_leaveTtyMode()/)
 <p>
 This should be sent to free the tty and masked keys lists.
 This is acknowledged by the server.
@@ -1400,18 +1400,18 @@ double-width character.
 A <tt/BRLPACKET_WRITE/ packet without any flag (and hence no data) means a
 "void" WRITE: the server clears the output buffer for this connection.
 
-<sect2><tt/BRLPACKET_GETRAW/ (see <em/brlapi_getRaw()/)
+<sect2><tt/BRLPACKET_ENTERRAWMODE/ (see <em/brlapi_enterRawMode()/)
 <p>
-To enter raw mode, the client must send a <tt/BRLPACKET_GETRAW/ packet,
+To enter raw mode, the client must send a <tt/BRLPACKET_ENTERRAWMODE/ packet,
 which is acknowledged. Once in raw mode, no other packet than
-<tt/BRLPACKET_LEAVERAW/ or <tt/BRLPACKET_PACKET/ will be accepted.
+<tt/BRLPACKET_LEAVERAWMODE/ or <tt/BRLPACKET_PACKET/ will be accepted.
 The data must hold the special value <tt/BRLDEVICE_MAGIC/: <tt/0xdeadbeef/, then
 the name of the driver (one byte for the length, then the name) to avoid
 erroneous raw mode activating.
 
-<sect2><tt/BRLPACKET_LEAVERAW/ (see <em/brlapi_leaveRaw()/)
+<sect2><tt/BRLPACKET_LEAVERAWMODE/ (see <em/brlapi_leaveRawMode()/)
 <p>
-To leave raw mode, the client must send a <tt/BRLPACKET_LEAVERAW/ packet, which
+To leave raw mode, the client must send a <tt/BRLPACKET_LEAVERAWMODE/ packet, which
 is acknowledged.
 
 <sect2><tt/BRLPACKET_PACKET/ (see <em/brlapi_sendRaw()/ and

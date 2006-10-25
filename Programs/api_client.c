@@ -189,6 +189,12 @@ int brlapi_getHandleSize(void)
   return sizeof(brlapi_handle_t);
 }
 
+/* Function brlapi_getHandleSize */
+int brlapi_getHandleSize(void)
+{
+  return sizeof(brlapi_handle_t);
+}
+
 static brlapi_handle_t defaultHandle;
 
 /* brlapi_initializeHandle */
@@ -720,28 +726,28 @@ out:
   return res;
 }
 
-/* brlapi_getRaw */
+/* brlapi_enterRawMode */
 /* Switch to Raw mode */
-int brlapi__getRaw(brlapi_handle_t *handle, const char *driver)
+int brlapi__enterRawMode(brlapi_handle_t *handle, const char *driver)
 {
-  return brlapi__getDriverSpecific(handle, driver, BRLPACKET_GETRAW, STRAW);
+  return brlapi__getDriverSpecific(handle, driver, BRLPACKET_ENTERRAWMODE, STRAW);
 }
 
-int brlapi_getRaw(const char *driver)
+int brlapi_enterRawMode(const char *driver)
 {
-  return brlapi__getRaw(&defaultHandle, driver);
+  return brlapi__enterRawMode(&defaultHandle, driver);
 }
 
-/* brlapi_leaveRaw */
+/* brlapi_leaveRawMode */
 /* Leave Raw mode */
-int brlapi__leaveRaw(brlapi_handle_t *handle)
+int brlapi__leaveRawMode(brlapi_handle_t *handle)
 {
-  return brlapi__leaveDriverSpecific(handle, BRLPACKET_LEAVERAW, STRAW);
+  return brlapi__leaveDriverSpecific(handle, BRLPACKET_LEAVERAWMODE, STRAW);
 }
 
-int brlapi_leaveRaw(void)
+int brlapi_leaveRawMode(void)
 {
-  return brlapi__leaveRaw(&defaultHandle);
+  return brlapi__leaveRawMode(&defaultHandle);
 }
 
 /* brlapi_sendRaw */
@@ -922,9 +928,9 @@ static int getControllingTty(void)
   return -1;
 }
 
-/* Function : brlapi_getTty */
+/* Function : brlapi_enterTtyMode */
 /* Takes control of a tty */
-int brlapi__getTty(brlapi_handle_t *handle, int tty, const char *how)
+int brlapi__enterTtyMode(brlapi_handle_t *handle, int tty, const char *driverName)
 {
   /* Determine which tty to take control of */
   if (tty<=0) tty = getControllingTty();
@@ -932,19 +938,19 @@ int brlapi__getTty(brlapi_handle_t *handle, int tty, const char *how)
   0xffffffff can not be a valid WINDOWID (top 3 bits guaranteed to be zero) */
   if (tty<0) { brlapi_errno=BRLERR_UNKNOWNTTY; return -1; }
   
-  if (brlapi__getTtyPath(handle, &tty, 1, how)) return -1;
+  if (brlapi__getTtyPath(handle, &tty, 1, driverName)) return -1;
 
   return tty;
 }
 
-int brlapi_getTty(int tty, const char *how)
+int brlapi_enterTtyMode(int tty, const char *how)
 {
-  return brlapi__getTty(&defaultHandle, tty, how);
+  return brlapi__enterTtyMode(&defaultHandle, tty, how);
 }
 
 /* Function : brlapi_getTtyPath */
 /* Takes control of a tty path */
-int brlapi__getTtyPath(brlapi_handle_t *handle, int *ttys, int nttys, const char *how)
+int brlapi__getTtyPath(brlapi_handle_t *handle, int *ttys, int nttys, const char *driverName)
 {
   int res;
   unsigned char packet[BRLAPI_MAXPACKETSIZE], *p;
@@ -983,16 +989,16 @@ int brlapi__getTtyPath(brlapi_handle_t *handle, int *ttys, int nttys, const char
 
   *nbTtys = htonl(*nbTtys);
   p = (unsigned char *) t;
-  if (how==NULL) n = 0; else n = strlen(how);
+  if (driverName==NULL) n = 0; else n = strlen(driverName);
   if (n>BRLAPI_MAXNAMELENGTH) {
     brlapi_errno = BRLERR_INVALID_PARAMETER;
     return -1;
   }
   *p = n;
   p++;
-  memcpy(p, how, n);
+  memcpy(p, driverName, n);
   p += n;
-  if ((res=brlapi__writePacketWaitForAck(handle,BRLPACKET_GETTTY,packet,(p-packet))) == 0)
+  if ((res=brlapi__writePacketWaitForAck(handle,BRLPACKET_ENTERTTYMODE,packet,(p-packet))) == 0)
     handle->state |= STCONTROLLINGTTY;
   pthread_mutex_unlock(&handle->state_mutex);
   return res;
@@ -1003,9 +1009,9 @@ int brlapi_getTtyPath(int *ttys, int nttys, const char *how)
   return brlapi__getTtyPath(&defaultHandle, ttys, nttys, how);
 }
 
-/* Function : brlapi_leaveTty */
+/* Function : brlapi_leaveTtyMode */
 /* Gives back control of our tty to brltty */
-int brlapi__leaveTty(brlapi_handle_t *handle)
+int brlapi__leaveTtyMode(brlapi_handle_t *handle)
 {
   int res;
   pthread_mutex_lock(&handle->state_mutex);
@@ -1015,16 +1021,16 @@ int brlapi__leaveTty(brlapi_handle_t *handle)
     goto out;
   }
   handle->brlx = 0; handle->brly = 0;
-  res = brlapi__writePacketWaitForAck(handle,BRLPACKET_LEAVETTY,NULL,0);
+  res = brlapi__writePacketWaitForAck(handle,BRLPACKET_LEAVETTYMODE,NULL,0);
   handle->state &= ~STCONTROLLINGTTY;
 out:
   pthread_mutex_unlock(&handle->state_mutex);
   return res;
 }
 
-int brlapi_leaveTty(void)
+int brlapi_leaveTtyMode(void)
 {
-  return brlapi__leaveTty(&defaultHandle);
+  return brlapi__leaveTtyMode(&defaultHandle);
 }
 
 /* Function : brlapi_setFocus */

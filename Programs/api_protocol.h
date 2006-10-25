@@ -56,17 +56,17 @@ extern "C" {
 #define BRLPACKET_GETDRIVERID       'd'    /**< Ask which driver is used    */
 #define BRLPACKET_GETDRIVERNAME     'n'    /**< Ask which driver is used    */
 #define BRLPACKET_GETDISPLAYSIZE    's'    /**< Dimensions of brl display   */
-#define BRLPACKET_GETTTY            't'    /**< Asks for a specified tty    */
+#define BRLPACKET_ENTERTTYMODE      't'    /**< Asks for a specified tty    */
 #define BRLPACKET_SETFOCUS          'F'    /**< Set current tty focus       */
-#define BRLPACKET_LEAVETTY          'L'    /**< Release the tty             */
+#define BRLPACKET_LEAVETTYMODE      'L'    /**< Release the tty             */
 #define BRLPACKET_KEY               'k'    /**< Braille key                 */
 #define BRLPACKET_IGNOREKEYRANGE    'm'    /**< Mask key-range              */
 #define BRLPACKET_IGNOREKEYSET      'M'    /**< Mask key-set                */
 #define BRLPACKET_UNIGNOREKEYRANGE  'u'    /**< Unmask key range            */
 #define BRLPACKET_UNIGNOREKEYSET    'U'    /**< Unmask key set              */
 #define BRLPACKET_WRITE             'w'    /**< Write                       */
-#define BRLPACKET_GETRAW            '*'    /**< Enter in raw mode           */
-#define BRLPACKET_LEAVERAW          '#'    /**< Leave raw mode              */
+#define BRLPACKET_ENTERRAWMODE      '*'    /**< Enter in raw mode           */
+#define BRLPACKET_LEAVERAWMODE      '#'    /**< Leave raw mode              */
 #define BRLPACKET_PACKET            'p'    /**< Raw packets                 */
 #define BRLPACKET_ACK               'A'    /**< Acknowledgement             */
 #define BRLPACKET_ERROR             'e'    /**< non-fatal error             */
@@ -74,7 +74,7 @@ extern "C" {
 #define BRLPACKET_SUSPEND           'S'    /**< Suspend driver              */
 #define BRLPACKET_RESUME            'R'    /**< Resume driver              */
 
-/** Magic number to give when sending a BRLPACKET_GETRAW or BRLPACKET_SUSPEND packet */
+/** Magic number to give when sending a BRLPACKET_ENTERRAWMODE or BRLPACKET_SUSPEND packet */
 #define BRLDEVICE_MAGIC (0xdeadbeefL)
 
 /** Structure of packets headers */
@@ -98,7 +98,7 @@ typedef struct {
   unsigned char packet;
 } errorPacket_t;
 
-/** Structure of getRaw / suspend packets */
+/** Structure of enterRawMode / suspend packets */
 typedef struct {
   uint32_t magic;
   unsigned char nameLength;
@@ -213,15 +213,15 @@ ssize_t brlapi_readPacket(brlapi_fileDescriptor fd, brl_type_t *type, void *buf,
  *
  * - brlapi_initializeConnection()
  * - brlapi_closeConnection()
- * - brlapi_getRaw()
+ * - brlapi_enterRawMode()
  * - brlapi_leaveRaw()
  * - brlapi_sendRaw()
  * - brlapi_recvRaw()
  * - brlapi_getDriverId()
  * - brlapi_getDriverName()
  * - brlapi_getDisplaySize()
- * - brlapi_getTty()
- * - brlapi_leaveTty()
+ * - brlapi_enterTtyMode()
+ * - brlapi_leaveTtyMode()
  * - brlapi_*write*()
  * - brlapi_(un)?ignorekey(Range|Set)()
  * - brlapi_readKey()

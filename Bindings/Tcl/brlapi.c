@@ -531,7 +531,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
           return TCL_OK;
         }
       } else {
-        int result = brlapi__getTty(session->handle, -1, options.driver);
+        int result = brlapi__enterTtyMode(session->handle, -1, options.driver);
 
         if (result != -1) {
           setIntResult(interp, result);
@@ -549,7 +549,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
         return TCL_ERROR;
       }
 
-      if (brlapi__leaveTty(session->handle) != -1) return TCL_OK;
+      if (brlapi__leaveTtyMode(session->handle) != -1) return TCL_OK;
       setBrlapiError(interp);
       return TCL_ERROR;
     }
@@ -782,7 +782,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
       {
         const char *driver = Tcl_GetString(objv[2]);
 
-        if (brlapi__getRaw(session->handle, driver) != -1) return TCL_OK;
+        if (brlapi__enterRawMode(session->handle, driver) != -1) return TCL_OK;
         setBrlapiError(interp);
         return TCL_ERROR;
       }
@@ -794,7 +794,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
         return TCL_ERROR;
       }
 
-      if (brlapi__leaveRaw(session->handle) != -1) return TCL_OK;
+      if (brlapi__leaveRawMode(session->handle) != -1) return TCL_OK;
       setBrlapiError(interp);
       return TCL_ERROR;
     }

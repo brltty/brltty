@@ -6,7 +6,7 @@ C API documentation : http://mielke.cc/brltty/doc/BrlAPIref-HTML
 Example : 
 import brlapi
 b = brlapi.Bridge()
-b.getTty()
+b.enterTtyMode()
 b.writeText("Press any key to continue ...")
 key = b.readKey()
 b.writeText("Key %lld ! Press any key to exit ..." % key)
@@ -234,7 +234,7 @@ cdef class Bridge:
 			else:
 				return name
 
-	def getTty(self, tty = -1, how = None):
+	def enterTtyMode(self, tty = -1, how = None):
 		"""Ask for some tty, with some key mechanism
 		* tty : If tty >= 0, application takes control of the specified tty
 			If tty == -1, the library first tries to get the tty number from the WINDOWID environment variable (form xterm case), then the CONTROLVT variable, and at last reads /proc/self/stat (on linux)
@@ -248,7 +248,7 @@ cdef class Bridge:
 		else:
 			c_how = how
 		c_brlapi.Py_BEGIN_ALLOW_THREADS
-		retval = c_brlapi.brlapi_getTty(c_tty, c_how)
+		retval = c_brlapi.brlapi_enterTtyMode(c_tty, c_how)
 		c_brlapi.Py_END_ALLOW_THREADS
 		if retval == -1:
 			raise OperationError(returnerrno())
@@ -271,7 +271,7 @@ cdef class Bridge:
 	
 	def setFocus(self, tty):
 		"""Tell the current tty to brltty.
-		This is intended for focus tellers, such as brltty, xbrlapi, screen, ... getTty() must have been called before hand to tell where this focus applies in the tty tree."""
+		This is intended for focus tellers, such as brltty, xbrlapi, screen, ... enterTtyMode() must have been called before hand to tell where this focus applies in the tty tree."""
 		cdef int retval
 		cdef int c_tty
 		c_tty = tty
@@ -333,11 +333,11 @@ cdef class Bridge:
 
 		This function returns one key press's code.
 
-		If None or "" was given to getTty(), a brltty command is returned. It is hence pretty driver-independent, and should be used by default when no other option is possible.
+		If None or "" was given to enterTtyPath(), a brltty command is returned. It is hence pretty driver-independent, and should be used by default when no other option is possible.
 
 		By default, all commands but those which restart drivers and switch virtual are returned to the application and not to brltty. If the application doesn't want to see some command events, it should call either ignoreKeySet() or ignoreKeyRange().
 
-		If some driver name was given to getTty(), a raw keycode is returned, as specified by the terminal driver. It generally corresponds to the very code that the terminal tells to the driver. This should only be used by applications which are dedicated to a particular braille terminal. Hence, checking the terminal type thanks to a call to driverid or even drivername before getting tty control is a pretty good idea.
+		If some driver name was given to enterTtyMode(), a raw keycode is returned, as specified by the terminal driver. It generally corresponds to the very code that the terminal tells to the driver. This should only be used by applications which are dedicated to a particular braille terminal. Hence, checking the terminal type thanks to a call to driverid or even drivername before getting tty control is a pretty good idea.
 
 		By default, all the keypresses will be passed to the client, none will go through brltty, so the application will have to handle console switching itself for instance."""
 		cdef unsigned long long code
@@ -359,7 +359,7 @@ cdef class Bridge:
 
 		This function asks the server to give keys between x and y to brltty, rather than returning them to the application via readKey().
 
-		Note: The given codes are either raw keycodes if some driver name was given to getTty(), or brltty commands if None or "" was given."""
+		Note: The given codes are either raw keycodes if some driver name was given to enterTtyMode(), or brltty commands if None or "" was given."""
 		cdef int retval
 		cdef unsigned long long x,y
 		x = range[0]
@@ -379,7 +379,7 @@ cdef class Bridge:
 
 		This function asks the server to return keys between x and y to the application, and not give them to brltty.
 
-		Note: You shouldn't ask the server to give you key presses which are usually used to switch between TTYs, unless you really know what you are doing ! The given codes are either raw keycodes if some driver name was given to getTty(), or brltty commands if None or "" was given."""
+		Note: You shouldn't ask the server to give you key presses which are usually used to switch between TTYs, unless you really know what you are doing ! The given codes are either raw keycodes if some driver name was given to enterTtyMode(), or brltty commands if None or "" was given."""
 		cdef int retval
 		cdef unsigned long long x,y
 		x = range[0]
@@ -392,7 +392,7 @@ cdef class Bridge:
 		else:
 			return retval
 
-	def getRaw(self, drivername):
+	def enterRawMode(self, drivername):
 		"""Switch to Raw mode
 		
 		* driver : Specifies the name of the driver for which the raw communication will be established"""
@@ -400,7 +400,7 @@ cdef class Bridge:
 		cdef char *c_drivername
 		c_drivername = drivername
 		c_brlapi.Py_BEGIN_ALLOW_THREADS
-		retval = c_brlapi.brlapi_getRaw(c_drivername)
+		retval = c_brlapi.brlapi_enterRawMode(c_drivername)
 		c_brlapi.Py_END_ALLOW_THREADS
 		if retval == -1:
 			raise OperationError(returnerror())

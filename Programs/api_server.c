@@ -495,16 +495,16 @@ typedef struct { /* packet handlers */
   PacketHandler getDriverId;
   PacketHandler getDriverName;
   PacketHandler getDisplaySize;
-  PacketHandler getTty;
+  PacketHandler enterTtyMode;
   PacketHandler setFocus;
-  PacketHandler leaveTty;
+  PacketHandler leaveTtyMode;
   PacketHandler ignoreKeyRange;
   PacketHandler unignoreKeyRange;
   PacketHandler ignoreKeySet;
   PacketHandler unignoreKeySet;
   PacketHandler write;
-  PacketHandler getRaw;  
-  PacketHandler leaveRaw;
+  PacketHandler enterRawMode;  
+  PacketHandler leaveRawMode;
   PacketHandler packet;
   PacketHandler suspend;
   PacketHandler resume;
@@ -784,7 +784,7 @@ static int handleGetDisplaySize(Connection *c, brl_type_t type, unsigned char *p
   return 0;
 }
 
-static int handleGetTty(Connection *c, brl_type_t type, unsigned char *packet, size_t size)
+static int handleEnterTtyMode(Connection *c, brl_type_t type, unsigned char *packet, size_t size)
 {
   uint32_t * ints = (uint32_t *) packet;
   uint32_t nbTtys;
@@ -812,7 +812,7 @@ static int handleGetTty(Connection *c, brl_type_t type, unsigned char *packet, s
     CHECKERR(isKeyCapable(trueBraille), BRLERR_OPNOTSUPP, "driver doesn't support raw keycodes");
     how = BRL_KEYCODES;
   }
-  freeBrailleWindow(&c->brailleWindow); /* In case of multiple gettty requests */
+  freeBrailleWindow(&c->brailleWindow); /* In case of multiple enterTtyMode requests */
   if ((initializeUnmaskedKeys(c)==-1) || (allocBrailleWindow(&c->brailleWindow)==-1)) {
     LogPrint(LOG_WARNING,"Failed to allocate some ressources");
     freeKeyrangeList(&c->unmaskedKeys);
@@ -918,7 +918,7 @@ static void doLeaveTty(Connection *c)
   freeBrailleWindow(&c->brailleWindow);
 }
 
-static int handleLeaveTty(Connection *c, brl_type_t type, unsigned char *packet, size_t size)
+static int handleLeaveTtyMode(Connection *c, brl_type_t type, unsigned char *packet, size_t size)
 {
   LogPrintRequest(type, c->fd);
   CHECKERR(!c->raw,BRLERR_ILLEGAL_INSTRUCTION,"not allowed in raw mode");
@@ -1107,7 +1107,7 @@ static int checkDriverSpecificModePacket(Connection *c, unsigned char *packet, s
   return 1;
 }
 
-static int handleGetRaw(Connection *c, brl_type_t type, unsigned char *packet, size_t size)
+static int handleEnterRawMode(Connection *c, brl_type_t type, unsigned char *packet, size_t size)
 {
   LogPrintRequest(type, c->fd);
   CHECKERR(!c->raw, BRLERR_ILLEGAL_INSTRUCTION,"not allowed in raw mode");
@@ -1134,7 +1134,7 @@ static int handleGetRaw(Connection *c, brl_type_t type, unsigned char *packet, s
   return 0;
 }
 
-static int handleLeaveRaw(Connection *c, brl_type_t type, unsigned char *packet, size_t size)
+static int handleLeaveRawMode(Connection *c, brl_type_t type, unsigned char *packet, size_t size)
 {
   LogPrintRequest(type, c->fd);
   CHECKERR(c->raw,BRLERR_ILLEGAL_INSTRUCTION,"not allowed out of raw mode");
@@ -1195,10 +1195,10 @@ static int handleResume(Connection *c, brl_type_t type, unsigned char *packet, s
 
 static PacketHandlers packetHandlers = {
   handleGetDriverId, handleGetDriverName, handleGetDisplaySize,
-  handleGetTty, handleSetFocus, handleLeaveTty,
+  handleEnterTtyMode, handleSetFocus, handleLeaveTtyMode,
   handleKeyRange, handleKeyRange, handleKeySet, handleKeySet,
   handleWrite,
-  handleGetRaw, handleLeaveRaw, handlePacket, handleSuspend, handleResume
+  handleEnterRawMode, handleLeaveRawMode, handlePacket, handleSuspend, handleResume
 };
 
 static AuthDescriptor *authDescriptor;
@@ -1316,16 +1316,16 @@ static int processRequest(Connection *c, PacketHandlers *handlers)
     case BRLPACKET_GETDRIVERID: p = handlers->getDriverId; break;
     case BRLPACKET_GETDRIVERNAME: p = handlers->getDriverName; break;
     case BRLPACKET_GETDISPLAYSIZE: p = handlers->getDisplaySize; break;
-    case BRLPACKET_GETTTY: p = handlers->getTty; break;
+    case BRLPACKET_ENTERTTYMODE: p = handlers->enterTtyMode; break;
     case BRLPACKET_SETFOCUS: p = handlers->setFocus; break;
-    case BRLPACKET_LEAVETTY: p = handlers->leaveTty; break;
+    case BRLPACKET_LEAVETTYMODE: p = handlers->leaveTtyMode; break;
     case BRLPACKET_IGNOREKEYRANGE: p = handlers->ignoreKeyRange; break;
     case BRLPACKET_UNIGNOREKEYRANGE: p = handlers->unignoreKeyRange; break;
     case BRLPACKET_IGNOREKEYSET: p = handlers->ignoreKeySet; break;
     case BRLPACKET_UNIGNOREKEYSET: p = handlers->unignoreKeySet; break;
     case BRLPACKET_WRITE: p = handlers->write; break;
-    case BRLPACKET_GETRAW: p = handlers->getRaw; break;
-    case BRLPACKET_LEAVERAW: p = handlers->leaveRaw; break;
+    case BRLPACKET_ENTERRAWMODE: p = handlers->enterRawMode; break;
+    case BRLPACKET_LEAVERAWMODE: p = handlers->leaveRawMode; break;
     case BRLPACKET_PACKET: p = handlers->packet; break;
     case BRLPACKET_SUSPEND: p = handlers->suspend; break;
     case BRLPACKET_RESUME: p = handlers->resume; break;
@@ -2269,14 +2269,14 @@ brl_keycode_t coreToClient(unsigned long keycode, int how) {
     }
     case BRL_BLK_PASSKEY:
       switch (keycode & BRL_MSK_ARG) {
-      case BRL_KEY_ENTER:		code = BRLAPI_KEY_SYM_LINEFEED;break;
+      case BRL_KEY_ENTER:		code = BRLAPI_KEY_SYM_ENTER;	break;
       case BRL_KEY_TAB:			code = BRLAPI_KEY_SYM_TAB;	break;
       case BRL_KEY_BACKSPACE:		code = BRLAPI_KEY_SYM_BACKSPACE;break;
       case BRL_KEY_ESCAPE:		code = BRLAPI_KEY_SYM_ESCAPE;	break;
-      case BRL_KEY_CURSOR_LEFT:		code = BRLAPI_KEY_SYM_LEFT;	break;
-      case BRL_KEY_CURSOR_RIGHT:	code = BRLAPI_KEY_SYM_RIGHT;	break;
-      case BRL_KEY_CURSOR_UP:		code = BRLAPI_KEY_SYM_UP;	break;
-      case BRL_KEY_CURSOR_DOWN:		code = BRLAPI_KEY_SYM_DOWN;	break;
+      case BRL_KEY_CURSOR_LEFT:		code = BRLAPI_KEY_SYM_CURSOR_LEFT;break;
+      case BRL_KEY_CURSOR_RIGHT:	code = BRLAPI_KEY_SYM_CURSOR_RIGHT;break;
+      case BRL_KEY_CURSOR_UP:		code = BRLAPI_KEY_SYM_CURSOR_UP;break;
+      case BRL_KEY_CURSOR_DOWN:		code = BRLAPI_KEY_SYM_CURSOR_DOWN;break;
       case BRL_KEY_PAGE_UP:		code = BRLAPI_KEY_SYM_PAGE_UP;	break;
       case BRL_KEY_PAGE_DOWN:		code = BRLAPI_KEY_SYM_PAGE_DOWN;break;
       case BRL_KEY_HOME:		code = BRLAPI_KEY_SYM_HOME;	break;
@@ -2426,7 +2426,7 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
     command = trueBraille->keyToCommand(brl,caller,keycode);
     pthread_mutex_unlock(&driverMutex);
   } else {
-    /* we already ensured in GETTTY that no connection has how == KEYCODES */
+    /* we already ensured in ENTERTTYMODE that no connection has how == KEYCODES */
     pthread_mutex_lock(&driverMutex);
     res = trueBraille->readCommand(brl,caller);
     pthread_mutex_unlock(&driverMutex);

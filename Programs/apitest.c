@@ -121,8 +121,8 @@ void showDots(void)
     brlapi_perror("failed");
     exit(1);
   }
-  if (brlapi_getTty(-1, NULL)<0) {
-    brlapi_perror("getTty");
+  if (brlapi_enterTtyMode(-1, NULL)<0) {
+    brlapi_perror("enterTtyMode");
     exit(1);
   }
   if (x*y<DOTS_TOTALLEN) {
@@ -163,8 +163,8 @@ void enterLearnMode(void)
   char buf[0X100];
 
   fprintf(stderr,"Entering command learn mode\n");
-  if (brlapi_getTty(-1, NULL)<0) {
-    brlapi_perror("getTty");
+  if (brlapi_enterTtyMode(-1, NULL)<0) {
+    brlapi_perror("enterTtyMode");
     return;
   }
 
@@ -247,8 +247,8 @@ void showKeyCodes(void)
     brlapi_perror("getDriverName");
     return;
   }
-  if (brlapi_getTty(-1, buf)<0) {
-    brlapi_perror("getTty");
+  if (brlapi_enterTtyMode(-1, buf)<0) {
+    brlapi_perror("enterTtyMode");
     return;
   }
 

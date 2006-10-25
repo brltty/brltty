@@ -119,7 +119,7 @@ brltty_brl_send_dots (guchar         *dots,
 void
 brltty_brl_close_device ()
 {
-    brlapi_leaveTty();
+    brlapi_leaveTtyMode();
     brlapi_closeConnection();
 }
 
@@ -378,7 +378,7 @@ brltty_brl_open_device (gchar*                         device_name,
      starting from 6.8.0
 
      If you have an older version, the tty will be kept to -1 so that the
-     brlapi_getTty() function will look at the CONTROLVT environment variable.
+     brlapi_EnterTtyMode() function will look at the CONTROLVT environment variable.
      So people having old versions should have something like this in their
      .xsession, before launching gnopernicus:
 
@@ -394,23 +394,23 @@ brltty_brl_open_device (gchar*                         device_name,
 
     root = gdk_get_default_root_window();
     if (!root)
-        goto gettty;
+        goto enterTtyMode;
 
     VTAtom = gdk_atom_intern("XFree86_VT", TRUE);
     if (VTAtom == None)
-        goto gettty;
+        goto enterTtyMode;
 
     if (!(gdk_property_get(root, VTAtom, AnyPropertyType, 0, 1, FALSE,
             &type, &format, &length, &buf)))
     {
         fprintf(stderr, "no XFree86_VT property\n"); //to be translated
-        goto gettty;
+        goto enterTtyMode;
     }
 
     if (length<1)
     {
         fprintf(stderr, "no item in XFree86_VT property\n"); //to be translated
-            goto gettty;
+            goto enterTtyMode;
     }
 
     switch ((guint)type)
@@ -430,8 +430,8 @@ brltty_brl_open_device (gchar*                         device_name,
             fprintf(stderr, "Bad type for VT number\n"); //to be translated
     }
 
-gettty:
-    if (brlapi_getTty (VT, BRLCOMMANDS) == -1)
+enterTtyMode:
+    if (brlapi_enterTtyMode (VT, BRLCOMMANDS) == -1)
     {
         brlapi_perror("Unable to get Tty"); //to be translated
         return 0;

@@ -45,8 +45,8 @@ cdef extern from "Programs/api.h":
 	int brlapi_getDriverId(char*, int)
 	int brlapi_getDriverName(char*, int)
 
-	int brlapi_getTty(int, char*)
-	int brlapi_leaveTty()
+	int brlapi_enterTtyMode(int, char*)
+	int brlapi_leaveTtyMode()
 	int brlapi_setFocus(int)
 
 	int brlapi_write(brlapi_writeStruct*)
@@ -57,8 +57,8 @@ cdef extern from "Programs/api.h":
 	int brlapi_unignoreKeyRange(unsigned long long, unsigned long long)
 	int brlapi_readKey(int, unsigned long long*)
 
-	int brlapi_getRaw(char*)
-	int brlapi_leaveRaw()
+	int brlapi_enterRawMode(char*)
+	int brlapi_leaveRawMode()
 	int brlapi_recvRaw(void*, int)
 	int brlapi_sendRaw(void*, int)
 

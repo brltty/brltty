@@ -59,6 +59,9 @@ typedef struct brlapi_handle_t brlapi_handle_t;
 /** Returns the size of an object of type brlapi_handle_t in bytes */
 int brlapi_getHandleSize(void);
 
+/** Returns the size of an object of type brlapi_handle_t in bytes */
+int brlapi_getHandleSize(void);
+
 /** \defgroup brlapi_connection Connecting to BrlAPI
  *
  * Before calling any other function of the library, calling
@@ -319,7 +322,7 @@ int brlapi__getDisplaySize(brlapi_handle_t *handle, unsigned int *x, unsigned in
 /* It should be removed in the long run. */
 #define BRLCOMMANDS NULL
 
-/* brlapi_getTty */
+/* brlapi_enterTtyMode */
 /** Ask for some tty, with some key mechanism
  *
  * \param tty
@@ -328,14 +331,14 @@ int brlapi__getDisplaySize(brlapi_handle_t *handle, unsigned int *x, unsigned in
  * environment variable (for xterm case), then the CONTROLVT variable, and at
  * last reads /proc/self/stat (on linux).
  *
- * \param how tells how the application wants brlapi_readKey() to return
+ * \param driverName tells how the application wants brlapi_readKey() to return
  * key presses. NULL or "" means BRLTTY commands are required,
  * whereas a driver name means that raw key codes returned by this
  * driver are expected.
  *
  * In an X window environment, CONTROLVT might be useful. XFree86 >=4.4 defines
  * an XFree86_VT root window property which exactly holds the used VT, so that
- * it should be given to brlapi_getTty. If it isn't available, one may,
+ * it should be given to brlapi_enterTtyMode. If it isn't available, one may,
  * right into .xsession and .xinitrc, grep X's log, for instance:
  *
  * CONTROLVT="$(grep "using VT number" "/var/log/XFree86.$(echo "$DISPLAY" | sed -e "s/^.*::*\([0-9]*\).*$/\1/").log" | sed -e "s/^.*using VT number \([0-9]*\).*$/\1/")"
@@ -345,10 +348,11 @@ int brlapi__getDisplaySize(brlapi_handle_t *handle, unsigned int *x, unsigned in
  *
  * \return the used tty number on success, -1 on error
  *
- * \sa brlapi_leaveTty() brlapi_readKey()
+ * \sa brlapi_leaveTtyMode() brlapi_readKey()
  */
-int brlapi_getTty(int tty, const char *how);
-int brlapi__getTty(brlapi_handle_t *handle, int tty, const char *how);
+int brlapi_enterTtyMode(int tty, const char *driverName);
+#define blapi_getTty(tty, driverName) enterTtyMode(tty, driverName)
+int brlapi__enterTtyMode(brlapi_handle_t *handle, int tty, const char *driverName);
 
 /* brlapi_getTtyPath */
 /** Ask for some tty path, with some key mechanism
@@ -356,35 +360,36 @@ int brlapi__getTty(brlapi_handle_t *handle, int tty, const char *how);
  * \param ttys points on the array of ttys representing the tty path to be got.
  * Can be NULL if nttys is 0.
  * \param nttys gives the number of elements in ttys.
- * \param how has the same meaning as in brlapi_getTty()
+ * \param driverName has the same meaning as in brlapi_enterTtyMode()
  *
  * Providing nttys == 0 means to get the root.
  *
- * \sa brlapi_getTty()
+ * \sa brlapi_enterTtyMode()
  */
-int brlapi_getTtyPath(int *ttys, int nttys, const char *how);
+int brlapi_getTtyPath(int *ttys, int nttys, const char *driverName);
 int brlapi__getTtyPath(brlapi_handle_t *handle, int *ttys, int nttys, const char *how);
 
-/* brlapi_leaveTty */
+/* brlapi_leaveTtyMode */
 /** Stop controlling the tty
  *
  * \return 0 on success, -1 on error.
  *
- * \sa brlapi_getTty()
+ * \sa brlapi_enterTtyMode()
  */
-int brlapi_leaveTty(void);
-int brlapi__leaveTty(brlapi_handle_t *handle);
+int brlapi_leaveTtyMode(void);
+#define brlapi_leveTty brlapi_leaveTtyMode
+int brlapi__leaveTtyMode(brlapi_handle_t *handle);
 
 /* brlapi_setFocus */
 /** Tell the current tty to brltty
  *
  * This is intended for focus tellers, such as brltty, xbrlapi, screen, ...
- * brlapi_getTty() must have been called beforehand to tell where this focus
+ * brlapi_enterTtyMode() must have been called beforehand to tell where this focus
  * applies in the tty tree.
  *
  * \return 0 on success, -1 on error.
  *
- * \sa brlapi_getTty() brlapi_leaveTty()
+ * \sa brlapi_enterTtyMode() brlapi_leaveTtyMode()
  */
 int brlapi_setFocus(int tty);
 int brlapi__setFocus(brlapi_handle_t *handle, int tty);
@@ -394,10 +399,10 @@ int brlapi__setFocus(brlapi_handle_t *handle, int tty);
 /** \defgroup brlapi_write Writing on the braille display
  * \brief Write text to the braille display
  *
- * Once brlapi_getTty() was called, the application can call brlapi_writeText()
+ * Once brlapi_enterTtyMode() was called, the application can call brlapi_writeText()
  * to write things on the braille display.
  *
- * \note Be sure to call brlapi_getTty() \e before calling brlapi_write*(), or
+ * \note Be sure to call brlapi_enterTtyMode() \e before calling brlapi_write*(), or
  * else you'll get an error. This is particularly not always trivial when
  * writing multithreaded applications.
  *
@@ -497,9 +502,9 @@ int brlapi__write(brlapi_handle_t *handle, const brlapi_writeStruct *s);
 /** \defgroup brlapi_keys Reading key presses
  * \brief How to read key presses from the braille terminal
  *
- * Once brlapi_getTty() is called, the application can call brlapi_readKey() to
+ * Once brlapi_enterTtyMode() is called, the application can call brlapi_readKey() to
  * read key presses. Either key codes or commands will be returned, depending
- * on parameters given to brlapi_getTty().
+ * on parameters given to brlapi_enterTtyMode().
  *
  * Key presses are buffered, so that calling brlapi_readKey() in non-blocking
  * mode from times to times should suffice.
@@ -634,7 +639,7 @@ extern unsigned char brlapi_dotBitToNumber (unsigned char bit);
  *
  * This function returns one key press's code.
  *
- * If NULL or "" was given to brlapi_getTty(), a \e brltty command is returned,
+ * If NULL or "" was given to brlapi_enterTtyMode(), a \e brltty command is returned,
  * as described in \c <brltty/brldefs.h> . It is hence pretty
  * driver-independent, and should be used by default when no other option is
  * possible.
@@ -644,7 +649,7 @@ extern unsigned char brlapi_dotBitToNumber (unsigned char bit);
  * If the application doesn't want to see some command events,
  * it should call either brlapi_ignoreKeySet() or brlapi_ignoreKeyRange()
  *
- * If some driver name was given to brlapi_getTty(), a raw keycode is returned,
+ * If some driver name was given to brlapi_enterTtyMode(), a raw keycode is returned,
  * as specified by the terminal driver, usually in <brltty/brldefs-xy> where xy
  * is the driver's code. It generally corresponds to the very code that the
  * terminal tells to the driver.
@@ -675,7 +680,7 @@ int brlapi__readKey(brlapi_handle_t *handle, int block, brl_keycode_t *code);
  * brlapi_readKey()
  *
  * \note The given codes are either raw keycodes if some driver name was given
- * to brlapi_getTty(), or \e brltty commands if NULL or "" was given. */
+ * to brlapi_enterTtyMode(), or \e brltty commands if NULL or "" was given. */
 int brlapi_ignoreKeyRange(brl_keycode_t x, brl_keycode_t y);
 int brlapi__ignoreKeyRange(brlapi_handle_t *handle, brl_keycode_t x, brl_keycode_t y);
 
@@ -687,7 +692,7 @@ int brlapi__ignoreKeyRange(brlapi_handle_t *handle, brl_keycode_t x, brl_keycode
  * brlapi_readKey()
  *
  * \note The given codes are either raw keycodes if some driver name was given
- * to brlapi_getTty(), or \e brltty commands if NULL or "" was given. */
+ * to brlapi_enterTtyMode(), or \e brltty commands if NULL or "" was given. */
 int brlapi_ignoreKeySet(const brl_keycode_t *s, unsigned int n);
 int brlapi__ignoreKeySet(brlapi_handle_t *handle, const brl_keycode_t *s, unsigned int n);
 
@@ -701,7 +706,7 @@ int brlapi__ignoreKeySet(brlapi_handle_t *handle, const brl_keycode_t *s, unsign
  * used to switch between TTYs, unless you really know what you are doing!
  *
  * \note The given codes are either raw keycodes if some driver name was given
- * to brlapi_getTty(), or \e brltty commands if NULL or "" was given. */
+ * to brlapi_enterTtyMode(), or \e brltty commands if NULL or "" was given. */
 int brlapi_unignoreKeyRange(brl_keycode_t x, brl_keycode_t y);
 int brlapi__unignoreKeyRange(brlapi_handle_t *handle, brl_keycode_t x, brl_keycode_t y);
 
@@ -715,7 +720,7 @@ int brlapi__unignoreKeyRange(brlapi_handle_t *handle, brl_keycode_t x, brl_keyco
  * used to switch between TTYs, unless you really know what you are doing!
  *
  * \note The given codes are either raw keycodes if some driver name was given
- * to brlapi_getTty(), or \e brltty commands if NULL or "" was given. */
+ * to brlapi_enterTtyMode(), or \e brltty commands if NULL or "" was given. */
 int brlapi_unignoreKeySet(const brl_keycode_t *s, unsigned int n);
 int brlapi__unignoreKeySet(brlapi_handle_t *handle, const brl_keycode_t *s, unsigned int n);
 
@@ -728,9 +733,9 @@ int brlapi__unignoreKeySet(brlapi_handle_t *handle, const brl_keycode_t *s, unsi
  * use Raw Mode. In this special mode, the driver gives the whole control of the
  * terminal to it: \e brltty doesn't work any more.
  *
- * For this, it simply has to call brlapi_getRaw(), then brlapi_sendRaw()
+ * For this, it simply has to call brlapi_enterRawMode(), then brlapi_sendRaw()
  * and brlapi_recvRaw(), and finally give control back thanks to
- * brlapi_leaveRaw().
+ * brlapi_leaveRawMode().
  *
  * Special care of the terminal should be taken, since one might completely
  * trash the terminal's data, or even lock it! The application should always
@@ -744,19 +749,21 @@ int brlapi__unignoreKeySet(brlapi_handle_t *handle, const brl_keycode_t *s, unsi
  * @{
  */
 
-/* brlapi_getRaw */
+/* brlapi_enterRawMode */
 /** Switch to Raw mode
- * \param driver Specifies the name of the driver for which the raw
+ * \param driverName Specifies the name of the driver for which the raw
  * communication will be established.
  * \return 0 on success, -1 on error */
-int brlapi_getRaw(const char *driver);
-int brlapi__getRaw(brlapi_handle_t *handle, const char *driver);
+int brlapi_enterRawMode(const char *driverName);
+#define brlapi_getRaw(driverName) brlapi_enterRawMode(driverName) 
+int brlapi__enterRawMode(brlapi_handle_t *handle, const char *driver);
 
-/* brlapi_leaveRaw */
+/* brlapi_leaveRawMode */
 /** Leave Raw mode
  * \return 0 on success, -1 on error */
-int brlapi_leaveRaw(void);
-int brlapi__leaveRaw(brlapi_handle_t *handle);
+int brlapi_leaveRawMode(void);
+#define brlapi_leaveRaw brlapi_leaveRawMode
+int brlapi__leaveRawMode(brlapi_handle_t *handle);
 
 /* brlapi_sendRaw */
 /** Send Raw data

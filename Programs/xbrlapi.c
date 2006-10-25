@@ -166,11 +166,11 @@ static int getXVTnb(void);
 void getVT(void) {
   if (getenv("WINDOWPATH")) {
     if (brlapi_getTtyPath(NULL,0,NULL)<0)
-      fatal_brlapi_errno("getTtyPath",gettext("cannot get tty\n"));
+      fatal_brlapi_errno("geTtyPath",gettext("cannot get tty\n"));
   } else {
     int vtno = getXVTnb();
-    if (brlapi_getTty(vtno,NULL)<0)
-      fatal_brlapi_errno("getTty",gettext("cannot get tty %d\n"),vtno);
+    if (brlapi_enterTtyMode(vtno,NULL)<0)
+      fatal_brlapi_errno("enterTtyMode",gettext("cannot get tty %d\n"),vtno);
   }
   if (brlapi_ignoreKeyRange(0,BRLAPI_KEYCODE_MAX)<0)
     fatal_brlapi_errno("ignoreKeys",gettext("cannot ignore keys\n"));
