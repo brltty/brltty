@@ -160,6 +160,20 @@ api_python.auto.c: $(SRC_TOP)$(PYT_DIR)/brlapi.pyx $(SRC_TOP)$(PYT_DIR)/c_brlapi
 
 ###############################################################################
 
+JAVA_LIB = api_java.$(LIB_EXT)
+JAVA_API = libbrlapi_java.$(LIB_EXT)
+
+$(JAVA_LIB): api_java.$O api
+	$(MKLIB:<name>=brlapi) $@ api_java.$O -L. -lbrlapi
+
+api_java.$O: api.h
+	$(CC) $(LIBCFLAGS) -o $@ -c $(SRC_TOP)$(JAV_DIR)/api_java.c
+
+Brlapi.class: $(SRC_TOP)$(JAV_DIR)/Brlapi.java $(SRC_TOP)$(JAV_DIR)/BrlapiError.java $(SRC_TOP)$(JAV_DIR)/BrlapiException.java $(SRC_TOP)$(JAV_DIR)/BrlapiKey.java $(SRC_TOP)$(JAV_DIR)/BrlapiSize.java
+	$(JAVAC) $^
+
+###############################################################################
+
 BRLTTY_OBJECTS = main.$O config.$O options.$O misc.$O $(SYSTEM_OBJECT) io_misc.$O queue.$O async.$O auth.$O cut.$O cmd.$O at2.$O lock.$O charset.$O $(TBL_OBJECTS) $(CTB_OBJECTS) serial.$O $(USB_OBJECTS) $(BLUETOOTH_OBJECTS) drivers.$O $(SCREEN_OBJECTS) $(SCREEN_DRIVER_OBJECTS) route.$O brl.$O $(BRAILLE_DRIVER_OBJECTS) $(SPEECH_OBJECT) $(SPEECH_DRIVER_OBJECTS) $(TUNE_OBJECTS) $(API_OBJECTS)
 
 brltty$X: $(BRLTTY_OBJECTS)
@@ -611,6 +625,8 @@ clean::
 	-rm -f brltty$X xbrlapi$X txt2hlp$X tbl2hex$X *test$X *-static$X
 	-rm -f $(API_LIB) $(API_ARC) $(API_DLL) $(API_IMPLIB)
 	-rm -f $(PYTHON_LIB)
+	-rm -f $(JAVA_LIB)
+	-rm -f $(BLD_TOP)$(JAV_DIR)/*.class
 	-rm -f $(BLD_TOP)$(DRV_DIR)/* $(BLD_TOP)$(DAT_DIR)/*
 
 distclean::

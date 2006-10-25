@@ -441,6 +441,21 @@ BRLTTY_ARG_DISABLE(
             fi
          ]
       )
+      BRLTTY_ARG_DISABLE(
+         [java-bindings],
+         [Java bindings for BrlAPI],
+         [],
+         [
+	    AC_PATH_PROG([JAVAC], [javac])
+	    if test -n "${JAVAC}"
+	    then
+	       api_bindings="${api_bindings} api_java.so Brlapi.class"
+	       install_api_bindings="${install_api_bindings} install-api-java"
+	    else
+               AC_MSG_WARN([Java BrlAPI bindings not included: javac not found])
+            fi
+         ]
+      )
    ])
 ])
 AC_SUBST([api_objects])
