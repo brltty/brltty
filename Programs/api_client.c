@@ -1684,6 +1684,39 @@ static const brlapi_keyEntry_t brlapi_keyTable[] = {
   {.name = NULL}
 };
 
+static int
+brlapi_getArgumentWidth (brl_keycode_t keyCode) {
+  brl_keycode_t code = keyCode & BRLAPI_KEY_CODE_MASK;
+
+  switch (keyCode & BRLAPI_KEY_TYPE_MASK) {
+    default: break;
+
+    case BRLAPI_KEY_TYPE_SYM:
+      switch (code & 0XFF000000U) {
+        default: break;
+
+        case 0X00000000U:
+          switch (code & 0XFF0000U) {
+            default: break;
+            case 0X000000U: return 8;
+          }
+          break;
+
+        case 0X01000000U: return 24;
+      }
+      break;
+
+    case BRLAPI_KEY_TYPE_CMD:
+      switch (code & BRLAPI_KEY_CMD_BLK_MASK) {
+        default: return 16;
+        case 0: return 0;
+      }
+      break;
+  }
+
+  return -1;
+}
+
 int
 brlapi_expandKeyCode (
   brl_keycode_t keyCode,
@@ -1691,51 +1724,21 @@ brlapi_expandKeyCode (
   unsigned int *argument,
   unsigned int *flags
 ) {
-  brl_keycode_t type = keyCode & BRLAPI_KEY_TYPE_MASK;
-  brl_keycode_t code = keyCode & BRLAPI_KEY_CODE_MASK;
+  int argumentWidth = brlapi_getArgumentWidth(keyCode);
 
-  switch (type) {
-    default:
-      return 0;
+  if (argumentWidth != -1) {
+    unsigned int argumentMask = (1 << argumentWidth) - 1;
+    brl_keycode_t type = keyCode & BRLAPI_KEY_TYPE_MASK;
+    brl_keycode_t code = keyCode & BRLAPI_KEY_CODE_MASK;
 
-    case BRLAPI_KEY_TYPE_SYM:
-      switch (code & 0XFF000000U) {
-        default:
-          return 0;
+    *command = type | (code & ~argumentMask);
+    *argument = code & argumentMask;
+    *flags = (keyCode & BRLAPI_KEY_FLAGS_MASK) >> BRLAPI_KEY_FLAGS_SHIFT;
 
-        case 0X00000000U:
-          switch (code & 0XFF0000U) {
-            default:
-              return 0;
-
-            case 0X000000U:
-              *command = code & 0XFF00U;
-              *argument = code & 0XFFU;
-              break;
-          }
-          break;
-
-        case 0X01000000U:
-          *command = code & 0XFF000000U;
-          *argument = code & 0XFFFFFFU;
-          break;
-      }
-      break;
-
-    case BRLAPI_KEY_TYPE_CMD:
-      *command = code & BRLAPI_KEY_CMD_BLK_MASK;
-      *argument = code & BRLAPI_KEY_CMD_ARG_MASK;
-
-      if (!*command) {
-        *command |= *argument;
-        *argument = 0;
-      }
-      break;
+    return 1;
   }
 
-  *command |= type;
-  *flags = (keyCode & BRLAPI_KEY_FLAGS_MASK) >> BRLAPI_KEY_FLAGS_SHIFT;
-  return 1;
+  return 0;
 }
 
 const char *
