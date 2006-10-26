@@ -1788,6 +1788,8 @@ main (int argc, char *argv[]) {
                   }
                   break;
                 case BRL_BLK_PASSAT2:
+                  if (flags & BRL_FLG_AT2_RELEASE) AT2_interpretCode(&command, 0XF0);
+                  if (flags & BRL_FLG_AT2_EXTENDED) AT2_interpretCode(&command, 0XE0);
                   if (AT2_interpretCode(&command, arg)) goto doCommand;
                   break;
 
