@@ -1,4 +1,5 @@
 Makefile
 reldeps.mk
 *.auto.c
+*.auto.pyx
 brlapi.so

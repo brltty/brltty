@@ -9,9 +9,10 @@ b = brlapi.Bridge()
 b.enterTtyMode()
 b.writeText("Press any key to continue ...")
 key = b.readKey()
-b.writeText("Key %lld ! Press any key to exit ..." % key)
+(command, argument, flags) = b.expandKeyCode(key)
+b.writeText("Key %ld (%x %x %x) ! Press any key to exit ..." % (key, command, argument, flags))
 b.readKey()
-b.leaveTty()
+b.leaveTtyMode()
 """
 
 ###############################################################################
@@ -255,7 +256,7 @@ cdef class Bridge:
 		else:
 			return retval
 
-	def leaveTty(self):
+	def leaveTtyMode(self):
 		"""Stop controlling the tty"""
 		cdef int retval
 		c_brlapi.Py_BEGIN_ALLOW_THREADS
@@ -353,6 +354,18 @@ cdef class Bridge:
 			return None
 		else:
 			return code
+
+	def expandKeyCode(self, code):
+		"""Expand a keycode into command, argument and flags parts."""
+		cdef unsigned int command
+		cdef unsigned int argument
+		cdef unsigned int flags
+		cdef int retval
+		retval = c_brlapi.brlapi_expandKeyCode(code, <unsigned int*>&command, <unsigned int*>&argument, <unsigned int*>&flags)
+		if retval == -1:
+			raise OperationError(returnerrno())
+		else:
+			return (command, argument, flags)
 	
 	def ignoreKeyRange(self, range):
 		"""Ignore some key presses from the braille keyboard.
@@ -406,3 +419,5 @@ cdef class Bridge:
 			raise OperationError(returnerror())
 		else:
 			return retval
+
+include "cmddefs.auto.pyx"

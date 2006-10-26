@@ -32,8 +32,11 @@ $(PYTHON_API): brlapi.$O api
 brlapi.$O: brlapi.auto.c $(API_HEADERS)
 	$(CC) $(LIBCFLAGS) $(PYREXC_CFLAGS) $(PYTHON_CPPFLAGS) -o $@ -c brlapi.auto.c
 
-brlapi.auto.c: $(SRC_DIR)/brlapi.pyx $(SRC_DIR)/c_brlapi.pxd
+brlapi.auto.c: $(SRC_DIR)/brlapi.pyx $(SRC_DIR)/c_brlapi.pxd cmddefs.auto.pyx
 	$(PYREXC) -o $@ $(SRC_DIR)/brlapi.pyx
+
+cmddefs.auto.pyx: $(BRLDEFS_HDR) $(BRLDEFS_AWK) $(SRC_DIR)/cmddefs.awk
+	$(AWK) -f $(BRLDEFS_AWK) -f $(SRC_DIR)/cmddefs.awk $(BRLDEFS_HDR) >$@
 
 install: $(PYTHON_API)
 	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(PYTHON_SITE_PKG)
@@ -43,5 +46,5 @@ uninstall: $(PYTHON_API)
 	-rm -f $(INSTALL_ROOT)$(PYTHON_SITE_PKG)/$(PYTHON_API)
 
 clean::
-	-rm $(PYTHON_API)
+	-rm -f $(PYTHON_API) *.auto.pyx
 

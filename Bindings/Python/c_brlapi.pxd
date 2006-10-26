@@ -56,6 +56,7 @@ cdef extern from "Programs/api.h":
 	int brlapi_ignoreKeyRange(unsigned long long, unsigned long long)
 	int brlapi_unignoreKeyRange(unsigned long long, unsigned long long)
 	int brlapi_readKey(int, unsigned long long*)
+	int brlapi_expandKeyCode(unsigned long long, unsigned int *, unsigned int *, unsigned int *)
 
 	int brlapi_enterRawMode(char*)
 	int brlapi_leaveRawMode()

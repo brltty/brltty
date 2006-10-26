@@ -15,19 +15,28 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-BRLDEFS_HDR = $(SRC_TOP)$(PGM_DIR)/brldefs.h
-BRLDEFS_AWK = $(SRC_TOP)$(PGM_DIR)/brldefs.awk
+function brlCommand(name, symbol, value, help) {
+  writeKeyDefinition(name, value)
+}
 
-API_DIR = $(BLD_TOP)$(PGM_DIR)
-API_LDFLAGS = -L$(API_DIR) -lbrlapi
+function brlBlock(name, symbol, value, help) {
+  if (name == "PASSCHAR") return
+  if (name == "PASSKEY") return
 
-API_HEADER = $(API_DIR)/api.h
-API_CMDDEFS = $(API_DIR)/api_cmddefs.auto.h
-API_HEADERS = $(API_HEADER) $(API_CMDDEFS)
+  if (value ~ /^0[xX][0-9a-fA-F]+00$/) {
+    writeKeyDefinition(name, tolower(value) "00")
+  }
+}
 
-api:
-	cd $(API_DIR) && $(MAKE) $(@)
+function brlKey(name, symbol, value, help) {
+}
 
-$(API_CMDDEFS):
-	cd $(API_DIR) && $(MAKE) $(@F)
+function brlFlag(name, symbol, value, help) {
+}
 
+function brlDot(number, symbol, value, help) {
+}
+
+function writeKeyDefinition(name, value) {
+  print "KEY_CMD_" name " = " value
+}
