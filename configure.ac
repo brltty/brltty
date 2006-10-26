@@ -477,6 +477,7 @@ BRLTTY_ARG_DISABLE(
             brltty_build_directories="${brltty_build_directories} Bindings/${brltty_bindings_directory}"
          done
 
+         all_api_bindings="all-api-bindings"
          install_api_bindings="install-api-bindings"
       }
    ])
@@ -484,6 +485,7 @@ BRLTTY_ARG_DISABLE(
 AC_SUBST([api_objects])
 AC_SUBST([api_libraries])
 AC_SUBST([api_bindings])
+AC_SUBST([all_api_bindings])
 AC_SUBST([install_api_bindings])
 AC_SUBST([all_api])
 AC_SUBST([install_api])

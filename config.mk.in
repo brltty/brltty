@@ -191,13 +191,15 @@ API_VERSION = @api_version@
 API_RELEASE = @api_release@
 API_OBJECTS = @api_objects@
 API_LIBRARIES = @api_libraries@
-API_BINDINGS = @api_bindings@
-INSTALL_API_BINDINGS = @install_api_bindings@
 ALL_API = @all_api@
 INSTALL_API = @install_api@
 API_DYNAMIC_LIBRARY = @api_dynamic_library@
 INSTALL_API_LIBRARIES = @install_api_libraries@
 API_AUTHFILE = @api_authfile@
+
+API_BINDINGS = @api_bindings@
+ALL_API_BINDINGS = @all_api_bindings@
+INSTALL_API_BINDINGS = @install_api_bindings@
 
 ALL_XBRLAPI = @all_xbrlapi@
 INSTALL_XBRLAPI = @install_xbrlapi@

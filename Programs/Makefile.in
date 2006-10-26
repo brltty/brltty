@@ -20,7 +20,7 @@ all-brltty: brltty$X $(BRAILLE_DRIVERS) $(BRAILLE_HELP) $(SPEECH_DRIVERS) $(SCRE
 all-brltest: brltest$X $(BRAILLE_DRIVERS)
 all-spktest: spktest$X $(SPEECH_DRIVERS)
 all-scrtest: scrtest$X $(SCREEN_DRIVERS)
-all-api: apitest$X $(ALL_XBRLAPI)
+all-api: apitest$X $(ALL_XBRLAPI) $(ALL_API_BINDINGS)
 all-xbrlapi: xbrlapi$X
 
 ###############################################################################
@@ -143,6 +143,21 @@ api_server.$O: api_cmddefs.auto.h
 
 keyrangelist.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/keyrangelist.c
+
+all-api-bindings: api
+	for language in $(API_BINDINGS); \
+	do (cd $(BLD_TOP)$(BND_DIR)/$$language && $(MAKE) all) || exit 0; \
+	done
+
+install-api-bindings: all-api-bindings
+	for language in $(API_BINDINGS); \
+	do (cd $(BLD_TOP)$(BND_DIR)/$$language && $(MAKE) install) || exit 0; \
+	done
+
+uninstall-api-bindings:
+	for language in $(API_BINDINGS); \
+	do (cd $(BLD_TOP)$(BND_DIR)/$$language && $(MAKE) uninstall) || exit 0; \
+	done
 
 ###############################################################################
 
@@ -531,14 +546,9 @@ install-api-key:
 	if test ! -f $$file -a -w $(sysconfdir) -a -z "$(INSTALL_ROOT)"; \
 	then umask 077 && $(SRC_DIR)/brltty-genkey $$file; fi
 
-install-api-bindings:
-	for language in $(API_BINDINGS); \
-	do (cd $(BLD_TOP)$(BND_DIR)/$$language && $(MAKE) install) || exit 0; \
-	done
-
 ###############################################################################
 
-uninstall:: uninstall-programs uninstall-data uninstall-libraries uninstall-manpages uninstall-headers uninstall-bindings
+uninstall:: uninstall-programs uninstall-data uninstall-libraries uninstall-manpages uninstall-headers uninstall-api-bindings
 
 uninstall-programs:
 	-rm -f $(INSTALL_ROOT)$(PROGRAM_DIRECTORY)/brltty$X
@@ -574,11 +584,6 @@ uninstall-headers:
 	-rm -f $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)/brldefs.h
 	-rm -f $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)/brldefs-*.h
 	-[ -d $(INSTALL_ROOT)$(INCLUDE_DIRECTORY) ] && rmdir $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
-
-uninstall-bindings:
-	for language in $(API_BINDINGS); \
-	do (cd $(BLD_TOP)$(BND_DIR)/$$language && $(MAKE) uninstall) || exit 0; \
-	done
 
 ###############################################################################
 
