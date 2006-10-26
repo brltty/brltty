@@ -878,6 +878,9 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
       return TCL_OK;
     }
   }
+
+  setStringResult(interp, "unimplemented function", -1);
+  return TCL_ERROR;
 }
 
 typedef struct {
@@ -1118,6 +1121,9 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
       return TCL_OK;
     }
   }
+
+  setStringResult(interp, "unimplemented function", -1);
+  return TCL_ERROR;
 }
 
 int

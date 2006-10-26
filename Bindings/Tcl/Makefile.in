@@ -19,5 +19,16 @@ include $(SRC_TOP)bindings.mk
 
 TCLSH = @TCLSH@
 
-all: api_tcl.so
+TCL_API = brlapi.$(LIB_EXT)
+
+all: $(TCL_API)
+
+$(TCL_API): brlapi.$O api
+	$(MKLIB:<name>=brlapi) $@ brlapi.$O -ltcl $(API_LDFLAGS)
+
+brlapi.$O: $(SRC_DIR)/brlapi.c $(API_HEADERS)
+	$(CC) $(LIBCFLAGS) -o $@ -c $(SRC_DIR)/brlapi.c
+
+clean::
+	-rm -f $(TCL_API)
 
