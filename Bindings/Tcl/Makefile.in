@@ -32,3 +32,7 @@ brlapi.$O: $(SRC_DIR)/brlapi.c $(API_HEADERS)
 clean::
 	-rm -f $(TCL_API)
 
+install: all
+
+uninstall:
+

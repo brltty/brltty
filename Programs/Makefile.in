@@ -146,17 +146,17 @@ keyrangelist.$O:
 
 all-api-bindings: api
 	for language in $(API_BINDINGS); \
-	do (cd $(BLD_TOP)$(BND_DIR)/$$language && $(MAKE) all) || exit 0; \
+	do (cd $(BLD_TOP)$(BND_DIR)/$$language && $(MAKE) all) || exit 1; \
 	done
 
 install-api-bindings: all-api-bindings
 	for language in $(API_BINDINGS); \
-	do (cd $(BLD_TOP)$(BND_DIR)/$$language && $(MAKE) install) || exit 0; \
+	do (cd $(BLD_TOP)$(BND_DIR)/$$language && $(MAKE) install) || exit 1; \
 	done
 
 uninstall-api-bindings:
 	for language in $(API_BINDINGS); \
-	do (cd $(BLD_TOP)$(BND_DIR)/$$language && $(MAKE) uninstall) || exit 0; \
+	do (cd $(BLD_TOP)$(BND_DIR)/$$language && $(MAKE) uninstall); \
 	done
 
 ###############################################################################

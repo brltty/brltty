@@ -38,3 +38,7 @@ brlapi.$O: brlapi.c $(API_HEADERS)
 clean::
 	-rm -f *.class brlapi.jar $(JAVA_NATIVE)
 
+install: all
+
+uninstall:
+
