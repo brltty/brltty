@@ -19,9 +19,15 @@ include $(SRC_TOP)bindings.mk
 
 JAVAC = @JAVAC@
 
-JAVA_NATIVE = libbrlapi_java.$(LIB_EXT)
+JAVA_NATIVE = brlapi.$(LIB_EXT)
 
-all: $(JAVA_NATIVE) Brlapi.class
+all: brlapi.jar $(JAVA_NATIVE)
+
+brlapi.jar: Brlapi.class
+	$(JAVAC:javac=jar) cf $@ *.class
+
+Brlapi.class: $(SRC_DIR)/Brlapi.java $(SRC_DIR)/BrlapiError.java $(SRC_DIR)/BrlapiException.java $(SRC_DIR)/BrlapiKey.java $(SRC_DIR)/BrlapiSize.java
+	$(JAVAC) $^
 
 $(JAVA_NATIVE): brlapi.$O api
 	$(MKLIB:<name>=brlapi) $@ brlapi.$O $(API_LDFLAGS)
@@ -29,9 +35,6 @@ $(JAVA_NATIVE): brlapi.$O api
 brlapi.$O: brlapi.c $(API_HEADERS)
 	$(CC) $(LIBCFLAGS) -o $@ -c $(SRC_DIR)/brlapi.c
 
-Brlapi.class: $(SRC_DIR)/Brlapi.java $(SRC_DIR)/BrlapiError.java $(SRC_DIR)/BrlapiException.java $(SRC_DIR)/BrlapiKey.java $(SRC_DIR)/BrlapiSize.java
-	$(JAVAC) $^
-
 clean::
-	-rm -f $(JAVA_NATIVE) *.class
+	-rm -f *.class brlapi.jar $(JAVA_NATIVE)
 

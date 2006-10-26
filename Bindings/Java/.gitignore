@@ -1,4 +1,5 @@
 Makefile
 reldeps.mk
 *.class
-libbrlapi_java.so
+brlapi.jar
+brlapi.so
