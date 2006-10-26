@@ -38,7 +38,7 @@ brlapi.auto.c: $(SRC_DIR)/brlapi.pyx $(SRC_DIR)/c_brlapi.pxd cmddefs.auto.pyx
 cmddefs.auto.pyx: $(BRLDEFS_HDR) $(API_HEADER) $(BRLDEFS_AWK) $(APIDEFS_AWK) $(SRC_DIR)/cmddefs.awk
 	$(AWK) -f $(BRLDEFS_AWK) -f $(APIDEFS_AWK) -f $(SRC_DIR)/cmddefs.awk $(BRLDEFS_HDR) $(API_HEADER) >$@
 
-install: $(PYTHON_API)
+install: all
 	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(PYTHON_SITE_PKG)
 	$(INSTALL_PROGRAM) $(PYTHON_API) $(INSTALL_ROOT)$(PYTHON_SITE_PKG)
 

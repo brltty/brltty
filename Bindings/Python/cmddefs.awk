@@ -32,6 +32,19 @@ function brlKey(name, symbol, value, help) {
 }
 
 function brlFlag(name, symbol, value, help) {
+  if (value ~ /^0[xX][0-9a-fA-F]+0000$/) {
+    value = tolower(substr(value, 1, length(value)-4))
+    if (name ~ /^CHAR_/) {
+      name = substr(name, 6)
+    } else {
+      value = value "00"
+    }
+  } else if (value ~ /^\(/) {
+    gsub("BRL_FLG_", "KEY_FLG_", value)
+  } else {
+    return
+  }
+  writePythonAssignment("KEY_FLG_" name, value)
 }
 
 function brlDot(number, symbol, value, help) {
