@@ -1048,7 +1048,7 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
         const char *name = brlapi_getKeyName(command, argument);
 
         if (!name) {
-          setStringResult(interp, "unknown command", -1);
+          setBrlapiError(interp);
           return TCL_ERROR;
         }
 

@@ -1714,6 +1714,7 @@ brlapi_getArgumentWidth (brl_keycode_t keyCode) {
       break;
   }
 
+  brlapi_errno = BRLERR_INVALID_PARAMETER;
   return -1;
 }
 
@@ -1738,7 +1739,6 @@ brlapi_expandKeyCode (
     return 0;
   }
 
-  brlapi_errno = BRLERR_INVALID_PARAMETER;
   return -1;
 }
 
@@ -1752,6 +1752,7 @@ brlapi_getKeyName (unsigned int command, unsigned int argument) {
     ++key;
   }
 
+  brlapi_errno = BRLERR_INVALID_PARAMETER;
   return NULL;
 }
 
