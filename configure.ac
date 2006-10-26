@@ -432,8 +432,7 @@ BRLTTY_ARG_DISABLE(
 	    AC_PATH_PROG([JAVAC], [javac])
 	    if test -n "${JAVAC}"
 	    then
-	       api_bindings="${api_bindings} api_java.so Brlapi.class"
-	       install_api_bindings="${install_api_bindings} install-api-java"
+	       api_bindings="${api_bindings} Java"
 	    else
                AC_MSG_WARN([Java BrlAPI bindings not included: javac not found])
             fi
@@ -445,18 +444,41 @@ BRLTTY_ARG_DISABLE(
          [Python bindings for BrlAPI],
          [],
          [
-            m4_include([ac_python_devel.m4])
             AC_PATH_PROG([PYREXC], [pyrexc])
             if test -n "${PYREXC}"
             then
+               m4_include([ac_python_devel.m4])
                AC_PYTHON_DEVEL()
-               api_bindings="${api_bindings} api_python.so"
-               install_api_bindings="${install_api_bindings} install-api-python"
+               api_bindings="${api_bindings} Python"
             else
                AC_MSG_WARN([Python BrlAPI bindings not included: pyrexc not found])
             fi
          ]
       )
+
+      BRLTTY_ARG_DISABLE(
+         [tcl-bindings],
+         [Tcl bindings for BrlAPI],
+         [],
+         [
+            AC_PATH_PROG([TCLSH], [tclsh])
+            if test -n "${TCLSH}"
+            then
+               api_bindings="${api_bindings} Tcl"
+            else
+               AC_MSG_WARN([Tcl BrlAPI bindings not included: tclsh not found])
+            fi
+         ]
+      )
+
+      test -n "${api_bindings}" && {
+         for brltty_bindings_directory in ${api_bindings}
+         do
+            brltty_build_directories="${brltty_build_directories} Bindings/${brltty_bindings_directory}"
+         done
+
+         install_api_bindings="install-api-bindings"
+      }
    ])
 ])
 AC_SUBST([api_objects])

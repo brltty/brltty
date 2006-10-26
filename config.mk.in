@@ -27,12 +27,7 @@ SPK_DIR = SpeechDrivers
 SCR_DIR = ScreenDrivers
 DRV_DIR = lib
 DAT_DIR = data
-
 BND_DIR = Bindings
-JAV_DIR = $(BND_DIR)/Java
-LSP_DIR = $(BND_DIR)/Lisp
-PYT_DIR = $(BND_DIR)/Python
-TCL_DIR = $(BND_DIR)/Tcl
 
 CROSSCOMP = @compiler_prefix@
 INSTALL_ROOT = @install_root@
@@ -83,13 +78,6 @@ RANLIB = $(CROSSCOMP)$(HOSTRANLIB)
 YACC = @YACC@
 
 AWK = @AWK@
-
-JAVAC = @JAVAC@
-
-PYREXC = @PYREXC@
-PYTHON_CPPFLAGS = @PYTHON_CPPFLAGS@
-PYTHON_LDFLAGS = @PYTHON_LDFLAGS@
-PYTHON_SITE_PKG = @PYTHON_SITE_PKG@
 
 SYMLINK = @LN_S@
 

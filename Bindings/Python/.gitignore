@@ -1,0 +1,4 @@
+Makefile
+reldeps.mk
+*.auto.c
+brlapi.so

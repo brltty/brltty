@@ -20,7 +20,7 @@ all-brltty: brltty$X $(BRAILLE_DRIVERS) $(BRAILLE_HELP) $(SPEECH_DRIVERS) $(SCRE
 all-brltest: brltest$X $(BRAILLE_DRIVERS)
 all-spktest: spktest$X $(SPEECH_DRIVERS)
 all-scrtest: scrtest$X $(SCREEN_DRIVERS)
-all-api: apitest$X $(API_BINDINGS) $(ALL_XBRLAPI)
+all-api: apitest$X $(ALL_XBRLAPI)
 all-xbrlapi: xbrlapi$X
 
 ###############################################################################
@@ -143,34 +143,6 @@ api_server.$O: api_cmddefs.auto.h
 
 keyrangelist.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/keyrangelist.c
-
-###############################################################################
-
-JAVA_LIB = api_java.$(LIB_EXT)
-JAVA_API = libbrlapi_java.$(LIB_EXT)
-
-$(JAVA_LIB): api_java.$O api
-	$(MKLIB:<name>=brlapi) $@ api_java.$O -L. -lbrlapi
-
-api_java.$O: api.h
-	$(CC) $(LIBCFLAGS) -o $@ -c $(SRC_TOP)$(JAV_DIR)/api_java.c
-
-Brlapi.class: $(SRC_TOP)$(JAV_DIR)/Brlapi.java $(SRC_TOP)$(JAV_DIR)/BrlapiError.java $(SRC_TOP)$(JAV_DIR)/BrlapiException.java $(SRC_TOP)$(JAV_DIR)/BrlapiKey.java $(SRC_TOP)$(JAV_DIR)/BrlapiSize.java
-	$(JAVAC) $^
-
-###############################################################################
-
-PYTHON_LIB = api_python.$(LIB_EXT)
-PYTHON_API = brlapi.$(LIB_EXT)
-
-$(PYTHON_LIB): api_python.$O api
-	$(MKLIB:<name>=brlapi) $@ api_python.$O $(PYTHON_LDFLAGS) -L. -lbrlapi
-
-api_python.$O: api_python.auto.c api.h
-	$(CC) $(LIBCFLAGS) $(PYREXC_CFLAGS) $(PYTHON_CPPFLAGS) -o $@ -c api_python.auto.c
-
-api_python.auto.c: $(SRC_TOP)$(PYT_DIR)/brlapi.pyx $(SRC_TOP)$(PYT_DIR)/c_brlapi.pxd
-	$(PYREXC) -o $@ $(SRC_TOP)$(PYT_DIR)/brlapi.pyx
 
 ###############################################################################
 
@@ -559,13 +531,14 @@ install-api-key:
 	if test ! -f $$file -a -w $(sysconfdir) -a -z "$(INSTALL_ROOT)"; \
 	then umask 077 && $(SRC_DIR)/brltty-genkey $$file; fi
 
-install-api-python: $(PYTHON_LIB)
-	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(PYTHON_SITE_PKG)
-	$(INSTALL_PROGRAM) $(PYTHON_LIB) $(INSTALL_ROOT)$(PYTHON_SITE_PKG)/$(PYTHON_API)
+install-api-bindings:
+	for language in $(API_BINDINGS); \
+	do (cd $(BLD_TOP)$(BND_DIR)/$$language && $(MAKE) install) || exit 0; \
+	done
 
 ###############################################################################
 
-uninstall:: uninstall-programs uninstall-data uninstall-libraries uninstall-manpages uninstall-headers
+uninstall:: uninstall-programs uninstall-data uninstall-libraries uninstall-manpages uninstall-headers uninstall-bindings
 
 uninstall-programs:
 	-rm -f $(INSTALL_ROOT)$(PROGRAM_DIRECTORY)/brltty$X
@@ -590,7 +563,6 @@ uninstall-libraries:
 	-rm -f $(INSTALL_ROOT)$(libdir)/$(API_IMPLIB)
 	-rm -f $(INSTALL_ROOT)$(libdir)/$(API_IMPLIB_VERSIONED)
 	-rm -f $(INSTALL_ROOT)$(PROGRAM_DIRECTORY)/$(API_DLL)
-	-rm -f $(INSTALL_ROOT)$(PYTHON_SITE_PKG)/$(PYTHON_API)
 
 uninstall-manpages:
 	-rm -f $(INSTALL_ROOT)$(MANPAGE_DIRECTORY)/man1/brltty.1
@@ -602,6 +574,11 @@ uninstall-headers:
 	-rm -f $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)/brldefs.h
 	-rm -f $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)/brldefs-*.h
 	-[ -d $(INSTALL_ROOT)$(INCLUDE_DIRECTORY) ] && rmdir $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
+
+uninstall-bindings:
+	for language in $(API_BINDINGS); \
+	do (cd $(BLD_TOP)$(BND_DIR)/$$language && $(MAKE) uninstall) || exit 0; \
+	done
 
 ###############################################################################
 
@@ -624,8 +601,6 @@ distclean clean::
 clean::
 	-rm -f brltty$X xbrlapi$X txt2hlp$X tbl2hex$X *test$X *-static$X
 	-rm -f $(API_LIB) $(API_ARC) $(API_DLL) $(API_IMPLIB)
-	-rm -f $(JAVA_LIB) $(BLD_TOP)$(JAV_DIR)/*.class
-	-rm -f $(PYTHON_LIB)
 	-rm -f $(BLD_TOP)$(DRV_DIR)/* $(BLD_TOP)$(DAT_DIR)/*
 
 distclean::

@@ -1,0 +1,37 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2006 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU General Public License, as published by the Free Software
+# Foundation.  Please see the file COPYING for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+include $(SRC_TOP)bindings.mk
+
+JAVAC = @JAVAC@
+
+JAVA_NATIVE = libbrlapi_java.$(LIB_EXT)
+
+all: $(JAVA_NATIVE) Brlapi.class
+
+$(JAVA_NATIVE): brlapi.$O api
+	$(MKLIB:<name>=brlapi) $@ brlapi.$O $(API_LDFLAGS)
+
+brlapi.$O: brlapi.c $(API_HEADERS)
+	$(CC) $(LIBCFLAGS) -o $@ -c $(SRC_DIR)/brlapi.c
+
+Brlapi.class: $(SRC_DIR)/Brlapi.java $(SRC_DIR)/BrlapiError.java $(SRC_DIR)/BrlapiException.java $(SRC_DIR)/BrlapiKey.java $(SRC_DIR)/BrlapiSize.java
+	$(JAVAC) $^
+
+clean::
+	-rm -f $(JAVA_NATIVE) *.class
+
