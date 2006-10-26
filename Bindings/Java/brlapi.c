@@ -120,11 +120,11 @@ static void exceptionHandler(int err, brl_type_t type, const void *buf, size_t s
 
 JNIEXPORT jint JNICALL Java_Brlapi_initializeConnection(JNIEnv *jenv, jobject jobj, jobject JclientSettings , jobject JusedSettings) {
   jclass jcclientSettings, jcusedSettings;
-  jfieldID clientAuthKeyID, clientHostNameID, usedAuthKeyID, usedHostNameID;
+  jfieldID clientAuthKeyID = NULL, clientHostNameID = NULL, usedAuthKeyID, usedHostNameID;
   brlapi_settings_t clientSettings,  usedSettings,
             *PclientSettings, *PusedSettings;
   int result;
-  jstring authKey, hostName;
+  jstring authKey = NULL, hostName = NULL;
   const char *str;
   jfieldID handleID;
   brlapi_handle_t *handle;
@@ -621,7 +621,7 @@ JNIEXPORT jstring JNICALL Java_Brlapi_packetType(JNIEnv *jenv, jclass jcls, jlon
 
   env = jenv;
 
-  if (!(type = brlapi_packetType((brl_type_t) type)))
+  if (!(type = brlapi_packetType((brl_type_t) jtype)))
     return ThrowError(jenv, __func__), NULL;
 
   return (*jenv)->NewStringUTF(jenv, type);
