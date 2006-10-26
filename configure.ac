@@ -425,6 +425,22 @@ BRLTTY_ARG_DISABLE(
       esac
 
       BRLTTY_ARG_DISABLE(
+         [java-bindings],
+         [Java bindings for BrlAPI],
+         [],
+         [
+	    AC_PATH_PROG([JAVAC], [javac])
+	    if test -n "${JAVAC}"
+	    then
+	       api_bindings="${api_bindings} api_java.so Brlapi.class"
+	       install_api_bindings="${install_api_bindings} install-api-java"
+	    else
+               AC_MSG_WARN([Java BrlAPI bindings not included: javac not found])
+            fi
+         ]
+      )
+
+      BRLTTY_ARG_DISABLE(
          [python-bindings],
          [Python bindings for BrlAPI],
          [],
@@ -438,21 +454,6 @@ BRLTTY_ARG_DISABLE(
                install_api_bindings="${install_api_bindings} install-api-python"
             else
                AC_MSG_WARN([Python BrlAPI bindings not included: pyrexc not found])
-            fi
-         ]
-      )
-      BRLTTY_ARG_DISABLE(
-         [java-bindings],
-         [Java bindings for BrlAPI],
-         [],
-         [
-	    AC_PATH_PROG([JAVAC], [javac])
-	    if test -n "${JAVAC}"
-	    then
-	       api_bindings="${api_bindings} api_java.so Brlapi.class"
-	       install_api_bindings="${install_api_bindings} install-api-java"
-	    else
-               AC_MSG_WARN([Java BrlAPI bindings not included: javac not found])
             fi
          ]
       )

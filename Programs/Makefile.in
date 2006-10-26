@@ -146,20 +146,6 @@ keyrangelist.$O:
 
 ###############################################################################
 
-PYTHON_LIB = api_python.$(LIB_EXT)
-PYTHON_API = brlapi.$(LIB_EXT)
-
-$(PYTHON_LIB): api_python.$O api
-	$(MKLIB:<name>=brlapi) $@ api_python.$O $(PYTHON_LDFLAGS) -L. -lbrlapi
-
-api_python.$O: api_python.auto.c api.h
-	$(CC) $(LIBCFLAGS) $(PYREXC_CFLAGS) $(PYTHON_CPPFLAGS) -o $@ -c api_python.auto.c
-
-api_python.auto.c: $(SRC_TOP)$(PYT_DIR)/brlapi.pyx $(SRC_TOP)$(PYT_DIR)/c_brlapi.pxd
-	$(PYREXC) -o $@ $(SRC_TOP)$(PYT_DIR)/brlapi.pyx
-
-###############################################################################
-
 JAVA_LIB = api_java.$(LIB_EXT)
 JAVA_API = libbrlapi_java.$(LIB_EXT)
 
@@ -171,6 +157,20 @@ api_java.$O: api.h
 
 Brlapi.class: $(SRC_TOP)$(JAV_DIR)/Brlapi.java $(SRC_TOP)$(JAV_DIR)/BrlapiError.java $(SRC_TOP)$(JAV_DIR)/BrlapiException.java $(SRC_TOP)$(JAV_DIR)/BrlapiKey.java $(SRC_TOP)$(JAV_DIR)/BrlapiSize.java
 	$(JAVAC) $^
+
+###############################################################################
+
+PYTHON_LIB = api_python.$(LIB_EXT)
+PYTHON_API = brlapi.$(LIB_EXT)
+
+$(PYTHON_LIB): api_python.$O api
+	$(MKLIB:<name>=brlapi) $@ api_python.$O $(PYTHON_LDFLAGS) -L. -lbrlapi
+
+api_python.$O: api_python.auto.c api.h
+	$(CC) $(LIBCFLAGS) $(PYREXC_CFLAGS) $(PYTHON_CPPFLAGS) -o $@ -c api_python.auto.c
+
+api_python.auto.c: $(SRC_TOP)$(PYT_DIR)/brlapi.pyx $(SRC_TOP)$(PYT_DIR)/c_brlapi.pxd
+	$(PYREXC) -o $@ $(SRC_TOP)$(PYT_DIR)/brlapi.pyx
 
 ###############################################################################
 
@@ -624,9 +624,8 @@ distclean clean::
 clean::
 	-rm -f brltty$X xbrlapi$X txt2hlp$X tbl2hex$X *test$X *-static$X
 	-rm -f $(API_LIB) $(API_ARC) $(API_DLL) $(API_IMPLIB)
+	-rm -f $(JAVA_LIB) $(BLD_TOP)$(JAV_DIR)/*.class
 	-rm -f $(PYTHON_LIB)
-	-rm -f $(JAVA_LIB)
-	-rm -f $(BLD_TOP)$(JAV_DIR)/*.class
 	-rm -f $(BLD_TOP)$(DRV_DIR)/* $(BLD_TOP)$(DAT_DIR)/*
 
 distclean::
