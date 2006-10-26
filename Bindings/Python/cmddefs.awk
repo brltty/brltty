@@ -35,8 +35,27 @@ function brlFlag(name, symbol, value, help) {
 }
 
 function brlDot(number, symbol, value, help) {
+  writePythonAssignment("BRL_DOT" number, value)
+}
+
+function apiKey(name, symbol, value, help) {
+  value = tolower(value)
+  gsub("u?l*$", "", value)
+
+  if (name == "FUNCTION") {
+    for (i=0; i<35; ++i) {
+      writeKeyDefinition("F" (i+1), value "+" i)
+    }
+  } else {
+    writeKeyDefinition(name, value)
+  }
 }
 
 function writeKeyDefinition(name, value) {
-  print "KEY_CMD_" name " = " value
+  writePythonAssignment("KEY_CMD_" name, value)
 }
+
+function writePythonAssignment(name, value) {
+  print name " = " value
+}
+
