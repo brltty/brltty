@@ -212,10 +212,10 @@ typedef enum {
 
 #define BRL_BLK_PASSCHAR 0X2100 /* input character by value */
 #define BRL_BLK_PASSDOTS 0X2200 /* input character as braille dots */
-#define BRL_FLG_CHAR_CONTROL 0X010000 /* control key pressed */
-#define BRL_FLG_CHAR_META    0X020000 /* meta key pressed */
-#define BRL_FLG_CHAR_UPPER   0X040000 /* convert to uppercase */
-#define BRL_FLG_CHAR_SHIFT   0X080000 /* shift key pressed */
+#define BRL_FLG_CHAR_SHIFT   0X010000 /* shift key pressed */
+#define BRL_FLG_CHAR_UPPER   0X020000 /* convert to uppercase */
+#define BRL_FLG_CHAR_CONTROL 0X040000 /* control key pressed */
+#define BRL_FLG_CHAR_META    0X080000 /* meta key pressed */
 
 #define BRL_BLK_PASSAT2 0X2300 /* input AT set 2 keyboard scan code */
 

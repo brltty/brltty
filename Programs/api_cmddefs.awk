@@ -43,10 +43,14 @@ function brlKey(name, symbol, value, help) {
 }
 
 function brlFlag(name, symbol, value, help) {
-  if (name ~ /^CHAR_/) return
-
   if (value ~ /^0[xX][0-9a-fA-F]+0000$/) {
-    value = "BRLAPI_KEY_FLG(" substr(value, 1, length(value)-4) " * 0X100)"
+    value = substr(value, 1, length(value)-4)
+    if (name ~ /^CHAR_/) {
+      name = substr(name, 6)
+    } else {
+      value = value "00"
+    }
+    value = "BRLAPI_KEY_FLG(" value ")"
   } else if (value ~ /^\(/) {
     gsub("BRL_FLG_", "BRLAPI_KEY_FLG_", value)
   } else {
