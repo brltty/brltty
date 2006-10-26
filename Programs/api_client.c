@@ -1735,10 +1735,11 @@ brlapi_expandKeyCode (
     *argument = code & argumentMask;
     *flags = (keyCode & BRLAPI_KEY_FLAGS_MASK) >> BRLAPI_KEY_FLAGS_SHIFT;
 
-    return 1;
+    return 0;
   }
 
-  return 0;
+  brlapi_errno = BRLERR_INVALID_PARAMETER;
+  return -1;
 }
 
 const char *

@@ -1008,8 +1008,8 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
         if (result != TCL_OK) return result;
       }
 
-      if (!brlapi_expandKeyCode(keyCode, &command, &argument, &flags)) {
-        setStringResult(interp, "invalid key code", -1);
+      if (brlapi_expandKeyCode(keyCode, &command, &argument, &flags) == -1) {
+        setBrlapiError(interp);
         return TCL_ERROR;
       }
 

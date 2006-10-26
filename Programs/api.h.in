@@ -536,11 +536,11 @@ typedef uint64_t brl_keycode_t;
  * Mask for flags of brl_keycode_t
  */
 #define BRLAPI_KEY_FLAGS_MASK		0xFFFFFFFF00000000ULL
-/* Shift for flags of brl_keycode_t */
+/** Shift for flags of brl_keycode_t */
 #define BRLAPI_KEY_FLAGS_SHIFT		32
 
 #define BRLAPI_KEY_FLG(v)		((brl_keycode_t)(v) << BRLAPI_KEY_FLAGS_SHIFT)
-/* Standard X modifiers */
+/** Standard X modifiers */
 /** Shift modifier */
 #define BRLAPI_KEY_FLG_SHIFT		BRLAPI_KEY_FLG(0x00000001)
 /** Upper case modififer */
@@ -565,7 +565,7 @@ typedef uint64_t brl_keycode_t;
  * Mask for type of brl_keycode_t
  */
 #define BRLAPI_KEY_TYPE_MASK		0x00000000E0000000ULL
-/* Shift for type of brl_keycode_t */
+/** Shift for type of brl_keycode_t */
 #define BRLAPI_KEY_TYPE_SHIFT		29
 /** Braille command brl_keycode_t */
 #define BRLAPI_KEY_TYPE_CMD		0x0000000020000000ULL
@@ -576,7 +576,7 @@ typedef uint64_t brl_keycode_t;
  * Mask for code of brl_keycode_t
  */
 #define BRLAPI_KEY_CODE_MASK		0x000000001FFFFFFFULL
-/* Shift for code of brl_keycode_t */
+/** Shift for code of brl_keycode_t */
 #define BRLAPI_KEY_CODE_SHIFT		0
 
 #define BRLAPI_KEY_CMD(v)		(BRLAPI_KEY_TYPE_CMD|((v) << 16))
@@ -585,7 +585,7 @@ typedef uint64_t brl_keycode_t;
 /** Mask for braille command value */
 #define BRLAPI_KEY_CMD_ARG_MASK		0X0000FFFFULL
 
-/* Standard X keysyms */
+/** Standard X keysyms */
 #define BRLAPI_KEY_SYM_BACKSPACE	0x0000FF08ULL
 #define BRLAPI_KEY_SYM_TAB		0x0000FF09ULL
 #define BRLAPI_KEY_SYM_LINEFEED		0x0000FF0DULL
@@ -605,6 +605,18 @@ typedef uint64_t brl_keycode_t;
 
 #include "api_cmddefs.h"
 
+/* brlapi_expandKeyCode */
+/** Expand a keycode into command, argument and flags parts
+ *
+ * This function returns one key press's code.
+ *
+ * \param keyCode is the keycode to be expanded ;
+ * \param command points to the integer that will receive the command part ;
+ * \param argument points to the integer that will receive the argument part ;
+ * \param flags points to the integer that will receive the flags part
+ *
+ * \return 0 on success, -1 on error.
+ */
 extern int brlapi_expandKeyCode (
   brl_keycode_t keyCode,
   unsigned int *command,
@@ -617,7 +629,7 @@ extern const char *brlapi_getKeyName (unsigned int command, unsigned int argumen
 extern unsigned char brlapi_dotNumberToBit (unsigned char number);
 extern unsigned char brlapi_dotBitToNumber (unsigned char bit);
 
-/* Unicode braille row */
+/** Unicode braille row */
 #define BRLAPI_UC_ROW	0x2800UL
 
 /** Maximum keyset size, i.e. maximum number of keys

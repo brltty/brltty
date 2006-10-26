@@ -1300,7 +1300,8 @@ the current <tt/brltty/ driver. The returned string is \0 terminated.
 This should be sent by the client when it needs to know the braille display
 size. The returned data are two integers: width and then height.
 
-<sect2><tt/BRLPACKET_ENTERTTYMODE/ (see <em/brlapi_enterTtyMode()/)
+<sect2><tt/BRLPACKET_ENTERTTYMODE/ (see <em/brlapi_enterTtyMode()/ and
+<em/brlapi_getTtyModePath()/)
 <p>
 This should be sent by the client to get control of a tty. Sent data are
 first a series of integers: the first one gives the number of following
