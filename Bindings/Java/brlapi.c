@@ -409,7 +409,7 @@ JNIEXPORT void JNICALL Java_Brlapi_writeDots(JNIEnv *jenv, jobject jobj, jbyteAr
   if (!arg1)
     return ThrowException(jenv, ERR_OUTOFMEM, __func__);
 
-  arg1 = *(jbyte **)&jarg1; 
+  arg1 = *(jbyte **)(void *)&jarg1; 
   result = brlapi__writeDots(handle, (const unsigned char *)arg1);
   (*jenv)->ReleaseByteArrayElements(jenv, jarg1, arg1, JNI_ABORT); 
   
