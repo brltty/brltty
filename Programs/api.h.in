@@ -541,6 +541,16 @@ typedef uint64_t brl_keycode_t;
 
 #define BRLAPI_KEY_FLG(v)		((brl_keycode_t)(v) << BRLAPI_KEY_FLAGS_SHIFT)
 /** Standard X modifiers */
+/** Mod1 modifier (AKA meta) */
+#define BRLAPI_KEY_FLG_MOD1		BRLAPI_KEY_FLG(0x00000008)
+/** Mod2 modifier (usually numlock) */
+#define BRLAPI_KEY_FLG_MOD2		BRLAPI_KEY_FLG(0x00000010)
+/** Mod3 modifier */
+#define BRLAPI_KEY_FLG_MOD3		BRLAPI_KEY_FLG(0x00000020)
+/** Mod4 modifier */
+#define BRLAPI_KEY_FLG_MOD4		BRLAPI_KEY_FLG(0x00000040)
+/** Mod5 modifier (usually Alt-Gr) */
+#define BRLAPI_KEY_FLG_MOD5		BRLAPI_KEY_FLG(0x00000080)
 
 
 /**
