@@ -8,12 +8,12 @@ brlapi <function> [<arg> ...]
    makeCells <dotsList>
 
 brlapi<sessionNumber> function [arg ...]
-   host
-   keyFile
-   fileDescriptor
-   driverIdentifier
-   driverName
-   displaySize
+   getHost
+   getKeyFile
+   getFileDescriptor
+   getDriverId
+   getDriverName
+   getDisplaySize
    enterTtyMode [<option> ...]
       tty {default | <number>}
       keyCodes
@@ -21,8 +21,10 @@ brlapi<sessionNumber> function [arg ...]
    leaveTtyMode
    setFocus <ttyNumber>
    readKey <wait>
-   acceptKeys {<keyList> | <firstKey> <lastKey>}
-   ignoreKeys {<keyList> | <firstKey> <lastKey>}
+   acceptKeyRange <firstKey> <lastKey>
+   ignoreKeyRange <firstKey> <lastKey>
+   acceptKeySet <keyList>
+   ignoreKeySet <keyList>
    writeText <string> [<option> ...]
       and <mask>
       or <mask>

@@ -316,18 +316,20 @@ endSession (ClientData data) {
 static int
 brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
   static const char *functions[] = {
-    "acceptKeys",
+    "acceptKeyRange",
+    "acceptKeySet",
     "closeConnection",
-    "displaySize",
-    "driverIdentifier",
-    "driverName",
     "enterRawMode",
     "enterTtyMode",
     "erase",
-    "fileDescriptor",
-    "host",
-    "ignoreKeys",
-    "keyFile",
+    "getDisplaySize",
+    "getDriverId",
+    "getDriverName",
+    "getFileDescriptor",
+    "getHost",
+    "getKeyFile",
+    "ignoreKeyRange",
+    "ignoreKeySet",
     "leaveRawMode",
     "leaveTtyMode",
     "readKey",
@@ -342,18 +344,20 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
   };
 
   typedef enum {
-    FCN_acceptKeys,
+    FCN_acceptKeyRange,
+    FCN_acceptKeySet,
     FCN_closeConnection,
-    FCN_displaySize,
-    FCN_driverIdentifier,
-    FCN_driverName,
     FCN_enterRawMode,
     FCN_enterTtyMode,
     FCN_erase,
-    FCN_fileDescriptor,
-    FCN_host,
-    FCN_ignoreKeys,
-    FCN_keyFile,
+    FCN_getDisplaySize,
+    FCN_getDriverId,
+    FCN_getDriverName,
+    FCN_getFileDescriptor,
+    FCN_getHost,
+    FCN_getKeyFile,
+    FCN_ignoreKeyRange,
+    FCN_ignoreKeySet,
     FCN_leaveRawMode,
     FCN_leaveTtyMode,
     FCN_readKey,
@@ -380,7 +384,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
   }
 
   switch (function) {
-    case FCN_host: {
+    case FCN_getHost: {
       if (objc != 2) {
         Tcl_WrongNumArgs(interp, 2, objv, NULL);
         return TCL_ERROR;
@@ -390,7 +394,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
       return TCL_OK;
     }
 
-    case FCN_keyFile: {
+    case FCN_getKeyFile: {
       if (objc != 2) {
         Tcl_WrongNumArgs(interp, 2, objv, NULL);
         return TCL_ERROR;
@@ -400,7 +404,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
       return TCL_OK;
     }
 
-    case FCN_fileDescriptor: {
+    case FCN_getFileDescriptor: {
       if (objc != 2) {
         Tcl_WrongNumArgs(interp, 2, objv, NULL);
         return TCL_ERROR;
@@ -410,7 +414,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
       return TCL_OK;
     }
 
-    case FCN_driverIdentifier: {
+    case FCN_getDriverId: {
       size_t size = 0X10;
 
       if (objc != 2) {
@@ -436,7 +440,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
       }
     }
 
-    case FCN_driverName: {
+    case FCN_getDriverName: {
       size_t size = 0X10;
 
       if (objc != 2) {
@@ -462,7 +466,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
       }
     }
 
-    case FCN_displaySize: {
+    case FCN_getDisplaySize: {
       int width, height;
 
       if (objc != 2) {
@@ -602,15 +606,59 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     {
       int ignore;
 
-    case FCN_acceptKeys:
+    case FCN_acceptKeyRange:
       ignore = 0;
-      goto doIgnoreKeys;
+      goto doKeyRange;
 
-    case FCN_ignoreKeys:
+    case FCN_ignoreKeyRange:
       ignore = 1;
 
-    doIgnoreKeys:
-      if (objc == 3) {
+    doKeyRange:
+      if (objc != 4) {
+        Tcl_WrongNumArgs(interp, 2, objv, "<firstKey> <lastKey>");
+        return TCL_ERROR;
+      }
+
+      {
+        brl_keycode_t keys[2];
+
+        {
+          int index;
+          for (index=0; index<2; ++index) {
+            Tcl_WideInt value;
+            int result = Tcl_GetWideIntFromObj(interp, objv[index+2], &value);
+            if (result != TCL_OK) return result;
+            keys[index] = value;
+          }
+        }
+
+        {
+          int result = ignore? brlapi__ignoreKeyRange(session->handle, keys[0], keys[1]):
+                               brlapi__unignoreKeyRange(session->handle, keys[0], keys[1]);
+          if (result != -1) return TCL_OK;
+          setBrlapiError(interp);
+          return TCL_ERROR;
+        }
+      }
+    }
+
+    {
+      int ignore;
+
+    case FCN_acceptKeySet:
+      ignore = 0;
+      goto doKeySet;
+
+    case FCN_ignoreKeySet:
+      ignore = 1;
+
+    doKeySet:
+      if (objc != 3) {
+        Tcl_WrongNumArgs(interp, 2, objv, "<keyList>");
+        return TCL_ERROR;
+      }
+
+      {
         Tcl_Obj **elements;
         int count;
 
@@ -642,31 +690,6 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
         return TCL_OK;
       }
-
-      if (objc == 4) {
-        brl_keycode_t keys[2];
-
-        {
-          int index;
-          for (index=0; index<2; ++index) {
-            Tcl_WideInt value;
-            int result = Tcl_GetWideIntFromObj(interp, objv[index+2], &value);
-            if (result != TCL_OK) return result;
-            keys[index] = value;
-          }
-        }
-
-        {
-          int result = ignore? brlapi__ignoreKeyRange(session->handle, keys[0], keys[1]):
-                               brlapi__unignoreKeyRange(session->handle, keys[0], keys[1]);
-          if (result != -1) return TCL_OK;
-          setBrlapiError(interp);
-          return TCL_ERROR;
-        }
-      }
-
-      Tcl_WrongNumArgs(interp, 2, objv, "{<keyList> | <firstKey> <lastKey>}");
-      return TCL_ERROR;
     }
 
     case FCN_writeText: {
