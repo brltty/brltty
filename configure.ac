@@ -461,13 +461,12 @@ BRLTTY_ARG_DISABLE(
          [Tcl bindings for BrlAPI],
          [],
          [
-            AC_PATH_PROG([TCLSH], [tclsh])
-            if test -n "${TCLSH}"
-            then
+            AC_CHECK_HEADER([tcl.h], [dnl
+               AC_PATH_PROG([TCLSH], [tclsh])
                api_bindings="${api_bindings} Tcl"
-            else
-               AC_MSG_WARN([Tcl BrlAPI bindings not included: tclsh not found])
-            fi
+            ], [dnl
+               AC_MSG_WARN([Tcl BrlAPI bindings not included: tcl.h not found])
+            ])
          ]
       )
 
