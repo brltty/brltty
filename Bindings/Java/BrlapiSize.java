@@ -3,7 +3,7 @@
  *
  * Copyright (C) 2002-2006 by
  *   Samuel Thibault <Samuel.Thibault@ens-lyon.org>
- *   Sébastien Hinderer <Sebastien.Hinderer@ens-lyon.org>
+ *   SÃ©bastien Hinderer <Sebastien.Hinderer@ens-lyon.org>
  * All rights reserved.
  *
  * libbrlapi comes with ABSOLUTELY NO WARRANTY.
@@ -22,7 +22,17 @@
 public class BrlapiSize {
   int x;
   int y;
-  public BrlapiSize(int x, int y) { this.x = x; this.y = y; }
-  public int x() { return x; }
-  public int y() { return y; }
+
+  public BrlapiSize (int x, int y) {
+    this.x = x;
+    this.y = y; 
+  }
+
+  public int x () {
+    return x;
+  }
+
+  public int y () {
+    return y;
+  }
 }

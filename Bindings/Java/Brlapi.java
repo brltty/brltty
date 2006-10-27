@@ -3,7 +3,7 @@
  *
  * Copyright (C) 2002-2006 by
  *   Samuel Thibault <Samuel.Thibault@ens-lyon.org>
- *   Sébastien Hinderer <Sebastien.Hinderer@ens-lyon.org>
+ *   SÃ©bastien Hinderer <Sebastien.Hinderer@ens-lyon.org>
  * All rights reserved.
  *
  * libbrlapi comes with ABSOLUTELY NO WARRANTY.
@@ -20,19 +20,11 @@
  */
 
 public class Brlapi {
-  public static class settings {
-    public String authKey;
-    public String hostName;
-    public settings(String authKey, String hostName) {
-      this.authKey = authKey;
-      this.hostName = hostName;
-    }
-    public settings() { this (null, null); }
-    public settings(String hostName) { this ((String) null, hostName); }
+  public final native int initializeConnection(
+    BrlapiSettings clientSettings,
+    BrlapiSettings usedSettings
+  ) throws BrlapiError;
 
-  };
-  public final native int initializeConnection(settings clientSettings,
-      settings usedSettings) throws BrlapiError;
   public final native void closeConnection();
 
   public final static native byte[] loadAuthKey(String jpath);
@@ -49,26 +41,7 @@ public class Brlapi {
 
   public final native void writeText(int cursor, String str) throws BrlapiError;
   public final native int writeDots(byte str[]) throws BrlapiError;
-  public static class writeStruct {
-    public int displayNumber;
-    public int regionBegin, regionSize;
-    public String text;
-    public byte attrAnd[];
-    public byte attrOr[];
-    public int cursor;
-    public writeStruct(int displayNumber, int regionBegin, int regionSize,
-		    String text, byte attrAnd[], byte attrOr[], int cursor) {
-      this.displayNumber = displayNumber;
-      this.regionBegin = regionBegin;
-      this.regionSize = regionSize;
-      this.text = text;
-      this.attrAnd = attrAnd;
-      this.attrOr = attrOr;
-      this.cursor = cursor;
-    }
-    public writeStruct() { this (-1, 0, 0, null, null, null, -1); }
-  }
-  public final native void write(writeStruct s) throws BrlapiError;
+  public final native void write(BrlapiWriteStruct s) throws BrlapiError;
 
   public final native long readKey(boolean block) throws BrlapiError;
   public final native void ignoreKeyRange(long x, long y) throws BrlapiError;

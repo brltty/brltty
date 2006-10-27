@@ -26,7 +26,7 @@ all: brlapi.jar $(JAVA_NATIVE)
 brlapi.jar: Brlapi.class
 	$(JAVAC:javac=jar) cf $@ *.class
 
-Brlapi.class: $(SRC_DIR)/Brlapi.java $(SRC_DIR)/BrlapiError.java $(SRC_DIR)/BrlapiException.java $(SRC_DIR)/BrlapiKey.java $(SRC_DIR)/BrlapiSize.java
+Brlapi.class: $(SRC_DIR)/Brlapi.java $(SRC_DIR)/BrlapiError.java $(SRC_DIR)/BrlapiException.java $(SRC_DIR)/BrlapiSettings.java $(SRC_DIR)/BrlapiWriteStruct.java $(SRC_DIR)/BrlapiSize.java $(SRC_DIR)/BrlapiKey.java
 	$(JAVAC) $^
 
 $(JAVA_NATIVE): brlapi.$O api
