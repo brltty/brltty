@@ -18,6 +18,9 @@
 
 # File binding C functions
 
+cdef extern from "sys/types.h":
+	ctypedef int size_t
+
 cdef extern from "Programs/api.h":
 	ctypedef struct brlapi_settings_t:
 		char *authKey
@@ -37,34 +40,40 @@ cdef extern from "Programs/api.h":
 		int libcerror
 		int gaierror
 		char *errfun
+	ctypedef struct brlapi_handle_t
 
-	void brlapi_closeConnection()
-	int brlapi_initializeConnection(brlapi_settings_t*, brlapi_settings_t*)
+	size_t brlapi_getHandleSize()
+	void brlapi__closeConnection(brlapi_handle_t *)
+	int brlapi__initializeConnection(brlapi_handle_t *, brlapi_settings_t*, brlapi_settings_t*)
 
-	int brlapi_getDisplaySize(unsigned int*, unsigned int *y)
-	int brlapi_getDriverId(char*, int)
-	int brlapi_getDriverName(char*, int)
+	int brlapi__getDisplaySize(brlapi_handle_t *, unsigned int*, unsigned int *y)
+	int brlapi__getDriverId(brlapi_handle_t *, char*, int)
+	int brlapi__getDriverName(brlapi_handle_t *, char*, int)
 
-	int brlapi_enterTtyMode(int, char*)
-	int brlapi_leaveTtyMode()
-	int brlapi_setFocus(int)
+	int brlapi__enterTtyMode(brlapi_handle_t *, int, char*)
+	int brlapi__leaveTtyMode(brlapi_handle_t *)
+	int brlapi__setFocus(brlapi_handle_t *, int)
 
-	int brlapi_write(brlapi_writeStruct*)
-	int brlapi_writeDots(unsigned char*)
-	int brlapi_writeText(int, char*)
+	int brlapi__write(brlapi_handle_t *, brlapi_writeStruct*)
+	int brlapi__writeDots(brlapi_handle_t *, unsigned char*)
+	int brlapi__writeText(brlapi_handle_t *, int, char*)
 
-	int brlapi_ignoreKeyRange(unsigned long long, unsigned long long)
-	int brlapi_unignoreKeyRange(unsigned long long, unsigned long long)
-	int brlapi_readKey(int, unsigned long long*)
+	int brlapi__ignoreKeyRange(brlapi_handle_t *, unsigned long long, unsigned long long)
+	int brlapi__unignoreKeyRange(brlapi_handle_t *, unsigned long long, unsigned long long)
+	int brlapi__readKey(brlapi_handle_t *, int, unsigned long long*)
 	int brlapi_expandKeyCode(unsigned long long, unsigned int *, unsigned int *, unsigned int *)
 
-	int brlapi_enterRawMode(char*)
-	int brlapi_leaveRawMode()
-	int brlapi_recvRaw(void*, int)
-	int brlapi_sendRaw(void*, int)
+	int brlapi__enterRawMode(brlapi_handle_t *, char*)
+	int brlapi__leaveRawMode(brlapi_handle_t *)
+	int brlapi__recvRaw(brlapi_handle_t *, void*, int)
+	int brlapi__sendRaw(brlapi_handle_t *, void*, int)
 
 	brlapi_error_t* brlapi_error_location()
 	char* brlapi_strerror(brlapi_error_t*)
+
+cdef extern from "stdlib.h":
+	void *malloc(size_t)
+	void free(void*)
 
 cdef extern from "Python.h":
 	# these are macros, we just need to make Pyrex aware of them

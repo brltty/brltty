@@ -150,20 +150,16 @@ cdef class Settings:
 		def __set__(self, val):
 			self.props.hostName = val
 
-cdef class Bridge:
+cdef class Connection:
 	"""Class which manages the bridge between BrlTTY and your program"""
+	cdef c_brlapi.brlapi_handle_t *h
 	def __init__(self, Settings clientSettings = None, Settings usedSettings = None):
-		self.connect(clientSettings, usedSettings)
-
-	def __del__(self):
-		self.close()
-
-	def connect(self, Settings clientSettings, Settings usedSettings):
 		"""Connect your program to BrlTTY using settings"""
-
 		cdef c_brlapi.brlapi_settings_t *client
 		cdef c_brlapi.brlapi_settings_t *used
 		cdef int retval
+
+		self.h = <c_brlapi.brlapi_handle_t*> c_brlapi.malloc(c_brlapi.brlapi_getHandleSize())
 
 		# Fix segmentation fault
 		if clientSettings == None:
@@ -177,7 +173,7 @@ cdef class Bridge:
 			used = &usedSettings.props
 
 		c_brlapi.Py_BEGIN_ALLOW_THREADS
-		retval = c_brlapi.brlapi_initializeConnection(client, used)
+		retval = c_brlapi.brlapi__initializeConnection(self.h, client, used)
 		c_brlapi.Py_END_ALLOW_THREADS
 		if retval == -1:
 			if clientSettings == None:
@@ -187,9 +183,10 @@ cdef class Bridge:
 
 			raise ConnectionError("couldn't connect to %s: %s" % (hostname,returnerrno()))
 
-	def close(self):
+	def __del__(self):
 		"""Close the BrlAPI conection"""
-		c_brlapi.brlapi_closeConnection()
+		c_brlapi.brlapi__closeConnection(self.h)
+		c_brlapi.free(self.h)
 
 	# TODO: loadAuthKey
 
@@ -200,7 +197,7 @@ cdef class Bridge:
 			cdef unsigned int y
 			cdef int retval
 			c_brlapi.Py_BEGIN_ALLOW_THREADS
-			retval = c_brlapi.brlapi_getDisplaySize(&x, &y)
+			retval = c_brlapi.brlapi__getDisplaySize(self.h, &x, &y)
 			c_brlapi.Py_END_ALLOW_THREADS
 			if retval == -1:
 				raise OperationError(returnerrno())
@@ -213,7 +210,7 @@ cdef class Bridge:
 			cdef char id[3]
 			cdef int retval
 			c_brlapi.Py_BEGIN_ALLOW_THREADS
-			retval = c_brlapi.brlapi_getDriverId(id, sizeof(id))
+			retval = c_brlapi.brlapi__getDriverId(self.h, id, sizeof(id))
 			c_brlapi.Py_END_ALLOW_THREADS
 			if retval == -1:
 				raise OperationError(returnerrno())
@@ -228,7 +225,7 @@ cdef class Bridge:
 			cdef char name[21]
 			cdef int retval
 			c_brlapi.Py_BEGIN_ALLOW_THREADS
-			retval = c_brlapi.brlapi_getDriverName(name, sizeof(name))
+			retval = c_brlapi.brlapi__getDriverName(self.h, name, sizeof(name))
 			c_brlapi.Py_END_ALLOW_THREADS
 			if retval == -1:
 				raise OperationError(returnerrno())
@@ -249,7 +246,7 @@ cdef class Bridge:
 		else:
 			c_how = how
 		c_brlapi.Py_BEGIN_ALLOW_THREADS
-		retval = c_brlapi.brlapi_enterTtyMode(c_tty, c_how)
+		retval = c_brlapi.brlapi__enterTtyMode(self.h, c_tty, c_how)
 		c_brlapi.Py_END_ALLOW_THREADS
 		if retval == -1:
 			raise OperationError(returnerrno())
@@ -260,7 +257,7 @@ cdef class Bridge:
 		"""Stop controlling the tty"""
 		cdef int retval
 		c_brlapi.Py_BEGIN_ALLOW_THREADS
-		retval = c_brlapi.brlapi_leaveTty()
+		retval = c_brlapi.brlapi__leaveTtyMode(self.h)
 		c_brlapi.Py_END_ALLOW_THREADS
 		if retval == -1:
 			raise OperationError(returnerrno())
@@ -277,7 +274,7 @@ cdef class Bridge:
 		cdef int c_tty
 		c_tty = tty
 		c_brlapi.Py_BEGIN_ALLOW_THREADS
-		retval = c_brlapi.brlapi_setFocus(c_tty)
+		retval = c_brlapi.brlapi__setFocus(self.h, c_tty)
 		c_brlapi.Py_END_ALLOW_THREADS
 		if retval == -1:
 			raise OperationError(returnerrno())
@@ -289,7 +286,7 @@ cdef class Bridge:
 		* s : gives information necessary for the update"""
 		cdef int retval
 		c_brlapi.Py_BEGIN_ALLOW_THREADS
-		retval = c_brlapi.brlapi_write(&writeStruct.props)
+		retval = c_brlapi.brlapi__write(self.h, &writeStruct.props)
 		c_brlapi.Py_END_ALLOW_THREADS
 		if retval == -1:
 			raise OperationError(returnerrno())
@@ -303,7 +300,7 @@ cdef class Bridge:
 		cdef unsigned char *c_dots
 		c_dots = <unsigned char *> dots
 		c_brlapi.Py_BEGIN_ALLOW_THREADS
-		retval = c_brlapi.brlapi_writeDots(c_dots)
+		retval = c_brlapi.brlapi__writeDots(self.h, c_dots)
 		c_brlapi.Py_END_ALLOW_THREADS
 		if retval == -1:
 			raise OperationError(returnerrno())
@@ -322,7 +319,7 @@ cdef class Bridge:
 		c_cursor = cursor
 		c_str = str
 		c_brlapi.Py_BEGIN_ALLOW_THREADS
-		retval = c_brlapi.brlapi_writeText(c_cursor, c_str)
+		retval = c_brlapi.brlapi__writeText(self.h, c_cursor, c_str)
 		c_brlapi.Py_END_ALLOW_THREADS
 		if retval == -1:
 			raise OperationError(returnerrno())
@@ -346,7 +343,7 @@ cdef class Bridge:
 		cdef int c_block
 		c_block = block
 		c_brlapi.Py_BEGIN_ALLOW_THREADS
-		retval = c_brlapi.brlapi_readKey(c_block, <unsigned long long*>&code)
+		retval = c_brlapi.brlapi__readKey(self.h, c_block, <unsigned long long*>&code)
 		c_brlapi.Py_END_ALLOW_THREADS
 		if retval == -1:
 			raise OperationError(returnerrno())
@@ -378,7 +375,7 @@ cdef class Bridge:
 		x = range[0]
 		y = range[1]
 		c_brlapi.Py_BEGIN_ALLOW_THREADS
-		retval = c_brlapi.brlapi_ignoreKeyRange(x, y)
+		retval = c_brlapi.brlapi__ignoreKeyRange(self.h, x, y)
 		c_brlapi.Py_END_ALLOW_THREADS
 		if retval == -1:
 			raise OperationError(returnerrno())
@@ -398,7 +395,7 @@ cdef class Bridge:
 		x = range[0]
 		y = range[1]
 		c_brlapi.Py_BEGIN_ALLOW_THREADS
-		retval = c_brlapi.brlapi_unignoreKeyRange(x, y)
+		retval = c_brlapi.brlapi__unignoreKeyRange(self.h, x, y)
 		c_brlapi.Py_END_ALLOW_THREADS
 		if retval == -1:
 			raise OperationError(returnerror())
@@ -413,7 +410,7 @@ cdef class Bridge:
 		cdef char *c_drivername
 		c_drivername = drivername
 		c_brlapi.Py_BEGIN_ALLOW_THREADS
-		retval = c_brlapi.brlapi_enterRawMode(c_drivername)
+		retval = c_brlapi.brlapi__enterRawMode(self.h, c_drivername)
 		c_brlapi.Py_END_ALLOW_THREADS
 		if retval == -1:
 			raise OperationError(returnerror())
