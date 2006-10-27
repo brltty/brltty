@@ -20,8 +20,8 @@
  */
 
 public class BrlapiSettings {
-  private String hostName;
-  private String authKey;
+  public String hostName;
+  public String authKey;
 
   public BrlapiSettings (String hostName, String authKey) {
     this.hostName = hostName;
@@ -34,13 +34,5 @@ public class BrlapiSettings {
 
   public BrlapiSettings () {
     this(null);
-  }
-
-  public String getHostName () {
-    return hostName;
-  }
-
-  public String getAuthKey () {
-    return authKey;
   }
 }

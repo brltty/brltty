@@ -40,8 +40,12 @@ public class Brlapi {
   public final native void closeConnection ();
   public final static native byte[] loadAuthKey (String path);
 
-  public BrlapiSettings getSettings () {
-    return settings;
+  public String getHostName () {
+    return settings.hostName;
+  }
+
+  public String getAuthKey () {
+    return settings.authKey;
   }
 
   public int getFileDescriptor () {
