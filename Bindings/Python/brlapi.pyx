@@ -5,7 +5,7 @@ C API documentation : http://mielke.cc/brltty/doc/BrlAPIref-HTML
 
 Example : 
 import brlapi
-b = brlapi.Bridge()
+b = brlapi.Connection()
 b.enterTtyMode()
 b.writeText("Press any key to continue ...")
 key = b.readKey()
