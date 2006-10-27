@@ -20,26 +20,25 @@
  */
 
 public class Brlapi {
-  private long handle;
-  private int fileDescriptor;;
-  private BrlapiSettings settings;
+  private final BrlapiSettings settings;
+  private final long handle;
+  private final int fileDescriptor;;
 
   public Brlapi (BrlapiSettings settings) throws BrlapiError {
     this.settings = new BrlapiSettings();
     fileDescriptor = initializeConnection(settings, this.settings);
   }
 
-  private final native int initializeConnection(
-    BrlapiSettings clientSettings,
-    BrlapiSettings usedSettings
-  ) throws BrlapiError;
-
-  public final native void closeConnection();
   protected void finalize () {
     closeConnection();
   }
 
-  public final static native byte[] loadAuthKey(String path);
+  private final native int initializeConnection (
+    BrlapiSettings clientSettings,
+    BrlapiSettings usedSettings)
+    throws BrlapiError;
+  public final native void closeConnection ();
+  public final static native byte[] loadAuthKey (String path);
 
   public BrlapiSettings getSettings () {
     return settings;
@@ -52,7 +51,7 @@ public class Brlapi {
   public final native String getDriverId () throws BrlapiError;
   public final native String getDriverName () throws BrlapiError;
   public final native BrlapiSize getDisplaySize () throws BrlapiError;
-  /*public final native byte[] getDriverInfo() throws BrlapiError;*/
+  /*public final native byte[] getDriverInfo () throws BrlapiError;*/
   
   public final native int enterTtyMode (int tty, String driver) throws BrlapiError;
   public final native int getTtyPath (int ttys[], String driver) throws BrlapiError;
@@ -63,7 +62,7 @@ public class Brlapi {
   public final native int writeDots (byte str[]) throws BrlapiError;
   public final native void write (BrlapiWriteStruct s) throws BrlapiError;
 
-  public final native long readKey(boolean block) throws BrlapiError;
+  public final native long readKey (boolean block) throws BrlapiError;
   public final native void ignoreKeyRange (long x, long y) throws BrlapiError;
   public final native void unignoreKeyRange (long x, long y) throws BrlapiError;
   public final native void ignoreKeySet (long s[]) throws BrlapiError;
