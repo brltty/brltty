@@ -417,4 +417,4 @@ cdef class Connection:
 		else:
 			return retval
 
-include "cmddefs.auto.pyx"
+include "constants.auto.pyx"
