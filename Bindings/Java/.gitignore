@@ -2,7 +2,7 @@ Makefile
 reldeps.mk
 *.class
 brlapi.jar
-brlapi.so
+libbrlapi_java.so
 resources
 package-list
 *.css

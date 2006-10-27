@@ -19,9 +19,9 @@ include $(SRC_TOP)bindings.mk
 
 JAVAC = @JAVAC@
 
-JAVA_NATIVE = brlapi.$(LIB_EXT)
+JAVA_NATIVE = libbrlapi_java.$(LIB_EXT)
 
-all: brlapi.jar $(JAVA_NATIVE) doc
+all: $(JAVA_NATIVE) brlapi.jar doc
 
 brlapi.jar: classes
 	$(JAVAC:javac=jar) cf $@ *.class
@@ -41,9 +41,9 @@ doc:
 	$(JAVAC:javac=javadoc) -quiet $(SRC_DIR)/*.java
 
 clean::
-	-rm -f *.class brlapi.jar $(JAVA_NATIVE)
-	-rm -f package-list *.css *.html
+	-rm -f $(JAVA_NATIVE) *.class brlapi.jar
 	-rm -f -r resources
+	-rm -f package-list *.css *.html
 
 install: all
 
