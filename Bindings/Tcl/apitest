@@ -1,0 +1,11 @@
+#!/bin/bash -p
+
+programName="$(basename "${0}")"
+programDirectory="$(cd "$(dirname "${0}")" && pwd)"
+currentDirectory="$(pwd)"
+
+export LD_LIBRARY_PATH="${currentDirectory}"
+export LD_PRELOAD="${currentDirectory}/../../Programs/libbrlapi.so"
+
+exec tclsh "${programDirectory}/${programName}.tcl" "${@}"
+exit "${?}"
