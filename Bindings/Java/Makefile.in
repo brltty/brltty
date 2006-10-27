@@ -21,13 +21,15 @@ JAVAC = @JAVAC@
 
 JAVA_NATIVE = brlapi.$(LIB_EXT)
 
-all: brlapi.jar $(JAVA_NATIVE)
+all: brlapi.jar $(JAVA_NATIVE) doc
 
-brlapi.jar: Brlapi.class
+brlapi.jar: classes
 	$(JAVAC:javac=jar) cf $@ *.class
 
-Brlapi.class: $(SRC_DIR)/Brlapi.java $(SRC_DIR)/BrlapiError.java $(SRC_DIR)/BrlapiException.java $(SRC_DIR)/BrlapiSettings.java $(SRC_DIR)/BrlapiWriteStruct.java $(SRC_DIR)/BrlapiSize.java $(SRC_DIR)/BrlapiKey.java
-	$(JAVAC) $^
+classes: Brlapi.class BrlapiError.class BrlapiException.class BrlapiSettings.class BrlapiWriteStruct.class BrlapiSize.class BrlapiKey.class Apitest.class
+
+%.class: $(SRC_DIR)/%.java
+	$(JAVAC) -classpath . -sourcepath $(SRC_DIR) $<
 
 $(JAVA_NATIVE): brlapi.$O api
 	$(MKLIB:<name>=brlapi) $@ brlapi.$O $(API_LDFLAGS)
@@ -35,8 +37,13 @@ $(JAVA_NATIVE): brlapi.$O api
 brlapi.$O: brlapi.c $(API_HEADERS)
 	$(CC) $(LIBCFLAGS) -o $@ -c $(SRC_DIR)/brlapi.c
 
+doc:
+	$(JAVAC:javac=javadoc) -quiet $(SRC_DIR)/*.java
+
 clean::
 	-rm -f *.class brlapi.jar $(JAVA_NATIVE)
+	-rm -f package-list *.css *.html
+	-rm -f -r resources
 
 install: all
 

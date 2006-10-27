@@ -21,7 +21,7 @@
 
 public class Brlapi {
   private final BrlapiSettings settings;
-  private final long handle;
+  private long handle;
   private final int fileDescriptor;;
 
   public Brlapi (BrlapiSettings settings) throws BrlapiError {

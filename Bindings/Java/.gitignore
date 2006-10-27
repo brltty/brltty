@@ -3,3 +3,7 @@ reldeps.mk
 *.class
 brlapi.jar
 brlapi.so
+resources
+package-list
+*.css
+*.html

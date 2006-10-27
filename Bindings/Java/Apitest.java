@@ -15,7 +15,7 @@ public class Apitest {
       Brlapi brlapi = new Brlapi(settings);
       size = brlapi.getDisplaySize();
       System.out.println("done (fd="+brlapi.getFileDescriptor()+")");
-      System.out.println("Connected to "+settings.hostName+" using key file "+settings.authKey);
+      System.out.println("Connected to "+settings.getHostName()+" using key file "+settings.getAuthKey());
       System.out.println("driver "+brlapi.getDriverId()+" "+brlapi.getDriverName());
       System.out.println("display "+size.x()+"x"+size.y());
       tty = brlapi.enterTtyMode(0,null);
