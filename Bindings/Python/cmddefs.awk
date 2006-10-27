@@ -16,7 +16,7 @@
 ###############################################################################
 
 function brlCommand(name, symbol, value, help) {
-  writeKeyDefinition(name, value)
+  writeCommandDefinition(name, value)
 }
 
 function brlBlock(name, symbol, value, help) {
@@ -24,7 +24,7 @@ function brlBlock(name, symbol, value, help) {
   if (name == "PASSKEY") return
 
   if (value ~ /^0[xX][0-9a-fA-F]+00$/) {
-    writeKeyDefinition(name, tolower(value) "00")
+    writeCommandDefinition(name, tolower(value) "00")
   }
 }
 
@@ -51,24 +51,38 @@ function brlDot(number, symbol, value, help) {
   writePythonAssignment("BRL_DOT" number, value)
 }
 
+function apiType(name, symbol, value, help) {
+  value = hexadecimalValue(value)
+  writePythonAssignment("KEY_TYPE_" name, value)
+}
+
 function apiKey(name, symbol, value, help) {
-  value = tolower(value)
-  gsub("u?l*$", "", value)
+  value = hexadecimalValue(value)
 
   if (name == "FUNCTION") {
     for (i=0; i<35; ++i) {
-      writeKeyDefinition("F" (i+1), value "+" i)
+      writeKeyDefinition("F" (i+1), "(" value " + " i ")")
     }
   } else {
     writeKeyDefinition(name, value)
   }
 }
 
+function writeCommandDefinition(name, value) {
+  writePythonAssignment("KEY_CMD_" name, "(KEY_TYPE_CMD | " value ")")
+}
+
 function writeKeyDefinition(name, value) {
-  writePythonAssignment("KEY_CMD_" name, value)
+  writePythonAssignment("KEY_SYM_" name, "(KEY_TYPE_SYM | " value ")")
 }
 
 function writePythonAssignment(name, value) {
   print name " = " value
+}
+
+function hexadecimalValue(value) {
+  value = tolower(value)
+  gsub("u?l*$", "", value)
+  return value
 }
 
