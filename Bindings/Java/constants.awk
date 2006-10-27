@@ -24,7 +24,7 @@ END {
 }
 
 function brlCommand(name, symbol, value, help) {
-  writeCommandDefinition(name, value)
+  writeCommandDefinition(name, value, help)
 }
 
 function brlBlock(name, symbol, value, help) {
@@ -32,7 +32,7 @@ function brlBlock(name, symbol, value, help) {
   if (name == "PASSKEY") return
 
   if (value ~ /^0[xX][0-9a-fA-F]+00$/) {
-    writeCommandDefinition(name, toupper(value) "00")
+    writeCommandDefinition(name, toupper(value) "00", help)
   }
 }
 
@@ -52,11 +52,11 @@ function brlFlag(name, symbol, value, help) {
   } else {
     return
   }
-  writeJavaConstant("KEY_FLG_" name, value)
+  writeJavaConstant("KEY_FLG_" name, value, help)
 }
 
 function brlDot(number, symbol, value, help) {
-  writeJavaConstant("BRL_DOT" number, value)
+  writeJavaConstant("BRL_DOT" number, value, help)
 }
 
 function apiType(name, symbol, value, help) {
@@ -75,16 +75,21 @@ function apiKey(name, symbol, value, help) {
   }
 }
 
-function writeCommandDefinition(name, value) {
-  writeJavaConstant("KEY_CMD_" name, "(KEY_TYPE_CMD | " value ")")
+function writeCommandDefinition(name, value, help) {
+  writeJavaConstant("KEY_CMD_" name, "(KEY_TYPE_CMD | " value ")", help)
 }
 
 function writeKeyDefinition(name, value) {
   writeJavaConstant("KEY_SYM_" name, "(KEY_TYPE_SYM | " value ")")
 }
 
-function writeJavaConstant(name, value) {
+function writeJavaConstant(name, value, help) {
+  writeJavadocComment(help)
   print "  public static final int " name " = " value ";"
+}
+
+function writeJavadocComment(text) {
+  print "  /** " text " */"
 }
 
 function hexadecimalValue(value) {
