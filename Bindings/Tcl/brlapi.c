@@ -317,7 +317,7 @@ static int
 brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
   static const char *functions[] = {
     "acceptKeys",
-    "disconnect",
+    "closeConnection",
     "displaySize",
     "driverIdentifier",
     "driverName",
@@ -343,7 +343,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
   typedef enum {
     FCN_acceptKeys,
-    FCN_disconnect,
+    FCN_closeConnection,
     FCN_displaySize,
     FCN_driverIdentifier,
     FCN_driverName,
@@ -868,7 +868,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
       return TCL_ERROR;
     }
 
-    case FCN_disconnect: {
+    case FCN_closeConnection: {
       if (objc != 2) {
         Tcl_WrongNumArgs(interp, 2, objv, NULL);
         return TCL_ERROR;

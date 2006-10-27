@@ -38,5 +38,5 @@ brlapi<sessionNumber> function [arg ...]
    sendRaw <packet>
    suspend <driver>
    resume
-   disconnect
+   closeConnection
 
