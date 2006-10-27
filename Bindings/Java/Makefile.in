@@ -32,7 +32,7 @@ brlapi.$O: brlapi.c $(API_HEADERS)
 brlapi.jar: classes
 	$(JAVAC:javac=jar) cf $@ Brlapi*.class
 
-classes: Brlapi.class BrlapiError.class BrlapiException.class BrlapiSettings.class BrlapiWriteStruct.class BrlapiSize.class BrlapiKey.class Apitest.class
+classes: Brlapi.class BrlapiError.class BrlapiException.class BrlapiSettings.class BrlapiWriteStruct.class BrlapiSize.class BrlapiKey.class ApiTest.class
 
 Brlapi.class: BrlapiConstants.class
 

@@ -1,0 +1,9 @@
+#!/bin/bash -p
+
+currentDirectory="$(pwd)"
+
+export LD_LIBRARY_PATH="${currentDirectory}"
+export LD_PRELOAD="${currentDirectory}/../../Programs/libbrlapi.so"
+
+exec java -classpath "${currentDirectory}" ApiTest "${@}"
+exit "${?}"
