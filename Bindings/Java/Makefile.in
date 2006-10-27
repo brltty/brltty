@@ -49,6 +49,7 @@ clean::
 	-rm -f $(JAVA_NATIVE) BrlapiConstants.java *.class brlapi.jar
 	-rm -f -r resources
 	-rm -f package-list *.css *.html
+	-rm -f gjdoc.properties
 
 install: all
 
