@@ -35,6 +35,9 @@ public class Brlapi {
   ) throws BrlapiError;
 
   public final native void closeConnection();
+  protected void finalize () {
+    closeConnection();
+  }
 
   public final static native byte[] loadAuthKey(String path);
 
