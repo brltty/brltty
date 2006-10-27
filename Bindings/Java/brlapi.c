@@ -306,31 +306,31 @@ JNIEXPORT jbyteArray JNICALL Java_Brlapi_getDriverInfo(JNIEnv *jenv, jobject job
 }
 #endif
 
-JNIEXPORT jint JNICALL Java_Brlapi_enterTtyMode(JNIEnv *jenv, jobject jobj, jint jtty, jstring jhow) {
+JNIEXPORT jint JNICALL Java_Brlapi_enterTtyMode(JNIEnv *jenv, jobject jobj, jint jtty, jstring jdriver) {
   int tty ;
-  char *how;
+  char *driver;
   int result;
   GET_HANDLE(jenv, jobj, -1);
   
   env = jenv;
 
   tty = (int)jtty; 
-  if (!jhow)
-    how = NULL;
+  if (!jdriver)
+    driver = NULL;
   else
-    if (!(how = (char *)(*jenv)->GetStringUTFChars(jenv, jhow, NULL)))
+    if (!(driver = (char *)(*jenv)->GetStringUTFChars(jenv, jdriver, NULL)))
       return ThrowException(jenv, ERR_OUTOFMEM, __func__), -1;
 
-  result = brlapi__enterTtyMode(handle, tty,how);
+  result = brlapi__enterTtyMode(handle, tty,driver);
   if (result < 0)
     return ThrowError(jenv, __func__), -1;
 
   return (jint) result;
 }
 
-JNIEXPORT jint JNICALL Java_Brlapi_getTtyPath(JNIEnv *jenv, jobject jobj, jintArray jttys, jstring jhow) {
+JNIEXPORT jint JNICALL Java_Brlapi_getTtyPath(JNIEnv *jenv, jobject jobj, jintArray jttys, jstring jdriver) {
   jint *ttys ;
-  char *how;
+  char *driver;
   int result;
   GET_HANDLE(jenv, jobj, -1);
   
@@ -341,13 +341,13 @@ JNIEXPORT jint JNICALL Java_Brlapi_getTtyPath(JNIEnv *jenv, jobject jobj, jintAr
   if (!(ttys = (*jenv)->GetIntArrayElements(jenv, jttys, NULL)))
     return ThrowException(jenv, ERR_OUTOFMEM, __func__), -1;
 
-  if (!jhow)
-    how = NULL;
+  if (!jdriver)
+    driver = NULL;
   else
-    if (!(how = (char *)(*jenv)->GetStringUTFChars(jenv, jhow, NULL)));
+    if (!(driver = (char *)(*jenv)->GetStringUTFChars(jenv, jdriver, NULL)));
       return ThrowException(jenv, ERR_OUTOFMEM, __func__), -1;
 
-  result = brlapi__getTtyPath(handle, ttys,(*jenv)->GetArrayLength(jenv,jttys),how);
+  result = brlapi__getTtyPath(handle, ttys,(*jenv)->GetArrayLength(jenv,jttys),driver);
   (*jenv)->ReleaseIntArrayElements(jenv, jttys, ttys, JNI_ABORT);
   if (result < 0)
     return ThrowError(jenv, __func__), -1;
