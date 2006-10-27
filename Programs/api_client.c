@@ -1537,116 +1537,6 @@ void brlapi_perror(const char *s)
   fprintf(stderr,"%s: %s\n",s,brlapi_strerror(&brlapi_error));
 }
 
-/* XXX functions mustn't use brlapi_errno after this since it #undefs it XXX */
-
-#ifdef brlapi_error
-#undef brlapi_error
-#endif /* brlapi_error */
-
-brlapi_error_t brlapi_error;
-static int pthread_error_ok;
-
-/* we need a per-thread errno variable, thanks to pthread_keys */
-static pthread_key_t error_key;
-
-/* the key must be created at most once */
-static pthread_once_t error_key_once = PTHREAD_ONCE_INIT;
-
-/* We need to declare these as weak external references to determine at runtime 
- * whether libpthread is used or not. We also can't rely on the functions prototypes.
- */
-#if defined(WINDOWS)
-
-#elif defined(__GNUC__)
-#define WEAK_REDEFINE(name) extern typeof(name) name __attribute__((weak))
-WEAK_REDEFINE(pthread_key_create);
-WEAK_REDEFINE(pthread_once);
-WEAK_REDEFINE(pthread_getspecific);
-WEAK_REDEFINE(pthread_setspecific);
-
-#elif defined(__sun__)
-#pragma weak pthread_key_create
-#pragma weak pthread_once
-#pragma weak pthread_getspecific
-#pragma weak pthread_setspecific
-
-#endif /* weak external references */
-
-static void error_key_free(void *key)
-{
-  free(key);
-}
-
-static void error_key_alloc(void)
-{
-  pthread_error_ok=!pthread_key_create(&error_key, error_key_free);
-}
-
-/* how to get per-thread errno variable. This will be called by the macro
- * brlapi_errno */
-brlapi_error_t *brlapi_error_location(void)
-{
-  brlapi_error_t *errorp;
-#ifndef WINDOWS
-  if (pthread_once && pthread_key_create) {
-#endif /* WINDOWS */
-    pthread_once(&error_key_once, error_key_alloc);
-    if (pthread_error_ok) {
-      if ((errorp=(brlapi_error_t *) pthread_getspecific(error_key)))
-        /* normal case */
-        return errorp;
-      else
-        /* on the first time, must allocate it */
-        if ((errorp=malloc(sizeof(*errorp))) && !pthread_setspecific(error_key,errorp)) {
-	  memset(errorp,0,sizeof(*errorp));
-          return errorp;
-	}
-    }
-#ifndef WINDOWS
-  }
-#endif /* WINDOWS */
-  /* fall-back: shared errno :/ */
-  return &brlapi_error;
-}
-
-brlapi_exceptionHandler_t brlapi__setExceptionHandler(brlapi_handle_t *handle, brlapi_exceptionHandler_t new)
-{
-  brlapi_exceptionHandler_t tmp;
-  pthread_mutex_lock(&handle->exceptionHandler_mutex);
-  tmp = handle->exceptionHandler;
-  if (new!=NULL) handle->exceptionHandler = new;
-  pthread_mutex_unlock(&handle->exceptionHandler_mutex);
-  return tmp;
-}
-
-brlapi_exceptionHandler_t brlapi_setExceptionHandler(brlapi_exceptionHandler_t new)
-{
-  return brlapi__setExceptionHandler(&defaultHandle, new);
-}
-
-int brlapi_strexception(char *buf, size_t n, int err, brl_type_t type, const void *packet, size_t size)
-{
-  int chars = 16; /* Number of bytes to dump */
-  char hexString[3*chars+1];
-  int i, nbChars = MIN(chars, size);
-  char *p = hexString;
-  brlapi_error_t error = { .brlerrno = err };
-  for (i=0; i<nbChars; i++)
-    p += sprintf(p, "%02x ", ((unsigned char *) packet)[i]);
-  p--; /* Don't keep last space */
-  *p = '\0';
-  return snprintf(buf, n, "%s on %s request of size %d (%s)",
-    brlapi_strerror(&error), brlapi_packetType(type), (int)size, hexString);
-}
-
-void brlapi_defaultExceptionHandler(int err, brl_type_t type, const void *packet, size_t size)
-{
-  char str[0X100];
-  brlapi_strexception(str,0X100, err, type, packet, size);
-  fprintf(stderr, "BrlAPI exception: %s\nYou may want to add option -l 7 to the brltty command line for getting debugging information in the system log\n", str);
-  abort();
-}
-
 typedef struct {
   brl_keycode_t code;
   const char *name;
@@ -1777,4 +1667,114 @@ unsigned char
 brlapi_dotBitToNumber (unsigned char bit) {
   const unsigned char *byte = memchr(brlapi_dotBits, bit, brlapi_dotCount);
   return byte? brlapi_dotNumbers[byte - brlapi_dotBits]: 0;
+}
+
+/* XXX functions mustn't use brlapi_errno after this since it #undefs it XXX */
+
+#ifdef brlapi_error
+#undef brlapi_error
+#endif /* brlapi_error */
+
+brlapi_error_t brlapi_error;
+static int pthread_error_ok;
+
+/* we need a per-thread errno variable, thanks to pthread_keys */
+static pthread_key_t error_key;
+
+/* the key must be created at most once */
+static pthread_once_t error_key_once = PTHREAD_ONCE_INIT;
+
+/* We need to declare these as weak external references to determine at runtime 
+ * whether libpthread is used or not. We also can't rely on the functions prototypes.
+ */
+#if defined(WINDOWS)
+
+#elif defined(__GNUC__)
+#define WEAK_REDEFINE(name) extern typeof(name) name __attribute__((weak))
+WEAK_REDEFINE(pthread_key_create);
+WEAK_REDEFINE(pthread_once);
+WEAK_REDEFINE(pthread_getspecific);
+WEAK_REDEFINE(pthread_setspecific);
+
+#elif defined(__sun__)
+#pragma weak pthread_key_create
+#pragma weak pthread_once
+#pragma weak pthread_getspecific
+#pragma weak pthread_setspecific
+
+#endif /* weak external references */
+
+static void error_key_free(void *key)
+{
+  free(key);
+}
+
+static void error_key_alloc(void)
+{
+  pthread_error_ok=!pthread_key_create(&error_key, error_key_free);
+}
+
+/* how to get per-thread errno variable. This will be called by the macro
+ * brlapi_errno */
+brlapi_error_t *brlapi_error_location(void)
+{
+  brlapi_error_t *errorp;
+#ifndef WINDOWS
+  if (pthread_once && pthread_key_create) {
+#endif /* WINDOWS */
+    pthread_once(&error_key_once, error_key_alloc);
+    if (pthread_error_ok) {
+      if ((errorp=(brlapi_error_t *) pthread_getspecific(error_key)))
+        /* normal case */
+        return errorp;
+      else
+        /* on the first time, must allocate it */
+        if ((errorp=malloc(sizeof(*errorp))) && !pthread_setspecific(error_key,errorp)) {
+	  memset(errorp,0,sizeof(*errorp));
+          return errorp;
+	}
+    }
+#ifndef WINDOWS
+  }
+#endif /* WINDOWS */
+  /* fall-back: shared errno :/ */
+  return &brlapi_error;
+}
+
+brlapi_exceptionHandler_t brlapi__setExceptionHandler(brlapi_handle_t *handle, brlapi_exceptionHandler_t new)
+{
+  brlapi_exceptionHandler_t tmp;
+  pthread_mutex_lock(&handle->exceptionHandler_mutex);
+  tmp = handle->exceptionHandler;
+  if (new!=NULL) handle->exceptionHandler = new;
+  pthread_mutex_unlock(&handle->exceptionHandler_mutex);
+  return tmp;
+}
+
+brlapi_exceptionHandler_t brlapi_setExceptionHandler(brlapi_exceptionHandler_t new)
+{
+  return brlapi__setExceptionHandler(&defaultHandle, new);
+}
+
+int brlapi_strexception(char *buf, size_t n, int err, brl_type_t type, const void *packet, size_t size)
+{
+  int chars = 16; /* Number of bytes to dump */
+  char hexString[3*chars+1];
+  int i, nbChars = MIN(chars, size);
+  char *p = hexString;
+  brlapi_error_t error = { .brlerrno = err };
+  for (i=0; i<nbChars; i++)
+    p += sprintf(p, "%02x ", ((unsigned char *) packet)[i]);
+  p--; /* Don't keep last space */
+  *p = '\0';
+  return snprintf(buf, n, "%s on %s request of size %d (%s)",
+    brlapi_strerror(&error), brlapi_packetType(type), (int)size, hexString);
+}
+
+void brlapi_defaultExceptionHandler(int err, brl_type_t type, const void *packet, size_t size)
+{
+  char str[0X100];
+  brlapi_strexception(str,0X100, err, type, packet, size);
+  fprintf(stderr, "BrlAPI exception: %s\nYou may want to add option -l 7 to the brltty command line for getting debugging information in the system log\n", str);
+  abort();
 }
