@@ -37,13 +37,13 @@ classes: Brlapi.class BrlapiError.class BrlapiException.class BrlapiSettings.cla
 Brlapi.class: BrlapiConstants.class
 
 %.class: $(SRC_DIR)/%.java
-	$(JAVAC) -classpath . -sourcepath $(SRC_DIR) $<
+	$(JAVAC) $<
 
 BrlapiConstants.java: $(API_HEADER) $(APIDEFS_AWK) $(BRLDEFS_HDR) $(BRLDEFS_AWK) $(SRC_DIR)/constants.awk
 	$(AWK) -f $(APIDEFS_AWK) -f $(BRLDEFS_AWK) -f $(SRC_DIR)/constants.awk $(API_HEADER) $(BRLDEFS_HDR) >$@
 
-doc:
-	$(JAVAC:javac=javadoc) -quiet $(SRC_DIR)/*.java
+doc: BrlapiConstants.java
+	$(JAVAC:javac=javadoc) -quiet $(SRC_DIR)/*.java BrlapiConstants.java
 
 clean::
 	-rm -f $(JAVA_NATIVE) BrlapiConstants.java *.class brlapi.jar
