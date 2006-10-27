@@ -57,7 +57,7 @@ extern "C" {
 typedef struct brlapi_handle_t brlapi_handle_t;
 
 /** Returns the size of an object of type brlapi_handle_t in bytes */
-int brlapi_getHandleSize(void);
+size_t brlapi_getHandleSize(void);
 
 /** \defgroup brlapi_connection Connecting to BrlAPI
  *

@@ -184,7 +184,7 @@ struct brlapi_handle_t { /* Connection-specific information */
 };
 
 /* Function brlapi_getHandleSize */
-int brlapi_getHandleSize(void)
+size_t brlapi_getHandleSize(void)
 {
   return sizeof(brlapi_handle_t);
 }
