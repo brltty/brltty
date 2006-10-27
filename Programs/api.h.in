@@ -595,7 +595,7 @@ typedef uint64_t brl_keycode_t;
 #define BRLAPI_KEY_SYM_DELETE		0x0000FFFFULL
 #define BRLAPI_KEY_SYM_UC		0x01000000ULL
 
-#include "api_cmddefs.h"
+#include "api_constants.h"
 
 /* brlapi_expandKeyCode */
 /** Expand a keycode into command, argument and flags parts

@@ -424,7 +424,7 @@ WARN_LOGFILE           =
 # with spaces.
 
 INPUT                  = @top_builddir@/Programs/api.h \
-                         @top_srcdir@/Programs/api_cmddefs.auto.h \
+                         @top_srcdir@/Programs/api_constants.auto.h \
                          @top_srcdir@/Programs/api_protocol.h
 
 # If the value of the INPUT tag contains directories, you can use the 

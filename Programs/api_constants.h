@@ -19,7 +19,7 @@
  */
 
 /* This header is a placeholder which includes the real header: */
-#include "api_cmddefs.auto.h"
+#include "api_constants.auto.h"
 
 /*
  * It's necessary when building BrlAPI itself. The real (generated) header is
