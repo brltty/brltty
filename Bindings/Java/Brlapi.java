@@ -20,41 +20,56 @@
  */
 
 public class Brlapi {
-  public final native int initializeConnection(
+  private long handle;
+  private int fileDescriptor;;
+  private BrlapiSettings settings;
+
+  public Brlapi (BrlapiSettings settings) throws BrlapiError {
+    this.settings = new BrlapiSettings();
+    fileDescriptor = initializeConnection(settings, this.settings);
+  }
+
+  private final native int initializeConnection(
     BrlapiSettings clientSettings,
     BrlapiSettings usedSettings
   ) throws BrlapiError;
 
   public final native void closeConnection();
 
-  public final static native byte[] loadAuthKey(String jpath);
+  public final static native byte[] loadAuthKey(String path);
 
-  public final native String getDriverId() throws BrlapiError;
-  public final native String getDriverName() throws BrlapiError;
-  public final native BrlapiSize getDisplaySize() throws BrlapiError;
+  public BrlapiSettings getSettings () {
+    return settings;
+  }
+
+  public int getFileDescriptor () {
+    return fileDescriptor;
+  }
+
+  public final native String getDriverId () throws BrlapiError;
+  public final native String getDriverName () throws BrlapiError;
+  public final native BrlapiSize getDisplaySize () throws BrlapiError;
   /*public final native byte[] getDriverInfo() throws BrlapiError;*/
   
-  public final native int enterTtyMode(int tty, String how) throws BrlapiError;
-  public final native int getTtyPath(int ttys[], String how) throws BrlapiError;
-  public final native void leaveTtyMode() throws BrlapiError;
-  public final native void setFocus(int tty) throws BrlapiError;
+  public final native int enterTtyMode (int tty, String driver) throws BrlapiError;
+  public final native int getTtyPath (int ttys[], String driver) throws BrlapiError;
+  public final native void leaveTtyMode () throws BrlapiError;
+  public final native void setFocus (int tty) throws BrlapiError;
 
-  public final native void writeText(int cursor, String str) throws BrlapiError;
-  public final native int writeDots(byte str[]) throws BrlapiError;
-  public final native void write(BrlapiWriteStruct s) throws BrlapiError;
+  public final native void writeText (int cursor, String str) throws BrlapiError;
+  public final native int writeDots (byte str[]) throws BrlapiError;
+  public final native void write (BrlapiWriteStruct s) throws BrlapiError;
 
   public final native long readKey(boolean block) throws BrlapiError;
-  public final native void ignoreKeyRange(long x, long y) throws BrlapiError;
-  public final native void ignoreKeySet(long s[]) throws BrlapiError;
-  public final native void unignoreKeyRange(long x, long y) throws BrlapiError;
-  public final native void unignoreKeySet(long s[]) throws BrlapiError;
+  public final native void ignoreKeyRange (long x, long y) throws BrlapiError;
+  public final native void unignoreKeyRange (long x, long y) throws BrlapiError;
+  public final native void ignoreKeySet (long s[]) throws BrlapiError;
+  public final native void unignoreKeySet (long s[]) throws BrlapiError;
 
-  public final native void enterRawMode(String driver) throws BrlapiError;
-  public final native void leaveRawMode() throws BrlapiError;
-  public final native int sendRaw(byte buf[]) throws BrlapiError;
-  public final native int recvRaw(byte buf[]) throws BrlapiError;
+  public final native void enterRawMode (String driver) throws BrlapiError;
+  public final native void leaveRawMode () throws BrlapiError;
+  public final native int sendRaw (byte buf[]) throws BrlapiError;
+  public final native int recvRaw (byte buf[]) throws BrlapiError;
 
-  public final static native String packetType(long type);
-
-  public long handle;
+  public final static native String packetType (long type);
 }
