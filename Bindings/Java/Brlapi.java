@@ -19,7 +19,7 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-public class Brlapi {
+public class Brlapi implements BrlapiConstants {
   private final BrlapiSettings settings;
   private long handle;
   private final int fileDescriptor;;

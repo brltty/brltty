@@ -23,25 +23,30 @@ JAVA_NATIVE = libbrlapi_java.$(LIB_EXT)
 
 all: $(JAVA_NATIVE) brlapi.jar doc
 
-brlapi.jar: classes
-	$(JAVAC:javac=jar) cf $@ *.class
-
-classes: Brlapi.class BrlapiError.class BrlapiException.class BrlapiSettings.class BrlapiWriteStruct.class BrlapiSize.class BrlapiKey.class Apitest.class
-
-%.class: $(SRC_DIR)/%.java
-	$(JAVAC) -classpath . -sourcepath $(SRC_DIR) $<
-
 $(JAVA_NATIVE): brlapi.$O api
 	$(MKLIB:<name>=brlapi) $@ brlapi.$O $(API_LDFLAGS)
 
 brlapi.$O: brlapi.c $(API_HEADERS)
 	$(CC) $(LIBCFLAGS) -o $@ -c $(SRC_DIR)/brlapi.c
 
+brlapi.jar: classes
+	$(JAVAC:javac=jar) cf $@ *.class
+
+classes: Brlapi.class BrlapiError.class BrlapiException.class BrlapiSettings.class BrlapiWriteStruct.class BrlapiSize.class BrlapiKey.class Apitest.class
+
+Brlapi.class: BrlapiConstants.class
+
+%.class: $(SRC_DIR)/%.java
+	$(JAVAC) -classpath . -sourcepath $(SRC_DIR) $<
+
+BrlapiConstants.java: $(API_HEADER) $(APIDEFS_AWK) $(BRLDEFS_HDR) $(BRLDEFS_AWK) $(SRC_DIR)/constants.awk
+	$(AWK) -f $(APIDEFS_AWK) -f $(BRLDEFS_AWK) -f $(SRC_DIR)/constants.awk $(API_HEADER) $(BRLDEFS_HDR) >$@
+
 doc:
 	$(JAVAC:javac=javadoc) -quiet $(SRC_DIR)/*.java
 
 clean::
-	-rm -f $(JAVA_NATIVE) *.class brlapi.jar
+	-rm -f $(JAVA_NATIVE) BrlapiConstants.java *.class brlapi.jar
 	-rm -f -r resources
 	-rm -f package-list *.css *.html
 
