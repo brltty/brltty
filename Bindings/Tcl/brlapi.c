@@ -90,7 +90,10 @@ setBrlapiError (Tcl_Interp *interp) {
 }
 
 static int
-getDisplaySize (Tcl_Interp *interp, BrlapiSession *session, int *width, int *height) {
+getDisplaySize (
+  Tcl_Interp *interp, BrlapiSession *session,
+  unsigned int *width, unsigned int *height
+) {
   if (brlapi__getDisplaySize(session->handle, width, height) != -1) return TCL_OK;
   setBrlapiError(interp);
   return TCL_ERROR;
@@ -216,7 +219,7 @@ typedef struct {
 OPTION_HANDLER(session, writeText, and) {
   FunctionData_session_writeText *options = data;
   int count;
-  char *mask = Tcl_GetByteArrayFromObj(objv[1], &count);
+  unsigned char *mask = Tcl_GetByteArrayFromObj(objv[1], &count);
 
   if (!count) {
     options->arguments.attrAnd = NULL;
@@ -277,7 +280,7 @@ OPTION_HANDLER(session, writeText, display) {
 OPTION_HANDLER(session, writeText, or) {
   FunctionData_session_writeText *options = data;
   int count;
-  char *mask = Tcl_GetByteArrayFromObj(objv[1], &count);
+  unsigned char *mask = Tcl_GetByteArrayFromObj(objv[1], &count);
 
   if (!count) {
     options->arguments.attrOr = NULL;
@@ -467,7 +470,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     }
 
     case FCN_getDisplaySize: {
-      int width, height;
+      unsigned int width, height;
 
       if (objc != 2) {
         Tcl_WrongNumArgs(interp, 2, objv, NULL);
@@ -758,7 +761,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
       }
 
       {
-        int width, height;
+        unsigned int width, height;
         int result = getDisplaySize(interp, session, &width, &height);
         if (result != TCL_OK) return result;
         size = width * height;
@@ -767,7 +770,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
       {
         unsigned char buffer[size];
         int count;
-        const char *cells = Tcl_GetByteArrayFromObj(objv[2], &count);
+        const unsigned char *cells = Tcl_GetByteArrayFromObj(objv[2], &count);
 
         if (count < size) {
           memcpy(buffer, cells, count);
@@ -857,7 +860,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
       {
         int count;
-        const char *bytes = Tcl_GetByteArrayFromObj(objv[2], &count);
+        const unsigned char *bytes = Tcl_GetByteArrayFromObj(objv[2], &count);
 
         if (brlapi__sendRaw(session->handle, bytes, count) != -1) return TCL_OK;
         setBrlapiError(interp);
