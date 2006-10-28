@@ -50,7 +50,7 @@ public class Brlapi extends BrlapiNative implements BrlapiConstants {
   }
 
   public int getTtyPath (int ttys[], String driver) throws BrlapiError {
-    return super.getTtyPath(ttys, driver);
+    return ttyNumber = super.getTtyPath(ttys, driver);
   }
 
   public void leaveTtyMode () throws BrlapiError {
