@@ -2,6 +2,7 @@ Makefile
 reldeps.mk
 api.h
 *.auto.h
+api_constants.h
 *.auto.c
 *.a
 *.so
