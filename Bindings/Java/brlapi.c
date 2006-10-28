@@ -117,6 +117,10 @@ static void exceptionHandler(int err, brl_type_t type, const void *buf, size_t s
   GET_CLASS(jenv, jcls, jobj, ret); \
   GET_ID(jenv, handleID, jcls, "handle", "J", ret); \
   handle = (void*) (intptr_t) (*jenv)->GetLongField(jenv, jcls, handleID); \
+  if (!handle) { \
+    ThrowException((jenv), ERR_NULLPTR, "connection has been closed"); \
+    return ret; \
+  }
 
 JNIEXPORT jint JNICALL Java_BrlapiNative_initializeConnection(JNIEnv *jenv, jobject jobj, jobject JclientSettings , jobject JusedSettings) {
   jclass jcclientSettings, jcusedSettings;
@@ -201,6 +205,7 @@ JNIEXPORT void JNICALL Java_BrlapiNative_closeConnection(JNIEnv *jenv, jobject j
 
   brlapi__closeConnection(handle);
   free((void*) (intptr_t) handle);
+  (*jenv)->SetLongField(jenv, jcls, handleID, (jlong) (intptr_t) NULL);
 }
 
 JNIEXPORT jbyteArray JNICALL Java_BrlapiNative_loadAuthKey(JNIEnv *jenv, jclass jcls, jstring jpath) {
