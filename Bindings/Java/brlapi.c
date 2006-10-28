@@ -281,36 +281,6 @@ JNIEXPORT jobject JNICALL Java_BrlapiNative_getDisplaySize(JNIEnv *jenv, jobject
   return jsize;
 }
 
-JNIEXPORT jint JNICALL Java_BrlapiNative_getDisplayY(JNIEnv *jenv, jobject jobj) {
-  unsigned int x, y;
-  GET_HANDLE(jenv, jobj, -1);
-
-  env = jenv;
-
-  if (brlapi__getDisplaySize(handle, &x, &y) < 0)
-    return ThrowError(jenv, __func__), -1;
-  return (jint) y;
-}
-
-#if 0
-JNIEXPORT jbyteArray JNICALL Java_BrlapiNative_getDriverInfo(JNIEnv *jenv, jobject jobj) {
-  jbyte buf[BRLAPI_MAXPACKETSIZE];
-  size_t size;
-  jbyteArray result;
-  GET_HANDLE(jenv, jobj, NULL);
-
-  env = jenv;
-
-  if ((size = brlapi__getDriverInfo(handle, buf, sizeof(buf))) < 0)
-    ThrowError(jenv, __func__), NULL;
-
-  if (!(result = (*jenv)->NewByteArray(jenv, size)))
-    return ThrowException(jenv, ERR_OUTOFMEM, __func__), NULL;
-  (*jenv)->SetByteArrayRegion(jenv, result, 0, size, buf);
-  return result;
-}
-#endif
-
 JNIEXPORT jint JNICALL Java_BrlapiNative_enterTtyMode(JNIEnv *jenv, jobject jobj, jint jtty, jstring jdriver) {
   int tty ;
   char *driver;

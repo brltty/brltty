@@ -32,7 +32,6 @@ public class BrlapiNative {
   public native String getDriverId () throws BrlapiError;
   public native String getDriverName () throws BrlapiError;
   public native BrlapiSize getDisplaySize () throws BrlapiError;
-  /*public native byte[] getDriverInfo () throws BrlapiError;*/
   
   public native int enterTtyMode (int tty, String driver) throws BrlapiError;
   public native int getTtyPath (int ttys[], String driver) throws BrlapiError;
