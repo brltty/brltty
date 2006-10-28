@@ -37,7 +37,7 @@ classes: Brlapi.class BrlapiError.class BrlapiException.class BrlapiSettings.cla
 Brlapi.class: BrlapiConstants.class
 
 BrlapiConstants.class: BrlapiConstants.java
-        $(JAVAC) BrlapiConstants.java
+	$(JAVAC) BrlapiConstants.java
 
 %.class: $(SRC_DIR)/%.java
 	$(JAVAC) $<
