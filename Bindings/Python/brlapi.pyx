@@ -116,79 +116,58 @@ cdef class Write:
 		def __set__(self, val):
 			self.props.attrOr = <unsigned char*>val
 
-cdef class Settings:
-	"""Settings structure for BrlAPI connection"""
-	cdef c_brlapi.brlapi_settings_t props
-	def __init__(self, authkey = None, hostname = None):
-		if authkey:
-			self.props.authKey = authkey
-		else:
-			self.props.authKey = ""
-
-		if hostname:
-			self.props.hostName = hostname
-		else:
-			self.props.hostName = ""
-
-	property authkey:
-		"""To get authorized to connect, libbrlapi has to tell the BrlAPI server a secret key, for security reasons. This is the path to the file which holds it; it will hence have to be readable by the application.
-		
-		Setting None defaults it to local installation setup or to the content of the BRLAPI_AUTHPATH environment variable, if it exists."""
-		def __get__(self):
-			return self.props.authKey
-		def __set__(self, val):
-			self.props.authKey = val
-
-	property hostname:
-		"""This tells where the BrlAPI server resides : it might be listening on another computer, on any TCP port. It should look like "foo:1", which means TCP port number BRLAPI_SOCKETPORTNUM+1 on computer called "foo".
-		
-		Note: Please check that resolving this name works before complaining.
-		
-		Settings None defaults it to localhost, using the local installation's default TCP port, or to the content of the BRLAPI_HOSTNAME environment variable, if it exists."""
-		def __get__(self):
-			return self.props.hostName
-		def __set__(self, val):
-			self.props.hostName = val
-
 cdef class Connection:
 	"""Class which manages the bridge between BrlTTY and your program"""
 	cdef c_brlapi.brlapi_handle_t *h
-	def __init__(self, Settings clientSettings = None, Settings usedSettings = None):
-		"""Connect your program to BrlTTY using settings"""
-		cdef c_brlapi.brlapi_settings_t *client
-		cdef c_brlapi.brlapi_settings_t *used
-		cdef int retval
+	cdef c_brlapi.brlapi_settings_t settings
+	cdef int fd
+	def __init__(self, hostName = None, authKey = None):
+		"""Connect your program to BrlTTY using settings
+		
+		Setting hostName to None defaults it to localhost, using the local installation's default TCP port, or to the content of the BRLAPI_HOSTNAME environment variable, if it exists.
+		Note: Please check that resolving this name works before complaining.
+
+		Setting authKey to None defaults it to local installation setup or to the content of the BRLAPI_AUTHPATH environment variable, if it exists."""
+		cdef c_brlapi.brlapi_settings_t client
+
+		if authKey:
+			client.authKey = authKey
+		else:
+			client.authKey = ""
+
+		if hostName:
+			client.hostName = hostName
+		else:
+			client.hostName = ""
 
 		self.h = <c_brlapi.brlapi_handle_t*> c_brlapi.malloc(c_brlapi.brlapi_getHandleSize())
 
-		# Fix segmentation fault
-		if clientSettings == None:
-			client = NULL
-		else:
-			client = &clientSettings.props
-
-		if usedSettings == None:
-			used = NULL
-		else:
-			used = &usedSettings.props
-
 		c_brlapi.Py_BEGIN_ALLOW_THREADS
-		retval = c_brlapi.brlapi__initializeConnection(self.h, client, used)
+		self.fd = c_brlapi.brlapi__initializeConnection(self.h, &client, &self.settings)
 		c_brlapi.Py_END_ALLOW_THREADS
-		if retval == -1:
-			if clientSettings == None:
-				hostname = "localhost"
-			else:
-				hostname = clientSettings.hostname
-
-			raise ConnectionError("couldn't connect to %s: %s" % (hostname,returnerrno()))
+		if self.fd == -1:
+			c_brlapi.free(self.h)
+			raise ConnectionError("couldn't connect to %s with key %s: %s" % (self.settings.hostName,self.settings.authKey,returnerrno()))
 
 	def __del__(self):
 		"""Close the BrlAPI conection"""
 		c_brlapi.brlapi__closeConnection(self.h)
 		c_brlapi.free(self.h)
 
-	# TODO: loadAuthKey
+	property hostName:
+		"""To get authorized to connect, libbrlapi has to tell the BrlAPI server a secret key, for security reasons. This is the path to the file which holds it; it will hence have to be readable by the application."""
+		def __get__(self):
+			return self.settings.hostName
+
+	property authKey:
+		"""This tells where the BrlAPI server resides : it might be listening on another computer, on any TCP port. It should look like "foo:1", which means TCP port number BRLAPI_SOCKETPORTNUM+1 on computer called "foo"."""
+		def __get__(self):
+			return self.settings.authKey
+
+	property fileDescriptor:
+		"""Returns the Unix file descriptor that the connection uses"""
+		def __get__(self):
+			return self.fd
 
 	property displaysize:
 		"""Get the size of the braille display"""
