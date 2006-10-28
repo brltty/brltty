@@ -602,6 +602,8 @@ distclean clean::
 	for driver do (cd $(BLD_TOP)$(SPK_DIR)/$$driver && $(MAKE) $@); done
 	-set -- $(SCREEN_EXTERNAL_DRIVER_NAMES) $(SCREEN_INTERNAL_DRIVER_NAMES); \
 	for driver do (cd $(BLD_TOP)$(SCR_DIR)/$$driver && $(MAKE) $@); done
+	-set -- $(API_BINDINGS); \
+	for language do (cd $(BLD_TOP)$(BND_DIR)/$$language && $(MAKE) $@); done
 
 clean::
 	-rm -f brltty$X xbrlapi$X txt2hlp$X tbl2hex$X *test$X *-static$X
