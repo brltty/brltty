@@ -19,10 +19,10 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-public class Brlapi implements BrlapiConstants {
-  private final BrlapiSettings settings;
-  private long handle;
-  private final int fileDescriptor;;
+public class Brlapi extends BrlapiNative implements BrlapiConstants {
+  protected final BrlapiSettings settings;
+  protected final int fileDescriptor;;
+  protected int ttyNumber = -1;
 
   public Brlapi (BrlapiSettings settings) throws BrlapiError {
     this.settings = new BrlapiSettings();
@@ -32,13 +32,6 @@ public class Brlapi implements BrlapiConstants {
   protected void finalize () {
     closeConnection();
   }
-
-  private final native int initializeConnection (
-    BrlapiSettings clientSettings,
-    BrlapiSettings usedSettings)
-    throws BrlapiError;
-  public final native void closeConnection ();
-  public final static native byte[] loadAuthKey (String path);
 
   public String getHostName () {
     return settings.hostName;
@@ -52,30 +45,20 @@ public class Brlapi implements BrlapiConstants {
     return fileDescriptor;
   }
 
-  public final native String getDriverId () throws BrlapiError;
-  public final native String getDriverName () throws BrlapiError;
-  public final native BrlapiSize getDisplaySize () throws BrlapiError;
-  /*public final native byte[] getDriverInfo () throws BrlapiError;*/
-  
-  public final native int enterTtyMode (int tty, String driver) throws BrlapiError;
-  public final native int getTtyPath (int ttys[], String driver) throws BrlapiError;
-  public final native void leaveTtyMode () throws BrlapiError;
-  public final native void setFocus (int tty) throws BrlapiError;
+  public int enterTtyMode (int tty, String driver) throws BrlapiError {
+    return ttyNumber = super.enterTtyMode(tty, driver);
+  }
 
-  public final native void writeText (int cursor, String str) throws BrlapiError;
-  public final native int writeDots (byte str[]) throws BrlapiError;
-  public final native void write (BrlapiWriteStruct s) throws BrlapiError;
+  public int getTtyPath (int ttys[], String driver) throws BrlapiError {
+    return super.getTtyPath(ttys, driver);
+  }
 
-  public final native long readKey (boolean block) throws BrlapiError;
-  public final native void ignoreKeyRange (long x, long y) throws BrlapiError;
-  public final native void unignoreKeyRange (long x, long y) throws BrlapiError;
-  public final native void ignoreKeySet (long s[]) throws BrlapiError;
-  public final native void unignoreKeySet (long s[]) throws BrlapiError;
+  public void leaveTtyMode () throws BrlapiError {
+    ttyNumber = -1;
+    super.leaveTtyMode();
+  }
 
-  public final native void enterRawMode (String driver) throws BrlapiError;
-  public final native void leaveRawMode () throws BrlapiError;
-  public final native int sendRaw (byte buf[]) throws BrlapiError;
-  public final native int recvRaw (byte buf[]) throws BrlapiError;
-
-  public final static native String packetType (long type);
+  public int getTtyNumber () {
+    return ttyNumber;
+  }
 }

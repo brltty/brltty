@@ -118,7 +118,7 @@ static void exceptionHandler(int err, brl_type_t type, const void *buf, size_t s
   GET_ID(jenv, handleID, jcls, "handle", "J", ret); \
   handle = (void*) (intptr_t) (*jenv)->GetLongField(jenv, jcls, handleID); \
 
-JNIEXPORT jint JNICALL Java_Brlapi_initializeConnection(JNIEnv *jenv, jobject jobj, jobject JclientSettings , jobject JusedSettings) {
+JNIEXPORT jint JNICALL Java_BrlapiNative_initializeConnection(JNIEnv *jenv, jobject jobj, jobject JclientSettings , jobject JusedSettings) {
   jclass jcclientSettings, jcusedSettings;
   jfieldID clientAuthKeyID = NULL, clientHostNameID = NULL, usedAuthKeyID, usedHostNameID;
   brlapi_settings_t clientSettings,  usedSettings,
@@ -195,7 +195,7 @@ JNIEXPORT jint JNICALL Java_Brlapi_initializeConnection(JNIEnv *jenv, jobject jo
   return (jint) result;
 }
 
-JNIEXPORT void JNICALL Java_Brlapi_closeConnection(JNIEnv *jenv, jobject jobj) {
+JNIEXPORT void JNICALL Java_BrlapiNative_closeConnection(JNIEnv *jenv, jobject jobj) {
   env = jenv;
   GET_HANDLE(jenv, jobj, );
 
@@ -203,7 +203,7 @@ JNIEXPORT void JNICALL Java_Brlapi_closeConnection(JNIEnv *jenv, jobject jobj) {
   free((void*) (intptr_t) handle);
 }
 
-JNIEXPORT jbyteArray JNICALL Java_Brlapi_loadAuthKey(JNIEnv *jenv, jclass jcls, jstring jpath) {
+JNIEXPORT jbyteArray JNICALL Java_BrlapiNative_loadAuthKey(JNIEnv *jenv, jclass jcls, jstring jpath) {
   jbyte buf[BRLAPI_MAXPACKETSIZE];
   size_t size = sizeof(buf), ret;
   char *path;
@@ -228,7 +228,7 @@ JNIEXPORT jbyteArray JNICALL Java_Brlapi_loadAuthKey(JNIEnv *jenv, jclass jcls, 
   return result;
 }
 
-JNIEXPORT jstring JNICALL Java_Brlapi_getDriverId(JNIEnv *jenv, jobject jobj) {
+JNIEXPORT jstring JNICALL Java_BrlapiNative_getDriverId(JNIEnv *jenv, jobject jobj) {
   char id[3];
   GET_HANDLE(jenv, jobj, NULL);
 
@@ -241,7 +241,7 @@ JNIEXPORT jstring JNICALL Java_Brlapi_getDriverId(JNIEnv *jenv, jobject jobj) {
   return (*jenv)->NewStringUTF(jenv, id);
 }
 
-JNIEXPORT jstring JNICALL Java_Brlapi_getDriverName(JNIEnv *jenv, jobject jobj) {
+JNIEXPORT jstring JNICALL Java_BrlapiNative_getDriverName(JNIEnv *jenv, jobject jobj) {
   char name[32];
   GET_HANDLE(jenv, jobj, NULL);
 
@@ -254,7 +254,7 @@ JNIEXPORT jstring JNICALL Java_Brlapi_getDriverName(JNIEnv *jenv, jobject jobj) 
   return (*jenv)->NewStringUTF(jenv, name);
 }
 
-JNIEXPORT jobject JNICALL Java_Brlapi_getDisplaySize(JNIEnv *jenv, jobject jobj) {
+JNIEXPORT jobject JNICALL Java_BrlapiNative_getDisplaySize(JNIEnv *jenv, jobject jobj) {
   unsigned int x, y;
   jclass jcsize;
   jmethodID jinit;
@@ -276,7 +276,7 @@ JNIEXPORT jobject JNICALL Java_Brlapi_getDisplaySize(JNIEnv *jenv, jobject jobj)
   return jsize;
 }
 
-JNIEXPORT jint JNICALL Java_Brlapi_getDisplayY(JNIEnv *jenv, jobject jobj) {
+JNIEXPORT jint JNICALL Java_BrlapiNative_getDisplayY(JNIEnv *jenv, jobject jobj) {
   unsigned int x, y;
   GET_HANDLE(jenv, jobj, -1);
 
@@ -288,7 +288,7 @@ JNIEXPORT jint JNICALL Java_Brlapi_getDisplayY(JNIEnv *jenv, jobject jobj) {
 }
 
 #if 0
-JNIEXPORT jbyteArray JNICALL Java_Brlapi_getDriverInfo(JNIEnv *jenv, jobject jobj) {
+JNIEXPORT jbyteArray JNICALL Java_BrlapiNative_getDriverInfo(JNIEnv *jenv, jobject jobj) {
   jbyte buf[BRLAPI_MAXPACKETSIZE];
   size_t size;
   jbyteArray result;
@@ -306,7 +306,7 @@ JNIEXPORT jbyteArray JNICALL Java_Brlapi_getDriverInfo(JNIEnv *jenv, jobject job
 }
 #endif
 
-JNIEXPORT jint JNICALL Java_Brlapi_enterTtyMode(JNIEnv *jenv, jobject jobj, jint jtty, jstring jdriver) {
+JNIEXPORT jint JNICALL Java_BrlapiNative_enterTtyMode(JNIEnv *jenv, jobject jobj, jint jtty, jstring jdriver) {
   int tty ;
   char *driver;
   int result;
@@ -328,7 +328,7 @@ JNIEXPORT jint JNICALL Java_Brlapi_enterTtyMode(JNIEnv *jenv, jobject jobj, jint
   return (jint) result;
 }
 
-JNIEXPORT jint JNICALL Java_Brlapi_getTtyPath(JNIEnv *jenv, jobject jobj, jintArray jttys, jstring jdriver) {
+JNIEXPORT jint JNICALL Java_BrlapiNative_getTtyPath(JNIEnv *jenv, jobject jobj, jintArray jttys, jstring jdriver) {
   jint *ttys ;
   char *driver;
   int result;
@@ -355,7 +355,7 @@ JNIEXPORT jint JNICALL Java_Brlapi_getTtyPath(JNIEnv *jenv, jobject jobj, jintAr
   return (jint) result;
 }
 
-JNIEXPORT void JNICALL Java_Brlapi_leaveTtyMode(JNIEnv *jenv, jobject jobj) {
+JNIEXPORT void JNICALL Java_BrlapiNative_leaveTtyMode(JNIEnv *jenv, jobject jobj) {
   env = jenv;
   GET_HANDLE(jenv, jobj, );
 
@@ -363,7 +363,7 @@ JNIEXPORT void JNICALL Java_Brlapi_leaveTtyMode(JNIEnv *jenv, jobject jobj) {
     return ThrowError(jenv, __func__);
 }
 
-JNIEXPORT void JNICALL Java_Brlapi_setFocus(JNIEnv *jenv, jobject jobj, jint jarg1) {
+JNIEXPORT void JNICALL Java_BrlapiNative_setFocus(JNIEnv *jenv, jobject jobj, jint jarg1) {
   int arg1 ;
   GET_HANDLE(jenv, jobj, );
   
@@ -374,7 +374,7 @@ JNIEXPORT void JNICALL Java_Brlapi_setFocus(JNIEnv *jenv, jobject jobj, jint jar
     return ThrowError(jenv, __func__);
 }
 
-JNIEXPORT void JNICALL Java_Brlapi_writeText(JNIEnv *jenv, jobject jobj, jint jarg1, jstring jarg2) {
+JNIEXPORT void JNICALL Java_BrlapiNative_writeText(JNIEnv *jenv, jobject jobj, jint jarg1, jstring jarg2) {
   int arg1 ;
   char *arg2;
   int result;
@@ -396,7 +396,7 @@ JNIEXPORT void JNICALL Java_Brlapi_writeText(JNIEnv *jenv, jobject jobj, jint ja
     return ThrowError(jenv, __func__);
 }
 
-JNIEXPORT void JNICALL Java_Brlapi_writeDots(JNIEnv *jenv, jobject jobj, jbyteArray jarg1) {
+JNIEXPORT void JNICALL Java_BrlapiNative_writeDots(JNIEnv *jenv, jobject jobj, jbyteArray jarg1) {
   jbyte *arg1;
   int result;
   GET_HANDLE(jenv, jobj, );
@@ -416,7 +416,7 @@ JNIEXPORT void JNICALL Java_Brlapi_writeDots(JNIEnv *jenv, jobject jobj, jbyteAr
     return ThrowError(jenv, __func__);
 }
 
-JNIEXPORT void JNICALL Java_Brlapi_write(JNIEnv *jenv, jobject jobj, jobject js) {
+JNIEXPORT void JNICALL Java_BrlapiNative_write(JNIEnv *jenv, jobject jobj, jobject js) {
   brlapi_writeStruct s;
   int result;
   jstring text, attrAnd, attrOr;
@@ -468,7 +468,7 @@ JNIEXPORT void JNICALL Java_Brlapi_write(JNIEnv *jenv, jobject jobj, jobject js)
     return ThrowError(jenv, __func__);
 }
 
-JNIEXPORT jlong JNICALL Java_Brlapi_readKey(JNIEnv *jenv, jobject jobj, jboolean jblock) {
+JNIEXPORT jlong JNICALL Java_BrlapiNative_readKey(JNIEnv *jenv, jobject jobj, jboolean jblock) {
   brl_keycode_t code;
   int result;
   GET_HANDLE(jenv, jobj, -1);
@@ -486,7 +486,7 @@ JNIEXPORT jlong JNICALL Java_Brlapi_readKey(JNIEnv *jenv, jobject jobj, jboolean
     return (jlong)code;
 }
 
-JNIEXPORT void JNICALL Java_Brlapi_ignoreKeyRange(JNIEnv *jenv, jobject jobj, jlong jarg1, jlong jarg2) {
+JNIEXPORT void JNICALL Java_BrlapiNative_ignoreKeyRange(JNIEnv *jenv, jobject jobj, jlong jarg1, jlong jarg2) {
   env = jenv;
   GET_HANDLE(jenv, jobj, );
 
@@ -494,7 +494,7 @@ JNIEXPORT void JNICALL Java_Brlapi_ignoreKeyRange(JNIEnv *jenv, jobject jobj, jl
     return ThrowError(jenv, __func__);
 }
 
-JNIEXPORT void JNICALL Java_Brlapi_ignoreKeySet(JNIEnv *jenv, jobject jobj, jlongArray js) {
+JNIEXPORT void JNICALL Java_BrlapiNative_ignoreKeySet(JNIEnv *jenv, jobject jobj, jlongArray js) {
   jlong *s;
   unsigned int n;
   int result;
@@ -516,7 +516,7 @@ JNIEXPORT void JNICALL Java_Brlapi_ignoreKeySet(JNIEnv *jenv, jobject jobj, jlon
     return ThrowError(jenv, __func__);
 }
 
-JNIEXPORT void JNICALL Java_Brlapi_unignoreKeyRange(JNIEnv *jenv, jobject jobj, jlong jarg1, jlong jarg2) {
+JNIEXPORT void JNICALL Java_BrlapiNative_unignoreKeyRange(JNIEnv *jenv, jobject jobj, jlong jarg1, jlong jarg2) {
   env = jenv;
   GET_HANDLE(jenv, jobj, );
 
@@ -524,7 +524,7 @@ JNIEXPORT void JNICALL Java_Brlapi_unignoreKeyRange(JNIEnv *jenv, jobject jobj, 
     return ThrowError(jenv, __func__);
 }
 
-JNIEXPORT void JNICALL Java_Brlapi_unignoreKeySet(JNIEnv *jenv, jobject jobj, jlongArray js) {
+JNIEXPORT void JNICALL Java_BrlapiNative_unignoreKeySet(JNIEnv *jenv, jobject jobj, jlongArray js) {
   jlong *s;
   unsigned int n;
   int result;
@@ -546,7 +546,7 @@ JNIEXPORT void JNICALL Java_Brlapi_unignoreKeySet(JNIEnv *jenv, jobject jobj, jl
     return ThrowError(jenv, __func__);
 }
 
-JNIEXPORT void JNICALL Java_Brlapi_enterRawMode(JNIEnv *jenv, jobject jobj, jstring jdriver) {
+JNIEXPORT void JNICALL Java_BrlapiNative_enterRawMode(JNIEnv *jenv, jobject jobj, jstring jdriver) {
   env = jenv;
   char *driver;
   int res;
@@ -560,7 +560,7 @@ JNIEXPORT void JNICALL Java_Brlapi_enterRawMode(JNIEnv *jenv, jobject jobj, jstr
   if (res < 0) return ThrowError(jenv, __func__);
 }
 
-JNIEXPORT void JNICALL Java_Brlapi_leaveRawMode(JNIEnv *jenv, jobject jobj) {
+JNIEXPORT void JNICALL Java_BrlapiNative_leaveRawMode(JNIEnv *jenv, jobject jobj) {
   env = jenv;
   GET_HANDLE(jenv, jobj, );
 
@@ -568,7 +568,7 @@ JNIEXPORT void JNICALL Java_Brlapi_leaveRawMode(JNIEnv *jenv, jobject jobj) {
     return ThrowError(jenv, __func__);
 }
 
-JNIEXPORT jint JNICALL Java_Brlapi_sendRaw(JNIEnv *jenv, jobject jobj, jbyteArray jbuf) {
+JNIEXPORT jint JNICALL Java_BrlapiNative_sendRaw(JNIEnv *jenv, jobject jobj, jbyteArray jbuf) {
   jbyte *buf;
   unsigned int n;
   int result;
@@ -591,7 +591,7 @@ JNIEXPORT jint JNICALL Java_Brlapi_sendRaw(JNIEnv *jenv, jobject jobj, jbyteArra
   return (jint) result;
 }
 
-JNIEXPORT jint JNICALL Java_Brlapi_recvRaw(JNIEnv *jenv, jobject jobj, jbyteArray jbuf) {
+JNIEXPORT jint JNICALL Java_BrlapiNative_recvRaw(JNIEnv *jenv, jobject jobj, jbyteArray jbuf) {
   jbyte *buf;
   unsigned int n;
   int result;
@@ -616,7 +616,7 @@ JNIEXPORT jint JNICALL Java_Brlapi_recvRaw(JNIEnv *jenv, jobject jobj, jbyteArra
   return (jint) result;
 }
 
-JNIEXPORT jstring JNICALL Java_Brlapi_packetType(JNIEnv *jenv, jclass jcls, jlong jtype) {
+JNIEXPORT jstring JNICALL Java_BrlapiNative_packetType(JNIEnv *jenv, jclass jcls, jlong jtype) {
   const char *type;
 
   env = jenv;
