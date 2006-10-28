@@ -19,7 +19,7 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-public abstract class BrlapiNative {
+public class BrlapiNative {
   protected long handle;
 
   protected native int initializeConnection (
