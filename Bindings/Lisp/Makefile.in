@@ -17,3 +17,9 @@
 
 include $(SRC_TOP)bindings.mk
 
+all:
+
+install: all
+
+uninstall:
+
