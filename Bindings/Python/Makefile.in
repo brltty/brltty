@@ -26,14 +26,14 @@ PYTHON_API = brlapi.$(LIB_EXT)
 
 all: $(PYTHON_API)
 
-$(PYTHON_API): brlapi.$O api
+$(PYTHON_API): brlapi.$O brlapi
 	$(MKLIB:<name>=brlapi) $@ brlapi.$O $(PYTHON_LDFLAGS) $(API_LDFLAGS)
 
 brlapi.$O: brlapi.auto.c $(API_HEADERS)
 	$(CC) $(LIBCFLAGS) $(PYREXC_CFLAGS) $(PYTHON_CPPFLAGS) -o $@ -c brlapi.auto.c
 
 brlapi.auto.c: $(SRC_DIR)/brlapi.pyx $(SRC_DIR)/c_brlapi.pxd constants.auto.pyx
-	$(PYREXC) -o $@ $(SRC_DIR)/brlapi.pyx
+	$(PYREXC) -I. -o $@ $(SRC_DIR)/brlapi.pyx
 
 constants.auto.pyx: $(API_HEADER) $(APIDEFS_AWK) $(BRLDEFS_HDR) $(BRLDEFS_AWK) $(SRC_DIR)/constants.awk
 	$(AWK) -f $(APIDEFS_AWK) -f $(BRLDEFS_AWK) -f $(SRC_DIR)/constants.awk $(API_HEADER) $(BRLDEFS_HDR) >$@

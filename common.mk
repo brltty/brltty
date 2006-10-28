@@ -15,8 +15,13 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-$(BLD_TOP)$(BRL_DIR)/VarioHT/braille.$O: $(BLD_TOP)$(BRL_DIR)/VarioHT/vario.$O
-$(BLD_TOP)$(BRL_DIR)/VarioHT/braille.$O: $(BLD_TOP)$(BRL_DIR)/VarioHT/variolow.$O
+brlapi:
+	cd $(BLD_TOP)$(PGM_DIR) && $(MAKE) api
+
+$(BLD_TOP)$(PGM_DIR)/api_constants.h:
+	cd $(@D) && $(MAKE) $(@F)
+
+$(BLD_TOP)$(PGM_DIR)/cmds.auto.h:
 	cd $(@D) && $(MAKE) $(@F)
 
 $(BLD_TOP)$(BRL_DIR)/VideoBraille/braille.$O: $(BLD_TOP)$(BRL_DIR)/VideoBraille/vb.$O

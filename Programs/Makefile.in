@@ -126,10 +126,10 @@ $(API_ARC): $(API_OBJS)
 	ar rc $@ $(API_OBJS)
 	$(RANLIB) $@
 
-api_client.$O: api_constants.auto.h api_keytab.auto.h
+api_client.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/api_client.c
 
-api_constants.auto.h: $(SRC_DIR)/brldefs.h $(SRC_DIR)/brldefs.awk $(SRC_DIR)/api_constants.awk
+api_constants.h: $(SRC_DIR)/brldefs.h $(SRC_DIR)/brldefs.awk $(SRC_DIR)/api_constants.awk
 	$(AWK) -f $(SRC_DIR)/brldefs.awk -f $(SRC_DIR)/api_constants.awk $(SRC_DIR)/brldefs.h >$@
 
 api_keytab.auto.h: $(SRC_DIR)/brldefs.h $(SRC_DIR)/brldefs.awk $(SRC_DIR)/api_keytab.awk
@@ -138,7 +138,7 @@ api_keytab.auto.h: $(SRC_DIR)/brldefs.h $(SRC_DIR)/brldefs.awk $(SRC_DIR)/api_ke
 api_brldefs.auto.h: $(SRC_DIR)/brldefs.h $(SRC_DIR)/brldefs.awk $(SRC_DIR)/api_brldefs.awk
 	$(AWK) -f $(SRC_DIR)/brldefs.awk -f $(SRC_DIR)/api_brldefs.awk $(SRC_DIR)/brldefs.h >$@
 
-api_server.$O: api_constants.auto.h
+api_server.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/api_server.c
 
 keyrangelist.$O:
@@ -190,7 +190,7 @@ drivers.$O:
 cut.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/cut.c
 
-cmd.$O: cmds.auto.h
+cmd.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/cmd.c
 
 at2.$O:
@@ -202,10 +202,10 @@ io_misc.$O:
 serial.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/serial.c
 
-brl.$O: brl.auto.h text.auto.h attrib.auto.h
+brl.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/brl.c
 
-spk.$O: spk.auto.h
+spk.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/spk.c
 
 ###############################################################################
@@ -356,7 +356,7 @@ APITEST_OBJECTS = apitest.$O cmd.$O options.$O misc.$O $(SYSTEM_OBJECT) io_misc.
 apitest$X: $(APITEST_OBJECTS) api
 	$(CC) $(LDFLAGS) -o $@ $(APITEST_OBJECTS) -L$(BLD_DIR) -lbrlapi $(LDLIBS)
 
-apitest.$O: api_constants.auto.h
+apitest.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/apitest.c
 
 ###############################################################################
@@ -454,7 +454,7 @@ XBRLAPI_OBJECTS = xbrlapi.$O options.$O misc.$O $(SYSTEM_OBJECT) io_misc.$O
 xbrlapi$X: $(XBRLAPI_OBJECTS) api
 	$(CC) $(LDFLAGS) -o $@ $(XBRLAPI_OBJECTS) -L. -lbrlapi $(XLIBS) $(LDLIBS)
 
-xbrlapi.$O: api_constants.auto.h
+xbrlapi.$O:
 	$(CC) $(CFLAGS) $(X_CFLAGS) -c $(SRC_DIR)/xbrlapi.c
 
 ###############################################################################
@@ -529,12 +529,12 @@ install-api-libraries-windows: $(API_DLL) $(API_ARC) install-program-directory i
 install-libdir-directory:
 	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(libdir)
 
-install-api-headers: api_constants.auto.h api_brldefs.auto.h
+install-api-headers: api_constants.h api_brldefs.auto.h
 	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
 	$(INSTALL_DATA) api.h $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
 	$(INSTALL_DATA) $(SRC_DIR)/api_protocol.h $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
-	$(INSTALL_DATA) $(SRC_DIR)/api_constants.auto.h $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)/api_constants.h
-	$(INSTALL_DATA) $(SRC_DIR)/api_brldefs.auto.h $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)/brldefs.h
+	$(INSTALL_DATA) api_constants.h $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
+	$(INSTALL_DATA) api_brldefs.auto.h $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)/brldefs.h
 
 install-api-manpages:
 	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(MANPAGE_DIRECTORY)/man3
@@ -605,7 +605,7 @@ distclean clean::
 
 clean::
 	-rm -f brltty$X xbrlapi$X txt2hlp$X tbl2hex$X *test$X *-static$X
-	-rm -f $(API_LIB) $(API_ARC) $(API_DLL) $(API_IMPLIB)
+	-rm -f api_constants.h $(API_LIB) $(API_ARC) $(API_DLL) $(API_IMPLIB)
 	-rm -f $(BLD_TOP)$(DRV_DIR)/* $(BLD_TOP)$(DAT_DIR)/*
 
 distclean::

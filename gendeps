@@ -118,7 +118,17 @@ proc getBuildDirectories {{root ""}} {
 }
 
 proc skipFile {file} {
-   if {[string equal [file extension [file rootname $file]] .auto]} {
+   set name [file tail $file]
+
+   if {[string equal [file extension [file rootname $name]] .auto]} {
+      return 1
+   }
+
+   if {[regexp {\.tab\.c$} $name]} {
+      return 1
+   }
+
+   if {[lsearch -exact {api_constants.h} $name] >= 0} {
       return 1
    }
 
@@ -130,11 +140,19 @@ proc sourceFile {file} {
       return $path
    }
 
-   if {[regexp {^(.*)\.tab\.c$} $file x base]} {
-      return "$base.y"
+   return ""
+}
+
+proc generatedFile {file} {
+   if {[skipFile $file]} {
+      return 1
    }
 
-   return ""
+   if {[string length [sourceFile $file]] > 0} {
+      return 1
+   }
+
+   return 0
 }
 
 proc dependencyExists {file} {
@@ -157,29 +175,31 @@ proc getDependencies {file} {
    if {![info exists dependencies]} {
       lappend dependencies $file
 
-      if {![skipFile $file]} {
-         if {[string length [set source [sourceFile $file]]] == 0} {
-            set source $file
-         }
-         set stream [open $source {RDONLY}]
+      if {[string length [set source [sourceFile $file]]] == 0} {
+         set source $file
+      }
+      set stream [open $source {RDONLY}]
 
-         set includes [list]
-         while {[gets $stream line] >= 0} {
-            if {[regexp {^ *# *include *"([^"]*)"} $line x header]} {
-               lappend includes $header
+      set includes [list]
+      while {[gets $stream line] >= 0} {
+         if {[regexp {^ *# *include *"([^"]*)"} $line x header]} {
+            lappend includes $header
+         }
+      }
+      close $stream; unset stream
+
+      if {[string equal [set directory [file dirname $file]] .]} {
+         set directory ""
+      }
+
+      foreach include $includes {
+         if {[skipFile $include]} {
+            if {[string first / $include] < 0} {
+               set include [file join $directory $include]
             }
-         }
-         close $stream; unset stream
 
-         if {[string equal [set directory [file dirname $file]] .]} {
-            set directory ""
-         }
-
-         foreach include $includes {
-            if {[skipFile $include]} {
-               continue
-            }
-
+            lappend dependencies $include
+         } else {
             if {[dependencyExists [set path [file join $directory $include]]]} {
                set include $path
             } elseif {![dependencyExists $include]} {
@@ -231,7 +251,7 @@ foreach buildDirectory [lsort $buildDirectories] {
          puts $relativeStream "# Dependencies for $objectName:"
 
          foreach dependency $dependencies($sourceFile) {
-            if {[file exists "$dependency.in"] || ([string length [sourceFile $dependency]] > 0)} {
+            if {[generatedFile $dependency]} {
                set tree BLD
             } else {
                set tree SRC

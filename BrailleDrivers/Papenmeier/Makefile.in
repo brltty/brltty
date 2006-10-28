@@ -35,14 +35,14 @@ read_config$X: $(READ_CONFIG_OBJECTS)
 read_config.$O:
 	$(HOSTCC) $(HOSTCFLAGS) $(YACC_CFLAGS) -c $(SRC_DIR)/read_config.c
 
-config.tab.c: cmd.auto.h hlp.auto.h
+config.tab.c:
 	$(YACC) -b config -v $(SRC_DIR)/config.y
 
 cmd.auto.h: $(PM_CMD_SOURCES) $(SRC_DIR)/cmd.awk
-	$(AWK) -f $(SRC_DIR)/cmd.awk $(PM_CMD_SOURCES) >cmd.auto.h
+	$(AWK) -f $(SRC_DIR)/cmd.awk $(PM_CMD_SOURCES) >$@
 
 hlp.auto.h: $(PM_CMD_SOURCES) $(SRC_DIR)/hlp.awk
-	$(AWK) -f $(SRC_DIR)/hlp.awk $(PM_CMD_SOURCES) >hlp.auto.h
+	$(AWK) -f $(SRC_DIR)/hlp.awk $(PM_CMD_SOURCES) >$@
 
 ###############################################################################
 

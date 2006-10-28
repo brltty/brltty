@@ -23,10 +23,10 @@ JAVA_NATIVE = libbrlapi_java.$(LIB_EXT)
 
 all: $(JAVA_NATIVE) brlapi.jar doc
 
-$(JAVA_NATIVE): brlapi.$O api
+$(JAVA_NATIVE): brlapi.$O brlapi
 	$(MKLIB:<name>=brlapi) $@ brlapi.$O $(API_LDFLAGS)
 
-brlapi.$O: brlapi.c $(API_HEADERS)
+brlapi.$O:
 	$(CC) $(LIBCFLAGS) -o $@ -c $(SRC_DIR)/brlapi.c
 
 brlapi.jar: classes
@@ -35,6 +35,9 @@ brlapi.jar: classes
 classes: Brlapi.class BrlapiError.class BrlapiException.class BrlapiSettings.class BrlapiWriteStruct.class BrlapiSize.class BrlapiKey.class ApiTest.class
 
 Brlapi.class: BrlapiConstants.class
+
+BrlapiConstants.class: BrlapiConstants.java
+        $(JAVAC) BrlapiConstants.java
 
 %.class: $(SRC_DIR)/%.java
 	$(JAVAC) $<

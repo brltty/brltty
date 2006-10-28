@@ -23,10 +23,10 @@ TCL_API = brlapi.$(LIB_EXT)
 
 all: $(TCL_API)
 
-$(TCL_API): brlapi.$O api
+$(TCL_API): brlapi.$O brlapi
 	$(MKLIB:<name>=brlapi) $@ brlapi.$O -ltcl $(API_LDFLAGS)
 
-brlapi.$O: $(SRC_DIR)/brlapi.c $(API_HEADERS)
+brlapi.$O:
 	$(CC) $(LIBCFLAGS) -o $@ -c $(SRC_DIR)/brlapi.c
 
 clean::

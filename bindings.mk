@@ -23,12 +23,6 @@ API_DIR = $(BLD_TOP)$(PGM_DIR)
 API_LDFLAGS = -L$(API_DIR) -lbrlapi
 
 API_HEADER = $(API_DIR)/api.h
-API_constants = $(API_DIR)/api_constants.auto.h
+API_constants = $(API_DIR)/api_constants.h
 API_HEADERS = $(API_HEADER) $(API_constants)
-
-api:
-	cd $(API_DIR) && $(MAKE) $(@)
-
-$(API_constants):
-	cd $(API_DIR) && $(MAKE) $(@F)
 
