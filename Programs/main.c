@@ -1069,6 +1069,7 @@ main (int argc, char *argv[]) {
   if (prefs.pointerFollowsWindow) setPointer(p->winx, p->winy);
   getPointer(&p->ptrx, &p->ptry);
 
+  AT2_resetState();
   resetBlinkingStates();
   if (prefs.autorepeat) resetAutorepeat();
 
@@ -1513,6 +1514,7 @@ main (int argc, char *argv[]) {
 
             case BRL_CMD_RESTARTBRL:
               restartBrailleDriver();
+              AT2_resetState();
               break;
             case BRL_CMD_PASTE:
               if (isLiveScreen() && !routingProcess) {
