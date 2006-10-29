@@ -21,29 +21,118 @@
 #include "brldefs.h"
 
 typedef enum {
-  AT2_RELEASE = 0, /* must be first */
-  AT2_LEFT_WINDOWS,
-  AT2_RIGHT_WINDOWS,
-  AT2_MENU,
-  AT2_CAPS_LOCK,
-  AT2_SCROLL_LOCK,
-  AT2_NUMBER_LOCK,
-  AT2_NUMBER_SHIFT,
-  AT2_LEFT_SHIFT,
-  AT2_RIGHT_SHIFT,
-  AT2_LEFT_CONTROL,
-  AT2_RIGHT_CONTROL,
-  AT2_LEFT_ALT,
-  AT2_RIGHT_ALT
-} At2Modifier;
+  MOD_RELEASE = 0, /* must be first */
+  MOD_WINDOWS_LEFT,
+  MOD_WINDOWS_RIGHT,
+  MOD_MENU,
+  MOD_CAPS_LOCK,
+  MOD_SCROLL_LOCK,
+  MOD_NUMBER_LOCK,
+  MOD_NUMBER_SHIFT,
+  MOD_SHIFT_LEFT,
+  MOD_SHIFT_RIGHT,
+  MOD_CONTROL_LEFT,
+  MOD_CONTROL_RIGHT,
+  MOD_ALT_LEFT,
+  MOD_ALT_RIGHT
+} Modifier;
+
+#define MOD_BIT(modifier) (1 << (modifier))
+#define MOD_SET(modifier, modifiers) ((modifiers) |= MOD_BIT((modifier)))
+#define MOD_CLR(modifier, modifiers) ((modifiers) &= ~MOD_BIT((modifier)))
+#define MOD_TST(modifier, modifiers) ((modifiers) & MOD_BIT((modifier)))
 
 typedef struct {
   uint16_t command;
   uint16_t alternate;
-} At2KeyEntry;
-typedef At2KeyEntry At2KeyTable[0X100];
+} KeyEntry;
+typedef KeyEntry KeyTable[0X100];
 
-static const At2KeyTable at2KeysOriginal = {
+static int
+interpretCode (int *command, const KeyEntry *key, int release, unsigned int *modifiers) {
+  int cmd = key->command;
+  int blk = cmd & BRL_MSK_BLK;
+
+  if (key->alternate) {
+    int alternate = 0;
+
+    if (blk == BRL_BLK_PASSCHAR) {
+      if (MOD_TST(MOD_SHIFT_LEFT, *modifiers) || MOD_TST(MOD_SHIFT_RIGHT, *modifiers)) alternate = 1;
+    } else {
+      if (MOD_TST(MOD_NUMBER_LOCK, *modifiers) || MOD_TST(MOD_NUMBER_SHIFT, *modifiers)) alternate = 1;
+    }
+
+    if (alternate) {
+      cmd = key->alternate;
+      blk = cmd & BRL_MSK_BLK;
+    }
+  }
+
+  if (cmd) {
+    if (blk) {
+      if (!release) {
+        if (blk == BRL_BLK_PASSCHAR) {
+          if (MOD_TST(MOD_CAPS_LOCK, *modifiers)) cmd |= BRL_FLG_CHAR_UPPER;
+          if (MOD_TST(MOD_ALT_LEFT, *modifiers)) cmd |= BRL_FLG_CHAR_META;
+          if (MOD_TST(MOD_CONTROL_LEFT, *modifiers) || MOD_TST(MOD_CONTROL_RIGHT, *modifiers)) cmd |= BRL_FLG_CHAR_CONTROL;
+        }
+
+        if ((blk == BRL_BLK_PASSKEY) && MOD_TST(MOD_ALT_LEFT, *modifiers)) {
+          int arg = cmd & BRL_MSK_ARG;
+          switch (arg) {
+            case BRL_KEY_CURSOR_LEFT:
+              cmd = BRL_CMD_SWITCHVT_PREV;
+              break;
+
+            case BRL_KEY_CURSOR_RIGHT:
+              cmd = BRL_CMD_SWITCHVT_NEXT;
+              break;
+
+            default:
+              if (arg >= BRL_KEY_FUNCTION) {
+                cmd = BRL_BLK_SWITCHVT + (arg - BRL_KEY_FUNCTION);
+              }
+              break;
+          }
+        }
+
+        *command = cmd;
+        return 1;
+      }
+    } else {
+      switch (cmd) {
+        case MOD_SCROLL_LOCK:
+        case MOD_NUMBER_LOCK:
+        case MOD_CAPS_LOCK:
+          if (!release) {
+            if (MOD_TST(cmd, *modifiers)) {
+              MOD_CLR(cmd, *modifiers);
+            } else {
+              MOD_SET(cmd, *modifiers);
+            }
+          }
+          break;
+
+        case MOD_NUMBER_SHIFT:
+        case MOD_SHIFT_LEFT:
+        case MOD_SHIFT_RIGHT:
+        case MOD_CONTROL_LEFT:
+        case MOD_CONTROL_RIGHT:
+        case MOD_ALT_LEFT:
+        case MOD_ALT_RIGHT:
+          if (release) {
+            MOD_CLR(cmd, *modifiers);
+          } else {
+            MOD_SET(cmd, *modifiers);
+          }
+          break;
+      }
+    }
+  }
+  return 0;
+}
+
+static const KeyTable originalScanCodes = {
   [0X76] = {BRL_BLK_PASSKEY+BRL_KEY_ESCAPE},
   [0X05] = {BRL_BLK_PASSKEY+BRL_KEY_FUNCTION+0},
   [0X06] = {BRL_BLK_PASSKEY+BRL_KEY_FUNCTION+1},
@@ -57,7 +146,7 @@ static const At2KeyTable at2KeysOriginal = {
   [0X09] = {BRL_BLK_PASSKEY+BRL_KEY_FUNCTION+9},
   [0X78] = {BRL_BLK_PASSKEY+BRL_KEY_FUNCTION+10},
   [0X07] = {BRL_BLK_PASSKEY+BRL_KEY_FUNCTION+11},
-  [0X7E] = {AT2_SCROLL_LOCK},
+  [0X7E] = {MOD_SCROLL_LOCK},
 
   [0X0E] = {BRL_BLK_PASSCHAR+'`', BRL_BLK_PASSCHAR+'~'},
   [0X16] = {BRL_BLK_PASSCHAR+'1', BRL_BLK_PASSCHAR+'!'},
@@ -89,7 +178,7 @@ static const At2KeyTable at2KeysOriginal = {
   [0X5B] = {BRL_BLK_PASSCHAR+']', BRL_BLK_PASSCHAR+'}'},
   [0X5D] = {BRL_BLK_PASSCHAR+'\\', BRL_BLK_PASSCHAR+'|'},
 
-  [0X58] = {AT2_CAPS_LOCK},
+  [0X58] = {MOD_CAPS_LOCK},
   [0X61] = {BRL_BLK_PASSCHAR+'<', BRL_BLK_PASSCHAR+'>'},
   [0X1C] = {BRL_BLK_PASSCHAR+'a', BRL_BLK_PASSCHAR+'A'},
   [0X1B] = {BRL_BLK_PASSCHAR+'s', BRL_BLK_PASSCHAR+'S'},
@@ -104,7 +193,7 @@ static const At2KeyTable at2KeysOriginal = {
   [0X52] = {BRL_BLK_PASSCHAR+'\'', BRL_BLK_PASSCHAR+'"'},
   [0X5A] = {BRL_BLK_PASSKEY+BRL_KEY_ENTER},
 
-  [0X12] = {AT2_LEFT_SHIFT},
+  [0X12] = {MOD_SHIFT_LEFT},
   [0X1A] = {BRL_BLK_PASSCHAR+'z', BRL_BLK_PASSCHAR+'Z'},
   [0X22] = {BRL_BLK_PASSCHAR+'x', BRL_BLK_PASSCHAR+'X'},
   [0X21] = {BRL_BLK_PASSCHAR+'c', BRL_BLK_PASSCHAR+'C'},
@@ -115,13 +204,13 @@ static const At2KeyTable at2KeysOriginal = {
   [0X41] = {BRL_BLK_PASSCHAR+',', BRL_BLK_PASSCHAR+'<'},
   [0X49] = {BRL_BLK_PASSCHAR+'.', BRL_BLK_PASSCHAR+'>'},
   [0X4A] = {BRL_BLK_PASSCHAR+'/', BRL_BLK_PASSCHAR+'?'},
-  [0X59] = {AT2_RIGHT_SHIFT},
+  [0X59] = {MOD_SHIFT_RIGHT},
 
-  [0X14] = {AT2_LEFT_CONTROL},
-  [0X11] = {AT2_LEFT_ALT},
+  [0X14] = {MOD_CONTROL_LEFT},
+  [0X11] = {MOD_ALT_LEFT},
   [0X29] = {BRL_BLK_PASSCHAR+' '},
 
-  [0X77] = {AT2_NUMBER_LOCK},
+  [0X77] = {MOD_NUMBER_LOCK},
   [0X7C] = {BRL_BLK_PASSCHAR+'*'},
   [0X7B] = {BRL_BLK_PASSCHAR+'-'},
   [0X79] = {BRL_BLK_PASSCHAR+'+'},
@@ -138,13 +227,13 @@ static const At2KeyTable at2KeysOriginal = {
   [0X7D] = {BRL_BLK_PASSKEY+BRL_KEY_PAGE_UP, BRL_BLK_PASSCHAR+'9'}
 };
 
-static const At2KeyTable at2KeysE0 = {
-  [0X12] = {AT2_NUMBER_SHIFT},
-  [0X1F] = {AT2_LEFT_WINDOWS},
-  [0X11] = {AT2_RIGHT_ALT},
-  [0X27] = {AT2_RIGHT_WINDOWS},
-  [0X2F] = {AT2_MENU},
-  [0X14] = {AT2_RIGHT_CONTROL},
+static const KeyTable extendedScanCodes = {
+  [0X12] = {MOD_NUMBER_SHIFT},
+  [0X1F] = {MOD_WINDOWS_LEFT},
+  [0X11] = {MOD_ALT_RIGHT},
+  [0X27] = {MOD_WINDOWS_RIGHT},
+  [0X2F] = {MOD_MENU},
+  [0X14] = {MOD_CONTROL_RIGHT},
   [0X70] = {BRL_BLK_PASSKEY+BRL_KEY_INSERT},
   [0X71] = {BRL_BLK_PASSKEY+BRL_KEY_DELETE},
   [0X6C] = {BRL_BLK_PASSKEY+BRL_KEY_HOME},
@@ -159,112 +248,117 @@ static const At2KeyTable at2KeysE0 = {
   [0X5A] = {BRL_BLK_PASSKEY+BRL_KEY_ENTER}
 };
 
-static const At2KeyEntry *at2Keys;
-static int at2Modifiers;
+static const KeyEntry *scanCodes;
+static unsigned int scanCodeModifiers;
 
-#define AT2_BIT(modifier) (1 << (modifier))
-#define AT2_SET(modifier) (at2Modifiers |= AT2_BIT((modifier)))
-#define AT2_CLR(modifier) (at2Modifiers &= ~AT2_BIT((modifier)))
-#define AT2_TST(modifier) (at2Modifiers & AT2_BIT((modifier)))
+int
+AT2_interpretScanCode (int *command, unsigned char byte) {
+  if (byte == 0XF0) {
+    MOD_SET(MOD_RELEASE, scanCodeModifiers);
+  } else if (byte == 0XE0) {
+    scanCodes = extendedScanCodes;
+  } else {
+    const KeyEntry *key = &scanCodes[byte];
+    int release = MOD_TST(MOD_RELEASE, scanCodeModifiers);
+
+    MOD_CLR(MOD_RELEASE, scanCodeModifiers);
+    scanCodes = originalScanCodes;
+
+    return interpretCode(command, key, release, &scanCodeModifiers);
+  }
+  return 0;
+}
+
+static const KeyTable keyCodes = {
+  [0X01] = {BRL_BLK_PASSKEY+BRL_KEY_ESCAPE},
+  [0X02] = {BRL_BLK_PASSCHAR+'1', BRL_BLK_PASSCHAR+'!'},
+  [0X03] = {BRL_BLK_PASSCHAR+'2', BRL_BLK_PASSCHAR+'@'},
+  [0X04] = {BRL_BLK_PASSCHAR+'3', BRL_BLK_PASSCHAR+'#'},
+  [0X05] = {BRL_BLK_PASSCHAR+'4', BRL_BLK_PASSCHAR+'$'},
+  [0X06] = {BRL_BLK_PASSCHAR+'5', BRL_BLK_PASSCHAR+'%'},
+  [0X07] = {BRL_BLK_PASSCHAR+'6', BRL_BLK_PASSCHAR+'^'},
+  [0X08] = {BRL_BLK_PASSCHAR+'7', BRL_BLK_PASSCHAR+'&'},
+  [0X09] = {BRL_BLK_PASSCHAR+'8', BRL_BLK_PASSCHAR+'*'},
+  [0X0A] = {BRL_BLK_PASSCHAR+'9', BRL_BLK_PASSCHAR+'('},
+  [0X0B] = {BRL_BLK_PASSCHAR+'0', BRL_BLK_PASSCHAR+')'},
+  [0X0C] = {BRL_BLK_PASSCHAR+'-', BRL_BLK_PASSCHAR+'_'},
+  [0X0D] = {BRL_BLK_PASSCHAR+'=', BRL_BLK_PASSCHAR+'+'},
+  [0X0E] = {BRL_BLK_PASSKEY+BRL_KEY_BACKSPACE},
+
+  [0X0F] = {BRL_BLK_PASSKEY+BRL_KEY_TAB},
+  [0X10] = {BRL_BLK_PASSCHAR+'q', BRL_BLK_PASSCHAR+'Q'},
+  [0X11] = {BRL_BLK_PASSCHAR+'w', BRL_BLK_PASSCHAR+'W'},
+  [0X12] = {BRL_BLK_PASSCHAR+'e', BRL_BLK_PASSCHAR+'E'},
+  [0X13] = {BRL_BLK_PASSCHAR+'r', BRL_BLK_PASSCHAR+'R'},
+  [0X14] = {BRL_BLK_PASSCHAR+'t', BRL_BLK_PASSCHAR+'T'},
+  [0X15] = {BRL_BLK_PASSCHAR+'y', BRL_BLK_PASSCHAR+'Y'},
+  [0X16] = {BRL_BLK_PASSCHAR+'u', BRL_BLK_PASSCHAR+'U'},
+  [0X17] = {BRL_BLK_PASSCHAR+'i', BRL_BLK_PASSCHAR+'I'},
+  [0X18] = {BRL_BLK_PASSCHAR+'o', BRL_BLK_PASSCHAR+'O'},
+  [0X19] = {BRL_BLK_PASSCHAR+'p', BRL_BLK_PASSCHAR+'P'},
+  [0X1A] = {BRL_BLK_PASSCHAR+'[', BRL_BLK_PASSCHAR+'{'},
+  [0X1B] = {BRL_BLK_PASSCHAR+']', BRL_BLK_PASSCHAR+'}'},
+  [0X1C] = {BRL_BLK_PASSKEY+BRL_KEY_ENTER},
+
+  [0X1D] = {MOD_CONTROL_LEFT},
+  [0X1E] = {BRL_BLK_PASSCHAR+'a', BRL_BLK_PASSCHAR+'A'},
+  [0X1F] = {BRL_BLK_PASSCHAR+'s', BRL_BLK_PASSCHAR+'S'},
+  [0X20] = {BRL_BLK_PASSCHAR+'d', BRL_BLK_PASSCHAR+'D'},
+  [0X21] = {BRL_BLK_PASSCHAR+'f', BRL_BLK_PASSCHAR+'F'},
+  [0X22] = {BRL_BLK_PASSCHAR+'g', BRL_BLK_PASSCHAR+'G'},
+  [0X23] = {BRL_BLK_PASSCHAR+'h', BRL_BLK_PASSCHAR+'H'},
+  [0X24] = {BRL_BLK_PASSCHAR+'j', BRL_BLK_PASSCHAR+'J'},
+  [0X25] = {BRL_BLK_PASSCHAR+'k', BRL_BLK_PASSCHAR+'K'},
+  [0X26] = {BRL_BLK_PASSCHAR+'l', BRL_BLK_PASSCHAR+'L'},
+  [0X27] = {BRL_BLK_PASSCHAR+';', BRL_BLK_PASSCHAR+':'},
+  [0X28] = {BRL_BLK_PASSCHAR+'\'', BRL_BLK_PASSCHAR+'"'},
+  [0X29] = {BRL_BLK_PASSCHAR+'`', BRL_BLK_PASSCHAR+'~'},
+
+  [0X2A] = {MOD_SHIFT_LEFT},
+  [0X2B] = {BRL_BLK_PASSCHAR+'\\', BRL_BLK_PASSCHAR+'|'},
+  [0X2C] = {BRL_BLK_PASSCHAR+'z', BRL_BLK_PASSCHAR+'Z'},
+  [0X2D] = {BRL_BLK_PASSCHAR+'x', BRL_BLK_PASSCHAR+'X'},
+  [0X2E] = {BRL_BLK_PASSCHAR+'c', BRL_BLK_PASSCHAR+'C'},
+  [0X2F] = {BRL_BLK_PASSCHAR+'v', BRL_BLK_PASSCHAR+'V'},
+  [0X30] = {BRL_BLK_PASSCHAR+'b', BRL_BLK_PASSCHAR+'B'},
+  [0X31] = {BRL_BLK_PASSCHAR+'n', BRL_BLK_PASSCHAR+'N'},
+  [0X32] = {BRL_BLK_PASSCHAR+'m', BRL_BLK_PASSCHAR+'M'},
+  [0X33] = {BRL_BLK_PASSCHAR+',', BRL_BLK_PASSCHAR+'<'},
+  [0X34] = {BRL_BLK_PASSCHAR+'.', BRL_BLK_PASSCHAR+'>'},
+  [0X35] = {BRL_BLK_PASSCHAR+'/', BRL_BLK_PASSCHAR+'?'},
+  [0X36] = {MOD_SHIFT_RIGHT},
+
+  [0X38] = {MOD_ALT_LEFT},
+  [0X39] = {BRL_BLK_PASSCHAR+' '},
+  [0X3A] = {MOD_CAPS_LOCK},
+
+  [0X3B] = {BRL_BLK_PASSKEY+BRL_KEY_FUNCTION+0},
+  [0X3C] = {BRL_BLK_PASSKEY+BRL_KEY_FUNCTION+1},
+  [0X3D] = {BRL_BLK_PASSKEY+BRL_KEY_FUNCTION+2},
+  [0X3E] = {BRL_BLK_PASSKEY+BRL_KEY_FUNCTION+3},
+  [0X3F] = {BRL_BLK_PASSKEY+BRL_KEY_FUNCTION+4},
+  [0X40] = {BRL_BLK_PASSKEY+BRL_KEY_FUNCTION+5},
+  [0X41] = {BRL_BLK_PASSKEY+BRL_KEY_FUNCTION+6},
+  [0X42] = {BRL_BLK_PASSKEY+BRL_KEY_FUNCTION+7},
+  [0X43] = {BRL_BLK_PASSKEY+BRL_KEY_FUNCTION+8},
+  [0X44] = {BRL_BLK_PASSKEY+BRL_KEY_FUNCTION+9},
+
+  [0X45] = {MOD_NUMBER_LOCK},
+  [0X46] = {MOD_SCROLL_LOCK}
+};
+
+static unsigned int keyCodeModifiers;
+
+int
+AT2_interpretKeyCode (int *command, unsigned char byte) {
+  const KeyEntry *key = &keyCodes[byte & 0X7F];
+  int release = (byte & 0X80) != 0;
+  return interpretCode(command, key, release, &keyCodeModifiers);
+}
 
 void
 AT2_resetState (void) {
-  at2Keys = at2KeysOriginal;
-  at2Modifiers = 0;
-}
-
-int
-AT2_interpretCode (int *command, unsigned char byte) {
-  if (byte == 0XF0) {
-    AT2_SET(AT2_RELEASE);
-  } else if (byte == 0XE0) {
-    at2Keys = at2KeysE0;
-  } else {
-    const At2KeyEntry *key = &at2Keys[byte];
-    int release = AT2_TST(AT2_RELEASE);
-
-    int cmd = key->command;
-    int blk = cmd & BRL_MSK_BLK;
-
-    AT2_CLR(AT2_RELEASE);
-    at2Keys = at2KeysOriginal;
-
-    if (key->alternate) {
-      int alternate = 0;
-
-      if (blk == BRL_BLK_PASSCHAR) {
-        if (AT2_TST(AT2_LEFT_SHIFT) || AT2_TST(AT2_RIGHT_SHIFT)) alternate = 1;
-      } else {
-        if (AT2_TST(AT2_NUMBER_LOCK) || AT2_TST(AT2_NUMBER_SHIFT)) alternate = 1;
-      }
-
-      if (alternate) {
-        cmd = key->alternate;
-        blk = cmd & BRL_MSK_BLK;
-      }
-    }
-
-    if (cmd) {
-      if (blk) {
-        if (!release) {
-          if (blk == BRL_BLK_PASSCHAR) {
-            if (AT2_TST(AT2_CAPS_LOCK)) cmd |= BRL_FLG_CHAR_UPPER;
-            if (AT2_TST(AT2_LEFT_ALT)) cmd |= BRL_FLG_CHAR_META;
-            if (AT2_TST(AT2_LEFT_CONTROL) || AT2_TST(AT2_RIGHT_CONTROL)) cmd |= BRL_FLG_CHAR_CONTROL;
-          }
-
-          if ((blk == BRL_BLK_PASSKEY) && AT2_TST(AT2_LEFT_ALT)) {
-            int arg = cmd & BRL_MSK_ARG;
-            switch (arg) {
-              case BRL_KEY_CURSOR_LEFT:
-                cmd = BRL_CMD_SWITCHVT_PREV;
-                break;
-
-              case BRL_KEY_CURSOR_RIGHT:
-                cmd = BRL_CMD_SWITCHVT_NEXT;
-                break;
-
-              default:
-                if (arg >= BRL_KEY_FUNCTION) {
-                  cmd = BRL_BLK_SWITCHVT + (arg - BRL_KEY_FUNCTION);
-                }
-                break;
-            }
-          }
-
-          *command = cmd;
-          return 1;
-        }
-      } else {
-        switch (cmd) {
-          case AT2_SCROLL_LOCK:
-          case AT2_NUMBER_LOCK:
-          case AT2_CAPS_LOCK:
-            if (!release) {
-              if (AT2_TST(cmd)) {
-                AT2_CLR(cmd);
-              } else {
-                AT2_SET(cmd);
-              }
-            }
-            break;
-
-          case AT2_NUMBER_SHIFT:
-          case AT2_LEFT_SHIFT:
-          case AT2_RIGHT_SHIFT:
-          case AT2_LEFT_CONTROL:
-          case AT2_RIGHT_CONTROL:
-          case AT2_LEFT_ALT:
-          case AT2_RIGHT_ALT:
-            if (release) {
-              AT2_CLR(cmd);
-            } else {
-              AT2_SET(cmd);
-            }
-            break;
-        }
-      }
-    }
-  }
-  return 0;
+  scanCodes = originalScanCodes;
+  scanCodeModifiers = 0;
+  keyCodeModifiers = 0;
 }

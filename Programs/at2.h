@@ -23,7 +23,8 @@ extern "C" {
 #endif /* __cplusplus */
 
 extern void AT2_resetState (void);
-extern int AT2_interpretCode (int *command, unsigned char byte);
+extern int AT2_interpretScanCode (int *command, unsigned char byte);
+extern int AT2_interpretKeyCode (int *command, unsigned char byte);
 
 #ifdef __cplusplus
 }

@@ -221,6 +221,7 @@ typedef enum {
 
 #define BRL_FLG_AT2_RELEASE 0X010000 /* prepend scancode for key reelase */
 #define BRL_FLG_AT2_EXTENDED 0X020000 /* prepend scancode for extended key */
+#define BRL_FLG_AT2_KEYCODE 0X040000 /* keycode rather than scancode */
 
 /*
  * Please comment all BRL_GSC_* definitions. They are

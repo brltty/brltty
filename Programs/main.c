@@ -1790,9 +1790,13 @@ main (int argc, char *argv[]) {
                   }
                   break;
                 case BRL_BLK_PASSAT2:
-                  if (flags & BRL_FLG_AT2_RELEASE) AT2_interpretCode(&command, 0XF0);
-                  if (flags & BRL_FLG_AT2_EXTENDED) AT2_interpretCode(&command, 0XE0);
-                  if (AT2_interpretCode(&command, arg)) goto doCommand;
+                  if (flags & BRL_FLG_AT2_KEYCODE) {
+                    if (AT2_interpretKeyCode(&command, arg)) goto doCommand;
+                  } else {
+                    if (flags & BRL_FLG_AT2_RELEASE) AT2_interpretScanCode(&command, 0XF0);
+                    if (flags & BRL_FLG_AT2_EXTENDED) AT2_interpretScanCode(&command, 0XE0);
+                    if (AT2_interpretScanCode(&command, arg)) goto doCommand;
+                  }
                   break;
 
                 case BRL_BLK_ROUTE:
