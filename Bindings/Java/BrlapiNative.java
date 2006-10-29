@@ -50,8 +50,8 @@ public class BrlapiNative {
 
   public native void enterRawMode (String driver) throws BrlapiError;
   public native void leaveRawMode () throws BrlapiError;
-  public native void sendRaw (byte buf[]) throws BrlapiError;
-  public native void recvRaw (byte buf[]) throws BrlapiError;
+  public native int sendRaw (byte buf[]) throws BrlapiError;
+  public native int recvRaw (byte buf[]) throws BrlapiError;
 
   public static native String packetType (long type);
 }

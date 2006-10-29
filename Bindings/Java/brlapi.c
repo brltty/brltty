@@ -539,15 +539,16 @@ JNIEXPORT void JNICALL Java_BrlapiNative_leaveRawMode(JNIEnv *jenv, jobject jobj
     return ThrowError(jenv, __func__);
 }
 
-JNIEXPORT void JNICALL Java_BrlapiNative_sendRaw(JNIEnv *jenv, jobject jobj, jbyteArray jbuf) {
+JNIEXPORT jint JNICALL Java_BrlapiNative_sendRaw(JNIEnv *jenv, jobject jobj, jbyteArray jbuf) {
   jbyte *buf;
   unsigned int n;
   int result;
-  GET_HANDLE(jenv, jobj, );
+  GET_HANDLE(jenv, jobj, -1);
 
   env = jenv;
 
-  if (!jbuf) return ThrowException(jenv, ERR_NULLPTR, __func__);
+  if (!jbuf)
+    return ThrowException(jenv, ERR_NULLPTR, __func__), -1;
 
   n = (unsigned int) (*jenv)->GetArrayLength(jenv, jbuf);
   buf = (*jenv)->GetByteArrayElements(jenv, jbuf, NULL);
@@ -555,18 +556,22 @@ JNIEXPORT void JNICALL Java_BrlapiNative_sendRaw(JNIEnv *jenv, jobject jobj, jby
   result = brlapi__sendRaw(handle, (const unsigned char *)buf, n);
   (*jenv)->ReleaseByteArrayElements(jenv, jbuf, buf, JNI_ABORT);
 
-  if (result < 0) return ThrowError(jenv, __func__);
+  if (result < 0)
+    return ThrowError(jenv, __func__), -1;
+
+  return (jint) result;
 }
 
-JNIEXPORT void JNICALL Java_BrlapiNative_recvRaw(JNIEnv *jenv, jobject jobj, jbyteArray jbuf) {
+JNIEXPORT jint JNICALL Java_BrlapiNative_recvRaw(JNIEnv *jenv, jobject jobj, jbyteArray jbuf) {
   jbyte *buf;
   unsigned int n;
   int result;
-  GET_HANDLE(jenv, jobj, );
+  GET_HANDLE(jenv, jobj, -1);
 
   env = jenv;
 
-  if (!jbuf) return ThrowException(jenv, ERR_NULLPTR, __func__);
+  if (!jbuf)
+    return ThrowException(jenv, ERR_NULLPTR, __func__), -1;
 
   n = (unsigned int) (*jenv)->GetArrayLength(jenv, jbuf);
   buf = (*jenv)->GetByteArrayElements(jenv, jbuf, NULL);
@@ -575,10 +580,11 @@ JNIEXPORT void JNICALL Java_BrlapiNative_recvRaw(JNIEnv *jenv, jobject jobj, jby
 
   if (result < 0) {
     (*jenv)->ReleaseByteArrayElements(jenv, jbuf, buf, JNI_ABORT);
-    return ThrowError(jenv, __func__);
+    return ThrowError(jenv, __func__), -1;
   }
 
   (*jenv)->ReleaseByteArrayElements(jenv, jbuf, buf, 0);
+  return (jint) result;
 }
 
 JNIEXPORT jstring JNICALL Java_BrlapiNative_packetType(JNIEnv *jenv, jclass jcls, jlong jtype) {
