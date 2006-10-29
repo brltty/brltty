@@ -34,12 +34,12 @@ public class BrlapiNative {
   public native BrlapiSize getDisplaySize () throws BrlapiError;
   
   public native int enterTtyMode (int tty, String driver) throws BrlapiError;
-  public native int getTtyPath (int ttys[], String driver) throws BrlapiError;
+  public native void getTtyPath (int ttys[], String driver) throws BrlapiError;
   public native void leaveTtyMode () throws BrlapiError;
   public native void setFocus (int tty) throws BrlapiError;
 
   public native void writeText (int cursor, String str) throws BrlapiError;
-  public native int writeDots (byte str[]) throws BrlapiError;
+  public native void writeDots (byte str[]) throws BrlapiError;
   public native void write (BrlapiWriteStruct s) throws BrlapiError;
 
   public native long readKey (boolean block) throws BrlapiError;
@@ -50,8 +50,8 @@ public class BrlapiNative {
 
   public native void enterRawMode (String driver) throws BrlapiError;
   public native void leaveRawMode () throws BrlapiError;
-  public native int sendRaw (byte buf[]) throws BrlapiError;
-  public native int recvRaw (byte buf[]) throws BrlapiError;
+  public native void sendRaw (byte buf[]) throws BrlapiError;
+  public native void recvRaw (byte buf[]) throws BrlapiError;
 
   public static native String packetType (long type);
 }

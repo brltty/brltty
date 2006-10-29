@@ -22,7 +22,6 @@
 public class Brlapi extends BrlapiNative implements BrlapiConstants {
   protected final BrlapiSettings settings;
   protected final int fileDescriptor;;
-  protected int ttyNumber = -1;
 
   public Brlapi (BrlapiSettings settings) throws BrlapiError {
     this.settings = new BrlapiSettings();
@@ -45,20 +44,19 @@ public class Brlapi extends BrlapiNative implements BrlapiConstants {
     return fileDescriptor;
   }
 
-  public int enterTtyMode (int tty, String driver) throws BrlapiError {
-    return ttyNumber = super.enterTtyMode(tty, driver);
+  public int enterTtyMode (int tty) throws BrlapiError {
+    return enterTtyMode(tty, null);
   }
 
-  public int getTtyPath (int ttys[], String driver) throws BrlapiError {
-    return ttyNumber = super.getTtyPath(ttys, driver);
+  public int enterTtyMode (String driver) throws BrlapiError {
+    return enterTtyMode(-1, driver);
   }
 
-  public void leaveTtyMode () throws BrlapiError {
-    ttyNumber = -1;
-    super.leaveTtyMode();
+  public int enterTtyMode () throws BrlapiError {
+    return enterTtyMode(-1, null);
   }
 
-  public int getTtyNumber () {
-    return ttyNumber;
+  public void getTtyPath (int ttys[]) throws BrlapiError {
+    getTtyPath(ttys, null);
   }
 }

@@ -303,31 +303,27 @@ JNIEXPORT jint JNICALL Java_BrlapiNative_enterTtyMode(JNIEnv *jenv, jobject jobj
   return (jint) result;
 }
 
-JNIEXPORT jint JNICALL Java_BrlapiNative_getTtyPath(JNIEnv *jenv, jobject jobj, jintArray jttys, jstring jdriver) {
+JNIEXPORT void JNICALL Java_BrlapiNative_getTtyPath(JNIEnv *jenv, jobject jobj, jintArray jttys, jstring jdriver) {
   jint *ttys ;
   char *driver;
   int result;
-  GET_HANDLE(jenv, jobj, -1);
+  GET_HANDLE(jenv, jobj, );
   
   env = jenv;
 
-  if (!jttys)
-    return ThrowException(jenv, ERR_NULLPTR, __func__), -1;
+  if (!jttys) return ThrowException(jenv, ERR_NULLPTR, __func__);
   if (!(ttys = (*jenv)->GetIntArrayElements(jenv, jttys, NULL)))
-    return ThrowException(jenv, ERR_OUTOFMEM, __func__), -1;
+    return ThrowException(jenv, ERR_OUTOFMEM, __func__);
 
   if (!jdriver)
     driver = NULL;
   else
     if (!(driver = (char *)(*jenv)->GetStringUTFChars(jenv, jdriver, NULL)));
-      return ThrowException(jenv, ERR_OUTOFMEM, __func__), -1;
+      return ThrowException(jenv, ERR_OUTOFMEM, __func__);
 
   result = brlapi__getTtyPath(handle, ttys,(*jenv)->GetArrayLength(jenv,jttys),driver);
   (*jenv)->ReleaseIntArrayElements(jenv, jttys, ttys, JNI_ABORT);
-  if (result < 0)
-    return ThrowError(jenv, __func__), -1;
-
-  return (jint) result;
+  if (result < 0) return ThrowError(jenv, __func__);
 }
 
 JNIEXPORT void JNICALL Java_BrlapiNative_leaveTtyMode(JNIEnv *jenv, jobject jobj) {
@@ -543,16 +539,15 @@ JNIEXPORT void JNICALL Java_BrlapiNative_leaveRawMode(JNIEnv *jenv, jobject jobj
     return ThrowError(jenv, __func__);
 }
 
-JNIEXPORT jint JNICALL Java_BrlapiNative_sendRaw(JNIEnv *jenv, jobject jobj, jbyteArray jbuf) {
+JNIEXPORT void JNICALL Java_BrlapiNative_sendRaw(JNIEnv *jenv, jobject jobj, jbyteArray jbuf) {
   jbyte *buf;
   unsigned int n;
   int result;
-  GET_HANDLE(jenv, jobj, -1);
+  GET_HANDLE(jenv, jobj, );
 
   env = jenv;
 
-  if (!jbuf)
-    return ThrowException(jenv, ERR_NULLPTR, __func__), -1;
+  if (!jbuf) return ThrowException(jenv, ERR_NULLPTR, __func__);
 
   n = (unsigned int) (*jenv)->GetArrayLength(jenv, jbuf);
   buf = (*jenv)->GetByteArrayElements(jenv, jbuf, NULL);
@@ -560,22 +555,18 @@ JNIEXPORT jint JNICALL Java_BrlapiNative_sendRaw(JNIEnv *jenv, jobject jobj, jby
   result = brlapi__sendRaw(handle, (const unsigned char *)buf, n);
   (*jenv)->ReleaseByteArrayElements(jenv, jbuf, buf, JNI_ABORT);
 
-  if (result < 0)
-    return ThrowError(jenv, __func__), -1;
-
-  return (jint) result;
+  if (result < 0) return ThrowError(jenv, __func__);
 }
 
-JNIEXPORT jint JNICALL Java_BrlapiNative_recvRaw(JNIEnv *jenv, jobject jobj, jbyteArray jbuf) {
+JNIEXPORT void JNICALL Java_BrlapiNative_recvRaw(JNIEnv *jenv, jobject jobj, jbyteArray jbuf) {
   jbyte *buf;
   unsigned int n;
   int result;
-  GET_HANDLE(jenv, jobj, -1);
+  GET_HANDLE(jenv, jobj, );
 
   env = jenv;
 
-  if (!jbuf)
-    return ThrowException(jenv, ERR_NULLPTR, __func__), -1;
+  if (!jbuf) return ThrowException(jenv, ERR_NULLPTR, __func__);
 
   n = (unsigned int) (*jenv)->GetArrayLength(jenv, jbuf);
   buf = (*jenv)->GetByteArrayElements(jenv, jbuf, NULL);
@@ -584,11 +575,10 @@ JNIEXPORT jint JNICALL Java_BrlapiNative_recvRaw(JNIEnv *jenv, jobject jobj, jby
 
   if (result < 0) {
     (*jenv)->ReleaseByteArrayElements(jenv, jbuf, buf, JNI_ABORT);
-    return ThrowError(jenv, __func__), -1;
+    return ThrowError(jenv, __func__);
   }
 
   (*jenv)->ReleaseByteArrayElements(jenv, jbuf, buf, 0);
-  return (jint) result;
 }
 
 JNIEXPORT jstring JNICALL Java_BrlapiNative_packetType(JNIEnv *jenv, jclass jcls, jlong jtype) {
