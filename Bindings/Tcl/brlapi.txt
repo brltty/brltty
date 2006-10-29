@@ -5,7 +5,8 @@ brlapi <function> [<arg> ...]
    expandHost <hostSpec>
    expandKeyCode <keyCode>
    getKeyName <command> [<argument>]
-   makeCells <dotsList>
+   makeDots <numbersList>
+   getHandleSize
 
 brlapi<sessionNumber> function [arg ...]
    getHost
@@ -32,8 +33,8 @@ brlapi<sessionNumber> function [arg ...]
       cursor {leave | off | <offset>}
       display {default | <number>}
       charset <name>
-   writeCells <cells>
-   erase
+   writeDots <dots>
+   withdrawDots
    enterRawMode <driver>
    leaveRawMode
    recvRaw <maximumLength>

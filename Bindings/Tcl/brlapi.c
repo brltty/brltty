@@ -324,7 +324,6 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     "closeConnection",
     "enterRawMode",
     "enterTtyMode",
-    "erase",
     "getDisplaySize",
     "getDriverId",
     "getDriverName",
@@ -341,7 +340,8 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     "sendRaw",
     "setFocus",
     "suspend",
-    "writeCells",
+    "withdrawDots",
+    "writeDots",
     "writeText",
     NULL
   };
@@ -352,7 +352,6 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     FCN_closeConnection,
     FCN_enterRawMode,
     FCN_enterTtyMode,
-    FCN_erase,
     FCN_getDisplaySize,
     FCN_getDriverId,
     FCN_getDriverName,
@@ -369,7 +368,8 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     FCN_sendRaw,
     FCN_setFocus,
     FCN_suspend,
-    FCN_writeCells,
+    FCN_withdrawDots,
+    FCN_writeDots,
     FCN_writeText
   } Function;
 
@@ -752,11 +752,11 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
       return TCL_ERROR;
     }
 
-    case FCN_writeCells: {
+    case FCN_writeDots: {
       int size;
 
       if (objc != 3) {
-        Tcl_WrongNumArgs(interp, 2, objv, "<cells>");
+        Tcl_WrongNumArgs(interp, 2, objv, "<dots>");
         return TCL_ERROR;
       }
 
@@ -784,7 +784,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
       }
     }
 
-    case FCN_erase: {
+    case FCN_withdrawDots: {
       if (objc != 2) {
         Tcl_WrongNumArgs(interp, 2, objv, NULL);
         return TCL_ERROR;
@@ -931,8 +931,9 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     "connect",
     "expandHost",
     "expandKeyCode",
+    "getHandleSize",
     "getKeyName",
-    "makeCells",
+    "makeDots",
     NULL
   };
 
@@ -940,8 +941,9 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     FCN_connect,
     FCN_expandHost,
     FCN_expandKeyCode,
+    FCN_getHandleSize,
     FCN_getKeyName,
-    FCN_makeCells
+    FCN_makeDots
   } Function;
 
   int function;
@@ -1086,12 +1088,12 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
       }
     }
 
-    case FCN_makeCells: {
+    case FCN_makeDots: {
       Tcl_Obj **elements;
       int elementCount;
 
       if (objc != 3) {
-        Tcl_WrongNumArgs(interp, 2, objv, "<dotsList>");
+        Tcl_WrongNumArgs(interp, 2, objv, "<numbersList>");
         return TCL_ERROR;
       }
 
@@ -1107,36 +1109,27 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
         for (elementIndex=0; elementIndex<elementCount; ++elementIndex) {
           unsigned char *cell = &cells[elementIndex];
           Tcl_Obj *element = elements[elementIndex];
-          int dotCount;
-          const char *dots = Tcl_GetStringFromObj(element, &dotCount);
+          int numberCount;
+          const char *numbers = Tcl_GetStringFromObj(element, &numberCount);
 
           *cell = 0;
-          if ((dotCount != 1) || (dots[0] != '0')) {
-            int dotIndex;
-            for (dotIndex=0; dotIndex<dotCount; ++dotIndex) {
-              unsigned char dotNumber = dots[dotIndex];
-              static const char dotNumbers[] = {'1', '2', '3', '4', '5', '6', '7', '8'};
-              const char *dot = memchr(dotNumbers, dotNumber, sizeof(dotNumbers));
+          if ((numberCount != 1) || (numbers[0] != '0')) {
+            int numberIndex;
+            for (numberIndex=0; numberIndex<numberCount; ++numberIndex) {
+              unsigned char number = numbers[numberIndex];
+              unsigned char bit = brlapi_dotNumberToBit(number);
 
-              if (!dot) {
+              if (!bit) {
                 setStringResult(interp, "invalid dot number", -1);
                 return TCL_ERROR;
               }
 
-              {
-                static const unsigned char dotBits[] = {
-                  BRL_DOT1, BRL_DOT2, BRL_DOT3, BRL_DOT4,
-                  BRL_DOT5, BRL_DOT6, BRL_DOT7, BRL_DOT8
-                };
-                unsigned char dotBit = dotBits[dot - dotNumbers];
-
-                if (*cell & dotBit) {
-                  setStringResult(interp, "duplicate dot number", -1);
-                  return TCL_ERROR;
-                }
-
-                *cell |= dotBit;
+              if (*cell & bit) {
+                setStringResult(interp, "duplicate dot number", -1);
+                return TCL_ERROR;
               }
+
+              *cell |= bit;
             }
           }
         }
@@ -1144,6 +1137,16 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
         setByteArrayResult(interp, cells, elementCount);
       }
 
+      return TCL_OK;
+    }
+
+    case FCN_getHandleSize: {
+      if (objc != 2) {
+        Tcl_WrongNumArgs(interp, 2, objv, NULL);
+        return TCL_ERROR;
+      }
+
+      setIntResult(interp, brlapi_getHandleSize());
       return TCL_OK;
     }
   }
