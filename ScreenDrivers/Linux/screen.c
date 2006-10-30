@@ -1562,44 +1562,55 @@ static int
 execute_LinuxScreen (int command) {
   int blk = command & BRL_MSK_BLK;
   int arg UNUSED = command & BRL_MSK_ARG;
+  int cmd = blk | arg;
 
-  switch (blk) {
-    case BRL_BLK_PASSAT2:
+  switch (cmd) {
+    case BRL_CMD_RESTARTBRL:
 #ifdef HAVE_LINUX_INPUT_H
-      if (command & BRL_FLG_AT2_KEYCODE) {
-        return writeKeyEvent(arg & 0X7F, !(arg & 0X80));
-      }
-
-      {
-        int handled = 0;
-
-        if (command & BRL_FLG_AT2_RELEASE) {
-          at2Pressed = 0;
-        } else if (arg == 0XF0) {
-          at2Pressed = 0;
-          handled = 1;
-        }
-
-        if (command & BRL_FLG_AT2_EXTENDED) {
-          at2Keys = at2KeysE0;
-        } else if (arg == 0XE0) {
-          at2Keys = at2KeysE0;
-          handled = 1;
-        }
-
-        if (handled) return 1;
-      }
-
-      {
-        unsigned char key = at2Keys[arg];
-        int pressed = at2Pressed;
-
-        at2Keys = at2KeysOriginal;
-        at2Pressed = 1;
-
-        if (key) return writeKeyEvent(key, pressed);
-      }
+      releaseAllKeys();
 #endif /* HAVE_LINUX_INPUT_H */
+      break;
+
+    default:
+      switch (blk) {
+        case BRL_BLK_PASSAT2:
+#ifdef HAVE_LINUX_INPUT_H
+          if (command & BRL_FLG_AT2_KEYCODE) {
+            return writeKeyEvent(arg & 0X7F, !(arg & 0X80));
+          }
+
+          {
+            int handled = 0;
+
+            if (command & BRL_FLG_AT2_RELEASE) {
+              at2Pressed = 0;
+            } else if (arg == 0XF0) {
+              at2Pressed = 0;
+              handled = 1;
+            }
+
+            if (command & BRL_FLG_AT2_EXTENDED) {
+              at2Keys = at2KeysE0;
+            } else if (arg == 0XE0) {
+              at2Keys = at2KeysE0;
+              handled = 1;
+            }
+
+            if (handled) return 1;
+          }
+
+          {
+            unsigned char key = at2Keys[arg];
+            int pressed = at2Pressed;
+
+            at2Keys = at2KeysOriginal;
+            at2Pressed = 1;
+
+            if (key) return writeKeyEvent(key, pressed);
+          }
+#endif /* HAVE_LINUX_INPUT_H */
+          break;
+      }
       break;
   }
 
