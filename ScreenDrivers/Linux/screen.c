@@ -1570,18 +1570,24 @@ execute_LinuxScreen (int command) {
         return writeKeyEvent(arg & 0X7F, !(arg & 0X80));
       }
 
-      if (command & BRL_FLG_AT2_RELEASE) {
-        at2Pressed = 0;
-      } else if (arg == 0XF0) {
-        at2Pressed = 0;
-        return 1;
-      }
+      {
+        int handled = 0;
 
-      if (command & BRL_FLG_AT2_EXTENDED) {
-        at2Keys = at2KeysE0;
-      } else if (arg == 0XE0) {
-        at2Keys = at2KeysE0;
-        return 1;
+        if (command & BRL_FLG_AT2_RELEASE) {
+          at2Pressed = 0;
+        } else if (arg == 0XF0) {
+          at2Pressed = 0;
+          handled = 1;
+        }
+
+        if (command & BRL_FLG_AT2_EXTENDED) {
+          at2Keys = at2KeysE0;
+        } else if (arg == 0XE0) {
+          at2Keys = at2KeysE0;
+          handled = 1;
+        }
+
+        if (handled) return 1;
       }
 
       {
