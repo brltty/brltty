@@ -260,6 +260,7 @@ getUinputDevice (void) {
 #ifdef HAVE_LINUX_UINPUT_H
   if (uinput == -1) {
     int device;
+    LogPrint(LOG_DEBUG, "opening uinput");
 
     {
       static int status = 0;
@@ -268,6 +269,7 @@ getUinputDevice (void) {
 
     if ((device = openCharacterDevice("/dev/uinput", O_WRONLY, 10, 223)) != -1) {
       struct uinput_user_dev description;
+      LogPrint(LOG_DEBUG, "uinput opened: fd=%d", device);
       
       memset(&description, 0, sizeof(description));
       strcpy(description.name, "brltty");
@@ -278,7 +280,7 @@ getUinputDevice (void) {
 
         {
           int key;
-          for (key=KEY_RESERVED; key<KEY_MAX; key++) {
+          for (key=KEY_RESERVED; key<=KEY_MAX; key++) {
             ioctl(device, UI_SET_KEYBIT, key);
           }
         }
@@ -292,13 +294,18 @@ getUinputDevice (void) {
         LogError("write(struct uinput_user_dev)");
       }
 
-      if (device != uinput) close(device);
+      if (device != uinput) {
+        close(device);
+        LogPrint(LOG_DEBUG, "uinput closed");
+      }
     }
   }
 #endif /* HAVE_LINUX_UINPUT_H */
 
   return uinput;
 }
+
+static BITMASK(pressedKeys, KEY_MAX+1);
 
 int
 writeKeyEvent (int key, int press) {
@@ -312,10 +319,28 @@ writeKeyEvent (int key, int press) {
     event.code = key;
     event.value = press;
 
-    if (write(device, &event, sizeof(event)) != -1) return 1;
+    if (write(device, &event, sizeof(event)) != -1) {
+      if (press) {
+        BITMASK_SET(pressedKeys, key);
+      } else {
+        BITMASK_CLEAR(pressedKeys, key);
+      }
+      return 1;
+    }
+
     LogError("write(struct input_event)");
 #endif /* HAVE_LINUX_INPUT_H */
   }
 
   return 0;
+}
+
+void
+releaseAllKeys (void) {
+  int key;
+  for (key=0; key<=KEY_MAX; ++key) {
+    if (BITMASK_TEST(pressedKeys, key)) {
+      if (!writeKeyEvent(key, 0)) break;
+    }
+  }
 }
