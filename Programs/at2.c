@@ -37,10 +37,10 @@ typedef enum {
   MOD_ALT_RIGHT
 } Modifier;
 
-#define MOD_BIT(modifier) (1 << (modifier))
-#define MOD_SET(modifier, modifiers) ((modifiers) |= MOD_BIT((modifier)))
-#define MOD_CLR(modifier, modifiers) ((modifiers) &= ~MOD_BIT((modifier)))
-#define MOD_TST(modifier, modifiers) ((modifiers) & MOD_BIT((modifier)))
+#define MOD_BIT(number) (1 << (number))
+#define MOD_SET(number, bits) ((bits) |= MOD_BIT((number)))
+#define MOD_CLR(number, bits) ((bits) &= ~MOD_BIT((number)))
+#define MOD_TST(number, bits) ((bits) & MOD_BIT((number)))
 
 typedef struct {
   uint16_t command;
@@ -344,7 +344,28 @@ static const KeyTable keyCodes = {
   [0X44] = {BRL_BLK_PASSKEY+BRL_KEY_FUNCTION+9},
 
   [0X45] = {MOD_NUMBER_LOCK},
-  [0X46] = {MOD_SCROLL_LOCK}
+  [0X46] = {MOD_SCROLL_LOCK},
+
+  [0X57] = {BRL_BLK_PASSKEY+BRL_KEY_FUNCTION+10},
+  [0X58] = {BRL_BLK_PASSKEY+BRL_KEY_FUNCTION+11},
+
+  [0X61] = {MOD_CONTROL_RIGHT},
+  [0X64] = {MOD_ALT_RIGHT},
+
+  [0X66] = {BRL_BLK_PASSKEY+BRL_KEY_HOME},
+  [0X67] = {BRL_BLK_PASSKEY+BRL_KEY_CURSOR_UP},
+  [0X68] = {BRL_BLK_PASSKEY+BRL_KEY_PAGE_UP},
+  [0X69] = {BRL_BLK_PASSKEY+BRL_KEY_CURSOR_LEFT},
+  [0X6A] = {BRL_BLK_PASSKEY+BRL_KEY_CURSOR_RIGHT},
+  [0X6B] = {BRL_BLK_PASSKEY+BRL_KEY_END},
+  [0X6C] = {BRL_BLK_PASSKEY+BRL_KEY_CURSOR_DOWN},
+  [0X6D] = {BRL_BLK_PASSKEY+BRL_KEY_PAGE_DOWN},
+  [0X6E] = {BRL_BLK_PASSKEY+BRL_KEY_INSERT},
+  [0X6F] = {BRL_BLK_PASSKEY+BRL_KEY_DELETE},
+
+  [0X7D] = {MOD_WINDOWS_LEFT},
+  [0X7E] = {MOD_WINDOWS_RIGHT},
+  [0X7F] = {MOD_MENU}
 };
 
 static unsigned int keyCodeModifiers;
