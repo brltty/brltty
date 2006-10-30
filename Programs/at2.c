@@ -46,7 +46,6 @@ typedef struct {
   uint16_t command;
   uint16_t alternate;
 } KeyEntry;
-typedef KeyEntry KeyTable[0X100];
 
 static int
 interpretCode (int *command, const KeyEntry *key, int release, unsigned int *modifiers) {
@@ -132,7 +131,7 @@ interpretCode (int *command, const KeyEntry *key, int release, unsigned int *mod
   return 0;
 }
 
-static const KeyTable originalScanCodes = {
+static const KeyEntry originalScanCodes[] = {
   [0X76] = {BRL_BLK_PASSKEY+BRL_KEY_ESCAPE},
   [0X05] = {BRL_BLK_PASSKEY+BRL_KEY_FUNCTION+0},
   [0X06] = {BRL_BLK_PASSKEY+BRL_KEY_FUNCTION+1},
@@ -227,7 +226,7 @@ static const KeyTable originalScanCodes = {
   [0X7D] = {BRL_BLK_PASSKEY+BRL_KEY_PAGE_UP, BRL_BLK_PASSCHAR+'9'}
 };
 
-static const KeyTable extendedScanCodes = {
+static const KeyEntry extendedScanCodes[] = {
   [0X12] = {MOD_NUMBER_SHIFT},
   [0X1F] = {MOD_WINDOWS_LEFT},
   [0X11] = {MOD_ALT_RIGHT},
@@ -249,27 +248,30 @@ static const KeyTable extendedScanCodes = {
 };
 
 static const KeyEntry *scanCodes;
+static size_t scanCodesSize;
 static unsigned int scanCodeModifiers;
+
+#define useScanCodes(type) (scanCodes = type##ScanCodes, scanCodesSize = sizeof(type##ScanCodes))
 
 int
 AT2_interpretScanCode (int *command, unsigned char byte) {
   if (byte == 0XF0) {
     MOD_SET(MOD_RELEASE, scanCodeModifiers);
   } else if (byte == 0XE0) {
-    scanCodes = extendedScanCodes;
-  } else {
+    useScanCodes(extended);
+  } else if (byte < scanCodesSize) {
     const KeyEntry *key = &scanCodes[byte];
     int release = MOD_TST(MOD_RELEASE, scanCodeModifiers);
 
     MOD_CLR(MOD_RELEASE, scanCodeModifiers);
-    scanCodes = originalScanCodes;
+    useScanCodes(original);
 
     return interpretCode(command, key, release, &scanCodeModifiers);
   }
   return 0;
 }
 
-static const KeyTable keyCodes = {
+static const KeyEntry keyCodes[0X80] = {
   [0X01] = {BRL_BLK_PASSKEY+BRL_KEY_ESCAPE},
   [0X02] = {BRL_BLK_PASSCHAR+'1', BRL_BLK_PASSCHAR+'!'},
   [0X03] = {BRL_BLK_PASSCHAR+'2', BRL_BLK_PASSCHAR+'@'},
@@ -379,7 +381,7 @@ AT2_interpretKeyCode (int *command, unsigned char byte) {
 
 void
 AT2_resetState (void) {
-  scanCodes = originalScanCodes;
+  useScanCodes(original);
   scanCodeModifiers = 0;
   keyCodeModifiers = 0;
 }
