@@ -28,6 +28,22 @@ extern "C" {
 #include <stdarg.h>
 #include <sys/time.h>
 
+/* These macros are meant for internal use only. */
+#define BITMASK_ELEMENT_TYPE unsigned char
+#define BITMASK_ELEMENT_SIZE (sizeof(BITMASK_ELEMENT_TYPE) * 8)
+#define BITMASK_INDEX(bit) ((bit) / BITMASK_ELEMENT_SIZE)
+#define BITMASK_SHIFT(bit) ((bit) % BITMASK_ELEMENT_SIZE)
+#define BITMASK_ELEMENT_COUNT(bits) BITMASK_INDEX((bits) + 1)
+#define BITMASK_ELEMENT(mask,bit) ((mask)[BITMASK_INDEX((bit))])
+#define BITMASK_BIT(bit) (1 << BITMASK_SHIFT((bit)))
+
+/* These macros are for public use. */
+#define BITMASK(name,bits) BITMASK_ELEMENT_TYPE name[BITMASK_ELEMENT_COUNT((bits))]
+#define BITMASK_SIZE(mask) (sizeof((mask)) * 8)
+#define BITMASK_SET(mask,bit) (BITMASK_ELEMENT((mask), (bit)) |= BITMASK_BIT((bit)))
+#define BITMASK_CLEAR(mask,bit) (BITMASK_ELEMENT((mask), (bit)) &= ~BITMASK_BIT((bit)))
+#define BITMASK_TEST(mask,bit) (BITMASK_ELEMENT((mask), (bit)) & BITMASK_BIT((bit)))
+
 #ifndef MIN
 #define MIN(a, b)  (((a) < (b))? (a): (b)) 
 #endif /* MIN */
