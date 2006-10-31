@@ -22,15 +22,13 @@ AC_CONFIG_SRCDIR([Programs/brltty.h])
 BRLTTY_SUMMARY_BEGIN
 brltty_build_directories=". Programs Documents"
 
+brltty_source_directory="`dirname "${0}"`"
 brltty_manual_directories=""
-for brltty_manual_directory in Documents/Manual-*
+for brltty_manual_directory in `(cd "${brltty_source_directory}" && echo Documents/Manual-*/*)`
 do
-   for brltty_language_directory in ${brltty_manual_directory}/*
-   do
-      test -f "${brltty_language_directory}/Makefile.in" && {
-         brltty_manual_directories="${brltty_manual_directories} ${brltty_language_directory}"
-      }
-   done
+   test -f "${brltty_source_directory}/${brltty_manual_directory}/Makefile.in" && {
+      brltty_manual_directories="${brltty_manual_directories} ${brltty_manual_directory}"
+   }
 done
 AC_SUBST([brltty_manual_directories])
 brltty_build_directories="${brltty_build_directories} ${brltty_manual_directories}"
