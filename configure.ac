@@ -40,6 +40,12 @@ AC_SUBST([api_version], [${api_major}.${api_minor}])
 AC_SUBST([api_release], [${api_version}.${api_revision}])
 AC_DEFINE_UNQUOTED([BRLAPI_RELEASE], ["${api_release}"],
                    [Define this to be a string containing the API library version.])
+AC_DEFINE_UNQUOTED([BRLAPI_MAJOR], [${api_major}],
+                   [Define this to be the API library major version number.])
+AC_DEFINE_UNQUOTED([BRLAPI_MINOR], [${api_minor}],
+                   [Define this to be the API library minor version number.])
+AC_DEFINE_UNQUOTED([BRLAPI_REVISION], [${api_revision}],
+                   [Define this to be the API library revision number.])
 
 AC_SUBST([PACKAGE_TITLE], ["`echo "${PACKAGE_NAME}" | sed -e 'y%abcdefghijklmnopqrstuvwxyz%ABCDEFGHIJKLMNOPQRSTUVWXYZ%'`"])
 AC_DEFINE_UNQUOTED([PACKAGE_TITLE], ["${PACKAGE_TITLE}"],

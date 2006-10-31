@@ -29,8 +29,22 @@
 extern "C" {
 #endif /* __cplusplus */
 
-/* Define this to be a string containing the library version. */
+/** \defgroup brlapi_version Version of the BrlAPI library
+ * @{ */
+
+/** Library version. */
 #undef BRLAPI_RELEASE
+
+/** Library major version. */
+#undef BRLAPI_MAJOR
+
+/** Library minor version. */
+#undef BRLAPI_MINOR
+
+/** Library revision. */
+#undef BRLAPI_REVISION
+
+/** @} */
 
 /* Types are defined there */
 #include <sys/types.h>
@@ -41,7 +55,8 @@ extern "C" {
 /* NULL is defined there */
 #include <unistd.h>
 
-/**
+/** \defgroup brlapi_handles BrlAPI handles
+ *
  * Each function provided by BrlAPI comes in two versions.
  *
  * 1. A version whose name is prefixed by brlapi_ for clients opening only
@@ -53,11 +68,16 @@ extern "C" {
  * A function called brlapi__foo is used in exactly the same way as its
  * brlapi_foo counterpart, except that it takes an additional argument
  * (the first one), which is a handle letting the client refer to a given
- * connection in a similar manner to what file descriptors do. */
+ * connection in a similar manner to what file descriptors do.
+ * @{ */
+
+/** Type for BrlAPI hanles */
 typedef struct brlapi_handle_t brlapi_handle_t;
 
 /** Returns the size of an object of type brlapi_handle_t in bytes */
 size_t brlapi_getHandleSize(void);
+
+/** @} */
 
 /** \defgroup brlapi_connection Connecting to BrlAPI
  *
