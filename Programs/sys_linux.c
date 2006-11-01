@@ -259,7 +259,10 @@ getUinputDevice (void) {
 
 #ifdef HAVE_LINUX_UINPUT_H
   if (uinput == -1) {
+    const char *path;
     int device;
+    int flags = O_WRONLY;
+
     LogPrint(LOG_DEBUG, "opening uinput");
 
     {
@@ -267,9 +270,17 @@ getUinputDevice (void) {
       installKernelModule("uinput", &status);
     }
 
-    if ((device = openCharacterDevice("/dev/uinput", O_WRONLY, 10, 223)) != -1) {
+    if ((device = open(path="/dev/input/uinput", flags)) == -1) {
+      if (errno == ENOENT) {
+        device = openCharacterDevice(path="/dev/uinput", flags, 10, 223);
+      } else {
+        LogPrint(LOG_ERR, "cannot open device: %s: %s", path, strerror(errno));
+      }
+    }
+
+    if (device != -1) {
       struct uinput_user_dev description;
-      LogPrint(LOG_DEBUG, "uinput opened: fd=%d", device);
+      LogPrint(LOG_DEBUG, "uinput opened: %s fd=%d", path, device);
       
       memset(&description, 0, sizeof(description));
       strcpy(description.name, "brltty");
