@@ -168,7 +168,9 @@ endBeep (void) {
 
 int
 installKernelModule (const char *name, int *status) {
-  if (!status || !*status) {
+  if (status && *status) return *status == 2;
+
+  {
     const char *command = "modprobe";
     char buffer[0X100];
     if (status) ++*status;
@@ -267,7 +269,9 @@ getUinputDevice (void) {
 
     {
       static int status = 0;
-      installKernelModule("uinput", &status);
+      int wait = !status;
+      if (!installKernelModule("uinput", &status)) wait = 0;
+      if (wait) approximateDelay(500);
     }
 
     if ((device = open(path="/dev/input/uinput", flags)) == -1) {
