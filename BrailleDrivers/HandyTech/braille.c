@@ -415,7 +415,6 @@ typedef enum {
 
 typedef enum {
   BDS_OFF,
-  BDS_RESETTING,
   BDS_READY,
   BDS_WRITING
 } BrailleDisplayState;
@@ -667,35 +666,42 @@ brl_close (BrailleDisplay *brl) {
 }
 
 static int
-updateBrailleCells (BrailleDisplay *brl) {
-  if (updateRequired && (currentState == BDS_READY)) {
-    unsigned char buffer[model->brailleBeginLength + model->statusCells + model->textCells + model->brailleEndLength];
-    int count = 0;
+writeBrailleCells (BrailleDisplay *brl) {
+  unsigned char buffer[model->brailleBeginLength + model->statusCells + model->textCells + model->brailleEndLength];
+  int count = 0;
 
-    if (model->brailleBeginLength) {
-      memcpy(buffer+count, model->brailleBeginAddress, model->brailleBeginLength);
-      count += model->brailleBeginLength;
-    }
-
-    memcpy(buffer+count, rawStatus, model->statusCells);
-    count += model->statusCells;
-
-    memcpy(buffer+count, rawData, model->textCells);
-    count += model->textCells;
-
-    if (model->brailleEndLength) {
-      memcpy(buffer+count, model->brailleEndAddress, model->brailleEndLength);
-      count += model->brailleEndLength;
-    }
-
-    // LogBytes("Write", buffer, count);
-    if (io->writeBytes(buffer, count, &brl->writeDelay) == -1) {
-      setState(BDS_OFF);
-      return 0;
-    }
-    setState(BDS_WRITING);
-    updateRequired = 0;
+  if (model->brailleBeginLength) {
+    memcpy(buffer+count, model->brailleBeginAddress, model->brailleBeginLength);
+    count += model->brailleBeginLength;
   }
+
+  memcpy(buffer+count, rawStatus, model->statusCells);
+  count += model->statusCells;
+
+  memcpy(buffer+count, rawData, model->textCells);
+  count += model->textCells;
+
+  if (model->brailleEndLength) {
+    memcpy(buffer+count, model->brailleEndAddress, model->brailleEndLength);
+    count += model->brailleEndLength;
+  }
+
+  // LogBytes("Write", buffer, count);
+  return (io->writeBytes(buffer, count, &brl->writeDelay) != -1);
+}
+
+static int
+updateBrailleCells (BrailleDisplay *brl) {
+  if (!updateRequired) return 1;
+  if (currentState != BDS_READY) return 1;
+
+  if (!writeBrailleCells(brl)) {
+    setState(BDS_OFF);
+    return 0;
+  }
+
+  setState(BDS_WRITING);
+  updateRequired = 0;
   return 1;
 }
 
@@ -1395,7 +1401,7 @@ interpretBookwormByte (BRL_DriverCommandContext context, unsigned char byte, int
 
 static int
 brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
-  int timedOut = 1;
+  int noInput = 1;
 
   if (at2Count) {
     unsigned char code = at2Buffer[0];
@@ -1413,7 +1419,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
       if (size == 0) break;
       if (logInputPackets) LogBytes("Input Packet", packet.bytes, size);
     }
-    timedOut = 0;
+    noInput = 0;
 
     if (packet.fields.type == 0X06) {
       if (currentState != BDS_OFF) {
@@ -1439,9 +1445,6 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
         switch (currentState) {
           case BDS_OFF:
             continue;
-
-          case BDS_RESETTING:
-            break;
 
           case BDS_WRITING:
             switch (packet.fields.type) {
@@ -1520,21 +1523,9 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
     LogPrint(LOG_WARNING, "Unexpected Packet: %02X (state %d)", packet.fields.type, currentState);
   }
 
-  if (timedOut) {
+  if (noInput) {
     switch (currentState) {
       case BDS_OFF:
-        break;
-
-      case BDS_RESETTING:
-        if (millisecondsSince(&stateTime) > 3000) {
-          if (retryCount > 3) {
-            setState(BDS_OFF);
-          } else if (brl_reset(brl)) {
-            setState(BDS_RESETTING);
-          } else {
-            setState(BDS_OFF);
-          }
-        }
         break;
 
       case BDS_READY:
@@ -1542,15 +1533,9 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 
       case BDS_WRITING:
         if (millisecondsSince(&stateTime) > 1000) {
-          if (retryCount > 3) {
-            if (brl_reset(brl)) {
-              setState(BDS_RESETTING);
-            } else {
-              setState(BDS_OFF);
-            }
-          } else {
-            updateRequired = 1;
-          }
+          if (retryCount > 3) return BRL_CMD_RESTARTBRL;
+          if (!writeBrailleCells(brl)) return BRL_CMD_RESTARTBRL;
+          setState(BDS_WRITING);
         }
         break;
     }
