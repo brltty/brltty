@@ -74,7 +74,7 @@ typedef struct {
   unsigned char brailleEndLength;
   unsigned char sessionEndLength;
 
-  unsigned hasATC:1; /* Active Touch Control */
+  unsigned hasATC:1; /* Active Tactile Control */
 } ModelEntry;
 
 #define HT_BYTE_SEQUENCE(name,bytes) .name##Address = bytes, .name##Length = sizeof(bytes)
@@ -568,6 +568,22 @@ identifyModel (BrailleDisplay *brl, unsigned char identifier) {
   return 1;
 }
 
+static void
+setAtcMode (BrailleDisplay *brl, unsigned char value) {
+  const unsigned char packet[] = {
+    HT_PKT_Extended, model->identifier, 0X02, 0X50, value, 0X16
+  };
+  brl_writePacket(brl, packet, sizeof(packet));
+}
+
+static void
+setAtcSensitivity (BrailleDisplay *brl, unsigned char value) {
+  const unsigned char packet[] = {
+    HT_PKT_Extended, model->identifier, 0X02, 0X51, value, 0X16
+  };
+  brl_writePacket(brl, packet, sizeof(packet));
+}
+
 static int
 brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
   at2Buffer = NULL;
@@ -612,11 +628,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
           if (response.fields.type == HT_PKT_OK) {
             if (identifyModel(brl, response.fields.data.ok.model)) {
               if (model->hasATC) {
-                // const unsigned char packetMode[] = {HT_PKT_Extended, model->identifier, 0X02, 0X51, 0X46, 0X16};
-                const unsigned char atc[] = {HT_PKT_Extended, model->identifier, 0X02, 0X50, 0X01, 0X16};
-                // io->writeBytes(packetMode, sizeof(packetMode), NULL);
-                /* Switch on Active Touch Control */
-                io->writeBytes(atc, sizeof(atc), NULL);
+		setAtcMode(brl, 1);
               }
 
               if (*parameters[PARM_INPUTMODE])
