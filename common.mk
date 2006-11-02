@@ -18,18 +18,6 @@
 brlapi:
 	cd $(BLD_TOP)$(PGM_DIR) && $(MAKE) api
 
-$(BLD_TOP)$(PGM_DIR)/api_constants.h:
-	cd $(@D) && $(MAKE) $(@F)
-
-$(BLD_TOP)$(PGM_DIR)/cmds.auto.h:
-	cd $(@D) && $(MAKE) $(@F)
-
-$(BLD_TOP)$(BRL_DIR)/Papenmeier/cmd.auto.h:
-	cd $(@D) && $(MAKE) $(@F)
-
-$(BLD_TOP)$(BRL_DIR)/Papenmeier/hlp.auto.h:
-	cd $(@D) && $(MAKE) $(@F)
-
 $(BLD_TOP)$(BRL_DIR)/VideoBraille/braille.$O: $(BLD_TOP)$(BRL_DIR)/VideoBraille/vb.$O
 $(BLD_TOP)$(BRL_DIR)/VideoBraille/braille.$O: $(BLD_TOP)$(BRL_DIR)/VideoBraille/vblow.$O
 	cd $(@D) && $(MAKE) $(@F)

@@ -228,6 +228,7 @@ foreach buildDirectory [set buildDirectories [getBuildDirectories]] {
    }
 }
 
+set generatedDependencies [list]
 set absoluteStream [open absdeps.mk {WRONLY CREAT TRUNC}]
 foreach buildDirectory [lsort $buildDirectories] {
    set relativeStream [open [file join $buildDirectory reldeps.mk] {WRONLY CREAT TRUNC}]
@@ -253,6 +254,7 @@ foreach buildDirectory [lsort $buildDirectories] {
          foreach dependency $dependencies($sourceFile) {
             if {[generatedFile $dependency]} {
                set tree BLD
+               lappend generatedDependencies $dependency
             } else {
                set tree SRC
             }
@@ -277,6 +279,17 @@ foreach buildDirectory [lsort $buildDirectories] {
    }
 
    close $relativeStream; unset relativeStream
+}
+
+if {![lempty $generatedDependencies]} {
+   puts $absoluteStream "# Generated dependencies:"
+   foreach dependency [lsort [lrmdups $generatedDependencies]] {
+      if {[skipFile $dependency]} {
+         puts $absoluteStream "\$(BLD_TOP)$dependency:"
+         puts $absoluteStream "\tcd \$(@D) && \$(MAKE) \$(@F)"
+      }
+   }
+   puts $absoluteStream ""
 }
 close $absoluteStream; unset absoluteStream
 
