@@ -562,11 +562,11 @@ uninstall-data:
 	-rm -f $(INSTALL_ROOT)$(DATA_DIRECTORY)/*.ctb
 	-rm -f $(INSTALL_ROOT)$(DATA_DIRECTORY)/*.cti
 	-rm -f $(INSTALL_ROOT)$(DATA_DIRECTORY)/brltty*
-	-[ -d $(INSTALL_ROOT)$(DATA_DIRECTORY) ] && rmdir $(INSTALL_ROOT)$(DATA_DIRECTORY)
+	-[ ! -d $(INSTALL_ROOT)$(DATA_DIRECTORY) ] || rmdir $(INSTALL_ROOT)$(DATA_DIRECTORY)
 
 uninstall-libraries:
 	-rm -f $(INSTALL_ROOT)$(LIBRARY_DIRECTORY)/$(LIB_NAME)*
-	-[ -d $(INSTALL_ROOT)$(LIBRARY_DIRECTORY) ] && rmdir $(INSTALL_ROOT)$(LIBRARY_DIRECTORY)
+	-[ ! -d $(INSTALL_ROOT)$(LIBRARY_DIRECTORY) ] || rmdir $(INSTALL_ROOT)$(LIBRARY_DIRECTORY)
 	-rm -f $(INSTALL_ROOT)$(libdir)/$(API_LIB)
 	-rm -f $(INSTALL_ROOT)$(libdir)/$(API_LIB).$(API_VERSION)
 	-rm -f $(INSTALL_ROOT)$(libdir)/$(API_LIB).$(API_RELEASE)
@@ -585,7 +585,7 @@ uninstall-headers:
 	-rm -f $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)/api_*.h
 	-rm -f $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)/brldefs.h
 	-rm -f $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)/brldefs-*.h
-	-[ -d $(INSTALL_ROOT)$(INCLUDE_DIRECTORY) ] && rmdir $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
+	-[ ! -d $(INSTALL_ROOT)$(INCLUDE_DIRECTORY) ] || rmdir $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
 
 ###############################################################################
 
