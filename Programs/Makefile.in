@@ -517,6 +517,7 @@ install-api: $(INSTALL_API_LIBRARIES) install-api-headers install-api-manpages i
 install-api-libraries: $(API_LIB) $(API_ARC) install-libdir-directory
 	$(INSTALL_PROGRAM) $(API_LIB) $(INSTALL_ROOT)$(libdir)/$(API_LIB).$(API_RELEASE)
 	$(SYMLINK) -f $(API_LIB).$(API_RELEASE) $(INSTALL_ROOT)$(libdir)/$(API_LIB)
+	$(SYMLINK) -f $(API_LIB).$(API_RELEASE) $(INSTALL_ROOT)$(libdir)/$(API_LIB).$(API_VERSION)
 	$(CONFLIBDIR) $(INSTALL_ROOT)$(libdir)
 	$(INSTALL_DATA) $(API_ARC) $(INSTALL_ROOT)$(libdir)
 
@@ -567,6 +568,7 @@ uninstall-libraries:
 	-rm -f $(INSTALL_ROOT)$(LIBRARY_DIRECTORY)/$(LIB_NAME)*
 	-[ -d $(INSTALL_ROOT)$(LIBRARY_DIRECTORY) ] && rmdir $(INSTALL_ROOT)$(LIBRARY_DIRECTORY)
 	-rm -f $(INSTALL_ROOT)$(libdir)/$(API_LIB)
+	-rm -f $(INSTALL_ROOT)$(libdir)/$(API_LIB).$(API_VERSION)
 	-rm -f $(INSTALL_ROOT)$(libdir)/$(API_LIB).$(API_RELEASE)
 	$(CONFLIBDIR) $(INSTALL_ROOT)$(libdir)
 	-rm -f $(INSTALL_ROOT)$(libdir)/$(API_ARC)
