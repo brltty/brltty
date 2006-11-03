@@ -20,12 +20,27 @@
  */
 
 public class BrlapiKey {
-  public final native void expandKeyCode(long key);
-  public BrlapiKey(long key) { expandKeyCode(key); }
-  int command;
-  int argument;
-  int flags;
+  final long code;
+  protected int command;
+  protected int argument;
+  protected int flags;
 
-  public final static int value = 0; /* comment */
-  /* TODO: generate */
+  public final native void expandKeyCode (long code);
+
+  public BrlapiKey (long code) {
+    this.code = code;
+    expandKeyCode(code);
+  }
+
+  public int getCommand () {
+    return command;
+  }
+
+  public int getArgument () {
+    return argument;
+  }
+
+  public int getFlags () {
+    return flags;
+  }
 }

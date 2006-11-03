@@ -20,19 +20,19 @@
  */
 
 public class BrlapiSize {
-  int x;
-  int y;
+  protected final int width;
+  protected final int height;
 
-  public BrlapiSize (int x, int y) {
-    this.x = x;
-    this.y = y; 
+  public BrlapiSize (int width, int height) {
+    this.width = width;
+    this.height = height; 
   }
 
-  public int x () {
-    return x;
+  public int getWidth () {
+    return width;
   }
 
-  public int y () {
-    return y;
+  public int getHeight () {
+    return height;
   }
 }
