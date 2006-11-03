@@ -74,6 +74,10 @@ if {[catch [list package require Tclx] response] != 0} {
       return [list $only1 $both $only2]
    }
 
+   proc lrmdups {list} {
+      return [lsort -unique $list]
+   }
+
    if {$tcl_version < 8.4} {
       proc readdir {directory} {
          set workingDirectory [pwd]
