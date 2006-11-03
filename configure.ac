@@ -428,7 +428,7 @@ BRLTTY_ARG_DISABLE(
             ;;
       esac
 
-      BRLTTY_ARG_ENABLE(
+      BRLTTY_ARG_DISABLE(
          [java-bindings],
          [Java bindings for BrlAPI],
          [],
