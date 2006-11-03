@@ -20,7 +20,7 @@
  */
 
 public class BrlapiKey {
-  final long code;
+  protected final long code;
   protected int command;
   protected int argument;
   protected int flags;
@@ -30,6 +30,10 @@ public class BrlapiKey {
   public BrlapiKey (long code) {
     this.code = code;
     expandKeyCode(code);
+  }
+
+  public long getCode () {
+    return code;
   }
 
   public int getCommand () {

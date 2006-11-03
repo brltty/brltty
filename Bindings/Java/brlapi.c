@@ -451,10 +451,8 @@ JNIEXPORT jlong JNICALL Java_BrlapiNative_readKey(JNIEnv *jenv, jobject jobj, jb
   if (result < 0)
     return ThrowError(jenv, __func__), -1;
 
-  if (!result)
-    return (jlong)(-1);
-  else
-    return (jlong)code;
+  if (!result) return (jlong)(-1);
+  return (jlong)code;
 }
 
 JNIEXPORT void JNICALL Java_BrlapiNative_ignoreKeyRange(JNIEnv *jenv, jobject jobj, jlong jarg1, jlong jarg2) {
@@ -671,7 +669,7 @@ JNIEXPORT void JNICALL Java_BrlapiKey_expandKeyCode (JNIEnv *jenv, jobject obj, 
   GET_ID(jenv, flagsID,    jckey, "flags",    "I", );
 
   brlapi_expandKeyCode(key, &command, &argument, &flags);
-  (*jenv)->SetLongField(jenv, obj, commandID,  command);
-  (*jenv)->SetLongField(jenv, obj, argumentID, argument);
-  (*jenv)->SetLongField(jenv, obj, flagsID,    flags);
+  (*jenv)->SetIntField(jenv, obj, commandID,  command);
+  (*jenv)->SetIntField(jenv, obj, argumentID, argument);
+  (*jenv)->SetIntField(jenv, obj, flagsID,    flags);
 }
