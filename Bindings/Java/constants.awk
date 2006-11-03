@@ -32,7 +32,7 @@ function brlBlock(name, symbol, value, help) {
   if (name == "PASSKEY") return
 
   if (value ~ /^0[xX][0-9a-fA-F]+00$/) {
-    writeCommandDefinition(name, toupper(value) "00", help)
+    writeCommandDefinition(name, hexadecimalValue(value) "00", help)
   }
 }
 
@@ -41,7 +41,7 @@ function brlKey(name, symbol, value, help) {
 
 function brlFlag(name, symbol, value, help) {
   if (value ~ /^0[xX][0-9a-fA-F]+0000$/) {
-    value = toupper(substr(value, 1, length(value)-4))
+    value = hexadecimalValue(substr(value, 1, length(value)-4))
     if (name ~ /^CHAR_/) {
       name = substr(name, 6)
     } else {
@@ -52,15 +52,15 @@ function brlFlag(name, symbol, value, help) {
   } else {
     return
   }
-  writeJavaConstant("KEY_FLG_" name, value, help)
+  writeJavaConstant("int", "KEY_FLG_" name, value, help)
 }
 
 function brlDot(number, symbol, value, help) {
-  writeJavaConstant("BRL_DOT" number, value, help)
+  writeJavaConstant("int", "BRL_DOT" number, value, help)
 }
 
 function apiType(name, symbol, value, help) {
-  writeJavaConstant("KEY_TYPE_" name, hexadecimalValue(value));
+  writeJavaConstant("int", "KEY_TYPE_" name, hexadecimalValue(value));
 }
 
 function apiKey(name, symbol, value, help) {
@@ -76,24 +76,26 @@ function apiKey(name, symbol, value, help) {
 }
 
 function writeCommandDefinition(name, value, help) {
-  writeJavaConstant("KEY_CMD_" name, "(KEY_TYPE_CMD | " value ")", help)
+  writeJavaConstant("int", "KEY_CMD_" name, "(KEY_TYPE_CMD | " value ")", help)
 }
 
 function writeKeyDefinition(name, value) {
-  writeJavaConstant("KEY_SYM_" name, "(KEY_TYPE_SYM | " value ")")
+  writeJavaConstant("int", "KEY_SYM_" name, "(KEY_TYPE_SYM | " value ")")
 }
 
-function writeJavaConstant(name, value, help) {
+function writeJavaConstant(type, name, value, help) {
   writeJavadocComment(help)
-  print "  public static final int " name " = " value ";"
+  print "  public static final " type " " name " = " value ";"
 }
 
 function writeJavadocComment(text) {
-  print "  /** " text " */"
+  if (length(text) > 0) print "  /** " text " */"
 }
 
 function hexadecimalValue(value) {
-  gsub("[uU]?[lL]*$", "", value)
+  value = tolower(value)
+  gsub("u?l*$", "", value)
+  gsub("x0+", "x0", value)
   return value
 }
 
