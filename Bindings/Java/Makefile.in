@@ -19,9 +19,10 @@ include $(SRC_TOP)bindings.mk
 
 JAVAC = @JAVAC@
 
-JAVA_NATIVE = libbrlapi_java.$(LIB_EXT)
+all: native jar doc
 
-all: $(JAVA_NATIVE) brlapi.jar doc
+JAVA_NATIVE = libbrlapi_java.$(LIB_EXT)
+native: $(JAVA_NATIVE)
 
 $(JAVA_NATIVE): brlapi.$O brlapi
 	$(MKLIB:<name>=brlapi) $@ brlapi.$O $(API_LDFLAGS)
@@ -29,7 +30,10 @@ $(JAVA_NATIVE): brlapi.$O brlapi
 brlapi.$O:
 	$(CC) $(LIBCFLAGS) -o $@ -c $(SRC_DIR)/brlapi.c
 
-brlapi.jar: classes
+JAVA_JAR = brlapi.jar
+jar: $(JAVA_JAR)
+
+$(JAVA_JAR): classes
 	$(JAVAC:javac=jar) cf $@ Brlapi*.class
 
 CLASSES = Brlapi.class BrlapiNative.class BrlapiError.class BrlapiException.class BrlapiSettings.class BrlapiWriteStruct.class BrlapiSize.class BrlapiKey.class ApiTest.class
