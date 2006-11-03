@@ -26,46 +26,94 @@ struct MidiDeviceStruct {
   int note;
 };
   
-
 MidiDevice *
 openMidiDevice (int errorLevel, const char *device) {
   MidiDevice *midi;
+  int result;
+  AUNode synthNode, outNode;
+  ComponentDescription cd;
+  UInt32 propVal;
 
-  if ((midi = malloc(sizeof(*midi)))) {
-    /* Create a graph with a synth and a default output unit. */
-    AUNode synthNode, outNode;
-    ComponentDescription cd;
+  midi = mallocWrapper(sizeof(*midi));
 
-    cd.componentManufacturer = kAudioUnitManufacturer_Apple;
-    cd.componentFlags = 0;
-    cd.componentFlagsMask = 0;
+  /* Create a graph with a software synth and a default output unit. */
 
-    NewAUGraph(&midi->graph);
+  cd.componentManufacturer = kAudioUnitManufacturer_Apple;
+  cd.componentFlags = 0;
+  cd.componentFlagsMask = 0;
 
-    cd.componentType = kAudioUnitType_MusicDevice;
-    cd.componentSubType = kAudioUnitSubType_DLSSynth;
-    AUGraphNewNode(midi->graph, &cd, 0, NULL, &synthNode);
+  if ((result = NewAUGraph(&midi->graph)) != noErr) {
+    LogPrint(errorLevel, "Can't create audio graph component: %d", result);
+    goto err;
+  }
 
-    cd.componentType = kAudioUnitType_Output;
-    cd.componentSubType = kAudioUnitSubType_DefaultOutput;
-    AUGraphNewNode(midi->graph, &cd, 0, NULL, &outNode);
+  cd.componentType = kAudioUnitType_MusicDevice;
+  cd.componentSubType = kAudioUnitSubType_DLSSynth;
+  if ((result = AUGraphNewNode(midi->graph, &cd, 0, NULL, &synthNode))
+      != noErr) {
+    LogPrint(errorLevel, "Can't create software synthersizer component: %d",
+	     result);
+    goto err;
+  }
 
-    AUGraphOpen(midi->graph);
-    AUGraphConnectNodeInput(midi->graph, synthNode, 0, outNode, 0);
+  cd.componentType = kAudioUnitType_Output;
+  cd.componentSubType = kAudioUnitSubType_DefaultOutput;
+  if ((result = AUGraphNewNode(midi->graph, &cd, 0, NULL, &outNode))
+      != noErr) {
+    LogPrint(errorLevel, "Can't create default output audio component: %d",
+	     result);
+    goto err;
+  }
 
-    AUGraphGetNodeInfo(midi->graph, synthNode, 0, 0, 0, &midi->synth);
+  if ((result = AUGraphOpen(midi->graph)) != noErr) {
+    LogPrint(errorLevel, "Can't open audio graph component: %d", result);
+    goto err;
+  }
 
-    AUGraphInitialize(midi->graph);
+  if ((result = AUGraphConnectNodeInput(midi->graph, synthNode, 0, outNode, 0))
+      != noErr) {
+    LogPrint(errorLevel, "Can't connect synth audio component to output: %d",
+	     result);
+    goto err;
+  }
 
-    /* Turn off the reverb.  The value range is -120 to 40 dB. */
-    AudioUnitSetParameter(midi->synth, kMusicDeviceParam_ReverbVolume,
-			  kAudioUnitScope_Global, 0, -120, 0);
+  if ((result = AUGraphGetNodeInfo(midi->graph, synthNode, 0, 0, 0,
+				   &midi->synth)) != noErr) {
+    LogPrint(errorLevel, "Can't get audio component for software synth: %d",
+	     result);
+    goto err;
+  }
 
-    /* TODO: Maybe just start the graph when we are going to use it? */
-    AUGraphStart(midi->graph);
+  if ((result = AUGraphInitialize(midi->graph)) != noErr) {
+    LogPrint(errorLevel, "Can't initialize audio graph: %d", result);
+    goto err;
+  }
+
+  /* Turn off the reverb.  The value range is -120 to 40 dB. */
+  propVal = false;
+  if ((result = AudioUnitSetProperty(midi->synth,
+				     kMusicDeviceProperty_UsesInternalReverb,
+				     kAudioUnitScope_Global, 0,
+				     &propVal, sizeof(propVal)))
+      != noErr) {
+    /* So, having reverb isn't that critical, is it? */
+    LogPrint(LOG_DEBUG, "Can't turn of software synth reverb: %d",
+	     result);
+  }
+
+  /* TODO: Maybe just start the graph when we are going to use it? */
+  if ((result = AUGraphStart(midi->graph)) != noErr) {
+    LogPrint(errorLevel, "Can't start audio graph component: %d", result);
+    goto err;
   }
 
   return midi;
+
+ err:
+  if (midi->graph)
+    DisposeAUGraph(midi->graph);
+  free(midi);
+  return NULL;
 }
 
 void
