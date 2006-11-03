@@ -40,7 +40,7 @@ BrlapiConstants.class: BrlapiConstants.java
 	$(JAVAC) BrlapiConstants.java
 
 %.class: $(SRC_DIR)/%.java
-	$(JAVAC) $<
+	$(JAVAC) -d . -classpath . $<
 
 BrlapiConstants.java: $(API_HEADER) $(APIDEFS_AWK) $(BRLDEFS_HDR) $(BRLDEFS_AWK) $(SRC_DIR)/constants.awk
 	$(AWK) -f $(APIDEFS_AWK) -f $(BRLDEFS_AWK) -f $(SRC_DIR)/constants.awk $(API_HEADER) $(BRLDEFS_HDR) >$@
