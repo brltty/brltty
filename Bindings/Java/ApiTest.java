@@ -66,11 +66,7 @@ public class ApiTest {
 
       brlapi.writeText(0, "ok !!");
 
-      long keyCode = brlapi.readKey(true);
-      BrlapiKey key = new BrlapiKey(keyCode);
-      System.out.print("got key " + keyCode + ":");
-      System.out.print(" (" + key.getCommand() + "," + key.getArgument() + "," + key.getFlags() + ")");
-      System.out.println();
+      printKey(new BrlapiKey(brlapi.readKey(true)));
 
       BrlapiWriteStruct ws = new BrlapiWriteStruct(
         -1, 10, 20,
@@ -79,11 +75,7 @@ public class ApiTest {
 	null, 3);
       brlapi.write(ws);
 
-      keyCode = brlapi.readKey(true);
-      key = new BrlapiKey(keyCode);
-      System.out.print("got key " + keyCode + ":");
-      System.out.print(" (" + key.getCommand() + "," + key.getArgument() + "," + key.getFlags() + ")");
-      System.out.println();
+      printKey(new BrlapiKey(brlapi.readKey(true)));
 
       brlapi.leaveTtyMode();
       brlapi.closeConnection();
@@ -91,5 +83,12 @@ public class ApiTest {
       System.out.println("got error: " + exception);
       System.exit(3);
     }
+  }
+
+  private static void printKey (BrlapiKey key) {
+    System.out.println("got key " + Long.toHexString(key.getCode()) + " (" +
+                       Integer.toHexString(key.getCommand()) + "," +
+                       Integer.toHexString(key.getArgument()) + "," +
+                       Integer.toHexString(key.getFlags()) + ")");
   }
 }
