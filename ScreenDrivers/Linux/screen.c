@@ -1192,6 +1192,21 @@ insertUtf8 (unsigned char byte) {
   return insertByte(byte);
 }
 
+static const unsigned char extendedKeycodeToLinuxKeycode[0X80] = {
+  [0X1D] = 0X61, /* KEY_RIGHTCTRL */
+  [0X38] = 0x64, /* KEY_RIGHTALT */
+  [0X47] = 0X66, /* KEY_HOME */
+  [0X48] = 0X67, /* KEY_CURSOR_UP */
+  [0X49] = 0X68, /* KEY_PAGE_UP */
+  [0X4B] = 0X69, /* KEY_CURSOR_LEFT */
+  [0X4D] = 0X6A, /* KEY_CURSOR_RIGHT */
+  [0X4F] = 0X6B, /* KEY_END */
+  [0X50] = 0X6C, /* KEY_CURSOR_DOWN */
+  [0X51] = 0X6D, /* KEY_PAGE_DOWN */
+  [0X52] = 0X6E, /* KEY_INSERT */
+  [0X53] = 0X6F, /* KEY_DELETE */
+};
+
 static int
 insertCode (ScreenKey key, int raw) {
   unsigned char prefix = 0X00;
@@ -1268,7 +1283,7 @@ insertCode (ScreenKey key, int raw) {
     case 'l':                   code = 0X26; break;
     case ';':                   code = 0X27; break;
     case '\'':                  code = 0X28; break;
-    case SCR_KEY_ENTER:        code = 0X1C; break;
+    case SCR_KEY_ENTER:         code = 0X1C; break;
     case 'z':                   code = 0X2C; break;
     case 'x':                   code = 0X2D; break;
     case 'c':                   code = 0X2E; break;
@@ -1281,41 +1296,28 @@ insertCode (ScreenKey key, int raw) {
     case '/':                   code = 0X35; break;
     case ' ':                   code = 0X39; break;
     default:
+      switch (key) {
+        case SCR_KEY_INSERT:       code = 0X52; break;
+        case SCR_KEY_HOME:         code = 0X47; break;
+        case SCR_KEY_PAGE_UP:      code = 0X49; break;
+        case SCR_KEY_DELETE:       code = 0X53; break;
+        case SCR_KEY_END:          code = 0X4F; break;
+        case SCR_KEY_PAGE_DOWN:    code = 0X51; break;
+        case SCR_KEY_CURSOR_UP:    code = 0X48; break;
+        case SCR_KEY_CURSOR_LEFT:  code = 0X4B; break;
+        case SCR_KEY_CURSOR_DOWN:  code = 0X50; break;
+        case SCR_KEY_CURSOR_RIGHT: code = 0X4D; break;
+        default:
+          if (insertUinputKey(key, modShift, modControl, modMeta)) return 1;
+          LogPrint(LOG_WARNING, "key %4.4X not suported in raw keycode mode.", key);
+          return 0;
+      }
+
       if (raw) {
         prefix = 0XE0;
-        switch (key) {
-          case SCR_KEY_INSERT:       code = 0X52; break;
-          case SCR_KEY_HOME:         code = 0X47; break;
-          case SCR_KEY_PAGE_UP:      code = 0X49; break;
-          case SCR_KEY_DELETE:       code = 0X53; break;
-          case SCR_KEY_END:          code = 0X4F; break;
-          case SCR_KEY_PAGE_DOWN:    code = 0X51; break;
-          case SCR_KEY_CURSOR_UP:    code = 0X48; break;
-          case SCR_KEY_CURSOR_LEFT:  code = 0X4B; break;
-          case SCR_KEY_CURSOR_DOWN:  code = 0X50; break;
-          case SCR_KEY_CURSOR_RIGHT: code = 0X4D; break;
-          default:
-            if (insertUinputKey(key, modShift, modControl, modMeta)) return 1;
-            LogPrint(LOG_WARNING, "key %4.4X not suported in scancode mode.", key);
-            return 0;
-        }
-      } else {
-        switch (key) {
-          case SCR_KEY_INSERT:       code = 0X6E; break;
-          case SCR_KEY_HOME:         code = 0X66; break;
-          case SCR_KEY_PAGE_UP:      code = 0X68; break;
-          case SCR_KEY_DELETE:       code = 0X6F; break;
-          case SCR_KEY_END:          code = 0X6B; break;
-          case SCR_KEY_PAGE_DOWN:    code = 0X6D; break;
-          case SCR_KEY_CURSOR_UP:    code = 0X67; break;
-          case SCR_KEY_CURSOR_LEFT:  code = 0X69; break;
-          case SCR_KEY_CURSOR_DOWN:  code = 0X6C; break;
-          case SCR_KEY_CURSOR_RIGHT: code = 0X6A; break;
-          default:
-            if (insertUinputKey(key, modShift, modControl, modMeta)) return 1;
-            LogPrint(LOG_WARNING, "key %4.4X not suported in keycode mode.", key);
-            return 0;
-        }
+      } else if (!(code = extendedKeycodeToLinuxKeycode[code])) {
+        LogPrint(LOG_WARNING, "key %4.4X not suported in medium raw keycode mode.", key);
+        return 0;
       }
       break;
   }
@@ -1576,7 +1578,19 @@ execute_LinuxScreen (int command) {
         case BRL_BLK_PASSAT2:
 #ifdef HAVE_LINUX_INPUT_H
           if (command & BRL_FLG_AT2_KEYCODE) {
-            return writeKeyEvent(arg & 0X7F, !(arg & 0X80));
+            int press = !(arg & 0X80);
+            arg &= 0X7F;
+
+            if (command & BRL_FLG_AT2_EXTENDED) {
+              unsigned char code = extendedKeycodeToLinuxKeycode[arg];
+              if (!code) {
+                LogPrint(LOG_WARNING, "AT2 extended keycode not supported: %02X", arg);
+                return 0;
+              }
+              arg = code;
+            }
+
+            return writeKeyEvent(arg, press);
           }
 
           {
