@@ -50,7 +50,7 @@ extern "C" {
  *
  * @{ */
 
-#define BRLAPI_PROTOCOL_VERSION ((uint32_t) 7) /** Communication protocol version */
+#define BRLAPI_PROTOCOL_VERSION ((uint32_t) 8) /** Communication protocol version */
 
 #define BRLPACKET_AUTHKEY           'K'    /**< Authorization key          */
 #define BRLPACKET_GETDRIVERID       'd'    /**< Ask which driver is used    */
