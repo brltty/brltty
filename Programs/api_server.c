@@ -206,7 +206,7 @@ static char **socketHosts; /* socket local hosts */
 static struct socketInfo {
   int addrfamily;
   FileDescriptor fd;
-  char *hostname;
+  char *host;
   char *port;
 #ifdef WINDOWS
   OVERLAPPED overl;
@@ -499,9 +499,9 @@ typedef struct { /* packet handlers */
   PacketHandler setFocus;
   PacketHandler leaveTtyMode;
   PacketHandler ignoreKeyRange;
-  PacketHandler unignoreKeyRange;
+  PacketHandler acceptKeyRange;
   PacketHandler ignoreKeySet;
-  PacketHandler unignoreKeySet;
+  PacketHandler acceptKeySet;
   PacketHandler write;
   PacketHandler enterRawMode;  
   PacketHandler leaveRawMode;
@@ -1320,9 +1320,9 @@ static int processRequest(Connection *c, PacketHandlers *handlers)
     case BRLPACKET_SETFOCUS: p = handlers->setFocus; break;
     case BRLPACKET_LEAVETTYMODE: p = handlers->leaveTtyMode; break;
     case BRLPACKET_IGNOREKEYRANGE: p = handlers->ignoreKeyRange; break;
-    case BRLPACKET_UNIGNOREKEYRANGE: p = handlers->unignoreKeyRange; break;
+    case BRLPACKET_ACCEPTKEYRANGE: p = handlers->acceptKeyRange; break;
     case BRLPACKET_IGNOREKEYSET: p = handlers->ignoreKeySet; break;
-    case BRLPACKET_UNIGNOREKEYSET: p = handlers->unignoreKeySet; break;
+    case BRLPACKET_ACCEPTKEYSET: p = handlers->acceptKeySet; break;
     case BRLPACKET_WRITE: p = handlers->write; break;
     case BRLPACKET_ENTERRAWMODE: p = handlers->enterRawMode; break;
     case BRLPACKET_LEAVERAWMODE: p = handlers->leaveRawMode; break;
@@ -1395,7 +1395,7 @@ static FileDescriptor initializeTcpSocket(struct socketInfo *info)
   hints.ai_family = PF_UNSPEC;
   hints.ai_socktype = SOCK_STREAM;
 
-  err = getaddrinfo(info->hostname, info->port, &hints, &res);
+  err = getaddrinfo(info->host, info->port, &hints, &res);
   if (err) {
     LogPrint(LOG_WARNING,"getaddrinfo(%s,%s): "
 #ifdef HAVE_GAI_STRERROR
@@ -1403,7 +1403,7 @@ static FileDescriptor initializeTcpSocket(struct socketInfo *info)
 #else /* HAVE_GAI_STRERROR */
 	"%d"
 #endif /* HAVE_GAI_STRERROR */
-	,info->hostname,info->port
+	,info->host,info->port
 #ifdef HAVE_GAI_STRERROR
 	,
 #ifdef EAI_SYSTEM
@@ -1446,8 +1446,8 @@ cont:
   }
   freeaddrinfo(res);
   if (cur) {
-    free(info->hostname);
-    info->hostname = NULL;
+    free(info->host);
+    info->host = NULL;
     free(info->port);
     info->port = NULL;
 
@@ -1463,7 +1463,7 @@ cont:
 
     return (FileDescriptor)fd;
   }
-  LogPrint(LOG_WARNING,"unable to find a local TCP port %s:%s !",info->hostname,info->port);
+  LogPrint(LOG_WARNING,"unable to find a local TCP port %s:%s !",info->host,info->port);
 #endif /* HAVE_GETADDRINFO */
 #ifdef WINDOWS
   } else {
@@ -1503,17 +1503,17 @@ cont:
     }
   }
 
-  if (!info->hostname) {
+  if (!info->host) {
     addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-  } else if ((addr.sin_addr.s_addr = inet_addr(info->hostname)) == htonl(INADDR_NONE)) {
-    if (!(he = gethostbyname(info->hostname))) {
+  } else if ((addr.sin_addr.s_addr = inet_addr(info->host)) == htonl(INADDR_NONE)) {
+    if (!(he = gethostbyname(info->host))) {
       LogPrint(LOG_ERR,"gethostbyname(%s): "
 #ifdef WINDOWS
 	"%d"
 #else /* WINDOWS */
 	"%s"
 #endif /* WINDOWS */
-	,info->hostname,
+	,info->host,
 #ifdef WINDOWS
 	WSAGetLastError()
 #else /* WINDOWS */
@@ -1556,8 +1556,8 @@ cont:
     fun = "listen";
     goto err;
   }
-  free(info->hostname);
-  info->hostname = NULL;
+  free(info->host);
+  info->host = NULL;
   free(info->port);
   info->port = NULL;
 
@@ -1582,8 +1582,8 @@ err:
   }
 #endif /* WINDOWS */
 
-  free(info->hostname);
-  info->hostname = NULL;
+  free(info->host);
+  info->host = NULL;
   free(info->port);
   info->port = NULL;
   return INVALID_FILE_DESCRIPTOR;
@@ -1859,8 +1859,8 @@ static void closeSockets(void *arg)
     }
     free(info->port);
     info->port = NULL;
-    free(info->hostname);
-    info->hostname = NULL;
+    free(info->host);
+    info->host = NULL;
   }
 }
 
@@ -2011,7 +2011,7 @@ static void *server(void *arg)
   pthread_cleanup_push(closeSockets,NULL);
 
   for (i=0;i<numSockets;i++) {
-    socketInfo[i].addrfamily=brlapiserver_splitHost(socketHosts[i],&socketInfo[i].hostname,&socketInfo[i].port);
+    socketInfo[i].addrfamily=brlapiserver_splitHost(socketHosts[i],&socketInfo[i].host,&socketInfo[i].port);
 #ifdef WINDOWS
     if (socketInfo[i].addrfamily != PF_LOCAL) {
 #endif /* WINDOWS */

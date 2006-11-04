@@ -25,7 +25,7 @@
 #include "Programs/scr.h"
 
 typedef enum {
-  PARM_HOSTNAME=0,
+  PARM_HOST=0,
   PARM_AUTHKEY=1
 } DriverParameter;
 #define BRLPARMS "host", "key"
@@ -54,11 +54,11 @@ static int restart;
 static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
 {
   brlapi_settings_t settings;
-  settings.hostName = parameters[PARM_HOSTNAME];
+  settings.host = parameters[PARM_HOST];
   settings.authKey = parameters[PARM_AUTHKEY];
   CHECK((brlapi_initializeConnection(&settings, &settings)>=0), out);
-  LogPrint(LOG_DEBUG, "Connected to %s using %s", settings.hostName, settings.authKey);
-  CHECK((brlapi_getTtyPath(NULL, 0, NULL)>=0), out0);
+  LogPrint(LOG_DEBUG, "Connected to %s using %s", settings.host, settings.authKey);
+  CHECK((brlapi_enterTtyModeWithPath(NULL, 0, NULL)>=0), out0);
   LogPrint(LOG_DEBUG, "Got tty successfully");
   CHECK((brlapi_getDisplaySize(&brl->x, &brl->y)==0), out1);
   LogPrint(LOG_DEBUG,"Found out display size: %dx%d", brl->x, brl->y);

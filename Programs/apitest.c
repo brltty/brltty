@@ -68,7 +68,7 @@ BEGIN_OPTION_TABLE
    "Suspend driver (press ^C on the PC keyboard or send SIGUSR1 to get back braille)."},
 
   {"brlapi-server", "[host][:port]", 'S', 0, 0,
-   &settings.hostName, NULL,
+   &settings.host, NULL,
    "The host name (or address) and port of the BrlAPI server."},
 
   {"brlapi-key", "file", 'K', 0, 0,
@@ -252,8 +252,8 @@ void showKeyCodes(void)
     return;
   }
 
-  if (brlapi_unignoreKeyRange(0, BRL_KEYCODE_MAX)==-1) {
-    brlapi_perror("unignoreKeyRange");
+  if (brlapi_acceptKeyRange(0, BRL_KEYCODE_MAX)==-1) {
+    brlapi_perror("acceptKeyRange");
     return;
   }
 
@@ -307,7 +307,7 @@ int main(int argc, char *argv[])
 {
   int status = 0;
   brlapi_fileDescriptor fd;
-  settings.hostName = NULL; settings.authKey = NULL;
+  settings.host = NULL; settings.authKey = NULL;
 
   processOptions(optionTable, optionCount,
                  "apitest", &argc, &argv,
@@ -317,7 +317,7 @@ int main(int argc, char *argv[])
   fprintf(stderr, "Connecting to BrlAPI... ");
   if ((fd=brlapi_initializeConnection(&settings, &settings)) >= 0) {
     fprintf(stderr, "done (fd=%"PRIFD")\n", fd);
-    fprintf(stderr,"Connected to %s using key file %s\n", settings.hostName, settings.authKey);
+    fprintf(stderr,"Connected to %s using key file %s\n", settings.host, settings.authKey);
 
     if (opt_showIdentifier) {
       showDriverIdentifier();
@@ -350,7 +350,7 @@ int main(int argc, char *argv[])
     brlapi_closeConnection();
     fprintf(stderr, "Disconnected\n"); 
   } else {
-    fprintf(stderr, "failed to connect to %s using key %s",settings.hostName, settings.authKey);
+    fprintf(stderr, "failed to connect to %s using key %s",settings.host, settings.authKey);
     brlapi_perror("");
     status = 1;
   }

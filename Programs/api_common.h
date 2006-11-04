@@ -270,45 +270,45 @@ int BRLAPI(loadAuthKey)(const char *filename, size_t *authlength, void *auth)
 }
 
 /* Function: brlapi_splitHost
- * splits host into hostname & port */
-int BRLAPI(splitHost)(const char *host, char **hostname, char **port) {
+ * splits host into host & port */
+int BRLAPI(splitHost)(const char *hostAndPort, char **host, char **port) {
   const char *c;
-  if (!host || !*host) {
+  if (!hostAndPort || !*hostAndPort) {
 #if defined(PF_LOCAL)
-    *hostname = NULL;
+    *host = NULL;
     *port = strdup("0");
     return PF_LOCAL;
 #else /* PF_LOCAL */
-    *hostname = strdup("127.0.0.1");
+    *host = strdup("127.0.0.1");
     *port = strdup(BRLAPI_SOCKETPORT);
     return PF_UNSPEC;
 #endif /* PF_LOCAL */
-  } else if ((c = strrchr(host,':'))) {
-    if (c != host) {
+  } else if ((c = strrchr(hostAndPort,':'))) {
+    if (c != hostAndPort) {
       int porti = atoi(c+1);
       if (porti>=(1<<16)-BRLAPI_SOCKETPORTNUM) porti=0;
-      *hostname = malloc(c-host+1);
-      memcpy(*hostname, host, c-host);
-      (*hostname)[c-host] = 0;
+      *host = malloc(c-hostAndPort+1);
+      memcpy(*host, hostAndPort, c-hostAndPort);
+      (*host)[c-hostAndPort] = 0;
       *port = malloc(6);
       snprintf(*port,6,"%u",BRLAPI_SOCKETPORTNUM+porti);
       return PF_UNSPEC;
     } else {
 #if defined(PF_LOCAL)
-      *hostname = NULL;
+      *host = NULL;
       *port = strdup(c+1);
       return PF_LOCAL;
 #else /* PF_LOCAL */
       int porti = atoi(c+1);
       if (porti>=(1<<16)-BRLAPI_SOCKETPORTNUM) porti=0;
-      *hostname = strdup("127.0.0.1");
+      *host = strdup("127.0.0.1");
       *port = malloc(6);
       snprintf(*port,6,"%u",BRLAPI_SOCKETPORTNUM+porti);
       return PF_UNSPEC;
 #endif /* PF_LOCAL */
     }
   } else {
-    *hostname = strdup(host);
+    *host = strdup(hostAndPort);
     *port = strdup(BRLAPI_SOCKETPORT);
     return PF_UNSPEC;
   }
@@ -329,8 +329,8 @@ static brlapi_packetType_t brlapi_packetTypes[] = {
   { BRLPACKET_KEY, "Key" },
   { BRLPACKET_IGNOREKEYRANGE, "IgnoreKeyRange" },
   { BRLPACKET_IGNOREKEYSET, "IggnoreKeySet" },
-  { BRLPACKET_UNIGNOREKEYRANGE, "UnignoreKeyRange" },
-  { BRLPACKET_UNIGNOREKEYSET, "UnignoreKeySet" },
+  { BRLPACKET_ACCEPTKEYRANGE, "AcceptKeyRange" },
+  { BRLPACKET_ACCEPTKEYSET, "AcceptKeySet" },
   { BRLPACKET_WRITE, "Write" },
   { BRLPACKET_ENTERRAWMODE, "EnterRawMode" },
   { BRLPACKET_LEAVERAWMODE, "LeaveRawMode" },

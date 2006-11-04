@@ -363,10 +363,10 @@ static int brlapi__writePacketWaitForAck(brlapi_handle_t *handle, brl_type_t typ
   return res;
 }
 
-/* Function: tryHostName */
-/* Tries to connect to the given hostname. */
-static int tryHostName(brlapi_handle_t *handle, char *hostName) {
-  char *hostname = NULL;
+/* Function: tryHost */
+/* Tries to connect to the given host. */
+static int tryHost(brlapi_handle_t *handle, char *hostAndPort) {
+  char *host = NULL;
   char *port;
   SocketDescriptor sockfd = -1;
 
@@ -381,7 +381,7 @@ static int tryHostName(brlapi_handle_t *handle, char *hostName) {
     return -1;
 #endif /* WINDOWS */
 
-  handle->addrfamily = brlapi_splitHost(hostName,&hostname,&port);
+  handle->addrfamily = brlapi_splitHost(hostAndPort,&host,&port);
 
 #if defined(PF_LOCAL)
   if (handle->addrfamily == PF_LOCAL) {
@@ -445,7 +445,7 @@ static int tryHostName(brlapi_handle_t *handle, char *hostName) {
     hints.ai_family = PF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
 
-    brlapi_gaierrno = getaddrinfo(hostname, port, &hints, &res);
+    brlapi_gaierrno = getaddrinfo(host, port, &hints, &res);
     if (brlapi_gaierrno) {
       brlapi_errno=BRLERR_GAIERR;
       brlapi_libcerrno=errno;
@@ -494,10 +494,10 @@ static int tryHostName(brlapi_handle_t *handle, char *hostName) {
       }
     }
 
-    if (!hostname) {
+    if (!host) {
       addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-    } else if ((addr.sin_addr.s_addr = inet_addr(hostname)) == htonl(INADDR_NONE)) {
-      if (!(he = gethostbyname(hostname))) {
+    } else if ((addr.sin_addr.s_addr = inet_addr(host)) == htonl(INADDR_NONE)) {
+      if (!(he = gethostbyname(host))) {
 	brlapi_gaierrno = h_errno;
 	brlapi_errno = BRLERR_GAIERR;
 	goto out;
@@ -538,7 +538,7 @@ static int tryHostName(brlapi_handle_t *handle, char *hostName) {
 
     handle->fileDescriptor = (FileDescriptor) sockfd;
   }
-  free(hostname);
+  free(host);
   free(port);
   return 0;
 
@@ -548,7 +548,7 @@ outlibc:
   if (sockfd>=0)
     closeSocketDescriptor(sockfd);
 out:
-  free(hostname);
+  free(host);
   free(port);
   return -1;
 }
@@ -572,8 +572,8 @@ static void updateSettings(brlapi_settings_t *s1, const brlapi_settings_t *s2)
   if (s2==NULL) return;
   if ((s2->authKey) && (*s2->authKey))
     s1->authKey = s2->authKey;
-  if ((s2->hostName) && (*s2->hostName))
-    s1->hostName = s2->hostName;
+  if ((s2->host) && (*s2->host))
+    s1->host = s2->host;
 }
 
 /* Function: brlapi_initializeConnection
@@ -585,7 +585,7 @@ brlapi_fileDescriptor brlapi__initializeConnection(brlapi_handle_t *handle, cons
   size_t authKeyLength;
 
   brlapi_settings_t settings = { BRLAPI_DEFAUTHPATH, ":0" };
-  brlapi_settings_t envsettings = { getenv("BRLAPI_AUTHPATH"), getenv("BRLAPI_HOSTNAME") };
+  brlapi_settings_t envsettings = { getenv("BRLAPI_AUTHPATH"), getenv("BRLAPI_HOST") };
 
   /* Here update settings with the parameters from misc sources (files, env...) */
   updateSettings(&settings, &envsettings);
@@ -594,17 +594,17 @@ brlapi_fileDescriptor brlapi__initializeConnection(brlapi_handle_t *handle, cons
   brlapi_initializeHandle(handle);
 
 retry:
-  if (tryHostName(handle, settings.hostName)<0) {
+  if (tryHost(handle, settings.host)<0) {
     brlapi_error_t error = brlapi_error;
-    if (tryHostName(handle, settings.hostName="127.0.0.1:0")<0
+    if (tryHost(handle, settings.host="127.0.0.1:0")<0
 #ifdef AF_INET6
-      && tryHostName(handle, settings.hostName="::1:0")<0
+      && tryHost(handle, settings.host="::1:0")<0
 #endif /* AF_INET6 */
       ) {
       brlapi_error = error;
       goto out;
     }
-    if (usedSettings) usedSettings->hostName = settings.hostName;
+    if (usedSettings) usedSettings->host = settings.host;
   }
 
   auth->protocolVersion = htonl(BRLAPI_PROTOCOL_VERSION);
@@ -932,7 +932,7 @@ int brlapi__enterTtyMode(brlapi_handle_t *handle, int tty, const char *driverNam
   0xffffffff can not be a valid WINDOWID (top 3 bits guaranteed to be zero) */
   if (tty<0) { brlapi_errno=BRLERR_UNKNOWNTTY; return -1; }
   
-  if (brlapi__getTtyPath(handle, &tty, 1, driverName)) return -1;
+  if (brlapi__enterTtyModeWithPath(handle, &tty, 1, driverName)) return -1;
 
   return tty;
 }
@@ -942,9 +942,9 @@ int brlapi_enterTtyMode(int tty, const char *how)
   return brlapi__enterTtyMode(&defaultHandle, tty, how);
 }
 
-/* Function : brlapi_getTtyPath */
+/* Function : brlapi_enterTtyModeWithPath */
 /* Takes control of a tty path */
-int brlapi__getTtyPath(brlapi_handle_t *handle, int *ttys, int nttys, const char *driverName)
+int brlapi__enterTtyModeWithPath(brlapi_handle_t *handle, int *ttys, int nttys, const char *driverName)
 {
   int res;
   unsigned char packet[BRLAPI_MAXPACKETSIZE], *p;
@@ -998,9 +998,9 @@ int brlapi__getTtyPath(brlapi_handle_t *handle, int *ttys, int nttys, const char
   return res;
 }
 
-int brlapi_getTtyPath(int *ttys, int nttys, const char *how)
+int brlapi_enterTtyModeWithPath(int *ttys, int nttys, const char *how)
 {
-  return brlapi__getTtyPath(&defaultHandle, ttys, nttys, how);
+  return brlapi__enterTtyModeWithPath(&defaultHandle, ttys, nttys, how);
 }
 
 /* Function : brlapi_leaveTtyMode */
@@ -1396,23 +1396,23 @@ int brlapi_readKey(int block, brl_keycode_t *code)
   return brlapi__readKey(&defaultHandle, block, code) ;
 }
 
-/* Function : ignore_unignore_key_range */
+/* Function : ignore_accept_key_range */
 /* Common tasks for ignoring and unignoring key ranges */
 /* what = 0 for ignoring !0 for unignoring */
-static int ignore_unignore_key_range(brlapi_handle_t *handle, int what, brl_keycode_t x, brl_keycode_t y)
+static int ignore_accept_key_range(brlapi_handle_t *handle, int what, brl_keycode_t x, brl_keycode_t y)
 {
   uint32_t ints[4] = {
     htonl(x >> 32), htonl(x & 0xffffffff),
     htonl(y >> 32), htonl(y & 0xffffffff),
   };
 
-  return brlapi__writePacketWaitForAck(handle,(what ? BRLPACKET_UNIGNOREKEYRANGE : BRLPACKET_IGNOREKEYRANGE),ints,sizeof(ints));
+  return brlapi__writePacketWaitForAck(handle,(what ? BRLPACKET_ACCEPTKEYRANGE : BRLPACKET_IGNOREKEYRANGE),ints,sizeof(ints));
 }
 
 /* Function : brlapi_ignoreKeyRange */
 int brlapi__ignoreKeyRange(brlapi_handle_t *handle, brl_keycode_t x, brl_keycode_t y)
 {
-  return ignore_unignore_key_range(handle, 0,x,y);
+  return ignore_accept_key_range(handle, 0,x,y);
 }
 
 int brlapi_ignoreKeyRange(brl_keycode_t x, brl_keycode_t y)
@@ -1420,21 +1420,21 @@ int brlapi_ignoreKeyRange(brl_keycode_t x, brl_keycode_t y)
   return brlapi__ignoreKeyRange(&defaultHandle, x, y);
 }
 
-/* Function : brlapi_unignoreKeyRange */
-int brlapi__unignoreKeyRange(brlapi_handle_t *handle, brl_keycode_t x, brl_keycode_t y)
+/* Function : brlapi_acceptKeyRange */
+int brlapi__acceptKeyRange(brlapi_handle_t *handle, brl_keycode_t x, brl_keycode_t y)
 {
-  return ignore_unignore_key_range(handle, !0,x,y);
+  return ignore_accept_key_range(handle, !0,x,y);
 }
 
-int brlapi_unignoreKeyRange(brl_keycode_t x, brl_keycode_t y)
+int brlapi_acceptKeyRange(brl_keycode_t x, brl_keycode_t y)
 {
-  return brlapi__unignoreKeyRange(&defaultHandle, x, y);
+  return brlapi__acceptKeyRange(&defaultHandle, x, y);
 }
 
-/* Function : ignore_unignore_key_set */
+/* Function : ignore_accept_key_set */
 /* Common tasks for ignoring and unignoring key sets */
 /* what = 0 for ignoring !0 for unignoring */
-static int ignore_unignore_key_set(brlapi_handle_t *handle, int what, const brl_keycode_t *s, unsigned int n)
+static int ignore_accept_key_set(brlapi_handle_t *handle, int what, const brl_keycode_t *s, unsigned int n)
 {
   uint32_t buf[2*n];
   int i;
@@ -1446,13 +1446,13 @@ static int ignore_unignore_key_set(brlapi_handle_t *handle, int what, const brl_
     buf[2*i+0] = htonl(s[i] >> 32);
     buf[2*i+1] = htonl(s[i] & 0xffffffff);
   }
-  return brlapi__writePacketWaitForAck(handle,(what ? BRLPACKET_UNIGNOREKEYSET : BRLPACKET_IGNOREKEYSET),buf,sizeof(buf));
+  return brlapi__writePacketWaitForAck(handle,(what ? BRLPACKET_ACCEPTKEYSET : BRLPACKET_IGNOREKEYSET),buf,sizeof(buf));
 }
 
 /* Function : brlapi_ignoreKeySet */
 int brlapi__ignoreKeySet(brlapi_handle_t *handle, const brl_keycode_t *s, unsigned int n)
 {
-  return ignore_unignore_key_set(handle, 0,s,n);
+  return ignore_accept_key_set(handle, 0,s,n);
 }
 
 int brlapi_ignoreKeySet(const brl_keycode_t *s, unsigned int n)
@@ -1460,15 +1460,15 @@ int brlapi_ignoreKeySet(const brl_keycode_t *s, unsigned int n)
   return brlapi__ignoreKeySet(&defaultHandle, s, n);
 }
 
-/* Function : brlapi_unignoreKeySet */
-int brlapi__unignoreKeySet(brlapi_handle_t *handle, const brl_keycode_t *s, unsigned int n)
+/* Function : brlapi_acceptKeySet */
+int brlapi__acceptKeySet(brlapi_handle_t *handle, const brl_keycode_t *s, unsigned int n)
 {
-  return ignore_unignore_key_set(handle, !0,s,n);
+  return ignore_accept_key_set(handle, !0,s,n);
 }
 
-int brlapi_unignoreKeySet(const brl_keycode_t *s, unsigned int n)
+int brlapi_acceptKeySet(const brl_keycode_t *s, unsigned int n)
 {
-  return brlapi__unignoreKeySet(&defaultHandle, s, n);
+  return brlapi__acceptKeySet(&defaultHandle, s, n);
 }
 
 /* Error code handling */

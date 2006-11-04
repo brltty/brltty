@@ -140,20 +140,20 @@ typedef int brlapi_fileDescriptor;
  * brlapi_settings_t settings;
  *
  * settings.authKey="/etc/brlapi.key";
- * settings.hostName="foo";
+ * settings.host="foo";
  * \endcode
  *
  * \e libbrlapi will read authorization key from file \p /etc/brlapi.key
  * and connect to the machine called "foo", on the default TCP port.
  *
  * \code
- * settings.hostName="10.1.0.2";
+ * settings.host="10.1.0.2";
  * \endcode
  *
  * lets directly enter an IP address instead of a machine name.
  *
  * \code
- * settings.hostName=":1";
+ * settings.host=":1";
  * \endcode
  *
  * lets \e libbrlapi connect to the local computer, on port BRLAPI_SOCKETPORTNUM+1
@@ -175,9 +175,9 @@ typedef struct {
    * \note Please check that resolving this name works before complaining
    *
    * Settings \c NULL defaults it to localhost, using the local installation's
-   * default TCP port, or to the content of the BRLAPI_HOSTNAME environment
+   * default TCP port, or to the content of the BRLAPI_HOST environment
    * variable, if it exists. */
-  char *hostName;
+  char *host;
 } brlapi_settings_t;
 
 /* BRLAPI_SETTINGS_INITIALIZER */
@@ -206,7 +206,7 @@ typedef struct {
  * \code
  * if (brlapi_initializeConnection(&settings,&settings)<0) {
  *  fprintf(stderr,"couldn't connect to BrlAPI at %s: %s\n",
- *   settings.hostName, brlapi_strerror(&brlapi_error));
+ *   settings.host, brlapi_strerror(&brlapi_error));
  *  exit(1);
  * }
  * \endcode
@@ -245,8 +245,8 @@ void brlapi_closeConnection(void);
 void brlapi__closeConnection(brlapi_handle_t *handle);
 
 /* brlapi_splitHost */
-/* splits host into hostname & port, returns address family to use */
-int brlapi_splitHost(const char *host, char **hostname, char **port);
+/* splits host:port into host & port, returns address family to use */
+int brlapi_splitHost(const char *hostAndPort, char **host, char **port);
 
 /* brlapi_loadAuthKey */
 /** Load an authorization key from the given file
@@ -361,7 +361,7 @@ int brlapi__getDisplaySize(brlapi_handle_t *handle, unsigned int *x, unsigned in
  * CONTROLVT="$(grep "using VT number" "/var/log/XFree86.$(echo "$DISPLAY" | sed -e "s/^.*::*\([0-9]*\).*$/\1/").log" | sed -e "s/^.*using VT number \([0-9]*\).*$/\1/")"
  *
  * CONTROLVT should also be propagated when running remote applications via ssh,
- * for instance, along with BRLAPI_HOSTNAME and the authorization key.
+ * for instance, along with BRLAPI_HOST and the authorization key.
  *
  * \return the used tty number on success, -1 on error
  *
@@ -371,8 +371,8 @@ int brlapi_enterTtyMode(int tty, const char *driverName);
 #define brlapi_getTty(tty, driverName) brlapi_enterTtyMode(tty, driverName)
 int brlapi__enterTtyMode(brlapi_handle_t *handle, int tty, const char *driverName);
 
-/* brlapi_getTtyPath */
-/** Ask for some tty path, with some key mechanism
+/* brlapi_enterTtyModeWithPath */
+/** Ask for some tty specified by its path in the tty tree, with some key mechanism
  *
  * \param ttys points on the array of ttys representing the tty path to be got.
  * Can be NULL if nttys is 0.
@@ -383,8 +383,10 @@ int brlapi__enterTtyMode(brlapi_handle_t *handle, int tty, const char *driverNam
  *
  * \sa brlapi_enterTtyMode()
  */
-int brlapi_getTtyPath(int *ttys, int nttys, const char *driverName);
-int brlapi__getTtyPath(brlapi_handle_t *handle, int *ttys, int nttys, const char *how);
+int brlapi_enterTtyModeWithPath(int *ttys, int nttys, const char *driverName);
+int brlapi__enterTtyModeWithPath(brlapi_handle_t *handle, int *ttys, int nttys, const char *how);
+#define brlapi_getTtyPath(ttys, nttys, driverName) brlapi_enterTtyModeWithPath(ttys, nttys, driverName)
+#define brlapi__getTtyPath(handle, ttys, nttys, driverName) brlapi__enterTtyModeWithPath(handle, ttys, nttys, driverName)
 
 /* brlapi_leaveTtyMode */
 /** Stop controlling the tty
@@ -711,8 +713,8 @@ int brlapi__ignoreKeyRange(brlapi_handle_t *handle, brl_keycode_t x, brl_keycode
 int brlapi_ignoreKeySet(const brl_keycode_t *s, unsigned int n);
 int brlapi__ignoreKeySet(brlapi_handle_t *handle, const brl_keycode_t *s, unsigned int n);
 
-/* brlapi_unignoreKeyRange */
-/** Unignore some key presses from the braille keyboard
+/* brlapi_acceptKeyRange */
+/** Accept some key presses from the braille keyboard
  *
  * This function asks the server to return keys between x and y to the
  * application, and not give them to \e brltty.
@@ -722,11 +724,12 @@ int brlapi__ignoreKeySet(brlapi_handle_t *handle, const brl_keycode_t *s, unsign
  *
  * \note The given codes are either raw keycodes if some driver name was given
  * to brlapi_enterTtyMode(), or \e brltty commands if NULL or "" was given. */
-int brlapi_unignoreKeyRange(brl_keycode_t x, brl_keycode_t y);
-int brlapi__unignoreKeyRange(brlapi_handle_t *handle, brl_keycode_t x, brl_keycode_t y);
-
-/* brlapi_unignoreKeySet */
-/** Unignore some key presses from the braille keyboard
+int brlapi_acceptKeyRange(brl_keycode_t x, brl_keycode_t y);
+int brlapi__acceptKeyRange(brlapi_handle_t *handle, brl_keycode_t x, brl_keycode_t y);
+#define brlapi_unignoreKeyRange(x, y) brlapi_acceptKeyRange(x, y)
+#define brlapi__unignoreKeyRange(h, x, y) brlapi__acceptKeyRange(h, x, y)
+/* brlapi_acceptKeySet */
+/** Accept some key presses from the braille keyboard
  *
  * This function asks the server to return all n keys in set s to the
  * application, and not give them to \e brltty.
@@ -736,9 +739,10 @@ int brlapi__unignoreKeyRange(brlapi_handle_t *handle, brl_keycode_t x, brl_keyco
  *
  * \note The given codes are either raw keycodes if some driver name was given
  * to brlapi_enterTtyMode(), or \e brltty commands if NULL or "" was given. */
-int brlapi_unignoreKeySet(const brl_keycode_t *s, unsigned int n);
-int brlapi__unignoreKeySet(brlapi_handle_t *handle, const brl_keycode_t *s, unsigned int n);
-
+int brlapi_acceptKeySet(const brl_keycode_t *s, unsigned int n);
+int brlapi__acceptKeySet(brlapi_handle_t *handle, const brl_keycode_t *s, unsigned int n);
+#define brlapi_unignoreKeySet(s, n) brlapi_acceptKeySet(s, n)
+#define brlapi__unignoreKeySet(h, s, n) brlapi__acceptKeySet(h, s, n)
 /** @} */
 
 /** \defgroup brlapi_driverspecific Driver-Specific modes

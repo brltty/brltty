@@ -34,7 +34,7 @@ public class BrlapiNative {
   public native BrlapiSize getDisplaySize () throws BrlapiError;
   
   public native int enterTtyMode (int tty, String driver) throws BrlapiError;
-  public native void getTtyPath (int ttys[], String driver) throws BrlapiError;
+  public native void enterTtyModeWithPath (int ttys[], String driver) throws BrlapiError;
   public native void leaveTtyMode () throws BrlapiError;
   public native void setFocus (int tty) throws BrlapiError;
 
@@ -44,9 +44,9 @@ public class BrlapiNative {
 
   public native long readKey (boolean block) throws BrlapiError;
   public native void ignoreKeyRange (long x, long y) throws BrlapiError;
-  public native void unignoreKeyRange (long x, long y) throws BrlapiError;
+  public native void acceptKeyRange (long x, long y) throws BrlapiError;
   public native void ignoreKeySet (long s[]) throws BrlapiError;
-  public native void unignoreKeySet (long s[]) throws BrlapiError;
+  public native void acceptKeySet (long s[]) throws BrlapiError;
 
   public native void enterRawMode (String driver) throws BrlapiError;
   public native void leaveRawMode () throws BrlapiError;

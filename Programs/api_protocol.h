@@ -62,8 +62,8 @@ extern "C" {
 #define BRLPACKET_KEY               'k'    /**< Braille key                 */
 #define BRLPACKET_IGNOREKEYRANGE    'm'    /**< Mask key-range              */
 #define BRLPACKET_IGNOREKEYSET      'M'    /**< Mask key-set                */
-#define BRLPACKET_UNIGNOREKEYRANGE  'u'    /**< Unmask key range            */
-#define BRLPACKET_UNIGNOREKEYSET    'U'    /**< Unmask key set              */
+#define BRLPACKET_ACCEPTKEYRANGE  'u'    /**< Unmask key range            */
+#define BRLPACKET_ACCEPTKEYSET    'U'    /**< Unmask key set              */
 #define BRLPACKET_WRITE             'w'    /**< Write                       */
 #define BRLPACKET_ENTERRAWMODE      '*'    /**< Enter in raw mode           */
 #define BRLPACKET_LEAVERAWMODE      '#'    /**< Leave raw mode              */

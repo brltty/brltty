@@ -124,11 +124,11 @@ static void exceptionHandler(int err, brl_type_t type, const void *buf, size_t s
 
 JNIEXPORT jint JNICALL Java_BrlapiNative_initializeConnection(JNIEnv *jenv, jobject jobj, jobject JclientSettings , jobject JusedSettings) {
   jclass jcclientSettings, jcusedSettings;
-  jfieldID clientAuthKeyID = NULL, clientHostNameID = NULL, usedAuthKeyID, usedHostNameID;
+  jfieldID clientAuthKeyID = NULL, clientHostID = NULL, usedAuthKeyID, usedHostID;
   brlapi_settings_t clientSettings,  usedSettings,
             *PclientSettings, *PusedSettings;
   int result;
-  jstring authKey = NULL, hostName = NULL;
+  jstring authKey = NULL, host = NULL;
   const char *str;
   jfieldID handleID;
   brlapi_handle_t *handle;
@@ -148,17 +148,17 @@ JNIEXPORT jint JNICALL Java_BrlapiNative_initializeConnection(JNIEnv *jenv, jobj
   if (JclientSettings) {
     GET_CLASS(jenv, jcclientSettings, JclientSettings, -1);
     GET_ID(jenv, clientAuthKeyID, jcclientSettings, "authKey", "Ljava/lang/String;", -1);
-    GET_ID(jenv, clientHostNameID, jcclientSettings, "hostName", "Ljava/lang/String;", -1);
+    GET_ID(jenv, clientHostID, jcclientSettings, "host", "Ljava/lang/String;", -1);
 
     PclientSettings = &clientSettings;
     if ((authKey = (*jenv)->GetObjectField(jenv, JclientSettings, clientAuthKeyID))) {
       if (!(clientSettings.authKey = (char *)(*jenv)->GetStringUTFChars(jenv, authKey, NULL)))
 	return ThrowException(jenv, ERR_OUTOFMEM, __func__), -1;
     } else clientSettings.authKey = NULL;
-    if ((hostName = (*jenv)->GetObjectField(jenv, JclientSettings, clientHostNameID))) {
-      if (!(clientSettings.hostName = (char *)(*jenv)->GetStringUTFChars(jenv, hostName, NULL)))
+    if ((host = (*jenv)->GetObjectField(jenv, JclientSettings, clientHostID))) {
+      if (!(clientSettings.host = (char *)(*jenv)->GetStringUTFChars(jenv, host, NULL)))
 	return ThrowException(jenv, ERR_OUTOFMEM, __func__), -1;
-    } else clientSettings.hostName = NULL;
+    } else clientSettings.host = NULL;
   } else PclientSettings = NULL;
 
   if (JusedSettings)
@@ -172,14 +172,14 @@ JNIEXPORT jint JNICALL Java_BrlapiNative_initializeConnection(JNIEnv *jenv, jobj
   if (JclientSettings) {
     if (clientSettings.authKey)
       (*jenv)->ReleaseStringUTFChars(jenv, authKey,  clientSettings.authKey); 
-    if (clientSettings.hostName)
-      (*jenv)->ReleaseStringUTFChars(jenv, hostName, clientSettings.hostName); 
+    if (clientSettings.host)
+      (*jenv)->ReleaseStringUTFChars(jenv, host, clientSettings.host); 
   }
 
   if (PusedSettings) {
     GET_CLASS(jenv, jcusedSettings, JusedSettings, -1);
     GET_ID(jenv, usedAuthKeyID, jcusedSettings, "authKey", "Ljava/lang/String;", -1);
-    GET_ID(jenv, usedHostNameID, jcusedSettings, "hostName", "Ljava/lang/String;", -1);
+    GET_ID(jenv, usedHostID, jcusedSettings, "host", "Ljava/lang/String;", -1);
 
     authKey = (*jenv)->NewStringUTF(jenv, usedSettings.authKey);
     if (!authKey)
@@ -188,12 +188,12 @@ JNIEXPORT jint JNICALL Java_BrlapiNative_initializeConnection(JNIEnv *jenv, jobj
     (*jenv)->SetObjectField(jenv, JusedSettings, clientAuthKeyID, authKey);
     (*jenv)->ReleaseStringUTFChars(jenv, authKey, str);
 
-    hostName = (*jenv)->NewStringUTF(jenv, usedSettings.hostName);
-    if (!hostName)
+    host = (*jenv)->NewStringUTF(jenv, usedSettings.host);
+    if (!host)
       return ThrowException(jenv, ERR_OUTOFMEM, __func__), -1;
-    str = (*jenv)->GetStringUTFChars(jenv, hostName, NULL);
-    (*jenv)->SetObjectField(jenv, JusedSettings, clientHostNameID, hostName);
-    (*jenv)->ReleaseStringUTFChars(jenv, hostName, str);
+    str = (*jenv)->GetStringUTFChars(jenv, host, NULL);
+    (*jenv)->SetObjectField(jenv, JusedSettings, clientHostID, host);
+    (*jenv)->ReleaseStringUTFChars(jenv, host, str);
   }
 
   return (jint) result;
@@ -303,7 +303,7 @@ JNIEXPORT jint JNICALL Java_BrlapiNative_enterTtyMode(JNIEnv *jenv, jobject jobj
   return (jint) result;
 }
 
-JNIEXPORT void JNICALL Java_BrlapiNative_getTtyPath(JNIEnv *jenv, jobject jobj, jintArray jttys, jstring jdriver) {
+JNIEXPORT void JNICALL Java_BrlapiNative_enterTtyModeWithPath(JNIEnv *jenv, jobject jobj, jintArray jttys, jstring jdriver) {
   jint *ttys ;
   char *driver;
   int result;
@@ -321,7 +321,7 @@ JNIEXPORT void JNICALL Java_BrlapiNative_getTtyPath(JNIEnv *jenv, jobject jobj, 
     if (!(driver = (char *)(*jenv)->GetStringUTFChars(jenv, jdriver, NULL)));
       return ThrowException(jenv, ERR_OUTOFMEM, __func__);
 
-  result = brlapi__getTtyPath(handle, ttys,(*jenv)->GetArrayLength(jenv,jttys),driver);
+  result = brlapi__enterTtyModeWithPath(handle, ttys,(*jenv)->GetArrayLength(jenv,jttys),driver);
   (*jenv)->ReleaseIntArrayElements(jenv, jttys, ttys, JNI_ABORT);
   if (result < 0) return ThrowError(jenv, __func__);
 }
@@ -485,15 +485,15 @@ JNIEXPORT void JNICALL Java_BrlapiNative_ignoreKeySet(JNIEnv *jenv, jobject jobj
     return ThrowError(jenv, __func__);
 }
 
-JNIEXPORT void JNICALL Java_BrlapiNative_unignoreKeyRange(JNIEnv *jenv, jobject jobj, jlong jarg1, jlong jarg2) {
+JNIEXPORT void JNICALL Java_BrlapiNative_acceptKeyRange(JNIEnv *jenv, jobject jobj, jlong jarg1, jlong jarg2) {
   env = jenv;
   GET_HANDLE(jenv, jobj, );
 
-  if (brlapi__ignoreKeyRange(handle, (brl_keycode_t)jarg1,(brl_keycode_t)jarg2) < 0)
+  if (brlapi__acceptKeyRange(handle, (brl_keycode_t)jarg1,(brl_keycode_t)jarg2) < 0)
     return ThrowError(jenv, __func__);
 }
 
-JNIEXPORT void JNICALL Java_BrlapiNative_unignoreKeySet(JNIEnv *jenv, jobject jobj, jlongArray js) {
+JNIEXPORT void JNICALL Java_BrlapiNative_acceptKeySet(JNIEnv *jenv, jobject jobj, jlongArray js) {
   jlong *s;
   unsigned int n;
   int result;
@@ -508,7 +508,7 @@ JNIEXPORT void JNICALL Java_BrlapiNative_unignoreKeySet(JNIEnv *jenv, jobject jo
   s = (*jenv)->GetLongArrayElements(jenv, js, NULL);
 
   // XXX jlong != brl_keycode_t probably
-  result = brlapi__unignoreKeySet(handle, (const brl_keycode_t *)s, n);
+  result = brlapi__acceptKeySet(handle, (const brl_keycode_t *)s, n);
   (*jenv)->ReleaseLongArrayElements(jenv, js, s, JNI_ABORT);
 
   if (result < 0)

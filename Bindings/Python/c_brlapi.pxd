@@ -24,7 +24,7 @@ cdef extern from "sys/types.h":
 cdef extern from "Programs/api.h":
 	ctypedef struct brlapi_settings_t:
 		char *authKey
-		char *hostName
+		char *host
 
 	ctypedef struct brlapi_writeStruct:
 		unsigned int regionBegin
@@ -59,7 +59,7 @@ cdef extern from "Programs/api.h":
 	int brlapi__writeText(brlapi_handle_t *, int, char*)
 
 	int brlapi__ignoreKeyRange(brlapi_handle_t *, unsigned long long, unsigned long long)
-	int brlapi__unignoreKeyRange(brlapi_handle_t *, unsigned long long, unsigned long long)
+	int brlapi__acceptKeyRange(brlapi_handle_t *, unsigned long long, unsigned long long)
 	int brlapi__readKey(brlapi_handle_t *, int, unsigned long long*)
 	int brlapi_expandKeyCode(unsigned long long, unsigned int *, unsigned int *, unsigned int *)
 

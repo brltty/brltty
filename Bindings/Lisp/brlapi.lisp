@@ -48,21 +48,21 @@
 (defcstruct settings
   "Connection settings."
   (authKey :string)
-  (hostName :string))
+  (host :string))
 (defcfun ("brlapi_closeConnection" disconnect) :void)
-(defun connect (&optional authkey hostname)
+(defun connect (&optional authkey host)
   (with-foreign-object (settings 'settings)
     (setf (foreign-slot-value settings 'settings 'authKey)
           (if (stringp authkey) authkey (null-pointer))
-	  (foreign-slot-value settings 'settings 'hostName)
-          (if (stringp hostname) hostname (null-pointer)))
+	  (foreign-slot-value settings 'settings 'host)
+          (if (stringp host) host (null-pointer)))
     (let ((handle (foreign-funcall "brlapi_initializeConnection"
 				   :pointer settings
 				   :pointer settings
 				   brlapi-code)))
       (values handle
 	      (foreign-slot-value settings 'settings 'authKey)
-	      (foreign-slot-value settings 'settings 'hostName)))))
+	      (foreign-slot-value settings 'settings 'host)))))
 
 (defun driver-id ()
   (with-foreign-pointer-as-string (str 4 str-size)

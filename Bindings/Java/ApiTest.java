@@ -34,7 +34,7 @@ public class ApiTest {
             System.exit(2);
           }
 
-          settings.hostName = argv[argi++];
+          settings.host = argv[argi++];
           continue;
         }
 
@@ -50,7 +50,7 @@ public class ApiTest {
       Brlapi brlapi = new Brlapi(settings);
       System.out.println("done (fd=" + brlapi.getFileDescriptor() + ")");
 
-      System.out.print("Connected to " + brlapi.getHostName());
+      System.out.print("Connected to " + brlapi.getHost());
       System.out.print(" using key file " + brlapi.getAuthKey());
       System.out.println();
 

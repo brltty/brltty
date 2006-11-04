@@ -1229,8 +1229,8 @@ display and keypresses. For this, it can send either of these types of packet:
   should be sent mustn't change,
   <item><tt/BRLPACKET_LEAVETTYMODE/ to leave tty handling mode and go back to
   normal mode,
-  <item><tt/BRLPACKET_IGNOREKEYRANGE/, <tt/BRLPACKET_UNIGNOREKEYRANGE/,
-  <tt/BRLPACKET_IGNOREKEYSET/, <tt/BRLPACKET_UNIGNOREKEYSET/ to mask and unmask
+  <item><tt/BRLPACKET_IGNOREKEYRANGE/, <tt/BRLPACKET_ACCEPTKEYRANGE/,
+  <tt/BRLPACKET_IGNOREKEYSET/, <tt/BRLPACKET_ACCEPTKEYSET/ to mask and unmask
   keys,
   <item><tt/BRLPACKET_WRITE/ to display text on this tty,
   <item><tt/BRLPACKET_ENTERRAWMODE/ to enter raw mode,
@@ -1339,17 +1339,17 @@ between xterms.
 This should be sent to free the tty and masked keys lists.
 This is acknowledged by the server.
 
-<sect2><tt/BRLPACKET_IGNOREKEYRANGE/, <tt/BRLPACKET_UNIGNOREKEYRANGE/,
-<tt/BRLPACKET_IGNOREKEYSET/ and <tt/BRLPACKET_UNIGNOREKEYSET/ (see
-<em/brlapi_ignoreKeyRange()/, <em/brlapi_unignoreKeyRange()/,
-<em/brlapi_ignoreKeySet()/, and <em/brlapi_unignoreKeySet()/)
+<sect2><tt/BRLPACKET_IGNOREKEYRANGE/, <tt/BRLPACKET_ACCEPTKEYRANGE/,
+<tt/BRLPACKET_IGNOREKEYSET/ and <tt/BRLPACKET_ACCEPTKEYSET/ (see
+<em/brlapi_ignoreKeyRange()/, <em/brlapi_acceptKeyRange()/,
+<em/brlapi_ignoreKeySet()/, and <em/brlapi_acceptKeySet()/)
 <p>
 If the client doesn't want every key press to be signaled to it, but some of
 them to be given to <tt/brltty/ for normal processing, it can send
 <tt/BRLPACKET_IGNOREKEYRANGE/ (resp. <tt/BRLPACKET_IGNOREKEYSET/) packets to
 tell ranges (resp. sets) of key codes which shouldn't be
-sent to it, but given to <tt/brltty/, and <tt/BRLPACKET_UNIGNOREKEYRANGE/
-(resp. <tt/BRLPACKET_UNIGNOREKEYSET/) packets to tell ranges (resp. sets)
+sent to it, but given to <tt/brltty/, and <tt/BRLPACKET_ACCEPTKEYRANGE/
+(resp. <tt/BRLPACKET_ACCEPTKEYSET/) packets to tell ranges (resp. sets)
 of key codes which should be sent to it, and not given to
 <tt/brltty/. The server keeps a dynamic list of ranges, so that arbitrary
 sequences of such packets can be sent.

@@ -136,10 +136,10 @@ void api_cleanExit(int foo) {
   exit(0);
 }
 
-void tobrltty_init(char *authKey, char *hostName) {
+void tobrltty_init(char *authKey, char *host) {
   brlapi_settings_t settings;
   unsigned int x,y;
-  settings.hostName=hostName;
+  settings.host=host;
   settings.authKey=authKey;
 
   signal(SIGTERM,api_cleanExit);
@@ -155,7 +155,7 @@ void tobrltty_init(char *authKey, char *hostName) {
 #endif /* SIGPIPE */
 
   if ((brlapi_fd = brlapi_initializeConnection(&settings,&settings))<0)
-    fatal_brlapi_errno("initializeConnection",gettext("cannot connect to brltty at %s\n"),settings.hostName);
+    fatal_brlapi_errno("initializeConnection",gettext("cannot connect to brltty at %s\n"),settings.host);
 
   if (brlapi_getDisplaySize(&x,&y)<0)
     fatal_brlapi_errno("getDisplaySize",NULL);
@@ -165,7 +165,7 @@ static int getXVTnb(void);
 
 void getVT(void) {
   if (getenv("WINDOWPATH")) {
-    if (brlapi_getTtyPath(NULL,0,NULL)<0)
+    if (brlapi_enterTtyModeWithPath(NULL,0,NULL)<0)
       fatal_brlapi_errno("geTtyPath",gettext("cannot get tty\n"));
   } else {
     int vtno = getXVTnb();
@@ -176,8 +176,8 @@ void getVT(void) {
     fatal_brlapi_errno("ignoreKeys",gettext("cannot ignore keys\n"));
 #ifdef CAN_SIMULATE_KEY_PRESSES
   /* All X keysyms with any modifier */
-  if (brlapi_unignoreKeyRange(BRLAPI_KEY_TYPE_SYM, BRLAPI_KEY_TYPE_SYM|BRLAPI_KEY_CODE_MASK|BRLAPI_KEY_FLG(0xFF)))
-    fatal_brlapi_errno("unignoreKeyRange",NULL);
+  if (brlapi_acceptKeyRange(BRLAPI_KEY_TYPE_SYM, BRLAPI_KEY_TYPE_SYM|BRLAPI_KEY_CODE_MASK|BRLAPI_KEY_FLG(0xFF)))
+    fatal_brlapi_errno("acceptKeyRange",NULL);
 #endif /* CAN_SIMULATE_KEY_PRESSES */
 }
 

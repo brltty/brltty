@@ -32,8 +32,8 @@ public class Brlapi extends BrlapiNative implements BrlapiConstants {
     closeConnection();
   }
 
-  public String getHostName () {
-    return settings.hostName;
+  public String getHost () {
+    return settings.host;
   }
 
   public String getAuthKey () {
@@ -56,7 +56,7 @@ public class Brlapi extends BrlapiNative implements BrlapiConstants {
     return enterTtyMode(-1, null);
   }
 
-  public void getTtyPath (int ttys[]) throws BrlapiError {
-    getTtyPath(ttys, null);
+  public void enterTtyModeWithPath (int ttys[]) throws BrlapiError {
+    enterTtyModeWithPath(ttys, null);
   }
 }

@@ -393,7 +393,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
         return TCL_ERROR;
       }
 
-      setStringResult(interp, session->settings.hostName, -1);
+      setStringResult(interp, session->settings.host, -1);
       return TCL_OK;
     }
 
@@ -533,8 +533,8 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
             if (result != TCL_OK) return result;
           }
 
-          if (brlapi__getTtyPath(session->handle, ttys, count, options.driver) != -1) return TCL_OK;
-        } else if (brlapi__getTtyPath(session->handle, NULL, 0, options.driver) != -1) {
+          if (brlapi__enterTtyModeWithPath(session->handle, ttys, count, options.driver) != -1) return TCL_OK;
+        } else if (brlapi__enterTtyModeWithPath(session->handle, NULL, 0, options.driver) != -1) {
           return TCL_OK;
         }
       } else {
@@ -637,7 +637,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
         {
           int result = ignore? brlapi__ignoreKeyRange(session->handle, keys[0], keys[1]):
-                               brlapi__unignoreKeyRange(session->handle, keys[0], keys[1]);
+                               brlapi__acceptKeyRange(session->handle, keys[0], keys[1]);
           if (result != -1) return TCL_OK;
           setBrlapiError(interp);
           return TCL_ERROR;
@@ -683,7 +683,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
           {
             int result = ignore? brlapi__ignoreKeySet(session->handle, keys, count):
-                                 brlapi__unignoreKeySet(session->handle, keys, count);
+                                 brlapi__acceptKeySet(session->handle, keys, count);
             if (result == -1) {
               setBrlapiError(interp);
               return TCL_ERROR;
@@ -915,7 +915,7 @@ typedef struct {
 
 OPTION_HANDLER(general, connect, host) {
   FunctionData_general_connect *options = data;
-  options->settings.hostName = Tcl_GetString(objv[1]);
+  options->settings.host = Tcl_GetString(objv[1]);
   return TCL_OK;
 }
 
