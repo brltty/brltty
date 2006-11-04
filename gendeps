@@ -78,6 +78,10 @@ if {[catch [list package require Tclx] response] != 0} {
       return [lsort -unique $list]
    }
 
+   proc lempty {list} {
+      return [expr {[llength $list] == 0}]
+   }
+
    if {$tcl_version < 8.4} {
       proc readdir {directory} {
          set workingDirectory [pwd]
