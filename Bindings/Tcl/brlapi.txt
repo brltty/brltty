@@ -1,5 +1,5 @@
 brlapi <function> [<arg> ...]
-   connect [<option> ...]
+   openConnection [<option> ...]
       host <hostSpec>
       keyFile <file>
    expandHost <hostSpec>

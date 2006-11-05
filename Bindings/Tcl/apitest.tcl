@@ -1,5 +1,20 @@
 #!/usr/bin/env tclsh
 load brlapi.so
+package require cmdline
+
+proc writeProgramMessage {message} {
+   puts stderr "[::cmdline::getArgv0]: $message"
+}
+
+set optionList {host.arg}
+while {[set optionStatus [::cmdline::getopt argv $optionList optionName optionValue]] > 0} {
+   set optionValues($optionName) $optionValue
+}
+
+if {$optionStatus < 0} {
+   writeProgramMessage $optionValue
+   exit 2
+}
 
 proc expandList {list args} {
    set result ""
@@ -11,7 +26,11 @@ proc expandList {list args} {
    return $result
 }
 
-set brlapi [brlapi connect]
+set connectionSettings [list]
+if {[info exists optionValues(host)]} {
+   lappend connectionSettings host $optionValues(host)
+}
+set brlapi [eval brlapi openConnection $connectionSettings]
 puts "Object: $brlapi"
 
 set host [$brlapi getHost]

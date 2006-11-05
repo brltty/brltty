@@ -928,22 +928,22 @@ OPTION_HANDLER(general, connect, keyFile) {
 static int
 brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
   static const char *functions[] = {
-    "connect",
     "expandHost",
     "expandKeyCode",
     "getHandleSize",
     "getKeyName",
     "makeDots",
+    "openConnection",
     NULL
   };
 
   typedef enum {
-    FCN_connect,
     FCN_expandHost,
     FCN_expandKeyCode,
     FCN_getHandleSize,
     FCN_getKeyName,
-    FCN_makeDots
+    FCN_makeDots,
+    FCN_openConnection
   } Function;
 
   int function;
@@ -959,7 +959,7 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
   }
 
   switch (function) {
-    case FCN_connect: {
+    case FCN_openConnection: {
       FunctionData_general_connect options = {
         .settings = BRLAPI_SETTINGS_INITIALIZER
       };
@@ -1156,7 +1156,9 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
 }
 
 int
-Brlapi_Init (Tcl_Interp *interp) {
+Brlapi_tcl_Init (Tcl_Interp *interp) {
   Tcl_CreateObjCommand(interp, "brlapi", brlapiGeneralCommand, NULL, NULL);
+  Tcl_PkgProvide(interp, "Brlapi",
+                 STRINGIFY(BRLAPI_MAJOR) "." STRINGIFY(BRLAPI_MINOR) "." STRINGIFY(BRLAPI_REVISION));
   return TCL_OK;
 }

@@ -19,7 +19,7 @@ include $(SRC_TOP)bindings.mk
 
 TCLSH = @TCLSH@
 
-TCL_API = brlapi.$(LIB_EXT)
+TCL_API = libbrlapi_tcl.$(LIB_EXT)
 
 all: $(TCL_API)
 
