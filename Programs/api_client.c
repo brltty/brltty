@@ -1192,22 +1192,24 @@ int brlapi__writeDots(brlapi_handle_t *handle, const unsigned char *dots)
 {
   int res;
   unsigned int size = handle->brlx * handle->brly;
-  char text[size+1];
-  unsigned char attrAnd[size], attrOr[size];
   brlapi_writeStruct ws = BRLAPI_WRITESTRUCT_INITIALIZER;
   if (size == 0) {
     brlapi_errno=BRLERR_INVALID_PARAMETER;
     return -1;
   }
-  memset(text, ' ', size);
-  text[size] = 0;
-  ws.text = text;
-  memcpy(attrOr, dots, size);
-  ws.attrOr = attrOr;
-  memset(attrAnd, 0, size);
-  ws.attrAnd = attrAnd;
-  ws.cursor = 0;
-  res = brlapi__write(handle,&ws);
+  {
+    char text[size+1];
+    unsigned char attrAnd[size], attrOr[size];
+    memset(text, ' ', size);
+    text[size] = 0;
+    ws.text = text;
+    memcpy(attrOr, dots, size);
+    ws.attrOr = attrOr;
+    memset(attrAnd, 0, size);
+    ws.attrAnd = attrAnd;
+    ws.cursor = 0;
+    res = brlapi__write(handle,&ws);
+  }
   return res;
 }
 
