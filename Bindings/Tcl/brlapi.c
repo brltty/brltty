@@ -177,7 +177,7 @@ processOptions (
   if (result != TCL_OK) return result; \
 }
 #define OPTION(command,function,option) \
-  .name = #option, .handler = OPTION_HANDLER_NAME(command, function, option)
+  .name = "-" #option, .handler = OPTION_HANDLER_NAME(command, function, option)
 #define OPERANDS(count,text) \
   .operands = (count), .help = ((count)? (text): NULL)
 

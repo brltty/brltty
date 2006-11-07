@@ -1,7 +1,7 @@
 brlapi <function> [<arg> ...]
    openConnection [<option> ...]
-      host <hostSpec>
-      keyFile <file>
+      -host <hostSpec>
+      -keyFile <file>
    expandHost <hostSpec>
    expandKeyCode <keyCode>
    getKeyName <command> [<argument>]
@@ -16,9 +16,9 @@ brlapi<sessionNumber> function [arg ...]
    getDriverName
    getDisplaySize
    enterTtyMode [<option> ...]
-      tty {default | <number>}
-      keyCodes
-      events <driver>
+      -tty {default | <number>}
+      -keyCodes
+      -events <driver>
    leaveTtyMode
    setFocus <ttyNumber>
    readKey <wait>
@@ -27,12 +27,12 @@ brlapi<sessionNumber> function [arg ...]
    acceptKeySet <keyList>
    ignoreKeySet <keyList>
    writeText <string> [<option> ...]
-      and <mask>
-      or <mask>
-      start <offset>
-      cursor {leave | off | <offset>}
-      display {default | <number>}
-      charset <name>
+      -and <mask>
+      -or <mask>
+      -start <offset>
+      -cursor {leave | off | <offset>}
+      -display {default | <number>}
+      -charset <name>
    writeDots <dots>
    withdrawDots
    enterRawMode <driver>

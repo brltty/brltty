@@ -1,5 +1,5 @@
 #!/usr/bin/env tclsh
-load brlapi.so
+load libbrlapi_tcl.so
 package require cmdline
 
 proc writeProgramMessage {message} {
@@ -28,7 +28,7 @@ proc expandList {list args} {
 
 set connectionSettings [list]
 if {[info exists optionValues(host)]} {
-   lappend connectionSettings host $optionValues(host)
+   lappend connectionSettings -host $optionValues(host)
 }
 set brlapi [eval brlapi openConnection $connectionSettings]
 puts "Object: $brlapi"
