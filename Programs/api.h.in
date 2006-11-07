@@ -478,7 +478,7 @@ typedef struct {
 /** Allows to initialize a structure of type \e brlapi_writeStruct *
  * with default values:
  * displayNumber = -1; (unspecified)
- * regionBegin = regionEnd = 0; (update the whole display)
+ * regionBegin = regionSize = 0; (update the whole display)
  * text = attrAnd = attrOr = NULL; (no text, no attribute)
  * cursor = -1; (don't touch cursor)
 */
@@ -498,7 +498,8 @@ typedef struct {
  * region.  The char string must hold exactly as many characters as the region
  * fields express.  For multibyte text, this is the number of \e multibyte
  * caracters.  Notably, combining and double-width caracters count for 1.  The
- * actual length of the text in \e bytes will be computed thanks to strlen().
+ * actual length of the text in \e bytes will be computed thanks to strlen(), so
+ * "text" must be null-terminated.
  *
  * The "attrAnd" and "attrOr" masks, if present, are then applied on top of the
  * text.  This hence permits the superimposing of attributes over the text.
