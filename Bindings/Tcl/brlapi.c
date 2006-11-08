@@ -1211,7 +1211,6 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
 int
 Brlapi_tcl_Init (Tcl_Interp *interp) {
   Tcl_CreateObjCommand(interp, "brlapi", brlapiGeneralCommand, NULL, NULL);
-  Tcl_PkgProvide(interp, "Brlapi",
-                 STRINGIFY(BRLAPI_MAJOR) "." STRINGIFY(BRLAPI_MINOR) "." STRINGIFY(BRLAPI_REVISION));
+  Tcl_PkgProvide(interp, "Brlapi", BRLAPI_RELEASE);
   return TCL_OK;
 }
