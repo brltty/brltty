@@ -49,6 +49,14 @@ setStringResult (Tcl_Interp *interp, const char *string, int length) {
 }
 
 static void
+setStringsResult (Tcl_Interp *interp, ...) {
+  va_list arguments;
+  va_start(arguments, interp);
+  Tcl_AppendStringsToObjVA(Tcl_GetObjResult(interp), arguments);
+  va_end(arguments);
+}
+
+static void
 setByteArrayResult (Tcl_Interp *interp, const unsigned char *bytes, int count) {
   Tcl_SetByteArrayObj(Tcl_GetObjResult(interp), bytes, count);
 }
@@ -214,33 +222,26 @@ OPTION_HANDLER(session, enterTtyMode, tty) {
 
 typedef struct {
   brlapi_writeStruct arguments;
-} FunctionData_session_writeText;
+  int textLength;
+  int andLength;
+  int orLength;
+} FunctionData_session_write;
 
-OPTION_HANDLER(session, writeText, and) {
-  FunctionData_session_writeText *options = data;
-  int count;
-  unsigned char *mask = Tcl_GetByteArrayFromObj(objv[1], &count);
-
-  if (!count) {
-    options->arguments.attrAnd = NULL;
-  } else if (count == options->arguments.regionSize) {
-    options->arguments.attrAnd = mask;
-  } else {
-    setStringResult(interp, "wrong and mask length", -1);
-    return TCL_ERROR;
-  }
-
+OPTION_HANDLER(session, write, and) {
+  FunctionData_session_write *options = data;
+  options->arguments.attrAnd = Tcl_GetByteArrayFromObj(objv[1], &options->andLength);
+  if (!options->andLength) options->arguments.attrAnd = NULL;
   return TCL_OK;
 }
 
-OPTION_HANDLER(session, writeText, charset) {
-  FunctionData_session_writeText *options = data;
+OPTION_HANDLER(session, write, charset) {
+  FunctionData_session_write *options = data;
   options->arguments.charset = Tcl_GetString(objv[1]);
   return TCL_OK;
 }
 
-OPTION_HANDLER(session, writeText, cursor) {
-  FunctionData_session_writeText *options = data;
+OPTION_HANDLER(session, write, cursor) {
+  FunctionData_session_write *options = data;
   Tcl_Obj *obj = objv[1];
   const char *string = Tcl_GetString(obj);
 
@@ -252,15 +253,15 @@ OPTION_HANDLER(session, writeText, cursor) {
     int number;
     int result = Tcl_GetIntFromObj(interp, obj, &number);
     if (result != TCL_OK) return result;
-    if (number < 0) number = 0;
-    options->arguments.cursor = number + 1;
+    if (number < 1) number = 1;
+    options->arguments.cursor = number;
   }
 
   return TCL_OK;
 }
 
-OPTION_HANDLER(session, writeText, display) {
-  FunctionData_session_writeText *options = data;
+OPTION_HANDLER(session, write, display) {
+  FunctionData_session_write *options = data;
   Tcl_Obj *obj = objv[1];
   const char *string = Tcl_GetString(obj);
 
@@ -277,25 +278,15 @@ OPTION_HANDLER(session, writeText, display) {
   return TCL_OK;
 }
 
-OPTION_HANDLER(session, writeText, or) {
-  FunctionData_session_writeText *options = data;
-  int count;
-  unsigned char *mask = Tcl_GetByteArrayFromObj(objv[1], &count);
-
-  if (!count) {
-    options->arguments.attrOr = NULL;
-  } else if (count == options->arguments.regionSize) {
-    options->arguments.attrOr = mask;
-  } else {
-    setStringResult(interp, "wrong or mask length", -1);
-    return TCL_ERROR;
-  }
-
+OPTION_HANDLER(session, write, or) {
+  FunctionData_session_write *options = data;
+  options->arguments.attrOr = Tcl_GetByteArrayFromObj(objv[1], &options->orLength);
+  if (!options->orLength) options->arguments.attrOr = NULL;
   return TCL_OK;
 }
 
-OPTION_HANDLER(session, writeText, start) {
-  FunctionData_session_writeText *options = data;
+OPTION_HANDLER(session, write, start) {
+  FunctionData_session_write *options = data;
   int offset;
 
   {
@@ -304,7 +295,14 @@ OPTION_HANDLER(session, writeText, start) {
   }
 
   if (offset < 0) offset = 0;
-  options->arguments.regionBegin = offset + 1;
+  options->arguments.regionBegin = offset;
+  return TCL_OK;
+}
+
+OPTION_HANDLER(session, write, text) {
+  FunctionData_session_write *options = data;
+  options->arguments.text = Tcl_GetStringFromObj(objv[1], &options->textLength);
+  if (!options->textLength) options->arguments.text = NULL;
   return TCL_OK;
 }
 
@@ -340,9 +338,8 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     "sendRaw",
     "setFocus",
     "suspend",
-    "withdrawDots",
+    "write",
     "writeDots",
-    "writeText",
     NULL
   };
 
@@ -368,9 +365,8 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     FCN_sendRaw,
     FCN_setFocus,
     FCN_suspend,
-    FCN_withdrawDots,
-    FCN_writeDots,
-    FCN_writeText
+    FCN_write,
+    FCN_writeDots
   } Function;
 
   BrlapiSession *session = data;
@@ -695,59 +691,131 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
       }
     }
 
-    case FCN_writeText: {
-      FunctionData_session_writeText options = {
-        .arguments = BRLAPI_WRITESTRUCT_INITIALIZER,
-        .arguments.regionBegin = 1
+    case FCN_write: {
+      FunctionData_session_write options = {
+        .arguments = BRLAPI_WRITESTRUCT_INITIALIZER
       };
 
-      if (objc < 3) {
-        Tcl_WrongNumArgs(interp, 2, objv, "<text> [<option> ...]");
+      if (objc < 2) {
+        Tcl_WrongNumArgs(interp, 2, objv, "[<option> ...]");
         return TCL_ERROR;
-      }
-
-      {
-        int length;
-        char *string = Tcl_GetStringFromObj(objv[2], &length);
-
-        options.arguments.text = length? string: NULL;
-        options.arguments.regionSize = length;
       }
 
       BEGIN_OPTIONS
         {
-          OPTION(session, writeText, and),
+          OPTION(session, write, and),
           OPERANDS(1, "<mask>")
         }
         ,
         {
-          OPTION(session, writeText, charset),
+          OPTION(session, write, charset),
           OPERANDS(1, "<name>")
         }
         ,
         {
-          OPTION(session, writeText, cursor),
+          OPTION(session, write, cursor),
           OPERANDS(1, "{leave | off | <offset>}")
         }
         ,
         {
-          OPTION(session, writeText, display),
+          OPTION(session, write, display),
           OPERANDS(1, "{default | <number>}")
         }
         ,
         {
-          OPTION(session, writeText, or),
+          OPTION(session, write, or),
           OPERANDS(1, "<mask>")
         }
         ,
         {
-          OPTION(session, writeText, start),
+          OPTION(session, write, start),
           OPERANDS(1, "<offset>")
         }
-      END_OPTIONS(3)
+        ,
+        {
+          OPTION(session, write, text),
+          OPERANDS(1, "<string>")
+        }
+      END_OPTIONS(2)
 
-      if (!options.arguments.regionSize) return TCL_OK;
-      if (brlapi__write(session->handle, &options.arguments) != -1) return TCL_OK;
+      {
+        typedef struct {
+          const char *name;
+          int value;
+        } LengthEntry;
+
+        const LengthEntry lengths[] = {
+          {.name="text", .value=options.textLength},
+          {.name="and", .value=options.andLength},
+          {.name="or", .value=options.orLength},
+          {.name=NULL}
+        };
+
+        const LengthEntry *current = lengths;
+        const LengthEntry *first = NULL;
+
+        while (current->name) {
+          if (current->value) {
+            if (!first) {
+              first = current;
+            } else if (current->value != first->value) {
+              setStringsResult(interp, first->name, "/", current->name, " length mismatch", NULL);
+              return TCL_ERROR;
+            }
+          }
+
+          ++current;
+        }
+
+        if (first) options.arguments.regionSize = first->value;
+      }
+
+      if (!options.arguments.regionBegin) {
+        int size;
+
+        {
+          int width, height;
+          int result = getDisplaySize(interp, session, &width, &height);
+          if (result != TCL_OK) return result;
+          size = width * height;
+        }
+
+        {
+          char text[size+1];
+          unsigned char and[size];
+          unsigned char or[size];
+          int count = options.arguments.regionSize;
+
+          if (count < size) {
+            if (options.arguments.attrAnd) {
+              memset(and, 0XFF, size);
+              memcpy(and, options.arguments.attrAnd, count);
+              options.arguments.attrAnd = and;
+            }
+
+            if (options.arguments.attrOr) {
+              memset(or, 0X00, size);
+              memcpy(or, options.arguments.attrOr, count);
+              options.arguments.attrOr = or;
+            }
+          } else {
+            count = size;
+          }
+
+          if (options.arguments.text) {
+            memset(text, ' ', size);
+            text[size] = 0;
+            memcpy(text, options.arguments.text, count);
+            options.arguments.text = text;
+          }
+
+          options.arguments.regionSize = 0;
+          if (brlapi__write(session->handle, &options.arguments) != -1) return TCL_OK;
+        }
+      } else if (brlapi__write(session->handle, &options.arguments) != -1) {
+        return TCL_OK;
+      }
+
       setBrlapiError(interp);
       return TCL_ERROR;
     }
@@ -779,21 +847,6 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
         }
 
         if (brlapi__writeDots(session->handle, cells) != -1) return TCL_OK;
-        setBrlapiError(interp);
-        return TCL_ERROR;
-      }
-    }
-
-    case FCN_withdrawDots: {
-      if (objc != 2) {
-        Tcl_WrongNumArgs(interp, 2, objv, NULL);
-        return TCL_ERROR;
-      }
-
-      {
-        brlapi_writeStruct arguments = BRLAPI_WRITESTRUCT_INITIALIZER;
-        int result = brlapi__write(session->handle, &arguments);
-        if (result != -1) return TCL_OK;
         setBrlapiError(interp);
         return TCL_ERROR;
       }

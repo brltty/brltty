@@ -26,7 +26,8 @@ brlapi<sessionNumber> function [arg ...]
    ignoreKeyRange <firstKey> <lastKey>
    acceptKeySet <keyList>
    ignoreKeySet <keyList>
-   writeText <string> [<option> ...]
+   write [<option> ...]
+      -text <string>
       -and <mask>
       -or <mask>
       -start <offset>
@@ -34,7 +35,6 @@ brlapi<sessionNumber> function [arg ...]
       -display {default | <number>}
       -charset <name>
    writeDots <dots>
-   withdrawDots
    enterRawMode <driver>
    leaveRawMode
    recvRaw <maximumLength>
