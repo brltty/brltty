@@ -1,26 +1,45 @@
-;;; -*- outline-regexp: ";;;;;*"; indent-tabs-mode: nil -*-
-
 (eval-when (:compile-toplevel)
   (declaim (optimize (safety 3) (debug 3))))
+
+;;;; * Package definition
+
 (defpackage :brlapi
   (:use :common-lisp :cffi)
-  (:export #:connect #:disconnect
+  (:export #:open-connection #:close-connection
 	   #:driver-id #:driver-name #:display-size
-           #:get-tty #:leave-tty
+           #:enter-tty-mode #:leave-tty-mode
            #:write-text #:write-dots #:write-region
            #:read-key #:expand-key))
 (in-package :brlapi)
 
 
-;;;; Library loading
+;;;; * C BrlAPI Library loading
 
 (define-foreign-library libbrlapi
   (:unix (:or "libbrlapi.so.0.5.0" "libbrlapi.so"))
   (t (:default "libbrlapi")))
 (use-foreign-library libbrlapi)
 
+;;;; * The DISPLAY class
+
+(defclass display ()
+  ((handle :initarg :handle :reader display-handle)
+   (fd :initarg :fd :reader display-file-descriptor)
+   (authkey :initarg :authkey :reader display-authkey)
+   (host :initarg :host :reader display-host)
+   (tty :initform nil :reader display-tty)))
+
+(defmethod print-object ((obj display) stream)
+  (print-unreadable-object (obj stream :type t)
+    (if (not (display-file-descriptor obj))
+        (format stream "disconnected")
+      (apply #'format stream "~Dx~D fd=~D, host=~A, id=~A, name=~A"
+             (concatenate 'list (multiple-value-list (display-size obj))
+                          (list (display-file-descriptor obj) (display-host obj)
+                                (driver-id obj) (driver-name obj)))))))
+
 
-;;;; Error handling
+;;;; * Error handling
 
 (defctype brlapi-code :int)
 (define-condition brlapi-error (error)
@@ -43,61 +62,84 @@
     value))
 
 
-;;;; Connection management
+;;;; * Connection management
 
 (defcstruct settings
-  "Connection settings."
+  "Connection setting structure."
   (authKey :string)
   (host :string))
-(defcfun ("brlapi_closeConnection" disconnect) :void)
-(defun connect (&optional authkey host)
+
+(defun open-connection (&optional key-filename host)
+  "Open a new connection to BRLTTY on HOST usng KEY-FILENAME for authorisation.
+Return a DISPLAY object which can further be used to interact with BRLTTY."
   (with-foreign-object (settings 'settings)
     (setf (foreign-slot-value settings 'settings 'authKey)
-          (if (stringp authkey) authkey (null-pointer))
-	  (foreign-slot-value settings 'settings 'host)
+          (if (stringp key-filename) key-filename (null-pointer))
+          (foreign-slot-value settings 'settings 'host)
           (if (stringp host) host (null-pointer)))
-    (let ((handle (foreign-funcall "brlapi_openConnection"
-				   :pointer settings
-				   :pointer settings
-				   brlapi-code)))
-      (values handle
-	      (foreign-slot-value settings 'settings 'authKey)
-	      (foreign-slot-value settings 'settings 'host)))))
+    (let* ((handle (foreign-alloc :char :count (foreign-funcall "brlapi_getHandleSize" :int)))
+           (fd (foreign-funcall "brlapi__openConnection"
+                                :pointer handle
+                                :pointer settings
+                                :pointer settings
+                                brlapi-code))
+           (display (make-instance 'display :handle handle :fd fd
+                                   :authkey (foreign-slot-value settings 'settings 'authKey)
+                                   :host (foreign-slot-value settings 'settings 'host))))
+      #+sbcl (sb-ext:finalize display (lambda ()
+                                        (foreign-funcall "brlapi__closeConnection" :pointer handle :void)
+                                        (foreign-free handle)))
+      display)))
 
-(defun driver-id ()
+(defmethod close-connection ((obj display))
+  (foreign-funcall "brlapi__closeConnection" :pointer (display-handle obj) :void)
+  (setf (slot-value obj 'fd) nil)
+  (foreign-free (display-handle obj))
+  (setf (slot-value obj 'handle) nil))
+
+;;;; * Querying the display
+
+(defmethod driver-id ((obj display))
+  "Return the currently used driver id as a string."
   (with-foreign-pointer-as-string (str 4 str-size)
-    (foreign-funcall "brlapi_getDriverId"
+    (foreign-funcall "brlapi__getDriverId" :pointer (display-handle obj)
                      :string str :int str-size
                      brlapi-code)))
 
-(defun driver-name ()
+(defmethod driver-name ((obj display))
+  "Return the currently used driver name."
   (with-foreign-pointer-as-string (str 64 str-size)
-    (foreign-funcall "brlapi_getDriverName"
+    (foreign-funcall "brlapi__getDriverName" :pointer (display-handle obj)
                      :string str :int str-size brlapi-code)))
 
-(defun display-size ()
+(defmethod display-size ((obj display))
+  "Return the dimensions of DISPLAY as multiple values.
+The first value represents the x dimension and the second the y dimension."
   (with-foreign-objects ((x :int) (y :int))
-    (foreign-funcall "brlapi_getDisplaySize" :pointer x :pointer y brlapi-code)
+    (foreign-funcall "brlapi__getDisplaySize" :pointer (display-handle obj) :pointer x :pointer y brlapi-code)
     (values (mem-ref x :int) (mem-ref y :int))))
 
 
-;;;; TTY acquisition
+;;;; * TTY mode
 
-(defun get-tty (tty &optional how)
+(defmethod enter-tty-mode ((obj display) tty &optional (how ""))
   (declare (integer tty))
-  (unless (stringp how) (setf how ""))
-  (foreign-funcall "brlapi_enterTtyMode" :int tty :string how brlapi-code))
+  (declare (string how))
+  (setf (slot-value obj 'tty) (foreign-funcall "brlapi__enterTtyMode" :pointer (display-handle obj) :int tty :string how brlapi-code)))
 
-(defcfun ("brlapi_leaveTtyMode" leave-tty) brlapi-code)
+(defmethod leave-tty-mode ((obj display))
+  (foreign-funcall "brlapi__leaveTtyMode" :pointer (display-handle obj) brlapi-code)
+  (setf (slot-value obj 'tty) nil))
 
 
-;;;; Output
+;;;; * Output
 
-(defun write-text (text &key (cursor -1))
+(defmethod write-text ((obj display) text &key (cursor -1))
   "Write TEXT (a string) to the braille display."
   (declare (string text))
   (declare (integer cursor))
-  (if (eql (foreign-funcall "brlapi_writeText"
+  (if (eql (foreign-funcall "brlapi__writeText"
+                            :pointer (display-handle obj)
                             :int cursor :string text
                             brlapi-code)
            0)
@@ -105,15 +147,15 @@
 
 (defbitfield (dots :uint8)
   (:dot1 #x01) :dot2 :dot3 :dot4 :dot5 :dot6 :dot7 :dot8)
-(defun write-dots (&rest dots-list)
+(defmethod write-dots ((obj display) &rest dots-list)
   "Write the given dots list to the display."
-  (with-foreign-object (dots 'dots (display-size))
-    (loop for i below (min (display-size) (length dots-list))
+  (with-foreign-object (dots 'dots (display-size obj))
+    (loop for i below (min (display-size obj) (length dots-list))
           do (setf (mem-aref dots 'dots i)
                    (foreign-bitfield-value 'dots (nth i dots-list))))
-    (loop for i from (length dots-list) below (display-size)
+    (loop for i from (length dots-list) below (display-size obj)
           do (setf (mem-aref dots 'dots i) 0))
-    (foreign-funcall "brlapi_writeDots" :pointer dots brlapi-code)))
+    (foreign-funcall "brlapi__writeDots" :pointer (display-handle obj) :pointer dots brlapi-code)))
 
 (defcstruct write-struct
   (display-number :int)
@@ -125,19 +167,20 @@
   (cursor :int)
   (charset :string))
 
-(defun write-region (text &key (begin 1) size (cursor -1) (display-number -1)
-                          (charset "") attr-and attr-or)
+(defmethod write-region ((obj display) text &key (begin 1) size (cursor -1) (display-number -1)
+                         (charset "") attr-and attr-or)
   "Update a specific region of the braille display and apply and/or masks."
-  (let ((size (or size (min (display-size)
+  (let ((size (or size (min (display-size obj)
                             (max (length text)
                                  (length attr-and)
                                  (length attr-or))))))    
     (with-foreign-objects ((ws 'write-struct)
-                           (txt :string size)
+                           (txt :string (1+ size))
                            (attra 'dots size)
                            (attro 'dots size))
       (loop for i below size
             do (setf (mem-aref txt :uint8 i) (char-code #\SPACE)))
+      (setf (mem-aref txt :uint8 size) 0)
       (loop for i below (min size (length text))
             do (setf (mem-aref txt :uint8 i) (char-code (aref text i))))
       (loop for i below size
@@ -154,15 +197,15 @@
             (foreign-slot-value ws 'write-struct 'text) txt
             (foreign-slot-value ws 'write-struct 'attr-or) attro
             (foreign-slot-value ws 'write-struct 'attr-and) attra)
-      (eql (foreign-funcall "brlapi_write" :pointer ws brlapi-code) 0))))
+      (eql (foreign-funcall "brlapi__write" :pointer (display-handle obj) :pointer ws brlapi-code) 0))))
 
 
-;;;; Input
+;;;; * Input
 
 (defctype key-code :uint64)
-(defun read-key (&optional block)
+(defmethod read-key ((obj display) &optional block)
   (with-foreign-object (key 'key-code)
-    (case (foreign-funcall "brlapi_readKey" :boolean block :pointer key brlapi-code)
+    (case (foreign-funcall "brlapi__readKey" :pointer (display-handle obj) :boolean block :pointer key brlapi-code)
       (0 nil)
       (1 (mem-ref key 'key-code)))))
 
@@ -178,3 +221,16 @@
                                      :string))
             (mem-ref arg :int)
             (mem-ref flags :int))))
+
+;;;; * Example usage
+
+(defun example (&optional (tty -1))
+  "A basic example."
+  (let ((display (open-connection)))
+    (enter-tty-mode display tty)
+    (write-text display "Press any key to continue...")
+    (apply #'format t "; Command: ~A, argument: ~D, flags: ~D"
+           (multiple-value-list (expand-key (read-key display t))))
+    (leave-tty-mode display)
+    (close-connection display)))
+
