@@ -39,7 +39,7 @@ brlapi<sessionNumber> function [arg ...]
    leaveRawMode
    recvRaw <maximumLength>
    sendRaw <packet>
-   suspend <driver>
-   resume
+   suspendDriver <driver>
+   resumeDriver
    closeConnection
 
