@@ -576,9 +576,9 @@ static void updateSettings(brlapi_settings_t *s1, const brlapi_settings_t *s2)
     s1->host = s2->host;
 }
 
-/* Function: brlapi_initializeConnection
+/* Function: brlapi_openConnection
  * Creates a socket to connect to BrlApi */
-brlapi_fileDescriptor brlapi__initializeConnection(brlapi_handle_t *handle, const brlapi_settings_t *clientSettings, brlapi_settings_t *usedSettings)
+brlapi_fileDescriptor brlapi__openConnection(brlapi_handle_t *handle, const brlapi_settings_t *clientSettings, brlapi_settings_t *usedSettings)
 {
   unsigned char packet[BRLAPI_MAXPACKETSIZE];
   authStruct *auth = (authStruct *) packet;
@@ -646,9 +646,9 @@ out:
   return INVALID_FILE_DESCRIPTOR;
 }
 
-brlapi_fileDescriptor brlapi_initializeConnection(const brlapi_settings_t *clientSettings, brlapi_settings_t *usedSettings)
+brlapi_fileDescriptor brlapi_openConnection(const brlapi_settings_t *clientSettings, brlapi_settings_t *usedSettings)
 {
-  return brlapi__initializeConnection(&defaultHandle, clientSettings, usedSettings);
+  return brlapi__openConnection(&defaultHandle, clientSettings, usedSettings);
 }
 
 /* brlapi_closeConnection */
@@ -784,26 +784,26 @@ ssize_t brlapi_recvRaw(void *buf, size_t size)
   return brlapi__recvRaw(&defaultHandle, buf, size);
 }
 
-/* brlapi_suspend */
-int brlapi__suspend(brlapi_handle_t *handle, const char *driver)
+/* brlapi_suspendDriver */
+int brlapi__suspendDriver(brlapi_handle_t *handle, const char *driver)
 {
-  return brlapi__getDriverSpecific(handle, driver, BRLPACKET_SUSPEND, STSUSPEND);
+  return brlapi__getDriverSpecific(handle, driver, BRLPACKET_SUSPENDDRIVER, STSUSPEND);
 }
 
-int brlapi_suspend(const char *driver)
+int brlapi_suspendDriver(const char *driver)
 {
-  return brlapi__suspend(&defaultHandle, driver);
+  return brlapi__suspendDriver(&defaultHandle, driver);
 }
 
-/* brlapi_resume */
-int brlapi__resume(brlapi_handle_t *handle)
+/* brlapi_resumeDriver */
+int brlapi__resumeDriver(brlapi_handle_t *handle)
 {
-  return brlapi__leaveDriverSpecific(handle, BRLPACKET_RESUME, STSUSPEND);
+  return brlapi__leaveDriverSpecific(handle, BRLPACKET_RESUMEDRIVER, STSUSPEND);
 }
 
-int brlapi_resume(void)
+int brlapi_resumeDriver(void)
 {
-  return brlapi__resume(&defaultHandle);
+  return brlapi__resumeDriver(&defaultHandle);
 }
 
 /* Function brlapi_request */

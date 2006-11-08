@@ -56,7 +56,7 @@
           (if (stringp authkey) authkey (null-pointer))
 	  (foreign-slot-value settings 'settings 'host)
           (if (stringp host) host (null-pointer)))
-    (let ((handle (foreign-funcall "brlapi_initializeConnection"
+    (let ((handle (foreign-funcall "brlapi_openConnection"
 				   :pointer settings
 				   :pointer settings
 				   brlapi-code)))

@@ -71,8 +71,8 @@ extern "C" {
 #define BRLPACKET_ACK               'A'    /**< Acknowledgement             */
 #define BRLPACKET_ERROR             'e'    /**< non-fatal error             */
 #define BRLPACKET_EXCEPTION         'E'    /**< Exception                   */
-#define BRLPACKET_SUSPEND           'S'    /**< Suspend driver              */
-#define BRLPACKET_RESUME            'R'    /**< Resume driver              */
+#define BRLPACKET_SUSPENDDRIVER     'S'    /**< Suspend driver              */
+#define BRLPACKET_RESUMEDRIVER      'R'    /**< Resume driver              */
 
 /** Magic number to give when sending a BRLPACKET_ENTERRAWMODE or BRLPACKET_SUSPEND packet */
 #define BRLDEVICE_MAGIC (0xdeadbeefL)
@@ -211,7 +211,7 @@ ssize_t brlapi_readPacket(brlapi_fileDescriptor fd, brl_type_t *type, void *buf,
  * requests to / answers from \e BrlAPI server, every function of the library
  * locks this mutex, namely
  *
- * - brlapi_initializeConnection()
+ * - brlapi_openConnection()
  * - brlapi_closeConnection()
  * - brlapi_enterRawMode()
  * - brlapi_leaveRaw()

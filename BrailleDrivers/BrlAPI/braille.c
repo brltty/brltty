@@ -56,7 +56,7 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
   brlapi_settings_t settings;
   settings.host = parameters[PARM_HOST];
   settings.authKey = parameters[PARM_AUTHKEY];
-  CHECK((brlapi_initializeConnection(&settings, &settings)>=0), out);
+  CHECK((brlapi_openConnection(&settings, &settings)>=0), out);
   LogPrint(LOG_DEBUG, "Connected to %s using %s", settings.host, settings.authKey);
   CHECK((brlapi_enterTtyModeWithPath(NULL, 0, NULL)>=0), out0);
   LogPrint(LOG_DEBUG, "Got tty successfully");

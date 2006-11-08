@@ -82,7 +82,7 @@ size_t brlapi_getHandleSize(void);
 /** \defgroup brlapi_connection Connecting to BrlAPI
  *
  * Before calling any other function of the library, calling
- * brlapi_initializeConnection() is needed to establish a connection to
+ * brlapi_openConnection() is needed to establish a connection to
  * \e BrlAPI 's server.
  * When the connection is not needed any more, brlapi_closeConnection() must be
  * called to close the connection.
@@ -158,7 +158,7 @@ typedef int brlapi_fileDescriptor;
  *
  * lets \e libbrlapi connect to the local computer, on port BRLAPI_SOCKETPORTNUM+1
  *
- * \sa brlapi_initializeConnection() brlapi_loadAuthKey()
+ * \sa brlapi_openConnection() brlapi_loadAuthKey()
  */
 typedef struct {
   /** To get authorized to connect, \e libbrlapi has to tell the \e BrlAPI server a
@@ -185,7 +185,7 @@ typedef struct {
  * with default values. */
 #define BRLAPI_SETTINGS_INITIALIZER { NULL, NULL }
 
-/* brlapi_initializeConnection */
+/* brlapi_openConnection */
 /** Open a socket and connect it to \e BrlAPI 's server
  *
  * This function first loads an authorization key as specified in settings.
@@ -199,12 +199,12 @@ typedef struct {
  * communicate with the server without using \e libbrlapi functions. If it uses
  * them however, it won't have to pass the file descriptor later, since the
  * library keeps a copy of it. But that also means that
- * brlapi_initializeConnection() may be called several times, but \e libbrlapi
+ * brlapi_openConnection() may be called several times, but \e libbrlapi
  * functions will always work with the last call's descriptor
  *
  * \par Example:
  * \code
- * if (brlapi_initializeConnection(&settings,&settings)<0) {
+ * if (brlapi_openConnection(&settings,&settings)<0) {
  *  fprintf(stderr,"couldn't connect to BrlAPI at %s: %s\n",
  *   settings.host, brlapi_strerror(&brlapi_error));
  *  exit(1);
@@ -231,15 +231,17 @@ typedef struct {
  * brlapi_readPacketContent()
  * brlapi_readPacket()
  */
-brlapi_fileDescriptor brlapi_initializeConnection(const brlapi_settings_t *clientSettings, brlapi_settings_t *usedSettings);
-brlapi_fileDescriptor brlapi__initializeConnection(brlapi_handle_t *handle, const brlapi_settings_t *clientSettings, brlapi_settings_t *usedSettings);
+brlapi_fileDescriptor brlapi_openConnection(const brlapi_settings_t *clientSettings, brlapi_settings_t *usedSettings);
+brlapi_fileDescriptor brlapi__openConnection(brlapi_handle_t *handle, const brlapi_settings_t *clientSettings, brlapi_settings_t *usedSettings);
+#define brlapi_initializeConnection(s1, s2) brlapi_openConnection(s1, s2)
+#define brlapi__initializeConnection(h, s1, s2) brlapi__openConnection(h, s1, s2)
 
 /* brlapi_closeConnection */
 /** Cleanly close the socket
  *
  * This function locks until a closing acknowledgement is received from the
  * server. The socket is then freed, so the file descriptor
- * brlapi_initializeConnection() gave has no meaning any more
+ * brlapi_openConnection() gave has no meaning any more
  */
 void brlapi_closeConnection(void);
 void brlapi__closeConnection(brlapi_handle_t *handle);
@@ -251,7 +253,7 @@ int brlapi_splitHost(const char *hostAndPort, char **host, char **port);
 /* brlapi_loadAuthKey */
 /** Load an authorization key from the given file
  *
- * Calling this function shouldn't be needed if brlapi_initializeConnection()
+ * Calling this function shouldn't be needed if brlapi_openConnection()
  * is used.
  *
  * \param filename gives the full path of the file;
@@ -260,7 +262,7 @@ int brlapi_splitHost(const char *hostAndPort, char **host, char **port);
  *
  * \return 0, -1 on error
  *
- * \sa brlapi_settings_t, brlapi_initializeConnection */
+ * \sa brlapi_settings_t, brlapi_openConnection */
 int brlapi_loadAuthKey(const char *filename, size_t *authlength, void *auth);
 
 /** @} */
@@ -761,8 +763,8 @@ int brlapi__acceptKeySet(brlapi_handle_t *handle, const brl_keycode_t *s, unsign
  * trash the terminal's data, or even lock it! The application should always
  * check for terminal's type thanks to brlapi_getDriverId().
  *
- * The client can also make brltty close the driver by using brlapi_suspend(),
- * and resume it again with brlapi_resume().  This should not be used if
+ * The client can also make brltty close the driver by using brlapi_suspendDriver(),
+ * and resume it again with brlapi_resumeDriver().  This should not be used if
  * possible: raw mode should be sufficient for any use.  If not, please ask for
  * features :)
  *
@@ -804,21 +806,24 @@ ssize_t brlapi__sendRaw(brlapi_handle_t *handle, const void *buf, size_t size);
 ssize_t brlapi_recvRaw(void *buf, size_t size);
 ssize_t brlapi__recvRaw(brlapi_handle_t *handle, void *buf, size_t size);
 
-/* brlapi_suspend */
+/* brlapi_suspendDriver */
 /** Suspend braille driver
  * \param driver Specifies the name of the driver which will be suspended.
  * \return -1 on error
  */
-int brlapi_suspend(const char *driver);
-int brlapi__suspend(brlapi_handle_t *handle, const char *driver);
+int brlapi_suspendDriver(const char *driver);
+int brlapi__suspendDriver(brlapi_handle_t *handle, const char *driver);
+#define brlapi_suspend(n) brlapi_suspendDriver(n)
+#define brlapi__suspend(h, n) brlapi__suspendDriver(h, n)
 
-/* brlapi_resume */
+/* brlapi_resumeDriver */
 /** Resume braille driver
  * \return -1 on error
  */
-int brlapi_resume(void);
-int brlapi__resume(brlapi_handle_t *handle);
-
+int brlapi_resumeDriver(void);
+int brlapi__resumeDriver(brlapi_handle_t *handle);
+#define brlapi_resume brlapi_resumeDriver
+#define brlapi__resume(h) brlapi__resumeDriver(h)
 /** @} */
 
 /** \defgroup brlapi_error Error handling

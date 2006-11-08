@@ -315,9 +315,9 @@ static int isKeyCapable(const BrailleDriver *brl)
   return ((brl->readKey!=NULL) && (brl->keyToCommand!=NULL));
 }
 
-/* Function : driverSuspend */
+/* Function : suspendDriver */
 /* Close driver */
-static void driverSuspend(BrailleDisplay *brl) {
+static void suspendDriver(BrailleDisplay *brl) {
   if (trueBraille == &noBraille) return; /* core unlinked api */
   LogPrint(LOG_DEBUG,"driver suspended");
   pthread_mutex_lock(&suspendMutex);
@@ -326,9 +326,9 @@ static void driverSuspend(BrailleDisplay *brl) {
   pthread_mutex_unlock(&suspendMutex);
 }
 
-/* Function : driverResume */
+/* Function : resumeDriver */
 /* Re-open driver */
-static int driverResume(BrailleDisplay *brl) {
+static int resumeDriver(BrailleDisplay *brl) {
   if (trueBraille == &noBraille) return 0; /* core unlinked api */
   pthread_mutex_lock(&suspendMutex);
   driverOpened = openBrailleDriver();
@@ -506,8 +506,8 @@ typedef struct { /* packet handlers */
   PacketHandler enterRawMode;  
   PacketHandler leaveRawMode;
   PacketHandler packet;
-  PacketHandler suspend;
-  PacketHandler resume;
+  PacketHandler suspendDriver;
+  PacketHandler resumeDriver;
 } PacketHandlers;
 
 /****************************************************************************/
@@ -1120,7 +1120,7 @@ static int handleEnterRawMode(Connection *c, brl_type_t type, unsigned char *pac
     return 0;
   }
   pthread_mutex_lock(&driverMutex);
-  if (!driverOpened && !driverResume(disp)) {
+  if (!driverOpened && !resumeDriver(disp)) {
     WERR(c->fd, BRLERR_DRIVERERROR,"driver resume error");
     pthread_mutex_unlock(&driverMutex);
     pthread_mutex_unlock(&rawMutex);
@@ -1157,7 +1157,7 @@ static int handlePacket(Connection *c, brl_type_t type, unsigned char *packet, s
   return 0;
 }
 
-static int handleSuspend(Connection *c, brl_type_t type, unsigned char *packet, size_t size)
+static int handleSuspendDriver(Connection *c, brl_type_t type, unsigned char *packet, size_t size)
 {
   LogPrintRequest(type, c->fd);
   if (!checkDriverSpecificModePacket(c, packet, size)) return 0;
@@ -1172,13 +1172,13 @@ static int handleSuspend(Connection *c, brl_type_t type, unsigned char *packet, 
   suspendConnection = c;
   pthread_mutex_unlock(&rawMutex);
   pthread_mutex_lock(&driverMutex);
-  if (driverOpened) driverSuspend(disp);
+  if (driverOpened) suspendDriver(disp);
   pthread_mutex_unlock(&driverMutex);
   writeAck(c->fd);
   return 0;
 }
 
-static int handleResume(Connection *c, brl_type_t type, unsigned char *packet, size_t size)
+static int handleResumeDriver(Connection *c, brl_type_t type, unsigned char *packet, size_t size)
 {
   LogPrintRequest(type, c->fd);
   CHECKERR(c->suspend,BRLERR_ILLEGAL_INSTRUCTION, "not allowed out of suspend mode");
@@ -1187,7 +1187,7 @@ static int handleResume(Connection *c, brl_type_t type, unsigned char *packet, s
   suspendConnection = NULL;
   pthread_mutex_unlock(&rawMutex);
   pthread_mutex_lock(&driverMutex);
-  if (!driverOpened) driverResume(disp);
+  if (!driverOpened) resumeDriver(disp);
   pthread_mutex_unlock(&driverMutex);
   writeAck(c->fd);
   return 0;
@@ -1198,7 +1198,7 @@ static PacketHandlers packetHandlers = {
   handleEnterTtyMode, handleSetFocus, handleLeaveTtyMode,
   handleKeyRange, handleKeyRange, handleKeySet, handleKeySet,
   handleWrite,
-  handleEnterRawMode, handleLeaveRawMode, handlePacket, handleSuspend, handleResume
+  handleEnterRawMode, handleLeaveRawMode, handlePacket, handleSuspendDriver, handleResumeDriver
 };
 
 static AuthDescriptor *authDescriptor;
@@ -1286,7 +1286,7 @@ static int processRequest(Connection *c, PacketHandlers *handlers)
       suspendConnection = NULL;
       LogPrint(LOG_WARNING,"Client on fd %"PRIFD" did not give up suspended mode properly",c->fd);
       pthread_mutex_lock(&driverMutex);
-      if (!driverOpened && !driverResume(disp))
+      if (!driverOpened && !resumeDriver(disp))
 	LogPrint(LOG_WARNING,"Couldn't resume braille driver");
       if (driverOpened && trueBraille->reset) {
         LogPrint(LOG_DEBUG,"Trying to reset braille terminal");
@@ -1327,8 +1327,8 @@ static int processRequest(Connection *c, PacketHandlers *handlers)
     case BRLPACKET_ENTERRAWMODE: p = handlers->enterRawMode; break;
     case BRLPACKET_LEAVERAWMODE: p = handlers->leaveRawMode; break;
     case BRLPACKET_PACKET: p = handlers->packet; break;
-    case BRLPACKET_SUSPEND: p = handlers->suspend; break;
-    case BRLPACKET_RESUME: p = handlers->resume; break;
+    case BRLPACKET_SUSPENDDRIVER: p = handlers->suspendDriver; break;
+    case BRLPACKET_RESUMEDRIVER: p = handlers->resumeDriver; break;
   }
   if (p!=NULL) p(c, type, packet, size);
   else WEXC(c->fd,BRLERR_UNKNOWN_INSTRUCTION, type, packet, size, "unknown packet type");
@@ -2376,7 +2376,7 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
     pthread_mutex_lock(&c->brlMutex);
     pthread_mutex_lock(&driverMutex);
     if (!driverOpened) {
-      if (!driverResume(brl)) {
+      if (!resumeDriver(brl)) {
 	pthread_mutex_unlock(&driverMutex);
 	pthread_mutex_unlock(&c->brlMutex);
         pthread_mutex_unlock(&rawMutex);
@@ -2408,7 +2408,7 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
     /* no RAW, no connection filling tty, hence suspend if needed */
     pthread_mutex_lock(&driverMutex);
     if (!coreActive) {
-      if (driverOpened) driverSuspend(brl);
+      if (driverOpened) suspendDriver(brl);
       pthread_mutex_unlock(&driverMutex);
       pthread_mutex_unlock(&rawMutex);
       goto out;
@@ -2471,7 +2471,7 @@ int api_resume(BrailleDisplay *brl) {
   pthread_mutex_lock(&rawMutex);
   pthread_mutex_lock(&driverMutex);
   if (!suspendConnection && !driverOpened) {
-    driverResume(brl);
+    resumeDriver(brl);
     if (driverOpened) {
       /* TODO: handle clients' resize */
       displayDimensions[0] = htonl(brl->x);
@@ -2539,7 +2539,7 @@ void api_unlink(BrailleDisplay *brl)
   trueBraille=&noBraille;
   pthread_mutex_lock(&driverMutex);
   if (!coreActive && driverOpened)
-    driverSuspend(disp);
+    suspendDriver(disp);
   pthread_mutex_unlock(&driverMutex);
 }
 

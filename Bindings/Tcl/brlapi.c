@@ -334,10 +334,10 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     "leaveTtyMode",
     "readKey",
     "recvRaw",
-    "resume",
+    "resumeDriver",
     "sendRaw",
     "setFocus",
-    "suspend",
+    "suspendDriver",
     "write",
     "writeDots",
     NULL
@@ -361,10 +361,10 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     FCN_leaveTtyMode,
     FCN_readKey,
     FCN_recvRaw,
-    FCN_resume,
+    FCN_resumeDriver,
     FCN_sendRaw,
     FCN_setFocus,
-    FCN_suspend,
+    FCN_suspendDriver,
     FCN_write,
     FCN_writeDots
   } Function;
@@ -921,7 +921,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
       }
     }
 
-    case FCN_suspend: {
+    case FCN_suspendDriver: {
       if (objc != 3) {
         Tcl_WrongNumArgs(interp, 2, objv, "<driver>");
         return TCL_ERROR;
@@ -930,19 +930,19 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
       {
         const char *driver = Tcl_GetString(objv[2]);
 
-        if (brlapi__suspend(session->handle, driver) != -1) return TCL_OK;
+        if (brlapi__suspendDriver(session->handle, driver) != -1) return TCL_OK;
         setBrlapiError(interp);
         return TCL_ERROR;
       }
     }
 
-    case FCN_resume: {
+    case FCN_resumeDriver: {
       if (objc != 2) {
         Tcl_WrongNumArgs(interp, 2, objv, NULL);
         return TCL_ERROR;
       }
 
-      if (brlapi__resume(session->handle) != -1) return TCL_OK;
+      if (brlapi__resumeDriver(session->handle) != -1) return TCL_OK;
       setBrlapiError(interp);
       return TCL_ERROR;
     }
@@ -1032,7 +1032,7 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
       {
         BrlapiSession *session = allocateMemory(sizeof(*session));
         session->handle = allocateMemory(brlapi_getHandleSize());
-        int result = brlapi__initializeConnection(session->handle, &options.settings, &session->settings);
+        int result = brlapi__openConnection(session->handle, &options.settings, &session->settings);
         if (result != -1) {
           session->fileDescriptor = result;
 

@@ -22,7 +22,7 @@
 public class BrlapiNative {
   protected long handle;
 
-  protected native int initializeConnection (
+  protected native int openConnection (
     BrlapiSettings clientSettings,
     BrlapiSettings usedSettings)
     throws BrlapiError;

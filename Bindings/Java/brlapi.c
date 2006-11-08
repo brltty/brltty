@@ -122,7 +122,7 @@ static void exceptionHandler(int err, brl_type_t type, const void *buf, size_t s
     return ret; \
   }
 
-JNIEXPORT jint JNICALL Java_BrlapiNative_initializeConnection(JNIEnv *jenv, jobject jobj, jobject JclientSettings , jobject JusedSettings) {
+JNIEXPORT jint JNICALL Java_BrlapiNative_openConnection(JNIEnv *jenv, jobject jobj, jobject JclientSettings , jobject JusedSettings) {
   jclass jcclientSettings, jcusedSettings;
   jfieldID clientAuthKeyID = NULL, clientHostID = NULL, usedAuthKeyID, usedHostID;
   brlapi_settings_t clientSettings,  usedSettings,
@@ -166,7 +166,7 @@ JNIEXPORT jint JNICALL Java_BrlapiNative_initializeConnection(JNIEnv *jenv, jobj
   else
     PusedSettings = NULL;
 
-  if ((result = brlapi__initializeConnection(handle, PclientSettings, PusedSettings)) < 0)
+  if ((result = brlapi__openConnection(handle, PclientSettings, PusedSettings)) < 0)
     return ThrowError(jenv, __func__), -1;
 
   if (JclientSettings) {

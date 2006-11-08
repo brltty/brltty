@@ -337,7 +337,7 @@ brltty_brl_open_device (gchar*                         device_name,
     unsigned char *buf;
 
 
-    if ((fd = brlapi_initializeConnection (NULL, &settings)) < 0) 
+    if ((fd = brlapi_openConnection (NULL, &settings)) < 0) 
     {
         brlapi_perror("Error opening brlapi connection"); //to be translated
         fprintf(stderr,"Please check that\n\

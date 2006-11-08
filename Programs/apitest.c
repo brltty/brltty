@@ -274,7 +274,7 @@ void showKeyCodes(void)
 void emptySignalHandler(int sig) { }
 #endif /* SIGUSR1 */
 
-void suspend(void)
+void suspendDriver(void)
 {
   char name[30];
   fprintf(stderr, "Getting driver name: ");
@@ -284,7 +284,7 @@ void suspend(void)
   }
   fprintf(stderr, "%s\n", name);
   fprintf(stderr, "Suspending\n");
-  if (brlapi_suspend(name)) {
+  if (brlapi_suspendDriver(name)) {
     brlapi_perror("suspend");
   } else {
 #ifdef SIGUSR1
@@ -298,8 +298,8 @@ void suspend(void)
 #ifdef SIGUSR1
     signal(SIGUSR1,SIG_DFL);
 #endif /* SIGUSR1 */
-    if (brlapi_resume())
-      brlapi_perror("resume");
+    if (brlapi_resumeDriver())
+      brlapi_perror("resumeDriver");
   }
 }
 
@@ -315,7 +315,7 @@ int main(int argc, char *argv[])
                  "");
 
   fprintf(stderr, "Connecting to BrlAPI... ");
-  if ((fd=brlapi_initializeConnection(&settings, &settings)) >= 0) {
+  if ((fd=brlapi_openConnection(&settings, &settings)) >= 0) {
     fprintf(stderr, "done (fd=%"PRIFD")\n", fd);
     fprintf(stderr,"Connected to %s using key file %s\n", settings.host, settings.authKey);
 
@@ -344,7 +344,7 @@ int main(int argc, char *argv[])
     }
 
     if (opt_suspendMode) {
-      suspend();
+      suspendDriver();
     }
 
     brlapi_closeConnection();

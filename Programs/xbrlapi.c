@@ -154,8 +154,8 @@ void tobrltty_init(char *authKey, char *host) {
   signal(SIGPIPE,api_cleanExit);
 #endif /* SIGPIPE */
 
-  if ((brlapi_fd = brlapi_initializeConnection(&settings,&settings))<0)
-    fatal_brlapi_errno("initializeConnection",gettext("cannot connect to brltty at %s\n"),settings.host);
+  if ((brlapi_fd = brlapi_openConnection(&settings,&settings))<0)
+    fatal_brlapi_errno("openConnection",gettext("cannot connect to brltty at %s\n"),settings.host);
 
   if (brlapi_getDisplaySize(&x,&y)<0)
     fatal_brlapi_errno("getDisplaySize",NULL);

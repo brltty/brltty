@@ -597,7 +597,7 @@ It is here rewritten, its working briefly explained.
 <sect1>Connecting to <em/BrlAPI/
 
 <p>Connection to <em/BrlAPI/ is needed first, thanks to the
-<tt>brlapi_initializeConnection</tt> call. For this, a
+<tt>brlapi_openConnection</tt> call. For this, a
 <tt>brlapi_settings_t</tt> variable must be filled which will hold the
 settings the library needs to connect to the server. Just giving <tt/NULL/
 will work for local use. The other parameter lets you get back the parameters
@@ -605,9 +605,9 @@ which were actually used to initialize connection. <tt/NULL/ will also be nice
 for now.
 
 <tscreen><code>
- if (brlapi_initializeConnection(NULL,NULL)<0)
+ if (brlapi_openConnection(NULL,NULL)<0)
  {
-  brlapi_perror("brlapi_initializeConnection");
+  brlapi_perror("brlapi_openConnection");
   exit(1);
  }
 </code></tscreen>
@@ -742,7 +742,7 @@ But control of another tty can still be get for instance, by calling
 </code></tscreen>
 
 The application can as well still need to connect to another server on another
-computer for instance, by calling <tt>brlapi_initializeConnection()</tt>
+computer for instance, by calling <tt>brlapi_openConnection()</tt>
 again...
 
 <sect1>Putting everything together...
@@ -760,9 +760,9 @@ int main()
  int x, y;
 
 /* Connect to BrlAPI */
-  if (brlapi_initializeConnection(NULL,NULL)<0)
+  if (brlapi_openConnection(NULL,NULL)<0)
   {
-   brlapi_perror("brlapi_initializeConnection");
+   brlapi_perror("brlapi_openConnection");
    exit(1);
   }
 
@@ -1425,7 +1425,7 @@ send to the terminal. Whenever its receives a packet from the terminal, the
 server does exactly the same, so that packet exchanges between the terminal and
 the server are exactly reproduced between the server and the client.
 
-<sect2><tt/BRLPACKET_SUSPEND/ (see <em/brlapi_suspend()/)
+<sect2><tt/BRLPACKET_SUSPENDDRIVER/ (see <em/brlapi_suspendDriver()/)
 <p>
 To enter suspend mode, the client must send a <tt/BRLPACKET_SUSPEND/ packet,
 which is acknowledge. Once in suspend mode, no other packet than

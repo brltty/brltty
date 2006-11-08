@@ -25,7 +25,7 @@ public class Brlapi extends BrlapiNative implements BrlapiConstants {
 
   public Brlapi (BrlapiSettings settings) throws BrlapiError {
     this.settings = new BrlapiSettings();
-    fileDescriptor = initializeConnection(settings, this.settings);
+    fileDescriptor = openConnection(settings, this.settings);
   }
 
   protected void finalize () {

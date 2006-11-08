@@ -44,7 +44,7 @@ cdef extern from "Programs/api.h":
 
 	size_t brlapi_getHandleSize()
 	void brlapi__closeConnection(brlapi_handle_t *)
-	int brlapi__initializeConnection(brlapi_handle_t *, brlapi_settings_t*, brlapi_settings_t*)
+	int brlapi__openConnection(brlapi_handle_t *, brlapi_settings_t*, brlapi_settings_t*)
 
 	int brlapi__getDisplaySize(brlapi_handle_t *, unsigned int*, unsigned int *y)
 	int brlapi__getDriverId(brlapi_handle_t *, char*, int)
