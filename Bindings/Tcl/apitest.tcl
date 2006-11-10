@@ -1,20 +1,25 @@
 #!/usr/bin/env tclsh
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2006 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU General Public License, as published by the Free Software
+# Foundation.  Please see the file COPYING for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+source [file join [file dirname $argv0] prologue.tcl]
+processOptions optionValues {host.arg}
+
 load libbrlapi_tcl.so
-package require cmdline
-
-proc writeProgramMessage {message} {
-   puts stderr "[::cmdline::getArgv0]: $message"
-}
-
-set optionList {host.arg}
-while {[set optionStatus [::cmdline::getopt argv $optionList optionName optionValue]] > 0} {
-   set optionValues($optionName) $optionValue
-}
-
-if {$optionStatus < 0} {
-   writeProgramMessage $optionValue
-   exit 2
-}
 
 proc expandList {list args} {
    set result ""

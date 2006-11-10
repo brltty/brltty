@@ -1,0 +1,102 @@
+#!/usr/bin/env tclsh
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2006 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU General Public License, as published by the Free Software
+# Foundation.  Please see the file COPYING for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+source [file join [file dirname $argv0] prologue.tcl]
+
+proc makeIndex {} {
+   global optionValues packageDirectory packageFile
+   set index [open [file join $packageDirectory "pkgIndex.tcl"] {WRONLY CREAT TRUNC}]
+
+   set template [open [info script] {RDONLY}]
+   set state 0
+   while {[gets $template line] >= 0} {
+      if {[regexp {^#{2,} *$} $line]} {
+         incr state
+      } elseif {![regexp {^#} $line]} {
+         break
+      }
+
+      if {$state > 0} {
+         puts $index $line
+      }
+
+      if {$state > 1} {
+         break
+      }
+   }
+   puts $index ""
+   close $template; unset template
+
+   if {[string equal [file extension $packageFile] [info sharedlibextension]]} {
+      set command "load"
+   } else {
+      set command "source"
+   }
+   puts $index "package ifneeded [string totitle $optionValues(name)] $optionValues(version) \[list $command \[file join \$dir $packageFile\]\]"
+   close $index; unset index
+}
+
+processOptions optionValues {name.arg root.arg uninstall version.arg}
+
+set index 0
+if {![info exists tcl_pkgPath] || ([llength $tcl_pkgPath] <= $index)} {
+   writeProgramMessage "package directory not defined."
+   exit 3
+}
+set packageDirectory [file join "$optionValues(root)[lindex $tcl_pkgPath $index]" $optionValues(name)]
+
+if {[string length $optionValues(version)] > 0} {
+   append packageDirectory "-$optionValues(version)"
+}
+
+switch -exact -- [set function [nextArgument "function"]] {
+   install {
+      set packageFile [nextArgument "package file name"]
+      noMoreArguments
+
+      if {[catch [list file mkdir $packageDirectory] response] != 0} {
+         writeProgramMessage $response
+         exit 4
+      }
+
+      if {[catch [list file copy -force -- $packageFile $packageDirectory] response] != 0} {
+         writeProgramMessage $response
+         exit 5
+      }
+
+      if {[catch [list makeIndex] response] != 0} {
+         writeProgramMessage $response
+         exit 6
+      }
+   }
+
+   uninstall {
+      noMoreArguments
+
+      if {[catch [list file delete -force -- $packageDirectory] response] != 0} {
+         writeProgramMessage $response
+         exit 9
+      }
+   }
+
+   default {
+      syntaxError "unknown function: $function"
+   }
+}
+
+exit 0
