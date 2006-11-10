@@ -118,8 +118,10 @@ openMidiDevice (int errorLevel, const char *device) {
 
 void
 closeMidiDevice (MidiDevice *midi) {
+  int result;
   if (midi) {
-    DisposeAUGraph(midi->graph);
+    if ((result = DisposeAUGraph(midi->graph)) != noErr)
+      LogPrint(LOG_ERR, "Can't dispose audio graph component: %d", result);
     free(midi);
   }
 }
@@ -131,9 +133,12 @@ flushMidiDevice (MidiDevice *midi) {
 
 int
 setMidiInstrument (MidiDevice *midi, unsigned char channel, unsigned char instrument) {
-  MusicDeviceMIDIEvent(midi->synth, 0xC0 | channel, instrument, 0, 0);
+  int result;
+  if ((result = MusicDeviceMIDIEvent(midi->synth, 0xC0 | channel, instrument,
+				     0, 0)) != noErr)
+    LogPrint(LOG_ERR, "Can't set MIDI instrument: %d", result);
 
-  return 1;
+  return result == noErr;
 }
 
 int
@@ -148,7 +153,13 @@ endMidiBlock (MidiDevice *midi) {
 
 int
 startMidiNote (MidiDevice *midi, unsigned char channel, unsigned char note, unsigned char volume) {
-  MusicDeviceMIDIEvent(midi->synth, 0x90 | channel, note, volume, 0);
+  int result;
+
+  if ((result = MusicDeviceMIDIEvent(midi->synth, 0x90 | channel, note,
+				     volume, 0)) != noErr) {
+    LogPrint(LOG_ERR, "Can't start MIDI note: %d", result);
+    return 0;
+  }
   midi->note = note;
 
   return 1;
@@ -156,7 +167,16 @@ startMidiNote (MidiDevice *midi, unsigned char channel, unsigned char note, unsi
 
 int
 stopMidiNote (MidiDevice *midi, unsigned char channel) {
-  return startMidiNote(midi, channel, midi->note, 0);
+  int result;
+
+  if ((result = MusicDeviceMIDIEvent(midi->synth, 0x90 | channel, midi->note,
+				     0, 0)) != noErr) {
+    LogPrint(LOG_ERR, "Can't stop MIDI note: %d", result);
+    return 0;
+  }
+  midi->note = 0;
+
+  return 1;
 }
 
 int
