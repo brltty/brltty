@@ -19,8 +19,10 @@ BRLDEFS_HDR = $(SRC_TOP)$(PGM_DIR)/brldefs.h
 BRLDEFS_AWK = $(SRC_TOP)$(PGM_DIR)/brldefs.awk
 APIDEFS_AWK = $(SRC_TOP)$(PGM_DIR)/apidefs.awk
 
+API_NAME = brlapi
 API_DIR = $(BLD_TOP)$(PGM_DIR)
-API_LDFLAGS = -L$(API_DIR) -lbrlapi
+API_LIB = $(API_DIR)/lib$(API_NAME).$(LIB_EXT)
+API_LDFLAGS = -L$(API_DIR) -l$(API_NAME)
 
 API_HEADER = $(API_DIR)/api.h
 API_constants = $(API_DIR)/api_constants.h

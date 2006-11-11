@@ -40,7 +40,7 @@ constants.auto.pyx: $(API_HEADER) $(APIDEFS_AWK) $(BRLDEFS_HDR) $(BRLDEFS_AWK) $
 	$(AWK) -f $(APIDEFS_AWK) -f $(BRLDEFS_AWK) -f $(SRC_DIR)/constants.awk $(API_HEADER) $(BRLDEFS_HDR) >$@
 
 doc: $(PYTHON_API)
-	LD_PRELOAD=$(API_DIR)/libbrlapi.$(LIB_EXT) PYTHONPATH=. pydoc -w $(PYTHON_MODULE)
+	LD_PRELOAD=$(API_LIB) PYTHONPATH=. pydoc -w $(PYTHON_MODULE)
 
 install: all
 	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(PYTHON_SITE_PKG)
