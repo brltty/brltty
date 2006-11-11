@@ -42,10 +42,11 @@ static const unsigned char BookwormSessionEnd[] = {0X05, 0X07};	/* bookworm trai
 
 typedef struct {
   unsigned long int front;
-  int column;
-  int status;
+  signed char column;
+  signed char status;
 } Keys;
-static Keys currentKeys, pressedKeys, nullKeys;
+static Keys currentKeys, pressedKeys;
+static const Keys nullKeys = {.front=0, .column=-1, .status=-1};
 static unsigned int inputMode;
 
 /* Braille display parameters */
@@ -550,9 +551,6 @@ identifyModel (BrailleDisplay *brl, unsigned char identifier) {
   if (!reallocateBuffer(&rawData, brl->x*brl->y)) return 0;
   if (!reallocateBuffer(&prevData, brl->x*brl->y)) return 0;
 
-  nullKeys.front = 0;
-  nullKeys.column = -1;
-  nullKeys.status = -1;
   currentKeys = pressedKeys = nullKeys;
   inputMode = 0;
 
