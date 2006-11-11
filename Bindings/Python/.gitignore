@@ -3,3 +3,4 @@ reldeps.mk
 *.auto.c
 *.auto.pyx
 brlapi.so
+brlapi.html

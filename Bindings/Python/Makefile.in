@@ -22,7 +22,8 @@ PYTHON_CPPFLAGS = @PYTHON_CPPFLAGS@
 PYTHON_LDFLAGS = @PYTHON_LDFLAGS@
 PYTHON_SITE_PKG = @PYTHON_SITE_PKG@
 
-PYTHON_API = brlapi.$(LIB_EXT)
+PYTHON_MODULE = brlapi
+PYTHON_API = $(PYTHON_MODULE).$(LIB_EXT)
 
 all: $(PYTHON_API)
 
@@ -38,6 +39,9 @@ brlapi.auto.c: $(SRC_DIR)/brlapi.pyx $(SRC_DIR)/c_brlapi.pxd constants.auto.pyx
 constants.auto.pyx: $(API_HEADER) $(APIDEFS_AWK) $(BRLDEFS_HDR) $(BRLDEFS_AWK) $(SRC_DIR)/constants.awk
 	$(AWK) -f $(APIDEFS_AWK) -f $(BRLDEFS_AWK) -f $(SRC_DIR)/constants.awk $(API_HEADER) $(BRLDEFS_HDR) >$@
 
+doc: $(PYTHON_API)
+	LD_PRELOAD=$(API_DIR)/libbrlapi.$(LIB_EXT) PYTHONPATH=. pydoc -w $(PYTHON_MODULE)
+
 install: all
 	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(PYTHON_SITE_PKG)
 	$(INSTALL_PROGRAM) $(PYTHON_API) $(INSTALL_ROOT)$(PYTHON_SITE_PKG)
@@ -46,5 +50,5 @@ uninstall: $(PYTHON_API)
 	-rm -f $(INSTALL_ROOT)$(PYTHON_SITE_PKG)/$(PYTHON_API)
 
 clean::
-	-rm -f $(PYTHON_API) *.auto.pyx
+	-rm -f $(PYTHON_API) *.auto.pyx *.html
 
