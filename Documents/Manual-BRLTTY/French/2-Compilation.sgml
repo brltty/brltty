@@ -1066,7 +1066,7 @@ Les variables d'environnement suivantes sont assignées:
     Programming Interface).
   <tag>BRLAPI_RELEASE</tag>
     Le numéro de version complet de BrlAPI.
-  <tag>BRLAPI_KEYFILE</tag>
+  <tag>BRLAPI_AUTH</tag>
     Le nom du fichier du clavier de BrlAPI.
 </descrip>
 
