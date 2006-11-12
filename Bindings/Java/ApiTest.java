@@ -51,7 +51,7 @@ public class ApiTest {
       System.out.println("done (fd=" + brlapi.getFileDescriptor() + ")");
 
       System.out.print("Connected to " + brlapi.getHost());
-      System.out.print(" using key file " + brlapi.getAuthKey());
+      System.out.print(" using key file " + brlapi.getAuth());
       System.out.println();
 
       System.out.print("Driver is " + brlapi.getDriverName());

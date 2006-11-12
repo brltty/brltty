@@ -343,7 +343,7 @@ brltty_brl_open_device (gchar*                         device_name,
         fprintf(stderr,"Please check that\n\
  - %s exists and contains some data\n\
  - you have read permission on %s\n\
- - BRLTTY is running\n", settings.authKey, settings.authKey); //to be translated
+ - BRLTTY is running\n", settings.auth, settings.auth); //to be translated
         return 0;
     }
 

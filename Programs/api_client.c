@@ -557,7 +557,7 @@ out:
 /* Tries to get authorization from server with the given key. */
 static int tryAuthKey(brlapi_handle_t *handle, authStruct *auth, size_t authKeyLength) {
   int res;
-  res = brlapi_writePacket(handle->fileDescriptor, BRLPACKET_AUTHKEY, auth, sizeof(auth->protocolVersion)+authKeyLength);
+  res = brlapi_writePacket(handle->fileDescriptor, BRLPACKET_AUTH, auth, sizeof(auth->protocolVersion)+authKeyLength);
   memset(&auth->key, 0, authKeyLength); /* Forget authorization key ASAP */
   if (res<0) return -1;
   if ((brlapi__waitForAck(handle))<0) return -1;
@@ -570,8 +570,8 @@ static int tryAuthKey(brlapi_handle_t *handle, authStruct *auth, size_t authKeyL
 static void updateSettings(brlapi_settings_t *s1, const brlapi_settings_t *s2)
 {
   if (s2==NULL) return;
-  if ((s2->authKey) && (*s2->authKey))
-    s1->authKey = s2->authKey;
+  if ((s2->auth) && (*s2->auth))
+    s1->auth = s2->auth;
   if ((s2->host) && (*s2->host))
     s1->host = s2->host;
 }
@@ -584,8 +584,8 @@ brlapi_fileDescriptor brlapi__openConnection(brlapi_handle_t *handle, const brla
   authStruct *auth = (authStruct *) packet;
   size_t authKeyLength;
 
-  brlapi_settings_t settings = { BRLAPI_DEFAUTHPATH, ":0" };
-  brlapi_settings_t envsettings = { getenv("BRLAPI_AUTHPATH"), getenv("BRLAPI_HOST") };
+  brlapi_settings_t settings = { BRLAPI_DEFAUTH, ":0" };
+  brlapi_settings_t envsettings = { getenv("BRLAPI_AUTH"), getenv("BRLAPI_HOST") };
 
   /* Here update settings with the parameters from misc sources (files, env...) */
   updateSettings(&settings, &envsettings);
@@ -610,17 +610,17 @@ retry:
   auth->protocolVersion = htonl(BRLAPI_PROTOCOL_VERSION);
 
   /* try with an empty key as well, in case no authorization is needed */
-  if (!settings.authKey) {
+  if (!settings.auth) {
     if (tryAuthKey(handle, auth,0)<0)
       goto outfd;
-    if (usedSettings) usedSettings->authKey = "none";
-  } else if (brlapi_loadAuthKey(settings.authKey,&authKeyLength,(void *) &auth->key)<0) {
+    if (usedSettings) usedSettings->auth = "none";
+  } else if (brlapi_loadAuthKey(settings.auth,&authKeyLength,(void *) &auth->key)<0) {
     brlapi_error_t error = brlapi_error;
     if (tryAuthKey(handle, auth,0)<0) {
       brlapi_error = error;
       goto outfd;
     }
-    if (usedSettings) usedSettings->authKey = "none";
+    if (usedSettings) usedSettings->auth = "none";
   } else if (tryAuthKey(handle, auth,authKeyLength)<0) {
     if (brlapi_errno != BRLERR_CONNREFUSED)
       goto outfd;
@@ -628,7 +628,7 @@ retry:
       closeFileDescriptor(handle->fileDescriptor);
       handle->fileDescriptor = INVALID_FILE_DESCRIPTOR;
     }
-    settings.authKey = NULL;
+    settings.auth = NULL;
     goto retry;
   }
 

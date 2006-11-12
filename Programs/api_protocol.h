@@ -52,7 +52,7 @@ extern "C" {
 
 #define BRLAPI_PROTOCOL_VERSION ((uint32_t) 8) /** Communication protocol version */
 
-#define BRLPACKET_AUTHKEY           'K'    /**< Authorization key          */
+#define BRLPACKET_AUTH              'K'    /**< Authorization key          */
 #define BRLPACKET_GETDRIVERID       'd'    /**< Ask which driver is used    */
 #define BRLPACKET_GETDRIVERNAME     'n'    /**< Ask which driver is used    */
 #define BRLPACKET_GETDISPLAYSIZE    's'    /**< Dimensions of brl display   */

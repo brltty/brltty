@@ -42,4 +42,4 @@ BRLTTY_INCLUDE_DIRECTORY="@include_directory@"
 
 BRLAPI_VERSION="@api_version@"
 BRLAPI_RELEASE="@api_release@"
-BRLAPI_KEYFILE="@api_authfile@"
+BRLAPI_AUTH="@api_authkeyfile@"

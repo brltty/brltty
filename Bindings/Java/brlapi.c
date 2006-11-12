@@ -124,11 +124,11 @@ static void exceptionHandler(int err, brl_type_t type, const void *buf, size_t s
 
 JNIEXPORT jint JNICALL Java_BrlapiNative_openConnection(JNIEnv *jenv, jobject jobj, jobject JclientSettings , jobject JusedSettings) {
   jclass jcclientSettings, jcusedSettings;
-  jfieldID clientAuthKeyID = NULL, clientHostID = NULL, usedAuthKeyID, usedHostID;
+  jfieldID clientAuthID = NULL, clientHostID = NULL, usedAuthID, usedHostID;
   brlapi_settings_t clientSettings,  usedSettings,
             *PclientSettings, *PusedSettings;
   int result;
-  jstring authKey = NULL, host = NULL;
+  jstring auth = NULL, host = NULL;
   const char *str;
   jfieldID handleID;
   brlapi_handle_t *handle;
@@ -147,14 +147,14 @@ JNIEXPORT jint JNICALL Java_BrlapiNative_openConnection(JNIEnv *jenv, jobject jo
 
   if (JclientSettings) {
     GET_CLASS(jenv, jcclientSettings, JclientSettings, -1);
-    GET_ID(jenv, clientAuthKeyID, jcclientSettings, "authKey", "Ljava/lang/String;", -1);
+    GET_ID(jenv, clientAuthID, jcclientSettings, "auth", "Ljava/lang/String;", -1);
     GET_ID(jenv, clientHostID, jcclientSettings, "host", "Ljava/lang/String;", -1);
 
     PclientSettings = &clientSettings;
-    if ((authKey = (*jenv)->GetObjectField(jenv, JclientSettings, clientAuthKeyID))) {
-      if (!(clientSettings.authKey = (char *)(*jenv)->GetStringUTFChars(jenv, authKey, NULL)))
+    if ((auth = (*jenv)->GetObjectField(jenv, JclientSettings, clientAuthID))) {
+      if (!(clientSettings.auth = (char *)(*jenv)->GetStringUTFChars(jenv, auth, NULL)))
 	return ThrowException(jenv, ERR_OUTOFMEM, __func__), -1;
-    } else clientSettings.authKey = NULL;
+    } else clientSettings.auth = NULL;
     if ((host = (*jenv)->GetObjectField(jenv, JclientSettings, clientHostID))) {
       if (!(clientSettings.host = (char *)(*jenv)->GetStringUTFChars(jenv, host, NULL)))
 	return ThrowException(jenv, ERR_OUTOFMEM, __func__), -1;
@@ -170,23 +170,23 @@ JNIEXPORT jint JNICALL Java_BrlapiNative_openConnection(JNIEnv *jenv, jobject jo
     return ThrowError(jenv, __func__), -1;
 
   if (JclientSettings) {
-    if (clientSettings.authKey)
-      (*jenv)->ReleaseStringUTFChars(jenv, authKey,  clientSettings.authKey); 
+    if (clientSettings.auth)
+      (*jenv)->ReleaseStringUTFChars(jenv, auth,  clientSettings.auth); 
     if (clientSettings.host)
       (*jenv)->ReleaseStringUTFChars(jenv, host, clientSettings.host); 
   }
 
   if (PusedSettings) {
     GET_CLASS(jenv, jcusedSettings, JusedSettings, -1);
-    GET_ID(jenv, usedAuthKeyID, jcusedSettings, "authKey", "Ljava/lang/String;", -1);
+    GET_ID(jenv, usedAuthID, jcusedSettings, "auth", "Ljava/lang/String;", -1);
     GET_ID(jenv, usedHostID, jcusedSettings, "host", "Ljava/lang/String;", -1);
 
-    authKey = (*jenv)->NewStringUTF(jenv, usedSettings.authKey);
-    if (!authKey)
+    auth = (*jenv)->NewStringUTF(jenv, usedSettings.auth);
+    if (!auth)
       return ThrowException(jenv, ERR_OUTOFMEM, __func__), -1;
-    str = (*jenv)->GetStringUTFChars(jenv, authKey, NULL);
-    (*jenv)->SetObjectField(jenv, JusedSettings, clientAuthKeyID, authKey);
-    (*jenv)->ReleaseStringUTFChars(jenv, authKey, str);
+    str = (*jenv)->GetStringUTFChars(jenv, auth, NULL);
+    (*jenv)->SetObjectField(jenv, JusedSettings, clientAuthID, auth);
+    (*jenv)->ReleaseStringUTFChars(jenv, auth, str);
 
     host = (*jenv)->NewStringUTF(jenv, usedSettings.host);
     if (!host)

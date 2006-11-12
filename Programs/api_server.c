@@ -1214,8 +1214,8 @@ static int handleUnauthorizedConnection(Connection *c, brl_type_t type, unsigned
   authStruct *auth = (authStruct *) packet;
   int remaining = size;
 
-  if (type!=BRLPACKET_AUTHKEY) {
-    WERR(c->fd, BRLERR_CONNREFUSED, "wrong packet type (should be authkey)");
+  if (type!=BRLPACKET_AUTH) {
+    WERR(c->fd, BRLERR_CONNREFUSED, "wrong packet type (should be auth)");
     return 1;
   }
 
@@ -2575,7 +2575,7 @@ int api_start(BrailleDisplay *brl, char **parameters)
     if (!(authDescriptor = authBeginServer(parameter))) return 0;
   }
 
-  keyfile = *parameters[PARM_KEYFILE]?parameters[PARM_KEYFILE]:BRLAPI_DEFAUTHPATH;
+  keyfile = *parameters[PARM_KEYFILE]?parameters[PARM_KEYFILE]:BRLAPI_DEFAUTH;
   pthread_attr_t attr;
   pthread_mutexattr_t mattr;
 

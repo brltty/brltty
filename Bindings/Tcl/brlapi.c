@@ -322,12 +322,12 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     "closeConnection",
     "enterRawMode",
     "enterTtyMode",
+    "getAuth",
     "getDisplaySize",
     "getDriverId",
     "getDriverName",
     "getFileDescriptor",
     "getHost",
-    "getKeyFile",
     "ignoreKeyRange",
     "ignoreKeySet",
     "leaveRawMode",
@@ -349,12 +349,12 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     FCN_closeConnection,
     FCN_enterRawMode,
     FCN_enterTtyMode,
+    FCN_getAuth,
     FCN_getDisplaySize,
     FCN_getDriverId,
     FCN_getDriverName,
     FCN_getFileDescriptor,
     FCN_getHost,
-    FCN_getKeyFile,
     FCN_ignoreKeyRange,
     FCN_ignoreKeySet,
     FCN_leaveRawMode,
@@ -393,13 +393,13 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
       return TCL_OK;
     }
 
-    case FCN_getKeyFile: {
+    case FCN_getAuth: {
       if (objc != 2) {
         Tcl_WrongNumArgs(interp, 2, objv, NULL);
         return TCL_ERROR;
       }
 
-      setStringResult(interp, session->settings.authKey, -1);
+      setStringResult(interp, session->settings.auth, -1);
       return TCL_OK;
     }
 
@@ -972,9 +972,9 @@ OPTION_HANDLER(general, connect, host) {
   return TCL_OK;
 }
 
-OPTION_HANDLER(general, connect, keyFile) {
+OPTION_HANDLER(general, connect, auth) {
   FunctionData_general_connect *options = data;
-  options->settings.authKey = Tcl_GetString(objv[1]);
+  options->settings.auth = Tcl_GetString(objv[1]);
   return TCL_OK;
 }
 
@@ -1024,7 +1024,7 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
         }
         ,
         {
-          OPTION(general, connect, keyFile),
+          OPTION(general, connect, auth),
           OPERANDS(1, "<file>")
         }
       END_OPTIONS(2)

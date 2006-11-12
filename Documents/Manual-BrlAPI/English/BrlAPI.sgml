@@ -1207,7 +1207,7 @@ four following modes:
 
 <itemize>
 <item>authorization mode: this is the initial mode, when the client hasn't
-got the authorization to use the server yet. Only one <tt/BRLPACKET_AUTHKEY/ packet
+got the authorization to use the server yet. Only one <tt/BRLPACKET_AUTH/ packet
 will be accepted, which makes the connection enter normal mode.
 
 
@@ -1267,7 +1267,7 @@ Here is described the semantics of each type of packet. Most of them are
 directly linked to some of <em/BrlAPI/'s library's functions. Reading their
 online manual page as well will hence be of good help for understanding.
 
-<sect2><tt/BRLPACKET_AUTHKEY/ (see <em/brlapi_loadAuthKey()/)
+<sect2><tt/BRLPACKET_AUTH/ (see <em/brlapi_loadAuthKey()/)
 <p>
 This must be the first packet ever transmitted from the client to the
 server. It lets the client ask an authorization to the server. Data is
@@ -1279,7 +1279,7 @@ If the protocol version is not the same as the server's, a
 closed.
 
 If the authorization key matches the servers', it is acknowledged, and
-other types of packets might be used, other <tt/BRLPACKET_AUTHKEY/ shouldn't
+other types of packets might be used, other <tt/BRLPACKET_AUTH/ shouldn't
 be sent by the client.
 
 If the authorization key doesn't match, the server sends a

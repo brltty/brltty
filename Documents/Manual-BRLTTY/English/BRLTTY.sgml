@@ -1429,7 +1429,7 @@ The following environment variables are set:
     The version number of BrlAPI (BRLTTY's Application Programming Interface).
   <tag/BRLAPI_RELEASE/
     The full release number of BrlAPI.
-  <tag/BRLAPI_KEYFILE/
+  <tag/BRLAPI_AUTH/
     The name of BrlAPI's key file.
 </descrip>
 

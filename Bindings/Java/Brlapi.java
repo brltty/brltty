@@ -36,8 +36,8 @@ public class Brlapi extends BrlapiNative implements BrlapiConstants {
     return settings.host;
   }
 
-  public String getAuthKey () {
-    return settings.authKey;
+  public String getAuth () {
+    return settings.auth;
   }
 
   public int getFileDescriptor () {

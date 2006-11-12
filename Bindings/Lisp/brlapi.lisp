@@ -25,7 +25,7 @@
 (defclass display ()
   ((handle :initarg :handle :reader display-handle)
    (fd :initarg :fd :reader display-file-descriptor)
-   (authkey :initarg :authkey :reader display-authkey)
+   (auth :initarg :auth :reader display-auth)
    (host :initarg :host :reader display-host)
    (tty :initform nil :reader display-tty)))
 
@@ -66,14 +66,14 @@
 
 (defcstruct settings
   "Connection setting structure."
-  (authKey :string)
+  (auth :string)
   (host :string))
 
 (defun open-connection (&optional key-filename host)
   "Open a new connection to BRLTTY on HOST usng KEY-FILENAME for authorisation.
 Return a DISPLAY object which can further be used to interact with BRLTTY."
   (with-foreign-object (settings 'settings)
-    (setf (foreign-slot-value settings 'settings 'authKey)
+    (setf (foreign-slot-value settings 'settings 'auth)
           (if (stringp key-filename) key-filename (null-pointer))
           (foreign-slot-value settings 'settings 'host)
           (if (stringp host) host (null-pointer)))
@@ -84,7 +84,7 @@ Return a DISPLAY object which can further be used to interact with BRLTTY."
                                 :pointer settings
                                 brlapi-code))
            (display (make-instance 'display :handle handle :fd fd
-                                   :authkey (foreign-slot-value settings 'settings 'authKey)
+                                   :auth (foreign-slot-value settings 'settings 'auth)
                                    :host (foreign-slot-value settings 'settings 'host))))
       #+sbcl (sb-ext:finalize display (lambda ()
                                         (foreign-funcall "brlapi__closeConnection" :pointer handle :void)

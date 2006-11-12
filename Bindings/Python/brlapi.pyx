@@ -121,19 +121,19 @@ cdef class Connection:
 	cdef c_brlapi.brlapi_handle_t *h
 	cdef c_brlapi.brlapi_settings_t settings
 	cdef int fd
-	def __init__(self, host = None, authKey = None):
+	def __init__(self, host = None, auth = None):
 		"""Connect your program to BrlTTY using settings
 		
 		Setting host to None defaults it to localhost, using the local installation's default TCP port, or to the content of the BRLAPI_HOST environment variable, if it exists.
 		Note: Please check that resolving this name works before complaining.
 
-		Setting authKey to None defaults it to local installation setup or to the content of the BRLAPI_AUTHPATH environment variable, if it exists."""
+		Setting auth to None defaults it to local installation setup or to the content of the BRLAPI_AUTH environment variable, if it exists."""
 		cdef c_brlapi.brlapi_settings_t client
 
-		if authKey:
-			client.authKey = authKey
+		if auth:
+			client.auth = auth
 		else:
-			client.authKey = ""
+			client.auth = ""
 
 		if host:
 			client.host = host
@@ -147,7 +147,7 @@ cdef class Connection:
 		c_brlapi.Py_END_ALLOW_THREADS
 		if self.fd == -1:
 			c_brlapi.free(self.h)
-			raise ConnectionError("couldn't connect to %s with key %s: %s" % (self.settings.host,self.settings.authKey,returnerrno()))
+			raise ConnectionError("couldn't connect to %s with key %s: %s" % (self.settings.host,self.settings.auth,returnerrno()))
 
 	def __del__(self):
 		"""Close the BrlAPI conection"""
@@ -159,10 +159,10 @@ cdef class Connection:
 		def __get__(self):
 			return self.settings.host
 
-	property authKey:
+	property auth:
 		"""This tells where the BrlAPI server resides : it might be listening on another computer, on any TCP port. It should look like "foo:1", which means TCP port number BRLAPI_SOCKETPORTNUM+1 on computer called "foo"."""
 		def __get__(self):
-			return self.settings.authKey
+			return self.settings.auth
 
 	property fileDescriptor:
 		"""Returns the Unix file descriptor that the connection uses"""

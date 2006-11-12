@@ -66,13 +66,13 @@
  * option handling
  */
 
-static char *keyFile;
+static char *auth;
 static char *brlttyServer;
 static char *xDisplay;
 
 BEGIN_OPTION_TABLE
-  {"keyfile", strtext("file"), 'k', 0, 0,
-   &keyFile, NULL,
+  {"auth", strtext("file"), 'k', 0, 0,
+   &auth, NULL,
    strtext("set path to file containing authorization key"), NULL},
 
   {"server", strtext("[host][:port]"), 's', 0, 0,
@@ -136,11 +136,11 @@ void api_cleanExit(int foo) {
   exit(0);
 }
 
-void tobrltty_init(char *authKey, char *host) {
+void tobrltty_init(char *auth, char *host) {
   brlapi_settings_t settings;
   unsigned int x,y;
   settings.host=host;
-  settings.authKey=authKey;
+  settings.auth=auth;
 
   signal(SIGTERM,api_cleanExit);
   signal(SIGINT,api_cleanExit);
@@ -567,7 +567,7 @@ int main(int argc, char *argv[]) {
                  NULL, NULL, NULL,
                  NULL);
 
-  tobrltty_init(keyFile,brlttyServer);
+  tobrltty_init(auth,brlttyServer);
 
   toX_f(xDisplay);
 

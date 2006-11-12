@@ -1,7 +1,7 @@
 brlapi <function> [<arg> ...]
    openConnection [<option> ...]
       -host <hostSpec>
-      -keyFile <file>
+      -auth <file>
    expandHost <hostSpec>
    expandKeyCode <keyCode>
    getKeyName <command> [<argument>]
@@ -10,7 +10,7 @@ brlapi <function> [<arg> ...]
 
 brlapi<sessionNumber> function [arg ...]
    getHost
-   getKeyFile
+   getAuth
    getFileDescriptor
    getDriverId
    getDriverName

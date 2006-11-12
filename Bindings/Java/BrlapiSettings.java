@@ -21,11 +21,11 @@
 
 public class BrlapiSettings {
   public String host;
-  public String authKey;
+  public String auth;
 
-  public BrlapiSettings (String host, String authKey) {
+  public BrlapiSettings (String host, String auth) {
     this.host = host;
-    this.authKey = authKey;
+    this.auth = auth;
   }
 
   public BrlapiSettings (String host) {

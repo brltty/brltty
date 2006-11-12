@@ -116,10 +116,10 @@ size_t brlapi_getHandleSize(void);
 /** Default name of the file containing \e BrlAPI 's authorization key
  *
  * This name is relative to BRLAPI_ETCDIR */
-#undef BRLAPI_AUTHFILE
+#undef BRLAPI_AUTHKEYFILE
 
-/** Final path for default authorization key file */
-#define BRLAPI_DEFAUTHPATH BRLAPI_ETCDIR "/" BRLAPI_AUTHFILE
+/** Default authorization setting */
+#define BRLAPI_DEFAUTH BRLAPI_ETCDIR "/" BRLAPI_AUTHKEYFILE
 
 #undef BRLAPI_WIN32
 
@@ -139,7 +139,7 @@ typedef int brlapi_fileDescriptor;
  * \code
  * brlapi_settings_t settings;
  *
- * settings.authKey="/etc/brlapi.key";
+ * settings.auth="/etc/brlapi.key";
  * settings.host="foo";
  * \endcode
  *
@@ -161,13 +161,14 @@ typedef int brlapi_fileDescriptor;
  * \sa brlapi_openConnection() brlapi_loadAuthKey()
  */
 typedef struct {
-  /** To get authorized to connect, \e libbrlapi has to tell the \e BrlAPI server a
-   * secret key, for security reasons. This is the path to the file which
-   * holds it; it will hence have to be readable by the application.
+  /** For security reasons, \e libbrlapi has to get authorized to connect to the
+   * \e BrlAPI server. This can be done via a secret key, for instance. This is
+   * the path to the file which holds it; it will hence have to be readable by
+   * the application.
    *
    * Setting \c NULL defaults it to local installation setup or to the content
-   * of the BRLAPI_AUTHPATH environment variable, if it exists. */
-  char *authKey;
+   * of the BRLAPI_AUTH environment variable, if it exists. */
+  char *auth;
 
   /** This tells where the \e BrlAPI server resides: it might be listening on
    * another computer, on any TCP port. It should look like "foo:1", which

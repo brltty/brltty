@@ -35,7 +35,7 @@ try() {
 if [ "${#}" -eq 0 ]
 then
    . "`dirname "${0}"`/brltty-config" || exit "${?}"
-   file="${BRLTTY_EXECUTE_ROOT}${sysconfdir}/${BRLAPI_KEYFILE}"
+   file="${BRLTTY_EXECUTE_ROOT}${sysconfdir}/${BRLAPI_AUTHKEYFILE}"
 elif [ "${#}" -eq 1 ]
 then
    file="${1}"

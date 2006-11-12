@@ -26,9 +26,9 @@
 
 typedef enum {
   PARM_HOST=0,
-  PARM_AUTHKEY=1
+  PARM_AUTH=1
 } DriverParameter;
-#define BRLPARMS "host", "key"
+#define BRLPARMS "host", "auth"
 
 #define BRL_HAVE_VISUAL_DISPLAY
 #include "Programs/brl_driver.h"
@@ -55,9 +55,9 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
 {
   brlapi_settings_t settings;
   settings.host = parameters[PARM_HOST];
-  settings.authKey = parameters[PARM_AUTHKEY];
+  settings.auth = parameters[PARM_AUTH];
   CHECK((brlapi_openConnection(&settings, &settings)>=0), out);
-  LogPrint(LOG_DEBUG, "Connected to %s using %s", settings.host, settings.authKey);
+  LogPrint(LOG_DEBUG, "Connected to %s using %s", settings.host, settings.auth);
   CHECK((brlapi_enterTtyModeWithPath(NULL, 0, NULL)>=0), out0);
   LogPrint(LOG_DEBUG, "Got tty successfully");
   CHECK((brlapi_getDisplaySize(&brl->x, &brl->y)==0), out1);

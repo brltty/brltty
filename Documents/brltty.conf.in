@@ -127,7 +127,7 @@
 #braille-parameters driver:parameter=setting,...
 
 # BrlAPI Braille Driver Parameters
-#braille-parameters ba:Key=@CONFIGURATION_DIRECTORY@/@api_authfile@
+#braille-parameters ba:Auth=@CONFIGURATION_DIRECTORY@/@api_authkeyfile@
 #braille-parameters ba:Host=:0
 
 # BrailleLite Braille Driver Parameters
@@ -330,8 +330,8 @@
 # (can be overridden with the -A [--api-parameters=] option)
 #api-parameters parameter=setting,...
 
+#api-parameters Auth=@CONFIGURATION_DIRECTORY@/@api_authkeyfile@
 #api-parameters Host=:0
-#api-parameters KeyFile=@CONFIGURATION_DIRECTORY@/@api_authfile@
 #api-parameters StackSize=65536
 
 

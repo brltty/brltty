@@ -23,7 +23,7 @@ cdef extern from "sys/types.h":
 
 cdef extern from "Programs/api.h":
 	ctypedef struct brlapi_settings_t:
-		char *authKey
+		char *auth
 		char *host
 
 	ctypedef struct brlapi_writeStruct:

@@ -125,7 +125,7 @@ running in, and connects, via BrlAPI, to the root BRLTTY in order to access
 your braille display.
 
 If you're not concerned with security, and would rather not fiddle with the
-brlapi.key file, then add the -Akeyfile=none option to the command line which
+brlapi.key file, then add the -Aauth=none option to the command line which
 invokes the root BRLTTY. You don't need to worry about unauthorized access over
 the network since the default is that only locally running programs can connect
 to BrlAPI.

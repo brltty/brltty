@@ -41,8 +41,8 @@ puts "Object: $brlapi"
 set host [$brlapi getHost]
 puts "Host: $host ([expandList [brlapi expandHost $host] name port family])"
 
-set keyFile [$brlapi getKeyFile]
-puts "KeyFile: $keyFile"
+set auth [$brlapi getAuth]
+puts "Auth: $auth"
 
 set fileDescriptor [$brlapi getFileDescriptor]
 puts "FileDescriptor: $fileDescriptor"

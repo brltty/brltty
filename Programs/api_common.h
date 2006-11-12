@@ -320,7 +320,7 @@ typedef struct {
 } brlapi_packetType_t;
 
 static brlapi_packetType_t brlapi_packetTypes[] = {
-  { BRLPACKET_AUTHKEY, "Auth" },
+  { BRLPACKET_AUTH, "Auth" },
   { BRLPACKET_GETDRIVERID, "GetDriverId" },
   { BRLPACKET_GETDRIVERNAME, "GetDriverName" },
   { BRLPACKET_GETDISPLAYSIZE, "GetDisplaySize" },

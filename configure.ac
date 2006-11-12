@@ -494,8 +494,8 @@ AC_SUBST([all_api])
 AC_SUBST([install_api])
 AC_SUBST([api_dynamic_library])
 AC_SUBST([install_api_libraries])
-AC_SUBST([api_authfile], [brlapi.key])
-BRLTTY_DEFINE_EXPANDED([BRLAPI_AUTHFILE], ["${api_authfile}"],
+AC_SUBST([api_authkeyfile], [brlapi.key])
+BRLTTY_DEFINE_EXPANDED([BRLAPI_AUTHKEYFILE], ["${api_authkeyfile}"],
                        [Define this to be a string containing the name of the file containing the authorization key.])
 
 brltty_curses_libs_save="${LIBS}"
