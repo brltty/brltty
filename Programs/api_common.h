@@ -269,9 +269,9 @@ int BRLAPI(loadAuthKey)(const char *filename, size_t *authlength, void *auth)
   return 0;
 }
 
-/* Function: brlapi_splitHost
+/* Function: brlapi_expandHost
  * splits host into host & port */
-int BRLAPI(splitHost)(const char *hostAndPort, char **host, char **port) {
+int BRLAPI(expandHost)(const char *hostAndPort, char **host, char **port) {
   const char *c;
   if (!hostAndPort || !*hostAndPort) {
 #if defined(PF_LOCAL)

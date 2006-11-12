@@ -1064,7 +1064,7 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
       {
         char *name;
         char *port;
-        int family = brlapi_splitHost(Tcl_GetString(objv[2]), &name, &port);
+        int family = brlapi_expandHost(Tcl_GetString(objv[2]), &name, &port);
         Tcl_Obj *elements[] = {
           Tcl_NewStringObj(name, -1),
           Tcl_NewStringObj(port, -1),

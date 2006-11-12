@@ -2011,7 +2011,7 @@ static void *server(void *arg)
   pthread_cleanup_push(closeSockets,NULL);
 
   for (i=0;i<numSockets;i++) {
-    socketInfo[i].addrfamily=brlapiserver_splitHost(socketHosts[i],&socketInfo[i].host,&socketInfo[i].port);
+    socketInfo[i].addrfamily=brlapiserver_expandHost(socketHosts[i],&socketInfo[i].host,&socketInfo[i].port);
 #ifdef WINDOWS
     if (socketInfo[i].addrfamily != PF_LOCAL) {
 #endif /* WINDOWS */

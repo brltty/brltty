@@ -381,7 +381,7 @@ static int tryHost(brlapi_handle_t *handle, char *hostAndPort) {
     return -1;
 #endif /* WINDOWS */
 
-  handle->addrfamily = brlapi_splitHost(hostAndPort,&host,&port);
+  handle->addrfamily = brlapi_expandHost(hostAndPort,&host,&port);
 
 #if defined(PF_LOCAL)
   if (handle->addrfamily == PF_LOCAL) {
