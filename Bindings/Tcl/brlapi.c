@@ -966,13 +966,13 @@ typedef struct {
   brlapi_settings_t settings;
 } FunctionData_general_connect;
 
-OPTION_HANDLER(general, connect, host) {
+OPTION_HANDLER(general, openConnection, host) {
   FunctionData_general_connect *options = data;
   options->settings.host = Tcl_GetString(objv[1]);
   return TCL_OK;
 }
 
-OPTION_HANDLER(general, connect, auth) {
+OPTION_HANDLER(general, openConnection, auth) {
   FunctionData_general_connect *options = data;
   options->settings.auth = Tcl_GetString(objv[1]);
   return TCL_OK;
@@ -1019,12 +1019,12 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
       BEGIN_OPTIONS
         {
-          OPTION(general, connect, host),
+          OPTION(general, openConnection, host),
           OPERANDS(1, "<hostSpec>")
         }
         ,
         {
-          OPTION(general, connect, auth),
+          OPTION(general, openConnection, auth),
           OPERANDS(1, "<file>")
         }
       END_OPTIONS(2)
