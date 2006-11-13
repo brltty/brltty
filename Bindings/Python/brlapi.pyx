@@ -60,6 +60,7 @@ cdef class Write:
 	cdef c_brlapi.brlapi_writeStruct props
 
 	def __new__(self):
+		self.props.displayNumber = -1
 		self.props.regionBegin = 0
 		self.props.regionSize = 0
 		self.props.text = ""
@@ -67,9 +68,15 @@ cdef class Write:
 		self.props.cursor = 0
 		self.props.charset = ""
 
+	property displayNumber:
+		"""Display number -1 == unspecified"""
+		def __get__(self):
+			return self.props.displayNumber
+		def __set__(self, val):
+			self.props.displayNumber = val
+
 	property regionBegin:
 		"""Region of display to update, 1st character of display is 1"""
-		"""Display number -1 == unspecified"""
 		def __get__(self):
 			return self.props.regionBegin
 		def __set__(self, val):

@@ -27,6 +27,7 @@ cdef extern from "Programs/api.h":
 		char *host
 
 	ctypedef struct brlapi_writeStruct:
+		int displayNumber
 		unsigned int regionBegin
 		unsigned int regionSize
 		char *text
