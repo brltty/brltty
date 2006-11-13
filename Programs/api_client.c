@@ -1072,7 +1072,9 @@ int brlapi__writeText(brlapi_handle_t *handle, int cursor, const char *str)
     return -1;
   }
   locale = setlocale(LC_CTYPE,NULL);
-  ws->flags = 0;
+  ws->flags = BRLAPI_WF_REGION;
+  *((uint32_t *) p) = htonl(1); p += sizeof(uint32_t);
+  *((uint32_t *) p) = htonl(dispSize); p += sizeof(uint32_t);
   if (str) {
     uint32_t *size;
     ws->flags |= BRLAPI_WF_TEXT;
