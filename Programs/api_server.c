@@ -1006,6 +1006,7 @@ static int handleWrite(Connection *c, brl_type_t type, unsigned char *packet, si
       (1<=rbeg) && (rsiz>0) && (rbeg+rsiz-1<=displaySize),
       BRLERR_INVALID_PARAMETER, "wrong region");
   } else {
+    LogPrint(LOG_DEBUG,"Warning: Client uses deprecated regionBegin=0 and regionSize = 0");
     rbeg = 1;
     rsiz = displaySize;
   }

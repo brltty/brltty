@@ -112,6 +112,8 @@ static void brl_writeWindow(BrailleDisplay *brl)
     unsigned char and[displaySize];
     if (prevShown && memcmp(prevData,brl->buffer,displaySize)==0) return;
     memset(and,0,sizeof(and));
+    ws.regionBegin = 1;
+    ws.regionSize = displaySize;
     ws.attrAnd = and;
     ws.attrOr = brl->buffer;
     if (brlapi_write(&ws)==0) {

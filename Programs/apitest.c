@@ -136,6 +136,8 @@ void showDots(void)
     fprintf(stderr,"Showing dot patterns\n");
     memcpy(text,DOTS_TEXT,DOTS_TEXTLEN);
     memset(text+DOTS_TEXTLEN,' ',sizeof(text)-DOTS_TEXTLEN);
+    ws.regionBegin = 1;
+    ws.regionSize = sizeof(or);
     ws.text = text;
     memset(or,0,sizeof(or));
     or[DOTS_TEXTLEN+0] = BRL_DOT1;

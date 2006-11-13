@@ -68,6 +68,7 @@ cdef class Write:
 		self.props.charset = ""
 
 	property regionBegin:
+		"""Region of display to update, 1st character of display is 1"""
 		"""Display number -1 == unspecified"""
 		def __get__(self):
 			return self.props.regionBegin
@@ -75,42 +76,42 @@ cdef class Write:
 			self.props.regionBegin = val
 
 	property regionSize:
-		"""Region of display to update, 1st character of display is 1"""
+		"""Number of characters held in text, attrAnd and attrOr. For multibytes text, this is the number of multibyte characters. Combining and double-width characters count for 1"""
 		def __get__(self):
 			return self.props.regionSize
 		def __set__(self, val):
 			self.props.regionSize = val
 
 	property text:
-		"""Number of characters held in text, attrAnd and attrOr. For multibytes text, this is the number of multibyte characters. Combining and double-width characters count for 1"""
+		"""Text to display"""
 		def __get__(self):
 			return self.props.text
 		def __set__(self, val):
 			self.props.text = val
 
 	property cursor:
-		"""Or attributes; applied after ANDing"""
+		"""-1 == don't touch, 0 == turn off, 1 = 1st char of display, ..."""
 		def __get__(self):
 			return self.props.cursor
 		def __set__(self, val):
 			self.props.cursor = val
 
 	property charset:
-		"""-1 == don't touch, 0 == turn off, 1 = 1st char of display, ..."""
+		"""Character set of the text"""
 		def __get__(self):
 			return self.props.charset
 		def __set__(self, val):
 			self.props.charset = val
 
 	property attrAnd:
-		"""Text to display"""
+		"""And attributes; applied first"""
 		def __get__(self):
 			return <char*>self.props.attrAnd
 		def __set__(self, val):
 			self.props.attrAnd = <unsigned char*>val
 
 	property attrOr:
-		"""And attributes; applies first"""
+		"""Or attributes; applied after ANDing"""
 		def __get__(self):
 			return <char*>self.props.attrOr
 		def __set__(self, val):

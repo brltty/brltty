@@ -481,7 +481,9 @@ typedef struct {
 /** Allows to initialize a structure of type \e brlapi_writeStruct *
  * with default values:
  * displayNumber = -1; (unspecified)
- * regionBegin = regionSize = 0; (update the whole display)
+ * regionBegin = regionSize = 0; (update the whole display, DEPRECATED and will
+ * be forbidden in next release. You must always express the region you wish to
+ * update)
  * text = attrAnd = attrOr = NULL; (no text, no attribute)
  * cursor = -1; (don't touch cursor)
 */
@@ -493,8 +495,7 @@ typedef struct {
  *
  * \param s gives information necessary for the update
  *
- * If \e both regionBegin and regionSize are valid (>=1 and <= size of the
- * display), then only part of the display will be updated.  Else the whole
+ * regionBegin and regionSize must be filled for specifying which part of the
  * display will be updated.
  *
  * If given, the "text" field holds the text that will be displayed in the

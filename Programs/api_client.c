@@ -1208,6 +1208,8 @@ int brlapi__writeDots(brlapi_handle_t *handle, const unsigned char *dots)
     unsigned char attrAnd[size], attrOr[size];
     memset(text, ' ', size);
     text[size] = 0;
+    ws.regionBegin = 1;
+    ws.regionSize = size;
     ws.text = text;
     memcpy(attrOr, dots, size);
     ws.attrOr = attrOr;
