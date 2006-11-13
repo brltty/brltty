@@ -553,17 +553,6 @@ out:
   return -1;
 }
 
-/* Function: tryAuthKey */
-/* Tries to get authorization from server with the given key. */
-static int tryAuthKey(brlapi_handle_t *handle, authStruct *auth, size_t authKeyLength) {
-  int res;
-  res = brlapi_writePacket(handle->fileDescriptor, BRLPACKET_AUTH, auth, sizeof(auth->protocolVersion)+authKeyLength);
-  memset(&auth->key, 0, authKeyLength); /* Forget authorization key ASAP */
-  if (res<0) return -1;
-  if ((brlapi__waitForAck(handle))<0) return -1;
-  return 0;
-}
-
 /* Function : updateSettings */
 /* Updates the content of a brlapi_settings_t structure according to */
 /* another structure of the same type */
@@ -581,8 +570,11 @@ static void updateSettings(brlapi_settings_t *s1, const brlapi_settings_t *s2)
 brlapi_fileDescriptor brlapi__openConnection(brlapi_handle_t *handle, const brlapi_settings_t *clientSettings, brlapi_settings_t *usedSettings)
 {
   unsigned char packet[BRLAPI_MAXPACKETSIZE];
-  authStruct *auth = (authStruct *) packet;
-  size_t authKeyLength;
+  unsigned char serverPacket[BRLAPI_MAXPACKETSIZE];
+  authClientStruct *auth = (authClientStruct *) packet;
+  authServerStruct *authServer = (authServerStruct *) serverPacket;
+  uint32_t *type;
+  int authServerLen;
 
   brlapi_settings_t settings = { BRLAPI_DEFAUTH, ":0" };
   brlapi_settings_t envsettings = { getenv("BRLAPI_AUTH"), getenv("BRLAPI_HOST") };
@@ -593,7 +585,6 @@ brlapi_fileDescriptor brlapi__openConnection(brlapi_handle_t *handle, const brla
   if (usedSettings!=NULL) updateSettings(usedSettings, &settings);
   brlapi_initializeHandle(handle);
 
-retry:
   if (tryHost(handle, settings.host)<0) {
     brlapi_error_t error = brlapi_error;
     if (tryHost(handle, settings.host="127.0.0.1:0")<0
@@ -607,43 +598,58 @@ retry:
     if (usedSettings) usedSettings->host = settings.host;
   }
 
-  auth->protocolVersion = htonl(BRLAPI_PROTOCOL_VERSION);
+  if ((authServerLen = brlapi__waitForPacket(handle, BRLPACKET_AUTH, serverPacket, sizeof(serverPacket), 1)) < 0)
+    return authServerLen;
 
-  /* try with an empty key as well, in case no authorization is needed */
-  if (!settings.auth) {
-    if (tryAuthKey(handle, auth,0)<0)
-      goto outfd;
-    if (usedSettings) usedSettings->auth = "none";
-  } else if (brlapi_loadAuthKey(settings.auth,&authKeyLength,(void *) &auth->key)<0) {
-    brlapi_error_t error = brlapi_error;
-    if (tryAuthKey(handle, auth,0)<0) {
-      brlapi_error = error;
-      goto outfd;
-    }
-    if (usedSettings) usedSettings->auth = "none";
-  } else if (tryAuthKey(handle, auth,authKeyLength)<0) {
-    if (brlapi_errno != BRLERR_CONNREFUSED)
-      goto outfd;
-    if (handle->fileDescriptor!=INVALID_FILE_DESCRIPTOR) {
-      closeFileDescriptor(handle->fileDescriptor);
-      handle->fileDescriptor = INVALID_FILE_DESCRIPTOR;
-    }
-    settings.auth = NULL;
-    goto retry;
+  if (authServer->protocolVersion != htonl(BRLAPI_PROTOCOL_VERSION)) {
+    brlapi_errno = BRLERR_PROTOCOL_VERSION;
+    return -1;
   }
 
+  auth->protocolVersion = htonl(BRLAPI_PROTOCOL_VERSION);
+
+  for (type = &authServer->type[0]; (void*) type < (void*) &serverPacket[authServerLen]; type++) {
+    auth->type = *type;
+    switch (ntohl(*type)) {
+      case BRLAPI_AUTH_NONE:
+        if (brlapi_writePacket(handle->fileDescriptor, BRLPACKET_AUTH, auth,
+	    sizeof(auth->protocolVersion)+sizeof(auth->type)) < 0)
+	  goto outfd;
+	if (usedSettings) usedSettings->auth = "none";
+	break;
+      case BRLAPI_AUTH_KEY: {
+        size_t authKeyLength;
+	int res;
+        if (brlapi_loadAuthKey(settings.auth, &authKeyLength, (void *) &auth->key) < 0)
+	  continue;
+        res = brlapi_writePacket(handle->fileDescriptor, BRLPACKET_AUTH, auth,
+	  sizeof(auth->protocolVersion)+sizeof(auth->type)+authKeyLength);
+	memset(&auth->key, 0, authKeyLength);
+	if (res < 0)
+	  goto outfd;
+	if (usedSettings) usedSettings->auth = settings.auth;
+	break;
+      }
+      default:
+        /* unsupported authorization type */
+	continue;
+    }
+    if ((brlapi__waitForAck(handle)) == 0) goto done;
+  }
+
+  /* no suitable authorization method */
+  brlapi_errno = BRLERR_CONNREFUSED;
+outfd:
+  closeFileDescriptor(handle->fileDescriptor);
+  handle->fileDescriptor = INVALID_FILE_DESCRIPTOR;
+out:
+  return INVALID_FILE_DESCRIPTOR;
+
+done:
   pthread_mutex_lock(&handle->state_mutex);
   handle->state = STCONNECTED;
   pthread_mutex_unlock(&handle->state_mutex);
   return handle->fileDescriptor;
-
-outfd:
-  if (handle->fileDescriptor!=INVALID_FILE_DESCRIPTOR) {
-    closeFileDescriptor(handle->fileDescriptor);
-    handle->fileDescriptor = INVALID_FILE_DESCRIPTOR;
-  }
-out:
-  return INVALID_FILE_DESCRIPTOR;
 }
 
 brlapi_fileDescriptor brlapi_openConnection(const brlapi_settings_t *clientSettings, brlapi_settings_t *usedSettings)

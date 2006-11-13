@@ -52,7 +52,7 @@ extern "C" {
 
 #define BRLAPI_PROTOCOL_VERSION ((uint32_t) 8) /** Communication protocol version */
 
-#define BRLPACKET_AUTH              'K'    /**< Authorization key          */
+#define BRLPACKET_AUTH              'K'    /**< Authorization key           */
 #define BRLPACKET_GETDRIVERID       'd'    /**< Ask which driver is used    */
 #define BRLPACKET_GETDRIVERNAME     'n'    /**< Ask which driver is used    */
 #define BRLPACKET_GETDISPLAYSIZE    's'    /**< Dimensions of brl display   */
@@ -62,8 +62,8 @@ extern "C" {
 #define BRLPACKET_KEY               'k'    /**< Braille key                 */
 #define BRLPACKET_IGNOREKEYRANGE    'm'    /**< Mask key-range              */
 #define BRLPACKET_IGNOREKEYSET      'M'    /**< Mask key-set                */
-#define BRLPACKET_ACCEPTKEYRANGE  'u'    /**< Unmask key range            */
-#define BRLPACKET_ACCEPTKEYSET    'U'    /**< Unmask key set              */
+#define BRLPACKET_ACCEPTKEYRANGE    'u'    /**< Unmask key range            */
+#define BRLPACKET_ACCEPTKEYSET      'U'    /**< Unmask key set              */
 #define BRLPACKET_WRITE             'w'    /**< Write                       */
 #define BRLPACKET_ENTERRAWMODE      '*'    /**< Enter in raw mode           */
 #define BRLPACKET_LEAVERAWMODE      '#'    /**< Leave raw mode              */
@@ -72,7 +72,7 @@ extern "C" {
 #define BRLPACKET_ERROR             'e'    /**< non-fatal error             */
 #define BRLPACKET_EXCEPTION         'E'    /**< Exception                   */
 #define BRLPACKET_SUSPENDDRIVER     'S'    /**< Suspend driver              */
-#define BRLPACKET_RESUMEDRIVER      'R'    /**< Resume driver              */
+#define BRLPACKET_RESUMEDRIVER      'R'    /**< Resume driver               */
 
 /** Magic number to give when sending a BRLPACKET_ENTERRAWMODE or BRLPACKET_SUSPEND packet */
 #define BRLDEVICE_MAGIC (0xdeadbeefL)
@@ -88,8 +88,18 @@ typedef struct {
 /** Structure of authorization packets */
 typedef struct {
   uint32_t protocolVersion;
+  uint32_t type;
   unsigned char key;
-} authStruct;
+} authClientStruct;
+
+typedef struct {
+  uint32_t protocolVersion;
+  uint32_t type[1];
+} authServerStruct;
+
+#define BRLAPI_AUTH_NONE 'N' /**< No or implicit authorization              */
+#define BRLAPI_AUTH_KEY  'K' /**< Key authorization                         */
+#define BRLAPI_AUTH_CRED 'C' /**< Explicit socket credentials authorization */
 
 /** Structure of error packets */
 typedef struct {

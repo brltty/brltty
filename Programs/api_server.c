@@ -84,11 +84,10 @@
 typedef enum {
   PARM_AUTH,
   PARM_HOST,
-  PARM_KEYFILE,
   PARM_STACKSIZE
 } Parameters;
 
-const char *const api_parameters[] = { "auth", "host", "keyfile", "stacksize", NULL };
+const char *const api_parameters[] = { "auth", "host", "stacksize", NULL };
 
 static size_t stackSize;
 
@@ -280,8 +279,8 @@ static int coreActive; /* Whether core is active */
 static int driverOpened; /* Whether device is really opened, protected by driverMutex */
 static pthread_mutex_t suspendMutex; /* Protects use of driverOpened state */
 
-static int unauthorizedConnectionsAllowed = 0;
-static char *keyfile;
+static const char *auth = BRLAPI_DEFAUTH;
+static AuthDescriptor *authDescriptor;
 
 static Connection *last_conn_write;
 static int refresh;
@@ -1201,7 +1200,21 @@ static PacketHandlers packetHandlers = {
   handleEnterRawMode, handleLeaveRawMode, handlePacket, handleSuspendDriver, handleResumeDriver
 };
 
-static AuthDescriptor *authDescriptor;
+static void handleNewConnection(Connection *c)
+{
+  unsigned char packet[BRLAPI_MAXPACKETSIZE];
+  int nbmethods = 0;
+  authServerStruct *authPacket = (authServerStruct *) packet;
+  authPacket->protocolVersion = htonl(BRLAPI_PROTOCOL_VERSION);
+
+  /* TODO: move this inside auth.c */
+  if (authDescriptor && authPerform(authDescriptor, c->fd))
+    authPacket->type[nbmethods++] = htonl(BRLAPI_AUTH_NONE);
+  if (auth[0] == '/')
+    authPacket->type[nbmethods++] = htonl(BRLAPI_AUTH_KEY);
+
+  brlapiserver_writePacket(c->fd,BRLPACKET_AUTH,packet,sizeof(authPacket->protocolVersion)+nbmethods*sizeof(authPacket->type));
+}
 
 /* Function : handleUnauthorizedConnection */
 /* Returns 0 if connection is authorized */
@@ -1210,39 +1223,58 @@ static int handleUnauthorizedConnection(Connection *c, brl_type_t type, unsigned
 {
   size_t authKeyLength = 0;
   unsigned char authKey[BRLAPI_MAXPACKETSIZE];
-  int authKeyCorrect = 0;
-  authStruct *auth = (authStruct *) packet;
+  int authCorrect = 0;
+  authClientStruct *authPacket = (authClientStruct *) packet;
   int remaining = size;
+  uint32_t authType;
 
   if (type!=BRLPACKET_AUTH) {
     WERR(c->fd, BRLERR_CONNREFUSED, "wrong packet type (should be auth)");
     return 1;
   }
 
-  if ((remaining<sizeof(auth->protocolVersion))||(ntohl(auth->protocolVersion)!=BRLAPI_PROTOCOL_VERSION)) {
+  if ((remaining<sizeof(authPacket->protocolVersion))||(ntohl(authPacket->protocolVersion)!=BRLAPI_PROTOCOL_VERSION)) {
     writeError(c->fd, BRLERR_PROTOCOL_VERSION);
     return 1;
   }
-  remaining -= sizeof(auth->protocolVersion);
+  remaining -= sizeof(authPacket->protocolVersion);
 
-  if (!unauthorizedConnectionsAllowed) {
-    if (brlapiserver_loadAuthKey(keyfile,&authKeyLength,authKey)==-1) {
-      LogPrint(LOG_WARNING,"Unable to load API authorization key from %s: %s in %s. You may use parameter keyfile=none if you don't want any authorization (dangerous)", keyfile, strerror(brlapi_libcerrno), brlapi_errfun);
-      return 1;
+  if (!strcmp(auth,"none"))
+    authCorrect = 1;
+  else {
+    authType = ntohl(authPacket->type);
+    remaining -= sizeof(authPacket->type);
+
+  /* TODO: move this inside auth.c */
+    switch(authType) {
+      case BRLAPI_AUTH_NONE:
+        if (authDescriptor) authCorrect = authPerform(authDescriptor, c->fd);
+	break;
+      case BRLAPI_AUTH_KEY:
+        if (auth[0] == '/') {
+	  if (brlapiserver_loadAuthKey(auth,&authKeyLength,authKey)==-1) {
+	    LogPrint(LOG_WARNING,"Unable to load API authorization key from %s: %s in %s. You may use parameter auth=none if you don't want any authorization (dangerous)", auth, strerror(brlapi_libcerrno), brlapi_errfun);
+	    break;
+	  }
+	  LogPrint(LOG_DEBUG, "Authorization key loaded");
+	  authCorrect = (remaining==authKeyLength) && (!memcmp(&authPacket->key, authKey, authKeyLength));
+	  memset(authKey, 0, authKeyLength);
+	  memset(&authPacket->key, 0, authKeyLength);
+	}
+	break;
+      default:
+        LogPrint(LOG_DEBUG, "Unsupported authorization method %d\n", authType);
+        break;
     }
-    LogPrint(LOG_DEBUG, "Authorization key loaded");
   }
 
-  authKeyCorrect = (remaining==authKeyLength) && (!memcmp(&auth->key, authKey, authKeyLength));
-  memset(authKey, 0, authKeyLength);
-  memset(&auth->key, 0, authKeyLength);
-  unauthConnections--;
-  if (!authKeyCorrect) {
+  if (!authCorrect) {
     writeError(c->fd, BRLERR_CONNREFUSED);
     LogPrint(LOG_WARNING, "BrlAPI connection fd=%"PRIFD" failed authorization", c->fd);
-    return 1;
+    return 0;
   }
 
+  unauthConnections--;
   writeAck(c->fd);
   c->auth = 1;
   return 0;
@@ -2109,10 +2141,6 @@ static void *server(void *arg)
         }
 #endif /* WINDOWS */
 
-        if (authDescriptor && !authPerform(authDescriptor, resfd)) {
-          closeFileDescriptor(resfd);
-          continue;
-        }
         LogPrint(LOG_NOTICE, "BrlAPI connection fd=%"PRIFD" accepted: %s", resfd, source);
 
         if (unauthConnections>=UNAUTH_MAX) {
@@ -2132,10 +2160,11 @@ static void *server(void *arg)
           if (c==NULL) {
             LogPrint(LOG_WARNING,"Failed to create connection structure");
             closeFileDescriptor(resfd);
-          }
-
-          unauthConnections++;
-          addConnection(c, notty.connections);
+          } else {
+	    unauthConnections++;
+	    addConnection(c, notty.connections);
+	    handleNewConnection(c);
+	  }
         }
       }
     }
@@ -2189,7 +2218,8 @@ static void terminationHandler(void)
     LogPrint(LOG_WARNING,"pthread_cancel: %s",strerror(res));
   ttyTerminationHandler(&notty);
   ttyTerminationHandler(&ttys);
-  authEnd(authDescriptor);
+  if (authDescriptor)
+    authEnd(authDescriptor);
   authDescriptor = NULL;
 #ifdef WINDOWS
   WSACleanup();
@@ -2570,18 +2600,17 @@ int api_start(BrailleDisplay *brl, char **parameters)
 
   {
     const char *parameter = parameters[PARM_AUTH];
-    if (!parameter) parameter = "";
-    if (!*parameter) parameter = "none";
-    if (!(authDescriptor = authBeginServer(parameter))) return 0;
+    if (!parameter || !*parameter) auth = BRLAPI_DEFAUTH;
+    else auth = parameter;
   }
 
-  keyfile = *parameters[PARM_KEYFILE]?parameters[PARM_KEYFILE]:BRLAPI_DEFAUTH;
+  if (auth && auth[0] != '/') 
+    if (!(authDescriptor = authBeginServer(auth))) return 0;
+
   pthread_attr_t attr;
   pthread_mutexattr_t mattr;
 
   coreActive=driverOpened=1;
-
-  if (!strcmp(keyfile,"none")) unauthorizedConnectionsAllowed = 1;
 
   if ((notty.connections = createConnection(INVALID_FILE_DESCRIPTOR,0)) == NULL) {
     LogPrint(LOG_WARNING, "Unable to create connections list");

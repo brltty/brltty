@@ -67,11 +67,11 @@ BEGIN_OPTION_TABLE
    &opt_suspendMode, NULL,
    "Suspend driver (press ^C on the PC keyboard or send SIGUSR1 to get back braille)."},
 
-  {"brlapi-server", "[host][:port]", 'S', 0, 0,
+  {"brlapi-host", "[host][:port]", 'H', 0, 0,
    &settings.host, NULL,
    "The host name (or address) and port of the BrlAPI server."},
 
-  {"brlapi-key", "file", 'K', 0, 0,
+  {"brlapi-auth", "file", 'A', 0, 0,
    &settings.auth, NULL,
    "The path to the file containing BrlAPI's authorization key."},
 END_OPTION_TABLE
@@ -317,7 +317,7 @@ int main(int argc, char *argv[])
   fprintf(stderr, "Connecting to BrlAPI... ");
   if ((fd=brlapi_openConnection(&settings, &settings)) >= 0) {
     fprintf(stderr, "done (fd=%"PRIFD")\n", fd);
-    fprintf(stderr,"Connected to %s using key file %s\n", settings.host, settings.auth);
+    fprintf(stderr,"Connected to %s using auth %s\n", settings.host, settings.auth);
 
     if (opt_showIdentifier) {
       showDriverIdentifier();
@@ -350,7 +350,7 @@ int main(int argc, char *argv[])
     brlapi_closeConnection();
     fprintf(stderr, "Disconnected\n"); 
   } else {
-    fprintf(stderr, "failed to connect to %s using key %s",settings.host, settings.auth);
+    fprintf(stderr, "failed to connect to %s using auth %s",settings.host, settings.auth);
     brlapi_perror("");
     status = 1;
   }

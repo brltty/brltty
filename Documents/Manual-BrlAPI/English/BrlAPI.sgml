@@ -9,7 +9,7 @@ name="&lt;Sebastien.Hinderer@ens-lyon.org&gt;"></tt><newline></name>
 <name>Samuel Thibault <tt><htmlurl url="mailto:Samuel.Thibault@ens-lyon.org"
 name="&lt;Samuel.Thibault@ens-lyon.org&gt;"></tt><newline></name>
 </author>
-<date>V1.4, May 2006
+<date>V1.4, November 2006
 <abstract>
 This document describes <tt>BrlAPI</tt>.
 </abstract>
@@ -1207,8 +1207,10 @@ four following modes:
 
 <itemize>
 <item>authorization mode: this is the initial mode, when the client hasn't
-got the authorization to use the server yet. Only one <tt/BRLPACKET_AUTH/ packet
-will be accepted, which makes the connection enter normal mode.
+got the authorization to use the server yet. The server first sends a
+<tt/BRLPACKET_AUTH/ packet that announces which authorization methods are
+allowed. The client can then send <tt/BRLPACKET_AUTH/ packets,
+which makes the connection enter normal mode.
 
 
 <item>normal mode: the client is authorized to use the server, but didn't ask for a tty
@@ -1269,21 +1271,42 @@ online manual page as well will hence be of good help for understanding.
 
 <sect2><tt/BRLPACKET_AUTH/ (see <em/brlapi_loadAuthKey()/)
 <p>
-This must be the first packet ever transmitted from the client to the
-server. It lets the client ask an authorization to the server. Data is
-first an integer indicating a protocol version, then comes the authorization
-key itself.
+This must be the first packet ever transmitted from the server to the client and
+from the client to the server. The server sends one first for letting the client
+know which authorization methods are available. Data is first an integer
+indicating the protocol version that the server uses. Then comes the allowed
+authorization types, as integers.
 
-If the protocol version is not the same as the server's, a 
+The client can then try to get authorized by sending packets whose data is first
+an integer indicating the protocol version, then the type of authorization that
+is tried (as an integer), and eventually some data (if the authorization type
+needs it).
+
+If the protocol version is not the same as the server's, a
 <tt/BRLERR_PROTOCOL_VERSION/ error packet is returned and the connection is
 closed.
 
-If the authorization key matches the servers', it is acknowledged, and
-other types of packets might be used, other <tt/BRLPACKET_AUTH/ shouldn't
-be sent by the client.
+If the authorization is successful, the server acknowledges the packet, and
+other types of packets might be used, other <tt/BRLPACKET_AUTH/ shouldn't be
+sent by the client.
 
-If the authorization key doesn't match, the server sends a
-<tt/BRLERR_CONNREFUSED/ and closes the connection.
+If the authorization is not successful, the server sends a
+<tt/BRLERR_CONNREFUSED/ error, and the client can try another authorization
+method.
+
+Authorization methods are as follow:
+
+<itemize>
+  <item><tt/none/: no data is needed, the authorization is always successful.
+  <item><tt/key/: data holds a secret key, the authorization is successful only
+if the key matches the server secret key.
+  <item><tt/credentials/: Operating-System-specific credentials are explicitely
+sent over the socket, the authorization is successful if the server considers
+the credentials sufficient.
+</itemize>
+
+Note: when the Operating system permits it, the server may use implicit
+credential check, and then advertise the <tt/none/ method.
 
 <sect2><tt/BRLPACKET_GETDRIVERID/ (see <em/brlapi_getDriverId()/)
 <p>

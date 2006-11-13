@@ -67,16 +67,16 @@
  */
 
 static char *auth;
-static char *brlttyServer;
+static char *host;
 static char *xDisplay;
 
 BEGIN_OPTION_TABLE
-  {"auth", strtext("file"), 'k', 0, 0,
+  {"auth", strtext("file"), 'a', 0, 0,
    &auth, NULL,
    strtext("set path to file containing authorization key"), NULL},
 
-  {"server", strtext("[host][:port]"), 's', 0, 0,
-   &brlttyServer, NULL,
+  {"host", strtext("[host][:port]"), 'h', 0, 0,
+   &host, NULL,
    strtext("set brltty server (host and/or port) to connect to"), NULL},
 
   {"display", strtext("display"), 'd', 0, 0,
@@ -567,7 +567,7 @@ int main(int argc, char *argv[]) {
                  NULL, NULL, NULL,
                  NULL);
 
-  tobrltty_init(auth,brlttyServer);
+  tobrltty_init(auth,host);
 
   toX_f(xDisplay);
 
