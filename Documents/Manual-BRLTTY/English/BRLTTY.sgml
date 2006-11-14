@@ -3991,6 +3991,8 @@ The following contraction tables are provided:
   <tag/en-us-g2/Grade 2 American English.
   <tag/fr-abrege/Contracted Unified French.
   <tag/fr-integral/Uncontracted Unified French.
+  <tag/gb2312/Simplified Chinese
+  <tag/uebc-g2/Grade 2 Unified English Braille Code
 </descrip>
 
 <sect1>File Format<p>

@@ -114,6 +114,7 @@
 #contraction-table	en-us-g2	# Grade 2 American English
 #contraction-table	fr-abrege	# Contracted French
 #contraction-table	fr-integral	# Uncontracted French
+#contraction-table	gb2312		# Simplified Chinese
 #contraction-table	uebc-g2	# Grade 2 Unified English Braille Code
 
 
