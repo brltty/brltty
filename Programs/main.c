@@ -1982,28 +1982,30 @@ main (int argc, char *argv[]) {
 #endif /* ENABLE_SPEECH_SUPPORT */
         }
 
-        if (command & BRL_FLG_ROUTE) {
-          int left = p->winx;
-          int right = left + brl.x - 1;
+        if (!(command & BRL_MSK_BLK)) {
+          if (command & BRL_FLG_ROUTE) {
+            int left = p->winx;
+            int right = left + brl.x - 1;
 
-          int top = p->winy;
-          int bottom = top + brl.y - 1;
+            int top = p->winy;
+            int bottom = top + brl.y - 1;
 
-          if ((scr.posx < left) || (scr.posx > right) ||
-              (scr.posy < top) || (scr.posy > bottom)) {
-            if (routeCursor(MIN(MAX(scr.posx, left), right),
-                            MIN(MAX(scr.posy, top), bottom),
-                            scr.number)) {
-              playTune(&tune_routing_started);
-              awaitRoutingStatus(ROUTE_WRONG_COLUMN);
+            if ((scr.posx < left) || (scr.posx > right) ||
+                (scr.posy < top) || (scr.posy > bottom)) {
+              if (routeCursor(MIN(MAX(scr.posx, left), right),
+                              MIN(MAX(scr.posy, top), bottom),
+                              scr.number)) {
+                playTune(&tune_routing_started);
+                awaitRoutingStatus(ROUTE_WRONG_COLUMN);
 
-              {
-                ScreenDescription description;
-                describeScreen(&description);
+                {
+                  ScreenDescription description;
+                  describeScreen(&description);
 
-                if (description.number == scr.number) {
-                  slideWindowVertically(description.posy);
-                  placeWindowHorizontally(description.posx);
+                  if (description.number == scr.number) {
+                    slideWindowVertically(description.posy);
+                    placeWindowHorizontally(description.posx);
+                  }
                 }
               }
             }
