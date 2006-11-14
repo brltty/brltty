@@ -1211,7 +1211,7 @@ static void handleNewConnection(Connection *c)
   /* TODO: move this inside auth.c */
   if (authDescriptor && authPerform(authDescriptor, c->fd))
     authPacket->type[nbmethods++] = htonl(BRLAPI_AUTH_NONE);
-  if (auth[0] == '/')
+  if (isAbsolutePath(auth))
     authPacket->type[nbmethods++] = htonl(BRLAPI_AUTH_KEY);
 
   brlapiserver_writePacket(c->fd,BRLPACKET_AUTH,packet,sizeof(authPacket->protocolVersion)+nbmethods*sizeof(authPacket->type));
@@ -1252,7 +1252,7 @@ static int handleUnauthorizedConnection(Connection *c, brl_type_t type, unsigned
         if (authDescriptor) authCorrect = authPerform(authDescriptor, c->fd);
 	break;
       case BRLAPI_AUTH_KEY:
-        if (auth[0] == '/') {
+        if (isAbsolutePath(auth)) {
 	  if (brlapiserver_loadAuthKey(auth,&authKeyLength,authKey)==-1) {
 	    LogPrint(LOG_WARNING,"Unable to load API authorization key from %s: %s in %s. You may use parameter auth=none if you don't want any authorization (dangerous)", auth, strerror(brlapi_libcerrno), brlapi_errfun);
 	    break;
@@ -2605,7 +2605,7 @@ int api_start(BrailleDisplay *brl, char **parameters)
     else auth = parameter;
   }
 
-  if (auth && auth[0] != '/') 
+  if (auth && !isAbsolutePath(auth)) 
     if (!(authDescriptor = authBeginServer(auth))) return 0;
 
   pthread_attr_t attr;
