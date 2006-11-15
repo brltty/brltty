@@ -918,10 +918,11 @@ always	\xA6\x6C	13-2345-3	奸
 always	\xA6\x6D	12345-356-3	妃
 always	\xA6\x6E\xA9\x5F	1235-146-5-245-16-2	好奇
 always	\xA6\x6E\xB4\x63	1235-146-5-34-5	好惡
+always	\xA6\x6E	1235-146-4	好
 always	\xA6\x50\xA6\x6E	124-12346-2-1235-146-5	同好
 always	\xB3\xDF\xA6\x6E	15-16-4-1235-146-5	喜好
 always	\xB6\xDD\xA6\x6E	24-156-5-1235-146-5	嗜好
-always	\xA6\x6E	1235-146-4	好
+always	\xB7\x52\xA6\x6E	2456-5-1235-146-5	愛好
 always	\xA6\x6F	1248-345-3	她
 always	\xA6\x70	1245-34-2	如
 always	\xA6\x71	24-25-5	妁
@@ -1180,11 +1181,13 @@ always	\xA7\xEF	13-2456-4	改
 always	\xA7\xF0	13-12346-3	攻
 always	\xA7\xF1	234-3	攸
 always	\xA7\xF2	1235-1236-5	旱
-always	\xA4\x54\xA7\xF3	15-1236-3-13-13456-3	三更
-always	\xC5\xDC\xA7\xF3	135-2345-5-13-1356-3	變更
 always	\xA7\xF3\xA5\xBF	13-1356-3-1-1356-5	更正
+always	\xA7\xF3\xA7\xEF	13-1356-3-13-2456-4	更改
+always	\xA7\xF3\xB0\xCA	13-1356-3-145-12346-5	更動
 always	\xA7\xF3\xB7\x73	13-1356-3-15-1456-3	更新
 always	\xA7\xF3	13-1356-5	更
+always	\xA4\x54\xA7\xF3	15-1236-3-13-13456-3	三更
+always	\xC5\xDC\xA7\xF3	135-2345-5-13-1356-3	變更
 always	\xA7\xF4	24-34-5	束
 always	\xA7\xF5	14-16-4	李
 always	\xA7\xF6	15-13456-5	杏
@@ -2078,6 +2081,7 @@ always	\xAD\xAA	145-13456-4	酊
 always	\xAD\xAB\xB2\xD5	12-12346-2-125-34-4	重組
 always	\xAD\xAB\xB4\x5F	12-12346-2-12345-34-5	重復
 always	\xAD\xAB\xB7\x73	12-12346-2-15-1456-3	重新
+always	\xAD\xAB\xBC\x67	12-12346-2-15-346-4	重寫
 always	\xAD\xAB	1-12346-5	重
 always	\xC2\xF9\xAD\xAB	24-456-3-12-12346-2	雙重
 always	\xAD\xAC	24-12456-3	閂
@@ -5477,6 +5481,7 @@ always	\xA8\xE5\xC2\xC3	145-2345-4-245-1346-2	典藏
 always	\xBA\xDB\xC2\xC3	25-3-245-1346-2	窩藏
 always	\xBC\xE7\xC2\xC3	245-2345-2-245-1346-2	潛藏
 always	\xC1\xF4\xC2\xC3	1456-4-245-1346-2	隱藏
+always	\xC4\xAD\xC2\xC3	256-5-245-1346-2	蘊藏
 always	\xC2\xC4	15-345-5	薩
 always	\xC2\xC5	14-1236-2	藍
 always	\xC2\xC6	134-246-4	藐
