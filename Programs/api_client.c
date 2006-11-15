@@ -1241,6 +1241,7 @@ int brlapi__write(brlapi_handle_t *handle, const brlapi_writeStruct *s)
   unsigned char packet[BRLAPI_MAXPACKETSIZE];
   writeStruct *ws = (writeStruct *) packet;
   unsigned char *p = &ws->data;
+  unsigned char *end = &packet[BRLAPI_MAXPACKETSIZE];
   int res;
   ws->flags = 0;
   if (s==NULL) goto send;
@@ -1263,21 +1264,37 @@ int brlapi__write(brlapi_handle_t *handle, const brlapi_writeStruct *s)
       strLen = strlen(s->text);
     *((uint32_t *) p) = htonl(strLen); p += sizeof(uint32_t);
     ws->flags |= BRLAPI_WF_TEXT;
+    if (p + strLen > end) {
+      brlapi_errno = BRLERR_INVALID_PARAMETER;
+      return -1;
+    }
     memcpy(p, s->text, strLen);
     p += strLen;
   }
   if (s->attrAnd) {
     ws->flags |= BRLAPI_WF_ATTR_AND;
+    if (p + rsiz > end) {
+      brlapi_errno = BRLERR_INVALID_PARAMETER;
+      return -1;
+    }
     memcpy(p, s->attrAnd, rsiz);
     p += rsiz;
   }
   if (s->attrOr) {
     ws->flags |= BRLAPI_WF_ATTR_OR;
+    if (p + rsiz > end) {
+      brlapi_errno = BRLERR_INVALID_PARAMETER;
+      return -1;
+    }
     memcpy(p, s->attrOr, rsiz);
     p += rsiz;
   }
   if ((s->cursor>=0) && (s->cursor<=dispSize)) {
     ws->flags |= BRLAPI_WF_CURSOR;
+    if (p + sizeof(uint32_t) > end) {
+      brlapi_errno = BRLERR_INVALID_PARAMETER;
+      return -1;
+    }
     *((uint32_t *) p) = htonl(s->cursor);
     p += sizeof(uint32_t);
   } else if (s->cursor!=-1) {
@@ -1288,6 +1305,10 @@ int brlapi__write(brlapi_handle_t *handle, const brlapi_writeStruct *s)
     strLen = strlen(s->charset);
     *p++ = strLen;
     ws->flags |= BRLAPI_WF_CHARSET;
+    if (p + strLen > end) {
+      brlapi_errno = BRLERR_INVALID_PARAMETER;
+      return -1;
+    }
     memcpy(p, s->charset, strLen);
     p += strLen;
   }
