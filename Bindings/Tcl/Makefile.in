@@ -33,8 +33,8 @@ clean::
 	-rm -f $(TCL_API)
 
 install: all
-	$(SRC_DIR)/pkgutil -name brlapi -version $(API_RELEASE) -root "$(INSTALL_ROOT)" install $(TCL_API)
+	$(SRC_DIR)/pkgutil -root "$(INSTALL_ROOT)" install brlapi $(API_RELEASE) $(TCL_API)
 
 uninstall:
-	-$(SRC_DIR)/pkgutil -name brlapi -version $(API_RELEASE) -root "$(INSTALL_ROOT)" uninstall
+	-$(SRC_DIR)/pkgutil -root "$(INSTALL_ROOT)" uninstall brlapi $(API_RELEASE)
 

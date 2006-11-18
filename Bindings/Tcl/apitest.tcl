@@ -17,7 +17,9 @@
 ###############################################################################
 
 source [file join [file dirname $argv0] prologue.tcl]
-processOptions optionValues {host.arg}
+processProgramOptions optionValues {
+   {host string "where the BrlAPI server is [name][:port]"}
+}
 
 load libbrlapi_tcl.so
 

@@ -18,8 +18,20 @@
 
 source [file join [file dirname $argv0] prologue.tcl]
 
+proc getPackageDirectory {} {
+   global tcl_pkgPath optionValues packageName packageVersion
+
+   set index 0
+   if {![info exists tcl_pkgPath] || ([llength $tcl_pkgPath] <= $index)} {
+      writeProgramMessage "package directory not defined."
+      exit 3
+   }
+
+   return [file join "$optionValues(root)[lindex $tcl_pkgPath $index]" "$packageName-$packageVersion"]
+}
+
 proc makeIndex {} {
-   global optionValues packageDirectory packageFile
+   global optionValues packageDirectory packageName packageVersion packageFile
    set index [open [file join $packageDirectory "pkgIndex.tcl"] {WRONLY CREAT TRUNC}]
 
    set template [open [info script] {RDONLY}]
@@ -47,27 +59,21 @@ proc makeIndex {} {
    } else {
       set command "source"
    }
-   puts $index "package ifneeded [string totitle $optionValues(name)] $optionValues(version) \[list $command \[file join \$dir $packageFile\]\]"
+   puts $index "package ifneeded [string totitle $packageName] $packageVersion \[list $command \[file join \$dir $packageFile\]\]"
    close $index; unset index
 }
 
-processOptions optionValues {name.arg root.arg uninstall version.arg}
-
-set index 0
-if {![info exists tcl_pkgPath] || ([llength $tcl_pkgPath] <= $index)} {
-   writeProgramMessage "package directory not defined."
-   exit 3
-}
-set packageDirectory [file join "$optionValues(root)[lindex $tcl_pkgPath $index]" $optionValues(name)]
-
-if {[string length $optionValues(version)] > 0} {
-   append packageDirectory "-$optionValues(version)"
+processProgramOptions optionValues {
+   {root    string: "the install root on the build system"}
 }
 
 switch -exact -- [set function [nextArgument "function"]] {
    install {
+      set packageName [nextArgument "package name"]
+      set packageVersion [nextArgument "package version"]
       set packageFile [nextArgument "package file name"]
       noMoreArguments
+      set packageDirectory [getPackageDirectory]
 
       if {[catch [list file mkdir $packageDirectory] response] != 0} {
          writeProgramMessage $response
@@ -86,7 +92,10 @@ switch -exact -- [set function [nextArgument "function"]] {
    }
 
    uninstall {
+      set packageName [nextArgument "package name"]
+      set packageVersion [nextArgument "package version"]
       noMoreArguments
+      set packageDirectory [getPackageDirectory]
 
       if {[catch [list file delete -force -- $packageDirectory] response] != 0} {
          writeProgramMessage $response
