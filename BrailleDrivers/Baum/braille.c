@@ -775,13 +775,11 @@ readBaumPacket (unsigned char *packet, int size) {
               break;
             }
 
-            length = (cellCount > 80)? 12:
-                     (cellCount > 40)? 11:
-                                        6;
+            length = KEY_GROUP_SIZE(cellCount) + 1;
             break;
 
           case BAUM_RSP_HorizontalSensors:
-            length = (textCount > 40)? 11: 6;
+            length = KEY_GROUP_SIZE(textCount) + 1;
             break;
 
           default:
