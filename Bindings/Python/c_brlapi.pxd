@@ -36,6 +36,8 @@ cdef extern from "Programs/api.h":
 		int cursor
 		char *charset
 
+	brlapi_writeStruct BRLAPI_WRITESTRUCT_INITIALIZER
+
 	ctypedef struct brlapi_error_t:
 		int brlerror
 		int libcerror
@@ -75,6 +77,9 @@ cdef extern from "Programs/api.h":
 cdef extern from "stdlib.h":
 	void *malloc(size_t)
 	void free(void*)
+
+cdef extern from "string.h":
+	void *memcpy(void *, void *, size_t)
 
 cdef extern from "Python.h":
 	# these are macros, we just need to make Pyrex aware of them

@@ -1,7 +1,9 @@
 """
 This module is a binding for BrlAPI, a BrlTTY bridge for applications.
 
-C API documentation : http://mielke.cc/brltty/doc/BrlAPIref-HTML
+The reference C API documentation is available online http://mielke.cc/brltty/doc/BrlAPIref-HTML, as well as in manual pages.
+
+This documentation is only a python helper, you should also read C manual pages.
 
 Example : 
 import brlapi
@@ -10,7 +12,15 @@ b.enterTtyMode()
 b.writeText("Press any key to continue ...")
 key = b.readKey()
 (command, argument, flags) = b.expandKeyCode(key)
-b.writeText("Key %ld (%x %x %x) ! Press any key to exit ..." % (key, command, argument, flags))
+b.writeText("Key %ld (%x %x %x) !" % (key, command, argument, flags))
+b.readKey()
+w = brlapi.Write()
+w.regionBegin = 1
+w.regionSize = 40
+w.text = "Press any key to exit                   "
+underline = chr(brlapi.BRL_DOT7 + brlapi.BRL_DOT8)
+w.attrOr = "".center(21,underline) + "".center(19,chr(0))
+b.write(w)
 b.readKey()
 b.leaveTtyMode()
 """
@@ -56,17 +66,12 @@ class OperationError:
 		return self.value
 
 cdef class Write:
-	"""Structure containing arguments to be given to Bridge.write()"""
+	"""Structure containing arguments to be given to Bridge.write()
+	See brlapi_writeStruct(3)."""
 	cdef c_brlapi.brlapi_writeStruct props
 
 	def __new__(self):
-		self.props.displayNumber = -1
-		self.props.regionBegin = 0
-		self.props.regionSize = 0
-		self.props.text = ""
-		# I must add attrAnd & attrOr
-		self.props.cursor = 0
-		self.props.charset = ""
+		self.props = <c_brlapi.brlapi_writeStruct> c_brlapi.BRLAPI_WRITESTRUCT_INITIALIZER
 
 	property displayNumber:
 		"""Display number -1 == unspecified"""
@@ -92,9 +97,23 @@ cdef class Write:
 	property text:
 		"""Text to display"""
 		def __get__(self):
-			return self.props.text
+			if (not self.props.text):
+				return None
+			else:
+				return self.props.text
 		def __set__(self, val):
-			self.props.text = val
+			cdef c_brlapi.size_t size
+			cdef char *c_val
+			if (self.props.text):
+				c_brlapi.free(self.props.text)
+			if (val):
+				size = len(val)
+				c_val = val
+				self.props.text = <char*>c_brlapi.malloc(size+1)
+				c_brlapi.memcpy(<void*>self.props.text,<void*>c_val,size)
+				self.props.text[size] = 0;
+			else:
+				self.props.text = NULL
 
 	property cursor:
 		"""-1 == don't touch, 0 == turn off, 1 = 1st char of display, ..."""
@@ -106,23 +125,63 @@ cdef class Write:
 	property charset:
 		"""Character set of the text"""
 		def __get__(self):
-			return self.props.charset
+			if (not self.props.charset):
+				return None
+			else:
+				return self.props.charset
 		def __set__(self, val):
-			self.props.charset = val
+			cdef c_brlapi.size_t size
+			cdef char *c_val
+			if (self.props.charset):
+				c_brlapi.free(self.props.charset)
+			if (val):
+				size = len(val)
+				c_val = val
+				self.props.charset = <char*>c_brlapi.malloc(size+1)
+				c_brlapi.memcpy(<void*>self.props.charset,<void*>c_val,size)
+				self.props.charset[size] = 0;
+			else:
+				self.props.charset = NULL
 
 	property attrAnd:
 		"""And attributes; applied first"""
 		def __get__(self):
-			return <char*>self.props.attrAnd
+			if (not self.props.attrAnd):
+				return None
+			else:
+				return <char*>self.props.attrAnd
 		def __set__(self, val):
-			self.props.attrAnd = <unsigned char*>val
+			cdef c_brlapi.size_t size
+			cdef char *c_val
+			if (self.props.attrAnd):
+				c_brlapi.free(self.props.attrAnd)
+			if (val):
+				size = len(val)
+				c_val = val
+				self.props.attrAnd = <unsigned char*>c_brlapi.malloc(size)
+				c_brlapi.memcpy(<void*>self.props.attrAnd,<void*>c_val,size)
+			else:
+				self.props.attrAnd = NULL
 
 	property attrOr:
 		"""Or attributes; applied after ANDing"""
 		def __get__(self):
-			return <char*>self.props.attrOr
+			if (not self.props.attrOr):
+				return None
+			else:
+				return <char*>self.props.attrOr
 		def __set__(self, val):
-			self.props.attrOr = <unsigned char*>val
+			cdef c_brlapi.size_t size
+			cdef char *c_val
+			if (self.props.attrOr):
+				c_brlapi.free(self.props.attrOr)
+			if (val):
+				size = len(val)
+				c_val = val
+				self.props.attrOr = <unsigned char*>c_brlapi.malloc(size)
+				c_brlapi.memcpy(<void*>self.props.attrOr,<void*>c_val,size)
+			else:
+				self.props.attrOr = NULL
 
 cdef class Connection:
 	"""Class which manages the bridge between BrlTTY and your program"""
@@ -131,6 +190,8 @@ cdef class Connection:
 	cdef int fd
 	def __init__(self, host = None, auth = None):
 		"""Connect your program to BrlTTY using settings
+
+		See brlapi_openConnection(3)
 		
 		Setting host to None defaults it to localhost, using the local installation's default TCP port, or to the content of the BRLAPI_HOST environment variable, if it exists.
 		Note: Please check that resolving this name works before complaining.
@@ -141,12 +202,12 @@ cdef class Connection:
 		if auth:
 			client.auth = auth
 		else:
-			client.auth = ""
+			client.auth = NULL
 
 		if host:
 			client.host = host
 		else:
-			client.host = ""
+			client.host = NULL
 
 		self.h = <c_brlapi.brlapi_handle_t*> c_brlapi.malloc(c_brlapi.brlapi_getHandleSize())
 
@@ -177,8 +238,9 @@ cdef class Connection:
 		def __get__(self):
 			return self.fd
 
-	property displaysize:
-		"""Get the size of the braille display"""
+	property displaySize:
+		"""Get the size of the braille display
+		See brlapi_getDisplaySize(3)."""
 		def __get__(self):
 			cdef unsigned int x
 			cdef unsigned int y
@@ -191,8 +253,9 @@ cdef class Connection:
 			else:
 				return (x, y)
 	
-	property driverid:
-		"""Identify the driver used by BrlTTY"""
+	property driverId:
+		"""Identify the driver used by BrlTTY
+		See brlapi_getDriverId(3)."""
 		def __get__(self):
 			cdef char id[3]
 			cdef int retval
@@ -204,10 +267,9 @@ cdef class Connection:
 			else:
 				return id
 
-	# TODO: getDriverInfo
-	
-	property drivername:
-		"""Get the complete name of the driver used by BrlTTY"""
+	property driverName:
+		"""Get the complete name of the driver used by BrlTTY
+		See brlapi_getDriverName(3)."""
 		def __get__(self):
 			cdef char name[21]
 			cdef int retval
@@ -221,6 +283,9 @@ cdef class Connection:
 
 	def enterTtyMode(self, tty = -1, how = None):
 		"""Ask for some tty, with some key mechanism
+
+		See brlapi_enterTtyMode(3).
+
 		* tty : If tty >= 0, application takes control of the specified tty
 			If tty == -1, the library first tries to get the tty number from the WINDOWID environment variable (form xterm case), then the CONTROLVT variable, and at last reads /proc/self/stat (on linux)
 		* how : Tells how the application wants readKey() to return key presses. None or "" means BrlTTY commands are required, whereas a driver name means that raw key codes returned by this driver are expected."""
@@ -241,7 +306,8 @@ cdef class Connection:
 			return retval
 
 	def leaveTtyMode(self):
-		"""Stop controlling the tty"""
+		"""Stop controlling the tty
+		See brlapi_leaveTtyMode(3)."""
 		cdef int retval
 		c_brlapi.Py_BEGIN_ALLOW_THREADS
 		retval = c_brlapi.brlapi__leaveTtyMode(self.h)
@@ -256,6 +322,7 @@ cdef class Connection:
 	
 	def setFocus(self, tty):
 		"""Tell the current tty to brltty.
+		See brlapi_setFocus(3).
 		This is intended for focus tellers, such as brltty, xbrlapi, screen, ... enterTtyMode() must have been called before hand to tell where this focus applies in the tty tree."""
 		cdef int retval
 		cdef int c_tty
@@ -270,6 +337,7 @@ cdef class Connection:
 
 	def write(self, Write writeStruct):
 		"""Update a specific region of the braille display and apply and/or masks.
+		See brlapi_write(3).
 		* s : gives information necessary for the update"""
 		cdef int retval
 		c_brlapi.Py_BEGIN_ALLOW_THREADS
@@ -282,12 +350,15 @@ cdef class Connection:
 
 	def writeDots(self, dots):
 		"""Write the given dots array to the display.
+		See brlapi_writeDots(3).
 		* dots : points on an array of dot information, one per character. Its size must hence be the same as what displaysize provides."""
 		cdef int retval
-		cdef unsigned char *c_dots
-		c_dots = <unsigned char *> dots
+		cdef char *c_dots
+		cdef unsigned char *c_udots
+		c_dots = dots
+		c_udots = <unsigned char *>c_dots
 		c_brlapi.Py_BEGIN_ALLOW_THREADS
-		retval = c_brlapi.brlapi__writeDots(self.h, c_dots)
+		retval = c_brlapi.brlapi__writeDots(self.h, c_udots)
 		c_brlapi.Py_END_ALLOW_THREADS
 		if retval == -1:
 			raise OperationError(returnerrno())
@@ -296,6 +367,7 @@ cdef class Connection:
 
 	def writeText(self, str, cursor = 0):
 		"""Write the given \0-terminated string to the braille display.
+		See brlapi_writeText(3).
 		If the string is too long, it is cut. If it's too short, spaces are appended. The current LC_CTYPE locale is considered, unless it is left as default "C", in which case the charset is assumed to be 8bits, and the same as the server's.
 
 		* cursor : gives the cursor position; if equal to 0, no cursor is shown at all; if cursor == -1, the cursor is left where it is
@@ -315,6 +387,7 @@ cdef class Connection:
 
 	def readKey(self, block = True):
 		"""Read a key from the braille keyboard.
+		See brlapi_readKey(3).
 
 		This function returns one key press's code.
 
@@ -340,7 +413,8 @@ cdef class Connection:
 			return code
 
 	def expandKeyCode(self, code):
-		"""Expand a keycode into command, argument and flags parts."""
+		"""Expand a keycode into command, argument and flags parts.
+		See brlapi_expandKeyCode(3)."""
 		cdef unsigned int command
 		cdef unsigned int argument
 		cdef unsigned int flags
@@ -353,6 +427,7 @@ cdef class Connection:
 	
 	def ignoreKeyRange(self, range):
 		"""Ignore some key presses from the braille keyboard.
+		See brlapi_ignoreKeyRange(3).
 
 		This function asks the server to give keys between x and y to brltty, rather than returning them to the application via readKey().
 
@@ -373,6 +448,7 @@ cdef class Connection:
 
 	def acceptKeyRange(self, range):
 		"""Accept some key presses from the braille keyboard.
+		See brlapi_acceptKeyRange(3).
 
 		This function asks the server to return keys between x and y to the application, and not give them to brltty.
 
@@ -385,12 +461,13 @@ cdef class Connection:
 		retval = c_brlapi.brlapi__acceptKeyRange(self.h, x, y)
 		c_brlapi.Py_END_ALLOW_THREADS
 		if retval == -1:
-			raise OperationError(returnerror())
+			raise OperationError(returnerrno())
 		else:
 			return retval
 
 	def enterRawMode(self, drivername):
 		"""Switch to Raw mode
+		See brlapi_enterRawMode(3).
 		
 		* driver : Specifies the name of the driver for which the raw communication will be established"""
 		cdef int retval
@@ -400,7 +477,19 @@ cdef class Connection:
 		retval = c_brlapi.brlapi__enterRawMode(self.h, c_drivername)
 		c_brlapi.Py_END_ALLOW_THREADS
 		if retval == -1:
-			raise OperationError(returnerror())
+			raise OperationError(returnerrno())
+		else:
+			return retval
+
+	def leaveRawMode(self):
+		"""leave Raw mode
+		See brlapi_leaveRawMode(3)."""
+		cdef int retval
+		c_brlapi.Py_BEGIN_ALLOW_THREADS
+		retval = c_brlapi.brlapi__leaveRawMode(self.h)
+		c_brlapi.Py_END_ALLOW_THREADS
+		if retval == -1:
+			raise OperationError(returnerrno())
 		else:
 			return retval
 
