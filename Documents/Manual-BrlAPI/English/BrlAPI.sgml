@@ -1391,16 +1391,14 @@ flag weight):
 <itemize>
 <item> A display number can be given as a integer, in case the braille
 display has several. If not given, usual display is used.
-<item> A region can be given as two integers indicating the beginning and the
+<item> A region must be given as two integers indicating the beginning and the
 number of characters of the part of the braille display which is to be updated,
-the first cell of the display being numbered 1. If not given, the whole display
-is considered to be updated (and hence the following three fields should exactly
-fit the braille display ie hold <em/height/*<em/width/
-bytes, where <em/height/ and <em/width/ must be got by sending a
-<tt/BRLPACKET_GETDISPLAYSIZE/ packet.
+the first cell of the display being numbered 1.
 <item> The text to display can then be given, preceded by its size in bytes
 expressed as an integer. It will erase the corresponding region in the AND and
-OR fields.
+OR fields. The text's length in characters must exactly match the region
+size. For multibyte text, this is the number of wide characters. Notably,
+combining and double-width characters count for 1.
 <item> Then an AND field can be given, one byte per character: the 8-dot
 representation of the above text will be AND-ed with this field, hence allowing
 to erase some unwanted parts of characters. Dots are coded as described in
@@ -1417,7 +1415,7 @@ the cursor (if any) is left unmodified.
 <item> Last but not least, the charset of the text can be specified. If it is
 not, an 8-bit charset is assumed, and it is assumed to be the same as the
 server's. Multibyte charsets may be used, AND and OR fields' bytes will
-correspond to each text's wide <em/character/, be it a composing or a
+correspond to each text's wide <em/character/, be it a combining or a
 double-width character.
 </itemize>
 
