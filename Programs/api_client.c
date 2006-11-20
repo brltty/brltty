@@ -1051,6 +1051,50 @@ int brlapi_setFocus(int tty)
   return brlapi__setFocus(&defaultHandle, tty);
 }
 
+#ifdef WINDOWS
+static size_t getCharset(unsigned char *buffer, int wide)
+#else /* WINDOWS */
+static size_t getCharset(unsigned char *buffer)
+#endif /* WINDOWS */
+{
+  unsigned char *p = buffer;
+  char *locale;
+  unsigned int len;
+  locale = setlocale(LC_CTYPE,NULL);
+#ifdef WINDOWS
+#ifdef WORDS_BIGENDIAN
+#define WIN_WCHAR_T "UCS-2BE"
+#else /* WORDS_BIGENDIAN */
+#define WIN_WCHAR_T "UCS-2LE"
+#endif /* WORDS_BIGENDIAN */
+  if (CHECKPROC("ntdll.dll", wcslen) && wide) {
+    *p++ = strlen(WIN_WCHAR_T);
+    strcpy(p, WIN_WCHAR_T);
+    p += strlen(WIN_WCHAR_T);
+  } else
+#endif /* WINDOWS */
+  if (locale && strcmp(locale,"C")) {
+    /* not default locale, tell charset to server */
+#ifdef WINDOWS
+    UINT CP;
+    if ((CP = GetACP() || (CP = GetOEMCP()))) {
+      len = sprintf(p+3, "%d", CP);
+      *p++ = 2 + len;
+      *p++ = 'C';
+      *p++ = 'P';
+      p += len;
+    }
+#else /* WINDOWS */
+    char *lang = nl_langinfo(CODESET);
+    len = strlen(lang);
+    *p++ = len;
+    memcpy(p, lang, len);
+    p += len;
+#endif /* WINDOWS */
+  }
+  return p-buffer;
+}
+
 /* Function : brlapi_writeText */
 /* Writes a string to the braille display */
 #ifdef WINDOWS
@@ -1141,40 +1185,15 @@ endcount:
     return -1;
   }
 
+  if ((len = getCharset(p
 #ifdef WINDOWS
-#ifdef WORDS_BIGENDIAN
-#define WIN_WCHAR_T "UCS-2BE"
-#else /* WORDS_BIGENDIAN */
-#define WIN_WCHAR_T "UCS-2LE"
-#endif /* WORDS_BIGENDIAN */
-  if (CHECKPROC("ntdll.dll", wcslen) && wide) {
-    ws->flags |= BRLAPI_WF_CHARSET;
-    *p++ = strlen(WIN_WCHAR_T);
-    strcpy(p, WIN_WCHAR_T);
-    p += strlen(WIN_WCHAR_T);
-  } else
+  	, wide
 #endif /* WINDOWS */
-  if (locale && strcmp(locale,"C")) {
-    /* not default locale, tell charset to server */
-#ifdef WINDOWS
-    UINT CP;
-    if ((CP = GetACP() || (CP = GetOEMCP()))) {
-      ws->flags |= BRLAPI_WF_CHARSET;
-      len = sprintf(p+3, "%d", CP);
-      *p++ = 2 + len;
-      *p++ = 'C';
-      *p++ = 'P';
-      p += len;
-    }
-#else /* WINDOWS */
-    char *lang = nl_langinfo(CODESET);
-    len = strlen(lang);
+	))) {
     ws->flags |= BRLAPI_WF_CHARSET;
-    *p++ = len;
-    memcpy(p, lang, len);
     p += len;
-#endif /* WINDOWS */
   }
+
   ws->flags = htonl(ws->flags);
   pthread_mutex_lock(&handle->fileDescriptor_mutex);
   res = brlapi_writePacket(handle->fileDescriptor,BRLPACKET_WRITE,packet,sizeof(ws->flags)+(p-&ws->data));
@@ -1247,12 +1266,13 @@ int brlapi__write(brlapi_handle_t *handle, const brlapi_writeStruct *s)
   if (s==NULL) goto send;
   rbeg = s->regionBegin;
   rsiz = s->regionSize;
-  if ((1<=rbeg) && (rbeg<=dispSize) && (1<=rbeg+rsiz-1) && (rbeg+rsiz-1<=dispSize)) {
+  if (rbeg || rsiz) {
     if (rsiz == 0) return 0;
     ws->flags |= BRLAPI_WF_REGION;
     *((uint32_t *) p) = htonl(rbeg); p += sizeof(uint32_t);
     *((uint32_t *) p) = htonl(rsiz); p += sizeof(uint32_t);
   } else {
+    /* DEPRECATED */
     rbeg = 1; rsiz = dispSize;
   }
   if (s->text) {
@@ -1301,16 +1321,27 @@ int brlapi__write(brlapi_handle_t *handle, const brlapi_writeStruct *s)
     brlapi_errno = BRLERR_INVALID_PARAMETER;
     return -1;    
   }
-  if (s->charset && *s->charset) {
-    strLen = strlen(s->charset);
-    *p++ = strLen;
-    ws->flags |= BRLAPI_WF_CHARSET;
-    if (p + strLen > end) {
-      brlapi_errno = BRLERR_INVALID_PARAMETER;
-      return -1;
+  if (s->charset) {
+    if (!*s->charset) {
+      if ((strLen = getCharset(p
+    #ifdef WINDOWS
+	    , wide
+    #endif /* WINDOWS */
+	    ))) {
+	ws->flags |= BRLAPI_WF_CHARSET;
+	p += strLen;
+      }
+    } else {
+      strLen = strlen(s->charset);
+      *p++ = strLen;
+      ws->flags |= BRLAPI_WF_CHARSET;
+      if (p + strLen > end) {
+	brlapi_errno = BRLERR_INVALID_PARAMETER;
+	return -1;
+      }
+      memcpy(p, s->charset, strLen);
+      p += strLen;
     }
-    memcpy(p, s->charset, strLen);
-    p += strLen;
   }
 send:
   ws->flags = htonl(ws->flags);
