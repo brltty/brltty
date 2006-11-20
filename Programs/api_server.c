@@ -1264,7 +1264,7 @@ static int handleUnauthorizedConnection(Connection *c, brl_type_t type, unsigned
 	}
 	break;
       default:
-        LogPrint(LOG_DEBUG, "Unsupported authorization method %d\n", authType);
+        LogPrint(LOG_DEBUG, "Unsupported authorization method %"PRId32, authType);
         break;
     }
   }

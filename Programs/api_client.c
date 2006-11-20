@@ -599,11 +599,11 @@ brlapi_fileDescriptor brlapi__openConnection(brlapi_handle_t *handle, const brla
   }
 
   if ((authServerLen = brlapi__waitForPacket(handle, BRLPACKET_AUTH, serverPacket, sizeof(serverPacket), 1)) < 0)
-    return authServerLen;
+    return INVALID_FILE_DESCRIPTOR;
 
   if (authServer->protocolVersion != htonl(BRLAPI_PROTOCOL_VERSION)) {
     brlapi_errno = BRLERR_PROTOCOL_VERSION;
-    return -1;
+    return INVALID_FILE_DESCRIPTOR;
   }
 
   auth->protocolVersion = htonl(BRLAPI_PROTOCOL_VERSION);

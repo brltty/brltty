@@ -29,6 +29,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#undef BRLAPI_WIN32
+
 /** \defgroup brlapi_version Version of the BrlAPI library
  * @{ */
 
@@ -101,11 +103,11 @@ size_t brlapi_getHandleSize(void);
 #define BRLAPI_MAXNAMELENGTH 31
 
 /** Default unix path on which connections to \e BrlAPI can be established */
-#ifdef WINDOWS
+#ifdef BRLAPI_WIN32
 #define BRLAPI_SOCKETPATH "\\\\.\\pipe\\BrlAPI"
-#else /* WINDOWS */
+#else /* BRLAPI_WIN32 */
 #define BRLAPI_SOCKETPATH "/var/lib/BrlAPI/"
-#endif /* WINDOWS */
+#endif /* BRLAPI_WIN32 */
 
 /** \e brltty 's settings directory
  *
@@ -120,8 +122,6 @@ size_t brlapi_getHandleSize(void);
 
 /** Default authorization setting */
 #define BRLAPI_DEFAUTH BRLAPI_ETCDIR "/" BRLAPI_AUTHKEYFILE
-
-#undef BRLAPI_WIN32
 
 #ifdef BRLAPI_WIN32
 #include <windows.h>
