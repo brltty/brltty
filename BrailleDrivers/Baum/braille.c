@@ -134,13 +134,23 @@ adjustWriteDelay (BrailleDisplay *brl, int bytes) {
 }
 
 static int
-updateFunctionKeys (uint64_t mask, uint64_t keys, int *pressed) {
+updateFunctionKeys (uint64_t keys, uint64_t mask, unsigned int shift, int *pressed) {
+  if (shift) {
+    keys <<= shift;
+    mask <<= shift;
+  }
+
   keys |= pressedKeys.functionKeys & ~mask;
   if (keys == pressedKeys.functionKeys) return 0;
 
   if (keys & ~pressedKeys.functionKeys) *pressed = 1;
   pressedKeys.functionKeys = keys;
   return 1;
+}
+
+static int
+updateFunctionKeyByte (unsigned char keys, unsigned int shift, unsigned int width, int *pressed) {
+  return updateFunctionKeys(keys, ((1 << width) - 1), shift, pressed);
 }
 
 static int
@@ -164,7 +174,7 @@ clearKeyGroup (unsigned char *keys, int count) {
 }
 
 static void
-makeKeyGroup (unsigned char *keys, int count, unsigned char key) {
+resetKeyGroup (unsigned char *keys, int count, unsigned char key) {
   clearKeyGroup(keys, count);
   if (key > 0) setGroupedKey(keys, key-1, 1);
 }
@@ -481,9 +491,13 @@ typedef enum {
   BAUM_RSP_HorizontalSensor     = 0X25,
   BAUM_RSP_VerticalSensor       = 0X26,
   BAUM_RSP_RoutingKey           = 0X27,
-  BAUM_RSP_FrontKeys            = 0X28,
-  BAUM_RSP_BackKeys             = 0X29,
+  BAUM_RSP_FrontKeys6           = 0X28,
+  BAUM_RSP_BackKeys6            = 0X29,
   BAUM_RSP_CommandKeys          = 0X2B,
+  BAUM_RSP_FrontKeys10          = 0X2C,
+  BAUM_RSP_BackKeys10           = 0X2D,
+  BAUM_RSP_EntryKeys            = 0X33,
+  BAUM_RSP_JoyStick             = 0X34,
   BAUM_RSP_ErrorCode            = 0X40,
   BAUM_RSP_DeviceIdentity       = 0X84,
   BAUM_RSP_SerialNumber         = 0X8A,
@@ -520,33 +534,109 @@ typedef enum {
   BAUM_PDR_Charging          = 0X80
 } BaumPowerdownReason;
 
-typedef enum {
-  BAUM_KEY_TL1 = 0X00000001,
-  BAUM_KEY_TL2 = 0X00000002,
-  BAUM_KEY_TL3 = 0X00000004,
-  BAUM_KEY_TR1 = 0X00000008,
-  BAUM_KEY_TR2 = 0X00000010,
-  BAUM_KEY_TR3 = 0X00000020,
+#define BAUM_KEY(bit,type) (UINT64_C(bit) << BAUM_SHIFT_##type)
 
-  BAUM_KEY_FLU = 0X00000100,
-  BAUM_KEY_FLD = 0X00000200,
-  BAUM_KEY_FMU = 0X00000400,
-  BAUM_KEY_FMD = 0X00000800,
-  BAUM_KEY_FRU = 0X00001000,
-  BAUM_KEY_FRD = 0X00002000,
+#define BAUM_SHIFT_TOP 0
+#define BAUM_WIDTH_TOP 6
+#define BAUM_KEY_TL1 BAUM_KEY(0X01, TOP)
+#define BAUM_KEY_TL2 BAUM_KEY(0X02, TOP)
+#define BAUM_KEY_TL3 BAUM_KEY(0X04, TOP)
+#define BAUM_KEY_TR1 BAUM_KEY(0X08, TOP)
+#define BAUM_KEY_TR2 BAUM_KEY(0X10, TOP)
+#define BAUM_KEY_TR3 BAUM_KEY(0X20, TOP)
 
-  BAUM_KEY_CK1 = 0X00010000,
-  BAUM_KEY_CK2 = 0X00020000,
-  BAUM_KEY_CK3 = 0X00040000,
-  BAUM_KEY_CK4 = 0X00080000,
-  BAUM_KEY_CK5 = 0X00100000,
-  BAUM_KEY_CK6 = 0X00200000,
-  BAUM_KEY_CK7 = 0X00400000,
+#define BAUM_SHIFT_COMMAND (BAUM_SHIFT_TOP + BAUM_WIDTH_TOP)
+#define BAUM_WIDTH_COMMAND 7
+#define BAUM_KEY_CK1 BAUM_KEY(0X01, COMMAND)
+#define BAUM_KEY_CK2 BAUM_KEY(0X02, COMMAND)
+#define BAUM_KEY_CK3 BAUM_KEY(0X04, COMMAND)
+#define BAUM_KEY_CK4 BAUM_KEY(0X08, COMMAND)
+#define BAUM_KEY_CK5 BAUM_KEY(0X10, COMMAND)
+#define BAUM_KEY_CK6 BAUM_KEY(0X20, COMMAND)
+#define BAUM_KEY_CK7 BAUM_KEY(0X40, COMMAND)
 
-  BAUM_KEY_HRZ = 0X10000000,
-  BAUM_KEY_VTL = 0X20000000,
-  BAUM_KEY_VTR = 0X40000000
-} BaumKey;
+#define BAUM_SHIFT_FRONT10B (BAUM_SHIFT_COMMAND + BAUM_WIDTH_COMMAND)
+#define BAUM_WIDTH_FRONT10B 8
+#define BAUM_KEY_FK10 BAUM_KEY(0X01, FRONT10B)
+#define BAUM_KEY_FK9  BAUM_KEY(0X02, FRONT10B)
+#define BAUM_KEY_FK8  BAUM_KEY(0X04, FRONT10B)
+#define BAUM_KEY_FK7  BAUM_KEY(0X08, FRONT10B)
+#define BAUM_KEY_FK6  BAUM_KEY(0X10, FRONT10B)
+#define BAUM_KEY_FK5  BAUM_KEY(0X20, FRONT10B)
+#define BAUM_KEY_FK4  BAUM_KEY(0X40, FRONT10B)
+#define BAUM_KEY_FK3  BAUM_KEY(0X80, FRONT10B)
+
+#define BAUM_SHIFT_FRONT10A (BAUM_SHIFT_FRONT10B + BAUM_WIDTH_FRONT10B)
+#define BAUM_WIDTH_FRONT10A 2
+#define BAUM_KEY_FK2  BAUM_KEY(0X01, FRONT10A)
+#define BAUM_KEY_FK1  BAUM_KEY(0X02, FRONT10A)
+
+#define BAUM_SHIFT_FRONT6 (BAUM_SHIFT_FRONT10B + 2)
+#define BAUM_WIDTH_FRONT6 6
+#define BAUM_KEY_FRD BAUM_KEY(0X01, FRONT6)
+#define BAUM_KEY_FRU BAUM_KEY(0X02, FRONT6)
+#define BAUM_KEY_FMD BAUM_KEY(0X04, FRONT6)
+#define BAUM_KEY_FMU BAUM_KEY(0X08, FRONT6)
+#define BAUM_KEY_FLD BAUM_KEY(0X10, FRONT6)
+#define BAUM_KEY_FLU BAUM_KEY(0X20, FRONT6)
+
+#define BAUM_SHIFT_BACK10B (BAUM_SHIFT_FRONT10A + BAUM_WIDTH_FRONT10A)
+#define BAUM_WIDTH_BACK10B 8
+#define BAUM_KEY_BK10 BAUM_KEY(0X01, BACK10B)
+#define BAUM_KEY_BK9  BAUM_KEY(0X02, BACK10B)
+#define BAUM_KEY_BK8  BAUM_KEY(0X04, BACK10B)
+#define BAUM_KEY_BK7  BAUM_KEY(0X08, BACK10B)
+#define BAUM_KEY_BK6  BAUM_KEY(0X10, BACK10B)
+#define BAUM_KEY_BK5  BAUM_KEY(0X20, BACK10B)
+#define BAUM_KEY_BK4  BAUM_KEY(0X40, BACK10B)
+#define BAUM_KEY_BK3  BAUM_KEY(0X80, BACK10B)
+
+#define BAUM_SHIFT_BACK10A (BAUM_SHIFT_BACK10B + BAUM_WIDTH_BACK10B)
+#define BAUM_WIDTH_BACK10A 2
+#define BAUM_KEY_BK2  BAUM_KEY(0X01, BACK10A)
+#define BAUM_KEY_BK1  BAUM_KEY(0X02, BACK10A)
+
+#define BAUM_SHIFT_BACK6 (BAUM_SHIFT_BACK10B + 2)
+#define BAUM_WIDTH_BACK6 6
+#define BAUM_KEY_BRD BAUM_KEY(0X01, BACK6)
+#define BAUM_KEY_BRU BAUM_KEY(0X02, BACK6)
+#define BAUM_KEY_BMD BAUM_KEY(0X04, BACK6)
+#define BAUM_KEY_BMU BAUM_KEY(0X08, BACK6)
+#define BAUM_KEY_BLD BAUM_KEY(0X10, BACK6)
+#define BAUM_KEY_BLU BAUM_KEY(0X20, BACK6)
+
+#define BAUM_SHIFT_DOT (BAUM_SHIFT_BACK10A + BAUM_WIDTH_BACK10A)
+#define BAUM_WIDTH_DOT 6
+#define BAUM_KEY_DOT1 BAUM_KEY(0X01, DOT)
+#define BAUM_KEY_DOT2 BAUM_KEY(0X02, DOT)
+#define BAUM_KEY_DOT3 BAUM_KEY(0X04, DOT)
+#define BAUM_KEY_DOT4 BAUM_KEY(0X08, DOT)
+#define BAUM_KEY_DOT5 BAUM_KEY(0X10, DOT)
+#define BAUM_KEY_DOT6 BAUM_KEY(0X20, DOT)
+
+#define BAUM_SHIFT_BUTTON (BAUM_SHIFT_DOT + BAUM_WIDTH_DOT)
+#define BAUM_WIDTH_BUTTON 8
+#define BAUM_KEY_B9  BAUM_KEY(0X01, BUTTON)
+#define BAUM_KEY_B0  BAUM_KEY(0X02, BUTTON)
+#define BAUM_KEY_B11 BAUM_KEY(0X04, BUTTON)
+#define BAUM_KEY_F1  BAUM_KEY(0X10, BUTTON)
+#define BAUM_KEY_F2  BAUM_KEY(0X20, BUTTON)
+#define BAUM_KEY_F3  BAUM_KEY(0X40, BUTTON)
+#define BAUM_KEY_F4  BAUM_KEY(0X80, BUTTON)
+
+#define BAUM_SHIFT_JOYSTICK (BAUM_SHIFT_BUTTON + BAUM_WIDTH_BUTTON)
+#define BAUM_WIDTH_JOYSTICK 5
+#define BAUM_KEY_UP    BAUM_KEY(0X01, JOYSTICK)
+#define BAUM_KEY_LEFT  BAUM_KEY(0X02, JOYSTICK)
+#define BAUM_KEY_DOWN  BAUM_KEY(0X04, JOYSTICK)
+#define BAUM_KEY_RIGHT BAUM_KEY(0X08, JOYSTICK)
+#define BAUM_KEY_PRESS BAUM_KEY(0X10, JOYSTICK)
+
+#define BAUM_SHIFT_SENSOR (BAUM_SHIFT_JOYSTICK + BAUM_WIDTH_JOYSTICK)
+#define BAUM_WIDTH_SENSOR 3
+#define BAUM_KEY_HRZ BAUM_KEY(0X1, SENSOR)
+#define BAUM_KEY_VTL BAUM_KEY(0X2, SENSOR)
+#define BAUM_KEY_VTR BAUM_KEY(0X4, SENSOR)
 
 typedef enum {
   BAUM_SWT_DisableSensors  = 0X01,
@@ -604,9 +694,16 @@ typedef union {
         unsigned char right;
       } PACKED verticalSensor;
       unsigned char routingKey;
-      unsigned char frontKeys;
-      unsigned char backKeys;
+      unsigned char frontKeys6;
+      unsigned char backKeys6;
       unsigned char commandKeys;
+      unsigned char frontKeys10[2];
+      unsigned char backKeys10[2];
+      struct {
+        unsigned char buttons;
+        unsigned char dots;
+      } PACKED entryKeys;
+      unsigned char joyStick;
 
       unsigned char cellCount;
       unsigned char versionNumber;
@@ -735,14 +832,18 @@ readBaumPacket (unsigned char *packet, int size) {
           case BAUM_RSP_TopKeys:
           case BAUM_RSP_HorizontalSensor:
           case BAUM_RSP_RoutingKey:
-          case BAUM_RSP_FrontKeys:
-          case BAUM_RSP_BackKeys:
+          case BAUM_RSP_FrontKeys6:
+          case BAUM_RSP_BackKeys6:
           case BAUM_RSP_CommandKeys:
+          case BAUM_RSP_JoyStick:
           case BAUM_RSP_ErrorCode:
             length = 2;
             break;
 
           case BAUM_RSP_ModeSetting:
+          case BAUM_RSP_FrontKeys10:
+          case BAUM_RSP_BackKeys10:
+          case BAUM_RSP_EntryKeys:
             length = 3;
             break;
 
@@ -990,11 +1091,9 @@ updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
         errno = ENODEV;
         return 0;
 
-      {
-        uint64_t keys;
-        unsigned int shift;
+      case BAUM_RSP_TopKeys: {
+        unsigned char keys;
 
-      case BAUM_RSP_TopKeys:
         switch (baumDeviceType) {
           case BAUM_TYPE_Inka:
             keys = 0;
@@ -1017,31 +1116,62 @@ updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
             break;
         }
 
-        shift = 0;
-        goto doKeys;
-
-      case BAUM_RSP_FrontKeys:
-        keys = packet.data.values.frontKeys;
-        shift = 8;
-        goto doKeys;
-
-      case BAUM_RSP_CommandKeys:
-        keys = packet.data.values.commandKeys;
-        shift = 16;
-        goto doKeys;
-
-      case BAUM_RSP_BackKeys:
-        keys = packet.data.values.backKeys;
-        shift = 24;
-        goto doKeys;
-
-      doKeys:
-        if (updateFunctionKeys((0XFF << shift), (keys << shift), keyPressed)) return 1;
+        if (updateFunctionKeyByte(keys, BAUM_SHIFT_TOP, BAUM_WIDTH_TOP, keyPressed)) return 1;
         continue;
       }
 
+      case BAUM_RSP_CommandKeys:
+        if (updateFunctionKeyByte(packet.data.values.commandKeys,
+                                  BAUM_SHIFT_COMMAND, BAUM_WIDTH_COMMAND, keyPressed)) return 1;
+        continue;
+
+      case BAUM_RSP_FrontKeys6:
+        if (updateFunctionKeyByte(packet.data.values.frontKeys6,
+                                  BAUM_SHIFT_FRONT6, BAUM_WIDTH_FRONT6, keyPressed)) return 1;
+        continue;
+
+      case BAUM_RSP_BackKeys6:
+        if (updateFunctionKeyByte(packet.data.values.backKeys6,
+                                  BAUM_SHIFT_BACK6, BAUM_WIDTH_BACK6, keyPressed)) return 1;
+        continue;
+
+      case BAUM_RSP_FrontKeys10: {
+        int changed = 0;
+        if (updateFunctionKeyByte(packet.data.values.frontKeys10[0],
+                                  BAUM_SHIFT_FRONT10A, BAUM_WIDTH_FRONT10A, keyPressed)) changed = 1;
+        if (updateFunctionKeyByte(packet.data.values.frontKeys10[1],
+                                  BAUM_SHIFT_FRONT10B, BAUM_WIDTH_FRONT10B, keyPressed)) changed = 1;
+        if (changed) return 1;
+        continue;
+      }
+
+      case BAUM_RSP_BackKeys10: {
+        int changed = 0;
+        if (updateFunctionKeyByte(packet.data.values.backKeys10[0],
+                                  BAUM_SHIFT_BACK10A, BAUM_WIDTH_BACK10A, keyPressed)) changed = 1;
+        if (updateFunctionKeyByte(packet.data.values.backKeys10[1],
+                                  BAUM_SHIFT_BACK10B, BAUM_WIDTH_BACK10B, keyPressed)) changed = 1;
+        if (changed) return 1;
+        continue;
+      }
+
+      case BAUM_RSP_EntryKeys: {
+        int changed = 0;
+        if (updateFunctionKeyByte(packet.data.values.entryKeys.dots,
+                                  BAUM_SHIFT_DOT, BAUM_WIDTH_DOT, keyPressed)) changed = 1;
+        if (updateFunctionKeyByte(packet.data.values.entryKeys.buttons,
+                                  BAUM_SHIFT_BUTTON, BAUM_WIDTH_BUTTON, keyPressed)) changed = 1;
+        if (changed) return 1;
+        continue;
+      }
+
+      case BAUM_RSP_JoyStick:
+        if (updateFunctionKeyByte(packet.data.values.joyStick,
+                                  BAUM_SHIFT_JOYSTICK, BAUM_WIDTH_JOYSTICK, keyPressed)) return 1;
+        continue;
+
       case BAUM_RSP_HorizontalSensor:
-        makeKeyGroup(packet.data.values.horizontalSensors, textCount, packet.data.values.horizontalSensor);
+        resetKeyGroup(packet.data.values.horizontalSensors, textCount, packet.data.values.horizontalSensor);
       case BAUM_RSP_HorizontalSensors:
         if (updateKeyGroup(pressedKeys.horizontalSensors, packet.data.values.horizontalSensors, textCount, keyPressed)) return 1;
         continue;
@@ -1058,8 +1188,8 @@ updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
           right = left;
           left = 0;
         }
-        makeKeyGroup(packet.data.values.verticalSensors.left, VERTICAL_SENSOR_COUNT, left);
-        makeKeyGroup(packet.data.values.verticalSensors.right, VERTICAL_SENSOR_COUNT, right);
+        resetKeyGroup(packet.data.values.verticalSensors.left, VERTICAL_SENSOR_COUNT, left);
+        resetKeyGroup(packet.data.values.verticalSensors.right, VERTICAL_SENSOR_COUNT, right);
       }
       case BAUM_RSP_VerticalSensors: {
         int changed = 0;
@@ -1070,7 +1200,7 @@ updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
       }
 
       case BAUM_RSP_RoutingKey:
-        makeKeyGroup(packet.data.values.routingKeys, cellCount, packet.data.values.routingKey);
+        resetKeyGroup(packet.data.values.routingKeys, cellCount, packet.data.values.routingKey);
         goto doRoutingKeys;
       case BAUM_RSP_RoutingKeys:
         if (baumDeviceType == BAUM_TYPE_Inka) {
@@ -1333,7 +1463,7 @@ updateHandyTechKeys (BrailleDisplay *brl, int *keyPressed) {
             LogBytes("unexpected packet", packet.bytes, size);
             continue;
         }
-        if (!updateFunctionKeys(bit, (press? bit: 0), keyPressed)) continue;
+        if (!updateFunctionKeys((press? bit: 0), bit, 0, keyPressed)) continue;
       }
       return 1;
     }
@@ -1594,7 +1724,7 @@ updatePowerBrailleKeys (BrailleDisplay *brl, int *keyPressed) {
        * emulation modes (either PB1 or PB2) should simply be avoided
        * whenever possible, and BAUM or HT should be used instead.
        */
-      if (updateFunctionKeys(0XFF, keys, keyPressed)) {
+      if (updateFunctionKeys(keys, 0XFF, 0, keyPressed)) {
         if (!*keyPressed) continue;
         *keyPressed = 0;
       }
@@ -1814,8 +1944,8 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
     if (rightVerticalSensor >= 0) keys |= BAUM_KEY_VTR;
   }
 
-#define KEY(key,cmd) case (key): command = (cmd); break;
-#define KEYv(key,baumCmd,varioCmd) case (key): command = useVarioKeys? (varioCmd): (baumCmd); break;
+#define KEY(key,cmd) case (key): command = (cmd); break
+#define KEYv(key,baumCmd,varioCmd) KEY((key), (useVarioKeys? (varioCmd): (baumCmd)))
   if (currentModifiers & MOD_INPUT) {
 #define DOT1 BAUM_KEY_TL1
 #define DOT2 BAUM_KEY_TL2
@@ -1978,96 +2108,119 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 #undef DOT5
 #undef DOT6
   } else if (routingKeyCount == 0) {
-    switch (keys) {
-      KEY(BAUM_KEY_TL2, BRL_CMD_FWINLT);
-      KEY(BAUM_KEY_TR2, BRL_CMD_FWINRT);
+    if (keys && (keys == (keys & (BAUM_KEY_DOT1 | BAUM_KEY_DOT2 | BAUM_KEY_DOT3 |
+                                  BAUM_KEY_DOT4 | BAUM_KEY_DOT5 | BAUM_KEY_DOT6 |
+                                  BAUM_KEY_B9 | BAUM_KEY_B0)))) {
+      command = BRL_BLK_PASSDOTS;
+#define DOT(dot,key) if (keys & BAUM_KEY_##key) command |= BRL_DOT##dot
+      DOT(1, DOT1);
+      DOT(2, DOT2);
+      DOT(3, DOT3);
+      DOT(4, DOT4);
+      DOT(5, DOT5);
+      DOT(6, DOT6);
+      DOT(7, B9);
+      DOT(8, B0);
+#undef DOT
+    } else {
+      switch (keys) {
+        KEY(BAUM_KEY_TL2, BRL_CMD_FWINLT);
+        KEY(BAUM_KEY_TR2, BRL_CMD_FWINRT);
 
-      KEYv(BAUM_KEY_TL1|BAUM_KEY_TL3, BRL_CMD_CHRLT, BRL_CMD_HOME);
-      KEYv(BAUM_KEY_TR1|BAUM_KEY_TR3, BRL_CMD_CHRRT, BRL_CMD_CSRTRK);
+        KEYv(BAUM_KEY_TL1|BAUM_KEY_TL3, BRL_CMD_CHRLT, BRL_CMD_HOME);
+        KEYv(BAUM_KEY_TR1|BAUM_KEY_TR3, BRL_CMD_CHRRT, BRL_CMD_CSRTRK);
 
-      KEYv(BAUM_KEY_TL1|BAUM_KEY_TL2|BAUM_KEY_TL3, BRL_CMD_LNBEG, BRL_CMD_CHRLT);
-      KEYv(BAUM_KEY_TR1|BAUM_KEY_TR2|BAUM_KEY_TR3, BRL_CMD_LNEND, BRL_CMD_CHRRT);
+        KEYv(BAUM_KEY_TL1|BAUM_KEY_TL2|BAUM_KEY_TL3, BRL_CMD_LNBEG, BRL_CMD_CHRLT);
+        KEYv(BAUM_KEY_TR1|BAUM_KEY_TR2|BAUM_KEY_TR3, BRL_CMD_LNEND, BRL_CMD_CHRRT);
 
-      KEYv(BAUM_KEY_TR1, BRL_CMD_LNUP, BRL_CMD_PRDIFLN);
-      KEYv(BAUM_KEY_TR3, BRL_CMD_LNDN, BRL_CMD_NXDIFLN);
+        KEYv(BAUM_KEY_TR1, BRL_CMD_LNUP, BRL_CMD_PRDIFLN);
+        KEYv(BAUM_KEY_TR3, BRL_CMD_LNDN, BRL_CMD_NXDIFLN);
 
-      KEY(BAUM_KEY_TL1|BAUM_KEY_TR1, BRL_CMD_TOP);
-      KEY(BAUM_KEY_TL3|BAUM_KEY_TR3, BRL_CMD_BOT);
+        KEY(BAUM_KEY_TL1|BAUM_KEY_TR1, BRL_CMD_TOP);
+        KEY(BAUM_KEY_TL3|BAUM_KEY_TR3, BRL_CMD_BOT);
 
-      KEYv(BAUM_KEY_TL2|BAUM_KEY_TR1, BRL_CMD_TOP_LEFT, BRL_CMD_INFO);
-      KEYv(BAUM_KEY_TL2|BAUM_KEY_TR3, BRL_CMD_BOT_LEFT, BRL_CMD_NOOP);
+        KEYv(BAUM_KEY_TL2|BAUM_KEY_TR1, BRL_CMD_TOP_LEFT, BRL_CMD_INFO);
+        KEYv(BAUM_KEY_TL2|BAUM_KEY_TR3, BRL_CMD_BOT_LEFT, BRL_CMD_NOOP);
 
-      KEYv(BAUM_KEY_TR2|BAUM_KEY_TR1, BRL_CMD_PRDIFLN, BRL_CMD_ATTRUP);
-      KEYv(BAUM_KEY_TR2|BAUM_KEY_TR3, BRL_CMD_NXDIFLN, BRL_CMD_ATTRDN);
+        KEYv(BAUM_KEY_TR2|BAUM_KEY_TR1, BRL_CMD_PRDIFLN, BRL_CMD_ATTRUP);
+        KEYv(BAUM_KEY_TR2|BAUM_KEY_TR3, BRL_CMD_NXDIFLN, BRL_CMD_ATTRDN);
 
-      KEYv(BAUM_KEY_TL2|BAUM_KEY_TL1, BRL_CMD_ATTRUP, BRL_CMD_TOP_LEFT);
-      KEYv(BAUM_KEY_TL2|BAUM_KEY_TL3, BRL_CMD_ATTRDN, BRL_CMD_BOT_LEFT);
+        KEYv(BAUM_KEY_TL2|BAUM_KEY_TL1, BRL_CMD_ATTRUP, BRL_CMD_TOP_LEFT);
+        KEYv(BAUM_KEY_TL2|BAUM_KEY_TL3, BRL_CMD_ATTRDN, BRL_CMD_BOT_LEFT);
 
-      KEY(BAUM_KEY_TL2|BAUM_KEY_TR2|BAUM_KEY_TL1|BAUM_KEY_TR1, BRL_CMD_PRPROMPT);
-      KEY(BAUM_KEY_TL2|BAUM_KEY_TR2|BAUM_KEY_TL3|BAUM_KEY_TR3, BRL_CMD_NXPROMPT);
+        KEY(BAUM_KEY_TL2|BAUM_KEY_TR2|BAUM_KEY_TL1|BAUM_KEY_TR1, BRL_CMD_PRPROMPT);
+        KEY(BAUM_KEY_TL2|BAUM_KEY_TR2|BAUM_KEY_TL3|BAUM_KEY_TR3, BRL_CMD_NXPROMPT);
 
-      KEY(BAUM_KEY_TL2|BAUM_KEY_TR2|BAUM_KEY_TR1, BRL_CMD_PRPGRPH);
-      KEY(BAUM_KEY_TL2|BAUM_KEY_TR2|BAUM_KEY_TR3, BRL_CMD_NXPGRPH);
+        KEY(BAUM_KEY_TL2|BAUM_KEY_TR2|BAUM_KEY_TR1, BRL_CMD_PRPGRPH);
+        KEY(BAUM_KEY_TL2|BAUM_KEY_TR2|BAUM_KEY_TR3, BRL_CMD_NXPGRPH);
 
-      KEY(BAUM_KEY_TL2|BAUM_KEY_TR1|BAUM_KEY_TR3|BAUM_KEY_TL1, BRL_CMD_PRSEARCH);
-      KEY(BAUM_KEY_TL2|BAUM_KEY_TR1|BAUM_KEY_TR3|BAUM_KEY_TL3, BRL_CMD_NXSEARCH);
+        KEY(BAUM_KEY_TL2|BAUM_KEY_TR1|BAUM_KEY_TR3|BAUM_KEY_TL1, BRL_CMD_PRSEARCH);
+        KEY(BAUM_KEY_TL2|BAUM_KEY_TR1|BAUM_KEY_TR3|BAUM_KEY_TL3, BRL_CMD_NXSEARCH);
 
-      KEYv(BAUM_KEY_TL1, BRL_CMD_CSRTRK|BRL_FLG_TOGGLE_ON, BRL_CMD_LNUP);
-      KEYv(BAUM_KEY_TL3, BRL_CMD_CSRTRK|BRL_FLG_TOGGLE_OFF, BRL_CMD_LNDN);
+        KEYv(BAUM_KEY_TL1, BRL_CMD_CSRTRK|BRL_FLG_TOGGLE_ON, BRL_CMD_LNUP);
+        KEYv(BAUM_KEY_TL3, BRL_CMD_CSRTRK|BRL_FLG_TOGGLE_OFF, BRL_CMD_LNDN);
 
-      KEYv(BAUM_KEY_TL2|BAUM_KEY_TR1|BAUM_KEY_TR3, BRL_CMD_HOME, BRL_CMD_LNBEG);
-      KEYv(BAUM_KEY_TL1|BAUM_KEY_TL3|BAUM_KEY_TR2, BRL_CMD_SPKHOME, BRL_CMD_LNEND);
+        KEYv(BAUM_KEY_TL2|BAUM_KEY_TR1|BAUM_KEY_TR3, BRL_CMD_HOME, BRL_CMD_LNBEG);
+        KEYv(BAUM_KEY_TL1|BAUM_KEY_TL3|BAUM_KEY_TR2, BRL_CMD_SPKHOME, BRL_CMD_LNEND);
 
-      KEY(BAUM_KEY_TL1|BAUM_KEY_TL3|BAUM_KEY_TR1|BAUM_KEY_TR3, BRL_CMD_CSRJMP_VERT);
-      KEYv(BAUM_KEY_TL2|BAUM_KEY_TR2, BRL_CMD_INFO, BRL_CMD_SKPBLNKWINS);
+        KEY(BAUM_KEY_TL1|BAUM_KEY_TL3|BAUM_KEY_TR1|BAUM_KEY_TR3, BRL_CMD_CSRJMP_VERT);
+        KEYv(BAUM_KEY_TL2|BAUM_KEY_TR2, BRL_CMD_INFO, BRL_CMD_SKPBLNKWINS);
 
-      KEY(BAUM_KEY_TL1|BAUM_KEY_TR1|BAUM_KEY_TR2, BRL_CMD_DISPMD);
-      KEY(BAUM_KEY_TL1|BAUM_KEY_TL2|BAUM_KEY_TR1, BRL_CMD_FREEZE);
-      KEY(BAUM_KEY_TL1|BAUM_KEY_TL2|BAUM_KEY_TR2, BRL_CMD_HELP);
-      KEY(BAUM_KEY_TL1|BAUM_KEY_TL3|BAUM_KEY_TR1, BRL_CMD_PREFMENU);
-      KEY(BAUM_KEY_TL1|BAUM_KEY_TL2|BAUM_KEY_TL3|BAUM_KEY_TR1, BRL_CMD_PASTE);
-      KEY(BAUM_KEY_TL1|BAUM_KEY_TL2|BAUM_KEY_TL3|BAUM_KEY_TR2, BRL_CMD_PREFLOAD);
-      KEY(BAUM_KEY_TL2|BAUM_KEY_TL3|BAUM_KEY_TR1, BRL_CMD_RESTARTSPEECH);
-      KEY(BAUM_KEY_TL2|BAUM_KEY_TL3|BAUM_KEY_TR1|BAUM_KEY_TR2, BRL_CMD_ATTRVIS);
-      KEY(BAUM_KEY_TL1|BAUM_KEY_TL3|BAUM_KEY_TR3, BRL_CMD_BACK);
-      KEY(BAUM_KEY_TL2|BAUM_KEY_TR1|BAUM_KEY_TR2|BAUM_KEY_TR3, BRL_CMD_PREFSAVE);
+        KEY(BAUM_KEY_TL1|BAUM_KEY_TR1|BAUM_KEY_TR2, BRL_CMD_DISPMD);
+        KEY(BAUM_KEY_TL1|BAUM_KEY_TL2|BAUM_KEY_TR1, BRL_CMD_FREEZE);
+        KEY(BAUM_KEY_TL1|BAUM_KEY_TL2|BAUM_KEY_TR2, BRL_CMD_HELP);
+        KEY(BAUM_KEY_TL1|BAUM_KEY_TL3|BAUM_KEY_TR1, BRL_CMD_PREFMENU);
+        KEY(BAUM_KEY_TL1|BAUM_KEY_TL2|BAUM_KEY_TL3|BAUM_KEY_TR1, BRL_CMD_PASTE);
+        KEY(BAUM_KEY_TL1|BAUM_KEY_TL2|BAUM_KEY_TL3|BAUM_KEY_TR2, BRL_CMD_PREFLOAD);
+        KEY(BAUM_KEY_TL2|BAUM_KEY_TL3|BAUM_KEY_TR1, BRL_CMD_RESTARTSPEECH);
+        KEY(BAUM_KEY_TL2|BAUM_KEY_TL3|BAUM_KEY_TR1|BAUM_KEY_TR2, BRL_CMD_ATTRVIS);
+        KEY(BAUM_KEY_TL1|BAUM_KEY_TL3|BAUM_KEY_TR3, BRL_CMD_BACK);
+        KEY(BAUM_KEY_TL2|BAUM_KEY_TR1|BAUM_KEY_TR2|BAUM_KEY_TR3, BRL_CMD_PREFSAVE);
 
-      KEY(BAUM_KEY_TL2|BAUM_KEY_TL3|BAUM_KEY_TR2, BRL_CMD_SIXDOTS|BRL_FLG_TOGGLE_ON);
-      KEY(BAUM_KEY_TL2|BAUM_KEY_TL3|BAUM_KEY_TR3, BRL_CMD_SIXDOTS|BRL_FLG_TOGGLE_OFF);
+        KEY(BAUM_KEY_TL2|BAUM_KEY_TL3|BAUM_KEY_TR2, BRL_CMD_SIXDOTS|BRL_FLG_TOGGLE_ON);
+        KEY(BAUM_KEY_TL2|BAUM_KEY_TL3|BAUM_KEY_TR3, BRL_CMD_SIXDOTS|BRL_FLG_TOGGLE_OFF);
 
-      KEY(BAUM_KEY_TL1|BAUM_KEY_TR1|BAUM_KEY_TR2|BAUM_KEY_TR3, BRL_CMD_LEARN);
-      KEY(BAUM_KEY_TL1|BAUM_KEY_TL2|BAUM_KEY_TL3|BAUM_KEY_TR3, BRL_CMD_SWITCHVT_NEXT);
-      KEY(BAUM_KEY_TL3|BAUM_KEY_TR1|BAUM_KEY_TR2|BAUM_KEY_TR3, BRL_CMD_SWITCHVT_PREV);
+        KEY(BAUM_KEY_TL1|BAUM_KEY_TR1|BAUM_KEY_TR2|BAUM_KEY_TR3, BRL_CMD_LEARN);
+        KEY(BAUM_KEY_TL1|BAUM_KEY_TL2|BAUM_KEY_TL3|BAUM_KEY_TR3, BRL_CMD_SWITCHVT_NEXT);
+        KEY(BAUM_KEY_TL3|BAUM_KEY_TR1|BAUM_KEY_TR2|BAUM_KEY_TR3, BRL_CMD_SWITCHVT_PREV);
 
-      KEY(BAUM_KEY_TL3|BAUM_KEY_TR1, BRL_CMD_MUTE);
-      KEY(BAUM_KEY_TL3|BAUM_KEY_TR2, BRL_CMD_SAY_LINE);
-      KEY(BAUM_KEY_TL3|BAUM_KEY_TR1|BAUM_KEY_TR2, BRL_CMD_SAY_ABOVE);
-      KEY(BAUM_KEY_TL3|BAUM_KEY_TR2|BAUM_KEY_TR3, BRL_CMD_SAY_BELOW);
-      KEY(BAUM_KEY_TL3|BAUM_KEY_TR1|BAUM_KEY_TR3, BRL_CMD_AUTOSPEAK);
+        KEY(BAUM_KEY_TL3|BAUM_KEY_TR1, BRL_CMD_MUTE);
+        KEY(BAUM_KEY_TL3|BAUM_KEY_TR2, BRL_CMD_SAY_LINE);
+        KEY(BAUM_KEY_TL3|BAUM_KEY_TR1|BAUM_KEY_TR2, BRL_CMD_SAY_ABOVE);
+        KEY(BAUM_KEY_TL3|BAUM_KEY_TR2|BAUM_KEY_TR3, BRL_CMD_SAY_BELOW);
+        KEY(BAUM_KEY_TL3|BAUM_KEY_TR1|BAUM_KEY_TR3, BRL_CMD_AUTOSPEAK);
 
-      {
-        int arg;
-        int flags;
+        KEY(BAUM_KEY_B11, BRL_BLK_PASSDOTS);
+        KEY(BAUM_KEY_PRESS, BRL_BLK_PASSKEY+BRL_KEY_ENTER);
+        KEY(BAUM_KEY_LEFT, BRL_BLK_PASSKEY+BRL_KEY_CURSOR_LEFT);
+        KEY(BAUM_KEY_RIGHT, BRL_BLK_PASSKEY+BRL_KEY_CURSOR_RIGHT);
+        KEY(BAUM_KEY_UP, BRL_BLK_PASSKEY+BRL_KEY_CURSOR_UP);
+        KEY(BAUM_KEY_DOWN, BRL_BLK_PASSKEY+BRL_KEY_CURSOR_DOWN);
 
-      case BAUM_KEY_VTL:
-        arg = leftVerticalSensor;
-        flags = BRL_FLG_LINE_TOLEFT;
-        goto doVerticalSensor;
+        {
+          int arg;
+          int flags;
 
-      case BAUM_KEY_VTR:
-        arg = rightVerticalSensor;
-        flags = 0;
-        goto doVerticalSensor;
+        case BAUM_KEY_VTL:
+          arg = leftVerticalSensor;
+          flags = BRL_FLG_LINE_TOLEFT;
+          goto doVerticalSensor;
 
-      doVerticalSensor:
-        if (switchSettings & BAUM_SWT_ScaledVertical) {
-          flags |= BRL_FLG_LINE_SCALED;
-          arg = rescaleInteger(arg, VERTICAL_SENSOR_COUNT-1, BRL_MSK_ARG);
-        } else if (arg > 0) {
-          --arg;
+        case BAUM_KEY_VTR:
+          arg = rightVerticalSensor;
+          flags = 0;
+          goto doVerticalSensor;
+
+        doVerticalSensor:
+          if (switchSettings & BAUM_SWT_ScaledVertical) {
+            flags |= BRL_FLG_LINE_SCALED;
+            arg = rescaleInteger(arg, VERTICAL_SENSOR_COUNT-1, BRL_MSK_ARG);
+          } else if (arg > 0) {
+            --arg;
+          }
+          command = BRL_BLK_GOTOLINE | arg | flags;
+          break;
         }
-        command = BRL_BLK_GOTOLINE | arg | flags;
-        break;
       }
     }
   } else if (routingKeyCount == 1) {
