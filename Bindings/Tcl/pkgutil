@@ -19,15 +19,20 @@
 source [file join [file dirname $argv0] prologue.tcl]
 
 proc getPackageDirectory {} {
-   global tcl_pkgPath optionValues packageName packageVersion
-
-   set index 0
-   if {![info exists tcl_pkgPath] || ([llength $tcl_pkgPath] <= $index)} {
-      writeProgramMessage "package directory not defined."
-      exit 3
+   foreach variable {tcl_pkgPath auto_path} {
+      global $variable
+      if {[info exists $variable]} {
+         foreach directory [set $variable] {
+            if {[string equal [file tail $directory] lib]} {
+               global optionValues packageName packageVersion
+               return [file join "$optionValues(root)$directory" "$packageName-$packageVersion"]
+            }
+         }
+      }
    }
 
-   return [file join "$optionValues(root)[lindex $tcl_pkgPath $index]" "$packageName-$packageVersion"]
+   writeProgramMessage "package directory not defined."
+   exit 3
 }
 
 proc makeIndex {} {
