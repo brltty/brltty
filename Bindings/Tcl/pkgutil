@@ -19,10 +19,18 @@
 source [file join [file dirname $argv0] prologue.tcl]
 
 proc getPackageDirectory {} {
-   foreach variable {tcl_pkgPath auto_path} {
-      global $variable
-      if {[info exists $variable]} {
-         foreach directory [set $variable] {
+   set rootEnd [expr {[set rootCount [llength [file split [set rootPath [file normalize /]]]]] - 1}]
+
+   foreach pathVariable {tcl_pkgPath auto_path} {
+      global $pathVariable
+      if {[info exists $pathVariable]} {
+         foreach directory [set $pathVariable] {
+            set count [llength [set components [file split [file normalize $directory]]]]
+            if {($count <= $rootEnd) || ![string equal $rootPath [eval file join [lrange $components 0 $rootEnd]]]} {
+               continue
+            }
+            set directory [eval file join / [lrange $components $rootCount end]]
+
             if {[string equal [file tail $directory] lib]} {
                global optionValues packageName packageVersion
                return [file join "$optionValues(root)$directory" "$packageName-$packageVersion"]
@@ -31,7 +39,7 @@ proc getPackageDirectory {} {
       }
    }
 
-   writeProgramMessage "package directory not defined."
+   writeProgramMessage "platform-dependent packages directory not defined."
    exit 3
 }
 
