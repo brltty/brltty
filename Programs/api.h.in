@@ -84,9 +84,9 @@ size_t brlapi_getHandleSize(void);
 /** \defgroup brlapi_connection Connecting to BrlAPI
  *
  * Before calling any other function of the library, calling
- * brlapi_openConnection() is needed to establish a connection to
+ * brlapi_openConnection(3) is needed to establish a connection to
  * \e BrlAPI 's server.
- * When the connection is not needed any more, brlapi_closeConnection() must be
+ * When the connection is not needed any more, brlapi_closeConnection(3) must be
  * called to close the connection.
  *
  * @{ */
@@ -158,7 +158,7 @@ typedef int brlapi_fileDescriptor;
  *
  * lets \e libbrlapi connect to the local computer, on port BRLAPI_SOCKETPORTNUM+1
  *
- * \sa brlapi_openConnection() brlapi_loadAuthKey()
+ * \sa brlapi_openConnection(3) brlapi_loadAuthKey(3)
  */
 typedef struct {
   /** For security reasons, \e libbrlapi has to get authorized to connect to the
@@ -200,7 +200,7 @@ typedef struct {
  * communicate with the server without using \e libbrlapi functions. If it uses
  * them however, it won't have to pass the file descriptor later, since the
  * library keeps a copy of it. But that also means that
- * brlapi_openConnection() may be called several times, but \e libbrlapi
+ * brlapi_openConnection(3) may be called several times, but \e libbrlapi
  * functions will always work with the last call's descriptor
  *
  * \par Example:
@@ -226,11 +226,11 @@ typedef struct {
  *
  * \sa
  * brlapi_settings_t
- * brlapi_loadAuthKey()
- * brlapi_writePacket()
- * brlapi_readPacketHeader()
- * brlapi_readPacketContent()
- * brlapi_readPacket()
+ * brlapi_loadAuthKey(3)
+ * brlapi_writePacket(3)
+ * brlapi_readPacketHeader(3)
+ * brlapi_readPacketContent(3)
+ * brlapi_readPacket(3)
  */
 brlapi_fileDescriptor brlapi_openConnection(const brlapi_settings_t *clientSettings, brlapi_settings_t *usedSettings);
 brlapi_fileDescriptor brlapi__openConnection(brlapi_handle_t *handle, const brlapi_settings_t *clientSettings, brlapi_settings_t *usedSettings);
@@ -242,7 +242,7 @@ brlapi_fileDescriptor brlapi__openConnection(brlapi_handle_t *handle, const brla
  *
  * This function locks until a closing acknowledgement is received from the
  * server. The socket is then freed, so the file descriptor
- * brlapi_openConnection() gave has no meaning any more
+ * brlapi_openConnection(3) gave has no meaning any more
  */
 void brlapi_closeConnection(void);
 void brlapi__closeConnection(brlapi_handle_t *handle);
@@ -254,7 +254,7 @@ int brlapi_expandHost(const char *hostAndPort, char **host, char **port);
 /* brlapi_loadAuthKey */
 /** Load an authorization key from the given file
  *
- * Calling this function shouldn't be needed if brlapi_openConnection()
+ * Calling this function shouldn't be needed if brlapi_openConnection(3)
  * is used.
  *
  * \param filename gives the full path of the file;
@@ -289,7 +289,7 @@ int brlapi_loadAuthKey(const char *filename, size_t *authlength, void *auth);
  * \param n is the maximum size of the id buffer.
  *
  * \return -1 on error, or a positive value giving the size of the needed
- * buffer, if the supplied one is to small (same as snprintf()).
+ * buffer, if the supplied one is to small (same as snprintf(3)).
 */
 int brlapi_getDriverId(char *id, size_t n);
 int brlapi__getDriverId(brlapi_handle_t *handle, char *id, size_t n);
@@ -304,7 +304,7 @@ int brlapi__getDriverId(brlapi_handle_t *handle, char *id, size_t n);
  * \param n is the maximum size for the name buffer.
  *
  * \return -1 on error, or a positive value giving the size of the needed
- * buffer, if the supplied one is to small (same as snprintf()).
+ * buffer, if the supplied one is to small (same as snprintf(3)).
 */
 int brlapi_getDriverName(char *name, size_t n);
 int brlapi__getDriverName(brlapi_handle_t *handle, char *name, size_t n);
@@ -334,7 +334,7 @@ int brlapi__getDisplaySize(brlapi_handle_t *handle, unsigned int *x, unsigned in
  * - commands means that applications will get exactly the same values as
  *   \e brltty. This allows driver-independent clients, which will hopefully
  *   be nice to use with a lot of different terminals.
- * \sa brlapi_readKey()
+ * \sa brlapi_readKey(3)
  * @{
  */
 
@@ -351,7 +351,7 @@ int brlapi__getDisplaySize(brlapi_handle_t *handle, unsigned int *x, unsigned in
  * environment variable (for xterm case), then the CONTROLVT variable, and at
  * last reads /proc/self/stat (on linux).
  *
- * \param driverName tells how the application wants brlapi_readKey() to return
+ * \param driverName tells how the application wants brlapi_readKey(3) to return
  * key presses. NULL or "" means BRLTTY commands are required,
  * whereas a driver name means that raw key codes returned by this
  * driver are expected.
@@ -368,7 +368,7 @@ int brlapi__getDisplaySize(brlapi_handle_t *handle, unsigned int *x, unsigned in
  *
  * \return the used tty number on success, -1 on error
  *
- * \sa brlapi_leaveTtyMode() brlapi_readKey()
+ * \sa brlapi_leaveTtyMode(3) brlapi_readKey(3)
  */
 int brlapi_enterTtyMode(int tty, const char *driverName);
 #define brlapi_getTty(tty, driverName) brlapi_enterTtyMode(tty, driverName)
@@ -380,11 +380,11 @@ int brlapi__enterTtyMode(brlapi_handle_t *handle, int tty, const char *driverNam
  * \param ttys points on the array of ttys representing the tty path to be got.
  * Can be NULL if nttys is 0.
  * \param nttys gives the number of elements in ttys.
- * \param driverName has the same meaning as in brlapi_enterTtyMode()
+ * \param driverName has the same meaning as in brlapi_enterTtyMode(3)
  *
  * Providing nttys == 0 means to get the root.
  *
- * \sa brlapi_enterTtyMode()
+ * \sa brlapi_enterTtyMode(3)
  */
 int brlapi_enterTtyModeWithPath(int *ttys, int nttys, const char *driverName);
 int brlapi__enterTtyModeWithPath(brlapi_handle_t *handle, int *ttys, int nttys, const char *how);
@@ -396,7 +396,7 @@ int brlapi__enterTtyModeWithPath(brlapi_handle_t *handle, int *ttys, int nttys, 
  *
  * \return 0 on success, -1 on error.
  *
- * \sa brlapi_enterTtyMode()
+ * \sa brlapi_enterTtyMode(3)
  */
 int brlapi_leaveTtyMode(void);
 #define brlapi_leaveTty brlapi_leaveTtyMode
@@ -406,12 +406,12 @@ int brlapi__leaveTtyMode(brlapi_handle_t *handle);
 /** Tell the current tty to brltty
  *
  * This is intended for focus tellers, such as brltty, xbrlapi, screen, ...
- * brlapi_enterTtyMode() must have been called beforehand to tell where this focus
+ * brlapi_enterTtyMode(3) must have been called beforehand to tell where this focus
  * applies in the tty tree.
  *
  * \return 0 on success, -1 on error.
  *
- * \sa brlapi_enterTtyMode() brlapi_leaveTtyMode()
+ * \sa brlapi_enterTtyMode(3) brlapi_leaveTtyMode(3)
  */
 int brlapi_setFocus(int tty);
 int brlapi__setFocus(brlapi_handle_t *handle, int tty);
@@ -421,10 +421,10 @@ int brlapi__setFocus(brlapi_handle_t *handle, int tty);
 /** \defgroup brlapi_write Writing on the braille display
  * \brief Write text to the braille display
  *
- * Once brlapi_enterTtyMode() was called, the application can call brlapi_writeText()
+ * Once brlapi_enterTtyMode(3) was called, the application can call brlapi_writeText(3)
  * to write things on the braille display.
  *
- * \note Be sure to call brlapi_enterTtyMode() \e before calling brlapi_write*(), or
+ * \note Be sure to call brlapi_enterTtyMode(3) \e before calling brlapi_write*(3), or
  * else you'll get an error. This is particularly not always trivial when
  * writing multithreaded applications.
  *
@@ -457,7 +457,7 @@ int brlapi__writeText(brlapi_handle_t *handle, int cursor, const char *str);
 /** Write the given dots array to the display
  *
  * \param dots points on an array of dot information, one per character. Its
- * size must hence be the same as what brlapi_getDisplaySize() returns.
+ * size must hence be the same as what brlapi_getDisplaySize(3) returns.
  *
  * \return 0 on success, -1 on error.
  */
@@ -465,7 +465,7 @@ int brlapi_writeDots(const unsigned char *dots);
 int brlapi__writeDots(brlapi_handle_t *handle, const unsigned char *dots);
 
 /* brlapi_writeStruct */
-/** Structure containing arguments to be given to brlapi_write() */
+/** Structure containing arguments to be given to brlapi_write(3) */
 typedef struct {
   int displayNumber /** Display number -1 == unspecified */;
   unsigned int regionBegin /** Region of display to update, 1st character of display is 1 */;
@@ -502,7 +502,7 @@ typedef struct {
  * region.  The char string must hold exactly as many characters as the region
  * fields express.  For multibyte text, this is the number of \e multibyte
  * caracters.  Notably, combining and double-width caracters count for 1.  The
- * actual length of the text in \e bytes will be computed thanks to strlen(), so
+ * actual length of the text in \e bytes will be computed thanks to strlen(3), so
  * "text" must be null-terminated.
  *
  * The "attrAnd" and "attrOr" masks, if present, are then applied on top of the
@@ -526,11 +526,11 @@ int brlapi__write(brlapi_handle_t *handle, const brlapi_writeStruct *s);
 /** \defgroup brlapi_keys Reading key presses
  * \brief How to read key presses from the braille terminal
  *
- * Once brlapi_enterTtyMode() is called, the application can call brlapi_readKey() to
+ * Once brlapi_enterTtyMode(3) is called, the application can call brlapi_readKey(3) to
  * read key presses. Either key codes or commands will be returned, depending
- * on parameters given to brlapi_enterTtyMode().
+ * on parameters given to brlapi_enterTtyMode(3).
  *
- * Key presses are buffered, so that calling brlapi_readKey() in non-blocking
+ * Key presses are buffered, so that calling brlapi_readKey(3) in non-blocking
  * mode from times to times should suffice.
  *
  * @{
@@ -661,7 +661,7 @@ extern unsigned char brlapi_dotBitToNumber (unsigned char bit);
  *
  * This function returns one key press's code.
  *
- * If NULL or "" was given to brlapi_enterTtyMode(), a \e brltty command is returned,
+ * If NULL or "" was given to brlapi_enterTtyMode(3), a \e brltty command is returned,
  * as described in \c <brltty/brldefs.h> . It is hence pretty
  * driver-independent, and should be used by default when no other option is
  * possible.
@@ -669,15 +669,15 @@ extern unsigned char brlapi_dotBitToNumber (unsigned char bit);
  * By default, all commands but those which restart drivers and switch
  * virtual terminals are returned to the application and not to brltty.
  * If the application doesn't want to see some command events,
- * it should call either brlapi_ignoreKeySet() or brlapi_ignoreKeyRange()
+ * it should call either brlapi_ignoreKeySet(3) or brlapi_ignoreKeyRange(3)
  *
- * If some driver name was given to brlapi_enterTtyMode(), a raw keycode is returned,
+ * If some driver name was given to brlapi_enterTtyMode(3), a raw keycode is returned,
  * as specified by the terminal driver, usually in <brltty/brldefs-xy> where xy
  * is the driver's code. It generally corresponds to the very code that the
  * terminal tells to the driver.
  * This should only be used by applications which are dedicated to a particular
  * braille terminal. Hence, checking the terminal type thanks to a call to
- * brlapi_getDriverId() or even brlapi_getDriverName() before getting tty
+ * brlapi_getDriverId(3) or even brlapi_getDriverName(3) before getting tty
  * control is a pretty good idea.
  *
  * By default, all the keypresses will be passed to the client, none will go
@@ -699,10 +699,10 @@ int brlapi__readKey(brlapi_handle_t *handle, int block, brl_keycode_t *code);
  *
  * This function asks the server to give keys between x and y to \e brltty,
  * rather than returning them to the application via
- * brlapi_readKey()
+ * brlapi_readKey(3)
  *
  * \note The given codes are either raw keycodes if some driver name was given
- * to brlapi_enterTtyMode(), or \e brltty commands if NULL or "" was given. */
+ * to brlapi_enterTtyMode(3), or \e brltty commands if NULL or "" was given. */
 int brlapi_ignoreKeyRange(brl_keycode_t x, brl_keycode_t y);
 int brlapi__ignoreKeyRange(brlapi_handle_t *handle, brl_keycode_t x, brl_keycode_t y);
 
@@ -711,10 +711,10 @@ int brlapi__ignoreKeyRange(brlapi_handle_t *handle, brl_keycode_t x, brl_keycode
  *
  * This function asks the server to give the n keys in set s to \e brltty,
  * rather than returning them to the application via
- * brlapi_readKey()
+ * brlapi_readKey(3)
  *
  * \note The given codes are either raw keycodes if some driver name was given
- * to brlapi_enterTtyMode(), or \e brltty commands if NULL or "" was given. */
+ * to brlapi_enterTtyMode(3), or \e brltty commands if NULL or "" was given. */
 int brlapi_ignoreKeySet(const brl_keycode_t *s, unsigned int n);
 int brlapi__ignoreKeySet(brlapi_handle_t *handle, const brl_keycode_t *s, unsigned int n);
 
@@ -728,7 +728,7 @@ int brlapi__ignoreKeySet(brlapi_handle_t *handle, const brl_keycode_t *s, unsign
  * used to switch between TTYs, unless you really know what you are doing!
  *
  * \note The given codes are either raw keycodes if some driver name was given
- * to brlapi_enterTtyMode(), or \e brltty commands if NULL or "" was given. */
+ * to brlapi_enterTtyMode(3), or \e brltty commands if NULL or "" was given. */
 int brlapi_acceptKeyRange(brl_keycode_t x, brl_keycode_t y);
 int brlapi__acceptKeyRange(brlapi_handle_t *handle, brl_keycode_t x, brl_keycode_t y);
 #define brlapi_unignoreKeyRange(x, y) brlapi_acceptKeyRange(x, y)
@@ -743,7 +743,7 @@ int brlapi__acceptKeyRange(brlapi_handle_t *handle, brl_keycode_t x, brl_keycode
  * used to switch between TTYs, unless you really know what you are doing!
  *
  * \note The given codes are either raw keycodes if some driver name was given
- * to brlapi_enterTtyMode(), or \e brltty commands if NULL or "" was given. */
+ * to brlapi_enterTtyMode(3), or \e brltty commands if NULL or "" was given. */
 int brlapi_acceptKeySet(const brl_keycode_t *s, unsigned int n);
 int brlapi__acceptKeySet(brlapi_handle_t *handle, const brl_keycode_t *s, unsigned int n);
 #define brlapi_unignoreKeySet(s, n) brlapi_acceptKeySet(s, n)
@@ -757,16 +757,16 @@ int brlapi__acceptKeySet(brlapi_handle_t *handle, const brl_keycode_t *s, unsign
  * use Raw Mode. In this special mode, the driver gives the whole control of the
  * terminal to it: \e brltty doesn't work any more.
  *
- * For this, it simply has to call brlapi_enterRawMode(), then brlapi_sendRaw()
- * and brlapi_recvRaw(), and finally give control back thanks to
- * brlapi_leaveRawMode().
+ * For this, it simply has to call brlapi_enterRawMode(3), then brlapi_sendRaw(3)
+ * and brlapi_recvRaw(3), and finally give control back thanks to
+ * brlapi_leaveRawMode(3).
  *
  * Special care of the terminal should be taken, since one might completely
  * trash the terminal's data, or even lock it! The application should always
- * check for terminal's type thanks to brlapi_getDriverId().
+ * check for terminal's type thanks to brlapi_getDriverId(3).
  *
- * The client can also make brltty close the driver by using brlapi_suspendDriver(),
- * and resume it again with brlapi_resumeDriver().  This should not be used if
+ * The client can also make brltty close the driver by using brlapi_suspendDriver(3),
+ * and resume it again with brlapi_resumeDriver(3).  This should not be used if
  * possible: raw mode should be sufficient for any use.  If not, please ask for
  * features :)
  *
@@ -838,15 +838,15 @@ int brlapi__resumeDriver(brlapi_handle_t *handle);
  * When something really wrong was done somewhere, like an out-of-bounds
  * argument, which is really a bug in either the implementation of BrlAPI or
  * in the application, an exception may be sent by the server. As soon as
- * libbrlapi receives it, an exception handler prints it and \e abort()s 
+ * libbrlapi receives it, an exception handler prints it and \e abort(3)s 
  * he program, since it means something went really wrong and that we shouldn't
  * go further.
  *
  * This is hopefully a really seldom event, but in the case of an editor, for
  * instance, one would surely want to have files saved before actually
- * abort()ing. brlapi_setExceptionHandler() lets the programmer define another
+ * abort(3)ing. brlapi_setExceptionHandler(3) lets the programmer define another
  * exception handler which would save files and then call the default handler
- * brlapi_defaultExceptionHandler().
+ * brlapi_defaultExceptionHandler(3).
  *
  * @{ */
 
@@ -872,7 +872,7 @@ int brlapi__resumeDriver(brlapi_handle_t *handle);
 /* brlapi_errlist */
 /** Error message list
  *
- * These are the string constants used by brlapi_perror().
+ * These are the string constants used by brlapi_perror(3).
  */
 extern const char *brlapi_errlist[];
 
@@ -883,7 +883,7 @@ extern const int brlapi_nerr;
 /* brlapi_perror */
 /** Print a BrlAPI error message
  *
- * brlapi_perror() reads brlapi_error, and acts just like perror().
+ * brlapi_perror(3) reads brlapi_error, and acts just like perror(3).
  */
 void brlapi_perror(const char *s);
 
@@ -900,7 +900,7 @@ typedef struct {
  *
  * In multithreaded software, brlapi_error is thread-specific, so api.h
  * cheats about the brlapi_error token and actually calls
- * brlapi_error_location().
+ * brlapi_error_location(3).
  *
  * This gets the thread specific location of global variable brlapi_error
  */
@@ -939,7 +939,7 @@ extern const char *brlapi_errfun;
 /* brlapi_strerror */
 /** Get plain error message
  *
- * brlapi_strerror() returns the plain error message corresponding to its
+ * brlapi_strerror(3) returns the plain error message corresponding to its
  * argument.
  */
 const char *brlapi_strerror(const brlapi_error_t *error);
@@ -950,7 +950,7 @@ typedef uint32_t brl_type_t;
 /* brlapi_packetType */
 /** Get plain packet type
  *
- * brlapi_packetType() returns the plain packet type name corresponding to
+ * brlapi_packetType(3) returns the plain packet type name corresponding to
  * its argument.
  */
 const char *brlapi_packetType(brl_type_t ptype);
@@ -959,7 +959,7 @@ const char *brlapi_packetType(brl_type_t ptype);
 /** Type for error handlers
  *
  * Type of error handlers which are to be given to
- * brlapi_setExceptionHandler().
+ * brlapi_setExceptionHandler(333).
  *
  * \param err is a BRLERR_ error code;
  * \param type is the type of the guilty packet;
@@ -971,12 +971,12 @@ typedef void (*brlapi_exceptionHandler_t)(int err, brl_type_t type, const void *
 /* brlapi_strexception */
 /** Describes an exception
  *
- * brlapi_strexception() puts a text describing the given exception in buf.
+ * brlapi_strexception(3) puts a text describing the given exception in buf.
  *
  * The beginning of the guilty packet is dumped as a sequence of hex bytes.
  *
  * \return the size of the text describing the exception, following
- * snprintf()'s semantics.
+ * snprintf(3)'s semantics.
 */
 int brlapi_strexception(char *buf, size_t n, int err, brl_type_t type, const void *packet, size_t
 size);
@@ -984,11 +984,11 @@ size);
 /* brlapi_setExceptionHandler */
 /** Set a new exception handler
  *
- * brlapi_setExceptionHandler() replaces the previous exception handler with the handler
+ * brlapi_setExceptionHandler(3) replaces the previous exception handler with the handler
  * parameter. The previous exception handler is returned to make chaining error
  * handlers possible.
  *
- * The default handler just prints the exception and exit()s.
+ * The default handler just prints the exception and exit(3)s.
  */
 brlapi_exceptionHandler_t brlapi_setExceptionHandler(brlapi_exceptionHandler_t handler);
 brlapi_exceptionHandler_t brlapi__setExceptionHandler(brlapi_handle_t *handle, brlapi_exceptionHandler_t handler);
