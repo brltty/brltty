@@ -66,14 +66,20 @@ static void ThrowError(JNIEnv *jenv, const char *msg) {
     char message[lenmsg + 2 + lenerr + 1];
     snprintf(message, sizeof(message), "%s: %s", msg, error);
 
-    if (!(jcexcep = (*jenv)->FindClass(jenv, "BrlapiError")))
+    if (!(jcexcep = (*jenv)->FindClass(jenv, "BrlapiError"))) {
       ThrowException(jenv, ERR_NULLPTR, "ThrowBrlapiErrorFindClass");
-    if (!(jinit = (*jenv)->GetMethodID(jenv, jcexcep, "<init>", "(IIILjava/lang/String;)V")))
+      return;
+    }
+    if (!(jinit = (*jenv)->GetMethodID(jenv, jcexcep, "<init>", "(IIILjava/lang/String;)V"))) {
       ThrowException(jenv, ERR_NULLPTR, "ThrowBrlapiErrorGetMethodID");
+      return;
+    }
     if (brlapi_errfun)
       errfun = (*jenv)->NewStringUTF(jenv, brlapi_errfun);
-    if (!(jexcep = (*jenv)->NewObject(jenv, jcexcep, jinit, brlapi_errno, brlapi_libcerrno, brlapi_gaierrno, errfun)))
+    if (!(jexcep = (*jenv)->NewObject(jenv, jcexcep, jinit, brlapi_errno, brlapi_libcerrno, brlapi_gaierrno, errfun))) {
       ThrowException(jenv, ERR_NULLPTR, "ThrowBrlapiErrorNewObject");
+      return;
+    }
     (*jenv)->ExceptionClear(jenv);
     (*jenv)->Throw(jenv, jexcep);
   }
@@ -85,16 +91,24 @@ static void exceptionHandler(int err, brl_type_t type, const void *buf, size_t s
   jmethodID jinit;
   jthrowable jexcep;
 
-  if (!(jbuf = (*env)->NewByteArray(env, size)))
-    return ThrowException(env, ERR_OUTOFMEM, __func__);
+  if (!(jbuf = (*env)->NewByteArray(env, size))) {
+    ThrowException(env, ERR_OUTOFMEM, __func__);
+    return;
+  }
   (*env)->SetByteArrayRegion(env, jbuf, 0, size, (jbyte *) buf);
 
-  if (!(jcexcep = (*env)->FindClass(env, "BrlapiException")))
+  if (!(jcexcep = (*env)->FindClass(env, "BrlapiException"))) {
     ThrowException(env, ERR_NULLPTR, "exceptionHandlerFindClass");
-  if (!(jinit = (*env)->GetMethodID(env, jcexcep, "<init>", "(II[B)V")))
+    return;
+  }
+  if (!(jinit = (*env)->GetMethodID(env, jcexcep, "<init>", "(II[B)V"))) {
     ThrowException(env, ERR_NULLPTR, "exceptionHandlerGetMethodID");
-  if (!(jexcep = (*env)->NewObject(env, jcexcep, jinit, err, type, jbuf)))
+    return;
+  }
+  if (!(jexcep = (*env)->NewObject(env, jcexcep, jinit, err, type, jbuf))) {
     ThrowException(env, ERR_NULLPTR, "exceptionHandlerNewObject");
+    return;
+  }
   (*env)->ExceptionClear(env);
   (*env)->Throw(env, jexcep);
   return;
@@ -139,8 +153,10 @@ JNIEXPORT jint JNICALL Java_BrlapiNative_openConnection(JNIEnv *jenv, jobject jo
   GET_CLASS(jenv, jcls, jobj, -1);
   GET_ID(jenv, handleID, jcls, "handle", "J", -1);
   handle = malloc(brlapi_getHandleSize());
-  if (!handle)
-    return ThrowException(jenv, ERR_OUTOFMEM, __func__), -1;
+  if (!handle) {
+    ThrowException(jenv, ERR_OUTOFMEM, __func__);
+    return -1;
+  }
   (*jenv)->SetLongField(jenv, jcls, handleID, (jlong) (intptr_t) handle);
 
   env = jenv;
@@ -152,12 +168,16 @@ JNIEXPORT jint JNICALL Java_BrlapiNative_openConnection(JNIEnv *jenv, jobject jo
 
     PclientSettings = &clientSettings;
     if ((auth = (*jenv)->GetObjectField(jenv, JclientSettings, clientAuthID))) {
-      if (!(clientSettings.auth = (char *)(*jenv)->GetStringUTFChars(jenv, auth, NULL)))
-	return ThrowException(jenv, ERR_OUTOFMEM, __func__), -1;
+      if (!(clientSettings.auth = (char *)(*jenv)->GetStringUTFChars(jenv, auth, NULL))) {
+	ThrowException(jenv, ERR_OUTOFMEM, __func__);
+	return -1;
+      }
     } else clientSettings.auth = NULL;
     if ((host = (*jenv)->GetObjectField(jenv, JclientSettings, clientHostID))) {
-      if (!(clientSettings.host = (char *)(*jenv)->GetStringUTFChars(jenv, host, NULL)))
-	return ThrowException(jenv, ERR_OUTOFMEM, __func__), -1;
+      if (!(clientSettings.host = (char *)(*jenv)->GetStringUTFChars(jenv, host, NULL))) {
+	ThrowException(jenv, ERR_OUTOFMEM, __func__);
+	return -1;
+      }
     } else clientSettings.host = NULL;
   } else PclientSettings = NULL;
 
@@ -166,8 +186,10 @@ JNIEXPORT jint JNICALL Java_BrlapiNative_openConnection(JNIEnv *jenv, jobject jo
   else
     PusedSettings = NULL;
 
-  if ((result = brlapi__openConnection(handle, PclientSettings, PusedSettings)) < 0)
-    return ThrowError(jenv, __func__), -1;
+  if ((result = brlapi__openConnection(handle, PclientSettings, PusedSettings)) < 0) {
+    ThrowError(jenv, __func__);
+    return -1;
+  }
 
   if (JclientSettings) {
     if (clientSettings.auth)
@@ -182,15 +204,19 @@ JNIEXPORT jint JNICALL Java_BrlapiNative_openConnection(JNIEnv *jenv, jobject jo
     GET_ID(jenv, usedHostID, jcusedSettings, "host", "Ljava/lang/String;", -1);
 
     auth = (*jenv)->NewStringUTF(jenv, usedSettings.auth);
-    if (!auth)
-      return ThrowException(jenv, ERR_OUTOFMEM, __func__), -1;
+    if (!auth) {
+      ThrowException(jenv, ERR_OUTOFMEM, __func__);
+      return -1;
+    }
     str = (*jenv)->GetStringUTFChars(jenv, auth, NULL);
     (*jenv)->SetObjectField(jenv, JusedSettings, clientAuthID, auth);
     (*jenv)->ReleaseStringUTFChars(jenv, auth, str);
 
     host = (*jenv)->NewStringUTF(jenv, usedSettings.host);
-    if (!host)
-      return ThrowException(jenv, ERR_OUTOFMEM, __func__), -1;
+    if (!host) {
+      ThrowException(jenv, ERR_OUTOFMEM, __func__);
+      return -1;
+    }
     str = (*jenv)->GetStringUTFChars(jenv, host, NULL);
     (*jenv)->SetObjectField(jenv, JusedSettings, clientHostID, host);
     (*jenv)->ReleaseStringUTFChars(jenv, host, str);
@@ -216,19 +242,27 @@ JNIEXPORT jbyteArray JNICALL Java_BrlapiNative_loadAuthKey(JNIEnv *jenv, jclass 
 
   env = jenv;
 
-  if (!jpath)
-    return ThrowException(jenv, ERR_NULLPTR, __func__), NULL;
-  if (!(path = (char *)(*jenv)->GetStringUTFChars(jenv, jpath, NULL)))
-    return ThrowException(jenv, ERR_NULLPTR, __func__), NULL;
+  if (!jpath) {
+    ThrowException(jenv, ERR_NULLPTR, __func__);
+    return NULL;
+  }
+  if (!(path = (char *)(*jenv)->GetStringUTFChars(jenv, jpath, NULL))) {
+    ThrowException(jenv, ERR_NULLPTR, __func__);
+    return NULL;
+  }
 
   ret = brlapi_loadAuthKey(path, &size, buf);
   if (path)
     (*jenv)->ReleaseStringUTFChars(jenv, jpath, path);
-  if (ret < 0)
-    ThrowError(jenv, __func__), NULL;
+  if (ret < 0) {
+    ThrowError(jenv, __func__);
+    return NULL;
+  }
 
-  if (!(result = (*jenv)->NewByteArray(jenv, size)))
-    return ThrowException(jenv, ERR_OUTOFMEM, __func__), NULL;
+  if (!(result = (*jenv)->NewByteArray(jenv, size))) {
+    ThrowException(jenv, ERR_OUTOFMEM, __func__);
+    return NULL;
+  }
   (*jenv)->SetByteArrayRegion(jenv, result, 0, size, buf);
   return result;
 }
@@ -239,8 +273,10 @@ JNIEXPORT jstring JNICALL Java_BrlapiNative_getDriverId(JNIEnv *jenv, jobject jo
 
   env = jenv;
 
-  if (brlapi__getDriverId(handle, id, sizeof(id)) < 0)
-    return ThrowError(jenv, __func__), NULL;
+  if (brlapi__getDriverId(handle, id, sizeof(id)) < 0) {
+    ThrowError(jenv, __func__);
+    return NULL;
+  }
 
   id[sizeof(id)-1] = 0;
   return (*jenv)->NewStringUTF(jenv, id);
@@ -252,8 +288,10 @@ JNIEXPORT jstring JNICALL Java_BrlapiNative_getDriverName(JNIEnv *jenv, jobject 
 
   env = jenv;
 
-  if (brlapi__getDriverName(handle, name, sizeof(name)) < 0)
-    return ThrowError(jenv, __func__), NULL;
+  if (brlapi__getDriverName(handle, name, sizeof(name)) < 0) {
+    ThrowError(jenv, __func__);
+    return NULL;
+  }
 
   name[sizeof(name)-1] = 0;
   return (*jenv)->NewStringUTF(jenv, name);
@@ -268,15 +306,23 @@ JNIEXPORT jobject JNICALL Java_BrlapiNative_getDisplaySize(JNIEnv *jenv, jobject
 
   env = jenv;
 
-  if (brlapi__getDisplaySize(handle, &x, &y) < 0)
-    return ThrowError(jenv, __func__), NULL;
+  if (brlapi__getDisplaySize(handle, &x, &y) < 0) {
+    ThrowError(jenv, __func__);
+    return NULL;
+  }
 
-  if (!(jcsize = (*jenv)->FindClass(jenv, "BrlapiSize")))
+  if (!(jcsize = (*jenv)->FindClass(jenv, "BrlapiSize"))) {
     ThrowException(jenv, ERR_NULLPTR, __func__);
-  if (!(jinit = (*jenv)->GetMethodID(jenv, jcsize, "<init>", "(II)V")))
+    return NULL;
+  }
+  if (!(jinit = (*jenv)->GetMethodID(jenv, jcsize, "<init>", "(II)V"))) {
     ThrowException(jenv, ERR_NULLPTR, __func__);
-  if (!(jsize = (*jenv)->NewObject(jenv, jcsize, jinit, x, y)))
+    return NULL;
+  }
+  if (!(jsize = (*jenv)->NewObject(jenv, jcsize, jinit, x, y))) {
     ThrowException(jenv, ERR_NULLPTR, __func__);
+    return NULL;
+  }
 
   return jsize;
 }
@@ -293,12 +339,16 @@ JNIEXPORT jint JNICALL Java_BrlapiNative_enterTtyMode(JNIEnv *jenv, jobject jobj
   if (!jdriver)
     driver = NULL;
   else
-    if (!(driver = (char *)(*jenv)->GetStringUTFChars(jenv, jdriver, NULL)))
-      return ThrowException(jenv, ERR_OUTOFMEM, __func__), -1;
+    if (!(driver = (char *)(*jenv)->GetStringUTFChars(jenv, jdriver, NULL))) {
+      ThrowException(jenv, ERR_OUTOFMEM, __func__);
+      return -1;
+    }
 
   result = brlapi__enterTtyMode(handle, tty,driver);
-  if (result < 0)
-    return ThrowError(jenv, __func__), -1;
+  if (result < 0) {
+    ThrowError(jenv, __func__);
+    return -1;
+  }
 
   return (jint) result;
 }
@@ -311,27 +361,38 @@ JNIEXPORT void JNICALL Java_BrlapiNative_enterTtyModeWithPath(JNIEnv *jenv, jobj
   
   env = jenv;
 
-  if (!jttys) return ThrowException(jenv, ERR_NULLPTR, __func__);
-  if (!(ttys = (*jenv)->GetIntArrayElements(jenv, jttys, NULL)))
-    return ThrowException(jenv, ERR_OUTOFMEM, __func__);
+  if (!jttys) {
+    ThrowException(jenv, ERR_NULLPTR, __func__);
+    return;
+  }
+  if (!(ttys = (*jenv)->GetIntArrayElements(jenv, jttys, NULL))) {
+    ThrowException(jenv, ERR_OUTOFMEM, __func__);
+    return;
+  }
 
-  if (!jdriver)
+  if (!jdriver) {
     driver = NULL;
-  else
-    if (!(driver = (char *)(*jenv)->GetStringUTFChars(jenv, jdriver, NULL)));
-      return ThrowException(jenv, ERR_OUTOFMEM, __func__);
+  } else if (!(driver = (char *)(*jenv)->GetStringUTFChars(jenv, jdriver, NULL))) {
+    ThrowException(jenv, ERR_OUTOFMEM, __func__);
+    return;
+  }
 
   result = brlapi__enterTtyModeWithPath(handle, ttys,(*jenv)->GetArrayLength(jenv,jttys),driver);
   (*jenv)->ReleaseIntArrayElements(jenv, jttys, ttys, JNI_ABORT);
-  if (result < 0) return ThrowError(jenv, __func__);
+  if (result < 0) {
+    ThrowError(jenv, __func__);
+    return;
+  }
 }
 
 JNIEXPORT void JNICALL Java_BrlapiNative_leaveTtyMode(JNIEnv *jenv, jobject jobj) {
   env = jenv;
   GET_HANDLE(jenv, jobj, );
 
-  if (brlapi__leaveTtyMode(handle) < 0)
-    return ThrowError(jenv, __func__);
+  if (brlapi__leaveTtyMode(handle) < 0) {
+    ThrowError(jenv, __func__);
+    return;
+  }
 }
 
 JNIEXPORT void JNICALL Java_BrlapiNative_setFocus(JNIEnv *jenv, jobject jobj, jint jarg1) {
@@ -341,8 +402,10 @@ JNIEXPORT void JNICALL Java_BrlapiNative_setFocus(JNIEnv *jenv, jobject jobj, ji
   env = jenv;
 
   arg1 = (int)jarg1; 
-  if (brlapi__setFocus(handle, arg1) < 0)
-    return ThrowError(jenv, __func__);
+  if (brlapi__setFocus(handle, arg1) < 0) {
+    ThrowError(jenv, __func__);
+    return;
+  }
 }
 
 JNIEXPORT void JNICALL Java_BrlapiNative_writeText(JNIEnv *jenv, jobject jobj, jint jarg1, jstring jarg2) {
@@ -355,16 +418,22 @@ JNIEXPORT void JNICALL Java_BrlapiNative_writeText(JNIEnv *jenv, jobject jobj, j
 
   arg1 = (int)jarg1; 
 
-  if (!jarg2)
-    return ThrowException(jenv, ERR_NULLPTR, __func__);
-  if (!(arg2 = (char *)(*jenv)->GetStringUTFChars(jenv, jarg2, NULL)))
-    return ThrowException(jenv, ERR_OUTOFMEM, __func__);
+  if (!jarg2) {
+    ThrowException(jenv, ERR_NULLPTR, __func__);
+    return;
+  }
+  if (!(arg2 = (char *)(*jenv)->GetStringUTFChars(jenv, jarg2, NULL))) {
+    ThrowException(jenv, ERR_OUTOFMEM, __func__);
+    return;
+  }
 
   result = brlapi__writeText(handle, arg1,arg2);
   (*jenv)->ReleaseStringUTFChars(jenv, jarg2, arg2); 
 
-  if (result < 0)
-    return ThrowError(jenv, __func__);
+  if (result < 0) {
+    ThrowError(jenv, __func__);
+    return;
+  }
 }
 
 JNIEXPORT void JNICALL Java_BrlapiNative_writeDots(JNIEnv *jenv, jobject jobj, jbyteArray jarg1) {
@@ -374,17 +443,23 @@ JNIEXPORT void JNICALL Java_BrlapiNative_writeDots(JNIEnv *jenv, jobject jobj, j
   
   env = jenv;
 
-  if (!jarg1)
-    return ThrowException(jenv, ERR_NULLPTR, __func__);
+  if (!jarg1) {
+    ThrowException(jenv, ERR_NULLPTR, __func__);
+    return;
+  }
   arg1 = (*jenv)->GetByteArrayElements(jenv, jarg1, NULL);
-  if (!arg1)
-    return ThrowException(jenv, ERR_OUTOFMEM, __func__);
+  if (!arg1) {
+    ThrowException(jenv, ERR_OUTOFMEM, __func__);
+    return;
+  }
 
   result = brlapi__writeDots(handle, (const unsigned char *)arg1);
   (*jenv)->ReleaseByteArrayElements(jenv, jarg1, arg1, JNI_ABORT); 
   
-  if (result < 0)
-    return ThrowError(jenv, __func__);
+  if (result < 0) {
+    ThrowError(jenv, __func__);
+    return;
+  }
 }
 
 JNIEXPORT void JNICALL Java_BrlapiNative_write(JNIEnv *jenv, jobject jobj, jobject js) {
@@ -398,8 +473,10 @@ JNIEXPORT void JNICALL Java_BrlapiNative_write(JNIEnv *jenv, jobject jobj, jobje
 
   env = jenv;
 
-  if (!js)
-    return ThrowException(jenv, ERR_NULLPTR, __func__);
+  if (!js) {
+    ThrowException(jenv, ERR_NULLPTR, __func__);
+    return;
+  }
 
   GET_CLASS(jenv, jcwriteStruct, js,);
 
@@ -435,8 +512,10 @@ JNIEXPORT void JNICALL Java_BrlapiNative_write(JNIEnv *jenv, jobject jobj, jobje
   if (attrOr)
     (*jenv)->ReleaseByteArrayElements(jenv, attrOr,  (jbyte*) s.attrOr,  JNI_ABORT); 
 
-  if (result < 0)
-    return ThrowError(jenv, __func__);
+  if (result < 0) {
+    ThrowError(jenv, __func__);
+    return;
+  }
 }
 
 JNIEXPORT jlong JNICALL Java_BrlapiNative_readKey(JNIEnv *jenv, jobject jobj, jboolean jblock) {
@@ -448,8 +527,10 @@ JNIEXPORT jlong JNICALL Java_BrlapiNative_readKey(JNIEnv *jenv, jobject jobj, jb
 
   result = brlapi__readKey(handle, (int) jblock, &code);
 
-  if (result < 0)
-    return ThrowError(jenv, __func__), -1;
+  if (result < 0) {
+    ThrowError(jenv, __func__);
+    return -1;
+  }
 
   if (!result) return (jlong)(-1);
   return (jlong)code;
@@ -459,8 +540,10 @@ JNIEXPORT void JNICALL Java_BrlapiNative_ignoreKeyRange(JNIEnv *jenv, jobject jo
   env = jenv;
   GET_HANDLE(jenv, jobj, );
 
-  if (brlapi__ignoreKeyRange(handle, (brl_keycode_t)jarg1,(brl_keycode_t)jarg2) < 0)
-    return ThrowError(jenv, __func__);
+  if (brlapi__ignoreKeyRange(handle, (brl_keycode_t)jarg1,(brl_keycode_t)jarg2) < 0) {
+    ThrowError(jenv, __func__);
+    return;
+  }
 }
 
 JNIEXPORT void JNICALL Java_BrlapiNative_ignoreKeySet(JNIEnv *jenv, jobject jobj, jlongArray js) {
@@ -471,8 +554,10 @@ JNIEXPORT void JNICALL Java_BrlapiNative_ignoreKeySet(JNIEnv *jenv, jobject jobj
 
   env = jenv;
 
-  if (!js)
-    return ThrowException(jenv, ERR_NULLPTR, __func__);
+  if (!js) {
+    ThrowException(jenv, ERR_NULLPTR, __func__);
+    return;
+  }
 
   n = (unsigned int) (*jenv)->GetArrayLength(jenv, js);
   s = (*jenv)->GetLongArrayElements(jenv, js, NULL);
@@ -481,16 +566,20 @@ JNIEXPORT void JNICALL Java_BrlapiNative_ignoreKeySet(JNIEnv *jenv, jobject jobj
   result = brlapi__ignoreKeySet(handle, (const brl_keycode_t *)s, n);
   (*jenv)->ReleaseLongArrayElements(jenv, js, s, JNI_ABORT);
   
-  if (result < 0)
-    return ThrowError(jenv, __func__);
+  if (result < 0) {
+    ThrowError(jenv, __func__);
+    return;
+  }
 }
 
 JNIEXPORT void JNICALL Java_BrlapiNative_acceptKeyRange(JNIEnv *jenv, jobject jobj, jlong jarg1, jlong jarg2) {
   env = jenv;
   GET_HANDLE(jenv, jobj, );
 
-  if (brlapi__acceptKeyRange(handle, (brl_keycode_t)jarg1,(brl_keycode_t)jarg2) < 0)
-    return ThrowError(jenv, __func__);
+  if (brlapi__acceptKeyRange(handle, (brl_keycode_t)jarg1,(brl_keycode_t)jarg2) < 0) {
+    ThrowError(jenv, __func__);
+    return;
+  }
 }
 
 JNIEXPORT void JNICALL Java_BrlapiNative_acceptKeySet(JNIEnv *jenv, jobject jobj, jlongArray js) {
@@ -501,8 +590,10 @@ JNIEXPORT void JNICALL Java_BrlapiNative_acceptKeySet(JNIEnv *jenv, jobject jobj
 
   env = jenv;
 
-  if (!js)
-    return ThrowException(jenv, ERR_NULLPTR, __func__);
+  if (!js) {
+    ThrowException(jenv, ERR_NULLPTR, __func__);
+    return;
+  }
 
   n = (unsigned int) (*jenv)->GetArrayLength(jenv, js);
   s = (*jenv)->GetLongArrayElements(jenv, js, NULL);
@@ -511,8 +602,10 @@ JNIEXPORT void JNICALL Java_BrlapiNative_acceptKeySet(JNIEnv *jenv, jobject jobj
   result = brlapi__acceptKeySet(handle, (const brl_keycode_t *)s, n);
   (*jenv)->ReleaseLongArrayElements(jenv, js, s, JNI_ABORT);
 
-  if (result < 0)
-    return ThrowError(jenv, __func__);
+  if (result < 0) {
+    ThrowError(jenv, __func__);
+    return;
+  }
 }
 
 JNIEXPORT void JNICALL Java_BrlapiNative_enterRawMode(JNIEnv *jenv, jobject jobj, jstring jdriver) {
@@ -521,20 +614,28 @@ JNIEXPORT void JNICALL Java_BrlapiNative_enterRawMode(JNIEnv *jenv, jobject jobj
   int res;
   GET_HANDLE(jenv, jobj, );
 
-  if (!jdriver) driver = NULL;
-  else if (!(driver = (char *)(*jenv)->GetStringUTFChars(jenv, jdriver, NULL)))
-    return ThrowException(jenv, ERR_NULLPTR, __func__);
+  if (!jdriver) {
+    driver = NULL;
+  } else if (!(driver = (char *)(*jenv)->GetStringUTFChars(jenv, jdriver, NULL))) {
+    ThrowException(jenv, ERR_NULLPTR, __func__);
+    return;
+  }
   res = brlapi__enterRawMode(handle, driver);
   if (jdriver) (*jenv)->ReleaseStringUTFChars(jenv, jdriver, driver);
-  if (res < 0) return ThrowError(jenv, __func__);
+  if (res < 0) {
+    ThrowError(jenv, __func__);
+    return;
+  }
 }
 
 JNIEXPORT void JNICALL Java_BrlapiNative_leaveRawMode(JNIEnv *jenv, jobject jobj) {
   env = jenv;
   GET_HANDLE(jenv, jobj, );
 
-  if (brlapi__leaveRawMode(handle) < 0)
-    return ThrowError(jenv, __func__);
+  if (brlapi__leaveRawMode(handle) < 0) {
+    ThrowError(jenv, __func__);
+    return;
+  }
 }
 
 JNIEXPORT jint JNICALL Java_BrlapiNative_sendRaw(JNIEnv *jenv, jobject jobj, jbyteArray jbuf) {
@@ -545,8 +646,10 @@ JNIEXPORT jint JNICALL Java_BrlapiNative_sendRaw(JNIEnv *jenv, jobject jobj, jby
 
   env = jenv;
 
-  if (!jbuf)
-    return ThrowException(jenv, ERR_NULLPTR, __func__), -1;
+  if (!jbuf) {
+    ThrowException(jenv, ERR_NULLPTR, __func__);
+    return -1;
+  }
 
   n = (unsigned int) (*jenv)->GetArrayLength(jenv, jbuf);
   buf = (*jenv)->GetByteArrayElements(jenv, jbuf, NULL);
@@ -554,8 +657,10 @@ JNIEXPORT jint JNICALL Java_BrlapiNative_sendRaw(JNIEnv *jenv, jobject jobj, jby
   result = brlapi__sendRaw(handle, (const unsigned char *)buf, n);
   (*jenv)->ReleaseByteArrayElements(jenv, jbuf, buf, JNI_ABORT);
 
-  if (result < 0)
-    return ThrowError(jenv, __func__), -1;
+  if (result < 0) {
+    ThrowError(jenv, __func__);
+    return -1;
+  }
 
   return (jint) result;
 }
@@ -568,8 +673,10 @@ JNIEXPORT jint JNICALL Java_BrlapiNative_recvRaw(JNIEnv *jenv, jobject jobj, jby
 
   env = jenv;
 
-  if (!jbuf)
-    return ThrowException(jenv, ERR_NULLPTR, __func__), -1;
+  if (!jbuf) {
+    ThrowException(jenv, ERR_NULLPTR, __func__);
+    return -1;
+  }
 
   n = (unsigned int) (*jenv)->GetArrayLength(jenv, jbuf);
   buf = (*jenv)->GetByteArrayElements(jenv, jbuf, NULL);
@@ -578,7 +685,8 @@ JNIEXPORT jint JNICALL Java_BrlapiNative_recvRaw(JNIEnv *jenv, jobject jobj, jby
 
   if (result < 0) {
     (*jenv)->ReleaseByteArrayElements(jenv, jbuf, buf, JNI_ABORT);
-    return ThrowError(jenv, __func__), -1;
+    ThrowError(jenv, __func__);
+    return -1;
   }
 
   (*jenv)->ReleaseByteArrayElements(jenv, jbuf, buf, 0);
@@ -590,8 +698,10 @@ JNIEXPORT jstring JNICALL Java_BrlapiNative_packetType(JNIEnv *jenv, jclass jcls
 
   env = jenv;
 
-  if (!(type = brlapi_packetType((brl_type_t) jtype)))
-    return ThrowError(jenv, __func__), NULL;
+  if (!(type = brlapi_packetType((brl_type_t) jtype))) {
+    ThrowError(jenv, __func__);
+    return NULL;
+  }
 
   return (*jenv)->NewStringUTF(jenv, type);
 }
@@ -614,11 +724,12 @@ JNIEXPORT jstring JNICALL Java_BrlapiError_toString (JNIEnv *jenv, jobject jerr)
   error.brlerrno  = (*jenv)->GetIntField(jenv, jerr, brlerrnoID);
   error.libcerrno = (*jenv)->GetIntField(jenv, jerr, libcerrnoID);
   error.gaierrno  = (*jenv)->GetIntField(jenv, jerr, gaierrnoID);
-  if (!(jerrfun = (*jenv)->GetObjectField(jenv, jerr, errfunID)))
+  if (!(jerrfun = (*jenv)->GetObjectField(jenv, jerr, errfunID))) {
     error.errfun = NULL;
-  else
-    if (!(error.errfun = (char *)(*jenv)->GetStringUTFChars(jenv, jerrfun, NULL)))
-      return ThrowException(jenv, ERR_OUTOFMEM, __func__), NULL;
+  } else if (!(error.errfun = (char *)(*jenv)->GetStringUTFChars(jenv, jerrfun, NULL))) {
+    ThrowException(jenv, ERR_OUTOFMEM, __func__);
+    return NULL;
+  }
   res = brlapi_strerror(&error);
   if (jerrfun)
     (*jenv)->ReleaseStringUTFChars(jenv, jerrfun, error.errfun);
@@ -638,8 +749,10 @@ JNIEXPORT jstring JNICALL Java_BrlapiException_toString (JNIEnv *jenv, jobject j
 
   env = jenv;
 
-  if (!jerr)
-    return ThrowException(jenv, ERR_NULLPTR, __func__), NULL;
+  if (!jerr) {
+    ThrowException(jenv, ERR_NULLPTR, __func__);
+    return NULL;
+  }
   GET_CLASS(jenv, jcerr, jerr, NULL);
   GET_ID(jenv, errnoID, jcerr, "errno", "I", NULL);
   GET_ID(jenv, typeID,  jcerr, "type",  "I", NULL);
@@ -647,8 +760,10 @@ JNIEXPORT jstring JNICALL Java_BrlapiException_toString (JNIEnv *jenv, jobject j
 
   error.brlerrno = (*jenv)->GetIntField(jenv, jerr, errnoID);
   type  = (*jenv)->GetIntField(jenv, jerr, typeID);
-  if (!(jbuf  = (*jenv)->GetObjectField(jenv, jerr, typeID)))
-    return ThrowException(jenv, ERR_NULLPTR, __func__), NULL;
+  if (!(jbuf  = (*jenv)->GetObjectField(jenv, jerr, typeID))) {
+    ThrowException(jenv, ERR_NULLPTR, __func__);
+    return NULL;
+  }
   size  = (*jenv)->GetArrayLength(jenv, jbuf);
   buf = (*jenv)->GetByteArrayElements(jenv, jbuf, NULL);
 
