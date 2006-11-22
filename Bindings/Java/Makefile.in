@@ -18,6 +18,7 @@
 include $(SRC_TOP)bindings.mk
 
 JAVAC = @JAVAC@
+JAVA_ENCODING = UTF-8
 
 all: native jar doc
 
@@ -39,7 +40,7 @@ $(JAVA_JAR): classes
 CLASSES = Brlapi.class BrlapiNative.class BrlapiError.class BrlapiException.class BrlapiSettings.class BrlapiWriteStruct.class BrlapiSize.class BrlapiKey.class ApiTest.class
 classes: $(CLASSES)
 $(CLASSES): $(SRC_DIR)/*.java BrlapiConstants.class
-	$(JAVAC) -d . -classpath . $(SRC_DIR)/*.java
+	$(JAVAC) -d . -classpath . -encoding $(JAVA_ENCODING) $(SRC_DIR)/*.java
 
 BrlapiConstants.class: BrlapiConstants.java
 	$(JAVAC) BrlapiConstants.java
@@ -48,7 +49,7 @@ BrlapiConstants.java: $(API_HEADER) $(APIDEFS_AWK) $(BRLDEFS_HDR) $(BRLDEFS_AWK)
 	$(AWK) -f $(APIDEFS_AWK) -f $(BRLDEFS_AWK) -f $(SRC_DIR)/constants.awk $(API_HEADER) $(BRLDEFS_HDR) >$@
 
 doc: BrlapiConstants.java
-	$(JAVAC:javac=javadoc) -quiet -d . -author -version -use $(SRC_DIR)/*.java BrlapiConstants.java
+	$(JAVAC:javac=javadoc) -quiet -d . -author -version -use -encoding $(JAVA_ENCODING) $(SRC_DIR)/*.java BrlapiConstants.java
 
 clean::
 	-rm -f $(JAVA_NATIVE) BrlapiConstants.java *.class brlapi.jar
