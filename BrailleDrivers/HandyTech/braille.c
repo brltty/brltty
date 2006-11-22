@@ -41,7 +41,7 @@ static const unsigned char BookwormBrailleEnd[] = {0X16};	/* bookworm trailer to
 static const unsigned char BookwormSessionEnd[] = {0X05, 0X07};	/* bookworm trailer to display braille */
 
 typedef struct {
-  unsigned long int front;
+  uint32_t front;
   signed char column;
   signed char status;
 } Keys;
@@ -428,7 +428,7 @@ static unsigned char updateRequired = 0;
 #define KEY_RELEASE 0X80
 #define KEY_ROUTING 0X20
 #define KEY_STATUS  0X70
-#define KEY(code)   (1U << (code))
+#define KEY(code)   (UINT32_C(1) << (code))
 
 /* modular front keys */
 #define KEY_B1              KEY(0X03)
@@ -759,7 +759,7 @@ interpretKeyByte (BRL_DriverCommandContext context, unsigned char byte, int *com
   }
 
   if (byte < 0X20) {
-    unsigned long int key = KEY(byte);
+    uint32_t key = KEY(byte);
     *command = BRL_CMD_NOOP;
     if (release) {
       currentKeys.front &= ~key;
@@ -991,9 +991,9 @@ interpretModularKeys (BRL_DriverCommandContext context, const Keys *keys, int *c
     }
 
     if (inputMode) {
-      const unsigned long int dots = KEY_B1 | KEY_B2 | KEY_B3 | KEY_B4 | KEY_B5 | KEY_B6 | KEY_B7 | KEY_B8;
+      const uint32_t dots = KEY_B1 | KEY_B2 | KEY_B3 | KEY_B4 | KEY_B5 | KEY_B6 | KEY_B7 | KEY_B8;
       if (keys->front & dots) {
-        unsigned long int modifiers = keys->front & ~dots;
+        uint32_t modifiers = keys->front & ~dots;
         *command = BRL_BLK_PASSDOTS;
 
         if (keys->front & KEY_B1) *command |= BRL_DOT7;
