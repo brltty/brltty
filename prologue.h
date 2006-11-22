@@ -69,6 +69,20 @@ typedef signed char		int8_t;
 typedef signed short		int16_t;
 typedef signed long		int32_t;
 typedef signed long long	int64_t;
+
+#define INT8_C(c)	c
+#define INT16_C(c)	c
+#define INT32_C(c)	c
+#define INT64_C(c)	c ## LL
+
+#define UINT8_C(c)	c ## U
+#define UINT16_C(c)	c ## U
+#define UINT32_C(c)	c ## U
+#define UINT64_C(c)	c ## ULL
+
+#define INTMAX_C(c)	c ## LL
+#define UINTMAX_C(c)	c ## ULL
+
 #else /* __MSDOS__ */
 #include <inttypes.h>
 #endif /* __MSDOS__ */

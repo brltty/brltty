@@ -77,7 +77,7 @@ void *signal(int signum, void*handler) { return NULL; }
 #define DOS_INT 0x21
 #define IDLE_INT 0x28
 
-#define PIT_FREQ 1193180ULL
+#define PIT_FREQ UINT64_C(1193180)
 
 /* For saving interrupt and main contexts */
 
@@ -289,7 +289,7 @@ tsr_usleep(unsigned long usec) {
   restoreState(&intState);
 
   /* clock ticks to wait */
-  count = (usec * PIT_FREQ) / 1000000ULL;
+  count = (usec * PIT_FREQ) / UINT64_C(1000000);
 
   /* we're starting in the middle of a timer period */
   intsWereEnabled = disable();
@@ -317,7 +317,7 @@ tsr_usleep(unsigned long usec) {
   saveState(&intState);
   restoreState(&mainState);
 
-  return (elapsedTicks * 1000000ULL) / PIT_FREQ;
+  return (elapsedTicks * UINT64_C(1000000)) / PIT_FREQ;
 }
 
 int
