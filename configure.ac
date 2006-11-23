@@ -451,7 +451,7 @@ BRLTTY_ARG_DISABLE(
             AC_PATH_PROG([PYREXC], [pyrexc])
             if test -n "${PYREXC}"
             then
-               m4_include([ac_python_devel.m4])
+               m4_include([acdir/ac_python_devel.m4])
                AC_PYTHON_DEVEL()
                api_bindings="${api_bindings} Python"
             else
