@@ -110,9 +110,14 @@ function getComment(line) {
 }
 
 function getDefineValue() {
-  if ($3 !~ "^\\(") return $3
+  if ($3 !~ "^\\(") return getNormalizedConstant($3)
   if (match($0, "\\([^)]*\\)")) return substr($0, RSTART, RLENGTH)
   return ""
+}
+
+function getNormalizedConstant(value) {
+   if (value ~ "^UINT64_C\\(.+\\)$") value = substr(value, 10, length(value)-10)
+   return value
 }
 
 function makeDoxygenComment(text) {

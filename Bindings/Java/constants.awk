@@ -94,7 +94,6 @@ function writeJavadocComment(text) {
 
 function hexadecimalValue(value) {
   value = tolower(value)
-  gsub("u?l*$", "", value)
   gsub("x0+", "x", value)
   gsub("x$", "x0", value)
   return value

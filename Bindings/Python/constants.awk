@@ -82,7 +82,6 @@ function writePythonAssignment(name, value) {
 
 function hexadecimalValue(value) {
   value = tolower(value)
-  gsub("u?l*$", "", value)
   return value
 }
 
