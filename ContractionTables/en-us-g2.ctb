@@ -132,9 +132,8 @@ word benefic 23-1345-15-124-24-14
 sufword beneficence 23-1345-15-124-24-14-56-15
 sufword beneficent 23-1345-15-124-24-14-26-2345
 begword benev 23-1345-15-1236 benevolent
-begword beni 12-26-24
-begword benif 23-1345-24-124 benificient
-sufword benign 23-1345-24-1245-1345 benignity
+begword benig 23-1345-24-1245 benign
+begword benigh 23-1345-24-126 benighted
 begword benu 23-1345-136 benumbed
 begword ber 12-12456
 begword bera 23-1235-1 berating
@@ -223,6 +222,7 @@ sufword clever 14-123-5-15 cleverest
 # the letter d
 always d 145
 always D 145
+begword dachs 145-1-16-234 dachshund
 begword dared 145-345-15-145 daredevil
 always day 5-145
 begword deact = deactivation
@@ -499,6 +499,7 @@ sufword nose = nosedive
 word not 1345
 word noways =
 word nowhere 1345-135-5-156
+begword nuth 1345-136-2345-125 nuthatch nuthouse
 
 # the letter o
 word o 135
