@@ -316,12 +316,11 @@ int brlapi__getDisplaySize(brlapi_handle_t *handle, unsigned int *x, unsigned in
 
 /** @} */
 
-/** \defgroup brlapi_tty Tty getting & leaving
+/** \defgroup brlapi_tty Entering & leaving tty mode
  * \brief How to take control of ttys for direct braille display / read
  *
  * Before being able to write on the braille display, the application must tell
- * the server which tty it will handle. Some checking is done just to be sure
- * that only one client gets control of each tty.
+ * the server which tty it will handle. 
  *
  * The application must also specify how braille keys will be delivered to it.
  * Two ways are possible: key codes and commands:
@@ -829,24 +828,17 @@ int brlapi__resumeDriver(brlapi_handle_t *handle);
 /** @} */
 
 /** \defgroup brlapi_error Error handling
- * \brief How to handle errors which might very well happen
+ * \brief How to handle errors
  *
- * When a function fails for some normal error, brlapi_errno will hold an error
- * code to explain why it failed. It is good practice to print it somewhere for
- * the user or the programmer to understand why it failed.
+ * When a function fails, brlapi_errno(3) will hold an error
+ * code to explain why it failed. It should always be reported somehow.
  *
- * When something really wrong was done somewhere, like an out-of-bounds
- * argument, which is really a bug in either the implementation of BrlAPI or
- * in the application, an exception may be sent by the server. As soon as
- * libbrlapi receives it, an exception handler prints it and \e abort(3)s 
- * he program, since it means something went really wrong and that we shouldn't
- * go further.
- *
- * This is hopefully a really seldom event, but in the case of an editor, for
- * instance, one would surely want to have files saved before actually
- * abort(3)ing. brlapi_setExceptionHandler(3) lets the programmer define another
- * exception handler which would save files and then call the default handler
- * brlapi_defaultExceptionHandler(3).
+ * Although most errors are reported that way, some (called exceptions) are
+ * reported asynchronously for efficiency reasons. The affected functions
+ * are: brlapi_setFocus, brlapi_write* and brlapi_sendRaw. The default
+ * exception handler (brlapi_defaultExceptionHandler(3)) dumps the guilty
+ * packet before abort(3)ing.  It can be replaced by calling
+ * brlapi_setExceptionHandler(3).
  *
  * @{ */
 
@@ -959,7 +951,7 @@ const char *brlapi_packetType(brl_type_t ptype);
 /** Type for error handlers
  *
  * Type of error handlers which are to be given to
- * brlapi_setExceptionHandler(333).
+ * brlapi_setExceptionHandler(3).
  *
  * \param err is a BRLERR_ error code;
  * \param type is the type of the guilty packet;
