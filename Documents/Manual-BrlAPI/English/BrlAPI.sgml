@@ -549,7 +549,8 @@ be).
 <p>
 <tt/make install/ will install libbrlapi.so in /lib, and include files in
 /usr/include/brltty. An authorization key will also typically be set in
-/etc/brlapi.key, but won't be readable by anybody else than root. It is up
+/etc/brlapi.key (if it is not, just create it and put arbitrary data in it), but
+it won't be readable by anybody else than root. It is up
 to you to define a group of users who will have the right to read it and hence
 be able to connect to the server. For instance, you may want to do:
 
