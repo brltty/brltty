@@ -184,7 +184,10 @@ typedef struct {
 /* BRLAPI_SETTINGS_INITIALIZER */
 /** Allows to initialize a structure of type \e brlapi_settings_t *
  * with default values. */
-#define BRLAPI_SETTINGS_INITIALIZER { NULL, NULL }
+#define BRLAPI_SETTINGS_INITIALIZER { \
+  .auth = NULL, \
+  .host = NULL \
+}
 
 /* brlapi_openConnection */
 /** Open a socket and connect it to \e BrlAPI 's server
@@ -486,8 +489,16 @@ typedef struct {
  * text = attrAnd = attrOr = NULL; (no text, no attribute)
  * cursor = -1; (don't touch cursor)
 */
-#define BRLAPI_WRITESTRUCT_INITIALIZER \
-  { -1, 0, 0, NULL, NULL, NULL, -1, NULL }
+#define BRLAPI_WRITESTRUCT_INITIALIZER { \
+  .displayNumber = -1, \
+  .regionBegin = 0, \
+  .regionSize = 0, \
+  .text = NULL, \
+  .attrAnd = NULL, \
+  .attrOr = NULL, \
+  .cursor = -1, \
+  .charset = NULL \
+}
 
 /* brlapi_write */
 /** Update a specific region of the braille display and apply and/or masks
