@@ -1168,7 +1168,7 @@ always	\xA7\xE2	135-345-4	§â
 always	\xA7\xE3	2346-5	§ã
 always	\xA7\xE4	1-146-4	§ä
 always	\xA7\xE5	1234-16-3	§å
-always	\xA7\xE6	135-1236-4	§æ
+always	\xA7\xE6	135-1236-3	§æ
 always	\xA7\xE7	24-34-3	§ç
 always	\xA7\xE8	12-2346-4	§è
 always	\xA7\xE9	1-2346-2	§é
@@ -1216,7 +1216,7 @@ always	\xA8\x4D	13-236-2	¨M
 always	\xA8\x4E	134-34-5	¨N
 always	\xA8\x4F	124-2456-5	¨O
 always	\xA8\x50	145-123456-5	¨P
-always	\xA8\x51	13-34-4	¨Q
+always	\xA8\x51	134-16-5	¨Q
 always	\xA8\x52	12-12346-3	¨R
 always	\xA8\x53\xB8\xA8	134-126-5-14-25-5	¨S¸¨
 always	\xA8\x53	134-356-2	¨S
@@ -1495,7 +1495,7 @@ always	\xA9\xE5	1-25-2	©å
 always	\xA9\xE6	134-34-4	©æ
 always	\xA9\xE7	1234-2456-3	©ç
 always	\xA9\xE8	145-16-4	©è
-always	\xA9\xE9	135-2345-5	©é
+always	\xA9\xE9	1234-1236-5	©é
 always	\xA9\xEA	135-146-5	©ê
 always	\xA9\xEB	13-1256-3	©ë
 always	\xA9\xEC	124-25-3	©ì
@@ -1575,7 +1575,7 @@ always	\xAA\x76	1-156-5	ªv
 always	\xAA\x77	1234-146-5	ªw
 always	\xAA\x78	12345-1236-5	ªx
 always	\xAA\x79	135-126-2	ªy
-always	\xAA\x7A	1235-1246-5	ªz
+always	\xAA\x7A	134-356-5	ªz
 always	\xAA\x7B	134-1456-4	ª{
 always	\xAA\x7C	145-16-5	ª|
 always	\xAA\x7D	134-146-4	ª}
@@ -1670,11 +1670,7 @@ always	\xAA\xF4	245-234-3	ªô
 always	\xAA\xF5	135-356-5	ªõ
 always	\xAA\xF6	245-2456-4	ªö
 always	\xAA\xF7	13-1456-3	ª÷
-always	\xAA\xF8\xBD\xFA	1-1346-4-135-356-5	ªø½ú
-always	\xAA\xF8	12-1346-2	ªø
-always	\xA6\xA8\xAA\xF8	12-1356-2-1-1346-4	¦¨ªø
-always	\xA5\xCD\xAA\xF8	24-1356-3-1-1346-4	¥Íªø
-always	\xAE\x61\xAA\xF8	13-23456-3-1-1346-4	®aªø
+always	\xAA\xF8	2-1346-2	ªø
 always	\xAA\xF9	134-136-2	ªù
 always	\xAA\xFA	12345-34-5	ªú
 always	\xAA\xFB	124-25-2	ªû
@@ -2198,7 +2194,7 @@ always	\xAE\x5A	2346-2	®Z
 always	\xAE\x5B	14-16-4	®[
 always	\xAE\x5C	1234-13456-3	®\
 always	\xAE\x5D	15-123456-3	®]
-always	\xAE\x5E	135-345-1	®^
+always	\xAE\x5E	134-1236-3	®^
 always	\xAE\x5F	125-2456-4	®_
 always	\xAE\x60	1235-2456-5	®`
 always	\xAE\x61	13-23456-3	®a
@@ -2937,7 +2933,7 @@ always	\xB2\xDF	15-16-2	²ß
 always	\xB2\xE0	15-156-5	²à
 always	\xB2\xE1	14-246-2	²á
 always	\xB2\xE2	14-13456-2	²â
-always	\xB2\xE3	12345-34-4	²ã
+always	\xB2\xE3	1234-34-2	²ã
 always	\xB2\xE4	135-126-2	²ä
 always	\xB2\xE5	12-123456-2	²å
 always	\xB2\xE6	124-25-3	²æ
@@ -2965,7 +2961,7 @@ always	\xB2\xFB	234-4	²û
 always	\xB2\xFC	1235-2346-2	²ü
 always	\xB2\xFD	145-16-2	²ý
 always	\xB2\xFE	124-34-2	²þ
-always	\xB3\x40	1234-34-4	³@
+always	\xB3\x40	1234-34-2	³@
 always	\xB3\x41	15-2345-5	³A
 always	\xAC\xDB\xB3\x42	15-46-3-12-34-4	¬Û³B
 always	\xB3\x42\xA5\xF7	12-34-4-12345-136-5	³B¥÷
@@ -3169,7 +3165,7 @@ always	\xB4\x62	1235-25-5	´b
 always	\xB9\xBD\xB4\x63	2345-5-34-5	¹½´c
 always	\xB4\x63	2346-5	´c
 always	\xB4\x64	135-356-3	´d
-always	\xB4\x65	134-136-5	´e
+always	\xB4\x65	134-136-3	´e
 always	\xB4\x66	1235-1246-5	´f
 always	\xB4\x67	245-346-5	´g
 always	\xB4\x68	14-1356-5	´h
@@ -3751,7 +3747,7 @@ always	\xB7\xE4	1235-34-2	·ä
 always	\xB7\xE5	15-23456-2	·å
 always	\xB7\xE6	15-2346-5	·æ
 always	\xB7\xE7	1245-1246-5	·ç
-always	\xB7\xE8	134-146-5	·è
+always	\xB7\xE8	134-356-5	·è
 always	\xB7\xE9	1235-123456-2	·é
 always	\xB7\xEA	1345-146-4	·ê
 always	\xB7\xEB	13456-3	·ë
@@ -3765,7 +3761,7 @@ always	\xB7\xF0	124-1236-2	·ð
 always	\xB7\xF1	245-1246-5	·ñ
 always	\xB7\xF2	134-345-2	·ò
 always	\xB7\xF3	12345-356-5	·ó
-always	\xB7\xF4	135-356-3	·ô
+always	\xB7\xF4	135-16-5	·ô
 always	\xB7\xF5	1246-4	·õ
 always	\xB7\xF6	12-156-3	·ö
 always	\xB7\xF7	14-1456-2	·÷
@@ -3933,7 +3929,7 @@ always	\xB8\xFB	13-246-5	¸û
 always	\xB8\xFC	125-2456-5	¸ü
 always	\xB8\xFD	24-156-5	¸ý
 always	\xB8\xFE	1-156-5	¸þ
-always	\xB9\x40	1234-16-5	¹@
+always	\xB9\x40	135-16-5	¹@
 always	\xB9\x41	1345-12346-2	¹A
 always	\xB9\x42	256-5	¹B
 always	\xB9\x43	234-2	¹C
@@ -4640,7 +4636,7 @@ always	\xBD\xA4	134-126-5	½¤
 always	\xBD\xA5	15-16-3	½¥
 always	\xBD\xA6	13-246-3	½¦
 always	\xBD\xA7	12345-34-3	½§
-always	\xBD\xA8	1234-246-4	½¨
+always	\xBD\xA8	135-246-3	½¨
 always	\xBD\xA9	1-2346-5	½©
 always	\xBD\xAA	135-16-5	½ª
 always	\xBD\xAB	1246-5	½«
@@ -4913,7 +4909,7 @@ always	\xBF\x50	2345-5	¿P
 always	\xBF\x51	15-16-3	¿Q
 always	\xBF\x52	14-246-2	¿R
 always	\xBF\x53	124-1346-5	¿S
-always	\xBF\x54	134-136-3	¿T
+always	\xBF\x54	134-136-5	¿T
 always	\xBF\x55	1245-1236-2	¿U
 always	\xBF\x56	2345-5	¿V
 always	\xBF\x57	145-34-2	¿W
@@ -4932,7 +4928,7 @@ always	\xBF\x63	14-34-2	¿c
 always	\xBF\x64	13-12456-5	¿d
 always	\xBF\x65	12-1356-3	¿e
 always	\xBF\x66	134-1236-2	¿f
-always	\xBF\x67	1234-246-5	¿g
+always	\xBF\x67	1234-246-4	¿g
 always	\xBF\x68	1234-346-3	¿h
 always	\xBF\x69	134-126-2	¿i
 always	\xBF\x6A	1-12456-3	¿j
@@ -5189,7 +5185,7 @@ always	\xC0\xE0	13-256-5	Àà
 always	\xC0\xE1	1245-34-2	Àá
 always	\xC0\xE2	1235-25-5	Àâ
 always	\xC0\xE3	24-156-3	Àã
-always	\xC0\xE4	1234-34-3	Àä
+always	\xC0\xE4	1234-34-2	Àä
 always	\xC0\xE5	1246-2	Àå
 always	\xC0\xE6	15-1246-5	Àæ
 always	\xC0\xE7	13456-2	Àç
@@ -5243,7 +5239,7 @@ always	\xC1\x57	245-146-3	ÁW
 always	\xC1\x58	15-1236-4	ÁX
 always	\xC1\x59	15-25-3	ÁY
 always	\xC1\x5A	13-16-3	ÁZ
-always	\xC1\x5B	134-234-5	Á[
+always	\xC1\x5B	134-12356-2	Á[
 always	\xC1\x5C	14-1256-4	Á\
 always	\xC1\x5D	14-356-2	Á]
 always	\xC1\x5E	135-1356-3	Á^
@@ -5294,7 +5290,7 @@ always	\xC1\xAC	24-2356-5	Á¬
 always	\xC1\xAD	1-1346-3	Á­
 always	\xC1\xAE	124-1346-2	Á®
 always	\xC1\xAF	134-1346-4	Á¯
-always	\xC1\xB0	134-345-2	Á°
+always	\xC1\xB0	134-345-1	Á°
 always	\xC1\xB1	1-2346-3	Á±
 always	\xC1\xB2	14-12356-2	Á²
 always	\xC1\xB3	14-25-2	Á³
@@ -5497,7 +5493,7 @@ always	\xC2\xCF	1234-1236-2	ÂÏ
 always	\xC2\xD0	12345-34-5	ÂÐ
 always	\xC2\xD1	13-1456-5	ÂÑ
 always	\xC2\xD2	24-1346-3	ÂÒ
-always	\xC2\xD3	134-34-2	ÂÓ
+always	\xC2\xD3	134-126-2	ÂÓ
 always	\xC2\xD4	13-1456-4	ÂÔ
 always	\xC2\xD5	134-234-5	ÂÕ
 always	\xC2\xD6	1-2346-2	ÂÖ
@@ -5673,7 +5669,7 @@ always	\xC3\xE2	13-246-5	Ãâ
 always	\xC3\xE3	245-156-2	Ãã
 always	\xC3\xE4	135-2345-3	Ãä
 always	\xC3\xE5	14-345-2	Ãå
-always	\xC3\xE6	12345-345-3	Ãæ
+always	\xC3\xE6	1234-126-5	Ãæ
 always	\xC3\xE7	13-246-5	Ãç
 always	\xC3\xE8	13-13456-5	Ãè
 always	\xC3\xE9	145-16-2	Ãé
@@ -5771,7 +5767,7 @@ always	\xC4\xA7	2456-4	Ä§
 always	\xC4\xA8	134-126-2	Ä¨
 always	\xC4\xA9	14-1456-5	Ä©
 always	\xC4\xAA	14-34-2	Äª
-always	\xC4\xAB	1234-1456-2	Ä«
+always	\xC4\xAB	1234-13456-2	Ä«
 always	\xC4\xAC	15-34-3	Ä¬
 always	\xC4\xAD	256-5	Ä­
 always	\xC4\xAE	1235-146-2	Ä®
@@ -6107,29 +6103,29 @@ always	\xC6\xBC	12367-247-247-247	Æ¼
 always	\xC6\xBD	247-13467	Æ½
 always	\xC6\xBE	13467	Æ¾
 always	\xC6\xBF	378-14567	Æ¿
-always	\xC6\xC0	378-23578	ÆÀ
+always	\xC6\xC0	1234-346-4	ÆÀ
 always	\xC6\xC1	378-1678	ÆÁ
-always	\xC6\xC2	378-278	ÆÂ
-always	\xC6\xC3	378-578	ÆÃ
-always	\xC6\xC4	378-1234678	ÆÄ
-always	\xC6\xC5	378-34578	ÆÅ
-always	\xC6\xC6	378-378	ÆÆ
-always	\xC6\xC7	378-34678	ÆÇ
-always	\xC6\xC8	378-235678	ÆÈ
+always	\xC6\xC2	124-12356-2	ÆÂ
+always	\xC6\xC3	13-235-3	ÆÃ
+always	\xC6\xC4	134-16-5	ÆÄ
+always	\xC6\xC5	135-13456-3	ÆÅ
+always	\xC6\xC6	135-146-3	ÆÆ
+always	\xC6\xC7	15-16-5	ÆÇ
+always	\xC6\xC8	13-346-2	ÆÈ
 always	\xC6\xC9	378-12678	ÆÉ
 always	\xC6\xCA	378-2378	ÆÊ
-always	\xC6\xCB	378-12345678	ÆË
+always	\xC6\xCB	134-2345-2	ÆË
 always	\xC6\xCC	378-23678	ÆÌ
 always	\xC6\xCD	378-14678	ÆÍ
-always	\xC6\xCE	378-2578	ÆÎ
+always	\xC6\xCE	2345-4	ÆÎ
 always	\xC6\xCF	378-1235678	ÆÏ
 always	\xC6\xD0	378-678	ÆÐ
-always	\xC6\xD1	378-4678	ÆÑ
-always	\xC6\xD2	378-3578	ÆÒ
+always	\xC6\xD1	24-1236-3	ÆÑ
+always	\xC6\xD2	1234-34-3	ÆÒ
 always	\xC6\xD3	378-145678	ÆÓ
-always	\xC6\xD4	378-25678	ÆÔ
-always	\xC6\xD5	378-5678	ÆÕ
-always	\xC6\xD6	378-234678	ÆÖ
+always	\xC6\xD4	12-456-2	ÆÔ
+always	\xC6\xD5	135-126-3	ÆÕ
+always	\xC6\xD6	12-25-5	ÆÖ
 always	\xC6\xD7	378-167	Æ×
 always	\xC6\xD8	378-3478	ÆØ
 always	\xC6\xD9	378-35678	ÆÙ
@@ -6485,7 +6481,7 @@ always	\xC8\xFC	235678-234568	Èü
 always	\xC8\xFD	235678-12468	Èý
 always	\xC8\xFE	235678-368	Èþ
 always	\xC9\x40	16-5	É@
-always	\xC9\x41	134-346-4	ÉA
+always	\xC9\x41	134-346-3	ÉA
 always	\xC9\x42	123-1236-4	ÉB
 always	\xC9\x43	12345-1346-3	ÉC
 always	\xC9\x44	1235-1236-5	ÉD
@@ -6498,7 +6494,7 @@ always	\xC9\x4A	34-5	ÉJ
 always	\xC9\x4B	12-2346-5	ÉK
 always	\xC9\x4C	12-156-5	ÉL
 always	\xC9\x4D	134-2345-4	ÉM
-always	\xC9\x4E	135-345-1	ÉN
+always	\xC9\x4E	134-12356-4	ÉN
 always	\xC9\x4F	1256-4	ÉO
 always	\xC9\x50	13-16-4	ÉP
 always	\xC9\x51	245-16-2	ÉQ
@@ -6715,7 +6711,7 @@ always	\xCA\xA8	13-235-4	Ê¨
 always	\xCA\xA9	123-1346-5	Ê©
 always	\xCA\xAA	1-156-4	Êª
 always	\xCA\xAB	245-1456-4	Ê«
-always	\xCA\xAC	1234-136-5	Ê¬
+always	\xCA\xAC	135-136-5	Ê¬
 always	\xCA\xAD	124-123456-2	Ê­
 always	\xCA\xAE	12345-136-5	Ê®
 always	\xCA\xAF	135-16-5	Ê¯
@@ -6936,7 +6932,7 @@ always	\xCB\xE8	1235-2456-2	Ëè
 always	\xCB\xE9	1234-13456-2	Ëé
 always	\xCB\xEA	123456-4	Ëê
 always	\xCB\xEB	1234-136-4	Ëë
-always	\xCB\xEC	135-345-1	Ëì
+always	\xCB\xEC	135-34-5	Ëì
 always	\xCB\xED	134-12356-2	Ëí
 always	\xCB\xEE	145-16-4	Ëî
 always	\xCB\xEF	14-13456-2	Ëï
@@ -7031,7 +7027,7 @@ always	\xCC\xAA	123-12356-5	Ìª
 always	\xCC\xAB	234-3	Ì«
 always	\xCC\xAC	1345-146-2	Ì¬
 always	\xCC\xAD	135-1236-5	Ì­
-always	\xCC\xAE	1234-356-3	Ì®
+always	\xCC\xAE	1234-16-3	Ì®
 always	\xCC\xAF	135-146-4	Ì¯
 always	\xCC\xB0	14-13456-2	Ì°
 always	\xCC\xB1	245-1236-2	Ì±
@@ -7352,7 +7348,7 @@ always	\xCE\xB1	245-23456-5	Î±
 always	\xCE\xB2	13-45-5	Î²
 always	\xCE\xB3	16-5	Î³
 always	\xCE\xB4	1245-34-2	Î´
-always	\xCE\xB5	145-13456-3	Îµ
+always	\xCE\xB5	135-13456-4	Îµ
 always	\xCE\xB6	1-156-5	Î¶
 always	\xCE\xB7	1-156-5	Î·
 always	\xCE\xB8	245-156-5	Î¸
@@ -7504,7 +7500,7 @@ always	\xCF\xAC	1235-12356-5	Ï¬
 always	\xCF\xAD	15-13456-2	Ï­
 always	\xCF\xAE	1-34-5	Ï®
 always	\xCF\xAF	145-345-2	Ï¯
-always	\xCF\xB0	1-34-5	Ï°
+always	\xCF\xB0	1234-13456-2	Ï°
 always	\xCF\xB1	124-2456-2	Ï±
 always	\xCF\xB2	1234-146-2	Ï²
 always	\xCF\xB3	1-1356-3	Ï³
@@ -7715,7 +7711,7 @@ always	\xD0\xE2	245-16-3	Ðâ
 always	\xD0\xE3	13-34-5	Ðã
 always	\xD0\xE4	13-13456-5	Ðä
 always	\xD0\xE5	135-345-1	Ðå
-always	\xD0\xE6	2345-4	Ðæ
+always	\xD0\xE6	24-1236-5	Ðæ
 always	\xD0\xE7	125-156-5	Ðç
 always	\xD0\xE8	245-25-5	Ðè
 always	\xD0\xE9	13-16-4	Ðé
@@ -7728,7 +7724,7 @@ always	\xD0\xEF	12345-356-5	Ðï
 always	\xD0\xF0	24-345-3	Ðð
 always	\xD0\xF1	14-12346-5	Ðñ
 always	\xD0\xF2	145-12356-3	Ðò
-always	\xD0\xF3	245-16-2	Ðó
+always	\xD0\xF3	134-234-3	Ðó
 always	\xD0\xF4	15-23456-5	Ðô
 always	\xD0\xF5	1-345-2	Ðõ
 always	\xD0\xF6	134-1346-2	Ðö
@@ -7739,7 +7735,7 @@ always	\xD0\xFA	16-5	Ðú
 always	\xD0\xFB	125-34-2	Ðû
 always	\xD0\xFC	24-156-5	Ðü
 always	\xD0\xFD	1235-1236-3	Ðý
-always	\xD0\xFE	135-126-2	Ðþ
+always	\xD0\xFE	135-146-3	Ðþ
 always	\xD1\x40	13-23456-2	Ñ@
 always	\xD1\x41	1235-1236-5	ÑA
 always	\xD1\x42	14-2346-5	ÑB
@@ -7796,7 +7792,7 @@ always	\xD1\x74	24-1246-5	Ñt
 always	\xD1\x75	15-246-3	Ñu
 always	\xD1\x76	234-4	Ñv
 always	\xD1\x77	13-1246-4	Ñw
-always	\xD1\x78	134-1346-2	Ñx
+always	\xD1\x78	1234-1346-2	Ñx
 always	\xD1\x79	135-345-1	Ñy
 always	\xD1\x7A	24-146-3	Ñz
 always	\xD1\x7B	1256-5	Ñ{
@@ -7964,7 +7960,7 @@ always	\xD2\xA1	245-45-2	Ò¡
 always	\xD2\xA2	245-45-5	Ò¢
 always	\xD2\xA3	24-345-3	Ò£
 always	\xD2\xA4	1456-2	Ò¤
-always	\xD2\xA5	135-16-3	Ò¥
+always	\xD2\xA5	135-16-5	Ò¥
 always	\xD2\xA6	1-156-5	Ò¦
 always	\xD2\xA7	15-16-4	Ò§
 always	\xD2\xA8	1256-2	Ò¨
@@ -7988,7 +7984,7 @@ always	\xD2\xB9	15-2345-3	Ò¹
 always	\xD2\xBA	1-12356-3	Òº
 always	\xD2\xBB	15-23456-2	Ò»
 always	\xD2\xBC	145-346-2	Ò¼
-always	\xD2\xBD	135-146-2	Ò½
+always	\xD2\xBD	135-126-2	Ò½
 always	\xD2\xBE	14-13456-2	Ò¾
 always	\xD2\xBF	16-2	Ò¿
 always	\xD2\xC0	24-136-3	ÒÀ
@@ -8005,7 +8001,7 @@ always	\xD2\xCA	12345-345-2	ÒÊ
 always	\xD2\xCB	14-13456-2	ÒË
 always	\xD2\xCC	1235-2346-2	ÒÌ
 always	\xD2\xCD	1-34-5	ÒÍ
-always	\xD2\xCE	134-346-5	ÒÎ
+always	\xD2\xCE	134-356-5	ÒÎ
 always	\xD2\xCF	1-1356-3	ÒÏ
 always	\xD2\xD0	1235-25-5	ÒÐ
 always	\xD2\xD1	24-136-5	ÒÑ
@@ -8045,7 +8041,7 @@ always	\xD2\xF2	1-156-3	Òò
 always	\xD2\xF3	1345-16-2	Òó
 always	\xD2\xF4	234-2	Òô
 always	\xD2\xF5	14-16-5	Òõ
-always	\xD2\xF6	135-2345-5	Òö
+always	\xD2\xF6	135-2345-4	Òö
 always	\xD2\xF7	135-13456-4	Ò÷
 always	\xD2\xF8	246-4	Òø
 always	\xD2\xF9	1-34-2	Òù
@@ -8229,7 +8225,7 @@ always	\xD4\x4E	1-1236-5	ÔN
 always	\xD4\x4F	346-5	ÔO
 always	\xD4\x50	246-4	ÔP
 always	\xD4\x51	25-5	ÔQ
-always	\xD4\x52	135-13456-4	ÔR
+always	\xD4\x52	135-13456-5	ÔR
 always	\xD4\x53	135-356-5	ÔS
 always	\xD4\x54	15-156-3	ÔT
 always	\xD4\x55	13-346-2	ÔU
@@ -8366,7 +8362,7 @@ always	\xD4\xF9	13-1256-3	Ôù
 always	\xD4\xFA	13-346-2	Ôú
 always	\xD4\xFB	14-2456-2	Ôû
 always	\xD4\xFC	2345-3	Ôü
-always	\xD4\xFD	135-16-3	Ôý
+always	\xD4\xFD	1234-16-4	Ôý
 always	\xD4\xFE	134-1456-2	Ôþ
 always	\xD5\x40	125-156-3	Õ@
 always	\xD5\x41	125-34-2	ÕA
@@ -8721,7 +8717,7 @@ always	\xD7\x63	15-13456-5	×c
 always	\xD7\x64	13-256-3	×d
 always	\xD7\x65	1245-136-4	×e
 always	\xD7\x66	134-1356-2	×f
-always	\xD7\x67	12345-34-3	×g
+always	\xD7\x67	1234-246-4	×g
 always	\xD7\x68	15-1246-3	×h
 always	\xD7\x69	15-16-3	×i
 always	\xD7\x6A	145-25-2	×j
@@ -8745,7 +8741,7 @@ always	\xD7\x7B	12345-34-2	×{
 always	\xD7\x7C	1235-34-3	×|
 always	\xD7\x7D	15-2345-2	×}
 always	\xD7\x7E	13-1256-5	×~
-always	\xD7\xA1	12345-34-2	×¡
+always	\xD7\xA1	135-346-2	×¡
 always	\xD7\xA2	145-246-3	×¢
 always	\xD7\xA3	1-1236-3	×£
 always	\xD7\xA4	1245-1236-2	×¤
@@ -8765,7 +8761,7 @@ always	\xD7\xB1	15-45-5	×±
 always	\xD7\xB2	124-25-2	×²
 always	\xD7\xB3	15-236-5	×³
 always	\xD7\xB4	15-45-5	×´
-always	\xD7\xB5	12345-1236-2	×µ
+always	\xD7\xB5	1234-1236-5	×µ
 always	\xD7\xB6	245-1256-3	×¶
 always	\xD7\xB7	135-126-3	×·
 always	\xD7\xB8	24-146-5	×¸
@@ -8909,7 +8905,7 @@ always	\xD8\xA4	1256-2	Ø¤
 always	\xD8\xA5	13-346-2	Ø¥
 always	\xD8\xA6	145-25-4	Ø¦
 always	\xD8\xA7	13-16-2	Ø§
-always	\xD8\xA8	134-12356-2	Ø¨
+always	\xD8\xA8	134-1356-2	Ø¨
 always	\xD8\xA9	14-2345-5	Ø©
 always	\xD8\xAA	135-16-5	Øª
 always	\xD8\xAB	134-356-2	Ø«
@@ -8932,7 +8928,7 @@ always	\xD8\xBB	145-1346-5	Ø»
 always	\xD8\xBC	1246-5	Ø¼
 always	\xD8\xBD	12-25-5	Ø½
 always	\xD8\xBE	1234-2345-3	Ø¾
-always	\xD8\xBF	135-345-1	Ø¿
+always	\xD8\xBF	135-146-4	Ø¿
 always	\xD8\xC0	2345-4	ØÀ
 always	\xD8\xC1	124-12356-3	ØÁ
 always	\xD8\xC2	24-1246-5	ØÂ
@@ -9069,10 +9065,10 @@ always	\xD9\xA7	124-2345-4	Ù§
 always	\xD9\xA8	16-4	Ù¨
 always	\xD9\xA9	245-1236-4	Ù©
 always	\xD9\xAA	245-46-3	Ùª
-always	\xD9\xAB	135-1346-5	Ù«
+always	\xD9\xAB	1234-12356-4	Ù«
 always	\xD9\xAC	13-346-3	Ù¬
 always	\xD9\xAD	1256-5	Ù­
-always	\xD9\xAE	135-345-1	Ù®
+always	\xD9\xAE	1234-1356-5	Ù®
 always	\xD9\xAF	245-45-3	Ù¯
 always	\xD9\xB0	2345-4	Ù°
 always	\xD9\xB1	14-1356-2	Ù±
@@ -9091,7 +9087,7 @@ always	\xD9\xBD	245-2456-4	Ù½
 always	\xD9\xBE	13-1256-2	Ù¾
 always	\xD9\xBF	1256-2	Ù¿
 always	\xD9\xC0	12-1236-3	ÙÀ
-always	\xD9\xC1	135-16-3	ÙÁ
+always	\xD9\xC1	1234-16-2	ÙÁ
 always	\xD9\xC2	1245-136-4	ÙÂ
 always	\xD9\xC3	1-123456-3	ÙÃ
 always	\xD9\xC4	125-156-3	ÙÄ
@@ -9238,7 +9234,7 @@ always	\xDA\xB3	134-1346-2	Ú³
 always	\xDA\xB4	15-246-3	Ú´
 always	\xDA\xB5	245-25-2	Úµ
 always	\xDA\xB6	134-356-5	Ú¶
-always	\xDA\xB7	135-16-3	Ú·
+always	\xDA\xB7	135-16-5	Ú·
 always	\xDA\xB8	2346-2	Ú¸
 always	\xDA\xB9	245-234-2	Ú¹
 always	\xDA\xBA	1235-12456-4	Úº
@@ -9348,7 +9344,7 @@ always	\xDB\x62	2345-4	Ûb
 always	\xDB\x63	145-16-4	Ûc
 always	\xDB\x64	13-45-4	Ûd
 always	\xDB\x65	124-1236-4	Ûe
-always	\xDB\x66	1234-1356-2	Ûf
+always	\xDB\x66	135-1356-4	Ûf
 always	\xDB\x67	24-345-5	Ûg
 always	\xDB\x68	125-12356-3	Ûh
 always	\xDB\x69	14-345-3	Ûi
@@ -9356,7 +9352,7 @@ always	\xDB\x6A	13-1456-4	Ûj
 always	\xDB\x6B	245-1456-5	Ûk
 always	\xDB\x6C	245-156-5	Ûl
 always	\xDB\x6D	245-16-2	Ûm
-always	\xDB\x6E	135-126-2	Ûn
+always	\xDB\x6E	135-345-2	Ûn
 always	\xDB\x6F	15-16-3	Ûo
 always	\xDB\x70	15-12346-3	Ûp
 always	\xDB\x71	145-146-5	Ûq
@@ -9448,7 +9444,7 @@ always	\xDB\xE8	123-456-5	Ûè
 always	\xDB\xE9	12-156-2	Ûé
 always	\xDB\xEA	24-156-5	Ûê
 always	\xDB\xEB	24-1356-5	Ûë
-always	\xDB\xEC	1234-2345-4	Ûì
+always	\xDB\xEC	1234-2345-3	Ûì
 always	\xDB\xED	13-1256-3	Ûí
 always	\xDB\xEE	245-156-3	Ûî
 always	\xDB\xEF	1-34-2	Ûï
@@ -9465,7 +9461,7 @@ always	\xDB\xF9	1345-2345-4	Ûù
 always	\xDB\xFA	12345-34-3	Ûú
 always	\xDB\xFB	124-25-5	Ûû
 always	\xDB\xFC	1234-1356-3	Ûü
-always	\xDB\xFD	1234-356-5	Ûý
+always	\xDB\xFD	135-345-2	Ûý
 always	\xDB\xFE	246-2	Ûþ
 always	\xDC\x40	1-156-4	Ü@
 always	\xDC\x41	1235-456-5	ÜA
@@ -9509,7 +9505,7 @@ always	\xDC\x66	1234-16-2	Üf
 always	\xDC\x67	124-2456-5	Üg
 always	\xDC\x68	1456-4	Üh
 always	\xDC\x69	13-236-2	Üi
-always	\xDC\x6A	135-345-3	Üj
+always	\xDC\x6A	135-345-4	Üj
 always	\xDC\x6B	15-345-5	Ük
 always	\xDC\x6C	1456-4	Ül
 always	\xDC\x6D	1234-16-3	Üm
@@ -9536,7 +9532,7 @@ always	\xDC\xA3	12-12346-2	Ü£
 always	\xDC\xA4	245-2345-2	Ü¤
 always	\xDC\xA5	1235-12456-2	Ü¥
 always	\xDC\xA6	245-2345-3	Ü¦
-always	\xDC\xA7	1234-1346-3	Ü§
+always	\xDC\xA7	1234-1346-2	Ü§
 always	\xDC\xA8	12345-136-3	Ü¨
 always	\xDC\xA9	123-1236-5	Ü©
 always	\xDC\xAA	135-345-1	Üª
@@ -9592,7 +9588,7 @@ always	\xDC\xDB	15-12356-3	ÜÛ
 always	\xDC\xDC	235-3	ÜÜ
 always	\xDC\xDD	145-346-3	ÜÝ
 always	\xDC\xDE	24-25-5	ÜÞ
-always	\xDC\xDF	135-1346-3	Üß
+always	\xDC\xDF	1234-1346-4	Üß
 always	\xDC\xE0	246-2	Üà
 always	\xDC\xE1	2346-5	Üá
 always	\xDC\xE2	134-16-5	Üâ
@@ -9833,7 +9829,7 @@ always	\xDE\x70	12-136-2	Þp
 always	\xDE\x71	134-356-5	Þq
 always	\xDE\x72	245-235-2	Þr
 always	\xDE\x73	135-146-5	Þs
-always	\xDE\x74	135-345-1	Þt
+always	\xDE\x74	135-2345-3	Þt
 always	\xDE\x75	245-234-2	Þu
 always	\xDE\x76	15-1456-5	Þv
 always	\xDE\x77	1235-2346-5	Þw
@@ -10047,13 +10043,13 @@ always	\xDF\xCB	12456-4	ßË
 always	\xDF\xCC	13-1256-3	ßÌ
 always	\xDF\xCD	1235-456-2	ßÍ
 always	\xDF\xCE	15-1246-3	ßÎ
-always	\xDF\xCF	1234-2345-3	ßÏ
+always	\xDF\xCF	135-2345-4	ßÏ
 always	\xDF\xD0	14-1256-5	ßÐ
 always	\xDF\xD1	13-2345-3	ßÑ
 always	\xDF\xD2	1235-12346-2	ßÒ
 always	\xDF\xD3	246-5	ßÓ
 always	\xDF\xD4	14-234-2	ßÔ
-always	\xDF\xD5	135-345-1	ßÕ
+always	\xDF\xD5	12345-34-5	ßÕ
 always	\xDF\xD6	1236-3	ßÖ
 always	\xDF\xD7	1245-12356-2	ß×
 always	\xDF\xD8	12-123456-4	ßØ
@@ -10211,7 +10207,7 @@ always	\xE0\xD2	1235-1246-3	àÒ
 always	\xE0\xD3	13-2456-3	àÓ
 always	\xE0\xD4	1246-4	àÔ
 always	\xE0\xD5	13-1256-3	àÕ
-always	\xE0\xD6	34-5	àÖ
+always	\xE0\xD6	134-1356-2	àÖ
 always	\xE0\xD7	1235-34-3	à×
 always	\xE0\xD8	1236-2	àØ
 always	\xE0\xD9	1346-4	àÙ
@@ -10303,7 +10299,7 @@ always	\xE1\x6F	14-146-5	áo
 always	\xE1\x70	134-1236-5	áp
 always	\xE1\x71	1235-34-5	áq
 always	\xE1\x72	134-126-2	ár
-always	\xE1\x73	1234-346-3	ás
+always	\xE1\x73	1234-346-5	ás
 always	\xE1\x74	13-1246-3	át
 always	\xE1\x75	14-16-2	áu
 always	\xE1\x76	16-3	áv
@@ -10379,7 +10375,7 @@ always	\xE1\xDD	24-34-3	áÝ
 always	\xE1\xDE	124-12456-2	áÞ
 always	\xE1\xDF	24-1236-3	áß
 always	\xE1\xE0	123-12356-3	áà
-always	\xE1\xE1	1234-246-4	áá
+always	\xE1\xE1	135-246-3	áá
 always	\xE1\xE2	15-25-4	áâ
 always	\xE1\xE3	1235-35-5	áã
 always	\xE1\xE4	12-2346-4	áä
@@ -10516,7 +10512,7 @@ always	\xE2\xC9	12-34-2	âÉ
 always	\xE2\xCA	145-2456-3	âÊ
 always	\xE2\xCB	13-13456-5	âË
 always	\xE2\xCC	12-1236-2	âÌ
-always	\xE2\xCD	12456-5	âÍ
+always	\xE2\xCD	134-1236-5	âÍ
 always	\xE2\xCE	1245-12346-2	âÎ
 always	\xE2\xCF	245-25-3	âÏ
 always	\xE2\xD0	124-2345-5	âÐ
@@ -10738,7 +10734,7 @@ always	\xE4\x4B	123-1356-3	äK
 always	\xE4\x4C	13-16-5	äL
 always	\xE4\x4D	15-16-3	äM
 always	\xE4\x4E	14-1346-4	äN
-always	\xE4\x4F	135-126-2	äO
+always	\xE4\x4F	135-356-5	äO
 always	\xE4\x50	1235-1236-3	äP
 always	\xE4\x51	15-16-4	äQ
 always	\xE4\x52	135-1456-3	äR
@@ -10753,7 +10749,7 @@ always	\xE4\x5A	15-246-5	äZ
 always	\xE4\x5B	13-16-5	ä[
 always	\xE4\x5C	235-4	ä\
 always	\xE4\x5D	15-246-3	ä]
-always	\xE4\x5E	134-34-4	ä^
+always	\xE4\x5E	134-12356-4	ä^
 always	\xE4\x5F	245-256-3	ä_
 always	\xE4\x60	12-156-5	ä`
 always	\xE4\x61	24-34-2	äa
@@ -10920,7 +10916,7 @@ always	\xE5\x63	14-146-3	åc
 always	\xE5\x64	125-123456-3	åd
 always	\xE5\x65	245-1356-2	åe
 always	\xE5\x66	246-2	åf
-always	\xE5\x67	135-126-2	åg
+always	\xE5\x67	135-126-3	åg
 always	\xE5\x68	13-246-3	åh
 always	\xE5\x69	245-246-2	åi
 always	\xE5\x6A	13-1456-3	åj
@@ -10999,7 +10995,7 @@ always	\xE5\xD4	1235-35-5	åÔ
 always	\xE5\xD5	15-16-2	åÕ
 always	\xE5\xD6	13-234-3	åÖ
 always	\xE5\xD7	1-345-3	å×
-always	\xE5\xD8	134-1236-5	åØ
+always	\xE5\xD8	134-1236-2	åØ
 always	\xE5\xD9	24-345-3	åÙ
 always	\xE5\xDA	1235-34-2	åÚ
 always	\xE5\xDB	15-136-3	åÛ
@@ -11200,10 +11196,10 @@ always	\xE7\x41	13-25-2	çA
 always	\xE7\x42	14-1256-2	çB
 always	\xE7\x43	13-46-4	çC
 always	\xE7\x44	12-2356-2	çD
-always	\xE7\x45	135-34-5	çE
+always	\xE7\x45	1234-34-5	çE
 always	\xE7\x46	24-12356-4	çF
 always	\xE7\x47	145-346-2	çG
-always	\xE7\x48	134-34-5	çH
+always	\xE7\x48	134-146-5	çH
 always	\xE7\x49	125-12346-3	çI
 always	\xE7\x4A	1235-456-2	çJ
 always	\xE7\x4B	135-2345-5	çK
@@ -11222,7 +11218,7 @@ always	\xE7\x57	146-2	çW
 always	\xE7\x58	13-16-2	çX
 always	\xE7\x59	2345-3	çY
 always	\xE7\x5A	16-5	çZ
-always	\xE7\x5B	1234-246-4	ç[
+always	\xE7\x5B	135-246-3	ç[
 always	\xE7\x5C	15-34-5	ç\
 always	\xE7\x5D	12-123456-2	ç]
 always	\xE7\x5E	24-1236-3	ç^
@@ -11378,7 +11374,7 @@ always	\xE8\x56	15-256-2	èV
 always	\xE8\x57	135-16-5	èW
 always	\xE8\x58	145-1236-3	èX
 always	\xE8\x59	15-1256-4	èY
-always	\xE8\x5A	134-12356-5	èZ
+always	\xE8\x5A	134-146-5	èZ
 always	\xE8\x5B	1234-356-3	è[
 always	\xE8\x5C	1-1236-4	è\
 always	\xE8\x5D	1-25-2	è]
@@ -11396,7 +11392,7 @@ always	\xE8\x68	13-23456-2	èh
 always	\xE8\x69	124-2346-5	èi
 always	\xE8\x6A	245-1456-3	èj
 always	\xE8\x6B	1235-35-2	èk
-always	\xE8\x6C	456-2	èl
+always	\xE8\x6C	134-1346-3	èl
 always	\xE8\x6D	15-45-3	èm
 always	\xE8\x6E	14-236-5	èn
 always	\xE8\x6F	124-13456-4	èo
@@ -11467,7 +11463,7 @@ always	\xE8\xD1	45-3	èÑ
 always	\xE8\xD2	135-16-5	èÒ
 always	\xE8\xD3	1234-16-3	èÓ
 always	\xE8\xD4	124-246-2	èÔ
-always	\xE8\xD5	134-12356-2	èÕ
+always	\xE8\xD5	134-156-2	èÕ
 always	\xE8\xD6	135-16-5	èÖ
 always	\xE8\xD7	1234-146-5	è×
 always	\xE8\xD8	15-1256-5	èØ
@@ -11494,7 +11490,7 @@ always	\xE8\xEC	12345-136-3	èì
 always	\xE8\xED	2345-5	èí
 always	\xE8\xEE	1235-12456-3	èî
 always	\xE8\xEF	1234-16-3	èï
-always	\xE8\xF0	1234-146-2	èð
+always	\xE8\xF0	135-246-3	èð
 always	\xE8\xF1	16-5	èñ
 always	\xE8\xF2	134-16-5	èò
 always	\xE8\xF3	1345-2456-5	èó
@@ -11558,7 +11554,7 @@ always	\xE9\x6D	134-16-5	ém
 always	\xE9\x6E	13-346-2	én
 always	\xE9\x6F	14-1456-4	éo
 always	\xE9\x70	245-46-2	ép
-always	\xE9\x71	1234-16-5	éq
+always	\xE9\x71	135-16-5	éq
 always	\xE9\x72	13-346-5	ér
 always	\xE9\x73	123-2356-5	és
 always	\xE9\x74	1235-12346-2	ét
@@ -11962,7 +11958,7 @@ always	\xEB\xE9	13-25-4	ëé
 always	\xEB\xEA	134-136-2	ëê
 always	\xEB\xEB	145-246-3	ëë
 always	\xEB\xEC	15-2345-5	ëì
-always	\xEB\xED	135-356-3	ëí
+always	\xEB\xED	1234-16-2	ëí
 always	\xEB\xEE	12-1236-2	ëî
 always	\xEB\xEF	245-12346-2	ëï
 always	\xEB\xF0	45-3	ëð
@@ -12035,7 +12031,7 @@ always	\xEC\x73	124-25-2	ìs
 always	\xEC\x74	135-16-5	ìt
 always	\xEC\x75	1246-5	ìu
 always	\xEC\x76	245-1256-3	ìv
-always	\xEC\x77	1234-16-3	ìw
+always	\xEC\x77	1234-16-2	ìw
 always	\xEC\x78	15-23456-2	ìx
 always	\xEC\x79	245-234-2	ìy
 always	\xEC\x7A	1-345-4	ìz
@@ -12052,7 +12048,7 @@ always	\xEC\xA6	15-246-3	ì¦
 always	\xEC\xA7	12345-34-2	ì§
 always	\xEC\xA8	16-5	ì¨
 always	\xEC\xA9	245-1256-2	ì©
-always	\xEC\xAA	1234-2345-4	ìª
+always	\xEC\xAA	135-2345-5	ìª
 always	\xEC\xAB	234-5	ì«
 always	\xEC\xAC	13-23456-3	ì¬
 always	\xEC\xAD	1-156-5	ì­
@@ -12154,7 +12150,7 @@ always	\xED\x4D	125-146-5	íM
 always	\xED\x4E	124-345-5	íN
 always	\xED\x4F	15-236-2	íO
 always	\xED\x50	15-13456-2	íP
-always	\xED\x51	1345-16-4	íQ
+always	\xED\x51	134-16-4	íQ
 always	\xED\x52	25-5	íR
 always	\xED\x53	13-1456-5	íS
 always	\xED\x54	2456-5	íT
@@ -12202,7 +12198,7 @@ always	\xED\x7D	13-2345-5	í}
 always	\xED\x7E	123-1246-5	í~
 always	\xED\xA1	134-12356-2	í¡
 always	\xED\xA2	346-5	í¢
-always	\xED\xA3	1234-34-2	í£
+always	\xED\xA3	1234-34-3	í£
 always	\xED\xA4	125-1356-3	í¤
 always	\xED\xA5	125-1356-3	í¥
 always	\xED\xA6	245-246-3	í¦
@@ -12335,7 +12331,7 @@ always	\xEE\x65	245-12346-3	îe
 always	\xEE\x66	135-1356-5	îf
 always	\xEE\x67	146-2	îg
 always	\xEE\x68	1-156-2	îh
-always	\xEE\x69	134-12356-2	îi
+always	\xEE\x69	134-146-2	îi
 always	\xEE\x6A	12-136-2	îj
 always	\xEE\x6B	245-1256-2	îk
 always	\xEE\x6C	13-46-3	îl
@@ -12353,7 +12349,7 @@ always	\xEE\x77	24-156-3	îw
 always	\xEE\x78	15-136-3	îx
 always	\xEE\x79	134-13456-2	îy
 always	\xEE\x7A	13-12356-5	îz
-always	\xEE\x7B	1234-13456-1	î{
+always	\xEE\x7B	1234-13456-3	î{
 always	\xEE\x7C	15-13456-1	î|
 always	\xEE\x7D	1235-34-2	î}
 always	\xEE\x7E	1235-2346-5	î~
@@ -12451,7 +12447,7 @@ always	\xEE\xFB	13456-3	îû
 always	\xEE\xFC	123-12346-5	îü
 always	\xEE\xFD	135-345-1	îý
 always	\xEE\xFE	124-345-5	îþ
-always	\xEF\x40	135-16-4	ï@
+always	\xEF\x40	135-13456-4	ï@
 always	\xEF\x41	1-1346-4	ïA
 always	\xEF\x42	135-345-1	ïB
 always	\xEF\x43	12-1346-5	ïC
@@ -12507,7 +12503,7 @@ always	\xEF\x74	1246-2	ït
 always	\xEF\x75	13-2346-2	ïu
 always	\xEF\x76	2345-5	ïv
 always	\xEF\x77	13-246-3	ïw
-always	\xEF\x78	1234-16-2	ïx
+always	\xEF\x78	1234-13456-2	ïx
 always	\xEF\x79	13-23456-5	ïy
 always	\xEF\x7A	34-3	ïz
 always	\xEF\x7B	156-2	ï{
@@ -12969,7 +12965,7 @@ always	\xF2\x6B	1245-25-5	òk
 always	\xF2\x6C	135-246-3	òl
 always	\xF2\x6D	134-126-5	òm
 always	\xF2\x6E	1234-246-4	òn
-always	\xF2\x6F	135-146-2	òo
+always	\xF2\x6F	135-146-5	òo
 always	\xF2\x70	1234-16-2	òp
 always	\xF2\x71	14-346-5	òq
 always	\xF2\x72	14-16-5	òr
@@ -13027,7 +13023,7 @@ always	\xF2\xC7	1235-1246-5	òÇ
 always	\xF2\xC8	245-235-2	òÈ
 always	\xF2\xC9	16-5	òÉ
 always	\xF2\xCA	145-16-2	òÊ
-always	\xF2\xCB	1234-246-4	òË
+always	\xF2\xCB	135-246-3	òË
 always	\xF2\xCC	15-1256-5	òÌ
 always	\xF2\xCD	15-34-5	òÍ
 always	\xF2\xCE	124-1246-3	òÎ
@@ -13104,7 +13100,7 @@ always	\xF3\x55	14-146-5	óU
 always	\xF3\x56	12345-136-2	óV
 always	\xF3\x57	14-146-4	óW
 always	\xF3\x58	1-1236-5	óX
-always	\xF3\x59	135-34-4	óY
+always	\xF3\x59	135-34-2	óY
 always	\xF3\x5A	12345-1236-3	óZ
 always	\xF3\x5B	1-136-4	ó[
 always	\xF3\x5C	2345-3	ó\
@@ -13313,7 +13309,7 @@ always	\xF4\xAB	13-2345-5	ô«
 always	\xF4\xAC	15-1256-3	ô¬
 always	\xF4\xAD	245-2345-4	ô­
 always	\xF4\xAE	15-256-3	ô®
-always	\xF4\xAF	135-34-4	ô¯
+always	\xF4\xAF	1234-34-2	ô¯
 always	\xF4\xB0	1345-12356-2	ô°
 always	\xF4\xB1	145-146-5	ô±
 always	\xF4\xB2	1345-13456-2	ô²
@@ -13824,7 +13820,7 @@ always	\xF7\xD3	2345-2	÷Ó
 always	\xF7\xD4	145-25-2	÷Ô
 always	\xF7\xD5	2345-2	÷Õ
 always	\xF7\xD6	2345-4	÷Ö
-always	\xF7\xD7	135-1356-5	÷×
+always	\xF7\xD7	1234-16-2	÷×
 always	\xF7\xD8	13-236-2	÷Ø
 always	\xF7\xD9	1345-1236-4	÷Ù
 always	\xF7\xDA	124-1346-4	÷Ú
@@ -14051,7 +14047,7 @@ always	\xF9\x5A	12-1346-2	ùZ
 always	\xF9\x5B	15-1256-5	ù[
 always	\xF9\x5C	13-16-5	ù\
 always	\xF9\x5D	1345-13456-2	ù]
-always	\xF9\x5E	24-156-3	ù^
+always	\xF9\x5E	134-16-2	ù^
 always	\xF9\x5F	145-16-2	ù_
 always	\xF9\x60	134-1356-2	ù`
 always	\xF9\x61	1256-5	ùa
@@ -14080,7 +14076,7 @@ always	\xF9\x77	134-346-5	ùw
 always	\xF9\x78	14-16-5	ùx
 always	\xF9\x79	14-16-5	ùy
 always	\xF9\x7A	1-136-3	ùz
-always	\xF9\x7B	135-146-5	ù{
+always	\xF9\x7B	135-126-2	ù{
 always	\xF9\x7C	14-356-4	ù|
 always	\xF9\x7D	2345-4	ù}
 always	\xF9\x7E	135-16-5	ù~
