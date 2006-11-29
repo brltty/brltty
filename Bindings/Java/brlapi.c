@@ -408,7 +408,7 @@ JNIEXPORT void JNICALL Java_BrlapiNative_setFocus(JNIEnv *jenv, jobject jobj, ji
   }
 }
 
-JNIEXPORT void JNICALL Java_BrlapiNative_writeText(JNIEnv *jenv, jobject jobj, jint jarg1, jstring jarg2) {
+JNIEXPORT void JNICALL Java_BrlapiNative_writeTextNative(JNIEnv *jenv, jobject jobj, jint jarg1, jstring jarg2) {
   brlapi_writeStruct s = BRLAPI_WRITESTRUCT_INITIALIZER;
   int result;
   GET_HANDLE(jenv, jobj, );

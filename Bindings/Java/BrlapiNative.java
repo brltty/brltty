@@ -38,7 +38,7 @@ public class BrlapiNative {
   public native void leaveTtyMode () throws BrlapiError;
   public native void setFocus (int tty) throws BrlapiError;
 
-  public native void writeText (int cursor, String str) throws BrlapiError;
+  protected native void writeTextNative (int cursor, String str) throws BrlapiError;
   public native void writeDots (byte str[]) throws BrlapiError;
   public native void write (BrlapiWriteStruct s) throws BrlapiError;
 
