@@ -27,7 +27,7 @@ typedef struct {
   const char *code;
   const char *comment;
   const char *version;
-  const char *copyright;
+  const char *developers;
   const char *date;
   const char *time;
 } DriverDefinition;
@@ -39,7 +39,7 @@ typedef struct {
   .code = STRINGIFY(DRIVER_CODE), \
   .comment = DRIVER_COMMENT, \
   .version = DRIVER_VERSION, \
-  .copyright = DRIVER_COPYRIGHT, \
+  .developers = DRIVER_DEVELOPERS, \
   .date = __DATE__, \
   .time = __TIME__ \
 }

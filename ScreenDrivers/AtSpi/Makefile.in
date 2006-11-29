@@ -19,7 +19,7 @@ DRIVER_CODE = as
 DRIVER_NAME = AtSpi
 DRIVER_COMMENT = 
 DRIVER_VERSION = 
-DRIVER_COPYRIGHT = 
+DRIVER_DEVELOPERS = 
 SCR_OBJS = @screen_libraries_as@
 include $(SRC_TOP)screen.mk
 

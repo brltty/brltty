@@ -19,7 +19,7 @@ DRIVER_CODE = vv
 DRIVER_NAME = ViaVoice
 DRIVER_COMMENT = text to speech engine
 DRIVER_VERSION = 
-DRIVER_COPYRIGHT = 
+DRIVER_DEVELOPERS = 
 SPK_OBJS = @speech_libraries_vv@
 include $(SRC_TOP)speech.mk
 

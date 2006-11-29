@@ -19,7 +19,7 @@ DRIVER_CODE = fv
 DRIVER_NAME = Festival
 DRIVER_COMMENT = text to speech engine
 DRIVER_VERSION = 
-DRIVER_COPYRIGHT = 
+DRIVER_DEVELOPERS = 
 include $(SRC_TOP)speech.mk
 
 speech.$O:

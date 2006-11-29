@@ -19,7 +19,7 @@ DRIVER_CODE = es
 DRIVER_NAME = ExternalSpeech
 DRIVER_COMMENT = runs /usr/local/bin/externalspeech
 DRIVER_VERSION = 0.8 (September 2004)
-DRIVER_COPYRIGHT = Copyright (C) 2000-2001,2004 by Stéphane Doyon <s.doyon@videotron.ca>
+DRIVER_DEVELOPERS = Stéphane Doyon <s.doyon@videotron.ca>
 include $(SRC_TOP)speech.mk
 
 speech.$O:

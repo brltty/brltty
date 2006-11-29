@@ -19,7 +19,7 @@ DRIVER_CODE = sd
 DRIVER_NAME = SpeechDispatcher
 DRIVER_COMMENT = text to speech server
 DRIVER_VERSION = 
-DRIVER_COPYRIGHT = 
+DRIVER_DEVELOPERS = 
 SPK_OBJS = @speech_libraries_sd@
 include $(SRC_TOP)speech.mk
 

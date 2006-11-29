@@ -19,7 +19,7 @@ DRIVER_CODE = xx
 DRIVER_NAME = DirectoryName
 DRIVER_COMMENT = 
 DRIVER_VERSION = 
-DRIVER_COPYRIGHT = 
+DRIVER_DEVELOPERS = 
 SPK_OBJS = @speech_libraries_xx@
 include $(SRC_TOP)speech.mk
 

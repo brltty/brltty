@@ -19,7 +19,7 @@ DRIVER_CODE = al
 DRIVER_NAME = Alva
 DRIVER_COMMENT = ABT(3nn), Delphi(4nn), Satellite(5nn)
 DRIVER_VERSION = 2.2
-DRIVER_COPYRIGHT = Copyright (C) 1995-2004 by Nicolas Pitre <nico@cam.org>
+DRIVER_DEVELOPERS = Nicolas Pitre <nico@cam.org>
 HELP_DEPS = $(HELP_TEXT)
 include $(SRC_TOP)braille.mk
 

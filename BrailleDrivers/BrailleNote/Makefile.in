@@ -19,7 +19,7 @@ DRIVER_CODE = bn
 DRIVER_NAME = BrailleNote
 DRIVER_COMMENT = 18/32
 DRIVER_VERSION = 1.0
-DRIVER_COPYRIGHT = Copyright (C) 2001 by Dave Mielke <dave@mielke.cc>
+DRIVER_DEVELOPERS = Dave Mielke <dave@mielke.cc>
 HELP_DEPS = $(HELP_TEXT)
 include $(SRC_TOP)braille.mk
 

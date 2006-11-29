@@ -19,7 +19,7 @@ DRIVER_CODE = fl
 DRIVER_NAME = FestivalLite
 DRIVER_COMMENT = text to speech engine
 DRIVER_VERSION = 
-DRIVER_COPYRIGHT = 
+DRIVER_DEVELOPERS = 
 SPK_OBJS = @speech_libraries_fl@
 include $(SRC_TOP)speech.mk
 

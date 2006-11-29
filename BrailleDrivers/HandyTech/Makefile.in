@@ -19,7 +19,7 @@ DRIVER_CODE = ht
 DRIVER_NAME = HandyTech
 DRIVER_COMMENT = Modular 20/40/80, Braille Wave 40, Braille Star 40/80, Bookworm, Braillino 20
 DRIVER_VERSION = 0.3
-DRIVER_COPYRIGHT = Copyright (C) 2000 by Andreas Gross <andi.gross@gmx.de>
+DRIVER_DEVELOPERS = Andreas Gross <andi.gross@gmx.de>, Dave Mielke <dave@mielke.cc>, Mario Lang <mlang@delysid.org>
 HELP_DEPS = $(HELP_TEXT)
 include $(SRC_TOP)braille.mk
 

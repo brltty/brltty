@@ -19,7 +19,7 @@ DRIVER_CODE = xw
 DRIVER_NAME = XWindow
 DRIVER_COMMENT = X11, Windows
 DRIVER_VERSION = 0.1, 2004
-DRIVER_COPYRIGHT = Copyright (C) 2004-2006 by Samuel Thibault <samuel.thibault@ens-lyon.org>
+DRIVER_DEVELOPERS = Samuel Thibault <samuel.thibault@ens-lyon.org>
 HELP_DEPS = $(HELP_TEXT)
 BRL_OBJS = @braille_libraries_xw@
 include $(SRC_TOP)braille.mk

@@ -33,7 +33,7 @@
 #define DRIVER_CODE no
 #define DRIVER_COMMENT "no speech support"
 #define DRIVER_VERSION ""
-#define DRIVER_COPYRIGHT ""
+#define DRIVER_DEVELOPERS ""
 #include "spk_driver.h"
 static int spk_open (char **parameters) { return 1; }
 static void spk_close (void) { }

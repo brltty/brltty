@@ -19,7 +19,7 @@ DRIVER_CODE = bl
 DRIVER_NAME = BrailleLite
 DRIVER_COMMENT = 
 DRIVER_VERSION = 
-DRIVER_COPYRIGHT = 
+DRIVER_DEVELOPERS = 
 include $(SRC_TOP)speech.mk
 
 speech.$O:

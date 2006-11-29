@@ -19,7 +19,7 @@ DRIVER_CODE = fs
 DRIVER_NAME = FreedomScientific
 DRIVER_COMMENT = Focus 40/44/70/80/84, PacMate 20/40
 DRIVER_VERSION = 
-DRIVER_COPYRIGHT = Copyright (C) 2004 by Dave Mielke <dave@mielke.cc>
+DRIVER_DEVELOPERS = Dave Mielke <dave@mielke.cc>
 HELP_DEPS = $(HELP_TEXT)
 include $(SRC_TOP)braille.mk
 

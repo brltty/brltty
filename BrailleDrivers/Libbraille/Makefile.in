@@ -19,7 +19,7 @@ DRIVER_CODE = lb
 DRIVER_NAME = Libbraille
 DRIVER_COMMENT = Libbraille
 DRIVER_VERSION = 
-DRIVER_COPYRIGHT = Copyright (C) 2004 by Sébastien Sablé <sable@users.sourceforge.net>
+DRIVER_DEVELOPERS = Sébastien Sablé <sable@users.sourceforge.net>
 HELP_DEPS = $(HELP_TEXT)
 BRL_OBJS = @braille_libraries_lb@
 include $(SRC_TOP)braille.mk

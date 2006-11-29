@@ -19,7 +19,7 @@ DRIVER_CODE = ts
 DRIVER_NAME = TSI
 DRIVER_COMMENT = Navigator 20/40/80, PowerBraille 40/65/80
 DRIVER_VERSION = 2.74 (April 2004)
-DRIVER_COPYRIGHT = Copyright (C) 1996-2004 by Stéphane Doyon <s.doyon@videotron.ca>
+DRIVER_DEVELOPERS = Stéphane Doyon <s.doyon@videotron.ca>
 HELP_DEPS = $(HELP_TEXT)
 include $(SRC_TOP)braille.mk
 

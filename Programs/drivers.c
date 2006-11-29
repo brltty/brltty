@@ -130,12 +130,31 @@ identifyDriver (
   const DriverDefinition *definition,
   int full
 ) {
-  if (definition->version && *definition->version)
-    LogPrint(LOG_NOTICE, "%s %s Driver: version %s, compiled on %s at %s", definition->name, type, definition->version, definition->date, definition->time);
-  else
-    LogPrint(LOG_NOTICE, "%s %s Driver: compiled on %s at %s", definition->name, type, definition->date, definition->time);
+  {
+    char buffer[0X100];
+    int length;
+    snprintf(buffer, sizeof(buffer), "%s %s Driver:%n", 
+             definition->name, type, &length);
+
+    if (definition->version && *definition->version) {
+      int count;
+      snprintf(&buffer[length], sizeof(buffer)-length, " version %s%n",
+               definition->version, &count);
+      length += count;
+    }
+
+    if (full) {
+      int count;
+      snprintf(&buffer[length], sizeof(buffer)-length, " [compiled on %s at %s]%n",
+               definition->date, definition->time, &count);
+      length += count;
+    }
+
+    LogPrint(LOG_NOTICE, "%s", buffer);
+  }
 
   if (full) {
-    if (definition->copyright && *definition->copyright) LogPrint(LOG_INFO, "   %s", definition->copyright);
+    if (definition->developers && *definition->developers)
+      LogPrint(LOG_INFO, "   Developed by %s", definition->developers);
   }
 }

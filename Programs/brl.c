@@ -36,7 +36,7 @@
 #define DRIVER_CODE no
 #define DRIVER_COMMENT "no braille support"
 #define DRIVER_VERSION ""
-#define DRIVER_COPYRIGHT ""
+#define DRIVER_DEVELOPERS ""
 #define BRLHELP "/dev/null"
 #include "brl_driver.h"
 static int

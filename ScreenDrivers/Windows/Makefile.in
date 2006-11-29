@@ -19,7 +19,7 @@ DRIVER_CODE = wn
 DRIVER_NAME = Windows
 DRIVER_COMMENT = 
 DRIVER_VERSION = 
-DRIVER_COPYRIGHT = 
+DRIVER_DEVELOPERS = 
 include $(SRC_TOP)screen.mk
 
 screen.$O:

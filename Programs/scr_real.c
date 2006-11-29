@@ -39,7 +39,7 @@
 #define DRIVER_CODE no
 #define DRIVER_COMMENT "no screen support"
 #define DRIVER_VERSION ""
-#define DRIVER_COPYRIGHT ""
+#define DRIVER_DEVELOPERS ""
 #include "scr_driver.h"
 
 static void

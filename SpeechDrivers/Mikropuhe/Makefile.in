@@ -19,7 +19,7 @@ DRIVER_CODE = mp
 DRIVER_NAME = Mikropuhe
 DRIVER_COMMENT = text to speech engine
 DRIVER_VERSION = 
-DRIVER_COPYRIGHT = 
+DRIVER_DEVELOPERS = 
 SPK_OBJS = @speech_libraries_mp@
 include $(SRC_TOP)speech.mk
 
