@@ -13,6 +13,7 @@ b.writeText("Press any key to continue ... ¤")
 key = b.readKey()
 (command, argument, flags) = b.expandKeyCode(key)
 b.writeText("Key %ld (%x %x %x) !" % (key, command, argument, flags))
+b.writeText(None,1)
 b.readKey()
 w = brlapi.Write()
 w.regionBegin = 1
@@ -378,18 +379,16 @@ cdef class Connection:
 
 		* cursor : gives the cursor position; if equal to 0, no cursor is shown at all; if cursor == -1, the cursor is left where it is
 		* str : points to the string to be displayed"""
-		cdef int retval
-		cdef int c_cursor
-		cdef char *c_str
-		(x, y) = self.displaySize
-		dispSize = x * y
-		if (len(str) < dispSize):
-			str = str + "".center(dispSize - len(str), ' ')
 		w = Write()
 		w.cursor = cursor
-		w.regionBegin = 1
-		w.regionSize = dispSize
-		w.text = str[0 : dispSize]
+		if (str):
+			(x, y) = self.displaySize
+			dispSize = x * y
+			if (len(str) < dispSize):
+				str = str + "".center(dispSize - len(str), ' ')
+			w.regionBegin = 1
+			w.regionSize = dispSize
+			w.text = str[0 : dispSize]
 		return self.write(w)
 
 	def readKey(self, block = True):
