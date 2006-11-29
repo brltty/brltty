@@ -416,21 +416,21 @@ JNIEXPORT void JNICALL Java_BrlapiNative_writeText(JNIEnv *jenv, jobject jobj, j
   env = jenv;
 
   s.cursor = (int)jarg1; 
-  s.regionBegin = 1;
-  s.regionSize = (*jenv)->GetStringLength(jenv, jarg2);
 
-  if (!jarg2) {
-    ThrowException(jenv, ERR_NULLPTR, __func__);
-    return;
+  if (jarg2) {
+    s.regionBegin = 1;
+    s.regionSize = (*jenv)->GetStringLength(jenv, jarg2);
+
+    if (!(s.text = (char *)(*jenv)->GetStringUTFChars(jenv, jarg2, NULL))) {
+      ThrowException(jenv, ERR_OUTOFMEM, __func__);
+      return;
+    }
+    s.charset = "UTF-8";
   }
-  if (!(s.text = (char *)(*jenv)->GetStringUTFChars(jenv, jarg2, NULL))) {
-    ThrowException(jenv, ERR_OUTOFMEM, __func__);
-    return;
-  }
-  s.charset = "UTF-8";
 
   result = brlapi__write(handle, &s);
-  (*jenv)->ReleaseStringUTFChars(jenv, jarg2, s.text); 
+  if (jarg2)
+    (*jenv)->ReleaseStringUTFChars(jenv, jarg2, s.text); 
 
   if (result < 0) {
     ThrowError(jenv, __func__);
