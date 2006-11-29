@@ -31,6 +31,7 @@ cdef extern from "Programs/api.h":
 		unsigned int regionBegin
 		unsigned int regionSize
 		char *text
+		int textSize
 		unsigned char *attrAnd
 		unsigned char *attrOr
 		int cursor

@@ -64,13 +64,13 @@ public class ApiTest {
       int tty = brlapi.enterTtyMode();
       System.out.println("TTY is " + tty);
 
-      brlapi.writeText(0, "ok !!");
+      brlapi.writeText("ok !! €", 0);
 
       printKey(new BrlapiKey(brlapi.readKey(true)));
 
       BrlapiWriteStruct ws = new BrlapiWriteStruct(
         -1, 10, 20,
-	"Key Pressed         ",
+	"Key Pressed €       ",
 	"????????????????????".getBytes(),
 	null, 3);
       brlapi.write(ws);

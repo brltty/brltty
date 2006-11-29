@@ -1279,12 +1279,15 @@ int brlapi__write(brlapi_handle_t *handle, const brlapi_writeStruct *s)
     rbeg = 1; rsiz = dispSize;
   }
   if (s->text) {
-#ifdef WINDOWS
-    if (CHECKGETPROC("ntdll.dll", wcslen) && wide)
-      strLen = sizeof(wchar_t) * wcslenProc((wchar_t *) s->text);
+    if (s->textSize != -1)
+      strLen = s->textSize;
     else
+#ifdef WINDOWS
+      if (CHECKGETPROC("ntdll.dll", wcslen) && wide)
+	strLen = sizeof(wchar_t) * wcslenProc((wchar_t *) s->text);
+      else
 #endif /* WINDOWS */
-      strLen = strlen(s->text);
+	strLen = strlen(s->text);
     *((uint32_t *) p) = htonl(strLen); p += sizeof(uint32_t);
     ws->flags |= BRLAPI_WF_TEXT;
     if (p + strLen > end) {

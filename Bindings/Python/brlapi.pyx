@@ -9,7 +9,7 @@ Example :
 import brlapi
 b = brlapi.Connection()
 b.enterTtyMode()
-b.writeText("Press any key to continue ...")
+b.writeText("Press any key to continue ... ¤")
 key = b.readKey()
 (command, argument, flags) = b.expandKeyCode(key)
 b.writeText("Key %ld (%x %x %x) !" % (key, command, argument, flags))
@@ -17,7 +17,7 @@ b.readKey()
 w = brlapi.Write()
 w.regionBegin = 1
 w.regionSize = 40
-w.text = "Press any key to exit                   "
+w.text = u"Press any key to exit ¤                 "
 underline = chr(brlapi.BRL_DOT7 + brlapi.BRL_DOT8)
 w.attrOr = "".center(21,underline) + "".center(19,chr(0))
 b.write(w)
@@ -104,6 +104,9 @@ cdef class Write:
 		def __set__(self, val):
 			cdef c_brlapi.size_t size
 			cdef char *c_val
+			if (type(val) == unicode):
+				val = val.encode('UTF-8')
+				self.charset = 'UTF-8'
 			if (self.props.text):
 				c_brlapi.free(self.props.text)
 			if (val):
@@ -111,7 +114,8 @@ cdef class Write:
 				c_val = val
 				self.props.text = <char*>c_brlapi.malloc(size+1)
 				c_brlapi.memcpy(<void*>self.props.text,<void*>c_val,size)
-				self.props.text[size] = 0;
+				self.props.text[size] = 0
+				self.props.textSize = size
 			else:
 				self.props.text = NULL
 
@@ -139,7 +143,7 @@ cdef class Write:
 				c_val = val
 				self.props.charset = <char*>c_brlapi.malloc(size+1)
 				c_brlapi.memcpy(<void*>self.props.charset,<void*>c_val,size)
-				self.props.charset[size] = 0;
+				self.props.charset[size] = 0
 			else:
 				self.props.charset = NULL
 
@@ -158,8 +162,9 @@ cdef class Write:
 			if (val):
 				size = len(val)
 				c_val = val
-				self.props.attrAnd = <unsigned char*>c_brlapi.malloc(size)
+				self.props.attrAnd = <unsigned char*>c_brlapi.malloc(size+1)
 				c_brlapi.memcpy(<void*>self.props.attrAnd,<void*>c_val,size)
+				self.props.attrAnd[size] = 0
 			else:
 				self.props.attrAnd = NULL
 
@@ -178,8 +183,9 @@ cdef class Write:
 			if (val):
 				size = len(val)
 				c_val = val
-				self.props.attrOr = <unsigned char*>c_brlapi.malloc(size)
+				self.props.attrOr = <unsigned char*>c_brlapi.malloc(size+1)
 				c_brlapi.memcpy(<void*>self.props.attrOr,<void*>c_val,size)
+				self.props.attrOr[size] = 0
 			else:
 				self.props.attrOr = NULL
 
@@ -375,15 +381,16 @@ cdef class Connection:
 		cdef int retval
 		cdef int c_cursor
 		cdef char *c_str
-		c_cursor = cursor
-		c_str = str
-		c_brlapi.Py_BEGIN_ALLOW_THREADS
-		retval = c_brlapi.brlapi__writeText(self.h, c_cursor, c_str)
-		c_brlapi.Py_END_ALLOW_THREADS
-		if retval == -1:
-			raise OperationError(returnerrno())
-		else:
-			return retval
+		(x, y) = self.displaySize
+		dispSize = x * y
+		if (len(str) < dispSize):
+			str = str + "".center(dispSize - len(str), ' ')
+		w = Write()
+		w.cursor = cursor
+		w.regionBegin = 1
+		w.regionSize = dispSize
+		w.text = str[0 : dispSize]
+		return self.write(w)
 
 	def readKey(self, block = True):
 		"""Read a key from the braille keyboard.

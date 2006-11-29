@@ -473,6 +473,7 @@ typedef struct {
   unsigned int regionBegin /** Region of display to update, 1st character of display is 1 */;
   unsigned int regionSize /** Number of caracters held in text, attrAnd and attrOr. */;
   char *text /** Text to display, must hold as many characters as the region fields expresses. */;
+  int textSize /** Size of text in bytes. If -1, strlen() is used for computing it. */;
   unsigned char *attrAnd /** And attributes; applied first */;
   unsigned char *attrOr /** Or attributes; applied \e after ANDing */;
   int cursor /** -1 == don't touch, 0 == turn off, 1 = 1st char of display, ... */;
@@ -494,6 +495,7 @@ typedef struct {
   .regionBegin = 0, \
   .regionSize = 0, \
   .text = NULL, \
+  .textSize = -1, \
   .attrAnd = NULL, \
   .attrOr = NULL, \
   .cursor = -1, \
@@ -511,9 +513,11 @@ typedef struct {
  * If given, the "text" field holds the text that will be displayed in the
  * region.  The char string must hold exactly as many characters as the region
  * fields express.  For multibyte text, this is the number of \e multibyte
- * caracters.  Notably, combining and double-width caracters count for 1.  The
- * actual length of the text in \e bytes will be computed thanks to strlen(3), so
- * "text" must be null-terminated.
+ * caracters.  Notably, combining and double-width caracters count for 1.
+ *
+ * The actual length of the text in \e bytes can be specified thanks to
+ * textSize.  If -1 is given, it will be computed thanks to strlen(3), so "text"
+ * must then be a NUL-terminated string.
  *
  * The "attrAnd" and "attrOr" masks, if present, are then applied on top of the
  * text.  This hence permits the superimposing of attributes over the text.

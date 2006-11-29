@@ -409,26 +409,28 @@ JNIEXPORT void JNICALL Java_BrlapiNative_setFocus(JNIEnv *jenv, jobject jobj, ji
 }
 
 JNIEXPORT void JNICALL Java_BrlapiNative_writeText(JNIEnv *jenv, jobject jobj, jint jarg1, jstring jarg2) {
-  int arg1 ;
-  char *arg2;
+  brlapi_writeStruct s = BRLAPI_WRITESTRUCT_INITIALIZER;
   int result;
   GET_HANDLE(jenv, jobj, );
   
   env = jenv;
 
-  arg1 = (int)jarg1; 
+  s.cursor = (int)jarg1; 
+  s.regionBegin = 1;
+  s.regionSize = (*jenv)->GetStringLength(jenv, jarg2);
 
   if (!jarg2) {
     ThrowException(jenv, ERR_NULLPTR, __func__);
     return;
   }
-  if (!(arg2 = (char *)(*jenv)->GetStringUTFChars(jenv, jarg2, NULL))) {
+  if (!(s.text = (char *)(*jenv)->GetStringUTFChars(jenv, jarg2, NULL))) {
     ThrowException(jenv, ERR_OUTOFMEM, __func__);
     return;
   }
+  s.charset = "UTF-8";
 
-  result = brlapi__writeText(handle, arg1,arg2);
-  (*jenv)->ReleaseStringUTFChars(jenv, jarg2, arg2); 
+  result = brlapi__write(handle, &s);
+  (*jenv)->ReleaseStringUTFChars(jenv, jarg2, s.text); 
 
   if (result < 0) {
     ThrowError(jenv, __func__);
@@ -463,7 +465,7 @@ JNIEXPORT void JNICALL Java_BrlapiNative_writeDots(JNIEnv *jenv, jobject jobj, j
 }
 
 JNIEXPORT void JNICALL Java_BrlapiNative_write(JNIEnv *jenv, jobject jobj, jobject js) {
-  brlapi_writeStruct s;
+  brlapi_writeStruct s = BRLAPI_WRITESTRUCT_INITIALIZER;
   int result;
   jstring text, attrAnd, attrOr;
   jclass jcwriteStruct;
