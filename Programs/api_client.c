@@ -179,7 +179,10 @@ struct brlapi_handle_t { /* Connection-specific information */
   brl_keycode_t keybuf[BRL_KEYBUF_SIZE];
   unsigned keybuf_next;
   unsigned keybuf_nb;
-  brlapi_exceptionHandler_t exceptionHandler;
+  union {
+    brlapi_exceptionHandler_t exceptionHandler;
+    brlapi__exceptionHandler_t exceptionHandler_h;
+  };
   pthread_mutex_t exceptionHandler_mutex;
 };
 
@@ -1794,22 +1797,27 @@ brlapi_error_t *brlapi_error_location(void)
   return &brlapi_error;
 }
 
-brlapi_exceptionHandler_t brlapi__setExceptionHandler(brlapi_handle_t *handle, brlapi_exceptionHandler_t new)
+brlapi__exceptionHandler_t brlapi__setExceptionHandler(brlapi_handle_t *handle, brlapi__exceptionHandler_t new)
 {
-  brlapi_exceptionHandler_t tmp;
+  brlapi__exceptionHandler_t tmp;
   pthread_mutex_lock(&handle->exceptionHandler_mutex);
-  tmp = handle->exceptionHandler;
-  if (new!=NULL) handle->exceptionHandler = new;
+  tmp = handle->exceptionHandler_h;
+  if (new!=NULL) handle->exceptionHandler_h = new;
   pthread_mutex_unlock(&handle->exceptionHandler_mutex);
   return tmp;
 }
 
 brlapi_exceptionHandler_t brlapi_setExceptionHandler(brlapi_exceptionHandler_t new)
 {
-  return brlapi__setExceptionHandler(&defaultHandle, new);
+  brlapi_exceptionHandler_t tmp;
+  pthread_mutex_lock(&defaultHandle.exceptionHandler_mutex);
+  tmp = defaultHandle.exceptionHandler;
+  if (new!=NULL) defaultHandle.exceptionHandler = new;
+  pthread_mutex_unlock(&defaultHandle.exceptionHandler_mutex);
+  return tmp;
 }
 
-int brlapi_strexception(char *buf, size_t n, int err, brl_type_t type, const void *packet, size_t size)
+int brlapi__strexception(brlapi_handle_t *handle, char *buf, size_t n, int err, brl_type_t type, const void *packet, size_t size)
 {
   int chars = 16; /* Number of bytes to dump */
   char hexString[3*chars+1];
@@ -1824,10 +1832,20 @@ int brlapi_strexception(char *buf, size_t n, int err, brl_type_t type, const voi
     brlapi_strerror(&error), brlapi_packetType(type), (int)size, hexString);
 }
 
-void brlapi_defaultExceptionHandler(int err, brl_type_t type, const void *packet, size_t size)
+int brlapi_strexception(char *buf, size_t n, int err, brl_type_t type, const void *packet, size_t size)
+{
+  return brlapi__strexception(&defaultHandle, buf, n, err, type, packet, size);
+}
+
+void brlapi__defaultExceptionHandler(brlapi_handle_t *handle, int err, brl_type_t type, const void *packet, size_t size)
 {
   char str[0X100];
   brlapi_strexception(str,0X100, err, type, packet, size);
   fprintf(stderr, "BrlAPI exception: %s\nYou may want to add option -l 7 to the brltty command line for getting debugging information in the system log\n", str);
   abort();
+}
+
+void brlapi_defaultExceptionHandler(int err, brl_type_t type, const void *packet, size_t size)
+{
+  brlapi__defaultExceptionHandler(&defaultHandle, err, type, packet, size);
 }
