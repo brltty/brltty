@@ -171,8 +171,8 @@ The following braille displays are supported:
 -  EcoBraille [20/40/80]
 -  EuroBraille [AzerBraille, Clio, Iris, NoteBraille, Scriba]
 -  FreedomScientific [Focus 44/70/84, PacMate 20/40/80]
--  HandyTech [Modular 20/40/80, Braille Wave 40, Braille Star 40/80,
-              Bookworm, Braillino 20]
+-  HandyTech [Modular 20/40/80, Modular Evolution 64/88, Braille Wave 40,
+              Braille Star 40/80, Bookworm, Braillino 20]
 -  Libbraille
 -  LogText [32]
 -  MDV [MB208/MB408L/MB408S (protocol 5)]
