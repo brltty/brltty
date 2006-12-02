@@ -227,7 +227,7 @@ ssize_t BRLAPI(readPacket)(brlapi_fileDescriptor fd, brl_type_t *packetType, voi
 /* Function : brlapi_loadAuthKey */
 /* Loads an authorization key from the given file */
 /* It is stored in auth, and its size in authLength */
-/* If the file is too big, non-existant or unreadable, returns -1 */
+/* If the file is non-existant or unreadable, returns -1 */
 int BRLAPI(loadAuthKey)(const char *filename, size_t *authlength, void *auth)
 {
   int fd;
@@ -244,7 +244,7 @@ int BRLAPI(loadAuthKey)(const char *filename, size_t *authlength, void *auth)
     return -1;
   }
 
-  stsize = MIN(statbuf.st_size, BRLAPI_MAXPACKETSIZE-sizeof(uint32_t));
+  stsize = MIN(statbuf.st_size, BRLAPI_MAXPACKETSIZE-2*sizeof(uint32_t));
 
   if ((fd = open(filename, O_RDONLY)) <0) {
     LibcError("open in loadAuthKey");
