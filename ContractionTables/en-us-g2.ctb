@@ -49,8 +49,7 @@ always according 1-14
 contraction ac
 always across 1-14-1235
 contraction acr
-always aed =
-always aer = Rosenlaer
+always ae =
 begword aforem 1-123456-15-134 aforementioned 
 word aforesaid 1-123456-15-234-145
 always after 1-124
@@ -374,6 +373,7 @@ begword hadd 125-1-256 haddock
 sufword hade = hadean 
 sufword hadr = hadrian 
 word have 125
+always headd 125-2-145-145 headdress
 always here 5-125
 always hered 125-12456-1246
 always heren 125-12456-26
