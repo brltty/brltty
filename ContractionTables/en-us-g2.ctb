@@ -50,6 +50,7 @@ contraction ac
 always across 1-14-1235
 contraction acr
 always ae =
+endword aed 1-1246
 begword aforem 1-123456-15-134 aforementioned 
 word aforesaid 1-123456-15-234-145
 always after 1-124
@@ -186,6 +187,7 @@ always c 14
 always C 14
 midword cch 14-16
 always chloro 16-123-135-1235-135
+sufword coed 14-135-1246
 begword cofac = cofactor
 always cofound 14-135-124-46-145
 begword com 36
@@ -299,6 +301,7 @@ always en 26
 always ename 15-5-1345
 sufword enamel 26-1-134-15-123 enameled
 midendword ence 56-15
+always enceph 26-14-15-1234-125 electroencephalogram
 always eneck = bottleneck
 midendword eness 15-56-234 closeness
 begword enor = enormous
@@ -506,9 +509,9 @@ word o 135
 always o 135
 word O 135
 always O 135
+begword oe = Oedipus
 midword oed = Schroeder
 always oen = Phoenix
-midendword oence 135-26-14-15 electroencephalogram
 largesign of 12356
 midendword ofar 135-124-345 insofar
 always ofold = twofold
@@ -887,6 +890,7 @@ begword ultra =
 
 # other prefixes
 begword electro =
+begword gastro 1245-1-34-1235-135
 begword neuro =
 begword psycho 1234-234-13456-16-135
 
