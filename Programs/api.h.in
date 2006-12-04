@@ -57,6 +57,8 @@ extern "C" {
 /* NULL is defined there */
 #include <unistd.h>
 
+#include <inttypes.h> /* For PRIx64 */
+
 /** \defgroup brlapi_handles BrlAPI handles
  *
  * Each function provided by BrlAPI comes in two versions.
