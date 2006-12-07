@@ -37,26 +37,26 @@ set connectionSettings [list]
 if {[info exists optionValues(host)]} {
    lappend connectionSettings -host $optionValues(host)
 }
-set brlapi [eval brlapi openConnection $connectionSettings]
-puts "Object: $brlapi"
+set session [eval brlapi openConnection $connectionSettings]
+puts "Object: $session"
 
-set host [$brlapi getHost]
+set host [$session getHost]
 puts "Host: $host ([expandList [brlapi expandHost $host] name port family])"
 
-set auth [$brlapi getAuth]
+set auth [$session getAuth]
 puts "Auth: $auth"
 
-set fileDescriptor [$brlapi getFileDescriptor]
+set fileDescriptor [$session getFileDescriptor]
 puts "FileDescriptor: $fileDescriptor"
 
-set driverId [$brlapi getDriverId]
+set driverId [$session getDriverId]
 puts "DriverId: $driverId"
 
-set driverName [$brlapi getDriverName]
+set driverName [$session getDriverName]
 puts "DriverName: $driverName"
 
-set displaySize [$brlapi getDisplaySize]
+set displaySize [$session getDisplaySize]
 puts "DisplaySize: [expandList $displaySize width height]"
 
-$brlapi closeConnection
+$session closeConnection; unset session
 exit 0
