@@ -139,7 +139,7 @@ typedef int brlapi_fileDescriptor;
  *
  * \par Examples:
  * \code
- * brlapi_settings_t settings;
+ * brlapi_connectionSettings_t settings;
  *
  * settings.auth="/etc/brlapi.key";
  * settings.host="foo";
@@ -181,10 +181,10 @@ typedef struct {
    * default TCP port, or to the content of the BRLAPI_HOST environment
    * variable, if it exists. */
   char *host;
-} brlapi_settings_t;
+} brlapi_connectionSettings_t;
 
 /* BRLAPI_SETTINGS_INITIALIZER */
-/** Allows to initialize a structure of type \e brlapi_settings_t *
+/** Allows to initialize a structure of type \e brlapi_connectionSettings_t *
  * with default values. */
 #define BRLAPI_SETTINGS_INITIALIZER { \
   .auth = NULL, \
@@ -222,23 +222,23 @@ typedef struct {
  * resolvable, the authorization may fail,...
  *
  * \param clientSettings this gives the connection parameters, as described
- * in brlapi_settings_t. If \c NULL, defaults values are used, so that it is
+ * in brlapi_connectionSettings_t. If \c NULL, defaults values are used, so that it is
  * generally a good idea to give \c NULL as default, and only fill a
- * brlapi_settings_t structure when the user gave parameters to the program
+ * brlapi_connectionSettings_t structure when the user gave parameters to the program
  * for instance;
  * \param usedSettings if not \c NULL, parameters which were actually used are
  * stored here, if the application ever needs them.
  *
  * \sa
- * brlapi_settings_t
+ * brlapi_connectionSettings_t
  * brlapi_loadAuthKey(3)
  * brlapi_writePacket(3)
  * brlapi_readPacketHeader(3)
  * brlapi_readPacketContent(3)
  * brlapi_readPacket(3)
  */
-brlapi_fileDescriptor brlapi_openConnection(const brlapi_settings_t *clientSettings, brlapi_settings_t *usedSettings);
-brlapi_fileDescriptor brlapi__openConnection(brlapi_handle_t *handle, const brlapi_settings_t *clientSettings, brlapi_settings_t *usedSettings);
+brlapi_fileDescriptor brlapi_openConnection(const brlapi_connectionSettings_t *clientSettings, brlapi_connectionSettings_t *usedSettings);
+brlapi_fileDescriptor brlapi__openConnection(brlapi_handle_t *handle, const brlapi_connectionSettings_t *clientSettings, brlapi_connectionSettings_t *usedSettings);
 
 /* brlapi_closeConnection */
 /** Cleanly close the socket
@@ -266,7 +266,7 @@ int brlapi_expandHost(const char *hostAndPort, char **host, char **port);
  *
  * \return 0, -1 on error
  *
- * \sa brlapi_settings_t, brlapi_openConnection */
+ * \sa brlapi_connectionSettings_t, brlapi_openConnection */
 int brlapi_loadAuthKey(const char *filename, size_t *authlength, void *auth);
 
 /** @} */
@@ -1009,8 +1009,9 @@ int brlapi__writeWin(brlapi_handle_t *handle, const brlapi_writeStruct_t *s, int
 #endif /* BRLAPI_WIN32 */
 
 #ifndef BRLAPI_NO_DEPRECATED
-#define brl_keycode_t brlapi_keyCode_t;
+#define brlapi_settings_t brlapi_connectionSettings_t
 #define brlapi_writeStruct brlapi_writeStruct_t
+#define brl_keycode_t brlapi_keyCode_t;
 
 #define BRLCOMMANDS NULL
 #define BRL_KEYCODE_MAX BRLAPI_KEYCODE_MAX

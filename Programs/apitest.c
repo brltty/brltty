@@ -30,7 +30,7 @@
 #define BRLAPI_NO_DEPRECATED
 #include "api.h"
 
-static brlapi_settings_t settings;
+static brlapi_connectionSettings_t settings;
 
 static int opt_learnMode;
 static int opt_showDots;

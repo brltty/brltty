@@ -139,7 +139,7 @@ void api_cleanExit(int foo) {
 }
 
 void tobrltty_init(char *auth, char *host) {
-  brlapi_settings_t settings;
+  brlapi_connectionSettings_t settings;
   unsigned int x,y;
   settings.host=host;
   settings.auth=auth;

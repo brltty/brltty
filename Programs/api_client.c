@@ -559,9 +559,9 @@ out:
 }
 
 /* Function : updateSettings */
-/* Updates the content of a brlapi_settings_t structure according to */
+/* Updates the content of a brlapi_connectionSettings_t structure according to */
 /* another structure of the same type */
-static void updateSettings(brlapi_settings_t *s1, const brlapi_settings_t *s2)
+static void updateSettings(brlapi_connectionSettings_t *s1, const brlapi_connectionSettings_t *s2)
 {
   if (s2==NULL) return;
   if ((s2->auth) && (*s2->auth))
@@ -572,7 +572,7 @@ static void updateSettings(brlapi_settings_t *s1, const brlapi_settings_t *s2)
 
 /* Function: brlapi_openConnection
  * Creates a socket to connect to BrlApi */
-brlapi_fileDescriptor brlapi__openConnection(brlapi_handle_t *handle, const brlapi_settings_t *clientSettings, brlapi_settings_t *usedSettings)
+brlapi_fileDescriptor brlapi__openConnection(brlapi_handle_t *handle, const brlapi_connectionSettings_t *clientSettings, brlapi_connectionSettings_t *usedSettings)
 {
   unsigned char packet[BRLAPI_MAXPACKETSIZE];
   unsigned char serverPacket[BRLAPI_MAXPACKETSIZE];
@@ -581,8 +581,8 @@ brlapi_fileDescriptor brlapi__openConnection(brlapi_handle_t *handle, const brla
   uint32_t *type;
   int authServerLen;
 
-  brlapi_settings_t settings = { BRLAPI_DEFAUTH, ":0" };
-  brlapi_settings_t envsettings = { getenv("BRLAPI_AUTH"), getenv("BRLAPI_HOST") };
+  brlapi_connectionSettings_t settings = { BRLAPI_DEFAUTH, ":0" };
+  brlapi_connectionSettings_t envsettings = { getenv("BRLAPI_AUTH"), getenv("BRLAPI_HOST") };
 
   /* Here update settings with the parameters from misc sources (files, env...) */
   updateSettings(&settings, &envsettings);
@@ -657,7 +657,7 @@ done:
   return handle->fileDescriptor;
 }
 
-brlapi_fileDescriptor brlapi_openConnection(const brlapi_settings_t *clientSettings, brlapi_settings_t *usedSettings)
+brlapi_fileDescriptor brlapi_openConnection(const brlapi_connectionSettings_t *clientSettings, brlapi_connectionSettings_t *usedSettings)
 {
   return brlapi__openConnection(&defaultHandle, clientSettings, usedSettings);
 }
