@@ -487,7 +487,7 @@ always N 1345
 always name 5-1345
 always nament 1345-1-56-2345 tournament
 always namese =
-endnum nd 1345-145
+endnum nd = (second)
 always necessary 1345-15-14
 contraction nec
 word neither 1345-15-24
@@ -601,11 +601,11 @@ always R 1235
 sufword rafter 1235-1-124-2345-12456
 word rather 1235
 sufword raw = rawhide
-endnum rd 1235-145
+endnum rd = (third)
 begword reab = reabsorbed
+always reach 1235-2-16
 always react =
 always reaction 1235-15-1-14-56-1345
-always reach 1235-2-16
 begword readj = readjust
 begword readm = readmit
 begword reaff 1235-15-1-235
@@ -614,6 +614,7 @@ begword reagg 1235-15-1-2356 reaggregated
 begword realig = realign
 begword rean = reanalyze, reanimate
 begword reapp = reappear
+begword reasc 1235-15-1-234-14 reascend
 begword reass 1235-15-1-234-234
 begword reatt = reattach
 begword reau = reauthorization
@@ -699,7 +700,7 @@ midendword somed 234-135-134-1246 ransomed
 always somer 234-135-134-12456 somersault 
 always spirit 456-234
 midendword ssword 234-234-45-2456 crossword 
-endnum st 34
+endnum st 34 (first)
 word st =
 always st 34
 always sth 234-1456
@@ -722,7 +723,7 @@ always sword =
 # the letter t
 always t 2345
 always T 2345
-endnum th 1456
+endnum th 1456 (fourth, fifth, ...)
 word th =
 always th 1456
 always thand 2345-125-12346 shorthand
@@ -912,6 +913,7 @@ endword 's 3-234
 endword 't 3-2345
 word 'tis =
 word 'twas =
+word 'twill =
 endword 've 3-1236-15
 midnum , 2
 always , 2
@@ -920,7 +922,7 @@ always . 256
 always ; 23
 midnum : 25
 always : 25
-endnum ! 12346
+endnum ! 12346 (factorial)
 always ! 235
 always # 3456
 midnum / 34
