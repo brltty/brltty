@@ -421,13 +421,13 @@ cdef class Connection:
 	def expandKeyCode(self, code):
 		"""Expand a keycode into its individual components.
 		See brlapi_expandKeyCode(3)."""
-		cdef c_brlapi.brlapi_keyCodeExpansion expansion
+		cdef c_brlapi.brlapi_expandedKeyCode_t ekc
 		cdef int retval
-		retval = c_brlapi.brlapi_expandKeyCode(code, <c_brlapi.brlapi_keyCodeExpansion*>&expansion)
+		retval = c_brlapi.brlapi_expandKeyCode(code, <c_brlapi.brlapi_expandedKeyCode_t*>&ekc)
 		if retval == -1:
 			raise OperationError(returnerrno())
 		else:
-			return (expansion.command, expansion.argument, expansion.flags)
+			return (ekc.command, ekc.argument, ekc.flags)
 	
 	def ignoreKeyRange(self, range):
 		"""Ignore some key presses from the braille keyboard.

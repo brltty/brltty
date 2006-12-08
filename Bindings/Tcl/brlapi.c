@@ -1080,7 +1080,7 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
 #define FLAG(name,string) if (flagsField & BRLAPI_KEY_FLG_##name) Tcl_ListObjAppendElement(interp, flagsObject, STRING((string)))
     case FCN_expandKeyCode: {
       Tcl_WideInt keyCode;
-      brlapi_keyCodeExpansion expansion;
+      brlapi_expandedKeyCode_t ekc;
 
       if (objc != 3) {
         Tcl_WrongNumArgs(interp, 2, objv, "<keyCode>");
@@ -1092,17 +1092,17 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
         if (result != TCL_OK) return result;
       }
 
-      if (brlapi_expandKeyCode(keyCode, &expansion) == -1) {
+      if (brlapi_expandKeyCode(keyCode, &ekc) == -1) {
         setBrlapiError(interp);
         return TCL_ERROR;
       }
 
       {
         Tcl_Obj *elements[] = {
-          Tcl_NewIntObj(expansion.type),
-          Tcl_NewIntObj(expansion.command),
-          Tcl_NewIntObj(expansion.argument),
-          Tcl_NewIntObj(expansion.flags)
+          Tcl_NewIntObj(ekc.type),
+          Tcl_NewIntObj(ekc.command),
+          Tcl_NewIntObj(ekc.argument),
+          Tcl_NewIntObj(ekc.flags)
         };
         Tcl_SetObjResult(interp, Tcl_NewListObj(4, elements));
         return TCL_OK;

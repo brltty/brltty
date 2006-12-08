@@ -778,7 +778,7 @@ JNIEXPORT void JNICALL Java_BrlapiKey_expandKeyCode (JNIEnv *jenv, jobject obj, 
   jclass jckey;
   jfieldID typeID, commandID, argumentID, flagsID;
   brl_keycode_t key = jkey;
-  brlapi_keyCodeExpansion expansion;
+  brlapi_expandedKeyCode_t ekc;
 
   GET_CLASS(jenv, jckey, obj, );
   GET_ID(jenv, typeID,     jckey, "type",     "I", );
@@ -786,9 +786,9 @@ JNIEXPORT void JNICALL Java_BrlapiKey_expandKeyCode (JNIEnv *jenv, jobject obj, 
   GET_ID(jenv, argumentID, jckey, "argument", "I", );
   GET_ID(jenv, flagsID,    jckey, "flags",    "I", );
 
-  brlapi_expandKeyCode(key, &expansion);
-  (*jenv)->SetIntField(jenv, obj, typeID,     expansion.type);
-  (*jenv)->SetIntField(jenv, obj, commandID,  expansion.command);
-  (*jenv)->SetIntField(jenv, obj, argumentID, expansion.argument);
-  (*jenv)->SetIntField(jenv, obj, flagsID,    expansion.flags);
+  brlapi_expandKeyCode(key, &ekc);
+  (*jenv)->SetIntField(jenv, obj, typeID,     ekc.type);
+  (*jenv)->SetIntField(jenv, obj, commandID,  ekc.command);
+  (*jenv)->SetIntField(jenv, obj, argumentID, ekc.argument);
+  (*jenv)->SetIntField(jenv, obj, flagsID,    ekc.flags);
 }
