@@ -134,7 +134,7 @@ void showDots(void)
   {
     char text[x*y];
     unsigned char or[x*y];
-    brlapi_writeStruct ws = BRLAPI_WRITESTRUCT_INITIALIZER;
+    brlapi_writeStruct_t ws = BRLAPI_WRITESTRUCT_INITIALIZER;
     fprintf(stderr,"Showing dot patterns\n");
     memcpy(text,DOTS_TEXT,DOTS_TEXTLEN);
     memset(text+DOTS_TEXTLEN,' ',sizeof(text)-DOTS_TEXTLEN);

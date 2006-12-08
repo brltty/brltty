@@ -458,7 +458,7 @@ int brlapi__writeText(brlapi_handle_t *handle, int cursor, const char *str);
 int brlapi_writeDots(const unsigned char *dots);
 int brlapi__writeDots(brlapi_handle_t *handle, const unsigned char *dots);
 
-/* brlapi_writeStruct */
+/* brlapi_writeStruct_t */
 /** Structure containing arguments to be given to brlapi_write(3) */
 typedef struct {
   int displayNumber /** Display number -1 == unspecified */;
@@ -470,10 +470,10 @@ typedef struct {
   unsigned char *attrOr /** Or attributes; applied \e after ANDing */;
   int cursor /** -1 == don't touch, 0 == turn off, 1 = 1st char of display, ... */;
   char *charset /** Text charset. NULL means it is assumed to be 8bits, and the same as the server's. "" means current locale's charset. If no locale was selected, defaults to NULL's meaning. */;
-} brlapi_writeStruct;
+} brlapi_writeStruct_t;
 
 /* BRLAPI_WRITESTRUCT_INITIALIZER */
-/** Allows to initialize a structure of type \e brlapi_writeStruct *
+/** Allows to initialize a structure of type \e brlapi_writeStruct_t *
  * with default values:
  * displayNumber = -1; (unspecified)
  * regionBegin = regionSize = 0; (update the whole display, DEPRECATED and will
@@ -524,8 +524,8 @@ typedef struct {
  *
  * \return 0 on success, -1 on error.
  */
-int brlapi_write(const brlapi_writeStruct *s);
-int brlapi__write(brlapi_handle_t *handle, const brlapi_writeStruct *s);
+int brlapi_write(const brlapi_writeStruct_t *s);
+int brlapi__write(brlapi_handle_t *handle, const brlapi_writeStruct_t *s);
 
 /** @} */
 
@@ -993,8 +993,8 @@ void brlapi__defaultExceptionHandler(brlapi_handle_t *handle, int err, brl_type_
 #ifdef BRLAPI_WIN32
 int brlapi_writeTextWin(int cursor, const void *str, int wide);
 int brlapi__writeTextWin(brlapi_handle_t *handle, int cursor, const void *str, int wide);
-int brlapi_writeWin(const brlapi_writeStruct *s, int wide);
-int brlapi__writeWin(brlapi_handle_t *handle, const brlapi_writeStruct *s, int wide);
+int brlapi_writeWin(const brlapi_writeStruct_t *s, int wide);
+int brlapi__writeWin(brlapi_handle_t *handle, const brlapi_writeStruct_t *s, int wide);
 #ifdef UNICODE
 #define brlapi_writeText(cursor, str) brlapi_writeTextWin(cursor, str, 1)
 #define brlapi__writeText(handle, cursor, str) brlapi__writeTextWin(handle, cursor, str, 1)
@@ -1010,6 +1010,7 @@ int brlapi__writeWin(brlapi_handle_t *handle, const brlapi_writeStruct *s, int w
 
 #ifndef BRLAPI_NO_DEPRECATED
 #define brl_keycode_t brlapi_keyCode_t;
+#define brlapi_writeStruct brlapi_writeStruct_t
 
 #define BRLCOMMANDS NULL
 #define BRL_KEYCODE_MAX BRLAPI_KEYCODE_MAX

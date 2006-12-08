@@ -1224,7 +1224,7 @@ int brlapi__writeDots(brlapi_handle_t *handle, const unsigned char *dots)
 {
   int res;
   unsigned int size = handle->brlx * handle->brly;
-  brlapi_writeStruct ws = BRLAPI_WRITESTRUCT_INITIALIZER;
+  brlapi_writeStruct_t ws = BRLAPI_WRITESTRUCT_INITIALIZER;
   if (size == 0) {
     brlapi_errno=BRLERR_INVALID_PARAMETER;
     return -1;
@@ -1255,9 +1255,9 @@ int brlapi_writeDots(const unsigned char *dots)
 /* Function : brlapi_write */
 /* Extended writes on braille displays */
 #ifdef WINDOWS
-int brlapi__writeWin(brlapi_handle_t *handle, const brlapi_writeStruct *s, int wide)
+int brlapi__writeWin(brlapi_handle_t *handle, const brlapi_writeStruct_t *s, int wide)
 #else /* WINDOWS */
-int brlapi__write(brlapi_handle_t *handle, const brlapi_writeStruct *s)
+int brlapi__write(brlapi_handle_t *handle, const brlapi_writeStruct_t *s)
 #endif /* WINDOWS */
 {
   int dispSize = handle->brlx * handle->brly;
@@ -1360,12 +1360,12 @@ send:
 }
 
 #ifdef WINDOWS
-int brlapi_writeWin(const brlapi_writeStruct *s, int wide)
+int brlapi_writeWin(const brlapi_writeStruct_t *s, int wide)
 {
   return brlapi__writeWin(&defaultHandle, s, wide);
 }
 #else /* WINDOWS */
-int brlapi_write(const brlapi_writeStruct *s)
+int brlapi_write(const brlapi_writeStruct_t *s)
 {
   return brlapi__write(&defaultHandle, s);
 }
