@@ -176,8 +176,8 @@ struct brlapi_handle_t { /* Connection-specific information */
   /* key presses buffer, for when key presses are received instead of
    * acknowledgements for instance
    *
-   * every function must hence be able to read at least sizeof(brl_keycode_t) */
-  brl_keycode_t keybuf[BRL_KEYBUF_SIZE];
+   * every function must hence be able to read at least sizeof(brlapi_keyCode_t) */
+  brlapi_keyCode_t keybuf[BRL_KEYBUF_SIZE];
   unsigned keybuf_next;
   unsigned keybuf_nb;
   union {
@@ -261,7 +261,7 @@ static ssize_t brlapi__doWaitForPacket(brlapi_handle_t *handle, brl_type_t expec
     pthread_mutex_unlock(&handle->read_mutex);
     return res;
   }
-  if ((type==BRLPACKET_KEY) && (handle->state & STCONTROLLINGTTY) && (res==sizeof(brl_keycode_t))) {
+  if ((type==BRLPACKET_KEY) && (handle->state & STCONTROLLINGTTY) && (res==sizeof(brlapi_keyCode_t))) {
     /* keypress, buffer it */
     if (handle->keybuf_nb>=BRL_KEYBUF_SIZE) {
       syslog(LOG_WARNING,"lost key: 0X%8"PRIx32"%8"PRIx32"\n",ntohl(code[0]),ntohl(code[1]));
@@ -1405,7 +1405,7 @@ static int packetReady(brlapi_handle_t *handle)
 
 /* Function : brlapi_readKey */
 /* Reads a key from the braille keyboard */
-int brlapi__readKey(brlapi_handle_t *handle, int block, brl_keycode_t *code)
+int brlapi__readKey(brlapi_handle_t *handle, int block, brlapi_keyCode_t *code)
 {
   ssize_t res;
   uint32_t buf[2];
@@ -1448,11 +1448,11 @@ int brlapi__readKey(brlapi_handle_t *handle, int block, brl_keycode_t *code)
     return -1;
   }
   if (res < 0) return -1;
-  *code = ((brl_keycode_t)ntohl(buf[0]) << 32) | ntohl(buf[1]);
+  *code = ((brlapi_keyCode_t)ntohl(buf[0]) << 32) | ntohl(buf[1]);
   return 1;
 }
 
-int brlapi_readKey(int block, brl_keycode_t *code)
+int brlapi_readKey(int block, brlapi_keyCode_t *code)
 {
   return brlapi__readKey(&defaultHandle, block, code) ;
 }
@@ -1460,7 +1460,7 @@ int brlapi_readKey(int block, brl_keycode_t *code)
 /* Function : ignore_accept_key_range */
 /* Common tasks for ignoring and unignoring key ranges */
 /* what = 0 for ignoring !0 for unignoring */
-static int ignore_accept_key_range(brlapi_handle_t *handle, int what, brl_keycode_t x, brl_keycode_t y)
+static int ignore_accept_key_range(brlapi_handle_t *handle, int what, brlapi_keyCode_t x, brlapi_keyCode_t y)
 {
   uint32_t ints[4] = {
     htonl(x >> 32), htonl(x & 0xffffffff),
@@ -1471,23 +1471,23 @@ static int ignore_accept_key_range(brlapi_handle_t *handle, int what, brl_keycod
 }
 
 /* Function : brlapi_ignoreKeyRange */
-int brlapi__ignoreKeyRange(brlapi_handle_t *handle, brl_keycode_t x, brl_keycode_t y)
+int brlapi__ignoreKeyRange(brlapi_handle_t *handle, brlapi_keyCode_t x, brlapi_keyCode_t y)
 {
   return ignore_accept_key_range(handle, 0,x,y);
 }
 
-int brlapi_ignoreKeyRange(brl_keycode_t x, brl_keycode_t y)
+int brlapi_ignoreKeyRange(brlapi_keyCode_t x, brlapi_keyCode_t y)
 {
   return brlapi__ignoreKeyRange(&defaultHandle, x, y);
 }
 
 /* Function : brlapi_acceptKeyRange */
-int brlapi__acceptKeyRange(brlapi_handle_t *handle, brl_keycode_t x, brl_keycode_t y)
+int brlapi__acceptKeyRange(brlapi_handle_t *handle, brlapi_keyCode_t x, brlapi_keyCode_t y)
 {
   return ignore_accept_key_range(handle, !0,x,y);
 }
 
-int brlapi_acceptKeyRange(brl_keycode_t x, brl_keycode_t y)
+int brlapi_acceptKeyRange(brlapi_keyCode_t x, brlapi_keyCode_t y)
 {
   return brlapi__acceptKeyRange(&defaultHandle, x, y);
 }
@@ -1495,7 +1495,7 @@ int brlapi_acceptKeyRange(brl_keycode_t x, brl_keycode_t y)
 /* Function : ignore_accept_key_set */
 /* Common tasks for ignoring and unignoring key sets */
 /* what = 0 for ignoring !0 for unignoring */
-static int ignore_accept_key_set(brlapi_handle_t *handle, int what, const brl_keycode_t *s, unsigned int n)
+static int ignore_accept_key_set(brlapi_handle_t *handle, int what, const brlapi_keyCode_t *s, unsigned int n)
 {
   uint32_t buf[2*n];
   int i;
@@ -1511,23 +1511,23 @@ static int ignore_accept_key_set(brlapi_handle_t *handle, int what, const brl_ke
 }
 
 /* Function : brlapi_ignoreKeySet */
-int brlapi__ignoreKeySet(brlapi_handle_t *handle, const brl_keycode_t *s, unsigned int n)
+int brlapi__ignoreKeySet(brlapi_handle_t *handle, const brlapi_keyCode_t *s, unsigned int n)
 {
   return ignore_accept_key_set(handle, 0,s,n);
 }
 
-int brlapi_ignoreKeySet(const brl_keycode_t *s, unsigned int n)
+int brlapi_ignoreKeySet(const brlapi_keyCode_t *s, unsigned int n)
 {
   return brlapi__ignoreKeySet(&defaultHandle, s, n);
 }
 
 /* Function : brlapi_acceptKeySet */
-int brlapi__acceptKeySet(brlapi_handle_t *handle, const brl_keycode_t *s, unsigned int n)
+int brlapi__acceptKeySet(brlapi_handle_t *handle, const brlapi_keyCode_t *s, unsigned int n)
 {
   return ignore_accept_key_set(handle, !0,s,n);
 }
 
-int brlapi_acceptKeySet(const brl_keycode_t *s, unsigned int n)
+int brlapi_acceptKeySet(const brlapi_keyCode_t *s, unsigned int n)
 {
   return brlapi__acceptKeySet(&defaultHandle, s, n);
 }
@@ -1599,7 +1599,7 @@ void brlapi_perror(const char *s)
 }
 
 typedef struct {
-  brl_keycode_t code;
+  brlapi_keyCode_t code;
   const char *name;
 } brlapi_keyEntry_t;
 
@@ -1636,8 +1636,8 @@ static const brlapi_keyEntry_t brlapi_keyTable[] = {
 };
 
 static int
-brlapi_getArgumentWidth (brl_keycode_t keyCode) {
-  brl_keycode_t code = keyCode & BRLAPI_KEY_CODE_MASK;
+brlapi_getArgumentWidth (brlapi_keyCode_t keyCode) {
+  brlapi_keyCode_t code = keyCode & BRLAPI_KEY_CODE_MASK;
 
   switch (keyCode & BRLAPI_KEY_TYPE_MASK) {
     default: break;
@@ -1670,13 +1670,13 @@ brlapi_getArgumentWidth (brl_keycode_t keyCode) {
 }
 
 int
-brlapi_expandKeyCode (brl_keycode_t keyCode, brlapi_expandedKeyCode_t *ekc) {
+brlapi_expandKeyCode (brlapi_keyCode_t keyCode, brlapi_expandedKeyCode_t *ekc) {
   int argumentWidth = brlapi_getArgumentWidth(keyCode);
 
   if (argumentWidth != -1) {
     unsigned int argumentMask = (1 << argumentWidth) - 1;
-    brl_keycode_t type = keyCode & BRLAPI_KEY_TYPE_MASK;
-    brl_keycode_t code = keyCode & BRLAPI_KEY_CODE_MASK;
+    brlapi_keyCode_t type = keyCode & BRLAPI_KEY_TYPE_MASK;
+    brlapi_keyCode_t code = keyCode & BRLAPI_KEY_CODE_MASK;
 
     ekc->type = type;
     ekc->command = type | (code & ~argumentMask);

@@ -401,7 +401,7 @@ void toX_f(const char *display) {
   int maxfd;
 #ifdef CAN_SIMULATE_KEY_PRESSES
   int res;
-  brl_keycode_t code;
+  brlapi_keyCode_t code;
   unsigned int keysym, keycode, modifiers;
   Bool haveXTest;
   int eventBase, errorBase, majorVersion, minorVersion;

@@ -374,7 +374,7 @@ static void writeException(FileDescriptor fd, unsigned int err, brl_type_t type,
   brlapiserver_writePacket(fd,BRLPACKET_EXCEPTION,epacket, hdrsize+esize);
 }
 
-static void writeKey(FileDescriptor fd, brl_keycode_t key) {
+static void writeKey(FileDescriptor fd, brlapi_keyCode_t key) {
   uint32_t buf[2];
   buf[0] = htonl(key >> 32);
   buf[1] = htonl(key & 0xffffffff);
@@ -932,14 +932,14 @@ static int handleLeaveTtyMode(Connection *c, brl_type_t type, unsigned char *pac
 static int handleKeyRange(Connection *c, brl_type_t type, unsigned char *packet, size_t size)
 {
   int res;
-  brl_keycode_t x,y;
+  brlapi_keyCode_t x,y;
   uint32_t * ints = (uint32_t *) packet;
   LogPrintRequest(type, c->fd);
   CHECKERR(!c->raw,BRLERR_ILLEGAL_INSTRUCTION,"not allowed in raw mode");
   CHECKERR(c->tty,BRLERR_ILLEGAL_INSTRUCTION,"not allowed out of tty mode");
-  CHECKERR(size==2*sizeof(brl_keycode_t),BRLERR_INVALID_PACKET,"wrong packet size");
-  x = ((brl_keycode_t)ntohl(ints[0]) << 32) | ntohl(ints[1]);
-  y = ((brl_keycode_t)ntohl(ints[2]) << 32) | ntohl(ints[3]);
+  CHECKERR(size==2*sizeof(brlapi_keyCode_t),BRLERR_INVALID_PACKET,"wrong packet size");
+  x = ((brlapi_keyCode_t)ntohl(ints[0]) << 32) | ntohl(ints[1]);
+  y = ((brlapi_keyCode_t)ntohl(ints[2]) << 32) | ntohl(ints[3]);
   LogPrint(LOG_DEBUG,"range: [%016"BRLAPI_PRIxKEYCODE"..%016"BRLAPI_PRIxKEYCODE"]",x,y);
   pthread_mutex_lock(&c->maskMutex);
   if (type==BRLPACKET_IGNOREKEYRANGE) res = removeKeyrange(x,y,&c->unmaskedKeys);
@@ -956,16 +956,16 @@ static int handleKeySet(Connection *c, brl_type_t type, unsigned char *packet, s
   unsigned int nbkeys;
   uint32_t *k = (uint32_t *) packet;
   int (*fptr)(KeyrangeElem, KeyrangeElem, KeyrangeList **);
-  brl_keycode_t code;
+  brlapi_keyCode_t code;
   LogPrintRequest(type, c->fd);
   if (type==BRLPACKET_IGNOREKEYSET) fptr = removeKeyrange; else fptr = addKeyrange;
   CHECKERR(!c->raw,BRLERR_ILLEGAL_INSTRUCTION,"not allowed in raw mode");
   CHECKERR(c->tty,BRLERR_ILLEGAL_INSTRUCTION,"not allowed out of tty mode");
-  CHECKERR(size % sizeof(brl_keycode_t)==0,BRLERR_INVALID_PACKET,"wrong packet size");
-  nbkeys = size/sizeof(brl_keycode_t);
+  CHECKERR(size % sizeof(brlapi_keyCode_t)==0,BRLERR_INVALID_PACKET,"wrong packet size");
+  nbkeys = size/sizeof(brlapi_keyCode_t);
   pthread_mutex_lock(&c->maskMutex);
   while ((res!=-1) && (i<nbkeys)) {
-    code = ((brl_keycode_t)ntohl(k[2*i]) << 32) | ntohl(k[2*i+1]);
+    code = ((brlapi_keyCode_t)ntohl(k[2*i]) << 32) | ntohl(k[2*i+1]);
     res = fptr(code,code,&c->unmaskedKeys);
     i++;
   }
@@ -2284,11 +2284,11 @@ static void api_writeVisual(BrailleDisplay *brl)
   pthread_mutex_unlock(&connectionsMutex);
 }
 
-brl_keycode_t coreToClient(unsigned long keycode, int how) {
+brlapi_keyCode_t coreToClient(unsigned long keycode, int how) {
   if (how == BRL_KEYCODES) {
     return keycode;
   } else {
-    brl_keycode_t code;
+    brlapi_keyCode_t code;
     switch (keycode & BRL_MSK_BLK) {
     case BRL_BLK_PASSCHAR: {
       wchar_t wc = convertCharToWchar(keycode & BRL_MSK_ARG);
@@ -2351,7 +2351,7 @@ brl_keycode_t coreToClient(unsigned long keycode, int how) {
 }
 /* Function: whoGetsKey */
 /* Returns the connection which gets that key */
-static Connection *whoGetsKey(Tty *tty, brl_keycode_t code, unsigned int how)
+static Connection *whoGetsKey(Tty *tty, brlapi_keyCode_t code, unsigned int how)
 {
   Connection *c;
   Tty *t;
@@ -2380,7 +2380,7 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
   Connection *c;
   unsigned char packet[BRLAPI_MAXPACKETSIZE];
   int keycode, command = EOF;
-  brl_keycode_t clientCode;
+  brlapi_keyCode_t clientCode;
 
   pthread_mutex_lock(&connectionsMutex);
   pthread_mutex_lock(&rawMutex);

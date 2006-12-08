@@ -118,7 +118,7 @@ void showDriverName(void)
 void showDots(void)
 {
   unsigned int x, y;
-  brl_keycode_t k;
+  brlapi_keyCode_t k;
   if (brlapi_getDisplaySize(&x, &y)<0) {
     brlapi_perror("failed");
     exit(1);
@@ -162,7 +162,7 @@ void showDots(void)
 void enterLearnMode(void)
 {
   int res;
-  brl_keycode_t code;
+  brlapi_keyCode_t code;
   int cmd;
   char buf[0X100];
 
@@ -243,7 +243,7 @@ void enterLearnMode(void)
 void showKeyCodes(void)
 {
   int res;
-  brl_keycode_t cmd;
+  brlapi_keyCode_t cmd;
   char buf[0X100];
 
   fprintf(stderr,"Entering keycode learn mode\n");
@@ -256,7 +256,7 @@ void showKeyCodes(void)
     return;
   }
 
-  if (brlapi_acceptKeyRange(0, BRL_KEYCODE_MAX)==-1) {
+  if (brlapi_acceptKeyRange(0, BRLAPI_KEYCODE_MAX)==-1) {
     brlapi_perror("acceptKeyRange");
     return;
   }

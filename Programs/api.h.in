@@ -551,28 +551,26 @@ int brlapi__write(brlapi_handle_t *handle, const brlapi_writeStruct *s);
  * - bits 31-29: key type: 1 for braille commands, 0 for X keysyms ;
  * - bits 28-0:  key code, depending on the key type.
  */
-typedef uint64_t brl_keycode_t;
+typedef uint64_t brlapi_keyCode_t;
 
-/** Hex print format for brl_keycode_t */
+/** Hex print format for brlapi_keyCode_t */
 #define BRLAPI_PRIxKEYCODE PRIx64
-/** Unsigned print format for brl_keycode_t */
+/** Unsigned print format for brlapi_keyCode_t */
 #define BRLAPI_PRIuKEYCODE PRIu64
 
-/** Brl_keycode_t's biggest value
+/** Brlapi_keyCode_t's biggest value
  *
  * As defined in \c <stdint.h> */
-#define BRLAPI_KEYCODE_MAX ((brl_keycode_t) (UINT64_MAX))
-/* Old name, deprecated.  */
-#define BRL_KEYCODE_MAX ((brl_keycode_t) (UINT64_MAX))
+#define BRLAPI_KEYCODE_MAX ((brlapi_keyCode_t) (UINT64_MAX))
 
 /**
- * Mask for flags of brl_keycode_t
+ * Mask for flags of brlapi_keyCode_t
  */
 #define BRLAPI_KEY_FLAGS_MASK		UINT64_C(0XFFFFFFFF00000000)
-/** Shift for flags of brl_keycode_t */
+/** Shift for flags of brlapi_keyCode_t */
 #define BRLAPI_KEY_FLAGS_SHIFT		32
 
-#define BRLAPI_KEY_FLG(v)		((brl_keycode_t)(v) << BRLAPI_KEY_FLAGS_SHIFT)
+#define BRLAPI_KEY_FLG(v)		((brlapi_keyCode_t)(v) << BRLAPI_KEY_FLAGS_SHIFT)
 /** Standard X modifiers */
 /** Mod1 modifier (AKA meta) */
 #define BRLAPI_KEY_FLG_MOD1		BRLAPI_KEY_FLG(0x00000008)
@@ -587,21 +585,21 @@ typedef uint64_t brl_keycode_t;
 
 
 /**
- * Mask for type of brl_keycode_t
+ * Mask for type of brlapi_keyCode_t
  */
 #define BRLAPI_KEY_TYPE_MASK		UINT64_C(0X00000000E0000000)
-/** Shift for type of brl_keycode_t */
+/** Shift for type of brlapi_keyCode_t */
 #define BRLAPI_KEY_TYPE_SHIFT		29
-/** Braille command brl_keycode_t */
+/** Braille command brlapi_keyCode_t */
 #define BRLAPI_KEY_TYPE_CMD		UINT64_C(0X0000000020000000)
-/** X Keysym brl_keycode_t */
+/** X Keysym brlapi_keyCode_t */
 #define BRLAPI_KEY_TYPE_SYM		UINT64_C(0X0000000000000000)
 
 /**
- * Mask for code of brl_keycode_t
+ * Mask for code of brlapi_keyCode_t
  */
 #define BRLAPI_KEY_CODE_MASK		UINT64_C(0X000000001FFFFFFF)
-/** Shift for code of brl_keycode_t */
+/** Shift for code of brlapi_keyCode_t */
 #define BRLAPI_KEY_CODE_SHIFT		0
 
 #define BRLAPI_KEY_CMD(v)		(BRLAPI_KEY_TYPE_CMD|((v) << 16))
@@ -649,7 +647,7 @@ typedef struct {
  *
  * \return 0 on success, -1 on error.
  */
-extern int brlapi_expandKeyCode (brl_keycode_t keyCode, brlapi_expandedKeyCode_t *ekc);
+extern int brlapi_expandKeyCode (brlapi_keyCode_t keyCode, brlapi_expandedKeyCode_t *ekc);
 
 extern const char *brlapi_getKeyName (unsigned int command, unsigned int argument);
 
@@ -662,7 +660,7 @@ extern unsigned char brlapi_dotBitToNumber (unsigned char bit);
 /** Maximum keyset size, i.e. maximum number of keys
  * allowed in a key set
  */
-#define BRLAPI_MAXKEYSETSIZE (BRLAPI_MAXPACKETSIZE / sizeof(brl_keycode_t))
+#define BRLAPI_MAXKEYSETSIZE (BRLAPI_MAXPACKETSIZE / sizeof(brlapi_keyCode_t))
 
 /* brlapi_readKey */
 /** Read a key from the braille keyboard
@@ -699,8 +697,8 @@ extern unsigned char brlapi_dotBitToNumber (unsigned char bit);
  * \return -1 on error or signal interrupt and *code is then undefined, 0 if
  * block was 0 and no key was pressed so far, or 1 and *code holds the key code.
  */
-int brlapi_readKey(int block, brl_keycode_t *code);
-int brlapi__readKey(brlapi_handle_t *handle, int block, brl_keycode_t *code);
+int brlapi_readKey(int block, brlapi_keyCode_t *code);
+int brlapi__readKey(brlapi_handle_t *handle, int block, brlapi_keyCode_t *code);
 
 /* brlapi_ignoreKeyRange */
 /** Ignore some key presses from the braille keyboard
@@ -711,8 +709,8 @@ int brlapi__readKey(brlapi_handle_t *handle, int block, brl_keycode_t *code);
  *
  * \note The given codes are either raw keycodes if some driver name was given
  * to brlapi_enterTtyMode(3), or \e brltty commands if NULL or "" was given. */
-int brlapi_ignoreKeyRange(brl_keycode_t x, brl_keycode_t y);
-int brlapi__ignoreKeyRange(brlapi_handle_t *handle, brl_keycode_t x, brl_keycode_t y);
+int brlapi_ignoreKeyRange(brlapi_keyCode_t x, brlapi_keyCode_t y);
+int brlapi__ignoreKeyRange(brlapi_handle_t *handle, brlapi_keyCode_t x, brlapi_keyCode_t y);
 
 /* brlapi_ignoreKeySet */
 /** Ignore some key presses from the braille keyboard
@@ -723,8 +721,8 @@ int brlapi__ignoreKeyRange(brlapi_handle_t *handle, brl_keycode_t x, brl_keycode
  *
  * \note The given codes are either raw keycodes if some driver name was given
  * to brlapi_enterTtyMode(3), or \e brltty commands if NULL or "" was given. */
-int brlapi_ignoreKeySet(const brl_keycode_t *s, unsigned int n);
-int brlapi__ignoreKeySet(brlapi_handle_t *handle, const brl_keycode_t *s, unsigned int n);
+int brlapi_ignoreKeySet(const brlapi_keyCode_t *s, unsigned int n);
+int brlapi__ignoreKeySet(brlapi_handle_t *handle, const brlapi_keyCode_t *s, unsigned int n);
 
 /* brlapi_acceptKeyRange */
 /** Accept some key presses from the braille keyboard
@@ -737,8 +735,8 @@ int brlapi__ignoreKeySet(brlapi_handle_t *handle, const brl_keycode_t *s, unsign
  *
  * \note The given codes are either raw keycodes if some driver name was given
  * to brlapi_enterTtyMode(3), or \e brltty commands if NULL or "" was given. */
-int brlapi_acceptKeyRange(brl_keycode_t x, brl_keycode_t y);
-int brlapi__acceptKeyRange(brlapi_handle_t *handle, brl_keycode_t x, brl_keycode_t y);
+int brlapi_acceptKeyRange(brlapi_keyCode_t x, brlapi_keyCode_t y);
+int brlapi__acceptKeyRange(brlapi_handle_t *handle, brlapi_keyCode_t x, brlapi_keyCode_t y);
 /* brlapi_acceptKeySet */
 /** Accept some key presses from the braille keyboard
  *
@@ -750,8 +748,8 @@ int brlapi__acceptKeyRange(brlapi_handle_t *handle, brl_keycode_t x, brl_keycode
  *
  * \note The given codes are either raw keycodes if some driver name was given
  * to brlapi_enterTtyMode(3), or \e brltty commands if NULL or "" was given. */
-int brlapi_acceptKeySet(const brl_keycode_t *s, unsigned int n);
-int brlapi__acceptKeySet(brlapi_handle_t *handle, const brl_keycode_t *s, unsigned int n);
+int brlapi_acceptKeySet(const brlapi_keyCode_t *s, unsigned int n);
+int brlapi__acceptKeySet(brlapi_handle_t *handle, const brlapi_keyCode_t *s, unsigned int n);
 /** @} */
 
 /** \defgroup brlapi_driverspecific Driver-Specific modes
@@ -1011,26 +1009,27 @@ int brlapi__writeWin(brlapi_handle_t *handle, const brlapi_writeStruct *s, int w
 #endif /* BRLAPI_WIN32 */
 
 #ifndef BRLAPI_NO_DEPRECATED
-#define brlapi_initializeConnection(s1, s2) brlapi_openConnection(s1, s2)
-#define brlapi__initializeConnection(h, s1, s2) brlapi__openConnection(h, s1, s2)
+#define brl_keycode_t brlapi_keyCode_t;
 
 #define BRLCOMMANDS NULL
+#define BRL_KEYCODE_MAX BRLAPI_KEYCODE_MAX
+
+#define brlapi_initializeConnection(s1, s2) brlapi_openConnection(s1, s2)
 #define brlapi_getTty(tty, driverName) brlapi_enterTtyMode(tty, driverName)
 #define brlapi_getTtyPath(ttys, nttys, driverName) brlapi_enterTtyModeWithPath(ttys, nttys, driverName)
-#define brlapi__getTtyPath(handle, ttys, nttys, driverName) brlapi__enterTtyModeWithPath(handle, ttys, nttys, driverName)
 #define brlapi_leaveTty brlapi_leaveTtyMode
-
 #define brlapi_unignoreKeyRange(x, y) brlapi_acceptKeyRange(x, y)
-#define brlapi__unignoreKeyRange(h, x, y) brlapi__acceptKeyRange(h, x, y)
 #define brlapi_unignoreKeySet(s, n) brlapi_acceptKeySet(s, n)
-#define brlapi__unignoreKeySet(h, s, n) brlapi__acceptKeySet(h, s, n)
-
 #define brlapi_getRaw(driverName) brlapi_enterRawMode(driverName)
 #define brlapi_leaveRaw brlapi_leaveRawMode
-
 #define brlapi_suspend(n) brlapi_suspendDriver(n)
-#define brlapi__suspend(h, n) brlapi__suspendDriver(h, n)
 #define brlapi_resume brlapi_resumeDriver
+
+#define brlapi__initializeConnection(h, s1, s2) brlapi__openConnection(h, s1, s2)
+#define brlapi__getTtyPath(handle, ttys, nttys, driverName) brlapi__enterTtyModeWithPath(handle, ttys, nttys, driverName)
+#define brlapi__unignoreKeyRange(h, x, y) brlapi__acceptKeyRange(h, x, y)
+#define brlapi__unignoreKeySet(h, s, n) brlapi__acceptKeySet(h, s, n)
+#define brlapi__suspend(h, n) brlapi__suspendDriver(h, n)
 #define brlapi__resume(h) brlapi__resumeDriver(h)
 #endif /* BRLAPI_NO_DEPRECATED */
 
