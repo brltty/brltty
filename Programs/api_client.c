@@ -87,6 +87,7 @@
 #define MAXIMUM_VIRTUAL_CONSOLE 1
 #endif /* MAXIMUM_VIRTUAL_CONSOLE */
 
+#define BRLAPI_NO_DEPRECATED
 #include "api.h"
 #include "api_protocol.h"
 

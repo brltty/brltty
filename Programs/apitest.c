@@ -24,9 +24,11 @@
 #include <signal.h>
 
 #include "options.h"
-#include "api.h"
 #include "brldefs.h"
 #include "cmd.h"
+
+#define BRLAPI_NO_DEPRECATED
+#include "api.h"
 
 static brlapi_settings_t settings;
 

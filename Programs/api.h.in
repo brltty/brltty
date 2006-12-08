@@ -239,8 +239,6 @@ typedef struct {
  */
 brlapi_fileDescriptor brlapi_openConnection(const brlapi_settings_t *clientSettings, brlapi_settings_t *usedSettings);
 brlapi_fileDescriptor brlapi__openConnection(brlapi_handle_t *handle, const brlapi_settings_t *clientSettings, brlapi_settings_t *usedSettings);
-#define brlapi_initializeConnection(s1, s2) brlapi_openConnection(s1, s2)
-#define brlapi__initializeConnection(h, s1, s2) brlapi__openConnection(h, s1, s2)
 
 /* brlapi_closeConnection */
 /** Cleanly close the socket
@@ -342,10 +340,6 @@ int brlapi__getDisplaySize(brlapi_handle_t *handle, unsigned int *x, unsigned in
  * @{
  */
 
-/* The following macro is for backward compatibility. */
-/* It should be removed in the long run. */
-#define BRLCOMMANDS NULL
-
 /* brlapi_enterTtyMode */
 /** Ask for some tty, with some key mechanism
  *
@@ -375,7 +369,6 @@ int brlapi__getDisplaySize(brlapi_handle_t *handle, unsigned int *x, unsigned in
  * \sa brlapi_leaveTtyMode(3) brlapi_readKey(3)
  */
 int brlapi_enterTtyMode(int tty, const char *driverName);
-#define brlapi_getTty(tty, driverName) brlapi_enterTtyMode(tty, driverName)
 int brlapi__enterTtyMode(brlapi_handle_t *handle, int tty, const char *driverName);
 
 /* brlapi_enterTtyModeWithPath */
@@ -392,8 +385,6 @@ int brlapi__enterTtyMode(brlapi_handle_t *handle, int tty, const char *driverNam
  */
 int brlapi_enterTtyModeWithPath(int *ttys, int nttys, const char *driverName);
 int brlapi__enterTtyModeWithPath(brlapi_handle_t *handle, int *ttys, int nttys, const char *how);
-#define brlapi_getTtyPath(ttys, nttys, driverName) brlapi_enterTtyModeWithPath(ttys, nttys, driverName)
-#define brlapi__getTtyPath(handle, ttys, nttys, driverName) brlapi__enterTtyModeWithPath(handle, ttys, nttys, driverName)
 
 /* brlapi_leaveTtyMode */
 /** Stop controlling the tty
@@ -403,7 +394,6 @@ int brlapi__enterTtyModeWithPath(brlapi_handle_t *handle, int *ttys, int nttys, 
  * \sa brlapi_enterTtyMode(3)
  */
 int brlapi_leaveTtyMode(void);
-#define brlapi_leaveTty brlapi_leaveTtyMode
 int brlapi__leaveTtyMode(brlapi_handle_t *handle);
 
 /* brlapi_setFocus */
@@ -749,8 +739,6 @@ int brlapi__ignoreKeySet(brlapi_handle_t *handle, const brl_keycode_t *s, unsign
  * to brlapi_enterTtyMode(3), or \e brltty commands if NULL or "" was given. */
 int brlapi_acceptKeyRange(brl_keycode_t x, brl_keycode_t y);
 int brlapi__acceptKeyRange(brlapi_handle_t *handle, brl_keycode_t x, brl_keycode_t y);
-#define brlapi_unignoreKeyRange(x, y) brlapi_acceptKeyRange(x, y)
-#define brlapi__unignoreKeyRange(h, x, y) brlapi__acceptKeyRange(h, x, y)
 /* brlapi_acceptKeySet */
 /** Accept some key presses from the braille keyboard
  *
@@ -764,8 +752,6 @@ int brlapi__acceptKeyRange(brlapi_handle_t *handle, brl_keycode_t x, brl_keycode
  * to brlapi_enterTtyMode(3), or \e brltty commands if NULL or "" was given. */
 int brlapi_acceptKeySet(const brl_keycode_t *s, unsigned int n);
 int brlapi__acceptKeySet(brlapi_handle_t *handle, const brl_keycode_t *s, unsigned int n);
-#define brlapi_unignoreKeySet(s, n) brlapi_acceptKeySet(s, n)
-#define brlapi__unignoreKeySet(h, s, n) brlapi__acceptKeySet(h, s, n)
 /** @} */
 
 /** \defgroup brlapi_driverspecific Driver-Specific modes
@@ -797,14 +783,12 @@ int brlapi__acceptKeySet(brlapi_handle_t *handle, const brl_keycode_t *s, unsign
  * communication will be established.
  * \return 0 on success, -1 on error */
 int brlapi_enterRawMode(const char *driverName);
-#define brlapi_getRaw(driverName) brlapi_enterRawMode(driverName) 
 int brlapi__enterRawMode(brlapi_handle_t *handle, const char *driver);
 
 /* brlapi_leaveRawMode */
 /** Leave Raw mode
  * \return 0 on success, -1 on error */
 int brlapi_leaveRawMode(void);
-#define brlapi_leaveRaw brlapi_leaveRawMode
 int brlapi__leaveRawMode(brlapi_handle_t *handle);
 
 /* brlapi_sendRaw */
@@ -833,8 +817,6 @@ ssize_t brlapi__recvRaw(brlapi_handle_t *handle, void *buf, size_t size);
  */
 int brlapi_suspendDriver(const char *driver);
 int brlapi__suspendDriver(brlapi_handle_t *handle, const char *driver);
-#define brlapi_suspend(n) brlapi_suspendDriver(n)
-#define brlapi__suspend(h, n) brlapi__suspendDriver(h, n)
 
 /* brlapi_resumeDriver */
 /** Resume braille driver
@@ -842,8 +824,6 @@ int brlapi__suspendDriver(brlapi_handle_t *handle, const char *driver);
  */
 int brlapi_resumeDriver(void);
 int brlapi__resumeDriver(brlapi_handle_t *handle);
-#define brlapi_resume brlapi_resumeDriver
-#define brlapi__resume(h) brlapi__resumeDriver(h)
 /** @} */
 
 /** \defgroup brlapi_error Error handling
@@ -1029,6 +1009,30 @@ int brlapi__writeWin(brlapi_handle_t *handle, const brlapi_writeStruct *s, int w
 #define brlapi__write(handle, s) brlapi__writeWin(handle, s, 0)
 #endif /* UNICODE */
 #endif /* BRLAPI_WIN32 */
+
+#ifndef BRLAPI_NO_DEPRECATED
+#define brlapi_initializeConnection(s1, s2) brlapi_openConnection(s1, s2)
+#define brlapi__initializeConnection(h, s1, s2) brlapi__openConnection(h, s1, s2)
+
+#define BRLCOMMANDS NULL
+#define brlapi_getTty(tty, driverName) brlapi_enterTtyMode(tty, driverName)
+#define brlapi_getTtyPath(ttys, nttys, driverName) brlapi_enterTtyModeWithPath(ttys, nttys, driverName)
+#define brlapi__getTtyPath(handle, ttys, nttys, driverName) brlapi__enterTtyModeWithPath(handle, ttys, nttys, driverName)
+#define brlapi_leaveTty brlapi_leaveTtyMode
+
+#define brlapi_unignoreKeyRange(x, y) brlapi_acceptKeyRange(x, y)
+#define brlapi__unignoreKeyRange(h, x, y) brlapi__acceptKeyRange(h, x, y)
+#define brlapi_unignoreKeySet(s, n) brlapi_acceptKeySet(s, n)
+#define brlapi__unignoreKeySet(h, s, n) brlapi__acceptKeySet(h, s, n)
+
+#define brlapi_getRaw(driverName) brlapi_enterRawMode(driverName)
+#define brlapi_leaveRaw brlapi_leaveRawMode
+
+#define brlapi_suspend(n) brlapi_suspendDriver(n)
+#define brlapi__suspend(h, n) brlapi__suspendDriver(h, n)
+#define brlapi_resume brlapi_resumeDriver
+#define brlapi__resume(h) brlapi__resumeDriver(h)
+#endif /* BRLAPI_NO_DEPRECATED */
 
 #ifdef __cplusplus
 }

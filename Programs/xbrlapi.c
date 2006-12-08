@@ -51,7 +51,9 @@
 #warning key press simulation not supported on this installation
 #endif /* HAVE_X11_EXTENSIONS_XTEST_H && HAVE_X11_EXTENSIONS_XKB_H */
 
+#define BRLAPI_NO_DEPRECATED
 #include "api.h"
+
 #include "misc.h"
 #include "options.h"
 

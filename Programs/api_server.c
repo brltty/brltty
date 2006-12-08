@@ -54,8 +54,10 @@
 #endif /* HAVE_SYS_SELECT_H */
 #endif /* WINDOWS */
 
+#define BRLAPI_NO_DEPRECATED
 #include "api.h"
 #include "api_protocol.h"
+
 #include "keyrangelist.h"
 #include "cmd.h"
 #include "brl.h"
