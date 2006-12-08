@@ -775,18 +775,20 @@ JNIEXPORT jstring JNICALL Java_BrlapiException_toString (JNIEnv *jenv, jobject j
 }
 
 JNIEXPORT void JNICALL Java_BrlapiKey_expandKeyCode (JNIEnv *jenv, jobject obj, jlong jkey) {
-  unsigned int command, argument, flags;
   jclass jckey;
-  jfieldID commandID, argumentID, flagsID;
+  jfieldID typeID, commandID, argumentID, flagsID;
   brl_keycode_t key = jkey;
+  brlapi_keyCodeExpansion expansion;
 
   GET_CLASS(jenv, jckey, obj, );
+  GET_ID(jenv, typeID,     jckey, "type",     "I", );
   GET_ID(jenv, commandID,  jckey, "command",  "I", );
   GET_ID(jenv, argumentID, jckey, "argument", "I", );
   GET_ID(jenv, flagsID,    jckey, "flags",    "I", );
 
-  brlapi_expandKeyCode(key, &command, &argument, &flags);
-  (*jenv)->SetIntField(jenv, obj, commandID,  command);
-  (*jenv)->SetIntField(jenv, obj, argumentID, argument);
-  (*jenv)->SetIntField(jenv, obj, flagsID,    flags);
+  brlapi_expandKeyCode(key, &expansion);
+  (*jenv)->SetIntField(jenv, obj, typeID,     expansion.type);
+  (*jenv)->SetIntField(jenv, obj, commandID,  expansion.command);
+  (*jenv)->SetIntField(jenv, obj, argumentID, expansion.argument);
+  (*jenv)->SetIntField(jenv, obj, flagsID,    expansion.flags);
 }

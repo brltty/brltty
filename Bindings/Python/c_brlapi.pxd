@@ -39,11 +39,18 @@ cdef extern from "Programs/api.h":
 
 	brlapi_writeStruct BRLAPI_WRITESTRUCT_INITIALIZER
 
+	ctypedef struct brlapi_keyCodeExpansion:
+		unsigned int type
+		unsigned int command
+		unsigned int argument
+		unsigned int flags
+
 	ctypedef struct brlapi_error_t:
 		int brlerror
 		int libcerror
 		int gaierror
 		char *errfun
+
 	ctypedef struct brlapi_handle_t
 
 	size_t brlapi_getHandleSize()
@@ -65,7 +72,7 @@ cdef extern from "Programs/api.h":
 	int brlapi__ignoreKeyRange(brlapi_handle_t *, unsigned long long, unsigned long long)
 	int brlapi__acceptKeyRange(brlapi_handle_t *, unsigned long long, unsigned long long)
 	int brlapi__readKey(brlapi_handle_t *, int, unsigned long long*)
-	int brlapi_expandKeyCode(unsigned long long, unsigned int *, unsigned int *, unsigned int *)
+	int brlapi_expandKeyCode(unsigned long long, brlapi_keyCodeExpansion *)
 
 	int brlapi__enterRawMode(brlapi_handle_t *, char*)
 	int brlapi__leaveRawMode(brlapi_handle_t *)

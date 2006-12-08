@@ -88,6 +88,7 @@ public class ApiTest {
 
   private static void printKey (BrlapiKey key) {
     System.out.println("got key " + Long.toHexString(key.getCode()) + " (" +
+                       Integer.toHexString(key.getType()) + "," +
                        Integer.toHexString(key.getCommand()) + "," +
                        Integer.toHexString(key.getArgument()) + "," +
                        Integer.toHexString(key.getFlags()) + ")");

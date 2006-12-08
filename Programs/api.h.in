@@ -640,24 +640,26 @@ typedef uint64_t brl_keycode_t;
 
 #include "api_constants.h"
 
+/* brlapi_keyCodeExpansion */
+/** Structure holding the components of a key code as returned by brlapi_expandKeyCode(3) */
+typedef struct {
+  unsigned int type /** the type part */;
+  unsigned int command /** the command part */;
+  unsigned int argument /** the argument part */;
+  unsigned int flags /** the flags part */;
+} brlapi_keyCodeExpansion;
+
 /* brlapi_expandKeyCode */
 /** Expand a keycode into command, argument and flags parts
  *
  * This function returns one key press's code.
  *
  * \param keyCode is the keycode to be expanded ;
- * \param command points to the integer that will receive the command part ;
- * \param argument points to the integer that will receive the argument part ;
- * \param flags points to the integer that will receive the flags part
+ * \param expansion points to the structure that will receive the individual components of the keycode
  *
  * \return 0 on success, -1 on error.
  */
-extern int brlapi_expandKeyCode (
-  brl_keycode_t keyCode,
-  unsigned int *command,
-  unsigned int *argument,
-  unsigned int *flags
-);
+extern int brlapi_expandKeyCode (brl_keycode_t keyCode, brlapi_keyCodeExpansion *expansion);
 
 extern const char *brlapi_getKeyName (unsigned int command, unsigned int argument);
 

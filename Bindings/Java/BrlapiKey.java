@@ -21,6 +21,7 @@
 
 public class BrlapiKey {
   protected final long code;
+  protected int type;
   protected int command;
   protected int argument;
   protected int flags;
@@ -34,6 +35,10 @@ public class BrlapiKey {
 
   public long getCode () {
     return code;
+  }
+
+  public int getType () {
+    return type;
   }
 
   public int getCommand () {

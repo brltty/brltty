@@ -419,17 +419,15 @@ cdef class Connection:
 			return code
 
 	def expandKeyCode(self, code):
-		"""Expand a keycode into command, argument and flags parts.
+		"""Expand a keycode into its individual components.
 		See brlapi_expandKeyCode(3)."""
-		cdef unsigned int command
-		cdef unsigned int argument
-		cdef unsigned int flags
+		cdef c_brlapi.brlapi_keyCodeExpansion expansion
 		cdef int retval
-		retval = c_brlapi.brlapi_expandKeyCode(code, <unsigned int*>&command, <unsigned int*>&argument, <unsigned int*>&flags)
+		retval = c_brlapi.brlapi_expandKeyCode(code, <c_brlapi.brlapi_keyCodeExpansion*>&expansion)
 		if retval == -1:
 			raise OperationError(returnerrno())
 		else:
-			return (command, argument, flags)
+			return (expansion.command, expansion.argument, expansion.flags)
 	
 	def ignoreKeyRange(self, range):
 		"""Ignore some key presses from the braille keyboard.

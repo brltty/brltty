@@ -1669,12 +1669,7 @@ brlapi_getArgumentWidth (brl_keycode_t keyCode) {
 }
 
 int
-brlapi_expandKeyCode (
-  brl_keycode_t keyCode,
-  unsigned int *command,
-  unsigned int *argument,
-  unsigned int *flags
-) {
+brlapi_expandKeyCode (brl_keycode_t keyCode, brlapi_keyCodeExpansion *expansion) {
   int argumentWidth = brlapi_getArgumentWidth(keyCode);
 
   if (argumentWidth != -1) {
@@ -1682,9 +1677,10 @@ brlapi_expandKeyCode (
     brl_keycode_t type = keyCode & BRLAPI_KEY_TYPE_MASK;
     brl_keycode_t code = keyCode & BRLAPI_KEY_CODE_MASK;
 
-    *command = type | (code & ~argumentMask);
-    *argument = code & argumentMask;
-    *flags = (keyCode & BRLAPI_KEY_FLAGS_MASK) >> BRLAPI_KEY_FLAGS_SHIFT;
+    expansion->type = type;
+    expansion->command = type | (code & ~argumentMask);
+    expansion->argument = code & argumentMask;
+    expansion->flags = (keyCode & BRLAPI_KEY_FLAGS_MASK) >> BRLAPI_KEY_FLAGS_SHIFT;
 
     return 0;
   }
