@@ -22,16 +22,16 @@ JAVA_ENCODING = UTF-8
 
 all: native jar doc
 
-JAVA_NATIVE = libbrlapi_java.$(LIB_EXT)
+JAVA_NATIVE = $(LIB_PFX)$(API_NAME)_java.$(LIB_EXT)
 native: $(JAVA_NATIVE)
 
-$(JAVA_NATIVE): brlapi.$O brlapi
-	$(MKLIB:<name>=brlapi) $@ brlapi.$O $(API_LDFLAGS)
+$(JAVA_NATIVE): bindings.$O $(API_NAME)
+	$(MKLIB:<name>=$(API_NAME)) $@ bindings.$O $(API_LDFLAGS)
 
-brlapi.$O:
-	$(CC) $(LIBCFLAGS) -o $@ -c $(SRC_DIR)/brlapi.c
+bindings.$O:
+	$(CC) $(LIBCFLAGS) -o $@ -c $(SRC_DIR)/bindings.c
 
-JAVA_JAR = brlapi.jar
+JAVA_JAR = $(API_NAME).jar
 jar: $(JAVA_JAR)
 
 $(JAVA_JAR): classes
@@ -45,14 +45,14 @@ $(CLASSES): $(SRC_DIR)/*.java BrlapiConstants.class
 BrlapiConstants.class: BrlapiConstants.java
 	$(JAVAC) BrlapiConstants.java
 
-BrlapiConstants.java: $(API_HEADER) $(APIDEFS_AWK) $(BRLDEFS_HDR) $(BRLDEFS_AWK) $(SRC_DIR)/constants.awk
-	$(AWK) -f $(APIDEFS_AWK) -f $(BRLDEFS_AWK) -f $(SRC_DIR)/constants.awk $(API_HEADER) $(BRLDEFS_HDR) >$@
+BrlapiConstants.java: $(API_HDR) $(API_AWK) $(BRL_HDR) $(BRL_AWK) $(SRC_DIR)/constants.awk
+	$(AWK) -f $(API_AWK) -f $(BRL_AWK) -f $(SRC_DIR)/constants.awk $(API_HDR) $(BRL_HDR) >$@
 
 doc: BrlapiConstants.java
 	$(JAVAC:javac=javadoc) -quiet -d . -author -version -use -encoding $(JAVA_ENCODING) $(SRC_DIR)/*.java BrlapiConstants.java
 
 clean::
-	-rm -f $(JAVA_NATIVE) BrlapiConstants.java *.class brlapi.jar
+	-rm -f $(JAVA_NATIVE) BrlapiConstants.java *.class $(API_NAME).jar
 	-rm -f -r resources
 	-rm -f package-list *.css *.html
 	-rm -f gjdoc.properties JAVADOC.PLACEHOLDER

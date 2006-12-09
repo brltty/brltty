@@ -19,22 +19,22 @@ include $(SRC_TOP)bindings.mk
 
 TCLSH = @TCLSH@
 
-TCL_API = libbrlapi_tcl.$(LIB_EXT)
+TCL_API = $(LIB_PFX)$(API_NAME)_tcl.$(LIB_EXT)
 
 all: $(TCL_API)
 
-$(TCL_API): brlapi.$O brlapi
-	$(MKLIB:<name>=brlapi) $@ brlapi.$O -ltcl $(API_LDFLAGS)
+$(TCL_API): bindings.$O $(API_NAME)
+	$(MKLIB:<name>=$(API_NAME)) $@ bindings.$O -ltcl $(API_LDFLAGS)
 
-brlapi.$O:
-	$(CC) $(LIBCFLAGS) -o $@ -c $(SRC_DIR)/brlapi.c
+bindings.$O:
+	$(CC) $(LIBCFLAGS) -o $@ -c $(SRC_DIR)/bindings.c
 
 clean::
 	-rm -f $(TCL_API)
 
 install: all
-	$(SRC_DIR)/pkgutil -root "$(INSTALL_ROOT)" install brlapi $(API_RELEASE) $(TCL_API)
+	$(SRC_DIR)/pkgutil -root "$(INSTALL_ROOT)" install $(API_NAME) $(API_RELEASE) $(TCL_API)
 
 uninstall:
-	-$(SRC_DIR)/pkgutil -root "$(INSTALL_ROOT)" uninstall brlapi $(API_RELEASE)
+	-$(SRC_DIR)/pkgutil -root "$(INSTALL_ROOT)" uninstall $(API_NAME) $(API_RELEASE)
 

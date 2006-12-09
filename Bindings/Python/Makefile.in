@@ -23,7 +23,7 @@ PYTHON_LDFLAGS = @PYTHON_LDFLAGS@
 PYTHON_SITE_PKG = @PYTHON_SITE_PKG@
 PYREXC_CFLAGS = @PYREXC_CFLAGS@
 
-PYTHON_MODULE = brlapi
+PYTHON_MODULE = $(API_NAME)
 PYTHON_API = $(PYTHON_MODULE).$(LIB_EXT)
 
 all: $(PYTHON_API)
@@ -31,14 +31,14 @@ all: $(PYTHON_API)
 $(PYTHON_API): brlapi.$O brlapi
 	$(MKLIB:<name>=brlapi) $@ brlapi.$O $(PYTHON_LDFLAGS) $(API_LDFLAGS)
 
-brlapi.$O: brlapi.auto.c $(API_HEADERS)
+brlapi.$O: brlapi.auto.c $(API_HDRS)
 	$(CC) $(LIBCFLAGS) $(PYREXC_CFLAGS) $(PYTHON_CPPFLAGS) -DBRLAPI_NO_DEPRECATED -o $@ -c brlapi.auto.c
 
 brlapi.auto.c: $(SRC_DIR)/brlapi.pyx $(SRC_DIR)/c_brlapi.pxd constants.auto.pyx
 	$(PYREXC) -I. -o $@ $(SRC_DIR)/brlapi.pyx
 
-constants.auto.pyx: $(API_HEADER) $(APIDEFS_AWK) $(BRLDEFS_HDR) $(BRLDEFS_AWK) $(SRC_DIR)/constants.awk
-	$(AWK) -f $(APIDEFS_AWK) -f $(BRLDEFS_AWK) -f $(SRC_DIR)/constants.awk $(API_HEADER) $(BRLDEFS_HDR) >$@
+constants.auto.pyx: $(API_HDR) $(API_AWK) $(BRL_HDR) $(BRL_AWK) $(SRC_DIR)/constants.awk
+	$(AWK) -f $(API_AWK) -f $(BRL_AWK) -f $(SRC_DIR)/constants.awk $(API_HDR) $(BRL_HDR) >$@
 
 doc: $(PYTHON_API)
 	LD_PRELOAD=$(API_LIB) PYTHONPATH=. pydoc -w $(PYTHON_MODULE)
