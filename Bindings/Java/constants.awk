@@ -56,7 +56,7 @@ function brlFlag(name, symbol, value, help) {
 }
 
 function brlDot(number, symbol, value, help) {
-  writeJavaConstant("int", "BRL_DOT" number, value, help)
+  writeJavaConstant("int", "DOT" number, value, help)
 }
 
 function apiType(name, symbol, value, help) {

@@ -48,7 +48,7 @@ function brlFlag(name, symbol, value, help) {
 }
 
 function brlDot(number, symbol, value, help) {
-  writePythonAssignment("BRL_DOT" number, value)
+  writePythonAssignment("DOT" number, value)
 }
 
 function apiType(name, symbol, value, help) {

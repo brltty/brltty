@@ -19,7 +19,7 @@ w = brlapi.Write()
 w.regionBegin = 1
 w.regionSize = 40
 w.text = u"Press any key to exit ¤                 "
-underline = chr(brlapi.BRL_DOT7 + brlapi.BRL_DOT8)
+underline = chr(brlapi.DOT7 + brlapi.DOT8)
 w.attrOr = "".center(21,underline) + "".center(19,chr(0))
 b.write(w)
 b.readKey()
