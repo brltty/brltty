@@ -1028,15 +1028,15 @@ int brlapi__writeWin(brlapi_handle_t *handle, const brlapi_writeStruct_t *s, int
 #define BRLCOMMANDS NULL
 #define BRL_KEYCODE_MAX BRLAPI_KEYCODE_MAX
 
-#define brlapi_initializeConnection(s1, s2) brlapi_openConnection(s1, s2)
-#define brlapi_getTty(tty, driverName) brlapi_enterTtyMode(tty, driverName)
-#define brlapi_getTtyPath(ttys, nttys, driverName) brlapi_enterTtyModeWithPath(ttys, nttys, driverName)
+#define brlapi_initializeConnection brlapi_openConnection
+#define brlapi_getTty brlapi_enterTtyMode
+#define brlapi_getTtyPath brlapi_enterTtyModeWithPath
 #define brlapi_leaveTty brlapi_leaveTtyMode
-#define brlapi_unignoreKeyRange(x, y) brlapi_acceptKeyRange(x, y)
-#define brlapi_unignoreKeySet(s, n) brlapi_acceptKeySet(s, n)
-#define brlapi_getRaw(driverName) brlapi_enterRawMode(driverName)
+#define brlapi_unignoreKeyRange brlapi_acceptKeyRange
+#define brlapi_unignoreKeySet brlapi_acceptKeySet
+#define brlapi_getRaw brlapi_enterRawMode
 #define brlapi_leaveRaw brlapi_leaveRawMode
-#define brlapi_suspend(n) brlapi_suspendDriver(n)
+#define brlapi_suspend brlapi_suspendDriver
 #define brlapi_resume brlapi_resumeDriver
 
 #define BRLERR_SUCCESS                 BRLAPI_ERROR_SUCCESS
