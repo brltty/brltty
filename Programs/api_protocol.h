@@ -81,21 +81,21 @@ extern "C" {
 typedef struct {
   uint32_t size;
   brlapi_type_t type;
-} header_t;
+} brlapi_header_t;
 
-#define BRLAPI_HEADERSIZE sizeof(header_t)
+#define BRLAPI_HEADERSIZE sizeof(brlapi_header_t)
 
 /** Structure of authorization packets */
 typedef struct {
   uint32_t protocolVersion;
   uint32_t type;
   unsigned char key;
-} authClientStruct;
+} brlapi_authClientStruct_t;
 
 typedef struct {
   uint32_t protocolVersion;
   uint32_t type[1];
-} authServerStruct;
+} brlapi_authServerStruct_t;
 
 #define BRLAPI_AUTH_NONE 'N' /**< No or implicit authorization              */
 #define BRLAPI_AUTH_KEY  'K' /**< Key authorization                         */
@@ -106,14 +106,14 @@ typedef struct {
   uint32_t code;
   brlapi_type_t type;
   unsigned char packet;
-} errorPacket_t;
+} brlapi_errorPacket_t;
 
 /** Structure of enterRawMode / suspend packets */
 typedef struct {
   uint32_t magic;
   unsigned char nameLength;
   char name;
-} getDriveSpecificModePacket_t;
+} brlapi_getDriverSpecificModePacket_t;
 
 /** Flags for writing */
 #define BRLAPI_WF_DISPLAYNUMBER 0X01    /**< Display number                 */
@@ -128,7 +128,7 @@ typedef struct {
 typedef struct {
   uint32_t flags; /** Flags to tell which fields are present */
   unsigned char data; /** Fields in the same order as flag weight */
-} writeStruct;
+} brlapi_writeStructPacket_t;
 
 /* brlapi_writePacket */
 /** Send a packet to \e BrlAPI server

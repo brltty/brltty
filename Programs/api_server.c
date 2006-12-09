@@ -162,7 +162,7 @@ typedef enum {
 } PacketState;
 
 typedef struct {
-  header_t header;
+  brlapi_header_t header;
   unsigned char content[BRLAPI_MAXPACKETSIZE+1]; /* +1 for additional \0 */
   PacketState state;
   int readBytes; /* Already read bytes */
@@ -364,7 +364,7 @@ static void writeException(FileDescriptor fd, unsigned int err, brlapi_type_t ty
 {
   int hdrsize, esize;
   unsigned char epacket[BRLAPI_MAXPACKETSIZE];
-  errorPacket_t * errorPacket = (errorPacket_t *) epacket;
+  brlapi_errorPacket_t * errorPacket = (brlapi_errorPacket_t *) epacket;
   LogPrint(LOG_DEBUG,"exception %u for packet type %lu on fd %"PRIFD, err, (unsigned long)type, fd);
   hdrsize = sizeof(errorPacket->code)+sizeof(errorPacket->type);
   errorPacket->code = htonl(err);
@@ -977,7 +977,7 @@ static int handleKeySet(Connection *c, brlapi_type_t type, unsigned char *packet
 
 static int handleWrite(Connection *c, brlapi_type_t type, unsigned char *packet, size_t size)
 {
-  writeStruct *ws = (writeStruct *) packet;
+  brlapi_writeStructPacket_t *ws = (brlapi_writeStructPacket_t *) packet;
   unsigned char *text = NULL, *orAttr = NULL, *andAttr = NULL;
   unsigned int rbeg, rsiz, textLen = 0;
   int cursor = -1;
@@ -1097,7 +1097,7 @@ static int handleWrite(Connection *c, brlapi_type_t type, unsigned char *packet,
 
 static int checkDriverSpecificModePacket(Connection *c, unsigned char *packet, size_t size)
 {
-  getDriveSpecificModePacket_t *getDevicePacket = (getDriveSpecificModePacket_t *) packet;
+  brlapi_getDriverSpecificModePacket_t *getDevicePacket = (brlapi_getDriverSpecificModePacket_t *) packet;
   int remaining = size;
   CHECKERR(remaining>sizeof(uint32_t), BRLAPI_ERROR_INVALID_PACKET, "packet too small");
   remaining -= sizeof(uint32_t);
@@ -1207,7 +1207,7 @@ static void handleNewConnection(Connection *c)
 {
   unsigned char packet[BRLAPI_MAXPACKETSIZE];
   int nbmethods = 0;
-  authServerStruct *authPacket = (authServerStruct *) packet;
+  brlapi_authServerStruct_t *authPacket = (brlapi_authServerStruct_t *) packet;
   authPacket->protocolVersion = htonl(BRLAPI_PROTOCOL_VERSION);
 
   /* TODO: move this inside auth.c */
@@ -1227,7 +1227,7 @@ static int handleUnauthorizedConnection(Connection *c, brlapi_type_t type, unsig
   size_t authKeyLength = 0;
   unsigned char authKey[BRLAPI_MAXPACKETSIZE];
   int authCorrect = 0;
-  authClientStruct *authPacket = (authClientStruct *) packet;
+  brlapi_authClientStruct_t *authPacket = (brlapi_authClientStruct_t *) packet;
   int remaining = size;
   uint32_t authType;
 

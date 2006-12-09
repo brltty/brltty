@@ -237,7 +237,7 @@ static ssize_t brlapi__doWaitForPacket(brlapi_handle_t *handle, brlapi_type_t ex
   brlapi_type_t type;
   ssize_t res;
   uint32_t *code = (uint32_t *) localPacket;
-  errorPacket_t *errorPacket = (errorPacket_t *) localPacket;
+  brlapi_errorPacket_t *errorPacket = (brlapi_errorPacket_t *) localPacket;
 
   res = brlapi_readPacketHeader(handle->fileDescriptor, &type);
   if (res<0) return res; /* reports EINTR too */
@@ -576,8 +576,8 @@ brlapi_fileDescriptor brlapi__openConnection(brlapi_handle_t *handle, const brla
 {
   unsigned char packet[BRLAPI_MAXPACKETSIZE];
   unsigned char serverPacket[BRLAPI_MAXPACKETSIZE];
-  authClientStruct *auth = (authClientStruct *) packet;
-  authServerStruct *authServer = (authServerStruct *) serverPacket;
+  brlapi_authClientStruct_t *auth = (brlapi_authClientStruct_t *) packet;
+  brlapi_authServerStruct_t *authServer = (brlapi_authServerStruct_t *) serverPacket;
   uint32_t *type;
   int authServerLen;
 
@@ -689,7 +689,7 @@ static int brlapi__getDriverSpecific(brlapi_handle_t *handle, const char *driver
 {
   int res;
   unsigned char packet[BRLAPI_MAXPACKETSIZE];
-  getDriveSpecificModePacket_t *driverPacket = (getDriveSpecificModePacket_t *) packet;
+  brlapi_getDriverSpecificModePacket_t *driverPacket = (brlapi_getDriverSpecificModePacket_t *) packet;
   unsigned int n = strlen(driver);
   if (n>BRLAPI_MAXNAMELENGTH) {
     brlapi_errno = BRLAPI_ERROR_INVALID_PARAMETER;
@@ -1111,7 +1111,7 @@ int brlapi__writeText(brlapi_handle_t *handle, int cursor, const char *str)
   int dispSize = handle->brlx * handle->brly;
   unsigned int min;
   unsigned char packet[BRLAPI_MAXPACKETSIZE];
-  writeStruct *ws = (writeStruct *) packet;
+  brlapi_writeStructPacket_t *ws = (brlapi_writeStructPacket_t *) packet;
   unsigned char *p = &ws->data;
   char *locale;
   int res;
@@ -1263,7 +1263,7 @@ int brlapi__write(brlapi_handle_t *handle, const brlapi_writeStruct_t *s)
   int dispSize = handle->brlx * handle->brly;
   unsigned int rbeg, rsiz, strLen;
   unsigned char packet[BRLAPI_MAXPACKETSIZE];
-  writeStruct *ws = (writeStruct *) packet;
+  brlapi_writeStructPacket_t *ws = (brlapi_writeStructPacket_t *) packet;
   unsigned char *p = &ws->data;
   unsigned char *end = &packet[BRLAPI_MAXPACKETSIZE];
   int res;
