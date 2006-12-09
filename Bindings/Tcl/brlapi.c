@@ -70,12 +70,12 @@ setBrlapiError (Tcl_Interp *interp) {
   int number;
 
   switch (brlapi_error.brlerrno) {
-    case BRLERR_LIBCERR:
+    case BRLAPI_ERROR_LIBCERR:
       name = "LIBC";
       number = brlapi_error.libcerrno;
       break;
 
-    case BRLERR_GAIERR:
+    case BRLAPI_ERROR_GAIERR:
       name = "GAI";
       number = brlapi_error.gaierrno;
       break;

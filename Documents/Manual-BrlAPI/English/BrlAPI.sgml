@@ -1163,7 +1163,7 @@ are transmitted this way:
 <p>
 The size does not include the { size, type } header, so that packets which
 don't need any data have a size of 0 byte. The type of the packet can be
-either of <tt/BRLPACKET_*/ constants defined in <tt/api_protocol.h/. Each type of
+either of <tt/BRLAPI_PACKET_*/ constants defined in <tt/api_protocol.h/. Each type of
 packet will be further discussed below.
 
 <p>
@@ -1180,10 +1180,10 @@ As described below, many packets are `acknowledged'. It means that upon
 reception, the server sends either:
 
 <itemize>
-<item>a <tt/BRLPACKET_ACK/ packet, with no data, which means the operation
+<item>a <tt/BRLAPI_PACKET_ACK/ packet, with no data, which means the operation
 corresponding to the received packet was successful,
-<item>or a <tt/BRLPACKET_ERROR/ packet, the data being an integer
-which should be one of <tt/BRLERR_*/ constants. This
+<item>or a <tt/BRLAPI_PACKET_ERROR/ packet, the data being an integer
+which should be one of <tt/BRLAPI_ERROR_*/ constants. This
 means the operation corresponding to the received packet failed.
 </itemize>
 
@@ -1193,12 +1193,12 @@ Upon reception, the server will send either:
 
 <itemize>
 <item>a packet of the same type, its data being the response,
-<item>or a <tt/BRLPACKET_ERROR/ packet.
+<item>or a <tt/BRLAPI_PACKET_ERROR/ packet.
 </itemize>
 
 <p>
 If at some point an ill-formed or non-sense packet is received by the server,
-and <tt/BRLPACKET_EXCEPTION/ is returned, holding the guilty packet for
+and <tt/BRLAPI_PACKET_EXCEPTION/ is returned, holding the guilty packet for
 further analysis.
 
 <sect1>Operating modes
@@ -1209,18 +1209,18 @@ four following modes:
 <itemize>
 <item>authorization mode: this is the initial mode, when the client hasn't
 got the authorization to use the server yet. The server first sends a
-<tt/BRLPACKET_AUTH/ packet that announces which authorization methods are
-allowed. The client can then send <tt/BRLPACKET_AUTH/ packets,
+<tt/BRLAPI_PACKET_AUTH/ packet that announces which authorization methods are
+allowed. The client can then send <tt/BRLAPI_PACKET_AUTH/ packets,
 which makes the connection enter normal mode.
 
 
 <item>normal mode: the client is authorized to use the server, but didn't ask for a tty
 or raw mode. The client can send either of these types of packet:
   <itemize>
-  <item><tt/BRLPACKET_GETDRIVERID/, <tt/BRLPACKET_GETDRIVERNAME/
-  or <tt/BRLPACKET_GETDISPLAYSIZE/ to get pieces of information from the server,
-  <item><tt/BRLPACKET_ENTERTTY/MODE to enter tty handling mode,
-  <item><tt/BRLPACKET_ENTERRAWMODE/ to enter raw mode,
+  <item><tt/BRLAPI_PACKET_GETDRIVERID/, <tt/BRLAPI_PACKET_GETDRIVERNAME/
+  or <tt/BRLAPI_PACKET_GETDISPLAYSIZE/ to get pieces of information from the server,
+  <item><tt/BRLAPI_PACKET_ENTERTTY/MODE to enter tty handling mode,
+  <item><tt/BRLAPI_PACKET_ENTERRAWMODE/ to enter raw mode,
   </itemize>
 
 
@@ -1228,34 +1228,34 @@ or raw mode. The client can send either of these types of packet:
 no power on it any more, masked keys excepted. It's up to the client to manage
 display and keypresses. For this, it can send either of these types of packet:
   <itemize>
-  <item><tt/BRLPACKET_ENTERTY/MODE to switch to another tty, but how key presses
+  <item><tt/BRLAPI_PACKET_ENTERTY/MODE to switch to another tty, but how key presses
   should be sent mustn't change,
-  <item><tt/BRLPACKET_LEAVETTYMODE/ to leave tty handling mode and go back to
+  <item><tt/BRLAPI_PACKET_LEAVETTYMODE/ to leave tty handling mode and go back to
   normal mode,
-  <item><tt/BRLPACKET_IGNOREKEYRANGE/, <tt/BRLPACKET_ACCEPTKEYRANGE/,
-  <tt/BRLPACKET_IGNOREKEYSET/, <tt/BRLPACKET_ACCEPTKEYSET/ to mask and unmask
+  <item><tt/BRLAPI_PACKET_IGNOREKEYRANGE/, <tt/BRLAPI_PACKET_ACCEPTKEYRANGE/,
+  <tt/BRLAPI_PACKET_IGNOREKEYSET/, <tt/BRLAPI_PACKET_ACCEPTKEYSET/ to mask and unmask
   keys,
-  <item><tt/BRLPACKET_WRITE/ to display text on this tty,
-  <item><tt/BRLPACKET_ENTERRAWMODE/ to enter raw mode,
-  <item><tt/BRLPACKET_GETDRIVERID/, <tt/BRLPACKET_GETDRIVERNAME/
-  or <tt/BRLPACKET_GETDISPLAYSIZE/ to get pieces of information from the server,
+  <item><tt/BRLAPI_PACKET_WRITE/ to display text on this tty,
+  <item><tt/BRLAPI_PACKET_ENTERRAWMODE/ to enter raw mode,
+  <item><tt/BRLAPI_PACKET_GETDRIVERID/, <tt/BRLAPI_PACKET_GETDRIVERNAME/
+  or <tt/BRLAPI_PACKET_GETDISPLAYSIZE/ to get pieces of information from the server,
   </itemize>
-And the server might send <tt/BRLPACKET_KEY/ packets to signal key presses.
+And the server might send <tt/BRLAPI_PACKET_KEY/ packets to signal key presses.
 
 
 <item>raw mode: the client wants to exchange packets directly with the braille
 terminal. Only these types of packet will be accepted.
   <itemize>
-  <item><tt/BRLPACKET_LEAVERAWMODE/ to get back to previous mode, either normal or
+  <item><tt/BRLAPI_PACKET_LEAVERAWMODE/ to get back to previous mode, either normal or
   tty handling mode.
-  <item><tt/BRLPACKET_PACKET/ to send a packet to the braille terminal.
+  <item><tt/BRLAPI_PACKET_PACKET/ to send a packet to the braille terminal.
   </itemize>
-And the server might send <tt/BRLPACKET_PACKET/ packets to give received packets
+And the server might send <tt/BRLAPI_PACKET_PACKET/ packets to give received packets
 from the terminal to the client.
 
 <item>suspend mode: the client wants to completely drive the braille terminal.
 The device driver is hence kept closed. No type of packet is allowed except
-<tt/BRLPACKET_RESUME/
+<tt/BRLAPI_PACKET_RESUME/
 </itemize>
 
 Termination of the connection is initiated by the client in normal mode by
@@ -1270,7 +1270,7 @@ Here is described the semantics of each type of packet. Most of them are
 directly linked to some of <em/BrlAPI/'s library's functions. Reading their
 online manual page as well will hence be of good help for understanding.
 
-<sect2><tt/BRLPACKET_AUTH/ (see <em/brlapi_loadAuthKey()/)
+<sect2><tt/BRLAPI_PACKET_AUTH/ (see <em/brlapi_loadAuthKey()/)
 <p>
 This must be the first packet ever transmitted from the server to the client and
 from the client to the server. The server sends one first for letting the client
@@ -1284,15 +1284,15 @@ is tried (as an integer), and eventually some data (if the authorization type
 needs it).
 
 If the protocol version is not the same as the server's, a
-<tt/BRLERR_PROTOCOL_VERSION/ error packet is returned and the connection is
+<tt/BRLAPI_ERROR_PROTOCOL_VERSION/ error packet is returned and the connection is
 closed.
 
 If the authorization is successful, the server acknowledges the packet, and
-other types of packets might be used, other <tt/BRLPACKET_AUTH/ shouldn't be
+other types of packets might be used, other <tt/BRLAPI_PACKET_AUTH/ shouldn't be
 sent by the client.
 
 If the authorization is not successful, the server sends a
-<tt/BRLERR_CONNREFUSED/ error, and the client can try another authorization
+<tt/BRLAPI_ERROR_CONNREFUSED/ error, and the client can try another authorization
 method.
 
 Authorization methods are as follow:
@@ -1309,23 +1309,23 @@ the credentials sufficient.
 Note: when the Operating system permits it, the server may use implicit
 credential check, and then advertise the <tt/none/ method.
 
-<sect2><tt/BRLPACKET_GETDRIVERID/ (see <em/brlapi_getDriverId()/)
+<sect2><tt/BRLAPI_PACKET_GETDRIVERID/ (see <em/brlapi_getDriverId()/)
 <p>
 This should be sent by the client when it needs the 2-char identifier of
 the current <tt/brltty/ driver. The returned string is \0 terminated.
 
-<sect2><tt/BRLPACKET_GETDRIVERNAME/ (see <em/brlapi_getDriverName()/)
+<sect2><tt/BRLAPI_PACKET_GETDRIVERNAME/ (see <em/brlapi_getDriverName()/)
 <p>
 This should be sent by the client when it needs the full name of
 the current <tt/brltty/ driver. The returned string is \0 terminated.
 
-<sect2><tt/BRLPACKET_GETDISPLAYSIZE/ (see <em/brlapi_getDisplaySize()/)
+<sect2><tt/BRLAPI_PACKET_GETDISPLAYSIZE/ (see <em/brlapi_getDisplaySize()/)
 <p>
 This should be sent by the client when it needs to know the braille display
 size. The returned data are two integers: width and then height.
 
-<sect2><tt/BRLPACKET_ENTERTTYMODE/ (see <em/brlapi_enterTtyMode()/ and
-<em/brlapi_enterTtyModePath()/)
+<sect2><tt/BRLAPI_PACKET_ENTERTTYMODE/ (see <em/brlapi_enterTtyMode()/ and
+<em/brlapi_enterTtyModeWithPath()/)
 <p>
 This should be sent by the client to get control of a tty. Sent data are
 first a series of integers: the first one gives the number of following
@@ -1337,43 +1337,43 @@ either a driver name or "", preceded by the number of caracters in the driver
 name (0 in the case of ""), as an unsigned byte. This packet is then
 acknowledged by the server.
 
-<sect2><tt/BRLPACKET_KEY/ (see <em/brlapi_readKey()/)
+<sect2><tt/BRLAPI_PACKET_KEY/ (see <em/brlapi_readKey()/)
 <p>
 As soon as the client gets a tty, it must be prepared to handle
-<tt/BRLPACKET_KEY/ incoming packets
+<tt/BRLAPI_PACKET_KEY/ incoming packets
 at any time (as soon as the key
 was pressed on the braille terminal, hopefuly).
 The data holds a key code as 2 integers, or
 the key flags then the command code
 as 2 integers, depending on what has been request in the
-<tt/BRLPACKET_ENTERTTYMODE/ packet.
+<tt/BRLAPI_PACKET_ENTERTTYMODE/ packet.
 
-<sect2><tt/BRLPACKET_SETFOCUS/ (see <em/brlapi_setFocus()/)
+<sect2><tt/BRLAPI_PACKET_SETFOCUS/ (see <em/brlapi_setFocus()/)
 
 <p>
 For the server to know which tty is active, one particular client is responsible
-for sending <tt/BRLPACKET_SETFOCUS/ packets. They hold a single integer telling
+for sending <tt/BRLAPI_PACKET_SETFOCUS/ packets. They hold a single integer telling
 the new current tty. For instance, when running an X server on VT 7, the
-<tt/xbrlapi/ client would have sent a <tt/BRLPACKET_ENTERTTYMODE(7)/ and will send
+<tt/xbrlapi/ client would have sent a <tt/BRLAPI_PACKET_ENTERTTYMODE(7)/ and will send
 window IDs whenever X focus changes, allowing display and keypresses switching
 between xterms.
 
-<sect2><tt/BRLPACKET_LEAVETTYMODE/ (see <em/brlapi_leaveTtyMode()/)
+<sect2><tt/BRLAPI_PACKET_LEAVETTYMODE/ (see <em/brlapi_leaveTtyMode()/)
 <p>
 This should be sent to free the tty and masked keys lists.
 This is acknowledged by the server.
 
-<sect2><tt/BRLPACKET_IGNOREKEYRANGE/, <tt/BRLPACKET_ACCEPTKEYRANGE/,
-<tt/BRLPACKET_IGNOREKEYSET/ and <tt/BRLPACKET_ACCEPTKEYSET/ (see
+<sect2><tt/BRLAPI_PACKET_IGNOREKEYRANGE/, <tt/BRLAPI_PACKET_ACCEPTKEYRANGE/,
+<tt/BRLAPI_PACKET_IGNOREKEYSET/ and <tt/BRLAPI_PACKET_ACCEPTKEYSET/ (see
 <em/brlapi_ignoreKeyRange()/, <em/brlapi_acceptKeyRange()/,
 <em/brlapi_ignoreKeySet()/, and <em/brlapi_acceptKeySet()/)
 <p>
 If the client doesn't want every key press to be signaled to it, but some of
 them to be given to <tt/brltty/ for normal processing, it can send
-<tt/BRLPACKET_IGNOREKEYRANGE/ (resp. <tt/BRLPACKET_IGNOREKEYSET/) packets to
+<tt/BRLAPI_PACKET_IGNOREKEYRANGE/ (resp. <tt/BRLAPI_PACKET_IGNOREKEYSET/) packets to
 tell ranges (resp. sets) of key codes which shouldn't be
-sent to it, but given to <tt/brltty/, and <tt/BRLPACKET_ACCEPTKEYRANGE/
-(resp. <tt/BRLPACKET_ACCEPTKEYSET/) packets to tell ranges (resp. sets)
+sent to it, but given to <tt/brltty/, and <tt/BRLAPI_PACKET_ACCEPTKEYRANGE/
+(resp. <tt/BRLAPI_PACKET_ACCEPTKEYSET/) packets to tell ranges (resp. sets)
 of key codes which should be sent to it, and not given to
 <tt/brltty/. The server keeps a dynamic list of ranges, so that arbitrary
 sequences of such packets can be sent.
@@ -1381,10 +1381,10 @@ For ranges, Data are 2 pairs of integers: the lower and the
 upper boundaries; lower and upper must be equal to tell one key, for instance.
 For Sets, Data simply consists of pairs of integers, one per key in the set.
 
-<sect2><tt/BRLPACKET_WRITE/ (see <em/brlapi_write()/)
+<sect2><tt/BRLAPI_PACKET_WRITE/ (see <em/brlapi_write()/)
 <p>
 To display text on the braille terminal and set the position of the cursor,
-the client can send a <tt/BRLPACKET_WRITE/ packet. The packet begins
+the client can send a <tt/BRLAPI_PACKET_WRITE/ packet. The packet begins
 with an integer holding flags (see <tt/BRLAPI_WF_*/). These flags indicate
 which data will then be available, in the following order (corresponding to
 flag weight):
@@ -1420,39 +1420,39 @@ correspond to each text's wide <em/character/, be it a combining or a
 double-width character.
 </itemize>
 
-A <tt/BRLPACKET_WRITE/ packet without any flag (and hence no data) means a
+A <tt/BRLAPI_PACKET_WRITE/ packet without any flag (and hence no data) means a
 "void" WRITE: the server clears the output buffer for this connection.
 
-<sect2><tt/BRLPACKET_ENTERRAWMODE/ (see <em/brlapi_enterRawMode()/)
+<sect2><tt/BRLAPI_PACKET_ENTERRAWMODE/ (see <em/brlapi_enterRawMode()/)
 <p>
-To enter raw mode, the client must send a <tt/BRLPACKET_ENTERRAWMODE/ packet,
+To enter raw mode, the client must send a <tt/BRLAPI_PACKET_ENTERRAWMODE/ packet,
 which is acknowledged. Once in raw mode, no other packet than
-<tt/BRLPACKET_LEAVERAWMODE/ or <tt/BRLPACKET_PACKET/ will be accepted.
-The data must hold the special value <tt/BRLDEVICE_MAGIC/: <tt/0xdeadbeef/, then
+<tt/BRLAPI_PACKET_LEAVERAWMODE/ or <tt/BRLAPI_PACKET_PACKET/ will be accepted.
+The data must hold the special value <tt/BRLAPI_DEVICE_MAGIC/: <tt/0xdeadbeef/, then
 the name of the driver (one byte for the length, then the name) to avoid
 erroneous raw mode activating.
 
-<sect2><tt/BRLPACKET_LEAVERAWMODE/ (see <em/brlapi_leaveRawMode()/)
+<sect2><tt/BRLAPI_PACKET_LEAVERAWMODE/ (see <em/brlapi_leaveRawMode()/)
 <p>
-To leave raw mode, the client must send a <tt/BRLPACKET_LEAVERAWMODE/ packet, which
+To leave raw mode, the client must send a <tt/BRLAPI_PACKET_LEAVERAWMODE/ packet, which
 is acknowledged.
 
-<sect2><tt/BRLPACKET_PACKET/ (see <em/brlapi_sendRaw()/ and
+<sect2><tt/BRLAPI_PACKET_PACKET/ (see <em/brlapi_sendRaw()/ and
 <em/brlapi_recvRaw()/)
 <p>
-While in raw mode, only <tt/BRLPACKET_PACKET/ packets can be exchanged between
+While in raw mode, only <tt/BRLAPI_PACKET_PACKET/ packets can be exchanged between
 the client and the server: to send a packet to the braille terminal, the
-client merely sends a <tt/BRLPACKET_PACKET/ packet, its data being the packet to
+client merely sends a <tt/BRLAPI_PACKET_PACKET/ packet, its data being the packet to
 send to the terminal. Whenever its receives a packet from the terminal, the
 server does exactly the same, so that packet exchanges between the terminal and
 the server are exactly reproduced between the server and the client.
 
-<sect2><tt/BRLPACKET_SUSPENDDRIVER/ (see <em/brlapi_suspendDriver()/)
+<sect2><tt/BRLAPI_PACKET_SUSPENDDRIVER/ (see <em/brlapi_suspendDriver()/)
 <p>
-To enter suspend mode, the client must send a <tt/BRLPACKET_SUSPEND/ packet,
+To enter suspend mode, the client must send a <tt/BRLAPI_PACKET_SUSPEND/ packet,
 which is acknowledge. Once in suspend mode, no other packet than
-<tt/BRLPACKET_RESUME/ will be accepted.
-The data must hold the special value <tt/BRLDEVICE_MAGIC/: <tt/0xdeadbeef/,
+<tt/BRLAPI_PACKET_RESUME/ will be accepted.
+The data must hold the special value <tt/BRLAPI_DEVICE_MAGIC/: <tt/0xdeadbeef/,
 then the name of the driver (one byte for the length, then the name) to avoid
 erroneous raw mode activating.
 

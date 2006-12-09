@@ -346,7 +346,7 @@ static int resumeDriver(BrailleDisplay *brl) {
 /* Sends an acknowledgement on the given socket */
 static inline void writeAck(FileDescriptor fd)
 {
-  brlapiserver_writePacket(fd,BRLPACKET_ACK,NULL,0);
+  brlapiserver_writePacket(fd,BRLAPI_PACKET_ACK,NULL,0);
 }
 
 /* Function : writeError */
@@ -355,12 +355,12 @@ static void writeError(FileDescriptor fd, unsigned int err)
 {
   uint32_t code = htonl(err);
   LogPrint(LOG_DEBUG,"error %u on fd %"PRIFD, err, fd);
-  brlapiserver_writePacket(fd,BRLPACKET_ERROR,&code,sizeof(code));
+  brlapiserver_writePacket(fd,BRLAPI_PACKET_ERROR,&code,sizeof(code));
 }
 
 /* Function : writeException */
 /* Sends the given error code on the given socket */
-static void writeException(FileDescriptor fd, unsigned int err, brl_type_t type, const void *packet, size_t size)
+static void writeException(FileDescriptor fd, unsigned int err, brlapi_type_t type, const void *packet, size_t size)
 {
   int hdrsize, esize;
   unsigned char epacket[BRLAPI_MAXPACKETSIZE];
@@ -371,7 +371,7 @@ static void writeException(FileDescriptor fd, unsigned int err, brl_type_t type,
   errorPacket->type = htonl(type);
   esize = MIN(size, BRLAPI_MAXPACKETSIZE-hdrsize);
   if ((packet!=NULL) && (size!=0)) memcpy(&errorPacket->packet, packet, esize);
-  brlapiserver_writePacket(fd,BRLPACKET_EXCEPTION,epacket, hdrsize+esize);
+  brlapiserver_writePacket(fd,BRLAPI_PACKET_EXCEPTION,epacket, hdrsize+esize);
 }
 
 static void writeKey(FileDescriptor fd, brlapi_keyCode_t key) {
@@ -379,7 +379,7 @@ static void writeKey(FileDescriptor fd, brlapi_keyCode_t key) {
   buf[0] = htonl(key >> 32);
   buf[1] = htonl(key & 0xffffffff);
   LogPrint(LOG_DEBUG,"writing key %08"PRIx32" %08"PRIx32,buf[0],buf[1]);
-  brlapiserver_writePacket(fd,BRLPACKET_KEY,&buf,sizeof(buf));
+  brlapiserver_writePacket(fd,BRLAPI_PACKET_KEY,&buf,sizeof(buf));
 }
 
 /* Function: resetPacket */
@@ -449,7 +449,7 @@ read:
 #endif /* WINDOWS */
   if (res==0) return -2; /* EOF */
   packet->readBytes += res;
-  if ((packet->state==READING_HEADER) && (packet->readBytes==HEADERSIZE)) {
+  if ((packet->state==READING_HEADER) && (packet->readBytes==BRLAPI_HEADERSIZE)) {
     packet->header.size = ntohl(packet->header.size);
     packet->header.type = ntohl(packet->header.type);
     if (packet->header.size==0) goto out;
@@ -490,7 +490,7 @@ out:
   return 1;
 }
 
-typedef int(*PacketHandler)(Connection *, brl_type_t, unsigned char *, size_t);
+typedef int(*PacketHandler)(Connection *, brlapi_type_t, unsigned char *, size_t);
 
 typedef struct { /* packet handlers */
   PacketHandler getDriverId;
@@ -646,7 +646,7 @@ static Connection *createConnection(FileDescriptor fd, time_t currentTime)
 outmalloc:
   free(c);
 out:
-  writeError(fd,BRLERR_NOMEM);
+  writeError(fd,BRLAPI_ERROR_NOMEM);
   closeFileDescriptor(fd);
   return NULL;
 }
@@ -756,36 +756,36 @@ static inline void LogPrintRequest(int type, FileDescriptor fd)
   LogPrint(LOG_DEBUG, "Received %s request on fd %"PRIFD, brlapiserver_packetType(type), fd);  
 }
 
-static int handleGetDriver(Connection *c, brl_type_t type, size_t size, const char *str)
+static int handleGetDriver(Connection *c, brlapi_type_t type, size_t size, const char *str)
 {
   int len = strlen(str);
   LogPrintRequest(type, c->fd);
-  CHECKERR(size==0,BRLERR_INVALID_PACKET,"packet should be empty");
-  CHECKERR(!c->raw,BRLERR_ILLEGAL_INSTRUCTION,"not allowed in raw mode");
+  CHECKERR(size==0,BRLAPI_ERROR_INVALID_PACKET,"packet should be empty");
+  CHECKERR(!c->raw,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed in raw mode");
   brlapiserver_writePacket(c->fd, type, str, len+1);
   return 0;
 }
 
-static int handleGetDriverId(Connection *c, brl_type_t type, unsigned char *packet, size_t size)
+static int handleGetDriverId(Connection *c, brlapi_type_t type, unsigned char *packet, size_t size)
 {
   return handleGetDriver(c, type, size, braille->definition.code);
 }
 
-static int handleGetDriverName(Connection *c, brl_type_t type, unsigned char *packet, size_t size)
+static int handleGetDriverName(Connection *c, brlapi_type_t type, unsigned char *packet, size_t size)
 {
   return handleGetDriver(c, type, size, braille->definition.name);
 }
 
-static int handleGetDisplaySize(Connection *c, brl_type_t type, unsigned char *packet, size_t size)
+static int handleGetDisplaySize(Connection *c, brlapi_type_t type, unsigned char *packet, size_t size)
 {
   LogPrintRequest(type, c->fd);
-  CHECKERR(size==0,BRLERR_INVALID_PACKET,"packet should be empty");
-  CHECKERR(!c->raw,BRLERR_ILLEGAL_INSTRUCTION,"not allowed in raw mode");
-  brlapiserver_writePacket(c->fd,BRLPACKET_GETDISPLAYSIZE,&displayDimensions[0],sizeof(displayDimensions));
+  CHECKERR(size==0,BRLAPI_ERROR_INVALID_PACKET,"packet should be empty");
+  CHECKERR(!c->raw,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed in raw mode");
+  brlapiserver_writePacket(c->fd,BRLAPI_PACKET_GETDISPLAYSIZE,&displayDimensions[0],sizeof(displayDimensions));
   return 0;
 }
 
-static int handleEnterTtyMode(Connection *c, brl_type_t type, unsigned char *packet, size_t size)
+static int handleEnterTtyMode(Connection *c, brlapi_type_t type, unsigned char *packet, size_t size)
 {
   uint32_t * ints = (uint32_t *) packet;
   uint32_t nbTtys;
@@ -797,27 +797,27 @@ static int handleEnterTtyMode(Connection *c, brl_type_t type, unsigned char *pac
   uint32_t *ptty;
   size_t remaining = size;
   LogPrintRequest(type, c->fd);
-  CHECKERR((!c->raw),BRLERR_ILLEGAL_INSTRUCTION,"not allowed in raw mode");
-  CHECKERR(remaining>=sizeof(uint32_t), BRLERR_INVALID_PACKET, "packet too small");
+  CHECKERR((!c->raw),BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed in raw mode");
+  CHECKERR(remaining>=sizeof(uint32_t), BRLAPI_ERROR_INVALID_PACKET, "packet too small");
   p += sizeof(uint32_t); remaining -= sizeof(uint32_t);
   nbTtys = ntohl(ints[0]);
-  CHECKERR(remaining>=nbTtys*sizeof(uint32_t), BRLERR_INVALID_PACKET, "packet too small for provided number of ttys");
+  CHECKERR(remaining>=nbTtys*sizeof(uint32_t), BRLAPI_ERROR_INVALID_PACKET, "packet too small for provided number of ttys");
   p += nbTtys*sizeof(uint32_t); remaining -= nbTtys*sizeof(uint32_t);
-  CHECKERR(*p<=BRLAPI_MAXNAMELENGTH, BRLERR_INVALID_PARAMETER, "driver name too long");
+  CHECKERR(*p<=BRLAPI_MAXNAMELENGTH, BRLAPI_ERROR_INVALID_PARAMETER, "driver name too long");
   n = *p; p++; remaining--;
-  CHECKERR(remaining==n, BRLERR_INVALID_PACKET,"packet size doesn't match format");
+  CHECKERR(remaining==n, BRLAPI_ERROR_INVALID_PACKET,"packet size doesn't match format");
   memcpy(name, p, n);
   name[n] = '\0';
   if (!*name) how = BRL_COMMANDS; else {
-    CHECKERR(!strcmp(name, trueBraille->definition.name), BRLERR_INVALID_PARAMETER, "wrong driver name");
-    CHECKERR(isKeyCapable(trueBraille), BRLERR_OPNOTSUPP, "driver doesn't support raw keycodes");
+    CHECKERR(!strcmp(name, trueBraille->definition.name), BRLAPI_ERROR_INVALID_PARAMETER, "wrong driver name");
+    CHECKERR(isKeyCapable(trueBraille), BRLAPI_ERROR_OPNOTSUPP, "driver doesn't support raw keycodes");
     how = BRL_KEYCODES;
   }
   freeBrailleWindow(&c->brailleWindow); /* In case of multiple enterTtyMode requests */
   if ((initializeUnmaskedKeys(c)==-1) || (allocBrailleWindow(&c->brailleWindow)==-1)) {
     LogPrint(LOG_WARNING,"Failed to allocate some ressources");
     freeKeyrangeList(&c->unmaskedKeys);
-    WERR(c->fd,BRLERR_NOMEM, "no memory for unmasked keys");
+    WERR(c->fd,BRLAPI_ERROR_NOMEM, "no memory for unmasked keys");
     return 0;
   }
   pthread_mutex_lock(&connectionsMutex);
@@ -834,7 +834,7 @@ static int handleEnterTtyMode(Connection *c, brl_type_t type, unsigned char *pac
       /* uhu, we already got a tty, but not this one, since the path
        * doesn't exist yet. This is forbidden. */
       pthread_mutex_unlock(&connectionsMutex);
-      WERR(c->fd, BRLERR_INVALID_PARAMETER, "already having another tty");
+      WERR(c->fd, BRLAPI_ERROR_INVALID_PARAMETER, "already having another tty");
       freeBrailleWindow(&c->brailleWindow);
       return 0;
     }
@@ -842,7 +842,7 @@ static int handleEnterTtyMode(Connection *c, brl_type_t type, unsigned char *pac
     /* we lock the entire subtree for easier cleanup */
     if (!(tty2 = newTty(tty,ntohl(*ptty)))) {
       pthread_mutex_unlock(&connectionsMutex);
-      WERR(c->fd,BRLERR_NOMEM, "no memory for new tty");
+      WERR(c->fd,BRLAPI_ERROR_NOMEM, "no memory for new tty");
       freeBrailleWindow(&c->brailleWindow);
       return 0;
     }
@@ -856,7 +856,7 @@ static int handleEnterTtyMode(Connection *c, brl_type_t type, unsigned char *pac
           freeTty(tty2);
         }
         pthread_mutex_unlock(&connectionsMutex);
-        WERR(c->fd,BRLERR_NOMEM, "no memory for new tty");
+        WERR(c->fd,BRLAPI_ERROR_NOMEM, "no memory for new tty");
         freeBrailleWindow(&c->brailleWindow);
   	return 0;
       }
@@ -868,19 +868,19 @@ static int handleEnterTtyMode(Connection *c, brl_type_t type, unsigned char *pac
     pthread_mutex_unlock(&connectionsMutex);
     if (c->tty == tty) {
       if (c->how==how) {
-	WERR(c->fd, BRLERR_ILLEGAL_INSTRUCTION, "already controlling tty %#010x", c->tty->number);
+	WERR(c->fd, BRLAPI_ERROR_ILLEGAL_INSTRUCTION, "already controlling tty %#010x", c->tty->number);
       } else {
         /* Here one is in the case where the client tries to change */
         /* from BRL_KEYCODES to BRL_COMMANDS, or something like that */
         /* For the moment this operation is not supported */
         /* A client that wants to do that should first LeaveTty() */
         /* and then get it again, risking to lose it */
-        WERR(c->fd,BRLERR_OPNOTSUPP, "Switching from BRL_KEYCODES to BRL_COMMANDS not supported yet");
+        WERR(c->fd,BRLAPI_ERROR_OPNOTSUPP, "Switching from BRL_KEYCODES to BRL_COMMANDS not supported yet");
       }
       return 0;
     } else {
       /* uhu, we already got a tty, but not this one: this is forbidden. */
-      WERR(c->fd, BRLERR_INVALID_PARAMETER, "already having a tty");
+      WERR(c->fd, BRLAPI_ERROR_INVALID_PARAMETER, "already having a tty");
       return 0;
     }
   }
@@ -894,11 +894,11 @@ static int handleEnterTtyMode(Connection *c, brl_type_t type, unsigned char *pac
   return 0;
 }
 
-static int handleSetFocus(Connection *c, brl_type_t type, unsigned char *packet, size_t size)
+static int handleSetFocus(Connection *c, brlapi_type_t type, unsigned char *packet, size_t size)
 {
   uint32_t * ints = (uint32_t *) packet;
-  CHECKEXC(!c->raw,BRLERR_ILLEGAL_INSTRUCTION,"not allowed in raw mode");
-  CHECKEXC(c->tty,BRLERR_ILLEGAL_INSTRUCTION,"not allowed out of tty mode");
+  CHECKEXC(!c->raw,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed in raw mode");
+  CHECKEXC(c->tty,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed out of tty mode");
   c->tty->focus = ntohl(ints[0]);
   LogPrint(LOG_DEBUG,"Focus on window %#010x",c->tty->focus);
   return 0;
@@ -919,38 +919,38 @@ static void doLeaveTty(Connection *c)
   freeBrailleWindow(&c->brailleWindow);
 }
 
-static int handleLeaveTtyMode(Connection *c, brl_type_t type, unsigned char *packet, size_t size)
+static int handleLeaveTtyMode(Connection *c, brlapi_type_t type, unsigned char *packet, size_t size)
 {
   LogPrintRequest(type, c->fd);
-  CHECKERR(!c->raw,BRLERR_ILLEGAL_INSTRUCTION,"not allowed in raw mode");
-  CHECKERR(c->tty,BRLERR_ILLEGAL_INSTRUCTION,"not allowed out of tty mode");
+  CHECKERR(!c->raw,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed in raw mode");
+  CHECKERR(c->tty,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed out of tty mode");
   doLeaveTty(c);
   writeAck(c->fd);
   return 0;
 }
 
-static int handleKeyRange(Connection *c, brl_type_t type, unsigned char *packet, size_t size)
+static int handleKeyRange(Connection *c, brlapi_type_t type, unsigned char *packet, size_t size)
 {
   int res;
   brlapi_keyCode_t x,y;
   uint32_t * ints = (uint32_t *) packet;
   LogPrintRequest(type, c->fd);
-  CHECKERR(!c->raw,BRLERR_ILLEGAL_INSTRUCTION,"not allowed in raw mode");
-  CHECKERR(c->tty,BRLERR_ILLEGAL_INSTRUCTION,"not allowed out of tty mode");
-  CHECKERR(size==2*sizeof(brlapi_keyCode_t),BRLERR_INVALID_PACKET,"wrong packet size");
+  CHECKERR(!c->raw,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed in raw mode");
+  CHECKERR(c->tty,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed out of tty mode");
+  CHECKERR(size==2*sizeof(brlapi_keyCode_t),BRLAPI_ERROR_INVALID_PACKET,"wrong packet size");
   x = ((brlapi_keyCode_t)ntohl(ints[0]) << 32) | ntohl(ints[1]);
   y = ((brlapi_keyCode_t)ntohl(ints[2]) << 32) | ntohl(ints[3]);
   LogPrint(LOG_DEBUG,"range: [%016"BRLAPI_PRIxKEYCODE"..%016"BRLAPI_PRIxKEYCODE"]",x,y);
   pthread_mutex_lock(&c->maskMutex);
-  if (type==BRLPACKET_IGNOREKEYRANGE) res = removeKeyrange(x,y,&c->unmaskedKeys);
+  if (type==BRLAPI_PACKET_IGNOREKEYRANGE) res = removeKeyrange(x,y,&c->unmaskedKeys);
   else res = addKeyrange(x,y,&c->unmaskedKeys);
   pthread_mutex_unlock(&c->maskMutex);
-  if (res==-1) WERR(c->fd,BRLERR_NOMEM,"no memory for key range");
+  if (res==-1) WERR(c->fd,BRLAPI_ERROR_NOMEM,"no memory for key range");
   else writeAck(c->fd);
   return 0;
 }
 
-static int handleKeySet(Connection *c, brl_type_t type, unsigned char *packet, size_t size)
+static int handleKeySet(Connection *c, brlapi_type_t type, unsigned char *packet, size_t size)
 {
   int i = 0, res = 0;
   unsigned int nbkeys;
@@ -958,10 +958,10 @@ static int handleKeySet(Connection *c, brl_type_t type, unsigned char *packet, s
   int (*fptr)(KeyrangeElem, KeyrangeElem, KeyrangeList **);
   brlapi_keyCode_t code;
   LogPrintRequest(type, c->fd);
-  if (type==BRLPACKET_IGNOREKEYSET) fptr = removeKeyrange; else fptr = addKeyrange;
-  CHECKERR(!c->raw,BRLERR_ILLEGAL_INSTRUCTION,"not allowed in raw mode");
-  CHECKERR(c->tty,BRLERR_ILLEGAL_INSTRUCTION,"not allowed out of tty mode");
-  CHECKERR(size % sizeof(brlapi_keyCode_t)==0,BRLERR_INVALID_PACKET,"wrong packet size");
+  if (type==BRLAPI_PACKET_IGNOREKEYSET) fptr = removeKeyrange; else fptr = addKeyrange;
+  CHECKERR(!c->raw,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed in raw mode");
+  CHECKERR(c->tty,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed out of tty mode");
+  CHECKERR(size % sizeof(brlapi_keyCode_t)==0,BRLAPI_ERROR_INVALID_PACKET,"wrong packet size");
   nbkeys = size/sizeof(brlapi_keyCode_t);
   pthread_mutex_lock(&c->maskMutex);
   while ((res!=-1) && (i<nbkeys)) {
@@ -970,12 +970,12 @@ static int handleKeySet(Connection *c, brl_type_t type, unsigned char *packet, s
     i++;
   }
   pthread_mutex_unlock(&c->maskMutex);
-  if (res==-1) WERR(c->fd,BRLERR_NOMEM,"no memory for key set");
+  if (res==-1) WERR(c->fd,BRLAPI_ERROR_NOMEM,"no memory for key set");
   else writeAck(c->fd);
   return 0;
 }
 
-static int handleWrite(Connection *c, brl_type_t type, unsigned char *packet, size_t size)
+static int handleWrite(Connection *c, brlapi_type_t type, unsigned char *packet, size_t size)
 {
   writeStruct *ws = (writeStruct *) packet;
   unsigned char *text = NULL, *orAttr = NULL, *andAttr = NULL;
@@ -988,67 +988,67 @@ static int handleWrite(Connection *c, brl_type_t type, unsigned char *packet, si
   unsigned int charsetLen = 0;
 #endif /* HAVE_ICONV_H */
   LogPrintRequest(type, c->fd);
-  CHECKEXC(remaining>=sizeof(ws->flags), BRLERR_INVALID_PACKET, "packet too small for flags");
-  CHECKERR(!c->raw,BRLERR_ILLEGAL_INSTRUCTION,"not allowed in raw mode");
-  CHECKERR(c->tty,BRLERR_ILLEGAL_INSTRUCTION,"not allowed out of tty mode");
+  CHECKEXC(remaining>=sizeof(ws->flags), BRLAPI_ERROR_INVALID_PACKET, "packet too small for flags");
+  CHECKERR(!c->raw,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed in raw mode");
+  CHECKERR(c->tty,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed out of tty mode");
   ws->flags = ntohl(ws->flags);
   if ((remaining==sizeof(ws->flags))&&(ws->flags==0)) {
     c->brlbufstate = EMPTY;
     return 0;
   }
   remaining -= sizeof(ws->flags); /* flags */
-  CHECKEXC((ws->flags & BRLAPI_WF_DISPLAYNUMBER)==0, BRLERR_OPNOTSUPP, "display number not yet supported");
+  CHECKEXC((ws->flags & BRLAPI_WF_DISPLAYNUMBER)==0, BRLAPI_ERROR_OPNOTSUPP, "display number not yet supported");
   if (ws->flags & BRLAPI_WF_REGION) {
-    CHECKEXC(remaining>2*sizeof(uint32_t), BRLERR_INVALID_PACKET, "packet too small for region");
+    CHECKEXC(remaining>2*sizeof(uint32_t), BRLAPI_ERROR_INVALID_PACKET, "packet too small for region");
     rbeg = ntohl( *((uint32_t *) p) );
     p += sizeof(uint32_t); remaining -= sizeof(uint32_t); /* region begin */
     rsiz = ntohl( *((uint32_t *) p) );
     p += sizeof(uint32_t); remaining -= sizeof(uint32_t); /* region size */
     CHECKEXC(
       (1<=rbeg) && (rsiz>0) && (rbeg+rsiz-1<=displaySize),
-      BRLERR_INVALID_PARAMETER, "wrong region");
+      BRLAPI_ERROR_INVALID_PARAMETER, "wrong region");
   } else {
     LogPrint(LOG_DEBUG,"Warning: Client uses deprecated regionBegin=0 and regionSize = 0");
     rbeg = 1;
     rsiz = displaySize;
   }
   if (ws->flags & BRLAPI_WF_TEXT) {
-    CHECKEXC(remaining>=sizeof(uint32_t), BRLERR_INVALID_PACKET, "packet too small for text length");
+    CHECKEXC(remaining>=sizeof(uint32_t), BRLAPI_ERROR_INVALID_PACKET, "packet too small for text length");
     textLen = ntohl( *((uint32_t *) p) );
     p += sizeof(uint32_t); remaining -= sizeof(uint32_t); /* text size */
-    CHECKEXC(remaining>=textLen, BRLERR_INVALID_PACKET, "packet too small for text");
+    CHECKEXC(remaining>=textLen, BRLAPI_ERROR_INVALID_PACKET, "packet too small for text");
     text = p;
     p += textLen; remaining -= textLen; /* text */
   }
   if (ws->flags & BRLAPI_WF_ATTR_AND) {
-    CHECKEXC(remaining>=rsiz, BRLERR_INVALID_PACKET, "packet too small for And mask");
+    CHECKEXC(remaining>=rsiz, BRLAPI_ERROR_INVALID_PACKET, "packet too small for And mask");
     andAttr = p;
     p += rsiz; remaining -= rsiz; /* and attributes */
   }
   if (ws->flags & BRLAPI_WF_ATTR_OR) {
-    CHECKEXC(remaining>=rsiz, BRLERR_INVALID_PACKET, "packet too small for Or mask");
+    CHECKEXC(remaining>=rsiz, BRLAPI_ERROR_INVALID_PACKET, "packet too small for Or mask");
     orAttr = p;
     p += rsiz; remaining -= rsiz; /* or attributes */
   }
   if (ws->flags & BRLAPI_WF_CURSOR) {
-    CHECKEXC(remaining>=sizeof(uint32_t), BRLERR_INVALID_PACKET, "packet too small for cursor");
+    CHECKEXC(remaining>=sizeof(uint32_t), BRLAPI_ERROR_INVALID_PACKET, "packet too small for cursor");
     cursor = ntohl( *((uint32_t *) p) );
     p += sizeof(uint32_t); remaining -= sizeof(uint32_t); /* cursor */
-    CHECKEXC(cursor<=displaySize, BRLERR_INVALID_PACKET, "wrong cursor");
+    CHECKEXC(cursor<=displaySize, BRLAPI_ERROR_INVALID_PACKET, "wrong cursor");
   }
 #ifdef HAVE_ICONV_H
   if (ws->flags & BRLAPI_WF_CHARSET) {
-    CHECKEXC(ws->flags & BRLAPI_WF_TEXT, BRLERR_INVALID_PACKET, "charset requires text");
-    CHECKEXC(remaining>=1, BRLERR_INVALID_PACKET, "packet too small for charset length");
+    CHECKEXC(ws->flags & BRLAPI_WF_TEXT, BRLAPI_ERROR_INVALID_PACKET, "charset requires text");
+    CHECKEXC(remaining>=1, BRLAPI_ERROR_INVALID_PACKET, "packet too small for charset length");
     charsetLen = *p++; remaining--; /* charset length */
-    CHECKEXC(remaining>=charsetLen, BRLERR_INVALID_PACKET, "packet too small for charset");
+    CHECKEXC(remaining>=charsetLen, BRLAPI_ERROR_INVALID_PACKET, "packet too small for charset");
     charset = (char *) p;
     p += charsetLen; remaining -= charsetLen; /* charset name */
   }
 #else /* HAVE_ICONV_H */
-  CHECKEXC(!(ws->flags & BRLAPI_WF_CHARSET), BRLERR_OPNOTSUPP, "charset conversion not supported (enable iconv?)");
+  CHECKEXC(!(ws->flags & BRLAPI_WF_CHARSET), BRLAPI_ERROR_OPNOTSUPP, "charset conversion not supported (enable iconv?)");
 #endif /* HAVE_ICONV_H */
-  CHECKEXC(remaining==0, BRLERR_INVALID_PACKET, "packet too big");
+  CHECKEXC(remaining==0, BRLAPI_ERROR_INVALID_PACKET, "packet too big");
   /* Here the whole packet has been checked */
   if (text) {
 #ifdef HAVE_ICONV_H
@@ -1066,12 +1066,12 @@ static int handleWrite(Connection *c, brl_type_t type, unsigned char *packet, si
       char *in = (char *) text, *out = (char *) textBuf;
       size_t sin = textLen, sout = sizeof(textBuf), res;
       LogPrint(LOG_DEBUG,"charset %s", charset);
-      CHECKEXC((conv = iconv_open("WCHAR_T",charset)) != (iconv_t)(-1), BRLERR_INVALID_PACKET, "invalid charset");
+      CHECKEXC((conv = iconv_open("WCHAR_T",charset)) != (iconv_t)(-1), BRLAPI_ERROR_INVALID_PACKET, "invalid charset");
       res = iconv(conv,&in,&sin,&out,&sout);
       iconv_close(conv);
-      CHECKEXC(res != (size_t) -1, BRLERR_INVALID_PACKET, "invalid charset conversion");
-      CHECKEXC(!sin, BRLERR_INVALID_PACKET, "text too big");
-      CHECKEXC(!sout, BRLERR_INVALID_PACKET, "text too small");
+      CHECKEXC(res != (size_t) -1, BRLAPI_ERROR_INVALID_PACKET, "invalid charset conversion");
+      CHECKEXC(!sin, BRLAPI_ERROR_INVALID_PACKET, "text too big");
+      CHECKEXC(!sout, BRLAPI_ERROR_INVALID_PACKET, "text too small");
       if (coreCharset) unlockCharset();
       pthread_mutex_lock(&c->brlMutex);
       memcpy(c->brailleWindow.text+rbeg-1,textBuf,rsiz*sizeof(wchar_t));
@@ -1099,31 +1099,31 @@ static int checkDriverSpecificModePacket(Connection *c, unsigned char *packet, s
 {
   getDriveSpecificModePacket_t *getDevicePacket = (getDriveSpecificModePacket_t *) packet;
   int remaining = size;
-  CHECKERR(remaining>sizeof(uint32_t), BRLERR_INVALID_PACKET, "packet too small");
+  CHECKERR(remaining>sizeof(uint32_t), BRLAPI_ERROR_INVALID_PACKET, "packet too small");
   remaining -= sizeof(uint32_t);
-  CHECKERR(ntohl(getDevicePacket->magic)==BRLDEVICE_MAGIC,BRLERR_INVALID_PARAMETER, "wrong magic number");
+  CHECKERR(ntohl(getDevicePacket->magic)==BRLAPI_DEVICE_MAGIC,BRLAPI_ERROR_INVALID_PARAMETER, "wrong magic number");
   remaining--;
-  CHECKERR(getDevicePacket->nameLength<=BRLAPI_MAXNAMELENGTH && getDevicePacket->nameLength == strlen(trueBraille->definition.name), BRLERR_INVALID_PARAMETER, "wrong driver length");
-  CHECKERR(remaining==getDevicePacket->nameLength, BRLERR_INVALID_PACKET, "wrong packet size");
-  CHECKERR(((!strncmp(&getDevicePacket->name, trueBraille->definition.name, remaining))), BRLERR_INVALID_PARAMETER, "wrong driver name");
+  CHECKERR(getDevicePacket->nameLength<=BRLAPI_MAXNAMELENGTH && getDevicePacket->nameLength == strlen(trueBraille->definition.name), BRLAPI_ERROR_INVALID_PARAMETER, "wrong driver length");
+  CHECKERR(remaining==getDevicePacket->nameLength, BRLAPI_ERROR_INVALID_PACKET, "wrong packet size");
+  CHECKERR(((!strncmp(&getDevicePacket->name, trueBraille->definition.name, remaining))), BRLAPI_ERROR_INVALID_PARAMETER, "wrong driver name");
   return 1;
 }
 
-static int handleEnterRawMode(Connection *c, brl_type_t type, unsigned char *packet, size_t size)
+static int handleEnterRawMode(Connection *c, brlapi_type_t type, unsigned char *packet, size_t size)
 {
   LogPrintRequest(type, c->fd);
-  CHECKERR(!c->raw, BRLERR_ILLEGAL_INSTRUCTION,"not allowed in raw mode");
+  CHECKERR(!c->raw, BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed in raw mode");
   if (!checkDriverSpecificModePacket(c, packet, size)) return 0;
-  CHECKERR(isRawCapable(trueBraille), BRLERR_OPNOTSUPP, "driver doesn't support Raw mode");
+  CHECKERR(isRawCapable(trueBraille), BRLAPI_ERROR_OPNOTSUPP, "driver doesn't support Raw mode");
   pthread_mutex_lock(&rawMutex);
   if (rawConnection || suspendConnection) {
-    WERR(c->fd,BRLERR_DEVICEBUSY,"driver busy (%s)", rawConnection?"raw":"suspend");
+    WERR(c->fd,BRLAPI_ERROR_DEVICEBUSY,"driver busy (%s)", rawConnection?"raw":"suspend");
     pthread_mutex_unlock(&rawMutex);
     return 0;
   }
   pthread_mutex_lock(&driverMutex);
   if (!driverOpened && !resumeDriver(disp)) {
-    WERR(c->fd, BRLERR_DRIVERERROR,"driver resume error");
+    WERR(c->fd, BRLAPI_ERROR_DRIVERERROR,"driver resume error");
     pthread_mutex_unlock(&driverMutex);
     pthread_mutex_unlock(&rawMutex);
     return 0;
@@ -1136,10 +1136,10 @@ static int handleEnterRawMode(Connection *c, brl_type_t type, unsigned char *pac
   return 0;
 }
 
-static int handleLeaveRawMode(Connection *c, brl_type_t type, unsigned char *packet, size_t size)
+static int handleLeaveRawMode(Connection *c, brlapi_type_t type, unsigned char *packet, size_t size)
 {
   LogPrintRequest(type, c->fd);
-  CHECKERR(c->raw,BRLERR_ILLEGAL_INSTRUCTION,"not allowed out of raw mode");
+  CHECKERR(c->raw,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed out of raw mode");
   LogPrint(LOG_DEBUG,"Going out of raw mode");
   pthread_mutex_lock(&rawMutex);
   c->raw = 0;
@@ -1149,24 +1149,24 @@ static int handleLeaveRawMode(Connection *c, brl_type_t type, unsigned char *pac
   return 0;
 }
 
-static int handlePacket(Connection *c, brl_type_t type, unsigned char *packet, size_t size)
+static int handlePacket(Connection *c, brlapi_type_t type, unsigned char *packet, size_t size)
 {
   LogPrintRequest(type, c->fd);
-  CHECKEXC(c->raw,BRLERR_ILLEGAL_INSTRUCTION,"not allowed out of raw mode");
+  CHECKEXC(c->raw,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed out of raw mode");
   pthread_mutex_lock(&driverMutex);
   trueBraille->writePacket(disp,packet,size);
   pthread_mutex_unlock(&driverMutex);
   return 0;
 }
 
-static int handleSuspendDriver(Connection *c, brl_type_t type, unsigned char *packet, size_t size)
+static int handleSuspendDriver(Connection *c, brlapi_type_t type, unsigned char *packet, size_t size)
 {
   LogPrintRequest(type, c->fd);
   if (!checkDriverSpecificModePacket(c, packet, size)) return 0;
-  CHECKERR(!c->suspend,BRLERR_ILLEGAL_INSTRUCTION, "not allowed in suspend mode");
+  CHECKERR(!c->suspend,BRLAPI_ERROR_ILLEGAL_INSTRUCTION, "not allowed in suspend mode");
   pthread_mutex_lock(&rawMutex);
   if (suspendConnection || rawConnection) {
-    WERR(c->fd, BRLERR_DEVICEBUSY,"driver busy (%s)", rawConnection?"raw":"suspend");
+    WERR(c->fd, BRLAPI_ERROR_DEVICEBUSY,"driver busy (%s)", rawConnection?"raw":"suspend");
     pthread_mutex_unlock(&rawMutex);
     return 0;
   }
@@ -1180,10 +1180,10 @@ static int handleSuspendDriver(Connection *c, brl_type_t type, unsigned char *pa
   return 0;
 }
 
-static int handleResumeDriver(Connection *c, brl_type_t type, unsigned char *packet, size_t size)
+static int handleResumeDriver(Connection *c, brlapi_type_t type, unsigned char *packet, size_t size)
 {
   LogPrintRequest(type, c->fd);
-  CHECKERR(c->suspend,BRLERR_ILLEGAL_INSTRUCTION, "not allowed out of suspend mode");
+  CHECKERR(c->suspend,BRLAPI_ERROR_ILLEGAL_INSTRUCTION, "not allowed out of suspend mode");
   pthread_mutex_lock(&rawMutex);
   c->suspend = 0;
   suspendConnection = NULL;
@@ -1216,13 +1216,13 @@ static void handleNewConnection(Connection *c)
   if (isAbsolutePath(auth))
     authPacket->type[nbmethods++] = htonl(BRLAPI_AUTH_KEY);
 
-  brlapiserver_writePacket(c->fd,BRLPACKET_AUTH,packet,sizeof(authPacket->protocolVersion)+nbmethods*sizeof(authPacket->type));
+  brlapiserver_writePacket(c->fd,BRLAPI_PACKET_AUTH,packet,sizeof(authPacket->protocolVersion)+nbmethods*sizeof(authPacket->type));
 }
 
 /* Function : handleUnauthorizedConnection */
 /* Returns 0 if connection is authorized */
 /* Returns 1 if connection has to be removed */
-static int handleUnauthorizedConnection(Connection *c, brl_type_t type, unsigned char *packet, size_t size)
+static int handleUnauthorizedConnection(Connection *c, brlapi_type_t type, unsigned char *packet, size_t size)
 {
   size_t authKeyLength = 0;
   unsigned char authKey[BRLAPI_MAXPACKETSIZE];
@@ -1231,13 +1231,13 @@ static int handleUnauthorizedConnection(Connection *c, brl_type_t type, unsigned
   int remaining = size;
   uint32_t authType;
 
-  if (type!=BRLPACKET_AUTH) {
-    WERR(c->fd, BRLERR_CONNREFUSED, "wrong packet type (should be auth)");
+  if (type!=BRLAPI_PACKET_AUTH) {
+    WERR(c->fd, BRLAPI_ERROR_CONNREFUSED, "wrong packet type (should be auth)");
     return 1;
   }
 
   if ((remaining<sizeof(authPacket->protocolVersion))||(ntohl(authPacket->protocolVersion)!=BRLAPI_PROTOCOL_VERSION)) {
-    writeError(c->fd, BRLERR_PROTOCOL_VERSION);
+    writeError(c->fd, BRLAPI_ERROR_PROTOCOL_VERSION);
     return 1;
   }
   remaining -= sizeof(authPacket->protocolVersion);
@@ -1272,7 +1272,7 @@ static int handleUnauthorizedConnection(Connection *c, brl_type_t type, unsigned
   }
 
   if (!authCorrect) {
-    writeError(c->fd, BRLERR_CONNREFUSED);
+    writeError(c->fd, BRLAPI_ERROR_CONNREFUSED);
     LogPrint(LOG_WARNING, "BrlAPI connection fd=%"PRIFD" failed authorization", c->fd);
     return 0;
   }
@@ -1293,7 +1293,7 @@ static int processRequest(Connection *c, PacketHandlers *handlers)
   int res;
   ssize_t size;
   unsigned char *packet = c->packet.content;
-  brl_type_t type;
+  brlapi_type_t type;
   res = readPacket(c);
   if (res==0) return 0; /* No packet ready */
   if (res<0) {
@@ -1348,25 +1348,25 @@ static int processRequest(Connection *c, PacketHandlers *handlers)
     return 0;    
   }
   switch (type) {
-    case BRLPACKET_GETDRIVERID: p = handlers->getDriverId; break;
-    case BRLPACKET_GETDRIVERNAME: p = handlers->getDriverName; break;
-    case BRLPACKET_GETDISPLAYSIZE: p = handlers->getDisplaySize; break;
-    case BRLPACKET_ENTERTTYMODE: p = handlers->enterTtyMode; break;
-    case BRLPACKET_SETFOCUS: p = handlers->setFocus; break;
-    case BRLPACKET_LEAVETTYMODE: p = handlers->leaveTtyMode; break;
-    case BRLPACKET_IGNOREKEYRANGE: p = handlers->ignoreKeyRange; break;
-    case BRLPACKET_ACCEPTKEYRANGE: p = handlers->acceptKeyRange; break;
-    case BRLPACKET_IGNOREKEYSET: p = handlers->ignoreKeySet; break;
-    case BRLPACKET_ACCEPTKEYSET: p = handlers->acceptKeySet; break;
-    case BRLPACKET_WRITE: p = handlers->write; break;
-    case BRLPACKET_ENTERRAWMODE: p = handlers->enterRawMode; break;
-    case BRLPACKET_LEAVERAWMODE: p = handlers->leaveRawMode; break;
-    case BRLPACKET_PACKET: p = handlers->packet; break;
-    case BRLPACKET_SUSPENDDRIVER: p = handlers->suspendDriver; break;
-    case BRLPACKET_RESUMEDRIVER: p = handlers->resumeDriver; break;
+    case BRLAPI_PACKET_GETDRIVERID: p = handlers->getDriverId; break;
+    case BRLAPI_PACKET_GETDRIVERNAME: p = handlers->getDriverName; break;
+    case BRLAPI_PACKET_GETDISPLAYSIZE: p = handlers->getDisplaySize; break;
+    case BRLAPI_PACKET_ENTERTTYMODE: p = handlers->enterTtyMode; break;
+    case BRLAPI_PACKET_SETFOCUS: p = handlers->setFocus; break;
+    case BRLAPI_PACKET_LEAVETTYMODE: p = handlers->leaveTtyMode; break;
+    case BRLAPI_PACKET_IGNOREKEYRANGE: p = handlers->ignoreKeyRange; break;
+    case BRLAPI_PACKET_ACCEPTKEYRANGE: p = handlers->acceptKeyRange; break;
+    case BRLAPI_PACKET_IGNOREKEYSET: p = handlers->ignoreKeySet; break;
+    case BRLAPI_PACKET_ACCEPTKEYSET: p = handlers->acceptKeySet; break;
+    case BRLAPI_PACKET_WRITE: p = handlers->write; break;
+    case BRLAPI_PACKET_ENTERRAWMODE: p = handlers->enterRawMode; break;
+    case BRLAPI_PACKET_LEAVERAWMODE: p = handlers->leaveRawMode; break;
+    case BRLAPI_PACKET_PACKET: p = handlers->packet; break;
+    case BRLAPI_PACKET_SUSPENDDRIVER: p = handlers->suspendDriver; break;
+    case BRLAPI_PACKET_RESUMEDRIVER: p = handlers->resumeDriver; break;
   }
   if (p!=NULL) p(c, type, packet, size);
-  else WEXC(c->fd,BRLERR_UNKNOWN_INSTRUCTION, type, packet, size, "unknown packet type");
+  else WEXC(c->fd,BRLAPI_ERROR_UNKNOWN_INSTRUCTION, type, packet, size, "unknown packet type");
   return 0;
 }
 
@@ -2147,7 +2147,7 @@ static void *server(void *arg)
         LogPrint(LOG_NOTICE, "BrlAPI connection fd=%"PRIFD" accepted: %s", resfd, source);
 
         if (unauthConnections>=UNAUTH_MAX) {
-          writeError(resfd, BRLERR_CONNREFUSED);
+          writeError(resfd, BRLAPI_ERROR_CONNREFUSED);
           closeFileDescriptor(resfd);
           if (unauthConnLog==0) LogPrint(LOG_WARNING, "Too many simultaneous unauthorized connections");
           unauthConnLog++;
@@ -2393,9 +2393,9 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
     size = trueBraille->readPacket(brl, packet,BRLAPI_MAXPACKETSIZE);
     pthread_mutex_unlock(&driverMutex);
     if (size<0)
-      writeException(rawConnection->fd, BRLERR_DRIVERERROR, BRLPACKET_PACKET, NULL, 0);
+      writeException(rawConnection->fd, BRLAPI_ERROR_DRIVERERROR, BRLAPI_PACKET_PACKET, NULL, 0);
     else if (size)
-      brlapiserver_writePacket(rawConnection->fd,BRLPACKET_PACKET,packet,size);
+      brlapiserver_writePacket(rawConnection->fd,BRLAPI_PACKET_PACKET,packet,size);
     pthread_mutex_unlock(&rawMutex);
     goto out;
   }

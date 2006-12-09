@@ -60,7 +60,7 @@
 #endif /* __MINGW32__ */
 
 #define LibcError(function) \
-  brlapi_errno=BRLERR_LIBCERR; \
+  brlapi_errno=BRLAPI_ERROR_LIBCERR; \
   brlapi_libcerrno = errno; \
   brlapi_errfun = function;
 
@@ -149,7 +149,7 @@ static ssize_t brlapi_readFile(brlapi_fileDescriptor fd, void *buffer, size_t si
 
 /* brlapi_writePacket */
 /* Write a packet on the socket */
-ssize_t BRLAPI(writePacket)(brlapi_fileDescriptor fd, brl_type_t type, const void *buf, size_t size)
+ssize_t BRLAPI(writePacket)(brlapi_fileDescriptor fd, brlapi_type_t type, const void *buf, size_t size)
 {
   uint32_t header[2] = { htonl(size), htonl(type) };
   ssize_t res;
@@ -172,7 +172,7 @@ ssize_t BRLAPI(writePacket)(brlapi_fileDescriptor fd, brl_type_t type, const voi
 
 /* brlapi_readPacketHeader */
 /* Read a packet's header and return packet's size */
-ssize_t BRLAPI(readPacketHeader)(brlapi_fileDescriptor fd, brl_type_t *packetType)
+ssize_t BRLAPI(readPacketHeader)(brlapi_fileDescriptor fd, brlapi_type_t *packetType)
 {
   uint32_t header[2];
   ssize_t res;
@@ -217,7 +217,7 @@ out:
 /* If the packet is larger than the supplied buffer, then */
 /* the packet is truncated to buffer's size, like in the recv system call */
 /* with option MSG_TRUNC (rest of the pcket is read but discarded) */
-ssize_t BRLAPI(readPacket)(brlapi_fileDescriptor fd, brl_type_t *packetType, void *buf, size_t size)
+ssize_t BRLAPI(readPacket)(brlapi_fileDescriptor fd, brlapi_type_t *packetType, void *buf, size_t size)
 {
   ssize_t res = BRLAPI(readPacketHeader)(fd, packetType);
   if (res<0) return res; /* reports EINTR too */
@@ -239,7 +239,7 @@ int BRLAPI(loadAuthKey)(const char *filename, size_t *authlength, void *auth)
   }
   
   if (statbuf.st_size==0) {
-    brlapi_errno = BRLERR_EMPTYKEY;
+    brlapi_errno = BRLAPI_ERROR_EMPTYKEY;
     brlapi_errfun = "brlapi_laudAuthKey";
     return -1;
   }
@@ -315,35 +315,35 @@ int BRLAPI(expandHost)(const char *hostAndPort, char **host, char **port) {
 }
 
 typedef struct {
-  brl_type_t type;
+  brlapi_type_t type;
   const char *name;
 } brlapi_packetType_t;
 
 static brlapi_packetType_t brlapi_packetTypes[] = {
-  { BRLPACKET_AUTH, "Auth" },
-  { BRLPACKET_GETDRIVERID, "GetDriverId" },
-  { BRLPACKET_GETDRIVERNAME, "GetDriverName" },
-  { BRLPACKET_GETDISPLAYSIZE, "GetDisplaySize" },
-  { BRLPACKET_ENTERTTYMODE, "enterTtyMode" },
-  { BRLPACKET_LEAVETTYMODE, "LeaveTtyMode" },
-  { BRLPACKET_KEY, "Key" },
-  { BRLPACKET_IGNOREKEYRANGE, "IgnoreKeyRange" },
-  { BRLPACKET_IGNOREKEYSET, "IggnoreKeySet" },
-  { BRLPACKET_ACCEPTKEYRANGE, "AcceptKeyRange" },
-  { BRLPACKET_ACCEPTKEYSET, "AcceptKeySet" },
-  { BRLPACKET_WRITE, "Write" },
-  { BRLPACKET_ENTERRAWMODE, "EnterRawMode" },
-  { BRLPACKET_LEAVERAWMODE, "LeaveRawMode" },
-  { BRLPACKET_PACKET, "Packet" },
-  { BRLPACKET_SUSPENDDRIVER, "SuspendDriver" },
-  { BRLPACKET_RESUMEDRIVER, "ResumeDriver" },
-  { BRLPACKET_ACK, "Ack" },
-  { BRLPACKET_ERROR, "Error" },
-  { BRLPACKET_EXCEPTION, "Exception" },
+  { BRLAPI_PACKET_AUTH, "Auth" },
+  { BRLAPI_PACKET_GETDRIVERID, "GetDriverId" },
+  { BRLAPI_PACKET_GETDRIVERNAME, "GetDriverName" },
+  { BRLAPI_PACKET_GETDISPLAYSIZE, "GetDisplaySize" },
+  { BRLAPI_PACKET_ENTERTTYMODE, "enterTtyMode" },
+  { BRLAPI_PACKET_LEAVETTYMODE, "LeaveTtyMode" },
+  { BRLAPI_PACKET_KEY, "Key" },
+  { BRLAPI_PACKET_IGNOREKEYRANGE, "IgnoreKeyRange" },
+  { BRLAPI_PACKET_IGNOREKEYSET, "IggnoreKeySet" },
+  { BRLAPI_PACKET_ACCEPTKEYRANGE, "AcceptKeyRange" },
+  { BRLAPI_PACKET_ACCEPTKEYSET, "AcceptKeySet" },
+  { BRLAPI_PACKET_WRITE, "Write" },
+  { BRLAPI_PACKET_ENTERRAWMODE, "EnterRawMode" },
+  { BRLAPI_PACKET_LEAVERAWMODE, "LeaveRawMode" },
+  { BRLAPI_PACKET_PACKET, "Packet" },
+  { BRLAPI_PACKET_SUSPENDDRIVER, "SuspendDriver" },
+  { BRLAPI_PACKET_RESUMEDRIVER, "ResumeDriver" },
+  { BRLAPI_PACKET_ACK, "Ack" },
+  { BRLAPI_PACKET_ERROR, "Error" },
+  { BRLAPI_PACKET_EXCEPTION, "Exception" },
   { 0, NULL }
 };
 
-const char *BRLAPI(packetType)(brl_type_t ptype)
+const char *BRLAPI(packetType)(brlapi_type_t ptype)
 {
   brlapi_packetType_t *p;
   for (p = brlapi_packetTypes; p->type; p++)

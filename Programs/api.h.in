@@ -840,23 +840,23 @@ int brlapi__resumeDriver(brlapi_handle_t *handle);
  * @{ */
 
 /* Error codes */
-#define BRLERR_SUCCESS                  0  /**< Success */
-#define BRLERR_NOMEM                    1  /**< Not enough memory */
-#define BRLERR_TTYBUSY                  2  /**< A connection is already running in this tty */
-#define BRLERR_DEVICEBUSY               3  /**< A connection is already using RAW or suspend mode */
-#define BRLERR_UNKNOWN_INSTRUCTION      4  /**< Not implemented in protocol */
-#define BRLERR_ILLEGAL_INSTRUCTION      5  /**< Forbiden in current mode */
-#define BRLERR_INVALID_PARAMETER        6  /**< Out of range or have no sense */
-#define BRLERR_INVALID_PACKET           7  /**< Invalid size */
-#define BRLERR_CONNREFUSED              8  /**< Connection refused */
-#define BRLERR_OPNOTSUPP                9  /**< Operation not supported */
-#define BRLERR_GAIERR                  10  /**< Getaddrinfo error */
-#define BRLERR_LIBCERR                 11  /**< Libc error */
-#define BRLERR_UNKNOWNTTY              12  /**< Couldn't find out the tty number */
-#define BRLERR_PROTOCOL_VERSION        13  /**< Bad protocol version */
-#define BRLERR_EOF                     14  /**< Unexpected end of file */
-#define BRLERR_EMPTYKEY                15  /**< Key file empty */
-#define BRLERR_DRIVERERROR             16  /**< Packet returned by driver too large */
+#define BRLAPI_ERROR_SUCCESS               0  /**< Success */
+#define BRLAPI_ERROR_NOMEM                 1  /**< Not enough memory */
+#define BRLAPI_ERROR_TTYBUSY               2  /**< A connection is already running in this tty */
+#define BRLAPI_ERROR_DEVICEBUSY            3  /**< A connection is already using RAW or suspend mode */
+#define BRLAPI_ERROR_UNKNOWN_INSTRUCTION   4  /**< Not implemented in protocol */
+#define BRLAPI_ERROR_ILLEGAL_INSTRUCTION   5  /**< Forbiden in current mode */
+#define BRLAPI_ERROR_INVALID_PARAMETER     6  /**< Out of range or have no sense */
+#define BRLAPI_ERROR_INVALID_PACKET        7  /**< Invalid size */
+#define BRLAPI_ERROR_CONNREFUSED           8  /**< Connection refused */
+#define BRLAPI_ERROR_OPNOTSUPP             9  /**< Operation not supported */
+#define BRLAPI_ERROR_GAIERR               10  /**< Getaddrinfo error */
+#define BRLAPI_ERROR_LIBCERR              11  /**< Libc error */
+#define BRLAPI_ERROR_UNKNOWNTTY           12  /**< Couldn't find out the tty number */
+#define BRLAPI_ERROR_PROTOCOL_VERSION     13  /**< Bad protocol version */
+#define BRLAPI_ERROR_EOF                  14  /**< Unexpected end of file */
+#define BRLAPI_ERROR_EMPTYKEY             15  /**< Key file empty */
+#define BRLAPI_ERROR_DRIVERERROR          16  /**< Packet returned by driver too large */
 
 /* brlapi_errlist */
 /** Error message list
@@ -934,7 +934,7 @@ extern const char *brlapi_errfun;
 const char *brlapi_strerror(const brlapi_error_t *error);
 
 /** Type for packet type. Only unsigned can cross networks, 32bits */
-typedef uint32_t brl_type_t;
+typedef uint32_t brlapi_type_t;
 
 /* brlapi_packetType */
 /** Get plain packet type
@@ -942,7 +942,7 @@ typedef uint32_t brl_type_t;
  * brlapi_packetType(3) returns the plain packet type name corresponding to
  * its argument.
  */
-const char *brlapi_packetType(brl_type_t ptype);
+const char *brlapi_packetType(brlapi_type_t ptype);
 
 /* brlapi_exceptionHandler_t */
 /** Types for exception handlers
@@ -956,8 +956,8 @@ const char *brlapi_packetType(brl_type_t ptype);
  * \param buf points to the content of the guilty packet (might be a little bit truncated);
  * \param size gives the guilty packet's size.
  */
-typedef void (*brlapi_exceptionHandler_t)(int err, brl_type_t type, const void *buf, size_t size);
-typedef void (*brlapi__exceptionHandler_t)(brlapi_handle_t *handle, int err, brl_type_t type, const void *buf, size_t size);
+typedef void (*brlapi_exceptionHandler_t)(int err, brlapi_type_t type, const void *buf, size_t size);
+typedef void (*brlapi__exceptionHandler_t)(brlapi_handle_t *handle, int err, brlapi_type_t type, const void *buf, size_t size);
 
 /* brlapi_strexception */
 /** Describes an exception
@@ -969,9 +969,9 @@ typedef void (*brlapi__exceptionHandler_t)(brlapi_handle_t *handle, int err, brl
  * \return the size of the text describing the exception, following
  * snprintf(3)'s semantics.
 */
-int brlapi_strexception(char *buf, size_t n, int err, brl_type_t type, const void *packet, size_t
+int brlapi_strexception(char *buf, size_t n, int err, brlapi_type_t type, const void *packet, size_t
 size);
-int brlapi__strexception(brlapi_handle_t *handle, char *buf, size_t n, int err, brl_type_t type, const void *packet, size_t size);
+int brlapi__strexception(brlapi_handle_t *handle, char *buf, size_t n, int err, brlapi_type_t type, const void *packet, size_t size);
 
 /* brlapi_setExceptionHandler */
 /** Set a new exception handler
@@ -984,8 +984,8 @@ int brlapi__strexception(brlapi_handle_t *handle, char *buf, size_t n, int err, 
  */
 brlapi_exceptionHandler_t brlapi_setExceptionHandler(brlapi_exceptionHandler_t handler);
 brlapi__exceptionHandler_t brlapi__setExceptionHandler(brlapi_handle_t *handle, brlapi__exceptionHandler_t handler);
-void brlapi_defaultExceptionHandler(int err, brl_type_t type, const void *buf, size_t size);
-void brlapi__defaultExceptionHandler(brlapi_handle_t *handle, int err, brl_type_t type, const void *buf, size_t size);
+void brlapi_defaultExceptionHandler(int err, brlapi_type_t type, const void *buf, size_t size);
+void brlapi__defaultExceptionHandler(brlapi_handle_t *handle, int err, brlapi_type_t type, const void *buf, size_t size);
 
 /** @} */
 
@@ -1023,6 +1023,7 @@ int brlapi__writeWin(brlapi_handle_t *handle, const brlapi_writeStruct_t *s, int
 #define brlapi_settings_t brlapi_connectionSettings_t
 #define brlapi_writeStruct brlapi_writeStruct_t
 #define brl_keycode_t brlapi_keyCode_t
+#define brl_type_t brlapi_type_t
 
 #define BRLCOMMANDS NULL
 #define BRL_KEYCODE_MAX BRLAPI_KEYCODE_MAX
@@ -1037,6 +1038,24 @@ int brlapi__writeWin(brlapi_handle_t *handle, const brlapi_writeStruct_t *s, int
 #define brlapi_leaveRaw brlapi_leaveRawMode
 #define brlapi_suspend(n) brlapi_suspendDriver(n)
 #define brlapi_resume brlapi_resumeDriver
+
+#define BRLERR_SUCCESS                 BRLAPI_ERROR_SUCCESS
+#define BRLERR_NOMEM                   BRLAPI_ERROR_NOMEM
+#define BRLERR_TTYBUSY                 BRLAPI_ERROR_TTYBUSY
+#define BRLERR_DEVICEBUSY              BRLAPI_ERROR_DEVICEBUSY
+#define BRLERR_UNKNOWN_INSTRUCTION     BRLAPI_ERROR_UNKNOWN_INSTRUCTION
+#define BRLERR_ILLEGAL_INSTRUCTION     BRLAPI_ERROR_ILLEGAL_INSTRUCTION
+#define BRLERR_INVALID_PARAMETER       BRLAPI_ERROR_INVALID_PARAMETER
+#define BRLERR_INVALID_PACKET          BRLAPI_ERROR_INVALID_PACKET
+#define BRLERR_CONNREFUSED             BRLAPI_ERROR_CONNREFUSED
+#define BRLERR_OPNOTSUPP               BRLAPI_ERROR_OPNOTSUPP
+#define BRLERR_GAIERR                  BRLAPI_ERROR_GAIERR
+#define BRLERR_LIBCERR                 BRLAPI_ERROR_LIBCERR
+#define BRLERR_UNKNOWNTTY              BRLAPI_ERROR_UNKNOWNTTY
+#define BRLERR_PROTOCOL_VERSION        BRLAPI_ERROR_PROTOCOL_VERSION
+#define BRLERR_EOF                     BRLAPI_ERROR_EOF
+#define BRLERR_EMPTYKEY                BRLAPI_ERROR_EMPTYKEY
+#define BRLERR_DRIVERERROR             BRLAPI_ERROR_DRIVERERROR
 
 /* @} */
 #endif /* BRLAPI_NO_DEPRECATED */

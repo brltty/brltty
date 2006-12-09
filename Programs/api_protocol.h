@@ -52,38 +52,38 @@ extern "C" {
 
 #define BRLAPI_PROTOCOL_VERSION ((uint32_t) 8) /** Communication protocol version */
 
-#define BRLPACKET_AUTH              'K'    /**< Authorization key           */
-#define BRLPACKET_GETDRIVERID       'd'    /**< Ask which driver is used    */
-#define BRLPACKET_GETDRIVERNAME     'n'    /**< Ask which driver is used    */
-#define BRLPACKET_GETDISPLAYSIZE    's'    /**< Dimensions of brl display   */
-#define BRLPACKET_ENTERTTYMODE      't'    /**< Asks for a specified tty    */
-#define BRLPACKET_SETFOCUS          'F'    /**< Set current tty focus       */
-#define BRLPACKET_LEAVETTYMODE      'L'    /**< Release the tty             */
-#define BRLPACKET_KEY               'k'    /**< Braille key                 */
-#define BRLPACKET_IGNOREKEYRANGE    'm'    /**< Mask key-range              */
-#define BRLPACKET_IGNOREKEYSET      'M'    /**< Mask key-set                */
-#define BRLPACKET_ACCEPTKEYRANGE    'u'    /**< Unmask key range            */
-#define BRLPACKET_ACCEPTKEYSET      'U'    /**< Unmask key set              */
-#define BRLPACKET_WRITE             'w'    /**< Write                       */
-#define BRLPACKET_ENTERRAWMODE      '*'    /**< Enter in raw mode           */
-#define BRLPACKET_LEAVERAWMODE      '#'    /**< Leave raw mode              */
-#define BRLPACKET_PACKET            'p'    /**< Raw packets                 */
-#define BRLPACKET_ACK               'A'    /**< Acknowledgement             */
-#define BRLPACKET_ERROR             'e'    /**< non-fatal error             */
-#define BRLPACKET_EXCEPTION         'E'    /**< Exception                   */
-#define BRLPACKET_SUSPENDDRIVER     'S'    /**< Suspend driver              */
-#define BRLPACKET_RESUMEDRIVER      'R'    /**< Resume driver               */
+#define BRLAPI_PACKET_AUTH           'K'    /**< Authorization key           */
+#define BRLAPI_PACKET_GETDRIVERID    'd'    /**< Ask which driver is used    */
+#define BRLAPI_PACKET_GETDRIVERNAME  'n'    /**< Ask which driver is used    */
+#define BRLAPI_PACKET_GETDISPLAYSIZE 's'    /**< Dimensions of brl display   */
+#define BRLAPI_PACKET_ENTERTTYMODE   't'    /**< Asks for a specified tty    */
+#define BRLAPI_PACKET_SETFOCUS       'F'    /**< Set current tty focus       */
+#define BRLAPI_PACKET_LEAVETTYMODE   'L'    /**< Release the tty             */
+#define BRLAPI_PACKET_KEY            'k'    /**< Braille key                 */
+#define BRLAPI_PACKET_IGNOREKEYRANGE 'm'    /**< Mask key-range              */
+#define BRLAPI_PACKET_IGNOREKEYSET   'M'    /**< Mask key-set                */
+#define BRLAPI_PACKET_ACCEPTKEYRANGE 'u'    /**< Unmask key range            */
+#define BRLAPI_PACKET_ACCEPTKEYSET   'U'    /**< Unmask key set              */
+#define BRLAPI_PACKET_WRITE          'w'    /**< Write                       */
+#define BRLAPI_PACKET_ENTERRAWMODE   '*'    /**< Enter in raw mode           */
+#define BRLAPI_PACKET_LEAVERAWMODE   '#'    /**< Leave raw mode              */
+#define BRLAPI_PACKET_PACKET         'p'    /**< Raw packets                 */
+#define BRLAPI_PACKET_ACK            'A'    /**< Acknowledgement             */
+#define BRLAPI_PACKET_ERROR          'e'    /**< non-fatal error             */
+#define BRLAPI_PACKET_EXCEPTION      'E'    /**< Exception                   */
+#define BRLAPI_PACKET_SUSPENDDRIVER  'S'    /**< Suspend driver              */
+#define BRLAPI_PACKET_RESUMEDRIVER   'R'    /**< Resume driver               */
 
 /** Magic number to give when sending a BRLPACKET_ENTERRAWMODE or BRLPACKET_SUSPEND packet */
-#define BRLDEVICE_MAGIC (0xdeadbeefL)
+#define BRLAPI_DEVICE_MAGIC (0xdeadbeefL)
 
 /** Structure of packets headers */
 typedef struct {
   uint32_t size;
-  brl_type_t type;
+  brlapi_type_t type;
 } header_t;
 
-#define HEADERSIZE sizeof(header_t)
+#define BRLAPI_HEADERSIZE sizeof(header_t)
 
 /** Structure of authorization packets */
 typedef struct {
@@ -104,7 +104,7 @@ typedef struct {
 /** Structure of error packets */
 typedef struct {
   uint32_t code;
-  brl_type_t type;
+  brlapi_type_t type;
   unsigned char packet;
 } errorPacket_t;
 
@@ -146,7 +146,7 @@ typedef struct {
  * brlapi_readPacketContent()
  * brlapi_readPacket()
  */
-ssize_t brlapi_writePacket(brlapi_fileDescriptor fd, brl_type_t type, const void *buf, size_t size);
+ssize_t brlapi_writePacket(brlapi_fileDescriptor fd, brlapi_type_t type, const void *buf, size_t size);
 
 /* brlapi_readPacketHeader */
 /** Read the header (type+size) of a packet from \e BrlAPI server
@@ -165,7 +165,7 @@ ssize_t brlapi_writePacket(brlapi_fileDescriptor fd, brl_type_t type, const void
  * brlapi_readPacketContent
  * brlapi_readPacket
  */
-ssize_t brlapi_readPacketHeader(brlapi_fileDescriptor fd, brl_type_t *packetType);
+ssize_t brlapi_readPacketHeader(brlapi_fileDescriptor fd, brlapi_type_t *packetType);
 
 /* brlapi_readPacketContent */
 /** Read the content of a packet from \e BrlAPI server
@@ -212,7 +212,7 @@ ssize_t brlapi_readPacketContent(brlapi_fileDescriptor fd, size_t packetSize, vo
  *
  * \sa brlapi_writePacket()
  */
-ssize_t brlapi_readPacket(brlapi_fileDescriptor fd, brl_type_t *type, void *buf, size_t size);
+ssize_t brlapi_readPacket(brlapi_fileDescriptor fd, brlapi_type_t *type, void *buf, size_t size);
 
 /* brlapi_fd_mutex */
 /** Mutex for protecting concurrent fd access
