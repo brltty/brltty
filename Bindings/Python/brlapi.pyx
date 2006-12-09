@@ -295,7 +295,7 @@ cdef class Connection:
 
 		* tty : If tty >= 0, application takes control of the specified tty
 			If tty == -1, the library first tries to get the tty number from the WINDOWID environment variable (form xterm case), then the CONTROLVT variable, and at last reads /proc/self/stat (on linux)
-		* how : Tells how the application wants readKey() to return key presses. None or "" means BrlTTY commands are required, whereas a driver name means that raw key codes returned by this driver are expected."""
+		* driverName : Tells how the application wants readKey() to return key presses. None or "" means BrlTTY commands are required, whereas a driver name means that raw key codes returned by this driver are expected."""
 		cdef int retval
 		cdef int c_tty
 		cdef char *c_how
@@ -312,6 +312,41 @@ cdef class Connection:
 		else:
 			return retval
 
+	def enterTtyModeWithPath(self, path = [], how = None):
+		"""Ask for some tty, with some key mechanism
+
+		See brlapi_enterTtyModeWithPath(3).
+
+		* tty is an array of ttys representing the tty path to be got. Can be None.
+		* driverName : has the same meaning as in enterTtyMode.
+		
+		Providing an empty array or None means to get the root."""
+		cdef int retval
+		cdef int *c_ttys
+		cdef int c_nttys
+		cdef char *c_how
+		if not path:
+			c_ttys = NULL
+			c_nttys = 0
+		else:
+			c_nttys = len(path)
+			c_ttys = <int*>c_brlapi.malloc(c_nttys * sizeof(int))
+			for i in range(0, c_nttys):
+				c_ttys[i] = path[i]
+		if not how:
+			c_how = NULL
+		else:
+			c_how = how
+		c_brlapi.Py_BEGIN_ALLOW_THREADS
+		retval = c_brlapi.brlapi__enterTtyModeWithPath(self.h, c_ttys, c_nttys, c_how)
+		c_brlapi.Py_END_ALLOW_THREADS
+		if (c_ttys):
+			c_brlapi.free(c_ttys)
+		if retval == -1:
+			raise OperationError(returnerrno())
+		else:
+			return retval
+
 	def leaveTtyMode(self):
 		"""Stop controlling the tty
 		See brlapi_leaveTtyMode(3)."""
@@ -323,10 +358,7 @@ cdef class Connection:
 			raise OperationError(returnerrno())
 		else:
 			return retval
-			
 
-	# TODO : enterTtyModeWithPath
-	
 	def setFocus(self, tty):
 		"""Tell the current tty to brltty.
 		See brlapi_setFocus(3).
