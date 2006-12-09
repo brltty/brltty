@@ -423,9 +423,9 @@ WARN_LOGFILE           =
 # directories like "/usr/src/myproject". Separate the files or directories 
 # with spaces.
 
-INPUT                  = @top_builddir@/Programs/api.h \
-                         @top_builddir@/Programs/api_constants.h \
-                         @top_srcdir@/Programs/api_protocol.h
+INPUT                  = @top_builddir@/Programs/brlapi.h \
+                         @top_builddir@/Programs/brlapi_constants.h \
+                         @top_srcdir@/Programs/brlapi_protocol.h
 
 # If the value of the INPUT tag contains directories, you can use the 
 # FILE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp 
