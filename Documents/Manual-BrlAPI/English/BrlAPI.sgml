@@ -599,7 +599,7 @@ It is here rewritten, its working briefly explained.
 
 <p>Connection to <em/BrlAPI/ is needed first, thanks to the
 <tt>brlapi_openConnection</tt> call. For this, a
-<tt>brlapi_settings_t</tt> variable must be filled which will hold the
+<tt>brlapi_connectionSettings_t</tt> variable must be filled which will hold the
 settings the library needs to connect to the server. Just giving <tt/NULL/
 will work for local use. The other parameter lets you get back the parameters
 which were actually used to initialize connection. <tt/NULL/ will also be nice
@@ -756,7 +756,7 @@ again...
 
 int main()
 {
- brl_keycode_t key;
+ brlapi_keyCode_t key;
  char *p,*c;
  int x, y;
 
@@ -1325,7 +1325,7 @@ This should be sent by the client when it needs to know the braille display
 size. The returned data are two integers: width and then height.
 
 <sect2><tt/BRLPACKET_ENTERTTYMODE/ (see <em/brlapi_enterTtyMode()/ and
-<em/brlapi_getTtyModePath()/)
+<em/brlapi_enterTtyModePath()/)
 <p>
 This should be sent by the client to get control of a tty. Sent data are
 first a series of integers: the first one gives the number of following

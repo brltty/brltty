@@ -25,6 +25,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#define BRLAPI_NO_DEPRECATED
 #include "Programs/api.h"
 
 #define ERR_NULLPTR 0
@@ -139,7 +140,7 @@ static void exceptionHandler(int err, brl_type_t type, const void *buf, size_t s
 JNIEXPORT jint JNICALL Java_BrlapiNative_openConnection(JNIEnv *jenv, jobject jobj, jobject JclientSettings , jobject JusedSettings) {
   jclass jcclientSettings, jcusedSettings;
   jfieldID clientAuthID = NULL, clientHostID = NULL, usedAuthID, usedHostID;
-  brlapi_settings_t clientSettings,  usedSettings,
+  brlapi_connectionSettings_t clientSettings,  usedSettings,
             *PclientSettings, *PusedSettings;
   int result;
   jstring auth = NULL, host = NULL;
@@ -409,7 +410,7 @@ JNIEXPORT void JNICALL Java_BrlapiNative_setFocus(JNIEnv *jenv, jobject jobj, ji
 }
 
 JNIEXPORT void JNICALL Java_BrlapiNative_writeTextNative(JNIEnv *jenv, jobject jobj, jint jarg1, jstring jarg2) {
-  brlapi_writeStruct s = BRLAPI_WRITESTRUCT_INITIALIZER;
+  brlapi_writeStruct_t s = BRLAPI_WRITESTRUCT_INITIALIZER;
   int result;
   GET_HANDLE(jenv, jobj, );
   
@@ -465,7 +466,7 @@ JNIEXPORT void JNICALL Java_BrlapiNative_writeDots(JNIEnv *jenv, jobject jobj, j
 }
 
 JNIEXPORT void JNICALL Java_BrlapiNative_write(JNIEnv *jenv, jobject jobj, jobject js) {
-  brlapi_writeStruct s = BRLAPI_WRITESTRUCT_INITIALIZER;
+  brlapi_writeStruct_t s = BRLAPI_WRITESTRUCT_INITIALIZER;
   int result;
   jstring text, attrAnd, attrOr;
   jclass jcwriteStruct;
@@ -521,7 +522,7 @@ JNIEXPORT void JNICALL Java_BrlapiNative_write(JNIEnv *jenv, jobject jobj, jobje
 }
 
 JNIEXPORT jlong JNICALL Java_BrlapiNative_readKey(JNIEnv *jenv, jobject jobj, jboolean jblock) {
-  brl_keycode_t code;
+  brlapi_keyCode_t code;
   int result;
   GET_HANDLE(jenv, jobj, -1);
 
@@ -542,7 +543,7 @@ JNIEXPORT void JNICALL Java_BrlapiNative_ignoreKeyRange(JNIEnv *jenv, jobject jo
   env = jenv;
   GET_HANDLE(jenv, jobj, );
 
-  if (brlapi__ignoreKeyRange(handle, (brl_keycode_t)jarg1,(brl_keycode_t)jarg2) < 0) {
+  if (brlapi__ignoreKeyRange(handle, (brlapi_keyCode_t)jarg1,(brlapi_keyCode_t)jarg2) < 0) {
     ThrowError(jenv, __func__);
     return;
   }
@@ -564,8 +565,8 @@ JNIEXPORT void JNICALL Java_BrlapiNative_ignoreKeySet(JNIEnv *jenv, jobject jobj
   n = (unsigned int) (*jenv)->GetArrayLength(jenv, js);
   s = (*jenv)->GetLongArrayElements(jenv, js, NULL);
 
-  // XXX jlong != brl_keycode_t probably
-  result = brlapi__ignoreKeySet(handle, (const brl_keycode_t *)s, n);
+  // XXX jlong != brlapi_keyCode_t probably
+  result = brlapi__ignoreKeySet(handle, (const brlapi_keyCode_t *)s, n);
   (*jenv)->ReleaseLongArrayElements(jenv, js, s, JNI_ABORT);
   
   if (result < 0) {
@@ -578,7 +579,7 @@ JNIEXPORT void JNICALL Java_BrlapiNative_acceptKeyRange(JNIEnv *jenv, jobject jo
   env = jenv;
   GET_HANDLE(jenv, jobj, );
 
-  if (brlapi__acceptKeyRange(handle, (brl_keycode_t)jarg1,(brl_keycode_t)jarg2) < 0) {
+  if (brlapi__acceptKeyRange(handle, (brlapi_keyCode_t)jarg1,(brlapi_keyCode_t)jarg2) < 0) {
     ThrowError(jenv, __func__);
     return;
   }
@@ -600,8 +601,8 @@ JNIEXPORT void JNICALL Java_BrlapiNative_acceptKeySet(JNIEnv *jenv, jobject jobj
   n = (unsigned int) (*jenv)->GetArrayLength(jenv, js);
   s = (*jenv)->GetLongArrayElements(jenv, js, NULL);
 
-  // XXX jlong != brl_keycode_t probably
-  result = brlapi__acceptKeySet(handle, (const brl_keycode_t *)s, n);
+  // XXX jlong != brlapi_keyCode_t probably
+  result = brlapi__acceptKeySet(handle, (const brlapi_keyCode_t *)s, n);
   (*jenv)->ReleaseLongArrayElements(jenv, js, s, JNI_ABORT);
 
   if (result < 0) {
@@ -777,7 +778,7 @@ JNIEXPORT jstring JNICALL Java_BrlapiException_toString (JNIEnv *jenv, jobject j
 JNIEXPORT void JNICALL Java_BrlapiKey_expandKeyCode (JNIEnv *jenv, jobject obj, jlong jkey) {
   jclass jckey;
   jfieldID typeID, commandID, argumentID, flagsID;
-  brl_keycode_t key = jkey;
+  brlapi_keyCode_t key = jkey;
   brlapi_expandedKeyCode_t ekc;
 
   GET_CLASS(jenv, jckey, obj, );

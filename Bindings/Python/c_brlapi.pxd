@@ -22,11 +22,11 @@ cdef extern from "sys/types.h":
 	ctypedef int size_t
 
 cdef extern from "Programs/api.h":
-	ctypedef struct brlapi_settings_t:
+	ctypedef struct brlapi_connectionSettings_t:
 		char *auth
 		char *host
 
-	ctypedef struct brlapi_writeStruct:
+	ctypedef struct brlapi_writeStruct_t:
 		int displayNumber
 		unsigned int regionBegin
 		unsigned int regionSize
@@ -37,7 +37,7 @@ cdef extern from "Programs/api.h":
 		int cursor
 		char *charset
 
-	brlapi_writeStruct BRLAPI_WRITESTRUCT_INITIALIZER
+	brlapi_writeStruct_t BRLAPI_WRITESTRUCT_INITIALIZER
 
 	ctypedef struct brlapi_expandedKeyCode_t:
 		unsigned int type
@@ -55,17 +55,18 @@ cdef extern from "Programs/api.h":
 
 	size_t brlapi_getHandleSize()
 	void brlapi__closeConnection(brlapi_handle_t *)
-	int brlapi__openConnection(brlapi_handle_t *, brlapi_settings_t*, brlapi_settings_t*)
+	int brlapi__openConnection(brlapi_handle_t *, brlapi_connectionSettings_t*, brlapi_connectionSettings_t*)
 
 	int brlapi__getDisplaySize(brlapi_handle_t *, unsigned int*, unsigned int *y)
 	int brlapi__getDriverId(brlapi_handle_t *, char*, int)
 	int brlapi__getDriverName(brlapi_handle_t *, char*, int)
 
 	int brlapi__enterTtyMode(brlapi_handle_t *, int, char*)
+	int brlapi__enterTtyModeWithPath(brlapi_handle_t *, int *, int, char*)
 	int brlapi__leaveTtyMode(brlapi_handle_t *)
 	int brlapi__setFocus(brlapi_handle_t *, int)
 
-	int brlapi__write(brlapi_handle_t *, brlapi_writeStruct*)
+	int brlapi__write(brlapi_handle_t *, brlapi_writeStruct_t*)
 	int brlapi__writeDots(brlapi_handle_t *, unsigned char*)
 	int brlapi__writeText(brlapi_handle_t *, int, char*)
 

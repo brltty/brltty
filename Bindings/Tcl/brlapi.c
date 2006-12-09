@@ -22,13 +22,15 @@
 
 #include <tcl.h>
 #include "Programs/brldefs.h"
+
+#define BRLAPI_NO_DEPRECATED
 #include "Programs/api.h"
 
 #define allocateMemory(size) ((void *)ckalloc((size)))
 #define deallocateMemory(address) ckfree((void *)(address))
 
 typedef struct {
-  brlapi_settings_t settings;
+  brlapi_connectionSettings_t settings;
   brlapi_handle_t *handle;
   brlapi_fileDescriptor fileDescriptor;
 } BrlapiSession;
@@ -221,7 +223,7 @@ OPTION_HANDLER(session, enterTtyMode, tty) {
 }
 
 typedef struct {
-  brlapi_writeStruct arguments;
+  brlapi_writeStruct_t arguments;
   int textLength;
   int andLength;
   int orLength;
@@ -589,7 +591,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
       }
 
       {
-        brl_keycode_t key;
+        brlapi_keyCode_t key;
         int result = brlapi__readKey(session->handle, wait, &key);
 
         if (result == -1) {
@@ -619,7 +621,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
       }
 
       {
-        brl_keycode_t keys[2];
+        brlapi_keyCode_t keys[2];
 
         {
           int index;
@@ -667,7 +669,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
         }
 
         if (count) {
-          brl_keycode_t keys[count];
+          brlapi_keyCode_t keys[count];
           int index;
 
           for (index=0; index<count; ++index) {
@@ -963,7 +965,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
 }
 
 typedef struct {
-  brlapi_settings_t settings;
+  brlapi_connectionSettings_t settings;
 } FunctionData_general_connect;
 
 OPTION_HANDLER(general, openConnection, host) {

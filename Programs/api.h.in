@@ -643,7 +643,7 @@ typedef struct {
  * This function returns one key press's code.
  *
  * \param keyCode is the keycode to be expanded ;
- * \param expansion points to the structure that will receive the individual components of the keycode
+ * \param ekc points to the structure that will receive the individual components of the keycode
  *
  * \return 0 on success, -1 on error.
  */
@@ -1009,9 +1009,20 @@ int brlapi__writeWin(brlapi_handle_t *handle, const brlapi_writeStruct_t *s, int
 #endif /* BRLAPI_WIN32 */
 
 #ifndef BRLAPI_NO_DEPRECATED
+/** \defgroup brlapi_deprecated Deprecated names
+ *
+ * With version 0.5.0, BrlAPI got a big renaming pass. Old names are still
+ * available through macros, but they are deprecated since they will get dropped
+ * in the next release. This documentation is for you to know the new names.
+ *
+ * For checking that you have completely switched to new names, just define
+ * BRLAPI_NO_DEPRECATED: that will disable compatibility macros.
+ *
+ * @{ */
+
 #define brlapi_settings_t brlapi_connectionSettings_t
 #define brlapi_writeStruct brlapi_writeStruct_t
-#define brl_keycode_t brlapi_keyCode_t;
+#define brl_keycode_t brlapi_keyCode_t
 
 #define BRLCOMMANDS NULL
 #define BRL_KEYCODE_MAX BRLAPI_KEYCODE_MAX
@@ -1027,12 +1038,7 @@ int brlapi__writeWin(brlapi_handle_t *handle, const brlapi_writeStruct_t *s, int
 #define brlapi_suspend(n) brlapi_suspendDriver(n)
 #define brlapi_resume brlapi_resumeDriver
 
-#define brlapi__initializeConnection(h, s1, s2) brlapi__openConnection(h, s1, s2)
-#define brlapi__getTtyPath(handle, ttys, nttys, driverName) brlapi__enterTtyModeWithPath(handle, ttys, nttys, driverName)
-#define brlapi__unignoreKeyRange(h, x, y) brlapi__acceptKeyRange(h, x, y)
-#define brlapi__unignoreKeySet(h, s, n) brlapi__acceptKeySet(h, s, n)
-#define brlapi__suspend(h, n) brlapi__suspendDriver(h, n)
-#define brlapi__resume(h) brlapi__resumeDriver(h)
+/* @} */
 #endif /* BRLAPI_NO_DEPRECATED */
 
 #ifdef __cplusplus

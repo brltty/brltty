@@ -21,8 +21,10 @@
 #include <string.h>
 
 #include "Programs/misc.h"
-#include "Programs/api.h"
 #include "Programs/scr.h"
+
+#define BRLAPI_NO_DEPRECATED
+#include "Programs/api.h"
 
 typedef enum {
   PARM_HOST=0,
@@ -53,7 +55,7 @@ static int restart;
 /* Opens a connection with BrlAPI's server */
 static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
 {
-  brlapi_settings_t settings;
+  brlapi_connectionSettings_t settings;
   settings.host = parameters[PARM_HOST];
   settings.auth = parameters[PARM_AUTH];
   CHECK((brlapi_openConnection(&settings, &settings)>=0), out);
@@ -102,13 +104,13 @@ static void brl_writeWindow(BrailleDisplay *brl)
   if (vt == -1) {
     /* should leave display */
     if (prevShown) {
-      brlapi_writeStruct ws = BRLAPI_WRITESTRUCT_INITIALIZER;
+      brlapi_writeStruct_t ws = BRLAPI_WRITESTRUCT_INITIALIZER;
       brlapi_write(&ws);
       prevShown = 0;
     }
     return;
   } else {
-    brlapi_writeStruct ws = BRLAPI_WRITESTRUCT_INITIALIZER;
+    brlapi_writeStruct_t ws = BRLAPI_WRITESTRUCT_INITIALIZER;
     unsigned char and[displaySize];
     if (prevShown && memcmp(prevData,brl->buffer,displaySize)==0) return;
     memset(and,0,sizeof(and));
@@ -136,7 +138,7 @@ static void brl_writeVisual(BrailleDisplay *brl)
   if (vt == -1) {
     /* should leave display */
     if (prevShown) {
-      brlapi_writeStruct ws = BRLAPI_WRITESTRUCT_INITIALIZER;
+      brlapi_writeStruct_t ws = BRLAPI_WRITESTRUCT_INITIALIZER;
       brlapi_write(&ws);
       prevShown = 0;
     }
@@ -164,7 +166,7 @@ static void brl_writeStatus(BrailleDisplay *brl, const unsigned char *s)
 /* Reads a command from the braille keyboard */
 static int brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context)
 {
-  brl_keycode_t command;
+  brlapi_keyCode_t command;
   if (restart) return BRL_CMD_RESTARTBRL;
   switch (brlapi_readKey(0, &command)) {
     case 0: return EOF;

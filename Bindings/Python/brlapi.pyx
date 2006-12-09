@@ -68,11 +68,11 @@ class OperationError:
 
 cdef class Write:
 	"""Structure containing arguments to be given to Bridge.write()
-	See brlapi_writeStruct(3)."""
-	cdef c_brlapi.brlapi_writeStruct props
+	See brlapi_writeStruct_t(3)."""
+	cdef c_brlapi.brlapi_writeStruct_t props
 
 	def __new__(self):
-		self.props = <c_brlapi.brlapi_writeStruct> c_brlapi.BRLAPI_WRITESTRUCT_INITIALIZER
+		self.props = <c_brlapi.brlapi_writeStruct_t> c_brlapi.BRLAPI_WRITESTRUCT_INITIALIZER
 
 	property displayNumber:
 		"""Display number -1 == unspecified"""
@@ -193,7 +193,7 @@ cdef class Write:
 cdef class Connection:
 	"""Class which manages the bridge between BrlTTY and your program"""
 	cdef c_brlapi.brlapi_handle_t *h
-	cdef c_brlapi.brlapi_settings_t settings
+	cdef c_brlapi.brlapi_connectionSettings_t settings
 	cdef int fd
 	def __init__(self, host = None, auth = None):
 		"""Connect your program to BrlTTY using settings
@@ -204,7 +204,7 @@ cdef class Connection:
 		Note: Please check that resolving this name works before complaining.
 
 		Setting auth to None defaults it to local installation setup or to the content of the BRLAPI_AUTH environment variable, if it exists."""
-		cdef c_brlapi.brlapi_settings_t client
+		cdef c_brlapi.brlapi_connectionSettings_t client
 
 		if auth:
 			client.auth = auth
@@ -423,11 +423,11 @@ cdef class Connection:
 		See brlapi_expandKeyCode(3)."""
 		cdef c_brlapi.brlapi_expandedKeyCode_t ekc
 		cdef int retval
-		retval = c_brlapi.brlapi_expandKeyCode(code, <c_brlapi.brlapi_expandedKeyCode_t*>&ekc)
+		retval = c_brlapi.brlapi_expandKeyCode(code, &ekc)
 		if retval == -1:
 			raise OperationError(returnerrno())
 		else:
-			return (ekc.command, ekc.argument, ekc.flags)
+			return (ekc.type, ekc.command, ekc.argument, ekc.flags)
 	
 	def ignoreKeyRange(self, range):
 		"""Ignore some key presses from the braille keyboard.

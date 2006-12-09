@@ -70,7 +70,7 @@ brltty_brl_send_dots (guchar         *dots,
                         len = dd.x * dd.y;
     guchar                 sendbuff[256];
 
-    brlapi_writeStruct ws = BRLAPI_WRITESTRUCT_INITIALIZER;
+    brlapi_writeStruct_t ws = BRLAPI_WRITESTRUCT_INITIALIZER;
   
     if (count > len) 
         return 0;
@@ -140,7 +140,7 @@ brltty_brl_glib_cb (GIOChannel   *source,
                     GIOCondition condition, 
                     gpointer     data)
 {
-    brl_keycode_t key;
+    brlapi_keyCode_t key;
 
     BRLEventCode bec;
     BRLEventData bed;
@@ -331,7 +331,7 @@ brltty_brl_open_device (gchar*                         device_name,
                         BRLDevice                 *device)
 {
     gint fd;
-    brlapi_settings_t settings;
+    brlapi_connectionSettings_t settings;
     GdkWindow *root;
     GdkAtom VTAtom, type;
     guint VT = -1;
@@ -433,7 +433,7 @@ brltty_brl_open_device (gchar*                         device_name,
     }
 
 enterTtyMode:
-    if (brlapi_enterTtyMode (VT, BRLCOMMANDS) == -1)
+    if (brlapi_enterTtyMode (VT, NULL) == -1)
     {
         brlapi_perror("Unable to get Tty"); //to be translated
         return 0;
