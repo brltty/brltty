@@ -28,7 +28,7 @@
 #include "cmd.h"
 
 #define BRLAPI_NO_DEPRECATED
-#include "api.h"
+#include "brlapi.h"
 
 static brlapi_connectionSettings_t settings;
 

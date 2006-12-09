@@ -24,7 +24,7 @@
 #include "Programs/scr.h"
 
 #define BRLAPI_NO_DEPRECATED
-#include "Programs/api.h"
+#include "Programs/brlapi.h"
 
 typedef enum {
   PARM_HOST=0,

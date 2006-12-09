@@ -136,7 +136,7 @@ proc generatedFile {file} {
       return 1
    }
 
-   if {[lsearch -exact {api_constants.h} $name] >= 0} {
+   if {[lsearch -exact {brlapi_constants.h} $name] >= 0} {
       return 1
    }
 

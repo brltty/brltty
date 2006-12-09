@@ -16,7 +16,7 @@
 ###############################################################################
 
 BEGIN {
-  writeHeaderPrologue("BRLAPI_INCLUDED_API_CMDDEFS", "api.h")
+  writeHeaderPrologue("BRLAPI_INCLUDED_CONSTANTS", "api.h")
   beginDoxygenFile("BrlAPI Commans")
   beginDoxygenGroup("brlapi_commands", "Defines for BrlAPI Commands")
 }

@@ -102,7 +102,7 @@ adlib.$O:
 
 ###############################################################################
 
-API_OBJS = api_client.$O
+API_OBJS = brlapi_client.$O
 API_NAME = brlapi
 API_ARC = $(ARC_PFX)$(API_NAME).$(ARC_EXT)
 API_LIB = $(LIB_PFX)$(API_NAME).$(LIB_EXT)
@@ -126,20 +126,20 @@ $(API_ARC): $(API_OBJS)
 	ar rc $@ $(API_OBJS)
 	$(RANLIB) $@
 
-api_client.$O:
-	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/api_client.c
+brlapi_client.$O:
+	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/brlapi_client.c
 
-api_constants.h: $(SRC_DIR)/brldefs.h $(SRC_DIR)/brldefs.awk $(SRC_DIR)/api_constants.awk
-	$(AWK) -f $(SRC_DIR)/brldefs.awk -f $(SRC_DIR)/api_constants.awk $(SRC_DIR)/brldefs.h >$@
+brlapi_constants.h: $(SRC_DIR)/brldefs.h $(SRC_DIR)/brldefs.awk $(SRC_DIR)/brlapi_constants.awk
+	$(AWK) -f $(SRC_DIR)/brldefs.awk -f $(SRC_DIR)/brlapi_constants.awk $(SRC_DIR)/brldefs.h >$@
 
-api_keytab.auto.h: $(SRC_DIR)/brldefs.h $(SRC_DIR)/brldefs.awk $(SRC_DIR)/api_keytab.awk
-	$(AWK) -f $(SRC_DIR)/brldefs.awk -f $(SRC_DIR)/api_keytab.awk $(SRC_DIR)/brldefs.h >$@
+brlapi_keytab.auto.h: $(SRC_DIR)/brldefs.h $(SRC_DIR)/brldefs.awk $(SRC_DIR)/brlapi_keytab.awk
+	$(AWK) -f $(SRC_DIR)/brldefs.awk -f $(SRC_DIR)/brlapi_keytab.awk $(SRC_DIR)/brldefs.h >$@
 
-api_brldefs.auto.h: $(SRC_DIR)/brldefs.h $(SRC_DIR)/brldefs.awk $(SRC_DIR)/api_brldefs.awk
-	$(AWK) -f $(SRC_DIR)/brldefs.awk -f $(SRC_DIR)/api_brldefs.awk $(SRC_DIR)/brldefs.h >$@
+brlapi_brldefs.auto.h: $(SRC_DIR)/brldefs.h $(SRC_DIR)/brldefs.awk $(SRC_DIR)/brlapi_brldefs.awk
+	$(AWK) -f $(SRC_DIR)/brldefs.awk -f $(SRC_DIR)/brlapi_brldefs.awk $(SRC_DIR)/brldefs.h >$@
 
-api_server.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/api_server.c
+brlapi_server.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/brlapi_server.c
 
 keyrangelist.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/keyrangelist.c
@@ -533,12 +533,14 @@ install-api-libraries-windows: $(API_DLL) $(API_ARC) install-program-directory i
 install-libdir-directory:
 	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(libdir)
 
-install-api-headers: api_constants.h api_brldefs.auto.h
+install-api-headers: brlapi_constants.h brlapi_brldefs.auto.h
+	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(includedir)
+	$(INSTALL_DATA) brlapi.h $(INSTALL_ROOT)$(includedir)
+	$(INSTALL_DATA) brlapi_constants.h $(INSTALL_ROOT)$(includedir)
+	$(INSTALL_DATA) $(SRC_DIR)/brlapi_protocol.h $(INSTALL_ROOT)$(includedir)
 	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
-	$(INSTALL_DATA) api.h $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
-	$(INSTALL_DATA) $(SRC_DIR)/api_protocol.h $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
-	$(INSTALL_DATA) api_constants.h $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
-	$(INSTALL_DATA) api_brldefs.auto.h $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)/brldefs.h
+	$(INSTALL_DATA) brlapi_brldefs.auto.h $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)/brldefs.h
+	$(INSTALL_DATA) $(SRC_DIR)/api.h $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
 
 install-api-manpages:
 	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(MANPAGE_DIRECTORY)/man3
@@ -584,8 +586,9 @@ uninstall-manpages:
 	-rm -f $(INSTALL_ROOT)$(MANPAGE_DIRECTORY)/man3/brlapi_*.3
 
 uninstall-headers:
+	-rm -f $(INSTALL_ROOT)$(includedir)/brlapi.h
+	-rm -f $(INSTALL_ROOT)$(includedir)/brlapi_*.h
 	-rm -f $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)/api.h
-	-rm -f $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)/api_*.h
 	-rm -f $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)/brldefs.h
 	-rm -f $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)/brldefs-*.h
 	-[ ! -d $(INSTALL_ROOT)$(INCLUDE_DIRECTORY) ] || rmdir $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
@@ -612,9 +615,9 @@ distclean clean::
 
 clean::
 	-rm -f brltty$X xbrlapi$X txt2hlp$X tbl2hex$X *test$X *-static$X
-	-rm -f api_constants.h $(API_LIB) $(API_ARC) $(API_DLL) $(API_IMPLIB)
+	-rm -f brlapi_constants.h $(API_LIB) $(API_ARC) $(API_DLL) $(API_IMPLIB)
 	-rm -f $(BLD_TOP)$(DRV_DIR)/* $(BLD_TOP)$(DAT_DIR)/*
 
 distclean::
-	-rm -f api.h
+	-rm -f brlapi.h
 	-rm -f brltty-config

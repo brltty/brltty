@@ -22,8 +22,8 @@
  * \brief Types, defines and functions prototypes for \e BrlAPI's library
  */
 
-#ifndef BRLAPI_INCLUDED_API
-#define BRLAPI_INCLUDED_API
+#ifndef BRLAPI_INCLUDED
+#define BRLAPI_INCLUDED
 
 #ifdef __cplusplus
 extern "C" {
@@ -626,7 +626,7 @@ typedef uint64_t brlapi_keyCode_t;
 #define BRLAPI_KEY_SYM_DELETE		UINT64_C(0X0000FFFF)
 #define BRLAPI_KEY_SYM_UC		UINT64_C(0X01000000)
 
-#include "api_constants.h"
+#include "brlapi_constants.h"
 
 /* brlapi_expandedKeyCode_t */
 /** Structure holding the components of a key code as returned by brlapi_expandKeyCode(3) */
@@ -1064,4 +1064,4 @@ int brlapi__writeWin(brlapi_handle_t *handle, const brlapi_writeStruct_t *s, int
 }
 #endif /* __cplusplus */
 
-#endif /* BRLAPI_INCLUDED_API */
+#endif /* BRLAPI_INCLUDED */

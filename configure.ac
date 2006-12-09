@@ -54,7 +54,7 @@ AC_DEFINE_UNQUOTED([PACKAGE_TITLE], ["${PACKAGE_TITLE}"],
 AC_SUBST([package_date], ["`date "+%Y/%m/%d"`"])
 
 AC_CONFIG_HEADER([config.h])
-AC_CONFIG_HEADER([Programs/api.h])
+AC_CONFIG_HEADER([Programs/brlapi.h])
 AC_PREFIX_DEFAULT([])
 AC_CONFIG_AUX_DIR([acdir])
 AC_CANONICAL_SYSTEM
@@ -410,7 +410,7 @@ BRLTTY_ARG_DISABLE(
                 [Define this if the application programming interface is to be included.])
       BRLTTY_ARG_PARAMETERS([api], [application programming interface])
 
-      api_objects='api_server.$O keyrangelist.$O'
+      api_objects='brlapi_server.$O keyrangelist.$O'
       api_libraries="${LIBS}"
 
       all_api="all-api"

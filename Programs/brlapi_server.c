@@ -55,8 +55,8 @@
 #endif /* WINDOWS */
 
 #define BRLAPI_NO_DEPRECATED
-#include "api.h"
-#include "api_protocol.h"
+#include "brlapi.h"
+#include "brlapi_protocol.h"
 
 #include "keyrangelist.h"
 #include "cmd.h"
@@ -129,7 +129,7 @@ static brlapi_error_t brlapiserver_error;
 #define brlapi_error brlapiserver_error
 
 #define BRLAPI(fun) brlapiserver_ ## fun
-#include "api_common.h"
+#include "brlapi_common.h"
  
 /** ask for \e brltty commands */
 #define BRL_COMMANDS 0

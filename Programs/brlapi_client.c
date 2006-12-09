@@ -88,11 +88,11 @@
 #endif /* MAXIMUM_VIRTUAL_CONSOLE */
 
 #define BRLAPI_NO_DEPRECATED
-#include "api.h"
-#include "api_protocol.h"
+#include "brlapi.h"
+#include "brlapi_protocol.h"
 
 #define BRLAPI(fun) brlapi_ ## fun
-#include "api_common.h"
+#include "brlapi_common.h"
 
 #ifndef MIN
 #define MIN(a, b) (((a) < (b))? (a): (b))
@@ -1604,7 +1604,7 @@ typedef struct {
 } brlapi_keyEntry_t;
 
 static const brlapi_keyEntry_t brlapi_keyTable[] = {
-#include "api_keytab.auto.h"
+#include "brlapi_keytab.auto.h"
 
   {.code = 0X0000U, .name = "LATIN1"},
   {.code = 0X0100U, .name = "LATIN2"},

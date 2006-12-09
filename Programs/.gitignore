@@ -1,8 +1,8 @@
 Makefile
 reldeps.mk
-api.h
+brlapi.h
 *.auto.h
-api_constants.h
+brlapi_constants.h
 *.auto.c
 *.a
 *.so

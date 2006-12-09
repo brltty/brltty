@@ -24,7 +24,7 @@
 #include "Programs/brldefs.h"
 
 #define BRLAPI_NO_DEPRECATED
-#include "Programs/api.h"
+#include "Programs/brlapi.h"
 
 #define allocateMemory(size) ((void *)ckalloc((size)))
 #define deallocateMemory(address) ckfree((void *)(address))

@@ -22,14 +22,14 @@
  * \brief types and constants for \e BrlAPI's protocol
  */
 
-#ifndef BRLAPI_INCLUDED_API_PROTOCOL
-#define BRLAPI_INCLUDED_API_PROTOCOL
+#ifndef BRLAPI_INCLUDED_PROTOCOL
+#define BRLAPI_INCLUDED_PROTOCOL
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-#include "api.h"
+#include "brlapi.h"
 
 /* this is for UINT32_MAX */
 #include <inttypes.h>
@@ -255,4 +255,4 @@ extern pthread_mutex_t brlapi_fd_mutex;
 }
 #endif /* __cplusplus */
 
-#endif /* BRLAPI_INCLUDED_API_PROTOCOL */
+#endif /* BRLAPI_INCLUDED_PROTOCOL */

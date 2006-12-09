@@ -21,7 +21,7 @@
 cdef extern from "sys/types.h":
 	ctypedef int size_t
 
-cdef extern from "Programs/api.h":
+cdef extern from "Programs/brlapi.h":
 	ctypedef struct brlapi_connectionSettings_t:
 		char *auth
 		char *host

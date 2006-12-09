@@ -26,7 +26,7 @@
 #include <unistd.h>
 
 #define BRLAPI_NO_DEPRECATED
-#include "Programs/api.h"
+#include "Programs/brlapi.h"
 
 #define ERR_NULLPTR 0
 #define ERR_OUTOFMEM 1
