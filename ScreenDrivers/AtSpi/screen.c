@@ -38,6 +38,7 @@
 
 #include "Programs/misc.h"
 #include "Programs/brldefs.h"
+#include "Programs/charset.h"
 
 typedef enum {
   PARM_TYPE
@@ -606,7 +607,7 @@ describe_AtSpiScreen (ScreenDescription *description) {
 static int
 read_AtSpiScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
   long x,y;
-  wchar_t c;
+  int c;
   if (box.height<0 || box.width<0) return 0;
   if (mode == SCR_ATTRIB) {
     memset(buffer,0x07,box.height*box.width);
@@ -625,11 +626,9 @@ read_AtSpiScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
       if (curRowLengths[box.top+y])
 	for (x=0; x<box.width; x++) {
 	  if (box.left+x<curRowLengths[box.top+y] - (curRows[box.top+y][curRowLengths[box.top+y]-1]=='\n')) {
-	    if ((c = curRows[box.top+y][box.left+x])<0x100)
-	      /* latin1 only */
-	      buffer[y*box.width+x] = c;
-	    else
-	      buffer[y*box.width+x] = '?';
+	    if ((c = convertWcharToChar(curRows[box.top+y][box.left+x])) == EOF)
+	      c = '?';
+	    buffer[y*box.width+x] = c;
 	  }
 	}
 out:

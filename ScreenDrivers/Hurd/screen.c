@@ -28,6 +28,7 @@
 
 #include "Programs/misc.h"
 #include "Programs/brldefs.h"
+#include "Programs/charset.h"
 
 #include "Programs/scr_driver.h"
 #include "screen.h"
@@ -210,6 +211,7 @@ describe_HurdScreen (ScreenDescription *description) {
 static int
 read_HurdScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
   ScreenDescription description;
+  int c;
   describe_HurdScreen(&description);
   if (lastReadVt != description.number) {
     openScreen(description.number);
@@ -221,9 +223,11 @@ read_HurdScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
     lines = screenMap->screen.lines;
     start = screenMap->screen.cur_line;
     for (row=start+box.top; row<start+box.top+box.height; ++row)
-      for (col=box.left; col<box.left+box.width; ++col)
-	      /* TODO: correctly translate uint32_t into char */
-	*buffer++ = *(uint32_t *)(((unsigned char *) &screenDisplay[(row%lines)*description.cols+col])+which);
+      for (col=box.left; col<box.left+box.width; ++col) {
+        if ((c = convertWcharToChar(*(uint32_t *)(((unsigned char *) &screenDisplay[(row%lines)*description.cols+col])+which))) == EOF)
+	  c = '?';
+	*buffer++ = c;
+      }
     return 1;
   } else {
     LogPrint(LOG_ERR, "Invalid screen area: cols=%d left=%d width=%d rows=%d top=%d height=%d",
