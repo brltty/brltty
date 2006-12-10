@@ -29,8 +29,8 @@ typedef enum {
 #define BRLPARMS "inputmode"
 
 #define BRLSTAT ST_AlvaStyle
-#define BRL_HAVE_SENSITIVITY
 #define BRL_HAVE_PACKET_IO
+#define BRL_HAVE_SENSITIVITY
 #include "Programs/brl_driver.h"
 #include "braille.h"
 
@@ -1639,6 +1639,6 @@ brl_writePacket (BrailleDisplay *brl, const void *packet, size_t length) {
 
 static void
 brl_sensitivity (BrailleDisplay *brl, BrailleSensitivity setting) {
-  unsigned char value = 0XFF - (setting * 0XFF / BS_MAXIMUM);
+  unsigned char value = 0XFF - (setting * 0XF0 / BS_MAXIMUM);
   setAtcSensitivity(brl, value);
 }
