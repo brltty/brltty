@@ -34,12 +34,13 @@ bindings.$O:
 JAVA_JAR = $(API_NAME).jar
 jar: $(JAVA_JAR)
 
-$(JAVA_JAR): classes
+API_CLASSES = Brlapi.class BrlapiNative.class BrlapiError.class BrlapiException.class BrlapiSettings.class BrlapiWriteStruct.class BrlapiSize.class BrlapiKey.class
+ALL_CLASSES = $(API_CLASSES) ApiTest.class
+
+$(JAVA_JAR): $(API_CLASSES)
 	$(JAVAC:javac=jar) cf $@ Brlapi*.class
 
-CLASSES = Brlapi.class BrlapiNative.class BrlapiError.class BrlapiException.class BrlapiSettings.class BrlapiWriteStruct.class BrlapiSize.class BrlapiKey.class ApiTest.class
-classes: $(CLASSES)
-$(CLASSES): $(SRC_DIR)/*.java BrlapiConstants.class
+$(ALL_CLASSES): $(SRC_DIR)/*.java BrlapiConstants.class
 	$(JAVAC) -d . -classpath . -encoding $(JAVA_ENCODING) $(SRC_DIR)/*.java
 
 BrlapiConstants.class: BrlapiConstants.java
@@ -48,13 +49,16 @@ BrlapiConstants.class: BrlapiConstants.java
 BrlapiConstants.java: $(API_HDR) $(API_AWK) $(BRL_HDR) $(BRL_AWK) $(SRC_DIR)/constants.awk
 	$(AWK) -f $(API_AWK) -f $(BRL_AWK) -f $(SRC_DIR)/constants.awk $(API_HDR) $(BRL_HDR) >$@
 
-doc: BrlapiConstants.java
+doc: javadoc.made
+
+javadoc.made: $(SRC_DIR)/*.java BrlapiConstants.java
 	$(JAVAC:javac=javadoc) -quiet -d . -author -version -use -encoding $(JAVA_ENCODING) $(SRC_DIR)/*.java BrlapiConstants.java
+	touch $@
 
 clean::
-	-rm -f $(JAVA_NATIVE) BrlapiConstants.java *.class $(API_NAME).jar
+	-rm -f $(JAVA_NATIVE) BrlapiConstants.java *.class $(JAVA_JAR)
+	-rm -f javadoc.made package-list *.css *.html
 	-rm -f -r resources
-	-rm -f package-list *.css *.html
 	-rm -f gjdoc.properties JAVADOC.PLACEHOLDER
 
 install: all

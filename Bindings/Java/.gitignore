@@ -4,6 +4,7 @@ BrlapiConstants.java
 *.class
 brlapi.jar
 libbrlapi_java.so
+javadoc.made
 resources
 package-list
 *.css
