@@ -3,7 +3,7 @@ brlapi <function> [<arg> ...]
       -host <hostSpec>
       -auth <file>
    expandHost <hostSpec>
-   expandKeyCode <keyCode>
+   expandKeyCode <keyCode> <arrayName>
    getKeyName <command> [<argument>]
    makeDots <numbersList>
    getHandleSize

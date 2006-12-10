@@ -1083,9 +1083,10 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     case FCN_expandKeyCode: {
       Tcl_WideInt keyCode;
       brlapi_expandedKeyCode_t ekc;
+      const char *array;
 
-      if (objc != 3) {
-        Tcl_WrongNumArgs(interp, 2, objv, "<keyCode>");
+      if (objc != 4) {
+        Tcl_WrongNumArgs(interp, 2, objv, "<keyCode> <arrayName>");
         return TCL_ERROR;
       }
 
@@ -1094,21 +1095,18 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
         if (result != TCL_OK) return result;
       }
 
+      if (!(array = Tcl_GetString(objv[3]))) return TCL_ERROR;
+
       if (brlapi_expandKeyCode(keyCode, &ekc) == -1) {
         setBrlapiError(interp);
         return TCL_ERROR;
       }
 
-      {
-        Tcl_Obj *elements[] = {
-          Tcl_NewIntObj(ekc.type),
-          Tcl_NewIntObj(ekc.command),
-          Tcl_NewIntObj(ekc.argument),
-          Tcl_NewIntObj(ekc.flags)
-        };
-        Tcl_SetObjResult(interp, Tcl_NewListObj(4, elements));
-        return TCL_OK;
-      }
+      if (!Tcl_SetVar2Ex(interp, array, "type", Tcl_NewIntObj(ekc.type), TCL_LEAVE_ERR_MSG)) return TCL_ERROR;
+      if (!Tcl_SetVar2Ex(interp, array, "command", Tcl_NewIntObj(ekc.command), TCL_LEAVE_ERR_MSG)) return TCL_ERROR;
+      if (!Tcl_SetVar2Ex(interp, array, "argument", Tcl_NewIntObj(ekc.argument), TCL_LEAVE_ERR_MSG)) return TCL_ERROR;
+      if (!Tcl_SetVar2Ex(interp, array, "flags", Tcl_NewIntObj(ekc.flags), TCL_LEAVE_ERR_MSG)) return TCL_ERROR;
+      return TCL_OK;
     }
 
     case FCN_getKeyName: {
