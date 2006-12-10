@@ -76,6 +76,7 @@ typedef struct {
   unsigned char sessionEndLength;
 
   unsigned hasATC:1; /* Active Tactile Control */
+  unsigned contiguous:1; /* no physical space between status and text cells */
 } ModelEntry;
 
 #define HT_BYTE_SEQUENCE(name,bytes) .name##Address = bytes, .name##Length = sizeof(bytes)
@@ -114,6 +115,7 @@ static const ModelEntry modelTable[] = {
     .name = "Modular Evolution 64",
     .textCells = 60,
     .statusCells = 4,
+    .contiguous = 1,
     .helpPage = 0,
     .interpretByte = interpretKeyByte,
     .interpretKeys = interpretBrailleStarKeys,
@@ -126,6 +128,7 @@ static const ModelEntry modelTable[] = {
     .name = "Modular Evolution 88",
     .textCells = 80,
     .statusCells = 8,
+    .contiguous = 1,
     .helpPage = 0,
     .interpretByte = interpretKeyByte,
     .interpretKeys = interpretBrailleStarKeys,
@@ -673,11 +676,19 @@ writeBrailleCells (BrailleDisplay *brl) {
     count += model->brailleBeginLength;
   }
 
-  memcpy(buffer+count, rawStatus, model->statusCells);
-  count += model->statusCells;
+  if (model->contiguous) {
+    memcpy(buffer+count, rawData, model->textCells);
+    count += model->textCells;
 
-  memcpy(buffer+count, rawData, model->textCells);
-  count += model->textCells;
+    memcpy(buffer+count, rawStatus, model->statusCells);
+    count += model->statusCells;
+  } else {
+    memcpy(buffer+count, rawStatus, model->statusCells);
+    count += model->statusCells;
+
+    memcpy(buffer+count, rawData, model->textCells);
+    count += model->textCells;
+  }
 
   if (model->brailleEndLength) {
     memcpy(buffer+count, model->brailleEndAddress, model->brailleEndLength);
