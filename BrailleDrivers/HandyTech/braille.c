@@ -1639,6 +1639,8 @@ brl_writePacket (BrailleDisplay *brl, const void *packet, size_t length) {
 
 static void
 brl_sensitivity (BrailleDisplay *brl, BrailleSensitivity setting) {
-  unsigned char value = 0XFF - (setting * 0XF0 / BS_MAXIMUM);
-  setAtcSensitivity(brl, value);
+  if (model->hasATC) {
+    unsigned char value = 0XFF - (setting * 0XF0 / BS_MAXIMUM);
+    setAtcSensitivity(brl, value);
+  }
 }
