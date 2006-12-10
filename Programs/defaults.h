@@ -65,6 +65,7 @@ extern "C" {
 
 #define DEFAULT_TEXT_STYLE 0		/* 1 for six-dot mode, 0 for eight-dot */
 #define DEFAULT_BRAILLE_FIRMNESS BF_MEDIUM
+#define DEFAULT_BRAILLE_SENSITIVITY BS_MEDIUM
 
 #define DEFAULT_WINDOW_OVERLAP 0
 #define DEFAULT_SLIDING_WINDOW 0		/* 1 for sliding window on, 0 for off */

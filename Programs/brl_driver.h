@@ -54,6 +54,10 @@ static void brl_writeStatus (BrailleDisplay *brl, const unsigned char *);
   static void brl_firmness (BrailleDisplay *brl, BrailleFirmness setting);
 #endif /* BRL_HAVE_FIRMNESS */
 
+#ifdef BRL_HAVE_SENSITIVITY
+  static void brl_sensitivity (BrailleDisplay *brl, BrailleSensitivity setting);
+#endif /* BRL_HAVE_SENSITIVITY */
+
 #ifdef BRLPARMS
   static const char *const brl_parameters[] = {BRLPARMS, NULL};
 #endif /* BRLPARMS */
@@ -114,10 +118,16 @@ BRLCONST BrailleDriver BRLSYMBOL = {
 #endif /* BRL_HAVE_KEY_CODES */
 
 #ifdef BRL_HAVE_FIRMNESS
-  brl_firmness
+  brl_firmness,
 #else /* BRL_HAVE_FIRMNESS */
-  NULL  /* brl_firmness */
+  NULL, /* brl_firmness */
 #endif /* BRL_HAVE_FIRMNESS */
+
+#ifdef BRL_HAVE_SENSITIVITY
+  brl_sensitivity
+#else /* BRL_HAVE_SENSITIVITY */
+  NULL  /* brl_sensitivity */
+#endif /* BRL_HAVE_SENSITIVITY */
 };
 
 #ifdef __cplusplus

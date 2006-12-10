@@ -366,3 +366,9 @@ setBrailleFirmness (BrailleDisplay *brl, int setting) {
   LogPrint(LOG_DEBUG, "setting braille firmness: %d", setting);
   braille->firmness(brl, setting);
 }
+
+void
+setBrailleSensitivity (BrailleDisplay *brl, int setting) {
+  LogPrint(LOG_DEBUG, "setting braille sensitivity: %d", setting);
+  braille->sensitivity(brl, setting);
+}

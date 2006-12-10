@@ -73,6 +73,14 @@ typedef enum {
   BF_MAXIMUM
 } BrailleFirmness;
 
+typedef enum {
+  BS_MINIMUM,
+  BS_LOW,
+  BS_MEDIUM,
+  BS_HIGH,
+  BS_MAXIMUM
+} BrailleSensitivity;
+
 /* Routines provided by each braille driver.
  * These are loaded dynamically at run-time into this structure
  * with pointers to all the functions and variables.
@@ -104,6 +112,9 @@ typedef struct {
 
   /* These require BRL_HAVE_FIRMNESS. */
   void (*firmness) (BrailleDisplay *brl, BrailleFirmness setting);
+
+  /* These require BRL_HAVE_SENSITIVITY. */
+  void (*sensitivity) (BrailleDisplay *brl, BrailleSensitivity setting);
 } BrailleDriver;
 
 extern int haveBrailleDriver (const char *code);
@@ -143,6 +154,7 @@ extern void learnMode (BrailleDisplay *brl, int poll, int timeout);
 
 extern void showDotPattern (unsigned char dots, unsigned char duration);
 extern void setBrailleFirmness (BrailleDisplay *brl, int setting);
+extern void setBrailleSensitivity (BrailleDisplay *brl, int setting);
 
 #ifdef __cplusplus
 }

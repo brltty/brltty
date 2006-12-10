@@ -51,7 +51,7 @@ typedef struct {
   unsigned char showCursor;
   unsigned char version;
   unsigned char showAttributes;
-  unsigned char spare2;
+  unsigned char brailleSensitivity;
   unsigned char blinkingCursor;
   unsigned char autorepeat;
   unsigned char blinkingCapitals;

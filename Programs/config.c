@@ -475,6 +475,7 @@ loadContractionTable (const char *file) {
 static void
 setBraillePreferences (void) {
   if (braille->firmness) braille->firmness(&brl, prefs.brailleFirmness);
+  if (braille->sensitivity) braille->sensitivity(&brl, prefs.brailleSensitivity);
 }
 
 #ifdef ENABLE_SPEECH_SUPPORT
@@ -575,6 +576,11 @@ loadPreferences (int change) {
         prefs.autorepeatPanning = DEFAULT_AUTOREPEAT_PANNING;
       }
 
+      if (prefs.version == 4) {
+        prefs.version++;
+        prefs.brailleSensitivity = DEFAULT_BRAILLE_SENSITIVITY;
+      }
+
       if (change) changedPreferences();
     }
     fclose(file);
@@ -616,6 +622,7 @@ getPreferences (void) {
 
     prefs.textStyle = DEFAULT_TEXT_STYLE;
     prefs.brailleFirmness = DEFAULT_BRAILLE_FIRMNESS;
+    prefs.brailleSensitivity = DEFAULT_BRAILLE_SENSITIVITY;
 
     prefs.windowOverlap = DEFAULT_WINDOW_OVERLAP;
     prefs.slidingWindow = DEFAULT_SLIDING_WINDOW;
@@ -670,8 +677,19 @@ testBrailleFirmness (void) {
 }
 
 static int
+testBrailleSensitivity (void) {
+  return braille->sensitivity != NULL;
+}
+
+static int
 changedBrailleFirmness (unsigned char setting) {
   setBrailleFirmness(&brl, setting);
+  return 1;
+}
+
+static int
+changedBrailleSensitivity (unsigned char setting) {
+  setBrailleSensitivity(&brl, setting);
   return 1;
 }
 
@@ -982,6 +1000,13 @@ updatePreferences (void) {
       strtext("High"),
       strtext("Maximum")
     };
+    static const char *sensitivityLevels[] = {
+      strtext("Minimum"),
+      strtext("Low"),
+      strtext("Medium"),
+      strtext("High"),
+      strtext("Maximum")
+    };
     static const char *skipBlankWindowsModes[] = {
       strtext("All"),
       strtext("End of Line"),
@@ -1077,6 +1102,7 @@ updatePreferences (void) {
       TIME_ITEM(prefs.capitalsVisibleTime, NULL, testBlinkingCapitals, strtext("Capitals Visible Time")),
       TIME_ITEM(prefs.capitalsInvisibleTime, NULL, testBlinkingCapitals, strtext("Capitals Invisible Time")),
       SYMBOLIC_ITEM(prefs.brailleFirmness, changedBrailleFirmness, testBrailleFirmness, strtext("Braille Firmness"), firmnessLevels),
+      SYMBOLIC_ITEM(prefs.brailleSensitivity, changedBrailleSensitivity, testBrailleSensitivity, strtext("Braille Sensitivity"), sensitivityLevels),
 #ifdef HAVE_LIBGPM
       BOOLEAN_ITEM(prefs.windowFollowsPointer, NULL, NULL, strtext("Window Follows Pointer")),
       BOOLEAN_ITEM(prefs.pointerFollowsWindow, NULL, NULL, strtext("Pointer Follows Window")),
