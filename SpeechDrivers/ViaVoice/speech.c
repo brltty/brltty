@@ -57,28 +57,319 @@ static char *sayBuffer = NULL;
 static int saySize = 0;
 
 static const int languageMap[] = {
+#ifdef eciGeneralAmericanEnglish
    eciGeneralAmericanEnglish,
+#endif /* eciGeneralAmericanEnglish */
+
+#ifdef eciBritishEnglish
    eciBritishEnglish,
+#endif /* eciBritishEnglish */
+
+#ifdef eciCastilianSpanish
    eciCastilianSpanish,
+#endif /* eciCastilianSpanish */
+
+#ifdef eciMexicanSpanish
    eciMexicanSpanish,
+#endif /* eciMexicanSpanish */
+
+#ifdef eciStandardFrench
    eciStandardFrench,
+#endif /* eciStandardFrench */
+
+#ifdef eciCanadianFrench
    eciCanadianFrench,
+#endif /* eciCanadianFrench */
+
+#ifdef eciStandardGerman
    eciStandardGerman,
+#endif /* eciStandardGerman */
+
+#ifdef eciStandardItalian
    eciStandardItalian,
-   eciSimplifiedChinese,
-   eciBrazilianPortuguese
+#endif /* eciStandardItalian */
+
+#ifdef eciMandarinChinese
+   eciMandarinChinese,
+#endif /* eciMandarinChinese */
+
+#ifdef eciMandarinChineseGB
+   eciMandarinChineseGB,
+#endif /* eciMandarinChineseGB */
+
+#ifdef eciMandarinChinesePinYin
+   eciMandarinChinesePinYin,
+#endif /* eciMandarinChinesePinYin */
+
+#ifdef eciMandarinChineseUCS
+   eciMandarinChineseUCS,
+#endif /* eciMandarinChineseUCS */
+
+#ifdef eciTaiwaneseMandarin
+   eciTaiwaneseMandarin,
+#endif /* eciTaiwaneseMandarin */
+
+#ifdef eciTaiwaneseMandarinBig5
+   eciTaiwaneseMandarinBig5,
+#endif /* eciTaiwaneseMandarinBig5 */
+
+#ifdef eciTaiwaneseMandarinZhuYin
+   eciTaiwaneseMandarinZhuYin,
+#endif /* eciTaiwaneseMandarinZhuYin */
+
+#ifdef eciTaiwaneseMandarinPinYin
+   eciTaiwaneseMandarinPinYin,
+#endif /* eciTaiwaneseMandarinPinYin */
+
+#ifdef eciTaiwaneseMandarinUCS
+   eciTaiwaneseMandarinUCS,
+#endif /* eciTaiwaneseMandarinUCS */
+
+#ifdef eciBrazilianPortuguese
+   eciBrazilianPortuguese,
+#endif /* eciBrazilianPortuguese */
+
+#ifdef eciStandardJapanese
+   eciStandardJapanese,
+#endif /* eciStandardJapanese */
+
+#ifdef eciStandardJapaneseSJIS
+   eciStandardJapaneseSJIS,
+#endif /* eciStandardJapaneseSJIS */
+
+#ifdef eciStandardJapaneseUCS
+   eciStandardJapaneseUCS,
+#endif /* eciStandardJapaneseUCS */
+
+#ifdef eciStandardFinnish
+   eciStandardFinnish,
+#endif /* eciStandardFinnish */
+
+#ifdef eciStandardKorean
+   eciStandardKorean,
+#endif /* eciStandardKorean */
+
+#ifdef eciStandardKoreanUHC
+   eciStandardKoreanUHC,
+#endif /* eciStandardKoreanUHC */
+
+#ifdef eciStandardKoreanUCS
+   eciStandardKoreanUCS,
+#endif /* eciStandardKoreanUCS */
+
+#ifdef eciStandardCantonese
+   eciStandardCantonese,
+#endif /* eciStandardCantonese */
+
+#ifdef eciStandardCantoneseGB
+   eciStandardCantoneseGB,
+#endif /* eciStandardCantoneseGB */
+
+#ifdef eciStandardCantoneseUCS
+   eciStandardCantoneseUCS,
+#endif /* eciStandardCantoneseUCS */
+
+#ifdef eciHongKongCantonese
+   eciHongKongCantonese,
+#endif /* eciHongKongCantonese */
+
+#ifdef eciHongKongCantoneseBig5
+   eciHongKongCantoneseBig5,
+#endif /* eciHongKongCantoneseBig5 */
+
+#ifdef eciHongKongCantoneseUCS
+   eciHongKongCantoneseUCS,
+#endif /* eciHongKongCantoneseUCS */
+
+#ifdef eciStandardDutch
+   eciStandardDutch,
+#endif /* eciStandardDutch */
+
+#ifdef eciStandardNorwegian
+   eciStandardNorwegian,
+#endif /* eciStandardNorwegian */
+
+#ifdef eciStandardSwedish
+   eciStandardSwedish,
+#endif /* eciStandardSwedish */
+
+#ifdef eciStandardDanish
+   eciStandardDanish,
+#endif /* eciStandardDanish */
+
+#ifdef eciStandardReserved
+   eciStandardReserved,
+#endif /* eciStandardReserved */
+
+#ifdef eciStandardThai
+   eciStandardThai,
+#endif /* eciStandardThai */
+
+#ifdef eciStandardThaiTIS
+   eciStandardThaiTIS,
+#endif /* eciStandardThaiTIS */
+
+#ifdef NODEFINEDCODESET
+   NODEFINEDCODESET,
+#endif /* NODEFINEDCODESET */
 };
 static const char *const languageNames[] = {
-   "AmericanEnglish",
+#ifdef eciGeneralAmericanEnglish
+   "GeneralAmericanEnglish",
+#endif /* eciGeneralAmericanEnglish */
+
+#ifdef eciBritishEnglish
    "BritishEnglish",
+#endif /* eciBritishEnglish */
+
+#ifdef eciCastilianSpanish
    "CastilianSpanish",
+#endif /* eciCastilianSpanish */
+
+#ifdef eciMexicanSpanish
    "MexicanSpanish",
+#endif /* eciMexicanSpanish */
+
+#ifdef eciStandardFrench
    "StandardFrench",
+#endif /* eciStandardFrench */
+
+#ifdef eciCanadianFrench
    "CanadianFrench",
+#endif /* eciCanadianFrench */
+
+#ifdef eciStandardGerman
    "StandardGerman",
+#endif /* eciStandardGerman */
+
+#ifdef eciStandardItalian
    "StandardItalian",
-   "SimplifiedChinese",
+#endif /* eciStandardItalian */
+
+#ifdef eciMandarinChinese
+   "MandarinChinese",
+#endif /* eciMandarinChinese */
+
+#ifdef eciMandarinChineseGB
+   "MandarinChineseGB",
+#endif /* eciMandarinChineseGB */
+
+#ifdef eciMandarinChinesePinYin
+   "MandarinChinesePinYin",
+#endif /* eciMandarinChinesePinYin */
+
+#ifdef eciMandarinChineseUCS
+   "MandarinChineseUCS",
+#endif /* eciMandarinChineseUCS */
+
+#ifdef eciTaiwaneseMandarin
+   "TaiwaneseMandarin",
+#endif /* eciTaiwaneseMandarin */
+
+#ifdef eciTaiwaneseMandarinBig5
+   "TaiwaneseMandarinBig5",
+#endif /* eciTaiwaneseMandarinBig5 */
+
+#ifdef eciTaiwaneseMandarinZhuYin
+   "TaiwaneseMandarinZhuYin",
+#endif /* eciTaiwaneseMandarinZhuYin */
+
+#ifdef eciTaiwaneseMandarinPinYin
+   "TaiwaneseMandarinPinYin",
+#endif /* eciTaiwaneseMandarinPinYin */
+
+#ifdef eciTaiwaneseMandarinUCS
+   "TaiwaneseMandarinUCS",
+#endif /* eciTaiwaneseMandarinUCS */
+
+#ifdef eciBrazilianPortuguese
    "BrazilianPortuguese",
+#endif /* eciBrazilianPortuguese */
+
+#ifdef eciStandardJapanese
+   "StandardJapanese",
+#endif /* eciStandardJapanese */
+
+#ifdef eciStandardJapaneseSJIS
+   "StandardJapaneseSJIS",
+#endif /* eciStandardJapaneseSJIS */
+
+#ifdef eciStandardJapaneseUCS
+   "StandardJapaneseUCS",
+#endif /* eciStandardJapaneseUCS */
+
+#ifdef eciStandardFinnish
+   "StandardFinnish",
+#endif /* eciStandardFinnish */
+
+#ifdef eciStandardKorean
+   "StandardKorean",
+#endif /* eciStandardKorean */
+
+#ifdef eciStandardKoreanUHC
+   "StandardKoreanUHC",
+#endif /* eciStandardKoreanUHC */
+
+#ifdef eciStandardKoreanUCS
+   "StandardKoreanUCS",
+#endif /* eciStandardKoreanUCS */
+
+#ifdef eciStandardCantonese
+   "StandardCantonese",
+#endif /* eciStandardCantonese */
+
+#ifdef eciStandardCantoneseGB
+   "StandardCantoneseGB",
+#endif /* eciStandardCantoneseGB */
+
+#ifdef eciStandardCantoneseUCS
+   "StandardCantoneseUCS",
+#endif /* eciStandardCantoneseUCS */
+
+#ifdef eciHongKongCantonese
+   "HongKongCantonese",
+#endif /* eciHongKongCantonese */
+
+#ifdef eciHongKongCantoneseBig5
+   "HongKongCantoneseBig5",
+#endif /* eciHongKongCantoneseBig5 */
+
+#ifdef eciHongKongCantoneseUCS
+   "HongKongCantoneseUCS",
+#endif /* eciHongKongCantoneseUCS */
+
+#ifdef eciStandardDutch
+   "StandardDutch",
+#endif /* eciStandardDutch */
+
+#ifdef eciStandardNorwegian
+   "StandardNorwegian",
+#endif /* eciStandardNorwegian */
+
+#ifdef eciStandardSwedish
+   "StandardSwedish",
+#endif /* eciStandardSwedish */
+
+#ifdef eciStandardDanish
+   "StandardDanish",
+#endif /* eciStandardDanish */
+
+#ifdef eciStandardReserved
+   "StandardReserved",
+#endif /* eciStandardReserved */
+
+#ifdef eciStandardThai
+   "StandardThai",
+#endif /* eciStandardThai */
+
+#ifdef eciStandardThaiTIS
+   "StandardThaiTIS",
+#endif /* eciStandardThaiTIS */
+
+#ifdef NODEFINEDCODESET
+   "NoDefinedCodeSet",
+#endif /* NODEFINEDCODESET */
+
    NULL
 };
 
