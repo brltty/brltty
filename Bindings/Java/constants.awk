@@ -59,6 +59,12 @@ function brlDot(number, symbol, value, help) {
   writeJavaConstant("int", "DOT" number, value, help)
 }
 
+function apiMask(name, symbol, value, help) {
+}
+
+function apiShift(name, symbol, value, help) {
+}
+
 function apiType(name, symbol, value, help) {
   writeJavaConstant("int", "KEY_TYPE_" name, hexadecimalValue(value));
 }

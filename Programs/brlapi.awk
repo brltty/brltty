@@ -15,8 +15,17 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
+/#define[ \t]*BRLAPI_KEY_[A-Z_]+_MASK/ {
+  apiMask(substr($2, 12), $2, getDefineValue(), "")
+  next
+}
+
+/#define[ \t]*BRLAPI_KEY_[A-Z_]+_SHIFT/ {
+  apiShift(substr($2, 12), $2, getDefineValue(), "")
+  next
+}
+
 /#define[ \t]*BRLAPI_KEY_TYPE_/ {
-  if ($2 ~ /_(MASK|SHIFT)$/) next
   apiType(substr($2, 17), $2, getDefineValue(), "")
   next
 }

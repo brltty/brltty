@@ -51,6 +51,16 @@ function brlDot(number, symbol, value, help) {
   writePythonAssignment("DOT" number, value)
 }
 
+function apiMask(name, symbol, value, help) {
+  value = hexadecimalValue(value)
+  writePythonAssignment("KEY_" name, value)
+}
+
+function apiShift(name, symbol, value, help) {
+  value = hexadecimalValue(value)
+  writePythonAssignment("KEY_" name, value)
+}
+
 function apiType(name, symbol, value, help) {
   value = hexadecimalValue(value)
   writePythonAssignment("KEY_TYPE_" name, value)
