@@ -28,7 +28,6 @@
 #include <sys/stat.h>
 #include <sys/vfs.h>
 #include <sys/ioctl.h>
-#include <linux/compiler.h>
 #include <linux/usbdevice_fs.h>
 
 #ifndef USBDEVFS_DISCONNECT
