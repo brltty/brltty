@@ -392,6 +392,19 @@ static void setFocus(Window win) {
   } else setName(window);
 }
 
+#ifdef CAN_SIMULATE_KEY_PRESSES
+static int tryModifiers(KeyCode keycode, unsigned int *modifiers, unsigned int modifiers_try, KeySym keysym) {
+  KeySym keysymRet;
+  unsigned int modifiersRet;
+  if (!XkbLookupKeySym(dpy, keycode, *modifiers | modifiers_try, &modifiersRet, &keysymRet))
+    return 0;
+  if (keysymRet != keysym)
+    return 0;
+  *modifiers |= modifiers_try;
+  return 1;
+}
+#endif /* CAN_SIMULATE_KEY_PRESSES */
+
 void toX_f(const char *display) {
   Window root;
   XEvent ev;
@@ -416,6 +429,15 @@ void toX_f(const char *display) {
 #ifdef CAN_SIMULATE_KEY_PRESSES
   haveXTest = XTestQueryExtension(dpy, &eventBase, &errorBase, &majorVersion, &minorVersion);
 #endif /* CAN_SIMULATE_KEY_PRESSES */
+
+  {
+    int foo;
+    int major = XkbMajorVersion, minor = XkbMinorVersion;
+    if (!XkbLibraryVersion(&major, &minor))
+      fatal(gettext("Incompatible XKB library\n"));
+    if (!XkbQueryExtension(dpy, &foo, &foo, &foo, &major, &minor))
+      fatal(gettext("Incompatible XKB server support\n"));
+  }
 
   X_fd = XConnectionNumber(dpy);
   FD_ZERO(&fds);
@@ -533,7 +555,7 @@ void toX_f(const char *display) {
     if (haveXTest && FD_ISSET(brlapi_fd,&readfds)) {
       while ((res = brlapi_readKey(0, &code)==1)) {
 	if (((code & BRLAPI_KEY_TYPE_MASK) != BRLAPI_KEY_TYPE_SYM)) {
-	  fprintf(stderr,"unexpected block type %" BRLAPI_PRIxKEYCODE "\n",code);
+	  fprintf(stderr,gettext("unexpected block type %" BRLAPI_PRIxKEYCODE "\n"),code);
 	  continue;
 	}
 
@@ -541,12 +563,19 @@ void toX_f(const char *display) {
 	keysym = code & BRLAPI_KEY_CODE_MASK;
 	keycode = XKeysymToKeycode(dpy,keysym);
 	if (keycode == NoSymbol) {
-	  fprintf(stderr,"Couldn't translate keysym %08X to keycode.\n",keysym);
+	  fprintf(stderr,gettext("Couldn't translate keysym %08X to keycode.\n"),keysym);
 	  continue;
 	}
+	if (!tryModifiers(keycode, &modifiers, 0, keysym)
+	 && !tryModifiers(keycode, &modifiers, ShiftMask, keysym)
+	 && !tryModifiers(keycode, &modifiers, Mod5Mask, keysym)
+	 && !tryModifiers(keycode, &modifiers, ShiftMask|Mod5Mask, keysym)) {
+	  fprintf(stderr,gettext("Couldn't find modifiers to apply to %d for getting keysym %08X\n"),keycode,keysym);
+	  continue;
+	}
+	debugf("key %08X: (%d,%x)\n", keysym, keycode, modifiers);
 	if (modifiers)
 	  XkbLockModifiers(dpy, XkbUseCoreKbd, modifiers, modifiers);
-	debugf("key %x\n",keysym);
 	XTestFakeKeyEvent(dpy,keycode,True,CurrentTime);
 	XTestFakeKeyEvent(dpy,keycode,False,CurrentTime);
 	if (modifiers)
