@@ -72,6 +72,8 @@ cdef extern from "Programs/brlapi.h":
 
 	int brlapi__ignoreKeyRange(brlapi_handle_t *, unsigned long long, unsigned long long)
 	int brlapi__acceptKeyRange(brlapi_handle_t *, unsigned long long, unsigned long long)
+	int brlapi__ignoreKeySet(brlapi_handle_t *, unsigned long long *, unsigned int)
+	int brlapi__acceptKeySet(brlapi_handle_t *, unsigned long long *, unsigned int)
 	int brlapi__readKey(brlapi_handle_t *, int, unsigned long long*)
 	int brlapi_expandKeyCode(unsigned long long, brlapi_expandedKeyCode_t *)
 
