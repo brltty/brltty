@@ -703,9 +703,9 @@ int brlapi__readKey(brlapi_handle_t *handle, int block, brlapi_keyCode_t *code);
 /* brlapi_ignoreKeyRange */
 /** Ignore some key presses from the braille keyboard
  *
- * This function asks the server to give keys between x and y to \e brltty,
- * rather than returning them to the application via
- * brlapi_readKey(3)
+ * This function asks the server to give keys between x and y (inclusive,
+ * and x can be equal to y) to \e brltty, rather than returning them to the
+ * application via brlapi_readKey(3)
  *
  * \note The given codes are either raw keycodes if some driver name was given
  * to brlapi_enterTtyMode(3), or \e brltty commands if NULL or "" was given. */
@@ -727,8 +727,8 @@ int brlapi__ignoreKeySet(brlapi_handle_t *handle, const brlapi_keyCode_t *s, uns
 /* brlapi_acceptKeyRange */
 /** Accept some key presses from the braille keyboard
  *
- * This function asks the server to return keys between x and y to the
- * application, and not give them to \e brltty.
+ * This function asks the server to return keys between x and y (inclusive, and
+ * x can be equal to y) to the application, and not give them to \e brltty.
  *
  * \note You shouldn't ask the server to give you key presses which are usually
  * used to switch between TTYs, unless you really know what you are doing!
