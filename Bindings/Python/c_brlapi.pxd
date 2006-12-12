@@ -53,6 +53,8 @@ cdef extern from "Programs/brlapi.h":
 
 	ctypedef struct brlapi_handle_t
 
+	ctypedef unsigned long long brlapi_keyCode_t
+
 	size_t brlapi_getHandleSize()
 	void brlapi__closeConnection(brlapi_handle_t *)
 	int brlapi__openConnection(brlapi_handle_t *, brlapi_connectionSettings_t*, brlapi_connectionSettings_t*)
@@ -70,12 +72,12 @@ cdef extern from "Programs/brlapi.h":
 	int brlapi__writeDots(brlapi_handle_t *, unsigned char*)
 	int brlapi__writeText(brlapi_handle_t *, int, char*)
 
-	int brlapi__ignoreKeyRange(brlapi_handle_t *, unsigned long long, unsigned long long)
-	int brlapi__acceptKeyRange(brlapi_handle_t *, unsigned long long, unsigned long long)
-	int brlapi__ignoreKeySet(brlapi_handle_t *, unsigned long long *, unsigned int)
-	int brlapi__acceptKeySet(brlapi_handle_t *, unsigned long long *, unsigned int)
-	int brlapi__readKey(brlapi_handle_t *, int, unsigned long long*)
-	int brlapi_expandKeyCode(unsigned long long, brlapi_expandedKeyCode_t *)
+	int brlapi__ignoreKeyRange(brlapi_handle_t *, brlapi_keyCode_t, brlapi_keyCode_t)
+	int brlapi__acceptKeyRange(brlapi_handle_t *, brlapi_keyCode_t, brlapi_keyCode_t)
+	int brlapi__ignoreKeySet(brlapi_handle_t *, brlapi_keyCode_t *, unsigned int)
+	int brlapi__acceptKeySet(brlapi_handle_t *, brlapi_keyCode_t *, unsigned int)
+	int brlapi__readKey(brlapi_handle_t *, int, brlapi_keyCode_t*)
+	int brlapi_expandKeyCode(brlapi_keyCode_t, brlapi_expandedKeyCode_t *)
 
 	int brlapi__enterRawMode(brlapi_handle_t *, char*)
 	int brlapi__leaveRawMode(brlapi_handle_t *)
@@ -84,12 +86,12 @@ cdef extern from "Programs/brlapi.h":
 
 	brlapi_error_t* brlapi_error_location()
 	char* brlapi_strerror(brlapi_error_t*)
-	unsigned long long BRLAPI_KEY_MAX
-	unsigned long long BRLAPI_KEY_FLAGS_MASK
-	unsigned long long BRLAPI_KEY_TYPE_MASK
-	unsigned long long BRLAPI_KEY_CODE_MASK
-	unsigned long long BRLAPI_KEY_CMD_BLK_MASK
-	unsigned long long BRLAPI_KEY_CMD_ARG_MASK
+	brlapi_keyCode_t BRLAPI_KEY_MAX
+	brlapi_keyCode_t BRLAPI_KEY_FLAGS_MASK
+	brlapi_keyCode_t BRLAPI_KEY_TYPE_MASK
+	brlapi_keyCode_t BRLAPI_KEY_CODE_MASK
+	brlapi_keyCode_t BRLAPI_KEY_CMD_BLK_MASK
+	brlapi_keyCode_t BRLAPI_KEY_CMD_ARG_MASK
 
 cdef extern from "stdlib.h":
 	void *malloc(size_t)
