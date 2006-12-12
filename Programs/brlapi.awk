@@ -15,6 +15,11 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
+/#define[ \t]*BRLAPI_KEY_MAX/ {
+  apiMask(substr($2, 12), $2, getDefineValue(), "")
+  next
+}
+
 /#define[ \t]*BRLAPI_KEY_[A-Z_]+_MASK/ {
   apiMask(substr($2, 12), $2, getDefineValue(), "")
   next
