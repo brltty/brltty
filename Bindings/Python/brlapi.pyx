@@ -334,7 +334,7 @@ cdef class Connection:
 		else:
 			c_nttys = len(path)
 			c_ttys = <int*>c_brlapi.malloc(c_nttys * sizeof(int))
-			for i in range(0, c_nttys):
+			for i from 0 <= i < c_nttys:
 				c_ttys[i] = path[i]
 		if not how:
 			c_how = NULL
@@ -515,7 +515,7 @@ cdef class Connection:
 		cdef unsigned int c_n
 		c_n = len(set)
 		c_set = <unsigned long long*>c_brlapi.malloc(c_n * sizeof(unsigned long long))
-		for i in range(0, c_n):
+		for i from 0 <= i < c_n:
 			c_set[i] = set[i]
 		c_brlapi.Py_BEGIN_ALLOW_THREADS
 		retval = c_brlapi.brlapi__ignoreKeySet(self.h, c_set, c_n)
@@ -539,7 +539,7 @@ cdef class Connection:
 		cdef unsigned int c_n
 		c_n = len(set)
 		c_set = <unsigned long long*>c_brlapi.malloc(c_n * sizeof(unsigned long long))
-		for i in range(0, c_n):
+		for i from 0 <= i < c_n:
 			c_set[i] = set[i]
 		c_brlapi.Py_BEGIN_ALLOW_THREADS
 		retval = c_brlapi.brlapi__acceptKeySet(self.h, c_set, c_n)
