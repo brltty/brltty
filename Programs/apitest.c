@@ -256,7 +256,7 @@ void showKeyCodes(void)
     return;
   }
 
-  if (brlapi_acceptKeyRange(0, BRLAPI_KEYCODE_MAX)==-1) {
+  if (brlapi_acceptKeyRange(0, BRLAPI_KEY_MAX)==-1) {
     brlapi_perror("acceptKeyRange");
     return;
   }

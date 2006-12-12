@@ -2195,7 +2195,7 @@ static int initializeUnmaskedKeys(Connection *c)
 {
   if (c==NULL) return 0;
   if (c->how==BRL_KEYCODES) return 0;
-  if (addKeyrange(0,BRLAPI_KEYCODE_MAX,&c->unmaskedKeys)==-1) return -1;
+  if (addKeyrange(0,BRLAPI_KEY_MAX,&c->unmaskedKeys)==-1) return -1;
   if (removeKeyrange(BRLAPI_KEY_CMD_NOOP,BRLAPI_KEY_CMD_NOOP|BRLAPI_KEY_FLAGS_MASK,&c->unmaskedKeys)==-1) return -1;
   if (removeKeyrange(BRLAPI_KEY_CMD_SWITCHVT_PREV,BRLAPI_KEY_CMD_SWITCHVT_NEXT|BRLAPI_KEY_FLAGS_MASK,&c->unmaskedKeys)==-1) return -1;
   if (removeKeyrange(BRLAPI_KEY_CMD_RESTARTBRL,BRLAPI_KEY_CMD_RESTARTSPEECH|BRLAPI_KEY_FLAGS_MASK,&c->unmaskedKeys)==-1) return -1;

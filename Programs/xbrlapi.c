@@ -174,7 +174,7 @@ void getVT(void) {
     if (brlapi_enterTtyMode(vtno,NULL)<0)
       fatal_brlapi_errno("enterTtyMode",gettext("cannot get tty %d\n"),vtno);
   }
-  if (brlapi_ignoreKeyRange(0,BRLAPI_KEYCODE_MAX)<0)
+  if (brlapi_ignoreKeyRange(0,BRLAPI_KEY_MAX)<0)
     fatal_brlapi_errno("ignoreKeys",gettext("cannot ignore keys\n"));
 #ifdef CAN_SIMULATE_KEY_PRESSES
   /* All X keysyms with any modifier */
