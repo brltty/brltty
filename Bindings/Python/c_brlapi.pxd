@@ -84,6 +84,12 @@ cdef extern from "Programs/brlapi.h":
 
 	brlapi_error_t* brlapi_error_location()
 	char* brlapi_strerror(brlapi_error_t*)
+	unsigned long long BRLAPI_KEY_MAX
+	unsigned long long BRLAPI_KEY_FLAGS_MASK
+	unsigned long long BRLAPI_KEY_TYPE_MASK
+	unsigned long long BRLAPI_KEY_CODE_MASK
+	unsigned long long BRLAPI_KEY_CMD_BLK_MASK
+	unsigned long long BRLAPI_KEY_CMD_ARG_MASK
 
 cdef extern from "stdlib.h":
 	void *malloc(size_t)

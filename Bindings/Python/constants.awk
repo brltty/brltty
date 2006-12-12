@@ -52,8 +52,7 @@ function brlDot(number, symbol, value, help) {
 }
 
 function apiMask(name, symbol, value, help) {
-  value = hexadecimalValue(value)
-  writePythonAssignment("KEY_" name, value)
+  writePythonAssignment("KEY_" name, "c_brlapi." symbol)
 }
 
 function apiShift(name, symbol, value, help) {
