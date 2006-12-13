@@ -60,9 +60,11 @@ function brlDot(number, symbol, value, help) {
 }
 
 function apiMask(name, symbol, value, help) {
+  writeJavaConstant("long", "KEY_" name, hexadecimalValue(value) "L");
 }
 
 function apiShift(name, symbol, value, help) {
+  writeJavaConstant("int", "KEY_" name, hexadecimalValue(value));
 }
 
 function apiType(name, symbol, value, help) {

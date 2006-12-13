@@ -561,7 +561,7 @@ typedef uint64_t brlapi_keyCode_t;
 /** Brlapi_keyCode_t's biggest value
  *
  * As defined in \c <stdint.h> */
-#define BRLAPI_KEY_MAX ((brlapi_keyCode_t) (UINT64_MAX))
+#define BRLAPI_KEY_MAX UINT64_C(0XFFFFFFFFFFFFFFFF)
 
 /**
  * Mask for flags of brlapi_keyCode_t
