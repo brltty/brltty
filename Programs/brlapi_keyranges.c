@@ -20,7 +20,7 @@
 /* Source file for range list management module */
 /* For a description of what each function does, see rangelist.h */
 
-#include "keyrangelist.h"
+#include "brlapi_keyranges.h"
 #include "misc.h"
 
 static int inKeyrange(KeyrangeList *l, KeyrangeElem e)

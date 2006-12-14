@@ -410,7 +410,7 @@ BRLTTY_ARG_DISABLE(
                 [Define this if the application programming interface is to be included.])
       BRLTTY_ARG_PARAMETERS([api], [application programming interface])
 
-      api_objects='brlapi_server.$O keyrangelist.$O'
+      api_objects='brlapi_server.$O brlapi_keyranges.$O'
       api_libraries="${LIBS}"
 
       all_api="all-api"

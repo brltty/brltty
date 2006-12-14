@@ -15,8 +15,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
  
-#ifndef BRLTTY_INCLUDED_RANGELIST
-#define BRLTTY_INCLUDED_RANGELIST
+#ifndef BRLAPI_INCLUDED_KEYRANGES
+#define BRLAPI_INCLUDED_KEYRANGES
 
 #ifdef __cplusplus
 extern "C" {
@@ -72,4 +72,4 @@ extern int removeKeyrange(KeyrangeElem x0, KeyrangeElem y0, KeyrangeList **l);
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_RANGELIST */
+#endif /* BRLAPI_INCLUDED_KEYRANGES */

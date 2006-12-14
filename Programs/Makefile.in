@@ -141,8 +141,8 @@ brlapi_brldefs.auto.h: $(SRC_DIR)/brldefs.h $(SRC_DIR)/brldefs.awk $(SRC_DIR)/br
 brlapi_server.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/brlapi_server.c
 
-keyrangelist.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/keyrangelist.c
+brlapi_keyranges.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/brlapi_keyranges.c
 
 all-api-bindings: api
 	set -- $(API_BINDINGS); \

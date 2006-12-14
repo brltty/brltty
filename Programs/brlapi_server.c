@@ -58,7 +58,7 @@
 #include "brlapi.h"
 #include "brlapi_protocol.h"
 
-#include "keyrangelist.h"
+#include "brlapi_keyranges.h"
 #include "cmd.h"
 #include "brl.h"
 #include "brltty.h"
