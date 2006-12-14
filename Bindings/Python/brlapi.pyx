@@ -14,8 +14,8 @@ b.acceptKeyRange([brlapi.KEY_TYPE_SYM, brlapi.KEY_TYPE_SYM|brlapi.KEY_CODE_MASK]
 b.acceptKeySet([brlapi.KEY_CMD_LNUP, brlapi.KEY_CMD_LNDN|brlapi.KEY_FLAGS_MASK])
 b.writeText("Press any key to continue ... ¤")
 key = b.readKey()
-(command, argument, flags) = b.expandKeyCode(key)
-b.writeText("Key %ld (%x %x %x) !" % (key, command, argument, flags))
+k = expandKeyCode(key)
+b.writeText("Key %ld (%x %x %x %x) !" % (key, k["type"], k["command"], k["argument"], k["flags"]))
 b.writeText(None,1)
 b.readKey()
 w = brlapi.Write()
@@ -462,7 +462,7 @@ cdef class Connection:
 		if retval == -1:
 			raise OperationError(returnerrno())
 		else:
-			return (ekc.type, ekc.command, ekc.argument, ekc.flags)
+			return { "type":ekc.type, "command":ekc.command, "argument":ekc.argument, "flags":ekc.flags }
 	
 	def ignoreKeyRange(self, range):
 		"""Ignore some key presses from the braille keyboard.
