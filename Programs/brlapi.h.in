@@ -550,6 +550,8 @@ int brlapi__write(brlapi_handle_t *handle, const brlapi_writeStruct_t *s);
  * - bits 63-32: flags, bits 39-32 are standard X modifiers ;
  * - bits 31-29: key type: 1 for braille commands, 0 for X keysyms ;
  * - bits 28-0:  key code, depending on the key type.
+ *
+ * For commands descriptions, see also brlapi_commands(3).
  */
 typedef uint64_t brlapi_keyCode_t;
 
