@@ -84,11 +84,11 @@ function apiKey(name, symbol, value, help) {
 }
 
 function writeCommandDefinition(name, value, help) {
-  writeJavaConstant("int", "KEY_CMD_" name, "(KEY_TYPE_CMD | " value ")", help)
+  writeJavaConstant("int", "KEY_CMD_" name, value, help)
 }
 
 function writeKeyDefinition(name, value) {
-  writeJavaConstant("int", "KEY_SYM_" name, "(KEY_TYPE_SYM | " value ")")
+  writeJavaConstant("int", "KEY_SYM_" name, value)
 }
 
 function writeJavaConstant(type, name, value, help) {

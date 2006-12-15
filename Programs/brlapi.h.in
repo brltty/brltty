@@ -600,7 +600,7 @@ typedef uint64_t brlapi_keyCode_t;
 /** Shift for code of brlapi_keyCode_t */
 #define BRLAPI_KEY_CODE_SHIFT		0
 
-#define BRLAPI_KEY_CMD(v)		(BRLAPI_KEY_TYPE_CMD|((v) << 16))
+#define BRLAPI_KEY_CMD(v)		((v) << 16)
 /** Mask for braille command type */
 #define BRLAPI_KEY_CMD_BLK_MASK		UINT64_C(0X1FFF0000)
 /** Mask for braille command value */

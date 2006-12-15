@@ -78,11 +78,11 @@ function apiKey(name, symbol, value, help) {
 }
 
 function writeCommandDefinition(name, value) {
-  writePythonAssignment("KEY_CMD_" name, "(KEY_TYPE_CMD | " value ")")
+  writePythonAssignment("KEY_CMD_" name, value)
 }
 
 function writeKeyDefinition(name, value) {
-  writePythonAssignment("KEY_SYM_" name, "(KEY_TYPE_SYM | " value ")")
+  writePythonAssignment("KEY_SYM_" name, value)
 }
 
 function writePythonAssignment(name, value) {

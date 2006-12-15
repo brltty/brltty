@@ -37,7 +37,7 @@ function writeSymbolDefinition(name, brlPrefix, brlSuffix, apiPrefix, apiSuffix,
 }
 
 function brlCommand(name, symbol, value, help) {
-  writeSymbolDefinition(name, "BRL_CMD_", "", "BRLAPI_KEY_CMD_", "", help)
+  writeSymbolDefinition(name, "BRL_CMD_", "", "(BRLAPI_KEY_TYPE_CMD | BRLAPI_KEY_CMD_", ")", help)
 }
 
 function brlBlock(name, symbol, value, help) {
@@ -46,7 +46,7 @@ function brlBlock(name, symbol, value, help) {
   } else if (name == "PASSKEY") {
     writeMacroDefinition("BRL_KEY_" name, "(BRLAPI_KEY_TYPE_SYM | 0XFF00)", help)
   } else {
-    writeSymbolDefinition(name, "BRL_BLK_", "", "BRLAPI_KEY_CMD_", "", help)
+    writeSymbolDefinition(name, "BRL_BLK_", "", "(BRLAPI_KEY_TYPE_CMD | BRLAPI_KEY_CMD_", ")", help)
   }
 }
 

@@ -1679,7 +1679,7 @@ brlapi_expandKeyCode (brlapi_keyCode_t keyCode, brlapi_expandedKeyCode_t *ekc) {
     brlapi_keyCode_t code = keyCode & BRLAPI_KEY_CODE_MASK;
 
     ekc->type = type;
-    ekc->command = type | (code & ~argumentMask);
+    ekc->command = (code & ~argumentMask);
     ekc->argument = code & argumentMask;
     ekc->flags = (keyCode & BRLAPI_KEY_FLAGS_MASK) >> BRLAPI_KEY_FLAGS_SHIFT;
 
