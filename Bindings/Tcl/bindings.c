@@ -983,7 +983,6 @@ OPTION_HANDLER(general, openConnection, auth) {
 static int
 brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
   static const char *functions[] = {
-    "expandHost",
     "expandKeyCode",
     "getHandleSize",
     "getKeyName",
@@ -993,7 +992,6 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
   };
 
   typedef enum {
-    FCN_expandHost,
     FCN_expandKeyCode,
     FCN_getHandleSize,
     FCN_getKeyName,
@@ -1055,27 +1053,6 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
         deallocateMemory(session);
       }
       return TCL_ERROR;
-    }
-
-    case FCN_expandHost: {
-      if (objc != 3) {
-        Tcl_WrongNumArgs(interp, 2, objv, "<hostSpec>");
-        return TCL_ERROR;
-      }
-
-      {
-        char *name;
-        char *port;
-        int family = brlapi_expandHost(Tcl_GetString(objv[2]), &name, &port);
-        Tcl_Obj *elements[] = {
-          Tcl_NewStringObj(name, -1),
-          Tcl_NewStringObj(port, -1),
-          Tcl_NewIntObj(family)
-        };
-
-        Tcl_SetObjResult(interp, Tcl_NewListObj(3, elements));
-        return TCL_OK;
-      }
     }
 
 #define STRING(string) Tcl_NewStringObj((string), -1)

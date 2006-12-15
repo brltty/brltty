@@ -271,7 +271,7 @@ int BRLAPI(loadAuthKey)(const char *filename, size_t *authlength, void *auth)
 
 /* Function: brlapi_expandHost
  * splits host into host & port */
-int BRLAPI(expandHost)(const char *hostAndPort, char **host, char **port) {
+static int BRLAPI(expandHost)(const char *hostAndPort, char **host, char **port) {
   const char *c;
   if (!hostAndPort || !*hostAndPort) {
 #if defined(PF_LOCAL)

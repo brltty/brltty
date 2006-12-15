@@ -250,10 +250,6 @@ brlapi_fileDescriptor brlapi__openConnection(brlapi_handle_t *handle, const brla
 void brlapi_closeConnection(void);
 void brlapi__closeConnection(brlapi_handle_t *handle);
 
-/* brlapi_expandHost */
-/* expands host:port into host & port, returns address family to use */
-int brlapi_expandHost(const char *hostAndPort, char **host, char **port);
-
 /* brlapi_loadAuthKey */
 /** Load an authorization key from the given file
  *
