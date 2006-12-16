@@ -132,6 +132,7 @@ size of the executable. Recommended possibilities include:
 
    --disable-table-selection --disable-learn-mode --disable-contracted-braille
    --disable-pcm-support --disable-midi-support --disable-fm-support
+   --disable-api --disable-gpm
    --disable-speech-support --without-x
 
 If building the Papenmeier driver, then also consider:
