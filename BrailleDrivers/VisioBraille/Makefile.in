@@ -26,3 +26,16 @@ include $(SRC_TOP)braille.mk
 braille.$O:
 	$(CC) $(BRL_CFLAGS) -c $(SRC_DIR)/braille.c
 
+###############################################################################
+
+VBTP_OBJECTS = vbtp_main.$O vbtp_transfer.$O
+
+vbtp$X: $(VBTP_OBJECTS) brlapi
+	$(CC) $(LDFLAGS) -o $@ $(VBTP_OBJECTS) -L$(BLD_TOP)$(PGM_DIR) -lbrlapi $(LDLIBS)
+
+vbtp_main.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/vbtp_main.c
+
+vbtp_transfer.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/vbtp_transfer.c
+
