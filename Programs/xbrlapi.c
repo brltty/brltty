@@ -566,19 +566,32 @@ void toX_f(const char *display) {
 	  fprintf(stderr,gettext("Couldn't translate keysym %08X to keycode.\n"),keysym);
 	  continue;
 	}
-	if (!tryModifiers(keycode, &modifiers, 0, keysym)
-	 && !tryModifiers(keycode, &modifiers, ShiftMask, keysym)
-	 && !tryModifiers(keycode, &modifiers, Mod2Mask, keysym)
-	 && !tryModifiers(keycode, &modifiers, Mod3Mask, keysym)
-	 && !tryModifiers(keycode, &modifiers, Mod4Mask, keysym)
-	 && !tryModifiers(keycode, &modifiers, Mod5Mask, keysym)
-	 && !tryModifiers(keycode, &modifiers, ShiftMask|Mod2Mask, keysym)
-	 && !tryModifiers(keycode, &modifiers, ShiftMask|Mod3Mask, keysym)
-	 && !tryModifiers(keycode, &modifiers, ShiftMask|Mod4Mask, keysym)
-	 && !tryModifiers(keycode, &modifiers, ShiftMask|Mod5Mask, keysym)) {
+
+        {
+          static const unsigned int tryTable[] = {
+            0,
+            ShiftMask,
+            Mod2Mask,
+            Mod3Mask,
+            Mod4Mask,
+            Mod5Mask,
+            ShiftMask|Mod2Mask,
+            ShiftMask|Mod3Mask,
+            ShiftMask|Mod4Mask,
+            ShiftMask|Mod5Mask,
+            0
+          };
+          const unsigned int *try = tryTable;
+
+          do {
+            if (tryModifiers(keycode, &modifiers, *try, keysym)) goto foundModifiers;
+          } while (*++try);
+
 	  fprintf(stderr,gettext("Couldn't find modifiers to apply to %d for getting keysym %08X\n"),keycode,keysym);
 	  continue;
-	}
+        }
+      foundModifiers:
+
 	debugf("key %08X: (%d,%x)\n", keysym, keycode, modifiers);
 	if (modifiers)
 	  XkbLockModifiers(dpy, XkbUseCoreKbd, modifiers, modifiers);
