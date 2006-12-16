@@ -18,7 +18,7 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/* vbtp_main.c
+/* vstp_main.c
  * files transferring with VisioBraille terminals
  */
 
@@ -29,7 +29,7 @@
 #include <signal.h>
 #include <malloc.h>
 #include "Programs/brlapi.h"
-#include "vbtp.h"
+#include "vstp.h"
 
 #define VBTPRC ".vbtprc"
 #define LINELENGTH 255

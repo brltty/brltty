@@ -19,7 +19,7 @@
  */
 
 /*
- * transfer.c
+ * vstp_transfer.c
  *
  * handles file transfers
  */
@@ -34,7 +34,7 @@
 #include "Programs/brlapi.h"
 #include <ctype.h>
 #include <errno.h>
-#include "vbtp.h"
+#include "vstp.h"
 
 /* SEND */
 /* tries to send a message */

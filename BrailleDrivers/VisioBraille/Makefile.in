@@ -28,14 +28,14 @@ braille.$O:
 
 ###############################################################################
 
-VBTP_OBJECTS = vbtp_main.$O vbtp_transfer.$O
+VSTP_OBJECTS = vstp_main.$O vstp_transfer.$O
 
-vbtp$X: $(VBTP_OBJECTS) brlapi
-	$(CC) $(LDFLAGS) -o $@ $(VBTP_OBJECTS) -L$(BLD_TOP)$(PGM_DIR) -lbrlapi $(LDLIBS)
+vstp$X: $(VSTP_OBJECTS) brlapi
+	$(CC) $(LDFLAGS) -o $@ $(VSTP_OBJECTS) -L$(BLD_TOP)$(PGM_DIR) -lbrlapi $(LDLIBS)
 
-vbtp_main.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/vbtp_main.c
+vstp_main.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/vstp_main.c
 
-vbtp_transfer.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/vbtp_transfer.c
+vstp_transfer.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/vstp_transfer.c
 
