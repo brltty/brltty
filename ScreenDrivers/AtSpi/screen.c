@@ -642,6 +642,7 @@ insert_AtSpiScreen (ScreenKey key) {
   int modMeta=0, modControl=0;
 
   if (key < SCR_KEY_ENTER) {
+    wint_t wc;
     if (key & SCR_KEY_MOD_META) {
       key &= ~SCR_KEY_MOD_META;
       modMeta = 1;
@@ -652,7 +653,13 @@ insert_AtSpiScreen (ScreenKey key) {
       modControl = 1;
     }
 
-    keysym = key;
+    wc = convertCharToWchar(key);
+    if (wc == WEOF)
+      keysym = key; /* let's hope this is more or less correct */
+    else if (wc < 0x100)
+      keysym = wc; /* latin1 character */
+    else
+      keysym = 0x1000000 | wc;
   } else {
     switch (key) {
       case SCR_KEY_ENTER:         keysym = XK_KP_Enter;  break;
