@@ -22,6 +22,7 @@
 #include <locale.h>
 
 #include "Programs/misc.h"
+#include "Programs/charset.h"
 
 #if defined(WINDOWS)
 #define USE_WINDOWS
@@ -262,9 +263,23 @@ static void keypress(Widget w, XEvent *event, String *params, Cardinal *num_para
   keysym = XtGetActionKeysym(event, &modifiers);
   modifiers |= my_modifiers;
   LogPrint(LOG_DEBUG,"keypress(%#lx), modif(%#x)", keysym, modifiers);
-  if (keysym<0x100) keypressed = keysym | BRL_BLK_PASSCHAR;
-  else if ((keysym&~0xfful) == (0x1000000|BRL_UC_ROW))
-    keypressed = (keysym&0xff) | BRL_BLK_PASSDOTS;
+
+  /* latin1 */
+  if (keysym < 0x100) keysym |= 0x1000000;
+
+  if ((keysym & 0x1f000000) == 0x1000000) {
+    /* unicode */
+    if ((keysym & 0xffff00) == BRL_UC_ROW)
+      keypressed = BRL_BLK_PASSDOTS | (keysym & 0xff);
+    else {
+      int c = convertWcharToChar(keysym & 0xffffff);
+      if (c == EOF) {
+	LogPrint(LOG_DEBUG, "non translatable unicode U+%lx\n", keysym & 0xffffff);
+	return;
+      }
+      keypressed = BRL_BLK_PASSCHAR | c;
+    }
+  }
   else switch(keysym) {
     case XK_Shift_L:
     case XK_Shift_R:   modifier = ShiftMask;   goto modif;
