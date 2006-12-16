@@ -38,7 +38,7 @@ do { \
   result = Tcl_SetVar2Ex(interp, array, name, value, TCL_LEAVE_ERR_MSG); \
   Tcl_DecrRefCount(value); \
   if (!result) return TCL_ERROR; \
-} while (0);
+} while (0)
 
 typedef struct {
   brlapi_connectionSettings_t settings;
@@ -202,6 +202,25 @@ processOptions (
 #define OPERANDS(count,text) \
   .operands = (count), .help = ((count)? (text): NULL)
 
+static int
+parseCursorOperand (Tcl_Interp *interp, Tcl_Obj *obj, int *cursor) {
+  const char *string = Tcl_GetString(obj);
+
+  if (strcmp(string, "off") == 0) {
+    *cursor = 0;
+  } else if (strcmp(string, "leave") == 0) {
+    *cursor = -1;
+  } else {
+    int number;
+    int result = Tcl_GetIntFromObj(interp, obj, &number);
+    if (result != TCL_OK) return result;
+    if (number < 1) number = 1;
+    *cursor = number;
+  }
+
+  return TCL_OK;
+}
+
 typedef struct {
   Tcl_Obj *tty;
   const char *driver;
@@ -255,22 +274,7 @@ OPTION_HANDLER(session, write, charset) {
 
 OPTION_HANDLER(session, write, cursor) {
   FunctionData_session_write *options = data;
-  Tcl_Obj *obj = objv[1];
-  const char *string = Tcl_GetString(obj);
-
-  if (strcmp(string, "off") == 0) {
-    options->arguments.cursor = 0;
-  } else if (strcmp(string, "leave") == 0) {
-    options->arguments.cursor = -1;
-  } else {
-    int number;
-    int result = Tcl_GetIntFromObj(interp, obj, &number);
-    if (result != TCL_OK) return result;
-    if (number < 1) number = 1;
-    options->arguments.cursor = number;
-  }
-
-  return TCL_OK;
+  return parseCursorOperand(interp, objv[1], &options->arguments.cursor);
 }
 
 OPTION_HANDLER(session, write, display) {
@@ -319,6 +323,22 @@ OPTION_HANDLER(session, write, text) {
   return TCL_OK;
 }
 
+typedef struct {
+  Tcl_Obj *text;
+  int cursor;
+} FunctionData_session_writeText;
+
+OPTION_HANDLER(session, writeText, text) {
+  FunctionData_session_writeText *options = data;
+  options->text = objv[1];
+  return TCL_OK;
+}
+
+OPTION_HANDLER(session, writeText, cursor) {
+  FunctionData_session_writeText *options = data;
+  return parseCursorOperand(interp, objv[1], &options->cursor);
+}
+
 static void
 endSession (ClientData data) {
   BrlapiSession *session = data;
@@ -353,6 +373,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     "suspendDriver",
     "write",
     "writeDots",
+    "writeText",
     NULL
   };
 
@@ -379,7 +400,8 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     FCN_setFocus,
     FCN_suspendDriver,
     FCN_write,
-    FCN_writeDots
+    FCN_writeDots,
+    FCN_writeText
   } Function;
 
   BrlapiSession *session = data;
@@ -829,6 +851,63 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
         return TCL_OK;
       }
 
+      setBrlapiError(interp);
+      return TCL_ERROR;
+    }
+
+    case FCN_writeText: {
+      FunctionData_session_writeText options = {
+        .text = NULL,
+        .cursor = 0
+      };
+      brlapi_writeStruct_t arguments = BRLAPI_WRITESTRUCT_INITIALIZER;
+
+      if (objc < 2) {
+        Tcl_WrongNumArgs(interp, 2, objv, "[<option> ...]");
+        return TCL_ERROR;
+      }
+
+      BEGIN_OPTIONS
+        {
+          OPTION(session, writeText, cursor),
+          OPERANDS(1, "{leave | off | <offset>}")
+        }
+        ,
+        {
+          OPTION(session, writeText, text),
+          OPERANDS(1, "<string>")
+        }
+      END_OPTIONS(2)
+
+      if (options.text) {
+        int length = Tcl_GetCharLength(options.text);
+
+        {
+          unsigned int width, height;
+          int result = getDisplaySize(interp, session, &width, &height);
+          if (result != TCL_OK) return result;
+          arguments.regionSize = width * height;
+        }
+
+        if (length < arguments.regionSize) {
+          if (Tcl_IsShared(options.text))
+            if (!(options.text = Tcl_DuplicateObj(options.text)))
+              return TCL_ERROR;
+
+          while (length++ < arguments.regionSize)
+            Tcl_AppendToObj(options.text, " ", -1);
+        } else if (length > arguments.regionSize) {
+          if (!(options.text = Tcl_GetRange(options.text, 0, arguments.regionSize-1))) return TCL_ERROR;
+        }
+
+        if (!(arguments.text = Tcl_GetString(options.text))) return TCL_ERROR;
+        arguments.charset = "UTF-8";
+        arguments.regionBegin = 1;
+      }
+
+      arguments.cursor = options.cursor;
+
+      if (brlapi__write(session->handle, &arguments) != -1) return TCL_OK;
       setBrlapiError(interp);
       return TCL_ERROR;
     }

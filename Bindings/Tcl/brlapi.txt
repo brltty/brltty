@@ -33,6 +33,9 @@ brlapi<sessionNumber> function [arg ...]
       -cursor {leave | off | <offset>}
       -display {default | <number>}
       -charset <name>
+   writeText [<option> ...]
+      -text <string>
+      -cursor {leave | off | <offset>}
    writeDots <dots>
    enterRawMode <driver>
    leaveRawMode
