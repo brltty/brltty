@@ -350,15 +350,16 @@ int brlapi__getDisplaySize(brlapi_handle_t *handle, unsigned int *x, unsigned in
  * whereas a driver name means that raw key codes returned by this
  * driver are expected.
  *
- * In an X window environment, CONTROLVT might be useful. XFree86 >=4.4 defines
+ * In an X window environment, WINDOWPATH might be useful. XFree86 >=4.4 defines
  * an XFree86_VT root window property which exactly holds the used VT, so that
  * it should be given to brlapi_enterTtyMode. If it isn't available, one may,
  * right into .xsession and .xinitrc, grep X's log, for instance:
  *
- * CONTROLVT="$(grep "using VT number" "/var/log/XFree86.$(echo "$DISPLAY" | sed -e "s/^.*::*\([0-9]*\).*$/\1/").log" | sed -e "s/^.*using VT number \([0-9]*\).*$/\1/")"
+ * WINDOWPATH="$(grep "using VT number" "/var/log/Xorg.$(echo "$DISPLAY" | sed -e "s/^.*::*\([0-9]*\).*$/\1/").log" | sed -e "s/^.*using VT number \([0-9]*\).*$/\1/")"
  *
- * CONTROLVT should also be propagated when running remote applications via ssh,
- * for instance, along with BRLAPI_HOST and the authorization key.
+ * WINDOWPATH and WINDOWID should be propagated when running remote applications
+ * via ssh, for instance, along with BRLAPI_HOST and the authorization key (see
+ * SendEnv in ssh_config(5) and AcceptEnv in sshd_config(5))
  *
  * \return the used tty number on success, -1 on error
  *
@@ -418,10 +419,10 @@ int brlapi__setFocus(brlapi_handle_t *handle, int tty);
  * else you'll get an error. This is particularly not always trivial when
  * writing multithreaded applications.
  *
- * \note Dots are coded as described in ISO/TR 11548-1: dot 1 is set iff bit 0
- * is set, dot 2 is set iff bit 1 is set, ... dot \e i+1 is set iff bit \e i is
- * set. This also corresponds to the low-order byte of the coding of unicode's
- * braille row U+2800.
+ * \note Dots are coded as described in ISO/TR 11548-1: a dot pattern is coded
+ * by a byte in which bit 0 is set iff dot 1 is up, bit 1 is set iff dot 2 is
+ * up, ... bit 7 is set iff dot 8 is up. This also corresponds to the low-order
+ * byte of the coding of unicode's braille row U+2800.
  *
  * @{ */
 
@@ -459,7 +460,7 @@ int brlapi__writeDots(brlapi_handle_t *handle, const unsigned char *dots);
 typedef struct {
   int displayNumber /** Display number -1 == unspecified */;
   unsigned int regionBegin /** Region of display to update, 1st character of display is 1 */;
-  unsigned int regionSize /** Number of caracters held in text, attrAnd and attrOr. */;
+  unsigned int regionSize /** Number of characters held in text, attrAnd and attrOr. */;
   char *text /** Text to display, must hold as many characters as the region fields expresses. */;
   int textSize /** Size of text in bytes. If -1, strlen() is used for computing it. */;
   unsigned char *attrAnd /** And attributes; applied first */;
@@ -496,22 +497,29 @@ typedef struct {
  * \param s gives information necessary for the update
  *
  * regionBegin and regionSize must be filled for specifying which part of the
- * display will be updated.
+ * display will be updated, as well as the size (in characters, not bytes) of
+ * the text, attrAnd and attrOr members.
  *
  * If given, the "text" field holds the text that will be displayed in the
  * region.  The char string must hold exactly as many characters as the region
  * fields express.  For multibyte text, this is the number of \e multibyte
  * caracters.  Notably, combining and double-width caracters count for 1.
  *
- * The actual length of the text in \e bytes can be specified thanks to
+ * The actual length of the text in \e bytes may be specified thanks to
  * textSize.  If -1 is given, it will be computed thanks to strlen(3), so "text"
  * must then be a NUL-terminated string.
  *
- * The "attrAnd" and "attrOr" masks, if present, are then applied on top of the
- * text.  This hence permits the superimposing of attributes over the text.
+ * The "attrAnd" and "attrOr" masks, if present, are then applied on top of
+ * the text, one byte per character.  This hence permits the superimposing of
+ * attributes over the text.  For instance, setting an attrAnd mask full of
+ * BRLAPI_DOT1|BRLAPI_DOT2|BRLAPI_DOT3|BRLAPI_DOT4|BRLAPI_DOT5|BRLAPI_DOT6
+ * will only keep (logical AND) dots 1-6, hence dropping dots 7 and 8.  On the
+ * contrary, setting an attrOr full of BRLAPI_DOT7|BRLAPI_DOT8 will add (logical
+ * OR) dots 7 and 8.
  *
  * The "charset" field, if present, specifies the charset of the "text" field.
- * Else, the 8-bit charset of the server is assumed.
+ * If it is "", the current locale's charset (if any) is assumed.  Else, the
+ * 8-bit charset of the server is assumed.
  *
  * A special invocation is with an unmodified initialized structure: this clears
  * the client's whole display, letting the display of other applications on
@@ -540,14 +548,44 @@ int brlapi__write(brlapi_handle_t *handle, const brlapi_writeStruct_t *s);
 
 /** Type for key codes
  *
- * Its size is 64 bits, so driver implementors have a whole 64 bit space.
+ * Key codes are unsigned 64 bit integers.  This 64-bit space is split into 3
+ * parts:
  *
- * Commands split the 64 bit space into 3 parts:
- * - bits 63-32: flags, bits 39-32 are standard X modifiers ;
- * - bits 31-29: key type: 1 for braille commands, 0 for X keysyms ;
- * - bits 28-0:  key code, depending on the key type.
+ * - bits 63-32 (BRLAPI_KEY_FLAGS_MASK), flags: bits 39-32 are standard X
+ * modifiers (shift, control, meta, ...). Other flags are use for some commands,
+ * see documentation of BRLAPI_KEY_FLG_* for their respective uses.
+ * - bits 31-29 (BRLAPI_KEY_TYPE_MASK), key type: either BRLAPI_KEY_TYPE_CMD for
+ * braille commands, or BRLAPI_KEY_TYPE_SYM for standard X keysyms.
+ * - bits 28-0 (BRLAPI_KEY_CODE_MASK), key code: for braille commands, see
+ * BRLAPI_KEY_CMD_* ; for standard X keysyms, this is the keysym value, see
+ * X11 documentation, a complete list is probably available on your system in
+ * /usr/include/X11/keysymdef.h
  *
- * For commands descriptions, see also brlapi_commands(3).
+ * The third part is itself split into two parts: a command number and a command
+ * value.  The relative sizes of these parts vary according to the key type.
+ * 
+ * For a braille command, bits 28-16 (BRLAPI_KEY_CMD_BLK_MASK) hold the braille
+ * command number, while bits 15-0 (BRLAPI_KEY_CMD_ARG_MASK) hold the command
+ * value. See brlapi_commands(3) for command descriptions.
+ *
+ * For a X keysym, if it is a unicode keysym (0x1uvwxyz), then the command
+ * number part is 0x1000000 and the value part is 0xuvwxyz. Else, the command
+ * part is held by bits 28-8 and the value part is held by bits 7-0. This
+ * permits to easily handle usual cases like 0x00xy (latin1), 0x01xy (latin2),
+ * 0xff08 (backspace), 0xff09 (tab), ...
+ *
+ * For instance, if key == 0x20010008,
+ * - key & BRLAPI_KEY_TYPE_MASK == BRLAPI_KEY_TYPE_CMD, so it's a braille
+ * command
+ * - key & BRLAPI_KEY_CMD_BLK_MASK == BRLAPI_KEY_CMD_ROUTE, so it's the braille
+ * route command.
+ * - key & BRLAPI_KEY_CMD_ARG_MASK == 8, so the highlighted cell is the 9th one
+ * (cells are numbered from 0)
+ * - key & BRLAPI_KEY_FLAGS_MASK == 0, so no modifier key was pressed during the
+ * command, and no particular flag applies to the command.
+ *
+ * The brlapi_expandKeyCode(3) function may be used for splitting key codes into
+ * these 4 parts.
  */
 typedef uint64_t brlapi_keyCode_t;
 
