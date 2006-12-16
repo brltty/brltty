@@ -41,7 +41,7 @@ set session [eval brlapi openConnection $connectionSettings]
 puts "Object: $session"
 
 set host [$session getHost]
-puts "Host: $host ([expandList [brlapi expandHost $host] name port family])"
+puts "Host: $host"
 
 set auth [$session getAuth]
 puts "Auth: $auth"
