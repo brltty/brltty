@@ -568,7 +568,13 @@ void toX_f(const char *display) {
 	}
 	if (!tryModifiers(keycode, &modifiers, 0, keysym)
 	 && !tryModifiers(keycode, &modifiers, ShiftMask, keysym)
+	 && !tryModifiers(keycode, &modifiers, Mod2Mask, keysym)
+	 && !tryModifiers(keycode, &modifiers, Mod3Mask, keysym)
+	 && !tryModifiers(keycode, &modifiers, Mod4Mask, keysym)
 	 && !tryModifiers(keycode, &modifiers, Mod5Mask, keysym)
+	 && !tryModifiers(keycode, &modifiers, ShiftMask|Mod2Mask, keysym)
+	 && !tryModifiers(keycode, &modifiers, ShiftMask|Mod3Mask, keysym)
+	 && !tryModifiers(keycode, &modifiers, ShiftMask|Mod4Mask, keysym)
 	 && !tryModifiers(keycode, &modifiers, ShiftMask|Mod5Mask, keysym)) {
 	  fprintf(stderr,gettext("Couldn't find modifiers to apply to %d for getting keysym %08X\n"),keycode,keysym);
 	  continue;
