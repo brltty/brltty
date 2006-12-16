@@ -39,3 +39,14 @@ vstp_main.$O:
 vstp_transfer.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/vstp_transfer.c
 
+clean::
+	-rm -f vstp$X
+
+install:: vstp$X install-program-directory install-man1-directory
+	$(INSTALL_PROGRAM) vstp$X $(INSTALL_PROGRAM_DIRECTORY)
+	$(INSTALL_DATA) vstp.1 $(INSTALL_MAN1_DIRECTORY)
+
+uninstall::
+	-rm -f $(INSTALL_PROGRAM_DIRECTORY)/vstp$X
+	-rm -f $(INSTALL_MAN1_DIRECTORY)/vstp.1
+
