@@ -9,7 +9,7 @@ Example :
 import brlapi
 b = brlapi.Connection()
 b.enterTtyMode()
-b.ignoreKeyRange([0, brlapi.KEYCODE_MAX])
+b.ignoreKeyRange([0, brlapi.KEY_MAX])
 b.acceptKeyRange([brlapi.KEY_TYPE_SYM, brlapi.KEY_TYPE_SYM|brlapi.KEY_CODE_MASK])
 b.acceptKeySet([brlapi.KEY_CMD_LNUP, brlapi.KEY_CMD_LNDN|brlapi.KEY_FLAGS_MASK])
 b.writeText("Press any key to continue ... ¤")
