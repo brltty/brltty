@@ -18,7 +18,7 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/* vbtp.h
+/* vstp.h
  * files transferring with VisioBraille terminals
  */
 #ifndef __VBCP_H
@@ -26,8 +26,8 @@
 
 /* different possible names for file */
 
-#define VBTP_PUT	"vbtpp"
-#define VBTP_GET	"vbtpg"
+#define VSTP_PUT	"vstpp"
+#define VSTP_GET	"vstpg"
 
 #define SIZE_PUT	250 /* just like xfl */
 

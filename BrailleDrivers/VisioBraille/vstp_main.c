@@ -31,7 +31,7 @@
 #include "Programs/brlapi.h"
 #include "vstp.h"
 
-#define VBTPRC ".vbtprc"
+#define VSTPRC ".vstprc"
 #define LINELENGTH 255
 
 char *socketport = NULL;
@@ -46,7 +46,7 @@ void handleint(int signum) {
 #define OPTIONS "ifbnskd"
 
 static void printusage(char *name) {
- printf(VBTP_GET "/" VBTP_PUT " : get files from / put files to a VisioBraille terminal\n");
+ printf(VSTP_GET "/" VSTP_PUT " : get files from / put files to a VisioBraille terminal\n");
  printf("Usage: %s [options] [files]\n",name);
  printf("[files] are Unix filenames\n");
  printf(" -i            ask for confirmation\n");
@@ -66,9 +66,9 @@ static void grr(char *name) {
 }
 
 static transferfun *CheckSendOrRecv(char *name){
- if (strstr(name,VBTP_PUT) != NULL) return fileput;
- if (strstr(name,VBTP_GET) != NULL) return fileget;
- printf("Please call me as " VBTP_PUT " or as " VBTP_GET ".\n");
+ if (strstr(name,VSTP_PUT) != NULL) return fileput;
+ if (strstr(name,VSTP_GET) != NULL) return fileget;
+ printf("Please call me as " VSTP_PUT " or as " VSTP_GET ".\n");
  grr(name);
  exit(RET_EPARSE);
 }
@@ -183,10 +183,10 @@ int main(int argc, char *argv[]) {
 
 /* first use options file */
  if ((home=getenv("HOME"))) {
-  char vbtprc[128];
-  strcpy(vbtprc,home);
-  strcat(vbtprc,"/" VBTPRC);
-  Parse(vbtprc);
+  char vstprc[128];
+  strcpy(vstprc,home);
+  strcat(vstprc,"/" VSTPRC);
+  Parse(vstprc);
  }
 
 /* a first pass to check options and record them, before doing anything */

@@ -1,10 +1,10 @@
-.TH VBTP 1 "Jul 15, 2002" "BrlNet" "BrlNet User's Manual"
+.TH VSTP 1 "Jul 15, 2002" "BrlNet" "BrlNet User's Manual"
 .SH NAME
-vbtpg, vbtpp \- VisioBraille file transferring
+vstpg, vstpp \- VisioBraille file transferring
 .SH SYNOPSIS
-vbtpg [-ifbnd] [-s \fIsocketport\fP] [-k \fIkeyname\fP] [-o \fIconfigname\fP] file ...
+vstpg [-ifbnd] [-s \fIsocketport\fP] [-k \fIkeyname\fP] [-o \fIconfigname\fP] file ...
 .SH DESCRIPTION
-\fIvbtpg\fP (resp. \fIvbtpp\fP) gets (resp. puts) files from (resp. onto)
+\fIvstpg\fP (resp. \fIvstpp\fP) gets (resp. puts) files from (resp. onto)
 a VisioBraille terminal.
 
 For communicating with the terminal, you must launch brltty with the BrlNet
@@ -48,7 +48,7 @@ also read filename as config file
 
 .SH CONFIG FILE
 
-\fIvbtpg\fP and \fIvbtpp\fP read a configuration file \fB$HOME/.vbtprc\fR which
+\fIvstpg\fP and \fIvstpp\fP read a configuration file \fB$HOME/.vstprc\fR which
 contains keywords or equalities, one per line (what follows a # is
 ignored).
 
@@ -98,12 +98,12 @@ lB lfCW.
 
 .SH SHELL EXPANSIONS
 Beware of special chars: * and . are often expanded by your shell, hence
-\fIvbtpp *\fR will probably do what you want, putting every file existing in
-the current directory onto the terminal, but \fIvbtpg *\fR may not do what you
+\fIvstpp *\fR will probably do what you want, putting every file existing in
+the current directory onto the terminal, but \fIvstpg *\fR may not do what you
 want: it will only get every file which already exist in the current
 directory, skipping those you just created on your terminal !
 If you want to get every file which exist in the terminal, you
-should use \fIvbtpg '*'\fR or something similar (please read your shell manual).
+should use \fIvstpg '*'\fR or something similar (please read your shell manual).
 
 The same warning applies to other special chars, such as $, ~, &,... which
 should be protected by surrounding arguments by quotes (') or by using single
