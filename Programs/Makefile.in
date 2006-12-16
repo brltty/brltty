@@ -479,59 +479,48 @@ check-speech: brltty speech-drivers
 install:: install-programs install-help install-tables $(INSTALL_DRIVERS) install-manpages $(INSTALL_API)
 
 install-programs: brltty$X install-program-directory
-	$(INSTALL_PROGRAM) brltty$X $(INSTALL_ROOT)$(PROGRAM_DIRECTORY) 
-	$(INSTALL_DATA) brltty-config $(INSTALL_ROOT)$(PROGRAM_DIRECTORY) 
-	$(INSTALL_SCRIPT) $(SRC_DIR)/brltty-install $(INSTALL_ROOT)$(PROGRAM_DIRECTORY) 
+	$(INSTALL_PROGRAM) brltty$X $(INSTALL_PROGRAM_DIRECTORY) 
+	$(INSTALL_DATA) brltty-config $(INSTALL_PROGRAM_DIRECTORY) 
+	$(INSTALL_SCRIPT) $(SRC_DIR)/brltty-install $(INSTALL_PROGRAM_DIRECTORY) 
 
 install-xbrlapi: xbrlapi$X install-program-directory
-	$(INSTALL_PROGRAM) xbrlapi$X $(INSTALL_ROOT)$(PROGRAM_DIRECTORY) 
-
-install-program-directory:
-	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(PROGRAM_DIRECTORY) 
+	$(INSTALL_PROGRAM) xbrlapi$X $(INSTALL_PROGRAM_DIRECTORY) 
 
 install-help: $(BRAILLE_DRIVERS) $(BRAILLE_HELP) install-data-directory
-	$(INSTALL_DATA) $(BLD_TOP)$(DAT_DIR)/* $(INSTALL_ROOT)$(DATA_DIRECTORY) 
+	$(INSTALL_DATA) $(BLD_TOP)$(DAT_DIR)/* $(INSTALL_DATA_DIRECTORY) 
 
 install-tables: $(INSTALL_TEXT_TABLES) $(INSTALL_ATTRIBUTES_TABLES) $(INSTALL_CONTRACTION_TABLES)
 
 install-text-tables: install-data-directory
-	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/text.*.tbl $(INSTALL_ROOT)$(DATA_DIRECTORY)
+	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/text.*.tbl $(INSTALL_DATA_DIRECTORY)
 
 install-attributes-tables: install-data-directory
-	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/attr*.tbl $(INSTALL_ROOT)$(DATA_DIRECTORY)
+	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/attr*.tbl $(INSTALL_DATA_DIRECTORY)
 
 install-contraction-tables: install-data-directory
-	$(INSTALL_DATA) $(SRC_TOP)$(CTB_DIR)/*.ctb $(INSTALL_ROOT)$(DATA_DIRECTORY)
-	$(INSTALL_DATA) $(SRC_TOP)$(CTB_DIR)/*.cti $(INSTALL_ROOT)$(DATA_DIRECTORY)
+	$(INSTALL_DATA) $(SRC_TOP)$(CTB_DIR)/*.ctb $(INSTALL_DATA_DIRECTORY)
+	$(INSTALL_DATA) $(SRC_TOP)$(CTB_DIR)/*.cti $(INSTALL_DATA_DIRECTORY)
 
-install-data-directory:
-	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(DATA_DIRECTORY) 
+install-drivers: $(BRAILLE_DRIVERS) $(SPEECH_DRIVERS) $(SCREEN_DRIVERS) install-library-directory
+	$(INSTALL_PROGRAM) $(BLD_TOP)$(DRV_DIR)/*.$(MOD_EXT) $(INSTALL_LIBRARY_DIRECTORY)
 
-install-drivers: $(BRAILLE_DRIVERS) $(SPEECH_DRIVERS) $(SCREEN_DRIVERS)
-	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(LIBRARY_DIRECTORY)
-	$(INSTALL_PROGRAM) $(BLD_TOP)$(DRV_DIR)/*.$(MOD_EXT) $(INSTALL_ROOT)$(LIBRARY_DIRECTORY)
-
-install-manpages:
-	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(MANPAGE_DIRECTORY)/man1
-	$(INSTALL_DATA) $(BLD_TOP)$(DOC_DIR)/*.1 $(INSTALL_ROOT)$(MANPAGE_DIRECTORY)/man1
+install-manpages: install-man1-directory
+	$(INSTALL_DATA) $(BLD_TOP)$(DOC_DIR)/*.1 $(INSTALL_MAN1_DIRECTORY)
 
 install-api: $(INSTALL_API_LIBRARIES) install-api-headers install-api-manpages install-api-key $(INSTALL_XBRLAPI) $(INSTALL_API_BINDINGS)
 
-install-api-libraries: $(API_LIB) $(API_ARC) install-libdir-directory
-	$(INSTALL_PROGRAM) $(API_LIB) $(INSTALL_ROOT)$(libdir)/$(API_LIB).$(API_RELEASE)
-	$(SYMLINK) -f $(API_LIB).$(API_RELEASE) $(INSTALL_ROOT)$(libdir)/$(API_LIB)
-	$(SYMLINK) -f $(API_LIB).$(API_RELEASE) $(INSTALL_ROOT)$(libdir)/$(API_LIB).$(API_VERSION)
-	$(CONFLIBDIR) $(INSTALL_ROOT)$(libdir)
-	$(INSTALL_DATA) $(API_ARC) $(INSTALL_ROOT)$(libdir)
+install-api-libraries: $(API_LIB) $(API_ARC) install-api-directory
+	$(INSTALL_PROGRAM) $(API_LIB) $(INSTALL_API_DIRECTORY)/$(API_LIB).$(API_RELEASE)
+	$(SYMLINK) -f $(API_LIB).$(API_RELEASE) $(INSTALL_API_DIRECTORY)/$(API_LIB)
+	$(SYMLINK) -f $(API_LIB).$(API_RELEASE) $(INSTALL_API_DIRECTORY)/$(API_LIB).$(API_VERSION)
+	$(CONFLIBDIR) $(INSTALL_API_DIRECTORY)
+	$(INSTALL_DATA) $(API_ARC) $(INSTALL_API_DIRECTORY)
 
-install-api-libraries-windows: $(API_DLL) $(API_ARC) install-program-directory install-libdir-directory
-	$(INSTALL_PROGRAM) $(API_DLL) $(INSTALL_ROOT)$(PROGRAM_DIRECTORY)
-	$(INSTALL_DATA) $(API_IMPLIB) $(INSTALL_ROOT)$(libdir)/$(API_IMPLIB_VERSIONED)
-	cd $(INSTALL_ROOT)$(libdir) && $(SYMLINK) -f $(API_IMPLIB_VERSIONED) $(API_IMPLIB)
-	$(INSTALL_DATA) $(API_ARC) $(INSTALL_ROOT)$(libdir)
-
-install-libdir-directory:
-	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(libdir)
+install-api-libraries-windows: $(API_DLL) $(API_ARC) install-program-directory install-api-directory
+	$(INSTALL_PROGRAM) $(API_DLL) $(INSTALL_PROGRAM_DIRECTORY)
+	$(INSTALL_DATA) $(API_IMPLIB) $(INSTALL_API_DIRECTORY)/$(API_IMPLIB_VERSIONED)
+	cd $(INSTALL_API_DIRECTORY) && $(SYMLINK) -f $(API_IMPLIB_VERSIONED) $(API_IMPLIB)
+	$(INSTALL_DATA) $(API_ARC) $(INSTALL_API_DIRECTORY)
 
 install-api-headers: brlapi_constants.h brlapi_brldefs.auto.h
 	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(includedir)
@@ -542,10 +531,9 @@ install-api-headers: brlapi_constants.h brlapi_brldefs.auto.h
 	$(INSTALL_DATA) brlapi_brldefs.auto.h $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)/brldefs.h
 	$(INSTALL_DATA) $(SRC_DIR)/api.h $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
 
-install-api-manpages:
-	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(MANPAGE_DIRECTORY)/man3
+install-api-manpages: install-man3-directory
 	set -- $(SRC_TOP)$(DOC_DIR)/BrlAPIref/man/man3/brlapi_*.3 && [ -f $$1 ] || exit 0 && \
-	$(INSTALL_DATA) $$* $(INSTALL_ROOT)$(MANPAGE_DIRECTORY)/man3
+	$(INSTALL_DATA) $$* $(INSTALL_MAN3_DIRECTORY)
 
 install-api-key:
 	file=$(sysconfdir)/$(API_AUTHFILE) && \
@@ -557,33 +545,33 @@ install-api-key:
 uninstall:: uninstall-programs uninstall-data uninstall-libraries uninstall-manpages uninstall-headers uninstall-api-bindings
 
 uninstall-programs:
-	-rm -f $(INSTALL_ROOT)$(PROGRAM_DIRECTORY)/brltty$X
-	-rm -f $(INSTALL_ROOT)$(PROGRAM_DIRECTORY)/brltty-config
-	-rm -f $(INSTALL_ROOT)$(PROGRAM_DIRECTORY)/brltty-install
-	-rm -f $(INSTALL_ROOT)$(PROGRAM_DIRECTORY)/xbrlapi$X
+	-rm -f $(INSTALL_PROGRAM_DIRECTORY)/brltty$X
+	-rm -f $(INSTALL_PROGRAM_DIRECTORY)/brltty-config
+	-rm -f $(INSTALL_PROGRAM_DIRECTORY)/brltty-install
+	-rm -f $(INSTALL_PROGRAM_DIRECTORY)/xbrlapi$X
 
 uninstall-data:
-	-rm -f $(INSTALL_ROOT)$(DATA_DIRECTORY)/*.tbl
-	-rm -f $(INSTALL_ROOT)$(DATA_DIRECTORY)/*.ctb
-	-rm -f $(INSTALL_ROOT)$(DATA_DIRECTORY)/*.cti
-	-rm -f $(INSTALL_ROOT)$(DATA_DIRECTORY)/brltty*
-	-[ ! -d $(INSTALL_ROOT)$(DATA_DIRECTORY) ] || rmdir $(INSTALL_ROOT)$(DATA_DIRECTORY)
+	-rm -f $(INSTALL_DATA_DIRECTORY)/*.tbl
+	-rm -f $(INSTALL_DATA_DIRECTORY)/*.ctb
+	-rm -f $(INSTALL_DATA_DIRECTORY)/*.cti
+	-rm -f $(INSTALL_DATA_DIRECTORY)/brltty*
+	-[ ! -d $(INSTALL_DATA_DIRECTORY) ] || rmdir $(INSTALL_DATA_DIRECTORY)
 
 uninstall-libraries:
-	-rm -f $(INSTALL_ROOT)$(LIBRARY_DIRECTORY)/$(LIB_NAME)*
-	-[ ! -d $(INSTALL_ROOT)$(LIBRARY_DIRECTORY) ] || rmdir $(INSTALL_ROOT)$(LIBRARY_DIRECTORY)
-	-rm -f $(INSTALL_ROOT)$(libdir)/$(API_LIB)
-	-rm -f $(INSTALL_ROOT)$(libdir)/$(API_LIB).$(API_VERSION)
-	-rm -f $(INSTALL_ROOT)$(libdir)/$(API_LIB).$(API_RELEASE)
-	$(CONFLIBDIR) $(INSTALL_ROOT)$(libdir)
-	-rm -f $(INSTALL_ROOT)$(libdir)/$(API_ARC)
-	-rm -f $(INSTALL_ROOT)$(libdir)/$(API_IMPLIB)
-	-rm -f $(INSTALL_ROOT)$(libdir)/$(API_IMPLIB_VERSIONED)
-	-rm -f $(INSTALL_ROOT)$(PROGRAM_DIRECTORY)/$(API_DLL)
+	-rm -f $(INSTALL_LIBRARY_DIRECTORY)/$(LIB_NAME)*
+	-[ ! -d $(INSTALL_LIBRARY_DIRECTORY) ] || rmdir $(INSTALL_LIBRARY_DIRECTORY)
+	-rm -f $(INSTALL_API_DIRECTORY)/$(API_LIB)
+	-rm -f $(INSTALL_API_DIRECTORY)/$(API_LIB).$(API_VERSION)
+	-rm -f $(INSTALL_API_DIRECTORY)/$(API_LIB).$(API_RELEASE)
+	$(CONFLIBDIR) $(INSTALL_API_DIRECTORY)
+	-rm -f $(INSTALL_API_DIRECTORY)/$(API_ARC)
+	-rm -f $(INSTALL_API_DIRECTORY)/$(API_IMPLIB)
+	-rm -f $(INSTALL_API_DIRECTORY)/$(API_IMPLIB_VERSIONED)
+	-rm -f $(INSTALL_PROGRAM_DIRECTORY)/$(API_DLL)
 
 uninstall-manpages:
 	-rm -f $(INSTALL_ROOT)$(MANPAGE_DIRECTORY)/man1/brltty.1
-	-rm -f $(INSTALL_ROOT)$(MANPAGE_DIRECTORY)/man3/brlapi_*.3
+	-rm -f $(INSTALL_MAN3_DIRECTORY)/brlapi_*.3
 
 uninstall-headers:
 	-rm -f $(INSTALL_ROOT)$(includedir)/brlapi.h
