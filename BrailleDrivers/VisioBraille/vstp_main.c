@@ -183,7 +183,7 @@ int main(int argc, char *argv[]) {
 
 /* first use options file */
  if ((home=getenv("HOME"))) {
-  char vstprc[128];
+  char vstprc[strlen(home)+strlen(VSTPRC)+2];
   strcpy(vstprc,home);
   strcat(vstprc,"/" VSTPRC);
   Parse(vstprc);
