@@ -29,6 +29,17 @@
 #define allocateMemory(size) ((void *)ckalloc((size)))
 #define deallocateMemory(address) ckfree((void *)(address))
 
+#define SET_ARRAY_ELEMENT(element, object) \
+do { \
+  const char *name = (element); \
+  Tcl_Obj *value = (object); \
+  Tcl_Obj *result; \
+  Tcl_IncrRefCount(value); \
+  result = Tcl_SetVar2Ex(interp, array, name, value, TCL_LEAVE_ERR_MSG); \
+  Tcl_DecrRefCount(value); \
+  if (!result) return TCL_ERROR; \
+} while (0);
+
 typedef struct {
   brlapi_connectionSettings_t settings;
   brlapi_handle_t *handle;
@@ -1055,8 +1066,6 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
       return TCL_ERROR;
     }
 
-#define STRING(string) Tcl_NewStringObj((string), -1)
-#define FLAG(name,string) if (flagsField & BRLAPI_KEY_FLG_##name) Tcl_ListObjAppendElement(interp, flagsObject, STRING((string)))
     case FCN_expandKeyCode: {
       Tcl_WideInt keyCode;
       brlapi_expandedKeyCode_t ekc;
@@ -1079,10 +1088,10 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
         return TCL_ERROR;
       }
 
-      if (!Tcl_SetVar2Ex(interp, array, "type", Tcl_NewIntObj(ekc.type), TCL_LEAVE_ERR_MSG)) return TCL_ERROR;
-      if (!Tcl_SetVar2Ex(interp, array, "command", Tcl_NewIntObj(ekc.command), TCL_LEAVE_ERR_MSG)) return TCL_ERROR;
-      if (!Tcl_SetVar2Ex(interp, array, "argument", Tcl_NewIntObj(ekc.argument), TCL_LEAVE_ERR_MSG)) return TCL_ERROR;
-      if (!Tcl_SetVar2Ex(interp, array, "flags", Tcl_NewIntObj(ekc.flags), TCL_LEAVE_ERR_MSG)) return TCL_ERROR;
+      SET_ARRAY_ELEMENT("type", Tcl_NewIntObj(ekc.type));
+      SET_ARRAY_ELEMENT("command", Tcl_NewIntObj(ekc.command));
+      SET_ARRAY_ELEMENT("argument", Tcl_NewIntObj(ekc.argument));
+      SET_ARRAY_ELEMENT("flags", Tcl_NewIntObj(ekc.flags));
       return TCL_OK;
     }
 
