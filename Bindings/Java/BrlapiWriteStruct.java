@@ -20,31 +20,14 @@
  */
 
 public class BrlapiWriteStruct {
-  public int displayNumber;
-  public int regionBegin;
-  public int regionSize;
-  public String text;
-  public byte attrAnd[];
-  public byte attrOr[];
-  public int cursor;
-
-  public BrlapiWriteStruct (
-    int displayNumber, int regionBegin, int regionSize,
-    String text, byte attrAnd[], byte attrOr[], int cursor
-  ) {
-    this.displayNumber = displayNumber;
-    this.regionBegin = regionBegin;
-    this.regionSize = regionSize;
-    this.text = text;
-    this.attrAnd = attrAnd;
-    this.attrOr = attrOr;
-    this.cursor = cursor;
-  }
+  public int displayNumber = Brlapi.DISPLAY_DEFAULT;
+  public int regionBegin = 0;
+  public int regionSize = 0;
+  public String text = null;
+  public byte attrAnd[] = null;
+  public byte attrOr[] = null;
+  public int cursor = Brlapi.CURSOR_LEAVE;
 
   public BrlapiWriteStruct () {
-    this(
-      Brlapi.DISPLAY_DEFAULT, 0, 0,
-      null, null, null, Brlapi.CURSOR_LEAVE
-    ); 
   }
 }

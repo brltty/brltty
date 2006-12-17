@@ -69,11 +69,12 @@ public class ApiTest {
 
       printKey(new BrlapiKey(brlapi.readKey(true)));
 
-      BrlapiWriteStruct ws = new BrlapiWriteStruct(
-        -1, 10, 20,
-	"Key Pressed €       ",
-	"????????????????????".getBytes(),
-	null, 3);
+      BrlapiWriteStruct ws = new BrlapiWriteStruct();
+      ws.regionBegin = 10;
+      ws.regionSize = 20;
+      ws.text = "Key Pressed €       ";
+      ws.attrAnd = "????????????????????".getBytes();
+      ws.cursor = 3;
       brlapi.write(ws);
 
       printKey(new BrlapiKey(brlapi.readKey(true)));
