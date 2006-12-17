@@ -73,6 +73,11 @@ extern "C" {
  * brlapi_foo counterpart, except that it takes an additional argument
  * (the first one), which is a handle letting the client refer to a given
  * connection in a similar manner to what file descriptors do.
+ *
+ * In case you want to check that your code is not erroneously using brlapi_foo
+ * functions, define BRLAPI_NO_SINGLE_SESSION before including <brlapi.h>: that
+ * will disable the declaration of all single session functions.
+ *
  * @{ */
 
 /** Type for BrlAPI hanles */
