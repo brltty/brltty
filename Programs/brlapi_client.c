@@ -938,7 +938,7 @@ static int getControllingTty(void)
 int brlapi__enterTtyMode(brlapi_handle_t *handle, int tty, const char *driverName)
 {
   /* Determine which tty to take control of */
-  if (tty<=0) tty = getControllingTty();
+  if (tty<0) tty = getControllingTty();
   /* 0 can be a valid screen WINDOW
   0xffffffff can not be a valid WINDOWID (top 3 bits guaranteed to be zero) */
   if (tty<0) { brlapi_errno=BRLAPI_ERROR_UNKNOWNTTY; return -1; }
