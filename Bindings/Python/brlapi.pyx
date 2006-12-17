@@ -48,6 +48,7 @@ b.leaveTtyMode()
 ###############################################################################
 
 cimport c_brlapi
+include "constants.auto.pyx"
 
 cdef returnerrno():
 	"""This function returns str message error from errno"""
@@ -291,7 +292,7 @@ cdef class Connection:
 			else:
 				return name
 
-	def enterTtyMode(self, tty = -1, how = None):
+	def enterTtyMode(self, tty = TTY_DEFAULT, driverName = None):
 		"""Ask for some tty, with some key mechanism
 
 		See brlapi_enterTtyMode(3).
@@ -301,14 +302,14 @@ cdef class Connection:
 		* driverName : Tells how the application wants readKey() to return key presses. None or "" means BrlTTY commands are required, whereas a driver name means that raw key codes returned by this driver are expected."""
 		cdef int retval
 		cdef int c_tty
-		cdef char *c_how
+		cdef char *c_driverName
 		c_tty = tty
-		if not how:
-			c_how = NULL
+		if not driverName:
+			c_driverName = NULL
 		else:
-			c_how = how
+			c_driverName = driverName
 		c_brlapi.Py_BEGIN_ALLOW_THREADS
-		retval = c_brlapi.brlapi__enterTtyMode(self.h, c_tty, c_how)
+		retval = c_brlapi.brlapi__enterTtyMode(self.h, c_tty, c_driverName)
 		c_brlapi.Py_END_ALLOW_THREADS
 		if retval == -1:
 			raise OperationError(returnerrno())
@@ -407,7 +408,7 @@ cdef class Connection:
 		else:
 			return retval
 
-	def writeText(self, str, cursor = 0):
+	def writeText(self, str, cursor = CURSOR_OFF):
 		"""Write the given \0-terminated string to the braille display.
 		See brlapi_writeText(3).
 		If the string is too long, it is cut. If it's too short, spaces are appended. The current LC_CTYPE locale is considered, unless it is left as default "C", in which case the charset is assumed to be 8bits, and the same as the server's.
@@ -578,4 +579,3 @@ cdef class Connection:
 		else:
 			return retval
 
-include "constants.auto.pyx"
