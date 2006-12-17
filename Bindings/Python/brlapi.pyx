@@ -23,7 +23,7 @@ w.regionBegin = 1
 w.regionSize = 40
 w.text = u"Press any key to exit ¤                 "
 underline = chr(brlapi.DOT7 + brlapi.DOT8)
-w.attrOr = "".center(21,underline) + "".center(19,chr(0))
+w.attrOr = "".center(21,underline) + "".center(19,chr(0))  # Note: center() can take two arguments only starting from python 2.4
 b.write(w)
 b.readKey()
 b.leaveTtyMode()
@@ -421,7 +421,7 @@ cdef class Connection:
 			(x, y) = self.displaySize
 			dispSize = x * y
 			if (len(str) < dispSize):
-				str = str + "".center(dispSize - len(str), ' ')
+				str = str + "".center(dispSize - len(str))
 			w.regionBegin = 1
 			w.regionSize = dispSize
 			w.text = str[0 : dispSize]
