@@ -1,5 +1,5 @@
 """
-This module is a binding for BrlAPI, a BrlTTY bridge for applications.
+This module implements a set of bindings for BrlAPI, a braille bridge for applications.
 
 The reference C API documentation is available online http://mielke.cc/brltty/doc/BrlAPIref-HTML, as well as in manual pages.
 
@@ -18,7 +18,7 @@ k = expandKeyCode(key)
 b.writeText("Key %ld (%x %x %x %x) !" % (key, k["type"], k["command"], k["argument"], k["flags"]))
 b.writeText(None,1)
 b.readKey()
-w = brlapi.Write()
+w = brlapi.WriteStruct()
 w.regionBegin = 1
 w.regionSize = 40
 w.text = u"Press any key to exit ¤                 "
@@ -70,8 +70,8 @@ class OperationError:
 	def __str__(self):
 		return self.value
 
-cdef class Write:
-	"""Structure containing arguments to be given to Bridge.write()
+cdef class WriteStruct:
+	"""Structure containing arguments to be given to Connection.write()
 	See brlapi_writeStruct_t(3)."""
 	cdef c_brlapi.brlapi_writeStruct_t props
 
@@ -195,7 +195,7 @@ cdef class Write:
 				self.props.attrOr = NULL
 
 cdef class Connection:
-	"""Class which manages the bridge between BrlTTY and your program"""
+	"""Class which manages the bridge between your program and BrlAPI"""
 	cdef c_brlapi.brlapi_handle_t *h
 	cdef c_brlapi.brlapi_connectionSettings_t settings
 	cdef int fd
@@ -378,7 +378,7 @@ cdef class Connection:
 		else:
 			return retval
 
-	def write(self, Write writeStruct):
+	def write(self, WriteStruct writeStruct):
 		"""Update a specific region of the braille display and apply and/or masks.
 		See brlapi_write(3).
 		* s : gives information necessary for the update"""
@@ -415,7 +415,7 @@ cdef class Connection:
 
 		* cursor : gives the cursor position; if equal to CURSOR_OFF, no cursor is shown at all; if cursor == CURSOR_LEAVE, the cursor is left where it is
 		* str : points to the string to be displayed"""
-		w = Write()
+		w = WriteStruct()
 		w.cursor = cursor
 		if (str):
 			(x, y) = self.displaySize
