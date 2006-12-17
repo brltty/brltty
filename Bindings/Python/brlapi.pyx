@@ -79,7 +79,7 @@ cdef class Write:
 		self.props = <c_brlapi.brlapi_writeStruct_t> c_brlapi.BRLAPI_WRITESTRUCT_INITIALIZER
 
 	property displayNumber:
-		"""Display number -1 == unspecified"""
+		"""Display number DISPLAY_DEFAULT == unspecified"""
 		def __get__(self):
 			return self.props.displayNumber
 		def __set__(self, val):
@@ -125,7 +125,7 @@ cdef class Write:
 				self.props.text = NULL
 
 	property cursor:
-		"""-1 == don't touch, 0 == turn off, 1 = 1st char of display, ..."""
+		"""CURSOR_LEAVE == don't touch, CURSOR_OFF == turn off, 1 = 1st char of display, ..."""
 		def __get__(self):
 			return self.props.cursor
 		def __set__(self, val):
@@ -298,7 +298,7 @@ cdef class Connection:
 		See brlapi_enterTtyMode(3).
 
 		* tty : If tty >= 0, application takes control of the specified tty
-			If tty == -1, the library first tries to get the tty number from the WINDOWID environment variable (form xterm case), then the CONTROLVT variable, and at last reads /proc/self/stat (on linux)
+			If tty == TTY_DEFAULT, the library first tries to get the tty number from the WINDOWID environment variable (form xterm case), then the CONTROLVT variable, and at last reads /proc/self/stat (on linux)
 		* driverName : Tells how the application wants readKey() to return key presses. None or "" means BrlTTY commands are required, whereas a driver name means that raw key codes returned by this driver are expected."""
 		cdef int retval
 		cdef int c_tty
@@ -316,7 +316,7 @@ cdef class Connection:
 		else:
 			return retval
 
-	def enterTtyModeWithPath(self, path = [], how = None):
+	def enterTtyModeWithPath(self, path = [], driverName = None):
 		"""Ask for some tty, with some key mechanism
 
 		See brlapi_enterTtyModeWithPath(3).
@@ -328,7 +328,7 @@ cdef class Connection:
 		cdef int retval
 		cdef int *c_ttys
 		cdef int c_nttys
-		cdef char *c_how
+		cdef char *c_driverName
 		if not path:
 			c_ttys = NULL
 			c_nttys = 0
@@ -337,12 +337,12 @@ cdef class Connection:
 			c_ttys = <int*>c_brlapi.malloc(c_nttys * sizeof(int))
 			for i from 0 <= i < c_nttys:
 				c_ttys[i] = path[i]
-		if not how:
-			c_how = NULL
+		if not driverName:
+			c_driverName = NULL
 		else:
-			c_how = how
+			c_driverName = driverName
 		c_brlapi.Py_BEGIN_ALLOW_THREADS
-		retval = c_brlapi.brlapi__enterTtyModeWithPath(self.h, c_ttys, c_nttys, c_how)
+		retval = c_brlapi.brlapi__enterTtyModeWithPath(self.h, c_ttys, c_nttys, c_driverName)
 		c_brlapi.Py_END_ALLOW_THREADS
 		if (c_ttys):
 			c_brlapi.free(c_ttys)
@@ -413,7 +413,7 @@ cdef class Connection:
 		See brlapi_writeText(3).
 		If the string is too long, it is cut. If it's too short, spaces are appended. The current LC_CTYPE locale is considered, unless it is left as default "C", in which case the charset is assumed to be 8bits, and the same as the server's.
 
-		* cursor : gives the cursor position; if equal to 0, no cursor is shown at all; if cursor == -1, the cursor is left where it is
+		* cursor : gives the cursor position; if equal to CURSOR_OFF, no cursor is shown at all; if cursor == CURSOR_LEAVE, the cursor is left where it is
 		* str : points to the string to be displayed"""
 		w = Write()
 		w.cursor = cursor
