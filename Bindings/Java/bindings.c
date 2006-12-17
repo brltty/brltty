@@ -87,7 +87,7 @@ static void ThrowError(JNIEnv *jenv, const char *msg) {
   }
 }
 
-static void exceptionHandler(int err, brlapi_type_t type, const void *buf, size_t size) {
+static void exceptionHandler(brlapi_handle_t *handle, int err, brlapi_type_t type, const void *buf, size_t size) {
   jarray jbuf;
   jclass jcexcep;
   jmethodID jinit;
@@ -103,11 +103,11 @@ static void exceptionHandler(int err, brlapi_type_t type, const void *buf, size_
     ThrowException(env, ERR_NULLPTR, "exceptionHandlerFindClass");
     return;
   }
-  if (!(jinit = (*env)->GetMethodID(env, jcexcep, "<init>", "(II[B)V"))) {
+  if (!(jinit = (*env)->GetMethodID(env, jcexcep, "<init>", "(JII[B)V"))) {
     ThrowException(env, ERR_NULLPTR, "exceptionHandlerGetMethodID");
     return;
   }
-  if (!(jexcep = (*env)->NewObject(env, jcexcep, jinit, err, type, jbuf))) {
+  if (!(jexcep = (*env)->NewObject(env, jcexcep, jinit, (jlong)(intptr_t) handle, err, type, jbuf))) {
     ThrowException(env, ERR_NULLPTR, "exceptionHandlerNewObject");
     return;
   }
@@ -150,8 +150,6 @@ JNIEXPORT jint JNICALL Java_BrlapiNative_openConnection(JNIEnv *jenv, jobject jo
   brlapi_handle_t *handle;
   jclass jcls;
 
-  (void) brlapi_setExceptionHandler(exceptionHandler);
-
   GET_CLASS(jenv, jcls, jobj, -1);
   GET_ID(jenv, handleID, jcls, "handle", "J", -1);
   handle = malloc(brlapi_getHandleSize());
@@ -192,6 +190,8 @@ JNIEXPORT jint JNICALL Java_BrlapiNative_openConnection(JNIEnv *jenv, jobject jo
     ThrowError(jenv, __func__);
     return -1;
   }
+
+  (void) brlapi__setExceptionHandler(handle, exceptionHandler);
 
   if (JclientSettings) {
     if (clientSettings.auth)
@@ -709,8 +709,9 @@ JNIEXPORT jstring JNICALL Java_BrlapiError_toString (JNIEnv *jenv, jobject jerr)
 
 JNIEXPORT jstring JNICALL Java_BrlapiException_toString (JNIEnv *jenv, jobject jerr) {
   jclass jcerr;
-  jfieldID errnoID, typeID, bufID;
+  jfieldID handleID, errnoID, typeID, bufID;
   jarray jbuf;
+  brlapi_handle_t *handle;
   int errno;
   long type;
   jbyte *buf;
@@ -725,10 +726,12 @@ JNIEXPORT jstring JNICALL Java_BrlapiException_toString (JNIEnv *jenv, jobject j
     return NULL;
   }
   GET_CLASS(jenv, jcerr, jerr, NULL);
-  GET_ID(jenv, errnoID, jcerr, "errno", "I", NULL);
-  GET_ID(jenv, typeID,  jcerr, "type",  "I", NULL);
-  GET_ID(jenv, bufID,   jcerr, "buf",   "I", NULL);
+  GET_ID(jenv, handleID, jcerr, "handle", "I", NULL);
+  GET_ID(jenv, errnoID,  jcerr, "errno",  "I", NULL);
+  GET_ID(jenv, typeID,   jcerr, "type",   "I", NULL);
+  GET_ID(jenv, bufID,    jcerr, "buf",    "I", NULL);
 
+  handle = (void*)(intptr_t)(*jenv)->GetLongField(jenv, jerr, handleID);
   error.brlerrno = (*jenv)->GetIntField(jenv, jerr, errnoID);
   type  = (*jenv)->GetIntField(jenv, jerr, typeID);
   if (!(jbuf  = (*jenv)->GetObjectField(jenv, jerr, typeID))) {
@@ -738,7 +741,7 @@ JNIEXPORT jstring JNICALL Java_BrlapiException_toString (JNIEnv *jenv, jobject j
   size  = (*jenv)->GetArrayLength(jenv, jbuf);
   buf = (*jenv)->GetByteArrayElements(jenv, jbuf, NULL);
 
-  brlapi_strexception(errmsg,sizeof(errmsg), errno, type, buf, size); 
+  brlapi__strexception(handle, errmsg, sizeof(errmsg), errno, type, buf, size); 
 
   return (*jenv)->NewStringUTF(jenv, errmsg);
 }

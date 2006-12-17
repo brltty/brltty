@@ -21,11 +21,13 @@
 
 public class BrlapiException extends Exception {
   static final long serialVersionUID = 0;
+  long handle;
   int errno;
   long packettype;
   byte buf[];
   public final native String toString();
-  public BrlapiException(int errno, int packettype, byte buf[]) {
+  public BrlapiException(long handle, int errno, int packettype, byte buf[]) {
+    this.handle = handle;
     this.errno = errno;
     this.packettype = packettype;
     this.buf = buf;
