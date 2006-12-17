@@ -160,7 +160,7 @@ typedef int brlapi_fileDescriptor;
  *
  * lets \e libbrlapi connect to the local computer, on port BRLAPI_SOCKETPORTNUM+1
  *
- * \sa brlapi_openConnection(3) brlapi_loadAuthKey(3)
+ * \sa brlapi_openConnection(3)
  */
 typedef struct {
   /** For security reasons, \e libbrlapi has to get authorized to connect to the
@@ -231,7 +231,6 @@ typedef struct {
  *
  * \sa
  * brlapi_connectionSettings_t
- * brlapi_loadAuthKey(3)
  * brlapi_writePacket(3)
  * brlapi_readPacketHeader(3)
  * brlapi_readPacketContent(3)
@@ -249,21 +248,6 @@ brlapi_fileDescriptor brlapi__openConnection(brlapi_handle_t *handle, const brla
  */
 void brlapi_closeConnection(void);
 void brlapi__closeConnection(brlapi_handle_t *handle);
-
-/* brlapi_loadAuthKey */
-/** Load an authorization key from the given file
- *
- * Calling this function shouldn't be needed if brlapi_openConnection(3)
- * is used.
- *
- * \param filename gives the full path of the file;
- * \param authlength gives the size of the \e auth buffer;
- * \param auth is a buffer where the function will store the authorization key.
- *
- * \return 0, -1 on error
- *
- * \sa brlapi_connectionSettings_t, brlapi_openConnection */
-int brlapi_loadAuthKey(const char *filename, size_t *authlength, void *auth);
 
 /** @} */
 

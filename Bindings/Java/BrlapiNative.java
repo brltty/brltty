@@ -27,7 +27,6 @@ public class BrlapiNative {
     BrlapiSettings usedSettings)
     throws BrlapiError;
   public native void closeConnection ();
-  public static native byte[] loadAuthKey (String path);
 
   public native String getDriverId () throws BrlapiError;
   public native String getDriverName () throws BrlapiError;

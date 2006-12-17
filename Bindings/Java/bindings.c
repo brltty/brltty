@@ -235,39 +235,6 @@ JNIEXPORT void JNICALL Java_BrlapiNative_closeConnection(JNIEnv *jenv, jobject j
   (*jenv)->SetLongField(jenv, jcls, handleID, (jlong) (intptr_t) NULL);
 }
 
-JNIEXPORT jbyteArray JNICALL Java_BrlapiNative_loadAuthKey(JNIEnv *jenv, jclass jcls, jstring jpath) {
-  jbyte buf[BRLAPI_MAXPACKETSIZE];
-  size_t size = sizeof(buf), ret;
-  char *path;
-  jbyteArray result;
-
-  env = jenv;
-
-  if (!jpath) {
-    ThrowException(jenv, ERR_NULLPTR, __func__);
-    return NULL;
-  }
-  if (!(path = (char *)(*jenv)->GetStringUTFChars(jenv, jpath, NULL))) {
-    ThrowException(jenv, ERR_NULLPTR, __func__);
-    return NULL;
-  }
-
-  ret = brlapi_loadAuthKey(path, &size, buf);
-  if (path)
-    (*jenv)->ReleaseStringUTFChars(jenv, jpath, path);
-  if (ret < 0) {
-    ThrowError(jenv, __func__);
-    return NULL;
-  }
-
-  if (!(result = (*jenv)->NewByteArray(jenv, size))) {
-    ThrowException(jenv, ERR_OUTOFMEM, __func__);
-    return NULL;
-  }
-  (*jenv)->SetByteArrayRegion(jenv, result, 0, size, buf);
-  return result;
-}
-
 JNIEXPORT jstring JNICALL Java_BrlapiNative_getDriverId(JNIEnv *jenv, jobject jobj) {
   char id[3];
   GET_HANDLE(jenv, jobj, NULL);
