@@ -42,6 +42,9 @@ public class BrlapiWriteStruct {
   }
 
   public BrlapiWriteStruct () {
-    this(-1, 0, 0, null, null, null, -1); 
+    this(
+      Brlapi.DISPLAY_DEFAULT, 0, 0,
+      null, null, null, Brlapi.CURSOR_LEAVE
+    ); 
   }
 }

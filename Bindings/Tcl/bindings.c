@@ -207,9 +207,9 @@ parseCursorOperand (Tcl_Interp *interp, Tcl_Obj *obj, int *cursor) {
   const char *string = Tcl_GetString(obj);
 
   if (strcmp(string, "off") == 0) {
-    *cursor = 0;
+    *cursor = BRLAPI_CURSOR_OFF;
   } else if (strcmp(string, "leave") == 0) {
-    *cursor = -1;
+    *cursor = BRLAPI_CURSOR_LEAVE;
   } else {
     int number;
     int result = Tcl_GetIntFromObj(interp, obj, &number);
@@ -283,7 +283,7 @@ OPTION_HANDLER(session, write, display) {
   const char *string = Tcl_GetString(obj);
 
   if (strcmp(string, "default") == 0) {
-    options->arguments.displayNumber = -1;
+    options->arguments.displayNumber = BRLAPI_DISPLAY_DEFAULT;
   } else {
     int number;
     int result = Tcl_GetIntFromObj(interp, obj, &number);
@@ -569,7 +569,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
           return TCL_OK;
         }
       } else {
-        int result = brlapi__enterTtyMode(session->handle, -1, options.driver);
+        int result = brlapi__enterTtyMode(session->handle, BRLAPI_TTY_DEFAULT, options.driver);
 
         if (result != -1) {
           setIntResult(interp, result);
@@ -858,7 +858,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     case FCN_writeText: {
       FunctionData_session_writeText options = {
         .text = NULL,
-        .cursor = 0
+        .cursor = BRLAPI_CURSOR_OFF
       };
       brlapi_writeStruct_t arguments = BRLAPI_WRITESTRUCT_INITIALIZER;
 

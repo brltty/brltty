@@ -51,6 +51,10 @@ function brlDot(number, symbol, value, help) {
   writePythonAssignment("DOT" number, value)
 }
 
+function apiConstant(name, symbol, value, help) {
+  writePythonAssignment(name, value)
+}
+
 function apiMask(name, symbol, value, help) {
   writePythonAssignment("KEY_" name, "c_brlapi." symbol)
 }

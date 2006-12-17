@@ -15,6 +15,11 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
+/#define[ \t]*BRLAPI_(CURSOR|DISPLAY|TTY)_/ {
+  apiConstant(substr($2, 8), $2, getDefineValue(), "")
+  next
+}
+
 /#define[ \t]*BRLAPI_KEY_MAX/ {
   apiMask(substr($2, 12), $2, getDefineValue(), "")
   next

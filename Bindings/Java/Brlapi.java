@@ -20,14 +20,6 @@
  */
 
 public class Brlapi extends BrlapiNative implements BrlapiConstants {
-  /** select the controlling tty */
-  public final static int TTY_CONTROL = -1;
-
-  /** turn the cursor off */
-  public final static int CURSOR_OFF = 0;
-  /** leave the cursor where it is */
-  public final static int CURSOR_LEAVE = -1;
-
   protected final BrlapiSettings settings;
   protected final int fileDescriptor;;
 
@@ -57,11 +49,11 @@ public class Brlapi extends BrlapiNative implements BrlapiConstants {
   }
 
   public int enterTtyMode (String driver) throws BrlapiError {
-    return enterTtyMode(TTY_CONTROL, driver);
+    return enterTtyMode(TTY_DEFAULT, driver);
   }
 
   public int enterTtyMode () throws BrlapiError {
-    return enterTtyMode(TTY_CONTROL, null);
+    return enterTtyMode(null);
   }
 
   public void enterTtyModeWithPath (int ttys[]) throws BrlapiError {
