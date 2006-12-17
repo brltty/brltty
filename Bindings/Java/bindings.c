@@ -26,6 +26,7 @@
 #include <unistd.h>
 
 #define BRLAPI_NO_DEPRECATED
+#define BRLAPI_NO_SINGLE_SESSION
 #include "Programs/brlapi.h"
 
 #define ERR_NULLPTR 0
