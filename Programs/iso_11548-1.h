@@ -48,11 +48,11 @@ extern "C" {
 #define BRL_DOT7 BRL_DOT(7) /* lower-left dot of computer braille cell */
 #define BRL_DOT8 BRL_DOT(8) /* lower-right dot of computer braille cell */
 
-inline unsigned char brl_dotNumberToBit (char number) {
+static inline unsigned char brl_dotNumberToBit (char number) {
   return ((number >= '1') && (number <= '8'))? BRL_DOT(number - '0'): 0;
 }
 
-inline char brl_dotBitToNumber (unsigned char bit) {
+static inline char brl_dotBitToNumber (unsigned char bit) {
   int shift = ffs(bit);
   return shift? (shift + '0'): 0;
 }
