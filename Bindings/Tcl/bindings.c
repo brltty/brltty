@@ -1291,7 +1291,7 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
             int numberIndex;
             for (numberIndex=0; numberIndex<numberCount; ++numberIndex) {
               unsigned char number = numbers[numberIndex];
-              unsigned char bit = brl_dotNumberToBit(number);
+              BrlCell bit = brlDotNumberToBit(number);
 
               if (!bit) {
                 setStringResult(interp, "invalid dot number", -1);
