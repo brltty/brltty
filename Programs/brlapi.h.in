@@ -706,9 +706,6 @@ extern int brlapi_expandKeyCode (brlapi_keyCode_t keyCode, brlapi_expandedKeyCod
 
 extern const char *brlapi_getKeyName (unsigned int command, unsigned int argument);
 
-extern unsigned char brlapi_dotNumberToBit (unsigned char number);
-extern unsigned char brlapi_dotBitToNumber (unsigned char bit);
-
 /** Unicode braille row */
 #define BRLAPI_UC_ROW	0x2800UL
 

@@ -21,7 +21,7 @@
 #include <string.h>
 
 #include <tcl.h>
-#include "Programs/brldefs.h"
+#include "Programs/iso_11548-1.h"
 
 #define BRLAPI_NO_DEPRECATED
 #define BRLAPI_NO_SINGLE_SESSION
@@ -1237,7 +1237,7 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
             int numberIndex;
             for (numberIndex=0; numberIndex<numberCount; ++numberIndex) {
               unsigned char number = numbers[numberIndex];
-              unsigned char bit = brlapi_dotNumberToBit(number);
+              unsigned char bit = brl_dotNumberToBit(number);
 
               if (!bit) {
                 setStringResult(interp, "invalid dot number", -1);
