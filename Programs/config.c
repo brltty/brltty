@@ -1815,6 +1815,29 @@ exitPidFile (void) {
   unlink(opt_pidFile);
 }
 
+static void createPidFile (void);
+
+static void
+retryPidFile (void *data) {
+  createPidFile();
+}
+
+static void
+createPidFile (void) {
+  FILE *stream = fopen(opt_pidFile, "w");
+  if (stream) {
+    long int pid = getpid();
+    fprintf(stream, "%ld\n", pid);
+    fclose(stream);
+    atexit(exitPidFile);
+  } else {
+    LogPrint(LOG_WARNING, "%s: %s: %s",
+             gettext("cannot open process identifier file"),
+             opt_pidFile, strerror(errno));
+    asyncRelativeAlarm(5000, retryPidFile, NULL);
+  }
+}
+
 #if defined(WINDOWS)
 #define BACKGROUND_EVENT_PREFIX "BRLTTY background "
 static void
@@ -2055,19 +2078,7 @@ startup (int argc, char *argv[]) {
 #endif /* background() */
 
   /* Create the process identifier file. */
-  if (opt_pidFile) {
-    FILE *stream = fopen(opt_pidFile, "w");
-    if (stream) {
-      long pid = getpid();
-      fprintf(stream, "%ld\n", pid);
-      fclose(stream);
-      atexit(exitPidFile);
-    } else {
-      LogPrint(LOG_ERR, "%s: %s: %s",
-               gettext("cannot open process identifier file"),
-               opt_pidFile, strerror(errno));
-    }
-  }
+  if (opt_pidFile) createPidFile();
 
   {
     const char *directories[] = {opt_dataDirectory, "/", NULL};
