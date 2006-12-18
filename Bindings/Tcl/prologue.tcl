@@ -59,7 +59,7 @@ proc processOptions {argumentsList valuesArray options} {
    upvar 1 $argumentsList arguments
    upvar 1 $valuesArray values
 
-   set checkValue(string) {true}
+   set checkValue(string) {1}
    set checkValue(integer) {[string is integer -strict $value]}
    set checkValue(double) {[string is double -strict $value]}
    set checkValue(boolean) {[string is boolean -strict $value]}
@@ -87,8 +87,8 @@ proc processOptions {argumentsList valuesArray options} {
             return -code error "default value specified for $type option: $name"
          }
 
-         set value false
-         set defaultSpecified true
+         set value 0
+         set defaultSpecified 1
       } elseif {![info exists checkValue($type)]} {
          return -code error "invalid option type: $type"
       } elseif {$defaultSpecified && ![expr $checkValue($type)]} {
@@ -136,7 +136,7 @@ proc processOptions {argumentsList valuesArray options} {
       }
 
       if {[string equal [set type $types($name)] flag]} {
-         set values($name) true
+         set values($name) 1
       } elseif {[llength $arguments] == 0} {
          return -code error "value not supplied for option: $argument"
       } else {
