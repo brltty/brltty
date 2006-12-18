@@ -864,7 +864,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
         int size;
 
         {
-          int width, height;
+          unsigned int width, height;
           int result = getDisplaySize(interp, session, &width, &height);
           if (result != TCL_OK) return result;
           size = width * height;
