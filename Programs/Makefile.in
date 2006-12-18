@@ -509,27 +509,25 @@ install-manpages: install-man1-directory
 
 install-api: $(INSTALL_API_LIBRARIES) install-api-headers install-api-manpages install-api-key $(INSTALL_XBRLAPI) $(INSTALL_API_BINDINGS)
 
-install-api-libraries: $(API_LIB) $(API_ARC) install-api-directory
-	$(INSTALL_PROGRAM) $(API_LIB) $(INSTALL_API_DIRECTORY)/$(API_LIB).$(API_RELEASE)
-	$(SYMLINK) -f $(API_LIB).$(API_RELEASE) $(INSTALL_API_DIRECTORY)/$(API_LIB)
-	$(SYMLINK) -f $(API_LIB).$(API_RELEASE) $(INSTALL_API_DIRECTORY)/$(API_LIB).$(API_VERSION)
-	$(CONFLIBDIR) $(INSTALL_API_DIRECTORY)
-	$(INSTALL_DATA) $(API_ARC) $(INSTALL_API_DIRECTORY)
+install-api-libraries: $(API_LIB) $(API_ARC) install-apilib-directory
+	$(INSTALL_PROGRAM) $(API_LIB) $(INSTALL_APILIB_DIRECTORY)/$(API_LIB).$(API_RELEASE)
+	$(SYMLINK) -f $(API_LIB).$(API_RELEASE) $(INSTALL_APILIB_DIRECTORY)/$(API_LIB)
+	$(SYMLINK) -f $(API_LIB).$(API_RELEASE) $(INSTALL_APILIB_DIRECTORY)/$(API_LIB).$(API_VERSION)
+	$(CONFLIBDIR) $(INSTALL_APILIB_DIRECTORY)
+	$(INSTALL_DATA) $(API_ARC) $(INSTALL_APILIB_DIRECTORY)
 
-install-api-libraries-windows: $(API_DLL) $(API_ARC) install-program-directory install-api-directory
+install-api-libraries-windows: $(API_DLL) $(API_ARC) install-program-directory install-apilib-directory
 	$(INSTALL_PROGRAM) $(API_DLL) $(INSTALL_PROGRAM_DIRECTORY)
-	$(INSTALL_DATA) $(API_IMPLIB) $(INSTALL_API_DIRECTORY)/$(API_IMPLIB_VERSIONED)
-	cd $(INSTALL_API_DIRECTORY) && $(SYMLINK) -f $(API_IMPLIB_VERSIONED) $(API_IMPLIB)
-	$(INSTALL_DATA) $(API_ARC) $(INSTALL_API_DIRECTORY)
+	$(INSTALL_DATA) $(API_IMPLIB) $(INSTALL_APILIB_DIRECTORY)/$(API_IMPLIB_VERSIONED)
+	cd $(INSTALL_APILIB_DIRECTORY) && $(SYMLINK) -f $(API_IMPLIB_VERSIONED) $(API_IMPLIB)
+	$(INSTALL_DATA) $(API_ARC) $(INSTALL_APILIB_DIRECTORY)
 
-install-api-headers: brlapi_constants.h brlapi_brldefs.auto.h
-	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(includedir)
-	$(INSTALL_DATA) brlapi.h $(INSTALL_ROOT)$(includedir)
-	$(INSTALL_DATA) brlapi_constants.h $(INSTALL_ROOT)$(includedir)
-	$(INSTALL_DATA) $(SRC_DIR)/brlapi_protocol.h $(INSTALL_ROOT)$(includedir)
-	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
-	$(INSTALL_DATA) brlapi_brldefs.auto.h $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)/brldefs.h
-	$(INSTALL_DATA) $(SRC_DIR)/api.h $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
+install-api-headers: brlapi_constants.h brlapi_brldefs.auto.h install-apihdr-directory install-include-directory
+	$(INSTALL_DATA) brlapi.h $(INSTALL_APIHDR_DIRECTORY)
+	$(INSTALL_DATA) brlapi_constants.h $(INSTALL_APIHDR_DIRECTORY)
+	$(INSTALL_DATA) $(SRC_DIR)/brlapi_protocol.h $(INSTALL_APIHDR_DIRECTORY)
+	$(INSTALL_DATA) brlapi_brldefs.auto.h $(INSTALL_INCLUDE_DIRECTORY)/brldefs.h
+	$(INSTALL_DATA) $(SRC_DIR)/api.h $(INSTALL_INCLUDE_DIRECTORY)
 
 install-api-manpages: install-man3-directory
 	set -- $(SRC_TOP)$(DOC_DIR)/BrlAPIref/man/man3/brlapi_*.3 && [ -f $$1 ] || exit 0 && \
@@ -562,13 +560,13 @@ uninstall-data:
 uninstall-libraries:
 	-rm -f $(INSTALL_LIBRARY_DIRECTORY)/$(LIB_NAME)*
 	-[ ! -d $(INSTALL_LIBRARY_DIRECTORY) ] || rmdir $(INSTALL_LIBRARY_DIRECTORY)
-	-rm -f $(INSTALL_API_DIRECTORY)/$(API_LIB)
-	-rm -f $(INSTALL_API_DIRECTORY)/$(API_LIB).$(API_VERSION)
-	-rm -f $(INSTALL_API_DIRECTORY)/$(API_LIB).$(API_RELEASE)
-	$(CONFLIBDIR) $(INSTALL_API_DIRECTORY)
-	-rm -f $(INSTALL_API_DIRECTORY)/$(API_ARC)
-	-rm -f $(INSTALL_API_DIRECTORY)/$(API_IMPLIB)
-	-rm -f $(INSTALL_API_DIRECTORY)/$(API_IMPLIB_VERSIONED)
+	-rm -f $(INSTALL_APILIB_DIRECTORY)/$(API_LIB)
+	-rm -f $(INSTALL_APILIB_DIRECTORY)/$(API_LIB).$(API_VERSION)
+	-rm -f $(INSTALL_APILIB_DIRECTORY)/$(API_LIB).$(API_RELEASE)
+	$(CONFLIBDIR) $(INSTALL_APILIB_DIRECTORY)
+	-rm -f $(INSTALL_APILIB_DIRECTORY)/$(API_ARC)
+	-rm -f $(INSTALL_APILIB_DIRECTORY)/$(API_IMPLIB)
+	-rm -f $(INSTALL_APILIB_DIRECTORY)/$(API_IMPLIB_VERSIONED)
 	-rm -f $(INSTALL_PROGRAM_DIRECTORY)/$(API_DLL)
 
 uninstall-manpages:
@@ -577,12 +575,12 @@ uninstall-manpages:
 	-rm -f $(INSTALL_MAN3_DIRECTORY)/BRLAPI_*.3
 
 uninstall-headers:
-	-rm -f $(INSTALL_ROOT)$(includedir)/brlapi.h
-	-rm -f $(INSTALL_ROOT)$(includedir)/brlapi_*.h
-	-rm -f $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)/api.h
-	-rm -f $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)/brldefs.h
-	-rm -f $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)/brldefs-*.h
-	-[ ! -d $(INSTALL_ROOT)$(INCLUDE_DIRECTORY) ] || rmdir $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
+	-rm -f $(INSTALL_APIHDR_DIRECTORY)/brlapi.h
+	-rm -f $(INSTALL_APIHDR_DIRECTORY)/brlapi_*.h
+	-rm -f $(INSTALL_INCLUDE_DIRECTORY)/api.h
+	-rm -f $(INSTALL_INCLUDE_DIRECTORY)/brldefs.h
+	-rm -f $(INSTALL_INCLUDE_DIRECTORY)/brldefs-*.h
+	-[ ! -d $(INSTALL_INCLUDE_DIRECTORY) ] || rmdir $(INSTALL_INCLUDE_DIRECTORY)
 
 ###############################################################################
 
