@@ -339,10 +339,8 @@ int brlapi__getDisplaySize(brlapi_handle_t *handle, unsigned int *x, unsigned in
 /** Ask for some tty, with some key mechanism
  *
  * \param tty
- * - If tty>=0, application takes control of the specified tty;
- * - if tty==BRLAPI_TTY_DEFAULT, the library first tries to get the tty number from the WINDOWID
- * environment variable (for xterm case), then the CONTROLVT variable, and at
- * last reads /proc/self/stat (on linux).
+ * - If tty>=0 then take control of the specified tty.
+ * - If tty==::BRLAPI_TTY_DEFAULT then take control of the default tty.
  *
  * \param driverName tells how the application wants brlapi_readKey(3) to return
  * key presses. NULL or "" means BRLTTY commands are required,
@@ -369,6 +367,12 @@ int brlapi_enterTtyMode(int tty, const char *driverName);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
 int brlapi__enterTtyMode(brlapi_handle_t *handle, int tty, const char *driverName);
 
+/** Select the default tty.
+ *
+ * The library first tries to get the tty number from the WINDOWID environment variable (for the xterm case),
+ * then the CONTROLVT variable,
+ * and at last reads /proc/self/stat (on linux).
+ */
 #define BRLAPI_TTY_DEFAULT -1
 
 /* brlapi_enterTtyModeWithPath */
@@ -443,8 +447,8 @@ int brlapi__setFocus(brlapi_handle_t *handle, int tty);
  * default "C", in which case the charset is assumed to be 8bits, and the same
  * as the server's.
  *
- * \param cursor gives the cursor position; if equal to BRLAPI_CURSOR_OFF, no cursor is shown at
- * all; if cursor==BRLAPI_CURSOR_LEAVE, the cursor is left where it is
+ * \param cursor gives the cursor position; if equal to ::BRLAPI_CURSOR_OFF, no cursor is shown at
+ * all; if cursor==::BRLAPI_CURSOR_LEAVE, the cursor is left where it is
  *
  * \param str points to the string to be displayed.
  *
@@ -471,30 +475,38 @@ int brlapi__writeDots(brlapi_handle_t *handle, const unsigned char *dots);
 /* brlapi_writeStruct_t */
 /** Structure containing arguments to be given to brlapi_write(3) */
 typedef struct {
-  int displayNumber /** Display number BRLAPI_DISPLAY_DEFAULT == unspecified */;
+  int displayNumber /** Display number ::BRLAPI_DISPLAY_DEFAULT == unspecified */;
   unsigned int regionBegin /** Region of display to update, 1st character of display is 1 */;
   unsigned int regionSize /** Number of characters held in text, attrAnd and attrOr. */;
   char *text /** Text to display, must hold as many characters as the region fields expresses. */;
   int textSize /** Size of text in bytes. If -1, strlen() is used for computing it. */;
   unsigned char *attrAnd /** And attributes; applied first */;
   unsigned char *attrOr /** Or attributes; applied \e after ANDing */;
-  int cursor /** BRLAPI_CURSOR_LEAVE == don't touch, BRLAPI_CURSOR_OFF == turn off, 1 = 1st char of display, ... */;
+  int cursor /** ::BRLAPI_CURSOR_LEAVE == don't touch, ::BRLAPI_CURSOR_OFF == turn off, 1 = 1st char of display, ... */;
   char *charset /** Text charset. NULL means it is assumed to be 8bits, and the same as the server's. "" means current locale's charset. If no locale was selected, defaults to NULL's meaning. */;
 } brlapi_writeStruct_t;
 
+/** Write to the default display on the braille device.
+ */
 #define BRLAPI_DISPLAY_DEFAULT -1
+
+/** Do not change the cursor's state or position.
+ */
 #define BRLAPI_CURSOR_LEAVE -1
+
+/** Do not display the cursor.
+ */
 #define BRLAPI_CURSOR_OFF 0
 
 /* BRLAPI_WRITESTRUCT_INITIALIZER */
 /** Allows to initialize a structure of type \e brlapi_writeStruct_t *
  * with default values:
- * displayNumber = BRLAPI_DISPLAY_DEFAULT; (unspecified)
+ * displayNumber = ::BRLAPI_DISPLAY_DEFAULT; (unspecified)
  * regionBegin = regionSize = 0; (update the whole display, DEPRECATED and will
  * be forbidden in next release. You must always express the region you wish to
  * update)
  * text = attrAnd = attrOr = NULL; (no text, no attribute)
- * cursor = BRLAPI_CURSOR_LEAVE; (don't touch cursor)
+ * cursor = ::BRLAPI_CURSOR_LEAVE; (don't touch cursor)
 */
 #define BRLAPI_WRITESTRUCT_INITIALIZER { \
   .displayNumber = BRLAPI_DISPLAY_DEFAULT, \
@@ -1129,6 +1141,7 @@ int brlapi__writeWin(brlapi_handle_t *handle, const brlapi_writeStruct_t *s, int
 #define BRLCOMMANDS NULL
 #define BRL_KEYCODE_MAX BRLAPI_KEY_MAX
 
+#ifndef BRLAPI_NO_SINGLE_SESSION
 #define brlapi_initializeConnection brlapi_openConnection
 #define brlapi_getTty brlapi_enterTtyMode
 #define brlapi_getTtyPath brlapi_enterTtyModeWithPath
@@ -1139,6 +1152,7 @@ int brlapi__writeWin(brlapi_handle_t *handle, const brlapi_writeStruct_t *s, int
 #define brlapi_leaveRaw brlapi_leaveRawMode
 #define brlapi_suspend brlapi_suspendDriver
 #define brlapi_resume brlapi_resumeDriver
+#endif /* BRLAPI_NO_SINGLE_SESSION */
 
 #define BRLERR_SUCCESS                 BRLAPI_ERROR_SUCCESS
 #define BRLERR_NOMEM                   BRLAPI_ERROR_NOMEM
