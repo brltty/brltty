@@ -223,19 +223,19 @@ parseCursorOperand (Tcl_Interp *interp, Tcl_Obj *obj, int *cursor) {
 }
 
 typedef struct {
-  Tcl_Obj *tty;
+  int tty;
   const char *driver;
 } FunctionData_session_enterTtyMode;
-
-OPTION_HANDLER(session, enterTtyMode, keyCodes) {
-  FunctionData_session_enterTtyMode *options = data;
-  options->driver = NULL;
-  return TCL_OK;
-}
 
 OPTION_HANDLER(session, enterTtyMode, events) {
   FunctionData_session_enterTtyMode *options = data;
   options->driver = Tcl_GetString(objv[1]);
+  return TCL_OK;
+}
+
+OPTION_HANDLER(session, enterTtyMode, keyCodes) {
+  FunctionData_session_enterTtyMode *options = data;
+  options->driver = NULL;
   return TCL_OK;
 }
 
@@ -245,11 +245,35 @@ OPTION_HANDLER(session, enterTtyMode, tty) {
   const char *string = Tcl_GetString(obj);
 
   if (strcmp(string, "default") == 0) {
-    options->tty = NULL;
+    options->tty = BRLAPI_TTY_DEFAULT;
   } else {
-    options->tty = obj;
+    int result = Tcl_GetIntFromObj(interp, obj, &options->tty);
+    if (result != TCL_OK) return result;
   }
 
+  return TCL_OK;
+}
+
+typedef struct {
+  Tcl_Obj *path;
+  const char *driver;
+} FunctionData_session_enterTtyModeWithPath;
+
+OPTION_HANDLER(session, enterTtyModeWithPath, events) {
+  FunctionData_session_enterTtyModeWithPath *options = data;
+  options->driver = Tcl_GetString(objv[1]);
+  return TCL_OK;
+}
+
+OPTION_HANDLER(session, enterTtyModeWithPath, keyCodes) {
+  FunctionData_session_enterTtyModeWithPath *options = data;
+  options->driver = NULL;
+  return TCL_OK;
+}
+
+OPTION_HANDLER(session, enterTtyModeWithPath, path) {
+  FunctionData_session_enterTtyModeWithPath *options = data;
+  options->path = objv[1];
   return TCL_OK;
 }
 
@@ -329,15 +353,15 @@ typedef struct {
   int cursor;
 } FunctionData_session_writeText;
 
+OPTION_HANDLER(session, writeText, cursor) {
+  FunctionData_session_writeText *options = data;
+  return parseCursorOperand(interp, objv[1], &options->cursor);
+}
+
 OPTION_HANDLER(session, writeText, text) {
   FunctionData_session_writeText *options = data;
   options->text = objv[1];
   return TCL_OK;
-}
-
-OPTION_HANDLER(session, writeText, cursor) {
-  FunctionData_session_writeText *options = data;
-  return parseCursorOperand(interp, objv[1], &options->cursor);
 }
 
 static void
@@ -356,6 +380,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     "closeConnection",
     "enterRawMode",
     "enterTtyMode",
+    "enterTtyModeWithPath",
     "getAuth",
     "getDisplaySize",
     "getDriverId",
@@ -384,6 +409,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     FCN_closeConnection,
     FCN_enterRawMode,
     FCN_enterTtyMode,
+    FCN_enterTtyModeWithPath,
     FCN_getAuth,
     FCN_getDisplaySize,
     FCN_getDriverId,
@@ -526,19 +552,19 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
     case FCN_enterTtyMode: {
       FunctionData_session_enterTtyMode options = {
-        .tty = NULL,
+        .tty = BRLAPI_TTY_DEFAULT,
         .driver = NULL
       };
 
       BEGIN_OPTIONS
         {
-          OPTION(session, enterTtyMode, keyCodes),
-          OPERANDS(0, "")
+          OPTION(session, enterTtyMode, events),
+          OPERANDS(1, "<driver>")
         }
         ,
         {
-          OPTION(session, enterTtyMode, events),
-          OPERANDS(1, "<driver>")
+          OPTION(session, enterTtyMode, keyCodes),
+          OPERANDS(0, "")
         }
         ,
         {
@@ -547,35 +573,63 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
         }
       END_OPTIONS(2)
 
-      if (options.tty) {
-        Tcl_Obj **elements;
-        int count;
+      {
+        int result = brlapi__enterTtyMode(session->handle, options.tty, options.driver);
 
+        if (result == -1) {
+          setBrlapiError(interp);
+          return TCL_ERROR;
+        }
+
+        setIntResult(interp, result);
+        return TCL_OK;
+      }
+    }
+
+    case FCN_enterTtyModeWithPath: {
+      FunctionData_session_enterTtyModeWithPath options = {
+        .path = NULL,
+        .driver = NULL
+      };
+      Tcl_Obj **elements;
+      int count;
+
+      BEGIN_OPTIONS
         {
-          int result = Tcl_ListObjGetElements(interp, options.tty, &count, &elements);
+          OPTION(session, enterTtyModeWithPath, events),
+          OPERANDS(1, "<driver>")
+        }
+        ,
+        {
+          OPTION(session, enterTtyModeWithPath, keyCodes),
+          OPERANDS(0, "")
+        }
+        ,
+        {
+          OPTION(session, enterTtyModeWithPath, path),
+          OPERANDS(1, "<list>")
+        }
+      END_OPTIONS(2)
+
+      if (options.path) {
+        int result = Tcl_ListObjGetElements(interp, options.path, &count, &elements);
+        if (result != TCL_OK) return result;
+      } else {
+        count = 0;
+      }
+
+      if (count) {
+        int path[count];
+        int index;
+
+        for (index=0; index<count; ++index) {
+          int result = Tcl_GetIntFromObj(interp, elements[index], &path[index]);
           if (result != TCL_OK) return result;
         }
 
-        if (count) {
-          int ttys[count];
-          int index;
-
-          for (index=0; index<count; ++index) {
-            int result = Tcl_GetIntFromObj(interp, elements[index], &ttys[index]);
-            if (result != TCL_OK) return result;
-          }
-
-          if (brlapi__enterTtyModeWithPath(session->handle, ttys, count, options.driver) != -1) return TCL_OK;
-        } else if (brlapi__enterTtyModeWithPath(session->handle, NULL, 0, options.driver) != -1) {
-          return TCL_OK;
-        }
-      } else {
-        int result = brlapi__enterTtyMode(session->handle, BRLAPI_TTY_DEFAULT, options.driver);
-
-        if (result != -1) {
-          setIntResult(interp, result);
-          return TCL_OK;
-        }
+        if (brlapi__enterTtyModeWithPath(session->handle, path, count, options.driver) != -1) return TCL_OK;
+      } else if (brlapi__enterTtyModeWithPath(session->handle, NULL, 0, options.driver) != -1) {
+        return TCL_OK;
       }
 
       setBrlapiError(interp);
@@ -1059,15 +1113,15 @@ typedef struct {
   brlapi_connectionSettings_t settings;
 } FunctionData_general_connect;
 
-OPTION_HANDLER(general, openConnection, host) {
-  FunctionData_general_connect *options = data;
-  options->settings.host = Tcl_GetString(objv[1]);
-  return TCL_OK;
-}
-
 OPTION_HANDLER(general, openConnection, auth) {
   FunctionData_general_connect *options = data;
   options->settings.auth = Tcl_GetString(objv[1]);
+  return TCL_OK;
+}
+
+OPTION_HANDLER(general, openConnection, host) {
+  FunctionData_general_connect *options = data;
+  options->settings.host = Tcl_GetString(objv[1]);
   return TCL_OK;
 }
 
@@ -1110,13 +1164,13 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
       BEGIN_OPTIONS
         {
-          OPTION(general, openConnection, host),
-          OPERANDS(1, "<hostSpec>")
+          OPTION(general, openConnection, auth),
+          OPERANDS(1, "<file>")
         }
         ,
         {
-          OPTION(general, openConnection, auth),
-          OPERANDS(1, "<file>")
+          OPTION(general, openConnection, host),
+          OPERANDS(1, "<hostSpec>")
         }
       END_OPTIONS(2)
 
