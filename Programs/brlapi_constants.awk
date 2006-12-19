@@ -17,12 +17,15 @@
 
 BEGIN {
   writeHeaderPrologue("BRLAPI_INCLUDED_CONSTANTS", "brlapi.h")
-  beginDoxygenFile("BrlAPI Commans")
-  beginDoxygenGroup("brlapi_commands", "Defines for BrlAPI Commands")
+  beginDoxygenFile()
+  print "/** \\ingroup brlapi_keys"
+  print " * @{ */"
+  print ""
 }
 
 END {
-  endDoxygenGroup()
+  print "/** @} */"
+  print ""
   writeHeaderEpilogue()
 }
 
