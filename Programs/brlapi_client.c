@@ -1606,33 +1606,34 @@ typedef struct {
 static const brlapi_keyEntry_t brlapi_keyTable[] = {
 #include "brlapi_keytab.auto.h"
 
-  {.code = 0X0000U, .name = "LATIN1"},
-  {.code = 0X0100U, .name = "LATIN2"},
-  {.code = 0X0200U, .name = "LATIN3"},
-  {.code = 0X0300U, .name = "LATIN4"},
-  {.code = 0X0400U, .name = "KATAKANA"},
-  {.code = 0X0500U, .name = "ARABIC"},
-  {.code = 0X0600U, .name = "CYRILLIC"},
-  {.code = 0X0700U, .name = "GREEK"},
-  {.code = 0X0800U, .name = "TECHNICAL"},
-  {.code = 0X0900U, .name = "SPECIAL"},
-  {.code = 0X0A00U, .name = "PUBLISHING"},
-  {.code = 0X0B00U, .name = "APL"},
-  {.code = 0X0C00U, .name = "HEBREW"},
-  {.code = 0X0D00U, .name = "THAI"},
-  {.code = 0X0E00U, .name = "KOREAN"},
-  {.code = 0X1200U, .name = "LATIN8"},
-  {.code = 0X1300U, .name = "LATIN9"},
-  {.code = 0X1400U, .name = "ARMENIAN"},
-  {.code = 0X1500U, .name = "GEORGIAN"},
-  {.code = 0X1600U, .name = "CAUCASUS"},
-  {.code = 0X1E00U, .name = "VIETNAMESE"},
-  {.code = 0X2000U, .name = "CURRENCY"},
-  {.code = 0XFD00U, .name = "3270"},
-  {.code = 0XFE00U, .name = "XKB"},
-  {.code = 0X01000000U, .name = "UNICODE"},
+  {.code=0X0000U, .name="LATIN1"},
+  {.code=0X0100U, .name="LATIN2"},
+  {.code=0X0200U, .name="LATIN3"},
+  {.code=0X0300U, .name="LATIN4"},
+  {.code=0X0400U, .name="KATAKANA"},
+  {.code=0X0500U, .name="ARABIC"},
+  {.code=0X0600U, .name="CYRILLIC"},
+  {.code=0X0700U, .name="GREEK"},
+  {.code=0X0800U, .name="TECHNICAL"},
+  {.code=0X0900U, .name="SPECIAL"},
+  {.code=0X0A00U, .name="PUBLISHING"},
+  {.code=0X0B00U, .name="APL"},
+  {.code=0X0C00U, .name="HEBREW"},
+  {.code=0X0D00U, .name="THAI"},
+  {.code=0X0E00U, .name="KOREAN"},
+  {.code=0X1200U, .name="LATIN8"},
+  {.code=0X1300U, .name="LATIN9"},
+  {.code=0X1400U, .name="ARMENIAN"},
+  {.code=0X1500U, .name="GEORGIAN"},
+  {.code=0X1600U, .name="CAUCASUS"},
+  {.code=0X1E00U, .name="VIETNAMESE"},
+  {.code=0X2000U, .name="CURRENCY"},
+  {.code=0XFD00U, .name="3270"},
+  {.code=0XFE00U, .name="XKB"},
+  {.code=0XFF00, .name="MISCELLANY"},
+  {.code=0X01000000U, .name="UNICODE"},
 
-  {.name = NULL}
+  {.name=NULL}
 };
 
 static int
@@ -1695,60 +1696,77 @@ brlapi_describeKeyCode (brlapi_keyCode_t keyCode, brlapi_describedKeyCode_t *dkc
   int result = brlapi_expandKeyCode(keyCode, &ekc);
 
   if (result != -1) {
-    unsigned int code = ekc.type | ekc.command;
+    unsigned int codeWithoutArgument = ekc.type | ekc.command;
+    unsigned int codeWithArgument = codeWithoutArgument | ekc.argument;
+    const brlapi_keyEntry_t *keyWithoutArgument = NULL;
     const brlapi_keyEntry_t *key = brlapi_keyTable;
 
     while (key->name) {
-      if (code == key->code) {
-        dkc->command = key->name;
-        dkc->argument = ekc.argument;
-
-        switch (ekc.type) {
-          case BRLAPI_KEY_TYPE_SYM: dkc->type = "SYM";     break;
-          case BRLAPI_KEY_TYPE_CMD: dkc->type = "CMD";     break;
-          default:                  dkc->type = "UNKNOWN"; break;
-        }
-
-#define FLAG(name) if (keyCode & BRLAPI_KEY_FLG_##name) dkc->flag[dkc->flags++] = #name
-        dkc->flags = 0;
-        FLAG(UPPER);
-        FLAG(SHIFT);
-        FLAG(CONTROL);
-        FLAG(META);
-
-        switch (ekc.type) {
-          case BRLAPI_KEY_TYPE_CMD:
-            switch (ekc.command & BRLAPI_KEY_CMD_BLK_MASK) {
-              case 0:
-                FLAG(TOGGLE_ON);
-                FLAG(TOGGLE_OFF);
-                FLAG(ROUTE);
-                break;
-
-              case BRLAPI_KEY_CMD_GOTOLINE:
-                FLAG(LINE_SCALED);
-                FLAG(LINE_TOLEFT);
-                break;
-
-              case BRLAPI_KEY_CMD_PASSAT2:
-                FLAG(AT2_RELEASE);
-                FLAG(AT2_EXTENDED);
-                FLAG(AT2_KEYCODE);
-                break;
-            }
-            break;
-        }
-#undef FLAG
-
-        return result;
+      if (codeWithArgument == key->code) {
+        ekc.argument = 0;
+        goto found;
       }
+
+      if (codeWithoutArgument == key->code)
+        if (!keyWithoutArgument)
+          keyWithoutArgument = key;
 
       ++key;
     }
+
+    if (keyWithoutArgument) {
+      key = keyWithoutArgument;
+      goto found;
+    }
+
+    brlapi_errno = BRLAPI_ERROR_INVALID_PARAMETER;
+    result = -1;
+    goto done;
+
+  found:
+    dkc->command = key->name;
+    dkc->argument = ekc.argument;
+
+    switch (ekc.type) {
+      case BRLAPI_KEY_TYPE_SYM: dkc->type = "SYM";     break;
+      case BRLAPI_KEY_TYPE_CMD: dkc->type = "CMD";     break;
+      default:                  dkc->type = "UNKNOWN"; break;
+    }
+
+#define FLAG(name) if (keyCode & BRLAPI_KEY_FLG_##name) dkc->flag[dkc->flags++] = #name
+    dkc->flags = 0;
+    FLAG(UPPER);
+    FLAG(SHIFT);
+    FLAG(CONTROL);
+    FLAG(META);
+
+    switch (ekc.type) {
+      case BRLAPI_KEY_TYPE_CMD:
+        switch (ekc.command & BRLAPI_KEY_CMD_BLK_MASK) {
+          case 0:
+            FLAG(TOGGLE_ON);
+            FLAG(TOGGLE_OFF);
+            FLAG(ROUTE);
+            break;
+
+          case BRLAPI_KEY_CMD_GOTOLINE:
+            FLAG(LINE_SCALED);
+            FLAG(LINE_TOLEFT);
+            break;
+
+          case BRLAPI_KEY_CMD_PASSAT2:
+            FLAG(AT2_RELEASE);
+            FLAG(AT2_EXTENDED);
+            FLAG(AT2_KEYCODE);
+            break;
+        }
+        break;
+    }
+#undef FLAG
   }
 
-  brlapi_errno = BRLAPI_ERROR_INVALID_PARAMETER;
-  return -1;
+done:
+  return result;
 }
 
 /* XXX functions mustn't use brlapi_errno after this since it #undefs it XXX */
