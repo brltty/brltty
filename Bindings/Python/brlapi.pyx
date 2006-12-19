@@ -9,8 +9,8 @@ Example :
 import brlapi
 b = brlapi.Connection()
 b.enterTtyMode()
-b.ignoreKeyRange([0, brlapi.KEY_MAX])
-b.acceptKeyRange([brlapi.KEY_TYPE_SYM, brlapi.KEY_TYPE_SYM|brlapi.KEY_CODE_MASK])
+b.ignoreKeyRange(0, brlapi.KEY_MAX)
+b.acceptKeyRange(brlapi.KEY_TYPE_SYM, brlapi.KEY_TYPE_SYM|brlapi.KEY_CODE_MASK|brlapi.KEY_FLAGS_MASK)
 b.acceptKeySet([brlapi.KEY_CMD_LNUP, brlapi.KEY_CMD_LNDN|brlapi.KEY_FLAGS_MASK])
 b.writeText("Press any key to continue ... ¤")
 key = b.readKey()
@@ -465,7 +465,7 @@ cdef class Connection:
 		else:
 			return { "type":ekc.type, "command":ekc.command, "argument":ekc.argument, "flags":ekc.flags }
 	
-	def ignoreKeyRange(self, range):
+	def ignoreKeyRange(self, x, y):
 		"""Ignore some key presses from the braille keyboard.
 		See brlapi_ignoreKeyRange(3).
 
@@ -473,18 +473,18 @@ cdef class Connection:
 
 		Note: The given codes are either raw keycodes if some driver name was given to enterTtyMode(), or brltty commands if None or "" was given."""
 		cdef int retval
-		cdef unsigned long long x,y
-		x = range[0]
-		y = range[1]
+		cdef unsigned long long c_x,c_y
+		c_x = x
+		c_y = y
 		c_brlapi.Py_BEGIN_ALLOW_THREADS
-		retval = c_brlapi.brlapi__ignoreKeyRange(self.h, x, y)
+		retval = c_brlapi.brlapi__ignoreKeyRange(self.h, c_x, c_y)
 		c_brlapi.Py_END_ALLOW_THREADS
 		if retval == -1:
 			raise OperationError(returnerrno())
 		else:
 			return retval
 
-	def acceptKeyRange(self, range):
+	def acceptKeyRange(self, x, y):
 		"""Accept some key presses from the braille keyboard.
 		See brlapi_acceptKeyRange(3).
 
@@ -492,11 +492,11 @@ cdef class Connection:
 
 		Note: You shouldn't ask the server to give you key presses which are usually used to switch between TTYs, unless you really know what you are doing ! The given codes are either raw keycodes if some driver name was given to enterTtyMode(), or brltty commands if None or "" was given."""
 		cdef int retval
-		cdef unsigned long long x,y
-		x = range[0]
-		y = range[1]
+		cdef unsigned long long c_x,c_y
+		c_x = x
+		c_y = y
 		c_brlapi.Py_BEGIN_ALLOW_THREADS
-		retval = c_brlapi.brlapi__acceptKeyRange(self.h, x, y)
+		retval = c_brlapi.brlapi__acceptKeyRange(self.h, c_x, c_y)
 		c_brlapi.Py_END_ALLOW_THREADS
 		if retval == -1:
 			raise OperationError(returnerrno())
@@ -551,16 +551,16 @@ cdef class Connection:
 		else:
 			return retval
 
-	def enterRawMode(self, drivername):
+	def enterRawMode(self, driverName):
 		"""Switch to Raw mode
 		See brlapi_enterRawMode(3).
 		
 		* driver : Specifies the name of the driver for which the raw communication will be established"""
 		cdef int retval
-		cdef char *c_drivername
-		c_drivername = drivername
+		cdef char *c_driverName
+		c_driverName = driverName
 		c_brlapi.Py_BEGIN_ALLOW_THREADS
-		retval = c_brlapi.brlapi__enterRawMode(self.h, c_drivername)
+		retval = c_brlapi.brlapi__enterRawMode(self.h, c_driverName)
 		c_brlapi.Py_END_ALLOW_THREADS
 		if retval == -1:
 			raise OperationError(returnerrno())
