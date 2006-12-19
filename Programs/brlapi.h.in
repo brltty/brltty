@@ -707,32 +707,40 @@ typedef uint64_t brlapi_keyCode_t;
 /* brlapi_expandedKeyCode_t */
 /** Structure holding the components of a key code as returned by brlapi_expandKeyCode() */
 typedef struct {
-  unsigned int type /** the type part */;
-  unsigned int command /** the command part */;
-  unsigned int argument /** the argument part */;
-  unsigned int flags /** the flags part */;
+  unsigned int type /** the type value */;
+  unsigned int command /** the command value */;
+  unsigned int argument /** the argument value */;
+  unsigned int flags /** the flags value */;
 } brlapi_expandedKeyCode_t;
 
 /* brlapi_expandKeyCode */
-/** Expand a keycode into command, argument and flags parts
+/** Expand the components of a key code
  *
- * This function returns one key press's code.
+ * \param keyCode the key code to be expanded
+ * \param ekc pointer to the structure that receives the components
  *
- * \param keyCode is the keycode to be expanded ;
- * \param ekc points to the structure that will receive the individual components of the keycode
- *
- * \return 0 on success, -1 on error.
+ * \return 0 on success, -1 on error
  */
-extern int brlapi_expandKeyCode (brlapi_keyCode_t keyCode, brlapi_expandedKeyCode_t *ekc);
+int brlapi_expandKeyCode (brlapi_keyCode_t keyCode, brlapi_expandedKeyCode_t *ekc);
 
+/* brlapi_describedKeyCode_t */
+/** Structure holding the components of a key code as returned by brlapi_describeKeyCode() */
 typedef struct {
-  const char *type;
-  const char *command;
-  unsigned int argument;
-  unsigned int flags;
-  const char *flag[64 - BRLAPI_KEY_FLAGS_SHIFT];
+  const char *type /** the  type name */;
+  const char *command /** the command name */;
+  unsigned int argument /** the argument value */;
+  unsigned int flags /** the flag count */;
+  const char *flag[64 - BRLAPI_KEY_FLAGS_SHIFT] /** the flag names */;
 } brlapi_describedKeyCode_t;
 
+/* brlapi_describeKeyCode */
+/** Describe the components of a key code.
+ *
+ * \param keyCode the keycode to be described
+ * \param dkc pointer to the structure that receives the description
+ *
+ * \return 0 on success, -1 on error
+ */
 int brlapi_describeKeyCode (brlapi_keyCode_t keyCode, brlapi_describedKeyCode_t *dkc);
 
 /** Unicode braille row */
