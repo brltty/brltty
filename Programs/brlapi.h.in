@@ -606,7 +606,7 @@ int brlapi__write(brlapi_handle_t *handle, const brlapi_writeStruct_t *s);
  * 
  * For a braille command, bits 28-16 (BRLAPI_KEY_CMD_BLK_MASK) hold the braille
  * command number, while bits 15-0 (BRLAPI_KEY_CMD_ARG_MASK) hold the command
- * value. See brlapi_commands for command descriptions.
+ * value.
  *
  * For a X keysym, if it is a unicode keysym (0x1uvwxyz), then the command
  * number part is 0x1000000 and the value part is 0xuvwxyz. Else, the command
@@ -731,6 +731,7 @@ typedef struct {
   unsigned int argument /** the argument value */;
   unsigned int flags /** the flag count */;
   const char *flag[64 - BRLAPI_KEY_FLAGS_SHIFT] /** the flag names */;
+  brlapi_expandedKeyCode_t values /** the actual values of the components */;
 } brlapi_describedKeyCode_t;
 
 /* brlapi_describeKeyCode */

@@ -1696,14 +1696,15 @@ brlapi_describeKeyCode (brlapi_keyCode_t keyCode, brlapi_describedKeyCode_t *dkc
   int result = brlapi_expandKeyCode(keyCode, &ekc);
 
   if (result != -1) {
+    unsigned int argument = ekc.argument;
     unsigned int codeWithoutArgument = ekc.type | ekc.command;
-    unsigned int codeWithArgument = codeWithoutArgument | ekc.argument;
+    unsigned int codeWithArgument = codeWithoutArgument | argument;
     const brlapi_keyEntry_t *keyWithoutArgument = NULL;
     const brlapi_keyEntry_t *key = brlapi_keyTable;
 
     while (key->name) {
       if (codeWithArgument == key->code) {
-        ekc.argument = 0;
+        argument = 0;
         goto found;
       }
 
@@ -1725,7 +1726,8 @@ brlapi_describeKeyCode (brlapi_keyCode_t keyCode, brlapi_describedKeyCode_t *dkc
 
   found:
     dkc->command = key->name;
-    dkc->argument = ekc.argument;
+    dkc->argument = argument;
+    dkc->values = ekc;
 
     switch (ekc.type) {
       case BRLAPI_KEY_TYPE_SYM: dkc->type = "SYM";     break;
