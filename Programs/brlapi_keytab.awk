@@ -42,7 +42,7 @@ function brlDot(number, symbol, value, help) {
 }
 
 function writeSimpleKey(type, name) {
-  writeComplexKey(name, "BRLAPI_KEY_" type "_" name)
+  writeComplexKey(name, "(BRLAPI_KEY_TYPE_" type " | BRLAPI_KEY_" type "_" name ")")
 }
 
 function writeComplexKey(name, code) {

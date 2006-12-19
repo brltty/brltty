@@ -725,7 +725,15 @@ typedef struct {
  */
 extern int brlapi_expandKeyCode (brlapi_keyCode_t keyCode, brlapi_expandedKeyCode_t *ekc);
 
-extern const char *brlapi_getKeyName (unsigned int command, unsigned int argument);
+typedef struct {
+  const char *type;
+  const char *command;
+  unsigned int argument;
+  unsigned int flags;
+  const char *flag[64 - BRLAPI_KEY_FLAGS_SHIFT];
+} brlapi_describedKeyCode_t;
+
+int brlapi_describeKeyCode (brlapi_keyCode_t keyCode, brlapi_describedKeyCode_t *dkc);
 
 /** Unicode braille row */
 #define BRLAPI_UC_ROW	0x2800UL

@@ -1689,18 +1689,66 @@ brlapi_expandKeyCode (brlapi_keyCode_t keyCode, brlapi_expandedKeyCode_t *ekc) {
   return -1;
 }
 
-const char *
-brlapi_getKeyName (unsigned int command, unsigned int argument) {
-  unsigned int code = command | argument;
-  const brlapi_keyEntry_t *key = brlapi_keyTable;
+int
+brlapi_describeKeyCode (brlapi_keyCode_t keyCode, brlapi_describedKeyCode_t *dkc) {
+  brlapi_expandedKeyCode_t ekc;
+  int result = brlapi_expandKeyCode(keyCode, &ekc);
 
-  while (key->name) {
-    if ((command == key->code) || (code == key->code)) return key->name;
-    ++key;
+  if (result != -1) {
+    unsigned int code = ekc.type | ekc.command;
+    const brlapi_keyEntry_t *key = brlapi_keyTable;
+
+    while (key->name) {
+      if (code == key->code) {
+        dkc->command = key->name;
+        dkc->argument = ekc.argument;
+
+        switch (ekc.type) {
+          case BRLAPI_KEY_TYPE_SYM: dkc->type = "SYM";     break;
+          case BRLAPI_KEY_TYPE_CMD: dkc->type = "CMD";     break;
+          default:                  dkc->type = "UNKNOWN"; break;
+        }
+
+#define FLAG(name) if (keyCode & BRLAPI_KEY_FLG_##name) dkc->flag[dkc->flags++] = #name
+        dkc->flags = 0;
+        FLAG(UPPER);
+        FLAG(SHIFT);
+        FLAG(CONTROL);
+        FLAG(META);
+
+        switch (ekc.type) {
+          case BRLAPI_KEY_TYPE_CMD:
+            switch (ekc.command & BRLAPI_KEY_CMD_BLK_MASK) {
+              case 0:
+                FLAG(TOGGLE_ON);
+                FLAG(TOGGLE_OFF);
+                FLAG(ROUTE);
+                break;
+
+              case BRLAPI_KEY_CMD_GOTOLINE:
+                FLAG(LINE_SCALED);
+                FLAG(LINE_TOLEFT);
+                break;
+
+              case BRLAPI_KEY_CMD_PASSAT2:
+                FLAG(AT2_RELEASE);
+                FLAG(AT2_EXTENDED);
+                FLAG(AT2_KEYCODE);
+                break;
+            }
+            break;
+        }
+#undef FLAG
+
+        return result;
+      }
+
+      ++key;
+    }
   }
 
   brlapi_errno = BRLAPI_ERROR_INVALID_PARAMETER;
-  return NULL;
+  return -1;
 }
 
 /* XXX functions mustn't use brlapi_errno after this since it #undefs it XXX */
