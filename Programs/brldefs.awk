@@ -124,21 +124,9 @@ function makeDoxygenComment(text) {
   return "/** " text " */"
 }
 
-function beginDoxygenFile(brief) {
+function beginDoxygenFile() {
   print "/** \\file"
-  print " * \\brief " brief
   print " */"
-  print ""
-}
-
-function beginDoxygenGroup(name, brief) {
-  print "/** \\defgroup " name " " brief
-  print " * @{ */"
-  print ""
-}
-
-function endDoxygenGroup() {
-  print "/** @} */"
   print ""
 }
 
