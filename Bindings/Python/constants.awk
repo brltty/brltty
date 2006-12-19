@@ -16,7 +16,7 @@
 ###############################################################################
 
 function brlCommand(name, symbol, value, help) {
-  writeCommandDefinition(name, value)
+  writeCommandDefinition(name, value, help)
 }
 
 function brlBlock(name, symbol, value, help) {
@@ -24,7 +24,7 @@ function brlBlock(name, symbol, value, help) {
   if (name == "PASSKEY") return
 
   if (value ~ /^0[xX][0-9a-fA-F]+00$/) {
-    writeCommandDefinition(name, tolower(value) "00")
+    writeCommandDefinition(name, tolower(value) "00", help)
   }
 }
 
@@ -44,29 +44,29 @@ function brlFlag(name, symbol, value, help) {
   } else {
     return
   }
-  writePythonAssignment("KEY_FLG_" name, value)
+  writePythonAssignment("KEY_FLG_" name, value, help)
 }
 
 function brlDot(number, symbol, value, help) {
-  writePythonAssignment("DOT" number, value)
+  writePythonAssignment("DOT" number, value, help)
 }
 
 function apiConstant(name, symbol, value, help) {
-  writePythonAssignment(name, value)
+  writePythonAssignment(name, value, help)
 }
 
 function apiMask(name, symbol, value, help) {
-  writePythonAssignment("KEY_" name, "c_brlapi." symbol)
+  writePythonAssignment("KEY_" name, "c_brlapi." symbol, help)
 }
 
 function apiShift(name, symbol, value, help) {
   value = hexadecimalValue(value)
-  writePythonAssignment("KEY_" name, value)
+  writePythonAssignment("KEY_" name, value, help)
 }
 
 function apiType(name, symbol, value, help) {
   value = hexadecimalValue(value)
-  writePythonAssignment("KEY_TYPE_" name, value)
+  writePythonAssignment("KEY_TYPE_" name, value, help)
 }
 
 function apiKey(name, symbol, value, help) {
@@ -74,22 +74,24 @@ function apiKey(name, symbol, value, help) {
 
   if (name == "FUNCTION") {
     for (i=0; i<35; ++i) {
-      writeKeyDefinition("F" (i+1), "(" value " + " i ")")
+      key = "F" (i+1)
+      writeKeyDefinition(key, "(" value " + " i ")", "the " key " key")
     }
   } else {
-    writeKeyDefinition(name, value)
+    writeKeyDefinition(name, value, help)
   }
 }
 
-function writeCommandDefinition(name, value) {
-  writePythonAssignment("KEY_CMD_" name, value)
+function writeCommandDefinition(name, value, help) {
+  writePythonAssignment("KEY_CMD_" name, value, help)
 }
 
-function writeKeyDefinition(name, value) {
-  writePythonAssignment("KEY_SYM_" name, value)
+function writeKeyDefinition(name, value, help) {
+  writePythonAssignment("KEY_SYM_" name, value, help)
 }
 
-function writePythonAssignment(name, value) {
+function writePythonAssignment(name, value, help) {
+  if (length(help) > 0) print "## " help
   print name " = " value
 }
 
