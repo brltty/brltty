@@ -319,12 +319,12 @@ again:
   if (doread) {
     do {
       res = brlapi__doWaitForPacket(handle, expectedPacketType, packet, size);
-    } while (loop && res == -1 && brlapi_errno == BRLAPI_ERROR_LIBCERR && (
+    } while (loop && (res == -3 || (res == -1 && brlapi_errno == BRLAPI_ERROR_LIBCERR && (
 	  brlapi_libcerrno == EINTR ||
 #ifdef EWOULDBLOCK
 	  brlapi_libcerrno == EWOULDBLOCK ||
 #endif /* EWOULDBLOCK */
-	  brlapi_libcerrno == EAGAIN));
+	  brlapi_libcerrno == EAGAIN))));
     pthread_mutex_lock(&handle->read_mutex);
     if (handle->altSem) {
       *handle->altRes = -3; /* no packet for him */
