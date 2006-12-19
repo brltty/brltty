@@ -2297,7 +2297,7 @@ brlapi_keyCode_t coreToClient(unsigned long keycode, int how) {
         code = wc;
       else
         /* unicode character */
-        code = BRLAPI_KEY_SYM_UC | wc;
+        code = BRLAPI_KEY_SYM_UNICODE | wc;
       break;
     }
     case BRL_BLK_PASSKEY:
