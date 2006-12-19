@@ -1128,18 +1128,18 @@ OPTION_HANDLER(general, openConnection, host) {
 static int
 brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
   static const char *functions[] = {
+    "describeKeyCode",
     "expandKeyCode",
     "getHandleSize",
-    "getKeyName",
     "makeDots",
     "openConnection",
     NULL
   };
 
   typedef enum {
+    FCN_describeKeyCode,
     FCN_expandKeyCode,
     FCN_getHandleSize,
-    FCN_getKeyName,
     FCN_makeDots,
     FCN_openConnection
   } Function;
@@ -1229,37 +1229,45 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
       return TCL_OK;
     }
 
-    case FCN_getKeyName: {
-      int command, argument;
+    case FCN_describeKeyCode: {
+      Tcl_WideInt keyCode;
+      brlapi_describedKeyCode_t dkc;
+      const char *array;
 
-      if ((objc < 3) || (objc > 4)) {
-        Tcl_WrongNumArgs(interp, 2, objv, "<command> [<argument>]");
+      if (objc != 4) {
+        Tcl_WrongNumArgs(interp, 2, objv, "<keyCode> <arrayName>");
         return TCL_ERROR;
       }
 
       {
-        int result = Tcl_GetIntFromObj(interp, objv[2], &command);
+        int result = Tcl_GetWideIntFromObj(interp, objv[2], &keyCode);
         if (result != TCL_OK) return result;
       }
 
-      if (objc < 4) {
-        argument = 0;
-      } else {
-        int result = Tcl_GetIntFromObj(interp, objv[3], &argument);
-        if (result != TCL_OK) return result;
+      if (!(array = Tcl_GetString(objv[3]))) return TCL_ERROR;
+
+      if (brlapi_describeKeyCode(keyCode, &dkc) == -1) {
+        setBrlapiError(interp);
+        return TCL_ERROR;
       }
+
+      SET_ARRAY_ELEMENT("type", Tcl_NewStringObj(dkc.type, -1));
+      SET_ARRAY_ELEMENT("command", Tcl_NewStringObj(dkc.command, -1));
+      SET_ARRAY_ELEMENT("argument", Tcl_NewIntObj(dkc.argument));
 
       {
-        const char *name = brlapi_getKeyName(command, argument);
+        Tcl_Obj *flags = Tcl_NewListObj(0, NULL);
+        SET_ARRAY_ELEMENT("flags", flags);
 
-        if (!name) {
-          setBrlapiError(interp);
-          return TCL_ERROR;
+        {
+          int index;
+          for (index=0; index<dkc.flags; ++index) {
+            Tcl_ListObjAppendElement(interp, flags, Tcl_NewStringObj(dkc.flag[index], -1));
+          }
         }
-
-        setStringResult(interp, name, -1);
-        return TCL_OK;
       }
+
+      return TCL_OK;
     }
 
     case FCN_makeDots: {
