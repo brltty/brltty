@@ -576,7 +576,7 @@ int brlapi__write(brlapi_handle_t *handle, const brlapi_writeStruct_t *s);
 /** \defgroup brlapi_keys Reading key presses
  * \brief How to read key presses from the braille terminal
  *
- * Once brlapi_enterTtyMode() is called, the application can call brlapi_readKey() to
+ * Once brlapi_enterTtyMode() has been called, the application can call brlapi_readKey() to
  * read key presses. Either key codes or commands will be returned, depending
  * on parameters given to brlapi_enterTtyMode().
  *
@@ -592,7 +592,7 @@ int brlapi__write(brlapi_handle_t *handle, const brlapi_writeStruct_t *s);
  * parts:
  *
  * - bits 63-32 (BRLAPI_KEY_FLAGS_MASK), flags: bits 39-32 are standard X
- * modifiers (shift, control, meta, ...). Other flags are use for some commands,
+ * modifiers (shift, control, meta, ...). Other flags are used for some commands,
  * see documentation of BRLAPI_KEY_FLG_* for their respective uses.
  * - bits 31-29 (BRLAPI_KEY_TYPE_MASK), key type: either BRLAPI_KEY_TYPE_CMD for
  * braille commands, or BRLAPI_KEY_TYPE_SYM for standard X keysyms.
