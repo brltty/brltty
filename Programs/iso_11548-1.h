@@ -48,24 +48,24 @@ extern "C" {
 #define BRL_DOT7 BRL_DOT(7) /* lower-left dot of computer braille cell */
 #define BRL_DOT8 BRL_DOT(8) /* lower-right dot of computer braille cell */
 
-typedef unsigned char BrlCell;
+typedef unsigned char BrlDots;
 
-static inline BrlCell brlDotNumberToBit (char number) {
+static inline BrlDots brlNumberToDot (char number) {
   return ((number >= '1') && (number <= '8'))? BRL_DOT(number - '0'): 0;
 }
 
-static inline char brlDotBitToNumber (BrlCell bit) {
-  int shift = ffs(bit);
+static inline char brlDotToNumber (BrlDots dot) {
+  int shift = ffs(dot);
   return shift? (shift + '0'): 0;
 }
 
 typedef char BrlDotNumbersBuffer[9];
 
-static inline unsigned int brlDotBitsToNumbers (BrlCell cell, BrlDotNumbersBuffer numbers) {
+static inline unsigned int brlDotsToNumbers (BrlDots dots, BrlDotNumbersBuffer numbers) {
   char *number = numbers;
-  while (cell) {
-    int shift = ffs(cell) - 1;
-    cell -= 1 << shift;
+  while (dots) {
+    int shift = ffs(dots) - 1;
+    dots -= 1 << shift;
     *number++ = shift + '1';
   }
   *number = 0;

@@ -1285,11 +1285,11 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
       }
 
       if (elementCount) {
-        unsigned char cells[elementCount];
+        BrlDots cells[elementCount];
         int elementIndex;
 
         for (elementIndex=0; elementIndex<elementCount; ++elementIndex) {
-          unsigned char *cell = &cells[elementIndex];
+          BrlDots *cell = &cells[elementIndex];
           Tcl_Obj *element = elements[elementIndex];
           int numberCount;
           const char *numbers = Tcl_GetStringFromObj(element, &numberCount);
@@ -1298,20 +1298,20 @@ brlapiGeneralCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
           if ((numberCount != 1) || (numbers[0] != '0')) {
             int numberIndex;
             for (numberIndex=0; numberIndex<numberCount; ++numberIndex) {
-              unsigned char number = numbers[numberIndex];
-              BrlCell bit = brlDotNumberToBit(number);
+              char number = numbers[numberIndex];
+              BrlDots dot = brlNumberToDot(number);
 
-              if (!bit) {
+              if (!dot) {
                 setStringResult(interp, "invalid dot number", -1);
                 return TCL_ERROR;
               }
 
-              if (*cell & bit) {
+              if (*cell & dot) {
                 setStringResult(interp, "duplicate dot number", -1);
                 return TCL_ERROR;
               }
 
-              *cell |= bit;
+              *cell |= dot;
             }
           }
         }
