@@ -59,6 +59,19 @@ static inline char brlDotBitToNumber (BrlCell bit) {
   return shift? (shift + '0'): 0;
 }
 
+typedef char BrlDotNumbersBuffer[9];
+
+static inline unsigned int brlDotBitsToNumbers (BrlCell cell, BrlDotNumbersBuffer numbers) {
+  char *number = numbers;
+  while (cell) {
+    int shift = ffs(cell) - 1;
+    cell -= 1 << shift;
+    *number++ = shift + '1';
+  }
+  *number = 0;
+  return number - numbers;
+}
+
 /* The Unicode row used for literal braille dot representations. */
 #define BRL_UNICODE_ROW 0X2800
 
