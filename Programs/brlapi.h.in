@@ -678,11 +678,15 @@ typedef uint64_t brlapi_keyCode_t;
 /** Shift for code of brlapi_keyCode_t */
 #define BRLAPI_KEY_CODE_SHIFT		0
 
-#define BRLAPI_KEY_CMD(v)		((v) << 16)
 /** Mask for braille command type */
 #define BRLAPI_KEY_CMD_BLK_MASK		UINT64_C(0X1FFF0000)
+/** Shift for braille command type */
+#define BRLAPI_KEY_CMD_BLK_SHIFT	16
 /** Mask for braille command value */
 #define BRLAPI_KEY_CMD_ARG_MASK		UINT64_C(0X0000FFFF)
+/** Shift for braille command value */
+#define BRLAPI_KEY_CMD_ARG_SHIFT	0
+#define BRLAPI_KEY_CMD(v)		((v) << BRLAPI_KEY_CMD_BLK_SHIFT)
 
 /** Standard X keysyms */
 #define BRLAPI_KEY_SYM_BACKSPACE	UINT64_C(0X0000FF08)
