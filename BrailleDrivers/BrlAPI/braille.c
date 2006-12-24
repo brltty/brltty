@@ -22,6 +22,7 @@
 
 #include "Programs/misc.h"
 #include "Programs/scr.h"
+#include "Programs/cmd.h"
 
 #define BRLAPI_NO_DEPRECATED
 #include "Programs/brlapi.h"
@@ -166,11 +167,11 @@ static void brl_writeStatus(BrailleDisplay *brl, const unsigned char *s)
 /* Reads a command from the braille keyboard */
 static int brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context)
 {
-  brlapi_keyCode_t command;
+  brlapi_keyCode_t keycode;
   if (restart) return BRL_CMD_RESTARTBRL;
-  switch (brlapi_readKey(0, &command)) {
+  switch (brlapi_readKey(0, &keycode)) {
     case 0: return EOF;
-    case 1: return command;
+    case 1: return cmdBrlapiToBrltty(keycode);
     default: return BRL_CMD_RESTARTBRL;
   }
 }

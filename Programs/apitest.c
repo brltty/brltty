@@ -179,59 +179,7 @@ void enterLearnMode(void)
 
   while ((res = brlapi_readKey(1, &code)) != -1) {
     fprintf(stderr, "got key %016"BRLAPI_PRIxKEYCODE"\n",code);
-    switch (code & BRLAPI_KEY_TYPE_MASK) {
-    case BRLAPI_KEY_TYPE_CMD:
-      cmd = ((code&BRLAPI_KEY_CMD_BLK_MASK)>>8)|(code&BRLAPI_KEY_CMD_ARG_MASK);
-      break;
-    case BRLAPI_KEY_TYPE_SYM: {
-        unsigned long keysym;
-        keysym = code & BRLAPI_KEY_CODE_MASK;
-	switch (keysym) {
-	case BRLAPI_KEY_SYM_BACKSPACE: cmd=BRL_BLK_PASSKEY|BRL_KEY_BACKSPACE; break;
-	case BRLAPI_KEY_SYM_TAB: cmd=BRL_BLK_PASSKEY|BRL_KEY_TAB; break;
-	case BRLAPI_KEY_SYM_LINEFEED: cmd=BRL_BLK_PASSKEY|BRL_KEY_ENTER; break;
-	case BRLAPI_KEY_SYM_ESCAPE: cmd=BRL_BLK_PASSKEY|BRL_KEY_ESCAPE; break;
-	case BRLAPI_KEY_SYM_HOME: cmd=BRL_BLK_PASSKEY|BRL_KEY_HOME; break;
-	case BRLAPI_KEY_SYM_LEFT: cmd=BRL_BLK_PASSKEY|BRL_KEY_CURSOR_LEFT; break;
-	case BRLAPI_KEY_SYM_UP: cmd=BRL_BLK_PASSKEY|BRL_KEY_CURSOR_UP; break;
-	case BRLAPI_KEY_SYM_RIGHT: cmd=BRL_BLK_PASSKEY|BRL_KEY_CURSOR_RIGHT; break;
-	case BRLAPI_KEY_SYM_DOWN: cmd=BRL_BLK_PASSKEY|BRL_KEY_CURSOR_DOWN; break;
-	case BRLAPI_KEY_SYM_PAGE_UP: cmd=BRL_BLK_PASSKEY|BRL_KEY_PAGE_UP; break;
-	case BRLAPI_KEY_SYM_PAGE_DOWN: cmd=BRL_BLK_PASSKEY|BRL_KEY_PAGE_DOWN; break;
-	case BRLAPI_KEY_SYM_END: cmd=BRL_BLK_PASSKEY|BRL_KEY_END; break;
-	case BRLAPI_KEY_SYM_INSERT: cmd=BRL_BLK_PASSKEY|BRL_KEY_INSERT; break;
-	case BRLAPI_KEY_SYM_DELETE: cmd=BRL_BLK_PASSKEY|BRL_KEY_DELETE; break;
-	default:
-	  if (keysym < 0x100)
-	    cmd = BRL_BLK_PASSCHAR|keysym;
-	  else if (keysym >= BRLAPI_KEY_SYM_FUNCTION && keysym <= BRLAPI_KEY_SYM_FUNCTION + 34)
-	    cmd = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION + keysym - BRLAPI_KEY_SYM_FUNCTION);
-	  else {
-	    fprintf(stderr,"unknown code %"BRLAPI_PRIxKEYCODE"\n", code);
-	    cmd = -1;
-	  }
-	  break;
-	}
-	break;
-      }
-    default:
-      fprintf(stderr,"unknown code %"BRLAPI_PRIxKEYCODE, code);
-      cmd = -1;
-      break;
-    }
-    cmd = cmd
-    | (code & BRLAPI_KEY_FLG_TOGGLE_ON		? BRL_FLG_TOGGLE_ON	: 0)
-    | (code & BRLAPI_KEY_FLG_TOGGLE_OFF		? BRL_FLG_TOGGLE_OFF	: 0)
-    | (code & BRLAPI_KEY_FLG_ROUTE		? BRL_FLG_ROUTE		: 0)
-    | (code & BRLAPI_KEY_FLG_REPEAT_INITIAL	? BRL_FLG_REPEAT_INITIAL: 0)
-    | (code & BRLAPI_KEY_FLG_REPEAT_DELAY	? BRL_FLG_REPEAT_DELAY	: 0)
-    | (code & BRLAPI_KEY_FLG_LINE_SCALED	? BRL_FLG_LINE_SCALED	: 0)
-    | (code & BRLAPI_KEY_FLG_LINE_TOLEFT	? BRL_FLG_LINE_TOLEFT	: 0)
-    | (code & BRLAPI_KEY_FLG_CONTROL		? BRL_FLG_CHAR_CONTROL	: 0)
-    | (code & BRLAPI_KEY_FLG_META		? BRL_FLG_CHAR_META	: 0)
-    | (code & BRLAPI_KEY_FLG_UPPER		? BRL_FLG_CHAR_UPPER	: 0)
-    | (code & BRLAPI_KEY_FLG_SHIFT		? BRL_FLG_CHAR_SHIFT	: 0)
-      ;
+    cmd = cmdBrlapiToBrltty(code);
     describeCommand(cmd, buf, sizeof(buf));
     brlapi_writeText(0, buf);
     fprintf(stderr, "%s\n", buf);

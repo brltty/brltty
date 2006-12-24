@@ -46,8 +46,8 @@ $(ALL_CLASSES): $(SRC_DIR)/*.java BrlapiConstants.class
 BrlapiConstants.class: BrlapiConstants.java
 	$(JAVAC) BrlapiConstants.java
 
-BrlapiConstants.java: $(API_HDR) $(API_AWK) $(BRL_HDR) $(BRL_AWK) $(SRC_DIR)/constants.awk
-	$(AWK) -f $(API_AWK) -f $(BRL_AWK) -f $(SRC_DIR)/constants.awk $(API_HDR) $(BRL_HDR) >$@
+BrlapiConstants.java: $(CONSTANTS_SCRIPTS) $(CONSTANTS_SOURCES)
+	$(AWK) $(CONSTANTS_OPTIONS) $(CONSTANTS_SOURCES) >$@
 
 doc: javadoc.made
 

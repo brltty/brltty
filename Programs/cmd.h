@@ -20,6 +20,8 @@
 
 #include <sys/time.h>
 
+#include "Programs/brlapi_keycodes.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -42,6 +44,9 @@ typedef struct {
 } RepeatState;
 extern void resetRepeatState (RepeatState *state);
 extern void handleRepeatFlags (int *command, RepeatState *state, int panning, int delay, int interval);
+
+extern brlapi_keyCode_t cmdBrlttyToBrlapi (int command);
+extern int cmdBrlapiToBrltty (brlapi_keyCode_t code);
 
 #ifdef __cplusplus
 }

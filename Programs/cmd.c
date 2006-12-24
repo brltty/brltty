@@ -24,6 +24,8 @@
 #include "brldefs.h"
 #include "cmd.h"
 
+#include "Programs/charset.h"
+
 const CommandEntry commandTable[] = {
 #ifdef ENABLE_LEARN_MODE
   #include "cmds.auto.h"
@@ -210,4 +212,127 @@ handleRepeatFlags (int *command, RepeatState *state, int panning, int delay, int
       *command &= ~BRL_FLG_REPEAT_MASK;
     }
   }
+}
+
+brlapi_keyCode_t
+cmdBrlttyToBrlapi (int command) {
+  brlapi_keyCode_t code;
+  switch (command & BRL_MSK_BLK) {
+  case BRL_BLK_PASSCHAR: {
+    wchar_t wc = convertCharToWchar(command & BRL_MSK_ARG);
+    if (wc < 0x100)
+      /* latin1 character */
+      code = wc;
+    else
+      /* unicode character */
+      code = BRLAPI_KEY_SYM_UNICODE | wc;
+    break;
+  }
+  case BRL_BLK_PASSKEY:
+    switch (command & BRL_MSK_ARG) {
+    case BRL_KEY_ENTER:		code = BRLAPI_KEY_SYM_LINEFEED;	 break;
+    case BRL_KEY_TAB:		code = BRLAPI_KEY_SYM_TAB;	 break;
+    case BRL_KEY_BACKSPACE:	code = BRLAPI_KEY_SYM_BACKSPACE; break;
+    case BRL_KEY_ESCAPE:	code = BRLAPI_KEY_SYM_ESCAPE;	 break;
+    case BRL_KEY_CURSOR_LEFT:	code = BRLAPI_KEY_SYM_LEFT;	 break;
+    case BRL_KEY_CURSOR_RIGHT:	code = BRLAPI_KEY_SYM_RIGHT;	 break;
+    case BRL_KEY_CURSOR_UP:	code = BRLAPI_KEY_SYM_UP;	 break;
+    case BRL_KEY_CURSOR_DOWN:	code = BRLAPI_KEY_SYM_DOWN;	 break;
+    case BRL_KEY_PAGE_UP:	code = BRLAPI_KEY_SYM_PAGE_UP;	 break;
+    case BRL_KEY_PAGE_DOWN:	code = BRLAPI_KEY_SYM_PAGE_DOWN; break;
+    case BRL_KEY_HOME:		code = BRLAPI_KEY_SYM_HOME;	 break;
+    case BRL_KEY_END:		code = BRLAPI_KEY_SYM_END;	 break;
+    case BRL_KEY_INSERT:	code = BRLAPI_KEY_SYM_INSERT;	 break;
+    case BRL_KEY_DELETE:	code = BRLAPI_KEY_SYM_DELETE;	 break;
+    default: code = BRLAPI_KEY_SYM_FUNCTION + (command & BRL_MSK_ARG) - BRL_KEY_FUNCTION; break;
+    }
+    break;
+  default:
+    code = BRLAPI_KEY_TYPE_CMD
+      | (((command & BRL_MSK_BLK) >> 8) << BRLAPI_KEY_CMD_BLK_SHIFT)
+      |   (command & BRL_MSK_ARG);
+    break;
+  }
+  if ((command & BRL_MSK_BLK) == BRL_BLK_GOTOLINE)
+    code = code
+    | (command & BRL_FLG_LINE_SCALED	? BRLAPI_KEY_FLG_LINE_SCALED	: 0)
+    | (command & BRL_FLG_LINE_TOLEFT	? BRLAPI_KEY_FLG_LINE_TOLEFT	: 0)
+      ;
+  if ((command & BRL_MSK_BLK) == BRL_BLK_PASSCHAR
+   || (command & BRL_MSK_BLK) == BRL_BLK_PASSKEY)
+    code = code
+    | (command & BRL_FLG_CHAR_CONTROL	? BRLAPI_KEY_FLG_CONTROL	: 0)
+    | (command & BRL_FLG_CHAR_META	? BRLAPI_KEY_FLG_META		: 0)
+    | (command & BRL_FLG_CHAR_UPPER	? BRLAPI_KEY_FLG_UPPER		: 0)
+    | (command & BRL_FLG_CHAR_SHIFT	? BRLAPI_KEY_FLG_SHIFT		: 0)
+      ;
+  else
+    code = code
+    | (command & BRL_FLG_TOGGLE_ON	? BRLAPI_KEY_FLG_TOGGLE_ON	: 0)
+    | (command & BRL_FLG_TOGGLE_OFF	? BRLAPI_KEY_FLG_TOGGLE_OFF	: 0)
+    | (command & BRL_FLG_ROUTE		? BRLAPI_KEY_FLG_ROUTE		: 0)
+      ;
+  return code
+  | (command & BRL_FLG_REPEAT_INITIAL	? BRLAPI_KEY_FLG_REPEAT_INITIAL	: 0)
+  | (command & BRL_FLG_REPEAT_DELAY	? BRLAPI_KEY_FLG_REPEAT_DELAY	: 0)
+    ;
+}
+
+int
+cmdBrlapiToBrltty (brlapi_keyCode_t code) {
+  int cmd;
+  switch (code & BRLAPI_KEY_TYPE_MASK) {
+  case BRLAPI_KEY_TYPE_CMD:
+    cmd = (((code&BRLAPI_KEY_CMD_BLK_MASK)>>BRLAPI_KEY_CMD_BLK_SHIFT)<<8)
+	   |(code&BRLAPI_KEY_CMD_ARG_MASK);
+    break;
+  case BRLAPI_KEY_TYPE_SYM: {
+      unsigned long keysym;
+      keysym = code & BRLAPI_KEY_CODE_MASK;
+      switch (keysym) {
+      case BRLAPI_KEY_SYM_BACKSPACE:	cmd = BRL_BLK_PASSKEY|BRL_KEY_BACKSPACE;	break;
+      case BRLAPI_KEY_SYM_TAB:		cmd = BRL_BLK_PASSKEY|BRL_KEY_TAB;	break;
+      case BRLAPI_KEY_SYM_LINEFEED:	cmd = BRL_BLK_PASSKEY|BRL_KEY_ENTER;	break;
+      case BRLAPI_KEY_SYM_ESCAPE:	cmd = BRL_BLK_PASSKEY|BRL_KEY_ESCAPE;	break;
+      case BRLAPI_KEY_SYM_HOME:		cmd = BRL_BLK_PASSKEY|BRL_KEY_HOME;	break;
+      case BRLAPI_KEY_SYM_LEFT:		cmd = BRL_BLK_PASSKEY|BRL_KEY_CURSOR_LEFT;	break;
+      case BRLAPI_KEY_SYM_UP:		cmd = BRL_BLK_PASSKEY|BRL_KEY_CURSOR_UP;	break;
+      case BRLAPI_KEY_SYM_RIGHT:	cmd = BRL_BLK_PASSKEY|BRL_KEY_CURSOR_RIGHT;	break;
+      case BRLAPI_KEY_SYM_DOWN:		cmd = BRL_BLK_PASSKEY|BRL_KEY_CURSOR_DOWN;	break;
+      case BRLAPI_KEY_SYM_PAGE_UP:	cmd = BRL_BLK_PASSKEY|BRL_KEY_PAGE_UP;	break;
+      case BRLAPI_KEY_SYM_PAGE_DOWN:	cmd = BRL_BLK_PASSKEY|BRL_KEY_PAGE_DOWN;	break;
+      case BRLAPI_KEY_SYM_END:		cmd = BRL_BLK_PASSKEY|BRL_KEY_END;	break;
+      case BRLAPI_KEY_SYM_INSERT:	cmd = BRL_BLK_PASSKEY|BRL_KEY_INSERT;	break;
+      case BRLAPI_KEY_SYM_DELETE:	cmd = BRL_BLK_PASSKEY|BRL_KEY_DELETE;	break;
+      default:
+	if (keysym >= BRLAPI_KEY_SYM_FUNCTION && keysym <= BRLAPI_KEY_SYM_FUNCTION + 34)
+	  cmd = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION + keysym - BRLAPI_KEY_SYM_FUNCTION);
+	else if (keysym < 0x100 || (keysym & 0x1F000000) == BRLAPI_KEY_SYM_UNICODE) {
+	  int c = convertWcharToChar(keysym & 0xFFFFFF);
+	  if (c == EOF)
+	    /* Not convertible to current 8bit charset */
+	    return EOF;
+	  else
+	    cmd = BRL_BLK_PASSCHAR | c;
+	} else return EOF;
+	break;
+      }
+      break;
+    }
+  default:
+    return EOF;
+  }
+  return cmd
+  | (code & BRLAPI_KEY_FLG_TOGGLE_ON		? BRL_FLG_TOGGLE_ON	: 0)
+  | (code & BRLAPI_KEY_FLG_TOGGLE_OFF		? BRL_FLG_TOGGLE_OFF	: 0)
+  | (code & BRLAPI_KEY_FLG_ROUTE		? BRL_FLG_ROUTE		: 0)
+  | (code & BRLAPI_KEY_FLG_REPEAT_INITIAL	? BRL_FLG_REPEAT_INITIAL: 0)
+  | (code & BRLAPI_KEY_FLG_REPEAT_DELAY		? BRL_FLG_REPEAT_DELAY	: 0)
+  | (code & BRLAPI_KEY_FLG_LINE_SCALED		? BRL_FLG_LINE_SCALED	: 0)
+  | (code & BRLAPI_KEY_FLG_LINE_TOLEFT		? BRL_FLG_LINE_TOLEFT	: 0)
+  | (code & BRLAPI_KEY_FLG_CONTROL		? BRL_FLG_CHAR_CONTROL	: 0)
+  | (code & BRLAPI_KEY_FLG_META			? BRL_FLG_CHAR_META	: 0)
+  | (code & BRLAPI_KEY_FLG_UPPER		? BRL_FLG_CHAR_UPPER	: 0)
+  | (code & BRLAPI_KEY_FLG_SHIFT		? BRL_FLG_CHAR_SHIFT	: 0)
+    ;
 }

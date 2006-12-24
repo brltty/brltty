@@ -424,6 +424,7 @@ WARN_LOGFILE           =
 # with spaces.
 
 INPUT                  = @top_builddir@/Programs/brlapi.h \
+                         @top_srcdir@/Programs/brlapi_keycodes.h \
                          @top_builddir@/Programs/brlapi_constants.h \
                          @top_srcdir@/Programs/brlapi_protocol.h
 

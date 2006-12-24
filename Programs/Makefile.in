@@ -294,7 +294,7 @@ bluetooth_linux.$O:
 
 ###############################################################################
 
-BRLTEST_OBJECTS = brltest.$O options.$O misc.$O $(SYSTEM_OBJECT) io_misc.$O queue.$O async.$O tbl.$O tbl_native.$O cmd.$O at2.$O drivers.$O brl.$O $(BRAILLE_DRIVER_OBJECTS) serial.$O $(USB_OBJECTS) $(BLUETOOTH_OBJECTS)
+BRLTEST_OBJECTS = brltest.$O options.$O misc.$O $(SYSTEM_OBJECT) io_misc.$O queue.$O async.$O tbl.$O tbl_native.$O cmd.$O charset.$O lock.$O at2.$O drivers.$O brl.$O $(BRAILLE_DRIVER_OBJECTS) serial.$O $(USB_OBJECTS) $(BLUETOOTH_OBJECTS)
 
 brltest$X: $(BRLTEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTEST_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(LDLIBS)
@@ -354,7 +354,7 @@ tunetest.$O:
 
 ###############################################################################
 
-APITEST_OBJECTS = apitest.$O cmd.$O options.$O misc.$O $(SYSTEM_OBJECT) io_misc.$O
+APITEST_OBJECTS = apitest.$O cmd.$O charset.$O lock.$O options.$O misc.$O $(SYSTEM_OBJECT) io_misc.$O
 
 apitest$X: $(APITEST_OBJECTS) api
 	$(CC) $(LDFLAGS) -o $@ $(APITEST_OBJECTS) -L$(BLD_DIR) -lbrlapi $(LDLIBS)
@@ -525,6 +525,7 @@ install-api-libraries-windows: $(API_DLL) $(API_ARC) install-program-directory i
 install-api-headers: brlapi_constants.h brlapi_brldefs.auto.h install-apihdr-directory install-include-directory
 	$(INSTALL_DATA) brlapi.h $(INSTALL_APIHDR_DIRECTORY)
 	$(INSTALL_DATA) brlapi_constants.h $(INSTALL_APIHDR_DIRECTORY)
+	$(INSTALL_DATA) $(SRC_DIR)/brlapi_keycodes.h $(INSTALL_APIHDR_DIRECTORY)
 	$(INSTALL_DATA) $(SRC_DIR)/brlapi_protocol.h $(INSTALL_APIHDR_DIRECTORY)
 	$(INSTALL_DATA) brlapi_brldefs.auto.h $(INSTALL_INCLUDE_DIRECTORY)/brldefs.h
 	$(INSTALL_DATA) $(SRC_DIR)/api.h $(INSTALL_INCLUDE_DIRECTORY)

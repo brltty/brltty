@@ -2284,71 +2284,6 @@ static void api_writeVisual(BrailleDisplay *brl)
   pthread_mutex_unlock(&connectionsMutex);
 }
 
-brlapi_keyCode_t coreToClient(unsigned long keycode, int how) {
-  if (how == BRL_KEYCODES) {
-    return keycode;
-  } else {
-    brlapi_keyCode_t code;
-    switch (keycode & BRL_MSK_BLK) {
-    case BRL_BLK_PASSCHAR: {
-      wchar_t wc = convertCharToWchar(keycode & BRL_MSK_ARG);
-      if (wc < 0x100)
-        /* latin1 character */
-        code = wc;
-      else
-        /* unicode character */
-        code = BRLAPI_KEY_SYM_UNICODE | wc;
-      break;
-    }
-    case BRL_BLK_PASSKEY:
-      switch (keycode & BRL_MSK_ARG) {
-      case BRL_KEY_ENTER:		code = BRLAPI_KEY_SYM_LINEFEED;break;
-      case BRL_KEY_TAB:			code = BRLAPI_KEY_SYM_TAB;	break;
-      case BRL_KEY_BACKSPACE:		code = BRLAPI_KEY_SYM_BACKSPACE;break;
-      case BRL_KEY_ESCAPE:		code = BRLAPI_KEY_SYM_ESCAPE;	break;
-      case BRL_KEY_CURSOR_LEFT:		code = BRLAPI_KEY_SYM_LEFT;	break;
-      case BRL_KEY_CURSOR_RIGHT:	code = BRLAPI_KEY_SYM_RIGHT;	break;
-      case BRL_KEY_CURSOR_UP:		code = BRLAPI_KEY_SYM_UP;	break;
-      case BRL_KEY_CURSOR_DOWN:		code = BRLAPI_KEY_SYM_DOWN;	break;
-      case BRL_KEY_PAGE_UP:		code = BRLAPI_KEY_SYM_PAGE_UP;	break;
-      case BRL_KEY_PAGE_DOWN:		code = BRLAPI_KEY_SYM_PAGE_DOWN;break;
-      case BRL_KEY_HOME:		code = BRLAPI_KEY_SYM_HOME;	break;
-      case BRL_KEY_END:			code = BRLAPI_KEY_SYM_END;	break;
-      case BRL_KEY_INSERT:		code = BRLAPI_KEY_SYM_INSERT;	break;
-      case BRL_KEY_DELETE:		code = BRLAPI_KEY_SYM_DELETE;	break;
-      default: code = BRLAPI_KEY_SYM_FUNCTION + (keycode & BRL_MSK_ARG) - BRL_KEY_FUNCTION; break;
-      }
-      break;
-    default:
-      code = BRLAPI_KEY_TYPE_CMD | ((keycode & BRL_MSK_BLK) << 8)
-        | (keycode & BRL_MSK_ARG);
-      break;
-    }
-    if ((keycode & BRL_MSK_BLK) == BRL_BLK_GOTOLINE)
-      code = code
-      | (keycode & BRL_FLG_LINE_SCALED	? BRLAPI_KEY_FLG_LINE_SCALED	: 0)
-      | (keycode & BRL_FLG_LINE_TOLEFT	? BRLAPI_KEY_FLG_LINE_TOLEFT	: 0)
-        ;
-    if ((keycode & BRL_MSK_BLK) == BRL_BLK_PASSCHAR
-     || (keycode & BRL_MSK_BLK) == BRL_BLK_PASSKEY)
-      code = code
-      | (keycode & BRL_FLG_CHAR_CONTROL	? BRLAPI_KEY_FLG_CONTROL	: 0)
-      | (keycode & BRL_FLG_CHAR_META	? BRLAPI_KEY_FLG_META		: 0)
-      | (keycode & BRL_FLG_CHAR_UPPER	? BRLAPI_KEY_FLG_UPPER		: 0)
-      | (keycode & BRL_FLG_CHAR_SHIFT	? BRLAPI_KEY_FLG_SHIFT		: 0)
-        ;
-    else
-      code = code
-      | (keycode & BRL_FLG_TOGGLE_ON	? BRLAPI_KEY_FLG_TOGGLE_ON	: 0)
-      | (keycode & BRL_FLG_TOGGLE_OFF	? BRLAPI_KEY_FLG_TOGGLE_OFF	: 0)
-      | (keycode & BRL_FLG_ROUTE	? BRLAPI_KEY_FLG_ROUTE		: 0)
-        ;
-    return code
-    | (keycode & BRL_FLG_REPEAT_INITIAL	? BRLAPI_KEY_FLG_REPEAT_INITIAL	: 0)
-    | (keycode & BRL_FLG_REPEAT_DELAY	? BRLAPI_KEY_FLG_REPEAT_DELAY	: 0)
-      ;
-  }
-}
 /* Function: whoGetsKey */
 /* Returns the connection which gets that key */
 static Connection *whoGetsKey(Tty *tty, brlapi_keyCode_t code, unsigned int how)
@@ -2470,7 +2405,7 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
   }
   /* some client may get raw mode only from now */
   pthread_mutex_unlock(&rawMutex);
-  clientCode = coreToClient(keycode, BRL_KEYCODES);
+  clientCode = keycode;
   if (trueBraille->readKey && keycode != EOF && (c = whoGetsKey(&ttys,clientCode,BRL_KEYCODES))) {
     /* somebody gets the raw code */
     LogPrint(LOG_DEBUG,"Transmitting unmasked key %lu",(unsigned long)keycode);
@@ -2479,7 +2414,7 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
   } else {
     handleAutorepeat(&command, &repeatState);
     if (command != EOF) {
-      clientCode = coreToClient(command, BRL_COMMANDS);
+      clientCode = cmdBrlttyToBrlapi(command);
       LogPrint(LOG_DEBUG,"client code %016"BRLAPI_PRIxKEYCODE, clientCode);
       /* nobody needs the raw code */
       if ((c = whoGetsKey(&ttys,clientCode,BRL_COMMANDS))) {
