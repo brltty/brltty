@@ -18,7 +18,7 @@
 BEGIN {
   writeHeaderPrologue("BRLAPI_INCLUDED_CONSTANTS", "brlapi.h")
   beginDoxygenFile()
-  print "/** \\ingroup brlapi_keys"
+  print "/** \\ingroup brlapi_keycodes"
   print " * @{ */"
   print ""
 }

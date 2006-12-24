@@ -19,7 +19,6 @@
  */
 
 /** \file
- * \brief Types, defines and function prototypes for \e BrlAPI's library
  */
 
 #ifndef BRLAPI_INCLUDED_KEYCODES
@@ -29,9 +28,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
-/** Type for key codes
+/** \defgroup brlapi_keycodes Types and Defines for \e BrlAPI Key Codes
  *
- * \ingroup brlapi_keys
  * Key codes are unsigned 64 bit integers.  This 64-bit space is split into 3
  * parts:
  *
@@ -70,6 +68,7 @@ extern "C" {
  *
  * The brlapi_expandKeyCode() function may be used for splitting key codes into
  * these 4 parts.
+ * @{
  */
 typedef uint64_t brlapi_keyCode_t;
 
@@ -149,6 +148,8 @@ typedef uint64_t brlapi_keyCode_t;
 #define BRLAPI_KEY_SYM_FUNCTION		UINT64_C(0X0000FFBE)
 #define BRLAPI_KEY_SYM_DELETE		UINT64_C(0X0000FFFF)
 #define BRLAPI_KEY_SYM_UNICODE		UINT64_C(0X01000000)
+
+/** @} */
 
 #include "brlapi_constants.h"
 

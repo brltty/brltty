@@ -573,20 +573,20 @@ int brlapi__write(brlapi_handle_t *handle, const brlapi_writeStruct_t *s);
 
 /** @} */
 
+#include "brlapi_keycodes.h"
+
 /** \defgroup brlapi_keys Reading key presses
  * \brief How to read key presses from the braille terminal
  *
  * Once brlapi_enterTtyMode() has been called, the application can call brlapi_readKey() to
- * read key presses. Either key codes or commands will be returned, depending
+ * read key presses. Either key codes (see \ref brlapi_keycodes) or commands will be returned, depending
  * on parameters given to brlapi_enterTtyMode().
  *
  * Key presses are buffered, so that calling brlapi_readKey() in non-blocking
- * mode from times to times should suffice.
+ * mode from time to time should suffice.
  *
  * @{
  */
-
-#include "brlapi_keycodes.h"
 
 /* brlapi_expandedKeyCode_t */
 /** Structure holding the components of a key code as returned by brlapi_expandKeyCode() */
