@@ -398,7 +398,7 @@ static int tryHost(brlapi_handle_t *handle, char *hostAndPort) {
       memcpy(path,BRLAPI_SOCKETPATH,lpath);
       memcpy(path+lpath,port,lport+1);
       while ((handle->fileDescriptor = CreateFile(path,GENERIC_READ|GENERIC_WRITE,
-	      FILE_SHARE_READ|FILE_SHARE_WRITE,NULL,OPEN_EXISTING,0,NULL))
+	      FILE_SHARE_READ|FILE_SHARE_WRITE,NULL,OPEN_EXISTING,SECURITY_IMPERSONATION,NULL))
 	  == INVALID_HANDLE_VALUE) {
 	if (GetLastError() != ERROR_PIPE_BUSY) {
 	  brlapi_errfun="CreateFile";

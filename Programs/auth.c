@@ -56,7 +56,63 @@
 /* peer credentials */
 #undef CAN_CHECK_CREDENTIALS
 
-#if defined(HAVE_GETPEERUCRED)
+typedef struct {
+  const char *name;
+  uid_t id;
+} MethodDescriptor_user;
+
+typedef struct {
+  const char *name;
+  gid_t id;
+} MethodDescriptor_group;
+
+#if defined(WINDOWS)
+#define CAN_CHECK_CREDENTIALS
+
+typedef struct {
+  char *user;
+} PeerCredentials;
+
+static int
+retrievePeerCredentials (PeerCredentials *credentials, FileDescriptor fd) {
+  char buffer[0X100+1];
+
+  if (GetNamedPipeHandleState(fd, NULL, NULL, NULL, NULL, buffer, sizeof(buffer))) {
+    buffer[sizeof(buffer) - 1] = 0;
+
+    if ((credentials->user = strdup(buffer))) {
+      return 1;
+    }
+  } else {
+    switch (GetLastError()) {
+      default:
+        LogWindowsError("GetNamedPipeHandleState");
+
+      case ERROR_INSUFFICIENT_BUFFER:
+      case ERROR_CANNOT_IMPERSONATE:
+        break;
+    }
+  }
+
+  return 0;
+}
+
+static void
+releasePeerCredentials (PeerCredentials *credentials) {
+  free(credentials->user);
+}
+
+static int
+checkPeerUser (PeerCredentials *credentials, const MethodDescriptor_user *user) {
+  return strcmp(user->name, credentials->user) == 0;
+}
+
+static int
+checkPeerGroup (PeerCredentials *credentials, const MethodDescriptor_group *group) {
+  return 0;
+}
+
+#elif defined(HAVE_GETPEERUCRED)
 #define CAN_CHECK_CREDENTIALS
 
 #include <ucred.h>
@@ -91,20 +147,20 @@ releasePeerCredentials (PeerCredentials *credentials) {
 }
 
 static int
-checkPeerUser (PeerCredentials *credentials, uid_t user) {
-  if (user == ucred_geteuid(*credentials)) return 1;
+checkPeerUser (PeerCredentials *credentials, const MethodDescriptor_user *user) {
+  if (user->id == ucred_geteuid(*credentials)) return 1;
   return 0;
 }
 
 static int
-checkPeerGroup (PeerCredentials *credentials, gid_t group) {
-  if (group == ucred_getegid(*credentials)) return 1;
+checkPeerGroup (PeerCredentials *credentials, const MethodDescriptor_group *group) {
+  if (group->id == ucred_getegid(*credentials)) return 1;
 
   {
     const gid_t *groups;
     int count = ucred_getgroups(*credentials, &groups);
     while (count > 0)
-      if (group == groups[--count])
+      if (group->id == groups[--count])
         return 1;
   }
 
@@ -129,13 +185,13 @@ releasePeerCredentials (PeerCredentials *credentials) {
 }
 
 static int
-checkPeerUser (PeerCredentials *credentials, uid_t user) {
-  return user == credentials->uid;
+checkPeerUser (PeerCredentials *credentials, const MethodDescriptor_user *user) {
+  return user->id == credentials->uid;
 }
 
 static int
-checkPeerGroup (PeerCredentials *credentials, gid_t group) {
-  return group == credentials->gid;
+checkPeerGroup (PeerCredentials *credentials, const MethodDescriptor_group *group) {
+  return group->id == credentials->gid;
 }
 
 #elif defined(HAVE_GETPEEREID)
@@ -158,13 +214,13 @@ releasePeerCredentials (PeerCredentials *credentials) {
 }
 
 static int
-checkPeerUser (PeerCredentials *credentials, uid_t user) {
-  return user == credentials->euid;
+checkPeerUser (PeerCredentials *credentials, const MethodDescriptor_user *user) {
+  return user->id == credentials->euid;
 }
 
 static int
-checkPeerGroup (PeerCredentials *credentials, gid_t group) {
-  return group == credentials->egid;
+checkPeerGroup (PeerCredentials *credentials, const MethodDescriptor_group *group) {
+  return group->id == credentials->egid;
 }
 
 #else /* peer credentials method */
@@ -258,7 +314,7 @@ authKeyfile_server (AuthDescriptor *auth, FileDescriptor fd, void *data) {
 static int
 getPeerCredentials (AuthDescriptor *auth, FileDescriptor fd) {
   if (auth->peerCredentialsState == PCS_NEED) {
-    auth->peerCredentialsState = retrievePeerCredentials(&auth->peerCredentials, GET_INT_FD(fd))? PCS_HAVE: PCS_CANT;
+    auth->peerCredentialsState = retrievePeerCredentials(&auth->peerCredentials, fd)? PCS_HAVE: PCS_CANT;
   }
   return auth->peerCredentialsState == PCS_HAVE;
 }
@@ -267,15 +323,13 @@ getPeerCredentials (AuthDescriptor *auth, FileDescriptor fd) {
 
 #include <pwd.h>
 
-typedef struct {
-  uid_t id;
-} MethodDescriptor_user;
-
 static void *
 authUser_initialize (const char *parameter) {
   MethodDescriptor_user *user;
 
   if ((user = malloc(sizeof(*user)))) {
+    user->name = parameter;
+
     if (!*parameter) {
       user->id = geteuid();
       return user;
@@ -316,22 +370,20 @@ static int
 authUser_server (AuthDescriptor *auth, FileDescriptor fd, void *data) {
   MethodDescriptor_user *user = data;
   return getPeerCredentials(auth, fd) &&
-         checkPeerUser(&auth->peerCredentials, user->id);
+         checkPeerUser(&auth->peerCredentials, user);
 }
 
 /* the group method */
 
 #include <grp.h>
 
-typedef struct {
-  gid_t id;
-} MethodDescriptor_group;
-
 static void *
 authGroup_initialize (const char *parameter) {
   MethodDescriptor_group *group;
 
   if ((group = malloc(sizeof(*group)))) {
+    group->name = parameter;
+
     if (!*parameter) {
       group->id = getegid();
       return group;
@@ -372,7 +424,7 @@ static int
 authGroup_server (AuthDescriptor *auth, FileDescriptor fd, void *data) {
   MethodDescriptor_group *group = data;
   return getPeerCredentials(auth, fd) &&
-         checkPeerGroup(&auth->peerCredentials, group->id);
+         checkPeerGroup(&auth->peerCredentials, group);
 }
 #endif /* CAN_CHECK_CREDENTIALS */
 
