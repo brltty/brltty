@@ -22,16 +22,6 @@
 
 #ifdef WINDOWS
 #include <ws2tcpip.h>
-
-#ifdef __MINGW32__
-#include <io.h>
-
-#define GET_INT_FD(fd) (_open_osfhandle((long)(fd), O_RDWR))
-#else /* __MINGW32__ */
-#include <sys/cygwin.h>
-
-#define GET_INT_FD(fd) (cygwin_attach_handle_to_fd("auth", -1, (fd), TRUE, GENERIC_READ|GENERIC_WRITE))
-#endif /* __MINGW32__ */
 #else /* WINDOWS */
 #include <sys/socket.h>
 #include <sys/un.h>
@@ -39,7 +29,8 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 
-#define GET_INT_FD(fd) (fd)
+#include <pwd.h>
+#include <grp.h>
 #endif /* WINDOWS */
 
 #if !defined(AF_LOCAL) && defined(AF_UNIX)
@@ -57,17 +48,17 @@
 #undef CAN_CHECK_CREDENTIALS
 
 typedef struct {
+#ifdef WINDOWS
   const char *name;
-
-#ifndef WINDOWS
+#else /* WINDOWS */
   uid_t id;
 #endif /* WINDOWS */
 } MethodDescriptor_user;
 
 typedef struct {
+#ifdef WINDOWS
   const char *name;
-
-#ifndef WINDOWS
+#else /* WINDOWS */
   gid_t id;
 #endif /* WINDOWS */
 } MethodDescriptor_group;
@@ -327,18 +318,13 @@ getPeerCredentials (AuthDescriptor *auth, FileDescriptor fd) {
 
 /* the user method */
 
-#ifndef WINDOWS
-#include <pwd.h>
-#endif /* WINDOWS */
-
 static void *
 authUser_initialize (const char *parameter) {
   MethodDescriptor_user *user;
 
   if ((user = malloc(sizeof(*user)))) {
-    user->name = parameter;
-
 #ifdef WINDOWS
+    user->name = parameter;
     return user;
 #else /* WINDOWS */
     if (!*parameter) {
@@ -387,18 +373,13 @@ authUser_server (AuthDescriptor *auth, FileDescriptor fd, void *data) {
 
 /* the group method */
 
-#ifndef WINDOWS
-#include <grp.h>
-#endif /* WINDOWS */
-
 static void *
 authGroup_initialize (const char *parameter) {
   MethodDescriptor_group *group;
 
   if ((group = malloc(sizeof(*group)))) {
-    group->name = parameter;
-
 #ifdef WINDOWS
+    group->name = parameter;
     return group;
 #else /* WINDOWS */
     if (!*parameter) {
