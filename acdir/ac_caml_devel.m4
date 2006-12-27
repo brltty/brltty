@@ -123,6 +123,7 @@ else
         AC_MSG_RESULT(Win32)
         OCAMLWIN32=yes
     else
+        AC_MSG_RESULT(Unix)
         OCAMLWIN32=no
     fi
 fi
