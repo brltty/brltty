@@ -429,6 +429,22 @@ BRLTTY_ARG_DISABLE(
       esac
 
       BRLTTY_ARG_DISABLE(
+         [caml-bindings],
+         [Caml bindings for BrlAPI],
+         [],
+         [
+            m4_include([acdir/ac_caml_devel.m4])
+            AC_CAML_DEVEL()
+            if test "${OCAMLC}" != "no"
+            then
+               api_bindings="${api_bindings} Caml"
+            else
+               AC_MSG_WARN([Caml BrlAPI bindings not included: ocamlc not found])
+            fi
+         ]
+      )
+
+      BRLTTY_ARG_DISABLE(
          [java-bindings],
          [Java bindings for BrlAPI],
          [],
