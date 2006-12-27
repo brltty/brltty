@@ -58,12 +58,18 @@
 
 typedef struct {
   const char *name;
+
+#ifndef WINDOWS
   uid_t id;
+#endif /* WINDOWS */
 } MethodDescriptor_user;
 
 typedef struct {
   const char *name;
+
+#ifndef WINDOWS
   gid_t id;
+#endif /* WINDOWS */
 } MethodDescriptor_group;
 
 #if defined(WINDOWS)
@@ -321,7 +327,9 @@ getPeerCredentials (AuthDescriptor *auth, FileDescriptor fd) {
 
 /* the user method */
 
+#ifndef WINDOWS
 #include <pwd.h>
+#endif /* WINDOWS */
 
 static void *
 authUser_initialize (const char *parameter) {
@@ -330,6 +338,9 @@ authUser_initialize (const char *parameter) {
   if ((user = malloc(sizeof(*user)))) {
     user->name = parameter;
 
+#ifdef WINDOWS
+    return user;
+#else /* WINDOWS */
     if (!*parameter) {
       user->id = geteuid();
       return user;
@@ -353,6 +364,7 @@ authUser_initialize (const char *parameter) {
 
     LogPrint(LOG_ERR, "unknown user: %s", parameter);
     free(user);
+#endif /* WINDOWS */
   } else {
     LogError("malloc");
   }
@@ -375,7 +387,9 @@ authUser_server (AuthDescriptor *auth, FileDescriptor fd, void *data) {
 
 /* the group method */
 
+#ifndef WINDOWS
 #include <grp.h>
+#endif /* WINDOWS */
 
 static void *
 authGroup_initialize (const char *parameter) {
@@ -384,6 +398,9 @@ authGroup_initialize (const char *parameter) {
   if ((group = malloc(sizeof(*group)))) {
     group->name = parameter;
 
+#ifdef WINDOWS
+    return group;
+#else /* WINDOWS */
     if (!*parameter) {
       group->id = getegid();
       return group;
@@ -407,6 +424,7 @@ authGroup_initialize (const char *parameter) {
 
     LogPrint(LOG_ERR, "unknown group: %s", parameter);
     free(group);
+#endif /* WINDOWS */
   } else {
     LogError("malloc");
   }
