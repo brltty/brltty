@@ -125,10 +125,10 @@ gpmOpenConnection (void) {
 }
 
 static void
-gpmCloseConnection (void) {
-  Gpm_Close();
-  LogPrint(GPM_LOG_LEVEL, "GPM closed");
+gpmCloseConnection (int alreadyClosed) {
+  if (!alreadyClosed) Gpm_Close();
   gpmConnectionState = GCS_CLOSED;
+  LogPrint(GPM_LOG_LEVEL, "GPM closed");
 }
 #endif /* HAVE_LIBGPM */
 
@@ -175,7 +175,7 @@ point_RealScreen (int left, int columns, int top, int lines) {
 
       if (errno != EINVAL) {
         LogPrint(GPM_LOG_LEVEL, "Gpm_DrawPointer error: %s", strerror(errno));
-        gpmCloseConnection();
+        gpmCloseConnection(0);
         return 0;
       }
     }
@@ -197,17 +197,18 @@ pointer_RealScreen (int *column, int *row) {
       while (1) {
         fd_set mask;
         struct timeval timeout;
-        int count;
         Gpm_Event event;
+        int result;
 
         FD_ZERO(&mask);
         FD_SET(gpm_fd, &mask);
         memset(&timeout, 0, sizeof(timeout));
 
-        if ((count = select(gpm_fd+1, &mask, NULL, NULL, &timeout)) == 0) break;
+        if ((result = select(gpm_fd+1, &mask, NULL, NULL, &timeout)) == 0) break;
         error = 1;
 
-        if (count < 0) {
+        if (result == -1) {
+          if (errno == EINTR) continue;
           LogError("select");
           break;
         }
@@ -217,26 +218,24 @@ pointer_RealScreen (int *column, int *row) {
           break;
         }
 
-        {
-          int result = Gpm_GetEvent(&event);
-
-          if (result == -1) {
-            if (errno == EINTR) continue;
-            LogError("Gpm_GetEvent");
-            gpmCloseConnection();
-            result = 0;
-          }
-
-          if (result == 0) break;
+        if ((result = Gpm_GetEvent(&event)) == -1) {
+          if (errno == EINTR) continue;
+          LogError("Gpm_GetEvent");
+          break;
         }
 
         error = 0;
+        if (result == 0) {
+          gpmCloseConnection(1);
+          break;
+        }
+
         *column = event.x;
         *row = event.y;
         ok = 1;
       }
 
-      if (error) gpmCloseConnection();
+      if (error) gpmCloseConnection(0);
     }
   }
 #endif /* HAVE_LIBGPM */
