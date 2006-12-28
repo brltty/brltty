@@ -85,8 +85,9 @@ retrievePeerCredentials (PeerCredentials *credentials, FileDescriptor fd) {
       default:
         LogWindowsError("GetNamedPipeHandleState");
 
-      case ERROR_INSUFFICIENT_BUFFER:
-      case ERROR_CANNOT_IMPERSONATE:
+      case ERROR_INSUFFICIENT_BUFFER: /* buffer too small */
+      case ERROR_INVALID_HANDLE: /* not a named pipe */
+      case ERROR_CANNOT_IMPERSONATE: /* no data transferred yet */
         break;
     }
   }
