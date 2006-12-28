@@ -316,16 +316,22 @@ CAMLprim value brlapiml_waitKey(value handle, value unit)
 CAMLprim value brlapiml_expandKeyCode(value camlKeyCode)
 {
   CAMLparam1(camlKeyCode);
-  CAMLlocal1(result);
+  CAMLlocal2(key, result);
+  tag_t keyType = 0;
   brlapi_expandedKeyCode_t ekc;
   brlapi_keyCode_t keyCode = Int64_val(camlKeyCode);
+  if ((keyCode & BRLAPI_KEY_TYPE_MASK) == BRLAPI_KEY_TYPE_CMD) keyType=0;
+  else if ((keyCode & BRLAPI_KEY_TYPE_MASK) == BRLAPI_KEY_TYPE_SYM) keyType=1;
+  else raise_brlapi_error("expandKeyCode: unknown key type");
   if (brlapi_expandKeyCode(keyCode, &ekc)==-1)
     raise_brlapi_error("expandKeyCode");
-  result = caml_alloc_tuple(4);
-  Store_field(result, 0, Val_int(ekc.type));
-  Store_field(result, 1, Val_int(ekc.command));
-  Store_field(result, 2, Val_int(ekc.argument));
-  Store_field(result, 3, Val_int(ekc.flags));
+  key = caml_alloc(1, keyType);
+  if (keyType==0) Store_field(key, 0, Val_int(ekc.command));
+  else Store_field(key, 0, caml_copy_int32(ekc.command));
+  result = caml_alloc_tuple(3);
+  Store_field(result, 0, key);
+  Store_field(result, 1, Val_int(ekc.argument));
+  Store_field(result, 2, caml_copy_int32(ekc.flags));
   CAMLreturn(result);
 }
 

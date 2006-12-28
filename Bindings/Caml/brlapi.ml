@@ -132,11 +132,14 @@ external readKey :
 external waitKey :
   ?h:handle -> unit -> int64 = "brlapiml_waitKey"
 
+type key =
+  | BrailleCommand of BrailleCommands.t
+  | Keysym of int32
+
 type expandedKeyCode = {
-  kc_type : int;
-  kc_command : int;
-  kc_argument : int;
-  kc_flags : int
+  key : key;
+  argument : int;
+  flags : int32
 }
 
 external expandKeyCode :
