@@ -28,6 +28,7 @@
 #endif /* HAVE_SYS_SELECT_H */
 
 #include "misc.h"
+#include "async.h"
 #include "drivers.h"
 #include "scr.h"
 #include "scr_real.h"
@@ -73,33 +74,61 @@ identifyScreenDrivers (int full) {
 #include <gpm.h>
 extern int gpm_tried;
 
+#define GPM_LOG_LEVEL LOG_DEBUG
+
+typedef enum {
+  GCS_CLOSED,
+  GCS_WAITING,
+  GCS_OPENED
+} GpmConnectionState;
+
+static int gpmConnectionState = GCS_CLOSED;
+
+static int gpmOpenConnection (void);
+
+static void
+gpmRetryConnection (void *data) {
+  gpmConnectionState = GCS_CLOSED;
+  gpmOpenConnection();
+}
+
 static int
 gpmOpenConnection (void) {
-  if (!gpm_flag) {
-    int wasTried = gpm_tried;
-    Gpm_Connect connection;
-    memset(&connection, 0, sizeof(connection));
-    connection.eventMask = GPM_MOVE;
-    connection.defaultMask = ~0;
-    connection.minMod = 0;
-    connection.maxMod = ~0;
+  switch (gpmConnectionState) {
+    case  GCS_CLOSED: {
+      Gpm_Connect options = {
+        .eventMask = GPM_MOVE,
+        .defaultMask = ~0,
+        .minMod = 0,
+        .maxMod = ~0
+      };
 
-    gpm_tried = 0;
-    gpm_zerobased = 1;
+      gpm_tried = 0;
+      gpm_zerobased = 1;
 
-    if (Gpm_Open(&connection, -1) == -1) {
-      if (!wasTried) LogPrint(LOG_WARNING, "GPM open error: %s", strerror(errno));
-      return 0;
+      if (Gpm_Open(&options, -1) == -1) {
+        LogPrint(GPM_LOG_LEVEL, "GPM open error: %s", strerror(errno));
+        asyncRelativeAlarm(5000, gpmRetryConnection, NULL);
+        gpmConnectionState = GCS_WAITING;
+        return 0;
+      }
+
+      LogPrint(GPM_LOG_LEVEL, "GPM opened: fd=%d", gpm_fd);
+      gpmConnectionState = GCS_OPENED;
     }
-    LogPrint(LOG_DEBUG, "GPM opened: fd=%d", gpm_fd);
+
+    case GCS_OPENED:
+      return 1;
   }
-  return 1;
+
+  return 0;
 }
 
 static void
 gpmCloseConnection (void) {
   Gpm_Close();
-  LogPrint(LOG_DEBUG, "GPM closed.");
+  LogPrint(GPM_LOG_LEVEL, "GPM closed");
+  gpmConnectionState = GCS_CLOSED;
 }
 #endif /* HAVE_LIBGPM */
 
@@ -112,10 +141,8 @@ static int
 point_RealScreen (int column, int row) {
 #ifdef HAVE_LIBGPM
   if (gpmOpenConnection()) {
-    Gpm_Event event;
-    event.x = column;
-    event.y = row;
-    if (GPM_DRAWPOINTER(&event) != -1) return 1;
+    if (Gpm_DrawPointer(column, row, gpm_consolefd) != -1) return 1;
+    LogError("Gpm_DrawPointer");
     gpmCloseConnection();
   }
 #endif /* HAVE_LIBGPM */
@@ -124,39 +151,65 @@ point_RealScreen (int column, int row) {
 
 static int
 pointer_RealScreen (int *column, int *row) {
+  int ok = 0;
+
 #ifdef HAVE_LIBGPM
   if (gpmOpenConnection()) {
+    int error = 1;
+
     if (gpm_fd >= 0) {
-      int ok = 0;
-      int error = 0;
+      error = 0;
+
       while (1) {
         fd_set mask;
         struct timeval timeout;
         int count;
         Gpm_Event event;
+
         FD_ZERO(&mask);
         FD_SET(gpm_fd, &mask);
         memset(&timeout, 0, sizeof(timeout));
 
         if ((count = select(gpm_fd+1, &mask, NULL, NULL, &timeout)) == 0) break;
         error = 1;
-        if (count < 0) break;
-        if (!FD_ISSET(gpm_fd, &mask)) break;
 
-        if (Gpm_GetEvent(&event) != 1) break;
+        if (count < 0) {
+          LogError("select");
+          break;
+        }
+
+        if (!FD_ISSET(gpm_fd, &mask)) {
+          LogPrint(GPM_LOG_LEVEL, "GPM file descriptor not set: %d", gpm_fd);
+          break;
+        }
+
+        {
+          int result = Gpm_GetEvent(&event);
+
+          if (result == -1) {
+            if (errno == EINTR) continue;
+            LogError("Gpm_GetEvent");
+            gpmCloseConnection();
+            result = 0;
+          }
+
+          if (result == 0) break;
+        }
+
         error = 0;
-
         *column = event.x;
         *row = event.y;
         ok = 1;
       }
-
-      if (error) gpmCloseConnection();
-      return ok;
+    } else {
+      LogPrint(GPM_LOG_LEVEL, "GPM file descriptor not valid: %d", gpm_fd);
     }
+
+    if (error) gpmCloseConnection();
   }
 #endif /* HAVE_LIBGPM */
-  return 0;
+
+  return ok;
 }
 
 void
