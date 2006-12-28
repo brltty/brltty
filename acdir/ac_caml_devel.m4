@@ -38,14 +38,14 @@ AC_DEFUN([AC_CAML_DEVEL], [dnl
 # we first look for ocamlc in the path; if not present, we fail
 AC_CHECK_PROG(OCAMLC,ocamlc,ocamlc,no)
 if test "$OCAMLC" = no ; then
-    AC_MSG_WARN(Cannot find ocamlc.)
+    AC_MSG_WARN([Cannot find ocamlc.])
 else
     # we extract Ocaml version number and library path
     OCAMLVERSION=`$OCAMLC -v | sed -n -e 's|.*version *\(.*\)$|\1|p' `
-    echo "ocaml version is $OCAMLVERSION"
+    AC_MSG_NOTICE([OCaml version is $OCAMLVERSION])
 
     OCAMLLIB=`$OCAMLC -v | tail -1 | cut -f 4 -d " "`
-    echo "ocaml library path is $OCAMLLIB"
+    AC_MSG_NOTICE([OCaml library path is $OCAMLLIB])
 
     # then we look for ocamlopt; if not present, we issue a warning
     # if the version is not the same, we also discard it
@@ -53,7 +53,7 @@ else
     AC_CHECK_PROG(OCAMLOPT,ocamlopt,ocamlopt,no)
     OCAMLBEST=byte
     if test "$OCAMLOPT" = no ; then
-        AC_MSG_WARN(Cannot find ocamlopt; bytecode compilation only.)
+        AC_MSG_WARN([Cannot find ocamlopt; bytecode compilation only.])
     else
         AC_MSG_CHECKING(ocamlopt version)
         TMPVERSION=`$OCAMLOPT -v | sed -n -e 's|.*version *\(.*\)$|\1|p' `
@@ -97,12 +97,12 @@ else
     # ocamldep, ocamllex and ocamlyacc should also be present in the path
     AC_CHECK_PROG(OCAMLDEP,ocamldep,ocamldep,no)
     if test "$OCAMLDEP" = no ; then
-        AC_MSG_WARN(Cannot find ocamldep.)
+        AC_MSG_WARN([Cannot find ocamldep.])
     fi
 
     AC_CHECK_PROG(OCAMLLEX,ocamllex,ocamllex,no)
     if test "$OCAMLLEX" = no ; then
-        AC_MSG_WARN(Cannot find ocamllex.)
+        AC_MSG_WARN([Cannot find ocamllex.])
     else
         AC_CHECK_PROG(OCAMLLEXDOTOPT,ocamllex.opt,ocamllex.opt,no)
         if test "$OCAMLLEXDOTOPT" != no ; then
@@ -112,7 +112,7 @@ else
 
     AC_CHECK_PROG(OCAMLYACC,ocamlyacc,ocamlyacc,no)
     if test "$OCAMLYACC" = no ; then
-        AC_MSG_WARN(Cannot find ocamlyacc.)
+        AC_MSG_WARN([Cannot find ocamlyacc.])
     fi
 
     AC_CHECK_PROG(OCAMLWEB,ocamlweb,ocamlweb,true)
