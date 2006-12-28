@@ -28,3 +28,11 @@ OCAMLLIB = @OCAMLLIB@
 OCAMLWEB = @OCAMLWEB@
 OCAMLWIN32 = @OCAMLWIN32@
 
+all:
+
+clean::
+
+install: all
+
+uninstall:
+
