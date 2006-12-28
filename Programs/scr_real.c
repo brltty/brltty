@@ -139,6 +139,7 @@ route_RealScreen (int column, int row, int screen) {
 
 static int
 point_RealScreen (int left, int columns, int top, int lines) {
+#ifdef HAVE_LIBGPM
   if (gpmOpenConnection() && (gpm_fd >= 0)) {
     int console = getConsole();
 
@@ -170,7 +171,6 @@ point_RealScreen (int left, int columns, int top, int lines) {
       }
 #endif /* TIOCLINUX */
 
-#ifdef HAVE_LIBGPM
       if (Gpm_DrawPointer(left, top, console) != -1) return 1;
 
       if (errno != EINVAL) {
@@ -178,9 +178,9 @@ point_RealScreen (int left, int columns, int top, int lines) {
         gpmCloseConnection();
         return 0;
       }
-#endif /* HAVE_LIBGPM */
     }
   }
+#endif /* HAVE_LIBGPM */
 
   return 0;
 }
