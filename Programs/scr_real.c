@@ -139,37 +139,38 @@ route_RealScreen (int column, int row, int screen) {
 
 static int
 point_RealScreen (int left, int columns, int top, int lines) {
-  int console = getConsole();
-  if (console != -1) {
+  if (gpmOpenConnection() && (gpm_fd >= 0)) {
+    int console = getConsole();
+
+    if (console != -1) {
 #ifdef TIOCLINUX
-    typedef struct {
-      char subcode;
-      short xs;
-      short ys;
-      short xe;
-      short ye;
-      short mode;
-    } PACKED Arguments;
+      typedef struct {
+        char subcode;
+        short xs;
+        short ys;
+        short xe;
+        short ye;
+        short mode;
+      } PACKED Arguments;
 
-    Arguments arguments = {
-      .subcode = 2,
-      .xs = 1 + left,
-      .ys = 1 + top,
-      .xe = 1 + left + columns - 1,
-      .ye = 1 + top + lines - 1,
-      .mode = 0
-    };
+      Arguments arguments = {
+        .subcode = 2,
+        .xs = 1 + left,
+        .ys = 1 + top,
+        .xe = 1 + left + columns - 1,
+        .ye = 1 + top + lines - 1,
+        .mode = 0
+      };
 
-    if (ioctl(console, TIOCLINUX, &arguments) != -1) return 1;
+      if (ioctl(console, TIOCLINUX, &arguments) != -1) return 1;
 
-    if (errno != EINVAL) {
-      LogPrint(GPM_LOG_LEVEL, "ioctl[TIOCLINUX] error: %s", strerror(errno));
-      return 0;
-    }
+      if (errno != EINVAL) {
+        LogPrint(GPM_LOG_LEVEL, "ioctl[TIOCLINUX] error: %s", strerror(errno));
+        return 0;
+      }
 #endif /* TIOCLINUX */
 
 #ifdef HAVE_LIBGPM
-    if (gpmOpenConnection()) {
       if (Gpm_DrawPointer(left, top, console) != -1) return 1;
 
       if (errno != EINVAL) {
@@ -177,8 +178,8 @@ point_RealScreen (int left, int columns, int top, int lines) {
         gpmCloseConnection();
         return 0;
       }
-    }
 #endif /* HAVE_LIBGPM */
+    }
   }
 
   return 0;
@@ -190,10 +191,8 @@ pointer_RealScreen (int *column, int *row) {
 
 #ifdef HAVE_LIBGPM
   if (gpmOpenConnection()) {
-    int error = 1;
-
     if (gpm_fd >= 0) {
-      error = 0;
+      int error = 0;
 
       while (1) {
         fd_set mask;
@@ -236,11 +235,9 @@ pointer_RealScreen (int *column, int *row) {
         *row = event.y;
         ok = 1;
       }
-    } else {
-      LogPrint(GPM_LOG_LEVEL, "GPM file descriptor not valid: %d", gpm_fd);
-    }
 
-    if (error) gpmCloseConnection();
+      if (error) gpmCloseConnection();
+    }
   }
 #endif /* HAVE_LIBGPM */
 
