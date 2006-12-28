@@ -74,7 +74,7 @@ route_BaseScreen (int column, int row, int screen) {
 }
 
 static int
-point_BaseScreen (int column, int row) {
+point_BaseScreen (int left, int columns, int top, int lines) {
   return 0;
 }
 

@@ -89,7 +89,7 @@ extern int insertKey (ScreenKey);
 extern int insertCharacters (const char *, int);
 extern int insertString (const char *);
 extern int routeCursor (int, int, int);
-extern int setPointer (int, int);
+extern int setPointer (int, int, int, int);
 extern int getPointer (int *, int *);
 extern int selectVirtualTerminal (int);
 extern int switchVirtualTerminal (int);

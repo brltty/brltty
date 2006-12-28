@@ -189,8 +189,8 @@ routeCursor (int column, int row, int screen) {
 }
 
 int
-setPointer (int column, int row) {
-  return currentScreen->point(column, row);
+setPointer (int left, int columns, int top, int lines) {
+  return currentScreen->point(left, columns, top, lines);
 }
 
 int

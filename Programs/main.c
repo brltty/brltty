@@ -1066,7 +1066,7 @@ main (int argc, char *argv[]) {
   trackCursor(1);        /* set initial window position */
   p->motx = p->winx; p->moty = p->winy;
   oldwinx = p->winx; oldwiny = p->winy;
-  if (prefs.pointerFollowsWindow) setPointer(p->winx, p->winy);
+  if (prefs.pointerFollowsWindow) setPointer(p->winx, brl.x, p->winy, brl.y);
   getPointer(&p->ptrx, &p->ptry);
 
   AT2_resetState();
@@ -2198,7 +2198,7 @@ main (int argc, char *argv[]) {
 
       /* There are a few things to take care of if the display has moved. */
       if ((p->winx != oldwinx) || (p->winy != oldwiny)) {
-        if (prefs.pointerFollowsWindow && !pointerMoved) setPointer(p->winx, p->winy);
+        if (prefs.pointerFollowsWindow && !pointerMoved) setPointer(p->winx, brl.x, p->winy, brl.y);
 
         if (prefs.showAttributes && prefs.blinkingAttributes) {
           /* Attributes are blinking.

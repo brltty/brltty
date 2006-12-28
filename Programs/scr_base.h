@@ -27,7 +27,7 @@ typedef struct {
   int (*read) (ScreenBox, unsigned char *, ScreenMode);
   int (*insert) (ScreenKey);
   int (*route) (int, int, int);
-  int (*point) (int, int);
+  int (*point) (int, int, int, int);
   int (*pointer) (int *, int *);
   int (*selectvt) (int);
   int (*switchvt) (int);

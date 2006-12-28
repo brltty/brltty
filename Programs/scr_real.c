@@ -74,7 +74,7 @@ identifyScreenDrivers (int full) {
 #include <gpm.h>
 extern int gpm_tried;
 
-#define GPM_LOG_LEVEL LOG_DEBUG
+#define GPM_LOG_LEVEL LOG_WARNING
 
 typedef enum {
   GCS_CLOSED,
@@ -113,7 +113,7 @@ gpmOpenConnection (void) {
         return 0;
       }
 
-      LogPrint(GPM_LOG_LEVEL, "GPM opened: fd=%d", gpm_fd);
+      LogPrint(GPM_LOG_LEVEL, "GPM opened: fd=%d con=%d", gpm_fd, gpm_consolefd);
       gpmConnectionState = GCS_OPENED;
     }
 
@@ -138,14 +138,49 @@ route_RealScreen (int column, int row, int screen) {
 }
 
 static int
-point_RealScreen (int column, int row) {
+point_RealScreen (int left, int columns, int top, int lines) {
+  int console = getConsole();
+  if (console != -1) {
+#ifdef TIOCLINUX
+    typedef struct {
+      char subcode;
+      short xs;
+      short ys;
+      short xe;
+      short ye;
+      short mode;
+    } PACKED Arguments;
+
+    Arguments arguments = {
+      .subcode = 2,
+      .xs = 1 + left,
+      .ys = 1 + top,
+      .xe = 1 + left + columns - 1,
+      .ye = 1 + top + lines - 1,
+      .mode = 0
+    };
+
+    if (ioctl(console, TIOCLINUX, &arguments) != -1) return 1;
+
+    if (errno != EINVAL) {
+      LogPrint(GPM_LOG_LEVEL, "ioctl[TIOCLINUX] error: %s", strerror(errno));
+      return 0;
+    }
+#endif /* TIOCLINUX */
+
 #ifdef HAVE_LIBGPM
-  if (gpmOpenConnection()) {
-    if (Gpm_DrawPointer(column, row, gpm_consolefd) != -1) return 1;
-    LogError("Gpm_DrawPointer");
-    gpmCloseConnection();
-  }
+    if (gpmOpenConnection()) {
+      if (Gpm_DrawPointer(left, top, console) != -1) return 1;
+
+      if (errno != EINVAL) {
+        LogPrint(GPM_LOG_LEVEL, "Gpm_DrawPointer error: %s", strerror(errno));
+        gpmCloseConnection();
+        return 0;
+      }
+    }
 #endif /* HAVE_LIBGPM */
+  }
+
   return 0;
 }
 
