@@ -899,10 +899,8 @@ prepunc " 236
 postpunc " 356
 always " 5
 
-prepunc ' 6-236
-postpunc ' 356-3
 postpunc '' 356
-postpunc ''' 356-3-356
+postpunc ''' 3-356
 always ' 3
 word 'em = 
 word 'tis =
@@ -917,7 +915,6 @@ endword 't 3-2345
 endword 've 3-1236-15
 
 prepunc `` 236
-prepunc ` 6-236
 always ` 4
 
 midnum ^ 45
