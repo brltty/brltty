@@ -314,7 +314,7 @@ spktest.$O:
 
 ###############################################################################
 
-SCRTEST_OBJECTS = scrtest.$O options.$O misc.$O $(SYSTEM_OBJECT) io_misc.$O drivers.$O $(SCREEN_OBJECTS) $(SCREEN_DRIVER_OBJECTS) route.$O
+SCRTEST_OBJECTS = scrtest.$O options.$O misc.$O $(SYSTEM_OBJECT) io_misc.$O async.$O queue.$O drivers.$O $(SCREEN_OBJECTS) $(SCREEN_DRIVER_OBJECTS) route.$O
 
 scrtest$X: $(SCRTEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(SCRTEST_OBJECTS) $(SCREEN_DRIVER_LIBRARIES) $(LDLIBS)
