@@ -9,7 +9,7 @@ name="&lt;Sebastien.Hinderer@ens-lyon.org&gt;"></tt><newline></name>
 <name>Samuel Thibault <tt><htmlurl url="mailto:Samuel.Thibault@ens-lyon.org"
 name="&lt;Samuel.Thibault@ens-lyon.org&gt;"></tt><newline></name>
 </author>
-<date>V1.4, November 2006
+<date>V1.4, December 2006
 <abstract>
 This document describes <tt>BrlAPI</tt>.
 </abstract>
@@ -1209,9 +1209,11 @@ four following modes:
 <itemize>
 <item>authorization mode: this is the initial mode, when the client hasn't
 got the authorization to use the server yet. The server first sends a
-<tt/BRLAPI_PACKET_AUTH/ packet that announces which authorization methods are
-allowed. The client can then send <tt/BRLAPI_PACKET_AUTH/ packets,
-which makes the connection enter normal mode.
+<tt/BRLAPI_PACKET_VERSION/ packet that announces the server version. The client
+must send back a <tt/BRLAPI_PACKET_VERSION/ for announcing its own version too.
+The server then sends a <tt/BRLAPI_PACKET_AUTH/ packet that announces
+which authorization methods are allowed. The client can then send
+<tt/BRLAPI_PACKET_AUTH/ packets, which makes the connection enter normal mode.
 
 
 <item>normal mode: the client is authorized to use the server, but didn't ask for a tty
@@ -1270,30 +1272,34 @@ Here is described the semantics of each type of packet. Most of them are
 directly linked to some of <em/BrlAPI/'s library's functions. Reading their
 online manual page as well will hence be of good help for understanding.
 
-<sect2><tt/BRLAPI_PACKET_AUTH/ (see <em/brlapi_loadAuthKey()/)
-<p>
+<sect2><tt/BRLAPI_PACKET_VERSION/
 This must be the first packet ever transmitted from the server to the client and
 from the client to the server. The server sends one first for letting the client
-know which authorization methods are available. Data is first an integer
-indicating the protocol version that the server uses. Then comes the allowed
+know its protocol version. Data is an integer indicating the protocol version.
+
+Then client must then respond the same way for giving its
+version.  If the protocol version can't be handled by the server, a
+<tt/BRLAPI_ERROR_PROTOCOL_VERSION/ error packet is returned and the connection
+is closed.
+
+<sect2><tt/BRLAPI_PACKET_AUTH/
+<p>
+This must be the second packet ever transmitted from the server to the client
+and from the client to the server. The server sends one first for letting the
+client know which authorization methods are available.  Data is the allowed
 authorization types, as integers.
 
-The client can then try to get authorized by sending packets whose data is first
-an integer indicating the protocol version, then the type of authorization that
-is tried (as an integer), and eventually some data (if the authorization type
-needs it).
-
-If the protocol version is not the same as the server's, a
-<tt/BRLAPI_ERROR_PROTOCOL_VERSION/ error packet is returned and the connection is
-closed.
+The client can then try to get authorized by sending packets whose data is the
+type of authorization that is tried (as an integer), and eventually some data
+(if the authorization type needs it).
 
 If the authorization is successful, the server acknowledges the packet, and
 other types of packets might be used, other <tt/BRLAPI_PACKET_AUTH/ shouldn't be
 sent by the client.
 
 If the authorization is not successful, the server sends a
-<tt/BRLAPI_ERROR_CONNREFUSED/ error, and the client can try another authorization
-method.
+<tt/BRLAPI_ERROR_CONNREFUSED/ error, and the client can try another
+authorization method.
 
 Authorization methods are as follow:
 

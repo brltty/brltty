@@ -52,7 +52,8 @@ extern "C" {
 
 #define BRLAPI_PROTOCOL_VERSION ((uint32_t) 8) /** Communication protocol version */
 
-#define BRLAPI_PACKET_AUTH           'K'    /**< Authorization key           */
+#define BRLAPI_PACKET_VERSION        'v'    /**< Version                     */
+#define BRLAPI_PACKET_AUTH           'a'    /**< Authorization               */
 #define BRLAPI_PACKET_GETDRIVERID    'd'    /**< Ask which driver is used    */
 #define BRLAPI_PACKET_GETDRIVERNAME  'n'    /**< Ask which driver is used    */
 #define BRLAPI_PACKET_GETDISPLAYSIZE 's'    /**< Dimensions of brl display   */
@@ -85,15 +86,18 @@ typedef struct {
 
 #define BRLAPI_HEADERSIZE sizeof(brlapi_header_t)
 
-/** Structure of authorization packets */
+/** Structure of version packets */
 typedef struct {
   uint32_t protocolVersion;
+} brlapi_versionStruct_t;
+
+/** Structure of authorization packets */
+typedef struct {
   uint32_t type;
   unsigned char key;
 } brlapi_authClientStruct_t;
 
 typedef struct {
-  uint32_t protocolVersion;
   uint32_t type[1];
 } brlapi_authServerStruct_t;
 

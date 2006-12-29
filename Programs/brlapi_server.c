@@ -623,7 +623,7 @@ static Connection *createConnection(FileDescriptor fd, time_t currentTime)
   pthread_mutexattr_t mattr;
   Connection *c =  malloc(sizeof(Connection));
   if (c==NULL) goto out;
-  c->auth = 0;
+  c->auth = -1;
   c->fd = fd;
   c->tty = NULL;
   c->raw = 0;
@@ -1205,82 +1205,100 @@ static PacketHandlers packetHandlers = {
 
 static void handleNewConnection(Connection *c)
 {
-  unsigned char packet[BRLAPI_MAXPACKETSIZE];
-  int nbmethods = 0;
-  brlapi_authServerStruct_t *authPacket = (brlapi_authServerStruct_t *) packet;
-  authPacket->protocolVersion = htonl(BRLAPI_PROTOCOL_VERSION);
+  brlapi_versionStruct_t versionPacket;
+  versionPacket.protocolVersion = htonl(BRLAPI_PROTOCOL_VERSION);
 
-  /* TODO: move this inside auth.c */
-  if (authDescriptor && authPerform(authDescriptor, c->fd))
-    authPacket->type[nbmethods++] = htonl(BRLAPI_AUTH_NONE);
-  if (isAbsolutePath(auth))
-    authPacket->type[nbmethods++] = htonl(BRLAPI_AUTH_KEY);
-
-  brlapiserver_writePacket(c->fd,BRLAPI_PACKET_AUTH,packet,sizeof(authPacket->protocolVersion)+nbmethods*sizeof(authPacket->type));
+  brlapiserver_writePacket(c->fd,BRLAPI_PACKET_VERSION,&versionPacket,sizeof(versionPacket));
 }
 
 /* Function : handleUnauthorizedConnection */
-/* Returns 0 if connection is authorized */
 /* Returns 1 if connection has to be removed */
 static int handleUnauthorizedConnection(Connection *c, brlapi_type_t type, unsigned char *packet, size_t size)
 {
-  size_t authKeyLength = 0;
-  unsigned char authKey[BRLAPI_MAXPACKETSIZE];
-  int authCorrect = 0;
-  brlapi_authClientStruct_t *authPacket = (brlapi_authClientStruct_t *) packet;
-  int remaining = size;
-  uint32_t authType;
+  if (c->auth == -1) {
+    if (type != BRLAPI_PACKET_VERSION) {
+      WERR(c->fd, BRLAPI_ERROR_CONNREFUSED, "wrong packet type (should be version)");
+      return 1;
+    }
+
+    {
+      brlapi_versionStruct_t *versionPacket = (brlapi_versionStruct_t *) packet;
+      unsigned char serverPacket[BRLAPI_MAXPACKETSIZE];
+      brlapi_authServerStruct_t *authPacket = (brlapi_authServerStruct_t *) serverPacket;
+      int nbmethods = 0;
+
+      if (size<sizeof(*versionPacket) || ntohl(versionPacket->protocolVersion)!=BRLAPI_PROTOCOL_VERSION) {
+	WERR(c->fd, BRLAPI_ERROR_PROTOCOL_VERSION, "wrong protocol version");
+	return 1;
+      }
+
+      c->auth = 0;
+
+      /* TODO: move this inside auth.c */
+      if (authDescriptor && authPerform(authDescriptor, c->fd))
+	authPacket->type[nbmethods++] = htonl(BRLAPI_AUTH_NONE);
+      if (isAbsolutePath(auth))
+	authPacket->type[nbmethods++] = htonl(BRLAPI_AUTH_KEY);
+
+      brlapiserver_writePacket(c->fd,BRLAPI_PACKET_AUTH,serverPacket,nbmethods*sizeof(authPacket->type));
+
+      return 0;
+    }
+  }
 
   if (type!=BRLAPI_PACKET_AUTH) {
     WERR(c->fd, BRLAPI_ERROR_CONNREFUSED, "wrong packet type (should be auth)");
     return 1;
   }
 
-  if ((remaining<sizeof(authPacket->protocolVersion))||(ntohl(authPacket->protocolVersion)!=BRLAPI_PROTOCOL_VERSION)) {
-    writeError(c->fd, BRLAPI_ERROR_PROTOCOL_VERSION);
-    return 1;
-  }
-  remaining -= sizeof(authPacket->protocolVersion);
+  {
+    size_t authKeyLength = 0;
+    unsigned char authKey[BRLAPI_MAXPACKETSIZE];
+    int authCorrect = 0;
+    brlapi_authClientStruct_t *authPacket = (brlapi_authClientStruct_t *) packet;
+    int remaining = size;
+    uint32_t authType;
 
-  if (!strcmp(auth,"none"))
-    authCorrect = 1;
-  else {
-    authType = ntohl(authPacket->type);
-    remaining -= sizeof(authPacket->type);
+    if (!strcmp(auth,"none"))
+      authCorrect = 1;
+    else {
+      authType = ntohl(authPacket->type);
+      remaining -= sizeof(authPacket->type);
 
-  /* TODO: move this inside auth.c */
-    switch(authType) {
-      case BRLAPI_AUTH_NONE:
-        if (authDescriptor) authCorrect = authPerform(authDescriptor, c->fd);
-	break;
-      case BRLAPI_AUTH_KEY:
-        if (isAbsolutePath(auth)) {
-	  if (brlapiserver_loadAuthKey(auth,&authKeyLength,authKey)==-1) {
-	    LogPrint(LOG_WARNING,"Unable to load API authorization key from %s: %s in %s. You may use parameter auth=none if you don't want any authorization (dangerous)", auth, strerror(brlapi_libcerrno), brlapi_errfun);
-	    break;
+    /* TODO: move this inside auth.c */
+      switch(authType) {
+	case BRLAPI_AUTH_NONE:
+	  if (authDescriptor) authCorrect = authPerform(authDescriptor, c->fd);
+	  break;
+	case BRLAPI_AUTH_KEY:
+	  if (isAbsolutePath(auth)) {
+	    if (brlapiserver_loadAuthKey(auth,&authKeyLength,authKey)==-1) {
+	      LogPrint(LOG_WARNING,"Unable to load API authorization key from %s: %s in %s. You may use parameter auth=none if you don't want any authorization (dangerous)", auth, strerror(brlapi_libcerrno), brlapi_errfun);
+	      break;
+	    }
+	    LogPrint(LOG_DEBUG, "Authorization key loaded");
+	    authCorrect = (remaining==authKeyLength) && (!memcmp(&authPacket->key, authKey, authKeyLength));
+	    memset(authKey, 0, authKeyLength);
+	    memset(&authPacket->key, 0, authKeyLength);
 	  }
-	  LogPrint(LOG_DEBUG, "Authorization key loaded");
-	  authCorrect = (remaining==authKeyLength) && (!memcmp(&authPacket->key, authKey, authKeyLength));
-	  memset(authKey, 0, authKeyLength);
-	  memset(&authPacket->key, 0, authKeyLength);
-	}
-	break;
-      default:
-        LogPrint(LOG_DEBUG, "Unsupported authorization method %"PRId32, authType);
-        break;
+	  break;
+	default:
+	  LogPrint(LOG_DEBUG, "Unsupported authorization method %"PRId32, authType);
+	  break;
+      }
     }
-  }
 
-  if (!authCorrect) {
-    writeError(c->fd, BRLAPI_ERROR_CONNREFUSED);
-    LogPrint(LOG_WARNING, "BrlAPI connection fd=%"PRIFD" failed authorization", c->fd);
+    if (!authCorrect) {
+      writeError(c->fd, BRLAPI_ERROR_CONNREFUSED);
+      LogPrint(LOG_WARNING, "BrlAPI connection fd=%"PRIFD" failed authorization", c->fd);
+      return 0;
+    }
+
+    unauthConnections--;
+    writeAck(c->fd);
+    c->auth = 1;
     return 0;
   }
-
-  unauthConnections--;
-  writeAck(c->fd);
-  c->auth = 1;
-  return 0;
 }
 
 /* Function : processRequest */
@@ -1335,13 +1353,13 @@ static int processRequest(Connection *c, PacketHandlers *handlers)
       LogPrint(LOG_DEBUG,"Client on fd %"PRIFD" did not give up control of tty %#010x properly",c->fd,c->tty->number);
       doLeaveTty(c);
     }
-    if (c->auth==0) unauthConnections--;
+    if (c->auth!=1) unauthConnections--;
     return 1;
   }
   size = c->packet.header.size;
   type = c->packet.header.type;
   
-  if (c->auth==0) return handleUnauthorizedConnection(c, type, packet, size);
+  if (c->auth!=1) return handleUnauthorizedConnection(c, type, packet, size);
 
   if (size>BRLAPI_MAXPACKETSIZE) {
     LogPrint(LOG_WARNING, "Discarding too large packet of type %s on fd %"PRIFD,brlapiserver_packetType(type), c->fd);
@@ -1947,7 +1965,7 @@ static void handleTtyFds(fd_set *fds, time_t currentTime, Tty *tty) {
       if (FD_ISSET(c->fd, fds))
 #endif /* WINDOWS */
 	remove = processRequest(c, &packetHandlers);
-      else remove = c->auth==0 && currentTime-(c->upTime) > UNAUTH_DELAY;
+      else remove = c->auth!=1 && currentTime-(c->upTime) > UNAUTH_DELAY;
 #ifndef WINDOWS
       FD_CLR(c->fd,fds);
 #endif /* WINDOWS */

@@ -578,8 +578,9 @@ brlapi_fileDescriptor brlapi__openConnection(brlapi_handle_t *handle, const brla
   unsigned char serverPacket[BRLAPI_MAXPACKETSIZE];
   brlapi_authClientStruct_t *auth = (brlapi_authClientStruct_t *) packet;
   brlapi_authServerStruct_t *authServer = (brlapi_authServerStruct_t *) serverPacket;
+  brlapi_versionStruct_t *version = (brlapi_versionStruct_t *) serverPacket;
   uint32_t *type;
-  int authServerLen;
+  int len;
 
   brlapi_connectionSettings_t settings = { BRLAPI_DEFAUTH, ":0" };
   brlapi_connectionSettings_t envsettings = { getenv("BRLAPI_AUTH"), getenv("BRLAPI_HOST") };
@@ -603,22 +604,26 @@ brlapi_fileDescriptor brlapi__openConnection(brlapi_handle_t *handle, const brla
     if (usedSettings) usedSettings->host = settings.host;
   }
 
-  if ((authServerLen = brlapi__waitForPacket(handle, BRLAPI_PACKET_AUTH, serverPacket, sizeof(serverPacket), 1)) < 0)
-    return INVALID_FILE_DESCRIPTOR;
+  if ((len = brlapi__waitForPacket(handle, BRLAPI_PACKET_VERSION, serverPacket, sizeof(serverPacket), 1)) < 0)
+    goto outfd;
 
-  if (authServer->protocolVersion != htonl(BRLAPI_PROTOCOL_VERSION)) {
+  if (version->protocolVersion != htonl(BRLAPI_PROTOCOL_VERSION)) {
     brlapi_errno = BRLAPI_ERROR_PROTOCOL_VERSION;
-    return INVALID_FILE_DESCRIPTOR;
+    goto outfd;
   }
 
-  auth->protocolVersion = htonl(BRLAPI_PROTOCOL_VERSION);
+  if (brlapi_writePacket(handle->fileDescriptor, BRLAPI_PACKET_VERSION, serverPacket, sizeof(serverPacket)) < 0)
+    goto outfd;
 
-  for (type = &authServer->type[0]; (void*) type < (void*) &serverPacket[authServerLen]; type++) {
+  if ((len = brlapi__waitForPacket(handle, BRLAPI_PACKET_AUTH, serverPacket, sizeof(serverPacket), 1)) < 0)
+    return INVALID_FILE_DESCRIPTOR;
+
+  for (type = &authServer->type[0]; (void*) type < (void*) &serverPacket[len]; type++) {
     auth->type = *type;
     switch (ntohl(*type)) {
       case BRLAPI_AUTH_NONE:
         if (brlapi_writePacket(handle->fileDescriptor, BRLAPI_PACKET_AUTH, auth,
-	    sizeof(auth->protocolVersion)+sizeof(auth->type)) < 0)
+	    sizeof(auth->type)) < 0)
 	  goto outfd;
 	if (usedSettings) usedSettings->auth = "none";
 	break;
@@ -628,7 +633,7 @@ brlapi_fileDescriptor brlapi__openConnection(brlapi_handle_t *handle, const brla
         if (brlapi_loadAuthKey(settings.auth, &authKeyLength, (void *) &auth->key) < 0)
 	  continue;
         res = brlapi_writePacket(handle->fileDescriptor, BRLAPI_PACKET_AUTH, auth,
-	  sizeof(auth->protocolVersion)+sizeof(auth->type)+authKeyLength);
+	  sizeof(auth->type)+authKeyLength);
 	memset(&auth->key, 0, authKeyLength);
 	if (res < 0)
 	  goto outfd;
