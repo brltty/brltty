@@ -1162,7 +1162,7 @@ main (int argc, char *argv[]) {
             LogPrint(LOG_NOTICE, "braille display offline");
             offline = 1;
           }
-          continue;
+          goto isOffline;
         }
         if (offline) {
           LogPrint(LOG_NOTICE, "braille display online");
@@ -2398,6 +2398,8 @@ main (int argc, char *argv[]) {
       api_flush(&brl, BRL_CTX_SCREEN);
 #endif /* ENABLE_API */
     }
+
+  isOffline:
 
 #ifdef ENABLE_SPEECH_SUPPORT
     processSpeechFifo();
