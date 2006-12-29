@@ -986,6 +986,7 @@ handleAutorepeat (int *command, RepeatState *state) {
 
 int
 main (int argc, char *argv[]) {
+  int offline = 0;
   int suspended = 0;
   short oldwinx, oldwiny;
   int i;                        /* loop counter */
@@ -1156,6 +1157,17 @@ main (int argc, char *argv[]) {
         }
 
         handleAutorepeat(&command, NULL);
+        if ((command & BRL_MSK_CMD) == BRL_CMD_OFFLINE) {
+          if (!offline) {
+            LogPrint(LOG_NOTICE, "braille display offline");
+            offline = 1;
+          }
+          continue;
+        }
+        if (offline) {
+          LogPrint(LOG_NOTICE, "braille display online");
+          offline = 0;
+        }
         if (command == EOF) break;
 
       doCommand:
