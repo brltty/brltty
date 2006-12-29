@@ -895,73 +895,97 @@ begword gastro 1245-1-34-1235-135
 begword neuro =
 begword psycho 1234-234-13456-16-135
 
-# punctuation
 prepunc " 236
 postpunc " 356
 always " 5
+
 prepunc ' 6-236
 postpunc ' 356-3
 postpunc '' 356
 postpunc ''' 356-3-356
 always ' 3
-endword 'd 3-145
 word 'em = 
+word 'tis =
+word 'twas =
+word 'twill =
+endword 'd 3-145
 endword 'll 3-123-123
 endword 'm 3-134
 endword 're 3-1235-15
 endword 's 3-234
 endword 't 3-2345
-word 'tis =
-word 'twas =
-word 'twill =
 endword 've 3-1236-15
-midnum , 2
-always , 2
-midnum . 46
-always . 256
-always ; 23
-midnum : 25
-always : 25
-endnum ! 12346 (factorial)
-always ! 235
-always # 3456
-midnum / 34
-always / 456-34
-always ? 236
-always % 4-356
-midnum ^ 45
-always ^ 456-126
-always ~ 4-156
-always & 456-12346
-midnum * 4-16
-always * 35-35
-repeated *** 16-16-16
-always ( 2356
-always ) 2356
-always [ 456-12356
-always ] 456-23456
-always { 46-12356
-always } 46-23456
-always -com =
-always _ 78
+
 prepunc `` 236
 prepunc ` 6-236
 always ` 4
+
+midnum ^ 45
+always ^ 456-126
+
+always ~ 4-156
+repeated ~~~ 4-156-4-156-4-156
+
+midnum , 2
+always , 2
+
+always ; 23
+
+midnum : 25
+always : 25
+repeated ::: 25-25-25
+
+midnum . 46
+always . 256
+always ... 3-3-3
+always .\s.\s. 3-3-3 . . .
+
+endnum ! 12346 (factorial)
+always ! 235
+
+always ? 236
+
+always ( 2356
+always ) 2356
+
+always [ 456-12356
+always ] 456-23456
+
+always { 46-12356
+always } 46-23456
+
+always # 3456
+
+midnum * 4-16
+always * 35-35
+repeated *** 16-16-16
+
+midnum / 34
+always / 456-34
+
+always % 4-356
+
+always & 456-12346
+
 always @ 4-1
+
 always \\ 456-16
+
 always | 456-1256
+
 repeated \s 0
 repeated \t 0
 repeated \xa0 0 no break space
+
+always -com =
 repeated --- 36-36-36
-repeated ___ 78-78-78
-repeated ::: 25-25-25
-repeated === 46-13-46-13-46-13
-repeated ~~~ 4-156-4-156-4-156
 always \s-\s 36-36
 always \s-\scom 36-36-14-135-134
-always ... 3-3-3
-always .\s.\s. 3-3-3 . . .
+
+always _ 78
+repeated ___ 78-78-78
+
+repeated === 46-13-46-13-46-13
 
 # the hyphen
 always ­ 36
