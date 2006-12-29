@@ -2435,10 +2435,9 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
     handleAutorepeat(&command, &repeatState);
     if (command != EOF) {
       clientCode = cmdBrlttyToBrlapi(command);
-      LogPrint(LOG_DEBUG,"client code %016"BRLAPI_PRIxKEYCODE, clientCode);
       /* nobody needs the raw code */
       if ((c = whoGetsKey(&ttys,clientCode,BRL_COMMANDS))) {
-        LogPrint(LOG_DEBUG,"Transmitting unmasked command %lx",(unsigned long)command);
+        LogPrint(LOG_DEBUG,"Transmitting unmasked command %lx as client code %016"BRLAPI_PRIxKEYCODE,(unsigned long)command, clientCode);
 	writeKey(c->fd,clientCode);
         command = EOF;
       }
