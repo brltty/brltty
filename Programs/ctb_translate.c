@@ -84,27 +84,29 @@ selectRule (int length) { /*check for valid contractions */
       setAfter(currentFindLength);
 
       if (!maximumLength) {
-#define STATE(c) (CTC((c), CTC_UpperCase)? 1: CTC((c), CTC_LowerCase)? 0: -1)
-
-        int state = STATE(before);
+        typedef enum {CS_Any, CS_Lower, CS_UpperSingle, CS_UpperMultiple} CapitalizationState;
+#define STATE(c) (CTC((c), CTC_UpperCase)? CS_UpperSingle: CTC((c), CTC_LowerCase)? CS_Lower: CS_Any)
+        CapitalizationState current = STATE(before);
         int i;
         maximumLength = currentFindLength;
 
         for (i=0; i<currentFindLength; ++i) {
           unsigned char byte = src[i];
-          int next = STATE(byte);
+          CapitalizationState next = STATE(byte);
 
           if ((i > 0) &&
-              (((state == 0) && (next == 1)) ||
-               ((state == 2) && (next == 0)))) {
+              (((current == CS_Lower) && (next == CS_UpperSingle)) ||
+               ((current == CS_UpperMultiple) && (next == CS_Lower)))) {
             maximumLength = i;
             break;
           }
 
-          if ((state > 0) && (next == 1)) {
-            state = 2;
-          } else {
-            state = next;
+          if ((current > CS_Lower) && (next == CS_UpperSingle)) {
+            current = CS_UpperMultiple;
+          } else if (next != CS_Any) {
+            current = next;
+          } else if (current == CS_Any) {
+            current = CS_Lower;
           }
         }
 
@@ -215,8 +217,7 @@ selectRule (int length) { /*check for valid contractions */
                 if (!CTC(*pre, CTC_Punctuation))
                   break;
               while (post < srcmax) {
-                if (!CTC(*post, CTC_Punctuation))
-                  break;
+                if (!CTC(*post, CTC_Punctuation)) break;
                 post++;
               }
               if (isPre) {
@@ -329,7 +330,7 @@ contractText (void *contractionTable,
             (currentOpcode != CTO_EndNum && CTC(before, CTC_Digit)) ||
             (currentOpcode == CTO_Always && currentFindLength == 1 && CTC(before, CTC_Space) &&
              (src + 1 == srcmax || CTC(src[1], CTC_Space) ||
-              (CTC(src[1], CTC_Punctuation) && (src[1] != '\''))))) {
+              (CTC(src[1], CTC_Punctuation) && (src[1] != '.') && (src[1] != '\''))))) {
           if (!putSequence(table->englishLetterSign)) break;
         }
       }
