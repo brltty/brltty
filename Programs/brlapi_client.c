@@ -622,11 +622,8 @@ brlapi_fileDescriptor brlapi__openConnection(brlapi_handle_t *handle, const brla
     auth->type = *type;
     switch (ntohl(*type)) {
       case BRLAPI_AUTH_NONE:
-        if (brlapi_writePacket(handle->fileDescriptor, BRLAPI_PACKET_AUTH, auth,
-	    sizeof(auth->type)) < 0)
-	  goto outfd;
 	if (usedSettings) usedSettings->auth = "none";
-	break;
+	goto done;
       case BRLAPI_AUTH_KEY: {
         size_t authKeyLength;
 	int res;

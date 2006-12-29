@@ -1214,6 +1214,9 @@ must send back a <tt/BRLAPI_PACKET_VERSION/ for announcing its own version too.
 The server then sends a <tt/BRLAPI_PACKET_AUTH/ packet that announces
 which authorization methods are allowed. The client can then send
 <tt/BRLAPI_PACKET_AUTH/ packets, which makes the connection enter normal mode.
+If no authorization is needed, the server can announce the <tt/NONE/ method, the
+client then doesn't need to send a <tt/BRLAPI_PACKET_AUTH/ packet.
+
 
 
 <item>normal mode: the client is authorized to use the server, but didn't ask for a tty
@@ -1289,9 +1292,10 @@ and from the client to the server. The server sends one first for letting the
 client know which authorization methods are available.  Data is the allowed
 authorization types, as integers.
 
-The client can then try to get authorized by sending packets whose data is the
-type of authorization that is tried (as an integer), and eventually some data
-(if the authorization type needs it).
+If the <tt/NONE/ method is not announced by the server, the client can then try
+to get authorized by sending packets whose data is the type of authorization
+that is tried (as an integer), and eventually some data (if the authorization
+type needs it).
 
 If the authorization is successful, the server acknowledges the packet, and
 other types of packets might be used, other <tt/BRLAPI_PACKET_AUTH/ shouldn't be
@@ -1304,10 +1308,10 @@ authorization method.
 Authorization methods are as follow:
 
 <itemize>
-  <item><tt/none/: no data is needed, the authorization is always successful.
-  <item><tt/key/: data holds a secret key, the authorization is successful only
+  <item><tt/NONE/: the client doesn't need to send an authorization packet.
+  <item><tt/KEY/: data holds a secret key, the authorization is successful only
 if the key matches the server secret key.
-  <item><tt/credentials/: Operating-System-specific credentials are explicitely
+  <item><tt/CREDENTIALS/: Operating-System-specific credentials are explicitely
 sent over the socket, the authorization is successful if the server considers
 the credentials sufficient.
 </itemize>

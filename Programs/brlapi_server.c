@@ -1232,13 +1232,15 @@ static int handleUnauthorizedConnection(Connection *c, brlapi_type_t type, unsig
 	return 1;
       }
 
-      c->auth = 0;
-
       /* TODO: move this inside auth.c */
-      if (authDescriptor && authPerform(authDescriptor, c->fd))
+      if (authDescriptor && authPerform(authDescriptor, c->fd)) {
 	authPacket->type[nbmethods++] = htonl(BRLAPI_AUTH_NONE);
-      if (isAbsolutePath(auth))
-	authPacket->type[nbmethods++] = htonl(BRLAPI_AUTH_KEY);
+	c->auth = 1;
+      } else {
+	if (isAbsolutePath(auth))
+	  authPacket->type[nbmethods++] = htonl(BRLAPI_AUTH_KEY);
+	c->auth = 0;
+      }
 
       brlapiserver_writePacket(c->fd,BRLAPI_PACKET_AUTH,serverPacket,nbmethods*sizeof(authPacket->type));
 
