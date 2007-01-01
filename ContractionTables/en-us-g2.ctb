@@ -80,6 +80,8 @@ contraction alw
 midendword ance 46-15
 largesign and 12346
 midword angh = Shanghai
+begword antenn 1-1345-2345-26-1345 antenna
+begword anterio 1-1345-2345-12456-24-135 anterior
 begword aqued = aqueduct
 always ar 345
 word aright 1-5-1235
@@ -303,6 +305,7 @@ always ename 15-5-1345
 sufword enamel 26-1-134-15-123 enameled
 midendword ence 56-15
 always enceph 26-14-15-1234-125 electroencephalogram
+sufword endow 26-145-246
 always eneck = bottleneck
 midendword eness 15-56-234 closeness
 begword enor = enormous
@@ -861,8 +864,9 @@ begword atto 1-2345-2345-135 10^-18
 begword zepto 1356-15-1234-2345-135 10^-21
 begword yocto 13456-135-14-2345-135 10^-24
 
+begword ante =
 begword anti =
-# begword endo 26-145-135 endow
+begword endo 26-145-135
 begword epi =
 begword extra =
 begword hyper 125-13456-1234-12456
