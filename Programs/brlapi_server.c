@@ -278,6 +278,7 @@ static BrailleDisplay *disp; /* Parameter to pass to braille drivers */
 static RepeatState repeatState;
 
 static int coreActive; /* Whether core is active */
+static int offline; /* Whether device is offline */
 static int driverOpened; /* Whether device is really opened, protected by driverMutex */
 static pthread_mutex_t suspendMutex; /* Protects use of driverOpened state */
 
@@ -2277,7 +2278,7 @@ static void api_writeWindow(BrailleDisplay *brl)
   setCurrentRootTty();
   pthread_mutex_lock(&connectionsMutex);
   pthread_mutex_lock(&rawMutex);
-  if (!suspendConnection && !rawConnection && !whoFillsTty(&ttys)) {
+  if (!offline && !suspendConnection && !rawConnection && !whoFillsTty(&ttys)) {
     last_conn_write=NULL;
     pthread_mutex_lock(&driverMutex);
     trueBraille->writeWindow(brl);
@@ -2294,7 +2295,7 @@ static void api_writeVisual(BrailleDisplay *brl)
   pthread_mutex_lock(&connectionsMutex);
   pthread_mutex_lock(&rawMutex);
   if (trueBraille->writeVisual &&
-      !suspendConnection && !rawConnection && !whoFillsTty(&ttys)) {
+      !offline && !suspendConnection && !rawConnection && !whoFillsTty(&ttys)) {
     last_conn_write=NULL;
     pthread_mutex_lock(&driverMutex);
     trueBraille->writeVisual(brl);
@@ -2360,7 +2361,7 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
     last_conn_write=c;
     refresh=1;
   }
-  if (c) {
+  if (!offline && c) {
     pthread_mutex_lock(&c->brlMutex);
     pthread_mutex_lock(&driverMutex);
     if (!driverOpened) {
@@ -2432,6 +2433,11 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
     writeKey(c->fd,clientCode);
     command = EOF;
   } else {
+    if (command == BRL_CMD_OFFLINE) {
+      offline = 1;
+      return BRL_CMD_OFFLINE;
+    }
+    offline = 0;
     handleAutorepeat(&command, &repeatState);
     if (command != EOF) {
       clientCode = cmdBrlttyToBrlapi(command);
