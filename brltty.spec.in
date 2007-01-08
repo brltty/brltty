@@ -22,6 +22,9 @@ BuildRequires: /usr/bin/awk
 BuildRequires: /usr/bin/bison
 BuildRequires: /usr/bin/install
 BuildRequires: glibc-devel
+BuildRequires: Pyrex
+BuildRequires: tcl
+BuildRequires: gcc-java
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-InstallRoot
 %define _bindir /bin
