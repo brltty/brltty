@@ -1,7 +1,7 @@
 ###############################################################################
 # libbrlapi - A library providing access to braille terminals for applications.
 #
-# Copyright (C) 2005-2006 by Alexis Robert <alexissoft@free.fr>
+# Copyright (C) 2005-2007 by Alexis Robert <alexissoft@free.fr>
 #
 # libbrlapi comes with ABSOLUTELY NO WARRANTY.
 #

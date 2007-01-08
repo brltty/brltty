@@ -2,7 +2,7 @@
  * BRLTTY - A background process providing access to the console screen (when in
  *          text mode) for a blind person using a refreshable braille display.
  *
- * Copyright (C) 1995-2006 by The BRLTTY Developers.
+ * Copyright (C) 1995-2007 by The BRLTTY Developers.
  *
  * BRLTTY comes with ABSOLUTELY NO WARRANTY.
  *
@@ -16,7 +16,6 @@
  */
 
 /* EuroBraille/braille.c - Braille display library for the EuroBraille family.
- * Copyright (C) 1997-2006 by Yannick Plassiard <yan@mistigri.org>
  *                        and Nicolas Pitre <nico@cam.org>
  * See the GNU General Public License for details in the ../../COPYING file
  * See the README file for details about copyrights and version informations
