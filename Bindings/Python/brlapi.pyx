@@ -14,7 +14,7 @@ b.acceptKeyRange(brlapi.KEY_TYPE_SYM, brlapi.KEY_TYPE_SYM|brlapi.KEY_CODE_MASK|b
 b.acceptKeySet([brlapi.KEY_TYPE_CMD|brlapi.KEY_CMD_LNUP, brlapi.KEY_TYPE_CMD|brlapi.KEY_CMD_LNUP])
 b.writeText("Press any key to continue ... ¤")
 key = b.readKey()
-k = expandKeyCode(key)
+k = b.expandKeyCode(key)
 b.writeText("Key %ld (%x %x %x %x) !" % (key, k["type"], k["command"], k["argument"], k["flags"]))
 b.writeText(None,1)
 b.readKey()
