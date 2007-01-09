@@ -165,7 +165,7 @@ highlightRegion_RealScreen (int left, int columns, int top, int lines) {
     if (ioctl(console, TIOCLINUX, &arguments) != -1) return 1;
 
     if (errno != EINVAL) {
-      LogPrint(GPM_LOG_LEVEL, "ioctl[TIOCLINUX] error: %s", strerror(errno));
+      LogError("ioctl[TIOCLINUX]");
       return 0;
     }
 #endif /* TIOCLINUX */
