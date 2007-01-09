@@ -1802,7 +1802,7 @@ static FileDescriptor initializeLocalSocket(struct socketInfo *info)
     /* failed to link */
     if ((pid = readPid(lockpath)) && pid != getpid()
 	&& (kill(pid, 0) != -1 || errno != ESRCH)) {
-      LogPrint(LOG_ERR,"a BrlAPI server already listens on %s (file %s exists)",info->port, lockpath);
+      LogPrint(LOG_ERR,"a BrlAPI server is already listening on %s (file %s exists)",info->port, lockpath);
       goto outtmp;
     }
     /* bogus file, myself or non-existent process, remove */
