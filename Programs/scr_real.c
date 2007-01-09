@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#include <sys/ioctl.h>
 
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
