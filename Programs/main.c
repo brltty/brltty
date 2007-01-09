@@ -984,6 +984,20 @@ handleAutorepeat (int *command, RepeatState *state) {
                     PREFERENCES_TIME(prefs.autorepeatInterval));
 }
 
+static void
+highlightWindow (void) {
+  int width;
+  int height;
+
+  if (prefs.showAttributes) {
+    width = 1, height = 1;
+  } else {
+    width = brl.x, height = brl.y;
+  }
+
+  if (prefs.highlightWindow) highlightScreenRegion(p->winx, width, p->winy, height);
+}
+
 int
 main (int argc, char *argv[]) {
   int offline = 0;
@@ -1067,8 +1081,8 @@ main (int argc, char *argv[]) {
   trackCursor(1);        /* set initial window position */
   p->motx = p->winx; p->moty = p->winy;
   oldwinx = p->winx; oldwiny = p->winy;
-  if (prefs.pointerFollowsWindow) setPointer(p->winx, brl.x, p->winy, brl.y);
-  getPointer(&p->ptrx, &p->ptry);
+  highlightWindow();
+  getScreenPointer(&p->ptrx, &p->ptry);
 
   AT2_resetState();
   resetBlinkingStates();
@@ -2070,7 +2084,7 @@ main (int argc, char *argv[]) {
             p->trky = scr.posy;
           } else if (prefs.windowFollowsPointer) {
             int x, y;
-            if (getPointer(&x, &y)) {
+            if (getScreenPointer(&x, &y)) {
               if ((x != p->ptrx)) {
                 p->ptrx = x;
                 if (x < p->winx)
@@ -2210,7 +2224,7 @@ main (int argc, char *argv[]) {
 
       /* There are a few things to take care of if the display has moved. */
       if ((p->winx != oldwinx) || (p->winy != oldwiny)) {
-        if (prefs.pointerFollowsWindow && !pointerMoved) setPointer(p->winx, brl.x, p->winy, brl.y);
+        if (!pointerMoved) highlightWindow();
 
         if (prefs.showAttributes && prefs.blinkingAttributes) {
           /* Attributes are blinking.

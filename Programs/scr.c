@@ -189,13 +189,13 @@ routeCursor (int column, int row, int screen) {
 }
 
 int
-setPointer (int left, int columns, int top, int lines) {
-  return currentScreen->point(left, columns, top, lines);
+highlightScreenRegion (int left, int columns, int top, int lines) {
+  return currentScreen->highlightRegion(left, columns, top, lines);
 }
 
 int
-getPointer (int *column, int *row) {
-  return currentScreen->pointer(column, row);
+getScreenPointer (int *column, int *row) {
+  return currentScreen->getPointer(column, row);
 }
 
 int

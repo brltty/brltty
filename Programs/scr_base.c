@@ -74,12 +74,12 @@ route_BaseScreen (int column, int row, int screen) {
 }
 
 static int
-point_BaseScreen (int left, int columns, int top, int lines) {
+highlightRegion_BaseScreen (int left, int columns, int top, int lines) {
   return 0;
 }
 
 static int
-pointer_BaseScreen (int *column, int *row) {
+getPointer_BaseScreen (int *column, int *row) {
   return 0;
 }
 
@@ -97,7 +97,7 @@ initializeBaseScreen (BaseScreen *base) {
   base->read = read_BaseScreen;
   base->insert = insert_BaseScreen;
   base->route = route_BaseScreen;
-  base->point = point_BaseScreen;
-  base->pointer = pointer_BaseScreen;
+  base->highlightRegion = highlightRegion_BaseScreen;
+  base->getPointer = getPointer_BaseScreen;
   base->execute = execute_BaseScreen;
 }

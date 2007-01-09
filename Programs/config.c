@@ -618,7 +618,7 @@ getPreferences (void) {
     prefs.capitalsInvisibleTime = DEFAULT_CAPITALS_INVISIBLE_TIME;
 
     prefs.windowFollowsPointer = DEFAULT_WINDOW_FOLLOWS_POINTER;
-    prefs.pointerFollowsWindow = DEFAULT_POINTER_FOLLOWS_WINDOW;
+    prefs.highlightWindow = DEFAULT_HIGHLIGHT_WINDOW;
 
     prefs.textStyle = DEFAULT_TEXT_STYLE;
     prefs.brailleFirmness = DEFAULT_BRAILLE_FIRMNESS;
@@ -1105,8 +1105,8 @@ updatePreferences (void) {
       SYMBOLIC_ITEM(prefs.brailleSensitivity, changedBrailleSensitivity, testBrailleSensitivity, strtext("Braille Sensitivity"), sensitivityLevels),
 #ifdef HAVE_LIBGPM
       BOOLEAN_ITEM(prefs.windowFollowsPointer, NULL, NULL, strtext("Window Follows Pointer")),
-      BOOLEAN_ITEM(prefs.pointerFollowsWindow, NULL, NULL, strtext("Pointer Follows Window")),
 #endif /* HAVE_LIBGPM */
+      BOOLEAN_ITEM(prefs.highlightWindow, NULL, NULL, strtext("Highlight Window")),
       BOOLEAN_ITEM(prefs.alertTunes, NULL, NULL, strtext("Alert Tunes")),
       SYMBOLIC_ITEM(prefs.tuneDevice, changedTuneDevice, testTunes, strtext("Tune Device"), tuneDevices),
 #ifdef ENABLE_PCM_SUPPORT

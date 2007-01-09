@@ -43,32 +43,32 @@ extern "C" {
 #define DEFAULT_AUTOREPEAT_DELAY 50	/* hundredths of a second */
 #define DEFAULT_AUTOREPEAT_INTERVAL 10	/* hundredths of a second */
 
-#define DEFAULT_SHOW_CURSOR 1		/* 1 for cursor display, 0 for no cursor */
+#define DEFAULT_SHOW_CURSOR 1		/* 1 for yes, 0 for no */
 #define DEFAULT_CURSOR_STYLE 0		/* 1 for block, 0 for underline */
-#define DEFAULT_TRACK_CURSOR 1		/* 1 for cursor tracking on, 0 for off */
-#define DEFAULT_HIDE_CURSOR 0		/* 1 for hiding cursor, 0 for showing it */
-#define DEFAULT_BLINKING_CURSOR 0		/* 1 for cursor blink on, 0 for off */
+#define DEFAULT_TRACK_CURSOR 1		/* 1 for on, 0 for off */
+#define DEFAULT_HIDE_CURSOR 0		/* 1 for yes, 0 for no */
+#define DEFAULT_BLINKING_CURSOR 0		/* 1 for on, 0 for off */
 #define DEFAULT_CURSOR_VISIBLE_TIME 40	/* for blinking cursor */
 #define DEFAULT_CURSOR_INVISIBLE_TIME 40
 
-#define DEFAULT_SHOW_ATTRIBUTES 0          /* 1 for attribute underlining */
-#define DEFAULT_BLINKING_ATTRIBUTES 1        /* 1 for attr underlining that blinks */
+#define DEFAULT_SHOW_ATTRIBUTES 0          /* 1 for on, 0 for off */
+#define DEFAULT_BLINKING_ATTRIBUTES 1        /* 1 for on, 0 for off */
 #define DEFAULT_ATTRIBUTES_VISIBLE_TIME 20      /* for attribute underlining */
 #define DEFAULT_ATTRIBUTES_INVISIBLE_TIME 60
 
-#define DEFAULT_BLINKING_CAPITALS 0		/* 1 for capital blink on, 0 for off */
+#define DEFAULT_BLINKING_CAPITALS 0		/* 1 for on, 0 for off */
 #define DEFAULT_CAPITALS_VISIBLE_TIME 60	/* for blinking caps */
 #define DEFAULT_CAPITALS_INVISIBLE_TIME 20
 
-#define DEFAULT_WINDOW_FOLLOWS_POINTER 0		/* 1 for capital blink on, 0 for off */
-#define DEFAULT_POINTER_FOLLOWS_WINDOW 0		/* 1 for capital blink on, 0 for off */
+#define DEFAULT_WINDOW_FOLLOWS_POINTER 0		/* 1 for on, 0 for off */
+#define DEFAULT_HIGHLIGHT_WINDOW 0		/* 1 for on, 0 for off */
 
-#define DEFAULT_TEXT_STYLE 0		/* 1 for six-dot mode, 0 for eight-dot */
+#define DEFAULT_TEXT_STYLE 0		/* 1 for six dots, 0 for eight dots */
 #define DEFAULT_BRAILLE_FIRMNESS BF_MEDIUM
 #define DEFAULT_BRAILLE_SENSITIVITY BS_MEDIUM
 
 #define DEFAULT_WINDOW_OVERLAP 0
-#define DEFAULT_SLIDING_WINDOW 0		/* 1 for sliding window on, 0 for off */
+#define DEFAULT_SLIDING_WINDOW 0		/* 1 for on, 0 for off */
 #define DEFAULT_EAGER_SLIDING_WINDOW 0
 
 #define DEFAULT_SKIP_IDENTICAL_LINES 0		/* 1 = skip all identical lines after first */

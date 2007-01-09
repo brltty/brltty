@@ -69,7 +69,7 @@ typedef struct {
   unsigned char capitalsInvisibleTime;
   unsigned char fmVolume;
   unsigned char attributesVisibleTime;
-  unsigned char pointerFollowsWindow;
+  unsigned char highlightWindow;
   unsigned char attributesInvisibleTime;
   unsigned char windowFollowsPointer;
   unsigned char textStyle;
