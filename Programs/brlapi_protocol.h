@@ -52,6 +52,17 @@ extern "C" {
 
 #define BRLAPI_PROTOCOL_VERSION ((uint32_t) 8) /** Communication protocol version */
 
+/** Maximum packet size for packets exchanged on sockets and with braille
+ * terminal */
+#define BRLAPI_MAXPACKETSIZE 512
+
+/** Type for packets.  Should be used instead of a char[], since it has correct
+ * alignment requirements. */
+typedef uint32_t brlapi_packet_t[BRLAPI_MAXPACKETSIZE/sizeof(uint32_t)];
+
+/** Maximum name length for names embeded in BrlAPI packets */
+#define BRLAPI_MAXNAMELENGTH 31
+
 #define BRLAPI_PACKET_VERSION        'v'    /**< Version                     */
 #define BRLAPI_PACKET_AUTH           'a'    /**< Authorization               */
 #define BRLAPI_PACKET_GETDRIVERID    'd'    /**< Ask which driver is used    */
@@ -84,6 +95,7 @@ typedef struct {
   brlapi_type_t type;
 } brlapi_header_t;
 
+/** Size of packet headers */
 #define BRLAPI_HEADERSIZE sizeof(brlapi_header_t)
 
 /** Structure of version packets */

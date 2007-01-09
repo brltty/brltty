@@ -163,7 +163,7 @@ typedef enum {
 
 typedef struct {
   brlapi_header_t header;
-  unsigned char content[BRLAPI_MAXPACKETSIZE+1]; /* +1 for additional \0 */
+  uint32_t content[BRLAPI_MAXPACKETSIZE/sizeof(uint32_t)+1]; /* +1 for additional \0 */
   PacketState state;
   int readBytes; /* Already read bytes */
   unsigned char *p; /* Where read() should load datas */
@@ -364,7 +364,7 @@ static void writeError(FileDescriptor fd, unsigned int err)
 static void writeException(FileDescriptor fd, unsigned int err, brlapi_type_t type, const void *packet, size_t size)
 {
   int hdrsize, esize;
-  unsigned char epacket[BRLAPI_MAXPACKETSIZE];
+  brlapi_packet_t epacket;
   brlapi_errorPacket_t * errorPacket = (brlapi_errorPacket_t *) epacket;
   LogPrint(LOG_DEBUG,"exception %u for packet type %lu on fd %"PRIFD, err, (unsigned long)type, fd);
   hdrsize = sizeof(errorPacket->code)+sizeof(errorPacket->type);
@@ -462,10 +462,10 @@ read:
       packet->state = DISCARDING;
       packet->n = BRLAPI_MAXPACKETSIZE;
     }
-    packet->p = packet->content;
+    packet->p = (unsigned char*) packet->content;
   } else if ((packet->state == READING_CONTENT) && (packet->readBytes==packet->header.size)) goto out;
   else if (packet->state==DISCARDING) {
-    packet->p = packet->content;
+    packet->p = (unsigned char *) packet->content;
     packet->n = MIN(packet->header.size-packet->readBytes, BRLAPI_MAXPACKETSIZE);
   } else {
     packet->n -= res;
@@ -1032,8 +1032,10 @@ static int handleWrite(Connection *c, brlapi_type_t type, unsigned char *packet,
     p += rsiz; remaining -= rsiz; /* or attributes */
   }
   if (ws->flags & BRLAPI_WF_CURSOR) {
+    uint32_t u32;
     CHECKEXC(remaining>=sizeof(uint32_t), BRLAPI_ERROR_INVALID_PACKET, "packet too small for cursor");
-    cursor = ntohl( *((uint32_t *) p) );
+    memcpy(&u32, p, sizeof(uint32_t));
+    cursor = ntohl(u32);
     p += sizeof(uint32_t); remaining -= sizeof(uint32_t); /* cursor */
     CHECKEXC(cursor<=displaySize, BRLAPI_ERROR_INVALID_PACKET, "wrong cursor");
   }
@@ -1224,7 +1226,7 @@ static int handleUnauthorizedConnection(Connection *c, brlapi_type_t type, unsig
 
     {
       brlapi_versionStruct_t *versionPacket = (brlapi_versionStruct_t *) packet;
-      unsigned char serverPacket[BRLAPI_MAXPACKETSIZE];
+      brlapi_packet_t serverPacket;
       brlapi_authServerStruct_t *authPacket = (brlapi_authServerStruct_t *) serverPacket;
       int nbmethods = 0;
 
@@ -1256,7 +1258,7 @@ static int handleUnauthorizedConnection(Connection *c, brlapi_type_t type, unsig
 
   {
     size_t authKeyLength = 0;
-    unsigned char authKey[BRLAPI_MAXPACKETSIZE];
+    brlapi_packet_t authKey;
     int authCorrect = 0;
     brlapi_authClientStruct_t *authPacket = (brlapi_authClientStruct_t *) packet;
     int remaining = size;
@@ -1313,7 +1315,7 @@ static int processRequest(Connection *c, PacketHandlers *handlers)
   PacketHandler p = NULL;
   int res;
   ssize_t size;
-  unsigned char *packet = c->packet.content;
+  unsigned char *packet = (unsigned char *) c->packet.content;
   brlapi_type_t type;
   res = readPacket(c);
   if (res==0) return 0; /* No packet ready */
@@ -2334,7 +2336,7 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
   int res;
   ssize_t size;
   Connection *c;
-  unsigned char packet[BRLAPI_MAXPACKETSIZE];
+  brlapi_packet_t packet;
   int keycode, command = EOF;
   brlapi_keyCode_t clientCode;
 

@@ -233,10 +233,9 @@ static void brlapi_initializeHandle(brlapi_handle_t *handle)
 /* Calls the exception handler if an exception is encountered */
 static ssize_t brlapi__doWaitForPacket(brlapi_handle_t *handle, brlapi_type_t expectedPacketType, void *packet, size_t size)
 {
-  static unsigned char localPacket[BRLAPI_MAXPACKETSIZE];
+  static brlapi_packet_t localPacket;
   brlapi_type_t type;
   ssize_t res;
-  uint32_t *code = (uint32_t *) localPacket;
   brlapi_errorPacket_t *errorPacket = (brlapi_errorPacket_t *) localPacket;
 
   res = brlapi_readPacketHeader(handle->fileDescriptor, &type);
@@ -264,9 +263,9 @@ static ssize_t brlapi__doWaitForPacket(brlapi_handle_t *handle, brlapi_type_t ex
   if ((type==BRLAPI_PACKET_KEY) && (handle->state & STCONTROLLINGTTY) && (res==sizeof(brlapi_keyCode_t))) {
     /* keypress, buffer it */
     if (handle->keybuf_nb>=BRL_KEYBUF_SIZE) {
-      syslog(LOG_WARNING,"lost key: 0X%8"PRIx32"%8"PRIx32"\n",ntohl(code[0]),ntohl(code[1]));
+      syslog(LOG_WARNING,"lost key: 0X%8"PRIx32"%8"PRIx32"\n",ntohl(localPacket[0]),ntohl(localPacket[1]));
     } else {
-      handle->keybuf[(handle->keybuf_next+handle->keybuf_nb++)%BRL_KEYBUF_SIZE]=ntohl(*code);
+      handle->keybuf[(handle->keybuf_next+handle->keybuf_nb++)%BRL_KEYBUF_SIZE]=ntohl(*localPacket);
     }
     pthread_mutex_unlock(&handle->read_mutex);
     return -3;
@@ -574,8 +573,8 @@ static void updateSettings(brlapi_connectionSettings_t *s1, const brlapi_connect
  * Creates a socket to connect to BrlApi */
 brlapi_fileDescriptor brlapi__openConnection(brlapi_handle_t *handle, const brlapi_connectionSettings_t *clientSettings, brlapi_connectionSettings_t *usedSettings)
 {
-  unsigned char packet[BRLAPI_MAXPACKETSIZE];
-  unsigned char serverPacket[BRLAPI_MAXPACKETSIZE];
+  brlapi_packet_t packet;
+  brlapi_packet_t serverPacket;
   brlapi_authClientStruct_t *auth = (brlapi_authClientStruct_t *) packet;
   brlapi_authServerStruct_t *authServer = (brlapi_authServerStruct_t *) serverPacket;
   brlapi_versionStruct_t *version = (brlapi_versionStruct_t *) serverPacket;
@@ -612,13 +611,13 @@ brlapi_fileDescriptor brlapi__openConnection(brlapi_handle_t *handle, const brla
     goto outfd;
   }
 
-  if (brlapi_writePacket(handle->fileDescriptor, BRLAPI_PACKET_VERSION, serverPacket, sizeof(serverPacket)) < 0)
+  if (brlapi_writePacket(handle->fileDescriptor, BRLAPI_PACKET_VERSION, version, sizeof(*version)) < 0)
     goto outfd;
 
   if ((len = brlapi__waitForPacket(handle, BRLAPI_PACKET_AUTH, serverPacket, sizeof(serverPacket), 1)) < 0)
     return INVALID_FILE_DESCRIPTOR;
 
-  for (type = &authServer->type[0]; (void*) type < (void*) &serverPacket[len]; type++) {
+  for (type = &authServer->type[0]; (void*) type < ((void*)&serverPacket) + len; type++) {
     auth->type = *type;
     switch (ntohl(*type)) {
       case BRLAPI_AUTH_NONE:
@@ -690,7 +689,7 @@ void brlapi_closeConnection(void)
 static int brlapi__getDriverSpecific(brlapi_handle_t *handle, const char *driver, brlapi_type_t type, int st)
 {
   int res;
-  unsigned char packet[BRLAPI_MAXPACKETSIZE];
+  brlapi_packet_t packet;
   brlapi_getDriverSpecificModePacket_t *driverPacket = (brlapi_getDriverSpecificModePacket_t *) packet;
   unsigned int n = strlen(driver);
   if (n>BRLAPI_MAXNAMELENGTH) {
@@ -960,8 +959,9 @@ int brlapi_enterTtyMode(int tty, const char *how)
 int brlapi__enterTtyModeWithPath(brlapi_handle_t *handle, int *ttys, int nttys, const char *driverName)
 {
   int res;
-  unsigned char packet[BRLAPI_MAXPACKETSIZE], *p;
-  uint32_t *nbTtys = (uint32_t *) packet, *t = nbTtys+1;
+  brlapi_packet_t packet;
+  unsigned char *p;
+  uint32_t *nbTtys = packet, *t = nbTtys+1;
   char *ttytreepath,*ttytreepathstop;
   int ttypath;
   unsigned int n;
@@ -1005,7 +1005,7 @@ int brlapi__enterTtyModeWithPath(brlapi_handle_t *handle, int *ttys, int nttys, 
   p++;
   memcpy(p, driverName, n);
   p += n;
-  if ((res=brlapi__writePacketWaitForAck(handle,BRLAPI_PACKET_ENTERTTYMODE,packet,(p-packet))) == 0)
+  if ((res=brlapi__writePacketWaitForAck(handle,BRLAPI_PACKET_ENTERTTYMODE,packet,(p-(unsigned char*)packet))) == 0)
     handle->state |= STCONTROLLINGTTY;
   pthread_mutex_unlock(&handle->state_mutex);
   return res;
@@ -1112,7 +1112,7 @@ int brlapi__writeText(brlapi_handle_t *handle, int cursor, const char *str)
 {
   int dispSize = handle->brlx * handle->brly;
   unsigned int min;
-  unsigned char packet[BRLAPI_MAXPACKETSIZE];
+  brlapi_packet_t packet;
   brlapi_writeStructPacket_t *ws = (brlapi_writeStructPacket_t *) packet;
   unsigned char *p = &ws->data;
   char *locale;
@@ -1264,10 +1264,10 @@ int brlapi__write(brlapi_handle_t *handle, const brlapi_writeStruct_t *s)
 {
   int dispSize = handle->brlx * handle->brly;
   unsigned int rbeg, rsiz, strLen;
-  unsigned char packet[BRLAPI_MAXPACKETSIZE];
+  brlapi_packet_t packet;
   brlapi_writeStructPacket_t *ws = (brlapi_writeStructPacket_t *) packet;
   unsigned char *p = &ws->data;
-  unsigned char *end = &packet[BRLAPI_MAXPACKETSIZE];
+  unsigned char *end = (unsigned char*) &packet[sizeof(packet)/sizeof(*packet)];
   int res;
   ws->flags = 0;
   if (s==NULL) goto send;

@@ -102,13 +102,6 @@ size_t brlapi_getHandleSize(void);
 #define BRLAPI_SOCKETPORTNUM 4101 
 #define BRLAPI_SOCKETPORT "4101"
 
-/** Maximum packet size for packets exchanged on sockets and with braille
- * terminal */
-#define BRLAPI_MAXPACKETSIZE 512
-
-/** Maximum name length for names embeded in BrlAPI packets */
-#define BRLAPI_MAXNAMELENGTH 31
-
 /** Default unix path on which connections to \e BrlAPI can be established */
 #ifdef BRLAPI_WIN32
 #define BRLAPI_SOCKETPATH "\\\\.\\pipe\\BrlAPI"
