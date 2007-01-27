@@ -752,7 +752,7 @@ insert_AtSpiScreen (ScreenKey key) {
 }
 
 static int
-execute_AtSpiScreen (int command) {
+executeCommand_AtSpiScreen (int command) {
   int blk = command & BRL_MSK_BLK;
   int arg UNUSED = command & BRL_MSK_ARG;
 
@@ -772,7 +772,7 @@ scr_initialize (MainScreen *main) {
   main->base.selectvt = selectvt_AtSpiScreen;
   main->base.switchvt = switchvt_AtSpiScreen;
   main->base.currentvt = currentvt_AtSpiScreen;
-  main->base.execute = execute_AtSpiScreen;
+  main->base.executeCommand = executeCommand_AtSpiScreen;
   main->prepare = prepare_AtSpiScreen;
   main->open = open_AtSpiScreen;
   main->setup = setup_AtSpiScreen;

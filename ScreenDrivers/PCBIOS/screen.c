@@ -187,7 +187,7 @@ currentvt_PcbiosScreen (void) {
 }
 
 static int
-execute_PcbiosScreen (int command) {
+executeCommand_PcbiosScreen (int command) {
   if ((command & BRL_MSK_BLK) == BRL_BLK_PASSAT2)
     return simulateKey(command & BRL_MSK_ARG, 0);
   return 0;
@@ -202,7 +202,7 @@ scr_initialize (MainScreen *main) {
   main->base.selectvt = selectvt_PcbiosScreen;
   main->base.switchvt = switchvt_PcbiosScreen;
   main->base.currentvt = currentvt_PcbiosScreen;
-  main->base.execute = execute_PcbiosScreen;
+  main->base.executeCommand = executeCommand_PcbiosScreen;
   main->prepare = prepare_PcbiosScreen;
   main->open = open_PcbiosScreen;
   main->setup = setup_PcbiosScreen;

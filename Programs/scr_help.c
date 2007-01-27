@@ -302,7 +302,7 @@ insert_HelpScreen (ScreenKey key) {
 }
 
 static int
-route_HelpScreen (int column, int row, int screen) {
+routeCursor_HelpScreen (int column, int row, int screen) {
   const HelpPageEntry *description = &pageDescriptions[pageNumber];
   if (row != -1) {
     if ((row < 0) || (row >= getBigEndian(description->height))) return 0;
@@ -322,7 +322,7 @@ initializeHelpScreen (HelpScreen *help) {
   help->base.describe = describe_HelpScreen;
   help->base.read = read_HelpScreen;
   help->base.insert = insert_HelpScreen;
-  help->base.route = route_HelpScreen;
+  help->base.routeCursor = routeCursor_HelpScreen;
   help->open = open_HelpScreen;
   help->close = close_HelpScreen;
   help->setPageNumber = setPageNumber_HelpScreen;

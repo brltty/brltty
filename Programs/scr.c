@@ -185,7 +185,7 @@ insertString (const char *string) {
 
 int
 routeCursor (int column, int row, int screen) {
-  return currentScreen->route(column, row, screen);
+  return currentScreen->routeCursor(column, row, screen);
 }
 
 int
@@ -219,8 +219,8 @@ userVirtualTerminal (int number) {
 }
 
 int
-executeScreenCommand (int cmd) {
-  return currentScreen->execute(cmd);
+executeScreenCommand (int command) {
+  return currentScreen->executeCommand(command);
 }
 
 

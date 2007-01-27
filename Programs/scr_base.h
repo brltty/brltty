@@ -26,13 +26,13 @@ typedef struct {
   void (*describe) (ScreenDescription *);
   int (*read) (ScreenBox, unsigned char *, ScreenMode);
   int (*insert) (ScreenKey);
-  int (*route) (int, int, int);
-  int (*highlightRegion) (int, int, int, int);
-  int (*getPointer) (int *, int *);
+  int (*routeCursor) (int column, int row, int screen);
+  int (*highlightRegion) (int left, int columns, int top, int lines);
+  int (*getPointer) (int *column, int *row);
   int (*selectvt) (int);
   int (*switchvt) (int);
   int (*currentvt) (void);
-  int (*execute) (int);
+  int (*executeCommand) (int command);
 } BaseScreen;
 
 extern void initializeBaseScreen (BaseScreen *);

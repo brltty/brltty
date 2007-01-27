@@ -375,7 +375,7 @@ insert_WindowsScreen (ScreenKey key) {
 }
 
 static int
-execute_WindowsScreen (int command) {
+executeCommand_WindowsScreen (int command) {
   int blk = command & BRL_MSK_BLK;
   int arg UNUSED = command & BRL_MSK_ARG;
 
@@ -395,7 +395,7 @@ scr_initialize (MainScreen *main) {
   main->base.describe = describe_WindowsScreen;
   main->base.read = read_WindowsScreen;
   main->base.insert = insert_WindowsScreen;
-  main->base.execute = execute_WindowsScreen;
+  main->base.executeCommand = executeCommand_WindowsScreen;
   main->prepare = prepare_WindowsScreen;
   main->open = open_WindowsScreen;
   main->setup = setup_WindowsScreen;

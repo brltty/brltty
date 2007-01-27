@@ -69,7 +69,7 @@ insert_BaseScreen (ScreenKey key) {
 }
 
 static int
-route_BaseScreen (int column, int row, int screen) {
+routeCursor_BaseScreen (int column, int row, int screen) {
   return 0;
 }
 
@@ -84,7 +84,7 @@ getPointer_BaseScreen (int *column, int *row) {
 }
 
 static int
-execute_BaseScreen (int cmd) {
+executeCommand_BaseScreen (int command) {
   return 0;
 }
 
@@ -96,8 +96,8 @@ initializeBaseScreen (BaseScreen *base) {
   base->describe = describe_BaseScreen;
   base->read = read_BaseScreen;
   base->insert = insert_BaseScreen;
-  base->route = route_BaseScreen;
+  base->routeCursor = routeCursor_BaseScreen;
   base->highlightRegion = highlightRegion_BaseScreen;
   base->getPointer = getPointer_BaseScreen;
-  base->execute = execute_BaseScreen;
+  base->executeCommand = executeCommand_BaseScreen;
 }

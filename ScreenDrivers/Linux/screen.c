@@ -1561,7 +1561,7 @@ currentvt_LinuxScreen (void) {
 }
 
 static int
-execute_LinuxScreen (int command) {
+executeCommand_LinuxScreen (int command) {
   int blk = command & BRL_MSK_BLK;
   int arg UNUSED = command & BRL_MSK_ARG;
   int cmd = blk | arg;
@@ -1640,7 +1640,7 @@ scr_initialize (MainScreen *main) {
   main->base.selectvt = selectvt_LinuxScreen;
   main->base.switchvt = switchvt_LinuxScreen;
   main->base.currentvt = currentvt_LinuxScreen;
-  main->base.execute = execute_LinuxScreen;
+  main->base.executeCommand = executeCommand_LinuxScreen;
   main->prepare = prepare_LinuxScreen;
   main->open = open_LinuxScreen;
   main->setup = setup_LinuxScreen;

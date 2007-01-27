@@ -427,7 +427,7 @@ currentvt_HurdScreen (void) {
 }
 
 static int
-execute_HurdScreen (int command) {
+executeCommand_HurdScreen (int command) {
   int blk = command & BRL_MSK_BLK;
   int arg UNUSED = command & BRL_MSK_ARG;
 
@@ -447,7 +447,7 @@ scr_initialize (MainScreen *main) {
   main->base.selectvt = selectvt_HurdScreen;
   main->base.switchvt = switchvt_HurdScreen;
   main->base.currentvt = currentvt_HurdScreen;
-  main->base.execute = execute_HurdScreen;
+  main->base.executeCommand = executeCommand_HurdScreen;
   main->prepare = prepare_HurdScreen;
   main->open = open_HurdScreen;
   main->setup = setup_HurdScreen;

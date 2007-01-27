@@ -134,7 +134,7 @@ gpmCloseConnection (int alreadyClosed) {
 #endif /* HAVE_LIBGPM */
 
 static int
-route_RealScreen (int column, int row, int screen) {
+routeCursor_RealScreen (int column, int row, int screen) {
   return startCursorRouting(column, row, screen);
 }
 
@@ -247,7 +247,7 @@ getPointer_RealScreen (int *column, int *row) {
 void
 initializeRealScreen (MainScreen *main) {
   initializeMainScreen(main);
-  main->base.route = route_RealScreen;
+  main->base.routeCursor = routeCursor_RealScreen;
   main->base.highlightRegion = highlightRegion_RealScreen;
   main->base.getPointer = getPointer_RealScreen;
 }
