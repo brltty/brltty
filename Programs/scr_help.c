@@ -221,7 +221,7 @@ getPageCount_HelpScreen (void) {
 }
 
 static int
-currentvt_HelpScreen (void) {
+currentVirtualTerminal_HelpScreen (void) {
   return userVirtualTerminal(1);
 }
 
@@ -232,7 +232,7 @@ describe_HelpScreen (ScreenDescription *description) {
   description->posy = cursorRow;
   description->cols = getBigEndian(page->width);
   description->rows = getBigEndian(page->height);
-  description->number = currentvt_HelpScreen();
+  description->number = currentVirtualTerminal_HelpScreen();
 }
 
 static int
@@ -318,7 +318,7 @@ routeCursor_HelpScreen (int column, int row, int screen) {
 void
 initializeHelpScreen (HelpScreen *help) {
   initializeBaseScreen(&help->base);
-  help->base.currentvt = currentvt_HelpScreen;
+  help->base.currentVirtualTerminal = currentVirtualTerminal_HelpScreen;
   help->base.describe = describe_HelpScreen;
   help->base.read = read_HelpScreen;
   help->base.insert = insert_HelpScreen;

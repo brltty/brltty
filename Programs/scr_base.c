@@ -27,17 +27,17 @@
 static const char *text_BaseScreen = "no screen";
 
 static int
-selectvt_BaseScreen (int vt) {
+selectVirtualTerminal_BaseScreen (int vt) {
   return 0;
 }
 
 static int
-switchvt_BaseScreen (int vt) {
+switchVirtualTerminal_BaseScreen (int vt) {
   return 0;
 }
 
 static int
-currentvt_BaseScreen (void) {
+currentVirtualTerminal_BaseScreen (void) {
   return -1;
 }
 
@@ -47,7 +47,7 @@ describe_BaseScreen (ScreenDescription *description) {
   description->cols = strlen(text_BaseScreen);
   description->posx = 0;
   description->posy = 0;
-  description->number = currentvt_BaseScreen();
+  description->number = currentVirtualTerminal_BaseScreen();
 }
 
 static int
@@ -90,9 +90,9 @@ executeCommand_BaseScreen (int command) {
 
 void
 initializeBaseScreen (BaseScreen *base) {
-  base->selectvt = selectvt_BaseScreen;
-  base->switchvt = switchvt_BaseScreen;
-  base->currentvt = currentvt_BaseScreen;
+  base->selectVirtualTerminal = selectVirtualTerminal_BaseScreen;
+  base->switchVirtualTerminal = switchVirtualTerminal_BaseScreen;
+  base->currentVirtualTerminal = currentVirtualTerminal_BaseScreen;
   base->describe = describe_BaseScreen;
   base->read = read_BaseScreen;
   base->insert = insert_BaseScreen;

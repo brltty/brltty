@@ -30,7 +30,7 @@ typedef struct {
   int (*open) (void);
   int (*setup) (void);
   void (*close) (void);
-  int (*uservt) (int number);
+  int (*userVirtualTerminal) (int number);
 } MainScreen;
 
 extern void initializeMainScreen (MainScreen *);

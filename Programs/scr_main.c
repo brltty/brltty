@@ -43,7 +43,7 @@ close_MainScreen (void) {
 }
 
 static int
-uservt_MainScreen (int number) {
+userVirtualTerminal_MainScreen (int number) {
   return 0 + number;
 }
 
@@ -54,5 +54,5 @@ initializeMainScreen (MainScreen *main) {
   main->open = open_MainScreen;
   main->setup = setup_MainScreen;
   main->close = close_MainScreen;
-  main->uservt = uservt_MainScreen;
+  main->userVirtualTerminal = userVirtualTerminal_MainScreen;
 }

@@ -172,17 +172,17 @@ insert_PcbiosScreen (ScreenKey key) {
 }
 
 static int
-selectvt_PcbiosScreen (int vt) {
+selectVirtualTerminal_PcbiosScreen (int vt) {
   return vt == 1;
 }
 
 static int
-switchvt_PcbiosScreen (int vt) {
+switchVirtualTerminal_PcbiosScreen (int vt) {
   return vt == 1;
 }
 
 static int
-currentvt_PcbiosScreen (void) {
+currentVirtualTerminal_PcbiosScreen (void) {
   return 1;
 }
 
@@ -199,9 +199,9 @@ scr_initialize (MainScreen *main) {
   main->base.describe = describe_PcbiosScreen;
   main->base.read = read_PcbiosScreen;
   main->base.insert = insert_PcbiosScreen;
-  main->base.selectvt = selectvt_PcbiosScreen;
-  main->base.switchvt = switchvt_PcbiosScreen;
-  main->base.currentvt = currentvt_PcbiosScreen;
+  main->base.selectVirtualTerminal = selectVirtualTerminal_PcbiosScreen;
+  main->base.switchVirtualTerminal = switchVirtualTerminal_PcbiosScreen;
+  main->base.currentVirtualTerminal = currentVirtualTerminal_PcbiosScreen;
   main->base.executeCommand = executeCommand_PcbiosScreen;
   main->prepare = prepare_PcbiosScreen;
   main->open = open_PcbiosScreen;

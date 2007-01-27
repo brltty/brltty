@@ -872,7 +872,7 @@ close_LinuxScreen (void) {
 }
 
 static int
-uservt_LinuxScreen (int number) {
+userVirtualTerminal_LinuxScreen (int number) {
   return MAX_NR_CONSOLES + 1 + number;
 }
 
@@ -1532,16 +1532,16 @@ validateVt (int vt) {
 }
 
 static int
-selectvt_LinuxScreen (int vt) {
+selectVirtualTerminal_LinuxScreen (int vt) {
   if (vt == virtualTerminal) return 1;
   if (vt && !validateVt(vt)) return 0;
   return openScreen(vt);
 }
 
 static int
-switchvt_LinuxScreen (int vt) {
+switchVirtualTerminal_LinuxScreen (int vt) {
   if (validateVt(vt)) {
-    if (selectvt_LinuxScreen(0)) {
+    if (selectVirtualTerminal_LinuxScreen(0)) {
       if (ioctl(consoleDescriptor, VT_ACTIVATE, vt) != -1) {
         LogPrint(LOG_DEBUG, "switched to virtual tertminal %d.", vt);
         return 1;
@@ -1554,7 +1554,7 @@ switchvt_LinuxScreen (int vt) {
 }
 
 static int
-currentvt_LinuxScreen (void) {
+currentVirtualTerminal_LinuxScreen (void) {
   ScreenDescription description;
   getConsoleDescription(&description);
   return description.number;
@@ -1637,15 +1637,15 @@ scr_initialize (MainScreen *main) {
   main->base.describe = describe_LinuxScreen;
   main->base.read = read_LinuxScreen;
   main->base.insert = insert_LinuxScreen;
-  main->base.selectvt = selectvt_LinuxScreen;
-  main->base.switchvt = switchvt_LinuxScreen;
-  main->base.currentvt = currentvt_LinuxScreen;
+  main->base.selectVirtualTerminal = selectVirtualTerminal_LinuxScreen;
+  main->base.switchVirtualTerminal = switchVirtualTerminal_LinuxScreen;
+  main->base.currentVirtualTerminal = currentVirtualTerminal_LinuxScreen;
   main->base.executeCommand = executeCommand_LinuxScreen;
   main->prepare = prepare_LinuxScreen;
   main->open = open_LinuxScreen;
   main->setup = setup_LinuxScreen;
   main->close = close_LinuxScreen;
-  main->uservt = uservt_LinuxScreen;
+  main->userVirtualTerminal = userVirtualTerminal_LinuxScreen;
 
 #ifdef HAVE_LINUX_INPUT_H
   at2Keys = at2KeysOriginal;

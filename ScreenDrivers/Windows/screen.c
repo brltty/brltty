@@ -100,12 +100,12 @@ close_WindowsScreen (void) {
 }
 
 static int
-selectvt_WindowsScreen (int vt) {
+selectVirtualTerminal_WindowsScreen (int vt) {
   return 0;
 }
 
 static int
-switchvt_WindowsScreen (int vt) {
+switchVirtualTerminal_WindowsScreen (int vt) {
   return 0;
 }
 
@@ -126,7 +126,7 @@ static int cols;
 static int rows;
 
 static int
-currentvt_WindowsScreen (void) {
+currentVirtualTerminal_WindowsScreen (void) {
   HWND win;
   altTab = NULL;
   if ((AttachConsoleProc || root) && GetAltTabInfoAProc) {
@@ -168,7 +168,7 @@ error:
 
 static void
 describe_WindowsScreen (ScreenDescription *description) {
-  description->number = (int) currentvt_WindowsScreen();
+  description->number = (int) currentVirtualTerminal_WindowsScreen();
   description->unreadable = unreadable;
   if (altTab) {
     description->rows = 1;
@@ -389,9 +389,9 @@ executeCommand_WindowsScreen (int command) {
 static void
 scr_initialize (MainScreen *main) {
   initializeRealScreen(main);
-  main->base.selectvt = selectvt_WindowsScreen;
-  main->base.switchvt = switchvt_WindowsScreen;
-  main->base.currentvt = currentvt_WindowsScreen;
+  main->base.selectVirtualTerminal = selectVirtualTerminal_WindowsScreen;
+  main->base.switchVirtualTerminal = switchVirtualTerminal_WindowsScreen;
+  main->base.currentVirtualTerminal = currentVirtualTerminal_WindowsScreen;
   main->base.describe = describe_WindowsScreen;
   main->base.read = read_WindowsScreen;
   main->base.insert = insert_WindowsScreen;

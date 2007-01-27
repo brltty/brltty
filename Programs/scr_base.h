@@ -29,9 +29,9 @@ typedef struct {
   int (*routeCursor) (int column, int row, int screen);
   int (*highlightRegion) (int left, int columns, int top, int lines);
   int (*getPointer) (int *column, int *row);
-  int (*selectvt) (int);
-  int (*switchvt) (int);
-  int (*currentvt) (void);
+  int (*selectVirtualTerminal) (int vt);
+  int (*switchVirtualTerminal) (int vt);
+  int (*currentVirtualTerminal) (void);
   int (*executeCommand) (int command);
 } BaseScreen;
 

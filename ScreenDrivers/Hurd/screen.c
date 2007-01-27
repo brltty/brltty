@@ -398,14 +398,14 @@ validateVt (int vt) {
 }
 
 static int
-selectvt_HurdScreen (int vt) {
+selectVirtualTerminal_HurdScreen (int vt) {
   if (vt == virtualTerminal) return 1;
   if (vt && !validateVt(vt)) return 0;
   return openScreen(vt);
 }
 
 static int
-switchvt_HurdScreen (int vt) {
+switchVirtualTerminal_HurdScreen (int vt) {
   if (validateVt(vt)) {
     char link[]=HURD_VCSDIR "/00";
     snprintf(link, sizeof(link), HURD_VCSDIR "/%u", vt);
@@ -420,7 +420,7 @@ switchvt_HurdScreen (int vt) {
 }
 
 static int
-currentvt_HurdScreen (void) {
+currentVirtualTerminal_HurdScreen (void) {
   ScreenDescription description;
   getConsoleDescription(&description);
   return description.number;
@@ -444,9 +444,9 @@ scr_initialize (MainScreen *main) {
   main->base.describe = describe_HurdScreen;
   main->base.read = read_HurdScreen;
   main->base.insert = insert_HurdScreen;
-  main->base.selectvt = selectvt_HurdScreen;
-  main->base.switchvt = switchvt_HurdScreen;
-  main->base.currentvt = currentvt_HurdScreen;
+  main->base.selectVirtualTerminal = selectVirtualTerminal_HurdScreen;
+  main->base.switchVirtualTerminal = switchVirtualTerminal_HurdScreen;
+  main->base.currentVirtualTerminal = currentVirtualTerminal_HurdScreen;
   main->base.executeCommand = executeCommand_HurdScreen;
   main->prepare = prepare_HurdScreen;
   main->open = open_HurdScreen;

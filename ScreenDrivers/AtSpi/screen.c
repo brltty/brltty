@@ -569,17 +569,17 @@ close_AtSpiScreen (void) {
 }
 
 static int
-selectvt_AtSpiScreen (int vt) {
+selectVirtualTerminal_AtSpiScreen (int vt) {
   return 0;
 }
 
 static int
-switchvt_AtSpiScreen (int vt) {
+switchVirtualTerminal_AtSpiScreen (int vt) {
   return 0;
 }
 
 static int
-currentvt_AtSpiScreen (void) {
+currentVirtualTerminal_AtSpiScreen (void) {
   return curTerm? 0: -1;
 }
 
@@ -601,7 +601,7 @@ describe_AtSpiScreen (ScreenDescription *description) {
     description->posy = 0;
   }
   pthread_mutex_unlock(&updateMutex);
-  description->number = currentvt_AtSpiScreen();
+  description->number = currentVirtualTerminal_AtSpiScreen();
 }
 
 static int
@@ -769,9 +769,9 @@ scr_initialize (MainScreen *main) {
   main->base.describe = describe_AtSpiScreen;
   main->base.read = read_AtSpiScreen;
   main->base.insert = insert_AtSpiScreen;
-  main->base.selectvt = selectvt_AtSpiScreen;
-  main->base.switchvt = switchvt_AtSpiScreen;
-  main->base.currentvt = currentvt_AtSpiScreen;
+  main->base.selectVirtualTerminal = selectVirtualTerminal_AtSpiScreen;
+  main->base.switchVirtualTerminal = switchVirtualTerminal_AtSpiScreen;
+  main->base.currentVirtualTerminal = currentVirtualTerminal_AtSpiScreen;
   main->base.executeCommand = executeCommand_AtSpiScreen;
   main->prepare = prepare_AtSpiScreen;
   main->open = open_AtSpiScreen;

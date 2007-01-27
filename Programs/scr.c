@@ -200,22 +200,22 @@ getScreenPointer (int *column, int *row) {
 
 int
 selectVirtualTerminal (int vt) {
-  return currentScreen->selectvt(vt);
+  return currentScreen->selectVirtualTerminal(vt);
 }
 
 int
 switchVirtualTerminal (int vt) {
-  return currentScreen->switchvt(vt);
+  return currentScreen->switchVirtualTerminal(vt);
 }
 
 int
 currentVirtualTerminal (void) {
-  return currentScreen->currentvt();
+  return currentScreen->currentVirtualTerminal();
 }
 
 int
 userVirtualTerminal (int number) {
-  return mainScreen.uservt(number);
+  return mainScreen.userVirtualTerminal(number);
 }
 
 int

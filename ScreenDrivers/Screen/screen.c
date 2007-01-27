@@ -117,7 +117,7 @@ getAuxiliaryData (void) {
 }
 
 static int
-currentvt_ScreenScreen (void) {
+currentVirtualTerminal_ScreenScreen (void) {
   return getAuxiliaryData()[0];
 }
 
@@ -138,7 +138,7 @@ doScreenCommand (const char *command, ...) {
     *arg++ = "screen";
 
     *arg++ = "-p";
-    snprintf(window, sizeof(window), "%d", currentvt_ScreenScreen());
+    snprintf(window, sizeof(window), "%d", currentVirtualTerminal_ScreenScreen());
     *arg++ = window;
 
     *arg++ = "-X";
@@ -159,7 +159,7 @@ doScreenCommand (const char *command, ...) {
 }
 
 static int
-uservt_ScreenScreen (int number) {
+userVirtualTerminal_ScreenScreen (int number) {
   return 1 + number;
 }
 
@@ -169,7 +169,7 @@ describe_ScreenScreen (ScreenDescription *description) {
   description->rows = shmAddress[1];
   description->posx = shmAddress[2];
   description->posy = shmAddress[3];
-  description->number = currentvt_ScreenScreen();
+  description->number = currentVirtualTerminal_ScreenScreen();
 }
 
 static int
@@ -275,11 +275,11 @@ close_ScreenScreen (void) {
 static void
 scr_initialize (MainScreen *main) {
   initializeRealScreen(main);
-  main->base.currentvt = currentvt_ScreenScreen;
+  main->base.currentVirtualTerminal = currentVirtualTerminal_ScreenScreen;
   main->base.describe = describe_ScreenScreen;
   main->base.read = read_ScreenScreen;
   main->base.insert = insert_ScreenScreen;
   main->open = open_ScreenScreen;
   main->close = close_ScreenScreen;
-  main->uservt = uservt_ScreenScreen;
+  main->userVirtualTerminal = userVirtualTerminal_ScreenScreen;
 }

@@ -83,7 +83,7 @@ read_FrozenScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
 }
 
 static int
-currentvt_FrozenScreen (void) {
+currentVirtualTerminal_FrozenScreen (void) {
   return screenDescription.number;
 }
 
@@ -92,7 +92,7 @@ initializeFrozenScreen (FrozenScreen *frozen) {
   initializeBaseScreen(&frozen->base);
   frozen->base.describe = describe_FrozenScreen;
   frozen->base.read = read_FrozenScreen;
-  frozen->base.currentvt = currentvt_FrozenScreen;
+  frozen->base.currentVirtualTerminal = currentVirtualTerminal_FrozenScreen;
   frozen->open = open_FrozenScreen;
   frozen->close = close_FrozenScreen;
   screenText = NULL;
