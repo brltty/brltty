@@ -166,7 +166,7 @@ insertMapped (ScreenKey key) {
 }
 
 static int
-insert_PcbiosScreen (ScreenKey key) {
+insertKey_PcbiosScreen (ScreenKey key) {
   LogPrint(LOG_DEBUG, "Insert key: %4.4X", key);
   return insertMapped(key); 
 }
@@ -198,7 +198,7 @@ scr_initialize (MainScreen *main) {
   initializeRealScreen(main);
   main->base.describe = describe_PcbiosScreen;
   main->base.read = read_PcbiosScreen;
-  main->base.insert = insert_PcbiosScreen;
+  main->base.insertKey = insertKey_PcbiosScreen;
   main->base.selectVirtualTerminal = selectVirtualTerminal_PcbiosScreen;
   main->base.switchVirtualTerminal = switchVirtualTerminal_PcbiosScreen;
   main->base.currentVirtualTerminal = currentVirtualTerminal_PcbiosScreen;

@@ -304,7 +304,7 @@ doinsert(INPUT_RECORD *buf) {
 }
 
 static int
-insert_WindowsScreen (ScreenKey key) {
+insertKey_WindowsScreen (ScreenKey key) {
   INPUT_RECORD buf;
   KEY_EVENT_RECORD *keyE = &buf.Event.KeyEvent;
 
@@ -394,7 +394,7 @@ scr_initialize (MainScreen *main) {
   main->base.currentVirtualTerminal = currentVirtualTerminal_WindowsScreen;
   main->base.describe = describe_WindowsScreen;
   main->base.read = read_WindowsScreen;
-  main->base.insert = insert_WindowsScreen;
+  main->base.insertKey = insertKey_WindowsScreen;
   main->base.executeCommand = executeCommand_WindowsScreen;
   main->prepare = prepare_WindowsScreen;
   main->open = open_WindowsScreen;

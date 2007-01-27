@@ -637,7 +637,7 @@ out:
 }
 
 static int
-insert_AtSpiScreen (ScreenKey key) {
+insertKey_AtSpiScreen (ScreenKey key) {
   long keysym;
   int modMeta=0, modControl=0;
 
@@ -768,7 +768,7 @@ scr_initialize (MainScreen *main) {
   initializeRealScreen(main);
   main->base.describe = describe_AtSpiScreen;
   main->base.read = read_AtSpiScreen;
-  main->base.insert = insert_AtSpiScreen;
+  main->base.insertKey = insertKey_AtSpiScreen;
   main->base.selectVirtualTerminal = selectVirtualTerminal_AtSpiScreen;
   main->base.switchVirtualTerminal = switchVirtualTerminal_AtSpiScreen;
   main->base.currentVirtualTerminal = currentVirtualTerminal_AtSpiScreen;

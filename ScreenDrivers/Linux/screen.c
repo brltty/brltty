@@ -1494,7 +1494,7 @@ insertMapped (ScreenKey key, int (*byteInserter)(unsigned char byte)) {
 }
 
 static int
-insert_LinuxScreen (ScreenKey key) {
+insertKey_LinuxScreen (ScreenKey key) {
   int ok = 0;
   LogPrint(LOG_DEBUG, "insert key: %4.4X", key);
   if (rebindConsole()) {
@@ -1636,7 +1636,7 @@ scr_initialize (MainScreen *main) {
   initializeRealScreen(main);
   main->base.describe = describe_LinuxScreen;
   main->base.read = read_LinuxScreen;
-  main->base.insert = insert_LinuxScreen;
+  main->base.insertKey = insertKey_LinuxScreen;
   main->base.selectVirtualTerminal = selectVirtualTerminal_LinuxScreen;
   main->base.switchVirtualTerminal = switchVirtualTerminal_LinuxScreen;
   main->base.currentVirtualTerminal = currentVirtualTerminal_LinuxScreen;

@@ -385,7 +385,7 @@ insertUtf8 (unsigned char byte) {
 }
 
 static int
-insert_HurdScreen (ScreenKey key) {
+insertKey_HurdScreen (ScreenKey key) {
   LogPrint(LOG_DEBUG, "Insert key: %4.4X", key);
   return insertMapped(key, &insertUtf8); 
 }
@@ -443,7 +443,7 @@ scr_initialize (MainScreen *main) {
   initializeRealScreen(main);
   main->base.describe = describe_HurdScreen;
   main->base.read = read_HurdScreen;
-  main->base.insert = insert_HurdScreen;
+  main->base.insertKey = insertKey_HurdScreen;
   main->base.selectVirtualTerminal = selectVirtualTerminal_HurdScreen;
   main->base.switchVirtualTerminal = switchVirtualTerminal_HurdScreen;
   main->base.currentVirtualTerminal = currentVirtualTerminal_HurdScreen;

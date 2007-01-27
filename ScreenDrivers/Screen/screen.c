@@ -190,7 +190,7 @@ read_ScreenScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
 }
 
 static int
-insert_ScreenScreen (ScreenKey key) {
+insertKey_ScreenScreen (ScreenKey key) {
   unsigned char flags = getAuxiliaryData()[1];
   char buffer[3];
   char *sequence;
@@ -278,7 +278,7 @@ scr_initialize (MainScreen *main) {
   main->base.currentVirtualTerminal = currentVirtualTerminal_ScreenScreen;
   main->base.describe = describe_ScreenScreen;
   main->base.read = read_ScreenScreen;
-  main->base.insert = insert_ScreenScreen;
+  main->base.insertKey = insertKey_ScreenScreen;
   main->open = open_ScreenScreen;
   main->close = close_ScreenScreen;
   main->userVirtualTerminal = userVirtualTerminal_ScreenScreen;

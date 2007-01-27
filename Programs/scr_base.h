@@ -25,7 +25,7 @@ extern "C" {
 typedef struct {
   void (*describe) (ScreenDescription *);
   int (*read) (ScreenBox, unsigned char *, ScreenMode);
-  int (*insert) (ScreenKey);
+  int (*insertKey) (ScreenKey key);
   int (*routeCursor) (int column, int row, int screen);
   int (*highlightRegion) (int left, int columns, int top, int lines);
   int (*getPointer) (int *column, int *row);

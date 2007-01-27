@@ -64,7 +64,7 @@ read_BaseScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
 }
 
 static int
-insert_BaseScreen (ScreenKey key) {
+insertKey_BaseScreen (ScreenKey key) {
   return 0;
 }
 
@@ -95,7 +95,7 @@ initializeBaseScreen (BaseScreen *base) {
   base->currentVirtualTerminal = currentVirtualTerminal_BaseScreen;
   base->describe = describe_BaseScreen;
   base->read = read_BaseScreen;
-  base->insert = insert_BaseScreen;
+  base->insertKey = insertKey_BaseScreen;
   base->routeCursor = routeCursor_BaseScreen;
   base->highlightRegion = highlightRegion_BaseScreen;
   base->getPointer = getPointer_BaseScreen;

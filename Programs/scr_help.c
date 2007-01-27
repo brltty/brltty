@@ -255,7 +255,7 @@ read_HelpScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
 }
 
 static int
-insert_HelpScreen (ScreenKey key) {
+insertKey_HelpScreen (ScreenKey key) {
   switch (key) {
     case SCR_KEY_PAGE_UP:
       if (pageNumber > 0) {
@@ -321,7 +321,7 @@ initializeHelpScreen (HelpScreen *help) {
   help->base.currentVirtualTerminal = currentVirtualTerminal_HelpScreen;
   help->base.describe = describe_HelpScreen;
   help->base.read = read_HelpScreen;
-  help->base.insert = insert_HelpScreen;
+  help->base.insertKey = insertKey_HelpScreen;
   help->base.routeCursor = routeCursor_HelpScreen;
   help->open = open_HelpScreen;
   help->close = close_HelpScreen;

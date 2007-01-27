@@ -85,7 +85,7 @@ extern void deactivateHelpScreen (void);
 /* Routines which apply to the current screen. */
 extern void describeScreen (ScreenDescription *);		/* get screen status */
 extern int readScreen (short, short, short, short, unsigned char *, ScreenMode);
-extern int insertKey (ScreenKey);
+extern int insertKey (ScreenKey key);
 extern int insertCharacters (const char *, int);
 extern int insertString (const char *);
 extern int routeCursor (int column, int row, int screen);
