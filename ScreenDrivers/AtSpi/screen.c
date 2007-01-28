@@ -556,11 +556,6 @@ open_AtSpiScreen (void) {
   return 1;
 }
 
-static int
-setup_AtSpiScreen (void) {
-  return 1;
-}
-
 static void
 close_AtSpiScreen (void) {
   SPI_event_quit();
@@ -775,6 +770,5 @@ scr_initialize (MainScreen *main) {
   main->base.executeCommand = executeCommand_AtSpiScreen;
   main->prepare = prepare_AtSpiScreen;
   main->open = open_AtSpiScreen;
-  main->setup = setup_AtSpiScreen;
   main->close = close_AtSpiScreen;
 }

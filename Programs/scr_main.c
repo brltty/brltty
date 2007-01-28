@@ -33,11 +33,6 @@ open_MainScreen (void) {
   return 1;
 }
 
-static int
-setup_MainScreen (void) {
-  return 1;
-}
-
 static void
 close_MainScreen (void) {
 }
@@ -52,7 +47,6 @@ initializeMainScreen (MainScreen *main) {
   initializeBaseScreen(&main->base);
   main->prepare = prepare_MainScreen;
   main->open = open_MainScreen;
-  main->setup = setup_MainScreen;
   main->close = close_MainScreen;
   main->userVirtualTerminal = userVirtualTerminal_MainScreen;
 }

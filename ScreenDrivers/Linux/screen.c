@@ -620,21 +620,6 @@ prepare_LinuxScreen (char **parameters) {
   return 1;
 }
 
-static int currentConsoleNumber;
-static int
-open_LinuxScreen (void) {
-  if (setScreenPath()) {
-    screenDescriptor = -1;
-
-    if (setConsolePath()) {
-      consoleDescriptor = -1;
-
-      if (openScreen(currentConsoleNumber=0)) return 1;
-    }
-  }
-  return 0;
-}
-
 /* 
  * The virtual screen devices return the actual font positions of the glyphs to
  * be drawn on the screen. The problem is that the font may not have been
@@ -840,10 +825,21 @@ static const unsigned char *at2Keys;
 static int at2Pressed;
 #endif /* HAVE_LINUX_INPUT_H */
 
+static int currentConsoleNumber;
 static int
-setup_LinuxScreen (void) {
-  if (setTranslationTable(1)) {
-    return 1;
+open_LinuxScreen (void) {
+  if (setScreenPath()) {
+    screenDescriptor = -1;
+
+    if (setConsolePath()) {
+      consoleDescriptor = -1;
+
+      if (openScreen(currentConsoleNumber=0)) {
+        if (setTranslationTable(1)) {
+          return 1;
+        }
+      }
+    }
   }
   return 0;
 }
@@ -1643,7 +1639,6 @@ scr_initialize (MainScreen *main) {
   main->base.executeCommand = executeCommand_LinuxScreen;
   main->prepare = prepare_LinuxScreen;
   main->open = open_LinuxScreen;
-  main->setup = setup_LinuxScreen;
   main->close = close_LinuxScreen;
   main->userVirtualTerminal = userVirtualTerminal_LinuxScreen;
 

@@ -39,11 +39,6 @@ open_PcbiosScreen (void) {
   return 1;
 }
 
-static int
-setup_PcbiosScreen (void) {
-  return 1;
-}
-
 static void
 close_PcbiosScreen (void) {
 }
@@ -205,6 +200,5 @@ scr_initialize (MainScreen *main) {
   main->base.executeCommand = executeCommand_PcbiosScreen;
   main->prepare = prepare_PcbiosScreen;
   main->open = open_PcbiosScreen;
-  main->setup = setup_PcbiosScreen;
   main->close = close_PcbiosScreen;
 }

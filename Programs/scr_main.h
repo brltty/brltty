@@ -28,7 +28,6 @@ typedef struct {
   BaseScreen base;
   int (*prepare) (char **parameters);
   int (*open) (void);
-  int (*setup) (void);
   void (*close) (void);
   int (*userVirtualTerminal) (int number);
 } MainScreen;

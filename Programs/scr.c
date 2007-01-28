@@ -238,10 +238,8 @@ int
 openMainScreen (char **parameters) {
   if (mainScreen.prepare(parameters)) {
     if (mainScreen.open()) {
-      if (mainScreen.setup()) {
-        currentScreen = &mainScreen.base;
-        return 1;
-      }
+      currentScreen = &mainScreen.base;
+      return 1;
       mainScreen.close();
     }
   }

@@ -175,11 +175,6 @@ open_HurdScreen (void) {
   return openScreen(0);
 }
 
-static int
-setup_HurdScreen (void) {
-  return 1;
-}
-
 static void
 close_HurdScreen (void) {
   closeConsole();
@@ -450,6 +445,5 @@ scr_initialize (MainScreen *main) {
   main->base.executeCommand = executeCommand_HurdScreen;
   main->prepare = prepare_HurdScreen;
   main->open = open_HurdScreen;
-  main->setup = setup_HurdScreen;
   main->close = close_HurdScreen;
 }

@@ -89,11 +89,6 @@ open_WindowsScreen (void) {
   return openStdHandles();
 }
 
-static int
-setup_WindowsScreen (void) {
-  return 1;
-}
-
 static void
 close_WindowsScreen (void) {
   closeStdHandles();
@@ -398,6 +393,5 @@ scr_initialize (MainScreen *main) {
   main->base.executeCommand = executeCommand_WindowsScreen;
   main->prepare = prepare_WindowsScreen;
   main->open = open_WindowsScreen;
-  main->setup = setup_WindowsScreen;
   main->close = close_WindowsScreen;
 }
