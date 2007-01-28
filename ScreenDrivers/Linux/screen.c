@@ -569,7 +569,7 @@ determineAttributesMasks (void) {
 }
 
 static int
-prepare_LinuxScreen (char **parameters) {
+processParameters_LinuxScreen (char **parameters) {
   if (!validateYesNo(&debugApplicationCharacterMap, parameters[PARM_DEBUGACM]))
     LogPrint(LOG_WARNING, "%s: %s", "invalid application character map debug setting", parameters[PARM_DEBUGACM]);
 
@@ -1637,7 +1637,7 @@ scr_initialize (MainScreen *main) {
   main->base.switchVirtualTerminal = switchVirtualTerminal_LinuxScreen;
   main->base.currentVirtualTerminal = currentVirtualTerminal_LinuxScreen;
   main->base.executeCommand = executeCommand_LinuxScreen;
-  main->prepare = prepare_LinuxScreen;
+  main->processParameters = processParameters_LinuxScreen;
   main->open = open_LinuxScreen;
   main->close = close_LinuxScreen;
   main->userVirtualTerminal = userVirtualTerminal_LinuxScreen;

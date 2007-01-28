@@ -204,7 +204,7 @@ static void delRows(long pos, long num) {
 }
 
 static int
-prepare_AtSpiScreen (char **parameters) {
+processParameters_AtSpiScreen (char **parameters) {
   if (*parameters[PARM_TYPE]) {
     static const char *const choices[] = {"text"   , "terminal"   , "all"   , NULL}; 
     static       int  *const flags  [] = {&typeText, &typeTerminal, &typeAll, NULL};
@@ -768,7 +768,7 @@ scr_initialize (MainScreen *main) {
   main->base.switchVirtualTerminal = switchVirtualTerminal_AtSpiScreen;
   main->base.currentVirtualTerminal = currentVirtualTerminal_AtSpiScreen;
   main->base.executeCommand = executeCommand_AtSpiScreen;
-  main->prepare = prepare_AtSpiScreen;
+  main->processParameters = processParameters_AtSpiScreen;
   main->open = open_AtSpiScreen;
   main->close = close_AtSpiScreen;
 }

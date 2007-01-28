@@ -164,7 +164,7 @@ openScreen (unsigned char vt) {
 }
 
 static int
-prepare_HurdScreen (char **parameters) {
+processParameters_HurdScreen (char **parameters) {
   return 1;
 }
 
@@ -443,7 +443,7 @@ scr_initialize (MainScreen *main) {
   main->base.switchVirtualTerminal = switchVirtualTerminal_HurdScreen;
   main->base.currentVirtualTerminal = currentVirtualTerminal_HurdScreen;
   main->base.executeCommand = executeCommand_HurdScreen;
-  main->prepare = prepare_HurdScreen;
+  main->processParameters = processParameters_HurdScreen;
   main->open = open_HurdScreen;
   main->close = close_HurdScreen;
 }

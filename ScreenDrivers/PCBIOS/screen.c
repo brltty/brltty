@@ -30,7 +30,7 @@
 #include "Programs/scr_driver.h"
 
 static int
-prepare_PcbiosScreen (char **parameters) {
+processParameters_PcbiosScreen (char **parameters) {
   return 1;
 }
 
@@ -198,7 +198,7 @@ scr_initialize (MainScreen *main) {
   main->base.switchVirtualTerminal = switchVirtualTerminal_PcbiosScreen;
   main->base.currentVirtualTerminal = currentVirtualTerminal_PcbiosScreen;
   main->base.executeCommand = executeCommand_PcbiosScreen;
-  main->prepare = prepare_PcbiosScreen;
+  main->processParameters = processParameters_PcbiosScreen;
   main->open = open_PcbiosScreen;
   main->close = close_PcbiosScreen;
 }

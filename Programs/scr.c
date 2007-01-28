@@ -236,7 +236,7 @@ getScreenDriverCode (void) {
 
 int
 openMainScreen (char **parameters) {
-  if (mainScreen.prepare(parameters)) {
+  if (mainScreen.processParameters(parameters)) {
     if (mainScreen.open()) {
       currentScreen = &mainScreen.base;
       return 1;

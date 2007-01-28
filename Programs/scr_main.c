@@ -24,7 +24,7 @@
 #include "scr_main.h"
 
 static int
-prepare_MainScreen (char **parameters) {
+processParameters_MainScreen (char **parameters) {
   return 1;
 }
 
@@ -45,7 +45,7 @@ userVirtualTerminal_MainScreen (int number) {
 void
 initializeMainScreen (MainScreen *main) {
   initializeBaseScreen(&main->base);
-  main->prepare = prepare_MainScreen;
+  main->processParameters = processParameters_MainScreen;
   main->open = open_MainScreen;
   main->close = close_MainScreen;
   main->userVirtualTerminal = userVirtualTerminal_MainScreen;

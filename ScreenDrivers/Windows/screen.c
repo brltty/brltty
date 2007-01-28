@@ -33,7 +33,7 @@ static HANDLE consoleOutput = INVALID_HANDLE_VALUE;
 static HANDLE consoleInput = INVALID_HANDLE_VALUE;
 
 static int
-prepare_WindowsScreen (char **parameters) {
+processParameters_WindowsScreen (char **parameters) {
   if (*parameters[PARM_ROOT]) {
     if (AttachConsoleProc)
       LogError("No need for root BRLTTY on systems that support AttachConsole()");
@@ -391,7 +391,7 @@ scr_initialize (MainScreen *main) {
   main->base.read = read_WindowsScreen;
   main->base.insertKey = insertKey_WindowsScreen;
   main->base.executeCommand = executeCommand_WindowsScreen;
-  main->prepare = prepare_WindowsScreen;
+  main->processParameters = processParameters_WindowsScreen;
   main->open = open_WindowsScreen;
   main->close = close_WindowsScreen;
 }

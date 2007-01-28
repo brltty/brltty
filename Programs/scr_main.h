@@ -26,7 +26,7 @@ extern "C" {
 
 typedef struct {
   BaseScreen base;
-  int (*prepare) (char **parameters);
+  int (*processParameters) (char **parameters);
   int (*open) (void);
   void (*close) (void);
   int (*userVirtualTerminal) (int number);
