@@ -234,9 +234,10 @@ static void brlapi_initializeHandle(brlapi_handle_t *handle)
 static ssize_t brlapi__doWaitForPacket(brlapi_handle_t *handle, brlapi_type_t expectedPacketType, void *packet, size_t size)
 {
   static brlapi_packet_t localPacket;
+  uint32_t *uint32Packet = (uint32_t *) &localPacket;
   brlapi_type_t type;
   ssize_t res;
-  brlapi_errorPacket_t *errorPacket = (brlapi_errorPacket_t *) localPacket;
+  static const brlapi_errorPacket_t *errorPacket = &localPacket.error;
 
   res = brlapi_readPacketHeader(handle->fileDescriptor, &type);
   if (res<0) return res; /* reports EINTR too */
@@ -256,16 +257,16 @@ static ssize_t brlapi__doWaitForPacket(brlapi_handle_t *handle, brlapi_type_t ex
     return -3;
   }
   /* No alternate reader, read it locally... */
-  if ((res = brlapi_readPacketContent(handle->fileDescriptor, res, localPacket, sizeof(localPacket))) < 0) {
+  if ((res = brlapi_readPacketContent(handle->fileDescriptor, res, &localPacket, sizeof(localPacket))) < 0) {
     pthread_mutex_unlock(&handle->read_mutex);
     return res;
   }
   if ((type==BRLAPI_PACKET_KEY) && (handle->state & STCONTROLLINGTTY) && (res==sizeof(brlapi_keyCode_t))) {
     /* keypress, buffer it */
     if (handle->keybuf_nb>=BRL_KEYBUF_SIZE) {
-      syslog(LOG_WARNING,"lost key: 0X%8"PRIx32"%8"PRIx32"\n",ntohl(localPacket[0]),ntohl(localPacket[1]));
+      syslog(LOG_WARNING,"lost key: 0X%8"PRIx32"%8"PRIx32"\n",ntohl(uint32Packet[0]),ntohl(uint32Packet[1]));
     } else {
-      handle->keybuf[(handle->keybuf_next+handle->keybuf_nb++)%BRL_KEYBUF_SIZE]=ntohl(*localPacket);
+      handle->keybuf[(handle->keybuf_next+handle->keybuf_nb++)%BRL_KEYBUF_SIZE]=ntohl(*uint32Packet);
     }
     pthread_mutex_unlock(&handle->read_mutex);
     return -3;
@@ -575,9 +576,9 @@ brlapi_fileDescriptor brlapi__openConnection(brlapi_handle_t *handle, const brla
 {
   brlapi_packet_t packet;
   brlapi_packet_t serverPacket;
-  brlapi_authClientStruct_t *auth = (brlapi_authClientStruct_t *) packet;
-  brlapi_authServerStruct_t *authServer = (brlapi_authServerStruct_t *) serverPacket;
-  brlapi_versionStruct_t *version = (brlapi_versionStruct_t *) serverPacket;
+  brlapi_authClientPacket_t *auth = &packet.authClient;
+  brlapi_authServerPacket_t *authServer = &serverPacket.authServer;
+  brlapi_versionPacket_t *version = &serverPacket.version;
   uint32_t *type;
   int len;
 
@@ -603,7 +604,7 @@ brlapi_fileDescriptor brlapi__openConnection(brlapi_handle_t *handle, const brla
     if (usedSettings) usedSettings->host = settings.host;
   }
 
-  if ((len = brlapi__waitForPacket(handle, BRLAPI_PACKET_VERSION, serverPacket, sizeof(serverPacket), 1)) < 0)
+  if ((len = brlapi__waitForPacket(handle, BRLAPI_PACKET_VERSION, &serverPacket, sizeof(serverPacket), 1)) < 0)
     goto outfd;
 
   if (version->protocolVersion != htonl(BRLAPI_PROTOCOL_VERSION)) {
@@ -614,7 +615,7 @@ brlapi_fileDescriptor brlapi__openConnection(brlapi_handle_t *handle, const brla
   if (brlapi_writePacket(handle->fileDescriptor, BRLAPI_PACKET_VERSION, version, sizeof(*version)) < 0)
     goto outfd;
 
-  if ((len = brlapi__waitForPacket(handle, BRLAPI_PACKET_AUTH, serverPacket, sizeof(serverPacket), 1)) < 0)
+  if ((len = brlapi__waitForPacket(handle, BRLAPI_PACKET_AUTH, &serverPacket, sizeof(serverPacket), 1)) < 0)
     return INVALID_FILE_DESCRIPTOR;
 
   for (type = &authServer->type[0]; (void*) type < ((void*)&serverPacket) + len; type++) {
@@ -690,7 +691,7 @@ static int brlapi__getDriverSpecific(brlapi_handle_t *handle, const char *driver
 {
   int res;
   brlapi_packet_t packet;
-  brlapi_getDriverSpecificModePacket_t *driverPacket = (brlapi_getDriverSpecificModePacket_t *) packet;
+  brlapi_getDriverSpecificModePacket_t *driverPacket = &packet.getDriverSpecificMode;
   unsigned int n = strlen(driver);
   if (n>BRLAPI_MAXNAMELENGTH) {
     brlapi_errno = BRLAPI_ERROR_INVALID_PARAMETER;
@@ -705,7 +706,7 @@ static int brlapi__getDriverSpecific(brlapi_handle_t *handle, const char *driver
   driverPacket->magic = htonl(BRLAPI_DEVICE_MAGIC);
   driverPacket->nameLength = n;
   memcpy(&driverPacket->name, driver, n);
-  res = brlapi__writePacketWaitForAck(handle, type, packet, sizeof(uint32_t)+1+n);
+  res = brlapi__writePacketWaitForAck(handle, type, &packet, sizeof(uint32_t)+1+n);
   if (res!=-1)
     handle->state |= st;
 out:
@@ -961,7 +962,7 @@ int brlapi__enterTtyModeWithPath(brlapi_handle_t *handle, int *ttys, int nttys, 
   int res;
   brlapi_packet_t packet;
   unsigned char *p;
-  uint32_t *nbTtys = packet, *t = nbTtys+1;
+  uint32_t *nbTtys = (uint32_t*) &packet, *t = nbTtys+1;
   char *ttytreepath,*ttytreepathstop;
   int ttypath;
   unsigned int n;
@@ -1005,7 +1006,7 @@ int brlapi__enterTtyModeWithPath(brlapi_handle_t *handle, int *ttys, int nttys, 
   p++;
   memcpy(p, driverName, n);
   p += n;
-  if ((res=brlapi__writePacketWaitForAck(handle,BRLAPI_PACKET_ENTERTTYMODE,packet,(p-(unsigned char*)packet))) == 0)
+  if ((res=brlapi__writePacketWaitForAck(handle,BRLAPI_PACKET_ENTERTTYMODE,&packet,(p-(unsigned char *)&packet))) == 0)
     handle->state |= STCONTROLLINGTTY;
   pthread_mutex_unlock(&handle->state_mutex);
   return res;
@@ -1113,7 +1114,7 @@ int brlapi__writeText(brlapi_handle_t *handle, int cursor, const char *str)
   int dispSize = handle->brlx * handle->brly;
   unsigned int min;
   brlapi_packet_t packet;
-  brlapi_writeStructPacket_t *ws = (brlapi_writeStructPacket_t *) packet;
+  brlapi_writeStructPacket_t *ws = &packet.writeStruct;
   unsigned char *p = &ws->data;
   char *locale;
   int res;
@@ -1203,7 +1204,7 @@ endcount:
 
   ws->flags = htonl(ws->flags);
   pthread_mutex_lock(&handle->fileDescriptor_mutex);
-  res = brlapi_writePacket(handle->fileDescriptor,BRLAPI_PACKET_WRITE,packet,sizeof(ws->flags)+(p-&ws->data));
+  res = brlapi_writePacket(handle->fileDescriptor,BRLAPI_PACKET_WRITE,&packet,sizeof(ws->flags)+(p-&ws->data));
   pthread_mutex_unlock(&handle->fileDescriptor_mutex);
   return res;
 }
@@ -1265,9 +1266,9 @@ int brlapi__write(brlapi_handle_t *handle, const brlapi_writeStruct_t *s)
   int dispSize = handle->brlx * handle->brly;
   unsigned int rbeg, rsiz, strLen;
   brlapi_packet_t packet;
-  brlapi_writeStructPacket_t *ws = (brlapi_writeStructPacket_t *) packet;
+  brlapi_writeStructPacket_t *ws = &packet.writeStruct;
   unsigned char *p = &ws->data;
-  unsigned char *end = (unsigned char*) &packet[sizeof(packet)/sizeof(*packet)];
+  unsigned char *end = (unsigned char*) &packet.data[sizeof(packet)];
   int res;
   ws->flags = 0;
   if (s==NULL) goto send;
@@ -1356,7 +1357,7 @@ int brlapi__write(brlapi_handle_t *handle, const brlapi_writeStruct_t *s)
 send:
   ws->flags = htonl(ws->flags);
   pthread_mutex_lock(&handle->fileDescriptor_mutex);
-  res = brlapi_writePacket(handle->fileDescriptor,BRLAPI_PACKET_WRITE,packet,sizeof(ws->flags)+(p-&ws->data));
+  res = brlapi_writePacket(handle->fileDescriptor,BRLAPI_PACKET_WRITE,&packet,sizeof(ws->flags)+(p-&ws->data));
   pthread_mutex_unlock(&handle->fileDescriptor_mutex);
   return res;
 }

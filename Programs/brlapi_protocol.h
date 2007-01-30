@@ -56,10 +56,6 @@ extern "C" {
  * terminal */
 #define BRLAPI_MAXPACKETSIZE 512
 
-/** Type for packets.  Should be used instead of a char[], since it has correct
- * alignment requirements. */
-typedef uint32_t brlapi_packet_t[BRLAPI_MAXPACKETSIZE/sizeof(uint32_t)];
-
 /** Maximum name length for names embeded in BrlAPI packets */
 #define BRLAPI_MAXNAMELENGTH 31
 
@@ -101,17 +97,17 @@ typedef struct {
 /** Structure of version packets */
 typedef struct {
   uint32_t protocolVersion;
-} brlapi_versionStruct_t;
+} brlapi_versionPacket_t;
 
-/** Structure of authorization packets */
+/** Packeture of authorization packets */
 typedef struct {
   uint32_t type;
   unsigned char key;
-} brlapi_authClientStruct_t;
+} brlapi_authClientPacket_t;
 
 typedef struct {
   uint32_t type[1];
-} brlapi_authServerStruct_t;
+} brlapi_authServerPacket_t;
 
 #define BRLAPI_AUTH_NONE 'N' /**< No or implicit authorization              */
 #define BRLAPI_AUTH_KEY  'K' /**< Key authorization                         */
@@ -145,6 +141,19 @@ typedef struct {
   uint32_t flags; /** Flags to tell which fields are present */
   unsigned char data; /** Fields in the same order as flag weight */
 } brlapi_writeStructPacket_t;
+
+/** Type for packets.  Should be used instead of a mere char[], since it has
+ * correct alignment requirements. */
+typedef union {
+	unsigned char data[BRLAPI_MAXPACKETSIZE];
+	brlapi_versionPacket_t version;
+	brlapi_authClientPacket_t authClient;
+	brlapi_authServerPacket_t authServer;
+	brlapi_errorPacket_t error;
+	brlapi_getDriverSpecificModePacket_t getDriverSpecificMode;
+	brlapi_writeStructPacket_t writeStruct;
+	uint32_t uint32;
+} brlapi_packet_t;
 
 /* brlapi_writePacket */
 /** Send a packet to \e BrlAPI server
