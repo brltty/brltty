@@ -375,6 +375,7 @@ endSession (ClientData data) {
 static int
 brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]) {
   static const char *functions[] = {
+    "acceptKeyRanges",
     "acceptKeys",
     "closeConnection",
     "enterRawMode",
@@ -386,6 +387,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     "getDriverName",
     "getFileDescriptor",
     "getHost",
+    "ignoreKeyRanges",
     "ignoreKeys",
     "leaveRawMode",
     "leaveTtyMode",
@@ -402,6 +404,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
   };
 
   typedef enum {
+    FCN_acceptKeyRanges,
     FCN_acceptKeys,
     FCN_closeConnection,
     FCN_enterRawMode,
@@ -413,6 +416,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     FCN_getDriverName,
     FCN_getFileDescriptor,
     FCN_getHost,
+    FCN_ignoreKeyRanges,
     FCN_ignoreKeys,
     FCN_leaveRawMode,
     FCN_leaveTtyMode,
@@ -691,7 +695,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     {
       int ignore;
       brlapi_rangeType_t rangeType;
-      Tcl_Obj *keyCodeList;
+      Tcl_Obj *codeList;
 
     case FCN_acceptKeys:
       ignore = 0;
@@ -724,66 +728,136 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
           brlapi_rangeType_type
         };
 
-        int index;
-        int result = Tcl_GetIndexFromObj(interp, objv[2], rangeNames, "range type", 0, &index);
+        int rangeIndex;
+        int result = Tcl_GetIndexFromObj(interp, objv[2], rangeNames, "range type", 0, &rangeIndex);
         if (result != TCL_OK) return result;
-        rangeType = rangeTypes[index];
+        rangeType = rangeTypes[rangeIndex];
       }
 
       if (objc < 4) {
-        keyCodeList = NULL;
+        codeList = NULL;
       } else {
-        keyCodeList = objv[3];
+        codeList = objv[3];
       }
 
-      if (rangeType == brlapi_rangeType_all) {
-        if (keyCodeList) {
-          setStringResult(interp, "unexpected key code list", -1);
+      if (rangeType != brlapi_rangeType_all) {
+        Tcl_Obj **codeElements;
+        int codeCount;
+
+        if (!codeList) {
+          setStringResult(interp, "no key code list", -1);
           return TCL_ERROR;
         }
 
         {
-          int result = ignore? brlapi__ignoreAllKeys(session->handle):
-                               brlapi__acceptAllKeys(session->handle);
+          int result = Tcl_ListObjGetElements(interp, codeList, &codeCount, &codeElements);
+          if (result != TCL_OK) return result;
+        }
+
+        if (codeCount) {
+          brlapi_keyCode_t codes[codeCount];
+          int codeIndex;
+
+          for (codeIndex=0; codeIndex<codeCount; ++codeIndex) {
+            Tcl_WideInt code;
+            int result = Tcl_GetWideIntFromObj(interp, codeElements[codeIndex], &code);
+            if (result != TCL_OK) return result;
+            codes[codeIndex] = code;
+          }
+
+          {
+            int result = ignore? brlapi__ignoreKeys(session->handle, rangeType, codes, codeCount):
+                                 brlapi__acceptKeys(session->handle, rangeType, codes, codeCount);
+            if (result != -1) return TCL_OK;
+            setBrlapiError(interp);
+            return TCL_ERROR;
+          }
+        }
+      } else if (codeList) {
+        setStringResult(interp, "unexpected key code list", -1);
+        return TCL_ERROR;
+      }
+
+      {
+        int result = ignore? brlapi__ignoreKeys(session->handle, rangeType, NULL, 0):
+                             brlapi__acceptKeys(session->handle, rangeType, NULL, 0);
+        if (result != -1) return TCL_OK;
+        setBrlapiError(interp);
+        return TCL_ERROR;
+      }
+    }
+
+    {
+      int ignore;
+      Tcl_Obj **rangeElements;
+      int rangeCount;
+
+    case FCN_acceptKeyRanges:
+      ignore = 0;
+      goto doKeyRanges;
+
+    case FCN_ignoreKeyRanges:
+      ignore = 1;
+
+    doKeyRanges:
+      if (objc != 3) {
+        Tcl_WrongNumArgs(interp, 2, objv, "<keyRangeList>");
+        return TCL_ERROR;
+      }
+
+      {
+        int result = Tcl_ListObjGetElements(interp, objv[2], &rangeCount, &rangeElements);
+        if (result != TCL_OK) return result;
+      }
+
+      if (rangeCount) {
+        brlapi_range_t ranges[rangeCount];
+        int rangeIndex;
+
+        for (rangeIndex=0; rangeIndex<rangeCount; ++rangeIndex) {
+          brlapi_range_t *range = &ranges[rangeIndex];
+          Tcl_Obj **codeElements;
+          int codeCount;
+
+          {
+            int result = Tcl_ListObjGetElements(interp, rangeElements[rangeIndex], &codeCount, &codeElements);
+            if (result != TCL_OK) return result;
+          }
+
+          if (codeCount != 2) {
+            setStringResult(interp, "key range element is not a two-element list", -1);
+            return TCL_ERROR;
+          }
+
+          {
+            Tcl_WideInt codes[codeCount];
+            int codeIndex;
+
+            for (codeIndex=0; codeIndex<codeCount; ++codeIndex) {
+              int result = Tcl_GetWideIntFromObj(interp, codeElements[codeIndex], &codes[codeIndex]);
+              if (result != TCL_OK) return result;
+            }
+
+            range->first = codes[0];
+            range->last = codes[1];
+          }
+        }
+
+        {
+          int result = ignore? brlapi__ignoreKeyRanges(session->handle, ranges, rangeCount):
+                               brlapi__acceptKeyRanges(session->handle, ranges, rangeCount);
           if (result != -1) return TCL_OK;
           setBrlapiError(interp);
           return TCL_ERROR;
         }
       }
 
-      if (!keyCodeList) {
-        setStringResult(interp, "no key code list", -1);
-        return TCL_ERROR;
-      }
-
       {
-        Tcl_Obj **keyCodeElements;
-        int keyCodeCount;
-        int result = Tcl_ListObjGetElements(interp, keyCodeList, &keyCodeCount, &keyCodeElements);
-        if (result != TCL_OK) return result;
-
-        if (keyCodeCount) {
-          brlapi_keyCode_t keyCodes[keyCodeCount];
-          int keyCodeIndex;
-
-          for (keyCodeIndex=0; keyCodeIndex<keyCodeCount; ++keyCodeIndex) {
-            Tcl_WideInt keyCode;
-            int result = Tcl_GetWideIntFromObj(interp, keyCodeElements[keyCodeIndex], &keyCode);
-            if (result != TCL_OK) return result;
-            keyCodes[keyCodeIndex] = keyCode;
-          }
-
-          {
-            int result = ignore? brlapi__ignoreKeys(session->handle, rangeType, keyCodes, keyCodeCount):
-                                 brlapi__acceptKeys(session->handle, rangeType, keyCodes, keyCodeCount);
-            if (result == -1) {
-              setBrlapiError(interp);
-              return TCL_ERROR;
-            }
-          }
-        }
-
-        return TCL_OK;
+        int result = ignore? brlapi__ignoreKeyRanges(session->handle, NULL, 0):
+                             brlapi__acceptKeyRanges(session->handle, NULL, 0);
+        if (result != -1) return TCL_OK;
+        setBrlapiError(interp);
+        return TCL_ERROR;
       }
     }
 
