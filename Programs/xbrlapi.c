@@ -174,12 +174,13 @@ void getVT(void) {
     if (brlapi_enterTtyMode(vtno,NULL)<0)
       fatal_brlapi_errno("enterTtyMode",gettext("cannot get tty %d\n"),vtno);
   }
-  if (brlapi_ignoreKeyRange(0,BRLAPI_KEY_MAX)<0)
-    fatal_brlapi_errno("ignoreKeys",gettext("cannot ignore keys\n"));
+  if (brlapi_ignoreAllKeys()<0)
+    fatal_brlapi_errno("ignoreAllKeys",gettext("cannot ignore keys\n"));
 #ifdef CAN_SIMULATE_KEY_PRESSES
   /* All X keysyms with any modifier */
-  if (brlapi_acceptKeyRange(BRLAPI_KEY_TYPE_SYM, BRLAPI_KEY_TYPE_SYM|BRLAPI_KEY_CODE_MASK|BRLAPI_KEY_FLG(0xFF)))
-    fatal_brlapi_errno("acceptKeyRange",NULL);
+  brlapi_keyCode_t cmd = BRLAPI_KEY_TYPE_SYM;
+  if (brlapi_acceptKeys(brlapi_rangeType_type, &cmd, 1))
+    fatal_brlapi_errno("acceptKeys",NULL);
 #endif /* CAN_SIMULATE_KEY_PRESSES */
 }
 

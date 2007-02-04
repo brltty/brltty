@@ -204,8 +204,8 @@ void showKeyCodes(void)
     return;
   }
 
-  if (brlapi_acceptKeyRange(0, BRLAPI_KEY_MAX)==-1) {
-    brlapi_perror("acceptKeyRange");
+  if (brlapi_acceptAllKeys()==-1) {
+    brlapi_perror("acceptAllKeys");
     return;
   }
 

@@ -72,10 +72,23 @@ cdef extern from "Programs/brlapi.h":
 	int brlapi__writeDots(brlapi_handle_t *, unsigned char*)
 	int brlapi__writeText(brlapi_handle_t *, int, char*)
 
-	int brlapi__ignoreKeyRange(brlapi_handle_t *, brlapi_keyCode_t, brlapi_keyCode_t)
-	int brlapi__acceptKeyRange(brlapi_handle_t *, brlapi_keyCode_t, brlapi_keyCode_t)
-	int brlapi__ignoreKeySet(brlapi_handle_t *, brlapi_keyCode_t *, unsigned int)
-	int brlapi__acceptKeySet(brlapi_handle_t *, brlapi_keyCode_t *, unsigned int)
+	ctypedef enum brlapi_rangeType_t:
+		brlapi_rangeType_all
+		brlapi_rangeType_type
+		brlapi_rangeType_command
+		brlapi_rangeType_key
+		brlapi_rangeType_code
+	
+	ctypedef struct brlapi_range_t:
+		brlapi_keyCode_t first
+		brlapi_keyCode_t last
+
+	int brlapi__ignoreKeys(brlapi_handle_t *, brlapi_rangeType_t, brlapi_keyCode_t *, unsigned int)
+	int brlapi__acceptKeys(brlapi_handle_t *, brlapi_rangeType_t, brlapi_keyCode_t *, unsigned int)
+	int brlapi__ignoreAllKeys(brlapi_handle_t *)
+	int brlapi__acceptAllKeys(brlapi_handle_t *)
+	int brlapi__ignoreKeyRanges(brlapi_handle_t *, brlapi_range_t *, unsigned int)
+	int brlapi__acceptKeyRanges(brlapi_handle_t *, brlapi_range_t *, unsigned int)
 	int brlapi__readKey(brlapi_handle_t *, int, brlapi_keyCode_t*)
 	int brlapi_expandKeyCode(brlapi_keyCode_t, brlapi_expandedKeyCode_t *)
 

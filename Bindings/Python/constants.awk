@@ -82,6 +82,10 @@ function apiKey(name, symbol, value, help) {
   }
 }
 
+function apiRangeType(name, symbol, value, help) {
+  writePythonAssignment("rangeType_" name, value, help)
+}
+
 function writeCommandDefinition(name, value, help) {
   writePythonAssignment("KEY_CMD_" name, value, help)
 }

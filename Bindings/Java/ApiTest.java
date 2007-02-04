@@ -67,6 +67,13 @@ public class ApiTest {
       brlapi.writeText("ok !! €", 0);
       brlapi.writeText(null, 1);
 
+      long key[] = {0};
+      brlapi.ignoreKeys(Brlapi.rangeType_all, key);
+      key[0] = BrlapiConstants.KEY_TYPE_CMD;
+      brlapi.acceptKeys(Brlapi.rangeType_type, key);
+      long keys[][] = {{0,2},{5,7}};
+      brlapi.ignoreKeyRanges(keys);
+
       printKey(new BrlapiKey(brlapi.readKey(true)));
 
       BrlapiWriteStruct ws = new BrlapiWriteStruct();

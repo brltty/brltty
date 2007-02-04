@@ -9,10 +9,9 @@ Example :
 import brlapi
 b = brlapi.Connection()
 b.enterTtyMode()
-b.ignoreKeyRange(0, brlapi.KEY_MAX)
-b.acceptKeyRange(brlapi.KEY_TYPE_SYM, brlapi.KEY_TYPE_SYM|brlapi.KEY_CODE_MASK|brlapi.KEY_FLAGS_MASK)
-b.acceptKeySet([brlapi.KEY_TYPE_CMD|brlapi.KEY_CMD_LNUP, brlapi.KEY_TYPE_CMD|brlapi.KEY_CMD_LNUP])
-b.writeText("Press any key to continue ... ¤")
+b.ignoreKeys(brlapi.brlapi_rangeType_all,[0])
+b.acceptKeys(brlapi.brlapi_rangeType_command,[brlapi.KEY_TYPE_CMD|brlapi.KEY_CMD_HOME, brlapi.KEY_TYPE_CMD|brlapi.KEY_CMD_WINUP, brlapi.KEY_TYPE_CMD|brlapi.KEY_CMD_WINDN])
+b.writeText("Press home or winup/dn to continue ... ¤")
 key = b.readKey()
 k = b.expandKeyCode(key)
 b.writeText("Key %ld (%x %x %x %x) !" % (key, k["type"], k["command"], k["argument"], k["flags"]))
@@ -25,6 +24,7 @@ w.text = u"Press any key to exit ¤                 "
 underline = chr(brlapi.DOT7 + brlapi.DOT8)
 w.attrOr = "".center(21,underline) + "".center(19,chr(0))  # Note: center() can take two arguments only starting from python 2.4
 b.write(w)
+b.acceptKeys(brlapi.brlapi_rangeType_all,[0])
 b.readKey()
 b.leaveTtyMode()
 """
@@ -49,6 +49,12 @@ b.leaveTtyMode()
 
 cimport c_brlapi
 include "constants.auto.pyx"
+
+brlapi_rangeType_all = 0
+brlapi_rangeType_type = 1
+brlapi_rangeType_command = 2
+brlapi_rangeType_key = 3
+brlapi_rangeType_code = 4
 
 cdef returnerrno():
 	"""This function returns str message error from errno"""
@@ -435,17 +441,17 @@ cdef class Connection:
 
 		If None or "" was given to enterTtyPath(), a brltty command is returned. It is hence pretty driver-independent, and should be used by default when no other option is possible.
 
-		By default, all commands but those which restart drivers and switch virtual are returned to the application and not to brltty. If the application doesn't want to see some command events, it should call either ignoreKeySet() or ignoreKeyRange().
+		By default, all commands but those which restart drivers and switch virtual are returned to the application and not to brltty. If the application doesn't want to see some command events, it should call either ignoreKeys() or ignoreKeyRanges().
 
 		If some driver name was given to enterTtyMode(), a raw keycode is returned, as specified by the terminal driver. It generally corresponds to the very code that the terminal tells to the driver. This should only be used by applications which are dedicated to a particular braille terminal. Hence, checking the terminal type thanks to a call to driverid or even drivername before getting tty control is a pretty good idea.
 
 		By default, all the keypresses will be passed to the client, none will go through brltty, so the application will have to handle console switching itself for instance."""
-		cdef unsigned long long code
+		cdef c_brlapi.brlapi_keyCode_t code
 		cdef int retval
 		cdef int c_block
 		c_block = block
 		c_brlapi.Py_BEGIN_ALLOW_THREADS
-		retval = c_brlapi.brlapi__readKey(self.h, c_block, <unsigned long long*>&code)
+		retval = c_brlapi.brlapi__readKey(self.h, c_block, <c_brlapi.brlapi_keyCode_t*>&code)
 		c_brlapi.Py_END_ALLOW_THREADS
 		if retval == -1:
 			raise OperationError(returnerrno())
@@ -465,61 +471,24 @@ cdef class Connection:
 		else:
 			return { "type":ekc.type, "command":ekc.command, "argument":ekc.argument, "flags":ekc.flags }
 	
-	def ignoreKeyRange(self, x, y):
+	def ignoreKeys(self, range, set):
 		"""Ignore some key presses from the braille keyboard.
-		See brlapi_ignoreKeyRange(3).
-
-		This function asks the server to give keys between x and y (inclusive, and x can be equal to y) to brltty, rather than returning them to the application via readKey().
-
-		Note: The given codes are either raw keycodes if some driver name was given to enterTtyMode(), or brltty commands if None or "" was given."""
+		See brlapi_ignoreKeys(3).
+		
+		This function asks the server to give the provided keys to brltty, rather than returning them to the application via brlapi_readKey().
+		
+		The given codes should be brltty commands (nul or "" was given to brlapi_enterTtyMode())"""
 		cdef int retval
-		cdef unsigned long long c_x,c_y
-		c_x = x
-		c_y = y
-		c_brlapi.Py_BEGIN_ALLOW_THREADS
-		retval = c_brlapi.brlapi__ignoreKeyRange(self.h, c_x, c_y)
-		c_brlapi.Py_END_ALLOW_THREADS
-		if retval == -1:
-			raise OperationError(returnerrno())
-		else:
-			return retval
-
-	def acceptKeyRange(self, x, y):
-		"""Accept some key presses from the braille keyboard.
-		See brlapi_acceptKeyRange(3).
-
-		This function asks the server to return keys between x and y (inclusive, and x can be equal to y) to the application, and not give them to brltty.
-
-		Note: You shouldn't ask the server to give you key presses which are usually used to switch between TTYs, unless you really know what you are doing ! The given codes are either raw keycodes if some driver name was given to enterTtyMode(), or brltty commands if None or "" was given."""
-		cdef int retval
-		cdef unsigned long long c_x,c_y
-		c_x = x
-		c_y = y
-		c_brlapi.Py_BEGIN_ALLOW_THREADS
-		retval = c_brlapi.brlapi__acceptKeyRange(self.h, c_x, c_y)
-		c_brlapi.Py_END_ALLOW_THREADS
-		if retval == -1:
-			raise OperationError(returnerrno())
-		else:
-			return retval
-
-	def ignoreKeySet(self, set):
-		"""Ignore some key presses from the braille keyboard.
-		See brlapi_ignoreKeySet(3).
-
-		This function asks the server to give the keys in the set to brltty, rather than returning them to the application via readKey().
-
-		Note: The given codes are either raw keycodes if some driver name was given to enterTtyMode(), or brltty commands if None or "" was given."""
-		cdef int retval
-		cdef unsigned long long x,y
-		cdef unsigned long long *c_set
+		cdef c_brlapi.brlapi_rangeType_t c_range
+		cdef c_brlapi.brlapi_keyCode_t *c_set
 		cdef unsigned int c_n
+		c_range = range
 		c_n = len(set)
-		c_set = <unsigned long long*>c_brlapi.malloc(c_n * sizeof(unsigned long long))
+		c_set = <c_brlapi.brlapi_keyCode_t*>c_brlapi.malloc(c_n * sizeof(c_set[0]))
 		for i from 0 <= i < c_n:
 			c_set[i] = set[i]
 		c_brlapi.Py_BEGIN_ALLOW_THREADS
-		retval = c_brlapi.brlapi__ignoreKeySet(self.h, c_set, c_n)
+		retval = c_brlapi.brlapi__ignoreKeys(self.h, c_range, c_set, c_n)
 		c_brlapi.Py_END_ALLOW_THREADS
 		c_brlapi.free(c_set)
 		if retval == -1:
@@ -527,23 +496,102 @@ cdef class Connection:
 		else:
 			return retval
 
-	def acceptKeySet(self, set):
+	def acceptKeys(self, range, set):
 		"""Accept some key presses from the braille keyboard.
-		See brlapi_acceptKeySet(3).
+		See brlapi_ignoreKeys(3).
+		
+		This function asks the server to give the provided keys to the application, and not give them to brltty.
 
-		This function asks the server to return keys in the set to the application, and not give them to brltty.
-
-		Note: You shouldn't ask the server to give you key presses which are usually used to switch between TTYs, unless you really know what you are doing ! The given codes are either raw keycodes if some driver name was given to enterTtyMode(), or brltty commands if None or "" was given."""
+		The given codes should be brltty commands (nul or "" was given to brlapi_enterTtyMode())"""
 		cdef int retval
-		cdef unsigned long long x,y
-		cdef unsigned long long *c_set
+		cdef c_brlapi.brlapi_rangeType_t c_range
+		cdef c_brlapi.brlapi_keyCode_t *c_set
 		cdef unsigned int c_n
+		c_range = range
 		c_n = len(set)
-		c_set = <unsigned long long*>c_brlapi.malloc(c_n * sizeof(unsigned long long))
+		c_set = <c_brlapi.brlapi_keyCode_t*>c_brlapi.malloc(c_n * sizeof(c_set[0]))
 		for i from 0 <= i < c_n:
 			c_set[i] = set[i]
 		c_brlapi.Py_BEGIN_ALLOW_THREADS
-		retval = c_brlapi.brlapi__acceptKeySet(self.h, c_set, c_n)
+		retval = c_brlapi.brlapi__acceptKeys(self.h, c_range, c_set, c_n)
+		c_brlapi.Py_END_ALLOW_THREADS
+		c_brlapi.free(c_set)
+		if retval == -1:
+			raise OperationError(returnerrno())
+		else:
+			return retval
+	
+	def ignoreAllKeys(self):
+		"""Ignore all key presses from the braille keyboard.
+		See brlapi_ignoreAllKeys(3).
+		
+		This function asks the server to give all keys to brltty, rather than returning them to the application via brlapi_readKey()."""
+		cdef int retval
+		c_brlapi.Py_BEGIN_ALLOW_THREADS
+		retval = c_brlapi.brlapi__ignoreAllKeys(self.h)
+		c_brlapi.Py_END_ALLOW_THREADS
+		if retval == -1:
+			raise OperationError(returnerrno())
+		else:
+			return retval
+	
+	def acceptAllKeys(self):
+		"""Accept all key presses from the braille keyboard.
+		See brlapi_acceptAllKeys(3).
+		
+		This function asks the server to give all keys to the application, and not give them to brltty.
+
+		Warning: after calling this function, make sure to call brlapi_ignoreKeys() for ignoring important keys like BRL_CMD_SWITCHVT_PREV/NEXT and such."""
+		cdef int retval
+		c_brlapi.Py_BEGIN_ALLOW_THREADS
+		retval = c_brlapi.brlapi__acceptAllKeys(self.h)
+		c_brlapi.Py_END_ALLOW_THREADS
+		if retval == -1:
+			raise OperationError(returnerrno())
+		else:
+			return retval
+
+	def ignoreKeyRanges(self, set):
+		"""Ignore some key presses from the braille keyboard.
+		See brlapi_ignoreKeyRanges(3).
+		
+		This function asks the server to give the provided key ranges to brltty, rather than returning them to the application via brlapi_readKey().
+		
+		The given codes should be raw keycodes (i.e. some driver name was given to brlapi_enterTtyMode()) """
+		cdef int retval
+		cdef c_brlapi.brlapi_range_t *c_set
+		cdef unsigned int c_n
+		c_n = len(set)
+		c_set = <c_brlapi.brlapi_range_t*>c_brlapi.malloc(c_n * sizeof(c_set[0]))
+		for i from 0 <= i < c_n:
+			c_set[i].first = set[i][0]
+			c_set[i].last = set[i][1]
+		c_brlapi.Py_BEGIN_ALLOW_THREADS
+		retval = c_brlapi.brlapi__ignoreKeyRanges(self.h, c_set, c_n)
+		c_brlapi.Py_END_ALLOW_THREADS
+		c_brlapi.free(c_set)
+		if retval == -1:
+			raise OperationError(returnerrno())
+		else:
+			return retval
+
+	def acceptKeyRanges(self, set):
+		"""Accept some key presses from the braille keyboard.
+		See brlapi_acceptKeyRanges(3).
+		
+		This function asks the server to return the provided key ranges (inclusive) to the application, and not give them to brltty.
+		
+		The given codes should be raw keycodes (i.e. some driver name was given to brlapi_enterTtyMode()) """
+		cdef int retval
+		cdef c_brlapi.brlapi_range_t *c_set
+		cdef unsigned int c_n
+		c_n = len(set)
+		c_set = <c_brlapi.brlapi_range_t*>c_brlapi.malloc(c_n * sizeof(c_set[0]))
+		for i from 0 <= i < c_n:
+			c_set[i].first = set[i][0]
+			c_set[i].last = set[i][1]
+		c_brlapi.Py_BEGIN_ALLOW_THREADS
+		retval = c_brlapi.brlapi__acceptKeyRanges(self.h, c_set, c_n)
 		c_brlapi.Py_END_ALLOW_THREADS
 		c_brlapi.free(c_set)
 		if retval == -1:

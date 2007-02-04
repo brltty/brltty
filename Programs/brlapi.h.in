@@ -669,65 +669,118 @@ int brlapi_readKey(int block, brlapi_keyCode_t *code);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
 int brlapi__readKey(brlapi_handle_t *handle, int block, brlapi_keyCode_t *code);
 
-/* brlapi_ignoreKeyRange */
+/** types of key ranges */
+typedef enum {
+  brlapi_rangeType_all,	/**< all keys, code must be 0 */
+  brlapi_rangeType_type,	/**< all keys of a given type */
+  brlapi_rangeType_command,	/**< all keys of a given command block, i.e. matching the key type and command parts */
+  brlapi_rangeType_key,	/**< a given key with any flags */
+  brlapi_rangeType_code,	/**< a given key code */
+} brlapi_rangeType_t;
+
+/* brlapi_ignoreKeys */
 /** Ignore some key presses from the braille keyboard
  *
- * This function asks the server to give keys between x and y (inclusive,
- * and x can be equal to y) to \e brltty, rather than returning them to the
- * application via brlapi_readKey()
+ * This function asks the server to give the provided keys to \e brltty, rather
+ * than returning them to the application via brlapi_readKey().
  *
- * \note The given codes are either raw keycodes if some driver name was given
- * to brlapi_enterTtyMode(), or \e brltty commands if NULL or "" was given. */
+ * \param r type of keys to be ignored
+ * \param keys array of keys to be ignored
+ * \param n number of keys
+ *
+ * \note The given codes should be \e brltty commands (NULL or "" was given to
+ brlapi_enterTtyMode()) */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-int brlapi_ignoreKeyRange(brlapi_keyCode_t x, brlapi_keyCode_t y);
+int brlapi_ignoreKeys(brlapi_rangeType_t r, const brlapi_keyCode_t keys[], unsigned int n);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
-int brlapi__ignoreKeyRange(brlapi_handle_t *handle, brlapi_keyCode_t x, brlapi_keyCode_t y);
+int brlapi__ignoreKeys(brlapi_handle_t *handle, brlapi_rangeType_t r, const brlapi_keyCode_t keys[], unsigned int n);
 
-/* brlapi_ignoreKeySet */
+/* brlapi_acceptKeys */
+/** Accept some key presses from the braille keyboard
+ *
+ * This function asks the server to give the provided keys to the application,
+ * and not give them to \e brltty.
+ *
+ * \param r type of keys to be ignored
+ * \param keys array of keys to be ignored
+ * \param n number of keys
+ *
+ * \note The given codes should be \e brltty commands (NULL or "" was given to
+ brlapi_enterTtyMode()) */
+#ifndef BRLAPI_NO_SINGLE_SESSION
+int brlapi_acceptKeys(brlapi_rangeType_t r, const brlapi_keyCode_t keys[], unsigned int n);
+#endif /* BRLAPI_NO_SINGLE_SESSION */
+int brlapi__acceptKeys(brlapi_handle_t *handle, brlapi_rangeType_t r, const brlapi_keyCode_t keys[], unsigned int n);
+
+/* brlapi_ignoreAllKeys */
+/** Ignore all key presses from the braille keyboard
+ *
+ * This function asks the server to give all keys to \e brltty, rather than
+ * returning them to the application via brlapi_readKey().
+ */
+#ifndef BRLAPI_NO_SINGLE_SESSION
+int brlapi_ignoreAllKeys();
+#define brlapi_ignoreAllKeys() brlapi_ignoreKeys(brlapi_rangeType_all, NULL, 0)
+#endif /* BRLAPI_NO_SINGLE_SESSION */
+int brlapi__ignoreAllKeys(brlapi_handle_t *handle);
+#define brlapi__ignoreAllKeys(handle) brlapi__ignoreKeys(handle, brlapi_rangeType_all, NULL, 0)
+
+/* brlapi_acceptAllKeys */
+/** Accept all key presses from the braille keyboard
+ *
+ * This function asks the server to give all keys to the application, and not
+ * give them to \e brltty.
+ *
+ * Warning: after calling this function, make sure to call brlapi_ignoreKeys()
+ * for ignoring important keys like BRL_CMD_SWITCHVT_PREV/NEXT and such.
+ */
+#ifndef BRLAPI_NO_SINGLE_SESSION
+int brlapi_acceptAllKeys();
+#define brlapi_acceptAllKeys() brlapi_acceptKeys(brlapi_rangeType_all, NULL, 0)
+#endif /* BRLAPI_NO_SINGLE_SESSION */
+int brlapi__acceptAllKeys(brlapi_handle_t *handle);
+#define brlapi__acceptAllKeys(handle) brlapi__acceptKeys(handle, brlapi_rangeType_all, NULL, 0)
+
+/** Type for raw keycode ranges
+ *
+ * Denotes the set of keycodes between \e first and \e last (inclusive)
+ */
+typedef struct {
+	brlapi_keyCode_t first;
+	brlapi_keyCode_t last;
+} brlapi_range_t;
+
+/* brlapi_ignoreKeyRanges */
 /** Ignore some key presses from the braille keyboard
  *
- * This function asks the server to give the n keys in set s to \e brltty,
- * rather than returning them to the application via
- * brlapi_readKey()
+ * This function asks the server to give the provided key ranges to \e brltty,
+ * rather than returning them to the application via brlapi_readKey().
  *
- * \note The given codes are either raw keycodes if some driver name was given
- * to brlapi_enterTtyMode(), or \e brltty commands if NULL or "" was given. */
+ * \param ranges key ranges, which are inclusive
+ * \param n number of ranges
+ *
+ * \note The given codes should be raw keycodes (i.e. some driver name was given
+ * to brlapi_enterTtyMode()) */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-int brlapi_ignoreKeySet(const brlapi_keyCode_t *s, unsigned int n);
+int brlapi_ignoreKeyRanges(brlapi_range_t ranges[], unsigned int n);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
-int brlapi__ignoreKeySet(brlapi_handle_t *handle, const brlapi_keyCode_t *s, unsigned int n);
+int brlapi__ignoreKeyRanges(brlapi_handle_t *handle, brlapi_range_t ranges[], unsigned int n);
 
-/* brlapi_acceptKeyRange */
+/* brlapi_acceptKeyRanges */
 /** Accept some key presses from the braille keyboard
  *
- * This function asks the server to return keys between x and y (inclusive, and
- * x can be equal to y) to the application, and not give them to \e brltty.
+ * This function asks the server to return the provided key ranges (inclusive)
+ * to the application, and not give them to \e brltty.
  *
- * \note You shouldn't ask the server to give you key presses which are usually
- * used to switch between TTYs, unless you really know what you are doing!
+ * \param ranges key ranges, which are inclusive
+ * \param n number of ranges
  *
- * \note The given codes are either raw keycodes if some driver name was given
- * to brlapi_enterTtyMode(), or \e brltty commands if NULL or "" was given. */
+ * \note The given codes should be raw keycodes (i.e. some driver name was given
+ * to brlapi_enterTtyMode()) */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-int brlapi_acceptKeyRange(brlapi_keyCode_t x, brlapi_keyCode_t y);
+int brlapi_acceptKeyRanges(brlapi_range_t ranges[], unsigned int n);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
-int brlapi__acceptKeyRange(brlapi_handle_t *handle, brlapi_keyCode_t x, brlapi_keyCode_t y);
-/* brlapi_acceptKeySet */
-/** Accept some key presses from the braille keyboard
- *
- * This function asks the server to return all n keys in set s to the
- * application, and not give them to \e brltty.
- *
- * \note You shouldn't ask the server to give you key presses which are usually
- * used to switch between TTYs, unless you really know what you are doing!
- *
- * \note The given codes are either raw keycodes if some driver name was given
- * to brlapi_enterTtyMode(), or \e brltty commands if NULL or "" was given. */
-#ifndef BRLAPI_NO_SINGLE_SESSION
-int brlapi_acceptKeySet(const brlapi_keyCode_t *s, unsigned int n);
-#endif /* BRLAPI_NO_SINGLE_SESSION */
-int brlapi__acceptKeySet(brlapi_handle_t *handle, const brlapi_keyCode_t *s, unsigned int n);
-/** @} */
+int brlapi__acceptKeyRanges(brlapi_handle_t *handle, brlapi_range_t ranges[], unsigned int n);
 
 /** \defgroup brlapi_driverspecific Driver-Specific modes
  * \brief Raw and Suspend Modes mechanism

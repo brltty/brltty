@@ -1460,147 +1460,6 @@ int brlapi_readKey(int block, brlapi_keyCode_t *code)
   return brlapi__readKey(&defaultHandle, block, code) ;
 }
 
-/* Function : ignore_accept_key_range */
-/* Common tasks for ignoring and unignoring key ranges */
-/* what = 0 for ignoring !0 for unignoring */
-static int ignore_accept_key_range(brlapi_handle_t *handle, int what, brlapi_keyCode_t x, brlapi_keyCode_t y)
-{
-  uint32_t ints[4] = {
-    htonl(x >> 32), htonl(x & 0xffffffff),
-    htonl(y >> 32), htonl(y & 0xffffffff),
-  };
-
-  return brlapi__writePacketWaitForAck(handle,(what ? BRLAPI_PACKET_ACCEPTKEYRANGE : BRLAPI_PACKET_IGNOREKEYRANGE),ints,sizeof(ints));
-}
-
-/* Function : brlapi_ignoreKeyRange */
-int brlapi__ignoreKeyRange(brlapi_handle_t *handle, brlapi_keyCode_t x, brlapi_keyCode_t y)
-{
-  return ignore_accept_key_range(handle, 0,x,y);
-}
-
-int brlapi_ignoreKeyRange(brlapi_keyCode_t x, brlapi_keyCode_t y)
-{
-  return brlapi__ignoreKeyRange(&defaultHandle, x, y);
-}
-
-/* Function : brlapi_acceptKeyRange */
-int brlapi__acceptKeyRange(brlapi_handle_t *handle, brlapi_keyCode_t x, brlapi_keyCode_t y)
-{
-  return ignore_accept_key_range(handle, !0,x,y);
-}
-
-int brlapi_acceptKeyRange(brlapi_keyCode_t x, brlapi_keyCode_t y)
-{
-  return brlapi__acceptKeyRange(&defaultHandle, x, y);
-}
-
-/* Function : ignore_accept_key_set */
-/* Common tasks for ignoring and unignoring key sets */
-/* what = 0 for ignoring !0 for unignoring */
-static int ignore_accept_key_set(brlapi_handle_t *handle, int what, const brlapi_keyCode_t *s, unsigned int n)
-{
-  uint32_t buf[2*n];
-  int i;
-  if (n>BRLAPI_MAXKEYSETSIZE) {
-    brlapi_errno = BRLAPI_ERROR_INVALID_PARAMETER;
-    return -1;
-  }
-  for (i=0;i<n;i++) {
-    buf[2*i+0] = htonl(s[i] >> 32);
-    buf[2*i+1] = htonl(s[i] & 0xffffffff);
-  }
-  return brlapi__writePacketWaitForAck(handle,(what ? BRLAPI_PACKET_ACCEPTKEYSET : BRLAPI_PACKET_IGNOREKEYSET),buf,sizeof(buf));
-}
-
-/* Function : brlapi_ignoreKeySet */
-int brlapi__ignoreKeySet(brlapi_handle_t *handle, const brlapi_keyCode_t *s, unsigned int n)
-{
-  return ignore_accept_key_set(handle, 0,s,n);
-}
-
-int brlapi_ignoreKeySet(const brlapi_keyCode_t *s, unsigned int n)
-{
-  return brlapi__ignoreKeySet(&defaultHandle, s, n);
-}
-
-/* Function : brlapi_acceptKeySet */
-int brlapi__acceptKeySet(brlapi_handle_t *handle, const brlapi_keyCode_t *s, unsigned int n)
-{
-  return ignore_accept_key_set(handle, !0,s,n);
-}
-
-int brlapi_acceptKeySet(const brlapi_keyCode_t *s, unsigned int n)
-{
-  return brlapi__acceptKeySet(&defaultHandle, s, n);
-}
-
-/* Error code handling */
-
-/* brlapi_errlist: error messages */
-const char *brlapi_errlist[] = {
-  "Success",                            /* BRLAPI_ERROR_SUCESS */
-  "Not enough memory",                  /* BRLAPI_ERROR_NOMEM */
-  "Tty Busy",                           /* BRLAPI_ERROR_TTYBUSY */
-  "Device busy",                        /* BRLAPI_ERROR_DEVICEBUSY */
-  "Unknown instruction",                /* BRLAPI_ERROR_UNKNOWN_INSTRUCTION */
-  "Illegal instruction",                /* BRLAPI_ERROR_ILLEGAL_INSTRUCTION */
-  "Invalid parameter",                  /* BRLAPI_ERROR_INVALID_PARAMETER */
-  "Invalid packet",                     /* BRLAPI_ERROR_INVALID_PACKET */
-  "Connection refused",                 /* BRLAPI_ERROR_CONNREFUSED */
-  "Operation not supported",            /* BRLAPI_ERROR_OPNOTSUPP */
-  "getaddrinfo error",                  /* BRLAPI_ERROR_GAIERR */
-  "libc error",                         /* BRLAPI_ERROR_LIBCERR */
-  "Couldn't find out tty number",       /* BRLAPI_ERROR_UNKNOWNTTY */
-  "Bad protocol version",               /* BRLAPI_ERROR_PROTOCOL_VERSION */
-  "Unexpected end of file",             /* BRLAPI_ERROR_EOF */
-  "Key file is empty",                  /* BRLAPI_ERROR_EMPTYKEY */
-  "Driver error",                       /* BRLAPI_ERROR_DRIVERERROR */
-};
-
-/* brlapi_nerr: last error number */
-const int brlapi_nerr = (sizeof(brlapi_errlist)/sizeof(char*)) - 1;
-
-/* brlapi_strerror: return error message */
-const char *brlapi_strerror(const brlapi_error_t *error)
-{
-  static char errmsg[128];
-  if (error->brlerrno>=brlapi_nerr)
-    return "Unknown error";
-  else if (error->brlerrno==BRLAPI_ERROR_GAIERR) {
-#if defined(EAI_SYSTEM)
-    if (error->gaierrno == EAI_SYSTEM)
-      snprintf(errmsg,sizeof(errmsg),"resolve: %s", strerror(error->libcerrno));
-    else
-#endif /* EAI_SYSTEM */
-      snprintf(errmsg,sizeof(errmsg),"resolve: "
-#if defined(HAVE_GETADDRINFO)
-#if defined(HAVE_GAI_STRERROR)
-	"%s\n", gai_strerror(error->gaierrno)
-#else
-	"%d\n", error->gaierrno
-#endif
-#elif defined(HAVE_HSTRERROR) && !defined(WINDOWS)
-	"%s\n", hstrerror(error->gaierrno)
-#else
-	"%x\n", error->gaierrno
-#endif
-	);
-    return errmsg;
-  }
-  else if (error->brlerrno==BRLAPI_ERROR_LIBCERR) {
-    snprintf(errmsg,sizeof(errmsg),"%s: %s", error->errfun, strerror(error->libcerrno));
-    return errmsg;
-  } else
-    return brlapi_errlist[error->brlerrno];
-}
-
-/* brlapi_perror: error message printing */
-void brlapi_perror(const char *s)
-{
-  fprintf(stderr,"%s: %s\n",s,brlapi_strerror(&brlapi_error));
-}
-
 typedef struct {
   brlapi_keyCode_t code;
   const char *name;
@@ -1772,6 +1631,198 @@ brlapi_describeKeyCode (brlapi_keyCode_t keyCode, brlapi_describedKeyCode_t *dkc
 
 done:
   return result;
+}
+
+/* Function : ignore_accept_key_range */
+/* Common tasks for ignoring and unignoring key ranges */
+/* what = 0 for ignoring !0 for unignoring */
+static int ignore_accept_key_ranges(brlapi_handle_t *handle, int what, brlapi_range_t ranges[], unsigned int n)
+{
+  uint32_t ints[n][4];
+  unsigned int i;
+
+  if (n>BRLAPI_MAXKEYSETSIZE) {
+    brlapi_errno = BRLAPI_ERROR_INVALID_PARAMETER;
+    return -1;
+  }
+
+  for (i=0; i<n; i++) {
+    ints[i][0] = htonl(ranges[i].first >> 32);
+    ints[i][1] = htonl(ranges[i].first & 0xffffffff);
+    ints[i][2] = htonl(ranges[i].last >> 32);
+    ints[i][3] = htonl(ranges[i].last & 0xffffffff);
+  };
+
+  return brlapi__writePacketWaitForAck(handle,(what ? BRLAPI_PACKET_ACCEPTKEYRANGES : BRLAPI_PACKET_IGNOREKEYRANGES),ints,sizeof(ints));
+}
+
+/* Function : keyrangeMask */
+/* returns the keyCode mask for a given range type */
+static int keyrangeMask(brlapi_rangeType_t r, brlapi_keyCode_t code, brlapi_keyCode_t *mask)
+{
+  switch(r) {
+    case brlapi_rangeType_all:
+      *mask = BRLAPI_KEY_MAX;
+      return 0;
+    case brlapi_rangeType_type:
+      *mask = BRLAPI_KEY_CODE_MASK|BRLAPI_KEY_FLAGS_MASK;
+      return 0;
+    case brlapi_rangeType_command: {
+      int width = brlapi_getArgumentWidth(code);
+      if (width == -1) return -1;
+      *mask = ((1 << width) - 1) | BRLAPI_KEY_FLAGS_MASK;
+      return 0;
+    }
+    case brlapi_rangeType_key:
+      *mask = BRLAPI_KEY_FLAGS_MASK;
+      return 0;
+    case brlapi_rangeType_code:
+      *mask = 0;
+      return 0;
+  }
+  brlapi_errno = BRLAPI_ERROR_INVALID_PARAMETER;
+  return -1;
+}
+
+/* Function : ignore_accept_keys */
+/* Common tasks for ignoring and unignoring keys */
+/* what = 0 for ignoring !0 for unignoring */
+static int ignore_accept_keys(brlapi_handle_t *handle, int what, brlapi_rangeType_t r, const brlapi_keyCode_t *code, unsigned int n)
+{
+  if (!n) {
+    if (r != brlapi_rangeType_all) {
+      brlapi_errno = BRLAPI_ERROR_INVALID_PARAMETER;
+      return -1;
+    }
+    brlapi_range_t range = { .first = 0, .last = BRLAPI_KEY_MAX };
+    return ignore_accept_key_ranges(handle, what, &range, 1);
+  } else {
+    brlapi_range_t ranges[n];
+    unsigned int i;
+    brlapi_keyCode_t mask;
+
+    for (i=0; i<n; i++) {
+      if (keyrangeMask(r, code[i], &mask))
+	return -1;
+      if (code[i] & mask) {
+	brlapi_errno = BRLAPI_ERROR_INVALID_PARAMETER;
+	return -1;
+      }
+      ranges[i].first = code[i];
+      ranges[i].last = code[i] | mask;
+    }
+    return ignore_accept_key_ranges(handle, what, ranges, n);
+  }
+}
+
+/* Function : brlapi_acceptKeyRanges */
+int brlapi__acceptKeyRanges(brlapi_handle_t *handle, brlapi_range_t ranges[], unsigned int n)
+{
+  return ignore_accept_key_ranges(handle, !0, ranges, n);
+}
+
+int brlapi_acceptKeyRanges(brlapi_range_t ranges[], unsigned int n)
+{
+  return brlapi__acceptKeyRanges(&defaultHandle, ranges, n);
+}
+
+/* Function : brlapi_acceptKeys */
+int brlapi__acceptKeys(brlapi_handle_t *handle, brlapi_rangeType_t r, const brlapi_keyCode_t *code, unsigned int n)
+{
+  return ignore_accept_keys(handle, !0, r, code, n);
+}
+
+int brlapi_acceptKeys(brlapi_rangeType_t r, const brlapi_keyCode_t *code, unsigned int n)
+{
+  return brlapi__acceptKeys(&defaultHandle, r, code, n);
+}
+
+/* Function : brlapi_ignoreKeyRanges */
+int brlapi__ignoreKeyRanges(brlapi_handle_t *handle, brlapi_range_t ranges[], unsigned int n)
+{
+  return ignore_accept_key_ranges(handle, 0, ranges, n);
+}
+
+int brlapi_ignoreKeyRanges(brlapi_range_t ranges[], unsigned int n)
+{
+  return brlapi__ignoreKeyRanges(&defaultHandle, ranges, n);
+}
+
+/* Function : brlapi_ignoreKeys */
+int brlapi__ignoreKeys(brlapi_handle_t *handle, brlapi_rangeType_t r, const brlapi_keyCode_t *code, unsigned int n)
+{
+  return ignore_accept_keys(handle, 0, r, code, n);
+}
+
+int brlapi_ignoreKeys(brlapi_rangeType_t r, const brlapi_keyCode_t *code, unsigned int n)
+{
+  return brlapi__ignoreKeys(&defaultHandle, r, code, n);
+}
+
+/* Error code handling */
+
+/* brlapi_errlist: error messages */
+const char *brlapi_errlist[] = {
+  "Success",                            /* BRLAPI_ERROR_SUCESS */
+  "Not enough memory",                  /* BRLAPI_ERROR_NOMEM */
+  "Tty Busy",                           /* BRLAPI_ERROR_TTYBUSY */
+  "Device busy",                        /* BRLAPI_ERROR_DEVICEBUSY */
+  "Unknown instruction",                /* BRLAPI_ERROR_UNKNOWN_INSTRUCTION */
+  "Illegal instruction",                /* BRLAPI_ERROR_ILLEGAL_INSTRUCTION */
+  "Invalid parameter",                  /* BRLAPI_ERROR_INVALID_PARAMETER */
+  "Invalid packet",                     /* BRLAPI_ERROR_INVALID_PACKET */
+  "Connection refused",                 /* BRLAPI_ERROR_CONNREFUSED */
+  "Operation not supported",            /* BRLAPI_ERROR_OPNOTSUPP */
+  "getaddrinfo error",                  /* BRLAPI_ERROR_GAIERR */
+  "libc error",                         /* BRLAPI_ERROR_LIBCERR */
+  "Couldn't find out tty number",       /* BRLAPI_ERROR_UNKNOWNTTY */
+  "Bad protocol version",               /* BRLAPI_ERROR_PROTOCOL_VERSION */
+  "Unexpected end of file",             /* BRLAPI_ERROR_EOF */
+  "Key file is empty",                  /* BRLAPI_ERROR_EMPTYKEY */
+  "Driver error",                       /* BRLAPI_ERROR_DRIVERERROR */
+};
+
+/* brlapi_nerr: last error number */
+const int brlapi_nerr = (sizeof(brlapi_errlist)/sizeof(char*)) - 1;
+
+/* brlapi_strerror: return error message */
+const char *brlapi_strerror(const brlapi_error_t *error)
+{
+  static char errmsg[128];
+  if (error->brlerrno>=brlapi_nerr)
+    return "Unknown error";
+  else if (error->brlerrno==BRLAPI_ERROR_GAIERR) {
+#if defined(EAI_SYSTEM)
+    if (error->gaierrno == EAI_SYSTEM)
+      snprintf(errmsg,sizeof(errmsg),"resolve: %s", strerror(error->libcerrno));
+    else
+#endif /* EAI_SYSTEM */
+      snprintf(errmsg,sizeof(errmsg),"resolve: "
+#if defined(HAVE_GETADDRINFO)
+#if defined(HAVE_GAI_STRERROR)
+	"%s\n", gai_strerror(error->gaierrno)
+#else
+	"%d\n", error->gaierrno
+#endif
+#elif defined(HAVE_HSTRERROR) && !defined(WINDOWS)
+	"%s\n", hstrerror(error->gaierrno)
+#else
+	"%x\n", error->gaierrno
+#endif
+	);
+    return errmsg;
+  }
+  else if (error->brlerrno==BRLAPI_ERROR_LIBCERR) {
+    snprintf(errmsg,sizeof(errmsg),"%s: %s", error->errfun, strerror(error->libcerrno));
+    return errmsg;
+  } else
+    return brlapi_errlist[error->brlerrno];
+}
+
+/* brlapi_perror: error message printing */
+void brlapi_perror(const char *s)
+{
+  fprintf(stderr,"%s: %s\n",s,brlapi_strerror(&brlapi_error));
 }
 
 /* XXX functions mustn't use brlapi_errno after this since it #undefs it XXX */

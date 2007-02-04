@@ -42,10 +42,12 @@ public class BrlapiNative {
   public native void write (BrlapiWriteStruct s) throws BrlapiError;
 
   public native long readKey (boolean block) throws BrlapiError;
-  public native void ignoreKeyRange (long x, long y) throws BrlapiError;
-  public native void acceptKeyRange (long x, long y) throws BrlapiError;
-  public native void ignoreKeySet (long s[]) throws BrlapiError;
-  public native void acceptKeySet (long s[]) throws BrlapiError;
+  public native void ignoreKeys (long range, long s[]) throws BrlapiError;
+  public native void acceptKeys (long range, long s[]) throws BrlapiError;
+  public native void ignoreAllKeys () throws BrlapiError;
+  public native void acceptAllKeys () throws BrlapiError;
+  public native void ignoreKeyRanges (long s[][]) throws BrlapiError;
+  public native void acceptKeyRanges (long s[][]) throws BrlapiError;
 
   public native void enterRawMode (String driver) throws BrlapiError;
   public native void leaveRawMode () throws BrlapiError;

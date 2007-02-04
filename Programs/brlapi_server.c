@@ -500,10 +500,8 @@ typedef struct { /* packet handlers */
   PacketHandler enterTtyMode;
   PacketHandler setFocus;
   PacketHandler leaveTtyMode;
-  PacketHandler ignoreKeyRange;
-  PacketHandler acceptKeyRange;
-  PacketHandler ignoreKeySet;
-  PacketHandler acceptKeySet;
+  PacketHandler ignoreKeyRanges;
+  PacketHandler acceptKeyRanges;
   PacketHandler write;
   PacketHandler enterRawMode;  
   PacketHandler leaveRawMode;
@@ -930,49 +928,31 @@ static int handleLeaveTtyMode(Connection *c, brlapi_type_t type, brlapi_packet_t
   return 0;
 }
 
-static int handleKeyRange(Connection *c, brlapi_type_t type, brlapi_packet_t *packet, size_t size)
+static int handleKeyRanges(Connection *c, brlapi_type_t type, brlapi_packet_t *packet, size_t size)
 {
-  int res;
+  int res = 0;
   brlapi_keyCode_t x,y;
-  uint32_t * ints = &packet->uint32;
+  uint32_t (*ints)[4] = (uint32_t (*)[4]) packet;
+  unsigned int i;
   LogPrintRequest(type, c->fd);
   CHECKERR(!c->raw,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed in raw mode");
   CHECKERR(c->tty,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed out of tty mode");
-  CHECKERR(size==2*sizeof(brlapi_keyCode_t),BRLAPI_ERROR_INVALID_PACKET,"wrong packet size");
-  x = ((brlapi_keyCode_t)ntohl(ints[0]) << 32) | ntohl(ints[1]);
-  y = ((brlapi_keyCode_t)ntohl(ints[2]) << 32) | ntohl(ints[3]);
-  LogPrint(LOG_DEBUG,"range: [%016"BRLAPI_PRIxKEYCODE"..%016"BRLAPI_PRIxKEYCODE"]",x,y);
+  CHECKERR(!(size%2*sizeof(brlapi_keyCode_t)),BRLAPI_ERROR_INVALID_PACKET,"wrong packet size");
   pthread_mutex_lock(&c->maskMutex);
-  if (type==BRLAPI_PACKET_IGNOREKEYRANGE) res = removeKeyrange(x,y,&c->unmaskedKeys);
-  else res = addKeyrange(x,y,&c->unmaskedKeys);
-  pthread_mutex_unlock(&c->maskMutex);
-  if (res==-1) WERR(c->fd,BRLAPI_ERROR_NOMEM,"no memory for key range");
-  else writeAck(c->fd);
-  return 0;
-}
-
-static int handleKeySet(Connection *c, brlapi_type_t type, brlapi_packet_t *packet, size_t size)
-{
-  int i = 0, res = 0;
-  unsigned int nbkeys;
-  uint32_t *k = &packet->uint32;
-  int (*fptr)(KeyrangeElem, KeyrangeElem, KeyrangeList **);
-  brlapi_keyCode_t code;
-  LogPrintRequest(type, c->fd);
-  if (type==BRLAPI_PACKET_IGNOREKEYSET) fptr = removeKeyrange; else fptr = addKeyrange;
-  CHECKERR(!c->raw,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed in raw mode");
-  CHECKERR(c->tty,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed out of tty mode");
-  CHECKERR(size % sizeof(brlapi_keyCode_t)==0,BRLAPI_ERROR_INVALID_PACKET,"wrong packet size");
-  nbkeys = size/sizeof(brlapi_keyCode_t);
-  pthread_mutex_lock(&c->maskMutex);
-  while ((res!=-1) && (i<nbkeys)) {
-    code = ((brlapi_keyCode_t)ntohl(k[2*i]) << 32) | ntohl(k[2*i+1]);
-    res = fptr(code,code,&c->unmaskedKeys);
-    i++;
+  for (i=0; i<size/(2*sizeof(brlapi_keyCode_t)); i++) {
+    x = ((brlapi_keyCode_t)ntohl(ints[i][0]) << 32) | ntohl(ints[i][1]);
+    y = ((brlapi_keyCode_t)ntohl(ints[i][2]) << 32) | ntohl(ints[i][3]);
+    LogPrint(LOG_DEBUG,"range: [%016"BRLAPI_PRIxKEYCODE"..%016"BRLAPI_PRIxKEYCODE"]",x,y);
+    if (type==BRLAPI_PACKET_IGNOREKEYRANGES) res = removeKeyrange(x,y,&c->unmaskedKeys);
+    else res = addKeyrange(x,y,&c->unmaskedKeys);
+    if (res==-1) {
+      /* XXX: humf, in the middle of keycode updates :( */
+      WERR(c->fd,BRLAPI_ERROR_NOMEM,"no memory for key range");
+      break;
+    }
   }
   pthread_mutex_unlock(&c->maskMutex);
-  if (res==-1) WERR(c->fd,BRLAPI_ERROR_NOMEM,"no memory for key set");
-  else writeAck(c->fd);
+  if (!res) writeAck(c->fd);
   return 0;
 }
 
@@ -1201,8 +1181,7 @@ static int handleResumeDriver(Connection *c, brlapi_type_t type, brlapi_packet_t
 static PacketHandlers packetHandlers = {
   handleGetDriverId, handleGetDriverName, handleGetDisplaySize,
   handleEnterTtyMode, handleSetFocus, handleLeaveTtyMode,
-  handleKeyRange, handleKeyRange, handleKeySet, handleKeySet,
-  handleWrite,
+  handleKeyRanges, handleKeyRanges, handleWrite,
   handleEnterRawMode, handleLeaveRawMode, handlePacket, handleSuspendDriver, handleResumeDriver
 };
 
@@ -1377,10 +1356,8 @@ static int processRequest(Connection *c, PacketHandlers *handlers)
     case BRLAPI_PACKET_ENTERTTYMODE: p = handlers->enterTtyMode; break;
     case BRLAPI_PACKET_SETFOCUS: p = handlers->setFocus; break;
     case BRLAPI_PACKET_LEAVETTYMODE: p = handlers->leaveTtyMode; break;
-    case BRLAPI_PACKET_IGNOREKEYRANGE: p = handlers->ignoreKeyRange; break;
-    case BRLAPI_PACKET_ACCEPTKEYRANGE: p = handlers->acceptKeyRange; break;
-    case BRLAPI_PACKET_IGNOREKEYSET: p = handlers->ignoreKeySet; break;
-    case BRLAPI_PACKET_ACCEPTKEYSET: p = handlers->acceptKeySet; break;
+    case BRLAPI_PACKET_IGNOREKEYRANGES: p = handlers->ignoreKeyRanges; break;
+    case BRLAPI_PACKET_ACCEPTKEYRANGES: p = handlers->acceptKeyRanges; break;
     case BRLAPI_PACKET_WRITE: p = handlers->write; break;
     case BRLAPI_PACKET_ENTERRAWMODE: p = handlers->enterRawMode; break;
     case BRLAPI_PACKET_LEAVERAWMODE: p = handlers->leaveRawMode; break;

@@ -15,6 +15,10 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
+BEGIN {
+  apiRangeTypeCount = 0
+}
+
 /#define[ \t]*BRLAPI_(CURSOR|DISPLAY|TTY)_/ {
   apiConstant(substr($2, 8), $2, getDefineValue(), "")
   next
@@ -42,6 +46,12 @@
 
 /#define[ \t]*BRLAPI_KEY_SYM_/ {
   apiKey(substr($2, 16), $2, getDefineValue(), "")
+  next
+}
+
+/^ *brlapi_rangeType_/ {
+  gsub(",", "", $1)
+  apiRangeType(substr($1, 18), $1, apiRangeTypeCount++, "")
   next
 }
 

@@ -507,17 +507,7 @@ JNIEXPORT jlong JNICALL Java_BrlapiNative_readKey(JNIEnv *jenv, jobject jobj, jb
   return (jlong)code;
 }
 
-JNIEXPORT void JNICALL Java_BrlapiNative_ignoreKeyRange(JNIEnv *jenv, jobject jobj, jlong jarg1, jlong jarg2) {
-  env = jenv;
-  GET_HANDLE(jenv, jobj, );
-
-  if (brlapi__ignoreKeyRange(handle, (brlapi_keyCode_t)jarg1,(brlapi_keyCode_t)jarg2) < 0) {
-    ThrowError(jenv, __func__);
-    return;
-  }
-}
-
-JNIEXPORT void JNICALL Java_BrlapiNative_ignoreKeySet(JNIEnv *jenv, jobject jobj, jlongArray js) {
+JNIEXPORT void JNICALL Java_BrlapiNative_ignoreKeys(JNIEnv *jenv, jobject jobj, jlong jrange, jlongArray js) {
   jlong *s;
   unsigned int n;
   int result;
@@ -534,7 +524,7 @@ JNIEXPORT void JNICALL Java_BrlapiNative_ignoreKeySet(JNIEnv *jenv, jobject jobj
   s = (*jenv)->GetLongArrayElements(jenv, js, NULL);
 
   // XXX jlong != brlapi_keyCode_t probably
-  result = brlapi__ignoreKeySet(handle, (const brlapi_keyCode_t *)s, n);
+  result = brlapi__ignoreKeys(handle, jrange, (const brlapi_keyCode_t *)s, n);
   (*jenv)->ReleaseLongArrayElements(jenv, js, s, JNI_ABORT);
   
   if (result < 0) {
@@ -543,17 +533,7 @@ JNIEXPORT void JNICALL Java_BrlapiNative_ignoreKeySet(JNIEnv *jenv, jobject jobj
   }
 }
 
-JNIEXPORT void JNICALL Java_BrlapiNative_acceptKeyRange(JNIEnv *jenv, jobject jobj, jlong jarg1, jlong jarg2) {
-  env = jenv;
-  GET_HANDLE(jenv, jobj, );
-
-  if (brlapi__acceptKeyRange(handle, (brlapi_keyCode_t)jarg1,(brlapi_keyCode_t)jarg2) < 0) {
-    ThrowError(jenv, __func__);
-    return;
-  }
-}
-
-JNIEXPORT void JNICALL Java_BrlapiNative_acceptKeySet(JNIEnv *jenv, jobject jobj, jlongArray js) {
+JNIEXPORT void JNICALL Java_BrlapiNative_acceptKeys(JNIEnv *jenv, jobject jobj, jlong jrange, jlongArray js) {
   jlong *s;
   unsigned int n;
   int result;
@@ -570,12 +550,88 @@ JNIEXPORT void JNICALL Java_BrlapiNative_acceptKeySet(JNIEnv *jenv, jobject jobj
   s = (*jenv)->GetLongArrayElements(jenv, js, NULL);
 
   // XXX jlong != brlapi_keyCode_t probably
-  result = brlapi__acceptKeySet(handle, (const brlapi_keyCode_t *)s, n);
+  result = brlapi__acceptKeys(handle, jrange, (const brlapi_keyCode_t *)s, n);
   (*jenv)->ReleaseLongArrayElements(jenv, js, s, JNI_ABORT);
 
   if (result < 0) {
     ThrowError(jenv, __func__);
     return;
+  }
+}
+
+JNIEXPORT void JNICALL Java_BrlapiNative_ignoreAllKeys(JNIEnv *jenv, jobject jobj) {
+  GET_HANDLE(jenv, jobj, );
+
+  if (brlapi__ignoreAllKeys(handle) < 0)
+    ThrowError(jenv, __func__);
+}
+
+JNIEXPORT void JNICALL Java_BrlapiNative_acceptAllKeys(JNIEnv *jenv, jobject jobj) {
+  GET_HANDLE(jenv, jobj, );
+
+  if (brlapi__acceptAllKeys(handle) < 0)
+    ThrowError(jenv, __func__);
+}
+
+JNIEXPORT void JNICALL Java_BrlapiNative_ignoreKeyRanges(JNIEnv *jenv, jobject jobj, jobjectArray js) {
+  unsigned int n;
+  GET_HANDLE(jenv, jobj, );
+
+  env = jenv;
+
+  if (!js) {
+    ThrowException(jenv, ERR_NULLPTR, __func__);
+    return;
+  }
+
+  n = (unsigned int) (*jenv)->GetArrayLength(jenv, js);
+
+  {
+    unsigned int i;
+    brlapi_range_t s[n];
+
+    for (i=0; i<n; i++) {
+      jlongArray jl = (*jenv)->GetObjectArrayElement(jenv, js, i);
+      jlong *l = (*jenv)->GetLongArrayElements(jenv, jl, NULL);
+      s[i].first = l[0];
+      s[i].last = l[1];
+      (*jenv)->ReleaseLongArrayElements(jenv, jl, l, JNI_ABORT);
+    }
+    if (brlapi__ignoreKeyRanges(handle, s, n)) {
+      ThrowError(jenv, __func__);
+      return;
+    }
+  }
+}
+
+JNIEXPORT void JNICALL Java_BrlapiNative_acceptKeyRanges(JNIEnv *jenv, jobject jobj, jobjectArray js) {
+  unsigned int n;
+  GET_HANDLE(jenv, jobj, );
+
+  env = jenv;
+
+  if (!js) {
+    ThrowException(jenv, ERR_NULLPTR, __func__);
+    return;
+  }
+
+  n = (unsigned int) (*jenv)->GetArrayLength(jenv, js);
+
+  {
+    unsigned int i;
+    brlapi_range_t s[n];
+
+    for (i=0; i<n; i++) {
+      jlongArray jl = (*jenv)->GetObjectArrayElement(jenv, js, i);
+      jlong *l = (*jenv)->GetLongArrayElements(jenv, jl, NULL);
+      s[i].first = l[0];
+      s[i].last = l[1];
+      (*jenv)->ReleaseLongArrayElements(jenv, jl, l, JNI_ABORT);
+    }
+    if (brlapi__acceptKeyRanges(handle, s, n)) {
+      ThrowError(jenv, __func__);
+      return;
+    }
   }
 }
 

@@ -59,28 +59,26 @@ extern "C" {
 /** Maximum name length for names embeded in BrlAPI packets */
 #define BRLAPI_MAXNAMELENGTH 31
 
-#define BRLAPI_PACKET_VERSION        'v'    /**< Version                     */
-#define BRLAPI_PACKET_AUTH           'a'    /**< Authorization               */
-#define BRLAPI_PACKET_GETDRIVERID    'd'    /**< Ask which driver is used    */
-#define BRLAPI_PACKET_GETDRIVERNAME  'n'    /**< Ask which driver is used    */
-#define BRLAPI_PACKET_GETDISPLAYSIZE 's'    /**< Dimensions of brl display   */
-#define BRLAPI_PACKET_ENTERTTYMODE   't'    /**< Asks for a specified tty    */
-#define BRLAPI_PACKET_SETFOCUS       'F'    /**< Set current tty focus       */
-#define BRLAPI_PACKET_LEAVETTYMODE   'L'    /**< Release the tty             */
-#define BRLAPI_PACKET_KEY            'k'    /**< Braille key                 */
-#define BRLAPI_PACKET_IGNOREKEYRANGE 'm'    /**< Mask key-range              */
-#define BRLAPI_PACKET_IGNOREKEYSET   'M'    /**< Mask key-set                */
-#define BRLAPI_PACKET_ACCEPTKEYRANGE 'u'    /**< Unmask key range            */
-#define BRLAPI_PACKET_ACCEPTKEYSET   'U'    /**< Unmask key set              */
-#define BRLAPI_PACKET_WRITE          'w'    /**< Write                       */
-#define BRLAPI_PACKET_ENTERRAWMODE   '*'    /**< Enter in raw mode           */
-#define BRLAPI_PACKET_LEAVERAWMODE   '#'    /**< Leave raw mode              */
-#define BRLAPI_PACKET_PACKET         'p'    /**< Raw packets                 */
-#define BRLAPI_PACKET_ACK            'A'    /**< Acknowledgement             */
-#define BRLAPI_PACKET_ERROR          'e'    /**< non-fatal error             */
-#define BRLAPI_PACKET_EXCEPTION      'E'    /**< Exception                   */
-#define BRLAPI_PACKET_SUSPENDDRIVER  'S'    /**< Suspend driver              */
-#define BRLAPI_PACKET_RESUMEDRIVER   'R'    /**< Resume driver               */
+#define BRLAPI_PACKET_VERSION         'v'   /**< Version                     */
+#define BRLAPI_PACKET_AUTH            'a'   /**< Authorization               */
+#define BRLAPI_PACKET_GETDRIVERID     'd'   /**< Ask which driver is used    */
+#define BRLAPI_PACKET_GETDRIVERNAME   'n'   /**< Ask which driver is used    */
+#define BRLAPI_PACKET_GETDISPLAYSIZE  's'   /**< Dimensions of brl display   */
+#define BRLAPI_PACKET_ENTERTTYMODE    't'   /**< Asks for a specified tty    */
+#define BRLAPI_PACKET_SETFOCUS        'F'   /**< Set current tty focus       */
+#define BRLAPI_PACKET_LEAVETTYMODE    'L'   /**< Release the tty             */
+#define BRLAPI_PACKET_KEY             'k'   /**< Braille key                 */
+#define BRLAPI_PACKET_IGNOREKEYRANGES 'm'   /**< Mask key ranges             */
+#define BRLAPI_PACKET_ACCEPTKEYRANGES 'u'   /**< Unmask key ranges           */
+#define BRLAPI_PACKET_WRITE           'w'   /**< Write                       */
+#define BRLAPI_PACKET_ENTERRAWMODE    '*'   /**< Enter in raw mode           */
+#define BRLAPI_PACKET_LEAVERAWMODE    '#'   /**< Leave raw mode              */
+#define BRLAPI_PACKET_PACKET          'p'   /**< Raw packets                 */
+#define BRLAPI_PACKET_ACK             'A'   /**< Acknowledgement             */
+#define BRLAPI_PACKET_ERROR           'e'   /**< non-fatal error             */
+#define BRLAPI_PACKET_EXCEPTION       'E'   /**< Exception                   */
+#define BRLAPI_PACKET_SUSPENDDRIVER   'S'   /**< Suspend driver              */
+#define BRLAPI_PACKET_RESUMEDRIVER    'R'   /**< Resume driver               */
 
 /** Magic number to give when sending a BRLPACKET_ENTERRAWMODE or BRLPACKET_SUSPEND packet */
 #define BRLAPI_DEVICE_MAGIC (0xdeadbeefL)

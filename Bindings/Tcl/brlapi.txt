@@ -25,10 +25,8 @@ brlapi<sessionNumber> function [arg ...]
    leaveTtyMode
    setFocus <ttyNumber>
    readKey <wait>
-   acceptKeyRange <firstKey> <lastKey>
-   ignoreKeyRange <firstKey> <lastKey>
-   acceptKeySet <keyList>
-   ignoreKeySet <keyList>
+   acceptKeys <rangeType> [<keyCodeList>]
+   ignoreKeys <rangeType> [<keyCodeList>]
    write [<option> ...]
       -text <string>
       -and <mask>

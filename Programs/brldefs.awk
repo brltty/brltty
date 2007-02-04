@@ -16,12 +16,12 @@
 ###############################################################################
 
 BEGIN {
-  commandCount = 0
+  brlCommandCount = 0
   keyCount = 0
 }
 
 /^ *BRL_CMD_/ {
-  brlCommand(substr($1, 9), $1, commandCount++, getComment($0))
+  brlCommand(substr($1, 9), $1, brlCommandCount++, getComment($0))
   next
 }
 

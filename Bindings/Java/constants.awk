@@ -87,6 +87,10 @@ function apiKey(name, symbol, value, help) {
   }
 }
 
+function apiRangeType(name, symbol, value, help) {
+  writeJavaConstant("int", "rangeType_" name, value, help)
+}
+
 function writeCommandDefinition(name, value, help) {
   writeJavaConstant("int", "KEY_CMD_" name, value, help)
 }
