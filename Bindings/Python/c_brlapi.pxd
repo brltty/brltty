@@ -74,10 +74,6 @@ cdef extern from "Programs/brlapi.h":
 
 	ctypedef enum brlapi_rangeType_t:
 		brlapi_rangeType_all
-		brlapi_rangeType_type
-		brlapi_rangeType_command
-		brlapi_rangeType_key
-		brlapi_rangeType_code
 	
 	ctypedef struct brlapi_range_t:
 		brlapi_keyCode_t first

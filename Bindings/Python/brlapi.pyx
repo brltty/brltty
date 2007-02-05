@@ -9,8 +9,8 @@ Example :
 import brlapi
 b = brlapi.Connection()
 b.enterTtyMode()
-b.ignoreKeys(brlapi.brlapi_rangeType_all,[0])
-b.acceptKeys(brlapi.brlapi_rangeType_command,[brlapi.KEY_TYPE_CMD|brlapi.KEY_CMD_HOME, brlapi.KEY_TYPE_CMD|brlapi.KEY_CMD_WINUP, brlapi.KEY_TYPE_CMD|brlapi.KEY_CMD_WINDN])
+b.ignoreKeys(brlapi.rangeType_all,[0])
+b.acceptKeys(brlapi.rangeType_command,[brlapi.KEY_TYPE_CMD|brlapi.KEY_CMD_HOME, brlapi.KEY_TYPE_CMD|brlapi.KEY_CMD_WINUP, brlapi.KEY_TYPE_CMD|brlapi.KEY_CMD_WINDN])
 b.writeText("Press home or winup/dn to continue ... ¤")
 key = b.readKey()
 k = b.expandKeyCode(key)
@@ -24,7 +24,7 @@ w.text = u"Press any key to exit ¤                 "
 underline = chr(brlapi.DOT7 + brlapi.DOT8)
 w.attrOr = "".center(21,underline) + "".center(19,chr(0))  # Note: center() can take two arguments only starting from python 2.4
 b.write(w)
-b.acceptKeys(brlapi.brlapi_rangeType_all,[0])
+b.acceptKeys(brlapi.rangeType_all,[0])
 b.readKey()
 b.leaveTtyMode()
 """
@@ -49,12 +49,6 @@ b.leaveTtyMode()
 
 cimport c_brlapi
 include "constants.auto.pyx"
-
-brlapi_rangeType_all = 0
-brlapi_rangeType_type = 1
-brlapi_rangeType_command = 2
-brlapi_rangeType_key = 3
-brlapi_rangeType_code = 4
 
 cdef returnerrno():
 	"""This function returns str message error from errno"""
