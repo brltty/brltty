@@ -1520,64 +1520,46 @@ insertKey_LinuxScreen (ScreenKey key) {
   return ok;
 }
 
+typedef struct {
+  char subcode;
+  short xs;
+  short ys;
+  short xe;
+  short ye;
+  short mode;
+} PACKED CharacterSelectionArguments;
+
 static int
-highlightRegion_LinuxScreen (int left, int columns, int top, int lines) {
-  int console = getConsole();
-
-  if (console != -1) {
-    typedef struct {
-      char subcode;
-      short xs;
-      short ys;
-      short xe;
-      short ye;
-      short mode;
-    } PACKED Arguments;
-
-    Arguments arguments = {
-      .subcode = 2,
-      .xs = 1 + left,
-      .ys = 1 + top,
-      .xe = 1 + left + columns - 1,
-      .ye = 1 + top + lines - 1,
-      .mode = 0
-    };
-
-    if (ioctl(console, TIOCLINUX, &arguments) != -1) return 1;
-    if (errno != EINVAL) LogError("ioctl[TIOCLINUX]");
-  }
-
+selectCharacters (CharacterSelectionArguments *arguments) {
+  if (controlConsole(TIOCLINUX, arguments) != -1) return 1;
+  if (errno != EINVAL) LogError("ioctl[TIOCLINUX]");
   return 0;
 }
 
 static int
+highlightRegion_LinuxScreen (int left, int columns, int top, int lines) {
+  CharacterSelectionArguments arguments = {
+    .subcode = 2,
+    .xs = 1 + left,
+    .ys = 1 + top,
+    .xe = 1 + left + columns - 1,
+    .ye = 1 + top + lines - 1,
+    .mode = 0
+  };
+  return selectCharacters(&arguments);
+}
+
+static int
 unhighlightRegion_LinuxScreen (void) {
-  int console = getConsole();
-
-  if (console != -1) {
-    typedef struct {
-      char subcode;
-      short xs;
-      short ys;
-      short xe;
-      short ye;
-      short mode;
-    } PACKED Arguments;
-
-    Arguments arguments = {
-      .subcode = 2,
-      .xs = 0,
-      .ys = 0,
-      .xe = 0,
-      .ye = 0,
-      .mode = 4
-    };
-
-    if (ioctl(console, TIOCLINUX, &arguments) != -1) return 1;
-    if (errno != EINVAL) LogError("ioctl[TIOCLINUX]");
-  }
-
-  return 0;
+  CharacterSelectionArguments arguments = {
+    .subcode = 2,
+    .xs = 0,
+    .ys = 0,
+    .xe = 0,
+    .ye = 0,
+    .mode = 4
+  };
+  return selectCharacters(&arguments);
 }
 
 static int
