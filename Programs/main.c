@@ -984,6 +984,88 @@ handleAutorepeat (int *command, RepeatState *state) {
                     PREFERENCES_TIME(prefs.autorepeatInterval));
 }
 
+static int touchLeft;
+static int touchRight;
+static int touchTop;
+static int touchBottom;
+
+static inline int
+touchCheckColumn (int column) {
+  int row;
+  for (row=touchTop; row<=touchBottom; ++row) {
+    if (brl.pressureBuffer[(row * brl.x) + column]) return 1;
+  }
+  return 0;
+}
+
+static inline int
+touchCheckRow (int row) {
+  int column;
+  for (column=touchLeft; column<=touchRight; ++column) {
+    if (brl.pressureBuffer[(row * brl.x) + column]) return 1;
+  }
+  return 0;
+}
+
+static inline int
+touchCropLeft (void) {
+  while (touchLeft <= touchRight) {
+    if (touchCheckColumn(touchLeft)) return 1;
+    ++touchLeft;
+  }
+  return 0;
+}
+
+static inline int
+touchCropRight (void) {
+  while (touchRight >= touchLeft) {
+    if (touchCheckColumn(touchRight)) return 1;
+    --touchRight;
+  }
+  return 0;
+}
+
+static inline int
+touchCropTop (void) {
+  while (touchTop <= touchBottom) {
+    if (touchCheckRow(touchTop)) return 1;
+    ++touchTop;
+  }
+  return 0;
+}
+
+static inline int
+touchCropBottom (void) {
+  while (touchBottom >= touchTop) {
+    if (touchCheckRow(touchBottom)) return 1;
+    --touchBottom;
+  }
+  return 0;
+}
+
+static inline int
+touchCropWindow (void) {
+  touchCropRight();
+  if (!touchCropBottom()) return 0;
+  touchCropLeft();
+  touchCropTop();
+  return 1;
+}
+
+static inline void
+touchUncropWindow (void) {
+  touchLeft = 0;
+  touchRight = brl.x;
+  touchTop = 0;
+  touchBottom = brl.y;
+}
+
+static inline int
+touchSetRegion (void) {
+  touchUncropWindow();
+  return touchCropWindow();
+}
+
 static void
 highlightWindow (void) {
   if (prefs.highlightWindow) {
@@ -991,66 +1073,24 @@ highlightWindow (void) {
     int right;
     int top = p->winy;
     int bottom;
-    int clear = 0;
 
     if (prefs.showAttributes) {
       right = left;
       bottom = top;
-    } else {
+    } else if (!brl.pressureInfo) {
       right = left + brl.x - 1;
       bottom = top + brl.y - 1;
-
-      if (brl.pressureInfo) {
-      }
-    }
-
-    while (top <= bottom) {
-      int offset = top * brl.y;
-      int column;
-
-      for (column=left; column<=right; ++column) {
-        if (brl.pressureBuffer[offset + column]) break;
-      }
-
-      ++top;
-    }
-
-    while (bottom >= top) {
-      int offset = bottom * brl.y;
-      int column;
-
-      for (column=left; column<=right; ++column) {
-        if (brl.pressureBuffer[offset + column]) break;
-      }
-
-      --bottom;
-    }
-
-    while (left <= right) {
-      int line;
-
-      for (line=top; line<=bottom; ++line) {
-        if (brl.pressureBuffer[(line * brl.y) + left]) break;
-      }
-
-      ++left;
-    }
-
-    while (right >= left) {
-      int line;
-
-      for (line=top; line<=bottom; ++line) {
-        if (brl.pressureBuffer[(line * brl.y) + right]) break;
-      }
-
-      --right;
-    }
-
-    if (clear) {
-      unhighlightScreenRegion();
+    } else if (touchSetRegion()) {
+      left = touchLeft;
+      right = touchRight;
+      top = touchTop;
+      bottom = touchBottom;
     } else {
-      highlightScreenRegion(left, right, top, bottom);
+      unhighlightScreenRegion();
+      return;
     }
+
+    highlightScreenRegion(left, right, top, bottom);
   }
 }
 
