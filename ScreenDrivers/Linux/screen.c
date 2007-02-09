@@ -1521,6 +1521,66 @@ insertKey_LinuxScreen (ScreenKey key) {
 }
 
 static int
+highlightRegion_LinuxScreen (int left, int columns, int top, int lines) {
+  int console = getConsole();
+
+  if (console != -1) {
+    typedef struct {
+      char subcode;
+      short xs;
+      short ys;
+      short xe;
+      short ye;
+      short mode;
+    } PACKED Arguments;
+
+    Arguments arguments = {
+      .subcode = 2,
+      .xs = 1 + left,
+      .ys = 1 + top,
+      .xe = 1 + left + columns - 1,
+      .ye = 1 + top + lines - 1,
+      .mode = 0
+    };
+
+    if (ioctl(console, TIOCLINUX, &arguments) != -1) return 1;
+    if (errno != EINVAL) LogError("ioctl[TIOCLINUX]");
+  }
+
+  return 0;
+}
+
+static int
+unhighlightRegion_LinuxScreen (void) {
+  int console = getConsole();
+
+  if (console != -1) {
+    typedef struct {
+      char subcode;
+      short xs;
+      short ys;
+      short xe;
+      short ye;
+      short mode;
+    } PACKED Arguments;
+
+    Arguments arguments = {
+      .subcode = 2,
+      .xs = 0,
+      .ys = 0,
+      .xe = 0,
+      .ye = 0,
+      .mode = 4
+    };
+
+    if (ioctl(console, TIOCLINUX, &arguments) != -1) return 1;
+    if (errno != EINVAL) LogError("ioctl[TIOCLINUX]");
+  }
+
+  return 0;
+}
+
+static int
 validateVt (int vt) {
   if ((vt >= 1) && (vt <= 0X3F)) return 1;
   LogPrint(LOG_DEBUG, "virtual terminal out of range: %d", vt);
@@ -1633,6 +1693,8 @@ scr_initialize (MainScreen *main) {
   main->base.describe = describe_LinuxScreen;
   main->base.read = read_LinuxScreen;
   main->base.insertKey = insertKey_LinuxScreen;
+  main->base.highlightRegion = highlightRegion_LinuxScreen;
+  main->base.unhighlightRegion = unhighlightRegion_LinuxScreen;
   main->base.selectVirtualTerminal = selectVirtualTerminal_LinuxScreen;
   main->base.switchVirtualTerminal = switchVirtualTerminal_LinuxScreen;
   main->base.currentVirtualTerminal = currentVirtualTerminal_LinuxScreen;
