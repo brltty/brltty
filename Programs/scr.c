@@ -189,8 +189,8 @@ routeCursor (int column, int row, int screen) {
 }
 
 int
-highlightScreenRegion (int left, int columns, int top, int lines) {
-  return currentScreen->highlightRegion(left, columns, top, lines);
+highlightScreenRegion (int left, int right, int top, int bottom) {
+  return currentScreen->highlightRegion(left, right, top, bottom);
 }
 
 int

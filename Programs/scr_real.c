@@ -138,7 +138,7 @@ routeCursor_RealScreen (int column, int row, int screen) {
 }
 
 static int
-highlightRegion_RealScreen (int left, int columns, int top, int lines) {
+highlightRegion_RealScreen (int left, int right, int top, int bottom) {
   int console = getConsole();
 
   if (console != -1) {

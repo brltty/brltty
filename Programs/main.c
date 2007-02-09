@@ -986,16 +986,72 @@ handleAutorepeat (int *command, RepeatState *state) {
 
 static void
 highlightWindow (void) {
-  int width;
-  int height;
+  if (prefs.highlightWindow) {
+    int left = p->winx;
+    int right;
+    int top = p->winy;
+    int bottom;
+    int clear = 0;
 
-  if (prefs.showAttributes) {
-    width = 1, height = 1;
-  } else {
-    width = brl.x, height = brl.y;
+    if (prefs.showAttributes) {
+      right = left;
+      bottom = top;
+    } else {
+      right = left + brl.x - 1;
+      bottom = top + brl.y - 1;
+
+      if (brl.pressureInfo) {
+      }
+    }
+
+    while (top <= bottom) {
+      int offset = top * brl.y;
+      int column;
+
+      for (column=left; column<=right; ++column) {
+        if (brl.pressureBuffer[offset + column]) break;
+      }
+
+      ++top;
+    }
+
+    while (bottom >= top) {
+      int offset = bottom * brl.y;
+      int column;
+
+      for (column=left; column<=right; ++column) {
+        if (brl.pressureBuffer[offset + column]) break;
+      }
+
+      --bottom;
+    }
+
+    while (left <= right) {
+      int line;
+
+      for (line=top; line<=bottom; ++line) {
+        if (brl.pressureBuffer[(line * brl.y) + left]) break;
+      }
+
+      ++left;
+    }
+
+    while (right >= left) {
+      int line;
+
+      for (line=top; line<=bottom; ++line) {
+        if (brl.pressureBuffer[(line * brl.y) + right]) break;
+      }
+
+      --right;
+    }
+
+    if (clear) {
+      unhighlightScreenRegion();
+    } else {
+      highlightScreenRegion(left, right, top, bottom);
+    }
   }
-
-  if (prefs.highlightWindow) highlightScreenRegion(p->winx, width, p->winy, height);
 }
 
 int
@@ -1740,6 +1796,10 @@ main (int argc, char *argv[]) {
               }
               break;
 #endif /* ENABLE_SPEECH_SUPPORT */
+
+            case BRL_CMD_PRESSURECHANGED:
+              highlightWindow();
+              break;
 
             default: {
               int blk = command & BRL_MSK_BLK;

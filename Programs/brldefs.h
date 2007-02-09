@@ -143,6 +143,7 @@ typedef enum {
   BRL_CMD_PASTE /* insert cut buffer at cursor */,
   BRL_CMD_RESTARTBRL /* reinitialize braille driver */,
   BRL_CMD_RESTARTSPEECH /* reinitialize speech driver */,
+  BRL_CMD_PRESSURECHANGED /* pressure information changed */,
 
   BRL_CMD_OFFLINE /* braille display temporarily unavailable */,
   

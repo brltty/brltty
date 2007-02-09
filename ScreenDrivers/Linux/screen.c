@@ -1537,13 +1537,13 @@ selectCharacters (CharacterSelectionArguments *arguments) {
 }
 
 static int
-highlightRegion_LinuxScreen (int left, int columns, int top, int lines) {
+highlightRegion_LinuxScreen (int left, int right, int top, int bottom) {
   CharacterSelectionArguments arguments = {
     .subcode = 2,
-    .xs = 1 + left,
-    .ys = 1 + top,
-    .xe = 1 + left + columns - 1,
-    .ye = 1 + top + lines - 1,
+    .xs = left + 1,
+    .ys = top + 1,
+    .xe = right + 1,
+    .ye = bottom + 1,
     .mode = 0
   };
   return selectCharacters(&arguments);

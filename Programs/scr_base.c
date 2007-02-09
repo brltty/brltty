@@ -74,7 +74,7 @@ routeCursor_BaseScreen (int column, int row, int screen) {
 }
 
 static int
-highlightRegion_BaseScreen (int left, int columns, int top, int lines) {
+highlightRegion_BaseScreen (int left, int right, int top, int bottom) {
   return 0;
 }
 

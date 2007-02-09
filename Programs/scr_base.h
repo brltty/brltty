@@ -27,7 +27,7 @@ typedef struct {
   int (*read) (ScreenBox, unsigned char *, ScreenMode);
   int (*insertKey) (ScreenKey key);
   int (*routeCursor) (int column, int row, int screen);
-  int (*highlightRegion) (int left, int columns, int top, int lines);
+  int (*highlightRegion) (int left, int right, int top, int bottom);
   int (*unhighlightRegion) (void);
   int (*getPointer) (int *column, int *row);
   int (*selectVirtualTerminal) (int vt);
