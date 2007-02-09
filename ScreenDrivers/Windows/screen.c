@@ -43,7 +43,8 @@ processParameters_WindowsScreen (char **parameters) {
   return 1;
 }
 
-static int openStdHandles(void) {
+static int
+openStdHandles (void) {
   if ((consoleOutput == INVALID_HANDLE_VALUE &&
     (consoleOutput = CreateFile("CONOUT$",GENERIC_READ|GENERIC_WRITE,FILE_SHARE_READ|FILE_SHARE_WRITE,NULL,OPEN_EXISTING,0,NULL)) == INVALID_HANDLE_VALUE)
     ||(consoleInput == INVALID_HANDLE_VALUE &&
@@ -54,14 +55,16 @@ static int openStdHandles(void) {
   return 1;
 }
 
-static void closeStdHandles(void) {
+static void
+closeStdHandles (void) {
   CloseHandle(consoleInput);
   consoleInput = INVALID_HANDLE_VALUE;
   CloseHandle(consoleOutput);
   consoleOutput = INVALID_HANDLE_VALUE;
 }
 
-static int tryToAttach(HWND win) {
+static int
+tryToAttach (HWND win) {
 #define CONSOLEWINDOW "ConsoleWindowClass"
   static char class[strlen(CONSOLEWINDOW)+1];
   DWORD process;
@@ -107,7 +110,8 @@ switchVirtualTerminal_WindowsScreen (int vt) {
 static ALTTABINFO altTabInfo;
 static HWND altTab;
 static char altTabName[128];
-static BOOL CALLBACK findAltTab(HWND win, LPARAM lparam) {
+static BOOL CALLBACK
+findAltTab (HWND win, LPARAM lparam) {
   if (GetAltTabInfoAProc(win, -1, &altTabInfo, NULL, 0)) {
     altTab = win;
     return FALSE;
@@ -283,19 +287,20 @@ read_WindowsScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
 }
 
 static int 
-doinsert(INPUT_RECORD *buf) {
+doInsert (INPUT_RECORD *buf) {
   DWORD num;
-  if (!(WriteConsoleInputA(consoleInput, buf, 1, &num))) {
+  if (WriteConsoleInputA(consoleInput, buf, 1, &num)) {
+    if (num == 1) {
+      return 1;
+    } else {
+      LogPrint(LOG_ERR, "inserted %ld keys, expected 1", num);
+    }
+  } else {
     LogWindowsError("WriteConsoleInput");
     CloseHandle(consoleInput);
     consoleInput = INVALID_HANDLE_VALUE;
-    return 0;
   }
-  if (num!=1) {
-    LogPrint(LOG_ERR, "inserted only %ld keys, expected 1", num);
-    return 0;
-  }
-  return 1;
+  return 0;
 }
 
 static int
@@ -361,10 +366,10 @@ insertKey_WindowsScreen (ScreenKey key) {
 
   keyE->wRepeatCount = 1;
   keyE->bKeyDown = TRUE;
-  if (!doinsert(&buf))
+  if (!doInsert(&buf))
     return 0;
   keyE->bKeyDown = FALSE;
-  if (!doinsert(&buf))
+  if (!doInsert(&buf))
     return 0;
   return 1;
 }
