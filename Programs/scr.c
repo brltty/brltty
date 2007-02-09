@@ -194,6 +194,11 @@ highlightScreenRegion (int left, int columns, int top, int lines) {
 }
 
 int
+unhighlightScreenRegion (void) {
+  return currentScreen->unhighlightRegion();
+}
+
+int
 getScreenPointer (int *column, int *row) {
   return currentScreen->getPointer(column, row);
 }

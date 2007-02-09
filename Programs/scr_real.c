@@ -186,6 +186,42 @@ highlightRegion_RealScreen (int left, int columns, int top, int lines) {
   return 0;
 }
 
+int
+unhighlightRegion_RealScreen (void) {
+  int console = getConsole();
+
+  if (console != -1) {
+#ifdef TIOCLINUX
+    typedef struct {
+      char subcode;
+      short xs;
+      short ys;
+      short xe;
+      short ye;
+      short mode;
+    } PACKED Arguments;
+
+    Arguments arguments = {
+      .subcode = 2,
+      .xs = 0,
+      .ys = 0,
+      .xe = 0,
+      .ye = 0,
+      .mode = 4
+    };
+
+    if (ioctl(console, TIOCLINUX, &arguments) != -1) return 1;
+
+    if (errno != EINVAL) {
+      LogError("ioctl[TIOCLINUX]");
+      return 0;
+    }
+#endif /* TIOCLINUX */
+  }
+
+  return 0;
+}
+
 static int
 getPointer_RealScreen (int *column, int *row) {
   int ok = 0;
@@ -249,5 +285,6 @@ initializeRealScreen (MainScreen *main) {
   initializeMainScreen(main);
   main->base.routeCursor = routeCursor_RealScreen;
   main->base.highlightRegion = highlightRegion_RealScreen;
+  main->base.unhighlightRegion = unhighlightRegion_RealScreen;
   main->base.getPointer = getPointer_RealScreen;
 }

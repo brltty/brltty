@@ -78,6 +78,11 @@ highlightRegion_BaseScreen (int left, int columns, int top, int lines) {
   return 0;
 }
 
+int
+unhighlightRegion_BaseScreen (void) {
+  return 0;
+}
+
 static int
 getPointer_BaseScreen (int *column, int *row) {
   return 0;
@@ -98,6 +103,7 @@ initializeBaseScreen (BaseScreen *base) {
   base->insertKey = insertKey_BaseScreen;
   base->routeCursor = routeCursor_BaseScreen;
   base->highlightRegion = highlightRegion_BaseScreen;
+  base->unhighlightRegion = unhighlightRegion_BaseScreen;
   base->getPointer = getPointer_BaseScreen;
   base->executeCommand = executeCommand_BaseScreen;
 }

@@ -90,6 +90,7 @@ extern int insertCharacters (const char *, int);
 extern int insertString (const char *);
 extern int routeCursor (int column, int row, int screen);
 extern int highlightScreenRegion (int left, int columns, int top, int lines);
+extern int unhighlightScreenRegion (void);
 extern int getScreenPointer (int *column, int *row);
 extern int selectVirtualTerminal (int vt);
 extern int switchVirtualTerminal (int vt);
