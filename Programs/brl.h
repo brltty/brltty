@@ -49,9 +49,8 @@ typedef struct {
   unsigned int writeDelay;
   void (*bufferResized) (int rows, int columns);
   const char *dataDirectory;
-  unsigned char *pressureBuffer; /* Touch sensitivity info */
-  int pressureBufferSize;
-  unsigned pressureInfo:1;
+  unsigned char *touchPressure; /* how firmly each cell is being touched */
+  unsigned touchEnabled:1;
 } BrailleDisplay;				/* used for writing to a braille display */
 
 extern void initializeBrailleDisplay (BrailleDisplay *);

@@ -36,6 +36,7 @@
 #include "ctb.h"
 #include "route.h"
 #include "cut.h"
+#include "touch.h"
 #include "cmd.h"
 #include "at2.h"
 #include "scr.h"
@@ -968,10 +969,12 @@ insertCharacter (unsigned char character, int flags) {
 }
 
 static RepeatState repeatState;
+
 void
 resetAutorepeat (void) {
   resetRepeatState(&repeatState);
 }
+
 void
 handleAutorepeat (int *command, RepeatState *state) {
   if (!prefs.autorepeat) {
@@ -984,113 +987,26 @@ handleAutorepeat (int *command, RepeatState *state) {
                     PREFERENCES_TIME(prefs.autorepeatInterval));
 }
 
-static int touchLeft;
-static int touchRight;
-static int touchTop;
-static int touchBottom;
-
-static inline int
-touchCheckColumn (int column) {
-  int row;
-  for (row=touchTop; row<=touchBottom; ++row) {
-    if (brl.pressureBuffer[(row * brl.x) + column]) return 1;
-  }
-  return 0;
-}
-
-static inline int
-touchCheckRow (int row) {
-  int column;
-  for (column=touchLeft; column<=touchRight; ++column) {
-    if (brl.pressureBuffer[(row * brl.x) + column]) return 1;
-  }
-  return 0;
-}
-
-static inline int
-touchCropLeft (void) {
-  while (touchLeft <= touchRight) {
-    if (touchCheckColumn(touchLeft)) return 1;
-    ++touchLeft;
-  }
-  return 0;
-}
-
-static inline int
-touchCropRight (void) {
-  while (touchRight >= touchLeft) {
-    if (touchCheckColumn(touchRight)) return 1;
-    --touchRight;
-  }
-  return 0;
-}
-
-static inline int
-touchCropTop (void) {
-  while (touchTop <= touchBottom) {
-    if (touchCheckRow(touchTop)) return 1;
-    ++touchTop;
-  }
-  return 0;
-}
-
-static inline int
-touchCropBottom (void) {
-  while (touchBottom >= touchTop) {
-    if (touchCheckRow(touchBottom)) return 1;
-    --touchBottom;
-  }
-  return 0;
-}
-
-static inline int
-touchCropWindow (void) {
-  touchCropRight();
-  if (!touchCropBottom()) return 0;
-  touchCropLeft();
-  touchCropTop();
-  return 1;
-}
-
-static inline void
-touchUncropWindow (void) {
-  touchLeft = 0;
-  touchRight = brl.x;
-  touchTop = 0;
-  touchBottom = brl.y;
-}
-
-static inline int
-touchSetRegion (void) {
-  touchUncropWindow();
-  return touchCropWindow();
-}
-
-static void
+void
 highlightWindow (void) {
   if (prefs.highlightWindow) {
-    int left = p->winx;
+    int left = 0;
     int right;
-    int top = p->winy;
+    int top = 0;
     int bottom;
 
     if (prefs.showAttributes) {
       right = left;
       bottom = top;
-    } else if (!brl.pressureInfo) {
-      right = left + brl.x - 1;
-      bottom = top + brl.y - 1;
-    } else if (touchSetRegion()) {
-      left = touchLeft;
-      right = touchRight;
-      top = touchTop;
-      bottom = touchBottom;
-    } else {
+    } else if (!brl.touchEnabled) {
+      right = brl.x - 1;
+      bottom = brl.y - 1;
+    } else if (!touchGetRegion(&left, &right, &top, &bottom)) {
       unhighlightScreenRegion();
       return;
     }
 
-    highlightScreenRegion(left, right, top, bottom);
+    highlightScreenRegion(p->winx+left, p->winx+right, p->winy+top, p->winy+bottom);
   }
 }
 
@@ -1838,7 +1754,7 @@ main (int argc, char *argv[]) {
 #endif /* ENABLE_SPEECH_SUPPORT */
 
             case BRL_CMD_PRESSURECHANGED:
-              highlightWindow();
+              touchAnalyzePressure();
               break;
 
             default: {

@@ -125,6 +125,8 @@ extern int readCommand (BRL_DriverCommandContext context);
 extern void resetAutorepeat (void);
 extern void handleAutorepeat (int *command, RepeatState *state);
 
+extern void highlightWindow (void);
+
 extern void api_identify (int full);
 extern int api_start (BrailleDisplay *brl, char **parameters);
 extern void api_stop (BrailleDisplay *brl);
