@@ -1015,7 +1015,6 @@ main (int argc, char *argv[]) {
   int offline = 0;
   int suspended = 0;
   short oldwinx, oldwiny;
-  int i;                        /* loop counter */
 
 #ifdef INIT_PATH
   if ((getpid() == 1) || (strstr(argv[0], "linuxrc") != NULL)) {
@@ -1320,12 +1319,22 @@ main (int argc, char *argv[]) {
                   int line = p->winy;
                   unsigned char buffer[scr.cols];
                   unsigned char bytes[count];
-                  for (i=0; i<count; i++) bytes[i] = tolower(cutBuffer[i]);
+
+                  {
+                    int i;
+                    for (i=0; i<count; i++) bytes[i] = tolower(cutBuffer[i]);
+                  }
+
                   while ((line >= 0) && (line <= (scr.rows - brl.y))) {
                     const unsigned char *address = buffer;
                     size_t length = scr.cols;
                     readScreen(0, line, length, 1, buffer, SCR_TEXT);
-                    for (i=0; i<length; i++) buffer[i] = tolower(buffer[i]);
+
+                    {
+                      int i;
+                      for (i=0; i<length; i++) buffer[i] = tolower(buffer[i]);
+                    }
+
                     if (line == p->winy) {
                       if (increment < 0) {
                         int end = p->winx + count - 1;
@@ -2275,7 +2284,12 @@ main (int argc, char *argv[]) {
 
             if ((scr.posy == p->winy) && (scr.posx >= p->winx)) cursorOffset = scr.posx - p->winx;
             readScreen(p->winx, p->winy, inputLength, 1, inputBuffer, SCR_TEXT);
-            for (i=0; i<inputLength; ++i) contractedOffsets[i] = -1;
+
+            {
+              int i;
+              for (i=0; i<inputLength; ++i) contractedOffsets[i] = -1;
+            }
+
             if (!contractText(contractionTable,
                               inputBuffer, &inputLength,
                               outputBuffer, &outputLength,
@@ -2367,6 +2381,7 @@ main (int argc, char *argv[]) {
              * is in an off-right position with some cells at the end blank
              * so we'll insert these cells and blank them.
              */
+            int i;
             for (i=brl.y-1; i>0; i--)
               memmove(brl.buffer+i*brl.x, brl.buffer+i*winlen, winlen);
             for (i=0; i<brl.y; i++)
@@ -2383,19 +2398,23 @@ main (int argc, char *argv[]) {
           if (braille->writeVisual) braille->writeVisual(&brl);
 
           /* blank out capital letters if they're blinking and should be off */
-          if (prefs.blinkingCapitals && !capitalsState)
+          if (prefs.blinkingCapitals && !capitalsState) {
+            int i;
             for (i=0; i<brl.x*brl.y; i++)
               if (BRL_ISUPPER(brl.buffer[i]))
                 brl.buffer[i] = ' ';
+          }
 
           /* convert to dots using the current translation table */
           if ((translationTable == attributesTable) || !prefs.textStyle) {
+            int i;
             for (
               i = 0;
               i < (brl.x * brl.y);
               brl.buffer[i] = translationTable[brl.buffer[i]], i++
             );
           } else {
+            int i;
             for (
               i = 0;
               i < (brl.x * brl.y);
