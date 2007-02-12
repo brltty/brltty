@@ -63,8 +63,8 @@ short fwinshift;                /* Full window horizontal distance */
 short hwinshift;                /* Half window horizontal distance */
 short vwinshift;                /* Window vertical distance */
 
-static int contracted = 0;
 #ifdef ENABLE_CONTRACTED_BRAILLE
+static int contracted = 0;
 static int contractedLength;
 static int contractedStart;
 static int contractedOffsets[0X100];
@@ -760,7 +760,7 @@ getContractedLength (int x, int y) {
 
 static void
 placeRightEdge (int column) {
-#if ENABLE_CONTRACTED_BRAILLE
+#ifdef ENABLE_CONTRACTED_BRAILLE
   if (isContracting()) {
     p->winx = 0;
     while (1) {
@@ -817,7 +817,7 @@ shiftWindowRight (void) {
 
 static int
 getWindowLength (void) {
-#if ENABLE_CONTRACTED_BRAILLE
+#ifdef ENABLE_CONTRACTED_BRAILLE
   if (isContracting()) return getContractedLength(p->winx, p->winy);
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
@@ -2023,7 +2023,10 @@ main (int argc, char *argv[]) {
           /* The window has been manually moved. */
           p->motx = p->winx;
           p->moty = p->winy;
+
+#ifdef ENABLE_CONTRACTED_BRAILLE
           contracted = 0;
+#endif /* ENABLE_CONTRACTED_BRAILLE */
 
 #ifdef ENABLE_SPEECH_SUPPORT
           if (p->trackCursor && speechTracking && (scr.number == speechScreen)) {
@@ -2270,9 +2273,9 @@ main (int argc, char *argv[]) {
         showInfo();
       } else {
         brl.cursor = -1;
-        contracted = 0;
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
+        contracted = 0;
         if (isContracting()) {
           int windowLength = brl.x * brl.y;
           while (1) {
@@ -2369,9 +2372,10 @@ main (int argc, char *argv[]) {
             break;
           }
         }
-#endif /* ENABLE_CONTRACTED_BRAILLE */
 
-        if (!contracted) {
+        if (!contracted)
+#endif /* ENABLE_CONTRACTED_BRAILLE */
+        {
           int winlen = MIN(brl.x, scr.cols-p->winx);
 
           readScreen(p->winx, p->winy, winlen, brl.y, brl.buffer,
