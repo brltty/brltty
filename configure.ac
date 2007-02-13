@@ -610,6 +610,7 @@ in
 esac
 
 AC_CHECK_SIZEOF([key_t], [], [
+#include <sys/types.h>
 #include <sys/ipc.h>
 ])
 
