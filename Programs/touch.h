@@ -22,7 +22,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
-extern void touchAnalyzePressure (void);
+extern int touchAnalyzePressure (void);
 extern int touchGetRegion (int *left, int *right, int *top, int *bottom);
 
 #ifdef __cplusplus

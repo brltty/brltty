@@ -1762,9 +1762,9 @@ main (int argc, char *argv[]) {
               break;
 #endif /* ENABLE_SPEECH_SUPPORT */
 
-            case BRL_CMD_PRESSURECHANGED:
-              touchAnalyzePressure();
-              break;
+            case BRL_CMD_TOUCH:
+              if ((command = touchAnalyzePressure()) != EOF) goto doCommand;
+              continue;
 
             default: {
               int blk = command & BRL_MSK_BLK;

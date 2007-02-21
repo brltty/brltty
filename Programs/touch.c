@@ -17,6 +17,8 @@
 
 #include "prologue.h"
 
+#include <stdio.h>
+
 #include "brl.h"
 #include "touch.h"
 #include "brltty.h"
@@ -118,8 +120,9 @@ touchRecropWindow (void) {
   return touchCropWindow();
 }
 
-void
+int
 touchAnalyzePressure (void) {
   touchRecropWindow();
   highlightWindow();
+  return EOF;
 }
