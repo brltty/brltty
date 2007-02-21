@@ -122,99 +122,143 @@ static const int logOutputPackets = 0;
 
 /* Braille display parameters */
 typedef struct {
-  const char *Name;
-  unsigned char ID;
-  unsigned char Flags;
-  unsigned char Cols;
-  unsigned char NbStCells;
-  unsigned char HelpPage;
-} BRLPARAMS;
-#define BPF_CONFIGURABLE 0X01
+  const char *name;
+  unsigned char identifier;
+  unsigned char flags;
+  unsigned char columns;
+  unsigned char statusCells;
+  unsigned char helpPage;
+} ModelEntry;
+#define MOD_FLG__CONFIGURABLE 0X01
 
-static BRLPARAMS Models[] =
-{
+static ModelEntry modelTable[] = {
   {
-    /* ID == 0 */
-    "ABT 320", ABT320, 0,
-    20, 3, 0
+    .name = "ABT 320",
+    .identifier = 0X00,
+    .flags = 0,
+    .columns = 20,
+    .statusCells = 3,
+    .helpPage = 0
   }
   ,
   {
-    /* ID == 1 */
-    "ABT 340", ABT340, 0,
-    40, 3, 0
+    .name = "ABT 340",
+    .identifier = 0X01,
+    .flags = 0,
+    .columns = 40,
+    .statusCells = 3,
+    .helpPage = 0
   }
   ,
   {
-    /* ID == 2 */
-    "ABT 340 Desktop", ABT34D, 0,
-    40, 5, 0
+    .name = "ABT 340 Desktop",
+    .identifier = 0X02,
+    .flags = 0,
+    .columns = 40,
+    .statusCells = 5,
+    .helpPage = 0
   }
   ,
   {
-    /* ID == 3 */
-    "ABT 380", ABT380, 0,
-    80, 5, 0
+    .name = "ABT 380",
+    .identifier = 0X03,
+    .flags = 0,
+    .columns = 80,
+    .statusCells = 5,
+    .helpPage = 0
   }
   ,
   {
-    /* ID == 4 */
-    "ABT 382 Twin Space", ABT382, 0,
-    80, 5, 0
+    .name = "ABT 382 Twin Space",
+    .identifier = 0X04,
+    .flags = 0,
+    .columns = 80,
+    .statusCells = 5,
+    .helpPage = 0
   }
   ,
   {
-    /* ID == 10 */
-    "Delphi 420", DEL420, 0,
-    20, 3, 0
+    .name = "Delphi 420",
+    .identifier = 0X0A,
+    .flags = 0,
+    .columns = 20,
+    .statusCells = 3,
+    .helpPage = 0
   }
   ,
   {
-    /* ID == 11 */
-    "Delphi 440", DEL440, 0,
-    40, 3, 0
+    .name = "Delphi 440",
+    .identifier = 0X0B,
+    .flags = 0,
+    .columns = 40,
+    .statusCells = 3,
+    .helpPage = 0
   }
   ,
   {
-    /* ID == 12 */
-    "Delphi 440 Desktop", DEL44D, 0,
-    40, 5, 0
+    .name = "Delphi 440 Desktop",
+    .identifier = 0X0C,
+    .flags = 0,
+    .columns = 40,
+    .statusCells = 5,
+    .helpPage = 0
   }
   ,
   {
-    /* ID == 13 */
-    "Delphi 480", DEL480, 0,
-    80, 5, 0
+    .name = "Delphi 480",
+    .identifier = 0X0D,
+    .flags = 0,
+    .columns = 80,
+    .statusCells = 5,
+    .helpPage = 0
   }
   ,
   {
-    /* ID == 14 */
-    "Satellite 544", SAT544, BPF_CONFIGURABLE,
-    40, 3, 1
+    .name = "Satellite 544",
+    .identifier = 0X0E,
+    .flags = MOD_FLG__CONFIGURABLE,
+    .columns = 40,
+    .statusCells = 3,
+    .helpPage = 1
   }
   ,
   {
-    /* ID == 15 */
-    "Satellite 570 Pro", SAT570P, BPF_CONFIGURABLE,
-    66, 3, 1
+    .name = "Satellite 570 Pro",
+    .identifier = 0X0F,
+    .flags = MOD_FLG__CONFIGURABLE,
+    .columns = 66,
+    .statusCells = 3,
+    .helpPage = 1
   }
   ,
   {
-    /* ID == 16 */
-    "Satellite 584 Pro", SAT584P, BPF_CONFIGURABLE,
-    80, 3, 1
+    .name = "Satellite 584 Pro",
+    .identifier = 0X10,
+    .flags = MOD_FLG__CONFIGURABLE,
+    .columns = 80,
+    .statusCells = 3,
+    .helpPage = 1
   }
   ,
   {
-    /* ID == 17 */
-    "Satellite 544 Traveller", SAT544T, BPF_CONFIGURABLE,
-    40, 3, 1
+    .name = "Satellite 544 Traveller",
+    .identifier = 0X11,
+    .flags = MOD_FLG__CONFIGURABLE,
+    .columns = 40,
+    .statusCells = 3,
+    .helpPage = 1
   }
   ,
   {
-    NULL, 0, 0,
-    0, 0, 0
+    .name = "Braille System 40",
+    .identifier = 0X13,
+    .flags = MOD_FLG__CONFIGURABLE,
+    .columns = 40,
+    .statusCells = 0,
+    .helpPage = 1
   }
+  ,
+  { .name = NULL }
 };
 
 
@@ -235,7 +279,7 @@ static unsigned char *prevdata = NULL;	/* previously sent raw data */
 static unsigned char StatusCells[MAX_STCELLS];		/* to hold status info */
 static unsigned char PrevStatus[MAX_STCELLS];	/* to hold previous status */
 static unsigned char NbStCells;	/* number of status cells */
-static BRLPARAMS *model;		/* points to terminal model config struct */
+static ModelEntry *model;		/* points to terminal model config struct */
 static int rewriteRequired = 0;		/* 1 if display need to be rewritten */
 static int rewriteInterval;
 static struct timeval rewriteTime;
@@ -614,27 +658,26 @@ static int
 identifyModel (BrailleDisplay *brl, unsigned char identifier) {
   /* Find out which model we are connected to... */
   for (
-    model = Models;
-    model->Name && (model->ID != identifier);
+    model = modelTable;
+    model->name && (model->identifier != identifier);
     model++
   );
 
-  if (!model->Name) {
+  if (!model->name) {
     /* Unknown model */
     LogPrint(LOG_ERR, "Detected unknown Alva model with ID %02X (hex).", identifier);
-    LogPrint(LOG_WARNING, "Please fix Models[] in Alva/braille.c and mail the maintainer.");
     return 0;
   }
-  LogPrint(LOG_INFO, "Detected Alva %s: %d columns, %d status cells.",
-           model->Name, model->Cols, model->NbStCells);
+  LogPrint(LOG_INFO, "Detected Alva %s: %d columns, %d status cells",
+           model->name, model->columns, model->statusCells);
 
   /* Set model parameters... */
-  brl->x = model->Cols;
+  brl->x = model->columns;
   brl->y = 1;
-  brl->helpPage = model->HelpPage;			/* initialise size of display */
-  NbStCells = model->NbStCells;
+  brl->helpPage = model->helpPage;			/* initialise size of display */
+  NbStCells = model->statusCells;
 
-  if (model->Flags & BPF_CONFIGURABLE) {
+  if (model->flags & MOD_FLG__CONFIGURABLE) {
     BRLSYMBOL.firmness = brl_firmness;
 
     writeFunction(brl, 0X07);
@@ -665,7 +708,7 @@ identifyModel (BrailleDisplay *brl, unsigned char identifier) {
 
 static int
 brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
-  unsigned char ModelID = MODEL;
+  unsigned char ModelID;
 
   {
     static const DotsTable dots = {0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80};
