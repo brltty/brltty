@@ -19,6 +19,7 @@
 
 #include <stdio.h>
 
+#include "misc.h"
 #include "brl.h"
 #include "touch.h"
 #include "brltty.h"
@@ -122,6 +123,7 @@ touchRecropWindow (void) {
 
 int
 touchAnalyzePressure (void) {
+  LogBytes(LOG_DEBUG, "Touch Pressure", brl.touchPressure, brl.x*brl.y);
   touchRecropWindow();
   highlightWindow();
   return EOF;
