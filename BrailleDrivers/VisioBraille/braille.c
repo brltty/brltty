@@ -646,11 +646,6 @@ static int brl_readKey(BrailleDisplay *brl)
   readNextPacket:
   lgthi = brl_readPacket(brl,ibuf,MAXPKTLEN-1);
   if (lgthi==0) return EOF;
-  if (ibuf[0]=='%') {
-    ibuf[lgthi] = '\0';
-    insertString((char *)&ibuf[1]);
-    return EOF;
-  }  
   if ((ibuf[0]!=0x3c) && (ibuf[0]!=0x3d) && (ibuf[0]!=0x23)) {
     char buf[100];
     if (ibuf[0]==0x2b) return EOF;
