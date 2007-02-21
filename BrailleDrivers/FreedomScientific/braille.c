@@ -540,7 +540,7 @@ readPacket (BrailleDisplay *brl, Packet *packet) {
         } else if ((count == 0) && (inputCount > 0)) {
           if (io->awaitInput(1000)) goto retry;
           if (errno != EAGAIN) count = -1;
-          LogBytes(LOG_DEBUG, "Aborted Input", inputBuffer.bytes, inputCount);
+          LogBytes(LOG_WARNING, "Aborted Input", inputBuffer.bytes, inputCount);
           inputCount = 0;
         }
         return count;
@@ -558,7 +558,7 @@ readPacket (BrailleDisplay *brl, Packet *packet) {
           if (memchr(packets, inputBuffer.bytes[first], sizeof(packets)))
             break;
         if (first) {
-          LogBytes(LOG_DEBUG, "Discarded Input", inputBuffer.bytes, first);
+          LogBytes(LOG_WARNING, "Discarded Input", inputBuffer.bytes, first);
           memmove(&inputBuffer.bytes[0], &inputBuffer.bytes[first], count-=first);
         }
       }
