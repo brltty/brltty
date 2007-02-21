@@ -396,7 +396,7 @@ verifyInputPacket (unsigned char *buffer, int *length) {
     }
 
   unrecognized:
-    LogBytes(LOG_DEBUG, "Unrecognized Packet", inputBuffer, inputUsed);
+    LogBytes(LOG_WARNING, "Unrecognized Packet", inputBuffer, inputUsed);
     memcpy(&inputBuffer[0], &inputBuffer[1], --inputUsed);
   }
 #else /* ABT3_OLD_FIRMWARE */
@@ -542,7 +542,7 @@ readUsbPacket (unsigned char *buffer, int length) {
       inputUsed += count;
       if (verifyInputPacket(buffer, &length)) return length;
     } else if (inputUsed) {
-      LogBytes(LOG_DEBUG, "Truncated Packet", inputBuffer, inputUsed);
+      LogBytes(LOG_WARNING, "Truncated Packet", inputBuffer, inputUsed);
       inputUsed = 0;
     }
   }
@@ -929,7 +929,7 @@ GetKey (BrailleDisplay *brl, unsigned int *Keys, unsigned int *Pos) {
   }
 
 #endif /* ! ABT3_OLD_FIRMWARE */
-  LogBytes(LOG_DEBUG, "Unexpected Packet", packet, length);
+  LogBytes(LOG_WARNING, "Unexpected Packet", packet, length);
   return 0;
 }
 
