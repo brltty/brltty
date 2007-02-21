@@ -316,7 +316,7 @@ QueryDisplay(unsigned char *reply)
           LogPrint(LOG_DEBUG, "Valid reply received.");
           return 1;
         } else {
-          LogBytes(LOG_DEBUG, "Unexpected response", reply, count);
+          LogBytes(LOG_WARNING, "Unexpected Response", reply, count);
         }
       } else {
         LogError("Read");
