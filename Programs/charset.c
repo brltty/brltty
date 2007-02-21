@@ -175,6 +175,19 @@ convertUtf8ToChar (char **utf8, size_t *utfs) {
   if (wc == WEOF) return EOF;
   return convertWcharToChar(wc);
 }
+#else /* conversions */
+/* Assume latin1 encoding */
+
+wint_t
+convertCharToWchar (char c) {
+  return c;
+}
+
+int
+convertWcharToChar (wchar_t wc) {
+  if (wc < 0X100) return wc;
+  return EOF;
+}
 #endif /* conversions */
 
 static const char *
