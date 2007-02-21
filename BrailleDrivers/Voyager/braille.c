@@ -113,7 +113,7 @@ readSerialPacket (unsigned char *buffer, int size) {
     }
 
     if (!serialReadChunk(serialDevice, buffer, &offset, 1, 0, 100)) {
-      LogBytes(LOG_DEBUG, "Partial Packet", buffer, offset);
+      LogBytes(LOG_WARNING, "Partial Packet", buffer, offset);
       return 0;
     }
 

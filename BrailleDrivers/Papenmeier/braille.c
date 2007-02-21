@@ -912,7 +912,7 @@ readPacket2 (BrailleDisplay *brl, Packet2 *packet) {
 
   while (1) {
     if (!io->readBytes(buffer, &offset, 1, 1000)) {
-      LogBytes(LOG_DEBUG, "Partial Packet", buffer, offset);
+      LogBytes(LOG_WARNING, "Partial Packet", buffer, offset);
       return 0;
     }
 
