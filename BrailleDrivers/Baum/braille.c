@@ -792,7 +792,7 @@ readBaumPacket (unsigned char *packet, int size) {
     unsigned char byte;
 
     if (!readByte(&byte, (started || escape))) {
-      if (offset > 0) LogBytes(LOG_DEBUG, "Partial Packet", packet, offset);
+      if (offset > 0) LogBytes(LOG_WARNING, "Partial Packet", packet, offset);
       return 0;
     }
 
@@ -802,7 +802,7 @@ readBaumPacket (unsigned char *packet, int size) {
       escape = 0;
 
       if (offset > 0) {
-        LogBytes(LOG_DEBUG, "Short Packet", packet, offset);
+        LogBytes(LOG_WARNING, "Short Packet", packet, offset);
         offset = 0;
         length = 0;
       } else {
@@ -811,7 +811,7 @@ readBaumPacket (unsigned char *packet, int size) {
     }
 
     if (!started) {
-      LogBytes(LOG_DEBUG, "Ignored Byte", &byte, 1);
+      LogBytes(LOG_WARNING, "Ignored Byte", &byte, 1);
       continue;
     }
 
@@ -884,7 +884,7 @@ readBaumPacket (unsigned char *packet, int size) {
             break;
 
           default:
-            LogBytes(LOG_DEBUG, "Unknown Packet", &byte, 1);
+            LogBytes(LOG_WARNING, "Unknown Packet", &byte, 1);
             started = 0;
             continue;
         }
@@ -892,8 +892,8 @@ readBaumPacket (unsigned char *packet, int size) {
 
       packet[offset] = byte;
     } else {
-      if (offset == size) LogBytes(LOG_DEBUG, "Truncated Packet", packet, offset);
-      LogBytes(LOG_DEBUG, "Discarded Byte", &byte, 1);
+      if (offset == size) LogBytes(LOG_WARNING, "Truncated Packet", packet, offset);
+      LogBytes(LOG_WARNING, "Discarded Byte", &byte, 1);
     }
 
     if (++offset == length) {
@@ -1046,7 +1046,7 @@ probeBaumDisplay (BrailleDisplay *brl) {
             continue;
 
           default:
-            LogBytes(LOG_DEBUG, "unexpected packet", response.bytes, size);
+            LogBytes(LOG_WARNING, "Unexpected Packet", response.bytes, size);
             continue;
         }
       } else if (errno != EAGAIN) {
@@ -1217,7 +1217,7 @@ updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
         continue;
 
       default:
-        LogBytes(LOG_DEBUG, "unexpected packet", packet.bytes, size);
+        LogBytes(LOG_WARNING, "Unexpected Packet", packet.bytes, size);
         continue;
     }
   }
@@ -1308,7 +1308,7 @@ readHandyTechPacket (unsigned char *packet, int size) {
     unsigned char byte;
 
     if (!readByte(&byte, offset>0)) {
-      if (offset > 0) LogBytes(LOG_DEBUG, "Partial Packet", packet, offset);
+      if (offset > 0) LogBytes(LOG_WARNING, "Partial Packet", packet, offset);
       return 0;
     }
 
@@ -1328,7 +1328,7 @@ readHandyTechPacket (unsigned char *packet, int size) {
             switch (key) {
               default:
                 if (!HT_IS_ROUTING_KEY(key)) {
-                  LogBytes(LOG_DEBUG, "Unknown Packet", &byte, 1);
+                  LogBytes(LOG_WARNING, "Unknown Packet", &byte, 1);
                   continue;
                 }
 
@@ -1348,8 +1348,8 @@ readHandyTechPacket (unsigned char *packet, int size) {
 
       packet[offset] = byte;
     } else {
-      if (offset == size) LogBytes(LOG_DEBUG, "Truncated Packet", packet, offset);
-      LogBytes(LOG_DEBUG, "Discarded Byte", &byte, 1);
+      if (offset == size) LogBytes(LOG_WARNING, "Truncated Packet", packet, offset);
+      LogBytes(LOG_WARNING, "Discarded Byte", &byte, 1);
     }
 
     if (++offset == length) {
@@ -1460,7 +1460,7 @@ updateHandyTechKeys (BrailleDisplay *brl, int *keyPressed) {
 #undef KEY
 
           default:
-            LogBytes(LOG_DEBUG, "unexpected packet", packet.bytes, size);
+            LogBytes(LOG_WARNING, "Unexpected Packet", packet.bytes, size);
             continue;
         }
         if (!updateFunctionKeys((press? bit: 0), bit, 0, keyPressed)) continue;
@@ -1559,7 +1559,7 @@ readPowerBraillePacket (unsigned char *packet, int size) {
     unsigned char byte;
 
     if (!readByte(&byte, offset>0)) {
-      if (offset > 0) LogBytes(LOG_DEBUG, "Partial Packet", packet, offset);
+      if (offset > 0) LogBytes(LOG_WARNING, "Partial Packet", packet, offset);
       return 0;
     }
   haveByte:
@@ -1570,12 +1570,12 @@ readPowerBraillePacket (unsigned char *packet, int size) {
       } else if ((byte & PB_BUTTONS0_MARKER) == PB_BUTTONS0_MARKER) {
         length = 2;
       } else {
-        LogBytes(LOG_DEBUG, "Ignored Byte", &byte, 1);
+        LogBytes(LOG_WARNING, "Ignored Byte", &byte, 1);
         continue;
       }
     } else if (packet[0]) {
       if ((byte & PB_BUTTONS1_MARKER) != PB_BUTTONS1_MARKER) {
-        LogBytes(LOG_DEBUG, "Short Packet", packet, offset);
+        LogBytes(LOG_WARNING, "Short Packet", packet, offset);
         offset = 0;
         length = 0;
         goto haveByte;
@@ -1592,7 +1592,7 @@ readPowerBraillePacket (unsigned char *packet, int size) {
             break;
 
           default:
-            LogBytes(LOG_DEBUG, "Unknown Packet", &byte, 1);
+            LogBytes(LOG_WARNING, "Unknown Packet", &byte, 1);
             offset = 0;
             length = 0;
             continue;
@@ -1605,8 +1605,8 @@ readPowerBraillePacket (unsigned char *packet, int size) {
     if (offset < length) {
       packet[offset] = byte;
     } else {
-      if (offset == size) LogBytes(LOG_DEBUG, "Truncated Packet", packet, offset);
-      LogBytes(LOG_DEBUG, "Discarded Byte", &byte, 1);
+      if (offset == size) LogBytes(LOG_WARNING, "Truncated Packet", packet, offset);
+      LogBytes(LOG_WARNING, "Discarded Byte", &byte, 1);
     }
 
     if (++offset == length) {
@@ -1691,7 +1691,7 @@ updatePowerBrailleKeys (BrailleDisplay *brl, int *keyPressed) {
           continue;
 
         default:
-          LogBytes(LOG_DEBUG, "unexpected packet", packet.bytes, size);
+          LogBytes(LOG_WARNING, "Unexpected Packet", packet.bytes, size);
           continue;
       }
     } else {
