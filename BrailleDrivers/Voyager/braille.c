@@ -108,7 +108,7 @@ readSerialPacket (unsigned char *buffer, int size) {
 
   while ((offset < 1) || (offset < length)) {
     if (offset == size) {
-      LogBytes(LOG_DEBUG, "Large Packet", buffer, offset);
+      LogBytes(LOG_WARNING, "Large Packet", buffer, offset);
       offset = 0;
     }
 
@@ -129,7 +129,7 @@ readSerialPacket (unsigned char *buffer, int size) {
 
       if (!escape) {
         if (offset == 1) {
-          LogBytes(LOG_DEBUG, "Discarded Byte", buffer, offset);
+          LogBytes(LOG_WARNING, "Discarded Byte", buffer, offset);
           offset = 0;
         }
         continue;
@@ -137,7 +137,7 @@ readSerialPacket (unsigned char *buffer, int size) {
       escape = 0;
 
       if (offset > 1) {
-        LogBytes(LOG_DEBUG, "Truncated Packet", buffer, offset-1);
+        LogBytes(LOG_WARNING, "Truncated Packet", buffer, offset-1);
         buffer[0] = byte;
         offset = 1;
       }
@@ -166,7 +166,7 @@ readSerialPacket (unsigned char *buffer, int size) {
           continue;
 
         default:
-          LogBytes(LOG_DEBUG, "Unsupported Packet", buffer, offset);
+          LogBytes(LOG_WARNING, "Unsupported Packet", buffer, offset);
           offset = 0;
           continue;
       }
@@ -182,7 +182,7 @@ nextSerialPacket (unsigned char code, unsigned char *buffer, int size) {
   int length;
   while ((length = readSerialPacket(buffer, size))) {
     if (buffer[0] == code) return length;
-    LogBytes(LOG_DEBUG, "Ignored Packet", buffer, length);
+    LogBytes(LOG_WARNING, "Ignored Packet", buffer, length);
   }
   return 0;
 }
