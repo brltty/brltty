@@ -550,7 +550,7 @@ readBytes1 (BrailleDisplay *brl, unsigned char *buffer, size_t offset, size_t co
   if (io->readBytes(buffer, &offset, count, 1000)) {
     if (!(flags & RBF_ETX)) return 1;
     if (*(buffer+offset-1) == cETX) return 1;
-    LogBytes(LOG_DEBUG, "Corrupt Packet", buffer, offset);
+    LogBytes(LOG_WARNING, "Corrupt Packet", buffer, offset);
   }
   if ((offset > 0) && (flags & RBF_RESET)) resetTerminal1(brl);
   return 0;
@@ -752,7 +752,7 @@ readCommand1 (BrailleDisplay *brl, BRL_DriverCommandContext context) {
     while (1) {
       READ(0, 1, 0);
       if (buf[0] == cSTX) break;
-      LogBytes(LOG_DEBUG, "Discarded Byte", buf, 1);
+      LogBytes(LOG_WARNING, "Discarded Byte", buf, 1);
     }
 
     READ(1, 1, 0);
@@ -924,7 +924,7 @@ readPacket2 (BrailleDisplay *brl, Packet2 *packet) {
       switch (byte) {
         case cSTX:
           if (offset > 1) {
-            LogBytes(LOG_DEBUG, "Incomplete Packet", buffer, offset);
+            LogBytes(LOG_WARNING, "Incomplete Packet", buffer, offset);
             offset = 1;
           }
           continue;
@@ -934,14 +934,14 @@ readPacket2 (BrailleDisplay *brl, Packet2 *packet) {
             if (debugReads) LogBytes(LOG_DEBUG, "Input Packet", buffer, offset);
             return 1;
           }
-          LogBytes(LOG_DEBUG, "Short Packet", buffer, offset);
+          LogBytes(LOG_WARNING, "Short Packet", buffer, offset);
           offset = 0;
           continue;
 
         default:
           switch (offset) {
             case 1:
-              LogBytes(LOG_DEBUG, "Discarded Byte", buffer, offset);
+              LogBytes(LOG_WARNING, "Discarded Byte", buffer, offset);
               offset = 0;
               continue;
     
@@ -969,7 +969,7 @@ readPacket2 (BrailleDisplay *brl, Packet2 *packet) {
               if (type != 0X30) break;
 
               if (offset == size) {
-                LogBytes(LOG_DEBUG, "Long Packet", buffer, offset);
+                LogBytes(LOG_WARNING, "Long Packet", buffer, offset);
                 offset = 0;
                 continue;
               }
@@ -994,7 +994,7 @@ readPacket2 (BrailleDisplay *brl, Packet2 *packet) {
       }
     }
 
-    LogBytes(LOG_DEBUG, "Corrupt Packet", buffer, offset);
+    LogBytes(LOG_WARNING, "Corrupt Packet", buffer, offset);
     offset = 0;
   }
 }
