@@ -340,7 +340,7 @@ writePacket (
   }
 
   if (debugPackets)
-    LogBytes("Output Packet", (unsigned char *)&packet, size);
+    LogBytes(LOG_DEBUG, "Output Packet", (unsigned char *)&packet, size);
   return io->writePacket(&packet, size, &brl->writeDelay);
 }
 
@@ -514,7 +514,7 @@ readPacket (BrailleDisplay *brl, Packet *packet) {
     }
 
     if (size <= inputCount) {
-      if (debugPackets) LogBytes("Input Packet", inputBuffer.bytes, size);
+      if (debugPackets) LogBytes(LOG_DEBUG, "Input Packet", inputBuffer.bytes, size);
 
       if (hasPayload) {
         unsigned char checksum = 0;
@@ -540,7 +540,7 @@ readPacket (BrailleDisplay *brl, Packet *packet) {
         } else if ((count == 0) && (inputCount > 0)) {
           if (io->awaitInput(1000)) goto retry;
           if (errno != EAGAIN) count = -1;
-          LogBytes("Aborted Input", inputBuffer.bytes, inputCount);
+          LogBytes(LOG_DEBUG, "Aborted Input", inputBuffer.bytes, inputCount);
           inputCount = 0;
         }
         return count;
@@ -558,13 +558,13 @@ readPacket (BrailleDisplay *brl, Packet *packet) {
           if (memchr(packets, inputBuffer.bytes[first], sizeof(packets)))
             break;
         if (first) {
-          LogBytes("Discarded Input", inputBuffer.bytes, first);
+          LogBytes(LOG_DEBUG, "Discarded Input", inputBuffer.bytes, first);
           memmove(&inputBuffer.bytes[0], &inputBuffer.bytes[first], count-=first);
         }
       }
 
       if (debugPackets)
-        LogBytes("Input Bytes", &inputBuffer.bytes[inputCount], count);
+        LogBytes(LOG_DEBUG, "Input Bytes", &inputBuffer.bytes[inputCount], count);
       inputCount += count;
     }
   }

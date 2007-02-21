@@ -696,7 +696,7 @@ writeBrailleCells (BrailleDisplay *brl) {
     count += model->brailleEndLength;
   }
 
-  // LogBytes("Write", buffer, count);
+  // LogBytes(LOG_DEBUG, "Write", buffer, count);
   return (io->writeBytes(buffer, count, &brl->writeDelay) != -1);
 }
 
@@ -1427,7 +1427,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
       int size = brl_readPacket(brl, &packet, sizeof(packet));
       if (size == -1) return BRL_CMD_RESTARTBRL;
       if (size == 0) break;
-      if (logInputPackets) LogBytes("Input Packet", packet.bytes, size);
+      if (logInputPackets) LogBytes(LOG_DEBUG, "Input Packet", packet.bytes, size);
     }
     noInput = 0;
 
@@ -1510,7 +1510,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
                   }
 
                   case 0X52:
-                    LogBytes("ATC", bytes, length);			break;
+                    LogBytes(LOG_DEBUG, "ATC", bytes, length);			break;
                     continue;
                 }
                 break;
@@ -1570,7 +1570,7 @@ brl_readPacket (BrailleDisplay *brl, void *buffer, size_t size) {
       int count = io->readBytes(&byte, 1, started);
 
       if (count != 1) {
-        if (!count && started) LogBytes("Partial Packet", packet, offset);
+        if (!count && started) LogBytes(LOG_DEBUG, "Partial Packet", packet, offset);
         return count;
       }
     }
@@ -1600,8 +1600,8 @@ brl_readPacket (BrailleDisplay *brl, void *buffer, size_t size) {
     if (offset < size) {
       packet[offset] = byte;
     } else {
-      if (offset == size) LogBytes("Truncated Packet", packet, offset);
-      LogBytes("Discarded Byte", &byte, 1);
+      if (offset == size) LogBytes(LOG_DEBUG, "Truncated Packet", packet, offset);
+      LogBytes(LOG_DEBUG, "Discarded Byte", &byte, 1);
     }
 
     if (++offset == length) {
@@ -1619,11 +1619,11 @@ brl_readPacket (BrailleDisplay *brl, void *buffer, size_t size) {
         }
 
         if (ok) {
-          if (logInputPackets) LogBytes("Input Packet", packet, offset);
+          if (logInputPackets) LogBytes(LOG_DEBUG, "Input Packet", packet, offset);
           return length;
         }
 
-        LogBytes("Malformed Packet", packet, offset);
+        LogBytes(LOG_DEBUG, "Malformed Packet", packet, offset);
       }
 
       offset = 0;

@@ -358,7 +358,7 @@ static int inputUsed;
 static int
 verifyInputPacket (unsigned char *buffer, int *length) {
   int size = 0;
-  if (logInputBuffer) LogBytes("Input Buffer", inputBuffer, inputUsed);
+  if (logInputBuffer) LogBytes(LOG_DEBUG, "Input Buffer", inputBuffer, inputUsed);
 
 #if ! ABT3_OLD_FIRMWARE
   while (inputUsed > 0) {
@@ -396,7 +396,7 @@ verifyInputPacket (unsigned char *buffer, int *length) {
     }
 
   unrecognized:
-    LogBytes("Unrecognized Packet", inputBuffer, inputUsed);
+    LogBytes(LOG_DEBUG, "Unrecognized Packet", inputBuffer, inputUsed);
     memcpy(&inputBuffer[0], &inputBuffer[1], --inputUsed);
   }
 #else /* ABT3_OLD_FIRMWARE */
@@ -404,7 +404,7 @@ verifyInputPacket (unsigned char *buffer, int *length) {
 #endif /* ! ABT3_OLD_FIRMWARE */
 
   if (!size) return 0;
-  if (logInputPackets) LogBytes("Input Packet", inputBuffer, size);
+  if (logInputPackets) LogBytes(LOG_DEBUG, "Input Packet", inputBuffer, size);
 
   if (*length < size) {
     LogPrint(LOG_DEBUG, "truncated input packet: %d < %d", *length, size);
@@ -479,7 +479,7 @@ readSerialPacket (unsigned char *buffer, int length) {
 
 static int
 writeSerialPacket (const unsigned char *buffer, int length, unsigned int *delay) {
-  if (logOutputPackets) LogBytes("Output Packet", buffer, length);
+  if (logOutputPackets) LogBytes(LOG_DEBUG, "Output Packet", buffer, length);
   if (delay) *delay += (length * 1000 / serialCharactersPerSecond) + 1;
   return serialWriteData(serialDevice, buffer, length);
 }
@@ -542,7 +542,7 @@ readUsbPacket (unsigned char *buffer, int length) {
       inputUsed += count;
       if (verifyInputPacket(buffer, &length)) return length;
     } else if (inputUsed) {
-      LogBytes("Truncated Packet", inputBuffer, inputUsed);
+      LogBytes(LOG_DEBUG, "Truncated Packet", inputBuffer, inputUsed);
       inputUsed = 0;
     }
   }
@@ -550,7 +550,7 @@ readUsbPacket (unsigned char *buffer, int length) {
 
 static int
 writeUsbPacket (const unsigned char *buffer, int length, unsigned int *delay) {
-  if (logOutputPackets) LogBytes("Output Packet", buffer, length);
+  if (logOutputPackets) LogBytes(LOG_DEBUG, "Output Packet", buffer, length);
   return usbWriteEndpoint(usb->device, usb->definition.outputEndpoint, buffer, length, 1000);
 }
 
@@ -929,7 +929,7 @@ GetKey (BrailleDisplay *brl, unsigned int *Keys, unsigned int *Pos) {
   }
 
 #endif /* ! ABT3_OLD_FIRMWARE */
-  LogBytes("Unexpected Packet", packet, length);
+  LogBytes(LOG_DEBUG, "Unexpected Packet", packet, length);
   return 0;
 }
 

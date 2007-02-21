@@ -421,10 +421,10 @@ sendData (unsigned char line, unsigned char column, unsigned char count) {
    *target++ = (line == cursorRow)? cursorColumn+1: 0;
    *target++ = column + 1;
    *target++ = count;
-   LogBytes("Output dots", source, count);
+   LogBytes(LOG_DEBUG, "Output dots", source, count);
    while (count--) *target++ = outputTable[*source++];
    count = target - data;
-   LogBytes("LogText write", data, count);
+   LogBytes(LOG_DEBUG, "LogText write", data, count);
    if (checkData(data, count)) {
       if (sendBytes(data, count)) {
          return 1;

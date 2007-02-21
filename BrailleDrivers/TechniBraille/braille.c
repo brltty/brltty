@@ -47,14 +47,14 @@ readPacket (BrailleDisplay *brl, unsigned char *packet, int length) {
     if (!serialReadChunk(serialDevice, packet, &offset, 1, 0, 1000)) {
       if (errno == EAGAIN) {
         if (!offset) return 0;
-        LogBytes("Aborted Input", packet, offset);
+        LogBytes(LOG_DEBUG, "Aborted Input", packet, offset);
       }
       return -1;
     }
 
     if (offset == 1) {
       if (*byte) {
-        LogBytes("Discarded Input", packet, offset);
+        LogBytes(LOG_DEBUG, "Discarded Input", packet, offset);
         offset = 0;
       }
     } else {
@@ -68,13 +68,13 @@ readPacket (BrailleDisplay *brl, unsigned char *packet, int length) {
       }
 
       if (offset == size) {
-      //LogBytes("Input Packet", packet, offset);
+      //LogBytes(LOG_DEBUG, "Input Packet", packet, offset);
         return offset;
       }
     }
   }
 
-  LogBytes("Truncated Input", packet, offset);
+  LogBytes(LOG_DEBUG, "Truncated Input", packet, offset);
   return 0;
 }
 
@@ -99,7 +99,7 @@ writePacket (BrailleDisplay *brl, unsigned char function, unsigned char *data, u
 
   {
     int size = byte - buffer;
-  //LogBytes("Output Packet", buffer, size);
+  //LogBytes(LOG_DEBUG, "Output Packet", buffer, size);
     brl->writeDelay += (count * 1000 / charactersPerSecond) + 1;
     if (serialWriteData(serialDevice, buffer, size) != -1) return 1;
   }
@@ -339,7 +339,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
         continue;
     }
 
-    LogBytes("Unhandled Input", packet, size);
+    LogBytes(LOG_DEBUG, "Unhandled Input", packet, size);
   }
 
   return EOF;

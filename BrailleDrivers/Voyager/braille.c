@@ -96,7 +96,7 @@ writeSerialPacket (unsigned char code, unsigned char *data, unsigned char count)
     if ((buffer[size++] = data[index]) == buffer[0])
       buffer[size++] = buffer[0];
 
-/*LogBytes("Output Packet", buffer, size);*/
+/*LogBytes(LOG_DEBUG, "Output Packet", buffer, size);*/
   return serialWriteData(serialDevice, buffer, size) != -1;
 }
 
@@ -108,12 +108,12 @@ readSerialPacket (unsigned char *buffer, int size) {
 
   while ((offset < 1) || (offset < length)) {
     if (offset == size) {
-      LogBytes("Large Packet", buffer, offset);
+      LogBytes(LOG_DEBUG, "Large Packet", buffer, offset);
       offset = 0;
     }
 
     if (!serialReadChunk(serialDevice, buffer, &offset, 1, 0, 100)) {
-      LogBytes("Partial Packet", buffer, offset);
+      LogBytes(LOG_DEBUG, "Partial Packet", buffer, offset);
       return 0;
     }
 
@@ -129,7 +129,7 @@ readSerialPacket (unsigned char *buffer, int size) {
 
       if (!escape) {
         if (offset == 1) {
-          LogBytes("Discarded Byte", buffer, offset);
+          LogBytes(LOG_DEBUG, "Discarded Byte", buffer, offset);
           offset = 0;
         }
         continue;
@@ -137,7 +137,7 @@ readSerialPacket (unsigned char *buffer, int size) {
       escape = 0;
 
       if (offset > 1) {
-        LogBytes("Truncated Packet", buffer, offset-1);
+        LogBytes(LOG_DEBUG, "Truncated Packet", buffer, offset-1);
         buffer[0] = byte;
         offset = 1;
       }
@@ -166,14 +166,14 @@ readSerialPacket (unsigned char *buffer, int size) {
           continue;
 
         default:
-          LogBytes("Unsupported Packet", buffer, offset);
+          LogBytes(LOG_DEBUG, "Unsupported Packet", buffer, offset);
           offset = 0;
           continue;
       }
     }
   }
 
-/*LogBytes("Input Packet", buffer, offset);*/
+/*LogBytes(LOG_DEBUG, "Input Packet", buffer, offset);*/
   return offset;
 }
 
@@ -182,7 +182,7 @@ nextSerialPacket (unsigned char code, unsigned char *buffer, int size) {
   int length;
   while ((length = readSerialPacket(buffer, size))) {
     if (buffer[0] == code) return length;
-    LogBytes("Ignored Packet", buffer, length);
+    LogBytes(LOG_DEBUG, "Ignored Packet", buffer, length);
   }
   return 0;
 }

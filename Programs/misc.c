@@ -192,13 +192,13 @@ LogWindowsSocketError(const char *action) {
 #endif /* WINDOWS */
 
 void
-LogBytes (const char *description, const unsigned char *data, unsigned int length) {
+LogBytes (int level, const char *description, const unsigned char *data, unsigned int length) {
    if (length) {
       char buffer[(length * 3) + 1];
       char *out = buffer;
       const unsigned char *in = data;
       while (length--) out += sprintf(out, " %2.2X", *in++);
-      LogPrint(LOG_DEBUG, "%s:%s", description, buffer);
+      LogPrint(level, "%s:%s", description, buffer);
    }
 }
 

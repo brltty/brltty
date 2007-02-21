@@ -49,7 +49,7 @@ readBytes (unsigned char *buffer, int size, size_t *length) {
     }
 
     if (byte == '\r') {
-      LogBytes("Read", buffer, *length);
+      LogBytes(LOG_DEBUG, "Read", buffer, *length);
       return 1;
     }
   }
@@ -59,7 +59,7 @@ readBytes (unsigned char *buffer, int size, size_t *length) {
 
 static int
 writeBytes (BrailleDisplay *brl, const unsigned char *bytes, int count) {
-  LogBytes("Write", bytes, count);
+  LogBytes(LOG_DEBUG, "Write", bytes, count);
   if (serialWriteData(serialDevice, bytes, count) == -1) return 0;
   brl->writeDelay += (count * 1000 / charactersPerSecond) + 1;
   return 1;
@@ -161,7 +161,7 @@ identifyDisplay (BrailleDisplay *brl) {
           }
         }
 
-        LogBytes("Unrecognized identity", identity, length);
+        LogBytes(LOG_DEBUG, "Unrecognized identity", identity, length);
       }
     }
   }
@@ -295,7 +295,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
       }
     }
 
-    LogBytes("Unexpected input", buffer, length);
+    LogBytes(LOG_DEBUG, "Unexpected input", buffer, length);
   }
 
   if (errno == EAGAIN) return EOF;

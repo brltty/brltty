@@ -443,7 +443,7 @@ static unsigned char currentText[BRLCOLSMAX];
 
 static int
 writeBytes (BrailleDisplay *brl, const unsigned char *bytes, int count) {
-  if (debugWrites) LogBytes("Write", bytes, count);
+  if (debugWrites) LogBytes(LOG_DEBUG, "Write", bytes, count);
   if (io->writeBytes(bytes, count) != -1) {
     brl->writeDelay += (count * 1000 / charactersPerSecond) + 1;
     return 1;
@@ -550,7 +550,7 @@ readBytes1 (BrailleDisplay *brl, unsigned char *buffer, size_t offset, size_t co
   if (io->readBytes(buffer, &offset, count, 1000)) {
     if (!(flags & RBF_ETX)) return 1;
     if (*(buffer+offset-1) == cETX) return 1;
-    LogBytes("Corrupt Packet", buffer, offset);
+    LogBytes(LOG_DEBUG, "Corrupt Packet", buffer, offset);
   }
   if ((offset > 0) && (flags & RBF_RESET)) resetTerminal1(brl);
   return 0;
@@ -752,7 +752,7 @@ readCommand1 (BrailleDisplay *brl, BRL_DriverCommandContext context) {
     while (1) {
       READ(0, 1, 0);
       if (buf[0] == cSTX) break;
-      LogBytes("Discarded Byte", buf, 1);
+      LogBytes(LOG_DEBUG, "Discarded Byte", buf, 1);
     }
 
     READ(1, 1, 0);
@@ -770,7 +770,7 @@ readCommand1 (BrailleDisplay *brl, BRL_DriverCommandContext context) {
       case cIdIdentify: {
         const int length = 10;
         READ(2, length-2, RBF_ETX);
-        if (debugReads) LogBytes("Identity Packet", buf, length);
+        if (debugReads) LogBytes(LOG_DEBUG, "Identity Packet", buf, length);
         if (interpretIdentity1(brl, buf)) brl->resizeRequired = 1;
         approximateDelay(200);
         restartTerminal1(brl);
@@ -789,7 +789,7 @@ readCommand1 (BrailleDisplay *brl, BRL_DriverCommandContext context) {
           return EOF;
         }
         READ(6, length-6, RBF_ETX);			/* Data */
-        if (debugReads) LogBytes("Input Packet", buf, length);
+        if (debugReads) LogBytes(LOG_DEBUG, "Input Packet", buf, length);
 
         {
           int command = handleKey1(brl, ((buf[2] << 8) | buf[3]),
@@ -818,7 +818,7 @@ readCommand1 (BrailleDisplay *brl, BRL_DriverCommandContext context) {
         message = "data framing error";
       logError:
         READ(2, 1, RBF_ETX);
-        if (debugReads) LogBytes("Error Packet", buf, 3);
+        if (debugReads) LogBytes(LOG_DEBUG, "Error Packet", buf, 3);
         LogPrint(LOG_WARNING, "Output packet error: %02X: %s", buf[1], message);
         restartTerminal1(brl);
         break;
@@ -912,7 +912,7 @@ readPacket2 (BrailleDisplay *brl, Packet2 *packet) {
 
   while (1) {
     if (!io->readBytes(buffer, &offset, 1, 1000)) {
-      LogBytes("Partial Packet", buffer, offset);
+      LogBytes(LOG_DEBUG, "Partial Packet", buffer, offset);
       return 0;
     }
 
@@ -924,24 +924,24 @@ readPacket2 (BrailleDisplay *brl, Packet2 *packet) {
       switch (byte) {
         case cSTX:
           if (offset > 1) {
-            LogBytes("Incomplete Packet", buffer, offset);
+            LogBytes(LOG_DEBUG, "Incomplete Packet", buffer, offset);
             offset = 1;
           }
           continue;
 
         case cETX:
           if ((offset >= 5) && (offset == size)) {
-            if (debugReads) LogBytes("Input Packet", buffer, offset);
+            if (debugReads) LogBytes(LOG_DEBUG, "Input Packet", buffer, offset);
             return 1;
           }
-          LogBytes("Short Packet", buffer, offset);
+          LogBytes(LOG_DEBUG, "Short Packet", buffer, offset);
           offset = 0;
           continue;
 
         default:
           switch (offset) {
             case 1:
-              LogBytes("Discarded Byte", buffer, offset);
+              LogBytes(LOG_DEBUG, "Discarded Byte", buffer, offset);
               offset = 0;
               continue;
     
@@ -969,7 +969,7 @@ readPacket2 (BrailleDisplay *brl, Packet2 *packet) {
               if (type != 0X30) break;
 
               if (offset == size) {
-                LogBytes("Long Packet", buffer, offset);
+                LogBytes(LOG_DEBUG, "Long Packet", buffer, offset);
                 offset = 0;
                 continue;
               }
@@ -994,7 +994,7 @@ readPacket2 (BrailleDisplay *brl, Packet2 *packet) {
       }
     }
 
-    LogBytes("Corrupt Packet", buffer, offset);
+    LogBytes(LOG_DEBUG, "Corrupt Packet", buffer, offset);
     offset = 0;
   }
 }
@@ -1101,7 +1101,7 @@ initializeTerminal2 (BrailleDisplay *brl) {
     data[size++] = 0; /* EAB mixed into braille data stream */
     data[size++] = 1; /* routing keys mixed into braille data stream */
 
-    LogBytes("Init Packet", data, size);
+    LogBytes(LOG_DEBUG, "Init Packet", data, size);
     writePacket2(brl, 1, size, data);
   }
 }

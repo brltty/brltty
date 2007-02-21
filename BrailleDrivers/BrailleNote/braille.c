@@ -120,7 +120,7 @@ readPacket (unsigned char *packet, int size) {
     unsigned char byte;
 
     if (!readByte(&byte, (offset > 0))) {
-      if (offset > 0) LogBytes("Partial Packet", packet, offset);
+      if (offset > 0) LogBytes(LOG_DEBUG, "Partial Packet", packet, offset);
       return 0;
     }
 
@@ -145,7 +145,7 @@ readPacket (unsigned char *packet, int size) {
             break;
 
           default:
-            LogBytes("Unknown Packet", &byte, 1);
+            LogBytes(LOG_DEBUG, "Unknown Packet", &byte, 1);
             offset = 0;
             length = 0;
             continue;
@@ -154,8 +154,8 @@ readPacket (unsigned char *packet, int size) {
 
       packet[offset] = byte;
     } else {
-      if (offset == size) LogBytes("Truncated Packet", packet, offset);
-      LogBytes("Discarded Byte", &byte, 1);
+      if (offset == size) LogBytes(LOG_DEBUG, "Truncated Packet", packet, offset);
+      LogBytes(LOG_DEBUG, "Discarded Byte", &byte, 1);
     }
 
     if (++offset == length) {
@@ -165,7 +165,7 @@ readPacket (unsigned char *packet, int size) {
         continue;
       }
 
-      if (logInputPackets) LogBytes("Input Packet", packet, offset);
+      if (logInputPackets) LogBytes(LOG_DEBUG, "Input Packet", packet, offset);
       return length;
     }
   }
@@ -190,7 +190,7 @@ writePacket (BrailleDisplay *brl, const unsigned char *packet, int size) {
 
   {
     int count = byte - buffer;
-    if (logOutputPackets) LogBytes("Output Packet", buffer, count);
+    if (logOutputPackets) LogBytes(LOG_DEBUG, "Output Packet", buffer, count);
 
     {
       int ok = serialWriteData(serialDevice, buffer, count) != -1;
@@ -440,7 +440,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
                 LogError("cell buffer allocation");
               }
             } else {
-              LogBytes("unexpected packet", response.bytes, size);
+              LogBytes(LOG_DEBUG, "unexpected packet", response.bytes, size);
             }
           }
         }
@@ -969,7 +969,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
         break;
 
       default:
-        LogBytes("unexpected packet", packet.bytes, size);
+        LogBytes(LOG_DEBUG, "unexpected packet", packet.bytes, size);
         continue;
     }
 

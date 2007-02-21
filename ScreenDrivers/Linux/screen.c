@@ -692,7 +692,7 @@ setTranslationTable (int force) {
       for (position=0; position<vgaCharacterCount; position+=count) {
         char description[0X20];
         sprintf(description, "c2f[%02X]", position);
-        LogBytes(description, &translationTable[position], count);
+        LogBytes(LOG_DEBUG, description, &translationTable[position], count);
       }
     }
     return 1;
@@ -1017,9 +1017,9 @@ read_LinuxScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
             if (debugScreenTextTranslation) {
               char desc[0X20];
               sprintf(desc, "fpos[%03d,%03d]", box.left, box.top+row);
-              LogBytes(desc, src, box.width);
+              LogBytes(LOG_DEBUG, desc, src, box.width);
               memcpy(desc, "char", 4);
-              LogBytes(desc, trg, box.width);
+              LogBytes(LOG_DEBUG, desc, trg, box.width);
             }
           } else {
             int column;
