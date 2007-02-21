@@ -124,137 +124,123 @@ static const int logOutputPackets = 0;
 typedef struct {
   const char *name;
   unsigned char identifier;
-  unsigned char flags;
   unsigned char columns;
   unsigned char statusCells;
+  unsigned char flags;
   unsigned char helpPage;
 } ModelEntry;
 #define MOD_FLG__CONFIGURABLE 0X01
 
-static ModelEntry modelTable[] = {
-  {
+static const ModelEntry modelTable[] = {
+  { .identifier = 0X00,
     .name = "ABT 320",
-    .identifier = 0X00,
-    .flags = 0,
     .columns = 20,
     .statusCells = 3,
+    .flags = 0,
     .helpPage = 0
   }
   ,
-  {
+  { .identifier = 0X01,
     .name = "ABT 340",
-    .identifier = 0X01,
-    .flags = 0,
     .columns = 40,
     .statusCells = 3,
+    .flags = 0,
     .helpPage = 0
   }
   ,
-  {
+  { .identifier = 0X02,
     .name = "ABT 340 Desktop",
-    .identifier = 0X02,
-    .flags = 0,
     .columns = 40,
     .statusCells = 5,
+    .flags = 0,
     .helpPage = 0
   }
   ,
-  {
+  { .identifier = 0X03,
     .name = "ABT 380",
-    .identifier = 0X03,
-    .flags = 0,
     .columns = 80,
     .statusCells = 5,
+    .flags = 0,
     .helpPage = 0
   }
   ,
-  {
+  { .identifier = 0X04,
     .name = "ABT 382 Twin Space",
-    .identifier = 0X04,
-    .flags = 0,
     .columns = 80,
     .statusCells = 5,
+    .flags = 0,
     .helpPage = 0
   }
   ,
-  {
+  { .identifier = 0X0A,
     .name = "Delphi 420",
-    .identifier = 0X0A,
-    .flags = 0,
     .columns = 20,
     .statusCells = 3,
+    .flags = 0,
     .helpPage = 0
   }
   ,
-  {
+  { .identifier = 0X0B,
     .name = "Delphi 440",
-    .identifier = 0X0B,
-    .flags = 0,
     .columns = 40,
     .statusCells = 3,
+    .flags = 0,
     .helpPage = 0
   }
   ,
-  {
+  { .identifier = 0X0C,
     .name = "Delphi 440 Desktop",
-    .identifier = 0X0C,
-    .flags = 0,
     .columns = 40,
     .statusCells = 5,
+    .flags = 0,
     .helpPage = 0
   }
   ,
-  {
+  { .identifier = 0X0D,
     .name = "Delphi 480",
-    .identifier = 0X0D,
-    .flags = 0,
     .columns = 80,
     .statusCells = 5,
+    .flags = 0,
     .helpPage = 0
   }
   ,
-  {
+  { .identifier = 0X0E,
     .name = "Satellite 544",
-    .identifier = 0X0E,
-    .flags = MOD_FLG__CONFIGURABLE,
     .columns = 40,
     .statusCells = 3,
+    .flags = MOD_FLG__CONFIGURABLE,
     .helpPage = 1
   }
   ,
-  {
+  { .identifier = 0X0F,
     .name = "Satellite 570 Pro",
-    .identifier = 0X0F,
-    .flags = MOD_FLG__CONFIGURABLE,
     .columns = 66,
     .statusCells = 3,
+    .flags = MOD_FLG__CONFIGURABLE,
     .helpPage = 1
   }
   ,
-  {
+  { .identifier = 0X10,
     .name = "Satellite 584 Pro",
-    .identifier = 0X10,
-    .flags = MOD_FLG__CONFIGURABLE,
     .columns = 80,
     .statusCells = 3,
+    .flags = MOD_FLG__CONFIGURABLE,
     .helpPage = 1
   }
   ,
-  {
+  { .identifier = 0X11,
     .name = "Satellite 544 Traveller",
-    .identifier = 0X11,
-    .flags = MOD_FLG__CONFIGURABLE,
     .columns = 40,
     .statusCells = 3,
+    .flags = MOD_FLG__CONFIGURABLE,
     .helpPage = 1
   }
   ,
-  {
+  { .identifier = 0X13,
     .name = "Braille System 40",
-    .identifier = 0X13,
-    .flags = MOD_FLG__CONFIGURABLE,
     .columns = 40,
     .statusCells = 0,
+    .flags = MOD_FLG__CONFIGURABLE,
     .helpPage = 1
   }
   ,
@@ -279,7 +265,7 @@ static unsigned char *prevdata = NULL;	/* previously sent raw data */
 static unsigned char StatusCells[MAX_STCELLS];		/* to hold status info */
 static unsigned char PrevStatus[MAX_STCELLS];	/* to hold previous status */
 static unsigned char NbStCells;	/* number of status cells */
-static ModelEntry *model;		/* points to terminal model config struct */
+static const ModelEntry *model;		/* points to terminal model config struct */
 static int rewriteRequired = 0;		/* 1 if display need to be rewritten */
 static int rewriteInterval;
 static struct timeval rewriteTime;
