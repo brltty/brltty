@@ -47,14 +47,14 @@ readPacket (BrailleDisplay *brl, unsigned char *packet, int length) {
     if (!serialReadChunk(serialDevice, packet, &offset, 1, 0, 1000)) {
       if (errno == EAGAIN) {
         if (!offset) return 0;
-        LogBytes(LOG_DEBUG, "Aborted Input", packet, offset);
+        LogBytes(LOG_WARNING, "Aborted Input", packet, offset);
       }
       return -1;
     }
 
     if (offset == 1) {
       if (*byte) {
-        LogBytes(LOG_DEBUG, "Discarded Input", packet, offset);
+        LogBytes(LOG_WARNING, "Discarded Input", packet, offset);
         offset = 0;
       }
     } else {
@@ -74,7 +74,7 @@ readPacket (BrailleDisplay *brl, unsigned char *packet, int length) {
     }
   }
 
-  LogBytes(LOG_DEBUG, "Truncated Input", packet, offset);
+  LogBytes(LOG_WARNING, "Truncated Input", packet, offset);
   return 0;
 }
 
@@ -339,7 +339,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
         continue;
     }
 
-    LogBytes(LOG_DEBUG, "Unhandled Input", packet, size);
+    LogBytes(LOG_WARNING, "Unhandled Input", packet, size);
   }
 
   return EOF;
