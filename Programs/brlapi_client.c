@@ -181,9 +181,9 @@ struct brlapi_handle_t { /* Connection-specific information */
   unsigned keybuf_next;
   unsigned keybuf_nb;
   union {
-    brlapi_exceptionHandler_t exceptionHandler;
-    brlapi__exceptionHandler_t exceptionHandlerWithHandle;
-  };
+    brlapi_exceptionHandler_t withoutHandle;
+    brlapi__exceptionHandler_t withHandle;
+  } exceptionHandler;
   pthread_mutex_t exceptionHandler_mutex;
 };
 
@@ -220,7 +220,7 @@ static void brlapi_initializeHandle(brlapi_handle_t *handle)
   memset(handle->keybuf, 0, sizeof(handle->keybuf));
   handle->keybuf_next = 0;
   handle->keybuf_nb = 0;
-  handle->exceptionHandler = brlapi_defaultExceptionHandler;
+  handle->exceptionHandler.withoutHandle = brlapi_defaultExceptionHandler;
   pthread_mutex_init(&handle->exceptionHandler_mutex, &mattr);
 }
 
@@ -279,14 +279,24 @@ static ssize_t brlapi__doWaitForPacket(brlapi_handle_t *handle, brlapi_type_t ex
     brlapi_errno = ntohl(errorPacket->code);
     return -1;
   }
+
   if (type==BRLAPI_PACKET_EXCEPTION) {
     size_t esize;
     int hdrSize = sizeof(errorPacket->code)+sizeof(errorPacket->type);
-    if (res<hdrSize) esize = 0; else esize = res-hdrSize;
-    if (handle==&defaultHandle) defaultHandle.exceptionHandler(ntohl(errorPacket->code), ntohl(errorPacket->type), &errorPacket->packet, esize);
-    else handle->exceptionHandlerWithHandle(handle, ntohl(errorPacket->code), ntohl(errorPacket->type), &errorPacket->packet, esize);
+
+    if (res<hdrSize)
+      esize = 0;
+    else
+      esize = res-hdrSize;
+
+    if (handle==&defaultHandle)
+      defaultHandle.exceptionHandler.withoutHandle(ntohl(errorPacket->code), ntohl(errorPacket->type), &errorPacket->packet, esize);
+    else
+      handle->exceptionHandler.withHandle(handle, ntohl(errorPacket->code), ntohl(errorPacket->type), &errorPacket->packet, esize);
+
     return -3;
   }
+
   syslog(LOG_ERR,"(brlapi_waitForPacket) Received unexpected packet of type %s and size %ld\n",brlapi_packetType(type),(long)res);
   return -3;
 }
@@ -1901,8 +1911,8 @@ brlapi__exceptionHandler_t brlapi__setExceptionHandler(brlapi_handle_t *handle, 
 {
   brlapi__exceptionHandler_t tmp;
   pthread_mutex_lock(&handle->exceptionHandler_mutex);
-  tmp = handle->exceptionHandlerWithHandle;
-  if (new!=NULL) handle->exceptionHandlerWithHandle = new;
+  tmp = handle->exceptionHandler.withHandle;
+  if (new!=NULL) handle->exceptionHandler.withHandle = new;
   pthread_mutex_unlock(&handle->exceptionHandler_mutex);
   return tmp;
 }
@@ -1911,8 +1921,8 @@ brlapi_exceptionHandler_t brlapi_setExceptionHandler(brlapi_exceptionHandler_t n
 {
   brlapi_exceptionHandler_t tmp;
   pthread_mutex_lock(&defaultHandle.exceptionHandler_mutex);
-  tmp = defaultHandle.exceptionHandler;
-  if (new!=NULL) defaultHandle.exceptionHandler = new;
+  tmp = defaultHandle.exceptionHandler.withoutHandle;
+  if (new!=NULL) defaultHandle.exceptionHandler.withoutHandle = new;
   pthread_mutex_unlock(&defaultHandle.exceptionHandler_mutex);
   return tmp;
 }
