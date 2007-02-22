@@ -38,7 +38,7 @@ typedef enum {
 #include "brldefs-vs.h"
 #include "Programs/io_serial.h"
 
-#define MAXPKTLEN 512
+#define MAXPACKETSIZE 512
 
 static SerialDevice *serialDevice;
 #ifdef SendIdReq
@@ -66,7 +66,7 @@ static ssize_t brl_writePacket(BrailleDisplay *brl, const void *packet, size_t s
 {
   const unsigned char *p = packet;
   int lgtho = 1;
-  static unsigned char obuf[MAXPKTLEN] = { 02 };
+  static unsigned char obuf[MAXPACKETSIZE] = { 02 };
   const unsigned char *x;
   unsigned char *y = obuf+1;
   unsigned char chksum=0;
@@ -112,9 +112,9 @@ static ssize_t brl_readPacket(BrailleDisplay *brl, void *p, size_t size)
   static int apacket = 0;
   static unsigned char prefix, checksum;
   unsigned char ch;
-  static unsigned char buf[MAXPKTLEN]; 
+  static unsigned char buf[MAXPACKETSIZE]; 
   static unsigned char *q;
-  if ((p==NULL) || (size<2) || (size>MAXPKTLEN)) return 0; 
+  if ((p==NULL) || (size<2) || (size>MAXPACKETSIZE)) return 0; 
   while (serialReadChunk(serialDevice,&ch,&offset,1,0,1000)) {
     if (ch==0x02) {
       apacket = 1;
@@ -640,20 +640,16 @@ int brl_keyToCommand(BrailleDisplay *brl, BRL_DriverCommandContext context, int 
 /* for BRL_ROUTING, the code is the ofset to route, starting from 0 */
 static int brl_readKey(BrailleDisplay *brl)
 {
-  unsigned char ch, ibuf[MAXPKTLEN-1];
+  unsigned char ch, packet[MAXPACKETSIZE];
   static int routing = 0;
-  ssize_t lgthi;
-  readNextPacket:
-  lgthi = brl_readPacket(brl,ibuf,MAXPKTLEN-1);
-  if (lgthi==0) return EOF;
-  if ((ibuf[0]!=0x3c) && (ibuf[0]!=0x3d) && (ibuf[0]!=0x23)) {
-    char buf[100];
-    if (ibuf[0]==0x2b) return EOF;
-    sprintf(buf,"Unknown packet 0x%x",ibuf[0]);
-    message(buf,MSG_WAITKEY | MSG_NODELAY);
+  ssize_t packetSize;
+  packetSize = brl_readPacket(brl,packet,sizeof(packet));
+  if (packetSize==0) return EOF;
+  if ((packet[0]!=0x3c) && (packet[0]!=0x3d) && (packet[0]!=0x23)) {
+    LogBytes(LOG_WARNING, "[vs] Discarding unsupported packet", packet, packetSize);
     return EOF;
   }
-  ch = ibuf[1];
+  ch = packet[1];
   if (printcode) {
     char buf [100];
     sprintf(buf,"Keycode: 0x%x",ch);
@@ -663,13 +659,13 @@ static int brl_readKey(BrailleDisplay *brl)
   }
   if (routing) {
     routing=0;
-    if (ch>=0xc0)  return (ibuf[1]-0xc0) | BRL_VSMSK_ROUTING;
+    if (ch>=0xc0)  return (packet[1]-0xc0) | BRL_VSMSK_ROUTING;
     return EOF;
   }
   if ((ch>=0xc0) && (ch<=0xdf)) return (ch-0xc0) | BRL_VSMSK_FUNCTIONKEY;
   if (ch==0x91) {
     routing = 1;
-    goto readNextPacket;
+    return BRL_CMD_NOOP;
   } 
   if ((ch>=0x20) && (ch<=0x9e)) {
     switch (ch) {
