@@ -857,6 +857,7 @@ serialDiscardInput (SerialDevice *serial) {
   return 1;
 #else /* UNIX */
   if (tcflush(serial->fileDescriptor, TCIFLUSH) != -1) return 1;
+  if (errno == EINVAL) return 1;
   LogError("TCIFLUSH");
 #endif /* discard input */
   return 0;
@@ -872,6 +873,7 @@ serialDiscardOutput (SerialDevice *serial) {
   return 1;
 #else /* UNIX */
   if (tcflush(serial->fileDescriptor, TCOFLUSH) != -1) return 1;
+  if (errno == EINVAL) return 1;
   LogError("TCOFLUSH");
 #endif /* discard output */
   return 0;
