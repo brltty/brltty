@@ -210,6 +210,28 @@ getLocaleCharset (void) {
 }
 
 const char *
+getWcharCharset (void) {
+  static const char *wcharCharset = NULL;
+
+  if (!wcharCharset) {
+    char charset[0X10];
+    snprintf(charset, sizeof(charset), "UCS-%u%cE",
+             sizeof(wchar_t),
+#ifdef WORDS_BIGENDIAN
+             'B'
+#else /* WORDS_BIGENDIAN */
+             'L'
+#endif /* WORDS_BIGENDIAN */
+            );
+
+    wcharCharset = strdupWrapper(charset);
+    LogPrint(LOG_NOTICE, "Wchar Charset: %s", wcharCharset);
+  }
+
+  return wcharCharset;
+}
+
+const char *
 setCharset (const char *name) {
   char *charset;
 
@@ -225,7 +247,7 @@ setCharset (const char *name) {
 #if defined(HAVE_ICONV_H)
   {
     static const char *const utf8Charset = "UTF-8";
-    static const char *const wcharCharset = "WCHAR_T";
+    const char *const wcharCharset = getWcharCharset();
 
     typedef struct {
       iconv_t *handle;

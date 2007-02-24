@@ -1049,7 +1049,7 @@ static int handleWrite(Connection *c, brlapi_type_t type, brlapi_packet_t *packe
       char *in = (char *) text, *out = (char *) textBuf;
       size_t sin = textLen, sout = sizeof(textBuf), res;
       LogPrint(LOG_DEBUG,"charset %s", charset);
-      CHECKEXC((conv = iconv_open("WCHAR_T",charset)) != (iconv_t)(-1), BRLAPI_ERROR_INVALID_PACKET, "invalid charset");
+      CHECKEXC((conv = iconv_open(getWcharCharset(),charset)) != (iconv_t)(-1), BRLAPI_ERROR_INVALID_PACKET, "invalid charset");
       res = iconv(conv,&in,&sin,&out,&sout);
       iconv_close(conv);
       CHECKEXC(res != (size_t) -1, BRLAPI_ERROR_INVALID_PACKET, "invalid charset conversion");
