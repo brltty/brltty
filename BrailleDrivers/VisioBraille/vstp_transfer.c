@@ -30,7 +30,6 @@
 #include <string.h>
 #include <ctype.h>
 #include <errno.h>
-#include <malloc.h>
 #include <fcntl.h>
 #include <sys/stat.h>
 

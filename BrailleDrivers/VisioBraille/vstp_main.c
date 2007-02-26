@@ -27,7 +27,6 @@
 #include <string.h>
 #include <unistd.h>
 #include <signal.h>
-#include <malloc.h>
 #include "Programs/brlapi.h"
 #include "vstp.h"
 
