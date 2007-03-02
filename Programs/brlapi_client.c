@@ -1855,14 +1855,7 @@ static pthread_once_t error_key_once = PTHREAD_ONCE_INIT;
  */
 #if defined(WINDOWS)
 
-#elif defined(__GNUC__)
-#define WEAK_REDEFINE(name) extern typeof(name) name __attribute__((weak))
-WEAK_REDEFINE(pthread_key_create);
-WEAK_REDEFINE(pthread_once);
-WEAK_REDEFINE(pthread_getspecific);
-WEAK_REDEFINE(pthread_setspecific);
-
-#elif defined(__sun__)
+#elif defined(__GNUC__) || defined(__sun__)
 #pragma weak pthread_key_create
 #pragma weak pthread_once
 #pragma weak pthread_getspecific
