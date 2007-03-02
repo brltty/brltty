@@ -628,7 +628,7 @@ brlapi_fileDescriptor brlapi__openConnection(brlapi_handle_t *handle, const brla
   if ((len = brlapi__waitForPacket(handle, BRLAPI_PACKET_AUTH, &serverPacket, sizeof(serverPacket), 1)) < 0)
     return INVALID_FILE_DESCRIPTOR;
 
-  for (type = &authServer->type[0]; (void*) type < ((void*)&serverPacket) + len; type++) {
+  for (type = &authServer->type[0]; type < &authServer->type[len / sizeof(authServer->type[0])]; type++) {
     auth->type = *type;
     switch (ntohl(*type)) {
       case BRLAPI_AUTH_NONE:
