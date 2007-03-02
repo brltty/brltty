@@ -32,6 +32,7 @@ typedef enum {
 #define BRL_HAVE_PACKET_IO
 #define BRL_HAVE_SENSITIVITY
 #include "Programs/brl_driver.h"
+#include "Programs/touch.h"
 #include "braille.h"
 
 /* packets */
@@ -629,7 +630,9 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
           if (response.fields.type == HT_PKT_OK) {
             if (identifyModel(brl, response.fields.data.ok.model)) {
               if (model->hasATC) {
-		setAtcMode(brl, 1);
+                brl->touchEnabled = 1;
+                setAtcMode(brl, 1);
+                setAtcSensitivity(brl, 50);
               }
 
               if (*parameters[PARM_INPUTMODE])
@@ -722,6 +725,7 @@ brl_writeWindow (BrailleDisplay *brl) {
     for (i=0; i<model->textCells; ++i) {
       rawData[i] = outputTable[(prevData[i] = brl->buffer[i])];
     }
+    if (model->hasATC) touchAnalyzeCells(brl, brl->buffer);
     updateRequired = 1;
   }
   updateBrailleCells(brl);
@@ -1509,9 +1513,28 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
                     break;
                   }
 
-                  case 0X52:
-                    LogBytes(LOG_DEBUG, "ATC", bytes, length);			break;
+                  case 0X52: {
+                    unsigned int cellCount = model->textCells + model->statusCells;
+                    unsigned char pressure[cellCount];
+
+                    memset(pressure, 0, cellCount);
+                    if (bytes[0] > 0) {
+                      int cellIndex = bytes[0] - 1;
+                      int dataIndex;
+
+                      for (dataIndex=1; dataIndex<length; dataIndex++) {
+                        pressure[cellIndex++] = bytes[dataIndex] & 0XF0;
+                        pressure[cellIndex++] = (bytes[dataIndex] & 0X0F) << 4;
+                      }
+                    }
+
+                    {
+                      int command = touchAnalyzePressure(brl, pressure);
+                      if (command != EOF) return command;
+                    }
+
                     continue;
+                  }
                 }
                 break;
               }
@@ -1570,7 +1593,7 @@ brl_readPacket (BrailleDisplay *brl, void *buffer, size_t size) {
       int count = io->readBytes(&byte, 1, started);
 
       if (count != 1) {
-        if (!count && started) LogBytes(LOG_DEBUG, "Partial Packet", packet, offset);
+        if (!count && started) LogBytes(LOG_WARNING, "Partial Packet", packet, offset);
         return count;
       }
     }
@@ -1600,8 +1623,8 @@ brl_readPacket (BrailleDisplay *brl, void *buffer, size_t size) {
     if (offset < size) {
       packet[offset] = byte;
     } else {
-      if (offset == size) LogBytes(LOG_DEBUG, "Truncated Packet", packet, offset);
-      LogBytes(LOG_DEBUG, "Discarded Byte", &byte, 1);
+      if (offset == size) LogBytes(LOG_WARNING, "Truncated Packet", packet, offset);
+      LogBytes(LOG_WARNING, "Discarded Byte", &byte, 1);
     }
 
     if (++offset == length) {
@@ -1623,7 +1646,7 @@ brl_readPacket (BrailleDisplay *brl, void *buffer, size_t size) {
           return length;
         }
 
-        LogBytes(LOG_DEBUG, "Malformed Packet", packet, offset);
+        LogBytes(LOG_WARNING, "Malformed Packet", packet, offset);
       }
 
       offset = 0;
