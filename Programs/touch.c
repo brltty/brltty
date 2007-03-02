@@ -20,9 +20,7 @@
 #include <stdio.h>
 
 #include "misc.h"
-#include "brl.h"
 #include "touch.h"
-#include "brltty.h"
 
 static int touchLeft;
 static int touchRight;
@@ -41,90 +39,93 @@ touchGetRegion (int *left, int *right, int *top, int *bottom) {
 }
 
 static inline int
-touchCheckColumn (int column) {
+touchCheckColumn (BrailleDisplay *brl, const unsigned char *pressure, int column) {
   int row;
   for (row=touchTop; row<=touchBottom; ++row) {
-    if (brl.touchPressure[(row * brl.x) + column]) return 1;
+    if (pressure[(row * brl->x) + column]) return 1;
   }
   return 0;
 }
 
 static inline int
-touchCheckRow (int row) {
+touchCheckRow (BrailleDisplay *brl, const unsigned char *pressure, int row) {
   int column;
   for (column=touchLeft; column<=touchRight; ++column) {
-    if (brl.touchPressure[(row * brl.x) + column]) return 1;
+    if (pressure[(row * brl->x) + column]) return 1;
   }
   return 0;
 }
 
 static inline int
-touchCropLeft (void) {
+touchCropLeft (BrailleDisplay *brl, const unsigned char *pressure) {
   while (touchLeft <= touchRight) {
-    if (touchCheckColumn(touchLeft)) return 1;
+    if (touchCheckColumn(brl, pressure, touchLeft)) return 1;
     ++touchLeft;
   }
   return 0;
 }
 
 static inline int
-touchCropRight (void) {
+touchCropRight (BrailleDisplay *brl, const unsigned char *pressure) {
   while (touchRight >= touchLeft) {
-    if (touchCheckColumn(touchRight)) return 1;
+    if (touchCheckColumn(brl, pressure, touchRight)) return 1;
     --touchRight;
   }
   return 0;
 }
 
 static inline int
-touchCropTop (void) {
+touchCropTop (BrailleDisplay *brl, const unsigned char *pressure) {
   while (touchTop <= touchBottom) {
-    if (touchCheckRow(touchTop)) return 1;
+    if (touchCheckRow(brl, pressure, touchTop)) return 1;
     ++touchTop;
   }
   return 0;
 }
 
 static inline int
-touchCropBottom (void) {
+touchCropBottom (BrailleDisplay *brl, const unsigned char *pressure) {
   while (touchBottom >= touchTop) {
-    if (touchCheckRow(touchBottom)) return 1;
+    if (touchCheckRow(brl, pressure, touchBottom)) return 1;
     --touchBottom;
   }
   return 0;
 }
 
 static inline int
-touchCropWindow (void) {
-  if (!touchCropRight()) {
+touchCropWindow (BrailleDisplay *brl, const unsigned char *pressure) {
+  if (!touchCropRight(brl, pressure)) {
     touchBottom = touchTop - 1;
     return 0;
   }
 
-  touchCropLeft();
-  touchCropTop();
-  touchCropBottom();
+  touchCropLeft(brl, pressure);
+  touchCropTop(brl, pressure);
+  touchCropBottom(brl, pressure);
   return 1;
 }
 
 static inline void
-touchUncropWindow (void) {
+touchUncropWindow (BrailleDisplay *brl) {
   touchLeft = 0;
-  touchRight = brl.x;
+  touchRight = brl->x;
   touchTop = 0;
-  touchBottom = brl.y;
+  touchBottom = brl->y;
 }
 
 static inline int
-touchRecropWindow (void) {
-  touchUncropWindow();
-  return touchCropWindow();
+touchRecropWindow (BrailleDisplay *brl, const unsigned char *pressure) {
+  touchUncropWindow(brl);
+  return touchCropWindow(brl, pressure);
 }
 
 int
-touchAnalyzePressure (void) {
-  LogBytes(LOG_DEBUG, "Touch Pressure", brl.touchPressure, brl.x*brl.y);
-  touchRecropWindow();
-  highlightWindow();
+touchAnalyzePressure (BrailleDisplay *brl, const unsigned char *pressure) {
+  LogBytes(LOG_DEBUG, "Touch Pressure", pressure, brl->x*brl->y);
+  touchRecropWindow(brl, pressure);
   return EOF;
+}
+
+void
+touchAnalyzeCells (BrailleDisplay *brl, const unsigned char *cells) {
 }

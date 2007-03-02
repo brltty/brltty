@@ -22,7 +22,11 @@
 extern "C" {
 #endif /* __cplusplus */
 
-extern int touchAnalyzePressure (void);
+#include "brl.h"
+
+extern int touchAnalyzePressure (BrailleDisplay *brl, const unsigned char *pressure);
+extern void touchAnalyzeCells (BrailleDisplay *brl, const unsigned char *cells);
+
 extern int touchGetRegion (int *left, int *right, int *top, int *bottom);
 
 #ifdef __cplusplus
