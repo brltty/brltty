@@ -630,9 +630,11 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
           if (response.fields.type == HT_PKT_OK) {
             if (identifyModel(brl, response.fields.data.ok.model)) {
               if (model->hasATC) {
-                brl->touchEnabled = 1;
                 setAtcMode(brl, 1);
                 setAtcSensitivity(brl, 50);
+
+                touchAnalyzeCells(brl, NULL);
+                brl->touchEnabled = 1;
               }
 
               if (*parameters[PARM_INPUTMODE])
@@ -1515,17 +1517,22 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 
                   case 0X52: {
                     unsigned int cellCount = model->textCells + model->statusCells;
-                    unsigned char pressure[cellCount];
+                    unsigned char pressureValues[cellCount];
+                    const unsigned char *pressure;
 
-                    memset(pressure, 0, cellCount);
-                    if (bytes[0] > 0) {
+                    if (bytes[0]) {
                       int cellIndex = bytes[0] - 1;
                       int dataIndex;
 
+                      memset(pressureValues, 0, cellCount);
                       for (dataIndex=1; dataIndex<length; dataIndex++) {
-                        pressure[cellIndex++] = bytes[dataIndex] & 0XF0;
-                        pressure[cellIndex++] = (bytes[dataIndex] & 0X0F) << 4;
+                        pressureValues[cellIndex++] = bytes[dataIndex] & 0XF0;
+                        pressureValues[cellIndex++] = (bytes[dataIndex] & 0X0F) << 4;
                       }
+
+                      pressure = &pressureValues[0];
+                    } else {
+                      pressure = NULL;
                     }
 
                     {

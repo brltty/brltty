@@ -94,15 +94,17 @@ touchCropBottom (BrailleDisplay *brl, const unsigned char *pressure) {
 
 static inline int
 touchCropWindow (BrailleDisplay *brl, const unsigned char *pressure) {
-  if (!touchCropRight(brl, pressure)) {
-    touchBottom = touchTop - 1;
-    return 0;
+  if (pressure) {
+    if (touchCropRight(brl, pressure)) {
+      touchCropLeft(brl, pressure);
+      touchCropTop(brl, pressure);
+      touchCropBottom(brl, pressure);
+      return 1;
+    }
   }
 
-  touchCropLeft(brl, pressure);
-  touchCropTop(brl, pressure);
-  touchCropBottom(brl, pressure);
-  return 1;
+  touchBottom = touchTop - 1;
+  return 0;
 }
 
 static inline void
@@ -121,7 +123,12 @@ touchRecropWindow (BrailleDisplay *brl, const unsigned char *pressure) {
 
 int
 touchAnalyzePressure (BrailleDisplay *brl, const unsigned char *pressure) {
-  LogBytes(LOG_DEBUG, "Touch Pressure", pressure, brl->x*brl->y);
+  if (pressure) {
+    LogBytes(LOG_DEBUG, "Touch Pressure", pressure, brl->x*brl->y);
+  } else {
+    LogPrint(LOG_DEBUG, "Touch Pressure off");
+  }
+
   touchRecropWindow(brl, pressure);
   return EOF;
 }
