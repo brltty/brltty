@@ -1526,8 +1526,17 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 
                       memset(pressureValues, 0, cellCount);
                       for (dataIndex=1; dataIndex<length; dataIndex++) {
-                        pressureValues[cellIndex++] = bytes[dataIndex] & 0XF0;
-                        pressureValues[cellIndex++] = (bytes[dataIndex] & 0X0F) << 4;
+                        unsigned char byte = bytes[dataIndex];
+
+                        {
+                          unsigned char nibble = byte & 0XF0;
+                          pressureValues[cellIndex++] = nibble | (nibble >> 4);
+                        }
+
+                        {
+                          unsigned char nibble = byte & 0X0F;
+                          pressureValues[cellIndex++] = nibble | (nibble << 4);
+                        }
                       }
 
                       pressure = &pressureValues[0];
