@@ -226,7 +226,7 @@ then
 fi
 AC_PROG_CXX
 
-brltty_gcc_options="-Wall -std=c99"
+brltty_gcc_options="-Wall"
 case "${build_os} ${host_os}"
 in
    cygwin*\ mingw*)
