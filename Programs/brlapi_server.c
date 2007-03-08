@@ -596,12 +596,12 @@ void getDots(const BrailleWindow *brailleWindow, unsigned char *buf)
 void getText(const BrailleWindow *brailleWindow, unsigned char *buf)
 {
   int i;
-  wchar_t wc;
+  int c;
   for (i=0; i<displaySize; i++) {
-    if ((wc = brailleWindow->text[i]) >= 256)
+    if ((c = convertWcharToChar(brailleWindow->text[i])) == EOF)
       buf[i] = '?';
     else
-      buf[i] = wc;
+      buf[i] = c;
   }
 }
 
