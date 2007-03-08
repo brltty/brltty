@@ -1423,10 +1423,11 @@ to set some dots, to underline characters for instance.
 <item> A cursor position can be specified. 1 representing
 the first character of the display, 0 turning the cursor off. If not given,
 the cursor (if any) is left unmodified.
-<item> Last but not least, the charset of the text can be specified. If it is
-not, an 8-bit charset is assumed, and it is assumed to be the same as the
-server's. Multibyte charsets may be used, AND and OR fields' bytes will
-correspond to each text's wide <em/character/, be it a combining or a
+<item> Last but not least, the charset of the text can be specified: the length
+of the name first in one byte, then the name itself in ASCII characters. If the
+charset is not specified, an 8-bit charset is assumed, and it is assumed to be
+the same as the server's. Multibyte charsets may be used, AND and OR fields'
+bytes will correspond to each text's wide <em/character/, be it a combining or a
 double-width character.
 </itemize>
 
