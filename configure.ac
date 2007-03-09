@@ -275,7 +275,7 @@ AC_SUBST([MKOBJ])
 AC_CACHE_CHECK([for loadable module creation command], [brltty_cv_prog_mkmod], [dnl
 case "${host_os}"
 in
-   linux*|gnu*|openbsd*|freebsd*|netbsd*|*qnx*|cygwin*|mingw*)
+   linux*|gnu*|openbsd*|freebsd*|kfreebsd*|netbsd*|*qnx*|cygwin*|mingw*)
       brltty_mkmod_ld_make="-shared"
       ;;
    solaris*)
@@ -312,7 +312,7 @@ AC_SUBST([MKMOD], ["${brltty_cv_prog_mkmod}"])
 AC_CACHE_CHECK([for dynamic library creation command], [brltty_cv_prog_mklib], [dnl
 case "${host_os}"
 in
-   linux*|gnu*|openbsd*|freebsd*|netbsd*|*qnx*)
+   linux*|gnu*|openbsd*|freebsd*|kfreebsd*|netbsd*|*qnx*)
       brltty_mklib_ld_make="-shared"
       brltty_mklib_ld_options="-soname"
       ;;
@@ -357,7 +357,7 @@ AC_SUBST([MKLIB], ["${brltty_cv_prog_mklib}"])
 AC_CACHE_CHECK([for configure shared object directory command], [brltty_cv_prog_conflibdir], [dnl
 case "${host_os}"
 in
-   linux*|gnu*)
+   linux*|gnu*|kfreebsd*)
       brltty_cv_prog_conflibdir="/sbin/ldconfig -n"
       ;;
    *)
@@ -694,7 +694,7 @@ fi
 AC_CACHE_CHECK([for system-dependent compilation flags], [brltty_cv_prog_cc_sysflags], [dnl
 case "${host_os}"
 in
-   linux*|gnu*)
+   linux*|gnu*|kfreebsd*)
       brltty_cv_prog_cc_sysflags="-D_POSIX_C_SOURCE=2 -D_BSD_SOURCE -D_XOPEN_SOURCE=500"
       ;;
    solaris*)
@@ -899,6 +899,11 @@ in
    freebsd*)
       system_object="freebsd"
       ;;
+   kfreebsd*)
+      system_object="kfreebsd"
+      brltty_pcm_interfaces="oss"
+      brltty_midi_interfaces="oss"
+      ;;
    netbsd*)
       system_object="netbsd"
       ;;
@@ -1034,7 +1039,7 @@ BRLTTY_ARG_DISABLE(
 AC_CACHE_CHECK([for linkage editor program creation flags], [brltty_cv_prog_ld_flags], [dnl
 case "${host_os}"
 in
-   linux*|gnu*|openbsd*|freebsd*|netbsd*|*qnx*)
+   linux*|gnu*|openbsd*|freebsd*|kfreebsd*|netbsd*|*qnx*)
       brltty_cv_prog_ld_flags="-export-dynamic"
       ;;
    solaris*)
@@ -1068,7 +1073,7 @@ then
 else
    case "${host_os}"
    in
-      linux*|gnu*|openbsd*|freebsd*|*qnx*|cygwin*|mingw*)
+      linux*|gnu*|openbsd*|freebsd*|kfreebsd*|*qnx*|cygwin*|mingw*)
          brltty_cv_prog_ld_static="-static"
          ;;
       netbsd*)
@@ -1102,7 +1107,7 @@ LDFLAGS="${LDFLAGS} BRLTTY_OPTIONS_LD2CC([${brltty_link_flags}])"
 
 case "${host_os}"
 in
-   linux*|gnu*|solaris*|openbsd*|freebsd*|netbsd*|osf*|*qnx*|cygwin*|mingw*)
+   linux*|gnu*|solaris*|openbsd*|freebsd*|kfreebsd*|netbsd*|osf*|*qnx*|cygwin*|mingw*)
       BRLTTY_SEARCH_LIBS([dlopen], [dl])
       ;;
    hpux*)
@@ -1127,6 +1132,9 @@ in
       ;;
    freebsd*)
       usb_object="freebsd"
+      ;;
+   kfreebsd*)
+      usb_object="kfreebsd"
       ;;
    netbsd*)
       usb_object="netbsd"
@@ -1264,6 +1272,9 @@ in
       brltty_cv_device_serial_first="cua00"
       ;;
    freebsd*)
+      brltty_cv_device_serial_first="cuaa0"
+      ;;
+   kfreebsd*)
       brltty_cv_device_serial_first="cuaa0"
       ;;
    netbsd*)
