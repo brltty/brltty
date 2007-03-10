@@ -433,7 +433,7 @@ BRLTTY_ARG_DISABLE(
          [Caml bindings for BrlAPI],
          [],
          [
-            m4_include([acdir/ac_caml_devel.m4])
+            m4_include([Bindings/Caml/ac_caml_devel.m4])
             AC_CAML_DEVEL()
             if test "${OCAMLC}" != "no"
             then
@@ -467,7 +467,7 @@ BRLTTY_ARG_DISABLE(
             AC_PATH_PROG([PYREXC], [pyrexc])
             if test -n "${PYREXC}"
             then
-               m4_include([acdir/ac_python_devel.m4])
+               m4_include([Bindings/Python/ac_python_devel.m4])
                AC_PYTHON_DEVEL()
                api_bindings="${api_bindings} Python"
             else
