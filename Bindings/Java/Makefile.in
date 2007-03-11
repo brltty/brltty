@@ -21,6 +21,8 @@
 include $(SRC_TOP)bindings.mk
 
 JAVAC = @JAVAC@
+JAVADOC = @JAVADOC@
+JNIFLAGS = @JNIFLAGS@
 JAVA_ENCODING = UTF-8
 
 all: native jar doc
@@ -32,7 +34,7 @@ $(JAVA_NATIVE): bindings.$O $(API_NAME)
 	$(MKLIB:<name>=$(API_NAME)) $@ bindings.$O $(API_LDFLAGS)
 
 bindings.$O:
-	$(CC) $(LIBCFLAGS) -o $@ -c $(SRC_DIR)/bindings.c
+	$(CC) $(LIBCFLAGS) $(JNIFLAGS) -o $@ -c $(SRC_DIR)/bindings.c
 
 JAVA_JAR = $(API_NAME).jar
 jar: $(JAVA_JAR)
@@ -55,7 +57,7 @@ BrlapiConstants.java: $(CONSTANTS_SCRIPTS) $(CONSTANTS_SOURCES)
 doc: javadoc.made
 
 javadoc.made: $(SRC_DIR)/*.java BrlapiConstants.java
-	$(JAVAC:javac=javadoc) -quiet -d . -author -version -use -encoding $(JAVA_ENCODING) $(SRC_DIR)/*.java BrlapiConstants.java
+	$(JAVADOC) -quiet -d . -author -version -use -encoding $(JAVA_ENCODING) $(SRC_DIR)/*.java BrlapiConstants.java
 	touch $@
 
 clean::

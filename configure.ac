@@ -439,7 +439,7 @@ BRLTTY_ARG_DISABLE(
             then
                api_bindings="${api_bindings} Caml"
             else
-               AC_MSG_WARN([Caml BrlAPI bindings not included: ocamlc not found])
+               AC_MSG_WARN([Caml BrlAPI bindings not included])
             fi
          ]
       )
@@ -449,12 +449,13 @@ BRLTTY_ARG_DISABLE(
          [Java bindings for BrlAPI],
          [],
          [
-	    AC_PATH_PROG([JAVAC], [javac])
-	    if test -n "${JAVAC}"
+            m4_include([Bindings/Java/ac_java_devel.m4])
+            AC_JAVA_DEVEL()
+	    if test "${JAVA}" = "yes"
 	    then
 	       api_bindings="${api_bindings} Java"
 	    else
-               AC_MSG_WARN([Java BrlAPI bindings not included: javac not found])
+               AC_MSG_WARN([Java BrlAPI bindings not included])
             fi
          ]
       )
