@@ -21,27 +21,33 @@
 AC_DEFUN([AC_JAVA_DEVEL], [dnl
 if test -n "${JAVA_HOME}"
 then
-   AC_PATH_PROG([JAVAC], [javac], [], ["${JAVA_HOME}/bin"])
+   AC_JAVA_COMPILER([javac], ["${JAVA_HOME}/bin"])
 else
-   AC_PATH_PROG([JAVAC], [javac])
-   if test -z "${JAVAC}"
-   then
-      AC_PATH_PROG([JAVAC], [javac], [], [/usr/java/bin /usr/java/jdk*/bin])
-      if test -z "${JAVAC}"
-      then
-         AC_PATH_PROG([JAVAC], [gcj])
-      fi
-   fi
+   AC_JAVA_COMPILER([javac], [], [dnl
+      AC_JAVA_COMPILER([javac], [/usr/java/bin /usr/java/jdk*/bin], [dnl
+         AC_JAVA_COMPILER([gcj])
+      ])
+   ])
 fi
 
-if test -n "${JAVAC}"
+if test -n "${JAVAC_PATH}"
 then
-   AC_MSG_NOTICE([javac is ${JAVAC}])
+   AC_MSG_NOTICE([Java compiler is ${JAVAC_PATH}])
 
-   JAVA_BIN=`AS_DIRNAME("${JAVAC}")`
+   JAVA_ENCODING="UTF-8"
+   case "${JAVAC_NAME}"
+   in
+      javac) JAVAC_OPTIONS="-encoding ${JAVA_ENCODING}";;
+      gcj)   JAVAC_OPTIONS="-C --encoding=${JAVA_ENCODING}";;
+      *)     JAVAC_OPTIONS="";;
+   esac
+   AC_SUBST([JAVAC], ["${JAVAC_PATH} ${JAVAC_OPTIONS}"])
+
+   JAVA_BIN=`AS_DIRNAME("${JAVAC_PATH}")`
    JAVA_ROOT=`AS_DIRNAME("${JAVA_BIN}")`
 
    AC_SUBST([JAVADOC], ["${JAVA_BIN}/javadoc"])
+   AC_SUBST([JAR], ["${JAVA_BIN}/jar"])
 
    JNIDIR="${JAVA_ROOT}/include"
    JNIHDR="jni.h"
@@ -51,6 +57,17 @@ then
    AC_SUBST([JNIFLAGS])
    AC_SUBST([JAVA])
 else
-   AC_MSG_WARN([javac not found])
+   AC_MSG_WARN([Java compiler not found])
 fi
 ])
+
+AC_DEFUN([AC_JAVA_COMPILER], [dnl
+AC_PATH_PROG([JAVAC_PATH], [$1], [], [$2])
+if test -n "${JAVAC_PATH}"
+then
+   JAVAC_NAME="$1"
+ifelse(len([$3]), 0, [], [dnl
+else
+   $3
+])dnl
+fi])
