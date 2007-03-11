@@ -46,7 +46,7 @@ then
    JAVA_BIN=`AS_DIRNAME("${JAVAC_PATH}")`
    JAVA_ROOT=`AS_DIRNAME("${JAVA_BIN}")`
 
-   AC_SUBST([JAVADOC], ["${JAVA_BIN}/javadoc"])
+   AC_SUBST([JAVADOC], ["${JAVA_BIN}/javadoc -encoding ${JAVA_ENCODING}"])
    AC_SUBST([JAR], ["${JAVA_BIN}/jar"])
 
    JNIDIR="${JAVA_ROOT}/include"
