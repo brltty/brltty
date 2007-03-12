@@ -142,7 +142,7 @@ $ac_distutils_result])
 
 		PYTHON_LDFLAGS=`$PYTHON -c "from distutils.sysconfig import *; \
 			from string import join; \
-			print '-L' + get_python_lib(0,1), \
+			print '-L' + get_python_lib(0,1) + '/config', \
 		      	'-lpython';"`$py_version
 	fi		
 	AC_MSG_RESULT([$PYTHON_LDFLAGS])
