@@ -21,6 +21,10 @@ subdirectory) you'll need these packages:
 *  linuxdoc-tools
 *  doxygen
 
+If you are using MSYS for running configure and make, you should always use
+Windows paths (like c:/brltty), not MSYS paths (like /c/brltty), because brltty
+does _not_ understand MSYS paths.
+
 ------------------------------------------------------------------------------
 
 USB Support
