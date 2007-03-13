@@ -104,7 +104,7 @@ function writeKeyDefinition(name, value) {
 
 function writeJavaConstant(type, name, value, help) {
   writeJavadocComment(help)
-  print "  public static final " type " " name " = " value ";"
+  print "  " type " " name " = " value ";"
 }
 
 function writeJavadocComment(text) {
