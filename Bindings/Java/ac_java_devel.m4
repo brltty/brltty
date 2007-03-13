@@ -55,7 +55,7 @@ then
    fi
    AC_SUBST([JAVADOC], ["${JAVADOC_PATH} -encoding ${JAVA_ENCODING}"])
 
-   AC_CHECK_PROGS([JAR_NAME], [jar], [], ["${JAVA_BIN}"])
+   AC_CHECK_PROGS([JAR_NAME], [jar], [JAR_NOT_FOUND_BY_CONFIGURE], ["${JAVA_BIN}"])
    AC_SUBST([JAR], ["${JAVA_BIN}/${JAR_NAME}"])
 
    JNIDIR="${JAVA_ROOT}/include"
