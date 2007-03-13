@@ -46,8 +46,17 @@ then
    JAVA_BIN=`AS_DIRNAME("${JAVAC_PATH}")`
    JAVA_ROOT=`AS_DIRNAME("${JAVA_BIN}")`
 
-   AC_SUBST([JAVADOC], ["${JAVA_BIN}/javadoc -encoding ${JAVA_ENCODING}"])
-   AC_SUBST([JAR], ["${JAVA_BIN}/jar"])
+   AC_CHECK_PROGS([JAVADOC_NAME], [javadoc gjdoc], [], ["${JAVA_BIN}"])
+   if test -n "${JAVADOC_NAME}"
+   then
+      JAVADOC_PATH="${JAVA_BIN}/${JAVADOC_NAME}"
+   else
+      JAVADOC_PATH=":"
+   fi
+   AC_SUBST([JAVADOC], ["${JAVADOC_PATH} -encoding ${JAVA_ENCODING}"])
+
+   AC_CHECK_PROGS([JAR_NAME], [jar], [], ["${JAVA_BIN}"])
+   AC_SUBST([JAR], ["${JAVA_BIN}/${JAR_NAME}"])
 
    JNIDIR="${JAVA_ROOT}/include"
    JNIHDR="jni.h"
