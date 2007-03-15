@@ -20,7 +20,7 @@
 
 public class Brlapi extends BrlapiNative implements BrlapiConstants {
   protected final BrlapiSettings settings;
-  protected final int fileDescriptor;;
+  protected final int fileDescriptor;
 
   public Brlapi (BrlapiSettings settings) throws BrlapiError {
     this.settings = new BrlapiSettings();
