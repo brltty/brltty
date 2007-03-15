@@ -215,8 +215,8 @@ getWcharCharset (void) {
 
   if (!wcharCharset) {
     char charset[0X10];
-    snprintf(charset, sizeof(charset), "UCS-%u%cE",
-             sizeof(wchar_t),
+    snprintf(charset, sizeof(charset), "UCS-%lu%cE",
+             (unsigned long)sizeof(wchar_t),
 #ifdef WORDS_BIGENDIAN
              'B'
 #else /* WORDS_BIGENDIAN */
