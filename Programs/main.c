@@ -1149,6 +1149,11 @@ main (int argc, char *argv[]) {
 
         command = readBrailleCommand(&brl, context);
 
+        if (brl.highlightWindow) {
+          brl.highlightWindow = 0;
+          highlightWindow();
+        }
+
         if (command != EOF) {
           int real = command;
 

@@ -50,6 +50,7 @@ typedef struct {
   void (*bufferResized) (int rows, int columns);
   const char *dataDirectory;
   unsigned touchEnabled:1;
+  unsigned highlightWindow:1;
 } BrailleDisplay;				/* used for writing to a braille display */
 
 extern void initializeBrailleDisplay (BrailleDisplay *);

@@ -130,6 +130,7 @@ touchAnalyzePressure (BrailleDisplay *brl, const unsigned char *pressure) {
   }
 
   touchRecropWindow(brl, pressure);
+  brl->highlightWindow = 1;
   return EOF;
 }
 

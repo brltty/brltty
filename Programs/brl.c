@@ -117,6 +117,7 @@ initializeBrailleDisplay (BrailleDisplay *brl) {
   brl->bufferResized = NULL;
   brl->dataDirectory = NULL;
   brl->touchEnabled = 0;
+  brl->highlightWindow = 0;
 }
 
 unsigned int
