@@ -35,13 +35,6 @@ typedef enum {
 #include "Programs/touch.h"
 #include "braille.h"
 
-/* packets */
-static const unsigned char HandyBrailleBegin[] = {0X01};	/* general header to display braille */
-static const unsigned char HandyME6Begin[] = {0X79, 0X36, 0X41, 0X01};	/* general header to display braille */
-static const unsigned char HandyME8Begin[] = {0X79, 0X38, 0X59, 0X01};	/* general header to display braille */
-static const unsigned char BookwormBrailleEnd[] = {0X16};	/* bookworm trailer to display braille */
-static const unsigned char BookwormSessionEnd[] = {0X05, 0X07};	/* bookworm trailer to display braille */
-
 typedef struct {
   uint32_t front;
   signed char column;
@@ -51,21 +44,28 @@ static Keys currentKeys, pressedKeys;
 static const Keys nullKeys = {.front=0, .column=-1, .status=-1};
 static unsigned int inputMode;
 
-/* Braille display parameters */
+static const unsigned char BookwormSessionEnd[] = {0X05, 0X07};	/* bookworm trailer to display braille */
+
 typedef int (ByteInterpreter) (BRL_DriverCommandContext context, unsigned char byte, int *command);
 static ByteInterpreter interpretKeyByte;
 static ByteInterpreter interpretBookwormByte;
+
 typedef int (KeysInterpreter) (BRL_DriverCommandContext context, const Keys *keys, int *command);
 static KeysInterpreter interpretModularKeys;
 static KeysInterpreter interpretBrailleWaveKeys;
 static KeysInterpreter interpretBrailleStarKeys;
+
+typedef int (CellWriter) (BrailleDisplay *brl);
+static CellWriter writeStatusAndTextCells;
+static CellWriter writeBookwormCells;
+static CellWriter writeEvolutionCells;
+
 typedef struct {
   const char *name;
   ByteInterpreter *interpretByte;
   KeysInterpreter *interpretKeys;
+  CellWriter *writeCells;
 
-  const unsigned char *brailleBeginAddress;
-  const unsigned char *brailleEndAddress;
   const unsigned char *sessionEndAddress;
 
   unsigned char identifier;
@@ -73,12 +73,9 @@ typedef struct {
   unsigned char statusCells;
   unsigned char helpPage;
 
-  unsigned char brailleBeginLength;
-  unsigned char brailleEndLength;
   unsigned char sessionEndLength;
 
   unsigned hasATC:1; /* Active Tactile Control */
-  unsigned contiguous:1; /* no physical space between status and text cells */
 } ModelEntry;
 
 #define HT_BYTE_SEQUENCE(name,bytes) .name##Address = bytes, .name##Length = sizeof(bytes)
@@ -90,7 +87,7 @@ static const ModelEntry modelTable[] = {
     .helpPage = 0,
     .interpretByte = interpretKeyByte,
     .interpretKeys = interpretModularKeys,
-    HT_BYTE_SEQUENCE(brailleBegin, HandyBrailleBegin)
+    .writeCells = writeStatusAndTextCells
   }
   ,
   { .identifier = 0X89,
@@ -100,7 +97,7 @@ static const ModelEntry modelTable[] = {
     .helpPage = 0,
     .interpretByte = interpretKeyByte,
     .interpretKeys = interpretModularKeys,
-    HT_BYTE_SEQUENCE(brailleBegin, HandyBrailleBegin)
+    .writeCells = writeStatusAndTextCells
   }
   ,
   { .identifier = 0X88,
@@ -110,33 +107,29 @@ static const ModelEntry modelTable[] = {
     .helpPage = 0,
     .interpretByte = interpretKeyByte,
     .interpretKeys = interpretModularKeys,
-    HT_BYTE_SEQUENCE(brailleBegin, HandyBrailleBegin)
+    .writeCells = writeStatusAndTextCells
   }
   ,
   { .identifier = 0X36,
     .name = "Modular Evolution 64",
     .textCells = 60,
     .statusCells = 4,
-    .contiguous = 1,
     .helpPage = 0,
     .interpretByte = interpretKeyByte,
     .interpretKeys = interpretBrailleStarKeys,
-    .hasATC = 1,
-    HT_BYTE_SEQUENCE(brailleBegin, HandyME6Begin),
-    HT_BYTE_SEQUENCE(brailleEnd, BookwormBrailleEnd)
+    .writeCells = writeEvolutionCells,
+    .hasATC = 1
   }
   ,
   { .identifier = 0X38,
     .name = "Modular Evolution 88",
     .textCells = 80,
     .statusCells = 8,
-    .contiguous = 1,
     .helpPage = 0,
     .interpretByte = interpretKeyByte,
     .interpretKeys = interpretBrailleStarKeys,
-    .hasATC = 1,
-    HT_BYTE_SEQUENCE(brailleBegin, HandyME8Begin),
-    HT_BYTE_SEQUENCE(brailleEnd, BookwormBrailleEnd)
+    .writeCells = writeEvolutionCells,
+    .hasATC = 1
   }
   ,
   { .identifier = 0X05,
@@ -146,7 +139,7 @@ static const ModelEntry modelTable[] = {
     .helpPage = 0,
     .interpretByte = interpretKeyByte,
     .interpretKeys = interpretBrailleWaveKeys,
-    HT_BYTE_SEQUENCE(brailleBegin, HandyBrailleBegin)
+    .writeCells = writeStatusAndTextCells
   }
   ,
   { .identifier = 0X90,
@@ -155,8 +148,7 @@ static const ModelEntry modelTable[] = {
     .statusCells = 0,
     .helpPage = 1,
     .interpretByte = interpretBookwormByte,
-    HT_BYTE_SEQUENCE(brailleBegin, HandyBrailleBegin),
-    HT_BYTE_SEQUENCE(brailleEnd, BookwormBrailleEnd),
+    .writeCells = writeBookwormCells,
     HT_BYTE_SEQUENCE(sessionEnd, BookwormSessionEnd)
   }
   ,
@@ -167,7 +159,7 @@ static const ModelEntry modelTable[] = {
     .helpPage = 2,
     .interpretByte = interpretKeyByte,
     .interpretKeys = interpretBrailleStarKeys,
-    HT_BYTE_SEQUENCE(brailleBegin, HandyBrailleBegin)
+    .writeCells = writeStatusAndTextCells
   }
   ,
   { .identifier = 0X74,
@@ -177,7 +169,7 @@ static const ModelEntry modelTable[] = {
     .helpPage = 2,
     .interpretByte = interpretKeyByte,
     .interpretKeys = interpretBrailleStarKeys,
-    HT_BYTE_SEQUENCE(brailleBegin, HandyBrailleBegin)
+    .writeCells = writeStatusAndTextCells
   }
   ,
   { .identifier = 0X78,
@@ -187,7 +179,7 @@ static const ModelEntry modelTable[] = {
     .helpPage = 3,
     .interpretByte = interpretKeyByte,
     .interpretKeys = interpretBrailleStarKeys,
-    HT_BYTE_SEQUENCE(brailleBegin, HandyBrailleBegin)
+    .writeCells = writeStatusAndTextCells
   }
   ,
   { /* end of table */
@@ -198,8 +190,6 @@ static const ModelEntry modelTable[] = {
 
 #define BRLROWS		1
 #define MAX_STCELLS	8	/* highest number of status cells */
-
-
 
 /* This is the brltty braille mapping standard to Handy's mapping table.
  */
@@ -387,11 +377,31 @@ static const InputOutputOperations bluetoothOperations = {
 };
 #endif /* ENABLE_BLUETOOTH_SUPPORT */
 
+#define SYN 0X16
+
+typedef enum {
+  HT_PKT_Extended = 0X79,
+  HT_PKT_NAK      = 0X7D,
+  HT_PKT_ACK      = 0X7E,
+  HT_PKT_OK       = 0XFE,
+  HT_PKT_Reset    = 0XFF
+} HT_PacketType;
+
+typedef enum {
+  HT_EXTPKT_Braille           = 0X01,
+  HT_EXTPKT_Key               = 0X04,
+  HT_EXTPKT_Confirmation      = 0X07,
+  HT_EXTPKT_Scancode          = 0X09,
+  HT_EXTPKT_SetAtcMode        = 0X50,
+  HT_EXTPKT_SetAtcSensitivity = 0X51,
+  HT_EXTPKT_AtcInfo           = 0X52
+} HT_ExtendedPacketType;
+
 typedef union {
   unsigned char bytes[4 + 0XFF];
 
   struct {
-    unsigned char type;
+    HT_PacketType type:8;
 
     union {
       struct {
@@ -401,7 +411,7 @@ typedef union {
       struct {
         unsigned char model;
         unsigned char length;
-        unsigned char type;
+        HT_ExtendedPacketType type:8;
 
         union {
           unsigned char bytes[0XFF];
@@ -410,14 +420,6 @@ typedef union {
     } data;
   } PACKED fields;
 } HT_Packet;
-
-typedef enum {
-  HT_PKT_Extended = 0X79,
-  HT_PKT_NAK      = 0X7D,
-  HT_PKT_ACK      = 0X7E,
-  HT_PKT_OK       = 0XFE,
-  HT_PKT_Reset    = 0XFF
-} HT_PacketType;
 
 typedef enum {
   BDS_OFF,
@@ -540,7 +542,6 @@ identifyModel (BrailleDisplay *brl, unsigned char identifier) {
   if (!model->name) {
     LogPrint(LOG_ERR, "Detected unknown HandyTech model with ID %02X.",
              identifier);
-    LogPrint(LOG_WARNING, "Please fix modelTable[] in HandyTech/braille.c and notify the maintainer.");
     return 0;
   }
 
@@ -570,20 +571,32 @@ identifyModel (BrailleDisplay *brl, unsigned char identifier) {
   return 1;
 }
 
-static void
-setAtcMode (BrailleDisplay *brl, unsigned char value) {
-  const unsigned char packet[] = {
-    HT_PKT_Extended, model->identifier, 0X02, 0X50, value, 0X16
-  };
-  brl_writePacket(brl, packet, sizeof(packet));
+static int
+writeExtendedPacket (
+  BrailleDisplay *brl, HT_ExtendedPacketType type,
+  const unsigned char *data, unsigned char size
+) {
+  HT_Packet packet;
+  packet.fields.type = HT_PKT_Extended;
+  packet.fields.data.extended.model = model->identifier;
+  packet.fields.data.extended.length = size + 1; /* type byte is included */
+  packet.fields.data.extended.type = type;
+  memcpy(packet.fields.data.extended.data.bytes, data, size);
+  packet.fields.data.extended.data.bytes[size] = SYN;
+  size += 5; /* EXT, ID, LEN, TYPE, ..., SYN */
+  return io->writeBytes((unsigned char *)&packet, size, &brl->writeDelay) == size;
 }
 
-static void
+static int
+setAtcMode (BrailleDisplay *brl, unsigned char value) {
+  const unsigned char data[] = {value};
+  return writeExtendedPacket(brl, HT_EXTPKT_SetAtcMode, data, sizeof(data));
+}
+
+static int
 setAtcSensitivity (BrailleDisplay *brl, unsigned char value) {
-  const unsigned char packet[] = {
-    HT_PKT_Extended, model->identifier, 0X02, 0X51, value, 0X16
-  };
-  brl_writePacket(brl, packet, sizeof(packet));
+  const unsigned char data[] = {value};
+  return writeExtendedPacket(brl, HT_EXTPKT_SetAtcSensitivity, data, sizeof(data));
 }
 
 static int
@@ -673,49 +686,53 @@ brl_close (BrailleDisplay *brl) {
 }
 
 static int
-writeBrailleCells (BrailleDisplay *brl) {
-  unsigned char buffer[model->brailleBeginLength + model->statusCells + model->textCells + model->brailleEndLength];
-  int count = 0;
-
-  if (model->brailleBeginLength) {
-    memcpy(buffer+count, model->brailleBeginAddress, model->brailleBeginLength);
-    count += model->brailleBeginLength;
-  }
-
-  if (model->contiguous) {
-    memcpy(buffer+count, rawData, model->textCells);
-    count += model->textCells;
-
-    memcpy(buffer+count, rawStatus, model->statusCells);
-    count += model->statusCells;
-  } else {
-    memcpy(buffer+count, rawStatus, model->statusCells);
-    count += model->statusCells;
-
-    memcpy(buffer+count, rawData, model->textCells);
-    count += model->textCells;
-  }
-
-  if (model->brailleEndLength) {
-    memcpy(buffer+count, model->brailleEndAddress, model->brailleEndLength);
-    count += model->brailleEndLength;
-  }
-
-  // LogBytes(LOG_DEBUG, "Write", buffer, count);
-  return (io->writeBytes(buffer, count, &brl->writeDelay) != -1);
+writeCells (BrailleDisplay *brl) {
+  if (!model->writeCells(brl)) return 0;
+  setState(BDS_WRITING);
+  return 1;
 }
 
 static int
-updateBrailleCells (BrailleDisplay *brl) {
+writeStatusAndTextCells (BrailleDisplay *brl) {
+  unsigned char buffer[1 + model->statusCells + model->textCells];
+
+  buffer[0] = 0X01;
+  memcpy(buffer+1, rawStatus, model->statusCells);
+  memcpy(buffer+model->statusCells+1, rawData, model->textCells);
+
+  return io->writeBytes(buffer, sizeof(buffer), &brl->writeDelay) != -1;
+}
+
+static int
+writeBookwormCells (BrailleDisplay *brl) {
+  unsigned char buffer[1 + model->statusCells + model->textCells + 1];
+
+  buffer[0] = 0X01;
+  memcpy(buffer+1, rawData, model->textCells);
+  buffer[sizeof(buffer)-1] = SYN;
+  return io->writeBytes(buffer, sizeof(buffer), &brl->writeDelay) != -1;
+}
+
+static int
+writeEvolutionCells (BrailleDisplay *brl) {
+  unsigned char buffer[model->textCells + model->statusCells];
+
+  memcpy(buffer, rawData, model->textCells);
+  memcpy(buffer+model->textCells, rawStatus, model->statusCells);
+
+  return writeExtendedPacket(brl, HT_EXTPKT_Braille, buffer, sizeof(buffer));
+}
+
+static int
+updateCells (BrailleDisplay *brl) {
   if (!updateRequired) return 1;
   if (currentState != BDS_READY) return 1;
 
-  if (!writeBrailleCells(brl)) {
+  if (!writeCells(brl)) {
     setState(BDS_OFF);
     return 0;
   }
 
-  setState(BDS_WRITING);
   updateRequired = 0;
   return 1;
 }
@@ -727,15 +744,15 @@ brl_writeWindow (BrailleDisplay *brl) {
     for (i=0; i<model->textCells; ++i) {
       rawData[i] = outputTable[(prevData[i] = brl->buffer[i])];
     }
-    if (model->hasATC) touchAnalyzeCells(brl, brl->buffer);
     updateRequired = 1;
   }
-  updateBrailleCells(brl);
+  updateCells(brl);
 }
 
 static void
 brl_writeStatus (BrailleDisplay *brl, const unsigned char *st) {
-  if (memcmp(st, prevStatus, model->statusCells) != 0) {	/* only if it changed */
+  if (model->statusCells &&
+      (memcmp(st, prevStatus, model->statusCells) != 0)) {
     int i;
     for (i=0; i<model->statusCells; ++i) {
       rawStatus[i] = outputTable[(prevStatus[i] = st[i])];
@@ -1427,23 +1444,27 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 
   while (1) {
     HT_Packet packet;
+    int size = brl_readPacket(brl, &packet, sizeof(packet));
 
-    {
-      static const int logInputPackets = 0;
-      int size = brl_readPacket(brl, &packet, sizeof(packet));
-      if (size == -1) return BRL_CMD_RESTARTBRL;
-      if (size == 0) break;
-      if (logInputPackets) LogBytes(LOG_DEBUG, "Input Packet", packet.bytes, size);
-    }
+    if (size == -1) return BRL_CMD_RESTARTBRL;
+    if (size == 0) break;
     noInput = 0;
 
+    /* a kludge to handle the Bookworm going offline */
     if (packet.fields.type == 0X06) {
       if (currentState != BDS_OFF) {
+        /* if we get another byte right away then the device
+         * has gone offline and is echoing its display
+         */
         if (io->awaitInput(10)) {
           setState(BDS_OFF);
           continue;
         }
+
+        /* if an input error occurred then restart the driver */
         if (errno != EAGAIN) return BRL_CMD_RESTARTBRL;
+
+        /* no additional input so fall through and interpret the packet as keys */
       }
     }
 
@@ -1467,8 +1488,12 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
               case HT_PKT_NAK:
                 updateRequired = 1;
               case HT_PKT_ACK:
+                if (model->hasATC) touchAnalyzeCells(brl, prevData);
                 setState(BDS_READY);
                 continue;
+
+	      default:
+                break;
             }
 
           case BDS_READY:
@@ -1478,16 +1503,16 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
                 const unsigned char *bytes = &packet.fields.data.extended.data.bytes[0];
 
                 switch (packet.fields.data.extended.type) {
-                  case 0X04: {
+                  case HT_EXTPKT_Key: {
                     int command;
                     if (model->interpretByte(context, bytes[0], &command)) {
-                      updateBrailleCells(brl);
+                      updateCells(brl);
                       return command;
                     }
                     break;
                   }
 
-                  case 0X07:
+                  case HT_EXTPKT_Confirmation:
                     switch (bytes[0]) {
                       case HT_PKT_NAK:
                         updateRequired = 1;
@@ -1497,7 +1522,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
                     }
                     break;
 
-                  case 0X09: {
+                  case HT_EXTPKT_Scancode: {
                     if (length) {
                       unsigned char code = bytes++[0];
                       if (--length) {
@@ -1515,7 +1540,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
                     break;
                   }
 
-                  case 0X52: {
+                  case HT_EXTPKT_AtcInfo: {
                     unsigned int cellCount = model->textCells + model->statusCells;
                     unsigned char pressureValues[cellCount];
                     const unsigned char *pressure;
@@ -1527,16 +1552,13 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
                       memset(pressureValues, 0, cellCount);
                       for (dataIndex=1; dataIndex<length; dataIndex++) {
                         unsigned char byte = bytes[dataIndex];
+			unsigned char nibble;
 
-                        {
-                          unsigned char nibble = byte & 0XF0;
-                          pressureValues[cellIndex++] = nibble | (nibble >> 4);
-                        }
+			nibble = byte & 0XF0;
+			pressureValues[cellIndex++] = nibble | (nibble >> 4);
 
-                        {
-                          unsigned char nibble = byte & 0X0F;
-                          pressureValues[cellIndex++] = nibble | (nibble << 4);
-                        }
+			nibble = byte & 0X0F;
+			pressureValues[cellIndex++] = nibble | (nibble << 4);
                       }
 
                       pressure = &pressureValues[0];
@@ -1551,6 +1573,9 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 
                     continue;
                   }
+
+                  default:
+                    break;
                 }
                 break;
               }
@@ -1558,7 +1583,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
               default: {
                 int command;
                 if (model->interpretByte(context, packet.fields.type, &command)) {
-                  updateBrailleCells(brl);
+                  updateCells(brl);
                   return command;
                 }
                 break;
@@ -1583,13 +1608,12 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
       case BDS_WRITING:
         if (millisecondsSince(&stateTime) > 1000) {
           if (retryCount > 3) return BRL_CMD_RESTARTBRL;
-          if (!writeBrailleCells(brl)) return BRL_CMD_RESTARTBRL;
-          setState(BDS_WRITING);
+          if (!writeCells(brl)) return BRL_CMD_RESTARTBRL;
         }
         break;
     }
   }
-  updateBrailleCells(brl);
+  updateCells(brl);
 
   return EOF;
 }
@@ -1649,7 +1673,7 @@ brl_readPacket (BrailleDisplay *brl, void *buffer, size_t size) {
 
         switch (packet[0]) {
           case HT_PKT_Extended:
-            if (packet[length-1] == 0X16) ok = 1;
+            if (packet[length-1] == SYN) ok = 1;
             break;
 
           default:
