@@ -110,9 +110,9 @@ touchCropWindow (BrailleDisplay *brl, const unsigned char *pressure) {
 static inline void
 touchUncropWindow (BrailleDisplay *brl) {
   touchLeft = 0;
-  touchRight = brl->x;
+  touchRight = brl->x - 1;
   touchTop = 0;
-  touchBottom = brl->y;
+  touchBottom = brl->y - 1;
 }
 
 static inline int
