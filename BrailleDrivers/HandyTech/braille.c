@@ -76,6 +76,7 @@ typedef struct {
   unsigned char sessionEndLength;
 
   unsigned hasATC:1; /* Active Tactile Control */
+  unsigned isBookworm:1;
 } ModelEntry;
 
 #define HT_BYTE_SEQUENCE(name,bytes) .name##Address = bytes, .name##Length = sizeof(bytes)
@@ -144,6 +145,7 @@ static const ModelEntry modelTable[] = {
   ,
   { .identifier = 0X90,
     .name = "Bookworm",
+    .isBookworm = 1,
     .textCells = 8,
     .statusCells = 0,
     .helpPage = 1,
@@ -1451,20 +1453,22 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
     noInput = 0;
 
     /* a kludge to handle the Bookworm going offline */
-    if (packet.fields.type == 0X06) {
-      if (currentState != BDS_OFF) {
-        /* if we get another byte right away then the device
-         * has gone offline and is echoing its display
-         */
-        if (io->awaitInput(10)) {
-          setState(BDS_OFF);
-          continue;
+    if (model->isBookworm) {
+      if (packet.fields.type == 0X06) {
+        if (currentState != BDS_OFF) {
+          /* if we get another byte right away then the device
+           * has gone offline and is echoing its display
+           */
+          if (io->awaitInput(10)) {
+            setState(BDS_OFF);
+            continue;
+          }
+
+          /* if an input error occurred then restart the driver */
+          if (errno != EAGAIN) return BRL_CMD_RESTARTBRL;
+
+          /* no additional input so fall through and interpret the packet as keys */
         }
-
-        /* if an input error occurred then restart the driver */
-        if (errno != EAGAIN) return BRL_CMD_RESTARTBRL;
-
-        /* no additional input so fall through and interpret the packet as keys */
       }
     }
 
