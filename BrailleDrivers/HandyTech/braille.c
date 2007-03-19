@@ -1308,6 +1308,10 @@ interpretBrailleStarKeys (BRL_DriverCommandContext context, const Keys *keys, in
       case (KEY_B7 | ROCKER_RIGHT_BOTTOM):
         *command = BRL_CMD_ATTRDN;
         return 1;
+      case (KEY_B2 | KEY_B4 | KEY_B5 | KEY_SPACE_LEFT):
+        setState(BDS_OFF);
+        *command = EOF;
+        return 1;
     }
   }
   if (!(keys->front & ~(KEY_B1 | KEY_B2 | KEY_B3 | KEY_B4 |
