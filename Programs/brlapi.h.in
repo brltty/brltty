@@ -781,6 +781,7 @@ int brlapi__ignoreKeyRanges(brlapi_handle_t *handle, brlapi_range_t ranges[], un
 int brlapi_acceptKeyRanges(brlapi_range_t ranges[], unsigned int n);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
 int brlapi__acceptKeyRanges(brlapi_handle_t *handle, brlapi_range_t ranges[], unsigned int n);
+/** @} */
 
 /** \defgroup brlapi_driverspecific Driver-Specific modes
  * \brief Raw and Suspend Modes mechanism
@@ -1128,7 +1129,7 @@ int brlapi__writeWin(brlapi_handle_t *handle, const brlapi_writeStruct_t *s, int
 #define BRLERR_EMPTYKEY                BRLAPI_ERROR_EMPTYKEY
 #define BRLERR_DRIVERERROR             BRLAPI_ERROR_DRIVERERROR
 
-/* @} */
+/** @} */
 #endif /* BRLAPI_NO_DEPRECATED */
 
 #ifdef __cplusplus
