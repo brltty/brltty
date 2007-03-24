@@ -119,9 +119,10 @@ static char* search_key(int16_t key) {
     return res;
   }
 
-  if (key >= OFFS_EASY) {
-    snprintf(res, sizeof(res), "easy %s",
-             search_code(EASYCODE, key-OFFS_EASY));
+  if (key >= OFFS_BAR) {
+    snprintf(res, sizeof(res), "%s %s",
+             search_symbol(BAR),
+             search_code(BARCODE, key-OFFS_BAR));
     return res;
   }
 
@@ -209,9 +210,9 @@ void terminals(int help, int verbose)
       if (terminal->frontKeys)
         fprintf(fh, "%s = %d\n", 
                 search_symbol(FRONTKEYS), terminal->frontKeys);
-      if (terminal->hasEasyBar)
+      if (terminal->hasBar)
 	fprintf(fh, "%s = %d %d %d %d\n",
-                search_symbol(EASYBAR),
+                search_symbol(HASBAR),
                 terminal->leftSwitches, terminal->rightSwitches,
                 terminal->leftKeys, terminal->rightKeys);
 

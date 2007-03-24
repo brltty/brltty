@@ -192,19 +192,19 @@ handleCommand (BrailleDisplay *brl, int cmd, int repeat) {
         break;
 
       case BRL_CMD_SWSIM_LC:
-        return changeModifiers(MOD_EASY_SLR|MOD_EASY_SLF, MOD_EASY_SLC);
+        return changeModifiers(MOD_BAR_SLR|MOD_BAR_SLF, MOD_BAR_SLC);
       case BRL_CMD_SWSIM_LR:
-        return changeModifiers(MOD_EASY_SLF, MOD_EASY_SLR);
+        return changeModifiers(MOD_BAR_SLF, MOD_BAR_SLR);
       case BRL_CMD_SWSIM_LF:
-        return changeModifiers(MOD_EASY_SLR, MOD_EASY_SLF);
+        return changeModifiers(MOD_BAR_SLR, MOD_BAR_SLF);
       case BRL_CMD_SWSIM_RC:
-        return changeModifiers(MOD_EASY_SRR|MOD_EASY_SRF, MOD_EASY_SRC);
+        return changeModifiers(MOD_BAR_SRR|MOD_BAR_SRF, MOD_BAR_SRC);
       case BRL_CMD_SWSIM_RR:
-        return changeModifiers(MOD_EASY_SRF, MOD_EASY_SRR);
+        return changeModifiers(MOD_BAR_SRF, MOD_BAR_SRR);
       case BRL_CMD_SWSIM_RF:
-        return changeModifiers(MOD_EASY_SRR, MOD_EASY_SRF);
+        return changeModifiers(MOD_BAR_SRR, MOD_BAR_SRF);
       case BRL_CMD_SWSIM_BC:
-        return changeModifiers(MOD_EASY_SLR|MOD_EASY_SLF|MOD_EASY_SRR|MOD_EASY_SRF, MOD_EASY_SLC|MOD_EASY_SRC);
+        return changeModifiers(MOD_BAR_SLR|MOD_BAR_SLF|MOD_BAR_SRR|MOD_BAR_SRF, MOD_BAR_SLC|MOD_BAR_SRC);
       case BRL_CMD_SWSIM_BQ: {
         static const char *const states[] = {"center", "rear", "front", "both"};
         const char *left = states[currentModifiers & 0X3];
@@ -612,9 +612,9 @@ interpretIdentity1 (BrailleDisplay *brl, const unsigned char *identity) {
   rcvFrontFirst = RCV_KEYFUNC + 3;
   rcvFrontLast  = rcvFrontFirst + 3 * (terminal->frontKeys - 1);
   rcvBarFirst = rcvFrontLast + 3;
-  rcvBarLast  = rcvBarFirst + 3 * ((terminal->hasEasyBar? 8: 0) - 1);
+  rcvBarLast  = rcvBarFirst + 3 * ((terminal->hasBar? 8: 0) - 1);
   rcvSwitchFirst = rcvBarLast + 3;
-  rcvSwitchLast  = rcvSwitchFirst + 3 * ((terminal->hasEasyBar? 8: 0) - 1);
+  rcvSwitchLast  = rcvSwitchFirst + 3 * ((terminal->hasBar? 8: 0) - 1);
   LogPrint(LOG_DEBUG, "Function Keys: front=%03X-%03X bar=%03X-%03X switches=%03X-%03X",
            rcvFrontFirst, rcvFrontLast,
            rcvBarFirst, rcvBarLast,
@@ -648,13 +648,13 @@ handleKey1 (BrailleDisplay *brl, int code, int press, int time) {
   }
 
   if (rcvBarFirst <= code && 
-      code <= rcvBarLast) { /* easy bar */
+      code <= rcvBarLast) { /* easy access bar */
     {
       static const int modifiers[] = {
-        MOD_EASY_SLR, MOD_EASY_SLF,
-        MOD_EASY_KLR, MOD_EASY_KLF,
-        MOD_EASY_KRR, MOD_EASY_KRF,
-        MOD_EASY_SRR, MOD_EASY_SRF,
+        MOD_BAR_SLR, MOD_BAR_SLF,
+        MOD_BAR_KLR, MOD_BAR_KLF,
+        MOD_BAR_KRR, MOD_BAR_KRF,
+        MOD_BAR_SRR, MOD_BAR_SRF,
         0
       };
       const int *modifier = modifiers;
@@ -678,11 +678,11 @@ handleKey1 (BrailleDisplay *brl, int code, int press, int time) {
     }
 
     num = 1 + (code - rcvBarFirst) / 3;
-    return handleKey(brl, OFFS_EASY+num, press, 0);
+    return handleKey(brl, OFFS_BAR+num, press, 0);
   }
 
   if (rcvSwitchFirst <= code && 
-      code <= rcvSwitchLast) { /* easy bar */
+      code <= rcvSwitchLast) { /* easy access bar */
     num = 1 + (code - rcvSwitchFirst) / 3;
     return handleKey(brl, OFFS_SWITCH+num, press, 0);
   }
@@ -1271,14 +1271,14 @@ mapInputModules2 (void) {
           OFFS_SWITCH+KEY_LEFT_FRONT);
 
   byte--;
-  addInputMapping2(byte, 7, OFFS_EASY+EASY_L2, 0);
-  addInputMapping2(byte, 6, OFFS_EASY+EASY_R2, 0);
-  addInputMapping2(byte, 5, OFFS_EASY+EASY_L1, 0);
-  addInputMapping2(byte, 4, OFFS_EASY+EASY_R1, 0);
-  addInputMapping2(byte, 3, OFFS_EASY+EASY_D2, 0);
-  addInputMapping2(byte, 2, OFFS_EASY+EASY_D1, 0);
-  addInputMapping2(byte, 1, OFFS_EASY+EASY_U1, 0);
-  addInputMapping2(byte, 0, OFFS_EASY+EASY_U2, 0);
+  addInputMapping2(byte, 7, OFFS_BAR+BAR_L2, 0);
+  addInputMapping2(byte, 6, OFFS_BAR+BAR_R2, 0);
+  addInputMapping2(byte, 5, OFFS_BAR+BAR_L1, 0);
+  addInputMapping2(byte, 4, OFFS_BAR+BAR_R1, 0);
+  addInputMapping2(byte, 3, OFFS_BAR+BAR_D2, 0);
+  addInputMapping2(byte, 2, OFFS_BAR+BAR_D1, 0);
+  addInputMapping2(byte, 1, OFFS_BAR+BAR_U1, 0);
+  addInputMapping2(byte, 0, OFFS_BAR+BAR_U2, 0);
 }
 
 static int

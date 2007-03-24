@@ -126,7 +126,7 @@ addTerminal (int identifier) {
       terminal->rows = 1;
 
       terminal->frontKeys = 0;
-      terminal->hasEasyBar = 0;
+      terminal->hasBar = 0;
       terminal->leftSwitches = 0;
       terminal->rightSwitches = 0;
       terminal->leftKeys = 0;
@@ -239,11 +239,11 @@ setFrontKeys (int count) {
 }
 
 static int
-setHasEasyBar (int ls, int rs, int lk, int rk) {
+setHasBar (int ls, int rs, int lk, int rk) {
   TerminalDefinition *terminal = getCurrentTerminal();
   if (terminal) {
-    if (terminal->hasEasyBar) {
-      yyerror("duplicate easy bar specification");
+    if (terminal->hasBar) {
+      yyerror("duplicate bar specification");
     } else if ((ls < 0) || (ls > 1)) {
       yyerror("invalid left switches count");
     } else if ((rs < 0) || (rs > 1)) {
@@ -253,7 +253,7 @@ setHasEasyBar (int ls, int rs, int lk, int rk) {
     } else if ((rk < 0) || (rk > 1)) {
       yyerror("invalid right keys count");
     } else {
-      terminal->hasEasyBar = 1;
+      terminal->hasBar = 1;
       terminal->leftSwitches = ls;
       terminal->rightSwitches = rs;
       terminal->leftKeys = lk;
@@ -361,11 +361,11 @@ addCommand (int code) {
 %start input
 
 %token NUM STRING IS AND
-%token NAME IDENT HELPFILE DISPLAYSIZE STATCELLS FRONTKEYS EASYBAR
+%token NAME IDENT HELPFILE DISPLAYSIZE STATCELLS FRONTKEYS HASBAR
 %token MODIFIER
-%token ROUTING1 ROUTING2 EASY SWITCH KEY
+%token ROUTING1 ROUTING2 BAR SWITCH KEY
 %token LEFT RIGHT REAR FRONT
-%token STAT KEYCODE STATCODE EASYCODE
+%token STAT KEYCODE STATCODE BARCODE
 %token NUMBER FLAG HORIZ
 %token ON OFF CHECK ROUTE
 %token VPK
@@ -381,10 +381,10 @@ inputline:  '\n'
        | NAME eq STRING '\n'        { setName(nameval); }
        | HELPFILE eq STRING '\n'    { setHelp(nameval); }
        | DISPLAYSIZE eq NUM '\n'           { setColumns(numval); }
-       | STATCELLS eq NUM '\n'      { setStatusCells(numval); }
-       | FRONTKEYS eq NUM '\n'      { setFrontKeys(numval); }
-       | EASYBAR '\n'               { setHasEasyBar(1, 1, 1, 1); }
-       | EASYBAR eq NUM NUM NUM NUM '\n' { setHasEasyBar($3, $4, $5, $6); }
+       | STATCELLS eq NUM '\n'          { setStatusCells(numval); }
+       | FRONTKEYS eq NUM '\n'          { setFrontKeys(numval); }
+       | HASBAR '\n'                    { setHasBar(1, 1, 1, 1); }
+       | HASBAR eq NUM NUM NUM NUM '\n' { setHasBar($3, $4, $5, $6); }
 
        | statdef eq statdisp '\n'  { setStatusCell(keyindex, numval);  }
        | MODIFIER eq anykey '\n'   { addModifier(keyindex); }
@@ -420,7 +420,7 @@ statdisp: STATCODE            {  }
 
 anykey:   STAT   NUM         { keyindex= OFFS_STAT + numval; } 
         | FRONT  NUM         { keyindex= OFFS_FRONT + numval; } 
-        | EASY   EASYCODE    { keyindex= OFFS_EASY + numval; } 
+        | BAR    BARCODE     { keyindex= OFFS_BAR + numval; } 
         | SWITCH LEFT  REAR  { keyindex= OFFS_SWITCH + SWITCH_LEFT_REAR; }
         | SWITCH LEFT  FRONT { keyindex= OFFS_SWITCH + SWITCH_LEFT_FRONT; }
         | SWITCH RIGHT REAR  { keyindex= OFFS_SWITCH + SWITCH_RIGHT_REAR; }
@@ -469,11 +469,10 @@ static struct init_v symbols[]= {
   { "displaysize", DISPLAYSIZE, 0 },
   { "statuscells", STATCELLS, 0 },
   { "frontkeys",   FRONTKEYS, 0 },
-  { "haseasybar",  EASYBAR, 0 },
-  { "easybar",     EASYBAR, 0 },
+  { "hasbar",      HASBAR,    0 },
 
   { "status",      STAT,   0 },
-  { "easy",        EASY,   0 },
+  { "bar",         BAR,    0 },
 
   { "front",       FRONT,  0 },
   { "rear",        REAR,   0 },
@@ -487,14 +486,14 @@ static struct init_v symbols[]= {
   { "flag",        FLAG,   0 },
   { "number",      NUMBER, 0 },
 
-  { "left1",       EASYCODE, EASY_L1},
-  { "left2",       EASYCODE, EASY_L2 },
-  { "up1",         EASYCODE, EASY_U1},
-  { "up2",         EASYCODE, EASY_U2 },
-  { "right1",      EASYCODE, EASY_R1},
-  { "right2",      EASYCODE, EASY_R2 },
-  { "down1",       EASYCODE, EASY_D1},
-  { "down2",       EASYCODE, EASY_D2 },
+  { "left1",       BARCODE, BAR_L1},
+  { "left2",       BARCODE, BAR_L2 },
+  { "up1",         BARCODE, BAR_U1},
+  { "up2",         BARCODE, BAR_U2 },
+  { "right1",      BARCODE, BAR_R1},
+  { "right2",      BARCODE, BAR_R2 },
+  { "down1",       BARCODE, BAR_D1},
+  { "down2",       BARCODE, BAR_D2 },
 
   { "routing1",    ROUTING1, 0 },
   { "routing2",    ROUTING2, 0 },

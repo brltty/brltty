@@ -48,7 +48,7 @@ typedef enum {
 #define OFFS_FRONT      0
 #define OFFS_STAT    1000
 #define OFFS_ROUTE   2000  
-#define OFFS_EASY    3000
+#define OFFS_BAR     3000
 #define OFFS_SWITCH  4000
 #define OFFS_CR      5000
 
@@ -64,15 +64,15 @@ typedef enum {
 #define OFFS_FLAG     2000
 #define OFFS_NUMBER   3000
 
-/* easy bar - code as delivered by the terminals */
-#define EASY_L1 1
-#define EASY_L2 2    
-#define EASY_U1 3 
-#define EASY_U2 4
-#define EASY_R1 5 
-#define EASY_R2 6  
-#define EASY_D1 7 
-#define EASY_D2 8  
+/* easy access bar - code as delivered by the terminals */
+#define BAR_L1 1
+#define BAR_L2 2    
+#define BAR_U1 3 
+#define BAR_U2 4
+#define BAR_R1 5 
+#define BAR_R2 6  
+#define BAR_D1 7 
+#define BAR_D2 8  
 
 #define SWITCH_LEFT_REAR   1
 #define SWITCH_LEFT_FRONT  2
@@ -97,7 +97,7 @@ typedef struct {
   uint8_t columns;		/* width of display */
   uint8_t rows;			/* height of display */
   uint8_t frontKeys;		/* number of front keys */
-  uint8_t hasEasyBar;		/* has an easy access bar */
+  uint8_t hasBar;		/* has an easy access bar */
   uint8_t leftSwitches;		/* number of switches on the left side */
   uint8_t rightSwitches;		/* number of switches on the right side */
   uint8_t leftKeys;		/* number of keys on the left side */
@@ -231,7 +231,7 @@ BEGIN_MODIFIERS(Front13)
   OFFS_FRONT + 13
 END_MODIFIERS
 
-BEGIN_MODIFIERS(Easy)
+BEGIN_MODIFIERS(Bar)
   OFFS_SWITCH + SWITCH_LEFT_REAR,
   OFFS_SWITCH + SWITCH_LEFT_FRONT,
   OFFS_SWITCH + SWITCH_RIGHT_REAR,
@@ -240,35 +240,35 @@ BEGIN_MODIFIERS(Easy)
   OFFS_SWITCH + KEY_LEFT_FRONT,
   OFFS_SWITCH + KEY_RIGHT_REAR,
   OFFS_SWITCH + KEY_RIGHT_FRONT,
-  OFFS_EASY   + EASY_U1,
-  OFFS_EASY   + EASY_D1,
-  OFFS_EASY   + EASY_L1,
-  OFFS_EASY   + EASY_R1,
-  OFFS_EASY   + EASY_U2,
-  OFFS_EASY   + EASY_D2,
-  OFFS_EASY   + EASY_L2,
-  OFFS_EASY   + EASY_R2
+  OFFS_BAR    + BAR_U1,
+  OFFS_BAR    + BAR_D1,
+  OFFS_BAR    + BAR_L1,
+  OFFS_BAR    + BAR_R1,
+  OFFS_BAR    + BAR_U2,
+  OFFS_BAR    + BAR_D2,
+  OFFS_BAR    + BAR_L2,
+  OFFS_BAR    + BAR_R2
 END_MODIFIERS
-#define pmModifiers_EasySim pmModifiers_Easy
+#define pmModifiers_BarSim pmModifiers_Bar
 
-#define MOD_EASY_SLC 0X0000
-#define MOD_EASY_SLR 0X0001
-#define MOD_EASY_SLF 0X0002
-#define MOD_EASY_SRC 0X0000
-#define MOD_EASY_SRR 0X0004
-#define MOD_EASY_SRF 0X0008
-#define MOD_EASY_KLR 0X0010
-#define MOD_EASY_KLF 0X0020
-#define MOD_EASY_KRR 0X0040
-#define MOD_EASY_KRF 0X0080
-#define MOD_EASY_BU1 0X0100
-#define MOD_EASY_BD1 0X0200
-#define MOD_EASY_BL1 0X0400
-#define MOD_EASY_BR1 0X0800
-#define MOD_EASY_BU2 0X1000
-#define MOD_EASY_BD2 0X2000
-#define MOD_EASY_BL2 0X4000
-#define MOD_EASY_BR2 0X8000
+#define MOD_BAR_SLC 0X0000
+#define MOD_BAR_SLR 0X0001
+#define MOD_BAR_SLF 0X0002
+#define MOD_BAR_SRC 0X0000
+#define MOD_BAR_SRR 0X0004
+#define MOD_BAR_SRF 0X0008
+#define MOD_BAR_KLR 0X0010
+#define MOD_BAR_KLF 0X0020
+#define MOD_BAR_KRR 0X0040
+#define MOD_BAR_KRF 0X0080
+#define MOD_BAR_BU1 0X0100
+#define MOD_BAR_BD1 0X0200
+#define MOD_BAR_BL1 0X0400
+#define MOD_BAR_BR1 0X0800
+#define MOD_BAR_BU2 0X1000
+#define MOD_BAR_BD2 0X2000
+#define MOD_BAR_BL2 0X4000
+#define MOD_BAR_BR2 0X8000
 
 
 #define CHGONOFF(cmd, offs, on, off) \
@@ -396,74 +396,74 @@ END_MODIFIERS
       { BRL_BLK_ROUTE                    , ROUTINGKEY1    , 0000 }
 	
 
-/* commands for easy bar + switches/keys */
-#define CMDS_EASY_COMMON(common) \
-  common(MOD_EASY_SLC|MOD_EASY_SRC), \
-  common(MOD_EASY_SLC|MOD_EASY_SRR), \
-  common(MOD_EASY_SLC|MOD_EASY_SRF), \
-  common(MOD_EASY_SLR|MOD_EASY_SRC), \
-  common(MOD_EASY_SLR|MOD_EASY_SRR), \
-  common(MOD_EASY_SLR|MOD_EASY_SRF), \
-  common(MOD_EASY_SLF|MOD_EASY_SRC), \
-  common(MOD_EASY_SLF|MOD_EASY_SRR), \
-  common(MOD_EASY_SLF|MOD_EASY_SRF)
-#define CMDS_EASY_BAR(code, mod, u1, d1, u2, d2, l1, r1, l2, r2) \
-  {(u1), (code), MOD_EASY_BU1|(mod)}, \
-  {(d1), (code), MOD_EASY_BD1|(mod)}, \
-  {(u2), (code), MOD_EASY_BU2|(mod)}, \
-  {(d2), (code), MOD_EASY_BD2|(mod)}, \
-  {(l1), (code), MOD_EASY_BL1|(mod)}, \
-  {(r1), (code), MOD_EASY_BR1|(mod)}, \
-  {(l2), (code), MOD_EASY_BL2|(mod)}, \
-  {(r2), (code), MOD_EASY_BR2|(mod)}
-#define CMDS_EASY_COMMON_ALL(mod) \
-  {BRL_CMD_BACK , NOKEY, MOD_EASY_KLR|(mod)}, \
-  {BRL_CMD_HOME , NOKEY, MOD_EASY_KLF|(mod)}, \
-  {BRL_CMD_HELP , NOKEY, MOD_EASY_KRR|(mod)}, \
-  {BRL_CMD_LEARN, NOKEY, MOD_EASY_KRF|(mod)}, \
-  CMDS_EASY_BAR(NOKEY, MOD_EASY_KLR|(mod), \
-                BRL_CMD_SIXDOTS, BRL_CMD_PASTE, BRL_CMD_CAPBLINK, BRL_CMD_CSRJMP_VERT, \
+/* commands for easy access bar + switches/keys */
+#define CMDS_BAR_COMMON(common) \
+  common(MOD_BAR_SLC|MOD_BAR_SRC), \
+  common(MOD_BAR_SLC|MOD_BAR_SRR), \
+  common(MOD_BAR_SLC|MOD_BAR_SRF), \
+  common(MOD_BAR_SLR|MOD_BAR_SRC), \
+  common(MOD_BAR_SLR|MOD_BAR_SRR), \
+  common(MOD_BAR_SLR|MOD_BAR_SRF), \
+  common(MOD_BAR_SLF|MOD_BAR_SRC), \
+  common(MOD_BAR_SLF|MOD_BAR_SRR), \
+  common(MOD_BAR_SLF|MOD_BAR_SRF)
+#define CMDS_BAR(code, mod, u1, d1, u2, d2, l1, r1, l2, r2) \
+  {(u1), (code), MOD_BAR_BU1|(mod)}, \
+  {(d1), (code), MOD_BAR_BD1|(mod)}, \
+  {(u2), (code), MOD_BAR_BU2|(mod)}, \
+  {(d2), (code), MOD_BAR_BD2|(mod)}, \
+  {(l1), (code), MOD_BAR_BL1|(mod)}, \
+  {(r1), (code), MOD_BAR_BR1|(mod)}, \
+  {(l2), (code), MOD_BAR_BL2|(mod)}, \
+  {(r2), (code), MOD_BAR_BR2|(mod)}
+#define CMDS_BAR_COMMON_ALL(mod) \
+  {BRL_CMD_BACK , NOKEY, MOD_BAR_KLR|(mod)}, \
+  {BRL_CMD_HOME , NOKEY, MOD_BAR_KLF|(mod)}, \
+  {BRL_CMD_HELP , NOKEY, MOD_BAR_KRR|(mod)}, \
+  {BRL_CMD_LEARN, NOKEY, MOD_BAR_KRF|(mod)}, \
+  CMDS_BAR(NOKEY, MOD_BAR_KLR|(mod), \
+           BRL_CMD_SIXDOTS, BRL_CMD_PASTE, BRL_CMD_CAPBLINK, BRL_CMD_CSRJMP_VERT, \
                 BRL_CMD_DISPMD, BRL_CMD_CSRTRK, BRL_CMD_ATTRVIS, BRL_CMD_CSRVIS), \
-  CMDS_EASY_BAR(NOKEY, MOD_EASY_KLF|(mod), \
-                BRL_CMD_AUTOSPEAK, BRL_CMD_AUTOREPEAT, BRL_CMD_RESTARTBRL, BRL_CMD_FREEZE, \
+  CMDS_BAR(NOKEY, MOD_BAR_KLF|(mod), \
+           BRL_CMD_AUTOSPEAK, BRL_CMD_AUTOREPEAT, BRL_CMD_RESTARTBRL, BRL_CMD_FREEZE, \
                 BRL_CMD_INFO, BRL_CMD_PREFMENU, BRL_CMD_PREFLOAD, BRL_CMD_PREFSAVE), \
-  CMDS_EASY_BAR(NOKEY, MOD_EASY_KRR|(mod), \
-                BRL_CMD_SAY_ABOVE, BRL_CMD_SAY_BELOW, BRL_CMD_SAY_LOUDER, BRL_CMD_SAY_SOFTER, \
+  CMDS_BAR(NOKEY, MOD_BAR_KRR|(mod), \
+           BRL_CMD_SAY_ABOVE, BRL_CMD_SAY_BELOW, BRL_CMD_SAY_LOUDER, BRL_CMD_SAY_SOFTER, \
                 BRL_CMD_MUTE, BRL_CMD_SAY_LINE, BRL_CMD_SAY_SLOWER, BRL_CMD_SAY_FASTER), \
-  CMDS_EASY_BAR(NOKEY, MOD_EASY_KRF|(mod), \
-                BRL_CMD_SPKHOME, BRL_CMD_TUNES, BRL_CMD_RESTARTSPEECH, BRL_CMD_SWSIM_BQ, \
+  CMDS_BAR(NOKEY, MOD_BAR_KRF|(mod), \
+           BRL_CMD_SPKHOME, BRL_CMD_TUNES, BRL_CMD_RESTARTSPEECH, BRL_CMD_SWSIM_BQ, \
                 BRL_CMD_SKPIDLNS, BRL_CMD_SKPBLNKWINS, BRL_CMD_NOOP, BRL_CMD_SLIDEWIN), \
   {BRL_BLK_ROUTE, ROUTINGKEY1, (mod)}, \
-  CMDS_EASY_BAR(ROUTINGKEY1, (mod), \
-                BRL_BLK_PRINDENT, BRL_BLK_NXINDENT, BRL_BLK_SETLEFT, BRL_BLK_DESCCHAR, \
+  CMDS_BAR(ROUTINGKEY1, (mod), \
+           BRL_BLK_PRINDENT, BRL_BLK_NXINDENT, BRL_BLK_SETLEFT, BRL_BLK_DESCCHAR, \
                 BRL_BLK_CUTAPPEND, BRL_BLK_CUTLINE, BRL_BLK_CUTBEGIN, BRL_BLK_CUTRECT), \
   {BRL_BLK_DESCCHAR, ROUTINGKEY2, (mod)}
-#define CMDS_EASY_ALL \
-  CMDS_EASY_BAR(NOKEY, MOD_EASY_SLC|MOD_EASY_SRC, \
-                BRL_CMD_LNUP, BRL_CMD_LNDN, BRL_CMD_TOP, BRL_CMD_BOT, \
+#define CMDS_BAR_ALL \
+  CMDS_BAR(NOKEY, MOD_BAR_SLC|MOD_BAR_SRC, \
+           BRL_CMD_LNUP, BRL_CMD_LNDN, BRL_CMD_TOP, BRL_CMD_BOT, \
                 BRL_CMD_FWINLT, BRL_CMD_FWINRT, BRL_CMD_LNBEG, BRL_CMD_LNEND), \
-  CMDS_EASY_BAR(NOKEY, MOD_EASY_SLR|MOD_EASY_SRC, \
-                BRL_CMD_PRDIFLN, BRL_CMD_NXDIFLN, BRL_CMD_ATTRUP, BRL_CMD_ATTRDN, \
+  CMDS_BAR(NOKEY, MOD_BAR_SLR|MOD_BAR_SRC, \
+           BRL_CMD_PRDIFLN, BRL_CMD_NXDIFLN, BRL_CMD_ATTRUP, BRL_CMD_ATTRDN, \
                 BRL_CMD_PRPROMPT, BRL_CMD_NXPROMPT, BRL_CMD_PRPGRPH, BRL_CMD_NXPGRPH), \
-  CMDS_EASY_BAR(NOKEY, MOD_EASY_SLC|MOD_EASY_SRR, \
-                BRL_BLK_PASSKEY+BRL_KEY_CURSOR_UP, BRL_BLK_PASSKEY+BRL_KEY_CURSOR_DOWN, BRL_BLK_PASSKEY+BRL_KEY_PAGE_UP, BRL_BLK_PASSKEY+BRL_KEY_PAGE_DOWN, \
+  CMDS_BAR(NOKEY, MOD_BAR_SLC|MOD_BAR_SRR, \
+           BRL_BLK_PASSKEY+BRL_KEY_CURSOR_UP, BRL_BLK_PASSKEY+BRL_KEY_CURSOR_DOWN, BRL_BLK_PASSKEY+BRL_KEY_PAGE_UP, BRL_BLK_PASSKEY+BRL_KEY_PAGE_DOWN, \
                 BRL_CMD_FWINLT|BRL_FLG_ROUTE, BRL_CMD_FWINRT|BRL_FLG_ROUTE, BRL_CMD_LNBEG|BRL_FLG_ROUTE, BRL_CMD_LNEND|BRL_FLG_ROUTE), \
-  CMDS_EASY_BAR(NOKEY, MOD_EASY_SLR|MOD_EASY_SRR, \
-                BRL_BLK_PASSKEY+BRL_KEY_CURSOR_UP, BRL_BLK_PASSKEY+BRL_KEY_CURSOR_DOWN, BRL_BLK_PASSKEY+BRL_KEY_PAGE_UP, BRL_BLK_PASSKEY+BRL_KEY_PAGE_DOWN, \
+  CMDS_BAR(NOKEY, MOD_BAR_SLR|MOD_BAR_SRR, \
+           BRL_BLK_PASSKEY+BRL_KEY_CURSOR_UP, BRL_BLK_PASSKEY+BRL_KEY_CURSOR_DOWN, BRL_BLK_PASSKEY+BRL_KEY_PAGE_UP, BRL_BLK_PASSKEY+BRL_KEY_PAGE_DOWN, \
                 BRL_BLK_PASSKEY+BRL_KEY_CURSOR_LEFT, BRL_BLK_PASSKEY+BRL_KEY_CURSOR_RIGHT, BRL_BLK_PASSKEY+BRL_KEY_HOME, BRL_BLK_PASSKEY+BRL_KEY_END), \
-  CMDS_EASY_BAR(NOKEY, MOD_EASY_SLF|MOD_EASY_SRC, \
-                BRL_CMD_PRSEARCH, BRL_CMD_NXSEARCH, BRL_CMD_HELP, BRL_CMD_LEARN, \
+  CMDS_BAR(NOKEY, MOD_BAR_SLF|MOD_BAR_SRC, \
+           BRL_CMD_PRSEARCH, BRL_CMD_NXSEARCH, BRL_CMD_HELP, BRL_CMD_LEARN, \
                 BRL_CMD_CHRLT, BRL_CMD_CHRRT, BRL_CMD_HWINLT, BRL_CMD_HWINRT), \
-  CMDS_EASY_BAR(NOKEY, MOD_EASY_SLC|MOD_EASY_SRF, \
-                BRL_CMD_MENU_PREV_ITEM, BRL_CMD_MENU_NEXT_ITEM, BRL_CMD_MENU_FIRST_ITEM, BRL_CMD_MENU_LAST_ITEM, \
+  CMDS_BAR(NOKEY, MOD_BAR_SLC|MOD_BAR_SRF, \
+           BRL_CMD_MENU_PREV_ITEM, BRL_CMD_MENU_NEXT_ITEM, BRL_CMD_MENU_FIRST_ITEM, BRL_CMD_MENU_LAST_ITEM, \
                 BRL_CMD_MENU_PREV_SETTING, BRL_CMD_MENU_NEXT_SETTING, BRL_CMD_PREFLOAD, BRL_CMD_PREFSAVE), \
-  CMDS_EASY_COMMON(CMDS_EASY_COMMON_ALL)
+  CMDS_BAR_COMMON(CMDS_BAR_COMMON_ALL)
 
-#define CMDS_EASY_COMMON_SWSIM(mod) \
-  CMDS_EASY_BAR(NOKEY, MOD_EASY_KLF|MOD_EASY_KRF|(mod), \
-                BRL_CMD_SWSIM_LC, BRL_CMD_SWSIM_RC, BRL_CMD_SWSIM_BQ, BRL_CMD_SWSIM_BC, \
+#define CMDS_BAR_COMMON_SWSIM(mod) \
+  CMDS_BAR(NOKEY, MOD_BAR_KLF|MOD_BAR_KRF|(mod), \
+           BRL_CMD_SWSIM_LC, BRL_CMD_SWSIM_RC, BRL_CMD_SWSIM_BQ, BRL_CMD_SWSIM_BC, \
                 BRL_CMD_SWSIM_LR, BRL_CMD_SWSIM_RR, BRL_CMD_SWSIM_LF, BRL_CMD_SWSIM_RF)
-#define CMDS_EASY_SWSIM CMDS_EASY_COMMON(CMDS_EASY_COMMON_SWSIM)
+#define CMDS_BAR_SWSIM CMDS_BAR_COMMON(CMDS_BAR_COMMON_SWSIM)
 
 
 /* commands for 2 status keys */
@@ -569,34 +569,34 @@ BEGIN_COMMANDS(Front13_Status22)
   CMDS_STAT_22(0X80, 0X40)
 END_COMMANDS
 
-BEGIN_COMMANDS(Easy_Status0)
-  CMDS_EASY_ALL
+BEGIN_COMMANDS(Bar_Status0)
+  CMDS_BAR_ALL
 END_COMMANDS
 
-BEGIN_COMMANDS(Easy_Status2)
-  CMDS_EASY_ALL,
+BEGIN_COMMANDS(Bar_Status2)
+  CMDS_BAR_ALL,
   CMDS_STAT_2
 END_COMMANDS
 
-BEGIN_COMMANDS(Easy_Status13)
-  CMDS_EASY_ALL,
+BEGIN_COMMANDS(Bar_Status13)
+  CMDS_BAR_ALL,
   CMDS_STAT_13(0X8000, 0X4000)
 END_COMMANDS
 
-BEGIN_COMMANDS(Easy_Status20)
-  CMDS_EASY_ALL,
+BEGIN_COMMANDS(Bar_Status20)
+  CMDS_BAR_ALL,
   CMDS_STAT_20(0X8000, 0X4000)
 END_COMMANDS
 
-BEGIN_COMMANDS(EasySim_Status0)
-  CMDS_EASY_ALL,
-  CMDS_EASY_SWSIM
+BEGIN_COMMANDS(BarSim_Status0)
+  CMDS_BAR_ALL,
+  CMDS_BAR_SWSIM
 END_COMMANDS
 
-BEGIN_COMMANDS(EasySim_Status2)
-  CMDS_EASY_ALL,
+BEGIN_COMMANDS(BarSim_Status2)
+  CMDS_BAR_ALL,
   CMDS_STAT_2,
-  CMDS_EASY_SWSIM
+  CMDS_BAR_SWSIM
 END_COMMANDS
 
 
@@ -607,7 +607,7 @@ static TerminalDefinition pmTerminalTable[] = {
     "BrailleX Compact 486",	/* name of terminal */
     40, 1, 0,			/* size of display */
     9, Front9,			/* number of front keys */
-    0, 0, 0, 0, 0		/* terminal has an easy bar */
+    0, 0, 0, 0, 0		/* terminal has an easy access bar */
   )
   ,
   PM_TERMINAL(
@@ -616,7 +616,7 @@ static TerminalDefinition pmTerminalTable[] = {
     "BrailleX 2D Lite (plus)",	/* name of terminal */
     40, 1, 13,			/* size of display */
     9, Front9,			/* number of front keys */
-    0, 0, 0, 0, 0		/* terminal has an easy bar */
+    0, 0, 0, 0, 0		/* terminal has an easy access bar */
   )
   ,
   PM_TERMINAL(
@@ -625,7 +625,7 @@ static TerminalDefinition pmTerminalTable[] = {
     "BrailleX Compact/Tiny",	/* name of terminal */
     40, 1, 0,			/* size of display */
     9, Front9,			/* number of front keys */
-    0, 0, 0, 0, 0		/* terminal has an easy bar */
+    0, 0, 0, 0, 0		/* terminal has an easy access bar */
   )
   ,
   PM_TERMINAL(
@@ -634,7 +634,7 @@ static TerminalDefinition pmTerminalTable[] = {
     "BrailleX 2D Screen Soft", /* name of terminal */
     80, 1, 22,			/* size of display */
     13, Front13,		/* number of front keys */
-    0, 0, 0, 0, 0		/* terminal has an easy bar */
+    0, 0, 0, 0, 0		/* terminal has an easy access bar */
   )
   ,
   PM_TERMINAL(
@@ -643,7 +643,7 @@ static TerminalDefinition pmTerminalTable[] = {
     "BrailleX IB 80 CR Soft",	/* name of terminal */
     80, 1, 4,			/* size of display */
     9, Front9,			/* number of front keys */
-    0, 0, 0, 0, 0		/* terminal has an easy bar */
+    0, 0, 0, 0, 0		/* terminal has an easy access bar */
   )
   ,
   PM_TERMINAL(
@@ -651,8 +651,8 @@ static TerminalDefinition pmTerminalTable[] = {
     el_2d_40,		/* filename of local helpfile */
     "BrailleX EL 2D-40",	/* name of terminal */
     40, 1, 13,			/* size of display */
-    0, Easy,			/* number of front keys */
-    1, 1, 1, 1, 1		/* terminal has an easy bar */
+    0, Bar, 			/* number of front keys */
+    1, 1, 1, 1, 1		/* terminal has an easy access bar */
   )
   ,
   PM_TERMINAL(
@@ -660,8 +660,8 @@ static TerminalDefinition pmTerminalTable[] = {
     el_2d_66,		/* filename of local helpfile */
     "BrailleX EL 2D-66",	/* name of terminal */
     66, 1, 13,			/* size of display */
-    0, Easy,			/* number of front keys */
-    1, 1, 1, 1, 1		/* terminal has an easy bar */
+    0, Bar, 			/* number of front keys */
+    1, 1, 1, 1, 1		/* terminal has an easy access bar */
   )
   ,
   PM_TERMINAL(
@@ -669,8 +669,8 @@ static TerminalDefinition pmTerminalTable[] = {
     el_80,		/* filename of local helpfile */
     "BrailleX EL 80",		/* name of terminal */
     80, 1, 2,			/* size of display */
-    0, Easy,			/* number of front keys */
-    1, 1, 1, 1, 1		/* terminal has an easy bar */
+    0, Bar, 			/* number of front keys */
+    1, 1, 1, 1, 1		/* terminal has an easy access bar */
   )
   ,
   PM_TERMINAL(
@@ -678,8 +678,8 @@ static TerminalDefinition pmTerminalTable[] = {
     el_2d_80,		/* filename of local helpfile */
     "BrailleX EL 2D-80",		/* name of terminal */
     80, 1, 20,			/* size of display */
-    0, Easy,			/* number of front keys */
-    1, 1, 1, 1, 1		/* terminal has an easy bar */
+    0, Bar, 			/* number of front keys */
+    1, 1, 1, 1, 1		/* terminal has an easy access bar */
   )
   ,
   PM_TERMINAL(
@@ -687,8 +687,8 @@ static TerminalDefinition pmTerminalTable[] = {
     el_40_p,		/* filename of local helpfile */
     "BrailleX EL 40 P",		/* name of terminal */
     40, 1, 0,			/* size of display */
-    0, Easy,			/* number of front keys */
-    1, 1, 1, 1, 0		/* terminal has an easy bar */
+    0, Bar, 			/* number of front keys */
+    1, 1, 1, 1, 0		/* terminal has an easy access bar */
   )
   ,
   PM_TERMINAL(
@@ -696,8 +696,8 @@ static TerminalDefinition pmTerminalTable[] = {
     elba_32,		/* filename of local helpfile */
     "BrailleX Elba 32",		/* name of terminal */
     32, 1, 0,			/* size of display */
-    0, Easy,			/* number of front keys */
-    1, 1, 1, 1, 1		/* terminal has an easy bar */
+    0, Bar, 			/* number of front keys */
+    1, 1, 1, 1, 1		/* terminal has an easy access bar */
   )
   ,
   PM_TERMINAL(
@@ -705,8 +705,8 @@ static TerminalDefinition pmTerminalTable[] = {
     elba_20,		/* filename of local helpfile */
     "BrailleX Elba 20",		/* name of terminal */
     20, 1, 0,			/* size of display */
-    0, Easy,			/* number of front keys */
-    1, 1, 1, 1, 1		/* terminal has an easy bar */
+    0, Bar, 			/* number of front keys */
+    1, 1, 1, 1, 1		/* terminal has an easy access bar */
   )
   ,
   PM_TERMINAL(
@@ -714,8 +714,8 @@ static TerminalDefinition pmTerminalTable[] = {
     el_40s,		/* filename of local helpfile */
     "BrailleX EL 40s",		/* name of terminal */
     40, 1, 0,			/* size of display */
-    0, EasySim,			/* number of front keys */
-    1, 0, 0, 1, 1		/* terminal has an easy bar */
+    0, BarSim, 			/* number of front keys */
+    1, 0, 0, 1, 1		/* terminal has an easy access bar */
   )
   ,
   PM_TERMINAL(
@@ -723,8 +723,8 @@ static TerminalDefinition pmTerminalTable[] = {
     el_80_ii,		/* filename of local helpfile */
     "BrailleX EL 80 II",		/* name of terminal */
     80, 1, 2,			/* size of display */
-    0, EasySim,			/* number of front keys */
-    1, 0, 0, 1, 1		/* terminal has an easy bar */
+    0, BarSim, 			/* number of front keys */
+    1, 0, 0, 1, 1		/* terminal has an easy access bar */
   )
   ,
   PM_TERMINAL(
@@ -732,8 +732,8 @@ static TerminalDefinition pmTerminalTable[] = {
     el_66s,		/* filename of local helpfile */
     "BrailleX EL 66s",		/* name of terminal */
     66, 1, 0,			/* size of display */
-    0, EasySim,			/* number of front keys */
-    1, 0, 0, 1, 1		/* terminal has an easy bar */
+    0, BarSim, 			/* number of front keys */
+    1, 0, 0, 1, 1		/* terminal has an easy access bar */
   )
   ,
   PM_TERMINAL(
@@ -741,8 +741,8 @@ static TerminalDefinition pmTerminalTable[] = {
     el_80s,		/* filename of local helpfile */
     "BrailleX EL 80s",		/* name of terminal */
     80, 1, 0,			/* size of display */
-    0, EasySim,			/* number of front keys */
-    1, 0, 0, 1, 1		/* terminal has an easy bar */
+    0, BarSim, 			/* number of front keys */
+    1, 0, 0, 1, 1		/* terminal has an easy access bar */
   )
 };
 
