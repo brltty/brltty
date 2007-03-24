@@ -219,12 +219,12 @@ typedef struct {
  * \e BrlAPI might not be on this TCP port, the host name might not be
  * resolvable, the authorization may fail,...
  *
- * \param clientSettings this gives the connection parameters, as described
+ * \param desiredSettings this gives the desired connection parameters, as described
  * in brlapi_connectionSettings_t. If \c NULL, defaults values are used, so that it is
  * generally a good idea to give \c NULL as default, and only fill a
  * brlapi_connectionSettings_t structure when the user gave parameters to the program
  * for instance;
- * \param usedSettings if not \c NULL, parameters which were actually used are
+ * \param actualSettings if not \c NULL, parameters which were actually used are
  * stored here, if the application ever needs them.
  *
  * \sa
@@ -235,9 +235,9 @@ typedef struct {
  * brlapi_readPacket()
  */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-brlapi_fileDescriptor brlapi_openConnection(const brlapi_connectionSettings_t *clientSettings, brlapi_connectionSettings_t *usedSettings);
+brlapi_fileDescriptor brlapi_openConnection(const brlapi_connectionSettings_t *desiredSettings, brlapi_connectionSettings_t *actualSettings);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
-brlapi_fileDescriptor brlapi__openConnection(brlapi_handle_t *handle, const brlapi_connectionSettings_t *clientSettings, brlapi_connectionSettings_t *usedSettings);
+brlapi_fileDescriptor brlapi__openConnection(brlapi_handle_t *handle, const brlapi_connectionSettings_t *desiredSettings, brlapi_connectionSettings_t *actualSettings);
 
 /* brlapi_closeConnection */
 /** Cleanly close the socket
@@ -270,16 +270,16 @@ void brlapi__closeConnection(brlapi_handle_t *handle);
  * This function will fill its argument with the \e brltty 2-chars code of
  * the driver currently in use, to which it adds a '\\0'.
  *
- * \param id is the buffer given by the application;
- * \param n is the maximum size of the id buffer.
+ * \param buffer is the buffer given by the application;
+ * \param size is the maximum size of the id buffer.
  *
  * \return -1 on error, or a positive value giving the size of the needed
  * buffer, if the supplied one is to small (same as snprintf()).
 */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-int brlapi_getDriverId(char *id, size_t n);
+int brlapi_getDriverId(char *buffer, size_t size);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
-int brlapi__getDriverId(brlapi_handle_t *handle, char *id, size_t n);
+int brlapi__getDriverId(brlapi_handle_t *handle, char *buffer, size_t size);
 
 /* brlapi_getDriverName */
 /** Return the complete name of the driver used by \e brltty
@@ -287,16 +287,16 @@ int brlapi__getDriverId(brlapi_handle_t *handle, char *id, size_t n);
  * This function fills its argument with the whole name of the braille
  * terminal if available, terminated with a '\\0'.
  *
- * \param name is the buffer given by the application;
- * \param n is the maximum size for the name buffer.
+ * \param buffer is the buffer given by the application;
+ * \param size is the maximum size for the name buffer.
  *
  * \return -1 on error, or a positive value giving the size of the needed
  * buffer, if the supplied one is to small (same as snprintf()).
 */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-int brlapi_getDriverName(char *name, size_t n);
+int brlapi_getDriverName(char *buffer, size_t size);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
-int brlapi__getDriverName(brlapi_handle_t *handle, char *name, size_t n);
+int brlapi__getDriverName(brlapi_handle_t *handle, char *buffer, size_t size);
 
 /* brlapi_getDisplaySize */
 /** Return the size of the braille display */
@@ -335,7 +335,7 @@ int brlapi__getDisplaySize(brlapi_handle_t *handle, unsigned int *x, unsigned in
  * - If tty>=0 then take control of the specified tty.
  * - If tty==::BRLAPI_TTY_DEFAULT then take control of the default tty.
  *
- * \param driverName tells how the application wants brlapi_readKey() to return
+ * \param driver tells how the application wants brlapi_readKey() to return
  * key presses. NULL or "" means BRLTTY commands are required,
  * whereas a driver name means that raw key codes returned by this
  * driver are expected.
@@ -356,9 +356,9 @@ int brlapi__getDisplaySize(brlapi_handle_t *handle, unsigned int *x, unsigned in
  * \sa brlapi_leaveTtyMode() brlapi_readKey()
  */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-int brlapi_enterTtyMode(int tty, const char *driverName);
+int brlapi_enterTtyMode(int tty, const char *driver);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
-int brlapi__enterTtyMode(brlapi_handle_t *handle, int tty, const char *driverName);
+int brlapi__enterTtyMode(brlapi_handle_t *handle, int tty, const char *driver);
 
 /** Select the default tty.
  *
@@ -376,17 +376,17 @@ int brlapi__enterTtyMode(brlapi_handle_t *handle, int tty, const char *driverNam
  *
  * \param ttys points on the array of ttys representing the tty path to be got.
  * Can be NULL if nttys is 0.
- * \param nttys gives the number of elements in ttys.
- * \param driverName has the same meaning as in brlapi_enterTtyMode()
+ * \param count gives the number of elements in ttys.
+ * \param driver has the same meaning as in brlapi_enterTtyMode()
  *
  * Providing nttys == 0 means to get the root.
  *
  * \sa brlapi_enterTtyMode()
  */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-int brlapi_enterTtyModeWithPath(int *ttys, int nttys, const char *driverName);
+int brlapi_enterTtyModeWithPath(int *ttys, int count, const char *driver);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
-int brlapi__enterTtyModeWithPath(brlapi_handle_t *handle, int *ttys, int nttys, const char *how);
+int brlapi__enterTtyModeWithPath(brlapi_handle_t *handle, int *ttys, int count, const char *driver);
 
 /* brlapi_leaveTtyMode */
 /** Stop controlling the tty
@@ -446,14 +446,14 @@ int brlapi__setFocus(brlapi_handle_t *handle, int tty);
  * \param cursor gives the cursor position; if equal to ::BRLAPI_CURSOR_OFF, no cursor is shown at
  * all; if cursor==::BRLAPI_CURSOR_LEAVE, the cursor is left where it is
  *
- * \param str points to the string to be displayed.
+ * \param text points to the string to be displayed.
  *
  * \return 0 on success, -1 on error.
  */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-int brlapi_writeText(int cursor, const char *str);
+int brlapi_writeText(int cursor, const char *text);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
-int brlapi__writeText(brlapi_handle_t *handle, int cursor, const char *str);
+int brlapi__writeText(brlapi_handle_t *handle, int cursor, const char *text);
 
 /* brlapi_writeDots */
 /** Write the given dots array to the display
@@ -593,12 +593,12 @@ typedef struct {
 /* brlapi_expandKeyCode */
 /** Expand the components of a key code
  *
- * \param keyCode the key code to be expanded
- * \param ekc pointer to the structure that receives the components
+ * \param code the key code to be expanded
+ * \param expansion pointer to the structure that receives the components
  *
  * \return 0 on success, -1 on error
  */
-int brlapi_expandKeyCode (brlapi_keyCode_t keyCode, brlapi_expandedKeyCode_t *ekc);
+int brlapi_expandKeyCode (brlapi_keyCode_t code, brlapi_expandedKeyCode_t *expansion);
 
 /* brlapi_describedKeyCode_t */
 /** Structure holding the components of a key code as returned by brlapi_describeKeyCode() */
@@ -614,12 +614,12 @@ typedef struct {
 /* brlapi_describeKeyCode */
 /** Describe the components of a key code.
  *
- * \param keyCode the keycode to be described
- * \param dkc pointer to the structure that receives the description
+ * \param code the keycode to be described
+ * \param description pointer to the structure that receives the description
  *
  * \return 0 on success, -1 on error
  */
-int brlapi_describeKeyCode (brlapi_keyCode_t keyCode, brlapi_describedKeyCode_t *dkc);
+int brlapi_describeKeyCode (brlapi_keyCode_t code, brlapi_describedKeyCode_t *description);
 
 /** Unicode braille row */
 #define BRLAPI_UC_ROW	0x2800UL
@@ -657,7 +657,7 @@ int brlapi_describeKeyCode (brlapi_keyCode_t keyCode, brlapi_describedKeyCode_t 
  * through brltty, so the application will have to handle console switching
  * itself for instance.
  *
- * \param block tells whether the call should block until a key is pressed (1)
+ * \param wait tells whether the call should block until a key is pressed (1)
  *  or should only probe key presses (0);
  * \param code holds the key code if a key press is indeed read.
  *
@@ -665,9 +665,9 @@ int brlapi_describeKeyCode (brlapi_keyCode_t keyCode, brlapi_describedKeyCode_t 
  * block was 0 and no key was pressed so far, or 1 and *code holds the key code.
  */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-int brlapi_readKey(int block, brlapi_keyCode_t *code);
+int brlapi_readKey(int wait, brlapi_keyCode_t *code);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
-int brlapi__readKey(brlapi_handle_t *handle, int block, brlapi_keyCode_t *code);
+int brlapi__readKey(brlapi_handle_t *handle, int wait, brlapi_keyCode_t *code);
 
 /** types of key ranges */
 typedef enum {
@@ -684,16 +684,17 @@ typedef enum {
  * This function asks the server to give the provided keys to \e brltty, rather
  * than returning them to the application via brlapi_readKey().
  *
- * \param r type of keys to be ignored
+ * \param type type of keys to be ignored
  * \param keys array of keys to be ignored
- * \param n number of keys
+ * \param count number of keys
  *
  * \note The given codes should be \e brltty commands (NULL or "" was given to
- brlapi_enterTtyMode()) */
+ * brlapi_enterTtyMode())
+ */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-int brlapi_ignoreKeys(brlapi_rangeType_t r, const brlapi_keyCode_t keys[], unsigned int n);
+int brlapi_ignoreKeys(brlapi_rangeType_t type, const brlapi_keyCode_t keys[], unsigned int count);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
-int brlapi__ignoreKeys(brlapi_handle_t *handle, brlapi_rangeType_t r, const brlapi_keyCode_t keys[], unsigned int n);
+int brlapi__ignoreKeys(brlapi_handle_t *handle, brlapi_rangeType_t type, const brlapi_keyCode_t keys[], unsigned int count);
 
 /* brlapi_acceptKeys */
 /** Accept some key presses from the braille keyboard
@@ -701,16 +702,17 @@ int brlapi__ignoreKeys(brlapi_handle_t *handle, brlapi_rangeType_t r, const brla
  * This function asks the server to give the provided keys to the application,
  * and not give them to \e brltty.
  *
- * \param r type of keys to be ignored
+ * \param type type of keys to be ignored
  * \param keys array of keys to be ignored
- * \param n number of keys
+ * \param count number of keys
  *
  * \note The given codes should be \e brltty commands (NULL or "" was given to
- brlapi_enterTtyMode()) */
+ * brlapi_enterTtyMode())
+ */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-int brlapi_acceptKeys(brlapi_rangeType_t r, const brlapi_keyCode_t keys[], unsigned int n);
+int brlapi_acceptKeys(brlapi_rangeType_t type, const brlapi_keyCode_t keys[], unsigned int count);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
-int brlapi__acceptKeys(brlapi_handle_t *handle, brlapi_rangeType_t r, const brlapi_keyCode_t keys[], unsigned int n);
+int brlapi__acceptKeys(brlapi_handle_t *handle, brlapi_rangeType_t type, const brlapi_keyCode_t keys[], unsigned int count);
 
 /* brlapi_ignoreAllKeys */
 /** Ignore all key presses from the braille keyboard
@@ -757,14 +759,14 @@ typedef struct {
  * rather than returning them to the application via brlapi_readKey().
  *
  * \param ranges key ranges, which are inclusive
- * \param n number of ranges
+ * \param count number of ranges
  *
  * \note The given codes should be raw keycodes (i.e. some driver name was given
  * to brlapi_enterTtyMode()) */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-int brlapi_ignoreKeyRanges(brlapi_range_t ranges[], unsigned int n);
+int brlapi_ignoreKeyRanges(brlapi_range_t ranges[], unsigned int count);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
-int brlapi__ignoreKeyRanges(brlapi_handle_t *handle, brlapi_range_t ranges[], unsigned int n);
+int brlapi__ignoreKeyRanges(brlapi_handle_t *handle, brlapi_range_t ranges[], unsigned int count);
 
 /* brlapi_acceptKeyRanges */
 /** Accept some key presses from the braille keyboard
@@ -773,14 +775,14 @@ int brlapi__ignoreKeyRanges(brlapi_handle_t *handle, brlapi_range_t ranges[], un
  * to the application, and not give them to \e brltty.
  *
  * \param ranges key ranges, which are inclusive
- * \param n number of ranges
+ * \param count number of ranges
  *
  * \note The given codes should be raw keycodes (i.e. some driver name was given
  * to brlapi_enterTtyMode()) */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-int brlapi_acceptKeyRanges(brlapi_range_t ranges[], unsigned int n);
+int brlapi_acceptKeyRanges(brlapi_range_t ranges[], unsigned int count);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
-int brlapi__acceptKeyRanges(brlapi_handle_t *handle, brlapi_range_t ranges[], unsigned int n);
+int brlapi__acceptKeyRanges(brlapi_handle_t *handle, brlapi_range_t ranges[], unsigned int count);
 /** @} */
 
 /** \defgroup brlapi_driverspecific Driver-Specific modes
@@ -808,11 +810,11 @@ int brlapi__acceptKeyRanges(brlapi_handle_t *handle, brlapi_range_t ranges[], un
 
 /* brlapi_enterRawMode */
 /** Switch to Raw mode
- * \param driverName Specifies the name of the driver for which the raw
+ * \param driver Specifies the name of the driver for which the raw
  * communication will be established.
  * \return 0 on success, -1 on error */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-int brlapi_enterRawMode(const char *driverName);
+int brlapi_enterRawMode(const char *driver);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
 int brlapi__enterRawMode(brlapi_handle_t *handle, const char *driver);
 
@@ -827,25 +829,25 @@ int brlapi__leaveRawMode(brlapi_handle_t *handle);
 /* brlapi_sendRaw */
 /** Send Raw data
  *
- * \param buf points on the data;
+ * \param buffer points on the data;
  * \param size holds the packet size.
  * \return size on success, -1 on error */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-ssize_t brlapi_sendRaw(const void *buf, size_t size);
+ssize_t brlapi_sendRaw(const void *buffer, size_t size);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
-ssize_t brlapi__sendRaw(brlapi_handle_t *handle, const void *buf, size_t size);
+ssize_t brlapi__sendRaw(brlapi_handle_t *handle, const void *buffer, size_t size);
 
 /* brlapi_recvRaw */
 /** Get Raw data
  *
- * \param buf points on a buffer where the function will store the received
+ * \param buffer points on a buffer where the function will store the received
  * data;
  * \param size holds the buffer size.
  * \return its size, -1 on error or signal interruption */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-ssize_t brlapi_recvRaw(void *buf, size_t size);
+ssize_t brlapi_recvRaw(void *buffer, size_t size);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
-ssize_t brlapi__recvRaw(brlapi_handle_t *handle, void *buf, size_t size);
+ssize_t brlapi__recvRaw(brlapi_handle_t *handle, void *buffer, size_t size);
 
 /* brlapi_suspendDriver */
 /** Suspend braille driver
@@ -994,15 +996,15 @@ const char *brlapi_packetType(brlapi_type_t ptype);
  * brlapi_setExceptionHandler() and brlapi__setExceptionHandler().
  *
  * \param handle is the handle corresponding to the guilty connection;
- * \param err is a BRLERR_ error code;
+ * \param error is a BRLERR_ error code;
  * \param type is the type of the guilty packet;
- * \param buf points to the content of the guilty packet (might be a little bit truncated);
+ * \param data points to the content of the guilty packet (might be a little bit truncated);
  * \param size gives the guilty packet's size.
  */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-typedef void (*brlapi_exceptionHandler_t)(int err, brlapi_type_t type, const void *buf, size_t size);
+typedef void (*brlapi_exceptionHandler_t)(int error, brlapi_type_t type, const void *data, size_t size);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
-typedef void (*brlapi__exceptionHandler_t)(brlapi_handle_t *handle, int err, brlapi_type_t type, const void *buf, size_t size);
+typedef void (*brlapi__exceptionHandler_t)(brlapi_handle_t *handle, int error, brlapi_type_t type, const void *data, size_t size);
 
 /* brlapi_strexception */
 /** Describes an exception
