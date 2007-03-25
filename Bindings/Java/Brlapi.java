@@ -63,22 +63,22 @@ public class Brlapi extends BrlapiNative implements BrlapiConstants {
     writeText(cursor, null);
   }
 
-  public void writeText (String str) throws BrlapiError {
-    writeText(CURSOR_OFF, str);
+  public void writeText (String text) throws BrlapiError {
+    writeText(CURSOR_OFF, text);
   }
 
-  public void writeText (String str, int cursor) throws BrlapiError {
-    writeText(cursor, str);
+  public void writeText (String text, int cursor) throws BrlapiError {
+    writeText(cursor, text);
   }
 
-  public void writeText (int cursor, String str) throws BrlapiError {
-    if (str != null) {
+  public void writeText (int cursor, String text) throws BrlapiError {
+    if (text != null) {
       BrlapiSize size = getDisplaySize();
       int count = size.width * size.height;
-      int pad = count - str.length();
-      while (pad-- > 0) str += " ";
-      str = str.substring(0, count);
-    } 
-    writeTextNative(cursor, str);
+      int pad = count - text.length();
+      while (pad-- > 0) text += " ";
+      text = text.substring(0, count);
+    }
+    writeTextNative(cursor, text);
   }
 }

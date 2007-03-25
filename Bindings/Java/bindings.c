@@ -719,12 +719,12 @@ JNIEXPORT jint JNICALL Java_BrlapiNative_recvRaw(JNIEnv *jenv, jobject jobj, jby
   return (jint) result;
 }
 
-JNIEXPORT jstring JNICALL Java_BrlapiNative_packetType(JNIEnv *jenv, jclass jcls, jlong jtype) {
+JNIEXPORT jstring JNICALL Java_BrlapiNative_getPacketTypeName(JNIEnv *jenv, jclass jcls, jlong jtype) {
   const char *type;
 
   env = jenv;
 
-  if (!(type = brlapi_packetType((brlapi_type_t) jtype))) {
+  if (!(type = brlapi_getPacketTypeName((brlapi_type_t) jtype))) {
     ThrowError(jenv, __func__);
     return NULL;
   }
