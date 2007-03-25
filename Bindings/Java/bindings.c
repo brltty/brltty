@@ -86,7 +86,7 @@ static void ThrowError(JNIEnv *jenv, const char *msg) {
   }
 }
 
-static void exceptionHandler(brlapi_handle_t *handle, int err, brlapi_type_t type, const void *buf, size_t size) {
+static void exceptionHandler(brlapi_handle_t *handle, int err, brlapi_packetType_t type, const void *buf, size_t size) {
   jarray jbuf;
   jclass jcexcep;
   jmethodID jinit;
@@ -724,7 +724,7 @@ JNIEXPORT jstring JNICALL Java_BrlapiNative_getPacketTypeName(JNIEnv *jenv, jcla
 
   env = jenv;
 
-  if (!(type = brlapi_getPacketTypeName((brlapi_type_t) jtype))) {
+  if (!(type = brlapi_getPacketTypeName((brlapi_packetType_t) jtype))) {
     ThrowError(jenv, __func__);
     return NULL;
   }
