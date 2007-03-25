@@ -981,13 +981,13 @@ const char *brlapi_strerror(const brlapi_error_t *error);
 /** Type for packet type. Only unsigned can cross networks, 32bits */
 typedef uint32_t brlapi_type_t;
 
-/* brlapi_packetType */
+/* brlapi_getPacketTypeName */
 /** Get plain packet type
  *
- * brlapi_packetType() returns the plain packet type name corresponding to
+ * brlapi_getPacketTypeName() returns the plain packet type name corresponding to
  * its argument.
  */
-const char *brlapi_packetType(brlapi_type_t ptype);
+const char *brlapi_getPacketTypeName(brlapi_type_t type);
 
 /* brlapi_exceptionHandler_t */
 /** Types for exception handlers

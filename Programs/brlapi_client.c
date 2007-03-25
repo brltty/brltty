@@ -297,7 +297,7 @@ static ssize_t brlapi__doWaitForPacket(brlapi_handle_t *handle, brlapi_type_t ex
     return -3;
   }
 
-  syslog(LOG_ERR,"(brlapi_waitForPacket) Received unexpected packet of type %s and size %ld\n",brlapi_packetType(type),(long)res);
+  syslog(LOG_ERR,"(brlapi_waitForPacket) Received unexpected packet of type %s and size %ld\n",brlapi_getPacketTypeName(type),(long)res);
   return -3;
 }
 
@@ -1932,7 +1932,7 @@ int brlapi__strexception(brlapi_handle_t *handle, char *buf, size_t n, int err, 
   p--; /* Don't keep last space */
   *p = '\0';
   return snprintf(buf, n, "%s on %s request of size %d (%s)",
-    brlapi_strerror(&error), brlapi_packetType(type), (int)size, hexString);
+    brlapi_strerror(&error), brlapi_getPacketTypeName(type), (int)size, hexString);
 }
 
 int brlapi_strexception(char *buf, size_t n, int err, brlapi_type_t type, const void *packet, size_t size)

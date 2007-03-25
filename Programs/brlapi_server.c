@@ -752,7 +752,7 @@ static inline void freeTty(Tty *tty)
 /* Logs the given request */
 static inline void LogPrintRequest(int type, FileDescriptor fd)
 {
-  LogPrint(LOG_DEBUG, "Received %s request on fd %"PRIFD, brlapiserver_packetType(type), fd);  
+  LogPrint(LOG_DEBUG, "Received %s request on fd %"PRIFD, brlapiserver_getPacketTypeName(type), fd);  
 }
 
 static int handleGetDriver(Connection *c, brlapi_type_t type, size_t size, const char *str)
@@ -1346,7 +1346,7 @@ static int processRequest(Connection *c, PacketHandlers *handlers)
   if (c->auth!=1) return handleUnauthorizedConnection(c, type, packet, size);
 
   if (size>BRLAPI_MAXPACKETSIZE) {
-    LogPrint(LOG_WARNING, "Discarding too large packet of type %s on fd %"PRIFD,brlapiserver_packetType(type), c->fd);
+    LogPrint(LOG_WARNING, "Discarding too large packet of type %s on fd %"PRIFD,brlapiserver_getPacketTypeName(type), c->fd);
     return 0;    
   }
   switch (type) {

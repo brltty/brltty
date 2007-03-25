@@ -341,7 +341,7 @@ static brlapi_packetType_t brlapi_packetTypes[] = {
   { 0, NULL }
 };
 
-const char *BRLAPI(packetType)(brlapi_type_t ptype)
+const char *BRLAPI(getPacketTypeName)(brlapi_type_t ptype)
 {
   brlapi_packetType_t *p;
   for (p = brlapi_packetTypes; p->type; p++)
