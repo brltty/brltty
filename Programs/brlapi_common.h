@@ -149,7 +149,7 @@ static ssize_t brlapi_readFile(brlapi_fileDescriptor fd, void *buffer, size_t si
 
 /* brlapi_writePacket */
 /* Write a packet on the socket */
-ssize_t BRLAPI(writePacket)(brlapi_fileDescriptor fd, brlapi_type_t type, const void *buf, size_t size)
+ssize_t BRLAPI(writePacket)(brlapi_fileDescriptor fd, brlapi_packetType_t type, const void *buf, size_t size)
 {
   uint32_t header[2] = { htonl(size), htonl(type) };
   ssize_t res;
@@ -172,7 +172,7 @@ ssize_t BRLAPI(writePacket)(brlapi_fileDescriptor fd, brlapi_type_t type, const 
 
 /* brlapi_readPacketHeader */
 /* Read a packet's header and return packet's size */
-ssize_t BRLAPI(readPacketHeader)(brlapi_fileDescriptor fd, brlapi_type_t *packetType)
+ssize_t BRLAPI(readPacketHeader)(brlapi_fileDescriptor fd, brlapi_packetType_t *packetType)
 {
   uint32_t header[2];
   ssize_t res;
@@ -217,7 +217,7 @@ out:
 /* If the packet is larger than the supplied buffer, then */
 /* the packet is truncated to buffer's size, like in the recv system call */
 /* with option MSG_TRUNC (rest of the pcket is read but discarded) */
-ssize_t BRLAPI(readPacket)(brlapi_fileDescriptor fd, brlapi_type_t *packetType, void *buf, size_t size)
+ssize_t BRLAPI(readPacket)(brlapi_fileDescriptor fd, brlapi_packetType_t *packetType, void *buf, size_t size)
 {
   ssize_t res = BRLAPI(readPacketHeader)(fd, packetType);
   if (res<0) return res; /* reports EINTR too */
@@ -315,11 +315,11 @@ static int BRLAPI(expandHost)(const char *hostAndPort, char **host, char **port)
 }
 
 typedef struct {
-  brlapi_type_t type;
+  brlapi_packetType_t type;
   const char *name;
-} brlapi_packetType_t;
+} brlapi_packetTypeEntry_t;
 
-static brlapi_packetType_t brlapi_packetTypes[] = {
+static const brlapi_packetTypeEntry_t brlapi_packetTypeTable[] = {
   { BRLAPI_PACKET_AUTH, "Auth" },
   { BRLAPI_PACKET_GETDRIVERID, "GetDriverId" },
   { BRLAPI_PACKET_GETDRIVERNAME, "GetDriverName" },
@@ -341,10 +341,10 @@ static brlapi_packetType_t brlapi_packetTypes[] = {
   { 0, NULL }
 };
 
-const char *BRLAPI(getPacketTypeName)(brlapi_type_t ptype)
+const char *BRLAPI(getPacketTypeName)(brlapi_packetType_t type)
 {
-  brlapi_packetType_t *p;
-  for (p = brlapi_packetTypes; p->type; p++)
-    if (ptype==p->type) return p->name;
+  const brlapi_packetTypeEntry_t *p;
+  for (p = brlapi_packetTypeTable; p->type; p++)
+    if (type==p->type) return p->name;
   return "Unknown";
 }

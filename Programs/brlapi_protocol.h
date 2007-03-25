@@ -86,7 +86,7 @@ extern "C" {
 /** Structure of packets headers */
 typedef struct {
   uint32_t size;
-  brlapi_type_t type;
+  brlapi_packetType_t type;
 } brlapi_header_t;
 
 /** Size of packet headers */
@@ -114,7 +114,7 @@ typedef struct {
 /** Structure of error packets */
 typedef struct {
   uint32_t code;
-  brlapi_type_t type;
+  brlapi_packetType_t type;
   unsigned char packet;
 } brlapi_errorPacket_t;
 
@@ -169,7 +169,7 @@ typedef union {
  * brlapi_readPacketContent()
  * brlapi_readPacket()
  */
-ssize_t brlapi_writePacket(brlapi_fileDescriptor fd, brlapi_type_t type, const void *buf, size_t size);
+ssize_t brlapi_writePacket(brlapi_fileDescriptor fd, brlapi_packetType_t type, const void *buf, size_t size);
 
 /* brlapi_readPacketHeader */
 /** Read the header (type+size) of a packet from \e BrlAPI server
@@ -188,7 +188,7 @@ ssize_t brlapi_writePacket(brlapi_fileDescriptor fd, brlapi_type_t type, const v
  * brlapi_readPacketContent
  * brlapi_readPacket
  */
-ssize_t brlapi_readPacketHeader(brlapi_fileDescriptor fd, brlapi_type_t *packetType);
+ssize_t brlapi_readPacketHeader(brlapi_fileDescriptor fd, brlapi_packetType_t *packetType);
 
 /* brlapi_readPacketContent */
 /** Read the content of a packet from \e BrlAPI server
@@ -235,7 +235,7 @@ ssize_t brlapi_readPacketContent(brlapi_fileDescriptor fd, size_t packetSize, vo
  *
  * \sa brlapi_writePacket()
  */
-ssize_t brlapi_readPacket(brlapi_fileDescriptor fd, brlapi_type_t *type, void *buf, size_t size);
+ssize_t brlapi_readPacket(brlapi_fileDescriptor fd, brlapi_packetType_t *type, void *buf, size_t size);
 
 /* brlapi_fd_mutex */
 /** Mutex for protecting concurrent fd access

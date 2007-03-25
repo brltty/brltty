@@ -525,7 +525,7 @@ typedef struct {
 /* brlapi_write */
 /** Update a specific region of the braille display and apply and/or masks
  *
- * \param s gives information necessary for the update
+ * \param arguments gives information necessary for the update
  *
  * regionBegin and regionSize must be filled for specifying which part of the
  * display will be updated, as well as the size (in characters, not bytes) of
@@ -560,9 +560,9 @@ typedef struct {
  * \return 0 on success, -1 on error.
  */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-int brlapi_write(const brlapi_writeStruct_t *s);
+int brlapi_write(const brlapi_writeStruct_t *arguments);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
-int brlapi__write(brlapi_handle_t *handle, const brlapi_writeStruct_t *s);
+int brlapi__write(brlapi_handle_t *handle, const brlapi_writeStruct_t *arguments);
 
 /** @} */
 
@@ -979,7 +979,7 @@ extern const char *brlapi_errfun;
 const char *brlapi_strerror(const brlapi_error_t *error);
 
 /** Type for packet type. Only unsigned can cross networks, 32bits */
-typedef uint32_t brlapi_type_t;
+typedef uint32_t brlapi_packetType_t;
 
 /* brlapi_getPacketTypeName */
 /** Get plain packet type
@@ -987,7 +987,7 @@ typedef uint32_t brlapi_type_t;
  * brlapi_getPacketTypeName() returns the plain packet type name corresponding to
  * its argument.
  */
-const char *brlapi_getPacketTypeName(brlapi_type_t type);
+const char *brlapi_getPacketTypeName(brlapi_packetType_t type);
 
 /* brlapi_exceptionHandler_t */
 /** Types for exception handlers
@@ -998,18 +998,18 @@ const char *brlapi_getPacketTypeName(brlapi_type_t type);
  * \param handle is the handle corresponding to the guilty connection;
  * \param error is a BRLERR_ error code;
  * \param type is the type of the guilty packet;
- * \param data points to the content of the guilty packet (might be a little bit truncated);
+ * \param packet points to the content of the guilty packet (might be a little bit truncated);
  * \param size gives the guilty packet's size.
  */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-typedef void (*brlapi_exceptionHandler_t)(int error, brlapi_type_t type, const void *data, size_t size);
+typedef void (*brlapi_exceptionHandler_t)(int error, brlapi_packetType_t type, const void *packet, size_t size);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
-typedef void (*brlapi__exceptionHandler_t)(brlapi_handle_t *handle, int error, brlapi_type_t type, const void *data, size_t size);
+typedef void (*brlapi__exceptionHandler_t)(brlapi_handle_t *handle, int error, brlapi_packetType_t type, const void *packet, size_t size);
 
 /* brlapi_strexception */
 /** Describes an exception
  *
- * brlapi_strexception() puts a text describing the given exception in buf.
+ * brlapi_strexception() puts a text describing the given exception in buffer.
  *
  * The beginning of the guilty packet is dumped as a sequence of hex bytes.
  *
@@ -1017,9 +1017,9 @@ typedef void (*brlapi__exceptionHandler_t)(brlapi_handle_t *handle, int error, b
  * snprintf()'s semantics.
 */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-int brlapi_strexception(char *buf, size_t n, int err, brlapi_type_t type, const void *packet, size_t size);
+int brlapi_strexception(char *buffer, size_t bufferSize, int error, brlapi_packetType_t type, const void *packet, size_t packetSize);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
-int brlapi__strexception(brlapi_handle_t *handle, char *buf, size_t n, int err, brlapi_type_t type, const void *packet, size_t size);
+int brlapi__strexception(brlapi_handle_t *handle, char *buffer, size_t bufferSize, int error, brlapi_packetType_t type, const void *packet, size_t packetSize);
 
 /* brlapi_setExceptionHandler */
 /** Set a new exception handler
@@ -1036,9 +1036,9 @@ brlapi_exceptionHandler_t brlapi_setExceptionHandler(brlapi_exceptionHandler_t h
 brlapi__exceptionHandler_t brlapi__setExceptionHandler(brlapi_handle_t *handle, brlapi__exceptionHandler_t handler);
 
 #ifndef BRLAPI_NO_SINGLE_SESSION
-void brlapi_defaultExceptionHandler(int err, brlapi_type_t type, const void *buf, size_t size);
+void brlapi_defaultExceptionHandler(int error, brlapi_packetType_t type, const void *packet, size_t size);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
-void brlapi__defaultExceptionHandler(brlapi_handle_t *handle, int err, brlapi_type_t type, const void *buf, size_t size);
+void brlapi__defaultExceptionHandler(brlapi_handle_t *handle, int error, brlapi_packetType_t type, const void *packet, size_t size);
 
 /** @} */
 
@@ -1095,7 +1095,7 @@ int brlapi__writeWin(brlapi_handle_t *handle, const brlapi_writeStruct_t *s, int
 #define brlapi_settings_t brlapi_connectionSettings_t
 #define brlapi_writeStruct brlapi_writeStruct_t
 #define brl_keycode_t brlapi_keyCode_t
-#define brl_type_t brlapi_type_t
+#define brl_type_t brlapi_packetType_t
 
 #define BRLCOMMANDS NULL
 #define BRL_KEYCODE_MAX BRLAPI_KEY_MAX

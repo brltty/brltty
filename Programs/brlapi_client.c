@@ -166,7 +166,7 @@ struct brlapi_handle_t { /* Connection-specific information */
    * address/size of buffer, and address of return value, then wait on semaphore,
    * the buffer gets filled, altRes too */
   int reading;
-  brlapi_type_t altExpectedPacketType;
+  brlapi_packetType_t altExpectedPacketType;
   unsigned char *altPacket;
   size_t altSize;
   ssize_t *altRes;
@@ -231,11 +231,11 @@ static void brlapi_initializeHandle(brlapi_handle_t *handle)
 /* Returns -2 on end of file */
 /* Returns -3 if the available packet was not for us */
 /* Calls the exception handler if an exception is encountered */
-static ssize_t brlapi__doWaitForPacket(brlapi_handle_t *handle, brlapi_type_t expectedPacketType, void *packet, size_t size)
+static ssize_t brlapi__doWaitForPacket(brlapi_handle_t *handle, brlapi_packetType_t expectedPacketType, void *packet, size_t size)
 {
   static brlapi_packet_t localPacket;
   uint32_t *uint32Packet = (uint32_t *) &localPacket;
-  brlapi_type_t type;
+  brlapi_packetType_t type;
   ssize_t res;
   static const brlapi_errorPacket_t *errorPacket = &localPacket.error;
 
@@ -305,7 +305,7 @@ static ssize_t brlapi__doWaitForPacket(brlapi_handle_t *handle, brlapi_type_t ex
 /* same as brlapi_doWaitForPacket, but sleeps instead of reading if another
  * thread is already reading. Never returns -2. If loop is 1, never returns -3.
  */
-static ssize_t brlapi__waitForPacket(brlapi_handle_t *handle, brlapi_type_t expectedPacketType, void *packet, size_t size, int loop) {
+static ssize_t brlapi__waitForPacket(brlapi_handle_t *handle, brlapi_packetType_t expectedPacketType, void *packet, size_t size, int loop) {
   int doread = 0;
   ssize_t res;
   sem_t sem;
@@ -365,7 +365,7 @@ static int brlapi__waitForAck(brlapi_handle_t *handle)
 
 /* brlapi_writePacketWaitForAck */
 /* write a packet and wait for an acknowledgement */
-static int brlapi__writePacketWaitForAck(brlapi_handle_t *handle, brlapi_type_t type, const void *buf, size_t size)
+static int brlapi__writePacketWaitForAck(brlapi_handle_t *handle, brlapi_packetType_t type, const void *buf, size_t size)
 {
   ssize_t res;
   pthread_mutex_lock(&handle->req_mutex);
@@ -697,7 +697,7 @@ void brlapi_closeConnection(void)
 
 /* brlapi_getDriverSpecific */
 /* Switch to device specific mode */
-static int brlapi__getDriverSpecific(brlapi_handle_t *handle, const char *driver, brlapi_type_t type, int st)
+static int brlapi__getDriverSpecific(brlapi_handle_t *handle, const char *driver, brlapi_packetType_t type, int st)
 {
   int res;
   brlapi_packet_t packet;
@@ -726,7 +726,7 @@ out:
 
 /* brlapi_leaveDriverSpecific */
 /* Leave device specific mode */
-static int brlapi__leaveDriverSpecific(brlapi_handle_t *handle, brlapi_type_t type, int st)
+static int brlapi__leaveDriverSpecific(brlapi_handle_t *handle, brlapi_packetType_t type, int st)
 {
   int res;
   pthread_mutex_lock(&handle->state_mutex);
@@ -832,7 +832,7 @@ int brlapi_resumeDriver(void)
 /* Function brlapi_request */
 /* Sends a request to the API and waits for the answer */
 /* The answer is put in the given packet */
-static ssize_t brlapi__request(brlapi_handle_t *handle, brlapi_type_t request, void *packet, size_t size)
+static ssize_t brlapi__request(brlapi_handle_t *handle, brlapi_packetType_t request, void *packet, size_t size)
 {
   ssize_t res;
   pthread_mutex_lock(&handle->req_mutex);
@@ -1920,7 +1920,7 @@ brlapi_exceptionHandler_t brlapi_setExceptionHandler(brlapi_exceptionHandler_t n
   return tmp;
 }
 
-int brlapi__strexception(brlapi_handle_t *handle, char *buf, size_t n, int err, brlapi_type_t type, const void *packet, size_t size)
+int brlapi__strexception(brlapi_handle_t *handle, char *buf, size_t n, int err, brlapi_packetType_t type, const void *packet, size_t size)
 {
   int chars = 16; /* Number of bytes to dump */
   char hexString[3*chars+1];
@@ -1935,12 +1935,12 @@ int brlapi__strexception(brlapi_handle_t *handle, char *buf, size_t n, int err, 
     brlapi_strerror(&error), brlapi_getPacketTypeName(type), (int)size, hexString);
 }
 
-int brlapi_strexception(char *buf, size_t n, int err, brlapi_type_t type, const void *packet, size_t size)
+int brlapi_strexception(char *buf, size_t n, int err, brlapi_packetType_t type, const void *packet, size_t size)
 {
   return brlapi__strexception(&defaultHandle, buf, n, err, type, packet, size);
 }
 
-void brlapi__defaultExceptionHandler(brlapi_handle_t *handle, int err, brlapi_type_t type, const void *packet, size_t size)
+void brlapi__defaultExceptionHandler(brlapi_handle_t *handle, int err, brlapi_packetType_t type, const void *packet, size_t size)
 {
   char str[0X100];
   brlapi_strexception(str,0X100, err, type, packet, size);
@@ -1948,7 +1948,7 @@ void brlapi__defaultExceptionHandler(brlapi_handle_t *handle, int err, brlapi_ty
   abort();
 }
 
-void brlapi_defaultExceptionHandler(int err, brlapi_type_t type, const void *packet, size_t size)
+void brlapi_defaultExceptionHandler(int err, brlapi_packetType_t type, const void *packet, size_t size)
 {
   brlapi__defaultExceptionHandler(&defaultHandle, err, type, packet, size);
 }
