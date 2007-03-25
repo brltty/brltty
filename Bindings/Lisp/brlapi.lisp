@@ -87,12 +87,12 @@
   (auth :string)
   (host :string))
 
-(defun open-connection (&optional key-filename host)
-  "Open a new connection to BRLTTY on HOST usng KEY-FILENAME for authorisation.
+(defun open-connection (&optional auth host)
+  "Open a new connection to BRLTTY on HOST usng AUTH for authorization.
 Return a DISPLAY object which can further be used to interact with BRLTTY."
   (with-foreign-object (settings 'settings)
     (setf (foreign-slot-value settings 'settings 'auth)
-          (if (stringp key-filename) key-filename (null-pointer))
+          (if (stringp auth) auth (null-pointer))
           (foreign-slot-value settings 'settings 'host)
           (if (stringp host) host (null-pointer)))
     (let* ((handle (foreign-alloc :char :count (foreign-funcall "brlapi_getHandleSize" :int)))
@@ -140,10 +140,10 @@ The first value represents the x dimension and the second the y dimension."
 
 ;;;; * TTY mode
 
-(defmethod enter-tty-mode ((obj display) tty &optional (how ""))
+(defmethod enter-tty-mode ((obj display) tty &optional (driver ""))
   (declare (integer tty))
-  (declare (string how))
-  (setf (slot-value obj 'tty) (foreign-funcall "brlapi__enterTtyMode" :pointer (display-handle obj) :int tty :string how brlapi-code)))
+  (declare (string driver))
+  (setf (slot-value obj 'tty) (foreign-funcall "brlapi__enterTtyMode" :pointer (display-handle obj) :int tty :string driver brlapi-code)))
 
 (defmethod leave-tty-mode ((obj display))
   (foreign-funcall "brlapi__leaveTtyMode" :pointer (display-handle obj) brlapi-code)
@@ -227,10 +227,10 @@ The first value represents the x dimension and the second the y dimension."
       (0 nil)
       (1 (mem-ref key 'key-code)))))
 
-(defun expand-key (keycode)
+(defun expand-key (code)
   (with-foreign-objects ((command :int) (arg :int) (flags :int))
     (foreign-funcall "brlapi_expandKeyCode"
-                     key-code keycode
+                     key-code code
                      :pointer command :pointer arg :pointer flags
                      :int)
     (values (intern (foreign-funcall "brlapi_getKeyName"
