@@ -59,5 +59,9 @@ puts "DriverName: $driverName"
 set displaySize [$session getDisplaySize]
 puts "DisplaySize: [expandList $displaySize width height]"
 
+set tty [$session enterTtyMode]
+puts "Tty: $tty"
+
+$session leaveTtyMode
 $session closeConnection; unset session
 exit 0
