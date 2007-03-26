@@ -63,7 +63,7 @@ public class ApiTest {
       int tty = brlapi.enterTtyMode();
       System.out.println("TTY is " + tty);
 
-      brlapi.writeText("ok !! €", 0);
+      brlapi.writeText("ok !! €", Brlapi.CURSOR_OFF);
       brlapi.writeText(null, 1);
 
       long key[] = {0};

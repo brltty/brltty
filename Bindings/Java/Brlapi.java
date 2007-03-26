@@ -75,8 +75,13 @@ public class Brlapi extends BrlapiNative implements BrlapiConstants {
     if (text != null) {
       BrlapiSize size = getDisplaySize();
       int count = size.getWidth() * size.getHeight();
-      int pad = count - text.length();
-      while (pad-- > 0) text += " ";
+
+      {
+        StringBuffer sb = new StringBuffer(text);
+        while (sb.length() < count) sb.append(' ');
+        text = sb.toString();
+      }
+
       text = text.substring(0, count);
     }
     writeTextNative(cursor, text);
