@@ -220,7 +220,10 @@ static void brlapi_initializeHandle(brlapi_handle_t *handle)
   memset(handle->keybuf, 0, sizeof(handle->keybuf));
   handle->keybuf_next = 0;
   handle->keybuf_nb = 0;
-  handle->exceptionHandler.withoutHandle = brlapi_defaultExceptionHandler;
+  if (handle == &defaultHandle)
+    handle->exceptionHandler.withoutHandle = brlapi_defaultExceptionHandler;
+  else
+    handle->exceptionHandler.withHandle = brlapi__defaultExceptionHandler;
   pthread_mutex_init(&handle->exceptionHandler_mutex, &mattr);
 }
 
@@ -1944,7 +1947,7 @@ void brlapi__defaultExceptionHandler(brlapi_handle_t *handle, int err, brlapi_pa
 {
   char str[0X100];
   brlapi_strexception(str,0X100, err, type, packet, size);
-  fprintf(stderr, "BrlAPI exception: %s\nYou may want to add option -l 7 to the brltty command line for getting debugging information in the system log\n", str);
+  fprintf(stderr, "BrlAPI exception: %s\nYou may wish to add the -ldebug option to the brltty command line in order to get additional information in the system log\n", str);
   abort();
 }
 
