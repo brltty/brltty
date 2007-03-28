@@ -875,12 +875,18 @@ int brlapi__resumeDriver(brlapi_handle_t *handle);
  * When a function fails, ::brlapi_errno will hold an error
  * code to explain why it failed. It should always be reported somehow.
  *
- * Although most errors are reported that way, some (called exceptions) are
- * reported asynchronously for efficiency reasons. The affected functions
- * are: brlapi_setFocus, brlapi_write* and brlapi_sendRaw. The default
- * exception handler (brlapi_defaultExceptionHandler()) dumps the guilty
- * packet before abort()ing.  It can be replaced by calling
- * brlapi_setExceptionHandler().
+ * Although most errors are reported that way, some (called exceptions)
+ * are reported asynchronously for efficiency reasons, because they always
+ * just report a programming error. The affected functions are: brlapi_setFocus,
+ * brlapi_write* and brlapi_sendRaw.  When they happen, the next call to
+ * brlapi_something will close the connection and call the \e exception
+ * handler. If the exception handler returns, the brlapi_something function will
+ * return an end-of-file error.
+ *
+ * The default exception handler (brlapi_defaultExceptionHandler()) dumps
+ * the guilty packet before abort()ing.  It can be replaced by calling
+ * brlapi_setExceptionHandler().  For instance, the Java and Python bindings use
+ * this for raising a Java or Python exception that may be caught.
  *
  * @{ */
 
@@ -1024,11 +1030,11 @@ int brlapi__strexception(brlapi_handle_t *handle, char *buffer, size_t bufferSiz
 /* brlapi_setExceptionHandler */
 /** Set a new exception handler
  *
- * brlapi_setExceptionHandler() replaces the previous exception handler with the handler
- * parameter. The previous exception handler is returned to make chaining error
- * handlers possible.
+ * brlapi_setExceptionHandler() replaces the previous exception handler with
+ * the handler parameter. The previous exception handler is returned to make
+ * chaining error handlers possible.
  *
- * The default handler just prints the exception and exit()s.
+ * The default handler just prints the exception and abort()s.
  */
 #ifndef BRLAPI_NO_SINGLE_SESSION
 brlapi_exceptionHandler_t brlapi_setExceptionHandler(brlapi_exceptionHandler_t handler);

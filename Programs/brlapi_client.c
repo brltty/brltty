@@ -292,12 +292,17 @@ static ssize_t brlapi__doWaitForPacket(brlapi_handle_t *handle, brlapi_packetTyp
     else
       esize = res-hdrSize;
 
+    pthread_mutex_lock(&handle->fileDescriptor_mutex);
+    closeFileDescriptor(handle->fileDescriptor);
+    handle->fileDescriptor = INVALID_FILE_DESCRIPTOR;
+    pthread_mutex_unlock(&handle->fileDescriptor_mutex);
+
     if (handle==&defaultHandle)
       defaultHandle.exceptionHandler.withoutHandle(ntohl(errorPacket->code), ntohl(errorPacket->type), &errorPacket->packet, esize);
     else
       handle->exceptionHandler.withHandle(handle, ntohl(errorPacket->code), ntohl(errorPacket->type), &errorPacket->packet, esize);
 
-    return -3;
+    return -2;
   }
 
   syslog(LOG_ERR,"(brlapi_waitForPacket) Received unexpected packet of type %s and size %ld\n",brlapi_getPacketTypeName(type),(long)res);
