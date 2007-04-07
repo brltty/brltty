@@ -292,43 +292,43 @@ cdef class Connection:
 			else:
 				return name
 
-	def enterTtyMode(self, tty = TTY_DEFAULT, driverName = None):
+	def enterTtyMode(self, tty = TTY_DEFAULT, driver = None):
 		"""Ask for some tty, with some key mechanism
 
 		See brlapi_enterTtyMode(3).
 
 		* tty : If tty >= 0, application takes control of the specified tty
 			If tty == TTY_DEFAULT, the library first tries to get the tty number from the WINDOWID environment variable (form xterm case), then the CONTROLVT variable, and at last reads /proc/self/stat (on linux)
-		* driverName : Tells how the application wants readKey() to return key presses. None or "" means BrlTTY commands are required, whereas a driver name means that raw key codes returned by this driver are expected."""
+		* driver : Tells how the application wants readKey() to return key presses. None or "" means BrlTTY commands are required, whereas a driver name means that raw key codes returned by this driver are expected."""
 		cdef int retval
 		cdef int c_tty
-		cdef char *c_driverName
+		cdef char *c_driver
 		c_tty = tty
-		if not driverName:
-			c_driverName = NULL
+		if not driver:
+			c_driver = NULL
 		else:
-			c_driverName = driverName
+			c_driver = driver
 		c_brlapi.Py_BEGIN_ALLOW_THREADS
-		retval = c_brlapi.brlapi__enterTtyMode(self.h, c_tty, c_driverName)
+		retval = c_brlapi.brlapi__enterTtyMode(self.h, c_tty, c_driver)
 		c_brlapi.Py_END_ALLOW_THREADS
 		if retval == -1:
 			raise OperationError(returnerrno())
 		else:
 			return retval
 
-	def enterTtyModeWithPath(self, path = [], driverName = None):
+	def enterTtyModeWithPath(self, path = [], driver = None):
 		"""Ask for some tty, with some key mechanism
 
 		See brlapi_enterTtyModeWithPath(3).
 
 		* tty is an array of ttys representing the tty path to be got. Can be None.
-		* driverName : has the same meaning as in enterTtyMode.
+		* driver : has the same meaning as in enterTtyMode.
 		
 		Providing an empty array or None means to get the root."""
 		cdef int retval
 		cdef int *c_ttys
 		cdef int c_nttys
-		cdef char *c_driverName
+		cdef char *c_driver
 		if not path:
 			c_ttys = NULL
 			c_nttys = 0
@@ -337,12 +337,12 @@ cdef class Connection:
 			c_ttys = <int*>c_brlapi.malloc(c_nttys * sizeof(int))
 			for i from 0 <= i < c_nttys:
 				c_ttys[i] = path[i]
-		if not driverName:
-			c_driverName = NULL
+		if not driver:
+			c_driver = NULL
 		else:
-			c_driverName = driverName
+			c_driver = driver
 		c_brlapi.Py_BEGIN_ALLOW_THREADS
-		retval = c_brlapi.brlapi__enterTtyModeWithPath(self.h, c_ttys, c_nttys, c_driverName)
+		retval = c_brlapi.brlapi__enterTtyModeWithPath(self.h, c_ttys, c_nttys, c_driver)
 		c_brlapi.Py_END_ALLOW_THREADS
 		if (c_ttys):
 			c_brlapi.free(c_ttys)
@@ -408,26 +408,26 @@ cdef class Connection:
 		else:
 			return retval
 
-	def writeText(self, str, cursor = CURSOR_OFF):
+	def writeText(self, text, cursor = CURSOR_OFF):
 		"""Write the given \0-terminated string to the braille display.
 		See brlapi_writeText(3).
 		If the string is too long, it is cut. If it's too short, spaces are appended. The current LC_CTYPE locale is considered, unless it is left as default "C", in which case the charset is assumed to be 8bits, and the same as the server's.
 
 		* cursor : gives the cursor position; if equal to CURSOR_OFF, no cursor is shown at all; if cursor == CURSOR_LEAVE, the cursor is left where it is
-		* str : points to the string to be displayed"""
+		* text : points to the string to be displayed"""
 		w = WriteStruct()
 		w.cursor = cursor
-		if (str):
+		if (text):
 			(x, y) = self.displaySize
 			dispSize = x * y
-			if (len(str) < dispSize):
-				str = str + "".center(dispSize - len(str))
+			if (len(text) < dispSize):
+				text = text + "".center(dispSize - len(text))
 			w.regionBegin = 1
 			w.regionSize = dispSize
-			w.text = str[0 : dispSize]
+			w.text = text[0 : dispSize]
 		return self.write(w)
 
-	def readKey(self, block = True):
+	def readKey(self, wait = True):
 		"""Read a key from the braille keyboard.
 		See brlapi_readKey(3).
 
@@ -442,14 +442,14 @@ cdef class Connection:
 		By default, all the keypresses will be passed to the client, none will go through brltty, so the application will have to handle console switching itself for instance."""
 		cdef c_brlapi.brlapi_keyCode_t code
 		cdef int retval
-		cdef int c_block
-		c_block = block
+		cdef int c_wait
+		c_wait = wait
 		c_brlapi.Py_BEGIN_ALLOW_THREADS
-		retval = c_brlapi.brlapi__readKey(self.h, c_block, <c_brlapi.brlapi_keyCode_t*>&code)
+		retval = c_brlapi.brlapi__readKey(self.h, c_wait, <c_brlapi.brlapi_keyCode_t*>&code)
 		c_brlapi.Py_END_ALLOW_THREADS
 		if retval == -1:
 			raise OperationError(returnerrno())
-		elif retval <= 0 and block == False:
+		elif retval <= 0 and wait == False:
 			return None
 		else:
 			return code
@@ -465,7 +465,7 @@ cdef class Connection:
 		else:
 			return { "type":ekc.type, "command":ekc.command, "argument":ekc.argument, "flags":ekc.flags }
 	
-	def ignoreKeys(self, range, set):
+	def ignoreKeys(self, type, set):
 		"""Ignore some key presses from the braille keyboard.
 		See brlapi_ignoreKeys(3).
 		
@@ -473,16 +473,16 @@ cdef class Connection:
 		
 		The given codes should be brltty commands (nul or "" was given to brlapi_enterTtyMode())"""
 		cdef int retval
-		cdef c_brlapi.brlapi_rangeType_t c_range
+		cdef c_brlapi.brlapi_rangeType_t c_type
 		cdef c_brlapi.brlapi_keyCode_t *c_set
 		cdef unsigned int c_n
-		c_range = range
+		c_type = type
 		c_n = len(set)
 		c_set = <c_brlapi.brlapi_keyCode_t*>c_brlapi.malloc(c_n * sizeof(c_set[0]))
 		for i from 0 <= i < c_n:
 			c_set[i] = set[i]
 		c_brlapi.Py_BEGIN_ALLOW_THREADS
-		retval = c_brlapi.brlapi__ignoreKeys(self.h, c_range, c_set, c_n)
+		retval = c_brlapi.brlapi__ignoreKeys(self.h, c_type, c_set, c_n)
 		c_brlapi.Py_END_ALLOW_THREADS
 		c_brlapi.free(c_set)
 		if retval == -1:
@@ -490,7 +490,7 @@ cdef class Connection:
 		else:
 			return retval
 
-	def acceptKeys(self, range, set):
+	def acceptKeys(self, type, set):
 		"""Accept some key presses from the braille keyboard.
 		See brlapi_ignoreKeys(3).
 		
@@ -498,16 +498,16 @@ cdef class Connection:
 
 		The given codes should be brltty commands (nul or "" was given to brlapi_enterTtyMode())"""
 		cdef int retval
-		cdef c_brlapi.brlapi_rangeType_t c_range
+		cdef c_brlapi.brlapi_rangeType_t c_type
 		cdef c_brlapi.brlapi_keyCode_t *c_set
 		cdef unsigned int c_n
-		c_range = range
+		c_type = type
 		c_n = len(set)
 		c_set = <c_brlapi.brlapi_keyCode_t*>c_brlapi.malloc(c_n * sizeof(c_set[0]))
 		for i from 0 <= i < c_n:
 			c_set[i] = set[i]
 		c_brlapi.Py_BEGIN_ALLOW_THREADS
-		retval = c_brlapi.brlapi__acceptKeys(self.h, c_range, c_set, c_n)
+		retval = c_brlapi.brlapi__acceptKeys(self.h, c_type, c_set, c_n)
 		c_brlapi.Py_END_ALLOW_THREADS
 		c_brlapi.free(c_set)
 		if retval == -1:
@@ -545,7 +545,7 @@ cdef class Connection:
 		else:
 			return retval
 
-	def ignoreKeyRanges(self, set):
+	def ignoreKeyRanges(self, keys):
 		"""Ignore some key presses from the braille keyboard.
 		See brlapi_ignoreKeyRanges(3).
 		
@@ -553,23 +553,23 @@ cdef class Connection:
 		
 		The given codes should be raw keycodes (i.e. some driver name was given to brlapi_enterTtyMode()) """
 		cdef int retval
-		cdef c_brlapi.brlapi_range_t *c_set
+		cdef c_brlapi.brlapi_range_t *c_keys
 		cdef unsigned int c_n
-		c_n = len(set)
-		c_set = <c_brlapi.brlapi_range_t*>c_brlapi.malloc(c_n * sizeof(c_set[0]))
+		c_n = len(keys)
+		c_keys = <c_brlapi.brlapi_range_t*>c_brlapi.malloc(c_n * sizeof(c_keys[0]))
 		for i from 0 <= i < c_n:
-			c_set[i].first = set[i][0]
-			c_set[i].last = set[i][1]
+			c_keys[i].first = keys[i][0]
+			c_keys[i].last = keys[i][1]
 		c_brlapi.Py_BEGIN_ALLOW_THREADS
-		retval = c_brlapi.brlapi__ignoreKeyRanges(self.h, c_set, c_n)
+		retval = c_brlapi.brlapi__ignoreKeyRanges(self.h, c_keys, c_n)
 		c_brlapi.Py_END_ALLOW_THREADS
-		c_brlapi.free(c_set)
+		c_brlapi.free(c_keys)
 		if retval == -1:
 			raise OperationError(returnerrno())
 		else:
 			return retval
 
-	def acceptKeyRanges(self, set):
+	def acceptKeyRanges(self, keys):
 		"""Accept some key presses from the braille keyboard.
 		See brlapi_acceptKeyRanges(3).
 		
@@ -577,32 +577,32 @@ cdef class Connection:
 		
 		The given codes should be raw keycodes (i.e. some driver name was given to brlapi_enterTtyMode()) """
 		cdef int retval
-		cdef c_brlapi.brlapi_range_t *c_set
+		cdef c_brlapi.brlapi_range_t *c_keys
 		cdef unsigned int c_n
-		c_n = len(set)
-		c_set = <c_brlapi.brlapi_range_t*>c_brlapi.malloc(c_n * sizeof(c_set[0]))
+		c_n = len(keys)
+		c_keys = <c_brlapi.brlapi_range_t*>c_brlapi.malloc(c_n * sizeof(c_keys[0]))
 		for i from 0 <= i < c_n:
-			c_set[i].first = set[i][0]
-			c_set[i].last = set[i][1]
+			c_keys[i].first = keys[i][0]
+			c_keys[i].last = keys[i][1]
 		c_brlapi.Py_BEGIN_ALLOW_THREADS
-		retval = c_brlapi.brlapi__acceptKeyRanges(self.h, c_set, c_n)
+		retval = c_brlapi.brlapi__acceptKeyRanges(self.h, c_keys, c_n)
 		c_brlapi.Py_END_ALLOW_THREADS
-		c_brlapi.free(c_set)
+		c_brlapi.free(c_keys)
 		if retval == -1:
 			raise OperationError(returnerrno())
 		else:
 			return retval
 
-	def enterRawMode(self, driverName):
+	def enterRawMode(self, driver):
 		"""Switch to Raw mode
 		See brlapi_enterRawMode(3).
 		
 		* driver : Specifies the name of the driver for which the raw communication will be established"""
 		cdef int retval
-		cdef char *c_driverName
-		c_driverName = driverName
+		cdef char *c_driver
+		c_driver = driver
 		c_brlapi.Py_BEGIN_ALLOW_THREADS
-		retval = c_brlapi.brlapi__enterRawMode(self.h, c_driverName)
+		retval = c_brlapi.brlapi__enterRawMode(self.h, c_driver)
 		c_brlapi.Py_END_ALLOW_THREADS
 		if retval == -1:
 			raise OperationError(returnerrno())
