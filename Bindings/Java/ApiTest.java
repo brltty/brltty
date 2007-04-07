@@ -54,7 +54,6 @@ public class ApiTest {
       System.out.println();
 
       System.out.print("Driver is " + brlapi.getDriverName());
-      System.out.print(" [" + brlapi.getDriverId() + "]");
       System.out.println();
 
       BrlapiSize size = brlapi.getDisplaySize();

@@ -195,14 +195,6 @@ CAMLprim value brlapiml_closeConnection(value handle, value unit)
   CAMLreturn(Val_unit);
 }
 
-CAMLprim value brlapiml_getDriverId(value handle, value unit)
-{
-  CAMLparam2(handle, unit);
-  char id[BRLAPI_MAXNAMELENGTH];
-  brlapiCheckError( getDriverId, NULL, id, sizeof(id));
-  CAMLreturn(caml_copy_string(id));
-}
-
 CAMLprim value brlapiml_getDriverName(value handle, value unit)
 {
   CAMLparam2(handle, unit);

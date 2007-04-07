@@ -235,21 +235,6 @@ JNIEXPORT void JNICALL Java_BrlapiNative_closeConnection(JNIEnv *jenv, jobject j
   (*jenv)->SetLongField(jenv, jcls, handleID, (jlong) (intptr_t) NULL);
 }
 
-JNIEXPORT jstring JNICALL Java_BrlapiNative_getDriverId(JNIEnv *jenv, jobject jobj) {
-  char id[3];
-  GET_HANDLE(jenv, jobj, NULL);
-
-  env = jenv;
-
-  if (brlapi__getDriverId(handle, id, sizeof(id)) < 0) {
-    ThrowError(jenv, __func__);
-    return NULL;
-  }
-
-  id[sizeof(id)-1] = 0;
-  return (*jenv)->NewStringUTF(jenv, id);
-}
-
 JNIEXPORT jstring JNICALL Java_BrlapiNative_getDriverName(JNIEnv *jenv, jobject jobj) {
   char name[32];
   GET_HANDLE(jenv, jobj, NULL);

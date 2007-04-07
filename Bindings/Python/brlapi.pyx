@@ -264,20 +264,6 @@ cdef class Connection:
 			else:
 				return (x, y)
 	
-	property driverId:
-		"""Identify the driver used by BrlTTY
-		See brlapi_getDriverId(3)."""
-		def __get__(self):
-			cdef char id[3]
-			cdef int retval
-			c_brlapi.Py_BEGIN_ALLOW_THREADS
-			retval = c_brlapi.brlapi__getDriverId(self.h, id, sizeof(id))
-			c_brlapi.Py_END_ALLOW_THREADS
-			if retval == -1:
-				raise OperationError(returnerrno())
-			else:
-				return id
-
 	property driverName:
 		"""Get the complete name of the driver used by BrlTTY
 		See brlapi_getDriverName(3)."""
@@ -437,7 +423,7 @@ cdef class Connection:
 
 		By default, all commands but those which restart drivers and switch virtual are returned to the application and not to brltty. If the application doesn't want to see some command events, it should call either ignoreKeys() or ignoreKeyRanges().
 
-		If some driver name was given to enterTtyMode(), a raw keycode is returned, as specified by the terminal driver. It generally corresponds to the very code that the terminal tells to the driver. This should only be used by applications which are dedicated to a particular braille terminal. Hence, checking the terminal type thanks to a call to driverid or even drivername before getting tty control is a pretty good idea.
+		If some driver name was given to enterTtyMode(), a raw keycode is returned, as specified by the terminal driver. It generally corresponds to the very code that the terminal tells to the driver. This should only be used by applications which are dedicated to a particular braille terminal. Hence, checking the terminal type thanks to a call to drivername before getting tty control is a pretty good idea.
 
 		By default, all the keypresses will be passed to the client, none will go through brltty, so the application will have to handle console switching itself for instance."""
 		cdef c_brlapi.brlapi_keyCode_t code

@@ -494,7 +494,6 @@ out:
 typedef int(*PacketHandler)(Connection *, brlapi_packetType_t, brlapi_packet_t *, size_t);
 
 typedef struct { /* packet handlers */
-  PacketHandler getDriverId;
   PacketHandler getDriverName;
   PacketHandler getDisplaySize;
   PacketHandler enterTtyMode;
@@ -763,11 +762,6 @@ static int handleGetDriver(Connection *c, brlapi_packetType_t type, size_t size,
   CHECKERR(!c->raw,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed in raw mode");
   brlapiserver_writePacket(c->fd, type, str, len+1);
   return 0;
-}
-
-static int handleGetDriverId(Connection *c, brlapi_packetType_t type, brlapi_packet_t *packet, size_t size)
-{
-  return handleGetDriver(c, type, size, braille->definition.code);
 }
 
 static int handleGetDriverName(Connection *c, brlapi_packetType_t type, brlapi_packet_t *packet, size_t size)
@@ -1179,7 +1173,7 @@ static int handleResumeDriver(Connection *c, brlapi_packetType_t type, brlapi_pa
 }
 
 static PacketHandlers packetHandlers = {
-  handleGetDriverId, handleGetDriverName, handleGetDisplaySize,
+  handleGetDriverName, handleGetDisplaySize,
   handleEnterTtyMode, handleSetFocus, handleLeaveTtyMode,
   handleKeyRanges, handleKeyRanges, handleWrite,
   handleEnterRawMode, handleLeaveRawMode, handlePacket, handleSuspendDriver, handleResumeDriver
@@ -1350,7 +1344,6 @@ static int processRequest(Connection *c, PacketHandlers *handlers)
     return 0;    
   }
   switch (type) {
-    case BRLAPI_PACKET_GETDRIVERID: p = handlers->getDriverId; break;
     case BRLAPI_PACKET_GETDRIVERNAME: p = handlers->getDriverName; break;
     case BRLAPI_PACKET_GETDISPLAYSIZE: p = handlers->getDisplaySize; break;
     case BRLAPI_PACKET_ENTERTTYMODE: p = handlers->enterTtyMode; break;

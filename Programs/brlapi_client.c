@@ -854,20 +854,6 @@ static ssize_t brlapi__request(brlapi_handle_t *handle, brlapi_packetType_t requ
   return res;
 }
 
-/* Function : brlapi_getDriverId */
-/* Identify the driver used by brltty */
-int brlapi__getDriverId(brlapi_handle_t *handle, char *id, size_t n)
-{
-  ssize_t res = brlapi__request(handle, BRLAPI_PACKET_GETDRIVERID, id, n);
-  if ((res>0) && (res<=n)) id[res-1] = '\0';
-  return res; 
-}
-
-int brlapi_getDriverId(char *id, size_t n)
-{
-  return brlapi__getDriverId(&defaultHandle, id, n);
-}
-
 /* Function : brlapi_getDriverName */
 /* Name of the driver used by brltty */
 int brlapi__getDriverName(brlapi_handle_t *handle, char *name, size_t n)

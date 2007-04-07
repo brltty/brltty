@@ -104,8 +104,6 @@ external openConnectionHandle :
   settings -> handle = "brlapiml_openConnectionHandle"
 external closeConnection :
   ?h:handle -> unit -> unit = "brlapiml_closeConnection"
-external getDriverId :
-  ?h:handle -> string = "brlapiml_getDriverId"
 external getDriverName :
   ?h:handle -> unit -> string = "brlapiml_getDriverName"
 external getDisplaySize :

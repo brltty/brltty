@@ -50,9 +50,6 @@ puts "Auth: $auth"
 set fileDescriptor [$session getFileDescriptor]
 puts "FileDescriptor: $fileDescriptor"
 
-set driverId [$session getDriverId]
-puts "DriverId: $driverId"
-
 set driverName [$session getDriverName]
 puts "DriverName: $driverName"
 

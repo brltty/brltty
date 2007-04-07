@@ -34,17 +34,12 @@ static brlapi_connectionSettings_t settings;
 
 static int opt_learnMode;
 static int opt_showDots;
-static int opt_showIdentifier;
 static int opt_showName;
 static int opt_showSize;
 static int opt_showKeyCodes;
 static int opt_suspendMode;
 
 BEGIN_OPTION_TABLE
-  {"identifier", NULL, 'i', 0, 0,
-   &opt_showIdentifier, NULL,
-   "Show the driver's identifier."},
-
   {"name", NULL, 'n', 0, 0,
    &opt_showName, NULL,
    "Show the driver's name."},
@@ -87,17 +82,6 @@ void showDisplaySize(void)
     exit(1);
   }
   fprintf(stderr, "%dX%d\n", x, y);
-}
-
-void showDriverIdentifier(void)
-{
-  char id[3];
-  fprintf(stderr, "Getting driver id: ");
-  if (brlapi_getDriverId(id, sizeof(id))<0) {
-    brlapi_perror("failed");
-    exit(1);
-  }
-  fprintf(stderr, "%s\n", id);
 }
 
 void showDriverName(void)
@@ -270,10 +254,6 @@ int main(int argc, char *argv[])
   if ((fd=brlapi_openConnection(&settings, &settings)) != (brlapi_fileDescriptor)(-1)) {
     fprintf(stderr, "done (fd=%"PRIFD")\n", fd);
     fprintf(stderr,"Connected to %s using auth %s\n", settings.host, settings.auth);
-
-    if (opt_showIdentifier) {
-      showDriverIdentifier();
-    }
 
     if (opt_showName) {
       showDriverName();

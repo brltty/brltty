@@ -321,7 +321,6 @@ typedef struct {
 
 static const brlapi_packetTypeEntry_t brlapi_packetTypeTable[] = {
   { BRLAPI_PACKET_AUTH, "Auth" },
-  { BRLAPI_PACKET_GETDRIVERID, "GetDriverId" },
   { BRLAPI_PACKET_GETDRIVERNAME, "GetDriverName" },
   { BRLAPI_PACKET_GETDISPLAYSIZE, "GetDisplaySize" },
   { BRLAPI_PACKET_ENTERTTYMODE, "enterTtyMode" },

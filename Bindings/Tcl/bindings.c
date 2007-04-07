@@ -363,7 +363,6 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     "enterTtyModeWithPath",
     "getAuth",
     "getDisplaySize",
-    "getDriverId",
     "getDriverName",
     "getFileDescriptor",
     "getHost",
@@ -391,7 +390,6 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
     FCN_enterTtyModeWithPath,
     FCN_getAuth,
     FCN_getDisplaySize,
-    FCN_getDriverId,
     FCN_getDriverName,
     FCN_getFileDescriptor,
     FCN_getHost,
@@ -451,32 +449,6 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
       setIntResult(interp, session->fileDescriptor);
       return TCL_OK;
-    }
-
-    case FCN_getDriverId: {
-      size_t size = 0X10;
-
-      if (objc != 2) {
-        Tcl_WrongNumArgs(interp, 2, objv, NULL);
-        return TCL_ERROR;
-      }
-
-      while (1) {
-        char buffer[size];
-        int result = brlapi__getDriverId(session->handle, buffer, size);
-
-        if (result == -1) {
-          setBrlapiError(interp);
-          return TCL_ERROR;
-        }
-
-        if (result <= size) {
-          setStringResult(interp, buffer, result-1);
-          return TCL_OK;
-        }
-
-        size = result;
-      }
     }
 
     case FCN_getDriverName: {

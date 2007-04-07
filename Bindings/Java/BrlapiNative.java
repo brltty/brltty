@@ -27,7 +27,6 @@ public class BrlapiNative {
     throws BrlapiError;
   public native void closeConnection ();
 
-  public native String getDriverId () throws BrlapiError;
   public native String getDriverName () throws BrlapiError;
   public native BrlapiSize getDisplaySize () throws BrlapiError;
   

@@ -117,13 +117,6 @@ Return a DISPLAY object which can further be used to interact with BRLTTY."
 
 ;;;; * Querying the display
 
-(defmethod driver-id ((obj display))
-  "Return the currently used driver id as a string."
-  (with-foreign-pointer-as-string (str 4 str-size)
-    (foreign-funcall "brlapi__getDriverId" :pointer (display-handle obj)
-                     :string str :int str-size
-                     brlapi-code)))
-
 (defmethod driver-name ((obj display))
   "Return the currently used driver name."
   (with-foreign-pointer-as-string (str 64 str-size)

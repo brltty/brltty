@@ -112,8 +112,6 @@ external closeConnection :
 val expandHost : string -> string * string
 Idem: proto
 *)
-external getDriverId :
-  ?h:handle -> string = "brlapiml_getDriverId"
 external getDriverName :
   ?h:handle -> unit -> string = "brlapiml_getDriverName"
 external getDisplaySize :

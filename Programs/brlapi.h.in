@@ -264,22 +264,8 @@ void brlapi__closeConnection(brlapi_handle_t *handle);
  * @{
  */
 
-/* brlapi_getDriverId */
-/** Identify the driver used by \e brltty
- *
- * This function will fill its argument with the \e brltty 2-chars code of
- * the driver currently in use, to which it adds a '\\0'.
- *
- * \param buffer is the buffer given by the application;
- * \param size is the maximum size of the id buffer.
- *
- * \return -1 on error, or a positive value giving the size of the needed
- * buffer, if the supplied one is to small (same as snprintf()).
-*/
-#ifndef BRLAPI_NO_SINGLE_SESSION
-int brlapi_getDriverId(char *buffer, size_t size);
-#endif /* BRLAPI_NO_SINGLE_SESSION */
-int brlapi__getDriverId(brlapi_handle_t *handle, char *buffer, size_t size);
+/** Maximum name length for names embeded in BrlAPI packets */
+#define BRLAPI_MAXNAMELENGTH 31
 
 /* brlapi_getDriverName */
 /** Return the complete name of the driver used by \e brltty
@@ -650,8 +636,7 @@ int brlapi_describeKeyCode (brlapi_keyCode_t code, brlapi_describedKeyCode_t *de
  * terminal tells to the driver.
  * This should only be used by applications which are dedicated to a particular
  * braille terminal. Hence, checking the terminal type thanks to a call to
- * brlapi_getDriverId() or even brlapi_getDriverName() before getting tty
- * control is a pretty good idea.
+ * brlapi_getDriverName() before getting tty control is a pretty good idea.
  *
  * By default, all the keypresses will be passed to the client, none will go
  * through brltty, so the application will have to handle console switching
@@ -798,7 +783,7 @@ int brlapi__acceptKeyRanges(brlapi_handle_t *handle, brlapi_range_t ranges[], un
  *
  * Special care of the terminal should be taken, since one might completely
  * trash the terminal's data, or even lock it! The application should always
- * check for terminal's type thanks to brlapi_getDriverId().
+ * check for terminal's type thanks to brlapi_getDriverName().
  *
  * The client can also make brltty close the driver by using brlapi_suspendDriver(),
  * and resume it again with brlapi_resumeDriver().  This should not be used if
