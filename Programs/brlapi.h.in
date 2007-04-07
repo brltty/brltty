@@ -264,7 +264,8 @@ void brlapi__closeConnection(brlapi_handle_t *handle);
  * @{
  */
 
-/** Maximum name length for names embeded in BrlAPI packets */
+/** Maximum name length for names embeded in BrlAPI packets, not counting any
+ * termination \0 character */
 #define BRLAPI_MAXNAMELENGTH 31
 
 /* brlapi_getDriverName */
