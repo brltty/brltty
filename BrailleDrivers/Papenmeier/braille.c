@@ -1042,6 +1042,10 @@ flushCells2 (BrailleDisplay *brl) {
     unsigned char buffer[0XFF];
     unsigned int size = 0;
 
+    /* The status cells. */
+    memcpy(&buffer[size], currentStatus, terminal->statusCount);
+    size += terminal->statusCount;
+
     /* Two dummy cells for each key on the left side. */
     {
       int count = terminal->leftKeys;
@@ -1054,10 +1058,6 @@ flushCells2 (BrailleDisplay *brl) {
     /* The text cells. */
     memcpy(&buffer[size], currentText, terminal->columns);
     size += terminal->columns;
-
-    /* The status cells. */
-    memcpy(&buffer[size], currentStatus, terminal->statusCount);
-    size += terminal->statusCount;
 
     /* Two dummy cells for each key on the right side. */
     {
@@ -1089,9 +1089,9 @@ initializeTerminal2 (BrailleDisplay *brl) {
     data[size++] = 0;
     data[size++] = 0;
 
-    data[size++] = 0; /* vertical modules */
+    data[size++] = terminal->statusCount; /* vertical modules */
     data[size++] = terminal->leftKeys;
-    data[size++] = terminal->columns + terminal->statusCount;
+    data[size++] = terminal->columns; /* horizontal modules */
     data[size++] = terminal->rightKeys;
 
     data[size++] = 2; /* routing keys per cell */
