@@ -2407,6 +2407,7 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
   } else {
     if (command == BRL_CMD_OFFLINE) {
       offline = 1;
+      pthread_mutex_unlock(&connectionsMutex);
       return BRL_CMD_OFFLINE;
     }
     offline = 0;
