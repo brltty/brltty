@@ -1250,14 +1250,6 @@ mapInputModules2 (void) {
           OFFS_SWITCH+KEY_RIGHT_FRONT);
 
   {
-    unsigned char cell = terminal->statusCount;
-    while (cell) {
-      nextInputModule2(&byte, &bit);
-      addInputMapping2(byte, bit, OFFS_STAT+cell--, 0);
-    }
-  }
-
-  {
     unsigned char column = terminal->columns;
     while (column) {
       nextInputModule2(&byte, &bit);
@@ -1269,6 +1261,14 @@ mapInputModules2 (void) {
   mapKey2(terminal->leftKeys, &byte, &bit,
           OFFS_SWITCH+KEY_LEFT_REAR,
           OFFS_SWITCH+KEY_LEFT_FRONT);
+
+  {
+    unsigned char cell = terminal->statusCount;
+    while (cell) {
+      nextInputModule2(&byte, &bit);
+      addInputMapping2(byte, bit, OFFS_STAT+cell--, 0);
+    }
+  }
 
   byte--;
   addInputMapping2(byte, 7, OFFS_BAR+BAR_L2, 0);
