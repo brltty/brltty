@@ -1500,7 +1500,32 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
                 setState(BDS_READY);
                 continue;
 
-	      default:
+              case HT_PKT_Extended: {
+                unsigned char length UNUSED = packet.fields.data.extended.length - 1;
+                const unsigned char *bytes = &packet.fields.data.extended.data.bytes[0];
+
+                switch (packet.fields.data.extended.type) {
+                  case HT_EXTPKT_Confirmation:
+                    switch (bytes[0]) {
+                      case HT_PKT_NAK:
+                        updateRequired = 1;
+                      case HT_PKT_ACK:
+                        if (model->hasATC) touchAnalyzeCells(brl, prevData);
+                        setState(BDS_READY);
+                        continue;
+
+                      default:
+                        break;
+                    }
+                    break;
+
+                  default:
+                    break;
+                }
+                break;
+              }
+
+              default:
                 break;
             }
 
@@ -1519,16 +1544,6 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
                     }
                     break;
                   }
-
-                  case HT_EXTPKT_Confirmation:
-                    switch (bytes[0]) {
-                      case HT_PKT_NAK:
-                        updateRequired = 1;
-                      case HT_PKT_ACK:
-                        setState(BDS_READY);
-                        continue;
-                    }
-                    break;
 
                   case HT_EXTPKT_Scancode: {
                     if (length) {
@@ -1560,13 +1575,13 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
                       memset(pressureValues, 0, cellCount);
                       for (dataIndex=1; dataIndex<length; dataIndex++) {
                         unsigned char byte = bytes[dataIndex];
-			unsigned char nibble;
+                        unsigned char nibble;
 
-			nibble = byte & 0XF0;
-			pressureValues[cellIndex++] = nibble | (nibble >> 4);
+                        nibble = byte & 0XF0;
+                        pressureValues[cellIndex++] = nibble | (nibble >> 4);
 
-			nibble = byte & 0X0F;
-			pressureValues[cellIndex++] = nibble | (nibble << 4);
+                        nibble = byte & 0X0F;
+                        pressureValues[cellIndex++] = nibble | (nibble << 4);
                       }
 
                       pressure = &pressureValues[0];
