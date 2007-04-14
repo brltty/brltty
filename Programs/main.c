@@ -1132,7 +1132,7 @@ main (int argc, char *argv[]) {
 
     if (!suspended
 #ifdef ENABLE_API
-	&& api_claimDriver(&brl)
+	&& (!apiStarted || api_claimDriver(&brl))
 #endif /* ENABLE_API */
 	) {
       /*
