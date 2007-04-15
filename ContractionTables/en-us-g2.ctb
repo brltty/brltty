@@ -549,7 +549,6 @@ endword onez = Ordonez
 midendword ong 56-1245
 midendword ongen 135-1345-1245-26 uncongenial
 always oon = sooner
-always osome =
 word ou =
 always ou 1256
 midendword ound 46-145
@@ -850,6 +849,10 @@ contraction yrvs
 # the letter z
 always z 1356
 always Z 1356
+
+always agosom = phagosome
+always ibosom = ribosome
+always omosom = chromosome
 
 # Système International Prefixes
 begword yotta 13456-135-2345-2345-1 10^24
