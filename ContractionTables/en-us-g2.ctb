@@ -126,6 +126,7 @@ begword belg = Belgium
 begword belk = Belkin
 always bell =
 begword belm = Belmont
+always belsh 12-15-123-146
 always belt =
 begword belv = belvedere
 begword belw = belwether
@@ -146,6 +147,8 @@ always best 12-15-34
 sufword bestow 23-34-246
 always beth 12-15-1456 Bethany
 always bethe 12-15-2346 Bethel (Hans) Bethe
+sufword bethink 23-1456-35-13
+sufword bethought 23-1456-5-2345
 always bets =
 always bett =
 sufword bev = bevies
@@ -280,6 +283,7 @@ sufword disk =
 sufword dispirit 145-24-456-234 dispirited
 begword disul = disulfide
 word do 145
+always dumb = dumbbell
 
 # the letter e
 always e 15
