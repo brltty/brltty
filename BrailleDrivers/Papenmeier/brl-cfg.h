@@ -599,6 +599,12 @@ PM_BEGIN_COMMANDS(BarSim_Status2)
   CMDS_BAR_SWSIM
 PM_END_COMMANDS
 
+PM_BEGIN_COMMANDS(BarSim_Status20)
+  CMDS_BAR_ALL,
+  CMDS_STAT_20(0X8000, 0X4000),
+  CMDS_BAR_SWSIM
+PM_END_COMMANDS
+
 
 static TerminalDefinition pmTerminalTable[] = {
   PM_TERMINAL(
@@ -711,8 +717,8 @@ static TerminalDefinition pmTerminalTable[] = {
   ,
   PM_TERMINAL(
     85,				/* identity */
-    el_40s,		/* filename of local helpfile */
-    "BrailleX EL 40s",		/* name of terminal */
+    el40s,		/* filename of local helpfile */
+    "BrailleX EL40s",		/* name of terminal */
     40, 1, 0,			/* size of display */
     0, BarSim, 			/* number of front keys */
     1, 0, 0, 1, 1		/* terminal has an easy access bar */
@@ -720,8 +726,8 @@ static TerminalDefinition pmTerminalTable[] = {
   ,
   PM_TERMINAL(
     86,				/* identity */
-    el_80_ii,		/* filename of local helpfile */
-    "BrailleX EL 80 II",		/* name of terminal */
+    el80_ii,		/* filename of local helpfile */
+    "BrailleX EL80-II",		/* name of terminal */
     80, 1, 2,			/* size of display */
     0, BarSim, 			/* number of front keys */
     1, 0, 0, 1, 1		/* terminal has an easy access bar */
@@ -729,8 +735,8 @@ static TerminalDefinition pmTerminalTable[] = {
   ,
   PM_TERMINAL(
     87,				/* identity */
-    el_66s,		/* filename of local helpfile */
-    "BrailleX EL 66s",		/* name of terminal */
+    el66s,		/* filename of local helpfile */
+    "BrailleX EL66s",		/* name of terminal */
     66, 1, 0,			/* size of display */
     0, BarSim, 			/* number of front keys */
     1, 0, 0, 1, 1		/* terminal has an easy access bar */
@@ -738,9 +744,54 @@ static TerminalDefinition pmTerminalTable[] = {
   ,
   PM_TERMINAL(
     88,				/* identity */
-    el_80s,		/* filename of local helpfile */
-    "BrailleX EL 80s",		/* name of terminal */
+    el80s,		/* filename of local helpfile */
+    "BrailleX EL80s",		/* name of terminal */
     80, 1, 0,			/* size of display */
+    0, BarSim, 			/* number of front keys */
+    1, 0, 0, 1, 1		/* terminal has an easy access bar */
+  )
+  ,
+  PM_TERMINAL(
+    89,				/* identity */
+    trio,		/* filename of local helpfile */
+    "BrailleX Trio",		/* name of terminal */
+    40, 1, 0,			/* size of display */
+    0, BarSim, 			/* number of front keys */
+    1, 0, 0, 1, 1		/* terminal has an easy access bar */
+  )
+  ,
+  PM_TERMINAL(
+    90,				/* identity */
+    el70s,		/* filename of local helpfile */
+    "BrailleX EL70s",		/* name of terminal */
+    70, 1, 0,			/* size of display */
+    0, BarSim, 			/* number of front keys */
+    1, 0, 0, 1, 1		/* terminal has an easy access bar */
+  )
+  ,
+  PM_TERMINAL(
+    91,				/* identity */
+    el2d_80s,		/* filename of local helpfile */
+    "BrailleX EL2D-80s",		/* name of terminal */
+    80, 1, 20,			/* size of display */
+    0, BarSim, 			/* number of front keys */
+    1, 0, 0, 1, 1		/* terminal has an easy access bar */
+  )
+  ,
+  PM_TERMINAL(
+    92,				/* identity */
+    elba_trio_20,		/* filename of local helpfile */
+    "BrailleX Elba (Trio 20)",		/* name of terminal */
+    20, 1, 0,			/* size of display */
+    0, BarSim, 			/* number of front keys */
+    1, 0, 0, 1, 1		/* terminal has an easy access bar */
+  )
+  ,
+  PM_TERMINAL(
+    93,				/* identity */
+    elba_trio_32,		/* filename of local helpfile */
+    "BrailleX Elba (Trio 32)",		/* name of terminal */
+    32, 1, 0,			/* size of display */
     0, BarSim, 			/* number of front keys */
     1, 0, 0, 1, 1		/* terminal has an easy access bar */
   )

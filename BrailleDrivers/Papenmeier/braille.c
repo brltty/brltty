@@ -1082,23 +1082,24 @@ initializeTerminal2 (BrailleDisplay *brl) {
     unsigned char data[13];
     unsigned char size = 0;
 
-    data[size++] = terminal->identifier;
+    data[size++] = terminal->identifier; /* device identification code */
 
-    /* Set serial baud (bcd encoded) to default (57,600). */
+    /* serial baud (bcd-encoded, six digits, one per nibble) */
+    /* set to zero for default (57,600) */
     data[size++] = 0;
     data[size++] = 0;
     data[size++] = 0;
 
-    data[size++] = terminal->statusCount; /* vertical modules */
-    data[size++] = terminal->leftKeys;
-    data[size++] = terminal->columns; /* horizontal modules */
-    data[size++] = terminal->rightKeys;
+    data[size++] = terminal->statusCount; /* number of vertical braille cells */
+    data[size++] = terminal->leftKeys; /* number of left keys and switches */
+    data[size++] = terminal->columns; /* number of horizontal braille cells */
+    data[size++] = terminal->rightKeys; /* number of right keys and switches */
 
-    data[size++] = 2; /* routing keys per cell */
+    data[size++] = 2; /* number of routing keys per braille cell */
     data[size++] = 0; /* size of LCD */
 
-    data[size++] = 1; /* keys mixed into braille data stream */
-    data[size++] = 0; /* EAB mixed into braille data stream */
+    data[size++] = 1; /* keys and switches mixed into braille data stream */
+    data[size++] = 0; /* easy access bar mixed into braille data stream */
     data[size++] = 1; /* routing keys mixed into braille data stream */
 
     LogBytes(LOG_DEBUG, "Init Packet", data, size);
