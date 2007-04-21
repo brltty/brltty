@@ -180,6 +180,7 @@ always beyond 23-13456
 word bey =
 midendword ble 3456
 midendword bleau 12-123-2-136 tableau
+midendword bleed 12-123-15-1246 nosebleed
 always bless 12-46-234 joblessness
 always blind 12-123
 contraction bl
@@ -789,7 +790,7 @@ begword trans = transtype
 always u 136
 always U 136
 begword un = unameliorated
-begword unble = unblemished
+begword unb = unblemished
 begword undis = undisturbed
 begword uneas = unease
 begword uneat = uneaten
