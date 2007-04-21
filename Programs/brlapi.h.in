@@ -629,7 +629,7 @@ int brlapi_describeKeyCode (brlapi_keyCode_t code, brlapi_describedKeyCode_t *de
  * By default, all commands but those which restart drivers and switch
  * virtual terminals are returned to the application and not to brltty.
  * If the application doesn't want to see some command events,
- * it should call either brlapi_ignoreKeySet() or brlapi_ignoreKeyRange()
+ * it should call brlapi_ignoreKeys()
  *
  * If some driver name was given to brlapi_enterTtyMode(), a raw keycode is returned,
  * as specified by the terminal driver, usually in <brltty/brldefs-xy> where xy
