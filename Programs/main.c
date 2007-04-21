@@ -1695,12 +1695,12 @@ main (int argc, char *argv[]) {
 #endif /* ENABLE_LEARN_MODE */
 
             case BRL_CMD_SWITCHVT_PREV:
-              if (switchVirtualTerminal(scr.number-1)) goto newScreen;
-              playTune(&tune_command_rejected);
+              if (!switchVirtualTerminal(scr.number-1))
+                playTune(&tune_command_rejected);
               break;
             case BRL_CMD_SWITCHVT_NEXT:
-              if (switchVirtualTerminal(scr.number+1)) goto newScreen;
-              playTune(&tune_command_rejected);
+              if (!switchVirtualTerminal(scr.number+1))
+                playTune(&tune_command_rejected);
               break;
 
 #ifdef ENABLE_SPEECH_SUPPORT
@@ -1975,8 +1975,8 @@ main (int argc, char *argv[]) {
                 }
 
                 case BRL_BLK_SWITCHVT:
-                  if (switchVirtualTerminal(arg+1)) goto newScreen;
-                  playTune(&tune_command_rejected);
+                  if (!switchVirtualTerminal(arg+1))
+                    playTune(&tune_command_rejected);
                   break;
 
                 {
@@ -2062,6 +2062,8 @@ main (int argc, char *argv[]) {
           }
         }
       }
+
+      updateScreenAttributes();
 
       /*
        * Update blink counters: 
@@ -2461,7 +2463,6 @@ main (int argc, char *argv[]) {
      * Update Braille display and screen information.  Switch screen 
      * state if screen number has changed.
      */
-  newScreen:
     updateScreenAttributes();
 
     /* NB: This should also accomplish screen resizing: scr.rows and
