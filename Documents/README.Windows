@@ -27,6 +27,43 @@ does _not_ understand MSYS paths.
 
 ------------------------------------------------------------------------------
 
+Windows 98 and Me Limitation
+=================================
+
+On Windows versions 2000, XP, 2003, and later, BRLTTY automatically accesses
+the Windows terminal which you're currently using as you switch between them.
+This isn't possible on earlier versions. One way to still achieve this
+functionality, however, is to run one BRLTTY (which directly accesses your
+braille display) on the root window and another one (which indirectly accesses
+your braille display via BrlAPI) on each terminal. This scheme may sound
+complicated, but it can be easily set up to run automatically.
+
+The first (or root) BRLTTY should be run as part of Windows startup. It must be
+given those options which are necessary to access your braille display, e.g.
+-b, -d, and all other options you'd normally specify. It must also be given the
+-Xroot=yes option, which attaches it to the root window. 
+
+An additional BRLTTY should then be run for each new terminal. It should be
+invoked like this:
+
+   brltty -bba -N
+
+The -bba option tells it to access the root BRLTTY via BrlAPI, and the -N
+option tells it not to start a BrlAPI server of its own.
+
+These BRLTTYs can be started automatically by, for example, adding this line to
+your .bashrc script. Each of these BRLTTYs takes care of the terminal it's
+running in, and connects, via BrlAPI, to the root BRLTTY in order to access
+your braille display.
+
+If you're not concerned with security, and would rather not fiddle with the
+brlapi.key file, then add the -Aauth=none option to the command line which
+invokes the root BRLTTY. You don't need to worry about unauthorized access over
+the network since the default is that only locally running programs can connect
+to BrlAPI.
+
+------------------------------------------------------------------------------
+
 USB Support
 ===========
 
@@ -99,40 +136,112 @@ time so you should only use this option if it's actually needed.
 
 ------------------------------------------------------------------------------
 
-Windows 98 and Me Limitation
-=================================
+Sharing BRLTTY with JAWS
+========================
 
-On Windows versions 2000, XP, 2003, and later, BRLTTY automatically accesses
-the Windows terminal which you're currently using as you switch between them.
-This isn't possible on earlier versions. One way to still achieve this
-functionality, however, is to run one BRLTTY (which directly accesses your
-braille display) on the root window and another one (which indirectly accesses
-your braille display via BrlAPI) on each terminal. This scheme may sound
-complicated, but it can be easily set up to run automatically.
+A common case wherein a JAWS user might want BRLTTY to be in control of the
+braille display is when using Cygwin.
 
-The first (or root) BRLTTY should be run as part of Windows startup. It must be
-given those options which are necessary to access your braille display, e.g.
--b, -d, and all other options you'd normally specify. It must also be given the
--Xroot=yes option, which attaches it to the root window. 
+There are two phases to configuring JAWS to run in the background while BRLTTY
+controls the braille display. First, the window title must be established and
+stable. Second, JAWS braille must be put to sleep.
 
-An additional BRLTTY should then be run for each new terminal. It should be
-invoked like this:
+What is a window title?
+-----------------------
 
-   brltty -bba -N
+Every window in Windows has a title bar that contains the name of the
+application which is running in it as well as some controls to do things like
+move and resize it. BRLTTY does not show this title bar.
 
-The -bba option tells it to access the root BRLTTY via BrlAPI, and the -N
-option tells it not to start a BrlAPI server of its own.
+For a program window, JAWS uses the name of the program's executable as the
+name of the configuration files to load when that program gains focus. For a
+console application such as Cygwin, however, it uses the title of the window
+instead. We must, therefore, tell JAWS within the window title that this is a
+Cygwin window.
 
-These BRLTTYs can be started automatically by, for example, adding this line to
-your .bashrc script. Each of these BRLTTYs takes care of the terminal it's
-running in, and connects, via BrlAPI, to the root BRLTTY in order to access
-your braille display.
+Setting the Window Title
+------------------------
 
-If you're not concerned with security, and would rather not fiddle with the
-brlapi.key file, then add the -Aauth=none option to the command line which
-invokes the root BRLTTY. You don't need to worry about unauthorized access over
-the network since the default is that only locally running programs can connect
-to BrlAPI.
+JAWS uses one of the words in the window title as the name of the configuration
+files to load. This file set is what tells JAWS the specifics of how to handle
+the application. It is, therefore, where JAWS must be instructed to put its
+braille component to sleep.
+
+At this writing, it appears that JAWS uses the following algorithm for choosing
+which word in the title to use as the name of the file set:
+1) If there are no slashes (/) or backslashes (\) in the title then JAWS uses 
+   the first word. Thus, if the title is "Cygwin Bash Shell" then JAWS will 
+   load the Cygwin configuration files.
+2) If there is at least one slash (/) or backslash (\) in the title then JAWS 
+   uses the last word. Thus, if the title is "$PWD - Cygwin" then JAWS will 
+   similarly load the Cygwin configuration files.
+Setting Cygwin's Window Title
+-----------------------------
+
+First, it is imperative that you replace, or at least modify, the default PS1
+(primary shell prompt) setting. The default for this setting, as distributed by
+Cygwin, places $PWD (the path to the current working directory) in the window
+title, thus requiring you to have a separate JAWS configuration for every
+directory on the system! One possible way to resolve this problem is to
+uncomment the `settitle' function which can be found near the end of `.bashrc'.
+This function allows you to place a string of your own choice in the title. You
+can use this function, therefore, as follows:
+
+   export PROMPT_COMMAND='settitle "$PWD - Cygwin"'
+   export PS1='$ '
+
+The first of these lines causes the window title to be set just before each
+shell prompt. Since $PWD always contains at least one slash (/), the operative
+word is `Cygwin' (the last word), and JAWS will load any Cygwin configuration
+files that it finds. The second of these lines sets the primary shell prompt to
+the customary dollar sign ($). More importantly, though, it replaces the
+default PS1 setting which contains escape sequences that overwrite the window
+title and, therefore, undo the effect of the `settitle' function.
+
+Putting JAWS Braille to Sleep
+-----------------------------
+
+Now that a stable window title has been established, JAWS braille can finally
+be put to sleep. While in Cygwin and with BRLTTY not running, do the following:
+1) Press Insert+F2 to bring up the Run JAWS Manager dialog.
+2) Down-Arrow to Configuration Manager and press Enter. Verify that the title 
+   on the top line contains "Cygwin.jcf".
+3) Press Alt+S for Set Options.
+4) Press B for Braille.
+5) Press S for Braille Sleep Mode.
+6) Verify that the box is checked (it should look like <x> instead of < >). 
+   Press Space to toggle the setting if the x isn't there.
+7) Press Enter to leave the menu.
+8) Press Control+S to save the file.
+9) Press Alt+F4 to exit the configuration manager.
+
+Putting JAWS Speech to Sleep
+----------------------------
+
+If you want to use JAWS speech in Windows but not in Cygwin, you can do the
+following:
+
+1) Press Insert+F2 to bring up the Run JAWS Manager dialog.
+2) Down-Arrow to Configuration Manager and press Enter. Verify that the title 
+   on the top line contains "Cygwin.jcf".
+3) Press Alt+S for Set Options.
+4) Press A for Advanced.
+5) You should be on an item labelled "Sleep Mode Enable" with an empty check
+   box (< >). Press Space to check it (<x>). 
+6) Press Enter to leave the menu.
+7) Press Control+S to save the file.
+8) Press Alt+F4 to exit the configuration manager.
+
+Performance
+-----------
+
+You'll always be able to switch to Cygwin, and BRLTTY, if running, will take
+control of the braille display automatically. Switching back to Windows and
+JAWS may be a bit more problematic, though ... the degree of success seems to
+depend on the type of braille display being used. Sometimes it works properly.
+Sometimes, with a USB display, the cable must be unplugged/replugged to allow
+JAWS to regain control. In extreme cases you may need to exit BRLTTY before
+going to Windows.
 
 ------------------------------------------------------------------------------
 
