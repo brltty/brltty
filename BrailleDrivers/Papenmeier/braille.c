@@ -51,6 +51,7 @@ typedef enum {
 
 #define BRLSTAT ST_Generic
 #define BRLCONST
+#define BRL_HAVE_FIRMNESS
 #include "Programs/brl_driver.h"
 #include "braille.h"
 
@@ -434,6 +435,7 @@ typedef struct {
   void (*writeText) (BrailleDisplay *brl, int start, int count);
   void (*writeStatus) (BrailleDisplay *brl, int start, int count);
   void (*flushCells) (BrailleDisplay *brl);
+  void (*setFirmness) (BrailleDisplay *brl, BrailleFirmness setting);
 } ProtocolOperations;
 
 static const ProtocolOperations *protocol;
@@ -835,7 +837,8 @@ releaseResources1 (void) {
 static const ProtocolOperations protocolOperations1 = {
   initializeTerminal1, releaseResources1,
   readCommand1,
-  writeText1, writeStatus1, flushCells1
+  writeText1, writeStatus1, flushCells1,
+  NULL
 };
 
 static int
@@ -1203,10 +1206,17 @@ releaseResources2 (void) {
   }
 }
 
+static void
+setFirmness2 (BrailleDisplay *brl, BrailleFirmness setting) {
+  unsigned char data[] = {(setting * 98 / BF_MAXIMUM) + 2, 0X99};
+  writePacket2(brl, 6, sizeof(data), data);
+}
+
 static const ProtocolOperations protocolOperations2 = {
   initializeTerminal2, releaseResources2,
   readCommand2,
-  writeCells2, writeCells2, flushCells2
+  writeCells2, writeCells2, flushCells2,
+  setFirmness2
 };
 
 static void
@@ -1495,3 +1505,11 @@ static int
 brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   return protocol->readCommand(brl, context);
 }
+
+static void
+brl_firmness (BrailleDisplay *brl, BrailleFirmness setting) {
+  if (protocol->setFirmness) {
+    protocol->setFirmness(brl, setting);
+  }
+}
+
