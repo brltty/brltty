@@ -61,6 +61,12 @@ getDefaultDriver (const DriverEntry *table) {
   return (table && table[0].address && !table[1].address)? table[0].definition->code: NULL;
 }
 
+static int
+isDriverCode (const char *code, const DriverDefinition *definition) {
+  if (strcmp(code, definition->code) == 0) return 1;
+  return 0;
+}
+
 const void *
 loadDriver (
   const char *driverCode, void **driverObject,
@@ -78,14 +84,12 @@ loadDriver (
     return nullAddress;
   }
 
-  if (strcmp(driverCode, nullDefinition->code) == 0) return nullAddress;
+  if (isDriverCode(driverCode, nullDefinition)) return nullAddress;
 
   if (driverTable) {
     const DriverEntry *driverEntry = driverTable;
     while (driverEntry->address) {
-      if (strcmp(driverCode, driverEntry->definition->code) == 0) {
-        return driverEntry->address;
-      }
+      if (isDriverCode(driverCode, driverEntry->definition)) return driverEntry->address;
       ++driverEntry;
     }
   }
