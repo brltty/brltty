@@ -633,7 +633,7 @@ static int brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context
 
     while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
       if (msg.message == WM_QUIT)
-	return BRL_CMD_RESTARTBRL;
+	return BRL_CMD_SHUTDOWN;
       else {
 	TranslateMessage(&msg);
 	DispatchMessage(&msg);

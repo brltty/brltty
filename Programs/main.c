@@ -1179,20 +1179,27 @@ main (int argc, char *argv[]) {
             LogPrint(LOG_DEBUG, "command: %06X -> %06X", command, real);
             command = real;
           }
+
+          switch (command & BRL_MSK_CMD) {
+            case BRL_CMD_OFFLINE:
+              if (!offline) {
+                LogPrint(LOG_NOTICE, "braille display offline");
+                offline = 1;
+              }
+              goto isOffline;
+
+            case BRL_CMD_SHUTDOWN:
+              LogPrint(LOG_NOTICE, "shutdown requested");
+              exit(0);
+          }
         }
 
-        handleAutorepeat(&command, NULL);
-        if ((command & BRL_MSK_CMD) == BRL_CMD_OFFLINE) {
-          if (!offline) {
-            LogPrint(LOG_NOTICE, "braille display offline");
-            offline = 1;
-          }
-          goto isOffline;
-        }
         if (offline) {
           LogPrint(LOG_NOTICE, "braille display online");
           offline = 0;
         }
+
+        handleAutorepeat(&command, NULL);
         if (command == EOF) break;
 
       doCommand:
