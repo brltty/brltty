@@ -1450,4 +1450,5 @@ AC_OUTPUT([
    Documents/brltty.1
    Documents/BrlAPIref.doxy
    BrailleDrivers/Voyager/mkhlp
+   Bindings/Python/setup.py
    ${brltty_make_files}])

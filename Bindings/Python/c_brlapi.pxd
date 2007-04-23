@@ -37,8 +37,6 @@ cdef extern from "Programs/brlapi.h":
 		int cursor
 		char *charset
 
-	brlapi_writeStruct_t BRLAPI_WRITESTRUCT_INITIALIZER
-
 	ctypedef struct brlapi_expandedKeyCode_t:
 		unsigned int type
 		unsigned int command
@@ -100,6 +98,9 @@ cdef extern from "Programs/brlapi.h":
 	brlapi_keyCode_t BRLAPI_KEY_CODE_MASK
 	brlapi_keyCode_t BRLAPI_KEY_CMD_BLK_MASK
 	brlapi_keyCode_t BRLAPI_KEY_CMD_ARG_MASK
+
+cdef extern from "bindings.h":
+	brlapi_writeStruct_t brlapi_writeStruct_initialized
 
 cdef extern from "stdlib.h":
 	void *malloc(size_t)

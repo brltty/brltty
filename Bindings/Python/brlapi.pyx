@@ -76,7 +76,7 @@ cdef class WriteStruct:
 	cdef c_brlapi.brlapi_writeStruct_t props
 
 	def __new__(self):
-		self.props = <c_brlapi.brlapi_writeStruct_t> c_brlapi.BRLAPI_WRITESTRUCT_INITIALIZER
+		self.props = c_brlapi.brlapi_writeStruct_initialized
 
 	property displayNumber:
 		"""Display number DISPLAY_DEFAULT == unspecified"""

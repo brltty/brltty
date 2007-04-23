@@ -1,6 +1,9 @@
 Makefile
 reldeps.mk
+setup.py
 *.auto.c
 *.auto.pyx
 brlapi.so
+build
+installed-files
 brlapi.html
