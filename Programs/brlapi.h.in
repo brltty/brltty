@@ -51,13 +51,26 @@ extern "C" {
 /* Types are defined there */
 #include <sys/types.h>
 
-/* this is for UINT64_MAX */
+#ifdef BRLAPI_WIN32
+#include <windows.h>
+#endif /* BRLAPI_WIN32 */
+
+#ifdef _MSC_VER
+typedef __int64 uint64_t;
+typedef __int32 uint32_t;
+#define UINT64_C(x) (x ## Ui64)
+#define PRIx64 "I64x"
+typedef signed int ssize_t;
+#else /* _MSC_VER */
+
+/* this is for uint*_t */
 #include <stdint.h>
 
 /* NULL is defined there */
 #include <unistd.h>
 
 #include <inttypes.h> /* For PRIx64 */
+#endif /* _MSC_VER */
 
 /** \defgroup brlapi_handles BrlAPI handles
  *
@@ -124,11 +137,10 @@ size_t brlapi_getHandleSize(void);
 #define BRLAPI_DEFAUTH BRLAPI_ETCDIR "/" BRLAPI_AUTHKEYFILE
 
 #ifdef BRLAPI_WIN32
-#include <windows.h>
 typedef HANDLE brlapi_fileDescriptor;
-#else
+#else /* BRLAPI_WIN32 */
 typedef int brlapi_fileDescriptor;
-#endif
+#endif /* BRLAPI_WIN32 */
 
 /** \brief Settings structure for \e BrlAPI connection
  *
@@ -184,10 +196,7 @@ typedef struct {
 /* BRLAPI_SETTINGS_INITIALIZER */
 /** Allows to initialize a structure of type \e brlapi_connectionSettings_t *
  * with default values. */
-#define BRLAPI_SETTINGS_INITIALIZER { \
-  .auth = NULL, \
-  .host = NULL \
-}
+#define BRLAPI_SETTINGS_INITIALIZER { NULL, NULL }
 
 /* brlapi_openConnection */
 /** Open a socket and connect it to \e BrlAPI 's server
@@ -497,17 +506,7 @@ typedef struct {
  * text = attrAnd = attrOr = NULL; (no text, no attribute)
  * cursor = ::BRLAPI_CURSOR_LEAVE; (don't touch cursor)
 */
-#define BRLAPI_WRITESTRUCT_INITIALIZER { \
-  .displayNumber = BRLAPI_DISPLAY_DEFAULT, \
-  .regionBegin = 0, \
-  .regionSize = 0, \
-  .text = NULL, \
-  .textSize = -1, \
-  .attrAnd = NULL, \
-  .attrOr = NULL, \
-  .cursor = BRLAPI_CURSOR_LEAVE, \
-  .charset = NULL \
-}
+#define BRLAPI_WRITESTRUCT_INITIALIZER { BRLAPI_DISPLAY_DEFAULT, 0, 0, NULL, -1, NULL, NULL, BRLAPI_CURSOR_LEAVE, NULL }
 
 /* brlapi_write */
 /** Update a specific region of the braille display and apply and/or masks
