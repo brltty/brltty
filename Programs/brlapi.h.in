@@ -737,7 +737,7 @@ int brlapi__acceptKeys(brlapi_handle_t *handle, brlapi_rangeType_t type, const b
  * returning them to the application via brlapi_readKey().
  */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-int brlapi_ignoreAllKeys();
+int brlapi_ignoreAllKeys(void);
 #define brlapi_ignoreAllKeys() brlapi_ignoreKeys(brlapi_rangeType_all, NULL, 0)
 #endif /* BRLAPI_NO_SINGLE_SESSION */
 int brlapi__ignoreAllKeys(brlapi_handle_t *handle);
@@ -753,7 +753,7 @@ int brlapi__ignoreAllKeys(brlapi_handle_t *handle);
  * for ignoring important keys like BRL_CMD_SWITCHVT_PREV/NEXT and such.
  */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-int brlapi_acceptAllKeys();
+int brlapi_acceptAllKeys(void);
 #define brlapi_acceptAllKeys() brlapi_acceptKeys(brlapi_rangeType_all, NULL, 0)
 #endif /* BRLAPI_NO_SINGLE_SESSION */
 int brlapi__acceptAllKeys(brlapi_handle_t *handle);
