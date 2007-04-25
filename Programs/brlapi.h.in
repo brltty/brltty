@@ -648,6 +648,37 @@ int brlapi_describeKeyCode (brlapi_keyCode_t code, brlapi_describedKeyCode_t *de
  *
  * \return -1 on error or signal interrupt and *code is then undefined, 0 if
  * block was 0 and no key was pressed so far, or 1 and *code holds the key code.
+ *
+ * Programming hints:
+ *
+ * If your application is only driven by braille command keypresses, you can
+ * just call brlapi_readKey(1, &code) so that it keeps blocking, waiting for
+ * keypresses.
+ *
+ * Else, you'll probably want to use the file descriptor returned by
+ * brlapi_openConnection() in your "big polling loop". For instance:
+ *
+ * - in a \c select() loop, just add it to the \c readfds and \c exceptfds file
+ *   descriptor sets;
+ * - in a gtk or atspi application, use
+ *   \c g_io_add_watch(fileDescriptor,G_IO_IN|G_IO_ERR|G_IO_HUP,f,data)
+ *   for adding a callback called \c f;
+ * - in an Xt/Xaw/motif-based application, use
+ *   \c XtAppAddInput(app_context,fileDescriptor,XtInputReadMask|XtInputExceptMask,f,data)
+ * - etc.
+ *
+ * and then, when you detect inbound trafic on the file descriptor, do something
+ * like this:
+ *
+ * while (brlapi_readKey(0, &code) {
+ *    // process keycode code
+ *    // ...
+ * }
+ *
+ * The \c while loop is needed for processing \e all pending key presses, else
+ * some of them may be left in libbrlapi's internal key buffer and you wouldn't
+ * get them immediately.
+ *
  */
 #ifndef BRLAPI_NO_SINGLE_SESSION
 int brlapi_readKey(int wait, brlapi_keyCode_t *code);
