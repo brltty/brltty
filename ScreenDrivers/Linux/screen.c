@@ -1415,19 +1415,19 @@ insertMapped (ScreenKey key, int (*byteInserter)(unsigned char byte)) {
         sequence = "\x1b[3~";
         break;
       case SCR_KEY_FUNCTION + 0:
-        sequence = "\x1bOP";
+        sequence = "\x1b[[A";
         break;
       case SCR_KEY_FUNCTION + 1:
-        sequence = "\x1bOQ";
+        sequence = "\x1b[[B";
         break;
       case SCR_KEY_FUNCTION + 2:
-        sequence = "\x1bOR";
+        sequence = "\x1b[[C";
         break;
       case SCR_KEY_FUNCTION + 3:
-        sequence = "\x1bOS";
+        sequence = "\x1b[[D";
         break;
       case SCR_KEY_FUNCTION + 4:
-        sequence = "\x1b[15~";
+        sequence = "\x1b[[E";
         break;
       case SCR_KEY_FUNCTION + 5:
         sequence = "\x1b[17~";
