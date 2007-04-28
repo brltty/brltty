@@ -174,16 +174,19 @@ describe_WindowsScreen (ScreenDescription *description) {
     description->cols = strlen(altTabName);
     description->posx = 0;
     description->posy = 0;
+    description->cursor = 0;
   } else if (unreadable) {
     description->rows = 1;
     description->cols = strlen(unreadable);
     description->posx = 0;
     description->posy = 0;
+    description->cursor = 0;
   } else {
     description->cols = cols = info.srWindow.Right + 1 - info.srWindow.Left;
     description->rows = rows = info.srWindow.Bottom + 1 - info.srWindow.Top;
     description->posx = info.dwCursorPosition.X - info.srWindow.Left;
     description->posy = info.dwCursorPosition.Y - info.srWindow.Top; 
+    description->cursor = 1;
   }
 }
 
