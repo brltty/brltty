@@ -121,7 +121,7 @@ static ScreenState *p;
 ScreenDescription scr;          /* For screen state infos */
 
 static void
-updateScreenAttributes (void) {
+getScreenAttributes (void) {
   int previousScreen = scr.number;
 
   describeScreen(&scr);
@@ -145,6 +145,31 @@ updateScreenAttributes (void) {
   }
 
   setTranslationTable(p->showAttributes);
+}
+
+static void
+updateScreenAttributes (void) {
+  getScreenAttributes();
+
+  {
+    int maximum = MAX(scr.rows-(int)brl.y, 0);
+    int *table[] = {&p->winy, &p->moty, NULL};
+    int **value = table;
+    while (*value) {
+      if (**value > maximum) **value = maximum;
+      ++value;
+    }
+  }
+
+  {
+    int maximum = MAX(scr.cols-1, 0);
+    int *table[] = {&p->winx, &p->motx, NULL};
+    int **value = table;
+    while (*value) {
+      if (**value > maximum) **value = maximum;
+      ++value;
+    }
+  }
 }
 
 static void
@@ -1081,7 +1106,7 @@ main (int argc, char *argv[]) {
 #endif /* SIGCHLD */
 
   atexit(exitScreenStates);
-  updateScreenAttributes();
+  getScreenAttributes();
   /* NB: screen size can sometimes change, e.g. the video mode may be changed
    * when installing a new font. This will be detected by another call to
    * describeScreen() within the main loop. Don't assume that scr.rows
@@ -2075,6 +2100,9 @@ main (int argc, char *argv[]) {
         }
       }
 
+      /* some command (key insertion, virtual terminal switching, etc)
+       * may have moved the cursor
+       */
       updateScreenAttributes();
 
       /*
@@ -2476,28 +2504,6 @@ main (int argc, char *argv[]) {
      * state if screen number has changed.
      */
     updateScreenAttributes();
-
-    /* NB: This should also accomplish screen resizing: scr.rows and
-     * scr.cols may have changed.
-     */
-    {
-      int maximum = MAX(scr.rows-(int)brl.y, 0);
-      int *table[] = {&p->winy, &p->moty, NULL};
-      int **value = table;
-      while (*value) {
-        if (**value > maximum) **value = maximum;
-        ++value;
-      }
-    }
-    {
-      int maximum = MAX(scr.cols-1, 0);
-      int *table[] = {&p->winx, &p->motx, NULL};
-      int **value = table;
-      while (*value) {
-        if (**value > maximum) **value = maximum;
-        ++value;
-      }
-    }
   }
 }
 
