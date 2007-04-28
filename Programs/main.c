@@ -570,6 +570,11 @@ sayLines (int line, int count, int track, SayMode mode) {
 }
 #endif /* ENABLE_SPEECH_SUPPORT */
 
+static inline int
+showCursor (void) {
+  return scr.cursor && prefs.showCursor && !p->hideCursor;
+}
+
 static int
 toDifferentLine (ScreenMode mode, int (*canMove) (void), int amount, int from, int width) {
   if (canMove()) {
@@ -582,7 +587,7 @@ toDifferentLine (ScreenMode mode, int (*canMove) (void), int amount, int from, i
     do {
       readScreen(from, p->winy+=amount, width, 1, buffer2, mode);
       if ((memcmp(buffer1, buffer2, width) != 0) ||
-          ((mode == SCR_TEXT) && prefs.showCursor && (scr.posy == p->winy) &&
+          ((mode == SCR_TEXT) && showCursor() && (scr.posy == p->winy) &&
            (scr.posx >= from) && (scr.posx < (from + width))))
         return 1;
 
@@ -1417,7 +1422,7 @@ main (int argc, char *argv[]) {
                 if (shiftWindowLeft()) {
                   if (prefs.skipBlankWindows) {
                     if (prefs.blankWindowsSkipMode == sbwEndOfLine) goto skipEndOfLine;
-                    if (!prefs.showCursor ||
+                    if (!showCursor() ||
                         (scr.posy != p->winy) ||
                         (scr.posx >= (p->winx + brl.x))) {
                       int charCount = MIN(scr.cols, p->winx+brl.x);
@@ -1449,7 +1454,7 @@ main (int argc, char *argv[]) {
                   for (charIndex=scr.cols-1; charIndex>=0; --charIndex)
                     if ((buffer[charIndex] != ' ') && (buffer[charIndex] != 0))
                       break;
-                  if (prefs.showCursor && (scr.posy == p->winy))
+                  if (showCursor() && (scr.posy == p->winy))
                     charIndex = MAX(charIndex, scr.posx);
                   charIndex = MAX(charIndex, 0);
                   if (charIndex < p->winx) placeRightEdge(charIndex);
@@ -1481,7 +1486,7 @@ main (int argc, char *argv[]) {
                 for (charIndex=(charCount-1); charIndex>=0; charIndex--)
                   if ((buffer[charIndex] != ' ') && (buffer[charIndex] != 0))
                     break;
-                if (prefs.showCursor &&
+                if (showCursor() &&
                     (scr.posy == p->winy) &&
                     (scr.posx < (p->winx + charCount)))
                   charIndex = MAX(charIndex, scr.posx-p->winx);
@@ -1495,7 +1500,7 @@ main (int argc, char *argv[]) {
                 int oldX = p->winx;
                 if (shiftWindowRight()) {
                   if (prefs.skipBlankWindows) {
-                    if (!prefs.showCursor ||
+                    if (!showCursor() ||
                         (scr.posy != p->winy) ||
                         (scr.posx < p->winx)) {
                       int charCount = scr.cols - p->winx;
@@ -1546,7 +1551,7 @@ main (int argc, char *argv[]) {
                 for (charIndex=0; charIndex<charCount; charIndex++)
                   if ((buffer[charIndex] != ' ') && (buffer[charIndex] != 0))
                     break;
-                if (prefs.showCursor &&
+                if (showCursor() &&
                     (scr.posy == p->winy) &&
                     (scr.posx >= p->winx))
                   charIndex = MIN(charIndex, scr.posx-p->winx);
@@ -2442,7 +2447,7 @@ main (int argc, char *argv[]) {
         }
 
         if (brl.cursor >= 0) {
-          if (prefs.showCursor && !p->hideCursor && (!prefs.blinkingCursor || cursorState)) {
+          if (showCursor() && (!prefs.blinkingCursor || cursorState)) {
             brl.buffer[brl.cursor] |= cursorDots();
           }
         }

@@ -35,6 +35,7 @@ typedef struct {
   short rows, cols;	/* screen dimensions */
   short posx, posy;	/* cursor position */
   int number;		      /* screen number */
+  unsigned cursor:1;
   const char *unreadable;
 } ScreenDescription;
 
