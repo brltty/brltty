@@ -107,3 +107,19 @@ initializeBaseScreen (BaseScreen *base) {
   base->getPointer = getPointer_BaseScreen;
   base->executeCommand = executeCommand_BaseScreen;
 }
+
+void
+describeBaseScreen (BaseScreen *base, ScreenDescription *description) {
+  description->cols = description->rows = 1;
+  description->posx = description->posy = 0;
+  description->number = 0;
+  description->cursor = 1;
+  description->unreadable = NULL;
+  base->describe(description);
+
+  if (description->unreadable) {
+    description->cursor = 0;
+  } else if (description->number == -1) {
+    description->unreadable = "unreadable screen";
+  }
+}

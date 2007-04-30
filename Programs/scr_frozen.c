@@ -30,7 +30,7 @@ static unsigned char *screenAttributes;
 
 static int
 open_FrozenScreen (BaseScreen *source) {
-  source->describe(&screenDescription);
+  describeBaseScreen(source, &screenDescription);
   if ((screenText = calloc(screenDescription.rows*screenDescription.cols, sizeof(*screenText)))) {
     if ((screenAttributes = calloc(screenDescription.rows*screenDescription.cols, sizeof(*screenAttributes)))) {
       if (source->read((ScreenBox){0, 0, screenDescription.cols, screenDescription.rows}, screenText, SCR_TEXT)) {

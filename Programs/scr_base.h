@@ -37,6 +37,7 @@ typedef struct {
 } BaseScreen;
 
 extern void initializeBaseScreen (BaseScreen *);
+extern void describeBaseScreen (BaseScreen *, ScreenDescription *);
 
 #ifdef __cplusplus
 }
