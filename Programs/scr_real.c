@@ -52,7 +52,7 @@ const ScreenDriver *
 loadScreenDriver (const char *code, void **driverObject, const char *driverDirectory) {
   return loadDriver(code, driverObject,
                     driverDirectory, driverTable,
-                    "screen", 'x', "scr_driver",
+                    "screen", 'x', "scr",
                     &noScreen, &noScreen.definition);
 }
 

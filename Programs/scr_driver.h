@@ -57,6 +57,8 @@ SCRCONST ScreenDriver SCRSYMBOL = {
   scr_initialize
 };
 
+DRIVER_VERSION_DECLARATION(scr);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

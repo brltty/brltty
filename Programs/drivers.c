@@ -71,7 +71,7 @@ const void *
 loadDriver (
   const char *driverCode, void **driverObject,
   const char *driverDirectory, const DriverEntry *driverTable,
-  const char *driverType, char driverCharacter, const char *driverSymbol,
+  const char *typeName, char typeLetter, const char *symbolPrefix,
   const void *nullAddress, const DriverDefinition *nullDefinition
 ) {
   const void *driverAddress = NULL;
@@ -99,26 +99,47 @@ loadDriver (
     const int libraryNameLength = strlen(MODULE_NAME) + strlen(driverCode) + strlen(MODULE_EXTENSION) + 3;
     char libraryName[libraryNameLength];
     snprintf(libraryName, libraryNameLength, "%s%c%s.%s",
-             MODULE_NAME, driverCharacter, driverCode, MODULE_EXTENSION);
+             MODULE_NAME, typeLetter, driverCode, MODULE_EXTENSION);
 
     if ((libraryPath = makePath(driverDirectory, libraryName))) {
       void *libraryHandle = loadSharedObject(libraryPath);
 
       if (libraryHandle) {
-        const int symbolNameLength = strlen(driverSymbol) + strlen(driverCode) + 2;
-        char symbolName[symbolNameLength];
-        snprintf(symbolName, symbolNameLength, "%s_%s",
-                 driverSymbol, driverCode);
+        const int driverSymbolLength = strlen(symbolPrefix) + 8 + strlen(driverCode) + 1;
+        char driverSymbol[driverSymbolLength];
+        snprintf(driverSymbol, driverSymbolLength, "%s_driver_%s",
+                 symbolPrefix, driverCode);
 
-        if (findSharedSymbol(libraryHandle, symbolName, &driverAddress)) {
+        if (findSharedSymbol(libraryHandle, driverSymbol, &driverAddress)) {
           *driverObject = libraryHandle;
+
+          {
+            const int versionSymbolLength = strlen(symbolPrefix) + 9 + strlen(driverCode) + 1;
+            char versionSymbol[versionSymbolLength];
+            snprintf(versionSymbol, versionSymbolLength, "%s_version_%s",
+                     symbolPrefix, driverCode);
+            const void *versionAddress = NULL;
+
+            if (findSharedSymbol(libraryHandle, versionSymbol, &versionAddress)) {
+              const char *actualVersion = versionAddress;
+              static const char *expectedVersion = PACKAGE_VERSION;
+
+              if (strcmp(actualVersion, expectedVersion) != 0) {
+                LogPrint(LOG_WARNING, "%s %s driver version %s does not match expected version %s",
+                         driverCode, typeName, actualVersion, expectedVersion);
+              }
+            } else {
+              LogPrint(LOG_WARNING, "cannot find %s %s driver version symbol: %s",
+                       driverCode, typeName, versionSymbol);
+            }
+          }
         } else {
-          LogPrint(LOG_ERR, "Cannot find %s driver symbol: %s", driverType, symbolName);
+          LogPrint(LOG_ERR, "cannot find %s driver symbol: %s", typeName, driverSymbol);
           unloadSharedObject(libraryHandle);
           driverAddress = NULL;
         }
       } else {
-        LogPrint(LOG_ERR, "Cannot load %s driver: %s", driverType, libraryPath);
+        LogPrint(LOG_ERR, "cannot load %s driver: %s", typeName, libraryPath);
       }
 
       free(libraryPath);

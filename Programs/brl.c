@@ -90,7 +90,7 @@ const BrailleDriver *
 loadBrailleDriver (const char *code, void **driverObject, const char *driverDirectory) {
   return loadDriver(code, driverObject,
                     driverDirectory, driverTable,
-                    "braille", 'b', "brl_driver",
+                    "braille", 'b', "brl",
                     &noBraille, &noBraille.definition);
 }
 

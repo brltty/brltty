@@ -106,6 +106,8 @@ SPKCONST SpeechDriver SPKSYMBOL = {
 #endif /* SPK_HAVE_VOLUME */
 };
 
+DRIVER_VERSION_DECLARATION(spk);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

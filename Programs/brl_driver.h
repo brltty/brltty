@@ -130,6 +130,8 @@ BRLCONST BrailleDriver BRLSYMBOL = {
 #endif /* BRL_HAVE_SENSITIVITY */
 };
 
+DRIVER_VERSION_DECLARATION(brl);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

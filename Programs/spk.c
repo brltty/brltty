@@ -80,7 +80,7 @@ const SpeechDriver *
 loadSpeechDriver (const char *code, void **driverObject, const char *driverDirectory) {
   return loadDriver(code, driverObject,
                     driverDirectory, driverTable,
-                    "speech", 's', "spk_driver",
+                    "speech", 's', "spk",
                     &noSpeech, &noSpeech.definition);
 }
 

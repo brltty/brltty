@@ -37,7 +37,7 @@ extern const char *getDefaultDriver (const DriverEntry *table);
 extern const void *loadDriver (
   const char *driverCode, void **driverObject,
   const char *driverDirectory, const DriverEntry *driverTable,
-  const char *driverType, char driverCharacter, const char *driverSymbol,
+  const char *typeName, char typeLetter, const char *symbolPrefix,
   const void *nullAddress, const DriverDefinition *nullDefinition
 );
 
