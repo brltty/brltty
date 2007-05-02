@@ -30,7 +30,7 @@ PYTHON_API = $(PYTHON_MODULE).$(LIB_EXT)
 all: $(PYTHON_API)
 
 $(PYTHON_API): brlapi.auto.c $(API_HDRS) brlapi
-	$(PYTHON) $(SRC_DIR)/setup.py --quiet build --build-temp . --build-base . --build-lib .
+	$(PYTHON) ./setup.py --quiet build --build-temp . --build-base . --build-lib .
 
 brlapi.auto.c: $(SRC_DIR)/brlapi.pyx $(SRC_DIR)/c_brlapi.pxd constants.auto.pyx
 	$(PYREXC) -I. -o $@ $(SRC_DIR)/brlapi.pyx
@@ -45,7 +45,7 @@ INSTALLED_FILES = installed-files
 
 install: all
 	root="$(INSTALL_ROOT)"; [ -n "$${root}" ] || root="/"; \
-	$(PYTHON) $(SRC_DIR)/setup.py --quiet install --root "$${root}" --record "$(INSTALLED_FILES)"
+	$(PYTHON) ./setup.py --quiet install --root "$${root}" --record "$(INSTALLED_FILES)"
 
 uninstall:
 	[ ! -f "$(INSTALLED_FILES)" ] || rm -f -- `$(AWK) '{printf "%s%s ", "$(INSTALL_ROOT)", $$0}' "$(INSTALLED_FILES)"`
