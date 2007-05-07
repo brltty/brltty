@@ -131,7 +131,7 @@ interpretCode (int *command, const KeyEntry *key, int release, unsigned int *mod
   return 0;
 }
 
-static const KeyEntry originalScanCodes[] = {
+static const KeyEntry originalAtScanCodes[] = {
   [0X76] = {BRL_BLK_PASSKEY+BRL_KEY_ESCAPE},
   [0X05] = {BRL_BLK_PASSKEY+BRL_KEY_FUNCTION+0},
   [0X06] = {BRL_BLK_PASSKEY+BRL_KEY_FUNCTION+1},
@@ -226,7 +226,7 @@ static const KeyEntry originalScanCodes[] = {
   [0X7D] = {BRL_BLK_PASSKEY+BRL_KEY_PAGE_UP, BRL_BLK_PASSCHAR+'9'}
 };
 
-static const KeyEntry extendedScanCodes[] = {
+static const KeyEntry emul0AtScanCodes[] = {
   [0X12] = {MOD_NUMBER_SHIFT},
   [0X1F] = {MOD_WINDOWS_LEFT},
   [0X11] = {MOD_ALT_RIGHT},
@@ -247,31 +247,36 @@ static const KeyEntry extendedScanCodes[] = {
   [0X5A] = {BRL_BLK_PASSKEY+BRL_KEY_ENTER}
 };
 
-static const KeyEntry *scanCodes;
-static size_t scanCodesSize;
-static unsigned int scanCodeModifiers;
+static const KeyEntry emul1AtScanCodes[] = {
+};
 
-#define useScanCodes(type) (scanCodes = type##ScanCodes, scanCodesSize = sizeof(type##ScanCodes))
+static const KeyEntry *AtScanCodes;
+static size_t AtScanCodesSize;
+static unsigned int AtScanCodeModifiers;
+
+#define useAtScanCodes(type) (AtScanCodes = type##AtScanCodes, AtScanCodesSize = sizeof(type##AtScanCodes))
 
 int
-AT2_interpretScanCode (int *command, unsigned char byte) {
+AT2_interpretAtScanCode (int *command, unsigned char byte) {
   if (byte == 0XF0) {
-    MOD_SET(MOD_RELEASE, scanCodeModifiers);
+    MOD_SET(MOD_RELEASE, AtScanCodeModifiers);
   } else if (byte == 0XE0) {
-    useScanCodes(extended);
-  } else if (byte < scanCodesSize) {
-    const KeyEntry *key = &scanCodes[byte];
-    int release = MOD_TST(MOD_RELEASE, scanCodeModifiers);
+    useAtScanCodes(emul0);
+  } else if (byte == 0XE1) {
+    useAtScanCodes(emul1);
+  } else if (byte < AtScanCodesSize) {
+    const KeyEntry *key = &AtScanCodes[byte];
+    int release = MOD_TST(MOD_RELEASE, AtScanCodeModifiers);
 
-    MOD_CLR(MOD_RELEASE, scanCodeModifiers);
-    useScanCodes(original);
+    MOD_CLR(MOD_RELEASE, AtScanCodeModifiers);
+    useAtScanCodes(original);
 
-    return interpretCode(command, key, release, &scanCodeModifiers);
+    return interpretCode(command, key, release, &AtScanCodeModifiers);
   }
   return 0;
 }
 
-static const KeyEntry keyCodes[0X80] = {
+static const KeyEntry originalXtScanCodes[] = {
   [0X01] = {BRL_BLK_PASSKEY+BRL_KEY_ESCAPE},
   [0X02] = {BRL_BLK_PASSCHAR+'1', BRL_BLK_PASSCHAR+'!'},
   [0X03] = {BRL_BLK_PASSCHAR+'2', BRL_BLK_PASSCHAR+'@'},
@@ -330,6 +335,7 @@ static const KeyEntry keyCodes[0X80] = {
   [0X35] = {BRL_BLK_PASSCHAR+'/', BRL_BLK_PASSCHAR+'?'},
   [0X36] = {MOD_SHIFT_RIGHT},
 
+  [0X37] = {BRL_BLK_PASSCHAR+'*'},
   [0X38] = {MOD_ALT_LEFT},
   [0X39] = {BRL_BLK_PASSCHAR+' '},
   [0X3A] = {MOD_CAPS_LOCK},
@@ -348,40 +354,76 @@ static const KeyEntry keyCodes[0X80] = {
   [0X45] = {MOD_NUMBER_LOCK},
   [0X46] = {MOD_SCROLL_LOCK},
 
+  [0X47] = {BRL_BLK_PASSCHAR+'7'},
+  [0X48] = {BRL_BLK_PASSCHAR+'8'},
+  [0X49] = {BRL_BLK_PASSCHAR+'9'},
+  [0X4A] = {BRL_BLK_PASSCHAR+'-'},
+  [0X4B] = {BRL_BLK_PASSCHAR+'4'},
+  [0X4C] = {BRL_BLK_PASSCHAR+'5'},
+  [0X4D] = {BRL_BLK_PASSCHAR+'6'},
+  [0X4E] = {BRL_BLK_PASSCHAR+'+'},
+  [0X4F] = {BRL_BLK_PASSCHAR+'1'},
+  [0X50] = {BRL_BLK_PASSCHAR+'2'},
+  [0X51] = {BRL_BLK_PASSCHAR+'3'},
+  [0X52] = {BRL_BLK_PASSCHAR+'0'},
+  [0X53] = {BRL_BLK_PASSCHAR+'.'},
+
   [0X57] = {BRL_BLK_PASSKEY+BRL_KEY_FUNCTION+10},
   [0X58] = {BRL_BLK_PASSKEY+BRL_KEY_FUNCTION+11},
-
-  [0X61] = {MOD_CONTROL_RIGHT},
-  [0X64] = {MOD_ALT_RIGHT},
-
-  [0X66] = {BRL_BLK_PASSKEY+BRL_KEY_HOME},
-  [0X67] = {BRL_BLK_PASSKEY+BRL_KEY_CURSOR_UP},
-  [0X68] = {BRL_BLK_PASSKEY+BRL_KEY_PAGE_UP},
-  [0X69] = {BRL_BLK_PASSKEY+BRL_KEY_CURSOR_LEFT},
-  [0X6A] = {BRL_BLK_PASSKEY+BRL_KEY_CURSOR_RIGHT},
-  [0X6B] = {BRL_BLK_PASSKEY+BRL_KEY_END},
-  [0X6C] = {BRL_BLK_PASSKEY+BRL_KEY_CURSOR_DOWN},
-  [0X6D] = {BRL_BLK_PASSKEY+BRL_KEY_PAGE_DOWN},
-  [0X6E] = {BRL_BLK_PASSKEY+BRL_KEY_INSERT},
-  [0X6F] = {BRL_BLK_PASSKEY+BRL_KEY_DELETE},
-
-  [0X7D] = {MOD_WINDOWS_LEFT},
-  [0X7E] = {MOD_WINDOWS_RIGHT},
-  [0X7F] = {MOD_MENU}
 };
 
-static unsigned int keyCodeModifiers;
+static const KeyEntry emul0XtScanCodes[] = {
+  [0X1C] = {BRL_BLK_PASSKEY+BRL_KEY_ENTER},
+  [0X1D] = {MOD_CONTROL_RIGHT},
+  [0X35] = {BRL_BLK_PASSCHAR+'/'},
+  [0X38] = {MOD_ALT_RIGHT},
+
+  [0X47] = {BRL_BLK_PASSKEY+BRL_KEY_HOME},
+  [0X48] = {BRL_BLK_PASSKEY+BRL_KEY_CURSOR_UP},
+  [0X49] = {BRL_BLK_PASSKEY+BRL_KEY_PAGE_UP},
+  [0X4B] = {BRL_BLK_PASSKEY+BRL_KEY_CURSOR_LEFT},
+  [0X4D] = {BRL_BLK_PASSKEY+BRL_KEY_CURSOR_RIGHT},
+  [0X4F] = {BRL_BLK_PASSKEY+BRL_KEY_END},
+  [0X50] = {BRL_BLK_PASSKEY+BRL_KEY_CURSOR_DOWN},
+  [0X51] = {BRL_BLK_PASSKEY+BRL_KEY_PAGE_DOWN},
+  [0X52] = {BRL_BLK_PASSKEY+BRL_KEY_INSERT},
+  [0X53] = {BRL_BLK_PASSKEY+BRL_KEY_DELETE},
+
+  [0X5B] = {MOD_WINDOWS_LEFT},
+  [0X5C] = {MOD_WINDOWS_RIGHT},
+  [0X5D] = {MOD_MENU}
+};
+
+static const KeyEntry emul1XtScanCodes[] = {
+};
+
+static const KeyEntry *XtScanCodes;
+static size_t XtScanCodesSize;
+static unsigned int XtScanCodeModifiers;
+
+#define useXtScanCodes(type) (XtScanCodes = type##XtScanCodes, XtScanCodesSize = sizeof(type##XtScanCodes))
 
 int
-AT2_interpretKeyCode (int *command, unsigned char byte) {
-  const KeyEntry *key = &keyCodes[byte & 0X7F];
-  int release = (byte & 0X80) != 0;
-  return interpretCode(command, key, release, &keyCodeModifiers);
+AT2_interpretXtScanCode (int *command, unsigned char byte) {
+  if (byte == 0XE0) {
+    useXtScanCodes(emul0);
+  } else if (byte == 0XE1) {
+    useXtScanCodes(emul1);
+  } else if (byte < XtScanCodesSize) {
+    const KeyEntry *key = &XtScanCodes[byte & 0X7F];
+    int release = (byte & 0X80) != 0;
+
+    useXtScanCodes(original);
+
+    return interpretCode(command, key, release, &XtScanCodeModifiers);
+  }
+  return 0;
 }
 
 void
 AT2_resetState (void) {
-  useScanCodes(original);
-  scanCodeModifiers = 0;
-  keyCodeModifiers = 0;
+  useXtScanCodes(original);
+  useAtScanCodes(original);
+  XtScanCodeModifiers = 0;
+  AtScanCodeModifiers = 0;
 }

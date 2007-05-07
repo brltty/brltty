@@ -821,6 +821,9 @@ static const At2KeyTable at2KeysE0 = {
   [0X5A] = KEY_KPENTER
 };
 
+static const At2KeyTable at2KeysE1 = {
+};
+
 static const unsigned char *at2Keys;
 static int at2Pressed;
 #endif /* HAVE_LINUX_INPUT_H */
@@ -1188,9 +1191,12 @@ insertUtf8 (unsigned char byte) {
   return insertByte(byte);
 }
 
-static const unsigned char extendedKeycodeToLinuxKeycode[0X80] = {
+static const unsigned char emul0XtScanCodeToLinuxKeycode[0X80] = {
+  [0X1C] = 0X60, /* KEY_KPENTER */
   [0X1D] = 0X61, /* KEY_RIGHTCTRL */
-  [0X38] = 0x64, /* KEY_RIGHTALT */
+  [0X35] = 0X62, /* KEY_KPSLASH */
+  [0X37] = 0X63, /* KEY_SYSRQ */
+  [0X38] = 0X64, /* KEY_RIGHTALT */
   [0X47] = 0X66, /* KEY_HOME */
   [0X48] = 0X67, /* KEY_CURSOR_UP */
   [0X49] = 0X68, /* KEY_PAGE_UP */
@@ -1201,6 +1207,14 @@ static const unsigned char extendedKeycodeToLinuxKeycode[0X80] = {
   [0X51] = 0X6D, /* KEY_PAGE_DOWN */
   [0X52] = 0X6E, /* KEY_INSERT */
   [0X53] = 0X6F, /* KEY_DELETE */
+  [0X5B] = 0X7D, /* KEY_LEFTMETA */
+  [0X5C] = 0X7E, /* KEY_RIGHTMETA */
+  [0X5D] = 0X7F, /* KEY_COMPOSE */
+};
+
+static const unsigned int emul1XtScanCodeToLinuxKeycode[0X80] = {
+  [0X01] = 0X1D0, /* KEY_FN */
+  [0X1D] = 0X77,  /* KEY_PAUSE */
 };
 
 static int
@@ -1311,7 +1325,7 @@ insertCode (ScreenKey key, int raw) {
 
       if (raw) {
         prefix = 0XE0;
-      } else if (!(code = extendedKeycodeToLinuxKeycode[code])) {
+      } else if (!(code = emul0XtScanCodeToLinuxKeycode[code])) {
         LogPrint(LOG_WARNING, "key %4.4X not suported in medium raw keycode mode.", key);
         return 0;
       }
@@ -1612,39 +1626,52 @@ executeCommand_LinuxScreen (int command) {
       break;
 
     default:
-      switch (blk) {
-        case BRL_BLK_PASSAT2:
 #ifdef HAVE_LINUX_INPUT_H
-          if (command & BRL_FLG_AT2_KEYCODE) {
+      switch (blk) {
+        case BRL_BLK_PASSXT:
+	  {
             int press = !(arg & 0X80);
             arg &= 0X7F;
 
-            if (command & BRL_FLG_AT2_EXTENDED) {
-              unsigned char code = extendedKeycodeToLinuxKeycode[arg];
+            if (command & BRL_FLG_KBD_EMUL0) {
+              unsigned char code = emul0XtScanCodeToLinuxKeycode[arg];
               if (!code) {
-                LogPrint(LOG_WARNING, "AT2 extended keycode not supported: %02X", arg);
+		LogPrint(LOG_WARNING, "Xt emul0 scancode not supported: %02X", arg);
                 return 0;
               }
               arg = code;
-            }
+	    } else if (command & BRL_FLG_KBD_EMUL1) {
+              unsigned int code = emul1XtScanCodeToLinuxKeycode[arg];
+              if (!code) {
+		LogPrint(LOG_WARNING, "Xt emul1 scancode not supported: %02X", arg);
+                return 0;
+              }
+              arg = code;
+	    }
 
             return writeKeyEvent(arg, press);
-          }
+	  }
 
+	case BRL_BLK_PASSAT:
           {
             int handled = 0;
 
-            if (command & BRL_FLG_AT2_RELEASE) {
+            if (command & BRL_FLG_KBD_RELEASE) {
               at2Pressed = 0;
             } else if (arg == 0XF0) {
               at2Pressed = 0;
               handled = 1;
             }
 
-            if (command & BRL_FLG_AT2_EXTENDED) {
+            if (command & BRL_FLG_KBD_EMUL0) {
               at2Keys = at2KeysE0;
             } else if (arg == 0XE0) {
               at2Keys = at2KeysE0;
+              handled = 1;
+	    } else if (command & BRL_FLG_KBD_EMUL1) {
+              at2Keys = at2KeysE1;
+            } else if (arg == 0XE1) {
+              at2Keys = at2KeysE1;
               handled = 1;
             }
 
@@ -1660,9 +1687,9 @@ executeCommand_LinuxScreen (int command) {
 
             if (key) return writeKeyEvent(key, pressed);
           }
-#endif /* HAVE_LINUX_INPUT_H */
           break;
       }
+#endif /* HAVE_LINUX_INPUT_H */
       break;
   }
 

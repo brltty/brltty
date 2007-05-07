@@ -748,13 +748,9 @@ insertKey_AtSpiScreen (ScreenKey key) {
 
 static int
 executeCommand_AtSpiScreen (int command) {
-  int blk = command & BRL_MSK_BLK;
+  int blk UNUSED = command & BRL_MSK_BLK;
   int arg UNUSED = command & BRL_MSK_ARG;
 
-  switch (blk) {
-    case BRL_BLK_PASSAT2:
-      break;
-  }
   return 0;
 }
 

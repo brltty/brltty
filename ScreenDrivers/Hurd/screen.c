@@ -423,13 +423,9 @@ currentVirtualTerminal_HurdScreen (void) {
 
 static int
 executeCommand_HurdScreen (int command) {
-  int blk = command & BRL_MSK_BLK;
+  int blk UNUSED = command & BRL_MSK_BLK;
   int arg UNUSED = command & BRL_MSK_ARG;
 
-  switch (blk) {
-    case BRL_BLK_PASSAT2:
-      break;
-  }
   return 0;
 }
 

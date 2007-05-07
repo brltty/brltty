@@ -1622,10 +1622,12 @@ brlapi_describeKeyCode (brlapi_keyCode_t keyCode, brlapi_describedKeyCode_t *dkc
             FLAG(LINE_TOLEFT);
             break;
 
-          case BRLAPI_KEY_CMD_PASSAT2:
-            FLAG(AT2_RELEASE);
-            FLAG(AT2_EXTENDED);
-            FLAG(AT2_KEYCODE);
+          case BRLAPI_KEY_CMD_PASSXT:
+          case BRLAPI_KEY_CMD_PASSAT:
+          case BRLAPI_KEY_CMD_PASSPS2:
+            FLAG(KBD_RELEASE);
+            FLAG(KBD_EMUL0);
+            FLAG(KBD_EMUL1);
             break;
         }
         break;

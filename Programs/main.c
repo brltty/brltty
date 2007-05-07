@@ -1873,14 +1873,19 @@ main (int argc, char *argv[]) {
                     playTune(&tune_command_rejected);
                   }
                   break;
-                case BRL_BLK_PASSAT2:
-                  if (flags & BRL_FLG_AT2_KEYCODE) {
-                    if (AT2_interpretKeyCode(&command, arg)) goto doCommand;
-                  } else {
-                    if (flags & BRL_FLG_AT2_RELEASE) AT2_interpretScanCode(&command, 0XF0);
-                    if (flags & BRL_FLG_AT2_EXTENDED) AT2_interpretScanCode(&command, 0XE0);
-                    if (AT2_interpretScanCode(&command, arg)) goto doCommand;
-                  }
+                case BRL_BLK_PASSXT:
+                  if (flags & BRL_FLG_KBD_EMUL0) AT2_interpretXtScanCode(&command, 0XE0);
+                  if (flags & BRL_FLG_KBD_EMUL1) AT2_interpretXtScanCode(&command, 0XE1);
+                  if (AT2_interpretXtScanCode(&command, arg)) goto doCommand;
+                case BRL_BLK_PASSAT:
+                  if (flags & BRL_FLG_KBD_RELEASE) AT2_interpretAtScanCode(&command, 0XF0);
+                  if (flags & BRL_FLG_KBD_EMUL0) AT2_interpretAtScanCode(&command, 0XE0);
+                  if (flags & BRL_FLG_KBD_EMUL1) AT2_interpretAtScanCode(&command, 0XE1);
+                  if (AT2_interpretAtScanCode(&command, arg)) goto doCommand;
+                  break;
+                case BRL_BLK_PASSPS2:
+                  /* not implemented yet */
+                  playTune(&tune_command_rejected);
                   break;
 
                 case BRL_BLK_ROUTE:

@@ -1445,7 +1445,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   if (at2Count) {
     unsigned char code = at2Buffer[0];
     memcpy(at2Buffer, at2Buffer+1, --at2Count);
-    return BRL_BLK_PASSAT2 + code;
+    return BRL_BLK_PASSAT + code;
   }
 
   while (1) {
@@ -1558,7 +1558,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
                         memcpy(at2Buffer+at2Count, bytes, length);
                         at2Count = newCount;
                       }
-                      return BRL_BLK_PASSAT2 + code;
+                      return BRL_BLK_PASSAT + code;
                     }
                     break;
                   }

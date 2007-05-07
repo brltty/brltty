@@ -220,11 +220,12 @@ typedef enum {
 #define BRL_FLG_CHAR_CONTROL 0X040000 /* control key pressed */
 #define BRL_FLG_CHAR_META    0X080000 /* meta key pressed */
 
-#define BRL_BLK_PASSAT2 0X2300 /* input AT set 2 keyboard scan code */
-
-#define BRL_FLG_AT2_RELEASE 0X010000 /* prepend scancode for key reelase */
-#define BRL_FLG_AT2_EXTENDED 0X020000 /* prepend scancode for extended key */
-#define BRL_FLG_AT2_KEYCODE 0X040000 /* keycode rather than scancode */
+#define BRL_BLK_PASSAT 0X2300 /* input AT (aka set 2) keyboard scan code */
+#define BRL_BLK_PASSXT 0X2400 /* input XT (aka set 1) keyboard scan code */
+#define BRL_BLK_PASSPS2 0X2500 /* input PS/2 (aka set 3) keyboard scan code */
+#define BRL_FLG_KBD_RELEASE 0X010000 /* it is a release scan code */
+#define BRL_FLG_KBD_EMUL0 0X020000 /* it is an emulation 0 scan code */
+#define BRL_FLG_KBD_EMUL1 0X040000 /* it is an emulation 1 scan code */
 
 /*
  * Please comment all BRL_GSC_* definitions. They are

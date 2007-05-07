@@ -183,7 +183,7 @@ currentVirtualTerminal_PcbiosScreen (void) {
 
 static int
 executeCommand_PcbiosScreen (int command) {
-  if ((command & BRL_MSK_BLK) == BRL_BLK_PASSAT2)
+  if ((command & BRL_MSK_BLK) == BRL_BLK_PASSXT)
     return simulateKey(command & BRL_MSK_ARG, 0);
   return 0;
 }
