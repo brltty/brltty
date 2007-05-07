@@ -47,7 +47,7 @@ main (int argc, char *argv[]) {
       fileHeader.pages = argc;
 
       if ((pageTable = malloc(fileHeader.pages * sizeof(HelpPageEntry)))) {
-        FILE *outputStream = fopen(outputPath, "w+");
+        FILE *outputStream = fopen(outputPath, "w+b");
         if (outputStream) {
           unsigned char pageNumber;
           setvbuf(outputStream, NULL, _IOFBF, 0X7FF0);
