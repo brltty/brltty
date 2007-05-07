@@ -655,7 +655,7 @@ getPreferences (void) {
 int 
 savePreferences (void) {
   int ok = 0;
-  FILE *file = openDataFile(preferencesFile, "w+");
+  FILE *file = openDataFile(preferencesFile, "w+b");
   if (file) {
     size_t length = fwrite(&prefs, 1, sizeof(prefs), file);
     if (length == sizeof(prefs)) {
