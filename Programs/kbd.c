@@ -48,7 +48,7 @@ typedef struct {
 } KeyEntry;
 
 static int
-interpretCode (int *command, const KeyEntry *key, int release, unsigned int *modifiers) {
+interpretKey (int *command, const KeyEntry *key, int release, unsigned int *modifiers) {
   int cmd = key->command;
   int blk = cmd & BRL_MSK_BLK;
 
@@ -131,7 +131,7 @@ interpretCode (int *command, const KeyEntry *key, int release, unsigned int *mod
   return 0;
 }
 
-static const KeyEntry originalAtScanCodes[] = {
+static const KeyEntry AT_basicScanCodes[] = {
   [0X76] = {BRL_BLK_PASSKEY+BRL_KEY_ESCAPE},
   [0X05] = {BRL_BLK_PASSKEY+BRL_KEY_FUNCTION+0},
   [0X06] = {BRL_BLK_PASSKEY+BRL_KEY_FUNCTION+1},
@@ -226,7 +226,7 @@ static const KeyEntry originalAtScanCodes[] = {
   [0X7D] = {BRL_BLK_PASSKEY+BRL_KEY_PAGE_UP, BRL_BLK_PASSCHAR+'9'}
 };
 
-static const KeyEntry emul0AtScanCodes[] = {
+static const KeyEntry AT_emul0ScanCodes[] = {
   [0X12] = {MOD_NUMBER_SHIFT},
   [0X1F] = {MOD_WINDOWS_LEFT},
   [0X11] = {MOD_ALT_RIGHT},
@@ -247,36 +247,36 @@ static const KeyEntry emul0AtScanCodes[] = {
   [0X5A] = {BRL_BLK_PASSKEY+BRL_KEY_ENTER}
 };
 
-static const KeyEntry emul1AtScanCodes[] = {
+static const KeyEntry AT_emul1ScanCodes[] = {
 };
 
-static const KeyEntry *AtScanCodes;
-static size_t AtScanCodesSize;
-static unsigned int AtScanCodeModifiers;
+static const KeyEntry *AT_scanCodes;
+static size_t AT_scanCodesSize;
+static unsigned int AT_scanCodeModifiers;
 
-#define useAtScanCodes(type) (AtScanCodes = type##AtScanCodes, AtScanCodesSize = sizeof(type##AtScanCodes))
+#define AT_useScanCodes(type) (AT_scanCodes = AT_##type##ScanCodes, AT_scanCodesSize = sizeof(AT_##type##ScanCodes))
 
 int
-kbdInterpretAtScanCode (int *command, unsigned char byte) {
+kbdAT_interpretScanCode (int *command, unsigned char byte) {
   if (byte == 0XF0) {
-    MOD_SET(MOD_RELEASE, AtScanCodeModifiers);
+    MOD_SET(MOD_RELEASE, AT_scanCodeModifiers);
   } else if (byte == 0XE0) {
-    useAtScanCodes(emul0);
+    AT_useScanCodes(emul0);
   } else if (byte == 0XE1) {
-    useAtScanCodes(emul1);
-  } else if (byte < AtScanCodesSize) {
-    const KeyEntry *key = &AtScanCodes[byte];
-    int release = MOD_TST(MOD_RELEASE, AtScanCodeModifiers);
+    AT_useScanCodes(emul1);
+  } else if (byte < AT_scanCodesSize) {
+    const KeyEntry *key = &AT_scanCodes[byte];
+    int release = MOD_TST(MOD_RELEASE, AT_scanCodeModifiers);
 
-    MOD_CLR(MOD_RELEASE, AtScanCodeModifiers);
-    useAtScanCodes(original);
+    MOD_CLR(MOD_RELEASE, AT_scanCodeModifiers);
+    AT_useScanCodes(basic);
 
-    return interpretCode(command, key, release, &AtScanCodeModifiers);
+    return interpretKey(command, key, release, &AT_scanCodeModifiers);
   }
   return 0;
 }
 
-static const KeyEntry originalXtScanCodes[] = {
+static const KeyEntry XT_basicScanCodes[] = {
   [0X01] = {BRL_BLK_PASSKEY+BRL_KEY_ESCAPE},
   [0X02] = {BRL_BLK_PASSCHAR+'1', BRL_BLK_PASSCHAR+'!'},
   [0X03] = {BRL_BLK_PASSCHAR+'2', BRL_BLK_PASSCHAR+'@'},
@@ -372,7 +372,7 @@ static const KeyEntry originalXtScanCodes[] = {
   [0X58] = {BRL_BLK_PASSKEY+BRL_KEY_FUNCTION+11},
 };
 
-static const KeyEntry emul0XtScanCodes[] = {
+static const KeyEntry XT_emul0ScanCodes[] = {
   [0X1C] = {BRL_BLK_PASSKEY+BRL_KEY_ENTER},
   [0X1D] = {MOD_CONTROL_RIGHT},
   [0X35] = {BRL_BLK_PASSCHAR+'/'},
@@ -394,36 +394,37 @@ static const KeyEntry emul0XtScanCodes[] = {
   [0X5D] = {MOD_MENU}
 };
 
-static const KeyEntry emul1XtScanCodes[] = {
+static const KeyEntry XT_emul1ScanCodes[] = {
 };
 
-static const KeyEntry *XtScanCodes;
-static size_t XtScanCodesSize;
-static unsigned int XtScanCodeModifiers;
+static const KeyEntry *XT_scanCodes;
+static size_t XT_scanCodesSize;
+static unsigned int XT_scanCodeModifiers;
 
-#define useXtScanCodes(type) (XtScanCodes = type##XtScanCodes, XtScanCodesSize = sizeof(type##XtScanCodes))
+#define XT_useScanCodes(type) (XT_scanCodes = XT_##type##ScanCodes, XT_scanCodesSize = sizeof(XT_##type##ScanCodes))
 
 int
-kbdInterpretXtScanCode (int *command, unsigned char byte) {
+kbdXT_interpretScanCode (int *command, unsigned char byte) {
   if (byte == 0XE0) {
-    useXtScanCodes(emul0);
+    XT_useScanCodes(emul0);
   } else if (byte == 0XE1) {
-    useXtScanCodes(emul1);
-  } else if (byte < XtScanCodesSize) {
-    const KeyEntry *key = &XtScanCodes[byte & 0X7F];
+    XT_useScanCodes(emul1);
+  } else if (byte < XT_scanCodesSize) {
+    const KeyEntry *key = &XT_scanCodes[byte & 0X7F];
     int release = (byte & 0X80) != 0;
 
-    useXtScanCodes(original);
+    XT_useScanCodes(basic);
 
-    return interpretCode(command, key, release, &XtScanCodeModifiers);
+    return interpretKey(command, key, release, &XT_scanCodeModifiers);
   }
   return 0;
 }
 
 void
 kbdResetState (void) {
-  useXtScanCodes(original);
-  useAtScanCodes(original);
-  XtScanCodeModifiers = 0;
-  AtScanCodeModifiers = 0;
+  AT_useScanCodes(basic);
+  AT_scanCodeModifiers = 0;
+
+  XT_useScanCodes(basic);
+  XT_scanCodeModifiers = 0;
 }

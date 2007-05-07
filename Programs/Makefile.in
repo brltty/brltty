@@ -303,7 +303,7 @@ bluetooth_linux.$O:
 
 ###############################################################################
 
-BRLTEST_OBJECTS = brltest.$O options.$O misc.$O $(SYSTEM_OBJECT) io_misc.$O queue.$O async.$O tbl.$O tbl_native.$O cmd.$O charset.$O lock.$O kbd.$O drivers.$O brl.$O $(BRAILLE_DRIVER_OBJECTS) touch.$O serial.$O $(USB_OBJECTS) $(BLUETOOTH_OBJECTS)
+BRLTEST_OBJECTS = brltest.$O options.$O misc.$O $(SYSTEM_OBJECT) io_misc.$O queue.$O async.$O tbl.$O tbl_native.$O cmd.$O charset.$O lock.$O drivers.$O brl.$O $(BRAILLE_DRIVER_OBJECTS) touch.$O serial.$O $(USB_OBJECTS) $(BLUETOOTH_OBJECTS)
 
 brltest$X: $(BRLTEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTEST_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(LDLIBS)

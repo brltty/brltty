@@ -23,8 +23,10 @@ extern "C" {
 #endif /* __cplusplus */
 
 extern void kbdResetState (void);
-extern int kbdInterpretXtScanCode (int *command, unsigned char byte);
-extern int kbdInterpretAtScanCode (int *command, unsigned char byte);
+
+extern int kbdAT_interpretScanCode (int *command, unsigned char byte);
+
+extern int kbdXT_interpretScanCode (int *command, unsigned char byte);
 
 #ifdef __cplusplus
 }

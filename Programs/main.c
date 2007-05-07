@@ -1864,25 +1864,26 @@ main (int argc, char *argv[]) {
                 }
 
                 case BRL_BLK_PASSCHAR:
-                  if (!insertCharacter(arg, flags)) {
-                    playTune(&tune_command_rejected);
-                  }
+                  if (!insertCharacter(arg, flags)) playTune(&tune_command_rejected);
                   break;
+
                 case BRL_BLK_PASSDOTS:
-                  if (!insertCharacter(untextTable[arg], flags)) {
-                    playTune(&tune_command_rejected);
-                  }
+                  if (!insertCharacter(untextTable[arg], flags)) playTune(&tune_command_rejected);
                   break;
-                case BRL_BLK_PASSXT:
-                  if (flags & BRL_FLG_KBD_EMUL0) kbdInterpretXtScanCode(&command, 0XE0);
-                  if (flags & BRL_FLG_KBD_EMUL1) kbdInterpretXtScanCode(&command, 0XE1);
-                  if (kbdInterpretXtScanCode(&command, arg)) goto doCommand;
+
                 case BRL_BLK_PASSAT:
-                  if (flags & BRL_FLG_KBD_RELEASE) kbdInterpretAtScanCode(&command, 0XF0);
-                  if (flags & BRL_FLG_KBD_EMUL0) kbdInterpretAtScanCode(&command, 0XE0);
-                  if (flags & BRL_FLG_KBD_EMUL1) kbdInterpretAtScanCode(&command, 0XE1);
-                  if (kbdInterpretAtScanCode(&command, arg)) goto doCommand;
+                  if (flags & BRL_FLG_KBD_RELEASE) kbdAT_interpretScanCode(&command, 0XF0);
+                  if (flags & BRL_FLG_KBD_EMUL0) kbdAT_interpretScanCode(&command, 0XE0);
+                  if (flags & BRL_FLG_KBD_EMUL1) kbdAT_interpretScanCode(&command, 0XE1);
+                  if (kbdAT_interpretScanCode(&command, arg)) goto doCommand;
                   break;
+
+                case BRL_BLK_PASSXT:
+                  if (flags & BRL_FLG_KBD_EMUL0) kbdXT_interpretScanCode(&command, 0XE0);
+                  if (flags & BRL_FLG_KBD_EMUL1) kbdXT_interpretScanCode(&command, 0XE1);
+                  if (kbdXT_interpretScanCode(&command, arg)) goto doCommand;
+                  break;
+
                 case BRL_BLK_PASSPS2:
                   /* not implemented yet */
                   playTune(&tune_command_rejected);
