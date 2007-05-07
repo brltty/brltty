@@ -38,7 +38,7 @@
 #include "cut.h"
 #include "touch.h"
 #include "cmd.h"
-#include "at2.h"
+#include "kbd.h"
 #include "scr.h"
 #include "brl.h"
 #ifdef ENABLE_SPEECH_SUPPORT
@@ -1120,7 +1120,7 @@ main (int argc, char *argv[]) {
   highlightWindow();
   getScreenPointer(&p->ptrx, &p->ptry);
 
-  AT2_resetState();
+  kbdResetState();
   resetBlinkingStates();
   if (prefs.autorepeat) resetAutorepeat();
 
@@ -1598,7 +1598,7 @@ main (int argc, char *argv[]) {
 
             case BRL_CMD_RESTARTBRL:
               restartBrailleDriver();
-              AT2_resetState();
+              kbdResetState();
               break;
             case BRL_CMD_PASTE:
               if (isLiveScreen() && !routingProcess) {
@@ -1874,14 +1874,14 @@ main (int argc, char *argv[]) {
                   }
                   break;
                 case BRL_BLK_PASSXT:
-                  if (flags & BRL_FLG_KBD_EMUL0) AT2_interpretXtScanCode(&command, 0XE0);
-                  if (flags & BRL_FLG_KBD_EMUL1) AT2_interpretXtScanCode(&command, 0XE1);
-                  if (AT2_interpretXtScanCode(&command, arg)) goto doCommand;
+                  if (flags & BRL_FLG_KBD_EMUL0) kbdInterpretXtScanCode(&command, 0XE0);
+                  if (flags & BRL_FLG_KBD_EMUL1) kbdInterpretXtScanCode(&command, 0XE1);
+                  if (kbdInterpretXtScanCode(&command, arg)) goto doCommand;
                 case BRL_BLK_PASSAT:
-                  if (flags & BRL_FLG_KBD_RELEASE) AT2_interpretAtScanCode(&command, 0XF0);
-                  if (flags & BRL_FLG_KBD_EMUL0) AT2_interpretAtScanCode(&command, 0XE0);
-                  if (flags & BRL_FLG_KBD_EMUL1) AT2_interpretAtScanCode(&command, 0XE1);
-                  if (AT2_interpretAtScanCode(&command, arg)) goto doCommand;
+                  if (flags & BRL_FLG_KBD_RELEASE) kbdInterpretAtScanCode(&command, 0XF0);
+                  if (flags & BRL_FLG_KBD_EMUL0) kbdInterpretAtScanCode(&command, 0XE0);
+                  if (flags & BRL_FLG_KBD_EMUL1) kbdInterpretAtScanCode(&command, 0XE1);
+                  if (kbdInterpretAtScanCode(&command, arg)) goto doCommand;
                   break;
                 case BRL_BLK_PASSPS2:
                   /* not implemented yet */

@@ -17,7 +17,7 @@
 
 #include "prologue.h"
 
-#include "at2.h"
+#include "kbd.h"
 #include "brldefs.h"
 
 typedef enum {
@@ -257,7 +257,7 @@ static unsigned int AtScanCodeModifiers;
 #define useAtScanCodes(type) (AtScanCodes = type##AtScanCodes, AtScanCodesSize = sizeof(type##AtScanCodes))
 
 int
-AT2_interpretAtScanCode (int *command, unsigned char byte) {
+kbdInterpretAtScanCode (int *command, unsigned char byte) {
   if (byte == 0XF0) {
     MOD_SET(MOD_RELEASE, AtScanCodeModifiers);
   } else if (byte == 0XE0) {
@@ -404,7 +404,7 @@ static unsigned int XtScanCodeModifiers;
 #define useXtScanCodes(type) (XtScanCodes = type##XtScanCodes, XtScanCodesSize = sizeof(type##XtScanCodes))
 
 int
-AT2_interpretXtScanCode (int *command, unsigned char byte) {
+kbdInterpretXtScanCode (int *command, unsigned char byte) {
   if (byte == 0XE0) {
     useXtScanCodes(emul0);
   } else if (byte == 0XE1) {
@@ -421,7 +421,7 @@ AT2_interpretXtScanCode (int *command, unsigned char byte) {
 }
 
 void
-AT2_resetState (void) {
+kbdResetState (void) {
   useXtScanCodes(original);
   useAtScanCodes(original);
   XtScanCodeModifiers = 0;

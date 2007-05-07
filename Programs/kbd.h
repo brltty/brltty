@@ -15,19 +15,19 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_AT2
-#define BRLTTY_INCLUDED_AT2
+#ifndef BRLTTY_INCLUDED_KBD
+#define BRLTTY_INCLUDED_KBD
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-extern void AT2_resetState (void);
-extern int AT2_interpretXtScanCode (int *command, unsigned char byte);
-extern int AT2_interpretAtScanCode (int *command, unsigned char byte);
+extern void kbdResetState (void);
+extern int kbdInterpretXtScanCode (int *command, unsigned char byte);
+extern int kbdInterpretAtScanCode (int *command, unsigned char byte);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_AT2 */
+#endif /* BRLTTY_INCLUDED_KBD */
