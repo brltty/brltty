@@ -173,7 +173,7 @@ static void CheckOptions(int argc, char **argv) {
 
 int main(int argc, char *argv[]) {
  transferfun *transfer;
- char driverid[3];
+ char driverName[13];
  int stilloptions=1;
  char *home;
  brlapi_settings_t brlapi_settings;
@@ -199,13 +199,13 @@ int main(int argc, char *argv[]) {
   brlapi_perror("Couldn't initialize connection with BrlAPI");
   exit(RET_ECONN);
  }
- if (brlapi_getDriverId(driverid, sizeof(driverid))<2)
+ if (brlapi_getDriverName(driverName, sizeof(driverName))<12)
  {
-  brlapi_perror("Couldn't get driver id");
+  brlapi_perror("Couldn't get driver name");
   brlapi_closeConnection();
   exit(RET_ECONN);
  }
- if (strcmp(driverid,"vs"))
+ if (strcmp(driverName,"VisioBraille"))
  {
   fprintf(stderr,"braille driver is not VisioBraille\n");
   brlapi_closeConnection();
