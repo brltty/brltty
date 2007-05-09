@@ -340,7 +340,7 @@ static const brlapi_packetTypeEntry_t brlapi_packetTypeTable[] = {
   { 0, NULL }
 };
 
-const char *BRLAPI(getPacketTypeName)(brlapi_packetType_t type)
+const char * BRLAPI_STDCALL BRLAPI(getPacketTypeName)(brlapi_packetType_t type)
 {
   const brlapi_packetTypeEntry_t *p;
   for (p = brlapi_packetTypeTable; p->type; p++)

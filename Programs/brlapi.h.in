@@ -53,6 +53,9 @@ extern "C" {
 
 #ifdef BRLAPI_WIN32
 #include <windows.h>
+#define BRLAPI_STDCALL __stdcall
+#else /* BRLAPI_WIN32 */
+#define BRLAPI_STDCALL
 #endif /* BRLAPI_WIN32 */
 
 #ifdef _MSC_VER
@@ -97,7 +100,7 @@ typedef signed int ssize_t;
 typedef struct brlapi_handle_t brlapi_handle_t;
 
 /** Returns the size of an object of type brlapi_handle_t in bytes */
-size_t brlapi_getHandleSize(void);
+size_t BRLAPI_STDCALL brlapi_getHandleSize(void);
 
 /** @} */
 
@@ -244,9 +247,9 @@ typedef struct {
  * brlapi_readPacket()
  */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-brlapi_fileDescriptor brlapi_openConnection(const brlapi_connectionSettings_t *desiredSettings, brlapi_connectionSettings_t *actualSettings);
+brlapi_fileDescriptor BRLAPI_STDCALL brlapi_openConnection(const brlapi_connectionSettings_t *desiredSettings, brlapi_connectionSettings_t *actualSettings);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
-brlapi_fileDescriptor brlapi__openConnection(brlapi_handle_t *handle, const brlapi_connectionSettings_t *desiredSettings, brlapi_connectionSettings_t *actualSettings);
+brlapi_fileDescriptor BRLAPI_STDCALL brlapi__openConnection(brlapi_handle_t *handle, const brlapi_connectionSettings_t *desiredSettings, brlapi_connectionSettings_t *actualSettings);
 
 /* brlapi_closeConnection */
 /** Cleanly close the socket
@@ -256,9 +259,9 @@ brlapi_fileDescriptor brlapi__openConnection(brlapi_handle_t *handle, const brla
  * brlapi_openConnection() gave has no meaning any more
  */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-void brlapi_closeConnection(void);
+void BRLAPI_STDCALL brlapi_closeConnection(void);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
-void brlapi__closeConnection(brlapi_handle_t *handle);
+void BRLAPI_STDCALL brlapi__closeConnection(brlapi_handle_t *handle);
 
 /** @} */
 
@@ -290,16 +293,16 @@ void brlapi__closeConnection(brlapi_handle_t *handle);
  * buffer, if the supplied one is to small (same as snprintf()).
 */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-int brlapi_getDriverName(char *buffer, size_t size);
+int BRLAPI_STDCALL brlapi_getDriverName(char *buffer, size_t size);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
-int brlapi__getDriverName(brlapi_handle_t *handle, char *buffer, size_t size);
+int BRLAPI_STDCALL brlapi__getDriverName(brlapi_handle_t *handle, char *buffer, size_t size);
 
 /* brlapi_getDisplaySize */
 /** Return the size of the braille display */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-int brlapi_getDisplaySize(unsigned int *x, unsigned int *y);
+int BRLAPI_STDCALL brlapi_getDisplaySize(unsigned int *x, unsigned int *y);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
-int brlapi__getDisplaySize(brlapi_handle_t *handle, unsigned int *x, unsigned int *y);
+int BRLAPI_STDCALL brlapi__getDisplaySize(brlapi_handle_t *handle, unsigned int *x, unsigned int *y);
 
 /** @} */
 
@@ -352,9 +355,9 @@ int brlapi__getDisplaySize(brlapi_handle_t *handle, unsigned int *x, unsigned in
  * \sa brlapi_leaveTtyMode() brlapi_readKey()
  */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-int brlapi_enterTtyMode(int tty, const char *driver);
+int BRLAPI_STDCALL brlapi_enterTtyMode(int tty, const char *driver);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
-int brlapi__enterTtyMode(brlapi_handle_t *handle, int tty, const char *driver);
+int BRLAPI_STDCALL brlapi__enterTtyMode(brlapi_handle_t *handle, int tty, const char *driver);
 
 /** Select the default tty.
  *
@@ -380,9 +383,9 @@ int brlapi__enterTtyMode(brlapi_handle_t *handle, int tty, const char *driver);
  * \sa brlapi_enterTtyMode()
  */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-int brlapi_enterTtyModeWithPath(int *ttys, int count, const char *driver);
+int BRLAPI_STDCALL brlapi_enterTtyModeWithPath(int *ttys, int count, const char *driver);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
-int brlapi__enterTtyModeWithPath(brlapi_handle_t *handle, int *ttys, int count, const char *driver);
+int BRLAPI_STDCALL brlapi__enterTtyModeWithPath(brlapi_handle_t *handle, int *ttys, int count, const char *driver);
 
 /* brlapi_leaveTtyMode */
 /** Stop controlling the tty
@@ -392,9 +395,9 @@ int brlapi__enterTtyModeWithPath(brlapi_handle_t *handle, int *ttys, int count, 
  * \sa brlapi_enterTtyMode()
  */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-int brlapi_leaveTtyMode(void);
+int BRLAPI_STDCALL brlapi_leaveTtyMode(void);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
-int brlapi__leaveTtyMode(brlapi_handle_t *handle);
+int BRLAPI_STDCALL brlapi__leaveTtyMode(brlapi_handle_t *handle);
 
 /* brlapi_setFocus */
 /** Tell the current tty to brltty
@@ -408,9 +411,9 @@ int brlapi__leaveTtyMode(brlapi_handle_t *handle);
  * \sa brlapi_enterTtyMode() brlapi_leaveTtyMode()
  */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-int brlapi_setFocus(int tty);
+int BRLAPI_STDCALL brlapi_setFocus(int tty);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
-int brlapi__setFocus(brlapi_handle_t *handle, int tty);
+int BRLAPI_STDCALL brlapi__setFocus(brlapi_handle_t *handle, int tty);
 
 /** @} */
 
@@ -447,9 +450,9 @@ int brlapi__setFocus(brlapi_handle_t *handle, int tty);
  * \return 0 on success, -1 on error.
  */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-int brlapi_writeText(int cursor, const char *text);
+int BRLAPI_STDCALL brlapi_writeText(int cursor, const char *text);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
-int brlapi__writeText(brlapi_handle_t *handle, int cursor, const char *text);
+int BRLAPI_STDCALL brlapi__writeText(brlapi_handle_t *handle, int cursor, const char *text);
 
 /* brlapi_writeDots */
 /** Write the given dots array to the display
@@ -460,9 +463,9 @@ int brlapi__writeText(brlapi_handle_t *handle, int cursor, const char *text);
  * \return 0 on success, -1 on error.
  */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-int brlapi_writeDots(const unsigned char *dots);
+int BRLAPI_STDCALL brlapi_writeDots(const unsigned char *dots);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
-int brlapi__writeDots(brlapi_handle_t *handle, const unsigned char *dots);
+int BRLAPI_STDCALL brlapi__writeDots(brlapi_handle_t *handle, const unsigned char *dots);
 
 /* brlapi_writeStruct_t */
 /** Structure containing arguments to be given to brlapi_write() */
@@ -546,9 +549,9 @@ typedef struct {
  * \return 0 on success, -1 on error.
  */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-int brlapi_write(const brlapi_writeStruct_t *arguments);
+int BRLAPI_STDCALL brlapi_write(const brlapi_writeStruct_t *arguments);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
-int brlapi__write(brlapi_handle_t *handle, const brlapi_writeStruct_t *arguments);
+int BRLAPI_STDCALL brlapi__write(brlapi_handle_t *handle, const brlapi_writeStruct_t *arguments);
 
 /** @} */
 
@@ -584,7 +587,7 @@ typedef struct {
  *
  * \return 0 on success, -1 on error
  */
-int brlapi_expandKeyCode (brlapi_keyCode_t code, brlapi_expandedKeyCode_t *expansion);
+int BRLAPI_STDCALL brlapi_expandKeyCode (brlapi_keyCode_t code, brlapi_expandedKeyCode_t *expansion);
 
 /* brlapi_describedKeyCode_t */
 /** Structure holding the components of a key code as returned by brlapi_describeKeyCode() */
@@ -605,7 +608,7 @@ typedef struct {
  *
  * \return 0 on success, -1 on error
  */
-int brlapi_describeKeyCode (brlapi_keyCode_t code, brlapi_describedKeyCode_t *description);
+int BRLAPI_STDCALL brlapi_describeKeyCode (brlapi_keyCode_t code, brlapi_describedKeyCode_t *description);
 
 /** Unicode braille row */
 #define BRLAPI_UC_ROW	0x2800UL
@@ -681,9 +684,9 @@ int brlapi_describeKeyCode (brlapi_keyCode_t code, brlapi_describedKeyCode_t *de
  *
  */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-int brlapi_readKey(int wait, brlapi_keyCode_t *code);
+int BRLAPI_STDCALL brlapi_readKey(int wait, brlapi_keyCode_t *code);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
-int brlapi__readKey(brlapi_handle_t *handle, int wait, brlapi_keyCode_t *code);
+int BRLAPI_STDCALL brlapi__readKey(brlapi_handle_t *handle, int wait, brlapi_keyCode_t *code);
 
 /** types of key ranges */
 typedef enum {
@@ -708,9 +711,9 @@ typedef enum {
  * brlapi_enterTtyMode())
  */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-int brlapi_ignoreKeys(brlapi_rangeType_t type, const brlapi_keyCode_t keys[], unsigned int count);
+int BRLAPI_STDCALL brlapi_ignoreKeys(brlapi_rangeType_t type, const brlapi_keyCode_t keys[], unsigned int count);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
-int brlapi__ignoreKeys(brlapi_handle_t *handle, brlapi_rangeType_t type, const brlapi_keyCode_t keys[], unsigned int count);
+int BRLAPI_STDCALL brlapi__ignoreKeys(brlapi_handle_t *handle, brlapi_rangeType_t type, const brlapi_keyCode_t keys[], unsigned int count);
 
 /* brlapi_acceptKeys */
 /** Accept some key presses from the braille keyboard
@@ -726,9 +729,9 @@ int brlapi__ignoreKeys(brlapi_handle_t *handle, brlapi_rangeType_t type, const b
  * brlapi_enterTtyMode())
  */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-int brlapi_acceptKeys(brlapi_rangeType_t type, const brlapi_keyCode_t keys[], unsigned int count);
+int BRLAPI_STDCALL brlapi_acceptKeys(brlapi_rangeType_t type, const brlapi_keyCode_t keys[], unsigned int count);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
-int brlapi__acceptKeys(brlapi_handle_t *handle, brlapi_rangeType_t type, const brlapi_keyCode_t keys[], unsigned int count);
+int BRLAPI_STDCALL brlapi__acceptKeys(brlapi_handle_t *handle, brlapi_rangeType_t type, const brlapi_keyCode_t keys[], unsigned int count);
 
 /* brlapi_ignoreAllKeys */
 /** Ignore all key presses from the braille keyboard
@@ -737,10 +740,10 @@ int brlapi__acceptKeys(brlapi_handle_t *handle, brlapi_rangeType_t type, const b
  * returning them to the application via brlapi_readKey().
  */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-int brlapi_ignoreAllKeys(void);
+int BRLAPI_STDCALL brlapi_ignoreAllKeys(void);
 #define brlapi_ignoreAllKeys() brlapi_ignoreKeys(brlapi_rangeType_all, NULL, 0)
 #endif /* BRLAPI_NO_SINGLE_SESSION */
-int brlapi__ignoreAllKeys(brlapi_handle_t *handle);
+int BRLAPI_STDCALL brlapi__ignoreAllKeys(brlapi_handle_t *handle);
 #define brlapi__ignoreAllKeys(handle) brlapi__ignoreKeys(handle, brlapi_rangeType_all, NULL, 0)
 
 /* brlapi_acceptAllKeys */
@@ -753,10 +756,10 @@ int brlapi__ignoreAllKeys(brlapi_handle_t *handle);
  * for ignoring important keys like BRL_CMD_SWITCHVT_PREV/NEXT and such.
  */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-int brlapi_acceptAllKeys(void);
+int BRLAPI_STDCALL brlapi_acceptAllKeys(void);
 #define brlapi_acceptAllKeys() brlapi_acceptKeys(brlapi_rangeType_all, NULL, 0)
 #endif /* BRLAPI_NO_SINGLE_SESSION */
-int brlapi__acceptAllKeys(brlapi_handle_t *handle);
+int BRLAPI_STDCALL brlapi__acceptAllKeys(brlapi_handle_t *handle);
 #define brlapi__acceptAllKeys(handle) brlapi__acceptKeys(handle, brlapi_rangeType_all, NULL, 0)
 
 /** Type for raw keycode ranges
@@ -780,9 +783,9 @@ typedef struct {
  * \note The given codes should be raw keycodes (i.e. some driver name was given
  * to brlapi_enterTtyMode()) */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-int brlapi_ignoreKeyRanges(brlapi_range_t ranges[], unsigned int count);
+int BRLAPI_STDCALL brlapi_ignoreKeyRanges(brlapi_range_t ranges[], unsigned int count);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
-int brlapi__ignoreKeyRanges(brlapi_handle_t *handle, brlapi_range_t ranges[], unsigned int count);
+int BRLAPI_STDCALL brlapi__ignoreKeyRanges(brlapi_handle_t *handle, brlapi_range_t ranges[], unsigned int count);
 
 /* brlapi_acceptKeyRanges */
 /** Accept some key presses from the braille keyboard
@@ -796,9 +799,9 @@ int brlapi__ignoreKeyRanges(brlapi_handle_t *handle, brlapi_range_t ranges[], un
  * \note The given codes should be raw keycodes (i.e. some driver name was given
  * to brlapi_enterTtyMode()) */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-int brlapi_acceptKeyRanges(brlapi_range_t ranges[], unsigned int count);
+int BRLAPI_STDCALL brlapi_acceptKeyRanges(brlapi_range_t ranges[], unsigned int count);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
-int brlapi__acceptKeyRanges(brlapi_handle_t *handle, brlapi_range_t ranges[], unsigned int count);
+int BRLAPI_STDCALL brlapi__acceptKeyRanges(brlapi_handle_t *handle, brlapi_range_t ranges[], unsigned int count);
 /** @} */
 
 /** \defgroup brlapi_driverspecific Driver-Specific modes
@@ -830,17 +833,17 @@ int brlapi__acceptKeyRanges(brlapi_handle_t *handle, brlapi_range_t ranges[], un
  * communication will be established.
  * \return 0 on success, -1 on error */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-int brlapi_enterRawMode(const char *driver);
+int BRLAPI_STDCALL brlapi_enterRawMode(const char *driver);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
-int brlapi__enterRawMode(brlapi_handle_t *handle, const char *driver);
+int BRLAPI_STDCALL brlapi__enterRawMode(brlapi_handle_t *handle, const char *driver);
 
 /* brlapi_leaveRawMode */
 /** Leave Raw mode
  * \return 0 on success, -1 on error */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-int brlapi_leaveRawMode(void);
+int BRLAPI_STDCALL brlapi_leaveRawMode(void);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
-int brlapi__leaveRawMode(brlapi_handle_t *handle);
+int BRLAPI_STDCALL brlapi__leaveRawMode(brlapi_handle_t *handle);
 
 /* brlapi_sendRaw */
 /** Send Raw data
@@ -849,9 +852,9 @@ int brlapi__leaveRawMode(brlapi_handle_t *handle);
  * \param size holds the packet size.
  * \return size on success, -1 on error */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-ssize_t brlapi_sendRaw(const void *buffer, size_t size);
+ssize_t BRLAPI_STDCALL brlapi_sendRaw(const void *buffer, size_t size);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
-ssize_t brlapi__sendRaw(brlapi_handle_t *handle, const void *buffer, size_t size);
+ssize_t BRLAPI_STDCALL brlapi__sendRaw(brlapi_handle_t *handle, const void *buffer, size_t size);
 
 /* brlapi_recvRaw */
 /** Get Raw data
@@ -861,9 +864,9 @@ ssize_t brlapi__sendRaw(brlapi_handle_t *handle, const void *buffer, size_t size
  * \param size holds the buffer size.
  * \return its size, -1 on error or signal interruption */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-ssize_t brlapi_recvRaw(void *buffer, size_t size);
+ssize_t BRLAPI_STDCALL brlapi_recvRaw(void *buffer, size_t size);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
-ssize_t brlapi__recvRaw(brlapi_handle_t *handle, void *buffer, size_t size);
+ssize_t BRLAPI_STDCALL brlapi__recvRaw(brlapi_handle_t *handle, void *buffer, size_t size);
 
 /* brlapi_suspendDriver */
 /** Suspend braille driver
@@ -871,18 +874,18 @@ ssize_t brlapi__recvRaw(brlapi_handle_t *handle, void *buffer, size_t size);
  * \return -1 on error
  */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-int brlapi_suspendDriver(const char *driver);
+int BRLAPI_STDCALL brlapi_suspendDriver(const char *driver);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
-int brlapi__suspendDriver(brlapi_handle_t *handle, const char *driver);
+int BRLAPI_STDCALL brlapi__suspendDriver(brlapi_handle_t *handle, const char *driver);
 
 /* brlapi_resumeDriver */
 /** Resume braille driver
  * \return -1 on error
  */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-int brlapi_resumeDriver(void);
+int BRLAPI_STDCALL brlapi_resumeDriver(void);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
-int brlapi__resumeDriver(brlapi_handle_t *handle);
+int BRLAPI_STDCALL brlapi__resumeDriver(brlapi_handle_t *handle);
 /** @} */
 
 /** \defgroup brlapi_error Error handling
@@ -941,7 +944,7 @@ extern const int brlapi_nerr;
  *
  * brlapi_perror() reads ::brlapi_error, and acts just like perror().
  */
-void brlapi_perror(const char *s);
+void BRLAPI_STDCALL brlapi_perror(const char *s);
 
 /* brlapi_error_t */
 /** All information that is needed to describe brlapi errors */
@@ -960,7 +963,7 @@ typedef struct {
  *
  * This gets the thread specific location of global variable ::brlapi_error
  */
-brlapi_error_t *brlapi_error_location(void);
+brlapi_error_t * BRLAPI_STDCALL brlapi_error_location(void);
 
 /** Global variable brlapi_error
  *
@@ -998,7 +1001,7 @@ extern const char *brlapi_errfun;
  * brlapi_strerror() returns the plain error message corresponding to its
  * argument.
  */
-const char *brlapi_strerror(const brlapi_error_t *error);
+const char * BRLAPI_STDCALL brlapi_strerror(const brlapi_error_t *error);
 
 /** Type for packet type. Only unsigned can cross networks, 32bits */
 typedef uint32_t brlapi_packetType_t;
@@ -1009,7 +1012,7 @@ typedef uint32_t brlapi_packetType_t;
  * brlapi_getPacketTypeName() returns the plain packet type name corresponding to
  * its argument.
  */
-const char *brlapi_getPacketTypeName(brlapi_packetType_t type);
+const char * BRLAPI_STDCALL brlapi_getPacketTypeName(brlapi_packetType_t type);
 
 /* brlapi_exceptionHandler_t */
 /** Types for exception handlers
@@ -1039,9 +1042,9 @@ typedef void (*brlapi__exceptionHandler_t)(brlapi_handle_t *handle, int error, b
  * snprintf()'s semantics.
 */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-int brlapi_strexception(char *buffer, size_t bufferSize, int error, brlapi_packetType_t type, const void *packet, size_t packetSize);
+int BRLAPI_STDCALL brlapi_strexception(char *buffer, size_t bufferSize, int error, brlapi_packetType_t type, const void *packet, size_t packetSize);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
-int brlapi__strexception(brlapi_handle_t *handle, char *buffer, size_t bufferSize, int error, brlapi_packetType_t type, const void *packet, size_t packetSize);
+int BRLAPI_STDCALL brlapi__strexception(brlapi_handle_t *handle, char *buffer, size_t bufferSize, int error, brlapi_packetType_t type, const void *packet, size_t packetSize);
 
 /* brlapi_setExceptionHandler */
 /** Set a new exception handler
@@ -1053,28 +1056,28 @@ int brlapi__strexception(brlapi_handle_t *handle, char *buffer, size_t bufferSiz
  * The default handler just prints the exception and abort()s.
  */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-brlapi_exceptionHandler_t brlapi_setExceptionHandler(brlapi_exceptionHandler_t handler);
+brlapi_exceptionHandler_t BRLAPI_STDCALL brlapi_setExceptionHandler(brlapi_exceptionHandler_t handler);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
-brlapi__exceptionHandler_t brlapi__setExceptionHandler(brlapi_handle_t *handle, brlapi__exceptionHandler_t handler);
+brlapi__exceptionHandler_t BRLAPI_STDCALL brlapi__setExceptionHandler(brlapi_handle_t *handle, brlapi__exceptionHandler_t handler);
 
 #ifndef BRLAPI_NO_SINGLE_SESSION
-void brlapi_defaultExceptionHandler(int error, brlapi_packetType_t type, const void *packet, size_t size);
+void BRLAPI_STDCALL brlapi_defaultExceptionHandler(int error, brlapi_packetType_t type, const void *packet, size_t size);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
-void brlapi__defaultExceptionHandler(brlapi_handle_t *handle, int error, brlapi_packetType_t type, const void *packet, size_t size);
+void BRLAPI_STDCALL brlapi__defaultExceptionHandler(brlapi_handle_t *handle, int error, brlapi_packetType_t type, const void *packet, size_t size);
 
 /** @} */
 
 /* Windows-specific tricks - don't look at this */
 #ifdef BRLAPI_WIN32
 #ifndef BRLAPI_NO_SINGLE_SESSION
-int brlapi_writeTextWin(int cursor, const void *str, int wide);
+int BRLAPI_STDCALL brlapi_writeTextWin(int cursor, const void *str, int wide);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
-int brlapi__writeTextWin(brlapi_handle_t *handle, int cursor, const void *str, int wide);
+int BRLAPI_STDCALL brlapi__writeTextWin(brlapi_handle_t *handle, int cursor, const void *str, int wide);
 
 #ifndef BRLAPI_NO_SINGLE_SESSION
-int brlapi_writeWin(const brlapi_writeStruct_t *s, int wide);
+int BRLAPI_STDCALL brlapi_writeWin(const brlapi_writeStruct_t *s, int wide);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
-int brlapi__writeWin(brlapi_handle_t *handle, const brlapi_writeStruct_t *s, int wide);
+int BRLAPI_STDCALL brlapi__writeWin(brlapi_handle_t *handle, const brlapi_writeStruct_t *s, int wide);
 
 #ifdef UNICODE
 #ifndef BRLAPI_NO_SINGLE_SESSION

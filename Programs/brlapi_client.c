@@ -188,7 +188,7 @@ struct brlapi_handle_t { /* Connection-specific information */
 };
 
 /* Function brlapi_getHandleSize */
-size_t brlapi_getHandleSize(void)
+size_t BRLAPI_STDCALL brlapi_getHandleSize(void)
 {
   return sizeof(brlapi_handle_t);
 }
@@ -590,7 +590,7 @@ static void updateSettings(brlapi_connectionSettings_t *s1, const brlapi_connect
 
 /* Function: brlapi_openConnection
  * Creates a socket to connect to BrlApi */
-brlapi_fileDescriptor brlapi__openConnection(brlapi_handle_t *handle, const brlapi_connectionSettings_t *clientSettings, brlapi_connectionSettings_t *usedSettings)
+brlapi_fileDescriptor BRLAPI_STDCALL brlapi__openConnection(brlapi_handle_t *handle, const brlapi_connectionSettings_t *clientSettings, brlapi_connectionSettings_t *usedSettings)
 {
   brlapi_packet_t packet;
   brlapi_packet_t serverPacket;
@@ -677,14 +677,14 @@ done:
   return handle->fileDescriptor;
 }
 
-brlapi_fileDescriptor brlapi_openConnection(const brlapi_connectionSettings_t *clientSettings, brlapi_connectionSettings_t *usedSettings)
+brlapi_fileDescriptor BRLAPI_STDCALL brlapi_openConnection(const brlapi_connectionSettings_t *clientSettings, brlapi_connectionSettings_t *usedSettings)
 {
   return brlapi__openConnection(&defaultHandle, clientSettings, usedSettings);
 }
 
 /* brlapi_closeConnection */
 /* Cleanly close the socket */
-void brlapi__closeConnection(brlapi_handle_t *handle)
+void BRLAPI_STDCALL brlapi__closeConnection(brlapi_handle_t *handle)
 {
   pthread_mutex_lock(&handle->state_mutex);
   handle->state = 0;
@@ -698,7 +698,7 @@ void brlapi__closeConnection(brlapi_handle_t *handle)
 #endif /* WINDOWS */
 }
 
-void brlapi_closeConnection(void)
+void BRLAPI_STDCALL brlapi_closeConnection(void)
 {
   brlapi__closeConnection(&defaultHandle);
 }
@@ -753,31 +753,31 @@ out:
 
 /* brlapi_enterRawMode */
 /* Switch to Raw mode */
-int brlapi__enterRawMode(brlapi_handle_t *handle, const char *driver)
+int BRLAPI_STDCALL brlapi__enterRawMode(brlapi_handle_t *handle, const char *driver)
 {
   return brlapi__getDriverSpecific(handle, driver, BRLAPI_PACKET_ENTERRAWMODE, STRAW);
 }
 
-int brlapi_enterRawMode(const char *driver)
+int BRLAPI_STDCALL brlapi_enterRawMode(const char *driver)
 {
   return brlapi__enterRawMode(&defaultHandle, driver);
 }
 
 /* brlapi_leaveRawMode */
 /* Leave Raw mode */
-int brlapi__leaveRawMode(brlapi_handle_t *handle)
+int BRLAPI_STDCALL brlapi__leaveRawMode(brlapi_handle_t *handle)
 {
   return brlapi__leaveDriverSpecific(handle, BRLAPI_PACKET_LEAVERAWMODE, STRAW);
 }
 
-int brlapi_leaveRawMode(void)
+int BRLAPI_STDCALL brlapi_leaveRawMode(void)
 {
   return brlapi__leaveRawMode(&defaultHandle);
 }
 
 /* brlapi_sendRaw */
 /* Send a Raw Packet */
-ssize_t brlapi__sendRaw(brlapi_handle_t *handle, const void *buf, size_t size)
+ssize_t BRLAPI_STDCALL brlapi__sendRaw(brlapi_handle_t *handle, const void *buf, size_t size)
 {
   ssize_t res;
   pthread_mutex_lock(&handle->fileDescriptor_mutex);
@@ -786,14 +786,14 @@ ssize_t brlapi__sendRaw(brlapi_handle_t *handle, const void *buf, size_t size)
   return res;
 }
 
-ssize_t brlapi_sendRaw(const void *buf, size_t size)
+ssize_t BRLAPI_STDCALL brlapi_sendRaw(const void *buf, size_t size)
 {
   return brlapi__sendRaw(&defaultHandle, buf, size);
 }
 
 /* brlapi_recvRaw */
 /* Get a Raw packet */
-ssize_t brlapi__recvRaw(brlapi_handle_t *handle, void *buf, size_t size)
+ssize_t BRLAPI_STDCALL brlapi__recvRaw(brlapi_handle_t *handle, void *buf, size_t size)
 {
   ssize_t res;
   if (!(handle->state & STRAW)) {
@@ -810,29 +810,29 @@ ssize_t brlapi__recvRaw(brlapi_handle_t *handle, void *buf, size_t size)
   return res;
 }
 
-ssize_t brlapi_recvRaw(void *buf, size_t size)
+ssize_t BRLAPI_STDCALL brlapi_recvRaw(void *buf, size_t size)
 {
   return brlapi__recvRaw(&defaultHandle, buf, size);
 }
 
 /* brlapi_suspendDriver */
-int brlapi__suspendDriver(brlapi_handle_t *handle, const char *driver)
+int BRLAPI_STDCALL brlapi__suspendDriver(brlapi_handle_t *handle, const char *driver)
 {
   return brlapi__getDriverSpecific(handle, driver, BRLAPI_PACKET_SUSPENDDRIVER, STSUSPEND);
 }
 
-int brlapi_suspendDriver(const char *driver)
+int BRLAPI_STDCALL brlapi_suspendDriver(const char *driver)
 {
   return brlapi__suspendDriver(&defaultHandle, driver);
 }
 
 /* brlapi_resumeDriver */
-int brlapi__resumeDriver(brlapi_handle_t *handle)
+int BRLAPI_STDCALL brlapi__resumeDriver(brlapi_handle_t *handle)
 {
   return brlapi__leaveDriverSpecific(handle, BRLAPI_PACKET_RESUMEDRIVER, STSUSPEND);
 }
 
-int brlapi_resumeDriver(void)
+int BRLAPI_STDCALL brlapi_resumeDriver(void)
 {
   return brlapi__resumeDriver(&defaultHandle);
 }
@@ -856,21 +856,21 @@ static ssize_t brlapi__request(brlapi_handle_t *handle, brlapi_packetType_t requ
 
 /* Function : brlapi_getDriverName */
 /* Name of the driver used by brltty */
-int brlapi__getDriverName(brlapi_handle_t *handle, char *name, size_t n)
+int BRLAPI_STDCALL brlapi__getDriverName(brlapi_handle_t *handle, char *name, size_t n)
 {
   ssize_t res = brlapi__request(handle, BRLAPI_PACKET_GETDRIVERNAME, name, n);
   if ((res>0) && (res<=n)) name[res-1] = '\0';
   return res;
 }
 
-int brlapi_getDriverName(char *name, size_t n)
+int BRLAPI_STDCALL brlapi_getDriverName(char *name, size_t n)
 {
   return brlapi__getDriverName(&defaultHandle, name, n);
 }
 
 /* Function : brlapi_getDisplaySize */
 /* Returns the size of the braille display */
-int brlapi__getDisplaySize(brlapi_handle_t *handle, unsigned int *x, unsigned int *y)
+int BRLAPI_STDCALL brlapi__getDisplaySize(brlapi_handle_t *handle, unsigned int *x, unsigned int *y)
 {
   uint32_t displaySize[2];
   ssize_t res;
@@ -884,7 +884,7 @@ int brlapi__getDisplaySize(brlapi_handle_t *handle, unsigned int *x, unsigned in
   return 0;
 }
 
-int brlapi_getDisplaySize(unsigned int *x, unsigned int *y)
+int BRLAPI_STDCALL brlapi_getDisplaySize(unsigned int *x, unsigned int *y)
 {
   return brlapi__getDisplaySize(&defaultHandle, x, y);
 }
@@ -941,7 +941,7 @@ static int getControllingTty(void)
 
 /* Function : brlapi_enterTtyMode */
 /* Takes control of a tty */
-int brlapi__enterTtyMode(brlapi_handle_t *handle, int tty, const char *driverName)
+int BRLAPI_STDCALL brlapi__enterTtyMode(brlapi_handle_t *handle, int tty, const char *driverName)
 {
   /* Determine which tty to take control of */
   if (tty<0) tty = getControllingTty();
@@ -954,14 +954,14 @@ int brlapi__enterTtyMode(brlapi_handle_t *handle, int tty, const char *driverNam
   return tty;
 }
 
-int brlapi_enterTtyMode(int tty, const char *how)
+int BRLAPI_STDCALL brlapi_enterTtyMode(int tty, const char *how)
 {
   return brlapi__enterTtyMode(&defaultHandle, tty, how);
 }
 
 /* Function : brlapi_enterTtyModeWithPath */
 /* Takes control of a tty path */
-int brlapi__enterTtyModeWithPath(brlapi_handle_t *handle, int *ttys, int nttys, const char *driverName)
+int BRLAPI_STDCALL brlapi__enterTtyModeWithPath(brlapi_handle_t *handle, int *ttys, int nttys, const char *driverName)
 {
   int res;
   brlapi_packet_t packet;
@@ -1016,14 +1016,14 @@ int brlapi__enterTtyModeWithPath(brlapi_handle_t *handle, int *ttys, int nttys, 
   return res;
 }
 
-int brlapi_enterTtyModeWithPath(int *ttys, int nttys, const char *how)
+int BRLAPI_STDCALL brlapi_enterTtyModeWithPath(int *ttys, int nttys, const char *how)
 {
   return brlapi__enterTtyModeWithPath(&defaultHandle, ttys, nttys, how);
 }
 
 /* Function : brlapi_leaveTtyMode */
 /* Gives back control of our tty to brltty */
-int brlapi__leaveTtyMode(brlapi_handle_t *handle)
+int BRLAPI_STDCALL brlapi__leaveTtyMode(brlapi_handle_t *handle)
 {
   int res;
   pthread_mutex_lock(&handle->state_mutex);
@@ -1040,14 +1040,14 @@ out:
   return res;
 }
 
-int brlapi_leaveTtyMode(void)
+int BRLAPI_STDCALL brlapi_leaveTtyMode(void)
 {
   return brlapi__leaveTtyMode(&defaultHandle);
 }
 
 /* Function : brlapi_setFocus */
 /* sends the current focus to brltty */
-int brlapi__setFocus(brlapi_handle_t *handle, int tty)
+int BRLAPI_STDCALL brlapi__setFocus(brlapi_handle_t *handle, int tty)
 {
   uint32_t utty;
   int res;
@@ -1058,7 +1058,7 @@ int brlapi__setFocus(brlapi_handle_t *handle, int tty)
   return res;
 }
 
-int brlapi_setFocus(int tty)
+int BRLAPI_STDCALL brlapi_setFocus(int tty)
 {
   return brlapi__setFocus(&defaultHandle, tty);
 }
@@ -1110,7 +1110,7 @@ static size_t getCharset(unsigned char *buffer)
 /* Function : brlapi_writeText */
 /* Writes a string to the braille display */
 #ifdef WINDOWS
-int brlapi__writeTextWin(brlapi_handle_t *handle, int cursor, const void *str, int wide)
+int BRLAPI_STDCALL brlapi__writeTextWin(brlapi_handle_t *handle, int cursor, const void *str, int wide)
 #else /* WINDOWS */
 int brlapi__writeText(brlapi_handle_t *handle, int cursor, const char *str)
 #endif /* WINDOWS */
@@ -1214,7 +1214,7 @@ endcount:
 }
 
 #ifdef WINDOWS
-int brlapi_writeTextWin(int cursor, const void *str, int wide)
+int BRLAPI_STDCALL brlapi_writeTextWin(int cursor, const void *str, int wide)
 {
   return brlapi__writeTextWin(&defaultHandle, cursor, str, wide);
 }
@@ -1227,7 +1227,7 @@ int brlapi_writeText(int cursor, const char *str)
 
 /* Function : brlapi_writeDots */
 /* Writes dot-matrix to the braille display */
-int brlapi__writeDots(brlapi_handle_t *handle, const unsigned char *dots)
+int BRLAPI_STDCALL brlapi__writeDots(brlapi_handle_t *handle, const unsigned char *dots)
 {
   int res;
   unsigned int size = handle->brlx * handle->brly;
@@ -1254,7 +1254,7 @@ int brlapi__writeDots(brlapi_handle_t *handle, const unsigned char *dots)
   return res;
 }
 
-int brlapi_writeDots(const unsigned char *dots)
+int BRLAPI_STDCALL brlapi_writeDots(const unsigned char *dots)
 {
   return brlapi__writeDots(&defaultHandle, dots);
 }
@@ -1262,7 +1262,7 @@ int brlapi_writeDots(const unsigned char *dots)
 /* Function : brlapi_write */
 /* Extended writes on braille displays */
 #ifdef WINDOWS
-int brlapi__writeWin(brlapi_handle_t *handle, const brlapi_writeStruct_t *s, int wide)
+int BRLAPI_STDCALL brlapi__writeWin(brlapi_handle_t *handle, const brlapi_writeStruct_t *s, int wide)
 #else /* WINDOWS */
 int brlapi__write(brlapi_handle_t *handle, const brlapi_writeStruct_t *s)
 #endif /* WINDOWS */
@@ -1367,7 +1367,7 @@ send:
 }
 
 #ifdef WINDOWS
-int brlapi_writeWin(const brlapi_writeStruct_t *s, int wide)
+int BRLAPI_STDCALL brlapi_writeWin(const brlapi_writeStruct_t *s, int wide)
 {
   return brlapi__writeWin(&defaultHandle, s, wide);
 }
@@ -1412,7 +1412,7 @@ static int packetReady(brlapi_handle_t *handle)
 
 /* Function : brlapi_readKey */
 /* Reads a key from the braille keyboard */
-int brlapi__readKey(brlapi_handle_t *handle, int block, brlapi_keyCode_t *code)
+int BRLAPI_STDCALL brlapi__readKey(brlapi_handle_t *handle, int block, brlapi_keyCode_t *code)
 {
   ssize_t res;
   uint32_t buf[2];
@@ -1459,7 +1459,7 @@ int brlapi__readKey(brlapi_handle_t *handle, int block, brlapi_keyCode_t *code)
   return 1;
 }
 
-int brlapi_readKey(int block, brlapi_keyCode_t *code)
+int BRLAPI_STDCALL brlapi_readKey(int block, brlapi_keyCode_t *code)
 {
   return brlapi__readKey(&defaultHandle, block, code) ;
 }
@@ -1536,7 +1536,7 @@ brlapi_getArgumentWidth (brlapi_keyCode_t keyCode) {
   return -1;
 }
 
-int
+int BRLAPI_STDCALL
 brlapi_expandKeyCode (brlapi_keyCode_t keyCode, brlapi_expandedKeyCode_t *ekc) {
   int argumentWidth = brlapi_getArgumentWidth(keyCode);
 
@@ -1556,7 +1556,7 @@ brlapi_expandKeyCode (brlapi_keyCode_t keyCode, brlapi_expandedKeyCode_t *ekc) {
   return -1;
 }
 
-int
+int BRLAPI_STDCALL
 brlapi_describeKeyCode (brlapi_keyCode_t keyCode, brlapi_describedKeyCode_t *dkc) {
   brlapi_expandedKeyCode_t ekc;
   int result = brlapi_expandKeyCode(keyCode, &ekc);
@@ -1722,45 +1722,45 @@ static int ignore_accept_keys(brlapi_handle_t *handle, int what, brlapi_rangeTyp
 }
 
 /* Function : brlapi_acceptKeyRanges */
-int brlapi__acceptKeyRanges(brlapi_handle_t *handle, brlapi_range_t ranges[], unsigned int n)
+int BRLAPI_STDCALL brlapi__acceptKeyRanges(brlapi_handle_t *handle, brlapi_range_t ranges[], unsigned int n)
 {
   return ignore_accept_key_ranges(handle, !0, ranges, n);
 }
 
-int brlapi_acceptKeyRanges(brlapi_range_t ranges[], unsigned int n)
+int BRLAPI_STDCALL brlapi_acceptKeyRanges(brlapi_range_t ranges[], unsigned int n)
 {
   return brlapi__acceptKeyRanges(&defaultHandle, ranges, n);
 }
 
 /* Function : brlapi_acceptKeys */
-int brlapi__acceptKeys(brlapi_handle_t *handle, brlapi_rangeType_t r, const brlapi_keyCode_t *code, unsigned int n)
+int BRLAPI_STDCALL brlapi__acceptKeys(brlapi_handle_t *handle, brlapi_rangeType_t r, const brlapi_keyCode_t *code, unsigned int n)
 {
   return ignore_accept_keys(handle, !0, r, code, n);
 }
 
-int brlapi_acceptKeys(brlapi_rangeType_t r, const brlapi_keyCode_t *code, unsigned int n)
+int BRLAPI_STDCALL brlapi_acceptKeys(brlapi_rangeType_t r, const brlapi_keyCode_t *code, unsigned int n)
 {
   return brlapi__acceptKeys(&defaultHandle, r, code, n);
 }
 
 /* Function : brlapi_ignoreKeyRanges */
-int brlapi__ignoreKeyRanges(brlapi_handle_t *handle, brlapi_range_t ranges[], unsigned int n)
+int BRLAPI_STDCALL brlapi__ignoreKeyRanges(brlapi_handle_t *handle, brlapi_range_t ranges[], unsigned int n)
 {
   return ignore_accept_key_ranges(handle, 0, ranges, n);
 }
 
-int brlapi_ignoreKeyRanges(brlapi_range_t ranges[], unsigned int n)
+int BRLAPI_STDCALL brlapi_ignoreKeyRanges(brlapi_range_t ranges[], unsigned int n)
 {
   return brlapi__ignoreKeyRanges(&defaultHandle, ranges, n);
 }
 
 /* Function : brlapi_ignoreKeys */
-int brlapi__ignoreKeys(brlapi_handle_t *handle, brlapi_rangeType_t r, const brlapi_keyCode_t *code, unsigned int n)
+int BRLAPI_STDCALL brlapi__ignoreKeys(brlapi_handle_t *handle, brlapi_rangeType_t r, const brlapi_keyCode_t *code, unsigned int n)
 {
   return ignore_accept_keys(handle, 0, r, code, n);
 }
 
-int brlapi_ignoreKeys(brlapi_rangeType_t r, const brlapi_keyCode_t *code, unsigned int n)
+int BRLAPI_STDCALL brlapi_ignoreKeys(brlapi_rangeType_t r, const brlapi_keyCode_t *code, unsigned int n)
 {
   return brlapi__ignoreKeys(&defaultHandle, r, code, n);
 }
@@ -1792,7 +1792,7 @@ const char *brlapi_errlist[] = {
 const int brlapi_nerr = (sizeof(brlapi_errlist)/sizeof(char*)) - 1;
 
 /* brlapi_strerror: return error message */
-const char *brlapi_strerror(const brlapi_error_t *error)
+const char * BRLAPI_STDCALL brlapi_strerror(const brlapi_error_t *error)
 {
   static char errmsg[128];
   if (error->brlerrno>=brlapi_nerr)
@@ -1826,7 +1826,7 @@ const char *brlapi_strerror(const brlapi_error_t *error)
 }
 
 /* brlapi_perror: error message printing */
-void brlapi_perror(const char *s)
+void BRLAPI_STDCALL brlapi_perror(const char *s)
 {
   fprintf(stderr,"%s: %s\n",s,brlapi_strerror(&brlapi_error));
 }
@@ -1871,7 +1871,7 @@ static void error_key_alloc(void)
 
 /* how to get per-thread errno variable. This will be called by the macro
  * brlapi_errno */
-brlapi_error_t *brlapi_error_location(void)
+brlapi_error_t * BRLAPI_STDCALL brlapi_error_location(void)
 {
   brlapi_error_t *errorp;
 #ifndef WINDOWS
@@ -1896,7 +1896,7 @@ brlapi_error_t *brlapi_error_location(void)
   return &brlapi_error;
 }
 
-brlapi__exceptionHandler_t brlapi__setExceptionHandler(brlapi_handle_t *handle, brlapi__exceptionHandler_t new)
+brlapi__exceptionHandler_t BRLAPI_STDCALL brlapi__setExceptionHandler(brlapi_handle_t *handle, brlapi__exceptionHandler_t new)
 {
   brlapi__exceptionHandler_t tmp;
   pthread_mutex_lock(&handle->exceptionHandler_mutex);
@@ -1906,7 +1906,7 @@ brlapi__exceptionHandler_t brlapi__setExceptionHandler(brlapi_handle_t *handle, 
   return tmp;
 }
 
-brlapi_exceptionHandler_t brlapi_setExceptionHandler(brlapi_exceptionHandler_t new)
+brlapi_exceptionHandler_t BRLAPI_STDCALL brlapi_setExceptionHandler(brlapi_exceptionHandler_t new)
 {
   brlapi_exceptionHandler_t tmp;
   pthread_mutex_lock(&defaultHandle.exceptionHandler_mutex);
@@ -1916,7 +1916,7 @@ brlapi_exceptionHandler_t brlapi_setExceptionHandler(brlapi_exceptionHandler_t n
   return tmp;
 }
 
-int brlapi__strexception(brlapi_handle_t *handle, char *buf, size_t n, int err, brlapi_packetType_t type, const void *packet, size_t size)
+int BRLAPI_STDCALL brlapi__strexception(brlapi_handle_t *handle, char *buf, size_t n, int err, brlapi_packetType_t type, const void *packet, size_t size)
 {
   int chars = 16; /* Number of bytes to dump */
   char hexString[3*chars+1];
@@ -1931,12 +1931,12 @@ int brlapi__strexception(brlapi_handle_t *handle, char *buf, size_t n, int err, 
     brlapi_strerror(&error), brlapi_getPacketTypeName(type), (int)size, hexString);
 }
 
-int brlapi_strexception(char *buf, size_t n, int err, brlapi_packetType_t type, const void *packet, size_t size)
+int BRLAPI_STDCALL brlapi_strexception(char *buf, size_t n, int err, brlapi_packetType_t type, const void *packet, size_t size)
 {
   return brlapi__strexception(&defaultHandle, buf, n, err, type, packet, size);
 }
 
-void brlapi__defaultExceptionHandler(brlapi_handle_t *handle, int err, brlapi_packetType_t type, const void *packet, size_t size)
+void BRLAPI_STDCALL brlapi__defaultExceptionHandler(brlapi_handle_t *handle, int err, brlapi_packetType_t type, const void *packet, size_t size)
 {
   char str[0X100];
   brlapi_strexception(str,0X100, err, type, packet, size);
@@ -1944,7 +1944,7 @@ void brlapi__defaultExceptionHandler(brlapi_handle_t *handle, int err, brlapi_pa
   abort();
 }
 
-void brlapi_defaultExceptionHandler(int err, brlapi_packetType_t type, const void *packet, size_t size)
+void BRLAPI_STDCALL brlapi_defaultExceptionHandler(int err, brlapi_packetType_t type, const void *packet, size_t size)
 {
   brlapi__defaultExceptionHandler(&defaultHandle, err, type, packet, size);
 }
