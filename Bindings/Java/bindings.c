@@ -86,7 +86,7 @@ static void ThrowError(JNIEnv *jenv, const char *msg) {
   }
 }
 
-static void exceptionHandler(brlapi_handle_t *handle, int err, brlapi_packetType_t type, const void *buf, size_t size) {
+static void BRLAPI_STDCALL exceptionHandler(brlapi_handle_t *handle, int err, brlapi_packetType_t type, const void *buf, size_t size) {
   jarray jbuf;
   jclass jcexcep;
   jmethodID jinit;

@@ -132,7 +132,7 @@ static void raise_brlapi_error(char *fun)
 
 /* Function : raise_brlapi_exception */
 /* Raises Brlapi_exception*/
-static void raise_brlapi_exception(int err, brlapi_type_t type, const void *packet, size_t size)
+static void BRLAPI_STDCALL raise_brlapi_exception(int err, brlapi_type_t type, const void *packet, size_t size)
 {
   static value *exception = NULL;
   int i;

@@ -1027,9 +1027,9 @@ const char * BRLAPI_STDCALL brlapi_getPacketTypeName(brlapi_packetType_t type);
  * \param size gives the guilty packet's size.
  */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-typedef void (*brlapi_exceptionHandler_t)(int error, brlapi_packetType_t type, const void *packet, size_t size);
+typedef void (BRLAPI_STDCALL *brlapi_exceptionHandler_t)(int error, brlapi_packetType_t type, const void *packet, size_t size);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
-typedef void (*brlapi__exceptionHandler_t)(brlapi_handle_t *handle, int error, brlapi_packetType_t type, const void *packet, size_t size);
+typedef void (BRLAPI_STDCALL *brlapi__exceptionHandler_t)(brlapi_handle_t *handle, int error, brlapi_packetType_t type, const void *packet, size_t size);
 
 /* brlapi_strexception */
 /** Describes an exception
