@@ -105,21 +105,21 @@ static void brl_writeWindow(BrailleDisplay *brl)
   if (vt == -1) {
     /* should leave display */
     if (prevShown) {
-      brlapi_writeArguments_t ws = BRLAPI_WRITEARGUMENTS_INITIALIZER;
-      brlapi_write(&ws);
+      brlapi_writeArguments_t arguments = BRLAPI_WRITEARGUMENTS_INITIALIZER;
+      brlapi_write(&arguments);
       prevShown = 0;
     }
     return;
   } else {
-    brlapi_writeArguments_t ws = BRLAPI_WRITEARGUMENTS_INITIALIZER;
+    brlapi_writeArguments_t arguments = BRLAPI_WRITEARGUMENTS_INITIALIZER;
     unsigned char and[displaySize];
     if (prevShown && memcmp(prevData,brl->buffer,displaySize)==0) return;
     memset(and,0,sizeof(and));
-    ws.regionBegin = 1;
-    ws.regionSize = displaySize;
-    ws.andMask = and;
-    ws.orMask = brl->buffer;
-    if (brlapi_write(&ws)==0) {
+    arguments.regionBegin = 1;
+    arguments.regionSize = displaySize;
+    arguments.andMask = and;
+    arguments.orMask = brl->buffer;
+    if (brlapi_write(&arguments)==0) {
       memcpy(prevData,brl->buffer,displaySize);
       prevShown = 1;
     } else {
@@ -139,8 +139,8 @@ static void brl_writeVisual(BrailleDisplay *brl)
   if (vt == -1) {
     /* should leave display */
     if (prevShown) {
-      brlapi_writeArguments_t ws = BRLAPI_WRITEARGUMENTS_INITIALIZER;
-      brlapi_write(&ws);
+      brlapi_writeArguments_t arguments = BRLAPI_WRITEARGUMENTS_INITIALIZER;
+      brlapi_write(&arguments);
       prevShown = 0;
     }
     return;

@@ -70,7 +70,7 @@ brltty_brl_send_dots (guchar         *dots,
                         len = dd.x * dd.y;
     guchar                 sendbuff[256];
 
-    brlapi_writeStruct_t ws = BRLAPI_WRITESTRUCT_INITIALIZER;
+    brlapi_writeArguments_t arguments = BRLAPI_WRITEARGUMENTS_INITIALIZER;
   
     if (count > len) 
         return 0;
@@ -106,10 +106,10 @@ brltty_brl_send_dots (guchar         *dots,
         memset (&sendbuff[count], 0, len-count);
     }
 
-    ws.regionBegin = 1;
-    ws.regionSize = len;
-    ws.orMask = sendbuff;
-    if (brlapi_write(&ws) == 0) 
+    arguments.regionBegin = 1;
+    arguments.regionSize = len;
+    arguments.orMask = sendbuff;
+    if (brlapi_write(&arguments) == 0) 
         return 1;
     else 
     {
