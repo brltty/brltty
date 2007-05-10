@@ -22,4 +22,4 @@
 
 #include "Programs/brlapi.h"
 
-const brlapi_writeStruct_t brlapi_writeStruct_initialized = BRLAPI_WRITESTRUCT_INITIALIZER;
+const brlapi_writeArguments_t brlapi_writeArguments_initialized = BRLAPI_WRITEARGUMENTS_INITIALIZER;

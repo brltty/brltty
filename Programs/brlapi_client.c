@@ -1118,8 +1118,8 @@ int brlapi__writeText(brlapi_handle_t *handle, int cursor, const char *str)
   int dispSize = handle->brlx * handle->brly;
   unsigned int min;
   brlapi_packet_t packet;
-  brlapi_writeStructPacket_t *ws = &packet.writeStruct;
-  unsigned char *p = &ws->data;
+  brlapi_writeArgumentsPacket_t *wa = &packet.writeArguments;
+  unsigned char *p = &wa->data;
   char *locale;
   int res;
   size_t len;
@@ -1128,12 +1128,12 @@ int brlapi__writeText(brlapi_handle_t *handle, int cursor, const char *str)
     return -1;
   }
   locale = setlocale(LC_CTYPE,NULL);
-  ws->flags = BRLAPI_WF_REGION;
+  wa->flags = BRLAPI_WF_REGION;
   *((uint32_t *) p) = htonl(1); p += sizeof(uint32_t);
   *((uint32_t *) p) = htonl(dispSize); p += sizeof(uint32_t);
   if (str) {
     uint32_t *size;
-    ws->flags |= BRLAPI_WF_TEXT;
+    wa->flags |= BRLAPI_WF_TEXT;
     size = (uint32_t *) p;
     p += sizeof(*size);
 #ifdef WINDOWS
@@ -1189,7 +1189,7 @@ endcount:
     *size = htonl((p-(unsigned char *)(size+1)));
   }
   if ((cursor>=0) && (cursor<=dispSize)) {
-    ws->flags |= BRLAPI_WF_CURSOR;
+    wa->flags |= BRLAPI_WF_CURSOR;
     *((uint32_t *) p) = htonl(cursor);
     p += sizeof(uint32_t);
   } else if (cursor!=-1) {
@@ -1202,13 +1202,13 @@ endcount:
   	, wide
 #endif /* WINDOWS */
 	))) {
-    ws->flags |= BRLAPI_WF_CHARSET;
+    wa->flags |= BRLAPI_WF_CHARSET;
     p += len;
   }
 
-  ws->flags = htonl(ws->flags);
+  wa->flags = htonl(wa->flags);
   pthread_mutex_lock(&handle->fileDescriptor_mutex);
-  res = brlapi_writePacket(handle->fileDescriptor,BRLAPI_PACKET_WRITE,&packet,sizeof(ws->flags)+(p-&ws->data));
+  res = brlapi_writePacket(handle->fileDescriptor,BRLAPI_PACKET_WRITE,&packet,sizeof(wa->flags)+(p-&wa->data));
   pthread_mutex_unlock(&handle->fileDescriptor_mutex);
   return res;
 }
@@ -1231,25 +1231,25 @@ int BRLAPI_STDCALL brlapi__writeDots(brlapi_handle_t *handle, const unsigned cha
 {
   int res;
   unsigned int size = handle->brlx * handle->brly;
-  brlapi_writeStruct_t ws = BRLAPI_WRITESTRUCT_INITIALIZER;
+  brlapi_writeArguments_t wa = BRLAPI_WRITEARGUMENTS_INITIALIZER;
   if (size == 0) {
     brlapi_errno=BRLAPI_ERROR_INVALID_PARAMETER;
     return -1;
   }
   {
     char text[size+1];
-    unsigned char attrAnd[size], attrOr[size];
+    unsigned char andMask[size], orMask[size];
     memset(text, ' ', size);
     text[size] = 0;
-    ws.regionBegin = 1;
-    ws.regionSize = size;
-    ws.text = text;
-    memcpy(attrOr, dots, size);
-    ws.attrOr = attrOr;
-    memset(attrAnd, 0, size);
-    ws.attrAnd = attrAnd;
-    ws.cursor = 0;
-    res = brlapi__write(handle,&ws);
+    wa.regionBegin = 1;
+    wa.regionSize = size;
+    wa.text = text;
+    memcpy(orMask, dots, size);
+    wa.orMask = orMask;
+    memset(andMask, 0, size);
+    wa.andMask = andMask;
+    wa.cursor = 0;
+    res = brlapi__write(handle,&wa);
   }
   return res;
 }
@@ -1262,25 +1262,25 @@ int BRLAPI_STDCALL brlapi_writeDots(const unsigned char *dots)
 /* Function : brlapi_write */
 /* Extended writes on braille displays */
 #ifdef WINDOWS
-int BRLAPI_STDCALL brlapi__writeWin(brlapi_handle_t *handle, const brlapi_writeStruct_t *s, int wide)
+int BRLAPI_STDCALL brlapi__writeWin(brlapi_handle_t *handle, const brlapi_writeArguments_t *s, int wide)
 #else /* WINDOWS */
-int brlapi__write(brlapi_handle_t *handle, const brlapi_writeStruct_t *s)
+int brlapi__write(brlapi_handle_t *handle, const brlapi_writeArguments_t *s)
 #endif /* WINDOWS */
 {
   int dispSize = handle->brlx * handle->brly;
   unsigned int rbeg, rsiz, strLen;
   brlapi_packet_t packet;
-  brlapi_writeStructPacket_t *ws = &packet.writeStruct;
-  unsigned char *p = &ws->data;
+  brlapi_writeArgumentsPacket_t *wa = &packet.writeArguments;
+  unsigned char *p = &wa->data;
   unsigned char *end = (unsigned char*) &packet.data[sizeof(packet)];
   int res;
-  ws->flags = 0;
+  wa->flags = 0;
   if (s==NULL) goto send;
   rbeg = s->regionBegin;
   rsiz = s->regionSize;
   if (rbeg || rsiz) {
     if (rsiz == 0) return 0;
-    ws->flags |= BRLAPI_WF_REGION;
+    wa->flags |= BRLAPI_WF_REGION;
     *((uint32_t *) p) = htonl(rbeg); p += sizeof(uint32_t);
     *((uint32_t *) p) = htonl(rsiz); p += sizeof(uint32_t);
   } else {
@@ -1298,7 +1298,7 @@ int brlapi__write(brlapi_handle_t *handle, const brlapi_writeStruct_t *s)
 #endif /* WINDOWS */
 	strLen = strlen(s->text);
     *((uint32_t *) p) = htonl(strLen); p += sizeof(uint32_t);
-    ws->flags |= BRLAPI_WF_TEXT;
+    wa->flags |= BRLAPI_WF_TEXT;
     if (p + strLen > end) {
       brlapi_errno = BRLAPI_ERROR_INVALID_PARAMETER;
       return -1;
@@ -1306,26 +1306,26 @@ int brlapi__write(brlapi_handle_t *handle, const brlapi_writeStruct_t *s)
     memcpy(p, s->text, strLen);
     p += strLen;
   }
-  if (s->attrAnd) {
-    ws->flags |= BRLAPI_WF_ATTR_AND;
+  if (s->andMask) {
+    wa->flags |= BRLAPI_WF_ATTR_AND;
     if (p + rsiz > end) {
       brlapi_errno = BRLAPI_ERROR_INVALID_PARAMETER;
       return -1;
     }
-    memcpy(p, s->attrAnd, rsiz);
+    memcpy(p, s->andMask, rsiz);
     p += rsiz;
   }
-  if (s->attrOr) {
-    ws->flags |= BRLAPI_WF_ATTR_OR;
+  if (s->orMask) {
+    wa->flags |= BRLAPI_WF_ATTR_OR;
     if (p + rsiz > end) {
       brlapi_errno = BRLAPI_ERROR_INVALID_PARAMETER;
       return -1;
     }
-    memcpy(p, s->attrOr, rsiz);
+    memcpy(p, s->orMask, rsiz);
     p += rsiz;
   }
   if ((s->cursor>=0) && (s->cursor<=dispSize)) {
-    ws->flags |= BRLAPI_WF_CURSOR;
+    wa->flags |= BRLAPI_WF_CURSOR;
     if (p + sizeof(uint32_t) > end) {
       brlapi_errno = BRLAPI_ERROR_INVALID_PARAMETER;
       return -1;
@@ -1343,13 +1343,13 @@ int brlapi__write(brlapi_handle_t *handle, const brlapi_writeStruct_t *s)
 	    , wide
     #endif /* WINDOWS */
 	    ))) {
-	ws->flags |= BRLAPI_WF_CHARSET;
+	wa->flags |= BRLAPI_WF_CHARSET;
 	p += strLen;
       }
     } else {
       strLen = strlen(s->charset);
       *p++ = strLen;
-      ws->flags |= BRLAPI_WF_CHARSET;
+      wa->flags |= BRLAPI_WF_CHARSET;
       if (p + strLen > end) {
 	brlapi_errno = BRLAPI_ERROR_INVALID_PARAMETER;
 	return -1;
@@ -1359,20 +1359,20 @@ int brlapi__write(brlapi_handle_t *handle, const brlapi_writeStruct_t *s)
     }
   }
 send:
-  ws->flags = htonl(ws->flags);
+  wa->flags = htonl(wa->flags);
   pthread_mutex_lock(&handle->fileDescriptor_mutex);
-  res = brlapi_writePacket(handle->fileDescriptor,BRLAPI_PACKET_WRITE,&packet,sizeof(ws->flags)+(p-&ws->data));
+  res = brlapi_writePacket(handle->fileDescriptor,BRLAPI_PACKET_WRITE,&packet,sizeof(wa->flags)+(p-&wa->data));
   pthread_mutex_unlock(&handle->fileDescriptor_mutex);
   return res;
 }
 
 #ifdef WINDOWS
-int BRLAPI_STDCALL brlapi_writeWin(const brlapi_writeStruct_t *s, int wide)
+int BRLAPI_STDCALL brlapi_writeWin(const brlapi_writeArguments_t *s, int wide)
 {
   return brlapi__writeWin(&defaultHandle, s, wide);
 }
 #else /* WINDOWS */
-int brlapi_write(const brlapi_writeStruct_t *s)
+int brlapi_write(const brlapi_writeArguments_t *s)
 {
   return brlapi__write(&defaultHandle, s);
 }

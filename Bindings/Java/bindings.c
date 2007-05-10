@@ -362,7 +362,7 @@ JNIEXPORT void JNICALL Java_BrlapiNative_setFocus(JNIEnv *jenv, jobject jobj, ji
 }
 
 JNIEXPORT void JNICALL Java_BrlapiNative_writeTextNative(JNIEnv *jenv, jobject jobj, jint jarg1, jstring jarg2) {
-  brlapi_writeStruct_t s = BRLAPI_WRITESTRUCT_INITIALIZER;
+  brlapi_writeArguments_t s = BRLAPI_WRITEARGUMENTS_INITIALIZER;
   int result;
   GET_HANDLE(jenv, jobj, );
   
@@ -417,55 +417,58 @@ JNIEXPORT void JNICALL Java_BrlapiNative_writeDots(JNIEnv *jenv, jobject jobj, j
   }
 }
 
-JNIEXPORT void JNICALL Java_BrlapiNative_write(JNIEnv *jenv, jobject jobj, jobject js) {
-  brlapi_writeStruct_t s = BRLAPI_WRITESTRUCT_INITIALIZER;
+JNIEXPORT void JNICALL Java_BrlapiNative_write(JNIEnv *jenv, jobject jobj, jobject jarguments) {
+  brlapi_writeArguments_t arguments = BRLAPI_WRITEARGUMENTS_INITIALIZER;
   int result;
-  jstring text, attrAnd, attrOr;
-  jclass jcwriteStruct;
+  jstring text, andMask, orMask;
+  jclass jcwriteArguments;
   jfieldID displayNumberID, regionBeginID, regionSizeID,
-	   textID, attrAndID, attrOrID, cursorID; 
+	   textID, andMaskID, orMaskID, cursorID; 
   GET_HANDLE(jenv, jobj, );
 
   env = jenv;
 
-  if (!js) {
+  if (!jarguments) {
     ThrowException(jenv, ERR_NULLPTR, __func__);
     return;
   }
 
-  GET_CLASS(jenv, jcwriteStruct, js,);
+  GET_CLASS(jenv, jcwriteArguments, jarguments,);
 
-  GET_ID(jenv, displayNumberID,jcwriteStruct, "displayNumber", "I",);
-  GET_ID(jenv, regionBeginID,  jcwriteStruct, "regionBegin",   "I",);
-  GET_ID(jenv, regionSizeID,   jcwriteStruct, "regionSize",    "I",);
-  GET_ID(jenv, textID,         jcwriteStruct, "text",          "Ljava/lang/String;",);
-  GET_ID(jenv, attrAndID,      jcwriteStruct, "attrAnd",       "[B",);
-  GET_ID(jenv, attrOrID,       jcwriteStruct, "attrOr",        "[B",);
-  GET_ID(jenv, cursorID,       jcwriteStruct, "cursor",        "I",);
+  GET_ID(jenv, displayNumberID,jcwriteArguments, "displayNumber", "I",);
+  GET_ID(jenv, regionBeginID,  jcwriteArguments, "regionBegin",   "I",);
+  GET_ID(jenv, regionSizeID,   jcwriteArguments, "regionSize",    "I",);
+  GET_ID(jenv, textID,         jcwriteArguments, "text",          "Ljava/lang/String;",);
+  GET_ID(jenv, andMaskID,      jcwriteArguments, "andMask",       "[B",);
+  GET_ID(jenv, orMaskID,       jcwriteArguments, "orMask",        "[B",);
+  GET_ID(jenv, cursorID,       jcwriteArguments, "cursor",        "I",);
 
-  s.displayNumber = (*jenv)->GetIntField(jenv, js, displayNumberID);
-  s.regionBegin   = (*jenv)->GetIntField(jenv, js, regionBeginID);
-  s.regionSize    = (*jenv)->GetIntField(jenv, js, regionSizeID);
-  if ((text  = (*jenv)->GetObjectField(jenv, js, textID)))
-    s.text   = (char *)(*jenv)->GetStringUTFChars(jenv, text, NULL);
-  else s.text  = NULL;
-  if ((attrAnd = (*jenv)->GetObjectField(jenv, js, attrAndID)))
-    s.attrAnd  = (unsigned char *)(*jenv)->GetByteArrayElements(jenv, attrAnd, NULL);
-  else s.attrAnd = NULL;
-  if ((attrOr  = (*jenv)->GetObjectField(jenv, js, attrOrID)))
-    s.attrOr   = (unsigned char *)(*jenv)->GetByteArrayElements(jenv, attrOr, NULL);
-  else s.attrOr  = NULL;
-  s.cursor     = (*jenv)->GetIntField(jenv, js, cursorID);
-  s.charset = "UTF-8";
+  arguments.displayNumber = (*jenv)->GetIntField(jenv, jarguments, displayNumberID);
+  arguments.regionBegin   = (*jenv)->GetIntField(jenv, jarguments, regionBeginID);
+  arguments.regionSize    = (*jenv)->GetIntField(jenv, jarguments, regionSizeID);
+  if ((text  = (*jenv)->GetObjectField(jenv, jarguments, textID)))
+    arguments.text   = (char *)(*jenv)->GetStringUTFChars(jenv, text, NULL);
+  else 
+    arguments.text  = NULL;
+  if ((andMask = (*jenv)->GetObjectField(jenv, jarguments, andMaskID)))
+    arguments.andMask  = (unsigned char *)(*jenv)->GetByteArrayElements(jenv, andMask, NULL);
+  else
+    arguments.andMask = NULL;
+  if ((orMask  = (*jenv)->GetObjectField(jenv, jarguments, orMaskID)))
+    arguments.orMask   = (unsigned char *)(*jenv)->GetByteArrayElements(jenv, orMask, NULL);
+  else
+    arguments.orMask  = NULL;
+  arguments.cursor     = (*jenv)->GetIntField(jenv, jarguments, cursorID);
+  arguments.charset = "UTF-8";
 
-  result = brlapi__write(handle, &s);
+  result = brlapi__write(handle, &arguments);
 
   if (text)
-    (*jenv)->ReleaseStringUTFChars(jenv, text, s.text); 
-  if (attrAnd)
-    (*jenv)->ReleaseByteArrayElements(jenv, attrAnd, (jbyte*) s.attrAnd, JNI_ABORT); 
-  if (attrOr)
-    (*jenv)->ReleaseByteArrayElements(jenv, attrOr,  (jbyte*) s.attrOr,  JNI_ABORT); 
+    (*jenv)->ReleaseStringUTFChars(jenv, text, arguments.text); 
+  if (andMask)
+    (*jenv)->ReleaseByteArrayElements(jenv, andMask, (jbyte*) arguments.andMask, JNI_ABORT); 
+  if (orMask)
+    (*jenv)->ReleaseByteArrayElements(jenv, orMask,  (jbyte*) arguments.orMask,  JNI_ABORT); 
 
   if (result < 0) {
     ThrowError(jenv, __func__);

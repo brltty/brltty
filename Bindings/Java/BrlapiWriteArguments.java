@@ -18,15 +18,15 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-public class BrlapiWriteStruct {
+public class BrlapiWriteArguments {
   public int displayNumber = Brlapi.DISPLAY_DEFAULT;
   public int regionBegin = 0;
   public int regionSize = 0;
   public String text = null;
-  public byte attrAnd[] = null;
-  public byte attrOr[] = null;
+  public byte andMask[] = null;
+  public byte orMask[] = null;
   public int cursor = Brlapi.CURSOR_LEAVE;
 
-  public BrlapiWriteStruct () {
+  public BrlapiWriteArguments () {
   }
 }

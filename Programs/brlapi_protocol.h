@@ -134,7 +134,7 @@ typedef struct {
 typedef struct {
   uint32_t flags; /** Flags to tell which fields are present */
   unsigned char data; /** Fields in the same order as flag weight */
-} brlapi_writeStructPacket_t;
+} brlapi_writeArgumentsPacket_t;
 
 /** Type for packets.  Should be used instead of a mere char[], since it has
  * correct alignment requirements. */
@@ -145,7 +145,7 @@ typedef union {
 	brlapi_authServerPacket_t authServer;
 	brlapi_errorPacket_t error;
 	brlapi_getDriverSpecificModePacket_t getDriverSpecificMode;
-	brlapi_writeStructPacket_t writeStruct;
+	brlapi_writeArgumentsPacket_t writeArguments;
 	uint32_t uint32;
 } brlapi_packet_t;
 

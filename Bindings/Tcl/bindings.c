@@ -278,7 +278,7 @@ OPTION_HANDLER(session, enterTtyModeWithPath, path) {
 }
 
 typedef struct {
-  brlapi_writeStruct_t arguments;
+  brlapi_writeArguments_t arguments;
   Tcl_Obj *textObject;
   int textLength;
   int andLength;
@@ -287,8 +287,8 @@ typedef struct {
 
 OPTION_HANDLER(session, write, and) {
   FunctionData_session_write *options = data;
-  options->arguments.attrAnd = Tcl_GetByteArrayFromObj(objv[1], &options->andLength);
-  if (!options->andLength) options->arguments.attrAnd = NULL;
+  options->arguments.andMask = Tcl_GetByteArrayFromObj(objv[1], &options->andLength);
+  if (!options->andLength) options->arguments.andMask = NULL;
   return TCL_OK;
 }
 
@@ -331,8 +331,8 @@ OPTION_HANDLER(session, write, display) {
 
 OPTION_HANDLER(session, write, or) {
   FunctionData_session_write *options = data;
-  options->arguments.attrOr = Tcl_GetByteArrayFromObj(objv[1], &options->orLength);
-  if (!options->orLength) options->arguments.attrOr = NULL;
+  options->arguments.orMask = Tcl_GetByteArrayFromObj(objv[1], &options->orLength);
+  if (!options->orLength) options->arguments.orMask = NULL;
   return TCL_OK;
 }
 
@@ -813,7 +813,7 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
     case FCN_write: {
       FunctionData_session_write options = {
-        .arguments = BRLAPI_WRITESTRUCT_INITIALIZER
+        .arguments = BRLAPI_WRITEARGUMENTS_INITIALIZER
       };
 
       if (objc < 2) {
@@ -898,20 +898,20 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
         }
 
         {
-          unsigned char and[size];
-          unsigned char or[size];
+          unsigned char andMask[size];
+          unsigned char orMask[size];
 
           if (options.arguments.regionSize < size) {
-            if (options.arguments.attrAnd) {
-              memset(and, 0XFF, size);
-              memcpy(and, options.arguments.attrAnd, options.arguments.regionSize);
-              options.arguments.attrAnd = and;
+            if (options.arguments.andMask) {
+              memset(andMask, 0XFF, size);
+              memcpy(andMask, options.arguments.andMask, options.arguments.regionSize);
+              options.arguments.andMask = andMask;
             }
 
-            if (options.arguments.attrOr) {
-              memset(or, 0X00, size);
-              memcpy(or, options.arguments.attrOr, options.arguments.regionSize);
-              options.arguments.attrOr = or;
+            if (options.arguments.orMask) {
+              memset(orMask, 0X00, size);
+              memcpy(orMask, options.arguments.orMask, options.arguments.regionSize);
+              options.arguments.orMask = orMask;
             }
 
             if (options.textObject) {

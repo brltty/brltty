@@ -118,13 +118,13 @@ void showDots(void)
   {
     char text[x*y];
     unsigned char or[x*y];
-    brlapi_writeStruct_t ws = BRLAPI_WRITESTRUCT_INITIALIZER;
+    brlapi_writeArguments_t wa = BRLAPI_WRITEARGUMENTS_INITIALIZER;
     fprintf(stderr,"Showing dot patterns\n");
     memcpy(text,DOTS_TEXT,DOTS_TEXTLEN);
     memset(text+DOTS_TEXTLEN,' ',sizeof(text)-DOTS_TEXTLEN);
-    ws.regionBegin = 1;
-    ws.regionSize = sizeof(or);
-    ws.text = text;
+    wa.regionBegin = 1;
+    wa.regionSize = sizeof(or);
+    wa.text = text;
     memset(or,0,sizeof(or));
     or[DOTS_TEXTLEN+0] = BRL_DOT1;
     or[DOTS_TEXTLEN+1] = BRL_DOT2;
@@ -134,8 +134,8 @@ void showDots(void)
     or[DOTS_TEXTLEN+5] = BRL_DOT6;
     or[DOTS_TEXTLEN+6] = BRL_DOT7;
     or[DOTS_TEXTLEN+7] = BRL_DOT8;
-    ws.attrOr = or;
-    if (brlapi_write(&ws)<0) {
+    wa.orMask = or;
+    if (brlapi_write(&wa)<0) {
       brlapi_perror("brlapi_write");
       exit(1);
     }

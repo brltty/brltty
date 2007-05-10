@@ -28,14 +28,14 @@ cdef extern from "Programs/brlapi.h":
 		char *auth
 		char *host
 
-	ctypedef struct brlapi_writeStruct_t:
+	ctypedef struct brlapi_writeArguments_t:
 		int displayNumber
 		unsigned int regionBegin
 		unsigned int regionSize
 		char *text
 		int textSize
-		unsigned char *attrAnd
-		unsigned char *attrOr
+		unsigned char *andMask
+		unsigned char *orMask
 		int cursor
 		char *charset
 
@@ -67,7 +67,7 @@ cdef extern from "Programs/brlapi.h":
 	int brlapi__leaveTtyMode(brlapi_handle_t *)
 	int brlapi__setFocus(brlapi_handle_t *, int)
 
-	int brlapi__write(brlapi_handle_t *, brlapi_writeStruct_t*)
+	int brlapi__write(brlapi_handle_t *, brlapi_writeArguments_t*)
 	int brlapi__writeDots(brlapi_handle_t *, unsigned char*)
 	int brlapi__writeText(brlapi_handle_t *, int, char*)
 
@@ -102,7 +102,7 @@ cdef extern from "Programs/brlapi.h":
 	brlapi_keyCode_t BRLAPI_KEY_CMD_ARG_MASK
 
 cdef extern from "bindings.h":
-	brlapi_writeStruct_t brlapi_writeStruct_initialized
+	brlapi_writeArguments_t brlapi_writeArguments_initialized
 
 cdef extern from "stdlib.h":
 	void *malloc(size_t)

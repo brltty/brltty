@@ -39,7 +39,7 @@ bindings.$O:
 JAVA_JAR = $(API_NAME).jar
 jar: $(JAVA_JAR)
 
-API_CLASSES = Brlapi.class BrlapiNative.class BrlapiError.class BrlapiException.class BrlapiSettings.class BrlapiWriteStruct.class BrlapiSize.class BrlapiKey.class
+API_CLASSES = Brlapi.class BrlapiNative.class BrlapiError.class BrlapiException.class BrlapiSettings.class BrlapiWriteArguments.class BrlapiSize.class BrlapiKey.class
 ALL_CLASSES = $(API_CLASSES) ApiTest.class
 
 $(JAVA_JAR): $(API_CLASSES)

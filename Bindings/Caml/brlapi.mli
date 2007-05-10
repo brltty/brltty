@@ -53,18 +53,18 @@ type settings = {
 
 val settings_initializer : settings
 
-type writeStruct = {
+type writeArguments = {
   mutable displayNumber : int;
   mutable regionBegin : int;
   mutable regionSize : int;
   text : string;
-  attrAnd : int array;
-  attrOr : int array;
+  andMask : int array;
+  orMask : int array;
   mutable cursor : int;
   mutable charset : string
 }
 
-val writeStruct_initializer : writeStruct
+val writeArguments_initializer : writeArguments
 
 type handle
 
@@ -132,7 +132,7 @@ external writeText :
 external writeDots :
   ?h:handle -> int array -> unit = "brlapiml_writeDots"
 external write :
-  ?h:handle -> writeStruct -> unit = "brlapiml_write_"
+  ?h:handle -> writeArguments -> unit = "brlapiml_write_"
 
 (*
 BRLAPI_KEYCODE_MAX

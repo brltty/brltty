@@ -277,7 +277,7 @@ void BRLAPI_STDCALL brlapi__closeConnection(brlapi_handle_t *handle);
  */
 
 /** Maximum name length for names embeded in BrlAPI packets, not counting any
- * termination \0 character */
+ * termination \\0 character */
 #define BRLAPI_MAXNAMELENGTH 31
 
 /* brlapi_getDriverName */
@@ -467,49 +467,49 @@ int BRLAPI_STDCALL brlapi_writeDots(const unsigned char *dots);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
 int BRLAPI_STDCALL brlapi__writeDots(brlapi_handle_t *handle, const unsigned char *dots);
 
-/* brlapi_writeStruct_t */
+/* brlapi_writeArguments_t */
 /** Structure containing arguments to be given to brlapi_write() */
 typedef struct {
   int displayNumber /** Display number ::BRLAPI_DISPLAY_DEFAULT == unspecified */;
   unsigned int regionBegin /** Region of display to update, 1st character of display is 1 */;
-  unsigned int regionSize /** Number of characters held in text, attrAnd and attrOr. */;
+  unsigned int regionSize /** Number of characters held in text, andMask and orMask. */;
   char *text /** Text to display, must hold as many characters as the region fields expresses. */;
   int textSize /** Size of text in bytes. If -1, strlen() is used for computing it. */;
-  unsigned char *attrAnd /** And attributes; applied first */;
-  unsigned char *attrOr /** Or attributes; applied \e after ANDing */;
+  unsigned char *andMask /** And attributes; applied first */;
+  unsigned char *orMask /** Or attributes; applied \e after ANDing */;
   int cursor /** ::BRLAPI_CURSOR_LEAVE == don't touch, ::BRLAPI_CURSOR_OFF == turn off, 1 = 1st char of display, ... */;
   char *charset /** Text charset. NULL means it is assumed to be 8bits, and the same as the server's. "" means current locale's charset. If no locale was selected, defaults to NULL's meaning. */;
-} brlapi_writeStruct_t;
+} brlapi_writeArguments_t;
 
 /** Write to the default display on the braille device.
  *
- * \sa brlapi_write() brlapi_writeStruct_t
+ * \sa brlapi_write() brlapi_writeArguments_t
  */
 #define BRLAPI_DISPLAY_DEFAULT -1
 
 /** Do not change the cursor's state or position.
  *
- * \sa brlapi_writeText() brlapi_write() brlapi_writeStruct_t
+ * \sa brlapi_writeText() brlapi_write() brlapi_writeArguments_t
  */
 #define BRLAPI_CURSOR_LEAVE -1
 
 /** Do not display the cursor.
  *
- * \sa brlapi_writeText() brlapi_write() brlapi_writeStruct_t
+ * \sa brlapi_writeText() brlapi_write() brlapi_writeArguments_t
  */
 #define BRLAPI_CURSOR_OFF 0
 
-/* BRLAPI_WRITESTRUCT_INITIALIZER */
-/** Allows to initialize a structure of type \e brlapi_writeStruct_t *
+/* BRLAPI_WRITEARGUMENTS_INITIALIZER */
+/** Allows to initialize a structure of type \e brlapi_writeArguments_t *
  * with default values:
  * displayNumber = ::BRLAPI_DISPLAY_DEFAULT; (unspecified)
  * regionBegin = regionSize = 0; (update the whole display, DEPRECATED and will
  * be forbidden in next release. You must always express the region you wish to
  * update)
- * text = attrAnd = attrOr = NULL; (no text, no attribute)
+ * text = andMask = orMask = NULL; (no text, no attribute)
  * cursor = ::BRLAPI_CURSOR_LEAVE; (don't touch cursor)
 */
-#define BRLAPI_WRITESTRUCT_INITIALIZER { BRLAPI_DISPLAY_DEFAULT, 0, 0, NULL, -1, NULL, NULL, BRLAPI_CURSOR_LEAVE, NULL }
+#define BRLAPI_WRITEARGUMENTS_INITIALIZER { BRLAPI_DISPLAY_DEFAULT, 0, 0, NULL, -1, NULL, NULL, BRLAPI_CURSOR_LEAVE, NULL }
 
 /* brlapi_write */
 /** Update a specific region of the braille display and apply and/or masks
@@ -518,7 +518,7 @@ typedef struct {
  *
  * regionBegin and regionSize must be filled for specifying which part of the
  * display will be updated, as well as the size (in characters, not bytes) of
- * the text, attrAnd and attrOr members.
+ * the text, andMask and orMask members.
  *
  * If given, the "text" field holds the text that will be displayed in the
  * region.  The char string must hold exactly as many characters as the region
@@ -529,12 +529,12 @@ typedef struct {
  * textSize.  If -1 is given, it will be computed thanks to strlen(), so "text"
  * must then be a NUL-terminated string.
  *
- * The "attrAnd" and "attrOr" masks, if present, are then applied on top of
+ * The "andMask" and "orMask" masks, if present, are then applied on top of
  * the text, one byte per character.  This hence permits the superimposing of
- * attributes over the text.  For instance, setting an attrAnd mask full of
+ * attributes over the text.  For instance, setting an andMask mask full of
  * BRLAPI_DOT1|BRLAPI_DOT2|BRLAPI_DOT3|BRLAPI_DOT4|BRLAPI_DOT5|BRLAPI_DOT6
  * will only keep (logical AND) dots 1-6, hence dropping dots 7 and 8.  On the
- * contrary, setting an attrOr full of BRLAPI_DOT7|BRLAPI_DOT8 will add (logical
+ * contrary, setting an orMask full of BRLAPI_DOT7|BRLAPI_DOT8 will add (logical
  * OR) dots 7 and 8.
  *
  * The "charset" field, if present, specifies the charset of the "text" field.
@@ -549,9 +549,9 @@ typedef struct {
  * \return 0 on success, -1 on error.
  */
 #ifndef BRLAPI_NO_SINGLE_SESSION
-int BRLAPI_STDCALL brlapi_write(const brlapi_writeStruct_t *arguments);
+int BRLAPI_STDCALL brlapi_write(const brlapi_writeArguments_t *arguments);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
-int BRLAPI_STDCALL brlapi__write(brlapi_handle_t *handle, const brlapi_writeStruct_t *arguments);
+int BRLAPI_STDCALL brlapi__write(brlapi_handle_t *handle, const brlapi_writeArguments_t *arguments);
 
 /** @} */
 
@@ -1075,9 +1075,9 @@ int BRLAPI_STDCALL brlapi_writeTextWin(int cursor, const void *str, int wide);
 int BRLAPI_STDCALL brlapi__writeTextWin(brlapi_handle_t *handle, int cursor, const void *str, int wide);
 
 #ifndef BRLAPI_NO_SINGLE_SESSION
-int BRLAPI_STDCALL brlapi_writeWin(const brlapi_writeStruct_t *s, int wide);
+int BRLAPI_STDCALL brlapi_writeWin(const brlapi_writeArguments_t *s, int wide);
 #endif /* BRLAPI_NO_SINGLE_SESSION */
-int BRLAPI_STDCALL brlapi__writeWin(brlapi_handle_t *handle, const brlapi_writeStruct_t *s, int wide);
+int BRLAPI_STDCALL brlapi__writeWin(brlapi_handle_t *handle, const brlapi_writeArguments_t *s, int wide);
 
 #ifdef UNICODE
 #ifndef BRLAPI_NO_SINGLE_SESSION
@@ -1108,9 +1108,10 @@ int BRLAPI_STDCALL brlapi__writeWin(brlapi_handle_t *handle, const brlapi_writeS
 #ifndef BRLAPI_NO_DEPRECATED
 /** \defgroup brlapi_deprecated Deprecated names
  *
- * With version 0.5.0, BrlAPI got a big renaming pass. Old names are still
- * available through macros, but they are deprecated since they will get dropped
- * in the next release. This documentation is for you to know the new names.
+ * With version 0.5.0, BrlAPI is now provided through #include <brlapi.h> and
+ * got a big renaming pass. Old names are still available through macros, but
+ * they are deprecated since they will get dropped in the next release. This
+ * documentation is for you to know the new names.
  *
  * For checking that you have completely switched to new names, just define
  * BRLAPI_NO_DEPRECATED: that will disable compatibility macros.
@@ -1118,7 +1119,21 @@ int BRLAPI_STDCALL brlapi__writeWin(brlapi_handle_t *handle, const brlapi_writeS
  * @{ */
 
 #define brlapi_settings_t brlapi_connectionSettings_t
-#define brlapi_writeStruct brlapi_writeStruct_t
+
+/** brlapi_writeStruct, replaced by brlapi_writeArguments_t */
+typedef struct {
+  int displayNumber;
+  unsigned int regionBegin;
+  unsigned int regionSize;
+  char *text;
+  int textSize;
+  unsigned char *attrAnd;
+  unsigned char *attrOr;
+  int cursor;
+  char *charset;
+} brlapi_writeStruct;
+#define BRLAPI_WRITESTRUCT_INITIALIZER BRLAPI_WRITEARGUMENTS_INITIALIZER
+
 #define brl_keycode_t brlapi_keyCode_t
 #define brl_type_t brlapi_packetType_t
 

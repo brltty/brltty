@@ -74,11 +74,11 @@ class OperationError:
 
 cdef class WriteStruct:
 	"""Structure containing arguments to be given to Connection.write()
-	See brlapi_writeStruct_t(3)."""
-	cdef c_brlapi.brlapi_writeStruct_t props
+	See brlapi_writeArguments_t(3)."""
+	cdef c_brlapi.brlapi_writeArguments_t props
 
 	def __new__(self):
-		self.props = c_brlapi.brlapi_writeStruct_initialized
+		self.props = c_brlapi.brlapi_writeArguments_initialized
 
 	property displayNumber:
 		"""Display number DISPLAY_DEFAULT == unspecified"""
@@ -157,44 +157,44 @@ cdef class WriteStruct:
 	property attrAnd:
 		"""And attributes; applied first"""
 		def __get__(self):
-			if (not self.props.attrAnd):
+			if (not self.props.andMask):
 				return None
 			else:
-				return <char*>self.props.attrAnd
+				return <char*>self.props.andMask
 		def __set__(self, val):
 			cdef c_brlapi.size_t size
 			cdef char *c_val
-			if (self.props.attrAnd):
-				c_brlapi.free(self.props.attrAnd)
+			if (self.props.andMask):
+				c_brlapi.free(self.props.andMask)
 			if (val):
 				size = len(val)
 				c_val = val
-				self.props.attrAnd = <unsigned char*>c_brlapi.malloc(size+1)
-				c_brlapi.memcpy(<void*>self.props.attrAnd,<void*>c_val,size)
-				self.props.attrAnd[size] = 0
+				self.props.andMask = <unsigned char*>c_brlapi.malloc(size+1)
+				c_brlapi.memcpy(<void*>self.props.andMask,<void*>c_val,size)
+				self.props.andMask[size] = 0
 			else:
-				self.props.attrAnd = NULL
+				self.props.andMask = NULL
 
 	property attrOr:
 		"""Or attributes; applied after ANDing"""
 		def __get__(self):
-			if (not self.props.attrOr):
+			if (not self.props.orMask):
 				return None
 			else:
-				return <char*>self.props.attrOr
+				return <char*>self.props.orMask
 		def __set__(self, val):
 			cdef c_brlapi.size_t size
 			cdef char *c_val
-			if (self.props.attrOr):
-				c_brlapi.free(self.props.attrOr)
+			if (self.props.orMask):
+				c_brlapi.free(self.props.orMask)
 			if (val):
 				size = len(val)
 				c_val = val
-				self.props.attrOr = <unsigned char*>c_brlapi.malloc(size+1)
-				c_brlapi.memcpy(<void*>self.props.attrOr,<void*>c_val,size)
-				self.props.attrOr[size] = 0
+				self.props.orMask = <unsigned char*>c_brlapi.malloc(size+1)
+				c_brlapi.memcpy(<void*>self.props.orMask,<void*>c_val,size)
+				self.props.orMask[size] = 0
 			else:
-				self.props.attrOr = NULL
+				self.props.orMask = NULL
 
 cdef class Connection:
 	"""Class which manages the bridge between your program and BrlAPI"""
@@ -366,13 +366,13 @@ cdef class Connection:
 		else:
 			return retval
 
-	def write(self, WriteStruct writeStruct):
+	def write(self, WriteStruct writeArguments):
 		"""Update a specific region of the braille display and apply and/or masks.
 		See brlapi_write(3).
 		* s : gives information necessary for the update"""
 		cdef int retval
 		c_brlapi.Py_BEGIN_ALLOW_THREADS
-		retval = c_brlapi.brlapi__write(self.h, &writeStruct.props)
+		retval = c_brlapi.brlapi__write(self.h, &writeArguments.props)
 		c_brlapi.Py_END_ALLOW_THREADS
 		if retval == -1:
 			raise OperationError(returnerrno())

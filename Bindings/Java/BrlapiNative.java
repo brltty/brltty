@@ -37,7 +37,7 @@ public class BrlapiNative {
 
   protected native void writeTextNative (int cursor, String text) throws BrlapiError;
   public native void writeDots (byte dots[]) throws BrlapiError;
-  public native void write (BrlapiWriteStruct s) throws BrlapiError;
+  public native void write (BrlapiWriteArguments arguments) throws BrlapiError;
 
   public native long readKey (boolean wait) throws BrlapiError;
   public native void ignoreKeys (long type, long keys[]) throws BrlapiError;

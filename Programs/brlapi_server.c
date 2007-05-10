@@ -952,28 +952,28 @@ static int handleKeyRanges(Connection *c, brlapi_packetType_t type, brlapi_packe
 
 static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t *packet, size_t size)
 {
-  brlapi_writeStructPacket_t *ws = &packet->writeStruct;
+  brlapi_writeArgumentsPacket_t *wa = &packet->writeArguments;
   unsigned char *text = NULL, *orAttr = NULL, *andAttr = NULL;
   unsigned int rbeg, rsiz, textLen = 0;
   int cursor = -1;
-  unsigned char *p = &ws->data;
+  unsigned char *p = &wa->data;
   int remaining = size;
 #ifdef HAVE_ICONV_H
   char *charset = NULL, *coreCharset = NULL;
   unsigned int charsetLen = 0;
 #endif /* HAVE_ICONV_H */
   LogPrintRequest(type, c->fd);
-  CHECKEXC(remaining>=sizeof(ws->flags), BRLAPI_ERROR_INVALID_PACKET, "packet too small for flags");
+  CHECKEXC(remaining>=sizeof(wa->flags), BRLAPI_ERROR_INVALID_PACKET, "packet too small for flags");
   CHECKERR(!c->raw,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed in raw mode");
   CHECKERR(c->tty,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed out of tty mode");
-  ws->flags = ntohl(ws->flags);
-  if ((remaining==sizeof(ws->flags))&&(ws->flags==0)) {
+  wa->flags = ntohl(wa->flags);
+  if ((remaining==sizeof(wa->flags))&&(wa->flags==0)) {
     c->brlbufstate = EMPTY;
     return 0;
   }
-  remaining -= sizeof(ws->flags); /* flags */
-  CHECKEXC((ws->flags & BRLAPI_WF_DISPLAYNUMBER)==0, BRLAPI_ERROR_OPNOTSUPP, "display number not yet supported");
-  if (ws->flags & BRLAPI_WF_REGION) {
+  remaining -= sizeof(wa->flags); /* flags */
+  CHECKEXC((wa->flags & BRLAPI_WF_DISPLAYNUMBER)==0, BRLAPI_ERROR_OPNOTSUPP, "display number not yet supported");
+  if (wa->flags & BRLAPI_WF_REGION) {
     CHECKEXC(remaining>2*sizeof(uint32_t), BRLAPI_ERROR_INVALID_PACKET, "packet too small for region");
     rbeg = ntohl( *((uint32_t *) p) );
     p += sizeof(uint32_t); remaining -= sizeof(uint32_t); /* region begin */
@@ -987,7 +987,7 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
     rbeg = 1;
     rsiz = displaySize;
   }
-  if (ws->flags & BRLAPI_WF_TEXT) {
+  if (wa->flags & BRLAPI_WF_TEXT) {
     CHECKEXC(remaining>=sizeof(uint32_t), BRLAPI_ERROR_INVALID_PACKET, "packet too small for text length");
     textLen = ntohl( *((uint32_t *) p) );
     p += sizeof(uint32_t); remaining -= sizeof(uint32_t); /* text size */
@@ -995,17 +995,17 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
     text = p;
     p += textLen; remaining -= textLen; /* text */
   }
-  if (ws->flags & BRLAPI_WF_ATTR_AND) {
+  if (wa->flags & BRLAPI_WF_ATTR_AND) {
     CHECKEXC(remaining>=rsiz, BRLAPI_ERROR_INVALID_PACKET, "packet too small for And mask");
     andAttr = p;
     p += rsiz; remaining -= rsiz; /* and attributes */
   }
-  if (ws->flags & BRLAPI_WF_ATTR_OR) {
+  if (wa->flags & BRLAPI_WF_ATTR_OR) {
     CHECKEXC(remaining>=rsiz, BRLAPI_ERROR_INVALID_PACKET, "packet too small for Or mask");
     orAttr = p;
     p += rsiz; remaining -= rsiz; /* or attributes */
   }
-  if (ws->flags & BRLAPI_WF_CURSOR) {
+  if (wa->flags & BRLAPI_WF_CURSOR) {
     uint32_t u32;
     CHECKEXC(remaining>=sizeof(uint32_t), BRLAPI_ERROR_INVALID_PACKET, "packet too small for cursor");
     memcpy(&u32, p, sizeof(uint32_t));
@@ -1014,8 +1014,8 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
     CHECKEXC(cursor<=displaySize, BRLAPI_ERROR_INVALID_PACKET, "wrong cursor");
   }
 #ifdef HAVE_ICONV_H
-  if (ws->flags & BRLAPI_WF_CHARSET) {
-    CHECKEXC(ws->flags & BRLAPI_WF_TEXT, BRLAPI_ERROR_INVALID_PACKET, "charset requires text");
+  if (wa->flags & BRLAPI_WF_CHARSET) {
+    CHECKEXC(wa->flags & BRLAPI_WF_TEXT, BRLAPI_ERROR_INVALID_PACKET, "charset requires text");
     CHECKEXC(remaining>=1, BRLAPI_ERROR_INVALID_PACKET, "packet too small for charset length");
     charsetLen = *p++; remaining--; /* charset length */
     CHECKEXC(remaining>=charsetLen, BRLAPI_ERROR_INVALID_PACKET, "packet too small for charset");
@@ -1023,7 +1023,7 @@ static int handleWrite(Connection *c, brlapi_packetType_t type, brlapi_packet_t 
     p += charsetLen; remaining -= charsetLen; /* charset name */
   }
 #else /* HAVE_ICONV_H */
-  CHECKEXC(!(ws->flags & BRLAPI_WF_CHARSET), BRLAPI_ERROR_OPNOTSUPP, "charset conversion not supported (enable iconv?)");
+  CHECKEXC(!(wa->flags & BRLAPI_WF_CHARSET), BRLAPI_ERROR_OPNOTSUPP, "charset conversion not supported (enable iconv?)");
 #endif /* HAVE_ICONV_H */
   CHECKEXC(remaining==0, BRLAPI_ERROR_INVALID_PACKET, "packet too big");
   /* Here the whole packet has been checked */

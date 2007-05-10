@@ -40,24 +40,24 @@ let settings_initializer = {
   host = ""
 }
 
-type writeStruct = {
+type writeArguments = {
   mutable displayNumber : int;
   mutable regionBegin : int;
   mutable regionSize : int;
   text : string;
-  attrAnd : int array;
-  attrOr : int array;
+  andMask : int array;
+  orMask : int array;
   mutable cursor : int;
   mutable charset : string
 }
 
-let writeStruct_initializer = {
+let writeArguments_initializer = {
   displayNumber = -1;
   regionBegin = 0;
   regionSize = 0;
   text = "";
-  attrAnd = [| |];
-  attrOr = [| |];
+  andMask = [| |];
+  orMask = [| |];
   cursor = -1;
   charset = ""
 }
@@ -123,7 +123,7 @@ external writeText :
 external writeDots :
   ?h:handle -> int array -> unit = "brlapiml_writeDots"
 external write :
-  ?h:handle -> writeStruct -> unit = "brlapiml_write_"
+  ?h:handle -> writeArguments -> unit = "brlapiml_write_"
 
 external readKey :
   ?h:handle -> unit -> int64 option = "brlapiml_readKey"

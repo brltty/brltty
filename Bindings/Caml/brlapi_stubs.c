@@ -264,22 +264,22 @@ CAMLprim value brlapiml_writeDots(value handle, value camlDots)
   CAMLreturn(Val_unit);
 }
 
-CAMLprim value brlapiml_write_(value handle, value writeStruct)
+CAMLprim value brlapiml_write_(value handle, value writeArguments)
 {
-  CAMLparam2(handle, writeStruct);
-  int andSize = Wosize_val(Field(writeStruct, 4));
-  int orSize = Wosize_val(Field(writeStruct, 5));
-  unsigned char attrAnd[andSize], attrOr[orSize];
-  brlapi_writeStruct_t ws;
-  ws.displayNumber = Val_int(Field(writeStruct, 0));
-  ws.regionBegin = Val_int(Field(writeStruct, 1));
-  ws.regionSize = Val_int(Field(writeStruct, 2));
-  ws.text = String_val(Field(writeStruct, 3));
-  packDots(Field(writeStruct, 4), attrAnd, andSize);
-  ws.attrAnd = attrAnd;
-  packDots(Field(writeStruct, 5), attrOr, orSize);
-  ws.attrOr = attrOr;
-  ws.cursor = Val_int(Field(writeStruct, 6));
+  CAMLparam2(handle, writeArguments);
+  int andSize = Wosize_val(Field(writeArguments, 4));
+  int orSize = Wosize_val(Field(writeArguments, 5));
+  unsigned char andMask[andSize], orMask[orSize];
+  brlapi_writeArguments_t ws;
+  ws.displayNumber = Val_int(Field(writeArguments, 0));
+  ws.regionBegin = Val_int(Field(writeArguments, 1));
+  ws.regionSize = Val_int(Field(writeArguments, 2));
+  ws.text = String_val(Field(writeArguments, 3));
+  packDots(Field(writeArguments, 4), andMask, andSize);
+  ws.andMask = andMask;
+  packDots(Field(writeArguments, 5), orMask, orSize);
+  ws.orMask = orMask;
+  ws.cursor = Val_int(Field(writeArguments, 6));
   brlapiCheckError(write, NULL, &ws);
   CAMLreturn(Val_unit);
 }
