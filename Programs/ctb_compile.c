@@ -102,7 +102,7 @@ static const char *const opcodeNames[CTO_None] = {
 };
 static unsigned char opcodeLengths[CTO_None] = {0};
 
-static const char *originalLocale;
+static char *originalLocale;
 static int noLocale;
 
 typedef struct {
@@ -593,12 +593,13 @@ doOpcode:
         if (parseText(data, &locale, token, length)) {
           char string[locale.length + 1];
           snprintf(string, sizeof(string), "%.*s", locale.length, locale.bytes);
-          if (strcmp(string, "-") == 0)
+          if (strcmp(string, "-") == 0) {
             noLocale = 1;
-          else if (!setLocale(string))
+          } else if (!setLocale(string)) {
             compileError(data, "locale not available: %s", string);
-          else
+          } else {
             noLocale = 0;
+          }
         }
       break;
     }
@@ -897,7 +898,10 @@ compileContractionTable (const char *fileName) { /*compile source table into a t
       opcodeLengths[opcode] = strlen(opcodeNames[opcode]);
   }
 
-  originalLocale = getLocale();
+  {
+    const char *locale = getLocale();
+    originalLocale = locale? strdup(locale): NULL;
+  }
   setLocale("C");
   noLocale = 0;
 
@@ -908,10 +912,11 @@ compileContractionTable (const char *fileName) { /*compile source table into a t
           if (auditTable()) {
             ok = 1;
             if (!noLocale) {
-              if (saveString(NULL, &tableHeader->locale, getLocale()))
+              if (saveString(NULL, &tableHeader->locale, getLocale())) {
                 cacheCharacterAttributes();
-              else
+              } else {
                 ok = 0;
+              }
             }
           }
         }
@@ -922,7 +927,11 @@ compileContractionTable (const char *fileName) { /*compile source table into a t
     }
   }
 
-  setLocale(originalLocale);
+  if (originalLocale) {
+    setLocale(originalLocale);
+    free(originalLocale);
+    originalLocale = NULL;
+  }
 
   if (!ok) {
     free(tableHeader);
