@@ -44,8 +44,9 @@ doc: $(PYTHON_API)
 INSTALLED_FILES = installed-files
 
 install: all
-	root="$(INSTALL_ROOT)"; [ -n "$${root}" ] || root="/"; \
-	$(PYTHON) ./setup.py --quiet install --root "$${root}" --record "$(INSTALLED_FILES)"
+	set -- --quiet install --record "$(INSTALLED_FILES)"; \
+	[ -z "$(INSTALL_ROOT)" ] || set -- "$${@}" --root "$(INSTALL_ROOT)"; \
+	$(PYTHON) ./setup.py "$${@}"
 
 uninstall:
 	[ ! -f "$(INSTALLED_FILES)" ] || rm -f -- `$(AWK) '{printf "%s%s ", "$(INSTALL_ROOT)", $$0}' "$(INSTALLED_FILES)"`
