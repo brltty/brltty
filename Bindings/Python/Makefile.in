@@ -30,7 +30,7 @@ PYTHON_API = $(PYTHON_MODULE).$(LIB_EXT)
 all: $(PYTHON_API)
 
 $(PYTHON_API): brlapi.auto.c $(API_HDRS) brlapi
-	$(PYTHON) ./setup.py --quiet build --build-temp . --build-base . --build-lib .
+	$(PYTHON) ./setup.py --quiet build --build-temp .
 
 brlapi.auto.c: $(SRC_DIR)/brlapi.pyx $(SRC_DIR)/c_brlapi.pxd constants.auto.pyx
 	$(PYREXC) -I. -o $@ $(SRC_DIR)/brlapi.pyx
@@ -44,7 +44,7 @@ doc: $(PYTHON_API)
 INSTALLED_FILES = installed-files
 
 install: all
-	set -- --quiet install --record "$(INSTALLED_FILES)"; \
+	set -- --quiet install --skip-build --record "$(INSTALLED_FILES)"; \
 	[ -z "$(INSTALL_ROOT)" ] || set -- "$${@}" --root "$(INSTALL_ROOT)"; \
 	$(PYTHON) ./setup.py "$${@}"
 
