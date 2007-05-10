@@ -108,7 +108,7 @@ brltty_brl_send_dots (guchar         *dots,
 
     ws.regionBegin = 1;
     ws.regionSize = len;
-    ws.attrOr = sendbuff;
+    ws.orMask = sendbuff;
     if (brlapi_write(&ws) == 0) 
         return 1;
     else 
