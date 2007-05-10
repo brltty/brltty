@@ -39,6 +39,9 @@ cdef extern from "Programs/brlapi.h":
 		int cursor
 		char *charset
 
+	int BRLAPI_DISPLAY_DEFAULT
+	int BRLAPI_CURSOR_LEAVE
+
 	ctypedef struct brlapi_expandedKeyCode_t:
 		unsigned int type
 		unsigned int command

@@ -17,13 +17,13 @@ k = b.expandKeyCode(key)
 b.writeText("Key %ld (%x %x %x %x) !" % (key, k["type"], k["command"], k["argument"], k["flags"]))
 b.writeText(None,1)
 b.readKey()
-w = brlapi.WriteStruct()
-w.regionBegin = 1
-w.regionSize = 40
-w.text = u"Press any key to exit ¤                 "
 underline = chr(brlapi.DOT7 + brlapi.DOT8)
-w.attrOr = "".center(21,underline) + "".center(19,chr(0))  # Note: center() can take two arguments only starting from python 2.4
-b.write(w)
+# Note: center() can take two arguments only starting from python 2.4
+b.write(
+    regionBegin = 1,
+    regionSize = 40,
+    text = u"Press any key to exit ¤                 ",
+    orMask = "".center(21,underline) + "".center(19,chr(0)))
 b.acceptKeys(brlapi.rangeType_all,[0])
 b.readKey()
 b.leaveTtyMode()
@@ -74,7 +74,9 @@ class OperationError:
 
 cdef class WriteStruct:
 	"""Structure containing arguments to be given to Connection.write()
-	See brlapi_writeArguments_t(3)."""
+	See brlapi_writeArguments_t(3).
+	
+	This is DEPRECATED. Use the named parameters of write() instead."""
 	cdef c_brlapi.brlapi_writeArguments_t props
 
 	def __new__(self):
@@ -366,11 +368,42 @@ cdef class Connection:
 		else:
 			return retval
 
-	def write(self, WriteStruct writeArguments):
+	# The writeArguments parameter must remain first (after self) in order
+	# to maintain backward compatibility with old code which passes it
+	# by position. New code should not use it since the plan is to remove
+	# it once it's no longer being used. New code should supply attributes
+	# by specifying the remaining parameters, as needed, by name.
+	def write(self, WriteStruct writeArguments = None,
+			displayNumber = c_brlapi.BRLAPI_DISPLAY_DEFAULT,
+			regionBegin = 0,
+			regionSize = 0,
+			text = None,
+			andMask = None,
+			orMask = None,
+			cursor = c_brlapi.BRLAPI_CURSOR_LEAVE,
+			charset = None):
 		"""Update a specific region of the braille display and apply and/or masks.
 		See brlapi_write(3).
 		* s : gives information necessary for the update"""
 		cdef int retval
+		if not writeArguments:
+			writeArguments = WriteStruct()
+		if displayNumber != c_brlapi.BRLAPI_DISPLAY_DEFAULT:
+			writeArguments.displayNumber = displayNumber
+		if regionBegin != 0:
+			writeArguments.regionBegin = regionBegin
+		if regionSize != 0:
+			writeArguments.regionSize = regionSize
+		if text:
+			writeArguments.text = text
+		if andMask:
+			writeArguments.attrAnd = andMask
+		if orMask:
+			writeArguments.attrOr = orMask
+		if cursor != c_brlapi.BRLAPI_CURSOR_LEAVE:
+			writeArguments.cursor = cursor
+		if charset:
+			writeArguments.charset = charset
 		c_brlapi.Py_BEGIN_ALLOW_THREADS
 		retval = c_brlapi.brlapi__write(self.h, &writeArguments.props)
 		c_brlapi.Py_END_ALLOW_THREADS
