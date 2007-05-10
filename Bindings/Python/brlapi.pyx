@@ -374,13 +374,13 @@ cdef class Connection:
 	# it once it's no longer being used. New code should supply attributes
 	# by specifying the remaining parameters, as needed, by name.
 	def write(self, WriteStruct writeArguments = None,
-			displayNumber = c_brlapi.BRLAPI_DISPLAY_DEFAULT,
-			regionBegin = 0,
-			regionSize = 0,
+			displayNumber = None,
+			regionBegin = None,
+			regionSize = None,
 			text = None,
 			andMask = None,
 			orMask = None,
-			cursor = c_brlapi.BRLAPI_CURSOR_LEAVE,
+			cursor = None,
 			charset = None):
 		"""Update a specific region of the braille display and apply and/or masks.
 		See brlapi_write(3).
@@ -388,11 +388,11 @@ cdef class Connection:
 		cdef int retval
 		if not writeArguments:
 			writeArguments = WriteStruct()
-		if displayNumber != c_brlapi.BRLAPI_DISPLAY_DEFAULT:
+		if displayNumber != None:
 			writeArguments.displayNumber = displayNumber
-		if regionBegin != 0:
+		if regionBegin != None:
 			writeArguments.regionBegin = regionBegin
-		if regionSize != 0:
+		if regionSize != None:
 			writeArguments.regionSize = regionSize
 		if text:
 			writeArguments.text = text
@@ -400,7 +400,7 @@ cdef class Connection:
 			writeArguments.attrAnd = andMask
 		if orMask:
 			writeArguments.attrOr = orMask
-		if cursor != c_brlapi.BRLAPI_CURSOR_LEAVE:
+		if cursor != None:
 			writeArguments.cursor = cursor
 		if charset:
 			writeArguments.charset = charset
