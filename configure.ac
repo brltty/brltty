@@ -330,7 +330,7 @@ in
       ;;
    cygwin*|mingw*)
       brltty_mklib_ld_make="-shared"
-      brltty_mklib_ld_options="--out-implib implib.a -soname"
+      brltty_mklib_ld_options="--out-implib implib.a --output-def lib.def -soname"
       ;;
    msdos*)
       brltty_mklib_ld_make="not_supported_on_msdos"

@@ -109,6 +109,7 @@ API_LIB = $(LIB_PFX)$(API_NAME).$(LIB_EXT)
 API_DLL = $(LIB_PFX)$(API_NAME)-$(API_VERSION).$(LIB_EXT)
 API_IMPLIB = $(ARC_PFX)$(API_NAME).$(LIB_EXT).$(ARC_EXT)
 API_IMPLIB_VERSIONED = $(ARC_PFX)$(API_NAME)-$(API_RELEASE).$(LIB_EXT).$(ARC_EXT)
+API_DEF = $(API_NAME).def
 
 api: $(API_DYNAMIC_LIBRARY) $(API_ARC)
 
@@ -118,9 +119,10 @@ $(API_LIB): $(API_OBJS)
 
 api-dynamic-library-windows: $(API_DLL)
 $(API_DLL): $(API_OBJS)
-	-rm -f implib.a
+	-rm -f implib.a lib.def
 	$(MKLIB:<name>=${API_LIB}.${API_VERSION}) $@ $(API_OBJS) $(API_LIBRARIES)
 	[ ! -f implib.a ] || mv implib.a $(API_IMPLIB)
+	[ ! -f lib.def ] || mv lib.def $(API_DEF)
 
 $(API_ARC): $(API_OBJS)
 	ar rc $@ $(API_OBJS)
@@ -530,6 +532,7 @@ install-api-libraries-windows: $(API_DLL) $(API_ARC) install-program-directory i
 	$(INSTALL_DATA) $(API_IMPLIB) $(INSTALL_APILIB_DIRECTORY)/$(API_IMPLIB_VERSIONED)
 	cd $(INSTALL_APILIB_DIRECTORY) && $(SYMLINK) -f $(API_IMPLIB_VERSIONED) $(API_IMPLIB)
 	$(INSTALL_DATA) $(API_ARC) $(INSTALL_APILIB_DIRECTORY)
+	$(INSTALL_DATA) $(API_DEF) $(INSTALL_APILIB_DIRECTORY)
 
 install-api-headers: brlapi_constants.h brlapi_brldefs.auto.h install-apihdr-directory install-include-directory
 	$(INSTALL_DATA) brlapi.h $(INSTALL_APIHDR_DIRECTORY)
@@ -577,6 +580,7 @@ uninstall-libraries:
 	-rm -f $(INSTALL_APILIB_DIRECTORY)/$(API_ARC)
 	-rm -f $(INSTALL_APILIB_DIRECTORY)/$(API_IMPLIB)
 	-rm -f $(INSTALL_APILIB_DIRECTORY)/$(API_IMPLIB_VERSIONED)
+	-rm -f $(INSTALL_APILIB_DIRECTORY)/$(API_DEF)
 	-rm -f $(INSTALL_PROGRAM_DIRECTORY)/$(API_DLL)
 
 uninstall-manpages:
@@ -614,7 +618,7 @@ distclean clean::
 
 clean::
 	-rm -f brltty$X xbrlapi$X txt2hlp$X tbl2hex$X *test$X *-static$X
-	-rm -f brlapi_constants.h $(API_LIB) $(API_ARC) $(API_DLL) $(API_IMPLIB)
+	-rm -f brlapi_constants.h *.$(LIB_EXT) *.$(ARC_EXT) *.def
 	-rm -f $(BLD_TOP)$(DRV_DIR)/* $(BLD_TOP)$(DAT_DIR)/*
 
 distclean::

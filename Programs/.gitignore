@@ -8,6 +8,8 @@ brlapi_constants.h
 *.so
 *.dylib
 *.dll
+*.def
+*.lib
 *.exe
 brltty
 brltty-config
