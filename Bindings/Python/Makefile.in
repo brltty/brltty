@@ -30,7 +30,9 @@ PYTHON_API = $(PYTHON_MODULE).$(LIB_EXT)
 all: $(PYTHON_API)
 
 $(PYTHON_API): brlapi.auto.c $(API_HDRS) brlapi
-	$(PYTHON) ./setup.py --quiet build --build-temp .
+	set -- --quiet build --build-temp .; \
+	[ "@host_os@" != "mingw32" ] || set -- "$${@}" --compiler mingw32; \
+	$(PYTHON) ./setup.py "$${@}"
 
 brlapi.auto.c: $(SRC_DIR)/brlapi.pyx $(SRC_DIR)/c_brlapi.pxd constants.auto.pyx
 	$(PYREXC) -I. -o $@ $(SRC_DIR)/brlapi.pyx
