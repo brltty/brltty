@@ -328,8 +328,12 @@ insertKey_WindowsScreen (ScreenKey key) {
       LogPrint(LOG_DEBUG, "vk is %4.4X", vk);
       keyE->wVirtualKeyCode = vk & 0xff;
       if (vk & 0x100) keyE->dwControlKeyState |= SHIFT_PRESSED;
-      if (vk & 0x200) keyE->dwControlKeyState |= LEFT_CTRL_PRESSED;
-      if (vk & 0x400) keyE->dwControlKeyState |= LEFT_ALT_PRESSED;
+      if (vk & 0x600 == 0x600) {
+        keyE->dwControlKeyState |= RIGHT_ALT_PRESSED;
+      } else {
+        if (vk & 0x200) keyE->dwControlKeyState |= LEFT_CTRL_PRESSED;
+        if (vk & 0x400) keyE->dwControlKeyState |= LEFT_ALT_PRESSED;
+      }
     }
   } else {
     switch (key) {
