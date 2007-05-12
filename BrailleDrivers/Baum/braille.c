@@ -1883,6 +1883,7 @@ brl_writeWindow (BrailleDisplay *brl) {
     if (brl->buffer[start] != internalCells[start]) break;
     ++start;
   }
+  count -= start;
 
   memcpy(&internalCells[start], &brl->buffer[start], count);
   translateCells(start, count);
