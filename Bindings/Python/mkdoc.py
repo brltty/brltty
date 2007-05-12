@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 ###############################################################################
 # libbrlapi - A library providing access to braille terminals for applications.
 #
@@ -23,5 +22,6 @@ import sys
 from distutils.util import get_platform
 import pydoc
 
-sys.path.insert(1, 'build/lib.' + get_platform() + '-' + sys.version[0:3])
-pydoc.writedoc('brlapi')
+if __name__ == "__main__":
+    sys.path.insert(1, 'build/lib.' + get_platform() + '-' + sys.version[0:3])
+    pydoc.writedoc('brlapi')
