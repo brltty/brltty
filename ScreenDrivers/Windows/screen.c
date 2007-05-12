@@ -317,11 +317,20 @@ insertKey_WindowsScreen (ScreenKey key) {
   buf.EventType = KEY_EVENT;
   memset(keyE, 0, sizeof(*keyE));
   if (key < SCR_KEY_ENTER) {
+    SHORT vk;
     if (key & SCR_KEY_MOD_META) {
       keyE->dwControlKeyState |= LEFT_ALT_PRESSED;
       key &= ~ SCR_KEY_MOD_META;
     }
     keyE->uChar.AsciiChar = key;
+    vk = VkKeyScan(key);
+    if (vk != -1) {
+      LogPrint(LOG_DEBUG, "vk is %4.4X", vk);
+      keyE->wVirtualKeyCode = vk & 0xff;
+      if (vk & 0x100) keyE->dwControlKeyState |= SHIFT_PRESSED;
+      if (vk & 0x200) keyE->dwControlKeyState |= LEFT_CTRL_PRESSED;
+      if (vk & 0x400) keyE->dwControlKeyState |= LEFT_ALT_PRESSED;
+    }
   } else {
     switch (key) {
       case SCR_KEY_ENTER:         keyE->wVirtualKeyCode = VK_RETURN; break;
@@ -369,6 +378,7 @@ insertKey_WindowsScreen (ScreenKey key) {
 
   keyE->wRepeatCount = 1;
   keyE->bKeyDown = TRUE;
+  keyE->wVirtualScanCode = MapVirtualKey(keyE->wVirtualKeyCode, 0);
   if (!doInsert(&buf))
     return 0;
   keyE->bKeyDown = FALSE;
