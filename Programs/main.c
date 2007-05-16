@@ -2380,8 +2380,8 @@ main (int argc, char *argv[]) {
             memset(brl.buffer+outputLength, 0, windowLength-outputLength);
             while (cursorOffset >= 0) {
               int offset = contractedOffsets[cursorOffset];
-              if ((offset >= 0) && (offset < brl.x)) {
-                brl.cursor = offset;
+              if (offset >= 0) {
+                if (offset < brl.x) brl.cursor = offset;
                 break;
               }
               --cursorOffset;
