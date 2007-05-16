@@ -2329,10 +2329,7 @@ main (int argc, char *argv[]) {
             unsigned char inputBuffer[inputLength];
             unsigned char outputBuffer[outputLength];
 
-            if ((scr.posy == p->winy) &&
-                (scr.posx >= p->winx) &&
-                (scr.posx < (p->winx + brl.x)))
-              cursorOffset = scr.posx - p->winx;
+            if ((scr.posy == p->winy) && (scr.posx >= p->winx)) cursorOffset = scr.posx - p->winx;
             readScreen(p->winx, p->winy, inputLength, 1, inputBuffer, SCR_TEXT);
 
             {
@@ -2383,7 +2380,7 @@ main (int argc, char *argv[]) {
             memset(brl.buffer+outputLength, 0, windowLength-outputLength);
             while (cursorOffset >= 0) {
               int offset = contractedOffsets[cursorOffset];
-              if (offset >= 0) {
+              if ((offset >= 0) && (offset < brl.x)) {
                 brl.cursor = offset;
                 break;
               }
