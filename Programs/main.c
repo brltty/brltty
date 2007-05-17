@@ -2343,49 +2343,61 @@ main (int argc, char *argv[]) {
                               contractedOffsets, cursorOffset))
               break;
 
-            if (contractedTrack) {
+            {
               int inputEnd = inputLength;
-              if (outputLength == windowLength) {
-                int inputIndex = inputEnd;
-                while (inputIndex) {
-                  int offset = contractedOffsets[--inputIndex];
-                  if (offset != -1) {
-                    if (offset != outputLength) break;
-                    inputEnd = inputIndex;
+
+              if (contractedTrack) {
+                if (outputLength == windowLength) {
+                  int inputIndex = inputEnd;
+                  while (inputIndex) {
+                    int offset = contractedOffsets[--inputIndex];
+                    if (offset != -1) {
+                      if (offset != outputLength) break;
+                      inputEnd = inputIndex;
+                    }
                   }
+                }
+
+                if (scr.posx >= (p->winx + inputEnd)) {
+                  int offset = 0;
+                  int onspace = 0;
+                  int length = scr.cols - p->winx;
+                  unsigned char buffer[length];
+                  readScreen(p->winx, p->winy, length, 1, buffer, SCR_TEXT);
+
+                  while (offset < length) {
+                    if ((isspace(buffer[offset]) != 0) != onspace) {
+                      if (onspace) break;
+                      onspace = 1;
+                    }
+                    ++offset;
+                  }
+
+                  if ((offset += p->winx) > scr.posx) {
+                    p->winx = (p->winx + scr.posx) / 2;
+                  } else {
+                    p->winx = offset;
+                  }
+
+                  continue;
                 }
               }
-              if (scr.posx >= (p->winx + inputEnd)) {
-                int offset = 0;
-                int onspace = 0;
-                int length = scr.cols - p->winx;
-                unsigned char buffer[length];
-                readScreen(p->winx, p->winy, length, 1, buffer, SCR_TEXT);
-                while (offset < length) {
-                  if ((isspace(buffer[offset]) != 0) != onspace) {
-                    if (onspace) break;
-                    onspace = 1;
+
+              memcpy(brl.buffer, outputBuffer, outputLength);
+              memset(brl.buffer+outputLength, 0, windowLength-outputLength);
+
+              if (cursorOffset < inputEnd) {
+                while (cursorOffset >= 0) {
+                  int offset = contractedOffsets[cursorOffset];
+                  if (offset >= 0) {
+                    if (offset < brl.x) brl.cursor = offset;
+                    break;
                   }
-                  ++offset;
+                  --cursorOffset;
                 }
-                if ((offset += p->winx) > scr.posx)
-                  p->winx = (p->winx + scr.posx) / 2;
-                else
-                  p->winx = offset;
-                continue;
               }
             }
 
-            memcpy(brl.buffer, outputBuffer, outputLength);
-            memset(brl.buffer+outputLength, 0, windowLength-outputLength);
-            while (cursorOffset >= 0) {
-              int offset = contractedOffsets[cursorOffset];
-              if (offset >= 0) {
-                if (offset < brl.x) brl.cursor = offset;
-                break;
-              }
-              --cursorOffset;
-            }
             contractedStart = p->winx;
             contractedLength = inputLength;
             contractedTrack = 0;
