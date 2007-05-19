@@ -285,7 +285,7 @@ typedef struct {
   int orLength;
 } FunctionData_session_write;
 
-OPTION_HANDLER(session, write, and) {
+OPTION_HANDLER(session, write, andMask) {
   FunctionData_session_write *options = data;
   options->arguments.andMask = Tcl_GetByteArrayFromObj(objv[1], &options->andLength);
   if (!options->andLength) options->arguments.andMask = NULL;
@@ -311,7 +311,7 @@ OPTION_HANDLER(session, write, cursor) {
   return parseCursorOperand(interp, objv[1], &options->arguments.cursor);
 }
 
-OPTION_HANDLER(session, write, display) {
+OPTION_HANDLER(session, write, displayNumber) {
   FunctionData_session_write *options = data;
   Tcl_Obj *obj = objv[1];
   const char *string = Tcl_GetString(obj);
@@ -329,7 +329,7 @@ OPTION_HANDLER(session, write, display) {
   return TCL_OK;
 }
 
-OPTION_HANDLER(session, write, or) {
+OPTION_HANDLER(session, write, orMask) {
   FunctionData_session_write *options = data;
   options->arguments.orMask = Tcl_GetByteArrayFromObj(objv[1], &options->orLength);
   if (!options->orLength) options->arguments.orMask = NULL;
@@ -823,8 +823,8 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
       BEGIN_OPTIONS
         {
-          OPTION(session, write, and),
-          OPERANDS(1, "<mask>")
+          OPTION(session, write, andMask),
+          OPERANDS(1, "<dots>")
         }
         ,
         {
@@ -838,13 +838,13 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
         }
         ,
         {
-          OPTION(session, write, display),
+          OPTION(session, write, displayNumber),
           OPERANDS(1, "{default | <number>}")
         }
         ,
         {
-          OPTION(session, write, or),
-          OPERANDS(1, "<mask>")
+          OPTION(session, write, orMask),
+          OPERANDS(1, "<dots>")
         }
         ,
         {
@@ -863,8 +863,8 @@ brlapiSessionCommand (ClientData data, Tcl_Interp *interp, int objc, Tcl_Obj *co
 
         const LengthEntry lengths[] = {
           {.name="text", .value=options.textLength},
-          {.name="and", .value=options.andLength},
-          {.name="or", .value=options.orLength},
+          {.name="andMask", .value=options.andLength},
+          {.name="orMask", .value=options.orLength},
           {.name=NULL}
         };
 

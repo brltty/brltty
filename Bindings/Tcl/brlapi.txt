@@ -30,11 +30,11 @@ brlapi<sessionNumber> function [arg ...]
    ignoreKeyRanges <keyRangeList>
    write [<option> ...]
       -text <string>
-      -and <mask>
-      -or <mask>
+      -andMask <dots>
+      -orMask <dots>
       -begin <offset>
       -cursor {leave | off | <offset>}
-      -display {default | <number>}
+      -displayNumber {default | <number>}
    writeDots <dots>
    enterRawMode <driver>
    leaveRawMode
