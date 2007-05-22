@@ -698,27 +698,46 @@ usbTestPath (const char *path) {
 
 static char *
 usbFindRoot (void) {
-  char *root = NULL;
-  const char *path = MOUNTED;
-  FILE *table;
-  if ((table = setmntent(path, "r"))) {
-    struct mntent *entry;
-    while ((entry = getmntent(table))) {
-      if ((strcmp(entry->mnt_type, "usbdevfs") == 0) ||
-          (strcmp(entry->mnt_type, "usbfs") == 0)) {
-        if (usbTestPath(entry->mnt_dir)) {
-          root = strdupWrapper(entry->mnt_dir);
-          break;
+  {
+    static const char *const paths[] = {
+      "/proc/bus/usb",
+      NULL
+    };
+    const char *const *path = paths;
+
+    while (*path) {
+      if (usbTestPath(*path)) return strdupWrapper(*path);
+      ++path;
+    }
+  }
+
+  {
+    char *root = NULL;
+    const char *path = MOUNTED;
+    FILE *table;
+
+    if ((table = setmntent(path, "r"))) {
+      struct mntent *entry;
+
+      while ((entry = getmntent(table))) {
+        if ((strcmp(entry->mnt_type, "usbdevfs") == 0) ||
+            (strcmp(entry->mnt_type, "usbfs") == 0)) {
+          if (usbTestPath(entry->mnt_dir)) {
+            root = strdupWrapper(entry->mnt_dir);
+            break;
+          }
         }
       }
+
+      endmntent(table);
+    } else {
+      LogPrint((errno == ENOENT)? LOG_WARNING: LOG_ERR,
+               "mounted file system table open erorr: %s: %s",
+               path, strerror(errno));
     }
-    endmntent(table);
-  } else {
-    LogPrint((errno == ENOENT)? LOG_WARNING: LOG_ERR,
-             "Mounted file system table open erorr: %s: %s",
-             path, strerror(errno));
+
+    return root;
   }
-  return root;
 }
 
 static char *
@@ -755,6 +774,7 @@ usbFindDevice (UsbDeviceChooser chooser, void *data) {
   UsbDevice *device = NULL;
   char *root;
   if ((root = usbFindRoot()) || (root = usbMakeRoot())) {
+    LogPrint(LOG_DEBUG, "USB Root: %s", root);
     device = usbSearchDevice(root, chooser, data);
     free(root);
   } else {
