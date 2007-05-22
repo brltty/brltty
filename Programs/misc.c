@@ -439,7 +439,7 @@ makeDirectory (const char *path) {
                   ,S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH
 #endif /* __MINGW32__ */
                   ) != -1) {
-    LogPrint(LOG_DEBUG, "directory created: %s", path);
+    LogPrint(LOG_NOTICE, "directory created: %s", path);
     return 1;
   } else {
     LogPrint(LOG_ERR, "cannot create directory: %s: %s", path, strerror(errno));
