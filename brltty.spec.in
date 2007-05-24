@@ -127,7 +127,7 @@ rm -fr "${RPM_BUILD_ROOT}"
 %files -n brlapi
 %defattr(-,root,root)
 %{_libdir}/libbrlapi.so.*
-/usr/lib/python*/brlapi.*
+@PYTHON_SITE_PKG@/brlapi.*
 %doc Documents/Manual-BrlAPI/English/*.{sgml,txt,html}
 %doc Documents/README.Gnopernicus
 
