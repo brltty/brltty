@@ -114,6 +114,7 @@ rm -fr "${RPM_BUILD_ROOT}"
 %defattr(-,root,root)
 %{_bindir}/brltty
 %{_bindir}/brltty-*
+%{_bindir}/vstp
 %{_libdir}/brltty
 %{_sysconfdir}/brltty
 %doc %{_mandir}/man1/*
@@ -126,6 +127,7 @@ rm -fr "${RPM_BUILD_ROOT}"
 %files -n brlapi
 %defattr(-,root,root)
 %{_libdir}/libbrlapi.so.*
+/usr/lib/python*/brlapi.*
 %doc Documents/Manual-BrlAPI/English/*.{sgml,txt,html}
 %doc Documents/README.Gnopernicus
 
@@ -133,6 +135,8 @@ rm -fr "${RPM_BUILD_ROOT}"
 %defattr(-,root,root)
 %{_libdir}/libbrlapi.a
 %{_libdir}/libbrlapi.so
+%{_includedir}/brlapi.h
+%{_includedir}/brlapi_*.h
 %{_includedir}/brltty
 %doc %{_mandir}/man3/*
 %doc Documents/BrlAPIref
