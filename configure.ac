@@ -482,12 +482,14 @@ BRLTTY_ARG_DISABLE(
          [Tcl bindings for BrlAPI],
          [],
          [
-            AC_CHECK_HEADER([tcl.h], [dnl
-               AC_PATH_PROG([TCLSH], [tclsh])
+            m4_include([Bindings/Tcl/ac_tcl_devel.m4])
+            AC_TCL_DEVEL()
+            if "${TCL}"
+            then
                api_bindings="${api_bindings} Tcl"
-            ], [dnl
-               AC_MSG_WARN([Tcl BrlAPI bindings not included: tcl.h not found])
-            ])
+            else
+               AC_MSG_WARN([Tcl BrlAPI bindings not included])
+            fi
          ]
       )
 
