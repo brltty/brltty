@@ -20,7 +20,6 @@ AC_DEFUN([AC_TCL_DEVEL], [dnl
 TCL=false
 TCL_INCLUDE_FLAGS=""
 TCL_LIB_FLAGS=""
-tcl_config_name="tclConfig.sh"
 
 BRLTTY_ARG_WITH(
    [tcl-config], [PATH],
@@ -28,13 +27,14 @@ BRLTTY_ARG_WITH(
    [tcl_config_script], ["no"]
 )
 
+tcl_config_name="tclConfig.sh"
 if test "${tcl_config_script}" = "no"
 then
    tcl_config_script=""
 elif test "${tcl_config_script}" = "yes"
 then
    tcl_config_script=""
-   for directory in "/usr/lib"
+   for directory in "/usr/lib" "/usr/local/lib"
    do
       script="${directory}/${tcl_config_name}"
       test ! -f "${script}" || {
@@ -69,7 +69,7 @@ then
 fi
 
 "${TCL}" && {
-   AC_PATH_PROG([TCLSH], [tclsh])
+   AC_PATH_PROGS([TCLSH], [tclsh${TCL_VERSION} tclsh], [TCLSH_NOT_FOUND_BY_CONFIGURE])
 }
 
 AC_SUBST([TCL])
