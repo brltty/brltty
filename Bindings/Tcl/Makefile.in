@@ -34,8 +34,8 @@ clean::
 	-rm -f $(TCL_API)
 
 install: all
-	$(SRC_DIR)/pkgutil -root "$(INSTALL_ROOT)" install $(API_NAME) $(API_RELEASE) $(TCL_API)
+	$(TCLSH) $(SRC_DIR)/pkgutil -root "$(INSTALL_ROOT)" install $(API_NAME) $(API_RELEASE) $(TCL_API)
 
 uninstall:
-	-$(SRC_DIR)/pkgutil -root "$(INSTALL_ROOT)" uninstall $(API_NAME) $(API_RELEASE)
+	-$(TCLSH) $(SRC_DIR)/pkgutil -root "$(INSTALL_ROOT)" uninstall $(API_NAME) $(API_RELEASE)
 
