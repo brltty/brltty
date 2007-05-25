@@ -30,42 +30,48 @@ BRLTTY_ARG_WITH(
 tcl_config_name="tclConfig.sh"
 if test "${tcl_config_script}" = "no"
 then
-   tcl_config_script=""
-elif test "${tcl_config_script}" = "yes"
-then
-   tcl_config_script=""
-   for directory in "/usr/lib" "/usr/local/lib"
-   do
-      script="${directory}/${tcl_config_name}"
-      test ! -f "${script}" || {
-         tcl_config_script="${script}"
-         break
-      }
-   done
-   test -n "${tcl_config_script}" || {
-      AC_MSG_WARN([Tcl configuration script not found])
-   }
-else
-   test ! -d "${tcl_config_script}" || tcl_config_script="${tcl_config_script}/${tcl_config_name}"
-   test -f "${tcl_config_script}" || {
-      AC_MSG_WARN([Tcl configuration script not found: ${tcl_config_script}])
-   }
-fi
-
-if test -z "${tcl_config_script}"
-then
    AC_CHECK_HEADER([tcl.h], [dnl
       TCL=true
       TCL_LIB_FLAGS="-ltcl"
    ])
-elif test ! -r "${tcl_config_script}"
-then
-   AC_MSG_WARN([Tcl configuration script not readable: ${tcl_config_script}])
-elif . "${tcl_config_script}"
-then
-   TCL=true
-   TCL_INCLUDE_FLAGS="${TCL_INCLUDE_SPEC}"
-   TCL_LIB_FLAGS="${TCL_LIB_SPEC}"
+else
+   test "${tcl_config_script}" != "yes" || tcl_config_script=""
+
+   if test -z "${tcl_config_script}"
+   then
+      for directory in "/usr/lib" "/usr/local/lib"
+      do
+         script="${directory}/${tcl_config_name}"
+         test ! -f "${script}" || {
+            tcl_config_script="${script}"
+            AC_MSG_NOTICE([Tcl configuration script is ${tcl_config_script}])
+            break
+         }
+      done
+
+      test -n "${tcl_config_script}" || {
+         AC_MSG_WARN([Tcl configuration script not found: ${tcl_config_name}])
+      }
+   else
+      test ! -d "${tcl_config_script}" || tcl_config_script="${tcl_config_script}/${tcl_config_name}"
+
+      test -f "${tcl_config_script}" || {
+         AC_MSG_WARN([Tcl configuration script not found: ${tcl_config_script}])
+         tcl_config_script=""
+      }
+   fi
+
+   test -z "${tcl_config_script}" || {
+      if test ! -r "${tcl_config_script}"
+      then
+         AC_MSG_WARN([Tcl configuration script not readable: ${tcl_config_script}])
+      elif . "${tcl_config_script}"
+      then
+         TCL=true
+         TCL_INCLUDE_FLAGS="${TCL_INCLUDE_SPEC}"
+         TCL_LIB_FLAGS="${TCL_LIB_SPEC}"
+      fi
+   }
 fi
 
 "${TCL}" && {

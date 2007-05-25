@@ -1,4 +1,3 @@
-#!/usr/bin/env tclsh
 ###############################################################################
 # libbrlapi - A library providing access to braille terminals for applications.
 #
