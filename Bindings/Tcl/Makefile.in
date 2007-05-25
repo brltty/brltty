@@ -25,10 +25,10 @@ TCL_API = $(LIB_PFX)$(API_NAME)_tcl.$(LIB_EXT)
 all: $(TCL_API)
 
 $(TCL_API): bindings.$O $(API_NAME)
-	$(MKLIB:<name>=$(API_NAME)) $@ bindings.$O -ltcl $(API_LDFLAGS)
+	$(MKLIB:<name>=$(API_NAME)) $@ bindings.$O @TCL_LIB_FLAGS@ $(API_LDFLAGS)
 
 bindings.$O:
-	$(CC) $(LIBCFLAGS) -o $@ -c $(SRC_DIR)/bindings.c
+	$(CC) @TCL_INCLUDE_FLAGS@ $(LIBCFLAGS) -o $@ -c $(SRC_DIR)/bindings.c
 
 clean::
 	-rm -f $(TCL_API)

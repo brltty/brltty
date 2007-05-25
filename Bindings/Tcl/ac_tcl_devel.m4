@@ -24,7 +24,7 @@ tcl_config_name="tclConfig.sh"
 
 BRLTTY_ARG_WITH(
    [tcl-config], [PATH],
-   [the path to ${tcl_config_name} or to the directory containing it],
+   [the path to the Tcl configuration script (tclConfig.sh) or to the directory containing it],
    [tcl_config_script], ["no"]
 )
 
