@@ -61,8 +61,42 @@ Summary: Appliation Programming Interface for BRLTTY.
 This package provides the run-time support for the Application
 Programming Interface to BRLTTY.
 
-Install this package if you have an application which directly accesses
-a refreshable braille display.
+Install this package if you have an application
+which directly accesses a refreshable braille display.
+
+%package -n brlapi-python
+Version: @api_release@
+Group: Applications/System
+License: LGPL
+
+AutoProv: 1
+
+AutoReq: 1
+
+Summary: Python bindings for BrlAPI.
+%description -n brlapi-python
+This package provides the Python bindings for BrlAPI,
+which is the Application Programming Interface to BRLTTY.
+
+Install this package if you have a Python application
+which directly accesses a refreshable braille display.
+
+%package -n brlapi-tcl
+Version: @api_release@
+Group: Applications/System
+License: LGPL
+
+AutoProv: 1
+
+AutoReq: 1
+
+Summary: Tcl bindings for BrlAPI.
+%description -n brlapi-tcl
+This package provides the Tcl bindings for BrlAPI,
+which is the Application Programming Interface to BRLTTY.
+
+Install this package if you have a Tcl application
+which directly accesses a refreshable braille display.
 
 %package -n brlapi-devel
 Version: @api_release@
@@ -127,9 +161,15 @@ rm -fr "${RPM_BUILD_ROOT}"
 %files -n brlapi
 %defattr(-,root,root)
 %{_libdir}/libbrlapi.so.*
-@PYTHON_SITE_PKG@/brlapi.*
 %doc Documents/Manual-BrlAPI/English/*.{sgml,txt,html}
 %doc Documents/README.Gnopernicus
+
+%files -n brlapi-python
+@PYTHON_SITE_PKG@/brlapi.*
+
+%files -n brlapi-tcl
+/usr/lib/brlapi-@api_release@/libbrlapi_tcl.so
+/usr/lib/brlapi-@api_release@/pkgIndex.tcl
 
 %files -n brlapi-devel
 %defattr(-,root,root)
