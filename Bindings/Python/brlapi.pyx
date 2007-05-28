@@ -52,11 +52,9 @@ b.leaveTtyMode()
 cimport c_brlapi
 include "constants.auto.pyx"
 
-cdef returnerrno():
+def returnerrno():
 	"""This function returns str message error from errno"""
-	cdef c_brlapi.brlapi_error_t *error
-	error = c_brlapi.brlapi_error_location()
-	return c_brlapi.brlapi_strerror(error)
+	return c_brlapi.brlapi_strerror(c_brlapi.brlapi_error_location())
 
 class ConnectionError:
 	"""Error while connecting to BrlTTY"""
