@@ -52,6 +52,7 @@ WIN_PROC_STUB(AttachConsole);
 
 /* user32.dll */
 WIN_PROC_STUB(GetAltTabInfoA);
+WIN_PROC_STUB(SendInput);
 
 
 /* ws2_32.dll */
@@ -90,6 +91,7 @@ sysInit (void) {
 
   if (LOAD_LIBRARY("user32.dll")) {
     GET_PROC(GetAltTabInfoA);
+    GET_PROC(SendInput);
   }
 
   if (LOAD_LIBRARY("ws2_32.dll")) {

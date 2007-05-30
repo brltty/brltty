@@ -290,15 +290,36 @@ read_WindowsScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
 }
 
 static int 
-doInsert (INPUT_RECORD *buf) {
+doInsertWriteConsoleInput (BOOL down, WCHAR wchar, WORD vk, WORD scancode, DWORD controlKeyState) {
   DWORD num;
-  if (WriteConsoleInputA(consoleInput, buf, 1, &num)) {
+  INPUT_RECORD buf;
+  KEY_EVENT_RECORD *keyE = &buf.Event.KeyEvent;
+
+  buf.EventType = KEY_EVENT;
+  memset(keyE, 0, sizeof(*keyE));
+  keyE->bKeyDown = down;
+  keyE->wRepeatCount = 1;
+  keyE->wVirtualKeyCode = vk;
+  keyE->wVirtualScanCode = scancode;
+  keyE->uChar.UnicodeChar = wchar;
+  keyE->dwControlKeyState = controlKeyState;
+  if (WriteConsoleInputW(consoleInput, &buf, 1, &num)) {
     if (num == 1) {
       return 1;
     } else {
       LogPrint(LOG_ERR, "inserted %ld keys, expected 1", num);
     }
   } else {
+    if (GetLastError() == ERROR_CALL_NOT_IMPLEMENTED) {
+      keyE->uChar.AsciiChar = wchar;
+      if (WriteConsoleInputA(consoleInput, &buf, 1, &num)) {
+	if (num == 1) {
+	  return 1;
+	} else {
+	  LogPrint(LOG_ERR, "inserted %ld keys, expected 1", num);
+	}
+      }
+    }
     LogWindowsError("WriteConsoleInput");
     CloseHandle(consoleInput);
     consoleInput = INVALID_HANDLE_VALUE;
@@ -306,89 +327,156 @@ doInsert (INPUT_RECORD *buf) {
   return 0;
 }
 
+static int 
+doInsertSendInput (BOOL down, WCHAR wchar, WORD vk, WORD scancode) {
+  if (SendInputProc) {
+    UINT num;
+    INPUT input;
+    KEYBDINPUT *ki = &input.ki;
+
+    input.type = INPUT_KEYBOARD;
+    memset(ki, 0, sizeof(*ki));
+    if (wchar) {
+      ki->wVk = 0;
+      ki->wScan = wchar;
+      ki->dwFlags |= KEYEVENTF_UNICODE;
+    } else {
+      ki->wVk = vk;
+      ki->wScan = scancode;
+    }
+
+    if (!down)
+      ki->dwFlags |= KEYEVENTF_KEYUP;
+
+    num = SendInput(1, &input, sizeof(INPUT));
+    switch (num) {
+      case 1:  return 1;
+      case 0:  LogWindowsError("WriteConsoleInput"); break;
+      default: LogPrint(LOG_ERR, "inserted %d keys, expected 1", num); break;
+    }
+    return 0;
+  } else {
+    keybd_event(vk, scancode, down ? 0 : KEYEVENTF_KEYUP, 0);
+    return 1;
+  }
+}
+
 static int
 insertKey_WindowsScreen (ScreenKey key) {
-  INPUT_RECORD buf;
-  KEY_EVENT_RECORD *keyE = &buf.Event.KeyEvent;
-
-  if (consoleInput == INVALID_HANDLE_VALUE) return 0;
+  SHORT vk = 0;
+  SHORT scancode = 0;
+  DWORD controlKeyState = 0;
+  WCHAR wchar = 0;
 
   LogPrint(LOG_DEBUG, "Insert key: %4.4X",key);
-  buf.EventType = KEY_EVENT;
-  memset(keyE, 0, sizeof(*keyE));
   if (key < SCR_KEY_ENTER) {
-    SHORT vk;
     if (key & SCR_KEY_MOD_META) {
-      keyE->dwControlKeyState |= LEFT_ALT_PRESSED;
+      controlKeyState |= LEFT_ALT_PRESSED;
       key &= ~ SCR_KEY_MOD_META;
     }
-    keyE->uChar.AsciiChar = key;
-    vk = VkKeyScan(key);
+    wchar = key;
+    vk = VkKeyScanW(wchar);
+    if (vk == -1 && GetLastError() == ERROR_CALL_NOT_IMPLEMENTED)
+      vk = VkKeyScan(wchar);
     if (vk != -1) {
       LogPrint(LOG_DEBUG, "vk is %4.4X", vk);
-      keyE->wVirtualKeyCode = vk & 0xff;
-      if (vk & 0x100) keyE->dwControlKeyState |= SHIFT_PRESSED;
-      if (vk & 0x600 == 0x600) {
-        keyE->dwControlKeyState |= RIGHT_ALT_PRESSED;
+      if (vk & 0x100) controlKeyState |= SHIFT_PRESSED;
+      if ((vk & 0x600) == 0x600) {
+	controlKeyState |= RIGHT_ALT_PRESSED;
       } else {
-        if (vk & 0x200) keyE->dwControlKeyState |= LEFT_CTRL_PRESSED;
-        if (vk & 0x400) keyE->dwControlKeyState |= LEFT_ALT_PRESSED;
+        if (vk & 0x200) controlKeyState |= LEFT_CTRL_PRESSED;
+        if (vk & 0x400) controlKeyState |= LEFT_ALT_PRESSED;
       }
-    }
+      vk = vk & 0xff;
+    } else vk = 0;
   } else {
     switch (key) {
-      case SCR_KEY_ENTER:         keyE->wVirtualKeyCode = VK_RETURN; break;
-      case SCR_KEY_TAB:           keyE->wVirtualKeyCode = VK_TAB;    break;
-      case SCR_KEY_BACKSPACE:     keyE->wVirtualKeyCode = VK_BACK;   break;
-      case SCR_KEY_ESCAPE:        keyE->wVirtualKeyCode = VK_ESCAPE; break;
-      case SCR_KEY_CURSOR_LEFT:   keyE->wVirtualKeyCode = VK_LEFT;   break;
-      case SCR_KEY_CURSOR_RIGHT:  keyE->wVirtualKeyCode = VK_RIGHT;  break;
-      case SCR_KEY_CURSOR_UP:     keyE->wVirtualKeyCode = VK_UP;     break;
-      case SCR_KEY_CURSOR_DOWN:   keyE->wVirtualKeyCode = VK_DOWN;   break;
-      case SCR_KEY_PAGE_UP:       keyE->wVirtualKeyCode = VK_PRIOR;  break;
-      case SCR_KEY_PAGE_DOWN:     keyE->wVirtualKeyCode = VK_NEXT;   break;
-      case SCR_KEY_HOME:          keyE->wVirtualKeyCode = VK_HOME;   break;
-      case SCR_KEY_END:           keyE->wVirtualKeyCode = VK_END;    break;
-      case SCR_KEY_INSERT:        keyE->wVirtualKeyCode = VK_INSERT; break;
-      case SCR_KEY_DELETE:        keyE->wVirtualKeyCode = VK_DELETE; break;
-      case SCR_KEY_FUNCTION + 0:  keyE->wVirtualKeyCode = VK_F1;     break;
-      case SCR_KEY_FUNCTION + 1:  keyE->wVirtualKeyCode = VK_F2;     break;
-      case SCR_KEY_FUNCTION + 2:  keyE->wVirtualKeyCode = VK_F3;     break;
-      case SCR_KEY_FUNCTION + 3:  keyE->wVirtualKeyCode = VK_F4;     break;
-      case SCR_KEY_FUNCTION + 4:  keyE->wVirtualKeyCode = VK_F5;     break;
-      case SCR_KEY_FUNCTION + 5:  keyE->wVirtualKeyCode = VK_F6;     break;
-      case SCR_KEY_FUNCTION + 6:  keyE->wVirtualKeyCode = VK_F7;     break;
-      case SCR_KEY_FUNCTION + 7:  keyE->wVirtualKeyCode = VK_F8;     break;
-      case SCR_KEY_FUNCTION + 8:  keyE->wVirtualKeyCode = VK_F9;     break;
-      case SCR_KEY_FUNCTION + 9:  keyE->wVirtualKeyCode = VK_F10;    break;
-      case SCR_KEY_FUNCTION + 10: keyE->wVirtualKeyCode = VK_F11;    break;
-      case SCR_KEY_FUNCTION + 11: keyE->wVirtualKeyCode = VK_F12;    break;
-      case SCR_KEY_FUNCTION + 12: keyE->wVirtualKeyCode = VK_F13;    break;
-      case SCR_KEY_FUNCTION + 13: keyE->wVirtualKeyCode = VK_F14;    break;
-      case SCR_KEY_FUNCTION + 14: keyE->wVirtualKeyCode = VK_F15;    break;
-      case SCR_KEY_FUNCTION + 15: keyE->wVirtualKeyCode = VK_F16;    break;
-      case SCR_KEY_FUNCTION + 16: keyE->wVirtualKeyCode = VK_F17;    break;
-      case SCR_KEY_FUNCTION + 17: keyE->wVirtualKeyCode = VK_F18;    break;
-      case SCR_KEY_FUNCTION + 18: keyE->wVirtualKeyCode = VK_F19;    break;
-      case SCR_KEY_FUNCTION + 19: keyE->wVirtualKeyCode = VK_F20;    break;
-      case SCR_KEY_FUNCTION + 20: keyE->wVirtualKeyCode = VK_F21;    break;
-      case SCR_KEY_FUNCTION + 21: keyE->wVirtualKeyCode = VK_F22;    break;
-      case SCR_KEY_FUNCTION + 22: keyE->wVirtualKeyCode = VK_F23;    break;
-      case SCR_KEY_FUNCTION + 23: keyE->wVirtualKeyCode = VK_F24;    break;
+      case SCR_KEY_ENTER:         vk = VK_RETURN; wchar='\r'; break;
+      case SCR_KEY_TAB:           vk = VK_TAB;    wchar='\t'; break;
+      case SCR_KEY_BACKSPACE:     vk = VK_BACK;   wchar='\b'; break;
+      case SCR_KEY_ESCAPE:        vk = VK_ESCAPE; wchar='\e'; break;
+      case SCR_KEY_CURSOR_LEFT:   vk = VK_LEFT;   break;
+      case SCR_KEY_CURSOR_RIGHT:  vk = VK_RIGHT;  break;
+      case SCR_KEY_CURSOR_UP:     vk = VK_UP;     break;
+      case SCR_KEY_CURSOR_DOWN:   vk = VK_DOWN;   break;
+      case SCR_KEY_PAGE_UP:       vk = VK_PRIOR;  break;
+      case SCR_KEY_PAGE_DOWN:     vk = VK_NEXT;   break;
+      case SCR_KEY_HOME:          vk = VK_HOME;   break;
+      case SCR_KEY_END:           vk = VK_END;    break;
+      case SCR_KEY_INSERT:        vk = VK_INSERT; break;
+      case SCR_KEY_DELETE:        vk = VK_DELETE; break;
+      case SCR_KEY_FUNCTION + 0:  vk = VK_F1;     break;
+      case SCR_KEY_FUNCTION + 1:  vk = VK_F2;     break;
+      case SCR_KEY_FUNCTION + 2:  vk = VK_F3;     break;
+      case SCR_KEY_FUNCTION + 3:  vk = VK_F4;     break;
+      case SCR_KEY_FUNCTION + 4:  vk = VK_F5;     break;
+      case SCR_KEY_FUNCTION + 5:  vk = VK_F6;     break;
+      case SCR_KEY_FUNCTION + 6:  vk = VK_F7;     break;
+      case SCR_KEY_FUNCTION + 7:  vk = VK_F8;     break;
+      case SCR_KEY_FUNCTION + 8:  vk = VK_F9;     break;
+      case SCR_KEY_FUNCTION + 9:  vk = VK_F10;    break;
+      case SCR_KEY_FUNCTION + 10: vk = VK_F11;    break;
+      case SCR_KEY_FUNCTION + 11: vk = VK_F12;    break;
+      case SCR_KEY_FUNCTION + 12: vk = VK_F13;    break;
+      case SCR_KEY_FUNCTION + 13: vk = VK_F14;    break;
+      case SCR_KEY_FUNCTION + 14: vk = VK_F15;    break;
+      case SCR_KEY_FUNCTION + 15: vk = VK_F16;    break;
+      case SCR_KEY_FUNCTION + 16: vk = VK_F17;    break;
+      case SCR_KEY_FUNCTION + 17: vk = VK_F18;    break;
+      case SCR_KEY_FUNCTION + 18: vk = VK_F19;    break;
+      case SCR_KEY_FUNCTION + 19: vk = VK_F20;    break;
+      case SCR_KEY_FUNCTION + 20: vk = VK_F21;    break;
+      case SCR_KEY_FUNCTION + 21: vk = VK_F22;    break;
+      case SCR_KEY_FUNCTION + 22: vk = VK_F23;    break;
+      case SCR_KEY_FUNCTION + 23: vk = VK_F24;    break;
       default: LogPrint(LOG_WARNING, "Key %4.4X not suported.", key);
                return 0;
     }
   }
 
-  keyE->wRepeatCount = 1;
-  keyE->bKeyDown = TRUE;
-  keyE->wVirtualScanCode = MapVirtualKey(keyE->wVirtualKeyCode, 0);
-  if (!doInsert(&buf))
-    return 0;
-  keyE->bKeyDown = FALSE;
-  if (!doInsert(&buf))
-    return 0;
-  return 1;
+  scancode = MapVirtualKey(vk, 0);
+
+  LogPrint(LOG_DEBUG,"wchar %x vk %x scancode %d ks %ld", wchar, vk, scancode, controlKeyState);
+  if (consoleInput != INVALID_HANDLE_VALUE && !unreadable) {
+    LogPrint(LOG_DEBUG, "using WriteConsoleInput");
+    if (!doInsertWriteConsoleInput(TRUE, wchar, vk, scancode, controlKeyState))
+      return 0;
+    if (!doInsertWriteConsoleInput(FALSE, wchar, vk, scancode, controlKeyState))
+      return 0;
+    return 1;
+  } else {
+    LogPrint(LOG_DEBUG, "using SendInput");
+    if (controlKeyState & LEFT_CTRL_PRESSED)
+      if (!doInsertSendInput(TRUE, 0, VK_CONTROL, 0))
+        return 0;
+    if (controlKeyState & SHIFT_PRESSED)
+      if (!doInsertSendInput(TRUE, 0, VK_SHIFT, 0))
+        return 0;
+    if (controlKeyState & LEFT_ALT_PRESSED)
+      if (!doInsertSendInput(TRUE, 0, VK_MENU, 0))
+        return 0;
+    if (controlKeyState & RIGHT_ALT_PRESSED)
+      if (!doInsertSendInput(TRUE, 0, VK_RMENU, 0))
+        return 0;
+    if (!doInsertSendInput(TRUE, wchar, vk, scancode))
+      return 0;
+    if (!doInsertSendInput(FALSE, wchar, vk, scancode))
+      return 0;
+    if (controlKeyState & RIGHT_ALT_PRESSED)
+      if (!doInsertSendInput(FALSE, 0, VK_RMENU, 0))
+        return 0;
+    if (controlKeyState & LEFT_ALT_PRESSED)
+      if (!doInsertSendInput(FALSE, 0, VK_MENU, 0))
+        return 0;
+    if (controlKeyState & SHIFT_PRESSED)
+      if (!doInsertSendInput(FALSE, 0, VK_SHIFT, 0))
+        return 0;
+    if (controlKeyState & LEFT_CTRL_PRESSED)
+      if (!doInsertSendInput(FALSE, 0, VK_CONTROL, 0))
+        return 0;
+    return 1;
+  }
+  return 0;
 }
 
 static int

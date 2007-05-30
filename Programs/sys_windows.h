@@ -44,6 +44,7 @@ extern WIN_PROC_STUB(AttachConsole);
 
 /* user32.dll */
 extern WIN_PROC_STUB(GetAltTabInfoA);
+extern WIN_PROC_STUB(SendInput);
 
 
 /* ws2_32.dll */
