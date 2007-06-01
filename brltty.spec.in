@@ -182,328 +182,102 @@ rm -fr "${RPM_BUILD_ROOT}"
 %doc Documents/BrlAPIref
 
 %changelog
-* Sat Sep 17 2005 Dave Mielke <dave@mielke.cc> 3.7
-+  Change the dot-to-bit mapping to comply with ISO/TR 11548-1.
-+  New cursor routing algorithm (works with editors with wrapped lines).
-+  Replace the -N [--no-speech] option with -N [--no-api].
-+  Get the fully qualified path to the executable.
-+  getWorkingDirectory() should use reallocWrapper().
-+  hasTimedOut(0) should return true in order to handle a timeout of 0.
-+  Create the rescaleInteger() function from in-line preferences menu code.
-+  Define and implement BRL_BLK_GOTOLINE.
-+  NULs are written to the end of the visual display if it's off the end of the screen.
-+  Termination signals should just set a flag and let brltty terminate safely.
-+  Change all "bluez" uses to "bluetooth".
-+  Split the autorepeat code out into a separate function.
-+  Autospeak sometimes decides that characters have been deleted when, in fact, they've been replaced.
-+  Enable autorepeat and autospeak for the preferences menu.
-+  Write debug logs for braille and speech setting changes.
-+  The coordinates on the status line should start from 1 rather than from 0.
-+  Generate lower status digits symbolically rather than mathematically.
-+  Operate serial devices in true nonblocking mode.
-+  Give better names to serialTestLines()'s arguments.
-+  Text table renames: fr -> fr_CA, fr-iso01 -> fr_FR
-+  Force OSS PCM output to be blocking.
-      There appears to be a bug in ALSA OSS simulation.
-      Output is nonblocking if snd_seq_oss is loaded with nonblock_open=1.
-      In this case, write() always returns the full count even though
-      large chunks of sound are missing.
-+  Ensure that the PCM ALSA support uses a sensible sample rate.
-+  By default, use the PCM ALSA device "default".
-+  Fix ALSA MIDI event timing and output flushing.
-+  Alva braille driver changes:
-      Add input/output packet logging.
-      Remove the autodetect loop.
-      Remove some hard-coded delays during open.
-      Ensure that all packet buffers are as large as the largest possible packet.
-      Wait during open to see if the status cells have been turned off.
-+  BrailleLite braille driver changes:
-      Redefine the key-to-dots table in terms of braille dot constants.
-      Remove other hard-coded dot values.
-      Redo the layout of the bindings table to make it easier to edit.
-+  BrailleNote braille driver changes:
-      Reindent the source to 2 (form 3).
-      Remove the probe loop from brl_open().
-      Add packet I/O.
-      Add output flow control.
-      Define a structure for input packets.
-+  EuroBraille braille driver changes:
-      Use symbolic, rather than hard-coded, dot-to-bit mapping.
-+  FreedomScientific braille driver changes:
-      Reduce the USB retry count from 5 to 3.
-      Remove the "no response from display" warning.
-      Fix a typo in the definition of the Focus 40 braille display.
-+  HandyTech braille driver changes:
-      Reduce the USB retry count from 5 to 3.
-      Remove the "no response from display" warning.
-+  LogText braille driver changes:
-      Redefine the output and input tables in terms of braille dot constants.
-      Don't prepare the output and input tables more than once.
-+  MDV braille driver changes:
-      Remove the autodetect loop.
-+  Papenmeier braille driver changes:
-      Reduce the USB retry count from 5 to 3.
-      Remove the "no response from display" warning.
-      Add automatic cursor routing to horizontal combined mode bindings.
-      read_config:
-         Include prologue.h.
-         Link with $(LDLIBS).
-+  TTY braille driver changes:
-      Position the cursor correctly.
-      Build even if no curses package is available.
-+  Virtual braille driver changes:
-      Use PF_LOCAL/AF_LOCAL instead of PF_UNIX/AF_UNIX.
-      Don't index the names array beyond its size.
-+  VisioBraille braille driver changes:
-      Redefine the output table in terms of braille dot constants.
-+  Voyager braille driver changes:
-      Reformat the definition of the dots table.
-+  XWindow braille driver changes:
-      Reindent source.
-      Rename the xtparms parameter to tkparms.
-      Add the input= parameter.
-      Add a more advanced model (based on the VisioBraille mapping).
-      Xm isn't initernationalized.
-      Add cursor routing and displaying of dots.
-      Show the cursor position within the visual display.
-      Right-clicking on the window pops up a menu in which one can
-      change the size and model of the emulated braille device.
-      Keep the window on top.
-      Add a setup menu.
-      Add support for command autorepeating.
-      Include X11/Intrinsic.h in more places to keep Solaris happy.
-+  ExternalSpeech speech driver changes:
-      Allow names, rather than just numbers, to be passed to the uid/gid parameters.
-+  Swift speech driver changes:
-      Add debug logs for the setting of parameters.
-+  API changes:
-      Change BrlAPI's release to 0.4.0.
-      Add void to argumentless routine prototypes where missing.
-      Move brlapi_fd_mutex from api.h to api_protocol.h.
-      Move BRL_KEYBUF_SIZE from api.h to api_client.c.
-      Define the BRLAPI_MAXKEYSETSIZE constant and use it in api_client.c.
-      brlapi_readFile() and brlapi_writeFile() are only used within api_common.c.
-      Clean up the API TTY list in a safe way.
-      The API should automatically clean up its TTY tree.
-      Remove the ancestor loop from brlapi_getControllingTty().
-      Require clients to be more precise when claiming a tty or entering raw mode:
-         getRaw() has an argument to specify the driver one wants to exchange packets with.
-         The integer argument of getTty() used to specify either BRL_KEYCODES or BRL_COMMANCS
-         has been replaced by a string argument.
-         If either NULL or "" then keypresses are delivered as BRLTTY commands.
-         If a driver name then the server verifies that that driver is being used 
-         and that it actually supports raw key codes.
-         brlapi_getRaw() should return an error rather than an exception
-         when the required driver is not the one used by BRLTTY.
-      Define BRLCOMMANDS (in api.h) in a backward compatible way.
-      Verify the result of gethostbyname().
-      Add conditional code for PF_LOCAL.
-      Use sockaddr_storage rather than sockaddr.
-      Split brlapi_readPacket() into brlapi_readPacketHeader() and brlapi_readPacketContent().
-      Split processRequest() into several smaller functions.
-      Check cursor value more carefully in brlapi_writeText().
-      Only real commands (neither NOOP nor EOF) should be sent to clients.
-      The server side of the API should do non-blocked reads.
-      Report packet read errors via errno rather than via brlapi_libcerrno.
-      Rename errorHandler to exceptionHandler.
-      Add the brlapi_strexception() function.
-      More clearly distinguish between errors and exceptions.
-      Problems caused by getTty and (un)ignoreKeySet should be reported as errors rather than as exceptions.
-      brlapi_packetType() should return a convenient string for exception packets.
-      Clean up error handling by putting all necessary information for printing errors into a struct.
-      Add the infrastructure for handling display size changes.
-      Handle client's charset and convert as needed in the server.
-      Recognize -1 (rather than 0) as the "no screen" vt.
-      Several (rare) race condition fixes.
-      Add support for the Unicode braille row.
-      If supported, reduce the thread stack size to 64K (from 8M).
-      Add the API parameter stacksize=.
-      Remove the TOORECURSE error code.
-      Replace both RAWNOTSUPP and KEYSNOTSUMP errors by OPNOTSUPP.
-      Return OPNOTSUPP (rather than INVALID_PARAMETER) when a charset is specified and iconv is absent.
-      Simplify the returning of errors.
-      Fix tty table extension.
-      brlapi_write() should use the specified length rather than call strlen since the data could contain NUL bytes.
-      Add the brlapi_getTtyPath() function.
-      Use recursive locking so that brl_readCommand() can call message().
-      Change the prototypes for brlapi_(send|recv)Raw() to use "void *" instead of "unsigned char *".
-      Allow the KeyFile= parameter to accept the special string "none".
-      Reject empty key files.
-      Accept keys larger than the allowed key size.
-      By default, the client should also check for the IP socket.
-      Check for an already-running BrlAPI server.
-      Provide public access to brlapi_splitHost().
-      Dot masks should be unsigned.
-      Remove the trailing newline from the "BrlAPI resize" log.
-      "code" has already been converted to host byte order by the caller.
-      Add some synchronisation cleanups.
-      Allow users to call brlapi_write(NULL).
-      api.h should internally include what it depends on.
-      Preprocess the autorepeat flags.
-      Let the clients see BRL_CMD_NOOP.
-+  apitest changes:
-      Add the -d [--dots] option.
-      Exit show dots mode when a braille display key (rather than a keyboard key) is pressed.
-      Learn Mode:
-         Announce entry.
-         Write command descriptions to standard error.
-         Eliminate bogus error message when leaving.
-+  xbrlapi changes:
-      Add key event support.
-      No longer use the deprecated BRLCOMMANDS constant.
-      Close the connection via a signal-safe method.
-+  tbltest changes:
-      Add support for writing tables.
-      Add support for .a2b (Gnopernicus) braille tables.
-      Interpret - as standard input.
-+  en-us-g2 contraction table fixes:
-      [had]rian, hid[ea]way, r[er]egister, un[con]genial.
-      Don't remove space after "a" if before "and", "for", "of", "the", or "with".
-      Don't contract the word "in" after a dash.
-+  USB changes:
-      Remove the assumption that a USB device maps to a file system object.
-      A device should point to the proper descriptor for the current interface alternative.
-      Use a common algorithm for iterating through the configuration descriptor block.
-      Only reread the configuration descriptor block if the first buffer is too small.
-      Publicize the functions for getting the configuration descriptor and its components.
-      When setting the configuration, deallocate the cached copy of the old descriptor.
-      Add a function for reading the device descriptor from the device itself.
-      Automatically close an open interface when changing the configuration.
-      Add an endpoint parameter to usbReapResponse().
-      Improve the timeout used for in-line endpoint reading when awaiting input.
-      Calculate timeouts more accurately.
-      Make device closing more robust.
-      Check for a serial adapter even if configuration data for it isn't supplied.
-      Fix the bulk input loop.
-      Asynchronous errors should always be passed back to the caller.
-      Code restructuring:
-         Reorder the platform-dependent function definitions.
-         Group the global internal function definitions by where they need to be implemented.
-         Rename the constants to avoid conflicts with libusb.
-      Linux changes:
-         Allow reaping the URB for a specific endpoint.
-         Reap a URB after discarding it.
-         Add support for inline reading of an interrupt endpoint.
-         Add support for inline writing to an interrupt endpoint.
-      BSD changes:
-         Add more robustness to deallocating device and endpoint extensions.
-      Darwin changes:
-         Add more robustness to deallocating an endpoint extension.
-      Add support for libusb.
-+  General code changes:
-      Update the copyright prologues from 2004 to 2005.
-      Change "Linux console" to "console screen" in the copyright prologues.
-      Change the nested inclusion protection convention from _NAME_H to BRLTTY_INCLUDED_NAME.
-      <sys/types.h> needs to be included before almost any other header  on some BSD systems.
-      gcc-3.3 (at least on cygwin) doesn't like apostrophes in #error directives.
-      gcc-4 does a lot more checking for matching signedness.
-      gcc-4 doesn't allow a variable to be declared global and then static.
-      Remove the casts from the results of malloc() calls.
-      Clean up the passing of TranslationTable and DotsTable parameters.
-      Logs to standard error should be prefixed with the program's name.
-      Use LogPrint() rather than fprintf(stderr) for option processing errors.
-      Rename ctb_definitions.h to ctb_internal.h.
-      Remove dummy timezone parameters to gettimeofday().
-      Rename infmode to infoMode.
-      Remove tests for and calls to endhostent() and endservent().
-      Ensure that all I/O headers are prefixed with "io_" (primarily because of <usb.h>.
-+  General driver changes:
-      Define opt_pcmDevice as external for those speech drivers which need it.
-      Change the speech rate,volume handlers to take a floating-point multiplier.
-      Prefix all driver identification #defines with the driver code.
-      Uniformly refer to driver codes as "codes" rather than as "identifiers".
-      Add the driver comment string to the driver structure.
-      Split the braille and speech drivers into separate subdirectories.
-      Don't create the /lib/brltty/brltty-???.lst files.
-      Make the screen drivers dyamically loadable.
-      Add skeleton braille,speech,screen driver source.
-+  Screen driver changes:
-      Define screen driver parameters in a more standard way.
-      Allow screen driver codes to be used as parameter qualifiers.
-      Make --without-screen-driver work.
-      Add the screen-driver configuration directive and -x command line option to BRLTTY.
-      Remove hard-coded limitations and assumptions from the screen state table.
-      Don't keep two copies of the current screen number.
-      All screen drivers should determine their vt# in only one place.
-      Clean up the code which switches between the live,frozen,help screens.
-      The read() method should return a boolean rather than the buffer.
-      Add the uservt() method to the MainScreen object.
-      Add the uservt() method to the Screen screen driver.
-      Add the currentvt() method to the FrozenScreen object.
-      Correctly detect when the Linux console switches between text and graphics mode.
-+  Solaris changes:
-      Define AF_LOCAL to be AF_INET.
-      Define _XOPEN_SOURCE=500 and __EXTENSIONS__.
-      Add native USB support.
-      Remove the use of "[from ... to] =" initializers.
-      Remove the use of type-casted tuples.
-      Remove the use of __label__ declarations.
-      "#pragma weak", rather than "__attributes__((weak))", is needed on Solaris.
-+  Build changes:
-      gendeps changes:
-         Remove the need for TclX.
-         Search for tclsh rather than hard-code its path.
-      Rename the "aux" subdirectory to "acdir" (for Cygwin).
-      Don't build spktest automatically.
-      Build/install/uninstall xbrlapi.
-      Pass the list of needed libraries to the linking of the API server library.
-      Link the API client library with only those dependencies which it actually needs.
-      Add build-time detection for: pwd.h, grp.h, regex.h, gai_strerror(), hstrerror().
-      Add compile-time detection for: ETIMEDOUT, EAFNOSUPORT.
-      Explicitly test for libX11, libXt, and the xt toolkit library.
-      Separate the concepts of dynamic library and loadable module.
-      Use <NAME> rather than <SONAME> in the MKLIB macro.
-      Use libusb, if available, if we don't provie native USB support.
-      Upgrade the BrlAPIref doxygen configuration file to 1.3.9.1.
-      Clean up the top-level <driver-type>.mk files.
-      Correct the documentation regarding default installed package locations.
-      Rename the brltty_setup_files macro to brltty_make_files.
-      Rename setup.mk.in to prologue.mk.in.
-      "make clean/distclean" should process the directories for internal drivers.
-      "make all" in the "Documents/" subdirectory should make the man3 files.
-      Add the make file targets tar,gz,bz2,rpm.
-      Fix the hard-coded dependencies which allow the VideoBraille braille driver to be built-in.
-      Split the non-config parts of config.h into prologue.h and include the former from the latter.
-      Remove the leading ./ from config.h in make file dependency lists.
-      Some compilers don't like trailing slashes on directory paths.
-      Use the shell variable $RANDOM as a last resort when generating the API key.
-+  rhmkiso chagnes:
-      Build in the Linux screen driver, and don't build any other screen drivers.
-      Add support for making a braillified Fedora Core 4 installer image.
-+  RPM changes:
-      The spec file referenced an old substitution for the API version.
-      Don't include the TTY braille driver.
-+  Gnopernicus changes:
-      ttybrl.c:
-         Improve the BRLTTY command to Gnopernicus key mappings.
-         Use Gnopernicus layer-key codes rather than Baum key codes.
-         Move all key code generation into a common routine.
-         Rename key to blk and keypress to key.
-         Ignore BRL_CMD_NOOP.
-         Handle the autorepeat flags.
-         Check for errors in the command read loop.
-         ignore_input() is no longer needed because flags aren't taken into account when ignoring commands.
-         Adapt to BrlAPI 0.4.0.
-      README.Gnopernicus:
-         Add a note about using BRLTTY's Patches/ttybrl.c.
-         Document the latest BRLTTY command to Gnopernicus key mappings.
-         Document how to get the routing keys to work.
-+  Initial support for the Hurd platform.
-+  Initial support for the Mac OS X (Darwin) platform.
-+  Initial support for the Cygwin platform.
-+  Initial support for the MinGW platform.
-+  Remove the Vario braille driver.
-+  Remove the VarioHT braille driver.
-+  Add the Baum braille driver.
-+  Add the Braudi braille driver.
-+  Add the BrlAPI braille driver.
-+  Add the Libbraille braille driver.
-+  Add the TechniBraille braille driver.
-+  Add the AtSpi screen driver.
-+  Add the Hurd screen driver.
-+  Add the Windows screen driver.
-+  Rename the shm screen driver to Screen.
-+  Add al,bm,bn,ht,md to the braille driver serial autodetect list.
-+  Add bm to the braille driver USB autodetect list.
-+  Add bm to the braille driver Bluetooth autodetect list.
+* Mon Jun  4 2007 Dave Mielke <dave@mielke.cc> 3.8
++  General updates:
+      Add the -r [--release-device] command line option.
+      Add the release-device configuration directive.
+      Look in $HOME/.brltty/ for brltty.conf, translation tables, contraction tables, and preferences files.
+      Add screen scroll detection to the cursor routing algorithm.
+      Fix left-panning when presenting contracted braille.
+      Change the default braille and speech drivers to "auto".
+      Change the default braille device to "usb:".
+      Improved AT keyboard scancode support.
+      Added XT keyboard scancode support.
+      Verify that a driver's version matches that of the core when loading it.
+      If any drivers are built-in then only autodetect for them.
+      Log unexpected data from braille displays as warnings.
+      New braille drivers: IrixLinux
+      New speech drivers: SpeechDispatcher
+      New screen drivers: PCBIOS
+      New supported operating systems: kFreeBSD, MSDOS (almost)
++  Startup updates:
+      Only count command line option and configuration file errors as problems.
+      Periodically retry starting the speech driver.
+      Periodically retry creating the PID file.
++  BrlAPI updates:
+      Version changed to 0.5.0.
+      Base TCP/IP port changed from 35751 to the newly IANA-assigned 4101 [brlp-0] (4 ports).
+      Move headers from "/usr/include/brltty/*.h" to "/usr/include/brlapi_*.h".
+      Lots of function and constant renames (see man brlapi_deprecated).
+      Remove brlapi_getDriverId().
+      Add brlapi_suspendDriver() and brlapi_resumeDriver().
+      Redesign the paradigm for ignoring and accepting key codes.
+      Add support for multiple simultaneous sessions.
+      Add support for the application-definable BRLAPI_NO_DEPRECATED and BRLAPI_NO_SINGLE_SESSION macros.
+      Improved Unicode support.
+      Rename the WINDOWSPATH environment variable to WINDOWPATH.
+      Rename the BRLAPI_KEYFILE environment variable to BRLAPI_AUTH.
+      Rename the KeyFile= parameter to Auth=.
+      Add support for authentication by user and/or group.
+      Implement bindings for Caml, Java, Lisp, Python, and Tcl.
++  Preferences menu updates:
+      Change the default for "Autorepeat" from "No" to "Yes".
+      Add "Autorepeat Panning" [No, Yes].
+      Add "Braille Sensitivity" [Minimum, Low, Medium, High, Maximum].
+      Rename "Pointer Follows Window" to "Highlight Window".
+      The "Highlight Window" preference works even if gpm isn't available.
+      Only highlight the upper-left character of the window if attribute underlining is on.
++  Alva braille driver updates:
+      Add support for the Braille System 40.
++  Baum braille driver updates:
+      Some key binding changes.
+      Add keyboard input.
+      Add the VarioKeys parameter for those who prefer the old Vario driver bindings.
++  MiniBraille braille driver updates:
+      Add flow control so that it works on fast CPUs.
+      Some key binding changes.
++  HandyTech braille driver updates:
+      Support the Modular Evolution models (64 and 88).
++  Papenmeier braille driver updates:
+      Add support for the latest BrailleX II models (except for the Trio line).
+      Add support for setting braille firmness.
++  VisioBraille braille driver updates:
+      Support the non-standard serial flow control used by older models.
+      Distribute the vstp (VisioBraille file transfer) application.
++  Linux screen driver updates:
+      Add support for frame buffer consoles.
+      Fix the emulation of keys F1-F5.
++  Screen screen driver and screen patch updates:
+      Fixed cursor routing.
+      Add support for keyboard emulation.
+      Fix support for the status line.
+      Add support for the input line.
+      Show the current window number (rather than 0).
+      Show correct character highlighting.
++  Windows support updates:
+      Recognize the CR-LF sequence as a text file input line terminator.
+      Don't misinterpret/corrupt preferences files by treating them as text files.
+      Present the AltTabInfo window.
+      Support keyboard emulation when in a DOS box or a non-console application.
+      Determine which facilities are available at run-time rather than at build-time.
+      Remove support for Windows 95.
++  Text translation table updates:
+      Renames: uk->en_UK, us->en_US
+      Add a table for Swedish 1996.
+      Add a table for Unified French 2007.
+      Add a table for Portuguese.
+      Fix the Czech table to support German symbols in a uniform way.
+      Support tables in the Gnome Braille format.
+      Support tables in the sbl (SuSE Blinux) format.
++  Contraction table updates:
+      Several fixes to en-us-g2 (Grade 2 American English).
+      Updates to big5.
+      Add a table for GB2312 (Simplified Chinese Braille)
++  Build updates:
+      The autogen.sh script has been renamed to autogen.
+      Add support for a relocatable install (useful on Windows).
+      Change the default for gpm support to enabled.
+      Define general macros for braille applications in "/usr/include/iso_11548-1.h".
+      Add the --with-stderr-path configure script option.
+      Braillified installer images log errors to tty5.
 
