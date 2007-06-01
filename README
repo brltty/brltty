@@ -25,11 +25,11 @@ the file COPYING-API for details. Version 2.1 (or any later version) of the
 LGPL may be used when redistributing and/or modifying these files. The files
 covered by this special exception are:
 
-   Programs/api.h.in
-   Programs/api_protocol.h
-   Programs/api_client.c
-   Programs/api_common.h
-   Programs/brldefs.h
+   Programs/brlapi.h.in
+   Programs/brlapi_keycodes.h
+   Programs/brlapi_protocol.h
+   Programs/brlapi_client.c
+   Programs/brlapi_common.h
    BrailleDrivers/VisioBraille/brldefs-vs.h
 
 This software is maintained by: Dave Mielke <dave@mielke.cc>
