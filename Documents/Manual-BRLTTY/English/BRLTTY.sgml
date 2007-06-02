@@ -1002,13 +1002,14 @@ These options are primarily useful when building BRLTTY for use on a boot disk.
   <tag><tt/--disable-pm-configfile/<label id="build-pm-configfile"></tag>
     Reduce program size by excluding support for
     the Papenmeier driver's configuration file.
-  <tag><tt/--enable-gpm/<label id="build-gpm"></tag>
-    Include an interface to the <tt/gpm/ application
-    so that, on systems which support it,
-    BRLTTY will interact with the pointer (mouse) device
+  <tag><tt/--disable-gpm/<label id="build-gpm"></tag>
+    Reduce program size by excluding
+    the interface to the <tt/gpm/ application
+    which allows BRLTTY to interact with the pointer (mouse) device
     (see section <ref id="gpm" name="Pointer (Mouse) Support via GPM">).
-  <tag><tt/--enable-api/<label id="build-api"></tag>
-    Include the Application Programming Interface.
+  <tag><tt/--disable-api/<label id="build-api"></tag>
+    Reduce program size by excluding
+    the Application Programming Interface.
   <tag><tt/--with-api-parameters=/<em/name/<tt/=/<em/value/<tt/,/...<label id="build-api-parameters"></tag>
     Specify the default parameter settings for the Application Programming Interface.
     If the same parameter is specified more than once,
@@ -1018,6 +1019,30 @@ These options are primarily useful when building BRLTTY for use on a boot disk.
     See the <ref id="configure-api-parameters" name="api-parameters"> configuration file directive
     and the <ref id="options-api-parameters" name="-A"> command line option
     for run-time selection.
+  <tag><tt/--disable-caml-bindings/<label id="build-caml-bindings"></tag>
+    Don't build the Caml bindings for the Application Programming Interface.
+  <tag><tt/--disable-java-bindings/<label id="build-java-bindings"></tag>
+    Don't build the Java bindings for the Application Programming Interface.
+  <tag><tt/--disable-lisp-bindings/<label id="build-lisp-bindings"></tag>
+    Don't build the Lisp bindings for the Application Programming Interface.
+  <tag><tt/--disable-python-bindings/<label id="build-python-bindings"></tag>
+    Don't build the Python bindings for the Application Programming Interface.
+  <tag><tt/--disable-tcl-bindings/<label id="build-tcl-bindings"></tag>
+    Don't build the Tcl bindings for the Application Programming Interface.
+  <tag><tt/--with-tcl-config=/<em/path/<label id="build-tcl-config"></tag>
+    Specify the location of the Tcl configuration script (<tt/tclConfig.sh/).
+    Either the path to the script itself
+    or to the directory containing it
+    may be supplied.
+    Any of the following words can also be used as the operand of this option:
+    <descrip>
+      <tag/no/
+        Use other means to guess if Tcl is available, and, if so, where it has been installed.
+        This is equivalent to specifying <tt/--without-tcl-config/.
+      <tag/yes/
+        Search for the script in a few commonly used directories.
+        This is equivalent to specifying <tt/--with-tcl-config/.
+    </descrip>
 </descrip>
 
 <sect3>Miscellaneous Options<label id="build-miscellaneous"><p>
