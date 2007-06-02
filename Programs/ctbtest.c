@@ -136,7 +136,7 @@ main (int argc, char *argv[]) {
   processOptions(optionTable, optionCount,
                  "ctbtest", &argc, &argv,
                  NULL, NULL, NULL,
-                 "contraction-table");
+                 "[{input-file | -} ...]");
 
   {
     char **const paths[] = {
