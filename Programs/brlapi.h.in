@@ -1108,7 +1108,7 @@ int BRLAPI_STDCALL brlapi__writeWin(brlapi_handle_t *handle, const brlapi_writeA
 #ifndef BRLAPI_NO_DEPRECATED
 /** \defgroup brlapi_deprecated Deprecated names
  *
- * With version 0.5.0, BrlAPI is now provided through #include <brlapi.h> and
+ * With version 0.5.0, BrlAPI is now provided through including <brlapi.h> and
  * got a big renaming pass. Old names are still available through macros, but
  * they are deprecated since they will get dropped in the next release. This
  * documentation is for you to know the new names.
