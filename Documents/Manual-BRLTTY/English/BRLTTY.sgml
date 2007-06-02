@@ -1640,7 +1640,7 @@ This utility tests a translation table
     If it's relative then it's anchored at the current working directory.
     If this parameter isn't supplied then no output table is written.
   <tag><tt/-c/<em/charset/ <tt/--character-set=/<em/charset/</tag>
-    Specify the name of the 8-bit character set to use when interpreting the table.
+    Specify the name of the 8-bit character set to use when interpreting the tables.
     If this option isn't supplied then the host's character set is used.
   <tag><tt/-i/<em/format/ <tt/--input-format=/<em/format/</tag>
     Specify the format of the input table.
@@ -1650,6 +1650,19 @@ This utility tests a translation table
     Specify the format of the output table.
     If this option isn't supplied then the format of the output table
     is deduced from the extension of the output table's file name.
+  <tag><tt/-t/ <tt/--translate/</tag>
+    <itemize>
+      <item>
+        If this option is supplied then both tables must be specified.
+        Standard input is read,
+        translated to braille via the input table,
+        translated back to text via the output table,
+        and written to standard output.
+      <item>
+        If this option isn't supplied then the output table is optional.
+        If specified, the input table is converted.
+        If not specified, the input table is just checked.
+    </itemize>
   <tag><tt/-h/ <tt/--help/</tag>
     Display a summary of the command line options, and then exit.
 </descrip>
