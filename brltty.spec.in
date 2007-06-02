@@ -238,6 +238,7 @@ rm -fr "${RPM_BUILD_ROOT}"
       Some key binding changes.
 +  HandyTech braille driver updates:
       Support the Modular Evolution models (64 and 88).
+      Add one-hand convenience bindings for BrailleStar navigation functions.
 +  Papenmeier braille driver updates:
       Add support for the latest BrailleX II models (except for the Trio line).
       Add support for setting braille firmness.
