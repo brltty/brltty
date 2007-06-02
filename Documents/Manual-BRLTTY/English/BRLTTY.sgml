@@ -2562,8 +2562,7 @@ The <tt/brltty/ command accepts the following options:
     and of the selected braille and speech drivers,
     and then exit.
     If the <ref id="options-quiet" name="-q"> option isn't specified,
-    then also display copyright information as well as
-    the values of the options after all sources have been considered.
+    then also display the values of the options after all sources have been considered.
     If more than one braille driver
     (see the <ref id="options-braille-driver" name="-b"> command line option)
     and/or more than one braille device
