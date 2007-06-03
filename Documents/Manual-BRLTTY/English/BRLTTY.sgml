@@ -940,10 +940,18 @@ These options are primarily useful when building BRLTTY for use on a boot disk.
   <tag><tt/--enable-standalone-programs/<label id="build-standalone-programs"></tag>
     Create statically linked, rather than dynamically linked, programs.
     This option removes all dependencies on shared objects at run-time.
-    Only the default drivers
-    (see the <ref id="build-braille-driver" name="--with-braille-driver">
-    and the <ref id="build-speech-driver" name="--with-speech-driver">
+    Only the default drivers (see the
+    <ref id="build-braille-driver" name="--with-braille-driver">,
+    <ref id="build-speech-driver" name="--with-speech-driver">,
+    and <ref id="build-screen-driver" name="--with-screen-driver">
     build options) are compiled.
+  <tag><tt/--enable-relocatable-install/<label id="build-relocatable-install"></tag>
+    If this feature is enabled then all internal paths
+    are recalculated to be relative to the program directory.
+    If it's disabled then all internal paths are absolute.
+    This feature allows the entire installed file hierarchy
+    to be copied or moved, in tact, from one place to another,
+    and is primarily intended for use on Windows platforms.
   <tag><tt/--disable-preferences-menu/<label id="build-preferences-menu"></tag>
     Reduce program size by excluding the preferences menu
     (see section <ref id="preferences-menu" name="The Preferences Menu">).
@@ -1070,10 +1078,12 @@ These options are primarily useful when building BRLTTY for use on a boot disk.
         It's especially useful for some install/rescue disks.
     </enum>
     If this option isn't specified, then this feature isn't activated.
+    This option is primarily intended for building a braillified installer image.
   <tag><tt/--with-stderr-path=/<em/path/<label id="build-stderr-path"></tag>
     Specify the path to the file or device where standard erorr output is to be written.
     The absolute path should be supplied.
     If this option isn't specified, then this feature isn't activated.
+    This option is primarily intended for building a braillified installer image.
 </descrip>
 
 <sect2>Make File Targets<label id="make"><p>
