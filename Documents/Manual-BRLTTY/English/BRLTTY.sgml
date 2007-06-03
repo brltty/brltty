@@ -2114,8 +2114,8 @@ via the <ref id="preferences-menu" name="preferences menu">.
     while its key (combination) remains pressed.
     Only some drivers support this functionality,
     the primary limitation being that many braille displays
-    don't signal both key presses and key releases as distinctly separate events.
-    This feature is initially <bf/off/.
+    don't signal key presses and key releases as distinctly separate events.
+    This feature is initially <bf/on/.
     This setting can also be changed with the
     <ref id="preference-autorepeat" name="Autorepeat"> preference.
   <tag>AUTOSPEAK<label id="command-AUTOSPEAK"></tag>
@@ -2876,19 +2876,6 @@ If BRLTTY is configured with the <ref id="build-gpm" name="--enable-gpm"> build 
 on a system where the <tt/gpm/ application has been installed,
 then it'll interact with the pointer (mouse).
 
-Moving the braille window moves the pointer
-(see the <ref id="preference-pointer-follows-window" name="Pointer Follows Window"> preference).
-Any motion of the braille window (manual, cursor tracking, etc.),
-other than when it moves in response to pointer motion,
-moves the pointer to the character on the screen
-which corresponds to the upper-left corner of the braille window.
-This enables a sighted observer to see where the braille window is,
-and, therefore, to know what the braille user is reading.
-It also keeps the pointer within the braille window
-so that it can be found easily,
-and so that the pointer device can always be readily used
-as another way to move the braille window.
-
 Moving the pointer drags the braille window
 (see the <ref id="preference-window-follows-pointer" name="Window Follows Pointer"> preference).
 Whenever the pointer is moved beyond the edge of the braille window,
@@ -3152,7 +3139,7 @@ Notes:
       <tag/Yes/
         Reposition it whenever the cursor moves too close to either end.
     </descrip>
-    The initial setting is <tt/off/.
+    The initial setting is <tt/No/.
   <tag>Window Overlap<label id="preference-window-overlap"></tag>
     When moving either left or right with
     the <ref id="command-FWINLT-FWINRT" name="FWINLT/FWINRT"> commands,
@@ -3191,7 +3178,17 @@ Notes:
     don't signal both key presses and key releases as distinctly separate events.
     This setting can also be changed with the
     <ref id="command-AUTOREPEAT" name="AUTOREPEAT"> command.
-    The initial setting is <tt/off/.
+    The initial setting is <tt/Yes/.
+  <tag>Autorepeat Panning<label id="preference-autorepeat-panning"></tag>
+    When the <ref id="preference-autorepeat" name="Autorepeat"> preference is enabled:
+    <descrip>
+      <tag/No/
+        Don't autorepeat braille window panning operations.
+      <tag/Yes/
+        Autorepeat braille window panning operations.
+    </descrip>
+    This preference affects the <ref id="command-FWINLT-FWINRT" name="FWINLT/FWINRT"> commands.
+    The initial setting is <tt/No/.
   <tag>Autorepeat Delay<label id="preference-autorepeat-delay"></tag>
     When a character is to be autorepeated,
     this setting specifies the amount of time
@@ -3327,17 +3324,23 @@ Notes:
     </descrip>
     This preference is only presented if the
     <ref id="build-gpm" name="--enable-gpm"> build option was specified.
-  <tag>Pointer Follows Window<label id="preference-pointer-follows-window"></tag>
+  <tag>Highlight Window<label id="preference-highlight-window"></tag>
     When moving the braille window:
     <descrip>
       <tag/No/
-        Don't move the pointer (mouse).
+        Don't highlight the new screen area.
       <tag/Yes/
-        Move the pointer (mouse) to the character on the screen
-        corresponding to the top-left corner of the braille window.
+        Highlight the new screen area.
     </descrip>
-    This preference is only presented if the
-    <ref id="build-gpm" name="--enable-gpm"> build option was specified.
+    This feature enables a sighted observer to see where the braille window is,
+    and, therefore, to know what the braille user is reading.
+    Any motion of the braille window (manual, cursor tracking, etc.),
+    other than when it moves in response to pointer (mouse) motion
+    (see the <ref id="preference-window-follows-pointer" name="Window Follows Pointer"> preference),
+    causes the area of the screen corresponding to
+    the new location of the braille window to be highlighted.
+    If the <ref id="preference-show-attributes" name="Show Attributes"> preference is enabled
+    then only the character corresponding to the upper-left corner of the braille window is highlighted.
   <tag>Alert Tunes<label id="preference-alert-tunes"></tag>
     Whenever a significant event with an associated tune occurs
     (see <ref id="tunes" name="Alert Tunes">):
@@ -3349,7 +3352,7 @@ Notes:
     </descrip>
     This setting can also be changed with the
     <ref id="command-TUNES" name="TUNES"> command.
-    The initial setting is <tt/on/.
+    The initial setting is <tt/Yes/.
   <tag>Tune Device<label id="preference-tune-device"></tag>
     Play alert tunes via:
     <descrip>
@@ -3396,7 +3399,7 @@ Notes:
         This device isn't available if the
         <ref id="build-fm-support" name="--disable-fm-support"> build option was specified.
     </descrip>
-    The initial setting is <tt/beeper/ on those platforms which support it,
+    The initial setting is <tt/Beeper/ on those platforms which support it,
     and <tt/PCM/ on those platforms which don't.
   <tag>MIDI Instrument<label id="preference-midi-instrument"></tag>
     If the Musical Instrument Digital Interface (MIDI) of the sound card
@@ -3445,7 +3448,7 @@ Notes:
       <tag/Enqueue/
         Don't discard pending speech.
     </descrip>
-    The initial setting is <tt/immediate/.
+    The initial setting is <tt/Immediate/.
   <tag>Autospeak<label id="preference-autospeak"></tag>
     <descrip>
       <tag/No/
@@ -3460,7 +3463,7 @@ Notes:
     </descrip>
     This setting can also be changed with the
     <ref id="command-AUTOSPEAK" name="AUTOSPEAK"> command.
-    The initial setting is <tt/off/.
+    The initial setting is <tt/No/.
   <tag>Speech Rate<label id="preference-speech-rate"></tag>
     Adjust the speech rate
     (<tt/0/ is the slowest, <tt/20/ is the fastest).
@@ -3604,7 +3607,7 @@ Notes:
         The tens digit is shown in the top half of the cell,
         and the units digit is shown in the bottom half of the cell.
     </descrip>
-    It's initial setting is braille display driver dependent.
+    The initial setting is braille display driver dependent.
   <tag>Text Table<label id="preference-text-table"></tag>
     Select the text translation table.
     See section <ref id="translation-text" name="Text Translation"> for details.
