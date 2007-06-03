@@ -3401,12 +3401,33 @@ Notes:
     </descrip>
     The initial setting is <tt/Beeper/ on those platforms which support it,
     and <tt/PCM/ on those platforms which don't.
+  <tag>PCM Volume<label id="preference-pcm-volume"></tag>
+    If the digital audio interface of the sound card
+    is being used to play the alert tunes,
+    this setting specifies the loudness
+    (as a percentage of the maximum)
+    at which they are to be played.
+    The initial setting is <tt/70/.
+  <tag>MIDI Volume<label id="preference-midi-volume"></tag>
+    If the Musical Instrument Digital Interface (MIDI) of the sound card
+    is being used to play the alert tunes,
+    this setting specifies the loudness
+    (as a percentage of the maximum)
+    at which they are to be played.
+    The initial setting is <tt/70/.
   <tag>MIDI Instrument<label id="preference-midi-instrument"></tag>
     If the Musical Instrument Digital Interface (MIDI) of the sound card
     is being used to play the alert tunes,
     this setting specifies which instrument is to be used
     (see the <ref id="midi" name="MIDI Instrument Table">).
     The initial setting is <tt/Acoustic Grand Piano/.
+  <tag>FM Volume<label id="preference-fm-volume"></tag>
+    If the FM synthesizer of the sound card
+    is being used to play the alert tunes,
+    this setting specifies the loudness
+    (as a percentage of the maximum)
+    at which they are to be played.
+    The initial setting is <tt/70/.
   <tag>Alert Dots<label id="preference-alert-dots"></tag>
     Whenever a significant event with an associated dot pattern occurs
     (see <ref id="tunes" name="Alert Tunes">):
