@@ -3314,6 +3314,18 @@ Notes:
     </itemize>
     This preference is only available if a driver which supports it is being used.
     The initial setting is <tt/Medium/.
+  <tag>Braille Sensitivity<label id="preference-braille-sensitivity"></tag>
+    Adjust the sensitivity of the braille dots to touch.
+    It can be set to:
+    <itemize>
+      <item>Maximum
+      <item>High
+      <item>Medium
+      <item>Low
+      <item>Minimum
+    </itemize>
+    This preference is only available if a driver which supports it is being used.
+    The initial setting is <tt/Medium/.
   <tag>Window Follows Pointer<label id="preference-window-follows-pointer"></tag>
     When moving the pointer device (mouse):
     <descrip>
