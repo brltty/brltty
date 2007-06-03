@@ -973,6 +973,9 @@ These options are primarily useful when building BRLTTY for use on a boot disk.
     Reduce program size by excluding support for bluetooth devices.
   <tag><tt/--disable-speech-support/<label id="build-speech-support"></tag>
     Reduce program size by excluding support for speech synthesizers.
+  <tag><tt/--disable-iconv/<label id="build-iconv"></tag>
+    Reduce program size by excluding support for
+    character set conversion.
   <tag><tt/--disable-beeper-support/<label id="build-beeper-support"></tag>
     Reduce program size by excluding support for
     the console tone generator.
