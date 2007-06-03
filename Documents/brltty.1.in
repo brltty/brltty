@@ -593,6 +593,9 @@ GenericSay
 .B ht
 HandyTech
 .TP 4
+.B il
+IrisLinux
+.TP 4
 .B lb
 Libbraille
 .TP 4
@@ -616,6 +619,9 @@ no driver
 .TP 4
 .B pm
 Papenmeier
+.TP 4
+.B sd
+SpeechDispatcher
 .TP 4
 .B sw
 Swift

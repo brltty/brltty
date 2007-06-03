@@ -46,6 +46,7 @@
 #braille-driver	eu	# EuroBraille
 #braille-driver	fs	# FreedomScientific
 #braille-driver	ht	# HandyTech
+#braille-driver	il	# IrisLinux
 #braille-driver	lb	# Libbraille
 #braille-driver	lt	# LogText
 #braille-driver	mb	# MultiBraille
@@ -346,6 +347,7 @@
 # identification code of the driver for the console screen.
 # (can be overridden with the -x [--screen-driver=] option)
 #screen-driver	as	# AtSpi
+#screen-driver	pb	# PCBIOS
 #screen-driver	hd	# Hurd
 #screen-driver	lx	# Linux
 #screen-driver	sc	# Screen
