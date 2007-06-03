@@ -1070,6 +1070,10 @@ These options are primarily useful when building BRLTTY for use on a boot disk.
         It's especially useful for some install/rescue disks.
     </enum>
     If this option isn't specified, then this feature isn't activated.
+  <tag><tt/--with-stderr-path=/<em/path/<label id="build-stderr-path"></tag>
+    Specify the path to the file or device where standard erorr output is to be written.
+    The absolute path should be supplied.
+    If this option isn't specified, then this feature isn't activated.
 </descrip>
 
 <sect2>Make File Targets<label id="make"><p>
@@ -3162,6 +3166,9 @@ Notes:
         The <ref id="command-PRDIFLN-NXDIFLN" name="PRDIFLN/NXDIFLN"> commands.
       <item>
         The <ref id="command-CHRLT-CHRRT" name="CHRLT/CHRRT"> commands.
+      <item>
+        Braille window panning operations
+        (see the <ref id="preference-autorepeat-panning" name="Autorepeat Panning"> preference).
       <item>
         The Page-Up and Page-Down operations.
       <item>
