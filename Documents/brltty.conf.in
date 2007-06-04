@@ -76,6 +76,13 @@
 #braille-device	usb:nnnnn	# Specific USB device by serial number.
 #braille-device	bluetooth:xx:xx:xx:xx:xx:xx	# Specific bluetooth device by address.
 
+# The release-device directive specifies whether or not the device to which the
+# braille display is connected is to be released when the current screen or
+# window can't be read by BRLTTY. If not specified, "off" will be used.
+# (can be overridden with the -r [--release-device] option)
+#release-device	on	# Release the device.
+#release-device	off	# Don't release the device.
+
 # The text-table directive specifies which text translation table to
 # use. Relative paths are anchored at "@DATA_DIRECTORY@". If not specified,
 # "@text_table@" will be used.
