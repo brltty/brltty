@@ -220,6 +220,10 @@ or
 .RB "(" "--version" ")"
 is also specified).
 .TP
+\fB-r\fR (\fB--release-device\fR)
+Release the device to which the braille display is connected
+when the current screen or window can't be read.
+.TP
 \fB-s \fIdriver\fB,\fR...|\fBauto\fR (\fB--speech-driver=\fR)
 The driver for the speech synthesizer
 (see Driver Specification).
@@ -250,12 +254,15 @@ If the
 .B -q
 .RB "(" "--quiet" ")"
 option isn't also specified
-then it also includes copyright information as well as
-the values of the options after all sources have been considered.
+then it also includes the values of the options after all sources have been considered.
 If more than one braille driver and/or more than one braille device
 has been specified then braille display autodetection is performed.
 If more than one speech driver
 has been specified then speech synthesizer autodetection is performed.
+.TP
+\fB-x \fIdriver\fR (\fB--screen-driver=\fR)
+The screen driver.
+The built-in default is operating system appropriate.
 .TP
 \fB-A \fIname\fB=\fIvalue\fB,\fR... (\fB--api-parameters=\fR)
 Parameters for the application programming interface.
@@ -403,6 +410,21 @@ See the
 .RB "(" "--pcm-device=" ")"
 option for details.
 .TP
+\fBBRLTTY_RELEASE_DEVICE=on\fR|\fBoff\fR
+Release the device to which the braille display is connected
+when the current screen or window can't be read.
+See the
+.B -r
+.RB "(" "--release-device" ")"
+option for details.
+.TP
+\fBBRLTTY_SCREEN_DRIVER=\fIdriver\fR
+The screen driver.
+See the
+.B -x
+.RB "(" "--screen-driver=" ")"
+option for details.
+.TP
 \fBBRLTTY_SCREEN_PARAMETERS=\fIname\fB=\fIvalue\fB,\fR...
 Parameters for the screen driver.
 See the
@@ -502,6 +524,21 @@ The device to use for digital audio.
 See the
 .B -p
 .RB "(" "--pcm-device=" ")"
+option for details.
+.TP
+\fBrelease-device on\fR|\fBoff\fR
+Release the device to which the braille display is connected
+when the current screen or window can't be read.
+See the
+.B -r
+.RB "(" "--release-device" ")"
+option for details.
+.TP
+\fBscreen-driver \fIdriver\fR
+The screen driver.
+See the
+.B -x
+.RB "(" "--screen-driver=" ")"
 option for details.
 .TP
 \fBscreen-parameters \fIname\fB=\fIvalue\fB,\fR...

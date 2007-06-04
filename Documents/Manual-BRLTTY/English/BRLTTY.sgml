@@ -2361,7 +2361,7 @@ The following directives are recognized:
     <ref id="options-braille-device" name="-d"> command line option.
   <tag><tt/release-device/ <em/boolean/<label id="configure-release-device"></tag>
     Whether or not to release the device to which the braille display is connected
-    when the current screen or window can't be read by BRLTTY.
+    when the current screen or window can't be read.
     <descrip>
       <tag/on/Release the device.
       <tag/off/Don't release the device.
@@ -2583,7 +2583,7 @@ The <tt/brltty/ command accepts the following options:
     option is specified, and to <tt/warning/ otherwise.
   <tag><tt/-r/ <tt/--release-device/<label id="options-release-device"></tag>
     Release the device to which the braille display is connected
-    when the current screen or window can't be read by BRLTTY.
+    when the current screen or window can't be read.
     See the <ref id="configure-release-device" name="release-device">
     configuration file directive for the default run-time setting.
   <tag><tt/-s/<em/driver/<tt/,/...|<tt/auto/ <tt/--speech-driver=/<em/driver/<tt/,/...|<tt/auto/<label id="options-speech-driver"></tag>
@@ -2676,7 +2676,7 @@ The <tt/brltty/ command accepts the following options:
         (see the <ref id="options-braille-device" name="-d"> command line option).
       <tag><tt/BRLTTY_RELEASE_DEVICE/</tag>
         Whether or not to release the device to which the braille display is connected
-        when the current screen or window can't be read by BRLTTY
+        when the current screen or window can't be read
         (see the <ref id="options-release-device" name="-r"> command line option).
       <tag><tt/BRLTTY_BRAILLE_DRIVER/</tag>
         The braille display driver
