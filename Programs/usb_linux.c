@@ -696,6 +696,17 @@ usbTestPath (const char *path) {
   return 0;
 }
 
+static FILE *
+usbOpenMountsTable (int update) {
+  const char *path = MOUNTED;
+  FILE *table = setmntent(path, (update? "a": "r"));
+  if (!table)
+    LogPrint((errno == ENOENT)? LOG_WARNING: LOG_ERR,
+             "mounted file systems table open erorr: %s: %s",
+             path, strerror(errno));
+  return table;
+}
+
 static char *
 usbFindRoot (void) {
   {
@@ -713,10 +724,9 @@ usbFindRoot (void) {
 
   {
     char *root = NULL;
-    const char *path = MOUNTED;
     FILE *table;
 
-    if ((table = setmntent(path, "r"))) {
+    if ((table = usbOpenMountsTable(0))) {
       struct mntent *entry;
 
       while ((entry = getmntent(table))) {
@@ -730,10 +740,6 @@ usbFindRoot (void) {
       }
 
       endmntent(table);
-    } else {
-      LogPrint((errno == ENOENT)? LOG_WARNING: LOG_ERR,
-               "mounted file system table open erorr: %s: %s",
-               path, strerror(errno));
     }
 
     return root;
@@ -744,6 +750,7 @@ static char *
 usbMakeRoot (void) {
   const char *type = "usbfs";
   const char *name = type;
+  const char *options = "rw";
   char *directory = NULL;
 
   {
@@ -759,8 +766,32 @@ usbMakeRoot (void) {
       if (usbTestPath(directory)) return directory;
 
       LogPrint(LOG_NOTICE, "mounting USBFS: %s", directory);
-      if (mount(name, directory, type, 0, NULL) != -1) return directory;
-      LogPrint(LOG_ERR, "USBFS mount error: %s: %s", directory, strerror(errno));
+      if (mount(name, directory, type, 0, NULL) != -1) {
+        {
+          FILE *table = usbOpenMountsTable(1);
+          if (table) {
+            struct mntent mnt;
+
+            memset(&mnt, 0, sizeof(mnt));
+            mnt.mnt_fsname = (char *)name;
+            mnt.mnt_dir = directory;
+            mnt.mnt_type = (char *)type;
+            mnt.mnt_opts = (char *)options;
+
+            LogPrint(LOG_NOTICE, "updating file systems mount table");
+            if (addmntent(table, &mnt))
+              LogPrint(LOG_WARNING,
+                       "file systems mount table update error: %s",
+                       strerror(errno));
+
+            endmntent(table);
+          }
+        }
+
+        return directory;
+      } else {
+        LogPrint(LOG_ERR, "USBFS mount error: %s: %s", directory, strerror(errno));
+      }
     }
 
     free(directory);
@@ -778,7 +809,7 @@ usbFindDevice (UsbDeviceChooser chooser, void *data) {
     device = usbSearchDevice(root, chooser, data);
     free(root);
   } else {
-    LogPrint(LOG_WARNING, "USBFS not mounted.");
+    LogPrint(LOG_WARNING, "USBFS not mounted");
   }
   return device;
 }
