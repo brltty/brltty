@@ -668,7 +668,7 @@ usbSearchDevice (const char *root, UsbDeviceChooser chooser, void *data) {
       if (stat(path, &status) == -1) continue;
       if (S_ISDIR(status.st_mode)) {
         if ((device = usbSearchDevice(path, chooser, data))) break;
-      } else if (S_ISREG(status.st_mode)) {
+      } else if (S_ISREG(status.st_mode) || S_ISCHR(status.st_mode)) {
         UsbDeviceExtension *devx;
         if ((devx = malloc(sizeof(*devx)))) {
           if ((devx->path = strdup(path))) {
@@ -719,7 +719,7 @@ usbAddMountEntry (struct mntent *mnt) {
 }
 
 static int
-usbTestPath (const char *path) {
+usbVerifyUsbfs (const char *path) {
   struct statfs status;
   if (statfs(path, &status) != -1) {
     if (status.f_type == USBDEVICE_SUPER_MAGIC) return 1;
@@ -727,18 +727,31 @@ usbTestPath (const char *path) {
   return 0;
 }
 
+static int
+usbVerifyDirectory (const char *path) {
+  if (access(path, F_OK) != -1) return 1;
+  return 0;
+}
+
 static char *
 usbFindRoot (void) {
   {
-    static const char *const paths[] = {
-      "/proc/bus/usb",
-      NULL
-    };
-    const char *const *path = paths;
+    typedef struct {
+      const char *path;
+      int (*verify) (const char *path);
+    } RootEntry;
 
-    while (*path) {
-      if (usbTestPath(*path)) return strdupWrapper(*path);
-      ++path;
+    static const RootEntry roots[] = {
+      {.path="/proc/bus/usb", .verify=usbVerifyUsbfs},
+      {.path="/dev/bus/usb", .verify=usbVerifyDirectory},
+      {.path=NULL, .verify=NULL}
+    };
+    const RootEntry *root = roots;
+
+    while (root->path) {
+      LogPrint(LOG_DEBUG, "verifying USB device root: %s", root->path);
+      if (root->verify(root->path)) return strdupWrapper(root->path);
+      ++root;
     }
   }
 
@@ -752,7 +765,7 @@ usbFindRoot (void) {
       while ((entry = getmntent(table))) {
         if ((strcmp(entry->mnt_type, "usbdevfs") == 0) ||
             (strcmp(entry->mnt_type, "usbfs") == 0)) {
-          if (usbTestPath(entry->mnt_dir)) {
+          if (usbVerifyUsbfs(entry->mnt_dir)) {
             root = strdupWrapper(entry->mnt_dir);
             break;
           }
@@ -783,7 +796,7 @@ usbMakeRoot (void) {
 
   if (directory) {
     if (makeDirectory(directory)) {
-      if (usbTestPath(directory)) return directory;
+      if (usbVerifyUsbfs(directory)) return directory;
 
       LogPrint(LOG_NOTICE, "mounting USBFS: %s", directory);
       if (mount(name, directory, type, 0, NULL) != -1) {
