@@ -687,15 +687,6 @@ usbSearchDevice (const char *root, UsbDeviceChooser chooser, void *data) {
   return device;
 }
 
-static int
-usbTestPath (const char *path) {
-  struct statfs status;
-  if (statfs(path, &status) != -1) {
-    if (status.f_type == USBDEVICE_SUPER_MAGIC) return 1;
-  }
-  return 0;
-}
-
 static FILE *
 usbOpenMountsTable (int update) {
   const char *path = MOUNTED;
@@ -707,8 +698,38 @@ usbOpenMountsTable (int update) {
   return table;
 }
 
+static int
+usbAddMountEntry (struct mntent *mnt) {
+  int added = 0;
+  FILE *table;
+
+  if ((table = usbOpenMountsTable(1))) {
+    if (!addmntent(table, mnt)) {
+      added = 1;
+    } else {
+      LogPrint(LOG_WARNING,
+               "file systems mount table update error: %s",
+               strerror(errno));
+    }
+
+    endmntent(table);
+  }
+
+  return added;
+}
+
+static int
+usbTestPath (const char *path) {
+  struct statfs status;
+  if (statfs(path, &status) != -1) {
+    if (status.f_type == USBDEVICE_SUPER_MAGIC) return 1;
+  }
+  return 0;
+}
+
 static char *
 usbFindRoot (void) {
+return 0;
   {
     static const char *const paths[] = {
       "/proc/bus/usb",
@@ -768,24 +789,13 @@ usbMakeRoot (void) {
       LogPrint(LOG_NOTICE, "mounting USBFS: %s", directory);
       if (mount(name, directory, type, 0, NULL) != -1) {
         {
-          FILE *table = usbOpenMountsTable(1);
-          if (table) {
-            struct mntent mnt;
-
-            memset(&mnt, 0, sizeof(mnt));
-            mnt.mnt_fsname = (char *)name;
-            mnt.mnt_dir = directory;
-            mnt.mnt_type = (char *)type;
-            mnt.mnt_opts = (char *)options;
-
-            LogPrint(LOG_NOTICE, "updating file systems mount table");
-            if (addmntent(table, &mnt))
-              LogPrint(LOG_WARNING,
-                       "file systems mount table update error: %s",
-                       strerror(errno));
-
-            endmntent(table);
-          }
+          struct mntent mnt;
+          memset(&mnt, 0, sizeof(mnt));
+          mnt.mnt_fsname = (char *)name;
+          mnt.mnt_dir = directory;
+          mnt.mnt_type = (char *)type;
+          mnt.mnt_opts = (char *)options;
+          usbAddMountEntry(&mnt);
         }
 
         return directory;
