@@ -729,7 +729,6 @@ usbTestPath (const char *path) {
 
 static char *
 usbFindRoot (void) {
-return 0;
   {
     static const char *const paths[] = {
       "/proc/bus/usb",
