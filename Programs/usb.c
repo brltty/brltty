@@ -1120,7 +1120,7 @@ usbGetSerialOperations (UsbDevice *device) {
 
     ++sa;
   }
-  LogPrint(LOG_WARNING, "unsupported serial adapter: vendor=%04X product=%04X",
+  LogPrint(LOG_WARNING, "USB: unsupported serial adapter: vendor=%04X product=%04X",
            device->descriptor.idVendor, device->descriptor.idProduct);
 
 error:
@@ -1144,10 +1144,10 @@ usbChooseChannel (UsbDevice *device, void *data) {
 
       if (usbConfigureDevice(device, definition->configuration)) {
         if (usbOpenInterface(device, definition->interface, definition->alternative)) {
-          const UsbSerialOperations *serial = usbGetSerialOperations(device);
           int ok = 1;
 
           if (definition->baud) {
+            const UsbSerialOperations *serial = usbGetSerialOperations(device);
             if (serial) {
               if (!serial->setBaud(device, definition->baud)) ok = 0;
               if (!serial->setFlowControl(device, definition->flowControl)) ok = 0;
