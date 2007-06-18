@@ -1056,6 +1056,7 @@ usbGetSerialOperations (UsbDevice *device) {
     const UsbSerialOperations *operations;
     UsbInputFilter inputFilter;
   } UsbSerialAdapter;
+
   static const UsbSerialAdapter usbSerialAdapters[] = {
     { /* HandyTech GoHubs */
       0X0921, 0X1200,
@@ -1108,17 +1109,21 @@ usbGetSerialOperations (UsbDevice *device) {
     {0, 0}
   };
   const UsbSerialAdapter *sa = usbSerialAdapters;
+
   while (sa->vendor) {
     if (sa->vendor == device->descriptor.idVendor) {
       if (!sa->product || (sa->product == device->descriptor.idProduct)) {
-        if (!sa->inputFilter || usbAddInputFilter(device, sa->inputFilter)) {
-          return sa->operations;
-        }
-        break;
+        if (sa->inputFilter && !usbAddInputFilter(device, sa->inputFilter)) goto error;
+        return sa->operations;
       }
     }
+
     ++sa;
   }
+  LogPrint(LOG_WARNING, "unsupported serial adapter: vendor=%04X product=%04X",
+           device->descriptor.idVendor, device->descriptor.idProduct);
+
+error:
   return NULL;
 }
 
@@ -1148,8 +1153,6 @@ usbChooseChannel (UsbDevice *device, void *data) {
               if (!serial->setFlowControl(device, definition->flowControl)) ok = 0;
               if (!serial->setDataFormat(device, definition->dataBits, definition->stopBits, definition->parity)) ok = 0;
             } else {
-              LogPrint(LOG_WARNING, "Unsupported serial adapter: vendor=%04X product=%04X",
-                       definition->vendor, definition->product);
               ok = 0;
             }
           }
