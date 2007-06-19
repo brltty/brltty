@@ -184,6 +184,16 @@ static const ModelEntry modelTable[] = {
     .writeCells = writeStatusAndTextCells
   }
   ,
+  { .identifier = 0X44,
+    .name = "Easy Braille",
+    .textCells = 40,
+    .statusCells = 0,
+    .helpPage = 4,
+    .interpretByte = interpretKeyByte,
+    .interpretKeys = interpretModularKeys,
+    .writeCells = writeStatusAndTextCells
+  }
+  ,
   { /* end of table */
     .name = NULL
   }
