@@ -80,7 +80,8 @@ static int currentModifiers;
 #define MOD_CNTRL      0X0800
 
 typedef struct {
-  int (*openPort) (char **parameters, const char *device);
+  int (*openPort) (const char *device);
+  int (*configurePort) (void);
   void (*closePort) ();
   int (*awaitInput) (int milliseconds);
   int (*readBytes) (unsigned char *buffer, int length, int wait);
@@ -297,19 +298,16 @@ changeCellCount (BrailleDisplay *brl, int count) {
 static SerialDevice *serialDevice = NULL;
 
 static int
-openSerialPort (char **parameters, const char *device) {
-  if ((serialDevice = serialOpenDevice(device))) {
-    if (serialRestartDevice(serialDevice, protocol->serialBaud)) {
-      if (serialSetParity(serialDevice, protocol->serialParity)) {
-        return 1;
-      }
-    }
-
-    io->closePort(serialDevice);
-    serialDevice = NULL;
-  }
-
+openSerialPort (const char *device) {
+  if ((serialDevice = serialOpenDevice(device))) return 1;
   return 0;
+}
+
+static int
+configureSerialPort (void) {
+  if (!serialRestartDevice(serialDevice, protocol->serialBaud)) return 0;
+  if (!serialSetParity(serialDevice, protocol->serialParity)) return 0;
+  return 1;
 }
 
 static int
@@ -338,7 +336,7 @@ closeSerialPort (void) {
 }
 
 static const InputOutputOperations serialOperations = {
-  openSerialPort, closeSerialPort,
+  openSerialPort, configureSerialPort, closeSerialPort,
   awaitSerialInput, readSerialBytes, writeSerialBytes
 };
 
@@ -346,42 +344,52 @@ static const InputOutputOperations serialOperations = {
 /* USB IO */
 #include "Programs/io_usb.h"
 
-static UsbChannel *usb = NULL;
+static UsbChannel *usbChannel = NULL;
+static const UsbSerialOperations *usbSerial = NULL;
 
 static int
-openUsbPort (char **parameters, const char *device) {
-  static UsbChannelDefinition definitions[] = {
-    {0X0403, 0XFE71, 1, 0, 0, 1, 2, 0, 0, 8, 1}, /* 24 cells */
-    {0X0403, 0XFE72, 1, 0, 0, 1, 2, 0, 0, 8, 1}, /* 40 cells */
-    {0X0403, 0XFE73, 1, 0, 0, 1, 2, 0, 0, 8, 1}, /* 32 cells */
-    {0X0403, 0XFE74, 1, 0, 0, 1, 2, 0, 0, 8, 1}, /* 64 cells */
-    {0X0403, 0XFE75, 1, 0, 0, 1, 2, 0, 0, 8, 1}, /* 80 cells */
+openUsbPort (const char *device) {
+  static const UsbChannelDefinition definitions[] = {
+    {0X0403, 0XFE71, 1, 0, 0, 1, 2, 0}, /* 24 cells */
+    {0X0403, 0XFE72, 1, 0, 0, 1, 2, 0}, /* 40 cells */
+    {0X0403, 0XFE73, 1, 0, 0, 1, 2, 0}, /* 32 cells */
+    {0X0403, 0XFE74, 1, 0, 0, 1, 2, 0}, /* 64 cells */
+    {0X0403, 0XFE75, 1, 0, 0, 1, 2, 0}, /* 80 cells */
     {0}
   };
-  UsbChannelDefinition *def = definitions;
 
-  while (def->vendor) {
-    def->baud = protocol->serialBaud;
-    def->parity = protocol->serialParity;
-    def++;
-  }
-
-  if ((usb = usbFindChannel(definitions, (void *)device))) {
-    usbBeginInput(usb->device, usb->definition.inputEndpoint, 8);
+  if ((usbChannel = usbFindChannel(definitions, (void *)device))) {
+    usbSerial = usbGetSerialOperations(usbChannel->device);
+    usbBeginInput(usbChannel->device,
+                  usbChannel->definition.inputEndpoint,
+                  8);
     return 1;
   }
   return 0;
 }
 
 static int
+configureUsbPort (void) {
+  if (!usbSerial) return 0;
+  if (!usbSerial->setBaud(usbChannel->device, protocol->serialBaud)) return 0;
+  if (!usbSerial->setFlowControl(usbChannel->device, SERIAL_FLOW_NONE)) return 0;
+  if (!usbSerial->setDataFormat(usbChannel->device, 8, 1, protocol->serialParity)) return 0;
+  return 1;
+}
+
+static int
 awaitUsbInput (int milliseconds) {
-  return usbAwaitInput(usb->device, usb->definition.inputEndpoint, milliseconds);
+  return usbAwaitInput(usbChannel->device,
+                       usbChannel->definition.inputEndpoint,
+                       milliseconds);
 }
 
 static int
 readUsbBytes (unsigned char *buffer, int length, int wait) {
   const int timeout = 100;
-  int count = usbReapInput(usb->device, usb->definition.inputEndpoint, buffer, length,
+  int count = usbReapInput(usbChannel->device,
+                           usbChannel->definition.inputEndpoint,
+                           buffer, length,
                            (wait? timeout: 0), timeout);
   if (count != -1) return count;
   if (errno == EAGAIN) return 0;
@@ -390,19 +398,22 @@ readUsbBytes (unsigned char *buffer, int length, int wait) {
 
 static int
 writeUsbBytes (const unsigned char *buffer, int length) {
-  return usbWriteEndpoint(usb->device, usb->definition.outputEndpoint, buffer, length, 1000);
+  return usbWriteEndpoint(usbChannel->device,
+                          usbChannel->definition.outputEndpoint,
+                          buffer, length, 1000);
 }
 
 static void
 closeUsbPort (void) {
-  if (usb) {
-    usbCloseChannel(usb);
-    usb = NULL;
+  if (usbChannel) {
+    usbCloseChannel(usbChannel);
+    usbSerial = NULL;
+    usbChannel = NULL;
   }
 }
 
 static const InputOutputOperations usbOperations = {
-  openUsbPort, closeUsbPort,
+  openUsbPort, configureUsbPort, closeUsbPort,
   awaitUsbInput, readUsbBytes, writeUsbBytes
 };
 #endif /* ENABLE_USB_SUPPORT */
@@ -415,8 +426,13 @@ static const InputOutputOperations usbOperations = {
 static int bluetoothConnection = -1;
 
 static int
-openBluetoothPort (char **parameters, const char *device) {
+openBluetoothPort (const char *device) {
   return (bluetoothConnection = btOpenConnection(device, 1, 0)) != -1;
+}
+
+static int
+configureBluetoothPort (void) {
+  return 1;
 }
 
 static int
@@ -452,7 +468,7 @@ closeBluetoothPort (void) {
 }
 
 static const InputOutputOperations bluetoothOperations = {
-  openBluetoothPort, closeBluetoothPort,
+  openBluetoothPort, configureBluetoothPort, closeBluetoothPort,
   awaitBluetoothInput, readBluetoothBytes, writeBluetoothBytes
 };
 #endif /* ENABLE_BLUETOOTH_SUPPORT */
@@ -1795,53 +1811,61 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
     return 0;
   }
 
-  {
-    static const ProtocolOperations *const protocolTable[] = {
-      &baumOperations,
-      &handyTechOperations,
-      &powerBrailleOperations,
-      NULL
-    };
-    const ProtocolOperations *const *protocolAddress = protocolTable;
+  useVarioKeys = 0;
+  if (!validateYesNo(&useVarioKeys, parameters[PARM_VARIOKEYS]))
+    LogPrint(LOG_WARNING, "%s: %s", "invalid vario keys setting", parameters[PARM_VARIOKEYS]);
 
-    useVarioKeys = 0;
-    if (!validateYesNo(&useVarioKeys, parameters[PARM_VARIOKEYS]))
-      LogPrint(LOG_WARNING, "%s: %s", "invalid vario keys setting", parameters[PARM_VARIOKEYS]);
+  if (io->openPort(device)) {
+    int attempts = 0;
 
-    while ((protocol = *protocolAddress)) {
-      {
-        int bits = 10;
-        if (protocol->serialParity != SERIAL_PARITY_NONE) ++bits;
-        charactersPerSecond = protocol->serialBaud / bits;
-      }
+    while (1) {
+      static const ProtocolOperations *const protocolTable[] = {
+        &baumOperations,
+        &handyTechOperations,
+        &powerBrailleOperations,
+        NULL
+      };
+      const ProtocolOperations *const *protocolAddress = protocolTable;
 
-      if (io->openPort(parameters, device)) {
-        if (!flushInput()) break;
-
-        memset(&pressedKeys, 0, sizeof(pressedKeys));
-        switchSettings = 0;
-
-        if (protocol->probeDisplay(brl)) {
-          logCellCount();
-
-          clearCells(0, cellCount);
-          if (!updateCells(brl)) break;
-
-          brl->x = textCount;
-          brl->y = 1;
-          brl->helpPage = useVarioKeys? 1: 0;
-
-          activeKeys = pressedKeys;
-          pendingCommand = EOF;
-          currentModifiers = 0;
-          return 1;
+      while ((protocol = *protocolAddress)) {
+        {
+          int bits = 10;
+          if (protocol->serialParity != SERIAL_PARITY_NONE) ++bits;
+          charactersPerSecond = protocol->serialBaud / bits;
         }
 
-        io->closePort();
+        if (io->configurePort()) {
+          if (!flushInput()) goto failed;
+
+          memset(&pressedKeys, 0, sizeof(pressedKeys));
+          switchSettings = 0;
+
+          if (protocol->probeDisplay(brl)) {
+            logCellCount();
+
+            clearCells(0, cellCount);
+            if (!updateCells(brl)) goto failed;
+
+            brl->x = textCount;
+            brl->y = 1;
+            brl->helpPage = useVarioKeys? 1: 0;
+
+            activeKeys = pressedKeys;
+            pendingCommand = EOF;
+            currentModifiers = 0;
+            return 1;
+          }
+        }
+
+        ++protocolAddress;
       }
 
-      ++protocolAddress;
+      if (++attempts == 2) break;
+      approximateDelay(700);
     }
+
+  failed:
+    io->closePort();
   }
 
   return 0;
