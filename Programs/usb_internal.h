@@ -50,6 +50,7 @@ typedef struct {
 struct UsbDeviceStruct {
   UsbDeviceDescriptor descriptor;
   void *extension;
+  const UsbSerialOperations *serial;
   UsbConfigurationDescriptor *configuration;
   const UsbInterfaceDescriptor *interface;
   Queue *endpoints;

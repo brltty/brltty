@@ -576,6 +576,7 @@ usbOpenDevice (void *extension) {
   if ((device = malloc(sizeof(*device)))) {
     memset(device, 0, sizeof(*device));
     device->extension = extension;
+    device->serial = NULL;
 
     if ((device->endpoints = newQueue(usbDeallocateEndpoint, NULL))) {
       if ((device->inputFilters = newQueue(usbDeallocateInputFilter, NULL))) {
@@ -1050,81 +1051,86 @@ static const UsbSerialOperations usbFtdiOperations_FT232BM = {
 
 const UsbSerialOperations *
 usbGetSerialOperations (UsbDevice *device) {
-  typedef struct {
-    uint16_t vendor;
-    uint16_t product;
-    const UsbSerialOperations *operations;
-    UsbInputFilter inputFilter;
-  } UsbSerialAdapter;
+  if (!device->serial) {
+    typedef struct {
+      uint16_t vendor;
+      uint16_t product;
+      const UsbSerialOperations *operations;
+      UsbInputFilter inputFilter;
+    } UsbSerialAdapter;
 
-  static const UsbSerialAdapter usbSerialAdapters[] = {
-    { /* HandyTech GoHubs */
-      0X0921, 0X1200,
-      &usbBelkinOperations,
-      NULL
-    }
-    ,
-    { /* HandyTech FTDI */
-      0X0403, 0X6001,
-      &usbFtdiOperations_FT8U232AM,
-      usbFtdiInputFilter
-    }
-    ,
-    { /* Papenmeier FTDI */
-      0X0403, 0XF208,
-      &usbFtdiOperations_FT232BM,
-      usbFtdiInputFilter
-    }
-    ,
-    { /* Baum FTDI: 24 cells  */
-      0X0403, 0XFE71,
-      &usbFtdiOperations_FT232BM,
-      usbFtdiInputFilter
-    }
-    ,
-    { /* Baum FTDI: 40 cells  */
-      0X0403, 0XFE72,
-      &usbFtdiOperations_FT232BM,
-      usbFtdiInputFilter
-    }
-    ,
-    { /* Baum FTDI: 32 cells  */
-      0X0403, 0XFE73,
-      &usbFtdiOperations_FT232BM,
-      usbFtdiInputFilter
-    }
-    ,
-    { /* Baum FTDI: 64 cells  */
-      0X0403, 0XFE74,
-      &usbFtdiOperations_FT232BM,
-      usbFtdiInputFilter
-    }
-    ,
-    { /* Baum FTDI: 80 cells  */
-      0X0403, 0XFE75,
-      &usbFtdiOperations_FT232BM,
-      usbFtdiInputFilter
-    }
-    ,
-    {0, 0}
-  };
-  const UsbSerialAdapter *sa = usbSerialAdapters;
-
-  while (sa->vendor) {
-    if (sa->vendor == device->descriptor.idVendor) {
-      if (!sa->product || (sa->product == device->descriptor.idProduct)) {
-        if (sa->inputFilter && !usbAddInputFilter(device, sa->inputFilter)) goto error;
-        return sa->operations;
+    static const UsbSerialAdapter usbSerialAdapters[] = {
+      { /* HandyTech GoHubs */
+        0X0921, 0X1200,
+        &usbBelkinOperations,
+        NULL
       }
-    }
+      ,
+      { /* HandyTech FTDI */
+        0X0403, 0X6001,
+        &usbFtdiOperations_FT8U232AM,
+        usbFtdiInputFilter
+      }
+      ,
+      { /* Papenmeier FTDI */
+        0X0403, 0XF208,
+        &usbFtdiOperations_FT232BM,
+        usbFtdiInputFilter
+      }
+      ,
+      { /* Baum FTDI: 24 cells  */
+        0X0403, 0XFE71,
+        &usbFtdiOperations_FT232BM,
+        usbFtdiInputFilter
+      }
+      ,
+      { /* Baum FTDI: 40 cells  */
+        0X0403, 0XFE72,
+        &usbFtdiOperations_FT232BM,
+        usbFtdiInputFilter
+      }
+      ,
+      { /* Baum FTDI: 32 cells  */
+        0X0403, 0XFE73,
+        &usbFtdiOperations_FT232BM,
+        usbFtdiInputFilter
+      }
+      ,
+      { /* Baum FTDI: 64 cells  */
+        0X0403, 0XFE74,
+        &usbFtdiOperations_FT232BM,
+        usbFtdiInputFilter
+      }
+      ,
+      { /* Baum FTDI: 80 cells  */
+        0X0403, 0XFE75,
+        &usbFtdiOperations_FT232BM,
+        usbFtdiInputFilter
+      }
+      ,
+      {0, 0}
+    };
+    const UsbSerialAdapter *sa = usbSerialAdapters;
 
-    ++sa;
+    while (sa->vendor) {
+      if (sa->vendor == device->descriptor.idVendor) {
+        if (!sa->product || (sa->product == device->descriptor.idProduct)) {
+          if (sa->inputFilter && !usbAddInputFilter(device, sa->inputFilter)) goto error;
+          device->serial = sa->operations;
+          break;
+        }
+      }
+
+      ++sa;
+    }
   }
-  LogPrint(LOG_WARNING, "USB: unsupported serial adapter: vendor=%04X product=%04X",
-           device->descriptor.idVendor, device->descriptor.idProduct);
+
+  if (!device->serial)
+    LogPrint(LOG_WARNING, "USB: unsupported serial adapter: vendor=%04X product=%04X",
+             device->descriptor.idVendor, device->descriptor.idProduct);
 
 error:
-  return NULL;
+  return device->serial;
 }
 
 typedef struct {
