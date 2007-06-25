@@ -212,9 +212,9 @@ static char **xtArgv = xtDefArgv;
 static int regenerate;
 static void generateToplevel(void);
 static void destroyToplevel(void);
-#ifdef USE_XAW
+#if defined(USE_XAW) || defined(USE_WINDOWS)
 static unsigned char displayedWindow[WHOLESIZE];
-#endif /* USE_XAW */
+#endif /* USE_XAW || USE_WINDOWS */
 static unsigned char displayedVisual[WHOLESIZE];
 
 #define BUTWIDTH 48
@@ -222,6 +222,9 @@ static unsigned char displayedVisual[WHOLESIZE];
 
 static Widget toplevel,hbox,display[WHOLESIZE];
 static MenuWidget menu;
+#if defined(USE_XAW) || defined(USE_WINDOWS)
+static Widget displayb[WHOLESIZE];
+#endif /* USE_XAW || USE_WINDOWS */
 #ifdef USE_XAW
 static Pixmap check;
 #endif /* USE_XAW */
@@ -229,15 +232,17 @@ static int lastcursor = -1;
 #ifdef USE_XT
 static Widget vbox,keybox;
 static Pixel displayForeground,displayBackground;
-#ifdef USE_XAW
-static Widget displayb[WHOLESIZE];
-static XFontSet fontset;
-#endif /* USE_XAW */
 static XtAppContext app_con;
 #ifdef USE_XM
 static XmString display_cs;
 #endif /* USE_XAW */
 #endif /* USE_XT */
+#ifdef USE_XAW
+static XFontSet fontset;
+#elif defined(USE_WINDOWS)
+static HFONT font;
+static int totlines;
+#endif /* USE_WINDOWS */
 
 #ifdef USE_WINDOWS
 static int modelWidth,modelHeight;
@@ -274,7 +279,7 @@ static void keypress(Widget w, XEvent *event, String *params, Cardinal *num_para
     else {
       int c = convertWcharToChar(keysym & 0xffffff);
       if (c == EOF) {
-	LogPrint(LOG_DEBUG, "non translatable unicode U+%lx\n", keysym & 0xffffff);
+	LogPrint(LOG_DEBUG, "non translatable unicode U+%lx", keysym & 0xffffff);
 	return;
       }
       keypressed = BRL_BLK_PASSCHAR | c;
@@ -372,7 +377,7 @@ static void keypress(Widget w, XEvent *event, String *params, Cardinal *num_para
     case XK_KP_7:         keypressed = BRL_BLK_PASSCHAR | '7'; break;
     case XK_KP_8:         keypressed = BRL_BLK_PASSCHAR | '8'; break;
     case XK_KP_9:         keypressed = BRL_BLK_PASSCHAR | '9'; break;
-    default: LogPrint(LOG_DEBUG,"unsupported keysym %lx\n",keysym); return;
+    default: LogPrint(LOG_DEBUG,"unsupported keysym %lx",keysym); return;
   }
   if (modifiers & ControlMask)
     keypressed |= BRL_FLG_CHAR_CONTROL;
@@ -425,7 +430,7 @@ static inline Widget crKeyBut(char *name, long keycode, int repeat,
     NULL);
   XtAddCallback(button, Ncallback, KeyPressCB, (XtPointer) keycode);
 #elif defined(USE_WINDOWS)
-  button = CreateWindow(WC_BUTTON, name, WS_CHILD | WS_VISIBLE, horizDistance, lines*CHRY+1+vertDistance, BUTWIDTH, BUTHEIGHT, toplevel, NULL, NULL, NULL);
+  button = CreateWindow(WC_BUTTON, name, WS_CHILD | WS_VISIBLE, horizDistance, totlines*CHRY+1+vertDistance, BUTWIDTH, BUTHEIGHT, toplevel, NULL, NULL, NULL);
   SetWindowLong(button, GWL_USERDATA, (long) keycode);
 #else /* USE_ */
 #error Toolkit button creation unspecified
@@ -620,6 +625,22 @@ static LRESULT CALLBACK wndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
   }
   return DefWindowProc(hwnd, uMsg, wParam, lParam);
 }
+
+#define BRAILLE_USB 82
+int CALLBACK fontEnumProc(ENUMLOGFONTEX *lpelfe, NEWTEXTMETRICEX *lpntme, DWORD FontType, LPARAM lParam) {
+	int shift = 8*sizeof(lpntme->ntmFontSig.fsUsb[0]);
+	if (!(lpntme->ntmFontSig.fsUsb[BRAILLE_USB / shift] &
+		(1 << (BRAILLE_USB % shift))))
+		return 1;
+	font = CreateFont(CHRY-6, CHRX-4, 0, 0, 0, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, lpelfe->elfFullName);
+	if (!font) {
+		LogWindowsError("Couldn't load font");
+		LogPrint(LOG_ERR,"font %s", lpelfe->elfFullName);
+		return 1;
+	}
+	LogPrint(LOG_INFO, "Using braille font `%s\'\n",lpelfe->elfFullName);
+	return 0;
+}
 #endif /* USE_WINDOWS */
 
 static int brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context)
@@ -737,6 +758,19 @@ static void generateToplevel(void)
 
 #elif defined(USE_WINDOWS)
   {
+    HWND root = GetDesktopWindow();
+    HDC hdc = GetDC(root);
+    EnumFontFamiliesEx(hdc, NULL, (void*) fontEnumProc, 0, 0);
+    ReleaseDC(root, hdc);
+    if (!font) {
+      LogPrint(LOG_ERR,"Error while loading braille font");
+      totlines = lines;
+    } else {
+      totlines = 2*lines;
+    }
+  }
+
+  {
     WNDCLASS wndclass = {
       .style = 0,
       .lpfnWndProc = wndProc,
@@ -765,7 +799,7 @@ static void generateToplevel(void)
     if (!(toplevel = CreateWindowEx(WS_EX_TOPMOST | WS_EX_TOOLWINDOW,
 	    "BRLTTYWClass", "BRLTTY",
 	    WS_POPUP, GetSystemMetrics(SM_CXSCREEN)-modelWidth-RIGHTMARGIN, 0,
-	    modelWidth, lines*CHRY+modelHeight, NULL, NULL, NULL, NULL))) {
+	    modelWidth, totlines*CHRY+modelHeight, NULL, NULL, NULL, NULL))) {
       LogWindowsError("CreateWindow");
       exit(1);
     }
@@ -832,7 +866,7 @@ static void generateToplevel(void)
 
 #ifdef USE_WINDOWS
   hbox = CreateWindow(WC_STATIC, "", WS_CHILD | WS_VISIBLE, 0, 0,
-       modelWidth, lines*CHRY+modelHeight, toplevel, NULL, NULL, NULL);
+       modelWidth, totlines*CHRY+modelHeight, toplevel, NULL, NULL, NULL);
 #endif /* USE_WINDOWS */
 
   for (x=0;x<cols;x++) {
@@ -893,6 +927,11 @@ static void generateToplevel(void)
 #elif defined(USE_WINDOWS)
       display[y*cols+x] = CreateWindow(WC_BUTTON, " ", WS_CHILD | WS_VISIBLE | BS_CHECKBOX | BS_PUSHLIKE, x*CHRX, y*CHRY, CHRX, CHRY, toplevel, NULL, NULL, NULL);
       SetWindowLong(display[y*cols+x], GWL_USERDATA, (long) (BRL_BLK_ROUTE | ((y*cols+x)&BRL_MSK_ARG)));
+      if (font) {
+        displayb[y*cols+x] = CreateWindowW(WC_BUTTONW, L" ", WS_CHILD | WS_VISIBLE | BS_CHECKBOX | BS_PUSHLIKE, x*CHRX, (lines+y)*CHRY, CHRX, CHRY, toplevel, NULL, NULL, NULL);
+        SetWindowLong(displayb[y*cols+x], GWL_USERDATA, (long) (BRL_BLK_ROUTE | ((y*cols+x)&BRL_MSK_ARG)));
+	SendMessage(displayb[y*cols+x], WM_SETFONT, (WPARAM) font, TRUE);
+      }
 #else /* USE_ */
 #error Toolkit display unspecified
 #endif /* USE_ */
@@ -986,9 +1025,9 @@ static void generateToplevel(void)
 #else /* USE_ */
 #error Toolkit toplevel realization unspecified
 #endif /* USE_ */
-#ifdef USE_XAW
+#if defined(USE_XAW) || defined(USE_WINDOWS)
   memset(displayedWindow,0,sizeof(displayedWindow));
-#endif /* USE_XAW */
+#endif /* USE_XAW || USE_WINDOWS */
   memset(displayedVisual,0,sizeof(displayedVisual));
   lastcursor = -1;
 }
@@ -1072,6 +1111,10 @@ static void destroyToplevel(void)
   DestroyMenu(menu);
   if (!DestroyWindow(toplevel))
     LogWindowsError("DestroyWindow");
+  if (font) {
+    DeleteObject(font);
+    font = NULL;
+  }
 #else /* USE_ */
 #error Toolkit toplevel destruction unspecified
 #endif /* USE_ */
@@ -1084,9 +1127,13 @@ static void brl_close(BrailleDisplay *brl)
 
 static void brl_writeWindow(BrailleDisplay *brl)
 {
-#ifdef USE_XAW
+#if defined(USE_XAW) || defined(USE_WINDOWS)
   int i;
+#ifdef USE_XAW
   unsigned char data[4];
+#elif defined(USE_WINDOWS)
+  wchar_t data[2] = {0};
+#endif
   char c;
 
   if (!displayb[0] || !memcmp(brl->buffer,displayedWindow,brl->y*brl->x)) return;
@@ -1094,7 +1141,7 @@ static void brl_writeWindow(BrailleDisplay *brl)
 
   for (i=0;i<brl->y*brl->x;i++) {
     c = brl->buffer[i];
-    brl->buffer[i] =
+    c =
        (!!(c&BRL_DOT1))<<0
       |(!!(c&BRL_DOT2))<<1
       |(!!(c&BRL_DOT3))<<2
@@ -1103,16 +1150,22 @@ static void brl_writeWindow(BrailleDisplay *brl)
       |(!!(c&BRL_DOT6))<<5
       |(!!(c&BRL_DOT7))<<6
       |(!!(c&BRL_DOT8))<<7;
+#ifdef USE_XAW
     data[0]=0xe0|((0x28>>4)&0x0f);
-    data[1]=0x80|((0x28<<2)&0x3f)|(brl->buffer[i]>>6);
-    data[2]=0x80                 |(brl->buffer[i]&0x3f);
+    data[1]=0x80|((0x28<<2)&0x3f)|(c>>6);
+    data[2]=0x80                 |(c&0x3f);
     data[3]=0;
 
     XtVaSetValues(displayb[i],
       XtNlabel, data,
       NULL);
+#elif defined(USE_WINDOWS)
+    data[0] = BRL_UC_ROW | c;
+    data[1] = 0;
+    SetWindowTextW(displayb[i],data);
+#endif /* USE_WINDOWS */
   }
-#endif /* USE_XAW */
+#endif /* USE_XAW || USE_WINDOWS */
 }
 
 static void brl_writeVisual(BrailleDisplay *brl)

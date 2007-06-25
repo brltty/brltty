@@ -370,6 +370,7 @@ case "${host_os}"
 in
    cygwin*|mingw*)
       BRLTTY_HAVE_WINDOWS_LIBRARY([ws2_32])
+      BRLTTY_HAVE_WINDOWS_LIBRARY([gdi32])
       BRLTTY_HAVE_WINDOWS_LIBRARY([winmm])
       ;;
    *)
