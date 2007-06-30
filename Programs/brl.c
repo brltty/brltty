@@ -41,8 +41,6 @@
 #include "brl_driver.h"
 static int
 brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
-  brl->x = 80;
-  brl->y = 1;
   return 1;
 }
 static void
@@ -110,7 +108,8 @@ identifyBrailleDrivers (int full) {
 
 void
 initializeBrailleDisplay (BrailleDisplay *brl) {
-  brl->x = brl->y = 0;
+  brl->x = 80;
+  brl->y = 1;
   brl->helpPage = 0;
   brl->buffer = NULL;
   brl->writeDelay = 0;
@@ -197,17 +196,31 @@ static int
 resizeBrailleBuffer (BrailleDisplay *brl) {
   if (brl->resizeRequired) {
     brl->resizeRequired = 0;
+
     if (brl->isCoreBuffer) {
-      int size = brl->x * brl->y;
-      unsigned char *buffer = realloc(brl->buffer, size);
-      if (!buffer) {
-        LogError("braille buffer allocation");
-        return 0;
+      static void *currentAddress = NULL;
+      static size_t currentSize = 0;
+      size_t newSize = brl->x * brl->y;
+
+      if (newSize > currentSize) {
+        void *newAddress = malloc(newSize);
+
+        if (!newAddress) {
+          LogError("malloc");
+          return 0;
+        }
+
+        if (currentAddress) free(currentAddress);
+        currentAddress = newAddress;
+        currentSize = newSize;
       }
-      brl->buffer = buffer;
+
+      brl->buffer = currentAddress;
     }
+
     brailleBufferResized(brl);
   }
+
   return 1;
 }
 

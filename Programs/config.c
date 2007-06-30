@@ -473,14 +473,14 @@ loadContractionTable (const char *file) {
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
 static void
-setBraillePreferences (void) {
+applyBraillePreferences (void) {
   if (braille->firmness) braille->firmness(&brl, prefs.brailleFirmness);
   if (braille->sensitivity) braille->sensitivity(&brl, prefs.brailleSensitivity);
 }
 
 #ifdef ENABLE_SPEECH_SUPPORT
 static void
-setSpeechPreferences (void) {
+applySpeechPreferences (void) {
   if (speech->rate) setSpeechRate(prefs.speechRate, 0);
   if (speech->volume) setSpeechVolume(prefs.speechVolume, 0);
 }
@@ -505,9 +505,9 @@ static void
 changedPreferences (void) {
   changedWindowAttributes();
   setTuneDevice(prefs.tuneDevice);
-  setBraillePreferences();
+  applyBraillePreferences();
 #ifdef ENABLE_SPEECH_SUPPORT
-  setSpeechPreferences();
+  applySpeechPreferences();
 #endif /* ENABLE_SPEECH_SUPPORT */
 }
 
@@ -589,65 +589,68 @@ loadPreferences (int change) {
 }
 
 static void
+resetPreferences (void) {
+  memset(&prefs, 0, sizeof(prefs));
+
+  prefs.magic[0] = PREFS_MAGIC_NUMBER & 0XFF;
+  prefs.magic[1] = PREFS_MAGIC_NUMBER >> 8;
+  prefs.version = 4;
+
+  prefs.autorepeat = DEFAULT_AUTOREPEAT;
+  prefs.autorepeatPanning = DEFAULT_AUTOREPEAT_PANNING;
+  prefs.autorepeatDelay = DEFAULT_AUTOREPEAT_DELAY;
+  prefs.autorepeatInterval = DEFAULT_AUTOREPEAT_INTERVAL;
+
+  prefs.showCursor = DEFAULT_SHOW_CURSOR;
+  prefs.cursorStyle = DEFAULT_CURSOR_STYLE;
+  prefs.blinkingCursor = DEFAULT_BLINKING_CURSOR;
+  prefs.cursorVisibleTime = DEFAULT_CURSOR_VISIBLE_TIME;
+  prefs.cursorInvisibleTime = DEFAULT_CURSOR_INVISIBLE_TIME;
+
+  prefs.showAttributes = DEFAULT_SHOW_ATTRIBUTES;
+  prefs.blinkingAttributes = DEFAULT_BLINKING_ATTRIBUTES;
+  prefs.attributesVisibleTime = DEFAULT_ATTRIBUTES_VISIBLE_TIME;
+  prefs.attributesInvisibleTime = DEFAULT_ATTRIBUTES_INVISIBLE_TIME;
+
+  prefs.blinkingCapitals = DEFAULT_BLINKING_CAPITALS;
+  prefs.capitalsVisibleTime = DEFAULT_CAPITALS_VISIBLE_TIME;
+  prefs.capitalsInvisibleTime = DEFAULT_CAPITALS_INVISIBLE_TIME;
+
+  prefs.windowFollowsPointer = DEFAULT_WINDOW_FOLLOWS_POINTER;
+  prefs.highlightWindow = DEFAULT_HIGHLIGHT_WINDOW;
+
+  prefs.textStyle = DEFAULT_TEXT_STYLE;
+  prefs.brailleFirmness = DEFAULT_BRAILLE_FIRMNESS;
+  prefs.brailleSensitivity = DEFAULT_BRAILLE_SENSITIVITY;
+
+  prefs.windowOverlap = DEFAULT_WINDOW_OVERLAP;
+  prefs.slidingWindow = DEFAULT_SLIDING_WINDOW;
+  prefs.eagerSlidingWindow = DEFAULT_EAGER_SLIDING_WINDOW;
+
+  prefs.skipIdenticalLines = DEFAULT_SKIP_IDENTICAL_LINES;
+  prefs.skipBlankWindows = DEFAULT_SKIP_BLANK_WINDOWS;
+  prefs.blankWindowsSkipMode = DEFAULT_BLANK_WINDOWS_SKIP_MODE;
+
+  prefs.alertMessages = DEFAULT_ALERT_MESSAGES;
+  prefs.alertDots = DEFAULT_ALERT_DOTS;
+  prefs.alertTunes = DEFAULT_ALERT_TUNES;
+  prefs.tuneDevice = getDefaultTuneDevice();
+  prefs.pcmVolume = DEFAULT_PCM_VOLUME;
+  prefs.midiVolume = DEFAULT_MIDI_VOLUME;
+  prefs.midiInstrument = DEFAULT_MIDI_INSTRUMENT;
+  prefs.fmVolume = DEFAULT_FM_VOLUME;
+
+  prefs.sayLineMode = DEFAULT_SAY_LINE_MODE;
+  prefs.autospeak = DEFAULT_AUTOSPEAK;
+  prefs.speechRate = SPK_DEFAULT_RATE;
+  prefs.speechVolume = SPK_DEFAULT_VOLUME;
+
+  prefs.statusStyle = braille->statusStyle;
+}
+
+static void
 getPreferences (void) {
-  if (!loadPreferences(0)) {
-    memset(&prefs, 0, sizeof(prefs));
-
-    prefs.magic[0] = PREFS_MAGIC_NUMBER & 0XFF;
-    prefs.magic[1] = PREFS_MAGIC_NUMBER >> 8;
-    prefs.version = 4;
-
-    prefs.autorepeat = DEFAULT_AUTOREPEAT;
-    prefs.autorepeatPanning = DEFAULT_AUTOREPEAT_PANNING;
-    prefs.autorepeatDelay = DEFAULT_AUTOREPEAT_DELAY;
-    prefs.autorepeatInterval = DEFAULT_AUTOREPEAT_INTERVAL;
-
-    prefs.showCursor = DEFAULT_SHOW_CURSOR;
-    prefs.cursorStyle = DEFAULT_CURSOR_STYLE;
-    prefs.blinkingCursor = DEFAULT_BLINKING_CURSOR;
-    prefs.cursorVisibleTime = DEFAULT_CURSOR_VISIBLE_TIME;
-    prefs.cursorInvisibleTime = DEFAULT_CURSOR_INVISIBLE_TIME;
-
-    prefs.showAttributes = DEFAULT_SHOW_ATTRIBUTES;
-    prefs.blinkingAttributes = DEFAULT_BLINKING_ATTRIBUTES;
-    prefs.attributesVisibleTime = DEFAULT_ATTRIBUTES_VISIBLE_TIME;
-    prefs.attributesInvisibleTime = DEFAULT_ATTRIBUTES_INVISIBLE_TIME;
-
-    prefs.blinkingCapitals = DEFAULT_BLINKING_CAPITALS;
-    prefs.capitalsVisibleTime = DEFAULT_CAPITALS_VISIBLE_TIME;
-    prefs.capitalsInvisibleTime = DEFAULT_CAPITALS_INVISIBLE_TIME;
-
-    prefs.windowFollowsPointer = DEFAULT_WINDOW_FOLLOWS_POINTER;
-    prefs.highlightWindow = DEFAULT_HIGHLIGHT_WINDOW;
-
-    prefs.textStyle = DEFAULT_TEXT_STYLE;
-    prefs.brailleFirmness = DEFAULT_BRAILLE_FIRMNESS;
-    prefs.brailleSensitivity = DEFAULT_BRAILLE_SENSITIVITY;
-
-    prefs.windowOverlap = DEFAULT_WINDOW_OVERLAP;
-    prefs.slidingWindow = DEFAULT_SLIDING_WINDOW;
-    prefs.eagerSlidingWindow = DEFAULT_EAGER_SLIDING_WINDOW;
-
-    prefs.skipIdenticalLines = DEFAULT_SKIP_IDENTICAL_LINES;
-    prefs.skipBlankWindows = DEFAULT_SKIP_BLANK_WINDOWS;
-    prefs.blankWindowsSkipMode = DEFAULT_BLANK_WINDOWS_SKIP_MODE;
-
-    prefs.alertMessages = DEFAULT_ALERT_MESSAGES;
-    prefs.alertDots = DEFAULT_ALERT_DOTS;
-    prefs.alertTunes = DEFAULT_ALERT_TUNES;
-    prefs.tuneDevice = getDefaultTuneDevice();
-    prefs.pcmVolume = DEFAULT_PCM_VOLUME;
-    prefs.midiVolume = DEFAULT_MIDI_VOLUME;
-    prefs.midiInstrument = DEFAULT_MIDI_INSTRUMENT;
-    prefs.fmVolume = DEFAULT_FM_VOLUME;
-
-    prefs.sayLineMode = DEFAULT_SAY_LINE_MODE;
-    prefs.autospeak = DEFAULT_AUTOSPEAK;
-    prefs.speechRate = SPK_DEFAULT_RATE;
-    prefs.speechVolume = SPK_DEFAULT_VOLUME;
-
-    prefs.statusStyle = braille->statusStyle;
-  }
+  if (!loadPreferences(0)) resetPreferences();
   setTuneDevice(prefs.tuneDevice);
 }
 
@@ -1404,11 +1407,6 @@ closeBrailleDriver (void) {
   brailleOpened = 0;
   drainBrailleOutput(&brl, 0);
   braille->close(&brl);
-
-  if (brl.isCoreBuffer) {
-    free(brl.buffer);
-    brl.buffer = NULL;
-  }
 }
 
 static int
@@ -1593,27 +1591,41 @@ deactivateBrailleDriver (void) {
   }
 }
 
-static void
+static int
 startBrailleDriver (void) {
-  while (1) {
-    testProgramTermination();
-
 #ifdef ENABLE_BLUETOOTH_SUPPORT
-    btForgetConnectErrors();
+  btForgetConnectErrors();
 #endif /* ENABLE_BLUETOOTH_SUPPORT */
 
-    if (activateBrailleDriver(0)) {
-      getPreferences();
-      setBraillePreferences();
+  if (!activateBrailleDriver(0)) return 0;
+  getPreferences();
+  applyBraillePreferences();
+  clearStatusCells(&brl);
+  setHelpPageNumber(brl.helpPage);
+  playTune(&tune_braille_on);
 
-      clearStatusCells(&brl);
-      setHelpPageNumber(brl.helpPage);
+  if (!opt_quiet) {
+    char buffer[18 + 1];
+    snprintf(buffer, sizeof(buffer), "%s %s", PACKAGE_TITLE, PACKAGE_VERSION);
+    message(buffer, 0);        /* display initialization message */
+  }
 
-      playTune(&tune_braille_on);
-      return;
-    }
+  return 1;
+}
 
-    approximateDelay(5000);
+static void tryBrailleDriver (void);
+
+static void
+retryBrailleDriver (void *data) {
+  if (!brailleDriver) tryBrailleDriver();
+}
+
+static void
+tryBrailleDriver (void) {
+  if (!startBrailleDriver()) {
+    asyncRelativeAlarm(5000, retryBrailleDriver, NULL);
+    initializeBraille();
+    allocateBrailleBuffer(&brl);
   }
 }
 
@@ -1627,7 +1639,7 @@ void
 restartBrailleDriver (void) {
   stopBrailleDriver();
   LogPrint(LOG_INFO, gettext("reinitializing braille driver"));
-  startBrailleDriver();
+  tryBrailleDriver();
 }
 
 static void
@@ -1765,20 +1777,23 @@ deactivateSpeechDriver (void) {
   }
 }
 
-static void startSpeechDriver (int retry);
+static int
+startSpeechDriver (void) {
+  if (!activateSpeechDriver(0)) return 0;
+  applySpeechPreferences();
+  return 1;
+}
+
+static void trySpeechDriver (void);
 
 static void
 retrySpeechDriver (void *data) {
-  if (!speechDriver) startSpeechDriver(1);
+  if (!speechDriver) trySpeechDriver();
 }
 
 static void
-startSpeechDriver (int retry) {
-  if (activateSpeechDriver(0)) {
-    setSpeechPreferences();
-  } else if (retry) {
-    asyncRelativeAlarm(5000, retrySpeechDriver, NULL);
-  }
+trySpeechDriver (void) {
+  if (!startSpeechDriver()) asyncRelativeAlarm(5000, retrySpeechDriver, NULL);
 }
 
 static void
@@ -1791,7 +1806,7 @@ void
 restartSpeechDriver (void) {
   stopSpeechDriver();
   LogPrint(LOG_INFO, gettext("reinitializing speech driver"));
-  startSpeechDriver(0);
+  trySpeechDriver();
 }
 
 static void
@@ -2274,8 +2289,9 @@ startup (int argc, char *argv[]) {
   if (opt_verify) {
     if (activateBrailleDriver(1)) deactivateBrailleDriver();
   } else {
+    resetPreferences();
     atexit(exitBrailleDriver);
-    startBrailleDriver();
+    tryBrailleDriver();
   }
 
 #ifdef ENABLE_SPEECH_SUPPORT
@@ -2285,7 +2301,7 @@ startup (int argc, char *argv[]) {
     if (activateSpeechDriver(1)) deactivateSpeechDriver();
   } else {
     atexit(exitSpeechDriver);
-    startSpeechDriver(1);
+    trySpeechDriver();
   }
 
   /* Create the speech pass-through FIFO. */
@@ -2297,12 +2313,6 @@ startup (int argc, char *argv[]) {
 #endif /* ENABLE_SPEECH_SUPPORT */
 
   if (opt_verify) exit(0);
-
-  if (!opt_quiet) {
-    char buffer[18 + 1];
-    snprintf(buffer, sizeof(buffer), "%s %s", PACKAGE_TITLE, PACKAGE_VERSION);
-    message(buffer, 0);        /* display initialization message */
-  }
 
   if (problemCount) {
     char buffer[0X40];
