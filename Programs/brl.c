@@ -39,20 +39,25 @@
 #define DRIVER_DEVELOPERS ""
 #define BRLHELP "/dev/null"
 #include "brl_driver.h"
+
 static int
 brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
   return 1;
 }
+
 static void
 brl_close (BrailleDisplay *brl) {
 }
+
 static int
 brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   return EOF;
 }
+
 static void
 brl_writeWindow (BrailleDisplay *brl) {
 }
+
 static void
 brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) {
 }
