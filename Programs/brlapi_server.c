@@ -93,7 +93,7 @@ const char *const api_parameters[] = { "auth", "host", "stacksize", NULL };
 
 static size_t stackSize;
 
-#define RELEASE "BRLTTY BrlAPI Server: release " BRLAPI_RELEASE
+#define RELEASE "BrlAPI Server: release " BRLAPI_RELEASE
 #define COPYRIGHT "   Copyright (C) 2002-2007 by Sebastien Hinderer <Sebastien.Hinderer@ens-lyon.org>, \
 Samuel Thibault <samuel.thibault@ens-lyon.org>"
 
