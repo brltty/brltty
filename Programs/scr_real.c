@@ -29,46 +29,9 @@
 
 #include "misc.h"
 #include "async.h"
-#include "drivers.h"
 #include "scr.h"
 #include "scr_real.h"
-#include "scr.auto.h"
 #include "route.h"
-
-#define SCRSYMBOL noScreen
-#define DRIVER_NAME NoScreen
-#define DRIVER_CODE no
-#define DRIVER_COMMENT "no screen support"
-#define DRIVER_VERSION ""
-#define DRIVER_DEVELOPERS ""
-#include "scr_driver.h"
-
-static void
-scr_initialize (MainScreen *main) {
-  initializeMainScreen(main);
-}
-
-const ScreenDriver *
-loadScreenDriver (const char *code, void **driverObject, const char *driverDirectory) {
-  return loadDriver(code, driverObject,
-                    driverDirectory, driverTable,
-                    "screen", 'x', "scr",
-                    &noScreen, &noScreen.definition);
-}
-
-void
-identifyScreenDriver (const ScreenDriver *driver, int full) {
-  identifyDriver("Screen", &driver->definition, full);
-}
-
-void
-identifyScreenDrivers (int full) {
-  const DriverEntry *entry = driverTable;
-  while (entry->address) {
-    const ScreenDriver *driver = entry++->address;
-    identifyScreenDriver(driver, full);
-  }
-}
 
 #ifdef HAVE_LIBGPM
 #include <gpm.h>

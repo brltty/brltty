@@ -22,9 +22,6 @@
 extern "C" {
 #endif /* __cplusplus */
 
-/* scr.h - C header file for the screen reading library
- */
-
 /* mode argument for readScreen() */
 typedef enum {
   SCR_TEXT,		/* get screen text */
@@ -67,9 +64,8 @@ typedef enum {
 } ScreenKey;
 
 /* Routines which apply to all screens. */
-extern void identifyScreenDrivers (int full);
-extern void initializeAllScreens (const char *identifier, const char *driverDirectory);		/* close screen reading */
-extern void closeAllScreens (void);		/* close screen reading */
+extern void openSpecialScreens (void);		/* close screen reading */
+extern void closeSpecialScreens (void);		/* close screen reading */
 
 extern int isLiveScreen (void);
 
@@ -99,11 +95,6 @@ extern int currentVirtualTerminal (void);
 extern int userVirtualTerminal (int number);
 extern int executeScreenCommand (int);
 
-/* Routines which apply to the main screen. */
-extern const char *const *getScreenParameters (void);			/* initialise screen reading functions */
-extern const char *getScreenDriverCode (void);			/* initialise screen reading functions */
-extern int openMainScreen (char **parameters);			/* initialise screen reading functions */
-
 /* Routines which apply to the routing screen.
  * An extra `thread' for the cursor routing subprocess.
  * This is needed because the forked subprocess shares its parent's
@@ -118,6 +109,22 @@ extern void closeHelpScreen (void);
 extern void setHelpPageNumber (short);
 extern short getHelpPageNumber (void);
 extern short getHelpPageCount (void);
+
+typedef struct ScreenDriverStruct ScreenDriver;
+extern const char *const *getScreenParameters (const ScreenDriver *driver);
+extern const char *getScreenDriverCode (const ScreenDriver *driver);
+extern const char *getScreenDriverName (const ScreenDriver *driver);
+
+extern int haveScreenDriver (const char *code);
+extern const char *getDefaultScreenDriver (void);
+extern const ScreenDriver *loadScreenDriver (const char *code, void **driverObject, const char *driverDirectory);
+extern void initializeScreen (void);
+extern int openScreenDriver (char **parameters);
+extern void closeScreenDriver (void);
+extern void identifyScreenDriver (const ScreenDriver *driver, int full);
+extern void identifyScreenDrivers (int full);
+extern const ScreenDriver *screen;
+extern const ScreenDriver noScreen;
 
 #ifdef __cplusplus
 }

@@ -22,22 +22,9 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#include "driver.h"
 #include "scr_main.h"
 
-typedef struct {
-  DRIVER_DEFINITION_DECLARATION;
-  const char *const *parameters;
-
-  void (*initialize) (MainScreen *main);		/* initialize speech device */
-} ScreenDriver;
-
 extern void initializeRealScreen (MainScreen *);
-
-extern const ScreenDriver noScreen;
-extern const ScreenDriver *loadScreenDriver (const char *code, void **driverObject, const char *driverDirectory);
-extern void identifyScreenDrivers (int full);
-extern void identifyScreenDriver (const ScreenDriver *driver, int full);
 
 #ifdef __cplusplus
 }

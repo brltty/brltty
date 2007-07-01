@@ -30,48 +30,115 @@
 
 #include "misc.h"
 #include "system.h"
+#include "drivers.h"
 #include "scr.h"
 #include "scr_frozen.h"
 #include "scr_help.h"
 #include "scr_real.h"
+#include "scr.auto.h"
 
-static BaseScreen *currentScreen;
 static HelpScreen helpScreen;
 static FrozenScreen frozenScreen;                
 static MainScreen mainScreen;
-static const ScreenDriver *screenDriver = NULL;
-static void *screenObject;
+static BaseScreen *currentScreen = &mainScreen.base;
+
+#define SCRSYMBOL noScreen
+#define DRIVER_NAME NoScreen
+#define DRIVER_CODE no
+#define DRIVER_COMMENT "no screen support"
+#define DRIVER_VERSION ""
+#define DRIVER_DEVELOPERS ""
+#include "scr_driver.h"
+
+static void
+scr_initialize (MainScreen *main) {
+  initializeMainScreen(main);
+}
+
+const ScreenDriver *screen = &noScreen;
+
+const char *const *
+getScreenParameters (const ScreenDriver *driver) {
+  return driver->parameters;
+}
+
+const char *
+getScreenDriverCode (const ScreenDriver *driver) {
+  return driver->definition.code;
+}
+
+const char *
+getScreenDriverName (const ScreenDriver *driver) {
+  return driver->definition.name;
+}
+
+int
+haveScreenDriver (const char *code) {
+  return haveDriver(code, SCREEN_DRIVER_CODES, driverTable);
+}
+
+const char *
+getDefaultScreenDriver (void) {
+  return getDefaultDriver(driverTable);
+}
+
+const ScreenDriver *
+loadScreenDriver (const char *code, void **driverObject, const char *driverDirectory) {
+  return loadDriver(code, driverObject,
+                    driverDirectory, driverTable,
+                    "screen", 'x', "scr",
+                    &noScreen, &noScreen.definition);
+}
 
 void
-initializeAllScreens (const char *identifier, const char *driverDirectory) {
-  initializeHelpScreen(&helpScreen);
-  initializeFrozenScreen(&frozenScreen);
+initializeScreen (void) {
+  screen->initialize(&mainScreen);
+}
 
-  {
-    if (!(screenDriver = loadScreenDriver(identifier, &screenObject, driverDirectory))) {
-      screenDriver = &noScreen;
-      screenObject = NULL;
+int
+openScreenDriver (char **parameters) {
+  initializeScreen();
+  if (mainScreen.processParameters(parameters)) {
+    if (mainScreen.open()) {
+      return 1;
+    } else {
+      LogPrint(LOG_DEBUG, "screen driver initialization failed: %s",
+               screen->definition.code);
     }
+  }
 
-    identifyScreenDriver(screenDriver, 0);
-    screenDriver->initialize(&mainScreen);
+  return 0;
+}
+
+void
+closeScreenDriver (void) {
+  mainScreen.close();
+}
+
+void
+identifyScreenDriver (const ScreenDriver *driver, int full) {
+  identifyDriver("Screen", &driver->definition, full);
+}
+
+void
+identifyScreenDrivers (int full) {
+  const DriverEntry *entry = driverTable;
+  while (entry->address) {
+    const ScreenDriver *driver = entry++->address;
+    identifyScreenDriver(driver, full);
   }
 }
 
 void
-closeAllScreens (void) {
+openSpecialScreens (void) {
+  initializeHelpScreen(&helpScreen);
+  initializeFrozenScreen(&frozenScreen);
+}
+
+void
+closeSpecialScreens (void) {
   frozenScreen.close();
   helpScreen.close();
-  mainScreen.close();
-
-  if (screenDriver) {
-    screenDriver = NULL;
-
-    if (screenObject) {
-      unloadSharedObject(screenObject);
-      screenObject = NULL;
-    }
-  }
 }
 
 
@@ -93,10 +160,12 @@ selectScreen (void) {
     {0         , &mainScreen.base}
   };
   const ScreenEntry *entry = screenEntries;
+
   while (entry->which) {
     if (entry->which & activeScreens) break;
     ++entry;
   }
+
   currentScreen = entry->screen;
 }
 
@@ -222,29 +291,6 @@ userVirtualTerminal (int number) {
 int
 executeScreenCommand (int command) {
   return currentScreen->executeCommand(command);
-}
-
-
-const char *const *
-getScreenParameters (void) {
-  return screenDriver->parameters;
-}
-
-const char *
-getScreenDriverCode (void) {
-  return screenDriver->definition.code;
-}
-
-int
-openMainScreen (char **parameters) {
-  if (mainScreen.processParameters(parameters)) {
-    if (mainScreen.open()) {
-      currentScreen = &mainScreen.base;
-      return 1;
-      mainScreen.close();
-    }
-  }
-  return 0;
 }
 
 

@@ -104,9 +104,7 @@ setRegion (int *offsetValue, const char *offsetOption, int offsetDefault, const 
 int
 main (int argc, char *argv[]) {
   int status;
-
-  const char *const *parameterNames;
-  char **parameterSettings;
+  void *driverObject;
 
   processOptions(optionTable, optionCount,
                  "scrtest", &argc, &argv,
@@ -121,86 +119,95 @@ main (int argc, char *argv[]) {
     fixInstallPaths(paths);
   }
 
-  initializeAllScreens(opt_screenDriver, opt_libraryDirectory);
-  if (!(parameterNames = getScreenParameters())) {
-    static const char *const noNames[] = {NULL};
-    parameterNames = noNames;
-  }
-  {
-    const char *const *name = parameterNames;
-    unsigned int count;
-    char **setting;
-    while (*name) ++name;
-    count = name - parameterNames;
-    if (!(parameterSettings = malloc((count + 1) * sizeof(*parameterSettings)))) {
-      LogPrint(LOG_ERR, "insufficient memory.");
-      exit(9);
-    }
-    setting = parameterSettings;
-    while (count--) *setting++ = "";
-    *setting = NULL;
-  }
+  if ((screen = loadScreenDriver(opt_screenDriver, &driverObject, opt_libraryDirectory))) {
+    const char *const *parameterNames = getScreenParameters(screen);
+    char **parameterSettings;
 
-  while (argc) {
-    char *assignment = *argv++;
-    int ok = 0;
-    char *delimiter = strchr(assignment, '=');
-    if (!delimiter) {
-      LogPrint(LOG_ERR, "missing screen parameter value: %s", assignment);
-    } else if (delimiter == assignment) {
-      LogPrint(LOG_ERR, "missing screen parameter name: %s", assignment);
-    } else {
-      size_t nameLength = delimiter - assignment;
+    if (!parameterNames) {
+      static const char *const noNames[] = {NULL};
+      parameterNames = noNames;
+    }
+
+    {
       const char *const *name = parameterNames;
-      while (*name) {
-        if (strncasecmp(assignment, *name, nameLength) == 0) {
-          parameterSettings[name - parameterNames] = delimiter + 1;
-          ok = 1;
-          break;
-        }
-        ++name;
+      unsigned int count;
+      char **setting;
+      while (*name) ++name;
+      count = name - parameterNames;
+      if (!(parameterSettings = malloc((count + 1) * sizeof(*parameterSettings)))) {
+        LogPrint(LOG_ERR, "insufficient memory.");
+        exit(9);
       }
-      if (!ok) LogPrint(LOG_ERR, "invalid screen parameter: %s", assignment);
+      setting = parameterSettings;
+      while (count--) *setting++ = "";
+      *setting = NULL;
     }
-    if (!ok) exit(2);
-    --argc;
-  }
 
-  if (openMainScreen(parameterSettings)) {
-    ScreenDescription description;
-    int left, top, width, height;
-    unsigned char buffer[0X800];
-
-    describeScreen(&description);
-    printf("Screen: %dx%d\n", description.cols, description.rows);
-    printf("Cursor: [%d,%d]\n", description.posx, description.posy);
-
-    setRegion(&left, opt_boxLeft, 5, "starting column",
-              &width, opt_boxWidth, description.cols, "region width");
-    setRegion(&top, opt_boxTop, 5, "starting row",
-              &height, opt_boxHeight, description.rows, "region height");
-    printf("Region: %dx%d@[%d,%d]\n", width, height, left, top);
-    if (readScreen(left, top, width, height, buffer, SCR_TEXT)) {
-      int line;
-      for (line=0; line<height; line++) {
-        int column;
-        for (column=0; column<width; column++) {
-          unsigned char character = buffer[line * width + column];
-          if (isprint(character))
-            putchar(character);
-          else
-            putchar(' ');
+    while (argc) {
+      char *assignment = *argv++;
+      int ok = 0;
+      char *delimiter = strchr(assignment, '=');
+      if (!delimiter) {
+        LogPrint(LOG_ERR, "missing screen parameter value: %s", assignment);
+      } else if (delimiter == assignment) {
+        LogPrint(LOG_ERR, "missing screen parameter name: %s", assignment);
+      } else {
+        size_t nameLength = delimiter - assignment;
+        const char *const *name = parameterNames;
+        while (*name) {
+          if (strncasecmp(assignment, *name, nameLength) == 0) {
+            parameterSettings[name - parameterNames] = delimiter + 1;
+            ok = 1;
+            break;
+          }
+          ++name;
         }
-        putchar('\n');
+        if (!ok) LogPrint(LOG_ERR, "invalid screen parameter: %s", assignment);
       }
-      status = 0;
+      if (!ok) exit(2);
+      --argc;
+    }
+
+    if (openScreenDriver(parameterSettings)) {
+      ScreenDescription description;
+      int left, top, width, height;
+      unsigned char buffer[0X800];
+
+      describeScreen(&description);
+      printf("Screen: %dx%d\n", description.cols, description.rows);
+      printf("Cursor: [%d,%d]\n", description.posx, description.posy);
+
+      setRegion(&left, opt_boxLeft, 5, "starting column",
+                &width, opt_boxWidth, description.cols, "region width");
+      setRegion(&top, opt_boxTop, 5, "starting row",
+                &height, opt_boxHeight, description.rows, "region height");
+      printf("Region: %dx%d@[%d,%d]\n", width, height, left, top);
+      if (readScreen(left, top, width, height, buffer, SCR_TEXT)) {
+        int line;
+        for (line=0; line<height; line++) {
+          int column;
+          for (column=0; column<width; column++) {
+            unsigned char character = buffer[line * width + column];
+            if (isprint(character))
+              putchar(character);
+            else
+              putchar(' ');
+          }
+          putchar('\n');
+        }
+        status = 0;
+      } else {
+        LogPrint(LOG_ERR, "Can't read screen.");
+        status = 4;
+      }
     } else {
-      LogPrint(LOG_ERR, "Can't read screen.");
-      status = 4;
+      LogPrint(LOG_ERR, "can't open screen.");
+      status = 3;
     }
-    closeAllScreens();
+
+    closeScreenDriver();
   } else {
-    LogPrint(LOG_ERR, "can't initialize screen driver.");
+    LogPrint(LOG_ERR, "can't load screen driver.");
     status = 3;
   }
   return status;

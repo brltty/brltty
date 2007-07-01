@@ -123,6 +123,9 @@ static char *opt_speechFifo;
 #endif /* ENABLE_SPEECH_SUPPORT */
 
 static char *opt_screenDriver;
+static char **screenDrivers;
+static const ScreenDriver *screenDriver = NULL;
+static void *screenObject;
 static char *opt_screenParameters;
 static char **screenParameters = NULL;
 
@@ -491,8 +494,10 @@ dimensionsChanged (int rows, int columns) {
   fwinshift = MAX(columns-prefs.windowOverlap, 1);
   hwinshift = columns / 2;
   vwinshift = (rows > 1)? rows: 5;
-  LogPrint(LOG_DEBUG, "shifts: fwin=%d hwin=%d vwin=%d",
-           fwinshift, hwinshift, vwinshift);
+
+  if (brailleDriver)
+    LogPrint(LOG_DEBUG, "shifts: fwin=%d hwin=%d vwin=%d",
+             fwinshift, hwinshift, vwinshift);
 }
 
 static int
@@ -1613,20 +1618,20 @@ startBrailleDriver (void) {
   return 1;
 }
 
-static void tryBrailleDriver (void);
+static int tryBrailleDriver (void);
 
 static void
 retryBrailleDriver (void *data) {
   if (!brailleDriver) tryBrailleDriver();
 }
 
-static void
+static int
 tryBrailleDriver (void) {
-  if (!startBrailleDriver()) {
-    asyncRelativeAlarm(5000, retryBrailleDriver, NULL);
-    initializeBraille();
-    allocateBrailleBuffer(&brl);
-  }
+  if (startBrailleDriver()) return 1;
+  asyncRelativeAlarm(5000, retryBrailleDriver, NULL);
+  initializeBraille();
+  allocateBrailleBuffer(&brl);
+  return 0;
 }
 
 static void
@@ -1784,16 +1789,18 @@ startSpeechDriver (void) {
   return 1;
 }
 
-static void trySpeechDriver (void);
+static int trySpeechDriver (void);
 
 static void
 retrySpeechDriver (void *data) {
   if (!speechDriver) trySpeechDriver();
 }
 
-static void
+static int
 trySpeechDriver (void) {
-  if (!startSpeechDriver()) asyncRelativeAlarm(5000, retrySpeechDriver, NULL);
+  if (startSpeechDriver()) return 1;
+  asyncRelativeAlarm(5000, retrySpeechDriver, NULL);
+  return 0;
 }
 
 static void
@@ -1815,14 +1822,137 @@ exitSpeechDriver (void) {
 }
 #endif /* ENABLE_SPEECH_SUPPORT */
 
+static int
+activateScreenDriver (int verify) {
+  int oneDriver = screenDrivers[0] && !screenDrivers[1];
+  int autodetect = oneDriver && (strcmp(screenDrivers[0], "auto") == 0);
+  const char *defaultCodes[] = {getDefaultScreenDriver(), NULL};
+  const char *const *code;
+
+  if (!oneDriver || autodetect) verify = 0;
+
+  if (!autodetect) {
+    code = (const char *const *)screenDrivers;
+  } else if (defaultCodes[0]) {
+    code = defaultCodes;
+  } else {
+    static const char *const screenCodes[] = {
+      NULL
+    };
+    code = screenCodes;
+  }
+  LogPrint(LOG_DEBUG, "looking for screen driver.");
+
+  while (*code) {
+    if (!autodetect || haveScreenDriver(*code)) {
+      LogPrint(LOG_DEBUG, "checking for '%s' screen driver.", *code);
+
+      if ((screen = loadScreenDriver(*code, &screenObject, opt_libraryDirectory))) {
+        screenParameters = processParameters(getScreenParameters(screen),
+                                             getScreenDriverCode(screen),
+                                             opt_screenParameters);
+        if (screenParameters) {
+          int opened = verify;
+
+          if (!opened) {
+            LogPrint(LOG_DEBUG, "initializing screen driver: %s",
+                     getScreenDriverCode(screen));
+
+            if (openScreenDriver(screenParameters)) {
+              opened = 1;
+              screenDriver = screen;
+            }
+          }
+
+          if (opened) {
+            LogPrint(LOG_INFO, "%s: %s [%s]",
+                     gettext("Screen Driver"),
+                     getScreenDriverCode(screen),
+                     getScreenDriverName(screen));
+            identifyScreenDriver(screen, 0);
+            logParameters(getScreenParameters(screen),
+                          screenParameters,
+                          gettext("Screen Parameter"));
+
+            return 1;
+          }
+
+          deallocateStrings(screenParameters);
+          screenParameters = NULL;
+        }
+
+        if (screenObject) {
+          unloadSharedObject(screenObject);
+          screenObject = NULL;
+        }
+      } else {
+        LogPrint(LOG_ERR, "%s: %s", gettext("screen driver not loadable"), *code);
+      }
+      screen = &noScreen;
+    }
+
+    ++code;
+  }
+
+  LogPrint(LOG_DEBUG, "no screen driver found.");
+  return 0;
+}
+
 static void
-exitTunes (void) {
-  closeTuneDevice(1);
+deactivateScreenDriver (void) {
+  if (screenDriver) {
+    closeScreenDriver();
+
+    screen = &noScreen;
+    screenDriver = NULL;
+  }
+
+  if (screenObject) {
+    unloadSharedObject(screenObject);
+    screenObject = NULL;
+  }
+
+  if (screenParameters) {
+    deallocateStrings(screenParameters);
+    screenParameters = NULL;
+  }
+}
+
+static int
+startScreenDriver (void) {
+  if (!activateScreenDriver(0)) return 0;
+  return 1;
+}
+
+static int tryScreenDriver (void);
+
+static void
+retryScreenDriver (void *data) {
+  if (!screenDriver) tryScreenDriver();
+}
+
+static int
+tryScreenDriver (void) {
+  if (startScreenDriver()) return 1;
+  asyncRelativeAlarm(5000, retryScreenDriver, NULL);
+  initializeScreen();
+  return 0;
+}
+
+static void
+stopScreenDriver (void) {
+  deactivateScreenDriver();
 }
 
 static void
 exitScreen (void) {
-  closeAllScreens();
+  stopScreenDriver();
+  closeSpecialScreens();
+}
+
+static void
+exitTunes (void) {
+  closeTuneDevice(1);
 }
 
 static void
@@ -2244,18 +2374,11 @@ startup (int argc, char *argv[]) {
    */
 
   /* initialize screen driver */
-  initializeAllScreens(opt_screenDriver, opt_libraryDirectory);
-  screenParameters = processParameters(getScreenParameters(),
-                                       getScreenDriverCode(),
-                                       opt_screenParameters);
-  logParameters(getScreenParameters(), screenParameters,
-                gettext("Screen Parameter"));
+  screenDrivers = splitString(opt_screenDriver? opt_screenDriver: "", ',', NULL);
   if (!opt_verify) {
-    if (!openMainScreen(screenParameters)) {                                
-      LogPrint(LOG_ERR, gettext("cannot read screen"));
-      exit(7);
-    }
     atexit(exitScreen);
+    openSpecialScreens();
+    tryScreenDriver();
   }
   
 #ifdef ENABLE_API

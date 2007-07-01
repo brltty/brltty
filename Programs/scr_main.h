@@ -23,6 +23,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 #include "scr_base.h"
+#include "driver.h"
 
 typedef struct {
   BaseScreen base;
@@ -33,6 +34,13 @@ typedef struct {
 } MainScreen;
 
 extern void initializeMainScreen (MainScreen *);
+
+struct ScreenDriverStruct {
+  DRIVER_DEFINITION_DECLARATION;
+  const char *const *parameters;
+
+  void (*initialize) (MainScreen *main);		/* initialize speech device */
+};
 
 #ifdef __cplusplus
 }
