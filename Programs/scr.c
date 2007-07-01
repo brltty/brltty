@@ -62,14 +62,9 @@ getScreenParameters (const ScreenDriver *driver) {
   return driver->parameters;
 }
 
-const char *
-getScreenDriverCode (const ScreenDriver *driver) {
-  return driver->definition.code;
-}
-
-const char *
-getScreenDriverName (const ScreenDriver *driver) {
-  return driver->definition.name;
+const DriverDefinition *
+getScreenDriverDefinition (const ScreenDriver *driver) {
+  return &driver->definition;
 }
 
 int

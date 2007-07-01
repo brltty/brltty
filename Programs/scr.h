@@ -22,6 +22,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#include "driver.h"
+
 /* mode argument for readScreen() */
 typedef enum {
   SCR_TEXT,		/* get screen text */
@@ -112,8 +114,7 @@ extern short getHelpPageCount (void);
 
 typedef struct ScreenDriverStruct ScreenDriver;
 extern const char *const *getScreenParameters (const ScreenDriver *driver);
-extern const char *getScreenDriverCode (const ScreenDriver *driver);
-extern const char *getScreenDriverName (const ScreenDriver *driver);
+extern const DriverDefinition *getScreenDriverDefinition (const ScreenDriver *driver);
 
 extern int haveScreenDriver (const char *code);
 extern const char *getDefaultScreenDriver (void);

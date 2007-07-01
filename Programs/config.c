@@ -1848,14 +1848,14 @@ activateScreenDriver (int verify) {
 
       if ((screen = loadScreenDriver(*code, &screenObject, opt_libraryDirectory))) {
         screenParameters = processParameters(getScreenParameters(screen),
-                                             getScreenDriverCode(screen),
+                                             getScreenDriverDefinition(screen)->code,
                                              opt_screenParameters);
         if (screenParameters) {
           int opened = verify;
 
           if (!opened) {
             LogPrint(LOG_DEBUG, "initializing screen driver: %s",
-                     getScreenDriverCode(screen));
+                     getScreenDriverDefinition(screen)->code);
 
             if (openScreenDriver(screenParameters)) {
               opened = 1;
@@ -1866,8 +1866,8 @@ activateScreenDriver (int verify) {
           if (opened) {
             LogPrint(LOG_INFO, "%s: %s [%s]",
                      gettext("Screen Driver"),
-                     getScreenDriverCode(screen),
-                     getScreenDriverName(screen));
+                     getScreenDriverDefinition(screen)->code,
+                     getScreenDriverDefinition(screen)->name);
             identifyScreenDriver(screen, 0);
             logParameters(getScreenParameters(screen),
                           screenParameters,
