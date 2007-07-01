@@ -2169,6 +2169,7 @@ startup (int argc, char *argv[]) {
 
   if (opt_version) {
     LogPrint(LOG_INFO, "%s", BRLTTY_COPYRIGHT);
+    identifyScreenDrivers(1);
 
 #ifdef ENABLE_API
     api_identify(1);
@@ -2180,7 +2181,6 @@ startup (int argc, char *argv[]) {
     identifySpeechDrivers(1);
 #endif /* ENABLE_SPEECH_SUPPORT */
 
-    identifyScreenDrivers(1);
     exit(0);
   }
 
@@ -2373,10 +2373,12 @@ startup (int argc, char *argv[]) {
    */
 
   /* initialize screen driver */
+  atexit(exitScreen);
+  openSpecialScreens();
   screenDrivers = splitString(opt_screenDriver? opt_screenDriver: "", ',', NULL);
-  if (!opt_verify) {
-    atexit(exitScreen);
-    openSpecialScreens();
+  if (opt_verify) {
+    if (activateScreenDriver(1)) deactivateScreenDriver();
+  } else {
     tryScreenDriver();
   }
   
