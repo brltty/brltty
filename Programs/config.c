@@ -490,19 +490,18 @@ applySpeechPreferences (void) {
 #endif /* ENABLE_SPEECH_SUPPORT */
 
 static void
-dimensionsChanged (int rows, int columns) {
+dimensionsChanged (int infoLevel, int rows, int columns) {
   fwinshift = MAX(columns-prefs.windowOverlap, 1);
   hwinshift = columns / 2;
   vwinshift = (rows > 1)? rows: 5;
 
-  if (brailleDriver)
-    LogPrint(LOG_DEBUG, "shifts: fwin=%d hwin=%d vwin=%d",
-             fwinshift, hwinshift, vwinshift);
+  LogPrint(LOG_DEBUG, "shifts: fwin=%d hwin=%d vwin=%d",
+           fwinshift, hwinshift, vwinshift);
 }
 
 static int
 changedWindowAttributes (void) {
-  dimensionsChanged(brl.y, brl.x);
+  dimensionsChanged(LOG_INFO, brl.y, brl.x);
   return 1;
 }
 
@@ -1392,7 +1391,7 @@ openBrailleDriver (void) {
   initializeBraille();
 
   if (braille->open(&brl, brailleParameters, brailleDevice)) {
-    if (allocateBrailleBuffer(&brl)) {
+    if (ensureBrailleBuffer(&brl, LOG_INFO)) {
       brailleOpened = 1;
       return 1;
     }
@@ -1630,7 +1629,7 @@ tryBrailleDriver (void) {
   if (startBrailleDriver()) return 1;
   asyncRelativeAlarm(5000, retryBrailleDriver, NULL);
   initializeBraille();
-  allocateBrailleBuffer(&brl);
+  ensureBrailleBuffer(&brl, LOG_DEBUG);
   return 0;
 }
 

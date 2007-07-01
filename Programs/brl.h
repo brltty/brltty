@@ -47,7 +47,7 @@ typedef struct {
   unsigned isCoreBuffer:1;	/* the core allocated the buffer */
   unsigned resizeRequired:1;	/* the display size has changed */
   unsigned int writeDelay;
-  void (*bufferResized) (int rows, int columns);
+  void (*bufferResized) (int infoLevel, int rows, int columns);
   const char *dataDirectory;
   unsigned touchEnabled:1;
   unsigned highlightWindow:1;
@@ -55,7 +55,7 @@ typedef struct {
 
 extern void initializeBrailleDisplay (BrailleDisplay *);
 extern unsigned int drainBrailleOutput (BrailleDisplay *, int minimumDelay);
-extern int allocateBrailleBuffer (BrailleDisplay *);
+extern int ensureBrailleBuffer (BrailleDisplay *brl, int infoLevel);
 
 extern void writeBrailleBuffer (BrailleDisplay *);
 extern void writeBrailleText (BrailleDisplay *, const char *, int);

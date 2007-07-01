@@ -162,7 +162,7 @@ main (int argc, char *argv[]) {
       brl.dataDirectory = opt_dataDirectory;
       identifyBrailleDriver(braille, 0);		/* start-up messages */
       if (braille->open(&brl, parameterSettings, opt_brailleDevice)) {
-        if (allocateBrailleBuffer(&brl)) {
+        if (ensureBrailleBuffer(&brl, LOG_INFO)) {
 #ifdef ENABLE_LEARN_MODE
           learnMode(&brl, updateInterval, 10000);
 #else /* ENABLE_LEARN_MODE */

@@ -184,16 +184,16 @@ setStatusText (BrailleDisplay *brl, const char *text) {
 }
 
 static void
-brailleBufferResized (BrailleDisplay *brl) {
+brailleBufferResized (BrailleDisplay *brl, int infoLevel) {
   memset(brl->buffer, 0, brl->x*brl->y);
-  LogPrint(LOG_INFO, "Braille Display Dimensions: %d %s, %d %s",
+  LogPrint(infoLevel, "Braille Display Dimensions: %d %s, %d %s",
            brl->y, (brl->y == 1)? "row": "rows",
            brl->x, (brl->x == 1)? "column": "columns");
-  if (brl->bufferResized) brl->bufferResized(brl->y, brl->x);
+  if (brl->bufferResized) brl->bufferResized(infoLevel, brl->y, brl->x);
 }
 
 static int
-resizeBrailleBuffer (BrailleDisplay *brl) {
+resizeBrailleBuffer (BrailleDisplay *brl, int infoLevel) {
   if (brl->resizeRequired) {
     brl->resizeRequired = 0;
 
@@ -218,18 +218,18 @@ resizeBrailleBuffer (BrailleDisplay *brl) {
       brl->buffer = currentAddress;
     }
 
-    brailleBufferResized(brl);
+    brailleBufferResized(brl, infoLevel);
   }
 
   return 1;
 }
 
 int
-allocateBrailleBuffer (BrailleDisplay *brl) {
+ensureBrailleBuffer (BrailleDisplay *brl, int infoLevel) {
   if ((brl->isCoreBuffer = brl->resizeRequired = brl->buffer == NULL)) {
-    if (!resizeBrailleBuffer(brl)) return 0;
+    if (!resizeBrailleBuffer(brl, infoLevel)) return 0;
   } else {
-    brailleBufferResized(brl);
+    brailleBufferResized(brl, infoLevel);
   }
   return 1;
 }
@@ -237,7 +237,7 @@ allocateBrailleBuffer (BrailleDisplay *brl) {
 int
 readBrailleCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   int command = braille->readCommand(brl, context);
-  resizeBrailleBuffer(brl);
+  resizeBrailleBuffer(brl, LOG_INFO);
   return command;
 }
 
