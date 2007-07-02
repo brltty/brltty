@@ -753,11 +753,7 @@ usbMakeRoot (void) {
   if (directory) {
     if (makeDirectory(directory)) {
       if (usbVerifyUsbfs(directory)) return directory;
-
-      {
-        const char *target = type;
-        if (mountFileSystem(directory, target, type)) return directory;
-      }
+      if (mountFileSystem(directory, PACKAGE_NAME "-usbfs", type)) return directory;
     }
 
     free(directory);

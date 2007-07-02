@@ -78,42 +78,64 @@ addMountEntry (struct mntent *entry) {
   return added;
 }
 
-static void
+static int
 removeMountEntry (const char *path) {
   const char *oldFile = MOUNTED;
-  FILE *oldTable = openMountsTable(oldFile, 0);
+  const char *newFile = MOUNTED "." PACKAGE_NAME;
+  int found = 0;
+  int error = 0;
 
-  if (oldTable) {
-    const char *newFile = MOUNTED "." PACKAGE_NAME;
-    FILE *newTable = openMountsTable(newFile, 1);
+  {
+    FILE *oldTable = openMountsTable(oldFile, 0);
 
-    if (newTable) {
-      struct mntent *entry;
+    if (oldTable) {
+      FILE *newTable = openMountsTable(newFile, 1);
 
-      while ((entry = getmntent(oldTable))) {
-        if (strcmp(entry->mnt_dir, path) != 0) {
-          appendMountEntry(newTable, entry);
+      if (newTable) {
+        struct mntent *entry;
+
+        while ((entry = getmntent(oldTable))) {
+          if (strcmp(entry->mnt_dir, path) == 0) {
+            found = 1;
+          } else if (!appendMountEntry(newTable, entry)) {
+            error = 1;
+            break;
+          }
         }
+
+        endmntent(newTable);
       }
 
-      endmntent(newTable);
+      endmntent(oldTable);
     }
-
-    endmntent(oldTable);
   }
+
+  if (!error) {
+    if (found) {
+      if (rename(newFile, oldFile) == -1) {
+        LogPrint(LOG_ERR, "file rename error: %s -> %s: %s",
+                 newFile, oldFile, strerror(errno));
+        error = 1;
+      }
+    }
+  }
+
+  if (!error) return 1;
+  unlink(newFile);
+  return 0;
 }
 
 int
-mountFileSystem (const char *path, const char *target, const char *type) {
-  if (mount(path, target, type, 0, NULL) != -1) {
+mountFileSystem (const char *path, const char *reference, const char *type) {
+  if (mount(reference, path, type, 0, NULL) != -1) {
     LogPrint(LOG_NOTICE, "file system mounted: %s[%s] -> %s",
-             type, target, path);
+             type, reference, path);
 
     {
       struct mntent entry;
       memset(&entry, 0, sizeof(entry));
       entry.mnt_dir = (char *)path;
-      entry.mnt_fsname = (char *)target;
+      entry.mnt_fsname = (char *)reference;
       entry.mnt_type = (char *)type;
       entry.mnt_opts = "rw";
       addMountEntry(&entry);
@@ -122,7 +144,7 @@ mountFileSystem (const char *path, const char *target, const char *type) {
     return 1;
   } else {
     LogPrint(LOG_ERR, "file system mount error: %s[%s] -> %s: %s",
-             type, target, path, strerror(errno));
+             type, reference, path, strerror(errno));
   }
 
   return 0;
