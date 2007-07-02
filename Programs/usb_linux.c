@@ -23,8 +23,6 @@
 #include <errno.h>
 #include <dirent.h>
 #include <fcntl.h>
-#include <mntent.h>
-#include <sys/mount.h>
 #include <sys/stat.h>
 #include <sys/vfs.h>
 #include <sys/ioctl.h>
@@ -39,6 +37,7 @@
 #endif /* USBDEVFS_CONNECT */
 
 #include "misc.h"
+#include "mount.h"
 #include "io_usb.h"
 #include "usb_internal.h"
 
@@ -687,35 +686,10 @@ usbSearchDevice (const char *root, UsbDeviceChooser chooser, void *data) {
   return device;
 }
 
-static FILE *
-usbOpenMountsTable (int update) {
-  const char *path = MOUNTED;
-  FILE *table = setmntent(path, (update? "a": "r"));
-  if (!table)
-    LogPrint((errno == ENOENT)? LOG_WARNING: LOG_ERR,
-             "mounted file systems table open erorr: %s: %s",
-             path, strerror(errno));
-  return table;
-}
-
 static int
-usbAddMountEntry (struct mntent *mnt) {
-  int added = 0;
-  FILE *table;
-
-  if ((table = usbOpenMountsTable(1))) {
-    if (!addmntent(table, mnt)) {
-      added = 1;
-    } else {
-      LogPrint(LOG_WARNING,
-               "file systems mount table update error: %s",
-               strerror(errno));
-    }
-
-    endmntent(table);
-  }
-
-  return added;
+usbVerifyDirectory (const char *path) {
+  if (access(path, F_OK) != -1) return 1;
+  return 0;
 }
 
 static int
@@ -728,13 +702,19 @@ usbVerifyUsbfs (const char *path) {
 }
 
 static int
-usbVerifyDirectory (const char *path) {
-  if (access(path, F_OK) != -1) return 1;
+usbTestUsbfs (const char *path, const char *type) {
+  if ((strcmp(type, "usbdevfs") == 0) ||
+      (strcmp(type, "usbfs") == 0)) {
+    if (usbVerifyUsbfs(path)) {
+      return 1;
+    }
+  }
   return 0;
 }
 
 static char *
 usbFindRoot (void) {
+return 0;
   {
     typedef struct {
       const char *path;
@@ -755,35 +735,12 @@ usbFindRoot (void) {
     }
   }
 
-  {
-    char *root = NULL;
-    FILE *table;
-
-    if ((table = usbOpenMountsTable(0))) {
-      struct mntent *entry;
-
-      while ((entry = getmntent(table))) {
-        if ((strcmp(entry->mnt_type, "usbdevfs") == 0) ||
-            (strcmp(entry->mnt_type, "usbfs") == 0)) {
-          if (usbVerifyUsbfs(entry->mnt_dir)) {
-            root = strdupWrapper(entry->mnt_dir);
-            break;
-          }
-        }
-      }
-
-      endmntent(table);
-    }
-
-    return root;
-  }
+  return getMountPoint(usbTestUsbfs);
 }
 
 static char *
 usbMakeRoot (void) {
   const char *type = "usbfs";
-  const char *name = type;
-  const char *options = "rw";
   char *directory = NULL;
 
   {
@@ -798,21 +755,10 @@ usbMakeRoot (void) {
     if (makeDirectory(directory)) {
       if (usbVerifyUsbfs(directory)) return directory;
 
-      LogPrint(LOG_NOTICE, "mounting USBFS: %s", directory);
-      if (mount(name, directory, type, 0, NULL) != -1) {
-        {
-          struct mntent mnt;
-          memset(&mnt, 0, sizeof(mnt));
-          mnt.mnt_fsname = (char *)name;
-          mnt.mnt_dir = directory;
-          mnt.mnt_type = (char *)type;
-          mnt.mnt_opts = (char *)options;
-          usbAddMountEntry(&mnt);
-        }
-
-        return directory;
-      } else {
-        LogPrint(LOG_ERR, "USBFS mount error: %s: %s", directory, strerror(errno));
+      {
+        const char *target = type;
+        LogPrint(LOG_NOTICE, "mounting USBFS: %s", directory);
+        if (mountFileSystem(directory, target, type)) return directory;
       }
     }
 
