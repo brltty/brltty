@@ -714,7 +714,6 @@ usbTestUsbfs (const char *path, const char *type) {
 
 static char *
 usbFindRoot (void) {
-return 0;
   {
     typedef struct {
       const char *path;
