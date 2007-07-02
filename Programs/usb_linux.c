@@ -756,7 +756,6 @@ usbMakeRoot (void) {
 
       {
         const char *target = type;
-        LogPrint(LOG_NOTICE, "mounting USBFS: %s", directory);
         if (mountFileSystem(directory, target, type)) return directory;
       }
     }

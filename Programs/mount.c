@@ -58,19 +58,20 @@ getMountPoint (int (*test) (const char *path, const char *type)) {
 }
 
 static int
+appendMountEntry (FILE *table, struct mntent *entry) {
+  if (!addmntent(table, entry)) return 1;
+  LogPrint(LOG_ERR, "mounts table entry add error: %s[%s] -> %s: %s",
+           entry->mnt_type, entry->mnt_fsname, entry->mnt_dir, strerror(errno));
+  return 0;
+}
+
+static int
 addMountEntry (struct mntent *entry) {
   int added = 0;
   FILE *table;
 
   if ((table = openMountsTable(MOUNTED, 1))) {
-    if (!addmntent(table, entry)) {
-      added = 1;
-    } else {
-      LogPrint(LOG_WARNING,
-               "file systems mount table update error: %s",
-               strerror(errno));
-    }
-
+    if (appendMountEntry(table, entry)) added = 1;
     endmntent(table);
   }
 
@@ -79,14 +80,23 @@ addMountEntry (struct mntent *entry) {
 
 static void
 removeMountEntry (const char *path) {
-  FILE *oldTable;
+  const char *oldFile = MOUNTED;
+  FILE *oldTable = openMountsTable(oldFile, 0);
 
-  if ((oldTable = openMountsTable(MOUNTED, 0))) {
-    struct mntent *entry;
+  if (oldTable) {
+    const char *newFile = MOUNTED "." PACKAGE_NAME;
+    FILE *newTable = openMountsTable(newFile, 1);
 
-    while ((entry = getmntent(oldTable))) {
-      if (strcmp(entry->mnt_dir, path) != 0) {
+    if (newTable) {
+      struct mntent *entry;
+
+      while ((entry = getmntent(oldTable))) {
+        if (strcmp(entry->mnt_dir, path) != 0) {
+          appendMountEntry(newTable, entry);
+        }
       }
+
+      endmntent(newTable);
     }
 
     endmntent(oldTable);
@@ -96,6 +106,9 @@ removeMountEntry (const char *path) {
 int
 mountFileSystem (const char *path, const char *target, const char *type) {
   if (mount(path, target, type, 0, NULL) != -1) {
+    LogPrint(LOG_NOTICE, "file system mounted: %s[%s] -> %s",
+             type, target, path);
+
     {
       struct mntent entry;
       memset(&entry, 0, sizeof(entry));
@@ -108,7 +121,7 @@ mountFileSystem (const char *path, const char *target, const char *type) {
 
     return 1;
   } else {
-    LogPrint(LOG_ERR, "mount error: %s[%s] -> %s: %s",
+    LogPrint(LOG_ERR, "file system mount error: %s[%s] -> %s: %s",
              type, target, path, strerror(errno));
   }
 
@@ -118,10 +131,11 @@ mountFileSystem (const char *path, const char *target, const char *type) {
 int
 unmountFileSystem (const char *path) {
   if (umount(path) != -1) {
+    LogPrint(LOG_NOTICE, "file system unmounted: %s", path);
     removeMountEntry(path);
     return 1;
   } else {
-    LogPrint(LOG_WARNING, "unmount error: %s: %s", path, strerror(errno));
+    LogPrint(LOG_WARNING, "file system unmount error: %s: %s", path, strerror(errno));
   }
 
   return 0;
