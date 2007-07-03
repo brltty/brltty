@@ -24,7 +24,6 @@ extern "C" {
 
 extern char *getMountPoint (int (*test) (const char *directory, const char *type));
 extern int mountFileSystem (const char *path, const char *reference, const char *type);
-extern int unmountFileSystem (const char *path);
 
 #ifdef __cplusplus
 }
