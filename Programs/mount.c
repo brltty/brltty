@@ -24,6 +24,7 @@
 #include <sys/mount.h>
 
 #include "misc.h"
+#include "async.h"
 #include "mount.h"
 
 static FILE *
@@ -58,24 +59,45 @@ getMountPoint (int (*test) (const char *path, const char *type)) {
 }
 
 static int
-appendMountEntry (FILE *table, struct mntent *entry) {
+addMountEntry (FILE *table, struct mntent *entry) {
   if (!addmntent(table, entry)) return 1;
   LogPrint(LOG_ERR, "mounts table entry add error: %s[%s] -> %s: %s",
            entry->mnt_type, entry->mnt_fsname, entry->mnt_dir, strerror(errno));
   return 0;
 }
 
-static int
-addMountEntry (struct mntent *entry) {
-  int added = 0;
-  FILE *table;
+static void updateMountsTable (struct mntent *entry);
 
-  if ((table = openMountsTable(1))) {
-    if (appendMountEntry(table, entry)) added = 1;
-    endmntent(table);
+static void
+retryMountsTableUpdate (void *data) {
+  struct mntent *entry = data;
+  updateMountsTable(entry);
+}
+
+static void
+updateMountsTable (struct mntent *entry) {
+  int retry = 0;
+
+  {
+    FILE *table;
+
+    if ((table = openMountsTable(1))) {
+      addMountEntry(table, entry);
+      endmntent(table);
+    } else if ((errno == EROFS) || (errno == EACCES)) {
+      retry = 1;
+    }
   }
 
-  return added;
+  if (retry) {
+    asyncRelativeAlarm(5000, retryMountsTableUpdate, entry);
+  } else {
+    if (entry->mnt_dir) free(entry->mnt_dir);
+    if (entry->mnt_fsname) free(entry->mnt_fsname);
+    if (entry->mnt_type) free(entry->mnt_type);
+    if (entry->mnt_opts) free(entry->mnt_opts);
+    free(entry);
+  }
 }
 
 int
@@ -85,13 +107,13 @@ mountFileSystem (const char *path, const char *reference, const char *type) {
              type, reference, path);
 
     {
-      struct mntent entry;
-      memset(&entry, 0, sizeof(entry));
-      entry.mnt_dir = (char *)path;
-      entry.mnt_fsname = (char *)reference;
-      entry.mnt_type = (char *)type;
-      entry.mnt_opts = MNTOPT_RW;
-      addMountEntry(&entry);
+      struct mntent *entry = mallocWrapper(sizeof(*entry));
+      memset(entry, 0, sizeof(*entry));
+      entry->mnt_dir = strdupWrapper(path);
+      entry->mnt_fsname = strdupWrapper(reference);
+      entry->mnt_type = strdupWrapper(type);
+      entry->mnt_opts = strdupWrapper(MNTOPT_RW);
+      updateMountsTable(entry);
     }
 
     return 1;
