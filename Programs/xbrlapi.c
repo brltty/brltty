@@ -25,12 +25,6 @@
 #include <signal.h>
 #include <string.h>
 
-#ifdef WINDOWS
-#include <ws2tcpip.h>
-#else /* WINDOWS */
-#include <netinet/in.h>
-#endif /* WINDOWS */
-
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #else /* HAVE_SYS_SELECT_H */
