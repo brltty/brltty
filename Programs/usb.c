@@ -1133,6 +1133,16 @@ error:
   return device->serial;
 }
 
+int
+usbSetSerialParameters (UsbDevice *device, const SerialParameters *parameters) {
+  const UsbSerialOperations *serial = usbGetSerialOperations(device);
+  if (!serial) return 0;
+  if (!serial->setBaud(device, parameters->baud)) return 0;
+  if (!serial->setFlowControl(device, parameters->flow)) return 0;
+  if (!serial->setDataFormat(device, parameters->data, parameters->stop, parameters->parity)) return 0;
+  return 1;
+}
+
 typedef struct {
   const UsbChannelDefinition *definition;
   const char *serialNumber;
@@ -1154,16 +1164,9 @@ usbChooseChannel (UsbDevice *device, void *data) {
         if (usbOpenInterface(device, definition->interface, definition->alternative)) {
           int ok = 1;
 
-          if (definition->serial.baud) {
-            const UsbSerialOperations *serial = usbGetSerialOperations(device);
-            if (serial) {
-              if (!serial->setBaud(device, definition->serial.baud)) ok = 0;
-              if (!serial->setFlowControl(device, definition->serial.flow)) ok = 0;
-              if (!serial->setDataFormat(device, definition->serial.data, definition->serial.stop, definition->serial.parity)) ok = 0;
-            } else {
+          if (definition->serial.baud)
+            if (!usbSetSerialParameters(device, &definition->serial))
               ok = 0;
-            }
-          }
 
           if (ok) {
             choose->definition = definition;

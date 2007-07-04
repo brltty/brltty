@@ -54,7 +54,7 @@ typedef struct {
   int data;
   int stop;
   SerialParity parity;
-} SerialConfiguration;
+} SerialParameters;
 
 #ifdef __cplusplus
 }

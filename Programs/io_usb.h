@@ -425,6 +425,7 @@ typedef struct {
 } UsbSerialOperations;
 
 extern const UsbSerialOperations *usbGetSerialOperations (UsbDevice *device);
+extern int usbSetSerialParameters (UsbDevice *device, const SerialParameters *parameters);
 
 typedef struct {
   uint16_t vendor;
@@ -435,7 +436,7 @@ typedef struct {
   unsigned char inputEndpoint;
   unsigned char outputEndpoint;
   unsigned disableAutosuspend:1;
-  SerialConfiguration serial;
+  SerialParameters serial;
 } UsbChannelDefinition;
 typedef struct {
   UsbChannelDefinition definition;
