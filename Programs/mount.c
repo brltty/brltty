@@ -20,12 +20,22 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
-#include <mntent.h>
 #include <sys/mount.h>
 
 #include "misc.h"
 #include "async.h"
 #include "mount.h"
+
+#if defined(HAVE_MNTENT_H)
+#include <mntent.h>
+
+#define MOUNT_OPTION_RW MNTOPT_RW
+
+typedef struct mntent MountEntry;
+#define mountPath mnt_dir
+#define mountReference mnt_fsname
+#define mountType mnt_type
+#define mountOptions mnt_opts
 
 static FILE *
 openMountsTable (int update) {
@@ -37,45 +47,87 @@ openMountsTable (int update) {
   return table;
 }
 
-char *
-getMountPoint (int (*test) (const char *path, const char *type)) {
-  char *path = NULL;
-  FILE *table;
+static void
+closeMountsTable (FILE *table) {
+  endmntent(table);
+}
 
-  if ((table = openMountsTable(0))) {
-    struct mntent *entry;
-
-    while ((entry = getmntent(table))) {
-      if (test(entry->mnt_dir, entry->mnt_type)) {
-        path = strdupWrapper(entry->mnt_dir);
-        break;
-      }
-    }
-
-    endmntent(table);
-  }
-
-  return path;
+static MountEntry *
+readMountsTable (FILE *table) {
+  return getmntent(table);
 }
 
 static int
-addMountEntry (FILE *table, struct mntent *entry) {
+addMountEntry (FILE *table, MountEntry *entry) {
   if (!addmntent(table, entry)) return 1;
   LogPrint(LOG_ERR, "mounts table entry add error: %s[%s] -> %s: %s",
            entry->mnt_type, entry->mnt_fsname, entry->mnt_dir, strerror(errno));
   return 0;
 }
 
-static void updateMountsTable (struct mntent *entry);
+#else /* mount paradigm */
+#warning mount support not available on this platform
+
+#define MOUNT_OPTION_RW "rw"
+
+typedef struct {
+  char *mountPath;
+  char *mountReference;
+  char *mountType;
+  char *mountOptions;
+} MountEntry;
+
+static FILE *
+openMountsTable (int update) {
+  return NULL;
+}
+
+static void
+closeMountsTable (FILE *table) {
+}
+
+static MountEntry *
+readMountsTable (FILE *table) {
+  return NULL;
+}
+
+static int
+addMountEntry (FILE *table, MountEntry *entry) {
+  return 0;
+}
+#endif /* mount paradigm */
+
+char *
+getMountPoint (int (*test) (const char *path, const char *type)) {
+  char *path = NULL;
+  FILE *table;
+
+  if ((table = openMountsTable(0))) {
+    MountEntry *entry;
+
+    while ((entry = readMountsTable(table))) {
+      if (test(entry->mountPath, entry->mountType)) {
+        path = strdupWrapper(entry->mountPath);
+        break;
+      }
+    }
+
+    closeMountsTable(table);
+  }
+
+  return path;
+}
+
+static void updateMountsTable (MountEntry *entry);
 
 static void
 retryMountsTableUpdate (void *data) {
-  struct mntent *entry = data;
+  MountEntry *entry = data;
   updateMountsTable(entry);
 }
 
 static void
-updateMountsTable (struct mntent *entry) {
+updateMountsTable (MountEntry *entry) {
   int retry = 0;
 
   {
@@ -83,7 +135,7 @@ updateMountsTable (struct mntent *entry) {
 
     if ((table = openMountsTable(1))) {
       addMountEntry(table, entry);
-      endmntent(table);
+      closeMountsTable(table);
     } else if ((errno == EROFS) || (errno == EACCES)) {
       retry = 1;
     }
@@ -92,10 +144,10 @@ updateMountsTable (struct mntent *entry) {
   if (retry) {
     asyncRelativeAlarm(5000, retryMountsTableUpdate, entry);
   } else {
-    if (entry->mnt_dir) free(entry->mnt_dir);
-    if (entry->mnt_fsname) free(entry->mnt_fsname);
-    if (entry->mnt_type) free(entry->mnt_type);
-    if (entry->mnt_opts) free(entry->mnt_opts);
+    if (entry->mountPath) free(entry->mountPath);
+    if (entry->mountReference) free(entry->mountReference);
+    if (entry->mountType) free(entry->mountType);
+    if (entry->mountOptions) free(entry->mountOptions);
     free(entry);
   }
 }
@@ -107,12 +159,12 @@ mountFileSystem (const char *path, const char *reference, const char *type) {
              type, reference, path);
 
     {
-      struct mntent *entry = mallocWrapper(sizeof(*entry));
+      MountEntry *entry = mallocWrapper(sizeof(*entry));
       memset(entry, 0, sizeof(*entry));
-      entry->mnt_dir = strdupWrapper(path);
-      entry->mnt_fsname = strdupWrapper(reference);
-      entry->mnt_type = strdupWrapper(type);
-      entry->mnt_opts = strdupWrapper(MNTOPT_RW);
+      entry->mountPath = strdupWrapper(path);
+      entry->mountReference = strdupWrapper(reference);
+      entry->mountType = strdupWrapper(type);
+      entry->mountOptions = strdupWrapper(MOUNT_OPTION_RW);
       updateMountsTable(entry);
     }
 

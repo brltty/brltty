@@ -61,6 +61,12 @@ extern "C" {
 /* Define this if the header file iconv.h exists. */
 #undef HAVE_ICONV_H
 
+/* Define this if the header file mntent.h exists. */
+#undef HAVE_MNTENT_H
+
+/* Define this if the header file sys/mnttab.h exists. */
+#undef HAVE_SYS_MNTTAB_H
+
 /* Define this if the header file pwd.h exists. */
 #undef HAVE_PWD_H
 

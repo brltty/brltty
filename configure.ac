@@ -585,6 +585,7 @@ test -z "$brltty_package_gui_toolkit" && {
 AC_CHECK_HEADERS([alloca.h getopt.h glob.h regex.h syslog.h])
 AC_CHECK_HEADERS([sys/poll.h sys/select.h sys/wait.h])
 AC_CHECK_HEADERS([pwd.h grp.h])
+AC_CHECK_HEADERS([mntent.h sys/mnttab.h])
 AC_CHECK_HEADERS([sys/io.h sys/modem.h machine/speaker.h linux/vt.h])
 
 AC_CHECK_HEADERS([linux/input.h], [
