@@ -562,7 +562,7 @@ usbCloseDevice (UsbDevice *device) {
   }
 
   if (device->extension) {
-    usbDeallocateDeviceExtension(device);
+    usbDeallocateDeviceExtension(device->extension);
     device->extension = NULL;
   }
 
@@ -571,7 +571,7 @@ usbCloseDevice (UsbDevice *device) {
 }
 
 static UsbDevice *
-usbOpenDevice (void *extension) {
+usbOpenDevice (UsbDeviceExtension *extension) {
   UsbDevice *device;
   if ((device = malloc(sizeof(*device)))) {
     memset(device, 0, sizeof(*device));
@@ -596,7 +596,7 @@ usbOpenDevice (void *extension) {
 }
 
 UsbDevice *
-usbTestDevice (void *extension, UsbDeviceChooser chooser, void *data) {
+usbTestDevice (UsbDeviceExtension *extension, UsbDeviceChooser chooser, void *data) {
   UsbDevice *device;
   if ((device = usbOpenDevice(extension))) {
     LogPrint(LOG_DEBUG, "USB: testing: vendor=%04X product=%04X",

@@ -15,11 +15,11 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-typedef struct {
+struct UsbDeviceExtensionStruct {
   char *path;
   int file;
   int timeout;
-} UsbDeviceExtension;
+};
 
 typedef struct {
   int file;
@@ -303,9 +303,7 @@ usbDeallocateEndpointExtension (UsbEndpoint *endpoint) {
 }
 
 void
-usbDeallocateDeviceExtension (UsbDevice *device) {
-  UsbDeviceExtension *devx = device->extension;
-
+usbDeallocateDeviceExtension (UsbDeviceExtension *devx) {
   if (devx->file != -1) {
     close(devx->file);
     devx->file = -1;

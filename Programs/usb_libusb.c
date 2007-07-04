@@ -26,9 +26,9 @@
 #include "io_usb.h"
 #include "usb_internal.h"
 
-typedef struct {
+struct UsbDeviceExtensionStruct {
   struct usb_dev_handle *handle;
-} UsbDeviceExtension;
+};
 
 int
 usbResetDevice (UsbDevice *device) {
@@ -286,9 +286,7 @@ usbDeallocateEndpointExtension (UsbEndpoint *endpoint) {
 }
 
 void
-usbDeallocateDeviceExtension (UsbDevice *device) {
-  UsbDeviceExtension *devx = device->extension;
-
+usbDeallocateDeviceExtension (UsbDeviceExtension *devx) {
   if (devx->handle) {
     usb_close(devx->handle);
     devx->handle = NULL;

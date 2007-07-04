@@ -41,11 +41,11 @@
 #include "io_usb.h"
 #include "usb_internal.h"
 
-typedef struct {
+struct UsbDeviceExtensionStruct {
   char *usbfsPath;
   char *sysfsPath;
   int usbfsFile;
-} UsbDeviceExtension;
+};
 
 typedef struct {
   Queue *completedRequests;
@@ -633,9 +633,7 @@ usbDeallocateEndpointExtension (UsbEndpoint *endpoint) {
 }
 
 void
-usbDeallocateDeviceExtension (UsbDevice *device) {
-  UsbDeviceExtension *devx = device->extension;
-
+usbDeallocateDeviceExtension (UsbDeviceExtension *devx) {
   if (devx->usbfsFile != -1) {
     close(devx->usbfsFile);
     devx->usbfsFile = -1;
@@ -702,7 +700,6 @@ usbSearchDevice (const char *root, UsbDeviceChooser chooser, void *data) {
         if ((devx = malloc(sizeof(*devx)))) {
           if ((devx->usbfsPath = strdup(path))) {
             if ((devx->sysfsPath = usbMakeSysfsPath(devx->usbfsPath))) {
-LogPrint(LOG_NOTICE, "usbfs=%s sysfs=%s", devx->usbfsPath, devx->sysfsPath);
               if ((devx->usbfsFile = open(devx->usbfsPath, O_RDWR)) != -1) {
                 if ((device = usbTestDevice(devx, chooser, data))) break;
                 close(devx->usbfsFile);

@@ -47,9 +47,11 @@ typedef struct {
   } direction;
 } UsbEndpoint;
 
+typedef struct UsbDeviceExtensionStruct UsbDeviceExtension;
+
 struct UsbDeviceStruct {
   UsbDeviceDescriptor descriptor;
-  void *extension;
+  UsbDeviceExtension *extension;
   const UsbSerialOperations *serial;
   UsbConfigurationDescriptor *configuration;
   const UsbInterfaceDescriptor *interface;
@@ -59,7 +61,7 @@ struct UsbDeviceStruct {
 };
 
 extern UsbDevice *usbTestDevice (
-  void *extension,
+  UsbDeviceExtension *extension,
   UsbDeviceChooser chooser,
   void *data
 );
@@ -100,7 +102,7 @@ extern int usbControlTransfer (
 extern int usbReadDeviceDescriptor (UsbDevice *device);
 extern int usbAllocateEndpointExtension (UsbEndpoint *endpoint);
 extern void usbDeallocateEndpointExtension (UsbEndpoint *endpoint);
-extern void usbDeallocateDeviceExtension (UsbDevice *device);
+extern void usbDeallocateDeviceExtension (UsbDeviceExtension *devx);
 
 #ifdef __cplusplus
 }

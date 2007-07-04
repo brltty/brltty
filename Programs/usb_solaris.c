@@ -29,7 +29,7 @@
 #include "io_usb.h"
 #include "usb_internal.h"
 
-typedef struct {
+struct UsbDeviceExtensionStruct {
   char *path;
   int data;
   int status;
@@ -37,7 +37,7 @@ typedef struct {
   unsigned char configuration;
   unsigned char interface;
   unsigned char alternative;
-} UsbDeviceExtension;
+};
 
 typedef struct {
   Queue *requests;
@@ -565,9 +565,7 @@ usbDeallocateEndpointExtension (UsbEndpoint *endpoint) {
 }
 
 void
-usbDeallocateDeviceExtension (UsbDevice *device) {
-  UsbDeviceExtension *devx = device->extension;
-
+usbDeallocateDeviceExtension (UsbDeviceExtension *devx) {
   if (devx->status != -1) {
     close(devx->status);
     devx->status = -1;

@@ -38,7 +38,7 @@ typedef struct {
   int count;
 } UsbAsynchronousRequest;
 
-typedef struct {
+struct UsbDeviceExtensionStruct {
   IOUSBDeviceInterface182 **device;
   unsigned deviceOpened:1;
 
@@ -49,7 +49,7 @@ typedef struct {
   CFRunLoopRef runloopReference;
   CFStringRef runloopMode;
   CFRunLoopSourceRef runloopSource;
-} UsbDeviceExtension;
+};
 
 typedef struct {
   UsbEndpoint *endpoint;
@@ -244,8 +244,7 @@ openDevice (UsbDevice *device, int seize) {
 }
 
 static int
-unsetInterface (UsbDevice *device) {
-  UsbDeviceExtension *devx = device->extension;
+unsetInterface (UsbDeviceExtension *devx) {
   int ok = 1;
 
   if (devx->interface) {
@@ -300,8 +299,7 @@ isInterface (IOUSBInterfaceInterface190 **interface, UInt8 number) {
 }
 
 static int
-setInterface (UsbDevice *device, UInt8 number) {
-  UsbDeviceExtension *devx = device->extension;
+setInterface (UsbDeviceExtension *devx, UInt8 number) {
   int found = 0;
   IOReturn result;
   io_iterator_t iterator = 0;
@@ -346,7 +344,7 @@ setInterface (UsbDevice *device, UInt8 number) {
 
         if ((result == kIOReturnSuccess) && interface) {
           if (isInterface(interface, number)) {
-            unsetInterface(device);
+            unsetInterface(devx);
             devx->interface = interface;
             found = 1;
             break;
@@ -422,7 +420,7 @@ usbClaimInterface (
   UsbDeviceExtension *devx = device->extension;
   IOReturn result;
 
-  if (setInterface(device, interface)) {
+  if (setInterface(devx, interface)) {
     if (devx->interfaceOpened) return 1;
 
     result = (*devx->interface)->USBInterfaceOpen(devx->interface);
@@ -449,7 +447,8 @@ usbReleaseInterface (
   UsbDevice *device,
   unsigned char interface
 ) {
-  return setInterface(device, interface) && unsetInterface(device);
+  UsbDeviceExtension *devx = device->extension;
+  return setInterface(devx, interface) && unsetInterface(devx);
 }
 
 int
@@ -460,7 +459,7 @@ usbSetAlternative (
 ) {
   UsbDeviceExtension *devx = device->extension;
 
-  if (setInterface(device, interface)) {
+  if (setInterface(devx, interface)) {
     IOReturn result;
     UInt8 arg;
 
@@ -874,11 +873,10 @@ usbDeallocateEndpointExtension (UsbEndpoint *endpoint) {
 }
 
 void
-usbDeallocateDeviceExtension (UsbDevice *device) {
-  UsbDeviceExtension *devx = device->extension;
+usbDeallocateDeviceExtension (UsbDeviceExtension *devx) {
   IOReturn result;
 
-  unsetInterface(device);
+  unsetInterface(devx);
 
   if (devx->deviceOpened) {
     result = (*devx->device)->USBDeviceClose(devx->device);
