@@ -65,6 +65,48 @@ addMountEntry (FILE *table, MountEntry *entry) {
   return 0;
 }
 
+#elif defined(HAVE_SYS_MNTTAB_H)
+#include <sys/mnttab.h>
+
+#define MOUNT_OPTION_RW "rw"
+
+typedef struct mnttab MountEntry;
+#define mountPath mnt_mountp
+#define mountReference mnt_special
+#define mountType mnt_fstype
+#define mountOptions mnt_mntopts
+
+static FILE *
+openMountsTable (int update) {
+  FILE *table = fopen(MNTTAB, (update? "a": "r"));
+  if (!table)
+    LogPrint((errno == ENOENT)? LOG_WARNING: LOG_ERR,
+             "mounted file systems table open erorr: %s: %s",
+             MNTTAB, strerror(errno));
+  return table;
+}
+
+static void
+closeMountsTable (FILE *table) {
+  fclose(table);
+}
+
+static MountEntry *
+readMountsTable (FILE *table) {
+  static struct mnttab entry;
+  if (getmntent(table, &entry) == 0) return &entry;
+  return NULL;
+}
+
+static int
+addMountEntry (FILE *table, MountEntry *entry) {
+  errno = ENOSYS;
+  if (!putmntent(table, entry)) return 1;
+  LogPrint(LOG_ERR, "mounts table entry add error: %s[%s] -> %s: %s",
+           entry->mnt_fstype, entry->mnt_special, entry->mnt_mountp, strerror(errno));
+  return 0;
+}
+
 #else /* mount paradigm */
 #warning mount support not available on this platform
 
