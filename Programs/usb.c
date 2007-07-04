@@ -1147,6 +1147,7 @@ usbChooseChannel (UsbDevice *device, void *data) {
   while (definition->vendor) {
     if (USB_IS_PRODUCT(descriptor, definition->vendor, definition->product)) {
       if (!usbVerifySerialNumber(device, choose->serialNumber)) break;
+      usbDisableAutosuspend(device);
 
       if (usbConfigureDevice(device, definition->configuration)) {
         if (usbOpenInterface(device, definition->interface, definition->alternative)) {

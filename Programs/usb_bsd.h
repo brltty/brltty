@@ -54,6 +54,13 @@ usbResetDevice (UsbDevice *device) {
 }
 
 int
+usbDisableAutosuspend (UsbDevice *device) {
+  errno = ENOSYS;
+  LogError("USB device autosuspend disable");
+  return 0;
+}
+
+int
 usbSetConfiguration (
   UsbDevice *device,
   unsigned char configuration

@@ -59,6 +59,48 @@ usbResetDevice (UsbDevice *device) {
   return 0;
 }
 
+int
+usbDisableAutosuspend (UsbDevice *device) {
+  UsbDeviceExtension *devx = device->extension;
+  int ok = 0;
+  char *path = makePath(devx->sysfsPath, "device/power/autosuspend");
+
+  if (path) {
+    int file = open(path, O_WRONLY);
+
+    if (file != -1) {
+      static const char *const values[] = {"-1", "0", NULL};
+      const char *const *value = values;
+
+      while (*value) {
+        size_t length = strlen(*value);
+        ssize_t result = write(file, *value, length);
+
+        if (result != -1) {
+          ok = 1;
+          break;
+        }
+
+        if (errno != EINVAL) {
+          LogPrint(LOG_ERR, "write error: %s: %s", path, strerror(errno));
+          break;
+        }
+
+        ++value;
+      }
+
+      close(file);
+    } else {
+      LogPrint((errno == ENOENT)? LOG_DEBUG: LOG_ERR,
+               "open error: %s: %s", path, strerror(errno));
+    }
+
+    free(path);
+  }
+
+  return ok;
+}
+
 static char *
 usbGetDriver (UsbDevice *device, unsigned char interface) {
   UsbDeviceExtension *devx = device->extension;

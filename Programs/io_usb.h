@@ -235,6 +235,7 @@ typedef int (*UsbDeviceChooser) (UsbDevice *device, void *data);
 extern UsbDevice *usbFindDevice (UsbDeviceChooser chooser, void *data);
 extern void usbCloseDevice (UsbDevice *device);
 extern int usbResetDevice (UsbDevice *device);
+extern int usbDisableAutosuspend (UsbDevice *device);
 
 extern const UsbDeviceDescriptor *usbDeviceDescriptor (UsbDevice *device);
 #define USB_IS_PRODUCT(descriptor,vendor,product) (((descriptor)->idVendor == (vendor)) && ((descriptor)->idProduct == (product)))
