@@ -34,6 +34,7 @@ typedef enum {
 #include "Programs/brl_driver.h"
 #include "Programs/touch.h"
 #include "braille.h"
+#include "brldefs-ht.h"
 
 typedef struct {
   uint32_t front;
@@ -410,48 +411,6 @@ static const InputOutputOperations bluetoothOperations = {
 #define SYN 0X16
 
 typedef enum {
-  HT_PKT_Extended = 0X79,
-  HT_PKT_NAK      = 0X7D,
-  HT_PKT_ACK      = 0X7E,
-  HT_PKT_OK       = 0XFE,
-  HT_PKT_Reset    = 0XFF
-} HT_PacketType;
-
-typedef enum {
-  HT_EXTPKT_Braille           = 0X01,
-  HT_EXTPKT_Key               = 0X04,
-  HT_EXTPKT_Confirmation      = 0X07,
-  HT_EXTPKT_Scancode          = 0X09,
-  HT_EXTPKT_SetAtcMode        = 0X50,
-  HT_EXTPKT_SetAtcSensitivity = 0X51,
-  HT_EXTPKT_AtcInfo           = 0X52
-} HT_ExtendedPacketType;
-
-typedef union {
-  unsigned char bytes[4 + 0XFF];
-
-  struct {
-    HT_PacketType type:8;
-
-    union {
-      struct {
-        unsigned char model;
-      } PACKED ok;
-
-      struct {
-        unsigned char model;
-        unsigned char length;
-        HT_ExtendedPacketType type:8;
-
-        union {
-          unsigned char bytes[0XFF];
-        } data;
-      } PACKED extended;
-    } data;
-  } PACKED fields;
-} HT_Packet;
-
-typedef enum {
   BDS_OFF,
   BDS_READY,
   BDS_WRITING
@@ -479,7 +438,7 @@ static unsigned char updateRequired = 0;
 #define KEY_UP              KEY(0X04)
 #define KEY_DOWN            KEY(0X08)
 
-/* modular keypad keys */
+/* keypad keys */
 #define KEY_B12             KEY(0X01)
 #define KEY_ZERO            KEY(0X05)
 #define KEY_B13             KEY(0X09)
