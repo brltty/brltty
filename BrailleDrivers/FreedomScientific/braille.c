@@ -109,10 +109,25 @@ static UsbChannel *usb = NULL;
 static int
 openUsbPort (char **parameters, const char *device) {
   static const UsbChannelDefinition definitions[] = {
-    {0X0F4E, 0X0100, 1, 0, 0, 2, 1, 0}, /* Focus */
-    {0X0F4E, 0X0111, 1, 0, 0, 2, 1, 0}, /* PAC Mate */
-    {0X0F4E, 0X0112, 1, 0, 0, 2, 1, 0}, /* Focus 2 */
-    {0}
+    { /* Focus */
+      .vendor=0X0F4E, .product=0X0100,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=2, .outputEndpoint=1
+    }
+    ,
+    { /* PAC Mate */
+      .vendor=0X0F4E, .product=0X0111,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=2, .outputEndpoint=1
+    }
+    ,
+    { /* Focus 2 */
+      .vendor=0X0F4E, .product=0X0112,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=2, .outputEndpoint=1
+    }
+    ,
+    { .vendor=0 }
   };
 
   if ((usb = usbFindChannel(definitions, (void *)device))) {

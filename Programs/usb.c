@@ -1153,12 +1153,12 @@ usbChooseChannel (UsbDevice *device, void *data) {
         if (usbOpenInterface(device, definition->interface, definition->alternative)) {
           int ok = 1;
 
-          if (definition->baud) {
+          if (definition->serial.baud) {
             const UsbSerialOperations *serial = usbGetSerialOperations(device);
             if (serial) {
-              if (!serial->setBaud(device, definition->baud)) ok = 0;
-              if (!serial->setFlowControl(device, definition->flowControl)) ok = 0;
-              if (!serial->setDataFormat(device, definition->dataBits, definition->stopBits, definition->parity)) ok = 0;
+              if (!serial->setBaud(device, definition->serial.baud)) ok = 0;
+              if (!serial->setFlowControl(device, definition->serial.flow)) ok = 0;
+              if (!serial->setDataFormat(device, definition->serial.data, definition->serial.stop, definition->serial.parity)) ok = 0;
             } else {
               ok = 0;
             }

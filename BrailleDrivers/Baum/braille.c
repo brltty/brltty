@@ -350,12 +350,37 @@ static const UsbSerialOperations *usbSerial = NULL;
 static int
 openUsbPort (const char *device) {
   static const UsbChannelDefinition definitions[] = {
-    {0X0403, 0XFE71, 1, 0, 0, 1, 2, 0}, /* 24 cells */
-    {0X0403, 0XFE72, 1, 0, 0, 1, 2, 0}, /* 40 cells */
-    {0X0403, 0XFE73, 1, 0, 0, 1, 2, 0}, /* 32 cells */
-    {0X0403, 0XFE74, 1, 0, 0, 1, 2, 0}, /* 64 cells */
-    {0X0403, 0XFE75, 1, 0, 0, 1, 2, 0}, /* 80 cells */
-    {0}
+    { /* 24 cells */
+      .vendor=0X0403, .product=0XFE71,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=2
+    }
+    ,
+    { /* 40 cells */
+      .vendor=0X0403, .product=0XFE72,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=2
+    }
+    ,
+    { /* 32 cells */
+      .vendor=0X0403, .product=0XFE73,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=2
+    }
+    ,
+    { /* 64 cells */
+      .vendor=0X0403, .product=0XFE74,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=2
+    }
+    ,
+    { /* 80 cells */
+      .vendor=0X0403, .product=0XFE75,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=2
+    }
+    ,
+    { .vendor=0 }
   };
 
   if ((usbChannel = usbFindChannel(definitions, (void *)device))) {

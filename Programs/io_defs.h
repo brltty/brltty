@@ -48,6 +48,14 @@ typedef enum {
   SERIAL_FLOW_NONE       = 0X00  /* no input or output flow control */
 } SerialFlowControl;
 
+typedef struct {
+  int baud;
+  SerialFlowControl flow;
+  int data;
+  int stop;
+  SerialParity parity;
+} SerialConfiguration;
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

@@ -527,8 +527,12 @@ static UsbChannel *usb = NULL;
 static int
 openUsbPort (char **parameters, const char *device) {
   static const UsbChannelDefinition definitions[] = {
-    {0X06b0, 0X0001, 1, 0, 0, 1, 2, 0},
-    {0}
+    { .vendor=0X06b0, .product=0X0001,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=2
+    }
+    ,
+    { .vendor=0 }
   };
 
   rewriteInterval = 0;

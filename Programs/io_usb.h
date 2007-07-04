@@ -434,11 +434,7 @@ typedef struct {
   unsigned char alternative;
   unsigned char inputEndpoint;
   unsigned char outputEndpoint;
-  int baud;
-  SerialFlowControl flowControl;
-  int dataBits;
-  int stopBits;
-  SerialParity parity;
+  SerialConfiguration serial;
 } UsbChannelDefinition;
 typedef struct {
   UsbChannelDefinition definition;

@@ -379,8 +379,12 @@ readUsbData (uint8_t request, uint16_t value, uint16_t index,
 static int
 openUsbPort (char **parameters, const char *device) {
   static const UsbChannelDefinition definitions[] = {
-    {0X0798, 0X0001, 1, 0, 0, 1, 0, 0},
-    {0}
+    { .vendor=0X0798, .product=0X0001, 
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=0
+    }
+    ,
+    { .vendor=0 }
   };
 
   if (!(usb = usbFindChannel(definitions, (void *)device))) return 0;
