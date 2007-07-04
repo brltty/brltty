@@ -434,6 +434,7 @@ typedef struct {
   unsigned char alternative;
   unsigned char inputEndpoint;
   unsigned char outputEndpoint;
+  unsigned disableAutosuspend:1;
   SerialConfiguration serial;
 } UsbChannelDefinition;
 typedef struct {

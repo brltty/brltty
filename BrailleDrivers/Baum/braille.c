@@ -353,31 +353,36 @@ openUsbPort (const char *device) {
     { /* 24 cells */
       .vendor=0X0403, .product=0XFE71,
       .configuration=1, .interface=0, .alternative=0,
-      .inputEndpoint=1, .outputEndpoint=2
+      .inputEndpoint=1, .outputEndpoint=2,
+      .disableAutosuspend=1
     }
     ,
     { /* 40 cells */
       .vendor=0X0403, .product=0XFE72,
       .configuration=1, .interface=0, .alternative=0,
-      .inputEndpoint=1, .outputEndpoint=2
+      .inputEndpoint=1, .outputEndpoint=2,
+      .disableAutosuspend=1
     }
     ,
     { /* 32 cells */
       .vendor=0X0403, .product=0XFE73,
       .configuration=1, .interface=0, .alternative=0,
-      .inputEndpoint=1, .outputEndpoint=2
+      .inputEndpoint=1, .outputEndpoint=2,
+      .disableAutosuspend=1
     }
     ,
     { /* 64 cells */
       .vendor=0X0403, .product=0XFE74,
       .configuration=1, .interface=0, .alternative=0,
-      .inputEndpoint=1, .outputEndpoint=2
+      .inputEndpoint=1, .outputEndpoint=2,
+      .disableAutosuspend=1
     }
     ,
     { /* 80 cells */
       .vendor=0X0403, .product=0XFE75,
       .configuration=1, .interface=0, .alternative=0,
-      .inputEndpoint=1, .outputEndpoint=2
+      .inputEndpoint=1, .outputEndpoint=2,
+      .disableAutosuspend=1
     }
     ,
     { .vendor=0 }
