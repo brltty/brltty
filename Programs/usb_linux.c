@@ -42,8 +42,9 @@
 #include "usb_internal.h"
 
 typedef struct {
-  char *path;
-  int file;
+  char *usbfsPath;
+  char *sysfsPath;
+  int usbfsFile;
 } UsbDeviceExtension;
 
 typedef struct {
@@ -53,7 +54,7 @@ typedef struct {
 int
 usbResetDevice (UsbDevice *device) {
   UsbDeviceExtension *devx = device->extension;
-  if (ioctl(devx->file, USBDEVFS_RESET, NULL) != -1) return 1;
+  if (ioctl(devx->usbfsFile, USBDEVFS_RESET, NULL) != -1) return 1;
   LogError("USB device reset");
   return 0;
 }
@@ -64,7 +65,7 @@ usbGetDriver (UsbDevice *device, unsigned char interface) {
   struct usbdevfs_getdriver arg;
   memset(&arg, 0, sizeof(arg));
   arg.interface = interface;
-  if (ioctl(devx->file, USBDEVFS_GETDRIVER, &arg) == -1) return NULL;
+  if (ioctl(devx->usbfsFile, USBDEVFS_GETDRIVER, &arg) == -1) return NULL;
   return strdup(arg.driver);
 }
 
@@ -81,7 +82,7 @@ usbControlDriver (
   arg.ifno = interface;
   arg.ioctl_code = code;
   arg.data = data;
-  if (ioctl(devx->file, USBDEVFS_IOCTL, &arg) != -1) return 1;
+  if (ioctl(devx->usbfsFile, USBDEVFS_IOCTL, &arg) != -1) return 1;
   LogError("USB driver control");
   return 0;
 }
@@ -135,7 +136,7 @@ usbSetConfiguration (
   while (1) {
     unsigned int arg = configuration;
 
-    if (ioctl(devx->file, USBDEVFS_SETCONFIGURATION, &arg) != -1) return 1;
+    if (ioctl(devx->usbfsFile, USBDEVFS_SETCONFIGURATION, &arg) != -1) return 1;
     if (errno != EBUSY) break;
     if (disconnected) break;
 
@@ -161,7 +162,7 @@ usbClaimInterface (
   while (1) {
     unsigned int arg = interface;
 
-    if (ioctl(devx->file, USBDEVFS_CLAIMINTERFACE, &arg) != -1) return 1;
+    if (ioctl(devx->usbfsFile, USBDEVFS_CLAIMINTERFACE, &arg) != -1) return 1;
     if (errno != EBUSY) break;
     if (disconnected) break;
 
@@ -183,7 +184,7 @@ usbReleaseInterface (
 ) {
   UsbDeviceExtension *devx = device->extension;
   unsigned int arg = interface;
-  if (ioctl(devx->file, USBDEVFS_RELEASEINTERFACE, &arg) != -1) return 1;
+  if (ioctl(devx->usbfsFile, USBDEVFS_RELEASEINTERFACE, &arg) != -1) return 1;
   if (errno == ENODEV) return 1;
   LogError("USB interface release");
   return 0;
@@ -200,7 +201,7 @@ usbSetAlternative (
   memset(&arg, 0, sizeof(arg));
   arg.interface = interface;
   arg.altsetting = alternative;
-  if (ioctl(devx->file, USBDEVFS_SETINTERFACE, &arg) != -1) return 1;
+  if (ioctl(devx->usbfsFile, USBDEVFS_SETINTERFACE, &arg) != -1) return 1;
   LogError("USB alternative set");
   return 0;
 }
@@ -212,7 +213,7 @@ usbResetEndpoint (
 ) {
   UsbDeviceExtension *devx = device->extension;
   unsigned int arg = endpointAddress;
-  if (ioctl(devx->file, USBDEVFS_RESETEP, &arg) != -1) return 1;
+  if (ioctl(devx->usbfsFile, USBDEVFS_RESETEP, &arg) != -1) return 1;
   LogError("USB endpoint reset");
   return 0;
 }
@@ -224,7 +225,7 @@ usbClearEndpoint (
 ) {
   UsbDeviceExtension *devx = device->extension;
   unsigned int arg = endpointAddress;
-  if (ioctl(devx->file, USBDEVFS_CLEAR_HALT, &arg) != -1) return 1;
+  if (ioctl(devx->usbfsFile, USBDEVFS_CLEAR_HALT, &arg) != -1) return 1;
   LogError("USB endpoint clear");
   return 0;
 }
@@ -257,7 +258,7 @@ usbControlTransfer (
   arg.transfer.timeout = timeout;
 
   {
-    int count = ioctl(devx->file, USBDEVFS_CONTROL, &arg);
+    int count = ioctl(devx->usbfsFile, USBDEVFS_CONTROL, &arg);
     if (count == -1) LogError("USB control transfer");
     return count;
   }
@@ -271,7 +272,7 @@ usbReapUrb (
   UsbDeviceExtension *devx = device->extension;
   struct usbdevfs_urb *urb;
 
-  if (ioctl(devx->file,
+  if (ioctl(devx->usbfsFile,
             wait? USBDEVFS_REAPURB: USBDEVFS_REAPURBNDELAY,
             &urb) != -1) {
     if (urb) {
@@ -335,7 +336,7 @@ usbSubmitRequest (
                urb->buffer, urb->buffer_length, urb->usercontext);
     */
     submit:
-      if (ioctl(devx->file, USBDEVFS_SUBMITURB, urb) != -1) return urb;
+      if (ioctl(devx->usbfsFile, USBDEVFS_SUBMITURB, urb) != -1) return urb;
       if ((errno == EINVAL) &&
           (USB_ENDPOINT_TRANSFER(endpoint->descriptor) == UsbEndpointTransfer_Interrupt) &&
           (urb->type == USBDEVFS_URB_TYPE_BULK)) {
@@ -362,7 +363,7 @@ usbCancelRequest (
   UsbDeviceExtension *devx = device->extension;
   int reap = 1;
 
-  if (ioctl(devx->file, USBDEVFS_DISCARDURB, request) == -1) {
+  if (ioctl(devx->usbfsFile, USBDEVFS_DISCARDURB, request) == -1) {
     if (errno == ENODEV)  {
       reap = 0;
     } else if (errno != EINVAL) {
@@ -460,7 +461,7 @@ usbBulkTransfer (
   arg.timeout = timeout;
 
   {
-    int count = ioctl(devx->file, USBDEVFS_BULK, &arg);
+    int count = ioctl(devx->usbfsFile, USBDEVFS_BULK, &arg);
     if (count != -1) return count;
     LogError("USB bulk transfer");
   }
@@ -590,7 +591,7 @@ usbWriteEndpoint (
 int
 usbReadDeviceDescriptor (UsbDevice *device) {
   UsbDeviceExtension *devx = device->extension;
-  int count = read(devx->file, &device->descriptor, UsbDescriptorSize_Device);
+  int count = read(devx->usbfsFile, &device->descriptor, UsbDescriptorSize_Device);
   if (count == -1) {
     LogError("USB device descriptor read");
   } else if (count != UsbDescriptorSize_Device) {
@@ -635,17 +636,46 @@ void
 usbDeallocateDeviceExtension (UsbDevice *device) {
   UsbDeviceExtension *devx = device->extension;
 
-  if (devx->file != -1) {
-    close(devx->file);
-    devx->file = -1;
+  if (devx->usbfsFile != -1) {
+    close(devx->usbfsFile);
+    devx->usbfsFile = -1;
   }
 
-  if (devx->path) {
-    free(devx->path);
-    devx->path = NULL;
+  if (devx->usbfsPath) {
+    free(devx->usbfsPath);
+    devx->usbfsPath = NULL;
+  }
+
+  if (devx->sysfsPath) {
+    free(devx->sysfsPath);
+    devx->sysfsPath = NULL;
   }
 
   free(devx);
+}
+
+static char *
+usbMakeSysfsPath (const char *usbfsPath) {
+  const char *tail = usbfsPath + strlen(usbfsPath) - 8;
+  unsigned int bus;
+  unsigned int device;
+  char extra;
+  int count = sscanf(tail, "/%u/%u%c", &bus, &device, &extra);
+
+  if (count == 2) {
+    char *sysfsPath;
+
+    {
+      const char *format = "/sys/class/usb_device/usbdev%u.%u";
+      char buffer[strlen(format) + (2 * 0X10) + 1];
+      snprintf(buffer, sizeof(buffer), format, bus, device);
+      sysfsPath= strdup(buffer);
+    }
+
+    if (sysfsPath) return sysfsPath;
+  }
+
+  return NULL;
 }
 
 static UsbDevice *
@@ -670,12 +700,19 @@ usbSearchDevice (const char *root, UsbDeviceChooser chooser, void *data) {
       } else if (S_ISREG(status.st_mode) || S_ISCHR(status.st_mode)) {
         UsbDeviceExtension *devx;
         if ((devx = malloc(sizeof(*devx)))) {
-          if ((devx->path = strdup(path))) {
-            if ((devx->file = open(devx->path, O_RDWR)) != -1) {
-              if ((device = usbTestDevice(devx, chooser, data))) break;
-              close(devx->file);
+          if ((devx->usbfsPath = strdup(path))) {
+            if ((devx->sysfsPath = usbMakeSysfsPath(devx->usbfsPath))) {
+LogPrint(LOG_NOTICE, "usbfs=%s sysfs=%s", devx->usbfsPath, devx->sysfsPath);
+              if ((devx->usbfsFile = open(devx->usbfsPath, O_RDWR)) != -1) {
+                if ((device = usbTestDevice(devx, chooser, data))) break;
+                close(devx->usbfsFile);
+                devx->usbfsFile = -1;
+              }
+              free(devx->sysfsPath);
+              devx->sysfsPath = NULL;
             }
-            free(devx->path);
+            free(devx->usbfsPath);
+            devx->usbfsPath = NULL;
           }
           free(devx);
         }
