@@ -184,11 +184,11 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
 }
 
 void
-usbDeallocateEndpointExtension (UsbEndpoint *endpoint) {
+usbDeallocateEndpointExtension (UsbEndpointExtension *eptx) {
 }
 
 void
-usbDeallocateDeviceExtension (UsbDevice *device) {
+usbDeallocateDeviceExtension (UsbDeviceExtension *devx) {
 }
 
 UsbDevice *

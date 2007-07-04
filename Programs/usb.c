@@ -391,7 +391,7 @@ usbDeallocateEndpoint (void *item, void *data) {
   }
 
   if (endpoint->extension) {
-    usbDeallocateEndpointExtension(endpoint);
+    usbDeallocateEndpointExtension(endpoint->extension);
     endpoint->extension = NULL;
   }
 
@@ -454,7 +454,7 @@ usbGetEndpoint (UsbDevice *device, unsigned char endpointAddress) {
       endpoint->extension = NULL;
       if (usbAllocateEndpointExtension(endpoint)) {
         if (enqueueItem(device->endpoints, endpoint)) return endpoint;
-        usbDeallocateEndpointExtension(endpoint);
+        usbDeallocateEndpointExtension(endpoint->extension);
       }
 
       free(endpoint);

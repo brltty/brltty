@@ -39,13 +39,13 @@ struct UsbDeviceExtensionStruct {
   unsigned char alternative;
 };
 
-typedef struct {
+struct UsbEndpointExtensionStruct {
   Queue *requests;
 
   char *name;
   int data;
   int status;
-} UsbEndpointExtension;
+};
 
 typedef struct {
   aio_result_t result; /* must be first for aiowait() */
@@ -538,9 +538,7 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
 }
 
 void
-usbDeallocateEndpointExtension (UsbEndpoint *endpoint) {
-  UsbEndpointExtension *eptx = endpoint->extension;
-
+usbDeallocateEndpointExtension (UsbEndpointExtension *eptx) {
   if (eptx->status != -1) {
     close(eptx->status);
     eptx->status = -1;

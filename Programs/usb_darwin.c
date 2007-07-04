@@ -51,7 +51,7 @@ struct UsbDeviceExtensionStruct {
   CFRunLoopSourceRef runloopSource;
 };
 
-typedef struct {
+struct UsbEndpointExtensionStruct {
   UsbEndpoint *endpoint;
   Queue *completedRequests;
 
@@ -61,7 +61,7 @@ typedef struct {
   UInt8 transferMode;
   UInt8 pollInterval;
   UInt16 packetSize;
-} UsbEndpointExtension;
+};
 
 static void
 setUnixError (long int result, const char *action) {
@@ -861,9 +861,7 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
 }
 
 void
-usbDeallocateEndpointExtension (UsbEndpoint *endpoint) {
-  UsbEndpointExtension *eptx = endpoint->extension;
-
+usbDeallocateEndpointExtension (UsbEndpointExtension *eptx) {
   if (eptx->completedRequests) {
     deallocateQueue(eptx->completedRequests);
     eptx->completedRequests = NULL;

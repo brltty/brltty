@@ -47,9 +47,9 @@ struct UsbDeviceExtensionStruct {
   int usbfsFile;
 };
 
-typedef struct {
+struct UsbEndpointExtensionStruct {
   Queue *completedRequests;
-} UsbEndpointExtension;
+};
 
 int
 usbResetDevice (UsbDevice *device) {
@@ -621,9 +621,7 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
 }
 
 void
-usbDeallocateEndpointExtension (UsbEndpoint *endpoint) {
-  UsbEndpointExtension *eptx = endpoint->extension;
-
+usbDeallocateEndpointExtension (UsbEndpointExtension *eptx) {
   if (eptx->completedRequests) {
     deallocateQueue(eptx->completedRequests);
     eptx->completedRequests = NULL;

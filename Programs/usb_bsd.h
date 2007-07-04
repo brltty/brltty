@@ -21,10 +21,10 @@ struct UsbDeviceExtensionStruct {
   int timeout;
 };
 
-typedef struct {
+struct UsbEndpointExtensionStruct {
   int file;
   int timeout;
-} UsbEndpointExtension;
+};
 
 static int
 usbSetTimeout (int file, int new, int *old) {
@@ -291,9 +291,7 @@ usbAllocateEndpointExtension (UsbEndpoint *endpoint) {
 }
 
 void
-usbDeallocateEndpointExtension (UsbEndpoint *endpoint) {
-  UsbEndpointExtension *eptx = endpoint->extension;
-
+usbDeallocateEndpointExtension (UsbEndpointExtension *eptx) {
   if (eptx->file != -1) {
     close(eptx->file);
     eptx->file = -1;

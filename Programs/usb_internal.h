@@ -28,10 +28,12 @@ typedef struct {
   UsbInputFilter filter;
 } UsbInputFilterEntry;
 
+typedef struct UsbEndpointExtensionStruct UsbEndpointExtension;
+
 typedef struct {
   UsbDevice *device;
   const UsbEndpointDescriptor *descriptor;
-  void *extension;
+  UsbEndpointExtension *extension;
 
   union {
     struct {
@@ -101,7 +103,7 @@ extern int usbControlTransfer (
 );
 extern int usbReadDeviceDescriptor (UsbDevice *device);
 extern int usbAllocateEndpointExtension (UsbEndpoint *endpoint);
-extern void usbDeallocateEndpointExtension (UsbEndpoint *endpoint);
+extern void usbDeallocateEndpointExtension (UsbEndpointExtension *eptx);
 extern void usbDeallocateDeviceExtension (UsbDeviceExtension *devx);
 
 #ifdef __cplusplus
