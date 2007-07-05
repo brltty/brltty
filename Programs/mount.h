@@ -22,8 +22,11 @@
 extern "C" {
 #endif /* __cplusplus */
 
-extern char *getMountPoint (int (*test) (const char *directory, const char *type));
-extern int mountFileSystem (const char *path, const char *reference, const char *type);
+typedef int (*MountPointTester) (const char *path, const char *type);
+
+extern char *getMountPoint (MountPointTester test);
+
+extern int createMountPoint (const char *path, const char *reference, const char *type);
 
 #ifdef __cplusplus
 }

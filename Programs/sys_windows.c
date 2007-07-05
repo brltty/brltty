@@ -27,6 +27,8 @@
 
 #include "sys_exec_windows.h"
 
+#include "sys_mount_none.h"
+
 #include "sys_shlib_windows.h"
 
 #include "sys_beep_windows.h"

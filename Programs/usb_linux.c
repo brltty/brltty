@@ -827,7 +827,7 @@ usbMakeRoot (void) {
   if (directory) {
     if (makeDirectory(directory)) {
       if (usbVerifyUsbfs(directory)) return directory;
-      if (mountFileSystem(directory, PACKAGE_NAME "-usbfs", type)) return directory;
+      if (createMountPoint(directory, PACKAGE_NAME "-usbfs", type)) return directory;
     }
 
     free(directory);

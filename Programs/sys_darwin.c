@@ -28,6 +28,8 @@
 
 #include "sys_exec_unix.h"
 
+#include "sys_mount_none.h"
+
 #include "sys_shlib_dyld.h"
 
 #include "sys_beep_none.h"

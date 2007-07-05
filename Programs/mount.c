@@ -20,9 +20,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
-#include <sys/mount.h>
 
 #include "misc.h"
+#include "system.h"
 #include "async.h"
 #include "mount.h"
 
@@ -108,7 +108,7 @@ addMountEntry (FILE *table, MountEntry *entry) {
 }
 
 #else /* mount paradigm */
-#warning mount support not available on this platform
+#warning mounts table support not available on this platform
 
 #define MOUNT_OPTION_RW "rw"
 
@@ -140,7 +140,7 @@ addMountEntry (FILE *table, MountEntry *entry) {
 #endif /* mount paradigm */
 
 char *
-getMountPoint (int (*test) (const char *path, const char *type)) {
+getMountPoint (MountPointTester test) {
   char *path = NULL;
   FILE *table;
 
@@ -195,8 +195,8 @@ updateMountsTable (MountEntry *entry) {
 }
 
 int
-mountFileSystem (const char *path, const char *reference, const char *type) {
-  if (mount(reference, path, type, 0, NULL) != -1) {
+createMountPoint (const char *path, const char *reference, const char *type) {
+  if (mountFileSystem(path, reference, type)) {
     LogPrint(LOG_NOTICE, "file system mounted: %s[%s] -> %s",
              type, reference, path);
 

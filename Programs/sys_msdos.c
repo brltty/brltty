@@ -26,6 +26,8 @@
 
 #include "sys_exec_none.h"
 
+#include "sys_mount_none.h"
+
 #include "sys_shlib_none.h"
 
 #include "sys_beep_msdos.h"

@@ -33,6 +33,8 @@
 
 #include "sys_exec_unix.h"
 
+#include "sys_mount_none.h"
+
 #define SHARED_OBJECT_LOAD_FLAGS (DL_LAZY)
 #include "sys_shlib_dlfcn.h"
 

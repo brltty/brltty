@@ -17,6 +17,8 @@
 
 #include "prologue.h"
 
+#include <errno.h>
+
 #include "misc.h"
 #include "system.h"
 
@@ -25,6 +27,8 @@
 #include "sys_boot_none.h"
 
 #include "sys_exec_none.h"
+
+#include "sys_mount_none.h"
 
 #include "sys_shlib_none.h"
 

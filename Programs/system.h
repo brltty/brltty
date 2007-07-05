@@ -28,6 +28,8 @@ extern char *getBootParameters (const char *name);
 
 extern int executeHostCommand (const char *const *arguments);
 
+extern int mountFileSystem (const char *path, const char *reference, const char *type);
+
 extern void *loadSharedObject (const char *path);
 extern void unloadSharedObject (void *object);
 extern int findSharedSymbol (void *object, const char *symbol, void *pointerAddress);

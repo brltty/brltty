@@ -15,30 +15,9 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#include "prologue.h"
+#include <sys/mount.h>
 
-#include "misc.h"
-#include "system.h"
-
-#include "sys_prog_none.h"
-
-#include "sys_boot_none.h"
-
-#include "sys_exec_unix.h"
-
-#include "sys_mount_none.h"
-
-#define SHARED_OBJECT_LOAD_FLAGS (RTLD_NOW | RTLD_GLOBAL)
-#include "sys_shlib_dlfcn.h"
-
-#include "sys_beep_none.h"
-
-#ifdef ENABLE_PCM_SUPPORT
-#include "sys_pcm_none.h"
-#endif /* ENABLE_PCM_SUPPORT */
-
-#ifdef ENABLE_MIDI_SUPPORT
-#include "sys_midi_none.h"
-#endif /* ENABLE_MIDI_SUPPORT */
-
-#include "sys_ports_glibc.h"
+int
+mountFileSystem (const char *path, const char *reference, const char *type) {
+  return mount(reference, path, type, 0, NULL) != -1;
+}
