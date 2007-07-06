@@ -66,6 +66,10 @@
 #include "io_bluetooth.h"
 #endif /* ENABLE_BLUETOOTH_SUPPORT */
 
+#ifdef __MSDOS__
+#include "sys_msdos.h"
+#endif /* __MSDOS__ */
+
 static int opt_version;
 static int opt_verify;
 static int opt_quiet;
@@ -1983,7 +1987,6 @@ createPidFile (void) {
 }
 
 #if defined(WINDOWS)
-#define BACKGROUND_EVENT_PREFIX "BRLTTY background "
 static void
 background (void) {
   LPTSTR cmdline = GetCommandLine();
@@ -1993,7 +1996,6 @@ background (void) {
   PROCESS_INFORMATION processinfo;
   HANDLE event;
   DWORD res;
-  char name[] = BACKGROUND_EVENT_PREFIX "XXXXXXXX";
   
   memset(&startupinfo, 0, sizeof(startupinfo));
   startupinfo.cb = sizeof(startupinfo);
@@ -2005,64 +2007,31 @@ background (void) {
     LogWindowsError("CreateProcess");
     exit(10);
   }
-  snprintf(name, sizeof(name), BACKGROUND_EVENT_PREFIX "%8lx", processinfo.dwProcessId);
-  if (!(event = CreateEvent(NULL, TRUE, FALSE, name))) {
-    LogWindowsError("CreateEvent");
-    exit(11);
-  }
-  /* wait at most for 100ms, then check whether it's still alive */
-  while ((res = WaitForSingleObject(event, 100)) != WAIT_OBJECT_0) {
-    if (res == WAIT_FAILED) {
-      LogWindowsError("WaitForSingleObject");
-      exit(12);
-    }
-    if (!GetExitCodeProcess(processinfo.hProcess, &res)) {
-      LogWindowsError("GetExitCodeProcess");
-      exit(13);
-    }
-    if (res != STILL_ACTIVE)
-      _exit(res);
-  }
   ExitProcess(0);
 }
-#elif defined(HAVE_SYS_WAIT_H)
-static void
-parentExit0 (int signalNumber) {
-  _exit(0);
-}
 
+#elif defined(__MSDOS__)
+
+#else /* Unix */
 static void
 background (void) {
-  pid_t child;
-
   fflush(stdout);
   fflush(stderr);
 
-  switch (child = fork()) {
-    case -1: /* error */
+  {
+    pid_t child = fork();
+
+    if (child == -1) {
       LogError("fork");
       exit(10);
+    }
 
-    case 0: /* child */
-      break;
-
-    default: /* parent */
-      while (1) {
-        int status;
-        if (waitpid(child, &status, 0) == -1) {
-          if (errno == EINTR) continue;
-          LogError("waitpid");
-          _exit(11);
-        }
-
-        if (WIFEXITED(status)) _exit(WEXITSTATUS(status));
-        if (WIFSIGNALED(status)) _exit(WTERMSIG(status) | 0X80);
-      }
+    if (child) _exit(0);
   }
 
-  if (!opt_standardError) {
-    LogClose();
-    LogOpen(1);
+  if (setsid() == -1) {                        
+    LogError("setsid");
+    exit(13);
   }
 }
 #endif /* background() */
@@ -2184,42 +2153,60 @@ startup (int argc, char *argv[]) {
     exit(0);
   }
 
-  atexit(exitTunes);
-  suppressTuneDeviceOpenErrors();
+  if (opt_verify) opt_noDaemon = 1;
+  if (!opt_noDaemon) background();
 
-#if defined(WINDOWS)
-  if (!opt_noDaemon) {
-    background();
-  } else if (!opt_standardError) {
+  if (!opt_standardError) {
     LogClose();
     LogOpen(1);
   }
-#elif defined(HAVE_SYS_WAIT_H)
+
   if (!opt_noDaemon) {
-    const int signalNumber = SIGUSR1;
-    struct sigaction newAction, oldAction;
-    memset(&newAction, 0, sizeof(newAction));
-    sigemptyset(&newAction.sa_mask);
-    newAction.sa_handler = parentExit0;
-    if (sigaction(signalNumber, &newAction, &oldAction) != -1) {
-      sigset_t newMask, oldMask;
-      sigemptyset(&newMask);
-      sigaddset(&newMask, SIGINT);
-      sigaddset(&newMask, SIGQUIT);
-      sigaddset(&newMask, SIGHUP);
-      sigprocmask(SIG_BLOCK, &newMask, &oldMask);
-      background(); /* first fork */
-      background(); /* second fork */
-      sigprocmask(SIG_SETMASK, &oldMask, NULL);
-      sigaction(signalNumber, &oldAction, NULL);
-    } else {
-      LogError("sigaction");
-      opt_noDaemon = 1;
+    setPrintOff();
+
+    {
+      const char *nullDevice = "/dev/null";
+
+      freopen(nullDevice, "r", stdin);
+      freopen(nullDevice, "a", stdout);
+
+      if (opt_standardError) {
+        fflush(stderr);
+      } else {
+        freopen(nullDevice, "a", stderr);
+      }
     }
+
+#ifdef WINDOWS
+    {
+      HANDLE h = CreateFile("NUL", GENERIC_READ|GENERIC_WRITE,
+                            FILE_SHARE_READ|FILE_SHARE_WRITE,
+                            NULL, OPEN_EXISTING, 0, NULL);
+
+      if (!h) {
+        LogWindowsError("CreateFile[NUL]");
+      } else {
+        SetStdHandle(STD_INPUT_HANDLE, h);
+        SetStdHandle(STD_OUTPUT_HANDLE, h);
+
+        if (opt_standardError) {
+          fflush(stderr);
+        } else {
+          SetStdHandle(STD_ERROR_HANDLE, h);
+        }
+      }
+    }
+#endif /* WINDOWS */
   }
-#else /* background() */
-  opt_noDaemon = 1;
-#endif /* background() */
+
+  /*
+   * From this point, all IO functions as printf, puts, perror, etc. can't be
+   * used anymore since we are a daemon.  The LogPrint facility should 
+   * be used instead.
+   */
+
+  atexit(exitTunes);
+  suppressTuneDeviceOpenErrors();
 
   /* Create the process identifier file. */
   if (opt_pidFile) createPidFile();
@@ -2300,77 +2287,6 @@ startup (int argc, char *argv[]) {
 #endif /* ENABLE_TABLE_SELECTION */
 #endif /* ENABLE_PREFERENCES_MENU */
 #endif /* ENABLE_CONTRACTED_BRAILLE */
-
-#if defined(HAVE_SYS_WAIT_H) || defined(WINDOWS)
-  if (!(
-#ifndef WINDOWS
-        opt_noDaemon || 
-#endif /* WINDOWS */
-        opt_verify)) {
-    setPrintOff();
-
-    {
-      char *nullDevice = "/dev/null";
-      freopen(nullDevice, "r", stdin);
-      freopen(nullDevice, "a", stdout);
-      if (opt_standardError) {
-        fflush(stderr);
-      } else {
-        freopen(nullDevice, "a", stderr);
-      }
-    }
-
-#ifdef WINDOWS
-    {
-      HANDLE h = CreateFile("NUL", GENERIC_READ|GENERIC_WRITE,
-                            FILE_SHARE_READ|FILE_SHARE_WRITE,
-                            NULL, OPEN_EXISTING, 0, NULL);
-      if (!h) {
-        LogWindowsError("CreateFile[NUL]");
-      } else {
-        SetStdHandle(STD_INPUT_HANDLE, h);
-        SetStdHandle(STD_OUTPUT_HANDLE, h);
-        if (opt_standardError) {
-          fflush(stderr);
-        } else {
-          SetStdHandle(STD_ERROR_HANDLE, h);
-        }
-      }
-    }
-#endif /* WINDOWS */
-
-#if defined(WINDOWS)
-    {
-      char name[] = BACKGROUND_EVENT_PREFIX "XXXXXXXX";
-      HANDLE event;
-      snprintf(name, sizeof(name), BACKGROUND_EVENT_PREFIX "%8lx", GetCurrentProcessId());
-      if (!(event = CreateEvent(NULL, TRUE, FALSE, name))) {
-        LogWindowsError("CreateEvent");
-      } else {
-        SetEvent(event);
-      }
-    }
-#elif defined(HAVE_SYS_WAIT_H)
-    /* tell the parent process to exit */
-    if (kill(getppid(), SIGUSR1) == -1) {
-      LogError("kill");
-      exit(12);
-    }
-
-    /* request a new session (job control) */
-    if (setsid() == -1) {                        
-      LogError("setsid");
-      exit(13);
-    }
-#endif /* detach */
-  }
-#endif /* HAVE_SYS_WAIT_H || WINDOWS */
-
-  /*
-   * From this point, all IO functions as printf, puts, perror, etc. can't be
-   * used anymore since we are a daemon.  The LogPrint facility should 
-   * be used instead.
-   */
 
   /* initialize screen driver */
   atexit(exitScreen);
