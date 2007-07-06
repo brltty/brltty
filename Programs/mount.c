@@ -29,8 +29,6 @@
 #if defined(HAVE_MNTENT_H)
 #include <mntent.h>
 
-#define MOUNT_OPTION_RW MNTOPT_RW
-
 typedef struct mntent MountEntry;
 #define mountPath mnt_dir
 #define mountReference mnt_fsname
@@ -67,8 +65,6 @@ addMountEntry (FILE *table, MountEntry *entry) {
 
 #elif defined(HAVE_SYS_MNTTAB_H)
 #include <sys/mnttab.h>
-
-#define MOUNT_OPTION_RW "rw"
 
 typedef struct mnttab MountEntry;
 #define mountPath mnt_mountp
@@ -110,8 +106,6 @@ addMountEntry (FILE *table, MountEntry *entry) {
 #else /* mount paradigm */
 #warning mounts table support not available on this platform
 
-#define MOUNT_OPTION_RW "rw"
-
 typedef struct {
   char *mountPath;
   char *mountReference;
@@ -138,6 +132,12 @@ addMountEntry (FILE *table, MountEntry *entry) {
   return 0;
 }
 #endif /* mount paradigm */
+
+#if defined(MNTOPT_RW)
+#define MOUNT_OPTION_RW MNTOPT_RW
+#else /* MOUNT_OPTION_RW */
+#define MOUNT_OPTION_RW "rw"
+#endif /* MOUNT_OPTION_RW */
 
 char *
 getMountPoint (MountPointTester test) {
