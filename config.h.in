@@ -116,6 +116,9 @@ extern "C" {
 /* Define this if the header file linux/uinput.h exists. */
 #undef HAVE_LINUX_UINPUT_H
 
+/* Define this if the function addmntent exists. */
+#undef HAVE_ADDMNTENT
+
 /* Define this if the function fchdir exists. */
 #undef HAVE_FCHDIR
 

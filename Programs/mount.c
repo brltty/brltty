@@ -57,10 +57,14 @@ readMountsTable (FILE *table) {
 
 static int
 addMountEntry (FILE *table, MountEntry *entry) {
-  if (!addmntent(table, entry)) return 1;
-  LogPrint(LOG_ERR, "mounts table entry add error: %s[%s] -> %s: %s",
-           entry->mnt_type, entry->mnt_fsname, entry->mnt_dir, strerror(errno));
-  return 0;
+#ifdef HAVE_ADDMNTENT
+  if (addmntent(table, entry)) {
+    LogPrint(LOG_ERR, "mounts table entry add error: %s[%s] -> %s: %s",
+             entry->mnt_type, entry->mnt_fsname, entry->mnt_dir, strerror(errno));
+    return 0;
+  }
+#endif /* HAVE_ADDMNTENT */
+  return 1;
 }
 
 #elif defined(HAVE_SYS_MNTTAB_H)
