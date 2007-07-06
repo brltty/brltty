@@ -24,9 +24,9 @@ extern "C" {
 
 typedef int (*MountPointTester) (const char *path, const char *type);
 
-extern char *getMountPoint (MountPointTester test);
+extern char *findMountPoint (MountPointTester test);
 
-extern int createMountPoint (const char *path, const char *reference, const char *type);
+extern int makeMountPoint (const char *path, const char *reference, const char *type);
 
 #ifdef __cplusplus
 }

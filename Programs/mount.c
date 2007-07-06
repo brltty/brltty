@@ -140,7 +140,7 @@ addMountEntry (FILE *table, MountEntry *entry) {
 #endif /* MOUNT_OPTION_RW */
 
 char *
-getMountPoint (MountPointTester test) {
+findMountPoint (MountPointTester test) {
   char *path = NULL;
   FILE *table;
 
@@ -195,7 +195,7 @@ updateMountsTable (MountEntry *entry) {
 }
 
 int
-createMountPoint (const char *path, const char *reference, const char *type) {
+makeMountPoint (const char *path, const char *reference, const char *type) {
   if (mountFileSystem(path, reference, type)) {
     LogPrint(LOG_NOTICE, "file system mounted: %s[%s] -> %s",
              type, reference, path);

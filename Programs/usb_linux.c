@@ -808,7 +808,7 @@ usbFindRoot (void) {
     }
   }
 
-  return getMountPoint(usbTestUsbfs);
+  return findMountPoint(usbTestUsbfs);
 }
 
 static char *
@@ -827,7 +827,7 @@ usbMakeRoot (void) {
   if (directory) {
     if (makeDirectory(directory)) {
       if (usbVerifyUsbfs(directory)) return directory;
-      if (createMountPoint(directory, PACKAGE_NAME "-usbfs", type)) return directory;
+      if (makeMountPoint(directory, PACKAGE_NAME "-usbfs", type)) return directory;
     }
 
     free(directory);
