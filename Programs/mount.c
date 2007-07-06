@@ -29,6 +29,12 @@
 #if defined(HAVE_MNTENT_H)
 #include <mntent.h>
 
+#if defined(MOUNTED)
+#define MOUNTS_TABLE_PATH MOUNTED
+#elif defined(MNT_MNTTAB)
+#define MOUNTS_TABLE_PATH MNT_MNTTAB
+#endif /* MOUNTS_TABLE_PATH */
+
 typedef struct mntent MountEntry;
 #define mountPath mnt_dir
 #define mountReference mnt_fsname
@@ -37,11 +43,11 @@ typedef struct mntent MountEntry;
 
 static FILE *
 openMountsTable (int update) {
-  FILE *table = setmntent(MOUNTED, (update? "a": "r"));
+  FILE *table = setmntent(MOUNTS_TABLE_PATH, (update? "a": "r"));
   if (!table)
     LogPrint((errno == ENOENT)? LOG_WARNING: LOG_ERR,
              "mounted file systems table open erorr: %s: %s",
-             MOUNTED, strerror(errno));
+             MOUNTS_TABLE_PATH, strerror(errno));
   return table;
 }
 
