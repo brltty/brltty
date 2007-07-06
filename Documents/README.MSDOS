@@ -1,0 +1,18 @@
+Serial Support
+--------------
+
+The default DOS serial driver does not support speeds above 9600 baud. For
+higher speeds a more capable serial driver (like ADF) must be used.
+
+
+USB Support
+-----------
+
+USB is not supported.
+
+
+Bluetooth Support
+-----------------
+
+Bluetooth is not supported.
+
