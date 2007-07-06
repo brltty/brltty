@@ -21,13 +21,41 @@
 
 #ifdef __MINGW32__
 #include "win_pthread.h"
-#else /* __MINGW32__ */
+
+#elif defined(__MSDOS__)
+
+#else /* posix threads */
 #include <pthread.h>
-#endif /* __MINGW32__ */
+#endif /* posix threads */
 
 #include "misc.h"
 #include "lock.h"
 
+#ifdef __MSDOS__
+LockDescriptor *
+newLockDescriptor (void) {
+  return NULL;
+}
+
+void
+freeLockDescriptor (LockDescriptor *lock) {
+}
+
+int
+obtainLock (LockDescriptor *lock, LockOptions options) {
+  return 1;
+}
+
+void
+releaseLock (LockDescriptor *lock) {
+}
+
+LockDescriptor *
+getLockDescriptor (LockDescriptor **lock) {
+  *lock = NULL;
+  return NULL;
+}
+#else /* __MSDOS__ */
 #ifdef PTHREAD_RWLOCK_INITIALIZER
 struct LockDescriptorStruct {
   pthread_rwlock_t lock;
@@ -171,3 +199,4 @@ getLockDescriptor (LockDescriptor **lock) {
   }
   return *lock;
 }
+#endif /* __MSDOS__ */
