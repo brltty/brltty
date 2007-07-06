@@ -17,6 +17,8 @@
 
 #warning file system mount support not available on this platform
 
+#include <errno.h>
+
 int
 mountFileSystem (const char *path, const char *reference, const char *type) {
   errno = ENOSYS;
