@@ -137,6 +137,14 @@ static void setDta(const struct Dta *dta) {
   __dpmi_int(DOS_INT, &r);
 }
 
+unsigned short getCP() {
+  __dpmi_regs r;
+  r.h.ah = 0x66;
+  r.h.al = 0x01;
+  __dpmi_int(DOS_INT, &r);
+  return r.x.bx;
+}
+
 /* Handle FPU state switch */
 #define saveFpuState(p) asm volatile("fnsave (%0); fwait"::"r"(p):"memory")
 #define restoreFpuState(p) asm volatile("frstor (%0)"::"r"(p))

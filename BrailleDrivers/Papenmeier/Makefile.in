@@ -28,7 +28,7 @@ PM_CMD_SOURCES = $(SRC_TOP)$(PGM_DIR)/brldefs.h $(SRC_DIR)/brl-cfg.h
 braille.$O:
 	$(CC) $(BRL_CFLAGS) $(YACC_CFLAGS) -c $(SRC_DIR)/braille.c
 
-READ_CONFIG_OBJECTS = read_config.$O $(BLD_TOP)$(PGM_DIR)/cmd.$O $(BLD_TOP)$(PGM_DIR)/charset.$O $(BLD_TOP)$(PGM_DIR)/lock.$O $(BLD_TOP)$(PGM_DIR)/misc.$O
+READ_CONFIG_OBJECTS = read_config.$O $(BLD_TOP)$(PGM_DIR)/cmd.$O $(BLD_TOP)$(PGM_DIR)/charset.$O $(BLD_TOP)$(PGM_DIR)/lock.$O $(BLD_TOP)$(PGM_DIR)/misc.$O $(BLD_TOP)$(PGM_DIR)/host_sys.$O
 read_config$X: $(READ_CONFIG_OBJECTS)
 	$(HOSTCC) $(HOSTLDFLAGS) -o $@ $(READ_CONFIG_OBJECTS) $(LDLIBS)
 

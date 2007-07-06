@@ -25,9 +25,14 @@
 #include <wchar.h>
 #include <locale.h>
 
-#ifndef WINDOWS
+#if defined(WINDOWS)
+
+#elif defined(__MSDOS__)
+#include "sys_msdos.h"
+
+#else /* Unix */
 #include <langinfo.h>
-#endif /* WINDOWS */
+#endif /* platform-specific includes */
 
 #include "misc.h"
 #include "lock.h"
@@ -198,13 +203,17 @@ getLocaleCharset (void) {
       (strcmp(locale, "C") != 0) &&
       (strcmp(locale, "POSIX") != 0)) {
     /* some 8-bit locale is set, assume its charset is correct */
-#ifdef WINDOWS
+#if defined(WINDOWS)
     static char codepage[8] = {'C', 'P'};
     GetLocaleInfo(GetThreadLocale(), LOCALE_IDEFAULTANSICODEPAGE, codepage+2, sizeof(codepage)-2);
     return codepage;
-#else /* WINDOWS */
+#elif defined(__MSDOS__)
+    static char codepage[8];
+    snprintf(codepage, sizeof(codepage), "CP%u", getCP());
+    return codepage;
+#else /* Unix */
     return nl_langinfo(CODESET);
-#endif /* WINDOWS */
+#endif /* locale character set */
   }
   return "ISO-8859-1";
 }
