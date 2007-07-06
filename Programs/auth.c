@@ -20,9 +20,12 @@
 #include <string.h>
 #include <errno.h>
 
-#ifdef WINDOWS
+#if defined(WINDOWS)
 #include <ws2tcpip.h>
-#else /* WINDOWS */
+
+#elif defined(__MSDOS__)
+
+#else /* Unix */
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <netinet/in.h>
@@ -31,7 +34,7 @@
 
 #include <pwd.h>
 #include <grp.h>
-#endif /* WINDOWS */
+#endif /* platform-specific includes */
 
 #if !defined(AF_LOCAL) && defined(AF_UNIX)
 #define AF_LOCAL AF_UNIX
@@ -623,6 +626,9 @@ authPerform (AuthDescriptor *auth, FileDescriptor fd) {
 
 void
 formatAddress (char *buffer, int bufferSize, const void *address, int addressSize) {
+#ifdef __MSDOS__
+  snprintf(buffer, bufferSize, "unknown");
+#else /* __MSDOS__ */
   const struct sockaddr *sa = address;
   switch (sa->sa_family) {
 #ifndef WINDOWS
@@ -687,4 +693,5 @@ formatAddress (char *buffer, int bufferSize, const void *address, int addressSiz
       }
       break;
   }
+#endif /* __MSDOS__ */
 }
