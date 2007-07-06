@@ -1,0 +1,139 @@
+Index: Programs/scr.h
+===================================================================
+--- Programs/scr.h	(r�vision 3012)
++++ Programs/scr.h	(copie de travail)
+@@ -25,6 +25,9 @@
+ /* scr.h - C header file for the screen reading library
+  */
+ 
++#ifdef __MSDOS__
++#define ScreenMode _ScreenMode
++#endif /* __MSDOS__ */
+ /* mode argument for readScreen() */
+ typedef enum {
+   SCR_TEXT,		/* get screen text */
+Index: Programs/io_misc.c
+===================================================================
+--- Programs/io_misc.c	(r�vision 3012)
++++ Programs/io_misc.c	(copie de travail)
+@@ -35,15 +35,23 @@
+ awaitInput (int fileDescriptor, int milliseconds) {
+   fd_set mask;
+   struct timeval timeout;
++#ifdef __MSDOS__
++  int elapsed = 0;
++#endif /* __MSDOS__ */
+ 
+   FD_ZERO(&mask);
+   FD_SET(fileDescriptor, &mask);
+ 
+   memset(&timeout, 0, sizeof(timeout));
++
++#ifdef __MSDOS__
++  do {
++#else /* __MSDOS__ */
+   timeout.tv_sec = milliseconds / 1000;
+   timeout.tv_usec = (milliseconds % 1000) * 1000;
+ 
+   while (1) {
++#endif /* __MSDOS__ */
+     switch (select(fileDescriptor+1, &mask, NULL, NULL, &timeout)) {
+       case -1:
+         if (errno == EINTR) continue;
+@@ -51,16 +59,27 @@
+         return 0;
+ 
+       case 0:
+-        if (milliseconds > 0)
+-          LogPrint(LOG_DEBUG, "Input wait timed out after %d %s.",
+-                   milliseconds, ((milliseconds == 1)? "millisecond": "milliseconds"));
+-        errno = EAGAIN;
+-        return 0;
++#ifdef __MSDOS__
++	elapsed += tsr_usleep(1000);
++	continue;
++#else /* __MSDOS__ */
++	goto out;
++#endif /* __MSDOS__ */
+ 
+       default:
+         return 1;
+     }
++#ifdef __MSDOS__
++  } while (elapsed < milliseconds * 1000);
++#else /* __MSDOS__ */
+   }
++out:
++#endif /* __MSDOS__ */
++  if (milliseconds > 0)
++    LogPrint(LOG_DEBUG, "Input wait timed out after %d %s.",
++	     milliseconds, ((milliseconds == 1)? "millisecond": "milliseconds"));
++  errno = EAGAIN;
++  return 0;
+ }
+ 
+ int
+@@ -69,6 +88,7 @@
+   void *buffer, size_t *offset, size_t count,
+   int initialTimeout, int subsequentTimeout
+ ) {
++  if (!awaitInput(fileDescriptor, initialTimeout)) return 0;
+   while (count > 0) {
+     ssize_t amount;
+     {
+@@ -120,15 +140,22 @@
+ awaitOutput (int fileDescriptor, int milliseconds) {
+   fd_set mask;
+   struct timeval timeout;
++#ifdef __MSDOS__
++  int elapsed = 0;
++#endif /* __MSDOS__ */
+ 
+   FD_ZERO(&mask);
+   FD_SET(fileDescriptor, &mask);
+ 
++#ifdef __MSDOS__
++  do {
++#else /* __MSDOS__ */
+   memset(&timeout, 0, sizeof(timeout));
+   timeout.tv_sec = milliseconds / 1000;
+   timeout.tv_usec = (milliseconds % 1000) * 1000;
+ 
+   while (1) {
++#endif /* __MSDOS__ */
+     switch (select(fileDescriptor+1, NULL, &mask, NULL, &timeout)) {
+       case -1:
+         if (errno == EINTR) continue;
+@@ -136,16 +163,27 @@
+         return 0;
+ 
+       case 0:
+-        if (milliseconds > 0)
+-          LogPrint(LOG_DEBUG, "Output wait timed out after %d %s.",
+-                   milliseconds, ((milliseconds == 1)? "millisecond": "milliseconds"));
+-        errno = EAGAIN;
+-        return 0;
++#ifdef __MSDOS__
++	elapsed += tsr_usleep(1000);
++	continue;
++#else /* __MSDOS__ */
++	goto out;
++#endif /* __MSDOS__ */
+ 
+       default:
+         return 1;
+     }
++#ifdef __MSDOS__
++  } while (elapsed < milliseconds * 1000);
++#else /* __MSDOS__ */
+   }
++out:
++#endif /* __MSDOS__ */
++  if (milliseconds > 0)
++    LogPrint(LOG_DEBUG, "Output wait timed out after %d %s.",
++	     milliseconds, ((milliseconds == 1)? "millisecond": "milliseconds"));
++  errno = EAGAIN;
++  return 0;
+ }
+ 
+ ssize_t
