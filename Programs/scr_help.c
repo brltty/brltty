@@ -236,10 +236,10 @@ describe_HelpScreen (ScreenDescription *description) {
 }
 
 static int
-read_HelpScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
+read_HelpScreen (ScreenBox box, unsigned char *buffer, ScreenCharacterProperty property) {
   const HelpPageEntry *description = &pageDescriptions[pageNumber];
   if (validateScreenBox(&box, getBigEndian(description->width), getBigEndian(description->height))) {
-    if (mode == SCR_TEXT) {
+    if (property == SCR_TEXT) {
        int row;
       for (row=0; row<box.height; row++) {
         memcpy(buffer + (row * box.width),

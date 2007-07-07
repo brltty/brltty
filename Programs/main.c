@@ -601,18 +601,18 @@ showCursor (void) {
 }
 
 static int
-toDifferentLine (ScreenMode mode, int (*canMove) (void), int amount, int from, int width) {
+toDifferentLine (ScreenCharacterProperty property, int (*canMove) (void), int amount, int from, int width) {
   if (canMove()) {
     unsigned char buffer1[width], buffer2[width];
     int skipped = 0;
 
-    if ((mode == SCR_TEXT) && p->showAttributes) mode = SCR_ATTRIB;
-    readScreen(from, p->winy, width, 1, buffer1, mode);
+    if ((property == SCR_TEXT) && p->showAttributes) property = SCR_ATTRIB;
+    readScreen(from, p->winy, width, 1, buffer1, property);
 
     do {
-      readScreen(from, p->winy+=amount, width, 1, buffer2, mode);
+      readScreen(from, p->winy+=amount, width, 1, buffer2, property);
       if ((memcmp(buffer1, buffer2, width) != 0) ||
-          ((mode == SCR_TEXT) && showCursor() && (scr.posy == p->winy) &&
+          ((property == SCR_TEXT) && showCursor() && (scr.posy == p->winy) &&
            (scr.posx >= from) && (scr.posx < (from + width))))
         return 1;
 
@@ -643,27 +643,27 @@ canMoveDown (void) {
 }
 
 static int
-upDifferentLine (ScreenMode mode) {
-  return toDifferentLine(mode, canMoveUp, -1, 0, scr.cols);
+upDifferentLine (ScreenCharacterProperty property) {
+  return toDifferentLine(property, canMoveUp, -1, 0, scr.cols);
 }
 
 static int
-downDifferentLine (ScreenMode mode) {
-  return toDifferentLine(mode, canMoveDown, 1, 0, scr.cols);
+downDifferentLine (ScreenCharacterProperty property) {
+  return toDifferentLine(property, canMoveDown, 1, 0, scr.cols);
 }
 
 static int
-upDifferentCharacter (ScreenMode mode, int column) {
-  return toDifferentLine(mode, canMoveUp, -1, column, 1);
+upDifferentCharacter (ScreenCharacterProperty property, int column) {
+  return toDifferentLine(property, canMoveUp, -1, column, 1);
 }
 
 static int
-downDifferentCharacter (ScreenMode mode, int column) {
-  return toDifferentLine(mode, canMoveDown, 1, column, 1);
+downDifferentCharacter (ScreenCharacterProperty property, int column) {
+  return toDifferentLine(property, canMoveDown, 1, column, 1);
 }
 
 static void
-upOneLine (ScreenMode mode) {
+upOneLine (ScreenCharacterProperty property) {
   if (p->winy > 0) {
     p->winy--;
   } else {
@@ -672,7 +672,7 @@ upOneLine (ScreenMode mode) {
 }
 
 static void
-downOneLine (ScreenMode mode) {
+downOneLine (ScreenCharacterProperty property) {
   if (p->winy < (scr.rows - brl.y)) {
     p->winy++;
   } else {
@@ -681,20 +681,20 @@ downOneLine (ScreenMode mode) {
 }
 
 static void
-upLine (ScreenMode mode) {
+upLine (ScreenCharacterProperty property) {
   if (prefs.skipIdenticalLines) {
-    upDifferentLine(mode);
+    upDifferentLine(property);
   } else {
-    upOneLine(mode);
+    upOneLine(property);
   }
 }
 
 static void
-downLine (ScreenMode mode) {
+downLine (ScreenCharacterProperty property) {
   if (prefs.skipIdenticalLines) {
-    downDifferentLine(mode);
+    downDifferentLine(property);
   } else {
-    downOneLine(mode);
+    downOneLine(property);
   }
 }
 

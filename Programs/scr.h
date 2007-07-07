@@ -28,7 +28,7 @@ extern "C" {
 typedef enum {
   SCR_TEXT,		/* get screen text */
   SCR_ATTRIB		/* get screen attributes */
-} ScreenMode;
+} ScreenCharacterProperty;
 
 typedef struct {
   short rows, cols;	/* screen dimensions */
@@ -44,7 +44,7 @@ typedef struct {
 } ScreenBox;
 
 extern int validateScreenBox (const ScreenBox *box, int columns, int rows);
-extern void setScreenMessage (const ScreenBox *box, unsigned char *buffer, ScreenMode mode, const char *message);
+extern void setScreenMessage (const ScreenBox *box, unsigned char *buffer, ScreenCharacterProperty property, const char *message);
 
 #define SCR_KEY_MOD_META 0X100
 typedef enum {
@@ -83,7 +83,7 @@ extern void deactivateHelpScreen (void);
 
 /* Routines which apply to the current screen. */
 extern void describeScreen (ScreenDescription *);		/* get screen status */
-extern int readScreen (short, short, short, short, unsigned char *, ScreenMode);
+extern int readScreen (short left, short top, short width, short height, unsigned char *buffer, ScreenCharacterProperty);
 extern int insertKey (ScreenKey key);
 extern int insertCharacters (const char *, int);
 extern int insertString (const char *);

@@ -69,9 +69,9 @@ describe_FrozenScreen (ScreenDescription *description) {
 }
 
 static int
-read_FrozenScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
+read_FrozenScreen (ScreenBox box, unsigned char *buffer, ScreenCharacterProperty property) {
   if (validateScreenBox(&box, screenDescription.cols, screenDescription.rows)) {
-    unsigned char *screen = (mode == SCR_TEXT)? screenText: screenAttributes;
+    unsigned char *screen = (property == SCR_TEXT)? screenText: screenAttributes;
     int row;
     for (row=0; row<box.height; row++)
       memcpy(buffer + (row * box.width),

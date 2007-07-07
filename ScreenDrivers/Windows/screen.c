@@ -191,9 +191,9 @@ describe_WindowsScreen (ScreenDescription *description) {
 }
 
 static int
-read_WindowsScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
+read_WindowsScreen (ScreenBox box, unsigned char *buffer, ScreenCharacterProperty property) {
   /* TODO: GetConsoleCP */
-  int text = mode == SCR_TEXT;
+  int text = property == SCR_TEXT;
   int x, y;
   static int wide;
   COORD coord;
@@ -204,12 +204,12 @@ read_WindowsScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
   void *buf;
 
   if (altTab) {
-    setScreenMessage(&box, buffer, mode, altTabName);
+    setScreenMessage(&box, buffer, property, altTabName);
     return 1;
   }
   if (consoleOutput == INVALID_HANDLE_VALUE) return 0;
   if (unreadable) {
-    setScreenMessage(&box, buffer, mode, unreadable);
+    setScreenMessage(&box, buffer, property, unreadable);
     return 1;
   }
   if (!validateScreenBox(&box, cols, rows)) return 0;

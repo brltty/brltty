@@ -173,11 +173,11 @@ describe_ScreenScreen (ScreenDescription *description) {
 }
 
 static int
-read_ScreenScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
+read_ScreenScreen (ScreenBox box, unsigned char *buffer, ScreenCharacterProperty property) {
   ScreenDescription description;                 /* screen statistics */
   describe_ScreenScreen(&description);
   if (validateScreenBox(&box, description.cols, description.rows)) {
-    off_t start = 4 + (((mode == SCR_TEXT)? 0: 1) * description.cols * description.rows) + (box.top * description.cols) + box.left;
+    off_t start = 4 + (((property == SCR_TEXT)? 0: 1) * description.cols * description.rows) + (box.top * description.cols) + box.left;
     int row;
     for (row=0; row<box.height; row++) {
       memcpy(buffer + (row * box.width),

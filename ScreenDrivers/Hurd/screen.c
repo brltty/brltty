@@ -204,7 +204,7 @@ describe_HurdScreen (ScreenDescription *description) {
 #define offsetof(type,field) ((size_t) &((type *) 0)->field)
 #endif
 static int
-read_HurdScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
+read_HurdScreen (ScreenBox box, unsigned char *buffer, ScreenCharacterProperty property) {
   ScreenDescription description;
   int c;
   describe_HurdScreen(&description);
@@ -214,7 +214,7 @@ read_HurdScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
   }
   if (validateScreenBox(&box, description.cols, description.rows)) {
     uint32_t lines, start, row, col;
-    const int which = mode == SCR_TEXT ? offsetof(conchar_t,chr):offsetof(conchar_t,attr);
+    const int which = property == SCR_TEXT ? offsetof(conchar_t,chr):offsetof(conchar_t,attr);
     lines = screenMap->screen.lines;
     start = screenMap->screen.cur_line;
     for (row=start+box.top; row<start+box.top+box.height; ++row)

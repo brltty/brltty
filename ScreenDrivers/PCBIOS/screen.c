@@ -55,14 +55,14 @@ describe_PcbiosScreen (ScreenDescription *description) {
 }
 
 static int
-read_PcbiosScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
+read_PcbiosScreen (ScreenBox box, unsigned char *buffer, ScreenCharacterProperty property) {
   unsigned offset = ScreenPrimary;
   ScreenDescription description;
   describe_PcbiosScreen(&description);
   if (validateScreenBox(&box, description.cols, description.rows)) {
     int row, col;
     _farsetsel(_go32_conventional_mem_selector());
-    if (mode == SCR_ATTRIB) offset++;
+    if (property == SCR_ATTRIB) offset++;
     for (row=box.top; row<box.top+box.height; ++row)
       for (col=box.left; col<box.left+box.width; ++col)
 	*buffer++ = _farnspeekb(offset + row*description.cols*2 + col*2);

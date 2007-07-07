@@ -195,10 +195,10 @@ validateScreenBox (const ScreenBox *box, int columns, int rows) {
 }
 
 void
-setScreenMessage (const ScreenBox *box, unsigned char *buffer, ScreenMode mode, const char *message) {
+setScreenMessage (const ScreenBox *box, unsigned char *buffer, ScreenCharacterProperty property, const char *message) {
   int count = box->width * box->height;
 
-  if (mode == SCR_TEXT) {
+  if (property == SCR_TEXT) {
     int length = strlen(message) - box->left;
     if (length < 0) length = 0;
     if (length > box->width) length = box->width;
@@ -216,13 +216,13 @@ describeScreen (ScreenDescription *description) {
 }
 
 int
-readScreen (short left, short top, short width, short height, unsigned char *buffer, ScreenMode mode) {
+readScreen (short left, short top, short width, short height, unsigned char *buffer, ScreenCharacterProperty property) {
   ScreenBox box;
   box.left = left;
   box.top = top;
   box.width = width;
   box.height = height;
-  return currentScreen->read(box, buffer, mode);
+  return currentScreen->read(box, buffer, property);
 }
 
 int

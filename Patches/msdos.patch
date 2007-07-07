@@ -1,17 +1,3 @@
-Index: Programs/scr.h
-===================================================================
---- Programs/scr.h	(r�vision 3012)
-+++ Programs/scr.h	(copie de travail)
-@@ -25,6 +25,9 @@
- /* scr.h - C header file for the screen reading library
-  */
- 
-+#ifdef __MSDOS__
-+#define ScreenMode _ScreenMode
-+#endif /* __MSDOS__ */
- /* mode argument for readScreen() */
- typedef enum {
-   SCR_TEXT,		/* get screen text */
 Index: Programs/io_misc.c
 ===================================================================
 --- Programs/io_misc.c	(r�vision 3012)

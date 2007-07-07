@@ -600,18 +600,18 @@ describe_AtSpiScreen (ScreenDescription *description) {
 }
 
 static int
-read_AtSpiScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
+read_AtSpiScreen (ScreenBox box, unsigned char *buffer, ScreenCharacterProperty property) {
   long x,y;
   int c;
   if (box.height<0 || box.width<0) return 0;
-  if (mode == SCR_ATTRIB) {
+  if (property == SCR_ATTRIB) {
     memset(buffer,0x07,box.height*box.width);
     return 1;
   }
   memset(buffer,' ',box.height*box.width);
   pthread_mutex_lock(&updateMutex);
   if (!curTerm) {
-    setScreenMessage(&box, buffer, mode, nonatspi);
+    setScreenMessage(&box, buffer, property, nonatspi);
     goto out;
   }
   if (box.top+box.height>curNumRows)

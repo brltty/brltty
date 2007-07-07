@@ -964,14 +964,14 @@ describe_LinuxScreen (ScreenDescription *description) {
 }
 
 static int
-read_LinuxScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
+read_LinuxScreen (ScreenBox box, unsigned char *buffer, ScreenCharacterProperty property) {
   ScreenDescription description;
   describe_LinuxScreen(&description);
   if (validateScreenBox(&box, description.cols, description.rows)) {
-    int text = mode == SCR_TEXT;
+    int text = property == SCR_TEXT;
 
     if (problemText) {
-      setScreenMessage(&box, buffer, mode, problemText);
+      setScreenMessage(&box, buffer, property, problemText);
       return 1;
     }
 

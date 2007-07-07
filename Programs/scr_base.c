@@ -51,11 +51,11 @@ describe_BaseScreen (ScreenDescription *description) {
 }
 
 static int
-read_BaseScreen (ScreenBox box, unsigned char *buffer, ScreenMode mode) {
+read_BaseScreen (ScreenBox box, unsigned char *buffer, ScreenCharacterProperty property) {
   ScreenDescription description;
   describe_BaseScreen(&description);
   if (!validateScreenBox(&box, description.cols, description.rows)) return 0;
-  if (mode == SCR_TEXT) {
+  if (property == SCR_TEXT) {
     memcpy(buffer, text_BaseScreen+box.left, box.width);
   } else {
     memset(buffer, 0X07, box.width);
