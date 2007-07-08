@@ -26,7 +26,7 @@ extern void background (void);
 
 extern unsigned long tsr_usleep (unsigned long usec);
 
-extern unsigned short getCP();
+extern unsigned short getCodePage (void);
 
 #ifdef __cplusplus
 }

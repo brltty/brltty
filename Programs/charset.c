@@ -209,7 +209,7 @@ getLocaleCharset (void) {
     return codepage;
 #elif defined(__MSDOS__)
     static char codepage[8];
-    snprintf(codepage, sizeof(codepage), "CP%u", getCP());
+    snprintf(codepage, sizeof(codepage), "CP%03u", getCodePage());
     return codepage;
 #else /* Unix */
     return nl_langinfo(CODESET);

@@ -137,7 +137,7 @@ static void setDta(const struct Dta *dta) {
   __dpmi_int(DOS_INT, &r);
 }
 
-unsigned short getCP() {
+unsigned short getCodePage (void) {
   __dpmi_regs r;
   r.h.ah = 0x66;
   r.h.al = 0x01;
