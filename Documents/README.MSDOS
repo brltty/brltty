@@ -16,3 +16,28 @@ Bluetooth Support
 
 Bluetooth is not supported.
 
+
+Compilation
+-----------
+
+The MSDOS version can be compiled thanks to a cross-compiler. Get the following
+archives:
+
+   ftp://ftp.delorie.com/pub/djgpp/current/v2gnu/gcc410s2.zip
+   ftp://ftp.delorie.com/pub/djgpp/current/v2/djcrx203.zip
+
+The djcrx203.zip archive contains a file named cross/howto.32 which explains
+how to build a cross-compiler for gcc 3.2. You can build one for gcc 4.1 by
+applying the same instructions to the gcc410s2.zip archive (listed above)
+instead of to the gcc32s2.zip archive (mentioned in the howto). You can also
+use a more recent binutils package too (2.16.91 works fine).
+
+You can use the cross-compiler with the following ./configure command (all on
+one line, of course):
+
+   CC_FOR_BUILD=gcc LD=i586-pc-msdosdjgpp-ld ./configure
+      --prefix=/brltty-msdos --host=i586-pc-msdosdjgpp
+      --disable-api
+      --with-braille-driver=-vr,all --without-libbraille
+      --with-speech-driver=all --without-flite
+      --with-screen-driver=pb,-all 
