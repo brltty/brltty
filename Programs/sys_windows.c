@@ -29,23 +29,13 @@
 
 #include "sys_boot_none.h"
 
-#include "sys_exec_windows.h"
-
 #include "sys_mount_none.h"
 
-#include "sys_shlib_windows.h"
+#include "sys_beep_windows.h"
 
-#ifdef __MINGW32__
+#include "sys_ports_windows.h"
 
-#ifdef ENABLE_PCM_SUPPORT
-#include "sys_pcm_windows.h"
-#endif /* ENABLE_PCM_SUPPORT */
-
-#ifdef ENABLE_MIDI_SUPPORT
-#include "sys_midi_windows.h"
-#endif /* ENABLE_MIDI_SUPPORT */
-
-#else /* __CYGWIN32__ */
+#ifdef __CYGWIN32__
 
 #include "sys_exec_unix.h"
 
@@ -62,11 +52,21 @@
 #include "sys_midi_oss.h"
 #endif /* ENABLE_MIDI_SUPPORT */
 
+#else /* __CYGWIN32__ */
+
+#include "sys_exec_windows.h"
+
+#include "sys_shlib_windows.h"
+
+#ifdef ENABLE_PCM_SUPPORT
+#include "sys_pcm_windows.h"
+#endif /* ENABLE_PCM_SUPPORT */
+
+#ifdef ENABLE_MIDI_SUPPORT
+#include "sys_midi_windows.h"
+#endif /* ENABLE_MIDI_SUPPORT */
+
 #endif /* __CYGWIN32__ */
-
-#include "sys_beep_windows.h"
-
-#include "sys_ports_windows.h"
 
 
 /* ntdll.dll */
