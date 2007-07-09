@@ -1197,7 +1197,7 @@ static int handleUnauthorizedConnection(Connection *c, brlapi_packetType_t type,
 {
   if (c->auth == -1) {
     if (type != BRLAPI_PACKET_VERSION) {
-      WERR(c->fd, BRLAPI_ERROR_CONNREFUSED, "wrong packet type (should be version)");
+      WERR(c->fd, BRLAPI_ERROR_PROTOCOL_VERSION, "wrong packet type (should be version)");
       return 1;
     }
 
@@ -1229,7 +1229,7 @@ static int handleUnauthorizedConnection(Connection *c, brlapi_packetType_t type,
   }
 
   if (type!=BRLAPI_PACKET_AUTH) {
-    WERR(c->fd, BRLAPI_ERROR_CONNREFUSED, "wrong packet type (should be auth)");
+    WERR(c->fd, BRLAPI_ERROR_PROTOCOL_VERSION, "wrong packet type (should be auth)");
     return 1;
   }
 
@@ -1271,7 +1271,7 @@ static int handleUnauthorizedConnection(Connection *c, brlapi_packetType_t type,
     }
 
     if (!authCorrect) {
-      writeError(c->fd, BRLAPI_ERROR_CONNREFUSED);
+      writeError(c->fd, BRLAPI_ERROR_AUTHENTICATION);
       LogPrint(LOG_WARNING, "BrlAPI connection fd=%"PRIFD" failed authorization", c->fd);
       return 0;
     }

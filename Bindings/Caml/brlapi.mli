@@ -89,6 +89,7 @@ type errorCode =
   | EOF
   | EMPTYKEY
   | DRIVERERROR
+  | AUTHENTICATION
   | Unknown of int
 
 type error = {

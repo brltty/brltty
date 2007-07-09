@@ -1302,7 +1302,7 @@ other types of packets might be used, other <tt/BRLAPI_PACKET_AUTH/ shouldn't be
 sent by the client.
 
 If the authorization is not successful, the server sends a
-<tt/BRLAPI_ERROR_CONNREFUSED/ error, and the client can try another
+<tt/BRLAPI_ERROR_AUTHENTICATION/ error, and the client can try another
 authorization method.
 
 Authorization methods are as follow:

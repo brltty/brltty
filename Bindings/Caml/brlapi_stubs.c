@@ -108,6 +108,7 @@ static value constrCamlError(const brlapi_error_t *err)
     case BRLAPI_ERROR_EOF: v = Val_int(11); break;
     case BRLAPI_ERROR_EMPTYKEY: v = Val_int(12); break; 
     case BRLAPI_ERROR_DRIVERERROR: v = Val_int(13); break;
+    case BRLAPI_ERROR_AUTHENTICATION: v = Val_int(14); break;
     default: {
       v = caml_alloc(1, 2);
       Store_field(v, 0, Val_int(err->brlerrno));

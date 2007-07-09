@@ -660,7 +660,7 @@ brlapi_fileDescriptor BRLAPI_STDCALL brlapi__openConnection(brlapi_handle_t *han
   }
 
   /* no suitable authorization method */
-  brlapi_errno = BRLAPI_ERROR_CONNREFUSED;
+  brlapi_errno = BRLAPI_ERROR_AUTHENTICATION;
 outfd:
   closeFileDescriptor(handle->fileDescriptor);
   handle->fileDescriptor = INVALID_FILE_DESCRIPTOR;
@@ -1795,6 +1795,7 @@ const char *brlapi_errlist[] = {
   "Unexpected end of file",             /* BRLAPI_ERROR_EOF */
   "Key file is empty",                  /* BRLAPI_ERROR_EMPTYKEY */
   "Driver error",                       /* BRLAPI_ERROR_DRIVERERROR */
+  "Authentication failed",              /* BRLAPI_ERROR_AUTHENTICATION */
 };
 
 /* brlapi_nerr: last error number */

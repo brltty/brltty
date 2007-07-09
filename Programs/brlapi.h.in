@@ -927,6 +927,7 @@ int BRLAPI_STDCALL brlapi__resumeDriver(brlapi_handle_t *handle);
 #define BRLAPI_ERROR_EOF                  14  /**< Unexpected end of file */
 #define BRLAPI_ERROR_EMPTYKEY             15  /**< Key file empty */
 #define BRLAPI_ERROR_DRIVERERROR          16  /**< Packet returned by driver too large */
+#define BRLAPI_ERROR_AUTHENTICATION       17  /**< Authentication failed */
 
 /* brlapi_errlist */
 /** Error message list
