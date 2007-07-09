@@ -1141,7 +1141,7 @@ int brlapi__writeText(brlapi_handle_t *handle, int cursor, const char *str)
     if (wide)
       len = sizeof(wchar_t) * wcslen(str);
     else
-#elif defiend(__MINGW32__)
+#elif defined(__MINGW32__)
     if (CHECKGETPROC("ntdll.dll", wcslen) && wide)
       len = sizeof(wchar_t) * wcslenProc(str);
     else
