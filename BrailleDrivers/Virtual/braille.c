@@ -52,6 +52,7 @@
 #ifdef WINDOWS
 #undef AF_LOCAL
 #endif /* WINDOWS */
+
 #ifdef __MINGW32__
 #define close(fd) CloseHandle((HANDLE)(fd))
 #define LogSocketError(msg) LogWindowsSocketError(msg)
