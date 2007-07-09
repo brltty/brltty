@@ -1076,10 +1076,10 @@ static size_t getCharset(unsigned char *buffer)
 #else /* WORDS_BIGENDIAN */
 #define WIN_WCHAR_T "UCS-2LE"
 #endif /* WORDS_BIGENDIAN */
-#ifdef __MINGW32__
-  if (CHECKPROC("ntdll.dll", wcslen) && wide) {
-#else /* __CYGWIN32__ */
+#ifdef __CYGWIN32__
   if (wide) {
+#else /* __CYGWIN32__ */
+  if (CHECKPROC("ntdll.dll", wcslen) && wide) {
 #endif /* __CYGWIN32__ */
     *p++ = strlen(WIN_WCHAR_T);
     strcpy(p, WIN_WCHAR_T);
@@ -1137,13 +1137,13 @@ int brlapi__writeText(brlapi_handle_t *handle, int cursor, const char *str)
     wa->flags |= BRLAPI_WF_TEXT;
     size = (uint32_t *) p;
     p += sizeof(*size);
-#ifdef __MINGW32__
-    if (CHECKGETPROC("ntdll.dll", wcslen) && wide)
-      len = sizeof(wchar_t) * wcslenProc(str);
-    else
-#elif defined(__CYGWIN32__)
+#if defined(__CYGWIN32__)
     if (wide)
       len = sizeof(wchar_t) * wcslen(str);
+    else
+#elif defiend(__MINGW32__)
+    if (CHECKGETPROC("ntdll.dll", wcslen) && wide)
+      len = sizeof(wchar_t) * wcslenProc(str);
     else
 #endif /* __CYGWIN32__ */
       len = strlen(str);
@@ -1296,13 +1296,13 @@ int brlapi__write(brlapi_handle_t *handle, const brlapi_writeArguments_t *s)
     if (s->textSize != -1)
       strLen = s->textSize;
     else
-#ifdef __MINGW32__
-      if (CHECKGETPROC("ntdll.dll", wcslen) && wide)
-	strLen = sizeof(wchar_t) * wcslenProc((wchar_t *) s->text);
-      else
-#elif defined(__CYGWIN32__)
+#if defined(__CYGWIN32__)
       if (wide)
 	strLen = sizeof(wchar_t) * wcslen((wchar_t *) s->text);
+      else
+#elif defined(__MINGW32__)
+      if (CHECKGETPROC("ntdll.dll", wcslen) && wide)
+	strLen = sizeof(wchar_t) * wcslenProc((wchar_t *) s->text);
       else
 #endif /* __CYGWIN32__ */
 	strLen = strlen(s->text);
