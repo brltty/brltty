@@ -227,11 +227,7 @@ usbReadEndpoint (
     errno = -result;
   }
 
-  if (errno != EAGAIN)
-#ifdef ETIMEDOUT
-    if (errno != ETIMEDOUT)
-#endif /* ETIMEDOUT */
-      LogError("USB endpoint read");
+  if (errno != EAGAIN) LogError("USB endpoint read");
   return -1;
 }
 
