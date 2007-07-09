@@ -24,10 +24,10 @@
 #include <errno.h>
 #include <fcntl.h>
 
-#ifdef WINDOWS
+#ifdef __MINGW32__
 #include <ws2tcpip.h>
 #include "Programs/sys_windows.h"
-#else /* WINDOWS */
+#else /* __MINGW32__ */
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <netinet/in.h>
@@ -39,7 +39,7 @@
 #else /* HAVE_SYS_SELECT_H */
 #include <sys/time.h>
 #endif /* HAVE_SYS_SELECT_H */
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
 
 #if !defined(AF_LOCAL) && defined(AF_UNIX)
 #define AF_LOCAL AF_UNIX
@@ -51,11 +51,13 @@
  
 #ifdef WINDOWS
 #undef AF_LOCAL
+#endif /* WINDOWS */
+#ifdef __MINGW32__
 #define close(fd) CloseHandle((HANDLE)(fd))
 #define LogSocketError(msg) LogWindowsSocketError(msg)
-#else /* WINDOWS */
+#else /* __MINGW32__ */
 #define LogSocketError(msg) LogError(msg)
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
 
 #include "Programs/misc.h"
 #include "Programs/cmd.h"
@@ -99,9 +101,9 @@ typedef struct {
   int (*getLocalConnection) (const struct sockaddr_un *address);
 #endif /* AF_LOCAL */
 
-#ifdef WINDOWS
+#ifdef __MINGW32__
   int (*getNamedPipeConnection) (const char *path);
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
 
   int (*getInetConnection) (const struct sockaddr_in *address);
 } ModeEntry;
@@ -342,7 +344,7 @@ requestLocalConnection (const struct sockaddr_un *remoteAddress) {
 }
 #endif /* AF_LOCAL */
 
-#ifdef WINDOWS
+#ifdef __MINGW32__
 static int
 readNamedPipe (int descriptor, void *buffer, int size) {
   {
@@ -447,7 +449,7 @@ requestNamedPipeConnection (const char *path) {
   operations = &namedPipeOperationsEntry;
   return (int)h;
 }
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
 
 static int
 setInetAddress (const char *string, struct sockaddr_in *address) {
@@ -614,7 +616,7 @@ flushOutput (void) {
   size_t length = outputLength;
 
   while (length) {
-#ifdef WINDOWS
+#ifdef __MINGW32__
     DWORD sent;
     OVERLAPPED overl = {0,0,0,0,CreateEvent(NULL,TRUE,FALSE,NULL)};
     if ((!WriteFile((HANDLE) fileDescriptor, buffer, length, &sent, &overl)
@@ -626,7 +628,7 @@ flushOutput (void) {
         return 0;
       }
     CloseHandle(overl.hEvent);
-#else /* WINDOWS */
+#else /* __MINGW32__ */
     int sent;
     sent = send(fileDescriptor, buffer, length, 0);
 
@@ -636,7 +638,7 @@ flushOutput (void) {
       memmove(outputBuffer, buffer, (outputLength = length));
       return 0;
     }
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
 
     buffer += sent;
     length -= sent;
@@ -889,9 +891,9 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
       requestLocalConnection,
 #endif /* AF_LOCAL */
 
-#ifdef WINDOWS
+#ifdef __MINGW32__
       requestNamedPipeConnection,
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
 
       requestInetConnection
     };
@@ -902,9 +904,9 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
       acceptLocalConnection,
 #endif /* AF_LOCAL */
 
-#ifdef WINDOWS
+#ifdef __MINGW32__
       acceptNamedPipeConnection,
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
 
       acceptInetConnection
     };
@@ -924,7 +926,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
   } else
 #endif /* AF_LOCAL */
 
-#ifdef WINDOWS
+#ifdef __MINGW32__
   if (device[0] == '\\') {
     fileDescriptor = mode->getNamedPipeConnection(device);
   } else {
@@ -934,7 +936,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
       goto failed;
     }
   }
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
 
   {
     struct sockaddr_in address;

@@ -18,6 +18,10 @@
 #include "prologue.h"
 #include "sys_windows.h"
 
+#include <fcntl.h>
+#include <errno.h>
+#include <sys/ioctl.h>
+
 #include "misc.h"
 #include "system.h"
 
@@ -31,7 +35,7 @@
 
 #include "sys_shlib_windows.h"
 
-#include "sys_beep_windows.h"
+#ifdef __MINGW32__
 
 #ifdef ENABLE_PCM_SUPPORT
 #include "sys_pcm_windows.h"
@@ -40,6 +44,27 @@
 #ifdef ENABLE_MIDI_SUPPORT
 #include "sys_midi_windows.h"
 #endif /* ENABLE_MIDI_SUPPORT */
+
+#else /* __CYGWIN32__ */
+
+#include "sys_exec_unix.h"
+
+#define SHARED_OBJECT_LOAD_FLAGS (RTLD_NOW | RTLD_GLOBAL)
+#include "sys_shlib_dlfcn.h"
+
+#ifdef ENABLE_PCM_SUPPORT
+#define PCM_OSS_DEVICE_PATH "/dev/dsp"
+#include "sys_pcm_oss.h"
+#endif /* ENABLE_PCM_SUPPORT */
+
+#ifdef ENABLE_MIDI_SUPPORT
+#define MIDI_OSS_DEVICE_PATH "/dev/sequencer"
+#include "sys_midi_oss.h"
+#endif /* ENABLE_MIDI_SUPPORT */
+
+#endif /* __CYGWIN32__ */
+
+#include "sys_beep_windows.h"
 
 #include "sys_ports_windows.h"
 
@@ -57,9 +82,11 @@ WIN_PROC_STUB(GetAltTabInfoA);
 WIN_PROC_STUB(SendInput);
 
 
+#ifdef __MINGW32__
 /* ws2_32.dll */
 WIN_PROC_STUB(getaddrinfo);
 WIN_PROC_STUB(freeaddrinfo);
+#endif /* __MINGW32__ */
 
 
 static void *
@@ -96,8 +123,10 @@ sysInit (void) {
     GET_PROC(SendInput);
   }
 
+#ifdef __MINGW32__
   if (LOAD_LIBRARY("ws2_32.dll")) {
     GET_PROC(getaddrinfo);
     GET_PROC(freeaddrinfo);
   }
+#endif /* __MINGW32__ */
 }

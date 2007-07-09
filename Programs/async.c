@@ -21,7 +21,7 @@
 #include <errno.h>
 #include <sys/time.h>
 
-#if defined(WINDOWS)
+#if defined(__MINGW32__)
 
 typedef HANDLE MonitorEntry;
 
@@ -96,7 +96,7 @@ struct FunctionEntryStruct {
   const FunctionMethods *methods;
   Queue *operations;
 
-#if defined(WINDOWS)
+#if defined(__MINGW32__)
   OVERLAPPED ol;
 #elif defined(HAVE_SYS_POLL_H)
   short pollEvents;
@@ -110,7 +110,7 @@ typedef struct {
   const FunctionMethods *methods;
 } FunctionKey;
 
-#ifdef WINDOWS
+#ifdef __MINGW32__
 static void
 prepareMonitors (void) {
 }
@@ -248,7 +248,7 @@ finishWindowsTransferOperation (OperationEntry *operation) {
   DWORD success = GetOverlappedResult(function->fileDescriptor, &function->ol, &count, FALSE);
   setWindowsTransferResult(operation, success, count);
 }
-#else /* WINDOWS */
+#else /* __MINGW32__ */
 #ifdef HAVE_SYS_POLL_H
 static void
 prepareMonitors (void) {
@@ -411,7 +411,7 @@ finishUnixWrite (OperationEntry *operation) {
                      extension->size - extension->length);
   setUnixTransferResult(operation, result);
 }
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
 
 static int
 invokeInputCallback (OperationEntry *operation) {
@@ -646,15 +646,15 @@ asyncRead (
   AsyncInputCallback callback, void *data
 ) {
   static const FunctionMethods methods = {
-#ifdef WINDOWS
+#ifdef __MINGW32__
     .beginFunction = beginWindowsFunction,
     .endFunction = endWindowsFunction,
     .startOperation = startWindowsRead,
     .finishOperation = finishWindowsTransferOperation,
-#else /* WINDOWS */
+#else /* __MINGW32__ */
     .beginFunction = beginUnixInputFunction,
     .finishOperation = finishUnixRead,
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
     .invokeCallback = invokeInputCallback
   };
 
@@ -668,15 +668,15 @@ asyncWrite (
   AsyncOutputCallback callback, void *data
 ) {
   static const FunctionMethods methods = {
-#ifdef WINDOWS
+#ifdef __MINGW32__
     .beginFunction = beginWindowsFunction,
     .endFunction = endWindowsFunction,
     .startOperation = startWindowsWrite,
     .finishOperation = finishWindowsTransferOperation,
-#else /* WINDOWS */
+#else /* __MINGW32__ */
     .beginFunction = beginUnixOutputFunction,
     .finishOperation = finishUnixWrite,
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
     .invokeCallback = invokeOutputCallback
   };
 

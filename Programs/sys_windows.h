@@ -48,6 +48,7 @@ extern WIN_PROC_STUB(SendInput);
 
 
 /* ws2_32.dll */
+#ifdef __MINGW32__
 #include <ws2tcpip.h>
 
 extern WIN_PROC_STUB(getaddrinfo);
@@ -55,6 +56,7 @@ extern WIN_PROC_STUB(freeaddrinfo);
 
 #define getaddrinfo(host,port,hints,res) getaddrinfoProc(host,port,hints,res)
 #define freeaddrinfo(res) freeaddrinfoProc(res)
+#endif /* __MINGW32__ */
 
 
 extern void sysInit (void);

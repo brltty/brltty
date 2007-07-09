@@ -368,10 +368,13 @@ AC_SUBST([CONFLIBDIR], ["${brltty_cv_prog_conflibdir}"])
 
 case "${host_os}"
 in
-   cygwin*|mingw*)
+   mingw*)
       BRLTTY_HAVE_WINDOWS_LIBRARY([ws2_32])
       BRLTTY_HAVE_WINDOWS_LIBRARY([gdi32])
       BRLTTY_HAVE_WINDOWS_LIBRARY([winmm])
+      ;;
+   cygwin*)
+      BRLTTY_HAVE_WINDOWS_LIBRARY([gdi32])
       ;;
    *)
       AC_SEARCH_LIBS([socket], [socket])

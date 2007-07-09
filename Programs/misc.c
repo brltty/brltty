@@ -184,11 +184,13 @@ LogWindowsError (const char *action) {
   DWORD error = GetLastError();
   LogWindowsCodeError(error, action);
 }
+#ifdef __MINGW32__
 void
 LogWindowsSocketError(const char *action) {
   DWORD error = WSAGetLastError();
   LogWindowsCodeError(error, action);
 }
+#endif /* __MINGW32__ */
 #endif /* WINDOWS */
 
 void
@@ -296,9 +298,9 @@ int
 isAbsolutePath (const char *path) {
   if (isPathDelimiter(path[0])) return 1;
 
-#if defined(WINDOWS) || defined(__MSDOS__)
+#if defined(__MINGW32__) || defined(__MSDOS__)
   if (strchr("ABCDEFGHIJKLMNOPQRSTUVWXYZ", toupper(path[0])) && (path[1] == ':')) return 1;
-#endif /* defined(WINDOWS) || defined(__MSDOS__) */
+#endif /* defined(__MINGW32__) || defined(__MSDOS__) */
 
   return 0;
 }
@@ -703,9 +705,7 @@ formatInputError (char *buffer, int size, const char *file, const int *line, con
 void
 approximateDelay (int milliseconds) {
   if (milliseconds > 0) {
-#if defined(__CYGWIN__)
-    usleep(milliseconds*1000);
-#elif defined(WINDOWS)
+#if defined(__MINGW32__)
     Sleep(milliseconds);
 #elif defined(__MSDOS__)
     tsr_usleep(milliseconds*1000);

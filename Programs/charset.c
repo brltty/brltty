@@ -104,7 +104,7 @@ CHARSET_CONVERT_TYPE_TO_TYPE(CharToWchar, char, wchar_t, wint_t, WEOF)
 CHARSET_CONVERT_TYPE_TO_TYPE(WcharToChar, wchar_t, unsigned char, int, EOF)
 #undef CHARSET_CONVERT_TYPE_TO_TYPE
 
-#elif defined(WINDOWS)
+#elif defined(__MINGW32__)
 
 #if defined(CP_THREAD_ACP)
 #define CURRENT_CODEPAGE CP_THREAD_ACP

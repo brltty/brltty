@@ -29,26 +29,19 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <wchar.h>
-#ifndef WINDOWS
+#ifndef __MINGW32__
 #include <langinfo.h>
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
 #include <locale.h>
 
-#ifdef WINDOWS
-#include <ws2tcpip.h>
-
 #ifdef __MINGW32__
+#include <ws2tcpip.h>
 #include "win_pthread.h"
-#else /* __MINGW32__ */
-#include <pthread.h>
-#include <semaphore.h>
-#endif /* __MINGW32__ */
-
 #include "misc.h"
 
 #define syslog(level,fmt,...) fprintf(stderr,#level ": " fmt, ## __VA_ARGS__)
 
-#else /* WINDOWS */
+#else /* __MINGW32__ */
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <netinet/in.h>
@@ -66,7 +59,7 @@
 #endif /* HAVE_SYS_SELECT_H */
 
 #define setSocketErrno()
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
 
 #ifdef HAVE_ALLOCA_H
 #include <alloca.h>
@@ -109,7 +102,9 @@
 #define STCONTROLLINGTTY 8
 
 #ifdef WINDOWS
+#ifdef __MINGW32__
 static WSADATA wsadata;
+#endif /* __MINGW32__ */
 
 static void* GetProc(const char *library, const char *fun) {
   HMODULE module;
@@ -129,12 +124,14 @@ static void* GetProc(const char *library, const char *fun) {
 
 static WIN_PROC_STUB(GetConsoleWindow);
 
+#ifdef __MINGW32__
 static WIN_PROC_STUB(wcslen);
 
 static WIN_PROC_STUB(getaddrinfo);
 #define getaddrinfo(host,port,hints,res) getaddrinfoProc(host,port,hints,res)
 static WIN_PROC_STUB(freeaddrinfo);
 #define freeaddrinfo(res) freeaddrinfoProc(res)
+#endif /* __MINGW32__ */
 #endif /* WINDOWS */
 
 /** key presses buffer size
@@ -393,7 +390,7 @@ static int tryHost(brlapi_handle_t *handle, char *hostAndPort) {
   char *port;
   SocketDescriptor sockfd = -1;
 
-#ifdef WINDOWS
+#ifdef __MINGW32__
   if (WSAStartup(
 #ifdef HAVE_GETADDRINFO
 	  MAKEWORD(2,0),
@@ -402,7 +399,7 @@ static int tryHost(brlapi_handle_t *handle, char *hostAndPort) {
 #endif /* HAVE_GETADDRINFO */
 	  &wsadata))
     return -1;
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
 
   handle->addrfamily = brlapi_expandHost(hostAndPort,&host,&port);
 
@@ -410,7 +407,7 @@ static int tryHost(brlapi_handle_t *handle, char *hostAndPort) {
   if (handle->addrfamily == PF_LOCAL) {
     int lpath = strlen(BRLAPI_SOCKETPATH),lport;
     lport = strlen(port);
-#ifdef WINDOWS
+#ifdef __MINGW32__
     {
       char path[lpath+lport+1];
       memcpy(path,BRLAPI_SOCKETPATH,lpath);
@@ -425,7 +422,7 @@ static int tryHost(brlapi_handle_t *handle, char *hostAndPort) {
 	WaitNamedPipe(path,NMPWAIT_WAIT_FOREVER);
       }
     }
-#else /* WINDOWS */
+#else /* __MINGW32__ */
     {
       struct sockaddr_un sa;
       if (lpath+lport+1>sizeof(sa.sun_path)) {
@@ -448,17 +445,17 @@ static int tryHost(brlapi_handle_t *handle, char *hostAndPort) {
         goto outlibc;
       }
     }
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
   } else {
 #else /* PF_LOCAL */
   if (0) {} else {
 #endif /* PF_LOCAL */
 
-#ifdef WINDOWS
+#ifdef __MINGW32__
     if (CHECKGETPROC("ws2_32.dll",getaddrinfo)
 	&& CHECKGETPROC("ws2_32.dll",freeaddrinfo)) {
-#endif /* WINDOWS */
-#if defined(HAVE_GETADDRINFO) || defined(WINDOWS)
+#endif /* __MINGW32__ */
+#if defined(HAVE_GETADDRINFO) || defined(__MINGW32__)
 
     struct addrinfo *res,*cur;
     struct addrinfo hints;
@@ -490,10 +487,10 @@ static int tryHost(brlapi_handle_t *handle, char *hostAndPort) {
     }
 
 #endif /* HAVE_GETADDRINFO */
-#ifdef WINDOWS
+#ifdef __MINGW32__
     } else {
-#endif /* WINDOWS */
-#if !defined(HAVE_GETADDRINFO) || defined(WINDOWS)
+#endif /* __MINGW32__ */
+#if !defined(HAVE_GETADDRINFO) || defined(__MINGW32__)
 
     struct sockaddr_in addr;
     struct hostent *he;
@@ -555,9 +552,9 @@ static int tryHost(brlapi_handle_t *handle, char *hostAndPort) {
     }
 
 #endif /* !HAVE_GETADDRINFO */
-#ifdef WINDOWS
+#ifdef __MINGW32__
     }
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
 
     handle->fileDescriptor = (FileDescriptor) sockfd;
   }
@@ -693,9 +690,9 @@ void BRLAPI_STDCALL brlapi__closeConnection(brlapi_handle_t *handle)
   closeFileDescriptor(handle->fileDescriptor);
   handle->fileDescriptor = INVALID_FILE_DESCRIPTOR;
   pthread_mutex_unlock(&handle->fileDescriptor_mutex);
-#ifdef WINDOWS
+#ifdef __MINGW32__
   WSACleanup();
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
 }
 
 void BRLAPI_STDCALL brlapi_closeConnection(void)
@@ -1079,7 +1076,11 @@ static size_t getCharset(unsigned char *buffer)
 #else /* WORDS_BIGENDIAN */
 #define WIN_WCHAR_T "UCS-2LE"
 #endif /* WORDS_BIGENDIAN */
+#ifdef __MINGW32__
   if (CHECKPROC("ntdll.dll", wcslen) && wide) {
+#else /* __CYGWIN32__ */
+  if (wide) {
+#endif /* __CYGWIN32__ */
     *p++ = strlen(WIN_WCHAR_T);
     strcpy(p, WIN_WCHAR_T);
     p += strlen(WIN_WCHAR_T);
@@ -1136,11 +1137,15 @@ int brlapi__writeText(brlapi_handle_t *handle, int cursor, const char *str)
     wa->flags |= BRLAPI_WF_TEXT;
     size = (uint32_t *) p;
     p += sizeof(*size);
-#ifdef WINDOWS
+#ifdef __MINGW32__
     if (CHECKGETPROC("ntdll.dll", wcslen) && wide)
       len = sizeof(wchar_t) * wcslenProc(str);
     else
-#endif /* WINDOWS */
+#elif defined(__CYGWIN32__)
+    if (wide)
+      len = sizeof(wchar_t) * wcslen(str);
+    else
+#endif /* __CYGWIN32__ */
       len = strlen(str);
     if (locale && strcmp(locale,"C")) {
       mbstate_t ps;
@@ -1291,11 +1296,15 @@ int brlapi__write(brlapi_handle_t *handle, const brlapi_writeArguments_t *s)
     if (s->textSize != -1)
       strLen = s->textSize;
     else
-#ifdef WINDOWS
+#ifdef __MINGW32__
       if (CHECKGETPROC("ntdll.dll", wcslen) && wide)
 	strLen = sizeof(wchar_t) * wcslenProc((wchar_t *) s->text);
       else
-#endif /* WINDOWS */
+#elif defined(__CYGWIN32__)
+      if (wide)
+	strLen = sizeof(wchar_t) * wcslen((wchar_t *) s->text);
+      else
+#endif /* __CYGWIN32__ */
 	strLen = strlen(s->text);
     *((uint32_t *) p) = htonl(strLen); p += sizeof(uint32_t);
     wa->flags |= BRLAPI_WF_TEXT;
@@ -1384,7 +1393,7 @@ int brlapi_write(const brlapi_writeArguments_t *s)
 /* packet ready to be read */
 static int packetReady(brlapi_handle_t *handle)
 {
-#ifdef WINDOWS
+#ifdef __MINGW32__
   if (handle->addrfamily == PF_LOCAL) {
     DWORD avail;
     if (!PeekNamedPipe(handle->fileDescriptor, NULL, 0, NULL, &avail, NULL)) {
@@ -1396,18 +1405,18 @@ static int packetReady(brlapi_handle_t *handle)
     return avail!=0;
   } else {
     SOCKET fd = (SOCKET) handle->fileDescriptor;
-#else /* WINDOWS */
+#else /* __MINGW32__ */
   int fd = handle->fileDescriptor;
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
   fd_set set;
   struct timeval timeout;
   memset(&timeout, 0, sizeof(timeout));
   FD_ZERO(&set);
   FD_SET(fd, &set);
   return select(fd+1, &set, NULL, NULL, &timeout);
-#ifdef WINDOWS
+#ifdef __MINGW32__
   }
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
 }
 
 /* Function : brlapi_readKey */
@@ -1810,7 +1819,7 @@ const char * BRLAPI_STDCALL brlapi_strerror(const brlapi_error_t *error)
 #else
 	"%d\n", error->gaierrno
 #endif
-#elif defined(HAVE_HSTRERROR) && !defined(WINDOWS)
+#elif defined(HAVE_HSTRERROR) && !defined(__MINGW32__)
 	"%s\n", hstrerror(error->gaierrno)
 #else
 	"%x\n", error->gaierrno

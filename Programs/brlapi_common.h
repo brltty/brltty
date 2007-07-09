@@ -27,14 +27,14 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 
-#ifdef WINDOWS
+#ifdef __MINGW32__
 #include <io.h>
-#else /* WINDOWS */
+#else /* __MINGW32__ */
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
 
 #if !defined(AF_LOCAL) && defined(AF_UNIX)
 #define AF_LOCAL AF_UNIX
@@ -52,9 +52,6 @@
 #define MAX(a, b) (((a) > (b))? (a): (b))
 #endif /* MAX */
 
-#ifndef WINDOWS
-#define get_osfhandle(fd) (fd)
-#endif /* WINDOWS */
 #ifdef __MINGW32__
 #define get_osfhandle(fd) _get_osfhandle(fd)
 #endif /* __MINGW32__ */
@@ -70,13 +67,13 @@ static ssize_t brlapi_writeFile(brlapi_fileDescriptor fd, const void *buffer, si
 {
   const unsigned char *buf = buffer;
   size_t n;
-#ifdef WINDOWS
+#ifdef __MINGW32__
   DWORD res=0;
-#else /* WINDOWS */
+#else /* __MINGW32__ */
   ssize_t res=0;
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
   for (n=0;n<size;n+=res) {
-#ifdef WINDOWS
+#ifdef __MINGW32__
     OVERLAPPED overl = {0,0,0,0,CreateEvent(NULL,TRUE,FALSE,NULL)};
     if ((!WriteFile(fd,buf+n,size-n,&res,&overl)
       && GetLastError() != ERROR_IO_PENDING) ||
@@ -87,7 +84,7 @@ static ssize_t brlapi_writeFile(brlapi_fileDescriptor fd, const void *buffer, si
       return -1;
     }
     CloseHandle(overl.hEvent);
-#else /* WINDOWS */
+#else /* __MINGW32__ */
     res=send(fd,buf+n,size-n,0);
     if ((res<0) &&
         (errno!=EINTR) &&
@@ -97,7 +94,7 @@ static ssize_t brlapi_writeFile(brlapi_fileDescriptor fd, const void *buffer, si
         (errno!=EAGAIN)) { /* EAGAIN shouldn't happen, but who knows... */
       return res;
     }
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
   }
   return n;
 }
@@ -108,13 +105,13 @@ static ssize_t brlapi_readFile(brlapi_fileDescriptor fd, void *buffer, size_t si
 {
   unsigned char *buf = buffer;
   size_t n;
-#ifdef WINDOWS
+#ifdef __MINGW32__
   DWORD res=0;
-#else /* WINDOWS */
+#else /* __MINGW32__ */
   ssize_t res=0;
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
   for (n=0;n<size && res>=0;n+=res) {
-#ifdef WINDOWS
+#ifdef __MINGW32__
     OVERLAPPED overl = {0,0,0,0,CreateEvent(NULL,TRUE,FALSE,NULL)};
     if ((!ReadFile(fd,buf+n,size-n,&res,&overl)
       && GetLastError() != ERROR_IO_PENDING) ||
@@ -126,7 +123,7 @@ static ssize_t brlapi_readFile(brlapi_fileDescriptor fd, void *buffer, size_t si
       return -1;
     }
     CloseHandle(overl.hEvent);
-#else /* WINDOWS */
+#else /* __MINGW32__ */
     res=read(fd,buf+n,size-n);
     if (res<0) {
       if ((errno!=EINTR) &&
@@ -139,7 +136,7 @@ static ssize_t brlapi_readFile(brlapi_fileDescriptor fd, void *buffer, size_t si
       if (!loop && !n) return -1; /* Nothing read yet, report EINTR */
       /* else, continue reading */
     }
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
     if (res==0)
       /* Unexpected end of file ! */
       break;
@@ -252,11 +249,11 @@ static int BRLAPI(loadAuthKey)(const char *filename, size_t *authlength, void *a
   }
 
   *authlength = brlapi_readFile(
-#ifdef WINDOWS
+#ifdef __MINGW32__
 		  (HANDLE) get_osfhandle(fd),
-#else /* WINDOWS */
+#else /* __MINGW32__ */
 		  fd,
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
 		  auth, stsize, 1);
 
   if (*authlength!=(size_t)stsize) {

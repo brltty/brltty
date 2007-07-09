@@ -35,7 +35,7 @@
 #endif /* __MINGW32__ */
 #endif /* HAVE_POSIX_THREADS */
 
-#if defined(WINDOWS)
+#if defined(__MINGW32__)
 
 #ifdef __MINGW32__
 #include <io.h>
@@ -160,9 +160,9 @@ struct SerialDeviceStruct {
   unsigned flowControlRunning:1;
 #endif /* HAVE_POSIX_THREADS */
 
-#ifdef WINDOWS
+#ifdef __MINGW32__
   HANDLE fileHandle;
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
 
 #ifdef __MSDOS__
   int port;
@@ -174,7 +174,7 @@ typedef struct {
   SerialSpeed speed;
 } BaudEntry;
 static const BaudEntry baudTable[] = {
-#if defined(WINDOWS)
+#if defined(__MINGW32__)
 
 #ifdef CBR_110
   {110, CBR_110},
@@ -404,7 +404,7 @@ serialWritePort (SerialDevice *serial, unsigned char port, unsigned char value) 
 static void
 serialInitializeAttributes (SerialAttributes *attributes) {
   memset(attributes, 0, sizeof(*attributes));
-#if defined(WINDOWS)
+#if defined(__MINGW32__)
   attributes->DCBlength = sizeof(*attributes);
   attributes->fBinary = TRUE;
   attributes->ByteSize = 8;
@@ -441,7 +441,7 @@ serialInitializeAttributes (SerialAttributes *attributes) {
 
 static int
 serialSetSpeed (SerialDevice *serial, SerialSpeed speed) {
-#if defined(WINDOWS)
+#if defined(__MINGW32__)
   serial->pendingAttributes.BaudRate = speed;
   return 1;
 #elif defined(__MSDOS__)
@@ -498,7 +498,7 @@ serialValidateBaud (int *baud, const char *description, const char *word, const 
 
 int
 serialSetDataBits (SerialDevice *serial, int bits) {
-#if defined(WINDOWS) || defined(__MSDOS__)
+#if defined(__MINGW32__) || defined(__MSDOS__)
   if ((bits < 5) || (bits > 8)) {
 #else /* UNIX */
   tcflag_t size;
@@ -525,7 +525,7 @@ serialSetDataBits (SerialDevice *serial, int bits) {
       return 0;
   }
 
-#if defined(WINDOWS)
+#if defined(__MINGW32__)
   serial->pendingAttributes.ByteSize = bits;
 #elif defined(__MSDOS__)
   serial->pendingAttributes.bios.fields.bits = bits - 5;
@@ -538,7 +538,7 @@ serialSetDataBits (SerialDevice *serial, int bits) {
 
 int
 serialSetStopBits (SerialDevice *serial, int bits) {
-#if defined(WINDOWS)
+#if defined(__MINGW32__)
   if (bits == 1) {
     serial->pendingAttributes.StopBits = ONESTOPBIT;
   } else if (bits == 15) {
@@ -565,7 +565,7 @@ serialSetStopBits (SerialDevice *serial, int bits) {
 
 int
 serialSetParity (SerialDevice *serial, SerialParity parity) {
-#if defined(WINDOWS)
+#if defined(__MINGW32__)
   serial->pendingAttributes.fParity = FALSE;
   serial->pendingAttributes.Parity = NOPARITY;
 
@@ -687,7 +687,7 @@ serialStopFlowControlThread (SerialDevice *serial) {
 
 int
 serialSetFlowControl (SerialDevice *serial, SerialFlowControl flow) {
-#if defined(WINDOWS)
+#if defined(__MINGW32__)
   if (flow & SERIAL_FLOW_INPUT_RTS) {
     flow &= ~SERIAL_FLOW_INPUT_RTS;
     serial->pendingAttributes.fRtsControl = RTS_CONTROL_HANDSHAKE;
@@ -782,7 +782,7 @@ serialSetFlowControl (SerialDevice *serial, SerialFlowControl flow) {
     serial->pendingFlowControlProc = NULL;
   }
 
-#if defined(WINDOWS)
+#if defined(__MINGW32__)
 #elif defined(__MSDOS__)
 #else /* UNIX */
   if (serial->pendingFlowControlProc) {
@@ -802,7 +802,7 @@ int
 serialGetCharacterBits (SerialDevice *serial) {
   int bits = 2; /* 1 start bit + 1 stop bit */
 
-#if defined(WINDOWS)
+#if defined(__MINGW32__)
   bits += serial->pendingAttributes.ByteSize;
   if (serial->pendingAttributes.fParity && (serial->pendingAttributes.Parity != NOPARITY)) ++bits;
   if (serial->pendingAttributes.StopBits == TWOSTOPBITS) {
@@ -849,7 +849,7 @@ serialGetCharacterBits (SerialDevice *serial) {
 
 int
 serialDiscardInput (SerialDevice *serial) {
-#if defined(WINDOWS)
+#if defined(__MINGW32__)
   if (PurgeComm(serial->fileHandle, PURGE_RXCLEAR)) return 1;
   LogWindowsError("PurgeComm");
 #elif defined(__MSDOS__)
@@ -865,7 +865,7 @@ serialDiscardInput (SerialDevice *serial) {
 
 int
 serialDiscardOutput (SerialDevice *serial) {
-#if defined(WINDOWS)
+#if defined(__MINGW32__)
   if (PurgeComm(serial->fileHandle, PURGE_TXCLEAR)) return 1;
   LogWindowsError("PurgeComm");
 #elif defined(__MSDOS__)
@@ -894,7 +894,7 @@ int
 serialDrainOutput (SerialDevice *serial) {
   if (!serialFlushOutput(serial)) return 0;
 
-#if defined(WINDOWS)
+#if defined(__MINGW32__)
   if (FlushFileBuffers(serial->fileHandle)) return 1;
   LogWindowsError("FlushFileBuffers");
 #elif defined(__MSDOS__)
@@ -921,7 +921,7 @@ serialCompareAttributes (const SerialAttributes *attributes, const SerialAttribu
 
 static int
 serialReadAttributes (SerialDevice *serial) {
-#if defined(WINDOWS)
+#if defined(__MINGW32__)
   if (GetCommState(serial->fileHandle, &serial->currentAttributes)) return 1;
   LogWindowsError("GetCommState");
 #elif defined(__MSDOS__)
@@ -961,7 +961,7 @@ serialWriteAttributes (SerialDevice *serial, const SerialAttributes *attributes)
   if (!serialCompareAttributes(attributes, &serial->currentAttributes)) {
     if (!serialDrainOutput(serial)) return 0;
 
-#if defined(WINDOWS)
+#if defined(__MINGW32__)
     if (!SetCommState(serial->fileHandle, (SerialAttributes *)attributes)) {
       LogWindowsError("SetCommState");
       return 0;
@@ -1023,7 +1023,7 @@ int
 serialAwaitInput (SerialDevice *serial, int timeout) {
   if (!serialFlushAttributes(serial)) return 0;
 
-#ifdef WINDOWS
+#ifdef __MINGW32__
   COMMTIMEOUTS timeouts = {MAXDWORD, 0, timeout, 0, 0};
   DWORD bytesRead;
   int ret;
@@ -1037,9 +1037,9 @@ serialAwaitInput (SerialDevice *serial, int timeout) {
   if (!ret)
     LogWindowsError("ReadFile");
   return ret;
-#else /* WINDOWS */
+#else /* __MINGW32__ */
   return awaitInput(serial->fileDescriptor, timeout);
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
 }
 
 int
@@ -1050,7 +1050,7 @@ serialReadChunk (
 ) {
   if (!serialFlushAttributes(serial)) return 0;
 
-#ifdef WINDOWS
+#ifdef __MINGW32__
   COMMTIMEOUTS timeouts = {MAXDWORD, 0, initialTimeout, 0, 0};
   DWORD bytesRead;
 
@@ -1094,9 +1094,9 @@ serialReadChunk (
   LogWindowsError("ReadFile");
   setSystemErrno();
   return 0;
-#else /* WINDOWS */
+#else /* __MINGW32__ */
   return readChunk(serial->fileDescriptor, buffer, offset, count, initialTimeout, subsequentTimeout);
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
 }
 
 ssize_t
@@ -1105,15 +1105,15 @@ serialReadData (
   void *buffer, size_t size,
   int initialTimeout, int subsequentTimeout
 ) {
-#ifdef WINDOWS
+#ifdef __MINGW32__
   size_t length = 0;
   if (serialReadChunk(serial, buffer, &length, size, initialTimeout, subsequentTimeout)) return size;
   if (errno == EAGAIN) return length;
   return -1;
-#else /* WINDOWS */
+#else /* __MINGW32__ */
   if (!serialFlushAttributes(serial)) return -1;
   return readData(serial->fileDescriptor, buffer, size, initialTimeout, subsequentTimeout);
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
 }
 
 ssize_t
@@ -1122,7 +1122,7 @@ serialWriteData (
   const void *data, size_t size
 ) {
   if (serialFlushAttributes(serial)) {
-#ifdef WINDOWS
+#ifdef __MINGW32__
     COMMTIMEOUTS timeouts = {MAXDWORD, 0, 0, 0, 15000};
     size_t left = size;
     DWORD bytesWritten;
@@ -1141,17 +1141,17 @@ serialWriteData (
 
     if (!left) return size;
     LogWindowsError("WriteFile");
-#else /* WINDOWS */
+#else /* __MINGW32__ */
     if (writeData(serial->fileDescriptor, data, size) != -1) return size;
     LogError("serial write");
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
   }
   return -1;
 }
 
 static int
 serialGetLines (SerialDevice *serial, SerialLines *lines) {
-#if defined(WINDOWS)
+#if defined(__MINGW32__)
   if (!GetCommModemStatus(serial->fileHandle, &serial->linesState)) {
     LogWindowsError("GetCommModemStatus");
     return 0;
@@ -1174,7 +1174,7 @@ serialGetLines (SerialDevice *serial, SerialLines *lines) {
 
 static int
 serialSetLines (SerialDevice *serial, SerialLines high, SerialLines low) {
-#if defined(WINDOWS)
+#if defined(__MINGW32__)
   DCB dcb;
   if (GetCommState(serial->fileHandle, &dcb)) {
     if (low & SERIAL_LINE_RTS)
@@ -1251,7 +1251,7 @@ serialTestLineDSR (SerialDevice *serial) {
 static int
 serialDefineWaitLines (SerialDevice *serial, SerialLines lines) {
   if (lines != serial->waitLines) {
-#ifdef WINDOWS
+#ifdef __MINGW32__
     DWORD eventMask = 0;
 
     if (lines & SERIAL_LINE_CTS) eventMask |= EV_CTS;
@@ -1263,7 +1263,7 @@ serialDefineWaitLines (SerialDevice *serial, SerialLines lines) {
       LogWindowsError("SetCommMask");
       return 0;
     }
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
 
     serial->waitLines = lines;
   }
@@ -1273,7 +1273,7 @@ serialDefineWaitLines (SerialDevice *serial, SerialLines lines) {
 
 static int
 serialMonitorWaitLines (SerialDevice *serial) {
-#if defined(WINDOWS)
+#if defined(__MINGW32__)
   DWORD event;
   if (WaitCommEvent(serial->fileHandle, &event, NULL)) return 1;
   LogWindowsError("WaitCommEvent");
@@ -1346,10 +1346,10 @@ serialOpenDevice (const char *path) {
   if ((serial = malloc(sizeof(*serial)))) {
     char *device;
     if ((device = getDevicePath(path))) {
-#ifdef WINDOWS
+#ifdef __MINGW32__
       if ((serial->fileHandle = CreateFile(device, GENERIC_READ|GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL)) != INVALID_HANDLE_VALUE) {
         serial->fileDescriptor = -1;
-#else /* WINDOWS */
+#else /* __MINGW32__ */
       if ((serial->fileDescriptor = open(device, O_RDWR|O_NOCTTY|O_NONBLOCK)) != -1) {
 #ifdef __MSDOS__
         char *truePath, *com;
@@ -1360,7 +1360,7 @@ serialOpenDevice (const char *path) {
 #else /* __MSDOS__ */
         if (isatty(serial->fileDescriptor)) {
 #endif /* __MSDOS__ */
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
 
           if (serialReadAttributes(serial)) {
             serialCopyAttributes(&serial->originalAttributes, &serial->currentAttributes);
@@ -1379,19 +1379,19 @@ serialOpenDevice (const char *path) {
 
             LogPrint(LOG_DEBUG, "serial device opened: %s: fd=%d",
                      device,
-#ifdef WINDOWS
+#ifdef __MINGW32__
                      (int)serial->fileHandle
-#else /* WINDOWS */
+#else /* __MINGW32__ */
                      serial->fileDescriptor
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
                      );
             free(device);
             return serial;
           }
 
-#ifdef WINDOWS
+#ifdef __MINGW32__
         CloseHandle(serial->fileHandle);
-#else /* WINDOWS */
+#else /* __MINGW32__ */
 #ifdef __MSDOS__
         } else {
           LogPrint(LOG_ERR, "could not determine port number: %s", device);
@@ -1405,7 +1405,7 @@ serialOpenDevice (const char *path) {
 #endif /* __MSDOS__ */
 
         close(serial->fileDescriptor);
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
       } else {
         LogPrint(LOG_ERR, "cannot open '%s': %s", device, strerror(errno));
       }
@@ -1433,11 +1433,11 @@ serialCloseDevice (SerialDevice *serial) {
     fclose(serial->stream);
   }
 
-#ifdef WINDOWS
+#ifdef __MINGW32__
   else if (serial->fileDescriptor < 0) {
     CloseHandle(serial->fileHandle);
   }
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
 
   else {
     close(serial->fileDescriptor);
@@ -1456,9 +1456,9 @@ serialRestartDevice (SerialDevice *serial, int baud) {
   FlowControlProc flowControlProc = serial->pendingFlowControlProc;
 #endif /* HAVE_POSIX_THREADS */
 
-#ifdef WINDOWS
+#ifdef __MINGW32__
   if (!ClearCommError(serial->fileHandle, NULL, NULL)) return 0;
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
 
   if (serial->stream) clearerr(serial->stream);
   if (!serialDiscardOutput(serial)) return 0;
@@ -1518,7 +1518,7 @@ serialRestartDevice (SerialDevice *serial, int baud) {
 FILE *
 serialGetStream (SerialDevice *serial) {
   if (!serial->stream) {
-#ifdef WINDOWS
+#ifdef __MINGW32__
     if (serial->fileDescriptor < 0) {
 #ifdef __MINGW32__
       if ((serial->fileDescriptor = _open_osfhandle((long)serial->fileHandle, O_RDWR)) < 0) {
@@ -1530,7 +1530,7 @@ serialGetStream (SerialDevice *serial) {
         return NULL;
       }
     }
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
 
     if (!(serial->stream = fdopen(serial->fileDescriptor, "ab+"))) {
       LogError("fdopen");

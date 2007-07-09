@@ -76,9 +76,9 @@ extern "C" {
 /* Define this if the header file syslog.h exists. */
 #undef HAVE_SYSLOG_H
 
-#ifdef WINDOWS
+#ifdef __MINGW32__
 
-#else /* WINDOWS */
+#else /* __MINGW32__ */
 
 /* Define this if the header file sys/poll.h exists. */
 #undef HAVE_SYS_POLL_H
@@ -86,7 +86,7 @@ extern "C" {
 /* Define this if the header file sys/select.h exists. */
 #undef HAVE_SYS_SELECT_H
 
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
 
 /* Define this if the header file sys/wait.h exists,
  * but not for DOS since it wouldn't make sense. 

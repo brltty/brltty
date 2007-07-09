@@ -75,12 +75,13 @@ extern "C" {
 
 #ifdef WINDOWS
 #define getSystemError() GetLastError()
-#define getSocketError() WSAGetLastError()
 
 #ifdef __CYGWIN__
 #include <sys/cygwin.h>
+#define getSocketError() errno
 #define setErrno(error) errno = cygwin_internal(CW_GET_ERRNO_FROM_WINERROR, (error))
 #else /* __CYGWIN__ */
+#define getSocketError() WSAGetLastError()
 #define setErrno(error) errno = EIO
 #endif /* __CYGWIN__ */
 #else /* WINDOWS */
@@ -151,7 +152,9 @@ extern void LogError (const char *action);
 #ifdef WINDOWS
 extern void LogWindowsCodeError (DWORD code, const char *action);
 extern void LogWindowsError (const char *action);
+#ifdef __MINGW32__
 extern void LogWindowsSocketError (const char *action);
+#endif /* __MINGW32__ */
 #endif /* WINDOWS */
 extern void LogBytes (int level, const char *description, const unsigned char *data, unsigned int length);
 extern int setLogLevel (int level);

@@ -32,13 +32,13 @@
 #include <iconv.h>
 #endif /* HAVE_ICONV_H */
 
-#ifdef WINDOWS
+#ifdef __MINGW32__
 #include "sys_windows.h"
 
 #ifdef __MINGW32__
 #include "win_pthread.h"
 #endif /* __MINGW32__ */
-#else /* WINDOWS */
+#else /* __MINGW32__ */
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <netinet/in.h>
@@ -52,7 +52,7 @@
 #else /* HAVE_SYS_SELECT_H */
 #include <sys/time.h>
 #endif /* HAVE_SYS_SELECT_H */
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
 
 #define BRLAPI_NO_DEPRECATED
 #include "brlapi.h"
@@ -69,11 +69,15 @@
 #include "tunes.h"
 #include "charset.h"
 
-#ifdef WINDOWS
+#ifdef __MINGW32__
 #define LogSocketError(msg) LogWindowsSocketError(msg)
-#else /* WINDOWS */
+#else /* __MINGW32__ */
 #define LogSocketError(msg) LogError(msg)
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
+
+#ifdef __CYGWIN32__
+#undef PF_LOCAL
+#endif
 
 #define UNAUTH_MAX 5
 #define UNAUTH_DELAY 30
@@ -153,9 +157,9 @@ typedef struct {
 typedef enum { TODISPLAY, FULL, EMPTY } BrlBufState;
 
 typedef enum {
-#ifdef WINDOWS
+#ifdef __MINGW32__
   READY, /* but no pending ReadFile */
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
   READING_HEADER,
   READING_CONTENT,
   DISCARDING
@@ -168,9 +172,9 @@ typedef struct {
   int readBytes; /* Already read bytes */
   unsigned char *p; /* Where read() should load datas */
   int n; /* Value to give so read() */ 
-#ifdef WINDOWS
+#ifdef __MINGW32__
   OVERLAPPED overl;
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
 } Packet;
 
 typedef struct Connection {
@@ -209,9 +213,9 @@ static struct socketInfo {
   FileDescriptor fd;
   char *host;
   char *port;
-#ifdef WINDOWS
+#ifdef __MINGW32__
   OVERLAPPED overl;
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
 } socketInfo[MAXSOCKETS]; /* information for cleaning sockets */
 static int numSockets; /* number of sockets */
 
@@ -288,9 +292,9 @@ static AuthDescriptor *authDescriptor;
 static Connection *last_conn_write;
 static int refresh;
 
-#ifdef WINDOWS
+#ifdef __MINGW32__
 static WSADATA wsadata;
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
 
 /****************************************************************************/
 /** SOME PROTOTYPES                                                        **/
@@ -387,17 +391,17 @@ static void writeKey(FileDescriptor fd, brlapi_keyCode_t key) {
 /* Resets a Packet structure */
 void resetPacket(Packet *packet)
 {
-#ifdef WINDOWS
+#ifdef __MINGW32__
   packet->state = READY;
-#else /* WINDOWS */
+#else /* __MINGW32__ */
   packet->state = READING_HEADER;
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
   packet->readBytes = 0;
   packet->p = (unsigned char *) &packet->header;
   packet->n = sizeof(packet->header);
-#ifdef WINDOWS
+#ifdef __MINGW32__
   SetEvent(packet->overl.hEvent);
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
 }
 
 /* Function: initializePacket */
@@ -405,13 +409,13 @@ void resetPacket(Packet *packet)
 /* returns 0 on success, -1 on failure */
 int initializePacket(Packet *packet)
 {
-#ifdef WINDOWS
+#ifdef __MINGW32__
   memset(&packet->overl,0,sizeof(packet->overl));
   if (!(packet->overl.hEvent = CreateEvent(NULL, TRUE, TRUE, NULL))) {
     LogWindowsError("CreateEvent for readPacket");
     return -1;
   }
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
   resetPacket(packet);
   return 0;
 }
@@ -423,7 +427,7 @@ int initializePacket(Packet *packet)
 int readPacket(Connection *c)
 {
   Packet *packet = &c->packet;
-#ifdef WINDOWS
+#ifdef __MINGW32__
   DWORD res;
   if (packet->state!=READY) {
     /* pending read */
@@ -436,7 +440,7 @@ int readPacket(Connection *c)
       }
     }
 read:
-#else /* WINDOWS */
+#else /* __MINGW32__ */
   int res;
 read:
   res = read(c->fd, packet->p, packet->n);
@@ -447,7 +451,7 @@ read:
       default: return -1;
     }
   }
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
   if (res==0) return -2; /* EOF */
   packet->readBytes += res;
   if ((packet->state==READING_HEADER) && (packet->readBytes==BRLAPI_HEADERSIZE)) {
@@ -471,7 +475,7 @@ read:
     packet->n -= res;
     packet->p += res;
   }
-#ifdef WINDOWS
+#ifdef __MINGW32__
   } else packet->state = READING_HEADER;
   if (!ResetEvent(packet->overl.hEvent))
     LogWindowsError("ResetEvent in readPacket");
@@ -483,7 +487,7 @@ read:
       default: LogWindowsError("ReadFile"); setSystemErrno(); return -1;
     }
   }
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
   goto read;
 
 out:
@@ -1402,18 +1406,18 @@ static int loopBind(SocketDescriptor fd, struct sockaddr *addr, socklen_t len)
 /* Returns the descriptor, or -1 if an error occurred */
 static FileDescriptor initializeTcpSocket(struct socketInfo *info)
 {
-#ifdef WINDOWS
+#ifdef __MINGW32__
   SOCKET fd=INVALID_SOCKET;
-#else /* WINDOWS */
+#else /* __MINGW32__ */
   int fd=-1;
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
   const char *fun;
   int yes=1;
 
-#ifdef WINDOWS
+#ifdef __MINGW32__
   if (getaddrinfoProc) {
 #endif
-#if defined(HAVE_GETADDRINFO) || defined(WINDOWS)
+#if defined(HAVE_GETADDRINFO) || defined(__MINGW32__)
   int err;
   struct addrinfo *res,*cur;
   struct addrinfo hints;
@@ -1479,7 +1483,7 @@ cont:
     free(info->port);
     info->port = NULL;
 
-#ifdef WINDOWS
+#ifdef __MINGW32__
     if (!(info->overl.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL))) {
       LogWindowsError("CreateEvent");
       closeSocketDescriptor(fd);
@@ -1487,16 +1491,16 @@ cont:
     }
     LogPrint(LOG_DEBUG,"Event -> %p",info->overl.hEvent);
     WSAEventSelect(fd, info->overl.hEvent, FD_ACCEPT);
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
 
     return (FileDescriptor)fd;
   }
   LogPrint(LOG_WARNING,"unable to find a local TCP port %s:%s !",info->host,info->port);
 #endif /* HAVE_GETADDRINFO */
-#ifdef WINDOWS
+#ifdef __MINGW32__
   } else {
-#endif /* WINDOWS */
-#if !defined(HAVE_GETADDRINFO) || defined(WINDOWS)
+#endif /* __MINGW32__ */
+#if !defined(HAVE_GETADDRINFO) || defined(__MINGW32__)
 
   struct sockaddr_in addr;
   struct hostent *he;
@@ -1513,17 +1517,17 @@ cont:
 
       if (!(se = getservbyname(info->port,"tcp"))) {
         LogPrint(LOG_ERR,"port %s: "
-#ifdef WINDOWS
+#ifdef __MINGW32__
 	  "%d"
-#else /* WINDOWS */
+#else /* __MINGW32__ */
 	  "%s"
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
 	  ,info->port,
-#ifdef WINDOWS
+#ifdef __MINGW32__
 	  WSAGetLastError()
-#else /* WINDOWS */
+#else /* __MINGW32__ */
 	  hstrerror(h_errno)
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
 	  );
 	return INVALID_FILE_DESCRIPTOR;
       }
@@ -1536,17 +1540,17 @@ cont:
   } else if ((addr.sin_addr.s_addr = inet_addr(info->host)) == htonl(INADDR_NONE)) {
     if (!(he = gethostbyname(info->host))) {
       LogPrint(LOG_ERR,"gethostbyname(%s): "
-#ifdef WINDOWS
+#ifdef __MINGW32__
 	"%d"
-#else /* WINDOWS */
+#else /* __MINGW32__ */
 	"%s"
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
 	,info->host,
-#ifdef WINDOWS
+#ifdef __MINGW32__
 	WSAGetLastError()
-#else /* WINDOWS */
+#else /* __MINGW32__ */
 	hstrerror(h_errno)
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
 	);
       return INVALID_FILE_DESCRIPTOR;
     }
@@ -1589,7 +1593,7 @@ cont:
   free(info->port);
   info->port = NULL;
 
-#ifdef WINDOWS
+#ifdef __MINGW32__
   if (!(info->overl.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL))) {
     LogWindowsError("CreateEvent");
     closeSocketDescriptor(fd);
@@ -1597,7 +1601,7 @@ cont:
   }
   LogPrint(LOG_DEBUG,"Event -> %p",info->overl.hEvent);
   WSAEventSelect(fd, info->overl.hEvent, FD_ACCEPT);
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
 
   return (FileDescriptor)fd;
 
@@ -1606,9 +1610,9 @@ err:
   if (fd >= 0) closeSocketDescriptor(fd);
 
 #endif /* !HAVE_GETADDRINFO */
-#ifdef WINDOWS
+#ifdef __MINGW32__
   }
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
 
   free(info->host);
   info->host = NULL;
@@ -1619,7 +1623,7 @@ err:
 
 #if defined(PF_LOCAL)
 
-#ifndef WINDOWS
+#ifndef __MINGW32__
 static int readPid(char *path)
   /* read pid from specified file. Return 0 on any error */
 {
@@ -1636,7 +1640,7 @@ static int readPid(char *path)
   if (ptr != &pids[n]) return 0;
   return pid;
 }
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
 
 /* Function : initializeLocalSocket */
 /* Creates the listening socket for in-connections */
@@ -1645,7 +1649,7 @@ static FileDescriptor initializeLocalSocket(struct socketInfo *info)
 {
   int lpath=strlen(BRLAPI_SOCKETPATH),lport=strlen(info->port);
   FileDescriptor fd;
-#ifdef WINDOWS
+#ifdef __MINGW32__
   char path[lpath+lport+1];
   memcpy(path,BRLAPI_SOCKETPATH,lpath);
   memcpy(path+lpath,info->port,lport+1);
@@ -1680,7 +1684,7 @@ static FileDescriptor initializeLocalSocket(struct socketInfo *info)
     default: LogWindowsError("ConnectNamedPipe");
   }
   CloseHandle(info->overl.hEvent);
-#else /* WINDOWS */
+#else /* __MINGW32__ */
   struct sockaddr_un sa;
   char tmppath[lpath+lport+3];
   char lockpath[lpath+lport+2];
@@ -1807,7 +1811,7 @@ outtmp:
   unlink(tmppath);
 outmode:
   umask(oldmode);
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
 outfd:
   closeFileDescriptor(fd);
 out:
@@ -1819,7 +1823,7 @@ static void *establishSocket(void *arg)
 {
   intptr_t num = (intptr_t) arg;
   struct socketInfo *cinfo = &socketInfo[num];
-#ifndef WINDOWS
+#ifndef __MINGW32__
   int res;
   sigset_t blockedSignals;
 
@@ -1833,7 +1837,7 @@ static void *establishSocket(void *arg)
     LogPrint(LOG_WARNING,"pthread_sigmask: %s",strerror(res));
     return NULL;
   }
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
 
 #if defined(PF_LOCAL)
   if ((cinfo->addrfamily==PF_LOCAL && (cinfo->fd=initializeLocalSocket(cinfo))==INVALID_FILE_DESCRIPTOR) ||
@@ -1860,12 +1864,12 @@ static void closeSockets(void *arg)
       if (closeFileDescriptor(info->fd))
         LogError("closing socket");
       info->fd=INVALID_FILE_DESCRIPTOR;
-#ifdef WINDOWS
+#ifdef __MINGW32__
       if ((info->overl.hEvent)) {
 	CloseHandle(info->overl.hEvent);
 	info->overl.hEvent = NULL;
       }
-#else /* WINDOWS */
+#else /* __MINGW32__ */
 #if defined(PF_LOCAL)
       if (info->addrfamily==PF_LOCAL) {
 	char *path;
@@ -1883,7 +1887,7 @@ static void closeSockets(void *arg)
 	}
       }
 #endif /* PF_LOCAL */
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
     }
     free(info->port);
     info->port = NULL;
@@ -1894,34 +1898,34 @@ static void closeSockets(void *arg)
 
 /* Function: addTtyFds */
 /* recursively add fds of ttys */
-#ifdef WINDOWS
+#ifdef __MINGW32__
 static void addTtyFds(HANDLE **lpHandles, int *nbAlloc, int *nbHandles, Tty *tty) {
-#else /* WINDOWS */
+#else /* __MINGW32__ */
 static void addTtyFds(fd_set *fds, int *fdmax, Tty *tty) {
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
   {
     Connection *c;
     for (c = tty->connections->next; c != tty->connections; c = c -> next) {
-#ifdef WINDOWS
+#ifdef __MINGW32__
       if (*nbHandles == *nbAlloc) {
 	*nbAlloc *= 2;
 	*lpHandles = realloc(*lpHandles,*nbAlloc*sizeof(**lpHandles));
       }
       (*lpHandles)[(*nbHandles)++] = c->packet.overl.hEvent;
-#else /* WINDOWS */
+#else /* __MINGW32__ */
       if (c->fd>*fdmax) *fdmax = c->fd;
       FD_SET(c->fd,fds);
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
     }
   }
   {
     Tty *t;
     for (t = tty->subttys; t; t = t->next)
-#ifdef WINDOWS
+#ifdef __MINGW32__
       addTtyFds(lpHandles, nbAlloc, nbHandles, t);
-#else /* WINDOWS */
+#else /* __MINGW32__ */
       addTtyFds(fds,fdmax,t);
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
   }
 }
 
@@ -1934,16 +1938,16 @@ static void handleTtyFds(fd_set *fds, time_t currentTime, Tty *tty) {
     while (c!=tty->connections) {
       int remove = 0;
       next = c->next;
-#ifdef WINDOWS
+#ifdef __MINGW32__
       if (WaitForSingleObject(c->packet.overl.hEvent,0) == WAIT_OBJECT_0)
-#else /* WINDOWS */
+#else /* __MINGW32__ */
       if (FD_ISSET(c->fd, fds))
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
 	remove = processRequest(c, &packetHandlers);
       else remove = c->auth!=1 && currentTime-(c->upTime) > UNAUTH_DELAY;
-#ifndef WINDOWS
+#ifndef __MINGW32__
       FD_CLR(c->fd,fds);
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
       if (remove) removeFreeConnection(c);
       c = next;
     }
@@ -1980,18 +1984,18 @@ static void *server(void *arg)
   time_t currentTime;
   fd_set sockset;
   FileDescriptor resfd;
-#ifdef WINDOWS
+#ifdef __MINGW32__
   HANDLE *lpHandles;
   int nbAlloc;
   int nbHandles = 0;
-#else /* WINDOWS */
+#else /* __MINGW32__ */
   int fdmax;
   struct timeval tv;
   int n;
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
 
 
-#ifndef WINDOWS
+#ifndef __MINGW32__
   sigset_t blockedSignals;
   sigemptyset(&blockedSignals);
   sigaddset(&blockedSignals,SIGTERM);
@@ -2003,7 +2007,7 @@ static void *server(void *arg)
     LogPrint(LOG_WARNING,"pthread_sigmask : %s",strerror(res));
     pthread_exit(NULL);
   }
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
 
   socketHosts = splitString(hosts,'+',&numSockets);
   if (numSockets>MAXSOCKETS) {
@@ -2014,54 +2018,54 @@ static void *server(void *arg)
     LogPrint(LOG_INFO,"no hosts specified");
     pthread_exit(NULL);
   }
-#ifdef WINDOWS
+#ifdef __MINGW32__
   nbAlloc = numSockets;
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
 
   pthread_attr_init(&attr);
-#ifndef WINDOWS
+#ifndef __MINGW32__
   pthread_attr_setdetachstate(&attr,PTHREAD_CREATE_DETACHED);
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
   /* don't care if it fails */
   pthread_attr_setstacksize(&attr,stackSize);
 
   for (i=0;i<numSockets;i++)
     socketInfo[i].fd = INVALID_FILE_DESCRIPTOR;
 
-#ifdef WINDOWS
+#ifdef __MINGW32__
   if ((getaddrinfoProc && WSAStartup(MAKEWORD(2,0), &wsadata))
 	|| (!getaddrinfoProc && WSAStartup(MAKEWORD(1,1), &wsadata))) {
     LogWindowsSocketError("Starting socket library");
     pthread_exit(NULL);
   }
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
 
   pthread_cleanup_push(closeSockets,NULL);
 
   for (i=0;i<numSockets;i++) {
     socketInfo[i].addrfamily=brlapiserver_expandHost(socketHosts[i],&socketInfo[i].host,&socketInfo[i].port);
-#ifdef WINDOWS
+#ifdef __MINGW32__
     if (socketInfo[i].addrfamily != PF_LOCAL) {
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
       if ((res = pthread_create(&socketThreads[i],&attr,establishSocket,(void *)(intptr_t)i)) != 0) {
 	LogPrint(LOG_WARNING,"pthread_create: %s",strerror(res));
 	for (i--;i>=0;i--)
 	  pthread_cancel(socketThreads[i]);
 	pthread_exit(NULL);
       }
-#ifdef WINDOWS
+#ifdef __MINGW32__
     } else {
       /* Windows doesn't have troubles with local sockets on read-only
        * filesystems, but it has with inter-thread overlapped operations,
        * so call from here */
       establishSocket((void *)i);
     }
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
   }
 
   unauthConnections = 0; unauthConnLog = 0;
   while (1) {
-#ifdef WINDOWS
+#ifdef __MINGW32__
     lpHandles = malloc(nbAlloc * sizeof(*lpHandles));
     nbHandles = 0;
     for (i=0;i<numSockets;i++)
@@ -2081,7 +2085,7 @@ static void *server(void *arg)
       case WAIT_FAILED:  LogWindowsError("WaitForMultipleObjects");
     }
     free(lpHandles);
-#else /* WINDOWS */
+#else /* __MINGW32__ */
     /* Compute sockets set and fdmax */
     FD_ZERO(&sockset);
     fdmax=0;
@@ -2102,12 +2106,12 @@ static void *server(void *arg)
       LogPrint(LOG_WARNING,"select: %s",strerror(errno));
       break;
     }
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
     time(&currentTime);
     for (i=0;i<numSockets;i++) {
       char source[0X100];
 
-#ifdef WINDOWS
+#ifdef __MINGW32__
       if (socketInfo[i].fd != INVALID_FILE_DESCRIPTOR &&
           WaitForSingleObject(socketInfo[i].overl.hEvent, 0) == WAIT_OBJECT_0) {
         if (socketInfo[i].addrfamily == PF_LOCAL) {
@@ -2121,9 +2125,9 @@ static void *server(void *arg)
         } else {
           if (!ResetEvent(socketInfo[i].overl.hEvent))
             LogWindowsError("ResetEvent in server loop");
-#else /* WINDOWS */
+#else /* __MINGW32__ */
       if (socketInfo[i].fd>=0 && FD_ISSET(socketInfo[i].fd, &sockset)) {
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
           addrlen = sizeof(addr);
           resfd = (FileDescriptor)accept((SocketDescriptor)socketInfo[i].fd, (struct sockaddr *) &addr, &addrlen);
           if (resfd == INVALID_FILE_DESCRIPTOR) {
@@ -2133,9 +2137,9 @@ static void *server(void *arg)
           }
           formatAddress(source, sizeof(source), &addr, addrlen);
 
-#ifdef WINDOWS
+#ifdef __MINGW32__
         }
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
 
         LogPrint(LOG_NOTICE, "BrlAPI connection fd=%"PRIFD" accepted: %s", resfd, source);
 
@@ -2145,12 +2149,12 @@ static void *server(void *arg)
           if (unauthConnLog==0) LogPrint(LOG_WARNING, "Too many simultaneous unauthorized connections");
           unauthConnLog++;
         } else {
-#ifndef WINDOWS
+#ifndef __MINGW32__
           if (!setBlockingIo(resfd, 0)) {
             LogPrint(LOG_WARNING, "Failed to switch to non-blocking mode: %s",strerror(errno));
             break;
           }
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
 
           c = createConnection(resfd, currentTime);
           if (c==NULL) {
@@ -2219,9 +2223,9 @@ static void terminationHandler(void)
   if (authDescriptor)
     authEnd(authDescriptor);
   authDescriptor = NULL;
-#ifdef WINDOWS
+#ifdef __MINGW32__
   WSACleanup();
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
 }
 
 /* Function: whoFillsTty */
@@ -2586,9 +2590,9 @@ int api_start(BrailleDisplay *brl, char **parameters)
   }
 
   pthread_attr_init(&attr);
-#ifndef WINDOWS
+#ifndef __MINGW32__
   pthread_attr_setdetachstate(&attr,PTHREAD_CREATE_DETACHED);
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
   /* don't care if it fails */
   pthread_attr_setstacksize(&attr,stackSize);
 

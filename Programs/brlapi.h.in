@@ -139,11 +139,11 @@ size_t BRLAPI_STDCALL brlapi_getHandleSize(void);
 /** Default authorization setting */
 #define BRLAPI_DEFAUTH BRLAPI_ETCDIR "/" BRLAPI_AUTHKEYFILE
 
-#ifdef BRLAPI_WIN32
+#ifdef __MINGW32__
 typedef HANDLE brlapi_fileDescriptor;
-#else /* BRLAPI_WIN32 */
+#else /* __MINGW32__ */
 typedef int brlapi_fileDescriptor;
-#endif /* BRLAPI_WIN32 */
+#endif /* __MINGW32__ */
 
 /** \brief Settings structure for \e BrlAPI connection
  *

@@ -20,7 +20,7 @@
 #include <string.h>
 #include <errno.h>
 
-#if defined(WINDOWS)
+#if defined(__MINGW32__)
 #include <ws2tcpip.h>
 
 #elif defined(__MSDOS__)
@@ -51,22 +51,22 @@
 #undef CAN_CHECK_CREDENTIALS
 
 typedef struct {
-#ifdef WINDOWS
+#ifdef __MINGW32__
   const char *name;
-#else /* WINDOWS */
+#else /* __MINGW32__ */
   uid_t id;
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
 } MethodDescriptor_user;
 
 typedef struct {
-#ifdef WINDOWS
+#ifdef __MINGW32__
   const char *name;
-#else /* WINDOWS */
+#else /* __MINGW32__ */
   gid_t id;
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
 } MethodDescriptor_group;
 
-#if defined(WINDOWS)
+#if defined(__MINGW32__)
 #define CAN_CHECK_CREDENTIALS
 
 typedef struct {
@@ -327,10 +327,10 @@ authUser_initialize (const char *parameter) {
   MethodDescriptor_user *user;
 
   if ((user = malloc(sizeof(*user)))) {
-#ifdef WINDOWS
+#ifdef __MINGW32__
     user->name = parameter;
     return user;
-#else /* WINDOWS */
+#else /* __MINGW32__ */
     if (!*parameter) {
       user->id = geteuid();
       return user;
@@ -354,7 +354,7 @@ authUser_initialize (const char *parameter) {
 
     LogPrint(LOG_ERR, "unknown user: %s", parameter);
     free(user);
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
   } else {
     LogError("malloc");
   }
@@ -382,10 +382,10 @@ authGroup_initialize (const char *parameter) {
   MethodDescriptor_group *group;
 
   if ((group = malloc(sizeof(*group)))) {
-#ifdef WINDOWS
+#ifdef __MINGW32__
     group->name = parameter;
     return group;
-#else /* WINDOWS */
+#else /* __MINGW32__ */
     if (!*parameter) {
       group->id = getegid();
       return group;
@@ -409,7 +409,7 @@ authGroup_initialize (const char *parameter) {
 
     LogPrint(LOG_ERR, "unknown group: %s", parameter);
     free(group);
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
   } else {
     LogError("malloc");
   }
@@ -631,13 +631,13 @@ formatAddress (char *buffer, int bufferSize, const void *address, int addressSiz
 #else /* __MSDOS__ */
   const struct sockaddr *sa = address;
   switch (sa->sa_family) {
-#ifndef WINDOWS
+#ifndef __MINGW32__
     case AF_LOCAL: {
       const struct sockaddr_un *local = address;
       snprintf(buffer, bufferSize, "local %s", local->sun_path);
       break;
     }
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
 
     case AF_INET: {
       const struct sockaddr_in *inet = address;

@@ -40,7 +40,9 @@ extern "C" {
 #include <w32api.h>
 #define WINVER WindowsXP
 
+#ifdef __MINGW32__
 #define __USE_W32_SOCKETS
+#endif /* __MINGW32__ */
 #include <windows.h>
 
 #endif /* WINDOWS */
@@ -87,7 +89,7 @@ typedef signed long long	int64_t;
 #include <inttypes.h>
 #endif /* __MSDOS__ */
 
-#ifdef WINDOWS
+#ifdef __MINGW32__
 typedef HANDLE FileDescriptor;
 #define INVALID_FILE_DESCRIPTOR INVALID_HANDLE_VALUE
 #define PRIFD "p"
@@ -97,7 +99,7 @@ typedef SOCKET SocketDescriptor;
 #define INVALID_SOCKET_DESCRIPTOR -1
 #define PRISD "d"
 #define closeSocketDescriptor(sd) closesocket(sd)
-#else /* WINDOWS */
+#else /* __MINGW32__ */
 typedef int FileDescriptor;
 #define INVALID_FILE_DESCRIPTOR -1
 #define PRIFD "d"
@@ -107,7 +109,7 @@ typedef int SocketDescriptor;
 #define INVALID_SOCKET_DESCRIPTOR -1
 #define PRISD "d"
 #define closeSocketDescriptor(sd) close(sd)
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"

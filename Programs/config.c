@@ -1986,7 +1986,7 @@ createPidFile (void) {
   }
 }
 
-#if defined(WINDOWS)
+#if defined(__MINGW32__)
 static void
 background (void) {
   LPTSTR cmdline = GetCommandLine();
@@ -2177,7 +2177,7 @@ startup (int argc, char *argv[]) {
       }
     }
 
-#ifdef WINDOWS
+#ifdef __MINGW32__
     {
       HANDLE h = CreateFile("NUL", GENERIC_READ|GENERIC_WRITE,
                             FILE_SHARE_READ|FILE_SHARE_WRITE,
@@ -2196,7 +2196,7 @@ startup (int argc, char *argv[]) {
         }
       }
     }
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
   }
 
   /*
