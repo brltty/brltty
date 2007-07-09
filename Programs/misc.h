@@ -76,14 +76,16 @@ extern "C" {
 #ifdef WINDOWS
 #define getSystemError() GetLastError()
 
-#ifdef __CYGWIN__
+#ifdef __CYGWIN32__
 #include <sys/cygwin.h>
+
 #define getSocketError() errno
 #define setErrno(error) errno = cygwin_internal(CW_GET_ERRNO_FROM_WINERROR, (error))
-#else /* __CYGWIN__ */
+#else /* __CYGWIN32__ */
 #define getSocketError() WSAGetLastError()
 #define setErrno(error) errno = EIO
-#endif /* __CYGWIN__ */
+#endif /* __CYGWIN32__ */
+
 #else /* WINDOWS */
 #define getSystemError() errno
 #define getSocketError() errno

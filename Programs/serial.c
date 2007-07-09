@@ -1520,13 +1520,13 @@ serialGetStream (SerialDevice *serial) {
   if (!serial->stream) {
 #ifdef __MINGW32__
     if (serial->fileDescriptor < 0) {
-#ifdef __MINGW32__
-      if ((serial->fileDescriptor = _open_osfhandle((long)serial->fileHandle, O_RDWR)) < 0) {
-        LogError("open_osfhandle");
-#else /* __CYGWIN__ */
+#ifdef __CYGWIN32__
       if ((serial->fileDescriptor = cygwin_attach_handle_to_fd("serialdevice", -1, serial->fileHandle, TRUE, GENERIC_READ|GENERIC_WRITE)) < 0) {
         LogError("cygwin_attach_handle_to_fd");
-#endif /* __CYGWIN__ */
+#else /* __CYGWIN32__ */
+      if ((serial->fileDescriptor = _open_osfhandle((long)serial->fileHandle, O_RDWR)) < 0) {
+        LogError("open_osfhandle");
+#endif /* __CYGWIN32__ */
         return NULL;
       }
     }
