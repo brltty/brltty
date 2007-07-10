@@ -16,14 +16,13 @@
  */
 
 #include "prologue.h"
-#include "sys_windows.h"
 
 #include <fcntl.h>
 #include <errno.h>
-#include <sys/ioctl.h>
 
 #include "misc.h"
 #include "system.h"
+#include "sys_windows.h"
 
 #include "sys_prog_windows.h"
 
