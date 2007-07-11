@@ -172,6 +172,10 @@ handleCommand (BrailleDisplay *brl, int cmd, int repeat) {
   if (cmd == BRL_CMD_INPUT) {
     /* translate toggle -> ON/OFF */
     cmd |= inputMode? BRL_FLG_TOGGLE_OFF: BRL_FLG_TOGGLE_ON;
+  } else if ((cmd & BRL_MSK_BLK) == BRL_BLK_GOTOLINE) {
+    int arg = cmd & BRL_MSK_ARG;
+    cmd &= ~BRL_MSK_ARG;
+    cmd |= rescaleInteger(arg, terminal->statusCount-1, BRL_MSK_ARG);
   }
 
   if (!IS_DELAYED_COMMAND(repeat)) {
@@ -247,7 +251,7 @@ handleModifier (BrailleDisplay *brl, int bit, int press) {
           command |= *dot;
       if (debugKeys)
         LogPrint(LOG_DEBUG, "cmd: [%02X]->%04X", modifiers, command); 
-    } else if (findCommand(&command, NOKEY, modifiers)) {
+    } else if (findCommand(&command, KEY_NONE, modifiers)) {
       if (debugKeys)
         LogPrint(LOG_DEBUG, "cmd: [%04X]->%04X",
                  modifiers, command); 
@@ -648,13 +652,13 @@ handleKey1 (BrailleDisplay *brl, int code, int press, int time) {
   if (rcvFrontFirst <= code && 
       code <= rcvFrontLast) { /* front key */
     num = 1 + (code - rcvFrontFirst) / 3;
-    return handleKey(brl, OFFS_FRONT+num, press, 0);
+    return handleKey(brl, KEYS_FRONT+num, press, 0);
   }
 
   if (rcvStatusFirst <= code && 
       code <= rcvStatusLast) { /* status key */
     num = 1 + (code - rcvStatusFirst) / 3;
-    return handleKey(brl, OFFS_STAT+num, press, 0);
+    return handleKey(brl, KEYS_STATUS+num, press, 0);
   }
 
   if (rcvBarFirst <= code && 
@@ -688,19 +692,19 @@ handleKey1 (BrailleDisplay *brl, int code, int press, int time) {
     }
 
     num = 1 + (code - rcvBarFirst) / 3;
-    return handleKey(brl, OFFS_BAR+num, press, 0);
+    return handleKey(brl, KEYS_BAR+num, press, 0);
   }
 
   if (rcvSwitchFirst <= code && 
       code <= rcvSwitchLast) { /* easy access bar */
     num = 1 + (code - rcvSwitchFirst) / 3;
-    return handleKey(brl, OFFS_SWITCH+num, press, 0);
+    return handleKey(brl, KEYS_SWITCH+num, press, 0);
   }
 
   if (rcvCursorFirst <= code && 
       code <= rcvCursorLast) { /* Routing Keys */ 
     num = (code - rcvCursorFirst) / 3;
-    return handleKey(brl, ROUTINGKEY1, press, num);
+    return handleKey(brl, KEY_ROUTING1, press, num);
   }
 
   LogPrint(LOG_WARNING, "Unexpected key: %04X", code);
@@ -1148,7 +1152,7 @@ readCommand2 (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 
               while (bit) {
                 if (!(new & bit) && (old & bit)) {
-                  if (mapping->code != NOKEY) {
+                  if (mapping->code != KEY_NONE) {
                     int cmd = handleKey(brl, mapping->code, 0, mapping->offset);
                     if (!release) {
                       command = cmd;
@@ -1179,7 +1183,7 @@ readCommand2 (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 
             while (bit) {
               if ((new & bit) && !(old & bit)) {
-                if (mapping->code != NOKEY) {
+                if (mapping->code != KEY_NONE) {
                   command = handleKey(brl, mapping->code, 1, mapping->offset);
                 }
 
@@ -1259,45 +1263,46 @@ mapInputModules2 (void) {
     int i;
     for (i=0; i<inputBits2; ++i) {
       InputMapping2 *mapping = &inputMap2[i];
-      mapping->code = NOKEY;
+      mapping->code = KEY_NONE;
       mapping->offset = 0;
     }
   }
 
   mapKey2(terminal->rightKeys, &byte, &bit,
-          OFFS_SWITCH+KEY_RIGHT_REAR,
-          OFFS_SWITCH+KEY_RIGHT_FRONT);
+          KEYS_SWITCH+KEY_RIGHT_REAR,
+          KEYS_SWITCH+KEY_RIGHT_FRONT);
 
   {
     unsigned char column = terminal->columns;
     while (column) {
       nextInputModule2(&byte, &bit);
-      addInputMapping2(byte, bit, ROUTINGKEY1, column-1);
-      addInputMapping2(byte, bit+1, ROUTINGKEY2, --column);
+      addInputMapping2(byte, bit, KEY_ROUTING1, --column);
+      addInputMapping2(byte, bit+1, KEY_ROUTING2, column);
     }
   }
 
   mapKey2(terminal->leftKeys, &byte, &bit,
-          OFFS_SWITCH+KEY_LEFT_REAR,
-          OFFS_SWITCH+KEY_LEFT_FRONT);
+          KEYS_SWITCH+KEY_LEFT_REAR,
+          KEYS_SWITCH+KEY_LEFT_FRONT);
 
   {
     unsigned char cell = terminal->statusCount;
     while (cell) {
       nextInputModule2(&byte, &bit);
-      addInputMapping2(byte, bit, OFFS_STAT+cell--, 0);
+      addInputMapping2(byte, bit, KEYS_STATUS+cell--, 0);
+      addInputMapping2(byte, bit, KEY_STATUS2, cell);
     }
   }
 
   byte--;
-  addInputMapping2(byte, 7, OFFS_BAR+BAR_L2, 0);
-  addInputMapping2(byte, 6, OFFS_BAR+BAR_R2, 0);
-  addInputMapping2(byte, 5, OFFS_BAR+BAR_L1, 0);
-  addInputMapping2(byte, 4, OFFS_BAR+BAR_R1, 0);
-  addInputMapping2(byte, 3, OFFS_BAR+BAR_D2, 0);
-  addInputMapping2(byte, 2, OFFS_BAR+BAR_D1, 0);
-  addInputMapping2(byte, 1, OFFS_BAR+BAR_U1, 0);
-  addInputMapping2(byte, 0, OFFS_BAR+BAR_U2, 0);
+  addInputMapping2(byte, 7, KEYS_BAR+BAR_L2, 0);
+  addInputMapping2(byte, 6, KEYS_BAR+BAR_R2, 0);
+  addInputMapping2(byte, 5, KEYS_BAR+BAR_L1, 0);
+  addInputMapping2(byte, 4, KEYS_BAR+BAR_R1, 0);
+  addInputMapping2(byte, 3, KEYS_BAR+BAR_D2, 0);
+  addInputMapping2(byte, 2, KEYS_BAR+BAR_D1, 0);
+  addInputMapping2(byte, 1, KEYS_BAR+BAR_U1, 0);
+  addInputMapping2(byte, 0, KEYS_BAR+BAR_U2, 0);
 }
 
 static int

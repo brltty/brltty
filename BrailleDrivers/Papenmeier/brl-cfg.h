@@ -45,16 +45,15 @@ typedef enum {
   InternalStatusCellCount
 } InternalStatusCell;
 
-#define OFFS_FRONT      0
-#define OFFS_STAT    1000
-#define OFFS_ROUTE   2000  
-#define OFFS_BAR     3000
-#define OFFS_SWITCH  4000
-#define OFFS_CR      5000
+#define KEY_NONE     0X000
+#define KEY_ROUTING1 0X001  /* first row of routing keys */
+#define KEY_ROUTING2 0X002  /* second row of routing keys */
+#define KEY_STATUS2  0X003  /* second row of status keys */
+#define KEYS_FRONT   0X100
+#define KEYS_STATUS  0X200
+#define KEYS_BAR     0X300
+#define KEYS_SWITCH  0X400
 
-#define ROUTINGKEY1     -9999  /* first row of  routing keys */
-#define ROUTINGKEY2     -9998  /* second row of  routing keys */
-#define NOKEY           -1
 
 #define MODMAX    16
 #define KEYMAX     8
@@ -214,40 +213,40 @@ PM_END_STATUS
 #define PM_END_MODIFIERS };
 
 PM_BEGIN_MODIFIERS(Front9)
-  OFFS_FRONT + 1,
-  OFFS_FRONT + 9,
-  OFFS_FRONT + 2,
-  OFFS_FRONT + 8
+  KEYS_FRONT + 1,
+  KEYS_FRONT + 9,
+  KEYS_FRONT + 2,
+  KEYS_FRONT + 8
 PM_END_MODIFIERS
 
 PM_BEGIN_MODIFIERS(Front13)
-  OFFS_FRONT +  4,
-  OFFS_FRONT +  3,
-  OFFS_FRONT +  2,
-  OFFS_FRONT + 10,
-  OFFS_FRONT + 11,
-  OFFS_FRONT + 12,
-  OFFS_FRONT +  1,
-  OFFS_FRONT + 13
+  KEYS_FRONT +  4,
+  KEYS_FRONT +  3,
+  KEYS_FRONT +  2,
+  KEYS_FRONT + 10,
+  KEYS_FRONT + 11,
+  KEYS_FRONT + 12,
+  KEYS_FRONT +  1,
+  KEYS_FRONT + 13
 PM_END_MODIFIERS
 
 PM_BEGIN_MODIFIERS(Bar)
-  OFFS_SWITCH + SWITCH_LEFT_REAR,
-  OFFS_SWITCH + SWITCH_LEFT_FRONT,
-  OFFS_SWITCH + SWITCH_RIGHT_REAR,
-  OFFS_SWITCH + SWITCH_RIGHT_FRONT,
-  OFFS_SWITCH + KEY_LEFT_REAR,
-  OFFS_SWITCH + KEY_LEFT_FRONT,
-  OFFS_SWITCH + KEY_RIGHT_REAR,
-  OFFS_SWITCH + KEY_RIGHT_FRONT,
-  OFFS_BAR    + BAR_U1,
-  OFFS_BAR    + BAR_D1,
-  OFFS_BAR    + BAR_L1,
-  OFFS_BAR    + BAR_R1,
-  OFFS_BAR    + BAR_U2,
-  OFFS_BAR    + BAR_D2,
-  OFFS_BAR    + BAR_L2,
-  OFFS_BAR    + BAR_R2
+  KEYS_SWITCH + SWITCH_LEFT_REAR,
+  KEYS_SWITCH + SWITCH_LEFT_FRONT,
+  KEYS_SWITCH + SWITCH_RIGHT_REAR,
+  KEYS_SWITCH + SWITCH_RIGHT_FRONT,
+  KEYS_SWITCH + KEY_LEFT_REAR,
+  KEYS_SWITCH + KEY_LEFT_FRONT,
+  KEYS_SWITCH + KEY_RIGHT_REAR,
+  KEYS_SWITCH + KEY_RIGHT_FRONT,
+  KEYS_BAR    + BAR_U1,
+  KEYS_BAR    + BAR_D1,
+  KEYS_BAR    + BAR_L1,
+  KEYS_BAR    + BAR_R1,
+  KEYS_BAR    + BAR_U2,
+  KEYS_BAR    + BAR_D2,
+  KEYS_BAR    + BAR_L2,
+  KEYS_BAR    + BAR_R2
 PM_END_MODIFIERS
 #define pmModifiers_BarSim pmModifiers_Bar
 
@@ -279,121 +278,121 @@ PM_END_MODIFIERS
 
 /* commands for 9 front keys */
 #define CMDS_FRONT_9 \
-     { BRL_CMD_FWINLT     , NOKEY         , 0X1 }, \
-     { BRL_CMD_FWINRT     , NOKEY         , 0X2 }, \
-     { BRL_CMD_HWINLT     , NOKEY         , 0X4 }, \
-     { BRL_CMD_HWINRT     , NOKEY         , 0X8 }, \
+     { BRL_CMD_FWINLT     , KEY_NONE      , 0X1 }, \
+     { BRL_CMD_FWINRT     , KEY_NONE      , 0X2 }, \
+     { BRL_CMD_HWINLT     , KEY_NONE      , 0X4 }, \
+     { BRL_CMD_HWINRT     , KEY_NONE      , 0X8 }, \
                                                \
-     { BRL_CMD_HOME       , OFFS_FRONT + 5, 0X0 }, \
-     { BRL_CMD_LNBEG      , OFFS_FRONT + 5, 0X1 }, \
-     { BRL_CMD_LNEND      , OFFS_FRONT + 5, 0X2 }, \
-     { BRL_CMD_CHRLT      , OFFS_FRONT + 5, 0X4 }, \
-     { BRL_CMD_CHRRT      , OFFS_FRONT + 5, 0X8 }, \
+     { BRL_CMD_HOME       , KEYS_FRONT + 5, 0X0 }, \
+     { BRL_CMD_LNBEG      , KEYS_FRONT + 5, 0X1 }, \
+     { BRL_CMD_LNEND      , KEYS_FRONT + 5, 0X2 }, \
+     { BRL_CMD_CHRLT      , KEYS_FRONT + 5, 0X4 }, \
+     { BRL_CMD_CHRRT      , KEYS_FRONT + 5, 0X8 }, \
                                                \
-     { BRL_CMD_WINUP      , OFFS_FRONT + 4, 0X0 }, \
-     { BRL_CMD_PRDIFLN    , OFFS_FRONT + 4, 0X1 }, \
-     { BRL_CMD_ATTRUP     , OFFS_FRONT + 4, 0X2 }, \
-     { BRL_CMD_PRPGRPH    , OFFS_FRONT + 4, 0X4 }, \
-     { BRL_CMD_PRSEARCH   , OFFS_FRONT + 4, 0X8 }, \
+     { BRL_CMD_WINUP      , KEYS_FRONT + 4, 0X0 }, \
+     { BRL_CMD_PRDIFLN    , KEYS_FRONT + 4, 0X1 }, \
+     { BRL_CMD_ATTRUP     , KEYS_FRONT + 4, 0X2 }, \
+     { BRL_CMD_PRPGRPH    , KEYS_FRONT + 4, 0X4 }, \
+     { BRL_CMD_PRSEARCH   , KEYS_FRONT + 4, 0X8 }, \
                                                \
-     { BRL_CMD_WINDN      , OFFS_FRONT + 6, 0X0 }, \
-     { BRL_CMD_NXDIFLN    , OFFS_FRONT + 6, 0X1 }, \
-     { BRL_CMD_ATTRDN     , OFFS_FRONT + 6, 0X2 }, \
-     { BRL_CMD_NXPGRPH    , OFFS_FRONT + 6, 0X4 }, \
-     { BRL_CMD_NXSEARCH   , OFFS_FRONT + 6, 0X8 }, \
+     { BRL_CMD_WINDN      , KEYS_FRONT + 6, 0X0 }, \
+     { BRL_CMD_NXDIFLN    , KEYS_FRONT + 6, 0X1 }, \
+     { BRL_CMD_ATTRDN     , KEYS_FRONT + 6, 0X2 }, \
+     { BRL_CMD_NXPGRPH    , KEYS_FRONT + 6, 0X4 }, \
+     { BRL_CMD_NXSEARCH   , KEYS_FRONT + 6, 0X8 }, \
                                                \
-     { BRL_CMD_LNUP       , OFFS_FRONT + 3, 0X0 }, \
-     { BRL_CMD_TOP_LEFT   , OFFS_FRONT + 3, 0X1 }, \
-     { BRL_CMD_TOP        , OFFS_FRONT + 3, 0X2 }, \
+     { BRL_CMD_LNUP       , KEYS_FRONT + 3, 0X0 }, \
+     { BRL_CMD_TOP_LEFT   , KEYS_FRONT + 3, 0X1 }, \
+     { BRL_CMD_TOP        , KEYS_FRONT + 3, 0X2 }, \
                                                \
-     { BRL_CMD_LNDN       , OFFS_FRONT + 7, 0X0 }, \
-     { BRL_CMD_BOT_LEFT   , OFFS_FRONT + 7, 0X1 }, \
-     { BRL_CMD_BOT        , OFFS_FRONT + 7, 0X2 }, \
+     { BRL_CMD_LNDN       , KEYS_FRONT + 7, 0X0 }, \
+     { BRL_CMD_BOT_LEFT   , KEYS_FRONT + 7, 0X1 }, \
+     { BRL_CMD_BOT        , KEYS_FRONT + 7, 0X2 }, \
                                                \
-     { BRL_BLK_ROUTE       , ROUTINGKEY1   , 0X0 }, \
-     { BRL_BLK_CUTBEGIN    , ROUTINGKEY1   , 0X1 }, \
-     { BRL_BLK_CUTRECT     , ROUTINGKEY1   , 0X2 }, \
-     { BRL_BLK_PRINDENT    , ROUTINGKEY1   , 0X4 }, \
-     { BRL_BLK_NXINDENT    , ROUTINGKEY1   , 0X8 }, \
-     { BRL_CMD_PASTE      , NOKEY         , 0X3 }
+     { BRL_BLK_ROUTE       , KEY_ROUTING1  , 0X0 }, \
+     { BRL_BLK_CUTBEGIN    , KEY_ROUTING1  , 0X1 }, \
+     { BRL_BLK_CUTRECT     , KEY_ROUTING1  , 0X2 }, \
+     { BRL_BLK_PRINDENT    , KEY_ROUTING1  , 0X4 }, \
+     { BRL_BLK_NXINDENT    , KEY_ROUTING1  , 0X8 }, \
+     { BRL_CMD_PASTE      , KEY_NONE      , 0X3 }
 
 
 /* commands for 13 front keys */
 #define CMDS_FRONT_13 \
-      { BRL_CMD_HOME                    , OFFS_FRONT +  7, 0000 }, \
-      { BRL_CMD_TOP                     , OFFS_FRONT +  6, 0000 }, \
-      { BRL_CMD_BOT                     , OFFS_FRONT +  8, 0000 }, \
-      { BRL_CMD_LNUP                    , OFFS_FRONT +  5, 0000 }, \
-      { BRL_CMD_LNDN                    , OFFS_FRONT +  9, 0000 }, \
+      { BRL_CMD_HOME                    , KEYS_FRONT +  7, 0000 }, \
+      { BRL_CMD_TOP                     , KEYS_FRONT +  6, 0000 }, \
+      { BRL_CMD_BOT                     , KEYS_FRONT +  8, 0000 }, \
+      { BRL_CMD_LNUP                    , KEYS_FRONT +  5, 0000 }, \
+      { BRL_CMD_LNDN                    , KEYS_FRONT +  9, 0000 }, \
                                                                \
-      { BRL_CMD_PRDIFLN                 , NOKEY          , 0001 }, \
-      { BRL_CMD_NXDIFLN                 , NOKEY          , 0010 }, \
-      { BRL_CMD_ATTRUP                  , NOKEY          , 0002 }, \
-      { BRL_CMD_ATTRDN                  , NOKEY          , 0020 }, \
-      { BRL_CMD_PRPGRPH                 , NOKEY          , 0004 },         \
-      { BRL_CMD_NXPGRPH                 , NOKEY          , 0040 },        \
-      { BRL_CMD_PRPROMPT                , NOKEY          , 0100 },        \
-      { BRL_CMD_NXPROMPT                , NOKEY          , 0200 },        \
+      { BRL_CMD_PRDIFLN                 , KEY_NONE       , 0001 }, \
+      { BRL_CMD_NXDIFLN                 , KEY_NONE       , 0010 }, \
+      { BRL_CMD_ATTRUP                  , KEY_NONE       , 0002 }, \
+      { BRL_CMD_ATTRDN                  , KEY_NONE       , 0020 }, \
+      { BRL_CMD_PRPGRPH                 , KEY_NONE       , 0004 },         \
+      { BRL_CMD_NXPGRPH                 , KEY_NONE       , 0040 },        \
+      { BRL_CMD_PRPROMPT                , KEY_NONE       , 0100 },        \
+      { BRL_CMD_NXPROMPT                , KEY_NONE       , 0200 },        \
                                                                \
-      { BRL_CMD_WINUP                   , NOKEY          , 0003 },        \
-      { BRL_CMD_WINDN                   , NOKEY          , 0030 },        \
-      { BRL_CMD_PRSEARCH                , NOKEY          , 0104 },        \
-      { BRL_CMD_NXSEARCH                , NOKEY          , 0240 },        \
-      { BRL_BLK_PRINDENT                 , ROUTINGKEY1    , 0104 },        \
-      { BRL_BLK_NXINDENT                 , ROUTINGKEY1    , 0240 },        \
+      { BRL_CMD_WINUP                   , KEY_NONE       , 0003 },        \
+      { BRL_CMD_WINDN                   , KEY_NONE       , 0030 },        \
+      { BRL_CMD_PRSEARCH                , KEY_NONE       , 0104 },        \
+      { BRL_CMD_NXSEARCH                , KEY_NONE       , 0240 },        \
+      { BRL_BLK_PRINDENT                 , KEY_ROUTING1   , 0104 },        \
+      { BRL_BLK_NXINDENT                 , KEY_ROUTING1   , 0240 },        \
                                                                \
-      { BRL_CMD_LNBEG                   , OFFS_FRONT +  7, 0001 }, \
-      { BRL_CMD_TOP_LEFT                , OFFS_FRONT +  6, 0001 }, \
-      { BRL_CMD_BOT_LEFT                , OFFS_FRONT +  8, 0001 }, \
-      { BRL_CMD_FWINLT                  , OFFS_FRONT +  5, 0001 }, \
-      { BRL_CMD_FWINRT                  , OFFS_FRONT +  9, 0001 }, \
-      { BRL_BLK_DESCCHAR                 , ROUTINGKEY1    , 0001 }, \
+      { BRL_CMD_LNBEG                   , KEYS_FRONT +  7, 0001 }, \
+      { BRL_CMD_TOP_LEFT                , KEYS_FRONT +  6, 0001 }, \
+      { BRL_CMD_BOT_LEFT                , KEYS_FRONT +  8, 0001 }, \
+      { BRL_CMD_FWINLT                  , KEYS_FRONT +  5, 0001 }, \
+      { BRL_CMD_FWINRT                  , KEYS_FRONT +  9, 0001 }, \
+      { BRL_BLK_DESCCHAR                 , KEY_ROUTING1   , 0001 }, \
                                                                \
-      { BRL_CMD_LNEND                   , OFFS_FRONT +  7, 0010 }, \
-      { BRL_CMD_CHRLT                   , OFFS_FRONT +  6, 0010 }, \
-      { BRL_CMD_CHRRT                   , OFFS_FRONT +  8, 0010 }, \
-      { BRL_CMD_HWINLT                  , OFFS_FRONT +  5, 0010 }, \
-      { BRL_CMD_HWINRT                  , OFFS_FRONT +  9, 0010 }, \
-      { BRL_BLK_SETLEFT                  , ROUTINGKEY1    , 0010 }, \
+      { BRL_CMD_LNEND                   , KEYS_FRONT +  7, 0010 }, \
+      { BRL_CMD_CHRLT                   , KEYS_FRONT +  6, 0010 }, \
+      { BRL_CMD_CHRRT                   , KEYS_FRONT +  8, 0010 }, \
+      { BRL_CMD_HWINLT                  , KEYS_FRONT +  5, 0010 }, \
+      { BRL_CMD_HWINRT                  , KEYS_FRONT +  9, 0010 }, \
+      { BRL_BLK_SETLEFT                  , KEY_ROUTING1   , 0010 }, \
                                                                \
-      { BRL_BLK_PASSKEY+BRL_KEY_INSERT      , OFFS_FRONT +  7, 0002 }, \
-      { BRL_BLK_PASSKEY+BRL_KEY_PAGE_UP     , OFFS_FRONT +  6, 0002 }, \
-      { BRL_BLK_PASSKEY+BRL_KEY_PAGE_DOWN   , OFFS_FRONT +  8, 0002 }, \
-      { BRL_BLK_PASSKEY+BRL_KEY_CURSOR_UP   , OFFS_FRONT +  5, 0002 }, \
-      { BRL_BLK_PASSKEY+BRL_KEY_CURSOR_DOWN , OFFS_FRONT +  9, 0002 }, \
-      { BRL_BLK_SWITCHVT                 , ROUTINGKEY1    , 0002 }, \
+      { BRL_BLK_PASSKEY+BRL_KEY_INSERT      , KEYS_FRONT +  7, 0002 }, \
+      { BRL_BLK_PASSKEY+BRL_KEY_PAGE_UP     , KEYS_FRONT +  6, 0002 }, \
+      { BRL_BLK_PASSKEY+BRL_KEY_PAGE_DOWN   , KEYS_FRONT +  8, 0002 }, \
+      { BRL_BLK_PASSKEY+BRL_KEY_CURSOR_UP   , KEYS_FRONT +  5, 0002 }, \
+      { BRL_BLK_PASSKEY+BRL_KEY_CURSOR_DOWN , KEYS_FRONT +  9, 0002 }, \
+      { BRL_BLK_SWITCHVT                 , KEY_ROUTING1   , 0002 }, \
                                                                \
-      { BRL_BLK_PASSKEY+BRL_KEY_DELETE      , OFFS_FRONT +  7, 0020 }, \
-      { BRL_BLK_PASSKEY+BRL_KEY_HOME        , OFFS_FRONT +  6, 0020 }, \
-      { BRL_BLK_PASSKEY+BRL_KEY_END         , OFFS_FRONT +  8, 0020 }, \
-      { BRL_BLK_PASSKEY+BRL_KEY_CURSOR_LEFT , OFFS_FRONT +  5, 0020 }, \
-      { BRL_BLK_PASSKEY+BRL_KEY_CURSOR_RIGHT, OFFS_FRONT +  9, 0020 }, \
-      { BRL_BLK_PASSKEY+BRL_KEY_FUNCTION    , ROUTINGKEY1    , 0020 }, \
+      { BRL_BLK_PASSKEY+BRL_KEY_DELETE      , KEYS_FRONT +  7, 0020 }, \
+      { BRL_BLK_PASSKEY+BRL_KEY_HOME        , KEYS_FRONT +  6, 0020 }, \
+      { BRL_BLK_PASSKEY+BRL_KEY_END         , KEYS_FRONT +  8, 0020 }, \
+      { BRL_BLK_PASSKEY+BRL_KEY_CURSOR_LEFT , KEYS_FRONT +  5, 0020 }, \
+      { BRL_BLK_PASSKEY+BRL_KEY_CURSOR_RIGHT, KEYS_FRONT +  9, 0020 }, \
+      { BRL_BLK_PASSKEY+BRL_KEY_FUNCTION    , KEY_ROUTING1   , 0020 }, \
                                                                \
-      { BRL_CMD_NODOTS                  , OFFS_FRONT +  7, 0004 }, \
-      { BRL_BLK_PASSKEY+BRL_KEY_ESCAPE      , OFFS_FRONT +  6, 0004 }, \
-      { BRL_BLK_PASSKEY+BRL_KEY_TAB         , OFFS_FRONT +  8, 0004 }, \
-      { BRL_BLK_PASSKEY+BRL_KEY_BACKSPACE   , OFFS_FRONT +  5, 0004 }, \
-      { BRL_BLK_PASSKEY+BRL_KEY_ENTER      , OFFS_FRONT +  9, 0004 }, \
+      { BRL_CMD_NODOTS                  , KEYS_FRONT +  7, 0004 }, \
+      { BRL_BLK_PASSKEY+BRL_KEY_ESCAPE      , KEYS_FRONT +  6, 0004 }, \
+      { BRL_BLK_PASSKEY+BRL_KEY_TAB         , KEYS_FRONT +  8, 0004 }, \
+      { BRL_BLK_PASSKEY+BRL_KEY_BACKSPACE   , KEYS_FRONT +  5, 0004 }, \
+      { BRL_BLK_PASSKEY+BRL_KEY_ENTER      , KEYS_FRONT +  9, 0004 }, \
                                                                \
-      { BRL_CMD_SPKHOME                 , OFFS_FRONT +  7, 0100 }, \
-      { BRL_CMD_SAY_ABOVE               , OFFS_FRONT +  6, 0100 }, \
-      { BRL_CMD_SAY_BELOW               , OFFS_FRONT +  8, 0100 }, \
-      { BRL_CMD_MUTE                    , OFFS_FRONT +  5, 0100 }, \
-      { BRL_CMD_SAY_LINE                , OFFS_FRONT +  9, 0100 }, \
+      { BRL_CMD_SPKHOME                 , KEYS_FRONT +  7, 0100 }, \
+      { BRL_CMD_SAY_ABOVE               , KEYS_FRONT +  6, 0100 }, \
+      { BRL_CMD_SAY_BELOW               , KEYS_FRONT +  8, 0100 }, \
+      { BRL_CMD_MUTE                    , KEYS_FRONT +  5, 0100 }, \
+      { BRL_CMD_SAY_LINE                , KEYS_FRONT +  9, 0100 }, \
                                                                \
-      { BRL_CMD_RESTARTSPEECH           , OFFS_FRONT +  7, 0200 }, \
-      { BRL_CMD_SAY_SLOWER              , OFFS_FRONT +  6, 0200 }, \
-      { BRL_CMD_SAY_FASTER              , OFFS_FRONT +  8, 0200 }, \
-      { BRL_CMD_SAY_SOFTER              , OFFS_FRONT +  5, 0200 }, \
-      { BRL_CMD_SAY_LOUDER              , OFFS_FRONT +  9, 0200 }, \
+      { BRL_CMD_RESTARTSPEECH           , KEYS_FRONT +  7, 0200 }, \
+      { BRL_CMD_SAY_SLOWER              , KEYS_FRONT +  6, 0200 }, \
+      { BRL_CMD_SAY_FASTER              , KEYS_FRONT +  8, 0200 }, \
+      { BRL_CMD_SAY_SOFTER              , KEYS_FRONT +  5, 0200 }, \
+      { BRL_CMD_SAY_LOUDER              , KEYS_FRONT +  9, 0200 }, \
                                                                \
-      { BRL_BLK_CUTBEGIN                 , ROUTINGKEY1    , 0100 }, \
-      { BRL_BLK_CUTAPPEND                , ROUTINGKEY1    , 0004 }, \
-      { BRL_BLK_CUTLINE                  , ROUTINGKEY1    , 0040 }, \
-      { BRL_BLK_CUTRECT                  , ROUTINGKEY1    , 0200 }, \
+      { BRL_BLK_CUTBEGIN                 , KEY_ROUTING1   , 0100 }, \
+      { BRL_BLK_CUTAPPEND                , KEY_ROUTING1   , 0004 }, \
+      { BRL_BLK_CUTLINE                  , KEY_ROUTING1   , 0040 }, \
+      { BRL_BLK_CUTRECT                  , KEY_ROUTING1   , 0200 }, \
                                                                \
-      { BRL_BLK_ROUTE                    , ROUTINGKEY1    , 0000 }
+      { BRL_BLK_ROUTE                    , KEY_ROUTING1   , 0000 }
 	
 
 /* commands for easy access bar + switches/keys */
@@ -417,134 +416,135 @@ PM_END_MODIFIERS
   {(l2), (code), MOD_BAR_BL2|(mod)}, \
   {(r2), (code), MOD_BAR_BR2|(mod)}
 #define CMDS_BAR_COMMON_ALL(mod) \
-  {BRL_CMD_BACK , NOKEY, MOD_BAR_KLR|(mod)}, \
-  {BRL_CMD_HOME , NOKEY, MOD_BAR_KLF|(mod)}, \
-  {BRL_CMD_HELP , NOKEY, MOD_BAR_KRR|(mod)}, \
-  {BRL_CMD_LEARN, NOKEY, MOD_BAR_KRF|(mod)}, \
-  CMDS_BAR(NOKEY, MOD_BAR_KLR|(mod), \
+  {BRL_CMD_BACK , KEY_NONE, MOD_BAR_KLR|(mod)}, \
+  {BRL_CMD_HOME , KEY_NONE, MOD_BAR_KLF|(mod)}, \
+  {BRL_CMD_HELP , KEY_NONE, MOD_BAR_KRR|(mod)}, \
+  {BRL_CMD_LEARN, KEY_NONE, MOD_BAR_KRF|(mod)}, \
+  CMDS_BAR(KEY_NONE, MOD_BAR_KLR|(mod), \
            BRL_CMD_SIXDOTS, BRL_CMD_PASTE, BRL_CMD_CAPBLINK, BRL_CMD_CSRJMP_VERT, \
-                BRL_CMD_DISPMD, BRL_CMD_CSRTRK, BRL_CMD_ATTRVIS, BRL_CMD_CSRVIS), \
-  CMDS_BAR(NOKEY, MOD_BAR_KLF|(mod), \
+           BRL_CMD_DISPMD, BRL_CMD_CSRTRK, BRL_CMD_ATTRVIS, BRL_CMD_CSRVIS), \
+  CMDS_BAR(KEY_NONE, MOD_BAR_KLF|(mod), \
            BRL_CMD_AUTOSPEAK, BRL_CMD_AUTOREPEAT, BRL_CMD_RESTARTBRL, BRL_CMD_FREEZE, \
-                BRL_CMD_INFO, BRL_CMD_PREFMENU, BRL_CMD_PREFLOAD, BRL_CMD_PREFSAVE), \
-  CMDS_BAR(NOKEY, MOD_BAR_KRR|(mod), \
+           BRL_CMD_INFO, BRL_CMD_PREFMENU, BRL_CMD_PREFLOAD, BRL_CMD_PREFSAVE), \
+  CMDS_BAR(KEY_NONE, MOD_BAR_KRR|(mod), \
            BRL_CMD_SAY_ABOVE, BRL_CMD_SAY_BELOW, BRL_CMD_SAY_LOUDER, BRL_CMD_SAY_SOFTER, \
-                BRL_CMD_MUTE, BRL_CMD_SAY_LINE, BRL_CMD_SAY_SLOWER, BRL_CMD_SAY_FASTER), \
-  CMDS_BAR(NOKEY, MOD_BAR_KRF|(mod), \
+           BRL_CMD_MUTE, BRL_CMD_SAY_LINE, BRL_CMD_SAY_SLOWER, BRL_CMD_SAY_FASTER), \
+  CMDS_BAR(KEY_NONE, MOD_BAR_KRF|(mod), \
            BRL_CMD_SPKHOME, BRL_CMD_TUNES, BRL_CMD_RESTARTSPEECH, BRL_CMD_SWSIM_BQ, \
-                BRL_CMD_SKPIDLNS, BRL_CMD_SKPBLNKWINS, BRL_CMD_NOOP, BRL_CMD_SLIDEWIN), \
-  {BRL_BLK_ROUTE, ROUTINGKEY1, (mod)}, \
-  CMDS_BAR(ROUTINGKEY1, (mod), \
+           BRL_CMD_SKPIDLNS, BRL_CMD_SKPBLNKWINS, BRL_CMD_NOOP, BRL_CMD_SLIDEWIN), \
+  {BRL_BLK_ROUTE, KEY_ROUTING1, (mod)}, \
+  CMDS_BAR(KEY_ROUTING1, (mod), \
            BRL_BLK_PRINDENT, BRL_BLK_NXINDENT, BRL_BLK_SETLEFT, BRL_BLK_DESCCHAR, \
                 BRL_BLK_CUTAPPEND, BRL_BLK_CUTLINE, BRL_BLK_CUTBEGIN, BRL_BLK_CUTRECT), \
-  {BRL_BLK_DESCCHAR, ROUTINGKEY2, (mod)}
+  {BRL_BLK_DESCCHAR, KEY_ROUTING2, (mod)}, \
+  {BRL_BLK_GOTOLINE, KEY_STATUS2, (mod)}
 #define CMDS_BAR_ALL \
-  CMDS_BAR(NOKEY, MOD_BAR_SLC|MOD_BAR_SRC, \
+  CMDS_BAR(KEY_NONE, MOD_BAR_SLC|MOD_BAR_SRC, \
            BRL_CMD_LNUP, BRL_CMD_LNDN, BRL_CMD_TOP, BRL_CMD_BOT, \
-                BRL_CMD_FWINLT, BRL_CMD_FWINRT, BRL_CMD_LNBEG, BRL_CMD_LNEND), \
-  CMDS_BAR(NOKEY, MOD_BAR_SLR|MOD_BAR_SRC, \
+           BRL_CMD_FWINLT, BRL_CMD_FWINRT, BRL_CMD_LNBEG, BRL_CMD_LNEND), \
+  CMDS_BAR(KEY_NONE, MOD_BAR_SLR|MOD_BAR_SRC, \
            BRL_CMD_PRDIFLN, BRL_CMD_NXDIFLN, BRL_CMD_ATTRUP, BRL_CMD_ATTRDN, \
-                BRL_CMD_PRPROMPT, BRL_CMD_NXPROMPT, BRL_CMD_PRPGRPH, BRL_CMD_NXPGRPH), \
-  CMDS_BAR(NOKEY, MOD_BAR_SLC|MOD_BAR_SRR, \
+           BRL_CMD_PRPROMPT, BRL_CMD_NXPROMPT, BRL_CMD_PRPGRPH, BRL_CMD_NXPGRPH), \
+  CMDS_BAR(KEY_NONE, MOD_BAR_SLC|MOD_BAR_SRR, \
            BRL_BLK_PASSKEY+BRL_KEY_CURSOR_UP, BRL_BLK_PASSKEY+BRL_KEY_CURSOR_DOWN, BRL_BLK_PASSKEY+BRL_KEY_PAGE_UP, BRL_BLK_PASSKEY+BRL_KEY_PAGE_DOWN, \
-                BRL_CMD_FWINLT|BRL_FLG_ROUTE, BRL_CMD_FWINRT|BRL_FLG_ROUTE, BRL_CMD_LNBEG|BRL_FLG_ROUTE, BRL_CMD_LNEND|BRL_FLG_ROUTE), \
-  CMDS_BAR(NOKEY, MOD_BAR_SLR|MOD_BAR_SRR, \
+           BRL_CMD_FWINLT|BRL_FLG_ROUTE, BRL_CMD_FWINRT|BRL_FLG_ROUTE, BRL_CMD_LNBEG|BRL_FLG_ROUTE, BRL_CMD_LNEND|BRL_FLG_ROUTE), \
+  CMDS_BAR(KEY_NONE, MOD_BAR_SLR|MOD_BAR_SRR, \
            BRL_BLK_PASSKEY+BRL_KEY_CURSOR_UP, BRL_BLK_PASSKEY+BRL_KEY_CURSOR_DOWN, BRL_BLK_PASSKEY+BRL_KEY_PAGE_UP, BRL_BLK_PASSKEY+BRL_KEY_PAGE_DOWN, \
-                BRL_BLK_PASSKEY+BRL_KEY_CURSOR_LEFT, BRL_BLK_PASSKEY+BRL_KEY_CURSOR_RIGHT, BRL_BLK_PASSKEY+BRL_KEY_HOME, BRL_BLK_PASSKEY+BRL_KEY_END), \
-  CMDS_BAR(NOKEY, MOD_BAR_SLF|MOD_BAR_SRC, \
+           BRL_BLK_PASSKEY+BRL_KEY_CURSOR_LEFT, BRL_BLK_PASSKEY+BRL_KEY_CURSOR_RIGHT, BRL_BLK_PASSKEY+BRL_KEY_HOME, BRL_BLK_PASSKEY+BRL_KEY_END), \
+  CMDS_BAR(KEY_NONE, MOD_BAR_SLF|MOD_BAR_SRC, \
            BRL_CMD_PRSEARCH, BRL_CMD_NXSEARCH, BRL_CMD_HELP, BRL_CMD_LEARN, \
-                BRL_CMD_CHRLT, BRL_CMD_CHRRT, BRL_CMD_HWINLT, BRL_CMD_HWINRT), \
-  CMDS_BAR(NOKEY, MOD_BAR_SLC|MOD_BAR_SRF, \
+           BRL_CMD_CHRLT, BRL_CMD_CHRRT, BRL_CMD_HWINLT, BRL_CMD_HWINRT), \
+  CMDS_BAR(KEY_NONE, MOD_BAR_SLC|MOD_BAR_SRF, \
            BRL_CMD_MENU_PREV_ITEM, BRL_CMD_MENU_NEXT_ITEM, BRL_CMD_MENU_FIRST_ITEM, BRL_CMD_MENU_LAST_ITEM, \
-                BRL_CMD_MENU_PREV_SETTING, BRL_CMD_MENU_NEXT_SETTING, BRL_CMD_PREFLOAD, BRL_CMD_PREFSAVE), \
+           BRL_CMD_MENU_PREV_SETTING, BRL_CMD_MENU_NEXT_SETTING, BRL_CMD_PREFLOAD, BRL_CMD_PREFSAVE), \
   CMDS_BAR_COMMON(CMDS_BAR_COMMON_ALL)
 
 #define CMDS_BAR_COMMON_SWSIM(mod) \
-  CMDS_BAR(NOKEY, MOD_BAR_KLF|MOD_BAR_KRF|(mod), \
+  CMDS_BAR(KEY_NONE, MOD_BAR_KLF|MOD_BAR_KRF|(mod), \
            BRL_CMD_SWSIM_LC, BRL_CMD_SWSIM_RC, BRL_CMD_SWSIM_BQ, BRL_CMD_SWSIM_BC, \
-                BRL_CMD_SWSIM_LR, BRL_CMD_SWSIM_RR, BRL_CMD_SWSIM_LF, BRL_CMD_SWSIM_RF)
+           BRL_CMD_SWSIM_LR, BRL_CMD_SWSIM_RR, BRL_CMD_SWSIM_LF, BRL_CMD_SWSIM_RF)
 #define CMDS_BAR_SWSIM CMDS_BAR_COMMON(CMDS_BAR_COMMON_SWSIM)
 
 
 /* commands for 2 status keys */
 #define CMDS_STAT_2 \
-      { BRL_CMD_HELP , OFFS_STAT + 1, 0 }, \
-      { BRL_CMD_LEARN, OFFS_STAT + 2, 0 }
+      { BRL_CMD_HELP , KEYS_STATUS + 1, 0 }, \
+      { BRL_CMD_LEARN, KEYS_STATUS + 2, 0 }
 
 
 /* commands for 4 status keys */
 #define CMDS_STAT_4 \
-      { BRL_CMD_HELP       , OFFS_STAT + 1, 0 }, \
-      { BRL_CMD_LEARN      , OFFS_STAT + 2, 0 }, \
-      { BRL_CMD_CSRJMP_VERT, OFFS_STAT + 3, 0 }, \
-      { BRL_CMD_DISPMD     , OFFS_STAT + 4, 0 }
+      { BRL_CMD_HELP       , KEYS_STATUS + 1, 0 }, \
+      { BRL_CMD_LEARN      , KEYS_STATUS + 2, 0 }, \
+      { BRL_CMD_CSRJMP_VERT, KEYS_STATUS + 3, 0 }, \
+      { BRL_CMD_DISPMD     , KEYS_STATUS + 4, 0 }
 
 
 /* commands for 13 status keys */
 #define CMDS_STAT_13(on, off) \
-      CHGONOFF( BRL_CMD_HELP       , OFFS_STAT +  1, on, off), \
-              { BRL_CMD_LEARN      , OFFS_STAT +  2, 0      }, \
-              { BRL_CMD_CSRJMP_VERT, OFFS_STAT +  3, 0      }, \
-              { BRL_CMD_BACK       , OFFS_STAT +  4, 0      }, \
-      CHGONOFF( BRL_CMD_INFO       , OFFS_STAT +  5, on, off), \
-      CHGONOFF( BRL_CMD_CSRTRK     , OFFS_STAT +  6, on, off), \
-      CHGONOFF( BRL_CMD_DISPMD     , OFFS_STAT +  7, on, off), \
-      CHGONOFF( BRL_CMD_FREEZE     , OFFS_STAT +  8, on, off), \
-              { BRL_CMD_PREFMENU   , OFFS_STAT +  9, 0      }, \
-              { BRL_CMD_PREFLOAD   , OFFS_STAT + 10, 0      }, \
-      CHGONOFF( BRL_CMD_CSRVIS     , OFFS_STAT + 11, on, off), \
-      CHGONOFF( BRL_CMD_ATTRVIS    , OFFS_STAT + 12, on, off), \
-              { BRL_CMD_PASTE      , OFFS_STAT + 13, 0      }
+      CHGONOFF( BRL_CMD_HELP       , KEYS_STATUS +  1, on, off), \
+              { BRL_CMD_LEARN      , KEYS_STATUS +  2, 0      }, \
+              { BRL_CMD_CSRJMP_VERT, KEYS_STATUS +  3, 0      }, \
+              { BRL_CMD_BACK       , KEYS_STATUS +  4, 0      }, \
+      CHGONOFF( BRL_CMD_INFO       , KEYS_STATUS +  5, on, off), \
+      CHGONOFF( BRL_CMD_CSRTRK     , KEYS_STATUS +  6, on, off), \
+      CHGONOFF( BRL_CMD_DISPMD     , KEYS_STATUS +  7, on, off), \
+      CHGONOFF( BRL_CMD_FREEZE     , KEYS_STATUS +  8, on, off), \
+              { BRL_CMD_PREFMENU   , KEYS_STATUS +  9, 0      }, \
+              { BRL_CMD_PREFLOAD   , KEYS_STATUS + 10, 0      }, \
+      CHGONOFF( BRL_CMD_CSRVIS     , KEYS_STATUS + 11, on, off), \
+      CHGONOFF( BRL_CMD_ATTRVIS    , KEYS_STATUS + 12, on, off), \
+              { BRL_CMD_PASTE      , KEYS_STATUS + 13, 0      }
 
 
 /* commands for 20 status keys */
 #define CMDS_STAT_20(on, off) \
-      CHGONOFF( BRL_CMD_HELP       , OFFS_STAT +  1, on, off ), \
-              { BRL_CMD_LEARN      , OFFS_STAT +  2, 0X0000  }, \
-              { BRL_CMD_CSRJMP_VERT, OFFS_STAT +  3, 0X0000  }, \
-              { BRL_CMD_BACK       , OFFS_STAT +  4, 0X0000  }, \
-      CHGONOFF( BRL_CMD_INFO       , OFFS_STAT +  5, on, off ), \
-      CHGONOFF( BRL_CMD_CSRTRK     , OFFS_STAT +  6, on, off ), \
-      CHGONOFF( BRL_CMD_DISPMD     , OFFS_STAT +  7, on, off ), \
-      CHGONOFF( BRL_CMD_FREEZE     , OFFS_STAT +  8, on, off ), \
-              { BRL_CMD_PREFMENU   , OFFS_STAT +  9, 0X0000  }, \
-              { BRL_CMD_PREFSAVE   , OFFS_STAT + 10, 0X0000  }, \
-              { BRL_CMD_PREFLOAD   , OFFS_STAT + 11, 0X0000  }, \
-      CHGONOFF( BRL_CMD_CSRVIS     , OFFS_STAT + 12, on, off ), \
-      CHGONOFF( BRL_CMD_ATTRVIS    , OFFS_STAT + 13, on, off ), \
-      CHGONOFF( BRL_CMD_CAPBLINK   , OFFS_STAT + 14, on, off ), \
-      CHGONOFF( BRL_CMD_SIXDOTS    , OFFS_STAT + 15, on, off ), \
-      CHGONOFF( BRL_CMD_SKPIDLNS   , OFFS_STAT + 16, on, off ), \
-      CHGONOFF( BRL_CMD_TUNES      , OFFS_STAT + 17, on, off ), \
-      CHGONOFF( BRL_CMD_AUTOSPEAK  , OFFS_STAT + 18, on, off ), \
-      CHGONOFF( BRL_CMD_AUTOREPEAT , OFFS_STAT + 19, on, off ), \
-              { BRL_CMD_PASTE      , OFFS_STAT + 20, 0X0000  }
+      CHGONOFF( BRL_CMD_HELP       , KEYS_STATUS +  1, on, off ), \
+              { BRL_CMD_LEARN      , KEYS_STATUS +  2, 0X0000  }, \
+              { BRL_CMD_CSRJMP_VERT, KEYS_STATUS +  3, 0X0000  }, \
+              { BRL_CMD_BACK       , KEYS_STATUS +  4, 0X0000  }, \
+      CHGONOFF( BRL_CMD_INFO       , KEYS_STATUS +  5, on, off ), \
+      CHGONOFF( BRL_CMD_CSRTRK     , KEYS_STATUS +  6, on, off ), \
+      CHGONOFF( BRL_CMD_DISPMD     , KEYS_STATUS +  7, on, off ), \
+      CHGONOFF( BRL_CMD_FREEZE     , KEYS_STATUS +  8, on, off ), \
+              { BRL_CMD_PREFMENU   , KEYS_STATUS +  9, 0X0000  }, \
+              { BRL_CMD_PREFSAVE   , KEYS_STATUS + 10, 0X0000  }, \
+              { BRL_CMD_PREFLOAD   , KEYS_STATUS + 11, 0X0000  }, \
+      CHGONOFF( BRL_CMD_CSRVIS     , KEYS_STATUS + 12, on, off ), \
+      CHGONOFF( BRL_CMD_ATTRVIS    , KEYS_STATUS + 13, on, off ), \
+      CHGONOFF( BRL_CMD_CAPBLINK   , KEYS_STATUS + 14, on, off ), \
+      CHGONOFF( BRL_CMD_SIXDOTS    , KEYS_STATUS + 15, on, off ), \
+      CHGONOFF( BRL_CMD_SKPIDLNS   , KEYS_STATUS + 16, on, off ), \
+      CHGONOFF( BRL_CMD_TUNES      , KEYS_STATUS + 17, on, off ), \
+      CHGONOFF( BRL_CMD_AUTOSPEAK  , KEYS_STATUS + 18, on, off ), \
+      CHGONOFF( BRL_CMD_AUTOREPEAT , KEYS_STATUS + 19, on, off ), \
+              { BRL_CMD_PASTE      , KEYS_STATUS + 20, 0X0000  }
 
 
 /* commands for 22 status keys */
 #define CMDS_STAT_22(on, off) \
-      CHGONOFF( BRL_CMD_HELP       , OFFS_STAT +  1, on, off ), \
-              { BRL_CMD_LEARN      , OFFS_STAT +  2, 0X0000  }, \
-              { BRL_CMD_CSRJMP_VERT, OFFS_STAT +  3, 0X0000  }, \
-              { BRL_CMD_BACK       , OFFS_STAT +  4, 0X0000  }, \
-      CHGONOFF( BRL_CMD_INFO       , OFFS_STAT +  5, on, off ), \
-      CHGONOFF( BRL_CMD_CSRTRK     , OFFS_STAT +  6, on, off ), \
-      CHGONOFF( BRL_CMD_DISPMD     , OFFS_STAT +  7, on, off ), \
-      CHGONOFF( BRL_CMD_FREEZE     , OFFS_STAT +  8, on, off ), \
-              { BRL_CMD_PREFMENU   , OFFS_STAT +  9, 0X0000  }, \
-              { BRL_CMD_PREFSAVE   , OFFS_STAT + 10, 0X0000  }, \
-              { BRL_CMD_PREFLOAD   , OFFS_STAT + 11, 0X0000  }, \
-      CHGONOFF( BRL_CMD_CSRVIS     , OFFS_STAT + 12, on, off ), \
-      CHGONOFF( BRL_CMD_ATTRVIS    , OFFS_STAT + 13, on, off ), \
-      CHGONOFF( BRL_CMD_CAPBLINK   , OFFS_STAT + 14, on, off ), \
-      CHGONOFF( BRL_CMD_SIXDOTS    , OFFS_STAT + 15, on, off ), \
-      CHGONOFF( BRL_CMD_SKPIDLNS   , OFFS_STAT + 16, on, off ), \
-      CHGONOFF( BRL_CMD_TUNES      , OFFS_STAT + 17, on, off ), \
-              { BRL_CMD_RESTARTBRL , OFFS_STAT + 18, 0X0000  }, \
-      CHGONOFF( BRL_CMD_INPUT      , OFFS_STAT + 19, on, off ), \
-      CHGONOFF( BRL_CMD_AUTOSPEAK  , OFFS_STAT + 20, on, off ), \
-      CHGONOFF( BRL_CMD_AUTOREPEAT , OFFS_STAT + 21, on, off ), \
-              { BRL_CMD_PASTE      , OFFS_STAT + 22, 0X0000  }
+      CHGONOFF( BRL_CMD_HELP       , KEYS_STATUS +  1, on, off ), \
+              { BRL_CMD_LEARN      , KEYS_STATUS +  2, 0X0000  }, \
+              { BRL_CMD_CSRJMP_VERT, KEYS_STATUS +  3, 0X0000  }, \
+              { BRL_CMD_BACK       , KEYS_STATUS +  4, 0X0000  }, \
+      CHGONOFF( BRL_CMD_INFO       , KEYS_STATUS +  5, on, off ), \
+      CHGONOFF( BRL_CMD_CSRTRK     , KEYS_STATUS +  6, on, off ), \
+      CHGONOFF( BRL_CMD_DISPMD     , KEYS_STATUS +  7, on, off ), \
+      CHGONOFF( BRL_CMD_FREEZE     , KEYS_STATUS +  8, on, off ), \
+              { BRL_CMD_PREFMENU   , KEYS_STATUS +  9, 0X0000  }, \
+              { BRL_CMD_PREFSAVE   , KEYS_STATUS + 10, 0X0000  }, \
+              { BRL_CMD_PREFLOAD   , KEYS_STATUS + 11, 0X0000  }, \
+      CHGONOFF( BRL_CMD_CSRVIS     , KEYS_STATUS + 12, on, off ), \
+      CHGONOFF( BRL_CMD_ATTRVIS    , KEYS_STATUS + 13, on, off ), \
+      CHGONOFF( BRL_CMD_CAPBLINK   , KEYS_STATUS + 14, on, off ), \
+      CHGONOFF( BRL_CMD_SIXDOTS    , KEYS_STATUS + 15, on, off ), \
+      CHGONOFF( BRL_CMD_SKPIDLNS   , KEYS_STATUS + 16, on, off ), \
+      CHGONOFF( BRL_CMD_TUNES      , KEYS_STATUS + 17, on, off ), \
+              { BRL_CMD_RESTARTBRL , KEYS_STATUS + 18, 0X0000  }, \
+      CHGONOFF( BRL_CMD_INPUT      , KEYS_STATUS + 19, on, off ), \
+      CHGONOFF( BRL_CMD_AUTOSPEAK  , KEYS_STATUS + 20, on, off ), \
+      CHGONOFF( BRL_CMD_AUTOREPEAT , KEYS_STATUS + 21, on, off ), \
+              { BRL_CMD_PASTE      , KEYS_STATUS + 22, 0X0000  }
 
 
 #define PM_BEGIN_COMMANDS(name) static CommandDefinition pmCommands_##name[] = {

@@ -96,21 +96,27 @@ static char* search_toggle(int cmd)
 static char* search_key(int16_t key) {
   static char res[20];
 
-  if (key == ROUTINGKEY1) {
+  if (key == KEY_ROUTING1) {
     snprintf(res, sizeof(res), "%s",
              search_code(ROUTING1, 0));
     return res;
   }
 
-  if (key == ROUTINGKEY2) {
+  if (key == KEY_ROUTING2) {
     snprintf(res, sizeof(res), "%s",
              search_code(ROUTING2, 0));
     return res;
   }
 
-  if (key >= OFFS_SWITCH) {
+  if (key == KEY_STATUS2) {
+    snprintf(res, sizeof(res), "%s",
+             search_code(STATUS2, 0));
+    return res;
+  }
+
+  if (key >= KEYS_SWITCH) {
     static const unsigned char map[] = {0, 2, 3, 1};
-    key -= OFFS_SWITCH + 1;
+    key -= KEYS_SWITCH + 1;
     key = (map[key >> 1] << 1) | (key & 0X1);
     snprintf(res, sizeof(res), "%s %s %s",
              (key & 0X04)? "key": "switch",
@@ -119,20 +125,20 @@ static char* search_key(int16_t key) {
     return res;
   }
 
-  if (key >= OFFS_BAR) {
+  if (key >= KEYS_BAR) {
     snprintf(res, sizeof(res), "%s %s",
              search_symbol(BAR),
-             search_code(BARCODE, key-OFFS_BAR));
+             search_code(BARCODE, key-KEYS_BAR));
     return res;
   }
 
-  if (key >=  OFFS_STAT) {
-    snprintf(res, sizeof(res), "status %d", key-OFFS_STAT);
+  if (key >=  KEYS_STATUS) {
+    snprintf(res, sizeof(res), "status %d", key-KEYS_STATUS);
     return res;
   }
 
-  if (key >=  OFFS_FRONT) {
-    snprintf(res, sizeof(res), "front %d", key-OFFS_FRONT);
+  if (key >=  KEYS_FRONT) {
+    snprintf(res, sizeof(res), "front %d", key-KEYS_FRONT);
     return res;
   }
 
@@ -157,7 +163,7 @@ printkeys (FILE *fh, const TerminalDefinition *terminal, const CommandDefinition
     }
   }
 
-  if (cmd->key != NOKEY) {
+  if (cmd->key != KEY_NONE) {
     fprintf(fh, "%s%s", delimiter, search_key(cmd->key));
   }
 }
@@ -245,7 +251,7 @@ void terminals(int help, int verbose)
 
             fprintf(fh, " %s # %s\n",
                     search_code(STATCODE, code),
-                    search_help_text(code + OFFS_STAT));
+                    search_help_text(code + KEYS_STATUS));
           }
         }
       }

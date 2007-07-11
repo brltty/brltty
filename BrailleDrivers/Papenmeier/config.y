@@ -320,7 +320,7 @@ addCommand (int code) {
       int k;
 
       cmd->code = code;
-      cmd->key = NOKEY;
+      cmd->key = KEY_NONE;
       cmd->modifiers = 0;
 
       for (k=0; k<numkeys; k++) {
@@ -341,7 +341,7 @@ addCommand (int code) {
         }
 
         if (!found) {
-          if (cmd->key != NOKEY) {
+          if (cmd->key != KEY_NONE) {
             yyerror("more than one nonmodifier key");
             goto removeCommand;
           }
@@ -365,7 +365,7 @@ addCommand (int code) {
 %token MODIFIER
 %token ROUTING1 ROUTING2 BAR SWITCH KEY
 %token LEFT RIGHT REAR FRONT
-%token STAT KEYCODE STATCODE BARCODE
+%token STAT STATUS2 KEYCODE STATCODE BARCODE
 %token NUMBER FLAG HORIZ
 %token ON OFF CHECK ROUTE
 %token VPK
@@ -418,19 +418,20 @@ statdisp: STATCODE            {  }
         | NUMBER STATCODE     { numval += OFFS_NUMBER; }
         ;
 
-anykey:   STAT   NUM         { keyindex= OFFS_STAT + numval; } 
-        | FRONT  NUM         { keyindex= OFFS_FRONT + numval; } 
-        | BAR    BARCODE     { keyindex= OFFS_BAR + numval; } 
-        | SWITCH LEFT  REAR  { keyindex= OFFS_SWITCH + SWITCH_LEFT_REAR; }
-        | SWITCH LEFT  FRONT { keyindex= OFFS_SWITCH + SWITCH_LEFT_FRONT; }
-        | SWITCH RIGHT REAR  { keyindex= OFFS_SWITCH + SWITCH_RIGHT_REAR; }
-        | SWITCH RIGHT FRONT { keyindex= OFFS_SWITCH + SWITCH_RIGHT_FRONT; }
-        | KEY    LEFT  REAR  { keyindex= OFFS_SWITCH + KEY_LEFT_REAR; }
-        | KEY    LEFT  FRONT { keyindex= OFFS_SWITCH + KEY_LEFT_FRONT; }
-        | KEY    RIGHT REAR  { keyindex= OFFS_SWITCH + KEY_RIGHT_REAR; }
-        | KEY    RIGHT FRONT { keyindex= OFFS_SWITCH + KEY_RIGHT_FRONT; }
-        | ROUTING1           { keyindex= ROUTINGKEY1; }
-        | ROUTING2           { keyindex= ROUTINGKEY2; }
+anykey:   STAT   NUM         { keyindex= KEYS_STATUS + numval; } 
+        | FRONT  NUM         { keyindex= KEYS_FRONT + numval; } 
+        | BAR    BARCODE     { keyindex= KEYS_BAR + numval; } 
+        | SWITCH LEFT  REAR  { keyindex= KEYS_SWITCH + SWITCH_LEFT_REAR; }
+        | SWITCH LEFT  FRONT { keyindex= KEYS_SWITCH + SWITCH_LEFT_FRONT; }
+        | SWITCH RIGHT REAR  { keyindex= KEYS_SWITCH + SWITCH_RIGHT_REAR; }
+        | SWITCH RIGHT FRONT { keyindex= KEYS_SWITCH + SWITCH_RIGHT_FRONT; }
+        | KEY    LEFT  REAR  { keyindex= KEYS_SWITCH + KEY_LEFT_REAR; }
+        | KEY    LEFT  FRONT { keyindex= KEYS_SWITCH + KEY_LEFT_FRONT; }
+        | KEY    RIGHT REAR  { keyindex= KEYS_SWITCH + KEY_RIGHT_REAR; }
+        | KEY    RIGHT FRONT { keyindex= KEYS_SWITCH + KEY_RIGHT_FRONT; }
+        | ROUTING1           { keyindex= KEY_ROUTING1; }
+        | ROUTING2           { keyindex= KEY_ROUTING2; }
+        | STATUS2            { keyindex= KEY_STATUS2; }
         ; 
 
 modifiers: modifier
@@ -471,8 +472,9 @@ static struct init_v symbols[]= {
   { "frontkeys",   FRONTKEYS, 0 },
   { "hasbar",      HASBAR,    0 },
 
-  { "status",      STAT,   0 },
-  { "bar",         BAR,    0 },
+  { "status",      STAT,    0 },
+  { "status2",     STATUS2, 0 },
+  { "bar",         BAR,     0 },
 
   { "front",       FRONT,  0 },
   { "rear",        REAR,   0 },
