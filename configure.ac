@@ -1296,7 +1296,10 @@ in
    *qnx*)
       brltty_cv_device_serial_first="ser1"
       ;;
-   cygwin*|mingw*|msdos*)
+   cygwin*)
+      brltty_cv_device_serial_first="ttyS0"
+      ;;
+   mingw*|msdos*)
       brltty_cv_device_serial_first="COM1"
       ;;
    *)
