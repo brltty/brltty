@@ -1093,7 +1093,12 @@ initializeTerminal2 (BrailleDisplay *brl) {
   memset(inputState2, 0, inputBytes2);
   refreshRequired2 = 1;
 
-  {
+  /* Don't send the init packet by default as that was done at the factory
+   * and shouldn't need to be done again. We'll keep the code, though,
+   * just in case it's ever needed. Perhaps there should be a driver
+   * parameter to control it.
+   */
+  if (0) {
     unsigned char data[13];
     unsigned char size = 0;
 
