@@ -1247,7 +1247,7 @@ BRLTTY_ARG_DRIVER([braille], [BrailleDrivers])
 AC_CACHE_CHECK([for device directory], [brltty_cv_device_directory], [dnl
 case "${host_os}"
 in
-   cygwin*|mingw*)
+   mingw*)
       brltty_cv_device_directory=""
       ;;
    *)
