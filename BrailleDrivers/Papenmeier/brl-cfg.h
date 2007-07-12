@@ -249,7 +249,7 @@ PM_BEGIN_MODIFIERS(Front13)
   KEYS_FRONT + 13
 PM_END_MODIFIERS
 
-PM_BEGIN_MODIFIERS(Bar)
+PM_BEGIN_MODIFIERS(BarBasic)
   KEYS_SWITCH + SWITCH_LEFT_REAR,
   KEYS_SWITCH + SWITCH_LEFT_FRONT,
   KEYS_SWITCH + SWITCH_RIGHT_REAR,
@@ -267,7 +267,7 @@ PM_BEGIN_MODIFIERS(Bar)
   KEYS_BAR    + BAR_L2,
   KEYS_BAR    + BAR_R2
 PM_END_MODIFIERS
-#define pmModifiers_BarSim pmModifiers_Bar
+#define pmModifiers_BarSimulate pmModifiers_BarBasic
 
 #define MOD_BAR_SLC 0X0000
 #define MOD_BAR_SLR 0X0001
@@ -588,37 +588,37 @@ PM_BEGIN_COMMANDS(Front13_Status22)
   CMDS_STAT_22(0X80, 0X40)
 PM_END_COMMANDS
 
-PM_BEGIN_COMMANDS(Bar_Status0)
+PM_BEGIN_COMMANDS(BarBasic_Status0)
   CMDS_BAR_ALL
 PM_END_COMMANDS
 
-PM_BEGIN_COMMANDS(Bar_Status2)
+PM_BEGIN_COMMANDS(BarBasic_Status2)
   CMDS_BAR_ALL,
   CMDS_STAT_2
 PM_END_COMMANDS
 
-PM_BEGIN_COMMANDS(Bar_Status13)
+PM_BEGIN_COMMANDS(BarBasic_Status13)
   CMDS_BAR_ALL,
   CMDS_STAT_13(0X8000, 0X4000)
 PM_END_COMMANDS
 
-PM_BEGIN_COMMANDS(Bar_Status20)
+PM_BEGIN_COMMANDS(BarBasic_Status20)
   CMDS_BAR_ALL,
   CMDS_STAT_20(0X8000, 0X4000)
 PM_END_COMMANDS
 
-PM_BEGIN_COMMANDS(BarSim_Status0)
+PM_BEGIN_COMMANDS(BarSimulate_Status0)
   CMDS_BAR_ALL,
   CMDS_BAR_SWSIM
 PM_END_COMMANDS
 
-PM_BEGIN_COMMANDS(BarSim_Status2)
+PM_BEGIN_COMMANDS(BarSimulate_Status2)
   CMDS_BAR_ALL,
   CMDS_STAT_2,
   CMDS_BAR_SWSIM
 PM_END_COMMANDS
 
-PM_BEGIN_COMMANDS(BarSim_Status20)
+PM_BEGIN_COMMANDS(BarSimulate_Status20)
   CMDS_BAR_ALL,
   CMDS_STAT_20(0X8000, 0X4000),
   CMDS_BAR_SWSIM
@@ -653,85 +653,85 @@ static TerminalDefinition pmTerminalTable[] = {
   ,
   { PM_MODEL_IDENTITY(64, el_2d_40, "BrailleX EL 2D-40"),
     PM_TEXT_CELLS(40, 1),
-    PM_BAR(1, 1, 1, 1, , 13)
+    PM_BAR(1, 1, 1, 1, Basic, 13)
   }
   ,
   { PM_MODEL_IDENTITY(65, el_2d_66, "BrailleX EL 2D-66"),
     PM_TEXT_CELLS(66, 1),
-    PM_BAR(1, 1, 1, 1, , 13)
+    PM_BAR(1, 1, 1, 1, Basic, 13)
   }
   ,
   { PM_MODEL_IDENTITY(66, el_80, "BrailleX EL 80"),
     PM_TEXT_CELLS(80, 1),
-    PM_BAR(1, 1, 1, 1, , 2)
+    PM_BAR(1, 1, 1, 1, Basic, 2)
   }
   ,
   { PM_MODEL_IDENTITY(67, el_2d_80, "BrailleX EL 2D-80"),
     PM_TEXT_CELLS(80, 1),
-    PM_BAR(1, 1, 1, 1, , 20)
+    PM_BAR(1, 1, 1, 1, Basic, 20)
   }
   ,
   { PM_MODEL_IDENTITY(68, el_40_p, "BrailleX EL 40 P"),
     PM_TEXT_CELLS(40, 1),
-    PM_BAR(1, 1, 1, 0, , 0)
+    PM_BAR(1, 1, 1, 0, Basic, 0)
   }
   ,
   { PM_MODEL_IDENTITY(69, elba_32, "BrailleX Elba 32"),
     PM_TEXT_CELLS(32, 1),
-    PM_BAR(1, 1, 1, 1, , 0)
+    PM_BAR(1, 1, 1, 1, Basic, 0)
   }
   ,
   { PM_MODEL_IDENTITY(70, elba_20, "BrailleX Elba 20"),
     PM_TEXT_CELLS(20, 1),
-    PM_BAR(1, 1, 1, 1, , 0)
+    PM_BAR(1, 1, 1, 1, Basic, 0)
   }
   ,
   { PM_MODEL_IDENTITY(85, el40s, "BrailleX EL40s"),
     PM_TEXT_CELLS(40, 1),
-    PM_BAR(0, 0, 1, 1, Sim, 0)
+    PM_BAR(0, 0, 1, 1, Simulate, 0)
   }
   ,
   { PM_MODEL_IDENTITY(86, el80_ii, "BrailleX EL80-II"),
     PM_TEXT_CELLS(80, 1),
-    PM_BAR(0, 0, 1, 1, Sim, 2)
+    PM_BAR(0, 0, 1, 1, Simulate, 2)
   }
   ,
   { PM_MODEL_IDENTITY(87, el66s, "BrailleX EL66s"),
     PM_TEXT_CELLS(66, 1),
-    PM_BAR(0, 0, 1, 1, Sim, 0)
+    PM_BAR(0, 0, 1, 1, Simulate, 0)
   }
   ,
   { PM_MODEL_IDENTITY(88, el80s, "BrailleX EL80s"),
     PM_TEXT_CELLS(80, 1),
-    PM_BAR(0, 0, 1, 1, Sim, 0)
+    PM_BAR(0, 0, 1, 1, Simulate, 0)
   }
   ,
   { PM_MODEL_IDENTITY(89, trio, "BrailleX Trio"),
     .protocolRevision = 2,
     PM_TEXT_CELLS(40, 1),
-    PM_BAR(0, 0, 1, 1, Sim, 0)
+    PM_BAR(0, 0, 1, 1, Simulate, 0)
   }
   ,
   { PM_MODEL_IDENTITY(90, el70s, "BrailleX EL70s"),
     PM_TEXT_CELLS(70, 1),
-    PM_BAR(0, 0, 1, 1, Sim, 0)
+    PM_BAR(0, 0, 1, 1, Simulate, 0)
   }
   ,
   { PM_MODEL_IDENTITY(91, el2d_80s, "BrailleX EL2D-80s"),
     PM_TEXT_CELLS(80, 1),
-    PM_BAR(0, 0, 1, 1, Sim, 20)
+    PM_BAR(0, 0, 1, 1, Simulate, 20)
   }
   ,
   { PM_MODEL_IDENTITY(92, elba_trio_20, "BrailleX Elba (Trio 20)"),
     .protocolRevision = 2,
     PM_TEXT_CELLS(20, 1),
-    PM_BAR(0, 0, 1, 1, Sim, 0)
+    PM_BAR(0, 0, 1, 1, Simulate, 0)
   }
   ,
   { PM_MODEL_IDENTITY(93, elba_trio_32, "BrailleX Elba (Trio 32)"),
     .protocolRevision = 2,
     PM_TEXT_CELLS(32, 1),
-    PM_BAR(0, 0, 1, 1, Sim, 0)
+    PM_BAR(0, 0, 1, 1, Simulate, 0)
   }
 };
 
