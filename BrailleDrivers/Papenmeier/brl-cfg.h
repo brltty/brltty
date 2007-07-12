@@ -111,27 +111,35 @@ typedef struct {
   CommandDefinition *commandDefinitions;
 } TerminalDefinition; 
 
-#define PM_TERMINAL(identifier, revision, model, name, columns, rows, status, front, modifiers, eab, ls, rs, lk, rk) \
-{ \
+#define PM_MODEL_IDENTITY(identifier, model, name) \
   .modelIdentifier = identifier, \
-  .protocolRevision = revision, \
   .modelName = name, \
-  .helpFile = "brltty-pm-" #model ".hlp", \
+  .protocolRevision = 1, \
+  .helpFile = "brltty-pm-" #model ".hlp"
+
+#define PM_TEXT_CELLS(columns, rows) \
   .textColumns = columns, \
-  .textRows = rows, \
+  .textRows = rows
+
+#define PM_FRONT_KEYS(front, status) \
   .frontKeys = front, \
-  .hasBar = eab, \
+  PM_TERMINAL_TABLES(status, Front##front)
+
+#define PM_BAR(ls, rs, lk, rk, modifiers, status) \
+  .hasBar = 1, \
   .leftSwitches = ls, \
   .rightSwitches = rs, \
   .leftKeys = lk, \
   .rightKeys = rk, \
-  .statusCount = status, \
-  .modifierCount = ARRAY_COUNT(pmModifiers_##modifiers), \
-  .commandCount = ARRAY_COUNT(pmCommands_##modifiers##_Status##status), \
+  PM_TERMINAL_TABLES(status, Bar##modifiers)
+
+#define PM_TERMINAL_TABLES(status, modifiers) \
   .statusCells = pmStatus_##status, \
+  .statusCount = status, \
   .modifierKeys = pmModifiers_##modifiers, \
-  .commandDefinitions = pmCommands_##modifiers##_Status##status \
-}
+  .modifierCount = ARRAY_COUNT(pmModifiers_##modifiers), \
+  .commandDefinitions = pmCommands_##modifiers##_Status##status, \
+  .commandCount = ARRAY_COUNT(pmCommands_##modifiers##_Status##status)
 
 /* some macros for terminals with the same layout -
  * named after there usage
@@ -618,194 +626,113 @@ PM_END_COMMANDS
 
 
 static TerminalDefinition pmTerminalTable[] = {
-  PM_TERMINAL(
-    0, 1,				/* identity */
-    c_486,		/* filename of local helpfile */
-    "BrailleX Compact 486",	/* name of terminal */
-    40, 1, 0,			/* size of display */
-    9, Front9,			/* number of front keys */
-    0, 0, 0, 0, 0		/* terminal has an easy access bar */
-  )
+  { PM_MODEL_IDENTITY(0, c_486, "BrailleX Compact 486"),
+    PM_TEXT_CELLS(40, 1),
+    PM_FRONT_KEYS(9, 0)
+  }
   ,
-  PM_TERMINAL(
-    1, 1,				/* identity */
-    2d_l,		/* filename of local helpfile */
-    "BrailleX 2D Lite (plus)",	/* name of terminal */
-    40, 1, 13,			/* size of display */
-    9, Front9,			/* number of front keys */
-    0, 0, 0, 0, 0		/* terminal has an easy access bar */
-  )
+  { PM_MODEL_IDENTITY(1, 2d_l, "BrailleX 2D Lite (plus)"),
+    PM_TEXT_CELLS(40, 1),
+    PM_FRONT_KEYS(9, 13)
+  }
   ,
-  PM_TERMINAL(
-    2, 1,				/* identity */
-    c,		/* filename of local helpfile */
-    "BrailleX Compact/Tiny",	/* name of terminal */
-    40, 1, 0,			/* size of display */
-    9, Front9,			/* number of front keys */
-    0, 0, 0, 0, 0		/* terminal has an easy access bar */
-  )
+  { PM_MODEL_IDENTITY(2, c, "BrailleX Compact/Tiny"),
+    PM_TEXT_CELLS(40, 1),
+    PM_FRONT_KEYS(9, 0)
+  }
   ,
-  PM_TERMINAL(
-    3, 1,				/* identity */
-    2d_s,		/* filename of local helpfile */
-    "BrailleX 2D Screen Soft", /* name of terminal */
-    80, 1, 22,			/* size of display */
-    13, Front13,		/* number of front keys */
-    0, 0, 0, 0, 0		/* terminal has an easy access bar */
-  )
+  { PM_MODEL_IDENTITY(3, 2d_s, "BrailleX 2D Screen Soft"),
+    PM_TEXT_CELLS(80, 1),
+    PM_FRONT_KEYS(13, 22)
+  }
   ,
-  PM_TERMINAL(
-    6, 1,				/* identity */
-    ib_80,		/* filename of local helpfile */
-    "BrailleX IB 80 CR Soft",	/* name of terminal */
-    80, 1, 4,			/* size of display */
-    9, Front9,			/* number of front keys */
-    0, 0, 0, 0, 0		/* terminal has an easy access bar */
-  )
+  { PM_MODEL_IDENTITY(6, ib_80, "BrailleX IB 80 CR Soft"),
+    PM_TEXT_CELLS(80, 1),
+    PM_FRONT_KEYS(9, 4)
+  }
   ,
-  PM_TERMINAL(
-    64, 1,				/* identity */
-    el_2d_40,		/* filename of local helpfile */
-    "BrailleX EL 2D-40",	/* name of terminal */
-    40, 1, 13,			/* size of display */
-    0, Bar, 			/* number of front keys */
-    1, 1, 1, 1, 1		/* terminal has an easy access bar */
-  )
+  { PM_MODEL_IDENTITY(64, el_2d_40, "BrailleX EL 2D-40"),
+    PM_TEXT_CELLS(40, 1),
+    PM_BAR(1, 1, 1, 1, , 13)
+  }
   ,
-  PM_TERMINAL(
-    65, 1,				/* identity */
-    el_2d_66,		/* filename of local helpfile */
-    "BrailleX EL 2D-66",	/* name of terminal */
-    66, 1, 13,			/* size of display */
-    0, Bar, 			/* number of front keys */
-    1, 1, 1, 1, 1		/* terminal has an easy access bar */
-  )
+  { PM_MODEL_IDENTITY(65, el_2d_66, "BrailleX EL 2D-66"),
+    PM_TEXT_CELLS(66, 1),
+    PM_BAR(1, 1, 1, 1, , 13)
+  }
   ,
-  PM_TERMINAL(
-    66, 1,				/* identity */
-    el_80,		/* filename of local helpfile */
-    "BrailleX EL 80",		/* name of terminal */
-    80, 1, 2,			/* size of display */
-    0, Bar, 			/* number of front keys */
-    1, 1, 1, 1, 1		/* terminal has an easy access bar */
-  )
+  { PM_MODEL_IDENTITY(66, el_80, "BrailleX EL 80"),
+    PM_TEXT_CELLS(80, 1),
+    PM_BAR(1, 1, 1, 1, , 2)
+  }
   ,
-  PM_TERMINAL(
-    67, 1,				/* identity */
-    el_2d_80,		/* filename of local helpfile */
-    "BrailleX EL 2D-80",		/* name of terminal */
-    80, 1, 20,			/* size of display */
-    0, Bar, 			/* number of front keys */
-    1, 1, 1, 1, 1		/* terminal has an easy access bar */
-  )
+  { PM_MODEL_IDENTITY(67, el_2d_80, "BrailleX EL 2D-80"),
+    PM_TEXT_CELLS(80, 1),
+    PM_BAR(1, 1, 1, 1, , 20)
+  }
   ,
-  PM_TERMINAL(
-    68, 1,				/* identity */
-    el_40_p,		/* filename of local helpfile */
-    "BrailleX EL 40 P",		/* name of terminal */
-    40, 1, 0,			/* size of display */
-    0, Bar, 			/* number of front keys */
-    1, 1, 1, 1, 0		/* terminal has an easy access bar */
-  )
+  { PM_MODEL_IDENTITY(68, el_40_p, "BrailleX EL 40 P"),
+    PM_TEXT_CELLS(40, 1),
+    PM_BAR(1, 1, 1, 0, , 0)
+  }
   ,
-  PM_TERMINAL(
-    69, 1,				/* identity */
-    elba_32,		/* filename of local helpfile */
-    "BrailleX Elba 32",		/* name of terminal */
-    32, 1, 0,			/* size of display */
-    0, Bar, 			/* number of front keys */
-    1, 1, 1, 1, 1		/* terminal has an easy access bar */
-  )
+  { PM_MODEL_IDENTITY(69, elba_32, "BrailleX Elba 32"),
+    PM_TEXT_CELLS(32, 1),
+    PM_BAR(1, 1, 1, 1, , 0)
+  }
   ,
-  PM_TERMINAL(
-    70, 1,				/* identity */
-    elba_20,		/* filename of local helpfile */
-    "BrailleX Elba 20",		/* name of terminal */
-    20, 1, 0,			/* size of display */
-    0, Bar, 			/* number of front keys */
-    1, 1, 1, 1, 1		/* terminal has an easy access bar */
-  )
+  { PM_MODEL_IDENTITY(70, elba_20, "BrailleX Elba 20"),
+    PM_TEXT_CELLS(20, 1),
+    PM_BAR(1, 1, 1, 1, , 0)
+  }
   ,
-  PM_TERMINAL(
-    85, 1,				/* identity */
-    el40s,		/* filename of local helpfile */
-    "BrailleX EL40s",		/* name of terminal */
-    40, 1, 0,			/* size of display */
-    0, BarSim, 			/* number of front keys */
-    1, 0, 0, 1, 1		/* terminal has an easy access bar */
-  )
+  { PM_MODEL_IDENTITY(85, el40s, "BrailleX EL40s"),
+    PM_TEXT_CELLS(40, 1),
+    PM_BAR(0, 0, 1, 1, Sim, 0)
+  }
   ,
-  PM_TERMINAL(
-    86, 1,				/* identity */
-    el80_ii,		/* filename of local helpfile */
-    "BrailleX EL80-II",		/* name of terminal */
-    80, 1, 2,			/* size of display */
-    0, BarSim, 			/* number of front keys */
-    1, 0, 0, 1, 1		/* terminal has an easy access bar */
-  )
+  { PM_MODEL_IDENTITY(86, el80_ii, "BrailleX EL80-II"),
+    PM_TEXT_CELLS(80, 1),
+    PM_BAR(0, 0, 1, 1, Sim, 2)
+  }
   ,
-  PM_TERMINAL(
-    87, 1,				/* identity */
-    el66s,		/* filename of local helpfile */
-    "BrailleX EL66s",		/* name of terminal */
-    66, 1, 0,			/* size of display */
-    0, BarSim, 			/* number of front keys */
-    1, 0, 0, 1, 1		/* terminal has an easy access bar */
-  )
+  { PM_MODEL_IDENTITY(87, el66s, "BrailleX EL66s"),
+    PM_TEXT_CELLS(66, 1),
+    PM_BAR(0, 0, 1, 1, Sim, 0)
+  }
   ,
-  PM_TERMINAL(
-    88, 1,				/* identity */
-    el80s,		/* filename of local helpfile */
-    "BrailleX EL80s",		/* name of terminal */
-    80, 1, 0,			/* size of display */
-    0, BarSim, 			/* number of front keys */
-    1, 0, 0, 1, 1		/* terminal has an easy access bar */
-  )
+  { PM_MODEL_IDENTITY(88, el80s, "BrailleX EL80s"),
+    PM_TEXT_CELLS(80, 1),
+    PM_BAR(0, 0, 1, 1, Sim, 0)
+  }
   ,
-  PM_TERMINAL(
-    89, 2,				/* identity */
-    trio,		/* filename of local helpfile */
-    "BrailleX Trio",		/* name of terminal */
-    40, 1, 0,			/* size of display */
-    0, BarSim, 			/* number of front keys */
-    1, 0, 0, 1, 1		/* terminal has an easy access bar */
-  )
+  { PM_MODEL_IDENTITY(89, trio, "BrailleX Trio"),
+    .protocolRevision = 2,
+    PM_TEXT_CELLS(40, 1),
+    PM_BAR(0, 0, 1, 1, Sim, 0)
+  }
   ,
-  PM_TERMINAL(
-    90, 1,				/* identity */
-    el70s,		/* filename of local helpfile */
-    "BrailleX EL70s",		/* name of terminal */
-    70, 1, 0,			/* size of display */
-    0, BarSim, 			/* number of front keys */
-    1, 0, 0, 1, 1		/* terminal has an easy access bar */
-  )
+  { PM_MODEL_IDENTITY(90, el70s, "BrailleX EL70s"),
+    PM_TEXT_CELLS(70, 1),
+    PM_BAR(0, 0, 1, 1, Sim, 0)
+  }
   ,
-  PM_TERMINAL(
-    91, 1,				/* identity */
-    el2d_80s,		/* filename of local helpfile */
-    "BrailleX EL2D-80s",		/* name of terminal */
-    80, 1, 20,			/* size of display */
-    0, BarSim, 			/* number of front keys */
-    1, 0, 0, 1, 1		/* terminal has an easy access bar */
-  )
+  { PM_MODEL_IDENTITY(91, el2d_80s, "BrailleX EL2D-80s"),
+    PM_TEXT_CELLS(80, 1),
+    PM_BAR(0, 0, 1, 1, Sim, 20)
+  }
   ,
-  PM_TERMINAL(
-    92, 2,				/* identity */
-    elba_trio_20,		/* filename of local helpfile */
-    "BrailleX Elba (Trio 20)",		/* name of terminal */
-    20, 1, 0,			/* size of display */
-    0, BarSim, 			/* number of front keys */
-    1, 0, 0, 1, 1		/* terminal has an easy access bar */
-  )
+  { PM_MODEL_IDENTITY(92, elba_trio_20, "BrailleX Elba (Trio 20)"),
+    .protocolRevision = 2,
+    PM_TEXT_CELLS(20, 1),
+    PM_BAR(0, 0, 1, 1, Sim, 0)
+  }
   ,
-  PM_TERMINAL(
-    93, 2,				/* identity */
-    elba_trio_32,		/* filename of local helpfile */
-    "BrailleX Elba (Trio 32)",		/* name of terminal */
-    32, 1, 0,			/* size of display */
-    0, BarSim, 			/* number of front keys */
-    1, 0, 0, 1, 1		/* terminal has an easy access bar */
-  )
+  { PM_MODEL_IDENTITY(93, elba_trio_32, "BrailleX Elba (Trio 32)"),
+    .protocolRevision = 2,
+    PM_TEXT_CELLS(32, 1),
+    PM_BAR(0, 0, 1, 1, Sim, 0)
+  }
 };
 
 static TerminalDefinition *pmTerminals = pmTerminalTable;
