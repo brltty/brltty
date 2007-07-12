@@ -89,37 +89,48 @@ typedef struct {
 } CommandDefinition;
 
 typedef struct {
-  unsigned char identifier;		/* identity of terminal */
-  char *name;		/* name of terminal */
-  char *helpFile;		/* filename of local helpfile */
+  unsigned char modelIdentifier;
+  unsigned char protocolRevision;
+  char *modelName;
+  char *helpFile;
 
-  uint8_t columns;		/* width of display */
-  uint8_t rows;			/* height of display */
-  uint8_t frontKeys;		/* number of front keys */
-  uint8_t hasBar;		/* has an easy access bar */
-  uint8_t leftSwitches;		/* number of switches on the left side */
-  uint8_t rightSwitches;		/* number of switches on the right side */
-  uint8_t leftKeys;		/* number of keys on the left side */
-  uint8_t rightKeys;		/* number of keys on the right side */
-  uint8_t statusCount;		/* number of status cells */
-  uint8_t modifierCount;		/* number of modifier keys */
-  uint16_t commandCount;		/* number of commands */
+  uint8_t textColumns;
+  uint8_t textRows;
+  uint8_t frontKeys;
+  uint8_t hasBar;
+  uint8_t leftSwitches;
+  uint8_t rightSwitches;
+  uint8_t leftKeys;
+  uint8_t rightKeys;
+  uint8_t statusCount;
+  uint8_t modifierCount;
+  uint16_t commandCount;
 
-  uint16_t *statusCells;	/* status cells: info to show */
-  int16_t *modifiers;	/* keys used as modifier */
-  CommandDefinition *commands;
+  uint16_t *statusCells;
+  int16_t *modifierKeys;
+  CommandDefinition *commandDefinitions;
 } TerminalDefinition; 
 
-#define PM_TERMINAL(identifier, model, name, columns, rows, status, front, modifiers, eab, ls, rs, lk, rk) \
+#define PM_TERMINAL(identifier, revision, model, name, columns, rows, status, front, modifiers, eab, ls, rs, lk, rk) \
 { \
-  identifier, name, "brltty-pm-" #model ".hlp", \
-  columns, rows, front, eab, ls, rs, lk, rk, \
-  status, \
-  ARRAY_COUNT(pmModifiers_##modifiers), \
-  ARRAY_COUNT(pmCommands_##modifiers##_Status##status), \
-  pmStatus_##status, \
-  pmModifiers_##modifiers, \
-  pmCommands_##modifiers##_Status##status \
+  .modelIdentifier = identifier, \
+  .protocolRevision = revision, \
+  .modelName = name, \
+  .helpFile = "brltty-pm-" #model ".hlp", \
+  .textColumns = columns, \
+  .textRows = rows, \
+  .frontKeys = front, \
+  .hasBar = eab, \
+  .leftSwitches = ls, \
+  .rightSwitches = rs, \
+  .leftKeys = lk, \
+  .rightKeys = rk, \
+  .statusCount = status, \
+  .modifierCount = ARRAY_COUNT(pmModifiers_##modifiers), \
+  .commandCount = ARRAY_COUNT(pmCommands_##modifiers##_Status##status), \
+  .statusCells = pmStatus_##status, \
+  .modifierKeys = pmModifiers_##modifiers, \
+  .commandDefinitions = pmCommands_##modifiers##_Status##status \
 }
 
 /* some macros for terminals with the same layout -
@@ -608,7 +619,7 @@ PM_END_COMMANDS
 
 static TerminalDefinition pmTerminalTable[] = {
   PM_TERMINAL(
-    0,				/* identity */
+    0, 1,				/* identity */
     c_486,		/* filename of local helpfile */
     "BrailleX Compact 486",	/* name of terminal */
     40, 1, 0,			/* size of display */
@@ -617,7 +628,7 @@ static TerminalDefinition pmTerminalTable[] = {
   )
   ,
   PM_TERMINAL(
-    1,				/* identity */
+    1, 1,				/* identity */
     2d_l,		/* filename of local helpfile */
     "BrailleX 2D Lite (plus)",	/* name of terminal */
     40, 1, 13,			/* size of display */
@@ -626,7 +637,7 @@ static TerminalDefinition pmTerminalTable[] = {
   )
   ,
   PM_TERMINAL(
-    2,				/* identity */
+    2, 1,				/* identity */
     c,		/* filename of local helpfile */
     "BrailleX Compact/Tiny",	/* name of terminal */
     40, 1, 0,			/* size of display */
@@ -635,7 +646,7 @@ static TerminalDefinition pmTerminalTable[] = {
   )
   ,
   PM_TERMINAL(
-    3,				/* identity */
+    3, 1,				/* identity */
     2d_s,		/* filename of local helpfile */
     "BrailleX 2D Screen Soft", /* name of terminal */
     80, 1, 22,			/* size of display */
@@ -644,7 +655,7 @@ static TerminalDefinition pmTerminalTable[] = {
   )
   ,
   PM_TERMINAL(
-    6,				/* identity */
+    6, 1,				/* identity */
     ib_80,		/* filename of local helpfile */
     "BrailleX IB 80 CR Soft",	/* name of terminal */
     80, 1, 4,			/* size of display */
@@ -653,7 +664,7 @@ static TerminalDefinition pmTerminalTable[] = {
   )
   ,
   PM_TERMINAL(
-    64,				/* identity */
+    64, 1,				/* identity */
     el_2d_40,		/* filename of local helpfile */
     "BrailleX EL 2D-40",	/* name of terminal */
     40, 1, 13,			/* size of display */
@@ -662,7 +673,7 @@ static TerminalDefinition pmTerminalTable[] = {
   )
   ,
   PM_TERMINAL(
-    65,				/* identity */
+    65, 1,				/* identity */
     el_2d_66,		/* filename of local helpfile */
     "BrailleX EL 2D-66",	/* name of terminal */
     66, 1, 13,			/* size of display */
@@ -671,7 +682,7 @@ static TerminalDefinition pmTerminalTable[] = {
   )
   ,
   PM_TERMINAL(
-    66,				/* identity */
+    66, 1,				/* identity */
     el_80,		/* filename of local helpfile */
     "BrailleX EL 80",		/* name of terminal */
     80, 1, 2,			/* size of display */
@@ -680,7 +691,7 @@ static TerminalDefinition pmTerminalTable[] = {
   )
   ,
   PM_TERMINAL(
-    67,				/* identity */
+    67, 1,				/* identity */
     el_2d_80,		/* filename of local helpfile */
     "BrailleX EL 2D-80",		/* name of terminal */
     80, 1, 20,			/* size of display */
@@ -689,7 +700,7 @@ static TerminalDefinition pmTerminalTable[] = {
   )
   ,
   PM_TERMINAL(
-    68,				/* identity */
+    68, 1,				/* identity */
     el_40_p,		/* filename of local helpfile */
     "BrailleX EL 40 P",		/* name of terminal */
     40, 1, 0,			/* size of display */
@@ -698,7 +709,7 @@ static TerminalDefinition pmTerminalTable[] = {
   )
   ,
   PM_TERMINAL(
-    69,				/* identity */
+    69, 1,				/* identity */
     elba_32,		/* filename of local helpfile */
     "BrailleX Elba 32",		/* name of terminal */
     32, 1, 0,			/* size of display */
@@ -707,7 +718,7 @@ static TerminalDefinition pmTerminalTable[] = {
   )
   ,
   PM_TERMINAL(
-    70,				/* identity */
+    70, 1,				/* identity */
     elba_20,		/* filename of local helpfile */
     "BrailleX Elba 20",		/* name of terminal */
     20, 1, 0,			/* size of display */
@@ -716,7 +727,7 @@ static TerminalDefinition pmTerminalTable[] = {
   )
   ,
   PM_TERMINAL(
-    85,				/* identity */
+    85, 1,				/* identity */
     el40s,		/* filename of local helpfile */
     "BrailleX EL40s",		/* name of terminal */
     40, 1, 0,			/* size of display */
@@ -725,7 +736,7 @@ static TerminalDefinition pmTerminalTable[] = {
   )
   ,
   PM_TERMINAL(
-    86,				/* identity */
+    86, 1,				/* identity */
     el80_ii,		/* filename of local helpfile */
     "BrailleX EL80-II",		/* name of terminal */
     80, 1, 2,			/* size of display */
@@ -734,7 +745,7 @@ static TerminalDefinition pmTerminalTable[] = {
   )
   ,
   PM_TERMINAL(
-    87,				/* identity */
+    87, 1,				/* identity */
     el66s,		/* filename of local helpfile */
     "BrailleX EL66s",		/* name of terminal */
     66, 1, 0,			/* size of display */
@@ -743,7 +754,7 @@ static TerminalDefinition pmTerminalTable[] = {
   )
   ,
   PM_TERMINAL(
-    88,				/* identity */
+    88, 1,				/* identity */
     el80s,		/* filename of local helpfile */
     "BrailleX EL80s",		/* name of terminal */
     80, 1, 0,			/* size of display */
@@ -752,7 +763,7 @@ static TerminalDefinition pmTerminalTable[] = {
   )
   ,
   PM_TERMINAL(
-    89,				/* identity */
+    89, 2,				/* identity */
     trio,		/* filename of local helpfile */
     "BrailleX Trio",		/* name of terminal */
     40, 1, 0,			/* size of display */
@@ -761,7 +772,7 @@ static TerminalDefinition pmTerminalTable[] = {
   )
   ,
   PM_TERMINAL(
-    90,				/* identity */
+    90, 1,				/* identity */
     el70s,		/* filename of local helpfile */
     "BrailleX EL70s",		/* name of terminal */
     70, 1, 0,			/* size of display */
@@ -770,7 +781,7 @@ static TerminalDefinition pmTerminalTable[] = {
   )
   ,
   PM_TERMINAL(
-    91,				/* identity */
+    91, 1,				/* identity */
     el2d_80s,		/* filename of local helpfile */
     "BrailleX EL2D-80s",		/* name of terminal */
     80, 1, 20,			/* size of display */
@@ -779,7 +790,7 @@ static TerminalDefinition pmTerminalTable[] = {
   )
   ,
   PM_TERMINAL(
-    92,				/* identity */
+    92, 2,				/* identity */
     elba_trio_20,		/* filename of local helpfile */
     "BrailleX Elba (Trio 20)",		/* name of terminal */
     20, 1, 0,			/* size of display */
@@ -788,7 +799,7 @@ static TerminalDefinition pmTerminalTable[] = {
   )
   ,
   PM_TERMINAL(
-    93,				/* identity */
+    93, 2,				/* identity */
     elba_trio_32,		/* filename of local helpfile */
     "BrailleX Elba (Trio 32)",		/* name of terminal */
     32, 1, 0,			/* size of display */

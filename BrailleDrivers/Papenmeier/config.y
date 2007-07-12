@@ -106,8 +106,8 @@ finishCurrentTerminal (void) {
   if (pmTerminalCount) {
     TerminalDefinition *terminal = &pmTerminals[pmTerminalCount - 1];
     if (!reallocateTable(&terminal->statusCells, sizeof(*terminal->statusCells), terminal->statusCount)) return 0;
-    if (!reallocateTable(&terminal->modifiers, sizeof(*terminal->modifiers), terminal->modifierCount)) return 0;
-    if (!reallocateTable(&terminal->commands, sizeof(*terminal->commands), terminal->commandCount)) return 0;
+    if (!reallocateTable(&terminal->modifierKeys, sizeof(*terminal->modifierKeys), terminal->modifierCount)) return 0;
+    if (!reallocateTable(&terminal->commandDefinitions, sizeof(*terminal->commandDefinitions), terminal->commandCount)) return 0;
   }
   return 1;
 }
@@ -118,12 +118,13 @@ addTerminal (int identifier) {
     if (ensureTableSize(&pmTerminals, sizeof(*pmTerminals),
                         pmTerminalCount, &terminalsSize, 4)) {
       TerminalDefinition *terminal = &pmTerminals[pmTerminalCount++];
-      terminal->identifier = identifier;
-      terminal->name = NULL;
+      terminal->modelIdentifier = identifier;
+      terminal->modelName = NULL;
+      terminal->protocolRevision = 0;
       terminal->helpFile = NULL;
 
-      terminal->columns = 0;
-      terminal->rows = 1;
+      terminal->textColumns = 0;
+      terminal->textRows = 1;
 
       terminal->frontKeys = 0;
       terminal->hasBar = 0;
@@ -132,13 +133,14 @@ addTerminal (int identifier) {
       terminal->leftKeys = 0;
       terminal->rightKeys = 0;
 
-      terminal->statusCount = 0;
-      terminal->modifierCount = 0;
-      terminal->commandCount = 0;
-
       terminal->statusCells = NULL;
-      terminal->modifiers = NULL;
-      terminal->commands = NULL;
+      terminal->statusCount = 0;
+
+      terminal->modifierKeys = NULL;
+      terminal->modifierCount = 0;
+
+      terminal->commandDefinitions = NULL;
+      terminal->commandCount = 0;
 
       commandsSize = 0;
       return terminal;
@@ -151,12 +153,30 @@ static int
 setName (char *name) {
   TerminalDefinition *terminal = getCurrentTerminal();
   if (terminal) {
-    if (!terminal->name) {
-      if (duplicateString(&terminal->name, name)) {
+    if (!terminal->modelName) {
+      if (duplicateString(&terminal->modelName, name)) {
         return 1;
       }
     } else {
       yyerror("duplicate name");
+    }
+  }
+  return 0;
+}
+
+static int
+setProtocolRevision (int revision) {
+  TerminalDefinition *terminal = getCurrentTerminal();
+  if (terminal) {
+    if ((0 < revision) && (revision <= 0XFF)) {
+      if (!terminal->protocolRevision) {
+        terminal->protocolRevision = revision;
+        return 1;
+      } else {
+        yyerror("duplicate protocol revision");
+      }
+    } else {
+      yyerror("invalid protocol revision");
     }
   }
   return 0;
@@ -182,8 +202,8 @@ setColumns (int columns) {
   TerminalDefinition *terminal = getCurrentTerminal();
   if (terminal) {
     if ((0 < columns) && (columns <= 0XFF)) {
-      if (!terminal->columns) {
-        terminal->columns = columns;
+      if (!terminal->textColumns) {
+        terminal->textColumns = columns;
         return 1;
       } else {
         yyerror("duplicate column count");
@@ -290,7 +310,7 @@ addModifier (int key) {
     {
       int m;
       for (m=0; m<terminal->modifierCount; m++) {
-        if (terminal->modifiers[m] == key) {
+        if (terminal->modifierKeys[m] == key) {
           yyerror("duplicate modifier");
           return 0;
         }
@@ -298,9 +318,9 @@ addModifier (int key) {
     }
 
     if (terminal->modifierCount < MODMAX) {
-      if (terminal->modifiers ||
-          allocateTable(&terminal->modifiers, sizeof(*terminal->modifiers), MODMAX)) {
-        terminal->modifiers[terminal->modifierCount++] = key;
+      if (terminal->modifierKeys ||
+          allocateTable(&terminal->modifierKeys, sizeof(*terminal->modifierKeys), MODMAX)) {
+        terminal->modifierKeys[terminal->modifierCount++] = key;
         return 1;
       }
     } else {
@@ -314,9 +334,9 @@ static CommandDefinition *
 addCommand (int code) {
   TerminalDefinition *terminal = getCurrentTerminal();
   if (terminal) {
-    if (ensureTableSize(&terminal->commands, sizeof(*terminal->commands),
+    if (ensureTableSize(&terminal->commandDefinitions, sizeof(*terminal->commandDefinitions),
                         terminal->commandCount, &commandsSize, 0X20)) {
-      CommandDefinition *cmd = &terminal->commands[terminal->commandCount++];
+      CommandDefinition *cmd = &terminal->commandDefinitions[terminal->commandCount++];
       int k;
 
       cmd->code = code;
@@ -328,7 +348,7 @@ addCommand (int code) {
         int found = 0;
         int m;
         for (m=0; m<terminal->modifierCount; m++) {
-          if (key == terminal->modifiers[m]) {
+          if (key == terminal->modifierKeys[m]) {
             int bit = 1 << m;
             if (cmd->modifiers & bit) {
               yyerror("duplicate modifier");
@@ -361,7 +381,7 @@ addCommand (int code) {
 %start input
 
 %token NUM STRING IS AND
-%token NAME IDENT HELPFILE DISPLAYSIZE STATCELLS FRONTKEYS HASBAR
+%token IDENT NAME PROTOCOLREVISION HELPFILE DISPLAYSIZE STATCELLS FRONTKEYS HASBAR
 %token MODIFIER
 %token ROUTING1 ROUTING2 BAR SWITCH KEY
 %token LEFT RIGHT REAR FRONT
@@ -379,6 +399,7 @@ inputline:  '\n'
        | error '\n'                 { yyerrok;  }
        | IDENT eq NUM '\n'          { addTerminal(numval); }
        | NAME eq STRING '\n'        { setName(nameval); }
+       | PROTOCOLREVISION eq NUM '\n' { setProtocolRevision(numval); }
        | HELPFILE eq STRING '\n'    { setHelp(nameval); }
        | DISPLAYSIZE eq NUM '\n'           { setColumns(numval); }
        | STATCELLS eq NUM '\n'          { setStatusCells(numval); }
@@ -462,6 +483,7 @@ static struct init_v symbols[]= {
   { "identification", IDENT, 0 },
   { "identity",    IDENT, 0 },
   { "terminal",    NAME, 0 },
+  { "protocolrevision", PROTOCOLREVISION, 0 },
   { "type",        NAME, 0 },
   { "typ",         NAME, 0 },
 
@@ -613,11 +635,11 @@ void
 deallocateTerminalTable (void) {
   while (pmTerminalCount) {
     TerminalDefinition *terminal = &pmTerminals[--pmTerminalCount];
-    if (terminal->name) free(terminal->name);
+    if (terminal->modelName) free(terminal->modelName);
     if (terminal->helpFile) free(terminal->helpFile);
     if (terminal->statusCells) free(terminal->statusCells);
-    if (terminal->modifiers) free(terminal->modifiers);
-    if (terminal->commands) free(terminal->commands);
+    if (terminal->modifierKeys) free(terminal->modifierKeys);
+    if (terminal->commandDefinitions) free(terminal->commandDefinitions);
   }
 
   if (pmTerminals) {

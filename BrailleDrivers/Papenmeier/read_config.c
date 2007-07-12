@@ -158,7 +158,7 @@ printkeys (FILE *fh, const TerminalDefinition *terminal, const CommandDefinition
 
   for (m=0; m<terminal->modifierCount; m++) {
     if (cmd->modifiers & (1 << m)) {
-      fprintf(fh, "%s%s", delimiter, search_key(terminal->modifiers[m])); 
+      fprintf(fh, "%s%s", delimiter, search_key(terminal->modifierKeys[m])); 
       delimiter = " and ";
     }
   }
@@ -178,22 +178,22 @@ void terminals(int help, int verbose)
   for (t=0; t<pmTerminalCount; t++) {
     const TerminalDefinition *terminal = &pmTerminals[t];
 
-    if (terminal->name) {
+    if (terminal->modelName) {
       if (help) {
 	fh = fopen(terminal->helpFile, "wa");
 	if (!fh) {
 	  perror("fopen");
 	  fprintf(stderr, "read_config: Error creating help file %s for %s.\n", 
-		  terminal->helpFile, terminal->name);
+		  terminal->helpFile, terminal->modelName);
 	  continue;
 	}
 	if (verbose)
 	  fprintf(stderr, "read_config: Generating help file %s for %s.\n", 
-		  terminal->helpFile, terminal->name);
+		  terminal->helpFile, terminal->modelName);
       } else {
         if (verbose)
 	  fprintf(stderr, "read_config: Writing configuration records for %s.\n",
-	          terminal->name);
+	          terminal->modelName);
       }
       
       if (!help)
@@ -202,14 +202,16 @@ void terminals(int help, int verbose)
       fprintf(fh, "# Terminal Parameters:\n");
      
       fprintf(fh, "%s = %d\n", 
-	      search_symbol(IDENT), terminal->identifier);
+	      search_symbol(IDENT), terminal->modelIdentifier);
       fprintf(fh, "%s = \"%s\"\n", 
-	      search_symbol(NAME), terminal->name);
+	      search_symbol(NAME), terminal->modelName);
+      fprintf(fh, "%s = %d\n", 
+	      search_symbol(PROTOCOLREVISION), terminal->protocolRevision);
       fprintf(fh, "%s = \"%s\"\n", 
 	      search_symbol(HELPFILE), terminal->helpFile);
 
       fprintf(fh, "%s = %d\n", 
-	      search_symbol(DISPLAYSIZE),      terminal->columns);
+	      search_symbol(DISPLAYSIZE),      terminal->textColumns);
       if (terminal->statusCount)
         fprintf(fh, "%s = %d\n", 
                 search_symbol(STATCELLS), terminal->statusCount);
@@ -260,7 +262,7 @@ void terminals(int help, int verbose)
         int first = 1;
         int m;
         for (m=0; m<terminal->modifierCount; m++)  {
-          uint16_t key = terminal->modifiers[m];
+          uint16_t key = terminal->modifierKeys[m];
           if (key) {
             if (first) {
               first = 0;
@@ -276,7 +278,7 @@ void terminals(int help, int verbose)
       {
         int c;
         for (c=0; c<terminal->commandCount; c++) {
-          const CommandDefinition *command = &terminal->commands[c];
+          const CommandDefinition *command = &terminal->commandDefinitions[c];
           if (command->code) {
             fprintf(fh, "%s", search_cmd(command->code & BRL_MSK_CMD));
             if (command->code & BRL_FLG_TOGGLE_MASK) 

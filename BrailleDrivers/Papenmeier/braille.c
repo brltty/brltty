@@ -115,7 +115,7 @@ compareCommands (const void *item1, const void *item2) {
 
 static void
 sortCommands (void) {
-  qsort(terminal->commands, terminal->commandCount, sizeof(*terminal->commands), compareCommands);
+  qsort(terminal->commandDefinitions, terminal->commandCount, sizeof(*terminal->commandDefinitions), compareCommands);
 }
 
 static int
@@ -127,7 +127,7 @@ findCommand (int *command, int key, int modifiers) {
   ref.modifiers = modifiers;
   while (first <= last) {
     int current = (first + last) / 2;
-    CommandDefinition *cmd = &terminal->commands[current];
+    CommandDefinition *cmd = &terminal->commandDefinitions[current];
     int relation = compareCommands(cmd, &ref);
 
     if (!relation) {
@@ -268,7 +268,7 @@ handleKey (BrailleDisplay *brl, int code, int press, int offset) {
 
   /* look for modfier keys */
   for (i=0; i<terminal->modifierCount; i++)
-    if (terminal->modifiers[i] == code)
+    if (terminal->modifierKeys[i] == code)
       return handleModifier(brl, 1<<i, press);
 
   /* must be a "normal key" - search for cmd on key press */
@@ -473,14 +473,14 @@ interpretIdentity (BrailleDisplay *brl, unsigned char id, int major, int minor) 
   LogPrint(LOG_INFO, "Papenmeier ID: %d  Version: %d.%02d", 
            id, major, minor);
   for (tn=0; tn<pmTerminalCount; tn++) {
-    if (pmTerminals[tn].identifier == id) {
+    if (pmTerminals[tn].modelIdentifier == id) {
       terminal = &pmTerminals[tn];
       LogPrint(LOG_INFO, "%s  Size: %dx%d  HelpFile: %s", 
-               terminal->name,
-               terminal->columns, terminal->rows,
+               terminal->modelName,
+               terminal->textColumns, terminal->textRows,
                terminal->helpFile);
-      brl->x = terminal->columns;
-      brl->y = terminal->rows;
+      brl->x = terminal->textColumns;
+      brl->y = terminal->textRows;
 
       /* TODO: ?? HACK */
       BRLSYMBOL.helpFile = terminal->helpFile;
@@ -617,7 +617,7 @@ interpretIdentity1 (BrailleDisplay *brl, const unsigned char *identity) {
   rcvStatusFirst = RCV_KEYROUTE;
   rcvStatusLast  = rcvStatusFirst + 3 * (terminal->statusCount - 1);
   rcvCursorFirst = rcvStatusLast + 3;
-  rcvCursorLast  = rcvCursorFirst + 3 * (terminal->columns - 1);
+  rcvCursorLast  = rcvCursorFirst + 3 * (terminal->textColumns - 1);
   LogPrint(LOG_DEBUG, "Routing Keys: status=%03X-%03X cursor=%03X-%03X",
            rcvStatusFirst, rcvStatusLast,
            rcvCursorFirst, rcvCursorLast);
@@ -722,7 +722,7 @@ disableOutputTranslation1 (BrailleDisplay *brl, unsigned char xmtOffset, int cou
 static void
 initializeTable1 (BrailleDisplay *brl) {
   disableOutputTranslation1(brl, xmtStatusOffset, terminal->statusCount);
-  disableOutputTranslation1(brl, xmtTextOffset, terminal->columns);
+  disableOutputTranslation1(brl, xmtTextOffset, terminal->textColumns);
 }
 
 static void
@@ -747,7 +747,7 @@ initializeTerminal1 (BrailleDisplay *brl) {
   writeStatus1(brl, 0, terminal->statusCount);
   drainBrailleOutput(brl, 0);
 
-  writeText1(brl, 0, terminal->columns);
+  writeText1(brl, 0, terminal->textColumns);
   drainBrailleOutput(brl, 0);
 }
 
@@ -1062,7 +1062,7 @@ flushCells2 (BrailleDisplay *brl) {
     size += terminal->statusCount;
 
     /* Two dummy cells for each key on the left side. */
-    {
+    if (terminal->protocolRevision < 2) {
       int count = terminal->leftKeys;
       while (count-- > 0) {
         buffer[size++] = 0;
@@ -1071,11 +1071,11 @@ flushCells2 (BrailleDisplay *brl) {
     }
 
     /* The text cells. */
-    memcpy(&buffer[size], currentText, terminal->columns);
-    size += terminal->columns;
+    memcpy(&buffer[size], currentText, terminal->textColumns);
+    size += terminal->textColumns;
 
     /* Two dummy cells for each key on the right side. */
-    {
+    if (terminal->protocolRevision < 2) {
       int count = terminal->rightKeys;
       while (count-- > 0) {
         buffer[size++] = 0;
@@ -1102,7 +1102,7 @@ initializeTerminal2 (BrailleDisplay *brl) {
     unsigned char data[13];
     unsigned char size = 0;
 
-    data[size++] = terminal->identifier; /* device identification code */
+    data[size++] = terminal->modelIdentifier; /* device identification code */
 
     /* serial baud (bcd-encoded, six digits, one per nibble) */
     /* set to zero for default (57,600) */
@@ -1112,7 +1112,7 @@ initializeTerminal2 (BrailleDisplay *brl) {
 
     data[size++] = terminal->statusCount; /* number of vertical braille cells */
     data[size++] = terminal->leftKeys; /* number of left keys and switches */
-    data[size++] = terminal->columns; /* number of horizontal braille cells */
+    data[size++] = terminal->textColumns; /* number of horizontal braille cells */
     data[size++] = terminal->rightKeys; /* number of right keys and switches */
 
     data[size++] = 2; /* number of routing keys per braille cell */
@@ -1278,7 +1278,7 @@ mapInputModules2 (void) {
           KEYS_SWITCH+KEY_RIGHT_FRONT);
 
   {
-    unsigned char column = terminal->columns;
+    unsigned char column = terminal->textColumns;
     while (column) {
       nextInputModule2(&byte, &bit);
       addInputMapping2(byte, bit, KEY_ROUTING1, --column);
@@ -1329,7 +1329,7 @@ identifyTerminal2 (BrailleDisplay *brl) {
 
             {
               int modules = terminal->leftKeys + terminal->rightKeys;
-              inputBytes2 = modules + 1 + ((((modules * 4) + ((terminal->columns + terminal->statusCount) * 2)) + 7) / 8);
+              inputBytes2 = modules + 1 + ((((modules * 4) + ((terminal->textColumns + terminal->statusCount) * 2)) + 7) / 8);
             }
             inputBits2 = inputBytes2 * 8;
 
@@ -1427,7 +1427,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
 
     if (io->openPort(parameters, device)) {
       if (identifyTerminal(brl)) {
-        memset(currentText, outputTable[0], terminal->columns);
+        memset(currentText, outputTable[0], terminal->textColumns);
         memset(currentStatus, outputTable[0], terminal->statusCount);
         resetState();
         protocol->initializeTerminal(brl);
@@ -1477,8 +1477,8 @@ updateCells (BrailleDisplay *brl, int size, const unsigned char *data, unsigned 
 static void
 brl_writeWindow (BrailleDisplay *brl) {
   int i;
-  for (i=0; i<terminal->columns; i++) brl->buffer[i] = outputTable[brl->buffer[i]];
-  updateCells(brl, terminal->columns, brl->buffer, currentText, protocol->writeText);
+  for (i=0; i<terminal->textColumns; i++) brl->buffer[i] = outputTable[brl->buffer[i]];
+  updateCells(brl, terminal->textColumns, brl->buffer, currentText, protocol->writeText);
   protocol->flushCells(brl);
 }
 
