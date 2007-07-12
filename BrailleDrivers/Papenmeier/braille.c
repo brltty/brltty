@@ -1203,12 +1203,13 @@ readCommand2 (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 
         return command;
       }
+
       case 0X0C: {
-        int command = BRL_CMD_NOOP;
-        uint8_t modifiers = packet.data.bytes[0];
-        uint8_t dots = packet.data.bytes[1];
+        int command = BRL_BLK_PASSDOTS;
+        unsigned char modifiers = packet.data.bytes[0];
+        unsigned char dots = packet.data.bytes[1];
+
         if (dots) {
-          command = BRL_BLK_PASSDOTS;
           if (dots & 0X01) command |= BRL_DOT1;
           if (dots & 0X02) command |= BRL_DOT2;
           if (dots & 0X04) command |= BRL_DOT3;
@@ -1217,15 +1218,12 @@ readCommand2 (BrailleDisplay *brl, BRL_DriverCommandContext context) {
           if (dots & 0X20) command |= BRL_DOT6;
           if (dots & 0X40) command |= BRL_DOT7;
           if (dots & 0X80) command |= BRL_DOT8;
-          if (modifiers == 0X12) command |= BRL_FLG_CHAR_CONTROL;
-          if (modifiers == 0X0A) command |= BRL_FLG_CHAR_META;
-        } else if (modifiers) {
-          if (modifiers & 0X01 || modifiers & 0X04) {
-            command = BRL_BLK_PASSDOTS;
-            if (modifiers & 0X12 == 0X12) command |= BRL_FLG_CHAR_CONTROL;
-            if (modifiers & 0X0A == 0X0A) command |= BRL_FLG_CHAR_META;
-          }
+          if (modifiers & 0X02) command |= BRL_FLG_CHAR_UPPER;
+        } else if (!(modifiers & 0X02)) {
+          return BRL_CMD_NOOP;
         }
+        if (modifiers & 0X04) command |= BRL_FLG_CHAR_CONTROL;
+        if (modifiers & 0X01) command |= BRL_FLG_CHAR_META;
         return command;
       }
     }
