@@ -1526,8 +1526,5 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 
 static void
 brl_firmness (BrailleDisplay *brl, BrailleFirmness setting) {
-  if (protocol->setFirmness) {
-    protocol->setFirmness(brl, setting);
-  }
+  if (protocol->setFirmness) protocol->setFirmness(brl, setting);
 }
-
