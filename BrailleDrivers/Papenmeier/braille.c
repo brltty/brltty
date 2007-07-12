@@ -371,7 +371,7 @@ static const InputOutputOperations serialOperations = {
 #ifdef ENABLE_USB_SUPPORT
 #include "Programs/io_usb.h"
 static UsbChannel *usb = NULL;
-static const int usbBauds[] = {57600, 0};
+static const int usbBauds[] = {115200, 57600, 0};
 
 static int
 openUsbPort (char **parameters, const char *device) {
