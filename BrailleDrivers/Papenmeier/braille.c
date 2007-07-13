@@ -444,7 +444,7 @@ static const InputOutputOperations usbOperations = {
 #include "Programs/io_misc.h"
 
 static int bluetoothConnection = -1;
-static int bluetoothBauds[] = {115200, 0};
+static const int bluetoothBauds[] = {115200, 0};
 
 static int
 openBluetoothPort (char **parameters, const char *device) {
