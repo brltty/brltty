@@ -438,6 +438,64 @@ static const InputOutputOperations usbOperations = {
 };
 #endif /* ENABLE_USB_SUPPORT */
 
+/*--- Bluetooth Operations ---*/
+#ifdef ENABLE_BLUETOOTH_SUPPORT
+#include "Programs/io_bluetooth.h"
+#include "Programs/io_misc.h"
+
+static int bluetoothConnection = -1;
+static int bluetoothBauds[] = {115200, 0};
+
+static int
+openBluetoothPort (char **parameters, const char *device) {
+  return (bluetoothConnection = btOpenConnection(device, 1, 0)) != -1;
+}
+
+static int
+prepareBluetoothPort (void) {
+  return 1;
+}
+
+static void
+closeBluetoothPort (void) {
+  close(bluetoothConnection);
+  bluetoothConnection = -1;
+}
+
+static void
+flushBluetoothPort (BrailleDisplay *brl) {
+}
+
+static int
+awaitBluetoothInput (int milliseconds) {
+  return awaitInput(bluetoothConnection, milliseconds);
+}
+
+static int
+readBluetoothBytes (unsigned char *buffer, size_t *offset, size_t length, int timeout) {
+  return readChunk(bluetoothConnection, buffer, offset, length, 0, timeout);
+}
+
+static int
+writeBluetoothBytes (const unsigned char *buffer, int length) {
+  int count = writeData(bluetoothConnection, buffer, length);
+  if (count != length) {
+    if (count == -1) {
+      LogError("Papenmeier Bluetooth write");
+    } else {
+      LogPrint(LOG_WARNING, "Trunccated bluetooth write: %d < %d", count, length);
+    }
+  }
+  return count;
+}
+
+static const InputOutputOperations bluetoothOperations = {
+  bluetoothBauds, 0, 3,
+  openBluetoothPort, prepareBluetoothPort, closeBluetoothPort, flushBluetoothPort,
+  awaitBluetoothInput, readBluetoothBytes, writeBluetoothBytes
+};
+#endif /* ENABLE_BLUETOOTH_SUPPORT */
+
 /*--- Protocol Operation Utilities ---*/
 
 typedef struct {
@@ -1437,6 +1495,12 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
     io = &usbOperations;
   } else
 #endif /* ENABLE_USB_SUPPORT */
+
+#ifdef ENABLE_BLUETOOTH_SUPPORT
+  if (isBluetoothDevice(&device)) {
+    io = &bluetoothOperations;
+  } else
+#endif /* ENABLE_BLUETOOTH_SUPPORT */
 
   {
     unsupportedDevice(device);
