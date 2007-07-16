@@ -972,6 +972,7 @@ typedef struct {
 static InputMapping2 *inputMap2 = NULL;
 static int inputBytes2;
 static int inputBits2;
+static int inputKeySize2;
 
 static unsigned char *inputState2 = NULL;
 static int refreshRequired2;
@@ -1317,33 +1318,52 @@ static const ProtocolOperations protocolOperations2 = {
   setFirmness2
 };
 
+typedef struct {
+  unsigned char byte;
+  unsigned char bit;
+  unsigned char size;
+} InputModule2;
+
 static void
-addInputMapping2 (int byte, int bit, int code, int offset) {
-  InputMapping2 *mapping = &inputMap2[(byte * 8) + bit];
-  mapping->code = code;
-  mapping->offset = offset;
+addInputMapping2 (const InputModule2 *module, unsigned char bit, int code, int offset) {
+  if (terminal->protocolRevision < 2) {
+    bit += module->bit;
+  } else {
+    bit += 8 - module->bit - module->size;
+  }
+
+  {
+    InputMapping2 *mapping = &inputMap2[(module->byte * 8) + bit];
+    mapping->code = code;
+    mapping->offset = offset;
+  }
+}
+
+static int
+nextInputModule2 (InputModule2 *module, unsigned char size) {
+  if (!module->bit) {
+    if (!module->byte) return 0;
+    module->byte -= 1;
+    module->bit = 8;
+  }
+  module->bit -= module->size = size;
+  return 1;
 }
 
 static void
-nextInputModule2 (int *byte, int *bit) {
-  if (!*bit) *bit = 8, *byte -= 1;
-  *bit -= 2;
-}
-
-static void
-mapKey2 (int count, int *byte, int *bit, int rear, int front) {
+mapInputKey2 (int count, InputModule2 *module, int rear, int front) {
   while (count--) {
-    nextInputModule2(byte, bit);
-    nextInputModule2(byte, bit);
-    addInputMapping2(*byte, *bit+1, front, 0);
-    addInputMapping2(*byte, *bit, rear, 0);
+    nextInputModule2(module, inputKeySize2);
+    addInputMapping2(module, 0, rear, 0);
+    addInputMapping2(module, 1, front, 0);
   }
 }
 
 static void
 mapInputModules2 (void) {
-  int byte = inputBytes2;
-  int bit = 0;
+  InputModule2 module;
+  module.byte = inputBytes2;
+  module.bit = 0;
 
   {
     int i;
@@ -1354,41 +1374,45 @@ mapInputModules2 (void) {
     }
   }
 
-  mapKey2(terminal->rightKeys, &byte, &bit,
-          KEYS_SWITCH+KEY_RIGHT_REAR,
-          KEYS_SWITCH+KEY_RIGHT_FRONT);
+  mapInputKey2(terminal->rightKeys, &module,
+               KEYS_SWITCH+KEY_RIGHT_REAR,
+               KEYS_SWITCH+KEY_RIGHT_FRONT);
 
   {
     unsigned char column = terminal->textColumns;
     while (column) {
-      nextInputModule2(&byte, &bit);
-      addInputMapping2(byte, bit, KEY_ROUTING1, --column);
-      addInputMapping2(byte, bit+1, KEY_ROUTING2, column);
+      nextInputModule2(&module, 1);
+      addInputMapping2(&module, 0, KEY_ROUTING2, --column);
+
+      nextInputModule2(&module, 1);
+      addInputMapping2(&module, 0, KEY_ROUTING1, column);
     }
   }
 
-  mapKey2(terminal->leftKeys, &byte, &bit,
-          KEYS_SWITCH+KEY_LEFT_REAR,
-          KEYS_SWITCH+KEY_LEFT_FRONT);
+  mapInputKey2(terminal->leftKeys, &module,
+               KEYS_SWITCH+KEY_LEFT_REAR,
+               KEYS_SWITCH+KEY_LEFT_FRONT);
 
   {
     unsigned char cell = terminal->statusCount;
     while (cell) {
-      nextInputModule2(&byte, &bit);
-      addInputMapping2(byte, bit, KEYS_STATUS+cell--, 0);
-      addInputMapping2(byte, bit, KEY_STATUS2, cell);
+      nextInputModule2(&module, 1);
+      addInputMapping2(&module, 0, KEY_STATUS2, cell-1);
+
+      nextInputModule2(&module, 1);
+      addInputMapping2(&module, 0, KEYS_STATUS+cell--, 0);
     }
   }
 
-  byte--;
-  addInputMapping2(byte, 7, KEYS_BAR+BAR_L2, 0);
-  addInputMapping2(byte, 6, KEYS_BAR+BAR_R2, 0);
-  addInputMapping2(byte, 5, KEYS_BAR+BAR_L1, 0);
-  addInputMapping2(byte, 4, KEYS_BAR+BAR_R1, 0);
-  addInputMapping2(byte, 3, KEYS_BAR+BAR_D2, 0);
-  addInputMapping2(byte, 2, KEYS_BAR+BAR_D1, 0);
-  addInputMapping2(byte, 1, KEYS_BAR+BAR_U1, 0);
-  addInputMapping2(byte, 0, KEYS_BAR+BAR_U2, 0);
+  nextInputModule2(&module, 8);
+  addInputMapping2(&module, 0, KEYS_BAR+BAR_U2, 0);
+  addInputMapping2(&module, 1, KEYS_BAR+BAR_U1, 0);
+  addInputMapping2(&module, 2, KEYS_BAR+BAR_D1, 0);
+  addInputMapping2(&module, 3, KEYS_BAR+BAR_D2, 0);
+  addInputMapping2(&module, 4, KEYS_BAR+BAR_R1, 0);
+  addInputMapping2(&module, 5, KEYS_BAR+BAR_L1, 0);
+  addInputMapping2(&module, 6, KEYS_BAR+BAR_R2, 0);
+  addInputMapping2(&module, 7, KEYS_BAR+BAR_L2, 0);
 }
 
 static int
@@ -1408,9 +1432,13 @@ identifyTerminal2 (BrailleDisplay *brl) {
               makeOutputTable(dots, outputTable);
             }
 
+            inputKeySize2 = (terminal->protocolRevision < 2)? 4: 8;
             {
-              int modules = terminal->leftKeys + terminal->rightKeys;
-              inputBytes2 = modules + 1 + ((((modules * 4) + ((terminal->textColumns + terminal->statusCount) * 2)) + 7) / 8);
+              int keyCount = terminal->leftKeys + terminal->rightKeys;
+              inputBytes2 = keyCount + 1 +
+                            ((((keyCount * inputKeySize2) +
+                               ((terminal->textColumns + terminal->statusCount) * 2)
+                              ) + 7) / 8);
             }
             inputBits2 = inputBytes2 * 8;
 
