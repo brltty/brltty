@@ -23,7 +23,7 @@ from distutils.core import setup, Extension
 if __name__ == "__main__":
     brlapi = Extension("brlapi",
         sources = ["brlapi.auto.c","@srcdir@/bindings.c"],
-        include_dirs = ["./@top_builddir@/"],
+        include_dirs = ["@builddir@", "@srcdir@", "./@top_builddir@/Programs", "./@top_srcdir@/Programs", "./@top_builddir@/", "./@top_srcdir@/"],
         library_dirs = ["./@top_builddir@/Programs"],
         libraries = ["brlapi"],
         language = "c",
