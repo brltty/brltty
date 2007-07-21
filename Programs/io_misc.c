@@ -49,7 +49,7 @@ awaitInput (int fileDescriptor, int milliseconds) {
   timeout.tv_usec = (milliseconds % 1000) * 1000;
 #endif /* __MSDOS__ */
 
-  do {
+  while (1) {
     switch (select(fileDescriptor+1, &mask, NULL, NULL, &timeout)) {
       case -1:
         if (errno == EINTR) continue;
@@ -58,27 +58,23 @@ awaitInput (int fileDescriptor, int milliseconds) {
 
       case 0:
 #ifdef __MSDOS__
-        elapsed += tsr_usleep(1000);
-        continue;
-#else /* __MSDOS__ */
-        goto out;
+        if (elapsed < (milliseconds * 1000)) {
+          elapsed += tsr_usleep(1000);
+          continue;
+        }
 #endif /* __MSDOS__ */
+
+        if (milliseconds > 0)
+          LogPrint(LOG_DEBUG, "input wait timed out after %d %s",
+                   milliseconds, ((milliseconds == 1)? "millisecond": "milliseconds"));
+
+        errno = EAGAIN;
+        return 0;
 
       default:
         return 1;
     }
-#ifdef __MSDOS__
-  } while (elapsed < (milliseconds * 1000));
-#else /* __MSDOS__ */
-  } while (1);
-out:
-#endif /* __MSDOS__ */
-
-  if (milliseconds > 0)
-    LogPrint(LOG_DEBUG, "input wait timed out after %d %s",
-             milliseconds, ((milliseconds == 1)? "millisecond": "milliseconds"));
-  errno = EAGAIN;
-  return 0;
+  }
 }
 
 int
@@ -89,6 +85,7 @@ readChunk (
 ) {
   while (count > 0) {
     ssize_t amount;
+
     {
       unsigned char *address = buffer;
       address += *offset;
@@ -98,10 +95,12 @@ readChunk (
     if (amount == -1) {
       if (errno == EINTR) continue;
       if (errno == EAGAIN) goto noInput;
+
 #ifdef EWOULDBLOCK
       if (errno == EWOULDBLOCK) goto noInput;
 #endif /* EWOULDBLOCK */
-      LogError("Read");
+
+      LogError("read");
       return 0;
     }
 
@@ -110,7 +109,7 @@ readChunk (
     noInput:
       if ((timeout = *offset? subsequentTimeout: initialTimeout)) {
         if (awaitInput(fileDescriptor, timeout)) continue;
-        LogPrint(LOG_WARNING, "Input byte missing at offset %d.", (int)*offset);
+        LogPrint(LOG_WARNING, "input byte missing at offset %d", (int)*offset);
       } else {
         errno = EAGAIN;
       }
@@ -152,7 +151,7 @@ awaitOutput (int fileDescriptor, int milliseconds) {
   timeout.tv_usec = (milliseconds % 1000) * 1000;
 #endif /* __MSDOS__ */
 
-  do {
+  while (1) {
     switch (select(fileDescriptor+1, NULL, &mask, NULL, &timeout)) {
       case -1:
         if (errno == EINTR) continue;
@@ -161,27 +160,23 @@ awaitOutput (int fileDescriptor, int milliseconds) {
 
       case 0:
 #ifdef __MSDOS__
-        elapsed += tsr_usleep(1000);
-        continue;
-#else /* __MSDOS__ */
-        goto out;
+        if (elapsed < (milliseconds * 1000)) {
+          elapsed += tsr_usleep(1000);
+          continue;
+        }
 #endif /* __MSDOS__ */
+
+        if (milliseconds > 0)
+          LogPrint(LOG_DEBUG, "output wait timed out after %d %s",
+                   milliseconds, ((milliseconds == 1)? "millisecond": "milliseconds"));
+
+        errno = EAGAIN;
+        return 0;
 
       default:
         return 1;
     }
-#ifdef __MSDOS__
-  } while (elapsed < (milliseconds * 1000));
-#else /* __MSDOS__ */
-  } while (1);
-out:
-#endif /* __MSDOS__ */
-
-  if (milliseconds > 0)
-    LogPrint(LOG_DEBUG, "output wait timed out after %d %s",
-             milliseconds, ((milliseconds == 1)? "millisecond": "milliseconds"));
-  errno = EAGAIN;
-  return 0;
+  }
 }
 
 ssize_t
