@@ -36,31 +36,49 @@ awaitInput (int fileDescriptor, int milliseconds) {
   fd_set mask;
   struct timeval timeout;
 
+#ifdef __MSDOS__
+  int elapsed = 0;
+#endif /* __MSDOS__ */
+
   FD_ZERO(&mask);
   FD_SET(fileDescriptor, &mask);
 
   memset(&timeout, 0, sizeof(timeout));
+#ifndef __MSDOS__
   timeout.tv_sec = milliseconds / 1000;
   timeout.tv_usec = (milliseconds % 1000) * 1000;
+#endif /* __MSDOS__ */
 
-  while (1) {
+  do {
     switch (select(fileDescriptor+1, &mask, NULL, NULL, &timeout)) {
       case -1:
         if (errno == EINTR) continue;
-        LogError("Input wait");
+        LogError("input wait");
         return 0;
 
       case 0:
-        if (milliseconds > 0)
-          LogPrint(LOG_DEBUG, "Input wait timed out after %d %s.",
-                   milliseconds, ((milliseconds == 1)? "millisecond": "milliseconds"));
-        errno = EAGAIN;
-        return 0;
+#ifdef __MSDOS__
+        elapsed += tsr_usleep(1000);
+        continue;
+#else /* __MSDOS__ */
+        goto out;
+#endif /* __MSDOS__ */
 
       default:
         return 1;
     }
-  }
+#ifdef __MSDOS__
+  } while (elapsed < (milliseconds * 1000));
+#else /* __MSDOS__ */
+  } while (1);
+out:
+#endif /* __MSDOS__ */
+
+  if (milliseconds > 0)
+    LogPrint(LOG_DEBUG, "input wait timed out after %d %s",
+             milliseconds, ((milliseconds == 1)? "millisecond": "milliseconds"));
+  errno = EAGAIN;
+  return 0;
 }
 
 int
