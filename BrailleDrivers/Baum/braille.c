@@ -400,11 +400,15 @@ openUsbPort (const char *device) {
 
 static int
 configureUsbPort (void) {
-  if (!usbSerial) return 0;
-  if (!usbSerial->setBaud(usbChannel->device, protocol->serialBaud)) return 0;
-  if (!usbSerial->setFlowControl(usbChannel->device, SERIAL_FLOW_NONE)) return 0;
-  if (!usbSerial->setDataFormat(usbChannel->device, 8, 1, protocol->serialParity)) return 0;
-  return 1;
+  const SerialParameters parameters = {
+    .baud = protocol->serialBaud,
+    .flow = SERIAL_FLOW_NONE,
+    .data = 8,
+    .stop = 1,
+    .parity = protocol->serialParity
+  };
+
+  return usbSetSerialParameters(usbChannel->device, &parameters);
 }
 
 static int
