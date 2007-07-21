@@ -196,14 +196,17 @@ proc getDependencies {file} {
 
             lappend dependencies $include
          } else {
-            if {[dependencyExists [set path [file join $directory $include]]]} {
-               set include $path
-            } elseif {![dependencyExists $include]} {
-               writeProgramMessage "missing dependency: $file includes $include"
-               continue
+            set found 0
+            foreach location [list $directory Programs ""] {
+               if {[dependencyExists [set path [file join $location $include]]]} {
+                  lvarcat dependencies [lindex [intersect3 $dependencies [getDependencies $path]] 2]
+                  set found 1
+                  break
+               }
             }
-
-            lvarcat dependencies [lindex [intersect3 $dependencies [getDependencies $include]] 2]
+            if {!$found} {
+               writeProgramMessage "missing dependency: $file includes $include"
+            }
          }
       }
    }
