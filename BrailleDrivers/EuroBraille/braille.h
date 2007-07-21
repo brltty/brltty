@@ -17,7 +17,7 @@
 
 /* serial line baudrate 
  */
-#include "Programs/brl.h"
+#include "brl.h"
 
 
 #define BAUDRATE	9600

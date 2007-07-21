@@ -20,7 +20,7 @@
 
 #include <sys/time.h>
 
-#include "Programs/brlapi_keycodes.h"
+#include "brlapi_keycodes.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -26,7 +26,7 @@
 
 #include "prologue.h"
 
-#include "Programs/brl.h"
+#include "brl.h"
 typedef enum {
   BRL_CMD_INPUT = BRL_driverCommandCount /* toggle input mode */,
   BRL_CMD_SWSIM_LC /* simulate left switch centered */,

@@ -33,17 +33,17 @@
 #include	<string.h>
 #include	<sys/ioctl.h>
 
-#include	"Programs/message.h"
-#include	"Programs/misc.h"
+#include	"message.h"
+#include	"misc.h"
 
 
 #define		BRL_HAVE_PACKET_IO	1
 #define		BRL_HAVE_KEY_CODES	1
 #define		BRL_HAVE_VISUAL_DISPLAY	1
-#include	"Programs/brldefs.h"
-#include	"Programs/brl_driver.h"
+#include	"brldefs.h"
+#include	"brl_driver.h"
 #include	"braille.h"
-#include	"Programs/io_serial.h"
+#include	"io_serial.h"
 
 /*
 ** For debugging only

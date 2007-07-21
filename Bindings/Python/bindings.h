@@ -20,6 +20,6 @@
 
 /* bindings.h provides initialized variables to the Python bindings */
 
-#include "Programs/brlapi.h"
+#include "brlapi.h"
 
 extern const brlapi_writeArguments_t brlapi_writeArguments_initialized;

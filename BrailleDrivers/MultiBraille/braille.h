@@ -33,7 +33,7 @@
  */
 
 /* used by braille.c */
-#include "Programs/io_serial.h"
+#include "io_serial.h"
 extern SerialDevice *MB_serialDevice;
 
 #define BRLROWS 1					/* number of rows on Braille display */
