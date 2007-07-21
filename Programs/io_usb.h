@@ -436,12 +436,14 @@ typedef struct {
   unsigned char inputEndpoint;
   unsigned char outputEndpoint;
   unsigned disableAutosuspend:1;
-  SerialParameters serial;
+  const SerialParameters *serial;
 } UsbChannelDefinition;
+
 typedef struct {
   UsbChannelDefinition definition;
   UsbDevice *device;
 } UsbChannel;
+
 extern UsbChannel *usbFindChannel (const UsbChannelDefinition *definitions, const char *device);
 extern void usbCloseChannel (UsbChannel *channel);
 

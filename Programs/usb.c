@@ -1123,11 +1123,11 @@ usbGetSerialOperations (UsbDevice *device) {
 
       ++sa;
     }
-  }
 
-  if (!device->serial)
-    LogPrint(LOG_WARNING, "USB: unsupported serial adapter: vendor=%04X product=%04X",
-             device->descriptor.idVendor, device->descriptor.idProduct);
+    if (!device->serial)
+      LogPrint(LOG_WARNING, "USB: unsupported serial adapter: vendor=%04X product=%04X",
+               device->descriptor.idVendor, device->descriptor.idProduct);
+  }
 
 error:
   return device->serial;
@@ -1164,8 +1164,8 @@ usbChooseChannel (UsbDevice *device, void *data) {
         if (usbOpenInterface(device, definition->interface, definition->alternative)) {
           int ok = 1;
 
-          if (definition->serial.baud)
-            if (!usbSetSerialParameters(device, &definition->serial))
+          if (definition->serial)
+            if (!usbSetSerialParameters(device, definition->serial))
               ok = 0;
 
           if (ok) {

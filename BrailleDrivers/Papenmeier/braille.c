@@ -375,14 +375,19 @@ static const int usbBauds[] = {115200, 57600, 0};
 
 static int
 openUsbPort (char **parameters, const char *device) {
+  const SerialParameters serial = {
+    .baud = *baud,
+    .flow = SERIAL_FLOW_NONE,
+    .data = 8,
+    .stop = 1,
+    .parity = SERIAL_PARITY_NONE
+  };
+
   const UsbChannelDefinition definitions[] = {
     { .vendor=0X0403, .product=0Xf208,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
-      .serial = {
-        .baud=*baud, .flow=SERIAL_FLOW_NONE,
-        .data=8, .stop=1, .parity=SERIAL_PARITY_NONE
-      }
+      .serial = &serial
     }
     ,
     { .vendor=0 }

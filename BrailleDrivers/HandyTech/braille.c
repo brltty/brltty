@@ -291,25 +291,27 @@ static UsbChannel *usb = NULL;
 
 static int
 openUsbPort (char **parameters, const char *device) {
+  const SerialParameters serial = {
+    .baud = baud,
+    .flow = SERIAL_FLOW_NONE,
+    .data = 8,
+    .stop = 1,
+    .parity = SERIAL_PARITY_ODD
+  };
+
   const UsbChannelDefinition definitions[] = {
     { /* GoHubs chip */
       .vendor=0X0921, .product=0X1200,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=1,
-      .serial = {
-        .baud=baud, .flow=SERIAL_FLOW_NONE,
-        .data=8, .stop=1, .parity=SERIAL_PARITY_ODD
-      }
+      .serial = &serial
     }
     ,
     { /* FTDI chip */
       .vendor=0X0403, .product=0X6001,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
-      .serial = {
-        .baud=baud, .flow=SERIAL_FLOW_NONE,
-        .data=8, .stop=1, .parity=SERIAL_PARITY_ODD
-      }
+      .serial = &serial
     }
     ,
     { .vendor=0 }
