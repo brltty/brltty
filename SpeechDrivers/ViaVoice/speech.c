@@ -24,7 +24,7 @@
 #include <ctype.h>
 #include <eci.h>
 
-#include "Programs/misc.h"
+#include "misc.h"
 
 typedef enum {
    PARM_IniFile,
@@ -47,7 +47,7 @@ typedef enum {
 #define SPK_HAVE_TRACK
 #define SPK_HAVE_RATE
 #define SPK_HAVE_VOLUME
-#include "Programs/spk_driver.h"
+#include "spk_driver.h"
 #include "speech.h"
 
 static ECIHand eci = NULL_ECI_HAND;

@@ -24,9 +24,9 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "Programs/misc.h"
+#include "misc.h"
 
-#include "Programs/brl_driver.h"
+#include "brl_driver.h"
 #include "braille.h"
 #include "vblow.h"
 

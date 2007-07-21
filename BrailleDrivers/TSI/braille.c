@@ -81,13 +81,13 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "Programs/misc.h"
-#include "Programs/message.h"
+#include "misc.h"
+#include "message.h"
 
 #define BRLSTAT ST_PB80Style
-#include "Programs/brl_driver.h"
+#include "brl_driver.h"
 #include "braille.h"
-#include "Programs/io_serial.h"
+#include "io_serial.h"
 
 /* Braille display parameters that do not change */
 #define BRLROWS 1		/* only one row on braille display */

@@ -24,10 +24,10 @@
 #include <dpmi.h>
 #include <sys/farptr.h>
 
-#include "Programs/misc.h"
-#include "Programs/brldefs.h"
+#include "misc.h"
+#include "brldefs.h"
 
-#include "Programs/scr_driver.h"
+#include "scr_driver.h"
 
 static int
 processParameters_PcbiosScreen (char **parameters) {

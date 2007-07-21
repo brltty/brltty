@@ -21,10 +21,10 @@
 #include <string.h>
 #include <errno.h>
 
-#include "Programs/misc.h"
+#include "misc.h"
 
-#include "Programs/brl_driver.h"
-#include "Programs/io_serial.h"
+#include "brl_driver.h"
+#include "io_serial.h"
 
 static SerialDevice *serialDevice = NULL;
 static int charactersPerSecond;

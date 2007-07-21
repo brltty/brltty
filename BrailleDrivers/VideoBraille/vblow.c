@@ -19,9 +19,9 @@
 
 #include <string.h>
 
-#include "Programs/misc.h"
-#include "Programs/system.h"
-#include "Programs/brl.h"
+#include "misc.h"
+#include "system.h"
+#include "brl.h"
 #include "braille.h"
 #include "vblow.h"
 

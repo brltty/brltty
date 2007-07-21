@@ -28,7 +28,7 @@
 #include <signal.h>
 #include <sys/wait.h>
 
-#include "Programs/misc.h"
+#include "misc.h"
 
 typedef enum {
   PARM_AGE,
@@ -41,7 +41,7 @@ typedef enum {
 
 #define SPK_HAVE_RATE
 #define SPK_HAVE_VOLUME
-#include "Programs/spk_driver.h"
+#include "spk_driver.h"
 #include <theta.h>
 
 static cst_voice *voice = NULL;

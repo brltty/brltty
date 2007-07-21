@@ -37,10 +37,10 @@ static const char *shmPath = "/screen";
 static int shmFileDescriptor = -1;
 #endif /* HAVE_SHM_OPEN */
 
-#include "Programs/misc.h"
-#include "Programs/system.h"
+#include "misc.h"
+#include "system.h"
 
-#include "Programs/scr_driver.h"
+#include "scr_driver.h"
 #include "screen.h"
 
 static unsigned char *shmAddress = NULL;

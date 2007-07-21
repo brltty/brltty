@@ -21,7 +21,7 @@
 #include <string.h>
 #include <errno.h>
 
-#include "Programs/misc.h"
+#include "misc.h"
 
 typedef enum {
   PARM_INPUTMODE
@@ -31,8 +31,8 @@ typedef enum {
 #define BRLSTAT ST_AlvaStyle
 #define BRL_HAVE_PACKET_IO
 #define BRL_HAVE_SENSITIVITY
-#include "Programs/brl_driver.h"
-#include "Programs/touch.h"
+#include "brl_driver.h"
+#include "touch.h"
 #include "braille.h"
 #include "brldefs-ht.h"
 
@@ -232,7 +232,7 @@ static const int baud = 19200;
 static int charactersPerSecond;
 
 /* Serial IO */
-#include "Programs/io_serial.h"
+#include "io_serial.h"
 
 static SerialDevice *serialDevice = NULL;			/* file descriptor for Braille display */
 
@@ -285,7 +285,7 @@ static const InputOutputOperations serialOperations = {
 
 #ifdef ENABLE_USB_SUPPORT
 /* USB IO */
-#include "Programs/io_usb.h"
+#include "io_usb.h"
 
 static UsbChannel *usb = NULL;
 
@@ -361,8 +361,8 @@ static const InputOutputOperations usbOperations = {
 
 #ifdef ENABLE_BLUETOOTH_SUPPORT
 /* Bluetooth IO */
-#include "Programs/io_bluetooth.h"
-#include "Programs/io_misc.h"
+#include "io_bluetooth.h"
+#include "io_misc.h"
 
 static int bluetoothConnection = -1;
 

@@ -26,7 +26,7 @@
 #include <string.h>
 #include <strings.h>
 
-#include "Programs/misc.h"
+#include "misc.h"
 
 typedef enum {
   PARM_COMMAND,
@@ -35,7 +35,7 @@ typedef enum {
 #define SPKPARMS "command", "name"
 
 #define SPK_HAVE_RATE
-#include "Programs/spk_driver.h"
+#include "spk_driver.h"
 #include "speech.h"		/* for speech definitions */
 
 static const char *wordTable[] = {

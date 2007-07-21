@@ -26,7 +26,7 @@
 #include <string.h>
 #include <errno.h>
 
-#include "Programs/misc.h"
+#include "misc.h"
 
 typedef enum {
   PARM_DEBUGPACKETS,
@@ -37,7 +37,7 @@ typedef enum {
 #define BRLSTAT ST_AlvaStyle
 #define BRL_HAVE_PACKET_IO
 #define BRL_HAVE_FIRMNESS
-#include "Programs/brl_driver.h"
+#include "brl_driver.h"
 
 typedef struct {
   int (*openPort) (char **parameters, const char *device);
@@ -51,7 +51,7 @@ static const InputOutputOperations *io;
 static unsigned int debugPackets = 0;
 static int outputPayloadLimit;
 
-#include "Programs/io_serial.h"
+#include "io_serial.h"
 static SerialDevice *serialDevice = NULL;
 static int serialCharactersPerSecond;
 
@@ -102,7 +102,7 @@ static const InputOutputOperations serialOperations = {
 };
 
 #ifdef ENABLE_USB_SUPPORT
-#include "Programs/io_usb.h"
+#include "io_usb.h"
 
 static UsbChannel *usb = NULL;
 

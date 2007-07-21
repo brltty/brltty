@@ -26,7 +26,7 @@
 
 #define BRLAPI_NO_DEPRECATED
 #define BRLAPI_NO_SINGLE_SESSION
-#include "Programs/brlapi.h"
+#include "brlapi.h"
 
 #define ERR_NULLPTR 0
 #define ERR_OUTOFMEM 1

@@ -20,7 +20,7 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "Programs/misc.h"
+#include "misc.h"
 
 typedef enum {
   PARM_PORT,
@@ -34,7 +34,7 @@ typedef enum {
 //#define SPK_HAVE_TRACK
 #define SPK_HAVE_RATE
 #define SPK_HAVE_VOLUME
-#include "Programs/spk_driver.h"
+#include "spk_driver.h"
 
 #include <libspeechd.h>
 

@@ -26,7 +26,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "Programs/misc.h"
+#include "misc.h"
 
 #include <braille.h>
 
@@ -38,8 +38,8 @@ typedef enum {
 #define BRLPARMS "device", "driver", "table"
 
 #define BRL_HAVE_VISUAL_DISPLAY
-#include "Programs/brl_driver.h"
-#include "Programs/tbl.h"
+#include "brl_driver.h"
+#include "tbl.h"
 
 static TranslationTable outputTable;
 static TranslationTable inputTable;

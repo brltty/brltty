@@ -49,7 +49,7 @@ static iconv_t conversionDescriptor = NULL;
 #define getch() my_getch()
 #endif /* HAVE_PKG_CURSES */
 
-#include "Programs/misc.h"
+#include "misc.h"
 
 #ifdef USE_CURSES
 #define BRLPARM_TERM "term",
@@ -83,9 +83,9 @@ typedef enum {
 
 #define BRL_HAVE_KEY_CODES
 #define BRL_HAVE_VISUAL_DISPLAY
-#include "Programs/brl_driver.h"
+#include "brl_driver.h"
 #include "braille.h"
-#include "Programs/io_serial.h"
+#include "io_serial.h"
 
 #define MAX_WINDOW_LINES 3
 #define MAX_WINDOW_COLUMNS 80

@@ -27,7 +27,7 @@
 #include <langinfo.h>
 #include <locale.h>
 #ifdef __MINGW32__
-#include "Programs/win_pthread.h"
+#include "win_pthread.h"
 #else /* __MINGW32__ */
 #include <semaphore.h>
 #endif /* __MINGW32__ */
@@ -36,16 +36,16 @@
 #include <X11/keysym.h>
 #include <X11/Xlib.h>
 
-#include "Programs/misc.h"
-#include "Programs/brldefs.h"
-#include "Programs/charset.h"
+#include "misc.h"
+#include "brldefs.h"
+#include "charset.h"
 
 typedef enum {
   PARM_TYPE
 } ScreenParameters;
 #define SCRPARMS "type"
 
-#include "Programs/scr_driver.h"
+#include "scr_driver.h"
 
 static int typeText = 1, typeTerminal = 1, typeAll = 0;
 static AccessibleText *curTerm;

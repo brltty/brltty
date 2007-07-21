@@ -40,7 +40,7 @@
 #include <io.h>
 #endif /* __MINGW32__ */
 
-#include "Programs/misc.h"
+#include "misc.h"
 
 typedef enum {
   PARM_PROGRAM=0,
@@ -51,7 +51,7 @@ typedef enum {
 #define SPK_HAVE_TRACK
 #define SPK_HAVE_EXPRESS
 #define SPK_HAVE_RATE
-#include "Programs/spk_driver.h"
+#include "spk_driver.h"
 #include "speech.h"
 
 static int helper_fd_in = -1, helper_fd_out = -1;

@@ -21,18 +21,18 @@
 #include <string.h>
 #include <errno.h>
 
-#include "Programs/misc.h"
+#include "misc.h"
 
 #define BRL_HAVE_VISUAL_DISPLAY
-#include "Programs/brl_driver.h"
-#include "Programs/tbl.h"
+#include "brl_driver.h"
+#include "tbl.h"
 
 static TranslationTable outputTable;
 static TranslationTable inputTable;
 static unsigned char brailleCells[0XFF];
 static unsigned char visualCells[0XFF];
 
-#include "Programs/io_serial.h"
+#include "io_serial.h"
 static SerialDevice *serialDevice = NULL;
 static int charactersPerSecond;
 

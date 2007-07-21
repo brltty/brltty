@@ -39,7 +39,7 @@
 #include <string.h>
 #include <errno.h>
 
-#include "Programs/misc.h"
+#include "misc.h"
 
 typedef enum {
    PARM_CONFIGFILE,
@@ -52,7 +52,7 @@ typedef enum {
 #define BRLSTAT ST_Generic
 #define BRLCONST
 #define BRL_HAVE_FIRMNESS
-#include "Programs/brl_driver.h"
+#include "brl_driver.h"
 #include "braille.h"
 
 #ifdef ENABLE_PM_CONFIGURATION_FILE
@@ -310,7 +310,7 @@ static int charactersPerSecond;
 
 /*--- Serial Operations ---*/
 
-#include "Programs/io_serial.h"
+#include "io_serial.h"
 static SerialDevice *serialDevice = NULL;
 static const int serialBauds[] = {19200, 38400, 0};
 
@@ -369,7 +369,7 @@ static const InputOutputOperations serialOperations = {
 /*--- USB Operations ---*/
 
 #ifdef ENABLE_USB_SUPPORT
-#include "Programs/io_usb.h"
+#include "io_usb.h"
 static UsbChannel *usb = NULL;
 static const int usbBauds[] = {115200, 57600, 0};
 
@@ -445,8 +445,8 @@ static const InputOutputOperations usbOperations = {
 
 /*--- Bluetooth Operations ---*/
 #ifdef ENABLE_BLUETOOTH_SUPPORT
-#include "Programs/io_bluetooth.h"
-#include "Programs/io_misc.h"
+#include "io_bluetooth.h"
+#include "io_misc.h"
 
 static int bluetoothConnection = -1;
 static const int bluetoothBauds[] = {115200, 0};

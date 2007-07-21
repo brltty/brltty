@@ -29,8 +29,8 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "Programs/misc.h"
-#include "Programs/message.h"
+#include "misc.h"
+#include "message.h"
 
 typedef enum {
   PARM_BAUDRATE,
@@ -38,10 +38,10 @@ typedef enum {
 } DriverParameter;
 #define BRLPARMS "baudrate", "kbemu"
 
-#include "Programs/brl_driver.h"
-#include "Programs/tbl.h"
+#include "brl_driver.h"
+#include "tbl.h"
 #include "braille.h"
-#include "Programs/io_serial.h"
+#include "io_serial.h"
 
 #define BL_NEED_ARRAYS
 #include "bindings.h"		/* for keybindings */

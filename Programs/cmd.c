@@ -24,7 +24,7 @@
 #include "brldefs.h"
 #include "cmd.h"
 
-#include "Programs/charset.h"
+#include "charset.h"
 
 const CommandEntry commandTable[] = {
 #ifdef ENABLE_LEARN_MODE

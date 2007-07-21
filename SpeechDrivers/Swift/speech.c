@@ -24,7 +24,7 @@
 
 #include <stdio.h>
 
-#include "Programs/misc.h"
+#include "misc.h"
 
 typedef enum {
   PARM_NAME
@@ -33,7 +33,7 @@ typedef enum {
 
 #define SPK_HAVE_RATE
 #define SPK_HAVE_VOLUME
-#include "Programs/spk_driver.h"
+#include "spk_driver.h"
 #include <swift.h>
 
 static swift_engine *swiftEngine = NULL;

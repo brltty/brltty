@@ -19,13 +19,13 @@
 
 #include <stdio.h>
 
-#include "Programs/misc.h"
+#include "misc.h"
 
 //#define SPK_HAVE_EXPRESS
 //#define SPK_HAVE_TRACK
 //#define SPK_HAVE_RATE
 //#define SPK_HAVE_VOLUME
-#include "Programs/spk_driver.h"
+#include "spk_driver.h"
 
 static int
 spk_open (char **parameters) {

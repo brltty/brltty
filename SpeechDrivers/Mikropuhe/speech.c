@@ -28,15 +28,15 @@
 #include <math.h>
 
 #ifdef __MINGW32__
-#include "Programs/win_pthread.h"
+#include "win_pthread.h"
 #else /* __MINGW32__ */
 #include <pthread.h>
 #endif /* __MINGW32__ */
 
-#include "Programs/misc.h"
-#include "Programs/system.h"
-#include "Programs/queue.h"
-#include "Programs/brltty.h"
+#include "misc.h"
+#include "system.h"
+#include "queue.h"
+#include "brltty.h"
 
 typedef enum {
   PARM_NAME,
@@ -46,7 +46,7 @@ typedef enum {
 
 #define SPK_HAVE_RATE
 #define SPK_HAVE_VOLUME
-#include "Programs/spk_driver.h"
+#include "spk_driver.h"
 #include <mpwrfile.h>
 
 static void *speechLibrary = NULL;

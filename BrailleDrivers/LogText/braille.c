@@ -29,13 +29,13 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 
-#include "Programs/misc.h"
+#include "misc.h"
 
 #define BRLSTAT ST_Generic
-#include "Programs/brl_driver.h"
-#include "Programs/tbl.h"
+#include "brl_driver.h"
+#include "tbl.h"
 #include "braille.h"
-#include "Programs/io_serial.h"
+#include "io_serial.h"
 
 static SerialDevice *serialDevice = NULL;
 

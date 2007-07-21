@@ -26,7 +26,7 @@
 #include <string.h>
 #include <errno.h>
 
-#include "Programs/misc.h"
+#include "misc.h"
 
 typedef enum {
   PARM_STATUSCELLS
@@ -34,14 +34,14 @@ typedef enum {
 #define BRLPARMS "statuscells"
 
 #define BRL_HAVE_PACKET_IO
-#include "Programs/brl_driver.h"
+#include "brl_driver.h"
 #include "braille.h"
-#include "Programs/tbl.h"
+#include "tbl.h"
 
 static int logInputPackets = 0;
 static int logOutputPackets = 0;
 
-#include "Programs/io_serial.h"
+#include "io_serial.h"
 static SerialDevice *serialDevice = NULL;
 static const int serialBaud = 38400;
 static int charactersPerSecond;

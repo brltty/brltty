@@ -26,7 +26,7 @@
 
 #ifdef __MINGW32__
 #include <ws2tcpip.h>
-#include "Programs/sys_windows.h"
+#include "sys_windows.h"
 #else /* __MINGW32__ */
 #include <sys/socket.h>
 #include <sys/un.h>
@@ -60,12 +60,12 @@
 #define LogSocketError(msg) LogError(msg)
 #endif /* __MINGW32__ */
 
-#include "Programs/misc.h"
-#include "Programs/cmd.h"
+#include "misc.h"
+#include "cmd.h"
 
 #define BRLSTAT ST_Generic
 #define BRL_HAVE_VISUAL_DISPLAY
-#include "Programs/brl_driver.h"
+#include "brl_driver.h"
 #include "braille.h"
 
 static int fileDescriptor = -1;

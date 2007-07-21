@@ -21,8 +21,8 @@
 #include <string.h>
 #include <locale.h>
 
-#include "Programs/misc.h"
-#include "Programs/charset.h"
+#include "misc.h"
+#include "charset.h"
 
 #if defined(WINDOWS)
 #define USE_WINDOWS
@@ -197,7 +197,7 @@ typedef enum {
 #define BRLPARMS "tkparms", "lines", "columns", "model", "input"
 
 #define BRL_HAVE_VISUAL_DISPLAY
-#include "Programs/brl_driver.h"
+#include "brl_driver.h"
 #include "braille.h"
 
 #define MAXLINES 3

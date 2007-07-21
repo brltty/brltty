@@ -19,14 +19,14 @@
 
 #include <stdio.h>
 
-#include "Programs/misc.h"
+#include "misc.h"
 
 //#define BRL_HAVE_VISUAL_DISPLAY
 //#define BRL_HAVE_PACKET_IO
 //#define BRL_HAVE_KEY_CODES
 //#define BRL_HAVE_FIRMNESS
 //#define BRL_HAVE_SENSITIVITY
-#include "Programs/brl_driver.h"
+#include "brl_driver.h"
 
 static TranslationTable outputTable;
 

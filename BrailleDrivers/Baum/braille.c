@@ -21,8 +21,8 @@
 #include <string.h>
 #include <errno.h>
 
-#include "Programs/misc.h"
-#include "Programs/io_defs.h"
+#include "misc.h"
+#include "io_defs.h"
 
 typedef enum {
   PARM_VARIOKEYS
@@ -31,7 +31,7 @@ typedef enum {
 
 #define BRLSTAT ST_TiemanStyle
 #define BRL_HAVE_PACKET_IO
-#include "Programs/brl_driver.h"
+#include "brl_driver.h"
 
 /* Global Definitions */
 
@@ -293,7 +293,7 @@ changeCellCount (BrailleDisplay *brl, int count) {
 }
 
 /* Serial IO */
-#include "Programs/io_serial.h"
+#include "io_serial.h"
 
 static SerialDevice *serialDevice = NULL;
 
@@ -342,7 +342,7 @@ static const InputOutputOperations serialOperations = {
 
 #ifdef ENABLE_USB_SUPPORT
 /* USB IO */
-#include "Programs/io_usb.h"
+#include "io_usb.h"
 
 static UsbChannel *usbChannel = NULL;
 static const UsbSerialOperations *usbSerial = NULL;
@@ -454,8 +454,8 @@ static const InputOutputOperations usbOperations = {
 
 #ifdef ENABLE_BLUETOOTH_SUPPORT
 /* Bluetooth IO */
-#include "Programs/io_bluetooth.h"
-#include "Programs/io_misc.h"
+#include "io_bluetooth.h"
+#include "io_misc.h"
 
 static int bluetoothConnection = -1;
 

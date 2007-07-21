@@ -21,11 +21,11 @@
 #include <string.h>
 
 #include <tcl.h>
-#include "Programs/iso_11548-1.h"
+#include "iso_11548-1.h"
 
 #define BRLAPI_NO_DEPRECATED
 #define BRLAPI_NO_SINGLE_SESSION
-#include "Programs/brlapi.h"
+#include "brlapi.h"
 
 #define allocateMemory(size) ((void *)ckalloc((size)))
 #define deallocateMemory(address) ckfree((void *)(address))

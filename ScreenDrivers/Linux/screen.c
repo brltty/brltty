@@ -27,10 +27,10 @@
 #include <linux/vt.h>
 #include <linux/kd.h>
 
-#include "Programs/misc.h"
-#include "Programs/system.h"
-#include "Programs/sys_linux.h"
-#include "Programs/brldefs.h"
+#include "misc.h"
+#include "system.h"
+#include "sys_linux.h"
+#include "brldefs.h"
 
 typedef enum {
   PARM_HFB,
@@ -41,7 +41,7 @@ typedef enum {
 } ScreenParameters;
 #define SCRPARMS "hfb", "acm", "debugacm", "debugsfm", "debugctt"
 
-#include "Programs/scr_driver.h"
+#include "scr_driver.h"
 #include "screen.h"
 
 static const char *problemText;

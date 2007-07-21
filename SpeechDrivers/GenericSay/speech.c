@@ -24,14 +24,14 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "Programs/misc.h"
+#include "misc.h"
 
 typedef enum {
    PARM_COMMAND
 } DriverParameter;
 #define SPKPARMS "command"
 
-#include "Programs/spk_driver.h"
+#include "spk_driver.h"
 #include "speech.h"
 
 static const char *commandPath;	/* default full path for the say command */

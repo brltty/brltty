@@ -56,13 +56,13 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "Programs/misc.h"
+#include "misc.h"
 
 #define BRLSTAT ST_TiemanStyle
-#include "Programs/brl_driver.h"
+#include "brl_driver.h"
 #include "braille.h"
 #include "tables.h"		/* for keybindings */
-#include "Programs/io_serial.h"
+#include "io_serial.h"
 
 #define ESC '\033'
 #define CR '\015'

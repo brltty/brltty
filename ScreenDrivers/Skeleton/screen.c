@@ -19,9 +19,9 @@
 
 #include <stdio.h>
 
-#include "Programs/misc.h"
+#include "misc.h"
 
-#include "Programs/scr_driver.h"
+#include "scr_driver.h"
 
 static void
 scr_initialize (MainScreen *main) {

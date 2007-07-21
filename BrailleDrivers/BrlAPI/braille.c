@@ -20,12 +20,12 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "Programs/misc.h"
-#include "Programs/scr.h"
-#include "Programs/cmd.h"
+#include "misc.h"
+#include "scr.h"
+#include "cmd.h"
 
 #define BRLAPI_NO_DEPRECATED
-#include "Programs/brlapi.h"
+#include "brlapi.h"
 
 typedef enum {
   PARM_HOST=0,
@@ -34,7 +34,7 @@ typedef enum {
 #define BRLPARMS "host", "auth"
 
 #define BRL_HAVE_VISUAL_DISPLAY
-#include "Programs/brl_driver.h"
+#include "brl_driver.h"
 
 #define CHECK(cond, label) \
   do { \

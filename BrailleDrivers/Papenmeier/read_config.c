@@ -17,7 +17,7 @@
 
 #include "prologue.h"
 
-#include "Programs/cmd.h"
+#include "cmd.h"
 #include "config.tab.c"
 
 static char* filename = "stdin";

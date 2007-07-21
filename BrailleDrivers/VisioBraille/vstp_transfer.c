@@ -33,8 +33,8 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 
-#include "Programs/brlapi.h"
-#include "Programs/brlapi_protocol.h"
+#include "brlapi.h"
+#include "brlapi_protocol.h"
 
 #include "vstp.h"
 

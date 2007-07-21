@@ -26,11 +26,11 @@
 #include <sys/mman.h>
 #include <hurd/console.h>
 
-#include "Programs/misc.h"
-#include "Programs/brldefs.h"
-#include "Programs/charset.h"
+#include "misc.h"
+#include "brldefs.h"
+#include "charset.h"
 
-#include "Programs/scr_driver.h"
+#include "scr_driver.h"
 #include "screen.h"
 
 static char *

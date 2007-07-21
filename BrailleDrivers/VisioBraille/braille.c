@@ -20,9 +20,9 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "Programs/misc.h"
-#include "Programs/scr.h"
-#include "Programs/message.h"
+#include "misc.h"
+#include "scr.h"
+#include "message.h"
 
 typedef enum {
   PARM_DISPSIZE=0,
@@ -33,10 +33,10 @@ typedef enum {
 
 #define BRL_HAVE_PACKET_IO
 #define BRL_HAVE_KEY_CODES
-#include "Programs/brl_driver.h"
+#include "brl_driver.h"
 #include "braille.h"
 #include "brldefs-vs.h"
-#include "Programs/io_serial.h"
+#include "io_serial.h"
 
 #define MAXPACKETSIZE 512
 

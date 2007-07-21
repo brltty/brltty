@@ -32,11 +32,11 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "Programs/misc.h"
+#include "misc.h"
 
-#include "Programs/brl_driver.h"
+#include "brl_driver.h"
 #include "braille.h"
-#include "Programs/io_serial.h"
+#include "io_serial.h"
 
 /* Braille display parameters */
 typedef struct{

@@ -27,7 +27,7 @@
 #include <signal.h>
 #include <sys/wait.h>
 
-#include "Programs/misc.h"
+#include "misc.h"
 
 typedef enum {
   PARM_pitch
@@ -35,7 +35,7 @@ typedef enum {
 #define SPKPARMS "pitch"
 
 #define SPK_HAVE_RATE
-#include "Programs/spk_driver.h"
+#include "spk_driver.h"
 #include <flite.h>
 #include <flite_version.h>
 

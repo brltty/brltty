@@ -107,13 +107,13 @@
 #include <string.h>
 #include <errno.h>
 
-#include "Programs/misc.h"
-#include "Programs/brltty.h"
+#include "misc.h"
+#include "brltty.h"
 
 #define BRLSTAT ST_AlvaStyle
 #define BRL_HAVE_FIRMNESS
 #define BRLCONST
-#include "Programs/brl_driver.h"
+#include "brl_driver.h"
 #include "braille.h"
 
 static const int logInputBuffer = 0;
@@ -460,7 +460,7 @@ writeParameter (BrailleDisplay *brl, unsigned char parameter, unsigned char sett
   return io->writePacket(bytes, sizeof(bytes), &brl->writeDelay);
 }
 
-#include "Programs/io_serial.h"
+#include "io_serial.h"
 static SerialDevice *serialDevice = NULL;
 static int serialCharactersPerSecond;
 
@@ -520,7 +520,7 @@ static const InputOutputOperations serialOperations = {
 };
 
 #ifdef ENABLE_USB_SUPPORT
-#include "Programs/io_usb.h"
+#include "io_usb.h"
 
 static UsbChannel *usb = NULL;
 

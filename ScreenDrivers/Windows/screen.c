@@ -17,9 +17,9 @@
 
 #include "prologue.h"
 
-#include "Programs/misc.h"
-#include "Programs/brldefs.h"
-#include "Programs/sys_windows.h"
+#include "misc.h"
+#include "brldefs.h"
+#include "sys_windows.h"
 
 typedef enum {
   PARM_ROOT
@@ -27,7 +27,7 @@ typedef enum {
 #define SCRPARMS "root"
 static unsigned int root;
 
-#include "Programs/scr_driver.h"
+#include "scr_driver.h"
 
 static HANDLE consoleOutput = INVALID_HANDLE_VALUE;
 static HANDLE consoleInput = INVALID_HANDLE_VALUE;

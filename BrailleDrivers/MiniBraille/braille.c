@@ -32,13 +32,13 @@
 #include <string.h>
 #include <time.h>
 
-#include "Programs/misc.h"
-#include "Programs/message.h"
+#include "misc.h"
+#include "message.h"
 
 #define BRLSTAT ST_TiemanStyle
-#include "Programs/brl_driver.h"
+#include "brl_driver.h"
 
-#include "Programs/io_serial.h"
+#include "io_serial.h"
 static SerialDevice *serialDevice = NULL;
 static const int serialBaud = 9600;
 static int serialCharactersPerSecond;
