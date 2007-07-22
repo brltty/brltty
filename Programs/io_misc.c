@@ -42,31 +42,33 @@ awaitFileDescriptor (int fileDescriptor, int milliseconds, int output) {
 #endif /* __MSDOS__ */
 
   while (1) {
-    fd_set mask;
-    struct timeval timeout;
+    {
+      fd_set mask;
+      struct timeval timeout;
 
-    FD_ZERO(&mask);
-    FD_SET(fileDescriptor, &mask);
+      FD_ZERO(&mask);
+      FD_SET(fileDescriptor, &mask);
 
-    memset(&timeout, 0, sizeof(timeout));
+      memset(&timeout, 0, sizeof(timeout));
 #ifndef __MSDOS__
-    timeout.tv_sec = milliseconds / 1000;
-    timeout.tv_usec = (milliseconds % 1000) * 1000;
+      timeout.tv_sec = milliseconds / 1000;
+      timeout.tv_usec = (milliseconds % 1000) * 1000;
 #endif /* __MSDOS__ */
 
-    {
-      int result = select(fileDescriptor+1,
-                          (output? NULL: &mask),
-                          (output? &mask: NULL),
-                          NULL, &timeout);
+      {
+        int result = select(fileDescriptor+1,
+                            (output? NULL: &mask),
+                            (output? &mask: NULL),
+                            NULL, &timeout);
 
-      if (result == -1) {
-        if (errno == EINTR) continue;
-        LogError("select");
-        return 0;
+        if (result == -1) {
+          if (errno == EINTR) continue;
+          LogError("select");
+          return 0;
+        }
+
+        if (result) return 1;
       }
-
-      if (!result) return 1;
     }
 
 #ifdef __MSDOS__
