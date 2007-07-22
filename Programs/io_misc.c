@@ -22,7 +22,9 @@
 #include <errno.h>
 #include <fcntl.h>
 
-#if defined(HAVE_SYS_SELECT_H)
+#if defined(HAVE_SYS_POLL_H)
+#include <sys/poll.h>
+#elif defined(HAVE_SYS_SELECT_H)
 #include <sys/select.h>
 #else /* HAVE_SYS_SELECT_H */
 #include <sys/time.h>
@@ -43,6 +45,31 @@ awaitFileDescriptor (int fileDescriptor, int milliseconds, int output) {
 
   while (1) {
     {
+#if defined(HAVE_SYS_POLL_H)
+      struct pollfd pfd = {
+        .fd = fileDescriptor,
+        .events = output? POLLOUT: POLLIN
+      };
+      int timeout;
+
+#ifdef __MSDOS__
+      timeout = 0;
+#else /* __MSDOS__ */
+      timeout = milliseconds;
+#endif /* __MSDOS__ */
+
+      {
+        int result = poll(&pfd, 1, timeout);
+
+        if (result == -1) {
+          if (errno == EINTR) continue;
+          LogError("poll");
+          return 0;
+        }
+
+        if (result) return 1;
+      }
+#else /* select */
       fd_set mask;
       struct timeval timeout;
 
@@ -69,6 +96,7 @@ awaitFileDescriptor (int fileDescriptor, int milliseconds, int output) {
 
         if (result) return 1;
       }
+#endif /* await file descriptor */
     }
 
 #ifdef __MSDOS__
