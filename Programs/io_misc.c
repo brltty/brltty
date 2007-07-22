@@ -22,7 +22,7 @@
 #include <errno.h>
 #include <fcntl.h>
 
-#ifdef HAVE_SYS_SELECT_H
+#if defined(HAVE_SYS_SELECT_H)
 #include <sys/select.h>
 #else /* HAVE_SYS_SELECT_H */
 #include <sys/time.h>
@@ -31,50 +31,63 @@
 #include "io_misc.h"
 #include "misc.h"
 
-int
-awaitInput (int fileDescriptor, int milliseconds) {
-  fd_set mask;
-  struct timeval timeout;
-
 #ifdef __MSDOS__
-  int elapsed = 0;
+#include "sys_msdos.h"
 #endif /* __MSDOS__ */
 
-  FD_ZERO(&mask);
-  FD_SET(fileDescriptor, &mask);
-
-  memset(&timeout, 0, sizeof(timeout));
-#ifndef __MSDOS__
-  timeout.tv_sec = milliseconds / 1000;
-  timeout.tv_usec = (milliseconds % 1000) * 1000;
+static int
+awaitFileDescriptor (int fileDescriptor, int milliseconds, int output) {
+#ifdef __MSDOS__
+  int left = milliseconds * 1000;
 #endif /* __MSDOS__ */
 
   while (1) {
-    switch (select(fileDescriptor+1, &mask, NULL, NULL, &timeout)) {
-      case -1:
-        if (errno == EINTR) continue;
-        LogError("input wait");
-        return 0;
+    fd_set mask;
+    struct timeval timeout;
 
-      case 0:
-#ifdef __MSDOS__
-        if (elapsed < (milliseconds * 1000)) {
-          elapsed += tsr_usleep(1000);
-          continue;
-        }
+    FD_ZERO(&mask);
+    FD_SET(fileDescriptor, &mask);
+
+    memset(&timeout, 0, sizeof(timeout));
+#ifndef __MSDOS__
+    timeout.tv_sec = milliseconds / 1000;
+    timeout.tv_usec = (milliseconds % 1000) * 1000;
 #endif /* __MSDOS__ */
 
-        if (milliseconds > 0)
-          LogPrint(LOG_DEBUG, "input wait timed out after %d %s",
-                   milliseconds, ((milliseconds == 1)? "millisecond": "milliseconds"));
+    {
+      int result = select(fileDescriptor+1,
+                          (output? NULL: &mask),
+                          (output? &mask: NULL),
+                          NULL, &timeout);
 
-        errno = EAGAIN;
+      if (result == -1) {
+        if (errno == EINTR) continue;
+        LogError("select");
         return 0;
+      }
 
-      default:
-        return 1;
+      if (!result) return 1;
     }
+
+#ifdef __MSDOS__
+    if (left > 0) {
+      left -= tsr_usleep(1000);
+      continue;
+    }
+#endif /* __MSDOS__ */
+
+    if (milliseconds > 0)
+      LogPrint(LOG_DEBUG, "timeout after %d %s",
+               milliseconds, ((milliseconds == 1)? "millisecond": "milliseconds"));
+
+    errno = EAGAIN;
+    return 0;
   }
+}
+
+int
+awaitInput (int fileDescriptor, int milliseconds) {
+  return awaitFileDescriptor(fileDescriptor, milliseconds, 0);
 }
 
 int
@@ -135,48 +148,7 @@ readData (
 
 int
 awaitOutput (int fileDescriptor, int milliseconds) {
-  fd_set mask;
-  struct timeval timeout;
-
-#ifdef __MSDOS__
-  int elapsed = 0;
-#endif /* __MSDOS__ */
-
-  FD_ZERO(&mask);
-  FD_SET(fileDescriptor, &mask);
-
-  memset(&timeout, 0, sizeof(timeout));
-#ifndef __MSDOS__
-  timeout.tv_sec = milliseconds / 1000;
-  timeout.tv_usec = (milliseconds % 1000) * 1000;
-#endif /* __MSDOS__ */
-
-  while (1) {
-    switch (select(fileDescriptor+1, NULL, &mask, NULL, &timeout)) {
-      case -1:
-        if (errno == EINTR) continue;
-        LogError("output wait");
-        return 0;
-
-      case 0:
-#ifdef __MSDOS__
-        if (elapsed < (milliseconds * 1000)) {
-          elapsed += tsr_usleep(1000);
-          continue;
-        }
-#endif /* __MSDOS__ */
-
-        if (milliseconds > 0)
-          LogPrint(LOG_DEBUG, "output wait timed out after %d %s",
-                   milliseconds, ((milliseconds == 1)? "millisecond": "milliseconds"));
-
-        errno = EAGAIN;
-        return 0;
-
-      default:
-        return 1;
-    }
-  }
+  return awaitFileDescriptor(fileDescriptor, milliseconds, 1);
 }
 
 ssize_t
