@@ -664,10 +664,10 @@ int BRLAPI_STDCALL brlapi_describeKeyCode (brlapi_keyCode_t code, brlapi_describ
  * - in a \c select() loop, just add it to the \c readfds and \c exceptfds file
  *   descriptor sets;
  * - in a gtk or atspi application, use
- *   \c g_io_add_watch(fileDescriptor,G_IO_IN|G_IO_ERR|G_IO_HUP,f,data)
+ *   \c g_io_add_watch(fileDescriptor, \c G_IO_IN|G_IO_ERR|G_IO_HUP, \c f, \c data)
  *   for adding a callback called \c f;
  * - in an Xt/Xaw/motif-based application, use
- *   \c XtAppAddInput(app_context,fileDescriptor,XtInputReadMask|XtInputExceptMask,f,data)
+ *   \c XtAppAddInput(app_context, \c fileDescriptor, \c XtInputReadMask|XtInputExceptMask, \c f, \c data)
  * - etc.
  *
  * and then, when you detect inbound trafic on the file descriptor, do something
