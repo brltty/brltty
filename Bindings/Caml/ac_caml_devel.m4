@@ -126,6 +126,15 @@ else
         AC_MSG_RESULT(Unix)
         OCAMLWIN32=no
     fi
+    
+    # Checking for ocamlfindlib
+    AC_CHECK_PROG(OCAMLFIND,ocamlfind,ocamlfind,no)
+    if test "$OCAMLFIND" = ocamlfind; then
+        OCAMLC='ocamlfind ocamlc'
+        if test "$OCAMLOPT" = ocamlopt; then
+            OCAMLOPT='ocamlfind ocamlopt'
+        fi
+    fi
 fi
 
 # substitutions to perform
@@ -139,4 +148,5 @@ AC_SUBST(OCAMLVERSION)
 AC_SUBST(OCAMLLIB)
 AC_SUBST(OCAMLWEB)
 AC_SUBST(OCAMLWIN32)
+AC_SUBST(OCAMLFIND)
 ])
