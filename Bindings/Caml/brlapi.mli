@@ -53,18 +53,18 @@ type settings = {
 
 val settings_initializer : settings
 
-type writeArguments = {
+type writeStruct = {
   mutable displayNumber : int;
   mutable regionBegin : int;
   mutable regionSize : int;
   text : string;
-  andMask : int array;
-  orMask : int array;
+  attrAnd : int array;
+  attrOr : int array;
   mutable cursor : int;
   mutable charset : string
 }
 
-val writeArguments_initializer : writeArguments
+val writeStruct_initializer : writeStruct
 
 type handle
 
@@ -93,9 +93,14 @@ type errorCode =
   | Unknown of int
 
 type error = {
-  errorCode : errorCode;
-  errorFunction : string;
+  brlerrno : int;
+  libcerrno : int;
+  gaierrno : int;
+  errfun : string;
 }
+
+external errorCode_of_error :
+  error -> errorCode = "brlapiml_errorCode_of_error"
 
 external strerror :
   error -> string = "brlapiml_strerror"
@@ -105,8 +110,8 @@ exception Brlapi_exception of errorCode * int32 * string
 
 external openConnection :
   settings -> Unix.file_descr * settings = "brlapiml_openConnection"
-external openConnectionHandle :
-  settings -> handle = "brlapiml_openConnectionHandle"
+external openConnectionWithHandle :
+  settings -> handle = "brlapiml_openConnectionWithHandle"
 external closeConnection :
   ?h:handle -> unit -> unit = "brlapiml_closeConnection"
 (*
@@ -133,7 +138,7 @@ external writeText :
 external writeDots :
   ?h:handle -> int array -> unit = "brlapiml_writeDots"
 external write :
-  ?h:handle -> writeArguments -> unit = "brlapiml_write_"
+  ?h:handle -> writeStruct -> unit = "brlapiml_write"
 
 (*
 BRLAPI_KEYCODE_MAX
@@ -157,27 +162,35 @@ external readKey :
 external waitKey :
   ?h:handle -> unit -> int64 = "brlapiml_waitKey"
 
-type key =
-  | BrailleCommand of BrailleCommands.t
-  | Keysym of int32
-
 type expandedKeyCode = {
-  key : key;
-  argument : int;
+  type_ : int32;
+  command : int32;
+  argument : int32;
   flags : int32
 }
 
 external expandKeyCode :
-  int64 -> expandedKeyCode = "brlapiml_expandKeyCode"
+  ?h:handle -> int64 -> expandedKeyCode = "brlapiml_expandKeyCode"
 
-external ignoreKeyRange :
-  ?h:handle -> int64 -> int64 -> unit = "brlapiml_ignoreKeyRange"
-external acceptKeyRange :
-  ?h:handle -> int64 -> int64 -> unit = "brlapiml_acceptKeyRange"
-external ignoreKeySet :
-  ?h:handle -> int64 array -> unit = "brlapiml_ignoreKeySet"
-external acceptKeySet :
-  ?h:handle -> int64 array -> unit = "brlapiml_acceptKeySet"
+type rangeType =
+  | RT_all
+  | RT_type
+  | RT_command
+  | RT_key
+  | RT_code
+
+external ignoreKeys :
+  ?h:handle -> rangeType -> int64 array -> unit = "brlapiml_ignoreKeys"
+external acceptKeys :
+  ?h:handle -> rangeType -> int64 array -> unit = "brlapiml_acceptKeys"
+external ignoreAllKeys :
+  ?h:handle -> unit = "brlapiml_ignoreAllKeys"
+external acceptAllKeys :
+  ?h:handle -> unit = "brlapiml_acceptAllKeys"  
+external ignoreKeyRanges :
+  ?h:handle -> (int64 * int64) array -> unit = "brlapiml_ignoreKeyRanges"
+external acceptKeyRanges :
+  ?h:handle -> (int64 * int64) array -> unit = "brlapiml_acceptKeyRanges"
 
 external enterRawMode :
   ?h:handle -> string -> unit = "brlapiml_enterRawMode"
@@ -204,8 +217,8 @@ module MakeKeyHandlers (M1 : KEY) : sig
   val readKey : ?h:handle -> unit -> key option
   val waitKey : ?h:handle -> unit -> key
 
-  val ignoreKeyRange : ?h:handle -> key -> key -> unit
-  val acceptKeyRange : ?h:handle -> key -> key -> unit
-  val ignoreKeySet : ?h:handle -> key array -> unit
-  val acceptKeySet : ?h:handle -> key array -> unit
+  val ignoreKeys : ?h:handle -> rangeType -> key array -> unit
+  val acceptKeys : ?h:handle -> rangeType -> key array -> unit
+  val ignoreKeyRanges : ?h:handle -> (key * key) array -> unit
+  val acceptKeyRanges : ?h:handle -> (key * key) array -> unit
 end

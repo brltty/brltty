@@ -27,12 +27,74 @@ OCAMLVERSION = @OCAMLVERSION@
 OCAMLLIB = @OCAMLLIB@
 OCAMLWEB = @OCAMLWEB@
 OCAMLWIN32 = @OCAMLWIN32@
+OCAMLFIND = @OCAMLFIND@
 
-all:
+lib := brlapi
+bclib := $(lib).cma
+nclib := $(lib).cmxa
+ifeq ($(OCAMLOPT),no)
+files := brlapi.cmi $(bclib)
+else
+files := brlapi.cmi $(bclib) $(nclib)
+endif
+
+bcobjects := brlapi_stubs.o constants.cmo brlapi.cmo
+ncobjects := brlapi_stubs.o constants.cmx brlapi.cmx
+
+.PHONY: all clean install uninstall
+
+all : $(files)
+
+$(bclib) : $(bcobjects)
+#ifeq ($(OCkAMLFIND),no)
+	ocamlmklib -o $(lib) $^ -lbrlapi
+#else
+#	$(OCAMLC) -a -o $@ $^
+#endif
+
+$(nclib) : $(ncobjects)
+ifeq ($(OCkAMLFIND),no)
+	ocamlmklib -o $(lib) $^ -lbrlapi
+else
+	$(OCAMLOPT) -a -o $@ $^
+endif
+
+brlapi.cmi: brlapi.mli
+	$(OCAMLC) -c $<
+
+brlapi.cmo: brlapi.ml brlapi.cmi
+	$(OCAMLC) -c $<
+
+brlapi.cmx brlapi.o: brlapi.ml brlapi.cmi
+	$(OCAMLOPT) -c $<
+
+brlapi_stubs.o: brlapi_stubs.c
+	$(OCAMLC) -c $<
+
+brlapi.mli : constants.cmi
+
+constants.cmi : constants.ml
+	$(OCAMLC) -c $<
+
+constants.cmo : constants.ml
+	$(OCAMLC) -c $<
+
+constants.cmx : constants.ml
+	$(OCAMLOPT) -c $<
+
+constants.ml: $(CONSTANTS_SCRIPTS) $(CONSTANTS_SOURCES)
+	$(AWK) $(CONSTANTS_OPTIONS) $(CONSTANTS_SOURCES) >$@
 
 clean::
+	rm -f *.cm* *.a *.so constants.ml
 
 install: all
+ifeq ($(OCkAMLFIND),no)
+	@echo Can't install OCaml bindings withot findlib; exit 1 
+else
+	-$(OCAMLFIND) remove $(lib)
+	$(OCAMLFIND) install $(lib) META $(files) constants.cmi brlapi.a libbrlapi.a dllbrlapi.so 
+endif
 
 uninstall:
 

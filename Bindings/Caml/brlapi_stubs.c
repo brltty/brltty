@@ -35,7 +35,8 @@
 #include <caml/custom.h> /* operations on custom blocks */
 #include <caml/intext.h> /* operations for writing user-defined serialization and deserialization functions for custom blocks */
 #define BRLAPI_NO_DEPRECATED
-#include <brlapi.h>
+#include "../../Programs/brlapi.h"
+#include "../../Programs/brlapi_protocol.h"
 
 #ifndef MIN
 #define MIN(x, y) (x<y)?(x):(y)
@@ -44,11 +45,11 @@
 extern value unix_error_of_code (int errcode); /* TO BE REMOVED */
 
 /* The following macros call a BrlAPI function */
-/* The first one just calls thefunction, whereas */
-/* thesecond one also checks thefunction's return code and raises */
+/* The first one just calls the function, whereas */
+/* the second one also checks the function's return code and raises */
 /* an exception if this code is -1 */
 /* The macros decide which version of a brlapi function should be called */
-/* depending om whether the handle value is None or Some realHandle */
+/* depending on whether the handle value is None or Some realHandle */
 
 #define brlapi(function, ...) \
 do { \
@@ -61,7 +62,7 @@ do { \
   int res_; \
   if (Is_long(handle)) res_ = brlapi_ ##function (__VA_ARGS__); \
   else res_ = brlapi__ ##function ((brlapi_handle_t *) Data_custom_val(Field(handle, 0)), ## __VA_ARGS__); \
-  if (res_==-1) raise_brlapi_error(#function); \
+  if (res_==-1) raise_brlapi_error(); \
   if (ret!=NULL) (*(int *)ret) = res_; \
 } while (0)
 
@@ -84,56 +85,70 @@ static struct custom_operations customOperations = {
 /* Converts a brlapi_error_t into its Caml representation */
 static value constrCamlError(const brlapi_error_t *err)
 {
-  CAMLlocal1(v);
-  switch (err->brlerrno) {
-    case BRLAPI_ERROR_NOMEM: v = Val_int(0); break;
-    case BRLAPI_ERROR_TTYBUSY: v = Val_int(1); break;
-    case BRLAPI_ERROR_DEVICEBUSY: v = Val_int(2); break;
-    case BRLAPI_ERROR_UNKNOWN_INSTRUCTION: v = Val_int(3); break;
-    case BRLAPI_ERROR_ILLEGAL_INSTRUCTION: v = Val_int(4); break;
-    case BRLAPI_ERROR_INVALID_PARAMETER: v = Val_int(5); break;
-    case BRLAPI_ERROR_INVALID_PACKET: v = Val_int(6); break;
-    case BRLAPI_ERROR_CONNREFUSED: v = Val_int(7); break;
-    case BRLAPI_ERROR_OPNOTSUPP: v = Val_int(8); break;
-    case BRLAPI_ERROR_GAIERR: {
-      v = caml_alloc(1, 0);
-      Store_field(v, 0, Val_int(err->gaierrno));
-    }; break;
-    case BRLAPI_ERROR_LIBCERR: {
-      v = caml_alloc(1, 1);
-      Store_field(v, 0, unix_error_of_code(err->libcerrno));
-    }; break;
-    case BRLAPI_ERROR_UNKNOWNTTY: v = Val_int(9); break;
-    case BRLAPI_ERROR_PROTOCOL_VERSION: v = Val_int(10); break;
-    case BRLAPI_ERROR_EOF: v = Val_int(11); break;
-    case BRLAPI_ERROR_EMPTYKEY: v = Val_int(12); break; 
-    case BRLAPI_ERROR_DRIVERERROR: v = Val_int(13); break;
-    case BRLAPI_ERROR_AUTHENTICATION: v = Val_int(14); break;
-    default: {
-      v = caml_alloc(1, 2);
-      Store_field(v, 0, Val_int(err->brlerrno));
-    }
-  }
-  return v;
+  value camlError;
+  camlError = caml_alloc_tuple(4);
+  Store_field(camlError, 0, Val_int(err->brlerrno));
+  Store_field(camlError, 1, Val_int(err->libcerrno));
+  Store_field(camlError, 2, Val_int(err->gaierrno));
+  if (err->errfun!=NULL)
+    Store_field(camlError, 3, caml_copy_string(err->errfun));
+  else
+    Store_field(camlError, 3, caml_copy_string(""));
+  return camlError;
 }
 
-/* Function : raise_brlapi_err[Bor */
+CAMLprim value brlapiml_errorCode_of_error(value camlError)
+{
+  CAMLparam1(camlError);
+  CAMLlocal1(result);
+  switch (Int_val(Field(camlError, 0))) {
+    case BRLAPI_ERROR_NOMEM: result = Val_int(0); break;
+    case BRLAPI_ERROR_TTYBUSY: result = Val_int(1); break;
+    case BRLAPI_ERROR_DEVICEBUSY: result = Val_int(2); break;
+    case BRLAPI_ERROR_UNKNOWN_INSTRUCTION: result = Val_int(3); break;
+    case BRLAPI_ERROR_ILLEGAL_INSTRUCTION: result = Val_int(4); break;
+    case BRLAPI_ERROR_INVALID_PARAMETER: result = Val_int(5); break;
+    case BRLAPI_ERROR_INVALID_PACKET: result = Val_int(6); break;
+    case BRLAPI_ERROR_CONNREFUSED: result = Val_int(7); break;
+    case BRLAPI_ERROR_OPNOTSUPP: result = Val_int(8); break;
+    case BRLAPI_ERROR_GAIERR: {
+      result = caml_alloc(1, 0);
+      Store_field(result, 0, Val_int(Field(camlError, 2)));
+    }; break;
+    case BRLAPI_ERROR_LIBCERR: {
+      result = caml_alloc(1, 1);
+      Store_field(result, 0, unix_error_of_code(Int_val(Field(camlError, 1))));
+    }; break;
+    case BRLAPI_ERROR_UNKNOWNTTY: result = Val_int(9); break;
+    case BRLAPI_ERROR_PROTOCOL_VERSION: result = Val_int(10); break;
+    case BRLAPI_ERROR_EOF: result = Val_int(11); break;
+    case BRLAPI_ERROR_EMPTYKEY: result = Val_int(12); break; 
+    case BRLAPI_ERROR_DRIVERERROR: result = Val_int(13); break;
+    case BRLAPI_ERROR_AUTHENTICATION: result = Val_int(14); break;
+    default: {
+      result = caml_alloc(1, 2);
+      Store_field(result, 0, Val_int(Field(camlError, 0)));
+    }
+  }
+  CAMLreturn(result);
+}
+
+/* Function : raise_brlapi_error */
 /* Raises the Brlapi_error exception */
-static void raise_brlapi_error(char *fun)
+static void raise_brlapi_error(void)
 {
   static value *exception = NULL;
   CAMLlocal1(res);
   if (exception==NULL) exception = caml_named_value("Brlapi_error");
-  res = caml_alloc(3,0);
+  res = caml_alloc(2,0);
   Store_field(res, 0, *exception);
   Store_field(res, 1, constrCamlError(&brlapi_error));
-  Store_field(res, 2, caml_copy_string(fun));
   caml_raise(res);
 }
 
 /* Function : raise_brlapi_exception */
-/* Raises Brlapi_exception*/
-static void BRLAPI_STDCALL raise_brlapi_exception(int err, brlapi_type_t type, const void *packet, size_t size)
+/* Raises Brlapi_exception */
+static void raise_brlapi_exception(int err, brlapi_packetType_t type, const void *packet, size_t size)
 {
   static value *exception = NULL;
   int i;
@@ -144,7 +159,7 @@ static void BRLAPI_STDCALL raise_brlapi_exception(int err, brlapi_type_t type, c
   res = caml_alloc (4, 0);
   Store_field(res, 0, *exception);
   Store_field(res, 1, Val_int(err));
-  Store_field(res, 2, caml_copy_int64(type));
+  Store_field(res, 2, caml_copy_int32(type));
   Store_field(res, 3, str);
   caml_raise(res);
 }
@@ -167,7 +182,7 @@ CAMLprim value brlapiml_openConnection(value settings)
   brlapiSettings.auth = String_val(Field(settings, 0));
   brlapiSettings.host = String_val(Field(settings, 1));
   res = brlapi_openConnection(&brlapiSettings, &brlapiSettings);
-  if (res<0) raise_brlapi_error("openConnection");
+  if (res<0) raise_brlapi_error();
   s = caml_alloc_tuple(2);
   Store_field(s, 0, caml_copy_string(brlapiSettings.auth));
   Store_field(s, 1, caml_copy_string(brlapiSettings.host));
@@ -177,7 +192,7 @@ CAMLprim value brlapiml_openConnection(value settings)
   CAMLreturn(pair);
 }
 
-CAMLprim value brlapiml_openConnectionHandle(value settings)
+CAMLprim value brlapiml_openConnectionWithHandle(value settings)
 {
   CAMLparam1(settings);
   CAMLlocal1(handle);
@@ -185,7 +200,7 @@ CAMLprim value brlapiml_openConnectionHandle(value settings)
   brlapiSettings.auth = String_val(Field(settings, 0));
   brlapiSettings.host = String_val(Field(settings, 1));
   handle = caml_alloc_custom(&customOperations, brlapi_getHandleSize(), 0, 1);
-  if (brlapi__openConnection(Data_custom_val(handle), &brlapiSettings, &brlapiSettings)<0) raise_brlapi_error("openConnectionHandle");
+  if (brlapi__openConnection(Data_custom_val(handle), &brlapiSettings, &brlapiSettings)<0) raise_brlapi_error();
   CAMLreturn(handle);
 }
 
@@ -226,7 +241,7 @@ CAMLprim value brlapiml_enterTtyMode(value handle, value tty, value driverName)
 
 CAMLprim value brlapiml_enterTtyModeWithPath(value handle, value ttyPathCaml, value driverName)
 {
-  CAMLparam2(handle, ttyPathCaml);
+  CAMLparam3(handle, ttyPathCaml, driverName);
   int i, size = Wosize_val(ttyPathCaml);
   int ttyPath[size];
   for (i=0; i<size; i++) ttyPath[i] = Int_val(Field(ttyPathCaml, i));
@@ -251,7 +266,7 @@ CAMLprim value brlapiml_setFocus(value handle, value tty)
 CAMLprim value brlapiml_writeText(value handle, value cursor, value text)
 {
   CAMLparam3(handle, cursor, text);
- brlapiCheckError(writeText, NULL, Int_val(cursor), String_val(text));
+  brlapiCheckError(writeText, NULL, Int_val(cursor), String_val(text));
   CAMLreturn(Val_unit);
 }
 
@@ -265,22 +280,22 @@ CAMLprim value brlapiml_writeDots(value handle, value camlDots)
   CAMLreturn(Val_unit);
 }
 
-CAMLprim value brlapiml_write_(value handle, value writeArguments)
+CAMLprim value brlapiml_write(value handle, value writeStruct)
 {
-  CAMLparam2(handle, writeArguments);
-  int andSize = Wosize_val(Field(writeArguments, 4));
-  int orSize = Wosize_val(Field(writeArguments, 5));
+  CAMLparam2(handle, writeStruct);
+  int andSize = Wosize_val(Field(writeStruct, 4));
+  int orSize = Wosize_val(Field(writeStruct, 5));
   unsigned char andMask[andSize], orMask[orSize];
   brlapi_writeArguments_t ws;
-  ws.displayNumber = Val_int(Field(writeArguments, 0));
-  ws.regionBegin = Val_int(Field(writeArguments, 1));
-  ws.regionSize = Val_int(Field(writeArguments, 2));
-  ws.text = String_val(Field(writeArguments, 3));
-  packDots(Field(writeArguments, 4), andMask, andSize);
+  ws.displayNumber = Val_int(Field(writeStruct, 0));
+  ws.regionBegin = Val_int(Field(writeStruct, 1));
+  ws.regionSize = Val_int(Field(writeStruct, 2));
+  ws.text = String_val(Field(writeStruct, 3));
+  packDots(Field(writeStruct, 4), andMask, andSize);
   ws.andMask = andMask;
-  packDots(Field(writeArguments, 5), orMask, orSize);
+  packDots(Field(writeStruct, 5), orMask, orSize);
   ws.orMask = orMask;
-  ws.cursor = Val_int(Field(writeArguments, 6));
+  ws.cursor = Val_int(Field(writeStruct, 6));
   brlapiCheckError(write, NULL, &ws);
   CAMLreturn(Val_unit);
 }
@@ -306,59 +321,83 @@ CAMLprim value brlapiml_waitKey(value handle, value unit)
   CAMLreturn(caml_copy_int64(keyCode));
 }
 
-CAMLprim value brlapiml_expandKeyCode(value camlKeyCode)
+#define brlapi__expandKeyCode(h,x,y) brlapi_expandKeyCode(x,y)
+
+CAMLprim value brlapiml_expandKeyCode(value handle, value camlKeyCode)
 {
-  CAMLparam1(camlKeyCode);
-  CAMLlocal2(key, result);
-  tag_t keyType = 0;
+  CAMLparam2(handle, camlKeyCode);
+  CAMLlocal1(result);
   brlapi_expandedKeyCode_t ekc;
-  brlapi_keyCode_t keyCode = Int64_val(camlKeyCode);
-  if ((keyCode & BRLAPI_KEY_TYPE_MASK) == BRLAPI_KEY_TYPE_CMD) keyType=0;
-  else if ((keyCode & BRLAPI_KEY_TYPE_MASK) == BRLAPI_KEY_TYPE_SYM) keyType=1;
-  else raise_brlapi_error("expandKeyCode: unknown key type");
-  if (brlapi_expandKeyCode(keyCode, &ekc)==-1)
-    raise_brlapi_error("expandKeyCode");
-  key = caml_alloc(1, keyType);
-  if (keyType==0) Store_field(key, 0, Val_int(ekc.command));
-  else Store_field(key, 0, caml_copy_int32(ekc.command));
-  result = caml_alloc_tuple(3);
-  Store_field(result, 0, key);
-  Store_field(result, 1, Val_int(ekc.argument));
+  brlapiCheckError(expandKeyCode, NULL, Int64_val(camlKeyCode), &ekc);
+  result = caml_alloc_tuple(4);
+  Store_field(result, 0, caml_copy_int32(ekc.type));
+  Store_field(result, 1, caml_copy_int32(ekc.command));
+  Store_field(result, 2, caml_copy_int32(ekc.argument));
   Store_field(result, 2, caml_copy_int32(ekc.flags));
   CAMLreturn(result);
 }
 
-CAMLprim value brlapiml_ignoreKeyRange(value handle, value x, value y)
+CAMLprim value brlapiml_ignoreKeys(value handle, value rt, value camlKeys)
 {
-  CAMLparam3(handle, x, y);
-  brlapiCheckError(ignoreKeyRange, NULL, Int64_val(x), Int64_val(y));;
+  CAMLparam3(handle, rt, camlKeys);
+  unsigned int i, size = Wosize_val(camlKeys);
+  brlapi_keyCode_t keys[size];
+  for (i=0; i<size; i++) keys[i] = Int64_val(Field(camlKeys, i)); 
+  brlapiCheckError(ignoreKeys, NULL, Int_val(rt), keys, size);
   CAMLreturn(Val_unit);
 }
 
-CAMLprim value brlapiml_acceptKeyRange(value handle, value x, value y)
+CAMLprim value brlapiml_acceptKeys(value handle, value rt, value camlKeys)
 {
-  CAMLparam3(handle, x, y);
-  brlapiCheckError(acceptKeyRange, NULL, Int64_val(x), Int64_val(y));
+  CAMLparam3(handle, rt, camlKeys);
+  unsigned int i, size = Wosize_val(camlKeys);
+  brlapi_keyCode_t keys[size];
+  for (i=0; i<size; i++) keys[i] = Int64_val(Field(camlKeys, i)); 
+  brlapiCheckError(acceptKeys, NULL, Int_val(rt), keys, size);
   CAMLreturn(Val_unit);
 }
 
-CAMLprim value brlapiml_ignoreKeySet(value handle, value array)
+CAMLprim value brlapiml_ignoreAllKeys(value handle, value unit)
 {
-  CAMLparam2(handle, array);
-  int i, nbKeys = Wosize_val(array);
-  brlapi_keyCode_t keySet[nbKeys];
-  for (i=0; i<nbKeys; i++) keySet[i] = Int64_val(Field(array, i));
-  brlapiCheckError(ignoreKeySet, NULL, keySet, nbKeys);
+  CAMLparam2(handle, unit);
+  brlapiCheckError(ignoreAllKeys, NULL);
   CAMLreturn(Val_unit);
 }
 
-CAMLprim value brlapiml_acceptKeySet(value handle, value array)
+CAMLprim value brlapiml_acceptAllKeys(value handle, value unit)
 {
-  CAMLparam2(handle, array);
-  int i, nbKeys = Wosize_val(array);
-  brlapi_keyCode_t keySet[nbKeys];
-  for (i=0; i<nbKeys; i++) keySet[i] = Int64_val(Field(array, i));
-  brlapiCheckError(acceptKeySet, NULL, keySet, nbKeys);
+  CAMLparam2(handle, unit);
+  brlapiCheckError(acceptAllKeys, NULL);
+  CAMLreturn(Val_unit);
+}
+
+CAMLprim value brlapiml_ignoreKeyRanges(value handle, value camlRanges)
+{
+  CAMLparam2(handle, camlRanges);
+  CAMLlocal1(r);
+  unsigned int i, size = Wosize_val(camlRanges);
+  brlapi_range_t ranges[size];
+  for (i=0; i<size; i++) {
+    r = Field(camlRanges, i);
+    ranges[i].first = Int64_val(Field(r, 0));
+    ranges[i].last = Int64_val(Field(r, 1));
+  }
+  brlapiCheckError(ignoreKeyRanges, NULL, ranges, size);
+  CAMLreturn(Val_unit);
+}
+
+CAMLprim value brlapiml_acceptKeyRanges(value handle, value camlRanges)
+{
+  CAMLparam2(handle, camlRanges);
+  CAMLlocal1(r);
+  unsigned int i, size = Wosize_val(camlRanges);
+  brlapi_range_t ranges[size];
+  for (i=0; i<size; i++) {
+    r = Field(camlRanges, i);
+    ranges[i].first = Int64_val(Field(r, 0));
+    ranges[i].last = Int64_val(Field(r, 1));
+  }
+  brlapiCheckError(acceptKeyRanges, NULL, ranges, size);
   CAMLreturn(Val_unit);
 }
 
@@ -411,6 +450,17 @@ CAMLprim value brlapiml_resumeDriver(value handle, value unit)
   CAMLparam2(handle, unit);
   brlapi(resumeDriver);
   CAMLreturn(Val_unit);
+}
+
+CAMLprim value brlapiml_strerror(value camlError)
+{
+  CAMLparam1(camlError);
+  brlapi_error_t error;
+  error.brlerrno = Int_val(Field(camlError,0));
+  error.libcerrno = Int_val(Field(camlError,1));
+  error.gaierrno = Int_val(Field(camlError,2));
+  error.errfun = String_val(Field(camlError,3));
+  CAMLreturn(caml_copy_string(brlapi_strerror(&error)));
 }
 
 /* Function : setExceptionHandler */
