@@ -218,7 +218,7 @@ BRLTTY is distributed as a single GNU compressed tar file named
    brltty-<release>.tar.gz
 
 where `<release>' is the release number. When the archive is unpacked, there
-should be a subdirectory called `DOCS' which contains all of the general BRLTTY
+should be a subdirectory called `Documents' which contains all of the general BRLTTY
 documentation including the manual in various formats, and the list of
 Frequently Asked Questions (FAQ).
 
@@ -292,7 +292,7 @@ Braille driver with the `-b' option. `brltty -h' displays a brief summary of
 all available options.
 
 You may use a configuration file for most options as well. See the example
-configuration file `brltty.conf' in the `DOCS' subdirectory.
+configuration file `brltty.conf' in the `Documents' subdirectory.
 
 And don't forget to review the notes for your Braille display. See the `README'
 file in its driver's subdirectory.
