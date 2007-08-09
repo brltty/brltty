@@ -82,7 +82,7 @@ typedef struct {
 
 #define HT_BYTE_SEQUENCE(name,bytes) .name##Address = bytes, .name##Length = sizeof(bytes)
 static const ModelEntry modelTable[] = {
-  { .identifier = 0X80,
+  { .identifier = HT_Model_Modular20,
     .name = "Modular 20+4",
     .textCells = 20,
     .statusCells = 4,
@@ -92,7 +92,7 @@ static const ModelEntry modelTable[] = {
     .writeCells = writeStatusAndTextCells
   }
   ,
-  { .identifier = 0X89,
+  { .identifier = HT_Model_Modular40,
     .name = "Modular 40+4",
     .textCells = 40,
     .statusCells = 4,
@@ -102,7 +102,7 @@ static const ModelEntry modelTable[] = {
     .writeCells = writeStatusAndTextCells
   }
   ,
-  { .identifier = 0X88,
+  { .identifier = HT_Model_Modular80,
     .name = "Modular 80+4",
     .textCells = 80,
     .statusCells = 4,
@@ -112,7 +112,7 @@ static const ModelEntry modelTable[] = {
     .writeCells = writeStatusAndTextCells
   }
   ,
-  { .identifier = 0X36,
+  { .identifier = HT_Model_ModularEvolution64,
     .name = "Modular Evolution 64",
     .textCells = 60,
     .statusCells = 4,
@@ -123,7 +123,7 @@ static const ModelEntry modelTable[] = {
     .hasATC = 1
   }
   ,
-  { .identifier = 0X38,
+  { .identifier = HT_Model_ModularEvolution88,
     .name = "Modular Evolution 88",
     .textCells = 80,
     .statusCells = 8,
@@ -134,7 +134,7 @@ static const ModelEntry modelTable[] = {
     .hasATC = 1
   }
   ,
-  { .identifier = 0X05,
+  { .identifier = HT_Model_BrailleWave,
     .name = "Braille Wave 40",
     .textCells = 40,
     .statusCells = 0,
@@ -144,7 +144,7 @@ static const ModelEntry modelTable[] = {
     .writeCells = writeStatusAndTextCells
   }
   ,
-  { .identifier = 0X90,
+  { .identifier = HT_Model_Bookworm,
     .name = "Bookworm",
     .isBookworm = 1,
     .textCells = 8,
@@ -155,7 +155,7 @@ static const ModelEntry modelTable[] = {
     HT_BYTE_SEQUENCE(sessionEnd, BookwormSessionEnd)
   }
   ,
-  { .identifier = 0X72,
+  { .identifier = HT_Model_Braillino,
     .name = "Braillino 20",
     .textCells = 20,
     .statusCells = 0,
@@ -165,7 +165,7 @@ static const ModelEntry modelTable[] = {
     .writeCells = writeStatusAndTextCells
   }
   ,
-  { .identifier = 0X74,
+  { .identifier = HT_Model_BrailleStar40,
     .name = "Braille Star 40",
     .textCells = 40,
     .statusCells = 0,
@@ -175,7 +175,7 @@ static const ModelEntry modelTable[] = {
     .writeCells = writeStatusAndTextCells
   }
   ,
-  { .identifier = 0X78,
+  { .identifier = HT_Model_BrailleStar80,
     .name = "Braille Star 80",
     .textCells = 80,
     .statusCells = 0,
@@ -185,7 +185,7 @@ static const ModelEntry modelTable[] = {
     .writeCells = writeStatusAndTextCells
   }
   ,
-  { .identifier = 0X44,
+  { .identifier = HT_Model_EasyBraille,
     .name = "Easy Braille",
     .textCells = 40,
     .statusCells = 0,

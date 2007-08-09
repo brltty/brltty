@@ -21,6 +21,20 @@
 #ifndef BRLTTY_INCLUDED_HT_BRLDEFS
 #define BRLTTY_INCLUDED_HT_BRLDEFS
 
+typedef enum {
+  HT_Model_BrailleWave        = 0X05,
+  HT_Model_ModularEvolution64 = 0X36,
+  HT_Model_ModularEvolution88 = 0X38,
+  HT_Model_EasyBraille        = 0X44,
+  HT_Model_Braillino          = 0X72,
+  HT_Model_BrailleStar40      = 0X74,
+  HT_Model_BrailleStar80      = 0X78,
+  HT_Model_Modular20          = 0X80,
+  HT_Model_Modular80          = 0X88,
+  HT_Model_Modular40          = 0X89,
+  HT_Model_Bookworm           = 0X90
+} HT_ModelIdentifier;
+
 /* Packet definition */
 typedef enum {
   HT_PKT_Extended = 0X79,
@@ -48,11 +62,11 @@ typedef union {
 
     union {
       struct {
-        unsigned char model;
+        HT_ModelIdentifier model:8;
       } PACKED ok;
 
       struct {
-        unsigned char model;
+        HT_ModelIdentifier model:8;
         unsigned char length;
         HT_ExtendedPacketType type:8;
 
