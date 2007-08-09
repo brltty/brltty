@@ -69,7 +69,7 @@ typedef struct {
 
   const unsigned char *sessionEndAddress;
 
-  unsigned char identifier;
+  HT_ModelIdentifier identifier:8;
   unsigned char textCells;
   unsigned char statusCells;
   unsigned char helpPage;
