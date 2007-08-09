@@ -60,13 +60,13 @@ else
 endif
 
 brlapi.cmi: $(SRC_DIR)/brlapi.mli
-	$(OCAMLC) -c $(SRC_DIR)/brlapi.mli
+	$(OCAMLC) -o $@ -c $(SRC_DIR)/brlapi.mli
 
 brlapi.cmo: $(SRC_DIR)/brlapi.ml brlapi.cmi
-	$(OCAMLC) -c $(SRC_DIR)/brlapi.ml
+	$(OCAMLC) -o $@ -c $(SRC_DIR)/brlapi.ml
 
-brlapi.cmx brlapi.o: brlapi.ml brlapi.cmi
-	$(OCAMLOPT) -c $<
+brlapi.cmx brlapi.o: $(SRC_DIR)/brlapi.ml brlapi.cmi
+	$(OCAMLOPT) -o $@ -c $(SRC_DIR)/brlapi.ml
 
 brlapi_stubs.o: $(SRC_DIR)/brlapi_stubs.c
 	$(OCAMLC) -I $(BLD_TOP)$(PGM_DIR) -I $(SRC_TOP)$(PGM_DIR) -c $(SRC_DIR)/brlapi_stubs.c
