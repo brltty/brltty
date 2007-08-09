@@ -29,17 +29,17 @@ OCAMLWEB = @OCAMLWEB@
 OCAMLWIN32 = @OCAMLWIN32@
 OCAMLFIND = @OCAMLFIND@
 
-lib := brlapi
-bclib := $(lib).cma
-nclib := $(lib).cmxa
+lib = brlapi
+bclib = $(lib).cma
+nclib = $(lib).cmxa
 ifeq ($(OCAMLOPT),no)
-files := brlapi.cmi $(bclib)
+files = brlapi.cmi $(bclib)
 else
-files := brlapi.cmi $(bclib) $(nclib)
+files = brlapi.cmi $(bclib) $(nclib)
 endif
 
-bcobjects := brlapi_stubs.o constants.cmo brlapi.cmo
-ncobjects := brlapi_stubs.o constants.cmx brlapi.cmx
+bcobjects = brlapi_stubs.o constants.cmo brlapi.cmo
+ncobjects = brlapi_stubs.o constants.cmx brlapi.cmx
 
 .PHONY: all clean install uninstall
 
@@ -59,17 +59,17 @@ else
 	$(OCAMLOPT) -a -o $@ $^
 endif
 
-brlapi.cmi: brlapi.mli
-	$(OCAMLC) -c $<
+brlapi.cmi: $(SRC_DIR)/brlapi.mli
+	$(OCAMLC) -c $(SRC_DIR)/brlapi.mli
 
-brlapi.cmo: brlapi.ml brlapi.cmi
-	$(OCAMLC) -c $<
+brlapi.cmo: $(SRC_DIR)/brlapi.ml brlapi.cmi
+	$(OCAMLC) -c $(SRC_DIR)/brlapi.ml
 
 brlapi.cmx brlapi.o: brlapi.ml brlapi.cmi
 	$(OCAMLOPT) -c $<
 
-brlapi_stubs.o: brlapi_stubs.c
-	$(OCAMLC) -c $<
+brlapi_stubs.o: $(SRC_DIR)/brlapi_stubs.c
+	$(OCAMLC) -I $(BLD_TOP)$(PGM_DIR) -I $(SRC_TOP)$(PGM_DIR) -c $(SRC_DIR)/brlapi_stubs.c
 
 brlapi.mli : constants.cmi
 

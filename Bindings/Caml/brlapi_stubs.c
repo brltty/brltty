@@ -35,8 +35,8 @@
 #include <caml/custom.h> /* operations on custom blocks */
 #include <caml/intext.h> /* operations for writing user-defined serialization and deserialization functions for custom blocks */
 #define BRLAPI_NO_DEPRECATED
-#include "../../Programs/brlapi.h"
-#include "../../Programs/brlapi_protocol.h"
+#include "brlapi.h"
+#include "brlapi_protocol.h"
 
 #ifndef MIN
 #define MIN(x, y) (x<y)?(x):(y)
@@ -148,7 +148,7 @@ static void raise_brlapi_error(void)
 
 /* Function : raise_brlapi_exception */
 /* Raises Brlapi_exception */
-static void raise_brlapi_exception(int err, brlapi_packetType_t type, const void *packet, size_t size)
+static void BRLAPI_STDCALL raise_brlapi_exception(int err, brlapi_packetType_t type, const void *packet, size_t size)
 {
   static value *exception = NULL;
   int i;
