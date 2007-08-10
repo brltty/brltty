@@ -22,6 +22,7 @@
 
 #include "misc.h"
 #include "queue.h"
+#include "io_misc.h"
 #include "io_bluetooth.h"
 #include "bluetooth_internal.h"
 
@@ -150,7 +151,10 @@ btOpenConnection (const char *address, unsigned char channel, int force) {
 
     {
       int connection = btConnect(bda, channel);
-      if (connection != -1) return connection;
+      if (connection != -1) {
+        setBlockingIo(connection, 0);
+        return connection;
+      }
       btRememberConnectError(bda, errno);
     }
   } else {
