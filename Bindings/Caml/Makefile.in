@@ -19,6 +19,7 @@ include $(SRC_TOP)bindings.mk
 
 OCAMLC = @OCAMLC@
 OCAMLOPT = @OCAMLOPT@
+OCAMLMKLIB = @OCAMLMKLIB@
 OCAMLDEP = @OCAMLDEP@
 OCAMLLEX = @OCAMLLEX@
 OCAMLYACC = @OCAMLYACC@
@@ -29,35 +30,41 @@ OCAMLWEB = @OCAMLWEB@
 OCAMLWIN32 = @OCAMLWIN32@
 OCAMLFIND = @OCAMLFIND@
 
-lib = brlapi
+lib = $(API_NAME)
 bclib = $(lib).cma
 nclib = $(lib).cmxa
-ifeq ($(OCAMLOPT),no)
-files = brlapi.cmi $(bclib)
+
+constants = brlapiConstants
+
+misc = $(SRC_DIR)/META $(SRC_DIR)/brlapi.mli brlapi.cmi $(constants).ml $(constants).cmi
+
+ifeq ($(OCAMLWIN32),yes)
+clibs = libbrlapi.a
 else
-files = brlapi.cmi $(bclib) $(nclib)
+clibs = libbrlapi.a dllbrlapi.so
+endif 
+
+ifeq ($(OCAMLOPT),no)
+files = $(misc) $(clibs) $(bclib) $(constants).cmo
+else
+files = $(misc) $(clibs) $(bclib) $(constants).cmo $(nclib) $(constants).cmx
 endif
 
-bcobjects = brlapi_stubs.o constants.cmo brlapi.cmo
-ncobjects = brlapi_stubs.o constants.cmx brlapi.cmx
+bcobjects = $(constants).cmo brlapi.cmo
+ncobjects = $(subst .cmo,.cmx, $(bcobjects))
 
 .PHONY: all clean install uninstall
 
 all : $(files)
 
-$(bclib) : $(bcobjects)
-#ifeq ($(OCkAMLFIND),no)
-	ocamlmklib -o $(lib) $^ -lbrlapi
-#else
-#	$(OCAMLC) -a -o $@ $^
-#endif
+$(clibs) : brlapi_stubs.o
+	$(OCAMLMKLIB) -o $(lib) $< $(API_LDFLAGS)
 
-$(nclib) : $(ncobjects)
-ifeq ($(OCkAMLFIND),no)
-	ocamlmklib -o $(lib) $^ -lbrlapi
-else
-	$(OCAMLOPT) -a -o $@ $^
-endif
+$(bclib) : $(clibs) $(bcobjects)
+	$(OCAMLMKLIB) -o $(lib) $(bcobjects) $(API_LDFLAGS)
+
+$(nclib) : $(clibs) $(ncobjects)
+	$(OCAMLMKLIB) -o $(lib) $(ncobjects) $(API_LDFLAGS)
 
 brlapi.cmi: $(SRC_DIR)/brlapi.mli
 	$(OCAMLC) -o $@ -c $(SRC_DIR)/brlapi.mli
@@ -65,24 +72,24 @@ brlapi.cmi: $(SRC_DIR)/brlapi.mli
 brlapi.cmo: $(SRC_DIR)/brlapi.ml brlapi.cmi
 	$(OCAMLC) -o $@ -c $(SRC_DIR)/brlapi.ml
 
-brlapi.cmx brlapi.o: $(SRC_DIR)/brlapi.ml brlapi.cmi
+brlapi.cmx: $(SRC_DIR)/brlapi.ml brlapi.cmi
 	$(OCAMLOPT) -o $@ -c $(SRC_DIR)/brlapi.ml
 
 brlapi_stubs.o: $(SRC_DIR)/brlapi_stubs.c
 	$(OCAMLC) -I $(BLD_TOP)$(PGM_DIR) -I $(SRC_TOP)$(PGM_DIR) -c $(SRC_DIR)/brlapi_stubs.c
 
-brlapi.mli : constants.cmi
+brlapi.mli : $(constants).cmi
 
-constants.cmi : constants.ml
+$(constants).cmi : $(constants).ml
 	$(OCAMLC) -c $<
 
-constants.cmo : constants.ml
+$(constants).cmo : $(constants.ml)
 	$(OCAMLC) -c $<
 
-constants.cmx : constants.ml
+$(constants).cmx : $(constants).ml
 	$(OCAMLOPT) -c $<
 
-constants.ml: $(CONSTANTS_SCRIPTS) $(CONSTANTS_SOURCES)
+$(constants).ml: $(CONSTANTS_SCRIPTS) $(CONSTANTS_SOURCES)
 	$(AWK) $(CONSTANTS_OPTIONS) $(CONSTANTS_SOURCES) >$@
 
 clean::
@@ -93,7 +100,7 @@ ifeq ($(OCkAMLFIND),no)
 	@echo Can't install OCaml bindings withot findlib; exit 1 
 else
 	-$(OCAMLFIND) remove $(lib)
-	$(OCAMLFIND) install $(lib) META $(files) constants.cmi brlapi.a libbrlapi.a dllbrlapi.so 
+	$(OCAMLFIND) install $(lib) $(files) 
 endif
 
 uninstall:

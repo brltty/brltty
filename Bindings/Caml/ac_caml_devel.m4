@@ -22,6 +22,7 @@
 #   OCAMLC        "ocamlc" if present in the path, or a failure
 #                 or "ocamlc.opt" if present with same version number as ocamlc
 #   OCAMLOPT      "ocamlopt" (or "ocamlopt.opt" if present), or "no"
+#   OCAMLMKLIB      "ocamlkmlib", or "no"
 #   OCAMLBEST     either "byte" if no native compiler was found, 
 #                 or "opt" otherwise
 #   OCAMLDEP      "ocamldep"
@@ -51,6 +52,7 @@ else
     # if the version is not the same, we also discard it
     # we set OCAMLBEST to "opt" or "byte", whether ocamlopt is available or not
     AC_CHECK_PROG(OCAMLOPT,ocamlopt,ocamlopt,no)
+    AC_CHECK_PROG(OCAMLMKLIB,ocamlmklib,ocamlmklib,no)
     OCAMLBEST=byte
     if test "$OCAMLOPT" = no ; then
         AC_MSG_WARN([Cannot find ocamlopt; bytecode compilation only.])
@@ -140,6 +142,7 @@ fi
 # substitutions to perform
 AC_SUBST(OCAMLC)
 AC_SUBST(OCAMLOPT)
+AC_SUBST(OCAMLMKLIB)
 AC_SUBST(OCAMLDEP)
 AC_SUBST(OCAMLLEX)
 AC_SUBST(OCAMLYACC)
