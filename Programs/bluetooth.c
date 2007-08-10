@@ -152,8 +152,8 @@ btOpenConnection (const char *address, unsigned char channel, int force) {
     {
       int connection = btConnect(bda, channel);
       if (connection != -1) {
-        setBlockingIo(connection, 0);
-        return connection;
+        if (setBlockingIo(connection, 0)) return connection;
+        close(connection);
       }
       btRememberConnectError(bda, errno);
     }
