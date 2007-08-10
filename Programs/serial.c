@@ -1543,6 +1543,10 @@ serialGetStream (SerialDevice *serial) {
 
 int
 isSerialDevice (const char **path) {
+#ifdef ALLOW_DOS_DEVICE_NAMES
+  if (isDosDevice(*path, "COM")) return 1;
+#endif /* ALLOW_DOS_DEVICE_NAMES */
+
   if (isQualifiedDevice(path, "serial")) return 1;
   return !isQualifiedDevice(path, NULL);
 }

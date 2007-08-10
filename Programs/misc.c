@@ -559,7 +559,7 @@ isQualifiedDevice (const char **path, const char *qualifier) {
   if (!count) return 0;
 
   {
-    int ok = strncmp(*path, qualifier, count) == 0;
+    int ok = strncasecmp(*path, qualifier, count) == 0;
     if (ok) *path += count + 1;
     return ok;
   }
@@ -569,6 +569,18 @@ void
 unsupportedDevice (const char *path) {
   LogPrint(LOG_WARNING, "Unsupported device: %s", path);
 }
+
+#ifdef ALLOW_DOS_DEVICE_NAMES
+int
+isDosDevice (const char *path, const char *prefix) {
+  size_t count = strcspn(path, ":");
+  size_t length = strlen(prefix);
+  if (length > count) return 0;
+  if (strncasecmp(path, prefix, length) != 0) return 0;
+  if (strspn(path+length, "0123456789") != (count - length)) return 0;
+  return 1;
+}
+#endif /* ALLOW_DOS_DEVICE_NAMES */
 
 FILE *
 openFile (const char *path, const char *mode) {

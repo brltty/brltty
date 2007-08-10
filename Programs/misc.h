@@ -191,6 +191,12 @@ extern char *getDevicePath (const char *device);
 extern int isQualifiedDevice (const char **path, const char *qualifier);
 extern void unsupportedDevice (const char *path);
 
+#undef ALLOW_DOS_DEVICE_NAMES
+#if defined(__MSDOS__) || (defined(WINDOWS) && !defined(__CYGWIN32__))
+#define ALLOW_DOS_DEVICE_NAMES 1
+extern int isDosDevice (const char *path, const char *prefix);
+#endif /* DOS or Windows (but not Cygwin) */
+
 extern int rescaleInteger (int value, int from, int to);
 
 extern int isInteger (int *value, const char *string);
