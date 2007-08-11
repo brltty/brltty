@@ -52,8 +52,9 @@ else
     # if the version is not the same, we also discard it
     # we set OCAMLBEST to "opt" or "byte", whether ocamlopt is available or not
     AC_CHECK_PROG(OCAMLOPT,ocamlopt,ocamlopt,no)
-    AC_CHECK_PROG(OCAMLMKLIB,ocamlmklib,ocamlmklib,no)
     OCAMLBEST=byte
+    OCAMLNCLIB=
+    OCAMLNCCONSTANTS=
     if test "$OCAMLOPT" = no ; then
         AC_MSG_WARN([Cannot find ocamlopt; bytecode compilation only.])
     else
@@ -65,6 +66,8 @@ else
         else
             AC_MSG_RESULT(ok)
             OCAMLBEST=opt
+            OCAMLNCLIB="\$(lib).cmxa"
+            OCAMLNCCONSTANTS="\$(constants).cmx"
         fi
     fi
 
@@ -96,6 +99,9 @@ else
         fi
     fi
 
+    # checking for ocamlmklib
+    AC_CHECK_PROG(OCAMLMKLIB,ocamlmklib,ocamlmklib,no)
+
     # ocamldep, ocamllex and ocamlyacc should also be present in the path
     AC_CHECK_PROG(OCAMLDEP,ocamldep,ocamldep,no)
     if test "$OCAMLDEP" = no ; then
@@ -121,15 +127,21 @@ else
 
     # platform
     AC_MSG_CHECKING(platform)
-    if echo "let _ = Sys.os_type" | ocaml | grep -q Win32; then
+    if echo "let _ = Sys.os_type;;" | ocaml | grep -q Win32; then
         AC_MSG_RESULT(Win32)
         OCAMLWIN32=yes
+        OCAMLCLIBS=libbrlapi.a
+    elif echo "let _ = Sys.os_type;;" | ocaml | grep -q Cygwin; then
+        AC_MSG_RESULT(Cygwin)
+        OCAMLWIN32=yes
+        OCAMLCLIBS=libbrlapi.a
     else
         AC_MSG_RESULT(Unix)
         OCAMLWIN32=no
+        OCAMLCLIBS="libbrlapi.a dllbrlapi.so"
     fi
     
-    # Checking for ocamlfindlib
+    # checking for ocamlfindlib
     AC_CHECK_PROG(OCAMLFIND,ocamlfind,ocamlfind,no)
     if test "$OCAMLFIND" = ocamlfind; then
         OCAMLC='ocamlfind ocamlc'
@@ -151,5 +163,8 @@ AC_SUBST(OCAMLVERSION)
 AC_SUBST(OCAMLLIB)
 AC_SUBST(OCAMLWEB)
 AC_SUBST(OCAMLWIN32)
+AC_SUBST(OCAMLCLIBS)
+AC_SUBST(OCAMLNCLIB)
+AC_SUBST(OCAMLNCCONSTANTS)
 AC_SUBST(OCAMLFIND)
 ])

@@ -32,23 +32,16 @@ OCAMLFIND = @OCAMLFIND@
 
 lib = $(API_NAME)
 bclib = $(lib).cma
-nclib = $(lib).cmxa
+nclib = @OCAMLNCLIB@
 
 constants = brlapiConstants
+ncconstants = @OCAMLNCCONSTANTS@
 
 misc = $(SRC_DIR)/META $(SRC_DIR)/brlapi.mli brlapi.cmi $(constants).ml $(constants).cmi
 
-ifeq ($(OCAMLWIN32),yes)
-clibs = libbrlapi.a
-else
-clibs = libbrlapi.a dllbrlapi.so
-endif 
+clibs = @OCAMLCLIBS@
 
-ifeq ($(OCAMLOPT),no)
-files = $(misc) $(clibs) $(bclib) $(constants).cmo
-else
-files = $(misc) $(clibs) $(bclib) $(constants).cmo $(nclib) $(constants).cmx
-endif
+files = $(misc) $(clibs) $(bclib) $(constants).cmo $(nclib) $(ncconstants)
 
 bcobjects = $(constants).cmo brlapi.cmo
 ncobjects = $(subst .cmo,.cmx, $(bcobjects))
