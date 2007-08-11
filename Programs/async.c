@@ -826,8 +826,10 @@ asyncWait (int duration) {
           AlarmEntry *alarm = getElementItem(element);
           long int milliseconds = millisecondsBetween(&start, &alarm->time);
           if (milliseconds <= elapsed) {
-            alarm->callback(alarm->data);
+            AsyncAlarmCallback callback = alarm->callback;
+            void *data = alarm->data;
             deleteElement(element);
+            callback(data);
             continue;
           }
 
