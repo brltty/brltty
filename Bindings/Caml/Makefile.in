@@ -29,6 +29,8 @@ OCAMLLIB = @OCAMLLIB@
 OCAMLWEB = @OCAMLWEB@
 OCAMLWIN32 = @OCAMLWIN32@
 OCAMLFIND = @OCAMLFIND@
+installationmethod = @INSTALLATIONMETHOD@
+uninstallationmethod = @UNINSTALLATIONMETHOD@
 
 lib = $(API_NAME)
 bclib = $(lib).cma
@@ -46,7 +48,9 @@ files = $(misc) $(clibs) $(bclib) $(constants).cmo $(nclib) $(ncconstants)
 bcobjects = $(constants).cmo brlapi.cmo
 ncobjects = $(subst .cmo,.cmx, $(bcobjects))
 
-.PHONY: all clean install uninstall
+.PHONY: all clean
+.PHONY: install install-with-findlib install-without-findlib
+.PHONY: uninstall uninstall-with-findlib uninstall-without-findlib
 
 all : $(files)
 
@@ -88,13 +92,18 @@ $(constants).ml: $(CONSTANTS_SCRIPTS) $(CONSTANTS_SOURCES)
 clean::
 	rm -f *.cm* *.a *.so constants.ml
 
-install: all
-ifeq ($(OCkAMLFIND),no)
+install: all $(installationmethod)
+
+install-without-findlib:
 	@echo Can't install OCaml bindings withot findlib; exit 1 
-else
+
+install-with-findlib:
 	-$(OCAMLFIND) remove $(lib)
 	$(OCAMLFIND) install $(lib) $(files) 
-endif
 
-uninstall:
+uninstall: $(uninstallationmethod)
 
+uninstall-without-findlib:
+
+uninstall-with-find-lib:
+	$(OCAMLFIND) remove $(lib)

@@ -148,6 +148,11 @@ else
         if test "$OCAMLOPT" = ocamlopt; then
             OCAMLOPT='ocamlfind ocamlopt'
         fi
+        INSTALLATIONMETHOD=install-with-findlib
+        UNINSTALLATIONMETHOD=uninstall-with-findlib
+    else
+        INSTALLATIONMETHOD=install-without-findlib
+        UNINSTALLATIONMETHOD=uninstall-without-findlib
     fi
 fi
 
@@ -167,4 +172,6 @@ AC_SUBST(OCAMLCLIBS)
 AC_SUBST(OCAMLNCLIB)
 AC_SUBST(OCAMLNCCONSTANTS)
 AC_SUBST(OCAMLFIND)
+AC_SUBST(INSTALLATIONMETHOD)
+AC_SUBST(UNINSTALLATIONMETHOD)
 ])
