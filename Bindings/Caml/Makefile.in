@@ -29,39 +29,39 @@ OCAMLLIB = @OCAMLLIB@
 OCAMLWEB = @OCAMLWEB@
 OCAMLWIN32 = @OCAMLWIN32@
 OCAMLFIND = @OCAMLFIND@
-installationmethod = @INSTALLATIONMETHOD@
-uninstallationmethod = @UNINSTALLATIONMETHOD@
+INSTALL_TARGET = @OCAML_INSTALL_TARGET@
+UNINSTALL_TARGET = @OCAML_UNINSTALL_TARGET@
 
-lib = $(API_NAME)
-bclib = $(lib).cma
-nclib = @OCAMLNCLIB@
+LIB = $(API_NAME)
+BCLIB = $(LIB).cma
+NCLIB = @OCAMLNCLIB@
 
-constants = brlapiConstants
-ncconstants = @OCAMLNCCONSTANTS@
+CONSTANTS = brlapiConstants
+NCCONSTANTS = @OCAMLNCCONSTANTS@
 
-misc = $(SRC_DIR)/META $(SRC_DIR)/brlapi.mli brlapi.cmi $(constants).ml $(constants).cmi
+MISC = $(SRC_DIR)/META $(SRC_DIR)/brlapi.mli brlapi.cmi $(CONSTANTS).ml $(CONSTANTS).cmi
 
-clibs = @OCAMLCLIBS@
+CLIBS = @OCAML_CLIBS@
 
-files = $(misc) $(clibs) $(bclib) $(constants).cmo $(nclib) $(ncconstants)
+FILES = $(MISC) $(CLIBS) $(BCLIB) $(CONSTANTS).cmo $(NCLIB) $(NCCONSTANTS)
 
-bcobjects = $(constants).cmo brlapi.cmo
-ncobjects = $(subst .cmo,.cmx, $(bcobjects))
+BCOBJECTS = $(CONSTANTS).cmo brlapi.cmo
+NCOBJECTS = $(BCOBJECTS:.cmo=.cmx)
 
 .PHONY: all clean
 .PHONY: install install-with-findlib install-without-findlib
 .PHONY: uninstall uninstall-with-findlib uninstall-without-findlib
 
-all : $(files)
+all : $(FILES)
 
-$(clibs) : brlapi_stubs.o
-	$(OCAMLMKLIB) -o $(lib) $< $(API_LDFLAGS)
+$(CLIBS) : brlapi_stubs.o
+	$(OCAMLMKLIB) -o $(LIB) $< $(API_LDFLAGS)
 
-$(bclib) : $(clibs) $(bcobjects)
-	$(OCAMLMKLIB) -o $(lib) $(bcobjects) $(API_LDFLAGS)
+$(BCLIB) : $(CLIBS) $(BCOBJECTS)
+	$(OCAMLMKLIB) -o $(LIB) $(BCOBJECTS) $(API_LDFLAGS)
 
-$(nclib) : $(clibs) $(ncobjects)
-	$(OCAMLMKLIB) -o $(lib) $(ncobjects) $(API_LDFLAGS)
+$(NCLIB) : $(CLIBS) $(NCOBJECTS)
+	$(OCAMLMKLIB) -o $(LIB) $(NCOBJECTS) $(API_LDFLAGS)
 
 brlapi.cmi: $(SRC_DIR)/brlapi.mli
 	$(OCAMLC) -o $@ -c $(SRC_DIR)/brlapi.mli
@@ -75,35 +75,35 @@ brlapi.cmx: $(SRC_DIR)/brlapi.ml brlapi.cmi
 brlapi_stubs.o: $(SRC_DIR)/brlapi_stubs.c
 	$(OCAMLC) -I $(BLD_TOP)$(PGM_DIR) -I $(SRC_TOP)$(PGM_DIR) -c $(SRC_DIR)/brlapi_stubs.c
 
-brlapi.mli : $(constants).cmi
+brlapi.mli : $(CONSTANTS).cmi
 
-$(constants).cmi : $(constants).ml
+$(CONSTANTS).cmi : $(CONSTANTS).ml
 	$(OCAMLC) -c $<
 
-$(constants).cmo : $(constants.ml)
+$(CONSTANTS).cmo : $(CONSTANTS).ml
 	$(OCAMLC) -c $<
 
-$(constants).cmx : $(constants).ml
+$(CONSTANTS).cmx : $(CONSTANTS).ml
 	$(OCAMLOPT) -c $<
 
-$(constants).ml: $(CONSTANTS_SCRIPTS) $(CONSTANTS_SOURCES)
+$(CONSTANTS).ml: $(CONSTANTS_SCRIPTS) $(CONSTANTS_SOURCES)
 	$(AWK) $(CONSTANTS_OPTIONS) $(CONSTANTS_SOURCES) >$@
 
 clean::
-	rm -f *.cm* *.a *.so constants.ml
+	rm -f *.cm* *.a *.so $(CONSTANTS).ml
 
-install: all $(installationmethod)
+install: all $(INSTALL_TARGET)
 
 install-without-findlib:
-	@echo Can't install OCaml bindings withot findlib; exit 1 
+	@echo Can't install OCaml bindings withot using findlib; exit 1 
 
 install-with-findlib:
-	-$(OCAMLFIND) remove $(lib)
-	$(OCAMLFIND) install $(lib) $(files) 
+	-$(OCAMLFIND) remove $(LIB)
+	$(OCAMLFIND) install $(LIB) $(FILES) 
 
-uninstall: $(uninstallationmethod)
+uninstall: $(UNINSTALL_TARGET)
 
 uninstall-without-findlib:
 
-uninstall-with-find-lib:
-	$(OCAMLFIND) remove $(lib)
+uninstall-with-findlib:
+	$(OCAMLFIND) remove $(LIB)

@@ -66,8 +66,8 @@ else
         else
             AC_MSG_RESULT(ok)
             OCAMLBEST=opt
-            OCAMLNCLIB="\$(lib).cmxa"
-            OCAMLNCCONSTANTS="\$(constants).cmx"
+            OCAMLNCLIB="\$(LIB).cmxa"
+            OCAMLNCCONSTANTS="\$(CONSTANTS).cmx"
         fi
     fi
 
@@ -130,15 +130,15 @@ else
     if echo "let _ = Sys.os_type;;" | ocaml | grep -q Win32; then
         AC_MSG_RESULT(Win32)
         OCAMLWIN32=yes
-        OCAMLCLIBS=libbrlapi.a
+        OCAML_CLIBS=libbrlapi.a
     elif echo "let _ = Sys.os_type;;" | ocaml | grep -q Cygwin; then
         AC_MSG_RESULT(Cygwin)
         OCAMLWIN32=yes
-        OCAMLCLIBS=libbrlapi.a
+        OCAML_CLIBS=libbrlapi.a
     else
         AC_MSG_RESULT(Unix)
         OCAMLWIN32=no
-        OCAMLCLIBS="libbrlapi.a dllbrlapi.so"
+        OCAML_CLIBS="libbrlapi.a dllbrlapi.so"
     fi
     
     # checking for ocamlfindlib
@@ -148,11 +148,11 @@ else
         if test "$OCAMLOPT" = ocamlopt; then
             OCAMLOPT='ocamlfind ocamlopt'
         fi
-        INSTALLATIONMETHOD=install-with-findlib
-        UNINSTALLATIONMETHOD=uninstall-with-findlib
+        OCAML_INSTALL_TARGET=install-with-findlib
+        OCAML_UNINSTALL_TARGET=uninstall-without-findlib
     else
-        INSTALLATIONMETHOD=install-without-findlib
-        UNINSTALLATIONMETHOD=uninstall-without-findlib
+        OCAML_INSTALL_TARGET=install-without-findlib
+        OCAML_UNINSTALL_TARGET=uninstall-without-findlib
     fi
 fi
 
@@ -168,10 +168,10 @@ AC_SUBST(OCAMLVERSION)
 AC_SUBST(OCAMLLIB)
 AC_SUBST(OCAMLWEB)
 AC_SUBST(OCAMLWIN32)
-AC_SUBST(OCAMLCLIBS)
+AC_SUBST(OCAML_CLIBS)
 AC_SUBST(OCAMLNCLIB)
 AC_SUBST(OCAMLNCCONSTANTS)
 AC_SUBST(OCAMLFIND)
-AC_SUBST(INSTALLATIONMETHOD)
-AC_SUBST(UNINSTALLATIONMETHOD)
+AC_SUBST(OCAML_INSTALL_TARGET)
+AC_SUBST(OCAML_UNINSTALL_TARGET)
 ])
