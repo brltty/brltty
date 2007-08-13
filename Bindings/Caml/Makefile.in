@@ -37,16 +37,11 @@ OCAML_LIB = $(API_NAME)
 OCAML_BCLIB = $(OCAML_LIB).cma
 OCAML_NCLIB = @OCAML_NCLIB@
 
-OCAML_CONSTANTS = constants
-
-OCAML_MISC = $(SRC_DIR)/META $(SRC_DIR)/brlapi.mli brlapi.cmi $(OCAML_CONSTANTS).cmi
+OCAML_MISC = $(SRC_DIR)/META brlapi.mli brlapi.cmi
 
 OCAML_CLIBS = @OCAML_CLIBS@
 
 OCAML_FILES = $(OCAML_MISC) $(OCAML_CLIBS) $(OCAML_BCLIB) $(OCAML_NCLIB)
-
-OCAML_BCOBJECTS = $(OCAML_CONSTANTS).cmo brlapi.cmo
-OCAML_NCOBJECTS = $(OCAML_BCOBJECTS:.cmo=.cmx)
 
 .PHONY: all clean
 .PHONY: install install-with-findlib install-without-findlib
@@ -57,40 +52,38 @@ all : $(OCAML_FILES)
 $(OCAML_CLIBS) : brlapi_stubs.o
 	$(OCAMLMKLIB) $(API_LDFLAGS) -o $(OCAML_LIB) brlapi_stubs.o
 
-$(OCAML_BCLIB) : $(OCAML_CLIBS) $(OCAML_BCOBJECTS)
-	$(OCAMLMKLIB) $(OCAMLMKLIB_FLAGS) -o $(OCAML_LIB) $(OCAML_BCOBJECTS)
+$(OCAML_BCLIB) : $(OCAML_CLIBS) brlapi.cmo
+	$(OCAMLMKLIB) $(OCAMLMKLIB_FLAGS) -o $(OCAML_LIB) brlapi.cmo
 
-$(OCAML_NCLIB) : $(OCAML_CLIBS) $(OCAML_NCOBJECTS)
-	$(OCAMLMKLIB) $(OCAMLMKLIB_FLAGS) -o $(OCAML_LIB) $(OCAML_NCOBJECTS)
+$(OCAML_NCLIB) : $(OCAML_CLIBS) brlapi.cmx
+	$(OCAMLMKLIB) $(OCAMLMKLIB_FLAGS) -o $(OCAML_LIB) brlapi.cmx
 
-brlapi.cmi: $(SRC_DIR)/brlapi.mli
-	$(OCAMLC) -o $@ -c $(SRC_DIR)/brlapi.mli
+brlapi.cmi: brlapi.mli
+	$(OCAMLC) -o $@ -c brlapi.mli
 
-brlapi.cmo: $(SRC_DIR)/brlapi.ml brlapi.cmi
-	$(OCAMLC) -o $@ -c $(SRC_DIR)/brlapi.ml
+brlapi.cmo: brlapi.ml brlapi.cmi
+	$(OCAMLC) -o $@ -c brlapi.ml
 
-brlapi.cmx: $(SRC_DIR)/brlapi.ml brlapi.cmi
-	$(OCAMLOPT) -o $@ -c $(SRC_DIR)/brlapi.ml
+brlapi.cmx: brlapi.ml brlapi.cmi
+	$(OCAMLOPT) -o $@ -c brlapi.cmx brlapi.ml
 
 brlapi_stubs.o: $(SRC_DIR)/brlapi_stubs.c
 	$(OCAMLC) -I $(BLD_TOP)$(PGM_DIR) -I $(SRC_TOP)$(PGM_DIR) -c $(SRC_DIR)/brlapi_stubs.c
 
-brlapi.mli : $(OCAML_CONSTANTS).cmi
+brlapi.mli : $(SRC_DIR)/main.mli constants.mli
+	cat $(SRC_DIR)/main.mli constants.mli > $@
 
-$(OCAML_CONSTANTS).cmi : $(OCAML_CONSTANTS).ml
-	$(OCAMLC) -c $(OCAML_CONSTANTS).ml
+brlapi.ml : $(SRC_DIR)/main.ml constants.ml
+	cat $(SRC_DIR)/main.ml constants.ml > $@
 
-$(OCAML_CONSTANTS).cmo : $(OCAML_CONSTANTS).ml
-	$(OCAMLC) -c $(OCAML_CONSTANTS).ml
+constants.mli : constants.ml
+	$(OCAMLC) -o /dev/null -c -i constants.ml > $@
 
-$(OCAML_CONSTANTS).cmx : $(OCAML_CONSTANTS).ml
-	$(OCAMLOPT) -c $(OCAML_CONSTANTS).ml
-
-$(OCAML_CONSTANTS).ml: $(CONSTANTS_SCRIPTS) $(CONSTANTS_SOURCES)
+constants.ml: $(CONSTANTS_SCRIPTS) $(CONSTANTS_SOURCES)
 	$(AWK) $(CONSTANTS_OPTIONS) $(CONSTANTS_SOURCES) >$@
 
 clean::
-	rm -f *.cm* *.a *.so $(OCAML_CONSTANTS).ml
+	rm -f *.cm* *.a *.so constants.ml
 
 install: all $(OCAML_INSTALL_TARGET)
 
