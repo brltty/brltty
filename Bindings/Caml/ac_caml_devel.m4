@@ -53,8 +53,7 @@ else
     # we set OCAMLBEST to "opt" or "byte", whether ocamlopt is available or not
     AC_CHECK_PROG(OCAMLOPT,ocamlopt,ocamlopt,no)
     OCAMLBEST=byte
-    OCAMLNCLIB=
-    OCAMLNCCONSTANTS=
+    OCAML_NCLIB=
     if test "$OCAMLOPT" = no ; then
         AC_MSG_WARN([Cannot find ocamlopt; bytecode compilation only.])
     else
@@ -66,8 +65,7 @@ else
         else
             AC_MSG_RESULT(ok)
             OCAMLBEST=opt
-            OCAMLNCLIB="\$(LIB).cmxa"
-            OCAMLNCCONSTANTS="\$(CONSTANTS).cmx"
+            OCAML_NCLIB="\$(OCAML_LIB).cmxa"
         fi
     fi
 
@@ -169,8 +167,7 @@ AC_SUBST(OCAMLLIB)
 AC_SUBST(OCAMLWEB)
 AC_SUBST(OCAMLWIN32)
 AC_SUBST(OCAML_CLIBS)
-AC_SUBST(OCAMLNCLIB)
-AC_SUBST(OCAMLNCCONSTANTS)
+AC_SUBST(OCAML_NCLIB)
 AC_SUBST(OCAMLFIND)
 AC_SUBST(OCAML_INSTALL_TARGET)
 AC_SUBST(OCAML_UNINSTALL_TARGET)

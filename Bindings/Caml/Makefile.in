@@ -20,6 +20,7 @@ include $(SRC_TOP)bindings.mk
 OCAMLC = @OCAMLC@
 OCAMLOPT = @OCAMLOPT@
 OCAMLMKLIB = @OCAMLMKLIB@
+OCAMLMKLIB_FLAGS = -cclib -l$(API_NAME) -ldopt -L$(API_DIR)
 OCAMLDEP = @OCAMLDEP@
 OCAMLLEX = @OCAMLLEX@
 OCAMLYACC = @OCAMLYACC@
@@ -29,81 +30,80 @@ OCAMLLIB = @OCAMLLIB@
 OCAMLWEB = @OCAMLWEB@
 OCAMLWIN32 = @OCAMLWIN32@
 OCAMLFIND = @OCAMLFIND@
-INSTALL_TARGET = @OCAML_INSTALL_TARGET@
-UNINSTALL_TARGET = @OCAML_UNINSTALL_TARGET@
+OCAML_INSTALL_TARGET = @OCAML_INSTALL_TARGET@
+OCAML_UNINSTALL_TARGET = @OCAML_UNINSTALL_TARGET@
 
-LIB = $(API_NAME)
-BCLIB = $(LIB).cma
-NCLIB = @OCAMLNCLIB@
+OCAML_LIB = $(API_NAME)
+OCAML_BCLIB = $(OCAML_LIB).cma
+OCAML_NCLIB = @OCAML_NCLIB@
 
-CONSTANTS = brlapiConstants
-NCCONSTANTS = @OCAMLNCCONSTANTS@
+OCAML_CONSTANTS = constants
 
-MISC = $(SRC_DIR)/META $(SRC_DIR)/brlapi.mli brlapi.cmi $(CONSTANTS).ml $(CONSTANTS).cmi
+OCAML_MISC = $(SRC_DIR)/META $(SRC_DIR)/brlapi.mli brlapi.cmi $(OCAML_CONSTANTS).cmi
 
-CLIBS = @OCAML_CLIBS@
+OCAML_CLIBS = @OCAML_CLIBS@
 
-FILES = $(MISC) $(CLIBS) $(BCLIB) $(CONSTANTS).cmo $(NCLIB) $(NCCONSTANTS)
+OCAML_FILES = $(OCAML_MISC) $(OCAML_CLIBS) $(OCAML_BCLIB) $(OCAML_NCLIB)
 
-BCOBJECTS = $(CONSTANTS).cmo brlapi.cmo
-NCOBJECTS = $(BCOBJECTS:.cmo=.cmx)
+OCAML_BCOBJECTS = $(OCAML_CONSTANTS).cmo brlapi.cmo
+OCAML_NCOBJECTS = $(OCAML_BCOBJECTS:.cmo=.cmx)
 
 .PHONY: all clean
 .PHONY: install install-with-findlib install-without-findlib
 .PHONY: uninstall uninstall-with-findlib uninstall-without-findlib
 
-all : $(FILES)
+all : $(OCAML_FILES)
 
-$(CLIBS) : brlapi_stubs.o
-	$(OCAMLMKLIB) -o $(LIB) $< $(API_LDFLAGS)
+$(OCAML_CLIBS) : brlapi_stubs.o
+	$(OCAMLMKLIB) $(API_LDFLAGS) -o $(OCAML_LIB) brlapi_stubs.o
 
-$(BCLIB) : $(CLIBS) $(BCOBJECTS)
-	$(OCAMLMKLIB) -o $(LIB) $(BCOBJECTS) $(API_LDFLAGS)
+$(OCAML_BCLIB) : $(OCAML_CLIBS) $(OCAML_BCOBJECTS)
+	$(OCAMLMKLIB) $(OCAMLMKLIB_FLAGS) -o $(OCAML_LIB) $(OCAML_BCOBJECTS)
 
-$(NCLIB) : $(CLIBS) $(NCOBJECTS)
-	$(OCAMLMKLIB) -o $(LIB) $(NCOBJECTS) $(API_LDFLAGS)
+$(OCAML_NCLIB) : $(OCAML_CLIBS) $(OCAML_NCOBJECTS)
+	$(OCAMLMKLIB) $(OCAMLMKLIB_FLAGS) -o $(OCAML_LIB) $(OCAML_NCOBJECTS)
 
 brlapi.cmi: $(SRC_DIR)/brlapi.mli
-	$(OCAMLC) -o $@ -c $(SRC_DIR)/brlapi.mli
+	$(OCAMLC) -o brlapi.cmi -c $(SRC_DIR)/brlapi.mli
 
 brlapi.cmo: $(SRC_DIR)/brlapi.ml brlapi.cmi
-	$(OCAMLC) -o $@ -c $(SRC_DIR)/brlapi.ml
+	$(OCAMLC) -o brlapi.cmo -c $(SRC_DIR)/brlapi.ml
 
 brlapi.cmx: $(SRC_DIR)/brlapi.ml brlapi.cmi
-	$(OCAMLOPT) -o $@ -c $(SRC_DIR)/brlapi.ml
+	$(OCAMLOPT) -o brlapi.cmx -c $(SRC_DIR)/brlapi.ml
 
 brlapi_stubs.o: $(SRC_DIR)/brlapi_stubs.c
 	$(OCAMLC) -I $(BLD_TOP)$(PGM_DIR) -I $(SRC_TOP)$(PGM_DIR) -c $(SRC_DIR)/brlapi_stubs.c
 
-brlapi.mli : $(CONSTANTS).cmi
+brlapi.mli : $(OCAML_CONSTANTS).cmi
 
-$(CONSTANTS).cmi : $(CONSTANTS).ml
-	$(OCAMLC) -c $<
+$(OCAML_CONSTANTS).cmi : $(OCAML_CONSTANTS).ml
+	$(OCAMLC) -c $(OCAML_CONSTANTS).ml
 
-$(CONSTANTS).cmo : $(CONSTANTS).ml
-	$(OCAMLC) -c $<
+$(OCAML_CONSTANTS).cmo : $(OCAML_CONSTANTS).ml
+	$(OCAMLC) -c $(OCAML_CONSTANTS).ml
 
-$(CONSTANTS).cmx : $(CONSTANTS).ml
-	$(OCAMLOPT) -c $<
+$(OCAML_CONSTANTS).cmx : $(OCAML_CONSTANTS).ml
+	$(OCAMLOPT) -c $(OCAML_CONSTANTS).ml
 
-$(CONSTANTS).ml: $(CONSTANTS_SCRIPTS) $(CONSTANTS_SOURCES)
-	$(AWK) $(CONSTANTS_OPTIONS) $(CONSTANTS_SOURCES) >$@
+$(OCAML_CONSTANTS).ml: $(CONSTANTS_SCRIPTS) $(CONSTANTS_SOURCES)
+	$(AWK) $(CONSTANTS_OPTIONS) $(CONSTANTS_SOURCES) >$(OCAML_CONSTANTS).ml
 
 clean::
-	rm -f *.cm* *.a *.so $(CONSTANTS).ml
+	rm -f *.cm* *.a *.so $(OCAML_CONSTANTS).ml
 
-install: all $(INSTALL_TARGET)
+install: all $(OCAML_INSTALL_TARGET)
 
 install-without-findlib:
-	@echo Can't install OCaml bindings withot using findlib; exit 1 
+	@echo Can't install OCaml bindings withot using findlib 
 
 install-with-findlib:
-	-$(OCAMLFIND) remove $(LIB)
-	$(OCAMLFIND) install $(LIB) $(FILES) 
+	-$(OCAMLFIND) remove $(OCAML_LIB)
+	$(OCAMLFIND) install $(OCAML_LIB) $(OCAML_FILES) 
 
-uninstall: $(UNINSTALL_TARGET)
+uninstall: $(OCAML_UNINSTALL_TARGET)
 
 uninstall-without-findlib:
 
 uninstall-with-findlib:
-	$(OCAMLFIND) remove $(LIB)
+	$(OCAMLFIND) remove $(OCAML_LIB)
