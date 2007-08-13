@@ -49,8 +49,8 @@ OCAML_FILES = $(OCAML_MISC) $(OCAML_CLIBS) $(OCAML_BCLIB) $(OCAML_NCLIB)
 
 all : $(OCAML_FILES)
 
-$(OCAML_CLIBS) : brlapi_stubs.o
-	$(OCAMLMKLIB) $(API_LDFLAGS) -o $(OCAML_LIB) brlapi_stubs.o
+$(OCAML_CLIBS) : brlapi_stubs.$O
+	$(OCAMLMKLIB) $(API_LDFLAGS) -o $(OCAML_LIB) brlapi_stubs.$O
 
 $(OCAML_BCLIB) : $(OCAML_CLIBS) brlapi.cmo
 	$(OCAMLMKLIB) $(OCAMLMKLIB_FLAGS) -o $(OCAML_LIB) brlapi.cmo
@@ -67,7 +67,7 @@ brlapi.cmo: brlapi.ml brlapi.cmi
 brlapi.cmx: brlapi.ml brlapi.cmi
 	$(OCAMLOPT) -o $@ -c brlapi.cmx brlapi.ml
 
-brlapi_stubs.o: $(SRC_DIR)/brlapi_stubs.c
+brlapi_stubs.$O: $(SRC_DIR)/brlapi_stubs.c
 	$(OCAMLC) -I $(BLD_TOP)$(PGM_DIR) -I $(SRC_TOP)$(PGM_DIR) -c $(SRC_DIR)/brlapi_stubs.c
 
 brlapi.mli : $(SRC_DIR)/main.mli constants.mli
