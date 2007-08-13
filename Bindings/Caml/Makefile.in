@@ -64,13 +64,13 @@ $(OCAML_NCLIB) : $(OCAML_CLIBS) $(OCAML_NCOBJECTS)
 	$(OCAMLMKLIB) $(OCAMLMKLIB_FLAGS) -o $(OCAML_LIB) $(OCAML_NCOBJECTS)
 
 brlapi.cmi: $(SRC_DIR)/brlapi.mli
-	$(OCAMLC) -o brlapi.cmi -c $(SRC_DIR)/brlapi.mli
+	$(OCAMLC) -o $@ -c $(SRC_DIR)/brlapi.mli
 
 brlapi.cmo: $(SRC_DIR)/brlapi.ml brlapi.cmi
-	$(OCAMLC) -o brlapi.cmo -c $(SRC_DIR)/brlapi.ml
+	$(OCAMLC) -o $@ -c $(SRC_DIR)/brlapi.ml
 
 brlapi.cmx: $(SRC_DIR)/brlapi.ml brlapi.cmi
-	$(OCAMLOPT) -o brlapi.cmx -c $(SRC_DIR)/brlapi.ml
+	$(OCAMLOPT) -o $@ -c $(SRC_DIR)/brlapi.ml
 
 brlapi_stubs.o: $(SRC_DIR)/brlapi_stubs.c
 	$(OCAMLC) -I $(BLD_TOP)$(PGM_DIR) -I $(SRC_TOP)$(PGM_DIR) -c $(SRC_DIR)/brlapi_stubs.c
@@ -87,7 +87,7 @@ $(OCAML_CONSTANTS).cmx : $(OCAML_CONSTANTS).ml
 	$(OCAMLOPT) -c $(OCAML_CONSTANTS).ml
 
 $(OCAML_CONSTANTS).ml: $(CONSTANTS_SCRIPTS) $(CONSTANTS_SOURCES)
-	$(AWK) $(CONSTANTS_OPTIONS) $(CONSTANTS_SOURCES) >$(OCAML_CONSTANTS).ml
+	$(AWK) $(CONSTANTS_OPTIONS) $(CONSTANTS_SOURCES) >$@
 
 clean::
 	rm -f *.cm* *.a *.so $(OCAML_CONSTANTS).ml
