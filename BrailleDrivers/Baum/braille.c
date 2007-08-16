@@ -477,9 +477,10 @@ awaitBluetoothInput (int milliseconds) {
 static int
 readBluetoothBytes (unsigned char *buffer, int length, int wait) {
   const int timeout = 100;
-  if (!awaitInput(bluetoothConnection, (wait? timeout: 0)))
-    return (errno == EAGAIN)? 0: -1;
-  return readData(bluetoothConnection, buffer, length, 0, timeout);
+  size_t offset = 0;
+  return readChunk(bluetoothConnection,
+                   buffer, &offset, length,
+                   (wait? timeout: 0), timeout);
 }
 
 static int
