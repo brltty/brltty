@@ -51,7 +51,7 @@ AC_SUBST([PACKAGE_TITLE], ["`echo "${PACKAGE_NAME}" | sed -e 'y%abcdefghijklmnop
 AC_DEFINE_UNQUOTED([PACKAGE_TITLE], ["${PACKAGE_TITLE}"],
                    [Define this to be a string containing the package title.])
 
-PACKAGE_REVISION="`./revision`"
+PACKAGE_REVISION="`"${srcdir}/revision" "${srcdir}"`"
 if test -z "${PACKAGE_REVISION}"
 then
    AC_MSG_WARN([package revision not known])

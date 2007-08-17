@@ -18,10 +18,14 @@
 
 . "`dirname "${0}"`/prologue.sh"
 
+[ "${#}" -eq 0 ] && syntaxError "missing source root."
+sourceRoot="${1}"
+shift
+
 [ "${#}" -eq 0 ] || syntaxError "too many parameters."
 
 set -e
-revision="`svnversion -n .`"
+revision="`svnversion -n "${sourceRoot}"`"
 [ "${revision}" != "exported" ] || revision=""
 [ -z "${revision}" ] || echo "${revision}"
 exit 0
