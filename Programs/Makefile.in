@@ -25,6 +25,9 @@ all-xbrlapi: xbrlapi$X
 
 ###############################################################################
 
+program.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/program.c
+
 options.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/options.c
 
@@ -166,7 +169,7 @@ uninstall-api-bindings:
 
 ###############################################################################
 
-BRLTTY_OBJECTS = main.$O config.$O options.$O misc.$O mount.$O $(SYSTEM_OBJECT) io_misc.$O queue.$O async.$O auth.$O cut.$O cmd.$O kbd.$O lock.$O charset.$O $(TBL_OBJECTS) $(CTB_OBJECTS) touch.$O serial.$O $(USB_OBJECTS) $(BLUETOOTH_OBJECTS) drivers.$O $(SCREEN_OBJECTS) $(SCREEN_DRIVER_OBJECTS) route.$O brl.$O $(BRAILLE_DRIVER_OBJECTS) $(SPEECH_OBJECT) $(SPEECH_DRIVER_OBJECTS) $(TUNE_OBJECTS) $(API_OBJECTS)
+BRLTTY_OBJECTS = main.$O config.$O program.$O options.$O misc.$O mount.$O $(SYSTEM_OBJECT) io_misc.$O queue.$O async.$O auth.$O cut.$O cmd.$O kbd.$O lock.$O charset.$O $(TBL_OBJECTS) $(CTB_OBJECTS) touch.$O serial.$O $(USB_OBJECTS) $(BLUETOOTH_OBJECTS) drivers.$O $(SCREEN_OBJECTS) $(SCREEN_DRIVER_OBJECTS) route.$O brl.$O $(BRAILLE_DRIVER_OBJECTS) $(SPEECH_OBJECT) $(SPEECH_DRIVER_OBJECTS) $(TUNE_OBJECTS) $(API_OBJECTS)
 
 brltty$X: $(BRLTTY_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(SPEECH_DRIVER_LIBRARIES) $(SCREEN_DRIVER_LIBRARIES) $(LDLIBS)
@@ -308,7 +311,7 @@ bluetooth_linux.$O:
 
 ###############################################################################
 
-BRLTEST_OBJECTS = brltest.$O options.$O misc.$O mount.$O $(SYSTEM_OBJECT) io_misc.$O queue.$O async.$O tbl.$O tbl_native.$O cmd.$O charset.$O lock.$O drivers.$O brl.$O $(BRAILLE_DRIVER_OBJECTS) touch.$O serial.$O $(USB_OBJECTS) $(BLUETOOTH_OBJECTS)
+BRLTEST_OBJECTS = brltest.$O program.$O options.$O misc.$O mount.$O $(SYSTEM_OBJECT) io_misc.$O queue.$O async.$O tbl.$O tbl_native.$O cmd.$O charset.$O lock.$O drivers.$O brl.$O $(BRAILLE_DRIVER_OBJECTS) touch.$O serial.$O $(USB_OBJECTS) $(BLUETOOTH_OBJECTS)
 
 brltest$X: $(BRLTEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTEST_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(LDLIBS)
@@ -318,7 +321,7 @@ brltest.$O:
 
 ###############################################################################
 
-SPKTEST_OBJECTS = spktest.$O options.$O misc.$O $(SYSTEM_OBJECT) io_misc.$O queue.$O drivers.$O spk.$O $(SPEECH_DRIVER_OBJECTS)
+SPKTEST_OBJECTS = spktest.$O program.$O options.$O misc.$O $(SYSTEM_OBJECT) io_misc.$O queue.$O drivers.$O spk.$O $(SPEECH_DRIVER_OBJECTS)
 
 spktest$X: $(SPKTEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(SPKTEST_OBJECTS) $(SPEECH_DRIVER_LIBRARIES) $(LDLIBS)
@@ -328,7 +331,7 @@ spktest.$O:
 
 ###############################################################################
 
-SCRTEST_OBJECTS = scrtest.$O options.$O misc.$O $(SYSTEM_OBJECT) io_misc.$O async.$O queue.$O drivers.$O $(SCREEN_OBJECTS) $(SCREEN_DRIVER_OBJECTS) route.$O
+SCRTEST_OBJECTS = scrtest.$O program.$O options.$O misc.$O $(SYSTEM_OBJECT) io_misc.$O async.$O queue.$O drivers.$O $(SCREEN_OBJECTS) $(SCREEN_DRIVER_OBJECTS) route.$O
 
 scrtest$X: $(SCRTEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(SCRTEST_OBJECTS) $(SCREEN_DRIVER_LIBRARIES) $(LDLIBS)
@@ -338,7 +341,7 @@ scrtest.$O:
 
 ###############################################################################
 
-TBLTEST_OBJECTS = tbltest.$O options.$O misc.$O $(SYSTEM_OBJECT) io_misc.$O lock.$O charset.$O tbl.$O tbl_native.$O tbl_gnome.$O
+TBLTEST_OBJECTS = tbltest.$O program.$O options.$O misc.$O $(SYSTEM_OBJECT) io_misc.$O lock.$O charset.$O tbl.$O tbl_native.$O tbl_gnome.$O
 
 tbltest$X: $(TBLTEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(TBLTEST_OBJECTS) $(LDLIBS)
@@ -348,7 +351,7 @@ tbltest.$O:
 
 ###############################################################################
 
-CTBTEST_OBJECTS = ctbtest.$O options.$O misc.$O $(SYSTEM_OBJECT) io_misc.$O ctb_compile.$O ctb_translate.$O tbl.$O tbl_native.$O
+CTBTEST_OBJECTS = ctbtest.$O program.$O options.$O misc.$O $(SYSTEM_OBJECT) io_misc.$O ctb_compile.$O ctb_translate.$O tbl.$O tbl_native.$O
 
 ctbtest$X: $(CTBTEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(CTBTEST_OBJECTS) $(LDLIBS)
@@ -358,7 +361,7 @@ ctbtest.$O:
 
 ###############################################################################
 
-TUNETEST_OBJECTS = tunetest.$O options.$O misc.$O $(SYSTEM_OBJECT) io_misc.$O $(TUNE_OBJECTS)
+TUNETEST_OBJECTS = tunetest.$O program.$O options.$O misc.$O $(SYSTEM_OBJECT) io_misc.$O $(TUNE_OBJECTS)
 
 tunetest$X: $(TUNETEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(TUNETEST_OBJECTS) $(LDLIBS)
@@ -368,7 +371,7 @@ tunetest.$O:
 
 ###############################################################################
 
-APITEST_OBJECTS = apitest.$O cmd.$O charset.$O lock.$O options.$O misc.$O $(SYSTEM_OBJECT) io_misc.$O
+APITEST_OBJECTS = apitest.$O cmd.$O charset.$O lock.$O program.$O options.$O misc.$O $(SYSTEM_OBJECT) io_misc.$O
 
 apitest$X: $(APITEST_OBJECTS) api
 	$(CC) $(LDFLAGS) -o $@ $(APITEST_OBJECTS) -L$(BLD_DIR) -lbrlapi $(LDLIBS)
@@ -404,6 +407,9 @@ screen-drivers:
 
 ###############################################################################
 
+revision.auto.h: FORCE
+	$(SRC_TOP)mkrevhdr $@ $(SRC_TOP)
+
 text.auto.h: $(TEXT_TABLE) tbl2hex$X
 	./tbl2hex$X $(TEXT_TABLE) >$@
 
@@ -424,7 +430,10 @@ scr.auto.h: $(SRC_DIR)/mkdrvtab
 
 ###############################################################################
 
-HOSTOPTS_OBJECTS = host_opts.$O host_misc.$O host_sys.$O host_io.$O
+HOSTOPTS_OBJECTS = host_prog.$O host_opts.$O host_misc.$O host_sys.$O host_io.$O
+
+host_prog.$O: options.$O
+	$(HOSTCC) $(HOSTCFLAGS) -o $@ -c $(SRC_DIR)/program.c
 
 host_opts.$O: options.$O
 	$(HOSTCC) $(HOSTCFLAGS) -o $@ -c $(SRC_DIR)/options.c
@@ -466,7 +475,7 @@ host_tbl_native.$O: tbl_native.$O
 
 ###############################################################################
 
-XBRLAPI_OBJECTS = xbrlapi.$O options.$O misc.$O $(SYSTEM_OBJECT) io_misc.$O
+XBRLAPI_OBJECTS = xbrlapi.$O program.$O options.$O misc.$O $(SYSTEM_OBJECT) io_misc.$O
 
 xbrlapi$X: $(XBRLAPI_OBJECTS) api
 	$(CC) $(LDFLAGS) -o $@ $(XBRLAPI_OBJECTS) -L. -lbrlapi $(XLIBS) $(LDLIBS)

@@ -26,6 +26,7 @@
 #include <strings.h>
 #include <errno.h>
 
+#include "program.h"
 #include "options.h"
 #include "brl.h"
 #include "tbl.h"

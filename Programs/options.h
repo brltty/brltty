@@ -65,12 +65,6 @@ extern int processOptions (
   const char *argumentsSummary
 );
 
-extern void fixInstallPaths (char **const *paths);
-extern void fixInstallPath (char **path);
-
-extern const char *programPath;
-extern const char *programName;
-
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

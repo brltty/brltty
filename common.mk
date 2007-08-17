@@ -15,6 +15,8 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
+FORCE:
+
 brlapi:
 	cd $(BLD_TOP)$(PGM_DIR) && $(MAKE) api
 

@@ -25,6 +25,7 @@
 #include <strings.h>
 #include <errno.h>
 
+#include "program.h"
 #include "options.h"
 #include "spk.h"
 #include "misc.h"

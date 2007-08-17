@@ -53,6 +53,7 @@
 #include "misc.h"
 #include "system.h"
 #include "async.h"
+#include "program.h"
 #include "options.h"
 #include "brltty.h"
 #include "defaults.h"
@@ -1613,8 +1614,10 @@ startBrailleDriver (void) {
   playTune(&tune_braille_on);
 
   if (!opt_quiet) {
-    char buffer[18 + 1];
-    snprintf(buffer, sizeof(buffer), "%s %s", PACKAGE_TITLE, PACKAGE_VERSION);
+    char buffer[0X100];
+    snprintf(buffer, sizeof(buffer), "%s %s%s%s",
+             PACKAGE_TITLE, PACKAGE_VERSION,
+             (*packageRevision? " rev ": ""), packageRevision);
     message(buffer, 0);        /* display initialization message */
   }
 
@@ -2132,7 +2135,10 @@ startup (int argc, char *argv[]) {
 
   {
     const char *prefix = setPrintPrefix(NULL);
-    LogPrint(LOG_NOTICE, "%s %s [%s]", PACKAGE_TITLE, PACKAGE_VERSION, BRLTTY_URL);
+    LogPrint(LOG_NOTICE, "%s %s%s%s [%s]",
+             PACKAGE_TITLE, PACKAGE_VERSION,
+             (*packageRevision? " rev ": ""), packageRevision,
+             BRLTTY_URL);
     setPrintPrefix(prefix);
   }
 

@@ -22,12 +22,8 @@
 #include <strings.h>
 #include <ctype.h>
 #include <errno.h>
-#include <limits.h>
 
-#ifdef ENABLE_I18N_SUPPORT
-#include <locale.h>
-#endif /* ENABLE_I18N_SUPPORT */
-
+#include "program.h"
 #include "options.h"
 #include "misc.h"
 #include "system.h"
@@ -35,9 +31,6 @@
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
 #endif /* HAVE_GETOPT_H */
-
-const char *programPath;
-const char *programName;
 
 typedef char **StringSetting;
 typedef int *FlagSetting;
@@ -48,38 +41,6 @@ typedef struct {
   unsigned char ensuredSettings[0X100];
   int errorCount;
 } OptionProcessingInformation;
-
-void
-fixInstallPaths (char **const *paths) {
-  static const char *programDirectory = NULL;
-
-  if (!programDirectory) {
-    if (!(programDirectory = getPathDirectory(programPath))) {
-      LogPrint(LOG_WARNING, gettext("cannot determine program directory"));
-      programDirectory = ".";
-    }
-
-    LogPrint(LOG_DEBUG, "program directory: %s", programDirectory);
-  }
-
-  while (*paths) {
-    char *newPath = makePath(programDirectory, **paths);
-
-    if (!newPath) {
-      LogPrint(LOG_WARNING, "%s: %s", gettext("cannot fix install path"), **paths);
-    } else if (!isAbsolutePath(**paths=newPath)) {
-      LogPrint(LOG_WARNING, "%s: %s", gettext("install path not absolute"), **paths);
-    }
-
-    ++paths;
-  }
-}
-
-void
-fixInstallPath (char **path) {
-  char **const paths[] = {path, NULL};
-  fixInstallPaths(paths);
-}
 
 static void
 extendSetting (char **setting, const char *value, int prepend) {
@@ -610,47 +571,6 @@ processConfigurationFile (
   return 0;
 }
 
-static char *
-testProgram (const char *directory, const char *name) {
-  char *path;
-
-  if ((path = makePath(directory, name))) {
-    if (access(path, X_OK) != -1) return path;
-
-    free(path);
-  }
-
-  return NULL;
-}
-
-static char *
-findProgram (const char *name) {
-  char *path = NULL;
-  const char *string;
-
-  if ((string = getenv("PATH"))) {
-    int count;
-    char **array;
-
-    if ((array = splitString(string, ':', &count))) {
-      int index;
-
-      for (index=0; index<count; ++index) {
-        const char *directory = array[index];
-        if (!*directory) directory = ".";
-        if ((path = testProgram(directory, name))) break;
-      }
-
-      deallocateStrings(array);
-    }
-  }
-
-  return path;
-}
-
-#ifdef WINDOWS
-#include "sys_windows.h"
-#endif /* WINDOWS */
 int
 processOptions (
   const OptionEntry *optionTable,
@@ -666,55 +586,12 @@ processOptions (
   OptionProcessingInformation info;
   int index;
 
-#ifdef WINDOWS
-  sysInit();
-#endif /* WINDOWS */
-
-#ifdef ENABLE_I18N_SUPPORT
-  setlocale(LC_ALL, "");
-  textdomain(PACKAGE_NAME);
-#endif /* ENABLE_I18N_SUPPORT */
+  prepareProgram(*argumentCount, *argumentVector);
 
   info.optionTable = optionTable;
   info.optionCount = optionCount;
   for (index=0; index<0X100; ++index) info.ensuredSettings[index] = 0;
   info.errorCount = 0;
-
-  if (!(programPath = getProgramPath())) programPath = **argumentVector;
-
-  if (!isExplicitPath(programPath)) {
-    char *path = findProgram(programPath);
-    if (!path) path = testProgram(".", programPath);
-    if (path) programPath = path;
-  }
-
-  if (isExplicitPath(programPath)) {
-#if defined(HAVE_REALPATH) && defined(PATH_MAX)
-    if (!isAbsolutePath(programPath)) {
-      char buffer[PATH_MAX];
-      char *path = realpath(programPath, buffer);
-
-      if (path) {
-        programPath = strdupWrapper(path);
-      } else {
-        LogError("realpath");
-      }
-    }
-#endif /* defined(HAVE_REALPATH) && defined(PATH_MAX) */
-
-    if (!isAbsolutePath(programPath)) {
-      char *directory;
-
-      if ((directory = getWorkingDirectory())) {
-        char *path;
-        if ((path = makePath(directory, programPath))) programPath = path;
-        free(directory);
-      }
-    }
-  }
-
-  programName = locatePathName(programPath);
-  setPrintPrefix(programName);
 
   processCommandLine(&info, argumentCount, argumentVector, argumentsSummary);
   {

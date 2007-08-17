@@ -26,6 +26,7 @@
 #include <strings.h>
 #include <ctype.h>
 
+#include "program.h"
 #include "options.h"
 #include "misc.h"
 #include "scr.h"
