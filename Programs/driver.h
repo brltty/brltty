@@ -44,7 +44,8 @@ typedef struct {
   .time = __TIME__ \
 }
 
-#define DRIVER_VERSION_DECLARATION(type) const char CONCATENATE(type##_version_,DRIVER_CODE)[] = PACKAGE_VERSION
+#define DRIVER_VERSION_STRING (PACKAGE_VERSION "@" PACKAGE_REVISION)
+#define DRIVER_VERSION_DECLARATION(type) const char CONCATENATE(type##_version_,DRIVER_CODE)[] = DRIVER_VERSION_STRING
 
 #ifdef __cplusplus
 }

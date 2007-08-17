@@ -122,7 +122,7 @@ loadDriver (
 
             if (findSharedSymbol(libraryHandle, versionSymbol, &versionAddress)) {
               const char *actualVersion = versionAddress;
-              static const char *expectedVersion = PACKAGE_VERSION;
+              static const char *expectedVersion = DRIVER_VERSION_STRING;
 
               if (strcmp(actualVersion, expectedVersion) != 0) {
                 LogPrint(LOG_WARNING, "%s %s driver version %s does not match expected version %s",
