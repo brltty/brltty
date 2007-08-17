@@ -125,6 +125,14 @@ prepareProgram (int argumentCount, char **argumentVector) {
 }
 
 void
+makeProgramBanner (char *buffer, size_t size) {
+  snprintf(buffer, size, "%s %s%s%s [%s]",
+           PACKAGE_TITLE, PACKAGE_VERSION,
+           (*packageRevision? " rev ": ""), packageRevision,
+           BRLTTY_URL);
+}
+
+void
 fixInstallPaths (char **const *paths) {
   static const char *programDirectory = NULL;
 

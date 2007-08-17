@@ -1614,11 +1614,9 @@ startBrailleDriver (void) {
   playTune(&tune_braille_on);
 
   if (!opt_quiet) {
-    char buffer[0X100];
-    snprintf(buffer, sizeof(buffer), "%s %s%s%s",
-             PACKAGE_TITLE, PACKAGE_VERSION,
-             (*packageRevision? " rev ": ""), packageRevision);
-    message(buffer, 0);        /* display initialization message */
+    char banner[0X100];
+    makeProgramBanner(banner, sizeof(banner));
+    message(banner, 0);
   }
 
   return 1;
@@ -2135,10 +2133,9 @@ startup (int argc, char *argv[]) {
 
   {
     const char *prefix = setPrintPrefix(NULL);
-    LogPrint(LOG_NOTICE, "%s %s%s%s [%s]",
-             PACKAGE_TITLE, PACKAGE_VERSION,
-             (*packageRevision? " rev ": ""), packageRevision,
-             BRLTTY_URL);
+    char banner[0X100];
+    makeProgramBanner(banner, sizeof(banner));
+    LogPrint(LOG_NOTICE, "%s", banner);
     setPrintPrefix(prefix);
   }
 
