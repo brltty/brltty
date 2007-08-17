@@ -25,8 +25,6 @@ extern "C" {
 extern const char *programPath;
 extern const char *programName;
 
-extern const char *packageRevision;
-
 extern void prepareProgram (int argumentCount, char **argumentVector);
 extern void makeProgramBanner (char *buffer, size_t size);
 

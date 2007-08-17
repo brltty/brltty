@@ -18,18 +18,10 @@
 
 . "`dirname "${0}"`/prologue.sh"
 
-[ "${#}" -eq 0 ] && syntaxError "missing output file."
-headerFile="${1}"
-shift
-
-[ "${#}" -eq 0 ] && syntaxError "missing source directory."
-sourceDirectory="${1}"
-shift
-
 [ "${#}" -eq 0 ] || syntaxError "too many parameters."
 
 set -e
-revisionNumber="`svnversion "${sourceDirectory}"`" || revisionNumber=
-[ "${revisionNumber}" != "exported" ] || revisionNumber=
-echo >"${headerFile}" "\"${revisionNumber}\""
+revision="`svnversion -n .`"
+[ "${revision}" != "exported" ] || revision=""
+[ -z "${revision}" ] || echo "${revision}"
 exit 0

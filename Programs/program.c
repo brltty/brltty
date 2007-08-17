@@ -34,10 +34,6 @@
 const char *programPath;
 const char *programName;
 
-const char *packageRevision =
-#include "revision.auto.h"
-;
-
 static char *
 testProgram (const char *directory, const char *name) {
   char *path;
@@ -126,9 +122,10 @@ prepareProgram (int argumentCount, char **argumentVector) {
 
 void
 makeProgramBanner (char *buffer, size_t size) {
+  const char *revision = PACKAGE_REVISION;
   snprintf(buffer, size, "%s %s%s%s [%s]",
            PACKAGE_TITLE, PACKAGE_VERSION,
-           (*packageRevision? " rev ": ""), packageRevision,
+           (*revision? " rev ": ""), revision,
            BRLTTY_URL);
 }
 

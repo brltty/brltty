@@ -51,6 +51,15 @@ AC_SUBST([PACKAGE_TITLE], ["`echo "${PACKAGE_NAME}" | sed -e 'y%abcdefghijklmnop
 AC_DEFINE_UNQUOTED([PACKAGE_TITLE], ["${PACKAGE_TITLE}"],
                    [Define this to be a string containing the package title.])
 
+PACKAGE_REVISION="`./revision`"
+if test -z "${PACKAGE_REVISION}"
+then
+   AC_MSG_WARN([package revision not known])
+   PACKAGE_REVISION="UNKNOWN"
+fi
+AC_DEFINE_UNQUOTED([PACKAGE_REVISION], ["${PACKAGE_REVISION}"],
+                   [Define this to be a string containing the package revision.])
+
 AC_SUBST([package_date], ["`date "+%Y/%m/%d"`"])
 
 AC_CONFIG_HEADER([config.h])

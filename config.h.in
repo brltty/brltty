@@ -183,6 +183,9 @@ extern "C" {
 /* Define this to be a string containing the package version. */
 #undef PACKAGE_VERSION
 
+/* Define this to be a string containing the package revision. */
+#undef PACKAGE_REVISION
+
 /* Define this if BRLTTY is to be run as init. */
 #undef INIT_PATH
 

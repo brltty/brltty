@@ -407,9 +407,6 @@ screen-drivers:
 
 ###############################################################################
 
-revision.auto.h: FORCE
-	$(SRC_TOP)mkrevhdr $@ $(SRC_TOP)
-
 text.auto.h: $(TEXT_TABLE) tbl2hex$X
 	./tbl2hex$X $(TEXT_TABLE) >$@
 
