@@ -96,18 +96,22 @@ typedef struct {
   short row;
 } ScreenMark;
 typedef struct {
-  unsigned char trackCursor;		/* tracking mode */
-  unsigned char hideCursor;		/* For temporarily hiding cursor */
+  unsigned char trackCursor;		/* cursor tracking mode */
+  unsigned char hideCursor;		/* for temporarily hiding the cursor */
   unsigned char showAttributes;		/* text or attributes display */
   int winx, winy;	/* upper-left corner of braille window */
-  int motx, moty;	/* user motion of braille window */
+  int motx, moty;	/* last user motion of braille window */
   int trkx, trky;	/* tracked cursor position */
-  int ptrx, ptry;	/* mouse pointer position */
+  int ptrx, ptry;	/* last known mouse/pointer position */
   ScreenMark marks[0X100];
 } ScreenState;
+
 static const ScreenState initialScreenState = {
   .trackCursor = DEFAULT_TRACK_CURSOR,
-  .hideCursor = DEFAULT_HIDE_CURSOR
+  .hideCursor = DEFAULT_HIDE_CURSOR,
+
+  .ptrx = -1,
+  .ptry = -1
 };
 
 /* 
@@ -1012,6 +1016,42 @@ handleAutorepeat (int *command, RepeatState *state) {
                     PREFERENCES_TIME(prefs.autorepeatInterval));
 }
 
+static int
+checkPointer (void) {
+  int moved = 0;
+  int column, row;
+
+  if (prefs.windowFollowsPointer && getScreenPointer(&column, &row)) {
+    if (column != p->ptrx) {
+      if (p->ptrx >= 0) moved = 1;
+      p->ptrx = column;
+    }
+
+    if (row != p->ptry) {
+      if (p->ptry >= 0) moved = 1;
+      p->ptry = row;
+    }
+
+    if (moved) {
+      if (column < p->winx) {
+        p->winx = column;
+      } else if (column >= (p->winx + brl.x)) {
+        p->winx = column + 1 - brl.x;
+      }
+
+      if (row < p->winy) {
+        p->winy = row;
+      } else if (row >= (p->winy + brl.y)) {
+        p->winy = row + 1 - brl.y;
+      }
+    }
+  } else {
+    p->ptrx = p->ptry = -1;
+  }
+
+  return moved;
+}
+
 void
 highlightWindow (void) {
   if (prefs.highlightWindow) {
@@ -1118,12 +1158,7 @@ main (int argc, char *argv[]) {
   p->motx = p->winx; p->moty = p->winy;
   oldwinx = p->winx; oldwiny = p->winy;
   highlightWindow();
-
-  if (prefs.windowFollowsPointer) {
-    getScreenPointer(&p->ptrx, &p->ptry);
-  } else {
-    p->ptrx = p->ptry = 0;
-  }
+  checkPointer();
 
   kbdResetState();
   resetBlinkingStates();
@@ -2159,31 +2194,8 @@ main (int argc, char *argv[]) {
             trackCursor(0);
             p->trkx = scr.posx;
             p->trky = scr.posy;
-          } else if (prefs.windowFollowsPointer) {
-            int x, y;
-            if (getScreenPointer(&x, &y)) {
-              if (x != p->ptrx) {
-                p->ptrx = x;
-                pointerMoved = 1;
-
-                if (x < p->winx) {
-                  p->winx = x;
-                } else if (x >= (p->winx + brl.x)) {
-                  p->winx = x + 1 - brl.x;
-                }
-              }
-
-              if (y != p->ptry) {
-                p->ptry = y;
-                pointerMoved = 1;
-
-                if (y < p->winy) {
-                  p->winy = y;
-                } else if (y >= (p->winy + brl.y)) {
-                  p->winy = y + 1 - brl.y;
-                }
-              }
-            }
+          } else if (checkPointer()) {
+            pointerMoved = 1;
           }
         }
       }
