@@ -1118,7 +1118,12 @@ main (int argc, char *argv[]) {
   p->motx = p->winx; p->moty = p->winy;
   oldwinx = p->winx; oldwiny = p->winy;
   highlightWindow();
-  getScreenPointer(&p->ptrx, &p->ptry);
+
+  if (prefs.windowFollowsPointer) {
+    getScreenPointer(&p->ptrx, &p->ptry);
+  } else {
+    p->ptrx = p->ptry = 0;
+  }
 
   kbdResetState();
   resetBlinkingStates();
@@ -2157,22 +2162,26 @@ main (int argc, char *argv[]) {
           } else if (prefs.windowFollowsPointer) {
             int x, y;
             if (getScreenPointer(&x, &y)) {
-              if ((x != p->ptrx)) {
+              if (x != p->ptrx) {
                 p->ptrx = x;
-                if (x < p->winx)
-                  p->winx = x;
-                else if (x >= (p->winx + brl.x))
-                  p->winx = x + 1 - brl.x;
                 pointerMoved = 1;
+
+                if (x < p->winx) {
+                  p->winx = x;
+                } else if (x >= (p->winx + brl.x)) {
+                  p->winx = x + 1 - brl.x;
+                }
               }
 
-              if ((y != p->ptry)) {
+              if (y != p->ptry) {
                 p->ptry = y;
-                if (y < p->winy)
-                  p->winy = y;
-                else if (y >= (p->winy + brl.y))
-                  p->winy = y + 1 - brl.y;
                 pointerMoved = 1;
+
+                if (y < p->winy) {
+                  p->winy = y;
+                } else if (y >= (p->winy + brl.y)) {
+                  p->winy = y + 1 - brl.y;
+                }
               }
             }
           }
