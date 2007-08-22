@@ -2140,7 +2140,7 @@ startup (int argc, char *argv[]) {
   }
 
   if (opt_version) {
-    LogPrint(LOG_INFO, "%s", BRLTTY_COPYRIGHT);
+    LogPrint(LOG_INFO, "%s", PACKAGE_COPYRIGHT);
     identifyScreenDrivers(1);
 
 #ifdef ENABLE_API

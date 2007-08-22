@@ -126,7 +126,7 @@ makeProgramBanner (char *buffer, size_t size) {
   snprintf(buffer, size, "%s %s%s%s [%s]",
            PACKAGE_TITLE, PACKAGE_VERSION,
            (*revision? " rev ": ""), revision,
-           BRLTTY_URL);
+           PACKAGE_URL);
 }
 
 void
