@@ -997,14 +997,17 @@ updatePreferences (void) {
 
   {
     static unsigned char exitSave = 0;                /* 1 == save preferences on exit */
+
     static const char *booleanValues[] = {
       strtext("No"),
       strtext("Yes")
     };
+
     static const char *cursorStyles[] = {
       strtext("Underline"),
       strtext("Block")
     };
+
     static const char *firmnessLevels[] = {
       strtext("Minimum"),
       strtext("Low"),
@@ -1012,6 +1015,7 @@ updatePreferences (void) {
       strtext("High"),
       strtext("Maximum")
     };
+
     static const char *sensitivityLevels[] = {
       strtext("Minimum"),
       strtext("Low"),
@@ -1019,11 +1023,13 @@ updatePreferences (void) {
       strtext("High"),
       strtext("Maximum")
     };
+
     static const char *skipBlankWindowsModes[] = {
       strtext("All"),
       strtext("End of Line"),
       strtext("Rest of Line")
     };
+
     static const char *statusStyles[] = {
       strtext("None"),
       "Alva",
@@ -1033,10 +1039,12 @@ updatePreferences (void) {
       "MDV",
       "Voyager"
     };
+
     static const char *textStyles[] = {
       "8-dot",
       "6-dot"
     };
+
     static const char *tuneDevices[] = {
       "Beeper"
         " ("
@@ -1074,12 +1082,14 @@ updatePreferences (void) {
 #endif /* ENABLE_FM_SUPPORT */
         ")"
     };
+
 #ifdef ENABLE_SPEECH_SUPPORT
     static const char *sayModes[] = {
       strtext("Immediate"),
       strtext("Enqueue")
     };
 #endif /* ENABLE_SPEECH_SUPPORT */
+
     #define MENU_ITEM(setting, changed, test, label, values, minimum, maximum, divisor) {&setting, changed, test, label, values, minimum, maximum, divisor}
     #define NUMERIC_ITEM(setting, changed, test, label, minimum, maximum, divisor) MENU_ITEM(setting, changed, test, label, NULL, minimum, maximum, divisor)
     #define TIME_ITEM(setting, changed, test, label) NUMERIC_ITEM(setting, changed, test, label, 1, 100, updateInterval/10)
