@@ -41,18 +41,15 @@ extern int gpm_tried;
 
 typedef enum {
   GCS_CLOSED,
-  GCS_WAITING,
+  GCS_FAILED,
   GCS_OPENED
 } GpmConnectionState;
 
 static int gpmConnectionState = GCS_CLOSED;
 
-static int gpmOpenConnection (void);
-
 static void
-gpmRetryConnection (void *data) {
+gpmResetConnection (void *data) {
   gpmConnectionState = GCS_CLOSED;
-  gpmOpenConnection();
 }
 
 static int
@@ -71,8 +68,8 @@ gpmOpenConnection (void) {
 
       if (Gpm_Open(&options, -1) == -1) {
         LogPrint(GPM_LOG_LEVEL, "GPM open error: %s", strerror(errno));
-        asyncRelativeAlarm(5000, gpmRetryConnection, NULL);
-        gpmConnectionState = GCS_WAITING;
+        asyncRelativeAlarm(5000, gpmResetConnection, NULL);
+        gpmConnectionState = GCS_FAILED;
         return 0;
       }
 
