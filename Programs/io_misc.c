@@ -126,6 +126,11 @@ readChunk (
   void *buffer, size_t *offset, size_t count,
   int initialTimeout, int subsequentTimeout
 ) {
+#ifdef __MSDOS__
+  int tried = 0;
+  goto noInput;
+#endif /* __MSDOS__ */
+
   while (count > 0) {
     ssize_t amount;
 
@@ -134,6 +139,10 @@ readChunk (
       address += *offset;
       amount = read(fileDescriptor, address, count);
     }
+
+#ifdef __MSDOS__
+    tried = 1;
+#endif /* __MSDOS__ */
 
     if (amount == -1) {
       if (errno == EINTR) continue;
@@ -153,6 +162,10 @@ readChunk (
       if ((timeout = *offset? subsequentTimeout: initialTimeout)) {
         if (awaitInput(fileDescriptor, timeout)) continue;
         LogPrint(LOG_WARNING, "input byte missing at offset %d", (int)*offset);
+#ifdef __MSDOS__
+      } else if (!tried) {
+        if (awaitInput(fileDescriptor, 0)) continue;
+#endif /* __MSDOS__ */
       } else {
         errno = EAGAIN;
       }
