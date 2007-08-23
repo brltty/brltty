@@ -1490,6 +1490,12 @@ activateBrailleDriver (int verify) {
       LogPrint(LOG_DEBUG, "performing %s braille display autodetection.", type);
     }
 
+    if (!*code) {
+      static const char *const fallbackCodes[] = {"no", NULL};
+      code = fallbackCodes;
+      autodetect = 0;
+    }
+
     while (*code) {
       if (!autodetect || haveBrailleDriver(*code)) {
         LogPrint(LOG_DEBUG, "checking for '%s' braille display.", *code);
@@ -1722,6 +1728,12 @@ activateSpeechDriver (int verify) {
     };
     code = speechCodes;
   }
+
+  if (!*code) {
+    static const char *const fallbackCodes[] = {"no", NULL};
+    code = fallbackCodes;
+    autodetect = 0;
+  }
   LogPrint(LOG_DEBUG, "looking for speech synthesizer.");
 
   while (*code) {
@@ -1854,6 +1866,12 @@ activateScreenDriver (int verify) {
       NULL
     };
     code = screenCodes;
+  }
+
+  if (!*code) {
+    static const char *const fallbackCodes[] = {"no", NULL};
+    code = fallbackCodes;
+    autodetect = 0;
   }
   LogPrint(LOG_DEBUG, "looking for screen driver.");
 
