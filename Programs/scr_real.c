@@ -86,9 +86,11 @@ gpmOpenConnection (void) {
 
 static void
 gpmCloseConnection (int alreadyClosed) {
-  if (!alreadyClosed) Gpm_Close();
+  if (gpmConnectionState == GCS_OPENED) {
+    if (!alreadyClosed) Gpm_Close();
+    LogPrint(GPM_LOG_LEVEL, "GPM closed");
+  }
   gpmConnectionState = GCS_CLOSED;
-  LogPrint(GPM_LOG_LEVEL, "GPM closed");
 }
 #endif /* HAVE_LIBGPM */
 
