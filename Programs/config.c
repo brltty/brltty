@@ -1396,7 +1396,7 @@ updatePreferences (void) {
 
 typedef struct {
   const char *driverType;
-  char **requestedDrivers;
+  const char *const *requestedDrivers;
   const char *const *autodetectableDrivers;
   const char * (*getDefaultDriver) (void);
   int (*haveDriver) (const char *code);
@@ -1407,37 +1407,37 @@ static int
 activateDriver (const DriverActivationData *data, int verify) {
   int oneDriver = data->requestedDrivers[0] && !data->requestedDrivers[1];
   int autodetect = oneDriver && (strcmp(data->requestedDrivers[0], "auto") == 0);
-  const char *defaultCodes[] = {data->getDefaultDriver(), NULL};
-  const char *const *code;
+  const char *const defaultDrivers[] = {data->getDefaultDriver(), NULL};
+  const char *const *driver;
 
   if (!oneDriver || autodetect) verify = 0;
 
   if (!autodetect) {
-    code = (const char *const *)data->requestedDrivers;
-  } else if (defaultCodes[0]) {
-    code = defaultCodes;
-  } else if (*(code = data->autodetectableDrivers)) {
-    LogPrint(LOG_WARNING, "performing %s driver autodetection", data->driverType);
+    driver = data->requestedDrivers;
+  } else if (defaultDrivers[0]) {
+    driver = defaultDrivers;
+  } else if (*(driver = data->autodetectableDrivers)) {
+    LogPrint(LOG_DEBUG, "performing %s driver autodetection", data->driverType);
   } else {
-    LogPrint(LOG_WARNING, "no autodetectable %s drivers", data->driverType);
+    LogPrint(LOG_DEBUG, "no autodetectable %s drivers", data->driverType);
   }
 
-  if (!*code) {
-    static const char *const fallbackCodes[] = {"no", NULL};
-    code = fallbackCodes;
+  if (!*driver) {
+    static const char *const fallbackDrivers[] = {"no", NULL};
+    driver = fallbackDrivers;
     autodetect = 0;
   }
 
-  while (*code) {
-    if (!autodetect || data->haveDriver(*code)) {
-      LogPrint(LOG_DEBUG, "checking for %s driver: %s", data->driverType, *code);
-      if (data->initializeDriver(*code, verify)) return 1;
+  while (*driver) {
+    if (!autodetect || data->haveDriver(*driver)) {
+      LogPrint(LOG_DEBUG, "checking for %s driver: %s", data->driverType, *driver);
+      if (data->initializeDriver(*driver, verify)) return 1;
     }
 
-    ++code;
+    ++driver;
   }
 
-  LogPrint(LOG_DEBUG, "no %s synthesizer found.", data->driverType);
+  LogPrint(LOG_DEBUG, "%s driver not found", data->driverType);
   return 0;
 }
 
@@ -1609,7 +1609,7 @@ activateBrailleDriver (int verify) {
     {
       const DriverActivationData data = {
         .driverType = "braille",
-        .requestedDrivers = brailleDrivers,
+        .requestedDrivers = (const char *const *)brailleDrivers,
         .autodetectableDrivers = autodetectableDrivers,
         .getDefaultDriver = getDefaultBrailleDriver,
         .haveDriver = haveBrailleDriver,
@@ -1802,7 +1802,7 @@ activateSpeechDriver (int verify) {
 
   const DriverActivationData data = {
     .driverType = "speech",
-    .requestedDrivers = speechDrivers,
+    .requestedDrivers = (const char *const *)speechDrivers,
     .autodetectableDrivers = autodetectableDrivers,
     .getDefaultDriver = getDefaultSpeechDriver,
     .haveDriver = haveSpeechDriver,
@@ -1928,7 +1928,7 @@ activateScreenDriver (int verify) {
 
   const DriverActivationData data = {
     .driverType = "screen",
-    .requestedDrivers = screenDrivers,
+    .requestedDrivers = (const char *const *)screenDrivers,
     .autodetectableDrivers = autodetectableDrivers,
     .getDefaultDriver = getDefaultScreenDriver,
     .haveDriver = haveScreenDriver,
