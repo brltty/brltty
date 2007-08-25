@@ -694,23 +694,33 @@ usbDeallocateDeviceExtension (UsbDeviceExtension *devx) {
 
 static char *
 usbMakeSysfsPath (const char *usbfsPath) {
-  const char *tail = usbfsPath + strlen(usbfsPath) - 8;
-  unsigned int bus;
-  unsigned int device;
-  char extra;
-  int count = sscanf(tail, "/%u/%u%c", &bus, &device, &extra);
+  const char *tail = usbfsPath + strlen(usbfsPath);
 
-  if (count == 2) {
-    char *sysfsPath;
+  {
+    int count = 0;
+    while (1) {
+      if (tail == usbfsPath) return NULL;
+      if (!isPathDelimiter(*--tail)) continue;
+      if (++count == 2) break;
+    }
+  }
 
-    {
+  {
+    unsigned int bus;
+    unsigned int device;
+    char extra;
+    int count = sscanf(tail, "/%u/%u%c", &bus, &device, &extra);
+
+    if (count == 2) {
       const char *format = "/sys/class/usb_device/usbdev%u.%u";
       char buffer[strlen(format) + (2 * 0X10) + 1];
       snprintf(buffer, sizeof(buffer), format, bus, device);
-      sysfsPath= strdup(buffer);
-    }
 
-    if (sysfsPath) return sysfsPath;
+      {
+        char *sysfsPath = strdup(buffer);
+        if (sysfsPath) return sysfsPath;
+      }
+    }
   }
 
   return NULL;
@@ -721,42 +731,50 @@ usbSearchDevice (const char *root, UsbDeviceChooser chooser, void *data) {
   size_t rootLength = strlen(root);
   UsbDevice *device = NULL;
   DIR *directory;
+
   if ((directory = opendir(root))) {
     struct dirent *entry;
+
     while ((entry = readdir(directory))) {
       size_t nameLength = strlen(entry->d_name);
       struct stat status;
       char path[rootLength + 1 + nameLength + 1];
-      if (nameLength != 3) continue;
-      if (!isdigit(entry->d_name[0]) ||
-          !isdigit(entry->d_name[1]) ||
-          !isdigit(entry->d_name[2])) continue;
+
+      if (strspn(entry->d_name, "0123456789") != nameLength) continue;
       snprintf(path, sizeof(path), "%s/%s", root, entry->d_name);
       if (stat(path, &status) == -1) continue;
+
       if (S_ISDIR(status.st_mode)) {
         if ((device = usbSearchDevice(path, chooser, data))) break;
       } else if (S_ISREG(status.st_mode) || S_ISCHR(status.st_mode)) {
         UsbDeviceExtension *devx;
+
         if ((devx = malloc(sizeof(*devx)))) {
           if ((devx->usbfsPath = strdup(path))) {
             if ((devx->sysfsPath = usbMakeSysfsPath(devx->usbfsPath))) {
               if ((devx->usbfsFile = open(devx->usbfsPath, O_RDWR)) != -1) {
                 if ((device = usbTestDevice(devx, chooser, data))) break;
+
                 close(devx->usbfsFile);
                 devx->usbfsFile = -1;
               }
+
               free(devx->sysfsPath);
               devx->sysfsPath = NULL;
             }
+
             free(devx->usbfsPath);
             devx->usbfsPath = NULL;
           }
+
           free(devx);
         }
       }
     }
+
     closedir(directory);
   }
+
   return device;
 }
 
