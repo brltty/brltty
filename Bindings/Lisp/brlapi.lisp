@@ -24,7 +24,7 @@
 (defpackage :brlapi
   (:use :common-lisp :cffi)
   (:export #:open-connection #:close-connection
-	   #:driver-id #:driver-name #:display-size
+	   #:driver-name #:display-size
            #:enter-tty-mode #:leave-tty-mode
            #:write-text #:write-dots #:write-region
            #:read-key #:expand-key))
@@ -51,10 +51,10 @@
   (print-unreadable-object (obj stream :type t)
     (if (not (display-file-descriptor obj))
         (format stream "disconnected")
-      (apply #'format stream "~Dx~D fd=~D, host=~A, id=~A, name=~A"
+      (apply #'format stream "~Dx~D fd=~D, host=~A, driver=~A"
              (concatenate 'list (multiple-value-list (display-size obj))
                           (list (display-file-descriptor obj) (display-host obj)
-                                (driver-id obj) (driver-name obj)))))))
+                                (driver-name obj)))))))
 
 
 ;;;; * Error handling
