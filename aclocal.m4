@@ -5,9 +5,8 @@ brltty_uc="`echo "$1" | sed -e 'y%abcdefghijklmnopqrstuvwxyz%ABCDEFGHIJKLMNOPQRS
 AC_SEARCH_LIBS([$1], [$2], [AC_DEFINE_UNQUOTED(HAVE_${brltty_uc}, [1], [Define this if the function $1 is available.])])])
 
 AC_DEFUN([BRLTTY_VAR_TRIM], [dnl
-changequote(, )dnl
 $1="`echo "${$1}" | sed -e 's/^ *//' -e 's/ *$//'`"
-changequote([, ])])
+])
 
 AC_DEFUN([BRLTTY_VAR_EXPAND], [dnl
 eval '$1="'"$2"'"'])
@@ -146,11 +145,9 @@ fi])
 AC_DEFUN([BRLTTY_HELP_STRING], [dnl
 AC_HELP_STRING([$1], patsubst([$2], [
 .*$]), [brltty_help_prefix])dnl
-changequote(<, >)dnl
-patsubst(patsubst(<$2>, <\`[^
-]*>), <
->, <\&brltty_help_prefix>)<>dnl
-changequote([, ])dnl
+patsubst(patsubst([$2], [\`[^
+]*]), [
+], [\&brltty_help_prefix])[]dnl
 ])
 m4_define([brltty_help_indent], 32)
 m4_define([brltty_help_prefix], m4_format([%]brltty_help_indent[s], []))
@@ -210,8 +207,7 @@ else
    then
       while :
       do
-changequote(, )dnl
-         brltty_delimiter="`expr "${brltty_items}" : '[^,]*,'`"
+         [brltty_delimiter="`expr "${brltty_items}" : '[^,]*,'`"]
          if test "${brltty_delimiter}" -eq 0
          then
             brltty_item="${brltty_items}"
@@ -239,8 +235,8 @@ changequote(, )dnl
                break
             fi
          else
-            brltty_item="`expr "${brltty_items}" : '\([^,]*\)'`"
-            brltty_items="`expr "${brltty_items}" : '[^,]*,\(.*\)'`"
+            [brltty_item="`expr "${brltty_items}" : '\([^,]*\)'`"]
+            [brltty_items="`expr "${brltty_items}" : '[^,]*,\(.*\)'`"]
          fi
          brltty_item_suffix="${brltty_item#-}"
          if test "${brltty_item}" = "${brltty_item_suffix}"
@@ -253,32 +249,31 @@ changequote(, )dnl
          brltty_item_unknown=true
          if test -n "${brltty_item}"
          then
-            brltty_item_entry="`expr "${brltty_item_entries_$1}" : '.* \('"${brltty_item}"'-[^ ]*\)'`"
+            [brltty_item_entry="`expr "${brltty_item_entries_$1}" : '.* \('"${brltty_item}"'-[^ ]*\)'`"]
             if test -n "${brltty_item_entry}"
             then
                brltty_item_code="${brltty_item}"
-               brltty_item_name="`expr "${brltty_item_entry}" : '[^[.-.]]*-\(.*\)$'`"
+               [brltty_item_name="`expr "${brltty_item_entry}" : '[^[.-.]]*-\(.*\)$'`"]
                brltty_item_unknown=false
             else
-               brltty_item_entry="`expr "${brltty_item_entries_$1}" : '.* \([^- ]*-'"${brltty_item}"'[^ ]*\)'`"
+               [brltty_item_entry="`expr "${brltty_item_entries_$1}" : '.* \([^- ]*-'"${brltty_item}"'[^ ]*\)'`"]
                if test -z "${brltty_item_entry}"
                then
                   brltty_lowercase="`echo "${brltty_item_entries_$1}" | sed 'y%ABCDEFGHIJKLMNOPQRSTUVWXYZ%abcdefghijklmnopqrstuvwxyz%'`"
-                  brltty_item_code="`expr "${brltty_lowercase}" : '.* \([^- ]*\)-'"${brltty_item}"`"
+                  [brltty_item_code="`expr "${brltty_lowercase}" : '.* \([^- ]*\)-'"${brltty_item}"`"]
                   if test -n "${brltty_item_code}"
                   then
-                     brltty_item_entry="`expr "${brltty_item_entries_$1}" : '.* \('"${brltty_item_code}"'-[^ ]*\)'`"
+                     [brltty_item_entry="`expr "${brltty_item_entries_$1}" : '.* \('"${brltty_item_code}"'-[^ ]*\)'`"]
                   fi
                fi
                if test -n "${brltty_item_entry}"
                then
-                  brltty_item_code="`expr "${brltty_item_entry}" : '\([^[.-.]]*\)'`"
-                  brltty_item_name="`expr "${brltty_item_entry}" : '[^[.-.]]*-\(.*\)$'`"
+                  [brltty_item_code="`expr "${brltty_item_entry}" : '\([^[.-.]]*\)'`"]
+                  [brltty_item_name="`expr "${brltty_item_entry}" : '[^[.-.]]*-\(.*\)$'`"]
                   brltty_item_unknown=false
                fi
             fi
          fi
-changequote([, ])dnl
          if "${brltty_item_unknown}"
          then
             AC_MSG_ERROR([unknown $1 $2: ${brltty_item}])
@@ -337,9 +332,7 @@ if test "${brltty_enabled_$1_support}" != "no"
 then
    if test -n "${brltty_internal_codes_$1}"
    then
-changequote(, )dnl
-      $1_driver_objects="`echo "${brltty_internal_names_$1}" | sed -e 's%\([^ ][^ ]*\)%$(BLD_TOP)$2/\1/$1.$O%g'`"
-changequote([, ])dnl
+      [$1_driver_objects="`echo "${brltty_internal_names_$1}" | sed -e 's%\([^ ][^ ]*\)%$(BLD_TOP)$2/\1/$1.$O%g'`"]
       $1_help="$1-help"
    fi
 
@@ -425,9 +418,7 @@ if test "${prefix}" = "NONE"
 then
    if test -z "${execute_root}"
    then
-changequote()dnl
-      if test `expr "${$1} " : '\${$3}/[^/]*$'` -gt 0
-changequote([, ])dnl
+      [if test `expr "${$1} " : '\${$3}/[^/]*$'` -gt 0]
       then
          $1="`echo ${$1} | sed -e 's%/%$2/%'`"
       fi
@@ -435,9 +426,7 @@ changequote([, ])dnl
 fi])
 
 AC_DEFUN([BRLTTY_EXECUTABLE_PATH], [dnl
-changequote()dnl
-if test `expr "${$1} " : '[^/ ][^/ ]*/'` -gt 0
-changequote([, ])dnl
+[if test `expr "${$1} " : '[^/ ][^/ ]*/'` -gt 0]
 then
    $1="`pwd`/${$1}"
 fi])
