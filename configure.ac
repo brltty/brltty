@@ -1458,11 +1458,9 @@ BRLTTY_SUMMARY_ITEM([screen-driver], [brltty_default_code_screen])
 AC_SUBST([install_drivers])
 BRLTTY_SUMMARY_END
 
-changequote(, )dnl
-brltty_make_files="`echo "${brltty_build_directories}" | sed -e '
+[brltty_make_files="`echo "${brltty_build_directories}" | sed -e '
 s%\([^ ][^ ]*\)%\1/Makefile:prologue.mk.in:\1/Makefile.in%g
-'`"
-changequote([, ])dnl
+'`"]
 
 AC_OUTPUT([
    config.mk
