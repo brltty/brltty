@@ -146,6 +146,7 @@
 #braille-parameters bl:KbEmu=yes # [yes,no]
 
 # Baum Braille Driver Parameters
+#braille-parameters bm:Protocols=default # [default,all,native]
 #braille-parameters bm:VarioKeys=no # [no,yes]
 
 # BrailleNote Braille Driver Parameters
