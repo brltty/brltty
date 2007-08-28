@@ -81,7 +81,7 @@ tryToAttach (HWND win) {
 }
 
 static int
-open_WindowsScreen (void) {
+construct_WindowsScreen (void) {
   if (AttachConsoleProc || root) {
     /* disable ^C */
     SetConsoleCtrlHandler(NULL,TRUE);
@@ -93,7 +93,7 @@ open_WindowsScreen (void) {
 }
 
 static void
-close_WindowsScreen (void) {
+destruct_WindowsScreen (void) {
   closeStdHandles();
 }
 
@@ -498,6 +498,6 @@ scr_initialize (MainScreen *main) {
   main->base.insertKey = insertKey_WindowsScreen;
   main->base.executeCommand = executeCommand_WindowsScreen;
   main->processParameters = processParameters_WindowsScreen;
-  main->open = open_WindowsScreen;
-  main->close = close_WindowsScreen;
+  main->construct = construct_WindowsScreen;
+  main->destruct = destruct_WindowsScreen;
 }

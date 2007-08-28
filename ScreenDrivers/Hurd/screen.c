@@ -169,14 +169,14 @@ processParameters_HurdScreen (char **parameters) {
 }
 
 static int
-open_HurdScreen (void) {
+construct_HurdScreen (void) {
   screenDescriptor = -1;
   consoleDescriptor = -1;
   return openScreen(0);
 }
 
 static void
-close_HurdScreen (void) {
+destruct_HurdScreen (void) {
   closeConsole();
   closeScreen();
 }
@@ -440,6 +440,6 @@ scr_initialize (MainScreen *main) {
   main->base.currentVirtualTerminal = currentVirtualTerminal_HurdScreen;
   main->base.executeCommand = executeCommand_HurdScreen;
   main->processParameters = processParameters_HurdScreen;
-  main->open = open_HurdScreen;
-  main->close = close_HurdScreen;
+  main->construct = construct_HurdScreen;
+  main->destruct = destruct_HurdScreen;
 }

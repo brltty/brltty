@@ -537,7 +537,7 @@ static void *doAtSpiScreenOpen(void *arg) {
 }
 
 static int
-open_AtSpiScreen (void) {
+construct_AtSpiScreen (void) {
   sem_t SPI_init_sem;
   sem_init(&SPI_init_sem,0,0);
   XInitThreads();
@@ -557,7 +557,7 @@ open_AtSpiScreen (void) {
 }
 
 static void
-close_AtSpiScreen (void) {
+destruct_AtSpiScreen (void) {
   SPI_event_quit();
   pthread_join(SPI_main_thread,NULL);
   LogPrint(LOG_DEBUG,"SPI stopped");
@@ -765,6 +765,6 @@ scr_initialize (MainScreen *main) {
   main->base.currentVirtualTerminal = currentVirtualTerminal_AtSpiScreen;
   main->base.executeCommand = executeCommand_AtSpiScreen;
   main->processParameters = processParameters_AtSpiScreen;
-  main->open = open_AtSpiScreen;
-  main->close = close_AtSpiScreen;
+  main->construct = construct_AtSpiScreen;
+  main->destruct = destruct_AtSpiScreen;
 }

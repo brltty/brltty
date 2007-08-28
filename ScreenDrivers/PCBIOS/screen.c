@@ -35,12 +35,12 @@ processParameters_PcbiosScreen (char **parameters) {
 }
 
 static int
-open_PcbiosScreen (void) {
+construct_PcbiosScreen (void) {
   return 1;
 }
 
 static void
-close_PcbiosScreen (void) {
+destruct_PcbiosScreen (void) {
 }
 
 static void
@@ -199,6 +199,6 @@ scr_initialize (MainScreen *main) {
   main->base.currentVirtualTerminal = currentVirtualTerminal_PcbiosScreen;
   main->base.executeCommand = executeCommand_PcbiosScreen;
   main->processParameters = processParameters_PcbiosScreen;
-  main->open = open_PcbiosScreen;
-  main->close = close_PcbiosScreen;
+  main->construct = construct_PcbiosScreen;
+  main->destruct = destruct_PcbiosScreen;
 }

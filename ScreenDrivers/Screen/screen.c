@@ -48,7 +48,7 @@ static const mode_t shmMode = S_IRWXU;
 static const int shmSize = 4 + ((66 * 132) * 2);
 
 static int
-open_ScreenScreen (void) {
+construct_ScreenScreen (void) {
 #ifdef HAVE_SHMGET
   {
     key_t keys[2];
@@ -254,7 +254,7 @@ insertKey_ScreenScreen (ScreenKey key) {
 }
 
 static void
-close_ScreenScreen (void) {
+destruct_ScreenScreen (void) {
 #ifdef HAVE_SHMGET
   if (shmIdentifier != -1) {
     shmdt(shmAddress);
@@ -279,7 +279,7 @@ scr_initialize (MainScreen *main) {
   main->base.describe = describe_ScreenScreen;
   main->base.read = read_ScreenScreen;
   main->base.insertKey = insertKey_ScreenScreen;
-  main->open = open_ScreenScreen;
-  main->close = close_ScreenScreen;
+  main->construct = construct_ScreenScreen;
+  main->destruct = destruct_ScreenScreen;
   main->userVirtualTerminal = userVirtualTerminal_ScreenScreen;
 }

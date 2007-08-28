@@ -830,7 +830,7 @@ static int at2Pressed;
 
 static int currentConsoleNumber;
 static int
-open_LinuxScreen (void) {
+construct_LinuxScreen (void) {
   if (setScreenPath()) {
     screenDescriptor = -1;
 
@@ -848,7 +848,7 @@ open_LinuxScreen (void) {
 }
 
 static void
-close_LinuxScreen (void) {
+destruct_LinuxScreen (void) {
   closeConsole();
   closeScreen();
 
@@ -1709,8 +1709,8 @@ scr_initialize (MainScreen *main) {
   main->base.currentVirtualTerminal = currentVirtualTerminal_LinuxScreen;
   main->base.executeCommand = executeCommand_LinuxScreen;
   main->processParameters = processParameters_LinuxScreen;
-  main->open = open_LinuxScreen;
-  main->close = close_LinuxScreen;
+  main->construct = construct_LinuxScreen;
+  main->destruct = destruct_LinuxScreen;
   main->userVirtualTerminal = userVirtualTerminal_LinuxScreen;
 
 #ifdef HAVE_LINUX_INPUT_H
