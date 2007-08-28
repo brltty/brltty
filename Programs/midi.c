@@ -26,7 +26,7 @@
 #include "notes.h"
 
 static MidiDevice *midi = NULL;
-static int channelNumber = 0;
+static const int channelNumber = 0;
 
 const char *midiInstrumentTable[] = {
 /* Piano */
@@ -176,51 +176,60 @@ const char *midiInstrumentTable[] = {
 };
 const unsigned int midiInstrumentCount = ARRAY_COUNT(midiInstrumentTable);
 
-static int midiConstruct (int errorLevel) {
-   if (!midi) {
-      if (!(midi = openMidiDevice(errorLevel, opt_midiDevice))) {
-         LogPrint(LOG_DEBUG, "cannot open MIDI.");
-         return 0;
-      }
-      LogPrint(LOG_DEBUG, "MIDI opened.");
-   }
-   setMidiInstrument(midi, channelNumber, prefs.midiInstrument);
-   return 1;
+static int
+midiConstruct (int errorLevel) {
+  if (!midi) {
+    if (!(midi = openMidiDevice(errorLevel, opt_midiDevice))) {
+      LogPrint(LOG_DEBUG, "MIDI not available");
+      return 0;
+    }
+
+    LogPrint(LOG_DEBUG, "MIDI enabled");
+  }
+
+  setMidiInstrument(midi, channelNumber, prefs.midiInstrument);
+  return 1;
 }
 
-static int midiPlay (int note, int duration) {
-   if (midi) {
-      beginMidiBlock(midi);
-      if (note) {
-	 LogPrint(LOG_DEBUG, "tone: msec=%d note=%d", duration, note);
-         startMidiNote(midi, channelNumber, note, prefs.midiVolume);
-	 insertMidiWait(midi, duration);
-         stopMidiNote(midi, channelNumber);
-      } else {
-	 LogPrint(LOG_DEBUG, "tone: msec=%d", duration);
-	 insertMidiWait(midi, duration);
-      }
-      endMidiBlock(midi);
-      return 1;
-   }
-   return 0;
+static int
+midiPlay (int note, int duration) {
+  if (midi) {
+    beginMidiBlock(midi);
+
+    if (note) {
+      LogPrint(LOG_DEBUG, "tone: msec=%d note=%d", duration, note);
+      startMidiNote(midi, channelNumber, note, prefs.midiVolume);
+      insertMidiWait(midi, duration);
+      stopMidiNote(midi, channelNumber);
+    } else {
+      LogPrint(LOG_DEBUG, "tone: msec=%d", duration);
+      insertMidiWait(midi, duration);
+    }
+
+    endMidiBlock(midi);
+    return 1;
+  }
+
+  return 0;
 }
 
-static int midiFlush (void) {
-   return flushMidiDevice(midi);
+static int
+midiFlush (void) {
+  return flushMidiDevice(midi);
 }
 
-static void midiDestruct (void) {
-   if (midi) {
-      closeMidiDevice(midi);
-      LogPrint(LOG_DEBUG, "MIDI closed.");
-      midi = NULL;
-   }
+static void
+midiDestruct (void) {
+  if (midi) {
+    closeMidiDevice(midi);
+    midi = NULL;
+    LogPrint(LOG_DEBUG, "MIDI disabled");
+  }
 }
 
 const NoteGenerator midiNoteGenerator = {
-   midiConstruct,
-   midiPlay,
-   midiFlush,
-   midiDestruct
+  midiConstruct,
+  midiPlay,
+  midiFlush,
+  midiDestruct
 };
