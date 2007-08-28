@@ -1394,7 +1394,7 @@ serialOpenDevice (const char *path) {
 #else /* __MINGW32__ */
 #ifdef __MSDOS__
         } else {
-          LogPrint(LOG_ERR, "could not determine port number: %s", device);
+          LogPrint(LOG_ERR, "could not determine serial device port number: %s", device);
         }
 
         if (truePath) free(truePath);
@@ -1407,7 +1407,7 @@ serialOpenDevice (const char *path) {
         close(serial->fileDescriptor);
 #endif /* __MINGW32__ */
       } else {
-        LogPrint(LOG_ERR, "cannot open '%s': %s", device, strerror(errno));
+        LogPrint(LOG_ERR, "cannot open serial device: %s: %s", device, strerror(errno));
       }
 
       free(device);
