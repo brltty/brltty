@@ -32,7 +32,7 @@
 
 static unsigned char lastbuff[40];
 
-static int brl_open(BrailleDisplay *brl, char **parameters, const char *dev) {
+static int brl_construct(BrailleDisplay *brl, char **parameters, const char *dev) {
   /*	Seems to signal en error */ 
   if (!vbinit()) {
     /* Theese are pretty static */ 
@@ -43,7 +43,7 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *dev) {
   return 0;
 }
 
-static void brl_close(BrailleDisplay *brl) {
+static void brl_destruct(BrailleDisplay *brl) {
 }
 
 static void brl_writeWindow(BrailleDisplay *brl) {
