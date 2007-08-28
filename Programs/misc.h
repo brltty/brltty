@@ -133,18 +133,18 @@ extern long int millisecondsSince (const struct timeval *from);
 extern int hasTimedOut (int milliseconds);	/* test timeout condition */
 
 #ifdef HAVE_SYSLOG_H
-#  include <syslog.h>
-#else
-   typedef enum {
-      LOG_EMERG,
-      LOG_ALERT,
-      LOG_CRIT,
-      LOG_ERR,
-      LOG_WARNING,
-      LOG_NOTICE,
-      LOG_INFO,
-      LOG_DEBUG
-   } SyslogLevel;
+#include <syslog.h>
+#else /* HAVE_SYSLOG_H */
+typedef enum {
+  LOG_EMERG,
+  LOG_ALERT,
+  LOG_CRIT,
+  LOG_ERR,
+  LOG_WARNING,
+  LOG_NOTICE,
+  LOG_INFO,
+  LOG_DEBUG
+} SyslogLevel;
 #endif /* HAVE_SYSLOG_H */
 extern void LogOpen(int toConsole);
 extern void LogClose(void);

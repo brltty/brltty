@@ -23,18 +23,18 @@ extern "C" {
 #endif /* __cplusplus */
 
 typedef struct {
-   unsigned char note;     /* standard MIDI values (0 means silence) */
-                           /* 1 through 127 are semitones, 60 is middle C */
-   unsigned char duration; /* milliseconds (0 means stop) */
+  unsigned char note;     /* standard MIDI values (0 means silence) */
+                          /* 1 through 127 are semitones, 60 is middle C */
+  unsigned char duration; /* milliseconds (0 means stop) */
 } TuneElement;
 #define TUNE_NOTE(duration,note) {note, duration}
 #define TUNE_REST(duration) TUNE_NOTE(duration, 0)
 #define TUNE_STOP() TUNE_REST(0)
 
 typedef struct {
-   char *message;
-   unsigned int tactile;
-   TuneElement *elements;
+  char *message;
+  unsigned int tactile;
+  TuneElement *elements;
 } TuneDefinition;
 #define TUNE_TACTILE(duration,pattern) (((duration) << 8) | (pattern))
 
