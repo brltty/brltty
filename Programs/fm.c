@@ -22,52 +22,61 @@
 #include "notes.h"
 #include "adlib.h"
 
-static int cardOpen = 0;
-static unsigned int channelNumber = 0;
+static int fmEnabled = 0;
+static const unsigned int channelNumber = 0;
 
-static int fmConstruct (int errorLevel) {
-   if (!cardOpen) {
-      int ready = 0;
-      if (AL_enablePorts(errorLevel)) {
-         if (AL_testCard(errorLevel)) {
-	    ready = 1;
-	 }
+static int
+fmConstruct (int errorLevel) {
+  if (!fmEnabled) {
+    if (AL_enablePorts(errorLevel)) {
+      if (AL_testCard(errorLevel)) {
+        fmEnabled = 1;
+        LogPrint(LOG_DEBUG, "FM enabled");
+      } else {
+        AL_disablePorts();
       }
-      if (!ready) {
-         LogPrint(LOG_DEBUG, "cannot open FM.");
-         return 0;
-      }
-      LogPrint(LOG_DEBUG, "FM opened.");
-      cardOpen = 1;
-   }
-   return cardOpen;
+    }
+
+    if (!fmEnabled) {
+      LogPrint(LOG_DEBUG, "FM not available");
+      return 0;
+    }
+  }
+
+  return 1;
 }
 
-static int fmPlay (int note, int duration) {
-   LogPrint(LOG_DEBUG, "tone: msec=%d note=%d",
-	    duration, note);
-   if (note)
-      AL_playTone(channelNumber, (int)noteFrequencies[note], duration, prefs.fmVolume);
-   else
-      accurateDelay(duration);
-   return 1;
+static int
+fmPlay (int note, int duration) {
+  LogPrint(LOG_DEBUG, "tone: msec=%d note=%d",
+           duration, note);
+
+  if (note) {
+    AL_playTone(channelNumber, (int)noteFrequencies[note], duration, prefs.fmVolume);
+  } else {
+    accurateDelay(duration);
+  }
+
+  return 1;
 }
 
-static int fmFlush (void) {
-   return cardOpen;
+static int
+fmFlush (void) {
+  return fmEnabled;
 }
 
-static void fmDestruct (void) {
-   if (cardOpen) {
-      AL_disablePorts();
-      LogPrint(LOG_DEBUG, "FM closed.");
-      cardOpen = 0;
-   }
+static void
+fmDestruct (void) {
+  if (fmEnabled) {
+    AL_disablePorts();
+    fmEnabled = 0;
+    LogPrint(LOG_DEBUG, "FM disabled");
+  }
 }
 
 const NoteGenerator fmNoteGenerator = {
-   fmConstruct,
-   fmPlay,
-   fmFlush,
-   fmDestruct
+  fmConstruct,
+  fmPlay,
+  fmFlush,
+  fmDestruct
 };
