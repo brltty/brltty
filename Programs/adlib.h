@@ -71,7 +71,7 @@ extern unsigned char AL_readStatus (void);
 #define AL_TCTL_T2START 0X02
 #define AL_TCTL_T1START 0X01
 
-extern unsigned char AL_channelOffsets[];
+extern const unsigned char AL_channelOffsets[];
 extern const unsigned char AL_channelCount;
 #define ALR_MODULATOR(group,channel) ((group) + AL_channelOffsets[(channel)])
 #define ALR_CARRIER(group,channel) (ALR_MODULATOR((group),(channel)) + 3)
