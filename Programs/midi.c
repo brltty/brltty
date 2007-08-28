@@ -28,7 +28,7 @@
 static MidiDevice *midi = NULL;
 static const int channelNumber = 0;
 
-const char *midiInstrumentTable[] = {
+const char *const midiInstrumentTable[] = {
 /* Piano */
   /* 00 */ "Acoustic Grand Piano",
   /* 01 */ "Bright Acoustic Piano",
