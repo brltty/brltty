@@ -373,14 +373,14 @@ writeCommand (const char *command, int reopen) {
 }
 
 static int
-spk_open (char **parameters) {
+spk_construct (char **parameters) {
   festivalParameters = parameters;
   festivalRate = 0.0;
   return openStream();
 }
 
 static void
-spk_close (void) {
+spk_destruct (void) {
   if (writeCommand("(quit)", 0)) closeStream();
   festivalParameters = NULL;
 }

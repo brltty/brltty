@@ -216,7 +216,7 @@ refreshDisplay (BrailleDisplay *brl) {
 }
 
 static int
-brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
+brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   {
     static const DotsTable dots = {0X80, 0X40, 0X20, 0X10, 0X08, 0X04, 0X02, 0X01};
     makeOutputTable(dots, outputTable);
@@ -261,7 +261,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
 }
 
 static void
-brl_close (BrailleDisplay *brl) {
+brl_destruct (BrailleDisplay *brl) {
   serialCloseDevice(serialDevice);
   serialDevice = NULL;
 }

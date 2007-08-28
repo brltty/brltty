@@ -1181,7 +1181,7 @@ main (int argc, char *argv[]) {
             api_suspend(&brl);
           else
 #endif /* ENABLE_API */
-            closeBrailleDriver();
+            destructBrailleDriver();
           suspended = 1;
         }
       } else {
@@ -1190,7 +1190,7 @@ main (int argc, char *argv[]) {
 #ifdef ENABLE_API
             apiStarted? api_resume(&brl):
 #endif /* ENABLE_API */
-            openBrailleDriver());
+            constructBrailleDriver());
         }
       }
     }

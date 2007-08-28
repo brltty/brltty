@@ -287,7 +287,7 @@ peek_receive_packet(unsigned char *packet)
 
 
 static int
-brl_open (BrailleDisplay *brl, char **parameters, const char *device)
+brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
 {
   int hasrouting, dotspercell, version1, version2;
 
@@ -399,13 +399,13 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
   return 1;
 
 failure:;
-  brl_close(brl);
+  brl_destruct(brl);
   return 0;
 }
 
 
 static void 
-brl_close (BrailleDisplay *brl)
+brl_destruct (BrailleDisplay *brl)
 {
   if (serialDevice)
     {

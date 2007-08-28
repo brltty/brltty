@@ -52,7 +52,7 @@ static	int		*const readfd	= &fds[0];
 static	int		*const writefd	= &fds[1];
 
 static int
-spk_open (char **parameters)
+spk_construct (char **parameters)
 {
   child = -1;
   flite_init();
@@ -73,7 +73,7 @@ spk_open (char **parameters)
 }
 
 static void
-spk_close (void)
+spk_destruct (void)
 {
   spk_mute();
 

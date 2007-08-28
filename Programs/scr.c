@@ -91,10 +91,10 @@ initializeScreen (void) {
 }
 
 int
-openScreenDriver (char **parameters) {
+constructScreenDriver (char **parameters) {
   initializeScreen();
   if (mainScreen.processParameters(parameters)) {
-    if (mainScreen.open()) {
+    if (mainScreen.construct()) {
       return 1;
     } else {
       LogPrint(LOG_DEBUG, "screen driver initialization failed: %s",
@@ -106,8 +106,8 @@ openScreenDriver (char **parameters) {
 }
 
 void
-closeScreenDriver (void) {
-  mainScreen.close();
+destructScreenDriver (void) {
+  mainScreen.destruct();
 }
 
 void
@@ -125,15 +125,15 @@ identifyScreenDrivers (int full) {
 }
 
 void
-openSpecialScreens (void) {
+constructSpecialScreens (void) {
   initializeHelpScreen(&helpScreen);
   initializeFrozenScreen(&frozenScreen);
 }
 
 void
-closeSpecialScreens (void) {
-  frozenScreen.close();
-  helpScreen.close();
+destructSpecialScreens (void) {
+  frozenScreen.destruct();
+  helpScreen.destruct();
 }
 
 
@@ -290,22 +290,22 @@ executeScreenCommand (int command) {
 
 
 int
-openRoutingScreen (void) {
+constructRoutingScreen (void) {
   /* This function should be used in a forked process. Though we want to
    * have a separate file descriptor for the main screen from the one used
    * in the main thread.  So we close and reopen the device.
    */
-  mainScreen.close();
-  return mainScreen.open();
+  mainScreen.destruct();
+  return mainScreen.construct();
 }
 
 void
-closeRoutingScreen (void) {
-  mainScreen.close();
+destructRoutingScreen (void) {
+  mainScreen.destruct();
 }
 
 
-static int helpOpened = 0;
+static int helpConstructed = 0;
 
 int
 isHelpScreen (void) {
@@ -319,7 +319,7 @@ haveHelpScreen (void) {
 
 int
 activateHelpScreen (void) {
-  if (!helpOpened) return 0;
+  if (!helpConstructed) return 0;
   activateScreen(SCR_HELP);
   return 1;
 }
@@ -330,15 +330,15 @@ deactivateHelpScreen (void) {
 }
 
 int
-openHelpScreen (const char *file) {
-  return helpOpened = helpScreen.open(file);
+constructHelpScreen (const char *file) {
+  return helpConstructed = helpScreen.construct(file);
 }
 
 void
-closeHelpScreen (void) {
-  if (helpOpened) {
-    helpScreen.close();
-    helpOpened = 0;
+destructHelpScreen (void) {
+  if (helpConstructed) {
+    helpScreen.destruct();
+    helpConstructed = 0;
   }
 }
 
@@ -370,7 +370,7 @@ haveFrozenScreen (void) {
 
 int
 activateFrozenScreen (void) {
-  if (haveFrozenScreen() || !frozenScreen.open(&mainScreen.base)) return 0;
+  if (haveFrozenScreen() || !frozenScreen.construct(&mainScreen.base)) return 0;
   activateScreen(SCR_FROZEN);
   return 1;
 }
@@ -378,7 +378,7 @@ activateFrozenScreen (void) {
 void
 deactivateFrozenScreen (void) {
   if (haveFrozenScreen()) {
-    frozenScreen.close();
+    frozenScreen.destruct();
     deactivateScreen(SCR_FROZEN);
   }
 }

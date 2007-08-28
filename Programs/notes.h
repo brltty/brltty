@@ -23,10 +23,10 @@ extern "C" {
 #endif /* __cplusplus */
 
 typedef struct {
-   int (*open) (int errorLevel);
+   int (*construct) (int errorLevel);
    int (*play) (int note, int duration);
    int (*flush) (void);
-   void (*close) (void);
+   void (*destruct) (void);
 } NoteGenerator;
 
 extern const NoteGenerator beeperNoteGenerator;

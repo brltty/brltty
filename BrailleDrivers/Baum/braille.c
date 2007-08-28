@@ -1841,7 +1841,7 @@ static const InputOutputOperations bluetoothOperations = {
 /* Driver Handlers */
 
 static int
-brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
+brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   const ProtocolOperations *const *requestedProtocols;
 
   {
@@ -1941,7 +1941,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
 }
 
 static void
-brl_close (BrailleDisplay *brl) {
+brl_destruct (BrailleDisplay *brl) {
   io->closePort();
 }
 

@@ -94,8 +94,8 @@ typedef struct {
   int statusStyle;
 
   /* Routines provided by the braille driver library: */
-  int (*open) (BrailleDisplay *, char **parameters, const char *);
-  void (*close) (BrailleDisplay *);
+  int (*construct) (BrailleDisplay *, char **parameters, const char *);
+  void (*destruct) (BrailleDisplay *);
   int (*readCommand) (BrailleDisplay *, BRL_DriverCommandContext);
   void (*writeWindow) (BrailleDisplay *);
   void (*writeStatus) (BrailleDisplay *brl, const unsigned char *);

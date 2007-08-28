@@ -34,7 +34,7 @@ static PcmAmplitudeFormat amplitudeFormat;
 static unsigned char *blockAddress = NULL;
 static size_t blockUsed = 0;
 
-static int openPcm (int errorLevel) {
+static int pcmConstruct (int errorLevel) {
    if (pcm) return 1;
    if ((pcm = openPcmDevice(errorLevel, opt_pcmDevice))) {
       blockSize = getPcmBlockSize(pcm);
@@ -151,7 +151,7 @@ static int writeAmplitude (int amplitude) {
    return 1;
 }
 
-static int playPcm (int note, int duration) {
+static int pcmPlay (int note, int duration) {
    if (pcm) {
       long int sampleCount = sampleRate * duration / 1000;
       if (note) {
@@ -201,11 +201,11 @@ static int flushBlock (void) {
    return 1;
 }
 
-static int flushPcm (void) {
+static int pcmFlush (void) {
    return (pcm)? flushBlock(): 0;
 }
 
-static void closePcm (void) {
+static void pcmDestruct (void) {
    if (pcm) {
       flushBlock();
       free(blockAddress);
@@ -217,8 +217,8 @@ static void closePcm (void) {
 }
 
 const NoteGenerator pcmNoteGenerator = {
-   openPcm,
-   playPcm,
-   flushPcm,
-   closePcm
+   pcmConstruct,
+   pcmPlay,
+   pcmFlush,
+   pcmDestruct
 };

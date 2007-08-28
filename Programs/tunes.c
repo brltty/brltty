@@ -480,7 +480,7 @@ setTuneDevice (TuneDevice device) {
    }
 
    if (!generator) return 0;
-   if (noteGenerator) noteGenerator->close();
+   if (noteGenerator) noteGenerator->destruct();
    closeTimer = 0;
    noteGenerator = generator;
    return 1;
@@ -490,7 +490,7 @@ void
 closeTuneDevice (int force) {
    if (closeTimer) {
       if (force) closeTimer = 1;
-      if (!--closeTimer) noteGenerator->close();
+      if (!--closeTimer) noteGenerator->destruct();
    }
 }
  
@@ -499,7 +499,7 @@ playTune (const TuneDefinition *tune) {
    int tunePlayed = 0;
    if (prefs.alertTunes && tune->elements) {
       if (noteGenerator) {
-	 if (noteGenerator->open(openErrorLevel)) {
+	 if (noteGenerator->construct(openErrorLevel)) {
 	    TuneElement *element = tune->elements;
 	    tunePlayed = 1;
 	    closeTimer = 2000 / updateInterval;

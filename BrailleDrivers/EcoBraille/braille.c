@@ -157,7 +157,7 @@ static int WriteToBrlDisplay(unsigned char *Data)
 return(0);
 }
 
-static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
+static int brl_construct(BrailleDisplay *brl, char **parameters, const char *device)
 {
   short ModelID = MODEL;
   unsigned char buffer[DIM_BRL_ID + 6];
@@ -255,7 +255,7 @@ return 0;
 }
 
 
-static void brl_close(BrailleDisplay *brl)
+static void brl_destruct(BrailleDisplay *brl)
 {
   free(rawdata);
   serialCloseDevice(serialDevice);

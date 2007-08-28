@@ -526,7 +526,7 @@ isSet:
 }
 
 static int
-spk_open (char **parameters) {
+spk_construct (char **parameters) {
    if (!eci) {
       if (setIni(parameters[PARM_IniFile])) {
 	 if ((eci = eciNew()) != NULL_ECI_HAND) {
@@ -572,7 +572,7 @@ spk_open (char **parameters) {
 }
 
 static void
-spk_close (void) {
+spk_destruct (void) {
    if (eci) {
       eciDelete(eci);
       eci = NULL_ECI_HAND;

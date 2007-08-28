@@ -343,7 +343,7 @@ ResetTypematic (void)
 
 
 static int
-brl_open (BrailleDisplay *brl, char **parameters, const char *device)
+brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
 {
   int i=0;
   unsigned char reply[Q_REPLY_LENGTH];
@@ -517,13 +517,13 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device)
   return 1;
 
 failure:;
-  brl_close(brl);
+  brl_destruct(brl);
   return 0;
 }
 
 
 static void 
-brl_close (BrailleDisplay *brl)
+brl_destruct (BrailleDisplay *brl)
 {
   if (serialDevice) {
     serialCloseDevice(serialDevice);

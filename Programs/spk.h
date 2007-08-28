@@ -27,8 +27,8 @@ extern "C" {
 typedef struct {
   DRIVER_DEFINITION_DECLARATION;
   const char *const *parameters;
-  int (*open) (char **parameters);
-  void (*close) (void);
+  int (*construct) (char **parameters);
+  void (*destruct) (void);
   void (*say) (const unsigned char *buffer, int len);
   void (*mute) (void);
 

@@ -107,7 +107,7 @@ my_getch (void) {
 #endif /* USE_CURSES */
 
 static int
-brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
+brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   int ttyBaud = 9600;
   char *ttyType = "vt100";
   int windowLines = 1;
@@ -215,7 +215,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
 }
 
 static void
-brl_close (BrailleDisplay *brl) {
+brl_destruct (BrailleDisplay *brl) {
 #ifdef USE_CURSES
   if (ttyScreen) {
     endwin();

@@ -26,8 +26,8 @@ extern "C" {
 
 typedef struct {
   BaseScreen base;
-  int (*open) (BaseScreen *);		/* called every time the screen is frozen */
-  void (*close) (void);		/* called to discard frozen screen image */
+  int (*construct) (BaseScreen *);		/* called every time the screen is frozen */
+  void (*destruct) (void);		/* called to discard frozen screen image */
 } FrozenScreen;
 
 extern void initializeFrozenScreen (FrozenScreen *);

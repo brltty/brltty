@@ -351,7 +351,7 @@ static int brl_reset(BrailleDisplay *brl)
   return (brl_writePacket(brl, packet, sizeof(packet)) == sizeof(packet));
 }
 
-static int brl_open (BrailleDisplay *brl, char **parameters, const char *device)
+static int brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
 {
    {
      static const DotsTable dots = {0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80};
@@ -395,7 +395,7 @@ static int brl_open (BrailleDisplay *brl, char **parameters, const char *device)
    return 1;
 }
 
-static void brl_close (BrailleDisplay *brl)
+static void brl_destruct (BrailleDisplay *brl)
 {
    if (rawdata)
      {

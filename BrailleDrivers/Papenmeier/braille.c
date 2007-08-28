@@ -1490,7 +1490,7 @@ resetTerminalTable (void) {
 }
 
 static int
-brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
+brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   if (!validateYesNo(&debugKeys, parameters[PARM_DEBUGKEYS]))
     LogPrint(LOG_WARNING, "%s: %s", "invalid debug keys setting", parameters[PARM_DEBUGKEYS]);
 
@@ -1565,7 +1565,7 @@ failed:
 }
 
 static void
-brl_close (BrailleDisplay *brl) {
+brl_destruct (BrailleDisplay *brl) {
   io->closePort();
   protocol->releaseResources();
   resetTerminalTable();

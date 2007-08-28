@@ -29,8 +29,8 @@ extern "C" {
 #include "brl.h"
 
 /* Routines provided by this braille display driver. */
-static int brl_open (BrailleDisplay *, char **parameters, const char *);
-static void brl_close (BrailleDisplay *);
+static int brl_construct (BrailleDisplay *, char **parameters, const char *);
+static void brl_destruct (BrailleDisplay *);
 static int brl_readCommand (BrailleDisplay *, BRL_DriverCommandContext);
 static void brl_writeWindow (BrailleDisplay *);
 static void brl_writeStatus (BrailleDisplay *brl, const unsigned char *);
@@ -87,8 +87,8 @@ BRLCONST BrailleDriver BRLSYMBOL = {
   BRLHELP,
   BRLSTAT,
 
-  brl_open,
-  brl_close,
+  brl_construct,
+  brl_destruct,
   brl_readCommand,
   brl_writeWindow,
   brl_writeStatus,

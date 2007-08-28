@@ -41,7 +41,7 @@ typedef enum {
 static SPDConnection *connection = NULL;
 
 static int
-spk_open (char **parameters) {
+spk_construct (char **parameters) {
   if (parameters[PARM_PORT] && *parameters[PARM_PORT]) {
     static const int minimumPort = 0X1;
     static const int maximumPort = 0XFFFF;
@@ -97,7 +97,7 @@ spk_open (char **parameters) {
 }
 
 static void
-spk_close (void) {
+spk_destruct (void) {
   if (connection) {
     spd_close(connection);
     connection = NULL;

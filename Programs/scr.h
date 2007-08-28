@@ -66,8 +66,8 @@ typedef enum {
 } ScreenKey;
 
 /* Routines which apply to all screens. */
-extern void openSpecialScreens (void);		/* close screen reading */
-extern void closeSpecialScreens (void);		/* close screen reading */
+extern void constructSpecialScreens (void);
+extern void destructSpecialScreens (void);
 
 extern int isLiveScreen (void);
 
@@ -102,12 +102,12 @@ extern int executeScreenCommand (int);
  * This is needed because the forked subprocess shares its parent's
  * file descriptors.  A readScreen equivalent is not needed.
  */
-extern int openRoutingScreen (void);
-extern void closeRoutingScreen (void);
+extern int constructRoutingScreen (void);
+extern void destructRoutingScreen (void);
 
 /* Routines which apply to the help screen. */
-extern int openHelpScreen (const char *);
-extern void closeHelpScreen (void);
+extern int constructHelpScreen (const char *);
+extern void destructHelpScreen (void);
 extern void setHelpPageNumber (short);
 extern short getHelpPageNumber (void);
 extern short getHelpPageCount (void);
@@ -120,8 +120,8 @@ extern int haveScreenDriver (const char *code);
 extern const char *getDefaultScreenDriver (void);
 extern const ScreenDriver *loadScreenDriver (const char *code, void **driverObject, const char *driverDirectory);
 extern void initializeScreen (void);
-extern int openScreenDriver (char **parameters);
-extern void closeScreenDriver (void);
+extern int constructScreenDriver (char **parameters);
+extern void destructScreenDriver (void);
 extern void identifyScreenDriver (const ScreenDriver *driver, int full);
 extern void identifyScreenDrivers (int full);
 extern const ScreenDriver *screen;

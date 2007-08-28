@@ -169,7 +169,7 @@ main (int argc, char *argv[]) {
       --argc;
     }
 
-    if (openScreenDriver(parameterSettings)) {
+    if (constructScreenDriver(parameterSettings)) {
       ScreenDescription description;
       int left, top, width, height;
       unsigned char buffer[0X800];
@@ -206,7 +206,7 @@ main (int argc, char *argv[]) {
       status = 3;
     }
 
-    closeScreenDriver();
+    destructScreenDriver();
   } else {
     LogPrint(LOG_ERR, "can't load screen driver.");
     status = 3;

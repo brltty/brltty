@@ -53,7 +53,7 @@ static unsigned char latin2cp437[128] =
    176, 151, 163, 150, 129, 178, 254, 152};
 
 static int
-spk_open (char **parameters)
+spk_construct (char **parameters)
 {
   return 1;
 }
@@ -110,6 +110,6 @@ spk_mute (void)
 
 
 static void
-spk_close (void)
+spk_destruct (void)
 {
 }

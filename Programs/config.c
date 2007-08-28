@@ -91,7 +91,7 @@ static char *opt_brailleDevice;
 int opt_releaseDevice;
 static char **brailleDevices;
 static const char *brailleDevice = NULL;
-static int brailleOpened;
+static int brailleConstructed;
 
 static char *opt_brailleDriver;
 static char **brailleDrivers;
@@ -1449,16 +1449,16 @@ initializeBraille (void) {
 }
 
 int
-openBrailleDriver (void) {
+constructBrailleDriver (void) {
   initializeBraille();
 
-  if (braille->open(&brl, brailleParameters, brailleDevice)) {
+  if (braille->construct(&brl, brailleParameters, brailleDevice)) {
     if (ensureBrailleBuffer(&brl, LOG_INFO)) {
-      brailleOpened = 1;
+      brailleConstructed = 1;
       return 1;
     }
 
-    braille->close(&brl);
+    braille->destruct(&brl);
   } else {
     LogPrint(LOG_DEBUG, "%s: %s -> %s",
              gettext("braille driver initialization failed"),
@@ -1469,10 +1469,10 @@ openBrailleDriver (void) {
 }
 
 void
-closeBrailleDriver (void) {
-  brailleOpened = 0;
+destructBrailleDriver (void) {
+  brailleConstructed = 0;
   drainBrailleOutput(&brl, 0);
-  braille->close(&brl);
+  braille->destruct(&brl);
 }
 
 static int
@@ -1482,23 +1482,23 @@ initializeBrailleDriver (const char *code, int verify) {
                                           braille->definition.code,
                                           opt_brailleParameters);
     if (brailleParameters) {
-      int opened = verify;
+      int constructed = verify;
 
-      if (!opened) {
+      if (!constructed) {
         LogPrint(LOG_DEBUG, "initializing braille driver: %s -> %s",
                  braille->definition.code, brailleDevice);
 
-        if (openBrailleDriver()) {
+        if (constructBrailleDriver()) {
 #ifdef ENABLE_API
           if (apiStarted) api_link(&brl);
 #endif /* ENABLE_API */
 
           brailleDriver = braille;
-          opened = 1;
+          constructed = 1;
         }
       }
 
-      if (opened) {
+      if (constructed) {
         LogPrint(LOG_INFO, "%s: %s [%s]",
                  gettext("Braille Driver"), braille->definition.code, braille->definition.name);
         identifyBrailleDriver(braille, 0);
@@ -1512,7 +1512,7 @@ initializeBrailleDriver (const char *code, int verify) {
         {
           char *path = makePath(opt_dataDirectory, braille->helpFile);
           if (path) {
-            if (verify || openHelpScreen(path)) {
+            if (verify || constructHelpScreen(path)) {
               LogPrint(LOG_INFO, "%s: %s[%d]", gettext("Help Page"), path, getHelpPageNumber());
             } else {
               LogPrint(LOG_WARNING, "%s: %s", gettext("cannot open help file"), path);
@@ -1627,14 +1627,14 @@ activateBrailleDriver (int verify) {
 
 static void
 deactivateBrailleDriver (void) {
-  closeHelpScreen();
+  destructHelpScreen();
 
   if (brailleDriver) {
 #ifdef ENABLE_API
     if (apiStarted) api_unlink(&brl);
 #endif /* ENABLE_API */
 
-    if (brailleOpened) closeBrailleDriver();
+    if (brailleConstructed) destructBrailleDriver();
     braille = &noBraille;
     brailleDevice = NULL;
     brailleDriver = NULL;
@@ -1709,7 +1709,7 @@ restartBrailleDriver (void) {
 
 static void
 exitBrailleDriver (void) {
-  if (brailleOpened) {
+  if (brailleConstructed) {
     clearStatusCells(&brl);
     message(gettext("BRLTTY terminated"), MSG_NODELAY|MSG_SILENT);
   }
@@ -1731,10 +1731,10 @@ initializeSpeech (void) {
 }
 
 int
-openSpeechDriver (void) {
+constructSpeechDriver (void) {
   initializeSpeech();
 
-  if (speech->open(speechParameters)) {
+  if (speech->construct(speechParameters)) {
     return 1;
   } else {
     LogPrint(LOG_DEBUG, "speech driver initialization failed: %s",
@@ -1745,8 +1745,8 @@ openSpeechDriver (void) {
 }
 
 void
-closeSpeechDriver (void) {
-  speech->close();
+destructSpeechDriver (void) {
+  speech->destruct();
 }
 
 static int
@@ -1756,19 +1756,19 @@ initializeSpeechDriver (const char *code, int verify) {
                                          speech->definition.code,
                                          opt_speechParameters);
     if (speechParameters) {
-      int opened = verify;
+      int constructed = verify;
 
-      if (!opened) {
+      if (!constructed) {
         LogPrint(LOG_DEBUG, "initializing speech driver: %s",
                  speech->definition.code);
 
-        if (openSpeechDriver()) {
-          opened = 1;
+        if (constructSpeechDriver()) {
+          constructed = 1;
           speechDriver = speech;
         }
       }
 
-      if (opened) {
+      if (constructed) {
         LogPrint(LOG_INFO, "%s: %s [%s]",
                  gettext("Speech Driver"), speech->definition.code, speech->definition.name);
         identifySpeechDriver(speech, 0);
@@ -1815,7 +1815,7 @@ activateSpeechDriver (int verify) {
 static void
 deactivateSpeechDriver (void) {
   if (speechDriver) {
-    closeSpeechDriver();
+    destructSpeechDriver();
 
     speech = &noSpeech;
     speechDriver = NULL;
@@ -1879,19 +1879,19 @@ initializeScreenDriver (const char *code, int verify) {
                                          getScreenDriverDefinition(screen)->code,
                                          opt_screenParameters);
     if (screenParameters) {
-      int opened = verify;
+      int constructed = verify;
 
-      if (!opened) {
+      if (!constructed) {
         LogPrint(LOG_DEBUG, "initializing screen driver: %s",
                  getScreenDriverDefinition(screen)->code);
 
-        if (openScreenDriver(screenParameters)) {
-          opened = 1;
+        if (constructScreenDriver(screenParameters)) {
+          constructed = 1;
           screenDriver = screen;
         }
       }
 
-      if (opened) {
+      if (constructed) {
         LogPrint(LOG_INFO, "%s: %s [%s]",
                  gettext("Screen Driver"),
                  getScreenDriverDefinition(screen)->code,
@@ -1941,7 +1941,7 @@ activateScreenDriver (int verify) {
 static void
 deactivateScreenDriver (void) {
   if (screenDriver) {
-    closeScreenDriver();
+    destructScreenDriver();
 
     screen = &noScreen;
     screenDriver = NULL;
@@ -1987,7 +1987,7 @@ stopScreenDriver (void) {
 static void
 exitScreen (void) {
   stopScreenDriver();
-  closeSpecialScreens();
+  destructSpecialScreens();
 }
 
 static void
@@ -2329,7 +2329,7 @@ startup (int argc, char *argv[]) {
 
   /* initialize screen driver */
   atexit(exitScreen);
-  openSpecialScreens();
+  constructSpecialScreens();
   screenDrivers = splitString(opt_screenDriver? opt_screenDriver: "", ',', NULL);
   if (opt_verify) {
     if (activateScreenDriver(1)) deactivateScreenDriver();
@@ -2364,7 +2364,7 @@ startup (int argc, char *argv[]) {
 
   /* Activate the braille display. */
   brailleDrivers = splitString(opt_brailleDriver? opt_brailleDriver: "", ',', NULL);
-  brailleOpened = 0;
+  brailleConstructed = 0;
   if (opt_verify) {
     if (activateBrailleDriver(1)) deactivateBrailleDriver();
   } else {

@@ -386,7 +386,7 @@ loadSynthesisLibrary (void) {
 }
 
 static int
-spk_open (char **parameters) {
+spk_construct (char **parameters) {
   int code;
   loadSynthesisLibrary();
 
@@ -432,12 +432,12 @@ spk_open (char **parameters) {
     LogPrint(LOG_ERR, "Cannot allocate speech queue.");
   }
 
-  spk_close();
+  spk_destruct();
   return 0;
 }
 
 static void
-spk_close (void) {
+spk_destruct (void) {
   stopSynthesisThread();
   closeSoundDevice();
 

@@ -697,7 +697,7 @@ identifyModel (BrailleDisplay *brl, unsigned char identifier) {
 }
 
 static int
-brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
+brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   unsigned char ModelID;
 
   {
@@ -749,7 +749,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
 }
 
 
-static void brl_close (BrailleDisplay *brl)
+static void brl_destruct (BrailleDisplay *brl)
 {
   if (rawdata) {
     free(rawdata);

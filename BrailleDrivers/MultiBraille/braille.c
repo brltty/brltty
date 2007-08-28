@@ -90,7 +90,7 @@ typedef struct KeyStroke {
 /* Function prototypes: */
 static struct KeyStroke getbrlkey (void);		/* get a keystroke from the MultiBraille */
 
-static int brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
+static int brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 	short n, success;		/* loop counters, flags, etc. */
 	unsigned char *init_seq = (unsigned char *)"\002\0330";	/* string to send to Braille to initialise: [ESC][0] */
 	unsigned char *init_ack = (unsigned char *)"\002\033V";	/* string to expect as acknowledgement: [ESC][V]... */
@@ -175,7 +175,7 @@ failure:
 }
 
 
-static void brl_close (BrailleDisplay *brl) {
+static void brl_destruct (BrailleDisplay *brl) {
 	unsigned char *pre_data = (unsigned char *)"\002\033Z";	/* string to send to */
 	unsigned char *post_data = (unsigned char *)"\001\015";
 	unsigned char *close_seq = (unsigned char *)"";

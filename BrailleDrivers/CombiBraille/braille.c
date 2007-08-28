@@ -51,7 +51,7 @@ static short rawlen;			/* length of rawdata buffer */
 static int getbrlkey (void);		/* get a keystroke from the CombiBraille */
 
 static int
-brl_open (BrailleDisplay *brl, char **parameters, const char *device)
+brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
 {
   short n, success;		/* loop counters, flags, etc. */
   unsigned char *init_seq = (unsigned char *)INIT_SEQ;	/* bytewise accessible copies */
@@ -133,7 +133,7 @@ failure:
 
 
 static void
-brl_close (BrailleDisplay *brl)
+brl_destruct (BrailleDisplay *brl)
 {
   unsigned char *pre_data = (unsigned char *)PRE_DATA;	/* bytewise accessible copies */
   unsigned char *post_data = (unsigned char *)POST_DATA;

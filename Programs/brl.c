@@ -41,12 +41,12 @@
 #include "brl_driver.h"
 
 static int
-brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
+brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   return 1;
 }
 
 static void
-brl_close (BrailleDisplay *brl) {
+brl_destruct (BrailleDisplay *brl) {
 }
 
 static int

@@ -591,7 +591,7 @@ setAtcSensitivity (BrailleDisplay *brl, unsigned char value) {
 }
 
 static int
-brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
+brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   at2Buffer = NULL;
   at2Size = 0;
   at2Count = 0;
@@ -662,7 +662,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
 }
 
 static void
-brl_close (BrailleDisplay *brl) {
+brl_destruct (BrailleDisplay *brl) {
   if (model->sessionEndLength) {
     io->writeBytes(model->sessionEndAddress, model->sessionEndLength, NULL);
   }

@@ -25,7 +25,7 @@
 static int cardOpen = 0;
 static unsigned int channelNumber = 0;
 
-static int openFm (int errorLevel) {
+static int fmConstruct (int errorLevel) {
    if (!cardOpen) {
       int ready = 0;
       if (AL_enablePorts(errorLevel)) {
@@ -43,7 +43,7 @@ static int openFm (int errorLevel) {
    return cardOpen;
 }
 
-static int playFm (int note, int duration) {
+static int fmPlay (int note, int duration) {
    LogPrint(LOG_DEBUG, "tone: msec=%d note=%d",
 	    duration, note);
    if (note)
@@ -53,11 +53,11 @@ static int playFm (int note, int duration) {
    return 1;
 }
 
-static int flushFm (void) {
+static int fmFlush (void) {
    return cardOpen;
 }
 
-static void closeFm (void) {
+static void fmDestruct (void) {
    if (cardOpen) {
       AL_disablePorts();
       LogPrint(LOG_DEBUG, "FM closed.");
@@ -66,8 +66,8 @@ static void closeFm (void) {
 }
 
 const NoteGenerator fmNoteGenerator = {
-   openFm,
-   playFm,
-   flushFm,
-   closeFm
+   fmConstruct,
+   fmPlay,
+   fmFlush,
+   fmDestruct
 };

@@ -72,7 +72,7 @@ static void myerror(char *fmt, ...)
   buf[ERRBUFLEN-1] = 0;
   va_end(argp);
   LogPrint(LOG_ERR, "%s", buf);
-  spk_close();
+  spk_destruct();
 }
 static void myperror(char *fmt, ...)
 {
@@ -89,10 +89,10 @@ static void myperror(char *fmt, ...)
   buf[ERRBUFLEN-1] = 0;
   va_end(argp);
   LogPrint(LOG_ERR, "%s", buf);
-  spk_close();
+  spk_destruct();
 }
 
-static int spk_open (char **parameters)
+static int spk_construct (char **parameters)
 {
   char *extProgPath = parameters[PARM_PROGRAM];
 
@@ -358,7 +358,7 @@ static void spk_rate (float setting)
   mywrite(helper_fd_out, &l, 5);
 }
 
-static void spk_close (void)
+static void spk_destruct (void)
 {
   if(helper_fd_in >= 0)
     close(helper_fd_in);

@@ -27,8 +27,8 @@ extern "C" {
 
 typedef struct {
   BaseScreen base;
-  int (*open) (const char *);
-  void (*close) (void);		   /* called once to close the help screen */
+  int (*construct) (const char *);
+  void (*destruct) (void);		   /* called once to close the help screen */
   void (*setPageNumber) (short);
   short (*getPageNumber) (void);
   short (*getPageCount) (void);

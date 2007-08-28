@@ -29,7 +29,7 @@ static unsigned char *screenText;
 static unsigned char *screenAttributes;
 
 static int
-open_FrozenScreen (BaseScreen *source) {
+construct_FrozenScreen (BaseScreen *source) {
   describeBaseScreen(source, &screenDescription);
   if ((screenText = calloc(screenDescription.rows*screenDescription.cols, sizeof(*screenText)))) {
     if ((screenAttributes = calloc(screenDescription.rows*screenDescription.cols, sizeof(*screenAttributes)))) {
@@ -52,7 +52,7 @@ open_FrozenScreen (BaseScreen *source) {
 }
 
 static void
-close_FrozenScreen (void) {
+destruct_FrozenScreen (void) {
   if (screenText) {
     free(screenText);
     screenText = NULL;
@@ -93,8 +93,8 @@ initializeFrozenScreen (FrozenScreen *frozen) {
   frozen->base.describe = describe_FrozenScreen;
   frozen->base.read = read_FrozenScreen;
   frozen->base.currentVirtualTerminal = currentVirtualTerminal_FrozenScreen;
-  frozen->open = open_FrozenScreen;
-  frozen->close = close_FrozenScreen;
+  frozen->construct = construct_FrozenScreen;
+  frozen->destruct = destruct_FrozenScreen;
   screenText = NULL;
   screenAttributes = NULL;
 }

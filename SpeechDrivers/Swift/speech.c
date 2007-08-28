@@ -87,7 +87,7 @@ setEnvironmentVariable (const char *name, const char *value) {
 }
 
 static int
-spk_open (char **parameters) {
+spk_construct (char **parameters) {
   swift_result_t result;
 
   if (setEnvironmentVariable("SWIFT_HOME", SWIFT_ROOT)) {
@@ -139,7 +139,7 @@ spk_open (char **parameters) {
 }
 
 static void
-spk_close (void) {
+spk_destruct (void) {
   swift_result_t result;
 
   if (swiftPort) {

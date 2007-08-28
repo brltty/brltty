@@ -38,7 +38,7 @@ static const char *commandPath;	/* default full path for the say command */
 static FILE *commandStream = NULL;
 
 static int
-spk_open (char **parameters)
+spk_construct (char **parameters)
 {
   const char *command = parameters[PARM_COMMAND];
   commandPath = *command? command: SAY_CMD;
@@ -71,7 +71,7 @@ spk_mute (void)
 }
 
 static void
-spk_close (void)
+spk_destruct (void)
 {
    spk_mute();
 }

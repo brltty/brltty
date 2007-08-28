@@ -29,10 +29,10 @@ extern "C" {
 #include "spk.h"
 
 /* Routines provided by this speech driver. */
-static int spk_open (char **parameters);
+static int spk_construct (char **parameters);
 static void spk_say (const unsigned char *buffer, int len);
 static void spk_mute (void);
-static void spk_close (void);
+static void spk_destruct (void);
 
 #ifdef SPK_HAVE_EXPRESS
   static void spk_express (const unsigned char *buffer, int len);
@@ -78,8 +78,8 @@ SPKCONST SpeechDriver SPKSYMBOL = {
   NULL,
 #endif /* SPKPARMS */
 
-  spk_open,
-  spk_close,
+  spk_construct,
+  spk_destruct,
   spk_say,
   spk_mute,
 

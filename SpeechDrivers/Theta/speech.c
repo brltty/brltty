@@ -79,7 +79,7 @@ loadVoice (theta_voice_desc *descriptor) {
 }
 
 static int
-spk_open (char **parameters) {
+spk_construct (char **parameters) {
   theta_voice_search criteria;
   memset(&criteria, 0, sizeof(criteria));
   initializeTheta();
@@ -156,7 +156,7 @@ spk_open (char **parameters) {
 }
 
 static void
-spk_close (void) {
+spk_destruct (void) {
   spk_mute();
 
   if (voice) {

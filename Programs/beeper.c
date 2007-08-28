@@ -23,7 +23,7 @@
 
 static int beeperOpened = 0;
 
-static int openBeeper (int errorLevel) {
+static int beeperConstruct (int errorLevel) {
    if (!beeperOpened) {
       if (!canBeep()) {
          LogPrint(LOG_DEBUG, "cannot open beeper.");
@@ -35,7 +35,7 @@ static int openBeeper (int errorLevel) {
    return 1;
 }
 
-static int playBeeper (int note, int duration) {
+static int beeperPlay (int note, int duration) {
    if (beeperOpened) {
       LogPrint(LOG_DEBUG, "tone: msec=%d note=%d",
                duration, note);
@@ -62,11 +62,11 @@ static int playBeeper (int note, int duration) {
    return 0;
 }
 
-static int flushBeeper (void) {
+static int beeperFlush (void) {
    return beeperOpened;
 }
 
-static void closeBeeper (void) {
+static void beeperDestruct (void) {
    if (beeperOpened) {
       beeperOpened = 0;
       endBeep();
@@ -75,8 +75,8 @@ static void closeBeeper (void) {
 }
 
 const NoteGenerator beeperNoteGenerator = {
-   openBeeper,
-   playBeeper,
-   flushBeeper,
-   closeBeeper
+   beeperConstruct,
+   beeperPlay,
+   beeperFlush,
+   beeperDestruct
 };

@@ -39,7 +39,7 @@ static unsigned char **pages;
 static unsigned char *characters;
 
 static void
-close_HelpScreen (void) {
+destruct_HelpScreen (void) {
   if (characters) {
     free(characters);
     characters = NULL;
@@ -192,12 +192,12 @@ loadPages (const char *file) {
   return 1;
 
 failure:
-  close_HelpScreen();
+  destruct_HelpScreen();
   return 0;
 }
 
 static int
-open_HelpScreen (const char *file) {
+construct_HelpScreen (const char *file) {
   if (!pages)
     if (!loadPages(file))
       return 0;
@@ -323,8 +323,8 @@ initializeHelpScreen (HelpScreen *help) {
   help->base.read = read_HelpScreen;
   help->base.insertKey = insertKey_HelpScreen;
   help->base.routeCursor = routeCursor_HelpScreen;
-  help->open = open_HelpScreen;
-  help->close = close_HelpScreen;
+  help->construct = construct_HelpScreen;
+  help->destruct = destruct_HelpScreen;
   help->setPageNumber = setPageNumber_HelpScreen;
   help->getPageNumber = getPageNumber_HelpScreen;
   help->getPageCount = getPageCount_HelpScreen;

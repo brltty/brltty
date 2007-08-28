@@ -1032,7 +1032,7 @@ static void generateToplevel(void)
   lastcursor = -1;
 }
 
-static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
+static int brl_construct(BrailleDisplay *brl, char **parameters, const char *device)
 {
   lines=1;
   if (*parameters[PARM_LINES]) {
@@ -1120,7 +1120,7 @@ static void destroyToplevel(void)
 #endif /* USE_ */
 }
 
-static void brl_close(BrailleDisplay *brl)
+static void brl_destruct(BrailleDisplay *brl)
 {
   destroyToplevel();
 }

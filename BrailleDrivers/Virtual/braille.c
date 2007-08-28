@@ -878,7 +878,7 @@ dimensionsChanged (BrailleDisplay *brl) {
 }
 
 static int
-brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
+brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   allocateCommandDescriptors();
 
   inputLength = 0;
@@ -983,7 +983,7 @@ failed:
 }
 
 static void
-brl_close (BrailleDisplay *brl) {
+brl_destruct (BrailleDisplay *brl) {
   if (previousVisual) {
     free(previousVisual);
     previousVisual = NULL;

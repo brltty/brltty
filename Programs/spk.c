@@ -37,12 +37,12 @@
 #include "spk_driver.h"
 
 static int
-spk_open (char **parameters) {
+spk_construct (char **parameters) {
   return 1;
 }
 
 static void
-spk_close (void) {
+spk_destruct (void) {
 }
 
 static void

@@ -349,7 +349,7 @@ makeDownloadFifo (void) {
 }
 
 static int
-brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
+brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
    if (memchr(outputTable, 0XFF, sizeof(outputTable))) {
       reverseTranslationTable(outputTable, inputTable);
       outputTable[inputTable[0XFF]] = 0X1A;
@@ -377,7 +377,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
 }
 
 static void
-brl_close (BrailleDisplay *brl) {
+brl_destruct (BrailleDisplay *brl) {
    serialCloseDevice(serialDevice);
    serialDevice = NULL;
 }

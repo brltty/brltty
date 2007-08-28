@@ -335,9 +335,9 @@ startCursorRouting (int column, int row, int screen) {
     case 0: { /* child: cursor routing subprocess */
       int result = ROUTE_ERROR;
       nice(CURSOR_ROUTING_NICENESS);
-      if (openRoutingScreen())
+      if (constructRoutingScreen())
         result = doCursorRouting(column, row, screen);		/* terminate child process */
-      closeRoutingScreen();		/* close second thread of screen reading */
+      destructRoutingScreen();		/* close second thread of screen reading */
       _exit(result);		/* terminate child process */
     }
 

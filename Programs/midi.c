@@ -176,7 +176,7 @@ const char *midiInstrumentTable[] = {
 };
 const unsigned int midiInstrumentCount = ARRAY_COUNT(midiInstrumentTable);
 
-static int openMidi (int errorLevel) {
+static int midiConstruct (int errorLevel) {
    if (!midi) {
       if (!(midi = openMidiDevice(errorLevel, opt_midiDevice))) {
          LogPrint(LOG_DEBUG, "cannot open MIDI.");
@@ -188,7 +188,7 @@ static int openMidi (int errorLevel) {
    return 1;
 }
 
-static int playMidi (int note, int duration) {
+static int midiPlay (int note, int duration) {
    if (midi) {
       beginMidiBlock(midi);
       if (note) {
@@ -206,11 +206,11 @@ static int playMidi (int note, int duration) {
    return 0;
 }
 
-static int flushMidi (void) {
+static int midiFlush (void) {
    return flushMidiDevice(midi);
 }
 
-static void closeMidi (void) {
+static void midiDestruct (void) {
    if (midi) {
       closeMidiDevice(midi);
       LogPrint(LOG_DEBUG, "MIDI closed.");
@@ -219,8 +219,8 @@ static void closeMidi (void) {
 }
 
 const NoteGenerator midiNoteGenerator = {
-   openMidi,
-   playMidi,
-   flushMidi,
-   closeMidi
+   midiConstruct,
+   midiPlay,
+   midiFlush,
+   midiDestruct
 };

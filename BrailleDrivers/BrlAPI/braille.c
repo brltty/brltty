@@ -52,9 +52,9 @@ static int prevShown;
 
 static int restart;
 
-/* Function : brl_open */
+/* Function : brl_construct */
 /* Opens a connection with BrlAPI's server */
-static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
+static int brl_construct(BrailleDisplay *brl, char **parameters, const char *device)
 {
   brlapi_connectionSettings_t settings;
   settings.host = parameters[PARM_HOST];
@@ -86,9 +86,9 @@ out:
   return 0;
 }
 
-/* Function : brl_close */
+/* Function : brl_destruct */
 /* Frees memory and closes the connection with BrlAPI */
-static void brl_close(BrailleDisplay *brl)
+static void brl_destruct(BrailleDisplay *brl)
 {
   free(prevData);
   free(prevText);

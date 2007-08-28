@@ -164,14 +164,14 @@ static int brl_reset(BrailleDisplay *brl)
   return 1;
 }
 
-/* Function : brl_open */
+/* Function : brl_construct */
 /* Opens and configures the serial port properly */
-/* if brl->x <= 0 when brl_open is called, then brl->x is initialized */
+/* if brl->x <= 0 when brl_construct is called, then brl->x is initialized */
 /* either with the BRAILLEDISPLAYSIZE constant, defined in braille.h */
 /* or with the size got through identification request if it succeeds */
-/* Else, brl->x is left unmodified by brl_open, so that */
+/* Else, brl->x is left unmodified by brl_construct, so that */
 /* the braille display can be resized without reloading the driver */ 
-static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
+static int brl_construct(BrailleDisplay *brl, char **parameters, const char *device)
 {
 #ifdef SendIdReq
   unsigned char ch = '?';
@@ -242,9 +242,9 @@ static int brl_open(BrailleDisplay *brl, char **parameters, const char *device)
   return 1;
 }
 
-/* Function : brl_close */
+/* Function : brl_destruct */
 /* Closes the braille device and deallocates dynamic structures */
-static void brl_close(BrailleDisplay *brl)
+static void brl_destruct(BrailleDisplay *brl)
 {
   if (serialDevice) {
     serialCloseDevice(serialDevice);

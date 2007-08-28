@@ -164,7 +164,7 @@ main (int argc, char *argv[]) {
 
     if (chdir(opt_dataDirectory) != -1) {
       identifySpeechDriver(speech, 0);		/* start-up messages */
-      if (speech->open(parameterSettings)) {
+      if (speech->construct(parameterSettings)) {
         if (speech->rate) speech->rate(speechRate);
         if (speech->volume) speech->volume(speechVolume);
 
@@ -173,7 +173,7 @@ main (int argc, char *argv[]) {
         } else {
           processLines(stdin, sayLine, NULL);
         }
-        speech->close();		/* finish with the display */
+        speech->destruct();		/* finish with the display */
         status = 0;
       } else {
         LogPrint(LOG_ERR, "can't initialize speech driver.");

@@ -28,8 +28,8 @@ extern "C" {
 typedef struct {
   BaseScreen base;
   int (*processParameters) (char **parameters);
-  int (*open) (void);
-  void (*close) (void);
+  int (*construct) (void);
+  void (*destruct) (void);
   int (*userVirtualTerminal) (int number);
 } MainScreen;
 

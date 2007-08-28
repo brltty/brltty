@@ -162,14 +162,14 @@ main (int argc, char *argv[]) {
       initializeBrailleDisplay(&brl);
       brl.dataDirectory = opt_dataDirectory;
       identifyBrailleDriver(braille, 0);		/* start-up messages */
-      if (braille->open(&brl, parameterSettings, opt_brailleDevice)) {
+      if (braille->construct(&brl, parameterSettings, opt_brailleDevice)) {
         if (ensureBrailleBuffer(&brl, LOG_INFO)) {
 #ifdef ENABLE_LEARN_MODE
           learnMode(&brl, updateInterval, 10000);
 #else /* ENABLE_LEARN_MODE */
           message("braille test", 0);
 #endif /* ENABLE_LEARN_MODE */
-          braille->close(&brl);		/* finish with the display */
+          braille->destruct(&brl);		/* finish with the display */
           status = 0;
         } else {
           LogPrint(LOG_ERR, "can't allocate braille buffer.");

@@ -647,7 +647,7 @@ getPacket (BrailleDisplay *brl, Packet *packet) {
 }
 
 static int
-brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
+brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   if (!validateYesNo(&debugPackets, parameters[PARM_DEBUGPACKETS]))
     LogPrint(LOG_WARNING, "%s: %s", "invalid debug packets setting", parameters[PARM_DEBUGPACKETS]);
 
@@ -823,7 +823,7 @@ brl_open (BrailleDisplay *brl, char **parameters, const char *device) {
 }
 
 static void
-brl_close (BrailleDisplay *brl) {
+brl_destruct (BrailleDisplay *brl) {
   while (io->awaitInput(100)) {
     Packet packet;
     int count = getPacket(brl, &packet);
