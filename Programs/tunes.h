@@ -74,7 +74,7 @@ extern int setTuneDevice (TuneDevice device);
 extern void closeTuneDevice (int force);
 extern void playTune (const TuneDefinition *tune);
 
-extern const char *mconst idiInstrumentTable[];
+extern const char *const midiInstrumentTable[];
 extern const unsigned int midiInstrumentCount;
 
 #ifdef __cplusplus
