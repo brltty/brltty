@@ -31,7 +31,7 @@ proc getPackageDirectory {} {
             }
             set directory [eval file join / [lrange $components $rootCount end]]
 
-            if {[lsearch -exact {lib lib64} [file tail $directory]]} {
+            if {[lsearch -exact {lib lib64} [file tail $directory]] >= 0} {
                global optionValues packageName packageVersion
                return [file join "$optionValues(root)$directory" "$packageName-$packageVersion"]
             }
