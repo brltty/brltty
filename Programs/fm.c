@@ -22,37 +22,42 @@
 #include "notes.h"
 #include "adlib.h"
 
-static int fmEnabled = 0;
-static const unsigned int channelNumber = 0;
+struct NoteDeviceStruct {
+  unsigned int channelNumber;
+};
 
-static int
+static NoteDevice *
 fmConstruct (int errorLevel) {
-  if (!fmEnabled) {
+  NoteDevice *device;
+
+  if ((device = malloc(sizeof(*device)))) {
     if (AL_enablePorts(errorLevel)) {
       if (AL_testCard(errorLevel)) {
-        fmEnabled = 1;
+        device->channelNumber = 0;
+
         LogPrint(LOG_DEBUG, "FM enabled");
-      } else {
-        AL_disablePorts();
+        return device;
       }
+
+      AL_disablePorts();
     }
 
-    if (!fmEnabled) {
-      LogPrint(LOG_DEBUG, "FM not available");
-      return 0;
-    }
+    free(device);
+  } else {
+    LogError("malloc");
   }
 
-  return 1;
+  LogPrint(LOG_DEBUG, "FM not available");
+  return NULL;
 }
 
 static int
-fmPlay (int note, int duration) {
+fmPlay (NoteDevice *device, int note, int duration) {
   LogPrint(LOG_DEBUG, "tone: msec=%d note=%d",
            duration, note);
 
   if (note) {
-    AL_playTone(channelNumber, (int)noteFrequencies[note], duration, prefs.fmVolume);
+    AL_playTone(device->channelNumber, (int)noteFrequencies[note], duration, prefs.fmVolume);
   } else {
     accurateDelay(duration);
   }
@@ -61,20 +66,18 @@ fmPlay (int note, int duration) {
 }
 
 static int
-fmFlush (void) {
-  return fmEnabled;
+fmFlush (NoteDevice *device) {
+  return 1;
 }
 
 static void
-fmDestruct (void) {
-  if (fmEnabled) {
-    AL_disablePorts();
-    fmEnabled = 0;
-    LogPrint(LOG_DEBUG, "FM disabled");
-  }
+fmDestruct (NoteDevice *device) {
+  free(device);
+  AL_disablePorts();
+  LogPrint(LOG_DEBUG, "FM disabled");
 }
 
-const NoteGenerator fmNoteGenerator = {
+const NoteMethods fmMethods = {
   fmConstruct,
   fmPlay,
   fmFlush,

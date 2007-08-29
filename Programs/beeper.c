@@ -21,67 +21,67 @@
 #include "system.h"
 #include "notes.h"
 
-static int beeperEnabled = 0;
+struct NoteDeviceStruct {
+  char mustHaveAtLeastOneField;
+};
 
-static int
+static NoteDevice *
 beeperConstruct (int errorLevel) {
-  if (!beeperEnabled) {
-    if (!canBeep()) {
-      LogPrint(LOG_DEBUG, "beeper not available");
-      return 0;
+  NoteDevice *device;
+
+  if ((device = malloc(sizeof(*device)))) {
+    if (canBeep()) {
+      LogPrint(LOG_DEBUG, "beeper enabled");
+      return device;
     }
 
-    beeperEnabled = 1;
-    LogPrint(LOG_DEBUG, "beeper enabled");
+    free(device);
+  } else {
+    LogError("malloc");
   }
 
+  LogPrint(LOG_DEBUG, "beeper not available");
+  return NULL;
+}
+
+static int
+beeperPlay (NoteDevice *device, int note, int duration) {
+  LogPrint(LOG_DEBUG, "tone: msec=%d note=%d",
+           duration, note);
+
+  if (!note) {
+    accurateDelay(duration);
+    return 1;
+  }
+
+  if (asynchronousBeep((int)noteFrequencies[note], duration*4)) {
+    accurateDelay(duration);
+    stopBeep();
+    return 1;
+  }
+
+  if (startBeep((int)noteFrequencies[note])) {
+    accurateDelay(duration);
+    stopBeep();
+    return 1;
+  }
+
+  return synchronousBeep((int)noteFrequencies[note], duration);
+}
+
+static int
+beeperFlush (NoteDevice *device) {
   return 1;
 }
 
-static int
-beeperPlay (int note, int duration) {
-  if (beeperEnabled) {
-    LogPrint(LOG_DEBUG, "tone: msec=%d note=%d",
-             duration, note);
-
-    if (!note) {
-      accurateDelay(duration);
-      return 1;
-    }
-
-    if (asynchronousBeep((int)noteFrequencies[note], duration*4)) {
-      accurateDelay(duration);
-      stopBeep();
-      return 1;
-    }
-
-    if (startBeep((int)noteFrequencies[note])) {
-      accurateDelay(duration);
-      stopBeep();
-      return 1;
-    }
-
-    if (synchronousBeep((int)noteFrequencies[note], duration)) return 1;
-  }
-
-  return 0;
-}
-
-static int
-beeperFlush (void) {
-  return beeperEnabled;
-}
-
 static void
-beeperDestruct (void) {
-  if (beeperEnabled) {
-    beeperEnabled = 0;
-    endBeep();
-    LogPrint(LOG_DEBUG, "beeper disabled");
-  }
+beeperDestruct (NoteDevice *device) {
+  endBeep();
+  free(device);
+  LogPrint(LOG_DEBUG, "beeper disabled");
 }
 
-const NoteGenerator beeperNoteGenerator = {
+const NoteMethods beeperMethods = {
   beeperConstruct,
   beeperPlay,
   beeperFlush,

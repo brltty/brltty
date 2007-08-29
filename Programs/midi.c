@@ -25,8 +25,10 @@
 #include "system.h"
 #include "notes.h"
 
-static MidiDevice *midi = NULL;
-static const int channelNumber = 0;
+struct NoteDeviceStruct {
+  MidiDevice *midi;
+  int channelNumber;
+};
 
 const char *const midiInstrumentTable[] = {
 /* Piano */
@@ -176,58 +178,59 @@ const char *const midiInstrumentTable[] = {
 };
 const unsigned int midiInstrumentCount = ARRAY_COUNT(midiInstrumentTable);
 
-static int
+static NoteDevice *
 midiConstruct (int errorLevel) {
-  if (!midi) {
-    if (!(midi = openMidiDevice(errorLevel, opt_midiDevice))) {
-      LogPrint(LOG_DEBUG, "MIDI not available");
-      return 0;
+  NoteDevice *device;
+
+  if ((device = malloc(sizeof(*device)))) {
+    if ((device->midi = openMidiDevice(errorLevel, opt_midiDevice))) {
+      device->channelNumber = 0;
+      setMidiInstrument(device->midi, device->channelNumber, prefs.midiInstrument);
+
+      LogPrint(LOG_DEBUG, "MIDI enabled");
+      return device;
     }
 
-    LogPrint(LOG_DEBUG, "MIDI enabled");
+    free(device);
+  } else {
+    LogError("malloc");
   }
 
-  setMidiInstrument(midi, channelNumber, prefs.midiInstrument);
+  LogPrint(LOG_DEBUG, "MIDI not available");
+  return NULL;
+}
+
+static int
+midiPlay (NoteDevice *device, int note, int duration) {
+  beginMidiBlock(device->midi);
+
+  if (note) {
+    LogPrint(LOG_DEBUG, "tone: msec=%d note=%d", duration, note);
+    startMidiNote(device->midi, device->channelNumber, note, prefs.midiVolume);
+    insertMidiWait(device->midi, duration);
+    stopMidiNote(device->midi, device->channelNumber);
+  } else {
+    LogPrint(LOG_DEBUG, "tone: msec=%d", duration);
+    insertMidiWait(device->midi, duration);
+  }
+
+  endMidiBlock(device->midi);
   return 1;
 }
 
 static int
-midiPlay (int note, int duration) {
-  if (midi) {
-    beginMidiBlock(midi);
-
-    if (note) {
-      LogPrint(LOG_DEBUG, "tone: msec=%d note=%d", duration, note);
-      startMidiNote(midi, channelNumber, note, prefs.midiVolume);
-      insertMidiWait(midi, duration);
-      stopMidiNote(midi, channelNumber);
-    } else {
-      LogPrint(LOG_DEBUG, "tone: msec=%d", duration);
-      insertMidiWait(midi, duration);
-    }
-
-    endMidiBlock(midi);
-    return 1;
-  }
-
-  return 0;
-}
-
-static int
-midiFlush (void) {
-  return flushMidiDevice(midi);
+midiFlush (NoteDevice *device) {
+  return flushMidiDevice(device->midi);
 }
 
 static void
-midiDestruct (void) {
-  if (midi) {
-    closeMidiDevice(midi);
-    midi = NULL;
-    LogPrint(LOG_DEBUG, "MIDI disabled");
-  }
+midiDestruct (NoteDevice *device) {
+  closeMidiDevice(device->midi);
+  free(device);
+  LogPrint(LOG_DEBUG, "MIDI disabled");
 }
 
-const NoteGenerator midiNoteGenerator = {
+const NoteMethods midiMethods = {
   midiConstruct,
   midiPlay,
   midiFlush,

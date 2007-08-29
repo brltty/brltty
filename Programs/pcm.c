@@ -25,60 +25,66 @@
 #include "system.h"
 #include "notes.h"
 
-static PcmDevice *pcm = NULL;
-static int blockSize;
-static int sampleRate;
-static int channelCount;
-static PcmAmplitudeFormat amplitudeFormat;
+struct NoteDeviceStruct {
+  PcmDevice *pcm;
+  int blockSize;
+  int sampleRate;
+  int channelCount;
+  PcmAmplitudeFormat amplitudeFormat;
+  unsigned char *blockAddress;
+  size_t blockUsed;
+};
 
-static unsigned char *blockAddress = NULL;
-static size_t blockUsed = 0;
-
-static int
+static NoteDevice *
 pcmConstruct (int errorLevel) {
-  if (pcm) return 1;
+  NoteDevice *device;
 
-  if ((pcm = openPcmDevice(errorLevel, opt_pcmDevice))) {
-    blockSize = getPcmBlockSize(pcm);
-    sampleRate = getPcmSampleRate(pcm);
-    channelCount = getPcmChannelCount(pcm);
-    amplitudeFormat = getPcmAmplitudeFormat(pcm);
-    blockUsed = 0;
+  if ((device = malloc(sizeof(*device)))) {
+    if ((device->pcm = openPcmDevice(errorLevel, opt_pcmDevice))) {
+      device->blockSize = getPcmBlockSize(device->pcm);
+      device->sampleRate = getPcmSampleRate(device->pcm);
+      device->channelCount = getPcmChannelCount(device->pcm);
+      device->amplitudeFormat = getPcmAmplitudeFormat(device->pcm);
+      device->blockUsed = 0;
 
-    if ((blockAddress = malloc(blockSize))) {
-      LogPrint(LOG_DEBUG, "PCM enabled: blk=%d rate=%d chan=%d fmt=%d",
-               blockSize, sampleRate, channelCount, amplitudeFormat);
-      return 1;
-    } else {
-      LogError("malloc");
+      if ((device->blockAddress = malloc(device->blockSize))) {
+        LogPrint(LOG_DEBUG, "PCM enabled: blk=%d rate=%d chan=%d fmt=%d",
+                 device->blockSize, device->sampleRate, device->channelCount, device->amplitudeFormat);
+        return device;
+      } else {
+        LogError("malloc");
+      }
+
+      closePcmDevice(device->pcm);
     }
 
-    closePcmDevice(pcm);
-    pcm = NULL;
+    free(device);
+  } else {
+    LogError("malloc");
   }
 
   LogPrint(LOG_DEBUG, "PCM not available");
-  return 0;
+  return NULL;
 }
 
 static int
-flushBytes (void) {
-  int ok = writePcmData(pcm, blockAddress, blockUsed);
-  if (ok) blockUsed = 0;
+flushBytes (NoteDevice *device) {
+  int ok = writePcmData(device->pcm, device->blockAddress, device->blockUsed);
+  if (ok) device->blockUsed = 0;
   return ok;
 }
 
 static int
-writeBytes (const unsigned char *address, size_t length) {
+writeBytes (NoteDevice *device, const unsigned char *address, size_t length) {
   while (length > 0) {
-    size_t count = blockSize - blockUsed;
+    size_t count = device->blockSize - device->blockUsed;
     if (length < count) count = length;
-    memcpy(&blockAddress[blockUsed], address, count);
+    memcpy(&device->blockAddress[device->blockUsed], address, count);
     address += count;
     length -= count;
 
-    if ((blockUsed += count) == blockSize)
-      if (!flushBytes())
+    if ((device->blockUsed += count) == device->blockSize)
+      if (!flushBytes(device))
         return 0;
   }
 
@@ -86,11 +92,11 @@ writeBytes (const unsigned char *address, size_t length) {
 }
 
 static int
-writeAmplitude (int amplitude) {
+writeSample (NoteDevice *device, int amplitude) {
   unsigned char sample[4];
   size_t length;
 
-  switch (amplitudeFormat) {
+  switch (device->amplitudeFormat) {
     default:
       length = 0;
       break;
@@ -164,8 +170,8 @@ writeAmplitude (int amplitude) {
 
   {
     int channel;
-    for (channel=0; channel<channelCount; ++channel) {
-      if (!writeBytes(sample, length)) return 0;
+    for (channel=0; channel<device->channelCount; ++channel) {
+      if (!writeBytes(device, sample, length)) return 0;
     }
   }
 
@@ -173,84 +179,76 @@ writeAmplitude (int amplitude) {
 }
 
 static int
-pcmPlay (int note, int duration) {
-  if (pcm) {
-    long int sampleCount = sampleRate * duration / 1000;
+pcmPlay (NoteDevice *device, int note, int duration) {
+  long int sampleCount = device->sampleRate * duration / 1000;
 
-    if (note) {
-      /* A triangle waveform sounds nice, is lightweight, and avoids
-       * relying too much on floating-point performance and/or on
-       * expensive math functions like sin(). Considerations like
-       * these are especially important on PDAs without any FPU.
-       */ 
-      float maxAmplitude = 32767.0 * prefs.pcmVolume / 100;
-      float waveLength = sampleRate / noteFrequencies[note];
-      float stepSample = 4 * maxAmplitude / waveLength;
-      float currSample = 0;
+  if (note) {
+    /* A triangle waveform sounds nice, is lightweight, and avoids
+     * relying too much on floating-point performance and/or on
+     * expensive math functions like sin(). Considerations like
+     * these are especially important on PDAs without any FPU.
+     */ 
+    float maxAmplitude = 32767.0 * prefs.pcmVolume / 100;
+    float waveLength = device->sampleRate / noteFrequencies[note];
+    float stepSample = 4 * maxAmplitude / waveLength;
+    float currSample = 0;
 
-      if (waveLength <= 2) stepSample = 0;
-      LogPrint(LOG_DEBUG, "tone: msec=%d smct=%lu note=%d",
-               duration, sampleCount, note);
+    if (waveLength <= 2) stepSample = 0;
+    LogPrint(LOG_DEBUG, "tone: msec=%d smct=%lu note=%d",
+             duration, sampleCount, note);
 
-      while (sampleCount > 0) {
-        do {
-          sampleCount--;
-          if (!writeAmplitude(currSample)) return 0;
-          currSample += stepSample;
+    while (sampleCount > 0) {
+      do {
+        sampleCount--;
+        if (!writeSample(device, currSample)) return 0;
+        currSample += stepSample;
 
-          if (currSample >= maxAmplitude) {
-            currSample = 2*maxAmplitude - currSample;
-            stepSample = -stepSample;
-          } else if (currSample <= -maxAmplitude) {
-            currSample = -2*maxAmplitude - currSample;
-            stepSample = -stepSample;
-          }
-        } while ((stepSample < 0) || (currSample < 0) || (currSample > stepSample));
-      }
-    } else {
-      LogPrint(LOG_DEBUG, "tone: msec=%d smct=%lu note=%d",
-               duration, sampleCount, note);
-
-      while (sampleCount > 0) {
-        if (!writeAmplitude(0)) return 0;
-        --sampleCount;
-      }
+        if (currSample >= maxAmplitude) {
+          currSample = (2 * maxAmplitude) - currSample;
+          stepSample = -stepSample;
+        } else if (currSample <= -maxAmplitude) {
+          currSample = (-2 * maxAmplitude) - currSample;
+          stepSample = -stepSample;
+        }
+      } while ((stepSample < 0) || (currSample < 0) || (currSample > stepSample));
     }
+  } else {
+    LogPrint(LOG_DEBUG, "tone: msec=%d smct=%lu note=%d",
+             duration, sampleCount, note);
 
-    return 1;
+    while (sampleCount > 0) {
+      if (!writeSample(device, 0)) return 0;
+      --sampleCount;
+    }
   }
 
-  return 0;
+  return 1;
 }
 
 static int
-flushBlock (void) {
-  while (blockUsed)
-    if (!writeAmplitude(0))
+flushBlock (NoteDevice *device) {
+  while (device->blockUsed)
+    if (!writeSample(device, 0))
       return 0;
 
   return 1;
 }
 
 static int
-pcmFlush (void) {
-  return (pcm)? flushBlock(): 0;
+pcmFlush (NoteDevice *device) {
+  return flushBlock(device);
 }
 
 static void
-pcmDestruct (void) {
-  if (pcm) {
-    flushBlock();
-    free(blockAddress);
-    blockAddress = NULL;
-
-    closePcmDevice(pcm);
-    pcm = NULL;
-    LogPrint(LOG_DEBUG, "PCM disabled");
-  }
+pcmDestruct (NoteDevice *device) {
+  flushBlock(device);
+  free(device->blockAddress);
+  closePcmDevice(device->pcm);
+  free(device);
+  LogPrint(LOG_DEBUG, "PCM disabled");
 }
 
-const NoteGenerator pcmNoteGenerator = {
+const NoteMethods pcmMethods = {
   pcmConstruct,
   pcmPlay,
   pcmFlush,

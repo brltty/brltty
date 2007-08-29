@@ -37,10 +37,15 @@ const unsigned char AL_channelOffsets[] = {
 };
 const unsigned char AL_channelCount = ARRAY_COUNT(AL_channelOffsets);
 
+static unsigned int portsEnabledCount = 0;
+
 int
 AL_enablePorts (int errorLevel) {
+  if (portsEnabledCount) return 1;
+
   if (enablePorts(errorLevel, ALP_REGISTER, 1)) {
     if (enablePorts(errorLevel, ALP_DATA, 1)) {
+      portsEnabledCount++;
       return 1;
     }
 
@@ -52,8 +57,10 @@ AL_enablePorts (int errorLevel) {
 
 void
 AL_disablePorts (void) {
-  disablePorts(ALP_REGISTER, 1);
-  disablePorts(ALP_DATA, 1);
+  if (!--portsEnabledCount) {
+    disablePorts(ALP_REGISTER, 1);
+    disablePorts(ALP_DATA, 1);
+  }
 }
 
 unsigned char

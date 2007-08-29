@@ -22,17 +22,19 @@
 extern "C" {
 #endif /* __cplusplus */
 
-typedef struct {
-  int (*construct) (int errorLevel);
-  int (*play) (int note, int duration);
-  int (*flush) (void);
-  void (*destruct) (void);
-} NoteGenerator;
+typedef struct NoteDeviceStruct NoteDevice;
 
-extern const NoteGenerator beeperNoteGenerator;
-extern const NoteGenerator pcmNoteGenerator;
-extern const NoteGenerator midiNoteGenerator;
-extern const NoteGenerator fmNoteGenerator;
+typedef struct {
+  NoteDevice * (*construct) (int errorLevel);
+  int (*play) (NoteDevice *device, int note, int duration);
+  int (*flush) (NoteDevice *device);
+  void (*destruct) (NoteDevice *device);
+} NoteMethods;
+
+extern const NoteMethods beeperMethods;
+extern const NoteMethods pcmMethods;
+extern const NoteMethods midiMethods;
+extern const NoteMethods fmMethods;
 
 extern const float noteFrequencies[];
 extern const unsigned int noteCount;
