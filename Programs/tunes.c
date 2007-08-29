@@ -467,7 +467,6 @@ closeTuneDevice (int force) {
       noteMethods->destruct(noteDevice);
       noteDevice = NULL;
     }
-    noteMethods = NULL;
   }
 }
  
