@@ -39,7 +39,7 @@ else
 
    if test -z "${tcl_config_script}"
    then
-      for directory in "/usr/lib" "/usr/local/lib"
+      for directory in "/usr/lib" "/usr/local/lib" "/usr/lib64" "/usr/local/lib64"
       do
          script="${directory}/${tcl_config_name}"
          test ! -f "${script}" || {
