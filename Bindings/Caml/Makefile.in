@@ -88,7 +88,7 @@ clean::
 install: all $(OCAML_INSTALL_TARGET)
 
 install-without-findlib:
-	@echo Can't install OCaml bindings withot using findlib 
+	@echo "Can't install OCaml bindings withot using findlib"
 
 install-with-findlib:
 	-$(OCAMLFIND) remove $(OCAML_LIB)
