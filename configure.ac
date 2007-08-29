@@ -1425,7 +1425,7 @@ in
       BRLTTY_SCREEN_DRIVER([wn], [Windows])
       ;;
    msdos*)
-      BRLTTY_SCREEN_DRIVER([pb], [PCBIOS])
+      BRLTTY_SCREEN_DRIVER([pb], [PcBios])
       ;;
    *)
       AC_MSG_WARN([no native screen driver for ${host_os}])

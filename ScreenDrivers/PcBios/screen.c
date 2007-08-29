@@ -30,21 +30,21 @@
 #include "scr_driver.h"
 
 static int
-processParameters_PcbiosScreen (char **parameters) {
+processParameters_PcBiosScreen (char **parameters) {
   return 1;
 }
 
 static int
-construct_PcbiosScreen (void) {
+construct_PcBiosScreen (void) {
   return 1;
 }
 
 static void
-destruct_PcbiosScreen (void) {
+destruct_PcBiosScreen (void) {
 }
 
 static void
-describe_PcbiosScreen (ScreenDescription *description) {
+describe_PcBiosScreen (ScreenDescription *description) {
   int row, column;
   description->rows = ScreenRows();
   description->cols = ScreenCols();
@@ -55,10 +55,10 @@ describe_PcbiosScreen (ScreenDescription *description) {
 }
 
 static int
-read_PcbiosScreen (ScreenBox box, unsigned char *buffer, ScreenCharacterProperty property) {
+read_PcBiosScreen (ScreenBox box, unsigned char *buffer, ScreenCharacterProperty property) {
   unsigned offset = ScreenPrimary;
   ScreenDescription description;
-  describe_PcbiosScreen(&description);
+  describe_PcBiosScreen(&description);
   if (validateScreenBox(&box, description.cols, description.rows)) {
     int row, col;
     _farsetsel(_go32_conventional_mem_selector());
@@ -161,28 +161,28 @@ insertMapped (ScreenKey key) {
 }
 
 static int
-insertKey_PcbiosScreen (ScreenKey key) {
+insertKey_PcBiosScreen (ScreenKey key) {
   LogPrint(LOG_DEBUG, "Insert key: %4.4X", key);
   return insertMapped(key); 
 }
 
 static int
-selectVirtualTerminal_PcbiosScreen (int vt) {
+selectVirtualTerminal_PcBiosScreen (int vt) {
   return vt == 1;
 }
 
 static int
-switchVirtualTerminal_PcbiosScreen (int vt) {
+switchVirtualTerminal_PcBiosScreen (int vt) {
   return vt == 1;
 }
 
 static int
-currentVirtualTerminal_PcbiosScreen (void) {
+currentVirtualTerminal_PcBiosScreen (void) {
   return 1;
 }
 
 static int
-executeCommand_PcbiosScreen (int command) {
+executeCommand_PcBiosScreen (int command) {
   if ((command & BRL_MSK_BLK) == BRL_BLK_PASSXT)
     return simulateKey(command & BRL_MSK_ARG, 0);
   return 0;
@@ -191,14 +191,14 @@ executeCommand_PcbiosScreen (int command) {
 static void
 scr_initialize (MainScreen *main) {
   initializeRealScreen(main);
-  main->base.describe = describe_PcbiosScreen;
-  main->base.read = read_PcbiosScreen;
-  main->base.insertKey = insertKey_PcbiosScreen;
-  main->base.selectVirtualTerminal = selectVirtualTerminal_PcbiosScreen;
-  main->base.switchVirtualTerminal = switchVirtualTerminal_PcbiosScreen;
-  main->base.currentVirtualTerminal = currentVirtualTerminal_PcbiosScreen;
-  main->base.executeCommand = executeCommand_PcbiosScreen;
-  main->processParameters = processParameters_PcbiosScreen;
-  main->construct = construct_PcbiosScreen;
-  main->destruct = destruct_PcbiosScreen;
+  main->base.describe = describe_PcBiosScreen;
+  main->base.read = read_PcBiosScreen;
+  main->base.insertKey = insertKey_PcBiosScreen;
+  main->base.selectVirtualTerminal = selectVirtualTerminal_PcBiosScreen;
+  main->base.switchVirtualTerminal = switchVirtualTerminal_PcBiosScreen;
+  main->base.currentVirtualTerminal = currentVirtualTerminal_PcBiosScreen;
+  main->base.executeCommand = executeCommand_PcBiosScreen;
+  main->processParameters = processParameters_PcBiosScreen;
+  main->construct = construct_PcBiosScreen;
+  main->destruct = destruct_PcBiosScreen;
 }

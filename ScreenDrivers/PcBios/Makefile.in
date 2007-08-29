@@ -16,7 +16,7 @@
 ###############################################################################
 
 DRIVER_CODE = pb
-DRIVER_NAME = PCBIOS
+DRIVER_NAME = PcBios
 DRIVER_COMMENT = 
 DRIVER_VERSION = 
 DRIVER_DEVELOPERS = 
