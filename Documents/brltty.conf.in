@@ -314,6 +314,12 @@
 # (can be overridden with the -L [--library-directory=] option)
 #library-directory @LIBRARY_DIRECTORY@
 
+# The writable-directory directive specifies the absolute path to a directory
+# which can be written to (creation of missing but needed resources, etc). If
+# not specified, "@WRITABLE_DIRECTORY@" will be used.
+# (can be overridden with the -W [--writable-directory=] option)
+#writable-directory @WRITABLE_DIRECTORY@
+
 # The data-directory directive specifies the absolute path to the directory
 # which contains driver data files (help files, configuration files, etc.). If
 # not specified, "@DATA_DIRECTORY@" will be used.

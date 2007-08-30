@@ -120,6 +120,7 @@ mandir = @mandir@
 
 PROGRAM_DIRECTORY = @program_directory@
 LIBRARY_DIRECTORY = @library_directory@
+WRITABLE_DIRECTORY = @writable_directory@
 DATA_DIRECTORY = @data_directory@
 MANPAGE_DIRECTORY = @manpage_directory@
 INCLUDE_DIRECTORY = @include_directory@

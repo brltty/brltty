@@ -123,8 +123,14 @@ BRLTTY_ARG_REQUIRED(
 )
 
 BRLTTY_ARG_REQUIRED(
+   [writable-directory], [DIRECTORY],
+   [path to directory which can be written to],
+   [writable_directory], ["${localstatedir}/${PACKAGE_NAME}"]
+)
+
+BRLTTY_ARG_REQUIRED(
    [data-directory], [DIRECTORY],
-   [path to directory containing tables and help pages],
+   [path to directory containing data files],
    [data_directory], ["${sysconfdir}/${PACKAGE_NAME}"]
 )
 
@@ -148,8 +154,10 @@ BRLTTY_VAR_EXPAND([brltty_reference_directory], [${execute_root}${program_direct
 BRLTTY_ARG_ENABLE(
    [relocatable-install],
    [installation using paths relative to the program directory])
+BRLTTY_DEFINE_DIRECTORY([WRITABLE_DIRECTORY], [${execute_root}${writable_directory}],
+                        [Define this to be a string containing the path to a writable directory.])
 BRLTTY_DEFINE_DIRECTORY([DATA_DIRECTORY], [${execute_root}${data_directory}],
-                        [Define this to be a string containing the desired working directory.])
+                        [Define this to be a string containing the path to the data files directory.])
 BRLTTY_DEFINE_DIRECTORY([LIBRARY_DIRECTORY], [${execute_root}${library_directory}],
                         [Define this to be a string containing the path to the library directory.])
 BRLTTY_DEFINE_DIRECTORY([CONFIGURATION_DIRECTORY], [${sysconfdir}],

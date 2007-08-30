@@ -40,6 +40,7 @@ static BrailleDisplay brl;
 
 static char *opt_brailleDevice;
 static char *opt_libraryDirectory;
+static char *opt_writableDirectory;
 static char *opt_dataDirectory;
 
 BEGIN_OPTION_TABLE
@@ -54,6 +55,10 @@ BEGIN_OPTION_TABLE
   {"library-directory", "directory", 'L', 0, 0,
    &opt_libraryDirectory, LIBRARY_DIRECTORY,
    "Path to directory for loading drivers."},
+
+  {"writable-directory", strtext("directory"), 'W', 0, 0,
+   &opt_writableDirectory, WRITABLE_DIRECTORY,
+   strtext("Path to directory which can be written to."), NULL},
 END_OPTION_TABLE
 
 void

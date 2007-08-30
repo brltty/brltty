@@ -84,6 +84,7 @@ static char *opt_messageDelay;
 
 static char *opt_configurationFile;
 static char *opt_pidFile;
+static char *opt_writableDirectory;
 static char *opt_dataDirectory;
 static char *opt_libraryDirectory;
 
@@ -303,6 +304,10 @@ BEGIN_OPTION_TABLE
   {"version", NULL, 'V', 0, 0,
    &opt_version, NULL,
    strtext("Print the versions of the core, API, and built-in drivers, and then exit."), NULL},
+
+  {"writable-directory", strtext("directory"), 'W', 0, OPT_Hidden | OPT_Config | OPT_Environ,
+   &opt_writableDirectory, WRITABLE_DIRECTORY,
+   strtext("Path to directory which can be written to."), NULL},
 
   {"screen-parameters", strtext("arg,..."), 'X', 0, OPT_Extend | OPT_Config | OPT_Environ,
    &opt_screenParameters, SCREEN_PARAMETERS,

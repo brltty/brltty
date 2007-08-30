@@ -811,6 +811,7 @@ for any additional display-specific instructions.
     are to be rooted.
     These directories include:
     <itemize>
+      <item>the <ref id="build-writable-directory" name="writable directory">
       <item>the <ref id="build-data-directory" name="data directory">
       <item>the <ref id="build-configuration-directory" name="configuration directory">
       <item>the <ref id="build-manpage-directory" name="manpage directory">
@@ -886,6 +887,18 @@ for any additional display-specific instructions.
     specified via the standard configure option <tt/--libdir/
     (which defaults to <tt>/lib</> rooted at the directory specified by the
     <ref id="build-architecture-root" name="--exec-prefix"> build option)
+    is assumed.
+    The directory is created if it doesn't exist.
+  <tag><tt/--with-writable-directory=/<em/directory/<label id="build-writable-directory"></tag>
+    Specify the directory within the
+    <ref id="hierarchy" name="installed file hierarchy">
+    which may be written to.
+    The absolute path should be supplied.
+    If this option isn't specified,
+    then the <tt/brltty/ subdirectory of the directory
+    specified via the standard configure option <tt/--localstatedir/
+    (which defaults to <tt>/var</> rooted at the directory specified by the
+    <ref id="build-portable-root" name="--prefix"> build option)
     is assumed.
     The directory is created if it doesn't exist.
   <tag><tt/--with-data-directory=/<em/directory/<label id="build-data-directory"></tag>
@@ -1327,8 +1340,9 @@ If you want to start BRLTTY before any file systems are mounted, then
 ensure that all of its components are installed within the root file system.
 See the <ref id="build-execute-root" name="--with-execute-root">,
 <ref id="build-program-directory" name="--bindir">,
-<ref id="build-data-directory" name="--with-data-directory">,
-and <ref id="build-library-directory" name="--libdir">
+<ref id="build-library-directory" name="--libdir">,
+<ref id="build-writable-directory" name="--with-writable-directory">,
+and <ref id="build-data-directory" name="--with-data-directory">
 build options.
 
 <sect1>Security Considerations<p>
@@ -1452,6 +1466,9 @@ The following environment variables are set:
   <tag/BRLTTY_LIBRARY_DIRECTORY/
     Directory for drivers.
     Configured via the <ref id="build-library-directory" name="--with-library-directory"> build option.
+  <tag/BRLTTY_WRITABLE_DIRECTORY/
+    Directory which can be written to.
+    Configured via the <ref id="build-writable-directory" name="--with-writable-directory"> build option.
   <tag/BRLTTY_DATA_DIRECTORY/
     Directory for tables and help pages.
     Configured via the <ref id="build-data-directory" name="--with-data-directory"> build option.
@@ -1484,6 +1501,9 @@ In addition, the following standard <bf/autoconf/ environment variables are also
     Directory for BrlAPI's static archive and dynamically loadable object.
     Default anchor for <ref id="build-library-directory" name="library directory">.
     Configured via the <ref id="build-api-directory" name="--libdir"> build option.
+  <tag/localstatedir/
+    Default anchor for <ref id="build-writable-directory" name="writable directory">.
+    Configured via the <tt/--localstatedir/ build option.
   <tag/sysconfdir/
     Directory for configuration files.
     Default anchor for <ref id="build-data-directory" name="data directory">.
@@ -1557,6 +1577,11 @@ It should be run as root.
     The absolute path for the directory wherein the drivers reside.
     If it's not specified, then the directory configured via the
     <ref id="build-library-directory" name="--libdir"> build option
+    is assumed.
+  <tag><tt/-W/<em/directory/ <tt/--writable-directory=/<em/directory/</tag>
+    The absolute path for a directory which can be written to.
+    If it's not specified, then the directory configured via the
+    <ref id="build-writable-directory" name="--with-writable-directory"> build option
     is assumed.
   <tag><tt/-h/ <tt/--help/</tag>
     Display a summary of the command line options, and then exit.
