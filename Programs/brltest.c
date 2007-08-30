@@ -104,6 +104,7 @@ main (int argc, char *argv[]) {
   {
     char **const paths[] = {
       &opt_libraryDirectory,
+      &opt_writableDirectory,
       &opt_dataDirectory,
       NULL
     };

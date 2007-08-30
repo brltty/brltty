@@ -2101,9 +2101,10 @@ startup (int argc, char *argv[]) {
 
   {
     char **const paths[] = {
+      &opt_libraryDirectory,
+      &opt_writableDirectory,
       &opt_dataDirectory,
       &opt_tablesDirectory,
-      &opt_libraryDirectory,
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
       &opt_contractionsDirectory,
