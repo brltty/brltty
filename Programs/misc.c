@@ -88,9 +88,11 @@ deallocateStrings (char **array) {
 }
 
 #ifdef HAVE_SYSLOG_H
-   #include <syslog.h>
-   static int syslogOpened = 0;
+#include <syslog.h>
+
+static int syslogOpened = 0;
 #endif /* HAVE_SYSLOG_H */
+
 static int logLevel = LOG_NOTICE;
 static const char *printPrefix = NULL;
 static int printLevel = LOG_NOTICE;
@@ -179,11 +181,13 @@ LogWindowsCodeError (DWORD error, const char *action) {
   LogPrint(LOG_ERR, "%s error %ld: %s", action, error, message);
   LocalFree(message);
 }
+
 void
 LogWindowsError (const char *action) {
   DWORD error = GetLastError();
   LogWindowsCodeError(error, action);
 }
+
 #ifdef __MINGW32__
 void
 LogWindowsSocketError(const char *action) {
@@ -449,6 +453,14 @@ makeDirectory (const char *path) {
   return 0;
 }
 
+const char *writableDirectory = NULL;
+
+char *
+makeWritablePath (const char *file) {
+  if (writableDirectory) return makePath(writableDirectory, file);
+  return NULL;
+}
+
 char *
 getWorkingDirectory (void) {
   size_t size = 0X80;
@@ -466,6 +478,15 @@ getWorkingDirectory (void) {
 
   if (buffer) free(buffer);
   return NULL;
+}
+
+int
+setWorkingDirectory (const char *directory) {
+  if (chdir(directory) != -1) return 1;                /* * change to directory containing data files  */
+  LogPrint(LOG_WARNING, "%s: %s: %s",
+           gettext("cannot set working directory"),
+           directory, strerror(errno));
+  return 0;
 }
 
 char *

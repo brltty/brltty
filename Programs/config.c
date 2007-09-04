@@ -2259,11 +2259,9 @@ startup (int argc, char *argv[]) {
   {
     const char *directories[] = {opt_dataDirectory, "/", NULL};
     const char **directory = directories;
+
     while (*directory) {
-      if (chdir(*directory) != -1) break;                /* * change to directory containing data files  */
-      LogPrint(LOG_WARNING, "%s: %s: %s",
-               gettext("cannot set working directory"),
-               *directory, strerror(errno));
+      if (setWorkingDirectory(*directory)) break;                /* * change to directory containing data files  */
       ++directory;
     }
   }
@@ -2277,6 +2275,9 @@ startup (int argc, char *argv[]) {
       LogPrint(LOG_ERR, "%s: %s", gettext("cannot determine working directory"), strerror(errno));
     }
   }
+
+  LogPrint(LOG_INFO, "%s: %s", gettext("Writable Directory"), opt_writableDirectory);
+  writableDirectory = opt_writableDirectory;
 
   LogPrint(LOG_INFO, "%s: %s", gettext("Configuration File"), opt_configurationFile);
   LogPrint(LOG_INFO, "%s: %s", gettext("Data Directory"), opt_dataDirectory);

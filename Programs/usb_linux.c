@@ -806,6 +806,7 @@ usbTestUsbfs (const char *path, const char *type) {
 
 static char *
 usbFindRoot (void) {
+return NULL;
   {
     typedef struct {
       const char *path;
@@ -832,15 +833,7 @@ usbFindRoot (void) {
 static char *
 usbMakeRoot (void) {
   const char *type = "usbfs";
-  char *directory = NULL;
-
-  {
-    char *workingDirectory = getWorkingDirectory();
-    if (workingDirectory) {
-      directory = makePath(workingDirectory, type);
-      free(workingDirectory);
-    }
-  }
+  char *directory = makeWritablePath(type);
 
   if (directory) {
     if (makeDirectory(directory)) {

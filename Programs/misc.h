@@ -182,7 +182,12 @@ extern char *makePath (const char *directory, const char *file);
 extern void fixPath (char **path, const char *extension, const char *prefix);
 extern int makeDirectory (const char *path);
 
+extern const char *writableDirectory;
+extern char *makeWritablePath (const char *file);
+
 extern char *getWorkingDirectory (void);
+extern int setWorkingDirectory (const char *directory);
+
 extern char *getHomeDirectory (void);
 extern char *getUserDirectory (void);
 

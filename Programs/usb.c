@@ -1198,7 +1198,7 @@ usbFindChannel (const UsbChannelDefinition *definitions, const char *device) {
       return channel;
     } else {
       LogPrint(LOG_DEBUG, "USB device not found%s%s",
-               (*device? ": ": "."),
+               (*device? ": ": ""),
                device);
     }
 

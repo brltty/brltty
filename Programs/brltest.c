@@ -111,6 +111,8 @@ main (int argc, char *argv[]) {
     fixInstallPaths(paths);
   }
 
+  writableDirectory = opt_writableDirectory;
+
   if (argc) {
     driver = *argv++;
     --argc;
