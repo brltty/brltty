@@ -51,7 +51,6 @@ always across 1-14-1235
 contraction acr
 always ae =
 endword aed 1-1246
-begword aforem 1-123456-15-134 aforementioned 
 word aforesaid 1-123456-15-234-145
 always after 1-124
 contraction af
@@ -472,6 +471,7 @@ begword mc =
 always medic 134-1246-24-14 medicare
 midendword ment 56-2345
 midword menth 134-26-1456 Blumenthal
+always mention 134-26-56-1345
 always mideast 134-24-145-15-1-34
 word milling 134-24-123-123-346
 begword mishand 134-24-234-125-12346 mishandled
@@ -539,6 +539,8 @@ midendword oness 135-56-234
 midendword oneer 135-1345-15-12456
 midendword oned 135-1345-1246
 always one 5-135
+always aione = zabaione
+midendword mione = Hermione
 always onem = phoneme
 midendword onement 5-135-56-2345 atonement
 always onent 135-1345-26-2345
@@ -795,7 +797,6 @@ begword undis = undisturbed
 begword uneas = unease
 begword uneat = uneaten
 sufword unful = unfulfilled
-begword unmen 136-1345-134-26 unmentioned
 word upon 45-136 Dupont
 word us 136
 always under 5-136
