@@ -855,7 +855,7 @@ usbFindDevice (UsbDeviceChooser chooser, void *data) {
     device = usbSearchDevice(root, chooser, data);
     free(root);
   } else {
-    LogPrint(LOG_WARNING, "USBFS not mounted");
+    LogPrint(LOG_DEBUG, "USBFS not mounted");
   }
   return device;
 }

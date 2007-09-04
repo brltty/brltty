@@ -448,7 +448,8 @@ makeDirectory (const char *path) {
     LogPrint(LOG_NOTICE, "directory created: %s", path);
     return 1;
   } else {
-    LogPrint(LOG_ERR, "cannot create directory: %s: %s", path, strerror(errno));
+    LogPrint(((errno == ENOENT)? LOG_DEBUG: LOG_WARNING),
+             "cannot create directory: %s: %s", path, strerror(errno));
   }
   return 0;
 }
