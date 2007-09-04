@@ -123,10 +123,9 @@ prepareProgram (int argumentCount, char **argumentVector) {
 void
 makeProgramBanner (char *buffer, size_t size) {
   const char *revision = PACKAGE_REVISION;
-  snprintf(buffer, size, "%s %s%s%s [%s]",
+  snprintf(buffer, size, "%s %s%s%s",
            PACKAGE_TITLE, PACKAGE_VERSION,
-           (*revision? " rev ": ""), revision,
-           PACKAGE_URL);
+           (*revision? " rev ": ""), revision);
 }
 
 void

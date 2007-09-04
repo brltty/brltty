@@ -2177,7 +2177,7 @@ startup (int argc, char *argv[]) {
     const char *prefix = setPrintPrefix(NULL);
     char banner[0X100];
     makeProgramBanner(banner, sizeof(banner));
-    LogPrint(LOG_NOTICE, "%s", banner);
+    LogPrint(LOG_NOTICE, "%s [%s]", banner, PACKAGE_URL);
     setPrintPrefix(prefix);
   }
 
