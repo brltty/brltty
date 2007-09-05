@@ -125,7 +125,7 @@ BRLTTY_ARG_REQUIRED(
 BRLTTY_ARG_REQUIRED(
    [writable-directory], [DIRECTORY],
    [path to directory which can be written to],
-   [writable_directory], ["${localstatedir}/${PACKAGE_NAME}"]
+   [writable_directory], ["${localstatedir}/lib/${PACKAGE_NAME}"]
 )
 
 BRLTTY_ARG_REQUIRED(

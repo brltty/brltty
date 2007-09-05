@@ -328,6 +328,10 @@ The build procedure should result in the installation of the following files:
         <tt/attrib.tbl/ does it the original way,
         and <tt/attributes.tbl/ does it the current way.
     </descrip>
+  <tag>/var/lib/brltty/</>
+    Files created at run-time, e.g. needed but missing system resources.
+  <tag>/var/lib/BrlAPI/</>
+    Local sockets for connecting to the Application Programming Interface.
   <tag>/lib/</>
     <descrip>
       <tag/libbrlapi.a/
@@ -363,11 +367,16 @@ The build procedure should result in the installation of the following files:
         The dynamically loadable driver for a speech synthesizer,
         where <em/driver/ is the two-letter <ref id="drivers" name="driver identification code">.
     </descrip>
-  <tag>/include/brltty/</>
+  <tag>/include/</>
     C header files for the Application Programming Interface.
-    Their naems look like <em/function/<tt/.h/
-    or <em/function/<tt/-/<em/driver/<tt/.h/
+    Their names look like <tt/brlapi-/<em/function/<tt/.h/.
+    The main header is <tt/brlapi.h/.
+  <tag>/include/brltty/</>
+    C header files for accessing braille hardware.
+    Their names look like <tt/brldefs-/<em/driver/<tt/.h/
     (where <em/driver/ is the two-letter <ref id="drivers" name="driver identification code">).
+    The headers <tt/brldefs.h/ and <tt/api.h/ are provided
+    for backward compatibility and shouldn't be used.
   <tag>/man/</>
     Man pages.
     <descrip>
@@ -895,7 +904,7 @@ for any additional display-specific instructions.
     which may be written to.
     The absolute path should be supplied.
     If this option isn't specified,
-    then the <tt/brltty/ subdirectory of the directory
+    then the <tt>lib/brltty</> subdirectory of the directory
     specified via the standard configure option <tt/--localstatedir/
     (which defaults to <tt>/var</> rooted at the directory specified by the
     <ref id="build-portable-root" name="--prefix"> build option)
