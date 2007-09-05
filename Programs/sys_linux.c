@@ -213,7 +213,8 @@ installKernelModule (const char *name, int *status) {
 }
 
 int
-openCharacterDevice (const char *path, int flags, int major, int minor) {
+openCharacterDevice (const char *name, int flags, int major, int minor) {
+  char *path = getDevicePath(name);
   int descriptor;
 
   LogPrint(LOG_DEBUG, "opening device: %s", path);
@@ -225,27 +226,33 @@ openCharacterDevice (const char *path, int flags, int major, int minor) {
              path, strerror(errno));
 
     if (create) {
-      mode_t mode = S_IFCHR | S_IRUSR | S_IWUSR;
+      free(path);
+      path = makeWritablePath(name);
 
-      LogPrint(LOG_NOTICE, "creating device: %s mode=%06o major=%d minor=%d",
-               path, mode, major, minor);
-      if (mknod(path, mode, makedev(major, minor)) == -1) {
-        LogPrint(LOG_ERR, "cannot create device: %s: %s",
-                 path, strerror(errno));
-      } else if ((descriptor = open(path, flags)) == -1) {
-        LogPrint(LOG_ERR, "cannot open device: %s: %s",
-                 path, strerror(errno));
+      if (path) {
+        mode_t mode = S_IFCHR | S_IRUSR | S_IWUSR;
 
-        if (unlink(path) == -1) {
-          LogPrint(LOG_ERR, "cannot remove device: %s: %s",
+        LogPrint(LOG_NOTICE, "creating device: %s mode=%06o major=%d minor=%d",
+                 path, mode, major, minor);
+        if (mknod(path, mode, makedev(major, minor)) == -1) {
+          LogPrint(LOG_ERR, "cannot create device: %s: %s",
                    path, strerror(errno));
-        } else {
-          LogPrint(LOG_NOTICE, "device removed: %s", path);
+        } else if ((descriptor = open(path, flags)) == -1) {
+          LogPrint(LOG_ERR, "cannot open device: %s: %s",
+                   path, strerror(errno));
+
+          if (unlink(path) == -1) {
+            LogPrint(LOG_ERR, "cannot remove device: %s: %s",
+                     path, strerror(errno));
+          } else {
+            LogPrint(LOG_NOTICE, "device removed: %s", path);
+          }
         }
       }
     }
   }
 
+  free(path);
   return descriptor;
 }
 
@@ -259,13 +266,11 @@ openCharacterDevice (const char *path, int flags, int major, int minor) {
 
 int
 getUinputDevice (void) {
-  static int uinput = -1;
+  static int uinputDevice = -1;
 
 #ifdef HAVE_LINUX_UINPUT_H
-  if (uinput == -1) {
-    const char *path;
-    int device;
-    int flags = O_WRONLY;
+  if (uinputDevice == -1) {
+    const char *name;
 
     LogPrint(LOG_DEBUG, "opening uinput");
 
@@ -276,50 +281,51 @@ getUinputDevice (void) {
       if (wait) approximateDelay(500);
     }
 
-    if ((device = open(path="/dev/input/uinput", flags)) == -1) {
-      if (errno == ENOENT) {
-        device = openCharacterDevice(path="/dev/uinput", flags, 10, 223);
-      } else {
-        LogPrint(LOG_ERR, "cannot open device: %s: %s", path, strerror(errno));
-      }
+    {
+      static const char *const names[] = {"uinput", "input/uinput", NULL};
+      name = resolveDeviceName(names, "uinput", W_OK);
     }
 
-    if (device != -1) {
-      struct uinput_user_dev description;
-      LogPrint(LOG_DEBUG, "uinput opened: %s fd=%d", path, device);
-      
-      memset(&description, 0, sizeof(description));
-      strcpy(description.name, "brltty");
+    if (name) {
+      int device = openCharacterDevice(name, O_WRONLY, 10, 223);
 
-      if (write(device, &description, sizeof(description)) != -1) {
-        ioctl(device, UI_SET_EVBIT, EV_KEY);
-        ioctl(device, UI_SET_EVBIT, EV_REP);
+      if (device != -1) {
+        struct uinput_user_dev description;
+        LogPrint(LOG_DEBUG, "uinput opened: %s fd=%d", name, device);
+        
+        memset(&description, 0, sizeof(description));
+        strcpy(description.name, "brltty");
 
-        {
-          int key;
-          for (key=KEY_RESERVED; key<=KEY_MAX; key++) {
-            ioctl(device, UI_SET_KEYBIT, key);
+        if (write(device, &description, sizeof(description)) != -1) {
+          ioctl(device, UI_SET_EVBIT, EV_KEY);
+          ioctl(device, UI_SET_EVBIT, EV_REP);
+
+          {
+            int key;
+            for (key=KEY_RESERVED; key<=KEY_MAX; key++) {
+              ioctl(device, UI_SET_KEYBIT, key);
+            }
           }
-        }
 
-        if (ioctl(device, UI_DEV_CREATE) != -1) {
-          uinput = device;
+          if (ioctl(device, UI_DEV_CREATE) != -1) {
+            uinputDevice = device;
+          } else {
+            LogError("ioctl[UI_DEV_CREATE]");
+          }
         } else {
-          LogError("ioctl[UI_DEV_CREATE]");
+          LogError("write(struct uinput_user_dev)");
         }
-      } else {
-        LogError("write(struct uinput_user_dev)");
-      }
 
-      if (device != uinput) {
-        close(device);
-        LogPrint(LOG_DEBUG, "uinput closed");
+        if (device != uinputDevice) {
+          close(device);
+          LogPrint(LOG_DEBUG, "uinput closed");
+        }
       }
     }
   }
 #endif /* HAVE_LINUX_UINPUT_H */
 
-  return uinput;
+  return uinputDevice;
 }
 
 static BITMASK(pressedKeys, KEY_MAX+1);

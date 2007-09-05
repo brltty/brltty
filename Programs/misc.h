@@ -193,6 +193,8 @@ extern char *getUserDirectory (void);
 
 extern const char *getDeviceDirectory (void);
 extern char *getDevicePath (const char *device);
+extern const char *resolveDeviceName (const char *const *names, const char *description, int mode);
+
 extern int isQualifiedDevice (const char **path, const char *qualifier);
 extern void unsupportedDevice (const char *path);
 

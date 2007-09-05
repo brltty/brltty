@@ -573,6 +573,46 @@ getDevicePath (const char *device) {
   return strdupWrapper(device);
 }
 
+const char *
+resolveDeviceName (const char *const *names, const char *description, int mode) {
+  const char *first = *names;
+  const char *device = NULL;
+  const char *name;
+
+  while ((name = *names++)) {
+    char *path = getDevicePath(name);
+
+    if (!path) break;
+    LogPrint(LOG_DEBUG, "checking %s device: %s", description, path);
+
+    if (access(path, mode) == -1) {
+      LogPrint(LOG_DEBUG, "%s device access error: %s: %s",
+               description, path, strerror(errno));
+    } else {
+      struct stat status;
+      if (stat(path, &status) == -1) {
+        LogPrint(LOG_ERR, "%s device stat error: %s: %s",
+                 description, path, strerror(errno));
+      } else if (!S_ISCHR(status.st_mode)) {
+        LogPrint(LOG_ERR, "%s device not character special: %s",
+                 description, path);
+      } else {
+        device = name;
+        free(path);
+        break;
+      }
+    }
+
+    if (errno != ENOENT)
+      if (!device)
+        device = name;
+    free(path);
+  }
+
+  if (!device) device = first;
+  return device;
+}
+
 int
 isQualifiedDevice (const char **path, const char *qualifier) {
   size_t count = strcspn(*path, ":");

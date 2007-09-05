@@ -165,86 +165,37 @@ static const ApplicationCharacterMap cp437Map = {
   0x00b0, 0x2219, 0x00b7, 0x221a, 0x207f, 0x00b2, 0x25a0, 0x00a0
 };
 
-static char *
-findDevicePath (const char *paths, const char *description, int mode) {
-  char *devices = strdupWrapper(paths);
-  char *tokens = devices;
-  const char *delimiters = " ";
-  char *path = NULL;
-  int exists = 0;
-  char *device;
-  while ((device = strtok(tokens, delimiters))) {
-    tokens = NULL;
-    device = strdupWrapper(device);
-    LogPrint(LOG_DEBUG, "checking %s device: %s",
-             description, device);
-    if (access(device, mode) == -1) {
-      LogPrint(LOG_DEBUG, "%s device access error: %s: %s",
-               description, device, strerror(errno));
-    } else {
-      struct stat status;
-      if (stat(device, &status) == -1) {
-        LogPrint(LOG_ERR, "%s device stat error: %s: %s",
-                 description, device, strerror(errno));
-      } else if (!S_ISCHR(status.st_mode)) {
-        LogPrint(LOG_ERR, "%s device not character special: %s",
-                 description, device);
-      } else {
-        if (path) free(path);
-        path = device;
-        exists = 1;
-        break;
-      }
-    }
-    if (errno != ENOENT) {
-      if (!exists) {
-        exists = 1;
-        if (path) {
-          free(path);
-          path = NULL;
-        }
-      }
-    }
-    if (path)
-      free(device);
-    else
-      path = device;
-  }
-  free(devices);
-  return path;
-}
-
 static int
-setDevicePath (char **path, const char *paths, const char *description, int mode) {
-  LogPrint(LOG_DEBUG, "%s device list: %s", description, paths);
-  if ((*path = findDevicePath(paths, description, mode))) {
-    LogPrint(LOG_INFO, "%s device: %s", description, *path);
+setDeviceName (const char **name, const char *const *names, const char *description, int mode) {
+  if ((*name = resolveDeviceName(names, description, mode))) {
+    LogPrint(LOG_INFO, "%s device: %s", description, *name);
     return 1;
   } else {
-    LogPrint(LOG_ERR, "%s device not specified.", description);
+    LogPrint(LOG_ERR, "%s device not found", description);
   }
   return 0;
 }
 
 static char *
-vtPath (const char *base, unsigned char vt) {
+vtName (const char *name, unsigned char vt) {
   if (vt) {
-    size_t length = strlen(base);
+    size_t length = strlen(name);
     char buffer[length+4];
-    if (base[length-1] == '0') --length;
-    strncpy(buffer, base, length);
+    if (name[length-1] == '0') --length;
+    strncpy(buffer, name, length);
     sprintf(buffer+length,  "%u", vt);
     return strdupWrapper(buffer);
   }
-  return strdupWrapper(base);
+  return strdupWrapper(name);
 }
 
-static char *consolePath = NULL;
+static const char *consoleName = NULL;
 static int consoleDescriptor;
 
 static int
-setConsolePath (void) {
-  return setDevicePath(&consolePath, LINUX_CONSOLE_DEVICES, "console", R_OK|W_OK);
+setConsoleName (void) {
+  static const char *const names[] = {"tty0", "vc/0", NULL};
+  return setDeviceName(&consoleName, names, "console", R_OK|W_OK);
 }
 
 static void
@@ -260,28 +211,29 @@ closeConsole (void) {
 
 static int
 openConsole (unsigned char vt) {
-  char *path = vtPath(consolePath, vt);
-  if (path) {
-    int console = openCharacterDevice(path, O_RDWR|O_NOCTTY, 4, vt);
+  int opened = 0;
+  char *name = vtName(consoleName, vt);
+  if (name) {
+    int console = openCharacterDevice(name, O_RDWR|O_NOCTTY, 4, vt);
     if (console != -1) {
+      LogPrint(LOG_DEBUG, "console opened: %s: fd=%d", name, console);
       closeConsole();
       consoleDescriptor = console;
-      LogPrint(LOG_DEBUG, "console opened: %s: fd=%d", path, consoleDescriptor);
-      free(path);
-      return 1;
+      opened = 1;
     }
-    free(path);
+    free(name);
   }
-  return 0;
+  return opened;
 }
 
-static char *screenPath = NULL;
+static const char *screenName = NULL;
 static int screenDescriptor;
 static unsigned char virtualTerminal;
 
 static int
-setScreenPath (void) {
-  return setDevicePath(&screenPath, LINUX_SCREEN_DEVICES, "screen", R_OK|W_OK);
+setScreenName (void) {
+  static const char *const names[] = {"vcsa", "vcsa0", "vcc/a", NULL};
+  return setDeviceName(&screenName, names, "screen", R_OK|W_OK);
 }
 
 static void
@@ -297,24 +249,25 @@ closeScreen (void) {
 
 static int
 openScreen (unsigned char vt) {
-  char *path = vtPath(screenPath, vt);
-  if (path) {
-    int screen = openCharacterDevice(path, O_RDWR, 7, 0X80|vt);
+  int opened = 0;
+  char *name = vtName(screenName, vt);
+  if (name) {
+    int screen = openCharacterDevice(name, O_RDWR, 7, 0X80|vt);
     if (screen != -1) {
-      LogPrint(LOG_DEBUG, "screen opened: %s: fd=%d", path, screen);
+      LogPrint(LOG_DEBUG, "screen opened: %s: fd=%d", name, screen);
       if (openConsole(vt)) {
         closeScreen();
         screenDescriptor = screen;
         virtualTerminal = vt;
-        free(path);
-        return 1;
+        opened = 1;
+      } else {
+        close(screen);
+        LogPrint(LOG_DEBUG, "screen closed: fd=%d", screen);
       }
-      close(screen);
-      LogPrint(LOG_DEBUG, "screen closed: fd=%d", screen);
     }
-    free(path);
+    free(name);
   }
-  return 0;
+  return opened;
 }
 
 static int
@@ -831,10 +784,10 @@ static int at2Pressed;
 static int currentConsoleNumber;
 static int
 construct_LinuxScreen (void) {
-  if (setScreenPath()) {
+  if (setScreenName()) {
     screenDescriptor = -1;
 
-    if (setConsolePath()) {
+    if (setConsoleName()) {
       consoleDescriptor = -1;
 
       if (openScreen(currentConsoleNumber=0)) {
@@ -850,17 +803,10 @@ construct_LinuxScreen (void) {
 static void
 destruct_LinuxScreen (void) {
   closeConsole();
+  consoleName = NULL;
+
   closeScreen();
-
-  if (consolePath) {
-    free(consolePath);
-    consolePath = NULL;
-  }
-
-  if (screenPath) {
-    free(screenPath);
-    screenPath = NULL;
-  }
+  screenName = NULL;
 
   if (screenFontMapTable) {
     free(screenFontMapTable);
