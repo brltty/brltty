@@ -486,14 +486,13 @@ BRLTTY_ARG_DISABLE(
          [Python bindings for BrlAPI],
          [],
          [
-            AC_PATH_PROG([PYREXC], [pyrexc])
+            m4_include([Bindings/Python/ac_python.m4])
+            AC_PYTHON()
             if test -n "${PYREXC}"
             then
-               m4_include([Bindings/Python/ac_python.m4])
-               AC_PYTHON()
                api_bindings="${api_bindings} Python"
             else
-               AC_MSG_WARN([Python BrlAPI bindings not included: pyrexc not found])
+               AC_MSG_WARN([Python BrlAPI bindings not included])
             fi
          ]
       )
