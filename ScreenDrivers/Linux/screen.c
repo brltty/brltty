@@ -167,13 +167,7 @@ static const ApplicationCharacterMap cp437Map = {
 
 static int
 setDeviceName (const char **name, const char *const *names, const char *description, int mode) {
-  if ((*name = resolveDeviceName(names, description, mode))) {
-    LogPrint(LOG_INFO, "%s device: %s", description, *name);
-    return 1;
-  } else {
-    LogPrint(LOG_ERR, "%s device not found", description);
-  }
-  return 0;
+  return (*name = resolveDeviceName(names, description, mode)) != NULL;
 }
 
 static char *
