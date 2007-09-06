@@ -498,7 +498,7 @@ check-speech: brltty speech-drivers
 
 install:: install-programs install-help install-tables $(INSTALL_DRIVERS) install-manpages $(INSTALL_API)
 
-install-programs: brltty$X install-program-directory
+install-programs: brltty$X install-program-directory install-writable-directory
 	$(INSTALL_PROGRAM) brltty$X $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_DATA) brltty-config $(INSTALL_PROGRAM_DIRECTORY) 
 	$(INSTALL_SCRIPT) $(SRC_DIR)/brltty-install $(INSTALL_PROGRAM_DIRECTORY) 
