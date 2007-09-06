@@ -599,13 +599,15 @@ resolveDeviceName (const char *const *names, const char *description, int mode) 
     free(path);
   }
 
-  if (!device) device = first;
-
-  if (device) {
-    LogPrint(LOG_INFO, "%s device: %s", description, device);
-  } else {
-    LogPrint(LOG_ERR, "%s device not found", description);
+  if (!device) {
+    if (first) {
+      device = first;
+    } else {
+      LogPrint(LOG_ERR, "%s device names not defined", description);
+    }
   }
+
+  if (device) LogPrint(LOG_INFO, "%s device: %s", description, device);
   return device;
 }
 
