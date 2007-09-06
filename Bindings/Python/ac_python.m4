@@ -32,7 +32,7 @@ dnl @author Matteo Settenvini <matteo@member.fsf.org>
 dnl @version 2006-02-05
 dnl @license GPLWithACException
 
-AC_DEFUN([AC_PYTHON_DEVEL],[
+AC_DEFUN([AC_PYTHON],[
 	#
 	# Allow the use of a (user set) custom python version
 	#

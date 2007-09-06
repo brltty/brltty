@@ -18,7 +18,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-AC_DEFUN([AC_JAVA_DEVEL], [dnl
+AC_DEFUN([AC_JAVA], [dnl
 if test -n "${JAVA_HOME}"
 then
    AC_JAVA_COMPILER([javac], ["${JAVA_HOME}/bin"])
