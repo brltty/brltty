@@ -38,10 +38,25 @@ else
 
    if ${python_ok}
    then
+      PYTHON_VERSION="`${PYTHON} -c "from distutils.sysconfig import get_config_vars; print get_config_vars('VERSION')[[0]];"`"
+      if test -z "${PYTHON_VERSION}"
+      then
+         AC_MSG_WARN([Python version not defined])
+         python_ok=false
+      fi
+   fi
+   AC_SUBST([PYTHON_VERSION])
+
+   if ${python_ok}
+   then
       python_include_directory="`${PYTHON} -c "from distutils.sysconfig import get_python_inc; print get_python_inc();"`"
       if test -z "${python_include_directory}"
       then
          AC_MSG_WARN([Python include directory not found])
+         python_ok=false
+      elif test ! -f "${python_include_directory}/Python.h"
+      then
+         AC_MSG_WARN([Python development package not installed])
          python_ok=false
       else
          PYTHON_CPPFLAGS="-I${python_include_directory}"
@@ -51,9 +66,29 @@ else
 
    if ${python_ok}
    then
-   :
+      python_library_directory="`${PYTHON} -c "from distutils.sysconfig import get_python_lib; print get_python_lib(0,1);"`"
+      if test -z "${python_library_directory}"
+      then
+         AC_MSG_WARN([Python library directory not found])
+         python_ok=false
+      else
+         PYTHON_LDFLAGS="-L${python_library_directory}/config -lpython${PYTHON_VERSION}"
+      fi
    fi
    AC_SUBST([PYTHON_LDFLAGS])
+
+   if ${python_ok}
+   then
+      python_package_directory="`${PYTHON} -c "from distutils.sysconfig import get_python_lib; print get_python_lib(0,0);"`"
+      if test -z "${python_package_directory}"
+      then
+         AC_MSG_WARN([Python package directory not found])
+         python_ok=false
+      else
+         PYTHON_SITE_PKG="${python_package_directory}"
+      fi
+   fi
+   AC_SUBST([PYTHON_SITE_PKG])
 
    if ${python_ok}
    then
