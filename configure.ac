@@ -504,7 +504,7 @@ BRLTTY_ARG_DISABLE(
          [
             m4_include([Bindings/Tcl/ac_tcl.m4])
             AC_TCL()
-            if "${TCL}"
+            if "${TCL_OK}"
             then
                api_bindings="${api_bindings} Tcl"
             else

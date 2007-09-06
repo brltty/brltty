@@ -17,9 +17,9 @@
 ###############################################################################
 
 AC_DEFUN([AC_TCL], [dnl
-TCL=false
-TCL_INCLUDE_FLAGS=""
-TCL_LIB_FLAGS=""
+TCL_OK=false
+TCL_CPPFLAGS=""
+TCL_LIBS=""
 
 BRLTTY_ARG_WITH(
    [tcl-config], [PATH],
@@ -31,8 +31,8 @@ tcl_config_name="tclConfig.sh"
 if test "${tcl_config_script}" = "no"
 then
    AC_CHECK_HEADER([tcl.h], [dnl
-      TCL=true
-      TCL_LIB_FLAGS="-ltcl"
+      TCL_OK=true
+      TCL_LIBS="-ltcl"
    ])
 else
    test "${tcl_config_script}" != "yes" || tcl_config_script=""
@@ -67,18 +67,18 @@ else
          AC_MSG_WARN([Tcl configuration script not readable: ${tcl_config_script}])
       elif . "${tcl_config_script}"
       then
-         TCL=true
-         TCL_INCLUDE_FLAGS="${TCL_INCLUDE_SPEC}"
-         TCL_LIB_FLAGS="${TCL_LIB_SPEC}"
+         TCL_OK=true
+         TCL_CPPFLAGS="${TCL_INCLUDE_SPEC}"
+         TCL_LIBS="${TCL_LIB_SPEC}"
       fi
    }
 fi
 
-"${TCL}" && {
+"${TCL_OK}" && {
    AC_PATH_PROGS([TCLSH], [tclsh${TCL_VERSION} tclsh], [TCLSH_NOT_FOUND_BY_CONFIGURE])
 }
 
-AC_SUBST([TCL])
-AC_SUBST([TCL_INCLUDE_FLAGS])
-AC_SUBST([TCL_LIB_FLAGS])
+AC_SUBST([TCL_OK])
+AC_SUBST([TCL_CPPFLAGS])
+AC_SUBST([TCL_LIBS])
 ])
