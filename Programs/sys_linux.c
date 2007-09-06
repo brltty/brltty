@@ -217,42 +217,52 @@ openCharacterDevice (const char *name, int flags, int major, int minor) {
   char *path = getDevicePath(name);
   int descriptor;
 
-  LogPrint(LOG_DEBUG, "opening device: %s", path);
-  if ((descriptor = open(path, flags)) == -1) {
-    int create = errno == ENOENT;
+  if (!path) {
+    descriptor = -1;
+  } else if ((descriptor = open(path, flags)) != -1) {
+    LogPrint(LOG_INFO, "device opened: %s: fd=%d", path, descriptor);
+  } else {
+    int notFound = errno == ENOENT;
 
-    LogPrint(create? LOG_WARNING: LOG_ERR, 
+    LogPrint(notFound? LOG_DEBUG: LOG_ERR, 
              "cannot open device: %s: %s",
              path, strerror(errno));
 
-    if (create) {
+    if (notFound) {
       free(path);
-      path = makeWritablePath(name);
-
-      if (path) {
-        mode_t mode = S_IFCHR | S_IRUSR | S_IWUSR;
-
-        LogPrint(LOG_NOTICE, "creating device: %s mode=%06o major=%d minor=%d",
-                 path, mode, major, minor);
-        if (mknod(path, mode, makedev(major, minor)) == -1) {
-          LogPrint(LOG_ERR, "cannot create device: %s: %s",
-                   path, strerror(errno));
-        } else if ((descriptor = open(path, flags)) == -1) {
-          LogPrint(LOG_ERR, "cannot open device: %s: %s",
+      if ((path = makeWritablePath(name))) {
+        if ((descriptor = open(path, flags)) != -1) {
+          LogPrint(LOG_INFO, "device opened: %s: fd=%d", path, descriptor);
+        } else {
+          notFound = errno == ENOENT;
+          LogPrint(notFound? LOG_DEBUG: LOG_ERR, 
+                   "cannot open device: %s: %s",
                    path, strerror(errno));
 
-          if (unlink(path) == -1) {
-            LogPrint(LOG_ERR, "cannot remove device: %s: %s",
-                     path, strerror(errno));
-          } else {
-            LogPrint(LOG_NOTICE, "device removed: %s", path);
+          if (notFound) {
+            mode_t mode = S_IFCHR | S_IRUSR | S_IWUSR;
+
+            if (mknod(path, mode, makedev(major, minor)) == -1) {
+              LogPrint(LOG_ERR, "cannot create device: %s: %s",
+                       path, strerror(errno));
+            } else {
+              LogPrint(LOG_NOTICE, "device created: %s mode=%06o major=%d minor=%d",
+                       path, mode, major, minor);
+
+              if ((descriptor = open(path, flags)) != -1) {
+                LogPrint(LOG_INFO, "device opened: %s: fd=%d", path, descriptor);
+              } else {
+                LogPrint(LOG_ERR, "cannot open device: %s: %s",
+                         path, strerror(errno));
+              }
+            }
           }
         }
       }
     }
   }
 
-  free(path);
+  if (path) free(path);
   return descriptor;
 }
 
@@ -271,8 +281,6 @@ getUinputDevice (void) {
 #ifdef HAVE_LINUX_UINPUT_H
   if (uinputDevice == -1) {
     const char *name;
-
-    LogPrint(LOG_DEBUG, "opening uinput");
 
     {
       static int status = 0;
