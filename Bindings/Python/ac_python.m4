@@ -67,31 +67,31 @@ else
       fi
       AC_SUBST([PYTHON_CPPFLAGS])
 
-      if test -z "${PYTHON_LDFLAGS}"
+      if test -z "${PYTHON_LIBS}"
       then
-         PYTHON_LDFLAGS="-lpython${PYTHON_VERSION}"
+         PYTHON_LIBS="-lpython${PYTHON_VERSION}"
 
          python_library_directory="`${PYTHON} -c "from distutils.sysconfig import get_python_lib; print get_python_lib(0,1);"`"
          if test -z "${python_library_directory}"
          then
             AC_MSG_WARN([Python library directory not found])
          else
-            PYTHON_LDFLAGS="-L${python_library_directory}/config ${PYTHON_LDFLAGS}"
+            PYTHON_LIBS="-L${python_library_directory}/config ${PYTHON_LIBS}"
          fi
       fi
-      AC_SUBST([PYTHON_LDFLAGS])
-
-      if test -z "${PYTHON_EXTRA_LDFLAGS}"
-      then
-         PYTHON_EXTRA_LDFLAGS="`${PYTHON} -c "from distutils.sysconfig import get_config_var; print get_config_var('LINKFORSHARED');"`"
-      fi
-      AC_SUBST([PYTHON_EXTRA_LDFLAGS])
+      AC_SUBST([PYTHON_LIBS])
 
       if test -z "${PYTHON_EXTRA_LIBS}"
       then
          PYTHON_EXTRA_LIBS="`${PYTHON} -c "from distutils.sysconfig import get_config_var; print get_config_var('LOCALMODLIBS'), get_config_var('LIBS');"`"
       fi
       AC_SUBST([PYTHON_EXTRA_LIBS])
+
+      if test -z "${PYTHON_EXTRA_LDFLAGS}"
+      then
+         PYTHON_EXTRA_LDFLAGS="`${PYTHON} -c "from distutils.sysconfig import get_config_var; print get_config_var('LINKFORSHARED');"`"
+      fi
+      AC_SUBST([PYTHON_EXTRA_LDFLAGS])
 
       if test -z "${PYTHON_SITE_PKG}"
       then
