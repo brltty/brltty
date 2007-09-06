@@ -488,7 +488,7 @@ BRLTTY_ARG_DISABLE(
          [
             m4_include([Bindings/Python/ac_python.m4])
             AC_PYTHON()
-            if test -n "${PYREXC}"
+            if "${PYTHON_OK}"
             then
                api_bindings="${api_bindings} Python"
             else

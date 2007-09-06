@@ -19,24 +19,24 @@
 ###############################################################################
 
 AC_DEFUN([AC_PYTHON], [dnl
-python_ok=true
+PYTHON_OK=true
 
 AC_PATH_PROG([PYTHON], [python])
 if test -z "${PYTHON}"
 then
    AC_MSG_WARN([Python interpreter not found])
-   python_ok=false
+   PYTHON_OK=false
 else
    for python_module in distutils
    do
       if test -n "`${PYTHON} -c "import ${python_module};" 2>&1`"
       then
          AC_MSG_WARN([Python module not found: ${python_module}])
-         python_ok=false
+         PYTHON_OK=false
       fi
    done
 
-   if ${python_ok}
+   if "${PYTHON_OK}"
    then
       if test -z "${PYTHON_VERSION}"
       then
@@ -54,14 +54,14 @@ else
          if test -z "${python_include_directory}"
          then
             AC_MSG_WARN([Python include directory not found])
-            python_ok=false
+            PYTHON_OK=false
          else
             PYTHON_CPPFLAGS="-I${python_include_directory}"
 
             if test ! -f "${python_include_directory}/Python.h"
             then
-               AC_MSG_WARN([Python development package not installed])
-               python_ok=false
+               AC_MSG_WARN([Python developer environment not installed])
+               PYTHON_OK=false
             fi
          fi
       fi
@@ -102,13 +102,15 @@ else
          fi
       fi
       AC_SUBST([PYTHON_SITE_PKG])
-
-      AC_PATH_PROG([PYREXC], [pyrexc])
-      if test -z "${PYREXC}"
-      then
-         AC_MSG_WARN([Pyrex compiler not found])
-         python_ok=false
-      fi
    fi
 fi
+
+AC_PATH_PROG([PYREXC], [pyrexc])
+if test -z "${PYREXC}"
+then
+   AC_MSG_WARN([Pyrex compiler not found])
+   PYTHON_OK=false
+fi
+
+AC_SUBST([PYTHON_OK])
 ])
