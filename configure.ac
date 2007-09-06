@@ -472,7 +472,7 @@ BRLTTY_ARG_DISABLE(
          [
             m4_include([Bindings/Java/ac_java.m4])
             AC_JAVA()
-	    if test "${JAVA}" = "yes"
+	    if "${JAVA_OK}"
 	    then
 	       api_bindings="${api_bindings} Java"
 	    else

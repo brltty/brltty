@@ -61,10 +61,10 @@ then
    JNIDIR="${JAVA_ROOT}/include"
    JNIHDR="jni.h"
    JNIFLAGS=""
-   JAVA=yes
-   AC_CHECK_HEADER([${JNIHDR}], [], [AC_CHECK_FILE(["${JNIDIR}/${JNIHDR}"], [JNIFLAGS="-I${JNIDIR}"], [JAVA=no])])
+   JAVA_OK=true
+   AC_CHECK_HEADER([${JNIHDR}], [], [AC_CHECK_FILE(["${JNIDIR}/${JNIHDR}"], [JNIFLAGS="-I${JNIDIR}"], [JAVA_OK=false])])
    AC_SUBST([JNIFLAGS])
-   AC_SUBST([JAVA])
+   AC_SUBST([JAVA_OK])
 else
    AC_MSG_WARN([Java compiler not found])
 fi

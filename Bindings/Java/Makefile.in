@@ -20,6 +20,7 @@
 
 include $(SRC_TOP)bindings.mk
 
+JAVA_OK = @JAVA_OK@
 JAVAC = @JAVAC@
 JAVADOC = @JAVADOC@
 JAR = @JAR@
