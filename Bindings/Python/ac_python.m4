@@ -92,6 +92,18 @@ else
 
    if ${python_ok}
    then
+      PYTHON_EXTRA_LIBS="`${PYTHON} -c "from distutils.sysconfig import get_config_var; print get_config_var('LOCALMODLIBS'), get_config_var('LIBS');"`"
+   fi
+   AC_SUBST([PYTHON_EXTRA_LIBS])
+
+   if ${python_ok}
+   then
+      PYTHON_EXTRA_LDFLAGS="`${PYTHON} -c "from distutils.sysconfig import get_config_var; print get_config_var('LINKFORSHARED');"`"
+   fi
+   AC_SUBST([PYTHON_EXTRA_LDFLAGS])
+
+   if ${python_ok}
+   then
       AC_PATH_PROG([PYREXC], [pyrexc])
       if test -z "${PYREXC}"
       then
