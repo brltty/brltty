@@ -28,7 +28,7 @@ if __name__ == "__main__":
         libraries = ["brlapi"],
         language = "c",
         define_macros = [],
-        extra_compile_args = [])
+        extra_compile_args = "@PYREXC_CFLAGS@".split())
     
     setup(
         name = "Brlapi",
