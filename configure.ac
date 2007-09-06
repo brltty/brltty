@@ -753,20 +753,6 @@ else
 fi])
 AC_SUBST([YACC_CFLAGS], ["${brltty_cv_prog_cc_flags_yacc}"])
 
-AC_CACHE_CHECK([for c compiler python source flags], [brltty_cv_prog_cc_flags_pyrexc], [dnl
-if test "${GCC}" = "yes"
-then
-   brltty_cv_prog_cc_flags_pyrexc="-Wno-parentheses -Wno-unused -fno-strict-aliasing -U_POSIX_C_SOURCE -U_XOPEN_SOURCE"
-else
-   case "${host_os}"
-   in
-      *)
-         brltty_cv_prog_cc_flags_pyrexc=""
-         ;;
-   esac
-fi])
-AC_SUBST([PYREXC_CFLAGS], ["${brltty_cv_prog_cc_flags_pyrexc}"])
-
 AC_CACHE_CHECK([for c compiler shared object flags], [brltty_cv_prog_cc_libflags], [dnl
 if test "${GCC}" = "yes"
 then

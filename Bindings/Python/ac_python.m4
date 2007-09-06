@@ -112,5 +112,18 @@ then
    PYTHON_OK=false
 fi
 
+if test "${GCC}" = "yes"
+then
+   PYREXC_CFLAGS="-Wno-parentheses -Wno-unused -fno-strict-aliasing -U_POSIX_C_SOURCE -U_XOPEN_SOURCE"
+else
+   case "${host_os}"
+   in
+      *)
+         PYREXC_CFLAGS=""
+         ;;
+   esac
+fi
+AC_SUBST([PYREXC_CFLAGS])
+
 AC_SUBST([PYTHON_OK])
 ])
