@@ -454,8 +454,8 @@ BRLTTY_ARG_DISABLE(
          [Caml bindings for BrlAPI],
          [],
          [
-            m4_include([Bindings/Caml/ac_caml_devel.m4])
-            AC_CAML_DEVEL()
+            m4_include([Bindings/Caml/ac_caml.m4])
+            AC_CAML()
             if test "${OCAMLC}" != "no"
             then
                api_bindings="${api_bindings} Caml"
@@ -470,8 +470,8 @@ BRLTTY_ARG_DISABLE(
          [Java bindings for BrlAPI],
          [],
          [
-            m4_include([Bindings/Java/ac_java_devel.m4])
-            AC_JAVA_DEVEL()
+            m4_include([Bindings/Java/ac_java.m4])
+            AC_JAVA()
 	    if test "${JAVA}" = "yes"
 	    then
 	       api_bindings="${api_bindings} Java"
@@ -489,8 +489,8 @@ BRLTTY_ARG_DISABLE(
             AC_PATH_PROG([PYREXC], [pyrexc])
             if test -n "${PYREXC}"
             then
-               m4_include([Bindings/Python/ac_python_devel.m4])
-               AC_PYTHON_DEVEL()
+               m4_include([Bindings/Python/ac_python.m4])
+               AC_PYTHON()
                api_bindings="${api_bindings} Python"
             else
                AC_MSG_WARN([Python BrlAPI bindings not included: pyrexc not found])
@@ -503,8 +503,8 @@ BRLTTY_ARG_DISABLE(
          [Tcl bindings for BrlAPI],
          [],
          [
-            m4_include([Bindings/Tcl/ac_tcl_devel.m4])
-            AC_TCL_DEVEL()
+            m4_include([Bindings/Tcl/ac_tcl.m4])
+            AC_TCL()
             if "${TCL}"
             then
                api_bindings="${api_bindings} Tcl"
