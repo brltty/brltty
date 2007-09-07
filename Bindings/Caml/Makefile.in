@@ -83,7 +83,7 @@ constants.ml: $(CONSTANTS_SCRIPTS) $(CONSTANTS_SOURCES)
 	$(AWK) $(CONSTANTS_OPTIONS) $(CONSTANTS_SOURCES) >$@
 
 clean::
-	rm -f *.cm* *.a *.so constants.ml
+	rm -f *.cm* *.a *.so constants.ml* brlapi.ml*
 
 install: all $(OCAML_INSTALL_TARGET)
 

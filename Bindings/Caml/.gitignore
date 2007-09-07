@@ -1,2 +1,11 @@
 Makefile
 reldeps.mk
+*.a
+*.so
+*.cma
+*.cmi
+*.cmo
+*.cmx
+*.cmxa
+brlapi.ml*
+constants.ml*
