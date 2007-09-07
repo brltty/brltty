@@ -43,7 +43,11 @@ else
          PYTHON_VERSION="`${PYTHON} -c "from distutils.sysconfig import get_config_vars; print get_config_vars('VERSION')[[0]];"`"
          if test -z "${PYTHON_VERSION}"
          then
-            AC_MSG_WARN([Python version not defined])
+            [PYTHON_VERSION="`${PYTHON} -c "import sys; print '.'.join(sys.version.split()[0].split('.')[:2]);"`"]
+            if test -z "${PYTHON_VERSION}"
+            then
+               AC_MSG_WARN([Python version not defined])
+            fi
          fi
       fi
       AC_SUBST([PYTHON_VERSION])
