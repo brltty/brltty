@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-AC_DEFUN([AC_TCL], [dnl
+AC_DEFUN([BRLTTY_TCL_BINDINGS], [dnl
 TCL_OK=false
 TCL_CPPFLAGS=""
 TCL_LIBS=""

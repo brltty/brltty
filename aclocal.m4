@@ -621,8 +621,8 @@ BRLTTY_ARG_DISABLE(
    [$1 bindings for BrlAPI],
    [],
    [
-      m4_include([Bindings/$1/ac_$2.m4])
-      AC_$3
+      m4_include([Bindings/$1/bindings.m4])
+      BRLTTY_$3_BINDINGS
       if "${$3_OK}"
       then
          api_bindings="${api_bindings} $1"

@@ -33,7 +33,7 @@
 #   OCAMLWEB      "ocamlweb" (not mandatory)
 #   OCAMLWIN32    "yes"/"no" depending on Sys.os_type = "Win32"
 
-AC_DEFUN([AC_CAML], [dnl
+AC_DEFUN([BRLTTY_CAML_BINDINGS], [dnl
 # Check for Ocaml compilers
 
 # we first look for ocamlc in the path; if not present, we fail

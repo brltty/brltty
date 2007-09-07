@@ -18,7 +18,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-AC_DEFUN([AC_PYTHON], [dnl
+AC_DEFUN([BRLTTY_PYTHON_BINDINGS], [dnl
 PYTHON_OK=true
 
 AC_PATH_PROG([PYTHON], [python])

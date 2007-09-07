@@ -454,8 +454,8 @@ BRLTTY_ARG_DISABLE(
          [Caml bindings for BrlAPI],
          [],
          [
-            m4_include([Bindings/Caml/ac_caml.m4])
-            AC_CAML()
+            m4_include([Bindings/Caml/bindings.m4])
+            BRLTTY_CAML_BINDINGS
             if test "${OCAMLC}" != "no"
             then
                api_bindings="${api_bindings} Caml"

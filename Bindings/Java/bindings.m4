@@ -18,14 +18,14 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-AC_DEFUN([AC_JAVA], [dnl
+AC_DEFUN([BRLTTY_JAVA_BINDINGS], [dnl
 if test -n "${JAVA_HOME}"
 then
-   AC_JAVA_COMPILER([javac], ["${JAVA_HOME}/bin"])
+   BRLTTY_JAVA_COMPILER([javac], ["${JAVA_HOME}/bin"])
 else
-   AC_JAVA_COMPILER([javac], [], [dnl
-      AC_JAVA_COMPILER([javac], [/usr/java/bin /usr/java/jdk*/bin], [dnl
-         AC_JAVA_COMPILER([gcj])
+   BRLTTY_JAVA_COMPILER([javac], [], [dnl
+      BRLTTY_JAVA_COMPILER([javac], [/usr/java/bin /usr/java/jdk*/bin], [dnl
+         BRLTTY_JAVA_COMPILER([gcj])
       ])
    ])
 fi
@@ -70,7 +70,7 @@ else
 fi
 ])
 
-AC_DEFUN([AC_JAVA_COMPILER], [dnl
+AC_DEFUN([BRLTTY_JAVA_COMPILER], [dnl
 AC_PATH_PROG([JAVAC_PATH], [$1], [], [$2])
 if test -n "${JAVAC_PATH}"
 then
