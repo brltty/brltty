@@ -465,53 +465,9 @@ BRLTTY_ARG_DISABLE(
          ]
       )
 
-      BRLTTY_ARG_DISABLE(
-         [java-bindings],
-         [Java bindings for BrlAPI],
-         [],
-         [
-            m4_include([Bindings/Java/ac_java.m4])
-            AC_JAVA()
-	    if "${JAVA_OK}"
-	    then
-	       api_bindings="${api_bindings} Java"
-	    else
-               AC_MSG_WARN([Java BrlAPI bindings not included])
-            fi
-         ]
-      )
-
-      BRLTTY_ARG_DISABLE(
-         [python-bindings],
-         [Python bindings for BrlAPI],
-         [],
-         [
-            m4_include([Bindings/Python/ac_python.m4])
-            AC_PYTHON()
-            if "${PYTHON_OK}"
-            then
-               api_bindings="${api_bindings} Python"
-            else
-               AC_MSG_WARN([Python BrlAPI bindings not included])
-            fi
-         ]
-      )
-
-      BRLTTY_ARG_DISABLE(
-         [tcl-bindings],
-         [Tcl bindings for BrlAPI],
-         [],
-         [
-            m4_include([Bindings/Tcl/ac_tcl.m4])
-            AC_TCL()
-            if "${TCL_OK}"
-            then
-               api_bindings="${api_bindings} Tcl"
-            else
-               AC_MSG_WARN([Tcl BrlAPI bindings not included])
-            fi
-         ]
-      )
+      BRLTTY_BINDINGS([Java])
+      BRLTTY_BINDINGS([Python])
+      BRLTTY_BINDINGS([Tcl])
 
       test -n "${api_bindings}" && {
          for brltty_bindings_directory in ${api_bindings}

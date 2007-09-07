@@ -611,3 +611,24 @@ else
    $4
 fi
 ])
+
+AC_DEFUN([BRLTTY_BINDINGS], [dnl
+ifelse($#, 1, [dnl
+BRLTTY_BINDINGS([$1], m4_tolower([$1]), m4_toupper([$1]))dnl
+], [dnl
+BRLTTY_ARG_DISABLE(
+   [$2-bindings],
+   [$1 bindings for BrlAPI],
+   [],
+   [
+      m4_include([Bindings/$1/ac_$2.m4])
+      AC_$3
+      if "${$3_OK}"
+      then
+         api_bindings="${api_bindings} $1"
+      else
+         AC_MSG_WARN([$1 BrlAPI bindings not included])
+      fi
+   ]
+)dnl
+])])
