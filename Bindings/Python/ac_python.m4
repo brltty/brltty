@@ -27,23 +27,27 @@ then
    AC_MSG_WARN([Python interpreter not found])
    PYTHON_OK=false
 else
-   for python_module in distutils
+   PYTHON_PROLOGUE=""
+   for python_module in sys distutils.sysconfig
    do
       if test -n "`${PYTHON} -c "import ${python_module};" 2>&1`"
       then
          AC_MSG_WARN([Python module not found: ${python_module}])
          PYTHON_OK=false
+      else
+         PYTHON_PROLOGUE="${PYTHON_PROLOGUE}import ${python_module}; "
       fi
    done
+   AC_SUBST([PYTHON_PROLOGUE])
 
    if "${PYTHON_OK}"
    then
       if test -z "${PYTHON_VERSION}"
       then
-         PYTHON_VERSION="`${PYTHON} -c "from distutils.sysconfig import get_config_vars; print get_config_vars('VERSION')[[0]];"`"
+         [PYTHON_VERSION="`${PYTHON} -c "${PYTHON_PROLOGUE} print distutils.sysconfig.get_config_vars('VERSION')[0];"`"]
          if test -z "${PYTHON_VERSION}"
          then
-            [PYTHON_VERSION="`${PYTHON} -c "import sys; print '.'.join(sys.version.split()[0].split('.')[:2]);"`"]
+            [PYTHON_VERSION="`${PYTHON} -c "${PYTHON_PROLOGUE} print '.'.join(sys.version.split()[0].split('.')[:2]);"`"]
             if test -z "${PYTHON_VERSION}"
             then
                AC_MSG_WARN([Python version not defined])
@@ -54,7 +58,7 @@ else
 
       if test -z "${PYTHON_CPPFLAGS}"
       then
-         python_include_directory="`${PYTHON} -c "from distutils.sysconfig import get_python_inc; print get_python_inc();"`"
+         [python_include_directory="`${PYTHON} -c "${PYTHON_PROLOGUE} print distutils.sysconfig.get_python_inc();"`"]
          if test -z "${python_include_directory}"
          then
             AC_MSG_WARN([Python include directory not found])
@@ -75,7 +79,7 @@ else
       then
          PYTHON_LIBS="-lpython${PYTHON_VERSION}"
 
-         python_library_directory="`${PYTHON} -c "from distutils.sysconfig import get_python_lib; print get_python_lib(0,1);"`"
+         [python_library_directory="`${PYTHON} -c "${PYTHON_PROLOGUE} print distutils.sysconfig.get_python_lib(0,1);"`"]
          if test -z "${python_library_directory}"
          then
             AC_MSG_WARN([Python library directory not found])
@@ -87,19 +91,19 @@ else
 
       if test -z "${PYTHON_EXTRA_LIBS}"
       then
-         PYTHON_EXTRA_LIBS="`${PYTHON} -c "from distutils.sysconfig import get_config_var; print get_config_var('LOCALMODLIBS'), get_config_var('LIBS');"`"
+         [PYTHON_EXTRA_LIBS="`${PYTHON} -c "${PYTHON_PROLOGUE} print distutils.sysconfig.get_config_var('LOCALMODLIBS'), distutils.sysconfig.get_config_var('LIBS');"`"]
       fi
       AC_SUBST([PYTHON_EXTRA_LIBS])
 
       if test -z "${PYTHON_EXTRA_LDFLAGS}"
       then
-         PYTHON_EXTRA_LDFLAGS="`${PYTHON} -c "from distutils.sysconfig import get_config_var; print get_config_var('LINKFORSHARED');"`"
+         [PYTHON_EXTRA_LDFLAGS="`${PYTHON} -c "${PYTHON_PROLOGUE} print distutils.sysconfig.get_config_var('LINKFORSHARED');"`"]
       fi
       AC_SUBST([PYTHON_EXTRA_LDFLAGS])
 
       if test -z "${PYTHON_SITE_PKG}"
       then
-         PYTHON_SITE_PKG="`${PYTHON} -c "from distutils.sysconfig import get_python_lib; print get_python_lib(0,0);"`"
+         [PYTHON_SITE_PKG="`${PYTHON} -c "${PYTHON_PROLOGUE} print distutils.sysconfig.get_python_lib(0,0);"`"]
          if test -z "${PYTHON_SITE_PKG}"
          then
             AC_MSG_WARN([Python package directory not found])
