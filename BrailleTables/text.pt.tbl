@@ -54,8 +54,8 @@
 \X22 (   236  )  # quotation mark
 \X23 (  3456  )  # number sign
 \X24 (    56  )  # dollar sign
-\X25 (   356  )  # percent sign
-\X26 (1234 68 )  # ampersand
+\X25 (  3 5678)  # percent sign
+\X26 (1234 6 8)  # ampersand
 \X27 (  37    )  # apostrophe
 \X28 (  1268  )  # left parenthesis
 \X29 ( 3458   )  # right parenthesis
@@ -81,7 +81,7 @@
 \X3D ( 23 56  )  # equals sign
 \X3E (  1 358 )  # greater-than sign
 \X3F ( 2   6  )  # question mark
-\X40 ( 345 78 )  # commercial at
+\X40 ( 1568   )  # commercial at
 \X41 (1     7 )  # latin capital letter a
 \X42 (12    7 )  # latin capital letter b
 \X43 (1  4  7 )  # latin capital letter c
@@ -109,7 +109,7 @@
 \X59 (1 34567 )  # latin capital letter y
 \X5A (1 3 567 )  # latin capital letter z
 \X5B (123 568 )  # left square bracket
-\X5C (  5 78  )  # reverse solidus
+\X5C (  3    8)  # reverse solidus
 \X5D ( 234568 )  # right square bracket
 \X5E (  4     )  # circumflex accent
 \X5F (   358  )  # low line
@@ -180,15 +180,15 @@
 \XA0 (      7 )  # no-break space
 \XA1 (  3  67 )  # inverted exclamation mark
 \XA2 (    56 8)  # cent sign
-\XA3 (   4 6 )  # pound sign
+\XA3 (    4 6 )  # pound sign
 \XA4 (  3  678)  # currency sign
 \XA5 (   4 6 8)  # yen sign
 \XA6 ( 2   678)  # broken bar
 \XA7 (12345678)  # section sign
 \XA8 ( 2    78)  # diaeresis
-\XA9 (1  47 )  # copyright sign
-\XAA (4  7     )  # feminine ordinal indicator
-\XAB (  2367   )  # left-pointing double angle quotation mark
+\XA9 (1  47   )  # copyright sign
+\XAA (4  7    )  # feminine ordinal indicator
+\XAB (  2367  )  # left-pointing double angle quotation mark
 \XAC ( 2  5678)  # not sign
 \XAD (12 4   8)  # soft hyphen
 \XAE ( 12358  )  # registered sign
@@ -223,11 +223,11 @@
 \XCB (126   78)  # latin capital letter e with diaeresis
 \XCC (146    7)  # latin capital letter i with grave
 \XCD ( 3  4  7)  # latin capital letter i with acute
-\XCE ( 1  467 )  # latin capital letter i with circumflex
+\XCE ( 1  4678)  # latin capital letter i with circumflex
 \XCF (12 4567 )  # latin capital letter i with diaeresis
 \XD0 (  345 7 )  # latin capital letter eth
 \XD1 ( 1245678)  # latin capital letter n with tilde
-\XD2 ( 3  56 8)  # latin capital letter o with grave
+\XD2 ( 2 456 8)  # latin capital letter o with grave
 \XD3 ( 3 46 7 )  # latin capital letter o with acute
 \XD4 ( 1 456 7)  # latin capital letter o with circumflex
 \XD5 (2  46  7)  # latin capital letter o with tilde
@@ -256,7 +256,7 @@
 \XEC (  14   6)  # latin small letter i with grave
 \XED (3  4    )  # latin small letter i with acute
 \XEE (1  4 678)  # latin small letter i with circumflex
-\XEF (12 456)  # latin small letter i with diaeresis
+\XEF (12 456  )  # latin small letter i with diaeresis
 \XF0 ( 23 56 8)  # latin small letter eth
 \XF1 (1 345  8)  # latin small letter n with tilde
 \XF2 (  24568 )  # latin small letter o with grave
@@ -273,3 +273,5 @@
 \XFD ( 12  568)  # latin small letter y with acute
 \XFE (  3   8 )  # latin small letter thorn
 \XFF (13 456 8)  # latin small letter y with diaeresis
+
+
