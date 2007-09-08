@@ -813,8 +813,8 @@ usbFindRoot (void) {
     } RootEntry;
 
     static const RootEntry roots[] = {
-      {.path="/proc/bus/usb", .verify=usbVerifyUsbfs},
       {.path="/dev/bus/usb", .verify=usbVerifyDirectory},
+      {.path="/proc/bus/usb", .verify=usbVerifyUsbfs},
       {.path=NULL, .verify=NULL}
     };
     const RootEntry *root = roots;
