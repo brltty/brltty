@@ -115,6 +115,10 @@ typedef int SocketDescriptor;
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
 
+#ifndef WRITABLE_DIRECTORY
+#define WRITABLE_DIRECTORY ""
+#endif /* WRITABLE_DIRECTORY */
+
 #ifndef PACKED
 #ifdef HAVE_ATTRIBUTE_PACKED
 #define PACKED __attribute__((packed))

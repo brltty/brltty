@@ -122,11 +122,20 @@ BRLTTY_ARG_REQUIRED(
    [library_directory], ["${libdir}/${PACKAGE_NAME}"]
 )
 
-BRLTTY_ARG_REQUIRED(
+BRLTTY_ARG_WITH(
    [writable-directory], [DIRECTORY],
    [path to directory which can be written to],
-   [writable_directory], ["${library_directory}/rw"]
+   [writable_directory], ["yes"]
 )
+if test "${writable_directory}" = "no"
+then
+   writable_directory=""
+elif test "${writable_directory}" = "yes"
+then
+   writable_directory="${library_directory}/rw"
+fi
+AC_SUBST([writable_directory])
+BRLTTY_SUMMARY_ITEM([writable-directory], [writable_directory])
 
 BRLTTY_ARG_REQUIRED(
    [data-directory], [DIRECTORY],
@@ -154,8 +163,11 @@ BRLTTY_VAR_EXPAND([brltty_reference_directory], [${execute_root}${program_direct
 BRLTTY_ARG_ENABLE(
    [relocatable-install],
    [installation using paths relative to the program directory])
-BRLTTY_DEFINE_DIRECTORY([WRITABLE_DIRECTORY], [${execute_root}${writable_directory}],
-                        [Define this to be a string containing the path to a writable directory.])
+if test -n "${writable_directory}"
+then
+   BRLTTY_DEFINE_DIRECTORY([WRITABLE_DIRECTORY], [${execute_root}${writable_directory}],
+                           [Define this to be a string containing the path to a writable directory.])
+fi
 BRLTTY_DEFINE_DIRECTORY([DATA_DIRECTORY], [${execute_root}${data_directory}],
                         [Define this to be a string containing the path to the data files directory.])
 BRLTTY_DEFINE_DIRECTORY([LIBRARY_DIRECTORY], [${execute_root}${library_directory}],

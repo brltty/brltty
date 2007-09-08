@@ -903,6 +903,15 @@ for any additional display-specific instructions.
     <ref id="hierarchy" name="installed file hierarchy">
     which may be written to.
     The absolute path should be supplied.
+    Any of the following words can also be used as the operand of this option:
+    <descrip>
+      <tag/no/
+        Don't define a writable directory.
+        This is equivalent to specifying <tt/--without-writable-directory/.
+      <tag/yes/
+        Use the default location.
+        This is equivalent to specifying <tt/--with-writable-directory/.
+    </descrip>
     If this option isn't specified,
     then the <tt>rw</> subdirectory of the directory specified via the
     <ref id="build-library-directory" name="--with-library-directory"> build option

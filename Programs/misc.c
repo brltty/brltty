@@ -456,9 +456,18 @@ makeDirectory (const char *path) {
 
 const char *writableDirectory = NULL;
 
+const char *
+getWritableDirectory (void) {
+  if (writableDirectory && *writableDirectory) {
+    if (access(writableDirectory, W_OK) != -1) return writableDirectory;
+  }
+  return NULL;
+}
+
 char *
 makeWritablePath (const char *file) {
-  if (writableDirectory) return makePath(writableDirectory, file);
+  const char *directory = getWritableDirectory();
+  if (directory) return makePath(directory, file);
   return NULL;
 }
 
