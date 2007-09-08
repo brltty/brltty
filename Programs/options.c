@@ -233,8 +233,11 @@ processCommandLine (
   char ***argumentVector,
   const char *argumentsSummary
 ) {
-  int opt_help = 0;
-  int opt_helpAll = 0;
+  int optHelp = 0;
+  int optHelpAll = 0;
+
+  int dosSyntax = 0;
+  const char dosPrefix = '/';
 
   const OptionEntry *optionEntries[0X100];
   char shortOptions[1 + (info->optionCount * 2) + 1];
@@ -305,15 +308,77 @@ processCommandLine (
     *opt = 0;
   }
 
+  if (*argumentCount > 1)
+    if (*(*argumentVector)[1] == dosPrefix)
+      dosSyntax = 1;
+
   opterr = 0;
   while (1) {
     int option;
+    char prefix = '-';
 
+    if (dosSyntax) {
+      prefix = dosPrefix;
+
+      if (optind == *argumentCount) {
+        option = -1;
+      } else {
+        char *argument = (*argumentVector)[optind++];
+
+        if (*argument != dosPrefix) {
+          option = -1;
+        } else {
+          char *name = argument + 1;
+          size_t nameLength = strcspn(name, ":");
+          char *value = (nameLength == strlen(name))? NULL: (name + nameLength + 1);
+          const OptionEntry *entry;
+
+          if (nameLength == 1) {
+            entry = optionEntries[option = *name];
+          } else {
+            int count = info->optionCount;
+            entry = info->optionTable;
+            option = -1;
+
+            while (count--) {
+              if (entry->word) {
+                size_t wordLength = strlen(entry->word);
+
+                if ((wordLength == nameLength) &&
+                    (strncasecmp(entry->word, name, wordLength) == 0)) {
+                  option = entry->letter;
+                  break;
+                }
+              }
+
+              entry++;
+            }
+
+            if (option < 0) {
+              option = 0;
+              entry = NULL;
+            }
+          }
+
+          optopt = option;
+          optarg = NULL;
+
+          if (!entry) {
+            option = '?';
+          } else if (entry->argument) {
+            if (!(optarg = value)) option = ':';
+          } else if (value) {
+            option = '?';
+          }
+        }
+      }
+    } else {
 #ifdef HAVE_GETOPT_LONG
-    option = getopt_long(*argumentCount, *argumentVector, shortOptions, longOptions, NULL);
+      option = getopt_long(*argumentCount, *argumentVector, shortOptions, longOptions, NULL);
 #else /* HAVE_GETOPT_LONG */
-    option = getopt(*argumentCount, *argumentVector, shortOptions);
+      option = getopt(*argumentCount, *argumentVector, shortOptions);
 #endif /* HAVE_GETOPT_LONG */
+    }
     if (option == -1) break;
 
     /* continue on error as much as possible, as often we are typing blind
@@ -354,26 +419,26 @@ processCommandLine (
 #endif /* HAVE_GETOPT_LONG */
 
       case '?':
-        LogPrint(LOG_ERR, "%s: -%c", gettext("unknown option"), optopt);
+        LogPrint(LOG_ERR, "%s: %c%c", gettext("unknown option"), prefix, optopt);
         info->errorCount++;
         break;
 
       case ':': /* An invalid option has been specified. */
-        LogPrint(LOG_ERR, "%s: -%c", gettext("missing operand"), optopt);
+        LogPrint(LOG_ERR, "%s: %c%c", gettext("missing operand"), prefix, optopt);
         info->errorCount++;
         break;
 
       case 'H':                /* help */
-        opt_helpAll = 1;
+        optHelpAll = 1;
       case 'h':                /* help */
-        opt_help = 1;
+        optHelp = 1;
         break;
     }
   }
   *argumentVector += optind, *argumentCount -= optind;
 
-  if (opt_help) {
-    printHelp(info, stdout, 79, argumentsSummary, opt_helpAll);
+  if (optHelp) {
+    printHelp(info, stdout, 79, argumentsSummary, optHelpAll);
     exit(0);
   }
 
