@@ -293,45 +293,6 @@ The build procedure should result in the installation of the following files:
         A utility which sets a number of environment variables to values
         which reflect the current installation of BRLTTY.
     </descrip>
-  <tag>/etc/</>
-    <descrip>
-      <tag/brltty.conf/
-        System defaults for BRLTTY.
-      <tag/brlapi.key/
-        The access key for BrlAPI.
-    </descrip>
-  <tag>/etc/brltty/</>
-    Your installation of BRLTTY may not have all of the following types of files.
-    They're only created as needed based on the build options you select
-    (see <ref id="build" name="Build Options">).
-    <descrip>
-      <tag/*.conf/
-        Driver-specific configuration data.
-        Their names look more or less like <tt/brltty-/<em/driver/<tt/.conf/,
-        where <em/driver/ is the two-letter <ref id="drivers" name="driver identification code">.
-      <tag/*.ctb/
-        Contraction tables
-        (see section <ref id="contraction" name="Contracted Braille"> for details).
-        Their names look like <em/language/<tt/-/<em/country/<tt/-/<em/level/<tt/.ctb/.
-      <tag/*.cti/
-        Include files for contraction tables.
-      <tag/*.hlp/
-        Driver-specific help pages.
-        Their names look more or less like <tt/brltty-/<em/driver/<tt/.hlp/,
-        where <em/driver/ is the two-letter <ref id="drivers" name="driver identification code">.
-      <tag/*.tbl/
-        Translation tables
-        (see section <ref id="translation" name="Translation Tables"> for details).
-        Their names look like <tt/text./<em/language/<tt/.tbl/.
-        There are also a couple of special tables which map
-        character highlighting attributes to braille dots:
-        <tt/attrib.tbl/ does it the original way,
-        and <tt/attributes.tbl/ does it the current way.
-    </descrip>
-  <tag>/var/lib/brltty/</>
-    Files created at run-time, e.g. needed but missing system resources.
-  <tag>/var/lib/BrlAPI/</>
-    Local sockets for connecting to the Application Programming Interface.
   <tag>/lib/</>
     <descrip>
       <tag/libbrlapi.a/
@@ -367,6 +328,45 @@ The build procedure should result in the installation of the following files:
         The dynamically loadable driver for a speech synthesizer,
         where <em/driver/ is the two-letter <ref id="drivers" name="driver identification code">.
     </descrip>
+  <tag>/lib/brltty/rw/</>
+    Files created at run-time, e.g. needed but missing system resources.
+  <tag>/etc/</>
+    <descrip>
+      <tag/brltty.conf/
+        System defaults for BRLTTY.
+      <tag/brlapi.key/
+        The access key for BrlAPI.
+    </descrip>
+  <tag>/etc/brltty/</>
+    Your installation of BRLTTY may not have all of the following types of files.
+    They're only created as needed based on the build options you select
+    (see <ref id="build" name="Build Options">).
+    <descrip>
+      <tag/*.conf/
+        Driver-specific configuration data.
+        Their names look more or less like <tt/brltty-/<em/driver/<tt/.conf/,
+        where <em/driver/ is the two-letter <ref id="drivers" name="driver identification code">.
+      <tag/*.ctb/
+        Contraction tables
+        (see section <ref id="contraction" name="Contracted Braille"> for details).
+        Their names look like <em/language/<tt/-/<em/country/<tt/-/<em/level/<tt/.ctb/.
+      <tag/*.cti/
+        Include files for contraction tables.
+      <tag/*.hlp/
+        Driver-specific help pages.
+        Their names look more or less like <tt/brltty-/<em/driver/<tt/.hlp/,
+        where <em/driver/ is the two-letter <ref id="drivers" name="driver identification code">.
+      <tag/*.tbl/
+        Translation tables
+        (see section <ref id="translation" name="Translation Tables"> for details).
+        Their names look like <tt/text./<em/language/<tt/.tbl/.
+        There are also a couple of special tables which map
+        character highlighting attributes to braille dots:
+        <tt/attrib.tbl/ does it the original way,
+        and <tt/attributes.tbl/ does it the current way.
+    </descrip>
+  <tag>/var/lib/BrlAPI/</>
+    Local sockets for connecting to the Application Programming Interface.
   <tag>/include/</>
     C header files for the Application Programming Interface.
     Their names look like <tt/brlapi-/<em/function/<tt/.h/.
@@ -904,10 +904,8 @@ for any additional display-specific instructions.
     which may be written to.
     The absolute path should be supplied.
     If this option isn't specified,
-    then the <tt>lib/brltty</> subdirectory of the directory
-    specified via the standard configure option <tt/--localstatedir/
-    (which defaults to <tt>/var</> rooted at the directory specified by the
-    <ref id="build-portable-root" name="--prefix"> build option)
+    then the <tt>rw</> subdirectory of the directory specified via the
+    <ref id="build-library-directory" name="--with-library-directory"> build option
     is assumed.
     The directory is created if it doesn't exist.
   <tag><tt/--with-data-directory=/<em/directory/<label id="build-data-directory"></tag>
@@ -1510,9 +1508,6 @@ In addition, the following standard <bf/autoconf/ environment variables are also
     Directory for BrlAPI's static archive and dynamically loadable object.
     Default anchor for <ref id="build-library-directory" name="library directory">.
     Configured via the <ref id="build-api-directory" name="--libdir"> build option.
-  <tag/localstatedir/
-    Default anchor for <ref id="build-writable-directory" name="writable directory">.
-    Configured via the <tt/--localstatedir/ build option.
   <tag/sysconfdir/
     Directory for configuration files.
     Default anchor for <ref id="build-data-directory" name="data directory">.
