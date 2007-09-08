@@ -45,6 +45,7 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <arpa/inet.h>
 #include <netdb.h>
 
@@ -450,6 +451,7 @@ static int tryHost(brlapi_handle_t *handle, char *hostAndPort) {
 #else /* PF_LOCAL */
   if (0) {} else {
 #endif /* PF_LOCAL */
+    int yes=1;
 
 #ifdef __MINGW32__
     if (CHECKGETPROC("ws2_32.dll",getaddrinfo)
@@ -556,6 +558,7 @@ static int tryHost(brlapi_handle_t *handle, char *hostAndPort) {
     }
 #endif /* __MINGW32__ */
 
+    setsockopt(sockfd,SOL_TCP,TCP_NODELAY,(void*)&yes,sizeof(yes));
     handle->fileDescriptor = (FileDescriptor) sockfd;
   }
   free(host);

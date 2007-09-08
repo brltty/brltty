@@ -1577,9 +1577,11 @@ cont:
     goto err;
   }
   if (setsockopt(fd,SOL_SOCKET,SO_REUSEADDR,(void*)&yes,sizeof(yes))!=0) {
-    fun = "setsockopt";
+    fun = "setsockopt(REUSEADDR)";
     goto err;
   }
+  if (setsockopt(fd,SOL_TCP,TCP_NODELAY,(void*)&yes,sizeof(yes))!=0)
+    LogPrint(LOG_WARNING, "setsockopt(NODELAY): %s", strerror(errno));
   if (loopBind(fd, (struct sockaddr *) &addr, sizeof(addr))<0) {
     fun = "bind";
     goto err;
