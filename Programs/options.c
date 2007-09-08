@@ -378,11 +378,14 @@ processCommandLine (
           } else if (entry->argument) {
             if (!(optarg = value)) option = ':';
           } else if (value) {
+            if (!entry->setting) goto dosBadFlagValue;
+
             if (!isPositiveResponse(value)) {
               if (isNegativeResponse(value)) {
                 flagLetter = option;
                 option = 0;
               } else {
+              dosBadFlagValue:
                 option = '?';
               }
             }
