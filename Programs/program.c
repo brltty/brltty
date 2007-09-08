@@ -142,12 +142,14 @@ fixInstallPaths (char **const *paths) {
   }
 
   while (*paths) {
-    char *newPath = makePath(programDirectory, **paths);
+    if (**paths && ***paths) {
+      char *newPath = makePath(programDirectory, **paths);
 
-    if (!newPath) {
-      LogPrint(LOG_WARNING, "%s: %s", gettext("cannot fix install path"), **paths);
-    } else if (!isAbsolutePath(**paths=newPath)) {
-      LogPrint(LOG_WARNING, "%s: %s", gettext("install path not absolute"), **paths);
+      if (!newPath) {
+        LogPrint(LOG_WARNING, "%s: %s", gettext("cannot fix install path"), **paths);
+      } else if (!isAbsolutePath(**paths=newPath)) {
+        LogPrint(LOG_WARNING, "%s: %s", gettext("install path not absolute"), **paths);
+      }
     }
 
     ++paths;
