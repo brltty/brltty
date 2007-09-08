@@ -17,7 +17,7 @@
 
 DRIVER_CODE = pm
 DRIVER_NAME = Papenmeier
-DRIVER_COMMENT = Compact 486, Compact/Tiny, IB 80 CR Soft, 2D Lite (plus), 2D Screen Soft, EL 80, EL 2D 40/66/80, EL 40/66/70/80 S, EL 2D 80 S, EL 40 P, EL 80 II, Elba 20/32
+DRIVER_COMMENT = Compact 486, Compact/Tiny, IB 80 CR Soft, 2D Lite (plus), 2D Screen Soft, EL 80, EL 2D 40/66/80, EL 40/66/70/80 S, EL 2D 80 S, EL 40 P, EL 80 II, Elba 20/32, Trio 40/Elba20/Elba32
 DRIVER_VERSION = 
 DRIVER_DEVELOPERS = August Hörandl <august.hoerandl@gmx.at>, Heimo Schön <heimo.schoen@gmx.at>
 HELP_DEPS = $(HELP_TEXT)
