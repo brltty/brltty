@@ -40,117 +40,102 @@ AC_DEFUN([BRLTTY_CAML_BINDINGS], [dnl
 AC_CHECK_PROG(OCAMLC,ocamlc,ocamlc,no)
 if test "$OCAMLC" = no ; then
     AC_MSG_WARN([Cannot find ocamlc.])
+    CAML_OK=false
 else
-    # we extract Ocaml version number and library path
-    OCAMLVERSION=`$OCAMLC -v | sed -n -e 's|.*version *\(.*\)$|\1|p' `
-    AC_MSG_NOTICE([OCaml version is $OCAMLVERSION])
-
-    OCAMLLIB=`$OCAMLC -v | tail -1 | cut -f 4 -d " "`
-    AC_MSG_NOTICE([OCaml library path is $OCAMLLIB])
-
-    # then we look for ocamlopt; if not present, we issue a warning
-    # if the version is not the same, we also discard it
-    # we set OCAMLBEST to "opt" or "byte", whether ocamlopt is available or not
-    AC_CHECK_PROG(OCAMLOPT,ocamlopt,ocamlopt,no)
-    OCAMLBEST=byte
-    OCAML_NCLIB=
-    if test "$OCAMLOPT" = no ; then
-        AC_MSG_WARN([Cannot find ocamlopt; bytecode compilation only.])
-    else
-        AC_MSG_CHECKING(ocamlopt version)
-        TMPVERSION=`$OCAMLOPT -v | sed -n -e 's|.*version *\(.*\)$|\1|p' `
-        if test "$TMPVERSION" != "$OCAMLVERSION" ; then
-            AC_MSG_RESULT(differs from ocamlc; ocamlopt discarded.)
-            OCAMLOPT=no
-        else
-            AC_MSG_RESULT(ok)
-            OCAMLBEST=opt
-            OCAML_NCLIB="\$(OCAML_LIB).cmxa"
-        fi
-    fi
-
-    # checking for ocamlc.opt
-    AC_CHECK_PROG(OCAMLCDOTOPT,ocamlc.opt,ocamlc.opt,no)
-    if test "$OCAMLCDOTOPT" != no ; then
-        AC_MSG_CHECKING(ocamlc.opt version)
-        TMPVERSION=`$OCAMLCDOTOPT -v | sed -n -e 's|.*version *\(.*\)$|\1|p' `
-        if test "$TMPVERSION" != "$OCAMLVERSION" ; then
-            AC_MSG_RESULT(differs from ocamlc; ocamlc.opt discarded.)
-        else
-            AC_MSG_RESULT(ok)
-            OCAMLC=$OCAMLCDOTOPT
-        fi
-    fi
-
-    # checking for ocamlopt.opt
-    if test "$OCAMLOPT" != no ; then
-        AC_CHECK_PROG(OCAMLOPTDOTOPT,ocamlopt.opt,ocamlopt.opt,no)
-        if test "$OCAMLOPTDOTOPT" != no ; then
-            AC_MSG_CHECKING(ocamlc.opt version)
-            TMPVER=`$OCAMLOPTDOTOPT -v | sed -n -e 's|.*version *\(.*\)$|\1|p' `
-            if test "$TMPVER" != "$OCAMLVERSION" ; then
-                AC_MSG_RESULT(differs from ocamlc; ocamlopt.opt discarded.)
-            else
-                AC_MSG_RESULT(ok)
-                OCAMLOPT=$OCAMLOPTDOTOPT
-            fi
-        fi
-    fi
-
     # checking for ocamlmklib
     AC_CHECK_PROG(OCAMLMKLIB,ocamlmklib,ocamlmklib,no)
+    if test "$OCAMLMKLIB" = no ; then
+        AC_MSG_WARN([Cannot find ocamlmklib.])
+        CAML_OK=false
+    else    
+        CAML_OK=true
+        # we extract Ocaml version number and library path
+        OCAMLVERSION=`$OCAMLC -v | sed -n -e 's|.*version *\(.*\)$|\1|p' `
+        AC_MSG_NOTICE([OCaml version is $OCAMLVERSION])
 
-    # ocamldep, ocamllex and ocamlyacc should also be present in the path
-    AC_CHECK_PROG(OCAMLDEP,ocamldep,ocamldep,no)
-    if test "$OCAMLDEP" = no ; then
-        AC_MSG_WARN([Cannot find ocamldep.])
-    fi
+        OCAMLLIB=`$OCAMLC -v | tail -1 | cut -f 4 -d " "`
+        AC_MSG_NOTICE([OCaml library path is $OCAMLLIB])
 
-    AC_CHECK_PROG(OCAMLLEX,ocamllex,ocamllex,no)
-    if test "$OCAMLLEX" = no ; then
-        AC_MSG_WARN([Cannot find ocamllex.])
-    else
-        AC_CHECK_PROG(OCAMLLEXDOTOPT,ocamllex.opt,ocamllex.opt,no)
-        if test "$OCAMLLEXDOTOPT" != no ; then
-            OCAMLLEX=$OCAMLLEXDOTOPT
+        # then we look for ocamlopt; if not present, we issue a warning
+        # if the version is not the same, we also discard it
+        # we set OCAMLBEST to "opt" or "byte", whether ocamlopt is available or not
+        AC_CHECK_PROG(OCAMLOPT,ocamlopt,ocamlopt,no)
+        OCAMLBEST=byte
+        OCAML_NCLIB=
+        if test "$OCAMLOPT" = no ; then
+            AC_MSG_WARN([Cannot find ocamlopt; bytecode compilation only.])
+        else
+            AC_MSG_CHECKING(ocamlopt version)
+            TMPVERSION=`$OCAMLOPT -v | sed -n -e 's|.*version *\(.*\)$|\1|p' `
+            if test "$TMPVERSION" != "$OCAMLVERSION" ; then
+                AC_MSG_RESULT(differs from ocamlc; ocamlopt discarded.)
+                OCAMLOPT=no
+            else
+                AC_MSG_RESULT(ok)
+                OCAMLBEST=opt
+                OCAML_NCLIB="\$(OCAML_LIB).cmxa"
+            fi
         fi
-    fi
 
-    AC_CHECK_PROG(OCAMLYACC,ocamlyacc,ocamlyacc,no)
-    if test "$OCAMLYACC" = no ; then
-        AC_MSG_WARN([Cannot find ocamlyacc.])
-    fi
+        # checking for ocamlc.opt
+        AC_CHECK_PROG(OCAMLCDOTOPT,ocamlc.opt,ocamlc.opt,no)
+        if test "$OCAMLCDOTOPT" != no ; then
+            AC_MSG_CHECKING(ocamlc.opt version)
+            TMPVERSION=`$OCAMLCDOTOPT -v | sed -n -e 's|.*version *\(.*\)$|\1|p' `
+            if test "$TMPVERSION" != "$OCAMLVERSION" ; then
+                AC_MSG_RESULT(differs from ocamlc; ocamlc.opt discarded.)
+            else
+                AC_MSG_RESULT(ok)
+                OCAMLC=$OCAMLCDOTOPT
+            fi
+        fi
 
-    AC_CHECK_PROG(OCAMLWEB,ocamlweb,ocamlweb,true)
+        # checking for ocamlopt.opt
+        if test "$OCAMLOPT" != no ; then
+            AC_CHECK_PROG(OCAMLOPTDOTOPT,ocamlopt.opt,ocamlopt.opt,no)
+            if test "$OCAMLOPTDOTOPT" != no ; then
+                AC_MSG_CHECKING(ocamlc.opt version)
+                TMPVER=`$OCAMLOPTDOTOPT -v | sed -n -e 's|.*version *\(.*\)$|\1|p' `
+                if test "$TMPVER" != "$OCAMLVERSION" ; then
+                    AC_MSG_RESULT(differs from ocamlc; ocamlopt.opt discarded.)
+                else
+                    AC_MSG_RESULT(ok)
+                    OCAMLOPT=$OCAMLOPTDOTOPT
+                fi
+            fi
+        fi
 
-    # platform
-    AC_MSG_CHECKING(platform)
-    if echo "let _ = Sys.os_type;;" | ocaml | grep -q Win32; then
-        AC_MSG_RESULT(Win32)
-        OCAMLWIN32=yes
-        OCAML_CLIBS=libbrlapi.a
-    elif echo "let _ = Sys.os_type;;" | ocaml | grep -q Cygwin; then
-        AC_MSG_RESULT(Cygwin)
-        OCAMLWIN32=yes
-        OCAML_CLIBS=libbrlapi.a
-    else
-        AC_MSG_RESULT(Unix)
-        OCAMLWIN32=no
-        OCAML_CLIBS="libbrlapi.a dllbrlapi.so"
-    fi
+        # platform
+        AC_MSG_CHECKING(platform)
+        if echo "let _ = Sys.os_type;;" | ocaml | grep -q Win32; then
+            AC_MSG_RESULT(Win32)
+            OCAMLWIN32=yes
+            OCAML_CLIBS=libbrlapi.a
+        elif echo "let _ = Sys.os_type;;" | ocaml | grep -q Cygwin; then
+            AC_MSG_RESULT(Cygwin)
+            OCAMLWIN32=yes
+            OCAML_CLIBS=libbrlapi.a
+        else
+            AC_MSG_RESULT(Unix)
+            OCAMLWIN32=no
+            OCAML_CLIBS="libbrlapi.a dllbrlapi.so"
+        fi
     
-    # checking for ocamlfindlib
-    AC_CHECK_PROG(OCAMLFIND,ocamlfind,ocamlfind,no)
-    if test "$OCAMLFIND" = ocamlfind; then
-        OCAMLC='ocamlfind ocamlc'
-        if test "$OCAMLOPT" = ocamlopt; then
-            OCAMLOPT='ocamlfind ocamlopt'
+        # checking for ocamlfindlib
+        AC_CHECK_PROG(OCAMLFIND,ocamlfind,ocamlfind,no)
+        if test "$OCAMLFIND" = ocamlfind; then
+            OCAMLC='ocamlfind ocamlc'
+            if test "$OCAMLOPT" = ocamlopt; then
+                OCAMLOPT='ocamlfind ocamlopt'
+            fi
+            OCAML_INSTALL_TARGET=install-with-findlib
+            OCAML_UNINSTALL_TARGET=uninstall-without-findlib
+        else
+            OCAML_INSTALL_TARGET=install-without-findlib
+            OCAML_UNINSTALL_TARGET=uninstall-without-findlib
+            AC_MSG_WARN([Cannot find ocamlfind.])
+            AC_MSG_WARN([BrlAPI Caml bindings will be compiled but not installed.])
         fi
-        OCAML_INSTALL_TARGET=install-with-findlib
-        OCAML_UNINSTALL_TARGET=uninstall-without-findlib
-    else
-        OCAML_INSTALL_TARGET=install-without-findlib
-        OCAML_UNINSTALL_TARGET=uninstall-without-findlib
     fi
 fi
 
@@ -158,13 +143,9 @@ fi
 AC_SUBST(OCAMLC)
 AC_SUBST(OCAMLOPT)
 AC_SUBST(OCAMLMKLIB)
-AC_SUBST(OCAMLDEP)
-AC_SUBST(OCAMLLEX)
-AC_SUBST(OCAMLYACC)
 AC_SUBST(OCAMLBEST)
 AC_SUBST(OCAMLVERSION)
 AC_SUBST(OCAMLLIB)
-AC_SUBST(OCAMLWEB)
 AC_SUBST(OCAMLWIN32)
 AC_SUBST(OCAML_CLIBS)
 AC_SUBST(OCAML_NCLIB)
