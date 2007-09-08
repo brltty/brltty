@@ -42,6 +42,16 @@ typedef struct {
   int errorCount;
 } OptionProcessingInformation;
 
+static int
+isPositiveResponse (const char *word) {
+  return strcasecmp(word, "on") == 0;
+}
+
+static int
+isNegativeResponse (const char *word) {
+  return strcasecmp(word, "off") == 0;
+}
+
 static void
 extendSetting (char **setting, const char *value, int prepend) {
   if (value && *value) {
@@ -80,9 +90,9 @@ ensureSetting (
         }
       } else {
         FlagSetting setting = option->setting;
-        if (strcasecmp(value, "on") == 0) {
+        if (isPositiveResponse(value)) {
           *setting = 1;
-        } else if (strcasecmp(value, "off") == 0) {
+        } else if (isNegativeResponse(value)) {
           *setting = 0;
         } else if (!(option->flags & OPT_Extend)) {
           LogPrint(LOG_ERR, "%s: %s", gettext("invalid flag setting"), value);
@@ -241,11 +251,11 @@ processCommandLine (
 
   const OptionEntry *optionEntries[0X100];
   char shortOptions[1 + (info->optionCount * 2) + 1];
+  int flagLetter;
   int index;
 
 #ifdef HAVE_GETOPT_LONG
   struct option longOptions[(info->optionCount * 2) + 1];
-  int flagLetter;
 
   {
     struct option *opt = longOptions;
@@ -368,7 +378,14 @@ processCommandLine (
           } else if (entry->argument) {
             if (!(optarg = value)) option = ':';
           } else if (value) {
-            option = '?';
+            if (!isPositiveResponse(value)) {
+              if (isNegativeResponse(value)) {
+                flagLetter = option;
+                option = 0;
+              } else {
+                option = '?';
+              }
+            }
           }
         }
       }
@@ -408,7 +425,6 @@ processCommandLine (
         break;
       }
 
-#ifdef HAVE_GETOPT_LONG
       case 0: {
         const OptionEntry *entry = optionEntries[flagLetter];
         FlagSetting setting = entry->setting;
@@ -416,7 +432,6 @@ processCommandLine (
         info->ensuredSettings[flagLetter] = 1;
         break;
       }
-#endif /* HAVE_GETOPT_LONG */
 
       case '?':
         LogPrint(LOG_ERR, "%s: %c%c", gettext("unknown option"), prefix, optopt);
