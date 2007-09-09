@@ -67,17 +67,26 @@ static char *host;
 static char *xDisplay;
 
 BEGIN_OPTION_TABLE
-  {"auth", strtext("file"), 'a', 0, 0,
-   &auth, NULL,
-   strtext("set path to file containing authorization key"), NULL},
+  { .letter = 'a',
+    .word = "auth",
+    .argument = strtext("file"),
+    .setting = &auth,
+    .description = strtext("set path to file containing authorization key")
+  },
 
-  {"host", strtext("[host][:port]"), 'h', 0, 0,
-   &host, NULL,
-   strtext("set brltty server (host and/or port) to connect to"), NULL},
+  { .letter = 'h',
+    .word = "host",
+    .argument = strtext("[host][:port]"),
+    .setting = &host,
+    .description = strtext("set brltty server (host and/or port) to connect to")
+  },
 
-  {"display", strtext("display"), 'd', 0, 0,
-   &xDisplay, NULL,
-   strtext("set X display to connect to"), NULL},
+  { .letter = 'd',
+    .word = "display",
+    .argument = strtext("display"),
+    .setting = &xDisplay,
+    .description = strtext("set X display to connect to")
+  },
 END_OPTION_TABLE
 
 /******************************************************************************

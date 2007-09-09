@@ -40,37 +40,55 @@ static int opt_showKeyCodes;
 static int opt_suspendMode;
 
 BEGIN_OPTION_TABLE
-  {"name", NULL, 'n', 0, 0,
-   &opt_showName, NULL,
-   "Show the driver's name."},
+  { .letter = 'n',
+    .word = "name",
+    .setting = &opt_showName,
+    .description = "Show the driver's name."
+  },
 
-  {"window", NULL, 'w', 0, 0,
-   &opt_showSize, NULL,
-   "Show the braille window's size."},
+  { .letter = 'w',
+    .word = "window",
+    .setting = &opt_showSize,
+    .description = "Show the braille window's size."
+  },
 
-  {"dots", NULL, 'd', 0, 0,
-   &opt_showDots, NULL,
-   "Show dot pattern."},
+  { .letter = 'd',
+    .word = "dots",
+    .setting = &opt_showDots,
+    .description = "Show dot pattern."
+  },
 
-  {"learn", NULL, 'l', 0, 0,
-   &opt_learnMode, NULL,
-   "Enter interactive command learn mode."},
+  { .letter = 'l',
+    .word = "learn",
+    .setting = &opt_learnMode,
+    .description = "Enter interactive command learn mode."
+  },
 
-  {"keycodes", NULL, 'k', 0, 0,
-   &opt_showKeyCodes, NULL,
-   "Enter interactive keycode learn mode."}, 
+  { .letter = 'k',
+    .word = "keycodes",
+    .setting = &opt_showKeyCodes,
+    .description = "Enter interactive keycode learn mode."
+  },
 
-  {"suspend", NULL, 's', 0, 0,
-   &opt_suspendMode, NULL,
-   "Suspend driver (press ^C on the PC keyboard or send SIGUSR1 to get back braille)."},
+  { .letter = 's',
+    .word = "suspend",
+    .setting = &opt_suspendMode,
+    .description = "Suspend driver (press ^C on the PC keyboard or send SIGUSR1 to get back braille)."
+  },
 
-  {"brlapi-host", "[host][:port]", 'H', 0, 0,
-   &settings.host, NULL,
-   "The host name (or address) and port of the BrlAPI server."},
+  { .letter = 'H',
+    .word = "brlapi-host",
+    .argument = "[host][:port]",
+    .setting = &settings.host,
+    .description = "The host name (or address) and port of the BrlAPI server."
+  },
 
-  {"brlapi-auth", "file", 'A', 0, 0,
-   &settings.auth, NULL,
-   "The path to the file containing BrlAPI's authorization key."},
+  { .letter = 'A',
+    .word = "brlapi-auth",
+    .argument = "file",
+    .setting = &settings.auth,
+    .description = "The path to the file containing BrlAPI's authorization key."
+  },
 END_OPTION_TABLE
 
 void showDisplaySize(void)
