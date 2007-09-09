@@ -37,7 +37,10 @@ typedef struct {
   unsigned char bootParameter;
   unsigned char flags;
 
-  void *setting;
+  union {
+    int *flag;
+    char **string;
+  } setting;
   const char *defaultSetting;
 
   const char *description;

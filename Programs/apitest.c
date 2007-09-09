@@ -42,51 +42,51 @@ static int opt_suspendMode;
 BEGIN_OPTION_TABLE
   { .letter = 'n',
     .word = "name",
-    .setting = &opt_showName,
+    .setting.flag = &opt_showName,
     .description = "Show the driver's name."
   },
 
   { .letter = 'w',
     .word = "window",
-    .setting = &opt_showSize,
+    .setting.flag = &opt_showSize,
     .description = "Show the braille window's size."
   },
 
   { .letter = 'd',
     .word = "dots",
-    .setting = &opt_showDots,
+    .setting.flag = &opt_showDots,
     .description = "Show dot pattern."
   },
 
   { .letter = 'l',
     .word = "learn",
-    .setting = &opt_learnMode,
+    .setting.flag = &opt_learnMode,
     .description = "Enter interactive command learn mode."
   },
 
   { .letter = 'k',
     .word = "keycodes",
-    .setting = &opt_showKeyCodes,
+    .setting.flag = &opt_showKeyCodes,
     .description = "Enter interactive keycode learn mode."
   },
 
   { .letter = 's',
     .word = "suspend",
-    .setting = &opt_suspendMode,
+    .setting.flag = &opt_suspendMode,
     .description = "Suspend driver (press ^C on the PC keyboard or send SIGUSR1 to get back braille)."
   },
 
   { .letter = 'H',
     .word = "brlapi-host",
     .argument = "[host][:port]",
-    .setting = &settings.host,
+    .setting.string = &settings.host,
     .description = "The host name (or address) and port of the BrlAPI server."
   },
 
   { .letter = 'A',
     .word = "brlapi-auth",
     .argument = "file",
-    .setting = &settings.auth,
+    .setting.string = &settings.auth,
     .description = "The path to the file containing BrlAPI's authorization key."
   },
 END_OPTION_TABLE

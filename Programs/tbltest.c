@@ -41,27 +41,27 @@ BEGIN_OPTION_TABLE
   { .letter = 'c',
     .word = "character-set",
     .argument = "charset",
-    .setting = &opt_characterSet,
+    .setting.string = &opt_characterSet,
     .description = "8-bit character set to use."
   },
 
   { .letter = 'i',
     .word = "input-format",
     .argument = "format",
-    .setting = &opt_inputFormat,
+    .setting.string = &opt_inputFormat,
     .description = "Format of input file."
   },
 
   { .letter = 'o',
     .word = "output-format",
     .argument = "format",
-    .setting = &opt_outputFormat,
+    .setting.string = &opt_outputFormat,
     .description = "Format of output file."
   },
 
   { .letter = 't',
     .word = "translate",
-    .setting = &opt_translate,
+    .setting.flag = &opt_translate,
     .description = "Translate."
   },
 
@@ -69,7 +69,7 @@ BEGIN_OPTION_TABLE
     .word = "data-directory",
     .flags = OPT_Hidden,
     .argument = "file",
-    .setting = &opt_dataDirectory,
+    .setting.string = &opt_dataDirectory,
     .defaultSetting = DATA_DIRECTORY,
     .description = "Path to directory for configuration files."
   },

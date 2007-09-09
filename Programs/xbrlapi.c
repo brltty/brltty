@@ -70,21 +70,21 @@ BEGIN_OPTION_TABLE
   { .letter = 'a',
     .word = "auth",
     .argument = strtext("file"),
-    .setting = &auth,
+    .setting.string = &auth,
     .description = strtext("set path to file containing authorization key")
   },
 
   { .letter = 'h',
     .word = "host",
     .argument = strtext("[host][:port]"),
-    .setting = &host,
+    .setting.string = &host,
     .description = strtext("set brltty server (host and/or port) to connect to")
   },
 
   { .letter = 'd',
     .word = "display",
     .argument = strtext("display"),
-    .setting = &xDisplay,
+    .setting.string = &xDisplay,
     .description = strtext("set X display to connect to")
   },
 END_OPTION_TABLE

@@ -42,35 +42,35 @@ BEGIN_OPTION_TABLE
   { .letter = 'l',
     .word = "left",
     .argument = "column",
-    .setting = &opt_boxLeft,
+    .setting.string = &opt_boxLeft,
     .description = "Left edge of region (from 0)."
   },
 
   { .letter = 'c',
     .word = "columns",
     .argument = "count",
-    .setting = &opt_boxWidth,
+    .setting.string = &opt_boxWidth,
     .description = "Width of region."
   },
 
   { .letter = 't',
     .word = "top",
     .argument = "row",
-    .setting = &opt_boxTop,
+    .setting.string = &opt_boxTop,
     .description = "Top edge of region (from 0)."
   },
 
   { .letter = 'r',
     .word = "rows",
     .argument = "count",
-    .setting = &opt_boxHeight,
+    .setting.string = &opt_boxHeight,
     .description = "Height of region."
   },
 
   { .letter = 'x',
     .word = "screen-driver",
     .argument = "driver",
-    .setting = &opt_screenDriver,
+    .setting.string = &opt_screenDriver,
     .defaultSetting = SCREEN_DRIVER,
     .description = "Screen driver: one of {" SCREEN_DRIVER_CODES "}"
   },
@@ -78,7 +78,7 @@ BEGIN_OPTION_TABLE
   { .letter = 'L',
     .word = "library-directory",
     .argument = "directory",
-    .setting = &opt_libraryDirectory,
+    .setting.string = &opt_libraryDirectory,
     .defaultSetting = LIBRARY_DIRECTORY,
     .description = "Path to directory for loading drivers."
   },

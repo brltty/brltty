@@ -41,35 +41,35 @@ BEGIN_OPTION_TABLE
   { .letter = 'd',
     .word = "device",
     .argument = "device",
-    .setting = &opt_pcmDevice,
+    .setting.string = &opt_pcmDevice,
     .description = "Digital audio soundcard device specifier."
   },
 
   { .letter = 'r',
     .word = "rate",
     .argument = "speed",
-    .setting = &opt_speechRate,
+    .setting.string = &opt_speechRate,
     .description = "Floating-point speech rate multiplier."
   },
 
   { .letter = 't',
     .word = "text-string",
     .argument = "string",
-    .setting = &opt_textString,
+    .setting.string = &opt_textString,
     .description = "Text to be spoken."
   },
 
   { .letter = 'v',
     .word = "volume",
     .argument = "loudness",
-    .setting = &opt_speechVolume,
+    .setting.string = &opt_speechVolume,
     .description = "Floating-point speech volume multiplier."
   },
 
   { .letter = 'D',
     .word = "data-directory",
     .argument = "directory",
-    .setting = &opt_dataDirectory,
+    .setting.string = &opt_dataDirectory,
     .defaultSetting = DATA_DIRECTORY,
     .description = "Path to directory for configuration files."
   },
@@ -77,7 +77,7 @@ BEGIN_OPTION_TABLE
   { .letter = 'L',
     .word = "library-directory",
     .argument = "directory",
-    .setting = &opt_libraryDirectory,
+    .setting.string = &opt_libraryDirectory,
     .defaultSetting = LIBRARY_DIRECTORY,
     .description = "Path to directory for loading drivers."
   },

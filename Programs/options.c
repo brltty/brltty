@@ -32,9 +32,6 @@
 #include <getopt.h>
 #endif /* HAVE_GETOPT_H */
 
-typedef char **StringSetting;
-typedef int *FlagSetting;
-
 typedef struct {
   const OptionEntry *optionTable;
   unsigned int optionCount;
@@ -82,25 +79,23 @@ ensureSetting (
       *ensured = 1;
 
       if (option->argument) {
-        StringSetting setting = option->setting;
         if (option->flags & OPT_Extend) {
-          extendSetting(setting, value, 1);
+          extendSetting(option->setting.string, value, 1);
         } else {
-          *setting = strdupWrapper(value);
+          *option->setting.string = strdupWrapper(value);
         }
       } else {
-        FlagSetting setting = option->setting;
         if (wordMeansTrue(value)) {
-          *setting = 1;
+          *option->setting.flag = 1;
         } else if (wordMeansFalse(value)) {
-          *setting = 0;
+          *option->setting.flag = 0;
         } else if (!(option->flags & OPT_Extend)) {
           LogPrint(LOG_ERR, "%s: %s", gettext("invalid flag setting"), value);
           info->errorCount++;
         } else {
           int count;
           if (isInteger(&count, value) && (count >= 0)) {
-            *setting = count;
+            *option->setting.flag = count;
           } else {
             LogPrint(LOG_ERR, "%s: %s", gettext("invalid counter setting"), value);
             info->errorCount++;
@@ -272,7 +267,7 @@ processCommandLine (
       opt->val = entry->letter;
       ++opt;
 
-      if (!entry->argument && entry->setting) {
+      if (!entry->argument && entry->setting.flag) {
         static const char *prefix = "no-";
         int length = strlen(prefix);
 
@@ -308,14 +303,10 @@ processCommandLine (
       *opt++ = entry->letter;
       if (entry->argument) *opt++ = ':';
 
-      if (entry->setting) {
-        if (entry->argument) {
-          StringSetting setting = entry->setting;
-          *setting = NULL;
-        } else {
-          FlagSetting setting = entry->setting;
-          *setting = 0;
-        }
+      if (entry->argument) {
+        if (entry->setting.string) *entry->setting.string = NULL;
+      } else {
+        if (entry->setting.flag) *entry->setting.flag = 0;
       }
     }
 
@@ -385,7 +376,7 @@ processCommandLine (
           } else if (entry->argument) {
             if (!(optarg = value)) option = ':';
           } else if (value) {
-            if (!entry->setting) goto dosBadFlagValue;
+            if (!entry->setting.flag) goto dosBadFlagValue;
 
             if (!wordMeansTrue(value)) {
               if (wordMeansFalse(value)) {
@@ -409,7 +400,7 @@ processCommandLine (
 
         {
           const OptionEntry *entry = optionEntries[option];
-          if (entry && !entry->argument && entry->setting) {
+          if (entry && !entry->argument && entry->setting.flag) {
             resetLetter = option;
             option = 0;
           } else {
@@ -440,18 +431,16 @@ processCommandLine (
         const OptionEntry *entry = optionEntries[option];
 
         if (entry->argument) {
-          StringSetting setting = entry->setting;
           if (entry->flags & OPT_Extend) {
-            extendSetting(setting, optarg, 0);
+            extendSetting(entry->setting.string, optarg, 0);
           } else {
-            *setting = optarg;
+            *entry->setting.string = optarg;
           }
         } else {
-          FlagSetting setting = entry->setting;
           if (entry->flags & OPT_Extend) {
-            ++*setting;
+            ++*entry->setting.flag;
           } else {
-            *setting = 1;
+            *entry->setting.flag = 1;
           }
         }
 
@@ -461,8 +450,7 @@ processCommandLine (
 
       case 0: {
         const OptionEntry *entry = optionEntries[resetLetter];
-        FlagSetting setting = entry->setting;
-        *setting = 0;
+        *entry->setting.flag = 0;
         info->ensuredSettings[resetLetter] = 1;
         break;
       }

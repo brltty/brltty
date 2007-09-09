@@ -47,7 +47,7 @@ BEGIN_OPTION_TABLE
   { .letter = 'd',
     .word = "device",
     .argument = "device",
-    .setting = &opt_brailleDevice,
+    .setting.string = &opt_brailleDevice,
     .defaultSetting = BRAILLE_DEVICE,
     .description = "Path to device for accessing braille display."
   },
@@ -55,7 +55,7 @@ BEGIN_OPTION_TABLE
   { .letter = 'D',
     .word = "data-directory",
     .argument = "directory",
-    .setting = &opt_dataDirectory,
+    .setting.string = &opt_dataDirectory,
     .defaultSetting = DATA_DIRECTORY,
     .description = "Path to directory for driver help and configuration files."
   },
@@ -63,7 +63,7 @@ BEGIN_OPTION_TABLE
   { .letter = 'L',
     .word = "library-directory",
     .argument = "directory",
-    .setting = &opt_libraryDirectory,
+    .setting.string = &opt_libraryDirectory,
     .defaultSetting = LIBRARY_DIRECTORY,
     .description = "Path to directory for loading drivers."
   },
@@ -71,7 +71,7 @@ BEGIN_OPTION_TABLE
   { .letter = 'W',
     .word = "writable-directory",
     .argument = strtext("directory"),
-    .setting = &opt_writableDirectory,
+    .setting.string = &opt_writableDirectory,
     .defaultSetting = WRITABLE_DIRECTORY,
     .description = strtext("Path to directory which can be written to.")
   },

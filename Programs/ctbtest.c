@@ -41,7 +41,7 @@ BEGIN_OPTION_TABLE
   { .letter = 'c',
     .word = "contraction-table",
     .argument = "file",
-    .setting = &opt_contractionTable,
+    .setting.string = &opt_contractionTable,
     .defaultSetting = "en-us-g2",
     .description = "Path to contraction table file."
   },
@@ -49,7 +49,7 @@ BEGIN_OPTION_TABLE
   { .letter = 't',
     .word = "text-table",
     .argument = "file",
-    .setting = &opt_textTable,
+    .setting.string = &opt_textTable,
     .defaultSetting = TEXT_TABLE,
     .description = "Text translation table."
   },
@@ -57,7 +57,7 @@ BEGIN_OPTION_TABLE
   { .letter = 'w',
     .word = "output-width",
     .argument = "columns",
-    .setting = &opt_outputWidth,
+    .setting.string = &opt_outputWidth,
     .defaultSetting = "",
     .description = "Maximum length of an output line."
   },
@@ -66,7 +66,7 @@ BEGIN_OPTION_TABLE
     .word = "data-directory",
     .flags = OPT_Hidden,
     .argument = "file",
-    .setting = &opt_dataDirectory,
+    .setting.string = &opt_dataDirectory,
     .defaultSetting = DATA_DIRECTORY,
     .description = "Path to directory for configuration files."
   },

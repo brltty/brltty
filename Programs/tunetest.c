@@ -51,7 +51,7 @@ BEGIN_OPTION_TABLE
   { .letter = 'd',
     .word = "device",
     .argument = "device",
-    .setting = &opt_tuneDevice,
+    .setting.string = &opt_tuneDevice,
     .description = "Name of tune device."
   },
 
@@ -59,7 +59,7 @@ BEGIN_OPTION_TABLE
   { .letter = 'i',
     .word = "instrument",
     .argument = "instrument",
-    .setting = &opt_midiInstrument,
+    .setting.string = &opt_midiInstrument,
     .description = "Name of MIDI instrument."
   },
 #endif /* ENABLE_MIDI_SUPPORT */
@@ -68,7 +68,7 @@ BEGIN_OPTION_TABLE
   { .letter = 'm',
     .word = "midi-device",
     .argument = "device",
-    .setting = &opt_midiDevice,
+    .setting.string = &opt_midiDevice,
     .description = "Device specifier for the Musical Instrument Digital Interface."
   },
 #endif /* ENABLE_MIDI_SUPPORT */
@@ -77,7 +77,7 @@ BEGIN_OPTION_TABLE
   { .letter = 'p',
     .word = "pcm-device",
     .argument = "device",
-    .setting = &opt_pcmDevice,
+    .setting.string = &opt_pcmDevice,
     .description = "Device specifier for soundcard digital audio."
   },
 #endif /* ENABLE_PCM_SUPPORT */
@@ -85,7 +85,7 @@ BEGIN_OPTION_TABLE
   { .letter = 'v',
     .word = "volume",
     .argument = "loudness",
-    .setting = &opt_outputVolume,
+    .setting.string = &opt_outputVolume,
     .description = "Output volume (percentage)."
   },
 END_OPTION_TABLE
