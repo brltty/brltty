@@ -44,21 +44,37 @@ static char *opt_writableDirectory;
 static char *opt_dataDirectory;
 
 BEGIN_OPTION_TABLE
-  {"device", "device", 'd', 0, 0,
-   &opt_brailleDevice, BRAILLE_DEVICE,
-   "Path to device for accessing braille display."},
+  { .letter = 'd',
+    .word = "device",
+    .argument = "device",
+    .setting = &opt_brailleDevice,
+    .defaultSetting = BRAILLE_DEVICE,
+    .description = "Path to device for accessing braille display."
+  },
 
-  {"data-directory", "directory", 'D', 0, 0,
-   &opt_dataDirectory, DATA_DIRECTORY,
-   "Path to directory for driver help and configuration files."},
+  { .letter = 'D',
+    .word = "data-directory",
+    .argument = "directory",
+    .setting = &opt_dataDirectory,
+    .defaultSetting = DATA_DIRECTORY,
+    .description = "Path to directory for driver help and configuration files."
+  },
 
-  {"library-directory", "directory", 'L', 0, 0,
-   &opt_libraryDirectory, LIBRARY_DIRECTORY,
-   "Path to directory for loading drivers."},
+  { .letter = 'L',
+    .word = "library-directory",
+    .argument = "directory",
+    .setting = &opt_libraryDirectory,
+    .defaultSetting = LIBRARY_DIRECTORY,
+    .description = "Path to directory for loading drivers."
+  },
 
-  {"writable-directory", strtext("directory"), 'W', 0, 0,
-   &opt_writableDirectory, WRITABLE_DIRECTORY,
-   strtext("Path to directory which can be written to."), NULL},
+  { .letter = 'W',
+    .word = "writable-directory",
+    .argument = strtext("directory"),
+    .setting = &opt_writableDirectory,
+    .defaultSetting = WRITABLE_DIRECTORY,
+    .description = strtext("Path to directory which can be written to.")
+  },
 END_OPTION_TABLE
 
 void

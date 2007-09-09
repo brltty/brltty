@@ -38,29 +38,49 @@ static char *opt_libraryDirectory;
 static char *opt_dataDirectory;
 
 BEGIN_OPTION_TABLE
-  {"pcm-device", "device", 'p', 0, 0,
-   &opt_pcmDevice, NULL,
-   "Device specifier for soundcard digital audio."},
+  { .letter = 'd',
+    .word = "device",
+    .argument = "device",
+    .setting = &opt_pcmDevice,
+    .description = "Digital audio soundcard device specifier."
+  },
 
-  {"rate", "speed", 'r', 0, 0,
-   &opt_speechRate, NULL,
-   "Floating-point speech rate multiplier."},
+  { .letter = 'r',
+    .word = "rate",
+    .argument = "speed",
+    .setting = &opt_speechRate,
+    .description = "Floating-point speech rate multiplier."
+  },
 
-  {"text-string", "string", 't', 0, 0,
-   &opt_textString, NULL,
-   "Text to be spoken."},
+  { .letter = 't',
+    .word = "text-string",
+    .argument = "string",
+    .setting = &opt_textString,
+    .description = "Text to be spoken."
+  },
 
-  {"volume", "loudness", 'v', 0, 0,
-   &opt_speechVolume, NULL,
-   "Floating-point speech volume multiplier."},
+  { .letter = 'v',
+    .word = "volume",
+    .argument = "loudness",
+    .setting = &opt_speechVolume,
+    .description = "Floating-point speech volume multiplier."
+  },
 
-  {"data-directory", "directory", 'D', 0, 0,
-   &opt_dataDirectory, DATA_DIRECTORY,
-   "Path to directory for configuration files."},
+  { .letter = 'D',
+    .word = "data-directory",
+    .argument = "directory",
+    .setting = &opt_dataDirectory,
+    .defaultSetting = DATA_DIRECTORY,
+    .description = "Path to directory for configuration files."
+  },
 
-  {"library-directory", "directory", 'L', 0, 0,
-   &opt_libraryDirectory, LIBRARY_DIRECTORY,
-   "Path to directory for loading drivers."},
+  { .letter = 'L',
+    .word = "library-directory",
+    .argument = "directory",
+    .setting = &opt_libraryDirectory,
+    .defaultSetting = LIBRARY_DIRECTORY,
+    .description = "Path to directory for loading drivers."
+  },
 END_OPTION_TABLE
 
 static int
