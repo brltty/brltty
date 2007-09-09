@@ -78,7 +78,8 @@
 
 # The release-device directive specifies whether or not the device to which the
 # braille display is connected is to be released when the current screen or
-# window can't be read by BRLTTY. If not specified, "off" will be used.
+# window can't be read by BRLTTY. If not specified, "on" will be used on Windows
+# platforms and "off" will be used on all other platforms.
 # (can be overridden with the -r [--release-device] option)
 #release-device	on	# Release the device.
 #release-device	off	# Don't release the device.

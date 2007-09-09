@@ -2404,7 +2404,8 @@ The following directives are recognized:
       <tag/on/Release the device.
       <tag/off/Don't release the device.
     </descrip>
-    The default setting is <tt/off/.
+    The default setting is <tt/on/ on Windows platforms
+    and <tt/off/ on all other platforms.
     This directive can be overridden with the
     <ref id="options-release-device" name="-r"> command line option.
   <tag><tt/braille-driver/ <em/driver/<tt/,/...|<tt/auto/<label id="configure-braille-driver"></tag>
