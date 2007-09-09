@@ -46,13 +46,16 @@ typedef struct {
 
 #define BEGIN_OPTION_TABLE static const OptionEntry optionTable[] = {
 #define END_OPTION_TABLE \
-  {"help", NULL, 'h', 0, 0, \
-   NULL, NULL, \
-   strtext("Print a usage summary and exit.")}, \
-\
-  {"full-help", NULL, 'H', 0, OPT_Hidden, \
-   NULL, NULL, \
-   strtext("Print a full usage summary and exit.")} \
+  { .letter = 'h', \
+    .word = "help", \
+    .description = strtext("Print a usage summary and exit.") \
+  } \
+  , \
+  { .letter = 'H', \
+    .word = "full-help", \
+    .flags = OPT_Hidden, \
+    .description = strtext("Print a full usage summary and exit.") \
+  } \
 }; \
 static unsigned int optionCount = ARRAY_COUNT(optionTable);
 
