@@ -243,16 +243,20 @@ processCommandLine (
   char ***argumentVector,
   const char *argumentsSummary
 ) {
-  int optHelp = 0;
-  int optHelpAll = 0;
-
-  int dosSyntax = 0;
-  const char dosPrefix = '/';
-
-  const OptionEntry *optionEntries[0X100];
-  char shortOptions[1 + (info->optionCount * 2) + 1];
+  int lastOptInd = -1;
   int flagLetter;
   int index;
+
+  const char resetPrefix = '+';
+  const char *reset = NULL;
+
+  const char dosPrefix = '/';
+  int dosSyntax = 0;
+
+  int optHelp = 0;
+  int optHelpAll = 0;
+  const OptionEntry *optionEntries[0X100];
+  char shortOptions[1 + (info->optionCount * 2) + 1];
 
 #ifdef HAVE_GETOPT_LONG
   struct option longOptions[(info->optionCount * 2) + 1];
@@ -323,17 +327,20 @@ processCommandLine (
       dosSyntax = 1;
 
   opterr = 0;
+  optind = 1;
+
   while (1) {
     int option;
     char prefix = '-';
 
-    if (dosSyntax) {
-      prefix = dosPrefix;
+    if (optind == *argumentCount) {
+      option = -1;
+    } else {
+      char *argument = (*argumentVector)[optind];
 
-      if (optind == *argumentCount) {
-        option = -1;
-      } else {
-        char *argument = (*argumentVector)[optind++];
+      if (dosSyntax) {
+        prefix = dosPrefix;
+        optind++;
 
         if (*argument != dosPrefix) {
           option = -1;
@@ -391,13 +398,37 @@ processCommandLine (
             }
           }
         }
-      }
-    } else {
+      } else if (reset) {
+        prefix = resetPrefix;
+
+        if (!(option = *reset++)) {
+          reset = NULL;
+          optind++;
+          continue;
+        }
+
+        {
+          const OptionEntry *entry = optionEntries[option];
+          if (entry && !entry->argument && entry->setting) {
+            flagLetter = option;
+            option = 0;
+          } else {
+            optopt = option;
+            option = '?';
+          }
+        }
+      } else {
+        if (optind != lastOptInd) {
+          lastOptInd = optind;
+          if ((reset = (*argument == resetPrefix)? argument+1: NULL)) continue;
+        }
+
 #ifdef HAVE_GETOPT_LONG
-      option = getopt_long(*argumentCount, *argumentVector, shortOptions, longOptions, NULL);
+        option = getopt_long(*argumentCount, *argumentVector, shortOptions, longOptions, NULL);
 #else /* HAVE_GETOPT_LONG */
-      option = getopt(*argumentCount, *argumentVector, shortOptions);
+        option = getopt(*argumentCount, *argumentVector, shortOptions);
 #endif /* HAVE_GETOPT_LONG */
+      }
     }
     if (option == -1) break;
 
