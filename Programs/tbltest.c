@@ -38,25 +38,41 @@ static int opt_translate;
 static char *opt_dataDirectory;
 
 BEGIN_OPTION_TABLE
-  {"character-set", "charset", 'c', 0, 0,
-   &opt_characterSet, NULL,
-   "8-bit character set to use."},
+  { .letter = 'c',
+    .word = "character-set",
+    .argument = "charset",
+    .setting = &opt_characterSet,
+    .description = "8-bit character set to use."
+  },
 
-  {"input-format", "format", 'i', 0, 0,
-   &opt_inputFormat, NULL,
-   "Format of input file."},
+  { .letter = 'i',
+    .word = "input-format",
+    .argument = "format",
+    .setting = &opt_inputFormat,
+    .description = "Format of input file."
+  },
 
-  {"output-format", "format", 'o', 0, 0,
-   &opt_outputFormat, NULL,
-   "Format of output file."},
+  { .letter = 'o',
+    .word = "output-format",
+    .argument = "format",
+    .setting = &opt_outputFormat,
+    .description = "Format of output file."
+  },
 
-  {"translate", NULL, 't', 0, 0,
-   &opt_translate, NULL,
-   "Translate."},
+  { .letter = 't',
+    .word = "translate",
+    .setting = &opt_translate,
+    .description = "Translate."
+  },
 
-  {"data-directory", "file", 'D', 0, OPT_Hidden,
-   &opt_dataDirectory, DATA_DIRECTORY,
-   "Path to directory for configuration files."},
+  { .letter = 'D',
+    .word = "data-directory",
+    .flags = OPT_Hidden,
+    .argument = "file",
+    .setting = &opt_dataDirectory,
+    .defaultSetting = DATA_DIRECTORY,
+    .description = "Path to directory for configuration files."
+  },
 END_OPTION_TABLE
 
 static const DotsTable dotsInternal = {

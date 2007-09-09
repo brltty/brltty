@@ -38,21 +38,38 @@ static char *opt_textTable;
 static char *opt_outputWidth;
 
 BEGIN_OPTION_TABLE
-  {"contraction-table", "file", 'c', 0, 0,
-   &opt_contractionTable, "en-us-g2",
-   "Path to contraction table file."},
+  { .letter = 'c',
+    .word = "contraction-table",
+    .argument = "file",
+    .setting = &opt_contractionTable,
+    .defaultSetting = "en-us-g2",
+    .description = "Path to contraction table file."
+  },
 
-  {"text-table", "file", 't', 0, 0,
-   &opt_textTable, TEXT_TABLE,
-   "Text translation table."},
+  { .letter = 't',
+    .word = "text-table",
+    .argument = "file",
+    .setting = &opt_textTable,
+    .defaultSetting = TEXT_TABLE,
+    .description = "Text translation table."
+  },
 
-  {"output-width", "columns", 'w', 0, 0,
-   &opt_outputWidth, "",
-   "Maximum length of an output line."},
+  { .letter = 'w',
+    .word = "output-width",
+    .argument = "columns",
+    .setting = &opt_outputWidth,
+    .defaultSetting = "",
+    .description = "Maximum length of an output line."
+  },
 
-  {"data-directory", "file", 'D', 0, OPT_Hidden,
-   &opt_dataDirectory, DATA_DIRECTORY,
-   "Path to directory for configuration files."},
+  { .letter = 'D',
+    .word = "data-directory",
+    .flags = OPT_Hidden,
+    .argument = "file",
+    .setting = &opt_dataDirectory,
+    .defaultSetting = DATA_DIRECTORY,
+    .description = "Path to directory for configuration files."
+  },
 END_OPTION_TABLE
 
 TranslationTable textTable;

@@ -39,29 +39,49 @@ static char *opt_screenDriver;
 static char *opt_libraryDirectory;
 
 BEGIN_OPTION_TABLE
-  {"left", "column", 'l', 0, 0,
-   &opt_boxLeft, NULL,
-   "Left edge of region (from 0)."},
+  { .letter = 'l',
+    .word = "left",
+    .argument = "column",
+    .setting = &opt_boxLeft,
+    .description = "Left edge of region (from 0)."
+  },
 
-  {"columns", "count", 'c', 0, 0,
-   &opt_boxWidth, NULL,
-   "Width of region."},
+  { .letter = 'c',
+    .word = "columns",
+    .argument = "count",
+    .setting = &opt_boxWidth,
+    .description = "Width of region."
+  },
 
-  {"top", "row", 't', 0, 0,
-   &opt_boxTop, NULL,
-   "Top edge of region (from 0)."},
+  { .letter = 't',
+    .word = "top",
+    .argument = "row",
+    .setting = &opt_boxTop,
+    .description = "Top edge of region (from 0)."
+  },
 
-  {"rows", "count", 'r', 0, 0,
-   &opt_boxHeight, NULL,
-   "Height of region."},
+  { .letter = 'r',
+    .word = "rows",
+    .argument = "count",
+    .setting = &opt_boxHeight,
+    .description = "Height of region."
+  },
 
-  {"screen-driver", "driver", 'x', 0, 0,
-   &opt_screenDriver, SCREEN_DRIVER,
-   "Screen driver: one of {" SCREEN_DRIVER_CODES "}"},
+  { .letter = 'x',
+    .word = "screen-driver",
+    .argument = "driver",
+    .setting = &opt_screenDriver,
+    .defaultSetting = SCREEN_DRIVER,
+    .description = "Screen driver: one of {" SCREEN_DRIVER_CODES "}"
+  },
 
-  {"library-directory", "directory", 'L', 0, 0,
-   &opt_libraryDirectory, LIBRARY_DIRECTORY,
-   "Path to directory for loading drivers."},
+  { .letter = 'L',
+    .word = "library-directory",
+    .argument = "directory",
+    .setting = &opt_libraryDirectory,
+    .defaultSetting = LIBRARY_DIRECTORY,
+    .description = "Path to directory for loading drivers."
+  },
 END_OPTION_TABLE
 
 static void
