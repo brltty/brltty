@@ -43,13 +43,13 @@ typedef struct {
 } OptionProcessingInformation;
 
 static int
-isPositiveResponse (const char *word) {
-  return strcasecmp(word, "on") == 0;
+wordMeansTrue (const char *word) {
+  return strcasecmp(word, FLAG_TRUE_WORD) == 0;
 }
 
 static int
-isNegativeResponse (const char *word) {
-  return strcasecmp(word, "off") == 0;
+wordMeansFalse (const char *word) {
+  return strcasecmp(word, FLAG_FALSE_WORD) == 0;
 }
 
 static void
@@ -90,9 +90,9 @@ ensureSetting (
         }
       } else {
         FlagSetting setting = option->setting;
-        if (isPositiveResponse(value)) {
+        if (wordMeansTrue(value)) {
           *setting = 1;
-        } else if (isNegativeResponse(value)) {
+        } else if (wordMeansFalse(value)) {
           *setting = 0;
         } else if (!(option->flags & OPT_Extend)) {
           LogPrint(LOG_ERR, "%s: %s", gettext("invalid flag setting"), value);
@@ -387,8 +387,8 @@ processCommandLine (
           } else if (value) {
             if (!entry->setting) goto dosBadFlagValue;
 
-            if (!isPositiveResponse(value)) {
-              if (isNegativeResponse(value)) {
+            if (!wordMeansTrue(value)) {
+              if (wordMeansFalse(value)) {
                 resetLetter = option;
                 option = 0;
               } else {

@@ -217,8 +217,13 @@ BEGIN_OPTION_TABLE
    &opt_quiet, NULL,
    strtext("Suppress start-up messages."), NULL},
 
+#ifdef WINDOWS
+#define DEFAULT_RELEASE_DEVICE FLAG_TRUE_WORD
+#else /* WINDOWS */
+#define DEFAULT_RELEASE_DEVICE FLAG_FALSE_WORD
+#endif /* WINDOWS */
   {"release-device", NULL, 'r', 0, OPT_Config | OPT_Environ,
-   &opt_releaseDevice, NULL,
+   &opt_releaseDevice, DEFAULT_RELEASE_DEVICE,
    strtext("Release braille device when screen is unreadable."), NULL},
 
 #ifdef ENABLE_SPEECH_SUPPORT

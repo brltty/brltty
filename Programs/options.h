@@ -27,6 +27,9 @@ extern "C" {
 #define OPT_Config	0X04
 #define OPT_Environ	0X08
 
+#define FLAG_TRUE_WORD "on"
+#define FLAG_FALSE_WORD "off"
+
 typedef struct {
   const char *word;
   const char *argument;
