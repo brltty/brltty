@@ -244,11 +244,11 @@ processCommandLine (
   const char *argumentsSummary
 ) {
   int lastOptInd = -1;
-  int flagLetter;
   int index;
 
   const char resetPrefix = '+';
   const char *reset = NULL;
+  int resetLetter;
 
   const char dosPrefix = '/';
   int dosSyntax = 0;
@@ -285,7 +285,7 @@ processCommandLine (
         }
 
         opt->has_arg = no_argument;
-        opt->flag = &flagLetter;
+        opt->flag = &resetLetter;
         opt->val = entry->letter;
         ++opt;
       }
@@ -389,7 +389,7 @@ processCommandLine (
 
             if (!isPositiveResponse(value)) {
               if (isNegativeResponse(value)) {
-                flagLetter = option;
+                resetLetter = option;
                 option = 0;
               } else {
               dosBadFlagValue:
@@ -410,7 +410,7 @@ processCommandLine (
         {
           const OptionEntry *entry = optionEntries[option];
           if (entry && !entry->argument && entry->setting) {
-            flagLetter = option;
+            resetLetter = option;
             option = 0;
           } else {
             optopt = option;
@@ -460,10 +460,10 @@ processCommandLine (
       }
 
       case 0: {
-        const OptionEntry *entry = optionEntries[flagLetter];
+        const OptionEntry *entry = optionEntries[resetLetter];
         FlagSetting setting = entry->setting;
         *setting = 0;
-        info->ensuredSettings[flagLetter] = 1;
+        info->ensuredSettings[resetLetter] = 1;
         break;
       }
 
