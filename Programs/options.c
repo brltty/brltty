@@ -115,31 +115,26 @@ printHelp (
   int all
 ) {
   char line[lineWidth+1];
+  unsigned int wordWidth = 0;
   unsigned int argumentWidth = 0;
   int optionIndex;
 
-#ifdef HAVE_GETOPT_LONG
-  unsigned int wordWidth = 0;
-#endif /* HAVE_GETOPT_LONG */
-
   for (optionIndex=0; optionIndex<info->optionCount; ++optionIndex) {
     const OptionEntry *option = &info->optionTable[optionIndex];
-
-#ifdef HAVE_GETOPT_LONG
     if (option->word) wordWidth = MAX(wordWidth, strlen(option->word));
-#endif /* HAVE_GETOPT_LONG */
-
     if (option->argument) argumentWidth = MAX(argumentWidth, strlen(option->argument));
   }
 
   fputs(gettext("Usage"), outputStream);
   fprintf(outputStream, ": %s", programName);
-  if (info->optionCount)
+  if (info->optionCount) {
     fputs(" [", outputStream);
     fputs(gettext("option"), outputStream);
     fputs(" ...]", outputStream);
-  if (argumentsSummary && *argumentsSummary)
+  }
+  if (argumentsSummary && *argumentsSummary) {
     fprintf(outputStream, " %s", argumentsSummary);
+  }
   fprintf(outputStream, "\n");
 
   for (optionIndex=0; optionIndex<info->optionCount; ++optionIndex) {
@@ -163,7 +158,6 @@ printHelp (
     }
     line[lineLength++] = ' ';
 
-#ifdef HAVE_GETOPT_LONG
     {
       unsigned int end = lineLength + 2 + wordWidth + 1;
       if (option->word) {
@@ -177,7 +171,6 @@ printHelp (
       while (lineLength < end) line[lineLength++] = ' ';
     }
     line[lineLength++] = ' ';
-#endif /* HAVE_GETOPT_LONG */
 
     line[lineLength++] = ' ';
     {
@@ -261,28 +254,30 @@ processCommandLine (
     for (index=0; index<info->optionCount; ++index) {
       const OptionEntry *entry = &info->optionTable[index];
 
-      opt->name = entry->word;
-      opt->has_arg = entry->argument? required_argument: no_argument;
-      opt->flag = NULL;
-      opt->val = entry->letter;
-      ++opt;
-
-      if (!entry->argument && entry->setting.flag) {
-        static const char *prefix = "no-";
-        int length = strlen(prefix);
-
-        if (strncasecmp(prefix, entry->word, length) == 0) {
-          opt->name = strdupWrapper(entry->word + length);
-        } else {
-          char *name = mallocWrapper(length + strlen(entry->word) + 1);
-          sprintf(name, "%s%s", prefix, entry->word);
-          opt->name = name;
-        }
-
-        opt->has_arg = no_argument;
-        opt->flag = &resetLetter;
+      if (entry->word) {
+        opt->name = entry->word;
+        opt->has_arg = entry->argument? required_argument: no_argument;
+        opt->flag = NULL;
         opt->val = entry->letter;
         ++opt;
+
+        if (!entry->argument && entry->setting.flag) {
+          static const char *prefix = "no-";
+          int length = strlen(prefix);
+
+          if (strncasecmp(prefix, entry->word, length) == 0) {
+            opt->name = strdupWrapper(entry->word + length);
+          } else {
+            char *name = mallocWrapper(length + strlen(entry->word) + 1);
+            sprintf(name, "%s%s", prefix, entry->word);
+            opt->name = name;
+          }
+
+          opt->has_arg = no_argument;
+          opt->flag = &resetLetter;
+          opt->val = entry->letter;
+          ++opt;
+        }
       }
     }
 
@@ -534,7 +529,7 @@ processEnvironmentVariables (
   int optionIndex;
   for (optionIndex=0; optionIndex<info->optionCount; ++optionIndex) {
     const OptionEntry *option = &info->optionTable[optionIndex];
-    if (option->flags & OPT_Environ) {
+    if ((option->flags & OPT_Environ) && option->word) {
       char name[prefixLength + 1 + strlen(option->word) + 1];
       sprintf(name, "%s_%s", prefix, option->word);
 
@@ -592,7 +587,7 @@ processConfigurationLine (
     int optionIndex;
     for (optionIndex=0; optionIndex<conf->info->optionCount; ++optionIndex) {
       const OptionEntry *option = &conf->info->optionTable[optionIndex];
-      if (option->flags & OPT_Config) {
+      if ((option->flags & OPT_Config) && option->word) {
         if (strcasecmp(directive, option->word) == 0) {
           const char *operand = strtok(NULL, delimiters);
 
