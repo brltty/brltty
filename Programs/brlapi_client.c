@@ -557,12 +557,12 @@ static int tryHost(brlapi_handle_t *handle, char *hostAndPort) {
     }
 #endif /* __MINGW32__ */
 
-#if defined(SOL_TCP) && defined(TCP_NODELAY)
+#if defined(IPPROTO_TCP) && defined(TCP_NODELAY)
     {
       int yes=1;
-      setsockopt(sockfd,SOL_TCP,TCP_NODELAY,(void*)&yes,sizeof(yes));
+      setsockopt(sockfd,IPPROTO_TCP,TCP_NODELAY,(void*)&yes,sizeof(yes));
     }
-#endif /* defined(SOL_TCP) && defined(TCP_NODELAY) */
+#endif /* defined(IPPROTO_TCP) && defined(TCP_NODELAY) */
     handle->fileDescriptor = (FileDescriptor) sockfd;
   }
   free(host);

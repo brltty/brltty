@@ -1580,10 +1580,10 @@ cont:
     fun = "setsockopt(REUSEADDR)";
     goto err;
   }
-#if defined(SOL_TCP) && defined(TCP_NODELAY)
-  if (setsockopt(fd,SOL_TCP,TCP_NODELAY,(void*)&yes,sizeof(yes))!=0)
+#if defined(IPPROTO_TCP) && defined(TCP_NODELAY)
+  if (setsockopt(fd,IPPROTO_TCP,TCP_NODELAY,(void*)&yes,sizeof(yes))!=0)
     LogPrint(LOG_WARNING, "setsockopt(NODELAY): %s", strerror(errno));
-#endif /* defined(SOL_TCP) && defined(TCP_NODELAY) */
+#endif /* defined(IPPROTO_TCP) && defined(TCP_NODELAY) */
   if (loopBind(fd, (struct sockaddr *) &addr, sizeof(addr))<0) {
     fun = "bind";
     goto err;
