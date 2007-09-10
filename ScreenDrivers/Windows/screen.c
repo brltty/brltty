@@ -36,7 +36,7 @@ static int
 processParameters_WindowsScreen (char **parameters) {
   if (*parameters[PARM_ROOT]) {
     if (AttachConsoleProc)
-      LogError("No need for root BRLTTY on systems that support AttachConsole()");
+      LogPrint(LOG_WARNING, "No need for root BRLTTY on systems that support AttachConsole()");
     if (!validateYesNo(&root, parameters[PARM_ROOT]))
       LogPrint(LOG_WARNING, "%s: %s", "invalid root setting", parameters[PARM_ROOT]);
   }
