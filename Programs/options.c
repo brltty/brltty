@@ -548,7 +548,10 @@ processEnvironmentVariables (
         }
       }
 
-      ensureSetting(info, option, getenv(name));
+      {
+        char *setting = getenv(name);
+        if (setting) ensureSetting(info, option, setting);
+      }
     }
   }
 }
