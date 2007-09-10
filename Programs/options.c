@@ -73,18 +73,21 @@ ensureSetting (
   const OptionEntry *option,
   const char *value
 ) {
-  if (value) {
-    unsigned char *ensured = &info->ensuredSettings[option->letter];
-    if (!*ensured) {
-      *ensured = 1;
+  unsigned char *ensured = &info->ensuredSettings[option->letter];
 
-      if (option->argument) {
+  if (!*ensured) {
+    *ensured = 1;
+
+    if (option->argument) {
+      if (option->setting.string) {
         if (option->flags & OPT_Extend) {
           extendSetting(option->setting.string, value, 1);
         } else {
           *option->setting.string = strdupWrapper(value);
         }
-      } else {
+      }
+    } else {
+      if (option->setting.flag) {
         if (wordMeansTrue(value)) {
           *option->setting.flag = 1;
         } else if (wordMeansFalse(value)) {
@@ -558,8 +561,11 @@ setDefaultOptions (
   int optionIndex;
   for (optionIndex=0; optionIndex<info->optionCount; ++optionIndex) {
     const OptionEntry *option = &info->optionTable[optionIndex];
-    if (!(option->flags & OPT_Config) != !config) continue;
-    ensureSetting(info, option, option->defaultSetting);
+    if (!(option->flags & OPT_Config) == !config) {
+      const char *setting = option->defaultSetting;
+      if (!setting) setting = option->argument? "": FLAG_FALSE_WORD;
+      ensureSetting(info, option, setting);
+    }
   }
 }
 
@@ -647,7 +653,7 @@ processConfigurationFile (
 
       for (index=0; index<info->optionCount; ++index) {
         char *setting = conf.settings[index];
-        ensureSetting(info, &info->optionTable[index], setting);
+        if (setting) ensureSetting(info, &info->optionTable[index], setting);
         free(setting);
       }
       free(conf.settings);
