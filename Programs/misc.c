@@ -87,11 +87,13 @@ deallocateStrings (char **array) {
   free(array);
 }
 
-#ifdef HAVE_SYSLOG_H
-#include <syslog.h>
-
+#if defined(HAVE_SYSLOG_H)
 static int syslogOpened = 0;
-#endif /* HAVE_SYSLOG_H */
+
+#elif defined(WINDOWS)
+static HANDLE windowsEventLog = INVALID_HANDLE_VALUE;
+
+#endif /* system log internal definitions */
 
 static int logLevel = LOG_NOTICE;
 static const char *printPrefix = NULL;
@@ -99,24 +101,33 @@ static int printLevel = LOG_NOTICE;
 
 void
 LogOpen (int toConsole) {
-#ifdef HAVE_SYSLOG_H
+#if defined(HAVE_SYSLOG_H)
   if (!syslogOpened) {
     int flags = LOG_PID;
     if (toConsole) flags |= LOG_CONS;
     openlog("brltty", flags, LOG_DAEMON);
     syslogOpened = 1;
   }
-#endif /* HAVE_SYSLOG_H */
+#elif defined(WINDOWS)
+  if (windowsEventLog == INVALID_HANDLE_VALUE) {
+    windowsEventLog = RegisterEventSource(NULL, "brltty");
+  }
+#endif /* open system log */
 }
 
 void
 LogClose (void) {
-#ifdef HAVE_SYSLOG_H
+#if defined(HAVE_SYSLOG_H)
   if (syslogOpened) {
     syslogOpened = 0;
     closelog();
   }
-#endif /* HAVE_SYSLOG_H */
+#elif defined(WINDOWS)
+  if (windowsEventLog != INVALID_HANDLE_VALUE) {
+    DeregisterEventSource(windowsEventLog);
+    windowsEventLog = INVALID_HANDLE_VALUE;
+  }
+#endif /* close system log */
 }
 
 void
@@ -125,7 +136,7 @@ LogPrint (int level, const char *format, ...) {
   va_list argp;
 
   if (level <= logLevel) {
-#ifdef HAVE_SYSLOG_H
+#if defined(HAVE_SYSLOG_H)
     if (syslogOpened) {
 #ifdef HAVE_VSYSLOG
       va_start(argp, format);
@@ -140,12 +151,24 @@ LogPrint (int level, const char *format, ...) {
 #endif /* HAVE_VSYSLOG */
       goto done;
     }
-#endif /* HAVE_SYSLOG_H */
+#elif defined(WINDOWS)
+    if (windowsEventLog != INVALID_HANDLE_VALUE) {
+      char buffer[0X100];
+      const char *b = buffer;
+      va_start(argp, format);
+      vsnprintf(buffer, sizeof(buffer), format, argp);
+      va_end(argp);
+      ReportEvent(windowsEventLog, level, 0, 0, NULL, 1, 0, &b, NULL);
+      goto done;
+    }
+#endif /* write system log */
+
     level = printLevel;
   }
-#ifdef HAVE_SYSLOG_H
+
+#if defined(HAVE_SYSLOG_H) || defined(WINDOWS)
 done:
-#endif /* HAVE_SYSLOG_H */
+#endif /* label needed */
 
   if (level <= printLevel) {
     FILE *stream = stderr;

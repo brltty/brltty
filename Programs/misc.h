@@ -132,9 +132,20 @@ extern long int millisecondsBetween (const struct timeval *from, const struct ti
 extern long int millisecondsSince (const struct timeval *from);
 extern int hasTimedOut (int milliseconds);	/* test timeout condition */
 
-#ifdef HAVE_SYSLOG_H
+#if defined(HAVE_SYSLOG_H)
 #include <syslog.h>
-#else /* HAVE_SYSLOG_H */
+
+#elif defined(WINDOWS)
+#define LOG_EMERG   EVENTLOG_ERROR_TYPE
+#define LOG_ALERT   EVENTLOG_ERROR_TYPE
+#define LOG_CRIT    EVENTLOG_ERROR_TYPE
+#define LOG_ERR	    EVENTLOG_ERROR_TYPE
+#define LOG_WARNING EVENTLOG_WARNING_TYPE
+#define LOG_NOTICE  EVENTLOG_INFORMATION_TYPE
+#define LOG_INFO    EVENTLOG_INFORMATION_TYPE
+#define LOG_DEBUG   EVENTLOG_INFORMATION_TYPE
+
+#else /* no system log */
 typedef enum {
   LOG_EMERG,
   LOG_ALERT,
@@ -145,7 +156,8 @@ typedef enum {
   LOG_INFO,
   LOG_DEBUG
 } SyslogLevel;
-#endif /* HAVE_SYSLOG_H */
+#endif /* system log external definitions */
+
 extern void LogOpen(int toConsole);
 extern void LogClose(void);
 extern void LogPrint
