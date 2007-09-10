@@ -16,6 +16,7 @@
  */
 
 #include <sys/soundcard.h>
+#include <sys/ioctl.h>
 
 #include "io_misc.h"
 
