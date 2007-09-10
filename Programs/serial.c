@@ -835,7 +835,7 @@ serialGetCharacterBits (SerialDevice *serial) {
   #endif /* CS8 */
 
       default:
-        LogPrint(LOG_WARNING, "unsupported serial data bits value: %X", size);
+        LogPrint(LOG_WARNING, "unsupported serial data bits value: %lX", (unsigned long) size);
         break;
     }
   }
