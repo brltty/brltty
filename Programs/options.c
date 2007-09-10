@@ -176,7 +176,7 @@ printHelp (
     {
       unsigned int headerWidth = lineLength;
       unsigned int descriptionWidth = lineWidth - headerWidth;
-      const char *description = gettext(option->description);
+      const char *description = option->description? gettext(option->description): "";
       char buffer[0X100];
 
       if (option->strings) {
@@ -190,8 +190,8 @@ printHelp (
         }
 
         while (index < count) strings[index++] = NULL;
-        snprintf(buffer, sizeof(buffer), gettext(option->description),
-                 strings[0], strings[1], strings[2], strings[3]);
+        snprintf(buffer, sizeof(buffer),
+                 description, strings[0], strings[1], strings[2], strings[3]);
         description = buffer;
       }
 
