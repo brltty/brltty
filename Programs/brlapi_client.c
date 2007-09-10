@@ -265,7 +265,7 @@ static ssize_t brlapi__doWaitForPacket(brlapi_handle_t *handle, brlapi_packetTyp
   if ((type==BRLAPI_PACKET_KEY) && (handle->state & STCONTROLLINGTTY) && (res==sizeof(brlapi_keyCode_t))) {
     /* keypress, buffer it */
     if (handle->keybuf_nb>=BRL_KEYBUF_SIZE) {
-      syslog(LOG_WARNING,"lost key: 0X%8"PRIx32"%8"PRIx32"\n",ntohl(uint32Packet[0]),ntohl(uint32Packet[1]));
+      syslog(LOG_WARNING,"lost key: 0X%8lx%8lx\n",(unsigned long)ntohl(uint32Packet[0]),(unsigned long)ntohl(uint32Packet[1]));
     } else {
       handle->keybuf[(handle->keybuf_next+handle->keybuf_nb++)%BRL_KEYBUF_SIZE]=ntohl(*uint32Packet);
     }
@@ -451,7 +451,6 @@ static int tryHost(brlapi_handle_t *handle, char *hostAndPort) {
 #else /* PF_LOCAL */
   if (0) {} else {
 #endif /* PF_LOCAL */
-    int yes=1;
 
 #ifdef __MINGW32__
     if (CHECKGETPROC("ws2_32.dll",getaddrinfo)
@@ -558,7 +557,12 @@ static int tryHost(brlapi_handle_t *handle, char *hostAndPort) {
     }
 #endif /* __MINGW32__ */
 
-    setsockopt(sockfd,SOL_TCP,TCP_NODELAY,(void*)&yes,sizeof(yes));
+#if defined(SOL_TCP) && defined(TCP_NODELAY)
+    {
+      int yes=1;
+      setsockopt(sockfd,SOL_TCP,TCP_NODELAY,(void*)&yes,sizeof(yes));
+    }
+#endif /* defined(SOL_TCP) && defined(TCP_NODELAY) */
     handle->fileDescriptor = (FileDescriptor) sockfd;
   }
   free(host);
