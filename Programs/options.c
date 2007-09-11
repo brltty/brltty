@@ -512,7 +512,7 @@ processBootParameters (
     for (optionIndex=0; optionIndex<info->optionCount; ++optionIndex) {
       const OptionEntry *option = &info->optionTable[optionIndex];
       if ((option->bootParameter) && (option->bootParameter <= count)) {
-        char *parameter = parameters[option->bootParameter-1];
+        const char *parameter = parameters[option->bootParameter-1];
         if (*parameter) ensureSetting(info, option, parameter);
       }
     }
@@ -656,8 +656,10 @@ processConfigurationFile (
 
       for (index=0; index<info->optionCount; ++index) {
         char *setting = conf.settings[index];
-        if (setting) ensureSetting(info, &info->optionTable[index], setting);
-        free(setting);
+        if (setting) {
+          ensureSetting(info, &info->optionTable[index], setting);
+          free(setting);
+        }
       }
       free(conf.settings);
     }
