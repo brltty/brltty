@@ -22,7 +22,7 @@ all:: $(ALL_API)
 
 all-api: BrlAPIref.made
 
-BrlAPIref.made: BrlAPIref $(BLD_TOP)$(PGM_DIR)/brlapi.h $(BLD_TOP)$(PGM_DIR)/brlapi_constants.h $(SRC_TOP)$(PGM_DIR)/brlapi_keycodes.h $(SRC_TOP)$(PGM_DIR)/brlapi_protocol.h BrlAPIref.doxy
+BrlAPIref.made man3: BrlAPIref $(BLD_TOP)$(PGM_DIR)/brlapi.h $(BLD_TOP)$(PGM_DIR)/brlapi_constants.h $(SRC_TOP)$(PGM_DIR)/brlapi_keycodes.h $(SRC_TOP)$(PGM_DIR)/brlapi_protocol.h BrlAPIref.doxy
 	doxygen BrlAPIref.doxy
 	touch $@
 
