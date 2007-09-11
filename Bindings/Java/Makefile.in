@@ -26,6 +26,8 @@ JAVADOC = @JAVADOC@
 JAR = @JAR@
 JNIFLAGS = @JNIFLAGS@
 
+JAR_DIR = /usr/share/java
+
 all: native jar doc
 
 JAVA_NATIVE = $(LIB_PFX)$(API_NAME)_java.$(LIB_EXT)
@@ -68,6 +70,9 @@ clean::
 	-rm -f gjdoc.properties JAVADOC.PLACEHOLDER
 
 install: all
+	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(JAR_DIR)
+	$(INSTALL) $(JAVA_JAR) $(INSTALL_ROOT)$(JAR_DIR)
 
 uninstall:
+	-rm -f -- $(INSTALL_ROOT)$(JAR_DIR)/$(JAVA_JAR)
 
