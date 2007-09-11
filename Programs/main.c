@@ -1075,12 +1075,8 @@ highlightWindow (void) {
   }
 }
 
-int
-programMain (int argc, char *argv[]) {
-  int offline = 0;
-  int suspended = 0;
-  short oldwinx, oldwiny;
-
+static int
+beginProgram (int argc, char *argv[]) {
 #ifdef INIT_PATH
   if ((getpid() == 1) || (strstr(argv[0], "linuxrc") != NULL)) {
     fprintf(stderr, gettext("%s started as %s\n"), PACKAGE_TITLE, argv[0]);
@@ -1144,6 +1140,15 @@ programMain (int argc, char *argv[]) {
   /* Install the handler which monitors the death of child processes. */
   handleSignal(SIGCHLD, childDeathHandler);
 #endif /* SIGCHLD */
+
+  return 0;
+}
+
+static int
+runProgram (void) {
+  int offline = 0;
+  int suspended = 0;
+  short oldwinx, oldwiny;
 
   atexit(exitScreenStates);
   getScreenAttributes();
@@ -2544,6 +2549,8 @@ programMain (int argc, char *argv[]) {
      */
     updateScreenAttributes();
   }
+
+  return 0;
 }
 
 void 
@@ -2684,10 +2691,12 @@ serviceMain (DWORD argc, LPSTR *argv) {
 
   if ((serviceStatusHandle = RegisterServiceCtrlHandler(NULL, &serviceHandler))) {
     if ((setServiceState(SERVICE_START_PENDING, 0, "SERVICE_START_PENDING"))) {
-      if ((setServiceState(SERVICE_RUNNING, 0, "SERVICE_RUNNING"))) {
-        serviceReturnCode = programMain(argc, argv);
-        setServiceState(SERVICE_STOPPED, 0, "SERVICE_STOPPED");
+      if (!(serviceReturnCode = beginProgram(argc, argv))) {
+        if ((setServiceState(SERVICE_RUNNING, 0, "SERVICE_RUNNING"))) {
+          runProgram();
+        }
       }
+      setServiceState(SERVICE_STOPPED, 0, "SERVICE_STOPPED");
     }
   } else {
     LogWindowsError("RegisterServiceCtrlHandler");
@@ -2707,5 +2716,9 @@ main (int argc, char *argv[]) {
   isWindowsService = 0;
 #endif /* __MINGW32__ */
 
-  return programMain(argc, argv);
+  {
+    int returnCode = beginProgram(argc, argv);
+    if (!returnCode) returnCode = runProgram();
+    return returnCode;
+  }
 }
