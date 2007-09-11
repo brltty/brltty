@@ -1076,7 +1076,7 @@ highlightWindow (void) {
 }
 
 int
-main (int argc, char *argv[]) {
+programMain (int argc, char *argv[]) {
   int offline = 0;
   int suspended = 0;
   short oldwinx, oldwiny;
@@ -2622,4 +2622,90 @@ showDotPattern (unsigned char dots, unsigned char duration) {
   braille->writeStatus(&brl, status);
   braille->writeWindow(&brl);
   drainBrailleOutput(&brl, duration);
+}
+
+#ifdef __MINGW32__
+int isWindowsService;
+static SERVICE_STATUS_HANDLE serviceStatusHandle;
+static DWORD serviceState;
+static int serviceReturnCode;
+
+static BOOL
+setServiceState (DWORD state, int exitCode, const char *name) {
+  SERVICE_STATUS status = {
+    .dwServiceType = SERVICE_WIN32_OWN_PROCESS | SERVICE_INTERACTIVE_PROCESS,
+    .dwCurrentState = state,
+    .dwControlsAccepted = SERVICE_ACCEPT_STOP | SERVICE_ACCEPT_PAUSE_CONTINUE,
+    .dwWin32ExitCode = exitCode? ERROR_SERVICE_SPECIFIC_ERROR: NO_ERROR,
+    .dwServiceSpecificExitCode = exitCode,
+    .dwCheckPoint = 0,
+    .dwWaitHint = 10000, /* milliseconds */
+  };
+
+  serviceState = state;
+  if (SetServiceStatus(serviceStatusHandle, &status)) return 1;
+  LogWindowsError(name);
+  return 0;
+}
+
+static void WINAPI
+serviceHandler (DWORD code) {
+  switch (code) {
+    case SERVICE_CONTROL_STOP:
+      setServiceState(SERVICE_STOP_PENDING, 0, "SERVICE_STOP_PENDING");
+      raise(SIGTERM);
+      break;
+
+    case SERVICE_CONTROL_PAUSE:
+      setServiceState(SERVICE_PAUSE_PENDING, 0, "SERVICE_PAUSE_PENDING");
+      /* TODO: suspend */
+      break;
+
+    case SERVICE_CONTROL_CONTINUE:
+      setServiceState(SERVICE_CONTINUE_PENDING, 0, "SERVICE_CONTINUE_PENDING");
+      /* TODO: resume */
+      break;
+
+    default:
+      setServiceState(serviceState, 0, "SetServiceStatus");
+      break;
+  }
+}
+
+static void
+exitService (void) {
+  setServiceState(SERVICE_STOPPED, 0, "SERVICE_STOPPED");
+}
+
+static void WINAPI
+serviceMain (DWORD argc, LPSTR *argv) {
+  atexit(exitService);
+  isWindowsService = 1;
+
+  if ((serviceStatusHandle = RegisterServiceCtrlHandler(NULL, &serviceHandler))) {
+    if ((setServiceState(SERVICE_START_PENDING, 0, "SERVICE_START_PENDING"))) {
+      if ((setServiceState(SERVICE_RUNNING, 0, "SERVICE_RUNNING"))) {
+        serviceReturnCode = programMain(argc, argv);
+        setServiceState(SERVICE_STOPPED, 0, "SERVICE_STOPPED");
+      }
+    }
+  } else {
+    LogWindowsError("RegisterServiceCtrlHandler");
+  }
+}
+#endif /* __MINGW32__ */
+
+int
+main (int argc, char *argv[]) {
+#ifdef __MINGW32__
+  static SERVICE_TABLE_ENTRY serviceTable[] = {
+    { .lpServiceName=NULL, .lpServiceProc=serviceMain },
+    {}
+  };
+
+  if (StartServiceCtrlDispatcher(serviceTable)) return serviceReturnCode;
+  isWindowsService = 0;
+#endif /* __MINGW32__ */
+
+  return programMain(argc, argv);
 }

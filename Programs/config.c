@@ -2171,8 +2171,6 @@ background (void) {
   char newcmdline[len+4];
   STARTUPINFO startupinfo;
   PROCESS_INFORMATION processinfo;
-  HANDLE event;
-  DWORD res;
   
   memset(&startupinfo, 0, sizeof(startupinfo));
   startupinfo.cb = sizeof(startupinfo);
@@ -2334,7 +2332,11 @@ startup (int argc, char *argv[]) {
   }
 
   if (opt_verify) opt_noDaemon = 1;
-  if (!opt_noDaemon) background();
+  if (!opt_noDaemon
+#ifdef __MINGW32__
+      && !isWindowsService
+#endif
+  ) background();
 
   if (!opt_standardError) {
     LogClose();

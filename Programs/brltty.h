@@ -140,6 +140,10 @@ extern void api_flush (BrailleDisplay *brl, BRL_DriverCommandContext caller);
 extern const char *const api_parameters[];
 extern int apiStarted;
 
+#ifdef __MINGW32__
+extern int isWindowsService;
+#endif /* __MINGW32__ */
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
