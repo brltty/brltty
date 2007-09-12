@@ -95,8 +95,8 @@ static HANDLE windowsEventLog = INVALID_HANDLE_VALUE;
 
 static WORD
 toEventType (int level) {
-  if (level >= LOG_ERR) return EVENTLOG_ERROR_TYPE;
-  if (level >= LOG_WARNING) return EVENTLOG_WARNING_TYPE;
+  if (level <= LOG_ERR) return EVENTLOG_ERROR_TYPE;
+  if (level <= LOG_WARNING) return EVENTLOG_WARNING_TYPE;
   return EVENTLOG_INFORMATION_TYPE;
 }
 
