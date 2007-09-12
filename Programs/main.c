@@ -2633,6 +2633,7 @@ showDotPattern (unsigned char dots, unsigned char duration) {
 
 #ifdef __MINGW32__
 int isWindowsService;
+
 static SERVICE_STATUS_HANDLE serviceStatusHandle;
 static DWORD serviceState;
 static int serviceReturnCode;
@@ -2689,7 +2690,7 @@ serviceMain (DWORD argc, LPSTR *argv) {
   atexit(exitService);
   isWindowsService = 1;
 
-  if ((serviceStatusHandle = RegisterServiceCtrlHandler(NULL, &serviceHandler))) {
+  if ((serviceStatusHandle = RegisterServiceCtrlHandler(SERVICE_NAME, &serviceHandler))) {
     if ((setServiceState(SERVICE_START_PENDING, 0, "SERVICE_START_PENDING"))) {
       if (!(serviceReturnCode = beginProgram(argc, argv))) {
         if ((setServiceState(SERVICE_RUNNING, 0, "SERVICE_RUNNING"))) {
@@ -2708,7 +2709,7 @@ int
 main (int argc, char *argv[]) {
 #ifdef __MINGW32__
   static SERVICE_TABLE_ENTRY serviceTable[] = {
-    { .lpServiceName="BrlAPI", .lpServiceProc=serviceMain },
+    { .lpServiceName=SERVICE_NAME, .lpServiceProc=serviceMain },
     {}
   };
 

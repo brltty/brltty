@@ -141,6 +141,9 @@ extern const char *const api_parameters[];
 extern int apiStarted;
 
 #ifdef __MINGW32__
+#define SERVICE_NAME "BrlAPI"
+#define SERVICE_DESCRIPTION "Braille API (BrlAPI)"
+
 extern int isWindowsService;
 #endif /* __MINGW32__ */
 
