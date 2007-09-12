@@ -2361,13 +2361,13 @@ startup (int argc, char *argv[]) {
     const char *description = "Braille API (BrlAPI)";
     int stop = 0;
 
-    if (opt_installService) {
-      installService(name, description);
+    if (opt_removeService) {
+      removeService(name);
       stop = 1;
     }
 
-    if (opt_removeService) {
-      removeService(name);
+    if (opt_installService) {
+      installService(name, description);
       stop = 1;
     }
 
