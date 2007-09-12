@@ -93,6 +93,13 @@ static int syslogOpened = 0;
 #elif defined(WINDOWS)
 static HANDLE windowsEventLog = INVALID_HANDLE_VALUE;
 
+static WORD
+toEventType (int level) {
+  if (level >= LOG_ERR) return EVENTLOG_ERROR_TYPE;
+  if (level >= LOG_WARNING) return EVENTLOG_WARNING_TYPE;
+  return EVENTLOG_INFORMATION_TYPE;
+}
+
 #endif /* system log internal definitions */
 
 static int logLevel = LOG_NOTICE;
@@ -154,11 +161,12 @@ LogPrint (int level, const char *format, ...) {
 #elif defined(WINDOWS)
     if (windowsEventLog != INVALID_HANDLE_VALUE) {
       char buffer[0X100];
-      const char *b = buffer;
+      const char *strings[] = {buffer};
       va_start(argp, format);
       vsnprintf(buffer, sizeof(buffer), format, argp);
       va_end(argp);
-      ReportEvent(windowsEventLog, level, 0, 0, NULL, 1, 0, &b, NULL);
+      ReportEvent(windowsEventLog, toEventType(level), 0, 0, NULL,
+                  ARRAY_COUNT(strings), 0, strings, NULL);
       goto done;
     }
 #endif /* write system log */

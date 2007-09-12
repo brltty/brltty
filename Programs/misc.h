@@ -134,17 +134,6 @@ extern int hasTimedOut (int milliseconds);	/* test timeout condition */
 
 #if defined(HAVE_SYSLOG_H)
 #include <syslog.h>
-
-#elif defined(WINDOWS)
-#define LOG_EMERG   EVENTLOG_ERROR_TYPE
-#define LOG_ALERT   EVENTLOG_ERROR_TYPE
-#define LOG_CRIT    EVENTLOG_ERROR_TYPE
-#define LOG_ERR	    EVENTLOG_ERROR_TYPE
-#define LOG_WARNING EVENTLOG_WARNING_TYPE
-#define LOG_NOTICE  EVENTLOG_INFORMATION_TYPE
-#define LOG_INFO    EVENTLOG_INFORMATION_TYPE
-#define LOG_DEBUG   EVENTLOG_INFORMATION_TYPE
-
 #else /* no system log */
 typedef enum {
   LOG_EMERG,
