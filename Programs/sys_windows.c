@@ -105,15 +105,18 @@ getProcedure (HMODULE module, const char *name) {
 int
 installService (const char *name, const char *description) {
   int installed = 0;
-  SC_HANDLE scm;
+  SC_HANDLE scm = OpenSCManager(NULL, NULL, SC_MANAGER_CREATE_SERVICE);
 
-  if ((scm = OpenSCManager(NULL, NULL, SC_MANAGER_CREATE_SERVICE))) {
-    if (CreateService(scm, name, description, SERVICE_ALL_ACCESS,
-                      SERVICE_WIN32_OWN_PROCESS | SERVICE_INTERACTIVE_PROCESS,
-                      SERVICE_AUTO_START, SERVICE_ERROR_NORMAL,
-                      getProgramPath(),
-                      NULL, NULL, NULL, NULL, NULL)) {
+  if (scm) {
+    SC_HANDLE service = CreateService(scm, name, description, SERVICE_ALL_ACCESS,
+                                      SERVICE_WIN32_OWN_PROCESS | SERVICE_INTERACTIVE_PROCESS,
+                                      SERVICE_AUTO_START, SERVICE_ERROR_NORMAL,
+                                      getProgramPath(),
+                                      NULL, NULL, NULL, NULL, NULL);
+
+    if (service) {
       installed = 1;
+      CloseServiceHandle(service);
     } else {
       LogWindowsError("CreateService");
     }
@@ -129,17 +132,19 @@ installService (const char *name, const char *description) {
 int
 uninstallWindowsService (const char *name) {
   int uninstalled = 0;
-  SC_HANDLE scm;
+  SC_HANDLE scm = OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
 
-  if ((scm = OpenSCManager(NULL, NULL, SC_MANAGER_CREATE_SERVICE))) {
-    SC_HANDLE service;
+  if (scm) {
+    SC_HANDLE service = OpenService(scm, name, SERVICE_ALL_ACCESS);
 
-    if ((service = OpenService(scm, name, SERVICE_ALL_ACCESS))) {
+    if (service) {
       if (DeleteService(service)) {
         uninstalled = 1;
       } else {
         LogWindowsError("DeleteService");
       }
+
+      CloseServiceHandle(service);
     } else {
       LogWindowsError("OpenService");
     }
