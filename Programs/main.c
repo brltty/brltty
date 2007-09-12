@@ -2690,7 +2690,7 @@ serviceMain (DWORD argc, LPSTR *argv) {
   atexit(exitService);
   isWindowsService = 1;
 
-  if ((serviceStatusHandle = RegisterServiceCtrlHandler(NULL, &serviceHandler))) {
+  if ((serviceStatusHandle = RegisterServiceCtrlHandler("", &serviceHandler))) {
     if ((setServiceState(SERVICE_START_PENDING, 0, "SERVICE_START_PENDING"))) {
       if (!(serviceReturnCode = beginProgram(argc, argv))) {
         if ((setServiceState(SERVICE_RUNNING, 0, "SERVICE_RUNNING"))) {
