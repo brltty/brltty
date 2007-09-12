@@ -146,7 +146,7 @@ removeService (const char *name) {
       if (DeleteService(service)) {
         LogPrint(LOG_INFO, "service removed: %s", name);
         removed = 1;
-      } else if (GetLastError() == ERROR_SERVICE_MARKED_FOR_DELETION) {
+      } else if (GetLastError() == ERROR_SERVICE_MARKED_FOR_DELETE) {
         LogPrint(LOG_WARNING, "service already removed: %s", name);
         removed = 1;
       } else {

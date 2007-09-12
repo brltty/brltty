@@ -72,6 +72,19 @@
 
 static int opt_installService;
 static int opt_removeService;
+
+#define SERVICE_NAME "BrlAPI"
+#define SERVICE_DESCRIPTION "Braille API (BrlAPI)"
+
+static const char *const optionStrings_InstallService[] = {
+  SERVICE_NAME,
+  NULL
+};
+
+static const char *const optionStrings_RemoveService[] = {
+  SERVICE_NAME,
+  NULL
+};
 #endif /* __MINGW32__ */
 
 #ifdef __MSDOS__
@@ -377,7 +390,8 @@ BEGIN_OPTION_TABLE
   { .letter = 'I',
     .word = "install-service",
     .setting.flag = &opt_installService,
-    .description = strtext("Install Windows service.")
+    .description = strtext("Install the %s service."),
+    .strings = optionStrings_InstallService
   },
 #endif /* __MINGW32__ */
 
@@ -417,7 +431,8 @@ BEGIN_OPTION_TABLE
   { .letter = 'R',
     .word = "remove-service",
     .setting.flag = &opt_removeService,
-    .description = strtext("Remove Windows service.")
+    .description = strtext("Remove the %s service."),
+    .strings = optionStrings_RemoveService
   },
 #endif /* __MINGW32__ */
 
@@ -2357,17 +2372,15 @@ startup (int argc, char *argv[]) {
 
 #ifdef __MINGW32__
   {
-    const char *serviceName = "BrlAPI";
-    const char *serviceDescription = "Braille API (BrlAPI)";
     int stop = 0;
 
     if (opt_removeService) {
-      removeService(serviceName);
+      removeService(SERVICE_NAME);
       stop = 1;
     }
 
     if (opt_installService) {
-      installService(serviceName, serviceDescription);
+      installService(SERVICE_NAME, SERVICE_DESCRIPTION);
       stop = 1;
     }
 
