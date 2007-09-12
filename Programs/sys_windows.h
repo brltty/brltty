@@ -59,6 +59,9 @@ extern WIN_PROC_STUB(freeaddrinfo);
 #endif /* __MINGW32__ */
 
 
+extern int installService (const char *name, const char *description);
+extern int uninstallWindowsService (const char *name);
+
 extern void sysInit (void);
 
 #ifdef __cplusplus

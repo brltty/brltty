@@ -2714,6 +2714,11 @@ main (int argc, char *argv[]) {
 
   if (StartServiceCtrlDispatcher(serviceTable)) return serviceReturnCode;
   isWindowsService = 0;
+
+  if (GetLastError() != ERROR_FAILED_SERVICE_CONTROLLER_CONNECT) {
+    LogWindowsError("StartServiceCtrlDispatcher");
+    return 20;
+  }
 #endif /* __MINGW32__ */
 
   {

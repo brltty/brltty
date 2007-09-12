@@ -102,6 +102,56 @@ getProcedure (HMODULE module, const char *name) {
   return address;
 }
 
+int
+installService (const char *name, const char *description) {
+  int installed = 0;
+  SC_HANDLE scm;
+
+  if ((scm = OpenSCManager(NULL, NULL, SC_MANAGER_CREATE_SERVICE))) {
+    if (CreateService(scm, name, description, SERVICE_ALL_ACCESS,
+                      SERVICE_WIN32_OWN_PROCESS | SERVICE_INTERACTIVE_PROCESS,
+                      SERVICE_AUTO_START, SERVICE_ERROR_NORMAL,
+                      getProgramPath(),
+                      NULL, NULL, NULL, NULL, NULL)) {
+      installed = 1;
+    } else {
+      LogWindowsError("CreateService");
+    }
+
+    CloseServiceHandle(scm);
+  } else {
+    LogWindowsError("OpenSCManager");
+  }
+
+  return installed;
+}
+
+int
+uninstallWindowsService (const char *name) {
+  int uninstalled = 0;
+  SC_HANDLE scm;
+
+  if ((scm = OpenSCManager(NULL, NULL, SC_MANAGER_CREATE_SERVICE))) {
+    SC_HANDLE service;
+
+    if ((service = OpenService(scm, name, SERVICE_ALL_ACCESS))) {
+      if (DeleteService(service)) {
+        uninstalled = 1;
+      } else {
+        LogWindowsError("DeleteService");
+      }
+    } else {
+      LogWindowsError("OpenService");
+    }
+
+    CloseServiceHandle(scm);
+  } else {
+    LogWindowsError("OpenSCManager");
+  }
+
+  return uninstalled;
+}
+
 void
 sysInit (void) {
   HMODULE library;
