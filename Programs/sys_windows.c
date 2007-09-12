@@ -115,8 +115,13 @@ installService (const char *name, const char *description) {
                                       NULL, NULL, NULL, NULL, NULL);
 
     if (service) {
+      LogPrint(LOG_INFO, "service installed: %s", name);
       installed = 1;
+
       CloseServiceHandle(service);
+    } else if (GetLastError() == ERROR_SERVICE_EXISTS) {
+      LogPrint(LOG_WARNING, "service already installed: %s", name);
+      installed = 1;
     } else {
       LogWindowsError("CreateService");
     }
@@ -135,16 +140,23 @@ removeService (const char *name) {
   SC_HANDLE scm = OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
 
   if (scm) {
-    SC_HANDLE service = OpenService(scm, name, SERVICE_ALL_ACCESS);
+    SC_HANDLE service = OpenService(scm, name, DELETE);
 
     if (service) {
       if (DeleteService(service)) {
+        LogPrint(LOG_INFO, "service removed: %s", name);
+        removed = 1;
+      } else if (GetLastError() == ERROR_SERVICE_MARKED_FOR_DELETION) {
+        LogPrint(LOG_WARNING, "service already removed: %s", name);
         removed = 1;
       } else {
         LogWindowsError("DeleteService");
       }
 
       CloseServiceHandle(service);
+    } else if (GetLastError() == ERROR_SERVICE_DOES_NOT_EXIST) {
+      LogPrint(LOG_WARNING, "service not installed: %s", name);
+      removed = 1;
     } else {
       LogWindowsError("OpenService");
     }
