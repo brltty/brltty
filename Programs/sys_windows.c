@@ -115,7 +115,7 @@ installService (const char *name, const char *description) {
                                       NULL, NULL, NULL, NULL, NULL);
 
     if (service) {
-      LogPrint(LOG_INFO, "service installed: %s", name);
+      LogPrint(LOG_NOTICE, "service installed: %s", name);
       installed = 1;
 
       CloseServiceHandle(service);
@@ -144,7 +144,7 @@ removeService (const char *name) {
 
     if (service) {
       if (DeleteService(service)) {
-        LogPrint(LOG_INFO, "service removed: %s", name);
+        LogPrint(LOG_NOTICE, "service removed: %s", name);
         removed = 1;
       } else if (GetLastError() == ERROR_SERVICE_MARKED_FOR_DELETE) {
         LogPrint(LOG_WARNING, "service already removed: %s", name);
