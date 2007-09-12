@@ -51,13 +51,12 @@ typedef struct {
 #define END_OPTION_TABLE \
   { .letter = 'h', \
     .word = "help", \
-    .description = strtext("Print a usage summary and exit.") \
+    .description = strtext("Print a usage summary (including commonly used options only) and then exit.") \
   } \
   , \
   { .letter = 'H', \
     .word = "full-help", \
-    .flags = OPT_Hidden, \
-    .description = strtext("Print a full usage summary and exit.") \
+    .description = strtext("Print a usage summary (including all options) and then exit.") \
   } \
 }; \
 static unsigned int optionCount = ARRAY_COUNT(optionTable);
