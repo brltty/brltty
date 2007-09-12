@@ -2708,7 +2708,7 @@ int
 main (int argc, char *argv[]) {
 #ifdef __MINGW32__
   static SERVICE_TABLE_ENTRY serviceTable[] = {
-    { .lpServiceName=NULL, .lpServiceProc=serviceMain },
+    { .lpServiceName="BrlAPI", .lpServiceProc=serviceMain },
     {}
   };
 

@@ -130,8 +130,8 @@ installService (const char *name, const char *description) {
 }
 
 int
-uninstallWindowsService (const char *name) {
-  int uninstalled = 0;
+removeService (const char *name) {
+  int removed = 0;
   SC_HANDLE scm = OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
 
   if (scm) {
@@ -139,7 +139,7 @@ uninstallWindowsService (const char *name) {
 
     if (service) {
       if (DeleteService(service)) {
-        uninstalled = 1;
+        removed = 1;
       } else {
         LogWindowsError("DeleteService");
       }
@@ -154,7 +154,7 @@ uninstallWindowsService (const char *name) {
     LogWindowsError("OpenSCManager");
   }
 
-  return uninstalled;
+  return removed;
 }
 
 void

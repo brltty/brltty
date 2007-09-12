@@ -67,6 +67,13 @@
 #include "io_bluetooth.h"
 #endif /* ENABLE_BLUETOOTH_SUPPORT */
 
+#ifdef __MINGW32__
+#include "sys_windows.h"
+
+static int opt_installService;
+static int opt_removeService;
+#endif /* __MINGW32__ */
+
 #ifdef __MSDOS__
 #include "sys_msdos.h"
 #endif /* __MSDOS__ */
@@ -366,6 +373,15 @@ BEGIN_OPTION_TABLE
   },
 #endif /* ENABLE_SPEECH_SUPPORT */
 
+#ifdef __MINGW32__
+  { .letter = 'I',
+    .word = "install-service",
+    .setting.flag = &opt_installService,
+    .description = strtext("Install Windows service.")
+  },
+#endif /* __MINGW32__ */
+
+
   { .letter = 'L',
     .word = "library-directory",
     .flags = OPT_Hidden | OPT_Config | OPT_Environ,
@@ -396,6 +412,14 @@ BEGIN_OPTION_TABLE
     .setting.string = &opt_pidFile,
     .description = strtext("Path to process identifier file.")
   },
+
+#ifdef __MINGW32__
+  { .letter = 'R',
+    .word = "remove-service",
+    .setting.flag = &opt_removeService,
+    .description = strtext("Remove Windows service.")
+  },
+#endif /* __MINGW32__ */
 
 #ifdef ENABLE_SPEECH_SUPPORT
   { .letter = 'S',
@@ -2330,6 +2354,26 @@ startup (int argc, char *argv[]) {
 
     exit(0);
   }
+
+#ifdef __MINGW32__
+  {
+    const char *name = "BrlAPI";
+    const char *description = "Braille API (BrlAPI)";
+    int stop = 0;
+
+    if (opt_installService) {
+      installService(name, description);
+      stop = 1;
+    }
+
+    if (opt_removeService) {
+      removeService(name);
+      stop = 1;
+    }
+
+    if (stop) exit(0);
+  }
+#endif /* __MINGW32__ */
 
   if (opt_verify) opt_noDaemon = 1;
   if (!opt_noDaemon
