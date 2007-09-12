@@ -2357,15 +2357,17 @@ startup (int argc, char *argv[]) {
 
 #ifdef __MINGW32__
   {
+    const char *serviceName = "BrlAPI";
+    const char *serviceDescription = "Braille API (BrlAPI)";
     int stop = 0;
 
     if (opt_removeService) {
-      removeService(SERVICE_NAME);
+      removeService(serviceName);
       stop = 1;
     }
 
     if (opt_installService) {
-      installService(SERVICE_NAME, SERVICE_DESCRIPTION);
+      installService(serviceName, serviceDescription);
       stop = 1;
     }
 
