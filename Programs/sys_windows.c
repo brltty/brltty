@@ -147,7 +147,7 @@ removeService (const char *name) {
         LogPrint(LOG_NOTICE, "service removed: %s", name);
         removed = 1;
       } else if (GetLastError() == ERROR_SERVICE_MARKED_FOR_DELETE) {
-        LogPrint(LOG_WARNING, "service already removed: %s", name);
+        LogPrint(LOG_WARNING, "service already being removed: %s", name);
         removed = 1;
       } else {
         LogWindowsError("DeleteService");
