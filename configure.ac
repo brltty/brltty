@@ -280,6 +280,10 @@ AC_PROG_LN_S
 AC_PROG_INSTALL
 BRLTTY_EXECUTABLE_PATH([INSTALL])
 
+AC_PATH_PROG([DOXYGEN], [doxygen])
+test -n "${DOXYGEN}" && can_make_BrlAPIref=yes || can_make_BrlAPIref=no
+AC_SUBST([can_make_BrlAPIref])
+
 case "${host_os}"
 in
    darwin*)

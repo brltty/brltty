@@ -20,10 +20,14 @@ all clean distclean::
 
 all:: $(ALL_API)
 
-all-api: BrlAPIref.made
+all-api man3: BrlAPIref-@can_make_BrlAPIref@
 
-BrlAPIref.made man3: BrlAPIref $(BLD_TOP)$(PGM_DIR)/brlapi.h $(BLD_TOP)$(PGM_DIR)/brlapi_constants.h $(SRC_TOP)$(PGM_DIR)/brlapi_keycodes.h $(SRC_TOP)$(PGM_DIR)/brlapi_protocol.h BrlAPIref.doxy
-	doxygen BrlAPIref.doxy
+BrlAPIref-no:
+	@echo doxygen is not installed - BrlAPI reference documentation will not be made
+
+BrlAPIref-yes: BrlAPIref.made
+BrlAPIref.made: BrlAPIref $(BLD_TOP)$(PGM_DIR)/brlapi.h $(BLD_TOP)$(PGM_DIR)/brlapi_constants.h $(SRC_TOP)$(PGM_DIR)/brlapi_keycodes.h $(SRC_TOP)$(PGM_DIR)/brlapi_protocol.h BrlAPIref.doxy
+	$(DOXYGEN) BrlAPIref.doxy
 	touch $@
 
 BrlAPIref:
