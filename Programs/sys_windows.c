@@ -102,33 +102,124 @@ getProcedure (HMODULE module, const char *name) {
   return address;
 }
 
+static int
+addWindowsCommandLineCharacter (char **buffer, int *size, int *length, char character) {
+  if (*length == *size) {
+    char *newBuffer = realloc(*buffer, (*size = *size? *size<<1: 0X80));
+    if (!newBuffer) {
+      LogError("realloc");
+      return 0;
+    }
+    *buffer = newBuffer;
+  }
+
+  (*buffer)[(*length)++] = character;
+  return 1;
+}
+
+char *
+makeWindowsCommandLine (const char *const *arguments) {
+  const char backslash = '\\';
+  const char quote = '"';
+  char *buffer = NULL;
+  int size = 0;
+  int length = 0;
+
+#define ADD(c) if (!addWindowsCommandLineCharacter(&buffer, &size, &length, (c))) goto error
+  while (*arguments) {
+    const char *character = *arguments;
+    int backslashCount = 0;
+    int needQuotes = 0;
+    int start = length;
+
+    while (*character) {
+      if (*character == backslash) {
+        ++backslashCount;
+      } else {
+        if (*character == quote) {
+          needQuotes = 1;
+          backslashCount = (backslashCount * 2) + 1;
+        } else if ((*character == ' ') || (*character == '\t')) {
+          needQuotes = 1;
+        }
+
+        while (backslashCount > 0) {
+          ADD(backslash);
+          --backslashCount;
+        }
+
+        ADD(*character);
+      }
+
+      ++character;
+    }
+
+    if (needQuotes) backslashCount *= 2;
+    while (backslashCount > 0) {
+      ADD(backslash);
+      --backslashCount;
+    }
+
+    if (needQuotes) {
+      ADD(quote);
+      ADD(quote);
+      memmove(&buffer[start+1], &buffer[start], length-start-1);
+      buffer[start] = quote;
+    }
+
+    ADD(' ');
+    ++arguments;
+  }
+#undef ADD
+
+  buffer[length-1] = 0;
+  {
+    char *line = realloc(buffer, length);
+    if (line) return line;
+    LogError("realloc");
+  }
+
+error:
+  if (buffer) free(buffer);
+  return NULL;
+}
+
 int
 installService (const char *name, const char *description) {
   int installed = 0;
-  SC_HANDLE scm = OpenSCManager(NULL, NULL, SC_MANAGER_CREATE_SERVICE);
+  const char *const arguments[] = {
+    getProgramPath(),
+    NULL
+  };
+  char *command = makeWindowsCommandLine(arguments);
 
-  if (scm) {
-    SC_HANDLE service = CreateService(scm, name, description, SERVICE_ALL_ACCESS,
-                                      SERVICE_WIN32_OWN_PROCESS | SERVICE_INTERACTIVE_PROCESS,
-                                      SERVICE_AUTO_START, SERVICE_ERROR_NORMAL,
-                                      getProgramPath(),
-                                      NULL, NULL, NULL, NULL, NULL);
+  if (command) {
+    SC_HANDLE scm = OpenSCManager(NULL, NULL, SC_MANAGER_CREATE_SERVICE);
 
-    if (service) {
-      LogPrint(LOG_NOTICE, "service installed: %s", name);
-      installed = 1;
+    if (scm) {
+      SC_HANDLE service = CreateService(scm, name, description, SERVICE_ALL_ACCESS,
+                                        SERVICE_WIN32_OWN_PROCESS | SERVICE_INTERACTIVE_PROCESS,
+                                        SERVICE_AUTO_START, SERVICE_ERROR_NORMAL,
+                                        command, NULL, NULL, NULL, NULL, NULL);
 
-      CloseServiceHandle(service);
-    } else if (GetLastError() == ERROR_SERVICE_EXISTS) {
-      LogPrint(LOG_WARNING, "service already installed: %s", name);
-      installed = 1;
+      if (service) {
+        LogPrint(LOG_NOTICE, "service installed: %s", name);
+        installed = 1;
+
+        CloseServiceHandle(service);
+      } else if (GetLastError() == ERROR_SERVICE_EXISTS) {
+        LogPrint(LOG_WARNING, "service already installed: %s", name);
+        installed = 1;
+      } else {
+        LogWindowsError("CreateService");
+      }
+
+      CloseServiceHandle(scm);
     } else {
-      LogWindowsError("CreateService");
+      LogWindowsError("OpenSCManager");
     }
 
-    CloseServiceHandle(scm);
-  } else {
-    LogWindowsError("OpenSCManager");
+    free(command);
   }
 
   return installed;

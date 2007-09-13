@@ -59,6 +59,7 @@ extern WIN_PROC_STUB(freeaddrinfo);
 #endif /* __MINGW32__ */
 
 
+extern char *makeWindowsCommandLine (const char *const *arguments);
 extern int installService (const char *name, const char *description);
 extern int removeService (const char *name);
 
