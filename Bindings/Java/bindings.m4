@@ -30,9 +30,11 @@ else
    ])
 fi
 
+JAVA_OK=false
 if test -n "${JAVAC_PATH}"
 then
    AC_MSG_NOTICE([Java compiler is ${JAVAC_PATH}])
+   JAVA_OK=true
 
    JAVA_ENCODING="UTF-8"
    case "${JAVAC_NAME}"
@@ -59,16 +61,19 @@ then
    AC_SUBST([JAR], ["${JAVA_BIN}/${JAR_NAME}"])
    BRLTTY_JAVA_DIRECTORY([JAR], [/usr/share/java])
 
-   JNIDIR="${JAVA_ROOT}/include"
-   JNIHDR="jni.h"
-   JNIFLAGS=""
-   JAVA_OK=true
-   AC_CHECK_HEADER([${JNIHDR}], [], [AC_CHECK_FILE(["${JNIDIR}/${JNIHDR}"], [JNIFLAGS="-I${JNIDIR}"], [JAVA_OK=false])])
-   AC_SUBST([JNIFLAGS])
-   AC_SUBST([JAVA_OK])
+   JAVA_JNI_INC="${JAVA_ROOT}/include"
+   JAVA_JNI_HDR="jni.h"
+   JAVA_JNI_FLAGS=""
+   AC_CHECK_HEADER([${JAVA_JNI_HDR}], [], [AC_CHECK_FILE(["${JAVA_JNI_INC}/${JAVA_JNI_HDR}"], [JAVA_JNI_FLAGS="-I${JAVA_JNI_INC}"], [JAVA_OK=false])])
+   AC_SUBST([JAVA_JNI_HDR])
+   AC_SUBST([JAVA_JNI_INC])
+   AC_SUBST([JAVA_JNI_FLAGS])
+   BRLTTY_JAVA_DIRECTORY([JNI], [/usr/lib/java /usr/lib/jni])
 else
    AC_MSG_WARN([Java compiler not found])
 fi
+
+AC_SUBST([JAVA_OK])
 ])
 
 AC_DEFUN([BRLTTY_JAVA_COMPILER], [dnl

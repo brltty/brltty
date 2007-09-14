@@ -24,21 +24,26 @@ JAVA_OK = @JAVA_OK@
 JAVAC = @JAVAC@
 JAVADOC = @JAVADOC@
 JAR = @JAR@
-JNIFLAGS = @JNIFLAGS@
 
 JAVA_JAR = @JAVA_JAR@
 JAVA_JAR_DIR = @JAVA_JAR_DIR@
 
-all: native jar doc
+JAVA_JNI = @JAVA_JNI@
+JAVA_JNI_DIR = @JAVA_JNI_DIR@
+JAVA_JNI_HDR = @JAVA_JNI_HDR@
+JAVA_JNI_INC = @JAVA_JNI_INC@
+JAVA_JNI_FLAGS = @JAVA_JNI_FLAGS@
 
-JAVA_NATIVE = $(LIB_PFX)$(API_NAME)_java.$(LIB_EXT)
-native: $(JAVA_NATIVE)
+all: jar jni doc
 
-$(JAVA_NATIVE): bindings.$O $(API_NAME)
+JAVA_JNI_FILE = $(LIB_PFX)$(API_NAME)_java.$(LIB_EXT)
+jni: $(JAVA_JNI_FILE)
+
+$(JAVA_JNI_FILE): bindings.$O $(API_NAME)
 	$(MKLIB:<name>=$(API_NAME)) $@ bindings.$O $(API_LDFLAGS)
 
 bindings.$O:
-	$(CC) $(LIBCFLAGS) $(JNIFLAGS) -o $@ -c $(SRC_DIR)/bindings.c
+	$(CC) $(LIBCFLAGS) $(JAVA_JNI_FLAGS) -o $@ -c $(SRC_DIR)/bindings.c
 
 JAVA_JAR_FILE = $(API_NAME).jar
 jar: $(JAVA_JAR_FILE)
@@ -65,12 +70,12 @@ javadoc.made: $(SRC_DIR)/*.java BrlapiConstants.java
 	touch $@
 
 clean::
-	-rm -f $(JAVA_NATIVE) BrlapiConstants.java *.class $(JAVA_JAR_FILE)
+	-rm -f BrlapiConstants.java *.class $(JAVA_JAR_FILE) $(JAVA_JNI_FILE)
 	-rm -f javadoc.made package-list *.css *.html
 	-rm -f -r resources
 	-rm -f gjdoc.properties JAVADOC.PLACEHOLDER
 
-install: install-jar
+install: install-jar install-jni
 
 install-jar: install-jar-$(JAVA_JAR)
 
@@ -81,12 +86,28 @@ install-jar-yes: jar
 install-jar-no:
 	@echo jar not installed
 
-uninstall: uninstall-jar
+install-jni: install-jni-$(JAVA_JNI)
+
+install-jni-yes: jni
+	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(JAVA_JNI_DIR)
+	$(INSTALL) $(JAVA_JNI_FILE) $(INSTALL_ROOT)$(JAVA_JNI_DIR)
+
+install-jni-no:
+	@echo jni not installed
+
+uninstall: uninstall-jar uninstall-jni
 
 uninstall-jar: uninstall-jar-$(JAVA_JAR)
 
-uninstall-jar-yes: jar
+uninstall-jar-yes:
 	-rm -f -- $(INSTALL_ROOT)$(JAVA_JAR_DIR)/$(JAVA_JAR_FILE)
 
 uninstall-jar-no:
+
+uninstall-jni: uninstall-jni-$(JAVA_JNI)
+
+uninstall-jni-yes:
+	-rm -f -- $(INSTALL_ROOT)$(JAVA_JNI_DIR)/$(JAVA_JNI_FILE)
+
+uninstall-jni-no:
 
