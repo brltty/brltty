@@ -26,7 +26,8 @@ JAVADOC = @JAVADOC@
 JAR = @JAR@
 JNIFLAGS = @JNIFLAGS@
 
-JAR_DIR = /usr/share/java
+JAVA_JAR = @JAVA_JAR@
+JAVA_JAR_DIR = @JAVA_JAR_DIR@
 
 all: native jar doc
 
@@ -39,13 +40,13 @@ $(JAVA_NATIVE): bindings.$O $(API_NAME)
 bindings.$O:
 	$(CC) $(LIBCFLAGS) $(JNIFLAGS) -o $@ -c $(SRC_DIR)/bindings.c
 
-JAVA_JAR = $(API_NAME).jar
-jar: $(JAVA_JAR)
+JAVA_JAR_FILE = $(API_NAME).jar
+jar: $(JAVA_JAR_FILE)
 
 API_CLASSES = Brlapi.class BrlapiNative.class BrlapiError.class BrlapiException.class BrlapiSettings.class BrlapiWriteArguments.class BrlapiSize.class BrlapiKey.class
 ALL_CLASSES = $(API_CLASSES) ApiTest.class
 
-$(JAVA_JAR): $(API_CLASSES)
+$(JAVA_JAR_FILE): $(API_CLASSES)
 	$(JAR) cf $@ Brlapi*.class
 
 $(ALL_CLASSES): $(SRC_DIR)/*.java BrlapiConstants.class
@@ -64,15 +65,28 @@ javadoc.made: $(SRC_DIR)/*.java BrlapiConstants.java
 	touch $@
 
 clean::
-	-rm -f $(JAVA_NATIVE) BrlapiConstants.java *.class $(JAVA_JAR)
+	-rm -f $(JAVA_NATIVE) BrlapiConstants.java *.class $(JAVA_JAR_FILE)
 	-rm -f javadoc.made package-list *.css *.html
 	-rm -f -r resources
 	-rm -f gjdoc.properties JAVADOC.PLACEHOLDER
 
-install: all
-	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(JAR_DIR)
-	$(INSTALL) $(JAVA_JAR) $(INSTALL_ROOT)$(JAR_DIR)
+install: install-jar
 
-uninstall:
-	-rm -f -- $(INSTALL_ROOT)$(JAR_DIR)/$(JAVA_JAR)
+install-jar: install-jar-$(JAVA_JAR)
+
+install-jar-yes: jar
+	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(JAVA_JAR_DIR)
+	$(INSTALL) $(JAVA_JAR_FILE) $(INSTALL_ROOT)$(JAVA_JAR_DIR)
+
+install-jar-no:
+	@echo jar not installed
+
+uninstall: uninstall-jar
+
+uninstall-jar: uninstall-jar-$(JAVA_JAR)
+
+uninstall-jar-yes: jar
+	-rm -f -- $(INSTALL_ROOT)$(JAVA_JAR_DIR)/$(JAVA_JAR_FILE)
+
+uninstall-jar-no:
 

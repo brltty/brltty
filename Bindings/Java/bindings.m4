@@ -57,6 +57,7 @@ then
 
    AC_CHECK_PROGS([JAR_NAME], [jar], [JAR_NOT_FOUND_BY_CONFIGURE], ["${JAVA_BIN}"])
    AC_SUBST([JAR], ["${JAVA_BIN}/${JAR_NAME}"])
+   BRLTTY_JAVA_DIRECTORY([JAR], [/usr/share/java])
 
    JNIDIR="${JAVA_ROOT}/include"
    JNIHDR="jni.h"
@@ -80,3 +81,26 @@ else
    $3
 ])dnl
 fi])
+
+AC_DEFUN([BRLTTY_JAVA_DIRECTORY], [dnl
+JAVA_$1_DIR=""
+for directory in $2
+do
+   test -d "${directory}" && {
+      JAVA_$1_DIR="${directory}"
+      break
+   }
+done
+
+if test -n "${JAVA_$1_DIR}"
+then
+   JAVA_$1="yes"
+   AC_MSG_NOTICE([Java] m4_tolower([$1]) [installation directory is ${JAVA_$1_DIR}])
+else
+   JAVA_$1="no"
+   AC_MSG_WARN([no commonly used] m4_tolower([$1]) [installation directory])
+fi
+
+AC_SUBST([JAVA_$1])
+AC_SUBST([JAVA_$1_DIR])
+])
