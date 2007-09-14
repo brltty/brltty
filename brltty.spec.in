@@ -64,6 +64,23 @@ Programming Interface to BRLTTY.
 Install this package if you have an application
 which directly accesses a refreshable braille display.
 
+%package -n brlapi-java
+Version: @api_release@
+Group: Applications/System
+License: LGPL
+
+AutoProv: 1
+
+AutoReq: 1
+
+Summary: Java bindings for BrlAPI.
+%description -n brlapi-java
+This package provides the Java bindings for BrlAPI,
+which is the Application Programming Interface to BRLTTY.
+
+Install this package if you have a Java application
+which directly accesses a refreshable braille display.
+
 %package -n brlapi-python
 Version: @api_release@
 Group: Applications/System
@@ -163,6 +180,10 @@ rm -fr "${RPM_BUILD_ROOT}"
 %{_libdir}/libbrlapi.so.*
 %doc Documents/Manual-BrlAPI/English/*.{sgml,txt,html}
 %doc Documents/README.Gnopernicus
+
+%files -n brlapi-java
+@JAVA_JAR_DIR@/*
+@JAVA_JNI_DIR@/*
 
 %files -n brlapi-python
 @PYTHON_SITE_PKG@/brlapi.*
