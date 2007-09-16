@@ -234,7 +234,6 @@ getWcharCharset (void) {
             );
 
     wcharCharset = strdupWrapper(charset);
-    LogPrint(LOG_NOTICE, "Wchar Charset: %s", wcharCharset);
   }
 
   return wcharCharset;
