@@ -1786,18 +1786,18 @@ int BRLAPI_STDCALL brlapi_ignoreKeys(brlapi_rangeType_t r, const brlapi_keyCode_
 /* brlapi_errlist: error messages */
 const char *brlapi_errlist[] = {
   "Success",                            /* BRLAPI_ERROR_SUCESS */
-  "Not enough memory",                  /* BRLAPI_ERROR_NOMEM */
-  "Tty Busy",                           /* BRLAPI_ERROR_TTYBUSY */
-  "Device busy",                        /* BRLAPI_ERROR_DEVICEBUSY */
+  "Insufficient memory",                /* BRLAPI_ERROR_NOMEM */
+  "Tty is busy",                        /* BRLAPI_ERROR_TTYBUSY */
+  "Device is busy",                     /* BRLAPI_ERROR_DEVICEBUSY */
   "Unknown instruction",                /* BRLAPI_ERROR_UNKNOWN_INSTRUCTION */
   "Illegal instruction",                /* BRLAPI_ERROR_ILLEGAL_INSTRUCTION */
   "Invalid parameter",                  /* BRLAPI_ERROR_INVALID_PARAMETER */
   "Invalid packet",                     /* BRLAPI_ERROR_INVALID_PACKET */
   "Connection refused",                 /* BRLAPI_ERROR_CONNREFUSED */
   "Operation not supported",            /* BRLAPI_ERROR_OPNOTSUPP */
-  "getaddrinfo error",                  /* BRLAPI_ERROR_GAIERR */
+  "getaddrinfo() error",                /* BRLAPI_ERROR_GAIERR */
   "libc error",                         /* BRLAPI_ERROR_LIBCERR */
-  "Couldn't find out tty number",       /* BRLAPI_ERROR_UNKNOWNTTY */
+  "Can't determine tty number",         /* BRLAPI_ERROR_UNKNOWNTTY */
   "Bad protocol version",               /* BRLAPI_ERROR_PROTOCOL_VERSION */
   "Unexpected end of file",             /* BRLAPI_ERROR_EOF */
   "Key file is empty",                  /* BRLAPI_ERROR_EMPTYKEY */
