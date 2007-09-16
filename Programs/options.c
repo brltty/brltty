@@ -429,16 +429,20 @@ processCommandLine (
         const OptionEntry *entry = optionEntries[option];
 
         if (entry->argument) {
-          if (entry->flags & OPT_Extend) {
-            extendSetting(entry->setting.string, optarg, 0);
-          } else {
-            *entry->setting.string = optarg;
+          if (entry->setting.string) {
+            if (entry->flags & OPT_Extend) {
+              extendSetting(entry->setting.string, optarg, 0);
+            } else {
+              *entry->setting.string = optarg;
+            }
           }
         } else {
-          if (entry->flags & OPT_Extend) {
-            ++*entry->setting.flag;
-          } else {
-            *entry->setting.flag = 1;
+          if (entry->setting.flag) {
+            if (entry->flags & OPT_Extend) {
+              ++*entry->setting.flag;
+            } else {
+              *entry->setting.flag = 1;
+            }
           }
         }
 
