@@ -25,7 +25,7 @@
 #include "misc.h"
 #include "help.h"
 
-BEGIN_OPTION_TABLE
+BEGIN_OPTION_TABLE(programOptions)
 END_OPTION_TABLE
 
 int
@@ -34,7 +34,7 @@ main (int argc, char *argv[]) {
 
   {
     static const OptionsDescriptor descriptor = {
-      OPTION_TABLE,
+      OPTION_TABLE(programOptions),
       .applicationName = "txt2hlp",
       .argumentsSummary = "output-file input-file ..."
     };

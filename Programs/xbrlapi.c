@@ -66,7 +66,7 @@ static char *auth;
 static char *host;
 static char *xDisplay;
 
-BEGIN_OPTION_TABLE
+BEGIN_OPTION_TABLE(programOptions)
   { .letter = 'a',
     .word = "auth",
     .argument = strtext("file"),
@@ -618,7 +618,7 @@ void toX_f(const char *display) {
 int main(int argc, char *argv[]) {
   {
     static const OptionsDescriptor descriptor = {
-      OPTION_TABLE,
+      OPTION_TABLE(programOptions),
       .applicationName = "xbrlapi"
     };
     processOptions(&descriptor, &argc, &argv);

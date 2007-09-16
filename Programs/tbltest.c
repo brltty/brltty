@@ -37,7 +37,7 @@ static char *opt_outputFormat;
 static int opt_translate;
 static char *opt_dataDirectory;
 
-BEGIN_OPTION_TABLE
+BEGIN_OPTION_TABLE(programOptions)
   { .letter = 'c',
     .word = "character-set",
     .argument = "charset",
@@ -307,7 +307,7 @@ main (int argc, char *argv[]) {
 
   {
     static const OptionsDescriptor descriptor = {
-      OPTION_TABLE,
+      OPTION_TABLE(programOptions),
       .applicationName = "tbltest",
       .argumentsSummary = "input-table [output-table]"
     };

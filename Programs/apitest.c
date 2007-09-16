@@ -39,7 +39,7 @@ static int opt_showSize;
 static int opt_showKeyCodes;
 static int opt_suspendMode;
 
-BEGIN_OPTION_TABLE
+BEGIN_OPTION_TABLE(programOptions)
   { .letter = 'n',
     .word = "name",
     .setting.flag = &opt_showName,
@@ -265,7 +265,7 @@ int main(int argc, char *argv[])
 
   {
     static const OptionsDescriptor descriptor = {
-      OPTION_TABLE,
+      OPTION_TABLE(programOptions),
       .applicationName = "apitest"
     };
     processOptions(&descriptor, &argc, &argv);

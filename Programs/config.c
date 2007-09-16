@@ -186,7 +186,7 @@ static const char *const optionStrings_SpeechDriver[] = {
 };
 #endif /* ENABLE_SPEECH_SUPPORT */
 
-BEGIN_OPTION_TABLE
+BEGIN_OPTION_TABLE(programOptions)
   { .letter = 'a',
     .word = "attributes-table",
     .flags = OPT_Config | OPT_Environ,
@@ -2268,7 +2268,7 @@ startup (int argc, char *argv[]) {
 
   {
     static const OptionsDescriptor descriptor = {
-      OPTION_TABLE,
+      OPTION_TABLE(programOptions),
       .doBootParameters = &opt_bootParameters,
       .doEnvironmentVariables = &opt_environmentVariables,
       .configurationFile = &opt_configurationFile,

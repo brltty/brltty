@@ -47,7 +47,7 @@ typedef struct {
   const char *const *strings;
 } OptionEntry;
 
-#define BEGIN_OPTION_TABLE static const OptionEntry optionTable[] = {
+#define BEGIN_OPTION_TABLE(name) static const OptionEntry name[] = {
 #define END_OPTION_TABLE \
   { .letter = 'h', \
     .word = "help", \
@@ -70,7 +70,7 @@ typedef struct {
   const char *argumentsSummary;
 } OptionsDescriptor;
 
-#define OPTION_TABLE .optionTable = optionTable, .optionCount = ARRAY_COUNT(optionTable)
+#define OPTION_TABLE(name) .optionTable = name, .optionCount = ARRAY_COUNT(name)
 
 extern int processOptions (const OptionsDescriptor *descriptor, int *argumentCount, char ***argumentVector);
 

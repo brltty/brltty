@@ -47,7 +47,7 @@ char *opt_midiDevice;
 static char *opt_midiInstrument;
 #endif /* ENABLE_MIDI_SUPPORT */
 
-BEGIN_OPTION_TABLE
+BEGIN_OPTION_TABLE(programOptions)
   { .letter = 'd',
     .word = "device",
     .argument = "device",
@@ -141,7 +141,7 @@ main (int argc, char *argv[]) {
 
   {
     static const OptionsDescriptor descriptor = {
-      OPTION_TABLE,
+      OPTION_TABLE(programOptions),
       .applicationName = "tunetest",
       .argumentsSummary = "{note duration} ..."
     };

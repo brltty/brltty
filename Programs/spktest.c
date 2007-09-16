@@ -37,7 +37,7 @@ static char *opt_speechVolume;
 static char *opt_libraryDirectory;
 static char *opt_dataDirectory;
 
-BEGIN_OPTION_TABLE
+BEGIN_OPTION_TABLE(programOptions)
   { .letter = 'd',
     .word = "device",
     .argument = "device",
@@ -99,7 +99,7 @@ main (int argc, char *argv[]) {
 
   {
     static const OptionsDescriptor descriptor = {
-      OPTION_TABLE,
+      OPTION_TABLE(programOptions),
       .applicationName = "spktest",
       .argumentsSummary = "[driver [parameter=value ...]]"
     };

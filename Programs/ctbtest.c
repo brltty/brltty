@@ -37,7 +37,7 @@ static char *opt_contractionTable;
 static char *opt_textTable;
 static char *opt_outputWidth;
 
-BEGIN_OPTION_TABLE
+BEGIN_OPTION_TABLE(programOptions)
   { .letter = 'c',
     .word = "contraction-table",
     .argument = "file",
@@ -153,7 +153,7 @@ main (int argc, char *argv[]) {
 
   {
     static const OptionsDescriptor descriptor = {
-      OPTION_TABLE,
+      OPTION_TABLE(programOptions),
       .applicationName = "ctbtest",
       .argumentsSummary = "[{input-file | -} ...]"
     };

@@ -38,7 +38,7 @@ static char *opt_boxHeight;
 static char *opt_screenDriver;
 static char *opt_libraryDirectory;
 
-BEGIN_OPTION_TABLE
+BEGIN_OPTION_TABLE(programOptions)
   { .letter = 'l',
     .word = "left",
     .argument = "column",
@@ -129,7 +129,7 @@ main (int argc, char *argv[]) {
 
   {
     static const OptionsDescriptor descriptor = {
-      OPTION_TABLE,
+      OPTION_TABLE(programOptions),
       .applicationName = "scrtest",
       .argumentsSummary = "[parameter=value ...]"
     };
