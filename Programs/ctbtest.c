@@ -151,10 +151,14 @@ int
 main (int argc, char *argv[]) {
   int status = 3;
 
-  processOptions(optionTable, optionCount,
-                 "ctbtest", &argc, &argv,
-                 NULL, NULL, NULL,
-                 "[{input-file | -} ...]");
+  {
+    static const OptionsDescriptor descriptor = {
+      OPTION_TABLE,
+      .applicationName = "ctbtest",
+      .argumentsSummary = "[{input-file | -} ...]"
+    };
+    processOptions(&descriptor, &argc, &argv);
+  }
 
   {
     char **const paths[] = {

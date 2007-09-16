@@ -112,10 +112,14 @@ main (int argc, char *argv[]) {
   const char *driver = NULL;
   void *object;
 
-  processOptions(optionTable, optionCount,
-                 "brltest", &argc, &argv,
-                 NULL, NULL, NULL,
-                 "[driver [parameter=value ...]]");
+  {
+    static const OptionsDescriptor descriptor = {
+      OPTION_TABLE,
+      .applicationName = "brltest",
+      .argumentsSummary = "[driver [parameter=value ...]]"
+    };
+    processOptions(&descriptor, &argc, &argv);
+  }
 
   {
     char **const paths[] = {

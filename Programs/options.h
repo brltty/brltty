@@ -58,20 +58,21 @@ typedef struct {
     .word = "full-help", \
     .description = strtext("Print a usage summary (including all options) and then exit.") \
   } \
-}; \
-static unsigned int optionCount = ARRAY_COUNT(optionTable);
+};
 
-extern int processOptions (
-  const OptionEntry *optionTable,
-  unsigned int optionCount,
-  const char *applicationName,
-  int *argumentCount,
-  char ***argumentVector,
-  int *doBootParameters,
-  int *doEnvironmentVariables,
-  char **configurationFile,
-  const char *argumentsSummary
-);
+typedef struct {
+  const OptionEntry *optionTable;
+  unsigned int optionCount;
+  int *doBootParameters;
+  int *doEnvironmentVariables;
+  char **configurationFile;
+  const char *applicationName;
+  const char *argumentsSummary;
+} OptionsDescriptor;
+
+#define OPTION_TABLE .optionTable = optionTable, .optionCount = ARRAY_COUNT(optionTable)
+
+extern int processOptions (const OptionsDescriptor *descriptor, int *argumentCount, char ***argumentVector);
 
 #ifdef __cplusplus
 }

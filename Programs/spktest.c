@@ -97,10 +97,14 @@ main (int argc, char *argv[]) {
   float speechRate;
   float speechVolume;
 
-  processOptions(optionTable, optionCount,
-                 "spktest", &argc, &argv,
-                 NULL, NULL, NULL,
-                 "[driver [parameter=value ...]]");
+  {
+    static const OptionsDescriptor descriptor = {
+      OPTION_TABLE,
+      .applicationName = "spktest",
+      .argumentsSummary = "[driver [parameter=value ...]]"
+    };
+    processOptions(&descriptor, &argc, &argv);
+  }
 
   {
     char **const paths[] = {

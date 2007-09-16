@@ -37,10 +37,14 @@ main (int argc, char *argv[]) {
   char *path;
   TranslationTable table;
 
-  processOptions(optionTable, optionCount,
-                 "tbl2hex", &argc, &argv,
-                 NULL, NULL, NULL,
-                 "translation-table");
+  {
+    static const OptionsDescriptor descriptor = {
+      OPTION_TABLE,
+      .applicationName = "tbl2hex",
+      .argumentsSummary = "translation-table"
+    };
+    processOptions(&descriptor, &argc, &argv);
+  }
 
   if (argc == 0) {
     LogPrint(LOG_ERR, "missing translation table.");

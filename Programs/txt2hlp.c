@@ -32,10 +32,14 @@ int
 main (int argc, char *argv[]) {
   int status = 2;
 
-  processOptions(optionTable, optionCount,
-                 "txt2hlp", &argc, &argv,
-                 NULL, NULL, NULL,
-                 "output-file input-file ...");
+  {
+    static const OptionsDescriptor descriptor = {
+      OPTION_TABLE,
+      .applicationName = "txt2hlp",
+      .argumentsSummary = "output-file input-file ..."
+    };
+    processOptions(&descriptor, &argc, &argv);
+  }
 
   if (argc > 0) {
     const char *outputPath = *argv++; argc--;

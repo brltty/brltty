@@ -2264,12 +2264,18 @@ validateInterval (int *value, const char *string) {
 
 void
 startup (int argc, char *argv[]) {
-  int problemCount = processOptions(optionTable, optionCount,
-                                    "brltty", &argc, &argv,
-                                    &opt_bootParameters,
-                                    &opt_environmentVariables,
-                                    &opt_configurationFile,
-                                    NULL);
+  int problemCount;
+
+  {
+    static const OptionsDescriptor descriptor = {
+      OPTION_TABLE,
+      .doBootParameters = &opt_bootParameters,
+      .doEnvironmentVariables = &opt_environmentVariables,
+      .configurationFile = &opt_configurationFile,
+      .applicationName = "brltty"
+    };
+    problemCount = processOptions(&descriptor, &argc, &argv);
+  }
 
   {
     char **const paths[] = {

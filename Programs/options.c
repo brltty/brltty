@@ -680,41 +680,32 @@ processConfigurationFile (
 }
 
 int
-processOptions (
-  const OptionEntry *optionTable,
-  unsigned int optionCount,
-  const char *applicationName,
-  int *argumentCount,
-  char ***argumentVector,
-  int *doBootParameters,
-  int *doEnvironmentVariables,
-  char **configurationFile,
-  const char *argumentsSummary
-) {
+processOptions (const OptionsDescriptor *descriptor, int *argumentCount, char ***argumentVector) {
   OptionProcessingInformation info;
   int index;
 
   prepareProgram(*argumentCount, *argumentVector);
 
-  info.optionTable = optionTable;
-  info.optionCount = optionCount;
+  info.optionTable = descriptor->optionTable;
+  info.optionCount = descriptor->optionCount;
   for (index=0; index<0X100; ++index) info.ensuredSettings[index] = 0;
   info.errorCount = 0;
 
-  processCommandLine(&info, argumentCount, argumentVector, argumentsSummary);
+  processCommandLine(&info, argumentCount, argumentVector, descriptor->argumentsSummary);
   {
-    int configurationFileSpecified = configurationFile && *configurationFile;
+    int configurationFileSpecified = descriptor->configurationFile && *descriptor->configurationFile;
 
-    if (doBootParameters && *doBootParameters)
-      processBootParameters(&info, applicationName);
+    if (descriptor->doBootParameters && *descriptor->doBootParameters)
+      processBootParameters(&info, descriptor->applicationName);
 
-    if (doEnvironmentVariables && *doEnvironmentVariables)
-      processEnvironmentVariables(&info, applicationName);
+    if (descriptor->doEnvironmentVariables && *descriptor->doEnvironmentVariables)
+      processEnvironmentVariables(&info, descriptor->applicationName);
 
     setDefaultOptions(&info, 0);
-    if (configurationFile && *configurationFile) {
-      fixInstallPath(configurationFile);
-      processConfigurationFile(&info, *configurationFile, !configurationFileSpecified);
+    if (descriptor->configurationFile && *descriptor->configurationFile) {
+      char *configurationFile = *descriptor->configurationFile;
+      fixInstallPath(&configurationFile);
+      processConfigurationFile(&info, configurationFile, !configurationFileSpecified);
     }
     setDefaultOptions(&info, 1);
   }

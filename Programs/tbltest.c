@@ -305,10 +305,14 @@ main (int argc, char *argv[]) {
   const FormatEntry *inputFormat;
   const FormatEntry *outputFormat;
 
-  processOptions(optionTable, optionCount,
-                 "tbltest", &argc, &argv,
-                 NULL, NULL, NULL,
-                 "input-table [output-table]");
+  {
+    static const OptionsDescriptor descriptor = {
+      OPTION_TABLE,
+      .applicationName = "tbltest",
+      .argumentsSummary = "input-table [output-table]"
+    };
+    processOptions(&descriptor, &argc, &argv);
+  }
 
   {
     char **const paths[] = {

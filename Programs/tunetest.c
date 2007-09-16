@@ -139,10 +139,14 @@ main (int argc, char *argv[]) {
   unsigned char midiInstrument;
 #endif /* ENABLE_MIDI_SUPPORT */
 
-  processOptions(optionTable, optionCount,
-                 "tunetest", &argc, &argv,
-                 NULL, NULL, NULL,
-                 "{note duration} ...");
+  {
+    static const OptionsDescriptor descriptor = {
+      OPTION_TABLE,
+      .applicationName = "tunetest",
+      .argumentsSummary = "{note duration} ..."
+    };
+    processOptions(&descriptor, &argc, &argv);
+  }
 
   if (opt_tuneDevice && *opt_tuneDevice) {
     unsigned int device;

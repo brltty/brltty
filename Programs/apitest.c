@@ -263,10 +263,13 @@ int main(int argc, char *argv[])
   brlapi_fileDescriptor fd;
   settings.host = NULL; settings.auth = NULL;
 
-  processOptions(optionTable, optionCount,
-                 "apitest", &argc, &argv,
-                 NULL, NULL, NULL,
-                 "");
+  {
+    static const OptionsDescriptor descriptor = {
+      OPTION_TABLE,
+      .applicationName = "apitest"
+    };
+    processOptions(&descriptor, &argc, &argv);
+  }
 
   fprintf(stderr, "Connecting to BrlAPI... ");
   if ((fd=brlapi_openConnection(&settings, &settings)) != (brlapi_fileDescriptor)(-1)) {
