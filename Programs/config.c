@@ -306,7 +306,7 @@ BEGIN_OPTION_TABLE(programOptions)
 
   { .letter = 'r',
     .word = "release-device",
-    .flags = OPT_Config | OPT_Environ,
+    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
     .setting.flag = &opt_releaseDevice,
 #ifdef WINDOWS
     .defaultSetting = FLAG_TRUE_WORD,
@@ -453,6 +453,7 @@ BEGIN_OPTION_TABLE(programOptions)
 
   { .letter = 'l',
     .word = "log-level",
+    .flags = OPT_Hidden,
     .argument = strtext("level"),
     .setting.string = &opt_logLevel,
     .description = strtext("Diagnostic logging level: %s, or one of {%s}"),
@@ -461,12 +462,14 @@ BEGIN_OPTION_TABLE(programOptions)
 
   { .letter = 'e',
     .word = "standard-error",
+    .flags = OPT_Hidden,
     .setting.flag = &opt_standardError,
     .description = strtext("Log to standard error rather than to the system log.")
   },
 
   { .letter = 'n',
     .word = "no-daemon",
+    .flags = OPT_Hidden,
     .setting.flag = &opt_noDaemon,
     .description = strtext("Remain a foreground process.")
   },
@@ -474,7 +477,7 @@ BEGIN_OPTION_TABLE(programOptions)
   { .letter = 'v',
     .word = "verify",
     .setting.flag = &opt_verify,
-    .description = strtext("Print start-up messages and exit.")
+    .description = strtext("Print start-up messages, and then exit.")
   },
 
   { .letter = 'V',

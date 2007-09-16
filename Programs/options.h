@@ -51,12 +51,12 @@ typedef struct {
 #define END_OPTION_TABLE \
   { .letter = 'h', \
     .word = "help", \
-    .description = strtext("Print a usage summary (including commonly used options only) and then exit.") \
+    .description = strtext("Print a usage summary (commonly used options only), and then exit.") \
   } \
   , \
   { .letter = 'H', \
     .word = "full-help", \
-    .description = strtext("Print a usage summary (including all options) and then exit.") \
+    .description = strtext("Print a usage summary (all options), and then exit.") \
   } \
 };
 
