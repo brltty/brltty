@@ -187,13 +187,92 @@ static const char *const optionStrings_SpeechDriver[] = {
 #endif /* ENABLE_SPEECH_SUPPORT */
 
 BEGIN_OPTION_TABLE(programOptions)
-  { .letter = 'a',
-    .word = "attributes-table",
-    .flags = OPT_Config | OPT_Environ,
-    .argument = strtext("file"),
-    .setting.string = &opt_attributesTable,
-    .description = strtext("Path to attributes translation table file.")
+#ifdef __MINGW32__
+  { .letter = 'I',
+    .word = "install-service",
+    .flags = OPT_Hidden,
+    .setting.flag = &opt_installService,
+    .description = strtext("Install the %s service."),
+    .strings = optionStrings_InstallService
   },
+
+  { .letter = 'R',
+    .word = "remove-service",
+    .flags = OPT_Hidden,
+    .setting.flag = &opt_removeService,
+    .description = strtext("Remove the %s service."),
+    .strings = optionStrings_RemoveService
+  },
+#endif /* __MINGW32__ */
+
+  { .letter = 'P',
+    .word = "pid-file",
+    .flags = OPT_Hidden,
+    .argument = strtext("file"),
+    .setting.string = &opt_pidFile,
+    .description = strtext("Path to process identifier file.")
+  },
+
+  { .letter = 'D',
+    .word = "data-directory",
+    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
+    .argument = strtext("directory"),
+    .setting.string = &opt_dataDirectory,
+    .defaultSetting = DATA_DIRECTORY,
+    .description = strtext("Path to directory for driver help and configuration files.")
+  },
+
+  { .letter = 'L',
+    .word = "library-directory",
+    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
+    .argument = strtext("directory"),
+    .setting.string = &opt_libraryDirectory,
+    .defaultSetting = LIBRARY_DIRECTORY,
+    .description = strtext("Path to directory for loading drivers.")
+  },
+
+  { .letter = 'W',
+    .word = "writable-directory",
+    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
+    .argument = strtext("directory"),
+    .setting.string = &opt_writableDirectory,
+    .defaultSetting = WRITABLE_DIRECTORY,
+    .description = strtext("Path to directory which can be written to.")
+  },
+
+  { .letter = 'f',
+    .word = "configuration-file",
+    .flags = OPT_Environ,
+    .argument = strtext("file"),
+    .setting.string = &opt_configurationFile,
+    .defaultSetting = CONFIGURATION_DIRECTORY "/" CONFIGURATION_FILE,
+    .description = strtext("Path to default settings file.")
+  },
+
+  { .letter = 'E',
+    .word = "environment-variables",
+    .flags = OPT_Hidden,
+    .setting.flag = &opt_environmentVariables,
+    .description = strtext("Recognize environment variables.")
+  },
+
+#ifdef ENABLE_API
+  { .letter = 'A',
+    .word = "api-parameters",
+    .flags = OPT_Extend | OPT_Config | OPT_Environ,
+    .argument = strtext("arg,..."),
+    .setting.string = &opt_apiParameters,
+    .defaultSetting = API_PARAMETERS,
+    .description = strtext("Parameters for the application programming interface.")
+  },
+
+  { .letter = 'N',
+    .word = "no-api",
+    .flags = OPT_Hidden,
+    .setting.flag = &opt_noApi,
+    .description = strtext("Disable the application programming interface.")
+  },
+#endif /* ENABLE_API */
 
   { .letter = 'b',
     .word = "braille-driver",
@@ -206,15 +285,14 @@ BEGIN_OPTION_TABLE(programOptions)
     .strings = optionStrings_BrailleDriver
   },
 
-#ifdef ENABLE_CONTRACTED_BRAILLE
-  { .letter = 'c',
-    .word = "contraction-table",
-    .flags = OPT_Config | OPT_Environ,
-    .argument = strtext("file"),
-    .setting.string = &opt_contractionTable,
-    .description = strtext("Path to contraction table file.")
+  { .letter = 'B',
+    .word = "braille-parameters",
+    .flags = OPT_Extend | OPT_Config | OPT_Environ,
+    .argument = strtext("arg,..."),
+    .setting.string = &opt_brailleParameters,
+    .defaultSetting = BRAILLE_PARAMETERS,
+    .description = strtext("Parameters for the braille driver.")
   },
-#endif /* ENABLE_CONTRACTED_BRAILLE */
 
   { .letter = 'd',
     .word = "braille-device",
@@ -224,61 +302,6 @@ BEGIN_OPTION_TABLE(programOptions)
     .setting.string = &opt_brailleDevice,
     .defaultSetting = BRAILLE_DEVICE,
     .description = strtext("Path to device for accessing braille display.")
-  },
-
-  { .letter = 'e',
-    .word = "standard-error",
-    .setting.flag = &opt_standardError,
-    .description = strtext("Log to standard error rather than to the system log.")
-  },
-
-  { .letter = 'f',
-    .word = "configuration-file",
-    .flags = OPT_Environ,
-    .argument = strtext("file"),
-    .setting.string = &opt_configurationFile,
-    .defaultSetting = CONFIGURATION_DIRECTORY "/" CONFIGURATION_FILE,
-    .description = strtext("Path to default settings file.")
-  },
-
-  { .letter = 'l',
-    .word = "log-level",
-    .argument = strtext("level"),
-    .setting.string = &opt_logLevel,
-    .description = strtext("Diagnostic logging level: %s, or one of {%s}"),
-    .strings = optionStrings_LogLevel
-  },
-
-#ifdef ENABLE_MIDI_SUPPORT
-  { .letter = 'm',
-    .word = "midi-device",
-    .flags = OPT_Config | OPT_Environ,
-    .argument = strtext("device"),
-    .setting.string = &opt_midiDevice,
-    .description = strtext("Device specifier for the Musical Instrument Digital Interface.")
-  },
-#endif /* ENABLE_MIDI_SUPPORT */
-
-  { .letter = 'n',
-    .word = "no-daemon",
-    .setting.flag = &opt_noDaemon,
-    .description = strtext("Remain a foreground process.")
-  },
-
-#ifdef ENABLE_PCM_SUPPORT
-  { .letter = 'p',
-    .word = "pcm-device",
-    .flags = OPT_Config | OPT_Environ,
-    .argument = strtext("device"),
-    .setting.string = &opt_pcmDevice,
-    .description = strtext("Device specifier for soundcard digital audio.")
-  },
-#endif /* ENABLE_PCM_SUPPORT */
-
-  { .letter = 'q',
-    .word = "quiet",
-    .setting.flag = &opt_quiet,
-    .description = strtext("Suppress start-up messages.")
   },
 
   { .letter = 'r',
@@ -293,17 +316,14 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = strtext("Release braille device when screen or window is unreadable.")
   },
 
-#ifdef ENABLE_SPEECH_SUPPORT
-  { .letter = 's',
-    .word = "speech-driver",
-    .flags = OPT_Config | OPT_Environ,
-    .argument = strtext("driver"),
-    .setting.string = &opt_speechDriver,
-    .defaultSetting = "auto",
-    .description = strtext("Speech driver: one of {%s}"),
-    .strings = optionStrings_SpeechDriver
+  { .letter = 'T',
+    .word = "tables-directory",
+    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
+    .argument = strtext("directory"),
+    .setting.string = &opt_tablesDirectory,
+    .defaultSetting = DATA_DIRECTORY,
+    .description = strtext("Path to directory for text and attributes tables.")
   },
-#endif /* ENABLE_SPEECH_SUPPORT */
 
   { .letter = 't',
     .word = "text-table",
@@ -314,40 +334,12 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = strtext("Path to text translation table file.")
   },
 
-  { .letter = 'v',
-    .word = "verify",
-    .setting.flag = &opt_verify,
-    .description = strtext("Print start-up messages and exit.")
-  },
-
-  { .letter = 'x',
-    .word = "screen-driver",
+  { .letter = 'a',
+    .word = "attributes-table",
     .flags = OPT_Config | OPT_Environ,
-    .argument = strtext("driver"),
-    .setting.string = &opt_screenDriver,
-    .defaultSetting = SCREEN_DRIVER,
-    .description = strtext("Screen driver: one of {%s}"),
-    .strings = optionStrings_ScreenDriver
-  },
-
-#ifdef ENABLE_API
-  { .letter = 'A',
-    .word = "api-parameters",
-    .flags = OPT_Extend | OPT_Config | OPT_Environ,
-    .argument = strtext("arg,..."),
-    .setting.string = &opt_apiParameters,
-    .defaultSetting = API_PARAMETERS,
-    .description = strtext("Parameters for the application programming interface.")
-  },
-#endif /* ENABLE_API */
-
-  { .letter = 'B',
-    .word = "braille-parameters",
-    .flags = OPT_Extend | OPT_Config | OPT_Environ,
-    .argument = strtext("arg,..."),
-    .setting.string = &opt_brailleParameters,
-    .defaultSetting = BRAILLE_PARAMETERS,
-    .description = strtext("Parameters for the braille driver.")
+    .argument = strtext("file"),
+    .setting.string = &opt_attributesTable,
+    .description = strtext("Path to attributes translation table file.")
   },
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
@@ -359,84 +351,27 @@ BEGIN_OPTION_TABLE(programOptions)
     .defaultSetting = DATA_DIRECTORY,
     .description = strtext("Path to directory for contractions tables.")
   },
-#endif /* ENABLE_CONTRACTED_BRAILLE */
 
-  { .letter = 'D',
-    .word = "data-directory",
-    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
-    .argument = strtext("directory"),
-    .setting.string = &opt_dataDirectory,
-    .defaultSetting = DATA_DIRECTORY,
-    .description = strtext("Path to directory for driver help and configuration files.")
-  },
-
-  { .letter = 'E',
-    .word = "environment-variables",
-    .setting.flag = &opt_environmentVariables,
-    .description = strtext("Recognize environment variables.")
-  },
-
-#ifdef ENABLE_SPEECH_SUPPORT
-  { .letter = 'F',
-    .word = "speech-fifo",
+  { .letter = 'c',
+    .word = "contraction-table",
     .flags = OPT_Config | OPT_Environ,
     .argument = strtext("file"),
-    .setting.string = &opt_speechFifo,
-    .description = strtext("Path to speech pass-through FIFO.")
+    .setting.string = &opt_contractionTable,
+    .description = strtext("Path to contraction table file.")
   },
-#endif /* ENABLE_SPEECH_SUPPORT */
-
-#ifdef __MINGW32__
-  { .letter = 'I',
-    .word = "install-service",
-    .setting.flag = &opt_installService,
-    .description = strtext("Install the %s service."),
-    .strings = optionStrings_InstallService
-  },
-#endif /* __MINGW32__ */
-
-
-  { .letter = 'L',
-    .word = "library-directory",
-    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
-    .argument = strtext("directory"),
-    .setting.string = &opt_libraryDirectory,
-    .defaultSetting = LIBRARY_DIRECTORY,
-    .description = strtext("Path to directory for loading drivers.")
-  },
-
-  { .letter = 'M',
-    .word = "message-delay",
-    .argument = strtext("csecs"),
-    .setting.string = &opt_messageDelay,
-    .description = strtext("Message hold time [400].")
-  },
-
-#ifdef ENABLE_API
-  { .letter = 'N',
-    .word = "no-api",
-    .setting.flag = &opt_noApi,
-    .description = strtext("Disable the application programming interface.")
-  },
-#endif /* ENABLE_API */
-
-  { .letter = 'P',
-    .word = "pid-file",
-    .argument = strtext("file"),
-    .setting.string = &opt_pidFile,
-    .description = strtext("Path to process identifier file.")
-  },
-
-#ifdef __MINGW32__
-  { .letter = 'R',
-    .word = "remove-service",
-    .setting.flag = &opt_removeService,
-    .description = strtext("Remove the %s service."),
-    .strings = optionStrings_RemoveService
-  },
-#endif /* __MINGW32__ */
+#endif /* ENABLE_CONTRACTED_BRAILLE */
 
 #ifdef ENABLE_SPEECH_SUPPORT
+  { .letter = 's',
+    .word = "speech-driver",
+    .flags = OPT_Config | OPT_Environ,
+    .argument = strtext("driver"),
+    .setting.string = &opt_speechDriver,
+    .defaultSetting = "auto",
+    .description = strtext("Speech driver: one of {%s}"),
+    .strings = optionStrings_SpeechDriver
+  },
+
   { .letter = 'S',
     .word = "speech-parameters",
     .flags = OPT_Extend | OPT_Config | OPT_Environ,
@@ -445,37 +380,24 @@ BEGIN_OPTION_TABLE(programOptions)
     .defaultSetting = SPEECH_PARAMETERS,
     .description = strtext("Parameters for the speech driver.")
   },
+
+  { .letter = 'F',
+    .word = "speech-fifo",
+    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
+    .argument = strtext("file"),
+    .setting.string = &opt_speechFifo,
+    .description = strtext("Path to speech pass-through FIFO.")
+  },
 #endif /* ENABLE_SPEECH_SUPPORT */
 
-  { .letter = 'T',
-    .word = "tables-directory",
-    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
-    .argument = strtext("directory"),
-    .setting.string = &opt_tablesDirectory,
-    .defaultSetting = DATA_DIRECTORY,
-    .description = strtext("Path to directory for text and attributes tables.")
-  },
-
-  { .letter = 'U',
-    .word = "update-interval",
-    .argument = strtext("csecs"),
-    .setting.string = &opt_updateInterval,
-    .description = strtext("Braille window update interval [4].")
-  },
-
-  { .letter = 'V',
-    .word = "version",
-    .setting.flag = &opt_version,
-    .description = strtext("Print the versions of the core, API, and built-in drivers, and then exit.")
-  },
-
-  { .letter = 'W',
-    .word = "writable-directory",
-    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
-    .argument = strtext("directory"),
-    .setting.string = &opt_writableDirectory,
-    .defaultSetting = WRITABLE_DIRECTORY,
-    .description = strtext("Path to directory which can be written to.")
+  { .letter = 'x',
+    .word = "screen-driver",
+    .flags = OPT_Config | OPT_Environ,
+    .argument = strtext("driver"),
+    .setting.string = &opt_screenDriver,
+    .defaultSetting = SCREEN_DRIVER,
+    .description = strtext("Screen driver: one of {%s}"),
+    .strings = optionStrings_ScreenDriver
   },
 
   { .letter = 'X',
@@ -485,6 +407,80 @@ BEGIN_OPTION_TABLE(programOptions)
     .setting.string = &opt_screenParameters,
     .defaultSetting = SCREEN_PARAMETERS,
     .description = strtext("Parameters for the screen driver.")
+  },
+
+#ifdef ENABLE_PCM_SUPPORT
+  { .letter = 'p',
+    .word = "pcm-device",
+    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
+    .argument = strtext("device"),
+    .setting.string = &opt_pcmDevice,
+    .description = strtext("Device specifier for soundcard digital audio.")
+  },
+#endif /* ENABLE_PCM_SUPPORT */
+
+#ifdef ENABLE_MIDI_SUPPORT
+  { .letter = 'm',
+    .word = "midi-device",
+    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
+    .argument = strtext("device"),
+    .setting.string = &opt_midiDevice,
+    .description = strtext("Device specifier for the Musical Instrument Digital Interface.")
+  },
+#endif /* ENABLE_MIDI_SUPPORT */
+
+  { .letter = 'U',
+    .word = "update-interval",
+    .flags = OPT_Hidden,
+    .argument = strtext("csecs"),
+    .setting.string = &opt_updateInterval,
+    .description = strtext("Braille window update interval [4].")
+  },
+
+  { .letter = 'M',
+    .word = "message-delay",
+    .flags = OPT_Hidden,
+    .argument = strtext("csecs"),
+    .setting.string = &opt_messageDelay,
+    .description = strtext("Message hold time [400].")
+  },
+
+  { .letter = 'q',
+    .word = "quiet",
+    .setting.flag = &opt_quiet,
+    .description = strtext("Suppress start-up messages.")
+  },
+
+  { .letter = 'l',
+    .word = "log-level",
+    .argument = strtext("level"),
+    .setting.string = &opt_logLevel,
+    .description = strtext("Diagnostic logging level: %s, or one of {%s}"),
+    .strings = optionStrings_LogLevel
+  },
+
+  { .letter = 'e',
+    .word = "standard-error",
+    .setting.flag = &opt_standardError,
+    .description = strtext("Log to standard error rather than to the system log.")
+  },
+
+  { .letter = 'n',
+    .word = "no-daemon",
+    .setting.flag = &opt_noDaemon,
+    .description = strtext("Remain a foreground process.")
+  },
+
+  { .letter = 'v',
+    .word = "verify",
+    .setting.flag = &opt_verify,
+    .description = strtext("Print start-up messages and exit.")
+  },
+
+  { .letter = 'V',
+    .word = "version",
+    .setting.flag = &opt_version,
+    .description = strtext("Print the versions of the core, API, and built-in drivers, and then exit.")
   },
 END_OPTION_TABLE
 
