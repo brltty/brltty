@@ -48,6 +48,13 @@ static char *opt_midiInstrument;
 #endif /* ENABLE_MIDI_SUPPORT */
 
 BEGIN_OPTION_TABLE(programOptions)
+  { .letter = 'v',
+    .word = "volume",
+    .argument = "loudness",
+    .setting.string = &opt_outputVolume,
+    .description = "Output volume (percentage)."
+  },
+
   { .letter = 'd',
     .word = "device",
     .argument = "device",
@@ -55,7 +62,25 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = "Name of tune device."
   },
 
+#ifdef ENABLE_PCM_SUPPORT
+  { .letter = 'p',
+    .word = "pcm-device",
+    .flags = OPT_Hidden,
+    .argument = "device",
+    .setting.string = &opt_pcmDevice,
+    .description = "Device specifier for soundcard digital audio."
+  },
+#endif /* ENABLE_PCM_SUPPORT */
+
 #ifdef ENABLE_MIDI_SUPPORT
+  { .letter = 'm',
+    .word = "midi-device",
+    .flags = OPT_Hidden,
+    .argument = "device",
+    .setting.string = &opt_midiDevice,
+    .description = "Device specifier for the Musical Instrument Digital Interface."
+  },
+
   { .letter = 'i',
     .word = "instrument",
     .argument = "instrument",
@@ -63,31 +88,6 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = "Name of MIDI instrument."
   },
 #endif /* ENABLE_MIDI_SUPPORT */
-
-#ifdef ENABLE_MIDI_SUPPORT
-  { .letter = 'm',
-    .word = "midi-device",
-    .argument = "device",
-    .setting.string = &opt_midiDevice,
-    .description = "Device specifier for the Musical Instrument Digital Interface."
-  },
-#endif /* ENABLE_MIDI_SUPPORT */
-
-#ifdef ENABLE_PCM_SUPPORT
-  { .letter = 'p',
-    .word = "pcm-device",
-    .argument = "device",
-    .setting.string = &opt_pcmDevice,
-    .description = "Device specifier for soundcard digital audio."
-  },
-#endif /* ENABLE_PCM_SUPPORT */
-
-  { .letter = 'v',
-    .word = "volume",
-    .argument = "loudness",
-    .setting.string = &opt_outputVolume,
-    .description = "Output volume (percentage)."
-  },
 END_OPTION_TABLE
 
 static const char *deviceNames[] = {"beeper", "pcm", "midi", "fm", NULL};

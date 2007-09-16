@@ -44,16 +44,9 @@ static char *opt_writableDirectory;
 static char *opt_dataDirectory;
 
 BEGIN_OPTION_TABLE(programOptions)
-  { .letter = 'd',
-    .word = "device",
-    .argument = "device",
-    .setting.string = &opt_brailleDevice,
-    .defaultSetting = BRAILLE_DEVICE,
-    .description = "Path to device for accessing braille display."
-  },
-
   { .letter = 'D',
     .word = "data-directory",
+    .flags = OPT_Hidden,
     .argument = "directory",
     .setting.string = &opt_dataDirectory,
     .defaultSetting = DATA_DIRECTORY,
@@ -62,6 +55,7 @@ BEGIN_OPTION_TABLE(programOptions)
 
   { .letter = 'L',
     .word = "library-directory",
+    .flags = OPT_Hidden,
     .argument = "directory",
     .setting.string = &opt_libraryDirectory,
     .defaultSetting = LIBRARY_DIRECTORY,
@@ -70,10 +64,19 @@ BEGIN_OPTION_TABLE(programOptions)
 
   { .letter = 'W',
     .word = "writable-directory",
+    .flags = OPT_Hidden,
     .argument = strtext("directory"),
     .setting.string = &opt_writableDirectory,
     .defaultSetting = WRITABLE_DIRECTORY,
     .description = strtext("Path to directory which can be written to.")
+  },
+
+  { .letter = 'd',
+    .word = "device",
+    .argument = "device",
+    .setting.string = &opt_brailleDevice,
+    .defaultSetting = BRAILLE_DEVICE,
+    .description = "Path to device for accessing braille display."
   },
 END_OPTION_TABLE
 

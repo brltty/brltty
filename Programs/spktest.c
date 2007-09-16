@@ -38,18 +38,22 @@ static char *opt_libraryDirectory;
 static char *opt_dataDirectory;
 
 BEGIN_OPTION_TABLE(programOptions)
-  { .letter = 'd',
-    .word = "device",
-    .argument = "device",
-    .setting.string = &opt_pcmDevice,
-    .description = "Digital audio soundcard device specifier."
+  { .letter = 'D',
+    .word = "data-directory",
+    .flags = OPT_Hidden,
+    .argument = "directory",
+    .setting.string = &opt_dataDirectory,
+    .defaultSetting = DATA_DIRECTORY,
+    .description = "Path to directory for configuration files."
   },
 
-  { .letter = 'r',
-    .word = "rate",
-    .argument = "speed",
-    .setting.string = &opt_speechRate,
-    .description = "Floating-point speech rate multiplier."
+  { .letter = 'L',
+    .word = "library-directory",
+    .flags = OPT_Hidden,
+    .argument = "directory",
+    .setting.string = &opt_libraryDirectory,
+    .defaultSetting = LIBRARY_DIRECTORY,
+    .description = "Path to directory for loading drivers."
   },
 
   { .letter = 't',
@@ -66,20 +70,18 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = "Floating-point speech volume multiplier."
   },
 
-  { .letter = 'D',
-    .word = "data-directory",
-    .argument = "directory",
-    .setting.string = &opt_dataDirectory,
-    .defaultSetting = DATA_DIRECTORY,
-    .description = "Path to directory for configuration files."
+  { .letter = 'r',
+    .word = "rate",
+    .argument = "speed",
+    .setting.string = &opt_speechRate,
+    .description = "Floating-point speech rate multiplier."
   },
 
-  { .letter = 'L',
-    .word = "library-directory",
-    .argument = "directory",
-    .setting.string = &opt_libraryDirectory,
-    .defaultSetting = LIBRARY_DIRECTORY,
-    .description = "Path to directory for loading drivers."
+  { .letter = 'd',
+    .word = "device",
+    .argument = "device",
+    .setting.string = &opt_pcmDevice,
+    .description = "Digital audio soundcard device specifier."
   },
 END_OPTION_TABLE
 

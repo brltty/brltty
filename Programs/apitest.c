@@ -43,13 +43,13 @@ BEGIN_OPTION_TABLE(programOptions)
   { .letter = 'n',
     .word = "name",
     .setting.flag = &opt_showName,
-    .description = "Show the driver's name."
+    .description = "Show the name of the braille driver."
   },
 
   { .letter = 'w',
     .word = "window",
     .setting.flag = &opt_showSize,
-    .description = "Show the braille window's size."
+    .description = "Show the dimensions of the braille window."
   },
 
   { .letter = 'd',
@@ -73,21 +73,21 @@ BEGIN_OPTION_TABLE(programOptions)
   { .letter = 's',
     .word = "suspend",
     .setting.flag = &opt_suspendMode,
-    .description = "Suspend driver (press ^C on the PC keyboard or send SIGUSR1 to get back braille)."
+    .description = "Suspend the braille driver (press ^C or send SIGUSR1 to resume)."
   },
 
-  { .letter = 'H',
-    .word = "brlapi-host",
+  { .letter = 'b',
+    .word = "brlapi",
     .argument = "[host][:port]",
     .setting.string = &settings.host,
-    .description = "The host name (or address) and port of the BrlAPI server."
+    .description = "BrlAPIa host and/or port to connect to."
   },
 
-  { .letter = 'A',
-    .word = "brlapi-auth",
+  { .letter = 'a',
+    .word = "auth",
     .argument = "file",
     .setting.string = &settings.auth,
-    .description = "The path to the file containing BrlAPI's authorization key."
+    .description = "BrlAPI authorization/authentication string."
   },
 END_OPTION_TABLE
 

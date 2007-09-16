@@ -38,11 +38,19 @@ static int opt_translate;
 static char *opt_dataDirectory;
 
 BEGIN_OPTION_TABLE(programOptions)
-  { .letter = 'c',
-    .word = "character-set",
-    .argument = "charset",
-    .setting.string = &opt_characterSet,
-    .description = "8-bit character set to use."
+  { .letter = 'D',
+    .word = "data-directory",
+    .flags = OPT_Hidden,
+    .argument = "file",
+    .setting.string = &opt_dataDirectory,
+    .defaultSetting = DATA_DIRECTORY,
+    .description = "Path to directory for configuration files."
+  },
+
+  { .letter = 't',
+    .word = "translate",
+    .setting.flag = &opt_translate,
+    .description = "Translate."
   },
 
   { .letter = 'i',
@@ -59,19 +67,11 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = "Format of output file."
   },
 
-  { .letter = 't',
-    .word = "translate",
-    .setting.flag = &opt_translate,
-    .description = "Translate."
-  },
-
-  { .letter = 'D',
-    .word = "data-directory",
-    .flags = OPT_Hidden,
-    .argument = "file",
-    .setting.string = &opt_dataDirectory,
-    .defaultSetting = DATA_DIRECTORY,
-    .description = "Path to directory for configuration files."
+  { .letter = 'c',
+    .word = "character-set",
+    .argument = "charset",
+    .setting.string = &opt_characterSet,
+    .description = "8-bit character set to use."
   },
 END_OPTION_TABLE
 

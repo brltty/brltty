@@ -39,6 +39,23 @@ static char *opt_screenDriver;
 static char *opt_libraryDirectory;
 
 BEGIN_OPTION_TABLE(programOptions)
+  { .letter = 'L',
+    .word = "library-directory",
+    .flags = OPT_Hidden,
+    .argument = "directory",
+    .setting.string = &opt_libraryDirectory,
+    .defaultSetting = LIBRARY_DIRECTORY,
+    .description = "Path to directory for loading drivers."
+  },
+
+  { .letter = 'x',
+    .word = "screen-driver",
+    .argument = "driver",
+    .setting.string = &opt_screenDriver,
+    .defaultSetting = SCREEN_DRIVER,
+    .description = "Screen driver: one of {" SCREEN_DRIVER_CODES "}"
+  },
+
   { .letter = 'l',
     .word = "left",
     .argument = "column",
@@ -65,22 +82,6 @@ BEGIN_OPTION_TABLE(programOptions)
     .argument = "count",
     .setting.string = &opt_boxHeight,
     .description = "Height of region."
-  },
-
-  { .letter = 'x',
-    .word = "screen-driver",
-    .argument = "driver",
-    .setting.string = &opt_screenDriver,
-    .defaultSetting = SCREEN_DRIVER,
-    .description = "Screen driver: one of {" SCREEN_DRIVER_CODES "}"
-  },
-
-  { .letter = 'L',
-    .word = "library-directory",
-    .argument = "directory",
-    .setting.string = &opt_libraryDirectory,
-    .defaultSetting = LIBRARY_DIRECTORY,
-    .description = "Path to directory for loading drivers."
   },
 END_OPTION_TABLE
 

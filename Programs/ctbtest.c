@@ -38,6 +38,15 @@ static char *opt_textTable;
 static char *opt_outputWidth;
 
 BEGIN_OPTION_TABLE(programOptions)
+  { .letter = 'D',
+    .word = "data-directory",
+    .flags = OPT_Hidden,
+    .argument = "file",
+    .setting.string = &opt_dataDirectory,
+    .defaultSetting = DATA_DIRECTORY,
+    .description = "Path to directory for configuration files."
+  },
+
   { .letter = 'c',
     .word = "contraction-table",
     .argument = "file",
@@ -60,15 +69,6 @@ BEGIN_OPTION_TABLE(programOptions)
     .setting.string = &opt_outputWidth,
     .defaultSetting = "",
     .description = "Maximum length of an output line."
-  },
-
-  { .letter = 'D',
-    .word = "data-directory",
-    .flags = OPT_Hidden,
-    .argument = "file",
-    .setting.string = &opt_dataDirectory,
-    .defaultSetting = DATA_DIRECTORY,
-    .description = "Path to directory for configuration files."
   },
 END_OPTION_TABLE
 

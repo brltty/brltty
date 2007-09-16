@@ -67,25 +67,25 @@ static char *host;
 static char *xDisplay;
 
 BEGIN_OPTION_TABLE(programOptions)
+  { .letter = 'b',
+    .word = "brlapi",
+    .argument = strtext("[host][:port]"),
+    .setting.string = &host,
+    .description = strtext("BrlAPI host and/or port to connect to")
+  },
+
   { .letter = 'a',
     .word = "auth",
     .argument = strtext("file"),
     .setting.string = &auth,
-    .description = strtext("set path to file containing authorization key")
-  },
-
-  { .letter = 'h',
-    .word = "host",
-    .argument = strtext("[host][:port]"),
-    .setting.string = &host,
-    .description = strtext("set brltty server (host and/or port) to connect to")
+    .description = strtext("BrlAPI authorization/authentication string")
   },
 
   { .letter = 'd',
     .word = "display",
     .argument = strtext("display"),
     .setting.string = &xDisplay,
-    .description = strtext("set X display to connect to")
+    .description = strtext("X display to connect to")
   },
 END_OPTION_TABLE
 
