@@ -685,17 +685,20 @@ processConfigurationFile (
 
 int
 processOptions (const OptionsDescriptor *descriptor, int *argumentCount, char ***argumentVector) {
-  OptionProcessingInformation info;
-  int index;
+  OptionProcessingInformation info = {
+    .optionTable = descriptor->optionTable,
+    .optionCount = descriptor->optionCount,
+    .errorCount = 0
+  };
+
+  {
+    int index;
+    for (index=0; index<0X100; ++index) info.ensuredSettings[index] = 0;
+  }
 
   prepareProgram(*argumentCount, *argumentVector);
-
-  info.optionTable = descriptor->optionTable;
-  info.optionCount = descriptor->optionCount;
-  for (index=0; index<0X100; ++index) info.ensuredSettings[index] = 0;
-  info.errorCount = 0;
-
   processCommandLine(&info, argumentCount, argumentVector, descriptor->argumentsSummary);
+
   {
     int configurationFileSpecified = descriptor->configurationFile && *descriptor->configurationFile;
 
