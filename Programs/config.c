@@ -2251,7 +2251,7 @@ background (void) {
 
 static int
 validateInterval (int *value, const char *string) {
-  if (!string || !*string) return 1;
+  if (!*string) return 1;
 
   {
     static const int minimum = 1;
@@ -2311,7 +2311,7 @@ startup (int argc, char *argv[]) {
   {
     int level = LOG_NOTICE;
 
-    if (opt_logLevel && *opt_logLevel) {
+    if (*opt_logLevel) {
       static const char *const words[] = {
         "emergency", "alert", "critical", "error",
         "warning", "notice", "information", "debug"
@@ -2518,13 +2518,13 @@ startup (int argc, char *argv[]) {
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
   LogPrint(LOG_INFO, "%s: %s", gettext("Contractions Directory"), opt_contractionsDirectory);
-  if (opt_contractionTable) {
+  if (*opt_contractionTable) {
     fixContractionTablePath(&opt_contractionTable);
     loadContractionTable(opt_contractionTable);
   }
   atexit(exitContractionTable);
   LogPrint(LOG_INFO, "%s: %s", gettext("Contraction Table"),
-           opt_contractionTable? opt_contractionTable: gettext("none"));
+           *opt_contractionTable? opt_contractionTable: gettext("none"));
 #ifdef ENABLE_PREFERENCES_MENU
 #ifdef ENABLE_TABLE_SELECTION
   globPrepare(&glob_contractionTable, opt_contractionsDirectory,
@@ -2592,9 +2592,9 @@ startup (int argc, char *argv[]) {
 
   /* Create the speech pass-through FIFO. */
   LogPrint(LOG_INFO, "%s: %s", gettext("Speech FIFO"),
-           opt_speechFifo? opt_speechFifo: gettext("none"));
+           *opt_speechFifo? opt_speechFifo: gettext("none"));
   if (!opt_verify) {
-    if (opt_speechFifo) openSpeechFifo(opt_dataDirectory, opt_speechFifo);
+    if (*opt_speechFifo) openSpeechFifo(opt_dataDirectory, opt_speechFifo);
   }
 #endif /* ENABLE_SPEECH_SUPPORT */
 
