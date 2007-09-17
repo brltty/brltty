@@ -2453,7 +2453,7 @@ startup (int argc, char *argv[]) {
   suppressTuneDeviceOpenErrors();
 
   /* Create the process identifier file. */
-  if (opt_pidFile && *opt_pidFile) createPidFile();
+  if (*opt_pidFile) createPidFile();
 
   {
     const char *directories[] = {opt_dataDirectory, "/", NULL};
@@ -2483,11 +2483,11 @@ startup (int argc, char *argv[]) {
   LogPrint(LOG_INFO, "%s: %s", gettext("Library Directory"), opt_libraryDirectory);
   LogPrint(LOG_INFO, "%s: %s", gettext("Tables Directory"), opt_tablesDirectory);
 
-  if (opt_textTable) {
+  if (*opt_textTable) {
     fixTextTablePath(&opt_textTable);
-    if (!replaceTextTable(opt_textTable)) opt_textTable = NULL;
+    if (!replaceTextTable(opt_textTable)) opt_textTable = "";
   }
-  if (!opt_textTable) {
+  if (!*opt_textTable) {
     opt_textTable = TEXT_TABLE;
     makeUntextTable();
   }
@@ -2500,10 +2500,11 @@ startup (int argc, char *argv[]) {
 #endif /* ENABLE_TABLE_SELECTION */
 #endif /* ENABLE_PREFERENCES_MENU */
 
-  if (opt_attributesTable) {
+  if (*opt_attributesTable) {
     fixAttributesTablePath(&opt_attributesTable);
-    replaceAttributesTable(opt_attributesTable);
-  } else {
+    if (!replaceAttributesTable(opt_attributesTable)) opt_attributesTable = "";
+  }
+  if (!*opt_attributesTable) {
     opt_attributesTable = ATTRIBUTES_TABLE;
   }
   LogPrint(LOG_INFO, "%s: %s", gettext("Attributes Table"), opt_attributesTable);
