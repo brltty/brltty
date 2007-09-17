@@ -120,13 +120,15 @@
 # table to use. Relative paths are anchored at "@DATA_DIRECTORY@". If not
 # specified, no contraction table will be available.
 # (can be overridden with the -c [--contraction-table=] option)
-#contraction-table	big5		# Chinese
 #contraction-table	compress	# Remove excess white space.
 #contraction-table	en-us-g2	# Grade 2 American English
 #contraction-table	fr-abrege	# Contracted French
 #contraction-table	fr-integral	# Uncontracted French
 #contraction-table	gb2312		# Simplified Chinese
-#contraction-table	uebc-g2	# Grade 2 Unified English Braille Code
+#contraction-table	uebc-g2		# Grade 2 Unified English Braille Code
+#contraction-table	zh_TW-big5	# Taiwanese Chinese (represented in big5)
+#contraction-table	zh_TW-ucb	# Taiwanese Chinese (as unique characters)
+#contraction-table	zh_TW-utf8	# Taiwanese Chinese (represented in utf8)
 
 
 #############################
