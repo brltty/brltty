@@ -2453,7 +2453,7 @@ startup (int argc, char *argv[]) {
   suppressTuneDeviceOpenErrors();
 
   /* Create the process identifier file. */
-  if (opt_pidFile) createPidFile();
+  if (opt_pidFile && *opt_pidFile) createPidFile();
 
   {
     const char *directories[] = {opt_dataDirectory, "/", NULL};
