@@ -559,7 +559,7 @@ processEnvironmentVariables (
 
       {
         char *setting = getenv(name);
-        if (setting) ensureSetting(info, option, setting);
+        if (setting && *setting) ensureSetting(info, option, setting);
       }
     }
   }
