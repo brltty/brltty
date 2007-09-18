@@ -429,6 +429,11 @@ processCommandLine (
         const OptionEntry *entry = optionEntries[option];
 
         if (entry->argument) {
+          if (!*optarg) {
+            info->ensuredSettings[option] = 0;
+            break;
+          }
+
           if (entry->setting.string) {
             if (entry->flags & OPT_Extend) {
               extendSetting(entry->setting.string, optarg, 0);
