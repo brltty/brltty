@@ -4156,14 +4156,14 @@ This feature isn't available if the
 The following contraction tables are provided:
 <descrip>
   <tag/compress/Remove excessive white-space.
+  <tag/en-uebc-g2/Grade 2 Unified English Braille Code
   <tag/en-us-g2/Grade 2 American English.
   <tag/fr-abrege/Contracted Unified French.
   <tag/fr-integral/Uncontracted Unified French.
-  <tag/gb2312/Simplified Chinese
-  <tag/uebc-g2/Grade 2 Unified English Braille Code
-  <tag/zh_TW-big5/Taiwanese Chinese (represented in big5)
-  <tag/zh_TW-ucb/Taiwanese Chinese (as unique characters)
-  <tag/zh_TW-utf8/Taiwanese Chinese (represented in utf8)
+  <tag/zh-tw-big5/Taiwanese Chinese (using BIG5 characters)
+  <tag/zh-tw-gb2312/Taiwanese Simplified Chinese
+  <tag/zh-tw-ucb/Taiwanese Unique Chinese Braille
+  <tag/zh-tw-utf8/Taiwanese Chinese (using UTF-8 characters)
 </descrip>
 
 <sect1>File Format<p>
