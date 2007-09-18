@@ -961,7 +961,6 @@ globPrepare (GlobData *data, const char *directory, const char *pattern, const c
   memset(data, 0, sizeof(*data));
   data->directory = directory;
   data->pattern = pattern;
-  if (!initial) initial = "";
   data->current = strdupWrapper(data->initial = initial);
   data->none = (none != 0);
 }
