@@ -196,7 +196,7 @@ openPcmDevice (int errorLevel, const char *device) {
   if ((pcm = malloc(sizeof(*pcm)))) {
     int result;
 
-    if (!device) device = "default";
+    if (!*device) device = "default";
     if ((result = my_snd_pcm_open(&pcm->handle, device,
                                   SND_PCM_STREAM_PLAYBACK, SND_PCM_NONBLOCK)) >= 0) {
       my_snd_pcm_nonblock(pcm->handle, 0);

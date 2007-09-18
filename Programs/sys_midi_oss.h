@@ -49,7 +49,7 @@ MidiDevice *
 openMidiDevice (int errorLevel, const char *device) {
   MidiDevice *midi;
   if ((midi = malloc(sizeof(*midi)))) {
-    if (!device) device = MIDI_OSS_DEVICE_PATH;
+    if (!*device) device = MIDI_OSS_DEVICE_PATH;
     if ((midi->fileDescriptor = open(device, O_WRONLY)) != -1) {
       {
         int count;

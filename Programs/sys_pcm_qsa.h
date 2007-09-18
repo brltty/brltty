@@ -59,7 +59,7 @@ openPcmDevice (int errorLevel, const char *device) {
   if ((pcm = malloc(sizeof(*pcm)))) {
     int code;
 
-    if (device && *device) {
+    if (*device) {
       {
 	int ok = 0;
 	long number;

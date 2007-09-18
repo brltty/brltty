@@ -65,7 +65,7 @@ openMidiDevice (int errorLevel, const char *device) {
   int id = 0;
   static const char *const defaultDevice = "default";
 
-  if (!device || !*device) device = defaultDevice;
+  if (!*device) device = defaultDevice;
 
   if (strcmp(device, defaultDevice) == 0) {
     id = -1;

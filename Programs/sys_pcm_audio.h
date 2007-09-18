@@ -28,8 +28,8 @@ PcmDevice *
 openPcmDevice (int errorLevel, const char *device) {
   PcmDevice *pcm;
   if ((pcm = malloc(sizeof(*pcm)))) {
-    if (!device) device = getenv("AUDIODEV");
-    if (!device) device = PCM_AUDIO_DEVICE_PATH;
+    if (!*device) device = getenv("AUDIODEV");
+    if (!device || !*device) device = PCM_AUDIO_DEVICE_PATH;
     if ((pcm->fileDescriptor = open(device, O_WRONLY|O_NONBLOCK)) != -1) {
       audio_info_t info;
       AUDIO_INITINFO(&info);

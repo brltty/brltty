@@ -254,7 +254,7 @@ openMidiDevice (int errorLevel, const char *device) {
             int port;
             int deviceOk;
 
-            if (device) {
+            if (*device) {
               deviceOk = parseMidiDevice(midi, errorLevel, device, &client, &port);
             } else {
               deviceOk = findMidiDevice(midi, errorLevel, &client, &port);

@@ -48,7 +48,7 @@ openPcmDevice (int errorLevel, const char *device) {
   WAVEOUTCAPS caps;
   int id = 0;
 
-  if (device && *device) {
+  if (*device) {
     if (!isInteger(&id, device) || (id < 0) || (id >= waveOutGetNumDevs())) {
       LogPrint(errorLevel, "invalid PCM device number: %s", device);
       return NULL;
