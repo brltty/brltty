@@ -2549,8 +2549,6 @@ runProgram (void) {
      */
     updateScreenAttributes();
   }
-
-  return 0;
 }
 
 void 
