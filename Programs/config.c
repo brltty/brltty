@@ -192,7 +192,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .word = "install-service",
     .flags = OPT_Hidden,
     .setting.flag = &opt_installService,
-    .description = strtext("Install the %s service."),
+    .description = strtext("Install the %s service, and then exit."),
     .strings = optionStrings_InstallService
   },
 
@@ -200,7 +200,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .word = "remove-service",
     .flags = OPT_Hidden,
     .setting.flag = &opt_removeService,
-    .description = strtext("Remove the %s service."),
+    .description = strtext("Remove the %s service, and then exit."),
     .strings = optionStrings_RemoveService
   },
 #endif /* __MINGW32__ */
@@ -477,13 +477,13 @@ BEGIN_OPTION_TABLE(programOptions)
   { .letter = 'v',
     .word = "verify",
     .setting.flag = &opt_verify,
-    .description = strtext("Print start-up messages, and then exit.")
+    .description = strtext("Write the start-up logs, and then exit.")
   },
 
   { .letter = 'V',
     .word = "version",
     .setting.flag = &opt_version,
-    .description = strtext("Print the versions of the core, API, and built-in drivers, and then exit.")
+    .description = strtext("Log the versions of the core, API, and built-in drivers, and then exit.")
   },
 END_OPTION_TABLE
 
