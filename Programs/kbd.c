@@ -254,7 +254,7 @@ static const KeyEntry *AT_scanCodes;
 static size_t AT_scanCodesSize;
 static unsigned int AT_scanCodeModifiers;
 
-#define AT_useScanCodes(type) (AT_scanCodes = AT_##type##ScanCodes, AT_scanCodesSize = sizeof(AT_##type##ScanCodes))
+#define AT_useScanCodes(type) (AT_scanCodes = AT_##type##ScanCodes, AT_scanCodesSize = ARRAY_COUNT(AT_##type##ScanCodes))
 
 int
 kbdAT_interpretScanCode (int *command, unsigned char byte) {
@@ -401,7 +401,7 @@ static const KeyEntry *XT_scanCodes;
 static size_t XT_scanCodesSize;
 static unsigned int XT_scanCodeModifiers;
 
-#define XT_useScanCodes(type) (XT_scanCodes = XT_##type##ScanCodes, XT_scanCodesSize = sizeof(XT_##type##ScanCodes))
+#define XT_useScanCodes(type) (XT_scanCodes = XT_##type##ScanCodes, XT_scanCodesSize = ARRAY_COUNT(XT_##type##ScanCodes))
 
 int
 kbdXT_interpretScanCode (int *command, unsigned char byte) {
