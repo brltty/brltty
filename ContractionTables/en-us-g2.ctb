@@ -399,7 +399,7 @@ always hered 125-12456-1246
 always heren 125-12456-26
 midendword herence 125-12456-56-15 adherence
 always herer 125-12456-12456
-always heres 125-12456-15-234
+begword heres 125-12456-15-234 heresy
 always heret 125-12456-15-2345
 word heretofore 5-125-2345-135-123456-15
 word herself 125-12456-124
@@ -520,7 +520,7 @@ word noone 1345-135-5-135
 sufword nose = nosedive
 word not 1345
 word noways =
-word nowhere 1345-135-5-156
+sufword nowhere 1345-135-5-156
 begword nuth 1345-136-2345-125 nuthatch nuthouse
 
 # the letter o
@@ -775,7 +775,7 @@ midendword thereal 2346-1235-2-123 ethereal
 word thereupon 5-2346-45-136
 always thered 2346-1235-1246
 always therer 2346-1235-12456
-always theres 2346-1235-15-234 theresa therese 
+begword theres 2346-1235-15-234 theresa therese 
 always thood =
 midendword tion 56-1345
 always time 5-2345
