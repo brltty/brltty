@@ -1106,6 +1106,9 @@ always £ 4-123 pounds
 always ¥ 4-13456 yen
 always µ 46-134 mu
 
+# abbreviations
+word aarp = American Association of Retired Persons
+
 # special character sequences
 literal :// URLs
 literal www.
