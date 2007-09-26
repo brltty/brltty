@@ -244,6 +244,7 @@ ensureDevices() {
 }
 ensureDevices c 7 0 vcs 12
 ensureDevices c 7 128 vcsa 12
+ensureDevices c 4 0 tty 12 0
 ensureDevices c 4 64 ttyS 3 0
 ensureDevices c 188 0 ttyUSB 1 0
 
@@ -282,6 +283,7 @@ brlttyInstallRoot="${temporaryDirectory}/install"
 
    ./configure --quiet --with-install-root="${brlttyInstallRoot}" \
 	       --with-init-path="${initPath}" --with-stderr-path="/dev/tty5" \
+               --with-writable-directory="/tmp" \
                --with-screen-driver="lx,-all" \
 	       --with-braille-driver="-tt,-vr,${brailleDrivers}" \
 	       --with-text-table="${textTable}" \
