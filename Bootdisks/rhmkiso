@@ -185,8 +185,15 @@ done
 
 configurationFile="isolinux.cfg"
 sed -n -e '
-/^\( *default  *\).*$/s//\1text/
-/^\( *timeout  *\).*$/s//\10/
+1i\
+prompt 1\
+timeout 0\
+default text\
+
+/^ *prompt /d
+/^ *timeout /d
+/^ *default /d
+/^ *menu  *default *$/d
 /^ *append.* text/s/$/ nofb/
 /^ *append.* rescue/s/$/ text nofb/
 p
