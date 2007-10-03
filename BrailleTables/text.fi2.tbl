@@ -112,7 +112,7 @@
 \X59 (1 34567 )  # latin capital letter y
 \X5A (1 3 567 )  # latin capital letter z
 \X5B (123 56  )  # left square bracket
-\X5C (12    68)  # reverse solidus
+\X5C (12   6 8)  # reverse solidus
 \X5D ( 23456  )  # right square bracket
 \X5E (   45 7 )  # circumflex accent
 \X5F (      78)  # low line

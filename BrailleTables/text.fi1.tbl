@@ -17,7 +17,7 @@
 
 # BRLTTY Text Translation Table - Finnish (iso-8859-1)
 
-# This table is very close to the official Finnish braille character set.
+# This table is very close to the official Finnish six dotbraille character set.
 
 \X00 (   4  78)  # null
 \X01 (1     78)  # start of heading
@@ -111,11 +111,11 @@
 \X59 (1 34567 )  # latin capital letter y
 \X5A (1 3 567 )  # latin capital letter z
 \X5B (123 56  )  # left square bracket
-\X5C (1   4 6 )  # reverse solidus
+\X5C (1  4 6  )  # reverse solidus
 \X5D ( 23456  )  # right square bracket
-\X5E (   45  8)  # circumflex accent
-\X5F (      78)  # low line
-\X60 (   4   8)  # grave accent
+\X5E (   45 7 )  # circumflex accent
+\X5F (  34 6  )  # low line
+\X60 (   4  7 )  # grave accent
 \X61 (1       )  # latin small letter a
 \X62 (12      )  # latin small letter b
 \X63 (1  4    )  # latin small letter c
