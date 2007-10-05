@@ -41,6 +41,7 @@
 
 #include "sys_mount_none.h"
 
+#ifndef ENABLE_STANDALONE_PROGRAMS
 void *
 loadSharedObject (const char *path) {
 #ifdef HAVE_SHL_LOAD
@@ -71,6 +72,7 @@ findSharedSymbol (void *object, const char *symbol, const void **address) {
 #endif /* HAVE_SHL_LOAD */
   return 0;
 }
+#endif /* ENABLE_STANDALONE_PROGRAMS */
 
 #include "sys_beep_none.h"
 

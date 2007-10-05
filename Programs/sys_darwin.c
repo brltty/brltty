@@ -30,7 +30,9 @@
 
 #include "sys_mount_none.h"
 
+#ifndef ENABLE_STANDALONE_PROGRAMS
 #include "sys_shlib_dyld.h"
+#endif /* ENABLE_STANDALONE_PROGRAMS */
 
 #include "sys_beep_none.h"
 

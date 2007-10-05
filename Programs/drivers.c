@@ -94,6 +94,7 @@ loadDriver (
     }
   }
 
+#ifndef ENABLE_STANDALONE_PROGRAMS
   {
     char *libraryPath;
     const int libraryNameLength = strlen(MODULE_NAME) + strlen(driverCode) + strlen(MODULE_EXTENSION) + 3;
@@ -114,11 +115,11 @@ loadDriver (
           *driverObject = libraryHandle;
 
           {
+            const void *versionAddress = NULL;
             const int versionSymbolLength = strlen(symbolPrefix) + 9 + strlen(driverCode) + 1;
             char versionSymbol[versionSymbolLength];
             snprintf(versionSymbol, versionSymbolLength, "%s_version_%s",
                      symbolPrefix, driverCode);
-            const void *versionAddress = NULL;
 
             if (findSharedSymbol(libraryHandle, versionSymbol, &versionAddress)) {
               const char *actualVersion = versionAddress;
@@ -145,6 +146,7 @@ loadDriver (
       free(libraryPath);
     }
   }
+#endif /* ENABLE_STANDALONE_PROGRAMS */
 
   return driverAddress;
 }

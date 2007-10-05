@@ -1618,6 +1618,16 @@ activateDriver (const DriverActivationData *data, int verify) {
   return 0;
 }
 
+static void
+unloadDriverObject (void **object) {
+#ifndef ENABLE_STANDALONE_PROGRAMS
+  if (*object) {
+    unloadSharedObject(*object);
+    *object = NULL;
+  }
+#endif /* ENABLE_STANDALONE_PROGRAMS */
+}
+
 void
 initializeBraille (void) {
   initializeBrailleDisplay(&brl);
@@ -1717,10 +1727,7 @@ initializeBrailleDriver (const char *code, int verify) {
       brailleParameters = NULL;
     }
 
-    if (brailleObject) {
-      unloadSharedObject(brailleObject);
-      brailleObject = NULL;
-    }
+    unloadDriverObject(&brailleObject);
   } else {
     LogPrint(LOG_ERR, "%s: %s", gettext("braille driver not loadable"), code);
   }
@@ -1817,10 +1824,7 @@ deactivateBrailleDriver (void) {
     brailleDriver = NULL;
   }
 
-  if (brailleObject) {
-    unloadSharedObject(brailleObject);
-    brailleObject = NULL;
-  }
+  unloadDriverObject(&brailleObject);
 
   if (brailleParameters) {
     deallocateStrings(brailleParameters);
@@ -1959,10 +1963,7 @@ initializeSpeechDriver (const char *code, int verify) {
       speechParameters = NULL;
     }
 
-    if (speechObject) {
-      unloadSharedObject(speechObject);
-      speechObject = NULL;
-    }
+    unloadDriverObject(&speechObject);
   } else {
     LogPrint(LOG_ERR, "%s: %s", gettext("speech driver not loadable"), code);
   }
@@ -1998,10 +1999,7 @@ deactivateSpeechDriver (void) {
     speechDriver = NULL;
   }
 
-  if (speechObject) {
-    unloadSharedObject(speechObject);
-    speechObject = NULL;
-  }
+  unloadDriverObject(&speechObject);
 
   if (speechParameters) {
     deallocateStrings(speechParameters);
@@ -2085,10 +2083,7 @@ initializeScreenDriver (const char *code, int verify) {
       screenParameters = NULL;
     }
 
-    if (screenObject) {
-      unloadSharedObject(screenObject);
-      screenObject = NULL;
-    }
+    unloadDriverObject(&screenObject);
   } else {
     LogPrint(LOG_ERR, "%s: %s", gettext("screen driver not loadable"), code);
   }
@@ -2124,10 +2119,7 @@ deactivateScreenDriver (void) {
     screenDriver = NULL;
   }
 
-  if (screenObject) {
-    unloadSharedObject(screenObject);
-    screenObject = NULL;
-  }
+  unloadDriverObject(&screenObject);
 
   if (screenParameters) {
     deallocateStrings(screenParameters);

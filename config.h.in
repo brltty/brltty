@@ -311,6 +311,9 @@ extern "C" {
 /* Define this to be a string containing the default application programming interface parameters. */
 #undef API_PARAMETERS
 
+/* Define this if standalone (static) programs are being built. */
+#undef ENABLE_STANDALONE_PROGRAMS
+
 /* Define this if Universal Serial Bus support is to be included. */
 #undef ENABLE_USB_SUPPORT
 

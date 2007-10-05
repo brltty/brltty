@@ -38,8 +38,10 @@
 
 #include "sys_exec_unix.h"
 
+#ifndef ENABLE_STANDALONE_PROGRAMS
 #define SHARED_OBJECT_LOAD_FLAGS (RTLD_NOW | RTLD_GLOBAL)
 #include "sys_shlib_dlfcn.h"
+#endif /* ENABLE_STANDALONE_PROGRAMS */
 
 #ifdef ENABLE_PCM_SUPPORT
 #define PCM_OSS_DEVICE_PATH "/dev/dsp"
@@ -55,7 +57,9 @@
 
 #include "sys_exec_windows.h"
 
+#ifndef ENABLE_STANDALONE_PROGRAMS
 #include "sys_shlib_windows.h"
+#endif /* ENABLE_STANDALONE_PROGRAMS */
 
 #ifdef ENABLE_PCM_SUPPORT
 #include "sys_pcm_windows.h"
