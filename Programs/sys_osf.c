@@ -28,10 +28,10 @@
 
 #include "sys_mount_none.h"
 
-#ifndef ENABLE_STANDALONE_PROGRAMS
+#ifdef ENABLE_SHARED_OBJECTS
 #define SHARED_OBJECT_LOAD_FLAGS (RTLD_NOW | RTLD_GLOBAL)
 #include "sys_shlib_dlfcn.h"
-#endif /* ENABLE_STANDALONE_PROGRAMS */
+#endif /* ENABLE_SHARED_OBJECTS */
 
 #include "sys_beep_none.h"
 

@@ -94,7 +94,7 @@ loadDriver (
     }
   }
 
-#ifndef ENABLE_STANDALONE_PROGRAMS
+#ifdef ENABLE_SHARED_OBJECTS
   {
     char *libraryPath;
     const int libraryNameLength = strlen(MODULE_NAME) + strlen(driverCode) + strlen(MODULE_EXTENSION) + 3;
@@ -146,7 +146,7 @@ loadDriver (
       free(libraryPath);
     }
   }
-#endif /* ENABLE_STANDALONE_PROGRAMS */
+#endif /* ENABLE_SHARED_OBJECTS */
 
   return driverAddress;
 }

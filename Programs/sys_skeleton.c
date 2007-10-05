@@ -28,9 +28,9 @@
 
 #include "sys_mount_none.h"
 
-#ifndef ENABLE_STANDALONE_PROGRAMS
+#ifdef ENABLE_SHARED_OBJECTS
 #include "sys_shlib_none.h"
-#endif /* ENABLE_STANDALONE_PROGRAMS */
+#endif /* ENABLE_SHARED_OBJECTS */
 
 #include "sys_beep_none.h"
 

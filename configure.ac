@@ -1071,6 +1071,9 @@ BRLTTY_ARG_ENABLE(
 [dnl
    brltty_standalone_programs="yes"
    LDFLAGS="${LDFLAGS} ${brltty_static_flag}"
+], [dnl
+   AC_DEFINE([ENABLE_SHARED_OBJECTS], [1],
+             [Define this if shared object support is to be included.])
 ])
 LDFLAGS="${LDFLAGS} BRLTTY_OPTIONS_LD2CC([${brltty_link_flags}])"
 

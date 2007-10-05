@@ -1620,12 +1620,12 @@ activateDriver (const DriverActivationData *data, int verify) {
 
 static void
 unloadDriverObject (void **object) {
-#ifndef ENABLE_STANDALONE_PROGRAMS
+#ifdef ENABLE_SHARED_OBJECTS
   if (*object) {
     unloadSharedObject(*object);
     *object = NULL;
   }
-#endif /* ENABLE_STANDALONE_PROGRAMS */
+#endif /* ENABLE_SHARED_OBJECTS */
 }
 
 void
