@@ -49,7 +49,10 @@ typedef enum {
 #include "spk_driver.h"
 #include <mpwrfile.h>
 
+#ifdef ENABLE_SHARED_OBJECTS
 static void *speechLibrary = NULL;
+#endif /* ENABLE_SHARED_OBJECTS */
+
 static MPINT_ChannelInitExType mpChannelInitEx = NULL;
 static MPINT_ChannelExitType mpChannelExit = NULL;
 static MPINT_ChannelSpeakFileType mpChannelSpeakFile = NULL;
@@ -361,6 +364,7 @@ enqueueTag (const char *tag) {
 
 static void
 loadSynthesisLibrary (void) {
+#ifdef ENABLE_SHARED_OBJECTS
   if (!speechLibrary) {
     static const char *name = "libmplinux." LIBRARY_EXTENSION;
     char *path = makePath(MIKROPUHE_ROOT, name);
@@ -383,6 +387,7 @@ loadSynthesisLibrary (void) {
       free(path);
     }
   }
+#endif /* ENABLE_SHARED_OBJECTS */
 }
 
 static int
@@ -451,6 +456,7 @@ spk_destruct (void) {
     speechChannel = NULL;
   }
 
+#ifdef ENABLE_SHARED_OBJECTS
   if (speechLibrary) {
     const SymbolEntry *symbol = symbolTable;
     while (symbol->name) {
@@ -461,6 +467,7 @@ spk_destruct (void) {
     unloadSharedObject(speechLibrary);
     speechLibrary = NULL;
   }
+#endif /* ENABLE_SHARED_OBJECTS */
 }
 
 static void
