@@ -1077,45 +1077,6 @@ highlightWindow (void) {
 
 static int
 beginProgram (int argc, char *argv[]) {
-#ifdef INIT_PATH
-  if ((getpid() == 1) || (strstr(argv[0], "linuxrc") != NULL)) {
-    fprintf(stderr, gettext("%s started as %s\n"), PACKAGE_TITLE, argv[0]);
-    fflush(stderr);
-    switch (fork()) {
-      case -1: /* failed */
-        fprintf(stderr, gettext("Fork of %s failed: %s\n"),
-                PACKAGE_TITLE, strerror(errno));
-        fflush(stderr);
-      default: /* parent */
-        fprintf(stderr, gettext("Executing %s (from %s)\n"), "INIT", INIT_PATH);
-        fflush(stderr);
-      exec_init:
-        execv(INIT_PATH, argv);
-        /* execv() shouldn't return */
-        fprintf(stderr, gettext("Execution of %s failed: %s\n"), "INIT", strerror(errno));
-        fflush(stderr);
-        exit(1);
-      case 0: { /* child */
-        static char *arguments[] = {"brltty", "-E", "-n", "-e", "-linfo", NULL};
-        argv = arguments;
-        argc = ARRAY_COUNT(arguments) - 1;
-        break;
-      }
-    }
-  } else if (strstr(argv[0], "brltty") == NULL) {
-    /* 
-     * If we are substituting the real init binary, then we may consider
-     * when someone might want to call that binary even when pid != 1.
-     * One example is /sbin/telinit which is a symlink to /sbin/init.
-     */
-    goto exec_init;
-  }
-#endif /* INIT_PATH */
-
-#ifdef STDERR_PATH
-  freopen(STDERR_PATH, "a", stderr);
-#endif /* STDERR_PATH */
-
   /* Open the system log. */
   LogOpen(0);
   LogPrint(LOG_INFO, gettext("starting"));
@@ -2706,19 +2667,60 @@ serviceMain (DWORD argc, LPSTR *argv) {
 int
 main (int argc, char *argv[]) {
 #ifdef __MINGW32__
-  static SERVICE_TABLE_ENTRY serviceTable[] = {
-    { .lpServiceName="", .lpServiceProc=serviceMain },
-    {}
-  };
+  {
+    static SERVICE_TABLE_ENTRY serviceTable[] = {
+      { .lpServiceName="", .lpServiceProc=serviceMain },
+      {}
+    };
 
-  if (StartServiceCtrlDispatcher(serviceTable)) return serviceReturnCode;
-  isWindowsService = 0;
+    if (StartServiceCtrlDispatcher(serviceTable)) return serviceReturnCode;
+    isWindowsService = 0;
 
-  if (GetLastError() != ERROR_FAILED_SERVICE_CONTROLLER_CONNECT) {
-    LogWindowsError("StartServiceCtrlDispatcher");
-    return 20;
+    if (GetLastError() != ERROR_FAILED_SERVICE_CONTROLLER_CONNECT) {
+      LogWindowsError("StartServiceCtrlDispatcher");
+      return 20;
+    }
   }
 #endif /* __MINGW32__ */
+
+#ifdef INIT_PATH
+  if ((getpid() == 1) || (strstr(argv[0], "linuxrc") != NULL)) {
+    fprintf(stderr, gettext("%s started as %s\n"), PACKAGE_TITLE, argv[0]);
+    fflush(stderr);
+    switch (fork()) {
+      case -1: /* failed */
+        fprintf(stderr, gettext("Fork of %s failed: %s\n"),
+                PACKAGE_TITLE, strerror(errno));
+        fflush(stderr);
+      default: /* parent */
+        fprintf(stderr, gettext("Executing %s (from %s)\n"), "INIT", INIT_PATH);
+        fflush(stderr);
+      exec_init:
+        execv(INIT_PATH, argv);
+        /* execv() shouldn't return */
+        fprintf(stderr, gettext("Execution of %s failed: %s\n"), "INIT", strerror(errno));
+        fflush(stderr);
+        exit(1);
+      case 0: { /* child */
+        static char *arguments[] = {"brltty", "-E", "-n", "-e", "-linfo", NULL};
+        argv = arguments;
+        argc = ARRAY_COUNT(arguments) - 1;
+        break;
+      }
+    }
+  } else if (strstr(argv[0], "brltty") == NULL) {
+    /* 
+     * If we are substituting the real init binary, then we may consider
+     * when someone might want to call that binary even when pid != 1.
+     * One example is /sbin/telinit which is a symlink to /sbin/init.
+     */
+    goto exec_init;
+  }
+#endif /* INIT_PATH */
+
+#ifdef STDERR_PATH
+  freopen(STDERR_PATH, "a", stderr);
+#endif /* STDERR_PATH */
 
   {
     int returnCode = beginProgram(argc, argv);
