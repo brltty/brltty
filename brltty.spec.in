@@ -203,103 +203,50 @@ rm -fr "${RPM_BUILD_ROOT}"
 %doc Documents/BrlAPIref
 
 %changelog
-* Mon Jun  4 2007 Dave Mielke <dave@mielke.cc> 3.8
-+  General updates:
-      Add the -r [--release-device] command line option.
-      Add the release-device configuration directive.
-      Look in $HOME/.brltty/ for brltty.conf, translation tables, contraction tables, and preferences files.
-      Add screen scroll detection to the cursor routing algorithm.
-      Fix left-panning when presenting contracted braille.
-      Change the default braille and speech drivers to "auto".
-      Change the default braille device to "usb:".
-      Improved AT keyboard scancode support.
-      Added XT keyboard scancode support.
-      Verify that a driver's version matches that of the core when loading it.
-      If any drivers are built-in then only autodetect for them.
-      Log unexpected data from braille displays as warnings.
-      New braille drivers: IrixLinux
-      New speech drivers: SpeechDispatcher
-      New screen drivers: PCBIOS
-      New supported operating systems: kFreeBSD, MSDOS (almost)
-+  Startup updates:
-      Only count command line option and configuration file errors as problems.
-      Periodically retry starting the speech driver.
-      Periodically retry creating the PID file.
-+  BrlAPI updates:
-      Version changed to 0.5.0.
-      Base TCP/IP port changed from 35751 to the newly IANA-assigned 4101 [brlp-0] (4 ports).
-      Move headers from "/usr/include/brltty/*.h" to "/usr/include/brlapi_*.h".
-      Lots of function and constant renames (see man brlapi_deprecated).
-      Remove brlapi_getDriverId().
-      Add brlapi_suspendDriver() and brlapi_resumeDriver().
-      Redesign the paradigm for ignoring and accepting key codes.
-      Add support for multiple simultaneous sessions.
-      Add support for the application-definable BRLAPI_NO_DEPRECATED and BRLAPI_NO_SINGLE_SESSION macros.
-      Improved Unicode support.
-      Rename the WINDOWSPATH environment variable to WINDOWPATH.
-      Rename the BRLAPI_KEYFILE environment variable to BRLAPI_AUTH.
-      Rename the KeyFile= parameter to Auth=.
-      Add support for authentication by user and/or group.
-      Implement bindings for Caml, Java, Lisp, Python, and Tcl.
-+  Preferences menu updates:
-      Change the default for "Autorepeat" from "No" to "Yes".
-      Add "Autorepeat Panning" [No, Yes].
-      Add "Braille Sensitivity" [Minimum, Low, Medium, High, Maximum].
-      Rename "Pointer Follows Window" to "Highlight Window".
-      The "Highlight Window" preference works even if gpm isn't available.
-      Only highlight the upper-left character of the window if attribute underlining is on.
-+  Alva braille driver updates:
-      Add support for the Braille System 40.
-+  Baum braille driver updates:
-      Some key binding changes.
-      Add keyboard input.
-      Add the VarioKeys parameter for those who prefer the old Vario driver bindings.
-+  MiniBraille braille driver updates:
-      Add flow control so that it works on fast CPUs.
-      Some key binding changes.
-+  HandyTech braille driver updates:
-      Support the Modular Evolution models (64 and 88).
-      Add one-hand convenience bindings for BrailleStar navigation functions.
-+  Papenmeier braille driver updates:
-      Add support for the latest BrailleX II models (except for the Trio line).
-      Add support for setting braille firmness.
-+  VisioBraille braille driver updates:
-      Support the non-standard serial flow control used by older models.
-      Distribute the vstp (VisioBraille file transfer) application.
-+  Linux screen driver updates:
-      Add support for frame buffer consoles.
-      Fix the emulation of keys F1-F5.
-+  Screen screen driver and screen patch updates:
-      Fixed cursor routing.
-      Add support for keyboard emulation.
-      Fix support for the status line.
-      Add support for the input line.
-      Show the current window number (rather than 0).
-      Show correct character highlighting.
-+  Windows support updates:
-      Recognize the CR-LF sequence as a text file input line terminator.
-      Don't misinterpret/corrupt preferences files by treating them as text files.
-      Present the AltTabInfo window.
-      Support keyboard emulation when in a DOS box or a non-console application.
-      Determine which facilities are available at run-time rather than at build-time.
-      Remove support for Windows 95.
-+  Text translation table updates:
-      Renames: uk->en_UK, us->en_US
-      Add a table for Swedish 1996.
-      Add a table for Unified French 2007.
-      Add a table for Portuguese.
-      Fix the Czech table to support German symbols in a uniform way.
-      Support tables in the Gnome Braille format.
-      Support tables in the sbl (SuSE Blinux) format.
-+  Contraction table updates:
-      Several fixes to en-us-g2 (Grade 2 American English).
-      Updates to big5.
-      Add a table for GB2312 (Simplified Chinese Braille)
-+  Build updates:
-      The autogen.sh script has been renamed to autogen.
-      Add support for a relocatable install (useful on Windows).
-      Change the default for gpm support to enabled.
-      Define general macros for braille applications in "/usr/include/iso_11548-1.h".
-      Add the --with-stderr-path configure script option.
-      Braillified installer images log errors to tty5.
+* Wed Oct 17 2007 Dave Mielke <dave@mielke.cc> 3.9
++  Core changes:
+      The startup log and initial braille display message contain the build revision.
+      The -v [--verify] option identifies the screen driver.
+      Failure of the braille and/or screen driver to start isn't fatal.
+      Repeated retries are scheduled for each driver until it starts.
+      Attempts to connect to gpm are only made when it's actually needed.
+      Standalone programs no longer include support for shared objects.
+      The MSDOS operating system is supported.
+      MSDOS option syntax (/flag and /name:value) is supported.
+      The syntax +x to clear a short option flag is supported.
+      Help output groups options by function rather than lists them alphabetically.
+      Needed but missing resources are created (by default) in /lib/brltty/rw/:
+         command line option: -W [--writable-directory=]
+         configuration file directive: writable-directory
+         environment variable: BRLTTY_WRITABLE_DIRECTORY
+         configure script option: --with-writable-directory=
++  BrlAPI changes:
+      Version updated to 0.5.1.
+      TCP sockets are more responsive.
+      The -h [--host] option of xbrlapi has been changed to -b [--brlapi].
++  Baum braille driver changes:
+      The autosuspend feature of Linux USB devices is disabled.
+      Don't probe for emulation modes if a serial device is being used.
+      Add the protocol= (all, native) parameter.
++  HandyTech braille driver changes:
+      The Easy Braille is supported.
++  Papenmeier braille driver changes:
+      The Trio models are supported.
+      The second set of vertical status keys does vertical routing.
++  Linux changes:
+      USB devices maintained by udev under /dev/bus/usb/ are supported.
++  Cygwin changes:
+      The emulation layer (rather than Windows functions) is used.
+      Serial devices named ttySn (rather than COMn) are used.
++  Windows changes:
+      Write to the event log.
+      The -I [--install-service] and -R [--remove-service] options have been added.
+      The -r [--release-device] option defaults to "on".
++  Table changes:
+      Corrections to Finnish braille [text.fi1.tbl, text.fi2.tbl].
+      Corrections to Portuguese braille [text.pt.tbl].
+      Corrections to American English grade 2 braille [en-us-g2.ctb].
+      Unified English Braille table rename: uebc-g2 -> en-uebc-g2
+      Chinese table renames: big5 -> zh-tw-big5, gb2312 -> zh-tw-gb2312
+      New Chinese tables: zh-tw-utf8, zh-tw-ucb
 

@@ -1,6 +1,54 @@
 Note: this file is in reversed chronological order (bottom to top).
 
 
+October 17, 2007:
+ - BRLTTY 3.9 released:
+   Core changes:
+      The startup log and initial braille display message contain the build revision.
+      The -v [--verify] option identifies the screen driver.
+      Failure of the braille and/or screen driver to start isn't fatal.
+      Repeated retries are scheduled for each driver until it starts.
+      Attempts to connect to gpm are only made when it's actually needed.
+      Standalone programs no longer include support for shared objects.
+      The MSDOS operating system is supported.
+      MSDOS option syntax (/flag and /name:value) is supported.
+      The syntax +x to clear a short option flag is supported.
+      Help output groups options by function rather than lists them alphabetically.
+      Needed but missing resources are created (by default) in /lib/brltty/rw/:
+         command line option: -W [--writable-directory=]
+         configuration file directive: writable-directory
+         environment variable: BRLTTY_WRITABLE_DIRECTORY
+         configure script option: --with-writable-directory=
+   BrlAPI changes:
+      Version updated to 0.5.1.
+      TCP sockets are more responsive.
+      The -h [--host] option of xbrlapi has been changed to -b [--brlapi].
+   Baum braille driver changes:
+      The autosuspend feature of Linux USB devices is disabled.
+      Don't probe for emulation modes if a serial device is being used.
+      Add the protocol= (all, native) parameter.
+   HandyTech braille driver changes:
+      The Easy Braille is supported.
+   Papenmeier braille driver changes:
+      The Trio models are supported.
+      The second set of vertical status keys does vertical routing.
+   Linux changes:
+      USB devices maintained by udev under /dev/bus/usb/ are supported.
+   Cygwin changes:
+      The emulation layer (rather than Windows functions) is used.
+      Serial devices named ttySn (rather than COMn) are used.
+   Windows changes:
+      Write to the event log.
+      The -I [--install-service] and -R [--remove-service] options have been added.
+      The -r [--release-device] option defaults to "on".
+   Table changes:
+      Corrections to Finnish braille [text.fi1.tbl, text.fi2.tbl].
+      Corrections to Portuguese braille [text.pt.tbl].
+      Corrections to American English grade 2 braille [en-us-g2.ctb].
+      Unified English Braille table rename: uebc-g2 -> en-uebc-g2
+      Chinese table renames: big5 -> zh-tw-big5, gb2312 -> zh-tw-gb2312
+      New Chinese tables: zh-tw-utf8, zh-tw-ucb
+
 June 4, 2007:
  - BRLTTY 3.8 released:
    General updates:
