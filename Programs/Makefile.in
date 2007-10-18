@@ -408,10 +408,10 @@ screen-drivers:
 ###############################################################################
 
 text.auto.h: $(TEXT_TABLE) tbl2hex$X
-	./tbl2hex$X $(TEXT_TABLE) >$@
+	./tbl2hex$X -- $(TEXT_TABLE) >$@
 
 attrib.auto.h: $(ATTRIBUTES_TABLE) tbl2hex$X
-	./tbl2hex$X $(ATTRIBUTES_TABLE) >$@
+	./tbl2hex$X -- $(ATTRIBUTES_TABLE) >$@
 
 cmds.auto.h: $(SRC_DIR)/brldefs.h $(SRC_DIR)/brldefs.awk $(SRC_DIR)/cmds.awk
 	$(AWK) -f $(SRC_DIR)/brldefs.awk -f $(SRC_DIR)/cmds.awk $(SRC_DIR)/brldefs.h >$@
