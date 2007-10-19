@@ -17,7 +17,7 @@ dnl Process this file with autoconf 2.53 to produce a configure script.
 ###############################################################################
 
 AC_PREREQ([2.53])
-AC_INIT([brltty], [3.9], [http://mielke.cc/brltty/])
+AC_INIT([brltty], [3.9.1dev], [http://mielke.cc/brltty/])
 AC_CONFIG_SRCDIR([Programs/brltty.h])
 BRLTTY_SUMMARY_BEGIN
 brltty_build_directories=". Programs Documents"
@@ -55,7 +55,7 @@ PACKAGE_REVISION="`"${srcdir}/revision" "${srcdir}"`"
 if test -z "${PACKAGE_REVISION}"
 then
    AC_MSG_WARN([package revision not known])
-   PACKAGE_REVISION="UNKNOWN"
+   PACKAGE_REVISION=""
 fi
 AC_DEFINE_UNQUOTED([PACKAGE_REVISION], ["${PACKAGE_REVISION}"],
                    [Define this to be a string containing the package revision.])
