@@ -35,16 +35,16 @@ unmount_ext2() {
    umount "${1}"
 }
 check_ext2() {
-   set -- $(stat -f -- "${initrdRoot}" | grep '^ *Blocks:')
-   initrdAvailableBlocks="${7}"
-   initrdBlockSize="${9}"
+   set -- $(stat -c '%a %s' -f -- "${initrdRoot}")
+   initrdAvailableBlocks="${1}"
+   initrdBlockSize="${2}"
    set -- $(du --block-size="${initrdBlockSize}" -s "${brlttyInstallRoot}")
    brlttyInstallBlocks="${1}"
-   set -- $(stat -- "${initrdImage}" | grep '^ *Size:')
-   initrdImageBytes="${2}"
+   set -- $(stat -c '%s' -- "${initrdImage}")
+   initrdImageBytes="${1}"
    initrdImageBlocks=$(( (initrdImageBytes + initrdBlockSize - 1) / initrdBlockSize ))
    initrdPadBlocks=$(( brlttyInstallBlocks - initrdAvailableBlocks ))
-   (( (initrdPadBlocks += 100) > 0 )) && {
+   (( (initrdPadBlocks += 200) > 0 )) && {
       initrdMounted=false
       "unmount_${initrdType}" "${initrdRoot}" "${initrdImage}"
 
