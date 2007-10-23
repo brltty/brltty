@@ -1,28 +1,26 @@
 BRLTTY help screen for EuroBraille terminals 
+      Driver developped by Yannick PLASSIARD and Olivier BERT
 
-To entre in the Learn-Mode, click on the "I Z" cell to enter in the internal
-menu and then click the "Help" item.
-If you don't know how the menu system works, (if you never used Scriba or 
-DraculaWin), an explaination of the work can be found in the README.menu file,
-located in the EuroBraille directory of your brltty copy.
+To enter in the Learn-Mode press Level 1 key (alpha or # or FG+FB) depending
+on the model of display you have followed by "J" (for notebraille/clio), 
+L6 (for scriba) L5 (for iris).
 
 Using Cut And Paste
 -------------------
-	To begin a block, press "*E" (or Beta+L1) and then click on the 
-cell where you want to start the block.
-To end a block press "^M" (or Beta+L9), and cliak on the cell you want to end 
-the block. 
-When you type "^M" (or Beta+L9), and click on a cell, the block is copied into
-the brltty clipboard, waiting to be pasted anywhere you want. To past a block,
-press the "*L" (or Beta+L8).
-
-Warning: This functionality is not implemented for Iris yet.
-
+	To begin a block, press "*E" or Beta+L1 or Layer2+L1 depending on your
+braille display and then click on the cell where you want to start the block.
+To end a block press "*M" or Beta+L9 or Layer2+l8 depending on your braille 
+display, and click on the cell where you want to end the block. 
+When you do this, the block is copied into the BRLTTY clipboard, waiting to 
+be pasted anywhere you want. To past a block,
+press the "*L" or Beta+L8 or Layer2+L7 depending on your braille display. 
+A separate help file for each model will be created soon.
 
 Note
 ----
-Please note that the README file contains although version information and
+Please note that the README file contains also version information and
 copyright notice, so if you find a bug that was not listed out in the README
 file, feel free to send an e-mail to me (yan@mistigri.org), because it's
 hard to test all possible functions, even if I use the driver 10 hours a day. 
+
 Thank you.

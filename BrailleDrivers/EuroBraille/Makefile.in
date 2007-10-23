@@ -17,12 +17,30 @@
 
 DRIVER_CODE = eu
 DRIVER_NAME = EuroBraille
-DRIVER_COMMENT = AzerBraille, Clio, Iris, NoteBraille, Scriba
-DRIVER_VERSION = 1.3.4
-DRIVER_DEVELOPERS = Yannick PLASSIARD <plassi_y@epitech.net>, Nicolas PITRE <nico@cam.org>
+DRIVER_COMMENT = AzerBraille, Clio, Iris, NoteBraille, Scriba, ESYS
+DRIVER_VERSION = 2.0
+DRIVER_DEVELOPERS = Yannick PLASSIARD <yan@mistigri.org>, Olivier BERT <obert01@mistigri.org>, Nicolas PITRE <nico@cam.org>
 HELP_DEPS = $(HELP_TEXT)
+SRC_FILES = $(SRC_DIR)/brl.c \
+		$(SRC_DIR)/braille.c \
+		$(SRC_DIR)/io.c \
+		$(SRC_DIR)/io_usb.c \
+	  	$(SRC_DIR)/io_net.c \
+	  	$(SRC_DIR)/io_serial.c \
+	  	$(SRC_DIR)/io_bluetooth.c \
+		$(SRC_DIR)/protocol.c \
+		$(SRC_DIR)/esysiris_protocol.c \
+		$(SRC_DIR)/clio_protocol.c
+
+OBJ_FILES = $(SRC_FILES:.c=.o)
+
+
 include $(SRC_TOP)braille.mk
 
-braille.$O:
-	$(CC) $(BRL_CFLAGS) -c $(SRC_DIR)/braille.c
+braille.$O: $(OBJ_FILES)
+	$(MKOBJ)  braille.$O $(OBJ_FILES)
 
+$(OBJ_FILES) : $(SRC_FILES)
+
+.c.o :
+	$(CC) $(BRL_CFLAGS) -o $@ -c $<

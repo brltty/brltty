@@ -1,12 +1,13 @@
-This is the EuroBraille family driver for BRLTTY, version 1.3.4
+This is the EuroBraille family driver for BRLTTY, version 2.0.0
 
 Initial writing by Nicolas Pitre <nico@cam.org>, Copyright 1997-1998.
 
 This code is copyrighted under the GNU Public License.  See the file
 COPYING included with BRLTTY for details.
 
-This driver is currently maintained by Yannick Plassiard 
-	<yan@mistigri.org>
+This driver is currently maintained by 
+	* Yannick Plassiard <yan@mistigri.org>
+	* Olivier Bert <obert01@mistigri.org>
 
 SUPPORTED HARDWARE
 ==================
@@ -17,12 +18,20 @@ on the following hardware:
    - an Azerbraille 40 and 80 display;
    - a Clio-PupiBraille display (80 cells)
    - an IRIS display (Iris-S20, Iris-S32 and Iris-40).
+   - An ESYS display (bluetooth only).
    - The driver is also tested with a NoteBraille display in order to 
      maintain backward compatibility.
 
 
 FIXES/ADDITIONS
 ===============
+Version 2.0.0:
+	- Complete rewrite of the whole driver to support new EsysIris
+	  protocol (serial and ethernet connection supported).
+	- Support Iris (firmware 1.71 and later)
+	- Support ESYS 12/40 display (beta, bluetooth only).
+	- Ability to autodetect which protocol to use.
+
 Version 1.3.4:
 	- Support the suspend/resume BRLTTY feature.
 
@@ -105,7 +114,8 @@ Version 0.5:
 
 Comments are strongly welcomed, because I don't know how many people use the 
 EuroBraille version of BRLTTY in the world so if you use this driver, just 
-e-mail me what are your suggestions for next versions.
+e-mail us what are your suggestions for next versions.
 
 Yannick Plassiard <yan@mistigri.org>
-    December 15 2005
+Olivier Bert <obert01@mistigri.org>
+    October 19 2007
