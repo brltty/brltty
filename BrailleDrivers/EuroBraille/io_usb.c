@@ -29,8 +29,14 @@ static UsbChannel *usb = NULL;
 int
 eubrl_usbInit (BrailleDisplay *brl, char **parameters, const char *device) {
   static const UsbChannelDefinition definitions[] = {
-    {0XC251, 0X1122, 1, 0, 0, 1, 1, 1, NULL}, /* ESYS 12 / 40 */
-    {0}
+    { /* ESYS 12/40 */
+      .vendor=0XC251, .product=0X1122,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=1,
+      .disableAutosuspend=1
+    }
+    ,
+    { .vendor=0 }
   };
 
   if ((usb = usbFindChannel(definitions, (void *)device))) 
