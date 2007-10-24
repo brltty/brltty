@@ -30,11 +30,11 @@ try:
   b.leaveTtyMode()
 
 except brlapi.ConnectionError, e:
-  if e.brlerrno == 8:
+  if e.brlerrno == brlapi.ERROR_CONNREFUSED:
     print "Connection refused. BRLTTY is too busy..."
-  elif e.brlerrno == 17:
+  elif e.brlerrno == brlapi.ERROR_AUTHENTICATION:
     print "Authentication failed. Please check the permissions of /etc/brlapi.key"
-  elif e.brlerrno == 11 and (e.libcerrno == errno.ECONNREFUSED or e.libcerrno == errno.ENOENT):
+  elif e.brlerrno == brlapi.ERROR_LIBCERR and (e.libcerrno == errno.ECONNREFUSED or e.libcerrno == errno.ENOENT):
     print "Connection refused. Is BRLTTY really running?"
   else:
     print "Connection to BRLTTY failed: "
