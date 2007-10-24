@@ -1805,8 +1805,8 @@ const char *brlapi_errlist[] = {
   "Authentication failed",              /* BRLAPI_ERROR_AUTHENTICATION */
 };
 
-/* brlapi_nerr: last error number */
-const int brlapi_nerr = (sizeof(brlapi_errlist)/sizeof(char*)) - 1;
+/* brlapi_nerr: number of error codes */
+const int brlapi_nerr = (sizeof(brlapi_errlist)/sizeof(char*));
 
 /* brlapi_strerror: return error message */
 const char * BRLAPI_STDCALL brlapi_strerror(const brlapi_error_t *error)
