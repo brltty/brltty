@@ -969,7 +969,7 @@ brlapi_error_t * BRLAPI_STDCALL brlapi_error_location(void);
 /** Global variable brlapi_error
  *
  * ::brlapi_error is a global left-value containing the last error information.
- * Its errno field is not reset to BRLERR_SUCCESS on success.
+ * Its errno field is not reset to BRLAPI_ERROR_SUCCESS on success.
  *
  * This information may be copied in brlapi_error_t variables for later use
  * with the brlapi_strerror function.
@@ -1022,7 +1022,7 @@ const char * BRLAPI_STDCALL brlapi_getPacketTypeName(brlapi_packetType_t type);
  * brlapi_setExceptionHandler() and brlapi__setExceptionHandler().
  *
  * \param handle is the handle corresponding to the guilty connection;
- * \param error is a BRLERR_ error code;
+ * \param error is a BRLAPI_ERROR_ error code;
  * \param type is the type of the guilty packet;
  * \param packet points to the content of the guilty packet (might be a little bit truncated);
  * \param size gives the guilty packet's size.
