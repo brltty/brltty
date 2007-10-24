@@ -7,26 +7,40 @@ This documentation is only a python helper, you should also read C manual pages.
 
 Example : 
 import brlapi
-b = brlapi.Connection()
-b.enterTtyMode()
-b.ignoreKeys(brlapi.rangeType_all,[0])
-b.acceptKeys(brlapi.rangeType_command,[brlapi.KEY_TYPE_CMD|brlapi.KEY_CMD_HOME, brlapi.KEY_TYPE_CMD|brlapi.KEY_CMD_WINUP, brlapi.KEY_TYPE_CMD|brlapi.KEY_CMD_WINDN])
-b.writeText("Press home or winup/dn to continue ... ¤")
-key = b.readKey()
-k = b.expandKeyCode(key)
-b.writeText("Key %ld (%x %x %x %x) !" % (key, k["type"], k["command"], k["argument"], k["flags"]))
-b.writeText(None,1)
-b.readKey()
-underline = chr(brlapi.DOT7 + brlapi.DOT8)
-# Note: center() can take two arguments only starting from python 2.4
-b.write(
-    regionBegin = 1,
-    regionSize = 40,
-    text = u"Press any key to exit ¤                 ",
-    orMask = "".center(21,underline) + "".center(19,chr(0)))
-b.acceptKeys(brlapi.rangeType_all,[0])
-b.readKey()
-b.leaveTtyMode()
+try:
+  b = brlapi.Connection()
+  b.enterTtyMode()
+  b.ignoreKeys(brlapi.rangeType_all,[0])
+  b.acceptKeys(brlapi.rangeType_command,[brlapi.KEY_TYPE_CMD|brlapi.KEY_CMD_HOME, brlapi.KEY_TYPE_CMD|brlapi.KEY_CMD_WINUP, brlapi.KEY_TYPE_CMD|brlapi.KEY_CMD_WINDN])
+  b.writeText("Press home or winup/dn to continue ... ¤")
+  key = b.readKey()
+  k = b.expandKeyCode(key)
+  b.writeText("Key %ld (%x %x %x %x) !" % (key, k["type"], k["command"], k["argument"], k["flags"]))
+  b.writeText(None,1)
+  b.readKey()
+  underline = chr(brlapi.DOT7 + brlapi.DOT8)
+  # Note: center() can take two arguments only starting from python 2.4
+  b.write(
+      regionBegin = 1,
+      regionSize = 40,
+      text = u"Press any key to exit ¤                 ",
+      orMask = "".center(21,underline) + "".center(19,chr(0)))
+  b.acceptKeys(brlapi.rangeType_all,[0])
+  b.readKey()
+  b.leaveTtyMode()
+
+except brlapi.ConnectionError, e:
+  if e.brlerrno == 8:
+    print "Connection refused. BRLTTY is too busy..."
+  elif e.brlerrno == 17:
+    print "Authentication failed. Please check the permissions of /etc/brlapi.key"
+  elif e.brlerrno == 11 and (e.libcerrno == errno.ECONNREFUSED or e.libcerrno == errno.ENOENT):
+    print "Connection refused. Is BRLTTY really running?"
+  else:
+    print "Connection to BRLTTY failed: "
+  print e
+  print e.brlerrno
+  print e.libcerrno
 """
 
 ###############################################################################
@@ -52,23 +66,63 @@ b.leaveTtyMode()
 cimport c_brlapi
 include "constants.auto.pyx"
 
-def returnerrno():
-	"""This function returns str message error from errno"""
-	return c_brlapi.brlapi_strerror(c_brlapi.brlapi_error_location())
+cdef class OperationError:
+	"""Error while performing some operation"""
 
-class ConnectionError:
+	cdef c_brlapi.brlapi_error_t error
+
+	def __init__(self):
+		self.error = c_brlapi.brlapi_error
+
+	property brlerrno:
+		"""Braille error"""
+		def __get__(self):
+			return self.error.brlerrno
+
+	property libcerrno:
+		"""C library error"""
+		def __get__(self):
+			return self.error.libcerrno
+
+	property gaierrno:
+		"""Getaddrinfo error"""
+		def __get__(self):
+			return self.error.gaierrno
+
+	property errfun:
+		"""Function in which error occurred"""
+		def __get__(self):
+			return self.error.errfun
+
+	def __str__(self):
+		return c_brlapi.brlapi_strerror(&self.error)
+
+cdef class ConnectionError(OperationError):
 	"""Error while connecting to BrlTTY"""
-	def __init__(self, value):
-		self.value = value
-	def __str__(self):
-		return self.value
 
-class OperationError:
-	"""Error while getting an attribute"""
-	def __init__(self, value):
-		self.value = value
+	cdef c_brlapi.brlapi_connectionSettings_t settings
+
+	def __init__(self, host, auth):
+		OperationError.__init__(self)
+		self.settings.host = c_brlapi.strdup(host)
+		self.settings.auth = c_brlapi.strdup(auth)
+
+	def __del__(self):
+		c_brlapi.free(self.settings.host)
+		c_brlapi.free(self.settings.auth)
+
 	def __str__(self):
-		return self.value
+		return "couldn't connect to %s with key %s: %s" % (self.settings.host,self.settings.auth,c_brlapi.brlapi_strerror(&self.error))
+
+	property host:
+		"""Host of BRLTTY server"""
+		def __get__(self):
+			return self.settings.host
+
+	property auth:
+		"""Authentication method used"""
+		def __get__(self):
+			return self.settings.auth
 
 cdef class WriteStruct:
 	"""Structure containing arguments to be given to Connection.write()
@@ -198,9 +252,11 @@ cdef class WriteStruct:
 
 cdef class Connection:
 	"""Class which manages the bridge between your program and BrlAPI"""
+
 	cdef c_brlapi.brlapi_handle_t *h
 	cdef c_brlapi.brlapi_connectionSettings_t settings
 	cdef int fd
+
 	def __init__(self, host = None, auth = None):
 		"""Connect your program to BrlTTY using settings
 
@@ -229,7 +285,7 @@ cdef class Connection:
 		c_brlapi.Py_END_ALLOW_THREADS
 		if self.fd == -1:
 			c_brlapi.free(self.h)
-			raise ConnectionError("couldn't connect to %s with key %s: %s" % (self.settings.host,self.settings.auth,returnerrno()))
+			raise ConnectionError(self.settings.host, self.settings.auth)
 
 	def __del__(self):
 		"""Close the BrlAPI conection"""
@@ -262,7 +318,7 @@ cdef class Connection:
 			retval = c_brlapi.brlapi__getDisplaySize(self.h, &x, &y)
 			c_brlapi.Py_END_ALLOW_THREADS
 			if retval == -1:
-				raise OperationError(returnerrno())
+				raise OperationError()
 			else:
 				return (x, y)
 	
@@ -276,7 +332,7 @@ cdef class Connection:
 			retval = c_brlapi.brlapi__getDriverName(self.h, name, sizeof(name))
 			c_brlapi.Py_END_ALLOW_THREADS
 			if retval == -1:
-				raise OperationError(returnerrno())
+				raise OperationError()
 			else:
 				return name
 
@@ -300,7 +356,7 @@ cdef class Connection:
 		retval = c_brlapi.brlapi__enterTtyMode(self.h, c_tty, c_driver)
 		c_brlapi.Py_END_ALLOW_THREADS
 		if retval == -1:
-			raise OperationError(returnerrno())
+			raise OperationError()
 		else:
 			return retval
 
@@ -335,7 +391,7 @@ cdef class Connection:
 		if (c_ttys):
 			c_brlapi.free(c_ttys)
 		if retval == -1:
-			raise OperationError(returnerrno())
+			raise OperationError()
 		else:
 			return retval
 
@@ -347,7 +403,7 @@ cdef class Connection:
 		retval = c_brlapi.brlapi__leaveTtyMode(self.h)
 		c_brlapi.Py_END_ALLOW_THREADS
 		if retval == -1:
-			raise OperationError(returnerrno())
+			raise OperationError()
 		else:
 			return retval
 
@@ -362,7 +418,7 @@ cdef class Connection:
 		retval = c_brlapi.brlapi__setFocus(self.h, c_tty)
 		c_brlapi.Py_END_ALLOW_THREADS
 		if retval == -1:
-			raise OperationError(returnerrno())
+			raise OperationError()
 		else:
 			return retval
 
@@ -406,7 +462,7 @@ cdef class Connection:
 		retval = c_brlapi.brlapi__write(self.h, &writeArguments.props)
 		c_brlapi.Py_END_ALLOW_THREADS
 		if retval == -1:
-			raise OperationError(returnerrno())
+			raise OperationError()
 		else:
 			return retval
 
@@ -423,7 +479,7 @@ cdef class Connection:
 		retval = c_brlapi.brlapi__writeDots(self.h, c_udots)
 		c_brlapi.Py_END_ALLOW_THREADS
 		if retval == -1:
-			raise OperationError(returnerrno())
+			raise OperationError()
 		else:
 			return retval
 
@@ -467,7 +523,7 @@ cdef class Connection:
 		retval = c_brlapi.brlapi__readKey(self.h, c_wait, <c_brlapi.brlapi_keyCode_t*>&code)
 		c_brlapi.Py_END_ALLOW_THREADS
 		if retval == -1:
-			raise OperationError(returnerrno())
+			raise OperationError()
 		elif retval <= 0 and wait == False:
 			return None
 		else:
@@ -480,7 +536,7 @@ cdef class Connection:
 		cdef int retval
 		retval = c_brlapi.brlapi_expandKeyCode(code, &ekc)
 		if retval == -1:
-			raise OperationError(returnerrno())
+			raise OperationError()
 		else:
 			return { "type":ekc.type, "command":ekc.command, "argument":ekc.argument, "flags":ekc.flags }
 	
@@ -505,7 +561,7 @@ cdef class Connection:
 		c_brlapi.Py_END_ALLOW_THREADS
 		c_brlapi.free(c_set)
 		if retval == -1:
-			raise OperationError(returnerrno())
+			raise OperationError()
 		else:
 			return retval
 
@@ -530,7 +586,7 @@ cdef class Connection:
 		c_brlapi.Py_END_ALLOW_THREADS
 		c_brlapi.free(c_set)
 		if retval == -1:
-			raise OperationError(returnerrno())
+			raise OperationError()
 		else:
 			return retval
 	
@@ -544,7 +600,7 @@ cdef class Connection:
 		retval = c_brlapi.brlapi__ignoreAllKeys(self.h)
 		c_brlapi.Py_END_ALLOW_THREADS
 		if retval == -1:
-			raise OperationError(returnerrno())
+			raise OperationError()
 		else:
 			return retval
 	
@@ -560,7 +616,7 @@ cdef class Connection:
 		retval = c_brlapi.brlapi__acceptAllKeys(self.h)
 		c_brlapi.Py_END_ALLOW_THREADS
 		if retval == -1:
-			raise OperationError(returnerrno())
+			raise OperationError()
 		else:
 			return retval
 
@@ -584,7 +640,7 @@ cdef class Connection:
 		c_brlapi.Py_END_ALLOW_THREADS
 		c_brlapi.free(c_keys)
 		if retval == -1:
-			raise OperationError(returnerrno())
+			raise OperationError()
 		else:
 			return retval
 
@@ -608,7 +664,7 @@ cdef class Connection:
 		c_brlapi.Py_END_ALLOW_THREADS
 		c_brlapi.free(c_keys)
 		if retval == -1:
-			raise OperationError(returnerrno())
+			raise OperationError()
 		else:
 			return retval
 
@@ -624,7 +680,7 @@ cdef class Connection:
 		retval = c_brlapi.brlapi__enterRawMode(self.h, c_driver)
 		c_brlapi.Py_END_ALLOW_THREADS
 		if retval == -1:
-			raise OperationError(returnerrno())
+			raise OperationError()
 		else:
 			return retval
 
@@ -636,7 +692,7 @@ cdef class Connection:
 		retval = c_brlapi.brlapi__leaveRawMode(self.h)
 		c_brlapi.Py_END_ALLOW_THREADS
 		if retval == -1:
-			raise OperationError(returnerrno())
+			raise OperationError()
 		else:
 			return retval
 

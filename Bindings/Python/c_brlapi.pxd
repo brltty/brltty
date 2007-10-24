@@ -46,10 +46,12 @@ cdef extern from "Programs/brlapi.h":
 		unsigned int flags
 
 	ctypedef struct brlapi_error_t:
-		int brlerror
-		int libcerror
-		int gaierror
+		int brlerrno
+		int libcerrno
+		int gaierrno
 		char *errfun
+
+	brlapi_error_t brlapi_error
 
 	ctypedef struct brlapi_handle_t
 
@@ -107,6 +109,7 @@ cdef extern from "bindings.h":
 cdef extern from "stdlib.h":
 	void *malloc(size_t)
 	void free(void*)
+	char *strdup(char *)
 
 cdef extern from "string.h":
 	void *memcpy(void *, void *, size_t)
