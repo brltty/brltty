@@ -19,7 +19,7 @@ BEGIN {
   apiRangeTypeCount = 0
 }
 
-/#define[ \t]*BRLAPI_(CURSOR|DISPLAY|TTY)_/ {
+/#define[ \t]*BRLAPI_(CURSOR|DISPLAY|ERROR|TTY)_/ {
   apiConstant(substr($2, 8), $2, getDefineValue(), "")
   next
 }
