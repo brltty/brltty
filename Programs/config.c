@@ -36,9 +36,13 @@
 
 #ifdef ENABLE_PREFERENCES_MENU
 #ifdef ENABLE_TABLE_SELECTION
-#ifdef HAVE_GLOB_H
+#if defined(HAVE_GLOB_H)
 #include <glob.h>
-#endif /* HAVE_GLOB_H */
+#elif defined(__MINGW32__)
+#include <io.h>
+#else /* glob: paradigm-specific global definitions */
+#warning file globbing support not available on this platform
+#endif /* glob: paradigm-specific global definitions */
 #endif /* ENABLE_TABLE_SELECTION */
 #endif /* ENABLE_PREFERENCES_MENU */
 
@@ -945,9 +949,13 @@ typedef struct {
   const char *initial;
   char *current;
   unsigned none:1;
-#ifdef HAVE_GLOB_H
+
+#if defined(HAVE_GLOB_H)
   glob_t glob;
-#endif /* HAVE_GLOB_H */
+#elif defined(__MINGW32__)
+  long findHandle;
+#endif /* glob: paradigm-specific field declarations */
+
   const char **paths;
   int count;
   unsigned char setting;
@@ -974,11 +982,6 @@ globBegin (GlobData *data) {
   data->paths[data->count] = NULL;
   index = data->count;
 
-#ifdef HAVE_GLOB_H
-  memset(&data->glob, 0, sizeof(data->glob));
-  data->glob.gl_offs = data->count;
-#endif /* HAVE_GLOB_H */
-
   {
 #ifdef HAVE_FCHDIR
     int originalDirectory = open(".", O_RDONLY);
@@ -988,7 +991,10 @@ globBegin (GlobData *data) {
     if (originalDirectory) {
 #endif /* HAVE_FCHDIR */
       if (chdir(data->directory) != -1) {
-#ifdef HAVE_GLOB_H
+#if defined(HAVE_GLOB_H)
+        memset(&data->glob, 0, sizeof(data->glob));
+        data->glob.gl_offs = data->count;
+
         if (glob(data->pattern, GLOB_DOOFFS, NULL, &data->glob) == 0) {
           data->paths = (const char **)data->glob.gl_pathv;
           /* The behaviour of gl_pathc is inconsistent. Some implementations
@@ -997,7 +1003,26 @@ globBegin (GlobData *data) {
            */
           while (data->paths[data->count]) ++data->count;
         }
-#endif /* HAVE_GLOB_H */
+#elif defined(__MINGW32__)
+        struct _finddata_t findData;
+
+        data->paths = NULL;
+        data->count = 0;
+        data->findHandle = _findfirst(data->pattern, &findData);
+        if (data->findHandle != -1) {
+          int allocated = 16;
+          data->paths = malloc(allocated * sizeof(char*));
+          do {
+            if (data->count >= allocated) {
+              allocated = allocated * 2;
+              data->paths = realloc(data->paths, allocated * sizeof(char*));
+            }
+            data->paths[data->count++] = strdup(findData.name);
+          } while (_findnext(data->findHandle, &findData) == 0);
+          _findclose(data->findHandle);
+          data->paths = realloc(data->paths, data->count * sizeof(char*));
+        }
+#endif /* glob: paradigm-specific field initialization */
 
 #ifdef HAVE_FCHDIR
         if (fchdir(originalDirectory) == -1) LogError("fchdir");
@@ -1048,14 +1073,20 @@ globBegin (GlobData *data) {
 
 static void
 globEnd (GlobData *data) {
-#ifdef HAVE_GLOB_H
+#if defined(HAVE_GLOB_H)
   if (data->glob.gl_pathc) {
     int index;
     for (index=0; index<data->glob.gl_offs; ++index)
       data->glob.gl_pathv[index] = NULL;
     globfree(&data->glob);
   }
-#endif /* HAVE_GLOB_H */
+#elif defined(__MINGW32__)
+  if (data->paths) {
+    int i;
+    for (i=0; i<data->count; i++) free(data->paths[i]);
+    free(data->paths);
+  }
+#endif /* glob: paradigm-specific memory deallocation */
 }
 
 static const char *
