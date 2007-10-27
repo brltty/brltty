@@ -17,8 +17,8 @@
 
 /** EuroBraille/key.h '- Key defines for all models **/
 
-#ifndef		__EU_KEY_H__
-# define	__EU_KEY_H__
+#ifndef __EU_KEYS_H__
+#define __EU_KEYS_H__
 
 # define	EUBRL_BRAILLE_KEY	0x10000000
 # define	EUBRL_ROUTING_KEY	0x20000000
@@ -117,4 +117,4 @@
 
 /** Esys Model keys **/
 
-#endif
+#endif /* __EU_KEYS_H__ */

@@ -24,8 +24,8 @@
 **/
 
 
-#ifndef		__EU_PROTOCOL_H__
-# define	__EU_PROTOCOL_H__
+#ifndef __EU_PROTOCOL_H__
+#define __EU_PROTOCOL_H__
 
 #include	"io.h"
 #include	"string.h"
@@ -93,4 +93,4 @@ int	esysiris_writePacket(BrailleDisplay *brl,
 			     const unsigned char *packet, int size);
 
 unsigned int		protocol_handleBrailleKey(unsigned int key);
-#endif
+#endif /* __EU_PROTOCOL_H__ */

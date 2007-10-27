@@ -41,7 +41,7 @@
 
 #ifdef WINDOWS
 #include <ws2tcpip.h>
-#include "Programs/sys_windows.h"
+#include "sys_windows.h"
 #else /* WINDOWS */
 #include <sys/socket.h>
 #include <sys/un.h>
@@ -72,9 +72,9 @@
 #define LogSocketError(msg) LogError(msg)
 #endif /* WINDOWS */
 
-#include "Programs/misc.h"
-#include "Programs/io_misc.h"
-#include "Programs/cmd.h"
+#include "misc.h"
+#include "io_misc.h"
+#include "cmd.h"
 
 #include "braille.h"
 

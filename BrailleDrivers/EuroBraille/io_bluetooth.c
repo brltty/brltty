@@ -24,10 +24,10 @@
 
 # define	DEFAULT_ESYS_CHANNEL	1
 
-#include	"Programs/io_bluetooth.h"
-#include	"Programs/misc.h"
+#include	"io_bluetooth.h"
+#include	"misc.h"
 
-#include "Programs/io_misc.h"
+#include "io_misc.h"
 
 static int bluetoothConnection = -1;
 

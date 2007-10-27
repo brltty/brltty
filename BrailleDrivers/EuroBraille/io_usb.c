@@ -23,7 +23,7 @@
 #include "io.h"
 
 #ifdef ENABLE_USB_SUPPORT
-#include "Programs/io_usb.h"
+#include "io_usb.h"
 
 static UsbChannel *usb = NULL;
 int
@@ -103,4 +103,4 @@ eubrl_usbWrite(BrailleDisplay *brl, char *buffer, int length)
   return -1;
 }
 
-#endif
+#endif /* ENABLE_USB_SUPPORT */

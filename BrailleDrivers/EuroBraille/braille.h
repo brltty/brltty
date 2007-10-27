@@ -16,14 +16,14 @@
  */
 
 
-#ifndef		__BRAILLE_H_INCLUDED__
-# define	__BRAILLE_H_INCLUDED__
+#ifndef __EU_BRAILLE_H__
+#define __EU_BRAILLE_H__
 
 
 /** Generic BrlTty Headers **/
 
 
-#include "Programs/brl.h"
+#include "brl.h"
 
 /* serial line baudrate 
  */
@@ -158,4 +158,4 @@ typedef struct	s_key
   int		(*f)(BrailleDisplay *);
 }		t_key;
 
-#endif
+#endif /* __EU_BRAILLE_H__ */

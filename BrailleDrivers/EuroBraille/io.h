@@ -19,8 +19,8 @@
  ** io.h -- Implements the IO structures and functions headers.
  */
 
-#ifndef		__EUBRL_IO_H__
-# define	__EUBRL_IO_H__
+#ifndef __EU_IO_H__
+#define __EU_IO_H__
 
 #include	"braille.h"
 
@@ -81,4 +81,4 @@ int		eubrl_netClose(BrailleDisplay *brl);
 int		eubrl_netRead(BrailleDisplay *brl, char *buf, int size);
 int		eubrl_netWrite(BrailleDisplay *brl, char *buf, int size);
 
-#endif
+#endif /* __EU_IO_H__ */

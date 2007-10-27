@@ -21,7 +21,7 @@
 
 
 #include "io.h"
-#include "Programs/io_serial.h"
+#include "io_serial.h"
 
 /** Static Members **/
 static SerialDevice *serialDevice = NULL;

@@ -21,8 +21,8 @@
  */
 
 #include	"protocol.h"
-#include	"Programs/misc.h"
-#include	"Programs/message.h"
+#include	"misc.h"
+#include	"message.h"
 #include	"keys.h"
 
 /* Communication codes */

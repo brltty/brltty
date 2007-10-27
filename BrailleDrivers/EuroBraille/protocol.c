@@ -20,7 +20,7 @@
  ** (C) Yannick PLASSIARD <yan@mistigri.org>
  */
 
-#include "Programs/misc.h"
+#include "misc.h"
 #include "protocol.h"
 
 t_eubrl_protocol	esysirisProtocol = {

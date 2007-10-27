@@ -34,22 +34,22 @@ typedef enum {
 #include <stdio.h>
 #include <string.h>
 
-#include "Programs/message.h"
-#include "Programs/misc.h"
+#include "message.h"
+#include "misc.h"
 
 #define BRL_HAVE_PACKET_IO
 #define BRL_HAVE_VISUAL_DISPLAY
-#include "Programs/brl_driver.h"
-#include "Programs/misc.h"
+#include "brl_driver.h"
+#include "misc.h"
 #ifdef ENABLE_USB_SUPPORT
-#include "Programs/io_usb.h"
-#endif
+#include "io_usb.h"
+#endif /* ENABLE_USB_SUPPORT */
 
 #ifdef ENABLE_BLUETOOTH_SUPPORT
-#include "Programs/io_bluetooth.h"
-#endif
+#include "io_bluetooth.h"
+#endif /* ENABLE_BLUETOOTH_SUPPORT */
 
-#include "Programs/io_serial.h"
+#include "io_serial.h"
 
 #include	"protocol.h"
 
@@ -110,13 +110,14 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
     {
       iop = &eubrl_serialIos;
     }
+
 #ifdef ENABLE_USB_SUPPORT
   else if (isUsbDevice(&device))
     {
       iop = &eubrl_usbIos;
       protocolp = &esysirisProtocol;
     }
-#endif
+#endif /* ENABLE_USB_SUPPORT */
 
 #ifdef ENABLE_BLUETOOTH_SUPPORT
   else if (isBluetoothDevice(&device))
@@ -124,7 +125,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
       iop = &eubrl_bluetoothIos;
       protocolp = &esysirisProtocol;
     }
-#endif
+#endif /* ENABLE_BLUETOOTH_SUPPORT */
 
   else if (!strncasecmp(device, "net:", 4))
     {
