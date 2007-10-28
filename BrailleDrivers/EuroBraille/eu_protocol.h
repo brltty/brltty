@@ -15,7 +15,7 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/** EuroBraille/protocol.h -- Protocol defines, structures and unions
+/** EuroBraille/eu_protocol.h -- Protocol defines, structures and unions
  ** This file contains all definitions about the two protocols.
  ** It is also used to store protocol method headers and the main structure
  ** to access the terminal generically by the High-level part.

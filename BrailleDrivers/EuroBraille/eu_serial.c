@@ -15,7 +15,7 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/** EuroBraille/io_serial.c
+/** EuroBraille/eu_serial.c
  ** Implements the Serial low-level transport methods
  */
 

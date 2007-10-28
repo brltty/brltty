@@ -15,7 +15,7 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/** EuroBraille/key.h '- Key defines for all models **/
+/** EuroBraille/eu_keys.h '- Key defines for all models **/
 
 #ifndef __EU_KEYS_H__
 #define __EU_KEYS_H__

@@ -15,7 +15,7 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/** EuroBraille/io_bluetooth.c 
+/** EuroBraille/eu_bluetooth.c 
  ** Implements the Bluetooth low-level transport methods
  */
 
