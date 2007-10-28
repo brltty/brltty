@@ -39,10 +39,10 @@
 #include <errno.h>
 #include <fcntl.h>
 
-#ifdef WINDOWS
+#ifdef __MINGW32__
 #include <ws2tcpip.h>
 #include "sys_windows.h"
-#else /* WINDOWS */
+#else /* __MINGW32__ */
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <netinet/in.h>
@@ -54,7 +54,7 @@
 #else /* HAVE_SYS_SELECT_H */
 #include <sys/time.h>
 #endif /* HAVE_SYS_SELECT_H */
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
 
 #if !defined(AF_LOCAL) && defined(AF_UNIX)
 #define AF_LOCAL AF_UNIX
@@ -64,13 +64,13 @@
 #define PF_LOCAL PF_UNIX
 #endif /* !defined(PF_LOCAL) && defined(PF_UNIX) */
  
-#ifdef WINDOWS
+#ifdef __MINGW32__
 #undef AF_LOCAL
 #define close(fd) CloseHandle((HANDLE)(fd))
 #define LogSocketError(msg) LogWindowsSocketError(msg)
-#else /* WINDOWS */
+#else /* __MINGW32__ */
 #define LogSocketError(msg) LogError(msg)
-#endif /* WINDOWS */
+#endif /* __MINGW32__ */
 
 #include "misc.h"
 #include "io_misc.h"
