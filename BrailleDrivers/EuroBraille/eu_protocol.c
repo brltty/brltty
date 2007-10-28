@@ -15,10 +15,12 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/** EuroBraille/protocol.c 
+/** EuroBraille/eu_protocol.c 
  ** Protocol base stuff for Clio/scriba and Esys/Iris.
  ** (C) Yannick PLASSIARD <yan@mistigri.org>
  */
+
+#include "prologue.h"
 
 #include "misc.h"
 #include "eu_protocol.h"

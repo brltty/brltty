@@ -19,7 +19,10 @@
 ** USB Specific low-level IO routines.
 */
 
+#include "prologue.h"
+
 #include <errno.h>
+
 #include "eu_io.h"
 
 #ifdef ENABLE_USB_SUPPORT

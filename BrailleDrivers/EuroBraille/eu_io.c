@@ -30,7 +30,9 @@
 ** Maintained by Yannick PLASSIARD <yan@mistigri.org>
 */
 
-#include	"eu_io.h"
+#include "prologue.h"
+
+#include "eu_io.h"
 
 /*
 ** Static structure io operations

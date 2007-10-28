@@ -15,15 +15,17 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/** EuroBraille/esysiris_protocol.c 
+/** EuroBraille/eu_esysiris.c 
  ** Implements the ESYS and IRIS rev >=1.71 protocol 
  ** Made by Yannick PLASSIARD <yan@mistigri.org>
  */
-#include	"eu_protocol.h"
-#include	"misc.h"
-#include	"message.h"
-#include	"eu_keys.h"
 
+#include "prologue.h"
+
+#include "misc.h"
+#include "message.h"
+#include "eu_protocol.h"
+#include "eu_keys.h"
 
 # define	STX	0x02
 # define	ETX	0x03

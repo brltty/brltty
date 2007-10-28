@@ -26,11 +26,7 @@
 *** initialization stuff (see eubrl_netInit for details).
 **/
 
-
-#include	"prologue.h"
-#include	"eu_io.h"
-
-/** Generic Headers */
+#include "prologue.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -38,6 +34,8 @@
 #include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
+
+#include "eu_io.h"
 
 #ifdef __MINGW32__
 #include <ws2tcpip.h>

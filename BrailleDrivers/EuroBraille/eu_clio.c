@@ -15,15 +15,17 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/** EuroBraille/clio_protocol.c 
+/** EuroBraille/eu_clio.c 
  ** Implements the NoteBraille/Clio/Scriba/Iris <= 1.70 protocol 
  ** Made by Olivier BER` <obert01@mistigri.org>
  */
 
-#include	"eu_protocol.h"
-#include	"misc.h"
-#include	"message.h"
-#include	"eu_keys.h"
+#include "prologue.h"
+
+#include "misc.h"
+#include "message.h"
+#include "eu_protocol.h"
+#include "eu_keys.h"
 
 /* Communication codes */
 # define SOH	0x01

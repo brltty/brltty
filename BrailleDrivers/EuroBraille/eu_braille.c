@@ -20,7 +20,6 @@
  ** Made by Yannick PLASSIARD and Olivier BERT
  */
 
-
 #include "prologue.h"
 
 typedef enum {

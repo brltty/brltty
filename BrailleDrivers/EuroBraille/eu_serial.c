@@ -19,6 +19,7 @@
  ** Implements the Serial low-level transport methods
  */
 
+#include "prologue.h"
 
 #include "eu_io.h"
 #include "io_serial.h"
