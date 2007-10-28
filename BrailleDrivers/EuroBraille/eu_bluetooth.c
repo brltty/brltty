@@ -19,7 +19,7 @@
  ** Implements the Bluetooth low-level transport methods
  */
 
-#include	"io.h"
+#include	"eu_io.h"
 #ifdef ENABLE_BLUETOOTH_SUPPORT
 
 # define	DEFAULT_ESYS_CHANNEL	1

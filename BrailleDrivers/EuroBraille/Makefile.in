@@ -25,15 +25,15 @@ HELP_DEPS = $(HELP_TEXT)
 include $(SRC_TOP)braille.mk
 
 SRC_FILES = \
-	brl.c \
-	io.c \
-	io_usb.c \
-  	io_net.c \
-  	io_serial.c \
-  	io_bluetooth.c \
-	protocol.c \
-	esysiris_protocol.c \
-	clio_protocol.c
+	eu_braille.c \
+	eu_io.c \
+  	eu_serial.c \
+	eu_usb.c \
+  	eu_bluetooth.c \
+  	eu_net.c \
+	eu_protocol.c \
+	eu_clio.c \
+	eu_esysiris.c
 
 OBJ_FILES = $(SRC_FILES:.c=.$O)
 

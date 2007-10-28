@@ -19,10 +19,10 @@
  ** Implements the ESYS and IRIS rev >=1.71 protocol 
  ** Made by Yannick PLASSIARD <yan@mistigri.org>
  */
-#include	"protocol.h"
+#include	"eu_protocol.h"
 #include	"misc.h"
 #include	"message.h"
-#include	"keys.h"
+#include	"eu_keys.h"
 
 
 # define	STX	0x02

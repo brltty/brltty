@@ -21,7 +21,7 @@
  */
 
 #include "misc.h"
-#include "protocol.h"
+#include "eu_protocol.h"
 
 t_eubrl_protocol	esysirisProtocol = {
   .init = esysiris_init,

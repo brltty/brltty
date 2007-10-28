@@ -20,10 +20,10 @@
  ** Made by Olivier BER` <obert01@mistigri.org>
  */
 
-#include	"protocol.h"
+#include	"eu_protocol.h"
 #include	"misc.h"
 #include	"message.h"
-#include	"keys.h"
+#include	"eu_keys.h"
 
 /* Communication codes */
 # define SOH	0x01

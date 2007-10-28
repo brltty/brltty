@@ -20,7 +20,7 @@
 */
 
 #include <errno.h>
-#include "io.h"
+#include "eu_io.h"
 
 #ifdef ENABLE_USB_SUPPORT
 #include "io_usb.h"

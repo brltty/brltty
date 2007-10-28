@@ -28,7 +28,7 @@
 
 
 #include	"prologue.h"
-#include	"io.h"
+#include	"eu_io.h"
 
 /** Generic Headers */
 
@@ -76,7 +76,7 @@
 #include "io_misc.h"
 #include "cmd.h"
 
-#include "braille.h"
+#include "eu_braille.h"
 
 /**
  ** Define our local variables 

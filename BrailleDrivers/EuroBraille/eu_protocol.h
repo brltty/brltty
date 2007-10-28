@@ -27,7 +27,7 @@
 #ifndef __EU_PROTOCOL_H__
 #define __EU_PROTOCOL_H__
 
-#include	"io.h"
+#include	"eu_io.h"
 #include	"string.h"
 
 

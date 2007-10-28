@@ -51,7 +51,7 @@ typedef enum {
 
 #include "io_serial.h"
 
-#include	"protocol.h"
+#include	"eu_protocol.h"
 
 
 /*
