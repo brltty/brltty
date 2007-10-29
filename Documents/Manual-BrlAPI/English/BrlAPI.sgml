@@ -606,26 +606,24 @@ which were actually used to initialize connection. <tt/NULL/ will also be nice
 for now.
 
 <tscreen><code>
- if (brlapi_openConnection(NULL,NULL)<0)
- {
-  brlapi_perror("brlapi_openConnection");
-  exit(1);
- }
+  if (brlapi_openConnection(NULL, NULL)<0) {
+    brlapi_perror("brlapi_openConnection");
+    exit(1);
+  }
 </code></tscreen>
 
 The connection might fail, so testing is needed.
 
-<sect1>Getting driver id and name
+<sect1>Getting driver name
 
 <p>Knowing the type of the braille device might be useful:
 
 <tscreen><code>
- unsigned char id[3], name[21];
- if (brlapi_getDriverId(id, sizeof(id))<0) {
-   brlapi_perror("getDriverId");
- } else printf("Driver id: %s\n",id);
- if (brlapi_getDriverName(name, sizeof(name))<0) {
-   brlapi_perror("getDriverName");
+  char name[BRLAPI_MAXNAMELENGTH+1];
+  if (brlapi_getDriverName(name, sizeof(name)) < 0)
+    brlapi_perror("brlapi_getDriverName");
+  else
+    fprintf(stderr, "Driver name: %s\n", name);
 </code></tscreen>
 
 This is particularly useful before entering raw mode to achieve file
@@ -638,10 +636,11 @@ expected.
 checked to be sure everything will hold on it:
 
 <tscreen><code>
- if (brlapi_getDisplaySize(&amp;x, &amp;y)<0)
-  brlapi_perror("brlapi_getDisplaySize");
- else
-  printf("Braille display has %d line%s of %d column%s\n",y,y>1?"s":"",x,x>1?"s":"");
+  if (brlapi_getDisplaySize(&amp;x, &amp;y) < 0)
+    brlapi_perror("brlapi_getDisplaySize");
+  else
+    fprintf(stderr, "Braille display has %d line%s of %d column%s\n",
+      y, y>1?"s":"", x, x>1?"s":"");
 </code></tscreen>
 
 <sect1>Entering raw mode, immediately leaving raw mode.
@@ -649,17 +648,16 @@ checked to be sure everything will hold on it:
 <p>Entering raw mode is very simple:
 
 <tscreen><code>
- fprintf(stderr,"Trying to enter in raw mode... ");
- if (brlapi_enterRawMode()<0)
-  brlapi_perror("brlapi_enterRawMode");
- else {
-  fprintf(stderr,"Ok, leaving raw mode immediately\n");
-  brlapi_leaveRawMode();
- }
+  fprintf(stderr, "Trying to enter in raw mode... ");
+  if (brlapi_enterRawMode(name) < 0)
+    brlapi_perror("brlapi_enterRawMode");
+  else {
+    fprintf(stderr, "Ok, leaving raw mode immediately\n");
+    brlapi_leaveRawMode();
+  }
 </code></tscreen>
 
-Not every driver supports raw mode (actually only one does for the moment ;-),
-so testing is needed.
+Not every driver supports raw mode, so testing is needed.
 
 While in raw mode, <tt>brlapi_sendRaw</tt> and <tt>brlapi_recvRaw</tt>
 can be used to send and get data directly to and from the device.
@@ -671,10 +669,10 @@ It should be used with care, improper use might completely thrash the device!
 first:
 
 <tscreen><code>
- fprintf(stderr,"Taking control of the tty... ");
- if (brlapi_enterTtyMode(-1,NULL)>=0)
- {
-  printf("Ok\n");
+  fprintf(stderr, "Taking control of the tty... ");
+  if (brlapi_enterTtyMode(-1, NULL) >= 0)
+  {
+    fprintf(stderr, "Ok\n");
 </code></tscreen>
 
 The first parameter tells the server the number of the tty to take
@@ -693,10 +691,10 @@ control of this tty, so testing is needed.
 altering the screen display:
 
 <tscreen><code>
-  fprintf(stderr,"Writing to braille display... ");
-  if (brlapi_writeText(0,"Press a braille key to continue...")>=0)
-  {
-   fprintf(stderr,"Ok\n");
+    fprintf(stderr, "Writing to braille display... ");
+    if (brlapi_writeText(0, "Press a braille key to continue...") >= 0)
+    {
+      fprintf(stderr, "Ok\n");
 </code></tscreen>
 
 The cursor is also asked <em/not/ to be shown: its position is set to 0.
@@ -710,25 +708,70 @@ The cursor is also asked <em/not/ to be shown: its position is set to 0.
 a key press (a command here, which is driver-independent) may be waited for:
 
 <tscreen><code>
-   fprintf(stderr,"Waiting until a braille key is pressed to continue... ");
-   if (brlapi_readKey(1,&amp;key)>0)
-    fprintf(stderr,"got it! (code=%"BRLAPI_PRIxKEYCODE")\n",key);
+      fprintf(stderr, "Waiting until a braille key is pressed to continue... ");
+      if (brlapi_readKey(1, &amp;key) > 0)
+        fprintf(stderr, "got it! (code=%"BRLAPI_PRIxKEYCODE")\n", key);
 </code></tscreen>
 
-The command code is returned, as described in <tt>&lt;brltty/brldefs.h></tt>.
+The command is returned, as described in <tt>&lt;brlapi_constants.h></tt>
+and <tt>&lt;brlapi_keycodes.h></tt>.
 It is not transmitted to <em/brltty/: it is up to the application to define
 the behavior, here cleanly exitting, as described below.
 
 The first parameter tells the lib to block until a key press is indeed read.
+
+<sect1>Understanding commands
+
+<p>There are two kinds of commands: braille commands (line up/down, top/bottom,
+etc.) and X Keysyms (i.e. regular keyboard keys). One way to discover which key
+was pressed is to just use a switch statement: 
+
+<tscreen><code>
+        switch(key) {
+	  case BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_LNUP:
+	    fprintf(stderr, "line up\n");
+	    break;
+	  case BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_LNDN:
+	    fprintf(stderr, "line down\n");
+	    break;
+	  default:
+	    fprintf(stderr, "unknown key\n");
+	    break;
+	}
+</code></tscreen>
+
+Another way is to ask BrlAPI to expand the keycode into separate information
+parts:
+
+<tscreen><code>
+        brlapi_expandedKeyCode_t ekey;
+	brlapi_expandKeyCode(key, &amp;ekey);
+	fprintf(stderr, "type %u, command %u, argument %u, flags %u\n",
+	  ekey.type, ekey.command, ekey.argument, ekey.flags);
+</code></tscreen>
+
+Eventually, named equivalents are provided:
+
+<tscreen><code>
+        brlapi_describedKeyCode_t dkey;
+	int i;
+
+	brlapi_describeKeyCode(key, &amp;dkey);
+	fprintf(stderr, "type %s, command %s, argument %u, flags",
+	  dkey.type, dkey.command, dkey.argument);
+	for (i = 0; i < dkey.flags; i++)
+	  fprintf(stderr, " %s", dkey.flag[i]);
+	fprintf(stderr, "\n");
+</code></tscreen>
 
 <sect1>Leaving tty control
 
 <p>Let's now leave the tty:
 
 <tscreen><code>
-  fprintf(stderr,"Leaving tty... ");
-  if (brlapi_leaveTtyMode()>=0)
-   fprintf(stderr,"Ok\n");
+    fprintf(stderr, "Leaving tty... ");
+    if (brlapi_leaveTtyMode() >= 0)
+      fprintf(stderr, "Ok\n");
 </code></tscreen>
 
 But control of another tty can still be get for instance, by calling
@@ -739,7 +782,7 @@ But control of another tty can still be get for instance, by calling
 <p>Let's disconnect from <em/BrlAPI/:
 
 <tscreen><code>
- brlapi_closeConnection();
+  brlapi_closeConnection();
 </code></tscreen>
 
 The application can as well still need to connect to another server on another
@@ -752,80 +795,89 @@ again...
 <tscreen><code>
 #include <stdio.h>
 #include <stdlib.h>
-#include <brltty/api.h>
+#include <brlapi.h>
 
 int main()
 {
- brlapi_keyCode_t key;
- char *p,*c;
- int x, y;
+  brlapi_keyCode_t key;
+  char name[BRLAPI_MAXNAMELENGTH+1];
+  unsigned int x, y;
 
 /* Connect to BrlAPI */
-  if (brlapi_openConnection(NULL,NULL)<0)
+  if (brlapi_openConnection(NULL, NULL)<0)
   {
-   brlapi_perror("brlapi_openConnection");
-   exit(1);
+    brlapi_perror("brlapi_openConnection");
+    exit(1);
   }
 
-/* Get driver id & name */
- p = brlapi_getDriverId();
- if (!p)
-  brlapi_perror("brlapi_getDriverId");
- else
-  printf("Driver id: %s\n",p);
- 
- p = brlapi_getDriverName();
- if (!p)
-  brlapi_perror("brlapi_getDriverName");
- else
-  printf("Driver name: %s\n",p);
+/* Get driver name */
+  if (brlapi_getDriverName(name, sizeof(name)) < 0)
+    brlapi_perror("brlapi_getDriverName");
+  else
+    fprintf(stderr, "Driver name: %s\n", name);
 
 /* Get display size */
- if (brlapi_getDisplaySize(&amp;x, &amp;y)<0)
-  brlapi_perror("brlapi_getDisplaySize");
- else
-  printf("Braille display has %d line%s of %d column%s\n",y,y>1?"s":"",x,x>1?"s":"");
+  if (brlapi_getDisplaySize(&amp;x, &amp;y) < 0)
+    brlapi_perror("brlapi_getDisplaySize");
+  else
+    fprintf(stderr, "Braille display has %d line%s of %d column%s\n",
+      y, y>1?"s":"", x, x>1?"s":"");
 
 /* Try entering raw mode, immediately go out from raw mode */
- printf("Trying to enter in raw mode... ");
- if (brlapi_enterRawMode()<0)
-  brlapi_perror("brlapi_enterRawMode");
- else {
-  printf("Ok, leaving raw mode immediately\n");
-  brlapi_leaveRawMode();
- }
+  fprintf(stderr, "Trying to enter in raw mode... ");
+  if (brlapi_enterRawMode(name) < 0)
+    brlapi_perror("brlapi_enterRawMode");
+  else {
+    fprintf(stderr, "Ok, leaving raw mode immediately\n");
+    brlapi_leaveRawMode();
+  }
 
 /* Get tty control */
- printf("Taking control of the tty... ");
- if (brlapi_enterTtyMode(-1,NULL)>=0)
- {
-  printf("Ok\n");
+  fprintf(stderr, "Taking control of the tty... ");
+  if (brlapi_enterTtyMode(-1, NULL) >= 0)
+  {
+    fprintf(stderr, "Ok\n");
 
 /* Write something on the display */
-  fprintf(stderr,"Writing to braille display... ");
-  if (brlapi_writeText(0,"Press a braille key to continue...")>=0)
-  {
-   fprintf(stderr,"Ok\n");
+    fprintf(stderr, "Writing to braille display... ");
+    if (brlapi_writeText(0, "Press a braille key to continue...") >= 0)
+    {
+      fprintf(stderr, "Ok\n");
 
 /* Wait for a key press */
-   fprintf(stderr,"Waiting until a braille key is pressed to continue... ");
-   if (brlapi_readKey(1,&amp;key)>0)
-    fprintf(stderr,"got it! (code=%"BRLAPI_PRIxKEYCODE")\n",key);
-   else brlapi_perror("brlapi_readKey");
+      fprintf(stderr, "Waiting until a braille key is pressed to continue... ");
+      if (brlapi_readKey(1, &amp;key) > 0) {
+        brlapi_expandedKeyCode_t ekey;
+        brlapi_describedKeyCode_t dkey;
+	int i;
 
-  } else brlapi_perror("brlapi_writeText");
+        fprintf(stderr, "got it! (code=%"BRLAPI_PRIxKEYCODE")\n", key);
+
+	brlapi_expandKeyCode(key, &amp;ekey);
+	fprintf(stderr, "type %u, command %u, argument %u, flags %u\n",
+	  ekey.type, ekey.command, ekey.argument, ekey.flags);
+
+	brlapi_describeKeyCode(key, &amp;dkey);
+	fprintf(stderr, "type %s, command %s, argument %u, flags",
+	  dkey.type, dkey.command, dkey.argument);
+	for (i = 0; i < dkey.flags; i++)
+	  fprintf(stderr, " %s", dkey.flag[i]);
+	fprintf(stderr, "\n");
+      } else brlapi_perror("brlapi_readKey");
+
+    } else brlapi_perror("brlapi_writeText");
 
 /* Leave tty control */
-  fprintf(stderr,"Leaving tty... ");
-  if (brlapi_leaveTtyMode()>=0)
-   fprintf(stderr,"Ok\n");
-  else brlapi_perror("brlapi_leaveTtyMode");
+    fprintf(stderr, "Leaving tty... ");
+    if (brlapi_leaveTtyMode() >= 0)
+      fprintf(stderr, "Ok\n");
+    else brlapi_perror("brlapi_leaveTtyMode");
 
- } else brlapi_perror("brlapi_enterTtyMode");
+  } else brlapi_perror("brlapi_enterTtyMode");
 
 /* Disconnect from BrlAPI */
- brlapi_closeConnection();
- return 0;
+  brlapi_closeConnection();
+  return 0;
 }
 </code></tscreen>
 
