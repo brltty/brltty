@@ -7,6 +7,7 @@ This documentation is only a python helper, you should also read C manual pages.
 
 Example : 
 import brlapi
+import errno
 try:
   b = brlapi.Connection()
   b.enterTtyMode()
@@ -31,13 +32,13 @@ try:
 
 except brlapi.ConnectionError, e:
   if e.brlerrno == brlapi.ERROR_CONNREFUSED:
-    print "Connection refused. BRLTTY is too busy..."
+    print "Connection to %s refused. BRLTTY is too busy..." % e.host
   elif e.brlerrno == brlapi.ERROR_AUTHENTICATION:
-    print "Authentication failed. Please check the permissions of /etc/brlapi.key"
+    print "Authentication with %s failed. Please check the permissions of %s" % (e.host,e.auth)
   elif e.brlerrno == brlapi.ERROR_LIBCERR and (e.libcerrno == errno.ECONNREFUSED or e.libcerrno == errno.ENOENT):
-    print "Connection refused. Is BRLTTY really running?"
+    print "Connection to %s failed. Is BRLTTY really running?" % (e.host)
   else:
-    print "Connection to BRLTTY failed: "
+    print "Connection to BRLTTY at %s failed: " % (e.host)
   print e
   print e.brlerrno
   print e.libcerrno
