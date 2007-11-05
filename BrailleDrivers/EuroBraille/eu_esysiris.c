@@ -74,6 +74,10 @@ static int		routingMode = BRL_BLK_ROUTE;
 /*** Local functions */
 
 
+static inline void
+LogUnknownProtocolKey(const char *function, unsigned char key) {
+  LogPrint(LOG_NOTICE,"[eu] %s: unknown protocol key %c (%x)",function,key,key);
+}
 
 static int esysiris_handleCommandKey(BrailleDisplay *brl, unsigned int key)
 {
@@ -165,6 +169,8 @@ static int esysiris_SysIdentity(BrailleDisplay *brl, char *packet)
     case 'T':
       brlType = packet[1];
       break;
+    default:
+      LogUnknownProtocolKey("esysiris_SysIdentity", packet[0]);
     }
   return 0;
 }
@@ -266,7 +272,7 @@ unsigned int	esysiris_readKey(BrailleDisplay *brl)
 	  res = esysiris_KeyboardHandling(brl, (char *)inPacket + 4);
 	  break;
 	default:
-	  break;
+	  LogUnknownProtocolKey("esysiris_readKey", inPacket[3]);
 	}
     }
   return res;
