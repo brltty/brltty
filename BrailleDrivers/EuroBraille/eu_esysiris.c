@@ -171,6 +171,7 @@ static int esysiris_SysIdentity(BrailleDisplay *brl, char *packet)
       break;
     default:
       LogUnknownProtocolKey("esysiris_SysIdentity", packet[0]);
+      break;
     }
   return 0;
 }
@@ -273,6 +274,7 @@ unsigned int	esysiris_readKey(BrailleDisplay *brl)
 	  break;
 	default:
 	  LogUnknownProtocolKey("esysiris_readKey", inPacket[3]);
+	  break;
 	}
     }
   return res;
