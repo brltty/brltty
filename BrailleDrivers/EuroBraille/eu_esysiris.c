@@ -388,15 +388,16 @@ int	esysiris_readPacket(BrailleDisplay *brl, unsigned char *packet, int size)
 int	esysiris_writePacket(BrailleDisplay *brl, 
 			     const unsigned char *packet, int size)
 {
-  unsigned char buf[size + 4];
+  int packetSize = size + 2;
+  unsigned char buf[packetSize + 2];
   if (!iop || !packet || !size)
     return (-1);;
   buf[0] = STX;
-  buf[1] = ((size + 2) >> 8) & 0x00FF;
-  buf[2] = ((size + 2) & 0x00FF);
+  buf[1] = (packetSize >> 8) & 0x00FF;
+  buf[2] = packetSize & 0x00FF;
   memcpy(buf + 3, packet, size);
-  buf[size + 3] = ETX;
+  buf[sizeof(buf)-1] = ETX;
   if (iop->ioType == IO_SERIAL)
-    brl->writeDelay += size * 1000 / chars_per_sec + 1;
-  return (iop->write(brl, (char *)buf, size + 4));
+    brl->writeDelay += sizeof(buf) * 1000 / chars_per_sec + 1;
+  return iop->write(brl, (char *)buf, sizeof(buf));
 }
