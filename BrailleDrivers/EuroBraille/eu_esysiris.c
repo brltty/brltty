@@ -338,21 +338,12 @@ int	esysiris_writeLcd(BrailleDisplay *brl, unsigned char *str, int len)
 
 int	esysiris_readPacket(BrailleDisplay *brl, unsigned char *packet, int size)
 {
-  static char* buffer = NULL;
+  static char buffer[READ_BUFFER_LENGTH];
   static int pos = 0;
   int	ret, i, start, end, framelen = 0;
 
   if (!iop || !packet || size < 4)
     return (-1);
-  if (buffer == NULL)
-    {
-      if (!(buffer = malloc(READ_BUFFER_LENGTH)))
-	{
-	  LogPrint(LOG_ERR, "esysiris: Failed to allocate memory.\n");
-	  return (-1);
-	}
-      pos = 0;
-    }
   ret = iop->read(brl, buffer + pos, READ_BUFFER_LENGTH - pos);
   if (ret < 0)
     return (-1);
