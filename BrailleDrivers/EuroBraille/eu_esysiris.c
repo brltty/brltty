@@ -392,7 +392,7 @@ int	esysiris_writePacket(BrailleDisplay *brl,
   if (!iop || !packet || !size)
     return (-1);;
   buf[0] = STX;
-  buf[1] = ((size + 2) & 0xFF00);
+  buf[1] = ((size + 2) >> 8) & 0x00FF;
   buf[2] = ((size + 2) & 0x00FF);
   memcpy(buf + 3, packet, size);
   buf[size + 3] = ETX;
