@@ -671,8 +671,8 @@ applyBraillePreferences (void) {
 #ifdef ENABLE_SPEECH_SUPPORT
 static void
 applySpeechPreferences (void) {
-  if (speech->rate) setSpeechRate(prefs.speechRate, 0);
-  if (speech->volume) setSpeechVolume(prefs.speechVolume, 0);
+  if (speech->rate) setSpeechRate(&spk, prefs.speechRate, 0);
+  if (speech->volume) setSpeechVolume(&spk, prefs.speechVolume, 0);
 }
 #endif /* ENABLE_SPEECH_SUPPORT */
 
@@ -895,7 +895,7 @@ testSpeechRate (void) {
 
 static int
 changedSpeechRate (unsigned char setting) {
-  setSpeechRate(setting, 1);
+  setSpeechRate(&spk, setting, 1);
   return 1;
 }
 
@@ -906,7 +906,7 @@ testSpeechVolume (void) {
 
 static int
 changedSpeechVolume (unsigned char setting) {
-  setSpeechVolume(setting, 1);
+  setSpeechVolume(&spk, setting, 1);
   return 1;
 }
 #endif /* ENABLE_SPEECH_SUPPORT */
@@ -1413,9 +1413,9 @@ updatePreferences (void) {
 #ifdef ENABLE_SPEECH_SUPPORT
         if (prefs.autospeak) {
           if (indexChanged) {
-            sayString(line, 1);
+            sayString(&spk, line, 1);
           } else if (settingChanged) {
-            sayString(value, 1);
+            sayString(&spk, value, 1);
           }
         }
 #endif /* ENABLE_SPEECH_SUPPORT */
@@ -1548,10 +1548,10 @@ updatePreferences (void) {
 
     #ifdef ENABLE_SPEECH_SUPPORT
             case BRL_CMD_SAY_LINE:
-              speech->say((unsigned char *)line, lineLength);
+              speech->say(&spk, (unsigned char *)line, lineLength);
               break;
             case BRL_CMD_MUTE:
-              speech->mute();
+              speech->mute(&spk);
               break;
     #endif /* ENABLE_SPEECH_SUPPORT */
 
@@ -1940,13 +1940,14 @@ exitApi (void) {
 #ifdef ENABLE_SPEECH_SUPPORT
 void
 initializeSpeech (void) {
+  initializeSpeechSynthesizer(&spk);
 }
 
 int
 constructSpeechDriver (void) {
   initializeSpeech();
 
-  if (speech->construct(speechParameters)) {
+  if (speech->construct(&spk, speechParameters)) {
     return 1;
   } else {
     LogPrint(LOG_DEBUG, "speech driver initialization failed: %s",
@@ -1958,7 +1959,7 @@ constructSpeechDriver (void) {
 
 void
 destructSpeechDriver (void) {
-  speech->destruct();
+  speech->destruct(&spk);
 }
 
 static int
@@ -2061,7 +2062,7 @@ trySpeechDriver (void) {
 
 static void
 stopSpeechDriver (void) {
-  speech->mute();
+  speech->mute(&spk);
   deactivateSpeechDriver();
 }
 

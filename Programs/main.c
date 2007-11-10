@@ -557,6 +557,7 @@ trackCursor (int place) {
 }
 
 #ifdef ENABLE_SPEECH_SUPPORT
+SpeechSynthesizer spk;
 static int speechTracking = 0;
 static int speechScreen = -1;
 static int speechLine = 0;
@@ -579,13 +580,13 @@ sayRegion (int left, int top, int width, int height, int track, SayMode mode) {
   int length = width * height;
   unsigned char buffer[length * 2];
 
-  if (mode == sayImmediate) speech->mute();
+  if (mode == sayImmediate) speech->mute(&spk);
   readScreen(left, top, width, height, buffer, SCR_TEXT);
   if (speech->express) {
     readScreen(left, top, width, height, buffer+length, SCR_ATTRIB);
-    speech->express(buffer, length);
+    speech->express(&spk, buffer, length);
   } else {
-    speech->say(buffer, length);
+    speech->say(&spk, buffer, length);
   }
 
   speechTracking = track;
@@ -1752,7 +1753,7 @@ runProgram (void) {
               break;
             case BRL_CMD_SPKHOME:
               if (scr.number == speechScreen) {
-                trackSpeech(speech->getTrack());
+                trackSpeech(speech->getTrack(&spk));
               } else {
                 playTune(&tune_command_rejected);
               }
@@ -1761,7 +1762,7 @@ runProgram (void) {
               TOGGLE_PLAY(prefs.autospeak);
               break;
             case BRL_CMD_MUTE:
-              speech->mute();
+              speech->mute(&spk);
               break;
 
             case BRL_CMD_SAY_LINE:
@@ -1776,14 +1777,14 @@ runProgram (void) {
 
             case BRL_CMD_SAY_SLOWER:
               if (speech->rate && (prefs.speechRate > 0)) {
-                setSpeechRate(--prefs.speechRate, 1);
+                setSpeechRate(&spk, --prefs.speechRate, 1);
               } else {
                 playTune(&tune_command_rejected);
               }
               break;
             case BRL_CMD_SAY_FASTER:
               if (speech->rate && (prefs.speechRate < SPK_MAXIMUM_RATE)) {
-                setSpeechRate(++prefs.speechRate, 1);
+                setSpeechRate(&spk, ++prefs.speechRate, 1);
               } else {
                 playTune(&tune_command_rejected);
               }
@@ -1791,14 +1792,14 @@ runProgram (void) {
 
             case BRL_CMD_SAY_SOFTER:
               if (speech->volume && (prefs.speechVolume > 0)) {
-                setSpeechVolume(--prefs.speechVolume, 1);
+                setSpeechVolume(&spk, --prefs.speechVolume, 1);
               } else {
                 playTune(&tune_command_rejected);
               }
               break;
             case BRL_CMD_SAY_LOUDER:
               if (speech->volume && (prefs.speechVolume < SPK_MAXIMUM_VOLUME)) {
-                setSpeechVolume(++prefs.speechVolume, 1);
+                setSpeechVolume(&spk, ++prefs.speechVolume, 1);
               } else {
                 playTune(&tune_command_rejected);
               }
@@ -2132,15 +2133,15 @@ runProgram (void) {
 
 #ifdef ENABLE_SPEECH_SUPPORT
       /* called continually even if we're not tracking so that the pipe doesn't fill up. */
-      speech->doTrack();
+      speech->doTrack(&spk);
 
-      if (speechTracking && !speech->isSpeaking()) speechTracking = 0;
+      if (speechTracking && !speech->isSpeaking(&spk)) speechTracking = 0;
 #endif /* ENABLE_SPEECH_SUPPORT */
 
       if (p->trackCursor) {
 #ifdef ENABLE_SPEECH_SUPPORT
         if (speechTracking && (scr.number == speechScreen)) {
-          int index = speech->getTrack();
+          int index = speech->getTrack(&spk);
           if (index != speechIndex) trackSpeech(speechIndex = index);
         } else
 #endif /* ENABLE_SPEECH_SUPPORT */
@@ -2266,8 +2267,8 @@ runProgram (void) {
 
         speak:
           if (count) {
-            speech->mute();
-            speech->say(text+column, count);
+            speech->mute(&spk);
+            speech->say(&spk, text+column, count);
           }
         }
 
@@ -2498,7 +2499,7 @@ runProgram (void) {
   isOffline:
 
 #ifdef ENABLE_SPEECH_SUPPORT
-    processSpeechFifo();
+    processSpeechFifo(&spk);
 #endif /* ENABLE_SPEECH_SUPPORT */
 
     drainBrailleOutput(&brl, updateInterval);
@@ -2515,7 +2516,7 @@ runProgram (void) {
 void 
 message (const char *text, short flags) {
 #ifdef ENABLE_SPEECH_SUPPORT
-  if (prefs.alertTunes && !(flags & MSG_SILENT)) sayString(text, 1);
+  if (prefs.alertTunes && !(flags & MSG_SILENT)) sayString(&spk, text, 1);
 #endif /* ENABLE_SPEECH_SUPPORT */
 
   if (braille && brl.buffer) {

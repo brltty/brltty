@@ -87,7 +87,7 @@ setEnvironmentVariable (const char *name, const char *value) {
 }
 
 static int
-spk_construct (char **parameters) {
+spk_construct (SpeechSynthesizer *spk, char **parameters) {
   swift_result_t result;
 
   if (setEnvironmentVariable("SWIFT_HOME", SWIFT_ROOT)) {
@@ -139,7 +139,7 @@ spk_construct (char **parameters) {
 }
 
 static void
-spk_destruct (void) {
+spk_destruct (SpeechSynthesizer *spk) {
   swift_result_t result;
 
   if (swiftPort) {
@@ -158,7 +158,7 @@ spk_destruct (void) {
 }
 
 static void
-spk_say (const unsigned char *buffer, int length) {
+spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, int length) {
   swift_result_t result;
   swift_background_t job;
 
@@ -168,7 +168,7 @@ spk_say (const unsigned char *buffer, int length) {
 }
 
 static void
-spk_mute (void) {
+spk_mute (SpeechSynthesizer *spk) {
   swift_result_t result;
 
   if ((result = swift_port_stop(swiftPort, SWIFT_ASYNC_CURRENT, SWIFT_EVENT_NOW)) != SWIFT_SUCCESS) {
@@ -177,11 +177,11 @@ spk_mute (void) {
 }
 
 static void
-spk_rate (float setting) {
+spk_rate (SpeechSynthesizer *spk, float setting) {
   setRate((int)(setting * 170));
 }
 
 static void
-spk_volume (float setting) {
+spk_volume (SpeechSynthesizer *spk, float setting) {
   setVolume((int)(setting * 100.0));
 }

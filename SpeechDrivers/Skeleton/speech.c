@@ -28,52 +28,52 @@
 #include "spk_driver.h"
 
 static int
-spk_construct (char **parameters) {
+spk_construct (SpeechSynthesizer *spk, char **parameters) {
   return 0;
 }
 
 static void
-spk_destruct (void) {
+spk_destruct (SpeechSynthesizer *spk) {
 }
 
 static void
-spk_say (const unsigned char *buffer, int length) {
+spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, int length) {
 }
 
 static void
-spk_mute (void) {
+spk_mute (SpeechSynthesizer *spk) {
 }
 
 #ifdef SPK_HAVE_EXPRESS
 static void
-spk_express (const unsigned char *buffer, int length) {
+spk_express (SpeechSynthesizer *spk, const unsigned char *buffer, int length) {
 }
 #endif /* SPK_HAVE_EXPRESS */
 
 #ifdef SPK_HAVE_TRACK
 static void
-spk_doTrack (void) {
+spk_doTrack (SpeechSynthesizer *spk) {
 }
 
 static int
-spk_getTrack (void) {
+spk_getTrack (SpeechSynthesizer *spk) {
   return 0;
 }
 
 static int
-spk_isSpeaking (void) {
+spk_isSpeaking (SpeechSynthesizer *spk) {
   return 0;
 }
 #endif /* SPK_HAVE_TRACK */
 
 #ifdef SPK_HAVE_RATE
 static void
-spk_rate (float setting) {
+spk_rate (SpeechSynthesizer *spk, float setting) {
 }
 #endif /* SPK_HAVE_RATE */
 
 #ifdef SPK_HAVE_VOLUME
 static void
-spk_volume (float setting) {
+spk_volume (SpeechSynthesizer *spk, float setting) {
 }
 #endif /* SPK_HAVE_VOLUME */

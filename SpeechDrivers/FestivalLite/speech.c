@@ -52,7 +52,7 @@ static	int		*const readfd	= &fds[0];
 static	int		*const writefd	= &fds[1];
 
 static int
-spk_construct (char **parameters)
+spk_construct (SpeechSynthesizer *spk, char **parameters)
 {
   child = -1;
   flite_init();
@@ -73,9 +73,9 @@ spk_construct (char **parameters)
 }
 
 static void
-spk_destruct (void)
+spk_destruct (SpeechSynthesizer *spk)
 {
-  spk_mute();
+  spk_mute(spk);
 
   UNREGISTER_VOX(voice);
   voice = NULL;
@@ -94,7 +94,7 @@ doChild (void)
 }
 
 static void
-spk_say (const unsigned char *buffer, int length)
+spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, int length)
 {
   if (child != -1) goto ready;
 
@@ -120,7 +120,7 @@ spk_say (const unsigned char *buffer, int length)
 }
 
 static void
-spk_mute (void)
+spk_mute (SpeechSynthesizer *spk)
 {
   if (child != -1) {
     close(*readfd);
@@ -133,7 +133,7 @@ spk_mute (void)
 }
 
 static void
-spk_rate (float setting)
+spk_rate (SpeechSynthesizer *spk, float setting)
 {
   feat_set_float(voice->features, "duration_stretch", 1.0/setting);
 }

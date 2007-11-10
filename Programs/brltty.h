@@ -26,6 +26,7 @@ extern "C" {
 
 #include "cmd.h"
 #include "brl.h"
+#include "spk.h"
 
 typedef enum {
   sbwAll,
@@ -97,13 +98,6 @@ extern int opt_releaseDevice;
 extern char *opt_pcmDevice;
 extern char *opt_midiDevice;
 
-extern unsigned char cursorDots (void);
-
-extern BrailleDisplay brl;			/* braille driver reference */
-extern short fwinshift;			/* Full window horizontal distance */
-extern short hwinshift;			/* Half window horizontal distance */
-extern short vwinshift;			/* Window vertical distance */
-
 extern int updateInterval;
 extern int messageDelay;
 
@@ -113,13 +107,24 @@ extern int loadPreferences (int change);
 extern int savePreferences (void);
 extern void updatePreferences (void);
 
+extern unsigned char cursorDots (void);
+
+extern BrailleDisplay brl;			/* braille driver reference */
+extern short fwinshift;			/* Full window horizontal distance */
+extern short hwinshift;			/* Half window horizontal distance */
+extern short vwinshift;			/* Window vertical distance */
+
 extern void restartBrailleDriver (void);
 extern int constructBrailleDriver (void);
 extern void destructBrailleDriver (void);
 
+#ifdef ENABLE_SPEECH_SUPPORT
+extern SpeechSynthesizer spk;
+
 extern void restartSpeechDriver (void);
 extern int constructSpeechDriver (void);
 extern void destructSpeechDriver (void);
+#endif /* ENABLE_SPEECH_SUPPORT */
 
 extern int readCommand (BRL_DriverCommandContext context);
 extern void resetAutorepeat (void);

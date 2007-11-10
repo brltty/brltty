@@ -37,20 +37,20 @@
 #include "spk_driver.h"
 
 static int
-spk_construct (char **parameters) {
+spk_construct (SpeechSynthesizer *spk, char **parameters) {
   return 1;
 }
 
 static void
-spk_destruct (void) {
+spk_destruct (SpeechSynthesizer *spk) {
 }
 
 static void
-spk_say (const unsigned char *buffer, int length) {
+spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, int length) {
 }
 
 static void
-spk_mute (void) {
+spk_mute (SpeechSynthesizer *spk) {
 }
 
 const SpeechDriver *speech = &noSpeech;
@@ -112,30 +112,35 @@ identifySpeechDrivers (int full) {
 }
 
 void
-sayString (const char *string, int mute) {
-  if (mute) speech->mute();
-  speech->say((unsigned char *)string, strlen(string));
+initializeSpeechSynthesizer (SpeechSynthesizer *spk) {
+  spk->data = NULL;
+}
+
+void
+sayString (SpeechSynthesizer *spk, const char *string, int mute) {
+  if (mute) speech->mute(spk);
+  speech->say(spk, (unsigned char *)string, strlen(string));
 }
 
 static void
-saySpeechSetting (int setting, const char *name) {
+saySpeechSetting (SpeechSynthesizer *spk, int setting, const char *name) {
   char phrase[0X40];
   snprintf(phrase, sizeof(phrase), "%s %d", name, setting);
-  sayString(phrase, 1);
+  sayString(spk, phrase, 1);
 }
 
 void
-setSpeechRate (int setting, int say) {
+setSpeechRate (SpeechSynthesizer *spk, int setting, int say) {
   LogPrint(LOG_DEBUG, "setting speech rate: %d", setting);
-  speech->rate(spkRateTable[setting]);
-  if (say) saySpeechSetting(setting, "rate");
+  speech->rate(spk, spkRateTable[setting]);
+  if (say) saySpeechSetting(spk, setting, "rate");
 }
 
 void
-setSpeechVolume (int setting, int say) {
+setSpeechVolume (SpeechSynthesizer *spk, int setting, int say) {
   LogPrint(LOG_DEBUG, "setting speech volume: %d", setting);
-  speech->volume((float)setting / (float)SPK_DEFAULT_VOLUME);
-  if (say) saySpeechSetting(setting, "volume");
+  speech->volume(spk, (float)setting / (float)SPK_DEFAULT_VOLUME);
+  if (say) saySpeechSetting(spk, setting, "volume");
 }
 
 static char *speechFifoPath = NULL;
@@ -226,7 +231,7 @@ openSpeechFifo (const char *directory, const char *path) {
 }
 
 void
-processSpeechFifo (void) {
+processSpeechFifo (SpeechSynthesizer *spk) {
 #ifdef __MINGW32__
   if (speechFifoHandle != INVALID_HANDLE_VALUE) {
     if (speechFifoConnected ||
@@ -236,7 +241,7 @@ processSpeechFifo (void) {
       DWORD count;
 
       if (ReadFile(speechFifoHandle, buffer, sizeof(buffer), &count, NULL)) {
-        if (count) speech->say(buffer, count);
+        if (count) speech->say(spk, buffer, count);
       } else {
         DWORD error = GetLastError();
 
@@ -254,7 +259,7 @@ processSpeechFifo (void) {
   if (speechFifoDescriptor != -1) {
     unsigned char buffer[0X1000];
     int count = read(speechFifoDescriptor, buffer, sizeof(buffer));
-    if (count > 0) speech->say(buffer, count);
+    if (count > 0) speech->say(spk, buffer, count);
   }
 #endif /* __MINGW32__ */
 }

@@ -79,7 +79,7 @@ loadVoice (theta_voice_desc *descriptor) {
 }
 
 static int
-spk_construct (char **parameters) {
+spk_construct (SpeechSynthesizer *spk, char **parameters) {
   theta_voice_search criteria;
   memset(&criteria, 0, sizeof(criteria));
   initializeTheta();
@@ -156,7 +156,7 @@ spk_construct (char **parameters) {
 }
 
 static void
-spk_destruct (void) {
+spk_destruct (SpeechSynthesizer *spk) {
   spk_mute();
 
   if (voice) {
@@ -177,7 +177,7 @@ doChild (void) {
 }
 
 static void
-spk_say (const unsigned char *buffer, int length) {
+spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, int length) {
   if (voice) {
     if (child != -1) goto ready;
 
@@ -204,7 +204,7 @@ spk_say (const unsigned char *buffer, int length) {
 }
 
 static void
-spk_mute (void) {
+spk_mute (SpeechSynthesizer *spk) {
   if (child != -1) {
     close(*pipeInput);
     close(*pipeOutput);
@@ -216,11 +216,11 @@ spk_mute (void) {
 }
 
 static void
-spk_rate (float setting) {
+spk_rate (SpeechSynthesizer *spk, float setting) {
   theta_set_rate_stretch(voice, 1.0/setting, NULL);
 }
 
 static void
-spk_volume (float setting) {
+spk_volume (SpeechSynthesizer *spk, float setting) {
   theta_set_rescale(voice, setting, NULL);
 }

@@ -38,7 +38,7 @@ static const char *commandPath;	/* default full path for the say command */
 static FILE *commandStream = NULL;
 
 static int
-spk_construct (char **parameters)
+spk_construct (SpeechSynthesizer *spk, char **parameters)
 {
   const char *command = parameters[PARM_COMMAND];
   commandPath = *command? command: SAY_CMD;
@@ -47,7 +47,7 @@ spk_construct (char **parameters)
 }
 
 static void
-spk_say (const unsigned char *buffer, int length)
+spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, int length)
 {
   if (!commandStream)
     commandStream = popen(commandPath, "w");
@@ -61,7 +61,7 @@ spk_say (const unsigned char *buffer, int length)
 }
 
 static void
-spk_mute (void)
+spk_mute (SpeechSynthesizer *spk)
 {
   if (commandStream)
     {
@@ -71,7 +71,7 @@ spk_mute (void)
 }
 
 static void
-spk_destruct (void)
+spk_destruct (SpeechSynthesizer *spk)
 {
-   spk_mute();
+   spk_mute(spk);
 }

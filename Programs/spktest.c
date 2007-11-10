@@ -30,6 +30,8 @@
 #include "spk.h"
 #include "misc.h"
 
+static SpeechSynthesizer spk;
+
 char *opt_pcmDevice;
 static char *opt_speechRate;
 static char *opt_textString;
@@ -87,7 +89,7 @@ END_OPTION_TABLE
 
 static int
 sayLine (char *line, void *data) {
-  sayString(line, 0);
+  sayString(&spk, line, 0);
   return 1;
 }
 
@@ -189,17 +191,18 @@ main (int argc, char *argv[]) {
     }
 
     if (chdir(opt_dataDirectory) != -1) {
+      initializeSpeechSynthesizer(&spk);
       identifySpeechDriver(speech, 0);		/* start-up messages */
-      if (speech->construct(parameterSettings)) {
-        if (speech->rate) speech->rate(speechRate);
-        if (speech->volume) speech->volume(speechVolume);
+      if (speech->construct(&spk, parameterSettings)) {
+        if (speech->rate) speech->rate(&spk, speechRate);
+        if (speech->volume) speech->volume(&spk, speechVolume);
 
         if (opt_textString) {
-          sayString(opt_textString, 0);
+          sayString(&spk, opt_textString, 0);
         } else {
           processLines(stdin, sayLine, NULL);
         }
-        speech->destruct();		/* finish with the display */
+        speech->destruct(&spk);		/* finish with the display */
         status = 0;
       } else {
         LogPrint(LOG_ERR, "can't initialize speech driver.");

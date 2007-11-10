@@ -526,7 +526,7 @@ isSet:
 }
 
 static int
-spk_construct (char **parameters) {
+spk_construct (SpeechSynthesizer *spk, char **parameters) {
    if (!eci) {
       if (setIni(parameters[PARM_IniFile])) {
 	 if ((eci = eciNew()) != NULL_ECI_HAND) {
@@ -572,7 +572,7 @@ spk_construct (char **parameters) {
 }
 
 static void
-spk_destruct (void) {
+spk_destruct (SpeechSynthesizer *spk) {
    if (eci) {
       eciDelete(eci);
       eci = NULL_ECI_HAND;
@@ -615,7 +615,7 @@ saySegment (ECIHand eci, const unsigned char *buffer, int from, int to) {
 }
 
 static void
-spk_say (const unsigned char *buffer, int length) {
+spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, int length) {
    if (eci) {
       int onSpace = -1;
       int sayFrom = 0;
@@ -646,7 +646,7 @@ spk_say (const unsigned char *buffer, int length) {
 }
 
 static void
-spk_mute (void) {
+spk_mute (SpeechSynthesizer *spk) {
    if (eci) {
       if (eciStop(eci)) {
       } else {
@@ -656,14 +656,14 @@ spk_mute (void) {
 }
 
 static void
-spk_doTrack (void) {
+spk_doTrack (SpeechSynthesizer *spk) {
    if (eci) {
       eciSpeaking(eci);
    }
 }
 
 static int
-spk_getTrack (void) {
+spk_getTrack (SpeechSynthesizer *spk) {
    if (eci) {
       int index = eciGetIndex(eci);
       LogPrint(LOG_DEBUG, "speech tracked at %d", index);
@@ -673,7 +673,7 @@ spk_getTrack (void) {
 }
 
 static int
-spk_isSpeaking (void) {
+spk_isSpeaking (SpeechSynthesizer *spk) {
    if (eci) {
       if (eciSpeaking(eci)) {
          return 1;
@@ -702,11 +702,11 @@ setExternalUnits (void) {
 }
 
 static void
-spk_rate (float setting) {
+spk_rate (SpeechSynthesizer *spk, float setting) {
    if (setExternalUnits()) setVoiceParameter (eci, "rate", eciSpeed, (int)(setting * 210.0));
 }
 
 static void
-spk_volume (float setting) {
+spk_volume (SpeechSynthesizer *spk, float setting) {
    if (setInternalUnits()) setVoiceParameter(eci, "volume", eciVolume, (int)(setting * 100.0));
 }

@@ -391,7 +391,7 @@ loadSynthesisLibrary (void) {
 }
 
 static int
-spk_construct (char **parameters) {
+spk_construct (SpeechSynthesizer *spk, char **parameters) {
   int code;
   loadSynthesisLibrary();
 
@@ -437,12 +437,12 @@ spk_construct (char **parameters) {
     LogPrint(LOG_ERR, "Cannot allocate speech queue.");
   }
 
-  spk_destruct();
+  spk_destruct(spk);
   return 0;
 }
 
 static void
-spk_destruct (void) {
+spk_destruct (SpeechSynthesizer *spk) {
   stopSynthesisThread();
   closeSoundDevice();
 
@@ -471,19 +471,19 @@ spk_destruct (void) {
 }
 
 static void
-spk_say (const unsigned char *buffer, int length) {
+spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, int length) {
   if (enqueueText(buffer, length))
     enqueueTag("<break time=\"none\"/>");
 }
 
 static void
-spk_mute (void) {
+spk_mute (SpeechSynthesizer *spk) {
   stopSynthesisThread();
   if (pcm) cancelPcmOutput(pcm);
 }
 
 static void
-spk_rate (float setting) {
+spk_rate (SpeechSynthesizer *spk, float setting) {
   char tag[0X40];
   snprintf(tag, sizeof(tag), "<rate absspeed=\"%d\"/>",
            (int)(log10(setting) * 10.0 / log10(3.0)));
@@ -491,7 +491,7 @@ spk_rate (float setting) {
 }
 
 static void
-spk_volume (float setting) {
+spk_volume (SpeechSynthesizer *spk, float setting) {
   char tag[0X40];
   snprintf(tag, sizeof(tag), "<volume level=\"%d\"/>",
            (int)(setting * 100.0));

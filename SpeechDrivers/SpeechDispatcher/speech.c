@@ -41,7 +41,7 @@ typedef enum {
 static SPDConnection *connection = NULL;
 
 static int
-spk_construct (char **parameters) {
+spk_construct (SpeechSynthesizer *spk, char **parameters) {
   if (parameters[PARM_PORT] && *parameters[PARM_PORT]) {
     static const int minimumPort = 0X1;
     static const int maximumPort = 0XFFFF;
@@ -97,7 +97,7 @@ spk_construct (char **parameters) {
 }
 
 static void
-spk_destruct (void) {
+spk_destruct (SpeechSynthesizer *spk) {
   if (connection) {
     spd_close(connection);
     connection = NULL;
@@ -105,33 +105,33 @@ spk_destruct (void) {
 }
 
 static void
-spk_say (const unsigned char *buffer, int length) {
+spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, int length) {
   spd_sayf(connection, SPD_TEXT, "%.*s", length, buffer);
 }
 
 static void
-spk_mute (void) {
+spk_mute (SpeechSynthesizer *spk) {
   spd_cancel(connection);
 }
 
 #ifdef SPK_HAVE_EXPRESS
 static void
-spk_express (const unsigned char *buffer, int length) {
+spk_express (SpeechSynthesizer *spk, const unsigned char *buffer, int length) {
 }
 #endif /* SPK_HAVE_EXPRESS */
 
 #ifdef SPK_HAVE_TRACK
 static void
-spk_doTrack (void) {
+spk_doTrack (SpeechSynthesizer *spk) {
 }
 
 static int
-spk_getTrack (void) {
+spk_getTrack (SpeechSynthesizer *spk) {
   return 0;
 }
 
 static int
-spk_isSpeaking (void) {
+spk_isSpeaking (SpeechSynthesizer *spk) {
   return 0;
 }
 #endif /* SPK_HAVE_TRACK */
@@ -147,7 +147,7 @@ scaleSetting (float setting, float minimum, float maximum) {
 }
 
 static void
-spk_rate (float setting) {
+spk_rate (SpeechSynthesizer *spk, float setting) {
   signed int value;
   static float minimum;
   static float maximum;
@@ -165,7 +165,7 @@ spk_rate (float setting) {
 }
 
 static void
-spk_volume (float setting) {
+spk_volume (SpeechSynthesizer *spk, float setting) {
   signed int value = scaleSetting(setting, 0.0, 2.0);
   spd_set_volume(connection, value);
   LogPrint(LOG_DEBUG, "set volume: %g -> %d", setting, value);

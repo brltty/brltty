@@ -29,31 +29,31 @@ extern "C" {
 #include "spk.h"
 
 /* Routines provided by this speech driver. */
-static int spk_construct (char **parameters);
-static void spk_say (const unsigned char *buffer, int len);
-static void spk_mute (void);
-static void spk_destruct (void);
+static int spk_construct (SpeechSynthesizer *spk, char **parameters);
+static void spk_destruct (SpeechSynthesizer *spk);
+static void spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, int len);
+static void spk_mute (SpeechSynthesizer *spk);
 
 #ifdef SPK_HAVE_EXPRESS
-  static void spk_express (const unsigned char *buffer, int len);
+  static void spk_express (SpeechSynthesizer *spk, const unsigned char *buffer, int len);
 #endif /* SPK_HAVE_EXPRESS */
 
 #ifdef SPK_HAVE_TRACK
-  static void spk_doTrack (void);
-  static int spk_getTrack (void);
-  static int spk_isSpeaking (void);
+  static void spk_doTrack (SpeechSynthesizer *spk);
+  static int spk_getTrack (SpeechSynthesizer *spk);
+  static int spk_isSpeaking (SpeechSynthesizer *spk);
 #else
-  static void spk_doTrack (void) { }
-  static int spk_getTrack () { return 0; }
-  static int spk_isSpeaking () { return 0; }
+  static void spk_doTrack (SpeechSynthesizer *spk) { }
+  static int spk_getTrack (SpeechSynthesizer *spk) { return 0; }
+  static int spk_isSpeaking (SpeechSynthesizer *spk) { return 0; }
 #endif /* SPK_HAVE_TRACK */
 
 #ifdef SPK_HAVE_RATE
-  static void spk_rate (float setting);		/* mute speech */
+  static void spk_rate (SpeechSynthesizer *spk, float setting);		/* mute speech */
 #endif /* SPK_HAVE_RATE */
 
 #ifdef SPK_HAVE_VOLUME
-  static void spk_volume (float setting);		/* mute speech */
+  static void spk_volume (SpeechSynthesizer *spk, float setting);		/* mute speech */
 #endif /* SPK_HAVE_VOLUME */
 
 #ifdef SPKPARMS

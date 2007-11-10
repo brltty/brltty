@@ -59,7 +59,7 @@ static unsigned short lastIndex, finalIndex;
 static char speaking = 0;
 
 #define ERRBUFLEN 200
-static void myerror(char *fmt, ...)
+static void myerror(SpeechSynthesizer *spk, char *fmt, ...)
 {
   char buf[ERRBUFLEN];
   int offs;
@@ -72,9 +72,9 @@ static void myerror(char *fmt, ...)
   buf[ERRBUFLEN-1] = 0;
   va_end(argp);
   LogPrint(LOG_ERR, "%s", buf);
-  spk_destruct();
+  spk_destruct(spk);
 }
-static void myperror(char *fmt, ...)
+static void myperror(SpeechSynthesizer *spk, char *fmt, ...)
 {
   char buf[ERRBUFLEN];
   int offs;
@@ -89,10 +89,10 @@ static void myperror(char *fmt, ...)
   buf[ERRBUFLEN-1] = 0;
   va_end(argp);
   LogPrint(LOG_ERR, "%s", buf);
-  spk_destruct();
+  spk_destruct(spk);
 }
 
-static int spk_construct (char **parameters)
+static int spk_construct (SpeechSynthesizer *spk, char **parameters)
 {
   char *extProgPath = parameters[PARM_PROGRAM];
 
@@ -149,7 +149,7 @@ static int spk_construct (char **parameters)
       char *ptr;
       uid = strtol(s_uid, &ptr, 0);
       if(*ptr != 0) {
-        myerror("Unable to get an uid value with '%s'", s_uid);
+        myerror(spk, "Unable to get an uid value with '%s'", s_uid);
         return 0;
       }
     }
@@ -166,7 +166,7 @@ static int spk_construct (char **parameters)
       char *ptr;
       gid = strtol(s_gid, &ptr, 0);
       if(*ptr != 0) {
-        myerror("Unable to get a gid value with '%s'", s_gid);
+        myerror(spk, "Unable to get a gid value with '%s'", s_gid);
         return 0;
       }
     }
@@ -174,23 +174,23 @@ static int spk_construct (char **parameters)
 
   if(pipe(fd1) < 0
      || pipe(fd2) < 0) {
-    myperror("pipe");
+    myperror(spk, "pipe");
     return 0;
   }
   LogPrint(LOG_DEBUG, "pipe fds: fd1 %d %d, fd2 %d %d",
 	   fd1[0],fd1[1], fd2[0],fd2[1]);
   switch(fork()) {
   case -1:
-    myperror("fork");
+    myperror(spk, "fork");
     return 0;
   case 0: {
     int i;
     if(setgid(gid) <0) {
-      myperror("setgid to %u", gid);
+      myperror(spk, "setgid to %u", gid);
       _exit(1);
     }
     if(setuid(uid) <0) {
-      myperror("setuid to %u", uid);
+      myperror(spk, "setuid to %u", uid);
       _exit(1);
     }
 
@@ -202,7 +202,7 @@ static int spk_construct (char **parameters)
 
     if(dup2(fd2[0], 0) < 0 /* stdin */
        || dup2(fd1[1], 1) < 0){ /* stdout */
-      myperror("dup2");
+      myperror(spk, "dup2");
       _exit(1);
     }
     {
@@ -210,7 +210,7 @@ static int spk_construct (char **parameters)
       for(i=2; i<numfds; i++) close(i);
     }
     execl(extProgPath, extProgPath, (void *)NULL);
-    myperror("Unable to execute external speech program '%s'", extProgPath);
+    myperror(spk, "Unable to execute external speech program '%s'", extProgPath);
     _exit(1);
   }
   default:
@@ -220,7 +220,7 @@ static int spk_construct (char **parameters)
     close(fd2[0]);
     if(fcntl(helper_fd_in, F_SETFL,O_NONBLOCK) < 0
        || fcntl(helper_fd_out, F_SETFL,O_NONBLOCK) < 0) {
-      myperror("fcntl F_SETFL O_NONBLOCK");
+      myperror(spk, "fcntl F_SETFL O_NONBLOCK");
       return 0;
     }
   };
@@ -232,7 +232,7 @@ static int spk_construct (char **parameters)
   return 1;
 }
 
-static void mywrite(int fd, const void *buf, int len)
+static void mywrite(SpeechSynthesizer *spk, int fd, const void *buf, int len)
 {
   char *pos = (char *)buf;
   int w;
@@ -242,18 +242,18 @@ static void mywrite(int fd, const void *buf, int len)
     if((w = write(fd, pos, len)) < 0) {
       if(errno == EINTR || errno == EAGAIN) continue;
       else if(errno == EPIPE)
-	myerror("ExternalSpeech: pipe to helper program was broken");
+	myerror(spk, "ExternalSpeech: pipe to helper program was broken");
          /* try to reinit may be ??? */
-      else myperror("ExternalSpeech: pipe to helper program: write");
+      else myperror(spk, "ExternalSpeech: pipe to helper program: write");
       return;
     }
     pos += w; len -= w;
   } while(len && !hasTimedOut(2000));
   if(len)
-    myerror("ExternalSpeech: pipe to helper program: write timed out");
+    myerror(spk, "ExternalSpeech: pipe to helper program: write timed out");
 }
 
-static int myread(int fd, void *buf, int len)
+static int myread(SpeechSynthesizer *spk, int fd, void *buf, int len)
 {
   char *pos = (char *)buf;
   int r;
@@ -266,21 +266,21 @@ static int myread(int fd, void *buf, int len)
       else if(errno == EAGAIN) {
 	if(firstTime) return 0;
 	else continue;
-      }else myperror("ExternalSpeech: pipe to helper program: read");
+      }else myperror(spk, "ExternalSpeech: pipe to helper program: read");
     }else if(r==0)
-      myerror("ExternalSpeech: pipe to helper program: read: EOF!");
+      myerror(spk, "ExternalSpeech: pipe to helper program: read: EOF!");
     if(r<=0) return 0;
     firstTime = 0;
     pos += r; len -= r;
   } while(len && !hasTimedOut(400));
   if(len) {
-    myerror("ExternalSpeech: pipe to helper program: read timed out");
+    myerror(spk, "ExternalSpeech: pipe to helper program: read timed out");
     return 0;
   }
   return 1;
 }
 
-static void sayit(const unsigned char *buffer, int len, int attriblen)
+static void sayit(SpeechSynthesizer *spk, const unsigned char *buffer, int len, int attriblen)
 {
   unsigned char l[5];
   if(helper_fd_out < 0) return;
@@ -291,26 +291,26 @@ static void sayit(const unsigned char *buffer, int len, int attriblen)
   l[3] = attriblen>>8;
   l[4] = attriblen & 0xFF;
   speaking = 1;
-  mywrite(helper_fd_out, l, 5);
-  mywrite(helper_fd_out, buffer, len+attriblen);
+  mywrite(spk, helper_fd_out, l, 5);
+  mywrite(spk, helper_fd_out, buffer, len+attriblen);
   lastIndex = 0;
   finalIndex = len;
 }
 
-static void spk_say(const unsigned char *buffer, int len)
+static void spk_say(SpeechSynthesizer *spk, const unsigned char *buffer, int len)
 {
-  sayit(buffer,len,0);
+  sayit(spk, buffer,len,0);
 }
-static void spk_express(const unsigned char *buffer, int len)
+static void spk_express(SpeechSynthesizer *spk, const unsigned char *buffer, int len)
 {
-  sayit(buffer,len,len);
+  sayit(spk, buffer,len,len);
 }
 
-static void spk_doTrack(void)
+static void spk_doTrack(SpeechSynthesizer *spk)
 {
   unsigned char b[2];
   if(helper_fd_in < 0) return;
-  while(myread(helper_fd_in, b, 2)) {
+  while(myread(spk, helper_fd_in, b, 2)) {
     unsigned inx;
     inx = (b[0]<<8 | b[1]);
     LogPrint(LOG_DEBUG, "spktrk: Received index %u", inx);
@@ -323,26 +323,26 @@ static void spk_doTrack(void)
   }
 }
 
-static int spk_getTrack(void)
+static int spk_getTrack(SpeechSynthesizer *spk)
 {
   return lastIndex;
 }
 
-static int spk_isSpeaking(void)
+static int spk_isSpeaking(SpeechSynthesizer *spk)
 {
   return speaking;
 }
 
-static void spk_mute (void)
+static void spk_mute (SpeechSynthesizer *spk)
 {
   unsigned char c = 1;
   if(helper_fd_out < 0) return;
   LogPrint(LOG_DEBUG,"mute");
   speaking = 0;
-  mywrite(helper_fd_out, &c,1);
+  mywrite(spk, helper_fd_out, &c,1);
 }
 
-static void spk_rate (float setting)
+static void spk_rate (SpeechSynthesizer *spk, float setting)
 {
   float expand = 1.0 / setting; 
   unsigned char *p = (unsigned char *)&expand;
@@ -355,10 +355,10 @@ static void spk_rate (float setting)
 #else /* WORDS_BIGENDIAN */
   l[1] = p[3]; l[2] = p[2]; l[3] = p[1]; l[4] = p[0];
 #endif /* WORDS_BIGENDIAN */
-  mywrite(helper_fd_out, &l, 5);
+  mywrite(spk, helper_fd_out, &l, 5);
 }
 
-static void spk_destruct (void)
+static void spk_destruct (SpeechSynthesizer *spk)
 {
   if(helper_fd_in >= 0)
     close(helper_fd_in);

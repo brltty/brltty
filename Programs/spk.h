@@ -24,28 +24,37 @@ extern "C" {
 
 #include "driver.h"
 
+typedef struct SpeechDataStruct SpeechData;
+
+typedef struct {
+  SpeechData *data;
+} SpeechSynthesizer;
+
 typedef struct {
   DRIVER_DEFINITION_DECLARATION;
   const char *const *parameters;
-  int (*construct) (char **parameters);
-  void (*destruct) (void);
-  void (*say) (const unsigned char *buffer, int len);
-  void (*mute) (void);
+
+  int (*construct) (SpeechSynthesizer *spk, char **parameters);
+  void (*destruct) (SpeechSynthesizer *spk);
+  void (*say) (SpeechSynthesizer *spk, const unsigned char *buffer, int len);
+  void (*mute) (SpeechSynthesizer *spk);
 
   /* These require SPK_HAVE_EXPRESS. */
-  void (*express) (const unsigned char *buffer, int len);
+  void (*express) (SpeechSynthesizer *spk, const unsigned char *buffer, int len);
 
   /* These require SPK_HAVE_TRACK. */
-  void (*doTrack) (void);
-  int (*getTrack) (void);
-  int (*isSpeaking) (void);
+  void (*doTrack) (SpeechSynthesizer *spk);
+  int (*getTrack) (SpeechSynthesizer *spk);
+  int (*isSpeaking) (SpeechSynthesizer *spk);
 
   /* These require SPK_HAVE_RATE. */
-  void (*rate) (float setting);
+  void (*rate) (SpeechSynthesizer *spk, float setting);
 
   /* These require SPK_HAVE_VOLUME. */
-  void (*volume) (float setting);
+  void (*volume) (SpeechSynthesizer *spk, float setting);
 } SpeechDriver;
+
+extern void initializeSpeechSynthesizer (SpeechSynthesizer *spk);
 
 extern int haveSpeechDriver (const char *code);
 extern const char *getDefaultSpeechDriver (void);
@@ -55,18 +64,18 @@ extern void identifySpeechDrivers (int full);
 extern const SpeechDriver *speech;
 extern const SpeechDriver noSpeech;
 
-extern void sayString (const char *string, int mute);
+extern void sayString (SpeechSynthesizer *spk, const char *string, int mute);
 
-extern void setSpeechRate (int setting, int say);
+extern void setSpeechRate (SpeechSynthesizer *spk, int setting, int say);
 #define SPK_DEFAULT_RATE 10
 #define SPK_MAXIMUM_RATE (SPK_DEFAULT_RATE * 2)
 
-extern void setSpeechVolume (int setting, int say);
+extern void setSpeechVolume (SpeechSynthesizer *spk, int setting, int say);
 #define SPK_DEFAULT_VOLUME 10
 #define SPK_MAXIMUM_VOLUME (SPK_DEFAULT_VOLUME * 2)
 
 extern int openSpeechFifo (const char *directory, const char *path);
-extern void processSpeechFifo (void);
+extern void processSpeechFifo (SpeechSynthesizer *spk);
 
 #ifdef __cplusplus
 }

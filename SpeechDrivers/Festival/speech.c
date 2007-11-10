@@ -373,20 +373,20 @@ writeCommand (const char *command, int reopen) {
 }
 
 static int
-spk_construct (char **parameters) {
+spk_construct (SpeechSynthesizer *spk, char **parameters) {
   festivalParameters = parameters;
   festivalRate = 0.0;
   return openStream();
 }
 
 static void
-spk_destruct (void) {
+spk_destruct (SpeechSynthesizer *spk) {
   if (writeCommand("(quit)", 0)) closeStream();
   festivalParameters = NULL;
 }
 
 static void
-spk_say (const unsigned char *buffer, int length) {
+spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, int length) {
   if (writeString("(SayText \"", 1)) {
     int index;
     for (index=0; index<length; index++) {
@@ -405,11 +405,11 @@ spk_say (const unsigned char *buffer, int length) {
 }
 
 static void
-spk_mute (void) {
+spk_mute (SpeechSynthesizer *spk) {
   writeCommand("(audio_mode 'shutup)", 0);
 }
 
 static void
-spk_rate (float setting) {
+spk_rate (SpeechSynthesizer *spk, float setting) {
   setRate(festivalRate=setting, 1);
 }
