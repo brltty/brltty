@@ -381,7 +381,7 @@ openUsbPort (char **parameters, const char *device) {
   static const UsbChannelDefinition definitions[] = {
     { .vendor=0X0798, .product=0X0001, 
       .configuration=1, .interface=0, .alternative=0,
-      .inputEndpoint=1, .outputEndpoint=0
+      .inputEndpoint=1
     }
     ,
     { .vendor=0 }
