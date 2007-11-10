@@ -38,7 +38,8 @@ typedef enum {
   ST_VoyagerStyle
 } StatusCellsStyle;
 
-/* Braille information structure. */
+typedef struct BrailleDataStruct BrailleData;
+
 typedef struct {
   unsigned int x, y;			/* the dimensions of the display */
   unsigned int helpPage;			/* the page number within the help file */
@@ -51,10 +52,11 @@ typedef struct {
   const char *dataDirectory;
   unsigned touchEnabled:1;
   unsigned highlightWindow:1;
+  BrailleData *data;
 } BrailleDisplay;				/* used for writing to a braille display */
 
-extern void initializeBrailleDisplay (BrailleDisplay *);
-extern unsigned int drainBrailleOutput (BrailleDisplay *, int minimumDelay);
+extern void initializeBrailleDisplay (BrailleDisplay *brl);
+extern unsigned int drainBrailleOutput (BrailleDisplay *brl, int minimumDelay);
 extern int ensureBrailleBuffer (BrailleDisplay *brl, int infoLevel);
 
 extern void writeBrailleBuffer (BrailleDisplay *);
@@ -94,23 +96,23 @@ typedef struct {
   int statusStyle;
 
   /* Routines provided by the braille driver library: */
-  int (*construct) (BrailleDisplay *, char **parameters, const char *);
-  void (*destruct) (BrailleDisplay *);
-  int (*readCommand) (BrailleDisplay *, BRL_DriverCommandContext);
-  void (*writeWindow) (BrailleDisplay *);
-  void (*writeStatus) (BrailleDisplay *brl, const unsigned char *);
+  int (*construct) (BrailleDisplay *brl, char **parameters, const char *device);
+  void (*destruct) (BrailleDisplay *brl);
+  int (*readCommand) (BrailleDisplay *brl, BRL_DriverCommandContext context);
+  void (*writeWindow) (BrailleDisplay *brl);
+  void (*writeStatus) (BrailleDisplay *brl, const unsigned char *cells);
 
   /* These require BRL_HAVE_VISUAL_DISPLAY. */
-  void (*writeVisual) (BrailleDisplay *);
+  void (*writeVisual) (BrailleDisplay *brl);
 
   /* These require BRL_HAVE_PACKET_IO. */
-  ssize_t (*readPacket) (BrailleDisplay *, void *, size_t);
-  ssize_t (*writePacket) (BrailleDisplay *, const void *, size_t);
-  int (*reset) (BrailleDisplay *);
+  ssize_t (*readPacket) (BrailleDisplay *brl, void *buffer, size_t size);
+  ssize_t (*writePacket) (BrailleDisplay *brl, const void *packet, size_t size);
+  int (*reset) (BrailleDisplay *brl);
   
   /* These require BRL_HAVE_KEY_CODES. */
-  int (*readKey) (BrailleDisplay *);
-  int (*keyToCommand) (BrailleDisplay *, BRL_DriverCommandContext, int);
+  int (*readKey) (BrailleDisplay *brl);
+  int (*keyToCommand) (BrailleDisplay *brl, BRL_DriverCommandContext context, int key);
 
   /* These require BRL_HAVE_FIRMNESS. */
   void (*firmness) (BrailleDisplay *brl, BrailleFirmness setting);
