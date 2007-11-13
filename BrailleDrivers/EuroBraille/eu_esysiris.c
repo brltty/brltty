@@ -150,6 +150,8 @@ static int esysiris_handleCommandKey(BrailleDisplay *brl, unsigned int key)
 	    case VK_FG:	res = BRL_BLK_PASSKEY + BRL_KEY_CURSOR_LEFT; break;
 	    case VK_FD:	res = BRL_BLK_PASSKEY + BRL_KEY_CURSOR_RIGHT; break;
 	    case VK_L12:	res = BRL_CMD_TOP_LEFT; break;
+	    case VK_L34:        res = BRL_CMD_FREEZE; break;
+	    case VK_L67:	res = BRL_CMD_HOME; break;
 	    case VK_L78:	res = BRL_CMD_BOT_LEFT; break;
 	    case VK_L1234:	res = BRL_CMD_RESTARTBRL; break;
 	    case VK_L5678:	res = BRL_CMD_RESTARTSPEECH; break;
