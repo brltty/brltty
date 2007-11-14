@@ -1,7 +1,7 @@
 BRLTTY help screen for EuroBraille terminals 
       Driver developped by Yannick PLASSIARD and Olivier BERT
 
-To enter in the Learn-Mode press Level 1 key (alpha or # or FG+FB) depending
+To enter in the Learn-Mode press Layer1 key (alpha or # or FG+FB) depending
 on the model of display you have followed by "J" (for notebraille/clio), 
 L6 (for scriba) L5 (for iris).
 
@@ -12,7 +12,7 @@ braille display and then click on the cell where you want to start the block.
 To end a block press "*M" or Beta+L9 or Layer2+l8 depending on your braille 
 display, and click on the cell where you want to end the block. 
 When you do this, the block is copied into the BRLTTY clipboard, waiting to 
-be pasted anywhere you want. To past a block,
+be pasted anywhere you want. To paste a block,
 press the "*L" or Beta+L8 or Layer2+L7 depending on your braille display. 
 A separate help file for each model will be created soon.
 
