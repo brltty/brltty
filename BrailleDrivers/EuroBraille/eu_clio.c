@@ -272,7 +272,7 @@ static void	clio_ModeHandling(BrailleDisplay *brl, char* packet)
   if (*packet == 'B')
     {
       refreshDisplay = 1;
-      clio_writeBraille(brl, (unsigned char*)prevData, brlCols);
+      clio_writeWindow(brl, (unsigned char*)prevData, brlCols);
     }
 }
 
@@ -397,7 +397,7 @@ int	clio_keyToCommand(BrailleDisplay *brl, unsigned int key, BRL_DriverCommandCo
   return res;
 }
  
-int     clio_writeBraille(BrailleDisplay *brl, unsigned char *data, int len)
+int     clio_writeWindow(BrailleDisplay *brl, unsigned char *data, int len)
 {
   unsigned char buf[len + 3];
 
@@ -419,7 +419,7 @@ int     clio_writeBraille(BrailleDisplay *brl, unsigned char *data, int len)
   return (clio_writePacket(brl, buf, len + 3));
 }
 
-int     clio_writeLcd(BrailleDisplay *brl, unsigned char *data, int len)
+int     clio_writeVisual(BrailleDisplay *brl, unsigned char *data, int len)
 {
   unsigned char buf[len + 3];
 

@@ -307,7 +307,7 @@ int	esysiris_keyToCommand(BrailleDisplay *brl, unsigned int key, BRL_DriverComma
   return res;
 }
 
-int	esysiris_writeBraille(BrailleDisplay *brl, unsigned char *data, int len)
+int	esysiris_writeWindow(BrailleDisplay *brl, unsigned char *data, int len)
 {
   unsigned char buf[len + 2];
 
@@ -332,7 +332,7 @@ int	esysiris_hasLcdSupport(BrailleDisplay *brl)
   return (0);
 }
 
-int	esysiris_writeLcd(BrailleDisplay *brl, unsigned char *str, int len)
+int	esysiris_writeVisual(BrailleDisplay *brl, unsigned char *str, int len)
 {
   return (-1);
 }

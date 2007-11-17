@@ -33,9 +33,9 @@ t_eubrl_protocol	esysirisProtocol = {
   .readCommand = esysiris_readCommand,
   .readKey = esysiris_readKey,
   .keyToCommand = esysiris_keyToCommand,
-  .writeBraille = esysiris_writeBraille,
+  .writeWindow = esysiris_writeWindow,
   .hasLcdSupport = esysiris_hasLcdSupport,
-  .writeLcd = esysiris_writeLcd,
+  .writeVisual = esysiris_writeVisual,
   .protocolType = ESYSIRIS_PROTOCOL
 };
 
@@ -48,9 +48,9 @@ t_eubrl_protocol	clioProtocol = {
   .readCommand = clio_readCommand,
   .readKey = clio_readKey,
   .keyToCommand = clio_keyToCommand,
-  .writeBraille = clio_writeBraille,
+  .writeWindow = clio_writeWindow,
   .hasLcdSupport = clio_hasLcdSupport,
-  .writeLcd = clio_writeLcd,
+  .writeVisual = clio_writeVisual,
   .protocolType = CLIO_PROTOCOL
 };
 
