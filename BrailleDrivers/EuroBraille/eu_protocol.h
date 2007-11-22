@@ -50,9 +50,9 @@ typedef struct	s_eubrl_protocol
   unsigned int	(*readKey)(BrailleDisplay *brl);
   int	(*readCommand)(BrailleDisplay *brl, BRL_DriverCommandContext c);
   int	(*keyToCommand)(BrailleDisplay *brl, unsigned int key, BRL_DriverCommandContext ctx);
-  int	(*writeWindow)(BrailleDisplay *brl, unsigned char *data, int len);
+  void	(*writeWindow)(BrailleDisplay *brl);
   int	(*hasLcdSupport)(BrailleDisplay *brl);
-  int	(*writeVisual)(BrailleDisplay *brl, unsigned char *str, int len);
+  void	(*writeVisual)(BrailleDisplay *brl);
   int	(*readPacket)(BrailleDisplay *brl, unsigned char *packet, int size);
   int	(*writePacket)(BrailleDisplay *brl, const unsigned char *packet, int size);
   
@@ -70,9 +70,9 @@ int	clio_reset(BrailleDisplay *brl);
 unsigned int	clio_readKey(BrailleDisplay *brl);
 int	clio_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext c);
 int	clio_keyToCommand(BrailleDisplay *brl, unsigned int key, BRL_DriverCommandContext c);
-int	clio_writeWindow(BrailleDisplay *brl, unsigned char *data, int len);
+void	clio_writeWindow(BrailleDisplay *brl);
 int	clio_hasLcdSupport(BrailleDisplay *brl);
-int	clio_writeVisual(BrailleDisplay *brl, unsigned char *str, int len);
+void	clio_writeVisual(BrailleDisplay *brl);
 int	clio_readPacket(BrailleDisplay *brl, unsigned char *packet, int size);
 int	clio_writePacket(BrailleDisplay *brl, 
 			 const unsigned char *packet, int size);
@@ -85,9 +85,9 @@ int	esysiris_reset(BrailleDisplay *brl);
 unsigned int	esysiris_readKey(BrailleDisplay *brl);
 int	esysiris_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext c);
 int	esysiris_keyToCommand(BrailleDisplay *brl, unsigned int key, BRL_DriverCommandContext c);
-int	esysiris_writeWindow(BrailleDisplay *brl, unsigned char *data, int len);
+void	esysiris_writeWindow(BrailleDisplay *brl);
 int	esysiris_hasLcdSupport(BrailleDisplay *brl);
-int	esysiris_writeVisual(BrailleDisplay *brl, unsigned char *str, int len);
+void	esysiris_writeVisual(BrailleDisplay *brl);
 int	esysiris_readPacket(BrailleDisplay *brl, unsigned char *packet, int size);
 int	esysiris_writePacket(BrailleDisplay *brl, 
 			     const unsigned char *packet, int size);

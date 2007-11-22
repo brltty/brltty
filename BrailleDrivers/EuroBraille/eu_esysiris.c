@@ -64,7 +64,6 @@ const char	modelTable[TYPE_LAST][20] = {
 static int brlCols = 0;
 static enum hardwareType brlType = UNKNOWN;
 static t_eubrl_io*	iop = NULL;
-static char* prevData = NULL, *prevLcdData = NULL;
 static unsigned char	brlFirmwareVersion[21];
 static unsigned int	chars_per_sec = 0;
 static int		routingMode = BRL_BLK_ROUTE;
@@ -307,24 +306,24 @@ int	esysiris_keyToCommand(BrailleDisplay *brl, unsigned int key, BRL_DriverComma
   return res;
 }
 
-int	esysiris_writeWindow(BrailleDisplay *brl, unsigned char *data, int len)
+void	esysiris_writeWindow(BrailleDisplay *brl)
 {
-  unsigned char buf[len + 2];
+  static unsigned char previousBrailleWindow[80];
+  int displaySize = brl->x * brl->y;
+  unsigned char buf[displaySize + 2];
+  
+  if (displaySize > sizeof(previousBrailleWindow)) {
+    LogPrint(LOG_WARNING, "[eu] Discarding too large braille window");
+    return;
+  }
 
-  if (prevData == NULL)
-    {
-      prevData = malloc(brlCols);
-      if (prevData == NULL)
-	return -1;
-      memset(prevData, 0, brlCols);
-    }
-  if (!memcmp(prevData, data, brlCols))
-    return (1);
-  memcpy(prevData, data, len);
+  if (!memcmp(previousBrailleWindow, brl->buffer, displaySize))
+    return;
+  memcpy(previousBrailleWindow, brl->buffer, displaySize);
   buf[0] = 'B';
   buf[1] = 'S';
-  memcpy(buf + 2, data, len);
-  return (esysiris_writePacket(brl, buf, len + 2));
+  memcpy(buf + 2, brl->buffer, displaySize);
+  esysiris_writePacket(brl, buf, sizeof(buf));
 }
 
 int	esysiris_hasLcdSupport(BrailleDisplay *brl)
@@ -332,9 +331,9 @@ int	esysiris_hasLcdSupport(BrailleDisplay *brl)
   return (0);
 }
 
-int	esysiris_writeVisual(BrailleDisplay *brl, unsigned char *str, int len)
+void	esysiris_writeVisual(BrailleDisplay *brl)
 {
-  return (-1);
+  return;
 }
 
 

@@ -247,7 +247,7 @@ brl_writeWindow (BrailleDisplay *brl)
 {
   if (!protocolp)
     return;
-  protocolp->writeWindow(brl, brl->buffer, brl->x);
+  protocolp->writeWindow(brl);
 }
 
 static void
@@ -261,7 +261,7 @@ brl_writeVisual (BrailleDisplay *brl)
 {
   if (!protocolp)
     return;
-  protocolp->writeVisual(brl, brl->buffer, brl->x);  
+  protocolp->writeVisual(brl);  
 }
 #endif /* BRL_HAVE_VISUAL_DISPLAY */
 

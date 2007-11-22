@@ -91,8 +91,6 @@ static unsigned char	brlFirmwareVersion[21];
 static unsigned int	chars_per_sec;
 static int		routingMode = BRL_BLK_ROUTE;
 static int refreshDisplay = 0;
-static char	*prevData = NULL;
-static char	*prevLcdData = NULL;
 static struct s_clioModelType		clioModels[] =
   {
     {UNKNOWN, "", ""},
@@ -272,7 +270,7 @@ static void	clio_ModeHandling(BrailleDisplay *brl, char* packet)
   if (*packet == 'B')
     {
       refreshDisplay = 1;
-      clio_writeWindow(brl, (unsigned char*)prevData, brlCols);
+      clio_writeWindow(brl);
     }
 }
 
@@ -397,47 +395,46 @@ int	clio_keyToCommand(BrailleDisplay *brl, unsigned int key, BRL_DriverCommandCo
   return res;
 }
  
-int     clio_writeWindow(BrailleDisplay *brl, unsigned char *data, int len)
+void     clio_writeWindow(BrailleDisplay *brl)
 {
-  unsigned char buf[len + 3];
+  static char previousBrailleWindow[80];
+  int displaySize = brl->x * brl->y;
+  unsigned char buf[displaySize + 3];
 
-  if (prevData == NULL)
-    {
-      prevData = malloc(brlCols);
-      if (prevData == NULL)
-	return -1;
-      memset(prevData, 0, brlCols);
-    }
-  if (!memcmp(prevData, data, brlCols) && !refreshDisplay)
-    return (1);
+  if ( displaySize > sizeof(previousBrailleWindow) ) {
+    LogPrint(LOG_WARNING, "[eu] Discarding too large braille window" );
+    return;
+  }
+  if (!memcmp(previousBrailleWindow, brl->buffer, displaySize) && !refreshDisplay)
+    return;
   refreshDisplay = 0;
-  memcpy(prevData, data, len);
-  buf[0] = (unsigned char)(len + 2);
+  memcpy(previousBrailleWindow, brl->buffer, displaySize);
+  buf[0] = (unsigned char)(displaySize + 2);
   buf[1] = 'D';
   buf[2] = 'P';
-  memcpy(buf + 3, data, len);
-  return (clio_writePacket(brl, buf, len + 3));
+  memcpy(buf + 3, brl->buffer, displaySize);
+  clio_writePacket(brl, buf, sizeof(buf));
 }
 
-int     clio_writeVisual(BrailleDisplay *brl, unsigned char *data, int len)
+void     clio_writeVisual(BrailleDisplay *brl)
 {
-  unsigned char buf[len + 3];
+  static unsigned char previousVisualDisplay[80];
+  int displaySize = brl->x * brl->y;
+  unsigned char buf[displaySize + 3];
 
-  if (prevLcdData == NULL)
-    {
-      prevLcdData = malloc(brlCols);
-      if (prevLcdData == NULL)
-	return -1;
-      memset(prevLcdData, 0, brlCols);
-    }
-  if (!memcmp(prevLcdData, data, brlCols))
-    return (1);
-  memcpy(prevLcdData, data, len);
-  buf[0] = (unsigned char)(len + 2);
+  if ( displaySize > sizeof(previousVisualDisplay) ) {
+    LogPrint(LOG_WARNING, "[eu] Discarding too large visual display" );
+    return;
+  }
+
+  if (!memcmp(previousVisualDisplay, brl->buffer, displaySize))
+    return;
+  memcpy(previousVisualDisplay, brl->buffer, displaySize);
+  buf[0] = (unsigned char)(displaySize + 2);
   buf[1] = 'D';
   buf[2] = 'L';
-  memcpy(buf + 3, data, len);
-  return (clio_writePacket(brl, buf, len + 3));
+  memcpy(buf + 3, brl->buffer, displaySize);
+  clio_writePacket(brl, buf, sizeof(buf));
 }
 
 int	clio_hasLcdSupport(BrailleDisplay *brl)
