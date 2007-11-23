@@ -555,8 +555,6 @@ install-api-manpages: install-man3-directory
 	cd $(BLD_TOP)$(DOC_DIR) && $(MAKE) man3
 	set -- $(SRC_TOP)$(DOC_DIR)/BrlAPIref/man/man3/brlapi_*.3 && [ -f $$1 ] || exit 0 && \
 	$(INSTALL_DATA) $$* $(INSTALL_MAN3_DIRECTORY)
-	set -- $(SRC_TOP)$(DOC_DIR)/BrlAPIref/man/man3/BRLAPI_*.3 && [ -f $$1 ] || exit 0 && \
-	$(INSTALL_DATA) $$* $(INSTALL_MAN3_DIRECTORY)
 
 install-api-key:
 	file=$(sysconfdir)/$(API_AUTHFILE) && \
@@ -596,7 +594,6 @@ uninstall-libraries:
 uninstall-manpages:
 	-rm -f $(INSTALL_ROOT)$(MANPAGE_DIRECTORY)/man1/brltty.1
 	-rm -f $(INSTALL_MAN3_DIRECTORY)/brlapi_*.3
-	-rm -f $(INSTALL_MAN3_DIRECTORY)/BRLAPI_*.3
 
 uninstall-headers:
 	-rm -f $(INSTALL_APIHDR_DIRECTORY)/brlapi.h
