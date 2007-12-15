@@ -924,7 +924,7 @@ read_LinuxScreen (ScreenBox box, unsigned char *buffer, ScreenCharacterProperty 
         int row;
         for (row=0; row<box.height; ++row) {
           int count;
-          unsigned short *source;
+          const unsigned short *source;
 
           if (row) {
             if (lseek(screenDescriptor, increment, SEEK_CUR) == -1) {
@@ -947,10 +947,10 @@ read_LinuxScreen (ScreenBox box, unsigned char *buffer, ScreenCharacterProperty 
           source = line;
           if (text) {
             unsigned char src[box.width];
-            unsigned char *trg = target;
+            const unsigned char *trg = target;
             int column;
             for (column=0; column<box.width; ++column) {
-              unsigned char byte = *source & 0XFF;
+              const unsigned char byte = *source & 0XFF;
               int position = byte;
               if (*source & fontAttributesMask) position |= 0X100;
               src[column] = byte;
