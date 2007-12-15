@@ -445,19 +445,19 @@ setVgaCharacterCount (int force) {
   return 1;
 }
 
-static unsigned char highFontBit;
-static unsigned char fontAttributesMask;
-static unsigned char unshiftedAttributesMask;
-static unsigned char shiftedAttributesMask;
+static unsigned short highFontBit;
+static unsigned short fontAttributesMask;
+static unsigned short unshiftedAttributesMask;
+static unsigned short shiftedAttributesMask;
 
 static void
 setAttributesMasks (unsigned char bit) {
   fontAttributesMask = bit;
-  unshiftedAttributesMask = (((bit & 0XF0) - 0X10) & 0XF0) |
-                            (((bit & 0X0F) - 0X01) & 0X0F);
-  shiftedAttributesMask = ((~((bit & 0XF0) - 0X10) << 1) & 0XE0) |
-                          ((~((bit & 0X0F) - 0X01) << 1) & 0X0E);
-  LogPrint(LOG_DEBUG, "attributes masks: font=%02X unshifted=%02X shifted=%02X",
+  unshiftedAttributesMask = (((bit & 0XF000) - 0X1000) & 0XF000) |
+                            (((bit & 0X0F00) - 0X0100) & 0X0F00);
+  shiftedAttributesMask = ((~((bit & 0XF000) - 0X1000) << 1) & 0XE000) |
+                          ((~((bit & 0X0F00) - 0X0100) << 1) & 0X0E00);
+  LogPrint(LOG_DEBUG, "attributes masks: font=%04X unshifted=%04X shifted=%04X",
            fontAttributesMask, unshiftedAttributesMask, shiftedAttributesMask);
 }
 
@@ -479,7 +479,7 @@ determineAttributesMasks (void) {
       } else if (mask & 0XFF) {
         LogPrint(LOG_ERR, "high font mask has bit set in low-order byte: %04X", mask);
       } else {
-        setAttributesMasks(mask >> 8);
+        setAttributesMasks(mask);
         return 1;
       }
     }
@@ -489,17 +489,16 @@ determineAttributesMasks (void) {
 
       if (read(screenDescriptor, attributes, sizeof(attributes)) != -1) {
         const size_t count = attributes[0] * attributes[1];
-        const size_t size = count * 2;
-        unsigned char buffer[size];
+        unsigned short buffer[count];
 
         if (read(screenDescriptor, buffer, sizeof(buffer)) != -1) {
           int counts[0X10];
           int index;
 
           memset(counts, 0, sizeof(counts));
-          for (index=1; index<size; index+=2) ++counts[buffer[index] & 0X0F];
+          for (index=0; index<count; index++) ++counts[(buffer[index] & 0X0F00) >> 8];
 
-          setAttributesMasks((counts[0XE] > counts[0X7])? 0X01: 0X08);
+          setAttributesMasks((counts[0XE] > counts[0X7])? 0X0100: 0X0800);
           return 1;
         } else {
           LogError("read");
@@ -538,7 +537,7 @@ processParameters_LinuxScreen (char **parameters) {
     } else if (!validateChoice(&choice, parameters[PARM_HFB], choices)) {
       LogPrint(LOG_WARNING, "%s: %s", "invalid high font bit", parameters[PARM_HFB]);
     } else if (choice) {
-      static const unsigned char bits[] = {0X08, 0X01};
+      static const unsigned short bits[] = {0X0800, 0X0100};
       highFontBit = bits[choice-1];
     }
   }
@@ -916,16 +915,16 @@ read_LinuxScreen (ScreenBox box, unsigned char *buffer, ScreenCharacterProperty 
     }
 
     {
-      off_t start = 4 + (box.top * description.cols + box.left) * 2;
+      unsigned short line[box.width];
+      off_t start = 4 + (box.top * description.cols + box.left) * sizeof(line[0]);
       if (lseek(screenDescriptor, start, SEEK_SET) != -1) {
-        int length = box.width * 2;
-        unsigned char line[length];
+        int length = box.width * sizeof(line[0]);
+        off_t increment = description.cols * sizeof(line[0]) - length;
         unsigned char *target = buffer;
-        off_t increment = description.cols * 2 - length;
         int row;
         for (row=0; row<box.height; ++row) {
           int count;
-          unsigned char *source;
+          unsigned short *source;
 
           if (row) {
             if (lseek(screenDescriptor, increment, SEEK_CUR) == -1) {
@@ -951,11 +950,12 @@ read_LinuxScreen (ScreenBox box, unsigned char *buffer, ScreenCharacterProperty 
             unsigned char *trg = target;
             int column;
             for (column=0; column<box.width; ++column) {
-              int position = *source;
-              if (source[1] & fontAttributesMask) position |= 0X100;
-              src[column] = *source;
+              unsigned char byte = *source & 0XFF;
+              int position = byte;
+              if (*source & fontAttributesMask) position |= 0X100;
+              src[column] = byte;
               *target++ = translationTable[position];
-              source += 2;
+              source++;
             }
             if (debugScreenTextTranslation) {
               char desc[0X20];
@@ -966,11 +966,10 @@ read_LinuxScreen (ScreenBox box, unsigned char *buffer, ScreenCharacterProperty 
             }
           } else {
             int column;
-            source++;
             for (column=0; column<box.width; ++column) {
-              *target++ = (*source & unshiftedAttributesMask) |
-                          ((*source & shiftedAttributesMask) >> 1);
-              source += 2;
+              *target++ = ((*source & unshiftedAttributesMask) |
+                           ((*source & shiftedAttributesMask) >> 1)) >> 8;
+              source++;
             }
           }
         }
