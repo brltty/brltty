@@ -80,15 +80,15 @@ CR1+CR(max): cancel all modifiers
 You can also press CR2 or CR(max-1) or both at the same time as
 a dot pattern, instead of preceeding it.
 CR(max-1)+CR(max): space
-Either CR1 or CR(max), preceeding or at the same time as a dot pattern,
-produces a special character:
-  DOT1: backspace
-  DOT4+DOT6: RETURN/ENTER
-  DOT4/DOT6: arrow key up/down
-  DOT2/DOT5: arrow key left/right
-  DOT4+DOT5 / DOT5+DOT6: page-up/down
-  DOT1+DOT2 / DOT2+DOT3: home / end
-  d: delete
-  e: escape
-  i: insert
-  t: tab
+Either CR1 or CR(max), preceeding or at the same time as any of the
+following dot patterns, produces the corresponding special key:
+  1: backspace
+  46: entEr
+  4/6: arrow up/down
+  2/5: arrow left/right
+  45/56: page up/down
+  12/23: home/end
+  145 (d): delete
+  15 (e): escape
+  24 (i): insert
+  2345 (t): tab
