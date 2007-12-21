@@ -368,7 +368,7 @@ begword geo = geoengineering
 sufword geoff 1245-15-12356-124 Geoffrey
 midword gg 2356
 always gh 126
-endword gham = Langham
+endword ngham = Langham
 always ghead 1245-125-2-145
 always gheart 1245-125-15-345-2345
 midendword ghill = dunghill
