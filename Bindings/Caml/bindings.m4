@@ -50,7 +50,7 @@ else
     else    
         CAML_OK=true
         # we extract Ocaml version number and library path
-        OCAMLVERSION=`$OCAMLC -version' `
+        OCAMLVERSION=`$OCAMLC -version`
         AC_MSG_NOTICE([OCaml version is $OCAMLVERSION])
 
         OCAMLLIB=`$OCAMLC -where`
