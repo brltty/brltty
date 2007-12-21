@@ -85,15 +85,19 @@ clean::
 install: all $(OCAML_INSTALL_TARGET)
 
 install-without-findlib:
-#	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(OCAMLLIB)$(API_NAME)
+	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(OCAMLLIB)/$(API_NAME)
 
 install-with-findlib:
-	-$(OCAMLFIND) remove $(OCAML_LIB)
-	$(OCAMLFIND) install $(OCAML_LIB) $(OCAML_FILES) 
+	set -- ; \
+	[ -z "$(INSTALL_ROOT)" ] || set -- -destdir "$(INSTALL_ROOT)" "$${@}"; \
+	$(OCAMLFIND) install "$${@}" $(OCAML_LIB) $(OCAML_FILES) 
 
 uninstall: $(OCAML_UNINSTALL_TARGET)
 
 uninstall-without-findlib:
+	-rm -f -r -- $(INSTALL_ROOT)$(OCAMLLIB)/$(API_NAME)
 
 uninstall-with-findlib:
-	$(OCAMLFIND) remove $(OCAML_LIB)
+	set -- ; \
+	[ -z "$(INSTALL_ROOT)" ] || set -- -destdir "$(INSTALL_ROOT)" "$${@}"; \
+	$(OCAMLFIND) remove "$${@}" $(OCAML_LIB)
