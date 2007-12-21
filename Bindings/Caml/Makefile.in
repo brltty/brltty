@@ -40,6 +40,9 @@ OCAML_CLIBS = @OCAML_CLIBS@
 
 OCAML_DESTDIR = $(INSTALL_ROOT)$(OCAMLLIB)
 OCAML_PKGDIR = $(OCAML_DESTDIR)/$(OCAML_LIB)
+OCAML_STUBDIR = $(OCAML_DESTDIR)/stublibs
+OCAML_STUB = dll$(OCAML_LIB).so
+OCAML_OWNER = $(OCAML_STUB).owner
 
 OCAML_FILES = $(OCAML_MISC) $(OCAML_CLIBS) $(OCAML_BCLIB) $(OCAML_NCLIB)
 
@@ -89,7 +92,10 @@ install: all $(OCAML_INSTALL_TARGET)
 
 install-without-findlib:
 	$(INSTALL_DIRECTORY) $(OCAML_PKGDIR)
-	for file in $(OCAML_MISC) $(OCAML_BCLIB) $(OCAML_NCLIB); do $(INSTALL) $$file $(OCAML_PKGDIR); done
+	for file in $(OCAML_FILES); do $(INSTALL) $$file $(OCAML_PKGDIR); done
+	$(INSTALL_DIRECTORY) $(OCAML_STUBDIR)
+	mv $(OCAML_PKGDIR)/$(OCAML_STUB) $(OCAML_STUBDIR)
+	echo >$(OCAML_STUBDIR)/$(OCAML_OWNER) $(OCAML_LIB)
 
 install-with-findlib:
 	$(INSTALL_DIRECTORY) $(OCAML_DESTDIR)
@@ -100,6 +106,8 @@ uninstall: $(OCAML_UNINSTALL_TARGET)
 
 uninstall-without-findlib:
 	-rm -f -r -- $(OCAML_PKGDIR)
+	-rm -f -- $(OCAML_STUBDIR)/$(OCAML_STUB)
+	-rm -f -- $(OCAML_STUBDIR)/$(OCAML_OWNER)
 
 uninstall-with-findlib:
 	-$(OCAMLFIND) remove -destdir "$(OCAML_DESTDIR)" $(OCAML_LIB)
