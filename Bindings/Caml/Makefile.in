@@ -89,9 +89,11 @@ install: all $(OCAML_INSTALL_TARGET)
 
 install-without-findlib:
 	$(INSTALL_DIRECTORY) $(OCAML_PKGDIR)
+	for file in $(OCAML_MISC) $(OCAML_BCLIB) $(OCAML_NCLIB); do $(INSTALL) $$file $(OCAML_PKGDIR); done
 
 install-with-findlib:
 	$(INSTALL_DIRECTORY) $(OCAML_DESTDIR)
+	$(OCAMLFIND) remove -destdir "$(OCAML_DESTDIR)" $(OCAML_LIB)
 	$(OCAMLFIND) install -destdir "$(OCAML_DESTDIR)" -ldconf "$(OCAML_DESTDIR)/ld.conf" $(OCAML_LIB) $(OCAML_FILES) 
 
 uninstall: $(OCAML_UNINSTALL_TARGET)
