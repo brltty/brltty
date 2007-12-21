@@ -91,6 +91,7 @@ install-without-findlib:
 	$(INSTALL_DIRECTORY) $(OCAML_PKGDIR)
 
 install-with-findlib:
+	$(INSTALL_DIRECTORY) $(OCAML_DESTDIR)
 	$(OCAMLFIND) install -destdir "$(OCAML_DESTDIR)" $(OCAML_LIB) $(OCAML_FILES) 
 
 uninstall: $(OCAML_UNINSTALL_TARGET)
