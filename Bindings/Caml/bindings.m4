@@ -50,10 +50,10 @@ else
     else    
         CAML_OK=true
         # we extract Ocaml version number and library path
-        OCAMLVERSION=`$OCAMLC -v | sed -n -e 's|.*version *\(.*\)$|\1|p' `
+        OCAMLVERSION=`$OCAMLC -version' `
         AC_MSG_NOTICE([OCaml version is $OCAMLVERSION])
 
-        OCAMLLIB=`$OCAMLC -v | tail -1 | cut -f 4 -d " "`
+        OCAMLLIB=`$OCAMLC -where`
         AC_MSG_NOTICE([OCaml library path is $OCAMLLIB])
 
         # then we look for ocamlopt; if not present, we issue a warning
