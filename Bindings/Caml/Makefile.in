@@ -38,7 +38,8 @@ OCAML_MISC = $(SRC_DIR)/META brlapi.mli brlapi.cmi
 
 OCAML_CLIBS = @OCAML_CLIBS@
 
-OCAML_DESTDIR = $(INSTALL_ROOT)$(OCAMLLIB)/$(API_NAME)
+OCAML_DESTDIR = $(INSTALL_ROOT)$(OCAMLLIB)
+OCAML_PKGDIR = $(OCAML_DESTDIR)/$(OCAML_LIB)
 
 OCAML_FILES = $(OCAML_MISC) $(OCAML_CLIBS) $(OCAML_BCLIB) $(OCAML_NCLIB)
 
@@ -87,7 +88,7 @@ clean::
 install: all $(OCAML_INSTALL_TARGET)
 
 install-without-findlib:
-	$(INSTALL_DIRECTORY) $(OCAML_DESTDIR)
+	$(INSTALL_DIRECTORY) $(OCAML_PKGDIR)
 
 install-with-findlib:
 	$(OCAMLFIND) install -destdir "$(OCAML_DESTDIR)" $(OCAML_LIB) $(OCAML_FILES) 
@@ -95,7 +96,7 @@ install-with-findlib:
 uninstall: $(OCAML_UNINSTALL_TARGET)
 
 uninstall-without-findlib:
-	-rm -f -r -- $(OCAML_DESTDIR)
+	-rm -f -r -- $(OCAML_PKGDIR)
 
 uninstall-with-findlib:
 	-$(OCAMLFIND) remove -destdir "$(OCAML_DESTDIR)" $(OCAML_LIB)
