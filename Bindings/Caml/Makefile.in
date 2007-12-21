@@ -92,7 +92,7 @@ install-without-findlib:
 
 install-with-findlib:
 	$(INSTALL_DIRECTORY) $(OCAML_DESTDIR)
-	$(OCAMLFIND) install -destdir "$(OCAML_DESTDIR)" $(OCAML_LIB) $(OCAML_FILES) 
+	$(OCAMLFIND) install -destdir "$(OCAML_DESTDIR)" -ldconf "$(OCAML_DESTDIR)/ld.conf" $(OCAML_LIB) $(OCAML_FILES) 
 
 uninstall: $(OCAML_UNINSTALL_TARGET)
 
