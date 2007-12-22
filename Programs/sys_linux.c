@@ -351,7 +351,7 @@ getUinputDevice (void) {
   return uinputDevice;
 }
 
-static BITMASK(pressedKeys, KEY_MAX+1);
+static BITMASK(pressedKeys, KEY_MAX+1, char);
 
 int
 writeKeyEvent (int key, int press) {
