@@ -33,7 +33,6 @@
 #include <strings.h>
 #include <ctype.h>
 #include <errno.h>
-#include <fcntl.h>
 
 #include "eu_io.h"
 
@@ -246,7 +245,7 @@ eubrl_netInit(BrailleDisplay *brl, char **params, const char* device)
     }
   close(realConnectionFd);
   realConnectionFd = fd;
-  fcntl(realConnectionFd, F_SETFL, O_NONBLOCK);
+  setBlockingIo(realConnectionFd, 0);
   LogPrint(LOG_INFO, "eu: Ethernet transport initialized, fd=%d.",
 	   realConnectionFd);
   connectionStatus = NET_CONNECTED;

@@ -29,7 +29,6 @@ typedef enum {
 #define BRLPARMS "protocol"
 
 
-#include <fcntl.h>
 #include <stdio.h>
 #include <string.h>
 
