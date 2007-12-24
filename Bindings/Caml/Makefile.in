@@ -94,7 +94,7 @@ install-without-findlib:
 	$(INSTALL_DIRECTORY) $(OCAML_PKGDIR)
 	for file in $(OCAML_FILES); do $(INSTALL) $$file $(OCAML_PKGDIR); done
 	$(INSTALL_DIRECTORY) $(OCAML_STUBDIR)
-	mv $(OCAML_PKGDIR)/$(OCAML_STUB) $(OCAML_STUBDIR)
+	[ ! -f "$(OCAML_PKGDIR)/$(OCAML_STUB)" ] || mv $(OCAML_PKGDIR)/$(OCAML_STUB) $(OCAML_STUBDIR)
 	echo >$(OCAML_STUBDIR)/$(OCAML_OWNER) $(OCAML_LIB)
 
 install-with-findlib:
