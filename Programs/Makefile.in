@@ -95,28 +95,10 @@ sys_msdos.$O:
 
 ###############################################################################
 
-HOST_OBJECTS = host_prog.$O host_opts.$O host_misc.$O host_io.$O host_queue.$O host_async.$O host_sys.$O
+HOST_OBJECTS = host_program.$O host_options.$O host_misc.$O host_io_misc.$O host_queue.$O host_async.$O host_$(SYSTEM_OBJECT)
 
-host_prog.$O: options.$O
-	$(HOSTCC) $(HOSTCFLAGS) -o $@ -c $(SRC_DIR)/program.c
-
-host_opts.$O: options.$O
-	$(HOSTCC) $(HOSTCFLAGS) -o $@ -c $(SRC_DIR)/options.c
-
-host_misc.$O: misc.$O
-	$(HOSTCC) $(HOSTCFLAGS) -o $@ -c $(SRC_DIR)/misc.c
-
-host_io.$O: io_misc.$O
-	$(HOSTCC) $(HOSTCFLAGS) -o $@ -c $(SRC_DIR)/io_misc.c
-
-host_queue.$O: queue.$O
-	$(HOSTCC) $(HOSTCFLAGS) -o $@ -c $(SRC_DIR)/queue.c
-
-host_async.$O: async.$O
-	$(HOSTCC) $(HOSTCFLAGS) -o $@ -c $(SRC_DIR)/async.c
-
-host_sys.$O: $(SYSTEM_OBJECT)
-	$(HOSTCC) $(HOSTCFLAGS) -o $@ -c $(SRC_DIR)/$(SYSTEM_OBJECT:.${O}=.c)
+host_%.$O: %.$O
+	$(HOSTCC) $(HOSTCFLAGS) -o $@ -c $(SRC_DIR)/$*.c
 
 ###############################################################################
 
@@ -477,12 +459,6 @@ tbl2hex$X: $(TBL2HEX_OBJECTS)
 
 tbl2hex.$O:
 	$(HOSTCC) $(HOSTCFLAGS) -c $(SRC_DIR)/tbl2hex.c
-
-host_tbl.$O: tbl.$O
-	$(HOSTCC) $(HOSTCFLAGS) -o $@ -c $(SRC_DIR)/tbl.c
-
-host_tbl_native.$O: tbl_native.$O
-	$(HOSTCC) $(HOSTCFLAGS) -o $@ -c $(SRC_DIR)/tbl_native.c
 
 ###############################################################################
 
