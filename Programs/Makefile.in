@@ -109,10 +109,10 @@ host_misc.$O: misc.$O
 host_io.$O: io_misc.$O
 	$(HOSTCC) $(HOSTCFLAGS) -o $@ -c $(SRC_DIR)/io_misc.c
 
-host_queue.$O: io_misc.$O
+host_queue.$O: queue.$O
 	$(HOSTCC) $(HOSTCFLAGS) -o $@ -c $(SRC_DIR)/queue.c
 
-host_async.$O: io_misc.$O
+host_async.$O: async.$O
 	$(HOSTCC) $(HOSTCFLAGS) -o $@ -c $(SRC_DIR)/async.c
 
 host_sys.$O: $(SYSTEM_OBJECT)
