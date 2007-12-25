@@ -15,10 +15,6 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/*
- * main.c - Main processing loop plus signal handling
- */
-
 #include "prologue.h"
 
 #include <string.h>
