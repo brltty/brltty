@@ -18,6 +18,6 @@
 #warning key event support not available on this platform
 
 int
-monitorKeyEvents (void) {
+monitorKeyEvents (const KeyboardProperties *keyboardProperties) {
   return 0;
 }

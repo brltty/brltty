@@ -22,17 +22,23 @@
 extern "C" {
 #endif /* __cplusplus */
 
+
 extern char *getProgramPath (void);
+
 
 extern char *getBootParameters (const char *name);
 
+
 extern int executeHostCommand (const char *const *arguments);
 
+
 extern int mountFileSystem (const char *path, const char *reference, const char *type);
+
 
 extern void *loadSharedObject (const char *path);
 extern void unloadSharedObject (void *object);
 extern int findSharedSymbol (void *object, const char *symbol, void *pointerAddress);
+
 
 extern int canBeep (void);
 extern int synchronousBeep (unsigned short frequency, unsigned short milliseconds);
@@ -41,7 +47,9 @@ extern int startBeep (unsigned short frequency);
 extern int stopBeep (void);
 extern void endBeep (void);
 
+
 typedef struct PcmDeviceStruct PcmDevice;
+
 typedef enum {
   PCM_FMT_U8,
   PCM_FMT_S8,
@@ -53,6 +61,7 @@ typedef enum {
   PCM_FMT_ALAW,
   PCM_FMT_UNKNOWN
 } PcmAmplitudeFormat;
+
 extern PcmDevice *openPcmDevice (int errorLevel, const char *device);
 extern void closePcmDevice (PcmDevice *pcm);
 extern int writePcmData (PcmDevice *pcm, const unsigned char *buffer, int count);
@@ -67,8 +76,10 @@ extern void forcePcmOutput (PcmDevice *pcm);
 extern void awaitPcmOutput (PcmDevice *pcm);
 extern void cancelPcmOutput (PcmDevice *pcm);
 
+
 typedef struct MidiDeviceStruct MidiDevice;
 typedef void (*MidiBufferFlusher) (unsigned char *buffer, int count);
+
 extern MidiDevice *openMidiDevice (int errorLevel, const char *device);
 extern void closeMidiDevice (MidiDevice *midi);
 extern int flushMidiDevice (MidiDevice *midi);
@@ -79,12 +90,17 @@ extern int startMidiNote (MidiDevice *midi, unsigned char channel, unsigned char
 extern int stopMidiNote (MidiDevice *midi, unsigned char channel);
 extern int insertMidiWait (MidiDevice *midi, int duration);
 
+
 extern int enablePorts (int errorLevel, unsigned short int base, unsigned short int count);
 extern int disablePorts (unsigned short int base, unsigned short int count);
 extern unsigned char readPort1 (unsigned short int port);
 extern void writePort1 (unsigned short int port, unsigned char value);
 
-extern int monitorKeyEvents (void);
+
+#include "keys.h"
+
+extern int monitorKeyEvents (const KeyboardProperties *keyboardProperties);
+
 
 #ifdef __cplusplus
 }

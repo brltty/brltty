@@ -38,7 +38,7 @@ hasEvent (int device, uint16_t type, uint16_t code, uint16_t max) {
 }
 
 static int
-getKeyboardDevice (void) {
+getKeyboardDevice (const KeyboardProperties *requiredProperties) {
   static int keyboardDevice = -1;
 
 #ifdef HAVE_LINUX_INPUT_H
@@ -66,12 +66,34 @@ getKeyboardDevice (void) {
 
           LogPrint(LOG_DEBUG, "testing device: %s", path);
           if ((device = open(path, O_RDONLY)) != -1) {
-            struct input_id id;
-            
-            if (ioctl(device, EVIOCGID, &id) != -1) {
-              LogPrint(LOG_DEBUG, "checking device: %s type=%04X vendor=%04X product=%04X version=%04X",
-                       path, id.bustype, id.vendor, id.product, id.version);
+            KeyboardProperties actualProperties = KEYBOARD_PROPERTIES_INITIALIZER;
+            actualProperties.device = path;
 
+            {
+              struct input_id identity;
+              if (ioctl(device, EVIOCGID, &identity) != -1) {
+                LogPrint(LOG_DEBUG, "checking device: %s type=%04X vendor=%04X product=%04X version=%04X",
+                         path, identity.bustype,
+                         identity.vendor, identity.product, identity.version);
+
+                {
+                  static const KeyboardType typeTable[] = {
+                    [BUS_USB] = KBD_TYPE_USB,
+                    [BUS_BLUETOOTH] = KBD_TYPE_Bluetooth,
+                  };
+
+                  if (identity.bustype < ARRAY_COUNT(typeTable))
+                    actualProperties.type = typeTable[identity.bustype];
+                }
+
+                actualProperties.vendor = identity.vendor;
+                actualProperties.product = identity.product;
+              } else {
+                LogPrint(LOG_DEBUG, "cannot get identity: %s: %s", path, strerror(errno));
+              }
+            }
+            
+            if (checkKeyboardProperties(requiredProperties, &actualProperties)) {
               if (hasEvent(device, EV_KEY, KEY_ENTER, KEY_MAX)) {
                 LogPrint(LOG_DEBUG, "keyboard opened: %s fd=%d", path, device);
                 keyboardDevice = device;
@@ -124,11 +146,11 @@ handleKeyEvent (const AsyncInputResult *result) {
 }
 
 int
-monitorKeyEvents (void) {
+monitorKeyEvents (const KeyboardProperties *keyboardProperties) {
   int uinput = getUinputDevice();
 
   if (uinput != -1) {
-    int keyboard = getKeyboardDevice();
+    int keyboard = getKeyboardDevice(keyboardProperties);
 
     if (keyboard != -1) {
       if (asyncRead(keyboard, sizeof(struct input_event), handleKeyEvent, NULL)) {
