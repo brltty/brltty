@@ -26,6 +26,11 @@ int
 checkKeyboardProperties (const KeyboardProperties *required, const KeyboardProperties *actual) {
   if (!required) return 1;
 
+  if (!actual) {
+    static const KeyboardProperties noProperties = KEYBOARD_PROPERTIES_INITIALIZER;
+    actual = &noProperties;
+  }
+
   if (required->device) {
     if (strcmp(required->device, actual->device) != 0)
       if (strcmp(required->device, locatePathName(actual->device)) != 0)

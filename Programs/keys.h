@@ -34,7 +34,13 @@ typedef struct {
   int vendor;
   int product;
 } KeyboardProperties;
-#define KEYBOARD_PROPERTIES_INITIALIZER {.type=KBD_TYPE_Any}
+
+#define KEYBOARD_PROPERTIES_INITIALIZER { \
+  .device = NULL, \
+  .type = KBD_TYPE_Any, \
+  .vendor = 0, \
+  .product = 0 \
+}
 
 extern int checkKeyboardProperties (const KeyboardProperties *required, const KeyboardProperties *actual);
 
