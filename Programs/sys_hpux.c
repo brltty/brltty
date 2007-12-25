@@ -247,3 +247,5 @@ cancelPcmOutput (PcmDevice *pcm) {
 #endif /* ENABLE_MIDI_SUPPORT */
 
 #include "sys_ports_none.h"
+
+#include "sys_kbd_none.h"

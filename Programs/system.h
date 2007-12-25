@@ -84,6 +84,8 @@ extern int disablePorts (unsigned short int base, unsigned short int count);
 extern unsigned char readPort1 (unsigned short int port);
 extern void writePort1 (unsigned short int port, unsigned char value);
 
+extern int interceptKeyboard (void);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

@@ -170,6 +170,8 @@ endBeep (void) {
 
 #include "sys_ports_glibc.h"
 
+#include "sys_kbd_linux.h"
+
 int
 installKernelModule (const char *name, int *status) {
   if (status && *status) return *status == 2;

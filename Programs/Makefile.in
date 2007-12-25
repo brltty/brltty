@@ -25,11 +25,100 @@ all-xbrlapi: xbrlapi$X
 
 ###############################################################################
 
+PROGRAM_OBJECTS = program.$O options.$O
+
 program.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/program.c
 
 options.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/options.c
+
+###############################################################################
+
+BASE_OBJECTS = misc.$O io_misc.$O queue.$O async.$O $(SYSTEM_OBJECT)
+
+misc.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/misc.c
+
+io_misc.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/io_misc.c
+
+queue.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/queue.c
+
+async.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/async.c
+
+###############################################################################
+
+sys_skeleton.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_skeleton.c
+
+sys_linux.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_linux.c
+
+sys_solaris.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_solaris.c
+
+sys_hpux.$O:
+	$(CC) $(CFLAGS) -I/opt/audio/include -c $(SRC_DIR)/sys_hpux.c
+
+sys_openbsd.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_openbsd.c
+
+sys_freebsd.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_freebsd.c
+
+sys_kfreebsd.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_kfreebsd.c
+
+sys_netbsd.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_netbsd.c
+
+sys_osf.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_osf.c
+
+sys_qnx.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_qnx.c
+
+sys_hurd.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_hurd.c
+
+sys_darwin.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_darwin.c
+
+sys_windows.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_windows.c
+
+sys_msdos.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_msdos.c
+
+###############################################################################
+
+HOST_OBJECTS = host_prog.$O host_opts.$O host_misc.$O host_io.$O host_queue.$O host_async.$O host_sys.$O
+
+host_prog.$O: options.$O
+	$(HOSTCC) $(HOSTCFLAGS) -o $@ -c $(SRC_DIR)/program.c
+
+host_opts.$O: options.$O
+	$(HOSTCC) $(HOSTCFLAGS) -o $@ -c $(SRC_DIR)/options.c
+
+host_misc.$O: misc.$O
+	$(HOSTCC) $(HOSTCFLAGS) -o $@ -c $(SRC_DIR)/misc.c
+
+host_io.$O: io_misc.$O
+	$(HOSTCC) $(HOSTCFLAGS) -o $@ -c $(SRC_DIR)/io_misc.c
+
+host_queue.$O: io_misc.$O
+	$(HOSTCC) $(HOSTCFLAGS) -o $@ -c $(SRC_DIR)/queue.c
+
+host_async.$O: io_misc.$O
+	$(HOSTCC) $(HOSTCFLAGS) -o $@ -c $(SRC_DIR)/async.c
+
+host_sys.$O: $(SYSTEM_OBJECT)
+	$(HOSTCC) $(HOSTCFLAGS) -o $@ -c $(SRC_DIR)/$(SYSTEM_OBJECT:.${O}=.c)
+
+###############################################################################
 
 lock.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/lock.c
@@ -169,7 +258,7 @@ uninstall-api-bindings:
 
 ###############################################################################
 
-BRLTTY_OBJECTS = main.$O config.$O program.$O options.$O misc.$O mount.$O $(SYSTEM_OBJECT) io_misc.$O queue.$O async.$O auth.$O cut.$O cmd.$O kbd.$O lock.$O charset.$O $(TBL_OBJECTS) $(CTB_OBJECTS) touch.$O serial.$O $(USB_OBJECTS) $(BLUETOOTH_OBJECTS) drivers.$O $(SCREEN_OBJECTS) $(SCREEN_DRIVER_OBJECTS) route.$O brl.$O $(BRAILLE_DRIVER_OBJECTS) $(SPEECH_OBJECT) $(SPEECH_DRIVER_OBJECTS) $(TUNE_OBJECTS) $(API_OBJECTS)
+BRLTTY_OBJECTS = main.$O $(PROGRAM_OBJECTS) config.$O $(BASE_OBJECTS) mount.$O auth.$O cut.$O cmd.$O kbd.$O lock.$O charset.$O $(TBL_OBJECTS) $(CTB_OBJECTS) touch.$O serial.$O $(USB_OBJECTS) $(BLUETOOTH_OBJECTS) drivers.$O $(SCREEN_OBJECTS) $(SCREEN_DRIVER_OBJECTS) route.$O brl.$O $(BRAILLE_DRIVER_OBJECTS) $(SPEECH_OBJECT) $(SPEECH_DRIVER_OBJECTS) $(TUNE_OBJECTS) $(API_OBJECTS)
 
 brltty$X: $(BRLTTY_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(SPEECH_DRIVER_LIBRARIES) $(SCREEN_DRIVER_LIBRARIES) $(LDLIBS)
@@ -180,17 +269,8 @@ main.$O:
 config.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/config.c
 
-queue.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/queue.c
-
-async.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/async.c
-
 auth.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/auth.c
-
-misc.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/misc.c
 
 mount.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/mount.c
@@ -210,9 +290,6 @@ cmd.$O:
 kbd.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/kbd.c
 
-io_misc.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/io_misc.c
-
 serial.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/serial.c
 
@@ -221,50 +298,6 @@ brl.$O:
 
 spk.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/spk.c
-
-###############################################################################
-
-sys_skeleton.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_skeleton.c
-
-sys_linux.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_linux.c
-
-sys_solaris.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_solaris.c
-
-sys_hpux.$O:
-	$(CC) $(CFLAGS) -I/opt/audio/include -c $(SRC_DIR)/sys_hpux.c
-
-sys_openbsd.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_openbsd.c
-
-sys_freebsd.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_freebsd.c
-
-sys_kfreebsd.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_kfreebsd.c
-
-sys_netbsd.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_netbsd.c
-
-sys_osf.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_osf.c
-
-sys_qnx.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_qnx.c
-
-sys_hurd.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_hurd.c
-
-sys_darwin.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_darwin.c
-
-sys_windows.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_windows.c
-
-sys_msdos.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/sys_msdos.c
 
 ###############################################################################
 
@@ -311,7 +344,7 @@ bluetooth_linux.$O:
 
 ###############################################################################
 
-BRLTEST_OBJECTS = brltest.$O program.$O options.$O misc.$O mount.$O $(SYSTEM_OBJECT) io_misc.$O queue.$O async.$O tbl.$O tbl_native.$O cmd.$O charset.$O lock.$O drivers.$O brl.$O $(BRAILLE_DRIVER_OBJECTS) touch.$O serial.$O $(USB_OBJECTS) $(BLUETOOTH_OBJECTS)
+BRLTEST_OBJECTS = brltest.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) mount.$O tbl.$O tbl_native.$O cmd.$O charset.$O lock.$O drivers.$O brl.$O $(BRAILLE_DRIVER_OBJECTS) touch.$O serial.$O $(USB_OBJECTS) $(BLUETOOTH_OBJECTS)
 
 brltest$X: $(BRLTEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTEST_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(LDLIBS)
@@ -321,7 +354,7 @@ brltest.$O:
 
 ###############################################################################
 
-SPKTEST_OBJECTS = spktest.$O program.$O options.$O misc.$O $(SYSTEM_OBJECT) io_misc.$O queue.$O drivers.$O spk.$O $(SPEECH_DRIVER_OBJECTS)
+SPKTEST_OBJECTS = spktest.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) drivers.$O spk.$O $(SPEECH_DRIVER_OBJECTS)
 
 spktest$X: $(SPKTEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(SPKTEST_OBJECTS) $(SPEECH_DRIVER_LIBRARIES) $(LDLIBS)
@@ -331,7 +364,7 @@ spktest.$O:
 
 ###############################################################################
 
-SCRTEST_OBJECTS = scrtest.$O program.$O options.$O misc.$O $(SYSTEM_OBJECT) io_misc.$O async.$O queue.$O drivers.$O $(SCREEN_OBJECTS) $(SCREEN_DRIVER_OBJECTS) route.$O
+SCRTEST_OBJECTS = scrtest.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) drivers.$O $(SCREEN_OBJECTS) $(SCREEN_DRIVER_OBJECTS) route.$O
 
 scrtest$X: $(SCRTEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(SCRTEST_OBJECTS) $(SCREEN_DRIVER_LIBRARIES) $(LDLIBS)
@@ -341,7 +374,7 @@ scrtest.$O:
 
 ###############################################################################
 
-TBLTEST_OBJECTS = tbltest.$O program.$O options.$O misc.$O $(SYSTEM_OBJECT) io_misc.$O lock.$O charset.$O tbl.$O tbl_native.$O tbl_gnome.$O
+TBLTEST_OBJECTS = tbltest.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) lock.$O charset.$O tbl.$O tbl_native.$O tbl_gnome.$O
 
 tbltest$X: $(TBLTEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(TBLTEST_OBJECTS) $(LDLIBS)
@@ -351,7 +384,7 @@ tbltest.$O:
 
 ###############################################################################
 
-CTBTEST_OBJECTS = ctbtest.$O program.$O options.$O misc.$O $(SYSTEM_OBJECT) io_misc.$O ctb_compile.$O ctb_translate.$O tbl.$O tbl_native.$O
+CTBTEST_OBJECTS = ctbtest.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) ctb_compile.$O ctb_translate.$O tbl.$O tbl_native.$O
 
 ctbtest$X: $(CTBTEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(CTBTEST_OBJECTS) $(LDLIBS)
@@ -361,7 +394,7 @@ ctbtest.$O:
 
 ###############################################################################
 
-TUNETEST_OBJECTS = tunetest.$O program.$O options.$O misc.$O $(SYSTEM_OBJECT) io_misc.$O $(TUNE_OBJECTS)
+TUNETEST_OBJECTS = tunetest.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) $(TUNE_OBJECTS)
 
 tunetest$X: $(TUNETEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(TUNETEST_OBJECTS) $(LDLIBS)
@@ -371,7 +404,7 @@ tunetest.$O:
 
 ###############################################################################
 
-APITEST_OBJECTS = apitest.$O cmd.$O charset.$O lock.$O program.$O options.$O misc.$O $(SYSTEM_OBJECT) io_misc.$O
+APITEST_OBJECTS = apitest.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) cmd.$O charset.$O lock.$O
 
 apitest$X: $(APITEST_OBJECTS) api
 	$(CC) $(LDFLAGS) -o $@ $(APITEST_OBJECTS) -L$(BLD_DIR) -lbrlapi $(LDLIBS)
@@ -427,26 +460,7 @@ scr.auto.h: $(SRC_DIR)/mkdrvtab
 
 ###############################################################################
 
-HOSTOPTS_OBJECTS = host_prog.$O host_opts.$O host_misc.$O host_sys.$O host_io.$O
-
-host_prog.$O: options.$O
-	$(HOSTCC) $(HOSTCFLAGS) -o $@ -c $(SRC_DIR)/program.c
-
-host_opts.$O: options.$O
-	$(HOSTCC) $(HOSTCFLAGS) -o $@ -c $(SRC_DIR)/options.c
-
-host_misc.$O: misc.$O
-	$(HOSTCC) $(HOSTCFLAGS) -o $@ -c $(SRC_DIR)/misc.c
-
-host_sys.$O: $(SYSTEM_OBJECT)
-	$(HOSTCC) $(HOSTCFLAGS) -o $@ -c $(SRC_DIR)/$(SYSTEM_OBJECT:.${O}=.c)
-
-host_io.$O: io_misc.$O
-	$(HOSTCC) $(HOSTCFLAGS) -o $@ -c $(SRC_DIR)/io_misc.c
-
-###############################################################################
-
-TXT2HLP_OBJECTS = txt2hlp.$O $(HOSTOPTS_OBJECTS)
+TXT2HLP_OBJECTS = txt2hlp.$O $(HOST_OBJECTS)
 
 txt2hlp: $(TXT2HLP_OBJECTS)
 	$(HOSTCC) $(HOSTLDFLAGS) -o $@ $(TXT2HLP_OBJECTS) $(LDLIBS)
@@ -456,7 +470,7 @@ txt2hlp.$O:
 
 ###############################################################################
 
-TBL2HEX_OBJECTS = tbl2hex.$O host_tbl.$O host_tbl_native.$O $(HOSTOPTS_OBJECTS)
+TBL2HEX_OBJECTS = tbl2hex.$O $(HOST_OBJECTS) host_tbl.$O host_tbl_native.$O
 
 tbl2hex$X: $(TBL2HEX_OBJECTS)
 	$(HOSTCC) $(HOSTLDFLAGS) -o $@ $(TBL2HEX_OBJECTS) $(LDLIBS)
@@ -472,7 +486,7 @@ host_tbl_native.$O: tbl_native.$O
 
 ###############################################################################
 
-XBRLAPI_OBJECTS = xbrlapi.$O program.$O options.$O misc.$O $(SYSTEM_OBJECT) io_misc.$O
+XBRLAPI_OBJECTS = xbrlapi.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS)
 
 xbrlapi$X: $(XBRLAPI_OBJECTS) api
 	$(CC) $(LDFLAGS) -o $@ $(XBRLAPI_OBJECTS) -L. -lbrlapi $(XLIBS) $(LDLIBS)
