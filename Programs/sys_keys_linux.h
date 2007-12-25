@@ -97,19 +97,45 @@ getKeyboardDevice (void) {
 }
 
 static size_t
-handleKeyboardEvent (const AsyncInputResult *result) {
+handleKeyEvent (const AsyncInputResult *result) {
+  if (result->error) {
+    LogPrint(LOG_DEBUG, "keyboard read error: %s", strerror(result->error));
+  } else if (result->end) {
+    LogPrint(LOG_DEBUG, "keyboard end-of-file");
+  } else {
+#ifdef HAVE_LINUX_INPUT_H
+    const struct input_event *event = result->buffer;
+
+    if (result->length >= sizeof(*event)) {
+      if (event->type == EV_KEY) {
+        writeKeyEvent(event->code, event->value);
+      } else {
+        writeInputEvent(event);
+      }
+
+      return sizeof(*event);
+    }
+#else /* HAVE_LINUX_INPUT_H */
+    return result->length;
+#endif /* HAVE_LINUX_INPUT_H */
+  }
+
   return 0;
 }
 
 int
-interceptKeyboard (void) {
+monitorKeyEvents (void) {
   int uinput = getUinputDevice();
 
   if (uinput != -1) {
     int keyboard = getKeyboardDevice();
 
     if (keyboard != -1) {
-      if (asyncRead(keyboard, sizeof(struct input_event), handleKeyboardEvent, NULL)) {
+      if (asyncRead(keyboard, sizeof(struct input_event), handleKeyEvent, NULL)) {
+#ifdef EVIOCGRAB
+        ioctl(keyboard, EVIOCGRAB, 1);
+#endif /* EVIOCGRAB */
+
         return 1;
       }
     }

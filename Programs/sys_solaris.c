@@ -136,4 +136,4 @@ endBeep (void) {
 
 #include "sys_ports_none.h"
 
-#include "sys_kbd_none.h"
+#include "sys_keys_none.h"

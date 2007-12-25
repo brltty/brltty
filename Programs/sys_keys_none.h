@@ -15,9 +15,9 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#warning keyboard interception support not available on this platform
+#warning key event support not available on this platform
 
 int
-interceptKeyboard (void) {
+monitorKeyEvents (void) {
   return 0;
 }

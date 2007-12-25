@@ -27,6 +27,29 @@
 #include "system.h"
 #include "sys_linux.h"
 
+#ifdef HAVE_LINUX_INPUT_H
+#include <linux/input.h>
+
+static int
+writeInputEvent (const struct input_event *event) {
+  int device = getUinputDevice();
+
+  if (device != -1) {
+    if (write(device, event, sizeof(*event)) != -1) {
+      return 1;
+    } else {
+      LogError("write(struct input_event)");
+    }
+  }
+
+  return 0;
+}
+#endif /* HAVE_LINUX_INPUT_H */
+
+#ifdef HAVE_LINUX_UINPUT_H
+#include <linux/uinput.h>
+#endif /* HAVE_LINUX_UINPUT_H */
+
 char *
 getProgramPath (void) {
   char *path = NULL;
@@ -170,7 +193,7 @@ endBeep (void) {
 
 #include "sys_ports_glibc.h"
 
-#include "sys_kbd_linux.h"
+#include "sys_keys_linux.h"
 
 int
 installKernelModule (const char *name, int *status) {
@@ -281,14 +304,6 @@ openCharacterDevice (const char *name, int flags, int major, int minor) {
   return descriptor;
 }
 
-#ifdef HAVE_LINUX_INPUT_H
-#include <linux/input.h>
-#endif /* HAVE_LINUX_INPUT_H */
-
-#ifdef HAVE_LINUX_UINPUT_H
-#include <linux/uinput.h>
-#endif /* HAVE_LINUX_UINPUT_H */
-
 int
 getUinputDevice (void) {
   static int uinputDevice = -1;
@@ -357,28 +372,23 @@ static BITMASK(pressedKeys, KEY_MAX+1, char);
 
 int
 writeKeyEvent (int key, int press) {
-  int device = getUinputDevice();
-
-  if (device != -1) {
 #ifdef HAVE_LINUX_INPUT_H
-    struct input_event event;
+  struct input_event event;
 
-    event.type = EV_KEY;
-    event.code = key;
-    event.value = press;
+  event.type = EV_KEY;
+  event.code = key;
+  event.value = press;
 
-    if (write(device, &event, sizeof(event)) != -1) {
-      if (press) {
-        BITMASK_SET(pressedKeys, key);
-      } else {
-        BITMASK_CLEAR(pressedKeys, key);
-      }
-      return 1;
+  if (writeInputEvent(&event)) {
+    if (press) {
+      BITMASK_SET(pressedKeys, key);
+    } else {
+      BITMASK_CLEAR(pressedKeys, key);
     }
 
-    LogError("write(struct input_event)");
-#endif /* HAVE_LINUX_INPUT_H */
+    return 1;
   }
+#endif /* HAVE_LINUX_INPUT_H */
 
   return 0;
 }
