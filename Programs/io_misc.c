@@ -233,10 +233,11 @@ canWrite:
   }
 }
 
-#ifndef __MINGW32__
 int
 changeOpenFlags (int fileDescriptor, int flagsToClear, int flagsToSet) {
+#if defined(F_GETFL) && defined(F_SETFL)
   int flags;
+
   if ((flags = fcntl(fileDescriptor, F_GETFL)) != -1) {
     flags &= ~flagsToClear;
     flags |= flagsToSet;
@@ -248,6 +249,10 @@ changeOpenFlags (int fileDescriptor, int flagsToClear, int flagsToSet) {
   } else {
     LogError("F_GETFL");
   }
+#else /* defined(F_GETFL) && defined(F_SETFL) */
+  errno = ENOSYS;
+#endif /* defined(F_GETFL) && defined(F_SETFL) */
+
   return 0;
 }
 
@@ -262,11 +267,22 @@ setOpenFlags (int fileDescriptor, int state, int flags) {
 
 int
 setBlockingIo (int fileDescriptor, int state) {
-  return setOpenFlags(fileDescriptor, !state, O_NONBLOCK);
+#ifdef O_NONBLOCK
+  if (setOpenFlags(fileDescriptor, !state, O_NONBLOCK)) return 1;
+#else /* O_NONBLOCK */
+  errno = ENOSYS;
+#endif /* O_NONBLOCK */
+
+  return 0;
 }
 
 int
 setCloseOnExec (int fileDescriptor, int state) {
-  return fcntl(fileDescriptor, F_SETFD, (state? FD_CLOEXEC: 0)) != -1;
+#if defined(F_SETFD) && defined(FD_CLOEXEC)
+  if (fcntl(fileDescriptor, F_SETFD, (state? FD_CLOEXEC: 0)) != -1) return 1;
+#else /* defined(F_SETFD) && defined(FD_CLOEXEC) */
+  errno = ENOSYS;
+#endif /* defined(F_SETFD) && defined(FD_CLOEXEC) */
+
+  return 0;
 }
-#endif /* __MINGW32__ */
