@@ -417,7 +417,7 @@ xtInterpretScanCode (int *command, unsigned char byte) {
 }
 
 void
-resetScanCodesState (void) {
+resetScanCodes (void) {
   USE_SCAN_CODES(AT, basic);
   AT_scanCodeModifiers = 0;
 

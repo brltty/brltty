@@ -22,7 +22,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
-extern void resetScanCodesState (void);
+extern void resetScanCodes (void);
 extern int atInterpretScanCode (int *command, unsigned char byte);
 extern int xtInterpretScanCode (int *command, unsigned char byte);
 

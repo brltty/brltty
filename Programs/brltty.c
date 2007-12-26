@@ -1123,7 +1123,7 @@ runProgram (void) {
   highlightWindow();
   checkPointer();
 
-  resetScanCodesState();
+  resetScanCodes();
   resetBlinkingStates();
   if (prefs.autorepeat) resetAutorepeat();
 
@@ -1601,7 +1601,7 @@ runProgram (void) {
 
             case BRL_CMD_RESTARTBRL:
               restartBrailleDriver();
-              resetScanCodesState();
+              resetScanCodes();
               break;
             case BRL_CMD_PASTE:
               if (isLiveScreen() && !routingProcess) {
