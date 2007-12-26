@@ -22,7 +22,12 @@
 #include "keys.h"
 #include "misc.h"
 
-const KeyboardProperties noKeyboardProperties = KEYBOARD_PROPERTIES_INITIALIZER;
+const KeyboardProperties anyKeyboard = {
+  .device = NULL,
+  .type = KBD_TYPE_Any,
+  .vendor = 0,
+  .product = 0
+};
 
 int
 parseKeyboardProperties (KeyboardProperties *properties, const char *parameters) {
@@ -38,7 +43,7 @@ parseKeyboardProperties (KeyboardProperties *properties, const char *parameters)
   int ok = 1;
 
   logParameters(names, values, "Keyboard Property");
-  *properties = noKeyboardProperties;
+  *properties = anyKeyboard;
 
   if (*values[KBD_PARM_DEVICE]) {
     properties->device = values[KBD_PARM_DEVICE];
@@ -89,7 +94,7 @@ parseKeyboardProperties (KeyboardProperties *properties, const char *parameters)
 int
 checkKeyboardProperties (const KeyboardProperties *actual, const KeyboardProperties *required) {
   if (!required) return 1;
-  if (!actual)  actual = &noKeyboardProperties;
+  if (!actual)  actual = &anyKeyboard;
 
   if (required->device) {
     if (strcmp(required->device, actual->device) != 0)

@@ -55,7 +55,7 @@ getKeyboardDevice (const KeyboardProperties *requiredProperties) {
 
           LogPrint(LOG_DEBUG, "checking device: %s", path);
           if ((device = open(path, O_RDONLY)) != -1) {
-            KeyboardProperties actualProperties = KEYBOARD_PROPERTIES_INITIALIZER;
+            KeyboardProperties actualProperties = anyKeyboard;
             actualProperties.device = path;
 
             {

@@ -36,12 +36,7 @@ typedef struct {
   int product;
 } KeyboardProperties;
 
-#define KEYBOARD_PROPERTIES_INITIALIZER { \
-  .device = NULL, \
-  .type = KBD_TYPE_Any, \
-  .vendor = 0, \
-  .product = 0 \
-}
+extern const KeyboardProperties anyKeyboard;
 
 extern int parseKeyboardProperties (KeyboardProperties *properties, const char *parameters);
 extern int checkKeyboardProperties (const KeyboardProperties *actual, const KeyboardProperties *required);
