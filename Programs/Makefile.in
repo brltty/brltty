@@ -243,7 +243,7 @@ uninstall-api-bindings:
 
 ###############################################################################
 
-BRLTTY_OBJECTS = brltty.$O $(PROGRAM_OBJECTS) config.$O $(BASE_OBJECTS) mount.$O auth.$O cut.$O cmd.$O kbd.$O lock.$O charset.$O $(TBL_OBJECTS) $(CTB_OBJECTS) touch.$O serial.$O $(USB_OBJECTS) $(BLUETOOTH_OBJECTS) drivers.$O $(SCREEN_OBJECTS) $(SCREEN_DRIVER_OBJECTS) route.$O brl.$O $(BRAILLE_DRIVER_OBJECTS) $(SPEECH_OBJECT) $(SPEECH_DRIVER_OBJECTS) $(TUNE_OBJECTS) $(API_OBJECTS)
+BRLTTY_OBJECTS = brltty.$O $(PROGRAM_OBJECTS) config.$O $(BASE_OBJECTS) mount.$O auth.$O cut.$O cmd.$O scancodes.$O lock.$O charset.$O $(TBL_OBJECTS) $(CTB_OBJECTS) touch.$O serial.$O $(USB_OBJECTS) $(BLUETOOTH_OBJECTS) drivers.$O $(SCREEN_OBJECTS) $(SCREEN_DRIVER_OBJECTS) route.$O brl.$O $(BRAILLE_DRIVER_OBJECTS) $(SPEECH_OBJECT) $(SPEECH_DRIVER_OBJECTS) $(TUNE_OBJECTS) $(API_OBJECTS)
 
 brltty$X: $(BRLTTY_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(SPEECH_DRIVER_LIBRARIES) $(SCREEN_DRIVER_LIBRARIES) $(LDLIBS)
@@ -272,8 +272,8 @@ touch.$O:
 cmd.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/cmd.c
 
-kbd.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/kbd.c
+scancodes.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/scancodes.c
 
 serial.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/serial.c

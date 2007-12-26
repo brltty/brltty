@@ -15,21 +15,19 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_KBD
-#define BRLTTY_INCLUDED_KBD
+#ifndef BRLTTY_INCLUDED_SCANCODES
+#define BRLTTY_INCLUDED_SCANCODES
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-extern void kbdResetState (void);
-
-extern int kbdAT_interpretScanCode (int *command, unsigned char byte);
-
-extern int kbdXT_interpretScanCode (int *command, unsigned char byte);
+extern void resetScanCodesState (void);
+extern int atInterpretScanCode (int *command, unsigned char byte);
+extern int xtInterpretScanCode (int *command, unsigned char byte);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_KBD */
+#endif /* BRLTTY_INCLUDED_SCANCODES */

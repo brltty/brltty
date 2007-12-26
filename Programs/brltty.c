@@ -34,7 +34,7 @@
 #include "cut.h"
 #include "touch.h"
 #include "cmd.h"
-#include "kbd.h"
+#include "scancodes.h"
 #include "scr.h"
 #include "brl.h"
 #ifdef ENABLE_SPEECH_SUPPORT
@@ -1123,7 +1123,7 @@ runProgram (void) {
   highlightWindow();
   checkPointer();
 
-  kbdResetState();
+  resetScanCodesState();
   resetBlinkingStates();
   if (prefs.autorepeat) resetAutorepeat();
 
@@ -1601,7 +1601,7 @@ runProgram (void) {
 
             case BRL_CMD_RESTARTBRL:
               restartBrailleDriver();
-              kbdResetState();
+              resetScanCodesState();
               break;
             case BRL_CMD_PASTE:
               if (isLiveScreen() && !routingProcess) {
@@ -1875,16 +1875,16 @@ runProgram (void) {
                   break;
 
                 case BRL_BLK_PASSAT:
-                  if (flags & BRL_FLG_KBD_RELEASE) kbdAT_interpretScanCode(&command, 0XF0);
-                  if (flags & BRL_FLG_KBD_EMUL0) kbdAT_interpretScanCode(&command, 0XE0);
-                  if (flags & BRL_FLG_KBD_EMUL1) kbdAT_interpretScanCode(&command, 0XE1);
-                  if (kbdAT_interpretScanCode(&command, arg)) goto doCommand;
+                  if (flags & BRL_FLG_KBD_RELEASE) atInterpretScanCode(&command, 0XF0);
+                  if (flags & BRL_FLG_KBD_EMUL0) atInterpretScanCode(&command, 0XE0);
+                  if (flags & BRL_FLG_KBD_EMUL1) atInterpretScanCode(&command, 0XE1);
+                  if (atInterpretScanCode(&command, arg)) goto doCommand;
                   break;
 
                 case BRL_BLK_PASSXT:
-                  if (flags & BRL_FLG_KBD_EMUL0) kbdXT_interpretScanCode(&command, 0XE0);
-                  if (flags & BRL_FLG_KBD_EMUL1) kbdXT_interpretScanCode(&command, 0XE1);
-                  if (kbdXT_interpretScanCode(&command, arg)) goto doCommand;
+                  if (flags & BRL_FLG_KBD_EMUL0) xtInterpretScanCode(&command, 0XE0);
+                  if (flags & BRL_FLG_KBD_EMUL1) xtInterpretScanCode(&command, 0XE1);
+                  if (xtInterpretScanCode(&command, arg)) goto doCommand;
                   break;
 
                 case BRL_BLK_PASSPS2:

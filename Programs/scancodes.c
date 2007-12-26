@@ -17,7 +17,7 @@
 
 #include "prologue.h"
 
-#include "kbd.h"
+#include "scancodes.h"
 #include "brldefs.h"
 
 typedef enum {
@@ -256,7 +256,7 @@ static size_t AT_scanCodesSize;
 static unsigned int AT_scanCodeModifiers;
 
 int
-kbdAT_interpretScanCode (int *command, unsigned char byte) {
+atInterpretScanCode (int *command, unsigned char byte) {
   if (byte == 0XF0) {
     MOD_SET(MOD_RELEASE, AT_scanCodeModifiers);
   } else if (byte == 0XE0) {
@@ -400,7 +400,7 @@ static size_t XT_scanCodesSize;
 static unsigned int XT_scanCodeModifiers;
 
 int
-kbdXT_interpretScanCode (int *command, unsigned char byte) {
+xtInterpretScanCode (int *command, unsigned char byte) {
   if (byte == 0XE0) {
     USE_SCAN_CODES(XT, emul0);
   } else if (byte == 0XE1) {
@@ -417,7 +417,7 @@ kbdXT_interpretScanCode (int *command, unsigned char byte) {
 }
 
 void
-kbdResetState (void) {
+resetScanCodesState (void) {
   USE_SCAN_CODES(AT, basic);
   AT_scanCodeModifiers = 0;
 
