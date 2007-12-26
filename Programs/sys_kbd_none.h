@@ -15,9 +15,9 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#warning key event support not available on this platform
+#warning keyboard monitor support not available on this platform
 
 int
-monitorKeyEvents (const KeyboardProperties *keyboardProperties) {
+startKeyboardMonitor (const KeyboardProperties *keyboardProperties) {
   return 0;
 }

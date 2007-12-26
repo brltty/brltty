@@ -146,7 +146,7 @@ handleKeyEvent (const AsyncInputResult *result) {
 }
 
 int
-monitorKeyEvents (const KeyboardProperties *keyboardProperties) {
+startKeyboardMonitor (const KeyboardProperties *keyboardProperties) {
   int uinput = getUinputDevice();
 
   if (uinput != -1) {
