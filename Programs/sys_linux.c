@@ -31,6 +31,17 @@
 #include <linux/input.h>
 
 static int
+hasInputEvent (int device, uint16_t type, uint16_t code, uint16_t max) {
+  BITMASK(mask, max+1, long);
+
+  if (ioctl(device, EVIOCGBIT(type, max), mask) != -1)
+    if (BITMASK_TEST(mask, code))
+      return 1;
+
+  return 0;
+}
+
+static int
 writeInputEvent (const struct input_event *event) {
   int device = getUinputDevice();
 

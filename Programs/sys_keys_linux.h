@@ -27,17 +27,6 @@
 #include "async.h"
 
 static int
-hasEvent (int device, uint16_t type, uint16_t code, uint16_t max) {
-  BITMASK(mask, max+1, long);
-
-  if (ioctl(device, EVIOCGBIT(type, max), mask) != -1)
-    if (BITMASK_TEST(mask, code))
-      return 1;
-
-  return 0;
-}
-
-static int
 getKeyboardDevice (const KeyboardProperties *requiredProperties) {
   static int keyboardDevice = -1;
 
@@ -72,14 +61,23 @@ getKeyboardDevice (const KeyboardProperties *requiredProperties) {
             {
               struct input_id identity;
               if (ioctl(device, EVIOCGID, &identity) != -1) {
-                LogPrint(LOG_DEBUG, "checking device: %s type=%04X vendor=%04X product=%04X version=%04X",
+                LogPrint(LOG_DEBUG, "device identity: %s type=%04X vendor=%04X product=%04X version=%04X",
                          path, identity.bustype,
                          identity.vendor, identity.product, identity.version);
 
                 {
                   static const KeyboardType typeTable[] = {
+#ifdef BUS_I8042
+                    [BUS_I8042] = KBD_TYPE_PS2,
+#endif /* BUS_I8042 */
+
+#ifdef BUS_USB
                     [BUS_USB] = KBD_TYPE_USB,
+#endif /* BUS_USB */
+
+#ifdef BUS_BLUETOOTH
                     [BUS_BLUETOOTH] = KBD_TYPE_Bluetooth,
+#endif /* BUS_BLUETOOTH */
                   };
 
                   if (identity.bustype < ARRAY_COUNT(typeTable))
@@ -89,12 +87,14 @@ getKeyboardDevice (const KeyboardProperties *requiredProperties) {
                 actualProperties.vendor = identity.vendor;
                 actualProperties.product = identity.product;
               } else {
-                LogPrint(LOG_DEBUG, "cannot get identity: %s: %s", path, strerror(errno));
+                LogPrint(LOG_DEBUG, "cannot get device identity: %s: %s", path, strerror(errno));
               }
             }
             
             if (checkKeyboardProperties(requiredProperties, &actualProperties)) {
-              if (hasEvent(device, EV_KEY, KEY_ENTER, KEY_MAX)) {
+              LogPrint(LOG_DEBUG, "testing device: %s", path);
+
+              if (hasInputEvent(device, EV_KEY, KEY_ENTER, KEY_MAX)) {
                 LogPrint(LOG_DEBUG, "keyboard opened: %s fd=%d", path, device);
                 keyboardDevice = device;
                 break;
