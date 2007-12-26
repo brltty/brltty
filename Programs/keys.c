@@ -22,14 +22,74 @@
 #include "keys.h"
 #include "misc.h"
 
-int
-checkKeyboardProperties (const KeyboardProperties *required, const KeyboardProperties *actual) {
-  if (!required) return 1;
+const KeyboardProperties noKeyboardProperties = KEYBOARD_PROPERTIES_INITIALIZER;
 
-  if (!actual) {
-    static const KeyboardProperties noProperties = KEYBOARD_PROPERTIES_INITIALIZER;
-    actual = &noProperties;
+int
+parseKeyboardProperties (KeyboardProperties *properties, const char *parameters) {
+  typedef enum {
+    KBD_PARM_DEVICE,
+    KBD_PARM_TYPE,
+    KBD_PARM_VENDOR,
+    KBD_PARM_PRODUCT
+  } KeyboardParameter;
+
+  static const char *const names[] = {"device", "type", "vendor", "product", NULL};
+  char **values = getParameters(names, NULL, parameters);
+  int ok = 1;
+
+  logParameters(names, values, "Keyboard Property");
+  *properties = noKeyboardProperties;
+
+  if (*values[KBD_PARM_DEVICE]) {
+    properties->device = values[KBD_PARM_DEVICE];
   }
+
+  if (*values[KBD_PARM_TYPE]) {
+    static const char *choices[] = {"any", "ps2", "usb", "bluetooth", NULL};
+    unsigned int choice;
+
+    if (validateChoice(&choice, values[KBD_PARM_TYPE], choices)) {
+      properties->type = choice;
+    } else {
+      LogPrint(LOG_WARNING, "invalid keyboard type: %s", values[KBD_PARM_TYPE]);
+      ok = 0;
+    }
+  }
+
+  if (*values[KBD_PARM_VENDOR]) {
+    static const int minimum = 0;
+    static const int maximum = 0xFFFF;
+    int value;
+
+    if (validateInteger(&value, values[KBD_PARM_VENDOR], &minimum, &maximum)) {
+      properties->vendor = value;
+    } else {
+      LogPrint(LOG_WARNING, "invalid keyboard vendor code: %s", values[KBD_PARM_VENDOR]);
+      ok = 0;
+    }
+  }
+
+  if (*values[KBD_PARM_PRODUCT]) {
+    static const int minimum = 0;
+    static const int maximum = 0xFFFF;
+    int value;
+
+    if (validateInteger(&value, values[KBD_PARM_PRODUCT], &minimum, &maximum)) {
+      properties->product = value;
+    } else {
+      LogPrint(LOG_WARNING, "invalid keyboard product code: %s", values[KBD_PARM_PRODUCT]);
+      ok = 0;
+    }
+  }
+
+  deallocateStrings(values);
+  return ok;
+}
+
+int
+checkKeyboardProperties (const KeyboardProperties *actual, const KeyboardProperties *required) {
+  if (!required) return 1;
+  if (!actual)  actual = &noKeyboardProperties;
 
   if (required->device) {
     if (strcmp(required->device, actual->device) != 0)

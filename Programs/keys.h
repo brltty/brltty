@@ -43,7 +43,8 @@ typedef struct {
   .product = 0 \
 }
 
-extern int checkKeyboardProperties (const KeyboardProperties *required, const KeyboardProperties *actual);
+extern int parseKeyboardProperties (KeyboardProperties *properties, const char *parameters);
+extern int checkKeyboardProperties (const KeyboardProperties *actual, const KeyboardProperties *required);
 
 typedef enum {
   KEY_ERROR_RollOver = 1,

@@ -990,3 +990,106 @@ int
 validateYesNo (unsigned int *value, const char *string) {
   return validateFlag(value, string, "yes", "no");
 }
+
+static void
+parseParameters (
+  char **values,
+  const char *const *names,
+  const char *qualifier,
+  const char *parameters
+) {
+  if (parameters && *parameters) {
+    char *copy = strdupWrapper(parameters);
+    char *name = copy;
+
+    while (1) {
+      char *end = strchr(name, ',');
+      int done = end == NULL;
+      if (!done) *end = 0;
+
+      if (*name) {
+        char *value = strchr(name, '=');
+        if (!value) {
+          LogPrint(LOG_ERR, "%s: %s", gettext("missing parameter value"), name);
+        } else if (value == name) {
+        noName:
+          LogPrint(LOG_ERR, "%s: %s", gettext("missing parameter name"), name);
+        } else {
+          int nameLength = value++ - name;
+          int eligible = 1;
+
+          if (qualifier) {
+            char *colon = memchr(name, ':', nameLength);
+            if (colon) {
+              int qualifierLength = colon - name;
+              int nameAdjustment = qualifierLength + 1;
+              eligible = 0;
+              if (!qualifierLength) {
+                LogPrint(LOG_ERR, "%s: %s", gettext("missing parameter qualifier"), name);
+              } else if (!(nameLength -= nameAdjustment)) {
+                goto noName;
+              } else if ((qualifierLength == strlen(qualifier)) &&
+                         (memcmp(name, qualifier, qualifierLength) == 0)) {
+                name += nameAdjustment;
+                eligible = 1;
+              }
+            }
+          }
+
+          if (eligible) {
+            unsigned int index = 0;
+            while (names[index]) {
+              if (strncasecmp(name, names[index], nameLength) == 0) {
+                free(values[index]);
+                values[index] = strdupWrapper(value);
+                break;
+              }
+              ++index;
+            }
+
+            if (!names[index]) {
+              LogPrint(LOG_ERR, "%s: %s", gettext("unsupported parameter"), name);
+            }
+          }
+        }
+      }
+
+      if (done) break;
+      name = end + 1;
+    }
+
+    free(copy);
+  }
+}
+
+char **
+getParameters (const char *const *names, const char *qualifier, const char *parameters) {
+  char **values;
+
+  if (!names) {
+    static const char *const noNames[] = {NULL};
+    names = noNames;
+  }
+
+  {
+    unsigned int count = 0;
+    while (names[count]) ++count;
+    values = mallocWrapper((count + 1) * sizeof(*values));
+    values[count] = NULL;
+    while (count--) values[count] = strdupWrapper("");
+  }
+
+  parseParameters(values, names, qualifier, parameters);
+  return values;
+}
+
+void
+logParameters (const char *const *names, char **values, char *description) {
+  if (names && values) {
+    while (*names) {
+      LogPrint(LOG_INFO, "%s: %s=%s", description, *names, *values);
+      ++names;
+      ++values;
+    }
+  }
+}

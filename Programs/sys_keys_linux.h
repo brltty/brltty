@@ -53,7 +53,7 @@ getKeyboardDevice (const KeyboardProperties *requiredProperties) {
         {
           int device;
 
-          LogPrint(LOG_DEBUG, "testing device: %s", path);
+          LogPrint(LOG_DEBUG, "checking device: %s", path);
           if ((device = open(path, O_RDONLY)) != -1) {
             KeyboardProperties actualProperties = KEYBOARD_PROPERTIES_INITIALIZER;
             actualProperties.device = path;
@@ -91,7 +91,7 @@ getKeyboardDevice (const KeyboardProperties *requiredProperties) {
               }
             }
             
-            if (checkKeyboardProperties(requiredProperties, &actualProperties)) {
+            if (checkKeyboardProperties(&actualProperties, requiredProperties)) {
               LogPrint(LOG_DEBUG, "testing device: %s", path);
 
               if (hasInputEvent(device, EV_KEY, KEY_ENTER, KEY_MAX)) {

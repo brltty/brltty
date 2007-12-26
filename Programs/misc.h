@@ -217,6 +217,9 @@ extern int validateFlag (unsigned int *value, const char *string, const char *on
 extern int validateOnOff (unsigned int *value, const char *string);
 extern int validateYesNo (unsigned int *value, const char *string);
 
+extern char **getParameters (const char *const *names, const char *qualifier, const char *parameters);
+extern void logParameters (const char *const *names, char **values, char *description);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
