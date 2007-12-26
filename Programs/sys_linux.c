@@ -204,7 +204,7 @@ endBeep (void) {
 
 #include "sys_ports_glibc.h"
 
-#include "sys_keys_linux.h"
+#include "sys_kbd_linux.h"
 
 int
 installKernelModule (const char *name, int *status) {

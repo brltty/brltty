@@ -248,4 +248,4 @@ cancelPcmOutput (PcmDevice *pcm) {
 
 #include "sys_ports_none.h"
 
-#include "sys_keys_none.h"
+#include "sys_kbd_none.h"

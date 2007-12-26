@@ -97,7 +97,7 @@ extern unsigned char readPort1 (unsigned short int port);
 extern void writePort1 (unsigned short int port, unsigned char value);
 
 
-#include "keys.h"
+#include "keyboard.h"
 
 extern int monitorKeyEvents (const KeyboardProperties *keyboardProperties);
 

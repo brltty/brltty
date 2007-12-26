@@ -34,7 +34,7 @@
 
 #include "sys_ports_windows.h"
 
-#include "sys_keys_none.h"
+#include "sys_kbd_none.h"
 
 #ifdef __CYGWIN32__
 

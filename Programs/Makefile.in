@@ -35,7 +35,7 @@ options.$O:
 
 ###############################################################################
 
-BASE_OBJECTS = misc.$O io_misc.$O queue.$O async.$O keys.$O $(SYSTEM_OBJECT)
+BASE_OBJECTS = misc.$O io_misc.$O queue.$O async.$O keyboard.$O $(SYSTEM_OBJECT)
 
 misc.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/misc.c
@@ -49,8 +49,8 @@ queue.$O:
 async.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/async.c
 
-keys.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/keys.c
+keyboard.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/keyboard.c
 
 ###############################################################################
 
@@ -98,7 +98,7 @@ sys_msdos.$O:
 
 ###############################################################################
 
-HOST_OBJECTS = host_program.$O host_options.$O host_misc.$O host_io_misc.$O host_queue.$O host_async.$O host_keys.$O host_$(SYSTEM_OBJECT)
+HOST_OBJECTS = host_program.$O host_options.$O host_misc.$O host_io_misc.$O host_queue.$O host_async.$O host_keyboard.$O host_$(SYSTEM_OBJECT)
 
 host_%.$O: %.$O
 	$(HOSTCC) $(HOSTCFLAGS) -o $@ -c $(SRC_DIR)/$*.c

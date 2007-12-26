@@ -15,8 +15,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_KEYS
-#define BRLTTY_INCLUDED_KEYS
+#ifndef BRLTTY_INCLUDED_KEYBOARD
+#define BRLTTY_INCLUDED_KEYBOARD
 
 #ifdef __cplusplus
 extern "C" {
@@ -243,4 +243,4 @@ typedef enum {
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_KEYS */
+#endif /* BRLTTY_INCLUDED_KEYBOARD */

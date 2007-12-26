@@ -19,7 +19,7 @@
 
 #include <string.h>
 
-#include "keys.h"
+#include "keyboard.h"
 #include "misc.h"
 
 const KeyboardProperties anyKeyboard = {
