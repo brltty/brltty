@@ -38,7 +38,7 @@ typedef struct {
 
 extern const KeyboardProperties anyKeyboard;
 
-extern int parseKeyboardProperties (KeyboardProperties *properties, const char *parameters);
+extern int parseKeyboardProperties (KeyboardProperties *properties, const char *string);
 extern int checkKeyboardProperties (const KeyboardProperties *actual, const KeyboardProperties *required);
 
 typedef enum {
