@@ -44,17 +44,17 @@ eubrl_bluetoothInit (BrailleDisplay *brl, char **parameters, const char *device)
   return (1);
 }
 
-int
-eubrl_bluetoothRead (BrailleDisplay *brl, char *buffer, int length)
+ssize_t
+eubrl_bluetoothRead (BrailleDisplay *brl, void *buffer, size_t length)
 {
   const int timeout = 100;
   return readData(bluetoothConnection, buffer, length, 0, timeout);
 }
 
-int
-eubrl_bluetoothWrite (BrailleDisplay *brl, char *buf, int length)
+ssize_t
+eubrl_bluetoothWrite (BrailleDisplay *brl, const void *buf, size_t length)
 {
-  int count = writeData(bluetoothConnection, (void *)buf, length);
+  ssize_t count = writeData(bluetoothConnection, buf, length);
   if (count != length) 
     {
       if (count == -1) 
@@ -88,14 +88,14 @@ eubrl_bluetoothInit (BrailleDisplay *brl, char **parameters, const char *device)
   return -1;
 }
 
-int
-eubrl_bluetoothRead(BrailleDisplay *brl, char *buffer, int length)
+ssize_t
+eubrl_bluetoothRead(BrailleDisplay *brl, void *buffer, size_t length)
 {
   return -1;
 }
 
-int
-eubrl_bluetoothWrite (BrailleDisplay *brl, char *buf, int length)
+ssize_t
+eubrl_bluetoothWrite (BrailleDisplay *brl, const void *buf, size_t length)
 {
   return 0;
 }

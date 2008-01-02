@@ -22,23 +22,20 @@
 #include "prologue.h"
 
 #include "eu_io.h"
+#include "eu_protocol.h"
 #include "io_serial.h"
 
 /** Static Members **/
 static SerialDevice *serialDevice = NULL;
-static int serialCharactersPerSecond;
 
 int
 eubrl_serialInit(BrailleDisplay *brl, char **parameters, const char *device) 
 {
   if ((serialDevice = serialOpenDevice(device))) 
     {
-      int baud = BAUD_RATE;
-
       serialSetParity(serialDevice, SERIAL_PARITY_EVEN);
-      if (serialRestartDevice(serialDevice, baud)) 
+      if (serialRestartDevice(serialDevice, SPEED)) 
 	{
-	  serialCharactersPerSecond = baud / 10;
 	  return 1;
 	}
       serialCloseDevice(serialDevice);
@@ -57,16 +54,15 @@ eubrl_serialClose (BrailleDisplay *brl) {
   return 0;
 }
 
-int
-eubrl_serialRead (BrailleDisplay *brl, char *buf, int length) 
+ssize_t
+eubrl_serialRead (BrailleDisplay *brl, void *buf, size_t length) 
 {
-  return serialReadData(serialDevice, (void*)buf, length, 0, 0);
+  return serialReadData(serialDevice, buf, length, 0, 0);
 }
 
-int
-eubrl_serialWrite (BrailleDisplay *brl, char *buffer, int length)
+ssize_t
+eubrl_serialWrite (BrailleDisplay *brl, const void *buffer, size_t length)
 {
-  int written = serialWriteData(serialDevice, buffer, length);
-  return written;
+  return serialWriteData(serialDevice, buffer, length);
 }
 

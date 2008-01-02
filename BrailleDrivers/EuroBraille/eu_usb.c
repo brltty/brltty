@@ -61,20 +61,20 @@ eubrl_usbClose (BrailleDisplay *brl)
 }
 
 
-int
-eubrl_usbRead (BrailleDisplay *brl, char *buffer, int length) 
+ssize_t
+eubrl_usbRead (BrailleDisplay *brl, void *buffer, size_t length) 
 {
-  int count = usbReapInput(usb->device, usb->definition.inputEndpoint, buffer, length, 0, 0);
+  ssize_t count = usbReapInput(usb->device, usb->definition.inputEndpoint, buffer, length, 0, 0);
   if (count == -1)
     if (errno == EAGAIN)
       count = 0;
   return count;
 }
 
-int
-eubrl_usbWrite(BrailleDisplay *brl, char *buffer, int length)
+ssize_t
+eubrl_usbWrite(BrailleDisplay *brl, const void *buffer, size_t length)
 {
-  return usbWriteEndpoint(usb->device, usb->definition.outputEndpoint, (void *)buffer, length, 1000);
+  return usbWriteEndpoint(usb->device, usb->definition.outputEndpoint, buffer, length, 1000);
 }
 
 
@@ -94,14 +94,14 @@ eubrl_usbClose (BrailleDisplay *brl)
 }
 
 
-int
-eubrl_usbRead (BrailleDisplay *brl, char *buffer, int length) 
+ssize_t
+eubrl_usbRead (BrailleDisplay *brl, void *buffer, size_t length) 
 {
   return -1;
 }
 
-int
-eubrl_usbWrite(BrailleDisplay *brl, char *buffer, int length)
+ssize_t
+eubrl_usbWrite(BrailleDisplay *brl, const void *buffer, size_t length)
 {
   return -1;
 }

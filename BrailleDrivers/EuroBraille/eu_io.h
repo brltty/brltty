@@ -43,8 +43,8 @@ typedef struct	s_eubrl_io
 {
   int			(*init)(BrailleDisplay *brl, char **params, const char* device);
   int			(*close)(BrailleDisplay *brl);
-  int			(*read)(BrailleDisplay *brl, char *buffer, int bufsize);
-  int			(*write)(BrailleDisplay *brl, char *buf, int size);
+  ssize_t		(*read)(BrailleDisplay *brl, void *buffer, size_t bufsize);
+  ssize_t		(*write)(BrailleDisplay *brl, const void *buf, size_t size);
   
   t_eubrl_iotype	ioType;
   void*			*private;
@@ -57,28 +57,28 @@ typedef struct	s_eubrl_io
 /* USB IO */
 int		eubrl_usbInit(BrailleDisplay *brl, char **params, const char *device);
 int		eubrl_usbClose(BrailleDisplay *brl);
-int		eubrl_usbRead(BrailleDisplay *brl, char *buf, int size);
-int		eubrl_usbWrite(BrailleDisplay *brl, char *buf, int size);
+ssize_t		eubrl_usbRead(BrailleDisplay *brl, void *buf, size_t size);
+ssize_t		eubrl_usbWrite(BrailleDisplay *brl, const void *buf, size_t size);
 
 
 /* Serial  IO */
 
 int		eubrl_serialInit(BrailleDisplay *brl, char **params, const char *device);
 int		eubrl_serialClose(BrailleDisplay *brl);
-int		eubrl_serialRead(BrailleDisplay *brl, char *buf, int size);
-int		eubrl_serialWrite(BrailleDisplay *brl, char *buf, int size);
+ssize_t		eubrl_serialRead(BrailleDisplay *brl, void *buf, size_t size);
+ssize_t		eubrl_serialWrite(BrailleDisplay *brl, const void *buf, size_t size);
 
 /* Bluetooth IO */
 int		eubrl_bluetoothInit(BrailleDisplay *brl, char **params, const char *device);
 int		eubrl_bluetoothClose(BrailleDisplay *brl);
-int		eubrl_bluetoothRead(BrailleDisplay *brl, char *buf, int size);
-int		eubrl_bluetoothWrite(BrailleDisplay *brl, char *buf, int size);
+ssize_t		eubrl_bluetoothRead(BrailleDisplay *brl, void *buf, size_t size);
+ssize_t		eubrl_bluetoothWrite(BrailleDisplay *brl, const void *buf, size_t size);
 
 /* Ethernet IO */
 
 int		eubrl_netInit(BrailleDisplay *brl, char **params, const char *device);
 int		eubrl_netClose(BrailleDisplay *brl);
-int		eubrl_netRead(BrailleDisplay *brl, char *buf, int size);
-int		eubrl_netWrite(BrailleDisplay *brl, char *buf, int size);
+ssize_t		eubrl_netRead(BrailleDisplay *brl, void *buf, size_t size);
+ssize_t		eubrl_netWrite(BrailleDisplay *brl, const void *buf, size_t size);
 
 #endif /* __EU_IO_H__ */

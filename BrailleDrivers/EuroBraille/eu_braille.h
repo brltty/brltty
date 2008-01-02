@@ -29,7 +29,6 @@
  */
 
 
-#define BAUD_RATE	9600
 #define CNTX_INTERNAL	0x80
 
 

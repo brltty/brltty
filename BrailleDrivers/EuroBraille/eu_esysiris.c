@@ -65,7 +65,6 @@ static int brlCols = 0;
 static enum hardwareType brlType = UNKNOWN;
 static t_eubrl_io*	iop = NULL;
 static unsigned char	brlFirmwareVersion[21];
-static unsigned int	chars_per_sec = 0;
 static int		routingMode = BRL_BLK_ROUTE;
 
 
@@ -218,7 +217,6 @@ static int esysiris_KeyboardHandling(BrailleDisplay *brl, char *packet)
 
 int	esysiris_init(BrailleDisplay *brl, t_eubrl_io *io)
 {
-  chars_per_sec = BAUD_RATE / 9;
   if (!io)
     {
       LogPrint(LOG_ERR, "eu: EsysIris: Invalid IO Subsystem driver.");
@@ -389,7 +387,6 @@ int	esysiris_writePacket(BrailleDisplay *brl,
   buf[2] = packetSize & 0x00FF;
   memcpy(buf + 3, packet, size);
   buf[sizeof(buf)-1] = ETX;
-  if (iop->ioType == IO_SERIAL)
-    brl->writeDelay += sizeof(buf) * 1000 / chars_per_sec + 1;
-  return iop->write(brl, (char *)buf, sizeof(buf));
+  updateWriteDelay(brl, sizeof(buf) );
+  return iop->write(brl, buf, sizeof(buf));
 }

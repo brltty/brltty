@@ -88,7 +88,6 @@ static int brlCols = 0; /* Number of braille cells */
 static enum clioModelType brlModel = 0; /* brl display model currently used */
 static t_eubrl_io*	iop = NULL; /* I/O methods */
 static unsigned char	brlFirmwareVersion[21];
-static unsigned int	chars_per_sec;
 static int		routingMode = BRL_BLK_ROUTE;
 static int refreshDisplay = 0;
 static struct s_clioModelType		clioModels[] =
@@ -306,7 +305,6 @@ int     clio_init(BrailleDisplay *brl, t_eubrl_io *io)
   int	leftTries = 2;
   iop = io;
 
-  chars_per_sec = BAUD_RATE / 10;
   brlCols = 0;
   if (!io)
     {
@@ -553,7 +551,7 @@ int	clio_writePacket(BrailleDisplay *brl,
   unsigned char		*p = buf;
   unsigned char		parity = 0;
   static int pktNbr = 127; /* packet number = 127 at first time */
-  int			ret = 0;
+  size_t packetSize;
 
   *p++ = SOH;
   while (size--)
@@ -569,7 +567,7 @@ int	clio_writePacket(BrailleDisplay *brl,
    if (needsEscape[parity]) *p++ = DLE;
    *p++ = parity;
    *p++ = EOT;
-   ret = iop->write(brl, (char*)buf, p - buf);
-   brl->writeDelay += (p - buf) * 1000 / chars_per_sec + 1;
-   return ret;
+   packetSize = p - buf;
+   updateWriteDelay(brl, packetSize);
+   return iop->write(brl, buf, packetSize);
 }

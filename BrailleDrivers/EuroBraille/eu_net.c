@@ -252,24 +252,24 @@ eubrl_netInit(BrailleDisplay *brl, char **params, const char* device)
   return (1);
 }
 
-int
-eubrl_netRead(BrailleDisplay *brl, char *buf, int bufsize)
+ssize_t
+eubrl_netRead(BrailleDisplay *brl, void *buf, size_t bufsize)
 {
   if (connectionStatus != NET_CONNECTED)
     {
       LogPrint(LOG_ERR, "EuroBraille: NET read while not connected.");
       return (-1);
     }
-  int nBytes = readData(realConnectionFd, buf, bufsize, 0, 0);
+  ssize_t nBytes = readData(realConnectionFd, buf, bufsize, 0, 0);
   return nBytes;
 }
 
-int
-eubrl_netWrite(BrailleDisplay *brl, char *buf, int length)
+ssize_t
+eubrl_netWrite(BrailleDisplay *brl, const void *buf, size_t length)
 {
   if (connectionStatus != NET_CONNECTED)
     return (-1);
-  int nBytes = writeData(realConnectionFd, buf, length);
+  ssize_t nBytes = writeData(realConnectionFd, buf, length);
   if (nBytes == -1)
     {
       connectionStatus = NET_DISCONNECTED;

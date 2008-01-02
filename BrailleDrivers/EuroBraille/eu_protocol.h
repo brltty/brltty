@@ -30,6 +30,12 @@
 #include	"eu_io.h"
 #include	"string.h"
 
+#define SPEED 9600
+#define CHARSPERSEC ( SPEED / 11 ) /* 1 start + 8 data + 1 parity + 1 stop */
+static inline void updateWriteDelay(BrailleDisplay *brl, unsigned int chars)
+{
+  brl->writeDelay += 1000 * ( chars / CHARSPERSEC ) + 1;
+}
 
 /** Enum which define what protocol is used. */
 
