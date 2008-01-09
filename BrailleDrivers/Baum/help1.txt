@@ -14,6 +14,7 @@ TL2+TR2 + TL1+TR1/TL3+TR3: go up/down to nearest command prompt
 TL2+TR2 + TR1/TR3: go up/down to next paragraph (blank line)
 TL2+TR1+TR3 + TL1/TL3: search backward/forward for text from cut buffer
 
+TL1+TR3: go back (undo unexpected cursor tracking motion
 TL1+TL3: go to cursor
 TR1+TR3: toggle cursor tracking
 TL2+TR1: switch to/from the status line
