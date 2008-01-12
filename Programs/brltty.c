@@ -342,84 +342,86 @@ setStateDots (unsigned char *cell) {
 }
 
 static void
-setStatusCellsNone (unsigned char *status) {
+setStatusCellsNone (unsigned char *cells) {
 }
 
 static void
-setStatusCellsAlva (unsigned char *status) {
+setStatusCellsAlva (unsigned char *cells) {
   if (isHelpScreen()) {
-    status[0] = textTable['h'];
-    status[1] = textTable['l'];
-    status[2] = textTable['p'];
+    cells[0] = textTable['h'];
+    cells[1] = textTable['l'];
+    cells[2] = textTable['p'];
   } else {
-    setCoordinateAlphabetic(&status[0], scr.posx, scr.posy);
-    setCoordinateAlphabetic(&status[1], p->winx, p->winy);
-    setStateLetter(&status[2]);
+    setCoordinateAlphabetic(&cells[0], scr.posx, scr.posy);
+    setCoordinateAlphabetic(&cells[1], p->winx, p->winy);
+    setStateLetter(&cells[2]);
   }
 }
 
 static void
-setStatusCellsTieman (unsigned char *status) {
-  setCoordinateUpper(&status[0], scr.posx+1, scr.posy+1);
-  setCoordinateLower(&status[0], p->winx+1, p->winy+1);
-  setStateDots(&status[4]);
+setStatusCellsTieman (unsigned char *cells) {
+  setCoordinateUpper(&cells[0], scr.posx+1, scr.posy+1);
+  setCoordinateLower(&cells[0], p->winx+1, p->winy+1);
+  setStateDots(&cells[4]);
 }
 
 static void
-setStatusCellsPB80 (unsigned char *status) {
-  setNumberVertical(&status[0], p->winy+1);
+setStatusCellsPB80 (unsigned char *cells) {
+  setNumberVertical(&cells[0], p->winy+1);
 }
 
 static void
-setStatusCellsGeneric (unsigned char *status) {
-  status[BRL_firstStatusCell] = BRL_STATUS_CELLS_GENERIC;
-  status[BRL_GSC_BRLCOL] = p->winx+1;
-  status[BRL_GSC_BRLROW] = p->winy+1;
-  status[BRL_GSC_CSRCOL] = scr.posx+1;
-  status[BRL_GSC_CSRROW] = scr.posy+1;
-  status[BRL_GSC_SCRNUM] = scr.number;
-  status[BRL_GSC_FREEZE] = isFrozenScreen();
-  status[BRL_GSC_DISPMD] = p->showAttributes;
-  status[BRL_GSC_SIXDOTS] = prefs.textStyle;
-  status[BRL_GSC_SLIDEWIN] = prefs.slidingWindow;
-  status[BRL_GSC_SKPIDLNS] = prefs.skipIdenticalLines;
-  status[BRL_GSC_SKPBLNKWINS] = prefs.skipBlankWindows;
-  status[BRL_GSC_CSRVIS] = prefs.showCursor;
-  status[BRL_GSC_CSRHIDE] = p->hideCursor;
-  status[BRL_GSC_CSRTRK] = p->trackCursor;
-  status[BRL_GSC_CSRSIZE] = prefs.cursorStyle;
-  status[BRL_GSC_CSRBLINK] = prefs.blinkingCursor;
-  status[BRL_GSC_ATTRVIS] = prefs.showAttributes;
-  status[BRL_GSC_ATTRBLINK] = prefs.blinkingAttributes;
-  status[BRL_GSC_CAPBLINK] = prefs.blinkingCapitals;
-  status[BRL_GSC_TUNES] = prefs.alertTunes;
-  status[BRL_GSC_HELP] = isHelpScreen();
-  status[BRL_GSC_INFO] = infoMode;
-  status[BRL_GSC_AUTOREPEAT] = prefs.autorepeat;
-  status[BRL_GSC_AUTOSPEAK] = prefs.autospeak;
+setStatusCellsGeneric (unsigned char *cells) {
+  cells[BRL_firstStatusCell] = BRL_STATUS_CELLS_GENERIC;
+  cells[BRL_GSC_BRLCOL] = p->winx+1;
+  cells[BRL_GSC_BRLROW] = p->winy+1;
+  cells[BRL_GSC_CSRCOL] = scr.posx+1;
+  cells[BRL_GSC_CSRROW] = scr.posy+1;
+  cells[BRL_GSC_SCRNUM] = scr.number;
+  cells[BRL_GSC_FREEZE] = isFrozenScreen();
+  cells[BRL_GSC_DISPMD] = p->showAttributes;
+  cells[BRL_GSC_SIXDOTS] = prefs.textStyle;
+  cells[BRL_GSC_SLIDEWIN] = prefs.slidingWindow;
+  cells[BRL_GSC_SKPIDLNS] = prefs.skipIdenticalLines;
+  cells[BRL_GSC_SKPBLNKWINS] = prefs.skipBlankWindows;
+  cells[BRL_GSC_CSRVIS] = prefs.showCursor;
+  cells[BRL_GSC_CSRHIDE] = p->hideCursor;
+  cells[BRL_GSC_CSRTRK] = p->trackCursor;
+  cells[BRL_GSC_CSRSIZE] = prefs.cursorStyle;
+  cells[BRL_GSC_CSRBLINK] = prefs.blinkingCursor;
+  cells[BRL_GSC_ATTRVIS] = prefs.showAttributes;
+  cells[BRL_GSC_ATTRBLINK] = prefs.blinkingAttributes;
+  cells[BRL_GSC_CAPBLINK] = prefs.blinkingCapitals;
+  cells[BRL_GSC_TUNES] = prefs.alertTunes;
+  cells[BRL_GSC_HELP] = isHelpScreen();
+  cells[BRL_GSC_INFO] = infoMode;
+  cells[BRL_GSC_AUTOREPEAT] = prefs.autorepeat;
+  cells[BRL_GSC_AUTOSPEAK] = prefs.autospeak;
 }
 
 static void
-setStatusCellsMDV (unsigned char *status) {
-  setCoordinateVertical(&status[0], p->winx+1, p->winy+1);
+setStatusCellsMDV (unsigned char *cells) {
+  setCoordinateVertical(&cells[0], p->winx+1, p->winy+1);
 }
 
 static void
-setStatusCellsVoyager (unsigned char *status) {
-  setNumberVertical(&status[0], p->winy+1);
-  setNumberVertical(&status[1], scr.posy+1);
+setStatusCellsVoyager (unsigned char *cells) {
+  setNumberVertical(&cells[0], p->winy+1);
+  setNumberVertical(&cells[1], scr.posy+1);
   if (isFrozenScreen()) {
-    status[2] = textTable['F'];
+    cells[2] = textTable['F'];
   } else {
-    setNumberVertical(&status[2], scr.posx+1);
+    setNumberVertical(&cells[2], scr.posx+1);
   }
 }
 
-typedef void (*SetStatusCellsHandler) (unsigned char *status);
+typedef void (*SetStatusCellsHandler) (unsigned char *cells);
+
 typedef struct {
   SetStatusCellsHandler set;
   unsigned char count;
 } StatusStyleEntry;
+
 static const StatusStyleEntry statusStyleTable[] = {
   {setStatusCellsNone, 0},
   {setStatusCellsAlva, 3},
@@ -434,11 +436,11 @@ static const int statusStyleCount = ARRAY_COUNT(statusStyleTable);
 static void
 setStatusCells (void) {
   if (braille->writeStatus) {
-    unsigned char status[BRL_MAX_STATUS_CELL_COUNT];        /* status cell buffer */
-    memset(status, 0, sizeof(status));
+    unsigned char cells[BRL_MAX_STATUS_CELL_COUNT];        /* status cell buffer */
+    memset(cells, 0, sizeof(cells));
     if (prefs.statusStyle < statusStyleCount)
-      statusStyleTable[prefs.statusStyle].set(status);
-    braille->writeStatus(&brl, status);
+      statusStyleTable[prefs.statusStyle].set(cells);
+    braille->writeStatus(&brl, cells);
   }
 }
 
@@ -2582,10 +2584,11 @@ message (const char *text, short flags) {
 void
 showDotPattern (unsigned char dots, unsigned char duration) {
   if (braille->writeStatus) {
-    unsigned char status[BRL_MAX_STATUS_CELL_COUNT];        /* status cell buffer */
-    memset(status, dots, sizeof(status));
-    braille->writeStatus(&brl, status);
+    unsigned char cells[BRL_MAX_STATUS_CELL_COUNT];        /* status cell buffer */
+    memset(cells, dots, sizeof(cells));
+    braille->writeStatus(&brl, cells);
   }
+
   memset(brl.buffer, dots, brl.x*brl.y);
   braille->writeWindow(&brl);
   drainBrailleOutput(&brl, duration);

@@ -168,24 +168,28 @@ showBrailleString (BrailleDisplay *brl, const char *string, unsigned int duratio
 void
 clearStatusCells (BrailleDisplay *brl) {
   if (braille->writeStatus) {
-    unsigned char status[BRL_MAX_STATUS_CELL_COUNT];        /* status cell buffer */
-    memset(status, 0, sizeof(status));
-    braille->writeStatus(brl, status);
+    unsigned char cells[BRL_MAX_STATUS_CELL_COUNT];        /* status cell buffer */
+    memset(cells, 0, sizeof(cells));
+    braille->writeStatus(brl, cells);
   }
 }
 
 void
 setStatusText (BrailleDisplay *brl, const char *text) {
   if (braille->writeStatus) {
-    unsigned char status[BRL_MAX_STATUS_CELL_COUNT];        /* status cell buffer */
-    int i;
-    memset(status, 0, sizeof(status));
-    for (i=0; i<sizeof(status); ++i) {
-      unsigned char character = text[i];
-      if (!character) break;
-      status[i] = textTable[character];
+    unsigned char cells[BRL_MAX_STATUS_CELL_COUNT];        /* status cell buffer */
+    memset(cells, 0, sizeof(cells));
+
+    {
+      int i;
+      for (i=0; i<sizeof(cells); ++i) {
+        unsigned char character = text[i];
+        if (!character) break;
+        cells[i] = textTable[character];
+      }
     }
-    braille->writeStatus(brl, status);
+
+    braille->writeStatus(brl, cells);
   }
 }
 
