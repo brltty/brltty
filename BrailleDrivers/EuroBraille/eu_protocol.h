@@ -51,16 +51,16 @@ typedef enum	u_eubrl_protocolType
 
 typedef struct	s_eubrl_protocol
 {
-  int	(*init)(BrailleDisplay *brl, t_eubrl_io *io);
-  int	(*reset)(BrailleDisplay *brl);
+  int		(*init)(BrailleDisplay *brl, t_eubrl_io *io);
+  int		(*reset)(BrailleDisplay *brl);
   unsigned int	(*readKey)(BrailleDisplay *brl);
-  int	(*readCommand)(BrailleDisplay *brl, BRL_DriverCommandContext c);
-  int	(*keyToCommand)(BrailleDisplay *brl, unsigned int key, BRL_DriverCommandContext ctx);
-  void	(*writeWindow)(BrailleDisplay *brl);
-  int	(*hasLcdSupport)(BrailleDisplay *brl);
-  void	(*writeVisual)(BrailleDisplay *brl);
-  int	(*readPacket)(BrailleDisplay *brl, unsigned char *packet, int size);
-  int	(*writePacket)(BrailleDisplay *brl, const unsigned char *packet, int size);
+  int		(*readCommand)(BrailleDisplay *brl, BRL_DriverCommandContext c);
+  int		(*keyToCommand)(BrailleDisplay *brl, unsigned int key, BRL_DriverCommandContext ctx);
+  void		(*writeWindow)(BrailleDisplay *brl);
+  int		(*hasLcdSupport)(BrailleDisplay *brl);
+  void		(*writeVisual)(BrailleDisplay *brl);
+  ssize_t	(*readPacket)(BrailleDisplay *brl, void *packet, size_t size);
+  ssize_t	(*writePacket)(BrailleDisplay *brl, const void *packet, size_t size);
   
   t_eubrl_protocolType	protocolType;
 }		t_eubrl_protocol;
@@ -71,32 +71,30 @@ typedef struct	s_eubrl_protocol
 
 /** Notebraille/Clio/Scriba/Iris <1.71 protocol driver */
 
-int	clio_init(BrailleDisplay *brl, t_eubrl_io *io);
-int	clio_reset(BrailleDisplay *brl);
+int		clio_init(BrailleDisplay *brl, t_eubrl_io *io);
+int		clio_reset(BrailleDisplay *brl);
 unsigned int	clio_readKey(BrailleDisplay *brl);
-int	clio_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext c);
-int	clio_keyToCommand(BrailleDisplay *brl, unsigned int key, BRL_DriverCommandContext c);
-void	clio_writeWindow(BrailleDisplay *brl);
-int	clio_hasLcdSupport(BrailleDisplay *brl);
-void	clio_writeVisual(BrailleDisplay *brl);
-int	clio_readPacket(BrailleDisplay *brl, unsigned char *packet, int size);
-int	clio_writePacket(BrailleDisplay *brl, 
-			 const unsigned char *packet, int size);
+int		clio_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext c);
+int		clio_keyToCommand(BrailleDisplay *brl, unsigned int key, BRL_DriverCommandContext c);
+void		clio_writeWindow(BrailleDisplay *brl);
+int		clio_hasLcdSupport(BrailleDisplay *brl);
+void		clio_writeVisual(BrailleDisplay *brl);
+ssize_t		clio_readPacket(BrailleDisplay *brl, void *packet, size_t size);
+ssize_t		clio_writePacket(BrailleDisplay *brl, const void *packet, size_t size);
 
 /** Esys/Iris >= 1.71  protocol headers */
 
 
-int	esysiris_init(BrailleDisplay *brl, t_eubrl_io *io);
-int	esysiris_reset(BrailleDisplay *brl);
+int		esysiris_init(BrailleDisplay *brl, t_eubrl_io *io);
+int		esysiris_reset(BrailleDisplay *brl);
 unsigned int	esysiris_readKey(BrailleDisplay *brl);
-int	esysiris_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext c);
-int	esysiris_keyToCommand(BrailleDisplay *brl, unsigned int key, BRL_DriverCommandContext c);
-void	esysiris_writeWindow(BrailleDisplay *brl);
-int	esysiris_hasLcdSupport(BrailleDisplay *brl);
-void	esysiris_writeVisual(BrailleDisplay *brl);
-int	esysiris_readPacket(BrailleDisplay *brl, unsigned char *packet, int size);
-int	esysiris_writePacket(BrailleDisplay *brl, 
-			     const unsigned char *packet, int size);
+int		esysiris_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext c);
+int		esysiris_keyToCommand(BrailleDisplay *brl, unsigned int key, BRL_DriverCommandContext c);
+void		esysiris_writeWindow(BrailleDisplay *brl);
+int		esysiris_hasLcdSupport(BrailleDisplay *brl);
+void		esysiris_writeVisual(BrailleDisplay *brl);
+ssize_t		esysiris_readPacket(BrailleDisplay *brl, void *packet, size_t size);
+ssize_t		esysiris_writePacket(BrailleDisplay *brl, const void *packet, size_t size);
 
 unsigned int		protocol_handleBrailleKey(unsigned int key);
 #endif /* __EU_PROTOCOL_H__ */

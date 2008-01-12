@@ -335,7 +335,7 @@ void	esysiris_writeVisual(BrailleDisplay *brl)
 }
 
 
-int	esysiris_readPacket(BrailleDisplay *brl, unsigned char *packet, int size)
+ssize_t esysiris_readPacket(BrailleDisplay *brl, void *packet, size_t size)
 {
   static char buffer[READ_BUFFER_LENGTH];
   static int pos = 0;
@@ -375,8 +375,7 @@ int	esysiris_readPacket(BrailleDisplay *brl, unsigned char *packet, int size)
   return (0);
 }
 
-int	esysiris_writePacket(BrailleDisplay *brl, 
-			     const unsigned char *packet, int size)
+ssize_t esysiris_writePacket(BrailleDisplay *brl, const void *packet, size_t size)
 {
   int packetSize = size + 2;
   unsigned char buf[packetSize + 2];

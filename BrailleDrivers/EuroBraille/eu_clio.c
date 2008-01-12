@@ -440,7 +440,7 @@ int	clio_hasLcdSupport(BrailleDisplay *brl)
   return (1);
 }
 
-int	clio_readPacket(BrailleDisplay *brl, unsigned char *packet, int size)
+ssize_t	clio_readPacket(BrailleDisplay *brl, void *packet, size_t size)
 {
   static char 		buffer[READ_BUFFER_LENGTH];
   static int		pos = 0;
@@ -543,31 +543,31 @@ int	clio_readPacket(BrailleDisplay *brl, unsigned char *packet, int size)
   return (0);
 }
 
-int	clio_writePacket(BrailleDisplay *brl, 
-			 const unsigned char *packet, int size)
+ssize_t	clio_writePacket(BrailleDisplay *brl, const void *packet, size_t size)
 {
-  /* extreme case, every chars are escaped */
+  /* limit case, every char is escaped */
   unsigned char		buf[(size + 3) * 2]; 
-  unsigned char		*p = buf;
+  unsigned char		*q = buf;
+  const unsigned char *p = packet;
   unsigned char		parity = 0;
   static int pktNbr = 127; /* packet number = 127 at first time */
   size_t packetSize;
 
-  *p++ = SOH;
+  *q++ = SOH;
   while (size--)
     {
-	if (needsEscape[*packet]) *p++ = DLE;
-        *p++ = *packet;
-	parity ^= *packet++;
+	if (needsEscape[*p]) *q++ = DLE;
+        *q++ = *p;
+	parity ^= *p++;
      }
-   *p++ = pktNbr; /* Doesn't need to be prefixed since greater than 128 */
+   *q++ = pktNbr; /* Doesn't need to be prefixed since greater than 128 */
    parity ^= pktNbr;
    if (++pktNbr >= 256)
      pktNbr = 128;
-   if (needsEscape[parity]) *p++ = DLE;
-   *p++ = parity;
-   *p++ = EOT;
-   packetSize = p - buf;
+   if (needsEscape[parity]) *q++ = DLE;
+   *q++ = parity;
+   *q++ = EOT;
+   packetSize = q - buf;
    updateWriteDelay(brl, packetSize);
    return iop->write(brl, buf, packetSize);
 }
