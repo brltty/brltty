@@ -29,28 +29,28 @@ extern "C" {
 #include "brl.h"
 
 /* Routines provided by this braille display driver. */
-static int brl_construct (BrailleDisplay *, char **parameters, const char *);
-static void brl_destruct (BrailleDisplay *);
-static int brl_readCommand (BrailleDisplay *, BRL_DriverCommandContext);
-static void brl_writeWindow (BrailleDisplay *);
+static int brl_construct (BrailleDisplay *brl, char **parameters, const char *device);
+static void brl_destruct (BrailleDisplay *brl);
+static int brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context);
+static void brl_writeWindow (BrailleDisplay *brl);
 
 #ifdef BRL_HAVE_STATUS_CELLS
-  static void brl_writeStatus (BrailleDisplay *brl, const unsigned char *);
+  static void brl_writeStatus (BrailleDisplay *brl, const unsigned char *cells);
 #endif /* BRL_HAVE_STATUS_CELLS */
 
 #ifdef BRL_HAVE_VISUAL_DISPLAY
-  static void brl_writeVisual (BrailleDisplay *);
+  static void brl_writeVisual (BrailleDisplay *brl);
 #endif /* BRL_HAVE_VISUAL_DISPLAY */
 
 #ifdef BRL_HAVE_PACKET_IO
-  static ssize_t brl_readPacket (BrailleDisplay *, void *, size_t);
-  static ssize_t brl_writePacket (BrailleDisplay *, const void *, size_t);
-  static int brl_reset (BrailleDisplay *);
+  static ssize_t brl_readPacket (BrailleDisplay *brl, void *buffer, size_t size);
+  static ssize_t brl_writePacket (BrailleDisplay *brl, const void *buffer, size_t size);
+  static int brl_reset (BrailleDisplay *brl);
 #endif /* BRL_HAVE_PACKET_IO */
 
 #ifdef BRL_HAVE_KEY_CODES
-  static int brl_readKey (BrailleDisplay *);
-  static int brl_keyToCommand (BrailleDisplay *, BRL_DriverCommandContext, int);
+  static int brl_readKey (BrailleDisplay *brl);
+  static int brl_keyToCommand (BrailleDisplay *brl, BRL_DriverCommandContext context, int key);
 #endif /* BRL_HAVE_KEY_CODES */
 
 #ifdef BRL_HAVE_FIRMNESS
