@@ -20,8 +20,19 @@
 
 #include "io_misc.h"
 
+#ifndef SNDCTL_DSP_SPEED
+#define SNDCTL_DSP_SPEED SOUND_PCM_WRITE_RATE
+#endif /* SNDCTL_DSP_SPEED */
+
+#ifndef SNDCTL_DSP_CHANNELS
+#define SNDCTL_DSP_CHANNELS SOUND_PCM_WRITE_CHANNELS
+#endif /* SNDCTL_DSP_CHANNELS */
+
 struct PcmDeviceStruct {
   int fileDescriptor;
+  int driverVersion;
+  int sampleRate;
+  int channelCount;
 };
 
 PcmDevice *
@@ -37,9 +48,18 @@ openPcmDevice (int errorLevel, const char *device) {
        */
       setBlockingIo(pcm->fileDescriptor, 1);
 
+      pcm->driverVersion = 0X030000;
+#ifdef OSS_GETVERSION
+      if (ioctl(pcm->fileDescriptor, OSS_GETVERSION, &pcm->driverVersion) == -1)
+        LogPrint(errorLevel, "cannot get OSS driver version");
+#endif /* OSS_GETVERSION */
+      LogPrint(LOG_DEBUG, "OPSS driver version: %06X", pcm->driverVersion);
+
+      setPcmSampleRate(pcm, 8000);
+      setPcmChannelCount(pcm, 1);
       return pcm;
     } else {
-      LogPrint(errorLevel, "Cannot open PCM device: %s: %s", device, strerror(errno));
+      LogPrint(errorLevel, "cannot open PCM device: %s: %s", device, strerror(errno));
     }
     free(pcm);
   } else {
@@ -76,27 +96,23 @@ getPcmBlockSize (PcmDevice *pcm) {
 
 int
 getPcmSampleRate (PcmDevice *pcm) {
-  int rate;
-  if (ioctl(pcm->fileDescriptor, SOUND_PCM_READ_RATE, &rate) != -1) return rate;
-  return 8000;
+  return pcm->sampleRate;
 }
 
 int
 setPcmSampleRate (PcmDevice *pcm, int rate) {
-  if (ioctl(pcm->fileDescriptor, SOUND_PCM_WRITE_RATE, &rate) != -1) return rate;
+  if (ioctl(pcm->fileDescriptor, SNDCTL_DSP_SPEED, &rate) != -1) pcm->sampleRate = rate;
   return getPcmSampleRate(pcm);
 }
 
 int
 getPcmChannelCount (PcmDevice *pcm) {
-  int channels;
-  if (ioctl(pcm->fileDescriptor, SOUND_PCM_READ_CHANNELS, &channels) != -1) return channels;
-  return 1;
+  return pcm->channelCount;
 }
 
 int
 setPcmChannelCount (PcmDevice *pcm, int channels) {
-  if (ioctl(pcm->fileDescriptor, SOUND_PCM_WRITE_CHANNELS, &channels) != -1) return channels;
+  if (ioctl(pcm->fileDescriptor, SNDCTL_DSP_CHANNELS, &channels) != -1) pcm->channelCount = channels;
   return getPcmChannelCount(pcm);
 }
 
