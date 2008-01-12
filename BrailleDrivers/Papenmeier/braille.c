@@ -50,9 +50,9 @@ typedef enum {
 #define BRLPARMS "configfile", "debugkeys", "debugreads", "debugwrites"
 
 #define BRLSTAT ST_Generic
-#define BRLCONST
 #define BRL_HAVE_STATUS_CELLS
 #define BRL_HAVE_FIRMNESS
+#define BRLCONST
 #include "brl_driver.h"
 #include "braille.h"
 
