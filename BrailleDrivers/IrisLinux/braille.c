@@ -445,11 +445,6 @@ static void	brl_writeVisual(BrailleDisplay *brl)
 
 #endif
 
-static void brl_writeStatus (BrailleDisplay *brl, const unsigned char *st)
-{
-  /* Iris devices don't have status cells */
-}
-
 static int Program(BrailleDisplay *brl)
 {
   int		key = 0;

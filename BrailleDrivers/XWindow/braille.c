@@ -1236,8 +1236,3 @@ static void brl_writeVisual(BrailleDisplay *brl)
 #endif /* USE_ */
   }
 }
-
-static void brl_writeStatus(BrailleDisplay *brl, const unsigned char *s)
-{
-  /* TODO: another label */
-}

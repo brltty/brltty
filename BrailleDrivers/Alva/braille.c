@@ -111,6 +111,7 @@
 #include "brltty.h"
 
 #define BRLSTAT ST_AlvaStyle
+#define BRL_HAVE_STATUS_CELLS
 #define BRL_HAVE_FIRMNESS
 #define BRLCONST
 #include "brl_driver.h"

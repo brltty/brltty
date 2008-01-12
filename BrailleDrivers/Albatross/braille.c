@@ -28,6 +28,7 @@
 
 #include "misc.h"
 
+#define BRL_HAVE_STATUS_CELLS
 #include "brl_driver.h"
 #include "braille.h"
 #include "io_serial.h"

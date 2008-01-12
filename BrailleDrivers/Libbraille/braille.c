@@ -126,11 +126,6 @@ brl_writeWindow(BrailleDisplay *brl)
   braille_render();
 }
 
-static void
-brl_writeStatus(BrailleDisplay *brl, const unsigned char *status)
-{
-}
-
 static int
 brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context)
 {

@@ -36,6 +36,7 @@
 #include "message.h"
 
 #define BRLSTAT ST_TiemanStyle
+#define BRL_HAVE_STATUS_CELLS
 #include "brl_driver.h"
 
 #include "io_serial.h"

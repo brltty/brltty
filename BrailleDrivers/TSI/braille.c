@@ -85,6 +85,7 @@
 #include "message.h"
 
 #define BRLSTAT ST_PB80Style
+#define BRL_HAVE_STATUS_CELLS
 #include "brl_driver.h"
 #include "braille.h"
 #include "io_serial.h"

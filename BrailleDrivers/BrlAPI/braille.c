@@ -157,12 +157,6 @@ static void brl_writeVisual(BrailleDisplay *brl)
   }
 }
 
-/* Function : brl_writeStatus */
-/* Not supported by BrlAPI yet */
-static void brl_writeStatus(BrailleDisplay *brl, const unsigned char *s)
-{
-}
-
 /* Function : brl_readCommand */
 /* Reads a command from the braille keyboard */
 static int brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context)

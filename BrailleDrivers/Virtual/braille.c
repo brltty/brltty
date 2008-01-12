@@ -64,6 +64,7 @@
 #include "cmd.h"
 
 #define BRLSTAT ST_Generic
+#define BRL_HAVE_STATUS_CELLS
 #define BRL_HAVE_VISUAL_DISPLAY
 #include "brl_driver.h"
 #include "braille.h"

@@ -55,6 +55,7 @@ typedef enum {
 #define BRLPARMS "inputmode", "statuscells"
 
 #define BRLSTAT ST_VoyagerStyle
+#define BRL_HAVE_STATUS_CELLS
 #define BRL_HAVE_FIRMNESS
 #include "brl_driver.h"
 #include "tbl.h"

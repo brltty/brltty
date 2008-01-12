@@ -33,6 +33,7 @@ typedef enum {
 } DriverParameter;
 #define BRLPARMS "statuscells"
 
+#define BRL_HAVE_STATUS_CELLS
 #define BRL_HAVE_PACKET_IO
 #include "brl_driver.h"
 #include "braille.h"

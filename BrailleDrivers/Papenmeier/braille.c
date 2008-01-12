@@ -51,6 +51,7 @@ typedef enum {
 
 #define BRLSTAT ST_Generic
 #define BRLCONST
+#define BRL_HAVE_STATUS_CELLS
 #define BRL_HAVE_FIRMNESS
 #include "brl_driver.h"
 #include "braille.h"

@@ -236,10 +236,6 @@ brl_writeWindow (BrailleDisplay *brl) {
   }
 }
 
-static void
-brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) {
-}
-
 static int
 brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   unsigned char buffer[0X100];

@@ -21,6 +21,7 @@
 
 #include "misc.h"
 
+//#define BRL_HAVE_STATUS_CELLS
 //#define BRL_HAVE_VISUAL_DISPLAY
 //#define BRL_HAVE_PACKET_IO
 //#define BRL_HAVE_KEY_CODES
@@ -77,9 +78,11 @@ static void
 brl_writeWindow (BrailleDisplay *brl) {
 }
 
+#ifdef BRL_HAVE_STATUS_CELLS
 static void
 brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) {
 }
+#endif /* BRL_HAVE_STATUS_CELLS */
 
 #ifdef BRL_HAVE_VISUAL_DISPLAY
 static void

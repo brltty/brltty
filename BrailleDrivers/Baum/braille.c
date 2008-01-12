@@ -31,6 +31,7 @@ typedef enum {
 #define BRLPARMS "protocols", "variokeys"
 
 #define BRLSTAT ST_TiemanStyle
+#define BRL_HAVE_STATUS_CELLS
 #define BRL_HAVE_PACKET_IO
 #include "brl_driver.h"
 

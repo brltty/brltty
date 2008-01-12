@@ -35,6 +35,7 @@ typedef enum {
 #define BRLPARMS "debugpackets", "statuscells"
 
 #define BRLSTAT ST_AlvaStyle
+#define BRL_HAVE_STATUS_CELLS
 #define BRL_HAVE_PACKET_IO
 #define BRL_HAVE_FIRMNESS
 #include "brl_driver.h"

@@ -59,6 +59,7 @@
 #include "misc.h"
 
 #define BRLSTAT ST_TiemanStyle
+#define BRL_HAVE_STATUS_CELLS
 #include "brl_driver.h"
 #include "braille.h"
 #include "tables.h"		/* for keybindings */

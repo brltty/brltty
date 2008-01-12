@@ -311,10 +311,6 @@ brl_writeVisual (BrailleDisplay *brl) {
   if (previousLocale) setlocale(LC_CTYPE, previousLocale);
 }
 
-static void
-brl_writeStatus(BrailleDisplay *brl, const unsigned char *cells) {
-}
-
 int
 brl_keyToCommand (BrailleDisplay *brl, BRL_DriverCommandContext context, int key) {
 #define KEY(key,cmd) case (key): return (cmd)

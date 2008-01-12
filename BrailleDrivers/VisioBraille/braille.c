@@ -528,13 +528,6 @@ static void brl_writeWindow(BrailleDisplay *brl)
   }
 }
 
-/* Function : brl_writeStatus */
-/* normally, this function should write status cells */
-/* Actually it does nothing, since VisioBraille terminals have no such cells */
-static void brl_writeStatus(BrailleDisplay *brl, const unsigned char *s)
-{
-}
-
 /* Function : brl_keyToCommand */
 /* Converts a key code to a brltty command according to the context */
 int brl_keyToCommand(BrailleDisplay *brl, BRL_DriverCommandContext context, int code)

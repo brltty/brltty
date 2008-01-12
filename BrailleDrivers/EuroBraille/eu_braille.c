@@ -249,11 +249,6 @@ brl_writeWindow (BrailleDisplay *brl)
   protocolp->writeWindow(brl);
 }
 
-static void
-brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) 
-{
-}
-
 #ifdef BRL_HAVE_VISUAL_DISPLAY
 static void
 brl_writeVisual (BrailleDisplay *brl) 

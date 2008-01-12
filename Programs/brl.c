@@ -58,10 +58,6 @@ static void
 brl_writeWindow (BrailleDisplay *brl) {
 }
 
-static void
-brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) {
-}
-
 const BrailleDriver *braille = &noBraille;
 
 /*
@@ -171,22 +167,26 @@ showBrailleString (BrailleDisplay *brl, const char *string, unsigned int duratio
 
 void
 clearStatusCells (BrailleDisplay *brl) {
-  unsigned char status[BRL_MAX_STATUS_CELL_COUNT];        /* status cell buffer */
-  memset(status, 0, sizeof(status));
-  braille->writeStatus(brl, status);
+  if (braille->writeStatus) {
+    unsigned char status[BRL_MAX_STATUS_CELL_COUNT];        /* status cell buffer */
+    memset(status, 0, sizeof(status));
+    braille->writeStatus(brl, status);
+  }
 }
 
 void
 setStatusText (BrailleDisplay *brl, const char *text) {
-  unsigned char status[BRL_MAX_STATUS_CELL_COUNT];        /* status cell buffer */
-  int i;
-  memset(status, 0, sizeof(status));
-  for (i=0; i<sizeof(status); ++i) {
-    unsigned char character = text[i];
-    if (!character) break;
-    status[i] = textTable[character];
+  if (braille->writeStatus) {
+    unsigned char status[BRL_MAX_STATUS_CELL_COUNT];        /* status cell buffer */
+    int i;
+    memset(status, 0, sizeof(status));
+    for (i=0; i<sizeof(status); ++i) {
+      unsigned char character = text[i];
+      if (!character) break;
+      status[i] = textTable[character];
+    }
+    braille->writeStatus(brl, status);
   }
-  braille->writeStatus(brl, status);
 }
 
 static void

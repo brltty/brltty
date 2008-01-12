@@ -425,12 +425,6 @@ brl_destruct (BrailleDisplay * brl)
 
 
 static void
-brl_writeStatus (BrailleDisplay *brl, const unsigned char *s)
-{
-}
-
-
-static void
 brl_writeWindow (BrailleDisplay * brl)
 {
   short i;			/* loop counter */

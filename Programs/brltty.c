@@ -433,11 +433,13 @@ static const int statusStyleCount = ARRAY_COUNT(statusStyleTable);
 
 static void
 setStatusCells (void) {
-  unsigned char status[BRL_MAX_STATUS_CELL_COUNT];        /* status cell buffer */
-  memset(status, 0, sizeof(status));
-  if (prefs.statusStyle < statusStyleCount)
-    statusStyleTable[prefs.statusStyle].set(status);
-  braille->writeStatus(&brl, status);
+  if (braille->writeStatus) {
+    unsigned char status[BRL_MAX_STATUS_CELL_COUNT];        /* status cell buffer */
+    memset(status, 0, sizeof(status));
+    if (prefs.statusStyle < statusStyleCount)
+      statusStyleTable[prefs.statusStyle].set(status);
+    braille->writeStatus(&brl, status);
+  }
 }
 
 static void
@@ -2579,10 +2581,12 @@ message (const char *text, short flags) {
 
 void
 showDotPattern (unsigned char dots, unsigned char duration) {
-  unsigned char status[BRL_MAX_STATUS_CELL_COUNT];        /* status cell buffer */
-  memset(status, dots, sizeof(status));
+  if (braille->writeStatus) {
+    unsigned char status[BRL_MAX_STATUS_CELL_COUNT];        /* status cell buffer */
+    memset(status, dots, sizeof(status));
+    braille->writeStatus(&brl, status);
+  }
   memset(brl.buffer, dots, brl.x*brl.y);
-  braille->writeStatus(&brl, status);
   braille->writeWindow(&brl);
   drainBrailleOutput(&brl, duration);
 }

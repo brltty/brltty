@@ -198,10 +198,6 @@ brl_writeWindow (BrailleDisplay *brl) {
 }
 
 static void
-brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) {
-}
-
-static void
 brl_writeVisual (BrailleDisplay *brl) {
   if (memcmp(brl->buffer, visualCells, brl->x) != 0) {
     memcpy(visualCells, brl->buffer, brl->x);

@@ -33,7 +33,10 @@ static int brl_construct (BrailleDisplay *, char **parameters, const char *);
 static void brl_destruct (BrailleDisplay *);
 static int brl_readCommand (BrailleDisplay *, BRL_DriverCommandContext);
 static void brl_writeWindow (BrailleDisplay *);
-static void brl_writeStatus (BrailleDisplay *brl, const unsigned char *);
+
+#ifdef BRL_HAVE_STATUS_CELLS
+  static void brl_writeStatus (BrailleDisplay *brl, const unsigned char *);
+#endif /* BRL_HAVE_STATUS_CELLS */
 
 #ifdef BRL_HAVE_VISUAL_DISPLAY
   static void brl_writeVisual (BrailleDisplay *);
@@ -91,7 +94,12 @@ BRLCONST BrailleDriver BRLSYMBOL = {
   brl_destruct,
   brl_readCommand,
   brl_writeWindow,
+
+#ifdef BRL_HAVE_STATUS_CELLS
   brl_writeStatus,
+#else /* BRL_HAVE_STATUS_CELLS */
+  NULL, /* brl_writeStatus */
+#endif /* BRL_HAVE_STATUS_CELLS */
 
 #ifdef BRL_HAVE_VISUAL_DISPLAY
   brl_writeVisual,

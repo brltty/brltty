@@ -29,6 +29,7 @@ typedef enum {
 #define BRLPARMS "inputmode"
 
 #define BRLSTAT ST_AlvaStyle
+#define BRL_HAVE_STATUS_CELLS
 #define BRL_HAVE_PACKET_IO
 #define BRL_HAVE_SENSITIVITY
 #include "brl_driver.h"
