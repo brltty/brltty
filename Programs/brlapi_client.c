@@ -1131,10 +1131,6 @@ int brlapi__writeText(brlapi_handle_t *handle, int cursor, const char *str)
   char *locale;
   int res;
   size_t len;
-  if ((dispSize == 0) || (dispSize > BRLAPI_MAXPACKETSIZE/4)) {
-    brlapi_errno=BRLAPI_ERROR_INVALID_PARAMETER;
-    return -1;
-  }
   locale = setlocale(LC_CTYPE,NULL);
   wa->flags = BRLAPI_WF_REGION;
   *((uint32_t *) p) = htonl(1); p += sizeof(uint32_t);
@@ -1200,13 +1196,10 @@ endcount:
     }
     *size = htonl((p-(unsigned char *)(size+1)));
   }
-  if ((cursor>=0) && (cursor<=dispSize)) {
+  if (cursor!=BRLAPI_CURSOR_LEAVE) {
     wa->flags |= BRLAPI_WF_CURSOR;
     *((uint32_t *) p) = htonl(cursor);
     p += sizeof(uint32_t);
-  } else if (cursor!=-1) {
-    brlapi_errno = BRLAPI_ERROR_INVALID_PARAMETER;
-    return -1;
   }
 
   if ((len = getCharset(p
