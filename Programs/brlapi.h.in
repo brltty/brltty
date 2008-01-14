@@ -532,10 +532,9 @@ typedef struct {
  * The "andMask" and "orMask" masks, if present, are then applied on top of
  * the text, one byte per character.  This hence permits the superimposing of
  * attributes over the text.  For instance, setting an andMask mask full of
- * BRLAPI_DOT1|BRLAPI_DOT2|BRLAPI_DOT3|BRLAPI_DOT4|BRLAPI_DOT5|BRLAPI_DOT6
- * will only keep (logical AND) dots 1-6, hence dropping dots 7 and 8.  On the
- * contrary, setting an orMask full of BRLAPI_DOT7|BRLAPI_DOT8 will add (logical
- * OR) dots 7 and 8.
+ * BRLAPI_DOTS(1,1,1,1,1,1,0,0) will only keep (logical AND) dots 1-6,
+ * hence dropping dots 7 and 8.  On the contrary, setting an orMask full of
+ * BRLAPI_DOT7|BRLAPI_DOT8 will add (logical OR) dots 7 and 8.
  *
  * The "charset" field, if present, specifies the charset of the "text" field.
  * If it is "", the current locale's charset (if any) is assumed.  Else, the

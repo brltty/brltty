@@ -24,6 +24,7 @@ BEGIN {
 }
 
 END {
+  writeBrlapiDots()
   print "/** @} */"
   print ""
   writeHeaderEpilogue()
@@ -64,4 +65,27 @@ function brlFlag(name, symbol, value, help) {
 
 function brlDot(number, symbol, value, help) {
   writeMacroDefinition("BRLAPI_DOT" number, value, help)
+}
+
+function writeBrlapiDots() {
+  print ""
+  print "/** Helper macro to easily produce braille patterns */"
+
+  arguments = ""
+  argumentDelimiter = ""
+  expression = ""
+  subexpressionDelimiter = ""
+
+  for (dotNumber=1; dotNumber<=8; ++dotNumber) {
+    argumentName = "dot" dotNumber
+
+    arguments = arguments argumentDelimiter argumentName
+    argumentDelimiter = ", "
+
+    subexpression = "((" argumentName ")? BRLAPI_DOT" dotNumber ": 0)"
+    expression = expression subexpressionDelimiter "  " subexpression
+    subexpressionDelimiter = " | \\\n"
+  }
+
+  print "#define BRLAPI_DOTS(" arguments ") (\\\n" expression " \\\n)"
 }
