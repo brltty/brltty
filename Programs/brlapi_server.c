@@ -102,13 +102,13 @@ static size_t stackSize;
 Samuel Thibault <samuel.thibault@ens-lyon.org>"
 
 #define WERR(x, y, ...) do { \
-  LogPrint(LOG_DEBUG, "writing error %d", y); \
-  LogPrint(LOG_DEBUG, __VA_ARGS__); \
+  LogPrint(LOG_ERR, "writing error %d", y); \
+  LogPrint(LOG_ERR, __VA_ARGS__); \
   writeError(x, y); \
 } while(0)
 #define WEXC(x, y, type, packet, size, ...) do { \
-  LogPrint(LOG_DEBUG, "writing exception %d", y); \
-  LogPrint(LOG_DEBUG, __VA_ARGS__); \
+  LogPrint(LOG_ERR, "writing exception %d", y); \
+  LogPrint(LOG_ERR, __VA_ARGS__); \
   writeException(x, y, type, packet, size); \
 } while(0)
 
