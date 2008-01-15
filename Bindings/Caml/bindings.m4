@@ -134,7 +134,6 @@ else
             OCAML_INSTALL_TARGET=install-without-findlib
             OCAML_UNINSTALL_TARGET=uninstall-without-findlib
             AC_MSG_WARN([Cannot find ocamlfind.])
-            AC_MSG_WARN([BrlAPI Caml bindings will be compiled but not installed.])
         fi
     fi
 fi
