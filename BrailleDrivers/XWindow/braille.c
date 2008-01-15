@@ -1137,33 +1137,34 @@ static void brl_writeWindow(BrailleDisplay *brl)
   char c;
 
   if (!displayb[0] || !memcmp(brl->buffer,displayedWindow,brl->y*brl->x)) return;
-  memcpy(displayedWindow,brl->buffer,brl->y*brl->x);
 
-  for (i=0;i<brl->y*brl->x;i++) {
-    c = brl->buffer[i];
-    c =
-       (!!(c&BRL_DOT1))<<0
-      |(!!(c&BRL_DOT2))<<1
-      |(!!(c&BRL_DOT3))<<2
-      |(!!(c&BRL_DOT4))<<3
-      |(!!(c&BRL_DOT5))<<4
-      |(!!(c&BRL_DOT6))<<5
-      |(!!(c&BRL_DOT7))<<6
-      |(!!(c&BRL_DOT8))<<7;
+  for (i=0;i<brl->y*brl->x;i++)
+    if (displayedWindow[i] != brl->buffer[i]) {
+      c = brl->buffer[i];
+      c =
+	 (!!(c&BRL_DOT1))<<0
+	|(!!(c&BRL_DOT2))<<1
+	|(!!(c&BRL_DOT3))<<2
+	|(!!(c&BRL_DOT4))<<3
+	|(!!(c&BRL_DOT5))<<4
+	|(!!(c&BRL_DOT6))<<5
+	|(!!(c&BRL_DOT7))<<6
+	|(!!(c&BRL_DOT8))<<7;
 #ifdef USE_XAW
-    data[0]=0xe0|((0x28>>4)&0x0f);
-    data[1]=0x80|((0x28<<2)&0x3f)|(c>>6);
-    data[2]=0x80                 |(c&0x3f);
-    data[3]=0;
+      data[0]=0xe0|((0x28>>4)&0x0f);
+      data[1]=0x80|((0x28<<2)&0x3f)|(c>>6);
+      data[2]=0x80                 |(c&0x3f);
+      data[3]=0;
 
-    XtVaSetValues(displayb[i],
-      XtNlabel, data,
-      NULL);
+      XtVaSetValues(displayb[i],
+	XtNlabel, data,
+	NULL);
 #elif defined(USE_WINDOWS)
-    data[0] = BRL_UC_ROW | c;
-    data[1] = 0;
-    SetWindowTextW(displayb[i],data);
+      data[0] = BRL_UC_ROW | c;
+      data[1] = 0;
+      SetWindowTextW(displayb[i],data);
 #endif /* USE_WINDOWS */
+      displayedWindow[i] = brl->buffer[i];
   }
 #endif /* USE_XAW || USE_WINDOWS */
 }
@@ -1202,37 +1203,39 @@ static void brl_writeVisual(BrailleDisplay *brl)
   }
 
   if (!memcmp(brl->buffer,displayedVisual,brl->y*brl->x)) return;
-  memcpy(displayedVisual,brl->buffer,brl->y*brl->x);
 
   for (i=0;i<brl->y*brl->x;i++) {
-    data[0]=brl->buffer[i];
-    if (data[0]==0) data[0]=' ';
+    if (displayedVisual[i] != brl->buffer[i]) {
+      displayedVisual[i] = brl->buffer[i];
+      data[0]=brl->buffer[i];
+      if (data[0]==0) data[0]=' ';
 #ifdef USE_WINDOWS
-    else if (data[0]=='&') {
-      data[1] = '&';
-      data[2] = 0;
-    } else
+      else if (data[0]=='&') {
+	data[1] = '&';
+	data[2] = 0;
+      } else
 #endif
-    data[1]=0;
+      data[1]=0;
 
 #if defined(USE_XT)
 #ifdef USE_XM
-    display_cs = XmStringCreateLocalized(data);
+      display_cs = XmStringCreateLocalized(data);
 #endif /* USE_XM */
-    XtVaSetValues(display[i],
+      XtVaSetValues(display[i],
 #ifdef USE_XAW
-      XtNlabel, data,
+	XtNlabel, data,
 #else /* USE_XAW */
-      XmNlabelString, display_cs,
+	XmNlabelString, display_cs,
 #endif /* USE_XAW */
-      NULL);
+	NULL);
 #ifdef USE_XM
-    XmStringFree(display_cs);
+      XmStringFree(display_cs);
 #endif /* USE_XM */
 #elif defined(USE_WINDOWS)
-    SetWindowText(display[i],data);
+      SetWindowText(display[i],data);
 #else /* USE_ */
 #error Toolkit display refresh unspecified
 #endif /* USE_ */
+    }
   }
 }
