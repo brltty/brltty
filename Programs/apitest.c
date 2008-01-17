@@ -174,7 +174,7 @@ void enterLearnMode(void)
     return;
   }
 
-  if (brlapi_writeText(0, "command learn mode")<0) {
+  if (brlapi_writeText(BRLAPI_CURSOR_OFF, "command learn mode")<0) {
     brlapi_perror("brlapi_writeText");
     exit(1);
   }
@@ -183,7 +183,7 @@ void enterLearnMode(void)
     fprintf(stderr, "got key %016"BRLAPI_PRIxKEYCODE"\n",code);
     cmd = cmdBrlapiToBrltty(code);
     describeCommand(cmd, buf, sizeof(buf));
-    brlapi_writeText(0, buf);
+    brlapi_writeText(BRLAPI_CURSOR_OFF, buf);
     fprintf(stderr, "%s\n", buf);
     if (cmd==BRL_CMD_LEARN) return;
   }
@@ -211,14 +211,14 @@ void showKeyCodes(void)
     return;
   }
 
-  if (brlapi_writeText(0, "show key codes")<0) {
+  if (brlapi_writeText(BRLAPI_CURSOR_OFF, "show key codes")<0) {
     brlapi_perror("brlapi_writeText");
     exit(1);
   }
 
   while ((res = brlapi_readKey(1, &cmd)) != -1) {
     sprintf(buf, "0X%" BRLAPI_PRIxKEYCODE " (%" BRLAPI_PRIuKEYCODE ")",cmd, cmd);
-    brlapi_writeText(0, buf);
+    brlapi_writeText(BRLAPI_CURSOR_OFF, buf);
     fprintf(stderr, "%s\n", buf);
   }
   brlapi_perror("brlapi_readKey");
