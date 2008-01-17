@@ -132,7 +132,7 @@ cdef class WriteStruct:
 	This is DEPRECATED. Use the named parameters of write() instead."""
 	cdef c_brlapi.brlapi_writeArguments_t props
 
-	def __new__(self):
+	def __init__(self):
 		self.props = c_brlapi.brlapi_writeArguments_initialized
 
 	property displayNumber:
