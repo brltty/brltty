@@ -59,10 +59,10 @@ extern void initializeBrailleDisplay (BrailleDisplay *brl);
 extern unsigned int drainBrailleOutput (BrailleDisplay *brl, int minimumDelay);
 extern int ensureBrailleBuffer (BrailleDisplay *brl, int infoLevel);
 
-extern void writeBrailleBuffer (BrailleDisplay *);
-extern void writeBrailleText (BrailleDisplay *, const char *, int);
-extern void writeBrailleString (BrailleDisplay *, const char *);
-extern void showBrailleString (BrailleDisplay *, const char *, unsigned int);
+extern int writeBrailleBuffer (BrailleDisplay *);
+extern int writeBrailleText (BrailleDisplay *, const char *, int);
+extern int writeBrailleString (BrailleDisplay *, const char *);
+extern int showBrailleString (BrailleDisplay *, const char *, unsigned int);
 
 extern void clearStatusCells (BrailleDisplay *brl);
 extern void setStatusText (BrailleDisplay *brl, const char *text);
@@ -158,7 +158,7 @@ extern int portraitFlag (int number, int on);
 
 extern void learnMode (BrailleDisplay *brl, int poll, int timeout);
 
-extern void showDotPattern (unsigned char dots, unsigned char duration);
+extern int showDotPattern (unsigned char dots, unsigned char duration);
 extern void setBrailleFirmness (BrailleDisplay *brl, int setting);
 extern void setBrailleSensitivity (BrailleDisplay *brl, int setting);
 

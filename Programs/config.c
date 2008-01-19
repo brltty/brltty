@@ -1086,8 +1086,11 @@ nextSetting (MenuItem *item) {
   if ((*item->setting)++ >= item->maximum) *item->setting = item->minimum;
 }
 
-void
+int
 updatePreferences (void) {
+  static unsigned char saveOnExit = 0;                /* 1 == save preferences on exit */
+  int ok = 1;
+
 #ifdef ENABLE_TABLE_SELECTION
   globBegin(&glob_textTable);
   globBegin(&glob_attributesTable);
@@ -1097,8 +1100,6 @@ updatePreferences (void) {
 #endif /* ENABLE_TABLE_SELECTION */
 
   {
-    static unsigned char exitSave = 0;                /* 1 == save preferences on exit */
-
     static const char *booleanValues[] = {
       strtext("No"),
       strtext("Yes")
@@ -1200,7 +1201,7 @@ updatePreferences (void) {
     #define BOOLEAN_ITEM(setting, changed, test, label) SYMBOLIC_ITEM(setting, changed, test, label, booleanValues)
     #define GLOB_ITEM(data, changed, test, label) TEXT_ITEM(data.setting, changed, test, label, data.paths, data.count)
     MenuItem menu[] = {
-      BOOLEAN_ITEM(exitSave, NULL, NULL, strtext("Save on Exit")),
+      BOOLEAN_ITEM(saveOnExit, NULL, NULL, strtext("Save on Exit")),
       SYMBOLIC_ITEM(prefs.textStyle, NULL, NULL, strtext("Text Style"), textStyles),
       BOOLEAN_ITEM(prefs.skipIdenticalLines, NULL, NULL, strtext("Skip Identical Lines")),
       BOOLEAN_ITEM(prefs.skipBlankWindows, NULL, NULL, strtext("Skip Blank Windows")),
@@ -1275,7 +1276,7 @@ updatePreferences (void) {
 
     if (prefs.autorepeat) resetAutorepeat();
 
-    while (1) {
+    while (ok) {
       MenuItem *item = &menu[menuIndex];
       char valueBuffer[0X10];
       const char *value;
@@ -1325,8 +1326,9 @@ updatePreferences (void) {
         indexChanged = 0;
 
         /* Then draw the braille window */
-        writeBrailleText(&brl, &line[lineIndent], MAX(0, lineLength-lineIndent));
+        if (!writeBrailleText(&brl, &line[lineIndent], MAX(0, lineLength-lineIndent))) ok = 0;
         drainBrailleOutput(&brl, updateInterval);
+        if (!ok) break;
 
         /* Now process any user interaction */
         command = readBrailleCommand(&brl, BRL_CTX_PREFS);
@@ -1355,7 +1357,7 @@ updatePreferences (void) {
               break;
             case BRL_BLK_PASSKEY+BRL_KEY_ENTER:
             case BRL_CMD_PREFSAVE:
-              exitSave = 1;
+              saveOnExit = 1;
               goto exitMenu;
 
             case BRL_CMD_TOP:
@@ -1471,27 +1473,33 @@ updatePreferences (void) {
             case BRL_BLK_PASSKEY+BRL_KEY_ESCAPE:
             case BRL_BLK_PASSKEY+BRL_KEY_END:
             case BRL_CMD_PREFMENU:
-            exitMenu:
-              if (exitSave) {
-                if (savePreferences()) {
-                  playTune(&tune_command_done);
-                }
-              }
+              goto exitMenu;
 
-    #ifdef ENABLE_TABLE_SELECTION
-              globEnd(&glob_textTable);
-              globEnd(&glob_attributesTable);
-    #ifdef ENABLE_CONTRACTED_BRAILLE
-              globEnd(&glob_contractionTable);
-    #endif /* ENABLE_CONTRACTED_BRAILLE */
-    #endif /* ENABLE_TABLE_SELECTION */
-
-              return;
+            case BRL_CMD_RESTARTBRL:
+              ok = 0;
+              break;
           }
         }
       }
     }
   }
+
+exitMenu:
+  if (saveOnExit) {
+    if (savePreferences()) {
+      playTune(&tune_command_done);
+    }
+  }
+
+#ifdef ENABLE_TABLE_SELECTION
+  globEnd(&glob_textTable);
+  globEnd(&glob_attributesTable);
+#ifdef ENABLE_CONTRACTED_BRAILLE
+  globEnd(&glob_contractionTable);
+#endif /* ENABLE_CONTRACTED_BRAILLE */
+#endif /* ENABLE_TABLE_SELECTION */
+
+  return ok;
 }
 #endif /* ENABLE_PREFERENCES_MENU */
 

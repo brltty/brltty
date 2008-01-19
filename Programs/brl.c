@@ -131,10 +131,13 @@ drainBrailleOutput (BrailleDisplay *brl, int minimumDelay) {
   return duration;
 }
 
-void
+int
 writeBrailleBuffer (BrailleDisplay *brl) {
   brl->cursor = -1;
-  if (braille->writeVisual) braille->writeVisual(brl);
+
+  if (braille->writeVisual) 
+    if (!braille->writeVisual(brl))
+      return 0;
 
   {
     int i;
@@ -143,27 +146,28 @@ writeBrailleBuffer (BrailleDisplay *brl) {
      */
     for (i=0; i<brl->x*brl->y; ++i) brl->buffer[i] = textTable[brl->buffer[i]];
   }
-  braille->writeWindow(brl);
+  return braille->writeWindow(brl);
 }
 
-void
+int
 writeBrailleText (BrailleDisplay *brl, const char *text, int length) {
   int width = brl->x * brl->y;
   if (length > width) length = width;
   memcpy(brl->buffer, text, length);
   memset(&brl->buffer[length], ' ', width-length);
-  writeBrailleBuffer(brl);
+  return writeBrailleBuffer(brl);
 }
 
-void
+int
 writeBrailleString (BrailleDisplay *brl, const char *string) {
-  writeBrailleText(brl, string, strlen(string));
+  return writeBrailleText(brl, string, strlen(string));
 }
 
-void
+int
 showBrailleString (BrailleDisplay *brl, const char *string, unsigned int duration) {
-  writeBrailleString(brl, string);
+  int ok = writeBrailleString(brl, string);
   drainBrailleOutput(brl, duration);
+  return ok;
 }
 
 void

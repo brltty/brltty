@@ -25,7 +25,7 @@ extern "C" {
 /* message.h - send a message to Braille and speech */
 
 /* Prototype: */
-extern void message (const char *, short);
+extern int message (const char *, short);
 
 
 /* Flags for the second argument: */

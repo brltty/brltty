@@ -271,9 +271,11 @@ main (int argc, char *argv[]) {
   return 0;
 }
 
-void
+int
 message (const char *text, short flags) {
+  return 1;
 }
-void
+int
 showDotPattern (unsigned char dots, unsigned char duration) {
+  return 1;
 }

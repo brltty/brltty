@@ -80,7 +80,7 @@ BEGIN_OPTION_TABLE(programOptions)
   },
 END_OPTION_TABLE
 
-void
+int
 message (const char *string, short flags) {
   int length = strlen(string);
   int limit = brl.x * brl.y;
@@ -96,7 +96,7 @@ message (const char *string, short flags) {
       brl.buffer[(brl.x * brl.y) - 1] = '-';
     else
       while (index < limit) brl.buffer[index++] = ' ';
-    writeBrailleBuffer(&brl);
+    if (!writeBrailleBuffer(&brl)) return 0;
 
     if (length) {
       int timer = 0;
@@ -107,6 +107,8 @@ message (const char *string, short flags) {
       }
     }
   }
+
+  return 1;
 }
 
 int

@@ -105,7 +105,7 @@ extern void testProgramTermination (void);
 extern void startup (int argc, char *argv[]);
 extern int loadPreferences (int change);
 extern int savePreferences (void);
-extern void updatePreferences (void);
+extern int updatePreferences (void);
 
 extern unsigned char cursorDots (void);
 
