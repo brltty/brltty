@@ -818,7 +818,7 @@ static int brl_writeWindow (BrailleDisplay *brl)
 }
 
 
-static void
+static int
 brl_writeStatus (BrailleDisplay *brl, const unsigned char *st)
 {
   int i;
@@ -830,6 +830,7 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *st)
         StatusCells[i] = outputTable[(PrevStatus[i] = st[i])];
       WriteToBrlDisplay (brl, 0, NbStCells, StatusCells);
     }
+  return 1;
 }
 
 

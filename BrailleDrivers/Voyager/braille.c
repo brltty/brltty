@@ -670,9 +670,10 @@ brl_destruct (BrailleDisplay *brl) {
   }
 }
 
-static void
+static int
 brl_writeStatus (BrailleDisplay *brl, const unsigned char *cells) {
   memcpy(currentCells+statusOffset, cells, statusCells);
+  return 1;
 }
 
 static int

@@ -423,12 +423,13 @@ brl_destruct (BrailleDisplay *brl)
 }
 
 
-static void
+static int
 brl_writeStatus (BrailleDisplay *brl, const unsigned char *s)
 {
   if(nrstatcells >= EXPECTEDNRSTATCELLS)
     memcpy(statbuf, s, EXPECTEDNRSTATCELLS);
   /* BRLTTY expects this display to have only 2 status cells */
+  return 1;
 }
 
 

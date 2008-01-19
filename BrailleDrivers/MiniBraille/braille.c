@@ -407,9 +407,10 @@ brl_writeWindow (BrailleDisplay *brl) {
   return 1;
 }
 
-static void
+static int
 brl_writeStatus (BrailleDisplay *brl, const unsigned char *s) {
   updateCells(statusCells, s, sizeof(statusCells));
+  return 1;
 }
 
 static int

@@ -488,7 +488,7 @@ brl_writeWindow (BrailleDisplay *brl) {
   return 1;
 }
 
-static void
+static int
 brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) {
   if (memcmp(statusArea, status, statusCells) != 0) {
     memcpy(statusArea, status, statusCells);
@@ -496,6 +496,7 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) {
      * Not needed since writebrl will be called shortly.
      */
   }
+  return 1;
 }
 
 static int

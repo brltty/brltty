@@ -505,7 +505,7 @@ isOnline (void) {
    return online;
 }
 
-static void
+static int
 brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) {
    if (isOnline()) {
       if (status[BRL_firstStatusCell] == BRL_STATUS_CELLS_GENERIC) {
@@ -529,6 +529,7 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) {
          }
       }
    }
+   return 1;
 }
 
 static int

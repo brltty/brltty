@@ -1049,7 +1049,7 @@ brl_writeVisual (BrailleDisplay *brl) {
   }
 }
 
-static void
+static int
 brl_writeStatus (BrailleDisplay *brl, const unsigned char *st) {
   int generic = st[BRL_firstStatusCell] == BRL_STATUS_CELLS_GENERIC;
   int cells = BRL_MAX_STATUS_CELL_COUNT;
@@ -1118,6 +1118,7 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *st) {
 
     memcpy(previousStatus, st, cells);
   }
+  return 1;
 }
 
 static int

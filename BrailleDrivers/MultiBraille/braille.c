@@ -209,11 +209,12 @@ static void brl_destruct (BrailleDisplay *brl) {
 
 
 
-static void brl_writeStatus (BrailleDisplay *brl, const unsigned char *s) {
+static int brl_writeStatus (BrailleDisplay *brl, const unsigned char *s) {
 	short i;
 
 	/* Dot mapping: */
 	for (i = 0; i < 5; status[i] = outputTable[s[i]], i++);
+	return 1;
 }
 
 

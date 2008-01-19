@@ -742,7 +742,7 @@ brl_writeWindow (BrailleDisplay *brl) {
   return 1;
 }
 
-static void
+static int
 brl_writeStatus (BrailleDisplay *brl, const unsigned char *st) {
   if (model->statusCells &&
       (memcmp(st, prevStatus, model->statusCells) != 0)) {
@@ -752,6 +752,7 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *st) {
     }
     updateRequired = 1;
   }
+  return 1;
 }
 
 static int

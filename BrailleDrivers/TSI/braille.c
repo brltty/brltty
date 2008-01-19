@@ -626,7 +626,7 @@ display (const unsigned char *pattern,
   };
 }
 
-static void
+static int
 brl_writeStatus (BrailleDisplay *brl, const unsigned char *s)
 /* Only the PB80, which actually has 81cells, can be considered to have status
    cells, and it has only one. We could also decide to devote some of
@@ -634,6 +634,7 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *s)
 {
   if(ncells == 81)
     dispbuf[80] = s[0];
+  return 1;
 }
 
 

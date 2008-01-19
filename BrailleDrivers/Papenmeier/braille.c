@@ -1604,7 +1604,7 @@ brl_writeWindow (BrailleDisplay *brl) {
   return 1;
 }
 
-static void
+static int
 brl_writeStatus (BrailleDisplay *brl, const unsigned char* s) {
   if (terminal->statusCount) {
     unsigned char cells[terminal->statusCount];
@@ -1639,6 +1639,7 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char* s) {
     }
     updateCells(brl, terminal->statusCount, cells, currentStatus, protocol->writeStatus);
   }
+  return 1;
 }
 
 static int 

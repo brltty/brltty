@@ -1985,12 +1985,13 @@ brl_writeWindow (BrailleDisplay *brl) {
   return 1;
 }
 
-static void
+static int
 brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) {
   if (memcmp(&internalCells[textCount], status, statusCount) != 0) {
     memcpy(&internalCells[textCount], status, statusCount);
     translateCells(textCount, statusCount);
   }
+  return 1;
 }
 
 static int

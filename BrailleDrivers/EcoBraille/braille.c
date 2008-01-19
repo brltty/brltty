@@ -289,10 +289,11 @@ static int brl_writeWindow(BrailleDisplay *brl)
 }
 
 
-static void brl_writeStatus(BrailleDisplay *brl, const unsigned char *st)
+static int brl_writeStatus(BrailleDisplay *brl, const unsigned char *st)
 {
   /* Update status cells */
   memcpy(Status, st, model->NbStCells);
+  return 1;
 }
 
 

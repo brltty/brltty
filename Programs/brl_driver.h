@@ -35,7 +35,7 @@ static int brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext contex
 static int brl_writeWindow (BrailleDisplay *brl);
 
 #ifdef BRL_HAVE_STATUS_CELLS
-  static void brl_writeStatus (BrailleDisplay *brl, const unsigned char *cells);
+  static int brl_writeStatus (BrailleDisplay *brl, const unsigned char *cells);
 #endif /* BRL_HAVE_STATUS_CELLS */
 
 #ifdef BRL_HAVE_VISUAL_DISPLAY

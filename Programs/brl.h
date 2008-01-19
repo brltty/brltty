@@ -102,7 +102,7 @@ typedef struct {
   int (*writeWindow) (BrailleDisplay *brl);
 
   /* These require BRL_HAVE_STATUS_CELLS. */
-  void (*writeStatus) (BrailleDisplay *brl, const unsigned char *cells);
+  int (*writeStatus) (BrailleDisplay *brl, const unsigned char *cells);
 
   /* These require BRL_HAVE_VISUAL_DISPLAY. */
   void (*writeVisual) (BrailleDisplay *brl);
