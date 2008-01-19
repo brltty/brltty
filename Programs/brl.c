@@ -170,16 +170,17 @@ showBrailleString (BrailleDisplay *brl, const char *string, unsigned int duratio
   return ok;
 }
 
-void
+int
 clearStatusCells (BrailleDisplay *brl) {
   if (braille->writeStatus) {
     unsigned char cells[BRL_MAX_STATUS_CELL_COUNT];        /* status cell buffer */
     memset(cells, 0, sizeof(cells));
-    braille->writeStatus(brl, cells);
+    if (!braille->writeStatus(brl, cells)) return 0;
   }
+  return 1;
 }
 
-void
+int
 setStatusText (BrailleDisplay *brl, const char *text) {
   if (braille->writeStatus) {
     unsigned char cells[BRL_MAX_STATUS_CELL_COUNT];        /* status cell buffer */
@@ -194,8 +195,9 @@ setStatusText (BrailleDisplay *brl, const char *text) {
       }
     }
 
-    braille->writeStatus(brl, cells);
+    if (!braille->writeStatus(brl, cells)) return 0;
   }
+  return 1;
 }
 
 static void
@@ -257,10 +259,10 @@ readBrailleCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 }
 
 #ifdef ENABLE_LEARN_MODE
-void
+int
 learnMode (BrailleDisplay *brl, int poll, int timeout) {
-  setStatusText(brl, "lrn");
-  message("command learn mode", MSG_NODELAY);
+  if (!setStatusText(brl, "lrn")) return 0;
+  if (!message("command learn mode", MSG_NODELAY)) return 0;
 
   hasTimedOut(0);
   do {
@@ -272,14 +274,14 @@ learnMode (BrailleDisplay *brl, int poll, int timeout) {
       {
         int cmd = command & BRL_MSK_CMD;
         if (cmd == BRL_CMD_NOOP) continue;
-        if (cmd == BRL_CMD_LEARN) return;
+        if (cmd == BRL_CMD_LEARN) return 1;
       }
 
       {
         char buffer[0X100];
         describeCommand(command, buffer, sizeof(buffer));
         LogPrint(LOG_DEBUG, "Learn: %s", buffer);
-        message(buffer, MSG_NODELAY|MSG_SILENT);
+        if (!message(buffer, MSG_NODELAY|MSG_SILENT)) return 0;
       }
 
       hasTimedOut(0);
@@ -287,7 +289,8 @@ learnMode (BrailleDisplay *brl, int poll, int timeout) {
 
     drainBrailleOutput(brl, poll);
   } while (!hasTimedOut(timeout));
-  message("done", 0);
+
+  return message("done", 0);
 }
 #endif /* ENABLE_LEARN_MODE */
 

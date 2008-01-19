@@ -1099,7 +1099,8 @@ updatePreferences (void) {
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 #endif /* ENABLE_TABLE_SELECTION */
 
-  {
+  if (setStatusText(&brl, "prf") &&
+      message(gettext("Preferences Menu"), 0)) {
     static const char *booleanValues[] = {
       strtext("No"),
       strtext("Yes")
@@ -1269,10 +1270,6 @@ updatePreferences (void) {
 
     Preferences oldPreferences = prefs;        /* backup preferences */
     int command = EOF;                                /* readbrl() value */
-
-    /* status cells */
-    setStatusText(&brl, "prf");
-    message(gettext("Preferences Menu"), 0);
 
     if (prefs.autorepeat) resetAutorepeat();
 
@@ -1775,20 +1772,26 @@ startBrailleDriver (void) {
   btForgetConnectErrors();
 #endif /* ENABLE_BLUETOOTH_SUPPORT */
 
-  if (!activateBrailleDriver(0)) return 0;
-  getPreferences();
-  applyBraillePreferences();
-  clearStatusCells(&brl);
-  setHelpPageNumber(brl.helpPage);
-  playTune(&tune_braille_on);
+  if (activateBrailleDriver(0)) {
+    getPreferences();
+    applyBraillePreferences();
+    setHelpPageNumber(brl.helpPage);
+    playTune(&tune_braille_on);
 
-  if (!opt_quiet) {
-    char banner[0X100];
-    makeProgramBanner(banner, sizeof(banner));
-    message(banner, 0);
+    if (clearStatusCells(&brl)) {
+      if (opt_quiet) return 1;
+
+      {
+        char banner[0X100];
+        makeProgramBanner(banner, sizeof(banner));
+        if (message(banner, 0)) return 1;
+      }
+    }
+
+    deactivateBrailleDriver();
   }
 
-  return 1;
+  return 0;
 }
 
 static int tryBrailleDriver (void);

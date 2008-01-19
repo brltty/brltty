@@ -433,25 +433,27 @@ static const StatusStyleEntry statusStyleTable[] = {
 };
 static const int statusStyleCount = ARRAY_COUNT(statusStyleTable);
 
-static void
+static int
 setStatusCells (void) {
   if (braille->writeStatus) {
     unsigned char cells[BRL_MAX_STATUS_CELL_COUNT];        /* status cell buffer */
     memset(cells, 0, sizeof(cells));
     if (prefs.statusStyle < statusStyleCount)
       statusStyleTable[prefs.statusStyle].set(cells);
-    braille->writeStatus(&brl, cells);
+    if (!braille->writeStatus(&brl, cells)) return 0;
   }
+  return 1;
 }
 
 static int
 showInfo (void) {
+  char text[22];
+
+  if (!setStatusText(&brl, gettext("info"))) return 0;
+
   /* Here we must be careful. Some displays (e.g. Braille Lite 18)
    * are very small, and others (e.g. Bookworm) are even smaller.
    */
-  char text[22];
-  setStatusText(&brl, gettext("info"));
-
   if (brl.x*brl.y >= 21) {
     snprintf(text, sizeof(text), "%02d:%02d %02d:%02d %02d %c%c%c%c%c%c",
              p->winx+1, p->winy+1, scr.posx+1, scr.posy+1, scr.number, 
@@ -1740,7 +1742,7 @@ runProgram (void) {
 
 #ifdef ENABLE_LEARN_MODE
             case BRL_CMD_LEARN:
-              learnMode(&brl, updateInterval, 10000);
+              if (!learnMode(&brl, updateInterval, 10000)) writable = 0;
               break;
 #endif /* ENABLE_LEARN_MODE */
 
@@ -2449,7 +2451,9 @@ runProgram (void) {
               (scr.posy >= p->winy) && (scr.posy < (p->winy + brl.y)))
             brl.cursor = (scr.posy - p->winy) * brl.x + scr.posx - p->winx;
 
-          if (braille->writeVisual) braille->writeVisual(&brl);
+          if (braille->writeVisual)
+            if (!braille->writeVisual(&brl))
+              writable = 0;
 
           /* blank out capital letters if they're blinking and should be off */
           if (prefs.blinkingCapitals && !capitalsState) {
@@ -2492,7 +2496,7 @@ runProgram (void) {
           }
         }
 
-        setStatusCells();
+        if (!setStatusCells()) writable = 0;
         if (!braille->writeWindow(&brl)) writable = 0;
       }
 #ifdef ENABLE_API
@@ -2600,7 +2604,7 @@ showDotPattern (unsigned char dots, unsigned char duration) {
   if (braille->writeStatus) {
     unsigned char cells[BRL_MAX_STATUS_CELL_COUNT];        /* status cell buffer */
     memset(cells, dots, sizeof(cells));
-    braille->writeStatus(&brl, cells);
+    if (!braille->writeStatus(&brl, cells)) return 0;
   }
 
   memset(brl.buffer, dots, brl.x*brl.y);
