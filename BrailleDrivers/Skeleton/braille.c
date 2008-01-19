@@ -87,8 +87,9 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) {
 #endif /* BRL_HAVE_STATUS_CELLS */
 
 #ifdef BRL_HAVE_VISUAL_DISPLAY
-static void
+static int
 brl_writeVisual (BrailleDisplay *brl) {
+  return 1;
 }
 #endif /* BRL_HAVE_VISUAL_DISPLAY */
 

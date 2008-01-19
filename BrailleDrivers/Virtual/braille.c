@@ -1016,7 +1016,7 @@ brl_writeWindow (BrailleDisplay *brl) {
   return 1;
 }
 
-static void
+static int
 brl_writeVisual (BrailleDisplay *brl) {
   if (memcmp(brl->buffer, previousVisual, brailleCells) != 0) {
     writeString("Visual \"");
@@ -1047,6 +1047,7 @@ brl_writeVisual (BrailleDisplay *brl) {
 
     memcpy(previousVisual, brl->buffer, brailleCells);
   }
+  return 1;
 }
 
 static int

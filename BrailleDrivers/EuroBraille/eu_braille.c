@@ -251,12 +251,13 @@ brl_writeWindow (BrailleDisplay *brl)
 }
 
 #ifdef BRL_HAVE_VISUAL_DISPLAY
-static void
+static int
 brl_writeVisual (BrailleDisplay *brl) 
 {
   if (!protocolp)
-    return;
+    return 1;
   protocolp->writeVisual(brl);  
+  return 1;
 }
 #endif /* BRL_HAVE_VISUAL_DISPLAY */
 

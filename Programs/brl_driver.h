@@ -39,7 +39,7 @@ static int brl_writeWindow (BrailleDisplay *brl);
 #endif /* BRL_HAVE_STATUS_CELLS */
 
 #ifdef BRL_HAVE_VISUAL_DISPLAY
-  static void brl_writeVisual (BrailleDisplay *brl);
+  static int brl_writeVisual (BrailleDisplay *brl);
 #endif /* BRL_HAVE_VISUAL_DISPLAY */
 
 #ifdef BRL_HAVE_PACKET_IO

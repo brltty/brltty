@@ -420,7 +420,7 @@ static int brl_writeWindow (BrailleDisplay *brl)
 
 #ifdef		BRL_HAVE_VISUAL_DISPLAY
 
-static void	brl_writeVisual(BrailleDisplay *brl)
+static int	brl_writeVisual(BrailleDisplay *brl)
 {
   int		i = NbCols;
   char		OutBuf[2 * NbCols + 6];
@@ -442,6 +442,7 @@ static void	brl_writeVisual(BrailleDisplay *brl)
       WriteToBrlDisplay(brl, p - OutBuf, OutBuf);
       ReWrite_LCD = 0;
     }
+  return 1;
 }
 
 #endif

@@ -1170,7 +1170,7 @@ static int brl_writeWindow(BrailleDisplay *brl)
   return 1;
 }
 
-static void brl_writeVisual(BrailleDisplay *brl)
+static int brl_writeVisual(BrailleDisplay *brl)
 {
   int i;
   unsigned char data[3];
@@ -1203,7 +1203,7 @@ static void brl_writeVisual(BrailleDisplay *brl)
     }
   }
 
-  if (!memcmp(brl->buffer,displayedVisual,brl->y*brl->x)) return;
+  if (memcmp(brl->buffer,displayedVisual,brl->y*brl->x) == 0) return 1;
 
   for (i=0;i<brl->y*brl->x;i++) {
     if (displayedVisual[i] != brl->buffer[i]) {
@@ -1239,4 +1239,5 @@ static void brl_writeVisual(BrailleDisplay *brl)
 #endif /* USE_ */
     }
   }
+  return 1;
 }

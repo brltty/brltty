@@ -198,12 +198,13 @@ brl_writeWindow (BrailleDisplay *brl) {
   return 1;
 }
 
-static void
+static int
 brl_writeVisual (BrailleDisplay *brl) {
   if (memcmp(brl->buffer, visualCells, brl->x) != 0) {
     memcpy(visualCells, brl->buffer, brl->x);
     writeVisualCells(brl);
   }
+  return 1;
 }
 
 static int

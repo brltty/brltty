@@ -132,7 +132,7 @@ static int brl_writeWindow(BrailleDisplay *brl)
 /* function : brl_writeVisual */
 /* Displays a text on the braille window, only if it's different from */
 /* the one already displayed */
-static void brl_writeVisual(BrailleDisplay *brl)
+static int brl_writeVisual(BrailleDisplay *brl)
 {
   int vt;
   vt = currentVirtualTerminal();
@@ -143,18 +143,21 @@ static void brl_writeVisual(BrailleDisplay *brl)
       brlapi_write(&arguments);
       prevShown = 0;
     }
-    return;
-  } else {
-    if (prevShown && memcmp(prevText,brl->buffer,displaySize)==0 && brl->cursor == prevCursor) return;
-    if (brlapi_writeText(brl->cursor+1,(char *) brl->buffer)==0) {
-      memcpy(prevText,brl->buffer,displaySize);
-      prevCursor = brl->cursor;
-      prevShown = 1;
-    } else {
-      LogPrint(LOG_ERR, "write: %s", brlapi_strerror(&brlapi_error));
-      restart = 1;
-    }
+    return 1;
   }
+
+  if (prevShown && memcmp(prevText,brl->buffer,displaySize)==0 && brl->cursor == prevCursor)
+    return 1;
+
+  if (brlapi_writeText(brl->cursor+1,(char *) brl->buffer)==0) {
+    memcpy(prevText,brl->buffer,displaySize);
+    prevCursor = brl->cursor;
+    prevShown = 1;
+  } else {
+    LogPrint(LOG_ERR, "write: %s", brlapi_strerror(&brlapi_error));
+    restart = 1;
+  }
+  return 1;
 }
 
 /* Function : brl_readCommand */

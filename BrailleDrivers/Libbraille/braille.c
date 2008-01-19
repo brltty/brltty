@@ -108,10 +108,11 @@ brl_destruct(BrailleDisplay *brl)
   braille_close();
 }
 
-static void
+static int
 brl_writeVisual(BrailleDisplay *brl)
 {
   braille_write((char *)brl->buffer, brl->x);
+  return 1;
 }
 
 static int

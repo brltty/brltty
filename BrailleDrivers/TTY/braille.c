@@ -263,14 +263,15 @@ writeText (const unsigned char *buffer, int columns) {
   }
 }
 
-static void
+static int
 brl_writeVisual (BrailleDisplay *brl) {
   static unsigned char previousContent[MAX_WINDOW_SIZE];
   static int previousCursor = -1;
   char *previousLocale;
 
-  if (memcmp(previousContent, brl->buffer, brl->x*brl->y) == 0
-      && brl->cursor == previousCursor) return;
+  if ((memcmp(previousContent, brl->buffer, brl->x*brl->y) == 0) &&
+      (brl->cursor == previousCursor))
+    return 1;
   memcpy(previousContent, brl->buffer, brl->x*brl->y);
   previousCursor = brl->cursor;
 
@@ -310,6 +311,7 @@ brl_writeVisual (BrailleDisplay *brl) {
 #endif /* USE_CURSES */
 
   if (previousLocale) setlocale(LC_CTYPE, previousLocale);
+  return 1;
 }
 
 int
