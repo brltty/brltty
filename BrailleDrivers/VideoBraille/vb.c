@@ -46,13 +46,10 @@ static int brl_construct(BrailleDisplay *brl, char **parameters, const char *dev
 static void brl_destruct(BrailleDisplay *brl) {
 }
 
-static void brl_writeWindow(BrailleDisplay *brl) {
+static int brl_writeWindow(BrailleDisplay *brl) {
   unsigned char outbuff[40];
   int i;
 
-  if (!brl) {
-    return;
-  }
   /* Only display something if the data actually differs, this 
   *  could most likely cause some problems in redraw situations etc
   *  but since the darn thing wants to redraw quite frequently otherwise 
@@ -68,6 +65,7 @@ static void brl_writeWindow(BrailleDisplay *brl) {
       break;
     }
   }
+  return 1;
 }
 
 static int brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context) {

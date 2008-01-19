@@ -267,9 +267,10 @@ brl_destruct (BrailleDisplay *brl) {
   serialDevice = NULL;
 }
 
-static void
+static int
 brl_writeWindow (BrailleDisplay *brl) {
   updateWindow(brl, brl->buffer);
+  return 1;
 }
 
 static void

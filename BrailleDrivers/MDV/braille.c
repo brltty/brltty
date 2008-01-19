@@ -432,18 +432,18 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *s)
 }
 
 
-static void 
+static int 
 brl_writeWindow (BrailleDisplay *brl)
 {
   int i;
   unsigned char *p;
 
   if (brl->x != brl_cols || brl->y != BRLROWS)
-    return;
+    return 1;
     
   if(memcmp(prevdata, brl->buffer, brl_cols) == 0
      && memcmp(prevstatbuf, statbuf, nrstatcells) == 0)
-    return;
+    return 1;
   memcpy(prevdata, brl->buffer, brl_cols);
   memcpy(prevstatbuf, statbuf, nrstatcells);
 
@@ -461,7 +461,7 @@ brl_writeWindow (BrailleDisplay *brl)
 
   if(expect_receive_packet(recvpacket)){
     if(memcmp(recvpacket, ackpacket, ACKPACKETLEN) == 0)
-      return;
+      return 1;
     else{
       packet_to_process = 1;
       LogPrint(LOG_DEBUG, "After sending update, received code %d packet",
@@ -472,6 +472,7 @@ brl_writeWindow (BrailleDisplay *brl)
   memset(prevdata, 0xFF, brl_cols);
   memset(prevstatbuf, 0, nrstatcells);
   /* and then wait for writebrl to be called again. */
+  return 1;
 }
 
 

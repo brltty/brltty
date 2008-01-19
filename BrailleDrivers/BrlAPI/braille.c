@@ -98,7 +98,7 @@ static void brl_destruct(BrailleDisplay *brl)
 /* function : brl_writeWindow */
 /* Displays a text on the braille window, only if it's different from */
 /* the one already displayed */
-static void brl_writeWindow(BrailleDisplay *brl)
+static int brl_writeWindow(BrailleDisplay *brl)
 {
   int vt;
   vt = currentVirtualTerminal();
@@ -109,11 +109,10 @@ static void brl_writeWindow(BrailleDisplay *brl)
       brlapi_write(&arguments);
       prevShown = 0;
     }
-    return;
   } else {
     brlapi_writeArguments_t arguments = BRLAPI_WRITEARGUMENTS_INITIALIZER;
     unsigned char and[displaySize];
-    if (prevShown && memcmp(prevData,brl->buffer,displaySize)==0) return;
+    if (prevShown && memcmp(prevData,brl->buffer,displaySize)==0) return 1;
     memset(and,0,sizeof(and));
     arguments.regionBegin = 1;
     arguments.regionSize = displaySize;
@@ -127,6 +126,7 @@ static void brl_writeWindow(BrailleDisplay *brl)
       restart = 1;
     }
   }
+  return 1;
 }
 
 /* function : brl_writeVisual */

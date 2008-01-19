@@ -644,7 +644,7 @@ display_all (unsigned char *pattern)
 }
 
 
-static void 
+static int 
 brl_writeWindow (BrailleDisplay *brl)
 {
   static int count = 0;
@@ -664,7 +664,7 @@ brl_writeWindow (BrailleDisplay *brl)
     
     for(start=0; start<ncells; start++)
       if(dispbuf[start] != prevdata[start]) break;
-    if(start == ncells) return;
+    if(start == ncells) return 1;
     for(stop = ncells-1; stop > start; stop--)
       if(dispbuf[stop] != prevdata[stop]) break;
     
@@ -699,6 +699,7 @@ brl_writeWindow (BrailleDisplay *brl)
     if (collecting)
       display (dispbuf, base, i - simil - 1);
   }
+return 1;
 }
 
 

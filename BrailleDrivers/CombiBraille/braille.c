@@ -180,7 +180,7 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *s)
 }
 
 
-static void
+static int
 brl_writeWindow (BrailleDisplay *brl)
 {
   short i;			/* loop counter */
@@ -224,6 +224,7 @@ brl_writeWindow (BrailleDisplay *brl)
       serialWriteData (CB_serialDevice, rawdata, rawlen);
       brl->writeDelay += (rawlen * 1000 / CB_charactersPerSecond) + 1;
     }
+  return 1;
 }
 
 

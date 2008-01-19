@@ -217,7 +217,7 @@ static void brl_writeStatus (BrailleDisplay *brl, const unsigned char *s) {
 }
 
 
-static void brl_writeWindow (BrailleDisplay *brl) {
+static int brl_writeWindow (BrailleDisplay *brl) {
 	short i;			/* loop counter */
 	unsigned char *pre_data = (unsigned char *)"\002\033Z";	/* bytewise accessible copies */
 	unsigned char *post_data = (unsigned char *)"\001\015";
@@ -260,6 +260,7 @@ static void brl_writeWindow (BrailleDisplay *brl) {
     
 		serialWriteData (MB_serialDevice, rawdata, rawlen);
 	}
+	return 1;
 }
 
 

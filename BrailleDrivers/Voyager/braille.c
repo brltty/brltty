@@ -675,14 +675,14 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *cells) {
   memcpy(currentCells+statusOffset, cells, statusCells);
 }
 
-static void
+static int
 brl_writeWindow (BrailleDisplay *brl) {
   unsigned char buffer[totalCells];
 
   memcpy(currentCells+textOffset, brl->buffer, textCells);
 
   /* If content hasn't changed, do nothing. */
-  if (memcmp(previousCells, currentCells, totalCells) == 0) return;
+  if (memcmp(previousCells, currentCells, totalCells) == 0) return 1;
 
   /* remember current content */
   memcpy(previousCells, currentCells, totalCells);
@@ -715,6 +715,7 @@ brl_writeWindow (BrailleDisplay *brl) {
       io->writeBraille(buffer, 70, 2);
       break;
   }
+  return 1;
 }
 
 

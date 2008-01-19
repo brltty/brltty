@@ -480,11 +480,12 @@ handleUpdate (unsigned char line) {
    return 1;
 }
 
-static void
+static int
 brl_writeWindow (BrailleDisplay *brl) {
    if (deviceStatus == DEV_READY) {
       sendCurrentLine();
    }
+   return 1;
 }
 
 static int

@@ -99,7 +99,7 @@ typedef struct {
   int (*construct) (BrailleDisplay *brl, char **parameters, const char *device);
   void (*destruct) (BrailleDisplay *brl);
   int (*readCommand) (BrailleDisplay *brl, BRL_DriverCommandContext context);
-  void (*writeWindow) (BrailleDisplay *brl);
+  int (*writeWindow) (BrailleDisplay *brl);
 
   /* These require BRL_HAVE_STATUS_CELLS. */
   void (*writeStatus) (BrailleDisplay *brl, const unsigned char *cells);

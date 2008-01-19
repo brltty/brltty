@@ -479,12 +479,13 @@ brl_reset (BrailleDisplay *brl) {
   return 0;
 }
 
-static void
+static int
 brl_writeWindow (BrailleDisplay *brl) {
   if (memcmp(dataArea, brl->buffer, dataCells) != 0) {
     memcpy(dataArea, brl->buffer, dataCells);
     refreshCells(brl);
   }
+  return 1;
 }
 
 static void

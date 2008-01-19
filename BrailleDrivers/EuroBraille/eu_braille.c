@@ -241,12 +241,13 @@ brl_keyToCommand (BrailleDisplay *brl, BRL_DriverCommandContext context, int key
 }
 #endif /* BRL_HAVE_KEY_CODES */
 
-static void
+static int
 brl_writeWindow (BrailleDisplay *brl) 
 {
   if (!protocolp)
-    return;
+    return 1;
   protocolp->writeWindow(brl);
+  return 1;
 }
 
 #ifdef BRL_HAVE_VISUAL_DISPLAY

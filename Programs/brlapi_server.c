@@ -2255,19 +2255,21 @@ static inline void setCurrentRootTty(void) {
 }
 
 /* Function : api_writeWindow */
-static void api_writeWindow(BrailleDisplay *brl)
+static int api_writeWindow(BrailleDisplay *brl)
 {
+  int ok = 1;
   setCurrentRootTty();
   pthread_mutex_lock(&connectionsMutex);
   pthread_mutex_lock(&rawMutex);
   if (!offline && !suspendConnection && !rawConnection && !whoFillsTty(&ttys)) {
     last_conn_write=NULL;
     pthread_mutex_lock(&driverMutex);
-    trueBraille->writeWindow(brl);
+    if (!trueBraille->writeWindow(brl)) ok = 0;
     pthread_mutex_unlock(&driverMutex);
   }
   pthread_mutex_unlock(&rawMutex);
   pthread_mutex_unlock(&connectionsMutex);
+  return ok;
 }
 
 /* Function : api_writeVisual */

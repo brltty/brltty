@@ -1595,12 +1595,13 @@ updateCells (BrailleDisplay *brl, int size, const unsigned char *data, unsigned 
   }
 }
 
-static void
+static int
 brl_writeWindow (BrailleDisplay *brl) {
   int i;
   for (i=0; i<terminal->textColumns; i++) brl->buffer[i] = outputTable[brl->buffer[i]];
   updateCells(brl, terminal->textColumns, brl->buffer, currentText, protocol->writeText);
   protocol->flushCells(brl);
+  return 1;
 }
 
 static void

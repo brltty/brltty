@@ -424,7 +424,7 @@ brl_destruct (BrailleDisplay * brl)
 }
 
 
-static void
+static int
 brl_writeWindow (BrailleDisplay * brl)
 {
   short i;			/* loop counter */
@@ -434,7 +434,7 @@ brl_writeWindow (BrailleDisplay * brl)
    * This is highly antisocial behaviour!
    */
   if (intoverride)
-    return;
+    return 1;
 
   /* First, the internal cursor: */
   if (int_cursor)
@@ -473,12 +473,13 @@ brl_writeWindow (BrailleDisplay * brl)
       waiting_ack = 1;
       /* send the ^ED... */
       write_prebrl();
-      if (!await_ack()) return;
+      if (!await_ack()) return 1;
 
       /* OK, now we'll suppose we're all clear to send Braille data. */
       serialWriteData(BL_serialDevice, rawdata, blitesz);
       await_ack();
     }
+  return 1;
 }
 
 

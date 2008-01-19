@@ -238,8 +238,9 @@ brl_destruct (BrailleDisplay *brl) {
 #endif /* HAVE_ICONV_H */
 }
 
-static void
+static int
 brl_writeWindow (BrailleDisplay *brl) {
+  return 1;
 }
 
 static void

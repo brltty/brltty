@@ -396,7 +396,7 @@ brl_destruct (BrailleDisplay *brl) {
   }
 }
 
-static void
+static int
 brl_writeWindow (BrailleDisplay *brl) {
   if (inputMode->modifyWindow) inputMode->modifyWindow(brl);
   updateCells(textCells, brl->buffer, sizeof(textCells));
@@ -404,6 +404,7 @@ brl_writeWindow (BrailleDisplay *brl) {
     writeCells(brl);
     refreshNeeded = 0;
   }
+  return 1;
 }
 
 static void

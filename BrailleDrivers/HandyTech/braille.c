@@ -729,7 +729,7 @@ updateCells (BrailleDisplay *brl) {
   return 1;
 }
 
-static void
+static int
 brl_writeWindow (BrailleDisplay *brl) {
   if (memcmp(brl->buffer, prevData, model->textCells) != 0) {
     int i;
@@ -739,6 +739,7 @@ brl_writeWindow (BrailleDisplay *brl) {
     updateRequired = 1;
   }
   updateCells(brl);
+  return 1;
 }
 
 static void

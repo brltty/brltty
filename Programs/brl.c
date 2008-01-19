@@ -54,8 +54,9 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   return EOF;
 }
 
-static void
+static int
 brl_writeWindow (BrailleDisplay *brl) {
+  return 1;
 }
 
 const BrailleDriver *braille = &noBraille;

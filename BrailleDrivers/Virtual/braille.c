@@ -1003,7 +1003,7 @@ brl_destruct (BrailleDisplay *brl) {
   deallocateCommandDescriptors();
 }
 
-static void
+static int
 brl_writeWindow (BrailleDisplay *brl) {
   if (memcmp(brl->buffer, previousBraille, brailleCells) != 0) {
     writeString("Braille \"");
@@ -1013,6 +1013,7 @@ brl_writeWindow (BrailleDisplay *brl) {
 
     memcpy(previousBraille, brl->buffer, brailleCells);
   }
+  return 1;
 }
 
 static void

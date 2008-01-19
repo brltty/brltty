@@ -1125,7 +1125,7 @@ static void brl_destruct(BrailleDisplay *brl)
   destroyToplevel();
 }
 
-static void brl_writeWindow(BrailleDisplay *brl)
+static int brl_writeWindow(BrailleDisplay *brl)
 {
 #if defined(USE_XAW) || defined(USE_WINDOWS)
   int i;
@@ -1136,7 +1136,7 @@ static void brl_writeWindow(BrailleDisplay *brl)
 #endif
   char c;
 
-  if (!displayb[0] || !memcmp(brl->buffer,displayedWindow,brl->y*brl->x)) return;
+  if (!displayb[0] || (memcmp(brl->buffer,displayedWindow,brl->y*brl->x) == 0)) return 1;
 
   for (i=0;i<brl->y*brl->x;i++)
     if (displayedWindow[i] != brl->buffer[i]) {
@@ -1167,6 +1167,7 @@ static void brl_writeWindow(BrailleDisplay *brl)
       displayedWindow[i] = brl->buffer[i];
   }
 #endif /* USE_XAW || USE_WINDOWS */
+  return 1;
 }
 
 static void brl_writeVisual(BrailleDisplay *brl)

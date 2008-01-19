@@ -833,10 +833,11 @@ brl_destruct (BrailleDisplay *brl) {
   io->closePort();
 }
 
-static void
+static int
 brl_writeWindow (BrailleDisplay *brl) {
   updateCells(brl, brl->buffer, textCells, textOffset);
   writeRequest(brl);
+  return 1;
 }
 
 static void

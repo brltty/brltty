@@ -32,7 +32,7 @@ extern "C" {
 static int brl_construct (BrailleDisplay *brl, char **parameters, const char *device);
 static void brl_destruct (BrailleDisplay *brl);
 static int brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context);
-static void brl_writeWindow (BrailleDisplay *brl);
+static int brl_writeWindow (BrailleDisplay *brl);
 
 #ifdef BRL_HAVE_STATUS_CELLS
   static void brl_writeStatus (BrailleDisplay *brl, const unsigned char *cells);

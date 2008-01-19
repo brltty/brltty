@@ -267,7 +267,7 @@ static void brl_destruct(BrailleDisplay *brl)
 }
 
 
-static void brl_writeWindow(BrailleDisplay *brl)
+static int brl_writeWindow(BrailleDisplay *brl)
 {
   int i, j;
 
@@ -285,6 +285,7 @@ static void brl_writeWindow(BrailleDisplay *brl)
      
   /* Write to Braille Display */
   WriteToBrlDisplay(rawdata);
+  return 1;
 }
 
 

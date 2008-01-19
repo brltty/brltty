@@ -381,13 +381,13 @@ static void brl_destruct (BrailleDisplay *brl)
    gio_fd = -1;
 }
 
-static void brl_writeWindow (BrailleDisplay *brl)
+static int brl_writeWindow (BrailleDisplay *brl)
 {
    int i = 41, j = 0;
 
    if (context) 
      {
-       return ;
+       return 1;
      }
    if (!ReWrite)
      /* We update the display only if it has changed */
@@ -411,6 +411,7 @@ static void brl_writeWindow (BrailleDisplay *brl)
        WriteToBrlDisplay (brl, p - OutBuf, OutBuf);
        ReWrite = 0;
      }
+   return 1;
 }
 
 /*

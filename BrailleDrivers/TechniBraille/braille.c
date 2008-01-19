@@ -186,7 +186,7 @@ brl_destruct (BrailleDisplay *brl) {
   }
 }
 
-static void
+static int
 brl_writeWindow (BrailleDisplay *brl) {
   unsigned char cells[brl->x];
   int i;
@@ -195,6 +195,7 @@ brl_writeWindow (BrailleDisplay *brl) {
     memcpy(brailleCells, cells, brl->x);
     writeBrailleCells(brl);
   }
+  return 1;
 }
 
 static void

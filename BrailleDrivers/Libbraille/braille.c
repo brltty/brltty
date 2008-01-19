@@ -114,7 +114,7 @@ brl_writeVisual(BrailleDisplay *brl)
   braille_write((char *)brl->buffer, brl->x);
 }
 
-static void
+static int
 brl_writeWindow(BrailleDisplay *brl)
 {
   int i;
@@ -124,6 +124,7 @@ brl_writeWindow(BrailleDisplay *brl)
       braille_filter(outputTable[brl->buffer[i]], i);
     }
   braille_render();
+  return 1;
 }
 
 static int

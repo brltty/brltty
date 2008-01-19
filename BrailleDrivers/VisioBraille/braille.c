@@ -254,7 +254,7 @@ static void brl_destruct(BrailleDisplay *brl)
 /* function : brl_writeWindow */
 /* Displays a text on the braille window, only if it's different from */
 /* the one alreadz displayed */
-static void brl_writeWindow(BrailleDisplay *brl)
+static int brl_writeWindow(BrailleDisplay *brl)
 {
   /* The following table defines how internal brltty format is converted to */
   /* VisioBraille format. Do *NOT* modify this table. */
@@ -521,11 +521,12 @@ static void brl_writeWindow(BrailleDisplay *brl)
   static unsigned char brailleDisplay[81]= { 0x3e }; /* should be large enough for everyone */
   static unsigned char prevData[80];
   int i;
-  if (memcmp(&prevData,brl->buffer,brl->x)==0) return;
+  if (memcmp(&prevData,brl->buffer,brl->x)==0) return 1;
   for (i=0; i<brl->x; i++) brailleDisplay[i+1] = outputTable[*(brl->buffer+i)];
   if (brl_writePacket(brl,(unsigned char *) &brailleDisplay,brl->x+1)==0) {
     memcpy(&prevData,brl->buffer,brl->x);
   }
+  return 1;
 }
 
 /* Function : brl_keyToCommand */
