@@ -1981,8 +1981,7 @@ brl_writeWindow (BrailleDisplay *brl) {
 
   memcpy(&internalCells[start], &brl->buffer[start], count);
   translateCells(start, count);
-  updateCells(brl);
-  return 1;
+  return updateCells(brl);
 }
 
 static int
