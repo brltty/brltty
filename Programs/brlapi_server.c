@@ -2323,6 +2323,7 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
   brlapi_packet_t packet;
   int keycode, command = EOF;
   brlapi_keyCode_t clientCode;
+  int ok = 1;
 
   pthread_mutex_lock(&connectionsMutex);
   pthread_mutex_lock(&rawMutex);
@@ -2367,16 +2368,20 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
         getText(&c->brailleWindow, buf);
         brl->cursor = c->brailleWindow.cursor-1;
 	pthread_mutex_lock(&driverMutex);
-        trueBraille->writeVisual(brl);
+        ok = trueBraille->writeVisual(brl);
 	pthread_mutex_unlock(&driverMutex);
       }
-      getDots(&c->brailleWindow, buf);
-      pthread_mutex_lock(&driverMutex);
-      trueBraille->writeWindow(brl);
-      pthread_mutex_unlock(&driverMutex);
+      if (ok) {
+	getDots(&c->brailleWindow, buf);
+	pthread_mutex_lock(&driverMutex);
+	ok = trueBraille->writeWindow(brl);
+	pthread_mutex_unlock(&driverMutex);
+      }
       disp->buffer = oldbuf;
-      c->brlbufstate = FULL;
-      refresh=0;
+      if (ok) {
+	c->brlbufstate = FULL;
+	refresh=0;
+      }
     }
     pthread_mutex_unlock(&c->brlMutex);
   } else {
@@ -2389,6 +2394,11 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
       goto out;
     }
     pthread_mutex_unlock(&driverMutex);
+  }
+  if (!ok) {
+    pthread_mutex_unlock(&rawMutex);
+    command = BRL_CMD_RESTARTBRL;
+    goto out;
   }
   if (trueBraille->readKey) {
     pthread_mutex_lock(&driverMutex);
