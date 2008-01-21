@@ -451,7 +451,7 @@ static unsigned short unshiftedAttributesMask;
 static unsigned short shiftedAttributesMask;
 
 static void
-setAttributesMasks (unsigned char bit) {
+setAttributesMasks (unsigned short bit) {
   fontAttributesMask = bit;
   unshiftedAttributesMask = (((bit & 0XF000) - 0X1000) & 0XF000) |
                             (((bit & 0X0F00) - 0X0100) & 0X0F00);
@@ -533,7 +533,7 @@ processParameters_LinuxScreen (char **parameters) {
     static const char *choices[] = {"auto", "vga", "fb", NULL};
     unsigned int choice;
     if (validateInteger(&bit, parameters[PARM_HFB], &minimum, &maximum)) {
-      highFontBit = 1 << bit;
+      highFontBit = 1 << (bit + 8);
     } else if (!validateChoice(&choice, parameters[PARM_HFB], choices)) {
       LogPrint(LOG_WARNING, "%s: %s", "invalid high font bit", parameters[PARM_HFB]);
     } else if (choice) {
