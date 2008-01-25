@@ -1308,7 +1308,7 @@ BRLTTY_TEXT_TABLE([fr-cbifs], [Code Braille Informatique Français Standard (iso-
 BRLTTY_TEXT_TABLE([it], [Italian (iso-8859-1)])
 BRLTTY_TEXT_TABLE([nabcc], [North American Braille Computer Code (iso-8859-1)])
 BRLTTY_TEXT_TABLE([no-h], [Norwegian and German (iso-8859-1)])
-BRLTTY_TEXT_TABLE([no-p], [Norwegian (iso-8859-1)])
+BRLTTY_TEXT_TABLE([no-oub], [Norwegian (Offentlig Utvalg for Blindeskrift)])
 BRLTTY_TEXT_TABLE([pl], [Polish (iso-8859-2)])
 BRLTTY_TEXT_TABLE([pt], [Portuguese (iso-8859-1)])
 BRLTTY_TEXT_TABLE([ru], [Russian (koi8-r)])

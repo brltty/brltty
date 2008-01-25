@@ -101,7 +101,7 @@
 #text-table	it	# Italian
 #text-table	nabcc	# North American Braille Computer Code
 #text-table	no-h	# Norwegian and German
-#text-table	no-p	# Norwegian
+#text-table	no-oub	# Norwegian (Offentlig Utvalg for Blindeskrift)
 #text-table	pl	# Polish (iso-8859-2)
 #text-table	pt	# Portuguese (iso-8859-1)
 #text-table	ru	# Russian (koi8-r)
