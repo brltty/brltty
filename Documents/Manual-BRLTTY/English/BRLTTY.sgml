@@ -3967,7 +3967,7 @@ several alternatives are provided:
   <tag/fr-cbifs/Code Braille Informatique Français Standard (iso-8859-1)
   <tag/it/Italian (iso-8859-1)
   <tag/nabcc/North American Braille Computer Code (iso-8859-1)
-  <tag/no-h/Norwegian and German (iso-8859-1)
+  <tag/no-generic/Norwegian (with support for other languages)
   <tag/no-oub/Norwegian (Offentlig Utvalg for Blindeskrift)
   <tag/pl/Polish (iso-8859-2)
   <tag/pt/Portuguese (iso-8859-1)
