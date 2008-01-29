@@ -60,6 +60,7 @@
 #include "brlapi_keyranges.h"
 #include "cmd.h"
 #include "brl.h"
+#include "tbl.h"
 #include "brltty.h"
 #include "misc.h"
 #include "auth.h"
@@ -567,27 +568,11 @@ void copyBrailleWindow(BrailleWindow *dest, const BrailleWindow *src)
 /* No allocation of buf is performed */
 void getDots(const BrailleWindow *brailleWindow, unsigned char *buf)
 {
-  int i, c;
-  wchar_t wc;
+  int i;
+  unsigned char c;
   for (i=0; i<displaySize; i++) {
-    wc = brailleWindow->text[i];
-    if ((wc >= BRLAPI_UC_ROW) && (wc <= (BRLAPI_UC_ROW | 0XFF)))
-      buf[i] =
-	(wc&(1<<(1-1))?BRLAPI_DOT1:0) |
-	(wc&(1<<(2-1))?BRLAPI_DOT2:0) |
-	(wc&(1<<(3-1))?BRLAPI_DOT3:0) |
-	(wc&(1<<(4-1))?BRLAPI_DOT4:0) |
-	(wc&(1<<(5-1))?BRLAPI_DOT5:0) |
-	(wc&(1<<(6-1))?BRLAPI_DOT6:0) |
-	(wc&(1<<(7-1))?BRLAPI_DOT7:0) |
-	(wc&(1<<(8-1))?BRLAPI_DOT8:0);
-    else
-      if ((c = convertWcharToChar(wc)) != EOF)
-        buf[i] = textTable[c];
-      else
-        /* TODO: "invalid" pattern */
-        buf[i] = textTable[(unsigned char) '?'];
-    buf[i] = (buf[i] & brailleWindow->andAttr[i]) | brailleWindow->orAttr[i];
+    c = convertWcharToDots(textTable, brailleWindow->text[i]);
+    buf[i] = (c & brailleWindow->andAttr[i]) | brailleWindow->orAttr[i];
   }
   if (brailleWindow->cursor) buf[brailleWindow->cursor-1] |= cursorDots();
 }
