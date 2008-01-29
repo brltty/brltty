@@ -31,12 +31,11 @@
 BEGIN_OPTION_TABLE(programOptions)
 END_OPTION_TABLE
 
-TranslationTable textTable;
-
 int
 main (int argc, char *argv[]) {
   int status;
   char *path;
+  TranslationTable table;
 
   {
     static const OptionsDescriptor descriptor = {
@@ -53,13 +52,13 @@ main (int argc, char *argv[]) {
   }
   path = *argv++, argc--;
 
-  if (loadTranslationTable(path, NULL, textTable, 0)) {
+  if (loadTranslationTable(path, NULL, table, 0)) {
     unsigned int columns = 8;
     unsigned int rows = 0X100 / columns;
     unsigned int row;
 
     for (row=0; row<rows; row++) {
-      const unsigned char *buffer = &textTable[row * columns];
+      const unsigned char *buffer = &table[row * columns];
       unsigned int column;
 
       for (column=0; column<columns; column++) {

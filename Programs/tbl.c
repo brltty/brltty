@@ -228,11 +228,7 @@ loadTranslationTable (const char *path, FILE *file, TranslationTable table, int 
 unsigned char
 convertWcharToDots (TranslationTable table, wchar_t character) {
   int byte = convertWcharToChar(character);
-  if (byte == EOF) {
-    uint32_t value = character;
-    LogPrint(LOG_NOTICE, "cannot translate character to braille: 0X%02" PRIX32, value);
-    byte = '?';
-  }
+  if (byte == EOF) byte = '?';
   return table[byte];
 }
 
