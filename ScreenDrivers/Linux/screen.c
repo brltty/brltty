@@ -366,7 +366,13 @@ setTranslationTable (int force) {
 
   if (sfmChanged || vccChanged) {
     unsigned int count = ARRAY_COUNT(translationTable);
-    wmemset(translationTable, '?', count);
+
+    {
+      int i;
+      for (i=0; i<count; ++i) {
+        translationTable[i] = 0XF000 | i;
+      }
+    }
 
     {
       int screenFontMapIndex = screenFontMapCount;
