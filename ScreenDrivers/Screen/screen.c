@@ -39,6 +39,7 @@ static int shmFileDescriptor = -1;
 
 #include "misc.h"
 #include "system.h"
+#include "charset.h"
 
 #include "scr_driver.h"
 #include "screen.h"
@@ -185,7 +186,9 @@ readCharacters_ScreenScreen (const ScreenBox *box, ScreenCharacter *buffer) {
     for (row=0; row<box->height; row++) {
       int column;
       for (column=0; column<box->width; column++) {
-        character->text = *text++;
+        wint_t wc = convertCharToWchar(*text++);
+        if (wc == WEOF) wc = L'?';
+        character->text = wc;
         character->attributes = *attributes++;
         character++;
       }
