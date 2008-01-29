@@ -22,7 +22,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
-extern unsigned char *cutBuffer;
+extern wchar_t *cutBuffer;
 extern size_t cutLength;
 
 extern void cutBegin (int column, int row);

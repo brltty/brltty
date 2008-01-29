@@ -28,7 +28,7 @@ extern "C" {
 #define CTR(table, offset) ((ContractionTableRule *)CTA((table), (offset)))
 
 #define HASHNUM 1087
-#define hash(x) (((x[0]<<8)+x[1])%HASHNUM)
+#define CTH(x) (((x[0]<<8)+x[1])%HASHNUM)
 
 typedef unsigned long int ContractionTableOffset;
 
@@ -43,16 +43,14 @@ typedef enum {
 typedef uint32_t ContractionTableCharacterAttributes;
 
 typedef struct {
+  wchar_t value;
   ContractionTableOffset rules;
   ContractionTableOffset always;
   ContractionTableCharacterAttributes attributes;
-  BYTE uppercase;
-  BYTE lowercase;
 } ContractionTableCharacter;
 
 typedef enum { /*Op codes*/
   CTO_IncludeFile, /*include a file*/
-  CTO_Locale, /*locale specification for character interpretation*/
 
   CTO_CapitalSign, /*dot pattern for capital sign*/
   CTO_BeginCapitalSign, /*dot pattern for beginning capital block*/
@@ -62,7 +60,6 @@ typedef enum { /*Op codes*/
   CTO_NumberSign, /*number sign*/
 
   CTO_Literal, /*don't translate this string*/
-  CTO_Replace, /*replace this string with another*/
   CTO_Always, /*always use this contraction*/
   CTO_Repeated, /*take just the first, i.e. multiple blanks*/
 
@@ -102,17 +99,17 @@ typedef struct {
   ContractionTableCharacterAttributes before; /*character types which must precede*/
   BYTE findlen; /*length of string to be replaced*/
   BYTE replen; /*length of replacement string*/
-  BYTE findrep[1]; /*find and replacement strings*/
+  wchar_t findrep[1]; /*find and replacement strings*/
 } ContractionTableRule;
 
 typedef struct { /*translation table*/
-  ContractionTableOffset locale; /*locale specification*/
   ContractionTableOffset capitalSign; /*capitalization sign*/
   ContractionTableOffset beginCapitalSign; /*begin capitals sign*/
   ContractionTableOffset endCapitalSign; /*end capitals sign*/
   ContractionTableOffset englishLetterSign; /*english letter sign*/
   ContractionTableOffset numberSign; /*number sign*/
-  ContractionTableCharacter characters[0X100]; /*descriptions of characters*/
+  ContractionTableOffset characters;
+  uint32_t characterCount;
   ContractionTableOffset rules[HASHNUM]; /*locations of multi-character rules in table*/
 } ContractionTableHeader;
 

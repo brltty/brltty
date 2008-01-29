@@ -62,7 +62,7 @@ spk_construct (SpeechSynthesizer *spk, char **parameters)
 
 
 static void
-spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, int len)
+spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, size_t len)
 {
   unsigned char *pre_speech = (unsigned char *)PRE_SPEECH;
   unsigned char *post_speech = (unsigned char *)POST_SPEECH;

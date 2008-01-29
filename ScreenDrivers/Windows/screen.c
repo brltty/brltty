@@ -191,9 +191,7 @@ describe_WindowsScreen (ScreenDescription *description) {
 }
 
 static int
-read_WindowsScreen (ScreenBox box, unsigned char *buffer, ScreenCharacterProperty property) {
-  /* TODO: GetConsoleCP */
-  int text = property == SCR_TEXT;
+readCharacters_WindowsScreen (const ScreenBox *box, ScreenCharacter *buffer) {
   int x, y;
   static int wide;
   COORD coord;
@@ -202,20 +200,21 @@ read_WindowsScreen (ScreenBox box, unsigned char *buffer, ScreenCharacterPropert
   const char *name;
   size_t size;
   void *buf;
+  WORD *bufAttr;
 
   if (altTab) {
-    setScreenMessage(&box, buffer, property, altTabName);
+    setScreenMessage(box, buffer, altTabName);
     return 1;
   }
   if (consoleOutput == INVALID_HANDLE_VALUE) return 0;
   if (unreadable) {
-    setScreenMessage(&box, buffer, property, unreadable);
+    setScreenMessage(box, buffer, unreadable);
     return 1;
   }
-  if (!validateScreenBox(&box, cols, rows)) return 0;
+  if (!validateScreenBox(box, cols, rows)) return 0;
 
-  coord.X = box.left + info.srWindow.Left;
-  coord.Y = box.top + info.srWindow.Top;
+  coord.X = box->left + info.srWindow.Left;
+  coord.Y = box->top + info.srWindow.Top;
 
   if (!wide) {
     wchar_t buf;
@@ -232,61 +231,68 @@ read_WindowsScreen (ScreenBox box, unsigned char *buffer, ScreenCharacterPropert
     }
   }
 #define USE(f, t) (fun = (typeof(fun))f, name = #f, size = sizeof(t))
-  if (text) {
-    if (wide > 0)
-      USE(ReadConsoleOutputCharacterW, wchar_t);
-    else
-      USE(ReadConsoleOutputCharacterA, char);
-  } else {
-    USE(ReadConsoleOutputAttribute, WORD);
-  }
+  if (wide > 0)
+    USE(ReadConsoleOutputCharacterW, wchar_t);
+  else
+    USE(ReadConsoleOutputCharacterA, char);
 #undef USE
 
-  if (text && wide < 0) {
-    buf = buffer;
-  } else {
-    if (!(buf = malloc(box.width*size))) {
-      LogError("malloc for Windows console reading");
-      return 0;
-    }
+  if (!(buf = malloc(box->width*size))) {
+    LogError("malloc for Windows console reading");
+    return 0;
   }
 
-  for (y=0; y<box.height; y++, coord.Y++) {
+  if (!(bufAttr = malloc(box->width*sizeof(WORD)))) {
+    LogError("malloc for Windows console reading");
+    free(buf);
+    return 0;
+  }
+
+  for (y=0; y<box->height; y++, coord.Y++) {
     DWORD read;
 
-    if (!fun(consoleOutput, buf, box.width, coord, &read)) {
+    if (!fun(consoleOutput, buf, box->width, coord, &read)) {
       LogWindowsError(name);
       break;
     }
 
-    if (read != box.width) {
+    if (read != box->width) {
       LogPrint(LOG_ERR, "wrong number of items read: %s: %ld != %d",
-               name, read, box.width);
+               name, read, box->width);
       break;
     }
 
-    if (text) {
-      if (wide > 0) {
-	for (x=0; x<box.width; x++) {
-	  wchar_t c = ((wchar_t *)buf)[x];
-	  if (c >= 0X100) c = '?';
-	  buffer[y*box.width+x] = c;
-	}
-      } else {
-	buf += box.width;
+    if (wide > 0) {
+      for (x=0; x<box->width; x++) {
+	buffer[y*box->width+x].text = ((wchar_t*)buf)[x];
       }
     } else {
-      for (x=0; x<box.width; x++) {
-	buffer[y*box.width+x] = ((WORD *)buf)[x];
+      for (x=0; x<box->width; x++) {
+	/* TODO: GetConsoleCP and convert */
+	buffer[y*box->width+x].text = ((char*)buf)[x];
       }
+    }
+
+    if (!ReadConsoleOutputAttribute(consoleOutput, bufAttr, box->width, coord, &read)) {
+      LogWindowsError(name);
+      break;
+    }
+
+    if (read != box->width) {
+      LogPrint(LOG_ERR, "wrong number of items read: %s: %ld != %d",
+               name, read, box->width);
+      break;
+    }
+
+    for (x=0; x<box->width; x++) {
+      buffer[y*box->width+x].attributes = bufAttr[x];
     }
   }
 
-  if (!text || wide > 0) {
-    free(buf);
-  }
+  free(buf);
+  free(bufAttr);
 
-  return (y == box.height);
+  return (y == box->height);
 }
 
 static int 
@@ -494,7 +500,7 @@ scr_initialize (MainScreen *main) {
   main->base.switchVirtualTerminal = switchVirtualTerminal_WindowsScreen;
   main->base.currentVirtualTerminal = currentVirtualTerminal_WindowsScreen;
   main->base.describe = describe_WindowsScreen;
-  main->base.read = read_WindowsScreen;
+  main->base.readCharacters = readCharacters_WindowsScreen;
   main->base.insertKey = insertKey_WindowsScreen;
   main->base.executeCommand = executeCommand_WindowsScreen;
   main->processParameters = processParameters_WindowsScreen;

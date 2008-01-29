@@ -25,6 +25,7 @@
 #include "misc.h"
 #include "async.h"
 #include "message.h"
+#include "charset.h"
 #include "drivers.h"
 #include "brl.h"
 #include "tbl.h"
@@ -295,6 +296,11 @@ learnMode (BrailleDisplay *brl, int poll, int timeout) {
 #endif /* ENABLE_LEARN_MODE */
 
 void
+makeUntextTable (void) {
+  reverseTranslationTable(textTable, untextTable);
+}
+
+void
 makeOutputTable (const DotsTable dots, TranslationTable table) {
   static const DotsTable internalDots = {BRL_DOT1, BRL_DOT2, BRL_DOT3, BRL_DOT4, BRL_DOT5, BRL_DOT6, BRL_DOT7, BRL_DOT8};
   int byte, dot;
@@ -303,11 +309,6 @@ makeOutputTable (const DotsTable dots, TranslationTable table) {
     for (dot=0; dot<DOTS_TABLE_SIZE; dot++)
       if (byte & internalDots[dot])
         table[byte] |= dots[dot];
-}
-
-void
-makeUntextTable (void) {
-  reverseTranslationTable(textTable, untextTable);
 }
 
 /* Functions which support vertical and horizontal status cells. */

@@ -55,24 +55,20 @@ describe_PcBiosScreen (ScreenDescription *description) {
 }
 
 static int
-read_PcBiosScreen (ScreenBox box, unsigned char *buffer, ScreenCharacterProperty property) {
+readCharacters_PcBiosScreen (const ScreenBox *box, ScreenCharacter *buffer) {
   unsigned offset = ScreenPrimary;
   ScreenDescription description;
+  int row, col;
   describe_PcBiosScreen(&description);
-  if (validateScreenBox(&box, description.cols, description.rows)) {
-    int row, col;
-    _farsetsel(_go32_conventional_mem_selector());
-    if (property == SCR_ATTRIB) offset++;
-    for (row=box.top; row<box.top+box.height; ++row)
-      for (col=box.left; col<box.left+box.width; ++col)
-	*buffer++ = _farnspeekb(offset + row*description.cols*2 + col*2);
-    return 1;
-  } else {
-    LogPrint(LOG_ERR, "Invalid screen area: cols=%d left=%d width=%d rows=%d top=%d height=%d",
-             description.cols, box.left, box.width,
-             description.rows, box.top, box.height);
-  }
-  return 0;
+  if (!validateScreenBox(box, description.cols, description.rows)) return 0;
+  _farsetsel(_go32_conventional_mem_selector());
+  for (row=box->top; row<box->top+box->height; ++row)
+    for (col=box->left; col<box->left+box->width; ++col) {
+      buffer->text = _farnspeekb(offset + row*description.cols*2 + col*2);
+      buffer->attributes = _farnspeekb(offset + row*description.cols*2 + col*2 + 1);
+      buffer++;
+    }
+  return 1;
 }
 
 static int
@@ -192,7 +188,7 @@ static void
 scr_initialize (MainScreen *main) {
   initializeRealScreen(main);
   main->base.describe = describe_PcBiosScreen;
-  main->base.read = read_PcBiosScreen;
+  main->base.readCharacters = readCharacters_PcBiosScreen;
   main->base.insertKey = insertKey_PcBiosScreen;
   main->base.selectVirtualTerminal = selectVirtualTerminal_PcBiosScreen;
   main->base.switchVirtualTerminal = switchVirtualTerminal_PcBiosScreen;

@@ -236,18 +236,20 @@ describe_HelpScreen (ScreenDescription *description) {
 }
 
 static int
-read_HelpScreen (ScreenBox box, unsigned char *buffer, ScreenCharacterProperty property) {
+readCharacters_HelpScreen (const ScreenBox *box, ScreenCharacter *buffer) {
   const HelpPageEntry *description = &pageDescriptions[pageNumber];
-  if (validateScreenBox(&box, getBigEndian(description->width), getBigEndian(description->height))) {
-    if (property == SCR_TEXT) {
-       int row;
-      for (row=0; row<box.height; row++) {
-        memcpy(buffer + (row * box.width),
-               pages[pageNumber] + ((box.top + row) * getBigEndian(description->width)) + box.left,
-               box.width);
+  if (validateScreenBox(box, getBigEndian(description->width), getBigEndian(description->height))) {
+    ScreenCharacter *character = buffer;
+    const unsigned char *page = pages[pageNumber];
+    int row;
+    for (row=0; row<box->height; row++) {
+      const unsigned char *line = &page[((box->top + row) * getBigEndian(description->width)) + box->left];
+      int column;
+      for (column=0; column<box->width; column++) {
+        character->text = line[column];
+        character->attributes = 0X07;
+        ++character;
       }
-    } else {
-      memset(buffer, 0X07, box.width*box.height);
     }
     return 1;
   }
@@ -320,7 +322,7 @@ initializeHelpScreen (HelpScreen *help) {
   initializeBaseScreen(&help->base);
   help->base.currentVirtualTerminal = currentVirtualTerminal_HelpScreen;
   help->base.describe = describe_HelpScreen;
-  help->base.read = read_HelpScreen;
+  help->base.readCharacters = readCharacters_HelpScreen;
   help->base.insertKey = insertKey_HelpScreen;
   help->base.routeCursor = routeCursor_HelpScreen;
   help->construct = construct_HelpScreen;

@@ -19,41 +19,153 @@
 
 #include <string.h>
  
+#include "tbl.h"
 #include "ctb.h"
 #include "ctb_internal.h"
 #include "brl.h"
 
 static const ContractionTableHeader *table;	/*translation table */
-static const BYTE *src, *srcmin, *srcmax;
+static const wchar_t *src, *srcmin, *srcmax;
 static BYTE *dest, *destmin, *destmax;
 static int *offsets;
-static BYTE before, after;	/*the characters before and after a string */
+static wchar_t before, after;	/*the characters before and after a string */
 static int currentFindLength;		/*length of current find string */
 static ContractionTableOpcode currentOpcode;
 static ContractionTableOpcode previousOpcode;
 static const ContractionTableRule *currentRule;	/*pointer to current rule in table */
 
 #define setOffset() offsets[src - srcmin] = dest - destmin
-#define CTC(c,a) (table->characters[(c)].attributes & (a))
-#define CTL(c) (CTC((c), CTC_UpperCase)? table->characters[(c)].lowercase: (c))
+
+typedef struct {
+  wchar_t value;
+  wchar_t uppercase;
+  wchar_t lowercase;
+  ContractionTableCharacterAttributes attributes;
+} CharacterDefinition;
+
+static CharacterDefinition *characterDefinitions = NULL;
+static int characterDefinitionsSize = 0;
+static int characterDefinitionCount = 0;
+
+static CharacterDefinition *
+getCharacterDefinition (wchar_t character) {
+  int first = 0;
+  int last = characterDefinitionCount - 1;
+
+  while (first <= last) {
+    int current = (first + last) / 2;
+    CharacterDefinition *definition = &characterDefinitions[current];
+
+    if (definition->value < character) {
+      first = current + 1;
+    } else if (definition->value > character) {
+      last = current - 1;
+    } else {
+      return definition;
+    }
+  }
+
+  if (characterDefinitionCount == characterDefinitionsSize) {
+    int newSize = characterDefinitionsSize;
+    newSize = newSize? newSize<<1: 0X80;
+
+    {
+      CharacterDefinition *newDefinitions = realloc(characterDefinitions, (newSize * sizeof(*newDefinitions)));
+      if (!newDefinitions) return NULL;
+
+      characterDefinitions = newDefinitions;
+      characterDefinitionsSize = newSize;
+    }
+  }
+
+  memmove(&characterDefinitions[first+1],
+          &characterDefinitions[first],
+          (characterDefinitionCount - first) * sizeof(*characterDefinitions));
+  ++characterDefinitionCount;
+
+  {
+    CharacterDefinition *definition = &characterDefinitions[first];
+    memset(definition, 0, sizeof(*definition));
+    definition->value = definition->uppercase = definition->lowercase = character;
+
+    if (iswspace(character)) {
+      definition->attributes |= CTC_Space;
+    } else if (iswalpha(character)) {
+      definition->attributes |= CTC_Letter;
+
+      if (iswupper(character)) {
+        definition->attributes |= CTC_UpperCase;
+        definition->lowercase = towlower(character);
+      }
+
+      if (iswlower(character)) {
+        definition->attributes |= CTC_LowerCase;
+        definition->uppercase = towupper(character);
+      }
+    } else if (iswdigit(character)) {
+      definition->attributes |= CTC_Digit;
+    } else if (iswpunct(character)) {
+      definition->attributes |= CTC_Punctuation;
+    }
+
+    return definition;
+  }
+}
 
 static int
-compareBytes (const BYTE *address1, const BYTE *address2, int count) {
+testCharacter (wchar_t character, ContractionTableCharacterAttributes attributes) {
+  const CharacterDefinition *definition = getCharacterDefinition(character);
+  return definition && (attributes & definition->attributes);
+}
+
+static wchar_t
+toLowerCase (wchar_t character) {
+  const CharacterDefinition *definition = getCharacterDefinition(character);
+  return definition? definition->lowercase: character;
+}
+
+static const ContractionTableCharacter *
+getCharacterEntry (wchar_t character) {
+  const ContractionTableCharacter *characters = (ContractionTableCharacter *)CTA(table, table->characters);
+  int first = 0;
+  int last = table->characterCount - 1;
+
+  while (first <= last) {
+    int current = (first + last) / 2;
+    const ContractionTableCharacter *entry = &characters[current];
+
+    if (entry->value < character) {
+      first = current + 1;
+    } else if (entry->value > character) {
+      last = current - 1;
+    } else {
+      return entry;
+    }
+  }
+
+  return NULL;
+}
+
+static int
+checkCurrentRule (const wchar_t *source) {
+  const wchar_t *character = currentRule->findrep;
+  int count = currentFindLength;
+
   while (count) {
-    if (CTL(*address1) != CTL(*address2)) return 0;
-    --count, ++address1, ++address2;
+    if (toLowerCase(*source) != toLowerCase(*character)) return 0;
+    --count, ++source, ++character;
   }
   return 1;
 }
 
 static void
 setBefore (void) {
-  before = (src == srcmin)? ' ': src[-1];
+  before = (src == srcmin)? L' ': src[-1];
 }
 
 static void
 setAfter (int length) {
-  after = (src + length < srcmax)? src[length]: ' ';
+  after = (src + length < srcmax)? src[length]: L' ';
 }
 
 static int
@@ -63,13 +175,15 @@ selectRule (int length) { /*check for valid contractions */
 
   if (length < 1) return 0;
   if (length == 1) {
-    ruleOffset = table->characters[CTL(*src)].rules;
+    const ContractionTableCharacter *entry = getCharacterEntry(toLowerCase(*src));
+    if (!entry) return 0;
+    ruleOffset = entry->rules;
     maximumLength = 1;
   } else {
-    BYTE bytes[2];
-    bytes[0] = CTL(src[0]);
-    bytes[1] = CTL(src[1]);
-    ruleOffset = table->rules[hash(bytes)];
+    wchar_t characters[2];
+    characters[0] = toLowerCase(src[0]);
+    characters[1] = toLowerCase(src[1]);
+    ruleOffset = table->rules[CTH(characters)];
     maximumLength = 0;
   }
 
@@ -80,19 +194,19 @@ selectRule (int length) { /*check for valid contractions */
 
     if ((length == 1) ||
         ((currentFindLength <= length) &&
-         compareBytes(src, currentRule->findrep, currentFindLength))) {
+         checkCurrentRule(src))) {
       setAfter(currentFindLength);
 
       if (!maximumLength) {
         typedef enum {CS_Any, CS_Lower, CS_UpperSingle, CS_UpperMultiple} CapitalizationState;
-#define STATE(c) (CTC((c), CTC_UpperCase)? CS_UpperSingle: CTC((c), CTC_LowerCase)? CS_Lower: CS_Any)
+#define STATE(c) (testCharacter((c), CTC_UpperCase)? CS_UpperSingle: testCharacter((c), CTC_LowerCase)? CS_Lower: CS_Any)
         CapitalizationState current = STATE(before);
         int i;
         maximumLength = currentFindLength;
 
         for (i=0; i<currentFindLength; ++i) {
-          unsigned char byte = src[i];
-          CapitalizationState next = STATE(byte);
+          wchar_t character = src[i];
+          CapitalizationState next = STATE(character);
 
           if ((i > 0) &&
               (((current == CS_Lower) && (next == CS_UpperSingle)) ||
@@ -114,40 +228,39 @@ selectRule (int length) { /*check for valid contractions */
       }
 
       if ((currentFindLength <= maximumLength) &&
-          (!currentRule->after || CTC(before, currentRule->after)) &&
-          (!currentRule->before || CTC(after, currentRule->before))) {
+          (!currentRule->after || testCharacter(before, currentRule->after)) &&
+          (!currentRule->before || testCharacter(after, currentRule->before))) {
         switch (currentOpcode) {
           case CTO_Always:
           case CTO_Repeated:
-          case CTO_Replace:
           case CTO_Literal:
             return 1;
           case CTO_LargeSign:
           case CTO_LastLargeSign:
-            if (!CTC(before, CTC_Space) || !CTC(after, CTC_Space))
+            if (!testCharacter(before, CTC_Space) || !testCharacter(after, CTC_Space))
               currentOpcode = CTO_Always;
             return 1;
           case CTO_WholeWord:
           case CTO_Contraction:
-            if (CTC(before, CTC_Space|CTC_Punctuation) &&
-                CTC(after, CTC_Space|CTC_Punctuation))
+            if (testCharacter(before, CTC_Space|CTC_Punctuation) &&
+                testCharacter(after, CTC_Space|CTC_Punctuation))
               return 1;
             break;
           case CTO_LowWord:
-            if (CTC(before, CTC_Space) && CTC(after, CTC_Space) &&
+            if (testCharacter(before, CTC_Space) && testCharacter(after, CTC_Space) &&
                 (previousOpcode != CTO_JoinableWord) &&
                 ((dest == destmin) || !dest[-1]))
               return 1;
             break;
           case CTO_JoinableWord:
-            if (CTC(before, CTC_Space|CTC_Punctuation) &&
+            if (testCharacter(before, CTC_Space|CTC_Punctuation) &&
                 (before != '-') &&
-                CTC(after, CTC_Space) &&
+                testCharacter(after, CTC_Space) &&
                 (dest + currentRule->replen < destmax)) {
-              const BYTE *ptr = src + currentFindLength + 1;
+              const wchar_t *ptr = src + currentFindLength + 1;
               while (ptr < srcmax) {
-                if (!CTC(*ptr, CTC_Space)) {
-                  if (CTC(*ptr, CTC_Letter)) return 1;
+                if (!testCharacter(*ptr, CTC_Space)) {
+                  if (testCharacter(*ptr, CTC_Letter)) return 1;
                   break;
                 }
                 ptr++;
@@ -155,51 +268,51 @@ selectRule (int length) { /*check for valid contractions */
             }
             break;
           case CTO_SuffixableWord:
-            if (CTC(before, CTC_Space|CTC_Punctuation) &&
-                CTC(after, CTC_Space|CTC_Letter|CTC_Punctuation))
+            if (testCharacter(before, CTC_Space|CTC_Punctuation) &&
+                testCharacter(after, CTC_Space|CTC_Letter|CTC_Punctuation))
               return 1;
             break;
           case CTO_PrefixableWord:
-            if (CTC(before, CTC_Space|CTC_Letter|CTC_Punctuation) &&
-                CTC(after, CTC_Space|CTC_Punctuation))
+            if (testCharacter(before, CTC_Space|CTC_Letter|CTC_Punctuation) &&
+                testCharacter(after, CTC_Space|CTC_Punctuation))
               return 1;
             break;
           case CTO_BegWord:
-            if (CTC(before, CTC_Space|CTC_Punctuation) &&
-                CTC(after, CTC_Letter))
+            if (testCharacter(before, CTC_Space|CTC_Punctuation) &&
+                testCharacter(after, CTC_Letter))
               return 1;
             break;
           case CTO_BegMidWord:
-            if (CTC(before, CTC_Letter|CTC_Space|CTC_Punctuation) &&
-                CTC(after, CTC_Letter))
+            if (testCharacter(before, CTC_Letter|CTC_Space|CTC_Punctuation) &&
+                testCharacter(after, CTC_Letter))
               return 1;
             break;
           case CTO_MidWord:
-            if (CTC(before, CTC_Letter) && CTC(after, CTC_Letter))
+            if (testCharacter(before, CTC_Letter) && testCharacter(after, CTC_Letter))
               return 1;
             break;
           case CTO_MidEndWord:
-            if (CTC(before, CTC_Letter) &&
-                CTC(after, CTC_Letter|CTC_Space|CTC_Punctuation))
+            if (testCharacter(before, CTC_Letter) &&
+                testCharacter(after, CTC_Letter|CTC_Space|CTC_Punctuation))
               return 1;
             break;
           case CTO_EndWord:
-            if (CTC(before, CTC_Letter) &&
-                CTC(after, CTC_Space|CTC_Punctuation))
+            if (testCharacter(before, CTC_Letter) &&
+                testCharacter(after, CTC_Space|CTC_Punctuation))
               return 1;
             break;
           case CTO_BegNum:
-            if (CTC(before, CTC_Space|CTC_Punctuation) &&
-                CTC(after, CTC_Digit))
+            if (testCharacter(before, CTC_Space|CTC_Punctuation) &&
+                testCharacter(after, CTC_Digit))
               return 1;
             break;
           case CTO_MidNum:
-            if (CTC(before, CTC_Digit) && CTC(after, CTC_Digit))
+            if (testCharacter(before, CTC_Digit) && testCharacter(after, CTC_Digit))
               return 1;
             break;
           case CTO_EndNum:
-            if (CTC(before, CTC_Digit) &&
-                CTC(after, CTC_Space|CTC_Punctuation))
+            if (testCharacter(before, CTC_Digit) &&
+                testCharacter(after, CTC_Space|CTC_Punctuation))
               return 1;
             break;
           {
@@ -210,23 +323,23 @@ selectRule (int length) { /*check for valid contractions */
           case CTO_PostPunc:
             isPre = 0;
           doPunc:
-            if (CTC(*src, CTC_Punctuation)) {
-              const BYTE *pre = src;
-              const BYTE *post = src + currentFindLength;
+            if (testCharacter(*src, CTC_Punctuation)) {
+              const wchar_t *pre = src;
+              const wchar_t *post = src + currentFindLength;
               while (--pre >= srcmin)
-                if (!CTC(*pre, CTC_Punctuation))
+                if (!testCharacter(*pre, CTC_Punctuation))
                   break;
               while (post < srcmax) {
-                if (!CTC(*post, CTC_Punctuation)) break;
+                if (!testCharacter(*post, CTC_Punctuation)) break;
                 post++;
               }
               if (isPre) {
-                if (((pre < srcmin) || CTC(*pre, CTC_Space)) &&
-                    ((post < srcmax) && !CTC(*post, CTC_Space)))
+                if (((pre < srcmin) || testCharacter(*pre, CTC_Space)) &&
+                    ((post < srcmax) && !testCharacter(*post, CTC_Space)))
                   return 1;
               } else {
-                if (((pre >= srcmin) && !CTC(*pre, CTC_Space)) &&
-                    ((post == srcmax) || CTC(*post, CTC_Space)))
+                if (((pre >= srcmin) && !testCharacter(*pre, CTC_Space)) &&
+                    ((post == srcmax) || testCharacter(*post, CTC_Space)))
                   return 1;
               }
             }
@@ -253,35 +366,27 @@ putBytes (const BYTE *bytes, int count) {
 }
 
 static int
-putUnknown (BYTE character) { /* Convert unknown character to hexadecimal. */
-  static const BYTE hexDigits[] = {
-    '0', '1', '2', '3', '4', '5', '6', '7',
-    '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'
-  };
-  BYTE buffer[3];
-  buffer[0] = textTable['\\'];
-  buffer[1] = textTable[hexDigits[(character >> 4) & 0XF]];
-  buffer[2] = textTable[hexDigits[character & 0XF]];
-  return putBytes(buffer, sizeof(buffer));
+putReplace (const ContractionTableRule *rule) {
+  return putBytes((BYTE *)&rule->findrep[rule->findlen], rule->replen);
 }
 
 static int
-putCharacter (BYTE character) {
-  ContractionTableOffset offset = table->characters[character].always;
-  if (offset) {
-    const ContractionTableRule *rule = CTR(table, offset);
-    if (rule->replen) return putBytes(&rule->findrep[1], rule->replen);
-    return putBytes(&textTable[character], 1);
+putComputerBraille (wchar_t character) {
+  BYTE cell = convertWcharToDots(textTable, character);
+  return putBytes(&cell, 1);
+}
+
+static int
+putCharacter (wchar_t character) {
+  const ContractionTableCharacter *entry = getCharacterEntry(character);
+  if (entry) {
+    ContractionTableOffset offset = entry->always;
+    if (offset) {
+      const ContractionTableRule *rule = CTR(table, offset);
+      if (rule->replen) return putReplace(rule);
+    }
   }
-  return putUnknown(character);
-}
-
-static int
-putCharacters (const BYTE *characters, int count) {
-  while (count--)
-    if (!putCharacter(*characters++))
-      return 0;
-  return 1;
+  return putComputerBraille(character);
 }
 
 static int
@@ -291,13 +396,15 @@ putSequence (ContractionTableOffset offset) {
 }
 
 int
-contractText (void *contractionTable,
-              const BYTE *inputBuffer, int *inputLength,
-              BYTE *outputBuffer, int *outputLength,
-              int *offsetsMap, const int cursorOffset) { /*begin translation */
-  const BYTE *srcword = NULL;
+contractText (
+  void *contractionTable,
+  const wchar_t *inputBuffer, int *inputLength,
+  BYTE *outputBuffer, int *outputLength,
+  int *offsetsMap, const int cursorOffset
+) {
+  const wchar_t *srcword = NULL;
   BYTE *destword = NULL; /* last word transla1ted */
-  const BYTE *computerBraille = NULL;
+  const wchar_t *computerBraille = NULL;
 
   if (!(table = (ContractionTableHeader *) contractionTable)) return 0;
   srcmax = (srcmin = src = inputBuffer) + *inputLength;
@@ -310,43 +417,42 @@ contractText (void *contractionTable,
     setBefore();
     if (computerBraille)
       if (src >= computerBraille)
-        if (CTC(*src, CTC_Space) || CTC(src[-1], CTC_Space))
+        if (testCharacter(*src, CTC_Space) || testCharacter(src[-1], CTC_Space))
           computerBraille = NULL;
     if (computerBraille) {
       setAfter(1);
       currentOpcode = CTO_Literal;
-      if (!putBytes(&textTable[*src], 1)) break;
+      if (!putComputerBraille(*src)) break;
       src++;
     } else if (selectRule(srcmax-src) || selectRule(1)) {
-      if (table->locale &&
-          (cursorOffset >= (src - srcmin)) &&
+      if ((cursorOffset >= (src - srcmin)) &&
           (cursorOffset < (src - srcmin + currentFindLength))) {
         currentOpcode = CTO_Literal;
       } else if (table->numberSign && previousOpcode != CTO_MidNum &&
-                 !CTC(before, CTC_Digit) && CTC(*src, CTC_Digit)) {
+                 !testCharacter(before, CTC_Digit) && testCharacter(*src, CTC_Digit)) {
         if (!putSequence(table->numberSign)) break;
-      } else if (table->englishLetterSign && CTC(*src, CTC_Letter)) {
+      } else if (table->englishLetterSign && testCharacter(*src, CTC_Letter)) {
         if ((currentOpcode == CTO_Contraction) ||
-            (currentOpcode != CTO_EndNum && CTC(before, CTC_Digit)) ||
-            (currentOpcode == CTO_Always && currentFindLength == 1 && CTC(before, CTC_Space) &&
-             (src + 1 == srcmax || CTC(src[1], CTC_Space) ||
-              (CTC(src[1], CTC_Punctuation) && (src[1] != '.') && (src[1] != '\''))))) {
+            (currentOpcode != CTO_EndNum && testCharacter(before, CTC_Digit)) ||
+            (currentOpcode == CTO_Always && currentFindLength == 1 && testCharacter(before, CTC_Space) &&
+             (src + 1 == srcmax || testCharacter(src[1], CTC_Space) ||
+              (testCharacter(src[1], CTC_Punctuation) && (src[1] != '.') && (src[1] != '\''))))) {
           if (!putSequence(table->englishLetterSign)) break;
         }
       }
 
-      if (CTC(*src, CTC_UpperCase)) {
-        if (!CTC(before, CTC_UpperCase)) {
+      if (testCharacter(*src, CTC_UpperCase)) {
+        if (!testCharacter(before, CTC_UpperCase)) {
           if (table->beginCapitalSign &&
-              (src + 1 < srcmax) && CTC(src[1], CTC_UpperCase)) {
+              (src + 1 < srcmax) && testCharacter(src[1], CTC_UpperCase)) {
             if (!putSequence(table->beginCapitalSign)) break;
           } else if (table->capitalSign) {
             if (!putSequence(table->capitalSign)) break;
           }
         }
-      } else if (CTC(*src, CTC_LowerCase)) {
+      } else if (testCharacter(*src, CTC_LowerCase)) {
         if (table->endCapitalSign && (src - 2 >= srcmin) &&
-            CTC(src[-1], CTC_UpperCase) && CTC(src[-2], CTC_UpperCase)) {
+            testCharacter(src[-1], CTC_UpperCase) && testCharacter(src[-2], CTC_UpperCase)) {
           if (!putSequence(table->endCapitalSign)) break;
         }
       }
@@ -376,14 +482,10 @@ contractText (void *contractionTable,
 
       /* main processing */
       switch (currentOpcode) {
-        case CTO_Replace:
-          src += currentFindLength;
-          if (!putCharacters(&currentRule->findrep[currentFindLength], currentRule->replen)) goto done;
-          break;
         case CTO_Literal: {
-          const BYTE *srcorig = src;
+          const wchar_t *srcorig = src;
           computerBraille = src + currentFindLength;
-          if (CTC(*src, CTC_Space)) continue;
+          if (testCharacter(*src, CTC_Space)) continue;
           if (destword) {
             src = srcword;
             dest = destword;
@@ -396,10 +498,10 @@ contractText (void *contractionTable,
         }
         default:
           if (currentRule->replen) {
-            if (!putBytes(&currentRule->findrep[currentFindLength], currentRule->replen)) goto done;
+            if (!putReplace(currentRule)) goto done;
             src += currentFindLength;
           } else {
-            const BYTE *srclim = src + currentFindLength;
+            const wchar_t *srclim = src + currentFindLength;
             while (1) {
               if (!putCharacter(*src)) goto done;
               if (++src == srclim) break;
@@ -411,25 +513,25 @@ contractText (void *contractionTable,
       /* post processing */
       switch (currentOpcode) {
         case CTO_Repeated: {
-          const BYTE *srclim = srcmax - currentFindLength;
+          const wchar_t *srclim = srcmax - currentFindLength;
           setOffset();
-          while ((src <= srclim) && compareBytes(currentRule->findrep, src, currentFindLength)) {
+          while ((src <= srclim) && checkCurrentRule(src)) {
             src += currentFindLength;
           }
           break;
         }
         case CTO_JoinableWord:
-          while ((src < srcmax) && CTC(*src, CTC_Space)) src++;
+          while ((src < srcmax) && testCharacter(*src, CTC_Space)) src++;
           break;
         default:
           break;
       }
     } else {
-      if (!putUnknown(*src)) break;
+      if (!putComputerBraille(*src)) break;
       src++;
     }
 
-    if (((src > srcmin) && CTC(src[-1], CTC_Space) && (currentOpcode != CTO_JoinableWord))) {
+    if (((src > srcmin) && testCharacter(src[-1], CTC_Space) && (currentOpcode != CTO_JoinableWord))) {
       srcword = src;
       destword = dest;
     }
@@ -438,13 +540,13 @@ contractText (void *contractionTable,
   }				/*end of translation loop */
 done:
 
-  if (destword != NULL && src < srcmax && !CTC(*src, CTC_Space)) {
+  if (destword != NULL && src < srcmax && !testCharacter(*src, CTC_Space)) {
     src = srcword;
     dest = destword;
   }
   if (src < srcmax) {
     setOffset();
-    while (CTC(*src, CTC_Space))
+    while (testCharacter(*src, CTC_Space))
       if (++src == srcmax)
         break;
   }

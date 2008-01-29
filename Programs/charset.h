@@ -22,7 +22,6 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#include <wchar.h>
 #include <limits.h>
 
 #include "lock.h"

@@ -280,30 +280,35 @@ static int myread(SpeechSynthesizer *spk, int fd, void *buf, int len)
   return 1;
 }
 
-static void sayit(SpeechSynthesizer *spk, const unsigned char *buffer, int len, int attriblen)
+static void sayit(SpeechSynthesizer *spk, const unsigned char *text, size_t textlen, const unsigned char *attr, size_t attrlen)
 {
   unsigned char l[5];
   if(helper_fd_out < 0) return;
-  LogPrint(LOG_DEBUG,"Say %d bytes", len);
+  LogPrint(LOG_DEBUG,"Say %d bytes", textlen);
   l[0] = 2; /* say code */
-  l[1] = len>>8;
-  l[2] = len & 0xFF;
-  l[3] = attriblen>>8;
-  l[4] = attriblen & 0xFF;
+  l[1] = textlen>>8;
+  l[2] = textlen & 0xFF;
+  l[3] = attrlen>>8;
+  l[4] = attrlen & 0xFF;
   speaking = 1;
   mywrite(spk, helper_fd_out, l, 5);
-  mywrite(spk, helper_fd_out, buffer, len+attriblen);
+  mywrite(spk, helper_fd_out, text, textlen);
+  mywrite(spk, helper_fd_out, attr, attrlen);
   lastIndex = 0;
-  finalIndex = len;
+  finalIndex = textlen;
 }
 
-static void spk_say(SpeechSynthesizer *spk, const unsigned char *buffer, int len)
+static void spk_say(SpeechSynthesizer *spk, const unsigned char *text, size_t length)
 {
-  sayit(spk, buffer,len,0);
+  sayit(spk, text,length, NULL,0);
 }
-static void spk_express(SpeechSynthesizer *spk, const unsigned char *buffer, int len)
+static void spk_express(
+  SpeechSynthesizer *spk,
+  const unsigned char *text, size_t textLength,
+  const unsigned char *attributes, size_t attributesLength
+)
 {
-  sayit(spk, buffer,len,len);
+  sayit(spk, text,textLength, attributes,attributesLength);
 }
 
 static void spk_doTrack(SpeechSynthesizer *spk)

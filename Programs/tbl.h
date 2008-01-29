@@ -37,6 +37,8 @@ extern int loadTranslationTable (
   int options
 );
 
+extern unsigned char convertWcharToDots (TranslationTable table, wchar_t character);
+
 extern void reverseTranslationTable (TranslationTable from, TranslationTable to);
 
 extern void fixTextTablePath (char **path);

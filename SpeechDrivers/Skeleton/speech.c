@@ -46,7 +46,11 @@ spk_mute (SpeechSynthesizer *spk) {
 
 #ifdef SPK_HAVE_EXPRESS
 static void
-spk_express (SpeechSynthesizer *spk, const unsigned char *buffer, int length) {
+spk_express (
+  SpeechSynthesizer *spk,
+  const unsigned char *text, size_t textLength,
+  const unsigned char *attributes, size_t attributesLength
+) {
 }
 #endif /* SPK_HAVE_EXPRESS */
 

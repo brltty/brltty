@@ -51,15 +51,11 @@ describe_BaseScreen (ScreenDescription *description) {
 }
 
 static int
-read_BaseScreen (ScreenBox box, unsigned char *buffer, ScreenCharacterProperty property) {
+readCharacters_BaseScreen (const ScreenBox *box, ScreenCharacter *buffer) {
   ScreenDescription description;
   describe_BaseScreen(&description);
-  if (!validateScreenBox(&box, description.cols, description.rows)) return 0;
-  if (property == SCR_TEXT) {
-    memcpy(buffer, text_BaseScreen+box.left, box.width);
-  } else {
-    memset(buffer, 0X07, box.width);
-  }
+  if (!validateScreenBox(box, description.cols, description.rows)) return 0;
+  setScreenMessage(box, buffer, text_BaseScreen);
   return 1;
 }
 
@@ -99,7 +95,7 @@ initializeBaseScreen (BaseScreen *base) {
   base->switchVirtualTerminal = switchVirtualTerminal_BaseScreen;
   base->currentVirtualTerminal = currentVirtualTerminal_BaseScreen;
   base->describe = describe_BaseScreen;
-  base->read = read_BaseScreen;
+  base->readCharacters = readCharacters_BaseScreen;
   base->insertKey = insertKey_BaseScreen;
   base->routeCursor = routeCursor_BaseScreen;
   base->highlightRegion = highlightRegion_BaseScreen;

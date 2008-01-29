@@ -30,8 +30,6 @@ typedef enum {
 } DriverParameter;
 #define SPKPARMS "port", "module", "language", "voice"
 
-//#define SPK_HAVE_EXPRESS
-//#define SPK_HAVE_TRACK
 #define SPK_HAVE_RATE
 #define SPK_HAVE_VOLUME
 #include "spk_driver.h"
@@ -105,7 +103,7 @@ spk_destruct (SpeechSynthesizer *spk) {
 }
 
 static void
-spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, int length) {
+spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, size_t length) {
   spd_sayf(connection, SPD_TEXT, "%.*s", length, buffer);
 }
 
@@ -113,28 +111,6 @@ static void
 spk_mute (SpeechSynthesizer *spk) {
   spd_cancel(connection);
 }
-
-#ifdef SPK_HAVE_EXPRESS
-static void
-spk_express (SpeechSynthesizer *spk, const unsigned char *buffer, int length) {
-}
-#endif /* SPK_HAVE_EXPRESS */
-
-#ifdef SPK_HAVE_TRACK
-static void
-spk_doTrack (SpeechSynthesizer *spk) {
-}
-
-static int
-spk_getTrack (SpeechSynthesizer *spk) {
-  return 0;
-}
-
-static int
-spk_isSpeaking (SpeechSynthesizer *spk) {
-  return 0;
-}
-#endif /* SPK_HAVE_TRACK */
 
 static signed int
 scaleSetting (float setting, float minimum, float maximum) {

@@ -158,7 +158,7 @@ spk_destruct (SpeechSynthesizer *spk) {
 }
 
 static void
-spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, int length) {
+spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, size_t length) {
   swift_result_t result;
   swift_background_t job;
 

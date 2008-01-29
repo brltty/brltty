@@ -369,7 +369,7 @@ tbltest.$O:
 
 ###############################################################################
 
-CTBTEST_OBJECTS = ctbtest.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) ctb_compile.$O ctb_translate.$O tbl.$O tbl_native.$O
+CTBTEST_OBJECTS = ctbtest.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) ctb_compile.$O ctb_translate.$O lock.$O charset.$O tbl.$O tbl_native.$O
 
 ctbtest$X: $(CTBTEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(CTBTEST_OBJECTS) $(LDLIBS)
@@ -455,7 +455,7 @@ txt2hlp.$O:
 
 ###############################################################################
 
-TBL2HEX_OBJECTS = tbl2hex.$O $(HOST_OBJECTS) host_tbl.$O host_tbl_native.$O
+TBL2HEX_OBJECTS = tbl2hex.$O $(HOST_OBJECTS) host_lock.$O host_charset.$O host_tbl.$O host_tbl_native.$O
 
 tbl2hex$X: $(TBL2HEX_OBJECTS)
 	$(HOSTCC) $(HOSTLDFLAGS) -o $@ $(TBL2HEX_OBJECTS) $(LDLIBS)

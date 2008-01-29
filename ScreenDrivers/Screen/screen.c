@@ -173,16 +173,24 @@ describe_ScreenScreen (ScreenDescription *description) {
 }
 
 static int
-read_ScreenScreen (ScreenBox box, unsigned char *buffer, ScreenCharacterProperty property) {
+readCharacters_ScreenScreen (const ScreenBox *box, ScreenCharacter *buffer) {
   ScreenDescription description;                 /* screen statistics */
   describe_ScreenScreen(&description);
-  if (validateScreenBox(&box, description.cols, description.rows)) {
-    off_t start = 4 + (((property == SCR_TEXT)? 0: 1) * description.cols * description.rows) + (box.top * description.cols) + box.left;
+  if (validateScreenBox(box, description.cols, description.rows)) {
+    ScreenCharacter *character = buffer;
+    unsigned char *text = shmAddress + 4 + (box->top * description.cols) + box->left;
+    unsigned char *attributes = text + (description.cols * description.rows);
+    size_t increment = description.cols - box->width;
     int row;
-    for (row=0; row<box.height; row++) {
-      memcpy(buffer + (row * box.width),
-             shmAddress + start + (row * description.cols),
-             box.width);
+    for (row=0; row<box->height; row++) {
+      int column;
+      for (column=0; column<box->width; column++) {
+        character->text = *text++;
+        character->attributes = *attributes++;
+        character++;
+      }
+      text += increment;
+      attributes += increment;
     }
     return 1;
   }
@@ -277,7 +285,7 @@ scr_initialize (MainScreen *main) {
   initializeRealScreen(main);
   main->base.currentVirtualTerminal = currentVirtualTerminal_ScreenScreen;
   main->base.describe = describe_ScreenScreen;
-  main->base.read = read_ScreenScreen;
+  main->base.readCharacters = readCharacters_ScreenScreen;
   main->base.insertKey = insertKey_ScreenScreen;
   main->construct = construct_ScreenScreen;
   main->destruct = destruct_ScreenScreen;

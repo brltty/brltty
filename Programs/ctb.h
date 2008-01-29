@@ -26,7 +26,7 @@ extern void *compileContractionTable (const char *fileName);
 extern int destroyContractionTable (void *contractionTable);
 extern int contractText (
   void *contractionTable, /* Pointer to translation table */
-  const unsigned char *inputBuffer, /* What is to be translated */
+  const wchar_t *inputBuffer, /* What is to be translated */
   int *inputLength, /* Its length */
   unsigned char *outputBuffer, /* Where the translation is to go */
   int *outputLength, /* length of this area */

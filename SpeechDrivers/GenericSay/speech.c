@@ -47,7 +47,7 @@ spk_construct (SpeechSynthesizer *spk, char **parameters)
 }
 
 static void
-spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, int length)
+spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, size_t length)
 {
   if (!commandStream)
     commandStream = popen(commandPath, "w");

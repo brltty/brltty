@@ -868,7 +868,7 @@ always agosom = phagosome
 always ibosom = ribosome
 always omosom = chromosome
 
-# SystËme International Prefixes
+# Syst√®me International Prefixes
 begword yotta 13456-135-2345-2345-1 10^24
 begword zetta 1356-15-2345-2345-1 10^21
 # begword exa 15-1346-1 10^18
@@ -1017,73 +1017,73 @@ repeated ___ 78-78-78
 repeated === 46-13-46-13-46-13
 
 # the hyphen
-always ≠ 36
-repeated ≠≠≠ 36-36-36
-always \s≠\s 36-36
+always ¬≠ 36
+repeated ¬≠¬≠¬≠ 36-36-36
+always \s¬≠\s 36-36
 
 # accented letters
-always ¿ 6-4-1      [C0] upper a grave
-always ¡ 6-4-1      [C1] upper a acute
-always ¬ 6-4-1      [C2] upper a circumflex
-always √ 6-4-1      [C3] upper a tilde
-always ƒ 6-4-1      [C4] upper a dieresis
-always ≈ 6-4-1      [C5] upper a ring
-always ∆ 6-1-15     [C6] upper ae
-always « 6-4-14     [C7] upper c cedilla
-always » 6-4-15     [C8] upper e grave
-always … 6-4-15     [C9] upper e acute
-always   6-4-15     [CA] upper e circumflex
-always À 6-4-15     [CB] upper e dieresis
-always Ã 6-4-24     [CC] upper i grave
-always Õ 6-4-24     [CD] upper i acute
-always Œ 6-4-24     [CE] upper i circumflex
-always œ 6-4-24     [CF] upper i dieresis
-always – 6-4-15     [D0] upper eth
-always — 6-4-1345   [D1] upper n tilde
-always “ 6-4-135    [D2] upper o grave
-always ” 6-4-135    [D3] upper o acute
-always ‘ 6-4-135    [D4] upper o circumflex
-always ’ 6-4-135    [D5] upper o tilde
-always ÷ 6-4-135    [D6] upper o dieresis
-always ÿ 6-4-135    [D8] upper o slash
-always Ÿ 6-4-136    [D9] upper u grave
-always ⁄ 6-4-136    [DA] upper u acute
-always € 6-4-136    [DB] upper u circumflex
-always ‹ 6-4-136    [DC] upper u dieresis
-always › 6-4-13456  [DD] upper y acute
-always ﬁ 6-4-2345   [DE] upper t horn
-always ﬂ 234-234    [DF] lower ss
-always ‡   4-1      [E0] lower a grave
-always ·   4-1      [E1] lower a acute
-always ‚   4-1      [E2] lower a circumflex
-always „   4-1      [E3] lower a tilde
-always ‰   4-1      [E4] lower a dieresis
-always Â   4-1      [E5] lower a ring
-always Ê   1-15     [E6] lower ae
-always Á   4-14     [E7] lower c cedilla
-always Ë   4-15     [E8] lower e grave
-always È   4-15     [E9] lower e acute
-always Í   4-15     [EA] lower e circumflex
-always Î   4-15     [EB] lower e dieresis
-always Ï   4-24     [EC] lower i grave
-always Ì   4-24     [ED] lower i acute
-always Ó   4-24     [EE] lower i circumflex
-always Ô   4-24     [EF] lower i dieresis
-always    4-15     [F0] lower eth
-always Ò   4-1345   [F1] lower n tilde
-always Ú   4-135    [F2] lower o grave
-always Û   4-135    [F3] lower o acute
-always Ù   4-135    [F4] lower o circumflex
-always ı   4-135    [F5] lower o tilde
-always ˆ   4-135    [F6] lower o dieresis
-always ¯   4-135    [F8] lower o slash
-always ˘   4-136    [F9] lower u grave
-always ˙   4-136    [FA] lower u acute
-always ˚   4-136    [FB] lower u circumflex
-always ¸   4-136    [FC] lower u dieresis
-always ˝   4-13456  [FD] lower y acute
-always ˛   4-2345   [FE] lower t horn
-always ˇ   4-13456  [FF] lower y dieresis
+always √Ä 6-4-1      [C0] upper a grave
+always √Å 6-4-1      [C1] upper a acute
+always √Ç 6-4-1      [C2] upper a circumflex
+always √É 6-4-1      [C3] upper a tilde
+always √Ñ 6-4-1      [C4] upper a dieresis
+always √Ö 6-4-1      [C5] upper a ring
+always √Ü 6-1-15     [C6] upper ae
+always √á 6-4-14     [C7] upper c cedilla
+always √à 6-4-15     [C8] upper e grave
+always √â 6-4-15     [C9] upper e acute
+always √ä 6-4-15     [CA] upper e circumflex
+always √ã 6-4-15     [CB] upper e dieresis
+always √å 6-4-24     [CC] upper i grave
+always √ç 6-4-24     [CD] upper i acute
+always √é 6-4-24     [CE] upper i circumflex
+always √è 6-4-24     [CF] upper i dieresis
+always √ê 6-4-15     [D0] upper eth
+always √ë 6-4-1345   [D1] upper n tilde
+always √í 6-4-135    [D2] upper o grave
+always √ì 6-4-135    [D3] upper o acute
+always √î 6-4-135    [D4] upper o circumflex
+always √ï 6-4-135    [D5] upper o tilde
+always √ñ 6-4-135    [D6] upper o dieresis
+always √ò 6-4-135    [D8] upper o slash
+always √ô 6-4-136    [D9] upper u grave
+always √ö 6-4-136    [DA] upper u acute
+always √õ 6-4-136    [DB] upper u circumflex
+always √ú 6-4-136    [DC] upper u dieresis
+always √ù 6-4-13456  [DD] upper y acute
+always √û 6-4-2345   [DE] upper t horn
+always √ü 234-234    [DF] lower ss
+always √†   4-1      [E0] lower a grave
+always √°   4-1      [E1] lower a acute
+always √¢   4-1      [E2] lower a circumflex
+always √£   4-1      [E3] lower a tilde
+always √§   4-1      [E4] lower a dieresis
+always √•   4-1      [E5] lower a ring
+always √¶   1-15     [E6] lower ae
+always √ß   4-14     [E7] lower c cedilla
+always √®   4-15     [E8] lower e grave
+always √©   4-15     [E9] lower e acute
+always √™   4-15     [EA] lower e circumflex
+always √´   4-15     [EB] lower e dieresis
+always √¨   4-24     [EC] lower i grave
+always √≠   4-24     [ED] lower i acute
+always √Æ   4-24     [EE] lower i circumflex
+always √Ø   4-24     [EF] lower i dieresis
+always √∞   4-15     [F0] lower eth
+always √±   4-1345   [F1] lower n tilde
+always √≤   4-135    [F2] lower o grave
+always √≥   4-135    [F3] lower o acute
+always √¥   4-135    [F4] lower o circumflex
+always √µ   4-135    [F5] lower o tilde
+always √∂   4-135    [F6] lower o dieresis
+always √∏   4-135    [F8] lower o slash
+always √π   4-136    [F9] lower u grave
+always √∫   4-136    [FA] lower u acute
+always √ª   4-136    [FB] lower u circumflex
+always √º   4-136    [FC] lower u dieresis
+always √Ω   4-13456  [FD] lower y acute
+always √æ   4-2345   [FE] lower t horn
+always √ø   4-13456  [FF] lower y dieresis
 
 # mathematical symbols
 always < 5-13
@@ -1093,20 +1093,20 @@ midnum + 346
 always + 346
 midnum - 36
 always - 36
-always ◊ 46-16 multiplication sign
-midnum ˜ 46-34 division sign
+always √ó 46-16 multiplication sign
+midnum √∑ 46-34 division sign
 begnum $ 256
 always $ 256-3456
 
 # other special characters
-always © 2356-6-14-2356 copyright
-always ∂ 4-1234-345 paragraph
-always ß 4-234-3 section
-always ∞ 45-46-16 degrees
-always ¢ 4-14 cents
-always £ 4-123 pounds
-always • 4-13456 yen
-always µ 46-134 mu
+always ¬© 2356-6-14-2356 copyright
+always ¬∂ 4-1234-345 paragraph
+always ¬ß 4-234-3 section
+always ¬∞ 45-46-16 degrees
+always ¬¢ 4-14 cents
+always ¬£ 4-123 pounds
+always ¬• 4-13456 yen
+always ¬µ 46-134 mu
 
 # abbreviations
 word aarp = American Association of Retired Persons

@@ -94,7 +94,7 @@ doChild (void)
 }
 
 static void
-spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, int length)
+spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, size_t length)
 {
   if (child != -1) goto ready;
 

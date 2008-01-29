@@ -89,6 +89,62 @@ typedef signed long long	int64_t;
 #include <inttypes.h>
 #endif /* __MSDOS__ */
 
+#if 1
+#include <wchar.h>
+#else /* wchar */
+#include <string.h>
+#include <ctype.h>
+
+#define wchar_t char
+#define wint_t int
+#define WEOF EOF
+
+#define wmemchr memchr
+#define wmemcmp memcmp
+#define wmemcpy memcpy
+#define wmemmove memmove
+#define wmemset memset
+
+#define wcscasecmp strcasecmp
+#define wcsncasecmp strncasecmp
+#define wcscat strcat
+#define wcsncat strncat
+#define wcscmp strcmp
+#define wcsncmp strncmp
+#define wcscpy strcpy
+#define wcsncpy strncpy
+#define wcslen strlen
+#define wcsnlen strnlen
+
+#define wcschr strchr
+#define wcscoll strcoll
+#define wcscspn strcspn
+#define wcsdup strdup
+#define wcspbrk strpbrk
+#define wcsrchr strrchr
+#define wcsspn strspn
+#define wcsstr strstr
+#define wcstok strtok
+#define wcswcs strstr
+#define wcsxfrm strxfrm
+
+#define iswalnum isalnum
+#define iswalpha isalpha
+#define iswblank isblank
+#define iswcntrl iscntrl
+#define iswdigit isdigit
+#define iswgraph isgraph
+#define iswlower islower
+#define iswprint isprint
+#define iswpunct ispunct
+#define iswspace isspace
+#define iswupper isupper
+#define iswxdigit isxdigit
+
+#define towlower tolower
+#define towupper toupper
+#endif /* wchar */
+
 #ifdef __MINGW32__
 typedef HANDLE FileDescriptor;
 #define INVALID_FILE_DESCRIPTOR INVALID_HANDLE_VALUE

@@ -28,12 +28,15 @@
 #include "program.h"
 #include "options.h"
 #include "misc.h"
+#include "charset.h"
 #include "brl.h"
 #include "ctb.h"
 #include "tbl.h"
 
 static char *opt_dataDirectory;
+static char *opt_contractionsDirectory;
 static char *opt_contractionTable;
+static char *opt_tablesDirectory;
 static char *opt_textTable;
 static char *opt_outputWidth;
 
@@ -47,12 +50,30 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = "Path to directory for configuration files."
   },
 
+  { .letter = 'C',
+    .word = "contractions-directory",
+    .flags = OPT_Hidden,
+    .argument = strtext("directory"),
+    .setting.string = &opt_contractionsDirectory,
+    .defaultSetting = DATA_DIRECTORY,
+    .description = strtext("Path to directory for contractions tables.")
+  },
+
   { .letter = 'c',
     .word = "contraction-table",
     .argument = "file",
     .setting.string = &opt_contractionTable,
     .defaultSetting = "en-us-g2",
     .description = "Path to contraction table file."
+  },
+
+  { .letter = 'T',
+    .word = "tables-directory",
+    .flags = OPT_Hidden,
+    .argument = strtext("directory"),
+    .setting.string = &opt_tablesDirectory,
+    .defaultSetting = DATA_DIRECTORY,
+    .description = strtext("Path to directory for text and attributes tables.")
   },
 
   { .letter = 't',
@@ -88,7 +109,18 @@ static int
 contractLine (char *line, void *data) {
   LineProcessingData *lpd = data;
   int lineLength = strlen(line);
+  wchar_t characters[lineLength];
+  const wchar_t *inputBuffer = characters;
   int offsets[lineLength];
+
+  {
+    int i;
+    for (i=0; i<lineLength; ++i) {
+      wint_t character = convertCharToWchar(line[i]);
+      if (character == WEOF) character = 0XFFFD;
+      characters[i] = character;
+    }
+  }
 
   while (lineLength) {
     int inputCount = lineLength;
@@ -103,7 +135,7 @@ contractLine (char *line, void *data) {
     }
 
     if (!contractText(contractionTable,
-                      (unsigned char *)line, &inputCount,
+                      inputBuffer, &inputCount,
                       outputBuffer, &outputCount,
                       offsets, -1)) {
       lpd->status = 11;
@@ -132,7 +164,7 @@ contractLine (char *line, void *data) {
         }
       }
 
-      line += inputCount;
+      inputBuffer += inputCount;
       lineLength -= inputCount;
     }
   }
@@ -163,6 +195,8 @@ main (int argc, char *argv[]) {
   {
     char **const paths[] = {
       &opt_dataDirectory,
+      &opt_tablesDirectory,
+      &opt_contractionsDirectory,
       NULL
     };
     fixInstallPaths(paths);
@@ -183,12 +217,12 @@ main (int argc, char *argv[]) {
     char *contractionTablePath;
 
     fixContractionTablePath(&opt_contractionTable);
-    if ((contractionTablePath = makePath(opt_dataDirectory, opt_contractionTable))) {
+    if ((contractionTablePath = makePath(opt_contractionsDirectory, opt_contractionTable))) {
       if ((contractionTable = compileContractionTable(contractionTablePath))) {
         char *textTablePath;
 
         fixTextTablePath(&opt_textTable);
-        if ((textTablePath = makePath(opt_dataDirectory, opt_textTable))) {
+        if ((textTablePath = makePath(opt_tablesDirectory, opt_textTable))) {
           if (loadTranslationTable(textTablePath, NULL, textTable, 0)) {
             reverseTranslationTable(textTable, untextTable);
 

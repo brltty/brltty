@@ -21,7 +21,6 @@
 #include <string.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <wchar.h>
 #include <pthread.h>
 #include <limits.h>
 #include <langinfo.h>
@@ -600,32 +599,24 @@ describe_AtSpiScreen (ScreenDescription *description) {
 }
 
 static int
-read_AtSpiScreen (ScreenBox box, unsigned char *buffer, ScreenCharacterProperty property) {
+readCharacters_AtSpiScreen (const ScreenBox *box, ScreenCharacter *buffer) {
   long x,y;
-  int c;
-  if (box.height<0 || box.width<0) return 0;
-  if (property == SCR_ATTRIB) {
-    memset(buffer,0x07,box.height*box.width);
-    return 1;
-  }
-  memset(buffer,' ',box.height*box.width);
+  if (!validateScreenBox(box, curNumCols, curNumRows)) return 0;
+  clearScreenCharacters(buffer,box->height*box->width);
   pthread_mutex_lock(&updateMutex);
   if (!curTerm) {
-    setScreenMessage(&box, buffer, property, nonatspi);
+    setScreenMessage(box, buffer, nonatspi);
     goto out;
   }
-  if (box.top+box.height>curNumRows)
-    box.height = curNumRows-box.top;
-  if (box.top<curNumRows && box.left<curNumCols)
-    for (y=0; y<box.height; y++)
-      if (curRowLengths[box.top+y])
-	for (x=0; x<box.width; x++) {
-	  if (box.left+x<curRowLengths[box.top+y] - (curRows[box.top+y][curRowLengths[box.top+y]-1]=='\n')) {
-	    if ((c = convertWcharToChar(curRows[box.top+y][box.left+x])) == EOF)
-	      c = '?';
-	    buffer[y*box.width+x] = c;
-	  }
-	}
+  for (y=0; y<box->height; y++) {
+    if (curRowLengths[box->top+y]) {
+      for (x=0; x<box->width; x++) {
+        if (box->left+x<curRowLengths[box->top+y] - (curRows[box->top+y][curRowLengths[box->top+y]-1]=='\n')) {
+          buffer[y*box->width+x].text = curRows[box->top+y][box->left+x];
+        }
+      }
+    }
+  }
 out:
   pthread_mutex_unlock(&updateMutex);
   return 1;
@@ -758,7 +749,7 @@ static void
 scr_initialize (MainScreen *main) {
   initializeRealScreen(main);
   main->base.describe = describe_AtSpiScreen;
-  main->base.read = read_AtSpiScreen;
+  main->base.readCharacters = readCharacters_AtSpiScreen;
   main->base.insertKey = insertKey_AtSpiScreen;
   main->base.selectVirtualTerminal = selectVirtualTerminal_AtSpiScreen;
   main->base.switchVirtualTerminal = switchVirtualTerminal_AtSpiScreen;

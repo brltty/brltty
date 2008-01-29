@@ -384,10 +384,7 @@
 #screen-parameters as:Type=text+terminal # [text,terminal,all]
 
 # Linux Screen Driver Parameters
-#screen-parameters lx:Acm=auto # [auto,iso01,vt100,cp437,user]
-#screen-parameters lx:DebugAcm=no # [no,yes]
 #screen-parameters lx:DebugSfm=no # [no,yes]
-#screen-parameters lx:DebugCtt=no # [no,yes]
 #screen-parameters lx:Hfb=auto # [auto,vga,fb,0-7]
 
 # Windows Screen Driver Parameters

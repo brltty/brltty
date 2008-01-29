@@ -191,22 +191,52 @@ validateScreenBox (const ScreenBox *box, int columns, int rows) {
           if ((box->height > 0))
             if (((box->top + box->height) <= rows))
               return 1;
+
+  LogPrint(LOG_ERR, "invalid screen area: cols=%d left=%d width=%d rows=%d top=%d height=%d",
+           columns, box->left, box->width,
+           rows, box->top, box->height);
   return 0;
 }
 
 void
-setScreenMessage (const ScreenBox *box, unsigned char *buffer, ScreenCharacterProperty property, const char *message) {
+setScreenCharacterText (ScreenCharacter *characters, char text, size_t count) {
+  while (count > 0) {
+    characters[--count].text = text;
+  }
+}
+
+void
+copyScreenCharacterText (ScreenCharacter *characters, const char *text, size_t count) {
+  while (count > 0) {
+    --count;
+    characters[count].text = text[count];
+  }
+}
+
+void
+setScreenCharacterAttributes (ScreenCharacter *characters, unsigned char attributes, size_t count) {
+  while (count > 0) {
+    characters[--count].attributes = attributes;
+  }
+}
+
+void
+clearScreenCharacters (ScreenCharacter *characters, size_t count) {
+  setScreenCharacterText(characters, ' ', count);
+  setScreenCharacterAttributes(characters, 0X07, count);
+}
+
+void
+setScreenMessage (const ScreenBox *box, ScreenCharacter *buffer, const char *message) {
   int count = box->width * box->height;
 
-  if (property == SCR_TEXT) {
-    int length = strlen(message) - box->left;
+  {
+    size_t length = strlen(message) - box->left;
     if (length < 0) length = 0;
     if (length > box->width) length = box->width;
 
-    memset(buffer, ' ', count);
-    if (length) memcpy(buffer, message+box->left, length);
-  } else {
-    memset(buffer, 0X07, count);
+    clearScreenCharacters(buffer, count);
+    if (length) copyScreenCharacterText(buffer, &message[box->left], length);
   }
 }
 
@@ -216,13 +246,27 @@ describeScreen (ScreenDescription *description) {
 }
 
 int
-readScreen (short left, short top, short width, short height, unsigned char *buffer, ScreenCharacterProperty property) {
+readScreen (short left, short top, short width, short height, ScreenCharacter *buffer) {
   ScreenBox box;
   box.left = left;
   box.top = top;
   box.width = width;
   box.height = height;
-  return currentScreen->read(box, buffer, property);
+  return currentScreen->readCharacters(&box, buffer);
+}
+
+int
+readScreenText (short left, short top, short width, short height, wchar_t *buffer) {
+  unsigned int count = width * height;
+  ScreenCharacter characters[count];
+  if (!readScreen(left, top, width, height, characters)) return 0;
+
+  {
+    int i;
+    for (i=0; i<count; ++i) buffer[i] = characters[i].text;
+  }
+
+  return 1;
 }
 
 int

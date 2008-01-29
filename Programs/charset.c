@@ -22,7 +22,6 @@
 #include <strings.h>
 #include <ctype.h>
 #include <errno.h>
-#include <wchar.h>
 #include <locale.h>
 
 #if defined(WINDOWS)

@@ -53,7 +53,7 @@ typedef struct {
   int screenColumns;
 
   int verticalDelta;
-  unsigned char *rowBuffer;
+  ScreenCharacter *rowBuffer;
 
   int cury, curx;
   int oldy, oldx;
@@ -63,9 +63,9 @@ typedef struct {
 } CursorRoutingData;
 
 static int
-readRow (CursorRoutingData *crd, unsigned char *buffer, int row) {
+readRow (CursorRoutingData *crd, ScreenCharacter *buffer, int row) {
   if (!buffer) buffer = crd->rowBuffer;
-  return readScreen(0, row, crd->screenColumns, 1, buffer, SCR_TEXT);
+  return readScreen(0, row, crd->screenColumns, 1, buffer);
 }
 
 static int
@@ -82,7 +82,7 @@ getCurrentPosition (CursorRoutingData *crd) {
     crd->screenRows = description.rows;
     crd->screenColumns = description.cols;
     crd->verticalDelta = 0;
-    if (!(crd->rowBuffer = malloc(crd->screenColumns))) goto error;
+    if (!(crd->rowBuffer = calloc(crd->screenColumns, sizeof(*crd->rowBuffer)))) goto error;
   } else if ((crd->screenRows != description.rows) ||
              (crd->screenColumns != description.cols)) {
     goto error;
@@ -128,18 +128,18 @@ awaitCursorMotion (CursorRoutingData *crd, int direction) {
       int bestLength = 0;
 
       do {
-        unsigned char buffer[crd->screenColumns];
+        ScreenCharacter buffer[crd->screenColumns];
         if (!readRow(crd, buffer, row)) break;
 
         {
           int before = crd->curx;
           int after = before;
 
-          while (buffer[before] == crd->rowBuffer[before])
+          while (buffer[before].text == crd->rowBuffer[before].text)
             if (--before < 0)
               break;
 
-          while (buffer[after] == crd->rowBuffer[after])
+          while (buffer[after].text == crd->rowBuffer[after].text)
             if (++after >= crd->screenColumns)
               break;
 

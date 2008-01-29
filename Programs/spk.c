@@ -46,7 +46,7 @@ spk_destruct (SpeechSynthesizer *spk) {
 }
 
 static void
-spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, int length) {
+spk_say (SpeechSynthesizer *spk, const unsigned char *text, size_t length) {
 }
 
 static void

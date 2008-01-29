@@ -471,7 +471,7 @@ spk_destruct (SpeechSynthesizer *spk) {
 }
 
 static void
-spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, int length) {
+spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, size_t length) {
   if (enqueueText(buffer, length))
     enqueueTag("<break time=\"none\"/>");
 }

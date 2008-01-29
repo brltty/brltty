@@ -23,30 +23,36 @@
 
 #include "scr.h"
 #include "tunes.h"
+#include "charset.h"
 #include "cut.h"
 
 /* Global state variables */
-unsigned char *cutBuffer = NULL;
+wchar_t *cutBuffer = NULL;
 size_t cutLength = 0;
 
 static int beginColumn = 0;
 static int beginRow = 0;
 static int beginOffset = -1;
 
-static unsigned char *
+static wchar_t *
+mallocWchars (size_t count) {
+  return malloc(count * sizeof(wchar_t));
+}
+
+static wchar_t *
 cut (size_t *length, int fromColumn, int fromRow, int toColumn, int toRow) {
-  unsigned char *newBuffer = NULL;
+  wchar_t *newBuffer = NULL;
   int columns = toColumn - fromColumn + 1;
   int rows = toRow - fromRow + 1;
 
   if ((columns >= 1) && (rows >= 1) && (beginOffset >= 0)) {
-    unsigned char *fromBuffer = malloc(rows * columns);
+    wchar_t *fromBuffer = mallocWchars(rows * columns);
     if (fromBuffer) {
-      unsigned char *toBuffer = malloc(rows * (columns + 1));
+      wchar_t *toBuffer = mallocWchars(rows * (columns + 1));
       if (toBuffer) {
-        if (readScreen(fromColumn, fromRow, columns, rows, fromBuffer, SCR_TEXT)) {
-          unsigned char *fromAddress = fromBuffer;
-          unsigned char *toAddress = toBuffer;
+        if (readScreenText(fromColumn, fromRow, columns, rows, fromBuffer)) {
+          wchar_t *fromAddress = fromBuffer;
+          wchar_t *toAddress = toBuffer;
           int row;
 
           /* remove spaces at end of line, add return (except to last line),
@@ -57,26 +63,26 @@ cut (size_t *length, int fromColumn, int fromRow, int toColumn, int toRow) {
             int column;
 
             for (column=fromColumn; column<=toColumn; column++, fromAddress++) {
-              if (iscntrl(*fromAddress) || isspace(*fromAddress)) {
+              if (iswcntrl(*fromAddress) || iswspace(*fromAddress)) {
                 spaces++;
               } else {
                 while (spaces) {
-                  *(toAddress++) = ' ';
+                  *(toAddress++) = L' ';
                   spaces--;
                 }
 
-                *(toAddress++) = *fromAddress;
+                *toAddress++ = *fromAddress;
               }
             }
 
-            if (row != toRow) *(toAddress++) = '\r';
+            if (row != toRow) *toAddress++ = L'\r';
           }
 
           /* make a new permanent buffer of just the right size */
           {
             size_t newLength = toAddress - toBuffer;
-            if ((newBuffer = malloc(newLength))) {
-              memcpy(newBuffer, toBuffer, (*length = newLength));
+            if ((newBuffer = mallocWchars(newLength))) {
+              wmemcpy(newBuffer, toBuffer, (*length = newLength));
             }
           }
         }
@@ -92,14 +98,14 @@ cut (size_t *length, int fromColumn, int fromRow, int toColumn, int toRow) {
 }
 
 static int
-append (unsigned char *buffer, size_t length) {
+append (wchar_t *buffer, size_t length) {
   if (cutBuffer) {
     size_t newLength = beginOffset + length;
-    unsigned char *newBuffer = malloc(newLength);
+    wchar_t *newBuffer = mallocWchars(newLength);
     if (!newBuffer) return 0;
 
-    memcpy(newBuffer, cutBuffer, beginOffset);
-    memcpy(newBuffer+beginOffset, buffer, length);
+    wmemcpy(newBuffer, cutBuffer, beginOffset);
+    wmemcpy(newBuffer+beginOffset, buffer, length);
 
     free(buffer);
     free(cutBuffer);
@@ -116,13 +122,17 @@ append (unsigned char *buffer, size_t length) {
 }
 
 void
-cutBegin (int column, int row) {
+cutClear (void) {
   if (cutBuffer) {
     free(cutBuffer);
     cutBuffer = NULL;
   }
   cutLength = 0;
+}
 
+void
+cutBegin (int column, int row) {
+  cutClear();
   cutAppend(column, row);
 }
 
@@ -137,7 +147,7 @@ cutAppend (int column, int row) {
 int
 cutRectangle (int column, int row) {
   size_t length;
-  unsigned char *buffer = cut(&length, beginColumn, beginRow, column, row);
+  wchar_t *buffer = cut(&length, beginColumn, beginRow, column, row);
 
   if (buffer) {
     if (append(buffer, length)) return 1;
@@ -154,13 +164,13 @@ cutLine (int column, int row) {
   {
     int rightColumn = screen.cols - 1;
     size_t length;
-    unsigned char *buffer = cut(&length, 0, beginRow, rightColumn, row);
+    wchar_t *buffer = cut(&length, 0, beginRow, rightColumn, row);
 
     if (buffer) {
       if (column < rightColumn) {
-        unsigned char *start = buffer + length;
+        wchar_t *start = buffer + length;
         while (start != buffer) {
-          if (*--start == '\r') {
+          if (*--start == L'\r') {
             ++start;
             break;
           }
@@ -173,10 +183,10 @@ cutLine (int column, int row) {
       }
 
       if (beginColumn) {
-        unsigned char *start = memchr(buffer, '\r', length);
+        wchar_t *start = wmemchr(buffer, L'\r', length);
         if (!start) start = buffer + length;
         if ((start - buffer) > beginColumn) start = buffer + beginColumn;
-        if (start != buffer) memmove(buffer, start, (length -= start - buffer));
+        if (start != buffer) wmemmove(buffer, start, (length -= start - buffer));
       }
 
       if (append(buffer, length)) return 1;
@@ -189,5 +199,18 @@ cutLine (int column, int row) {
 
 int
 cutPaste (void) {
-  return cutBuffer && insertCharacters((char *)cutBuffer, cutLength);
+  if (cutLength) {
+    char characters[cutLength];
+    int i;
+
+    for (i=0; i<cutLength; ++i) {
+      int c = convertWcharToChar(cutBuffer[i]);
+      if (c == EOF) c = '?';
+      characters[i] = c;
+    }
+
+    if (insertCharacters(characters, cutLength)) return 1;
+  }
+
+  return 0;
 }

@@ -24,11 +24,19 @@ extern "C" {
 
 #include "driver.h"
 
-/* mode argument for readScreen() */
-typedef enum {
-  SCR_TEXT,		/* get screen text */
-  SCR_ATTRIB		/* get screen attributes */
-} ScreenCharacterProperty;
+#define SCR_ATTR_FG_BLUE   0X01
+#define SCR_ATTR_FG_GREEN  0X02
+#define SCR_ATTR_FG_RED    0X04
+#define SCR_ATTR_FG_BRIGHT 0X08
+#define SCR_ATTR_BG_BLUE   0X10
+#define SCR_ATTR_BG_GREEN  0X20
+#define SCR_ATTR_BG_RED    0X40
+#define SCR_ATTR_BLINK     0X80
+
+typedef struct {
+  wchar_t text;
+  unsigned char attributes;
+} ScreenCharacter;
 
 typedef struct {
   short rows, cols;	/* screen dimensions */
@@ -44,7 +52,12 @@ typedef struct {
 } ScreenBox;
 
 extern int validateScreenBox (const ScreenBox *box, int columns, int rows);
-extern void setScreenMessage (const ScreenBox *box, unsigned char *buffer, ScreenCharacterProperty property, const char *message);
+extern void setScreenMessage (const ScreenBox *box, ScreenCharacter *buffer, const char *message);
+
+extern void clearScreenCharacters (ScreenCharacter *characters, size_t count);
+extern void setScreenCharacterText (ScreenCharacter *characters, char text, size_t count);
+extern void copyScreenCharacterText (ScreenCharacter *characters, const char *text, size_t count);
+extern void setScreenCharacterAttributes (ScreenCharacter *characters, unsigned char attributes, size_t count);
 
 #define SCR_KEY_MOD_META 0X100
 typedef enum {
@@ -83,7 +96,8 @@ extern void deactivateHelpScreen (void);
 
 /* Routines which apply to the current screen. */
 extern void describeScreen (ScreenDescription *);		/* get screen status */
-extern int readScreen (short left, short top, short width, short height, unsigned char *buffer, ScreenCharacterProperty);
+extern int readScreen (short left, short top, short width, short height, ScreenCharacter *buffer);
+extern int readScreenText (short left, short top, short width, short height, wchar_t *buffer);
 extern int insertKey (ScreenKey key);
 extern int insertCharacters (const char *, int);
 extern int insertString (const char *);

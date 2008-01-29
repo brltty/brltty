@@ -86,9 +86,11 @@ BEGIN_OPTION_TABLE(programOptions)
 END_OPTION_TABLE
 
 static void
-setRegion (int *offsetValue, const char *offsetOption, int offsetDefault, const char *offsetName,
-           int *sizeValue, const char *sizeOption, int sizeLimit, const char *sizeName) {
-  if (offsetOption) {
+setRegion (
+  int *offsetValue, const char *offsetOption, const char *offsetName,
+  int *sizeValue, const char *sizeOption, int sizeLimit, const char *sizeName
+) {
+  if (*offsetOption) {
     {
       const int minimum = 0;
       const int maximum = sizeLimit - 1;
@@ -98,7 +100,7 @@ setRegion (int *offsetValue, const char *offsetOption, int offsetDefault, const 
       }
     }
 
-    if (sizeOption) {
+    if (*sizeOption) {
       const int minimum = 1;
       const int maximum = sizeLimit - *offsetValue;
       if (!validateInteger(sizeValue, sizeOption, &minimum, &maximum)) {
@@ -107,7 +109,7 @@ setRegion (int *offsetValue, const char *offsetOption, int offsetDefault, const 
       }
       return;
     }
-  } else if (sizeOption) {
+  } else if (*sizeOption) {
     const int minimum = 1;
     const int maximum = sizeLimit;
     if (!validateInteger(sizeValue, sizeOption, &minimum, &maximum)) {
@@ -117,8 +119,7 @@ setRegion (int *offsetValue, const char *offsetOption, int offsetDefault, const 
     *offsetValue = (sizeLimit - *sizeValue) / 2;
     return;
   } else {
-    int offsetLimit = (sizeLimit - 1) / 2;
-    if ((*offsetValue = offsetDefault) > offsetLimit) *offsetValue = offsetLimit;
+    *offsetValue = sizeLimit / 4;
   }
   if ((*sizeValue = sizeLimit - (*offsetValue * 2)) < 1) *sizeValue = 1;
 }
@@ -197,34 +198,41 @@ main (int argc, char *argv[]) {
     if (constructScreenDriver(parameterSettings)) {
       ScreenDescription description;
       int left, top, width, height;
-      unsigned char buffer[0X800];
 
       describeScreen(&description);
       printf("Screen: %dx%d\n", description.cols, description.rows);
       printf("Cursor: [%d,%d]\n", description.posx, description.posy);
 
-      setRegion(&left, opt_boxLeft, 5, "starting column",
+      setRegion(&left, opt_boxLeft, "starting column",
                 &width, opt_boxWidth, description.cols, "region width");
-      setRegion(&top, opt_boxTop, 5, "starting row",
+      setRegion(&top, opt_boxTop, "starting row",
                 &height, opt_boxHeight, description.rows, "region height");
       printf("Region: %dx%d@[%d,%d]\n", width, height, left, top);
-      if (readScreen(left, top, width, height, buffer, SCR_TEXT)) {
-        int line;
-        for (line=0; line<height; line++) {
-          int column;
-          for (column=0; column<width; column++) {
-            unsigned char character = buffer[line * width + column];
-            if (isprint(character))
-              putchar(character);
-            else
-              putchar(' ');
+
+      {
+        ScreenCharacter buffer[width * height];
+
+        if (readScreen(left, top, width, height, buffer)) {
+          int line;
+          for (line=0; line<height; line++) {
+            int column;
+            for (column=0; column<width; column++) {
+              wchar_t character = buffer[line * width + column].text;
+              if (!iswprint(character)) {
+                putchar('?');
+              } else if (!isprint(character)) {
+                putchar('*');
+              } else {
+                putchar(character);
+              }
+            }
+            putchar('\n');
           }
-          putchar('\n');
+          status = 0;
+        } else {
+          LogPrint(LOG_ERR, "Can't read screen.");
+          status = 4;
         }
-        status = 0;
-      } else {
-        LogPrint(LOG_ERR, "Can't read screen.");
-        status = 4;
       }
     } else {
       LogPrint(LOG_ERR, "can't open screen.");

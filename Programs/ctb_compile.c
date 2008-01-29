@@ -19,7 +19,6 @@
 
 #include <stdio.h>
 #include <stdarg.h>
-#include <locale.h>
 #include <string.h>
 #include <ctype.h>
 #include <errno.h>
@@ -28,6 +27,11 @@
 #include "ctb.h"
 #include "ctb_internal.h"
 #include "brl.h"
+
+typedef struct {
+  BYTE length;
+  wchar_t characters[0XFF];
+} CharacterString;
 
 typedef struct {
   BYTE length;
@@ -40,76 +44,76 @@ static ContractionTableHeader *tableHeader;
 static ContractionTableOffset tableSize;
 static ContractionTableOffset tableUsed;
 
-static const char *const characterClassNames[] = {
-  "space",
-  "letter",
-  "digit",
-  "punctuation",
-  "uppercase",
-  "lowercase",
+static ContractionTableCharacter *characterTable = NULL;
+static int characterTableSize = 0;
+static int characterEntryCount = 0;
+
+static const wchar_t *const characterClassNames[] = {
+  L"space",
+  L"letter",
+  L"digit",
+  L"punctuation",
+  L"uppercase",
+  L"lowercase",
   NULL
 };
 struct CharacterClass {
   struct CharacterClass *next;
   ContractionTableCharacterAttributes attribute;
   BYTE length;
-  char name[1];
+  wchar_t name[1];
 };
 static struct CharacterClass *characterClasses;
 static ContractionTableCharacterAttributes characterClassAttribute;
 
-static const char *const opcodeNames[CTO_None] = {
-  "include",
-  "locale",
+static const wchar_t *const opcodeNames[CTO_None] = {
+  L"include",
 
-  "capsign",
-  "begcaps",
-  "endcaps",
+  L"capsign",
+  L"begcaps",
+  L"endcaps",
 
-  "letsign",
-  "numsign",
+  L"letsign",
+  L"numsign",
 
-  "literal",
-  "replace",
-  "always",
-  "repeated",
+  L"literal",
+  L"always",
+  L"repeated",
 
-  "largesign",
-  "lastlargesign",
-  "word",
-  "joinword",
-  "lowword",
-  "contraction",
+  L"largesign",
+  L"lastlargesign",
+  L"word",
+  L"joinword",
+  L"lowword",
+  L"contraction",
 
-  "sufword",
-  "prfword",
-  "begword",
-  "begmidword",
-  "midword",
-  "midendword",
-  "endword",
+  L"sufword",
+  L"prfword",
+  L"begword",
+  L"begmidword",
+  L"midword",
+  L"midendword",
+  L"endword",
 
-  "prepunc",
-  "postpunc",
+  L"prepunc",
+  L"postpunc",
 
-  "begnum",
-  "midnum",
-  "endnum",
+  L"begnum",
+  L"midnum",
+  L"endnum",
 
-  "class",
-  "after",
-  "before"
+  L"class",
+  L"after",
+  L"before"
 };
 static unsigned char opcodeLengths[CTO_None] = {0};
-
-static char *originalLocale;
-static int noLocale;
 
 typedef struct {
   const char *fileName;
   int lineNumber;		/*line number in table */
 } FileData;
 
+static void compileError (FileData *data, char *format, ...) PRINTF(2, 3);
 static void
 compileError (FileData *data, char *format, ...) {
   char message[0X100];
@@ -154,49 +158,104 @@ allocateBytes (FileData *data, ContractionTableOffset *offset, int count, int al
 }
 
 static int
-saveBytes (FileData *data, ContractionTableOffset *offset, const BYTE *bytes, BYTE length) {
-  if (allocateBytes(data, offset, length+1, __alignof__(BYTE))) {
+saveBytes (FileData *data, ContractionTableOffset *offset, const void *bytes, int count, int alignment) {
+  if (allocateBytes(data, offset, count, alignment)) {
     BYTE *address = CTA(tableHeader, *offset);
-    memcpy(address+1, bytes, (*address = length));
+    memcpy(address, bytes, count);
     return 1;
   }
   return 0;
 }
 
 static int
-saveString (FileData *data, ContractionTableOffset *offset, const char *string) {
-  return saveBytes(data, offset, (const unsigned char *)string, strlen(string));
+saveSequence (FileData *data, ContractionTableOffset *offset, const ByteString *sequence) {
+  if (allocateBytes(data, offset, sequence->length+1, __alignof__(BYTE))) {
+    BYTE *address = CTA(tableHeader, *offset);
+    memcpy(address+1, sequence->bytes, (*address = sequence->length));
+    return 1;
+  }
+  return 0;
+}
+
+static ContractionTableCharacter *
+getCharacterEntry (wchar_t character) {
+  int first = 0;
+  int last = characterEntryCount - 1;
+
+  while (first <= last) {
+    int current = (first + last) / 2;
+    ContractionTableCharacter *entry = &characterTable[current];
+
+    if (entry->value < character) {
+      first = current + 1;
+    } else if (entry->value > character) {
+      last = current - 1;
+    } else {
+      return entry;
+    }
+  }
+
+  if (characterEntryCount == characterTableSize) {
+    int newSize = characterTableSize;
+    newSize = newSize? newSize<<1: 0X80;
+
+    {
+      ContractionTableCharacter *newTable = realloc(characterTable, (newSize * sizeof(*newTable)));
+      if (!newTable) return NULL;
+
+      characterTable = newTable;
+      characterTableSize = newSize;
+    }
+  }
+
+  memmove(&characterTable[first+1],
+          &characterTable[first],
+          (characterEntryCount - first) * sizeof(*characterTable));
+  ++characterEntryCount;
+
+  {
+    ContractionTableCharacter *entry = &characterTable[first];
+    memset(entry, 0, sizeof(*entry));
+    entry->value = character;
+    return entry;
+  }
 }
 
 static int
-saveByteString (FileData *data, ContractionTableOffset *offset, const ByteString *string) {
-  return saveBytes(data, offset, string->bytes, string->length);
+saveCharacterTable (void) {
+  if (!characterEntryCount) return 1;
+  return saveBytes(NULL, &tableHeader->characters, characterTable,
+                   (tableHeader->characterCount = characterEntryCount) * sizeof(characterTable[0]),
+                   __alignof__(characterTable[0]));
 }
 
 static ContractionTableRule *
 addRule (
   FileData *data,
   ContractionTableOpcode opcode,
-  ByteString *find,
+  CharacterString *find,
   ByteString *replace,
   ContractionTableCharacterAttributes after,
   ContractionTableCharacterAttributes before
 ) {
   ContractionTableOffset ruleOffset;
-  int ruleSize = sizeof(ContractionTableRule) - 1;
-  if (find) ruleSize += find->length;
+  int ruleSize = sizeof(ContractionTableRule) - sizeof(find->characters[0]);
+  if (find) ruleSize += find->length * sizeof(find->characters[0]);
   if (replace) ruleSize += replace->length;
+
   if (allocateBytes(data, &ruleOffset, ruleSize, __alignof__(ContractionTableRule))) {
     ContractionTableRule *newRule = CTR(tableHeader, ruleOffset);
 
     newRule->opcode = opcode;
     newRule->after = after;
     newRule->before = before;
+
     if (find)
-      memcpy(&newRule->findrep[0], &find->bytes[0],
-             (newRule->findlen = find->length));
+      wmemcpy(&newRule->findrep[0], &find->characters[0],
+              (newRule->findlen = find->length));
     else
       newRule->findlen = 0;
+
     if (replace)
       memcpy(&newRule->findrep[newRule->findlen], &replace->bytes[0],
              (newRule->replen = replace->length));
@@ -208,11 +267,12 @@ addRule (
       ContractionTableOffset *offsetAddress;
 
       if (newRule->findlen == 1) {
-        ContractionTableCharacter *character = &tableHeader->characters[newRule->findrep[0]];
+        ContractionTableCharacter *character = getCharacterEntry(newRule->findrep[0]);
+        if (!character) return NULL;
         if (newRule->opcode == CTO_Always) character->always = ruleOffset;
         offsetAddress = &character->rules;
       } else {
-        offsetAddress = &tableHeader->rules[hash(newRule->findrep)];
+        offsetAddress = &tableHeader->rules[CTH(newRule->findrep)];
       }
 
       while (*offsetAddress) {
@@ -234,11 +294,11 @@ addRule (
 }
 
 static const struct CharacterClass *
-findCharacterClass (const unsigned char *name, int length) {
+findCharacterClass (const wchar_t *name, int length) {
   const struct CharacterClass *class = characterClasses;
   while (class) {
     if ((length == class->length) &&
-        (memcmp(name, class->name, length) == 0))
+        (wmemcmp(name, class->name, length) == 0))
       return class;
     class = class->next;
   }
@@ -246,12 +306,12 @@ findCharacterClass (const unsigned char *name, int length) {
 }
 
 static struct CharacterClass *
-addCharacterClass (FileData *data, const unsigned char *name, int length) {
+addCharacterClass (FileData *data, const wchar_t *name, int length) {
   struct CharacterClass *class;
   if (characterClassAttribute) {
-    if ((class = malloc(sizeof(*class) + length - 1))) {
+    if ((class = malloc(sizeof(*class) + ((length - 1) * sizeof(class->name[0]))))) {
       memset(class, 0, sizeof(*class));
-      memcpy(class->name, name, (class->length = length));
+      wmemcpy(class->name, name, (class->length = length));
 
       class->attribute = characterClassAttribute;
       characterClassAttribute <<= 1;
@@ -261,7 +321,7 @@ addCharacterClass (FileData *data, const unsigned char *name, int length) {
       return class;
     }
   }
-  compileError(data, "character class table overflow: %.*s", length, name);
+  compileError(data, "character class table overflow: %.*ls", length, name);
   return NULL;
 }
 
@@ -276,11 +336,11 @@ deallocateCharacterClasses (void) {
 
 static int
 allocateCharacterClasses (void) {
-  const char *const *name = characterClassNames;
+  const wchar_t *const *name = characterClassNames;
   characterClasses = NULL;
   characterClassAttribute = 1;
   while (*name) {
-    if (!addCharacterClass(NULL, (const unsigned char *)*name, strlen(*name))) {
+    if (!addCharacterClass(NULL, *name, wcslen(*name))) {
       deallocateCharacterClasses();
       return 0;
     }
@@ -290,23 +350,23 @@ allocateCharacterClasses (void) {
 }
 
 static ContractionTableOpcode
-getOpcode (FileData *data, const unsigned char *token, int length) {
+getOpcode (FileData *data, const wchar_t *token, int length) {
   ContractionTableOpcode opcode;
   for (opcode=0; opcode<CTO_None; ++opcode)
     if (length == opcodeLengths[opcode])
-      if (memcmp(token, opcodeNames[opcode], length) == 0)
+      if (wmemcmp(token, opcodeNames[opcode], length) == 0)
         return opcode;
-  compileError(data, "opcode not defined: %.*s", length, token);
+  compileError(data, "opcode not defined: %.*ls", length, token);
   return CTO_None;
 }
 
 static int
-getToken (FileData *data, const unsigned char **token, int *length, const char *description) { /*find the next string of contiguous nonblank characters */
-  const unsigned char *start = *token + *length;
+getToken (FileData *data, const wchar_t **token, int *length, const char *description) { /*find the next string of contiguous nonblank characters */
+  const wchar_t *start = *token + *length;
   int count = 0;
 
-  while (isspace(*start)) start++;
-  while (start[count] && !isspace(start[count])) count++;
+  while (iswspace(*start)) start++;
+  while (start[count] && !iswspace(start[count])) count++;
   *token = start;
   if (!(*length = count)) {
     if (description)
@@ -317,48 +377,48 @@ getToken (FileData *data, const unsigned char **token, int *length, const char *
 }				/*token obtained */
 
 static int
-hexadecimalDigit (FileData *data, int *value, char digit) {
-  if (digit >= '0' && digit <= '9')
-    *value = digit - '0';
-  else if (digit >= 'a' && digit <= 'f')
-    *value = digit - 'a' + 10;
-  else if (digit >= 'A' && digit <= 'F')
-    *value = digit - 'A' + 10;
+hexadecimalDigit (FileData *data, int *value, wchar_t digit) {
+  if (digit >= L'0' && digit <= L'9')
+    *value = digit - L'0';
+  else if (digit >= L'a' && digit <= L'f')
+    *value = digit - L'a' + 10;
+  else if (digit >= L'A' && digit <= L'F')
+    *value = digit - L'A' + 10;
   else
     return 0;
   return 1;
 }
 
 static int
-octalDigit (FileData *data, int *value, char digit) {
-  if (digit < '0' || digit > '7') return 0;
-  *value = digit - '0';
+octalDigit (FileData *data, int *value, wchar_t digit) {
+  if (digit < L'0' || digit > L'7') return 0;
+  *value = digit - L'0';
   return 1;
 }
 
 static int
-parseText (FileData *data, ByteString *result, const unsigned char *token, const int length) {	/*interpret find string */
+parseCharacters (FileData *data, CharacterString *result, const wchar_t *token, const int length) {	/*interpret find string */
   int count = 0;		/*loop counters */
   int index;		/*loop counters */
   for (index = 0; index < length; index++) {
-    char character = token[index];
-    if (character == '\\') { /* escape sequence */
+    wchar_t character = token[index];
+    if (character == L'\\') { /* escape sequence */
       int ok = 0;
       int start = index;
       if (++index < length) {
         switch (character = token[index]) {
-          case '\\':
+          case L'\\':
             ok = 1;
             break;
-          case 'f':
-            character = '\f';
+          case L'f':
+            character = L'\f';
             ok = 1;
             break;
-          case 'n':
-            character = '\n';
+          case L'n':
+            character = L'\n';
             ok = 1;
             break;
-          case 'o':
+          case L'o':
             if (length - index > 3) {
               int high, middle, low;
               if (octalDigit(data, &high, token[++index]))
@@ -370,23 +430,23 @@ parseText (FileData *data, ByteString *result, const unsigned char *token, const
                     }
             }
             break;
-          case 'r':
-            character = '\r';
+          case L'r':
+            character = L'\r';
             ok = 1;
             break;
-          case 's':
-            character = ' ';
+          case L's':
+            character = L' ';
             ok = 1;
             break;
-          case 't':
-            character = '\t';
+          case L't':
+            character = L'\t';
             ok = 1;
             break;
-          case 'v':
-            character = '\v';
+          case L'v':
+            character = L'\v';
             ok = 1;
             break;
-          case 'x':
+          case L'x':
             if (length - index > 2) {
               int high, low;
               if (hexadecimalDigit(data, &high, token[++index]))
@@ -400,20 +460,20 @@ parseText (FileData *data, ByteString *result, const unsigned char *token, const
       }
       if (!ok) {
         index++;
-        compileError(data, "invalid escape sequence: %.*s",
+        compileError(data, "invalid escape sequence: %.*ls",
                      index-start, &token[start]);
         return 0;
       }
     }
-    if (!character) character = ' ';
-    result->bytes[count++] = character;
+    if (!character) character = L' ';
+    result->characters[count++] = character;
   }
   result->length = count;
   return 1;
 }				/*find string interpreted */
 
 static int
-parseDots (FileData *data, ByteString *cells, const unsigned char *token, const int length) {	/*get dot patterns */
+parseDots (FileData *data, ByteString *cells, const wchar_t *token, const int length) {	/*get dot patterns */
   BYTE cell = 0;		/*assembly place for dots */
   int count = 0;		/*loop counters */
   int index;		/*loop counters */
@@ -421,48 +481,48 @@ parseDots (FileData *data, ByteString *cells, const unsigned char *token, const 
 
   for (index = 0; index < length; index++) {
     int started = index != start;
-    char character = token[index];
+    wchar_t character = token[index];
     switch (character) { /*or dots to make up Braille cell */
       {
         int dot;
-      case '1':
+      case L'1':
         dot = BRL_DOT1;
         goto haveDot;
-      case '2':
+      case L'2':
         dot = BRL_DOT2;
         goto haveDot;
-      case '3':
+      case L'3':
         dot = BRL_DOT3;
         goto haveDot;
-      case '4':
+      case L'4':
         dot = BRL_DOT4;
         goto haveDot;
-      case '5':
+      case L'5':
         dot = BRL_DOT5;
         goto haveDot;
-      case '6':
+      case L'6':
         dot = BRL_DOT6;
         goto haveDot;
-      case '7':
+      case L'7':
         dot = BRL_DOT7;
         goto haveDot;
-      case '8':
+      case L'8':
         dot = BRL_DOT8;
       haveDot:
         if (started && !cell) goto invalid;
         if (cell & dot) {
-          compileError(data, "dot specified more than once: %c", character);
+          compileError(data, "dot specified more than once: %.1ls", &character);
           return 0;
         }
         cell |= dot;
         break;
       }
-      case '0':			/*blank */
+      case L'0':			/*blank */
         if (started) goto invalid;
         break;
-      case '-':			/*got all dots for this cell */
+      case L'-':			/*got all dots for this cell */
         if (!started) {
-          compileError(data, "missing cell specification: %.*s",
+          compileError(data, "missing cell specification: %.*ls",
                        length-index, &token[index]);
           return 0;
         }
@@ -472,7 +532,7 @@ parseDots (FileData *data, ByteString *cells, const unsigned char *token, const 
         break;
       default:
       invalid:
-        compileError(data, "invalid dot number: %c", character);
+        compileError(data, "invalid dot number: %.1ls", &character);
         return 0;
     }
   }
@@ -486,33 +546,25 @@ parseDots (FileData *data, ByteString *cells, const unsigned char *token, const 
 }				/*end of function parseDots */
 
 static int
-getCharacters (FileData *data, ByteString *characters, const unsigned char **token, int *length) {
+getCharacters (FileData *data, CharacterString *characters, const wchar_t **token, int *length) {
   if (getToken(data, token, length, "characters"))
-    if (parseText(data, characters, *token, *length))
+    if (parseCharacters(data, characters, *token, *length))
       return 1;
   return 0;
 }
 
 static int
-getFindText (FileData *data, ByteString *find, const unsigned char **token, int *length) {
+getFindText (FileData *data, CharacterString *find, const wchar_t **token, int *length) {
   if (getToken(data, token, length, "find text"))
-    if (parseText(data, find, *token, *length))
+    if (parseCharacters(data, find, *token, *length))
       return 1;
   return 0;
 }
 
 static int
-getReplaceText (FileData *data, ByteString *replace, const unsigned char **token, int *length) {
-  if (getToken(data, token, length, "replacement text"))
-    if (parseText(data, replace, *token, *length))
-      return 1;
-  return 0;
-}
-
-static int
-getReplacePattern (FileData *data, ByteString *replace, const unsigned char **token, int *length) {
+getReplacePattern (FileData *data, ByteString *replace, const wchar_t **token, int *length) {
   if (getToken(data, token, length, "replacement pattern")) {
-    if (*length == 1 && **token == '=') {
+    if (*length == 1 && **token == L'=') {
       replace->length = 0;
       return 1;
     }
@@ -522,48 +574,40 @@ getReplacePattern (FileData *data, ByteString *replace, const unsigned char **to
   return 0;
 }
 
-static const char *
-setLocale (const char *locale) {
-  return setlocale(LC_CTYPE, locale);
-}
-
 static int
-getCharacterClass (FileData *data, const struct CharacterClass **class, const unsigned char **token, int *length) {
+getCharacterClass (FileData *data, const struct CharacterClass **class, const wchar_t **token, int *length) {
   if (getToken(data, token, length, "character class name")) {
     if ((*class = findCharacterClass(*token, *length))) return 1;
-    compileError(data, "character class not defined: %.*s", *length, *token);
+    compileError(data, "character class not defined: %.*ls", *length, *token);
   }
   return 0;
 }
 
-static const char *
-getLocale (void) {
-  return setLocale(NULL);
-}
-
 static int processFile (const char *fileName);
 static int
-includeFile (FileData *data, ByteString *path) {
+includeFile (FileData *data, CharacterString *path) {
   const char *prefixAddress = data->fileName;
   int prefixLength = 0;
-  const unsigned char *suffixAddress = path->bytes;
+  const wchar_t *suffixAddress = path->characters;
   int suffixLength = path->length;
-  if (*suffixAddress != '/') {
+
+  if (*suffixAddress != L'/') {
     const char *ptr = strrchr(prefixAddress, '/');
     if (ptr) prefixLength = ptr - prefixAddress + 1;
   }
+
   {
     char file[prefixLength + suffixLength + 1];
-    snprintf(file, sizeof(file), "%.*s%.*s",
+    snprintf(file, sizeof(file), "%.*s%.*ls",
              prefixLength, prefixAddress, suffixLength, suffixAddress);
     return processFile(file);
   }
 }
 
 static int
-processLine (FileData *data, const char *line) {
+processWcharLine (FileData *data, const wchar_t *line) {
   int ok = 0;
-  const unsigned char *token = (const unsigned char *)line;
+  const wchar_t *token = line;
   int length = 0;			/*length of token */
   ContractionTableOpcode opcode;
   ContractionTableCharacterAttributes after = 0;
@@ -571,7 +615,7 @@ processLine (FileData *data, const char *line) {
 
 doOpcode:
   if (!getToken(data, &token, &length, NULL)) return 1;			/*blank line */
-  if (*token == '#') return 1;
+  if (*token == L'#') return 1;
   opcode = getOpcode(data, token, length);
 
   switch (opcode) { /*Carry out operations */
@@ -579,28 +623,11 @@ doOpcode:
       break;
 
     case CTO_IncludeFile: {
-      ByteString path;
+      CharacterString path;
       if (getToken(data, &token, &length, "include file path"))
-        if (parseText(data, &path, token, length))
+        if (parseCharacters(data, &path, token, length))
           if (!includeFile(data, &path))
             goto failure;
-      break;
-    }
-
-    case CTO_Locale: {
-      ByteString locale;
-      if (getToken(data, &token, &length, "locale specification"))
-        if (parseText(data, &locale, token, length)) {
-          char string[locale.length + 1];
-          snprintf(string, sizeof(string), "%.*s", locale.length, locale.bytes);
-          if (strcmp(string, "-") == 0) {
-            noLocale = 1;
-          } else if (!setLocale(string)) {
-            compileError(data, "locale not available: %s", string);
-          } else {
-            noLocale = 0;
-          }
-        }
       break;
     }
 
@@ -623,7 +650,7 @@ doOpcode:
     case CTO_MidNum:
     case CTO_EndNum:
     case CTO_Repeated: {
-      ByteString find;
+      CharacterString find;
       ByteString replace;
       if (getFindText(data, &find, &token, &length))
         if (getReplacePattern(data, &replace, &token, &length))
@@ -632,19 +659,9 @@ doOpcode:
       break;
     }
 
-    case CTO_Replace: {
-      ByteString find;
-      ByteString replace;
-      if (getFindText(data, &find, &token, &length))
-        if (getReplaceText(data, &replace, &token, &length))
-          if (!addRule(data, opcode, &find, &replace, after, before))
-            goto failure;
-      break;
-    }
-
     case CTO_Contraction:
     case CTO_Literal: {
-      ByteString find;
+      CharacterString find;
       if (getFindText(data, &find, &token, &length))
         if (!addRule(data, opcode, &find, NULL, after, before))
           goto failure;
@@ -655,7 +672,7 @@ doOpcode:
       ByteString cells;
       if (getToken(data, &token, &length, "capital sign"))
         if (parseDots(data, &cells, token, length))
-          if (!saveByteString(data, &tableHeader->capitalSign, &cells))
+          if (!saveSequence(data, &tableHeader->capitalSign, &cells))
             goto failure;
       break;
     }
@@ -664,7 +681,7 @@ doOpcode:
       ByteString cells;
       if (getToken(data, &token, &length, "begin capital sign"))
         if (parseDots(data, &cells, token, length))
-          if (!saveByteString(data, &tableHeader->beginCapitalSign, &cells))
+          if (!saveSequence(data, &tableHeader->beginCapitalSign, &cells))
             goto failure;
       break;
     }
@@ -673,7 +690,7 @@ doOpcode:
       ByteString cells;
       if (getToken(data, &token, &length, "end capital sign"))
         if (parseDots(data, &cells, token, length))
-          if (!saveByteString(data, &tableHeader->endCapitalSign, &cells))
+          if (!saveSequence(data, &tableHeader->endCapitalSign, &cells))
             goto failure;
       break;
     }
@@ -682,7 +699,7 @@ doOpcode:
       ByteString cells;
       if (getToken(data, &token, &length, "letter sign"))
         if (parseDots(data, &cells, token, length))
-          if (!saveByteString(data, &tableHeader->englishLetterSign, &cells))
+          if (!saveSequence(data, &tableHeader->englishLetterSign, &cells))
             goto failure;
       break;
     }
@@ -691,23 +708,25 @@ doOpcode:
       ByteString cells;
       if (getToken(data, &token, &length, "number sign"))
         if (parseDots(data, &cells, token, length))
-          if (!saveByteString(data, &tableHeader->numberSign, &cells))
+          if (!saveSequence(data, &tableHeader->numberSign, &cells))
             goto failure;
       break;
     }
 
     case CTO_Class: {
       const struct CharacterClass *class;
-      ByteString characters;
+      CharacterString characters;
       if (getToken(data, &token, &length, "character class name")) {
         if ((class = findCharacterClass(token, length))) {
-          compileError(data, "character class already defined: %.*s", length, token);
+          compileError(data, "character class already defined: %.*ls", length, token);
         } else if ((class = addCharacterClass(data, token, length))) {
           if (getCharacters(data, &characters, &token, &length)) {
             int index;
             for (index=0; index<characters.length; ++index) {
-              ContractionTableCharacter *character = &tableHeader->characters[characters.bytes[index]];
-              character->attributes |= class->attribute;
+              wchar_t character = characters.characters[index];
+              ContractionTableCharacter *entry = getCharacterEntry(character);
+              if (!entry) goto failure;
+              entry->attributes |= class->attribute;
             }
           }
         }
@@ -734,14 +753,67 @@ doOpcode:
     }
 
     default:
-      compileError(data, "unimplemented opcode: %.*s", length, token);
+      compileError(data, "unimplemented opcode: %.*ls", length, token);
       break;
   }				/*end of loop for processing tableStream */
   ok = 1;
 
 failure:
   return ok;
-}				/*compilation completed */
+}
+
+static int
+processUtf8Line (char *line, void *dataAddress) {
+  FileData *data = dataAddress;
+  wchar_t characters[strlen(line)];
+  wchar_t *character = characters;
+  const char *byte = line;
+  int state = 0;
+
+  data->lineNumber++;
+
+  while (*byte) {
+    int length;
+
+    if (!(*byte & 0X80)) {
+      length = 1;
+    } else if (!(*byte & 0X40)) {
+      if (!state) goto error;
+      *character = (*character << 6) | (*byte & 0X3F);
+      goto next;
+    } else if (!(*byte & 0X20)) {
+      length = 2;
+    } else if (!(*byte & 0X10)) {
+      length = 3;
+    } else if (!(*byte & 0X08)) {
+      length = 4;
+    } else if (!(*byte & 0X04)) {
+      length = 5;
+    } else if (!(*byte & 0X02)) {
+      length = 6;
+    } else {
+      goto error;
+    }
+
+    if (state) goto error;
+    state = length;
+
+    *character = *byte;
+    if (length > 1) *character &= (1 << (8 - length)) - 1;
+
+  next:
+    if (!--state) ++character;
+    ++byte;
+  }
+
+  if (state) goto error;
+  *character = 0;
+  return processWcharLine(data, characters);
+
+error:
+  compileError(data, "illegal UTF-8 character at offset %d", byte-line);
+  return 1;
+}
 
 static int
 processFile (const char *fileName) {
@@ -754,52 +826,7 @@ processFile (const char *fileName) {
   LogPrint(LOG_DEBUG, "Including contraction table: %s", fileName);
 
   if ((stream = openDataFile(data.fileName, "r"))) {
-    int size = 0X80;
-    char *buffer = malloc(size);
-    if (buffer) {
-      while (1) { /*Process lines in table */
-        char *line = fgets(buffer, size, stream);
-        int length;
-        if (!line) {
-          if (ferror(stream))
-            compileError(&data, "read error: %s", strerror(errno));
-          break;
-        }
-        data.lineNumber++;
-
-        while (buffer[(length = strlen(line)) - 1] != '\n') {
-          if (length + 1 == size) {
-            char *newBuffer = realloc(buffer, size<<=1);
-            if (!newBuffer) {
-              compileError(&data, "cannot extend input buffer.");
-              ok = 0;
-              goto done;
-            }
-            buffer = newBuffer;
-          }
-          if (!(line = fgets(buffer+length, size-length, stream))) {
-            if (ferror(stream))
-              compileError(&data, "read error: %s", strerror(errno));
-            else
-              compileError(&data, "unterminated final line.");
-            goto done;
-          }
-          length += strlen(line);
-          line = buffer;
-        }
-        buffer[length-1] = 0;
-
-        if (!processLine(&data, line)) {
-          ok = 0;
-          break;
-        }
-      }				/*end of loop for processing tableStream */
-    done:
-      free(buffer);
-    } else {
-      compileError(&data, "cannot allocate input buffer.");
-      ok = 0;
-    }
+    if (!processLines(stream, processUtf8Line, &data)) return 0;
     fclose(stream);
   } else {
     LogPrint(LOG_ERR,
@@ -808,79 +835,6 @@ processFile (const char *fileName) {
   }
   return ok;
 }				/*compilation completed */
-
-static void
-cacheCharacterAttributes (void) {
-  int character;
-  for (character = 0; character < 0X100; character++) {
-    ContractionTableCharacter *c = &tableHeader->characters[character];
-    c->uppercase = c->lowercase = character;
-    if (isspace(character))
-      c->attributes |= CTC_Space;
-    else if (isdigit(character))
-      c->attributes |= CTC_Digit;
-    else if (ispunct(character))
-      c->attributes |= CTC_Punctuation;
-    else if (isalpha(character)) {
-      c->attributes |= CTC_Letter;
-      if (isupper(character)) {
-        c->attributes |= CTC_UpperCase;
-        c->lowercase = tolower(character);
-      } else if (islower(character)) {
-        c->attributes |= CTC_LowerCase;
-        c->uppercase = toupper(character);
-      }
-    }
-  }
-}
-
-static int
-auditCharacters (BYTE *encountered, const BYTE *start, BYTE length) {
-   const BYTE *address = start;
-   BYTE count = length;
-  while (count--) {
-    BYTE character = *address++;
-    if (!tableHeader->characters[character].always && !encountered[character]) {
-      encountered[character] = 1;
-      compileError(NULL, "character representation not defined: %c (%.*s)",
-                   character, length, start);
-      return 0;
-    }
-  }
-  return 1;
-}
-
-static int
-auditTable (void) {
-  int ok = 1;
-  BYTE characterEncountered[0X100];
-  int hashIndex;
-  memset(characterEncountered, 0, sizeof(characterEncountered));
-  for (hashIndex = 0; hashIndex < HASHNUM; hashIndex++) {
-    ContractionTableOffset bucket = tableHeader->rules[hashIndex];
-    while (bucket) {
-      const ContractionTableRule *rule = CTR(tableHeader, bucket);
-      switch (rule->opcode) {
-        default:
-          if (!rule->replen) {
-            if (!auditCharacters(characterEncountered, &rule->findrep[0], rule->findlen)) {
-              ok = 0;
-            }
-          }
-          break;
-        case CTO_Replace:
-          if (!auditCharacters(characterEncountered, &rule->findrep[rule->findlen], rule->replen)) {
-            ok = 0;
-          }
-          break;
-        case CTO_Literal:
-          break;
-      }
-      bucket = rule->next;
-    }
-  }
-  return ok;
-}
 
 void *
 compileContractionTable (const char *fileName) { /*compile source table into a table in memory */
@@ -892,34 +846,25 @@ compileContractionTable (const char *fileName) { /*compile source table into a t
   tableSize = 0;
   tableUsed = 0;
 
+  characterTable = NULL;
+  characterTableSize = 0;
+  characterEntryCount = 0;
+
   if (!opcodeLengths[0]) {
     ContractionTableOpcode opcode;
     for (opcode=0; opcode<CTO_None; ++opcode)
-      opcodeLengths[opcode] = strlen(opcodeNames[opcode]);
+      opcodeLengths[opcode] = wcslen(opcodeNames[opcode]);
   }
-
-  {
-    const char *locale = getLocale();
-    originalLocale = locale? strdup(locale): NULL;
-  }
-  setLocale("C");
-  noLocale = 0;
 
   if (allocateBytes(NULL, &headerOffset, sizeof(*tableHeader), __alignof__(*tableHeader))) {
     if (headerOffset == 0) {
       if (allocateCharacterClasses()) {
         if (processFile(fileName)) {
-          if (auditTable()) {
+          if (saveCharacterTable()) {
             ok = 1;
-            if (!noLocale) {
-              if (saveString(NULL, &tableHeader->locale, getLocale())) {
-                cacheCharacterAttributes();
-              } else {
-                ok = 0;
-              }
-            }
           }
         }
+
         deallocateCharacterClasses();
       }
     } else {
@@ -927,21 +872,22 @@ compileContractionTable (const char *fileName) { /*compile source table into a t
     }
   }
 
-  if (originalLocale) {
-    setLocale(originalLocale);
-    free(originalLocale);
-    originalLocale = NULL;
-  }
-
   if (!ok) {
-    free(tableHeader);
-    tableHeader = NULL;
+    if (characterTable) {
+      free(characterTable);
+      characterTable = NULL;
+    }
+
+    if (tableHeader) {
+      free(tableHeader);
+      tableHeader = NULL;
+    }
   }
 
   if (errorCount)
     LogPrint(LOG_WARNING, "%d %s in contraction table '%s'.",
              errorCount, ((errorCount == 1)? "error": "errors"), fileName);
-  return (void *)tableHeader;
+  return tableHeader;
 }
 
 int

@@ -204,32 +204,29 @@ describe_HurdScreen (ScreenDescription *description) {
 #define offsetof(type,field) ((size_t) &((type *) 0)->field)
 #endif
 static int
-read_HurdScreen (ScreenBox box, unsigned char *buffer, ScreenCharacterProperty property) {
+readCharacters_HurdScreen (const ScreenBox *box, ScreenCharacter *buffer) {
+  uint32_t lines, start, row, col;
   ScreenDescription description;
-  int c;
   describe_HurdScreen(&description);
   if (lastReadVt != description.number) {
     openScreen(description.number);
     lastReadVt = description.number;
   }
-  if (validateScreenBox(&box, description.cols, description.rows)) {
-    uint32_t lines, start, row, col;
-    const int which = property == SCR_TEXT ? offsetof(conchar_t,chr):offsetof(conchar_t,attr);
-    lines = screenMap->screen.lines;
-    start = screenMap->screen.cur_line;
-    for (row=start+box.top; row<start+box.top+box.height; ++row)
-      for (col=box.left; col<box.left+box.width; ++col) {
-        if ((c = convertWcharToChar(*(uint32_t *)(((unsigned char *) &screenDisplay[(row%lines)*description.cols+col])+which))) == EOF)
-	  c = '?';
-	*buffer++ = c;
-      }
-    return 1;
-  } else {
-    LogPrint(LOG_ERR, "Invalid screen area: cols=%d left=%d width=%d rows=%d top=%d height=%d",
-             description.cols, box.left, box.width,
-             description.rows, box.top, box.height);
-  }
-  return 0;
+  if (!validateScreenBox(box, description.cols, description.rows)) return 0;
+
+  lines = screenMap->screen.lines;
+  start = screenMap->screen.cur_line;
+  for (row=start+box->top; row<start+box->top+box->height; ++row)
+    for (col=box->left; col<box->left+box->width; ++col) {
+      conchar_attr_t attr;
+      buffer->text = screenDisplay[(row%lines)*description.cols+col].chr;
+      attr = screenDisplay[(row%lines)*description.cols+col].attr;
+      buffer->attributes = attr.fgcol | (attr.bgcol << 4)
+	| (attr.intensity == CONS_ATTR_INTENSITY_BOLD?SCR_ATTR_FG_BRIGHT:0)
+	| (attr.blinking?SCR_ATTR_BLINK:0);
+      buffer++;
+    }
+  return 1;
 }
 
 static int
@@ -433,7 +430,7 @@ static void
 scr_initialize (MainScreen *main) {
   initializeRealScreen(main);
   main->base.describe = describe_HurdScreen;
-  main->base.read = read_HurdScreen;
+  main->base.readCharacters = readCharacters_HurdScreen;
   main->base.insertKey = insertKey_HurdScreen;
   main->base.selectVirtualTerminal = selectVirtualTerminal_HurdScreen;
   main->base.switchVirtualTerminal = switchVirtualTerminal_HurdScreen;

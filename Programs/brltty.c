@@ -29,19 +29,22 @@
 #include "misc.h"
 #include "message.h"
 #include "tunes.h"
+#include "tbl.h"
 #include "ctb.h"
 #include "route.h"
 #include "cut.h"
 #include "touch.h"
 #include "cmd.h"
+#include "charset.h"
 #include "scancodes.h"
 #include "scr.h"
 #include "brl.h"
+#include "brltty.h"
+#include "defaults.h"
+
 #ifdef ENABLE_SPEECH_SUPPORT
 #include "spk.h"
 #endif /* ENABLE_SPEECH_SUPPORT */
-#include "brltty.h"
-#include "defaults.h"
 
 int updateInterval = DEFAULT_UPDATE_INTERVAL;
 int messageDelay = DEFAULT_MESSAGE_DELAY;
@@ -68,20 +71,6 @@ static int contractedTrack = 0;
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
 static unsigned int updateIntervals = 0;        /* incremented each main loop cycle */
-
-
-/*
- * useful macros
- */
-
-#define BRL_ISUPPER(c) \
-  (isupper((c)) || (c)=='@' || (c)=='[' || (c)=='^' || (c)==']' || (c)=='\\')
-
-static unsigned char *translationTable = textTable;        /* active translation table */
-static void
-setTranslationTable (int attributes) {
-  translationTable = attributes? attributesTable: textTable;
-}
 
 
 /* 
@@ -143,8 +132,6 @@ getScreenAttributes (void) {
     }
     p = *state;
   }
-
-  setTranslationTable(p->showAttributes);
 }
 
 static void
@@ -521,11 +508,11 @@ trackCursor (int place) {
     p->winy = scr.posy;
     if (scr.posx < p->winx) {
       int length = scr.posx + 1;
-      unsigned char buffer[length];
+      ScreenCharacter characters[length];
       int onspace = 1;
-      readScreen(0, p->winy, length, 1, buffer, SCR_TEXT);
+      readScreen(0, p->winy, length, 1, characters);
       while (length) {
-        if ((isspace(buffer[--length]) != 0) != onspace) {
+        if ((iswspace(characters[--length].text) != 0) != onspace) {
           if (onspace) {
             onspace = 0;
           } else {
@@ -576,24 +563,46 @@ trackSpeech (int index) {
 }
 
 static void
-sayRegion (int left, int top, int width, int height, int track, SayMode mode) {
-  /* OK heres a crazy idea: why not send the attributes with the
-   * text, in case some inflection or marking can be added...! The
-   * speech driver's say function will receive a buffer of text
-   * and a length, but in reality the buffer will contain twice
-   * len bytes: the text followed by the video attribs data.
-   */
-  int length = width * height;
-  unsigned char buffer[length * 2];
+sayCharacters (const ScreenCharacter *characters, size_t count, int immediate) {
+  unsigned char text[count * MB_LEN_MAX];
+  unsigned char *t = text;
 
-  if (mode == sayImmediate) speech->mute(&spk);
-  readScreen(left, top, width, height, buffer, SCR_TEXT);
-  if (speech->express) {
-    readScreen(left, top, width, height, buffer+length, SCR_ATTRIB);
-    speech->express(&spk, buffer, length);
-  } else {
-    speech->say(&spk, buffer, length);
+  unsigned char attributes[count];
+  unsigned char *a = attributes;
+
+  {
+    int i;
+    for (i=0; i<count; ++i) {
+      const ScreenCharacter *character = &characters[i];
+      Utf8Buffer utf8;
+      int length = convertWcharToUtf8(character->text, utf8);
+
+      if (length) {
+        memcpy(t, utf8, length);
+        t += length;
+      } else {
+        *t++ = ' ';
+      }
+
+      *a++ = character->attributes;
+    }
   }
+
+  if (immediate) speech->mute(&spk);
+  if (speech->express) {
+    speech->express(&spk, text, t-text, attributes, a-attributes);
+  } else {
+    speech->say(&spk, text, t-text);
+  }
+}
+
+static void
+sayRegion (int left, int top, int width, int height, int track, SayMode mode) {
+  size_t count = width * height;
+  ScreenCharacter characters[count];
+
+  readScreen(left, top, width, height, characters);
+  sayCharacters(characters, count, mode==sayImmediate);
 
   speechTracking = track;
   speechScreen = scr.number;
@@ -606,24 +615,76 @@ sayLines (int line, int count, int track, SayMode mode) {
 }
 #endif /* ENABLE_SPEECH_SUPPORT */
 
+typedef int (*IsSameCharacter) (
+  const ScreenCharacter *character1,
+  const ScreenCharacter *character2
+);
+
+static int
+isSameText (
+  const ScreenCharacter *character1,
+  const ScreenCharacter *character2
+) {
+  return character1->text == character2->text;
+}
+
+static int
+isSameAttributes (
+  const ScreenCharacter *character1,
+  const ScreenCharacter *character2
+) {
+  return character1->attributes == character2->attributes;
+}
+
+static int
+isSameRow (
+  const ScreenCharacter *characters1,
+  const ScreenCharacter *characters2,
+  int count,
+  IsSameCharacter isSameCharacter
+) {
+  int i;
+  for (i=0; i<count; ++i)
+    if (!isSameCharacter(&characters1[i], &characters2[i]))
+      return 0;
+
+  return 1;
+}
+
+typedef int (*CanMoveWindow) (void);
+
+static int
+canMoveUp (void) {
+  return p->winy > 0;
+}
+
+static int
+canMoveDown (void) {
+  return p->winy < (scr.rows - brl.y);
+}
+
 static inline int
 showCursor (void) {
   return scr.cursor && prefs.showCursor && !p->hideCursor;
 }
 
 static int
-toDifferentLine (ScreenCharacterProperty property, int (*canMove) (void), int amount, int from, int width) {
-  if (canMove()) {
-    unsigned char buffer1[width], buffer2[width];
+toDifferentLine (
+  IsSameCharacter isSameCharacter,
+  CanMoveWindow canMoveWindow,
+  int amount, int from, int width
+) {
+  if (canMoveWindow()) {
+    ScreenCharacter characters1[width], characters2[width];
     int skipped = 0;
 
-    if ((property == SCR_TEXT) && p->showAttributes) property = SCR_ATTRIB;
-    readScreen(from, p->winy, width, 1, buffer1, property);
+    if ((isSameCharacter == isSameText) && p->showAttributes) isSameCharacter = isSameAttributes;
+    readScreen(from, p->winy, width, 1, characters1);
 
     do {
-      readScreen(from, p->winy+=amount, width, 1, buffer2, property);
-      if ((memcmp(buffer1, buffer2, width) != 0) ||
-          ((property == SCR_TEXT) && showCursor() && (scr.posy == p->winy) &&
+      readScreen(from, p->winy+=amount, width, 1, characters2);
+      if (!isSameRow(characters1, characters2, width, isSameCharacter) ||
+          ((isSameCharacter == isSameText) && showCursor() && (scr.posy == p->winy) &&
            (scr.posx >= from) && (scr.posx < (from + width))))
         return 1;
 
@@ -636,7 +697,7 @@ toDifferentLine (ScreenCharacterProperty property, int (*canMove) (void), int am
         playTune(&tune_skip_more);
       }
       skipped++;
-    } while (canMove());
+    } while (canMoveWindow());
   }
 
   playTune(&tune_bounce);
@@ -644,37 +705,27 @@ toDifferentLine (ScreenCharacterProperty property, int (*canMove) (void), int am
 }
 
 static int
-canMoveUp (void) {
-  return p->winy > 0;
+upDifferentLine (IsSameCharacter isSameCharacter) {
+  return toDifferentLine(isSameCharacter, canMoveUp, -1, 0, scr.cols);
 }
 
 static int
-canMoveDown (void) {
-  return p->winy < (scr.rows - brl.y);
+downDifferentLine (IsSameCharacter isSameCharacter) {
+  return toDifferentLine(isSameCharacter, canMoveDown, 1, 0, scr.cols);
 }
 
 static int
-upDifferentLine (ScreenCharacterProperty property) {
-  return toDifferentLine(property, canMoveUp, -1, 0, scr.cols);
+upDifferentCharacter (IsSameCharacter isSameCharacter, int column) {
+  return toDifferentLine(isSameCharacter, canMoveUp, -1, column, 1);
 }
 
 static int
-downDifferentLine (ScreenCharacterProperty property) {
-  return toDifferentLine(property, canMoveDown, 1, 0, scr.cols);
-}
-
-static int
-upDifferentCharacter (ScreenCharacterProperty property, int column) {
-  return toDifferentLine(property, canMoveUp, -1, column, 1);
-}
-
-static int
-downDifferentCharacter (ScreenCharacterProperty property, int column) {
-  return toDifferentLine(property, canMoveDown, 1, column, 1);
+downDifferentCharacter (IsSameCharacter isSameCharacter, int column) {
+  return toDifferentLine(isSameCharacter, canMoveDown, 1, column, 1);
 }
 
 static void
-upOneLine (ScreenCharacterProperty property) {
+upOneLine (void) {
   if (p->winy > 0) {
     p->winy--;
   } else {
@@ -683,7 +734,7 @@ upOneLine (ScreenCharacterProperty property) {
 }
 
 static void
-downOneLine (ScreenCharacterProperty property) {
+downOneLine (void) {
   if (p->winy < (scr.rows - brl.y)) {
     p->winy++;
   } else {
@@ -692,20 +743,20 @@ downOneLine (ScreenCharacterProperty property) {
 }
 
 static void
-upLine (ScreenCharacterProperty property) {
+upLine (IsSameCharacter isSameCharacter) {
   if (prefs.skipIdenticalLines) {
-    upDifferentLine(property);
+    upDifferentLine(isSameCharacter);
   } else {
-    upOneLine(property);
+    upOneLine();
   }
 }
 
 static void
-downLine (ScreenCharacterProperty property) {
+downLine (IsSameCharacter isSameCharacter) {
   if (prefs.skipIdenticalLines) {
-    downDifferentLine(property);
+    downDifferentLine(isSameCharacter);
   } else {
-    downOneLine(property);
+    downOneLine();
   }
 }
 
@@ -726,10 +777,11 @@ findRow (int column, int increment, RowTester test, void *data) {
 static int
 testIndent (int column, int row, void *data) {
   int count = column+1;
-  unsigned char buffer[count];
-  readScreen(0, row, count, 1, buffer, SCR_TEXT);
+  ScreenCharacter characters[count];
+  readScreen(0, row, count, 1, characters);
   while (column >= 0) {
-    if ((buffer[column] != ' ') && (buffer[column] != 0)) return 1;
+    wchar_t text = characters[column].text;
+    if ((text != ' ') && (text != 0)) return 1;
     --column;
   }
   return 0;
@@ -737,24 +789,24 @@ testIndent (int column, int row, void *data) {
 
 static int
 testPrompt (int column, int row, void *data) {
-  const unsigned char *prompt = data;
+  const ScreenCharacter *prompt = data;
   int count = column+1;
-  unsigned char buffer[count];
-  readScreen(0, row, count, 1, buffer, SCR_TEXT);
-  return memcmp(buffer, prompt, count) == 0;
+  ScreenCharacter characters[count];
+  readScreen(0, row, count, 1, characters);
+  return isSameRow(characters, prompt, count, isSameText);
 }
 
 static int
-findBytes (const unsigned char **address, size_t *length, const unsigned char *bytes, size_t count) {
-  const unsigned char *ptr = *address;
+findCharacters (const wchar_t **address, size_t *length, const wchar_t *characters, size_t count) {
+  const wchar_t *ptr = *address;
   size_t len = *length;
 
   while (count <= len) {
-    const unsigned char *next = memchr(ptr, *bytes, len);
+    const wchar_t *next = wmemchr(ptr, *characters, len);
     if (!next) break;
 
     len -= next - ptr;
-    if (memcmp((ptr = next), bytes, count) == 0) {
+    if (wmemcmp((ptr = next), characters, count) == 0) {
       *address = ptr;
       *length = len;
       return 1;
@@ -782,10 +834,10 @@ static int
 getContractedLength (int x, int y) {
   int inputLength = scr.cols - x;
   int outputLength = brl.x * brl.y;
-  unsigned char inputBuffer[inputLength];
+  wchar_t inputBuffer[inputLength];
   unsigned char outputBuffer[outputLength];
   int outputOffsets[inputLength];
-  readScreen(x, y, inputLength, 1, inputBuffer, SCR_TEXT);
+  readScreenText(x, y, inputLength, 1, inputBuffer);
   if (!contractText(contractionTable,
                     inputBuffer, &inputLength,
                     outputBuffer, &outputLength,
@@ -882,31 +934,6 @@ getOffset (int arg, int end) {
   return arg;
 }
 
-static void
-overlayAttributes (const unsigned char *attributes, int width, int height) {
-  int row;
-  for (row=0; row<height; row++) {
-    int column;
-    for (column=0; column<width; column++) {
-      switch (attributes[row*width + column]) {
-        /* Experimental! Attribute values are hardcoded... */
-        case 0x08: /* dark-gray on black */
-        case 0x07: /* light-gray on black */
-        case 0x17: /* light-gray on blue */
-        case 0x30: /* black on cyan */
-          break;
-        case 0x70: /* black on light-gray */
-          brl.buffer[row*brl.x + column] |= (BRL_DOT7 | BRL_DOT8);
-          break;
-        case 0x0F: /* white on black */
-        default:
-          brl.buffer[row*brl.x + column] |= (BRL_DOT8);
-          break;
-      }
-    }
-  }
-}
-
 unsigned char
 cursorDots (void) {
   return prefs.cursorStyle?  (BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT4 | BRL_DOT5 | BRL_DOT6 | BRL_DOT7 | BRL_DOT8): (BRL_DOT7 | BRL_DOT8);
@@ -959,6 +986,35 @@ toggleFlag (unsigned char *flag, int command, const TuneDefinition *off, const T
 #define TOGGLE(flag, off, on) toggleFlag(&flag, command, off, on)
 #define TOGGLE_NOPLAY(flag) TOGGLE(flag, NULL, NULL)
 #define TOGGLE_PLAY(flag) TOGGLE(flag, &tune_toggle_off, &tune_toggle_on)
+
+static inline int
+showAttributesUnderline (void) {
+  return prefs.showAttributes && (!prefs.blinkingAttributes || attributesState);
+}
+
+static void
+overlayAttributesUnderline (unsigned char *cell, unsigned char attributes) {
+  unsigned char dots;
+
+  switch (attributes) {
+    case 0x08: /* dark-gray on black */
+    case 0x07: /* light-gray on black */
+    case 0x17: /* light-gray on blue */
+    case 0x30: /* black on cyan */
+      return;
+
+    case 0x70: /* black on light-gray */
+      dots = BRL_DOT7 | BRL_DOT8;
+      break;
+
+    case 0x0F: /* white on black */
+    default:
+      dots = BRL_DOT8;
+      break;
+  }
+
+  *cell |= dots;
+}
 
 static int
 insertCharacter (unsigned char character, int flags) {
@@ -1279,24 +1335,24 @@ runProgram (void) {
               break;
 
             case BRL_CMD_LNUP:
-              upOneLine(SCR_TEXT);
+              upOneLine();
               break;
             case BRL_CMD_LNDN:
-              downOneLine(SCR_TEXT);
+              downOneLine();
               break;
 
             case BRL_CMD_PRDIFLN:
-              upDifferentLine(SCR_TEXT);
+              upDifferentLine(isSameText);
               break;
             case BRL_CMD_NXDIFLN:
-              downDifferentLine(SCR_TEXT);
+              downDifferentLine(isSameText);
               break;
 
             case BRL_CMD_ATTRUP:
-              upDifferentLine(SCR_ATTRIB);
+              upDifferentLine(isSameAttributes);
               break;
             case BRL_CMD_ATTRDN:
-              downDifferentLine(SCR_ATTRIB);
+              downDifferentLine(isSameAttributes);
               break;
 
             {
@@ -1309,15 +1365,16 @@ runProgram (void) {
             findParagraph:
               {
                 int found = 0;
-                unsigned char buffer[scr.cols];
+                ScreenCharacter characters[scr.cols];
                 int findBlank = 1;
                 int line = p->winy;
                 int i;
                 while ((line >= 0) && (line <= (scr.rows - brl.y))) {
-                  readScreen(0, line, scr.cols, 1, buffer, SCR_TEXT);
-                  for (i=0; i<scr.cols; i++)
-                    if ((buffer[i] != ' ') && (buffer[i] != 0))
-                      break;
+                  readScreen(0, line, scr.cols, 1, characters);
+                  for (i=0; i<scr.cols; i++) {
+                    wchar_t text = characters[i].text;
+                    if ((text != ' ') && (text != 0)) break;
+                  }
                   if ((i == scr.cols) == findBlank) {
                     if (!findBlank) {
                       found = 1;
@@ -1343,11 +1400,15 @@ runProgram (void) {
               increment = 1;
             findPrompt:
               {
-                unsigned char buffer[scr.cols];
-                unsigned char *blank;
-                readScreen(0, p->winy, scr.cols, 1, buffer, SCR_TEXT);
-                if ((blank = memchr(buffer, ' ', scr.cols))) {
-                  findRow(blank-buffer, increment, testPrompt, buffer);
+                ScreenCharacter characters[scr.cols];
+                size_t length = 0;
+                readScreen(0, p->winy, scr.cols, 1, characters);
+                while (length < scr.cols) {
+                  if (characters[length].text == ' ') break;
+                  ++length;
+                }
+                if (length < scr.cols) {
+                  findRow(length, increment, testPrompt, characters);
                 } else {
                   playTune(&tune_command_rejected);
                 }
@@ -1368,22 +1429,22 @@ runProgram (void) {
                 size_t count = cutLength;
                 if (count <= scr.cols) {
                   int line = p->winy;
-                  unsigned char buffer[scr.cols];
-                  unsigned char bytes[count];
+                  wchar_t buffer[scr.cols];
+                  wchar_t characters[count];
 
                   {
                     int i;
-                    for (i=0; i<count; i++) bytes[i] = tolower(cutBuffer[i]);
+                    for (i=0; i<count; i++) characters[i] = towlower(cutBuffer[i]);
                   }
 
                   while ((line >= 0) && (line <= (scr.rows - brl.y))) {
-                    const unsigned char *address = buffer;
+                    const wchar_t *address = buffer;
                     size_t length = scr.cols;
-                    readScreen(0, line, length, 1, buffer, SCR_TEXT);
+                    readScreenText(0, line, length, 1, buffer);
 
                     {
                       int i;
-                      for (i=0; i<length; i++) buffer[i] = tolower(buffer[i]);
+                      for (i=0; i<length; i++) buffer[i] = towlower(buffer[i]);
                     }
 
                     if (line == p->winy) {
@@ -1397,9 +1458,9 @@ runProgram (void) {
                         length -= start;
                       }
                     }
-                    if (findBytes(&address, &length, bytes, count)) {
+                    if (findCharacters(&address, &length, characters, count)) {
                       if (increment < 0)
-                        while (findBytes(&address, &length, bytes, count))
+                        while (findCharacters(&address, &length, characters, count))
                           ++address, --length;
 
                       p->winy = line;
@@ -1466,11 +1527,12 @@ runProgram (void) {
                         (scr.posx >= (p->winx + brl.x))) {
                       int charCount = MIN(scr.cols, p->winx+brl.x);
                       int charIndex;
-                      unsigned char buffer[charCount];
-                      readScreen(0, p->winy, charCount, 1, buffer, SCR_TEXT);
-                      for (charIndex=0; charIndex<charCount; ++charIndex)
-                        if ((buffer[charIndex] != ' ') && (buffer[charIndex] != 0))
-                          break;
+                      ScreenCharacter characters[charCount];
+                      readScreen(0, p->winy, charCount, 1, characters);
+                      for (charIndex=0; charIndex<charCount; ++charIndex) {
+                        wchar_t text = characters[charIndex].text;
+                        if ((text != ' ') && (text != 0)) break;
+                      }
                       if (charIndex == charCount) goto wrapUp;
                     }
                   }
@@ -1483,16 +1545,17 @@ runProgram (void) {
                   break;
                 }
                 playTune(&tune_wrap_up);
-                upLine(SCR_TEXT);
+                upLine(isSameText);
                 placeWindowRight();
               skipEndOfLine:
                 if (prefs.skipBlankWindows && (prefs.blankWindowsSkipMode == sbwEndOfLine)) {
                   int charIndex;
-                  unsigned char buffer[scr.cols];
-                  readScreen(0, p->winy, scr.cols, 1, buffer, SCR_TEXT);
-                  for (charIndex=scr.cols-1; charIndex>=0; --charIndex)
-                    if ((buffer[charIndex] != ' ') && (buffer[charIndex] != 0))
-                      break;
+                  ScreenCharacter characters[scr.cols];
+                  readScreen(0, p->winy, scr.cols, 1, characters);
+                  for (charIndex=scr.cols-1; charIndex>=0; --charIndex) {
+                    wchar_t text = characters[charIndex].text;
+                    if ((text != ' ') && (text != 0)) break;
+                  }
                   if (showCursor() && (scr.posy == p->winy))
                     charIndex = MAX(charIndex, scr.posx);
                   charIndex = MAX(charIndex, 0);
@@ -1506,7 +1569,7 @@ runProgram (void) {
               int tuneLimit = 3;
               int charCount;
               int charIndex;
-              unsigned char buffer[scr.cols];
+              ScreenCharacter characters[scr.cols];
               while (1) {
                 if (!shiftWindowLeft()) {
                   if (p->winy == 0) {
@@ -1516,15 +1579,16 @@ runProgram (void) {
                     break;
                   }
                   if (tuneLimit-- > 0) playTune(&tune_wrap_up);
-                  upLine(SCR_TEXT);
+                  upLine(isSameText);
                   placeWindowRight();
                 }
                 charCount = getWindowLength();
                 charCount = MIN(charCount, scr.cols-p->winx);
-                readScreen(p->winx, p->winy, charCount, 1, buffer, SCR_TEXT);
-                for (charIndex=(charCount-1); charIndex>=0; charIndex--)
-                  if ((buffer[charIndex] != ' ') && (buffer[charIndex] != 0))
-                    break;
+                readScreen(p->winx, p->winy, charCount, 1, characters);
+                for (charIndex=(charCount-1); charIndex>=0; charIndex--) {
+                  wchar_t text = characters[charIndex].text;
+                  if ((text != ' ') && (text != 0)) break;
+                }
                 if (showCursor() &&
                     (scr.posy == p->winy) &&
                     (scr.posx < (p->winx + charCount)))
@@ -1544,11 +1608,12 @@ runProgram (void) {
                         (scr.posx < p->winx)) {
                       int charCount = scr.cols - p->winx;
                       int charIndex;
-                      unsigned char buffer[charCount];
-                      readScreen(p->winx, p->winy, charCount, 1, buffer, SCR_TEXT);
-                      for (charIndex=0; charIndex<charCount; ++charIndex)
-                        if ((buffer[charIndex] != ' ') && (buffer[charIndex] != 0))
-                          break;
+                      ScreenCharacter characters[charCount];
+                      readScreen(p->winx, p->winy, charCount, 1, characters);
+                      for (charIndex=0; charIndex<charCount; ++charIndex) {
+                        wchar_t text = characters[charIndex].text;
+                        if ((text != ' ') && (text != 0)) break;
+                      }
                       if (charIndex == charCount) goto wrapDown;
                     }
                   }
@@ -1561,7 +1626,7 @@ runProgram (void) {
                   break;
                 }
                 playTune(&tune_wrap_down);
-                downLine(SCR_TEXT);
+                downLine(isSameText);
                 p->winx = 0;
                 break;
               }
@@ -1571,7 +1636,7 @@ runProgram (void) {
               int tuneLimit = 3;
               int charCount;
               int charIndex;
-              unsigned char buffer[scr.cols];
+              ScreenCharacter characters[scr.cols];
               while (1) {
                 if (!shiftWindowRight()) {
                   if (p->winy >= (scr.rows - brl.y)) {
@@ -1581,15 +1646,16 @@ runProgram (void) {
                     break;
                   }
                   if (tuneLimit-- > 0) playTune(&tune_wrap_down);
-                  downLine(SCR_TEXT);
+                  downLine(isSameText);
                   p->winx = 0;
                 }
                 charCount = getWindowLength();
                 charCount = MIN(charCount, scr.cols-p->winx);
-                readScreen(p->winx, p->winy, charCount, 1, buffer, SCR_TEXT);
-                for (charIndex=0; charIndex<charCount; charIndex++)
-                  if ((buffer[charIndex] != ' ') && (buffer[charIndex] != 0))
-                    break;
+                readScreen(p->winx, p->winy, charCount, 1, characters);
+                for (charIndex=0; charIndex<charCount; charIndex++) {
+                  wchar_t text = characters[charIndex].text;
+                  if ((text != ' ') && (text != 0)) break;
+                }
                 if (showCursor() &&
                     (scr.posy == p->winy) &&
                     (scr.posx >= p->winx))
@@ -1688,7 +1754,7 @@ runProgram (void) {
               break;
 
             case BRL_CMD_DISPMD:
-              setTranslationTable(TOGGLE_NOPLAY(p->showAttributes));
+              TOGGLE_NOPLAY(p->showAttributes);
               break;
             case BRL_CMD_SIXDOTS:
               TOGGLE_PLAY(prefs.textStyle);
@@ -1969,24 +2035,24 @@ runProgram (void) {
                     char buffer[0X40];
                     int size = sizeof(buffer);
                     int length = 0;
-                    unsigned char character, attributes;
+                    ScreenCharacter character;
 
                     arg = getOffset(arg, 0);
-                    readScreen(p->winx+arg, p->winy, 1, 1, &character, SCR_TEXT);
-                    readScreen(p->winx+arg, p->winy, 1, 1, &attributes, SCR_ATTRIB);
+                    readScreen(p->winx+arg, p->winy, 1, 1, &character);
 
                     {
+                      uint32_t text = character.text;
                       int count;
                       snprintf(&buffer[length], size-length,
-                               "char %d (0x%02x): %s on %s%n",
-                               character, character,
-                               gettext(colours[attributes & 0X0F]),
-                               gettext(colours[(attributes & 0X70) >> 4]),
+                               "char %" PRIu32 " (0X%02" PRIX32 "): %s on %s%n",
+                               text, text,
+                               gettext(colours[character.attributes & 0X0F]),
+                               gettext(colours[(character.attributes & 0X70) >> 4]),
                                &count);
                       length += count;
                     }
 
-                    if (attributes & 0X80) {
+                    if (character.attributes & SCR_ATTR_BLINK) {
                       int count;
                       snprintf(&buffer[length], size-length,
                                " %s%n",
@@ -2053,13 +2119,13 @@ runProgram (void) {
 
                 case BRL_BLK_PRDIFCHAR:
                   if (arg < brl.x && p->winx+arg < scr.cols)
-                    upDifferentCharacter(SCR_TEXT, getOffset(arg, 0));
+                    upDifferentCharacter(isSameText, getOffset(arg, 0));
                   else
                     playTune(&tune_command_rejected);
                   break;
                 case BRL_BLK_NXDIFCHAR:
                   if (arg < brl.x && p->winx+arg < scr.cols)
-                    downDifferentCharacter(SCR_TEXT, getOffset(arg, 0));
+                    downDifferentCharacter(isSameText, getOffset(arg, 0));
                   else
                     playTune(&tune_command_rejected);
                   break;
@@ -2181,54 +2247,55 @@ runProgram (void) {
         static int oldX = -1;
         static int oldY = -1;
         static int oldWidth = 0;
-        static unsigned char *oldText = NULL;
+        static ScreenCharacter *oldCharacters = NULL;
 
         int newScreen = scr.number;
         int newX = scr.posx;
         int newY = scr.posy;
         int newWidth = scr.cols;
-        unsigned char newText[newWidth];
+        ScreenCharacter newCharacters[newWidth];
 
-        readScreen(0, p->winy, newWidth, 1, newText, SCR_TEXT);
+        readScreen(0, p->winy, newWidth, 1, newCharacters);
 
         if (!speechTracking) {
           int column = 0;
           int count = newWidth;
-          const unsigned char *text = newText;
+          const ScreenCharacter *characters = newCharacters;
 
-          if (oldText) {
+          if (oldCharacters) {
             if ((newScreen == oldScreen) && (p->winy == oldwiny) && (newWidth == oldWidth)) {
-              if (memcmp(newText, oldText, newWidth) != 0) {
+              if (!isSameRow(newCharacters, oldCharacters, newWidth, isSameText)) {
                 if ((newY == p->winy) && (newY == oldY)) {
                   if ((newX > oldX) &&
-                      (memcmp(newText, oldText, oldX) == 0) &&
-                      (memcmp(newText+newX, oldText+oldX, newWidth-newX) == 0)) {
+                      isSameRow(newCharacters, oldCharacters, oldX, isSameText) &&
+                      isSameRow(newCharacters+newX, oldCharacters+oldX, newWidth-newX, isSameText)) {
                     column = oldX;
                     count = newX - oldX;
                     goto speak;
                   }
 
                   if ((newX < oldX) &&
-                      (memcmp(newText, oldText, newX) == 0) &&
-                      (memcmp(newText+newX, oldText+oldX, newWidth-oldX) == 0)) {
+                      isSameRow(newCharacters, oldCharacters, newX, isSameText) &&
+                      isSameRow(newCharacters+newX, oldCharacters+oldX, newWidth-oldX, isSameText)) {
                     column = newX;
                     count = oldX - newX;
-                    text = oldText;
+                    characters = oldCharacters;
                     goto speak;
                   }
 
                   if ((newX == oldX) &&
-                      (memcmp(newText, oldText, newX) == 0)) {
+                      isSameRow(newCharacters, oldCharacters, newX, isSameText)) {
                     int oldLength = oldWidth;
                     int newLength = newWidth;
                     int x;
 
                     while (oldLength > oldX) {
-                      if (oldText[oldLength-1] != ' ') break;
+                      if (oldCharacters[oldLength-1].text != ' ') break;
                       --oldLength;
                     }
+
                     while (newLength > newX) {
-                      if (newText[newLength-1] != ' ') break;
+                      if (newCharacters[newLength-1].text != ' ') break;
                       --newLength;
                     }
 
@@ -2236,7 +2303,7 @@ runProgram (void) {
                       int done = 1;
 
                       if (x < newLength) {
-                        if (memcmp(newText+x, oldText+oldX, newWidth-x) == 0) {
+                        if (isSameRow(newCharacters+x, oldCharacters+oldX, newWidth-x, isSameText)) {
                           column = newX;
                           count = x - newX;
                           goto speak;
@@ -2246,10 +2313,10 @@ runProgram (void) {
                       }
 
                       if (x < oldLength) {
-                        if (memcmp(newText+newX, oldText+x, oldWidth-x) == 0) {
+                        if (isSameRow(newCharacters+newX, oldCharacters+x, oldWidth-x, isSameText)) {
                           column = oldX;
                           count = x - oldX;
-                          text = oldText;
+                          characters = oldCharacters;
                           goto speak;
                         }
 
@@ -2260,8 +2327,8 @@ runProgram (void) {
                     }
                   }
 
-                  while (newText[column] == oldText[column]) ++column;
-                  while (newText[count-1] == oldText[count-1]) --count;
+                  while (newCharacters[column].text == oldCharacters[column].text) ++column;
+                  while (newCharacters[count-1].text == oldCharacters[count-1].text) --count;
                   count -= column;
                 }
               } else if ((newY == p->winy) && ((newX != oldX) || (newY != oldY))) {
@@ -2275,18 +2342,20 @@ runProgram (void) {
 
         speak:
           if (count) {
-            speech->mute(&spk);
-            speech->say(&spk, text+column, count);
+            sayCharacters(characters+column, count, 1);
           }
         }
 
-        oldText = reallocWrapper(oldText, newWidth);
-        memcpy(oldText, newText, newWidth);
-        oldWidth = newWidth;
+        {
+          size_t size = newWidth * sizeof(*oldCharacters);
+          oldCharacters = reallocWrapper(oldCharacters, size);
+          memcpy(oldCharacters, newCharacters, size);
+        }
 
         oldScreen = newScreen;
         oldX = newX;
         oldY = newY;
+        oldWidth = newWidth;
       }
 #endif /* ENABLE_SPEECH_SUPPORT */
 
@@ -2320,21 +2389,27 @@ runProgram (void) {
           int windowLength = brl.x * brl.y;
           while (1) {
             int cursorOffset = brl.cursor;
+
             int inputLength = scr.cols - p->winx;
+            ScreenCharacter inputCharacters[inputLength];
+            wchar_t inputText[inputLength];
+
             int outputLength = windowLength;
-            unsigned char inputBuffer[inputLength];
             unsigned char outputBuffer[outputLength];
 
             if ((scr.posy == p->winy) && (scr.posx >= p->winx)) cursorOffset = scr.posx - p->winx;
-            readScreen(p->winx, p->winy, inputLength, 1, inputBuffer, SCR_TEXT);
+            readScreen(p->winx, p->winy, inputLength, 1, inputCharacters);
 
             {
               int i;
-              for (i=0; i<inputLength; ++i) contractedOffsets[i] = -1;
+              for (i=0; i<inputLength; ++i) {
+                inputText[i] = inputCharacters[i].text;
+                contractedOffsets[i] = -1;
+              }
             }
 
             if (!contractText(contractionTable,
-                              inputBuffer, &inputLength,
+                              inputText, &inputLength,
                               outputBuffer, &outputLength,
                               contractedOffsets, cursorOffset))
               break;
@@ -2356,13 +2431,11 @@ runProgram (void) {
 
                 if (scr.posx >= (p->winx + inputEnd)) {
                   int offset = 0;
-                  int onspace = 0;
                   int length = scr.cols - p->winx;
-                  unsigned char buffer[length];
-                  readScreen(p->winx, p->winy, length, 1, buffer, SCR_TEXT);
+                  int onspace = 0;
 
                   while (offset < length) {
-                    if ((isspace(buffer[offset]) != 0) != onspace) {
+                    if ((iswspace(inputCharacters[offset].text) != 0) != onspace) {
                       if (onspace) break;
                       onspace = 1;
                     }
@@ -2399,25 +2472,30 @@ runProgram (void) {
             contractedTrack = 0;
             contracted = 1;
 
-            if (p->showAttributes || (prefs.showAttributes && (!prefs.blinkingAttributes || attributesState))) {
+            if (p->showAttributes || showAttributesUnderline()) {
               int inputOffset;
               int outputOffset = 0;
               unsigned char attributes = 0;
-              readScreen(contractedStart, p->winy, contractedLength, 1, inputBuffer, SCR_ATTRIB);
+
               for (inputOffset=0; inputOffset<contractedLength; ++inputOffset) {
                 int offset = contractedOffsets[inputOffset];
                 if (offset >= 0) {
                   while (outputOffset < offset) outputBuffer[outputOffset++] = attributes;
                   attributes = 0;
                 }
-                attributes |= inputBuffer[inputOffset];
+                attributes |= inputCharacters[inputOffset].attributes;
               }
               while (outputOffset < outputLength) outputBuffer[outputOffset++] = attributes;
+
               if (p->showAttributes) {
-                for (outputOffset=0; outputOffset<outputLength; ++outputOffset)
+                for (outputOffset=0; outputOffset<outputLength; ++outputOffset) {
                   brl.buffer[outputOffset] = attributesTable[outputBuffer[outputOffset]];
+                }
               } else {
-                overlayAttributes(outputBuffer, outputLength, 1);
+                int i;
+                for (i=0; i<outputLength; ++i) {
+                  overlayAttributesUnderline(&brl.buffer[i], outputBuffer[i]);
+                }
               }
             }
 
@@ -2429,19 +2507,26 @@ runProgram (void) {
 #endif /* ENABLE_CONTRACTED_BRAILLE */
         {
           int winlen = MIN(brl.x, scr.cols-p->winx);
+          ScreenCharacter characters[brl.x * brl.y];
 
-          readScreen(p->winx, p->winy, winlen, brl.y, brl.buffer,
-                     p->showAttributes? SCR_ATTRIB: SCR_TEXT);
+          readScreen(p->winx, p->winy, winlen, brl.y, characters);
           if (winlen < brl.x) {
             /* We got a rectangular piece of text with readScreen but the display
              * is in an off-right position with some cells at the end blank
              * so we'll insert these cells and blank them.
              */
             int i;
-            for (i=brl.y-1; i>0; i--)
-              memmove(brl.buffer+i*brl.x, brl.buffer+i*winlen, winlen);
-            for (i=0; i<brl.y; i++)
-              memset(brl.buffer+i*brl.x+winlen, ' ', brl.x-winlen);
+
+            for (i=brl.y-1; i>0; i--) {
+              memmove(characters + (i * brl.x),
+                      characters + (i * winlen),
+                      winlen * sizeof(*characters));
+            }
+
+            for (i=0; i<brl.y; i++) {
+              clearScreenCharacters(characters + (i * brl.x) + winlen,
+                                    brl.x-winlen);
+            }
           }
 
           /*
@@ -2458,35 +2543,44 @@ runProgram (void) {
           /* blank out capital letters if they're blinking and should be off */
           if (prefs.blinkingCapitals && !capitalsState) {
             int i;
-            for (i=0; i<brl.x*brl.y; i++)
-              if (BRL_ISUPPER(brl.buffer[i]))
-                brl.buffer[i] = ' ';
+            for (i=0; i<brl.x*brl.y; i++) {
+              ScreenCharacter *character = &characters[i];
+              if (iswupper(character->text)) character->text = L' ';
+            }
           }
 
           /* convert to dots using the current translation table */
-          if ((translationTable == attributesTable) || !prefs.textStyle) {
+          if (p->showAttributes) {
             int i;
-            for (
-              i = 0;
-              i < (brl.x * brl.y);
-              brl.buffer[i] = translationTable[brl.buffer[i]], i++
-            );
+            for (i=0; i<(brl.x*brl.y); ++i) {
+              brl.buffer[i] = attributesTable[characters[i].attributes];
+            }
           } else {
             int i;
-            for (
-              i = 0;
-              i < (brl.x * brl.y);
-              brl.buffer[i] = translationTable[brl.buffer[i]] & (BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT4 | BRL_DOT5 | BRL_DOT6), i++
-            );
-          }
+            for (i=0; i<(brl.x*brl.y); ++i) {
+              wchar_t text = characters[i].text;
+              unsigned char *cell = &brl.buffer[i];
+              const wchar_t mask = 0XFF;
 
-          /* Attribute underlining: if viewing text (not attributes), attribute
-             underlining is active and visible and we're not in help, then we
-             get the attributes for the current region and OR the underline. */
-          if (!p->showAttributes && prefs.showAttributes && (!prefs.blinkingAttributes || attributesState)) {
-            unsigned char attrbuf[winlen*brl.y];
-            readScreen(p->winx, p->winy, winlen, brl.y, attrbuf, SCR_ATTRIB);
-            overlayAttributes(attrbuf, winlen, brl.y);
+              if ((text & ~mask) == BRL_UC_ROW) {
+                *cell = text & mask;
+              } else {
+                *cell = convertWcharToDots(textTable, text);
+                if (prefs.textStyle) *cell &= ~(BRL_DOT7 | BRL_DOT8);
+              }
+            }
+
+            /* Attribute underlining: if viewing text (not attributes), attribute
+             * underlining is active and visible and we're not in help, then we
+             * get the attributes for the current region and OR the underline.
+             */
+            if (showAttributesUnderline()) {
+              int count = brl.x * brl.y;
+              int i;
+              for (i=0; i<count; ++i) {
+                overlayAttributesUnderline(&brl.buffer[i], characters[i].attributes);
+              }
+            }
           }
         }
 

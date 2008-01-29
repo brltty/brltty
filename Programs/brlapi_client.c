@@ -28,7 +28,6 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/stat.h>
-#include <wchar.h>
 #ifndef __MINGW32__
 #include <langinfo.h>
 #endif /* __MINGW32__ */

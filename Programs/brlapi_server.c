@@ -27,7 +27,6 @@
 #include <sys/stat.h>
 #include <signal.h>
 #include <time.h>
-#include <wchar.h>
 #ifdef HAVE_ICONV_H
 #include <iconv.h>
 #endif /* HAVE_ICONV_H */

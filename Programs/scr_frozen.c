@@ -25,41 +25,32 @@
 #include "scr_frozen.h"
 
 static ScreenDescription screenDescription;
-static unsigned char *screenText;
-static unsigned char *screenAttributes;
+static ScreenCharacter *screenCharacters;
 
 static int
 construct_FrozenScreen (BaseScreen *source) {
   describeBaseScreen(source, &screenDescription);
-  if ((screenText = calloc(screenDescription.rows*screenDescription.cols, sizeof(*screenText)))) {
-    if ((screenAttributes = calloc(screenDescription.rows*screenDescription.cols, sizeof(*screenAttributes)))) {
-      if (source->read((ScreenBox){0, 0, screenDescription.cols, screenDescription.rows}, screenText, SCR_TEXT)) {
-        if (source->read((ScreenBox){0, 0, screenDescription.cols, screenDescription.rows}, screenAttributes, SCR_ATTRIB)) {
-          return 1;
-        }
-      }
-      free(screenAttributes);
-      screenAttributes = NULL;
-    } else {
-      LogError("Attributes buffer allocation");
+  if ((screenCharacters = calloc(screenDescription.rows*screenDescription.cols, sizeof(*screenCharacters)))) {
+    const ScreenBox box = {
+      .left=0, .width=screenDescription.cols,
+      .top=0, .height=screenDescription.rows
+    };
+    if (source->readCharacters(&box, screenCharacters)) {
+      return 1;
     }
-    free(screenText);
-    screenText = NULL;
+    free(screenCharacters);
+    screenCharacters = NULL;
   } else {
-    LogError("Text buffer allocation");
+    LogError("malloc");
   }
   return 0;
 }
 
 static void
 destruct_FrozenScreen (void) {
-  if (screenText) {
-    free(screenText);
-    screenText = NULL;
-  }
-  if (screenAttributes) {
-    free(screenAttributes);
-    screenAttributes = NULL;
+  if (screenCharacters) {
+    free(screenCharacters);
+    screenCharacters = NULL;
   }
 }
 
@@ -69,14 +60,14 @@ describe_FrozenScreen (ScreenDescription *description) {
 }
 
 static int
-read_FrozenScreen (ScreenBox box, unsigned char *buffer, ScreenCharacterProperty property) {
-  if (validateScreenBox(&box, screenDescription.cols, screenDescription.rows)) {
-    unsigned char *screen = (property == SCR_TEXT)? screenText: screenAttributes;
+readCharacters_FrozenScreen (const ScreenBox *box, ScreenCharacter *buffer) {
+  if (validateScreenBox(box, screenDescription.cols, screenDescription.rows)) {
     int row;
-    for (row=0; row<box.height; row++)
-      memcpy(buffer + (row * box.width),
-             screen + ((box.top + row) * screenDescription.cols) + box.left,
-             box.width);
+    for (row=0; row<box->height; row++) {
+      memcpy(&buffer[row * box->width],
+             &screenCharacters[((box->top + row) * screenDescription.cols) + box->left],
+             box->width * sizeof(*screenCharacters));
+    }
     return 1;
   }
   return 0;
@@ -91,10 +82,9 @@ void
 initializeFrozenScreen (FrozenScreen *frozen) {
   initializeBaseScreen(&frozen->base);
   frozen->base.describe = describe_FrozenScreen;
-  frozen->base.read = read_FrozenScreen;
+  frozen->base.readCharacters = readCharacters_FrozenScreen;
   frozen->base.currentVirtualTerminal = currentVirtualTerminal_FrozenScreen;
   frozen->construct = construct_FrozenScreen;
   frozen->destruct = destruct_FrozenScreen;
-  screenText = NULL;
-  screenAttributes = NULL;
+  screenCharacters = NULL;
 }

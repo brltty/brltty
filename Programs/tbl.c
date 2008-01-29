@@ -25,6 +25,7 @@
 #include <stdarg.h>
 
 #include "misc.h"
+#include "charset.h"
 #include "tbl.h"
 #include "tbl_internal.h"
 
@@ -222,6 +223,17 @@ tblProcessLines (
 int
 loadTranslationTable (const char *path, FILE *file, TranslationTable table, int options) {
   return tblLoad_Native(path, file, table, options);
+}
+
+unsigned char
+convertWcharToDots (TranslationTable table, wchar_t character) {
+  int byte = convertWcharToChar(character);
+  if (byte == EOF) {
+    uint32_t value = character;
+    LogPrint(LOG_NOTICE, "cannot translate character to braille: 0X%02" PRIX32, value);
+    byte = '?';
+  }
+  return table[byte];
 }
 
 void
