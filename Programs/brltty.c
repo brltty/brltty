@@ -2558,16 +2558,8 @@ runProgram (void) {
           } else {
             int i;
             for (i=0; i<(brl.x*brl.y); ++i) {
-              wchar_t text = characters[i].text;
-              unsigned char *cell = &brl.buffer[i];
-              const wchar_t mask = 0XFF;
-
-              if ((text & ~mask) == BRL_UC_ROW) {
-                *cell = text & mask;
-              } else {
-                *cell = convertWcharToDots(textTable, text);
-                if (prefs.textStyle) *cell &= ~(BRL_DOT7 | BRL_DOT8);
-              }
+              brl.buffer[i] = convertWcharToDots(textTable, characters[i].text);
+              if (prefs.textStyle) brl.buffer[i] &= ~(BRL_DOT7 | BRL_DOT8);
             }
 
             /* Attribute underlining: if viewing text (not attributes), attribute
