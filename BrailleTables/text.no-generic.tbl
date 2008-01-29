@@ -17,6 +17,7 @@
 
 # BRLTTY Text Translation Table - Generic Norwegian (iso-8859-1), with some
 # unofficial character representations to accommodate multilingual usage.
+# For example, numbers are represented with dot 6 rather than with dot 8.
 
 \X00 (   45 78)  # null
 \X01 (1     78)  # start of heading
