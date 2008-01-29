@@ -1134,7 +1134,7 @@ static int brl_writeWindow(BrailleDisplay *brl)
 #elif defined(USE_WINDOWS)
   wchar_t data[2] = {0};
 #endif
-  char c;
+  unsigned char c;
 
   if (!displayb[0] || (memcmp(brl->buffer,displayedWindow,brl->y*brl->x) == 0)) return 1;
 
