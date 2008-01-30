@@ -33,11 +33,11 @@ extern const char *getWcharCharset (void);
 
 typedef char Utf8Buffer[MB_LEN_MAX+1];
 
-extern int convertCharToUtf8 (char c, Utf8Buffer utf8);
-extern int convertUtf8ToChar (char **utf8, size_t *utfs);
+extern size_t convertCharToUtf8 (char c, Utf8Buffer utf8);
+extern int convertUtf8ToChar (const char **utf8, size_t *utfs);
 
-extern int convertWcharToUtf8 (wchar_t wc, Utf8Buffer utf8);
-extern wint_t convertUtf8ToWchar (char **utf8, size_t *utfs);
+extern size_t convertWcharToUtf8 (wchar_t wc, Utf8Buffer utf8);
+extern wint_t convertUtf8ToWchar (const char **utf8, size_t *utfs);
 
 extern wint_t convertCharToWchar (char c);
 extern int convertWcharToChar (wchar_t wc);
