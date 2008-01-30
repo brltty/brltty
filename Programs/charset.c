@@ -46,23 +46,8 @@ static char *currentCharset = NULL;
 #define CHARSET_ICONV_HANDLE(name) iconv_t iconv##name = CHARSET_ICONV_NULL
 
 static CHARSET_ICONV_HANDLE(WcharToUtf8);
-static CHARSET_ICONV_HANDLE(Utf8ToWchar);
 static CHARSET_ICONV_HANDLE(CharToWchar);
 static CHARSET_ICONV_HANDLE(WcharToChar);
-
-#define CHARSET_CONVERT_UTF8_TO_TYPE(name, type, ret, eof) \
-ret convert##name (char **utf8, size_t *utfs) { \
-  if (getCharset()) { \
-    type c; \
-    type *cp = &c; \
-    size_t cs = sizeof(c); \
-    if ((iconv(iconv##name, utf8, utfs, (void *)&cp, &cs) != -1) || (errno == E2BIG)) return c; \
-    LogError("iconv (UTF-8 -> " #type ")"); \
-  } \
-  return eof; \
-}
-CHARSET_CONVERT_UTF8_TO_TYPE(Utf8ToWchar, wchar_t, wint_t, WEOF)
-#undef CHARSET_CONVERT_UTF8_TO_TYPE
 
 #define CHARSET_CONVERT_TYPE_TO_UTF8(name, type) \
 int convert##name (type c, Utf8Buffer utf8) { \
@@ -121,27 +106,6 @@ convertWcharToUtf8 (wchar_t wc, Utf8Buffer utf8) {
 }
 
 wint_t
-convertUtf8ToWchar (char **utf8, size_t *utfs) {
-  if (*utfs) {
-    wchar_t wc;
-    int result = MultiByteToWideChar(CP_UTF8, 0,
-                                     *utf8, *utfs, &wc, 1);
-    if (result || (GetLastError() == ERROR_INSUFFICIENT_BUFFER)) {
-      if (**utf8 & 0X80) {
-        do {
-          ++*utf8, --*utfs;
-        } while (*utfs && ((**utf8 & 0XC0) == 0X80));
-      } else {
-        ++*utf8, --*utfs;
-      }
-      return wc;
-    }
-    LogWindowsError("MultiByteToWideChar[CP_UTF8]");
-  }
-  return WEOF;
-}
-
-wint_t
 convertCharToWchar (char c) {
   wchar_t wc;
   int result = MultiByteToWideChar(CURRENT_CODEPAGE, MB_ERR_INVALID_CHARS,
@@ -176,6 +140,64 @@ convertWcharToChar (wchar_t wc) {
 }
 #endif /* conversions */
 
+wint_t
+convertUtf8ToWchar (const char **utf8, size_t *utfs) {
+  wint_t wc = WEOF;
+  int state = 0;
+
+  while (*utfs) {
+    unsigned char byte = *(*utf8)++;
+    (*utfs)--;
+
+    if (!(byte & 0X80)) {
+      if (wc != WEOF) goto truncated;
+      wc = byte;
+      break;
+    }
+
+    if (!(byte & 0X40)) {
+      if (wc == WEOF) break;
+      wc = (wc << 6) | (byte & 0X3F);
+      if (!--state) break;
+    } else {
+      if (!(byte & 0X20)) {
+        state = 1;
+      } else if (!(byte & 0X10)) {
+        state = 2;
+      } else if (!(byte & 0X08)) {
+        state = 3;
+      } else if (!(byte & 0X04)) {
+        state = 4;
+      } else if (!(byte & 0X02)) {
+        state = 5;
+      } else {
+        state = 0;
+      }
+
+      if (wc != WEOF) goto truncated;
+
+      if (!state) {
+        wc = WEOF;
+        break;
+      }
+
+      wc = byte & ((1 << (6 - state)) - 1);
+    }
+  }
+
+  while (*utfs) {
+    if ((**utf8 & 0XC0) != 0X80) break;
+    (*utf8)++, (*utfs)--;
+    wc = WEOF;
+  }
+
+  return wc;
+
+truncated:
+  (*utf8)--, (*utfs)++;
+  return WEOF;
+}
+
 int
 convertCharToUtf8 (char c, Utf8Buffer utf8) {
   wint_t wc = convertCharToWchar(c);
@@ -184,7 +206,7 @@ convertCharToUtf8 (char c, Utf8Buffer utf8) {
 }
 
 int
-convertUtf8ToChar (char **utf8, size_t *utfs) {
+convertUtf8ToChar (const char **utf8, size_t *utfs) {
   wint_t wc = convertUtf8ToWchar(utf8, utfs);
   if (wc == WEOF) return EOF;
   return convertWcharToChar(wc);
@@ -264,7 +286,6 @@ setCharset (const char *name) {
       {&iconvCharToWchar, charset, wcharCharset, 0},
       {&iconvWcharToChar, wcharCharset, charset, 0},
       {&iconvWcharToUtf8, wcharCharset, utf8Charset, 1},
-      {&iconvUtf8ToWchar, utf8Charset, wcharCharset, 1},
       {NULL, NULL, NULL, 1}
     };
     ConvEntry *conv = convTable;
