@@ -24,6 +24,7 @@
 #include <errno.h>
  
 #include "misc.h"
+#include "charset.h"
 #include "ctb.h"
 #include "ctb_internal.h"
 #include "brl.h"
@@ -765,54 +766,27 @@ failure:
 static int
 processUtf8Line (char *line, void *dataAddress) {
   FileData *data = dataAddress;
-  wchar_t characters[strlen(line)];
-  wchar_t *character = characters;
   const char *byte = line;
-  int state = 0;
+  size_t length = strlen(line);
+  wchar_t characters[length];
+  wchar_t *character = characters;
 
   data->lineNumber++;
 
-  while (*byte) {
-    int length;
+  while (length) {
+    const char *start = byte;
+    wint_t wc = convertUtf8ToWchar(&byte, &length);
 
-    if (!(*byte & 0X80)) {
-      length = 1;
-    } else if (!(*byte & 0X40)) {
-      if (!state) goto error;
-      *character = (*character << 6) | (*byte & 0X3F);
-      goto next;
-    } else if (!(*byte & 0X20)) {
-      length = 2;
-    } else if (!(*byte & 0X10)) {
-      length = 3;
-    } else if (!(*byte & 0X08)) {
-      length = 4;
-    } else if (!(*byte & 0X04)) {
-      length = 5;
-    } else if (!(*byte & 0X02)) {
-      length = 6;
-    } else {
-      goto error;
+    if (wc == WEOF) {
+      compileError(data, "illegal UTF-8 character at offset %d", start-line);
+      return 1;
     }
 
-    if (state) goto error;
-    state = length;
-
-    *character = *byte;
-    if (length > 1) *character &= (1 << (8 - length)) - 1;
-
-  next:
-    if (!--state) ++character;
-    ++byte;
+    *character++ = wc;
   }
 
-  if (state) goto error;
   *character = 0;
   return processWcharLine(data, characters);
-
-error:
-  compileError(data, "illegal UTF-8 character at offset %d", byte-line);
-  return 1;
 }
 
 static int
