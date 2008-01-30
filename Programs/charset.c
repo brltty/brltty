@@ -45,8 +45,6 @@ static char *currentCharset = NULL;
 #define CHARSET_ICONV_NULL ((iconv_t)-1)
 #define CHARSET_ICONV_HANDLE(name) iconv_t iconv##name = CHARSET_ICONV_NULL
 
-static CHARSET_ICONV_HANDLE(CharToUtf8);
-static CHARSET_ICONV_HANDLE(Utf8ToChar);
 static CHARSET_ICONV_HANDLE(WcharToUtf8);
 static CHARSET_ICONV_HANDLE(Utf8ToWchar);
 static CHARSET_ICONV_HANDLE(CharToWchar);
@@ -64,7 +62,6 @@ ret convert##name (char **utf8, size_t *utfs) { \
   return eof; \
 }
 CHARSET_CONVERT_UTF8_TO_TYPE(Utf8ToWchar, wchar_t, wint_t, WEOF)
-CHARSET_CONVERT_UTF8_TO_TYPE(Utf8ToChar, unsigned char, int, EOF)
 #undef CHARSET_CONVERT_UTF8_TO_TYPE
 
 #define CHARSET_CONVERT_TYPE_TO_UTF8(name, type) \
@@ -83,7 +80,6 @@ int convert##name (type c, Utf8Buffer utf8) { \
   return 0; \
 }
 CHARSET_CONVERT_TYPE_TO_UTF8(WcharToUtf8, wchar_t)
-CHARSET_CONVERT_TYPE_TO_UTF8(CharToUtf8, char)
 #undef CHARSET_CONVERT_TYPE_TO_UTF8
 
 #define CHARSET_CONVERT_TYPE_TO_TYPE(name, from, to, ret, eof) \
@@ -165,20 +161,6 @@ convertWcharToChar (wchar_t wc) {
   LogWindowsError("WideCharToMultiByte[" STRINGIFY(CURRENT_CODEPAGE) "]");
   return EOF;
 }
-
-int
-convertCharToUtf8 (char c, Utf8Buffer utf8) {
-  wchar_t wc = convertCharToWchar(c);
-  if (wc == WEOF) return 0;
-  return convertWcharToUtf8(wc, utf8);
-}
-
-int
-convertUtf8ToChar (char **utf8, size_t *utfs) {
-  wchar_t wc = convertUtf8ToWchar(utf8, utfs);
-  if (wc == WEOF) return EOF;
-  return convertWcharToChar(wc);
-}
 #else /* conversions */
 /* Assume latin1 encoding */
 
@@ -193,6 +175,20 @@ convertWcharToChar (wchar_t wc) {
   return EOF;
 }
 #endif /* conversions */
+
+int
+convertCharToUtf8 (char c, Utf8Buffer utf8) {
+  wint_t wc = convertCharToWchar(c);
+  if (wc == WEOF) return 0;
+  return convertWcharToUtf8(wc, utf8);
+}
+
+int
+convertUtf8ToChar (char **utf8, size_t *utfs) {
+  wint_t wc = convertUtf8ToWchar(utf8, utfs);
+  if (wc == WEOF) return EOF;
+  return convertWcharToChar(wc);
+}
 
 static const char *
 getLocaleCharset (void) {
@@ -265,8 +261,6 @@ setCharset (const char *name) {
     } ConvEntry;
 
     ConvEntry convTable[] = {
-      {&iconvCharToUtf8, charset, utf8Charset, 0},
-      {&iconvUtf8ToChar, utf8Charset, charset, 0},
       {&iconvCharToWchar, charset, wcharCharset, 0},
       {&iconvWcharToChar, wcharCharset, charset, 0},
       {&iconvWcharToUtf8, wcharCharset, utf8Charset, 1},
