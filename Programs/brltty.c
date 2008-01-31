@@ -671,16 +671,18 @@ toDifferentLine (
   int amount, int from, int width
 ) {
   if (canMoveWindow()) {
-    ScreenCharacter characters1[width], characters2[width];
+    ScreenCharacter characters1[width];
     int skipped = 0;
 
     if ((isSameCharacter == isSameText) && p->showAttributes) isSameCharacter = isSameAttributes;
     readScreen(from, p->winy, width, 1, characters1);
 
     do {
+      ScreenCharacter characters2[width];
       readScreen(from, p->winy+=amount, width, 1, characters2);
+
       if (!isSameRow(characters1, characters2, width, isSameCharacter) ||
-          ((isSameCharacter == isSameText) && showCursor() && (scr.posy == p->winy) &&
+          (showCursor() && (scr.posy == p->winy) &&
            (scr.posx >= from) && (scr.posx < (from + width))))
         return 1;
 
