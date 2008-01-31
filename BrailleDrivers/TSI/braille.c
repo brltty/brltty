@@ -646,7 +646,7 @@ display_all (unsigned char *pattern)
 
 
 static int 
-brl_writeWindow (BrailleDisplay *brl)
+brl_writeWindow (BrailleDisplay *brl, const wchar_t *text)
 {
   static int count = 0;
 

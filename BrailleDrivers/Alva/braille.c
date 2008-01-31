@@ -782,7 +782,7 @@ static int WriteToBrlDisplay (BrailleDisplay *brl, int Start, int Len, unsigned 
   return io->writePacket(outbuf, outsz, &brl->writeDelay);
 }
 
-static int brl_writeWindow (BrailleDisplay *brl)
+static int brl_writeWindow (BrailleDisplay *brl, const wchar_t *text)
 {
   int from, to;
 

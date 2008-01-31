@@ -187,7 +187,7 @@ brl_destruct (BrailleDisplay *brl) {
 }
 
 static int
-brl_writeWindow (BrailleDisplay *brl) {
+brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   unsigned char cells[brl->x];
   int i;
   for (i=0; i<brl->x; ++i) cells[i] = outputTable[brl->buffer[i]];

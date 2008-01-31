@@ -272,7 +272,7 @@ main (int argc, char *argv[]) {
 }
 
 int
-message (const char *text, short flags) {
+message (const char *string, short flags) {
   return 1;
 }
 int

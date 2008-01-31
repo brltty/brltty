@@ -834,7 +834,7 @@ brl_destruct (BrailleDisplay *brl) {
 }
 
 static int
-brl_writeWindow (BrailleDisplay *brl) {
+brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   updateCells(brl, brl->buffer, textCells, textOffset);
   writeRequest(brl);
   return 1;

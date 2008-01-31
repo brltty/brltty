@@ -98,7 +98,7 @@ static void brl_destruct(BrailleDisplay *brl)
 /* function : brl_writeWindow */
 /* Displays a text on the braille window, only if it's different from */
 /* the one already displayed */
-static int brl_writeWindow(BrailleDisplay *brl)
+static int brl_writeWindow(BrailleDisplay *brl, const wchar_t *text)
 {
   int vt;
   vt = currentVirtualTerminal();

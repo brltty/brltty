@@ -182,7 +182,7 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *s)
 
 
 static int
-brl_writeWindow (BrailleDisplay *brl)
+brl_writeWindow (BrailleDisplay *brl, const wchar_t *text)
 {
   short i;			/* loop counter */
   unsigned char *pre_data = (unsigned char *)PRE_DATA;	/* bytewise accessible copies */

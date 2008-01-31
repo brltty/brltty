@@ -56,7 +56,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 }
 
 static int
-brl_writeWindow (BrailleDisplay *brl) {
+brl_writeWindow (BrailleDisplay *brl, const wchar_t *characters) {
   return 1;
 }
 
@@ -133,30 +133,36 @@ drainBrailleOutput (BrailleDisplay *brl, int minimumDelay) {
 }
 
 int
-writeBrailleBuffer (BrailleDisplay *brl) {
+writeBrailleWindow (BrailleDisplay *brl, const wchar_t *text) {
   brl->cursor = -1;
-
-  if (braille->writeVisual) 
-    if (!braille->writeVisual(brl))
-      return 0;
 
   {
     int i;
     /* Do Braille translation using text table. Six-dot mode is ignored
      * since case can be important, and blinking caps won't work. 
      */
-    for (i=0; i<brl->x*brl->y; ++i) brl->buffer[i] = textTable[brl->buffer[i]];
+    for (i=0; i<brl->x*brl->y; ++i) brl->buffer[i] = convertWcharToDots(textTable, text[i]);
   }
-  return braille->writeWindow(brl);
+  return braille->writeWindow(brl, text);
 }
 
 int
-writeBrailleText (BrailleDisplay *brl, const char *text, int length) {
+writeBrailleText (BrailleDisplay *brl, const char *text, size_t length) {
   int width = brl->x * brl->y;
+  wchar_t buffer[width];
+
   if (length > width) length = width;
-  memcpy(brl->buffer, text, length);
-  memset(&brl->buffer[length], ' ', width-length);
-  return writeBrailleBuffer(brl);
+  {
+    int i;
+    for (i=0; i<length; ++i) {
+      wint_t wc = convertCharToWchar(text[i]);
+      if (wc == WEOF) wc = L'?';
+      buffer[i] = wc;
+    }
+  }
+  wmemset(&buffer[length], L' ', width-length);
+
+  return writeBrailleWindow(brl, buffer);
 }
 
 int

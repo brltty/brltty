@@ -218,7 +218,7 @@ static int brl_writeStatus (BrailleDisplay *brl, const unsigned char *s) {
 }
 
 
-static int brl_writeWindow (BrailleDisplay *brl) {
+static int brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 	short i;			/* loop counter */
 	unsigned char *pre_data = (unsigned char *)"\002\033Z";	/* bytewise accessible copies */
 	unsigned char *post_data = (unsigned char *)"\001\015";

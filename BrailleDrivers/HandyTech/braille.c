@@ -730,7 +730,7 @@ updateCells (BrailleDisplay *brl) {
 }
 
 static int
-brl_writeWindow (BrailleDisplay *brl) {
+brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   if (memcmp(brl->buffer, prevData, model->textCells) != 0) {
     int i;
     for (i=0; i<model->textCells; ++i) {

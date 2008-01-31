@@ -254,7 +254,7 @@ static void brl_destruct(BrailleDisplay *brl)
 /* function : brl_writeWindow */
 /* Displays a text on the braille window, only if it's different from */
 /* the one alreadz displayed */
-static int brl_writeWindow(BrailleDisplay *brl)
+static int brl_writeWindow(BrailleDisplay *brl, const wchar_t *text)
 {
   /* The following table defines how internal brltty format is converted to */
   /* VisioBraille format. Do *NOT* modify this table. */

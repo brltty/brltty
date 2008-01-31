@@ -1125,7 +1125,7 @@ static void brl_destruct(BrailleDisplay *brl)
   destroyToplevel();
 }
 
-static int brl_writeWindow(BrailleDisplay *brl)
+static int brl_writeWindow(BrailleDisplay *brl, const wchar_t *text)
 {
 #if defined(USE_XAW) || defined(USE_WINDOWS)
   int i;

@@ -46,7 +46,7 @@ static int brl_construct(BrailleDisplay *brl, char **parameters, const char *dev
 static void brl_destruct(BrailleDisplay *brl) {
 }
 
-static int brl_writeWindow(BrailleDisplay *brl) {
+static int brl_writeWindow(BrailleDisplay *brl, const wchar_t *text) {
   unsigned char outbuff[40];
   int i;
 

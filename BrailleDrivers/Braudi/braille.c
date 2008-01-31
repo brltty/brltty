@@ -229,7 +229,7 @@ brl_destruct (BrailleDisplay *brl) {
 }
 
 static int
-brl_writeWindow (BrailleDisplay *brl) {
+brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   if (memcmp(brl->buffer, outputBuffer, brl->x) != 0) {
     memcpy(outputBuffer, brl->buffer, brl->x);
     writeCells(brl);

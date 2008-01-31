@@ -434,7 +434,7 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *s)
 
 
 static int 
-brl_writeWindow (BrailleDisplay *brl)
+brl_writeWindow (BrailleDisplay *brl, const wchar_t *text)
 {
   int i;
   unsigned char *p;

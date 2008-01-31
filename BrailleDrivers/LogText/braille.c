@@ -481,7 +481,7 @@ handleUpdate (unsigned char line) {
 }
 
 static int
-brl_writeWindow (BrailleDisplay *brl) {
+brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
    if (deviceStatus == DEV_READY) {
       sendCurrentLine();
    }

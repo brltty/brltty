@@ -22,7 +22,6 @@
 #include "misc.h"
 
 //#define BRL_HAVE_STATUS_CELLS
-//#define BRL_HAVE_VISUAL_DISPLAY
 //#define BRL_HAVE_PACKET_IO
 //#define BRL_HAVE_KEY_CODES
 //#define BRL_HAVE_FIRMNESS
@@ -75,7 +74,7 @@ brl_keyToCommand (BrailleDisplay *brl, BRL_DriverCommandContext context, int key
 #endif /* BRL_HAVE_KEY_CODES */
 
 static int
-brl_writeWindow (BrailleDisplay *brl) {
+brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   return 1;
 }
 
@@ -85,13 +84,6 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) {
   return 1;
 }
 #endif /* BRL_HAVE_STATUS_CELLS */
-
-#ifdef BRL_HAVE_VISUAL_DISPLAY
-static int
-brl_writeVisual (BrailleDisplay *brl) {
-  return 1;
-}
-#endif /* BRL_HAVE_VISUAL_DISPLAY */
 
 static int
 brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {

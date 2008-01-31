@@ -82,21 +82,22 @@ END_OPTION_TABLE
 
 int
 message (const char *string, short flags) {
-  int length = strlen(string);
-  int limit = brl.x * brl.y;
+  size_t length = strlen(string);
+  size_t size = brl.x * brl.y;
+  char buffer[size];
 
   clearStatusCells(&brl);
 
-  memset(brl.buffer, ' ', brl.x*brl.y);
+  memset(buffer, ' ', size);
   while (length) {
-    int count = (length <= limit)? length: (limit - 1);
+    int count = (length <= size)? length: (size - 1);
     int index;
-    for (index=0; index<count; brl.buffer[index++]=*string++);
-    if (length -= count)
-      brl.buffer[(brl.x * brl.y) - 1] = '-';
-    else
-      while (index < limit) brl.buffer[index++] = ' ';
-    if (!writeBrailleBuffer(&brl)) return 0;
+
+    for (index=0; index<count; buffer[index++]=*string++);
+    if (length -= count) {
+      buffer[(count = size) - 1] = L'-';
+    }
+    if (!writeBrailleText(&brl, buffer, count)) return 0;
 
     if (length) {
       int timer = 0;

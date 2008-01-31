@@ -677,7 +677,7 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *cells) {
 }
 
 static int
-brl_writeWindow (BrailleDisplay *brl) {
+brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   unsigned char buffer[totalCells];
 
   memcpy(currentCells+textOffset, brl->buffer, textCells);

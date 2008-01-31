@@ -59,10 +59,10 @@ extern void initializeBrailleDisplay (BrailleDisplay *brl);
 extern unsigned int drainBrailleOutput (BrailleDisplay *brl, int minimumDelay);
 extern int ensureBrailleBuffer (BrailleDisplay *brl, int infoLevel);
 
-extern int writeBrailleBuffer (BrailleDisplay *);
-extern int writeBrailleText (BrailleDisplay *, const char *, int);
-extern int writeBrailleString (BrailleDisplay *, const char *);
-extern int showBrailleString (BrailleDisplay *, const char *, unsigned int);
+extern int writeBrailleWindow (BrailleDisplay *brl, const wchar_t *text);
+extern int writeBrailleText (BrailleDisplay *brl, const char *text, size_t length);
+extern int writeBrailleString (BrailleDisplay *brl, const char *string);
+extern int showBrailleString (BrailleDisplay *brl, const char *string, unsigned int);
 
 extern int clearStatusCells (BrailleDisplay *brl);
 extern int setStatusText (BrailleDisplay *brl, const char *text);
@@ -99,13 +99,10 @@ typedef struct {
   int (*construct) (BrailleDisplay *brl, char **parameters, const char *device);
   void (*destruct) (BrailleDisplay *brl);
   int (*readCommand) (BrailleDisplay *brl, BRL_DriverCommandContext context);
-  int (*writeWindow) (BrailleDisplay *brl);
+  int (*writeWindow) (BrailleDisplay *brl, const wchar_t *characters);
 
   /* These require BRL_HAVE_STATUS_CELLS. */
   int (*writeStatus) (BrailleDisplay *brl, const unsigned char *cells);
-
-  /* These require BRL_HAVE_VISUAL_DISPLAY. */
-  int (*writeVisual) (BrailleDisplay *brl);
 
   /* These require BRL_HAVE_PACKET_IO. */
   ssize_t (*readPacket) (BrailleDisplay *brl, void *buffer, size_t size);

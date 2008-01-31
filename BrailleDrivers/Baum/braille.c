@@ -1964,7 +1964,7 @@ brl_reset (BrailleDisplay *brl) {
 }
 
 static int
-brl_writeWindow (BrailleDisplay *brl) {
+brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   int start = 0;
   int count = textCount;
 

@@ -242,7 +242,7 @@ brl_keyToCommand (BrailleDisplay *brl, BRL_DriverCommandContext context, int key
 #endif /* BRL_HAVE_KEY_CODES */
 
 static int
-brl_writeWindow (BrailleDisplay *brl) 
+brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) 
 {
   if (!protocolp)
     return 1;

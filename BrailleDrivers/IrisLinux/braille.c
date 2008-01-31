@@ -381,7 +381,7 @@ static void brl_destruct (BrailleDisplay *brl)
    gio_fd = -1;
 }
 
-static int brl_writeWindow (BrailleDisplay *brl)
+static int brl_writeWindow (BrailleDisplay *brl, const wchar_t *text)
 {
    int i = 41, j = 0;
 
