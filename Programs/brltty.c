@@ -434,14 +434,13 @@ setStatusCells (void) {
 
 static int
 showInfo (void) {
-  char text[22];
-
   if (!setStatusText(&brl, gettext("info"))) return 0;
 
   /* Here we must be careful. Some displays (e.g. Braille Lite 18)
    * are very small, and others (e.g. Bookworm) are even smaller.
    */
   if (brl.x*brl.y >= 21) {
+    char text[22];
     snprintf(text, sizeof(text), "%02d:%02d %02d:%02d %02d %c%c%c%c%c%c",
              p->winx+1, p->winy+1, scr.posx+1, scr.posy+1, scr.number, 
              p->trackCursor? 't': ' ',
@@ -454,37 +453,46 @@ showInfo (void) {
     return writeBrailleString(&brl, text);
   }
 
-  brl.cursor = -1;
-  snprintf(text, sizeof(text), "xxxxx %02d %c%c%c%c%c%c     ",
-           scr.number,
-           p->trackCursor? 't': ' ',
-           prefs.showCursor? (prefs.blinkingCursor? 'B': 'v'):
-                             (prefs.blinkingCursor? 'b': ' '),
-           p->showAttributes? 'a': 't',
-           isFrozenScreen()? 'f': ' ',
-           prefs.textStyle? '6': '8',
-           prefs.blinkingCapitals? 'B': ' ');
-
-  if (braille->writeVisual) {
-    memcpy(brl.buffer, text, brl.x*brl.y);
-    if (!braille->writeVisual(&brl)) return 0;
-  }
-
   {
-    unsigned char dots[sizeof(text)];
+    const size_t size = brl.x * brl.y;
+    int length;
+    wchar_t text[size];
+    unsigned char cells[size];
 
-    memset(&dots, 0, 5);
-    setCoordinateUpper(&dots[0], scr.posx+1, scr.posy+1);
-    setCoordinateLower(&dots[0], p->winx+1, p->winy+1);
-    setStateDots(&dots[4]);
+    swprintf(text, size, L"xxxxx %02d %c%c%c%c%c%c%n",
+             scr.number,
+             p->trackCursor? 't': ' ',
+             prefs.showCursor? (prefs.blinkingCursor? 'B': 'v'):
+                               (prefs.blinkingCursor? 'b': ' '),
+             p->showAttributes? 'a': 't',
+             isFrozenScreen()? 'f': ' ',
+             prefs.textStyle? '6': '8',
+             prefs.blinkingCapitals? 'B': ' ',
+             &length);
+    wmemset(&text[length], L' ', size-length);
+
+    memset(cells, 0, 5);
+    setCoordinateUpper(&cells[0], scr.posx+1, scr.posy+1);
+    setCoordinateLower(&cells[0], p->winx+1, p->winy+1);
+    setStateDots(&cells[4]);
 
     {
       int i;
-      for (i=5; text[i]; i++) dots[i] = textTable[(unsigned char)text[i]];
+      for (i=0; i<5; ++i) {
+        text[i] = BRL_UC_ROW | cells[i];
+      }
     }
 
-    memcpy(brl.buffer, dots, brl.x*brl.y);
-    return braille->writeWindow(&brl);
+    {
+      int i;
+      for (i=5; i<size; i++) {
+        cells[i] = convertWcharToDots(textTable, text[i]);
+      }
+    }
+
+    memcpy(brl.buffer, cells, size);
+    brl.cursor = -1;
+    return braille->writeWindow(&brl, text);
   }
 }
 
@@ -2381,12 +2389,17 @@ runProgram (void) {
       if (infoMode) {
         if (!showInfo()) writable = 0;
       } else {
+        const int cellCount = brl.x * brl.y;
+        wchar_t textBuffer[cellCount];
+
+        wmemset(textBuffer, L' ', cellCount);
         brl.cursor = -1;
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
         contracted = 0;
         if (isContracting()) {
-          int windowLength = brl.x * brl.y;
+          int windowLength = cellCount;
+
           while (1) {
             int cursorOffset = brl.cursor;
 
@@ -2507,7 +2520,7 @@ runProgram (void) {
 #endif /* ENABLE_CONTRACTED_BRAILLE */
         {
           int winlen = MIN(brl.x, scr.cols-p->winx);
-          ScreenCharacter characters[brl.x * brl.y];
+          ScreenCharacter characters[cellCount];
 
           readScreen(p->winx, p->winy, winlen, brl.y, characters);
           if (winlen < brl.x) {
@@ -2530,15 +2543,11 @@ runProgram (void) {
           }
 
           /*
-           * If the cursor is visible and in range, and help is off: 
+           * If the cursor is visible and in range: 
            */
           if ((scr.posx >= p->winx) && (scr.posx < (p->winx + brl.x)) &&
               (scr.posy >= p->winy) && (scr.posy < (p->winy + brl.y)))
             brl.cursor = (scr.posy - p->winy) * brl.x + scr.posx - p->winx;
-
-          if (braille->writeVisual)
-            if (!braille->writeVisual(&brl))
-              writable = 0;
 
           /* blank out capital letters if they're blinking and should be off */
           if (prefs.blinkingCapitals && !capitalsState) {
@@ -2558,8 +2567,10 @@ runProgram (void) {
           } else {
             int i;
             for (i=0; i<(brl.x*brl.y); ++i) {
-              brl.buffer[i] = convertWcharToDots(textTable, characters[i].text);
+              const ScreenCharacter *character = &characters[i];
+              brl.buffer[i] = convertWcharToDots(textTable, character->text);
               if (prefs.textStyle) brl.buffer[i] &= ~(BRL_DOT7 | BRL_DOT8);
+              textBuffer[i] = character->text;
             }
 
             /* Attribute underlining: if viewing text (not attributes), attribute
@@ -2582,8 +2593,7 @@ runProgram (void) {
           }
         }
 
-        if (!setStatusCells()) writable = 0;
-        if (!braille->writeWindow(&brl)) writable = 0;
+        if (!(setStatusCells() && braille->writeWindow(&brl, textBuffer))) writable = 0;
       }
 #ifdef ENABLE_API
       api_releaseDriver(&brl);
@@ -2610,20 +2620,22 @@ runProgram (void) {
 }
 
 int 
-message (const char *text, short flags) {
+message (const char *string, short flags) {
   int ok = 1;
 
 #ifdef ENABLE_SPEECH_SUPPORT
-  if (prefs.alertTunes && !(flags & MSG_SILENT)) sayString(&spk, text, 1);
+  if (prefs.alertTunes && !(flags & MSG_SILENT)) sayString(&spk, string, 1);
 #endif /* ENABLE_SPEECH_SUPPORT */
 
   if (braille && brl.buffer) {
-    int length = strlen(text);
+    size_t length = strlen(string);
+    size_t size = brl.x * brl.y;
+    char text[size];
 
 #ifdef ENABLE_API
-  int api = apiStarted;
-  apiStarted = 0;
-  if (api) api_unlink(&brl);
+    int api = apiStarted;
+    apiStarted = 0;
+    if (api) api_unlink(&brl);
 #endif /* ENABLE_API */
 
     while (length) {
@@ -2631,24 +2643,24 @@ message (const char *text, short flags) {
       int index;
 
       /* strip leading spaces */
-      while (*text == ' ')  text++, length--;
+      while (*string == ' ') string++, length--;
 
-      if (length <= brl.x*brl.y) {
+      if (length <= size) {
         count = length; /* the whole message fits in the braille window */
       } else {
         /* split the message across multiple windows on space characters */
-        for (count=brl.x*brl.y-2; count>0 && text[count]!=' '; count--);
-        if (!count) count = brl.x * brl.y - 1;
+        for (count=size-2; count>0 && string[count]==' '; count--);
+        count = count? count+1: size-1;
       }
 
-      memset(brl.buffer, ' ', brl.x*brl.y);
-      for (index=0; index<count; brl.buffer[index++]=*text++);
+      memset(text, ' ', size);
+      for (index=0; index<count; text[index++]=*string++);
       if (length -= count) {
-        while (index < brl.x*brl.y) brl.buffer[index++] = '-';
-        brl.buffer[brl.x*brl.y - 1] = '>';
+        while (index < size) text[index++] = '-';
+        text[index - 1] = '>';
       }
 
-      if (!writeBrailleBuffer(&brl)) {
+      if (!writeBrailleText(&brl, text, index)) {
         ok = 0;
         break;
       }
@@ -2677,8 +2689,8 @@ message (const char *text, short flags) {
     }
 
 #ifdef ENABLE_API
-  if (api) api_link(&brl);
-  apiStarted = api;
+    if (api) api_link(&brl);
+    apiStarted = api;
 #endif /* ENABLE_API */
   }
 
@@ -2694,7 +2706,7 @@ showDotPattern (unsigned char dots, unsigned char duration) {
   }
 
   memset(brl.buffer, dots, brl.x*brl.y);
-  return braille->writeWindow(&brl);
+  return braille->writeWindow(&brl, NULL);
   drainBrailleOutput(&brl, duration);
 }
 
