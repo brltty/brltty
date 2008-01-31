@@ -435,8 +435,7 @@ setStatusCells (void) {
 static int
 showInfo (void) {
   const size_t size = brl.x * brl.y;
-  wchar_t text[size];
-  int length;
+  wchar_t text[size + 1];
 
   if (!setStatusText(&brl, gettext("info"))) return 0;
 
@@ -444,7 +443,7 @@ showInfo (void) {
    * are very small, and others (e.g. Bookworm) are even smaller.
    */
   if (size > 20) {
-    swprintf(text, size, L"%02d:%02d %02d:%02d %02d %c%c%c%c%c%c%n",
+    swprintf(text, size, L"%02d:%02d %02d:%02d %02d %c%c%c%c%c%c",
              p->winx+1, p->winy+1, scr.posx+1, scr.posy+1, scr.number, 
              p->trackCursor? 't': ' ',
              prefs.showCursor? (prefs.blinkingCursor? 'B': 'v'):
@@ -452,8 +451,7 @@ showInfo (void) {
              p->showAttributes? 'a': 't',
              isFrozenScreen()? 'f': ' ',
              prefs.textStyle? '6': '8',
-             prefs.blinkingCapitals? 'B': ' ',
-             &length);
+             prefs.blinkingCapitals? 'B': ' ');
   } else {
     unsigned char cells[5];
 
@@ -462,7 +460,7 @@ showInfo (void) {
     setCoordinateLower(&cells[0], p->winx+1, p->winy+1);
     setStateDots(&cells[4]);
 
-    swprintf(text, size, L"%lc%lc%lc%lc%lc %02d %c%c%c%c%c%c%n",
+    swprintf(text, size, L"%lc%lc%lc%lc%lc %02d %c%c%c%c%c%c",
              BRL_UC_ROW | cells[0],
              BRL_UC_ROW | cells[1],
              BRL_UC_ROW | cells[2],
@@ -475,11 +473,14 @@ showInfo (void) {
              p->showAttributes? 'a': 't',
              isFrozenScreen()? 'f': ' ',
              prefs.textStyle? '6': '8',
-             prefs.blinkingCapitals? 'B': ' ',
-             &length);
+             prefs.blinkingCapitals? 'B': ' ');
   }
 
-  wmemset(&text[length], L' ', size-length);
+  {
+    size_t length = wcslen(text);
+    wmemset(&text[length], L' ', size-length);
+  }
+
   return writeBrailleWindow(&brl, text);
 }
 
