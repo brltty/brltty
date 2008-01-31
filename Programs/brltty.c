@@ -434,14 +434,17 @@ setStatusCells (void) {
 
 static int
 showInfo (void) {
+  const size_t size = brl.x * brl.y;
+  wchar_t text[size];
+  int length;
+
   if (!setStatusText(&brl, gettext("info"))) return 0;
 
   /* Here we must be careful. Some displays (e.g. Braille Lite 18)
    * are very small, and others (e.g. Bookworm) are even smaller.
    */
-  if (brl.x*brl.y >= 21) {
-    char text[22];
-    snprintf(text, sizeof(text), "%02d:%02d %02d:%02d %02d %c%c%c%c%c%c",
+  if (size > 20) {
+    swprintf(text, size, L"%02d:%02d %02d:%02d %02d %c%c%c%c%c%c%n",
              p->winx+1, p->winy+1, scr.posx+1, scr.posy+1, scr.number, 
              p->trackCursor? 't': ' ',
              prefs.showCursor? (prefs.blinkingCursor? 'B': 'v'):
@@ -449,17 +452,22 @@ showInfo (void) {
              p->showAttributes? 'a': 't',
              isFrozenScreen()? 'f': ' ',
              prefs.textStyle? '6': '8',
-             prefs.blinkingCapitals? 'B': ' ');
-    return writeBrailleString(&brl, text);
-  }
+             prefs.blinkingCapitals? 'B': ' ',
+             &length);
+  } else {
+    unsigned char cells[5];
 
-  {
-    const size_t size = brl.x * brl.y;
-    int length;
-    wchar_t text[size];
-    unsigned char cells[size];
+    memset(cells, 0, sizeof(cells));
+    setCoordinateUpper(&cells[0], scr.posx+1, scr.posy+1);
+    setCoordinateLower(&cells[0], p->winx+1, p->winy+1);
+    setStateDots(&cells[4]);
 
-    swprintf(text, size, L"xxxxx %02d %c%c%c%c%c%c%n",
+    swprintf(text, size, L"%lc%lc%lc%lc%lc %02d %c%c%c%c%c%c%n",
+             BRL_UC_ROW | cells[0],
+             BRL_UC_ROW | cells[1],
+             BRL_UC_ROW | cells[2],
+             BRL_UC_ROW | cells[3],
+             BRL_UC_ROW | cells[4],
              scr.number,
              p->trackCursor? 't': ' ',
              prefs.showCursor? (prefs.blinkingCursor? 'B': 'v'):
@@ -469,31 +477,10 @@ showInfo (void) {
              prefs.textStyle? '6': '8',
              prefs.blinkingCapitals? 'B': ' ',
              &length);
-    wmemset(&text[length], L' ', size-length);
-
-    memset(cells, 0, 5);
-    setCoordinateUpper(&cells[0], scr.posx+1, scr.posy+1);
-    setCoordinateLower(&cells[0], p->winx+1, p->winy+1);
-    setStateDots(&cells[4]);
-
-    {
-      int i;
-      for (i=0; i<5; ++i) {
-        text[i] = BRL_UC_ROW | cells[i];
-      }
-    }
-
-    {
-      int i;
-      for (i=5; i<size; i++) {
-        cells[i] = convertWcharToDots(textTable, text[i]);
-      }
-    }
-
-    memcpy(brl.buffer, cells, size);
-    brl.cursor = -1;
-    return braille->writeWindow(&brl, text);
   }
+
+  wmemset(&text[length], L' ', size-length);
+  return writeBrailleWindow(&brl, text);
 }
 
 static void 
