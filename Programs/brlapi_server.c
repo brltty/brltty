@@ -577,21 +577,6 @@ void getDots(const BrailleWindow *brailleWindow, unsigned char *buf)
   if (brailleWindow->cursor) buf[brailleWindow->cursor-1] |= cursorDots();
 }
 
-/* Function: getText */
-/* Returns the text corresponding to a BrailleWindow structure */
-/* No allocation of buf is performed */
-void getText(const BrailleWindow *brailleWindow, unsigned char *buf)
-{
-  int i;
-  int c;
-  for (i=0; i<displaySize; i++) {
-    if ((c = convertWcharToChar(brailleWindow->text[i])) == EOF)
-      buf[i] = '?';
-    else
-      buf[i] = c;
-  }
-}
-
 static void handleResize(BrailleDisplay *brl)
 {
   /* TODO: handle resize */
@@ -2239,7 +2224,7 @@ static inline void setCurrentRootTty(void) {
 }
 
 /* Function : api_writeWindow */
-static int api_writeWindow(BrailleDisplay *brl)
+static int api_writeWindow(BrailleDisplay *brl, const wchar_t *text)
 {
   int ok = 1;
   setCurrentRootTty();
@@ -2248,26 +2233,7 @@ static int api_writeWindow(BrailleDisplay *brl)
   if (!offline && !suspendConnection && !rawConnection && !whoFillsTty(&ttys)) {
     last_conn_write=NULL;
     pthread_mutex_lock(&driverMutex);
-    if (!trueBraille->writeWindow(brl)) ok = 0;
-    pthread_mutex_unlock(&driverMutex);
-  }
-  pthread_mutex_unlock(&rawMutex);
-  pthread_mutex_unlock(&connectionsMutex);
-  return ok;
-}
-
-/* Function : api_writeVisual */
-static int api_writeVisual(BrailleDisplay *brl)
-{
-  int ok = 1;
-  setCurrentRootTty();
-  pthread_mutex_lock(&connectionsMutex);
-  pthread_mutex_lock(&rawMutex);
-  if (trueBraille->writeVisual &&
-      !offline && !suspendConnection && !rawConnection && !whoFillsTty(&ttys)) {
-    last_conn_write=NULL;
-    pthread_mutex_lock(&driverMutex);
-    if (!trueBraille->writeVisual(brl)) ok = 0;
+    if (!trueBraille->writeWindow(brl, text)) ok = 0;
     pthread_mutex_unlock(&driverMutex);
   }
   pthread_mutex_unlock(&rawMutex);
@@ -2348,19 +2314,11 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
     if ((c->brlbufstate==TODISPLAY) || (refresh)) {
       unsigned char *oldbuf = disp->buffer, buf[displaySize];
       disp->buffer = buf;
-      if (trueBraille->writeVisual) {
-        getText(&c->brailleWindow, buf);
-        brl->cursor = c->brailleWindow.cursor-1;
-	pthread_mutex_lock(&driverMutex);
-        ok = trueBraille->writeVisual(brl);
-	pthread_mutex_unlock(&driverMutex);
-      }
-      if (ok) {
-	getDots(&c->brailleWindow, buf);
-	pthread_mutex_lock(&driverMutex);
-	ok = trueBraille->writeWindow(brl);
-	pthread_mutex_unlock(&driverMutex);
-      }
+      getDots(&c->brailleWindow, buf);
+      pthread_mutex_lock(&driverMutex);
+      brl->cursor = c->brailleWindow.cursor-1;
+      ok = trueBraille->writeWindow(brl, c->brailleWindow.text);
+      pthread_mutex_unlock(&driverMutex);
       disp->buffer = oldbuf;
       if (ok) {
 	c->brlbufstate = FULL;
@@ -2490,7 +2448,6 @@ void api_link(BrailleDisplay *brl)
   refresh=1;
   memcpy(&ApiBraille,braille,sizeof(BrailleDriver));
   ApiBraille.writeWindow=api_writeWindow;
-  ApiBraille.writeVisual=api_writeVisual;
   ApiBraille.readCommand=api_readCommand;
   ApiBraille.readKey = NULL;
   ApiBraille.keyToCommand = NULL;
