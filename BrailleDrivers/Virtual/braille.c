@@ -61,11 +61,11 @@
 #endif /* __MINGW32__ */
 
 #include "misc.h"
+#include "charset.h"
 #include "cmd.h"
 
 #define BRLSTAT ST_Generic
 #define BRL_HAVE_STATUS_CELLS
-#define BRL_HAVE_VISUAL_DISPLAY
 #include "brl_driver.h"
 #include "braille.h"
 
@@ -95,7 +95,7 @@ static int brailleColumns;
 static int brailleRows;
 static int brailleCells;
 static unsigned char *previousBraille = NULL;
-static unsigned char *previousVisual = NULL;
+static wchar_t *previousText = NULL;
 static unsigned char previousStatus[BRL_MAX_STATUS_CELL_COUNT];
 
 typedef struct {
@@ -677,6 +677,13 @@ writeString (const char *string) {
 }
 
 static int
+writeCharacter (wchar_t character) {
+  Utf8Buffer buffer;
+  size_t count = convertWcharToUtf8(character, buffer);
+  return writeBytes(buffer, count);
+}
+
+static int
 writeDots (const unsigned char *cells, int count) {
   const unsigned char *cell = cells;
 
@@ -710,9 +717,11 @@ writeLine (void) {
   if (inputCarriageReturn)
     if (!writeByte('\r'))
       return 0;
+
   if (writeByte('\n'))
     if (flushOutput())
       return 1;
+
   return 0;
 }
 
@@ -847,10 +856,10 @@ dimensionsChanged (BrailleDisplay *brl) {
   if (ok) {
     int cells = columns * rows;
     unsigned char *braille;
-    unsigned char *visual;
+    wchar_t *text;
 
     if ((braille = malloc(cells))) {
-      if ((visual = malloc(cells))) {
+      if ((text = calloc(cells, sizeof(*text)))) {
         brailleColumns = columns;
         brailleRows = rows;
         brailleCells = cells;
@@ -859,9 +868,9 @@ dimensionsChanged (BrailleDisplay *brl) {
         if (previousBraille) free(previousBraille);
         previousBraille = braille;
 
-        memset(visual, ' ', cells);
-        if (previousVisual) free(previousVisual);
-        previousVisual = visual;
+        wmemset(text, L' ', cells);
+        if (previousText) free(previousText);
+        previousText = text;
 
         memset(previousStatus, 0, sizeof(previousStatus));
 
@@ -985,9 +994,9 @@ failed:
 
 static void
 brl_destruct (BrailleDisplay *brl) {
-  if (previousVisual) {
-    free(previousVisual);
-    previousVisual = NULL;
+  if (previousText) {
+    free(previousText);
+    previousText = NULL;
   }
 
   if (previousBraille) {
@@ -1005,47 +1014,40 @@ brl_destruct (BrailleDisplay *brl) {
 
 static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
+  if (text) {
+    if (wmemcmp(text, previousText, brailleCells) != 0) {
+      const wchar_t *address = text;
+      int cells = brailleCells;
+
+      writeString("Visual \"");
+
+      while (cells-- > 0) {
+        wchar_t character = *address++;
+
+        switch (character) {
+          case L'"':
+          case L'\\':
+            writeCharacter(L'\\');
+          default:
+            writeCharacter(character);
+            break;
+        }
+      }
+
+      writeString("\"");
+      writeLine();
+
+      wmemcpy(previousText, text, brailleCells);
+    }
+  }
+
   if (memcmp(brl->buffer, previousBraille, brailleCells) != 0) {
     writeString("Braille \"");
     writeDots(brl->buffer, brailleCells);
-    writeString("\"\n");
+    writeString("\"");
     writeLine();
 
     memcpy(previousBraille, brl->buffer, brailleCells);
-  }
-  return 1;
-}
-
-static int
-brl_writeVisual (BrailleDisplay *brl) {
-  if (memcmp(brl->buffer, previousVisual, brailleCells) != 0) {
-    writeString("Visual \"");
-    {
-      const unsigned char *address = brl->buffer;
-      int cells = brailleCells;
-
-      while (cells-- > 0) {
-        unsigned char character = *address++;
-        if (iscntrl(character)) {
-          char buffer[5];
-          snprintf(buffer, sizeof(buffer), "\\X%02X", character);
-          writeString(buffer);
-        } else {
-          switch (character) {
-            case '"':
-            case '\\':
-              writeByte('\\');
-            default:
-              writeByte(character);
-              break;
-          }
-        }
-      }
-    }
-    writeString("\"\n");
-    writeLine();
-
-    memcpy(previousVisual, brl->buffer, brailleCells);
   }
   return 1;
 }
@@ -1096,13 +1098,13 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *st) {
             const char *name = names[i];
             if (name) {
               char buffer[0X40];
-              snprintf(buffer, sizeof(buffer), "%s %d\n", name, value);
+              snprintf(buffer, sizeof(buffer), "%s %d", name, value);
               writeString(buffer);
+              writeLine();
             }
           }
         }
       }
-      writeLine();
     } else {
       while (cells) {
         if (st[--cells]) {
@@ -1113,7 +1115,7 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *st) {
 
       writeString("Status \"");
       writeDots(st, cells);
-      writeString("\"\n");
+      writeString("\"");
       writeLine();
     }
 
