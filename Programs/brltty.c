@@ -304,16 +304,17 @@ static void
 setCoordinateAlphabetic (unsigned char *cell, int x, int y) {
   /* The coords are given with letters as the DOS tsr */
   *cell = ((updateIntervals / 16) % (y / 25 + 1))? 0:
-          textTable[y % 25 + 'a'] |
+          convertWcharToDots(textTable, (y % 25 + 'a')) |
           ((x / brl.x) << 6);
 }
 
 static void
 setStateLetter (unsigned char *cell) {
-  *cell = textTable[p->showAttributes? 'a':
-                    isFrozenScreen()? 'f':
-                    p->trackCursor? 't':
-                    ' '];
+  *cell = convertWcharToDots(textTable,
+                             p->showAttributes? L'a':
+                             isFrozenScreen()? L'f':
+                             p->trackCursor? L't':
+                             L' ');
 }
 
 static void
@@ -335,9 +336,9 @@ setStatusCellsNone (unsigned char *cells) {
 static void
 setStatusCellsAlva (unsigned char *cells) {
   if (isHelpScreen()) {
-    cells[0] = textTable['h'];
-    cells[1] = textTable['l'];
-    cells[2] = textTable['p'];
+    cells[0] = convertWcharToDots(textTable, L'h');
+    cells[1] = convertWcharToDots(textTable, L'l');
+    cells[2] = convertWcharToDots(textTable, L'p');
   } else {
     setCoordinateAlphabetic(&cells[0], scr.posx, scr.posy);
     setCoordinateAlphabetic(&cells[1], p->winx, p->winy);
@@ -396,7 +397,7 @@ setStatusCellsVoyager (unsigned char *cells) {
   setNumberVertical(&cells[0], p->winy+1);
   setNumberVertical(&cells[1], scr.posy+1);
   if (isFrozenScreen()) {
-    cells[2] = textTable['F'];
+    cells[2] = convertWcharToDots(textTable, L'F');
   } else {
     setNumberVertical(&cells[2], scr.posx+1);
   }

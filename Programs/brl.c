@@ -196,9 +196,12 @@ setStatusText (BrailleDisplay *brl, const char *text) {
     {
       int i;
       for (i=0; i<sizeof(cells); ++i) {
-        unsigned char character = text[i];
-        if (!character) break;
-        cells[i] = textTable[character];
+        char c;
+        wchar_t wc;
+
+        if (!(c = text[i])) break;
+        if ((wc = convertCharToWchar(c)) == WEOF) wc = L'?';
+        cells[i] = convertWcharToDots(textTable, wc);
       }
     }
 
