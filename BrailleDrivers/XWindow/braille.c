@@ -931,7 +931,7 @@ static void generateToplevel(void)
       display[y*cols+x] = CreateWindow(WC_BUTTON, " ", WS_CHILD | WS_VISIBLE | BS_CHECKBOX | BS_PUSHLIKE, x*CHRX, y*CHRY, CHRX, CHRY, toplevel, NULL, NULL, NULL);
       SetWindowLong(display[y*cols+x], GWL_USERDATA, (long) (BRL_BLK_ROUTE | ((y*cols+x)&BRL_MSK_ARG)));
       if (font) {
-        displayb[y*cols+x] = CreateWindowW(WC_BUTTONW, L" ", WS_CHILD | WS_VISIBLE | BS_CHECKBOX | BS_PUSHLIKE, x*CHRX, (lines+y)*CHRY, CHRX, CHRY, toplevel, NULL, NULL, NULL);
+        displayb[y*cols+x] = CreateWindowW(WC_BUTTONW, WS_C(" "), WS_CHILD | WS_VISIBLE | BS_CHECKBOX | BS_PUSHLIKE, x*CHRX, (lines+y)*CHRY, CHRX, CHRY, toplevel, NULL, NULL, NULL);
         SetWindowLong(displayb[y*cols+x], GWL_USERDATA, (long) (BRL_BLK_ROUTE | ((y*cols+x)&BRL_MSK_ARG)));
 	SendMessage(displayb[y*cols+x], WM_SETFONT, (WPARAM) font, TRUE);
       }
@@ -1176,7 +1176,7 @@ static int brl_writeWindow(BrailleDisplay *brl, const wchar_t *text)
     for (i=0;i<brl->y*brl->x;i++) {
       if (displayedVisual[i] != text[i]) {
 	wc = text[i];
-	if (wc == 0) wc = L' ';
+	if (wc == 0) wc = WC_C(' ');
 #ifdef USE_XM
 	if (wc < 0x100)
 	  data[0] = wc;
@@ -1187,8 +1187,8 @@ static int brl_writeWindow(BrailleDisplay *brl, const wchar_t *text)
 	convertWcharToUtf8(wc, utf8);
 #elif defined(USE_WINDOWS)
 	data[0] = wc;
-	if (data[0]==L'&') {
-	  data[1] = L'&';
+	if (data[0]==WC_C('&')) {
+	  data[1] = WC_C('&');
 	  data[2] = 0;
 	} else
 	  data[1]=0;

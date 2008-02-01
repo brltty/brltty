@@ -50,12 +50,12 @@ static int characterTableSize = 0;
 static int characterEntryCount = 0;
 
 static const wchar_t *const characterClassNames[] = {
-  L"space",
-  L"letter",
-  L"digit",
-  L"punctuation",
-  L"uppercase",
-  L"lowercase",
+  WS_C("space"),
+  WS_C("letter"),
+  WS_C("digit"),
+  WS_C("punctuation"),
+  WS_C("uppercase"),
+  WS_C("lowercase"),
   NULL
 };
 struct CharacterClass {
@@ -68,44 +68,44 @@ static struct CharacterClass *characterClasses;
 static ContractionTableCharacterAttributes characterClassAttribute;
 
 static const wchar_t *const opcodeNames[CTO_None] = {
-  L"include",
+  WS_C("include"),
 
-  L"capsign",
-  L"begcaps",
-  L"endcaps",
+  WS_C("capsign"),
+  WS_C("begcaps"),
+  WS_C("endcaps"),
 
-  L"letsign",
-  L"numsign",
+  WS_C("letsign"),
+  WS_C("numsign"),
 
-  L"literal",
-  L"always",
-  L"repeated",
+  WS_C("literal"),
+  WS_C("always"),
+  WS_C("repeated"),
 
-  L"largesign",
-  L"lastlargesign",
-  L"word",
-  L"joinword",
-  L"lowword",
-  L"contraction",
+  WS_C("largesign"),
+  WS_C("lastlargesign"),
+  WS_C("word"),
+  WS_C("joinword"),
+  WS_C("lowword"),
+  WS_C("contraction"),
 
-  L"sufword",
-  L"prfword",
-  L"begword",
-  L"begmidword",
-  L"midword",
-  L"midendword",
-  L"endword",
+  WS_C("sufword"),
+  WS_C("prfword"),
+  WS_C("begword"),
+  WS_C("begmidword"),
+  WS_C("midword"),
+  WS_C("midendword"),
+  WS_C("endword"),
 
-  L"prepunc",
-  L"postpunc",
+  WS_C("prepunc"),
+  WS_C("postpunc"),
 
-  L"begnum",
-  L"midnum",
-  L"endnum",
+  WS_C("begnum"),
+  WS_C("midnum"),
+  WS_C("endnum"),
 
-  L"class",
-  L"after",
-  L"before"
+  WS_C("class"),
+  WS_C("after"),
+  WS_C("before")
 };
 static unsigned char opcodeLengths[CTO_None] = {0};
 
@@ -322,7 +322,7 @@ addCharacterClass (FileData *data, const wchar_t *name, int length) {
       return class;
     }
   }
-  compileError(data, "character class table overflow: %.*ls", length, name);
+  compileError(data, "character class table overflow: %.*" PRIws, length, name);
   return NULL;
 }
 
@@ -357,7 +357,7 @@ getOpcode (FileData *data, const wchar_t *token, int length) {
     if (length == opcodeLengths[opcode])
       if (wmemcmp(token, opcodeNames[opcode], length) == 0)
         return opcode;
-  compileError(data, "opcode not defined: %.*ls", length, token);
+  compileError(data, "opcode not defined: %.*" PRIws, length, token);
   return CTO_None;
 }
 
@@ -379,12 +379,12 @@ getToken (FileData *data, const wchar_t **token, int *length, const char *descri
 
 static int
 hexadecimalDigit (FileData *data, int *value, wchar_t digit) {
-  if (digit >= L'0' && digit <= L'9')
-    *value = digit - L'0';
-  else if (digit >= L'a' && digit <= L'f')
-    *value = digit - L'a' + 10;
-  else if (digit >= L'A' && digit <= L'F')
-    *value = digit - L'A' + 10;
+  if (digit >= WC_C('0') && digit <= WC_C('9'))
+    *value = digit - WC_C('0');
+  else if (digit >= WC_C('a') && digit <= WC_C('f'))
+    *value = digit - WC_C('a') + 10;
+  else if (digit >= WC_C('A') && digit <= WC_C('F'))
+    *value = digit - WC_C('A') + 10;
   else
     return 0;
   return 1;
@@ -392,8 +392,8 @@ hexadecimalDigit (FileData *data, int *value, wchar_t digit) {
 
 static int
 octalDigit (FileData *data, int *value, wchar_t digit) {
-  if (digit < L'0' || digit > L'7') return 0;
-  *value = digit - L'0';
+  if (digit < WC_C('0') || digit > WC_C('7')) return 0;
+  *value = digit - WC_C('0');
   return 1;
 }
 
@@ -403,23 +403,23 @@ parseCharacters (FileData *data, CharacterString *result, const wchar_t *token, 
   int index;		/*loop counters */
   for (index = 0; index < length; index++) {
     wchar_t character = token[index];
-    if (character == L'\\') { /* escape sequence */
+    if (character == WC_C('\\')) { /* escape sequence */
       int ok = 0;
       int start = index;
       if (++index < length) {
         switch (character = token[index]) {
-          case L'\\':
+          case WC_C('\\'):
             ok = 1;
             break;
-          case L'f':
-            character = L'\f';
+          case WC_C('f'):
+            character = WC_C('\f');
             ok = 1;
             break;
-          case L'n':
-            character = L'\n';
+          case WC_C('n'):
+            character = WC_C('\n');
             ok = 1;
             break;
-          case L'o':
+          case WC_C('o'):
             if (length - index > 3) {
               int high, middle, low;
               if (octalDigit(data, &high, token[++index]))
@@ -431,23 +431,23 @@ parseCharacters (FileData *data, CharacterString *result, const wchar_t *token, 
                     }
             }
             break;
-          case L'r':
-            character = L'\r';
+          case WC_C('r'):
+            character = WC_C('\r');
             ok = 1;
             break;
-          case L's':
-            character = L' ';
+          case WC_C('s'):
+            character = WC_C(' ');
             ok = 1;
             break;
-          case L't':
-            character = L'\t';
+          case WC_C('t'):
+            character = WC_C('\t');
             ok = 1;
             break;
-          case L'v':
-            character = L'\v';
+          case WC_C('v'):
+            character = WC_C('\v');
             ok = 1;
             break;
-          case L'x':
+          case WC_C('x'):
             if (length - index > 2) {
               int high, low;
               if (hexadecimalDigit(data, &high, token[++index]))
@@ -461,12 +461,12 @@ parseCharacters (FileData *data, CharacterString *result, const wchar_t *token, 
       }
       if (!ok) {
         index++;
-        compileError(data, "invalid escape sequence: %.*ls",
+        compileError(data, "invalid escape sequence: %.*" PRIws,
                      index-start, &token[start]);
         return 0;
       }
     }
-    if (!character) character = L' ';
+    if (!character) character = WC_C(' ');
     result->characters[count++] = character;
   }
   result->length = count;
@@ -486,44 +486,44 @@ parseDots (FileData *data, ByteString *cells, const wchar_t *token, const int le
     switch (character) { /*or dots to make up Braille cell */
       {
         int dot;
-      case L'1':
+      case WC_C('1'):
         dot = BRL_DOT1;
         goto haveDot;
-      case L'2':
+      case WC_C('2'):
         dot = BRL_DOT2;
         goto haveDot;
-      case L'3':
+      case WC_C('3'):
         dot = BRL_DOT3;
         goto haveDot;
-      case L'4':
+      case WC_C('4'):
         dot = BRL_DOT4;
         goto haveDot;
-      case L'5':
+      case WC_C('5'):
         dot = BRL_DOT5;
         goto haveDot;
-      case L'6':
+      case WC_C('6'):
         dot = BRL_DOT6;
         goto haveDot;
-      case L'7':
+      case WC_C('7'):
         dot = BRL_DOT7;
         goto haveDot;
-      case L'8':
+      case WC_C('8'):
         dot = BRL_DOT8;
       haveDot:
         if (started && !cell) goto invalid;
         if (cell & dot) {
-          compileError(data, "dot specified more than once: %.1ls", &character);
+          compileError(data, "dot specified more than once: %.1" PRIws, &character);
           return 0;
         }
         cell |= dot;
         break;
       }
-      case L'0':			/*blank */
+      case WC_C('0'):			/*blank */
         if (started) goto invalid;
         break;
-      case L'-':			/*got all dots for this cell */
+      case WC_C('-'):			/*got all dots for this cell */
         if (!started) {
-          compileError(data, "missing cell specification: %.*ls",
+          compileError(data, "missing cell specification: %.*" PRIws,
                        length-index, &token[index]);
           return 0;
         }
@@ -533,7 +533,7 @@ parseDots (FileData *data, ByteString *cells, const wchar_t *token, const int le
         break;
       default:
       invalid:
-        compileError(data, "invalid dot number: %.1ls", &character);
+        compileError(data, "invalid dot number: %.1" PRIws, &character);
         return 0;
     }
   }
@@ -565,7 +565,7 @@ getFindText (FileData *data, CharacterString *find, const wchar_t **token, int *
 static int
 getReplacePattern (FileData *data, ByteString *replace, const wchar_t **token, int *length) {
   if (getToken(data, token, length, "replacement pattern")) {
-    if (*length == 1 && **token == L'=') {
+    if (*length == 1 && **token == WC_C('=')) {
       replace->length = 0;
       return 1;
     }
@@ -579,7 +579,7 @@ static int
 getCharacterClass (FileData *data, const struct CharacterClass **class, const wchar_t **token, int *length) {
   if (getToken(data, token, length, "character class name")) {
     if ((*class = findCharacterClass(*token, *length))) return 1;
-    compileError(data, "character class not defined: %.*ls", *length, *token);
+    compileError(data, "character class not defined: %.*" PRIws, *length, *token);
   }
   return 0;
 }
@@ -592,14 +592,14 @@ includeFile (FileData *data, CharacterString *path) {
   const wchar_t *suffixAddress = path->characters;
   int suffixLength = path->length;
 
-  if (*suffixAddress != L'/') {
+  if (*suffixAddress != WC_C('/')) {
     const char *ptr = strrchr(prefixAddress, '/');
     if (ptr) prefixLength = ptr - prefixAddress + 1;
   }
 
   {
     char file[prefixLength + suffixLength + 1];
-    snprintf(file, sizeof(file), "%.*s%.*ls",
+    snprintf(file, sizeof(file), "%.*s%.*" PRIws,
              prefixLength, prefixAddress, suffixLength, suffixAddress);
     return processFile(file);
   }
@@ -616,7 +616,7 @@ processWcharLine (FileData *data, const wchar_t *line) {
 
 doOpcode:
   if (!getToken(data, &token, &length, NULL)) return 1;			/*blank line */
-  if (*token == L'#') return 1;
+  if (*token == WC_C('#')) return 1;
   opcode = getOpcode(data, token, length);
 
   switch (opcode) { /*Carry out operations */
@@ -719,7 +719,7 @@ doOpcode:
       CharacterString characters;
       if (getToken(data, &token, &length, "character class name")) {
         if ((class = findCharacterClass(token, length))) {
-          compileError(data, "character class already defined: %.*ls", length, token);
+          compileError(data, "character class already defined: %.*" PRIws, length, token);
         } else if ((class = addCharacterClass(data, token, length))) {
           if (getCharacters(data, &characters, &token, &length)) {
             int index;
@@ -754,7 +754,7 @@ doOpcode:
     }
 
     default:
-      compileError(data, "unimplemented opcode: %.*ls", length, token);
+      compileError(data, "unimplemented opcode: %.*" PRIws, length, token);
       break;
   }				/*end of loop for processing tableStream */
   ok = 1;

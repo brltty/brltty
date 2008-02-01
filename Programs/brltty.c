@@ -311,10 +311,10 @@ setCoordinateAlphabetic (unsigned char *cell, int x, int y) {
 static void
 setStateLetter (unsigned char *cell) {
   *cell = convertWcharToDots(textTable,
-                             p->showAttributes? L'a':
-                             isFrozenScreen()? L'f':
-                             p->trackCursor? L't':
-                             L' ');
+                             p->showAttributes? WC_C('a'):
+                             isFrozenScreen()? WC_C('f'):
+                             p->trackCursor? WC_C('t'):
+                             WC_C(' '));
 }
 
 static void
@@ -336,9 +336,9 @@ setStatusCellsNone (unsigned char *cells) {
 static void
 setStatusCellsAlva (unsigned char *cells) {
   if (isHelpScreen()) {
-    cells[0] = convertWcharToDots(textTable, L'h');
-    cells[1] = convertWcharToDots(textTable, L'l');
-    cells[2] = convertWcharToDots(textTable, L'p');
+    cells[0] = convertWcharToDots(textTable, WC_C('h'));
+    cells[1] = convertWcharToDots(textTable, WC_C('l'));
+    cells[2] = convertWcharToDots(textTable, WC_C('p'));
   } else {
     setCoordinateAlphabetic(&cells[0], scr.posx, scr.posy);
     setCoordinateAlphabetic(&cells[1], p->winx, p->winy);
@@ -397,7 +397,7 @@ setStatusCellsVoyager (unsigned char *cells) {
   setNumberVertical(&cells[0], p->winy+1);
   setNumberVertical(&cells[1], scr.posy+1);
   if (isFrozenScreen()) {
-    cells[2] = convertWcharToDots(textTable, L'F');
+    cells[2] = convertWcharToDots(textTable, WC_C('F'));
   } else {
     setNumberVertical(&cells[2], scr.posx+1);
   }
@@ -436,15 +436,57 @@ setStatusCells (void) {
 static int
 showInfo (void) {
   const size_t size = brl.x * brl.y;
-  wchar_t text[size + 1];
+  char text[size + 1];
 
   if (!setStatusText(&brl, gettext("info"))) return 0;
 
   /* Here we must be careful. Some displays (e.g. Braille Lite 18)
    * are very small, and others (e.g. Bookworm) are even smaller.
    */
-  if (size > 20) {
-    swprintf(text, size, L"%02d:%02d %02d:%02d %02d %c%c%c%c%c%c",
+  if (size < 21) {
+    wchar_t characters[size];
+    int length;
+    unsigned char cells[5];
+    char prefix[sizeof(cells)];
+
+    memset(cells, 0, sizeof(cells));
+    setCoordinateUpper(&cells[0], scr.posx+1, scr.posy+1);
+    setCoordinateLower(&cells[0], p->winx+1, p->winy+1);
+    setStateDots(&cells[4]);
+
+    memset(prefix, 'x', sizeof(prefix));
+    snprintf(text, sizeof(text), "%.*s %02d %c%c%c%c%c%c%n",
+             sizeof(prefix), prefix,
+             scr.number,
+             p->trackCursor? 't': ' ',
+             prefs.showCursor? (prefs.blinkingCursor? 'B': 'v'):
+                               (prefs.blinkingCursor? 'b': ' '),
+             p->showAttributes? 'a': 't',
+             isFrozenScreen()? 'f': ' ',
+             prefs.textStyle? '6': '8',
+             prefs.blinkingCapitals? 'B': ' ',
+             &length);
+    if (length > size) length = size;
+
+    {
+      int i;
+      for (i=0; i<length; ++i) {
+        if (i < sizeof(cells)) {
+          characters[i] = BRL_UC_ROW | cells[i];
+        } else {
+          wint_t character = convertCharToWchar(text[i]);
+          if (character == WEOF) character = WC_C('?');
+          characters[i] = character;
+        }
+      }
+    }
+
+    wmemset(&characters[length], WC_C(' '), size-length);
+    return writeBrailleWindow(&brl, characters);
+  }
+
+  {
+    snprintf(text, sizeof(text), "%02d:%02d %02d:%02d %02d %c%c%c%c%c%c",
              p->winx+1, p->winy+1, scr.posx+1, scr.posy+1, scr.number, 
              p->trackCursor? 't': ' ',
              prefs.showCursor? (prefs.blinkingCursor? 'B': 'v'):
@@ -453,36 +495,8 @@ showInfo (void) {
              isFrozenScreen()? 'f': ' ',
              prefs.textStyle? '6': '8',
              prefs.blinkingCapitals? 'B': ' ');
-  } else {
-    unsigned char cells[5];
-
-    memset(cells, 0, sizeof(cells));
-    setCoordinateUpper(&cells[0], scr.posx+1, scr.posy+1);
-    setCoordinateLower(&cells[0], p->winx+1, p->winy+1);
-    setStateDots(&cells[4]);
-
-    swprintf(text, size, L"%lc%lc%lc%lc%lc %02d %c%c%c%c%c%c",
-             BRL_UC_ROW | cells[0],
-             BRL_UC_ROW | cells[1],
-             BRL_UC_ROW | cells[2],
-             BRL_UC_ROW | cells[3],
-             BRL_UC_ROW | cells[4],
-             scr.number,
-             p->trackCursor? 't': ' ',
-             prefs.showCursor? (prefs.blinkingCursor? 'B': 'v'):
-                               (prefs.blinkingCursor? 'b': ' '),
-             p->showAttributes? 'a': 't',
-             isFrozenScreen()? 'f': ' ',
-             prefs.textStyle? '6': '8',
-             prefs.blinkingCapitals? 'B': ' ');
+    return writeBrailleString(&brl, text);
   }
-
-  {
-    size_t length = wcslen(text);
-    wmemset(&text[length], L' ', size-length);
-  }
-
-  return writeBrailleWindow(&brl, text);
 }
 
 static void 
@@ -2383,7 +2397,7 @@ runProgram (void) {
         const int cellCount = brl.x * brl.y;
         wchar_t textBuffer[cellCount];
 
-        wmemset(textBuffer, L' ', cellCount);
+        wmemset(textBuffer, WC_C(' '), cellCount);
         brl.cursor = -1;
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
@@ -2545,7 +2559,7 @@ runProgram (void) {
             int i;
             for (i=0; i<brl.x*brl.y; i++) {
               ScreenCharacter *character = &characters[i];
-              if (iswupper(character->text)) character->text = L' ';
+              if (iswupper(character->text)) character->text = WC_C(' ');
             }
           }
 

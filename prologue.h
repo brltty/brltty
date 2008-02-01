@@ -91,6 +91,11 @@ typedef signed long long	int64_t;
 
 #if 1
 #include <wchar.h>
+
+#define WC_C(wc) L##wc
+#define WS_C(ws) L##ws
+#define PRIwc "lc"
+#define PRIws "ls"
 #else /* wchar */
 #include <string.h>
 #include <ctype.h>
@@ -145,6 +150,11 @@ typedef signed long long	int64_t;
 #define towupper toupper
 
 #define swprintf snprintf
+
+#define WC_C(wc) wc
+#define WS_C(ws) ws
+#define PRIwc "c"
+#define PRIws "s"
 #endif /* wchar */
 
 #ifdef __MINGW32__

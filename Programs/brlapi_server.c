@@ -527,7 +527,7 @@ int allocBrailleWindow(BrailleWindow *brailleWindow)
   if (!(brailleWindow->andAttr = malloc(displaySize))) goto outText;
   if (!(brailleWindow->orAttr = malloc(displaySize))) goto outAnd;
 
-  wmemset(brailleWindow->text, L' ', displaySize);
+  wmemset(brailleWindow->text, WC_C(' '), displaySize);
   memset(brailleWindow->andAttr, 0xFF, displaySize);
   memset(brailleWindow->orAttr, 0x00, displaySize);
   brailleWindow->cursor = 0;

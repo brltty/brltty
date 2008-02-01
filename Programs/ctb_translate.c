@@ -160,12 +160,12 @@ checkCurrentRule (const wchar_t *source) {
 
 static void
 setBefore (void) {
-  before = (src == srcmin)? L' ': src[-1];
+  before = (src == srcmin)? WC_C(' '): src[-1];
 }
 
 static void
 setAfter (int length) {
-  after = (src + length < srcmax)? src[length]: L' ';
+  after = (src + length < srcmax)? src[length]: WC_C(' ');
 }
 
 static int

@@ -148,21 +148,21 @@ writeBrailleWindow (BrailleDisplay *brl, const wchar_t *text) {
 
 int
 writeBrailleText (BrailleDisplay *brl, const char *text, size_t length) {
-  int width = brl->x * brl->y;
-  wchar_t buffer[width];
+  size_t size = brl->x * brl->y;
+  wchar_t characters[size];
 
-  if (length > width) length = width;
+  if (length > size) length = size;
   {
     int i;
     for (i=0; i<length; ++i) {
-      wint_t wc = convertCharToWchar(text[i]);
-      if (wc == WEOF) wc = L'?';
-      buffer[i] = wc;
+      wint_t character = convertCharToWchar(text[i]);
+      if (character == WEOF) character = WC_C('?');
+      characters[i] = character;
     }
   }
-  wmemset(&buffer[length], L' ', width-length);
+  wmemset(&characters[length], WC_C(' '), size-length);
 
-  return writeBrailleWindow(brl, buffer);
+  return writeBrailleWindow(brl, characters);
 }
 
 int
@@ -200,7 +200,7 @@ setStatusText (BrailleDisplay *brl, const char *text) {
         wchar_t wc;
 
         if (!(c = text[i])) break;
-        if ((wc = convertCharToWchar(c)) == WEOF) wc = L'?';
+        if ((wc = convertCharToWchar(c)) == WEOF) wc = WC_C('?');
         cells[i] = convertWcharToDots(textTable, wc);
       }
     }

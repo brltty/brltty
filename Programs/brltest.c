@@ -95,7 +95,7 @@ message (const char *string, short flags) {
 
     for (index=0; index<count; buffer[index++]=*string++);
     if (length -= count) {
-      buffer[(count = size) - 1] = L'-';
+      buffer[(count = size) - 1] = WC_C('-');
     }
     if (!writeBrailleText(&brl, buffer, count)) return 0;
 

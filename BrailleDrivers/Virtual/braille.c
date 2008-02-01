@@ -868,7 +868,7 @@ dimensionsChanged (BrailleDisplay *brl) {
         if (previousBraille) free(previousBraille);
         previousBraille = braille;
 
-        wmemset(text, L' ', cells);
+        wmemset(text, WC_C(' '), cells);
         if (previousText) free(previousText);
         previousText = text;
 
@@ -1025,9 +1025,9 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
         wchar_t character = *address++;
 
         switch (character) {
-          case L'"':
-          case L'\\':
-            writeCharacter(L'\\');
+          case WC_C('"'):
+          case WC_C('\\'):
+            writeCharacter(WC_C('\\'));
           default:
             writeCharacter(character);
             break;

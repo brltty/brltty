@@ -67,7 +67,7 @@ cut (size_t *length, int fromColumn, int fromRow, int toColumn, int toRow) {
                 spaces++;
               } else {
                 while (spaces) {
-                  *(toAddress++) = L' ';
+                  *(toAddress++) = WC_C(' ');
                   spaces--;
                 }
 
@@ -75,7 +75,7 @@ cut (size_t *length, int fromColumn, int fromRow, int toColumn, int toRow) {
               }
             }
 
-            if (row != toRow) *toAddress++ = L'\r';
+            if (row != toRow) *toAddress++ = WC_C('\r');
           }
 
           /* make a new permanent buffer of just the right size */
@@ -170,7 +170,7 @@ cutLine (int column, int row) {
       if (column < rightColumn) {
         wchar_t *start = buffer + length;
         while (start != buffer) {
-          if (*--start == L'\r') {
+          if (*--start == WC_C('\r')) {
             ++start;
             break;
           }
@@ -183,7 +183,7 @@ cutLine (int column, int row) {
       }
 
       if (beginColumn) {
-        wchar_t *start = wmemchr(buffer, L'\r', length);
+        wchar_t *start = wmemchr(buffer, WC_C('\r'), length);
         if (!start) start = buffer + length;
         if ((start - buffer) > beginColumn) start = buffer + beginColumn;
         if (start != buffer) wmemmove(buffer, start, (length -= start - buffer));
