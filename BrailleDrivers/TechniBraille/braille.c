@@ -23,14 +23,13 @@
 
 #include "misc.h"
 
-#define BRL_HAVE_VISUAL_DISPLAY
 #include "brl_driver.h"
 #include "tbl.h"
 
 static TranslationTable outputTable;
 static TranslationTable inputTable;
 static unsigned char brailleCells[0XFF];
-static unsigned char visualCells[0XFF];
+static wchar_t visualText[0XFF];
 
 #include "io_serial.h"
 static SerialDevice *serialDevice = NULL;
@@ -110,7 +109,10 @@ writePacket (BrailleDisplay *brl, unsigned char function, unsigned char *data, u
 
 static int
 writeBrailleCells (BrailleDisplay *brl) {
-  return writePacket(brl, 1, brailleCells, brl->x);
+  unsigned char cells[brl->x];
+  int i;
+  for (i=0; i<brl->x; ++i) cells[i] = outputTable[brailleCells[i]];
+  return writePacket(brl, 1, cells, brl->x);
 }
 
 static int
@@ -120,14 +122,17 @@ clearBrailleCells (BrailleDisplay *brl) {
 }
 
 static int
-writeVisualCells (BrailleDisplay *brl) {
-  return writePacket(brl, 2, visualCells, brl->x);
+writeVisualText (BrailleDisplay *brl) {
+  unsigned char bytes[brl->x];
+  int i;
+  for (i=0; i<brl->x; ++i) bytes[i] = visualText[i];
+  return writePacket(brl, 2, bytes, brl->x);
 }
 
 static int
-clearVisualCells (BrailleDisplay *brl) {
-  memset(visualCells, ' ', brl->x);
-  return writeVisualCells(brl);
+clearVisualText (BrailleDisplay *brl) {
+  wmemset(visualText, WC_C(' '), brl->x);
+  return writeVisualText(brl);
 }
 
 static int
@@ -161,7 +166,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
               brl->helpPage = 0;
 
               if (!clearBrailleCells(brl)) break;
-              if (!clearVisualCells(brl)) break;
+              if (!clearVisualText(brl)) break;
               if (!writeBrailleCells(brl)) break;
 
               return 1;
@@ -188,21 +193,16 @@ brl_destruct (BrailleDisplay *brl) {
 
 static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
-  unsigned char cells[brl->x];
-  int i;
-  for (i=0; i<brl->x; ++i) cells[i] = outputTable[brl->buffer[i]];
-  if (memcmp(cells, brailleCells, brl->x) != 0) {
-    memcpy(brailleCells, cells, brl->x);
-    writeBrailleCells(brl);
+  if (text) {
+    if (wmemcmp(text, visualText, brl->x) != 0) {
+      wmemcpy(visualText, text, brl->x);
+      if (!writeVisualText(brl)) return 0;
+    }
   }
-  return 1;
-}
 
-static int
-brl_writeVisual (BrailleDisplay *brl) {
-  if (memcmp(brl->buffer, visualCells, brl->x) != 0) {
-    memcpy(visualCells, brl->buffer, brl->x);
-    writeVisualCells(brl);
+  if (memcmp(brl->buffer, brailleCells, brl->x) != 0) {
+    memcpy(brailleCells, brl->buffer, brl->x);
+    if (!writeBrailleCells(brl)) return 0;
   }
   return 1;
 }
