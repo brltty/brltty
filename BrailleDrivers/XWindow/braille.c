@@ -196,7 +196,6 @@ typedef enum {
 } DriverParameter;
 #define BRLPARMS "tkparms", "lines", "columns", "model", "input"
 
-#define BRL_HAVE_VISUAL_DISPLAY
 #include "brl_driver.h"
 #include "braille.h"
 
