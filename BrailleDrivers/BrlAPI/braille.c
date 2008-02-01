@@ -23,6 +23,7 @@
 #include "misc.h"
 #include "scr.h"
 #include "cmd.h"
+#include "charset.h"
 
 #define BRLAPI_NO_DEPRECATED
 #include "brlapi.h"
@@ -33,7 +34,6 @@ typedef enum {
 } DriverParameter;
 #define BRLPARMS "host", "auth"
 
-#define BRL_HAVE_VISUAL_DISPLAY
 #include "brl_driver.h"
 
 #define CHECK(cond, label) \
@@ -46,7 +46,7 @@ typedef enum {
 
 static int displaySize;
 static unsigned char *prevData;
-static unsigned char *prevText;
+static wchar_t *prevText;
 static int prevCursor;
 static int prevShown;
 
@@ -68,7 +68,7 @@ static int brl_construct(BrailleDisplay *brl, char **parameters, const char *dev
   displaySize = brl->x*brl->y;
   prevData = malloc(displaySize);
   CHECK((prevData!=NULL), out1);
-  prevText = malloc(displaySize);
+  prevText = malloc(displaySize * sizeof(wchar_t));
   CHECK((prevText!=NULL), out2);
   prevShown = 0;
   restart = 0;
@@ -100,62 +100,42 @@ static void brl_destruct(BrailleDisplay *brl)
 /* the one already displayed */
 static int brl_writeWindow(BrailleDisplay *brl, const wchar_t *text)
 {
+  brlapi_writeArguments_t arguments = BRLAPI_WRITEARGUMENTS_INITIALIZER;
   int vt;
   vt = currentVirtualTerminal();
   if (vt == -1) {
     /* should leave display */
     if (prevShown) {
-      brlapi_writeArguments_t arguments = BRLAPI_WRITEARGUMENTS_INITIALIZER;
       brlapi_write(&arguments);
       prevShown = 0;
     }
   } else {
-    brlapi_writeArguments_t arguments = BRLAPI_WRITEARGUMENTS_INITIALIZER;
     unsigned char and[displaySize];
-    if (prevShown && memcmp(prevData,brl->buffer,displaySize)==0) return 1;
+    if (prevShown
+	&& memcmp(prevData,brl->buffer,displaySize) == 0
+	&& (!text || wmemcmp(prevText,text,displaySize) == 0)
+	&& brl->cursor == prevCursor)
+      return 1;
     memset(and,0,sizeof(and));
+    if (text) {
+      arguments.text = (char*) text;
+      arguments.textSize = displaySize * sizeof(wchar_t);
+      arguments.charset = (char*) getWcharCharset();
+    }
     arguments.regionBegin = 1;
     arguments.regionSize = displaySize;
     arguments.andMask = and;
     arguments.orMask = brl->buffer;
+    arguments.cursor = brl->cursor + 1;
     if (brlapi_write(&arguments)==0) {
       memcpy(prevData,brl->buffer,displaySize);
+      wmemcpy(prevText,text,displaySize);
+      prevCursor = brl->cursor;
       prevShown = 1;
     } else {
       LogPrint(LOG_ERR, "write: %s", brlapi_strerror(&brlapi_error));
       restart = 1;
     }
-  }
-  return 1;
-}
-
-/* function : brl_writeVisual */
-/* Displays a text on the braille window, only if it's different from */
-/* the one already displayed */
-static int brl_writeVisual(BrailleDisplay *brl)
-{
-  int vt;
-  vt = currentVirtualTerminal();
-  if (vt == -1) {
-    /* should leave display */
-    if (prevShown) {
-      brlapi_writeArguments_t arguments = BRLAPI_WRITEARGUMENTS_INITIALIZER;
-      brlapi_write(&arguments);
-      prevShown = 0;
-    }
-    return 1;
-  }
-
-  if (prevShown && memcmp(prevText,brl->buffer,displaySize)==0 && brl->cursor == prevCursor)
-    return 1;
-
-  if (brlapi_writeText(brl->cursor+1,(char *) brl->buffer)==0) {
-    memcpy(prevText,brl->buffer,displaySize);
-    prevCursor = brl->cursor;
-    prevShown = 1;
-  } else {
-    LogPrint(LOG_ERR, "write: %s", brlapi_strerror(&brlapi_error));
-    restart = 1;
   }
   return 1;
 }
