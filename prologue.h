@@ -122,6 +122,7 @@ typedef int SocketDescriptor;
 #define WS_C(ws) L##ws
 #define PRIwc "lc"
 #define PRIws "ls"
+#define iswLatin1(wc) ((wc) < 0X100)
 #else /* HAVE_WCHAR_H */
 #include <string.h>
 #include <ctype.h>
@@ -181,6 +182,7 @@ typedef int SocketDescriptor;
 #define WS_C(ws) ws
 #define PRIwc "c"
 #define PRIws "s"
+#define iswLatin1(wc) (1)
 #endif /* HAVE_WCHAR_H */
 
 #ifndef WRITABLE_DIRECTORY

@@ -125,7 +125,12 @@ static int
 writeVisualText (BrailleDisplay *brl) {
   unsigned char bytes[brl->x];
   int i;
-  for (i=0; i<brl->x; ++i) bytes[i] = visualText[i];
+
+  for (i=0; i<brl->x; ++i) {
+    wchar_t character = visualText[i];
+    bytes[i] = iswLatin1(character)? character: '?';
+  }
+
   return writePacket(brl, 2, bytes, brl->x);
 }
 

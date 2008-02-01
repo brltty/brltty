@@ -119,7 +119,8 @@ brl_writeWindow(BrailleDisplay *brl, const wchar_t *text)
 
       for(i = 0; i < brl->x; ++i)
         {
-          bytes[i] = text[i];
+          wchar_t character = text[i];
+          bytes[i] = iswLatin1(character)? character: '?';
         }
       braille_write(bytes, brl->x);
 
