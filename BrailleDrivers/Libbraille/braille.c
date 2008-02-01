@@ -145,6 +145,7 @@ brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context)
   if(status == -1)
     {
       LogPrint(LOG_ERR, "error in braille_read: %s", braille_geterror());
+      res = BRL_CMD_RESTARTBRL;
     }
   else if(status)
     {
