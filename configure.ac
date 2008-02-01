@@ -427,6 +427,8 @@ BRLTTY_ARG_DISABLE(
    ])
 ])
 
+AC_CHECK_FUNC([wcslen], [AC_CHECK_HEADERS([wchar.h])])
+
 BRLTTY_ARG_DISABLE(
    [iconv],
    [support for character encoding conversion],

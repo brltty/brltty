@@ -58,6 +58,9 @@ extern "C" {
 /* Define this if the header file grp.h exists. */
 #undef HAVE_GRP_H
 
+/* Define this if the header file wchar.h exists. */
+#undef HAVE_WCHAR_H
+
 /* Define this if the header file iconv.h exists. */
 #undef HAVE_ICONV_H
 

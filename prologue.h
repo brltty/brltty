@@ -89,14 +89,40 @@ typedef signed long long	int64_t;
 #include <inttypes.h>
 #endif /* __MSDOS__ */
 
-#if 1
+#ifdef __MINGW32__
+typedef HANDLE FileDescriptor;
+#define INVALID_FILE_DESCRIPTOR INVALID_HANDLE_VALUE
+#define PRIFD "p"
+#define closeFileDescriptor(fd) CloseHandle(fd)
+
+typedef SOCKET SocketDescriptor;
+#define INVALID_SOCKET_DESCRIPTOR -1
+#define PRISD "d"
+#define closeSocketDescriptor(sd) closesocket(sd)
+#else /* __MINGW32__ */
+typedef int FileDescriptor;
+#define INVALID_FILE_DESCRIPTOR -1
+#define PRIFD "d"
+#define closeFileDescriptor(fd) close(fd)
+
+typedef int SocketDescriptor;
+#define INVALID_SOCKET_DESCRIPTOR -1
+#define PRISD "d"
+#define closeSocketDescriptor(sd) close(sd)
+#endif /* __MINGW32__ */
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
+
+#ifdef HAVE_WCHAR_H 
 #include <wchar.h>
 
 #define WC_C(wc) L##wc
 #define WS_C(ws) L##ws
 #define PRIwc "lc"
 #define PRIws "ls"
-#else /* wchar */
+#else /* HAVE_WCHAR_H */
 #include <string.h>
 #include <ctype.h>
 
@@ -155,33 +181,7 @@ typedef signed long long	int64_t;
 #define WS_C(ws) ws
 #define PRIwc "c"
 #define PRIws "s"
-#endif /* wchar */
-
-#ifdef __MINGW32__
-typedef HANDLE FileDescriptor;
-#define INVALID_FILE_DESCRIPTOR INVALID_HANDLE_VALUE
-#define PRIFD "p"
-#define closeFileDescriptor(fd) CloseHandle(fd)
-
-typedef SOCKET SocketDescriptor;
-#define INVALID_SOCKET_DESCRIPTOR -1
-#define PRISD "d"
-#define closeSocketDescriptor(sd) closesocket(sd)
-#else /* __MINGW32__ */
-typedef int FileDescriptor;
-#define INVALID_FILE_DESCRIPTOR -1
-#define PRIFD "d"
-#define closeFileDescriptor(fd) close(fd)
-
-typedef int SocketDescriptor;
-#define INVALID_SOCKET_DESCRIPTOR -1
-#define PRISD "d"
-#define closeSocketDescriptor(sd) close(sd)
-#endif /* __MINGW32__ */
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif /* HAVE_CONFIG_H */
+#endif /* HAVE_WCHAR_H */
 
 #ifndef WRITABLE_DIRECTORY
 #define WRITABLE_DIRECTORY ""
