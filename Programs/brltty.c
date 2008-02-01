@@ -2040,10 +2040,10 @@ runProgram (void) {
                     readScreen(p->winx+arg, p->winy, 1, 1, &character);
 
                     {
-                      uint32_t text = character.text;
+                      unsigned long text = character.text;
                       int count;
                       snprintf(&buffer[length], size-length,
-                               "char %" PRIu32 " (0X%02" PRIX32 "): %s on %s%n",
+                               "char %lu (0X%02lX): %s on %s%n",
                                text, text,
                                gettext(colours[character.attributes & 0X0F]),
                                gettext(colours[(character.attributes & 0X70) >> 4]),
