@@ -1172,7 +1172,7 @@ static int brl_writeWindow(BrailleDisplay *brl, const wchar_t *text)
     }
   }
 
-  if (text && memcmp(text,displayedVisual,brl->y*brl->x)) {
+  if (text && wmemcmp(text,displayedVisual,brl->y*brl->x)) {
     for (i=0;i<brl->y*brl->x;i++) {
       if (displayedVisual[i] != text[i]) {
 	wc = text[i];
