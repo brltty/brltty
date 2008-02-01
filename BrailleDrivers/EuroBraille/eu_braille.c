@@ -126,11 +126,20 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
     }
 #endif /* ENABLE_BLUETOOTH_SUPPORT */
 
+#ifndef __MSDOS__
   else if (!strncasecmp(device, "net:", 4))
     {
       iop = &eubrl_ethernetIos;
       protocolp = &esysirisProtocol;
     }
+#endif /* __MSDOS__ */
+
+  else
+    {
+      unsupportedDevice(device);
+      return (0);
+    }
+
   if (!iop)
     {
       unsupportedDevice(device);
@@ -138,7 +147,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
     }
   if (iop->init(brl, parameters, device) == 0)
     {
-      LogPrint(LOG_ERR, "eu: Failed to initialize IO subsystem.");
+      LogPrint(LOG_DEBUG, "eu: Failed to initialize IO subsystem.");
       return (0);
     }
 

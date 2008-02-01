@@ -65,6 +65,7 @@ t_eubrl_io	eubrl_bluetoothIos = {
   .private = NULL
 };
 
+#ifndef __MSDOS__
 t_eubrl_io	eubrl_ethernetIos = {
   .init = eubrl_netInit,
   .read = eubrl_netRead,
@@ -73,6 +74,7 @@ t_eubrl_io	eubrl_ethernetIos = {
   .ioType = IO_ETHERNET,
   .private = NULL
 };
+#endif /* __MSDOS__ */
 
 /*
 ** All the IO code is separated into the io_*.c files

@@ -20,6 +20,7 @@
  */
 
 
+#ifndef __MSDOS__
 /**
 *** What we do here is dealing with Ethernet IOs, but also 
 *** we handle some Protocol stuff specific to ethernet, especially the 
@@ -293,3 +294,4 @@ eubrl_netClose(BrailleDisplay *brl)
   connectionStatus = NET_UNITIALIZED;
   return 0;
 }
+#endif /* __MSDOS__ */
