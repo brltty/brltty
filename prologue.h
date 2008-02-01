@@ -143,6 +143,8 @@ typedef signed long long	int64_t;
 
 #define towlower tolower
 #define towupper toupper
+
+#define swprintf snprintf
 #endif /* wchar */
 
 #ifdef __MINGW32__
