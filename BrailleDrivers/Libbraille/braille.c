@@ -27,6 +27,7 @@
 #include <string.h>
 
 #include "misc.h"
+#include "brltty.h"
 
 #include <braille.h>
 
@@ -37,7 +38,6 @@ typedef enum {
 } DriverParameter;
 #define BRLPARMS "device", "driver", "table"
 
-#define BRL_HAVE_VISUAL_DISPLAY
 #include "brl_driver.h"
 #include "tbl.h"
 
@@ -74,6 +74,7 @@ brl_construct(BrailleDisplay *brl, char **parameters, const char *device)
   if(braille_init())
     {
       LogPrint(LOG_INFO, "Libbraille Version: %s", braille_info(BRL_VERSION));
+
       LogPrint(LOG_DEBUG, "Libbraille Installation Directory: %s", braille_info(BRL_PATH));
       LogPrint(LOG_DEBUG, "Libbraille Configuration Directory: %s", braille_info(BRL_PATHCONF));
       LogPrint(LOG_DEBUG, "Libbraille Tables Directory: %s", braille_info(BRL_PATHTBL));
@@ -96,7 +97,7 @@ brl_construct(BrailleDisplay *brl, char **parameters, const char *device)
     }
   else
     {
-      LogPrint(LOG_ERR, "Libbraille initialization erorr: %s", braille_geterror());
+      LogPrint(LOG_DEBUG, "Libbraille initialization erorr: %s", braille_geterror());
     }
   
   return 0;
@@ -109,22 +110,27 @@ brl_destruct(BrailleDisplay *brl)
 }
 
 static int
-brl_writeVisual(BrailleDisplay *brl)
-{
-  braille_write((char *)brl->buffer, brl->x);
-  return 1;
-}
-
-static int
 brl_writeWindow(BrailleDisplay *brl, const wchar_t *text)
 {
-  int i;
-
-  for(i = 0; i < brl->x; i++)
+  if(text)
     {
-      braille_filter(outputTable[brl->buffer[i]], i);
+      char bytes[brl->x];
+      int i;
+
+      for(i = 0; i < brl->x; ++i)
+        {
+          bytes[i] = text[i];
+        }
+      braille_write(bytes, brl->x);
+
+      if(brl->cursor >= 0)
+        {
+          braille_filter(outputTable[cursorDots()], brl->cursor);
+        }
+
+      braille_render();
     }
-  braille_render();
+
   return 1;
 }
 
