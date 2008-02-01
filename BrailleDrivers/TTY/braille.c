@@ -82,7 +82,6 @@ typedef enum {
 #define BRLPARMS "baud", BRLPARM_TERM "lines", "columns", BRLPARM_CHARSET "locale"
 
 #define BRL_HAVE_KEY_CODES
-#define BRL_HAVE_VISUAL_DISPLAY
 #include "brl_driver.h"
 #include "braille.h"
 #include "io_serial.h"
@@ -164,7 +163,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     classificationLocale = parameters[PARM_LOCALE];
 
 #ifdef HAVE_ICONV_H
-  if ((conversionDescriptor = iconv_open(characterSet, "ISO8859-1")) != (iconv_t)-1) {
+  if ((conversionDescriptor = iconv_open(characterSet, "WCHAR_T")) != (iconv_t)-1) {
 #endif /* HAVE_ICONV_H */
     if ((ttyDevice = serialOpenDevice(device))) {
       if (serialRestartDevice(ttyDevice, ttyBaud)) {
@@ -238,19 +237,14 @@ brl_destruct (BrailleDisplay *brl) {
 #endif /* HAVE_ICONV_H */
 }
 
-static int
-brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
-  return 1;
-}
-
 static void
-writeText (const unsigned char *buffer, int columns) {
+writeText (const wchar_t *buffer, int columns) {
   int column;
   for (column=0; column<columns; column++) {
-    char c = buffer[column];
+    wchar_t c = buffer[column];
 #ifdef HAVE_ICONV_H
-    char *pc = &c;
-    size_t sc = 1;
+    char *pc = (char*) &c;
+    size_t sc = sizeof(wchar_t);
     char d[MB_MAX_LEN+1];
     char *pd = d;
     size_t sd = MB_MAX_LEN;
@@ -264,7 +258,7 @@ writeText (const unsigned char *buffer, int columns) {
 }
 
 static int
-brl_writeVisual (BrailleDisplay *brl) {
+brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   static unsigned char previousContent[MAX_WINDOW_SIZE];
   static int previousCursor = -1;
   char *previousLocale;
@@ -291,7 +285,7 @@ brl_writeVisual (BrailleDisplay *brl) {
   {
     int row;
     for (row=0; row<brl->y; row++) {
-      writeText(&brl->buffer[row*brl->x], brl->x);
+      writeText(&text[row*brl->x], brl->x);
       if (row < brl->y-1)
         addstr("\r\n");
     }
@@ -300,11 +294,13 @@ brl_writeVisual (BrailleDisplay *brl) {
 #ifdef USE_CURSES
   if ((brl->cursor >= 0) && (brl->cursor < (brl->x * brl->y)))
     move(brl->cursor/brl->x, brl->cursor%brl->x);
+  else
+    move(brl->y, 0);
   refresh();
 #else /* USE_CURSES */
   if ((brl->y == 1) && (brl->cursor >= 0) && (brl->cursor < brl->x)) {
     addch('\r');
-    writeText(brl->buffer, brl->cursor);
+    writeText(text, brl->cursor);
   } else {
     addstr("\r\n");
   }
