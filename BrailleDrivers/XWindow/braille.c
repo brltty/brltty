@@ -215,7 +215,7 @@ static void destroyToplevel(void);
 #if defined(USE_XAW) || defined(USE_WINDOWS)
 static unsigned char displayedWindow[WHOLESIZE];
 #endif /* USE_XAW || USE_WINDOWS */
-static unsigned char displayedVisual[WHOLESIZE];
+static wchar_t displayedVisual[WHOLESIZE];
 
 #define BUTWIDTH 48
 #define BUTHEIGHT 32
@@ -238,7 +238,7 @@ static XmString display_cs;
 #endif /* USE_XAW */
 #endif /* USE_XT */
 #ifdef USE_XAW
-static XFontSet fontset;
+static XFontSet fontset, fontsetb;
 #elif defined(USE_WINDOWS)
 static HFONT font;
 static int totlines;
@@ -823,8 +823,10 @@ static void generateToplevel(void)
 #endif /* USE_XT */
 
 #ifdef USE_XAW
-  if (!(fontset = XCreateFontSet(XtDisplay(toplevel),"-*-clearlyu-*-*-*-*-17-*-*-*-*-*-iso10646-1", &missing_charset_list_return, &missing_charset_count_return, &def_string_return)))
+  if (!(fontsetb = XCreateFontSet(XtDisplay(toplevel),"-*-clearlyu-*-r-*-*-17-*-*-*-*-*-iso10646-1", &missing_charset_list_return, &missing_charset_count_return, &def_string_return)))
     LogPrint(LOG_ERR,"Error while loading braille font");
+  if (!(fontset = XCreateFontSet(XtDisplay(toplevel),"-*-fixed-medium-r-*-*-24-*-*-*-*-*-iso10646-1", &missing_charset_list_return, &missing_charset_count_return, &def_string_return)))
+    LogPrint(LOG_ERR,"Error while loading unicode font");
 #endif /* USE_XAW */
   
 #ifdef USE_XT
@@ -901,6 +903,8 @@ static void generateToplevel(void)
 	XtNtranslations, transl,
 #ifdef USE_XAW
 	XtNshowGrip,False,
+	XtNinternational, True,
+	XNFontSet, fontset,
 #else /* USE_XAW */
 	XmNpaneMaximum,20,
 	XmNpaneMinimum,20,
@@ -914,11 +918,11 @@ static void generateToplevel(void)
 	NULL);
 
 #ifdef USE_XAW
-      if (fontset) {
+      if (fontsetb) {
 	displayb[y*cols+x] = XtVaCreateManagedWidget("displayb",labelWidgetClass,tmp_vbox,
 	  XtNtranslations, transl,
 	  XtNinternational, True,
-	  XNFontSet, fontset,
+	  XNFontSet, fontsetb,
 	  XtNshowGrip,False,
 	  XtNlabel, dispb,
 	  NULL);
@@ -1099,6 +1103,10 @@ static void destroyToplevel(void)
 {
 #if defined(USE_XT)
 #ifdef USE_XAW
+  if (fontsetb) {
+    XFreeFontSet(XtDisplay(toplevel),fontsetb);
+    fontsetb = NULL;
+  }
   if (fontset) {
     XFreeFontSet(XtDisplay(toplevel),fontset);
     fontset = NULL;
@@ -1127,53 +1135,15 @@ static void brl_destruct(BrailleDisplay *brl)
 
 static int brl_writeWindow(BrailleDisplay *brl, const wchar_t *text)
 {
-#if defined(USE_XAW) || defined(USE_WINDOWS)
+  wchar_t wc;
   int i;
-#ifdef USE_XAW
-  unsigned char data[4];
+#ifdef USE_XM
+  char data[2];
+#elif defined(USE_XAW)
+  Utf8Buffer utf8;
 #elif defined(USE_WINDOWS)
-  wchar_t data[2] = {0};
+  wchar_t data[3];
 #endif
-  unsigned char c;
-
-  if (!displayb[0] || (memcmp(brl->buffer,displayedWindow,brl->y*brl->x) == 0)) return 1;
-
-  for (i=0;i<brl->y*brl->x;i++)
-    if (displayedWindow[i] != brl->buffer[i]) {
-      c = brl->buffer[i];
-      c =
-	 (!!(c&BRL_DOT1))<<0
-	|(!!(c&BRL_DOT2))<<1
-	|(!!(c&BRL_DOT3))<<2
-	|(!!(c&BRL_DOT4))<<3
-	|(!!(c&BRL_DOT5))<<4
-	|(!!(c&BRL_DOT6))<<5
-	|(!!(c&BRL_DOT7))<<6
-	|(!!(c&BRL_DOT8))<<7;
-#ifdef USE_XAW
-      data[0]=0xe0|((0x28>>4)&0x0f);
-      data[1]=0x80|((0x28<<2)&0x3f)|(c>>6);
-      data[2]=0x80                 |(c&0x3f);
-      data[3]=0;
-
-      XtVaSetValues(displayb[i],
-	XtNlabel, data,
-	NULL);
-#elif defined(USE_WINDOWS)
-      data[0] = BRL_UC_ROW | c;
-      data[1] = 0;
-      SetWindowTextW(displayb[i],data);
-#endif /* USE_WINDOWS */
-      displayedWindow[i] = brl->buffer[i];
-  }
-#endif /* USE_XAW || USE_WINDOWS */
-  return 1;
-}
-
-static int brl_writeVisual(BrailleDisplay *brl)
-{
-  int i;
-  unsigned char data[3];
 
   if (lastcursor != brl->cursor) {
     if (lastcursor>=0) {
@@ -1203,41 +1173,80 @@ static int brl_writeVisual(BrailleDisplay *brl)
     }
   }
 
-  if (memcmp(brl->buffer,displayedVisual,brl->y*brl->x) == 0) return 1;
-
-  for (i=0;i<brl->y*brl->x;i++) {
-    if (displayedVisual[i] != brl->buffer[i]) {
-      displayedVisual[i] = brl->buffer[i];
-      data[0]=brl->buffer[i];
-      if (data[0]==0) data[0]=' ';
-#ifdef USE_WINDOWS
-      else if (data[0]=='&') {
-	data[1] = '&';
-	data[2] = 0;
-      } else
-#endif
-      data[1]=0;
+  if (text && memcmp(text,displayedVisual,brl->y*brl->x)) {
+    for (i=0;i<brl->y*brl->x;i++) {
+      if (displayedVisual[i] != text[i]) {
+	wc = text[i];
+	if (wc == 0) wc = L' ';
+#ifdef USE_XM
+	if (wc < 0x100)
+	  data[0] = wc;
+	else
+	  data[0] = '?';
+	data[1] = 0;
+#elif defined(USE_XAW)
+	convertWcharToUtf8(wc, utf8);
+#elif defined(USE_WINDOWS)
+	data[0] = wc;
+	if (data[0]==L'&') {
+	  data[1] = L'&';
+	  data[2] = 0;
+	} else
+	  data[1]=0;
+#else /* USE_ */
+#error Toolkit cursor not specified
+#endif /* USE_ */
 
 #if defined(USE_XT)
 #ifdef USE_XM
-      display_cs = XmStringCreateLocalized(data);
+	display_cs = XmStringCreateLocalized(data);
 #endif /* USE_XM */
-      XtVaSetValues(display[i],
+	XtVaSetValues(display[i],
 #ifdef USE_XAW
-	XtNlabel, data,
+	  XtNlabel, utf8,
 #else /* USE_XAW */
-	XmNlabelString, display_cs,
+	  XmNlabelString, display_cs,
 #endif /* USE_XAW */
-	NULL);
+	  NULL);
 #ifdef USE_XM
-      XmStringFree(display_cs);
+	XmStringFree(display_cs);
 #endif /* USE_XM */
 #elif defined(USE_WINDOWS)
-      SetWindowText(display[i],data);
+	SetWindowTextW(display[i],data);
 #else /* USE_ */
 #error Toolkit display refresh unspecified
 #endif /* USE_ */
+	displayedVisual[i] = text[i];
+      }
     }
   }
+
+#if defined(USE_XAW) || defined(USE_WINDOWS)
+  if (!displayb[0] || (memcmp(brl->buffer,displayedWindow,brl->y*brl->x) == 0)) return 1;
+
+  for (i=0;i<brl->y*brl->x;i++)
+    if (displayedWindow[i] != brl->buffer[i]) {
+      unsigned char c = brl->buffer[i];
+      c =
+	 (!!(c&BRL_DOT1))<<0
+	|(!!(c&BRL_DOT2))<<1
+	|(!!(c&BRL_DOT3))<<2
+	|(!!(c&BRL_DOT4))<<3
+	|(!!(c&BRL_DOT5))<<4
+	|(!!(c&BRL_DOT6))<<5
+	|(!!(c&BRL_DOT7))<<6
+	|(!!(c&BRL_DOT8))<<7;
+#ifdef USE_XAW
+      convertWcharToUtf8(BRL_UC_ROW | c, utf8);
+
+      XtVaSetValues(displayb[i], XtNlabel, utf8, NULL);
+#elif defined(USE_WINDOWS)
+      data[0] = BRL_UC_ROW | c;
+      data[1] = 0;
+      SetWindowTextW(displayb[i],data);
+#endif /* USE_WINDOWS */
+      displayedWindow[i] = brl->buffer[i];
+  }
+#endif /* USE_XAW || USE_WINDOWS */
   return 1;
 }
