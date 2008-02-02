@@ -227,18 +227,20 @@ loadTranslationTable (const char *path, FILE *file, TranslationTable table, int 
 
 unsigned char
 convertWcharToDots (TranslationTable table, wchar_t character) {
-  if (!iswLatin1(character)) {
-    const wchar_t cellMask = 0XFF;
-    const wchar_t row = character & ~cellMask;
+  const wchar_t cellMask = 0XFF;
 
-    if (row == BRL_UC_ROW) return character & cellMask;
-    if (row == 0XF000) return table[character & cellMask];
-  }
+  switch (character & ~cellMask) {
+    case BRL_UC_ROW:
+      return character & cellMask;
 
-  {
-    int byte = convertWcharToChar(character);
-    if (byte == EOF) byte = '?';
-    return table[byte];
+    case 0XF000:
+      return table[character & cellMask];
+
+    default: {
+      int byte = convertWcharToChar(character);
+      if (byte == EOF) byte = '?';
+      return table[byte];
+    }
   }
 }
 
