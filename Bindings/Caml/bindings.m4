@@ -110,15 +110,15 @@ else
         if echo "let _ = Sys.os_type;;" | ocaml | grep -q Win32; then
             AC_MSG_RESULT(Win32)
             OCAMLWIN32=yes
-            OCAML_CLIBS=libbrlapi.a
+            OCAML_CLIBS=libbrlapi_stubs.a
         elif echo "let _ = Sys.os_type;;" | ocaml | grep -q Cygwin; then
             AC_MSG_RESULT(Cygwin)
             OCAMLWIN32=yes
-            OCAML_CLIBS=libbrlapi.a
+            OCAML_CLIBS=libbrlapi_stubs.a
         else
             AC_MSG_RESULT(Unix)
             OCAMLWIN32=no
-            OCAML_CLIBS="libbrlapi.a dllbrlapi.so"
+            OCAML_CLIBS="libbrlapi_stubs.a dllbrlapi_stubs.so"
         fi
     
         # checking for ocamlfindlib
