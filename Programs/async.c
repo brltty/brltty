@@ -21,6 +21,10 @@
 #include <errno.h>
 #include <sys/time.h>
 
+#ifdef __MSDOS__
+#include "sys_msdos.h"
+#endif /* __MSDOS__ */
+
 #if defined(__MINGW32__)
 
 typedef HANDLE MonitorEntry;

@@ -220,12 +220,13 @@ cmdBrlttyToBrlapi (int command) {
   switch (command & BRL_MSK_BLK) {
   case BRL_BLK_PASSCHAR: {
     wchar_t wc = convertCharToWchar(command & BRL_MSK_ARG);
-    if (wc < 0x100)
+    if (iswLatin1(wc)) {
       /* latin1 character */
       code = wc;
-    else
+    } else {
       /* unicode character */
       code = BRLAPI_KEY_SYM_UNICODE | wc;
+    }
     break;
   }
   case BRL_BLK_PASSKEY:

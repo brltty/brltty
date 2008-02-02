@@ -103,7 +103,7 @@ convertCharToWchar (char c) {
 
 int
 convertWcharToChar (wchar_t wc) {
-  if (wc < 0X100) return wc;
+  if (iswLatin1(wc)) return wc;
   return EOF;
 }
 #endif /* conversions */
@@ -112,7 +112,7 @@ size_t
 convertWcharToUtf8 (wchar_t wc, Utf8Buffer utf8) {
   size_t utfs;
 
-  if (wc < 0X80) {
+  if (!(wc & ~0X7F)) {
     *utf8 = wc;
     utfs = 1;
   } else {

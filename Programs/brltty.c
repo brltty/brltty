@@ -446,17 +446,18 @@ showInfo (void) {
   if (size < 21) {
     wchar_t characters[size];
     int length;
-    unsigned char cells[5];
-    char prefix[sizeof(cells)];
+    const int cellCount = 5;
+    unsigned char cells[cellCount];
+    char prefix[cellCount];
 
-    memset(cells, 0, sizeof(cells));
+    memset(cells, 0, cellCount);
     setCoordinateUpper(&cells[0], scr.posx+1, scr.posy+1);
     setCoordinateLower(&cells[0], p->winx+1, p->winy+1);
     setStateDots(&cells[4]);
 
-    memset(prefix, 'x', sizeof(prefix));
+    memset(prefix, 'x', cellCount);
     snprintf(text, sizeof(text), "%.*s %02d %c%c%c%c%c%c%n",
-             sizeof(prefix), prefix,
+             cellCount, prefix,
              scr.number,
              p->trackCursor? 't': ' ',
              prefs.showCursor? (prefs.blinkingCursor? 'B': 'v'):
@@ -471,7 +472,7 @@ showInfo (void) {
     {
       int i;
       for (i=0; i<length; ++i) {
-        if (i < sizeof(cells)) {
+        if (i < cellCount) {
           characters[i] = BRL_UC_ROW | cells[i];
         } else {
           wint_t character = convertCharToWchar(text[i]);

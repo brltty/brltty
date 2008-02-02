@@ -284,7 +284,6 @@ static void sayit(SpeechSynthesizer *spk, const unsigned char *text, size_t text
 {
   unsigned char l[5];
   if(helper_fd_out < 0) return;
-  LogPrint(LOG_DEBUG,"Say %d bytes", textlen);
   l[0] = 2; /* say code */
   l[1] = textlen>>8;
   l[2] = textlen & 0xFF;
