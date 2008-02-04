@@ -249,7 +249,10 @@ setCharacterSet (const char *name) {
 
 wint_t
 convertCharToWchar (char c) {
-  return characterSet->toUnicode[c & 0XFF];
+  uint16_t wc = characterSet->toUnicode[c & 0XFF];
+  if (!wc && c) return WEOF;
+  if ((sizeof(wchar_t) == 1) && !iswLatin1(wc)) return WEOF;
+  return wc;
 }
 
 int
@@ -464,6 +467,11 @@ setCharset (const char *name) {
       }
     }
   }
+
+#elif defined(__MINGW32__)
+
+#else /* conversions */
+  if (!setCharacterSet(charset)) return 0;
 #endif /* conversions */
 
   if (currentCharset) free(currentCharset);
