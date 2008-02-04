@@ -1031,47 +1031,25 @@ overlayAttributesUnderline (unsigned char *cell, unsigned char attributes) {
 }
 
 static int
-insertCharacter (unsigned char character, int flags) {
-  if (islower(character)) {
-    if (flags & (BRL_FLG_CHAR_SHIFT | BRL_FLG_CHAR_UPPER)) character = toupper(character);
-  } else if (flags & BRL_FLG_CHAR_SHIFT) {
-    switch (character) {
-      case '1': character = '!'; break;
-      case '2': character = '@'; break;
-      case '3': character = '#'; break;
-      case '4': character = '$'; break;
-      case '5': character = '%'; break;
-      case '6': character = '^'; break;
-      case '7': character = '&'; break;
-      case '8': character = '*'; break;
-      case '9': character = '('; break;
-      case '0': character = ')'; break;
-      case '-': character = '_'; break;
-      case '=': character = '+'; break;
-      case '[': character = '{'; break;
-      case ']': character = '}'; break;
-      case'\\': character = '|'; break;
-      case ';': character = ':'; break;
-      case'\'': character = '"'; break;
-      case '`': character = '~'; break;
-      case ',': character = '<'; break;
-      case '.': character = '>'; break;
-      case '/': character = '?'; break;
-    }
-  }
+insertKey (ScreenKey key, int flags) {
+  if (flags & BRL_FLG_CHAR_SHIFT) key |= SCR_KEY_SHIFT;
+  if (flags & BRL_FLG_CHAR_UPPER) key |= SCR_KEY_UPPER;
+  if (flags & BRL_FLG_CHAR_CONTROL) key |= SCR_KEY_CONTROL;
+  if (flags & BRL_FLG_CHAR_META) key |= SCR_KEY_ALT_LEFT;
+  return insertScreenKey(key);
+}
 
-  if (flags & BRL_FLG_CHAR_CONTROL) {
-    if ((character & 0X6F) == 0X2F)
-      character |= 0X50;
-    else
-      character &= 0X9F;
-  }
+static int
+insertCharacter (unsigned char character, int flags) {
+  ScreenKey key;
 
   {
-    ScreenKey key = character;
-    if (flags & BRL_FLG_CHAR_META) key |= SCR_KEY_MOD_META;
-    return insertKey(key);
+    wint_t wc = convertCharToWchar(character);
+    if (wc == WEOF) return 0;
+    key = wc;
   }
+
+  return insertKey(key, flags);
 }
 
 static RepeatState repeatState;
@@ -1901,7 +1879,8 @@ runProgram (void) {
 
               switch (blk) {
                 case BRL_BLK_PASSKEY: {
-                  unsigned short key;
+                  ScreenKey key;
+
                   switch (arg) {
                     case BRL_KEY_ENTER:
                       key = SCR_KEY_ENTER;
@@ -1950,8 +1929,8 @@ runProgram (void) {
                       key = SCR_KEY_FUNCTION + (arg - BRL_KEY_FUNCTION);
                       break;
                   }
-                  if (flags & BRL_FLG_CHAR_META) key |= SCR_KEY_MOD_META;
-                  if (!insertKey(key)) {
+
+                  if (!insertKey(key, flags)) {
                   badKey:
                     playTune(&tune_command_rejected);
                   }

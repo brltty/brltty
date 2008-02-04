@@ -627,27 +627,8 @@ insertKey_AtSpiScreen (ScreenKey key) {
   long keysym;
   int modMeta=0, modControl=0;
 
-  if (key < SCR_KEY_ENTER) {
-    wint_t wc;
-    if (key & SCR_KEY_MOD_META) {
-      key &= ~SCR_KEY_MOD_META;
-      modMeta = 1;
-    }
-
-    if (!(key & 0xE0)) {
-      key |= 0x40;
-      modControl = 1;
-    }
-
-    wc = convertCharToWchar(key);
-    if (wc == WEOF)
-      keysym = key; /* let's hope this is more or less correct */
-    else if (wc < 0x100)
-      keysym = wc; /* latin1 character */
-    else
-      keysym = 0x1000000 | wc;
-  } else {
-    switch (key) {
+  if (isSpecialKey(key)) {
+    switch (key & SCR_KEY_CHAR_MASK) {
       case SCR_KEY_ENTER:         keysym = XK_KP_Enter;  break;
       case SCR_KEY_TAB:           keysym = XK_Tab;       break;
       case SCR_KEY_BACKSPACE:     keysym = XK_BackSpace; break;
@@ -699,6 +680,26 @@ insertKey_AtSpiScreen (ScreenKey key) {
       case SCR_KEY_FUNCTION + 34: keysym = XK_F35;       break;
       default: LogPrint(LOG_WARNING, "key not insertable: %04X", key); return 0;
     }
+  } else {
+    wchar_t wc;
+
+    setKeyModifiers(&key, SCR_KEY_CONTROL);
+
+    if (key & SCR_KEY_ALT_LEFT) {
+      key &= ~SCR_KEY_ALT_LEFT;
+      modMeta = 1;
+    }
+
+    if (key & SCR_KEY_CONTROL) {
+      key &= ~SCR_KEY_CONTROL;
+      modControl = 1;
+    }
+
+    wc = key & SCR_KEY_CHAR_MASK;
+    if (wc < 0x100)
+      keysym = wc; /* latin1 character */
+    else
+      keysym = 0x1000000 | wc;
   }
   LogPrint(LOG_DEBUG, "inserting key: %04X -> %s%s%ld",
            key,

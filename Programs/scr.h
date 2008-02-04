@@ -59,9 +59,17 @@ extern void setScreenCharacterText (ScreenCharacter *characters, char text, size
 extern void copyScreenCharacterText (ScreenCharacter *characters, const char *text, size_t count);
 extern void setScreenCharacterAttributes (ScreenCharacter *characters, unsigned char attributes, size_t count);
 
-#define SCR_KEY_MOD_META 0X100
+#define SCR_KEY_SHIFT     0X40000000
+#define SCR_KEY_UPPER     0X20000000
+#define SCR_KEY_CONTROL   0X10000000
+#define SCR_KEY_ALT_LEFT  0X08000000
+#define SCR_KEY_ALT_RIGHT 0X04000000
+#define SCR_KEY_CHAR_MASK 0X00FFFFFF
+
+#define SCR_KEY_UNICODE_ROW 0XF800
+
 typedef enum {
-  SCR_KEY_ENTER = 0X200,
+  SCR_KEY_ENTER = SCR_KEY_UNICODE_ROW,
   SCR_KEY_TAB,
   SCR_KEY_BACKSPACE,
   SCR_KEY_ESCAPE,
@@ -98,9 +106,7 @@ extern void deactivateHelpScreen (void);
 extern void describeScreen (ScreenDescription *);		/* get screen status */
 extern int readScreen (short left, short top, short width, short height, ScreenCharacter *buffer);
 extern int readScreenText (short left, short top, short width, short height, wchar_t *buffer);
-extern int insertKey (ScreenKey key);
-extern int insertCharacters (const char *, int);
-extern int insertString (const char *);
+extern int insertScreenKey (ScreenKey key);
 extern int routeCursor (int column, int row, int screen);
 extern int highlightScreenRegion (int left, int right, int top, int bottom);
 extern int unhighlightScreenRegion (void);

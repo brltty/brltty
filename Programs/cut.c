@@ -199,18 +199,14 @@ cutLine (int column, int row) {
 
 int
 cutPaste (void) {
-  if (cutLength) {
-    char characters[cutLength];
+  if (!cutLength) return 0;
+
+  {
     int i;
-
-    for (i=0; i<cutLength; ++i) {
-      int c = convertWcharToChar(cutBuffer[i]);
-      if (c == EOF) c = '?';
-      characters[i] = c;
-    }
-
-    if (insertCharacters(characters, cutLength)) return 1;
+    for (i=0; i<cutLength; ++i)
+      if (!insertScreenKey(cutBuffer[i]))
+        return 0;
   }
 
-  return 0;
+  return 1;
 }

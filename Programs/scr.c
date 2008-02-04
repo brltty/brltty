@@ -270,21 +270,8 @@ readScreenText (short left, short top, short width, short height, wchar_t *buffe
 }
 
 int
-insertKey (ScreenKey key) {
+insertScreenKey (ScreenKey key) {
   return currentScreen->insertKey(key);
-}
-
-int
-insertCharacters (const char *characters, int count) {
-  while (count-- > 0)
-    if (!insertKey((unsigned char)*characters++))
-      return 0;
-  return 1;
-}
-
-int
-insertString (const char *string) {
-  return insertCharacters(string, strlen(string));
 }
 
 int

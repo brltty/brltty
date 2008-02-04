@@ -30,6 +30,7 @@
 #include "misc.h"
 #include "system.h"
 #include "sys_linux.h"
+#include "charset.h"
 #include "brldefs.h"
 
 typedef enum {
@@ -837,21 +838,49 @@ insertUinputKey (ScreenKey key, int modShift, int modControl, int modMeta) {
 
 static int
 insertByte (unsigned char byte) {
-  if (controlConsole(TIOCSTI, &byte) != -1) {
-    return 1;
-  } else {
-    LogError("ioctl TIOCSTI");
-  }
+  if (controlConsole(TIOCSTI, &byte) != -1) return 1;
+  LogError("ioctl TIOCSTI");
   return 0;
 }
 
 static int
-insertUtf8 (unsigned char byte) {
-  if (byte & 0X80) {
-    if (!insertByte(0XC0 | (byte >> 6))) return 0;
-    byte &= 0XBF;
+insertXlate (wchar_t character) {
+  {
+    int byte = convertWcharToChar(character);
+    if (byte != EOF) return insertByte(byte);
   }
-  return insertByte(byte);
+
+  {
+    uint32_t value = character;
+    LogPrint(LOG_WARNING, "character 0X%02" PRIX32 " not insertable in xlate mode." , value);
+  }
+
+  return 0;
+}
+
+static int
+insertUnicode (wchar_t character) {
+  {
+    Utf8Buffer utf8;
+    size_t utfs = convertWcharToUtf8(character, utf8);
+
+    if (utfs > 0) {
+      int i;
+
+      for (i=0; i<utfs; ++i)
+        if (!insertByte(utf8[i]))
+          return 0;
+
+      return 1;
+    }
+  }
+
+  {
+    uint32_t value = character;
+    LogPrint(LOG_WARNING, "character 0X%02" PRIX32 " not insertable in unicode mode." , value);
+  }
+
+  return 0;
 }
 
 static const unsigned char emul0XtScanCodeToLinuxKeycode[0X80] = {
@@ -888,20 +917,24 @@ insertCode (ScreenKey key, int raw) {
   int modControl = 0;
   int modMeta = 0;
 
-  if (key & SCR_KEY_MOD_META) {
-    key &= ~SCR_KEY_MOD_META;
+  setKeyModifiers(&key, SCR_KEY_SHIFT | SCR_KEY_CONTROL);
+
+  if (key & SCR_KEY_SHIFT) {
+    key &= ~SCR_KEY_SHIFT;
+    modShift = 1;
+  }
+
+  if (key & SCR_KEY_CONTROL) {
+    key &= ~SCR_KEY_CONTROL;
+    modControl = 1;
+  }
+
+  if (key & SCR_KEY_ALT_LEFT) {
+    key &= ~SCR_KEY_ALT_LEFT;
     modMeta = 1;
   }
 
-  if (key < SCR_KEY_ENTER) {
-    if ((key >= 'A') && (key <= 'Z')) {
-      key = (key - 'A') + 'a';
-      modShift = 1;
-    } else if (!(key & 0XE0)) {
-      key |= 0X60;
-      modControl = 1;
-    }
-  }
+  key &= SCR_KEY_CHAR_MASK;
 
   switch (key) {
     case SCR_KEY_ESCAPE:        code = 0X01; break;
@@ -981,187 +1014,196 @@ insertCode (ScreenKey key, int raw) {
         case SCR_KEY_CURSOR_DOWN:  code = 0X50; break;
         case SCR_KEY_CURSOR_RIGHT: code = 0X4D; break;
         default:
-          if (insertUinputKey(key, modShift, modControl, modMeta)) return 1;
-          LogPrint(LOG_WARNING, "key %4.4X not suported in raw keycode mode.", key);
+          if (insertUinputKey(key&SCR_KEY_CHAR_MASK, modShift, modControl, modMeta)) return 1;
+          LogPrint(LOG_WARNING, "key %04X not suported in raw keycode mode.", key);
           return 0;
       }
 
       if (raw) {
         prefix = 0XE0;
       } else if (!(code = emul0XtScanCodeToLinuxKeycode[code])) {
-        LogPrint(LOG_WARNING, "key %4.4X not suported in medium raw keycode mode.", key);
+        LogPrint(LOG_WARNING, "key %04X not suported in medium raw keycode mode.", key);
         return 0;
       }
       break;
   }
 
   {
-    unsigned char buffer[10];
-    unsigned short count = 0;
-    const unsigned char *byte = buffer;
+    const unsigned char codeControl = 0X1D;
+    const unsigned char codeMeta = 0X38;
+    const unsigned char codeShift = 0X2A;
+    const unsigned char bitRelease = 0X80;
 
-    if (modControl) buffer[count++] = 0X1D;
-    if (modMeta) buffer[count++] = 0X38;
-    if (modShift) buffer[count++] = 0X2A;
-    if (prefix) buffer[count++] = prefix;
-    buffer[count++] = code;
+    unsigned char codes[10];
+    unsigned int count = 0;
+    const unsigned char *byte = codes;
 
-    if (prefix) buffer[count++] = prefix;
-    buffer[count++] = code | 0X80;
-    if (modShift) buffer[count++] = 0X2A | 0X80;
-    if (modMeta) buffer[count++] = 0X38 | 0X80;
-    if (modControl) buffer[count++] = 0X1D | 0X80;
+    if (modControl) codes[count++] = codeControl;
+    if (modMeta) codes[count++] = codeMeta;
+    if (modShift) codes[count++] = codeShift;
+    if (prefix) codes[count++] = prefix;
+    codes[count++] = code;
 
-    while (count--) {
-      if (!insertByte(*byte++)) return 0;
-    }
+    if (prefix) codes[count++] = prefix;
+    codes[count++] = code | bitRelease;
+    if (modShift) codes[count++] = codeShift | bitRelease;
+    if (modMeta) codes[count++] = codeMeta | bitRelease;
+    if (modControl) codes[count++] = codeControl | bitRelease;
+
+    while (count--)
+      if (!insertByte(*byte++))
+        return 0;
   }
   return 1;
 }
 
 static int
-insertMapped (ScreenKey key, int (*byteInserter)(unsigned char byte)) {
-  char buffer[2];
-  char *sequence;
-  char *end;
+insertMapped (ScreenKey key, int (*insertCharacter)(wchar_t character)) {
+  wchar_t buffer[2];
+  wchar_t *sequence;
+  wchar_t *end;
 
-  if (key < SCR_KEY_ENTER) {
-    sequence = end = buffer + sizeof(buffer);
-    *--sequence = key & 0XFF;
+  if (isSpecialKey(key)) {
+    switch (key & SCR_KEY_CHAR_MASK) {
+      case SCR_KEY_ENTER:
+        sequence = WS_C("\r");
+        break;
+      case SCR_KEY_TAB:
+        sequence = WS_C("\t");
+        break;
+      case SCR_KEY_BACKSPACE:
+        sequence = WS_C("\x7f");
+        break;
+      case SCR_KEY_ESCAPE:
+        sequence = WS_C("\x1b");
+        break;
+      case SCR_KEY_CURSOR_LEFT:
+        sequence = WS_C("\x1b[D");
+        break;
+      case SCR_KEY_CURSOR_RIGHT:
+        sequence = WS_C("\x1b[C");
+        break;
+      case SCR_KEY_CURSOR_UP:
+        sequence = WS_C("\x1b[A");
+        break;
+      case SCR_KEY_CURSOR_DOWN:
+        sequence = WS_C("\x1b[B");
+        break;
+      case SCR_KEY_PAGE_UP:
+        sequence = WS_C("\x1b[5~");
+        break;
+      case SCR_KEY_PAGE_DOWN:
+        sequence = WS_C("\x1b[6~");
+        break;
+      case SCR_KEY_HOME:
+        sequence = WS_C("\x1b[1~");
+        break;
+      case SCR_KEY_END:
+        sequence = WS_C("\x1b[4~");
+        break;
+      case SCR_KEY_INSERT:
+        sequence = WS_C("\x1b[2~");
+        break;
+      case SCR_KEY_DELETE:
+        sequence = WS_C("\x1b[3~");
+        break;
+      case SCR_KEY_FUNCTION + 0:
+        sequence = WS_C("\x1b[[A");
+        break;
+      case SCR_KEY_FUNCTION + 1:
+        sequence = WS_C("\x1b[[B");
+        break;
+      case SCR_KEY_FUNCTION + 2:
+        sequence = WS_C("\x1b[[C");
+        break;
+      case SCR_KEY_FUNCTION + 3:
+        sequence = WS_C("\x1b[[D");
+        break;
+      case SCR_KEY_FUNCTION + 4:
+        sequence = WS_C("\x1b[[E");
+        break;
+      case SCR_KEY_FUNCTION + 5:
+        sequence = WS_C("\x1b[17~");
+        break;
+      case SCR_KEY_FUNCTION + 6:
+        sequence = WS_C("\x1b[18~");
+        break;
+      case SCR_KEY_FUNCTION + 7:
+        sequence = WS_C("\x1b[19~");
+        break;
+      case SCR_KEY_FUNCTION + 8:
+        sequence = WS_C("\x1b[20~");
+        break;
+      case SCR_KEY_FUNCTION + 9:
+        sequence = WS_C("\x1b[21~");
+        break;
+      case SCR_KEY_FUNCTION + 10:
+        sequence = WS_C("\x1b[23~");
+        break;
+      case SCR_KEY_FUNCTION + 11:
+        sequence = WS_C("\x1b[24~");
+        break;
+      case SCR_KEY_FUNCTION + 12:
+        sequence = WS_C("\x1b[25~");
+        break;
+      case SCR_KEY_FUNCTION + 13:
+        sequence = WS_C("\x1b[26~");
+        break;
+      case SCR_KEY_FUNCTION + 14:
+        sequence = WS_C("\x1b[28~");
+        break;
+      case SCR_KEY_FUNCTION + 15:
+        sequence = WS_C("\x1b[29~");
+        break;
+      case SCR_KEY_FUNCTION + 16:
+        sequence = WS_C("\x1b[31~");
+        break;
+      case SCR_KEY_FUNCTION + 17:
+        sequence = WS_C("\x1b[32~");
+        break;
+      case SCR_KEY_FUNCTION + 18:
+        sequence = WS_C("\x1b[33~");
+        break;
+      case SCR_KEY_FUNCTION + 19:
+        sequence = WS_C("\x1b[34~");
+        break;
+      default:
+	if (insertUinputKey(key & SCR_KEY_CHAR_MASK,
+                            !!(key & SCR_KEY_SHIFT),
+                            !!(key & SCR_KEY_CONTROL),
+                            !!(key & SCR_KEY_ALT_LEFT))) return 1;
+        LogPrint(LOG_WARNING, "key %04X not supported in xlate mode.", key);
+        return 0;
+    }
+    end = sequence + wcslen(sequence);
+  } else {
+    sequence = end = buffer + ARRAY_COUNT(buffer);
+    *--sequence = key & SCR_KEY_CHAR_MASK;
 
-    if (key & SCR_KEY_MOD_META) {
+    if (key & SCR_KEY_ALT_LEFT) {
       int meta;
       if (controlConsole(KDGKBMETA, &meta) == -1) return 0;
 
       switch (meta) {
-        case K_METABIT:
-          *sequence |= 0X80;
-          break;
-
         case K_ESCPREFIX:
           *--sequence = 0X1B;
           break;
+
+        case K_METABIT:
+          if (*sequence < 0X80) {
+            *sequence |= 0X80;
+            break;
+          }
 
         default:
           LogPrint(LOG_WARNING, "unsupported keyboard meta mode: %d", meta);
           return 0;
       }
     }
-  } else {
-    switch (key) {
-      case SCR_KEY_ENTER:
-        sequence = "\r";
-        break;
-      case SCR_KEY_TAB:
-        sequence = "\t";
-        break;
-      case SCR_KEY_BACKSPACE:
-        sequence = "\x7f";
-        break;
-      case SCR_KEY_ESCAPE:
-        sequence = "\x1b";
-        break;
-      case SCR_KEY_CURSOR_LEFT:
-        sequence = "\x1b[D";
-        break;
-      case SCR_KEY_CURSOR_RIGHT:
-        sequence = "\x1b[C";
-        break;
-      case SCR_KEY_CURSOR_UP:
-        sequence = "\x1b[A";
-        break;
-      case SCR_KEY_CURSOR_DOWN:
-        sequence = "\x1b[B";
-        break;
-      case SCR_KEY_PAGE_UP:
-        sequence = "\x1b[5~";
-        break;
-      case SCR_KEY_PAGE_DOWN:
-        sequence = "\x1b[6~";
-        break;
-      case SCR_KEY_HOME:
-        sequence = "\x1b[1~";
-        break;
-      case SCR_KEY_END:
-        sequence = "\x1b[4~";
-        break;
-      case SCR_KEY_INSERT:
-        sequence = "\x1b[2~";
-        break;
-      case SCR_KEY_DELETE:
-        sequence = "\x1b[3~";
-        break;
-      case SCR_KEY_FUNCTION + 0:
-        sequence = "\x1b[[A";
-        break;
-      case SCR_KEY_FUNCTION + 1:
-        sequence = "\x1b[[B";
-        break;
-      case SCR_KEY_FUNCTION + 2:
-        sequence = "\x1b[[C";
-        break;
-      case SCR_KEY_FUNCTION + 3:
-        sequence = "\x1b[[D";
-        break;
-      case SCR_KEY_FUNCTION + 4:
-        sequence = "\x1b[[E";
-        break;
-      case SCR_KEY_FUNCTION + 5:
-        sequence = "\x1b[17~";
-        break;
-      case SCR_KEY_FUNCTION + 6:
-        sequence = "\x1b[18~";
-        break;
-      case SCR_KEY_FUNCTION + 7:
-        sequence = "\x1b[19~";
-        break;
-      case SCR_KEY_FUNCTION + 8:
-        sequence = "\x1b[20~";
-        break;
-      case SCR_KEY_FUNCTION + 9:
-        sequence = "\x1b[21~";
-        break;
-      case SCR_KEY_FUNCTION + 10:
-        sequence = "\x1b[23~";
-        break;
-      case SCR_KEY_FUNCTION + 11:
-        sequence = "\x1b[24~";
-        break;
-      case SCR_KEY_FUNCTION + 12:
-        sequence = "\x1b[25~";
-        break;
-      case SCR_KEY_FUNCTION + 13:
-        sequence = "\x1b[26~";
-        break;
-      case SCR_KEY_FUNCTION + 14:
-        sequence = "\x1b[28~";
-        break;
-      case SCR_KEY_FUNCTION + 15:
-        sequence = "\x1b[29~";
-        break;
-      case SCR_KEY_FUNCTION + 16:
-        sequence = "\x1b[31~";
-        break;
-      case SCR_KEY_FUNCTION + 17:
-        sequence = "\x1b[32~";
-        break;
-      case SCR_KEY_FUNCTION + 18:
-        sequence = "\x1b[33~";
-        break;
-      case SCR_KEY_FUNCTION + 19:
-        sequence = "\x1b[34~";
-        break;
-      default:
-	if (insertUinputKey(key & ~SCR_KEY_MOD_META, 0, 0,
-                            !!(key & SCR_KEY_MOD_META))) return 1;
-        LogPrint(LOG_WARNING, "key %4.4X not suported in ANSI mode.", key);
-        return 0;
-    }
-    end = sequence + strlen(sequence);
   }
 
   while (sequence != end)
-    if (!byteInserter(*sequence++))
+    if (!insertCharacter(*sequence++))
       return 0;
   return 1;
 }
@@ -1181,10 +1223,10 @@ insertKey_LinuxScreen (ScreenKey key) {
           if (insertCode(key, 0)) ok = 1;
           break;
         case K_XLATE:
-          if (insertMapped(key, &insertByte)) ok = 1;
+          if (insertMapped(key, insertXlate)) ok = 1;
           break;
         case K_UNICODE:
-          if (insertMapped(key, &insertUtf8)) ok = 1;
+          if (insertMapped(key, insertUnicode)) ok = 1;
           break;
         default:
           LogPrint(LOG_WARNING, "unsupported keyboard mode: %d", mode);

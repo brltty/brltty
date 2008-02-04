@@ -177,6 +177,7 @@ typedef int SocketDescriptor;
 #define towupper toupper
 
 #define swprintf snprintf
+#define vswprintf vsnprintf
 
 #define WC_C(wc) wc
 #define WS_C(ws) ws

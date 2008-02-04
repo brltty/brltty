@@ -104,7 +104,7 @@ insertCursorKey (CursorRoutingData *crd, ScreenKey key) {
   sigprocmask(SIG_BLOCK, &crd->signalMask, &oldMask);
 #endif /* SIGCHLD */
 
-  insertKey(key);
+  insertScreenKey(key);
 
 #ifdef SIGCHLD
   sigprocmask(SIG_SETMASK, &oldMask, NULL);

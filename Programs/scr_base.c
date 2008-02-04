@@ -24,6 +24,78 @@
 #include "scr.h"
 #include "scr_base.h"
 
+int
+isSpecialKey (ScreenKey key) {
+  return (key & (SCR_KEY_CHAR_MASK & ~0XFF)) == SCR_KEY_UNICODE_ROW;
+}
+
+void
+applyKeyModifiers (ScreenKey *key, ScreenKey which) {
+  if (!isSpecialKey(*key)) {
+    wchar_t character = *key & SCR_KEY_CHAR_MASK;
+    ScreenKey modifiers = *key & ~SCR_KEY_CHAR_MASK;
+
+    if (which & (SCR_KEY_UPPER | SCR_KEY_SHIFT)) {
+      if (modifiers & (SCR_KEY_UPPER | SCR_KEY_SHIFT)) {
+        if (iswlower(character)) {
+          character = towupper(character);
+          modifiers &= ~SCR_KEY_SHIFT;
+          which &= ~SCR_KEY_SHIFT;
+        }
+        modifiers &= ~SCR_KEY_UPPER;
+      }
+      which &= ~SCR_KEY_UPPER;
+    }
+
+    if (which & SCR_KEY_SHIFT) {
+      if (modifiers & SCR_KEY_SHIFT) {
+        modifiers &= ~SCR_KEY_SHIFT;
+      }
+      which &= ~SCR_KEY_SHIFT;
+    }
+
+    if (which & SCR_KEY_CONTROL) {
+      if (modifiers & SCR_KEY_CONTROL) {
+        modifiers &= ~SCR_KEY_CONTROL;
+      }
+      which &= ~SCR_KEY_CONTROL;
+    }
+
+    *key = character | modifiers;
+  }
+}
+
+void
+setKeyModifiers (ScreenKey *key, ScreenKey which) {
+  if (!isSpecialKey(*key)) {
+    wchar_t character = *key & SCR_KEY_CHAR_MASK;
+    ScreenKey modifiers = *key & ~SCR_KEY_CHAR_MASK;
+
+    if (which & (SCR_KEY_UPPER | SCR_KEY_SHIFT)) {
+      if (iswupper(character)) {
+        character = towlower(character);
+        modifiers ^= SCR_KEY_SHIFT;
+        which &= ~SCR_KEY_SHIFT;
+      }
+      which &= ~SCR_KEY_UPPER;
+    }
+
+    if (which & SCR_KEY_SHIFT) {
+      which &= ~SCR_KEY_SHIFT;
+    }
+
+    if (which & SCR_KEY_CONTROL) {
+      if (character < 0X20) {
+        character |= 0X60;
+        modifiers |= SCR_KEY_CONTROL;
+      }
+      which &= ~SCR_KEY_CONTROL;
+    }
+
+    *key = character | modifiers;
+  }
+}
+
 static const char *text_BaseScreen = "no screen";
 
 static int

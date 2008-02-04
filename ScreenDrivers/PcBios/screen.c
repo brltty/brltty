@@ -26,6 +26,7 @@
 
 #include "misc.h"
 #include "brldefs.h"
+#include "charset.h"
 
 #include "scr_driver.h"
 
@@ -87,14 +88,8 @@ insertMapped (ScreenKey key) {
   char *sequence;
   char *end;
 
-  if (key < SCR_KEY_ENTER) {
-    sequence = end = buffer + sizeof(buffer);
-    *--sequence = key & 0XFF;
-
-    if (key & SCR_KEY_MOD_META)
-      *--sequence = 0X1B;
-  } else {
-    switch (key) {
+  if (isSpecialKey(key)) {
+    switch (key & SCR_KEY_CHAR_MASK) {
       case SCR_KEY_ENTER:
         sequence = "\r";
         break;
@@ -148,6 +143,20 @@ insertMapped (ScreenKey key) {
         return 0;
     }
     end = sequence + strlen(sequence);
+  } else {
+    int character = key & SCR_KEY_CHAR_MASK;
+    int c = convertWcharToChar(character);
+
+    if (c== EOF) {
+      LogPrint(LOG_WARNING, "Character %d not supported", character);
+      return 0;
+    }
+
+    sequence = end = buffer + ARRAY_COUNT(buffer);
+    *--sequence = key & SCR_KEY_CHAR_MASK;
+
+    if (key & SCR_KEY_ALT_LEFT)
+      *--sequence = 0X1B;
   }
 
   while (sequence != end)

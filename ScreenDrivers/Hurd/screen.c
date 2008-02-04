@@ -238,148 +238,149 @@ insertByte (unsigned char byte) {
 }
 
 static int
-insertMapped (ScreenKey key, int (*byteInserter)(unsigned char byte)) {
-  char buffer[2];
-  char *sequence;
-  char *end;
+insertMapped (ScreenKey key, int (*insertCharacter)(wchar_t character)) {
+  wchar_t buffer[2];
+  wchar_t *sequence;
+  wchar_t *end;
 
-  if (key < SCR_KEY_ENTER) {
-    sequence = end = buffer + sizeof(buffer);
-    *--sequence = key & 0XFF;
-
-    if (key & SCR_KEY_MOD_META)
-      *--sequence = 0X1B;
-  } else {
-    switch (key) {
+  if (isSpecialKey(key)) {
+    switch (key & SCR_KEY_CHAR_MASK) {
       case SCR_KEY_ENTER:
-        sequence = "\r";
+        sequence = WS_C("\r");
         break;
       case SCR_KEY_TAB:
-        sequence = "\t";
+        sequence = WS_C("\t");
         break;
       case SCR_KEY_BACKSPACE:
-        sequence = "\x7f";
+        sequence = WS_C("\x7f");
         break;
       case SCR_KEY_ESCAPE:
-        sequence = "\x1b";
+        sequence = WS_C("\x1b");
         break;
       case SCR_KEY_CURSOR_LEFT:
-        sequence = "\x1b[D";
+        sequence = WS_C("\x1b[D");
         break;
       case SCR_KEY_CURSOR_RIGHT:
-        sequence = "\x1b[C";
+        sequence = WS_C("\x1b[C");
         break;
       case SCR_KEY_CURSOR_UP:
-        sequence = "\x1b[A";
+        sequence = WS_C("\x1b[A");
         break;
       case SCR_KEY_CURSOR_DOWN:
-        sequence = "\x1b[B";
+        sequence = WS_C("\x1b[B");
         break;
       case SCR_KEY_PAGE_UP:
-        sequence = "\x1b[5~";
+        sequence = WS_C("\x1b[5~");
         break;
       case SCR_KEY_PAGE_DOWN:
-        sequence = "\x1b[6~";
+        sequence = WS_C("\x1b[6~");
         break;
       case SCR_KEY_HOME:
-        sequence = "\x1b[1~";
+        sequence = WS_C("\x1b[1~");
         break;
       case SCR_KEY_END:
-        sequence = "\x1b[4~";
+        sequence = WS_C("\x1b[4~");
         break;
       case SCR_KEY_INSERT:
-        sequence = "\x1b[2~";
+        sequence = WS_C("\x1b[2~");
         break;
       case SCR_KEY_DELETE:
-        sequence = "\x1b[3~";
+        sequence = WS_C("\x1b[3~");
         break;
       case SCR_KEY_FUNCTION + 0:
-        sequence = "\x1bOP";
+        sequence = WS_C("\x1bOP");
         break;
       case SCR_KEY_FUNCTION + 1:
-        sequence = "\x1bOQ";
+        sequence = WS_C("\x1bOQ");
         break;
       case SCR_KEY_FUNCTION + 2:
-        sequence = "\x1bOR";
+        sequence = WS_C("\x1bOR");
         break;
       case SCR_KEY_FUNCTION + 3:
-        sequence = "\x1bOS";
+        sequence = WS_C("\x1bOS");
         break;
       case SCR_KEY_FUNCTION + 4:
-        sequence = "\x1b[15~";
+        sequence = WS_C("\x1b[15~");
         break;
       case SCR_KEY_FUNCTION + 5:
-        sequence = "\x1b[17~";
+        sequence = WS_C("\x1b[17~");
         break;
       case SCR_KEY_FUNCTION + 6:
-        sequence = "\x1b[18~";
+        sequence = WS_C("\x1b[18~");
         break;
       case SCR_KEY_FUNCTION + 7:
-        sequence = "\x1b[19~";
+        sequence = WS_C("\x1b[19~");
         break;
       case SCR_KEY_FUNCTION + 8:
-        sequence = "\x1b[20~";
+        sequence = WS_C("\x1b[20~");
         break;
       case SCR_KEY_FUNCTION + 9:
-        sequence = "\x1b[21~";
+        sequence = WS_C("\x1b[21~");
         break;
       case SCR_KEY_FUNCTION + 10:
-        sequence = "\x1b[23~";
+        sequence = WS_C("\x1b[23~");
         break;
       case SCR_KEY_FUNCTION + 11:
-        sequence = "\x1b[24~";
+        sequence = WS_C("\x1b[24~");
         break;
       case SCR_KEY_FUNCTION + 12:
-        sequence = "\x1b[25~";
+        sequence = WS_C("\x1b[25~");
         break;
       case SCR_KEY_FUNCTION + 13:
-        sequence = "\x1b[26~";
+        sequence = WS_C("\x1b[26~");
         break;
       case SCR_KEY_FUNCTION + 14:
-        sequence = "\x1b[28~";
+        sequence = WS_C("\x1b[28~");
         break;
       case SCR_KEY_FUNCTION + 15:
-        sequence = "\x1b[29~";
+        sequence = WS_C("\x1b[29~");
         break;
       case SCR_KEY_FUNCTION + 16:
-        sequence = "\x1b[31~";
+        sequence = WS_C("\x1b[31~");
         break;
       case SCR_KEY_FUNCTION + 17:
-        sequence = "\x1b[32~";
+        sequence = WS_C("\x1b[32~");
         break;
       case SCR_KEY_FUNCTION + 18:
-        sequence = "\x1b[33~";
+        sequence = WS_C("\x1b[33~");
         break;
       case SCR_KEY_FUNCTION + 19:
-        sequence = "\x1b[34~";
+        sequence = WS_C("\x1b[34~");
         break;
       default:
-        LogPrint(LOG_WARNING, "Key %4.4X not suported in ANSI mode.", key);
+        LogPrint(LOG_WARNING, "Key %04X not suported in ANSI mode.", key);
         return 0;
     }
-    end = sequence + strlen(sequence);
+    end = sequence + wcslen(sequence);
+  } else {
+    sequence = end = buffer + ARRAY_COUNT(buffer);
+    *--sequence = key & SCR_KEY_CHAR_MASK;
+
+    if (key & SCR_KEY_ALT_LEFT)
+      *--sequence = 0X1B;
   }
 
   while (sequence != end)
-    if (!byteInserter(*sequence++))
+    if (!insertCharacter(*sequence++))
       return 0;
   return 1;
 }
 
 static int
-insertUtf8 (unsigned char byte) {
-  if (byte & 0X80) {
-    if (!insertByte(0XC0 | (byte >> 6))) return 0;
-    byte &= 0XBF;
-  }
-  if (!insertByte(byte)) return 0;
+insertUtf8 (wchar_t character) {
+  Utf8Buffer utf8;
+  size_t utfs = convertWcharToUtf8(character, utf8);
+  int i;
+  for (i=0; i<utfs; ++i)
+    if (!insertByte(utf8[i]))
+      return 0;
   return 1;
 }
 
 static int
 insertKey_HurdScreen (ScreenKey key) {
   LogPrint(LOG_DEBUG, "Insert key: %4.4X", key);
-  return insertMapped(key, &insertUtf8); 
+  return insertMapped(key, insertUtf8); 
 }
 
 static int

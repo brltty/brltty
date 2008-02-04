@@ -22,6 +22,10 @@
 extern "C" {
 #endif /* __cplusplus */
 
+extern int isSpecialKey (ScreenKey key);
+extern void applyKeyModifiers (ScreenKey *key, ScreenKey which);
+extern void setKeyModifiers (ScreenKey *key, ScreenKey which);
+
 typedef struct {
   void (*describe) (ScreenDescription *);
   int (*readCharacters) (const ScreenBox *box, ScreenCharacter *buffer);

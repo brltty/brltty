@@ -202,20 +202,16 @@ readCharacters_ScreenScreen (const ScreenBox *box, ScreenCharacter *buffer) {
 
 static int
 insertKey_ScreenScreen (ScreenKey key) {
-  unsigned char flags = getAuxiliaryData()[1];
+  const unsigned char flags = getAuxiliaryData()[1];
+  wchar_t character = key & SCR_KEY_CHAR_MASK;
   char buffer[3];
   char *sequence;
 
-  LogPrint(LOG_DEBUG, "insert key: %4.4X", key);
-  if (key < SCR_KEY_ENTER) {
-    sequence = buffer + sizeof(buffer);
-    *--sequence = 0;
-    *--sequence = key & 0XFF;
-    if (key & SCR_KEY_MOD_META) *--sequence = 0X1B;
-  } else {
+  LogPrint(LOG_DEBUG, "insert key: %04X", key);
+  if (isSpecialKey(key)) {
 #define KEY(key,string) case (key): sequence = (string); break
 #define CURSOR_KEY(key,string1,string2) KEY((key), ((flags & 0X01)? (string1): (string2)))
-    switch (key) {
+    switch (character) {
       KEY(SCR_KEY_ENTER, "\r");
       KEY(SCR_KEY_TAB, "\t");
       KEY(SCR_KEY_BACKSPACE, "\x7f");
@@ -254,11 +250,22 @@ insertKey_ScreenScreen (ScreenKey key) {
       KEY(SCR_KEY_FUNCTION+19, "\x1b[34~");
 
       default:
-        LogPrint(LOG_WARNING, "unsuported key: %4.4X", key);
+        LogPrint(LOG_WARNING, "unsuported key: %04X", key);
         return 0;
     }
 #undef CURSOR_KEY
 #undef KEY
+  } else {
+    int byte = convertWcharToChar(character);
+
+    if (byte == EOF) {
+      LogPrint(LOG_WARNING, "character not supported in local character set: 0X%04X", key);
+    }
+
+    sequence = buffer + sizeof(buffer);
+    *--sequence = 0;
+    *--sequence = byte;
+    if (key & SCR_KEY_ALT_LEFT) *--sequence = 0X1B;
   }
 
   return doScreenCommand("stuff", sequence, NULL);

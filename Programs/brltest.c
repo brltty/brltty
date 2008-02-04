@@ -233,7 +233,3 @@ int
 currentVirtualTerminal (void) {
   return 0;
 }
-int
-insertString (const char *string) {
-  return 0;
-}

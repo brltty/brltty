@@ -375,28 +375,8 @@ insertKey_WindowsScreen (ScreenKey key) {
   WCHAR wchar = 0;
 
   LogPrint(LOG_DEBUG, "Insert key: %4.4X",key);
-  if (key < SCR_KEY_ENTER) {
-    if (key & SCR_KEY_MOD_META) {
-      controlKeyState |= LEFT_ALT_PRESSED;
-      key &= ~ SCR_KEY_MOD_META;
-    }
-    wchar = key;
-    vk = VkKeyScanW(wchar);
-    if (vk == -1 && GetLastError() == ERROR_CALL_NOT_IMPLEMENTED)
-      vk = VkKeyScan(wchar);
-    if (vk != -1) {
-      LogPrint(LOG_DEBUG, "vk is %4.4X", vk);
-      if (vk & 0x100) controlKeyState |= SHIFT_PRESSED;
-      if ((vk & 0x600) == 0x600) {
-	controlKeyState |= RIGHT_ALT_PRESSED;
-      } else {
-        if (vk & 0x200) controlKeyState |= LEFT_CTRL_PRESSED;
-        if (vk & 0x400) controlKeyState |= LEFT_ALT_PRESSED;
-      }
-      vk = vk & 0xff;
-    } else vk = 0;
-  } else {
-    switch (key) {
+  if (isSpecialKey(key)) {
+    switch (key & SCR_KEY_CHAR_MASK) {
       case SCR_KEY_ENTER:         vk = VK_RETURN; wchar='\r'; break;
       case SCR_KEY_TAB:           vk = VK_TAB;    wchar='\t'; break;
       case SCR_KEY_BACKSPACE:     vk = VK_BACK;   wchar='\b'; break;
@@ -438,6 +418,38 @@ insertKey_WindowsScreen (ScreenKey key) {
       default: LogPrint(LOG_WARNING, "Key %4.4X not suported.", key);
                return 0;
     }
+  } else {
+    if (key & SCR_KEY_ALT_LEFT) {
+      controlKeyState |= LEFT_ALT_PRESSED;
+      key &= ~ SCR_KEY_ALT_LEFT;
+    }
+    if (key & SCR_KEY_ALT_RIGHT) {
+      controlKeyState |= RIGHT_ALT_PRESSED;
+      key &= ~ SCR_KEY_ALT_RIGHT;
+    }
+    if (key & SCR_KEY_SHIFT) {
+      controlKeyState |= SHIFT_PRESSED;
+      key &= ~ SCR_KEY_SHIFT;
+    }
+    if (key & SCR_KEY_CONTROL) {
+      controlKeyState |= LEFT_CTRL_PRESSED;
+      key &= ~ SCR_KEY_CONTROL;
+    }
+    wchar = key & SCR_KEY_CHAR_MASK;
+    vk = VkKeyScanW(wchar);
+    if (vk == -1 && GetLastError() == ERROR_CALL_NOT_IMPLEMENTED)
+      vk = VkKeyScan(wchar);
+    if (vk != -1) {
+      LogPrint(LOG_DEBUG, "vk is %4.4X", vk);
+      if (vk & 0x100) controlKeyState |= SHIFT_PRESSED;
+      if ((vk & 0x600) == 0x600) {
+	controlKeyState |= RIGHT_ALT_PRESSED;
+      } else {
+        if (vk & 0x200) controlKeyState |= LEFT_CTRL_PRESSED;
+        if (vk & 0x400) controlKeyState |= LEFT_ALT_PRESSED;
+      }
+      vk = vk & 0xff;
+    } else vk = 0;
   }
 
   scancode = MapVirtualKey(vk, 0);
