@@ -36,7 +36,6 @@ typedef enum {
 #include "misc.h"
 
 #define BRL_HAVE_PACKET_IO
-#define BRL_HAVE_VISUAL_DISPLAY
 #include "brl_driver.h"
 #include "misc.h"
 #ifdef ENABLE_USB_SUPPORT
@@ -255,20 +254,11 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text)
 {
   if (!protocolp)
     return 1;
+  if (text)
+    protocolp->writeVisual(brl, text);  
   protocolp->writeWindow(brl);
   return 1;
 }
-
-#ifdef BRL_HAVE_VISUAL_DISPLAY
-static int
-brl_writeVisual (BrailleDisplay *brl) 
-{
-  if (!protocolp)
-    return 1;
-  protocolp->writeVisual(brl);  
-  return 1;
-}
-#endif /* BRL_HAVE_VISUAL_DISPLAY */
 
 static int
 brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) 

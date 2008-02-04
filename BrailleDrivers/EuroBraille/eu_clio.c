@@ -414,24 +414,29 @@ void     clio_writeWindow(BrailleDisplay *brl)
   clio_writePacket(brl, buf, sizeof(buf));
 }
 
-void     clio_writeVisual(BrailleDisplay *brl)
+void     clio_writeVisual(BrailleDisplay *brl, const wchar_t *text)
 {
-  static unsigned char previousVisualDisplay[80];
+  static wchar_t previousVisualDisplay[80];
   int displaySize = brl->x * brl->y;
   unsigned char buf[displaySize + 3];
+  int i;
 
   if ( displaySize > sizeof(previousVisualDisplay) ) {
     LogPrint(LOG_WARNING, "[eu] Discarding too large visual display" );
     return;
   }
 
-  if (!memcmp(previousVisualDisplay, brl->buffer, displaySize))
+  if (wmemcmp(previousVisualDisplay, text, displaySize) == 0)
     return;
-  memcpy(previousVisualDisplay, brl->buffer, displaySize);
+  wmemcpy(previousVisualDisplay, text, displaySize);
   buf[0] = (unsigned char)(displaySize + 2);
   buf[1] = 'D';
   buf[2] = 'L';
-  memcpy(buf + 3, brl->buffer, displaySize);
+  for (i = 0; i < displaySize; i++)
+    {
+      wchar_t wc = text[i];
+      buf[i+3] = iswLatin1(wc)? wc: '?';
+    }
   clio_writePacket(brl, buf, sizeof(buf));
 }
 

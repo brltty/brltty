@@ -58,7 +58,7 @@ typedef struct	s_eubrl_protocol
   int		(*keyToCommand)(BrailleDisplay *brl, unsigned int key, BRL_DriverCommandContext ctx);
   void		(*writeWindow)(BrailleDisplay *brl);
   int		(*hasLcdSupport)(BrailleDisplay *brl);
-  void		(*writeVisual)(BrailleDisplay *brl);
+  void		(*writeVisual)(BrailleDisplay *brl, const wchar_t *text);
   ssize_t	(*readPacket)(BrailleDisplay *brl, void *packet, size_t size);
   ssize_t	(*writePacket)(BrailleDisplay *brl, const void *packet, size_t size);
   
@@ -78,7 +78,7 @@ int		clio_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext c);
 int		clio_keyToCommand(BrailleDisplay *brl, unsigned int key, BRL_DriverCommandContext c);
 void		clio_writeWindow(BrailleDisplay *brl);
 int		clio_hasLcdSupport(BrailleDisplay *brl);
-void		clio_writeVisual(BrailleDisplay *brl);
+void		clio_writeVisual(BrailleDisplay *brl, const wchar_t *text);
 ssize_t		clio_readPacket(BrailleDisplay *brl, void *packet, size_t size);
 ssize_t		clio_writePacket(BrailleDisplay *brl, const void *packet, size_t size);
 
@@ -92,7 +92,7 @@ int		esysiris_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext c);
 int		esysiris_keyToCommand(BrailleDisplay *brl, unsigned int key, BRL_DriverCommandContext c);
 void		esysiris_writeWindow(BrailleDisplay *brl);
 int		esysiris_hasLcdSupport(BrailleDisplay *brl);
-void		esysiris_writeVisual(BrailleDisplay *brl);
+void		esysiris_writeVisual(BrailleDisplay *brl, const wchar_t *text);
 ssize_t		esysiris_readPacket(BrailleDisplay *brl, void *packet, size_t size);
 ssize_t		esysiris_writePacket(BrailleDisplay *brl, const void *packet, size_t size);
 

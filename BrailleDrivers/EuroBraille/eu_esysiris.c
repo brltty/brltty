@@ -329,7 +329,7 @@ int	esysiris_hasLcdSupport(BrailleDisplay *brl)
   return (0);
 }
 
-void	esysiris_writeVisual(BrailleDisplay *brl)
+void	esysiris_writeVisual(BrailleDisplay *brl, const wchar_t *text)
 {
   return;
 }
