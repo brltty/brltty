@@ -21,7 +21,6 @@
 
 #include "misc.h"
 
-//#define SPK_HAVE_EXPRESS
 //#define SPK_HAVE_TRACK
 //#define SPK_HAVE_RATE
 //#define SPK_HAVE_VOLUME
@@ -37,18 +36,12 @@ spk_destruct (SpeechSynthesizer *spk) {
 }
 
 static void
-spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, int length, size_t count) {
+spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, int length, size_t count, const unsigned char *attributes) {
 }
 
 static void
 spk_mute (SpeechSynthesizer *spk) {
 }
-
-#ifdef SPK_HAVE_EXPRESS
-static void
-spk_express (SpeechSynthesizer *spk, const unsigned char *text, size_t length, size_t count, const unsigned char *attributes) {
-}
-#endif /* SPK_HAVE_EXPRESS */
 
 #ifdef SPK_HAVE_TRACK
 static void

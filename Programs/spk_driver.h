@@ -31,12 +31,8 @@ extern "C" {
 /* Routines provided by this speech driver. */
 static int spk_construct (SpeechSynthesizer *spk, char **parameters);
 static void spk_destruct (SpeechSynthesizer *spk);
-static void spk_say (SpeechSynthesizer *spk, const unsigned char *text, size_t length, size_t count);
+static void spk_say (SpeechSynthesizer *spk, const unsigned char *text, size_t length, size_t count, const unsigned char *attributes);
 static void spk_mute (SpeechSynthesizer *spk);
-
-#ifdef SPK_HAVE_EXPRESS
-  static void spk_express (SpeechSynthesizer *spk, const unsigned char *text, size_t length, size_t count, const unsigned char *attributes);
-#endif /* SPK_HAVE_EXPRESS */
 
 #ifdef SPK_HAVE_TRACK
   static void spk_doTrack (SpeechSynthesizer *spk);
@@ -82,12 +78,6 @@ SPKCONST SpeechDriver SPKSYMBOL = {
   spk_destruct,
   spk_say,
   spk_mute,
-
-#ifdef SPK_HAVE_EXPRESS
-  spk_express,
-#else /* SPK_HAVE_EXPRESS */
-  NULL,
-#endif /* SPK_HAVE_EXPRESS */
 
   spk_doTrack,
   spk_getTrack,

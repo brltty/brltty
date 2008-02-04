@@ -36,11 +36,8 @@ typedef struct {
 
   int (*construct) (SpeechSynthesizer *spk, char **parameters);
   void (*destruct) (SpeechSynthesizer *spk);
-  void (*say) (SpeechSynthesizer *spk, const unsigned char *text, size_t length, size_t count);
+  void (*say) (SpeechSynthesizer *spk, const unsigned char *text, size_t length, size_t count, const unsigned char *attributes);
   void (*mute) (SpeechSynthesizer *spk);
-
-  /* These require SPK_HAVE_EXPRESS. */
-  void (*express) (SpeechSynthesizer *spk, const unsigned char *text, size_t length, size_t count, const unsigned char *attributes);
 
   /* These require SPK_HAVE_TRACK. */
   void (*doTrack) (SpeechSynthesizer *spk);

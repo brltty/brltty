@@ -47,7 +47,7 @@ spk_destruct (SpeechSynthesizer *spk) {
 }
 
 static void
-spk_say (SpeechSynthesizer *spk, const unsigned char *text, size_t length, size_t count) {
+spk_say (SpeechSynthesizer *spk, const unsigned char *text, size_t length, size_t count, const unsigned char *attributes) {
 }
 
 static void
@@ -139,7 +139,7 @@ sayCharacters (SpeechSynthesizer *spk, const char *characters, size_t count, int
     }
 
     if (mute) speech->mute(spk);
-    speech->say(spk, bytes, b-bytes, count);
+    speech->say(spk, bytes, b-bytes, count, NULL);
   }
 }
 

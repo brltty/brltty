@@ -49,7 +49,6 @@ typedef enum {
 #define SPKPARMS "program", "uid", "gid"
 
 #define SPK_HAVE_TRACK
-#define SPK_HAVE_EXPRESS
 #define SPK_HAVE_RATE
 #include "spk_driver.h"
 #include "speech.h"
@@ -280,7 +279,7 @@ static int myread(SpeechSynthesizer *spk, int fd, void *buf, int len)
   return 1;
 }
 
-static void sayit(SpeechSynthesizer *spk, const unsigned char *text, size_t length, size_t count, const unsigned char *attributes)
+static void spk_say(SpeechSynthesizer *spk, const unsigned char *text, size_t length, size_t count, const unsigned char *attributes)
 {
   unsigned char l[5];
   if(helper_fd_out < 0) return;
@@ -300,15 +299,6 @@ static void sayit(SpeechSynthesizer *spk, const unsigned char *text, size_t leng
   if (attributes) mywrite(spk, helper_fd_out, attributes, count);
   lastIndex = 0;
   finalIndex = count;
-}
-
-static void spk_say(SpeechSynthesizer *spk, const unsigned char *text, size_t length, size_t count)
-{
-  sayit(spk, text,length,count,NULL);
-}
-static void spk_express(SpeechSynthesizer *spk, const unsigned char *text, size_t length, size_t count, const unsigned char *attributes)
-{
-  sayit(spk, text,length,count,attributes);
 }
 
 static void spk_doTrack(SpeechSynthesizer *spk)

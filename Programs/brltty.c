@@ -601,11 +601,7 @@ sayScreenCharacters (const ScreenCharacter *characters, size_t count, int immedi
   }
 
   if (immediate) speech->mute(&spk);
-  if (speech->express) {
-    speech->express(&spk, text, t-text, count, attributes);
-  } else {
-    speech->say(&spk, text, t-text, count);
-  }
+  speech->say(&spk, text, t-text, count, attributes);
 }
 
 static void
