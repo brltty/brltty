@@ -575,7 +575,7 @@ trackSpeech (int index) {
 }
 
 static void
-sayCharacters (const ScreenCharacter *characters, size_t count, int immediate) {
+sayScreenCharacters (const ScreenCharacter *characters, size_t count, int immediate) {
   unsigned char text[count * MB_LEN_MAX];
   unsigned char *t = text;
 
@@ -602,19 +602,19 @@ sayCharacters (const ScreenCharacter *characters, size_t count, int immediate) {
 
   if (immediate) speech->mute(&spk);
   if (speech->express) {
-    speech->express(&spk, text, t-text, attributes, a-attributes);
+    speech->express(&spk, text, t-text, count, attributes);
   } else {
-    speech->say(&spk, text, t-text);
+    speech->say(&spk, text, t-text, count);
   }
 }
 
 static void
-sayRegion (int left, int top, int width, int height, int track, SayMode mode) {
+sayScreenRegion (int left, int top, int width, int height, int track, SayMode mode) {
   size_t count = width * height;
   ScreenCharacter characters[count];
 
   readScreen(left, top, width, height, characters);
-  sayCharacters(characters, count, mode==sayImmediate);
+  sayScreenCharacters(characters, count, mode==sayImmediate);
 
   speechTracking = track;
   speechScreen = scr.number;
@@ -622,8 +622,8 @@ sayRegion (int left, int top, int width, int height, int track, SayMode mode) {
 }
 
 static void
-sayLines (int line, int count, int track, SayMode mode) {
-  sayRegion(0, line, scr.cols, count, track, mode);
+sayScreenLines (int line, int count, int track, SayMode mode) {
+  sayScreenRegion(0, line, scr.cols, count, track, mode);
 }
 #endif /* ENABLE_SPEECH_SUPPORT */
 
@@ -1832,13 +1832,13 @@ runProgram (void) {
               break;
 
             case BRL_CMD_SAY_LINE:
-              sayLines(p->winy, 1, 0, prefs.sayLineMode);
+              sayScreenLines(p->winy, 1, 0, prefs.sayLineMode);
               break;
             case BRL_CMD_SAY_ABOVE:
-              sayLines(0, p->winy+1, 1, sayImmediate);
+              sayScreenLines(0, p->winy+1, 1, sayImmediate);
               break;
             case BRL_CMD_SAY_BELOW:
-              sayLines(p->winy, scr.rows-p->winy, 1, sayImmediate);
+              sayScreenLines(p->winy, scr.rows-p->winy, 1, sayImmediate);
               break;
 
             case BRL_CMD_SAY_SLOWER:
@@ -2335,7 +2335,7 @@ runProgram (void) {
 
         speak:
           if (count) {
-            sayCharacters(characters+column, count, 1);
+            sayScreenCharacters(characters+column, count, 1);
           }
         }
 

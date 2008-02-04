@@ -103,7 +103,7 @@ spk_destruct (SpeechSynthesizer *spk) {
 }
 
 static void
-spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, size_t length) {
+spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, size_t length, size_t count) {
   spd_sayf(connection, SPD_TEXT, "%.*s", length, buffer);
 }
 

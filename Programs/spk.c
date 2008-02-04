@@ -24,6 +24,7 @@
 #include <sys/stat.h>
 
 #include "misc.h"
+#include "charset.h"
 #include "drivers.h"
 #include "spk.h"
 #include "spk.auto.h"
@@ -46,7 +47,7 @@ spk_destruct (SpeechSynthesizer *spk) {
 }
 
 static void
-spk_say (SpeechSynthesizer *spk, const unsigned char *text, size_t length) {
+spk_say (SpeechSynthesizer *spk, const unsigned char *text, size_t length, size_t count) {
 }
 
 static void
@@ -117,9 +118,34 @@ initializeSpeechSynthesizer (SpeechSynthesizer *spk) {
 }
 
 void
+sayCharacters (SpeechSynthesizer *spk, const char *characters, size_t count, int mute) {
+  if (count) {
+    unsigned char bytes[count * MB_LEN_MAX];
+    unsigned char *b = bytes;
+
+    {
+      int i;
+      for (i=0; i<count; ++i) {
+        Utf8Buffer utf8;
+        size_t utfs = convertCharToUtf8(characters[i], utf8);
+
+        if (utfs) {
+          memcpy(b, utf8, utfs);
+          b += utfs;
+        } else {
+          *b++ = ' ';
+        }
+      }
+    }
+
+    if (mute) speech->mute(spk);
+    speech->say(spk, bytes, b-bytes, count);
+  }
+}
+
+void
 sayString (SpeechSynthesizer *spk, const char *string, int mute) {
-  if (mute) speech->mute(spk);
-  speech->say(spk, (unsigned char *)string, strlen(string));
+  sayCharacters(spk, string, strlen(string), mute);
 }
 
 static void
@@ -237,11 +263,11 @@ processSpeechFifo (SpeechSynthesizer *spk) {
     if (speechFifoConnected ||
         (speechFifoConnected = ConnectNamedPipe(speechFifoHandle, NULL)) ||
         (speechFifoConnected = (GetLastError() == ERROR_PIPE_CONNECTED))) {
-      unsigned char buffer[0X1000];
+      char buffer[0X1000];
       DWORD count;
 
       if (ReadFile(speechFifoHandle, buffer, sizeof(buffer), &count, NULL)) {
-        if (count) speech->say(spk, buffer, count);
+        if (count) sayCharacters(spk, buffer, count, 0);
       } else {
         DWORD error = GetLastError();
 
@@ -257,9 +283,9 @@ processSpeechFifo (SpeechSynthesizer *spk) {
   }
 #else /* __MINGW32__ */
   if (speechFifoDescriptor != -1) {
-    unsigned char buffer[0X1000];
+    char buffer[0X1000];
     int count = read(speechFifoDescriptor, buffer, sizeof(buffer));
-    if (count > 0) speech->say(spk, buffer, count);
+    if (count > 0) sayCharacters(spk, buffer, count, 0);
   }
 #endif /* __MINGW32__ */
 }

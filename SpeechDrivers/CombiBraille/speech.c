@@ -86,7 +86,7 @@ spk_flush (void)
 }
 
 static void
-spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, size_t len)
+spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, size_t len, size_t count)
 {
   unsigned char *pre_speech = (unsigned char *)PRE_SPEECH;
   unsigned char *post_speech = (unsigned char *)POST_SPEECH;

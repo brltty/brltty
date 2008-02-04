@@ -339,7 +339,7 @@ brltest.$O:
 
 ###############################################################################
 
-SPKTEST_OBJECTS = spktest.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) drivers.$O spk.$O $(SPEECH_DRIVER_OBJECTS)
+SPKTEST_OBJECTS = spktest.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) lock.$O charset.$O drivers.$O spk.$O $(SPEECH_DRIVER_OBJECTS)
 
 spktest$X: $(SPKTEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(SPKTEST_OBJECTS) $(SPEECH_DRIVER_LIBRARIES) $(LDLIBS)

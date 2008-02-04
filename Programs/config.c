@@ -1440,7 +1440,7 @@ updatePreferences (void) {
 
     #ifdef ENABLE_SPEECH_SUPPORT
             case BRL_CMD_SAY_LINE:
-              speech->say(&spk, (unsigned char *)line, lineLength);
+              sayCharacters(&spk, line, lineLength, 1);
               break;
             case BRL_CMD_MUTE:
               speech->mute(&spk);

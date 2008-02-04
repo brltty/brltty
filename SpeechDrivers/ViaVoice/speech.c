@@ -615,7 +615,7 @@ saySegment (ECIHand eci, const unsigned char *buffer, int from, int to) {
 }
 
 static void
-spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, size_t length) {
+spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, size_t length, size_t count) {
    if (eci) {
       int onSpace = -1;
       int sayFrom = 0;

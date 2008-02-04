@@ -386,7 +386,7 @@ spk_destruct (SpeechSynthesizer *spk) {
 }
 
 static void
-spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, size_t length) {
+spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, size_t length, size_t count) {
   if (writeString("(SayText \"", 1)) {
     int index;
     for (index=0; index<length; index++) {
