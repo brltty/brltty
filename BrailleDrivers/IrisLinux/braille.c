@@ -39,7 +39,6 @@
 
 #define		BRL_HAVE_PACKET_IO	1
 #define		BRL_HAVE_KEY_CODES	1
-#define		BRL_HAVE_VISUAL_DISPLAY	1
 #include	"brldefs.h"
 #include	"brl_driver.h"
 #include	"braille.h"
@@ -177,7 +176,7 @@ static TranslationTable outputTable;
 static int		chars_per_sec;
 static SerialDevice *	serialDevice;			/* file descriptor for Braille display */
 static unsigned char	*prevdata = NULL;	/* previously sent raw data */
-static unsigned char	*lcd_data = NULL;	/* previously sent to LCD */
+static wchar_t	*lcd_data = NULL;	/* previously sent to LCD */
 static int		NbCols = 0;			/* number of cells available */
 static char		IdentString[41] = "Device not recognized!";
 static int		gio_fd = -1;
@@ -313,7 +312,8 @@ static int brl_construct (BrailleDisplay *brl, char **parameters, const char *de
      return 0;
    }
 
-   prevdata = lcd_data = NULL;		/* clear pointers */
+   prevdata = NULL;		/* clear pointers */
+   lcd_data = NULL;		/* clear pointers */
 
   /* Open the Braille display device for random access */
    if (!(serialDevice = serialOpenDevice(device))) return 0;
@@ -381,9 +381,40 @@ static void brl_destruct (BrailleDisplay *brl)
    gio_fd = -1;
 }
 
+static int	writeVisual(BrailleDisplay *brl, const wchar_t *text)
+{
+  int		i = NbCols;
+  char		OutBuf[2 * NbCols + 6];
+  char	        *p = OutBuf;
+  int		j;
+
+  if (ReWrite_LCD == 0)
+    if (wmemcmp(text, lcd_data, NbCols) != 0)
+      {
+	ReWrite_LCD = 1;
+	wmemcpy(lcd_data, text, NbCols);
+      }
+  if (ReWrite_LCD)
+    {
+      memset(OutBuf, 0, NbCols + 2);
+      *p++ = 'L';
+      for (j = 0; j < i; j++)
+        {
+          wchar_t wc = text[j];
+          *p++ = iswLatin1(wc)? wc: '?';
+        }
+      WriteToBrlDisplay(brl, p - OutBuf, OutBuf);
+      ReWrite_LCD = 0;
+    }
+  return 1;
+}
+
 static int brl_writeWindow (BrailleDisplay *brl, const wchar_t *text)
 {
    int i = 41, j = 0;
+
+   if (text)
+     writeVisual(brl, text);
 
    if (context) 
      {
@@ -413,39 +444,6 @@ static int brl_writeWindow (BrailleDisplay *brl, const wchar_t *text)
      }
    return 1;
 }
-
-/*
-** If defined, the next routine will print informations on the LCD screen
-*/
-
-#ifdef		BRL_HAVE_VISUAL_DISPLAY
-
-static int	brl_writeVisual(BrailleDisplay *brl)
-{
-  int		i = NbCols;
-  char		OutBuf[2 * NbCols + 6];
-  char	        *p = OutBuf;
-  int		j;
-
-  if (ReWrite_LCD == 0)
-    if (memcmp(brl->buffer, lcd_data, NbCols) != 0)
-      {
-	ReWrite_LCD = 1;
-	memcpy(lcd_data, brl->buffer, NbCols);
-      }
-  if (ReWrite_LCD)
-    {
-      memset(OutBuf, 0, NbCols + 2);
-      *p++ = 'L';
-      for (j = 0; j < i; j++)
-	*p++ = brl->buffer[j];
-      WriteToBrlDisplay(brl, p - OutBuf, OutBuf);
-      ReWrite_LCD = 0;
-    }
-  return 1;
-}
-
-#endif
 
 static int Program(BrailleDisplay *brl)
 {
@@ -870,7 +868,7 @@ static int readbrlkey(BrailleDisplay *brl, char key_context)
 	    NbCols = 40;
 	  brl->x = NbCols;
 	  prevdata = realloc(prevdata, brl->x * brl->y);
-	  lcd_data = realloc(lcd_data, brl->x * brl->y);
+	  lcd_data = realloc(lcd_data, brl->x * brl->y * sizeof(*lcd_data));
 	  res = BRL_CMD_NOOP;
 	  break;
 	}
