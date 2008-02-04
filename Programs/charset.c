@@ -250,7 +250,7 @@ setCharacterSet (const char *name) {
 wint_t
 convertCharToWchar (char c) {
   if (getCharset()) {
-    uint16_t wc = characterSet->toUnicode[c & 0XFF];
+    uint16_t wc = characterSet->toUnicode[(unsigned char)c & 0XFF];
     if (wc || !c)
       if ((sizeof(wchar_t) > 1) || iswLatin1(wc))
         return wc;
