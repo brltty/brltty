@@ -374,6 +374,11 @@ convertUtf8ToChar (const char **utf8, size_t *utfs) {
 
 static const char *
 getLocaleCharset (void) {
+#if defined(__MSDOS__)
+  static char codepage[8];
+  snprintf(codepage, sizeof(codepage), "CP%03u", getCodePage());
+  return codepage;
+#else /* use setlocale() */
   const char *locale = setlocale(LC_ALL, "");
 
   if (locale && (MB_CUR_MAX == 1) &&
@@ -384,15 +389,12 @@ getLocaleCharset (void) {
     static char codepage[8] = {'C', 'P'};
     GetLocaleInfo(GetThreadLocale(), LOCALE_IDEFAULTANSICODEPAGE, codepage+2, sizeof(codepage)-2);
     return codepage;
-#elif defined(__MSDOS__)
-    static char codepage[8];
-    snprintf(codepage, sizeof(codepage), "CP%03u", getCodePage());
-    return codepage;
 #else /* Unix */
     return nl_langinfo(CODESET);
 #endif /* locale character set */
   }
   return "ISO-8859-1";
+#endif /* character set */
 }
 
 const char *
