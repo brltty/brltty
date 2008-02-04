@@ -249,18 +249,24 @@ setCharacterSet (const char *name) {
 
 wint_t
 convertCharToWchar (char c) {
-  uint16_t wc = characterSet->toUnicode[c & 0XFF];
-  if (!wc && c) return WEOF;
-  if ((sizeof(wchar_t) == 1) && !iswLatin1(wc)) return WEOF;
-  return wc;
+  if (getCharset()) {
+    uint16_t wc = characterSet->toUnicode[c & 0XFF];
+    if (wc || !c)
+      if ((sizeof(wchar_t) > 1) || iswLatin1(wc))
+        return wc;
+  }
+  return WEOF;
 }
 
 int
 convertWcharToChar (wchar_t wc) {
-  char *cell = getUnicodeCell(wc, 0);
-  if (!cell) return EOF;
-  if (!*cell && wc) return EOF;
-  return *cell & 0XFF;
+  if (getCharset()) {
+    char *cell = getUnicodeCell(wc, 0);
+    if (cell)
+      if (*cell || !wc)
+        return *cell & 0XFF;
+  }
+  return EOF;
 }
 #endif /* conversions */
 
