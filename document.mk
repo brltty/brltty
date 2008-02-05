@@ -23,7 +23,7 @@ txt: $(DOCUMENT_NAME).txt
 html: html.made
 
 $(DOCUMENT_NAME).txt: $(SRC_DIR)/$(DOCUMENT_NAME).sgml
-	$(SETLOCALE) sgml2txt -l $(DOCUMENT_LANGUAGE) -c latin $<
+	$(SETLOCALE) sgml2txt -l $(DOCUMENT_LANGUAGE) -f -c latin $<
 
 html.made: $(SRC_DIR)/$(DOCUMENT_NAME).sgml
 	$(SETLOCALE) sgml2html -l $(DOCUMENT_LANGUAGE) -c ascii $<
