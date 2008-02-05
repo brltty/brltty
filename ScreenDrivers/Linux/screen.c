@@ -97,8 +97,8 @@ convertCharacter (const wchar_t *character) {
   if (length < sizeof(buffer)) {
     buffer[length++] = *character & cellMask;
 
+    while (1) {
 #if defined(HAVE_ICONV_H)
-    {
       char *inptr = buffer;
       size_t inlen = length;
 
@@ -110,8 +110,14 @@ convertCharacter (const wchar_t *character) {
         length = 0;
         return wc;
       }
-    }
+
+      if (errno == EINVAL) break;
+      if (errno != EILSEQ) break;
 #endif /* convert character */
+
+      if (!--length) break;
+      memcpy(buffer, buffer+1, length);
+    }
   }
 
   spaces++;
@@ -780,6 +786,12 @@ readCharacters_LinuxScreen (const ScreenBox *box, ScreenCharacter *buffer) {
                 target->attributes = ((*source & unshiftedAttributesMask) |
                                       ((*source & shiftedAttributesMask) >> 1)) >> 8;
                 target++;
+
+                while ((wc = convertCharacter(NULL)) != WEOF) {
+                  target->text = wc;
+                  target->attributes = 0X07;
+                  target++;
+                }
               }
               source++;
             }
