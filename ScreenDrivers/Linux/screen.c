@@ -51,26 +51,43 @@ static const char *charsetName;
 #if defined(HAVE_ICONV_H)
 #include <iconv.h>
 #define ICONV_NULL ((iconv_t)-1)
-static iconv_t iconvHandle = ICONV_NULL;
+static iconv_t iconvCharsetToWchar = ICONV_NULL;
+static iconv_t iconvWcharToCharset = ICONV_NULL;
 #endif /* enable character conversion */
 
 static int
 enableCharacterConversion (void) {
 #if defined(HAVE_ICONV_H)
-  if ((iconvHandle = iconv_open(getWcharCharset(), charsetName)) == ICONV_NULL) {
+  const char *wcharCharset = getWcharCharset();
+  if ((iconvCharsetToWchar = iconv_open(wcharCharset, charsetName)) != ICONV_NULL) {
+    if ((iconvWcharToCharset = iconv_open(charsetName, wcharCharset)) != ICONV_NULL) {
+      return 1;
+    } else {
+      LogError("iconv_open");
+    }
+
+    iconv_close(iconvCharsetToWchar);
+    iconvCharsetToWchar = ICONV_NULL;
+  } else {
     LogError("iconv_open");
-    return 0;
   }
-#endif /* enable character conversion */
+  return 0;
+#else /* enable character conversion */
   return 1;
+#endif /* enable character conversion */
 }
 
 static void
 disableCharacterConversion (void) {
 #if defined(HAVE_ICONV_H)
-  if (iconvHandle != ICONV_NULL) {
-    iconv_close(iconvHandle);
-    iconvHandle = ICONV_NULL;
+  if (iconvWcharToCharset != ICONV_NULL) {
+    iconv_close(iconvWcharToCharset);
+    iconvWcharToCharset = ICONV_NULL;
+  }
+
+  if (iconvCharsetToWchar != ICONV_NULL) {
+    iconv_close(iconvCharsetToWchar);
+    iconvCharsetToWchar = ICONV_NULL;
   }
 #endif /* disable character conversion */
 }
@@ -106,7 +123,7 @@ convertCharacter (const wchar_t *character) {
       char *outptr = (char *)&wc;
       size_t outlen = sizeof(wc);
 
-      if (iconv(iconvHandle, &inptr, &inlen, &outptr, &outlen) != -1) {
+      if (iconv(iconvCharsetToWchar, &inptr, &inlen, &outptr, &outlen) != -1) {
         length = 0;
         return wc;
       }
@@ -941,17 +958,34 @@ insertUinputKey (ScreenKey key, int modShift, int modControl, int modMeta) {
 }
 
 static int
-insertByte (unsigned char byte) {
+insertByte (char byte) {
   if (controlConsole(TIOCSTI, &byte) != -1) return 1;
   LogError("ioctl TIOCSTI");
   return 0;
 }
 
 static int
+insertBytes (const char *byte, size_t count) {
+  while (count) {
+    if (!insertByte(*byte++)) return 0;
+    count--;
+  }
+  return 1;
+}
+
+static int
 insertXlate (wchar_t character) {
   {
-    int byte = convertWcharToChar(character);
-    if (byte != EOF) return insertByte(byte);
+    char *inptr = (char *)&character;
+    size_t inlen = sizeof(character);
+
+    char bytes[MB_LEN_MAX];
+    char *outptr = bytes;
+    size_t outlen = sizeof(bytes);
+
+    if (iconv(iconvWcharToCharset, &inptr, &inlen, &outptr, &outlen) != -1) {
+      if (insertBytes(bytes, outptr-bytes)) return 1;
+    }
   }
 
   {
@@ -967,16 +1001,7 @@ insertUnicode (wchar_t character) {
   {
     Utf8Buffer utf8;
     size_t utfs = convertWcharToUtf8(character, utf8);
-
-    if (utfs > 0) {
-      int i;
-
-      for (i=0; i<utfs; ++i)
-        if (!insertByte(utf8[i]))
-          return 0;
-
-      return 1;
-    }
+    if (utfs) return insertBytes(utf8, utfs);
   }
 
   {
@@ -1133,14 +1158,13 @@ insertCode (ScreenKey key, int raw) {
   }
 
   {
-    const unsigned char codeControl = 0X1D;
-    const unsigned char codeMeta = 0X38;
-    const unsigned char codeShift = 0X2A;
-    const unsigned char bitRelease = 0X80;
+    const char codeControl = 0X1D;
+    const char codeMeta = 0X38;
+    const char codeShift = 0X2A;
+    const char bitRelease = 0X80;
 
-    unsigned char codes[10];
+    char codes[10];
     unsigned int count = 0;
-    const unsigned char *byte = codes;
 
     if (modControl) codes[count++] = codeControl;
     if (modMeta) codes[count++] = codeMeta;
@@ -1154,11 +1178,8 @@ insertCode (ScreenKey key, int raw) {
     if (modMeta) codes[count++] = codeMeta | bitRelease;
     if (modControl) codes[count++] = codeControl | bitRelease;
 
-    while (count--)
-      if (!insertByte(*byte++))
-        return 0;
+    return insertBytes(codes, count);
   }
-  return 1;
 }
 
 static int
