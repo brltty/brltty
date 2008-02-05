@@ -55,43 +55,6 @@ static iconv_t iconvCharsetToWchar = ICONV_NULL;
 static iconv_t iconvWcharToCharset = ICONV_NULL;
 #endif /* enable character conversion */
 
-static int
-enableCharacterConversion (void) {
-#if defined(HAVE_ICONV_H)
-  const char *wcharCharset = getWcharCharset();
-  if ((iconvCharsetToWchar = iconv_open(wcharCharset, charsetName)) != ICONV_NULL) {
-    if ((iconvWcharToCharset = iconv_open(charsetName, wcharCharset)) != ICONV_NULL) {
-      return 1;
-    } else {
-      LogError("iconv_open");
-    }
-
-    iconv_close(iconvCharsetToWchar);
-    iconvCharsetToWchar = ICONV_NULL;
-  } else {
-    LogError("iconv_open");
-  }
-  return 0;
-#else /* enable character conversion */
-  return 1;
-#endif /* enable character conversion */
-}
-
-static void
-disableCharacterConversion (void) {
-#if defined(HAVE_ICONV_H)
-  if (iconvWcharToCharset != ICONV_NULL) {
-    iconv_close(iconvWcharToCharset);
-    iconvWcharToCharset = ICONV_NULL;
-  }
-
-  if (iconvCharsetToWchar != ICONV_NULL) {
-    iconv_close(iconvCharsetToWchar);
-    iconvCharsetToWchar = ICONV_NULL;
-  }
-#endif /* disable character conversion */
-}
-
 static wint_t
 convertCharacter (const wchar_t *character) {
   static unsigned char spaces = 0;
@@ -122,6 +85,13 @@ convertCharacter (const wchar_t *character) {
       wchar_t wc;
       char *outptr = (char *)&wc;
       size_t outlen = sizeof(wc);
+
+      if (iconvCharsetToWchar == ICONV_NULL) {
+        if ((iconvCharsetToWchar = iconv_open(getWcharCharset(), charsetName)) == ICONV_NULL) {
+          LogError("iconv_open");
+          break;
+        }
+      }
 
       if (iconv(iconvCharsetToWchar, &inptr, &inlen, &outptr, &outlen) != -1) {
         length = 0;
@@ -625,14 +595,10 @@ construct_LinuxScreen (void) {
     if (setConsoleName()) {
       consoleDescriptor = -1;
 
-      if (enableCharacterConversion()) {
-        if (openScreen(currentConsoleNumber=0)) {
-          if (setTranslationTable(1)) {
-            return 1;
-          }
+      if (openScreen(currentConsoleNumber=0)) {
+        if (setTranslationTable(1)) {
+          return 1;
         }
-
-        disableCharacterConversion();
       }
     }
   }
@@ -654,7 +620,17 @@ destruct_LinuxScreen (void) {
   screenFontMapSize = 0;
   screenFontMapCount = 0;
 
-  disableCharacterConversion();
+#if defined(HAVE_ICONV_H)
+  if (iconvCharsetToWchar != ICONV_NULL) {
+    iconv_close(iconvCharsetToWchar);
+    iconvCharsetToWchar = ICONV_NULL;
+  }
+
+  if (iconvWcharToCharset != ICONV_NULL) {
+    iconv_close(iconvWcharToCharset);
+    iconvWcharToCharset = ICONV_NULL;
+  }
+#endif /* disable character conversion */
 }
 
 static int
@@ -975,25 +951,39 @@ insertBytes (const char *byte, size_t count) {
 
 static int
 insertXlate (wchar_t character) {
-  {
-    char *inptr = (char *)&character;
-    size_t inlen = sizeof(character);
+  char bytes[MB_LEN_MAX];
+  size_t count = 0;
 
-    char bytes[MB_LEN_MAX];
-    char *outptr = bytes;
-    size_t outlen = sizeof(bytes);
-
-    if (iconv(iconvWcharToCharset, &inptr, &inlen, &outptr, &outlen) != -1) {
-      if (insertBytes(bytes, outptr-bytes)) return 1;
+#if defined(HAVE_ICONV_H)
+  if (iconvWcharToCharset == ICONV_NULL) {
+    if ((iconvWcharToCharset = iconv_open(charsetName, getWcharCharset())) == ICONV_NULL) {
+      LogError("iconv_open");
+      return 0;
     }
   }
 
   {
+    char *inptr = (char *)&character;
+    size_t inlen = sizeof(character);
+    char *outptr = bytes;
+    size_t outlen = sizeof(bytes);
+
+    if (iconv(iconvWcharToCharset, &inptr, &inlen, &outptr, &outlen) == -1) {
+      LogError("iconv[wchar -> charset]");
+      return 0;;
+    }
+
+    count = outptr - bytes;
+  }
+#endif /* conversion from wchar to charset */
+
+  if (!insertBytes(bytes, count)) {
     uint32_t value = character;
     LogPrint(LOG_WARNING, "character 0X%02" PRIX32 " not insertable in xlate mode." , value);
+    return 0;
   }
 
-  return 0;
+  return 1;
 }
 
 static int
