@@ -416,52 +416,91 @@ parseCharacters (FileData *data, CharacterString *result, const wchar_t *token, 
           case WC_C('\\'):
             ok = 1;
             break;
+
           case WC_C('f'):
             character = WC_C('\f');
             ok = 1;
             break;
+
           case WC_C('n'):
             character = WC_C('\n');
             ok = 1;
             break;
-          case WC_C('o'):
-            if (length - index > 3) {
-              int high, middle, low;
-              if (octalDigit(data, &high, token[++index]))
-                if (high < 04)
-                  if (octalDigit(data, &middle, token[++index]))
-                    if (octalDigit(data, &low, token[++index])) {
-                      character = (high << 6) | (middle << 3) | low;
-                      ok = 1;
-                    }
-            }
-            break;
+
           case WC_C('r'):
             character = WC_C('\r');
             ok = 1;
             break;
+
           case WC_C('s'):
             character = WC_C(' ');
             ok = 1;
             break;
+
           case WC_C('t'):
             character = WC_C('\t');
             ok = 1;
             break;
+
           case WC_C('v'):
             character = WC_C('\v');
             ok = 1;
             break;
-          case WC_C('x'):
-            if (length - index > 2) {
-              int high, low;
-              if (hexadecimalDigit(data, &high, token[++index]))
-                if (hexadecimalDigit(data, &low, token[++index])) {
-                  character = (high << 4) | low;
-                  ok = 1;
+
+          {
+            int count;
+
+          case WC_C('o'):
+            count = 3;
+
+            if ((length - index) > count) {
+              character = 0;
+              ok = 1;
+
+              do {
+                int octet;
+                if (!octalDigit(data, &octet, token[++index])) {
+                  ok = 0;
+                  break;
                 }
+
+                character = (character << 3) | octet;
+              } while (--count);
             }
             break;
+          }
+
+          {
+            int count;
+
+          case WC_C('U'):
+            count = 8;
+            goto hexadecimal;
+
+          case WC_C('u'):
+            count = 4;
+            goto hexadecimal;
+
+          case WC_C('x'):
+            count = 2;
+          hexadecimal:
+
+            if ((length - index) > count) {
+              character = 0;
+              ok = 1;
+
+              do {
+                int nibble;
+                if (!hexadecimalDigit(data, &nibble, token[++index])) {
+                  ok = 0;
+                  break;
+                }
+
+                character = (character << 4) | nibble;
+              } while (--count);
+            }
+            break;
+          }
         }
       }
       if (!ok) {
@@ -679,8 +718,7 @@ doOpcode:
       if (getToken(data, &token, &length, "capital sign"))
         if (parseDots(data, &cells, token, length)) {
           ContractionTableOffset offset;
-          if (!saveSequence(data, &offset, &cells))
-            goto failure;
+          if (!saveSequence(data, &offset, &cells)) goto failure;
           tableHeader->capitalSign = offset;
         }
       break;
@@ -691,8 +729,7 @@ doOpcode:
       if (getToken(data, &token, &length, "begin capital sign"))
         if (parseDots(data, &cells, token, length)) {
           ContractionTableOffset offset;
-          if (!saveSequence(data, &offset, &cells))
-            goto failure;
+          if (!saveSequence(data, &offset, &cells)) goto failure;
           tableHeader->beginCapitalSign = offset;
         }
       break;
@@ -703,8 +740,7 @@ doOpcode:
       if (getToken(data, &token, &length, "end capital sign"))
         if (parseDots(data, &cells, token, length)) {
           ContractionTableOffset offset;
-          if (!saveSequence(data, &offset, &cells))
-            goto failure;
+          if (!saveSequence(data, &offset, &cells)) goto failure;
           tableHeader->endCapitalSign = offset;
         }
       break;
@@ -715,8 +751,7 @@ doOpcode:
       if (getToken(data, &token, &length, "letter sign"))
         if (parseDots(data, &cells, token, length)) {
           ContractionTableOffset offset;
-          if (!saveSequence(data, &offset, &cells))
-            goto failure;
+          if (!saveSequence(data, &offset, &cells)) goto failure;
           tableHeader->englishLetterSign = offset;
         }
       break;
@@ -727,8 +762,7 @@ doOpcode:
       if (getToken(data, &token, &length, "number sign"))
         if (parseDots(data, &cells, token, length)) {
           ContractionTableOffset offset;
-          if (!saveSequence(data, &offset, &cells))
-            goto failure;
+          if (!saveSequence(data, &offset, &cells)) goto failure;
           tableHeader->numberSign = offset;
         }
       break;
