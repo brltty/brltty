@@ -283,7 +283,7 @@ static void spk_say(SpeechSynthesizer *spk, const unsigned char *text, size_t le
 {
   unsigned char l[5];
   if(helper_fd_out < 0) return;
-  l[0] = 2; /* say code */
+  l[0] = 4; /* say code */
   l[1] = length >> 8;
   l[2] = length & 0xFF;
   if (attributes) {
