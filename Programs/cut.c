@@ -75,6 +75,7 @@ cut (size_t *length, int fromColumn, int fromRow, int toColumn, int toRow) {
               }
             }
 
+            if (spaces) *toAddress++ = WC_C(' ');
             if (row != toRow) *toAddress++ = WC_C('\r');
           }
 
@@ -187,6 +188,42 @@ cutLine (int column, int row) {
         if (!start) start = buffer + length;
         if ((start - buffer) > beginColumn) start = buffer + beginColumn;
         if (start != buffer) wmemmove(buffer, start, (length -= start - buffer));
+      }
+
+      {
+        const wchar_t *from = buffer;
+        const wchar_t *end = from + length;
+        wchar_t *to = buffer;
+        int spaces = 0;
+        int newlines = 0;
+
+        while (from != end) {
+          wchar_t character = *from++;
+
+          switch (character) {
+            case WC_C(' '):
+              spaces++;
+              break;
+
+            case WC_C('\r'):
+              newlines++;
+              break;
+
+            default:
+              if (spaces && newlines) spaces = 1;
+              newlines = 0;
+
+              while (spaces) {
+                *to++ = WC_C(' ');
+                spaces--;
+              }
+
+              *to++ = character;
+              break;
+          }
+        }
+
+        length = to - buffer;
       }
 
       if (append(buffer, length)) return 1;
