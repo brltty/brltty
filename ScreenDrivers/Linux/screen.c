@@ -34,17 +34,89 @@
 #include "brldefs.h"
 
 typedef enum {
+  PARM_CHARSET,
   PARM_HFB,
   PARM_DEBUGSFM,
 } ScreenParameters;
-#define SCRPARMS "hfb", "debugsfm"
+#define SCRPARMS "charset", "hfb", "debugsfm"
 
 #include "scr_driver.h"
 #include "screen.h"
 
 static const char *problemText;
-
 static unsigned int debugScreenFontMap = 0;
+
+static const char *charsetName;
+#define UNICODE_ROW_DIRECT 0XF000
+#if defined(HAVE_ICONV_H)
+#include <iconv.h>
+#define ICONV_NULL ((iconv_t)-1)
+static iconv_t iconvHandle = ICONV_NULL;
+#endif /* enable character conversion */
+
+static int
+enableCharacterConversion (void) {
+#if defined(HAVE_ICONV_H)
+  if ((iconvHandle = iconv_open(getWcharCharset(), charsetName)) == ICONV_NULL) {
+    LogError("iconv_open");
+    return 0;
+  }
+#endif /* enable character conversion */
+  return 1;
+}
+
+static void
+disableCharacterConversion (void) {
+#if defined(HAVE_ICONV_H)
+  if (iconvHandle != ICONV_NULL) {
+    iconv_close(iconvHandle);
+    iconvHandle = ICONV_NULL;
+  }
+#endif /* disable character conversion */
+}
+
+static wint_t
+convertCharacter (const wchar_t *character) {
+  static unsigned char spaces = 0;
+  static unsigned char length = 0;
+  static char buffer[MB_LEN_MAX];
+  const wchar_t cellMask = 0XFF;
+
+  if (!character) {
+    length = 0;
+    if (!spaces) return WEOF;
+    spaces--;
+    return WC_C(' ');
+  }
+
+  if ((*character & ~cellMask) != UNICODE_ROW_DIRECT) {
+    length = 0;
+    return *character;
+  }
+
+  if (length < sizeof(buffer)) {
+    buffer[length++] = *character & cellMask;
+
+#if defined(HAVE_ICONV_H)
+    {
+      char *inptr = buffer;
+      size_t inlen = length;
+
+      wchar_t wc;
+      char *outptr = (char *)&wc;
+      size_t outlen = sizeof(wc);
+
+      if (iconv(iconvHandle, &inptr, &inlen, &outptr, &outlen) != -1) {
+        length = 0;
+        return wc;
+      }
+    }
+#endif /* convert character */
+  }
+
+  spaces++;
+  return WEOF;
+}
 
 static int
 setDeviceName (const char **name, const char *const *names, const char *description, int mode) {
@@ -334,6 +406,9 @@ determineAttributesMasks (void) {
 
 static int
 processParameters_LinuxScreen (char **parameters) {
+  charsetName = parameters[PARM_CHARSET];
+  if (!charsetName || !*charsetName) charsetName = getLocaleCharset();
+
   if (!validateYesNo(&debugScreenFontMap, parameters[PARM_DEBUGSFM]))
     LogPrint(LOG_WARNING, "%s: %s", "invalid screen font map debug setting", parameters[PARM_DEBUGSFM]);
 
@@ -371,7 +446,7 @@ setTranslationTable (int force) {
     {
       int i;
       for (i=0; i<count; ++i) {
-        translationTable[i] = 0XF000 | i;
+        translationTable[i] = UNICODE_ROW_DIRECT | i;
       }
     }
 
@@ -527,10 +602,14 @@ construct_LinuxScreen (void) {
     if (setConsoleName()) {
       consoleDescriptor = -1;
 
-      if (openScreen(currentConsoleNumber=0)) {
-        if (setTranslationTable(1)) {
-          return 1;
+      if (enableCharacterConversion()) {
+        if (openScreen(currentConsoleNumber=0)) {
+          if (setTranslationTable(1)) {
+            return 1;
+          }
         }
+
+        disableCharacterConversion();
       }
     }
   }
@@ -551,6 +630,8 @@ destruct_LinuxScreen (void) {
   }
   screenFontMapSize = 0;
   screenFontMapCount = 0;
+
+  disableCharacterConversion();
 }
 
 static int
@@ -691,14 +772,25 @@ readCharacters_LinuxScreen (const ScreenBox *box, ScreenCharacter *buffer) {
             int column;
             for (column=0; column<box->width; ++column) {
               unsigned short position = *source & 0XFF;
+              wint_t wc;
+
               if (*source & fontAttributesMask) position |= 0X100;
-              target->text = translationTable[position];
-
-              target->attributes = ((*source & unshiftedAttributesMask) |
-                                    ((*source & shiftedAttributesMask) >> 1)) >> 8;
-
-              target++;
+              if ((wc = convertCharacter(&translationTable[position])) != WEOF) {
+                target->text = wc;
+                target->attributes = ((*source & unshiftedAttributesMask) |
+                                      ((*source & shiftedAttributesMask) >> 1)) >> 8;
+                target++;
+              }
               source++;
+            }
+          }
+
+          {
+            wint_t wc;
+            while ((wc = convertCharacter(NULL)) != WEOF) {
+              target->text = wc;
+              target->attributes = 0X07;
+              target++;
             }
           }
         }

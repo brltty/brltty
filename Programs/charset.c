@@ -372,7 +372,7 @@ convertUtf8ToChar (const char **utf8, size_t *utfs) {
   return convertWcharToChar(wc);
 }
 
-static const char *
+const char *
 getLocaleCharset (void) {
 #if defined(__MSDOS__)
   static char codepage[8];

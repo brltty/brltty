@@ -29,6 +29,7 @@ extern "C" {
 extern const char *setCharset (const char *name);
 extern const char *getCharset (void);
 
+extern const char *getLocaleCharset (void);
 extern const char *getWcharCharset (void);
 
 typedef char Utf8Buffer[MB_LEN_MAX+1];

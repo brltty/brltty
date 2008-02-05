@@ -384,6 +384,7 @@
 #screen-parameters as:Type=text+terminal # [text,terminal,all]
 
 # Linux Screen Driver Parameters
+#screen-parameters lx:Charset= # []
 #screen-parameters lx:DebugSfm=no # [no,yes]
 #screen-parameters lx:Hfb=auto # [auto,vga,fb,0-7]
 
