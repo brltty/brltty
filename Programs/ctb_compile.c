@@ -224,10 +224,15 @@ getCharacterEntry (wchar_t character) {
 
 static int
 saveCharacterTable (void) {
+  ContractionTableOffset offset;
   if (!characterEntryCount) return 1;
-  return saveBytes(NULL, &tableHeader->characters, characterTable,
-                   (tableHeader->characterCount = characterEntryCount) * sizeof(characterTable[0]),
-                   __alignof__(characterTable[0]));
+  if (!saveBytes(NULL, &offset, characterTable,
+                 (tableHeader->characterCount = characterEntryCount) * sizeof(characterTable[0]),
+                 __alignof__(characterTable[0])))
+    return 0;
+
+  tableHeader->characters = offset;
+  return 1;
 }
 
 static ContractionTableRule *
@@ -672,45 +677,60 @@ doOpcode:
     case CTO_CapitalSign: {
       ByteString cells;
       if (getToken(data, &token, &length, "capital sign"))
-        if (parseDots(data, &cells, token, length))
-          if (!saveSequence(data, &tableHeader->capitalSign, &cells))
+        if (parseDots(data, &cells, token, length)) {
+          ContractionTableOffset offset;
+          if (!saveSequence(data, &offset, &cells))
             goto failure;
+          tableHeader->capitalSign = offset;
+        }
       break;
     }
 
     case CTO_BeginCapitalSign: {
       ByteString cells;
       if (getToken(data, &token, &length, "begin capital sign"))
-        if (parseDots(data, &cells, token, length))
-          if (!saveSequence(data, &tableHeader->beginCapitalSign, &cells))
+        if (parseDots(data, &cells, token, length)) {
+          ContractionTableOffset offset;
+          if (!saveSequence(data, &offset, &cells))
             goto failure;
+          tableHeader->beginCapitalSign = offset;
+        }
       break;
     }
 
     case CTO_EndCapitalSign: {
       ByteString cells;
       if (getToken(data, &token, &length, "end capital sign"))
-        if (parseDots(data, &cells, token, length))
-          if (!saveSequence(data, &tableHeader->endCapitalSign, &cells))
+        if (parseDots(data, &cells, token, length)) {
+          ContractionTableOffset offset;
+          if (!saveSequence(data, &offset, &cells))
             goto failure;
+          tableHeader->endCapitalSign = offset;
+        }
       break;
     }
 
     case CTO_EnglishLetterSign: {
       ByteString cells;
       if (getToken(data, &token, &length, "letter sign"))
-        if (parseDots(data, &cells, token, length))
-          if (!saveSequence(data, &tableHeader->englishLetterSign, &cells))
+        if (parseDots(data, &cells, token, length)) {
+          ContractionTableOffset offset;
+          if (!saveSequence(data, &offset, &cells))
             goto failure;
+          tableHeader->englishLetterSign = offset;
+        }
       break;
     }
 
     case CTO_NumberSign: {
       ByteString cells;
       if (getToken(data, &token, &length, "number sign"))
-        if (parseDots(data, &cells, token, length))
-          if (!saveSequence(data, &tableHeader->numberSign, &cells))
+        if (parseDots(data, &cells, token, length)) {
+          ContractionTableOffset offset;
+          if (!saveSequence(data, &offset, &cells))
             goto failure;
+          tableHeader->numberSign = offset;
+        }
       break;
     }
 
