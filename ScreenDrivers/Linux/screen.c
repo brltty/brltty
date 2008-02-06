@@ -55,62 +55,6 @@ static iconv_t iconvCharsetToWchar = ICONV_NULL;
 static iconv_t iconvWcharToCharset = ICONV_NULL;
 #endif /* enable character conversion */
 
-static wint_t
-convertCharacter (const wchar_t *character) {
-  static unsigned char spaces = 0;
-  static unsigned char length = 0;
-  static char buffer[MB_LEN_MAX];
-  const wchar_t cellMask = 0XFF;
-
-  if (!character) {
-    length = 0;
-    if (!spaces) return WEOF;
-    spaces--;
-    return WC_C(' ');
-  }
-
-  if ((*character & ~cellMask) != UNICODE_ROW_DIRECT) {
-    length = 0;
-    return *character;
-  }
-
-  if (length < sizeof(buffer)) {
-    buffer[length++] = *character & cellMask;
-
-    while (1) {
-#if defined(HAVE_ICONV_H)
-      char *inptr = buffer;
-      size_t inlen = length;
-
-      wchar_t wc;
-      char *outptr = (char *)&wc;
-      size_t outlen = sizeof(wc);
-
-      if (iconvCharsetToWchar == ICONV_NULL) {
-        if ((iconvCharsetToWchar = iconv_open(getWcharCharset(), charsetName)) == ICONV_NULL) {
-          LogError("iconv_open");
-          break;
-        }
-      }
-
-      if (iconv(iconvCharsetToWchar, &inptr, &inlen, &outptr, &outlen) != -1) {
-        length = 0;
-        return wc;
-      }
-
-      if (errno == EINVAL) break;
-      if (errno != EILSEQ) break;
-#endif /* convert character */
-
-      if (!--length) break;
-      memcpy(buffer, buffer+1, length);
-    }
-  }
-
-  spaces++;
-  return WEOF;
-}
-
 static int
 setDeviceName (const char **name, const char *const *names, const char *description, int mode) {
   return (*name = resolveDeviceName(names, description, mode)) != NULL;
@@ -726,10 +670,67 @@ describe_LinuxScreen (ScreenDescription *description) {
   }
 }
 
+static wint_t
+convertCharacter (const wchar_t *character) {
+  static unsigned char spaces = 0;
+  static unsigned char length = 0;
+  static char buffer[MB_LEN_MAX];
+  const wchar_t cellMask = 0XFF;
+
+  if (!character) {
+    length = 0;
+    if (!spaces) return WEOF;
+    spaces--;
+    return WC_C(' ');
+  }
+
+  if ((*character & ~cellMask) != UNICODE_ROW_DIRECT) {
+    length = 0;
+    return *character;
+  }
+
+  if (length < sizeof(buffer)) {
+    buffer[length++] = *character & cellMask;
+
+    while (1) {
+#if defined(HAVE_ICONV_H)
+      char *inptr = buffer;
+      size_t inlen = length;
+
+      wchar_t wc;
+      char *outptr = (char *)&wc;
+      size_t outlen = sizeof(wc);
+
+      if (iconvCharsetToWchar == ICONV_NULL) {
+        if ((iconvCharsetToWchar = iconv_open(getWcharCharset(), charsetName)) == ICONV_NULL) {
+          LogError("iconv_open");
+          break;
+        }
+      }
+
+      if (iconv(iconvCharsetToWchar, &inptr, &inlen, &outptr, &outlen) != -1) {
+        length = 0;
+        return wc;
+      }
+
+      if (errno == EINVAL) break;
+      if (errno != EILSEQ) break;
+#endif /* convert character */
+
+      if (!--length) break;
+      memcpy(buffer, buffer+1, length);
+    }
+  }
+
+  spaces++;
+  return WEOF;
+}
+
 static int
 readCharacters_LinuxScreen (const ScreenBox *box, ScreenCharacter *buffer) {
   ScreenDescription description;
   describe_LinuxScreen(&description);
+
   if (validateScreenBox(box, description.cols, description.rows)) {
     if (problemText) {
       setScreenMessage(box, buffer, problemText);
@@ -737,18 +738,26 @@ readCharacters_LinuxScreen (const ScreenBox *box, ScreenCharacter *buffer) {
     }
 
     {
-      unsigned short line[box->width];
-      off_t start = 4 + (box->top * description.cols + box->left) * sizeof(line[0]);
+      size_t size = box->left + box->width;
+      unsigned short line[size];
+      size_t length = size * sizeof(line[0]);
+
+      off_t start = 4 + (box->top * description.cols * sizeof(line[0]));
+      off_t increment = (description.cols * sizeof(line[0])) - length;
+
       if (lseek(screenDescriptor, start, SEEK_SET) != -1) {
-        int length = box->width * sizeof(line[0]);
-        off_t increment = description.cols * sizeof(line[0]) - length;
         ScreenCharacter *target = buffer;
         int row;
-        for (row=0; row<box->height; ++row) {
-          int count;
-          const unsigned short *source;
 
-          if (row) {
+        for (row=0; row<box->height; ++row) {
+          ScreenCharacter characters[size];
+          ScreenCharacter *character = characters;
+          const unsigned short *source = line;
+
+          int count;
+          int column;
+
+          if (row && increment) {
             if (lseek(screenDescriptor, increment, SEEK_CUR) == -1) {
               LogError("screen seek");
               return 0;
@@ -766,45 +775,42 @@ readCharacters_LinuxScreen (const ScreenBox *box, ScreenCharacter *buffer) {
             return 0;
           }
 
-          source = line;
-          {
-            int column;
-            for (column=0; column<box->width; ++column) {
-              unsigned short position = *source & 0XFF;
-              wint_t wc;
+          for (column=0; column<size; ++column) {
+            unsigned short position = *source & 0XFF;
+            wint_t wc;
 
-              if (*source & fontAttributesMask) position |= 0X100;
-              if ((wc = convertCharacter(&translationTable[position])) != WEOF) {
-                target->text = wc;
-                target->attributes = ((*source & unshiftedAttributesMask) |
-                                      ((*source & shiftedAttributesMask) >> 1)) >> 8;
-                target++;
-
-                while ((wc = convertCharacter(NULL)) != WEOF) {
-                  target->text = wc;
-                  target->attributes = 0X07;
-                  target++;
-                }
-              }
-              source++;
+            if (*source & fontAttributesMask) position |= 0X100;
+            if ((wc = convertCharacter(&translationTable[position])) != WEOF) {
+              character->text = wc;
+              character->attributes = ((*source & unshiftedAttributesMask) |
+                                       ((*source & shiftedAttributesMask) >> 1)) >> 8;
+              character++;
             }
+
+            source++;
           }
 
           {
             wint_t wc;
             while ((wc = convertCharacter(NULL)) != WEOF) {
-              target->text = wc;
-              target->attributes = 0X07;
-              target++;
+              character->text = wc;
+              character->attributes = 0X07;
+              character++;
             }
           }
+
+          memcpy(target, &characters[box->left],
+                 box->width * sizeof(characters[0]));
+          target += box->width;
         }
+
         return 1;
       } else {
         LogError("screen seek");
       }
     }
   }
+
   return 0;
 }
 
