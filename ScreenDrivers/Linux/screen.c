@@ -738,33 +738,22 @@ readCharacters_LinuxScreen (const ScreenBox *box, ScreenCharacter *buffer) {
     }
 
     {
-      size_t size = box->left + box->width;
+      size_t size = description.cols;
       unsigned short line[size];
       size_t length = size * sizeof(line[0]);
-
       off_t start = 4 + (box->top * description.cols * sizeof(line[0]));
-      off_t increment = (description.cols * sizeof(line[0])) - length;
 
       if (lseek(screenDescriptor, start, SEEK_SET) != -1) {
         ScreenCharacter *target = buffer;
         int row;
 
         for (row=0; row<box->height; ++row) {
+          const unsigned short *source = line;
           ScreenCharacter characters[size];
           ScreenCharacter *character = characters;
-          const unsigned short *source = line;
-
-          int count;
+          int count = read(screenDescriptor, line, length);
           int column;
 
-          if (row && increment) {
-            if (lseek(screenDescriptor, increment, SEEK_CUR) == -1) {
-              LogError("screen seek");
-              return 0;
-            }
-          }
-
-          count = read(screenDescriptor, line, length);
           if (count != length) {
             if (count == -1) {
               LogError("screen data read");
