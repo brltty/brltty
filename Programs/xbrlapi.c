@@ -24,12 +24,17 @@
 #include <stdarg.h>
 #include <signal.h>
 #include <string.h>
+#include <langinfo.h>
 
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #else /* HAVE_SYS_SELECT_H */
 #include <sys/time.h>
 #endif /* HAVE_SYS_SELECT_H */
+
+#ifdef HAVE_ICONV_H
+#include <iconv.h>
+#endif /* HAVE_ICONV_H */
 
 #include <X11/X.h>
 #include <X11/Xlib.h>
@@ -217,8 +222,13 @@ static const char *Xdisplay;
 static Display *dpy;
 
 static Window curWindow;
+static Atom netWmNameAtom, utf8StringAtom;
 
 static volatile int grabFailed;
+
+#ifdef HAVE_ICONV_H
+iconv_t utf8Conv = (iconv_t)(-1);
+#endif /* HAVE_ICONV_H */
 
 #define WINHASHBITS 12
 
@@ -256,7 +266,7 @@ static int del_window(Window win) {
 
   if (cur) {
     *pred=cur->next;
-    if (cur->wm_name && !XFree(cur->wm_name)) fatal("XFree(wm_name)");
+    free(cur->wm_name);
     free(cur);
     return 0;
   } else return -1;
@@ -338,20 +348,58 @@ static char *getWindowTitle(Window win) {
   int actual_format;
   unsigned long nitems,bytes_after;
   unsigned char *wm_name=NULL;
+  char *ret;
 
   do {
-    if (XGetWindowProperty(dpy,win,XA_WM_NAME,0,wm_name_size,False,/*XA_STRING*/AnyPropertyType,
-      &actual_type,&actual_format,&nitems,&bytes_after,&wm_name))
-      return NULL; /* window disappeared */
+    if (XGetWindowProperty(dpy,win,netWmNameAtom,0,wm_name_size,False,
+	/*XA_STRING*/AnyPropertyType,&actual_type,&actual_format,&nitems,&bytes_after,
+	&wm_name)) {
+      wm_name = NULL;
+      break; /* window disappeared or not available */
+    }
     wm_name_size+=bytes_after;
     if (!bytes_after) break;
     if (!XFree(wm_name)) fatal("tempo_XFree(wm_name)");
   } while (1);
-  if (actual_type==None) return NULL;
-  else {
-    debugf("type %lx name %s",actual_type,wm_name);
-    return (char *) wm_name;
+  if (!wm_name) do {
+    if (XGetWindowProperty(dpy,win,XA_WM_NAME,0,wm_name_size,False,
+	/*XA_STRING*/AnyPropertyType,&actual_type,&actual_format,&nitems,&bytes_after,
+	&wm_name))
+      return NULL; /* window disappeared */
+    if (wm_name_size >= nitems + 1) break;
+    wm_name_size += bytes_after + 1;
+    if (!XFree(wm_name)) fatal("tempo_XFree(wm_name)");
+  } while (1);
+  if (actual_type==None) {
+    XFree(wm_name);
+    return NULL;
   }
+  wm_name[nitems++] = 0;
+  ret = strdup((char *) wm_name);
+  XFree(wm_name);
+  debugf("type %lx name %s len %ld\n",actual_type,ret,nitems);
+#ifdef HAVE_ICONV_H
+  {
+    if (actual_type == utf8StringAtom && utf8Conv != (iconv_t)(-1)) {
+      char *ret2;
+      size_t input_size, output_size;
+      char *input, *output;
+
+      input_size = nitems;
+      input = ret;
+      output_size = nitems * MB_CUR_MAX;
+      output = ret2 = malloc(output_size);
+      if (iconv(utf8Conv, &input, &input_size, &output, &output_size) == -1) {
+	free(ret2);
+      } else {
+	free(ret);
+	ret = realloc(ret2, nitems * MB_CUR_MAX - output_size);
+	debugf("-> %s\n",ret);
+      }
+    }
+  }
+#endif /* HAVE_ICONV_H */
+  return ret;
 }
 
 static int grabWindows(Window win,int level) {
@@ -450,7 +498,19 @@ void toX_f(const char *display) {
   maxfd = X_fd>brlapi_fd ? X_fd+1 : brlapi_fd+1;
 
   getVT();
-  
+  netWmNameAtom = XInternAtom(dpy,"_NET_WM_NAME",False);
+  utf8StringAtom = XInternAtom(dpy,"UTF8_STRING",False);
+
+  {
+    char *localCharset = nl_langinfo(CODESET);
+    if (strcmp(localCharset, "UTF-8")) {
+      char buf[strlen(localCharset) + 10 + 1];
+      snprintf(buf, sizeof(buf), "%s//TRANSLIT", localCharset);
+      if ((utf8Conv = iconv_open(buf, "UTF-8")) == (iconv_t)(-1))
+        utf8Conv = iconv_open(localCharset, "UTF-8");
+    }
+  }
+
   for (i=0;i<ScreenCount(dpy);i++) {
     root=RootWindow(dpy,i);
     if (!grabWindows(root,0)) fatal(gettext("cannot grab windows on screen %d\n"),i);
@@ -519,7 +579,8 @@ void toX_f(const char *display) {
 
       /* Property change: WM_NAME ? */
       case PropertyNotify:
-	if (ev.xproperty.atom==XA_WM_NAME) {
+	if (ev.xproperty.atom==XA_WM_NAME ||
+	    (netWmNameAtom != None && ev.xproperty.atom == netWmNameAtom)) {
 	  Window win = ev.xproperty.window;
 	  debugf("WM_NAME property of %#010lx changed\n",win);
 	  struct window *window;
