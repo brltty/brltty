@@ -681,6 +681,8 @@ int BRLAPI_STDCALL brlapi_describeKeyCode (brlapi_keyCode_t code, brlapi_describ
  * some of them may be left in libbrlapi's internal key buffer and you wouldn't
  * get them immediately.
  *
+ * \note If the read is interrupted by a signal, brlapi_readKey() will return
+ * -1, brlapi_errno will be BRLAPI_ERROR_LIBCERR and errno will be EINTR.
  */
 #ifndef BRLAPI_NO_SINGLE_SESSION
 int BRLAPI_STDCALL brlapi_readKey(int wait, brlapi_keyCode_t *code);
