@@ -48,6 +48,7 @@ static unsigned int debugScreenFontMap = 0;
 
 static const char *charsetName;
 #define UNICODE_ROW_DIRECT 0XF000
+
 #if defined(HAVE_ICONV_H)
 #include <iconv.h>
 #define ICONV_NULL ((iconv_t)-1)
@@ -741,9 +742,8 @@ readCharacters_LinuxScreen (const ScreenBox *box, ScreenCharacter *buffer) {
       size_t size = description.cols;
       unsigned short line[size];
       size_t length = size * sizeof(line[0]);
-      off_t start = 4 + (box->top * description.cols * sizeof(line[0]));
 
-      if (lseek(screenDescriptor, start, SEEK_SET) != -1) {
+      if (lseek(screenDescriptor, (4 + (box->top * length)), SEEK_SET) != -1) {
         ScreenCharacter *target = buffer;
         int row;
 
@@ -963,22 +963,22 @@ insertXlate (wchar_t character) {
     char *outptr = bytes;
     size_t outlen = sizeof(bytes);
 
-    if (iconv(iconvWcharToCharset, &inptr, &inlen, &outptr, &outlen) == -1) {
+    if (iconv(iconvWcharToCharset, &inptr, &inlen, &outptr, &outlen) != -1) {
+      count = outptr - bytes;
+    } else if (errno != EILSEQ) {
       LogError("iconv[wchar -> charset]");
-      return 0;;
+      return 0;
     }
-
-    count = outptr - bytes;
   }
 #endif /* conversion from wchar to charset */
 
-  if (!insertBytes(bytes, count)) {
+  if (!count) {
     uint32_t value = character;
     LogPrint(LOG_WARNING, "character 0X%02" PRIX32 " not insertable in xlate mode." , value);
     return 0;
   }
 
-  return 1;
+  return insertBytes(bytes, count);
 }
 
 static int
@@ -1172,6 +1172,8 @@ insertMapped (ScreenKey key, int (*insertCharacter)(wchar_t character)) {
   wchar_t buffer[2];
   wchar_t *sequence;
   wchar_t *end;
+
+  setKeyModifiers(&key, 0);
 
   if (isSpecialKey(key)) {
     switch (key & SCR_KEY_CHAR_MASK) {
