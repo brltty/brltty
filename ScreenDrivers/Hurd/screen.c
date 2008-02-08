@@ -243,6 +243,8 @@ insertMapped (ScreenKey key, int (*insertCharacter)(wchar_t character)) {
   wchar_t *sequence;
   wchar_t *end;
 
+  setKeyModifiers(&key, 0);
+
   if (isSpecialKey(key)) {
     switch (key & SCR_KEY_CHAR_MASK) {
       case SCR_KEY_ENTER:
