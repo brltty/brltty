@@ -4160,10 +4160,8 @@ The following contraction tables are provided:
   <tag/en-us-g2/Grade 2 American English.
   <tag/fr-abrege/Contracted Unified French.
   <tag/fr-integral/Uncontracted Unified French.
-  <tag/zh-tw-big5/Taiwanese Chinese (using BIG5 characters)
-  <tag/zh-tw-gb2312/Taiwanese Simplified Chinese
+  <tag/zh-tw/Taiwanese Chinese
   <tag/zh-tw-ucb/Taiwanese Unique Chinese Braille
-  <tag/zh-tw-utf8/Taiwanese Chinese (using UTF-8 characters)
 </descrip>
 
 <sect1>File Format<p>

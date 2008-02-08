@@ -125,10 +125,8 @@
 #contraction-table	en-us-g2	# Grade 2 American English
 #contraction-table	fr-abrege	# Contracted French
 #contraction-table	fr-integral	# Uncontracted French
-#contraction-table	zh-tw-big5	# Taiwanese Chinese (using BIG5 characters)
-#contraction-table	zh-tw-gb2312	# Taiwanese Simplified Chinese
+#contraction-table	zh-tw	# Taiwanese Chinese
 #contraction-table	zh-tw-ucb	# Taiwanese Unique Chinese Braille
-#contraction-table	zh-tw-utf8	# Taiwanese Chinese (using UTF-8 characters)
 
 
 #############################
