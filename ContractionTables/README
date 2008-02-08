@@ -1,14 +1,16 @@
 Contraction Tables
 ==================
 
-The format of a table entry is: opcode, operands. A line may contain only one
-entry. The opcode is a keyword which tells the compiler how to handle the
-entry. In an entry, the opcode and the operands are separated by blanks or
-tabs. More than one blank or tab is ignored. Leading blanks at the beginning of
-lines are also ignored. Blank lines and lines beginning with '#' are ignored.
-Lines containing table entries may also contain comments following the entry
-and separated from the last operand by at least one blank or tab. Most entries
-have two operands, but the number is determined by the opcode.
+Each line of a contraction table consists of UTF8-encoded characters and may be 
+empty, a comment, or a table entry. An empty line contains only whitespace (any 
+number of blanks and/or tabs). A line is a comment if the first non-whitespace 
+character is '#'. The format of a table entry is:
+
+   opcode operand ... [comment]
+
+Each opcode has a specific number of operands (most have two). The opcode, each 
+of its operands, and the optional comment are separated from one another by 
+whitespace. Leading whitespace is ignored.
 
 The order of the entries in the table may be anything that is convenient. You
 may wish to bear in mind, however, that the compiler rearranges entries so that
