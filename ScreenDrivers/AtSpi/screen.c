@@ -627,6 +627,8 @@ insertKey_AtSpiScreen (ScreenKey key) {
   long keysym;
   int modMeta=0, modControl=0;
 
+  setKeyModifiers(&key, SCR_KEY_CONTROL);
+
   if (isSpecialKey(key)) {
     switch (key & SCR_KEY_CHAR_MASK) {
       case SCR_KEY_ENTER:         keysym = XK_KP_Enter;  break;
@@ -682,8 +684,6 @@ insertKey_AtSpiScreen (ScreenKey key) {
     }
   } else {
     wchar_t wc;
-
-    setKeyModifiers(&key, SCR_KEY_CONTROL);
 
     if (key & SCR_KEY_ALT_LEFT) {
       key &= ~SCR_KEY_ALT_LEFT;
