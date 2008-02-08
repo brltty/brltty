@@ -47,6 +47,28 @@ static CharacterDefinition *characterDefinitions = NULL;
 static int characterDefinitionsSize = 0;
 static int characterDefinitionCount = 0;
 
+static const ContractionTableCharacter *
+getContractionTableCharacter (wchar_t character) {
+  const ContractionTableCharacter *characters = (ContractionTableCharacter *)CTA(table, table->characters);
+  int first = 0;
+  int last = table->characterCount - 1;
+
+  while (first <= last) {
+    int current = (first + last) / 2;
+    const ContractionTableCharacter *ctc = &characters[current];
+
+    if (ctc->value < character) {
+      first = current + 1;
+    } else if (ctc->value > character) {
+      last = current - 1;
+    } else {
+      return ctc;
+    }
+  }
+
+  return NULL;
+}
+
 static CharacterDefinition *
 getCharacterDefinition (wchar_t character) {
   int first = 0;
@@ -108,6 +130,11 @@ getCharacterDefinition (wchar_t character) {
       definition->attributes |= CTC_Punctuation;
     }
 
+    {
+      const ContractionTableCharacter *ctc = getContractionTableCharacter(character);
+      if (ctc) definition->attributes |= ctc->attributes;
+    }
+
     return definition;
   }
 }
@@ -122,28 +149,6 @@ static wchar_t
 toLowerCase (wchar_t character) {
   const CharacterDefinition *definition = getCharacterDefinition(character);
   return definition? definition->lowercase: character;
-}
-
-static const ContractionTableCharacter *
-getCharacterEntry (wchar_t character) {
-  const ContractionTableCharacter *characters = (ContractionTableCharacter *)CTA(table, table->characters);
-  int first = 0;
-  int last = table->characterCount - 1;
-
-  while (first <= last) {
-    int current = (first + last) / 2;
-    const ContractionTableCharacter *entry = &characters[current];
-
-    if (entry->value < character) {
-      first = current + 1;
-    } else if (entry->value > character) {
-      last = current - 1;
-    } else {
-      return entry;
-    }
-  }
-
-  return NULL;
 }
 
 static int
@@ -175,9 +180,9 @@ selectRule (int length) { /*check for valid contractions */
 
   if (length < 1) return 0;
   if (length == 1) {
-    const ContractionTableCharacter *entry = getCharacterEntry(toLowerCase(*src));
-    if (!entry) return 0;
-    ruleOffset = entry->rules;
+    const ContractionTableCharacter *ctc = getContractionTableCharacter(toLowerCase(*src));
+    if (!ctc) return 0;
+    ruleOffset = ctc->rules;
     maximumLength = 1;
   } else {
     wchar_t characters[2];
@@ -378,9 +383,9 @@ putComputerBraille (wchar_t character) {
 
 static int
 putCharacter (wchar_t character) {
-  const ContractionTableCharacter *entry = getCharacterEntry(character);
-  if (entry) {
-    ContractionTableOffset offset = entry->always;
+  const ContractionTableCharacter *ctc = getContractionTableCharacter(character);
+  if (ctc) {
+    ContractionTableOffset offset = ctc->always;
     if (offset) {
       const ContractionTableRule *rule = CTR(table, offset);
       if (rule->replen) return putReplace(rule);
