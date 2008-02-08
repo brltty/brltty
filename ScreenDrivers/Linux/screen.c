@@ -804,11 +804,11 @@ readCharacters_LinuxScreen (const ScreenBox *box, ScreenCharacter *buffer) {
 }
 
 static int
-insertUinputKey (ScreenKey key, int modShift, int modControl, int modMeta) {
+insertUinput (ScreenKey key) {
 #ifdef HAVE_LINUX_INPUT_H
   int code;
 
-  switch (key) {
+  switch (key & SCR_KEY_CHAR_MASK) {
     default:                    code = KEY_RESERVED;   break;
     case SCR_KEY_ESCAPE:        code = KEY_ESC;        break;
     case '1':                   code = KEY_1;          break;
@@ -909,16 +909,18 @@ insertUinputKey (ScreenKey key, int modShift, int modControl, int modMeta) {
 
   if (code != KEY_RESERVED) {
 #define KEY_EVENT(k,p) { if (!writeKeyEvent((k), (p))) return 0; }
-    if (modControl) KEY_EVENT(KEY_LEFTCTRL, 1);
-    if (modMeta) KEY_EVENT(KEY_LEFTALT, 1);
-    if (modShift) KEY_EVENT(KEY_LEFTSHIFT, 1);
+    if (key & SCR_KEY_SHIFT) KEY_EVENT(KEY_LEFTSHIFT, 1);
+    if (key & SCR_KEY_CONTROL) KEY_EVENT(KEY_LEFTCTRL, 1);
+    if (key & SCR_KEY_ALT_LEFT) KEY_EVENT(KEY_LEFTALT, 1);
+    if (key & SCR_KEY_ALT_RIGHT) KEY_EVENT(KEY_RIGHTALT, 1);
 
     KEY_EVENT(code, 1);
     KEY_EVENT(code, 0);
 
-    if (modShift) KEY_EVENT(KEY_LEFTSHIFT, 0);
-    if (modMeta) KEY_EVENT(KEY_LEFTALT, 0);
-    if (modControl) KEY_EVENT(KEY_LEFTCTRL, 0);
+    if (key & SCR_KEY_ALT_RIGHT) KEY_EVENT(KEY_RIGHTALT, 0);
+    if (key & SCR_KEY_ALT_LEFT) KEY_EVENT(KEY_LEFTALT, 0);
+    if (key & SCR_KEY_CONTROL) KEY_EVENT(KEY_LEFTCTRL, 0);
+    if (key & SCR_KEY_SHIFT) KEY_EVENT(KEY_LEFTSHIFT, 0);
 #undef KEY_EVENT
 
     return 1;
@@ -997,7 +999,7 @@ insertUnicode (wchar_t character) {
   return 0;
 }
 
-static const unsigned char emul0XtScanCodeToLinuxKeycode[0X80] = {
+static const unsigned char emul0XtScanCodeToLinuxKeyCode[0X80] = {
   [0X1C] = 0X60, /* KEY_KPENTER */
   [0X1D] = 0X61, /* KEY_RIGHTCTRL */
   [0X35] = 0X62, /* KEY_KPSLASH */
@@ -1018,7 +1020,7 @@ static const unsigned char emul0XtScanCodeToLinuxKeycode[0X80] = {
   [0X5D] = 0X7F, /* KEY_COMPOSE */
 };
 
-static const unsigned int emul1XtScanCodeToLinuxKeycode[0X80] = {
+static const unsigned int emul1XtScanCodeToLinuxKeyCode[0X80] = {
   [0X01] = 0X1D0, /* KEY_FN */
   [0X1D] = 0X77,  /* KEY_PAUSE */
 };
@@ -1027,30 +1029,10 @@ static int
 insertCode (ScreenKey key, int raw) {
   unsigned char prefix = 0X00;
   unsigned char code;
-  int modShift = 0;
-  int modControl = 0;
-  int modMeta = 0;
 
   setKeyModifiers(&key, SCR_KEY_SHIFT | SCR_KEY_CONTROL);
 
-  if (key & SCR_KEY_SHIFT) {
-    key &= ~SCR_KEY_SHIFT;
-    modShift = 1;
-  }
-
-  if (key & SCR_KEY_CONTROL) {
-    key &= ~SCR_KEY_CONTROL;
-    modControl = 1;
-  }
-
-  if (key & SCR_KEY_ALT_LEFT) {
-    key &= ~SCR_KEY_ALT_LEFT;
-    modMeta = 1;
-  }
-
-  key &= SCR_KEY_CHAR_MASK;
-
-  switch (key) {
+  switch (key & SCR_KEY_CHAR_MASK) {
     case SCR_KEY_ESCAPE:        code = 0X01; break;
     case SCR_KEY_FUNCTION +  0: code = 0X3B; break;
     case SCR_KEY_FUNCTION +  1: code = 0X3C; break;
@@ -1116,7 +1098,7 @@ insertCode (ScreenKey key, int raw) {
     case '/':                   code = 0X35; break;
     case ' ':                   code = 0X39; break;
     default:
-      switch (key) {
+      switch (key & SCR_KEY_CHAR_MASK) {
         case SCR_KEY_INSERT:       code = 0X52; break;
         case SCR_KEY_HOME:         code = 0X47; break;
         case SCR_KEY_PAGE_UP:      code = 0X49; break;
@@ -1128,14 +1110,14 @@ insertCode (ScreenKey key, int raw) {
         case SCR_KEY_CURSOR_DOWN:  code = 0X50; break;
         case SCR_KEY_CURSOR_RIGHT: code = 0X4D; break;
         default:
-          if (insertUinputKey(key&SCR_KEY_CHAR_MASK, modShift, modControl, modMeta)) return 1;
+          if (insertUinput(key)) return 1;
           LogPrint(LOG_WARNING, "key %04X not suported in raw keycode mode.", key);
           return 0;
       }
 
       if (raw) {
         prefix = 0XE0;
-      } else if (!(code = emul0XtScanCodeToLinuxKeycode[code])) {
+      } else if (!(code = emul0XtScanCodeToLinuxKeyCode[code])) {
         LogPrint(LOG_WARNING, "key %04X not suported in medium raw keycode mode.", key);
         return 0;
       }
@@ -1143,32 +1125,54 @@ insertCode (ScreenKey key, int raw) {
   }
 
   {
-    const char codeControl = 0X1D;
-    const char codeMeta = 0X38;
+    int modShift = !!(key & SCR_KEY_SHIFT);
+    int modControl = !!(key & SCR_KEY_CONTROL);
+    int modAltLeft = !!(key & SCR_KEY_ALT_LEFT);
+    int modAltRight = !!(key & SCR_KEY_ALT_RIGHT);
+
     const char codeShift = 0X2A;
+    const char codeControl = 0X1D;
+    const char codeAlt = 0X38;
+    const char codeEmul0 = 0XE0;
     const char bitRelease = 0X80;
 
-    char codes[10];
+    char codes[14];
     unsigned int count = 0;
 
-    if (modControl) codes[count++] = codeControl;
-    if (modMeta) codes[count++] = codeMeta;
     if (modShift) codes[count++] = codeShift;
+    if (modControl) codes[count++] = codeControl;
+    if (modAltLeft) codes[count++] = codeAlt;
+    if (modAltRight) {
+      if (raw) {
+        codes[count++] = codeEmul0;
+        codes[count++] = codeAlt;
+      } else {
+        codes[count++] = emul0XtScanCodeToLinuxKeyCode[codeAlt & 0XFF];
+      }
+    }
     if (prefix) codes[count++] = prefix;
     codes[count++] = code;
 
     if (prefix) codes[count++] = prefix;
     codes[count++] = code | bitRelease;
-    if (modShift) codes[count++] = codeShift | bitRelease;
-    if (modMeta) codes[count++] = codeMeta | bitRelease;
+    if (modAltRight) {
+      if (raw) {
+        codes[count++] = codeEmul0;
+        codes[count++] = codeAlt | bitRelease;;
+      } else {
+        codes[count++] = emul0XtScanCodeToLinuxKeyCode[codeAlt & 0XFF] | bitRelease;;
+      }
+    }
+    if (modAltLeft) codes[count++] = codeAlt | bitRelease;
     if (modControl) codes[count++] = codeControl | bitRelease;
+    if (modShift) codes[count++] = codeShift | bitRelease;
 
     return insertBytes(codes, count);
   }
 }
 
 static int
-insertMapped (ScreenKey key, int (*insertCharacter)(wchar_t character)) {
+insertTranslated (ScreenKey key, int (*insertCharacter)(wchar_t character)) {
   wchar_t buffer[2];
   wchar_t *sequence;
   wchar_t *end;
@@ -1280,10 +1284,7 @@ insertMapped (ScreenKey key, int (*insertCharacter)(wchar_t character)) {
         sequence = WS_C("\x1b[34~");
         break;
       default:
-	if (insertUinputKey(key & SCR_KEY_CHAR_MASK,
-                            !!(key & SCR_KEY_SHIFT),
-                            !!(key & SCR_KEY_CONTROL),
-                            !!(key & SCR_KEY_ALT_LEFT))) return 1;
+	if (insertUinput(key)) return 1;
         LogPrint(LOG_WARNING, "key %04X not supported in xlate mode.", key);
         return 0;
     }
@@ -1335,10 +1336,10 @@ insertKey_LinuxScreen (ScreenKey key) {
           if (insertCode(key, 0)) ok = 1;
           break;
         case K_XLATE:
-          if (insertMapped(key, insertXlate)) ok = 1;
+          if (insertTranslated(key, insertXlate)) ok = 1;
           break;
         case K_UNICODE:
-          if (insertMapped(key, insertUnicode)) ok = 1;
+          if (insertTranslated(key, insertUnicode)) ok = 1;
           break;
         default:
           LogPrint(LOG_WARNING, "unsupported keyboard mode: %d", mode);
@@ -1451,14 +1452,14 @@ executeCommand_LinuxScreen (int command) {
             arg &= 0X7F;
 
             if (command & BRL_FLG_KBD_EMUL0) {
-              unsigned char code = emul0XtScanCodeToLinuxKeycode[arg];
+              unsigned char code = emul0XtScanCodeToLinuxKeyCode[arg];
               if (!code) {
 		LogPrint(LOG_WARNING, "Xt emul0 scancode not supported: %02X", arg);
                 return 0;
               }
               arg = code;
 	    } else if (command & BRL_FLG_KBD_EMUL1) {
-              unsigned int code = emul1XtScanCodeToLinuxKeycode[arg];
+              unsigned int code = emul1XtScanCodeToLinuxKeyCode[arg];
               if (!code) {
 		LogPrint(LOG_WARNING, "Xt emul1 scancode not supported: %02X", arg);
                 return 0;
