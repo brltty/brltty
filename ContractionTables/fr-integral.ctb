@@ -15,16 +15,16 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# DÈfinitions pour code braille franÁais international unifiÈ
+# D√©finitions pour code braille fran√ßais international unifi√©
 # Par Nicolas Pitre <nico@cam.org>
-# RÈfÈrence: http://www.inlb.qc.ca/apropos/c2003unificationdubraille.aspx
+# R√©f√©rence: http://www.inlb.qc.ca/apropos/c2003unificationdubraille.aspx
 
 locale french
 
 capsign 46		indicateur de majuscule
 begcaps 46-46		succession de majuscules
 
-numsign 6		prÈfixe pour les chiffres
+numsign 6		pr√©fixe pour les chiffres
 midnum \s 3		espace entre les chiffres
 midnum , 2
 midnum . 256
@@ -58,19 +58,19 @@ always v 1236		lettre v
 always x 1346		lettre x
 always y 13456		lettre y
 always z 1356		lettre z
-always Á 12346		c cÈdille
-always È 123456		e accent aigu
-always ‡ 12356		a accent grave
-always Ë 2346		e accent grave
-always ˘ 23456		u accent grave
-always ‚ 16		a accent circonflexe
-always Í 126		e accent circonflexe
-always Ó 146		i accent circonflexe
-always Ù 1456		o accent circonflexe
-always ˚ 156		u accent circonflexe
-always Î 1246		e trÈma
-always Ô 12456		i trÈma
-always ¸ 1256		u trÈma
+always √ß 12346		c c√©dille
+always √© 123456		e accent aigu
+always √† 12356		a accent grave
+always √® 2346		e accent grave
+always √π 23456		u accent grave
+always √¢ 16		a accent circonflexe
+always √™ 126		e accent circonflexe
+always √Æ 146		i accent circonflexe
+always √¥ 1456		o accent circonflexe
+always √ª 156		u accent circonflexe
+always √´ 1246		e tr√©ma
+always √Ø 12456		i tr√©ma
+always √º 1256		u tr√©ma
 always oe 246		oe ligatur
 always w 2456		lettre w
 
@@ -99,19 +99,19 @@ always V 1236		lettre V
 always X 1346		lettre X
 always Y 13456		lettre Y
 always Z 1356		lettre Z
-always « 12346		C cÈdille
-always … 123456		E accent aigu
-always ¿ 12356		A accent grave
-always » 2346		E accent grave
-always Ÿ 23456		U accent grave
-always ¬ 16		A accent circonflexe
-always   126		E accent circonflexe
-always Œ 146		I accent circonflexe
-always ‘ 1456		O accent circonflexe
-always € 156		U accent circonflexe
-always À 1246		E trÈma
-always œ 12456		I trÈma
-always ‹ 1256		U trÈma
+always √á 12346		C c√©dille
+always √â 123456		E accent aigu
+always √Ä 12356		A accent grave
+always √à 2346		E accent grave
+always √ô 23456		U accent grave
+always √Ç 16		A accent circonflexe
+always √ä 126		E accent circonflexe
+always √é 146		I accent circonflexe
+always √î 1456		O accent circonflexe
+always √õ 156		U accent circonflexe
+always √ã 1246		E tr√©ma
+always √è 12456		I tr√©ma
+always √ú 1256		U tr√©ma
 always Oe 246		Oe ligatur
 always W 2456		lettre w
 
@@ -122,17 +122,17 @@ always . 256		point
 always ? 26		point d'interrogation
 always ! 235		point d'exclamation
 always " 2356		guillemet
-always ( 236		parenthËse ouvrante
-always * 35		astÈrisque
-always ) 356		parenthËse fermante
+always ( 236		parenth√®se ouvrante
+always * 35		ast√©risque
+always ) 356		parenth√®se fermante
 always ' 3		apostrophe
 always / 34		barre oblique
 always @ 345		arobas
 always % 346		pour cent
 always - 36		trait d'union
-always # 3456		diËse
+always # 3456		di√®se
 
-always 0 3456		zÈro
+always 0 3456		z√©ro
 always 1 16		un
 always 2 126		deux
 always 3 146		trois
@@ -143,41 +143,41 @@ always 7 12456		sept
 always 8 1256		huit
 always 9 246		neuf
 
-always ˜ 6-256		divisÈ par
+always √∑ 6-256		divis√© par
 always + 6-235		plus
-always = 6-2356		Ègal
-always ◊ 6-35		multipliÈ par
-always < 46-126		infÈrieur ‡
-always > 46-345		supÈrieur ‡
+always = 6-2356		√©gal
+always √ó 6-35		multipli√© par
+always < 46-126		inf√©rieur √†
+always > 46-345		sup√©rieur √†
 
-always © 5-14		copyright
-always ∞ 5-135		degrÈ
-always & 5-123456	perluËte (et commercial)
-always ¢ 45-14		cent
-always § 45-15		euro
-always £ 45-123		livre
-always ß 45-1234	paragraphe
+always ¬© 5-14		copyright
+always ¬∞ 5-135		degr√©
+always & 5-123456	perlu√®te (et commercial)
+always ¬¢ 45-14		cent
+always ¬§ 45-15		euro
+always ¬£ 45-123		livre
+always ¬ß 45-1234	paragraphe
 always $ 45-234		dollar
-always • 45-13456	yen
-always ´ 45-2356	guillemet franÁais ouvrant
-always ª 2356-12	guillemet franÁais fermant
+always ¬• 45-13456	yen
+always ¬´ 45-2356	guillemet fran√ßais ouvrant
+always ¬ª 2356-12	guillemet fran√ßais fermant
 always [ 45-236		crochet droit ouvrant
 always ] 356-12		crochet droit fermant
 always { 6-236		accolade de gauche
 always } 356-3		accolade de droite
 
-always π 4-6-16		exposant 1
-always ≤ 4-6-126	exposant 2
-always ≥ 4-6-146	exposant 3
-always º 6-16-34-1456	un quart
-always Ω 6-16-34-126	un demi
-always æ 6-126-34-1456	trois quarts
+always ¬π 4-6-16		exposant 1
+always ¬≤ 4-6-126	exposant 2
+always ¬≥ 4-6-146	exposant 3
+always ¬º 6-16-34-1456	un quart
+always ¬Ω 6-16-34-126	un demi
+always ¬æ 6-126-34-1456	trois quarts
 
-always _ 78		soulignÈ
+always _ 78		soulign√©
 
 repeated \s 0		espaces
 repeated \t 0		tabulations
-repeated \xa0 0		espaces insÈcables
+repeated \xa0 0		espaces ins√©cables
 
 repeated ... 3-3-3		points de suite
 repeated --- 36-36-36
