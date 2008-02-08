@@ -208,6 +208,8 @@ insertKey_ScreenScreen (ScreenKey key) {
   char *sequence;
 
   LogPrint(LOG_DEBUG, "insert key: %04X", key);
+  setKeyModifiers(&key, 0);
+
   if (isSpecialKey(key)) {
 #define KEY(key,string) case (key): sequence = (string); break
 #define CURSOR_KEY(key,string1,string2) KEY((key), ((flags & 0X01)? (string1): (string2)))
