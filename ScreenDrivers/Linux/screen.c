@@ -804,6 +804,15 @@ readCharacters_LinuxScreen (const ScreenBox *box, ScreenCharacter *buffer) {
 }
 
 static int
+getCapsLockState (void) {
+  char leds;
+  if (controlConsole(KDGETLED, &leds) != -1)
+    if (leds & LED_CAP)
+      return 1;
+  return 0;
+}
+
+static int
 insertUinput (ScreenKey key) {
 #ifdef HAVE_LINUX_INPUT_H
   int code;
@@ -909,18 +918,32 @@ insertUinput (ScreenKey key) {
 
   if (code != KEY_RESERVED) {
 #define KEY_EVENT(k,p) { if (!writeKeyEvent((k), (p))) return 0; }
-    if (key & SCR_KEY_SHIFT) KEY_EVENT(KEY_LEFTSHIFT, 1);
-    if (key & SCR_KEY_CONTROL) KEY_EVENT(KEY_LEFTCTRL, 1);
-    if (key & SCR_KEY_ALT_LEFT) KEY_EVENT(KEY_LEFTALT, 1);
-    if (key & SCR_KEY_ALT_RIGHT) KEY_EVENT(KEY_RIGHTALT, 1);
+    int modCaps = (key & SCR_KEY_UPPER) && !getCapsLockState();
+    int modShift = !!(key & SCR_KEY_SHIFT);
+    int modControl = !!(key & SCR_KEY_CONTROL);
+    int modAltLeft = !!(key & SCR_KEY_ALT_LEFT);
+    int modAltRight = !!(key & SCR_KEY_ALT_RIGHT);
+
+    if (modCaps) {
+      KEY_EVENT(KEY_CAPSLOCK, 1);
+      KEY_EVENT(KEY_CAPSLOCK, 0);
+    }
+    if (modShift) KEY_EVENT(KEY_LEFTSHIFT, 1);
+    if (modControl) KEY_EVENT(KEY_LEFTCTRL, 1);
+    if (modAltLeft) KEY_EVENT(KEY_LEFTALT, 1);
+    if (modAltRight) KEY_EVENT(KEY_RIGHTALT, 1);
 
     KEY_EVENT(code, 1);
     KEY_EVENT(code, 0);
 
-    if (key & SCR_KEY_ALT_RIGHT) KEY_EVENT(KEY_RIGHTALT, 0);
-    if (key & SCR_KEY_ALT_LEFT) KEY_EVENT(KEY_LEFTALT, 0);
-    if (key & SCR_KEY_CONTROL) KEY_EVENT(KEY_LEFTCTRL, 0);
-    if (key & SCR_KEY_SHIFT) KEY_EVENT(KEY_LEFTSHIFT, 0);
+    if (modAltRight) KEY_EVENT(KEY_RIGHTALT, 0);
+    if (modAltLeft) KEY_EVENT(KEY_LEFTALT, 0);
+    if (modControl) KEY_EVENT(KEY_LEFTCTRL, 0);
+    if (modShift) KEY_EVENT(KEY_LEFTSHIFT, 0);
+    if (modCaps) {
+      KEY_EVENT(KEY_CAPSLOCK, 1);
+      KEY_EVENT(KEY_CAPSLOCK, 0);
+    }
 #undef KEY_EVENT
 
     return 1;
@@ -1125,20 +1148,26 @@ insertCode (ScreenKey key, int raw) {
   }
 
   {
+    int modCaps = (key & SCR_KEY_UPPER) && !getCapsLockState();
     int modShift = !!(key & SCR_KEY_SHIFT);
     int modControl = !!(key & SCR_KEY_CONTROL);
     int modAltLeft = !!(key & SCR_KEY_ALT_LEFT);
     int modAltRight = !!(key & SCR_KEY_ALT_RIGHT);
 
+    const char codeCapsLock = 0X3A;
     const char codeShift = 0X2A;
     const char codeControl = 0X1D;
     const char codeAlt = 0X38;
     const char codeEmul0 = 0XE0;
     const char bitRelease = 0X80;
 
-    char codes[14];
+    char codes[18];
     unsigned int count = 0;
 
+    if (modCaps) {
+      codes[count++] = codeCapsLock;
+      codes[count++] = codeCapsLock | bitRelease;
+    }
     if (modShift) codes[count++] = codeShift;
     if (modControl) codes[count++] = codeControl;
     if (modAltLeft) codes[count++] = codeAlt;
@@ -1166,6 +1195,10 @@ insertCode (ScreenKey key, int raw) {
     if (modAltLeft) codes[count++] = codeAlt | bitRelease;
     if (modControl) codes[count++] = codeControl | bitRelease;
     if (modShift) codes[count++] = codeShift | bitRelease;
+    if (modCaps) {
+      codes[count++] = codeCapsLock;
+      codes[count++] = codeCapsLock | bitRelease;
+    }
 
     return insertBytes(codes, count);
   }
