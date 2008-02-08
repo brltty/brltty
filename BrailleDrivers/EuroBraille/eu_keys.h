@@ -23,6 +23,7 @@
 # define	EUBRL_BRAILLE_KEY	0x10000000
 # define	EUBRL_ROUTING_KEY	0x20000000
 # define	EUBRL_COMMAND_KEY	0x40000000
+# define	EUBRL_PC_KEY	        0x80000000
 
 
 /** IRIS models **/
