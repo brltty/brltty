@@ -590,11 +590,10 @@ int brl_keyToCommand(BrailleDisplay *brl, BRL_DriverCommandContext context, int 
   } else if (type==BRL_VSMSK_OTHER) {
     /* ctrlpressed = 0; */
     if ((ch>=0xe1) && (ch<=0xea)) {
+      int flags = altpressed;
       ch-=0xe1;
-      if (altpressed) {
-        altpressed = 0;
-        return BRL_BLK_SWITCHVT + ch;
-      } else return BRL_BLK_PASSKEY+BRL_KEY_FUNCTION+ch; 
+      altpressed = 0;
+      return flags | BRL_BLK_PASSKEY | ( BRL_KEY_FUNCTION + ch); 
     }
     /* altpressed = 0; */
     switch (code) {
