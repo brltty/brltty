@@ -36,16 +36,26 @@ setKeyModifiers (ScreenKey *key, ScreenKey which) {
     ScreenKey modifiers = *key & ~SCR_KEY_CHAR_MASK;
 
     if (which & (SCR_KEY_UPPER | SCR_KEY_SHIFT)) {
-      if (iswupper(character)) {
-        character = towlower(character);
-        modifiers ^= SCR_KEY_SHIFT;
-        which &= ~SCR_KEY_SHIFT;
-      }
-      which &= ~SCR_KEY_UPPER;
-    }
+      if (!(modifiers & (SCR_KEY_UPPER | SCR_KEY_SHIFT))) {
+        if (iswupper(character)) {
+          character = towlower(character);
 
-    if (which & SCR_KEY_SHIFT) {
-      which &= ~SCR_KEY_SHIFT;
+          if (which & SCR_KEY_UPPER) {
+            modifiers |= SCR_KEY_UPPER;
+          } else {
+            modifiers |= SCR_KEY_SHIFT;
+          }
+        }
+      }
+    } else {
+      if (modifiers & (SCR_KEY_UPPER | SCR_KEY_SHIFT)) {
+        if (iswalpha(character)) {
+          character = towupper(character);
+          modifiers &= ~SCR_KEY_SHIFT;
+        }
+
+        modifiers &= ~SCR_KEY_UPPER;
+      }
     }
 
     if (which & SCR_KEY_CONTROL) {
@@ -57,7 +67,13 @@ setKeyModifiers (ScreenKey *key, ScreenKey which) {
       }
     } else {
       if (modifiers & SCR_KEY_CONTROL) {
-        character &= 0X1F;
+        if (iswLatin1(character)) {
+          if ((character & 0X6F) == 0X2F) {
+            character |= 0X50;
+          } else {
+            character &= 0X9F;
+          }
+        }
         modifiers &= ~SCR_KEY_CONTROL;
       }
     }
