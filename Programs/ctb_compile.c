@@ -820,9 +820,9 @@ failure:
 static int
 processUtf8Line (char *line, void *dataAddress) {
   FileData *data = dataAddress;
-  const char *byte = line;
   size_t length = strlen(line);
-  wchar_t characters[length];
+  const char *byte = line;
+  wchar_t characters[length+1];
   wchar_t *character = characters;
 
   data->lineNumber++;
