@@ -1176,7 +1176,7 @@ insertMapped (ScreenKey key, int (*insertCharacter)(wchar_t character)) {
   setKeyModifiers(&key, 0);
 
   if (isSpecialKey(key)) {
-    switch (key & SCR_KEY_CHAR_MASK) {
+    switch (key) {
       case SCR_KEY_ENTER:
         sequence = WS_C("\r");
         break;
