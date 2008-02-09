@@ -163,7 +163,7 @@ allocateCharsetEntries (const char *names) {
           charset->wcharToCharset = nullCharsetConverter;
         }
 
-        charsetCount++;
+        charsetCount += 1;
       }
     }
 
@@ -235,7 +235,7 @@ convertCharacter (const wchar_t *character) {
   if (!character) {
     length = 0;
     if (!spaces) return WEOF;
-    spaces--;
+    spaces -= 1;
     return WC_C(' ');
   }
 
@@ -264,7 +264,7 @@ convertCharacter (const wchar_t *character) {
     }
   }
 
-  spaces++;
+  spaces += 1;
   return WEOF;
 }
 
@@ -278,7 +278,7 @@ vtName (const char *name, unsigned char vt) {
   if (vt) {
     size_t length = strlen(name);
     char buffer[length+4];
-    if (name[length-1] == '0') --length;
+    if (name[length-1] == '0') length -= 1;
     strncpy(buffer, name, length);
     sprintf(buffer+length,  "%u", vt);
     return strdupWrapper(buffer);
@@ -536,7 +536,7 @@ determineAttributesMasks (void) {
           int index;
 
           memset(counts, 0, sizeof(counts));
-          for (index=0; index<count; index++) ++counts[(buffer[index] & 0X0F00) >> 8];
+          for (index=0; index<count; index+=1) ++counts[(buffer[index] & 0X0F00) >> 8];
 
           setAttributesMasks((counts[0XE] > counts[0X7])? 0X0100: 0X0800);
           return 1;
@@ -840,13 +840,13 @@ readScreenRow (int row, size_t size, ScreenCharacter *characters, int *offsets) 
           character->text = wc;
           character->attributes = ((*source & unshiftedAttributesMask) |
                                    ((*source & shiftedAttributesMask) >> 1)) >> 8;
-          character++;
+          character += 1;
         }
 
         if (offsets) offsets[column++] = source - line;
       }
 
-      source++;
+      source += 1;
     }
 
     {
@@ -855,7 +855,7 @@ readScreenRow (int row, size_t size, ScreenCharacter *characters, int *offsets) 
         if (character) {
           character->text = wc;
           character->attributes = 0X07;
-          character++;
+          character += 1;
         }
 
         if (offsets) offsets[column++] = size - 1;
@@ -904,6 +904,7 @@ readCursorCoordinates (short *column, short *row, short columns) {
           }
         }
 
+        if (first == columns) first -= 1;
         *column = first;
         return 1;
       }
@@ -1182,7 +1183,7 @@ static int
 insertBytes (const char *byte, size_t count) {
   while (count) {
     if (!insertByte(*byte++)) return 0;
-    count--;
+    count -= 1;
   }
   return 1;
 }
