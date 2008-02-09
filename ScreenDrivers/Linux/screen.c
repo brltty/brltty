@@ -212,6 +212,49 @@ convertWcharToChars (wchar_t character, char *chars, size_t length, size_t *size
   return result;
 }
 
+static wint_t
+convertCharacter (const wchar_t *character) {
+  static unsigned char spaces = 0;
+  static unsigned char length = 0;
+  static char buffer[MB_LEN_MAX];
+  const wchar_t cellMask = 0XFF;
+
+  if (!character) {
+    length = 0;
+    if (!spaces) return WEOF;
+    spaces--;
+    return WC_C(' ');
+  }
+
+  if ((*character & ~cellMask) != UNICODE_ROW_DIRECT) {
+    length = 0;
+    return *character;
+  }
+
+  if (length < sizeof(buffer)) {
+    buffer[length++] = *character & cellMask;
+
+    while (1) {
+      wchar_t wc;
+      CharacterConversionResult result = convertCharsToWchar(buffer, length, &wc, NULL);
+
+      if (result == CONV_OK) {
+        length = 0;
+        return wc;
+      }
+
+      if (result == CONV_SHORT) break;
+      if (result != CONV_ILLEGAL) break;
+
+      if (!--length) break;
+      memcpy(buffer, buffer+1, length);
+    }
+  }
+
+  spaces++;
+  return WEOF;
+}
+
 static int
 setDeviceName (const char **name, const char *const *names, const char *description, int mode) {
   return (*name = resolveDeviceName(names, description, mode)) != NULL;
@@ -731,29 +774,139 @@ userVirtualTerminal_LinuxScreen (int number) {
 }
 
 static int
+readScreenDevice (off_t offset, void *buffer, size_t size) {
+  if (lseek(screenDescriptor, offset, SEEK_SET) == -1) {
+    LogError("screen seek");
+  } else {
+    int count = read(screenDescriptor, buffer, size);
+    if (count == size) return 1;
+
+    if (count == -1) {
+      LogError("screen read");
+    } else {
+      LogPrint(LOG_ERR, "truncated screen data: expected %d bytes, read %d",
+               size, count);
+    }
+  }
+  return 0;
+}
+
+static int
+getScreenDimensions (short *columns, short *rows) {
+  typedef struct {
+    unsigned char rows;
+    unsigned char columns;
+  } ScreenDimensions;
+
+  ScreenDimensions dimensions;
+  if (!readScreenDevice(0, &dimensions, sizeof(dimensions))) return 0;
+
+  *rows = dimensions.rows;
+  *columns = dimensions.columns;
+  return 1;
+}
+
+static int
+readScreenRow (int row, size_t size, ScreenCharacter *characters, int *offsets) {
+  unsigned short line[size];
+  size_t length = sizeof(line);
+  int column = 0;
+
+  if (readScreenDevice((4 + (row * length)), line, length)) {
+    const unsigned short *source = line;
+    const unsigned short *end = source + size;
+    ScreenCharacter *character = characters;
+
+    while (source != end) {
+      unsigned short position = *source & 0XFF;
+      wint_t wc;
+
+      if (*source & fontAttributesMask) position |= 0X100;
+      if ((wc = convertCharacter(&translationTable[position])) != WEOF) {
+        if (character) {
+          character->text = wc;
+          character->attributes = ((*source & unshiftedAttributesMask) |
+                                   ((*source & shiftedAttributesMask) >> 1)) >> 8;
+          character++;
+        }
+
+        if (offsets) offsets[column++] = source - line;
+      }
+
+      source++;
+    }
+
+    {
+      wint_t wc;
+      while ((wc = convertCharacter(NULL)) != WEOF) {
+        if (character) {
+          character->text = wc;
+          character->attributes = 0X07;
+          character++;
+        }
+
+        if (offsets) offsets[column++] = size - 1;
+      }
+    }
+
+    return 1;
+  }
+
+  return 0;
+}
+
+static int
+getCursorCoordinates (short *column, short *row, short columns) {
+  typedef struct {
+    unsigned char column;
+    unsigned char row;
+  } ScreenCoordinates;
+
+  ScreenCoordinates coordinates;
+
+  if (readScreenDevice(2, &coordinates, sizeof(coordinates))) {
+    int offsets[columns];
+
+    if (readScreenRow(coordinates.row, columns, NULL, offsets)) {
+      *column = columns - 1;
+      *row = coordinates.row;
+
+      {
+        int first = 0;
+        int last = *column;
+
+        while (first <= last) {
+          int current = (first + last) / 2;
+
+          if (offsets[current] < coordinates.column) {
+            first = current + 1;
+          } else {
+            last = current - 1;
+          }
+        }
+
+        *column = first;
+      }
+
+      return 1;
+    }
+  }
+
+  return 0;
+}
+
+static int
 getScreenDescription (ScreenDescription *description) {
   if (!problemText) {
-    if (lseek(screenDescriptor, 0, SEEK_SET) != -1) {
-      unsigned char buffer[4];
-      int count = read(screenDescriptor, buffer, sizeof(buffer));
-      if (count == sizeof(buffer)) {
-        description->rows = buffer[0];
-        description->cols = buffer[1];
-        description->posx = buffer[2];
-        description->posy = buffer[3];
+    if (getScreenDimensions(&description->cols, &description->rows)) {
+      if (getCursorCoordinates(&description->posx, &description->posy, description->cols)) {
         return 1;
-      } else if (count == -1) {
-        LogError("screen header read");
-      } else {
-        long int expected = sizeof(buffer);
-        LogPrint(LOG_ERR, "truncated screen header: expected %ld bytes, read %d.",
-                 expected, count);
       }
-    } else {
-      LogError("screen seek");
     }
+
     problemText = "screen header read error";
   }
+
   description->rows = 1;
   description->cols = strlen(problemText);
   description->posx = 0;
@@ -818,118 +971,31 @@ describe_LinuxScreen (ScreenDescription *description) {
   }
 }
 
-static wint_t
-convertCharacter (const wchar_t *character) {
-  static unsigned char spaces = 0;
-  static unsigned char length = 0;
-  static char buffer[MB_LEN_MAX];
-  const wchar_t cellMask = 0XFF;
-
-  if (!character) {
-    length = 0;
-    if (!spaces) return WEOF;
-    spaces--;
-    return WC_C(' ');
-  }
-
-  if ((*character & ~cellMask) != UNICODE_ROW_DIRECT) {
-    length = 0;
-    return *character;
-  }
-
-  if (length < sizeof(buffer)) {
-    buffer[length++] = *character & cellMask;
-
-    while (1) {
-      wchar_t wc;
-      CharacterConversionResult result = convertCharsToWchar(buffer, length, &wc, NULL);
-
-      if (result == CONV_OK) {
-        length = 0;
-        return wc;
-      }
-
-      if (result == CONV_SHORT) break;
-      if (result != CONV_ILLEGAL) break;
-
-      if (!--length) break;
-      memcpy(buffer, buffer+1, length);
-    }
-  }
-
-  spaces++;
-  return WEOF;
-}
-
 static int
 readCharacters_LinuxScreen (const ScreenBox *box, ScreenCharacter *buffer) {
-  ScreenDescription description;
-  describe_LinuxScreen(&description);
+  short columns;
+  short rows;
 
-  if (validateScreenBox(box, description.cols, description.rows)) {
-    if (problemText) {
-      setScreenMessage(box, buffer, problemText);
-      return 1;
-    }
+  if (getScreenDimensions(&columns, &rows)) {
+    if (validateScreenBox(box, columns, rows)) {
+      if (problemText) {
+        setScreenMessage(box, buffer, problemText);
+        return 1;
+      }
 
-    {
-      size_t size = description.cols;
-      unsigned short line[size];
-      size_t length = size * sizeof(line[0]);
-
-      if (lseek(screenDescriptor, (4 + (box->top * length)), SEEK_SET) != -1) {
-        ScreenCharacter *target = buffer;
+      {
         int row;
 
         for (row=0; row<box->height; ++row) {
-          const unsigned short *source = line;
-          ScreenCharacter characters[size];
-          ScreenCharacter *character = characters;
-          int count = read(screenDescriptor, line, length);
-          int column;
+          ScreenCharacter characters[columns];
+          if (!readScreenRow(box->top+row, columns, characters, NULL)) return 0;
 
-          if (count != length) {
-            if (count == -1) {
-              LogError("screen data read");
-            } else {
-              LogPrint(LOG_ERR, "truncated screen data: expected %d bytes, read %d.",
-                       length, count);
-            }
-            return 0;
-          }
-
-          for (column=0; column<size; ++column) {
-            unsigned short position = *source & 0XFF;
-            wint_t wc;
-
-            if (*source & fontAttributesMask) position |= 0X100;
-            if ((wc = convertCharacter(&translationTable[position])) != WEOF) {
-              character->text = wc;
-              character->attributes = ((*source & unshiftedAttributesMask) |
-                                       ((*source & shiftedAttributesMask) >> 1)) >> 8;
-              character++;
-            }
-
-            source++;
-          }
-
-          {
-            wint_t wc;
-            while ((wc = convertCharacter(NULL)) != WEOF) {
-              character->text = wc;
-              character->attributes = 0X07;
-              character++;
-            }
-          }
-
-          memcpy(target, &characters[box->left],
+          memcpy(buffer, &characters[box->left],
                  box->width * sizeof(characters[0]));
-          target += box->width;
+          buffer += box->width;
         }
 
         return 1;
-      } else {
-        LogError("screen seek");
       }
     }
   }
