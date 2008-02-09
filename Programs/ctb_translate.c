@@ -427,7 +427,7 @@ contractText (
     if (computerBraille) {
       setAfter(1);
       currentOpcode = CTO_Literal;
-      if (!putComputerBraille(*src)) break;
+      if (!putCharacter(*src)) break;
       src++;
     } else if (selectRule(srcmax-src) || selectRule(1)) {
       if ((cursorOffset >= (src - srcmin)) &&
