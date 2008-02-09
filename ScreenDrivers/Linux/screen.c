@@ -46,15 +46,171 @@ typedef enum {
 static const char *problemText;
 static unsigned int debugScreenFontMap = 0;
 
-static const char *charsetName;
-#define UNICODE_ROW_DIRECT 0XF000
+typedef enum {
+  CONV_OK,
+  CONV_ILLEGAL,
+  CONV_SHORT,
+  CONV_OVERFLOW,
+  CONV_ERROR
+} CharacterConversionResult;
 
 #if defined(HAVE_ICONV_H)
 #include <iconv.h>
+
+typedef struct {
+  iconv_t iconvHandle;
+} CharsetConverter;
+
 #define ICONV_NULL ((iconv_t)-1)
-static iconv_t iconvCharsetToWchar = ICONV_NULL;
-static iconv_t iconvWcharToCharset = ICONV_NULL;
-#endif /* enable character conversion */
+#define CHARSET_CONVERTER_INITIALIZER {.iconvHandle = ICONV_NULL}
+
+static int
+allocateCharsetConverter (CharsetConverter *converter, const char *sourceCharset, const char *targetCharset) {
+  if (converter->iconvHandle == ICONV_NULL) {
+    if ((converter->iconvHandle = iconv_open(targetCharset, sourceCharset)) == ICONV_NULL) {
+      LogError("iconv_open");
+      return 0;
+    }
+  }
+  return 1;
+}
+
+static void
+deallocateCharsetConverter (CharsetConverter *converter) {
+  if (converter->iconvHandle != ICONV_NULL) {
+    iconv_close(converter->iconvHandle);
+    converter->iconvHandle = ICONV_NULL;
+  }
+}
+
+static CharacterConversionResult
+convertCharacters (
+  CharsetConverter *converter,
+  const char **inputAddress, size_t *inputLength,
+  char **outputAddress, size_t *outputLength
+) {
+  ssize_t result = iconv(converter->iconvHandle, (char **)inputAddress, inputLength, outputAddress, outputLength);
+  if (result != -1) return CONV_OK;
+  if (errno == EILSEQ) return CONV_ILLEGAL;
+  if (errno == EINVAL) return CONV_SHORT;
+  if (errno == E2BIG) return CONV_OVERFLOW;
+  LogError("iconv");
+  return CONV_ERROR;
+}
+#endif /* charset conversion definitions */
+
+typedef struct {
+  char *name;
+  CharsetConverter charsetToWchar;
+  CharsetConverter wcharToCharset;
+} CharsetEntry;
+
+static CharsetEntry *charsetEntries = NULL;
+static unsigned int charsetCount = 0;
+static unsigned int charsetIndex = 0;
+#define UNICODE_ROW_DIRECT 0XF000
+
+static void
+deallocateCharsetEntries (void) {
+  if (charsetEntries) {
+    while (charsetCount) {
+      CharsetEntry *entry = &charsetEntries[--charsetCount];
+      free(entry->name);
+      deallocateCharsetConverter(&entry->charsetToWchar);
+      deallocateCharsetConverter(&entry->wcharToCharset);
+    }
+
+    free(charsetEntries);
+    charsetEntries = NULL;
+  }
+}
+
+static int
+allocateCharsetEntries (const char *names) {
+  int ok = 0;
+  int count;
+  char **namesArray = splitString(names, '+', &count);
+
+  if (namesArray) {
+    CharsetEntry *entries = calloc(count, sizeof(*entries));
+
+    if (entries) {
+      charsetEntries = entries;
+      charsetCount = 0;
+      charsetIndex = 0;
+      ok = 1;
+
+      while (charsetCount < count) {
+        CharsetEntry *entry = &charsetEntries[charsetCount];
+
+        if (!(entry->name = strdup(namesArray[charsetCount]))) {
+          ok = 0;
+          deallocateCharsetEntries();
+          break;
+        }
+
+        {
+          static const CharsetConverter nullCharsetConverter = CHARSET_CONVERTER_INITIALIZER;
+          entry->charsetToWchar = nullCharsetConverter;
+          entry->wcharToCharset = nullCharsetConverter;
+        }
+
+        charsetCount++;
+      }
+    }
+
+    deallocateStrings(namesArray);
+  }
+
+  return ok;
+}
+
+static CharacterConversionResult
+convertCharsToWchar (const char *chars, size_t length, wchar_t *character, size_t *size) {
+  unsigned int count = charsetCount;
+
+  while (count--) {
+    CharsetEntry *charset = &charsetEntries[charsetIndex];
+    CharsetConverter *converter = &charset->charsetToWchar;
+    CharacterConversionResult result = CONV_ERROR;
+
+    if (allocateCharsetConverter(converter, charset->name, getWcharCharset())) {
+      const char *inptr = chars;
+      size_t inlen = length;
+      char *outptr = (char *)character;
+      size_t outlen = sizeof(*character);
+
+      if ((result = convertCharacters(converter, &inptr, &inlen, &outptr, &outlen)) == CONV_OK)
+        if (size)
+          *size = inptr - chars;
+    }
+
+    if (result != CONV_ILLEGAL) return result;
+    if (++charsetIndex == charsetCount) charsetIndex = 0;
+  }
+
+  return CONV_ILLEGAL;
+}
+
+static CharacterConversionResult
+convertWcharToChars (wchar_t character, char *chars, size_t length, size_t *size) {
+  CharsetEntry *charset = &charsetEntries[charsetIndex];
+  CharsetConverter *converter = &charset->wcharToCharset;
+  CharacterConversionResult result = CONV_ERROR;
+
+  if (allocateCharsetConverter(converter, getWcharCharset(), charset->name)) {
+    const char *inptr = (char *)&character;
+    size_t inlen = sizeof(character);
+    char *outptr = chars;
+    size_t outlen = length;
+
+    if ((result = convertCharacters(converter, &inptr, &inlen, &outptr, &outlen)) == CONV_OK)
+      if (size)
+        *size = outptr - chars;
+  }
+
+  return result;
+}
 
 static int
 setDeviceName (const char **name, const char *const *names, const char *description, int mode) {
@@ -344,8 +500,11 @@ determineAttributesMasks (void) {
 
 static int
 processParameters_LinuxScreen (char **parameters) {
-  charsetName = parameters[PARM_CHARSET];
-  if (!charsetName || !*charsetName) charsetName = getLocaleCharset();
+  {
+    const char *names = parameters[PARM_CHARSET];
+    if (!names || !*names) names = getLocaleCharset();
+    if (!allocateCharsetEntries(names)) return 0;
+  }
 
   if (!validateYesNo(&debugScreenFontMap, parameters[PARM_DEBUGSFM]))
     LogPrint(LOG_WARNING, "%s: %s", "invalid screen font map debug setting", parameters[PARM_DEBUGSFM]);
@@ -564,18 +723,6 @@ destruct_LinuxScreen (void) {
   }
   screenFontMapSize = 0;
   screenFontMapCount = 0;
-
-#if defined(HAVE_ICONV_H)
-  if (iconvCharsetToWchar != ICONV_NULL) {
-    iconv_close(iconvCharsetToWchar);
-    iconvCharsetToWchar = ICONV_NULL;
-  }
-
-  if (iconvWcharToCharset != ICONV_NULL) {
-    iconv_close(iconvWcharToCharset);
-    iconvWcharToCharset = ICONV_NULL;
-  }
-#endif /* disable character conversion */
 }
 
 static int
@@ -694,29 +841,16 @@ convertCharacter (const wchar_t *character) {
     buffer[length++] = *character & cellMask;
 
     while (1) {
-#if defined(HAVE_ICONV_H)
-      char *inptr = buffer;
-      size_t inlen = length;
-
       wchar_t wc;
-      char *outptr = (char *)&wc;
-      size_t outlen = sizeof(wc);
+      CharacterConversionResult result = convertCharsToWchar(buffer, length, &wc, NULL);
 
-      if (iconvCharsetToWchar == ICONV_NULL) {
-        if ((iconvCharsetToWchar = iconv_open(getWcharCharset(), charsetName)) == ICONV_NULL) {
-          LogError("iconv_open");
-          break;
-        }
-      }
-
-      if (iconv(iconvCharsetToWchar, &inptr, &inlen, &outptr, &outlen) != -1) {
+      if (result == CONV_OK) {
         length = 0;
         return wc;
       }
 
-      if (errno == EINVAL) break;
-      if (errno != EILSEQ) break;
-#endif /* convert character */
+      if (result == CONV_SHORT) break;
+      if (result != CONV_ILLEGAL) break;
 
       if (!--length) break;
       memcpy(buffer, buffer+1, length);
@@ -972,32 +1106,10 @@ insertBytes (const char *byte, size_t count) {
 static int
 insertXlate (wchar_t character) {
   char bytes[MB_LEN_MAX];
-  size_t count = 0;
+  size_t count;
+  CharacterConversionResult result = convertWcharToChars(character, bytes, sizeof(bytes), &count);
 
-#if defined(HAVE_ICONV_H)
-  if (iconvWcharToCharset == ICONV_NULL) {
-    if ((iconvWcharToCharset = iconv_open(charsetName, getWcharCharset())) == ICONV_NULL) {
-      LogError("iconv_open");
-      return 0;
-    }
-  }
-
-  {
-    char *inptr = (char *)&character;
-    size_t inlen = sizeof(character);
-    char *outptr = bytes;
-    size_t outlen = sizeof(bytes);
-
-    if (iconv(iconvWcharToCharset, &inptr, &inlen, &outptr, &outlen) != -1) {
-      count = outptr - bytes;
-    } else if (errno != EILSEQ) {
-      LogError("iconv[wchar -> charset]");
-      return 0;
-    }
-  }
-#endif /* conversion from wchar to charset */
-
-  if (!count) {
+  if (result != CONV_OK) {
     uint32_t value = character;
     LogPrint(LOG_WARNING, "character 0X%02" PRIX32 " not insertable in xlate mode." , value);
     return 0;
