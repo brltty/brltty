@@ -409,7 +409,7 @@ contractText (
 ) {
   const wchar_t *srcword = NULL;
   BYTE *destword = NULL; /* last word transla1ted */
-  const wchar_t *computerBraille = NULL;
+  const wchar_t *literal = NULL;
 
   if (!(table = (ContractionTableHeader *) contractionTable)) return 0;
   srcmax = (srcmin = src = inputBuffer) + *inputLength;
@@ -420,20 +420,19 @@ contractText (
   while (src < srcmax) { /*the main translation loop */
     setOffset();
     setBefore();
-    if (computerBraille)
-      if (src >= computerBraille)
+
+    if (literal)
+      if (src >= literal)
         if (testCharacter(*src, CTC_Space) || testCharacter(src[-1], CTC_Space))
-          computerBraille = NULL;
-    if (computerBraille) {
-      setAfter(1);
-      currentOpcode = CTO_Literal;
-      if (!putCharacter(*src)) break;
-      src++;
-    } else if (selectRule(srcmax-src) || selectRule(1)) {
+          literal = NULL;
+
+    if ((!literal && selectRule(srcmax-src)) || selectRule(1)) {
       if ((cursorOffset >= (src - srcmin)) &&
           (cursorOffset < (src - srcmin + currentFindLength))) {
         currentOpcode = CTO_Literal;
-      } else if (table->numberSign && previousOpcode != CTO_MidNum &&
+      } 
+
+      if (table->numberSign && previousOpcode != CTO_MidNum &&
                  !testCharacter(before, CTC_Digit) && testCharacter(*src, CTC_Digit)) {
         if (!putSequence(table->numberSign)) break;
       } else if (table->englishLetterSign && testCharacter(*src, CTC_Letter)) {
@@ -486,33 +485,29 @@ contractText (
       }				/*end of action */
 
       /* main processing */
-      switch (currentOpcode) {
-        case CTO_Literal: {
-          const wchar_t *srcorig = src;
-          computerBraille = src + currentFindLength;
-          if (testCharacter(*src, CTC_Space)) continue;
-          if (destword) {
-            src = srcword;
-            dest = destword;
-          } else {
-            src = srcmin;
-            dest = destmin;
-          }
-          while (srcorig > src) offsets[--srcorig - srcmin] = -1;
-          continue;
+      if (!literal && (currentOpcode == CTO_Literal)) {
+        const wchar_t *srcorig = src;
+        literal = src + currentFindLength;
+        if (testCharacter(*src, CTC_Space)) continue;
+        if (destword) {
+          src = srcword;
+          dest = destword;
+        } else {
+          src = srcmin;
+          dest = destmin;
         }
-        default:
-          if (currentRule->replen) {
-            if (!putReplace(currentRule)) goto done;
-            src += currentFindLength;
-          } else {
-            const wchar_t *srclim = src + currentFindLength;
-            while (1) {
-              if (!putCharacter(*src)) goto done;
-              if (++src == srclim) break;
-              setOffset();
-            }
-          }
+        while (srcorig > src) offsets[--srcorig - srcmin] = -1;
+        continue;
+      } else if (currentRule->replen) {
+        if (!putReplace(currentRule)) goto done;
+        src += currentFindLength;
+      } else {
+        const wchar_t *srclim = src + currentFindLength;
+        while (1) {
+          if (!putCharacter(*src)) goto done;
+          if (++src == srclim) break;
+          setOffset();
+        }
       }
 
       /* post processing */
