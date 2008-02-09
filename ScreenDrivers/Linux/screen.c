@@ -101,6 +101,7 @@ convertCharacters (
 
 typedef struct {
   char *name;
+  unsigned isMultiByte:1;
   CharsetConverter charsetToWchar;
   CharsetConverter wcharToCharset;
 } CharsetEntry;
@@ -110,14 +111,19 @@ static unsigned int charsetCount = 0;
 static unsigned int charsetIndex = 0;
 #define UNICODE_ROW_DIRECT 0XF000
 
+static inline CharsetEntry *
+getCharsetEntry (void) {
+  return &charsetEntries[charsetIndex];
+}
+
 static void
 deallocateCharsetEntries (void) {
   if (charsetEntries) {
     while (charsetCount) {
-      CharsetEntry *entry = &charsetEntries[--charsetCount];
-      free(entry->name);
-      deallocateCharsetConverter(&entry->charsetToWchar);
-      deallocateCharsetConverter(&entry->wcharToCharset);
+      CharsetEntry *charset = &charsetEntries[--charsetCount];
+      free(charset->name);
+      deallocateCharsetConverter(&charset->charsetToWchar);
+      deallocateCharsetConverter(&charset->wcharToCharset);
     }
 
     free(charsetEntries);
@@ -141,18 +147,20 @@ allocateCharsetEntries (const char *names) {
       ok = 1;
 
       while (charsetCount < count) {
-        CharsetEntry *entry = &charsetEntries[charsetCount];
+        CharsetEntry *charset = &charsetEntries[charsetCount];
 
-        if (!(entry->name = strdup(namesArray[charsetCount]))) {
+        if (!(charset->name = strdup(namesArray[charsetCount]))) {
           ok = 0;
           deallocateCharsetEntries();
           break;
         }
 
+        charset->isMultiByte = 0;
+
         {
           static const CharsetConverter nullCharsetConverter = CHARSET_CONVERTER_INITIALIZER;
-          entry->charsetToWchar = nullCharsetConverter;
-          entry->wcharToCharset = nullCharsetConverter;
+          charset->charsetToWchar = nullCharsetConverter;
+          charset->wcharToCharset = nullCharsetConverter;
         }
 
         charsetCount++;
@@ -170,7 +178,7 @@ convertCharsToWchar (const char *chars, size_t length, wchar_t *character, size_
   unsigned int count = charsetCount;
 
   while (count--) {
-    CharsetEntry *charset = &charsetEntries[charsetIndex];
+    CharsetEntry *charset = getCharsetEntry();
     CharsetConverter *converter = &charset->charsetToWchar;
     CharacterConversionResult result = CONV_ERROR;
 
@@ -185,6 +193,7 @@ convertCharsToWchar (const char *chars, size_t length, wchar_t *character, size_
           *size = inptr - chars;
     }
 
+    if (result == CONV_SHORT) charset->isMultiByte = 1;
     if (result != CONV_ILLEGAL) return result;
     if (++charsetIndex == charsetCount) charsetIndex = 0;
   }
@@ -194,7 +203,7 @@ convertCharsToWchar (const char *chars, size_t length, wchar_t *character, size_
 
 static CharacterConversionResult
 convertWcharToChars (wchar_t character, char *chars, size_t length, size_t *size) {
-  CharsetEntry *charset = &charsetEntries[charsetIndex];
+  CharsetEntry *charset = getCharsetEntry();
   CharsetConverter *converter = &charset->wcharToCharset;
   CharacterConversionResult result = CONV_ERROR;
 
@@ -204,9 +213,13 @@ convertWcharToChars (wchar_t character, char *chars, size_t length, size_t *size
     char *outptr = chars;
     size_t outlen = length;
 
-    if ((result = convertCharacters(converter, &inptr, &inlen, &outptr, &outlen)) == CONV_OK)
-      if (size)
-        *size = outptr - chars;
+    if ((result = convertCharacters(converter, &inptr, &inlen, &outptr, &outlen)) == CONV_OK) {
+      size_t count = outptr - chars;
+      if (size) *size = count;
+      if (count > 1) charset->isMultiByte = 1;
+    } else if ((result == CONV_OVERFLOW) && length) {
+      charset->isMultiByte = 1;
+    }
   }
 
   return result;
@@ -792,7 +805,7 @@ readScreenDevice (off_t offset, void *buffer, size_t size) {
 }
 
 static int
-getScreenDimensions (short *columns, short *rows) {
+readScreenDimensions (short *columns, short *rows) {
   typedef struct {
     unsigned char rows;
     unsigned char columns;
@@ -856,7 +869,7 @@ readScreenRow (int row, size_t size, ScreenCharacter *characters, int *offsets) 
 }
 
 static int
-getCursorCoordinates (short *column, short *row, short columns) {
+readCursorCoordinates (short *column, short *row, short columns) {
   typedef struct {
     unsigned char column;
     unsigned char row;
@@ -865,15 +878,21 @@ getCursorCoordinates (short *column, short *row, short columns) {
   ScreenCoordinates coordinates;
 
   if (readScreenDevice(2, &coordinates, sizeof(coordinates))) {
-    int offsets[columns];
+    const CharsetEntry *charset = getCharsetEntry();
 
-    if (readScreenRow(coordinates.row, columns, NULL, offsets)) {
-      *column = columns - 1;
-      *row = coordinates.row;
+    *row = coordinates.row;
 
-      {
+    if (!charset->isMultiByte) {
+      *column = coordinates.column;
+      return 1;
+    }
+
+    {
+      int offsets[columns];
+
+      if (readScreenRow(coordinates.row, columns, NULL, offsets)) {
         int first = 0;
-        int last = *column;
+        int last = columns - 1;
 
         while (first <= last) {
           int current = (first + last) / 2;
@@ -886,9 +905,8 @@ getCursorCoordinates (short *column, short *row, short columns) {
         }
 
         *column = first;
+        return 1;
       }
-
-      return 1;
     }
   }
 
@@ -898,8 +916,8 @@ getCursorCoordinates (short *column, short *row, short columns) {
 static int
 getScreenDescription (ScreenDescription *description) {
   if (!problemText) {
-    if (getScreenDimensions(&description->cols, &description->rows)) {
-      if (getCursorCoordinates(&description->posx, &description->posy, description->cols)) {
+    if (readScreenDimensions(&description->cols, &description->rows)) {
+      if (readCursorCoordinates(&description->posx, &description->posy, description->cols)) {
         return 1;
       }
     }
@@ -976,7 +994,7 @@ readCharacters_LinuxScreen (const ScreenBox *box, ScreenCharacter *buffer) {
   short columns;
   short rows;
 
-  if (getScreenDimensions(&columns, &rows)) {
+  if (readScreenDimensions(&columns, &rows)) {
     if (validateScreenBox(box, columns, rows)) {
       if (problemText) {
         setScreenMessage(box, buffer, problemText);
