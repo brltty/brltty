@@ -372,6 +372,62 @@ convertTable (void) {
   return status;
 }
 
+static wchar_t *
+formatLine (TranslationTable table, unsigned char byte, size_t *length, unsigned char *cell) {
+  char buffer[0X100];
+  int characterIndex;
+  int brailleIndex;
+  int lineLength;
+  wint_t character = convertCharToWchar(byte);
+  unsigned char dots;
+  char meta = ' ';
+  char ctrl = ' ';
+
+  if (character == WEOF) character = WC_C('?');
+  dots = convertWcharToDots(table, character);
+
+  if (iswLatin1(character)) {
+    ctrl = '^';
+    if (!(character & 0X60)) {
+      character |= 0X40;
+      if (character & 0X80) meta = '~';
+    } else if (character == 0X7F) {
+      character ^= 0X40;       
+    } else {
+      ctrl = ' ';
+    }
+  }
+
+#define DOT(n) ((dots & BRLAPI_DOT##n)? ((n) + '0'): ' ')
+  snprintf(buffer, sizeof(buffer),
+           "%02X %3u %c%c%nx %nx [%c%c%c%c%c%c%c%c]%n",
+           byte, byte, meta, ctrl, &characterIndex, &brailleIndex,
+           DOT(1), DOT(2), DOT(3), DOT(4), DOT(5), DOT(6), DOT(7), DOT(8),
+           &lineLength);
+#undef DOT
+
+  {
+    wchar_t *line = calloc(lineLength+1, sizeof(*line));
+    if (line) {
+      int i;
+      for (i=0; i<lineLength; i+=1) {
+        wint_t wc = convertCharToWchar(buffer[i]);
+        line[i] = (wc != WEOF)? wc: WC_C(' ');
+      }
+
+      line[characterIndex] = character;
+      line[brailleIndex] = BRL_UC_ROW | dots;
+      line[lineLength] = 0;
+
+      if (length) *length = lineLength;
+      if (cell) *cell = dots;
+      return line;
+    }
+  }
+
+  return NULL;
+}
+
 static int
 editTable (void) {
   int status;
@@ -416,7 +472,9 @@ editTable (void) {
 
           while (1) {
             {
-              unsigned char pattern = table[current];
+              size_t lineLength;
+              unsigned char brailleCell;
+              wchar_t *line = formatLine(table, current, &lineLength, &brailleCell);
 
               /* Display current character */
 #ifdef USE_CURSES
@@ -425,29 +483,27 @@ editTable (void) {
               printf("\r\n\v");
 #endif /* USE_CURSES */
 
-              printw("%02X %3u %lc %lc\n",
-                     current, current,
-                     (current >= 0X20)? convertCharToWchar(current): WC_C(' '),
-                     BRL_UC_ROW|pattern);
+              printw("%.*" PRIws "\n", lineLength, line);
 
-#define DOT(i) ((pattern & (1 << ((i)-1)))? '#': ' ')
+#define DOT(n) ((brailleCell & BRLAPI_DOT##n)? '#': ' ')
               printw("%c %c\n", DOT(1), DOT(4));
               printw("%c %c\n", DOT(2), DOT(5));
               printw("%c %c\n", DOT(3), DOT(6));
               printw("%c %c\n", DOT(7), DOT(8));
+#undef DOT
 
 #ifdef USE_CURSES
               refresh();
 #endif /* USE_CURSES */
 
               {
-                wchar_t text[displayWidth];
                 brlapi_writeArguments_t args = BRLAPI_WRITEARGUMENTS_INITIALIZER;
-                swprintf(text, displayWidth, WS_C("%02X %3u %lc %lc%*s"),
-                         current, current,
-                         (current >= 0X20)? convertCharToWchar(current): WC_C(' '),
-                         BRL_UC_ROW|pattern,
-                         displayWidth, "");
+                wchar_t text[displayWidth];
+                size_t length = MIN(displayWidth, lineLength);
+
+                wmemcpy(text, line, length);
+                wmemset(&text[length], WC_C(' '), displayWidth-length);
+
                 args.regionBegin = 1;
                 args.regionSize = displayWidth;
                 args.text = (char*)text;
@@ -455,6 +511,8 @@ editTable (void) {
                 args.charset = "WCHAR_T";
                 brlapi_write(&args);
               }
+
+              free(line);
             }
 
             {
@@ -533,10 +591,10 @@ editTable (void) {
 #endif /* USE_CURSES */
 
                       for (i=0; i<0X100; i+=1) {
-                        printw("%02X %3u %lc %lc",
-                               i, i,
-                               ((i != 0X7F) && ((i & 0X7F) >= 0X20))? convertCharToWchar(i): WC_C(' '),
-                               BRL_UC_ROW|table[i]);
+                        size_t length;
+                        wchar_t *line = formatLine(table, i, &length, NULL);
+                        printw("%.*" PRIws "\n", length, line);
+                        free(line);
                       }
 
                       brlapi_write(NULL);
