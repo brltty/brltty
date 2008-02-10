@@ -375,215 +375,257 @@ convertTable (void) {
 static int
 editTable (void) {
   int status;
-  brlapi_fileDescriptor brlapi_fd = brlapi_openConnection(NULL, NULL);
-  FILE *inputFile = openTable(&inputPath, "r", opt_dataDirectory, NULL, NULL);
   TranslationTable table;
-  unsigned char current = 0;
-  unsigned int brlx,brly;
 
   memset(table, 0xFF, sizeof(table));
-  if (inputFile) {
-    inputFormat->read(inputPath, inputFile, table, inputFormat->data);
-    fclose(inputFile);
-  }
 
-#ifdef USE_CURSES
-  initscr();
-  cbreak();
-  noecho();
-  nonl();
-  intrflush(stdscr, FALSE);
-  keypad(stdscr, TRUE);
-#endif /* USE_CURSES */
+  {
+    FILE *inputFile = openTable(&inputPath, "r", opt_dataDirectory, NULL, NULL);
 
-  if (brlapi_fd != (brlapi_fileDescriptor) -1) {
-    if (brlapi_enterTtyMode(BRLAPI_TTY_DEFAULT, NULL) != -1) {
-      brlapi_getDisplaySize(&brlx, &brly);
+    if (inputFile) {
+      if (inputFormat->read(inputPath, inputFile, table, inputFormat->data)) {
+        status = 0;
+      } else {
+        status = 4;
+      }
+
+      fclose(inputFile);
     } else {
-      brlapi_perror("brlapi_enterTtyMode");
-      brlapi_closeConnection();
-      brlapi_fd = -1;
+      status = 3;
     }
   }
 
-  while (1) {
-    {
-      unsigned char pattern = table[current];
-      /* Display current character */
+  if (!status) {
+    brlapi_fileDescriptor brlapi_fd = brlapi_openConnection(NULL, NULL);
+
+    if (brlapi_fd != (brlapi_fileDescriptor) -1) {
+      if (brlapi_enterTtyMode(BRLAPI_TTY_DEFAULT, NULL) != -1) {
+        unsigned int displayWidth, displayHeight;
+
+        if (brlapi_getDisplaySize(&displayWidth, &displayHeight) != -1) {
+          unsigned char current = 0;
+
 #ifdef USE_CURSES
-      clear();
-#else /* USE_CURSES */
-      printf("\r\n\v");
+          initscr();
+          cbreak();
+          noecho();
+          nonl();
+          intrflush(stdscr, FALSE);
+          keypad(stdscr, TRUE);
 #endif /* USE_CURSES */
-      printw("%2X %3u %lc %lc", current, current, current >= 32 ? convertCharToWchar(current) : ' ', BRL_UC_ROW|pattern);
-      printw("\n");
-#define DOT(i) (pattern&(1<<((i)-1))?'#':' ')
-      printw("%c %c\n",DOT(1),DOT(4));
-      printw("%c %c\n",DOT(2),DOT(5));
-      printw("%c %c\n",DOT(3),DOT(6));
-      printw("%c %c\n",DOT(7),DOT(8));
-#ifdef USE_CURSES
-      refresh();
-#endif /* USE_CURSES */
-      if (brlapi_fd != (brlapi_fileDescriptor) -1) {
-        wchar_t text[brlx];
-        brlapi_writeArguments_t args = BRLAPI_WRITEARGUMENTS_INITIALIZER;
-        swprintf(text, brlx, L"%2X %3u %lc %lc%*s", current, current, current >= 32 ? convertCharToWchar(current) : ' ', BRL_UC_ROW|pattern, brlx, "");
-        args.regionBegin = 1;
-        args.regionSize = brlx;
-        args.text = (char*) text;
-        args.textSize = brlx * sizeof(wchar_t);
-        args.charset = "WCHAR_T";
-        brlapi_write(&args);
-      }
-    }
 
-    {
-      /* Wait for input */
-      fd_set set;
-      int max = STDIN_FILENO + 1;
-      FD_ZERO(&set);
+          while (1) {
+            {
+              unsigned char pattern = table[current];
 
-      if (brlapi_fd != (brlapi_fileDescriptor) -1) {
-        FD_SET(brlapi_fd, &set);
-        max = brlapi_fd + 1;
-      }
-
-      FD_SET(STDIN_FILENO, &set);
-      select(max, &set, NULL, NULL, NULL);
-
-      {
-        /* Handle input */
-        /* TODO: factorize code */
-        if (FD_ISSET(STDIN_FILENO, &set)) {
-#ifdef USE_CURSES
-          /* FIXME: enter non-blocking mode */
-#ifdef HAVE_PKG_NCURSESW
-          wint_t ch;
-          int ret = get_wch(&ch);
-
-          if (ret == KEY_CODE_YES)
-#else
-          int ch = getch();
-
-          if (ch >= 0x100)
-#endif
-          {
-            switch (ch) {
-              case KEY_UP:    current--; break;
-              case KEY_DOWN:  current++; break;
-              case KEY_PPAGE: current-= 0x10; break;
-              case KEY_NPAGE: current+= 0x10; break;
-              case KEY_HOME:  current = 0; break;
-              case KEY_END:   current = 0xFF; break;
-              case KEY_BACKSPACE:
-              case KEY_CLEAR:
-              case KEY_DC:   table[current] = 0xFF; break;
-              case KEY_F(2):
-              default: break;
-            }
-          } else
-#ifdef HAVE_PKG_NCURSESW
-            if (ret == OK)
-#endif
-#else /* USE_CURSES */
-          wint_t ch;
-          ch = getwc(stdin);
-#endif /* USE_CURSES */
-          {
-            if (ch >= BRL_UC_ROW && ch <= (BRL_UC_ROW|0xFF)) {
-              /* Set braille pattern */
-              table[current] = ch & 0xFF;
-            } else if (ch == 'W' - '@') {
-              /* ^W: save */
-              if (!outputPath)
-                outputPath = inputPath;
-              if (!outputFormat)
-                outputFormat = inputFormat;
-              FILE *outputFile = openTable(&outputPath, "w", NULL, stdout, "<standard-output>");
-
-              if (outputFile) {
-                outputFormat->write(outputPath, outputFile, table, outputFormat->data);
-                fclose(outputFile);
-              }
-            } else if (ch == 'V' - '@') {
-              /* ^V: show charset table */
-              int i;
+              /* Display current character */
 #ifdef USE_CURSES
               clear();
-#endif
-              for (i = 0; i < 0x100; i++) {
-                printw("%2X %3u %lc%lc ", i, i, i != 127 && (i&0x7F) >= 32 ? convertCharToWchar(i) : ' ', BRL_UC_ROW|table[i]);
-              }
-              if (brlapi_fd != (brlapi_fileDescriptor)-1)
-                brlapi_write(NULL);
+#else /* USE_CURSES */
+              printf("\r\n\v");
+#endif /* USE_CURSES */
+
+              printw("%02X %3u %lc %lc\n",
+                     current, current,
+                     (current >= 0X20)? convertCharToWchar(current): WC_C(' '),
+                     BRL_UC_ROW|pattern);
+
+#define DOT(i) ((pattern & (1 << ((i)-1)))? '#': ' ')
+              printw("%c %c\n", DOT(1), DOT(4));
+              printw("%c %c\n", DOT(2), DOT(5));
+              printw("%c %c\n", DOT(3), DOT(6));
+              printw("%c %c\n", DOT(7), DOT(8));
+
 #ifdef USE_CURSES
               refresh();
-              getch();
-#else /* USE_CURSES */
-              getchar();
 #endif /* USE_CURSES */
-            } else {
-              /* Switch to char */
-              int c = convertWcharToChar(ch);
-              if (c != EOF)
-                current = c;
-            }
-          }
-        }
 
-        if (brlapi_fd != (brlapi_fileDescriptor)-1 && FD_ISSET(brlapi_fd, &set)) {
-          brlapi_keyCode_t key;
-          while (brlapi_readKey(0, &key) == 1) {
-            unsigned long code = key & BRLAPI_KEY_CODE_MASK;
-            switch (key & BRLAPI_KEY_TYPE_MASK) {
-              case BRLAPI_KEY_TYPE_CMD:
-                switch (code & BRLAPI_KEY_CMD_BLK_MASK) {
-                  case 0:
-                    switch (code) {
-                      case BRLAPI_KEY_CMD_LNUP: current--; break;
-                      case BRLAPI_KEY_CMD_LNDN: current++; break;
-                      case BRLAPI_KEY_CMD_PRPGRPH: current -= 0x10; break;
-                      case BRLAPI_KEY_CMD_NXPGRPH: current += 0x10; break;
-                      case BRLAPI_KEY_CMD_TOP_LEFT: current = 0; break;
-                      case BRLAPI_KEY_CMD_BOT_LEFT: current = 0xFF; break;
+              {
+                wchar_t text[displayWidth];
+                brlapi_writeArguments_t args = BRLAPI_WRITEARGUMENTS_INITIALIZER;
+                swprintf(text, displayWidth, WS_C("%02X %3u %lc %lc%*s"),
+                         current, current,
+                         (current >= 0X20)? convertCharToWchar(current): WC_C(' '),
+                         BRL_UC_ROW|pattern,
+                         displayWidth, "");
+                args.regionBegin = 1;
+                args.regionSize = displayWidth;
+                args.text = (char*)text;
+                args.textSize = displayWidth * sizeof(wchar_t);
+                args.charset = "WCHAR_T";
+                brlapi_write(&args);
+              }
+            }
+
+            {
+              /* Wait for input */
+              fd_set set;
+              int max = MAX(STDIN_FILENO, brlapi_fd) + 1;
+
+              FD_ZERO(&set);
+              FD_SET(STDIN_FILENO, &set);
+              FD_SET(brlapi_fd, &set);
+
+              select(max, &set, NULL, NULL, NULL);
+
+              {
+                /* Handle input */
+                /* TODO: factorize code */
+                if (FD_ISSET(STDIN_FILENO, &set)) {
+#ifdef USE_CURSES
+                  /* FIXME: enter non-blocking mode */
+#ifdef HAVE_PKG_NCURSESW
+                  wint_t ch;
+                  int ret = get_wch(&ch);
+
+                  if (ret == KEY_CODE_YES)
+#else /* HAVE_PKG_NCURSESW */
+                  int ch = getch();
+
+                  if (ch >= 0X100)
+#endif /* HAVE_PKG_NCURSESW */
+                  {
+                    switch (ch) {
+                      case KEY_UP:    current -= 1; break;
+                      case KEY_DOWN:  current += 1; break;
+                      case KEY_PPAGE: current -= 0X10; break;
+                      case KEY_NPAGE: current += 0X10; break;
+                      case KEY_HOME:  current = 0; break;
+                      case KEY_END:   current = 0XFF; break;
+
+                      case KEY_BACKSPACE:
+                      case KEY_CLEAR:
+                      case KEY_DC:   table[current] = 0xFF; break;
+
+                      case KEY_F(2):
                       default: break;
                     }
-                  default: break;
-                }
-                break;
-              case BRLAPI_KEY_TYPE_SYM: {
-                /* latin1 */
-                if (code < 0x100) code |= BRLAPI_KEY_SYM_UNICODE;
-                if ((code & 0x1f000000) == BRLAPI_KEY_SYM_UNICODE) {
-                  /* unicode */
-                  if ((code & 0xffff00) == BRL_UC_ROW) {
-                    /* Set braille pattern */
-                    table[current] = code & 0xFF;
-                  } else {
-                    /* Switch to char */
-                    int c = convertWcharToChar(code & 0xffffff);
-                    if (c != EOF)
-                      current = c;
+                  } else
+#ifdef HAVE_PKG_NCURSESW
+                    if (ret == OK)
+#endif /* HAVE_PKG_NCURSESW */
+#else /* USE_CURSES */
+                  wint_t ch;
+                  ch = getwc(stdin);
+#endif /* USE_CURSES */
+                  {
+                    if ((ch >= BRL_UC_ROW) && (ch <= (BRL_UC_ROW|0xFF))) {
+                      /* Set braille pattern */
+                      table[current] = ch & 0xFF;
+                    } else if (ch == 'W' - '@') {
+                      /* ^W: save */
+                      FILE *outputFile;
+
+                      if (!outputPath) outputPath = inputPath;
+                      if (!outputFormat) outputFormat = inputFormat;
+                      outputFile = openTable(&outputPath, "w", NULL, stdout, "<standard-output>");
+
+                      if (outputFile) {
+                        outputFormat->write(outputPath, outputFile, table, outputFormat->data);
+                        fclose(outputFile);
+                      }
+                    } else if (ch == 'V' - '@') {
+                      /* ^V: show charset table */
+                      int i;
+
+#ifdef USE_CURSES
+                      clear();
+#endif /* USE_CURSES */
+
+                      for (i=0; i<0X100; i+=1) {
+                        printw("%02X %3u %lc %lc",
+                               i, i,
+                               ((i != 0X7F) && ((i & 0X7F) >= 0X20))? convertCharToWchar(i): WC_C(' '),
+                               BRL_UC_ROW|table[i]);
+                      }
+
+                      brlapi_write(NULL);
+#ifdef USE_CURSES
+                      refresh();
+                      getch();
+#else /* USE_CURSES */
+                      getchar();
+#endif /* USE_CURSES */
+                    } else {
+                      /* Switch to char */
+                      int c = convertWcharToChar(ch);
+                      if (c != EOF) current = c;
+                    }
                   }
-                } else switch (code) {
-                  case BRLAPI_KEY_SYM_BACKSPACE:
-                  case BRLAPI_KEY_SYM_DELETE:    table[current] = 0xFF; break;
-                  case BRLAPI_KEY_SYM_UP:        current--; break;
-                  case BRLAPI_KEY_SYM_DOWN:      current++; break;
-                  case BRLAPI_KEY_SYM_PAGE_UP:   current -= 0x10; break;
-                  case BRLAPI_KEY_SYM_PAGE_DOWN: current += 0x10; break;
-                  case BRLAPI_KEY_SYM_HOME:      current = 0; break;
-                  case BRLAPI_KEY_SYM_END:       current = 0xFF; break;
                 }
-                break;
+
+                if (FD_ISSET(brlapi_fd, &set)) {
+                  brlapi_keyCode_t key;
+
+                  while (brlapi_readKey(0, &key) == 1) {
+                    unsigned long code = key & BRLAPI_KEY_CODE_MASK;
+
+                    switch (key & BRLAPI_KEY_TYPE_MASK) {
+                      case BRLAPI_KEY_TYPE_CMD:
+                        switch (code & BRLAPI_KEY_CMD_BLK_MASK) {
+                          case 0:
+                            switch (code) {
+                              case BRLAPI_KEY_CMD_LNUP: current -= 1; break;
+                              case BRLAPI_KEY_CMD_LNDN: current += 1; break;
+                              case BRLAPI_KEY_CMD_PRPGRPH: current -= 0X10; break;
+                              case BRLAPI_KEY_CMD_NXPGRPH: current += 0X10; break;
+                              case BRLAPI_KEY_CMD_TOP_LEFT: current = 0; break;
+                              case BRLAPI_KEY_CMD_BOT_LEFT: current = 0XFF; break;
+
+                              default: break;
+                            }
+
+                          default: break;
+                        }
+                        break;
+
+                      case BRLAPI_KEY_TYPE_SYM: {
+                        /* latin1 */
+                        if (code < 0X100) code |= BRLAPI_KEY_SYM_UNICODE;
+                        if ((code & 0X1f000000) == BRLAPI_KEY_SYM_UNICODE) {
+                          /* unicode */
+                          if ((code & 0Xffff00) == BRL_UC_ROW) {
+                            /* Set braille pattern */
+                            table[current] = code & 0XFF;
+                          } else {
+                            /* Switch to char */
+                            int c = convertWcharToChar(code & 0XFFFFFF);
+                            if (c != EOF) current = c;
+                          }
+                        } else{
+                          switch (code) {
+                            case BRLAPI_KEY_SYM_BACKSPACE:
+                            case BRLAPI_KEY_SYM_DELETE:    table[current] = 0XFF; break;
+
+                            case BRLAPI_KEY_SYM_UP:        current -= 1; break;
+                            case BRLAPI_KEY_SYM_DOWN:      current += 1; break;
+                            case BRLAPI_KEY_SYM_PAGE_UP:   current -= 0X10; break;
+                            case BRLAPI_KEY_SYM_PAGE_DOWN: current += 0X10; break;
+                            case BRLAPI_KEY_SYM_HOME:      current = 0; break;
+                            case BRLAPI_KEY_SYM_END:       current = 0XFF; break;
+                          }
+                        }
+                        break;
+                      }
+
+                      default:
+                        break;
+                    }
+                  }
+                }
               }
-              default:
-                break;
             }
           }
+        } else {
+          brlapi_perror("brlapi_getDisplaySize");
         }
+      } else {
+        brlapi_perror("brlapi_enterTtyMode");
       }
+
+      brlapi_closeConnection();
+      brlapi_fd = -1;
+    } else {
     }
   }
 
