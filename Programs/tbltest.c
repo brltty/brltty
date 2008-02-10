@@ -380,28 +380,29 @@ formatLine (TranslationTable table, unsigned char byte, size_t *length, unsigned
   int lineLength;
   wint_t character = convertCharToWchar(byte);
   unsigned char dots;
-  char meta = ' ';
-  char ctrl = ' ';
+  char characterPrefix;
 
   if (character == WEOF) character = WC_C('?');
   dots = convertWcharToDots(table, character);
 
   if (iswLatin1(character)) {
-    ctrl = '^';
+    characterPrefix = '^';
     if (!(character & 0X60)) {
       character |= 0X40;
-      if (character & 0X80) meta = '~';
+      if (character & 0X80) characterPrefix = '~';
     } else if (character == 0X7F) {
       character ^= 0X40;       
-    } else {
-      ctrl = ' ';
+    } else if (character != characterPrefix) {
+      characterPrefix = ' ';
     }
+  } else {
+    characterPrefix = ' ';
   }
 
 #define DOT(n) ((dots & BRLAPI_DOT##n)? ((n) + '0'): ' ')
   snprintf(buffer, sizeof(buffer),
-           "%02X %3u %c%c%nx %nx [%c%c%c%c%c%c%c%c]%n",
-           byte, byte, meta, ctrl, &characterIndex, &brailleIndex,
+           "%02X %3u %c%nx %nx [%c%c%c%c%c%c%c%c]%n",
+           byte, byte, characterPrefix, &characterIndex, &brailleIndex,
            DOT(1), DOT(2), DOT(3), DOT(4), DOT(5), DOT(6), DOT(7), DOT(8),
            &lineLength);
 #undef DOT
@@ -483,7 +484,7 @@ editTable (void) {
               printf("\r\n\v");
 #endif /* USE_CURSES */
 
-              printw("%.*" PRIws "\n", lineLength, line);
+              printw("%" PRIws "\n", line);
 
 #define DOT(n) ((brailleCell & BRLAPI_DOT##n)? '#': ' ')
               printw("%c %c\n", DOT(1), DOT(4));
@@ -591,9 +592,8 @@ editTable (void) {
 #endif /* USE_CURSES */
 
                       for (i=0; i<0X100; i+=1) {
-                        size_t length;
-                        wchar_t *line = formatLine(table, i, &length, NULL);
-                        printw("%.*" PRIws "\n", length, line);
+                        wchar_t *line = formatLine(table, i, NULL, NULL);
+                        printw("%" PRIws "\n", line);
                         free(line);
                       }
 
