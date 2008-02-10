@@ -487,10 +487,12 @@ editTable (void) {
               printw("%" PRIws "\n", line);
 
 #define DOT(n) ((brailleCell & BRLAPI_DOT##n)? '#': ' ')
-              printw("%c %c\n", DOT(1), DOT(4));
-              printw("%c %c\n", DOT(2), DOT(5));
-              printw("%c %c\n", DOT(3), DOT(6));
-              printw("%c %c\n", DOT(7), DOT(8));
+              printw(" +---+ \n");
+              printw("1|%c %c|4\n", DOT(1), DOT(4));
+              printw("2|%c %c|5\n", DOT(2), DOT(5));
+              printw("3|%c %c|6\n", DOT(3), DOT(6));
+              printw("7|%c %c|8\n", DOT(7), DOT(8));
+              printw(" +---+ \n");
 #undef DOT
 
 #ifdef USE_CURSES
