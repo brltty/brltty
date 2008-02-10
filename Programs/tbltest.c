@@ -456,12 +456,17 @@ main (int argc, char *argv[]) {
           /* Handle input */
 	  /* TODO: factorize code */
 	  if (FD_ISSET(STDIN_FILENO, &set)) {
-	    wint_t wch;
 #ifdef USE_CURSES
 	    /* FIXME: enter non-blocking mode */
-	    int ch = get_wch(&wch);
-	    if (ch == KEY_CODE_YES) {
-	      switch (wch) {
+#ifdef HAVE_PKG_NCURSESW
+	    wint_t ch;
+	    int ret = get_wch(&ch);
+	    if (ret == KEY_CODE_YES) {
+#else
+	    int ch = getch();
+	    if (ch >= 0x100) {
+#endif
+	      switch (ch) {
 		case KEY_UP:    current--; break;
 		case KEY_DOWN:  current++; break;
 		case KEY_PPAGE: current-= 0x10; break;
@@ -474,15 +479,19 @@ main (int argc, char *argv[]) {
 		case KEY_F(2):
 		default: break;
 	      }
-	    } else if (ch == OK)
+	    } else
+#ifdef HAVE_PKG_NCURSESW
+	      if (ret == OK)
+#endif
 #else /* USE_CURSES */
-	    wch = getwc(stdin);
+	    wint_t ch;
+	    ch = getwc(stdin);
 #endif /* USE_CURSES */
 	    {
-	      if (wch >= BRL_UC_ROW && wch <= (BRL_UC_ROW|0xFF)) {
+	      if (ch >= BRL_UC_ROW && ch <= (BRL_UC_ROW|0xFF)) {
 		/* Set braille pattern */
-		table[current] = wch & 0xFF;
-	      } else if (wch == 'W' - '@') {
+		table[current] = ch & 0xFF;
+	      } else if (ch == 'W' - '@') {
 		/* ^W: save */
 		if (!outputPath)
 		  outputPath = inputPath;
@@ -494,7 +503,8 @@ main (int argc, char *argv[]) {
 		  outputFormat->write(outputPath, outputFile, table, outputFormat->data);
 		  fclose(outputFile);
 		}
-	      } else if (wch == 'V' - '@') {
+	      } else if (ch == 'V' - '@') {
+		/* ^V: show charset table */
 		int i;
 #ifdef USE_CURSES
 		clear();
@@ -512,7 +522,7 @@ main (int argc, char *argv[]) {
 #endif /* USE_CURSES */
 	      } else {
 		/* Switch to char */
-		int c = convertWcharToChar(wch);
+		int c = convertWcharToChar(ch);
 		if (c != EOF)
 		  current = c;
 	      }
