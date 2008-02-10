@@ -22,6 +22,20 @@
 #include <errno.h>
 #include <ctype.h>
 
+#if defined(HAVE_PKG_CURSES)
+#define USE_CURSES
+#include <curses.h>
+#elif defined(HAVE_PKG_NCURSES)
+#define USE_CURSES
+#include <ncurses.h>
+#elif defined(HAVE_PKG_NCURSESW)
+#define USE_CURSES
+#include <ncursesw/ncurses.h>
+#else
+#warning curses package either unspecified or unsupported
+#define printw printf
+#endif /* HAVE_PKG_CURSES */
+
 #include "program.h"
 #include "options.h"
 #include "misc.h"
@@ -30,11 +44,15 @@
 #include "tbl.h"
 #include "tbl_internal.h"
 
+#define BRLAPI_NO_DEPRECATED
+#include "brlapi.h"
+
 static char *opt_characterSet;
 static char *opt_inputFormat;
 static char *opt_outputFormat;
 static int opt_translate;
 static char *opt_dataDirectory;
+static int opt_edit;
 
 BEGIN_OPTION_TABLE(programOptions)
   { .letter = 'D',
@@ -71,6 +89,12 @@ BEGIN_OPTION_TABLE(programOptions)
     .argument = "charset",
     .setting.string = &opt_characterSet,
     .description = "8-bit character set to use."
+  },
+
+  { .letter = 'e',
+    .word = "edit",
+    .setting.flag = &opt_edit,
+    .description = "Edit table."
   },
 END_OPTION_TABLE
 
@@ -356,9 +380,201 @@ main (int argc, char *argv[]) {
     exit(9);
   }
 
-  if (opt_translate) {
+  if (opt_edit) {
+    brlapi_fileDescriptor brlapi_fd = brlapi_openConnection(NULL, NULL);
     FILE *inputFile = openTable(&inputPath, "r", opt_dataDirectory, NULL, NULL);
+    TranslationTable table;
+    unsigned char current = 0;
+    unsigned int brlx,brly;
 
+    memset(table, 0xFF, sizeof(table));
+    if (inputFile) {
+      inputFormat->read(inputPath, inputFile, table, inputFormat->data);
+      fclose(inputFile);
+    }
+#ifdef USE_CURSES
+    initscr();
+    cbreak();
+    noecho();
+    nonl();
+    intrflush(stdscr, FALSE);
+    keypad(stdscr, TRUE);
+#endif /* USE_CURSES */
+    if (brlapi_fd != (brlapi_fileDescriptor) -1) {
+      if (brlapi_enterTtyMode(BRLAPI_TTY_DEFAULT, NULL) != -1) {
+	brlapi_getDisplaySize(&brlx, &brly);
+      } else {
+	brlapi_perror("brlapi_enterTtyMode");
+	brlapi_closeConnection();
+	brlapi_fd = -1;
+      }
+    }
+    while (1) {
+      {
+	unsigned char pattern = table[current];
+	/* Display current character */
+#ifdef USE_CURSES
+	clear();
+#else /* USE_CURSES */
+	printf("\r\n\v");
+#endif /* USE_CURSES */
+	printw("%2X %3u %lc %lc", current, current, current >= 32 ? convertCharToWchar(current) : ' ', BRL_UC_ROW|pattern);
+	printw("\n");
+#define DOT(i) (pattern&(1<<((i)-1))?'#':' ')
+	printw("%c %c\n",DOT(1),DOT(4));
+	printw("%c %c\n",DOT(2),DOT(5));
+	printw("%c %c\n",DOT(3),DOT(6));
+	printw("%c %c\n",DOT(7),DOT(8));
+#ifdef USE_CURSES
+	refresh();
+#endif /* USE_CURSES */
+	if (brlapi_fd != (brlapi_fileDescriptor) -1) {
+	  wchar_t text[brlx];
+	  brlapi_writeArguments_t args = BRLAPI_WRITEARGUMENTS_INITIALIZER;
+	  swprintf(text, brlx, L"%2X %3u %lc %lc%*s", current, current, current >= 32 ? convertCharToWchar(current) : ' ', BRL_UC_ROW|pattern, brlx, "");
+	  args.regionBegin = 1;
+	  args.regionSize = brlx;
+	  args.text = (char*) text;
+	  args.textSize = brlx * sizeof(wchar_t);
+	  args.charset = "WCHAR_T";
+	  brlapi_write(&args);
+	}
+      }
+
+      {
+	/* Wait for input */
+	fd_set set;
+	int max = STDIN_FILENO + 1;
+	FD_ZERO(&set);
+	if (brlapi_fd != (brlapi_fileDescriptor) -1) {
+	  FD_SET(brlapi_fd, &set);
+	  max = brlapi_fd + 1;
+	}
+	FD_SET(STDIN_FILENO, &set);
+	select(max, &set, NULL, NULL, NULL);
+        {
+          /* Handle input */
+	  /* TODO: factorize code */
+	  if (FD_ISSET(STDIN_FILENO, &set)) {
+	    wint_t wch;
+#ifdef USE_CURSES
+	    /* FIXME: enter non-blocking mode */
+	    int ch = get_wch(&wch);
+	    if (ch == KEY_CODE_YES) {
+	      switch (wch) {
+		case KEY_UP:    current--; break;
+		case KEY_DOWN:  current++; break;
+		case KEY_PPAGE: current-= 0x10; break;
+		case KEY_NPAGE: current+= 0x10; break;
+		case KEY_HOME:  current = 0; break;
+		case KEY_END:   current = 0xFF; break;
+		case KEY_BACKSPACE:
+		case KEY_CLEAR:
+		case KEY_DC:   table[current] = 0xFF; break;
+		case KEY_F(2):
+		default: break;
+	      }
+	    } else if (ch == OK)
+#else /* USE_CURSES */
+	    wch = getwc(stdin);
+#endif /* USE_CURSES */
+	    {
+	      if (wch >= BRL_UC_ROW && wch <= (BRL_UC_ROW|0xFF)) {
+		/* Set braille pattern */
+		table[current] = wch & 0xFF;
+	      } else if (wch == 'W' - '@') {
+		/* ^W: save */
+		if (!outputPath)
+		  outputPath = inputPath;
+		if (!outputFormat)
+		  outputFormat = inputFormat;
+		FILE *outputFile = openTable(&outputPath, "w", NULL, stdout, "<standard-output>");
+
+		if (outputFile) {
+		  outputFormat->write(outputPath, outputFile, table, outputFormat->data);
+		  fclose(outputFile);
+		}
+	      } else if (wch == 'V' - '@') {
+		int i;
+#ifdef USE_CURSES
+		clear();
+#endif
+		for (i = 0; i < 0x100; i++) {
+		  printw("%2X %3u %lc%lc ", i, i, i != 127 && (i&0x7F) >= 32 ? convertCharToWchar(i) : ' ', BRL_UC_ROW|table[i]);
+		}
+		if (brlapi_fd != (brlapi_fileDescriptor)-1)
+		  brlapi_write(NULL);
+#ifdef USE_CURSES
+		refresh();
+		getch();
+#else /* USE_CURSES */
+		getchar();
+#endif /* USE_CURSES */
+	      } else {
+		/* Switch to char */
+		int c = convertWcharToChar(wch);
+		if (c != EOF)
+		  current = c;
+	      }
+	    }
+	  }
+	  if (brlapi_fd != (brlapi_fileDescriptor)-1 && FD_ISSET(brlapi_fd, &set)) {
+	    brlapi_keyCode_t key;
+	    while (brlapi_readKey(0, &key) == 1) {
+	      unsigned long code = key & BRLAPI_KEY_CODE_MASK;
+	      switch (key & BRLAPI_KEY_TYPE_MASK) {
+		case BRLAPI_KEY_TYPE_CMD:
+		  switch (code & BRLAPI_KEY_CMD_BLK_MASK) {
+		    case 0:
+		      switch (code) {
+			case BRLAPI_KEY_CMD_LNUP: current--; break;
+			case BRLAPI_KEY_CMD_LNDN: current++; break;
+			case BRLAPI_KEY_CMD_PRPGRPH: current -= 0x10; break;
+			case BRLAPI_KEY_CMD_NXPGRPH: current += 0x10; break;
+			case BRLAPI_KEY_CMD_TOP_LEFT: current = 0; break;
+			case BRLAPI_KEY_CMD_BOT_LEFT: current = 0xFF; break;
+			default: break;
+		      }
+		    default: break;
+		  }
+		  break;
+		case BRLAPI_KEY_TYPE_SYM: {
+		  /* latin1 */
+		  if (code < 0x100) code |= BRLAPI_KEY_SYM_UNICODE;
+		  if ((code & 0x1f000000) == BRLAPI_KEY_SYM_UNICODE) {
+		    /* unicode */
+		    if ((code & 0xffff00) == BRL_UC_ROW) {
+		      /* Set braille pattern */
+		      table[current] = code & 0xFF;
+		    } else {
+		      /* Switch to char */
+		      int c = convertWcharToChar(code & 0xffffff);
+		      if (c != EOF)
+			current = c;
+		    }
+		  } else switch (code) {
+		    case BRLAPI_KEY_SYM_BACKSPACE:
+		    case BRLAPI_KEY_SYM_DELETE:    table[current] = 0xFF; break;
+		    case BRLAPI_KEY_SYM_UP:        current--; break;
+		    case BRLAPI_KEY_SYM_DOWN:      current++; break;
+		    case BRLAPI_KEY_SYM_PAGE_UP:   current -= 0x10; break;
+		    case BRLAPI_KEY_SYM_PAGE_DOWN: current += 0x10; break;
+		    case BRLAPI_KEY_SYM_HOME:      current = 0; break;
+		    case BRLAPI_KEY_SYM_END:       current = 0xFF; break;
+		  }
+		  break;
+		}
+		default:
+		  break;
+	      }
+	    }
+	  }
+        }
+      }
+    }
+  } else if (opt_translate) {
+    FILE *inputFile = openTable(&inputPath, "r", opt_dataDirectory, NULL, NULL);
+ 
     if (inputFile) {
       TranslationTable inputTable;
 
