@@ -34,10 +34,12 @@
 #include <ncurses.h>
 #elif defined(HAVE_PKG_NCURSESW)
 #define USE_CURSES
+#define HAVE_FUNC_GET_WCH
 #include <ncursesw/ncurses.h>
 #else
 #warning curses package either unspecified or unsupported
 #define printw printf
+#define beep() printf("\a");
 #endif /* HAVE_PKG_CURSES */
 
 #include "program.h"
@@ -491,14 +493,15 @@ editTable (void) {
         if (brlapi_getDisplaySize(&displayWidth, &displayHeight) != -1) {
           unsigned char current = 0;
 
-#ifdef USE_CURSES
+#if defined(USE_CURSES)
           initscr();
           cbreak();
           noecho();
           nonl();
           intrflush(stdscr, FALSE);
           keypad(stdscr, TRUE);
-#endif /* USE_CURSES */
+#else /* standard input/output */
+#endif /* initialize keyboard and screen */
 
           while (1) {
             {
@@ -506,12 +509,14 @@ editTable (void) {
               unsigned char brailleCell;
               wchar_t *line = makeCharacterDescription(table, current, &lineLength, &brailleCell);
 
-              /* Display current character */
-#ifdef USE_CURSES
+#if defined(USE_CURSES)
               clear();
-#else /* USE_CURSES */
+              printw("F2:Save F8:Exit\n");
+              printw("Up:Up1 Dn:Down1 PgUp:Up16 PgDn:Down16 Home:First End:Last\n");
+              printw("\n");
+#else /* standard input/output */
               printf("\r\n\v");
-#endif /* USE_CURSES */
+#endif /* clear screen */
 
               printWchars(line);
               printw("\n");
@@ -525,9 +530,10 @@ editTable (void) {
               printw(" +---+ \n");
 #undef DOT
 
-#ifdef USE_CURSES
+#if defined(USE_CURSES)
               refresh();
-#endif /* USE_CURSES */
+#else /* standard input/output */
+#endif /* update screen */
 
               {
                 brlapi_writeArguments_t args = BRLAPI_WRITEARGUMENTS_INITIALIZER;
@@ -539,8 +545,8 @@ editTable (void) {
 
                 args.regionBegin = 1;
                 args.regionSize = displayWidth;
-                args.text = (char*)text;
-                args.textSize = displayWidth * sizeof(wchar_t);
+                args.text = (char *)text;
+                args.textSize = displayWidth * sizeof(text[0]);
                 args.charset = "WCHAR_T";
                 brlapi_write(&args);
               }
@@ -548,63 +554,40 @@ editTable (void) {
               free(line);
             }
 
+            /* Wait for input */
             {
-              /* Wait for input */
               fd_set set;
-              int max = MAX(STDIN_FILENO, brlapi_fd) + 1;
-
-              FD_ZERO(&set);
-              FD_SET(STDIN_FILENO, &set);
-              FD_SET(brlapi_fd, &set);
-
-              select(max, &set, NULL, NULL, NULL);
 
               {
-                /* Handle input */
-                /* TODO: factorize code */
-                if (FD_ISSET(STDIN_FILENO, &set)) {
-#ifdef USE_CURSES
-                  /* FIXME: enter non-blocking mode */
-#ifdef HAVE_PKG_NCURSESW
-                  wint_t ch;
-                  int ret = get_wch(&ch);
+                int size = MAX(STDIN_FILENO, brlapi_fd) + 1;
+                FD_ZERO(&set);
+                FD_SET(STDIN_FILENO, &set);
+                FD_SET(brlapi_fd, &set);
+                select(size, &set, NULL, NULL, NULL);
+              }
 
-                  if (ret == KEY_CODE_YES)
-#else /* HAVE_PKG_NCURSESW */
-                  int ch = getch();
+              if (FD_ISSET(STDIN_FILENO, &set)) {
+#if defined(USE_CURSES)
+#ifdef HAVE_FUNC_GET_WCH
+                wint_t ch;
+                int ret = get_wch(&ch);
 
-                  if (ch >= 0X100)
-#endif /* HAVE_PKG_NCURSESW */
-                  {
-                    switch (ch) {
-                      case KEY_UP:    current -= 1; break;
-                      case KEY_DOWN:  current += 1; break;
-                      case KEY_PPAGE: current -= 0X10; break;
-                      case KEY_NPAGE: current += 0X10; break;
-                      case KEY_HOME:  current = 0; break;
-                      case KEY_END:   current = 0XFF; break;
+                if (ret == KEY_CODE_YES)
+#else /* HAVE_FUNC_GET_WCH */
+                int ch = getch();
 
-                      case KEY_BACKSPACE:
-                      case KEY_CLEAR:
-                      case KEY_DC:   table[current] = 0xFF; break;
+                if (ch >= 0X100)
+#endif /* HAVE_FUNC_GET_WCH */
+                {
+                  switch (ch) {
+                    case KEY_UP:    current -= 1; break;
+                    case KEY_DOWN:  current += 1; break;
+                    case KEY_PPAGE: current -= 0X10; break;
+                    case KEY_NPAGE: current += 0X10; break;
+                    case KEY_HOME:  current = 0; break;
+                    case KEY_END:   current = 0XFF; break;
 
-                      case KEY_F(2):
-                      default: break;
-                    }
-                  } else
-#ifdef HAVE_PKG_NCURSESW
-                    if (ret == OK)
-#endif /* HAVE_PKG_NCURSESW */
-#else /* USE_CURSES */
-                  wint_t ch;
-                  ch = getwc(stdin);
-#endif /* USE_CURSES */
-                  {
-                    if ((ch >= BRL_UC_ROW) && (ch <= (BRL_UC_ROW|0xFF))) {
-                      /* Set braille pattern */
-                      table[current] = ch & 0xFF;
-                    } else if (ch == 'W' - '@') {
-                      /* ^W: save */
+                    case KEY_F(2): {
                       FILE *outputFile;
 
                       if (!outputPath) outputPath = inputPath;
@@ -615,98 +598,167 @@ editTable (void) {
                         outputFormat->write(outputPath, outputFile, table, outputFormat->data);
                         fclose(outputFile);
                       }
-                    } else if (ch == 'V' - '@') {
-                      /* ^V: show charset table */
-                      int i;
+                      break;
+                    }
+
+                    case KEY_F(8):
+                      goto done;
+
+                    default:
+                      beep();
+                      break;
+                  }
+                } else
+
+#ifdef HAVE_FUNC_GET_WCH
+                if (ret == OK)
+#endif /* HAVE_FUNC_GET_WCH */
+#else /* standard input/output */
+                wint_t ch = fgetwc(stdin);
+                if (ch == WEOF) goto done;
+#endif /* read character */
+                {
+                  if ((ch >= BRL_UC_ROW) && (ch <= (BRL_UC_ROW|0xFF))) {
+                    /* Set braille pattern */
+                    table[current] = ch & 0XFF;
+                  } else if (ch == 'V' - '@') {
+                    /* ^V: show charset table */
+                    int i;
 
 #ifdef USE_CURSES
-                      clear();
+                    clear();
 #endif /* USE_CURSES */
 
-                      for (i=0; i<0X100; i+=1) {
-                        wchar_t *line = makeCharacterDescription(table, i, NULL, NULL);
-                        printWchars(line);
-                        printw("\n", line);
-                        free(line);
-                      }
+                    for (i=0; i<0X100; i+=1) {
+                      wchar_t *line = makeCharacterDescription(table, i, NULL, NULL);
+                      printWchars(line);
+                      printw("\n");
+                      free(line);
+                    }
 
-                      brlapi_write(NULL);
+                    brlapi_write(NULL);
 #ifdef USE_CURSES
-                      refresh();
-                      getch();
+                    refresh();
+                    getch();
 #else /* USE_CURSES */
-                      getchar();
+                    getchar();
 #endif /* USE_CURSES */
+                  } else {
+                    /* Switch to char */
+                    int c = convertWcharToChar(ch);
+                    if (c != EOF) {
+                      current = c;
                     } else {
-                      /* Switch to char */
-                      int c = convertWcharToChar(ch);
-                      if (c != EOF) current = c;
+                      beep();
                     }
                   }
                 }
+              }
 
-                if (FD_ISSET(brlapi_fd, &set)) {
-                  brlapi_keyCode_t key;
+              if (FD_ISSET(brlapi_fd, &set)) {
+                brlapi_keyCode_t key;
 
-                  while (brlapi_readKey(0, &key) == 1) {
-                    unsigned long code = key & BRLAPI_KEY_CODE_MASK;
+                if (brlapi_readKey(0, &key) == 1) {
+                  unsigned long code = key & BRLAPI_KEY_CODE_MASK;
 
-                    switch (key & BRLAPI_KEY_TYPE_MASK) {
-                      case BRLAPI_KEY_TYPE_CMD:
-                        switch (code & BRLAPI_KEY_CMD_BLK_MASK) {
-                          case 0:
-                            switch (code) {
-                              case BRLAPI_KEY_CMD_LNUP: current -= 1; break;
-                              case BRLAPI_KEY_CMD_LNDN: current += 1; break;
-                              case BRLAPI_KEY_CMD_PRPGRPH: current -= 0X10; break;
-                              case BRLAPI_KEY_CMD_NXPGRPH: current += 0X10; break;
-                              case BRLAPI_KEY_CMD_TOP_LEFT: current = 0; break;
-                              case BRLAPI_KEY_CMD_BOT_LEFT: current = 0XFF; break;
-
-                              default: break;
-                            }
-
-                          default: break;
-                        }
-                        break;
-
-                      case BRLAPI_KEY_TYPE_SYM: {
-                        /* latin1 */
-                        if (code < 0X100) code |= BRLAPI_KEY_SYM_UNICODE;
-                        if ((code & 0X1f000000) == BRLAPI_KEY_SYM_UNICODE) {
-                          /* unicode */
-                          if ((code & 0Xffff00) == BRL_UC_ROW) {
-                            /* Set braille pattern */
-                            table[current] = code & 0XFF;
-                          } else {
-                            /* Switch to char */
-                            int c = convertWcharToChar(code & 0XFFFFFF);
-                            if (c != EOF) current = c;
-                          }
-                        } else{
+                  switch (key & BRLAPI_KEY_TYPE_MASK) {
+                    case BRLAPI_KEY_TYPE_CMD:
+                      switch (code & BRLAPI_KEY_CMD_BLK_MASK) {
+                        case 0:
                           switch (code) {
-                            case BRLAPI_KEY_SYM_BACKSPACE:
-                            case BRLAPI_KEY_SYM_DELETE:    table[current] = 0XFF; break;
+                            case BRLAPI_KEY_CMD_LNUP:
+                              current -= 1;
+                              break;
 
-                            case BRLAPI_KEY_SYM_UP:        current -= 1; break;
-                            case BRLAPI_KEY_SYM_DOWN:      current += 1; break;
-                            case BRLAPI_KEY_SYM_PAGE_UP:   current -= 0X10; break;
-                            case BRLAPI_KEY_SYM_PAGE_DOWN: current += 0X10; break;
-                            case BRLAPI_KEY_SYM_HOME:      current = 0; break;
-                            case BRLAPI_KEY_SYM_END:       current = 0XFF; break;
+                            case BRLAPI_KEY_CMD_LNDN:
+                              current += 1;
+                              break;
+
+                            case BRLAPI_KEY_CMD_PRPGRPH:
+                              current -= 0X10;
+                              break;
+
+                            case BRLAPI_KEY_CMD_NXPGRPH:
+                              current += 0X10;
+                              break;
+
+                            case BRLAPI_KEY_CMD_TOP_LEFT:
+                            case BRLAPI_KEY_CMD_TOP:
+                              current = 0;
+                              break;
+
+                            case BRLAPI_KEY_CMD_BOT_LEFT:
+                            case BRLAPI_KEY_CMD_BOT:
+                              current = 0XFF;
+                              break;
+
+                            default:
+                              beep();
+                              break;
+                          }
+                          break;
+
+                        case BRLAPI_KEY_CMD_PASSDOTS:
+                          table[current] = code & BRLAPI_KEY_CMD_ARG_MASK;
+                          break;
+
+                        default:
+                          beep();
+                          break;
+                      }
+                      break;
+
+                    case BRLAPI_KEY_TYPE_SYM: {
+                      /* latin1 */
+                      if (code < 0X100) code |= BRLAPI_KEY_SYM_UNICODE;
+
+                      if ((code & 0X1f000000) == BRLAPI_KEY_SYM_UNICODE) {
+                        /* unicode */
+                        if ((code & 0Xffff00) == BRL_UC_ROW) {
+                          /* Set braille pattern */
+                          table[current] = code & 0XFF;
+                        } else {
+                          /* Switch to char */
+                          int c = convertWcharToChar(code & 0XFFFFFF);
+                          if (c != EOF) {
+                            current = c;
+                          } else {
+                            beep();
                           }
                         }
-                        break;
-                      }
+                      } else {
+                        switch (code) {
+                          case BRLAPI_KEY_SYM_UP:        current -= 1; break;
+                          case BRLAPI_KEY_SYM_DOWN:      current += 1; break;
+                          case BRLAPI_KEY_SYM_PAGE_UP:   current -= 0X10; break;
+                          case BRLAPI_KEY_SYM_PAGE_DOWN: current += 0X10; break;
+                          case BRLAPI_KEY_SYM_HOME:      current = 0; break;
+                          case BRLAPI_KEY_SYM_END:       current = 0XFF; break;
 
-                      default:
-                        break;
+                          default:
+                            beep();
+                            break;
+                        }
+                      }
+                      break;
                     }
+
+                    default:
+                      beep();
+                      break;
                   }
                 }
               }
             }
           }
+        done:
+
+#if defined(USE_CURSES)
+          clear();
+          refresh();
+          endwin();
+#else /* standard input/output */
+#endif /* restore keyboard and screen */
         } else {
           brlapi_perror("brlapi_getDisplaySize");
         }

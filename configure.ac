@@ -682,7 +682,7 @@ AC_CACHE_CHECK([for system-dependent compilation flags], [brltty_cv_prog_cc_sysf
 case "${host_os}"
 in
    linux*|gnu*|kfreebsd*)
-      brltty_cv_prog_cc_sysflags="-D_POSIX_C_SOURCE=2 -D_BSD_SOURCE -D_XOPEN_SOURCE=500"
+      brltty_cv_prog_cc_sysflags="-D_POSIX_C_SOURCE=2 -D_BSD_SOURCE -D_XOPEN_SOURCE=500 -D_XOPEN_SOURCE_EXTENDED"
       ;;
    solaris*)
       brltty_cv_prog_cc_sysflags="-D_XOPEN_SOURCE=500 -D__EXTENSIONS__"
