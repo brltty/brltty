@@ -266,11 +266,6 @@ static const FormatEntry formatEntries[] = {
   {NULL}
 };
 
-static const char *inputPath;
-static const char *outputPath;
-static const FormatEntry *inputFormat;
-static const FormatEntry *outputFormat;
-
 static const FormatEntry *
 findFormatEntry (const char *name) {
   const FormatEntry *format = formatEntries;
@@ -328,6 +323,11 @@ openTable (const char **file, const char *mode, const char *directory, FILE *std
   }
 }
 
+static const char *inputPath;
+static const char *outputPath;
+static const FormatEntry *inputFormat;
+static const FormatEntry *outputFormat;
+
 static int
 convertTable (void) {
   int status;
@@ -373,11 +373,11 @@ convertTable (void) {
 }
 
 static wchar_t *
-formatLine (TranslationTable table, unsigned char byte, size_t *length, unsigned char *cell) {
+makeCharacterDescription (TranslationTable table, unsigned char byte, size_t *length, unsigned char *cell) {
   char buffer[0X100];
   int characterIndex;
   int brailleIndex;
-  int lineLength;
+  int descriptionLength;
   wint_t character = convertCharToWchar(byte);
   unsigned char dots;
   char characterPrefix;
@@ -404,29 +404,37 @@ formatLine (TranslationTable table, unsigned char byte, size_t *length, unsigned
            "%02X %3u %c%nx %nx [%c%c%c%c%c%c%c%c]%n",
            byte, byte, characterPrefix, &characterIndex, &brailleIndex,
            DOT(1), DOT(2), DOT(3), DOT(4), DOT(5), DOT(6), DOT(7), DOT(8),
-           &lineLength);
+           &descriptionLength);
 #undef DOT
 
   {
-    wchar_t *line = calloc(lineLength+1, sizeof(*line));
-    if (line) {
+    wchar_t *description = calloc(descriptionLength+1, sizeof(*description));
+    if (description) {
       int i;
-      for (i=0; i<lineLength; i+=1) {
+      for (i=0; i<descriptionLength; i+=1) {
         wint_t wc = convertCharToWchar(buffer[i]);
-        line[i] = (wc != WEOF)? wc: WC_C(' ');
+        description[i] = (wc != WEOF)? wc: WC_C(' ');
       }
 
-      line[characterIndex] = character;
-      line[brailleIndex] = BRL_UC_ROW | dots;
-      line[lineLength] = 0;
+      description[characterIndex] = character;
+      description[brailleIndex] = BRL_UC_ROW | dots;
+      description[descriptionLength] = 0;
 
-      if (length) *length = lineLength;
+      if (length) *length = descriptionLength;
       if (cell) *cell = dots;
-      return line;
+      return description;
     }
   }
 
   return NULL;
+}
+
+static void
+printWchars (const wchar_t *wcs) {
+  while (*wcs) {
+    wint_t wc = *wcs++;
+    printw("%" PRIwc, wc);
+  }
 }
 
 static int
@@ -475,7 +483,7 @@ editTable (void) {
             {
               size_t lineLength;
               unsigned char brailleCell;
-              wchar_t *line = formatLine(table, current, &lineLength, &brailleCell);
+              wchar_t *line = makeCharacterDescription(table, current, &lineLength, &brailleCell);
 
               /* Display current character */
 #ifdef USE_CURSES
@@ -484,7 +492,8 @@ editTable (void) {
               printf("\r\n\v");
 #endif /* USE_CURSES */
 
-              printw("%" PRIws "\n", line);
+              printWchars(line);
+              printw("\n");
 
 #define DOT(n) ((brailleCell & BRLAPI_DOT##n)? '#': ' ')
               printw(" +---+ \n");
@@ -594,8 +603,9 @@ editTable (void) {
 #endif /* USE_CURSES */
 
                       for (i=0; i<0X100; i+=1) {
-                        wchar_t *line = formatLine(table, i, NULL, NULL);
-                        printw("%" PRIws "\n", line);
+                        wchar_t *line = makeCharacterDescription(table, i, NULL, NULL);
+                        printWchars(line);
+                        printw("\n", line);
                         free(line);
                       }
 
