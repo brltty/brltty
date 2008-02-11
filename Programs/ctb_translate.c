@@ -540,10 +540,14 @@ contractText (
   }				/*end of translation loop */
 done:
 
-  if (destword != NULL && src < srcmax && !testCharacter(*src, CTC_Space)) {
+  if ((src < srcmax) &&
+      (destword != NULL) &&
+      ((destmax - destword) < ((destmax - destmin) / 8)) &&
+      !testCharacter(*src, CTC_Space)) {
     src = srcword;
     dest = destword;
   }
+
   if (src < srcmax) {
     setOffset();
     while (testCharacter(*src, CTC_Space))
