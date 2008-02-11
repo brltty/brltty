@@ -39,7 +39,9 @@
 #else
 #warning curses package either unspecified or unsupported
 #define printw printf
-#define beep() printf("\a");
+#define clear() printf("\r\n\v")
+#define refresh() fflush(stdout)
+#define beep() printf("\a")
 #endif /* HAVE_PKG_CURSES */
 
 #include "program.h"
@@ -509,13 +511,13 @@ editTable (void) {
               unsigned char brailleCell;
               wchar_t *line = makeCharacterDescription(table, current, &lineLength, &brailleCell);
 
-#if defined(USE_CURSES)
               clear();
+#if defined(USE_CURSES)
               printw("F2:Save F8:Exit\n");
               printw("Up:Up1 Dn:Down1 PgUp:Up16 PgDn:Down16 Home:First End:Last\n");
               printw("\n");
 #else /* standard input/output */
-              printf("\r\n\v");
+              ;
 #endif /* clear screen */
 
               printWchars(line);
@@ -530,10 +532,7 @@ editTable (void) {
               printw(" +---+ \n");
 #undef DOT
 
-#if defined(USE_CURSES)
               refresh();
-#else /* standard input/output */
-#endif /* update screen */
 
               {
                 brlapi_writeArguments_t args = BRLAPI_WRITEARGUMENTS_INITIALIZER;
@@ -624,11 +623,7 @@ editTable (void) {
                   } else if (ch == 'V' - '@') {
                     /* ^V: show charset table */
                     int i;
-
-#ifdef USE_CURSES
                     clear();
-#endif /* USE_CURSES */
-
                     for (i=0; i<0X100; i+=1) {
                       wchar_t *line = makeCharacterDescription(table, i, NULL, NULL);
                       printWchars(line);
@@ -636,12 +631,13 @@ editTable (void) {
                       free(line);
                     }
 
-                    brlapi_write(NULL);
-#ifdef USE_CURSES
                     refresh();
+                    brlapi_write(NULL);
+
+#ifdef USE_CURSES
                     getch();
 #else /* USE_CURSES */
-                    getchar();
+                    fgetwc(stdin);
 #endif /* USE_CURSES */
                   } else {
                     /* Switch to char */
@@ -751,11 +747,12 @@ editTable (void) {
               }
             }
           }
-        done:
 
-#if defined(USE_CURSES)
+        done:
           clear();
           refresh();
+
+#if defined(USE_CURSES)
           endwin();
 #else /* standard input/output */
 #endif /* restore keyboard and screen */
