@@ -542,7 +542,7 @@ done:
 
   if ((src < srcmax) &&
       (destword != NULL) &&
-      ((destmax - destword) < ((destmax - destmin) / 8)) &&
+      ((destmax - destword) <= ((destmax - destmin) / 4)) &&
       !testCharacter(*src, CTC_Space)) {
     src = srcword;
     dest = destword;
