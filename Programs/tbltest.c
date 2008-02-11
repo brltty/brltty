@@ -22,6 +22,10 @@
 #include <errno.h>
 #include <ctype.h>
 
+#ifdef HAVE_LIBICUUC
+#include <unicode/uchar.h>
+#endif /* HAVE_LIBICUUC */
+
 #if defined(HAVE_PKG_CURSES)
 #define USE_CURSES
 #include <curses.h>
@@ -378,34 +382,51 @@ makeCharacterDescription (TranslationTable table, unsigned char byte, size_t *le
   int characterIndex;
   int brailleIndex;
   int descriptionLength;
+
   wint_t character = convertCharToWchar(byte);
   unsigned char dots;
-  char characterPrefix;
+  wchar_t printableCharacter;
+  char printablePrefix;
 
   if (character == WEOF) character = WC_C('?');
   dots = convertWcharToDots(table, character);
 
-  if (iswLatin1(character)) {
-    characterPrefix = '^';
-    if (!(character & 0X60)) {
-      character |= 0X40;
-      if (character & 0X80) characterPrefix = '~';
-    } else if (character == 0X7F) {
-      character ^= 0X40;       
-    } else if (character != characterPrefix) {
-      characterPrefix = ' ';
+  printableCharacter = character;
+  if (iswLatin1(printableCharacter)) {
+    printablePrefix = '^';
+    if (!(printableCharacter & 0X60)) {
+      printableCharacter |= 0X40;
+      if (printableCharacter & 0X80) printablePrefix = '~';
+    } else if (printableCharacter == 0X7F) {
+      printableCharacter ^= 0X40;       
+    } else if (printableCharacter != printablePrefix) {
+      printablePrefix = ' ';
     }
   } else {
-    characterPrefix = ' ';
+    printablePrefix = ' ';
   }
 
 #define DOT(n) ((dots & BRLAPI_DOT##n)? ((n) + '0'): ' ')
   snprintf(buffer, sizeof(buffer),
            "%02X %3u %c%nx %nx [%c%c%c%c%c%c%c%c]%n",
-           byte, byte, characterPrefix, &characterIndex, &brailleIndex,
+           byte, byte, printablePrefix, &characterIndex, &brailleIndex,
            DOT(1), DOT(2), DOT(3), DOT(4), DOT(5), DOT(6), DOT(7), DOT(8),
            &descriptionLength);
 #undef DOT
+
+#ifdef HAVE_LIBICUUC
+  {
+    char *name = buffer + descriptionLength + 1;
+    int size = buffer + sizeof(buffer) - name;
+    UErrorCode error = U_ZERO_ERROR;
+
+    u_charName(character, U_EXTENDED_CHAR_NAME, name, size, &error);
+    if (U_SUCCESS(error)) {
+      descriptionLength += strlen(name) + 1;
+      *--name = ' ';
+    }
+  }
+#endif /* HAVE_LIBICUUC */
 
   {
     wchar_t *description = calloc(descriptionLength+1, sizeof(*description));
@@ -416,7 +437,7 @@ makeCharacterDescription (TranslationTable table, unsigned char byte, size_t *le
         description[i] = (wc != WEOF)? wc: WC_C(' ');
       }
 
-      description[characterIndex] = character;
+      description[characterIndex] = printableCharacter;
       description[brailleIndex] = BRL_UC_ROW | dots;
       description[descriptionLength] = 0;
 
