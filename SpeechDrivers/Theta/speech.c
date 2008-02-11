@@ -157,7 +157,7 @@ spk_construct (SpeechSynthesizer *spk, char **parameters) {
 
 static void
 spk_destruct (SpeechSynthesizer *spk) {
-  spk_mute();
+  spk_mute(spk);
 
   if (voice) {
     theta_unload_voice(voice);
