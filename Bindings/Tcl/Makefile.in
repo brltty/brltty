@@ -22,6 +22,7 @@ TCL_OK = @TCL_OK@
 TCLSH = @TCLSH@
 TCL_CPPFLAGS = @TCL_CPPFLAGS@
 TCL_LIBS = @TCL_LIBS@
+TCL_DESTDIR = $(INSTALL_ROOT)$(exec_prefix)
 
 TCL_API = $(LIB_PFX)$(API_NAME)_tcl.$(LIB_EXT)
 
@@ -37,8 +38,8 @@ clean::
 	-rm -f $(TCL_API)
 
 install: all
-	$(TCLSH) $(SRC_DIR)/pkgutil -root "$(INSTALL_ROOT)" install $(API_NAME) $(API_RELEASE) $(TCL_API)
+	$(TCLSH) $(SRC_DIR)/pkgutil -root "$(TCL_DESTDIR)" install $(API_NAME) $(API_RELEASE) $(TCL_API)
 
 uninstall:
-	-$(TCLSH) $(SRC_DIR)/pkgutil -root "$(INSTALL_ROOT)" uninstall $(API_NAME) $(API_RELEASE)
+	-$(TCLSH) $(SRC_DIR)/pkgutil -root "$(TCL_DESTDIR)" uninstall $(API_NAME) $(API_RELEASE)
 

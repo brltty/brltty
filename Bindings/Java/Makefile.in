@@ -27,12 +27,14 @@ JAR = @JAR@
 
 JAVA_JAR = @JAVA_JAR@
 JAVA_JAR_DIR = @JAVA_JAR_DIR@
+JAVA_JAR_DESTDIR = $(INSTALL_ROOT)$(prefix)
 
 JAVA_JNI = @JAVA_JNI@
 JAVA_JNI_DIR = @JAVA_JNI_DIR@
 JAVA_JNI_HDR = @JAVA_JNI_HDR@
 JAVA_JNI_INC = @JAVA_JNI_INC@
 JAVA_JNI_FLAGS = @JAVA_JNI_FLAGS@
+JAVA_JNI_DESTDIR = $(INSTALL_ROOT)$(exec_prefix)
 
 all: jar jni doc
 
@@ -80,8 +82,8 @@ install: install-jar install-jni
 install-jar: install-jar-$(JAVA_JAR)
 
 install-jar-yes: jar
-	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(JAVA_JAR_DIR)
-	$(INSTALL) $(JAVA_JAR_FILE) $(INSTALL_ROOT)$(JAVA_JAR_DIR)
+	$(INSTALL_DIRECTORY) $(JAVA_JAR_DESTDIR)$(JAVA_JAR_DIR)
+	$(INSTALL) $(JAVA_JAR_FILE) $(JAVA_JAR_DESTDIR)$(JAVA_JAR_DIR)
 
 install-jar-no:
 	@echo jar not installed
@@ -89,8 +91,8 @@ install-jar-no:
 install-jni: install-jni-$(JAVA_JNI)
 
 install-jni-yes: jni
-	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(JAVA_JNI_DIR)
-	$(INSTALL) $(JAVA_JNI_FILE) $(INSTALL_ROOT)$(JAVA_JNI_DIR)
+	$(INSTALL_DIRECTORY) $(JAVA_JNI_DESTDIR)$(JAVA_JNI_DIR)
+	$(INSTALL) $(JAVA_JNI_FILE) $(JAVA_JNI_DESTDIR)$(JAVA_JNI_DIR)
 
 install-jni-no:
 	@echo jni not installed
@@ -100,14 +102,14 @@ uninstall: uninstall-jar uninstall-jni
 uninstall-jar: uninstall-jar-$(JAVA_JAR)
 
 uninstall-jar-yes:
-	-rm -f -- $(INSTALL_ROOT)$(JAVA_JAR_DIR)/$(JAVA_JAR_FILE)
+	-rm -f -- $(JAVA_JAR_DESTDIR)$(JAVA_JAR_DIR)/$(JAVA_JAR_FILE)
 
 uninstall-jar-no:
 
 uninstall-jni: uninstall-jni-$(JAVA_JNI)
 
 uninstall-jni-yes:
-	-rm -f -- $(INSTALL_ROOT)$(JAVA_JNI_DIR)/$(JAVA_JNI_FILE)
+	-rm -f -- $(JAVA_JNI_DESTDIR)$(JAVA_JNI_DIR)/$(JAVA_JNI_FILE)
 
 uninstall-jni-no:
 
