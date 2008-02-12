@@ -18,6 +18,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
+package org.a11y.BrlAPI;
+
 public class Brlapi extends BrlapiNative implements BrlapiConstants {
   protected final BrlapiSettings settings;
   protected final int fileDescriptor;

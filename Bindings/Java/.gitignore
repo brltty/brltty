@@ -1,13 +1,9 @@
 Makefile
 reldeps.mk
 BrlapiConstants.java
-*.class
+classes.made
+classes
 brlapi.jar
 libbrlapi_java.so
-javadoc.made
-resources
-package-list
-*.css
-*.html
-gjdoc.properties
-JAVADOC.PLACEHOLDER
+doc.made
+doc

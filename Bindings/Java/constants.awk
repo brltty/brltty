@@ -19,6 +19,8 @@
 ###############################################################################
 
 BEGIN {
+  print "package org.a11y.BrlAPI;"
+  print ""
   print "public interface BrlapiConstants {"
 }
 

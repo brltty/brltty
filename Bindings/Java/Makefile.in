@@ -50,32 +50,27 @@ bindings.$O:
 JAVA_JAR_FILE = $(API_NAME).jar
 jar: $(JAVA_JAR_FILE)
 
-API_CLASSES = Brlapi.class BrlapiNative.class BrlapiError.class BrlapiException.class BrlapiSettings.class BrlapiWriteArguments.class BrlapiSize.class BrlapiKey.class
-ALL_CLASSES = $(API_CLASSES) ApiTest.class
+$(JAVA_JAR_FILE): classes.made
+	$(JAR) cf $@ -C classes .
 
-$(JAVA_JAR_FILE): $(API_CLASSES)
-	$(JAR) cf $@ Brlapi*.class
-
-$(ALL_CLASSES): $(SRC_DIR)/*.java BrlapiConstants.class
-	$(JAVAC) -d . -classpath . $(SRC_DIR)/*.java
-
-BrlapiConstants.class: BrlapiConstants.java
-	$(JAVAC) BrlapiConstants.java
+classes.made: $(SRC_DIR)/*.java BrlapiConstants.java
+	$(JAVAC) -d classes -classpath . $(SRC_DIR)/*.java
+	touch $@
 
 BrlapiConstants.java: $(CONSTANTS_SCRIPTS) $(CONSTANTS_SOURCES)
 	$(AWK) $(CONSTANTS_OPTIONS) $(CONSTANTS_SOURCES) >$@
 
-doc: javadoc.made
+doc: doc.made
 
-javadoc.made: $(SRC_DIR)/*.java BrlapiConstants.java
-	$(JAVADOC) -quiet -d . -author -version -use $(SRC_DIR)/*.java BrlapiConstants.java
+doc.made: $(SRC_DIR)/*.java BrlapiConstants.java
+	$(JAVADOC) -quiet -d doc -author -version -use $(SRC_DIR)/*.java BrlapiConstants.java
 	touch $@
 
 clean::
-	-rm -f BrlapiConstants.java *.class $(JAVA_JAR_FILE) $(JAVA_JNI_FILE)
-	-rm -f javadoc.made package-list *.css *.html
-	-rm -f -r resources
-	-rm -f gjdoc.properties JAVADOC.PLACEHOLDER
+	-rm -f BrlapiConstants.java classes.made $(JAVA_JAR_FILE) $(JAVA_JNI_FILE)
+	-rm -f -r classes
+	-rm -f doc.made
+	-rm -f -r doc
 
 install: install-jar install-jni
 

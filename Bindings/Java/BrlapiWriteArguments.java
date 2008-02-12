@@ -18,6 +18,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
+package org.a11y.BrlAPI;
+
 public class BrlapiWriteArguments {
   public int displayNumber = Brlapi.DISPLAY_DEFAULT;
   public int regionBegin = 0;

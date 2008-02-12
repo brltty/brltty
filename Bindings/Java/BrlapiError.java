@@ -18,6 +18,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
+package org.a11y.BrlAPI;
+
 public class BrlapiError extends Exception {
   static final long serialVersionUID = 0;
   int brlerrno;
