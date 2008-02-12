@@ -20,12 +20,12 @@
 
 package org.a11y.BrlAPI;
 
-public class Brlapi extends BrlapiNative implements BrlapiConstants {
-  protected final BrlapiSettings settings;
+public class Brlapi extends Native implements Constants {
+  protected final ConnectionSettings settings;
   protected final int fileDescriptor;
 
-  public Brlapi (BrlapiSettings settings) throws BrlapiError {
-    this.settings = new BrlapiSettings();
+  public Brlapi (ConnectionSettings settings) throws Error {
+    this.settings = new ConnectionSettings();
     fileDescriptor = openConnection(settings, this.settings);
   }
 
@@ -45,37 +45,37 @@ public class Brlapi extends BrlapiNative implements BrlapiConstants {
     return fileDescriptor;
   }
 
-  public int enterTtyMode (int tty) throws BrlapiError {
+  public int enterTtyMode (int tty) throws Error {
     return enterTtyMode(tty, null);
   }
 
-  public int enterTtyMode (String driver) throws BrlapiError {
+  public int enterTtyMode (String driver) throws Error {
     return enterTtyMode(TTY_DEFAULT, driver);
   }
 
-  public int enterTtyMode () throws BrlapiError {
+  public int enterTtyMode () throws Error {
     return enterTtyMode(null);
   }
 
-  public void enterTtyModeWithPath (int ttys[]) throws BrlapiError {
+  public void enterTtyModeWithPath (int ttys[]) throws Error {
     enterTtyModeWithPath(ttys, null);
   }
 
-  public void writeText (int cursor) throws BrlapiError {
+  public void writeText (int cursor) throws Error {
     writeText(cursor, null);
   }
 
-  public void writeText (String text) throws BrlapiError {
+  public void writeText (String text) throws Error {
     writeText(CURSOR_OFF, text);
   }
 
-  public void writeText (String text, int cursor) throws BrlapiError {
+  public void writeText (String text, int cursor) throws Error {
     writeText(cursor, text);
   }
 
-  public void writeText (int cursor, String text) throws BrlapiError {
+  public void writeText (int cursor, String text) throws Error {
     if (text != null) {
-      BrlapiSize size = getDisplaySize();
+      DisplaySize size = getDisplaySize();
       int count = size.getWidth() * size.getHeight();
 
       {

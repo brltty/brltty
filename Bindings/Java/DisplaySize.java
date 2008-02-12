@@ -20,37 +20,20 @@
 
 package org.a11y.BrlAPI;
 
-public class BrlapiKey {
-  protected final long code;
-  protected int type;
-  protected int command;
-  protected int argument;
-  protected int flags;
+public class DisplaySize {
+  protected final int width;
+  protected final int height;
 
-  public final native void expandKeyCode (long code);
-
-  public BrlapiKey (long code) {
-    this.code = code;
-    expandKeyCode(code);
+  public DisplaySize (int width, int height) {
+    this.width = width;
+    this.height = height; 
   }
 
-  public long getCode () {
-    return code;
+  public int getWidth () {
+    return width;
   }
 
-  public int getType () {
-    return type;
-  }
-
-  public int getCommand () {
-    return command;
-  }
-
-  public int getArgument () {
-    return argument;
-  }
-
-  public int getFlags () {
-    return flags;
+  public int getHeight () {
+    return height;
   }
 }

@@ -20,20 +20,37 @@
 
 package org.a11y.BrlAPI;
 
-public class BrlapiSettings {
-  public String host;
-  public String auth;
+public class Key {
+  protected final long code;
+  protected int type;
+  protected int command;
+  protected int argument;
+  protected int flags;
 
-  public BrlapiSettings (String host, String auth) {
-    this.host = host;
-    this.auth = auth;
+  public final native void expandKeyCode (long code);
+
+  public Key (long code) {
+    this.code = code;
+    expandKeyCode(code);
   }
 
-  public BrlapiSettings (String host) {
-    this(host, null);
+  public long getCode () {
+    return code;
   }
 
-  public BrlapiSettings () {
-    this(null);
+  public int getType () {
+    return type;
+  }
+
+  public int getCommand () {
+    return command;
+  }
+
+  public int getArgument () {
+    return argument;
+  }
+
+  public int getFlags () {
+    return flags;
   }
 }

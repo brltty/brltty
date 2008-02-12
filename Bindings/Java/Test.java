@@ -20,9 +20,9 @@
 
 package org.a11y.BrlAPI;
 
-public class ApiTest {
+public class Test {
   public static void main(String argv[]) {
-    BrlapiSettings settings = new BrlapiSettings();
+    ConnectionSettings settings = new ConnectionSettings();
 
     {
       int argi = 0;
@@ -58,7 +58,7 @@ public class ApiTest {
       System.out.print("Driver is " + brlapi.getDriverName());
       System.out.println();
 
-      BrlapiSize size = brlapi.getDisplaySize();
+      DisplaySize size = brlapi.getDisplaySize();
       System.out.println("Display size is " + size.getWidth() + "x" + size.getHeight());
 
       int tty = brlapi.enterTtyMode();
@@ -69,32 +69,34 @@ public class ApiTest {
 
       long key[] = {0};
       brlapi.ignoreKeys(Brlapi.rangeType_all, key);
-      key[0] = BrlapiConstants.KEY_TYPE_CMD;
+      key[0] = Constants.KEY_TYPE_CMD;
       brlapi.acceptKeys(Brlapi.rangeType_type, key);
       long keys[][] = {{0,2},{5,7}};
       brlapi.ignoreKeyRanges(keys);
 
-      printKey(new BrlapiKey(brlapi.readKey(true)));
+      printKey(new Key(brlapi.readKey(true)));
 
-      BrlapiWriteArguments ws = new BrlapiWriteArguments();
-      ws.regionBegin = 10;
-      ws.regionSize = 20;
-      ws.text = "Key Pressed €       ";
-      ws.andMask = "????????????????????".getBytes();
-      ws.cursor = 3;
-      brlapi.write(ws);
+      {
+        WriteArguments args = new WriteArguments();
+        args.regionBegin = 10;
+        args.regionSize = 20;
+        args.text = "Key Pressed €       ";
+        args.andMask = "????????????????????".getBytes();
+        args.cursor = 3;
+        brlapi.write(args);
+      }
 
-      printKey(new BrlapiKey(brlapi.readKey(true)));
+      printKey(new Key(brlapi.readKey(true)));
 
       brlapi.leaveTtyMode();
       brlapi.closeConnection();
-    } catch (BrlapiError exception) {
-      System.out.println("got error: " + exception);
+    } catch (Error error) {
+      System.out.println("got error: " + error);
       System.exit(3);
     }
   }
 
-  private static void printKey (BrlapiKey key) {
+  private static void printKey (Key key) {
     System.out.println("got key " + Long.toHexString(key.getCode()) + " (" +
                        Integer.toHexString(key.getType()) + "," +
                        Integer.toHexString(key.getCommand()) + "," +

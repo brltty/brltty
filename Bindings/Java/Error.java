@@ -20,14 +20,14 @@
 
 package org.a11y.BrlAPI;
 
-public class BrlapiError extends Exception {
+public class Error extends java.lang.Error {
   static final long serialVersionUID = 0;
   int brlerrno;
   int libcerrno;
   int gaierrno;
   String errfun;
-  public final native String toString();
-  public BrlapiError(int brlerrno, int libcerrno, int gaierrno, String errfun) {
+  public final native String toString ();
+  public Error (int brlerrno, int libcerrno, int gaierrno, String errfun) {
     this.brlerrno = brlerrno;
     this.libcerrno = libcerrno;
     this.gaierrno = gaierrno;

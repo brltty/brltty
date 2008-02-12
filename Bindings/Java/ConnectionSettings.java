@@ -20,17 +20,20 @@
 
 package org.a11y.BrlAPI;
 
-public class BrlapiException extends Exception {
-  static final long serialVersionUID = 0;
-  long handle;
-  int errno;
-  long packettype;
-  byte buf[];
-  public final native String toString();
-  public BrlapiException(long handle, int errno, int packettype, byte buf[]) {
-    this.handle = handle;
-    this.errno = errno;
-    this.packettype = packettype;
-    this.buf = buf;
+public class ConnectionSettings {
+  public String host;
+  public String auth;
+
+  public ConnectionSettings (String host, String auth) {
+    this.host = host;
+    this.auth = auth;
+  }
+
+  public ConnectionSettings (String host) {
+    this(host, null);
+  }
+
+  public ConnectionSettings () {
+    this(null);
   }
 }

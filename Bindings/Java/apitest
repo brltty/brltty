@@ -24,5 +24,5 @@ currentDirectory="$(pwd)"
 export LD_LIBRARY_PATH="${currentDirectory}"
 export LD_PRELOAD="${currentDirectory}/../../Programs/libbrlapi.so"
 
-exec java -classpath "${currentDirectory}" ApiTest "${@}"
+exec java -classpath "${currentDirectory}/classes" org.a11y.BrlAPI.Test "${@}"
 exit "${?}"

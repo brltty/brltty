@@ -20,15 +20,17 @@
 
 package org.a11y.BrlAPI;
 
-public class BrlapiWriteArguments {
-  public int displayNumber = Brlapi.DISPLAY_DEFAULT;
-  public int regionBegin = 0;
-  public int regionSize = 0;
-  public String text = null;
-  public byte andMask[] = null;
-  public byte orMask[] = null;
-  public int cursor = Brlapi.CURSOR_LEAVE;
-
-  public BrlapiWriteArguments () {
+public class Exception extends java.lang.Exception {
+  static final long serialVersionUID = 0;
+  long handle;
+  int errno;
+  long packettype;
+  byte buf[];
+  public final native String toString ();
+  public Exception (long handle, int errno, int packettype, byte buf[]) {
+    this.handle = handle;
+    this.errno = errno;
+    this.packettype = packettype;
+    this.buf = buf;
   }
 }
