@@ -53,23 +53,23 @@ jar: $(JAVA_JAR_FILE)
 $(JAVA_JAR_FILE): classes.made
 	$(JAR) cf $@ -C classes .
 
-classes.made: $(SRC_DIR)/*.java BrlapiConstants.java
+classes.made: $(SRC_DIR)/*.java Constants.java
 	$(INSTALL_DIRECTORY) classes
 	$(JAVAC) -d classes -classpath . $(SRC_DIR)/*.java
 	touch $@
 
-BrlapiConstants.java: $(CONSTANTS_SCRIPTS) $(CONSTANTS_SOURCES)
+Constants.java: $(CONSTANTS_SCRIPTS) $(CONSTANTS_SOURCES)
 	$(AWK) $(CONSTANTS_OPTIONS) $(CONSTANTS_SOURCES) >$@
 
 doc: doc.made
 
-doc.made: $(SRC_DIR)/*.java BrlapiConstants.java
+doc.made: $(SRC_DIR)/*.java Constants.java
 	$(INSTALL_DIRECTORY) doc
-	$(JAVADOC) -quiet -d doc -author -version -use $(SRC_DIR)/*.java BrlapiConstants.java
+	$(JAVADOC) -quiet -d doc -author -version -use $(SRC_DIR)/*.java Constants.java
 	touch $@
 
 clean::
-	-rm -f BrlapiConstants.java classes.made $(JAVA_JAR_FILE) $(JAVA_JNI_FILE)
+	-rm -f Constants.java classes.made $(JAVA_JAR_FILE) $(JAVA_JNI_FILE)
 	-rm -f -r classes
 	-rm -f doc.made
 	-rm -f -r doc

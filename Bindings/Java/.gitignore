@@ -1,6 +1,6 @@
 Makefile
 reldeps.mk
-BrlapiConstants.java
+Constants.java
 classes.made
 classes
 brlapi.jar
