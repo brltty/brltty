@@ -54,6 +54,7 @@ $(JAVA_JAR_FILE): classes.made
 	$(JAR) cf $@ -C classes .
 
 classes.made: $(SRC_DIR)/*.java BrlapiConstants.java
+	$(INSTALL_DIRECTORY) classes
 	$(JAVAC) -d classes -classpath . $(SRC_DIR)/*.java
 	touch $@
 
@@ -63,6 +64,7 @@ BrlapiConstants.java: $(CONSTANTS_SCRIPTS) $(CONSTANTS_SOURCES)
 doc: doc.made
 
 doc.made: $(SRC_DIR)/*.java BrlapiConstants.java
+	$(INSTALL_DIRECTORY) doc
 	$(JAVADOC) -quiet -d doc -author -version -use $(SRC_DIR)/*.java BrlapiConstants.java
 	touch $@
 
