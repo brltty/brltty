@@ -23,6 +23,10 @@
 #include <ctype.h>
 #include <errno.h>
  
+#ifdef HAVE_LIBICUUC
+#include <unicode/uchar.h>
+#endif /* HAVE_LIBICUUC */
+
 #include "misc.h"
 #include "charset.h"
 #include "ctb.h"
@@ -499,6 +503,44 @@ parseCharacters (FileData *data, CharacterString *result, const wchar_t *token, 
                 character = (character << 4) | nibble;
               } while (--count);
             }
+            break;
+          }
+
+          case WC_C('<'): {
+            const wchar_t *first = &token[++index];
+            const wchar_t *end = wmemchr(first, WC_C('>'), length-index);
+
+            if (end) {
+              int count = end - first;
+              index += count;
+
+              {
+                char name[count+1];
+
+                {
+                  int i;
+                  for (i=0; i<count; i+=1) {
+                    wchar_t wc = first[i];
+                    if (wc == WC_C('_')) wc = WC_C(' ');
+                    if (!iswLatin1(wc)) goto badName;
+                    name[i] = wc;
+                  }
+                }
+                name[count] = 0;
+
+#ifdef HAVE_LIBICUUC
+                {
+                  UErrorCode error = U_ZERO_ERROR;
+                  character = u_charFromName(U_EXTENDED_CHAR_NAME, name, &error);
+                  if (U_SUCCESS(error)) ok = 1;
+                }
+#endif /* HAVE_LIBICUUC */
+              }
+            } else {
+              index = length - 1;
+            }
+
+          badName:
             break;
           }
         }
