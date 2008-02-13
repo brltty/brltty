@@ -18,6 +18,10 @@
 #include "prologue.h"
 
 #include <string.h>
+
+#ifdef HAVE_LIBICUUC
+#include <unicode/uchar.h>
+#endif /* HAVE_LIBICUUC */
  
 #include "tbl.h"
 #include "ctb.h"
@@ -400,6 +404,40 @@ putSequence (ContractionTableOffset offset) {
   return putBytes(sequence+1, *sequence);
 }
 
+static int
+canBreakLine (wchar_t c1, wchar_t c2) {
+#ifdef HAVE_LIBICUUC
+  ULineBreak lb1 = u_getIntPropertyValue(c1, UCHAR_LINE_BREAK);
+  ULineBreak lb2 = u_getIntPropertyValue(c2, UCHAR_LINE_BREAK);
+  if (lb1 == U_LB_MANDATORY_BREAK) return 1;
+  if (lb1 == U_LB_CARRIAGE_RETURN) return (c1 != WC_C('\r')) || (c2 != WC_C('\n'));
+  if (lb1 == U_LB_LINE_FEED) return 1;
+  if (lb2 == U_LB_COMBINING_MARK) return 0;
+  if (lb1 == U_LB_NEXT_LINE) return 1;
+  if ((lb1 == U_LB_SURROGATE) || (lb2 == U_LB_SURROGATE)) return 0;
+  if ((lb1 == U_LB_WORD_JOINER) || (lb2 == U_LB_WORD_JOINER)) return 0;
+  if (lb1 == U_LB_ZWSPACE) return 1;
+  if ((lb1 == U_LB_GLUE) || (lb2 == U_LB_GLUE)) return 0;
+  if (lb1 == U_LB_SPACE) return 1;
+  if ((lb1 == U_LB_BREAK_BOTH) || (lb2 == U_LB_BREAK_BOTH)) return 1;
+  if (lb1 == U_LB_BREAK_AFTER) return 1;
+  if (lb2 == U_LB_BREAK_BEFORE) return 1;
+  if (lb2 == U_LB_CLOSE_PUNCTUATION) return 0;
+  if (lb2 == U_LB_EXCLAMATION) return 0;
+  if (lb1 == U_LB_OPEN_PUNCTUATION) return 0;
+  if (lb2 == U_LB_INFIX_NUMERIC) return 0;
+  if ((lb1 == U_LB_INFIX_NUMERIC) && (lb2 == U_LB_NUMERIC)) return 0;
+  if ((lb1 == U_LB_NUMERIC) && (lb2 == U_LB_NUMERIC)) return 0;
+  if ((lb1 == U_LB_NUMERIC) && (lb2 == U_LB_POSTFIX_NUMERIC)) return 0;
+  if ((lb1 == U_LB_PREFIX_NUMERIC) && (lb2 == U_LB_NUMERIC)) return 0;
+  if (lb1 == U_LB_BREAK_SYMBOLS) return 1;
+  if (lb1 == U_LB_IDEOGRAPHIC) return 1;
+#else /* HAVE_LIBICUUC */
+  if (testCharacter(c1, CTC_Space)) return 1;
+#endif /* HAVE_LIBICUUC */
+  return 0;
+}
+
 int
 contractText (
   void *contractionTable,
@@ -531,12 +569,16 @@ contractText (
       src++;
     }
 
-    if (((src > srcmin) && testCharacter(src[-1], CTC_Space) && (currentOpcode != CTO_JoinableWord))) {
+    if ((src > srcmin) &&
+        (currentOpcode != CTO_JoinableWord) &&
+        canBreakLine(src[-1], *src)) {
       srcword = src;
       destword = dest;
     }
-    if ((dest == destmin) || dest[-1])
+
+    if ((dest == destmin) || dest[-1]) {
       previousOpcode = currentOpcode;
+    }
   }				/*end of translation loop */
 done:
 
