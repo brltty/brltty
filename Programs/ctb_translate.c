@@ -411,7 +411,7 @@ contractText (
   BYTE *destword = NULL; /* last word transla1ted */
   const wchar_t *literal = NULL;
 
-  if (!(table = (ContractionTableHeader *) contractionTable)) return 0;
+  if (!(table = (ContractionTableHeader *)contractionTable)) return 0;
   srcmax = (srcmin = src = inputBuffer) + *inputLength;
   destmax = (destmin = dest = outputBuffer) + *outputLength;
   offsets = offsetsMap;
@@ -549,10 +549,14 @@ done:
   }
 
   if (src < srcmax) {
+    const wchar_t *srcorig = src;
     setOffset();
-    while (testCharacter(*src, CTC_Space))
-      if (++src == srcmax)
+    do {
+      if (!testCharacter(*src, CTC_Space)) {
+        src = srcorig;
         break;
+      }
+    } while (++src < srcmax);
   }
 
   *inputLength = src - srcmin;
