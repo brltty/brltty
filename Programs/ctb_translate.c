@@ -22,7 +22,7 @@
 #ifdef HAVE_LIBICUUC
 #include <unicode/uchar.h>
 #endif /* HAVE_LIBICUUC */
- 
+
 #include "tbl.h"
 #include "ctb.h"
 #include "ctb_internal.h"
@@ -407,18 +407,40 @@ putSequence (ContractionTableOffset offset) {
 static void
 findLineBreakOpportunities (unsigned char *opportunities, const wchar_t *characters, size_t length) {
 #ifdef HAVE_LIBICUUC
+  /* UAX #14: Line Breaking Properties
+   * http://unicode.org/reports/tr14/
+   * Section 6: Line Breaking Algorithm
+   *
+   * !  Mandatory break at the indicated position
+   * ^  No break allowed at the indicated position
+   * _  Break allowed at the indicated position
+   *
+   * H  ideographs
+   * h  small kana
+   * 9  digits
+   */
+
   if (length > 0) {
     ULineBreak lineBreakTypes[length];
 
+    /* LB1: Assign a line breaking class to each code point of the input.
+     */
     {
       int i;
       for (i=0; i<length; i+=1) {
         lineBreakTypes[i] = u_getIntPropertyValue(characters[i], UCHAR_LINE_BREAK);
       }
     }
+
+    /* LB10: Treat any remaining combining mark as AL.
+     */
     if (lineBreakTypes[0] == U_LB_COMBINING_MARK) lineBreakTypes[0] = U_LB_ALPHABETIC;
 
+    /* LB2: Never break at the start of text.
+     * sot ×
+     */
     opportunities[0] = 0;
+
     {
       ULineBreak indirect = U_LB_SPACE;
       int limit = length - 1;
@@ -431,19 +453,34 @@ findLineBreakOpportunities (unsigned char *opportunities, const wchar_t *charact
 
         if (before != U_LB_SPACE) indirect = before;
 
+        /* LB4: Always break after hard line breaks
+         * BK !
+         */
+        if (before == U_LB_MANDATORY_BREAK) {
+          *opportunity = 1;
+          continue;
+        }
+
+        /* LB5: Treat CR followed by LF, as well as CR, LF, and NL as hard line breaks.
+         * CR ^ LF
+         * CR !
+         * LF !
+         * NL !
+         */
         if ((before == U_LB_CARRIAGE_RETURN) && (after == U_LB_LINE_FEED)) {
           *opportunity = 0;
           continue;
         }
-
-        if ((before == U_LB_MANDATORY_BREAK) ||
-            (before == U_LB_CARRIAGE_RETURN) ||
+        if ((before == U_LB_CARRIAGE_RETURN) ||
             (before == U_LB_LINE_FEED) ||
             (before == U_LB_NEXT_LINE)) {
           *opportunity = 1;
           continue;
         }
 
+        /* LB6: Do not break before hard line breaks.
+         * ^ ( BK | CR | LF | NL )
+         */
         if ((after == U_LB_MANDATORY_BREAK) ||
             (after == U_LB_CARRIAGE_RETURN) ||
             (after == U_LB_LINE_FEED) ||
@@ -452,17 +489,28 @@ findLineBreakOpportunities (unsigned char *opportunities, const wchar_t *charact
           continue;
         }
 
+        /* LB7: Do not break before spaces or zero width space.
+         * ^ SP
+         * ^ ZW
+         */
         if ((after == U_LB_SPACE) || (after == U_LB_ZWSPACE)) {
           *opportunity = 0;
           continue;
         }
 
+        /* LB8: Break after zero width space.
+         * ZW _
+         */
         if (before == U_LB_ZWSPACE) {
           *opportunity = 1;
           continue;
         }
 
+        /* LB9  Do not break a combining character sequence.
+         */
         if (after == U_LB_COMBINING_MARK) {
+          /* LB10: Treat any remaining combining mark as AL.
+           */
           if ((before == U_LB_MANDATORY_BREAK) ||
               (before == U_LB_CARRIAGE_RETURN) ||
               (before == U_LB_LINE_FEED) ||
@@ -472,22 +520,41 @@ findLineBreakOpportunities (unsigned char *opportunities, const wchar_t *charact
             before = U_LB_ALPHABETIC;
           }
 
+          /* treat it as if it has the line breaking class of the base character
+           */
           lineBreakTypes[index] = before;
           *opportunity = 0;
           continue;
         }
 
+        /* LB11: Do not break before or after Word joiner and related characters.
+         * ^ WJ
+         * WJ ^
+         */
         if ((before == U_LB_WORD_JOINER) || (after == U_LB_WORD_JOINER)) {
           *opportunity = 0;
           continue;
         }
 
-        if ((before == U_LB_GLUE) ||
-            ((before != U_LB_SPACE) && (after == U_LB_GLUE))) {
+        /* LB12: Do not break before or after NBSP and related characters.
+         * [^SP] ^ GL
+         * GL ^
+         */
+        if ((before != U_LB_SPACE) && (after == U_LB_GLUE)) {
+          *opportunity = 0;
+          continue;
+        }
+        if (before == U_LB_GLUE) {
           *opportunity = 0;
           continue;
         }
 
+        /* LB13: Do not break before ‘]' or ‘!' or ‘;' or ‘/', even after spaces.
+         * ^ CL
+         * ^ EX
+         * ^ IS
+         * ^ SY
+         */
         if ((after == U_LB_CLOSE_PUNCTUATION) ||
             (after == U_LB_EXCLAMATION) ||
             (after == U_LB_INFIX_NUMERIC) ||
@@ -496,41 +563,72 @@ findLineBreakOpportunities (unsigned char *opportunities, const wchar_t *charact
           continue;
         }
 
+        /* LB14: Do not break after ‘[', even after spaces.
+         * OP SP* ^
+         */
         if (indirect == U_LB_OPEN_PUNCTUATION) {
           *opportunity = 0;
           continue;
         }
 
+        /* LB15: Do not break within ‘"[', even with intervening spaces.
+         * QU SP* ^ OP
+         */
         if ((indirect == U_LB_QUOTATION) && (after == U_LB_OPEN_PUNCTUATION)) {
           *opportunity = 0;
           continue;
         }
 
+        /* LB16: Do not break within ‘]h', even with intervening spaces.
+         * CL SP* ^ NS
+         */
         if ((indirect == U_LB_CLOSE_PUNCTUATION) && (after == U_LB_NONSTARTER)) {
           *opportunity = 0;
           continue;
         }
 
+        /* LB17: Do not break within ‘ــ', even with intervening spaces.
+         * B2 SP* ^ B2
+         */
         if ((indirect == U_LB_BREAK_BOTH) && (after == U_LB_BREAK_BOTH)) {
           *opportunity = 0;
           continue;
         }
 
+        /* LB18: Break after spaces.
+         * SP _
+         */
         if (before == U_LB_SPACE) {
           *opportunity = 1;
           continue;
         }
 
+        /* LB19: Do not break before or after  quotation marks.
+         * ^ QU
+         * QU ^
+         */
         if ((before == U_LB_QUOTATION) || (after == U_LB_QUOTATION)) {
           *opportunity = 0;
           continue;
         }
 
+        /* LB20: Break before and after unresolved.
+         * _ CB
+         * CB _
+         */
         if ((after == U_LB_CONTINGENT_BREAK) || (before == U_LB_CONTINGENT_BREAK)) {
           *opportunity = 1;
           continue;
         }
 
+        /* LB21: Do not break before hyphen-minus, other hyphens,
+         *       fixed-width spaces, small kana, and other non-starters,
+         *       or after acute accents.
+         * ^ BA
+         * ^ HY
+         * ^ NS
+         * BB ^
+         */
         if ((after == U_LB_BREAK_AFTER) ||
             (after == U_LB_HYPHEN) ||
             (after == U_LB_NONSTARTER) ||
@@ -539,6 +637,13 @@ findLineBreakOpportunities (unsigned char *opportunities, const wchar_t *charact
           continue;
         }
 
+        /* LB22: Do not break between two ellipses,
+         *       or between letters or numbers and ellipsis.
+         * AL ^ IN
+         * ID ^ IN
+         * IN ^ IN
+         * NU ^ IN
+         */
         if ((after == U_LB_INSEPARABLE) &&
             ((before == U_LB_ALPHABETIC) ||
              (before == U_LB_IDEOGRAPHIC) ||
@@ -548,88 +653,65 @@ findLineBreakOpportunities (unsigned char *opportunities, const wchar_t *charact
           continue;
         }
 
-        if ((before == U_LB_IDEOGRAPHIC) && (after == U_LB_POSTFIX_NUMERIC) &&
-            (before == U_LB_ALPHABETIC) && (after == U_LB_NUMERIC) &&
-            (before == U_LB_NUMERIC) && (after == U_LB_ALPHABETIC)) {
+        /* LB23: Do not break within ‘a9', ‘3a', or ‘H%'.
+         * ID ^ PO
+         * AL ^ NU
+         * NU ^ AL
+         */
+        if (((before == U_LB_IDEOGRAPHIC) && (after == U_LB_POSTFIX_NUMERIC)) ||
+            ((before == U_LB_ALPHABETIC) && (after == U_LB_NUMERIC)) ||
+            ((before == U_LB_NUMERIC) && (after == U_LB_ALPHABETIC))) {
           *opportunity = 0;
           continue;
         }
 
-        if ((before == U_LB_PREFIX_NUMERIC) && (after == U_LB_IDEOGRAPHIC)) {
+        /* LB24: Do not break between prefix and letters or ideographs.
+         * PR ^ ID
+         * PR ^ AL
+         * PO ^ AL
+         */
+        if (((before == U_LB_PREFIX_NUMERIC) && (after == U_LB_IDEOGRAPHIC)) ||
+            ((before == U_LB_PREFIX_NUMERIC) && (after == U_LB_ALPHABETIC)) ||
+            ((before == U_LB_POSTFIX_NUMERIC) && (after == U_LB_ALPHABETIC))) {
           *opportunity = 0;
           continue;
         }
 
-        if ((before == U_LB_PREFIX_NUMERIC) && (after == U_LB_ALPHABETIC)) {
+        /* LB25:  Do not break between the following pairs of classes relevant to numbers:
+         * CL ^ PO
+         * CL ^ PR
+         * NU ^ PO
+         * NU ^ PR
+         * PO ^ OP
+         * PO ^ NU
+         * PR ^ OP
+         * PR ^ NU
+         * HY ^ NU
+         * IS ^ NU
+         * NU ^ NU
+         * SY ^ NU
+         */
+        if (((before == U_LB_CLOSE_PUNCTUATION) && (after == U_LB_POSTFIX_NUMERIC)) ||
+            ((before == U_LB_CLOSE_PUNCTUATION) && (after == U_LB_PREFIX_NUMERIC)) ||
+            ((before == U_LB_NUMERIC) && (after == U_LB_POSTFIX_NUMERIC)) ||
+            ((before == U_LB_NUMERIC) && (after == U_LB_PREFIX_NUMERIC)) ||
+            ((before == U_LB_POSTFIX_NUMERIC) && (after == U_LB_OPEN_PUNCTUATION)) ||
+            ((before == U_LB_POSTFIX_NUMERIC) && (after == U_LB_NUMERIC)) ||
+            ((before == U_LB_PREFIX_NUMERIC) && (after == U_LB_OPEN_PUNCTUATION)) ||
+            ((before == U_LB_PREFIX_NUMERIC) && (after == U_LB_NUMERIC)) ||
+            ((before == U_LB_HYPHEN) && (after == U_LB_NUMERIC)) ||
+            ((before == U_LB_INFIX_NUMERIC) && (after == U_LB_NUMERIC)) ||
+            ((before == U_LB_NUMERIC) && (after == U_LB_NUMERIC)) ||
+            ((before == U_LB_BREAK_SYMBOLS) && (after == U_LB_NUMERIC))) {
           *opportunity = 0;
           continue;
         }
 
-        if ((before == U_LB_POSTFIX_NUMERIC) && (after == U_LB_ALPHABETIC)) {
-          *opportunity = 0;
-          continue;
-        }
-
-        if ((before == U_LB_CLOSE_PUNCTUATION) && (after == U_LB_POSTFIX_NUMERIC)) {
-          *opportunity = 0;
-          continue;
-        }
-
-        if ((before == U_LB_CLOSE_PUNCTUATION) && (after == U_LB_PREFIX_NUMERIC)) {
-          *opportunity = 0;
-          continue;
-        }
-
-        if ((before == U_LB_NUMERIC) && (after == U_LB_POSTFIX_NUMERIC)) {
-          *opportunity = 0;
-          continue;
-        }
-
-        if ((before == U_LB_NUMERIC) && (after == U_LB_PREFIX_NUMERIC)) {
-          *opportunity = 0;
-          continue;
-        }
-
-        if ((before == U_LB_POSTFIX_NUMERIC) && (after == U_LB_OPEN_PUNCTUATION)) {
-          *opportunity = 0;
-          continue;
-        }
-
-        if ((before == U_LB_POSTFIX_NUMERIC) && (after == U_LB_NUMERIC)) {
-          *opportunity = 0;
-          continue;
-        }
-
-        if ((before == U_LB_PREFIX_NUMERIC) && (after == U_LB_OPEN_PUNCTUATION)) {
-          *opportunity = 0;
-          continue;
-        }
-
-        if ((before == U_LB_PREFIX_NUMERIC) && (after == U_LB_NUMERIC)) {
-          *opportunity = 0;
-          continue;
-        }
-
-        if ((before == U_LB_HYPHEN) && (after == U_LB_NUMERIC)) {
-          *opportunity = 0;
-          continue;
-        }
-
-        if ((before == U_LB_INFIX_NUMERIC) && (after == U_LB_NUMERIC)) {
-          *opportunity = 0;
-          continue;
-        }
-
-        if ((before == U_LB_NUMERIC) && (after == U_LB_NUMERIC)) {
-          *opportunity = 0;
-          continue;
-        }
-
-        if ((before == U_LB_BREAK_SYMBOLS) && (after == U_LB_NUMERIC)) {
-          *opportunity = 0;
-          continue;
-        }
-
+        /* LB26: Do not break a Korean syllable.
+         * JL ^ (JL | JV | H2 | H3)
+         * (JV | H2) ^ (JV | JT)
+         * (JT | H3) ^ JT
+         */
         if ((before == U_LB_JL) &&
             ((after == U_LB_JL) ||
              (after == U_LB_JV) ||
@@ -638,33 +720,34 @@ findLineBreakOpportunities (unsigned char *opportunities, const wchar_t *charact
           *opportunity = 0;
           continue;
         }
-
         if (((before == U_LB_JV) || (before == U_LB_H2)) &&
             ((after == U_LB_JV) || (after == U_LB_JT))) {
           *opportunity = 0;
           continue;
         }
-
         if (((before == U_LB_JT) || (before == U_LB_H3)) &&
             (after == U_LB_JT)) {
           *opportunity = 0;
           continue;
         }
 
+        /* LB27: Treat a Korean Syllable Block the same as ID.
+         * (JL | JV | JT | H2 | H3) ^ IN
+         * (JL | JV | JT | H2 | H3) ^ PO
+         * PR ^ (JL | JV | JT | H2 | H3)
+         */
         if (((before == U_LB_JL) || (before == U_LB_JV) || (before == U_LB_JT) ||
              (before == U_LB_H2) || (before == U_LB_H3)) &&
             (after == U_LB_INSEPARABLE)) {
           *opportunity = 0;
           continue;
         }
-
         if (((before == U_LB_JL) || (before == U_LB_JV) || (before == U_LB_JT) ||
              (before == U_LB_H2) || (before == U_LB_H3)) &&
             (after == U_LB_POSTFIX_NUMERIC)) {
           *opportunity = 0;
           continue;
         }
-
         if ((before == U_LB_PREFIX_NUMERIC) &&
             ((after == U_LB_JL) || (after == U_LB_JV) || (after == U_LB_JT) ||
              (after == U_LB_H2) || (after == U_LB_H3))) {
@@ -672,28 +755,42 @@ findLineBreakOpportunities (unsigned char *opportunities, const wchar_t *charact
           continue;
         }
 
+        /* LB28: Do not break between alphabetics.
+         * AL ^ AL
+         */
         if ((before == U_LB_ALPHABETIC) && (after == U_LB_ALPHABETIC)) {
           *opportunity = 0;
           continue;
         }
 
+        /* LB29: Do not break between numeric punctuation and alphabetics.
+         * IS ^ AL
+         */
         if ((before == U_LB_INFIX_NUMERIC) && (after == U_LB_ALPHABETIC)) {
           *opportunity = 0;
           continue;
         }
 
+        /* LB30: Do not break between letters, numbers, or ordinary symbols
+         *       and opening or closing punctuation.
+         * (AL | NU) ^ OP
+         * CL ^ (AL | NU)
+         */
         if (((before == U_LB_ALPHABETIC) || (before == U_LB_NUMERIC)) &&
             (after == U_LB_OPEN_PUNCTUATION)) {
           *opportunity = 0;
           continue;
         }
-
         if ((before == U_LB_CLOSE_PUNCTUATION) &&
             ((after == U_LB_ALPHABETIC) || (after == U_LB_NUMERIC))) {
           *opportunity = 0;
           continue;
         }
 
+        /* LB31: Break everywhere else.
+         * ALL _
+         * _ ALL
+         */
         *opportunity = 1;
       }
     }
@@ -745,7 +842,7 @@ contractText (
       if ((cursorOffset >= (src - srcmin)) &&
           (cursorOffset < (src - srcmin + currentFindLength))) {
         currentOpcode = CTO_Literal;
-      } 
+      }
 
       if (table->numberSign && previousOpcode != CTO_MidNum &&
                  !testCharacter(before, CTC_Digit) && testCharacter(*src, CTC_Digit)) {
