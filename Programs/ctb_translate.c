@@ -404,38 +404,310 @@ putSequence (ContractionTableOffset offset) {
   return putBytes(sequence+1, *sequence);
 }
 
-static int
-canBreakLine (wchar_t c1, wchar_t c2) {
+static void
+findLineBreakOpportunities (unsigned char *opportunities, const wchar_t *characters, size_t length) {
 #ifdef HAVE_LIBICUUC
-  ULineBreak lb1 = u_getIntPropertyValue(c1, UCHAR_LINE_BREAK);
-  ULineBreak lb2 = u_getIntPropertyValue(c2, UCHAR_LINE_BREAK);
-  if (lb1 == U_LB_MANDATORY_BREAK) return 1;
-  if (lb1 == U_LB_CARRIAGE_RETURN) return (c1 != WC_C('\r')) || (c2 != WC_C('\n'));
-  if (lb1 == U_LB_LINE_FEED) return 1;
-  if (lb2 == U_LB_COMBINING_MARK) return 0;
-  if (lb1 == U_LB_NEXT_LINE) return 1;
-  if ((lb1 == U_LB_SURROGATE) || (lb2 == U_LB_SURROGATE)) return 0;
-  if ((lb1 == U_LB_WORD_JOINER) || (lb2 == U_LB_WORD_JOINER)) return 0;
-  if (lb1 == U_LB_ZWSPACE) return 1;
-  if ((lb1 == U_LB_GLUE) || (lb2 == U_LB_GLUE)) return 0;
-  if (lb1 == U_LB_SPACE) return 1;
-  if ((lb1 == U_LB_BREAK_BOTH) || (lb2 == U_LB_BREAK_BOTH)) return 1;
-  if (lb1 == U_LB_BREAK_AFTER) return 1;
-  if (lb2 == U_LB_BREAK_BEFORE) return 1;
-  if (lb2 == U_LB_CLOSE_PUNCTUATION) return 0;
-  if (lb2 == U_LB_EXCLAMATION) return 0;
-  if (lb1 == U_LB_OPEN_PUNCTUATION) return 0;
-  if (lb2 == U_LB_INFIX_NUMERIC) return 0;
-  if ((lb1 == U_LB_INFIX_NUMERIC) && (lb2 == U_LB_NUMERIC)) return 0;
-  if ((lb1 == U_LB_NUMERIC) && (lb2 == U_LB_NUMERIC)) return 0;
-  if ((lb1 == U_LB_NUMERIC) && (lb2 == U_LB_POSTFIX_NUMERIC)) return 0;
-  if ((lb1 == U_LB_PREFIX_NUMERIC) && (lb2 == U_LB_NUMERIC)) return 0;
-  if (lb1 == U_LB_BREAK_SYMBOLS) return 1;
-  if (lb1 == U_LB_IDEOGRAPHIC) return 1;
+  if (length > 0) {
+    ULineBreak lineBreakTypes[length];
+
+    {
+      int i;
+      for (i=0; i<length; i+=1) {
+        lineBreakTypes[i] = u_getIntPropertyValue(characters[i], UCHAR_LINE_BREAK);
+      }
+    }
+    if (lineBreakTypes[0] == U_LB_COMBINING_MARK) lineBreakTypes[0] = U_LB_ALPHABETIC;
+
+    opportunities[0] = 0;
+    {
+      ULineBreak indirect = U_LB_SPACE;
+      int limit = length - 1;
+      int index = 0;
+
+      while (index < limit) {
+        ULineBreak before = lineBreakTypes[index];
+        ULineBreak after = lineBreakTypes[++index];
+        unsigned char *opportunity = &opportunities[index];
+
+        if (before != U_LB_SPACE) indirect = before;
+
+        if ((before == U_LB_CARRIAGE_RETURN) && (after == U_LB_LINE_FEED)) {
+          *opportunity = 0;
+          continue;
+        }
+
+        if ((before == U_LB_MANDATORY_BREAK) ||
+            (before == U_LB_CARRIAGE_RETURN) ||
+            (before == U_LB_LINE_FEED) ||
+            (before == U_LB_NEXT_LINE)) {
+          *opportunity = 1;
+          continue;
+        }
+
+        if ((after == U_LB_MANDATORY_BREAK) ||
+            (after == U_LB_CARRIAGE_RETURN) ||
+            (after == U_LB_LINE_FEED) ||
+            (after == U_LB_NEXT_LINE)) {
+          *opportunity = 0;
+          continue;
+        }
+
+        if ((after == U_LB_SPACE) || (after == U_LB_ZWSPACE)) {
+          *opportunity = 0;
+          continue;
+        }
+
+        if (before == U_LB_ZWSPACE) {
+          *opportunity = 1;
+          continue;
+        }
+
+        if (after == U_LB_COMBINING_MARK) {
+          if ((before == U_LB_MANDATORY_BREAK) ||
+              (before == U_LB_CARRIAGE_RETURN) ||
+              (before == U_LB_LINE_FEED) ||
+              (before == U_LB_NEXT_LINE) ||
+              (before == U_LB_SPACE) ||
+              (before == U_LB_ZWSPACE)) {
+            before = U_LB_ALPHABETIC;
+          }
+
+          lineBreakTypes[index] = before;
+          *opportunity = 0;
+          continue;
+        }
+
+        if ((before == U_LB_WORD_JOINER) || (after == U_LB_WORD_JOINER)) {
+          *opportunity = 0;
+          continue;
+        }
+
+        if ((before == U_LB_GLUE) ||
+            ((before != U_LB_SPACE) && (after == U_LB_GLUE))) {
+          *opportunity = 0;
+          continue;
+        }
+
+        if ((after == U_LB_CLOSE_PUNCTUATION) ||
+            (after == U_LB_EXCLAMATION) ||
+            (after == U_LB_INFIX_NUMERIC) ||
+            (after == U_LB_BREAK_SYMBOLS)) {
+          *opportunity = 0;
+          continue;
+        }
+
+        if (indirect == U_LB_OPEN_PUNCTUATION) {
+          *opportunity = 0;
+          continue;
+        }
+
+        if ((indirect == U_LB_QUOTATION) && (after == U_LB_OPEN_PUNCTUATION)) {
+          *opportunity = 0;
+          continue;
+        }
+
+        if ((indirect == U_LB_CLOSE_PUNCTUATION) && (after == U_LB_NONSTARTER)) {
+          *opportunity = 0;
+          continue;
+        }
+
+        if ((indirect == U_LB_BREAK_BOTH) && (after == U_LB_BREAK_BOTH)) {
+          *opportunity = 0;
+          continue;
+        }
+
+        if (before == U_LB_SPACE) {
+          *opportunity = 1;
+          continue;
+        }
+
+        if ((before == U_LB_QUOTATION) || (after == U_LB_QUOTATION)) {
+          *opportunity = 0;
+          continue;
+        }
+
+        if ((after == U_LB_CONTINGENT_BREAK) || (before == U_LB_CONTINGENT_BREAK)) {
+          *opportunity = 1;
+          continue;
+        }
+
+        if ((after == U_LB_BREAK_AFTER) ||
+            (after == U_LB_HYPHEN) ||
+            (after == U_LB_NONSTARTER) ||
+            (before == U_LB_BREAK_BEFORE)) {
+          *opportunity = 0;
+          continue;
+        }
+
+        if ((after == U_LB_INSEPARABLE) &&
+            ((before == U_LB_ALPHABETIC) ||
+             (before == U_LB_IDEOGRAPHIC) ||
+             (before == U_LB_INSEPARABLE) ||
+             (before == U_LB_NUMERIC))) {
+          *opportunity = 0;
+          continue;
+        }
+
+        if ((before == U_LB_IDEOGRAPHIC) && (after == U_LB_POSTFIX_NUMERIC) &&
+            (before == U_LB_ALPHABETIC) && (after == U_LB_NUMERIC) &&
+            (before == U_LB_NUMERIC) && (after == U_LB_ALPHABETIC)) {
+          *opportunity = 0;
+          continue;
+        }
+
+        if ((before == U_LB_PREFIX_NUMERIC) && (after == U_LB_IDEOGRAPHIC)) {
+          *opportunity = 0;
+          continue;
+        }
+
+        if ((before == U_LB_PREFIX_NUMERIC) && (after == U_LB_ALPHABETIC)) {
+          *opportunity = 0;
+          continue;
+        }
+
+        if ((before == U_LB_POSTFIX_NUMERIC) && (after == U_LB_ALPHABETIC)) {
+          *opportunity = 0;
+          continue;
+        }
+
+        if ((before == U_LB_CLOSE_PUNCTUATION) && (after == U_LB_POSTFIX_NUMERIC)) {
+          *opportunity = 0;
+          continue;
+        }
+
+        if ((before == U_LB_CLOSE_PUNCTUATION) && (after == U_LB_PREFIX_NUMERIC)) {
+          *opportunity = 0;
+          continue;
+        }
+
+        if ((before == U_LB_NUMERIC) && (after == U_LB_POSTFIX_NUMERIC)) {
+          *opportunity = 0;
+          continue;
+        }
+
+        if ((before == U_LB_NUMERIC) && (after == U_LB_PREFIX_NUMERIC)) {
+          *opportunity = 0;
+          continue;
+        }
+
+        if ((before == U_LB_POSTFIX_NUMERIC) && (after == U_LB_OPEN_PUNCTUATION)) {
+          *opportunity = 0;
+          continue;
+        }
+
+        if ((before == U_LB_POSTFIX_NUMERIC) && (after == U_LB_NUMERIC)) {
+          *opportunity = 0;
+          continue;
+        }
+
+        if ((before == U_LB_PREFIX_NUMERIC) && (after == U_LB_OPEN_PUNCTUATION)) {
+          *opportunity = 0;
+          continue;
+        }
+
+        if ((before == U_LB_PREFIX_NUMERIC) && (after == U_LB_NUMERIC)) {
+          *opportunity = 0;
+          continue;
+        }
+
+        if ((before == U_LB_HYPHEN) && (after == U_LB_NUMERIC)) {
+          *opportunity = 0;
+          continue;
+        }
+
+        if ((before == U_LB_INFIX_NUMERIC) && (after == U_LB_NUMERIC)) {
+          *opportunity = 0;
+          continue;
+        }
+
+        if ((before == U_LB_NUMERIC) && (after == U_LB_NUMERIC)) {
+          *opportunity = 0;
+          continue;
+        }
+
+        if ((before == U_LB_BREAK_SYMBOLS) && (after == U_LB_NUMERIC)) {
+          *opportunity = 0;
+          continue;
+        }
+
+        if ((before == U_LB_JL) &&
+            ((after == U_LB_JL) ||
+             (after == U_LB_JV) ||
+             (after == U_LB_H2) ||
+             (after == U_LB_H3))) {
+          *opportunity = 0;
+          continue;
+        }
+
+        if (((before == U_LB_JV) || (before == U_LB_H2)) &&
+            ((after == U_LB_JV) || (after == U_LB_JT))) {
+          *opportunity = 0;
+          continue;
+        }
+
+        if (((before == U_LB_JT) || (before == U_LB_H3)) &&
+            (after == U_LB_JT)) {
+          *opportunity = 0;
+          continue;
+        }
+
+        if (((before == U_LB_JL) || (before == U_LB_JV) || (before == U_LB_JT) ||
+             (before == U_LB_H2) || (before == U_LB_H3)) &&
+            (after == U_LB_INSEPARABLE)) {
+          *opportunity = 0;
+          continue;
+        }
+
+        if (((before == U_LB_JL) || (before == U_LB_JV) || (before == U_LB_JT) ||
+             (before == U_LB_H2) || (before == U_LB_H3)) &&
+            (after == U_LB_POSTFIX_NUMERIC)) {
+          *opportunity = 0;
+          continue;
+        }
+
+        if ((before == U_LB_PREFIX_NUMERIC) &&
+            ((after == U_LB_JL) || (after == U_LB_JV) || (after == U_LB_JT) ||
+             (after == U_LB_H2) || (after == U_LB_H3))) {
+          *opportunity = 0;
+          continue;
+        }
+
+        if ((before == U_LB_ALPHABETIC) && (after == U_LB_ALPHABETIC)) {
+          *opportunity = 0;
+          continue;
+        }
+
+        if ((before == U_LB_INFIX_NUMERIC) && (after == U_LB_ALPHABETIC)) {
+          *opportunity = 0;
+          continue;
+        }
+
+        if (((before == U_LB_ALPHABETIC) || (before == U_LB_NUMERIC)) &&
+            (after == U_LB_OPEN_PUNCTUATION)) {
+          *opportunity = 0;
+          continue;
+        }
+
+        if ((before == U_LB_CLOSE_PUNCTUATION) &&
+            ((after == U_LB_ALPHABETIC) || (after == U_LB_NUMERIC))) {
+          *opportunity = 0;
+          continue;
+        }
+
+        *opportunity = 1;
+      }
+    }
+  }
 #else /* HAVE_LIBICUUC */
-  if (testCharacter(c1, CTC_Space)) return 1;
+  int wasSpace = 0;
+  int index;
+
+  for (index=0; index<length; index+=1) {
+    int isSpace = testCharacter(characters[index], CTC_Space);
+    opportunities[index] = wasSpace && !isSpace;
+    wasSpace = isSpace;
+  }
 #endif /* HAVE_LIBICUUC */
-  return 0;
 }
 
 int
@@ -447,7 +719,9 @@ contractText (
 ) {
   const wchar_t *srcword = NULL;
   BYTE *destword = NULL; /* last word transla1ted */
+  BYTE *destlast = NULL;
   const wchar_t *literal = NULL;
+  unsigned char lineBreakOpportunities[*inputLength];
 
   if (!(table = (ContractionTableHeader *)contractionTable)) return 0;
   srcmax = (srcmin = src = inputBuffer) + *inputLength;
@@ -455,7 +729,10 @@ contractText (
   offsets = offsetsMap;
   previousOpcode = CTO_None;
 
+  findLineBreakOpportunities(lineBreakOpportunities, inputBuffer, *inputLength);
+
   while (src < srcmax) { /*the main translation loop */
+    destlast = dest;
     setOffset();
     setBefore();
 
@@ -569,9 +846,7 @@ contractText (
       src++;
     }
 
-    if ((src > srcmin) &&
-        (currentOpcode != CTO_JoinableWord) &&
-        canBreakLine(src[-1], *src)) {
+    if (lineBreakOpportunities[src-srcmin] && (currentOpcode != CTO_JoinableWord)) {
       srcword = src;
       destword = dest;
     }
@@ -580,11 +855,15 @@ contractText (
       previousOpcode = currentOpcode;
     }
   }				/*end of translation loop */
+
 done:
+  if (destlast) dest = destlast;
 
   if ((src < srcmax) &&
+      !lineBreakOpportunities[src-srcmin] &&
       (destword != NULL) &&
-      ((destmax - destword) <= ((destmax - destmin) / 4)) &&
+      ((destmax - destword) < ((destmax - destmin) / 2)) &&
+      !testCharacter(src[-1], CTC_Space) &&
       !testCharacter(*src, CTC_Space)) {
     src = srcword;
     dest = destword;
