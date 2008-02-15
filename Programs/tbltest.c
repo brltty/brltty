@@ -464,15 +464,27 @@ printCharacterString (const wchar_t *wcs) {
 
 typedef struct {
   TranslationTable translationTable;
+  unsigned char currentCharacter;
+
   brlapi_fileDescriptor brlapiFileDescriptor;
   unsigned int displayWidth;
   unsigned int displayHeight;
-  unsigned char currentCharacter;
+  const char *brlapiErrorFunction;
+  const char *brlapiErrorMessage;
 } EditTableData;
 
 static int
 haveBrailleDisplay (EditTableData *data) {
   return data->brlapiFileDescriptor != (brlapi_fileDescriptor)-1;
+}
+
+static void
+setBrlapiError (EditTableData *data, const char *function) {
+  if ((data->brlapiErrorFunction = function)) {
+    data->brlapiErrorMessage = brlapi_strerror(&brlapi_error);
+  } else {
+    data->brlapiErrorMessage = NULL;
+  }
 }
 
 static void
@@ -487,17 +499,18 @@ claimBrailleDisplay (EditTableData *data) {
   if (haveBrailleDisplay(data)) {
     if (brlapi_getDisplaySize(&data->displayWidth, &data->displayHeight) != -1) {
       if (brlapi_enterTtyMode(BRLAPI_TTY_DEFAULT, NULL) != -1) {
+        setBrlapiError(data, NULL);
         return 1;
       } else {
-        brlapi_perror("brlapi_enterTtyMode");
+        setBrlapiError(data, "brlapi_enterTtyMode");
       }
     } else {
-      brlapi_perror("brlapi_getDisplaySize");
+      setBrlapiError(data, "brlapi_getDisplaySize");
     }
 
     releaseBrailleDisplay(data);
   } else {
-    brlapi_perror("brlapi_openConnection");
+    setBrlapiError(data, "brlapi_openConnection");
   }
 
   return 0;
@@ -539,6 +552,12 @@ updateCharacterDescription (EditTableData *data) {
     printw(" +---+ \n");
 #undef DOT
 
+    if (data->brlapiErrorFunction) {
+      printw("BrlAPI error: %s: %s\n",
+             data->brlapiErrorFunction, data->brlapiErrorMessage);
+      setBrlapiError(data, NULL);
+    }
+
     refresh();
 
     if (haveBrailleDisplay(data)) {
@@ -556,7 +575,7 @@ updateCharacterDescription (EditTableData *data) {
       args.charset = "WCHAR_T";
 
       if (brlapi_write(&args) == -1) {
-        brlapi_perror("brlapi_write");
+        setBrlapiError(data, "brlapi_write");
         releaseBrailleDisplay(data);
       }
     }
@@ -768,7 +787,7 @@ doBrailleCommand (EditTableData *data) {
           break;
       }
     } else if (ret == -1) {
-      brlapi_perror("brlapi_readKey");
+      setBrlapiError(data, "brlapi_readKey");
       releaseBrailleDisplay(data);
     }
   }
