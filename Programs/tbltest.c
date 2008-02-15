@@ -464,10 +464,44 @@ printCharacterString (const wchar_t *wcs) {
 
 typedef struct {
   TranslationTable translationTable;
+  brlapi_fileDescriptor brlapiFileDescriptor;
   unsigned int displayWidth;
   unsigned int displayHeight;
   unsigned char currentCharacter;
 } EditTableData;
+
+static int
+haveBrailleDisplay (EditTableData *data) {
+  return data->brlapiFileDescriptor != (brlapi_fileDescriptor)-1;
+}
+
+static void
+releaseBrailleDisplay (EditTableData *data) {
+  brlapi_closeConnection();
+  data->brlapiFileDescriptor = (brlapi_fileDescriptor)-1;
+}
+
+static int
+claimBrailleDisplay (EditTableData *data) {
+  data->brlapiFileDescriptor = brlapi_openConnection(NULL, NULL);
+  if (haveBrailleDisplay(data)) {
+    if (brlapi_getDisplaySize(&data->displayWidth, &data->displayHeight) != -1) {
+      if (brlapi_enterTtyMode(BRLAPI_TTY_DEFAULT, NULL) != -1) {
+        return 1;
+      } else {
+        brlapi_perror("brlapi_enterTtyMode");
+      }
+    } else {
+      brlapi_perror("brlapi_getDisplaySize");
+    }
+
+    releaseBrailleDisplay(data);
+  } else {
+    brlapi_perror("brlapi_openConnection");
+  }
+
+  return 0;
+}
 
 static int
 updateCharacterDescription (EditTableData *data) {
@@ -483,6 +517,7 @@ updateCharacterDescription (EditTableData *data) {
   );
 
   if (descriptionText) {
+    ok = 1;
     clear();
 
 #if defined(USE_CURSES)
@@ -506,7 +541,7 @@ updateCharacterDescription (EditTableData *data) {
 
     refresh();
 
-    {
+    if (haveBrailleDisplay(data)) {
       brlapi_writeArguments_t args = BRLAPI_WRITEARGUMENTS_INITIALIZER;
       wchar_t text[data->displayWidth];
       size_t length = MIN(data->displayWidth, descriptionLength);
@@ -520,10 +555,9 @@ updateCharacterDescription (EditTableData *data) {
       args.textSize = data->displayWidth * sizeof(text[0]);
       args.charset = "WCHAR_T";
 
-      if (brlapi_write(&args) != -1) {
-        ok = 1;
-      } else {
+      if (brlapi_write(&args) == -1) {
         brlapi_perror("brlapi_write");
+        releaseBrailleDisplay(data);
       }
     }
 
@@ -623,45 +657,101 @@ doKeyboardCommand (EditTableData *data) {
 
 static int
 doBrailleCommand (EditTableData *data) {
-  brlapi_keyCode_t key;
-  int ret = brlapi_readKey(0, &key);
+  if (haveBrailleDisplay(data)) {
+    brlapi_keyCode_t key;
+    int ret = brlapi_readKey(0, &key);
 
-  if (ret == -1) {
-    brlapi_perror("brlapi_readKey");
-    return 0;
-  }
+    if (ret == 1) {
+      unsigned long code = key & BRLAPI_KEY_CODE_MASK;
 
-  if (ret == 1) {
-    unsigned long code = key & BRLAPI_KEY_CODE_MASK;
+      switch (key & BRLAPI_KEY_TYPE_MASK) {
+        case BRLAPI_KEY_TYPE_CMD:
+          switch (code & BRLAPI_KEY_CMD_BLK_MASK) {
+            case 0:
+              switch (code) {
+                case BRLAPI_KEY_CMD_LNUP:
+                  data->currentCharacter -= 1;
+                  break;
 
-    switch (key & BRLAPI_KEY_TYPE_MASK) {
-      case BRLAPI_KEY_TYPE_CMD:
-        switch (code & BRLAPI_KEY_CMD_BLK_MASK) {
-          case 0:
+                case BRLAPI_KEY_CMD_LNDN:
+                  data->currentCharacter += 1;
+                  break;
+
+                case BRLAPI_KEY_CMD_PRPGRPH:
+                  data->currentCharacter -= 0X10;
+                  break;
+
+                case BRLAPI_KEY_CMD_NXPGRPH:
+                  data->currentCharacter += 0X10;
+                  break;
+
+                case BRLAPI_KEY_CMD_TOP_LEFT:
+                case BRLAPI_KEY_CMD_TOP:
+                  data->currentCharacter = 0;
+                  break;
+
+                case BRLAPI_KEY_CMD_BOT_LEFT:
+                case BRLAPI_KEY_CMD_BOT:
+                  data->currentCharacter = 0XFF;
+                  break;
+
+                default:
+                  beep();
+                  break;
+              }
+              break;
+
+            case BRLAPI_KEY_CMD_PASSDOTS:
+              data->translationTable[data->currentCharacter] = code & BRLAPI_KEY_CMD_ARG_MASK;
+              break;
+
+            default:
+              beep();
+              break;
+          }
+          break;
+
+        case BRLAPI_KEY_TYPE_SYM: {
+          /* latin1 */
+          if (code < 0X100) code |= BRLAPI_KEY_SYM_UNICODE;
+
+          if ((code & 0X1f000000) == BRLAPI_KEY_SYM_UNICODE) {
+            /* unicode */
+            if ((code & 0Xffff00) == BRL_UC_ROW) {
+              /* Set braille pattern */
+              data->translationTable[data->currentCharacter] = code & 0XFF;
+            } else {
+              /* Switch to char */
+              int c = convertWcharToChar(code & 0XFFFFFF);
+              if (c != EOF) {
+                data->currentCharacter = c;
+              } else {
+                beep();
+              }
+            }
+          } else {
             switch (code) {
-              case BRLAPI_KEY_CMD_LNUP:
+              case BRLAPI_KEY_SYM_UP:
                 data->currentCharacter -= 1;
                 break;
 
-              case BRLAPI_KEY_CMD_LNDN:
+              case BRLAPI_KEY_SYM_DOWN:
                 data->currentCharacter += 1;
                 break;
 
-              case BRLAPI_KEY_CMD_PRPGRPH:
+              case BRLAPI_KEY_SYM_PAGE_UP:
                 data->currentCharacter -= 0X10;
                 break;
 
-              case BRLAPI_KEY_CMD_NXPGRPH:
+              case BRLAPI_KEY_SYM_PAGE_DOWN:
                 data->currentCharacter += 0X10;
                 break;
 
-              case BRLAPI_KEY_CMD_TOP_LEFT:
-              case BRLAPI_KEY_CMD_TOP:
+              case BRLAPI_KEY_SYM_HOME:
                 data->currentCharacter = 0;
                 break;
 
-              case BRLAPI_KEY_CMD_BOT_LEFT:
-              case BRLAPI_KEY_CMD_BOT:
+              case BRLAPI_KEY_SYM_END:
                 data->currentCharacter = 0XFF;
                 break;
 
@@ -669,73 +759,17 @@ doBrailleCommand (EditTableData *data) {
                 beep();
                 break;
             }
-            break;
-
-          case BRLAPI_KEY_CMD_PASSDOTS:
-            data->translationTable[data->currentCharacter] = code & BRLAPI_KEY_CMD_ARG_MASK;
-            break;
-
-          default:
-            beep();
-            break;
-        }
-        break;
-
-      case BRLAPI_KEY_TYPE_SYM: {
-        /* latin1 */
-        if (code < 0X100) code |= BRLAPI_KEY_SYM_UNICODE;
-
-        if ((code & 0X1f000000) == BRLAPI_KEY_SYM_UNICODE) {
-          /* unicode */
-          if ((code & 0Xffff00) == BRL_UC_ROW) {
-            /* Set braille pattern */
-            data->translationTable[data->currentCharacter] = code & 0XFF;
-          } else {
-            /* Switch to char */
-            int c = convertWcharToChar(code & 0XFFFFFF);
-            if (c != EOF) {
-              data->currentCharacter = c;
-            } else {
-              beep();
-            }
           }
-        } else {
-          switch (code) {
-            case BRLAPI_KEY_SYM_UP:
-              data->currentCharacter -= 1;
-              break;
-
-            case BRLAPI_KEY_SYM_DOWN:
-              data->currentCharacter += 1;
-              break;
-
-            case BRLAPI_KEY_SYM_PAGE_UP:
-              data->currentCharacter -= 0X10;
-              break;
-
-            case BRLAPI_KEY_SYM_PAGE_DOWN:
-              data->currentCharacter += 0X10;
-              break;
-
-            case BRLAPI_KEY_SYM_HOME:
-              data->currentCharacter = 0;
-              break;
-
-            case BRLAPI_KEY_SYM_END:
-              data->currentCharacter = 0XFF;
-              break;
-
-            default:
-              beep();
-              break;
-          }
+          break;
         }
-        break;
+
+        default:
+          beep();
+          break;
       }
-
-      default:
-        beep();
-        break;
+    } else if (ret == -1) {
+      brlapi_perror("brlapi_readKey");
+      releaseBrailleDisplay(data);
     }
   }
 
@@ -766,61 +800,54 @@ editTable (void) {
   }
 
   if (!status) {
-    brlapi_fileDescriptor brlapi_fd = brlapi_openConnection(NULL, NULL);
+    claimBrailleDisplay(&data);
 
-    if (brlapi_fd != (brlapi_fileDescriptor) -1) {
-      if (brlapi_enterTtyMode(BRLAPI_TTY_DEFAULT, NULL) != -1) {
-        if (brlapi_getDisplaySize(&data.displayWidth, &data.displayHeight) != -1) {
 #if defined(USE_CURSES)
-          initscr();
-          cbreak();
-          noecho();
-          nonl();
-          intrflush(stdscr, FALSE);
-          keypad(stdscr, TRUE);
+    initscr();
+    cbreak();
+    noecho();
+    nonl();
+    intrflush(stdscr, FALSE);
+    keypad(stdscr, TRUE);
 #else /* standard input/output */
 #endif /* initialize keyboard and screen */
 
-          data.currentCharacter = 0;
-          while (updateCharacterDescription(&data)) {
-            fd_set set;
+    data.currentCharacter = 0;
+    while (updateCharacterDescription(&data)) {
+      fd_set set;
+      FD_ZERO(&set);
 
-            {
-              int size = MAX(STDIN_FILENO, brlapi_fd) + 1;
-              FD_ZERO(&set);
-              FD_SET(STDIN_FILENO, &set);
-              FD_SET(brlapi_fd, &set);
-              select(size, &set, NULL, NULL, NULL);
-            }
+      {
+        int maximumFileDescriptor = STDIN_FILENO;
+        FD_SET(STDIN_FILENO, &set);
 
-            if (FD_ISSET(STDIN_FILENO, &set))
-              if (!doKeyboardCommand(&data))
-                break;
-
-            if (FD_ISSET(brlapi_fd, &set))
-              if (!doBrailleCommand(&data))
-                break;
-          }
-
-          clear();
-          refresh();
-
-#if defined(USE_CURSES)
-          endwin();
-#else /* standard input/output */
-#endif /* restore keyboard and screen */
-        } else {
-          brlapi_perror("brlapi_getDisplaySize");
+        if (haveBrailleDisplay(&data)) {
+          FD_SET(data.brlapiFileDescriptor, &set);
+          if (data.brlapiFileDescriptor > maximumFileDescriptor)
+            maximumFileDescriptor = data.brlapiFileDescriptor;
         }
-      } else {
-        brlapi_perror("brlapi_enterTtyMode");
+
+        select(maximumFileDescriptor+1, &set, NULL, NULL, NULL);
       }
 
-      brlapi_closeConnection();
-      brlapi_fd = -1;
-    } else {
-      brlapi_perror("brlapi_openConnection");
+      if (FD_ISSET(STDIN_FILENO, &set))
+        if (!doKeyboardCommand(&data))
+          break;
+
+      if (haveBrailleDisplay(&data) && FD_ISSET(data.brlapiFileDescriptor, &set))
+        if (!doBrailleCommand(&data))
+          break;
     }
+
+    clear();
+    refresh();
+
+#if defined(USE_CURSES)
+    endwin();
+#else /* standard input/output */
+#endif /* restore keyboard and screen */
+
+    if (haveBrailleDisplay(&data)) releaseBrailleDisplay(&data);
   }
 
   return status;
