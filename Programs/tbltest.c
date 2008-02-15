@@ -469,8 +469,10 @@ typedef struct {
   unsigned char currentCharacter;
 } EditTableData;
 
-static void
+static int
 updateCharacterDescription (EditTableData *data) {
+  int ok = 0;
+
   size_t descriptionLength;
   unsigned char descriptionDots;
   wchar_t *descriptionText = makeCharacterDescription(
@@ -480,46 +482,55 @@ updateCharacterDescription (EditTableData *data) {
     &descriptionDots
   );
 
-  clear();
+  if (descriptionText) {
+    clear();
 
 #if defined(USE_CURSES)
-  printw("F2:Save F8:Exit\n");
-  printw("Up:Up1 Dn:Down1 PgUp:Up16 PgDn:Down16 Home:First End:Last\n");
-  printw("\n");
+    printw("F2:Save F8:Exit\n");
+    printw("Up:Up1 Dn:Down1 PgUp:Up16 PgDn:Down16 Home:First End:Last\n");
+    printw("\n");
 #else /* standard input/output */
 #endif /* clear screen */
 
-  printCharacterString(descriptionText);
-  printw("\n");
+    printCharacterString(descriptionText);
+    printw("\n");
 
 #define DOT(n) ((descriptionDots & BRLAPI_DOT##n)? '#': ' ')
-  printw(" +---+ \n");
-  printw("1|%c %c|4\n", DOT(1), DOT(4));
-  printw("2|%c %c|5\n", DOT(2), DOT(5));
-  printw("3|%c %c|6\n", DOT(3), DOT(6));
-  printw("7|%c %c|8\n", DOT(7), DOT(8));
-  printw(" +---+ \n");
+    printw(" +---+ \n");
+    printw("1|%c %c|4\n", DOT(1), DOT(4));
+    printw("2|%c %c|5\n", DOT(2), DOT(5));
+    printw("3|%c %c|6\n", DOT(3), DOT(6));
+    printw("7|%c %c|8\n", DOT(7), DOT(8));
+    printw(" +---+ \n");
 #undef DOT
 
-  refresh();
+    refresh();
 
-  {
-    brlapi_writeArguments_t args = BRLAPI_WRITEARGUMENTS_INITIALIZER;
-    wchar_t text[data->displayWidth];
-    size_t length = MIN(data->displayWidth, descriptionLength);
+    {
+      brlapi_writeArguments_t args = BRLAPI_WRITEARGUMENTS_INITIALIZER;
+      wchar_t text[data->displayWidth];
+      size_t length = MIN(data->displayWidth, descriptionLength);
 
-    wmemcpy(text, descriptionText, length);
-    wmemset(&text[length], WC_C(' '), data->displayWidth-length);
+      wmemcpy(text, descriptionText, length);
+      wmemset(&text[length], WC_C(' '), data->displayWidth-length);
 
-    args.regionBegin = 1;
-    args.regionSize = data->displayWidth;
-    args.text = (char *)text;
-    args.textSize = data->displayWidth * sizeof(text[0]);
-    args.charset = "WCHAR_T";
-    brlapi_write(&args);
+      args.regionBegin = 1;
+      args.regionSize = data->displayWidth;
+      args.text = (char *)text;
+      args.textSize = data->displayWidth * sizeof(text[0]);
+      args.charset = "WCHAR_T";
+
+      if (brlapi_write(&args) != -1) {
+        ok = 1;
+      } else {
+        brlapi_perror("brlapi_write");
+      }
+    }
+
+    free(descriptionText);
   }
 
-  free(descriptionText);
+  return ok;
 }
 
 static int
@@ -613,8 +624,14 @@ doKeyboardCommand (EditTableData *data) {
 static int
 doBrailleCommand (EditTableData *data) {
   brlapi_keyCode_t key;
+  int ret = brlapi_readKey(0, &key);
 
-  if (brlapi_readKey(0, &key) == 1) {
+  if (ret == -1) {
+    brlapi_perror("brlapi_readKey");
+    return 0;
+  }
+
+  if (ret == 1) {
     unsigned long code = key & BRLAPI_KEY_CODE_MASK;
 
     switch (key & BRLAPI_KEY_TYPE_MASK) {
@@ -765,29 +782,24 @@ editTable (void) {
 #endif /* initialize keyboard and screen */
 
           data.currentCharacter = 0;
-          while (1) {
-            updateCharacterDescription(&data);
+          while (updateCharacterDescription(&data)) {
+            fd_set set;
 
-            /* Wait for input */
             {
-              fd_set set;
-
-              {
-                int size = MAX(STDIN_FILENO, brlapi_fd) + 1;
-                FD_ZERO(&set);
-                FD_SET(STDIN_FILENO, &set);
-                FD_SET(brlapi_fd, &set);
-                select(size, &set, NULL, NULL, NULL);
-              }
-
-              if (FD_ISSET(STDIN_FILENO, &set))
-                if (!doKeyboardCommand(&data))
-                  break;
-
-              if (FD_ISSET(brlapi_fd, &set))
-                if (!doBrailleCommand(&data))
-                  break;
+              int size = MAX(STDIN_FILENO, brlapi_fd) + 1;
+              FD_ZERO(&set);
+              FD_SET(STDIN_FILENO, &set);
+              FD_SET(brlapi_fd, &set);
+              select(size, &set, NULL, NULL, NULL);
             }
+
+            if (FD_ISSET(STDIN_FILENO, &set))
+              if (!doKeyboardCommand(&data))
+                break;
+
+            if (FD_ISSET(brlapi_fd, &set))
+              if (!doBrailleCommand(&data))
+                break;
           }
 
           clear();
