@@ -873,7 +873,7 @@ contractText (
         }
       }
 
-      /* pre processing */
+      /* preprocessing */
       switch (currentOpcode) {
         case CTO_LargeSign:
         case CTO_LastLargeSign:
@@ -910,7 +910,8 @@ contractText (
         }
         while (srcorig > src) offsets[--srcorig - srcmin] = -1;
         continue;
-      } else if (currentRule->replen) {
+      } else if (currentRule->replen &&
+                 !((currentOpcode == CTO_Always) && (currentFindLength == 1))) {
         if (!putReplace(currentRule)) goto done;
         src += currentFindLength;
       } else {
@@ -922,7 +923,7 @@ contractText (
         }
       }
 
-      /* post processing */
+      /* postprocessing */
       switch (currentOpcode) {
         case CTO_Repeated: {
           const wchar_t *srclim = srcmax - currentFindLength;
