@@ -787,6 +787,14 @@ findLineBreakOpportunities (unsigned char *opportunities, const wchar_t *charact
           continue;
         }
 
+        /* Unix options begin with a minus sign. */
+        if ((before == U_LB_HYPHEN) && (after != U_LB_SPACE)) {
+          if ((index >= 2) && (lineBreakTypes[index-2] == U_LB_SPACE)) {
+            *opportunity = 0;
+            continue;
+          }
+        }
+
         /* LB31: Break everywhere else.
          * ALL _
          * _ ALL
