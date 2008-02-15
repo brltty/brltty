@@ -34,7 +34,7 @@
 #include <ncurses.h>
 #elif defined(HAVE_PKG_NCURSESW)
 #define USE_CURSES
-#define HAVE_FUNC_GET_WCH
+#define USE_FUNC_GET_WCH
 #include <ncursesw/ncurses.h>
 #else
 #warning curses package either unspecified or unsupported
@@ -381,7 +381,7 @@ convertTable (void) {
 }
 
 static wchar_t *
-makeCharacterDescription (TranslationTable table, unsigned char byte, size_t *length, unsigned char *cell) {
+makeCharacterDescription (TranslationTable table, unsigned char byte, size_t *length, unsigned char *braille) {
   char buffer[0X100];
   int characterIndex;
   int brailleIndex;
@@ -446,7 +446,7 @@ makeCharacterDescription (TranslationTable table, unsigned char byte, size_t *le
       description[descriptionLength] = 0;
 
       if (length) *length = descriptionLength;
-      if (cell) *cell = dots;
+      if (braille) *braille = dots;
       return description;
     }
   }
@@ -508,8 +508,8 @@ editTable (void) {
           while (1) {
             {
               size_t lineLength;
-              unsigned char brailleCell;
-              wchar_t *line = makeCharacterDescription(table, current, &lineLength, &brailleCell);
+              unsigned char braille;
+              wchar_t *line = makeCharacterDescription(table, current, &lineLength, &braille);
 
               clear();
 #if defined(USE_CURSES)
@@ -523,7 +523,7 @@ editTable (void) {
               printWchars(line);
               printw("\n");
 
-#define DOT(n) ((brailleCell & BRLAPI_DOT##n)? '#': ' ')
+#define DOT(n) ((braille & BRLAPI_DOT##n)? '#': ' ')
               printw(" +---+ \n");
               printw("1|%c %c|4\n", DOT(1), DOT(4));
               printw("2|%c %c|5\n", DOT(2), DOT(5));
@@ -567,16 +567,16 @@ editTable (void) {
 
               if (FD_ISSET(STDIN_FILENO, &set)) {
 #if defined(USE_CURSES)
-#ifdef HAVE_FUNC_GET_WCH
+#ifdef USE_FUNC_GET_WCH
                 wint_t ch;
                 int ret = get_wch(&ch);
 
                 if (ret == KEY_CODE_YES)
-#else /* HAVE_FUNC_GET_WCH */
+#else /* USE_FUNC_GET_WCH */
                 int ch = getch();
 
                 if (ch >= 0X100)
-#endif /* HAVE_FUNC_GET_WCH */
+#endif /* USE_FUNC_GET_WCH */
                 {
                   switch (ch) {
                     case KEY_UP:    current -= 1; break;
@@ -609,9 +609,9 @@ editTable (void) {
                   }
                 } else
 
-#ifdef HAVE_FUNC_GET_WCH
+#ifdef USE_FUNC_GET_WCH
                 if (ret == OK)
-#endif /* HAVE_FUNC_GET_WCH */
+#endif /* USE_FUNC_GET_WCH */
 #else /* standard input/output */
                 wint_t ch = fgetwc(stdin);
                 if (ch == WEOF) goto done;
@@ -620,25 +620,6 @@ editTable (void) {
                   if ((ch >= BRL_UC_ROW) && (ch <= (BRL_UC_ROW|0xFF))) {
                     /* Set braille pattern */
                     table[current] = ch & 0XFF;
-                  } else if (ch == 'V' - '@') {
-                    /* ^V: show charset table */
-                    int i;
-                    clear();
-                    for (i=0; i<0X100; i+=1) {
-                      wchar_t *line = makeCharacterDescription(table, i, NULL, NULL);
-                      printWchars(line);
-                      printw("\n");
-                      free(line);
-                    }
-
-                    refresh();
-                    brlapi_write(NULL);
-
-#ifdef USE_CURSES
-                    getch();
-#else /* USE_CURSES */
-                    fgetwc(stdin);
-#endif /* USE_CURSES */
                   } else {
                     /* Switch to char */
                     int c = convertWcharToChar(ch);
@@ -766,6 +747,7 @@ editTable (void) {
       brlapi_closeConnection();
       brlapi_fd = -1;
     } else {
+      brlapi_perror("brlapi_openConnection");
     }
   }
 
