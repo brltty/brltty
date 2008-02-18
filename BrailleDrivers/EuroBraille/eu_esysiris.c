@@ -351,8 +351,10 @@ int	esysiris_keyToCommand(BrailleDisplay *brl, unsigned int key, BRL_DriverComma
 {
   unsigned int res = EOF;
 
-  if (key==EOF) return EOF;
-  if (key==0) return EOF;
+  if (key == EOF) 
+    return EOF;
+  if (key == 0) 
+    return EOF;
 
   if (key & EUBRL_BRAILLE_KEY)
     {

@@ -98,6 +98,9 @@ unsigned int		protocol_handleBrailleKey(unsigned int key)
       
       /** Other function keys (home, end, f1-f12, ... ) **/
     case 0x232:	res = BRL_BLK_PASSKEY + BRL_KEY_TAB; break;
+    case 0x216: 
+      res = BRL_FLG_CHAR_SHIFT | (BRL_BLK_PASSKEY + BRL_KEY_TAB); 
+      break;
     case 0x208:	res = BRL_BLK_PASSKEY + BRL_KEY_CURSOR_UP; break;
     case 0x220:	res = BRL_BLK_PASSKEY + BRL_KEY_CURSOR_DOWN; break;
     case 0x210:	res = BRL_BLK_PASSKEY + BRL_KEY_CURSOR_RIGHT; break;
