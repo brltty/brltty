@@ -361,8 +361,8 @@ scrtest.$O:
 
 TBLTEST_OBJECTS = tbltest.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) lock.$O charset.$O tbl.$O tbl_native.$O tbl_gnome.$O
 
-tbltest$X: $(TBLTEST_OBJECTS)
-	$(CC) $(LDFLAGS) -o $@ $(TBLTEST_OBJECTS) $(LDLIBS) -lbrlapi $(CLIBS)
+tbltest$X: $(TBLTEST_OBJECTS) api
+	$(CC) $(LDFLAGS) -o $@ $(TBLTEST_OBJECTS) $(LDLIBS) -L. -lbrlapi $(CLIBS)
 
 tbltest.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/tbltest.c
