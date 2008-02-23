@@ -50,6 +50,7 @@ static iconv_t conversionDescriptor = NULL;
 #endif /* HAVE_PKG_CURSES */
 
 #include "misc.h"
+#include "charset.h"
 
 #ifdef USE_CURSES
 #define BRLPARM_TERM "term",
@@ -113,7 +114,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   int windowColumns = 40;
 
 #ifdef HAVE_ICONV_H
-  char *characterSet = "ISO8859-1";
+  const char *characterSet = getLocaleCharset();
 #endif /* HAVE_ICONV_H */
 
   if (!isSerialDevice(&device)) {
