@@ -37,6 +37,7 @@ typedef struct {
 #include "io_serial.h"
 
 static SerialDevice *serialDevice = NULL;
+#define SERIAL_BAUD 115200
 
 static int
 openSerialPort (const char *device) {
@@ -46,7 +47,7 @@ openSerialPort (const char *device) {
 
 static int
 configureSerialPort (void) {
-  if (!serialRestartDevice(serialDevice, 115200)) return 0;
+  if (!serialRestartDevice(serialDevice, SERIAL_BAUD)) return 0;
   return 1;
 }
 
@@ -255,6 +256,7 @@ static const int logInputPackets = 0;
 static const int logOutputPackets = 0;
 
 static const InputOutputOperations *io = NULL;
+static int charactersPerSecond;
 static TranslationTable outputTable;
 static unsigned char previousCells[40];
 
@@ -323,6 +325,7 @@ readPacket (BrailleDisplay *brl, InputPacket *packet) {
 
 static int
 writePacket (
+  BrailleDisplay *brl,
   unsigned char type, unsigned char mode,
   const unsigned char *data1, size_t length1,
   const unsigned char *data2, size_t length2
@@ -389,7 +392,8 @@ writePacket (
   {
     int size = byte - packet;
     if (logOutputPackets) LogBytes(LOG_DEBUG, "Output Packet", packet, size);
-    io->writeBytes(packet, size);
+    if (io->writeBytes(packet, size) == -1) return 0;
+    brl->writeDelay += (size * 1000 / charactersPerSecond) + 1;
   }
 
   return 1;
@@ -405,7 +409,7 @@ writeCells (BrailleDisplay *brl) {
     for (i=0; i<count; i+=1) cells[i] = outputTable[previousCells[i]];
   }
 
-  return writePacket(0XFC, 0X01, cells, count, NULL, 0);
+  return writePacket(brl, 0XFC, 0X01, cells, count, NULL, 0);
 }
 
 static int
@@ -444,6 +448,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
   if (io->openPort(device)) {
     if (io->configurePort()) {
+      charactersPerSecond = SERIAL_BAUD / 10;
+
       brl->x = 32;
       brl->y = 1;
       brl->helpPage = 0;
