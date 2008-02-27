@@ -448,7 +448,7 @@ static void setFocus(Window win) {
 static int tryModifiers(KeyCode keycode, unsigned int *modifiers, unsigned int modifiers_try, KeySym keysym) {
   KeySym keysymRet;
   unsigned int modifiersRet;
-  if (!XkbLookupKeySym(dpy, keycode, *modifiers | modifiers_try, &modifiersRet, &keysymRet))
+  if (!XkbLookupKeySym(dpy, keycode, modifiers_try, &modifiersRet, &keysymRet))
     return 0;
   if (keysymRet != keysym)
     return 0;
