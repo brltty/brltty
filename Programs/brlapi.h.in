@@ -768,8 +768,8 @@ int BRLAPI_STDCALL brlapi__acceptAllKeys(brlapi_handle_t *handle);
  * Denotes the set of keycodes between \e first and \e last (inclusive)
  */
 typedef struct {
-	brlapi_keyCode_t first;
-	brlapi_keyCode_t last;
+	brlapi_keyCode_t first;	/**< first key of the range */
+	brlapi_keyCode_t last;	/**< last key of the range */
 } brlapi_range_t;
 
 /* brlapi_ignoreKeyRanges */
