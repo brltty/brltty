@@ -455,6 +455,15 @@ static int tryModifiers(KeyCode keycode, unsigned int *modifiers, unsigned int m
   *modifiers |= modifiers_try;
   return 1;
 }
+
+static void ignoreServerKeys(void) {
+  brlapi_range_t range = {
+    .first = BRLAPI_KEY_FLG(ControlMask|Mod1Mask),
+    .last  = BRLAPI_KEY_FLG(ControlMask|Mod1Mask)|~BRLAPI_KEY_FLAGS_MASK,
+  };
+  if (brlapi_ignoreKeyRanges(&range, 1))
+    fatal_brlapi_errno("ignoreKeyRanges",NULL);
+}
 #endif /* CAN_SIMULATE_KEY_PRESSES */
 
 void toX_f(const char *display) {
@@ -498,6 +507,9 @@ void toX_f(const char *display) {
   maxfd = X_fd>brlapi_fd ? X_fd+1 : brlapi_fd+1;
 
   getVT();
+#ifdef CAN_SIMULATE_KEY_PRESSES
+  ignoreServerKeys();
+#endif /* CAN_SIMULATE_KEY_PRESSES */
   netWmNameAtom = XInternAtom(dpy,"_NET_WM_NAME",False);
   utf8StringAtom = XInternAtom(dpy,"UTF8_STRING",False);
 
