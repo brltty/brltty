@@ -92,7 +92,7 @@ static int
 openUsbPort (const char *device) {
   static const UsbChannelDefinition definitions[] = {
     { /* Braille Sense */
-      .vendor=0X045E, .product=0X00CE,
+      .vendor=0X045E, .product=0X930A,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2
     }
