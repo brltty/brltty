@@ -497,8 +497,8 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
       BrailleKeys keys = packet.data.reserved[0] | (packet.data.reserved[1] << 8);
 
       {
-        const BrailleKeys dots = KEY_DOT1 | KEY_DOT2 | KEY_DOT3 | KEY_DOT4 | KEY_DOT5 | KEY_DOT6 | KEY_DOT7 | KEY_DOT8;
-        if ((keys & dots) && (keys == dots)) {
+        const BrailleKeys dotKeys = KEY_DOT1 | KEY_DOT2 | KEY_DOT3 | KEY_DOT4 | KEY_DOT5 | KEY_DOT6 | KEY_DOT7 | KEY_DOT8;
+        if (keys && !(keys & ~dotKeys)) {
           int command = BRL_BLK_PASSDOTS;
           if (keys & KEY_DOT1) command |= BRL_DOT1;
           if (keys & KEY_DOT2) command |= BRL_DOT2;
@@ -515,6 +515,36 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
       switch (keys) {
         case KEY_SPACE:
           return BRL_BLK_PASSDOTS;
+
+        case KEY_SPACE | KEY_DOT1 | KEY_DOT2 | KEY_DOT4:
+          return BRL_CMD_FREEZE;
+
+        case KEY_SPACE | KEY_DOT1 | KEY_DOT2 | KEY_DOT5:
+          return BRL_CMD_HELP;
+
+        case KEY_SPACE | KEY_DOT1 | KEY_DOT2 | KEY_DOT3:
+          return BRL_CMD_LEARN;
+
+        case KEY_SPACE | KEY_DOT1 | KEY_DOT3 | KEY_DOT4:
+          return BRL_CMD_PREFMENU;
+
+        case KEY_SPACE | KEY_DOT1 | KEY_DOT2 | KEY_DOT3 | KEY_DOT5:
+          return BRL_CMD_PREFLOAD;
+
+        case KEY_SPACE | KEY_DOT2 | KEY_DOT3 | KEY_DOT4:
+          return BRL_CMD_INFO;
+
+        case KEY_SPACE | KEY_DOT2 | KEY_DOT3 | KEY_DOT4 | KEY_DOT5:
+          return BRL_CMD_CSRTRK;
+
+        case KEY_SPACE | KEY_DOT2 | KEY_DOT4 | KEY_DOT5 | KEY_DOT6:
+          return BRL_CMD_PREFSAVE;
+
+        case KEY_SPACE | KEY_DOT2 | KEY_DOT3 | KEY_DOT5:
+          return BRL_CMD_SIXDOTS | BRL_FLG_TOGGLE_ON;
+
+        case KEY_SPACE | KEY_DOT2 | KEY_DOT3 | KEY_DOT6:
+          return BRL_CMD_SIXDOTS | BRL_FLG_TOGGLE_OFF;
 
         case KEY_LEFT:
           return BRL_CMD_FWINLT;
