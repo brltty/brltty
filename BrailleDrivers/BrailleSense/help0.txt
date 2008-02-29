@@ -1,1 +1,43 @@
 Braille Sense Help
+
+General Navigation:
+F4: go to cursor
+LEFT/RIGHT: go left/right one window
+LEFT+F1 / RIGHT+F4: go to beginning/end of line
+F2/F3: go up/down one line
+F2+F1 / F3+F4: go to top/bottom line
+LEFT+F1+F2 / RIGHT+F4+F3: go to previous/next command prompt
+LEFT+F2 / RIGHT+F3: go to previous/next paragraph
+
+Keyboard (spacebar and dot keys) Modes:
+SP+24: switch to (i)nput mode
+SP+1345: switch to (n)avigation mode
+
+Navigation Mode:
+SP: go to cursor
+1/4: go left/right one window
+2/5: go left/right to nonblank window
+12/45: go left/right one character
+123/456: go to beginning/end of line
+3/6: go up/down one line
+7/8: go up/down to line with different content
+37/68: go up/down to line with different highlighting
+23/56: go to top/bottom line
+237/568: go to top-left/bottom-left corner
+13/46: go to previous/next command prompt
+27/58: go to previous/next paragraph
+17/48: search backward/forward for text from cut buffer
+
+SP+125: switch to/from (h)elp page
+SP+123: enter/leave (l)earn mode
+SP+234: switch to/from (s)tatus line
+SP+134: enter/leave preferences (m)enu
+SP+1235: (r)estore preferences from disk
+SP+2456: (w)rite preferences to disk
+SP+235: switch to (6)-dot mode
+SP+236: switch to (8)-dot mode
+SP+14: toggle (c)ursor visibility
+SP+124: toggle screen (f)reeze
+SP+2345: toggle cursor (t)racking
+SP+136: toggle highlighted character (u)nderlining
+

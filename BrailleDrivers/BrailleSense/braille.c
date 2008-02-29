@@ -256,6 +256,7 @@ static const int logInputPackets = 0;
 static const int logOutputPackets = 0;
 
 static const InputOutputOperations *io = NULL;
+static int inputMode;
 static int charactersPerSecond;
 static TranslationTable outputTable;
 static unsigned char previousCells[40];
@@ -454,6 +455,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       brl->y = 1;
       brl->helpPage = 0;
 
+      inputMode = 0;
       if (clearCells(brl)) return 1;
     }
 
@@ -496,8 +498,9 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
     case IPT_KEYS: {
       BrailleKeys keys = packet.data.reserved[0] | (packet.data.reserved[1] << 8);
 
-      {
+      if (inputMode) {
         const BrailleKeys dotKeys = KEY_DOT1 | KEY_DOT2 | KEY_DOT3 | KEY_DOT4 | KEY_DOT5 | KEY_DOT6 | KEY_DOT7 | KEY_DOT8;
+
         if (keys && !(keys & ~dotKeys)) {
           int command = BRL_BLK_PASSDOTS;
           if (keys & KEY_DOT1) command |= BRL_DOT1;
@@ -510,47 +513,127 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
           if (keys & KEY_DOT8) command |= BRL_DOT8;
           return command;
         }
+
+        switch (keys) {
+          case KEY_SPACE:
+            return BRL_BLK_PASSDOTS;
+
+          default:
+            break;
+        }
       }
 
       switch (keys) {
         case KEY_SPACE:
-          return BRL_BLK_PASSDOTS;
+        case KEY_F4:
+          return BRL_CMD_HOME;
 
-        case KEY_SPACE | KEY_DOT1 | KEY_DOT2 | KEY_DOT4:
-          return BRL_CMD_FREEZE;
+        case KEY_DOT1:
+        case KEY_LEFT:
+          return BRL_CMD_FWINLT;
+        case KEY_DOT4:
+        case KEY_RIGHT:
+          return BRL_CMD_FWINRT;
+
+        case KEY_DOT2:
+          return BRL_CMD_FWINLTSKIP;
+        case KEY_DOT5:
+          return BRL_CMD_FWINRTSKIP;
+
+        case KEY_DOT1 | KEY_DOT2:
+          return BRL_CMD_CHRLT;
+        case KEY_DOT4 | KEY_DOT5:
+          return BRL_CMD_CHRRT;
+
+        case KEY_DOT1 | KEY_DOT2 | KEY_DOT3:
+        case KEY_LEFT | KEY_F1:
+          return BRL_CMD_LNBEG;
+        case KEY_DOT4 | KEY_DOT5 | KEY_DOT6:
+        case KEY_RIGHT | KEY_F4:
+          return BRL_CMD_LNEND;
+
+        case KEY_DOT3:
+        case KEY_F2:
+          return BRL_CMD_LNUP;
+        case KEY_DOT6:
+        case KEY_F3:
+          return BRL_CMD_LNDN;
+
+        case KEY_DOT7:
+          return BRL_CMD_PRDIFLN;
+        case KEY_DOT8:
+          return BRL_CMD_NXDIFLN;
+
+        case KEY_DOT3 | KEY_DOT7:
+          return BRL_CMD_ATTRUP;
+        case KEY_DOT6 | KEY_DOT8:
+          return BRL_CMD_ATTRDN;
+
+        case KEY_DOT2 | KEY_DOT3:
+        case KEY_F2 | KEY_F1:
+          return BRL_CMD_TOP;
+        case KEY_DOT5 | KEY_DOT6:
+        case KEY_F3 | KEY_F4:
+          return BRL_CMD_BOT;
+
+        case KEY_DOT2 | KEY_DOT3 | KEY_DOT7:
+          return BRL_CMD_TOP_LEFT;
+        case KEY_DOT5 | KEY_DOT6 | KEY_DOT8:
+          return BRL_CMD_BOT_LEFT;
+
+        case KEY_DOT1 | KEY_DOT3:
+        case KEY_LEFT | KEY_F1 | KEY_F2:
+          return BRL_CMD_PRPROMPT;
+        case KEY_DOT4 | KEY_DOT6:
+        case KEY_RIGHT | KEY_F4 | KEY_F3:
+          return BRL_CMD_NXPROMPT;
+
+        case KEY_DOT2 | KEY_DOT7:
+        case KEY_LEFT | KEY_F2:
+          return BRL_CMD_PRPGRPH;
+        case KEY_DOT5 | KEY_DOT8:
+        case KEY_RIGHT | KEY_F3:
+          return BRL_CMD_NXPGRPH;
+
+        case KEY_DOT1 | KEY_DOT7:
+          return BRL_CMD_PRSEARCH;
+        case KEY_DOT4 | KEY_DOT8:
+          return BRL_CMD_NXSEARCH;
+
+        case KEY_SPACE | KEY_DOT2 | KEY_DOT4:
+          inputMode = 1;
+          return BRL_CMD_NOOP | BRL_FLG_TOGGLE_ON;
+        case KEY_SPACE | KEY_DOT1 | KEY_DOT3 | KEY_DOT4 | KEY_DOT5:
+          inputMode = 0;
+          return BRL_CMD_NOOP | BRL_FLG_TOGGLE_OFF;
 
         case KEY_SPACE | KEY_DOT1 | KEY_DOT2 | KEY_DOT5:
           return BRL_CMD_HELP;
-
         case KEY_SPACE | KEY_DOT1 | KEY_DOT2 | KEY_DOT3:
           return BRL_CMD_LEARN;
-
-        case KEY_SPACE | KEY_DOT1 | KEY_DOT3 | KEY_DOT4:
-          return BRL_CMD_PREFMENU;
-
-        case KEY_SPACE | KEY_DOT1 | KEY_DOT2 | KEY_DOT3 | KEY_DOT5:
-          return BRL_CMD_PREFLOAD;
-
         case KEY_SPACE | KEY_DOT2 | KEY_DOT3 | KEY_DOT4:
           return BRL_CMD_INFO;
 
-        case KEY_SPACE | KEY_DOT2 | KEY_DOT3 | KEY_DOT4 | KEY_DOT5:
-          return BRL_CMD_CSRTRK;
-
+        case KEY_SPACE | KEY_DOT1 | KEY_DOT3 | KEY_DOT4:
+          return BRL_CMD_PREFMENU;
+        case KEY_SPACE | KEY_DOT1 | KEY_DOT2 | KEY_DOT3 | KEY_DOT5:
+          return BRL_CMD_PREFLOAD;
         case KEY_SPACE | KEY_DOT2 | KEY_DOT4 | KEY_DOT5 | KEY_DOT6:
           return BRL_CMD_PREFSAVE;
 
         case KEY_SPACE | KEY_DOT2 | KEY_DOT3 | KEY_DOT5:
           return BRL_CMD_SIXDOTS | BRL_FLG_TOGGLE_ON;
-
         case KEY_SPACE | KEY_DOT2 | KEY_DOT3 | KEY_DOT6:
           return BRL_CMD_SIXDOTS | BRL_FLG_TOGGLE_OFF;
 
-        case KEY_LEFT:
-          return BRL_CMD_FWINLT;
-
-        case KEY_RIGHT:
-          return BRL_CMD_FWINRT;
+        case KEY_SPACE | KEY_DOT1 | KEY_DOT4:
+          return BRL_CMD_CSRVIS;
+        case KEY_SPACE | KEY_DOT1 | KEY_DOT2 | KEY_DOT4:
+          return BRL_CMD_FREEZE;
+        case KEY_SPACE | KEY_DOT2 | KEY_DOT3 | KEY_DOT4 | KEY_DOT5:
+          return BRL_CMD_CSRTRK;
+        case KEY_SPACE | KEY_DOT1 | KEY_DOT3 | KEY_DOT6:
+          return BRL_CMD_ATTRVIS;
 
         default:
           break;
