@@ -4563,6 +4563,8 @@ BRLTTY supports the following braille displays:
       |18/40/M20/M40@
     BrailleNote
       |18/32@
+    BrailleSense
+      |32@
     BrlAPI@
     CombiBraille
       |25/45/85@
@@ -4667,6 +4669,7 @@ BRLTTY supports the following speech synthesizers:
     bl|BrailleLite@
     bm|Baum (Native, HT, PB1, PB2)@
     bn|BrailleNote@
+    bs|BrailleSense@
     cb|CombiBraille@
     ec|EcoBraille@
     es|ExternalSpeech@

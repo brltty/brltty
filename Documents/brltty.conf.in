@@ -41,6 +41,7 @@
 #braille-driver	bl	# BrailleLite
 #braille-driver	bm	# Baum
 #braille-driver	bn	# BrailleNote
+#braille-driver	bs	# BrailleSense
 #braille-driver	cb	# CombiBraille
 #braille-driver	ec	# EcoBraille
 #braille-driver	eu	# EuroBraille
