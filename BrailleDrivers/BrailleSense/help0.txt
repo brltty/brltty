@@ -2,6 +2,7 @@ Braille Sense Help
 
 General Navigation:
 F4: go to cursor
+F4+F1: go back (undo unexpected cursor tracking motion)
 LEFT/RIGHT: go left/right one window
 LEFT+F1 / RIGHT+F4: go to beginning/end of line
 F2/F3: go up/down one line
@@ -28,16 +29,45 @@ SP: go to cursor
 27/58: go to previous/next paragraph
 17/48: search backward/forward for text from cut buffer
 
+Display Modes:
 SP+125: switch to/from (h)elp page
 SP+123: enter/leave (l)earn mode
 SP+234: switch to/from (s)tatus line
+
+Preferences Menu:
 SP+134: enter/leave preferences (m)enu
 SP+1235: (r)estore preferences from disk
 SP+2456: (w)rite preferences to disk
+
 SP+235: switch to (6)-dot mode
 SP+236: switch to (8)-dot mode
 SP+14: toggle (c)ursor visibility
 SP+124: toggle screen (f)reeze
 SP+2345: toggle cursor (t)racking
 SP+136: toggle highlighted character (u)nderlining
+
+Special Key Entry:
+SP+2: home key
+SP+3: end key
+SP+5: page up key
+SP+6: page down key
+SP+25: cursor up key
+SP+36: cursor down key
+SP+23: cursor left key
+SP+56: cursor right key
+
+Cursor Routing:
+Rn: bring cursor to character
+F2+F3: bring cursor to line (no horizontal motion)
+
+Cut and Paste:
+SP+F1, Rn: start new cut buffer at character
+SP+F2, Rn: append to cut buffer from character
+SP+F3, Rn: linear cut to character
+SP+F4, Rn: rectangular cut to character
+SP+1234: (p)aste cut buffer at cursor
+
+Other Routing Key Functions:
+SP+LEFT, Rn: position left end of window at character
+SP+RIGHT, Rn: describe character
 
