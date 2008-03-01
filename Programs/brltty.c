@@ -26,6 +26,10 @@
 #include <sys/wait.h>
 #endif /* HAVE_SYS_WAIT_H */
 
+#ifdef HAVE_LIBICUUC
+#include <unicode/uchar.h>
+#endif /* HAVE_LIBICUUC */
+
 #include "misc.h"
 #include "message.h"
 #include "tunes.h"
@@ -2021,7 +2025,7 @@ runProgram (void) {
                       strtext("yellow"),
                       strtext("white")
                     };
-                    char buffer[0X40];
+                    char buffer[0X50];
                     int size = sizeof(buffer);
                     int length = 0;
                     ScreenCharacter character;
@@ -2030,10 +2034,10 @@ runProgram (void) {
                     readScreen(p->winx+arg, p->winy, 1, 1, &character);
 
                     {
-                      unsigned long text = character.text;
+                      uint32_t text = character.text;
                       int count;
                       snprintf(&buffer[length], size-length,
-                               "char %lu (0X%02lX): %s on %s%n",
+                               "char %" PRIu32 " (0X%02" PRIX32 "): %s on %s%n",
                                text, text,
                                gettext(colours[character.attributes & 0X0F]),
                                gettext(colours[(character.attributes & 0X70) >> 4]),
@@ -2049,6 +2053,20 @@ runProgram (void) {
                                &count);
                       length += count;
                     }
+
+#ifdef HAVE_LIBICUUC
+                    {
+                      char name[0X40];
+                      UErrorCode error = U_ZERO_ERROR;
+
+                      u_charName(character.text, U_EXTENDED_CHAR_NAME, name, sizeof(name), &error);
+                      if (U_SUCCESS(error)) {
+                        int count;
+                        snprintf(&buffer[length], size-length, " [%s]%n", name, &count);
+                        length += count;
+                      }
+                    }
+#endif /* HAVE_LIBICUUC */
 
                     message(buffer, 0);
                   } else
