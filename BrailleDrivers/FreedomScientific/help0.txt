@@ -27,6 +27,8 @@ With Left Advance: start new cut buffer at character
 With Left GDF: append to existing cut buffer from character
 With Right GDF: linear cut to character
 With Right Advance: rectangular cut to character
+With Left Wheel Press: position left end of window at character
+With Right Wheel Press: describe character
 
 Upper Routing Buttons (Focus only):
 Alone: describe character

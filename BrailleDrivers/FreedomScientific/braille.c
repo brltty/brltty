@@ -1132,6 +1132,13 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
                   case 0:
                     command = BRL_BLK_ROUTE;
                     break;
+                  case (KEY_WHEEL_LEFT):
+                    command = BRL_BLK_SETLEFT;
+                    break;
+                  case (KEY_WHEEL_RIGHT):
+                    command = BRL_BLK_DESCCHAR;
+                    break;
+
                   case (KEY_ADVANCE_LEFT):
                     command = BRL_BLK_CUTBEGIN;
                     break;
