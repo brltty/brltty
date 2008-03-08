@@ -542,8 +542,8 @@ getUserDirectory (void) {
   char *home = getHomeDirectory();
   if (home) {
     char *directory = makePath(home, "." PACKAGE_NAME);
-    if (directory) return directory;
     free(home);
+    if (directory) return directory;
   }
   return NULL;
 }
