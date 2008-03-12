@@ -296,6 +296,8 @@ static int refresh;
 static WSADATA wsadata;
 #endif /* __MINGW32__ */
 
+static unsigned char cursorShape;
+
 /****************************************************************************/
 /** SOME PROTOTYPES                                                        **/
 /****************************************************************************/
@@ -574,7 +576,7 @@ void getDots(const BrailleWindow *brailleWindow, unsigned char *buf)
     c = convertWcharToDots(textTable, brailleWindow->text[i]);
     buf[i] = (c & brailleWindow->andAttr[i]) | brailleWindow->orAttr[i];
   }
-  if (brailleWindow->cursor) buf[brailleWindow->cursor-1] |= cursorDots();
+  if (brailleWindow->cursor) buf[brailleWindow->cursor-1] |= cursorShape;
 }
 
 static void handleResize(BrailleDisplay *brl)
@@ -2274,6 +2276,7 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
   int keycode, command = EOF;
   brlapi_keyCode_t clientCode;
   int ok = 1;
+  unsigned char newCursorShape;
 
   pthread_mutex_lock(&connectionsMutex);
   pthread_mutex_lock(&rawMutex);
@@ -2311,6 +2314,11 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
       refresh=1;
     }
     pthread_mutex_unlock(&driverMutex);
+    newCursorShape = cursorDots();
+    if (newCursorShape!=cursorShape) {
+      cursorShape = newCursorShape;
+      refresh = 1;
+    }
     if ((c->brlbufstate==TODISPLAY) || (refresh)) {
       unsigned char *oldbuf = disp->buffer, buf[displaySize];
       disp->buffer = buf;

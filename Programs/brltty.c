@@ -948,9 +948,15 @@ getOffset (int arg, int end) {
   return arg;
 }
 
+static int cursorState;                /* display cursor on (toggled during blink) */
+static int cursorTimer;
 unsigned char
 cursorDots (void) {
-  return prefs.cursorStyle?  (BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT4 | BRL_DOT5 | BRL_DOT6 | BRL_DOT7 | BRL_DOT8): (BRL_DOT7 | BRL_DOT8);
+  if (!prefs.blinkingCursor || cursorState) {
+    return prefs.cursorStyle?  (BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT4 | BRL_DOT5 | BRL_DOT6 | BRL_DOT7 | BRL_DOT8): (BRL_DOT7 | BRL_DOT8);
+  } else {
+    return 0;
+  }
 }
 
 static void
@@ -958,8 +964,6 @@ setBlinkingState (int *state, int *timer, int visible, unsigned char invisibleTi
   *timer = PREFERENCES_TIME((*state = visible)? visibleTime: invisibleTime);
 }
 
-static int cursorState;                /* display cursor on (toggled during blink) */
-static int cursorTimer;
 static void
 setBlinkingCursor (int visible) {
   setBlinkingState(&cursorState, &cursorTimer, visible,
@@ -2587,7 +2591,7 @@ runProgram (void) {
         }
 
         if (brl.cursor >= 0) {
-          if (showCursor() && (!prefs.blinkingCursor || cursorState)) {
+          if (showCursor()) {
             brl.buffer[brl.cursor] |= cursorDots();
           }
         }
