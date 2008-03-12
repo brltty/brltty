@@ -952,11 +952,8 @@ static int cursorState;                /* display cursor on (toggled during blin
 static int cursorTimer;
 unsigned char
 cursorDots (void) {
-  if (!prefs.blinkingCursor || cursorState) {
-    return prefs.cursorStyle?  (BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT4 | BRL_DOT5 | BRL_DOT6 | BRL_DOT7 | BRL_DOT8): (BRL_DOT7 | BRL_DOT8);
-  } else {
-    return 0;
-  }
+  if (prefs.blinkingCursor && !cursorState) return 0;
+  return prefs.cursorStyle?  (BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT4 | BRL_DOT5 | BRL_DOT6 | BRL_DOT7 | BRL_DOT8): (BRL_DOT7 | BRL_DOT8);
 }
 
 static void
