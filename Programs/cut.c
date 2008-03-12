@@ -64,18 +64,17 @@ cut (size_t *length, int fromColumn, int fromRow, int toColumn, int toRow) {
 
             for (column=fromColumn; column<=toColumn; column++, fromAddress++) {
               if (iswcntrl(*fromAddress) || iswspace(*fromAddress)) {
-                spaces++;
+                spaces += 1;
               } else {
                 while (spaces) {
                   *(toAddress++) = WC_C(' ');
-                  spaces--;
+                  spaces -= 1;
                 }
 
                 *toAddress++ = *fromAddress;
               }
             }
 
-            if (spaces) *toAddress++ = WC_C(' ');
             if (row != toRow) *toAddress++ = WC_C('\r');
           }
 
@@ -172,7 +171,7 @@ cutLine (int column, int row) {
         wchar_t *start = buffer + length;
         while (start != buffer) {
           if (*--start == WC_C('\r')) {
-            ++start;
+            start += 1;
             break;
           }
         }
@@ -202,20 +201,20 @@ cutLine (int column, int row) {
 
           switch (character) {
             case WC_C(' '):
-              spaces++;
+              spaces += 1;
               break;
 
             case WC_C('\r'):
-              newlines++;
+              newlines += 1;
               break;
 
             default:
-              if (spaces && newlines) spaces = 1;
+              if (newlines) spaces = 1;
               newlines = 0;
 
               while (spaces) {
                 *to++ = WC_C(' ');
-                spaces--;
+                spaces -= 1;
               }
 
               *to++ = character;
