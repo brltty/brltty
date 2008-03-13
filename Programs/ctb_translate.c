@@ -907,8 +907,10 @@ contractText (
       /* main processing */
       if (!literal && (currentOpcode == CTO_Literal)) {
         const wchar_t *srcorig = src;
+
         literal = src + currentFindLength;
         if (testCharacter(*src, CTC_Space)) continue;
+
         if (destword) {
           src = srcword;
           dest = destword;
@@ -916,10 +918,13 @@ contractText (
           src = srcmin;
           dest = destmin;
         }
+
         while (srcorig > src) offsets[--srcorig - srcmin] = -1;
         continue;
-      } else if (currentRule->replen &&
-                 !((currentOpcode == CTO_Always) && (currentFindLength == 1))) {
+      }
+
+      if (currentRule->replen &&
+          !((currentOpcode == CTO_Always) && (currentFindLength == 1))) {
         if (!putReplace(currentRule)) goto done;
         src += currentFindLength;
       } else {
@@ -941,9 +946,11 @@ contractText (
           }
           break;
         }
+
         case CTO_JoinableWord:
           while ((src < srcmax) && testCharacter(*src, CTC_Space)) src++;
           break;
+
         default:
           break;
       }
@@ -965,12 +972,8 @@ contractText (
 done:
   if (destlast) dest = destlast;
 
-  if ((src < srcmax) &&
-      !lineBreakOpportunities[src-srcmin] &&
-      (destword != NULL) &&
-      ((destmax - destword) < ((destmax - destmin) / 2)) &&
-      !testCharacter(src[-1], CTC_Space) &&
-      !testCharacter(*src, CTC_Space)) {
+  if ((src < srcmax) && destword &&
+      ((destmax - destword) < ((destmax - destmin) / 2))) {
     src = srcword;
     dest = destword;
   }
