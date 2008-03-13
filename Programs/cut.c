@@ -209,8 +209,10 @@ cutLine (int column, int row) {
               break;
 
             default:
-              if (newlines) spaces = 1;
-              newlines = 0;
+              if (newlines) {
+                spaces = 1;
+                newlines = 0;
+              }
 
               while (spaces) {
                 *to++ = WC_C(' ');
