@@ -18,6 +18,8 @@
 # U.S. English Grade 2 Braille Contraction Table
 # Created by John Boyer <director@chpi.org>.
 
+class vowel aeiouyAEIOUY
+
 numsign 3456  number sign, just one operand
 letsign 56
 capsign 6
@@ -355,6 +357,7 @@ begword forens 123456-26-234 forensic
 always forever 123456-5-15 forevermore
 always foot =
 word from 124
+before vowel always friend 124-1235-24-26-145
 always friend 124-1235
 contraction fr
 word fruity =
