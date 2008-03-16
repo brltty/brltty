@@ -877,9 +877,21 @@ contractText (
           if (previousOpcode == CTO_LargeSign) {
             int srcoff = src - srcmin;
             int destlen;
-            while (dest > destmin && !dest[-1]) dest--;
-            setOffset();
+
+            while ((dest > destmin) && !dest[-1]) dest -= 1;
             destlen = dest - destmin;
+            setOffset();
+
+            {
+              BYTE **destptrs[] = {&destlast, &destword, NULL};
+              BYTE ***destptr = destptrs;
+
+              while (*destptr) {
+                if (**destptr && (**destptr > dest)) **destptr = dest;
+                destptr += 1;
+              }
+            }
+
             while (srcoff > 0) {
               int destoff = offsets[--srcoff];
               if (destoff != -1) {
@@ -889,11 +901,11 @@ contractText (
             }
           }
           break;
+
         default:
           break;
       }				/*end of action */
 
-      /* main processing */
       if (!literal && (currentOpcode == CTO_Literal)) {
         const wchar_t *srcorig = src;
 
@@ -937,7 +949,7 @@ contractText (
         }
 
         case CTO_JoinableWord:
-          while ((src < srcmax) && testCharacter(*src, CTC_Space)) src++;
+          while ((src < srcmax) && testCharacter(*src, CTC_Space)) src += 1;
           break;
 
         default:
@@ -959,12 +971,14 @@ contractText (
   }				/*end of translation loop */
 
 done:
-  if (destlast) dest = destlast;
-
-  if ((src < srcmax) && destword &&
-      ((destmax - destword) < ((destmax - destmin) / 2))) {
-    src = srcword;
-    dest = destword;
+  if (src < srcmax) {
+    if (destword &&
+        ((destmax - destword) < ((destmax - destmin) / 2))) {
+      src = srcword;
+      dest = destword;
+    } else if (destlast) {
+      dest = destlast;
+    }
   }
 
   if (src < srcmax) {
