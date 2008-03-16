@@ -165,7 +165,7 @@ allocateBytes (FileData *data, ContractionTableOffset *offset, int count, int al
 static int
 saveBytes (FileData *data, ContractionTableOffset *offset, const void *bytes, int count, int alignment) {
   if (allocateBytes(data, offset, count, alignment)) {
-    BYTE *address = CTA(tableHeader, *offset);
+    BYTE *address = getContractionTableItem(tableHeader, *offset);
     memcpy(address, bytes, count);
     return 1;
   }
@@ -175,7 +175,7 @@ saveBytes (FileData *data, ContractionTableOffset *offset, const void *bytes, in
 static int
 saveSequence (FileData *data, ContractionTableOffset *offset, const ByteString *sequence) {
   if (allocateBytes(data, offset, sequence->length+1, __alignof__(BYTE))) {
-    BYTE *address = CTA(tableHeader, *offset);
+    BYTE *address = getContractionTableItem(tableHeader, *offset);
     memcpy(address+1, sequence->bytes, (*address = sequence->length));
     return 1;
   }
@@ -254,7 +254,7 @@ addRule (
   if (replace) ruleSize += replace->length;
 
   if (allocateBytes(data, &ruleOffset, ruleSize, __alignof__(ContractionTableRule))) {
-    ContractionTableRule *newRule = CTR(tableHeader, ruleOffset);
+    ContractionTableRule *newRule = getContractionTableItem(tableHeader, ruleOffset);
 
     newRule->opcode = opcode;
     newRule->after = after;
@@ -286,7 +286,7 @@ addRule (
       }
 
       while (*offsetAddress) {
-        ContractionTableRule *currentRule = CTR(tableHeader, *offsetAddress);
+        ContractionTableRule *currentRule = getContractionTableItem(tableHeader, *offsetAddress);
         if (newRule->findlen > currentRule->findlen) break;
         if (newRule->findlen == currentRule->findlen) {
           if ((currentRule->opcode == CTO_Always) && (newRule->opcode != CTO_Always)) break;

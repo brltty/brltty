@@ -42,7 +42,7 @@ static const ContractionTableRule *currentRule;	/*pointer to current rule in tab
 
 static const ContractionTableCharacter *
 getContractionTableCharacter (wchar_t character) {
-  const ContractionTableCharacter *characters = (ContractionTableCharacter *)CTA(table->header, table->header->characters);
+  const ContractionTableCharacter *characters = getContractionTableItem(table->header, table->header->characters);
   int first = 0;
   int last = table->header->characterCount - 1;
 
@@ -186,7 +186,7 @@ selectRule (int length) {
   }
 
   while (ruleOffset) {
-    currentRule = CTR(table->header, ruleOffset);
+    currentRule = getContractionTableItem(table->header, ruleOffset);
     currentOpcode = currentRule->opcode;
     currentFindLength = currentRule->findlen;
 
@@ -380,7 +380,7 @@ putCharacter (wchar_t character) {
   if (ctc) {
     ContractionTableOffset offset = ctc->always;
     if (offset) {
-      const ContractionTableRule *rule = CTR(table->header, offset);
+      const ContractionTableRule *rule = getContractionTableItem(table->header, offset);
       if (rule->replen) return putReplace(rule);
     }
   }
@@ -389,7 +389,7 @@ putCharacter (wchar_t character) {
 
 static int
 putSequence (ContractionTableOffset offset) {
-  const BYTE *sequence = CTA(table->header, offset);
+  const BYTE *sequence = getContractionTableItem(table->header, offset);
   return putBytes(sequence+1, *sequence);
 }
 
@@ -825,7 +825,7 @@ contractText (
 
   findLineBreakOpportunities(lineBreakOpportunities, inputBuffer, *inputLength);
 
-  while (src < srcmax) { /*the main translation loop */
+  while (src < srcmax) {
     destlast = dest;
     setOffset();
     setBefore();

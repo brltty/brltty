@@ -24,9 +24,6 @@ extern "C" {
 
 #define BYTE unsigned char
 
-#define CTA(table, offset) (((BYTE *)(table)) + (offset))
-#define CTR(table, offset) ((ContractionTableRule *)CTA((table), (offset)))
-
 #define HASHNUM 1087
 #define CTH(x) (((x[0]<<8)+x[1])%HASHNUM)
 
@@ -112,6 +109,11 @@ typedef struct { /*translation table*/
   uint32_t characterCount;
   ContractionTableOffset rules[HASHNUM]; /*locations of multi-character rules in table*/
 } ContractionTableHeader;
+
+static inline void *
+getContractionTableItem (ContractionTableHeader *header, ContractionTableOffset offset) {
+  return (char *)header + offset;
+}
 
 typedef struct {
   wchar_t value;
