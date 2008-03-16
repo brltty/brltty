@@ -22,10 +22,12 @@
 extern "C" {
 #endif /* __cplusplus */
 
-extern void *compileContractionTable (const char *fileName);
-extern int destroyContractionTable (void *contractionTable);
+typedef struct ContractionTableStruct ContractionTable;
+
+extern ContractionTable *compileContractionTable (const char *fileName);
+extern int destroyContractionTable (ContractionTable *contractionTable);
 extern int contractText (
-  void *contractionTable, /* Pointer to translation table */
+  ContractionTable *contractionTable, /* Pointer to translation table */
   const wchar_t *inputBuffer, /* What is to be translated */
   int *inputLength, /* Its length */
   unsigned char *outputBuffer, /* Where the translation is to go */

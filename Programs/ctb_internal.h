@@ -113,6 +113,21 @@ typedef struct { /*translation table*/
   ContractionTableOffset rules[HASHNUM]; /*locations of multi-character rules in table*/
 } ContractionTableHeader;
 
+typedef struct {
+  wchar_t value;
+  wchar_t uppercase;
+  wchar_t lowercase;
+  ContractionTableCharacterAttributes attributes;
+} CharacterEntry;
+
+struct ContractionTableStruct {
+  ContractionTableHeader *header;
+
+  CharacterEntry *characters;
+  int charactersSize;
+  int characterCount;
+};
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

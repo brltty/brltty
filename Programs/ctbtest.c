@@ -95,7 +95,7 @@ END_OPTION_TABLE
 
 TranslationTable textTable;
 TranslationTable untextTable;
-void *contractionTable;
+static ContractionTable *contractionTable;
 
 static int outputWidth;
 static int outputExtend;

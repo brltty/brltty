@@ -27,6 +27,7 @@ extern "C" {
 #include "cmd.h"
 #include "brl.h"
 #include "spk.h"
+#include "ctb.h"
 
 typedef enum {
   sbwAll,
@@ -100,6 +101,7 @@ extern char *opt_midiDevice;
 
 extern int updateInterval;
 extern int messageDelay;
+extern ContractionTable *contractionTable;
 
 extern void testProgramTermination (void);
 extern void startup (int argc, char *argv[]);

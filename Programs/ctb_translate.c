@@ -28,7 +28,7 @@
 #include "ctb_internal.h"
 #include "brl.h"
 
-static const ContractionTableHeader *table;	/*translation table */
+static ContractionTable *table;
 static const wchar_t *src, *srcmin, *srcmax;
 static BYTE *dest, *destmin, *destmax;
 static int *offsets;
@@ -40,22 +40,11 @@ static const ContractionTableRule *currentRule;	/*pointer to current rule in tab
 
 #define setOffset() offsets[src - srcmin] = dest - destmin
 
-typedef struct {
-  wchar_t value;
-  wchar_t uppercase;
-  wchar_t lowercase;
-  ContractionTableCharacterAttributes attributes;
-} CharacterDefinition;
-
-static CharacterDefinition *characterDefinitions = NULL;
-static int characterDefinitionsSize = 0;
-static int characterDefinitionCount = 0;
-
 static const ContractionTableCharacter *
 getContractionTableCharacter (wchar_t character) {
-  const ContractionTableCharacter *characters = (ContractionTableCharacter *)CTA(table, table->characters);
+  const ContractionTableCharacter *characters = (ContractionTableCharacter *)CTA(table->header, table->header->characters);
   int first = 0;
-  int last = table->characterCount - 1;
+  int last = table->header->characterCount - 1;
 
   while (first <= last) {
     int current = (first + last) / 2;
@@ -73,86 +62,86 @@ getContractionTableCharacter (wchar_t character) {
   return NULL;
 }
 
-static CharacterDefinition *
-getCharacterDefinition (wchar_t character) {
+static CharacterEntry *
+getCharacterEntry (wchar_t character) {
   int first = 0;
-  int last = characterDefinitionCount - 1;
+  int last = table->characterCount - 1;
 
   while (first <= last) {
     int current = (first + last) / 2;
-    CharacterDefinition *definition = &characterDefinitions[current];
+    CharacterEntry *entry = &table->characters[current];
 
-    if (definition->value < character) {
+    if (entry->value < character) {
       first = current + 1;
-    } else if (definition->value > character) {
+    } else if (entry->value > character) {
       last = current - 1;
     } else {
-      return definition;
+      return entry;
     }
   }
 
-  if (characterDefinitionCount == characterDefinitionsSize) {
-    int newSize = characterDefinitionsSize;
+  if (table->characterCount == table->charactersSize) {
+    int newSize = table->charactersSize;
     newSize = newSize? newSize<<1: 0X80;
 
     {
-      CharacterDefinition *newDefinitions = realloc(characterDefinitions, (newSize * sizeof(*newDefinitions)));
-      if (!newDefinitions) return NULL;
+      CharacterEntry *newCharacters = realloc(table->characters, (newSize * sizeof(*newCharacters)));
+      if (!newCharacters) return NULL;
 
-      characterDefinitions = newDefinitions;
-      characterDefinitionsSize = newSize;
+      table->characters = newCharacters;
+      table->charactersSize = newSize;
     }
   }
 
-  memmove(&characterDefinitions[first+1],
-          &characterDefinitions[first],
-          (characterDefinitionCount - first) * sizeof(*characterDefinitions));
-  ++characterDefinitionCount;
+  memmove(&table->characters[first+1],
+          &table->characters[first],
+          (table->characterCount - first) * sizeof(*table->characters));
+  table->characterCount += 1;
 
   {
-    CharacterDefinition *definition = &characterDefinitions[first];
-    memset(definition, 0, sizeof(*definition));
-    definition->value = definition->uppercase = definition->lowercase = character;
+    CharacterEntry *entry = &table->characters[first];
+    memset(entry, 0, sizeof(*entry));
+    entry->value = entry->uppercase = entry->lowercase = character;
 
     if (iswspace(character)) {
-      definition->attributes |= CTC_Space;
+      entry->attributes |= CTC_Space;
     } else if (iswalpha(character)) {
-      definition->attributes |= CTC_Letter;
+      entry->attributes |= CTC_Letter;
 
       if (iswupper(character)) {
-        definition->attributes |= CTC_UpperCase;
-        definition->lowercase = towlower(character);
+        entry->attributes |= CTC_UpperCase;
+        entry->lowercase = towlower(character);
       }
 
       if (iswlower(character)) {
-        definition->attributes |= CTC_LowerCase;
-        definition->uppercase = towupper(character);
+        entry->attributes |= CTC_LowerCase;
+        entry->uppercase = towupper(character);
       }
     } else if (iswdigit(character)) {
-      definition->attributes |= CTC_Digit;
+      entry->attributes |= CTC_Digit;
     } else if (iswpunct(character)) {
-      definition->attributes |= CTC_Punctuation;
+      entry->attributes |= CTC_Punctuation;
     }
 
     {
       const ContractionTableCharacter *ctc = getContractionTableCharacter(character);
-      if (ctc) definition->attributes |= ctc->attributes;
+      if (ctc) entry->attributes |= ctc->attributes;
     }
 
-    return definition;
+    return entry;
   }
 }
 
 static int
 testCharacter (wchar_t character, ContractionTableCharacterAttributes attributes) {
-  const CharacterDefinition *definition = getCharacterDefinition(character);
-  return definition && (attributes & definition->attributes);
+  const CharacterEntry *entry = getCharacterEntry(character);
+  return entry && (attributes & entry->attributes);
 }
 
 static wchar_t
 toLowerCase (wchar_t character) {
-  const CharacterDefinition *definition = getCharacterDefinition(character);
-  return definition? definition->lowercase: character;
+  const CharacterEntry *entry = getCharacterEntry(character);
+  return entry? entry->lowercase: character;
 }
 
 static int
@@ -178,7 +167,7 @@ setAfter (int length) {
 }
 
 static int
-selectRule (int length) { /*check for valid contractions */
+selectRule (int length) {
   int ruleOffset;
   int maximumLength;
 
@@ -192,12 +181,12 @@ selectRule (int length) { /*check for valid contractions */
     wchar_t characters[2];
     characters[0] = toLowerCase(src[0]);
     characters[1] = toLowerCase(src[1]);
-    ruleOffset = table->rules[CTH(characters)];
+    ruleOffset = table->header->rules[CTH(characters)];
     maximumLength = 0;
   }
 
   while (ruleOffset) {
-    currentRule = CTR(table, ruleOffset);
+    currentRule = CTR(table->header, ruleOffset);
     currentOpcode = currentRule->opcode;
     currentFindLength = currentRule->findlen;
 
@@ -391,7 +380,7 @@ putCharacter (wchar_t character) {
   if (ctc) {
     ContractionTableOffset offset = ctc->always;
     if (offset) {
-      const ContractionTableRule *rule = CTR(table, offset);
+      const ContractionTableRule *rule = CTR(table->header, offset);
       if (rule->replen) return putReplace(rule);
     }
   }
@@ -400,7 +389,7 @@ putCharacter (wchar_t character) {
 
 static int
 putSequence (ContractionTableOffset offset) {
-  const BYTE *sequence = CTA(table, offset);
+  const BYTE *sequence = CTA(table->header, offset);
   return putBytes(sequence+1, *sequence);
 }
 
@@ -817,7 +806,7 @@ findLineBreakOpportunities (unsigned char *opportunities, const wchar_t *charact
 
 int
 contractText (
-  void *contractionTable,
+  ContractionTable *contractionTable,
   const wchar_t *inputBuffer, int *inputLength,
   BYTE *outputBuffer, int *outputLength,
   int *offsetsMap, const int cursorOffset
@@ -828,7 +817,7 @@ contractText (
   const wchar_t *literal = NULL;
   unsigned char lineBreakOpportunities[*inputLength];
 
-  if (!(table = (ContractionTableHeader *)contractionTable)) return 0;
+  table = contractionTable;
   srcmax = (srcmin = src = inputBuffer) + *inputLength;
   destmax = (destmin = dest = outputBuffer) + *outputLength;
   offsets = offsetsMap;
@@ -852,32 +841,32 @@ contractText (
         currentOpcode = CTO_Literal;
       }
 
-      if (table->numberSign && previousOpcode != CTO_MidNum &&
+      if (table->header->numberSign && previousOpcode != CTO_MidNum &&
                  !testCharacter(before, CTC_Digit) && testCharacter(*src, CTC_Digit)) {
-        if (!putSequence(table->numberSign)) break;
-      } else if (table->englishLetterSign && testCharacter(*src, CTC_Letter)) {
+        if (!putSequence(table->header->numberSign)) break;
+      } else if (table->header->englishLetterSign && testCharacter(*src, CTC_Letter)) {
         if ((currentOpcode == CTO_Contraction) ||
             (currentOpcode != CTO_EndNum && testCharacter(before, CTC_Digit)) ||
             (currentOpcode == CTO_Always && currentFindLength == 1 && testCharacter(before, CTC_Space) &&
              (src + 1 == srcmax || testCharacter(src[1], CTC_Space) ||
               (testCharacter(src[1], CTC_Punctuation) && (src[1] != '.') && (src[1] != '\''))))) {
-          if (!putSequence(table->englishLetterSign)) break;
+          if (!putSequence(table->header->englishLetterSign)) break;
         }
       }
 
       if (testCharacter(*src, CTC_UpperCase)) {
         if (!testCharacter(before, CTC_UpperCase)) {
-          if (table->beginCapitalSign &&
+          if (table->header->beginCapitalSign &&
               (src + 1 < srcmax) && testCharacter(src[1], CTC_UpperCase)) {
-            if (!putSequence(table->beginCapitalSign)) break;
-          } else if (table->capitalSign) {
-            if (!putSequence(table->capitalSign)) break;
+            if (!putSequence(table->header->beginCapitalSign)) break;
+          } else if (table->header->capitalSign) {
+            if (!putSequence(table->header->capitalSign)) break;
           }
         }
       } else if (testCharacter(*src, CTC_LowerCase)) {
-        if (table->endCapitalSign && (src - 2 >= srcmin) &&
+        if (table->header->endCapitalSign && (src - 2 >= srcmin) &&
             testCharacter(src[-1], CTC_UpperCase) && testCharacter(src[-2], CTC_UpperCase)) {
-          if (!putSequence(table->endCapitalSign)) break;
+          if (!putSequence(table->header->endCapitalSign)) break;
         }
       }
 

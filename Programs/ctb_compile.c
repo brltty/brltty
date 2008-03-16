@@ -906,8 +906,8 @@ processFile (const char *fileName) {
   return ok;
 }				/*compilation completed */
 
-void *
-compileContractionTable (const char *fileName) { /*compile source table into a table in memory */
+ContractionTable *
+compileContractionTable (const char *fileName) {
   int ok = 0;
   ContractionTableOffset headerOffset;
   errorCount = 0;
@@ -942,28 +942,34 @@ compileContractionTable (const char *fileName) { /*compile source table into a t
     }
   }
 
-  if (!ok) {
-    if (characterTable) {
-      free(characterTable);
-      characterTable = NULL;
-    }
+  if (characterTable) free(characterTable);
 
-    if (tableHeader) {
-      free(tableHeader);
-      tableHeader = NULL;
+  if (errorCount) {
+    LogPrint(LOG_WARNING, "%d %s in contraction table '%s'.",
+             errorCount, ((errorCount == 1)? "error": "errors"), fileName);
+  }
+
+  if (ok) {
+    ContractionTable *table;
+
+    if ((table = malloc(sizeof(*table)))) {
+      table->header = tableHeader;
+      table->characters = NULL;
+      table->charactersSize = 0;
+      table->characterCount = 0;
+      return table;
     }
   }
 
-  if (errorCount)
-    LogPrint(LOG_WARNING, "%d %s in contraction table '%s'.",
-             errorCount, ((errorCount == 1)? "error": "errors"), fileName);
-  return tableHeader;
+  if (tableHeader) free(tableHeader);
+  return NULL;
 }
 
 int
-destroyContractionTable (void *contractionTable) {
-  ContractionTableHeader *table = (ContractionTableHeader *) contractionTable;
-  free(table);
+destroyContractionTable (ContractionTable *contractionTable) {
+  if (contractionTable->characters) free(contractionTable->characters);
+  if (contractionTable->header) free(contractionTable->header);
+  free(contractionTable);
   return 1;
 }
 

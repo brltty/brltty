@@ -75,8 +75,6 @@ TranslationTable attributesTable = {
   #include "attrib.auto.h"
 };
 
-void *contractionTable = NULL;
-
 int
 haveBrailleDriver (const char *code) {
   return haveDriver(code, BRAILLE_DRIVER_CODES, driverTable);

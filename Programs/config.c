@@ -133,6 +133,7 @@ static char *opt_attributesTable;
 #ifdef ENABLE_CONTRACTED_BRAILLE
 static char *opt_contractionsDirectory;
 static char *opt_contractionTable;
+ContractionTable *contractionTable = NULL;
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
 #ifdef ENABLE_API
@@ -537,7 +538,7 @@ exitContractionTable (void) {
 
 static int
 loadContractionTable (const char *file) {
-  void *table = NULL;
+  ContractionTable *table = NULL;
   if (*file) {
     char *path = makePath(opt_contractionsDirectory, file);
     LogPrint(LOG_DEBUG, "compiling contraction table: %s", file);
