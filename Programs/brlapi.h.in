@@ -420,8 +420,8 @@ int BRLAPI_STDCALL brlapi__setFocus(brlapi_handle_t *handle, int tty);
 /** \defgroup brlapi_write Writing on the braille display
  * \brief Write text to the braille display
  *
- * Once brlapi_enterTtyMode() was called, the application can call brlapi_writeText()
- * to write things on the braille display.
+ * After brlapi_enterTtyMode() has been called, the application can
+ * call one of these functions to write things on the braille display.
  *
  * \note Be sure to call brlapi_enterTtyMode() \e before calling brlapi_write(), or
  * else you'll get an error. This is particularly not always trivial when
