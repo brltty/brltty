@@ -187,8 +187,8 @@ typedef struct Connection {
   BrailleWindow brailleWindow;
   BrlBufState brlbufstate;
   pthread_mutex_t brlMutex;
-  KeyrangeList *unmaskedKeys;
-  pthread_mutex_t maskMutex;
+  KeyrangeList *acceptedKeys;
+  pthread_mutex_t acceptedKeysMutex;
   time_t upTime;
   Packet packet;
 } Connection;
@@ -230,7 +230,7 @@ static pthread_mutex_t rawMutex;
 static Connection *rawConnection = NULL;
 static Connection *suspendConnection = NULL;
 
-/* mutex lock order is connectionsMutex first, then rawMutex, then (maskMutex
+/* mutex lock order is connectionsMutex first, then rawMutex, then (acceptedKeysMutex
  * or brlMutex) then driverMutex */
 
 static Tty notty;
@@ -303,7 +303,7 @@ static unsigned char cursorShape;
 /****************************************************************************/
 
 extern void processParameters(char ***values, const char *const *names, const char *description, char *optionParameters, char *configuredParameters, const char *environmentVariable);
-static int initializeUnmaskedKeys(Connection *c);
+static int initializeAcceptedKeys(Connection *c);
 
 /****************************************************************************/
 /** DRIVER CAPABILITIES                                                    **/
@@ -605,9 +605,9 @@ static Connection *createConnection(FileDescriptor fd, time_t currentTime)
   pthread_mutexattr_init(&mattr);
   pthread_mutexattr_settype(&mattr, PTHREAD_MUTEX_RECURSIVE);
   pthread_mutex_init(&c->brlMutex,&mattr);
-  pthread_mutex_init(&c->maskMutex,&mattr);
+  pthread_mutex_init(&c->acceptedKeysMutex,&mattr);
   c->how = 0;
-  c->unmaskedKeys = NULL;
+  c->acceptedKeys = NULL;
   c->upTime = currentTime;
   c->brailleWindow.text = NULL;
   c->brailleWindow.andAttr = NULL;
@@ -630,9 +630,9 @@ static void freeConnection(Connection *c)
 {
   if (c->fd>=0) closeFileDescriptor(c->fd);
   pthread_mutex_destroy(&c->brlMutex);
-  pthread_mutex_destroy(&c->maskMutex);
+  pthread_mutex_destroy(&c->acceptedKeysMutex);
   freeBrailleWindow(&c->brailleWindow);
-  freeKeyrangeList(&c->unmaskedKeys);
+  freeKeyrangeList(&c->acceptedKeys);
   free(c);
 }
 
@@ -782,10 +782,10 @@ static int handleEnterTtyMode(Connection *c, brlapi_packetType_t type, brlapi_pa
     how = BRL_KEYCODES;
   }
   freeBrailleWindow(&c->brailleWindow); /* In case of multiple enterTtyMode requests */
-  if ((initializeUnmaskedKeys(c)==-1) || (allocBrailleWindow(&c->brailleWindow)==-1)) {
+  if ((initializeAcceptedKeys(c)==-1) || (allocBrailleWindow(&c->brailleWindow)==-1)) {
     LogPrint(LOG_WARNING,"Failed to allocate some ressources");
-    freeKeyrangeList(&c->unmaskedKeys);
-    WERR(c->fd,BRLAPI_ERROR_NOMEM, "no memory for unmasked keys");
+    freeKeyrangeList(&c->acceptedKeys);
+    WERR(c->fd,BRLAPI_ERROR_NOMEM, "no memory for accepted keys");
     return 0;
   }
   pthread_mutex_lock(&connectionsMutex);
@@ -883,7 +883,7 @@ static void doLeaveTty(Connection *c)
   __removeConnection(c);
   __addConnection(c,notty.connections);
   pthread_mutex_unlock(&connectionsMutex);
-  freeKeyrangeList(&c->unmaskedKeys);
+  freeKeyrangeList(&c->acceptedKeys);
   freeBrailleWindow(&c->brailleWindow);
 }
 
@@ -907,20 +907,20 @@ static int handleKeyRanges(Connection *c, brlapi_packetType_t type, brlapi_packe
   CHECKERR(!c->raw,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed in raw mode");
   CHECKERR(c->tty,BRLAPI_ERROR_ILLEGAL_INSTRUCTION,"not allowed out of tty mode");
   CHECKERR(!(size%2*sizeof(brlapi_keyCode_t)),BRLAPI_ERROR_INVALID_PACKET,"wrong packet size");
-  pthread_mutex_lock(&c->maskMutex);
+  pthread_mutex_lock(&c->acceptedKeysMutex);
   for (i=0; i<size/(2*sizeof(brlapi_keyCode_t)); i++) {
     x = ((brlapi_keyCode_t)ntohl(ints[i][0]) << 32) | ntohl(ints[i][1]);
     y = ((brlapi_keyCode_t)ntohl(ints[i][2]) << 32) | ntohl(ints[i][3]);
     LogPrint(LOG_DEBUG,"range: [%016"BRLAPI_PRIxKEYCODE"..%016"BRLAPI_PRIxKEYCODE"]",x,y);
-    if (type==BRLAPI_PACKET_IGNOREKEYRANGES) res = removeKeyrange(x,y,&c->unmaskedKeys);
-    else res = addKeyrange(x,y,&c->unmaskedKeys);
+    if (type==BRLAPI_PACKET_IGNOREKEYRANGES) res = removeKeyrange(x,y,&c->acceptedKeys);
+    else res = addKeyrange(x,y,&c->acceptedKeys);
     if (res==-1) {
       /* XXX: humf, in the middle of keycode updates :( */
       WERR(c->fd,BRLAPI_ERROR_NOMEM,"no memory for key range");
       break;
     }
   }
-  pthread_mutex_unlock(&c->maskMutex);
+  pthread_mutex_unlock(&c->acceptedKeysMutex);
   if (!res) writeAck(c->fd);
   return 0;
 }
@@ -2156,25 +2156,25 @@ static void *server(void *arg)
 /** MISCELLANEOUS FUNCTIONS                                                **/
 /****************************************************************************/
 
-/* Function : initializeUnmaskedKeys */
+/* Function : initializeAcceptedKeys */
 /* Specify which keys should be passed to the client by default, as soon */
 /* as it controls the tty */
 /* If client asked for commands, one lets it process routing cursor */
 /* and screen-related commands */
 /* If the client is interested in braille codes, one passes it nothing */
 /* to let the user read the screen in case theree is an error */
-static int initializeUnmaskedKeys(Connection *c)
+static int initializeAcceptedKeys(Connection *c)
 {
   if (c==NULL) return 0;
   if (c->how==BRL_KEYCODES) return 0;
-  if (addKeyrange(0,BRLAPI_KEY_MAX,&c->unmaskedKeys)==-1) return -1;
-  if (removeKeyrange(BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_NOOP,BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_NOOP|BRLAPI_KEY_FLAGS_MASK,&c->unmaskedKeys)==-1) return -1;
-  if (removeKeyrange(BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_SWITCHVT_PREV,BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_SWITCHVT_NEXT|BRLAPI_KEY_FLAGS_MASK,&c->unmaskedKeys)==-1) return -1;
-  if (removeKeyrange(BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_RESTARTBRL,BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_RESTARTSPEECH|BRLAPI_KEY_FLAGS_MASK,&c->unmaskedKeys)==-1) return -1;
-  if (removeKeyrange(BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_SWITCHVT,BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_SWITCHVT|BRLAPI_KEY_CMD_ARG_MASK|BRLAPI_KEY_FLAGS_MASK,&c->unmaskedKeys)==-1) return -1;
-  if (removeKeyrange(BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_PASSXT,BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_PASSXT|BRLAPI_KEY_CMD_ARG_MASK|BRLAPI_KEY_FLAGS_MASK,&c->unmaskedKeys)==-1) return -1;
-  if (removeKeyrange(BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_PASSAT,BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_PASSAT|BRLAPI_KEY_CMD_ARG_MASK|BRLAPI_KEY_FLAGS_MASK,&c->unmaskedKeys)==-1) return -1;
-  if (removeKeyrange(BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_PASSPS2,BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_PASSPS2|BRLAPI_KEY_CMD_ARG_MASK|BRLAPI_KEY_FLAGS_MASK,&c->unmaskedKeys)==-1) return -1;
+  if (addKeyrange(0,BRLAPI_KEY_MAX,&c->acceptedKeys)==-1) return -1;
+  if (removeKeyrange(BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_NOOP,BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_NOOP|BRLAPI_KEY_FLAGS_MASK,&c->acceptedKeys)==-1) return -1;
+  if (removeKeyrange(BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_SWITCHVT_PREV,BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_SWITCHVT_NEXT|BRLAPI_KEY_FLAGS_MASK,&c->acceptedKeys)==-1) return -1;
+  if (removeKeyrange(BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_RESTARTBRL,BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_RESTARTSPEECH|BRLAPI_KEY_FLAGS_MASK,&c->acceptedKeys)==-1) return -1;
+  if (removeKeyrange(BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_SWITCHVT,BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_SWITCHVT|BRLAPI_KEY_CMD_ARG_MASK|BRLAPI_KEY_FLAGS_MASK,&c->acceptedKeys)==-1) return -1;
+  if (removeKeyrange(BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_PASSXT,BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_PASSXT|BRLAPI_KEY_CMD_ARG_MASK|BRLAPI_KEY_FLAGS_MASK,&c->acceptedKeys)==-1) return -1;
+  if (removeKeyrange(BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_PASSAT,BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_PASSAT|BRLAPI_KEY_CMD_ARG_MASK|BRLAPI_KEY_FLAGS_MASK,&c->acceptedKeys)==-1) return -1;
+  if (removeKeyrange(BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_PASSPS2,BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_PASSPS2|BRLAPI_KEY_CMD_ARG_MASK|BRLAPI_KEY_FLAGS_MASK,&c->acceptedKeys)==-1) return -1;
   return 0;
 }
 
@@ -2251,9 +2251,9 @@ static Connection *whoGetsKey(Tty *tty, brlapi_keyCode_t code, unsigned int how)
   Tty *t;
   int passKey;
   for (c=tty->connections->next; c!=tty->connections; c = c->next) {
-    pthread_mutex_lock(&c->maskMutex);
-    passKey = (c->how==how) && (inKeyrangeList(c->unmaskedKeys,code) != NULL);
-    pthread_mutex_unlock(&c->maskMutex);
+    pthread_mutex_lock(&c->acceptedKeysMutex);
+    passKey = (c->how==how) && (inKeyrangeList(c->acceptedKeys,code) != NULL);
+    pthread_mutex_unlock(&c->acceptedKeysMutex);
     if (passKey) goto found;
   }
   c = NULL;
@@ -2375,7 +2375,7 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
   clientCode = keycode;
   if (trueBraille->readKey && keycode != EOF && (c = whoGetsKey(&ttys,clientCode,BRL_KEYCODES))) {
     /* somebody gets the raw code */
-    LogPrint(LOG_DEBUG,"Transmitting unmasked key %lu",(unsigned long)keycode);
+    LogPrint(LOG_DEBUG,"Transmitting accepted key %lu",(unsigned long)keycode);
     writeKey(c->fd,clientCode);
     command = EOF;
   } else {
@@ -2390,7 +2390,7 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
       clientCode = cmdBrlttyToBrlapi(command);
       /* nobody needs the raw code */
       if ((c = whoGetsKey(&ttys,clientCode,BRL_COMMANDS))) {
-        LogPrint(LOG_DEBUG,"Transmitting unmasked command %lx as client code %016"BRLAPI_PRIxKEYCODE,(unsigned long)command, clientCode);
+        LogPrint(LOG_DEBUG,"Transmitting accepted command %lx as client code %016"BRLAPI_PRIxKEYCODE,(unsigned long)command, clientCode);
 	writeKey(c->fd,clientCode);
         command = EOF;
       }
