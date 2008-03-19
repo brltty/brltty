@@ -45,10 +45,10 @@ typedef struct {
   int (*isSpeaking) (SpeechSynthesizer *spk);
 
   /* These require SPK_HAVE_RATE. */
-  void (*rate) (SpeechSynthesizer *spk, float setting);
+  void (*rate) (SpeechSynthesizer *spk, unsigned char setting);
 
   /* These require SPK_HAVE_VOLUME. */
-  void (*volume) (SpeechSynthesizer *spk, float setting);
+  void (*volume) (SpeechSynthesizer *spk, unsigned char setting);
 } SpeechDriver;
 
 extern void initializeSpeechSynthesizer (SpeechSynthesizer *spk);
@@ -64,13 +64,17 @@ extern const SpeechDriver noSpeech;
 extern void sayCharacters (SpeechSynthesizer *spk, const char *characters, size_t count, int mute);
 extern void sayString (SpeechSynthesizer *spk, const char *string, int mute);
 
-extern void setSpeechRate (SpeechSynthesizer *spk, int setting, int say);
 #define SPK_DEFAULT_RATE 10
 #define SPK_MAXIMUM_RATE (SPK_DEFAULT_RATE * 2)
+extern void setSpeechRate (SpeechSynthesizer *spk, int setting, int say);
+extern unsigned int getIntegerSpeechRate (unsigned char setting, unsigned int normal);
+extern float getFloatSpeechRate (unsigned char setting);
 
-extern void setSpeechVolume (SpeechSynthesizer *spk, int setting, int say);
 #define SPK_DEFAULT_VOLUME 10
 #define SPK_MAXIMUM_VOLUME (SPK_DEFAULT_VOLUME * 2)
+extern void setSpeechVolume (SpeechSynthesizer *spk, int setting, int say);
+extern unsigned int getIntegerSpeechVolume (unsigned char setting, unsigned int normal);
+extern float getFloatSpeechVolume (unsigned char setting);
 
 extern int openSpeechFifo (const char *directory, const char *path);
 extern void processSpeechFifo (SpeechSynthesizer *spk);

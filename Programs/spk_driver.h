@@ -45,11 +45,11 @@ static void spk_mute (SpeechSynthesizer *spk);
 #endif /* SPK_HAVE_TRACK */
 
 #ifdef SPK_HAVE_RATE
-  static void spk_rate (SpeechSynthesizer *spk, float setting);		/* mute speech */
+  static void spk_rate (SpeechSynthesizer *spk, unsigned char setting);		/* mute speech */
 #endif /* SPK_HAVE_RATE */
 
 #ifdef SPK_HAVE_VOLUME
-  static void spk_volume (SpeechSynthesizer *spk, float setting);		/* mute speech */
+  static void spk_volume (SpeechSynthesizer *spk, unsigned char setting);		/* mute speech */
 #endif /* SPK_HAVE_VOLUME */
 
 #ifdef SPKPARMS

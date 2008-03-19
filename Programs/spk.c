@@ -56,30 +56,6 @@ spk_mute (SpeechSynthesizer *spk) {
 
 const SpeechDriver *speech = &noSpeech;
 
-static const float spkRateTable[] = {
-  0.3333,
-  0.3720,
-  0.4152,
-  0.4635,
-  0.5173,
-  0.5774,
-  0.6444,
-  0.7192,
-  0.8027,
-  0.8960,
-  1.0000,
-  1.1161,
-  1.2457,
-  1.3904,
-  1.5518,
-  1.7320,
-  1.9332,
-  2.1577,
-  2.4082,
-  2.6879,
-  3.0000
-};
-
 int
 haveSpeechDriver (const char *code) {
   return haveDriver(code, SPEECH_DRIVER_CODES, driverTable);
@@ -155,18 +131,67 @@ saySpeechSetting (SpeechSynthesizer *spk, int setting, const char *name) {
   sayString(spk, phrase, 1);
 }
 
+static unsigned int
+getIntegerSetting (unsigned char setting, unsigned char internal, unsigned int external) {
+  return rescaleInteger(setting, internal, external);
+}
+
 void
 setSpeechRate (SpeechSynthesizer *spk, int setting, int say) {
   LogPrint(LOG_DEBUG, "setting speech rate: %d", setting);
-  speech->rate(spk, spkRateTable[setting]);
+  speech->rate(spk, setting);
   if (say) saySpeechSetting(spk, setting, "rate");
+}
+
+unsigned int
+getIntegerSpeechRate (unsigned char setting, unsigned int normal) {
+  return getIntegerSetting(setting, SPK_DEFAULT_RATE, normal);
+}
+
+float
+getFloatSpeechRate (unsigned char setting) {
+  static const float spkRateTable[] = {
+    0.3333,
+    0.3720,
+    0.4152,
+    0.4635,
+    0.5173,
+    0.5774,
+    0.6444,
+    0.7192,
+    0.8027,
+    0.8960,
+    1.0000,
+    1.1161,
+    1.2457,
+    1.3904,
+    1.5518,
+    1.7320,
+    1.9332,
+    2.1577,
+    2.4082,
+    2.6879,
+    3.0000
+  };
+
+  return spkRateTable[setting];
 }
 
 void
 setSpeechVolume (SpeechSynthesizer *spk, int setting, int say) {
   LogPrint(LOG_DEBUG, "setting speech volume: %d", setting);
-  speech->volume(spk, (float)setting / (float)SPK_DEFAULT_VOLUME);
+  speech->volume(spk, setting);
   if (say) saySpeechSetting(spk, setting, "volume");
+}
+
+unsigned int
+getIntegerSpeechVolume (unsigned char setting, unsigned int normal) {
+  return getIntegerSetting(setting, SPK_DEFAULT_VOLUME, normal);
+}
+
+float
+getFloatSpeechVolume (unsigned char setting) {
+  return (float)setting / (float)SPK_DEFAULT_VOLUME;
 }
 
 static char *speechFifoPath = NULL;

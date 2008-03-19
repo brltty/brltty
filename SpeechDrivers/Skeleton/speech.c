@@ -61,12 +61,12 @@ spk_isSpeaking (SpeechSynthesizer *spk) {
 
 #ifdef SPK_HAVE_RATE
 static void
-spk_rate (SpeechSynthesizer *spk, float setting) {
+spk_rate (SpeechSynthesizer *spk, unsigned char setting) {
 }
 #endif /* SPK_HAVE_RATE */
 
 #ifdef SPK_HAVE_VOLUME
 static void
-spk_volume (SpeechSynthesizer *spk, float setting) {
+spk_volume (SpeechSynthesizer *spk, unsigned char setting) {
 }
 #endif /* SPK_HAVE_VOLUME */

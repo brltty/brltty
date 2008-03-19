@@ -133,7 +133,7 @@ spk_mute (SpeechSynthesizer *spk)
 }
 
 static void
-spk_rate (SpeechSynthesizer *spk, float setting)
+spk_rate (SpeechSynthesizer *spk, unsigned char setting)
 {
-  feat_set_float(voice->features, "duration_stretch", 1.0/setting);
+  feat_set_float(voice->features, "duration_stretch", 1.0/getFloatSpeechRate(setting));
 }

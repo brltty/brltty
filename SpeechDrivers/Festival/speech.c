@@ -410,6 +410,6 @@ spk_mute (SpeechSynthesizer *spk) {
 }
 
 static void
-spk_rate (SpeechSynthesizer *spk, float setting) {
-  setRate(festivalRate=setting, 1);
+spk_rate (SpeechSynthesizer *spk, unsigned char setting) {
+  setRate(festivalRate=getFloatSpeechRate(setting), 1);
 }

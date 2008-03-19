@@ -337,13 +337,13 @@ static void spk_mute (SpeechSynthesizer *spk)
   mywrite(spk, helper_fd_out, &c,1);
 }
 
-static void spk_rate (SpeechSynthesizer *spk, float setting)
+static void spk_rate (SpeechSynthesizer *spk, unsigned char setting)
 {
-  float expand = 1.0 / setting; 
+  float expand = 1.0 / getFloatSpeechRate(setting); 
   unsigned char *p = (unsigned char *)&expand;
   unsigned char l[5];
   if(helper_fd_out < 0) return;
-  LogPrint(LOG_DEBUG,"set rate to %f (time scale %f)", setting, expand);
+  LogPrint(LOG_DEBUG,"set rate to %u (time scale %f)", setting, expand);
   l[0] = 3; /* time scale code */
 #ifdef WORDS_BIGENDIAN
   l[1] = p[0]; l[2] = p[1]; l[3] = p[2]; l[4] = p[3];

@@ -1362,7 +1362,7 @@ BRLTTY_ARG_DISABLE(
    ])
    BRLTTY_SPEECH_DRIVER([fv], [Festival])
    BRLTTY_SPEECH_DRIVER([gs], [GenericSay])
-   BRLTTY_IF_PACKAGE([Mikropuhe], [mikropuhe], [mpwrfile.h], [BRLTTY_IF_PTHREADS([BRLTTY_SPEECH_DRIVER([mp], [Mikropuhe], [-L$(MPLINUX_ROOT) -lmplinux -lm])])])
+   BRLTTY_IF_PACKAGE([Mikropuhe], [mikropuhe], [mpwrfile.h], [BRLTTY_IF_PTHREADS([BRLTTY_SPEECH_DRIVER([mp], [Mikropuhe], [-L$(MPLINUX_ROOT) -lmplinux])])])
    BRLTTY_IF_PACKAGE([speech-dispatcher], [speechd], [include/libspeechd.h], [BRLTTY_SPEECH_DRIVER([sd], [SpeechDispatcher], [-L$(SPEECHD_ROOT)/lib -lspeechd])])
    BRLTTY_IF_PACKAGE([Swift], [swift], [include/swift.h], [BRLTTY_SPEECH_DRIVER([sw], [Swift], [-L$(SWIFT_ROOT)/lib -lswift -lm])])
    BRLTTY_IF_PACKAGE([Theta], [theta], [include/theta.h], [BRLTTY_SPEECH_DRIVER([th], [Theta], [-L$(THETA_ROOT)/lib -ltheta])])

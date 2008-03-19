@@ -25,7 +25,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
-#include <math.h>
 
 #ifdef __MINGW32__
 #include "win_pthread.h"
@@ -483,17 +482,18 @@ spk_mute (SpeechSynthesizer *spk) {
 }
 
 static void
-spk_rate (SpeechSynthesizer *spk, float setting) {
+spk_rate (SpeechSynthesizer *spk, unsigned char setting) {
   char tag[0X40];
   snprintf(tag, sizeof(tag), "<rate absspeed=\"%d\"/>",
-           (int)(log10(setting) * 10.0 / log10(3.0)));
+           getIntegerSpeechRate(setting, 10)-10);
   enqueueTag(tag);
 }
 
 static void
-spk_volume (SpeechSynthesizer *spk, float setting) {
+spk_volume (SpeechSynthesizer *spk, unsigned char setting) {
   char tag[0X40];
+  unsigned int percentage = getIntegerSpeechVolume(setting, 100);
   snprintf(tag, sizeof(tag), "<volume level=\"%d\"/>",
-           (int)(setting * 100.0));
+           MAX(percentage, 1));
   enqueueTag(tag);
 }

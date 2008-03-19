@@ -18,7 +18,6 @@
 #include "prologue.h"
 
 #include <stdio.h>
-#include <math.h>
 
 #include "misc.h"
 
@@ -112,37 +111,16 @@ spk_mute (SpeechSynthesizer *spk) {
   spd_cancel(connection);
 }
 
-static signed int
-scaleSetting (float setting, float minimum, float maximum) {
-  if (setting < minimum) {
-    setting = minimum;
-  } else if (setting > maximum) {
-    setting = maximum;
-  }
-  return (signed int)((setting - minimum) * 200.0 / (maximum - minimum)) - 100;
-}
-
 static void
-spk_rate (SpeechSynthesizer *spk, float setting) {
-  signed int value;
-  static float minimum;
-  static float maximum;
-  static char initialized = 0;
-
-  if (!initialized) {
-    maximum = logf(3.0);
-    minimum = -maximum;
-    initialized = 1;
-  }
-
-  value = scaleSetting(logf(setting), minimum, maximum);
+spk_rate (SpeechSynthesizer *spk, unsigned char setting) {
+  int value = getIntegerSpeechRate(setting, 100) - 100;
   spd_set_voice_rate(connection, value);
-  LogPrint(LOG_DEBUG, "set rate: %g -> %d", setting, value);
+  LogPrint(LOG_DEBUG, "set rate: %u -> %d", setting, value);
 }
 
 static void
-spk_volume (SpeechSynthesizer *spk, float setting) {
-  signed int value = scaleSetting(setting, 0.0, 2.0);
+spk_volume (SpeechSynthesizer *spk, unsigned char setting) {
+  int value = getIntegerSpeechVolume(setting, 100) - 100;
   spd_set_volume(connection, value);
-  LogPrint(LOG_DEBUG, "set volume: %g -> %d", setting, value);
+  LogPrint(LOG_DEBUG, "set volume: %u -> %d", setting, value);
 }
