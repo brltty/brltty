@@ -42,6 +42,10 @@ typedef enum {
 #define SPK_HAVE_RATE
 #define SPK_HAVE_VOLUME
 #include "spk_driver.h"
+
+struct theta_sfx_block_ops { /* used but not defined in header */
+  char dummy;
+};
 #include <theta.h>
 
 static cst_voice *voice = NULL;
