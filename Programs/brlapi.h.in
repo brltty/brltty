@@ -432,6 +432,16 @@ int BRLAPI_STDCALL brlapi__setFocus(brlapi_handle_t *handle, int tty);
  * up, ... bit 7 is set iff dot 8 is up. This also corresponds to the low-order
  * byte of the coding of unicode's braille row U+2800.
  *
+ * \note Text is translated by the server one to one, by just using a simple
+ * wchar_t to pattern table, i.e. no contraction/expansion is performed, because
+ * the client would then have no way to know how wide the output would be and
+ * thus the quantity of text to feed.  If contraction/expansion is desired, the
+ * client should perform it itself (e.g. thanks to liblouis or gnome-braille)
+ * and send the resulting dot patterns.  This is actually exactly the same
+ * problem as font rendering on a graphical display: for better control,
+ * nowadays all font rasterization is performed on the client side, and mere
+ * pixmaps are sent to the X server.
+ *
  * @{ */
 
 /* brlapi_writeText */
