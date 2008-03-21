@@ -836,19 +836,41 @@ contractText (
           literal = NULL;
 
     if ((!literal && selectRule(srcmax-src)) || selectRule(1)) {
-      if ((cursorOffset >= (src - srcmin)) &&
-          (cursorOffset < (src - srcmin + currentFindLength))) {
-        currentOpcode = CTO_Literal;
+      if (!literal &&
+          ((currentOpcode == CTO_Literal) ||
+           ((cursorOffset >= (src - srcmin)) &&
+            (cursorOffset < (src - srcmin + currentFindLength))))) {
+        const wchar_t *srcorig = src;
+
+        literal = src + currentFindLength;
+
+        if (!testCharacter(*src, CTC_Space)) {
+          if (destword) {
+            src = srcword;
+            dest = destword;
+          } else {
+            src = srcmin;
+            dest = destmin;
+          }
+
+          while (srcorig > src) offsets[--srcorig - srcmin] = -1;
+        }
+
+        continue;
       }
 
-      if (table->header->numberSign && previousOpcode != CTO_MidNum &&
-                 !testCharacter(before, CTC_Digit) && testCharacter(*src, CTC_Digit)) {
+      if (table->header->numberSign && (previousOpcode != CTO_MidNum) &&
+          !testCharacter(before, CTC_Digit) && testCharacter(*src, CTC_Digit)) {
         if (!putSequence(table->header->numberSign)) break;
       } else if (table->header->englishLetterSign && testCharacter(*src, CTC_Letter)) {
         if ((currentOpcode == CTO_Contraction) ||
-            (currentOpcode != CTO_EndNum && testCharacter(before, CTC_Digit)) ||
-            (currentOpcode == CTO_Always && currentFindLength == 1 && testCharacter(before, CTC_Space) &&
-             (src + 1 == srcmax || testCharacter(src[1], CTC_Space) ||
+            ((currentOpcode != CTO_EndNum) && testCharacter(before, CTC_Digit)) ||
+            (testCharacter(*src, CTC_Letter) &&
+             (currentOpcode == CTO_Always) &&
+             (currentFindLength == 1) &&
+             testCharacter(before, CTC_Space) &&
+             (((src + 1) == srcmax) ||
+              testCharacter(src[1], CTC_Space) ||
               (testCharacter(src[1], CTC_Punctuation) && (src[1] != '.') && (src[1] != '\''))))) {
           if (!putSequence(table->header->englishLetterSign)) break;
         }
@@ -906,24 +928,6 @@ contractText (
           break;
       }				/*end of action */
 
-      if (!literal && (currentOpcode == CTO_Literal)) {
-        const wchar_t *srcorig = src;
-
-        literal = src + currentFindLength;
-        if (testCharacter(*src, CTC_Space)) continue;
-
-        if (destword) {
-          src = srcword;
-          dest = destword;
-        } else {
-          src = srcmin;
-          dest = destmin;
-        }
-
-        while (srcorig > src) offsets[--srcorig - srcmin] = -1;
-        continue;
-      }
-
       if (currentRule->replen &&
           !((currentOpcode == CTO_Always) && (currentFindLength == 1))) {
         if (!putReplace(currentRule)) goto done;
@@ -941,10 +945,13 @@ contractText (
       switch (currentOpcode) {
         case CTO_Repeated: {
           const wchar_t *srclim = srcmax - currentFindLength;
+
           setOffset();
+
           while ((src <= srclim) && checkCurrentRule(src)) {
             src += currentFindLength;
           }
+
           break;
         }
 
