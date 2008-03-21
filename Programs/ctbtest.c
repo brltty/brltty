@@ -111,7 +111,6 @@ contractLine (char *line, void *data) {
   int lineLength = strlen(line);
   wchar_t characters[lineLength];
   const wchar_t *inputBuffer = characters;
-  int offsets[lineLength];
 
   {
     int i;
@@ -137,7 +136,7 @@ contractLine (char *line, void *data) {
     if (!contractText(contractionTable,
                       inputBuffer, &inputCount,
                       outputBuffer, &outputCount,
-                      offsets, -1)) {
+                      NULL, -1)) {
       lpd->status = 11;
       return 0;
     }

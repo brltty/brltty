@@ -38,7 +38,7 @@ static ContractionTableOpcode currentOpcode;
 static ContractionTableOpcode previousOpcode;
 static const ContractionTableRule *currentRule;	/*pointer to current rule in table */
 
-#define setOffset() offsets[src - srcmin] = dest - destmin
+#define setOffset() if (offsets) offsets[src - srcmin] = dest - destmin
 
 static const ContractionTableCharacter *
 getContractionTableCharacter (wchar_t character) {
@@ -820,8 +820,12 @@ contractText (
   table = contractionTable;
   srcmax = (srcmin = src = inputBuffer) + *inputLength;
   destmax = (destmin = dest = outputBuffer) + *outputLength;
-  offsets = offsetsMap;
   previousOpcode = CTO_None;
+
+  if ((offsets = offsetsMap)) {
+    int i;
+    for (i=0; i<*inputLength; i+=1) offsets[i] = -1;
+  };
 
   findLineBreakOpportunities(lineBreakOpportunities, inputBuffer, *inputLength);
 
@@ -853,7 +857,9 @@ contractText (
             dest = destmin;
           }
 
-          while (srcorig > src) offsets[--srcorig - srcmin] = -1;
+          if (offsets)
+            while (srcorig > src)
+              offsets[--srcorig - srcmin] = -1;
         }
 
         continue;
@@ -897,11 +903,7 @@ contractText (
         case CTO_LargeSign:
         case CTO_LastLargeSign:
           if (previousOpcode == CTO_LargeSign) {
-            int srcoff = src - srcmin;
-            int destlen;
-
             while ((dest > destmin) && !dest[-1]) dest -= 1;
-            destlen = dest - destmin;
             setOffset();
 
             {
@@ -914,11 +916,16 @@ contractText (
               }
             }
 
-            while (srcoff > 0) {
-              int destoff = offsets[--srcoff];
-              if (destoff != -1) {
-                if (destoff < destlen) break;
-                offsets[srcoff] = -1;
+            if (offsets) {
+              int destlen = dest - destmin;
+              int srcoff = src - srcmin;
+
+              while (srcoff > 0) {
+                int destoff = offsets[--srcoff];
+                if (destoff != -1) {
+                  if (destoff < destlen) break;
+                  offsets[srcoff] = -1;
+                }
               }
             }
           }

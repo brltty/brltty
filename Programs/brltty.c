@@ -850,12 +850,11 @@ getContractedLength (int x, int y) {
   int outputLength = brl.x * brl.y;
   wchar_t inputBuffer[inputLength];
   unsigned char outputBuffer[outputLength];
-  int outputOffsets[inputLength];
   readScreenText(x, y, inputLength, 1, inputBuffer);
   if (!contractText(contractionTable,
                     inputBuffer, &inputLength,
                     outputBuffer, &outputLength,
-                    outputOffsets, getCursorOffset(x, y))) return 0;
+                    NULL, getCursorOffset(x, y))) return 0;
   return inputLength;
 }
 #endif /* ENABLE_CONTRACTED_BRAILLE */
@@ -2417,7 +2416,6 @@ runProgram (void) {
               int i;
               for (i=0; i<inputLength; ++i) {
                 inputText[i] = inputCharacters[i].text;
-                contractedOffsets[i] = -1;
               }
             }
 
