@@ -824,7 +824,7 @@ contractText (
 
   if ((offsets = offsetsMap)) {
     int i;
-    for (i=0; i<*inputLength; i+=1) offsets[i] = -1;
+    for (i=0; i<*inputLength; i+=1) offsets[i] = CTB_NO_OFFSET;
   };
 
   findLineBreakOpportunities(lineBreakOpportunities, inputBuffer, *inputLength);
@@ -859,7 +859,7 @@ contractText (
 
           if (offsets)
             while (srcorig > src)
-              offsets[--srcorig - srcmin] = -1;
+              offsets[--srcorig - srcmin] = CTB_NO_OFFSET;
         }
 
         continue;
@@ -898,7 +898,6 @@ contractText (
         }
       }
 
-      /* preprocessing */
       switch (currentOpcode) {
         case CTO_LargeSign:
         case CTO_LastLargeSign:
@@ -922,9 +921,9 @@ contractText (
 
               while (srcoff > 0) {
                 int destoff = offsets[--srcoff];
-                if (destoff != -1) {
+                if (destoff != CTB_NO_OFFSET) {
                   if (destoff < destlen) break;
-                  offsets[srcoff] = -1;
+                  offsets[srcoff] = CTB_NO_OFFSET;
                 }
               }
             }
@@ -933,7 +932,7 @@ contractText (
 
         default:
           break;
-      }				/*end of action */
+      }
 
       if (currentRule->replen &&
           !((currentOpcode == CTO_Always) && (currentFindLength == 1))) {
@@ -948,26 +947,42 @@ contractText (
         }
       }
 
-      /* postprocessing */
-      switch (currentOpcode) {
-        case CTO_Repeated: {
-          const wchar_t *srclim = srcmax - currentFindLength;
+      if (!literal) {
+        const wchar_t *srcorig = src;
 
-          setOffset();
+        switch (currentOpcode) {
+          case CTO_Repeated: {
+            const wchar_t *srclim = srcmax - currentFindLength;
 
-          while ((src <= srclim) && checkCurrentRule(src)) {
-            src += currentFindLength;
+            setOffset();
+
+            while ((src <= srclim) && checkCurrentRule(src)) {
+              src += currentFindLength;
+            }
+
+            break;
           }
 
-          break;
+          case CTO_JoinableWord:
+            while ((src < srcmax) && testCharacter(*src, CTC_Space)) src += 1;
+            break;
+
+          default:
+            break;
         }
 
-        case CTO_JoinableWord:
-          while ((src < srcmax) && testCharacter(*src, CTC_Space)) src += 1;
-          break;
+        if ((cursorOffset >= (srcorig - srcmin)) &&
+            (cursorOffset < (src - srcmin))) {
+          literal = src;
+          src = srcorig - currentFindLength;
+          dest = destlast;
 
-        default:
-          break;
+          if (offsets)
+            while (srcorig > src)
+              offsets[--srcorig - srcmin] = CTB_NO_OFFSET;
+
+          continue;
+        }
       }
     } else {
       if (!putComputerBraille(*src)) break;

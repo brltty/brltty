@@ -933,7 +933,7 @@ getOffset (int arg, int end) {
     int index;
     for (index=0; index<contractedLength; ++index) {
       int offset = contractedOffsets[index];
-      if (offset != -1) {
+      if (offset != CTB_NO_OFFSET) {
         if (offset > arg) {
           if (end) result = index - 1;
           break;
@@ -2433,7 +2433,7 @@ runProgram (void) {
                   int inputIndex = inputEnd;
                   while (inputIndex) {
                     int offset = contractedOffsets[--inputIndex];
-                    if (offset != -1) {
+                    if (offset != CTB_NO_OFFSET) {
                       if (offset != outputLength) break;
                       inputEnd = inputIndex;
                     }

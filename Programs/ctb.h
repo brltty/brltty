@@ -24,6 +24,8 @@ extern "C" {
 
 typedef struct ContractionTableStruct ContractionTable;
 
+#define CTB_NO_OFFSET -1
+
 extern ContractionTable *compileContractionTable (const char *fileName);
 extern int destroyContractionTable (ContractionTable *contractionTable);
 extern int contractText (
