@@ -40,7 +40,7 @@ static const ContractionTableRule *currentRule;	/*pointer to current rule in tab
 
 #define assignOffset(value) if (offsets) offsets[src - srcmin] = (value)
 #define setOffset() assignOffset(dest-destmin)
-#define unsetOffset() assignOffset(CTB_NO_OFFSET)
+#define clearOffset() assignOffset(CTB_NO_OFFSET)
 
 static const ContractionTableCharacter *
 getContractionTableCharacter (wchar_t character) {
@@ -923,9 +923,9 @@ contractText (
 
       if (currentRule->replen &&
           !((currentOpcode == CTO_Always) && (currentFindLength == 1))) {
-        const wchar_t *srclim = src + currentFindLength;
+        const wchar_t *srcnxt = src + currentFindLength;
         if (!putReplace(currentRule)) goto done;
-        while (++src != srclim) unsetOffset();
+        while (++src != srcnxt) clearOffset();
       } else {
         const wchar_t *srclim = src + currentFindLength;
         while (1) {
@@ -943,14 +943,21 @@ contractText (
             const wchar_t *srclim = srcmax - currentFindLength;
 
             while ((src <= srclim) && checkCurrentRule(src)) {
-              src += currentFindLength;
+              const wchar_t *srcnxt = src + currentFindLength;
+
+              do {
+                clearOffset();
+              } while (++src != srcnxt);
             }
 
             break;
           }
 
           case CTO_JoinedWord:
-            while ((src < srcmax) && testCharacter(*src, CTC_Space)) src += 1;
+            while ((src < srcmax) && testCharacter(*src, CTC_Space)) {
+              clearOffset();
+              src += 1;
+            }
             break;
 
           default:
@@ -1004,7 +1011,7 @@ done:
     while (1) {
       if (!testCharacter(*src, CTC_Space)) done = 0;
       if (++src == srcmax) break;
-      unsetOffset();
+      clearOffset();
     }
 
     if (!done) src = srcorig;
