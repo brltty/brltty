@@ -1024,7 +1024,11 @@ done:
 
     setOffset();
     while (1) {
-      if (!testCharacter(*src, CTC_Space)) done = 0;
+      if (done && !testCharacter(*src, CTC_Space)) {
+        done = 0;
+        if ((cursor < srcorig) || (cursor >= src)) srcorig = src;
+      }
+
       if (++src == srcmax) break;
       clearOffset();
     }
