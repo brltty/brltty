@@ -1026,7 +1026,11 @@ done:
     while (1) {
       if (done && !testCharacter(*src, CTC_Space)) {
         done = 0;
-        if ((cursor < srcorig) || (cursor >= src)) srcorig = src;
+
+        if ((cursor < srcorig) || (cursor >= src)) {
+          setOffset();
+          srcorig = src;
+        }
       }
 
       if (++src == srcmax) break;
