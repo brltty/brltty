@@ -29,7 +29,7 @@
 #include "brl.h"
 
 static ContractionTable *table;
-static const wchar_t *src, *srcmin, *srcmax;
+static const wchar_t *src, *srcmin, *srcmax, *cursor;
 static BYTE *dest, *destmin, *destmax;
 static int *offsets;
 static wchar_t before, after;	/*the characters before and after a string */
@@ -255,13 +255,15 @@ selectRule (int length) {
                 (before != '-') &&
                 testCharacter(after, CTC_Space) &&
                 (dest + currentRule->replen < destmax)) {
-              const wchar_t *ptr = src + currentFindLength + 1;
+              const wchar_t *ptr = src + currentFindLength;
+
               while (ptr < srcmax) {
+                if (ptr++ == cursor) break;
+
                 if (!testCharacter(*ptr, CTC_Space)) {
                   if (testCharacter(*ptr, CTC_Letter)) return 1;
                   break;
                 }
-                ptr++;
               }
             }
             break;
@@ -812,7 +814,11 @@ contractText (
   int *offsetsMap, const int cursorOffset
 ) {
   const wchar_t *srcword = NULL;
-  BYTE *destword = NULL; /* last word transla1ted */
+  BYTE *destword = NULL;
+
+  const wchar_t *srcjoin = NULL;
+  BYTE *destjoin = NULL;
+
   BYTE *destlast = NULL;
   const wchar_t *literal = NULL;
   unsigned char lineBreakOpportunities[*inputLength];
@@ -820,7 +826,7 @@ contractText (
   table = contractionTable;
   srcmax = (srcmin = src = inputBuffer) + *inputLength;
   destmax = (destmin = dest = outputBuffer) + *outputLength;
-  previousOpcode = CTO_None;
+  cursor = (cursorOffset < 0)? NULL: &src[cursorOffset];
 
   if ((offsets = offsetsMap)) {
     int i;
@@ -828,8 +834,11 @@ contractText (
   };
 
   findLineBreakOpportunities(lineBreakOpportunities, inputBuffer, *inputLength);
+  previousOpcode = CTO_None;
 
   while (src < srcmax) {
+    const wchar_t *oldLiteral = literal;
+
     destlast = dest;
     setOffset();
     setBefore();
@@ -842,16 +851,15 @@ contractText (
     if ((!literal && selectRule(srcmax-src)) || selectRule(1)) {
       if (!literal &&
           ((currentOpcode == CTO_Literal) ||
-           ((cursorOffset >= (src - srcmin)) &&
-            (cursorOffset < (src - srcmin + currentFindLength))))) {
+           ((cursor >= src) && (cursor < (src + currentFindLength))))) {
         const wchar_t *srcorig = src;
 
         literal = src + currentFindLength;
 
         if (!testCharacter(*src, CTC_Space)) {
-          if (destword) {
-            src = srcword;
-            dest = destword;
+          if (destjoin) {
+            src = srcjoin;
+            dest = destjoin;
           } else {
             src = srcmin;
             dest = destmin;
@@ -901,12 +909,12 @@ contractText (
       switch (currentOpcode) {
         case CTO_LargeSign:
         case CTO_LastLargeSign:
-          if (previousOpcode == CTO_LargeSign) {
+          if ((previousOpcode == CTO_LargeSign) && (src != oldLiteral)) {
             while ((dest > destmin) && !dest[-1]) dest -= 1;
             setOffset();
 
             {
-              BYTE **destptrs[] = {&destlast, &destword, NULL};
+              BYTE **destptrs[] = {&destword, &destjoin, &destlast, NULL};
               BYTE ***destptr = destptrs;
 
               while (*destptr) {
@@ -954,8 +962,6 @@ contractText (
           case CTO_Repeated: {
             const wchar_t *srclim = srcmax - currentFindLength;
 
-            setOffset();
-
             while ((src <= srclim) && checkCurrentRule(src)) {
               src += currentFindLength;
             }
@@ -971,16 +977,9 @@ contractText (
             break;
         }
 
-        if ((cursorOffset >= (srcorig - srcmin)) &&
-            (cursorOffset < (src - srcmin))) {
+        if ((cursor >= srcorig) && (cursor < src)) {
           literal = src;
-          src = srcorig - currentFindLength;
-          dest = destlast;
-
-          if (offsets)
-            while (srcorig > src)
-              offsets[--srcorig - srcmin] = CTB_NO_OFFSET;
-
+          src = srcorig;
           continue;
         }
       }
@@ -989,9 +988,14 @@ contractText (
       src++;
     }
 
-    if (lineBreakOpportunities[src-srcmin] && (currentOpcode != CTO_JoinableWord)) {
-      srcword = src;
-      destword = dest;
+    if (lineBreakOpportunities[src-srcmin]) {
+      srcjoin = src;
+      destjoin = dest;
+
+      if (currentOpcode != CTO_JoinableWord) {
+        srcword = src;
+        destword = dest;
+      }
     }
 
     if ((dest == destmin) || dest[-1]) {
