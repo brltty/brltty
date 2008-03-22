@@ -38,7 +38,9 @@ static ContractionTableOpcode currentOpcode;
 static ContractionTableOpcode previousOpcode;
 static const ContractionTableRule *currentRule;	/*pointer to current rule in table */
 
-#define setOffset() if (offsets) offsets[src - srcmin] = dest - destmin
+#define assignOffset(value) if (offsets) offsets[src - srcmin] = (value)
+#define setOffset() assignOffset(dest-destmin)
+#define unsetOffset() assignOffset(CTB_NO_OFFSET)
 
 static const ContractionTableCharacter *
 getContractionTableCharacter (wchar_t character) {
@@ -826,12 +828,8 @@ contractText (
   table = contractionTable;
   srcmax = (srcmin = src = inputBuffer) + *inputLength;
   destmax = (destmin = dest = outputBuffer) + *outputLength;
+  offsets = offsetsMap;
   cursor = (cursorOffset < 0)? NULL: &src[cursorOffset];
-
-  if ((offsets = offsetsMap)) {
-    int i;
-    for (i=0; i<*inputLength; i+=1) offsets[i] = CTB_NO_OFFSET;
-  };
 
   findLineBreakOpportunities(lineBreakOpportunities, inputBuffer, *inputLength);
   previousOpcode = CTO_None;
@@ -852,8 +850,6 @@ contractText (
       if (!literal &&
           ((currentOpcode == CTO_Literal) ||
            ((cursor >= src) && (cursor < (src + currentFindLength))))) {
-        const wchar_t *srcorig = src;
-
         literal = src + currentFindLength;
 
         if (!testCharacter(*src, CTC_Space)) {
@@ -864,10 +860,6 @@ contractText (
             src = srcmin;
             dest = destmin;
           }
-
-          if (offsets)
-            while (srcorig > src)
-              offsets[--srcorig - srcmin] = CTB_NO_OFFSET;
         }
 
         continue;
@@ -922,19 +914,6 @@ contractText (
                 destptr += 1;
               }
             }
-
-            if (offsets) {
-              int destlen = dest - destmin;
-              int srcoff = src - srcmin;
-
-              while (srcoff > 0) {
-                int destoff = offsets[--srcoff];
-                if (destoff != CTB_NO_OFFSET) {
-                  if (destoff < destlen) break;
-                  offsets[srcoff] = CTB_NO_OFFSET;
-                }
-              }
-            }
           }
           break;
 
@@ -944,8 +923,9 @@ contractText (
 
       if (currentRule->replen &&
           !((currentOpcode == CTO_Always) && (currentFindLength == 1))) {
+        const wchar_t *srclim = src + currentFindLength;
         if (!putReplace(currentRule)) goto done;
-        src += currentFindLength;
+        while (++src != srclim) unsetOffset();
       } else {
         const wchar_t *srclim = src + currentFindLength;
         while (1) {
@@ -985,7 +965,7 @@ contractText (
       }
     } else {
       if (!putComputerBraille(*src)) break;
-      src++;
+      src += 1;
     }
 
     if (lineBreakOpportunities[src-srcmin]) {
@@ -1018,13 +998,16 @@ done:
 
   if (src < srcmax) {
     const wchar_t *srcorig = src;
+    int done = 1;
+
     setOffset();
-    do {
-      if (!testCharacter(*src, CTC_Space)) {
-        src = srcorig;
-        break;
-      }
-    } while (++src < srcmax);
+    while (1) {
+      if (!testCharacter(*src, CTC_Space)) done = 0;
+      if (++src == srcmax) break;
+      unsetOffset();
+    }
+
+    if (!done) src = srcorig;
   }
 
   *inputLength = src - srcmin;
