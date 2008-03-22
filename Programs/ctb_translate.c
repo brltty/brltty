@@ -829,13 +829,13 @@ contractText (
   srcmax = (srcmin = src = inputBuffer) + *inputLength;
   destmax = (destmin = dest = outputBuffer) + *outputLength;
   offsets = offsetsMap;
-  cursor = (cursorOffset < 0)? NULL: &src[cursorOffset];
+  cursor = (cursorOffset == CTB_NO_CURSOR)? NULL: &src[cursorOffset];
 
   findLineBreakOpportunities(lineBreakOpportunities, inputBuffer, *inputLength);
   previousOpcode = CTO_None;
 
   while (src < srcmax) {
-    const wchar_t *oldLiteral = literal;
+    int wasLiteral = src == literal;
 
     destlast = dest;
     setOffset();
@@ -901,7 +901,7 @@ contractText (
       switch (currentOpcode) {
         case CTO_LargeSign:
         case CTO_LastLargeSign:
-          if ((previousOpcode == CTO_LargeSign) && (src != oldLiteral)) {
+          if ((previousOpcode == CTO_LargeSign) && !wasLiteral) {
             while ((dest > destmin) && !dest[-1]) dest -= 1;
             setOffset();
 
@@ -935,12 +935,17 @@ contractText (
         }
       }
 
-      if (!literal) {
+      {
         const wchar_t *srcorig = src;
+        const wchar_t *srcbeg = NULL;
+        BYTE *destbeg = NULL;
 
         switch (currentOpcode) {
           case CTO_Repeatable: {
             const wchar_t *srclim = srcmax - currentFindLength;
+
+            srcbeg = src - currentFindLength;
+            destbeg = destlast;
 
             while ((src <= srclim) && checkCurrentRule(src)) {
               const wchar_t *srcnxt = src + currentFindLength;
@@ -954,6 +959,9 @@ contractText (
           }
 
           case CTO_JoinedWord:
+            srcbeg = src;
+            destbeg = dest;
+
             while ((src < srcmax) && testCharacter(*src, CTC_Space)) {
               clearOffset();
               src += 1;
@@ -964,10 +972,17 @@ contractText (
             break;
         }
 
-        if ((cursor >= srcorig) && (cursor < src)) {
+        if (srcbeg && (cursor >= srcbeg) && (cursor < src)) {
+          int repeat = !literal;
           literal = src;
+
+          if (repeat) {
+            src = srcbeg;
+            dest = destbeg;
+            continue;
+          }
+
           src = srcorig;
-          continue;
         }
       }
     } else {
