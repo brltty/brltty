@@ -136,7 +136,7 @@ contractLine (char *line, void *data) {
     if (!contractText(contractionTable,
                       inputBuffer, &inputCount,
                       outputBuffer, &outputCount,
-                      NULL, -1)) {
+                      NULL, CTB_NO_CURSOR)) {
       lpd->status = 11;
       return 0;
     }
