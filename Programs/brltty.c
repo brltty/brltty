@@ -2400,7 +2400,7 @@ runProgram (void) {
           int windowLength = cellCount;
 
           while (1) {
-            int cursorOffset = brl.cursor;
+            int cursorOffset = CTB_NO_CURSOR;
 
             int inputLength = scr.cols - p->winx;
             ScreenCharacter inputCharacters[inputLength];
