@@ -58,12 +58,12 @@ typedef enum { /*Op codes*/
 
   CTO_Literal, /*don't translate this string*/
   CTO_Always, /*always use this contraction*/
-  CTO_Repeated, /*take just the first, i.e. multiple blanks*/
+  CTO_Repeatable, /*take just the first, i.e. multiple blanks*/
 
   CTO_LargeSign, /*and, for, of, the, with*/
   CTO_LastLargeSign, /*a*/
   CTO_WholeWord, /*whole word contraction*/
-  CTO_JoinableWord, /*to, by, into*/
+  CTO_JoinedWord, /*to, by, into*/
   CTO_LowWord, /*enough, were, was, etc.*/
   CTO_Contraction, /*multiletter word sign that needs letsign*/
 

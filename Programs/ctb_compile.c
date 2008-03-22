@@ -83,7 +83,7 @@ static const wchar_t *const opcodeNames[CTO_None] = {
 
   WS_C("literal"),
   WS_C("always"),
-  WS_C("repeated"),
+  WS_C("repeatable"),
 
   WS_C("largesign"),
   WS_C("lastlargesign"),
@@ -722,7 +722,7 @@ doOpcode:
     case CTO_LargeSign:
     case CTO_LastLargeSign:
     case CTO_WholeWord:
-    case CTO_JoinableWord:
+    case CTO_JoinedWord:
     case CTO_LowWord:
     case CTO_SuffixableWord:
     case CTO_PrefixableWord:
@@ -736,7 +736,7 @@ doOpcode:
     case CTO_BegNum:
     case CTO_MidNum:
     case CTO_EndNum:
-    case CTO_Repeated: {
+    case CTO_Repeatable: {
       CharacterString find;
       ByteString replace;
       if (getFindText(data, &find, &token, &length))

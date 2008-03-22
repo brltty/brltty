@@ -173,13 +173,13 @@ always ¾ 6-126-34-1456	trois quarts
 
 always _ 78		souligné
 
-repeated \s 0		espaces
-repeated \t 0		tabulations
-repeated \xa0 0		espaces insécables
+repeatable \s 0		espaces
+repeatable \t 0		tabulations
+repeatable \xa0 0		espaces insécables
 
-repeated ... 3-3-3		points de suite
-repeated --- 36-36-36
-repeated ___ 78-78-78
+repeatable ... 3-3-3		points de suite
+repeatable --- 36-36-36
+repeatable ___ 78-78-78
 
 always \s--\s 36-36	tiret
 

@@ -303,7 +303,7 @@ always wh 156
 
 #single symbols
 always \x20 0  
-repeated \x20\x20 0-0
+repeatable \s\s 0-0
 always 1 1
 always 2 12
 always 3 14

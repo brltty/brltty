@@ -4318,7 +4318,7 @@ Now, finally, here are the opcode descriptions themselves:
     Translate the characters no matter where they appear.
     If there's only one character, then, in addition,
     define the default representation for that character.
-  <tag><tt/repeated/ <em/characters/ <em/dots/<label id="contraction-opcode-repeated"></tag>
+  <tag><tt/repeatable/ <em/characters/ <em/dots/<label id="contraction-opcode-repeatable"></tag>
     Translate the characters no matter where they appear.
     Ignore any consecutive repetitions of the same sequence.
   <tag><tt/largesign/ <em/characters/ <em/dots/<label id="contraction-opcode-largesign"></tag>

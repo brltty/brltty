@@ -418,9 +418,9 @@ sufword horse = horseradish
 always hydro =
 
 # the letter i
+word i 24
 always i 24
 always I 24
-word i 24
 midendword iever 24-15-1236-12456
 always immediate 24-134-134
 contraction imm
@@ -530,7 +530,6 @@ begword nuth 1345-136-2345-125 nuthatch nuthouse
 # the letter o
 word o 135
 always o 135
-word O 135
 always O 135
 begword oe = Oedipus
 midword oed = Schroeder
@@ -956,7 +955,7 @@ midnum ^ 45
 always ^ 456-126
 
 always ~ 4-156
-repeated ~~~ 4-156-4-156-4-156
+repeatable ~~~ 4-156-4-156-4-156
 
 midnum , 2
 always , 2
@@ -965,7 +964,7 @@ always ; 23
 
 midnum : 25
 always : 25
-repeated ::: 25-25-25
+repeatable ::: 25-25-25
 
 midnum . 46
 always . 256
@@ -990,7 +989,7 @@ always # 3456
 
 midnum * 4-16
 always * 35-35
-repeated *** 16-16-16
+repeatable *** 16-16-16
 
 midnum / 34
 always / 456-34
@@ -1005,23 +1004,23 @@ always \\ 456-16
 
 always | 456-1256
 
-repeated \s 0
-repeated \t 0
-repeated \xa0 0 no break space
+repeatable \s 0
+repeatable \t 0
+repeatable \xa0 0 no break space
 
 always -com =
-repeated --- 36-36-36
+repeatable --- 36-36-36
 always \s-\s 36-36
 always \s-\scom 36-36-14-135-134
 
 always _ 78
-repeated ___ 78-78-78
+repeatable ___ 78-78-78
 
-repeated === 46-13-46-13-46-13
+repeatable === 46-13-46-13-46-13
 
 # the hyphen
 always ­ 36
-repeated ­­­ 36-36-36
+repeatable ­­­ 36-36-36
 always \s­\s 36-36
 
 # accented letters

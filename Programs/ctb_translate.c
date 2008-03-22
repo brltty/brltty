@@ -230,7 +230,7 @@ selectRule (int length) {
           (!currentRule->before || testCharacter(after, currentRule->before))) {
         switch (currentOpcode) {
           case CTO_Always:
-          case CTO_Repeated:
+          case CTO_Repeatable:
           case CTO_Literal:
             return 1;
           case CTO_LargeSign:
@@ -246,11 +246,11 @@ selectRule (int length) {
             break;
           case CTO_LowWord:
             if (testCharacter(before, CTC_Space) && testCharacter(after, CTC_Space) &&
-                (previousOpcode != CTO_JoinableWord) &&
+                (previousOpcode != CTO_JoinedWord) &&
                 ((dest == destmin) || !dest[-1]))
               return 1;
             break;
-          case CTO_JoinableWord:
+          case CTO_JoinedWord:
             if (testCharacter(before, CTC_Space|CTC_Punctuation) &&
                 (before != '-') &&
                 testCharacter(after, CTC_Space) &&
@@ -959,7 +959,7 @@ contractText (
         const wchar_t *srcorig = src;
 
         switch (currentOpcode) {
-          case CTO_Repeated: {
+          case CTO_Repeatable: {
             const wchar_t *srclim = srcmax - currentFindLength;
 
             while ((src <= srclim) && checkCurrentRule(src)) {
@@ -969,7 +969,7 @@ contractText (
             break;
           }
 
-          case CTO_JoinableWord:
+          case CTO_JoinedWord:
             while ((src < srcmax) && testCharacter(*src, CTC_Space)) src += 1;
             break;
 
@@ -992,7 +992,7 @@ contractText (
       srcjoin = src;
       destjoin = dest;
 
-      if (currentOpcode != CTO_JoinableWord) {
+      if (currentOpcode != CTO_JoinedWord) {
         srcword = src;
         destword = dest;
       }
@@ -1008,7 +1008,7 @@ done:
     if (destword &&
         ((destmax - destword) < ((destmax - destmin) / 2)) &&
         (!(testCharacter(src[-1], CTC_Space) || testCharacter(*src, CTC_Space)) ||
-         (previousOpcode == CTO_JoinableWord))) {
+         (previousOpcode == CTO_JoinedWord))) {
       src = srcword;
       dest = destword;
     } else if (destlast) {
