@@ -634,7 +634,11 @@ formatAddress (char *buffer, int bufferSize, const void *address, int addressSiz
 #ifndef __MINGW32__
     case AF_LOCAL: {
       const struct sockaddr_un *local = address;
-      snprintf(buffer, bufferSize, "local %s", local->sun_path);
+      if (addressSize <= sizeof(sa_family_t)) {
+        snprintf(buffer, bufferSize, "local <unnamed>");
+      } else {
+        snprintf(buffer, bufferSize, "local %s", local->sun_path);
+      }
       break;
     }
 #endif /* __MINGW32__ */
