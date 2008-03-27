@@ -221,33 +221,6 @@ which don't have their own screen content inspection facility.
 The main weakness of the <tt/screen/ approach is that 
 BRLTTY can't be started until the user has logged in.
 
-In order for BRLTTY to successfully communicate with the refreshable braille display,
-the correct driver (serial, parallel, USB, bluetooth) must be configured into the kernel.
-If the driver requires special options, then they must be supplied.
-If it's built into the kernel, then its options must be:
-<descrip>
-  <tag/Linux/
-    <itemize>
-      <item>
-        Set during the kernel configuration procedure.
-      <item>
-        Supplied at the LILO boot prompt.
-      <item>
-        Specified on an <tt/append/ directive in <tt>/etc/lilo.conf</>.
-    </itemize>
-</descrip>
-If the driver is a module, then its options must be:
-<descrip>
-  <tag/Linux/
-    <itemize>
-      <item>
-        Supplied as options to the <tt/modprobe/ (or <tt/insmod/) command.
-      <item>
-        Specified on an <tt/options/ directive in <tt>/etc/modules.conf</>
-        (called <tt>/etc/conf.modules</> by some older distributions).
-    </itemize>
-</descrip>
-
 BRLTTY only works with text-based consoles and applications.
 It can be used with <tt/curses/-based applications,
 but not with any application which
