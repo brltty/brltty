@@ -45,6 +45,14 @@ static const unsigned char topRightKeys[] = {194, 193, 198, 195, 196, 197, 199, 
 static int lowerRoutingFunction;
 static int upperRoutingFunction;
 
+static const unsigned char controlKeys[] = {
+    1,  42, 151, 192,
+   83,  84,  89,  90,  91,  92,  93,  94,
+  193, 194, 199, 200, 201, 202, 203, 204
+};
+static unsigned char controlKey;
+#define NO_CONTROL_KEY 0XFF
+
 static TranslationTable outputTable;
 static unsigned char displayContent[80];
 static int displaySize;
@@ -238,6 +246,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       unsigned char byte;
 
       charactersPerSecond = *baud / 10;
+      controlKey = NO_CONTROL_KEY;
+
       LogPrint(LOG_DEBUG, "Trying Albatross at %d baud.", *baud);
       while (awaitByte(&byte)) {
         if (byte == 0XFF) {
@@ -285,7 +295,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 
   while (readByte(&byte)) {
     if (byte == 0XFF) {
-      if (acknowledgeDisplay(brl))  {
+      if (acknowledgeDisplay(brl)) {
         refreshDisplay(brl);
         brl->x = windowWidth;
         brl->y = 1;
@@ -319,11 +329,21 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
       } else {
         goto notRouting;
       }
+
       if ((offset >= windowStart) &&
           (offset < (windowStart + windowWidth)))
         return base + offset - windowStart;
     }
   notRouting:
+
+    if (memchr(controlKeys, byte, sizeof(controlKeys))) {
+      if (byte == controlKey) {
+        controlKey = NO_CONTROL_KEY;
+        return EOF;
+      }
+
+      if (controlKey == NO_CONTROL_KEY) controlKey = byte;
+    }
 
     switch (byte) {
       default:
