@@ -31,6 +31,7 @@ typedef enum {
 
 #define SPK_HAVE_RATE
 #define SPK_HAVE_VOLUME
+#define SPK_HAVE_PUNCTUATION
 #include "spk_driver.h"
 
 #include <libspeechd.h>
@@ -123,4 +124,13 @@ spk_volume (SpeechSynthesizer *spk, unsigned char setting) {
   int value = getIntegerSpeechVolume(setting, 100) - 100;
   spd_set_volume(connection, value);
   LogPrint(LOG_DEBUG, "set volume: %u -> %d", setting, value);
+}
+
+static void
+spk_punctuation (SpeechSynthesizer *spk, SpeechPunctuation setting) {
+  SPDPunctuation value = (setting <= SPK_PUNCTUATION_NONE)? SPD_PUNCT_NONE: 
+                         (setting >= SPK_PUNCTUATION_ALL)? SPD_PUNCT_ALL: 
+                         SPD_PUNCT_SOME;
+  spd_set_punctuation(connection, value);
+  LogPrint(LOG_NOTICE, "set punctuation: %u -> %d", setting, value);
 }

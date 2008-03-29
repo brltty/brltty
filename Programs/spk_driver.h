@@ -52,6 +52,10 @@ static void spk_mute (SpeechSynthesizer *spk);
   static void spk_volume (SpeechSynthesizer *spk, unsigned char setting);		/* mute speech */
 #endif /* SPK_HAVE_VOLUME */
 
+#ifdef SPK_HAVE_PUNCTUATION
+  static void spk_punctuation (SpeechSynthesizer *spk, SpeechPunctuation setting);		/* mute speech */
+#endif /* SPK_HAVE_PUNCTUATION */
+
 #ifdef SPKPARMS
   static const char *const spk_parameters[] = {SPKPARMS, NULL};
 #endif /* SPKPARMS */
@@ -90,10 +94,16 @@ SPKCONST SpeechDriver SPKSYMBOL = {
 #endif /* SPK_HAVE_RATE */
 
 #ifdef SPK_HAVE_VOLUME
-  spk_volume
+  spk_volume,
 #else /* SPK_HAVE_VOLUME */
-  NULL
+  NULL,
 #endif /* SPK_HAVE_VOLUME */
+
+#ifdef SPK_HAVE_PUNCTUATION
+  spk_punctuation
+#else /* SPK_HAVE_PUNCTUATION */
+  NULL
+#endif /* SPK_HAVE_PUNCTUATION */
 };
 
 DRIVER_VERSION_DECLARATION(spk);

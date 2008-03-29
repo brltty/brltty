@@ -24,6 +24,7 @@
 //#define SPK_HAVE_TRACK
 //#define SPK_HAVE_RATE
 //#define SPK_HAVE_VOLUME
+//#define SPK_HAVE_PUNCTUATION
 #include "spk_driver.h"
 
 static int
@@ -70,3 +71,9 @@ static void
 spk_volume (SpeechSynthesizer *spk, unsigned char setting) {
 }
 #endif /* SPK_HAVE_VOLUME */
+
+#ifdef SPK_HAVE_PUNCTUATION
+static void
+spk_punctuation (SpeechSynthesizer *spk, SpeechPunctuation setting) {
+}
+#endif /* SPK_HAVE_PUNCTUATION */

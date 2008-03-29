@@ -145,7 +145,7 @@ setSpeechRate (SpeechSynthesizer *spk, int setting, int say) {
 
 unsigned int
 getIntegerSpeechRate (unsigned char setting, unsigned int normal) {
-  return getIntegerSetting(setting, SPK_DEFAULT_RATE, normal);
+  return getIntegerSetting(setting, SPK_RATE_DEFAULT, normal);
 }
 
 float
@@ -186,12 +186,18 @@ setSpeechVolume (SpeechSynthesizer *spk, int setting, int say) {
 
 unsigned int
 getIntegerSpeechVolume (unsigned char setting, unsigned int normal) {
-  return getIntegerSetting(setting, SPK_DEFAULT_VOLUME, normal);
+  return getIntegerSetting(setting, SPK_VOLUME_DEFAULT, normal);
 }
 
 float
 getFloatSpeechVolume (unsigned char setting) {
-  return (float)setting / (float)SPK_DEFAULT_VOLUME;
+  return (float)setting / (float)SPK_VOLUME_DEFAULT;
+}
+
+void
+setSpeechPunctuation (SpeechSynthesizer *spk, SpeechPunctuation setting, int say) {
+  LogPrint(LOG_DEBUG, "setting speech punctuation: %d", setting);
+  speech->punctuation(spk, setting);
 }
 
 static char *speechFifoPath = NULL;

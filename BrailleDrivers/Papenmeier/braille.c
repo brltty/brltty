@@ -1313,7 +1313,7 @@ releaseResources2 (void) {
 
 static void
 setFirmness2 (BrailleDisplay *brl, BrailleFirmness setting) {
-  unsigned char data[] = {(setting * 98 / BF_MAXIMUM) + 2, 0X99};
+  unsigned char data[] = {(setting * 98 / BRL_FIRMNESS_MAXIMUM) + 2, 0X99};
   writePacket2(brl, 6, sizeof(data), data);
 }
 

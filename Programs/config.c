@@ -643,17 +643,22 @@ loadPreferences (int change) {
 
       if (length == 40) {
         length++;
-        prefs.speechRate = SPK_DEFAULT_RATE;
+        prefs.speechRate = DEFAULT_SPEECH_RATE;
       }
 
       if (length == 41) {
         length++;
-        prefs.speechVolume = SPK_DEFAULT_VOLUME;
+        prefs.speechVolume = DEFAULT_SPEECH_VOLUME;
       }
 
       if (length == 42) {
         length++;
         prefs.brailleFirmness = DEFAULT_BRAILLE_FIRMNESS;
+      }
+
+      if (length == 43) {
+        length++;
+        prefs.speechPunctuation = DEFAULT_SPEECH_PUNCTUATION;
       }
 
       if (prefs.version == 3) {
@@ -727,8 +732,9 @@ resetPreferences (void) {
 
   prefs.sayLineMode = DEFAULT_SAY_LINE_MODE;
   prefs.autospeak = DEFAULT_AUTOSPEAK;
-  prefs.speechRate = SPK_DEFAULT_RATE;
-  prefs.speechVolume = SPK_DEFAULT_VOLUME;
+  prefs.speechRate = DEFAULT_SPEECH_RATE;
+  prefs.speechVolume = DEFAULT_SPEECH_VOLUME;
+  prefs.speechPunctuation = DEFAULT_SPEECH_PUNCTUATION;
 
   prefs.statusStyle = braille->statusStyle;
 }
@@ -801,6 +807,17 @@ testSpeechVolume (void) {
 static int
 changedSpeechVolume (unsigned char setting) {
   setSpeechVolume(&spk, setting, 1);
+  return 1;
+}
+
+static int
+testSpeechPunctuation (void) {
+  return speech->punctuation != NULL;
+}
+
+static int
+changedSpeechPunctuation (unsigned char setting) {
+  setSpeechPunctuation(&spk, setting, 1);
   return 1;
 }
 #endif /* ENABLE_SPEECH_SUPPORT */
@@ -1192,6 +1209,12 @@ updatePreferences (void) {
       strtext("Immediate"),
       strtext("Enqueue")
     };
+
+    static const char *punctuationLevels[] = {
+      strtext("None"),
+      strtext("Some"),
+      strtext("All")
+    };
 #endif /* ENABLE_SPEECH_SUPPORT */
 
     #define MENU_ITEM(setting, changed, test, label, values, minimum, maximum, divisor) {&setting, changed, test, label, values, minimum, maximum, divisor}
@@ -1250,8 +1273,9 @@ updatePreferences (void) {
 #ifdef ENABLE_SPEECH_SUPPORT
       SYMBOLIC_ITEM(prefs.sayLineMode, NULL, NULL, strtext("Say-Line Mode"), sayModes),
       BOOLEAN_ITEM(prefs.autospeak, NULL, NULL, strtext("Autospeak")),
-      NUMERIC_ITEM(prefs.speechRate, changedSpeechRate, testSpeechRate, strtext("Speech Rate"), 0, SPK_MAXIMUM_RATE, 1),
-      NUMERIC_ITEM(prefs.speechVolume, changedSpeechVolume, testSpeechVolume, strtext("Speech Volume"), 0, SPK_MAXIMUM_VOLUME, 1),
+      NUMERIC_ITEM(prefs.speechRate, changedSpeechRate, testSpeechRate, strtext("Speech Rate"), 0, SPK_RATE_MAXIMUM, 1),
+      NUMERIC_ITEM(prefs.speechVolume, changedSpeechVolume, testSpeechVolume, strtext("Speech Volume"), 0, SPK_VOLUME_MAXIMUM, 1),
+      SYMBOLIC_ITEM(prefs.speechPunctuation, changedSpeechPunctuation, testSpeechPunctuation, strtext("Speech Punctuation"), punctuationLevels),
 #endif /* ENABLE_SPEECH_SUPPORT */
       SYMBOLIC_ITEM(prefs.statusStyle, NULL, NULL, strtext("Status Style"), statusStyles),
 #ifdef ENABLE_TABLE_SELECTION

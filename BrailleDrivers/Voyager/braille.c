@@ -1136,7 +1136,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
  */
 static void
 brl_firmness (BrailleDisplay *brl, BrailleFirmness setting) {
-  unsigned char voltage = 0XFF - (setting * 0XFF / BF_MAXIMUM);
+  unsigned char voltage = 0XFF - (setting * 0XFF / BRL_FIRMNESS_MAXIMUM);
   LogPrint(LOG_DEBUG, "Setting voltage: %02X", voltage);
   io->setDisplayVoltage(voltage);
 }

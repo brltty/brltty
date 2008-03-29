@@ -70,20 +70,22 @@ extern int setStatusText (BrailleDisplay *brl, const char *text);
 extern int readBrailleCommand (BrailleDisplay *, BRL_DriverCommandContext);
 
 typedef enum {
-  BF_MINIMUM,
-  BF_LOW,
-  BF_MEDIUM,
-  BF_HIGH,
-  BF_MAXIMUM
+  BRL_FIRMNESS_MINIMUM,
+  BRL_FIRMNESS_LOW,
+  BRL_FIRMNESS_MEDIUM,
+  BRL_FIRMNESS_HIGH,
+  BRL_FIRMNESS_MAXIMUM
 } BrailleFirmness;
 
 typedef enum {
-  BS_MINIMUM,
-  BS_LOW,
-  BS_MEDIUM,
-  BS_HIGH,
-  BS_MAXIMUM
+  BRL_SENSITIVITY_MINIMUM,
+  BRL_SENSITIVITY_LOW,
+  BRL_SENSITIVITY_MEDIUM,
+  BRL_SENSITIVITY_HIGH,
+  BRL_SENSITIVITY_MAXIMUM
 } BrailleSensitivity;
+extern void setBrailleFirmness (BrailleDisplay *brl, BrailleFirmness setting);
+extern void setBrailleSensitivity (BrailleDisplay *brl, BrailleSensitivity setting);
 
 /* Routines provided by each braille driver.
  * These are loaded dynamically at run-time into this structure
@@ -155,8 +157,6 @@ extern int portraitFlag (int number, int on);
 extern int learnMode (BrailleDisplay *brl, int poll, int timeout);
 
 extern int showDotPattern (unsigned char dots, unsigned char duration);
-extern void setBrailleFirmness (BrailleDisplay *brl, int setting);
-extern void setBrailleSensitivity (BrailleDisplay *brl, int setting);
 
 #ifdef __cplusplus
 }

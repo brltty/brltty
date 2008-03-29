@@ -1849,7 +1849,7 @@ runProgram (void) {
               }
               break;
             case BRL_CMD_SAY_FASTER:
-              if (speech->rate && (prefs.speechRate < SPK_MAXIMUM_RATE)) {
+              if (speech->rate && (prefs.speechRate < SPK_RATE_MAXIMUM)) {
                 setSpeechRate(&spk, ++prefs.speechRate, 1);
               } else {
                 playTune(&tune_command_rejected);
@@ -1864,7 +1864,7 @@ runProgram (void) {
               }
               break;
             case BRL_CMD_SAY_LOUDER:
-              if (speech->volume && (prefs.speechVolume < SPK_MAXIMUM_VOLUME)) {
+              if (speech->volume && (prefs.speechVolume < SPK_VOLUME_MAXIMUM)) {
                 setSpeechVolume(&spk, ++prefs.speechVolume, 1);
               } else {
                 playTune(&tune_command_rejected);

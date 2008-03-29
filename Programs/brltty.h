@@ -91,6 +91,7 @@ typedef struct {
   unsigned char speechRate;
   unsigned char speechVolume;
   unsigned char brailleFirmness;
+  unsigned char speechPunctuation;
 } PACKED Preferences;
 extern Preferences prefs;		/* current preferences settings */
 #define PREFERENCES_TIME(time) ((time) * 10)
