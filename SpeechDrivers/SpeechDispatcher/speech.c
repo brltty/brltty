@@ -132,5 +132,5 @@ spk_punctuation (SpeechSynthesizer *spk, SpeechPunctuation setting) {
                          (setting >= SPK_PUNCTUATION_ALL)? SPD_PUNCT_ALL: 
                          SPD_PUNCT_SOME;
   spd_set_punctuation(connection, value);
-  LogPrint(LOG_NOTICE, "set punctuation: %u -> %d", setting, value);
+  LogPrint(LOG_DEBUG, "set punctuation: %u -> %d", setting, value);
 }
