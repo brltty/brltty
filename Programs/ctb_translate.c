@@ -169,6 +169,36 @@ setAfter (int length) {
 }
 
 static int
+isBeginning (void) {
+  const wchar_t *ptr = src;
+
+  while (ptr > srcmin) {
+    if (!testCharacter(*--ptr, CTC_Punctuation)) {
+      if (!testCharacter(*ptr, CTC_Space)) return 0;
+      break;
+    }
+  }
+
+  return 1;
+}
+
+static int
+isEnding (void) {
+  const wchar_t *ptr = src + currentFindLength;
+
+  while (ptr < srcmax) {
+    if (!testCharacter(*ptr, CTC_Punctuation)) {
+      if (!testCharacter(*ptr, CTC_Space)) return 0;
+      break;
+    }
+
+    ptr += 1;
+  }
+
+  return 1;
+}
+
+static int
 selectRule (int length) {
   int ruleOffset;
   int maximumLength;
@@ -235,23 +265,26 @@ selectRule (int length) {
           case CTO_Repeatable:
           case CTO_Literal:
             return 1;
+
           case CTO_LargeSign:
           case CTO_LastLargeSign:
-            if (!testCharacter(before, CTC_Space) || !testCharacter(after, CTC_Space))
-              currentOpcode = CTO_Always;
+            if (!isBeginning() || !isEnding()) currentOpcode = CTO_Always;
             return 1;
+
           case CTO_WholeWord:
           case CTO_Contraction:
             if (testCharacter(before, CTC_Space|CTC_Punctuation) &&
                 testCharacter(after, CTC_Space|CTC_Punctuation))
               return 1;
             break;
+
           case CTO_LowWord:
             if (testCharacter(before, CTC_Space) && testCharacter(after, CTC_Space) &&
                 (previousOpcode != CTO_JoinedWord) &&
                 ((dest == destmin) || !dest[-1]))
               return 1;
             break;
+
           case CTO_JoinedWord:
             if (testCharacter(before, CTC_Space|CTC_Punctuation) &&
                 (before != '-') &&
@@ -269,84 +302,73 @@ selectRule (int length) {
               }
             }
             break;
+
           case CTO_SuffixableWord:
             if (testCharacter(before, CTC_Space|CTC_Punctuation) &&
                 testCharacter(after, CTC_Space|CTC_Letter|CTC_Punctuation))
               return 1;
             break;
+
           case CTO_PrefixableWord:
             if (testCharacter(before, CTC_Space|CTC_Letter|CTC_Punctuation) &&
                 testCharacter(after, CTC_Space|CTC_Punctuation))
               return 1;
             break;
+
           case CTO_BegWord:
             if (testCharacter(before, CTC_Space|CTC_Punctuation) &&
                 testCharacter(after, CTC_Letter))
               return 1;
             break;
+
           case CTO_BegMidWord:
             if (testCharacter(before, CTC_Letter|CTC_Space|CTC_Punctuation) &&
                 testCharacter(after, CTC_Letter))
               return 1;
             break;
+
           case CTO_MidWord:
             if (testCharacter(before, CTC_Letter) && testCharacter(after, CTC_Letter))
               return 1;
             break;
+
           case CTO_MidEndWord:
             if (testCharacter(before, CTC_Letter) &&
                 testCharacter(after, CTC_Letter|CTC_Space|CTC_Punctuation))
               return 1;
             break;
+
           case CTO_EndWord:
             if (testCharacter(before, CTC_Letter) &&
                 testCharacter(after, CTC_Space|CTC_Punctuation))
               return 1;
             break;
+
           case CTO_BegNum:
             if (testCharacter(before, CTC_Space|CTC_Punctuation) &&
                 testCharacter(after, CTC_Digit))
               return 1;
             break;
+
           case CTO_MidNum:
             if (testCharacter(before, CTC_Digit) && testCharacter(after, CTC_Digit))
               return 1;
             break;
+
           case CTO_EndNum:
             if (testCharacter(before, CTC_Digit) &&
                 testCharacter(after, CTC_Space|CTC_Punctuation))
               return 1;
             break;
-          {
-            int isPre;
+
           case CTO_PrePunc:
-            isPre = 1;
-            goto doPunc;
-          case CTO_PostPunc:
-            isPre = 0;
-          doPunc:
-            if (testCharacter(*src, CTC_Punctuation)) {
-              const wchar_t *pre = src;
-              const wchar_t *post = src + currentFindLength;
-              while (--pre >= srcmin)
-                if (!testCharacter(*pre, CTC_Punctuation))
-                  break;
-              while (post < srcmax) {
-                if (!testCharacter(*post, CTC_Punctuation)) break;
-                post++;
-              }
-              if (isPre) {
-                if (((pre < srcmin) || testCharacter(*pre, CTC_Space)) &&
-                    ((post < srcmax) && !testCharacter(*post, CTC_Space)))
-                  return 1;
-              } else {
-                if (((pre >= srcmin) && !testCharacter(*pre, CTC_Space)) &&
-                    ((post == srcmax) || testCharacter(*post, CTC_Space)))
-                  return 1;
-              }
-            }
+            if (testCharacter(*src, CTC_Punctuation) && isBeginning() && !isEnding()) return 1;
             break;
-          }
+
+          case CTO_PostPunc:
+            if (testCharacter(*src, CTC_Punctuation) && !isBeginning() && isEnding()) return 1;
+            break;
+
           default:
             break;
         }
