@@ -54,7 +54,7 @@ spk_construct (SpeechSynthesizer *spk, char **parameters) {
     }
   }
 
-  if ((connection = spd_open("brltty", "driver", NULL, SPD_MODE_THREADED))) {
+  if ((connection = spd_open("brltty", "main", NULL, SPD_MODE_THREADED))) {
     if (parameters[PARM_MODULE] && *parameters[PARM_MODULE]) {
       spd_set_output_module(connection, parameters[PARM_MODULE]);
     }
@@ -104,7 +104,12 @@ spk_destruct (SpeechSynthesizer *spk) {
 
 static void
 spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, size_t length, size_t count, const unsigned char *attributes) {
-  spd_sayf(connection, SPD_TEXT, "%.*s", length, buffer);
+  const SPDPriority priority = SPD_TEXT;
+  if (count == 1) {
+    spd_char(connection, priority, (const char *)buffer);
+  } else {
+    spd_sayf(connection, priority, "%.*s", length, buffer);
+  }
 }
 
 static void
