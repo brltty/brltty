@@ -115,12 +115,19 @@ openConnection (void) {
       return 0;
     }
 
-    speechdAction(setModule, NULL);
-    speechdAction(setLanguage, NULL);
-    speechdAction(setVoice, NULL);
-    speechdAction(setRate, NULL);
-    speechdAction(setVolume, NULL);
-    speechdAction(setPunctuation, NULL);
+    {
+      static const SpeechdAction actions[] = {
+        setModule,
+        setLanguage,
+        setVoice,
+        setRate,
+        setVolume,
+        setPunctuation,
+        NULL
+      };
+      const SpeechdAction *action = actions;
+      while (*action) speechdAction(*action++, NULL);
+    }
   }
 
   return 1;
