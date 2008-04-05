@@ -288,17 +288,18 @@ selectRule (int length) {
           case CTO_JoinedWord:
             if (testCharacter(before, CTC_Space|CTC_Punctuation) &&
                 (before != '-') &&
-                testCharacter(after, CTC_Space) &&
                 (dest + currentRule->replen < destmax)) {
               const wchar_t *ptr = src + currentFindLength;
 
               while (ptr < srcmax) {
-                if (ptr++ == cursor) break;
+                if (ptr == cursor) break;
 
                 if (!testCharacter(*ptr, CTC_Space)) {
                   if (testCharacter(*ptr, CTC_Letter)) return 1;
                   break;
                 }
+
+                ptr += 1;
               }
             }
             break;
