@@ -34,7 +34,7 @@
 ;;;; * C BrlAPI Library loading
 
 (define-foreign-library libbrlapi
-  (:unix (:or "libbrlapi.so.0.5.0" "libbrlapi.so"))
+  (:unix (:or "libbrlapi.so.0.5.1" "libbrlapi.so.0.5"))
   (t (:default "libbrlapi")))
 (use-foreign-library libbrlapi)
 
