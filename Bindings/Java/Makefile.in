@@ -38,6 +38,17 @@ JAVA_JNI_DESTDIR = $(INSTALL_ROOT)$(exec_prefix)
 
 all: jar jni doc
 
+JAVA_SOURCES = $(SRC_DIR)/Brlapi.java \
+	$(SRC_DIR)/ConnectionSettings.java \
+	$(SRC_DIR)/DisplaySize.java \
+	$(SRC_DIR)/Error.java \
+	$(SRC_DIR)/Exception.java \
+	$(SRC_DIR)/Key.java \
+	$(SRC_DIR)/Native.java \
+	$(SRC_DIR)/Test.java \
+	$(SRC_DIR)/WriteArguments.java \
+	$(BLD_DIR)/Constants.java
+
 JAVA_JNI_FILE = $(LIB_PFX)$(API_NAME)_java.$(LIB_EXT)
 jni: $(JAVA_JNI_FILE)
 
@@ -53,9 +64,9 @@ jar: $(JAVA_JAR_FILE)
 $(JAVA_JAR_FILE): classes.made
 	$(JAR) cf $@ -C classes .
 
-classes.made: $(SRC_DIR)/*.java Constants.java
+classes.made: $(JAVA_SOURCES)
 	$(INSTALL_DIRECTORY) classes
-	$(JAVAC) -d classes -classpath . $(SRC_DIR)/*.java
+	$(JAVAC) -d classes -classpath . $(JAVA_SOURCES)
 	touch $@
 
 Constants.java: $(CONSTANTS_SCRIPTS) $(CONSTANTS_SOURCES)
@@ -63,9 +74,9 @@ Constants.java: $(CONSTANTS_SCRIPTS) $(CONSTANTS_SOURCES)
 
 doc: doc.made
 
-doc.made: $(SRC_DIR)/*.java Constants.java
+doc.made: $(JAVA_SOURCES)
 	$(INSTALL_DIRECTORY) doc
-	$(JAVADOC) -quiet -d doc -author -version -use $(SRC_DIR)/*.java Constants.java
+	$(JAVADOC) -quiet -d doc -author -version -use $(JAVA_SOURCES)
 	touch $@
 
 clean::
