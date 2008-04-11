@@ -1028,8 +1028,7 @@ contractText (
 
 done:
   if (src < srcmax) {
-    if (destword &&
-        ((destmax - destword) < ((destmax - destmin) / 2)) &&
+    if (destword && (destword > destmin) &&
         (!(testCharacter(src[-1], CTC_Space) || testCharacter(*src, CTC_Space)) ||
          (previousOpcode == CTO_JoinedWord))) {
       src = srcword;
