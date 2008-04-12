@@ -46,6 +46,8 @@ typedef enum {
 static const char *problemText;
 static unsigned int debugScreenFontMap = 0;
 
+#define UNICODE_ROW_DIRECT 0XF000
+
 typedef enum {
   CONV_OK,
   CONV_ILLEGAL,
@@ -97,7 +99,6 @@ convertCharacters (
   LogError("iconv");
   return CONV_ERROR;
 }
-#endif /* charset conversion definitions */
 
 typedef struct {
   char *name;
@@ -109,7 +110,6 @@ typedef struct {
 static CharsetEntry *charsetEntries = NULL;
 static unsigned int charsetCount = 0;
 static unsigned int charsetIndex = 0;
-#define UNICODE_ROW_DIRECT 0XF000
 
 static inline CharsetEntry *
 getCharsetEntry (void) {
@@ -267,6 +267,30 @@ convertCharacter (const wchar_t *character) {
   spaces += 1;
   return WEOF;
 }
+#else /* charset conversion definitions */
+static int
+allocateCharsetEntries (const char *names) {
+  return 1;
+}
+
+static CharacterConversionResult
+convertWcharToChars (wchar_t character, char *chars, size_t length, size_t *size) {
+  if (!length) return CONV_OVERFLOW;
+
+  {
+    int c = convertWcharToChar(character);
+    chars[0] = c;
+    *size = 1;
+    return CONV_OK;
+  }
+}
+
+static wint_t
+convertCharacter (const wchar_t *character) {
+  if (!character) return WEOF;
+  return character[0];
+}
+#endif /* charset conversion definitions */
 
 static int
 setDeviceName (const char **name, const char *const *names, const char *description, int mode) {
@@ -878,14 +902,18 @@ readCursorCoordinates (short *column, short *row, short columns) {
   ScreenCoordinates coordinates;
 
   if (readScreenDevice(2, &coordinates, sizeof(coordinates))) {
+#if defined(HAVE_ICONV_H)
     const CharsetEntry *charset = getCharsetEntry();
+#endif /* HAVE_ICONV_H */
 
     *row = coordinates.row;
 
+#if defined(HAVE_ICONV_H)
     if (!charset->isMultiByte) {
       *column = coordinates.column;
       return 1;
     }
+#endif /* HAVE_ICONV_H */
 
     {
       int offsets[columns];
