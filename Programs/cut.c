@@ -55,24 +55,13 @@ cut (size_t *length, int fromColumn, int fromRow, int toColumn, int toRow) {
           wchar_t *toAddress = toBuffer;
           int row;
 
-          /* remove spaces at end of line, add return (except to last line),
-           * and possibly remove non-printables... if any
-           */
-          for (row=fromRow; row<=toRow; row++) {
-            int spaces = 0;
+          for (row=fromRow; row<=toRow; row+=1) {
             int column;
 
-            for (column=fromColumn; column<=toColumn; column++, fromAddress++) {
-              if (iswcntrl(*fromAddress) || iswspace(*fromAddress)) {
-                spaces += 1;
-              } else {
-                while (spaces) {
-                  *(toAddress++) = WC_C(' ');
-                  spaces -= 1;
-                }
-
-                *toAddress++ = *fromAddress;
-              }
+            for (column=fromColumn; column<=toColumn; column+=1) {
+              wchar_t character = *fromAddress++;
+              if (iswcntrl(character) || iswspace(character)) character = WC_C(' ');
+              *toAddress++ = character;
             }
 
             if (row != toRow) *toAddress++ = WC_C('\r');
@@ -150,6 +139,38 @@ cutRectangle (int column, int row) {
   wchar_t *buffer = cut(&length, beginColumn, beginRow, column, row);
 
   if (buffer) {
+    {
+      const wchar_t *from = buffer;
+      const wchar_t *end = from + length;
+      wchar_t *to = buffer;
+      int spaces = 0;
+
+      while (from != end) {
+        wchar_t character = *from++;
+
+        switch (character) {
+          case WC_C(' '):
+            spaces += 1;
+            continue;
+
+          case WC_C('\r'):
+            spaces = 0;
+
+          default:
+            break;
+        }
+
+        while (spaces) {
+          *to++ = WC_C(' ');
+          spaces -= 1;
+        }
+
+        *to++ = character;
+      }
+
+      length = to - buffer;
+    }
+
     if (append(buffer, length)) return 1;
     free(buffer);
   }
@@ -210,7 +231,7 @@ cutLine (int column, int row) {
 
             default:
               if (newlines) {
-                spaces = 1;
+                if ((newlines > 1) || (spaces > 0)) spaces = 1;
                 newlines = 0;
               }
 
