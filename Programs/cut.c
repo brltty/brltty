@@ -223,26 +223,27 @@ cutLine (int column, int row) {
           switch (character) {
             case WC_C(' '):
               spaces += 1;
-              break;
+              continue;
 
             case WC_C('\r'):
               newlines += 1;
-              break;
+              continue;
 
             default:
-              if (newlines) {
-                if ((newlines > 1) || (spaces > 0)) spaces = 1;
-                newlines = 0;
-              }
-
-              while (spaces) {
-                *to++ = WC_C(' ');
-                spaces -= 1;
-              }
-
-              *to++ = character;
               break;
           }
+
+          if (newlines) {
+            if ((newlines > 1) || (spaces > 0)) spaces = 1;
+            newlines = 0;
+          }
+
+          while (spaces) {
+            *to++ = WC_C(' ');
+            spaces -= 1;
+          }
+
+          *to++ = character;
         }
 
         length = to - buffer;
