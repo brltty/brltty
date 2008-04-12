@@ -99,6 +99,34 @@ convertCharacters (
   LogError("iconv");
   return CONV_ERROR;
 }
+#else /* charset conversion definitions */
+typedef struct {
+  char aStructNeedsAtLeastOneField;
+} CharsetConverter;
+
+#define CHARSET_CONVERTER_INITIALIZER {0}
+
+static int
+allocateCharsetConverter (CharsetConverter *converter, const char *sourceCharset, const char *targetCharset) {
+  return 1;
+}
+
+static void
+deallocateCharsetConverter (CharsetConverter *converter) {
+}
+
+static CharacterConversionResult
+convertCharacters (
+  CharsetConverter *converter,
+  const char **inputAddress, size_t *inputLength,
+  char **outputAddress, size_t *outputLength
+) {
+  *(*outputAddress)++ = *(*inputAddress)++;
+  *inputLength -= 1;
+  *outputLength -= 1;
+  return CONV_OK;
+}
+#endif /* charset conversion definitions */
 
 typedef struct {
   char *name;
@@ -267,30 +295,6 @@ convertCharacter (const wchar_t *character) {
   spaces += 1;
   return WEOF;
 }
-#else /* charset conversion definitions */
-static int
-allocateCharsetEntries (const char *names) {
-  return 1;
-}
-
-static CharacterConversionResult
-convertWcharToChars (wchar_t character, char *chars, size_t length, size_t *size) {
-  if (!length) return CONV_OVERFLOW;
-
-  {
-    int c = convertWcharToChar(character);
-    chars[0] = c;
-    *size = 1;
-    return CONV_OK;
-  }
-}
-
-static wint_t
-convertCharacter (const wchar_t *character) {
-  if (!character) return WEOF;
-  return character[0];
-}
-#endif /* charset conversion definitions */
 
 static int
 setDeviceName (const char **name, const char *const *names, const char *description, int mode) {
@@ -902,18 +906,14 @@ readCursorCoordinates (short *column, short *row, short columns) {
   ScreenCoordinates coordinates;
 
   if (readScreenDevice(2, &coordinates, sizeof(coordinates))) {
-#if defined(HAVE_ICONV_H)
     const CharsetEntry *charset = getCharsetEntry();
-#endif /* HAVE_ICONV_H */
 
     *row = coordinates.row;
 
-#if defined(HAVE_ICONV_H)
     if (!charset->isMultiByte) {
       *column = coordinates.column;
       return 1;
     }
-#endif /* HAVE_ICONV_H */
 
     {
       int offsets[columns];
