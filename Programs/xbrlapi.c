@@ -328,7 +328,7 @@ static int getXVTnb(void) {
 static int grabWindow(Window win,int level) {
 #ifdef DEBUG
   char spaces[level+1];
-#endif
+#endif /* DEBUG */
 
   grabFailed=0;
   if (!XSelectInput(dpy,win,PropertyChangeMask|FocusChangeMask|SubstructureNotifyMask) || grabFailed)
@@ -338,7 +338,7 @@ static int grabWindow(Window win,int level) {
   memset(spaces,' ',level);
   spaces[level]='\0';
   debugf("%sgrabbed %#010lx\n",spaces,win);
-#endif
+#endif /* DEBUG */
   return 1;
 }
 
@@ -513,6 +513,7 @@ void toX_f(const char *display) {
   netWmNameAtom = XInternAtom(dpy,"_NET_WM_NAME",False);
   utf8StringAtom = XInternAtom(dpy,"UTF8_STRING",False);
 
+#ifdef HAVE_ICONV_H
   {
     char *localCharset = nl_langinfo(CODESET);
     if (strcmp(localCharset, "UTF-8")) {
@@ -522,6 +523,7 @@ void toX_f(const char *display) {
         utf8Conv = iconv_open(localCharset, "UTF-8");
     }
   }
+#endif /* HAVE_ICONV_H */
 
   for (i=0;i<ScreenCount(dpy);i++) {
     root=RootWindow(dpy,i);
