@@ -47,7 +47,7 @@ JAVA_SOURCES = $(SRC_DIR)/Brlapi.java \
 	$(SRC_DIR)/Native.java \
 	$(SRC_DIR)/Test.java \
 	$(SRC_DIR)/WriteArguments.java \
-	$(BLD_DIR)/Constants.java
+	Constants.java
 
 JAVA_JNI_FILE = $(LIB_PFX)$(API_NAME)_java.$(LIB_EXT)
 jni: $(JAVA_JNI_FILE)
