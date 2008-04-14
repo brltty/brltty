@@ -567,6 +567,8 @@ static void
 applySpeechPreferences (void) {
   if (speech->rate) setSpeechRate(&spk, prefs.speechRate, 0);
   if (speech->volume) setSpeechVolume(&spk, prefs.speechVolume, 0);
+  if (speech->pitch) setSpeechPitch(&spk, prefs.speechPitch, 0);
+  if (speech->punctuation) setSpeechPunctuation(&spk, prefs.speechPunctuation, 0);
 }
 #endif /* ENABLE_SPEECH_SUPPORT */
 
@@ -661,6 +663,11 @@ loadPreferences (int change) {
         prefs.speechPunctuation = DEFAULT_SPEECH_PUNCTUATION;
       }
 
+      if (length == 44) {
+        length++;
+        prefs.speechPitch = DEFAULT_SPEECH_PITCH;
+      }
+
       if (prefs.version == 3) {
         prefs.version++;
         prefs.autorepeatPanning = DEFAULT_AUTOREPEAT_PANNING;
@@ -734,6 +741,7 @@ resetPreferences (void) {
   prefs.autospeak = DEFAULT_AUTOSPEAK;
   prefs.speechRate = DEFAULT_SPEECH_RATE;
   prefs.speechVolume = DEFAULT_SPEECH_VOLUME;
+  prefs.speechPitch = DEFAULT_SPEECH_PITCH;
   prefs.speechPunctuation = DEFAULT_SPEECH_PUNCTUATION;
 
   prefs.statusStyle = braille->statusStyle;
@@ -807,6 +815,17 @@ testSpeechVolume (void) {
 static int
 changedSpeechVolume (unsigned char setting) {
   setSpeechVolume(&spk, setting, 1);
+  return 1;
+}
+
+static int
+testSpeechPitch (void) {
+  return speech->pitch != NULL;
+}
+
+static int
+changedSpeechPitch (unsigned char setting) {
+  setSpeechPitch(&spk, setting, 1);
   return 1;
 }
 
@@ -1275,6 +1294,7 @@ updatePreferences (void) {
       BOOLEAN_ITEM(prefs.autospeak, NULL, NULL, strtext("Autospeak")),
       NUMERIC_ITEM(prefs.speechRate, changedSpeechRate, testSpeechRate, strtext("Speech Rate"), 0, SPK_RATE_MAXIMUM, 1),
       NUMERIC_ITEM(prefs.speechVolume, changedSpeechVolume, testSpeechVolume, strtext("Speech Volume"), 0, SPK_VOLUME_MAXIMUM, 1),
+      NUMERIC_ITEM(prefs.speechPitch, changedSpeechPitch, testSpeechPitch, strtext("Speech Pitch"), 0, SPK_PITCH_MAXIMUM, 1),
       SYMBOLIC_ITEM(prefs.speechPunctuation, changedSpeechPunctuation, testSpeechPunctuation, strtext("Speech Punctuation"), punctuationLevels),
 #endif /* ENABLE_SPEECH_SUPPORT */
       SYMBOLIC_ITEM(prefs.statusStyle, NULL, NULL, strtext("Status Style"), statusStyles),

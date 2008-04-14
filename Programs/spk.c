@@ -195,6 +195,23 @@ getFloatSpeechVolume (unsigned char setting) {
 }
 
 void
+setSpeechPitch (SpeechSynthesizer *spk, int setting, int say) {
+  LogPrint(LOG_DEBUG, "setting speech pitch: %d", setting);
+  speech->pitch(spk, setting);
+  if (say) saySpeechSetting(spk, setting, "pitch");
+}
+
+unsigned int
+getIntegerSpeechPitch (unsigned char setting, unsigned int normal) {
+  return getIntegerSetting(setting, SPK_PITCH_DEFAULT, normal);
+}
+
+float
+getFloatSpeechPitch (unsigned char setting) {
+  return (float)setting / (float)SPK_PITCH_DEFAULT;
+}
+
+void
 setSpeechPunctuation (SpeechSynthesizer *spk, SpeechPunctuation setting, int say) {
   LogPrint(LOG_DEBUG, "setting speech punctuation: %d", setting);
   speech->punctuation(spk, setting);

@@ -47,6 +47,12 @@ extern void setSpeechVolume (SpeechSynthesizer *spk, int setting, int say);
 extern unsigned int getIntegerSpeechVolume (unsigned char setting, unsigned int normal);
 extern float getFloatSpeechVolume (unsigned char setting);
 
+#define SPK_PITCH_DEFAULT 10
+#define SPK_PITCH_MAXIMUM (SPK_PITCH_DEFAULT * 2)
+extern void setSpeechPitch (SpeechSynthesizer *spk, int setting, int say);
+extern unsigned int getIntegerSpeechPitch (unsigned char setting, unsigned int normal);
+extern float getFloatSpeechPitch (unsigned char setting);
+
 typedef enum {
   SPK_PUNCTUATION_NONE,
   SPK_PUNCTUATION_SOME,
@@ -73,6 +79,9 @@ typedef struct {
 
   /* These require SPK_HAVE_VOLUME. */
   void (*volume) (SpeechSynthesizer *spk, unsigned char setting);
+
+  /* These require SPK_HAVE_PITCH. */
+  void (*pitch) (SpeechSynthesizer *spk, unsigned char setting);
 
   /* These require SPK_HAVE_PUNCTUATION. */
   void (*punctuation) (SpeechSynthesizer *spk, SpeechPunctuation setting);
