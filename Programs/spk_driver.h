@@ -45,15 +45,19 @@ static void spk_mute (SpeechSynthesizer *spk);
 #endif /* SPK_HAVE_TRACK */
 
 #ifdef SPK_HAVE_RATE
-  static void spk_rate (SpeechSynthesizer *spk, unsigned char setting);		/* mute speech */
+  static void spk_rate (SpeechSynthesizer *spk, unsigned char setting);
 #endif /* SPK_HAVE_RATE */
 
 #ifdef SPK_HAVE_VOLUME
-  static void spk_volume (SpeechSynthesizer *spk, unsigned char setting);		/* mute speech */
+  static void spk_volume (SpeechSynthesizer *spk, unsigned char setting);
 #endif /* SPK_HAVE_VOLUME */
 
+#ifdef SPK_HAVE_PITCH
+  static void spk_pitch (SpeechSynthesizer *spk, unsigned char setting);
+#endif /* SPK_HAVE_PITCH */
+
 #ifdef SPK_HAVE_PUNCTUATION
-  static void spk_punctuation (SpeechSynthesizer *spk, SpeechPunctuation setting);		/* mute speech */
+  static void spk_punctuation (SpeechSynthesizer *spk, SpeechPunctuation setting);
 #endif /* SPK_HAVE_PUNCTUATION */
 
 #ifdef SPKPARMS
@@ -98,6 +102,12 @@ SPKCONST SpeechDriver SPKSYMBOL = {
 #else /* SPK_HAVE_VOLUME */
   NULL,
 #endif /* SPK_HAVE_VOLUME */
+
+#ifdef SPK_HAVE_PITCH
+  spk_pitch,
+#else /* SPK_HAVE_PITCH */
+  NULL,
+#endif /* SPK_HAVE_PITCH */
 
 #ifdef SPK_HAVE_PUNCTUATION
   spk_punctuation
