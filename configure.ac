@@ -429,7 +429,13 @@ BRLTTY_ARG_DISABLE(
 
 AC_CHECK_FUNC([wcslen], [AC_CHECK_HEADERS([wchar.h])])
 
-AC_CHECK_HEADERS([unicode/uchar.h], [AC_HAVE_LIBRARY([icuuc])])
+BRLTTY_ARG_DISABLE(
+   [icu],
+   [support for Unicode-based internationalization],
+   [],
+[dnl
+   AC_CHECK_HEADERS([unicode/uchar.h], [AC_HAVE_LIBRARY([icuuc])])
+])
 
 BRLTTY_ARG_DISABLE(
    [iconv],
