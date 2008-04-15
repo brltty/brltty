@@ -31,6 +31,7 @@ typedef enum {
 
 #define SPK_HAVE_RATE
 #define SPK_HAVE_VOLUME
+#define SPK_HAVE_PITCH
 #define SPK_HAVE_PUNCTUATION
 #include "spk_driver.h"
 
@@ -42,6 +43,7 @@ static const char *languageName;
 static SPDVoiceType voiceType;
 static signed int relativeRate;
 static signed int relativeVolume;
+static signed int relativePitch;
 static SPDPunctuation punctuationVerbosity;
 
 static void
@@ -51,6 +53,7 @@ clearSettings (void) {
   voiceType = -1;
   relativeRate = 0;
   relativeVolume = 0;
+  relativePitch = 0;
   punctuationVerbosity = -1;
 }
 
@@ -98,6 +101,11 @@ setVolume (const void *data) {
 }
 
 static void
+setPitch (const void *data) {
+  spd_set_voice_pitch(connectionHandle, relativePitch);
+}
+
+static void
 setPunctuation (const void *data) {
   if (punctuationVerbosity != -1) spd_set_punctuation(connectionHandle, punctuationVerbosity);
 }
@@ -122,6 +130,7 @@ openConnection (void) {
         setVoice,
         setRate,
         setVolume,
+        setPitch,
         setPunctuation,
         NULL
       };
@@ -245,6 +254,13 @@ spk_volume (SpeechSynthesizer *spk, unsigned char setting) {
   relativeVolume = getIntegerSpeechVolume(setting, 100) - 100;
   speechdAction(setVolume, NULL);
   LogPrint(LOG_DEBUG, "set volume: %u -> %d", setting, relativeVolume);
+}
+
+static void
+spk_pitch (SpeechSynthesizer *spk, unsigned char setting) {
+  relativePitch = getIntegerSpeechPitch(setting, 100) - 100;
+  speechdAction(setPitch, NULL);
+  LogPrint(LOG_DEBUG, "set pitch: %u -> %d", setting, relativePitch);
 }
 
 static void
