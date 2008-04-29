@@ -191,6 +191,7 @@ sufword blinder 12-123-35-145-12456
 word blinding 12-123-35-145-346
 always braille 12-1235-123
 contraction brl
+sufword brigham =
 word but 12
 
 # the letter c
@@ -230,10 +231,12 @@ always cannot 456-14
 word ch =
 always ch 16
 always character 5-16
+sufword chatham =
 always chemo 16-15-134-135
 word child 16
 always children 16-1345
 word chn =
+sufword chisholm =
 sufword clever 14-123-5-15 cleverest
 
 # the letter d
