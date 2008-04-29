@@ -231,12 +231,12 @@ always cannot 456-14
 word ch =
 always ch 16
 always character 5-16
-sufword chatham =
+sufword chatham 16-1-2345-125-1-134
 always chemo 16-15-134-135
 word child 16
 always children 16-1345
 word chn =
-sufword chisholm =
+sufword chisholm 16-24-234-125-135-123-134
 sufword clever 14-123-5-15 cleverest
 
 # the letter d
