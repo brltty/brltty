@@ -289,12 +289,14 @@ selectRule (int length) {
             if (testCharacter(before, CTC_Space|CTC_Punctuation) &&
                 (before != '-') &&
                 (dest + currentRule->replen < destmax)) {
-              const wchar_t *ptr = src + currentFindLength;
+              const wchar_t *end = src + currentFindLength;
+              const wchar_t *ptr = end;
 
               while (ptr < srcmax) {
                 if (!testCharacter(*ptr, CTC_Space)) {
-                  if (testCharacter(*ptr, CTC_Letter)) return 1;
-                  break;
+                  if (!testCharacter(*ptr, CTC_Letter)) break;
+                  if (ptr == end) break;
+                  return 1;
                 }
 
                 if (ptr++ == cursor) break;
