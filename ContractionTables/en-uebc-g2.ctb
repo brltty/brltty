@@ -389,7 +389,7 @@ always + 5-235
 always < 4-126
 always > 4-345
 always = 5-2356
-always % 456-356
+always % 46-356
 always | 456-1256
 always ^ 4-26
 always ~ 4-35
