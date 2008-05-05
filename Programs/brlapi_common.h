@@ -193,7 +193,16 @@ ssize_t BRLAPI(readPacketContent)(brlapi_fileDescriptor fd, size_t packetSize, v
 {
   ssize_t res;
   char foo[BRLAPI_MAXPACKETSIZE];
-  if ((res = brlapi_readFile(fd,buf,MIN(bufSize,packetSize),1)) < 0) goto out;
+  while (1) {
+    res = brlapi_readFile(fd,buf,MIN(bufSize,packetSize),1);
+    if (res >= 0) break;
+    if (errno != EINTR
+#ifdef EWOULDBLOCK
+	&& errno != EWOULDBLOCK
+#endif /* EWOULDBLOCK */
+	&& errno != EAGAIN)
+      goto out;
+  }
   if (res<MIN(bufSize,packetSize)) return -2; /* pkt smaller than announced => EOF */
   if (packetSize>bufSize) {
     size_t discard = packetSize-bufSize;
