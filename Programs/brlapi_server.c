@@ -628,7 +628,10 @@ out:
 /* Frees all resources associated to a connection */
 static void freeConnection(Connection *c)
 {
-  if (c->fd>=0) closeFileDescriptor(c->fd);
+  if (c->fd>=0) {
+    if (c->auth != 1) unauthConnections--;
+    closeFileDescriptor(c->fd);
+  }
   pthread_mutex_destroy(&c->brlMutex);
   pthread_mutex_destroy(&c->acceptedKeysMutex);
   freeBrailleWindow(&c->brailleWindow);
@@ -1186,6 +1189,7 @@ static int handleUnauthorizedConnection(Connection *c, brlapi_packetType_t type,
       /* TODO: move this inside auth.c */
       if (authDescriptor && authPerform(authDescriptor, c->fd)) {
 	authPacket->type[nbmethods++] = htonl(BRLAPI_AUTH_NONE);
+	unauthConnections--;
 	c->auth = 1;
       } else {
 	if (isAbsolutePath(auth))
@@ -1306,7 +1310,6 @@ static int processRequest(Connection *c, PacketHandlers *handlers)
       LogPrint(LOG_DEBUG,"Client on fd %"PRIFD" did not give up control of tty %#010x properly",c->fd,c->tty->number);
       doLeaveTty(c);
     }
-    if (c->auth!=1) unauthConnections--;
     return 1;
   }
   size = c->packet.header.size;
