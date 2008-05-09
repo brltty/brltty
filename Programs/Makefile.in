@@ -546,7 +546,7 @@ install-api-headers: brlapi_constants.h brlapi_brldefs.auto.h install-apihdr-dir
 
 install-api-manpages: install-man3-directory
 	cd $(BLD_TOP)$(DOC_DIR) && $(MAKE) man3
-	set -- $(SRC_TOP)$(DOC_DIR)/BrlAPIref/man/man3/brlapi_*.3 && [ -f $$1 ] || exit 0 && \
+	set -- $(BLD_TOP)$(DOC_DIR)/BrlAPIref/man/man3/brlapi_*.3 && [ -f $$1 ] || exit 0 && \
 	$(INSTALL_DATA) $$* $(INSTALL_MAN3_DIRECTORY)
 
 install-api-key:
