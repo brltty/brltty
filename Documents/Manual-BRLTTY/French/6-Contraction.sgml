@@ -20,9 +20,13 @@ Les tables d'abrégé suivantes sont fournies:
 <descrip>
   <tag>big5</tag>Chinois
   <tag>compress</tag>Enlève les blancs en trop
-  <tag>en-us-g2</tag>Anglais Américain 2ème degré
+  <tag>en-uebc-g2</tag>Braille abrégé anglais unifié
   <tag>fr-abrege</tag>Français unifié abrégé
   <tag>fr-integral</tag>Français unifié désabrégé
+  <tag>zh-tw-big</tag>Chinois Thaïwanais (utilisant le codage BIG5).
+  <tag>zh-tw-gb</tag>Chinois Thaïwanais simplifié
+  <tag>zh-tw-1cb</tag>Braille Chinois Thaïwanais "Unique"
+  <tag>zh-tw-utf8</tag>Chinois Thaïwanais (utilisant le codage UTF-8)
 </descrip>
 
 <sect1>Format de fichier<p>
@@ -48,7 +52,7 @@ Les types d'opérateur suivant sont supportés:
     Les représentations spéciales suivantes sont aussi supportées:
     <descrip>
       <tag><tt>&bsol;&bsol;</tt></tag>barre oblique inversée
-      <tag><tt>&bsol;f</tt></tag>form feed
+      <tag><tt>&bsol;f</tt></tag>saut de page
       <tag><tt>&bsol;n</tt></tag>nouvelle ligne
       <tag><tt>&bsol;o</tt><em>ooo</em></tag>valeur d'octet sur 3 chiffres
       <tag><tt>&bsol;r</tt></tag>retour chariot
@@ -76,7 +80,7 @@ Les types d'opérateur suivant sont supportés:
     numéro standard (voir la 
     <ref id="dots" name="Convention du nombre de points braille Standard">),
     et, pour un symbole multicellules, les spécifications de la cellule doivent
-    être séparés par un tiret (<tt>-</tt>).
+    être séparées par un tiret (<tt>-</tt>).
     Par exemple, l'abréviation du mot anglais <tt>lord</tt> (la lettre <tt>l</tt>
     précédée du point 5) serait spécifiée comme <tt>5-123</tt>.
     Vous pouvez spécifier un espace avec le numéro de point spécial <tt>0</tt>.
@@ -93,7 +97,7 @@ Ils n'ont pas d'effet direct sur la traduction de caractère.
   <tag><tt>include</tt> <em>path</em><label id="contraction-opcode-include"></tag>
     Inclut le contenu d'un autre fichier.
     L'inclusion peut se faire à n'importe quel niveau.
-    Les chemins relatifs sont déterminés par rapport au répertoire du fichier inclu.
+    Les chemins relatifs sont déterminés par rapport au répertoire du fichier incluS.
   <tag><tt>locale</tt> <em>locale</em><label id="contraction-opcode-locale"></tag>
     Définit la locale pour l'interprétation d'un caractère (minuscule,
     majuscule, numérique, etc). La locale peut être définie comme:
@@ -128,8 +132,13 @@ le texte braille afin de le rendre plus clair.
     d'un mot.
   <tag><tt>letsign</tt> <em>points</em><label id="contraction-opcode-letsign"></tag>
     Le symbole qui désigne une lettre ne faisant pas partie du mot.
-  <tag><tt>numsign</tt> <em>points</em><label id="contraction-opcode-numsign"></tag>
+  
+  
     Le symbole marquant le début d'un nombre.
+  <tag><tt>lastlargesign</tt> <em>points</em><label id="contraction-opcode-numsign"></tag>
+    Traduit les caractères quelque soit l'endroit où ils apparaissent.
+    Supprime les espaces qui les précède si le mot précédent a été marqué
+    par le code "largesign".
 </descrip>
 
 <sect2>Traduction de caractère<label id="contraction-opcodes-translation"><p>

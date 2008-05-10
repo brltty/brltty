@@ -15,7 +15,7 @@ se trouve).
 La routine-curseur fournit cette possibilité en sachant où se trouve le curseur,
 en simulant les mêmes appuis sur les flèches de direction que vous devriez
 entrer manuellement, et en affichant l'évolution du curseur pendant qu'il se
-dépasse.
+déplace.
 
 Certains afficheurs braille ont un bouton, appelé routine-curseur, au-dessus de
 chaque cellule. Ces touches utilisent la commande
@@ -35,7 +35,7 @@ vertical imprévisible lorsque vous demandez un déplacement vertical, car elles
 n'autorisent pas le curseur à se placer à droite de la fin d'une ligne.
 Un problème majeur trouvé dans certains navigateurs web (comme
 <tt>lynx</tt>), est que les flèches haut et bas sont utilisées pour se déplacer
-parmi les liens (ce qui peut sauter des lignes et/ou déplacer horrizontalement
+parmi les liens (ce qui peut sauter des lignes et/ou déplacer horizontalement
 le curseur mais rarement déplacer le curseur d'une ligne dans la direction
 désirée), et que les flèches gauche et droite sont utilisées pour sélectionner
 les liens (ce qui n'a absolument rien à voir avec une quelconque forme de
@@ -57,14 +57,14 @@ mauvaise direction, ou vous passez à un terminal différent.
 En premier, un effort est fait pour utiliser le déplacement vertical pour
 amener le curseur à la bonne ligne, puis, uniquement si cela réussit, un effort
 est fait pour utiliser le déplacement horizontal pour amener le curseur à la
-bonne colonne. Si vous faites une autre demande alors qu'routine est en train de
+bonne colonne. Si vous faites une autre demande alors qu'une routine est en train de
 s'effectuer, la première est annulée et la deuxième est démarrée. 
 
 Une commande de routine curseur plus sûre mais moins puissante, 
 <ref id="command-CSRJMP_VERT" name="CSRJMP_VERT">, utilise le déplacement
 vertical pour amener le curseur n'importe où sur la première ligne de la
 fenêtre braille. Elle est surtout utile, jointe à certaines applications
-(comme <tt>lynx</tt>), dans lesquelles le déplacement du curseur à l'horrizontal
+(comme <tt>lynx</tt>), dans lesquelles le déplacement du curseur à l'horizontal
 ne doit jamais être tenté.
 
 <sect1>Couper-coller<label id="cut"><p>
@@ -162,7 +162,7 @@ Le soulignement des caractères en surbrillance devrait donc être activée (voir
 la commande <ref id="command-ATTRVIS" name="ATTRVIS"> pour des  détails) quand 
 l'utilisateur brailliste veut utiliser le pointeur.
 
-Cette caractéristique donne aussi à l'utilisateur braille au accès à la
+Cette caractéristique donne aussi à l'utilisateur braille  accès à la
 fonction couper-coller de <tt>gpm</tt>. Bien que vous devriez lire la documentation
 spécifique de <tt>gpm</tt>, voici quelques remarques sur son fonctionnement.
 <itemize>
@@ -244,7 +244,7 @@ Ces événements incluent:
   <item>
     Le moment où une caractéristique est activée ou désactivée.
   <item>
-    Le moment où le suivi du curseur est activée ou désactivée.
+    Le moment où le suivi du curseur est activé ou désactivé.
   <item>
     Le moment où l'image de l'écran est gelée ou rafraîchie.
   <item>
@@ -315,7 +315,7 @@ Remarques:
   <item>
     Utilisez la commande <tt>PREFMENU</tt> (encore) pour quitter
     effectivement les nouvelles valeurs., sortir du menu et faire des
-    opération normale. De plus, si vous avez sélectionner l'option <tt>Save Settings on Exit</tt>, les
+    opérations normales. De plus, si vous avez sélectionner l'option <tt>Save Settings on Exit</tt>, les
     nouvelles valeurs sont sauvegardées dans le fichier des préférences.
     Toute commande non reconnue par le système du menu fait la même chose.
 </itemize>
@@ -326,7 +326,7 @@ Remarques:
       Lors de la sortie du menu de préférences:
     <descrip>
       <tag>No</tag>
-        Ne sauvegarde pas automatiquement les paramètres de préférences.
+        Ne sauvegarde pas automatiquement les paramètres de préférence.
       <tag>Yes</tag>
         Sauvegarde automatiquement les paramètres de préférence.
     </descrip>
@@ -356,7 +356,7 @@ Remarques:
       <tag>No</tag>
         Ne saute pas les lignes qui ont le même contenu que la ligne courante.
       <tag>Yes</tag>
-        Saute les lignes qui ont le même contenu que la ligne courante.
+        Saute les lignes déjà vues qui ont le même contenu que la ligne courante.
     </descrip>
     Vous pouvez aussi changer ce paramètre avec la commande
     <ref id="command-SKPIDLNS" name="SKPIDLNS">.
@@ -365,7 +365,7 @@ Remarques:
     <ref id="command-FWINLT-FWINRT" name="FWINLT/FWINRT">:
     <descrip>
       <tag>No</tag>
-        Ne saute pas les fenêtres vides.
+        Ne saute pas les fenêtres vides déjà lues.
       <tag>Yes</tag>
         Saute les fenêtres vides.
     </descrip>
@@ -381,7 +381,7 @@ Remarques:
       <tag>Rest of Line</tag>
         Ne saute que celles qui sont à la fin (sur le côté droit) d'une ligne lors d'une lecture
 	vers l'avant, et au début (sur le côté gauche) d'une ligne lors d'une
-	lecture à reculon.
+	lecture à reculons.
     </descrip>
   <tag>Sliding Window<label id="preference-sliding-window"></tag>
     Si le curseur est suivi (voir la commande
@@ -406,7 +406,7 @@ Remarques:
         La repositionne chaque fois que le curseur va trop à l'intérieur près
 	de la fin.
     </descrip>
-    Le paramètre initial est à <tt>off</tt>.
+    Le paramètre initial est à <tt>no</tt>.
   <tag>Window Overlap<label id="preference-window-overlap"></tag>
     Lors d'un déplacement à gauche ou à droite avec les commandes
     <ref id="command-FWINLT-FWINRT" name="FWINLT/FWINRT">, ce paramètre
@@ -431,6 +431,9 @@ Remarques:
       <item>
         Les commandes <ref id="command-CHRLT-CHRRT" name="CHRLT/CHRRT">.
       <item>
+        Opérations de défilement automatique de la fenêtre braille (voir
+        la préférence "Autorepeat Panning).
+      <item>
         Les opérations Page Précédente Page suivante.
       <item>
         Les opérations curseur sur ligne précédente et ligne suivante.
@@ -447,7 +450,22 @@ Remarques:
     événements distinctement séparés.
     Vous pouvez aussi changer ce paramètre avec la commande
     <ref id="command-AUTOREPEAT" name="AUTOREPEAT">.
-    Le paramètre initial est <tt>off</tt>.
+    Le paramètre initial est <tt>yes</tt>.
+  <tag>Autorepeat Panning<label id="preference-autorepeat-delay"></tag>
+    Quand la préférence "Autorepeat" est activée:
+    
+    <descrip>
+      <tag>No</tag>
+        Ne répète pas automatiquement les opérations de défilement  de la
+        fenêtre braille.
+      <tag>Yes</tag>
+        Répète automatiquement les opérations de défilement  de la fenêtre 
+        braille.
+    </descrip>
+    
+    Ce paramètre modifie le comportement des commandes "FWINLT/FWINRT". Le
+    paramètre initial est <tt>no</tt>.
+
   <tag>Autorepeat Delay<label id="preference-autorepeat-delay"></tag>
     Lorsqu'un caractère doit être autorépété, ce paramètre spécifie la valeur
     du temps (voir la remarque sur <ref id="time-settings" name="time settings"> ci-dessous)
@@ -540,7 +558,7 @@ Remarques:
     <ref id="command-DISPMD" name="DISPMD">):
     <descrip>
       <tag>No</tag>
-        Laisse les lettres en majuscules visibles tout le temps.
+        Laisse les lettres en majuscule visibles tout le temps.
       <tag>Yes</tag>
         Rend les lettres en majuscule alternativement visible et invisible
 	selon un intervalle prédéfini.
@@ -571,6 +589,19 @@ Remarques:
     </itemize>
     Cette préférence n'est disponible que si vous utilisez un pilote qui
     la supporte. La valeur initiale est <tt>Medium</tt>.
+  <tag>Braille Sensitivity<label id="preference-braille-firmness"></tag>
+    Règle la sensibilité des points braille au teucher.
+    Elle peut être réglée à:
+    <itemize>
+      <item>Maximum (maximum)
+      <item>High (haut)
+      <item>Medium (moyen)
+      <item>Low (bas)
+      <item>Minimum (minimum)
+    </itemize>
+    Cette préférence n'est disponible que si vous utilisez un pilote qui
+    la supporte. La valeur initiale est <tt>Medium</tt>.
+
   <tag>Window Follows Pointer<label id="preference-window-follows-pointer"></tag>
     Lors du déplacement du pointeur (souris):
     <descrip>
@@ -581,14 +612,22 @@ Remarques:
     </descrip>
     Cette préférence n'est présentée que si l'option de compilation
     <ref id="gpm" name="--enable-gpm"> a été spécifiée.
-  <tag>Pointer Follows Window<label id="preference-pointer-follows-window"></tag>
+  <tag>Highlight Window<label id="preference-pointer-follows-window"></tag>
     Lors du déplacement de la fenêtre braille:
     <descrip>
       <tag>No</tag>
-        Ne déplace pas le pointeur (Souris).
+        Ne met pas en surbrillance la nouvelle zone de l'ùcran.
       <tag>Yes</tag>
-        Déplace le pointeur (la souris) sur le caractère à l'écran au coin en
-	haut à gauche de la fenêtre braille.
+        Cette option active un marqueur visible montrant où se situe la
+        fenêtre braille, et, par conséquent, permettant de savoir ce que
+        l'utilisateur en braille est en train de lire. Tout mouvement de la
+        fenêtre braille (manuel, poursuite du curseur, etc.) autre que ceux
+        répondant au mouvement du pointeur (voir la préférence ref id="preference-window-follows-pointer" name="Window Follows Pointer">)
+        a pour conséquence que la zone de l'écran correspondant à
+        au nouvel endroit où se trouve la  fenêtre braille est mis en
+        surbrillance. Si la préférence "Show Attributes" est activée, seul le
+        caractère correspondant au coin en haut à gauche de la fenêtre braille
+        est mis en surbrillance.
     </descrip>
     Cette préférence n'est présentée que si l'option de compilation 
     <ref id="gpm" name="--enable-gpm"> a été spécifiée.
@@ -603,7 +642,7 @@ Remarques:
     </descrip>
     Vous pouvez aussi changer ce paramètre avec la commande
     <ref id="command-TUNES" name="TUNES">.
-    La valeur initiale est <tt>on</tt>.
+    La valeur initiale est <tt>yes</tt>.
   <tag>Tune Device<label id="preference-tune-device"></tag>
     Joue les beeps d'alerte via:
     <descrip>
@@ -640,13 +679,27 @@ Remarques:
         Ce périphérique n'est pas disponible si vous avez spécifié l'option de
 	compilation <ref id="build-fm-support" name="--disable-fm-support">.
     </descrip>
-    La valeur initiale est <tt>beeper</tt> sur les plateformes supportant cela,
+    La valeur initiale est <tt>Beeper</tt> sur les plateformes supportant cela,
     et <tt>PCM</tt> sur les autres.
+  <tag>PCM Volume<label id="preference-pcm-instrument"></tag>
+    Si vous utilisez l'interface Digital Audio de votre carte son pour
+    jouer les beeps d'alerte, ce paramètre spécifie le volume (sous la forme d'un
+    pourcentage du maximum) auquel ils sont joués.
+  <tag>MIDI Volume<label id="preference-pcm-instrument"></tag>
+    Si vous utilisez la Musical Instrument Digital Interface (MIDI) (interface 
+    digital instrument de musique) de votre carte son 
+    pour jouer les beeps d'alerte, ce paramètre spécifie le volume (sous la
+    forme d'un pourcentage du maximum) auquel ils sont joués.
+    Le paramètre initial est 70.
   <tag>MIDI Instrument<label id="preference-midi-instrument"></tag>
     Si l'interface MIDI de la carte son est
     utilisé pour jouer les sons d'alerte, ce paramètre spécifie quel instrument doit être
     utilisé (voir <ref id="operand-midi-device" name="MIDI Instrument Table">).
     La valeur initiale est <tt>Acoustic Grand Piano</tt>.
+  <tag>FM Volume<label id="preference-alert-dots"></tag>
+    Si vous utilisez le synthétiseur FM de votre carte son 
+    pour jouer les beeps d'alerte, ce paramètre spécifie le volume (sous la
+    forme d'un pourcentage du maximum) auquel ils sont joués.
   <tag>Alert Dots<label id="preference-alert-dots"></tag>
     Chaque fois qu'un événement avec un type de point associé se produit (voir
     <ref id="tunes" name="Alert Tunes">):
@@ -687,12 +740,12 @@ Remarques:
       <tag>Enqueue</tag>
         Ne suspend pas la parole.
     </descrip>
-    La valeur initiale est <tt>immediate</tt>.
+    La valeur initiale est <tt>Immediate</tt>.
   <tag>Autospeak<label id="preference-autospeak"></tag>
     <descrip>
-      <tag>No</tag>
+      <tag>off</tag>
         Ne parle que quand vous le demandez explicitement.
-      <tag>Yes</tag>
+      <tag>on</tag>
         Parle automatiquement:
         <itemize>
           <item>la nouvelle ligne lorsque vous déplacez la fenêtre braille
@@ -765,17 +818,17 @@ Remarques:
         </descrip>
 	Dans les deux cas, les indicateurs incluent:
 	la ligne 26 est représentée par la lettre <tt>a</tt>, et la cinquième
-	fenêtre braille horrizontale est représentée avec aucun point derrière.
+	fenêtre braille horizontale est représentée avec aucun point derrière.
       <tag>Tieman</tag>
         Les cellules de statut contiennent:
         <descrip>
           <tag>1-2</tag>
-	    Les colonnes (en partant de zéro) du curseur (montrées dans la
-	    première moitié des cellules et du coin haut à gauche de la
+	    Les colonnes (en partant de un) du curseur (montrées dans la
+	    moitié supérieure des cellules et du coin haut à gauche de la
 	    fenêtre braille (montré dans la partie arrière des cellules).
           <tag>3-4</tag>
-	    Les rangées (en partant de zéro) du curseur montrées dans la
-	    première moitié des cellules et du coin haut à gauche de la
+	    Les rangées (en partant de un) du curseur montrées dans la
+	    moitié supérieure des cellules et du coin haut à gauche de la
 	    fenêtre braille (montré dans la partie arrière des cellules).
           <tag>5</tag>
 	    Chaque point indique si une caractéristique est active comme suit:
@@ -834,12 +887,12 @@ Remarques:
 	    La rangée (en partant de 0) correspondant au haut de la fenêtre
 	    braille (voir ci-dessous).
           <tag>2</tag>
-            La rangée (en partant de 0) sur laquelle se trouve le curseur (voir
+            La rangée (en partant de 1) sur laquelle se trouve le curseur (voir
 	    ci-dessous).
           <tag>3</tag>
 	    Si l'écran est gelé (voir la commande
 	    <ref id="command-FREEZE" name="FREEZE">), la lettre <tt>F</tt>.
-            Sinon, la colonne (en partant de 0) dans laquelle se trouve le
+            Sinon, la colonne (en partant de 1) dans laquelle se trouve le
 	    curseur (voir ci-dessous).
         </descrip>
 	Les numéros de rangée et de colonne sont montrés comme deux cases dans
@@ -899,15 +952,15 @@ La présentation des informations contenu à l'intérieur dépend de la taille de
 la fenêtre braille.
 
 <sect2>Afficheurs à 21 cellules ou plus<p>
-De courtes symboliques ont été utilisées, bien qu'elles s'aparentent à un code
+De courtes symboliques ont été utilisées, bien qu'elles s'apparentent à un code
 crypté, de façon à montrer la présentation en colonne précise.
 <tscreen><em>wx</em>:<em>wy</em> <em>cx</em>:<em>cy</em> <em>vt</em> <em>tcmfdu</em></tscreen>
 <descrip>
   <tag><em>wx</em><tt>:</tt><em>wy</em></tag>
-    La colonne et la rangée (en partant de 0) sur l'écran correspondant au
+    La colonne et la rangée (en partant de 1) sur l'écran correspondant au
     coin en haut à gauche de la fenêtre braille.
   <tag><em>cx</em><tt>:</tt><em>cy</em></tag>
-    La colonne et la rangée (en partant de 0) sur l'écran correspondant à la
+    La colonne et la rangée (en partant de 1) sur l'écran correspondant à la
     position du curseur.
   <tag><em>vt</em></tag>
     Le numéro (en partant de 1) de la console virtuelle courante.
@@ -928,7 +981,7 @@ crypté, de façon à montrer la présentation en colonne précise.
       <tag><tt>b</tt></tag>Le curseur n'est pas visible, et masquera lorsqu'il
       sera visible.
       <tag><tt>v</tt></tag>Le curseur est visible et non masquable.
-      <tag><tt>B</tt></tag>Le curseur et visible et masquable.
+      <tag><tt>B</tt></tag>Le curseur est visible et masquable.
     </descrip>
   <tag><em>m</em></tag>
     Le mode d'affichage courant (voir la commande
@@ -966,12 +1019,12 @@ crypté, de façon à montrer la présentation en colonne précise.
 <tscreen><em>xx</em><em>yy</em><em>s</em> <em>vt</em> <em>tcmfdu</em></tscreen>
 <descrip>
   <tag><em>xx</em></tag>
-    Les colonnes (en partant de 0) sur l'écran correspondant à la position du
+    Les colonnes (en partant de 1) sur l'écran correspondant à la position du
     curseur (affichée dans la moitié supérieure des cellules) et au coin en
     haut à gauche de l'afficheur braille (montré dans la moitié arrière des
     cellules).
   <tag><em>yy</em></tag>
-    Les rangées (en partant de 0) sur l'écran correspondant à la position du
+    Les rangées (en partant de 1) sur l'écran correspondant à la position du
     curseur (affichée dans la moitié supérieure des cellules) et au coin en
     haut à gauche de l'afficheur braille (montré dans la moitié arrière des
     cellules).
@@ -1023,7 +1076,7 @@ crypté, de façon à montrer la présentation en colonne précise.
       <tag><tt>b</tt></tag>Le curseur n'est pas visible, et masquera lorsqu'il
       sera visible.
       <tag><tt>v</tt></tag>Le curseur est visible et non masquable.
-      <tag><tt>B</tt></tag>Le curseur et visible et masquable.
+      <tag><tt>B</tt></tag>Le curseur est visible et masquable.
     </descrip>
   <tag><em>m</em></tag>
     Le mode d'affichage courant (voir la commande

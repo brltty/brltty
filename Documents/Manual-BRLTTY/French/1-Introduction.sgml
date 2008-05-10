@@ -33,7 +33,7 @@ BRLTTY donne les possibilités suivantes:
   <item>
     Gel de l'écran pour en faire une relecture plus lente.
   <item>
-    Routine-curseur intillegente, permettant un rapide
+    Routine-curseur intelligente, permettant un rapide
     rapatriment du curseur dans les éditeurs de texte, les navigateurs
     web, etc., sans bouger les mains de l'afficheur braille.
   <item>
@@ -42,7 +42,7 @@ BRLTTY donne les possibilités suivantes:
     texte entre des terminaux virtuels, la saisie de commandes
     compliquées, etc.
   <item>
-    Gestion des tables abrégé (fourni en anglais niveau 2).
+    Gestion des tables abrégée (fournie en anglais et en français).
   <item>
     Support pour de multiples codes braille.
   <item>
@@ -66,7 +66,7 @@ BRLTTY donne les possibilités suivantes:
 
 <sect1>Système requis<p>
 Actuellement, BRLTTY fonctionne sur Linux, Solaris, OpenBSD, FreeBSD,
-et NetBSD. Les transpositions pour d'autres systèmes d'exploitation
+NetBSD et Windows. Les transpositions pour d'autres systèmes d'exploitation
 dérivés de Unix ne sont pas encore prévues, nous apprécierions vraiment
 tout intérêt pour de tels projets.
 
@@ -111,6 +111,9 @@ tout intérêt pour de tels projets.
       <item>
         L'architecture Intel (version 1.6).
     </itemize>
+  <tag>Windows</tag>
+    Ce logiciel a été testé sur Windows 95, 98 et XP.
+
 </descrip>
 
 Sur Linux, BRLTTY peut inspecter le contenu de l'écran de façon
@@ -166,7 +169,7 @@ Si le pilote est un module, alors ses options doivent être:
         Fournies en tant qu'options à la commande <tt>modprobe</tt> (ou
         la commande <tt>insmod</tt>).
       <item>
-        Spécifiées sur une ligne <tt>options</tt>  dans <tt>/etc/modules.conf</tt>
+        Spécifiées sur une ligne <tt>options</tt> dans <tt>/etc/modules.conf</tt>
         (nommé <tt>/etc/conf.modules</tt> dans de vieilles distributions).
     </itemize>
 </descrip>
@@ -188,5 +191,5 @@ vous aimeriez voir supporté, faites-le nous savoir (voir la section
 Enfin, vous avez besoin d'outils pour compiler l'exécutable depuis le
 source, <tt>make</tt>, les compilateurs <tt>C</tt> et <tt>C++</tt>, <tt>yacc</tt>,
 <tt>awk</tt>, etc. Les outils de développement fournis avec les
-distributions Unix standards devraient suffir. Si vous rencontrez des
+distributions Unix standards devraient suffire. Si vous rencontrez des
 problèmes, contactez-nous et nous vous compilerons un exécutable.

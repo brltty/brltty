@@ -13,20 +13,24 @@ traduction de texte par défaut, plusieurs alternatives sont fournies:
   <tag>cz</tag>Tchèque (iso-8859-2)
   <tag>da</tag>Danois (iso-8859-1)
   <tag>de</tag>Allemand (iso-8859-1)
+  <tag>en_UK</tag>Anglais (United Kingdom)
+  <tag>en_US</tag>Anglais (United States)
   <tag>es</tag>Espagnol (iso-8859-1)
   <tag>fi1</tag>Finois (iso-8859-1)
   <tag>fi2</tag>Finois (iso-8859-1)
-  <tag>fr</tag>Français (iso-8859-1)
+  <tag>fr_CA</tag>Français (Canada)
+  <tag>fr_FR</tag>Français (France)
+  <tag>fr-2007</tag>Français unifié (iso-8859-1)
   <tag>fr-cbifs</tag>Code Braille Informatique Français Standard (iso-8859-1)
   <tag>it</tag>Italien (iso-8859-1)
   <tag>nabcc</tag>Code informatique braille nord-américain (iso-8859-1)
   <tag>no-h</tag>Norvégien et allemand (iso-8859-1)
   <tag>no-p</tag>Norvégien (iso-8859-1)
   <tag>pl</tag>Polonais (iso-8859-2)
+  <tag>pt</tag>Portugais (iso-8859-1)
   <tag>ru</tag>Russe (koi8-r)
-  <tag>se1</tag>Suédois (iso-8859-1)
-  <tag>se2</tag>Suédois (iso-8859-1)
-  <tag>uk</tag>Anglais Royaume-Uni (iso-8859-1)
+  <tag>se</tag>Suédois (1996 standard)
+  <tag>se-old</tag>Suédois (1989 standard)
   <tag>us</tag>Anglais américain (iso-8859-1)
   <tag>vni</tag>Vietnamien (iso-8859-1)
 </descrip>
@@ -48,7 +52,7 @@ Les tables de traduction d'attributs suivantes sont fournies:
     La colonne à gauche représente les couleurs de premier plan:
     <descrip>
       <tag>Point 1</tag>Rouge
-      <tag>Dot 2</tag>Green
+      <tag>Point 2</tag>Vert
       <tag>Point 3</tag>Bleu
       <tag>Point 7</tag>Brillant
     </descrip>
@@ -60,7 +64,7 @@ Les tables de traduction d'attributs suivantes sont fournies:
       <tag>Point 8</tag>Clignotant
     </descrip>
     Un point est affiché quand son bit d'attribut correspondant est actif.
-    C'est la Table de traduction d'attributs par défaut car c'est la plus
+    C'est la table de traduction d'attributs par défaut car c'est la plus
     intuitive. Cependant, l'un de ses problèmes est qu'il est difficile de
     distinguer la différence entre la vidéo normale (noir sur blanc) et inversée
     (blanc sur noir).
@@ -103,7 +107,7 @@ commentaire et est ignorée.
 
 Les lignes de commande suivantes sont fournies:
 <descrip>
-  <tag><tt>byte</tt> <em>octet</em> <em>dots</em> &num; <em>comment</em></tag>
+  <tag><tt>byte</tt> <em>octet</em> <em>points</em> &num; <em>commentaire</em></tag>
     Utilisez l'instruction <tt>byte</tt> pour spécifier comment un octet (caractère)
     doit être représenté en braille.
     Voir les tables de traduction de texte pour des exemples de son utilisation.
@@ -127,7 +131,7 @@ Les lignes de commande suivantes sont fournies:
 	      n'est pas significative)
             </descrip>
         </itemize>
-      <tag><em>dots</em></tag>
+      <tag><em>point</em></tag>
         La représentation braille de l'octet. C'est un séquence de un à huit
 	numéros de points. Si la séquence de nombre de point est entourée de
 	parenthèses, les numéros de points peuvent être séparés par des espaces.
@@ -148,7 +152,7 @@ Les lignes de commande suivantes sont fournies:
       <item>\\ 12567
       <item>\x20 0
     </itemize>
-  <tag><tt>dot</tt> <em>point</> <em>etat</em> &num; <em>commentaire</em></tag>
+  <tag><tt>dot</tt> <em>point</em> <em>etat</em> &num; <em>commentaire</em></tag>
     Utilisez l'instruction <tt>dot</tt> pour spécifier comment les octets non définis doivent être représentés en
     braille. Voir les tables de traduction des attributs pour des exemples
     de son utilisation. Par défaut, tous les points sont <tt>on</tt>.

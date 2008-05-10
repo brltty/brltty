@@ -21,12 +21,15 @@ fichiers suivants:
       <tag><ref id="utility-brltty-install" name="brltty-install"></tag>
         Un utilitaire pour la copie de la <ref id="hierarchy"
         name="hiérarchie des fichiers installés"> de BRLTTY d'un emplacement à
-        un autre..
+        un autre...
       <tag><ref id="utility-brltty-config" name="brltty-config"></tag>
         Un utilitaire qui assigne un certain nombre de variables
         d'environnement à des valeurs reflétant l'installation
         courante de BRLTTY.
     </descrip>
+  <tag>/lib/brltty/rw/</tag>
+    Fichiers créés lors de l'exécution, comme ceux nécessaires mais absents
+    du système.
   <tag>/etc/</tag>
     <descrip>
       <tag>brltty.conf</tag>
@@ -51,7 +54,7 @@ fichiers suivants:
         moins à
         <em>langue</em><tt>-</tt><em>pays</em><tt>-</tt><em>niveau</em><tt>.ctb</tt>.
       <tag>*.cti</tag>
-        Inclut les fichiers pour les tables de traduction.
+        Incluent les fichiers pour les tables de traduction.
       <tag>*.hlp</tag>
         Pages d'aide spécifiques à chaque pilote. Leur nom ressemble
         plus ou moins à <tt>brltty-</tt><em>pilote</em><tt>.hlp</tt>, où
@@ -62,17 +65,33 @@ fichiers suivants:
         name="Tables de traduction"> pour plus de détails). Leur nom
         ressemble plus ou moins à <tt>text.</tt><em>langue</em><tt>.tbl</tt>. Il y
         a aussi deux tables spéciales qui assignent les attributs des
-        caractères de mise en relief à des points braille:
+        caractères de mise en relief à des points braille :
         <tt>attrib.tbl</tt> le rend comme le chemin original, et
         <tt>attributes.tbl</tt> le rend comme le chemin courant.
     </descrip>
+  <tag>/var/lib/</tag>
+    Sockets locaux pour la connexion à l'interface de programmation de
+    l'application.
+  <tag>/include/</tag>
+    Les fichiers d'en-tête C pour l'interface de programmation de
+    l'application. Leurs noms ressemblent à <em>brlapi-fonction</em><tt>.h</tt>.
+    L'en-tête principale est brlapi.h.
+  <tag>/include/brltty/</tag>
+    Les fichiers d'en-tête C pour l'interface de programmation de
+    l'application. Leurs noms ressemblent à <em>brldefs-pilote</em><tt>.h</tt> où
+    <em>pilote</em><tt>-</tt><em>pilote</em><tt>.h</tt> (où <em>pilote</em> correspond
+    aux deux lettres du <ref id="drivers" name="Code d'identification
+     du pilote">). Les en-têtes brldefs.h et api.h sont fournies pour une
+     compatibilité avec des version précédentes et ne devraient pas être
+     utilisées.
+     
   <tag>/lib/</tag>
     <descrip>
       <tag>libbrlapi.a</tag>
-        bibliothèque statique de l'interface programmatique de
+        bibliothèque statique de l'interface de programmation de
         l'application (Application Programming Interface).
       <tag>libbrlapi.so</tag>
-        bibliothèque dynamique pour l'interface programmatique de
+        bibliothèque dynamique pour l'interface de programmation de
         l'application.
     </descrip>
   <tag>/lib/brltty/</tag>
@@ -95,7 +114,7 @@ fichiers suivants:
       <tag>brltty-spk.lst</tag>
         Une liste des pilotes de synthèse vocale qui ont été
         compilés en tant qu'objets dynamiques, et, ainsi, qui peuvent
-        être utilisé. Chaque ligne contient les deux lettres
+        être utilisés. Chaque ligne contient les deux lettres
         du code d'identification pour un pilote, une tabulation, et
         une description de la synthèse vocale pour laquelle ce pilote
         existe.
@@ -104,26 +123,21 @@ fichiers suivants:
         correspond aux deux lettres du <ref id="drivers" name="Code
         d'identification du pilote">.
     </descrip>
-  <tag>/include/brltty/</tag>
-    Les fichiers d'en-tête C pour l'interface programmatique de
-    l'application. Leurs noms ressemble à <em>fonction</em><tt>.h</tt> ou
-    <em>fonction</em><tt>-</tt><em>pilote</em><tt>.h</tt> (où <em>pilote</em> correspond
-    aux deux lettres du <ref id="drivers" name="Code d'identification
-    du pilote">).
+
   <tag>/man/</tag>
     Pages de manuel.
     <descrip>
       <tag>man1/<em>nom</em>.1</tag>
-        Pages de manuel pour les commandes utilisateur lié à
+        Pages de manuel pour les commandes utilisateur liées à
         BRLTTY.
       <tag>man3/<em>nom</em>.3</tag>
         Pages de manuel pour la bibliothèque de
-        l'interface programmatique de l'application.
+        l'interface de programmation de l'application.
     </descrip>
 </descrip>
 
-D'autres fichier optionnels que vous devriez connaître, bien qu'ils ne
-fassent pas partie de la hiérarchie des fichiers installés, sont:
+D'autres fichiers optionnels que vous devriez connaître, bien qu'ils ne
+fassent pas partie de la hiérarchie des fichiers installés, sont :
 <descrip>
   <tag>/etc/brltty.conf</tag>
     Le fichier des paramètres système par défaut. Il est créé par
@@ -165,7 +179,7 @@ nos paramètres par défaut soient corrects.
     Vous devez effectuer cette dernière commande en tant que <bf/root/.
 </enum>
 
-Pour désinstaller BRLTTY, faites:
+Pour désinstaller BRLTTY, faites :
 <tscreen>
   cd brltty-<em>version</em>
   <newline>
@@ -199,10 +213,10 @@ instructions supplémentaires spécifiques.
   <tag><tt>--with-braille-driver=</tt><em>pilote</em><label id="build-braille-driver"></tag>
     Spécifie les pilotes des terminaux braille que vous voulez lier à
     l'exécutable de BRLTTY. Les pilotes qui ne figureront pas dans la
-    liste de cette option seront compilés en tant qu'objets dynaniques
+    liste de cette option seront compilés en tant qu'objets dynamiques
     et pourront toujours être sélectionnés à l'exécution. Chaque
     pilote doit être identifié soit par les 2 lettres de son <ref id="drivers" name="code
-    d'identification de pilote"> ou par son vrai non (complet ou
+    d'identification de pilote"> ou par son vrai nom (complet ou
     abrégé). Ces noms et/ou identifiants de pilotes doivent être séparés les uns des
     autres par une simple virgule. Si un identifiant de pilote est
     précédé du signe moins (<tt>-</tt>), ce pilote est alors exclu de la
@@ -250,12 +264,108 @@ instructions supplémentaires spécifiques.
     Spécifie le port par défaut auquel l'afficheur braille est relié
     (voir la section <ref id="operand-braille-device"
     name="Spécification du port braille">). Si vous ne spécifiez pas
-    cette option, un chemin approprié pour le port série Com1
-    correspondant au système d'exploitation est assumé. Voir la ligne
+    cette option, usb: est assumé si le support USB est disponible, et un
+    chemin approprié pour le port série Com1 correspondant au système 
+    d'exploitation est assumé. Voir la ligne
     <ref id="configure-braille-device" name="braille-device"> du
     fichier de configuration et l'option <ref
     id="options-braille-device" name="-d"> de la ligne de commande
     pour la sélection à l'exécution.
+  <tag><tt>--with-libbraille=</tt><em>répertoire</em>
+    Spécifie l'endroit où se trouve le paquet libbraille, et compile le pilote
+    pour l'afficheur braille libbraille (voir
+    <ref id="restrictions-flite" name="Restrictions dans la compilation">).
+    Un des mots suivants peut être aussi utilisé comme
+    opérateur pour l'option:
+
+(<tt>-</tt>),
+    <descrip>
+      <tag>no</tag>
+        Ne compile pas le pilote. Cela revient à spécifier
+        <tt>--without-libbraille</tt>.
+        
+      <tag>yes</tag>
+        Compile le pilote si le paquet est présent dans <tt>/usr</tt>, 
+        <tt>/usr/local</tt>, <tt>/usr/local/Libbraille</tt>,
+        <tt>/usr/local/libbraille</tt>, <tt>/opt/Libbraille</tt>, ou
+        <tt>/opt/libbraille</tt>. Cela revient à à spécifier <tt>--with-libbraille</tt>.
+    </descrip>
+  <tag><tt>--with-text-table=</tt><em>fichier</em><label id="build-text-table"></tag>
+    Spécifie la table de traduction de texte (voir la section <ref
+    id="translation-text" name="Traduction de texte"> pour plus de
+    détails). Vous pouvez fournir le chemin absolu d'une table hors de
+    l'arborescence source. L'extension .tbl est facultative. Pour un
+    nom de fichier simple, le préfixe <tt>text.</tt> est facultatif. Si
+    vous ne spécifiez pas cette option, nabcc, une table commune (en
+    Amérique du Nord) utilisant la variante 8 points du 
+    <ref id="nabcc" name="North American Braille Computer Code">, est
+    utilisée. Voir la ligne <ref id="configure-text-table"
+    name="text-table"> du fichier de configuration et l'option <ref
+    id="options-text-table" name="-t"> en ligne de commande pour la
+    sélection à l'exécution. Ce paramètre peut être modifié par la
+    préférence <ref id="preference-text-table" name="Text Table">.
+  <tag><tt>--with-attributes-table=</tt><em>fichier</em><label id="build-attributes-table"></tag>
+    Spécifie la table de trwdfhwdfhaduction des attributs (voir la section
+    <ref id="translation-attributes" name="Traduction des attributs">
+    pour plus de détails). Vous pouvez fournir le chemin absolu d'une
+    table hors de l'arborescence source.  L'extension <tt>.tbl</tt> est
+    facultative. Si vous ne spécifiez pas cette option,
+    <tt>attributes</tt> est alors utilisé. Changez cette option en
+    <tt>attrib</tt> pour maintenir l'ancienne forme. Voir la ligne
+    <ref id="configure-attributes-table" name="attributes-table"> du
+    fichier de configuration et l'option <ref
+    id="options-attributes-table" name="-a"> en ligne de commande pour
+    la sélection à l'exécution. Ce paramètre peut être modifié par la
+    préférence <ref id="preference-attributes-table" name="Attributes
+    Table">.
+  <tag><tt>--with-speech-driver=</tt><em>pilote</em><label id="build-speech-driver"></tag>
+    Spécifie les pilotes de synthèse vocale que vous voulez lier à
+    l'exécutable de BRLTTY. Les pilotes qui ne figureront pas dans la
+    liste de cette option seront compilés en tant qu'objets dynamiques
+    et pourront toujours être sélectionnés à l'exécution. Chaque
+    pilote doit être identifié soit par les 2 lettres de son <ref
+    id="drivers" name="code d'identification de pilote"> ou par son
+    vrai nom (complet ou abrégé). Ces noms et/ou les identifiants de pilotes doivent être
+    séparés les uns des autres par une simple virgule. Si un
+    identifiant de pilote est précédé du signe moins (<tt>-</tt>), ce
+    pilote est alors exclu de la compilation. Un des mots
+    suivants peut aussi être utilisé comme opérateur pour l'option:
+    <descrip>
+      <tag>all</tag>
+        Lie tous les pilotes à l'exécutable. Ne les compile pas en
+        tant qu'objets dynamiques. Vous pouvez spécifier ce mot comme
+        élément terminant une liste de pilotes. C'est une façon de
+        spécifier un pilote par défaut quand tous les pilotes seront
+        compilés.
+      <tag>-all</tag>
+        Ne compile que les pilotes qui ont été explicitement inclus
+        par cette option.
+      <tag>no</tag>
+        Ne compile aucun pilote. Cela revient à spécifier
+        <tt>--without-speech-driver</tt>.
+      <tag>yes</tag>
+        Compile tous les pilotes en tant qu'objets dynamiques. Ne les
+        lie pas à l'exécutable. Cela revient à spécifier
+        <tt>--with-speech-driver</tt>.
+    </descrip>
+    Voir la ligne <ref id="configure-speech-driver" name="speech-driver"> du fichier de configuration et
+    l'option <ref id="options-speech-driver" name="-s"> de la ligne de commande pour une sélection à l'exécution.
+  <tag><tt>--with-speech-parameters=</tt>[<em>pilote</em><tt>:</tt>]<em>nom</em><tt>=</tt><em>valeur</em><tt>,</tt>...<label id="build-speech-parameters"></tag>
+    Spécifie les paramètres par défaut pour les pilotes de synthèse
+    vocale. Si un même paramètre est spécifié plus d'une fois, sa
+    valeur la plus à droite est prise en compte. Si le nom d'un
+    paramètre est spécifique à un pilote, (voir la section
+    <ref id="drivers" name="Codes d'identification de pilotes">) cette valeur ne s'applique
+    qu'à ce pilote; sinon, il s'applique à tous les
+    pilotes. Pour une description des paramètres acceptés par un
+    pilote spécifique, reportez-vous à la documentation de ce
+    pilote. Voir la ligne <ref id="configure-speech-parameters" name="speech-parameters"> du fichier de
+    configuration et l'option <ref id="options-speech-parameters" name="-S"> de la ligne de commande pour la
+    sélection à l'exécution.
+  <tag><tt>--with-flite=</tt><em>directory</em><label id="build-flite"></tag>
+    Spécifie l'emplacement d'installation de FestivalLite
+    et compile le pilote pour cette synthèse vocale
+    (voir <ref id="restrictions-flite" name="Restrictions dans la compilation">
   <tag><tt>--with-text-table=</tt><em>fichier</em><label id="build-text-table"></tag>
     Spécifie la table de traduction de texte (voir la section <ref
     id="translation-text" name="Traduction de texte"> pour plus de
@@ -287,7 +397,7 @@ instructions supplémentaires spécifiques.
   <tag><tt>--with-speech-driver=</tt><em>pilote</em><label id="build-speech-driver"></tag>
     Spécifie les pilotes de synthèse vocale que vous voulez lier à
     l'exécutable de BRLTTY. Les pilotes qui ne figureront pas dans la
-    liste de cette option seront compilés en tant qu'objets dynaniques
+    liste de cette option seront compilés en tant qu'objets dynamiques
     et pourront toujours être sélectionnés à l'exécution. Chaque
     pilote doit être identifié soit par les 2 lettres de son <ref
     id="drivers" name="code d'identification de pilote"> ou par son
@@ -297,7 +407,163 @@ instructions supplémentaires spécifiques.
     pilote est alors exclu de la compilation. Le premier pilote
     non-exclu devient le pilote par défaut. Il n'y a pas de pilote
     par défaut si vous n'utilisez pas cette option. Un des mots
-    suivants peut aussi être utilisés comme opérateur pour l'option:
+    suivants peut aussi être utilisé comme opérateur pour l'option:
+    <descrip>
+      <tag>all</tag>
+        Lie tous les pilotes à l'exécutable. Ne les compile pas en
+        tant qu'objets dynamiques. Vous pouvez spécifier ce mot comme
+        élément terminant une liste de pilotes. C'est une façon de
+        spécifier un pilote par défaut quand tous les pilotes seront
+        compilés.
+      <tag>-all</tag>
+        Ne compile que les pilotes qui ont été explicitement inclus
+        par cette option.
+      <tag>no</tag>
+        Ne compile aucun pilote. Cela revient à spécifier
+        <tt>--without-speech-driver</tt>.
+      <tag>yes</tag>
+        Compile tous les pilotes en tant qu'objets dynamiques. Ne les
+        lie pas à l'exécutable. Cela revient à spécifier
+        <tt>--with-speech-driver</tt>.
+    </descrip>
+    Voir la ligne <ref id="configure-speech-driver" name="speech-driver"> du fichier de configuration et
+    l'option <ref id="options-speech-driver" name="-s"> de la ligne de commande pour une sélection à l'exécution.
+  <tag><tt>--with-speech-parameters=</tt>[<em>pilote</em><tt>:</tt>]<em>nom</em><tt>=</tt><em>valeur</em><tt>,</tt>...<label id="build-speech-parameters"></tag>
+    Spécifie les paramètres par défaut pour les pilotes de synthèse
+    vocale. Si un même paramètre est spécifié plus d'une fois, sa
+    valeur la plus à droite est prise en compte. Si le nom d'un
+    paramètre est spécifique à un pilote, (voir la section
+    <ref id="drivers" name="Codes d'identification de pilotes">) cette valeur ne s'applique
+    qu'à ce pilote; sinon, il s'applique à tous les
+    pilotes. Pour une description des paramètres acceptés par un
+    pilote spécifique, reportez-vous à la documentation de ce
+    pilote. Voir la ligne <ref id="configure-speech-parameters" name="speech-parameters"> du fichier de
+    configuration et l'option <ref id="options-speech-parameters" name="-S"> de la ligne de commande pour la
+    sélection à l'exécution.
+  <tag><tt>--with-flite=</tt><em>directory</em><label id="build-flite"></tag>
+    Spécifie l'emplacement d'installation de FestivalLite
+    et compile le pilote pour cette synthèse vocale
+    (voir <ref id="restrictions-flite" name="Restrictions dans la compilation">
+  <tag><tt>--with-text-table=</tt><em>fichier</em><label id="build-text-table"></tag>
+    Spécifie la table de traduction de texte (voir la section <ref
+    id="translation-text" name="Traduction de texte"> pour plus de
+    détails). Vous pouvez fournir le chemin absolu d'une table hors de
+    l'arborescence source.  L'extension .tbl est facultative. Pour un
+    nom de fichier simple, le préfixe <tt>text.</tt> est facultatif. Si
+    vous ne spécifiez pas cette option, nabcc, une table commune (en
+    Amérique du Nord) utilisant la variante 8 points du 
+    <ref id="nabcc" name="North American Braille Computer Code">, est
+    utilisée. Voir la ligne <ref id="configure-text-table"
+    name="text-table"> du fichier de configuration et l'option <ref
+    id="options-text-table" name="-t"> en ligne de commande pour la
+    sélection à l'exécution. Ce paramètre peut être modifié par la
+    préférence <ref id="preference-text-table" name="Text Table">.
+  <tag><tt>--with-attributes-table=</tt><em>fichier</em><label id="build-attributes-table"></tag>
+    Spécifie la table de traduction des attributs (voir la section
+    <ref id="translation-attributes" name="Traduction des attributs">
+    pour plus de détails). Vous pouvez fournir le chemin absolu d'une
+    table hors de l'arborescence source.  L'extension <tt>.tbl</tt> est
+    facultative. Si vous ne spécifiez pas cette option,
+    <tt>attributes</tt> est alors utilisé. Changez cette option en
+    <tt>attrib</tt> pour maintenir l'ancienne forme. Voir la ligne
+    <ref id="configure-attributes-table" name="attributes-table"> du
+    fichier de configuration et l'option <ref
+    id="options-attributes-table" name="-a"> en ligne de commande pour
+    la sélection à l'exécution. Ce paramètre peut être modifié par la
+    préférence <ref id="preference-attributes-table" name="Attributes
+    Table">.
+  <tag><tt>--with-speech-driver=</tt><em>pilote</em><label id="build-speech-driver"></tag>
+    Spécifie les pilotes de synthèse vocale que vous voulez lier à
+    l'exécutable de BRLTTY. Les pilotes qui ne figureront pas dans la
+    liste de cette option seront compilés en tant qu'objets dynamiques
+    et pourront toujours être sélectionnés à l'exécution. Chaque
+    pilote doit être identifié soit par les 2 lettres de son <ref
+    id="drivers" name="code d'identification de pilote"> ou par son
+    vrai nom (complet ou abrégé). Ces noms et/ou les identifiants de pilotes doivent être
+    séparés les uns des autres par une simple virgule. Si un
+    identifiant de pilote est précédé du signe moins (<tt>-</tt>), ce
+    pilote est alors exclu de la compilation. Le premier pilote
+    non-exclu devient le pilote par défaut. Il n'y a pas de pilote
+    par défaut si vous n'utilisez pas cette option. Un des mots
+    suivants peut aussi être utilisé comme opérateur pour l'option:
+    <descrip>
+      <tag>all</tag>
+        Lie tous les pilotes à l'exécutable. Ne les compile pas en
+        tant qu'objets dynamiques. Vous pouvez spécifier ce mot comme
+        élément terminant une liste de pilotes. C'est une façon de
+        spécifier un pilote par défaut quand tous les pilotes seront
+        compilés.
+      <tag>-all</tag>
+        Ne compile que les pilotes qui ont été explicitement inclus
+        par cette option.
+      <tag>no</tag>
+        Ne compile aucun pilote. Cela revient à spécifier
+        <tt>--without-speech-driver</tt>.
+      <tag>yes</tag>
+        Compile tous les pilotes en tant qu'objets dynamiques. Ne les
+        lie pas à l'exécutable. Cela revient à spécifier
+        <tt>--with-speech-driver</tt>.
+    </descrip>
+    Voir la ligne <ref id="configure-speech-driver" name="speech-driver"> du fichier de configuration et
+    l'option <ref id="options-speech-driver" name="-s"> de la ligne de commande pour une sélection à l'exécution.
+  <tag><tt>--with-speech-parameters=</tt>[<em>pilote</em><tt>:</tt>]<em>nom</em><tt>=</tt><em>valeur</em><tt>,</tt>...<label id="build-speech-parameters"></tag>
+    Spécifie les paramètres par défaut pour les pilotes de synthèse
+    vocale. Si un même paramètre est spécifié plus d'une fois, sa
+    valeur la plus à droite est prise en compte. Si le nom d'un
+    paramètre est spécifique à un pilote, (voir la section
+    <ref id="drivers" name="Codes d'identification de pilotes">) cette valeur ne s'applique
+    qu'à ce pilote; sinon, il s'applique à tous les
+    pilotes. Pour une description des paramètres acceptés par un
+    pilote spécifique, reportez-vous à la documentation de ce
+    pilote. Voir la ligne <ref id="configure-speech-parameters" name="speech-parameters"> du fichier de
+    configuration et l'option <ref id="options-speech-parameters" name="-S"> de la ligne de commande pour la
+    sélection à l'exécution.
+  <tag><tt>--with-flite=</tt><em>directory</em><label id="build-flite"></tag>
+    Spécifie l'emplacement d'installation de FestivalLite
+    et compile le pilote pour cette synthèse vocale
+    (voir <ref id="restrictions-flite" name="Restrictions dans la compilation">
+  <tag><tt>--with-text-table=</tt><em>fichier</em><label id="build-text-table"></tag>
+    Spécifie la table de traduction de texte (voir la section <ref
+    id="translation-text" name="Traduction de texte"> pour plus de
+    détails). Vous pouvez fournir le chemin absolu d'une table hors de
+    l'arborescence source.  L'extension .tbl est facultative. Pour un
+    nom de fichier simple, le préfixe <tt>text.</tt> est facultatif. Si
+    vous ne spécifiez pas cette option, nabcc, une table commune (en
+    Amérique du Nord) utilisant la variante 8 points du 
+    <ref id="nabcc" name="North American Braille Computer Code">, est
+    utilisée. Voir la ligne <ref id="configure-text-table"
+    name="text-table"> du fichier de configuration et l'option <ref
+    id="options-text-table" name="-t"> en ligne de commande pour la
+    sélection à l'exécution. Ce paramètre peut être modifié par la
+    préférence <ref id="preference-text-table" name="Text Table">.
+  <tag><tt>--with-attributes-table=</tt><em>fichier</em><label id="build-attributes-table"></tag>
+    Spécifie la table de traduction des attributs (voir la section
+    <ref id="translation-attributes" name="Traduction des attributs">
+    pour plus de détails). Vous pouvez fournir le chemin absolu d'une
+    table hors de l'arborescence source.  L'extension <tt>.tbl</tt> est
+    facultative. Si vous ne spécifiez pas cette option,
+    <tt>attributes</tt> est alors utilisé. Changez cette option en
+    <tt>attrib</tt> pour maintenir l'ancienne forme. Voir la ligne
+    <ref id="configure-attributes-table" name="attributes-table"> du
+    fichier de configuration et l'option <ref
+    id="options-attributes-table" name="-a"> en ligne de commande pour
+    la sélection à l'exécution. Ce paramètre peut être modifié par la
+    préférence <ref id="preference-attributes-table" name="Attributes
+    Table">.
+  <tag><tt>--with-speech-driver=</tt><em>pilote</em><label id="build-speech-driver"></tag>
+    Spécifie les pilotes de synthèse vocale que vous voulez lier à
+    l'exécutable de BRLTTY. Les pilotes qui ne figureront pas dans la
+    liste de cette option seront compilés en tant qu'objets dynamiques
+    et pourront toujours être sélectionnés à l'exécution. Chaque
+    pilote doit être identifié soit par les 2 lettres de son <ref
+    id="drivers" name="code d'identification de pilote"> ou par son
+    vrai nom (complet ou abrégé). Ces noms et/ou les identifiants de pilotes doivent être
+    séparés les uns des autres par une simple virgule. Si un
+    identifiant de pilote est précédé du signe moins (<tt>-</tt>), ce
+    pilote est alors exclu de la compilation. Le premier pilote
+    non-exclu devient le pilote par défaut. Il n'y a pas de pilote
+    par défaut si vous n'utilisez pas cette option. Un des mots
+    suivants peut aussi être utilisé comme opérateur pour l'option:
     <descrip>
       <tag>all</tag>
         Lie tous les pilotes à l'exécutable. Ne les compile pas en
@@ -342,7 +608,9 @@ instructions supplémentaires spécifiques.
         Cela revient à spécifier <tt>--without-flite</tt>.
       <tag>yes</tag>
         Compile le pilote si le package existe dans <tt>/usr</tt>,
-        <tt>/usr/local</tt>, <tt>/opt/flite</tt>. Cela revient à
+        <tt>/usr/local</tt>, <tt>/usr/local/FestivalLite</tt>,
+        <tt>/usr/local/flite</tt>, <tt>/opt/FestivalLite</tt> ou
+        <tt>/opt/flite</tt>. Cela revient à
         spécifier<tt>--with-flite</tt>.
     </descrip>
   <tag><tt>--with-flite-language=</tt><em>language</em><label id="build-flite-language"></tag>
@@ -365,9 +633,42 @@ instructions supplémentaires spécifiques.
         Ne compile pas le pilote.
         Cela revient à spécifier <tt>--without-mikropuhe</tt>.
       <tag>yes</tag>
-        Compile le pilote si le package existe dans <tt>/usr</tt>, <tt>/usr/local</tt>,
-        ou <tt>/opt/mikropuhe</tt>. Cela revient à spécifier <tt>--with-mikropuhe</tt>.
+        Compile le pilote si le package existe dans <tt>/usr</tt>, 
+        <tt>/usr/local</tt>, <tt>/usr/local</tt>, <tt>/usr/local/Mikropuhe</tt>,
+        <tt>/usr/local/mikropuhe</tt>, <tt>/opt/Mikropuhe</tt> 
+        ou <tt>/opt/mikropuhe</tt>. Cela revient à spécifier 
+        <tt>--with-mikropuhe</tt>.
     </descrip>
+  <tag><tt>--with-speechd=</tt><em>repertoire</em><label id="build-theta"></tag>
+    Spécifie l'endroit où est installé le package de la synthèse vocale speech-dispatcher
+    (multiplexeur de synthèse vocale) et compile le pilote pour speech-dispatcher.
+    L'un des mots suivants peut aussi être utilisé comme opérateur de cette 
+    option:
+    <descrip>
+      <tag>no</tag>
+        Ne compile pas le pilote.
+        Cela revient à spécifier <tt>--without-speechd</tt>.
+      <tag>yes</tag>
+        Compile le pilote si le package existe dans <tt>/usr</tt>, <tt>/usr/local</tt>,
+        <tt>/usr/local/speech-dispatcher</tt>, <tt>/usr/local/speechd</tt>,
+        <tt>/opt/speech-dispatcher</tt>, ou <tt>/opt/speechd</tt>. Cela revient
+        à spécifier <tt>--with-speechd</tt>.
+    </descrip>    
+  <tag><tt>--with-swift=</tt><em>repertoire</em><label id="build-theta"></tag>
+    Spécifie l'endroit où est installé le package de la synthèse vocale, et
+    compile le pilote pour la synthèse vocale Swift.
+    L'un des mots suivants peut aussi être utilisé comme opérateur de cette 
+    option:
+    <descrip>
+      <tag>no</tag>
+        Ne compile pas le pilote.
+        Cela revient à spécifier <tt>--without-swift</tt>.
+      <tag>yes</tag>
+        Compile le pilote si le package existe dans <tt>/usr</tt>, <tt>/usr/local</tt>,
+        <tt>/usr/local/Swift</tt>, <tt>/usr/local/swift</tt>,
+        <tt>/opt/Swift</tt>, ou <tt>/opt/swift</tt>. Cela revient
+        à spécifier <tt>--with-swift</tt>.
+    </descrip>    
   <tag><tt>--with-theta=</tt><em>repertoire</em><label id="build-theta"></tag>
     Spécifie l'emplacement d'installation du package Theta
     et compile le pilote pour la synthèse vocale Theta
@@ -379,7 +680,9 @@ instructions supplémentaires spécifiques.
         Cela revient à spécifier <tt>--without-theta</tt>.
       <tag>yes</tag>
         Compile le pilote si le package existe dans <tt>/usr</tt>, <tt>/usr/local</tt>,
-        ou <tt>/opt/flite</tt>, Cela revient à spécifier <tt>--with-theta</tt>.
+        <tt>/usr/local/Theta</tt>, <tt>/usr/local/theta</tt>,
+        <tt>/opt/Theta</tt>, ou <tt>/opt/theta</tt>.
+        Cela revient à spécifier <tt>--with-theta</tt>.
     </descrip>
   <tag><tt>--with-viavoice=</tt><em>repertoire</em><label id="build-viavoice"></tag>
     Spécifie l'emplacement d'installation du package Viavoice
@@ -393,32 +696,57 @@ instructions supplémentaires spécifiques.
         Cela revient à spécifier <tt>--without-viavoice</tt>.
       <tag>yes</tag>
         Compile le pilote si le package existe dans <tt>/usr</tt>,
-        <tt>/usr/local</tt>, ou <tt>/opt/flite</tt>. Cela revient à spécifier <tt>--with-viavoice</tt>.
+        <tt>/usr/local</tt>, <tt>/usr/local/ViaVoice</tt>, <tt>/usr/local/viavoice</tt>,
+        <tt>/opt/ViaVoice</tt>, ou <tt>/opt/viavoice</tt>.
+        Cela revient à spécifier <tt>--with-viavoice</tt>.
     </descrip>
   <tag><tt>--with-screen-driver=</tt><em>pilote</em><label id="build-screen-driver"></tag>
-    Spécifie le pilote de l'écran. Il peut être l'un de ceux ci-dessous:
+    Spécifie les pilotes pour l'écran qui seront liés à l'exécutable BRLTTY. 
+    Ceux qui ne sont pas mentionnés dans cette option sont compilés en tant
+    qu'objets dynamiques et peuvent être choisis lors de
+    l'exécution. Chaque pilote doit être identifié soit par les deux lettres de
+    son code d'identification (voir la section Ecrans supportés) soit par
+    son nom  (complet ou abrégé). Vous devez séparer les identifiants des
+    pilotes les uns des autres par une virgule. Si l'identifiant d'un pilote
+    est précédé du signe moins (<tt>-</tt>), il est exclu de la compilation.
+    Un des mots suivants peut être aussi utilisé comme
+    opérateur pour l'option:
+
+(<tt>-</tt>),
     <descrip>
-      <tag>linux</tag>
-        Ce pilote fournit un accès direct à l'écran de la console
-        Linux. Il est par défaut et on ne peut le choisir que sur les
-        systèmes Linux.
-      <tag>shm</tag>
-        Ce pilote fournit un accès direct à un programme <tt>d'écran</tt>. On
-        peut le sélectionner sur tous les systèmes, et il est par
-        défaut sur la plupart d'entre eux. Le patch que nous
-        fournissons pour <tt>l'écran</tt> (voir le sous-répertoire <tt>Patches</tt>)
-        doit être appliqué. Etant donné que <tt>l'écran</tt> doit s'exécuter
-        pendant son utilisation, ce pilote ne rend BRLTTY opérationnel qu'après que l'utilisateur
-        ce soit connecté.
+      <tag>all</tag>
+        Lie tous les pilotes à l'exécutable. Ne les compile pas en
+        tant qu'objets dynamiques. Vous pouvez spécifier ce mot comme
+        élément terminant une liste de pilotes. C'est la façon de
+        spécifier un pilote par défaut quand tous les pilotes seront
+        compilés.
+      <tag>-all</tag>
+        Ne compile que les pilotes qui ont été explicitement inclus
+        par cette option.
+      <tag>no</tag>
+        Ne compile aucun pilote. Cela revient à spécifier
+        <tt>--without-screen-driver</tt>.
+      <tag>yes</tag>
+        Compile tous les pilotes en tant qu'objets dynamiques. Ne les
+        lie pas à l'exécutable. Cela revient à spécifier
+        <tt>--with-braille-driver</tt>.
     </descrip>
+
+    Le premier pilote non exclu devient celui par défaut. 
     Si cette option n'est pas spécifiée, une sélection appropriée au
     système d'exploitation est faite. Si un pilote spécifique au
     système d'exploitation en cours est fiable, il est utilisé. Sinon,
-    <tt>shm</tt> est utilisé.
+    <tt>sc</tt> est utilisé.
+    
+    Voir la ligne <ref id="configure-screen-driver" name="screen-driver"> du fichier de configuration
+    et l'option <ref id="options-screen-driver" name="-x"> de la ligne de commande pour une sélection à l'exécution.
   <tag><tt>--with-screen-parameters=</tt><em>name</em><tt>=</tt><em>valeur</em><tt>,</tt>...<label id="build-screen-parameters"></tag>
     Spécifie les paramètres par défaut pour le pilote d'écran. Si le
     même paramètre est spécifié plus d'une fois, c'est sa valeur la
-    plus à droite qui est retenue. Pour une description des paramètres
+    plus à droite qui est retenue. Si le nom d'un paramètre est assigné par un
+    pilote (voir section Pilotes d'écran supportés) alors ce paramètre ne
+    s'applique qu'au pilote; sinon il s'applique à tous les pilotes.
+    Pour une description des paramètres
     acceptés par un pilote spécifique, reportez-vous à la
     documentation de celui-ci. Voir la ligne <ref id="configure-screen-parameters" name="screen-parameters"> du
     fichier de configuration et l'option <ref id="options-screen-parameters" name="-X"> en ligne de commande
@@ -457,6 +785,7 @@ instructions supplémentaires spécifiques.
     l'architecture, et qui sera utilisé comme répertoire
     maître. Ces sous-répertoires comprennent les dossiers:
     <itemize>
+      <item>le <ref id="build-data-directory" name="répertoire writable">
       <item>le <ref id="build-data-directory" name="répertoire data">
       <item>le <ref id="build-configuration-directory" name="répertoire configuration">
       <item>le <ref id="build-manpage-directory" name="répertoire manpage">
@@ -466,7 +795,26 @@ instructions supplémentaires spécifiques.
     cette option, c'est le répertoire racine du système qui est
     utilisé. Ce répertoire est lié à celui précisé par l'option de
     compilation <ref id="build-execute-root" name="--with-execute-root">.
-  <tag><tt>--exec-prefix=</tt><em>directory</em><label id="build-architecture-root"></tag>
+  <tag><tt>--with-writable-directory=</tt><em>répertoire</em><label id="build-architecture-root"></tag>
+    Spécifie le répertoire dans lequel la <ref id="hierarchy" name="hiérarchie des fichiers installés">
+    pourra être écrite. Vous devriez fournir un chemin absolu. Un des mots
+    suivants peut être utilisé comme opérateur pour cette option.
+
+(<tt>-</tt>),
+    <descrip>
+      <tag>no</tag>
+        Ne définit pas de répertoire inscriptible (writable). Cela revient à
+        spécifier
+        <tt>--without-writable-directory</tt>.
+      <tag>yes</tag>
+        Utilise l'endroit par défaut. Cela revient à spécifier
+        <tt>--with-writable-directory</tt>.
+    </descrip>
+    Si vous ne spécifiez pas cette option, le sous-répertoire autorisé en rw
+    (lecture/écrijure) dans le dossier spécifié par l'option --with-library-directory
+    est assumé. Le répertoire est créé s'il n'existe pas.
+    
+  <tag><tt>--exec-prefix=</tt><em>répertoire</em><label id="build-architecture-root"></tag>
     Spécifie le répertoire de la <ref id="hierarchy" name="hiérarchie des fichiers installés">
     où les répertoires par défaut pour les
     fichiers dépendant de l'architecture doivent être placés.
@@ -562,11 +910,25 @@ les fonctions inutiles.
     Crée des programmes liés de façon statique plutôt que de façon
     dynamique. Cette option supprime toutes les dépendances sur les
     objets partagés à l'exécution. Seuls les pilotes par défaut (voir
-    les options de compilation <ref id="build-braille-driver" name="--with-braille-driver"> et
-    <ref id="build-speech-driver" name="--with-speech-driver">) sont compilés.
+    les options de compilation <ref id="build-braille-driver" name="--with-braille-driver">,
+    <ref id="build-speech-driver" name="--with-speech-driver"> et
+    <ref id="build-screen-driver" name="--with-screen-driver">) sont compilés.
   <tag><tt>--disable-preferences-menu</tt><label id="build-preferences-menu"></tag>
     Réduit la taille du programme en excluant le menu Préférences
     (voir la section <ref id="preferences-menu" name="Le Menu Préférences">).
+    
+  <tag><tt>--enable-relocatable-install</tt><label id="build-table-selection"></tag>
+    Si cette fonctionnalité est activée, tous les chemins internes sont
+    recalculés afin d'englober le répertoire du programme.. Si elle n'est pas
+    utilisée, tous les chemins internes sont absolus. Cette fonctionnalité
+    vise à ce que toute la
+    <ref id="hierarchy" name="hiérarchie des fichiers installés"> soit
+    copiée ou déplacée proprement d'un endroit à l'autre, tout particulièrement
+    pour un usage sur des plateformes Windows.
+  <tag><tt>--disable-iconv</tt><label id="build-table-selection"></tag>
+    Réduit la taille du programme en excluant le support pour la conversion
+    des codages.
+
   <tag><tt>--disable-table-selection</tt><label id="build-table-selection"></tag>
     Réduit la taille du programme en excluant les entrées de sélection
     des tables du menu Préférences (voir les préférences <ref id="preference-text-table" name="Text Table">,
@@ -628,10 +990,14 @@ les fonctions inutiles.
         sur les systèmes qui le supportent, BRLTTY interagisse avec le
         pilote du pointeur (souris) (voir la section <ref id="gpm"
     name="Support du pointeur (souris) via GPM">).
-  <tag><tt>--enable-api</tt><label id="build-api"></tag>
-    Inclut l'interface programmatique de l'application.
-  <tag><tt>--with-api-parameters=</tt><em>name</em><tt>=</tt><em>value</em><tt>,</tt>...<label id="build-api-parameters"></tag>
-    Spécifie les paramètres par défaut pour l'interface programmatique
+  <tag><tt>--disable-gpm</tt><label id="build-api"></tag>
+    Réduit la taille du programme en excluant l'interface avec l'application gpm
+    qui permet à BRLTTY d'interagir avec le périphérique du pointeur (la souris)
+    (voir Support du pointeur (sourii)  par GPM).
+  <tag><tt>--disable-api</tt><label id="build-api"></tag>
+    Réduit la taille du programme en excluant l'interface de programmation de l'application.
+  <tag><tt>--with-api-parameters=</tt><em>name</em><tt>=</tt><em>valeur</em><tt>,</tt>...<label id="build-api-parameters"></tag>
+    Spécifie les paramètres par défaut pour l'interface de programmation
     de l'application. Si le même paramètre est spécifié plus d'une
     fois, sa valeur la plus à droite est utilisée. Pour une
     description des paramètres acceptés par l'interface, voir le
@@ -640,6 +1006,34 @@ les fonctions inutiles.
     fichier de configuration et l'option <ref
     id="options-api-parameters" name="-A">
     en ligne de commande pour la sélection à l'exécution.
+  <tag><tt>--disable-caml-bindings=</tt><em>nom</em><tt>=</tt><em>valeur</em><tt>,</tt>...<label id="build-api-parameters"></tag>
+    Ne compile pas les bindings (interfaces de programmation) Caml pour l'interface de programmation de l'application.
+  <tag><tt>--disable-java-bindings=</tt><em>nom</em><tt>=</tt><em>valeur</em><tt>,</tt>...<label id="build-api-parameters"></tag>
+    Ne compile pas les bindings (interface de programmation) Java pour l'interface de programmation de l'application.
+  <tag><tt>--disable-lisp-bindings=</tt><em>nom</em><tt>=</tt><em>valeur</em><tt>,</tt>...<label id="build-api-parameters"></tag>
+    Ne compile pas les bindings (interface de programmation) Lisp pour l'interface de programmation de l'application.
+  <tag><tt>--disable-python-bindings=</tt><em>nom</em><tt>=</tt><em>valeur</em><tt>,</tt>...<label id="build-api-parameters"></tag>
+    Ne compile pas les bindings (interface de programmation) Python pour l'interface de programmation de l'application.
+  <tag><tt>--disable-tcl-bindings=</tt><em>nom</em><tt>=</tt><em>valeur</em><tt>,</tt>...<label id="build-api-parameters"></tag>
+    Ne compile pas les bindings (interface de programmation) Tcl pour l'interface de programmation de l'application.
+  <tag><tt>--with-tcl-config=</tt><em>chemin</em>
+    Spécifie l'endroit où se trouve le script de configuration Tcl 
+    (tclConfig.sh). Vous pouvez fournir le chemin, soit vers le script lui-même,
+    soit vers le répertoire où il se trouve. Un des mots suivants peut être 
+    aussi utilisé comme opérateur pour l'option:
+
+(<tt>-</tt>),
+    <descrip>
+      <tag>no</tag>
+        Utilise d'autres moyens pour savoir si Tcl est disponible et, s'il
+        l'est, où il a été installé. Cela revient à spécifier
+        <tt>--without-tcl-config.</tt>.
+      <tag>yes</tag>
+        Cherche le script dans quelques répertoires couramment utilisés. 
+        Cela revient à spécifier
+        <tt>--with-tcl-config</tt>.
+    </descrip>
+    
 </descrip>
 
 <sect3>Options diverses<label id="build-miscellaneous"><p>
@@ -671,7 +1065,14 @@ les fonctions inutiles.
         d'installation/sauvegarde.
     </enum>
     Si vous ne spécifiez pas cette option, cette possibilité n'est pas
-    activée.
+    activée. Elle vise tout particulièrement la compilation d'une image pour
+    un installeur en braille.
+  <tag><tt>--with-stderr-path==</tt><em>chemin</em><label id="build-init-path"></tag>
+    Spécifie le chemin du fichier ou du périphérique où la sortie standard
+    des erreurs sera écrite. Vous devriez fournir un chemin absolu. Si vous
+    ne spécifiez pas cette option, cette possibilité n'est pas activée.
+    Cette option vise tout particulièrement la compilation d'une image pour
+un installeur en braille.
 </descrip>
 
 <sect2>Préparer les cibles de fichier<label id="make"><p>
@@ -717,10 +1118,8 @@ d'application courants. Ils incluent:
         <tt>config.cache</tt>, <tt>config.status</tt>, et <tt>config.log</tt>.
       <item>
         Supprime les autres fichiers de la structure du répertoire
-        source, qui prend beaucoup de place mais qui ne leur
-        appartient pas. Cela inclut la suppression des fichiers de
-        l'éditeur backup, les résultats de test, les
-        du patch rejeté, et copie les fichiers source originaux.
+        source, qui prennent beaucoup de place mais qui ne leur
+        appartient pas. Cela inclut la suppression de fichiers éditeur de sauvegarde (backup), résultats de test, les reliquats du patch, et copies de fichiers source originaux.
     </itemize>
 </descrip>
 
@@ -764,7 +1163,7 @@ vous voudrez peut-être exécuter les options suivantes de la ligne de commande de
 <tt>brltty</tt>:
 <itemize>
   <item>
-    <ref id="options-log-level" name="-ldebug">
+    ...<ref id="options-log-level" name="-ldebug">
     pour mettre dans un journal beaucoup de messages de diagnostique.
   <item>
     <ref id="options-no-daemon" name="-n">
@@ -927,7 +1326,7 @@ dans le fichier racine du système. Voir les options de compilation
 <ref id="build-execute-root" name="--with-execute-root">,
 <ref id="build-program-directory" name="--bindir">,
 <ref id="build-data-directory" name="--with-data-directory">,
-et <ref id="build-library-directory" name="--libdir">.
+et <ref id="build-library-directory" name="--libdir"> ref id="build-execute-root" name="--with-writable-directory"> et ref id="build-execute-root" name="--with-data-directory'' build">.
 
 <sect1>Considérations sur la sécurité<p>
 L'exécution de BRLTTY nécessite les privilèges root parce que le
@@ -955,7 +1354,7 @@ root.
 <sect1>Restrcitions de construction de d'exécution<p>
 <descrip>
   <tag>les beeps d'Alerte</tag><label id="restriction-tunes">
-    Certaines plateforme ne supportent pas tous les périphériques
+    Certaines plateformes ne supportent pas tous les périphériques
     sonores. Voir <ref id="preference-tune-device" name="Tune Device"> pour plus de détails.
   <tag>Pilote pour la synthèse FestivalLite</tag><label id="restrictions-flite">
     Le pilote pour le moteur FestivalLite n'est compilé
@@ -966,6 +1365,10 @@ root.
     tous les deux à l'exécutable BRLTTY (voir l'option de compilation
     <ref id="build-theta" name="--with-speech-driver">) car les bibliothèques nécessaires à leur
     exécution contiennent des éléments conflictuels.
+  <tag>Pilote pour l'afficheur braille Libbraille</tag><label id="restrictions-mikropuhe">
+    Le pilote pour le package libbraille n'est compilé que si le package a
+    été installé.   
+  
   <tag>Pilote pour la synthèse Mikropuhe</tag><label id="restrictions-mikropuhe">
     Le pilote pour le moteur Mikropuhe n'est compilé
     que si ce paquet a été installé.
@@ -1029,7 +1432,7 @@ Pour désinstaller BRLTTY, faites:
 
 <sect1>Autres utilitaires<p>
 La compilation de BRLTTY donne aussi celle de quelques petits
-utilitaires d'aide et de diagnostique.
+utilitaires d'aide et de diagnostic.
 
 <sect2>brltty-config<label id="utility-brltty-config"><p>
 Cet utilitaire assigne un certain nombre de variables d'environnement
@@ -1052,6 +1455,9 @@ Les variables d'environnement suivantes sont assignées:
     exécutables). Configuré par l'option de compilation <ref id="build-program-directory" name="--with-program-directory">.
   <tag>BRLTTY_LIBRARY_DIRECTORY</tag>
     Répertoire des pilotes. Configuré par l'option de compilation <ref id="build-library-directory" name="--with-library-directory">.
+  <tag>BRLTTY_WRITABLE_DIRECTORY</tag>    
+    Répertoire vers lequel il est possible d'écrire. Configuré par l'option
+    de compilation <ref id="build-program-directory" name="--with-writable-directory">.
   <tag>BRLTTY_DATA_DIRECTORY</tag>
     Répertoire des tables et des pages de manuel. Configuré par
     l'option de compilation <ref id="build-data-directory" name="--with-data-directory">.
@@ -1155,6 +1561,10 @@ l'afficheur braille. Vous devriez l'exécuter en tant que root.
     Le chemin absolu pour le répertoire dans lequel sont situés les
     pilotes. S'il n'est pas spécifié, c'est le répertoire configuré par
     l'option de compilation <ref id="build-library-directory" name="--libdir"> qui est utilisé.
+  <tag><tt>-W</tt><em>répertoire</em> <tt>--writable-directory=</tt><em>repertoire</em></tag>
+    Le chemin absolu vers un répertoire où il est possible d'écrire. S'il
+    n'est pas spécifié, le répertoire configuré avec l'option >e compilation --with-writable-directory
+    est assumé.
   <tag><tt>-h</tt> <tt>--help</tt></tag>
     Affiche un résumé des options de la ligne de commande, puis quitte.
 </descrip>
@@ -1262,32 +1672,95 @@ Les éléments suivants sont écrits sur la sortie standard (stdout):
 <sect2>tbltest<label id="utility-tbltest"><p>
 Cet utilitaire teste une table de traduction (section <ref id="translation" name="Tables de
 traduction">).
-<tscreen>tbltest -<em>option</em> ... <em>table-de-traduction</em></tscreen>
+<tscreen>tbltest -<em>option</em> ... <em>table-en-entrée</em> ... <em>table-en-sortie</em></tscreen>
 <descrip>
-  <tag><em>table-de-traduction</em></tag>
-    Le chemin du système de fichier jusqu'à la table de
-    traduction. S'il est relatif, il est lié au répertoire configuré
-    par l'option de compilation <ref id="build-data-directory" name="--with-data-directory">.
+  <tag><em>table-en-entrée</em></tag>
+    Le chemin du fichier vers la table de traduction en entrée du test. S'il
+    est relatif, il est ancré au répertoire configuré avec l'option de
+    compilation --with-data-directory.
+    
+  <tag><em>table-en-sortie</em></tag>  
+    Le chemin du fichier vers la table de traduction en sortie du test. S'il
+    est relatif, il est ancré au répertoire de travail  courant. Si vous ne
+    fournissez pas ce paramètre, aucune table en sortie ne  sera écrite.
+    
+  <tag><tt>-c</tt> <tt>--charset=</tt><em>charset</em></tag>
+    Spécifie le  nom du codage 8-bit  à utiliser lors de l'interprétation
+    des tables. Si vous ne fournissez pas ce paramètre, le codage du système
+    est utilisé.
+  <tag><tt>-i</tt> <tt>--input-format=</tt><em>format</em></tag>
+    Spécifie le format  de la table d'entrée. S'il vous ne fournissez pas cette
+    option, le  format de la table en entrée est déduit du l'extension de son
+    fichier.
+  <tag><tt>-o</tt> <tt>--output-format=</tt><em>format</em></tag>
+    Spécifie le format  de la table en sortie. S'il vous ne fournissez pas cette
+    option, le  format de la table en entrée est déduit du l'extension de son
+    fichier.
+  <tag><tt>-t</tt> <tt>--translate</tt></tag>
+    <enum>
+       <item>
+          si vous fournissez cette  option, vous devez spécifier  deux
+           tables. L'entrée standard est lue, traduite en  braille  avec
+           la table en entrée, retraduite en texte avec la table en  sortie,
+           et écrite sur la sortie standard.
+       <item>
+           Si vous ne fournissez pas cette option, la table en sortie
+           est facultative. Si vous la spécifiez, la table en entrée est
+           convertie. Sinon elle est
+           simplement vérifiée.
+           
+           
+           
+           
+           
+    </enum>
   <tag><tt>-h</tt> <tt>--help</tt></tag>
     Affiche un résumé des options en ligne de commande, et quitte.
 </descrip>
+
+Les  formats de table suivants sont supportés:
+<descrip>
+  <tag><tt>tbl</tt></tag>
+    BRLTTY
+  <tag><tt>sbl</tt></tag>
+    SuSE Blinux
+  <tag><tt>a2b</tt></tag>
+    Gnopernicus
+</descrip>
+
 
 <sect2>ctbtest<label id="utility-ctbtest"><p>
 Cet utilitaire teste une table de braille abrégé (section <ref id="contraction" name="Braille
 abrégé">). Le texte lu à partir de l'entrée standard (stdin) est réécrit sur
 la sortie standard (stdout) en braille abrégé.
-<tscreen>ctbtest -<em>option</em> ... <em>table-abrégé</em></tscreen>
+<tscreen>ctbtest -<em>fichier-en-entrée</em></tscreen>
 <descrip>
-  <tag><em>table-abrégé</em></tag>
-    Le chemin du système de fichier jusqu'à la table de braille
-    abrégé. S'il est relatif, il est lié au répertoire configuré par
-    l'option de compilation <ref id="build-data-directory" name="--with-data-directory">.
+  <tag><em>fichier-en-entrée</em></tag>
+    La liste des fichiers à traiter. Vous pouvez spécifier n'importe quel
+    nombre de fichiers. Ils sont traités de la gauche vers la droite. Le  nom
+    de fichier spécial - est interprété comme l'entrée standard (stdin). Si
+    vous ne spécifiez aucun fichier, l'entrée standard est traitée.
+  <tag><tt>-c</tt><em>fichier</em> <tt>--contraction-table=</tt><em>fichier</em></tag>
+    Le chemin vers le  fichier de la table de braille abrégé. S'il est relatif, il
+    est ancré au répertoire configuré par l'option de compilation
+    <ref id="build-data-directory" name="--with-data-directory">.
+    L'extension .ctb est facultative. Si vous ne fournissez pas cette option,
+    en-us-g2 est assumé.
   <tag><tt>-t</tt><em>fichier</em> <tt>--text-table=</tt><em>fichier</em></tag>
-    Le chemin du système de fichier jusqu'à la table de braille abrégé
+    Le chemin du fichier de la table de braille abrégé
     à utiliser. S'il est relatif, il est lié au répertoire configuré
     par l'option de compilation <ref id="build-data-directory" name="--with-data-directory">. Si cette
     option n'est pas spécifiée, c'est la table définie par l'option de
     compilation <ref id="build-text-table" name="--with-text-table"> qui est utilisé.
+    L'extension .tbl et le préfixe text. sont facultatifs. Si vous ne
+    fournissez pas cette option,  la table configurée avec l'option de compilation
+    <ref id="build-data-directory" name="--with-text-table"> est assumée.
+  <tag><tt>-w</tt><em>colonnes</em> <tt>--output-width==</tt><em>colonnes</em></tag>
+    La longueur  maximale d'une ligne en sortie. Chaque ligne d'entrée en
+    braille abrégé est développée sur  autant de lignes que nécessaire. Si
+    vous ne spécifiez  pas cette option,  il n'y a  pas de limites et s'opère
+    une correspondance  ligne par  ligne entre les  lignes en entrée et celles  en
+    sortie.
   <tag><tt>-h</tt> <tt>--help</tt></tag>
     Affiche un résumé des options en ligne de commande, et quitte.
 </descrip>
@@ -1313,8 +1786,8 @@ utilisé en tant que traducteur de braille en texte.
 
 <sect2>tunetest<label id="utility-tunetest"><p>
 Cet utilitaire teste la facilité des beeps d'alerte, et fournit aussi
-un moyen facile composer de nouveaux beeps. Il se peut que vous
-soyez obliger de l'exécuter en tant que root.
+un moyen facile composé de nouveaux beeps. Il se peut que vous
+soyez obligés de l'exécuter en tant que root.
 <tscreen>tunetest -<em>option</em> ... {<em>note</em> <em>durée</em>} ...</tscreen>
 <descrip>
   <tag><em>note</em></tag>
@@ -1333,7 +1806,7 @@ soyez obliger de l'exécuter en tant que root.
       <tag>beeper</tag>
         Le beeper interne (générateur de sons en console).
       <tag>pcm</tag>
-        L'interfade digital audio sur la carte son.
+        L'interface digital audio sur la carte son.
       <tag>midi</tag>
         L'interface Musical Instrument Digital Interface sur la carte
         son.

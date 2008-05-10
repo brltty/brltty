@@ -2,7 +2,7 @@
 BRLTTY supporte les synthèses vocales suivantes:
 <table loc="h">
   <tabular ca="ll">
-    Nom|Modèles@<hline>
+    Nom|Modèle@<hline>
     Alva
       |Delphi (4nn)@
     BrailleLite
@@ -16,8 +16,10 @@ BRLTTY supporte les synthèses vocales suivantes:
     FestivalLite
       |text to speech engine@
     GenericSay
-      |tubes vers /usr/local/bin/say@
+      |redirige vers /usr/local/bin/say@
     Mikropuhe
+      |text to speech engine@
+    Swift
       |text to speech engine@
     Theta
       |text to speech engine@

@@ -11,12 +11,12 @@ pour d'autres moyens de dire à BRLTTY à quel périphérique votre
 afficheur est connecté. Regardez l'option <ref id="options-braille-driver" name="-b"> en ligne de commande,
 la ligne <ref id="configure-braille-driver" name="braille-driver"> du fichier de configuration, et l'option
 de compilation <ref id="configure-braille-driver" name="--with-braille-driver"> pour d'autres possibilités
-concernant la manière de dire à BRLTTY quel type d'afficheur braille
+concernant la manière d'indiquer à BRLTTY quel type d'afficheur braille
 vous avez. Observez l'option <ref id="options-braille-parameters" name="-B"> en ligne de commande, et la ligne
-de commande <ref id="configure-braille-parameters" name="braille-parameters"> du fichier de configuration pour
+<ref id="configure-braille-parameters" name="braille-parameters"> du fichier de configuration pour
 d'autres possibilités concernant la manière de passer les paramètres
 au pilote de votre afficheur braille. Un message donnant le nom du
-programme (BRLTTY) et son numéro de version apparaîtront brièvement
+programme (BRLTTY) et son numéro de version apparaîtra brièvement
 (voir l'option <ref id="options-message-delay" name="-M"> en ligne de commande) sur l'afficheur braille.
 L'afficheur montrera alors une petite zone de l'écran contenant le
 curseur. Par défaut, le curseur est représenté par les points 7 et 8
@@ -31,14 +31,14 @@ l'afficheur ne suffit pas. Essayez d'entrer une commande qui
 provoquera une erreur, et de taper <tt>entrée</tt>. L'erreur
 apparaît sur l'écran mais, sauf si vous avez un afficheur à plusieurs
 lignes, il y a des chances qu'elle ne soit pas visible sur l'afficheur
-braille. Vous n'y voyez qu'un invite du shell. Vous avez donc besoin,
+braille. Vous n'y voyez que l'invite du shell. Vous avez donc besoin,
 à présent, d'un moyen de déplacer la <tt>fenêtre</tt> braille à
 travers l'écran. Les touches de l'afficheur braille lui-même peuvent
 être utilisées pour envoyer les commandes à BRLTTY qui, entre autres
-choses, peut s'en occuper.
+choses, peut s'en charger.
 
 <sect1>Commandes<p>
-Malheureusement, les différents afficheurs braille n'offre pas des
+Malheureusement, les différents afficheurs braille n'offrent pas des
 touches de contrôle standard. Certains ont des touches standard six
 points, certains en ont huit, et d'autres n'en ont pas. Certains ont
 des touches au niveau des pouces, mais il n'y en a pas beaucoup en
@@ -60,19 +60,19 @@ décrit ci-dessous) pour naviguer dans la page d'aide, puis pressez de
 nouveau la touche d'aide pour quitter.
 
 <sect2>Déplacement vertical<label id="vertical"><p>
-Voir aussi les commandes de routines <ref id="command-PRINDENT-NXINDENT" name="PRINDENT/NXINDENT">.
+Voir aussi les commandes de routines <ref id="command-PRINDENT-NXINDENT" name="PRINDENT/NXINDENT"> et <ref id="command-PRDIFCHAR-NXDIFCHAR" name="PRDIFCHAR/NXDIFCHAR">.
 <descrip>
   <tag>LNUP/LNDN<label id="command-LNUP-LNDN"></tag>
     Monte/descend d'une ligne. Si le saut des lignes identiques a été
-    activée (voir la commande <ref id="command-SKPIDLNS" name="SKPIDLNS">), ces commandes, au lieu de
+    activé (voir la commande <ref id="command-SKPIDLNS" name="SKPIDLNS">), ces commandes, au lieu de
     se déplacer exactement d'une ligne à l'autre, sont des alias pour
     les commandes <ref id="command-PRDIFLN-NXDIFLN" name="PRDIFLN/NXDIFLN">.
   <tag>WINUP/WINDN<label id="command-WINUP-WINDN"></tag>
-    Monte/descend d'un écran. Si l'écran n'est plus haut qu'une ligne,
+    Monte/descend d'un écran. Si l'écran n'est pas plus haut qu'une ligne,
     elle déplace alors de 5 lignes.
   <tag>PRDIFLN/NXDIFLN<label id="command-PRDIFLN-NXDIFLN"></tag>
     Monte/descend à la ligne la plus proche ayant un contenu
-    différent. Si le saut de lignes identique a été activé (voir les
+    différent. Si le saut de lignes identiques a été activé (voir les
     commandes <ref id="command-SKPIDLNS" name="SKPIDLNS">), ces commandes, plutôt que de sauter des
     lignes identiques, sont des alias pour les commandes <ref id="command-LNUP-LNDN" name="LNUP/LNDN"> commands.
   <tag>ATTRUP/ATTRDN<label id="command-ATTRUP-ATTRDN"></tag>
@@ -107,7 +107,7 @@ Voir aussi la commande de la routine <ref id="command-SETLEFT" name="SETLEFT">.
     Va à gauche/droite de la moitié de la fenêtre.
   <tag>FWINLT/FWINRT<label id="command-FWINLT-FWINRT"></tag>
     Va à gauche/droite d'une fenêtre. Ces commandes sont
-    particulièrement utile parce qu'elles débordent automatiquement
+    particulièrement utiles parce qu'elles débordent automatiquement
     quand elles atteignent le bord de l'écran. Les autres
     caractéristiques, comme celles de sauter les fenêtres vides (voir
     la commande <ref id="command-SKPBLNKWINS" name="SKPBLNKWINS">), accroissent
@@ -146,7 +146,7 @@ Chacune de ces commandes a trois modes: <bf>activate</bf>
 (déclenche la fonction), <bf>deactivate</bf> (annule la fonction),
 et <bf>toggle</bf> (si la fonction est inhibée, la déclenche, et
 vis versa). Sauf si cela est explicitement dit, chacune de ces
-fonctions est initiallement à <tt>off</tt>, et, quand elle est
+fonctions est initialement à <tt>off</tt>, et, quand elle est
 <bf>on</bf>, cela agit sur l'exécution de BRLTTY tout entier. Le
 paramètre initial de certaines des fonctionnalités peut être changée
 par le <ref id="preferences-menu" name="menu préférences">.
@@ -189,7 +189,7 @@ par le <ref id="preferences-menu" name="menu préférences">.
     horizontalement la fenêtre braille, de sorte que le curseur,
     tant qu'il reste de ce côté, soit plus proche du centre. Si cette
     caractéristique est <bf>off</bf>, la fenêtre braille est toujours
-    positionné de façon à ce que sont côté gauche soit un multiple de
+    positionnée de façon à ce que sont côté gauche soit un multiple de
     de sa largeur depuis le bord gauche de l'écran.
 
     Vous pouvez aussi modifier ce paramètre avec la préférence <ref id="preference-sliding-window" name="Sliding Window">.
@@ -197,11 +197,11 @@ par le <ref id="preferences-menu" name="menu préférences">.
     Au lieu de déplacer exactement d'une ligne en haut ou en bas,
     saute les lignes déjà lues qui ont le même contenu que la ligne
     courante. Cette caractéristiques influence les commandes <ref id="command-LNUP-LNDN" name="LNUP/LNDN">,
-    autant que la ligne englobant la caractéristique des commandes
+    autant que le défilement de la ligne exécutée par les commandes
   <ref id="command-FWINLT-FWINRT" name="FWINLT/FWINRT"> et <ref id="command-FWINLTSKIP-FWINRTSKIP" name="FWINLTSKIP/FWINRTSKIP">.
     Vous pouvez aussi changer ce paramètre avec la préférence <ref id="preference-skip-identical-lines" name="Skip Identical Lines">.
   <tag>SKPBLNKWINS<label id="command-SKPBLNKWINS"></tag>
-    Saute les lignes vides déjà passées lors d'une lecture en avant ou
+    Saute les fenêtres vides déjà passées lors d'une lecture en avant ou
     en arrière. Cette caractéristique influence les commandes <ref id="command-FWINLT-FWINRT" name="FWINLT/FWINRT">.
     Vous pouvez aussi changer ce paramètre avec la préférence 
 <ref id="preference-skip-blank-windows" name="Skip Blank Windows">.
@@ -272,10 +272,10 @@ par le <ref id="preferences-menu" name="menu préférences">.
     Répète automatiquement une commande à un intervalle régulier après
     un délai initial tant que sa touche (combinaison) reste
     appuyée. Seuls certains pilotes supportent cette fonctionnalité,
-    la principale limite étant que la plupart des afficheurs braille
-    ne signalent pas en même temps les touches pressées et les touches
+    la principale limite étant que la plupart des afficheurs brailles
+    ne signale pas en même temps les touches pressées et les touches
     exécutées comme des événements distinctement séparés. A l'origine,
-    cette caractéristique est <bf>off</bf>.
+    cette caractéristique est <bf>on</bf>.
     Vous pouvez aussi changer ce paramètre avec la préférence <ref id="preference-autorepeat" name="Autorepeat">.
   <tag>AUTOSPEAK<label id="command-AUTOSPEAK"></tag>
     Dit automatiquement:
@@ -380,7 +380,7 @@ Voir aussi la commande de touche de chemin <ref id="command-SWITCHVT" name="SWIT
     braille (voir <ref id="routing" name="Déplacement du Curseur"> pour des détails complets).
     Le curseur se déplace grâce à la simulation de l'appui sur les touches de direction verticales.
     Cette commande ne fonctionne pas toujours car certaines applications,
-    soit déplace le curseur sans vraiment avertir, soit utilisent
+    soit déplacent le curseur sans vraiment avertir, soit utilisent
     les flèches de direction à d'autres fins que le déplacement du curseur.
     C'est toutefois un peu plus sûr que les autres commandes de déplacement du
     curseur car cette commande ne tente pas de simuler les flèches gauche et
@@ -402,7 +402,7 @@ Voir aussi la commande de touche de chemin <ref id="command-SWITCHVT" name="SWIT
     détails complets).
     Le curseur se déplace grâce à la simulation de l'appui sur les touches de direction verticales.
     Cette commande ne fonctionne pas toujours car certaines applications,
-    soit déplace le curseur sans vraiment avertir, soit utilisent
+    soit déplacent le curseur sans vraiment avertir, soit utilisent
     les flèches de direction à d'autres fins que le déplacement du curseur.
   <tag>CUTBEGIN<label id="command-CUTBEGIN"></tag>
     Positionne le début du bloc coupé au caractère associé à la routine-curseur.
@@ -443,13 +443,16 @@ Voir aussi la commande de touche de chemin <ref id="command-SWITCHVT" name="SWIT
     déplacement. Cette caractéristique rend très facile l'action de
     mettre la fenêtre précisément là où il faut et, donc, pour les
     afficheurs qui ont des touches routines, élimine presque la
-    nécessité pour beaucoup de déplacement élémentaires de la fenêtre
+    nécessité pour beaucoup de déplacements élémentaires de la fenêtre
     (comme les commandes <ref id="command-CHRLT-CHRRT"
     name="CHRLT/CHRRT"> et <ref id="command-HWINLT-HWINRT" name="HWINLT/HWINRT">).
   <tag>SETMARK<label id="command-SETMARK"></tag>
     Marque la position courante de la fenêtre braille dans
     une mémoire associée à la routine. Voir la commande <ref id="command-GOTOMARK" name="GOTOMARK">.
     Cette caractéristique n'affecte que le terminal virtuel courant.
+  <tag>PRDIFCHAR<label id="command-PRDIFCHAR/NXDIFCHAR"></tag>
+    Monte ou descend à la ligne la plus proche qui contient un caractère
+    différent dans la colonne associée à la routine-curseur.
   <tag>GOTOMARK<label id="command-GOTOMARK"></tag>
     Déplace la fenêtre braille à la position précédemment marquée
     (voir la commande <ref id="command-SETMARK" name="SETMARK">) avec
@@ -457,7 +460,7 @@ Voir aussi la commande de touche de chemin <ref id="command-SWITCHVT" name="SWIT
     Cette caractéristique n'affecte que le terminal virtuel courant.
 </descrip>
 
-<sect1>The fichier de configuration<label id="configure"><p>
+<sect1>Le fichier de configuration<label id="configure"><p>
 
 Des valeurs système par défaut pour certains paramètres peuvent être
 établis dans un fichier de configuration. Le nom par défaut de ce
@@ -500,12 +503,27 @@ Les lignes de commande suivantes sont reconnues:
     pour les paramètres par défaut établis durant la procédure de compilation.
     Vous pouvez vous passer de cette ligne de commande avec
     l'option <ref id="options-braille-device" name="-d">.
-  <tag><tt>braille-driver</tt> <em>driver</em><tt>,</tt>...|<tt>auto</tt><label id="configure-braille-driver"></tag>
+  <tag><tt>release-device</tt> [<em>boléen</em>label id="configure-braille-driver"></tag>
+    Prendre en compte ou non le périphérique auquel l'afficheur braille est connecté 
+    lorsque  l'écran courant ou la fenêtre  ne peuvent être lus.
+    
+<tt>-</tt>),
+    <descrip>
+          <tag>on</tag>
+                  Prend en compte le périphérique.
+          <tag>off</tag>
+                  Ne prend pas en compte le périphérique.
+    </descrip>
+    
+    Sur les plateformes Windows,  le paramètre est on (actif),  il est off
+    sur toutes les autres.
+    Vous pouvez éviter cette ligne avec l'option en ligne de commande 
+    <ref id="options-braille-driver" name="-r">.
+    <ref id="options-braille-driver" name="-r">.
+  <tag><tt>braille-driver</tt> <em>pilote</em><tt>,</tt>...|<tt>auto</tt><label id="configure-braille-driver"></tag>
     Spécifie le pilote de l'afficheur braille (voir la section
-    <ref id="operand-driver" name="Spécification du pilote">).
-    Voir l'option de compilation <ref id="build-braille-driver" name="--with-braille-driver">
-    pour les paramètres par défaut établis lors de la procédure de
-    compilation.
+    <ref id="operand-driver" name="Spécification du pilote">). Par défaut, c'est
+    une  autodétection  qui est effectuée.
     Vous pouvez éviter cette ligne avec l'option en ligne de commande 
     <ref id="options-braille-driver" name="-b">.
   <tag><tt>braille-parameters</tt> [<em>pilote</em><tt>:</tt>]<em>nom</em><tt>=</tt><em>valeur</em><tt>,</tt>...<label id="configure-braille-parameters"></tag>
@@ -515,7 +533,7 @@ Les lignes de commande suivantes sont reconnues:
     nom d'un paramètre est qualifié par celui d'un pilote (voir la
     section <ref id="drivers" name="Codes d'identification de pilote">)
     ce paramètre ne s'applique qu'à ce pilote; sinon il s'applique à
-    tous les pilotes.
+    tous les pilotes. Par défaut, c'est une  autodétection  qui est effectuée.
     Pour une description des paramètres acceptés par un pilote en
     particulier, voyez la documentation de ce pilote.
     Voir l'option de compilation <ref id="build-braille-parameters" name="--with-braille-parameters">
@@ -526,7 +544,7 @@ Les lignes de commande suivantes sont reconnues:
   <tag><tt>contraction-table</tt> <em>fichier</em><label id="configure-contraction-table"></tag>
     Spécifie la table abrégé (voir la section <ref id="contraction"
     name="Braille abrégé"> pour des détails).
-    Si vous fournissez un chemin relatif, il est fdéterminé par rapport à <tt>/etc/brltty</tt>
+    Si vous fournissez un chemin relatif, il est déterminé par rapport à <tt>/etc/brltty</tt>
     (voir les options de compilation <ref id="build-data-directory" name="--with-data-directory">
     et <ref id="build-execute-root" name="--with-execute-root"> pour
     plus de détails.
@@ -556,7 +574,7 @@ Les lignes de commande suivantes sont reconnues:
     <ref id="options-pcm-device" name="-p">.
     Elle n'est pas disponible si vous avez spécifié l'option de
     compilation <ref id="build-pcm-support" name="--disable-pcm-support">.
-  <tag><tt>screen-parameters</tt> <em>name</em><tt>=</tt><em>value</em><tt>.</tt>...<label id="configure-screen-parameters"></tag>
+  <tag><tt>screen-parameters</tt> <em>name</em><tt>=</tt><em>value</em><tt>,</tt>...<label id="configure-screen-parameters"></tag>
     Spécifie les paramètres pour le pilote d'écran.
     Si le même paramètre est spéciié plus d'une fois, sa valeur la
     plus à droite est utilisée. Pour une description des paramètres
@@ -566,12 +584,28 @@ Les lignes de commande suivantes sont reconnues:
     compilation.
     Vous pouvez éviter cette ligne avec l'option en ligne de commande
     <ref id="options-screen-parameters" name="-X">.
-  <tag><tt>speech-driver</tt> <em>driver</em><tt>.</tt>...|<tt>auto</tt><label id="configure-speech-driver"></tag>
-    Spécifie le pilote de synthèse vocales (voir la section 
-    <ref id="operand-driver" name="Spécification du pilote de synthèse">).
-    Voir l'option de compilation <ref id="build-speech-driver" name="--with-speech-driver">
-    pour les paramètres par défaut établis lors de la procédure de
+  <tag><tt>screen-driver</tt> <em>pilote</em><label id="configure-screen-driver"></tag>
+    Spécifie le pilote pour l'écran (voir section <ref id="operand-driver" name="Driver Specification">).
+    Voir l'option de compilation <ref id="build-braille-device" name="--with-screen-driver">.
+    Vous pouvez éviter cette ligne avec l'option en ligne de commande
+    <ref id="options-screen-driver" name="-x">.
+  <tag><tt>screen-parameters</tt> <em>pilote</em><em>nom</em><tt>=</tt><em>valeur</em><tt>,</tt>...<label id="configure-screen-parameters"></tag>
+    Spécifie les paramètres pour les pilotes d'écran.
+    Si le même paramètre est spéciié plus d'une fois, sa valeur la
+    plus à droite est utilisée. Si un nom de paramètre est affecté à un pilote
+    (voir section Pilotes d'écran supportés), ce paramètre ne s'applique qu'au 
+    pilote; sinon il s'applique à tous les pilotes. Pour une description des paramètres
+    acceptés par un pilote en particulier, voyez la documentation de
+    ce pilote. Voir l'option de compilation <ref id="build-screen-parameters" name="--with-screen-parameters">
+    pour les paramètres par défaut établis pendant la procédure de
     compilation.
+    Vous pouvez éviter cette ligne avec l'option en ligne de commande
+    <ref id="options-screen-parameters" name="-X">.
+
+  <tag><tt>speech-driver</tt> <em>driver</em><tt>,</tt>...|<tt>auto</tt><label id="configure-speech-driver"></tag>
+    Spécifie le pilote de synthèse vocales (voir la section 
+    <ref id="operand-driver" name="Spécification du pilote de synthèse">). Pah
+    défaut, uneautodétection est effectuée.
     Vous pouvez éviter cette ligne avec l'option en ligne de commande
     <ref id="options-speech-driver" name="-s">.
     Elle n'est pas disponible si vous avez spécifié l'option de
@@ -584,7 +618,7 @@ Les lignes de commande suivantes sont reconnues:
     Vous pouvez éviter cette ligne avec l'option en ligne de commande
     <ref id="options-speech-fifo" name="-F">.
     Elle n'est pas disponible si vous avez spécifié <ref id="build-speech-support" name="--disable-speech-support">.
-  <tag><tt>speech-parameters</tt> [<em>driver</em><tt>:</tt>]<em>name</em><tt>=</tt><em>value</em><tt>.</tt>...<label id="configure-speech-parameters"></tag>
+  <tag><tt>speech-parameters</tt> [<em>driver</em><tt>:</tt>]<em>name</em><tt>=</tt><em>value</em><tt>,</tt>...<label id="configure-speech-parameters"></tag>
     Spécifie les paramètres pour les pilotes de synthèse vocale. Si
     vous spécifiez plus d'une fois le paramètre, c'est sa valeur le
     plus à droite qui est utilisée. 
@@ -631,7 +665,7 @@ suivantes:
     du fichier de configuration pour la sélection des paramètres par défaut
     lors de l'exécution.
     Vous pouvez changer ce paramètre avec la préférence <ref id="preference-attributes-table" name="Attributes Table">.
-  <tag><tt>-b</tt><em>driver</em><tt>.</tt>...|<tt>auto</tt> <tt>--braille-driver=</tt><em>driver</em><tt>.</tt>...|<tt>auto</tt><label id="options-braille-driver"></tag>
+  <tag><tt>-b</tt><em>driver</em><tt>,</tt>...|<tt>auto</tt> <tt>--braille-driver=</tt><em>driver</em><tt>,</tt>...|<tt>auto</tt><label id="options-braille-driver"></tag>
     Spécifie le pilote de l'afficheur braille (voir la section
     <ref id="operand-driver" name="Spécification du pilote">).
     Voir la ligne <ref id="configure-braille-driver" name="braille-driver">
@@ -645,7 +679,7 @@ suivantes:
     et <ref id="build-execute-root" name="--with-execute-root"> pour plus de
     détails).
     L'extension <tt>.ctb</tt> est facultative.
-    La table d'abrégé est utilisée lorsque la caractéristiques braille 6
+    La table d'abrégé est utilisée lorsque la caractéristique braille 6
     points est activée (voir la commande <ref id="command-SIXDOTS" name="SIXDOTS">
     et la préférence <ref id="preference-text-style" name="Text Style">).
     Voir la ligne <ref id="configure-contraction-table" name="contraction-table">
@@ -655,7 +689,7 @@ suivantes:
     Cette option n'est pas disponible si l'option de compilation 
     <ref id="build-contracted-braille" name="--disable-contracted-braille">
     a été spécifiée.
-  <tag><tt>-d</tt><em>peripherique</em><tt>.</tt>... <tt>--braille-device=</tt><em>device</em><tt>.</tt>...<label id="options-braille-device"></tag>
+  <tag><tt>-d</tt><em>peripherique</em><tt>,</tt>... <tt>--braille-device=</tt><em>device</em><tt>,</tt>...<label id="options-braille-device"></tag>
     Spécifie le périphérique auquel l'afficheur braille est connecté (voir la
     section <ref id="operand-braille-device" name="Spécification du périphérique braille">).
     Voir la ligne <ref id="configure-braille-device" name="braille-device">
@@ -711,7 +745,12 @@ suivantes:
     à <tt>notice</tt> si vous avez spécifié l'option <ref id="options-verify" name="-v">
     ou <ref id="options-version" name="-V">,
     et, sinon, à <tt>warning</tt>.
-  <tag><tt>-s</tt><em>périphérique</em><tt>.</tt>...|<tt>auto</tt> <tt>--speech-driver=</tt><em>driver</em><tt>.</tt>...|<tt>auto</tt><label id="options-speech-driver"></tag>
+  <tag><tt>-r</tt> <tt>--release-device=</tt>...|<tt>auto</tt><label id="options-speech-driver"></tag>
+    Prend en compte le périphérique auquel est connecté l'afficheur braille 
+    lorsque  l'écran courant ou la fenêtre  ne peuvent être lus.
+    Voir la ligne <ref id="configure-speech-driver" name="release-device">
+    du fichier de configuration pour les paramètres par défaut à l'exécution.
+  <tag><tt>-s</tt><em>périphérique</em><tt>,</tt>...|<tt>auto</tt> <tt>--speech-driver=</tt><em>pilote</em><tt>,</tt>...|<tt>auto</tt><label id="options-speech-driver"></tag>
     Spécifie le pilote de la synthèse vocale (voir la section 
     <ref id="operand-driver" name="Spécification de pilote">).
     Voir la ligne <ref id="configure-speech-driver" name="speech-driver">
@@ -735,7 +774,7 @@ suivantes:
     API, et des pilotes de synthèse
     et de braille sélectionnés, puis quitte.
     Si l'option <ref id="options-quiet" name="-q"> n'est pas spéciifiée,
-    affiche aussi les informations légales, ainsi que les valeurs des
+    affiche aussi les valeurs des
     options après que toutes les sources aient été examinées.
     Si vous avez spécifié plus d'un pilote braille (voir l'option en ligne de
     commande <ref id="options-braille-driver" name="-b">) et/ou plus d'un
@@ -744,14 +783,19 @@ suivantes:
     Si vous avez spécifié plus d'un pilote de synthèse (voir l'option en ligne
     de commande <ref id="options-speech-driver" name="-s">), une autodétection
     de la synthèse vocale est entreprise.
-  <tag><tt>-A</tt><em>nom</em><tt>=</tt><em>valeur</em><tt>.</tt>... <tt>--api-parameters=</tt><em>name</em><tt>=</tt><em>value</em><tt>.</tt>...<label id="options-api-parameters"></tag>
+  <tag><tt>-x</tt><em>pilote</em> <tt>--screen-driver=</tt><em>pilote</em>...<label id="options-api-parameters"></tag>
+    Spécifie le pilote d'écran (voir la section Pilotes d'écran s1ffehtés).
+    Voir la ligne <ref id="configure-braille-device" name="screen-driver">
+    du fichier de configuration pour les paramètres par défaut à
+    l'exécution.
+  <tag><tt>-A</tt><em>nom</em><tt>=</tt><em>valeur</em><tt>,</tt>... <tt>--api-parameters=</tt><em>name</em><tt>=</tt><em>value</em><tt>,</tt>...<label id="options-api-parameters"></tag>
     Spécifie les paramètres pour l'API.
     Si vous spécifiez le même paramètre plus d'une fois, c'est sa valeur la
     plus à droite qui est utilisée. Pour une description des paramètres acceptés
     par l'interface, reportez-vous au manuel de référence <bf>BrlAPI</bf>.
     Voir la ligne <ref id="configure-api-parameters" name="api-parameters">
     du fichier de configuration pour les paramètres par défaut à l'exécution.
-  <tag><tt>-B</tt>[<em>pilote</em><tt>:</tt>]<em>nom</em><tt>=</tt><em>valeur</em><tt>.</tt>... <tt>--braille-parameters=</tt>[<em>driver</em><tt>:</tt>]<em>name</em><tt>=</tt><em>value</em><tt>.</tt>...<label id="options-braille-parameters"></tag>
+  <tag><tt>-B</tt>[<em>pilote</em><tt>:</tt>]<em>nom</em><tt>=</tt><em>valeur</em><tt>...</tt> <tt>--braille-parameters=</tt>[<em>pilote</em><tt>:</tt>]<em>nom</em><tt>=</tt><em>valeur</em><tt>,</tt>...<label id="options-braille-parameters"></tag>
     Spécifie les paramètres pour les pilotes des afficheurs braille. 
     Si vous spécifiez le même paramètre plus d'une fois, c'est sa valeur le
     plus à droite qui est utilisée. Si vous qualifiez le nom d'un paramètre par un pilote, (voir
@@ -763,7 +807,7 @@ suivantes:
     du fichier de configuration pour les paramètres par défaut à l'exécution.
   <tag><tt>-E</tt> <tt>--environment-variables</tt><label id="options-environment-variables"></tag>
     Reconnaît les variables d'environnement quand les paramètres par défaut
-    pour des options en ligne de commande non spécifiées sont déterminés.
+    pour des options en ligne de commandes non spécifiées sont déterminées.
     (voir la section <ref id="options" name="Options en ligne de commande">).
     Si vous spécifiez cette option, et si vous définissez une variable
     d'environnement associée à une option non spécifiée, c'est la valeur de cette variable d'environnement qui est
@@ -789,6 +833,11 @@ suivantes:
       <tag><tt>BRLTTY_BRAILLE_DEVICE</tt></tag>
         Le périphérique de l'afficheur braille (voir l'option en ligne de commande
         <ref id="options-braille-device" name="-d">).
+      <tag><tt>BRLTTY_RELEASE_DEVICE</tt></tag>
+         Prendre en compte ou non le périphérique auquel l'afficheur braille est connecté 
+         lorsque  l'écran courant ou la fenêtre  ne peuvent être lus (voir
+         l'option <ref id="options-braille-driver" name="-r"> en lignede
+         commande).
       <tag><tt>BRLTTY_BRAILLE_DRIVER</tt></tag>
         Le pilote de l'afficheur braille (voir l'option en ligne de commande
         <ref id="options-braille-driver" name="-b">).
@@ -837,17 +886,14 @@ suivantes:
     Spécifie le temps (en centièmes de seconde) que prend ÁRLTTY pour
     afficher ses propres messages internes sur l'afficheur braille. Si
     ce n'est pas spécifié, c'est <tt>400</tt> (4 secondes) qui est utlisé.
-  <tag><tt>-N</tt> <tt>--no-speech</tt><label id="options-no-speech"></tag>
-    Ne démarre pas automatiquement les pilotes de synthèse vocale.
-    Malheureusement, cette option est parfois nécessaire sur certains
-    systèmes, quand BRLTTY démarre avant que le son du système à
-    l'intérieur du noyau n'ait été initialisé.
+  <tag><tt>-N</tt> <tt>--no-api</tt><label id="options-no-speech"></tag>
+    Désactive l'interface programmatique de l'application.
   <tag><tt>-P</tt><em>fichier</em> <tt>--pid-file=</tt><em>fichier</em><label id="options-pid-file"></tag>
     Spécifie le fichier à l'intérieur duquel BRLTTY doit écrire ses
     identifiants de processus (pid). Si cela n'est pas spécifié,
     BRLTTY écrit ses identifiants de processus nulle part.
-  <tag><tt>-S</tt>[<em>driver</em><tt>:</tt>]<em>name</em><tt>=</tt><em>value</em><tt>.</tt>...
-   <tt>--speech-parameters=</tt>[<em>driver</em><tt>:</tt>]<em>name</em><tt>=</tt><em>value</em><tt>.</tt>...<label id="options-speech-parameters"></tag>
+  <tag><tt>-S</tt>[<em>driver</em><tt>:</tt>]<em>name</em><tt>=</tt><em>value</em><tt>,</tt>...
+   <tt>--speech-parameters=</tt>[<em>driver</em><tt>:</tt>]<em>name</em><tt>=</tt><em>value</em><tt>,</tt>...<label id="options-speech-parameters"></tag>
     Spécifie les paramètres pour les pilotes de synthèse vocale.
     Si vous spécifiez plus d'une fois le même paramètre, c'est sa
     valeur la plus à droite qui est utilisée. Si un nom de paramètre
@@ -868,13 +914,14 @@ suivantes:
     pilotes qui ont été liés à son binaire, puis quitte. Si vous
     ne spécifiez pas l'option <ref id="options-quiet" name="-q">,
     affiche aussi les informations légales.
-  <tag><tt>-X</tt><em>nom</em><tt>=</tt><em>valeur</em><tt>.</tt>...
-   <tt>--screen-parameters=</tt><em>name</em><tt>=</tt><em>value</em><tt>.</tt>...<label id="options-screen-parameters"></tag>
-    Spécifie les paramètres pour le pilote d'écran.
-        Si vous spécifiez plus d'une fois le même paramètre, c'est sa
-    valeur la plus à droite qui est utilisé. Pour une description des
-    paramètres acceptés par un pilote en particulier, reportez-vous à
-    sa documentation. Voir la ligne <ref id="configure-screen-parameters" name="screen-parameters">
+  <tag><tt>-X</tt><em>nom</em><tt>=</tt><em>valeur</em><tt>,</tt>...<tt>--screen-parameters=</tt><em>pilote</em><tt>=</tt><em>nom</em><tt>valeur</tt>...<label id="options-screen-parameters"></tag>
+    Spécifie les paramètres pour les pilotes d'écran. 
+    Si vous spécifiez plus d'une fois le même paramètre, c'est sa
+    valeur la plus à droite qui est utilisé. Si un paramètre est réservé
+    à un pilote, (voir la section Pilotes d'écran supportés), ce paramètre
+    ne s'applique qu'à ce pilote; sinon il s'applique à tous les pilotes. 
+    Pour une description des paramètres acceptés par un pilote en particulier, 
+    reportez-vous à sa documentation. Voir la ligne <ref id="configure-screen-parameters" name="screen-parameters">
     du fichier de configuration pour la sélection des paramètres par
     défaut à l'exécution.
 </descrip>

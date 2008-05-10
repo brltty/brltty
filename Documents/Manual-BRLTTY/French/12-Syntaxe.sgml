@@ -28,8 +28,9 @@ le qualificateur c'est <tt>série:</tt> qui est utilisé.
 Les types de périphérique suivants sont supportés:
 <descrip>
   <tag>Bluetooth</tag>
-    Pour un périphérique bluetooth, spécifiez <tt>bluez:</tt><em>addresse</em>.
-    L'adresse doit se composer de nombres hexadécimaux à deux chiffres
+    Pour un périphérique bluetooth, spécifiez <tt>bluetooth:</tt><em>addresse</em>
+    ?vous pouvez aussi utiliser bt: et bluez: ).
+    L'adresse doit se composer de six nombres hexadécimaux à deux chiffres
     séparés par des "deux-points", par exemple <tt>01:23:45:67:89:AB</tt>.
   <tag>Série</tag>
     Pour un périphérique en port série, spécifiez
@@ -71,7 +72,7 @@ périphérique du système approprié. Les exceptions sont:
 <descrip>
   <tag>ALSA</tag>
     Le nom et ses arguments pour le périphérique logique ou physique, comme
-    <em>nom</em>[<tt>:</tt><em>argument</em><tt>.</tt>...].
+    <em>nom</em>[<tt>:</tt><em>argument</em><tt>,</tt>...].
 </descrip>
 
 Le périphérique PCM par défaut est:

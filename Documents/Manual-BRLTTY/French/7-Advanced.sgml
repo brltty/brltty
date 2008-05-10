@@ -1,7 +1,7 @@
 <sect>Sujets avancés<p>
 
 <sect1>Installation de plusieurs versions<label id="multiple"><p>
-Il est facile d'avoir plus d'une version de BRLTTY installée sur le le même
+Il est facile d'avoir plus d'une version de BRLTTY installée sur  le même
 système en même temps. Cette possibilité vous permet de tester une nouvelle
 version avant de supprimer l'ancienne.
 
@@ -40,7 +40,7 @@ Si vous aimez vraiment faire de la fantaisie, introduisez un autre niveau
 de redirection de façon à rendre tous les fichiers de chaque version de BRLTTY
 tels qu'ils sont dans tous les emplacements standards.
 D'abord, créez un lien symbolique à travers un emplacement où on peut
-repointer aisément à partir de chacun des emplacements standard de BRLTTY.
+repointer aisément à partir de chacun des emplacements standards de BRLTTY.
 <tscreen><verb>
 ln -s /brltty/bin/brltty /bin/brltty
 ln -s /brltty/etc/brltty /etc/brltty
@@ -100,11 +100,11 @@ Cependant, si vous le copiez depuis le répertoire de compilation, n'oubliez pas 
 
 <sect1>Avancées futures<p>
 Outre la réparation de bugs et le support de plus de types d'afficheurs
-braille, nous espérons, si le temps nous le permet, travailler sur:
+brailles, nous espérons, si le temps nous le permet, travailler sur:
 <descrip>
   <tag>Meilleure prise en main des attributs</tag>
     <itemize>
-      <item>Suivi des attribut.
+      <item>Suivi des attributs.
       <item>Mode mixte texte et attribut.
     </itemize>
   <tag>Suivi du défilement</tag>
@@ -128,7 +128,7 @@ connus.
 
 La routine-curseur est considérée comme un sous-processus en boucle qui s'exécute
 avec une priorité réduite pour éviter de trop utiliser le temps cpu.
-Les chargements de système différent nécessitent des réglages différents de
+Les chargements de systèmes différents nécessitent des réglages différents de
 ses paramètres. Ceux par défaut fonctionnent très bien dans un éditeur Unix
 classique sur un système chargé normalement, mais très mal dans d'autres
 situations, par exemple sur une liaison série lente vers un nom de machine

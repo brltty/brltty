@@ -1,69 +1,25 @@
-<sect>Codes d'identification de pilote<label id="drivers"><p>
-<table loc="h">
-  <tabular ca="ll">
-    Code|Nom@<hline>
-    al|Alva@
-    at|Albatross@
-    ba|BrlAPI@
-    bl|BrailleLite@
-    bm|Baum (Native, HT, PB1, PB2)@
-    bn|BrailleNote@
-    cb|CombiBraille@
-    ec|EcoBraille@
-    es|ExternalSpeech@
-    eu|EuroBraille@
-    fl|FestivalLite@
-    fs|FreedomScientific@
-    fv|Festival@
-    gs|GenericSay@
-    ht|HandyTech@
-    il|IrisLinux@
-    lb|Libbraille@
-    lt|LogText@
-    mb|MultiBraille@
-    md|MDV@
-    mn|MiniBraille@
-    mp|Mikropuhe@
-    no|no driver@
-    pm|Papenmeier@
-    sd|SpeechDispatcher@
-    sw|Swift@
-    th|Theta@
-    ts|Telesensory Systems Inc.@
-    tt|TTY@
-    vd|VideoBraille@
-    vo|Voyager@
-    vr|Virtual@
-    vs|VisioBraille@
-    vv|ViaVoice@
-    xw|XWindow@
-  </tabular>
-</table>
-
-<sect>Supported Screen Drivers<label id="screen"><p>
-BRLTTY supports the following screen drivers:
+<sect>Pilotes d'écran supportés <label id="screen"><p>
+BRLTTY supporte les pilotes d'écran suivants:
 <descrip>
   <tag/as/
     AT-SPI
   <tag/hd/
-    This driver provides direct access to the Hurd console screen.
-    It's only selectable, and is the default, on Hurd systems.
+    Ce pilote fournit un accès direct à l'écran d'une console Hurd.
+    Il n'est  sélectionnable et par défaut oque sur les systèmes Hurd.
   <tag/lx/
-    This driver provides direct access to the Linux console screen.
-    It's only selectable, and is the default, on Linux systems.
+    Ce pilote fournit un accès direct à l'écran d'une console Linux
+    Il n'est  sélectionnable et par défaut oque sur les systèmes Linux.
   <tag/sc/
-    This driver provides access to the <tt/screen/ program.
-    It's selectable on all systems,
-    and is the default if no native screen driver is available.
-    The patch for <tt/screen/ which we provide
-    (see the <tt/Patches/ subdirectory)
-    must be applied.
-    Use of this driver,
-    due to the fact that <tt/screen/ must be concurrently running,
-    makes BRLTTY effectively useful only after the user has logged in.
+    Ce pilote fournit un accès direct au programme <tt/screen/
+    Vous pouvez le sélectionner sur tous les systèmes, et il l'est par défaut
+    si aucun pilote d'écran d'origine n'est disponible. Vous devez appliquer le
+    patch pour <tt/screen/ que nous fournissons (voir le sous-répertoire
+    <tt/Patches/ ). Du fait que screen doit être exécuté simultanément,
+    l'utilisation de ce pilote rend BRLTJó opérationnel uniquement après que
+    l'utilisateur s'est identifié.
   <tag/wn/
-    This driver provides direct access to the Windows console screen.
-    It's only selectable, and is the default, on Windows/Cygwin systems.
+    Ce pilote fournit un accès direct à l'écran d'une console Windows.
+    Il n'est  sélectionnable et par défaut oque sur les systèmes Windows/Cygwin.
 </descrip>
 
 <sect>Operand Syntax<p>

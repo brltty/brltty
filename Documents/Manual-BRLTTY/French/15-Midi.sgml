@@ -1,4 +1,4 @@
-<sect>Table d'Instruments MIDI<label id="midi"><p>
+<sect>Table d'instruments MIDI<label id="midi"><p>
 <table loc="h">
   <tabular ca="lrl">
     <hline>Piano
@@ -19,7 +19,7 @@
       |13|Xylophone@
       |14|Tubular Bells@
       |15|Dulcimer@
-    <hline>Orgue
+    <hline>Organ
       |16|Drawbar Organ@
       |17|Percussive Organ@
       |18|Rock Organ@
@@ -28,7 +28,7 @@
       |21|Accordion@
       |22|Harmonica@
       |23|Tango Accordion@
-    <hline>Guitare
+    <hline>Guitar
       |24|Nylon Acoustic Guitar@
       |25|Steel Acoustic Guitar@
       |26|Jazz Electric Guitar@

@@ -10,16 +10,18 @@
 <!ENTITY displays 	SYSTEM "8-Displays.sgml">
 <!ENTITY synthesizers 	SYSTEM "9-Synthesizers.sgml">
 <!ENTITY drivers 	SYSTEM "10-Drivers.sgml">
-<!ENTITY syntaxe 	SYSTEM "11-Syntaxe.sgml">
-<!ENTITY dots 		SYSTEM "12-Dots.sgml">
-<!ENTITY midi 		SYSTEM "13-Midi.sgml">
-<!ENTITY nabcc 		SYSTEM "14-nabcc.sgml">
+<!ENTITY screen         SYSTEM "11-Screen.sgml">
+<!ENTITY syntaxe 	SYSTEM "12-Syntaxe.sgml">
+<!ENTITY dots 		SYSTEM "13-Dots.sgml">
+<!ENTITY nabcc          SYSTEM "14-nabcc.sgml">
+<!ENTITY midi 		SYSTEM "15-Midi.sgml">
+
 ]>
 <article>
 
 <titlepag>
-  <title>BRLTTY
-    <subtitle>Accès à une console Linux/Unix pour les personnes non-voyantes utilisant des afficheurs braille
+  <title>Manuel de référence de BRLTTY
+    <subtitle>Accès à l'écran d'une console pour les personnes non-voyantes utilisant des afficheurs braille
   <author>
     <name>Nikhil Nair <tt><htmlurl url="mailto:nn201@cus.cam.ac.uk" name="&lt;nn201@cus.cam.ac.uk&gt;"></tt>
   <and>
@@ -32,9 +34,9 @@
     <name>Traduction française
   <and>
     <name>Jean-Philippe Mengual <tt><htmlurl url="mailto:mengualjeanphi@free.fr" name="&lt;mengualjeanphi@free.fr&gt;"></tt>
-  <date>Version 3.6, Octobre 2004
+  <date>Version 3.9, Octobre 2007
   <abstract>
-    Copyright &copy; 1995-2008 by Les Développeurs de BRLTTY.
+    Copyright &copy; 1995-2007 by Les Développeurs de BRLTTY.
     BRLTTY est un logiciel libre, et n'est fourni avec AUCUNE
     GARANTIE. Il est placé sous les termes de la version 2 ou
     ultérieure de la <bf>GNU General Public License</bf> publiée par
@@ -51,7 +53,7 @@
 <sect1>Licence<p>
 Ce programme est un logiciel libre. Vous pouvez le redistribuer et/ou
 le modifier sous les termes de la <htmlurl url="http://www.gnu.org/licenses/licenses.html#GPL" name="GNU General Public License">
-stipulé par la <htmlurl url="http://www.gnu.org/fsf/fsf.html" name="Free Software Foundation">. Vous pouvez utiliser une version 2 (ou supérieure) de la licence.
+stipulée par la <htmlurl url="http://www.gnu.org/fsf/fsf.html" name="Free Software Foundation">. Vous pouvez utiliser une version 2 (ou supérieure) de la licence.
 
 Vous devriez avoir reçu une copie de la licence avec le
 programme. Elle devrait être dans le fichier <tt>COPYING</tt> du
@@ -107,6 +109,7 @@ détails).
 &displays
 &synthesizers
 &drivers
+&screen
 &syntaxe
 &dots
 &nabcc
