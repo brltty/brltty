@@ -503,11 +503,10 @@ Les lignes de commande suivantes sont reconnues:
     pour les paramètres par défaut établis durant la procédure de compilation.
     Vous pouvez vous passer de cette ligne de commande avec
     l'option <ref id="options-braille-device" name="-d">.
-  <tag><tt>release-device</tt> [<em>boléen</em>label id="configure-braille-driver"></tag>
+  <tag><tt>release-device</tt> [<em>boléen</em><label id="configure-release-device"></tag>
     Prendre en compte ou non le périphérique auquel l'afficheur braille est connecté 
     lorsque  l'écran courant ou la fenêtre  ne peuvent être lus.
     
-<tt>-</tt>),
     <descrip>
           <tag>on</tag>
                   Prend en compte le périphérique.
@@ -518,8 +517,7 @@ Les lignes de commande suivantes sont reconnues:
     Sur les plateformes Windows,  le paramètre est on (actif),  il est off
     sur toutes les autres.
     Vous pouvez éviter cette ligne avec l'option en ligne de commande 
-    <ref id="options-braille-driver" name="-r">.
-    <ref id="options-braille-driver" name="-r">.
+    <ref id="options-release-device" name="-r">.
   <tag><tt>braille-driver</tt> <em>pilote</em><tt>,</tt>...|<tt>auto</tt><label id="configure-braille-driver"></tag>
     Spécifie le pilote de l'afficheur braille (voir la section
     <ref id="operand-driver" name="Spécification du pilote">). Par défaut, c'est
@@ -744,7 +742,7 @@ suivantes:
     à <tt>notice</tt> si vous avez spécifié l'option <ref id="options-verify" name="-v">
     ou <ref id="options-version" name="-V">,
     et, sinon, à <tt>warning</tt>.
-  <tag><tt>-r</tt> <tt>--release-device=</tt>...|<tt>auto</tt><label id="options-speech-driver"></tag>
+  <tag><tt>-r</tt> <tt>--release-device=</tt>...|<tt>auto</tt><label id="options-release-device"></tag>
     Prend en compte le périphérique auquel est connecté l'afficheur braille 
     lorsque  l'écran courant ou la fenêtre  ne peuvent être lus.
     Voir la ligne <ref id="configure-speech-driver" name="release-device">
