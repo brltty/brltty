@@ -450,14 +450,14 @@ Voir aussi la commande de touche de chemin <ref id="command-SWITCHVT" name="SWIT
     Marque la position courante de la fenêtre braille dans
     une mémoire associée à la routine. Voir la commande <ref id="command-GOTOMARK" name="GOTOMARK">.
     Cette caractéristique n'affecte que le terminal virtuel courant.
-  <tag>PRDIFCHAR<label id="command-PRDIFCHAR/NXDIFCHAR"></tag>
-    Monte ou descend à la ligne la plus proche qui contient un caractère
-    différent dans la colonne associée à la routine-curseur.
   <tag>GOTOMARK<label id="command-GOTOMARK"></tag>
     Déplace la fenêtre braille à la position précédemment marquée
     (voir la commande <ref id="command-SETMARK" name="SETMARK">) avec
     la même routine.
     Cette caractéristique n'affecte que le terminal virtuel courant.
+  <tag>PRDIFCHAR/NXDIFCHAR<label id="command-PRDIFCHAR-NXDIFCHAR"></tag>
+    Monte ou descend à la ligne la plus proche qui contient un caractère
+    différent dans la colonne associée à la routine-curseur.
 </descrip>
 
 <sect1>Le fichier de configuration<label id="configure"><p>
@@ -585,7 +585,6 @@ Les lignes de commande suivantes sont reconnues:
     Vous pouvez éviter cette ligne avec l'option en ligne de commande
     <ref id="options-screen-parameters" name="-X">.
   <tag><tt>screen-driver</tt> <em>pilote</em><label id="configure-screen-driver"></tag>
-    Spécifie le pilote pour l'écran (voir section <ref id="operand-driver" name="Driver Specification">).
     Voir l'option de compilation <ref id="build-braille-device" name="--with-screen-driver">.
     Vous pouvez éviter cette ligne avec l'option en ligne de commande
     <ref id="options-screen-driver" name="-x">.
@@ -783,7 +782,7 @@ suivantes:
     Si vous avez spécifié plus d'un pilote de synthèse (voir l'option en ligne
     de commande <ref id="options-speech-driver" name="-s">), une autodétection
     de la synthèse vocale est entreprise.
-  <tag><tt>-x</tt><em>pilote</em> <tt>--screen-driver=</tt><em>pilote</em>...<label id="options-api-parameters"></tag>
+  <tag><tt>-x</tt><em>pilote</em> <tt>--screen-driver=</tt><em>pilote</em>...<label id="options-screen-driver"></tag>
     Spécifie le pilote d'écran (voir la section Pilotes d'écran s1ffehtés).
     Voir la ligne <ref id="configure-braille-device" name="screen-driver">
     du fichier de configuration pour les paramètres par défaut à
