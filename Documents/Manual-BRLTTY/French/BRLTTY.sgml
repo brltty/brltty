@@ -1,20 +1,20 @@
 <!doctype linuxdoc system[
 
-<!ENTITY introduction 	SYSTEM "1-Introduction.sgml">
-<!ENTITY compilation 	SYSTEM "2-Compilation.sgml">
-<!ENTITY utilisation 	SYSTEM "3-Utilisation.sgml">
-<!ENTITY features 	SYSTEM "4-Features.sgml">
-<!ENTITY translation 	SYSTEM "5-Translation.sgml">
-<!ENTITY contraction 	SYSTEM "6-Contraction.sgml">
-<!ENTITY advanced 	SYSTEM "7-Advanced.sgml">
-<!ENTITY displays 	SYSTEM "8-Displays.sgml">
-<!ENTITY synthesizers 	SYSTEM "9-Synthesizers.sgml">
-<!ENTITY drivers 	SYSTEM "10-Drivers.sgml">
-<!ENTITY screen         SYSTEM "11-Screen.sgml">
-<!ENTITY syntaxe 	SYSTEM "12-Syntaxe.sgml">
-<!ENTITY dots 		SYSTEM "13-Dots.sgml">
-<!ENTITY nabcc          SYSTEM "14-nabcc.sgml">
-<!ENTITY midi 		SYSTEM "15-Midi.sgml">
+<!ENTITY introduction 	SYSTEM "Introduction.sgml">
+<!ENTITY compilation 	SYSTEM "Compilation.sgml">
+<!ENTITY utilisation 	SYSTEM "Utilisation.sgml">
+<!ENTITY features 	SYSTEM "Features.sgml">
+<!ENTITY translation 	SYSTEM "Translation.sgml">
+<!ENTITY contraction 	SYSTEM "Contraction.sgml">
+<!ENTITY advanced 	SYSTEM "Advanced.sgml">
+<!ENTITY displays 	SYSTEM "Displays.sgml">
+<!ENTITY synthesizers 	SYSTEM "Synthesizers.sgml">
+<!ENTITY drivers 	SYSTEM "Drivers.sgml">
+<!ENTITY screen         SYSTEM "Screen.sgml">
+<!ENTITY syntaxe 	SYSTEM "Syntax.sgml">
+<!ENTITY dots 		SYSTEM "Dots.sgml">
+<!ENTITY nabcc          SYSTEM "nabcc.sgml">
+<!ENTITY midi 		SYSTEM "Midi.sgml">
 
 ]>
 <article>
