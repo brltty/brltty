@@ -23,10 +23,8 @@ Les tables d'abrégé suivantes sont fournies:
   <tag>en-uebc-g2</tag>Braille abrégé anglais unifié
   <tag>fr-abrege</tag>Français unifié abrégé
   <tag>fr-integral</tag>Français unifié désabrégé
-  <tag>zh-tw-big</tag>Chinois Thaïwanais (utilisant le codage BIG5).
-  <tag>zh-tw-gb</tag>Chinois Thaïwanais simplifié
-  <tag>zh-tw-1cb</tag>Braille Chinois Thaïwanais "Unique"
-  <tag>zh-tw-utf8</tag>Chinois Thaïwanais (utilisant le codage UTF-8)
+  <tag>zh-tw</tag>Chinois Thaïwanais (utilisant le codage BIG5).
+  <tag>zh-tw-ucb</tag>Braille Chinois Thaïwanais "Unique"
 </descrip>
 
 <sect1>Format de fichier<p>
@@ -158,18 +156,17 @@ chaîne de caractères la plus longue est utilisée. S'il y a plus d'une
 entrée acceptable pour la même chaîne de caractères, celle définie le plus
 au début de la table est utilisée (c'est la seule dépendance de l'ordre).
 
-Beaucoup de ces opcodes ont un opérateur <em>points</em> qui définit la représentation
-braille de son opérateur <em>caractères</em>.
-Il peut être aussi spécifiée comme un signe égal (<tt>=</tt>), au quel cas il
-signifie l'une des deux choses.
-Si l'entrée est pour un seul caractère, cela signifie que la représentation
-du braille informatique sélectionnée (voir l'option
-<ref id="options-text-table" name="-t"> en ligne de commande et la ligne
-<ref id="configure-text-table" name="text-table"> du fichier de configuration)
-de ce caractère doit être utilisée.
-Si c'est pour une séquence multi-caractères, la représentation par défaut de
-chaque caractère (voir <ref id="contraction-opcode-always" name="always">) dans
-une séquence doit être utilisée.
+Beaucoup de ces opcodes ont un opérateur <em>points</em> qui définit la
+représentation braille de son opérateur <em>caractères</em>. Il peut
+être aussi spécifié comme un signe égal (<tt>=</tt>), au quel cas il
+signifie l'une des deux choses. Si l'entrée est pour un seul caractère,
+cela signifie que la représentation du braille informatique sélectionnée
+(voir l'option <ref id="options-text-table" name="-t"> en ligne de
+commande et la ligne <ref id="configure-text-table" name="text-table">
+du fichier de configuration) de ce caractère doit être utilisée. Si
+c'est pour une séquence multi-caractères, la représentation par défaut
+de chaque caractère (voir <ref id="contraction-opcode-always"
+name="always">) dans une séquence doit être utilisée.
 
 Certains termes spéciaux sont utilisés à l'intérieur des descriptions de ces
 opcodes.
@@ -194,7 +191,7 @@ Enfin, voici maintenant la description des opcodes eux-mêmes:
     Traduit les caractères quelque soit l'endroit où ils apparaissent.
     S'il n'y a qu'un caractère, alors, en plus, définit la représentation par
     défaut de ce caractère.
-  <tag><tt>repeated</tt> <em>caractères</em> <em>points</em><label id="contraction-opcode-repeated"></tag>
+  <tag><tt>repeatable</tt> <em>caractères</em> <em>points</em><label id="contraction-opcode-repeated"></tag>
     Traduit les caractères quelque soit l'endroit où ils apparaissent. Ignore toute
     répétition immédiate de la même séquence.
   <tag><tt>largesign</tt> <em>caractères</em> <em>points</em><label id="contraction-opcode-largesign"></tag>

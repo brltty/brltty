@@ -19,6 +19,8 @@ BRLTTY supporte les afficheurs braille suivants:
       |18/40/M20/M40@
     BrailleNote
       |18/32@
+    BrailleSense
+      |32@
     BrlAPI@
     CombiBraille
       |25/45/85@

@@ -24,7 +24,8 @@ traduction de texte par défaut, plusieurs alternatives sont fournies:
   <tag>fr-cbifs</tag>Code Braille Informatique Français Standard (iso-8859-1)
   <tag>it</tag>Italien (iso-8859-1)
   <tag>nabcc</tag>Code informatique braille nord-américain (iso-8859-1)
-  <tag>no-h</tag>Norvégien et allemand (iso-8859-1)
+  <tag>no-generic</tag>Norvégien (avec un support pour d'autres langues)
+  <tag>no-oub</tag>Norvégien (Offentlig Utvalg for Blindeskrift)
   <tag>no-p</tag>Norvégien (iso-8859-1)
   <tag>pl</tag>Polonais (iso-8859-2)
   <tag>pt</tag>Portugais (iso-8859-1)
@@ -93,7 +94,7 @@ commande, la ligne <ref id="configure-attributes-table" name="attributes-table">
 du fichier de configuration, et l'option de compilation
 <ref id="build-attributes-table" name="--with-attributes-table"> pour des
 détails concernant l'utilisation et le changement de table de
-traduction.
+traduction d'attributs.
 
 <sect1>Format des tables<p>
 Une table de traduction est une séquence de lignes de commande, avec une

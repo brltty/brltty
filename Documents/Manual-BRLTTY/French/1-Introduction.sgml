@@ -145,35 +145,6 @@ propres facilité d'inspection du contenu de leur écran. La faiblesse
 principale de cette approche de l'écran est que BRLTTY ne peut être
 démarré tant que l'utilisateur n'est pas connecté.
 
-Pour que BRLTTY communique avec succès avec un afficheur braille
-actualisable, le bon pilote (série, parallèle, USB ou bluetooth) doit être
-configuré dans le noyau. Si le pilote requiert des options spéciales,
-elles doivent être fournies. S'il est compilé en dur dans le noyau,
-ses options doivent être:
-<descrip>
-  <tag>Linux</tag>
-    <itemize>
-      <item>
-        Installées pendant la procédure de configuration du noyau.
-      <item>
-        Fournies à l'invite de démarrage de LILO
-      <item>
-        Spécifiées sur une ligne <tt>append</tt> dans <tt>/etc/lilo.conf</tt>.
-    </itemize>
-</descrip>
-Si le pilote est un module, alors ses options doivent être:
-<descrip>
-  <tag>Linux</tag>
-    <itemize>
-      <item>
-        Fournies en tant qu'options à la commande <tt>modprobe</tt> (ou
-        la commande <tt>insmod</tt>).
-      <item>
-        Spécifiées sur une ligne <tt>options</tt> dans <tt>/etc/modules.conf</tt>
-        (nommé <tt>/etc/conf.modules</tt> dans de vieilles distributions).
-    </itemize>
-</descrip>
-
 BRLTTY ne fonctionne qu'avec des consoles et des applications basées
 sur du texte. Il peut être utilisé avec les applications basées sur
 <tt>curses</tt>, mais pas avec une application utilisant des caractéristiques
