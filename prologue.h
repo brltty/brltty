@@ -117,6 +117,7 @@ typedef int SocketDescriptor;
 
 #ifdef HAVE_WCHAR_H 
 #include <wchar.h>
+#include <wctype.h>
 
 #define WC_C(wc) L##wc
 #define WS_C(ws) L##ws
@@ -124,8 +125,8 @@ typedef int SocketDescriptor;
 #define PRIws "ls"
 #define iswLatin1(wc) ((wc) < 0X100)
 #else /* HAVE_WCHAR_H */
-#include <string.h>
 #include <ctype.h>
+#include <string.h>
 
 #define wchar_t char
 #define wint_t int
