@@ -389,5 +389,6 @@
 
 # Windows Screen Driver Parameters
 #screen-parameters wn:Root=no # [no,yes]
+#screen-parameters wn:FollowFocus=no # [no,yes]
 
 

@@ -22,10 +22,11 @@
 #include "sys_windows.h"
 
 typedef enum {
-  PARM_ROOT
+  PARM_ROOT,
+  PARM_FOLLOWFOCUS
 } ScreenParameters;
-#define SCRPARMS "root"
-static unsigned int root;
+#define SCRPARMS "root", "followfocus"
+static unsigned int root, followfocus;
 
 #include "scr_driver.h"
 
@@ -39,6 +40,12 @@ processParameters_WindowsScreen (char **parameters) {
       LogPrint(LOG_WARNING, "No need for root BRLTTY on systems that support AttachConsole()");
     if (!validateYesNo(&root, parameters[PARM_ROOT]))
       LogPrint(LOG_WARNING, "%s: %s", "invalid root setting", parameters[PARM_ROOT]);
+  }
+  if (*parameters[PARM_FOLLOWFOCUS]) {
+    if (!AttachConsoleProc)
+      LogPrint(LOG_WARNING, "No need for followfocus BRLTTY on systems that do not support AttachConsole()");
+    if (!validateYesNo(&followfocus, parameters[PARM_FOLLOWFOCUS]))
+      LogPrint(LOG_WARNING, "%s: %s", "invalid followfocus setting", parameters[PARM_ROOT]);
   }
   return 1;
 }
@@ -82,7 +89,7 @@ tryToAttach (HWND win) {
 
 static int
 construct_WindowsScreen (void) {
-  if (AttachConsoleProc || root) {
+  if (followfocus && (AttachConsoleProc || root)) {
     /* disable ^C */
     SetConsoleCtrlHandler(NULL,TRUE);
     if (!FreeConsole() && GetLastError() != ERROR_INVALID_PARAMETER)
@@ -128,7 +135,7 @@ static int
 currentVirtualTerminal_WindowsScreen (void) {
   HWND win;
   altTab = NULL;
-  if ((AttachConsoleProc || root) && GetAltTabInfoAProc) {
+  if (followfocus && (AttachConsoleProc || root) && GetAltTabInfoAProc) {
     altTabInfo.cbSize = sizeof(altTabInfo);
     EnumWindows(findAltTab, 0);
     if (altTab) {
@@ -146,7 +153,7 @@ currentVirtualTerminal_WindowsScreen (void) {
     unreadable = "root BRLTTY";
     goto error;
   }
-  if (AttachConsoleProc && !tryToAttach(win)) {
+  if (followfocus && AttachConsoleProc && !tryToAttach(win)) {
     unreadable = "no terminal to read";
     goto error;
   }
