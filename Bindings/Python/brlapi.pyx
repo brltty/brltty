@@ -541,7 +541,7 @@ cdef class Connection:
 		else:
 			return { "type":ekc.type, "command":ekc.command, "argument":ekc.argument, "flags":ekc.flags }
 	
-	def ignoreKeys(self, type, set):
+	def ignoreKeys(self, key_type, set):
 		"""Ignore some key presses from the braille keyboard.
 		See brlapi_ignoreKeys(3).
 		
@@ -552,7 +552,7 @@ cdef class Connection:
 		cdef c_brlapi.brlapi_rangeType_t c_type
 		cdef c_brlapi.brlapi_keyCode_t *c_set
 		cdef unsigned int c_n
-		c_type = type
+		c_type = key_type
 		c_n = len(set)
 		c_set = <c_brlapi.brlapi_keyCode_t*>c_brlapi.malloc(c_n * sizeof(c_set[0]))
 		for i from 0 <= i < c_n:
@@ -566,7 +566,7 @@ cdef class Connection:
 		else:
 			return retval
 
-	def acceptKeys(self, type, set):
+	def acceptKeys(self, key_type, set):
 		"""Accept some key presses from the braille keyboard.
 		See brlapi_ignoreKeys(3).
 		
@@ -577,7 +577,7 @@ cdef class Connection:
 		cdef c_brlapi.brlapi_rangeType_t c_type
 		cdef c_brlapi.brlapi_keyCode_t *c_set
 		cdef unsigned int c_n
-		c_type = type
+		c_type = key_type
 		c_n = len(set)
 		c_set = <c_brlapi.brlapi_keyCode_t*>c_brlapi.malloc(c_n * sizeof(c_set[0]))
 		for i from 0 <= i < c_n:
