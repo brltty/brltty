@@ -26,7 +26,7 @@ typedef enum {
   PARM_FOLLOWFOCUS
 } ScreenParameters;
 #define SCRPARMS "root", "followfocus"
-static unsigned int root, followfocus;
+static unsigned int root, followFocus;
 
 #include "scr_driver.h"
 
@@ -35,18 +35,19 @@ static HANDLE consoleInput = INVALID_HANDLE_VALUE;
 
 static int
 processParameters_WindowsScreen (char **parameters) {
-  if (*parameters[PARM_ROOT]) {
-    if (AttachConsoleProc)
-      LogPrint(LOG_WARNING, "No need for root BRLTTY on systems that support AttachConsole()");
+  root = 0;
+  if (*parameters[PARM_ROOT])
     if (!validateYesNo(&root, parameters[PARM_ROOT]))
       LogPrint(LOG_WARNING, "%s: %s", "invalid root setting", parameters[PARM_ROOT]);
-  }
-  if (*parameters[PARM_FOLLOWFOCUS]) {
-    if (!AttachConsoleProc)
-      LogPrint(LOG_WARNING, "No need for followfocus BRLTTY on systems that do not support AttachConsole()");
-    if (!validateYesNo(&followfocus, parameters[PARM_FOLLOWFOCUS]))
-      LogPrint(LOG_WARNING, "%s: %s", "invalid followfocus setting", parameters[PARM_ROOT]);
-  }
+  if (root && AttachConsoleProc)
+    LogPrint(LOG_WARNING, "No need for root BRLTTY on newer (XP or later) systems");
+
+  followFocus = 1;
+  if (*parameters[PARM_FOLLOWFOCUS])
+    if (!validateYesNo(&followFocus, parameters[PARM_FOLLOWFOCUS]))
+      LogPrint(LOG_WARNING, "%s: %s", "invalid follow focus setting", parameters[PARM_FOLLOWFOCUS]);
+  if (followFocus && !AttachConsoleProc)
+    LogPrint(LOG_WARNING, "Cannot follow focus on older (pre-XP) systems");
   return 1;
 }
 
@@ -89,7 +90,7 @@ tryToAttach (HWND win) {
 
 static int
 construct_WindowsScreen (void) {
-  if (followfocus && (AttachConsoleProc || root)) {
+  if (followFocus && (AttachConsoleProc || root)) {
     /* disable ^C */
     SetConsoleCtrlHandler(NULL,TRUE);
     if (!FreeConsole() && GetLastError() != ERROR_INVALID_PARAMETER)
@@ -135,7 +136,7 @@ static int
 currentVirtualTerminal_WindowsScreen (void) {
   HWND win;
   altTab = NULL;
-  if (followfocus && (AttachConsoleProc || root) && GetAltTabInfoAProc) {
+  if (followFocus && (AttachConsoleProc || root) && GetAltTabInfoAProc) {
     altTabInfo.cbSize = sizeof(altTabInfo);
     EnumWindows(findAltTab, 0);
     if (altTab) {
@@ -153,7 +154,7 @@ currentVirtualTerminal_WindowsScreen (void) {
     unreadable = "root BRLTTY";
     goto error;
   }
-  if (followfocus && AttachConsoleProc && !tryToAttach(win)) {
+  if (followFocus && AttachConsoleProc && !tryToAttach(win)) {
     unreadable = "no terminal to read";
     goto error;
   }
