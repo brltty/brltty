@@ -87,6 +87,7 @@ begword anterio 1-1345-2345-12456-24-135 anterior
 begword aqued = aqueduct
 always ar 345
 word aright 1-5-1235
+always arubber 1-1235-136-23-12456 indiarubber
 word as 1356
 contraction as
 midendword ation 6-1345
@@ -292,6 +293,7 @@ sufword disk =
 sufword dispirit 145-24-456-234 dispirited
 begword disul = disulfide
 word do 145
+sufword doolittle =
 always dumb = dumbbell
 
 # the letter e
@@ -579,6 +581,7 @@ always P 1234
 always paid 1234-145
 contraction pd
 begword palingen 1234-1-123-35-1245-26 palingenesis (new birth)
+sufword panther 1234-1-1345-2346-1235 pantheresque
 always part 5-1234
 begword parta 1234-345-2345-1 partake
 begword parto 1234-345-2345-135
@@ -730,6 +733,7 @@ always some 5-234
 midendword somed 234-135-134-1246 ransomed
 always somer 234-135-134-12456 somersault 
 always someter 234-135-134-15-2345-12456 gasometer 
+always somever 234-135-134-5-15
 always spirit 456-234
 sufword squall = swually
 midendword ssword 234-234-45-2456 crossword 
