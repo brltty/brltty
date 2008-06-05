@@ -827,7 +827,7 @@ static void generateToplevel(void)
   if (missing_charset_count_return) {
     int i;
     for (i=0; i<missing_charset_count_return; i++)
-      LogPrint(LOG_WARNING,"Could not load a braille font for charset %s",missing_charset_list_return[i]);
+      LogPrint(LOG_INFO,"Could not load a braille font for charset %s",missing_charset_list_return[i]);
     XFreeStringList(missing_charset_list_return);
   }
   if (!(fontset = XCreateFontSet(XtDisplay(toplevel),"-*-fixed-medium-r-*-*-24-*-*-*-*-*-iso10646-1", &missing_charset_list_return, &missing_charset_count_return, &def_string_return)))
@@ -835,7 +835,7 @@ static void generateToplevel(void)
   if (missing_charset_count_return) {
     int i;
     for (i=0; i<missing_charset_count_return; i++)
-      LogPrint(LOG_WARNING,"Could not load a unicode font for charset %s",missing_charset_list_return[i]);
+      LogPrint(LOG_INFO,"Could not load a unicode font for charset %s",missing_charset_list_return[i]);
     XFreeStringList(missing_charset_list_return);
   }
 #endif /* USE_XAW */
