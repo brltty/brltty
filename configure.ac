@@ -1281,6 +1281,8 @@ in
       ;;
 esac])
 AC_SUBST([first_serial_device], [${brltty_cv_device_serial_first}])
+AC_DEFINE_UNQUOTED([FIRST_SERIAL_DEVICE], ["${first_serial_device}"],
+                   [Define this to be a string containing the path to the first serial device.])
 
 BRLTTY_ARG_WITH(
    [braille-device], [DEVICE],

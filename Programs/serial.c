@@ -1547,6 +1547,10 @@ isSerialDevice (const char **path) {
   if (isDosDevice(*path, "COM")) return 1;
 #endif /* ALLOW_DOS_DEVICE_NAMES */
 
-  if (isQualifiedDevice(path, "serial")) return 1;
-  return !isQualifiedDevice(path, NULL);
+  if (!isQualifiedDevice(path, "serial"))
+    if (isQualifiedDevice(path, NULL))
+      return 0;
+
+  if (!**path) *path = FIRST_SERIAL_DEVICE;
+  return 1;
 }
