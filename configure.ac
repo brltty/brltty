@@ -105,6 +105,7 @@ BRLTTY_DEFINE_EXPANDED([CONFIGURATION_FILE], ["${configuration_file}"],
                        [Define this to be a string containing the name of the default configuration file.])
 
 BRLTTY_PORTABLE_DIRECTORY([includedir], [/usr])
+BRLTTY_PORTABLE_DIRECTORY([datarootdir], [/usr])
 BRLTTY_PORTABLE_DIRECTORY([mandir], [/usr/share])
 
 BRLTTY_SUMMARY_ITEM([libdir], [libdir])
