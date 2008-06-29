@@ -51,11 +51,36 @@ struct UsbEndpointExtensionStruct {
   Queue *completedRequests;
 };
 
+static int
+usbOpenUsbfsFile (UsbDeviceExtension *devx) {
+  if (devx->usbfsFile == -1) {
+    if ((devx->usbfsFile = open(devx->usbfsPath, O_RDWR)) == -1) {
+      LogPrint(LOG_ERR, "USBFS open error: %s: %s",
+               devx->usbfsPath, strerror(errno));
+      return 0;
+    }
+  }
+
+  return 1;
+}
+
+static void
+usbCloseUsbfsFile (UsbDeviceExtension *devx) {
+  if (devx->usbfsFile != -1) {
+    close(devx->usbfsFile);
+    devx->usbfsFile = -1;
+  }
+}
+
 int
 usbResetDevice (UsbDevice *device) {
   UsbDeviceExtension *devx = device->extension;
-  if (ioctl(devx->usbfsFile, USBDEVFS_RESET, NULL) != -1) return 1;
-  LogError("USB device reset");
+
+  if (usbOpenUsbfsFile(devx)) {
+    if (ioctl(devx->usbfsFile, USBDEVFS_RESET, NULL) != -1) return 1;
+    LogError("USB device reset");
+  }
+
   return 0;
 }
 
@@ -63,7 +88,7 @@ int
 usbDisableAutosuspend (UsbDevice *device) {
   UsbDeviceExtension *devx = device->extension;
   int ok = 0;
-  char *path = makePath(devx->sysfsPath, "device/power/autosuspend");
+  char *path = makePath(devx->sysfsPath, "power/autosuspend");
 
   if (path) {
     int file = open(path, O_WRONLY);
@@ -104,11 +129,20 @@ usbDisableAutosuspend (UsbDevice *device) {
 static char *
 usbGetDriver (UsbDevice *device, unsigned char interface) {
   UsbDeviceExtension *devx = device->extension;
-  struct usbdevfs_getdriver arg;
-  memset(&arg, 0, sizeof(arg));
-  arg.interface = interface;
-  if (ioctl(devx->usbfsFile, USBDEVFS_GETDRIVER, &arg) == -1) return NULL;
-  return strdup(arg.driver);
+
+  if (usbOpenUsbfsFile(devx)) {
+    struct usbdevfs_getdriver arg;
+
+    memset(&arg, 0, sizeof(arg));
+    arg.interface = interface;
+
+    if (ioctl(devx->usbfsFile, USBDEVFS_GETDRIVER, &arg) != -1) {
+      char *name = strdup(arg.driver);
+      if (name) return name;
+    }
+  }
+
+  return NULL;
 }
 
 static int
@@ -119,13 +153,19 @@ usbControlDriver (
   void *data
 ) {
   UsbDeviceExtension *devx = device->extension;
-  struct usbdevfs_ioctl arg;
-  memset(&arg, 0, sizeof(arg));
-  arg.ifno = interface;
-  arg.ioctl_code = code;
-  arg.data = data;
-  if (ioctl(devx->usbfsFile, USBDEVFS_IOCTL, &arg) != -1) return 1;
-  LogError("USB driver control");
+
+  if (usbOpenUsbfsFile(devx)) {
+    struct usbdevfs_ioctl arg;
+
+    memset(&arg, 0, sizeof(arg));
+    arg.ifno = interface;
+    arg.ioctl_code = code;
+    arg.data = data;
+
+    if (ioctl(devx->usbfsFile, USBDEVFS_IOCTL, &arg) != -1) return 1;
+    LogError("USB driver control");
+  }
+
   return 0;
 }
 
@@ -173,23 +213,27 @@ usbSetConfiguration (
   unsigned char configuration
 ) {
   UsbDeviceExtension *devx = device->extension;
-  int disconnected = 0;
 
-  while (1) {
-    unsigned int arg = configuration;
+  if (usbOpenUsbfsFile(devx)) {
+    int disconnected = 0;
 
-    if (ioctl(devx->usbfsFile, USBDEVFS_SETCONFIGURATION, &arg) != -1) return 1;
-    if (errno != EBUSY) break;
-    if (disconnected) break;
+    while (1) {
+      unsigned int arg = configuration;
 
-    if (!usbDisconnectInterfaces(device)) {
-      errno = EBUSY;
-      break;
+      if (ioctl(devx->usbfsFile, USBDEVFS_SETCONFIGURATION, &arg) != -1) return 1;
+      if (errno != EBUSY) break;
+      if (disconnected) break;
+
+      if (!usbDisconnectInterfaces(device)) {
+        errno = EBUSY;
+        break;
+      }
+      disconnected = 1;
     }
-    disconnected = 1;
+
+    LogError("USB configuration set");
   }
 
-  LogError("USB configuration set");
   return 0;
 }
 
@@ -199,23 +243,27 @@ usbClaimInterface (
   unsigned char interface
 ) {
   UsbDeviceExtension *devx = device->extension;
-  int disconnected = 0;
 
-  while (1) {
-    unsigned int arg = interface;
+  if (usbOpenUsbfsFile(devx)) {
+    int disconnected = 0;
 
-    if (ioctl(devx->usbfsFile, USBDEVFS_CLAIMINTERFACE, &arg) != -1) return 1;
-    if (errno != EBUSY) break;
-    if (disconnected) break;
+    while (1) {
+      unsigned int arg = interface;
 
-    if (!usbDisconnectInterface(device, interface)) {
-      errno = EBUSY;
-      break;
+      if (ioctl(devx->usbfsFile, USBDEVFS_CLAIMINTERFACE, &arg) != -1) return 1;
+      if (errno != EBUSY) break;
+      if (disconnected) break;
+
+      if (!usbDisconnectInterface(device, interface)) {
+        errno = EBUSY;
+        break;
+      }
+      disconnected = 1;
     }
-    disconnected = 1;
+
+    LogError("USB interface claim");
   }
 
-  LogError("USB interface claim");
   return 0;
 }
 
@@ -225,10 +273,14 @@ usbReleaseInterface (
   unsigned char interface
 ) {
   UsbDeviceExtension *devx = device->extension;
-  unsigned int arg = interface;
-  if (ioctl(devx->usbfsFile, USBDEVFS_RELEASEINTERFACE, &arg) != -1) return 1;
-  if (errno == ENODEV) return 1;
-  LogError("USB interface release");
+
+  if (usbOpenUsbfsFile(devx)) {
+    unsigned int arg = interface;
+    if (ioctl(devx->usbfsFile, USBDEVFS_RELEASEINTERFACE, &arg) != -1) return 1;
+    if (errno == ENODEV) return 1;
+    LogError("USB interface release");
+  }
+
   return 0;
 }
 
@@ -239,12 +291,18 @@ usbSetAlternative (
   unsigned char alternative
 ) {
   UsbDeviceExtension *devx = device->extension;
-  struct usbdevfs_setinterface arg;
-  memset(&arg, 0, sizeof(arg));
-  arg.interface = interface;
-  arg.altsetting = alternative;
-  if (ioctl(devx->usbfsFile, USBDEVFS_SETINTERFACE, &arg) != -1) return 1;
-  LogError("USB alternative set");
+
+  if (usbOpenUsbfsFile(devx)) {
+    struct usbdevfs_setinterface arg;
+
+    memset(&arg, 0, sizeof(arg));
+    arg.interface = interface;
+    arg.altsetting = alternative;
+
+    if (ioctl(devx->usbfsFile, USBDEVFS_SETINTERFACE, &arg) != -1) return 1;
+    LogError("USB alternative set");
+  }
+
   return 0;
 }
 
@@ -254,9 +312,13 @@ usbResetEndpoint (
   unsigned char endpointAddress
 ) {
   UsbDeviceExtension *devx = device->extension;
-  unsigned int arg = endpointAddress;
-  if (ioctl(devx->usbfsFile, USBDEVFS_RESETEP, &arg) != -1) return 1;
-  LogError("USB endpoint reset");
+
+  if (usbOpenUsbfsFile(devx)) {
+    unsigned int arg = endpointAddress;
+    if (ioctl(devx->usbfsFile, USBDEVFS_RESETEP, &arg) != -1) return 1;
+    LogError("USB endpoint reset");
+  }
+
   return 0;
 }
 
@@ -266,9 +328,14 @@ usbClearEndpoint (
   unsigned char endpointAddress
 ) {
   UsbDeviceExtension *devx = device->extension;
-  unsigned int arg = endpointAddress;
-  if (ioctl(devx->usbfsFile, USBDEVFS_CLEAR_HALT, &arg) != -1) return 1;
-  LogError("USB endpoint clear");
+
+  if (usbOpenUsbfsFile(devx)) {
+    unsigned int arg = endpointAddress;
+
+    if (ioctl(devx->usbfsFile, USBDEVFS_CLEAR_HALT, &arg) != -1) return 1;
+    LogError("USB endpoint clear");
+  }
+
   return 0;
 }
 
@@ -286,24 +353,30 @@ usbControlTransfer (
   int timeout
 ) {
   UsbDeviceExtension *devx = device->extension;
-  union {
-    struct usbdevfs_ctrltransfer transfer;
-    UsbSetupPacket setup;
-  } arg;
-  memset(&arg, 0, sizeof(arg));
-  arg.setup.bRequestType = direction | recipient | type;
-  arg.setup.bRequest = request;
-  putLittleEndian(&arg.setup.wValue, value);
-  putLittleEndian(&arg.setup.wIndex, index);
-  putLittleEndian(&arg.setup.wLength, length);
-  arg.transfer.data = buffer;
-  arg.transfer.timeout = timeout;
 
-  {
-    int count = ioctl(devx->usbfsFile, USBDEVFS_CONTROL, &arg);
-    if (count == -1) LogError("USB control transfer");
-    return count;
+  if (usbOpenUsbfsFile(devx)) {
+    union {
+      struct usbdevfs_ctrltransfer transfer;
+      UsbSetupPacket setup;
+    } arg;
+
+    memset(&arg, 0, sizeof(arg));
+    arg.setup.bRequestType = direction | recipient | type;
+    arg.setup.bRequest = request;
+    putLittleEndian(&arg.setup.wValue, value);
+    putLittleEndian(&arg.setup.wIndex, index);
+    putLittleEndian(&arg.setup.wLength, length);
+    arg.transfer.data = buffer;
+    arg.transfer.timeout = timeout;
+
+    {
+      int count = ioctl(devx->usbfsFile, USBDEVFS_CONTROL, &arg);
+      if (count != -1) return count;
+      LogError("USB control transfer");
+    }
   }
+
+  return -1;
 }
 
 static int
@@ -312,26 +385,29 @@ usbReapUrb (
   int wait
 ) {
   UsbDeviceExtension *devx = device->extension;
-  struct usbdevfs_urb *urb;
 
-  if (ioctl(devx->usbfsFile,
-            wait? USBDEVFS_REAPURB: USBDEVFS_REAPURBNDELAY,
-            &urb) != -1) {
-    if (urb) {
-      UsbEndpoint *endpoint;
+  if (usbOpenUsbfsFile(devx)) {
+    struct usbdevfs_urb *urb;
 
-      if ((endpoint = usbGetEndpoint(device, urb->endpoint))) {
-        UsbEndpointExtension *eptx = endpoint->extension;
+    if (ioctl(devx->usbfsFile,
+              wait? USBDEVFS_REAPURB: USBDEVFS_REAPURBNDELAY,
+              &urb) != -1) {
+      if (urb) {
+        UsbEndpoint *endpoint;
 
-        if (enqueueItem(eptx->completedRequests, urb)) return 1;
-        LogError("USB completed request enqueue");
-        free(urb);
+        if ((endpoint = usbGetEndpoint(device, urb->endpoint))) {
+          UsbEndpointExtension *eptx = endpoint->extension;
+
+          if (enqueueItem(eptx->completedRequests, urb)) return 1;
+          LogError("USB completed request enqueue");
+          free(urb);
+        }
+      } else {
+        errno = EAGAIN;
       }
     } else {
-      errno = EAGAIN;
+      if (wait || (errno != EAGAIN)) LogError("USB URB reap");
     }
-  } else {
-    if (wait || (errno != EAGAIN)) LogError("USB URB reap");
   }
 
   return 0;
@@ -346,54 +422,64 @@ usbSubmitRequest (
   void *context
 ) {
   UsbDeviceExtension *devx = device->extension;
-  UsbEndpoint *endpoint = usbGetEndpoint(device, endpointAddress);
-  if (endpoint) {
-    struct usbdevfs_urb *urb;
-    if ((urb = malloc(sizeof(*urb) + length))) {
-      memset(urb, 0, sizeof(*urb));
-      urb->endpoint = endpointAddress;
-      switch (USB_ENDPOINT_TRANSFER(endpoint->descriptor)) {
-        case UsbEndpointTransfer_Control:
-          urb->type = USBDEVFS_URB_TYPE_CONTROL;
-          break;
-        case UsbEndpointTransfer_Isochronous:
-          urb->type = USBDEVFS_URB_TYPE_ISO;
-          break;
-        case UsbEndpointTransfer_Interrupt:
-        case UsbEndpointTransfer_Bulk:
-          urb->type = USBDEVFS_URB_TYPE_BULK;
-          break;
+
+  if (usbOpenUsbfsFile(devx)) {
+    UsbEndpoint *endpoint;
+
+    if ((endpoint = usbGetEndpoint(device, endpointAddress))) {
+      struct usbdevfs_urb *urb;
+
+      if ((urb = malloc(sizeof(*urb) + length))) {
+        memset(urb, 0, sizeof(*urb));
+        urb->endpoint = endpointAddress;
+        urb->flags = 0;
+        urb->signr = 0;
+        urb->usercontext = context;
+
+        urb->buffer = (urb->buffer_length = length)? (urb + 1): NULL;
+        if (buffer)
+          if (USB_ENDPOINT_DIRECTION(endpoint->descriptor) == UsbEndpointDirection_Output)
+            memcpy(urb->buffer, buffer, length);
+
+        switch (USB_ENDPOINT_TRANSFER(endpoint->descriptor)) {
+          case UsbEndpointTransfer_Control:
+            urb->type = USBDEVFS_URB_TYPE_CONTROL;
+            break;
+
+          case UsbEndpointTransfer_Isochronous:
+            urb->type = USBDEVFS_URB_TYPE_ISO;
+            break;
+
+          case UsbEndpointTransfer_Interrupt:
+          case UsbEndpointTransfer_Bulk:
+            urb->type = USBDEVFS_URB_TYPE_BULK;
+            break;
+        }
+
+      /*
+        LogPrint(LOG_DEBUG, "USB submit: urb=%p typ=%02X ept=%02X flg=%X sig=%d buf=%p len=%d ctx=%p",
+                 urb, urb->type, urb->endpoint, urb->flags, urb->signr,
+                 urb->buffer, urb->buffer_length, urb->usercontext);
+      */
+      submit:
+        if (ioctl(devx->usbfsFile, USBDEVFS_SUBMITURB, urb) != -1) return urb;
+        if ((errno == EINVAL) &&
+            (USB_ENDPOINT_TRANSFER(endpoint->descriptor) == UsbEndpointTransfer_Interrupt) &&
+            (urb->type == USBDEVFS_URB_TYPE_BULK)) {
+          urb->type = USBDEVFS_URB_TYPE_INTERRUPT;
+          goto submit;
+        }
+
+        /* UHCI support returns ENXIO if a URB is already submitted. */
+        if (errno != ENXIO) LogError("USB URB submit");
+
+        free(urb);
+      } else {
+        LogError("USB URB allocate");
       }
-      urb->buffer = (urb->buffer_length = length)? (urb + 1): NULL;
-      if (buffer)
-        if (USB_ENDPOINT_DIRECTION(endpoint->descriptor) == UsbEndpointDirection_Output)
-          memcpy(urb->buffer, buffer, length);
-      urb->flags = 0;
-      urb->signr = 0;
-      urb->usercontext = context;
-
-    /*
-      LogPrint(LOG_DEBUG, "USB submit: urb=%p typ=%02X ept=%02X flg=%X sig=%d buf=%p len=%d ctx=%p",
-               urb, urb->type, urb->endpoint, urb->flags, urb->signr,
-               urb->buffer, urb->buffer_length, urb->usercontext);
-    */
-    submit:
-      if (ioctl(devx->usbfsFile, USBDEVFS_SUBMITURB, urb) != -1) return urb;
-      if ((errno == EINVAL) &&
-          (USB_ENDPOINT_TRANSFER(endpoint->descriptor) == UsbEndpointTransfer_Interrupt) &&
-          (urb->type == USBDEVFS_URB_TYPE_BULK)) {
-        urb->type = USBDEVFS_URB_TYPE_INTERRUPT;
-        goto submit;
-      }
-
-      /* UHCI support returns ENXIO if a URB is already submitted. */
-      if (errno != ENXIO) LogError("USB URB submit");
-
-      free(urb);
-    } else {
-      LogError("USB URB allocate");
     }
   }
+
   return NULL;
 }
 
@@ -403,39 +489,43 @@ usbCancelRequest (
   void *request
 ) {
   UsbDeviceExtension *devx = device->extension;
-  int reap = 1;
 
-  if (ioctl(devx->usbfsFile, USBDEVFS_DISCARDURB, request) == -1) {
-    if (errno == ENODEV)  {
-      reap = 0;
-    } else if (errno != EINVAL) {
-      LogError("USB URB discard");
+  if (usbOpenUsbfsFile(devx)) {
+    int reap = 1;
+
+    if (ioctl(devx->usbfsFile, USBDEVFS_DISCARDURB, request) == -1) {
+      if (errno == ENODEV)  {
+        reap = 0;
+      } else if (errno != EINVAL) {
+        LogError("USB URB discard");
+      }
     }
-  }
-  
-  {
-    struct usbdevfs_urb *urb = request;
-    UsbEndpoint *endpoint;
+    
+    {
+      struct usbdevfs_urb *urb = request;
+      UsbEndpoint *endpoint;
 
-    if ((endpoint = usbGetEndpoint(device, urb->endpoint))) {
-      UsbEndpointExtension *eptx = endpoint->extension;
-      int found = 1;
+      if ((endpoint = usbGetEndpoint(device, urb->endpoint))) {
+        UsbEndpointExtension *eptx = endpoint->extension;
+        int found = 1;
 
-      while (!deleteItem(eptx->completedRequests, request)) {
-        if (!reap) break;
-        if (!usbReapUrb(device, 0)) {
-          found = 0;
-          break;
+        while (!deleteItem(eptx->completedRequests, request)) {
+          if (!reap) break;
+
+          if (!usbReapUrb(device, 0)) {
+            found = 0;
+            break;
+          }
         }
-      }
 
-      if (found) {
-        free(request);
-        return 1;
-      }
+        if (found) {
+          free(request);
+          return 1;
+        }
 
-      LogPrint(LOG_ERR, "USB request not found: urb=%p ept=%02X",
-               urb, urb->endpoint);
+        LogPrint(LOG_ERR, "USB request not found: urb=%p ept=%02X",
+                 urb, urb->endpoint);
+      }
     }
   }
 
@@ -495,18 +585,23 @@ usbBulkTransfer (
   int timeout
 ) {
   UsbDeviceExtension *devx = endpoint->device->extension;
-  struct usbdevfs_bulktransfer arg;
-  memset(&arg, 0, sizeof(arg));
-  arg.ep = endpoint->descriptor->bEndpointAddress;
-  arg.data = buffer;
-  arg.len = length;
-  arg.timeout = timeout;
 
-  {
-    int count = ioctl(devx->usbfsFile, USBDEVFS_BULK, &arg);
-    if (count != -1) return count;
-    LogError("USB bulk transfer");
+  if (usbOpenUsbfsFile(devx)) {
+    struct usbdevfs_bulktransfer arg;
+
+    memset(&arg, 0, sizeof(arg));
+    arg.ep = endpoint->descriptor->bEndpointAddress;
+    arg.data = buffer;
+    arg.len = length;
+    arg.timeout = timeout;
+
+    {
+      int count = ioctl(devx->usbfsFile, USBDEVFS_BULK, &arg);
+      if (count != -1) return count;
+      LogError("USB bulk transfer");
+    }
   }
+
   return -1;
 }
 
@@ -558,8 +653,9 @@ usbReadEndpoint (
   int timeout
 ) {
   int count = -1;
-  UsbEndpoint *endpoint = usbGetInputEndpoint(device, endpointNumber);
-  if (endpoint) {
+  UsbEndpoint *endpoint;
+
+  if ((endpoint = usbGetInputEndpoint(device, endpointNumber))) {
     UsbEndpointTransfer transfer = USB_ENDPOINT_TRANSFER(endpoint->descriptor);
     switch (transfer) {
       case UsbEndpointTransfer_Bulk:
@@ -603,8 +699,9 @@ usbWriteEndpoint (
   int length,
   int timeout
 ) {
-  UsbEndpoint *endpoint = usbGetOutputEndpoint(device, endpointNumber);
-  if (endpoint) {
+  UsbEndpoint *endpoint;
+
+  if ((endpoint = usbGetOutputEndpoint(device, endpointNumber))) {
     UsbEndpointTransfer transfer = USB_ENDPOINT_TRANSFER(endpoint->descriptor);
     switch (transfer) {
       case UsbEndpointTransfer_Bulk:
@@ -633,14 +730,50 @@ usbWriteEndpoint (
 int
 usbReadDeviceDescriptor (UsbDevice *device) {
   UsbDeviceExtension *devx = device->extension;
-  int count = read(devx->usbfsFile, &device->descriptor, UsbDescriptorSize_Device);
-  if (count == -1) {
-    LogError("USB device descriptor read");
-  } else if (count != UsbDescriptorSize_Device) {
-    LogPrint(LOG_ERR, "USB short device descriptor (%d).", count);
-  } else {
-    return 1;
+  int file = -1;
+  int sysfs;
+
+  if (file == -1) {
+    char *path;
+
+    if ((path = makePath(devx->sysfsPath, "descriptors"))) {
+      if ((file = open(path, O_RDONLY)) != -1) {
+        sysfs = 1;
+      }
+
+      free(path);
+    }
   }
+
+  if (file == -1) {
+    if (usbOpenUsbfsFile(devx)) {
+      file = devx->usbfsFile;
+      sysfs = 0;
+    }
+  }
+
+  if (file != -1) {
+    int count = read(file, &device->descriptor, UsbDescriptorSize_Device);
+
+    if (count == -1) {
+      LogError("USB device descriptor read");
+    } else if (count != UsbDescriptorSize_Device) {
+      LogPrint(LOG_ERR, "USB short device descriptor: %d", count);
+    } else {
+      if (sysfs) {
+        device->descriptor.bcdUSB = getLittleEndian(device->descriptor.bcdUSB);
+        device->descriptor.idVendor = getLittleEndian(device->descriptor.idVendor);
+        device->descriptor.idProduct = getLittleEndian(device->descriptor.idProduct);
+        device->descriptor.bcdDevice = getLittleEndian(device->descriptor.bcdDevice);
+
+        close(file);
+        file = -1;
+      }
+
+      return 1;
+    }
+  }
+
   return 0;
 }
 
@@ -674,10 +807,7 @@ usbDeallocateEndpointExtension (UsbEndpointExtension *eptx) {
 
 void
 usbDeallocateDeviceExtension (UsbDeviceExtension *devx) {
-  if (devx->usbfsFile != -1) {
-    close(devx->usbfsFile);
-    devx->usbfsFile = -1;
-  }
+  usbCloseUsbfsFile(devx);
 
   if (devx->usbfsPath) {
     free(devx->usbfsPath);
@@ -692,14 +822,14 @@ usbDeallocateDeviceExtension (UsbDeviceExtension *devx) {
   free(devx);
 }
 
-static char *
-usbMakeSysfsPath (const char *usbfsPath) {
-  const char *tail = usbfsPath + strlen(usbfsPath);
+static int
+usbMakeSysfsPath (UsbDeviceExtension *devx) {
+  const char *tail = devx->usbfsPath + strlen(devx->usbfsPath);
 
   {
     int count = 0;
     while (1) {
-      if (tail == usbfsPath) return NULL;
+      if (tail == devx->usbfsPath) return 0;
       if (!isPathDelimiter(*--tail)) continue;
       if (++count == 2) break;
     }
@@ -712,22 +842,30 @@ usbMakeSysfsPath (const char *usbfsPath) {
     int count = sscanf(tail, "/%u/%u%c", &bus, &device, &extra);
 
     if (count == 2) {
-      const char *format = "/sys/class/usb_device/usbdev%u.%u";
-      char buffer[strlen(format) + (2 * 0X10) + 1];
-      snprintf(buffer, sizeof(buffer), format, bus, device);
+      static const char *const formats[] = {
+        "/sys/class/usb_device/usbdev%u.%u/device",
+        "/sys/class/usb_endpoint/usbdev%u.%u_ep00/device",
+        NULL
+      };
+      const char *const *format = formats;
 
-      {
-        char *sysfsPath = strdup(buffer);
-        if (sysfsPath) return sysfsPath;
+      while (*format) {
+        char path[strlen(*format) + (2 * 0X10) + 1];
+        snprintf(path, sizeof(path), *format, bus, device);
+        if (access(path, F_OK) != -1) {
+          return (devx->sysfsPath = strdup(path)) != NULL;
+        }
+
+        format += 1;
       }
     }
   }
 
-  return NULL;
+  return 0;
 }
 
 static UsbDevice *
-usbSearchDevice (const char *root, UsbDeviceChooser chooser, void *data) {
+usbSearchUsbfs (const char *root, UsbDeviceChooser chooser, void *data) {
   size_t rootLength = strlen(root);
   UsbDevice *device = NULL;
   DIR *directory;
@@ -745,29 +883,22 @@ usbSearchDevice (const char *root, UsbDeviceChooser chooser, void *data) {
       if (stat(path, &status) == -1) continue;
 
       if (S_ISDIR(status.st_mode)) {
-        if ((device = usbSearchDevice(path, chooser, data))) break;
+        if ((device = usbSearchUsbfs(path, chooser, data))) break;
       } else if (S_ISREG(status.st_mode) || S_ISCHR(status.st_mode)) {
         UsbDeviceExtension *devx;
 
         if ((devx = malloc(sizeof(*devx)))) {
+          devx->usbfsPath = NULL;
+          devx->usbfsFile = -1;
+          devx->sysfsPath = NULL;
+
           if ((devx->usbfsPath = strdup(path))) {
-            if ((devx->sysfsPath = usbMakeSysfsPath(devx->usbfsPath))) {
-              if ((devx->usbfsFile = open(devx->usbfsPath, O_RDWR)) != -1) {
-                if ((device = usbTestDevice(devx, chooser, data))) break;
-
-                close(devx->usbfsFile);
-                devx->usbfsFile = -1;
-              }
-
-              free(devx->sysfsPath);
-              devx->sysfsPath = NULL;
+            if (usbMakeSysfsPath(devx)) {
+              if ((device = usbTestDevice(devx, chooser, data))) break;
             }
-
-            free(devx->usbfsPath);
-            devx->usbfsPath = NULL;
           }
 
-          free(devx);
+          usbDeallocateDeviceExtension(devx);
         }
       }
     }
@@ -778,6 +909,61 @@ usbSearchDevice (const char *root, UsbDeviceChooser chooser, void *data) {
   return device;
 }
 
+typedef int (*FileSystemVerifier) (const char *path);
+
+typedef struct {
+  const char *path;
+  FileSystemVerifier verify;
+} FileSystemCandidate;
+
+static int
+usbVerifyFileSystem (const char *path, long type) {
+  struct statfs status;
+  if (statfs(path, &status) != -1) {
+    if (status.f_type == type) return 1;
+  }
+  return 0;
+}
+
+static char *
+usbGetFileSystem (const char *type, const FileSystemCandidate *candidates, MountPointTester test, FileSystemVerifier verify) {
+  if (candidates) {
+    const FileSystemCandidate *candidate = candidates;
+
+    while (candidate->path) {
+      LogPrint(LOG_DEBUG, "verifying file system path: %s: %s", type, candidate->path);
+      if (candidate->verify(candidate->path)) return strdupWrapper(candidate->path);
+      candidate += 1;
+    }
+  }
+
+  if (test) {
+    char *path = findMountPoint(test);
+    if (path) return path;
+  }
+
+  if (verify) {
+    char *directory = makeWritablePath(type);
+
+    if (directory) {
+      if (makeDirectory(directory)) {
+        if (verify(directory)) return directory;
+
+        {
+          const char *components[] = {PACKAGE_NAME, "-", type};
+          int count = ARRAY_COUNT(components);
+          char *name = joinStrings(components, count);
+          if (makeMountPoint(directory, name, type)) return directory;
+        }
+      }
+
+      free(directory);
+    }
+  }
+
+  return NULL;
+}
+
 static int
 usbVerifyDirectory (const char *path) {
   if (access(path, F_OK) != -1) return 1;
@@ -786,11 +972,7 @@ usbVerifyDirectory (const char *path) {
 
 static int
 usbVerifyUsbfs (const char *path) {
-  struct statfs status;
-  if (statfs(path, &status) != -1) {
-    if (status.f_type == USBDEVICE_SUPER_MAGIC) return 1;
-  }
-  return 0;
+  return usbVerifyFileSystem(path, USBDEVICE_SUPER_MAGIC);
 }
 
 static int
@@ -805,57 +987,28 @@ usbTestUsbfs (const char *path, const char *type) {
 }
 
 static char *
-usbFindRoot (void) {
-  {
-    typedef struct {
-      const char *path;
-      int (*verify) (const char *path);
-    } RootEntry;
+usbGetUsbfs (void) {
+  static const FileSystemCandidate usbfsCandidates[] = {
+    {.path="/dev/bus/usb", .verify=usbVerifyDirectory},
+    {.path="/proc/bus/usb", .verify=usbVerifyUsbfs},
+    {.path=NULL, .verify=NULL}
+  };
 
-    static const RootEntry roots[] = {
-      {.path="/dev/bus/usb", .verify=usbVerifyDirectory},
-      {.path="/proc/bus/usb", .verify=usbVerifyUsbfs},
-      {.path=NULL, .verify=NULL}
-    };
-    const RootEntry *root = roots;
-
-    while (root->path) {
-      LogPrint(LOG_DEBUG, "verifying USB device root: %s", root->path);
-      if (root->verify(root->path)) return strdupWrapper(root->path);
-      ++root;
-    }
-  }
-
-  return findMountPoint(usbTestUsbfs);
-}
-
-static char *
-usbMakeRoot (void) {
-  const char *type = "usbfs";
-  char *directory = makeWritablePath(type);
-
-  if (directory) {
-    if (makeDirectory(directory)) {
-      if (usbVerifyUsbfs(directory)) return directory;
-      if (makeMountPoint(directory, PACKAGE_NAME "-usbfs", type)) return directory;
-    }
-
-    free(directory);
-  }
-
-  return NULL;
+  return usbGetFileSystem("usbfs", usbfsCandidates, usbTestUsbfs, usbVerifyUsbfs);
 }
 
 UsbDevice *
 usbFindDevice (UsbDeviceChooser chooser, void *data) {
   UsbDevice *device = NULL;
   char *root;
-  if ((root = usbFindRoot()) || (root = usbMakeRoot())) {
-    LogPrint(LOG_DEBUG, "USB Root: %s", root);
-    device = usbSearchDevice(root, chooser, data);
+
+  if ((root = usbGetUsbfs())) {
+    LogPrint(LOG_DEBUG, "USBFS Root: %s", root);
+    device = usbSearchUsbfs(root, chooser, data);
     free(root);
   } else {
     LogPrint(LOG_DEBUG, "USBFS not mounted");
   }
+
   return device;
 }

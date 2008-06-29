@@ -87,6 +87,32 @@ deallocateStrings (char **array) {
   free(array);
 }
 
+char *
+joinStrings (const char *const *strings, int count) {
+  char *string;
+  size_t length = 0;
+  size_t lengths[count];
+  int index;
+
+  for (index=0; index<count; index+=1) {
+    length += lengths[index] = strlen(strings[index]);
+  }
+
+  if ((string = malloc(length+1))) {
+    char *target = string;
+
+    for (index=0; index<count; index+=1) {
+      length = lengths[index];
+      memcpy(target, strings[index], length);
+      target += length;
+    }
+
+    *target = 0;
+  }
+
+  return string;
+}
+
 #if defined(HAVE_SYSLOG_H)
 static int syslogOpened = 0;
 
@@ -398,14 +424,9 @@ char *
 makePath (const char *directory, const char *file) {
   const int count = 3;
   const char *components[count];
-  int lengths[count];
-  const int last = count - 1;
-  int first = last;
-  int length = 0;
-  int index;
-  char *path;
+  int first = count;
 
-  components[last] = file;
+  components[--first] = file;
   if (!isAbsolutePath(file)) {
     if (directory && *directory) {
       if (!isPathDelimiter(directory[strlen(directory)-1])) components[--first] = "/";
@@ -413,20 +434,7 @@ makePath (const char *directory, const char *file) {
     }
   }
 
-  for (index=first; index<=last; ++index) {
-    length += lengths[index] = strlen(components[index]);
-  }
-
-  if ((path = malloc(length+1))) {
-    char *target = path;
-    for (index=first; index<=last; ++index) {
-      length = lengths[index];
-      memcpy(target, components[index], length);
-      target += length;
-    }
-    *target = 0;
-  }
-  return path;
+  return joinStrings(&components[first], count-first);
 }
 
 void
