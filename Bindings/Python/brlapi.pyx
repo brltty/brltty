@@ -67,63 +67,40 @@ except brlapi.ConnectionError, e:
 cimport c_brlapi
 include "constants.auto.pyx"
 
-cdef class OperationError:
+class OperationError(Exception):
 	"""Error while performing some operation"""
-
-	cdef c_brlapi.brlapi_error_t error
-
 	def __init__(self):
-		self.error = c_brlapi.brlapi_error
-
-	property brlerrno:
-		"""Braille error"""
-		def __get__(self):
-			return self.error.brlerrno
-
-	property libcerrno:
-		"""C library error"""
-		def __get__(self):
-			return self.error.libcerrno
-
-	property gaierrno:
-		"""Getaddrinfo error"""
-		def __get__(self):
-			return self.error.gaierrno
-
-	property errfun:
-		"""Function in which error occurred"""
-		def __get__(self):
-			return self.error.errfun
+		self.brlerrno = c_brlapi.brlapi_error.brlerrno
+		self.libcerrno = c_brlapi.brlapi_error.libcerrno
+		self.gaierrno = c_brlapi.brlapi_error.gaierrno
+		self.errfun = c_brlapi.brlapi_error.errfun
 
 	def __str__(self):
-		return c_brlapi.brlapi_strerror(&self.error)
+		cdef c_brlapi.brlapi_error_t error
+		error.brlerrno = self.brlerrno
+		error.libcerrno = self.libcerrno
+		error.gaierrno = self.gaierrno
+		error.errfun = self.errfun
+		return c_brlapi.brlapi_strerror(&error)
 
-cdef class ConnectionError(OperationError):
+class ConnectionError(OperationError):
 	"""Error while connecting to BrlTTY"""
-
-	cdef c_brlapi.brlapi_connectionSettings_t settings
 
 	def __init__(self, host, auth):
 		OperationError.__init__(self)
-		self.settings.host = c_brlapi.strdup(host)
-		self.settings.auth = c_brlapi.strdup(auth)
-
-	def __del__(self):
-		c_brlapi.free(self.settings.host)
-		c_brlapi.free(self.settings.auth)
+		self.host = host
+		self.auth = auth
 
 	def __str__(self):
-		return "couldn't connect to %s with key %s: %s" % (self.settings.host,self.settings.auth,c_brlapi.brlapi_strerror(&self.error))
+		return "couldn't connect to %s with key %s: %s" % (self.host,self.auth,OperationError.__str__(self))
 
-	property host:
+	def host(self):
 		"""Host of BRLTTY server"""
-		def __get__(self):
-			return self.settings.host
+		return self.settings.host
 
-	property auth:
+	def auth(self):
 		"""Authentication method used"""
-		def __get__(self):
-			return self.settings.auth
+		return self.settings.auth
 
 cdef class WriteStruct:
 	"""Structure containing arguments to be given to Connection.write()
