@@ -88,39 +88,42 @@ int
 usbDisableAutosuspend (UsbDevice *device) {
   UsbDeviceExtension *devx = device->extension;
   int ok = 0;
-  char *path = makePath(devx->sysfsPath, "power/autosuspend");
 
-  if (path) {
-    int file = open(path, O_WRONLY);
+  if (devx->sysfsPath) {
+    char *path = makePath(devx->sysfsPath, "power/autosuspend");
 
-    if (file != -1) {
-      static const char *const values[] = {"-1", "0", NULL};
-      const char *const *value = values;
+    if (path) {
+      int file = open(path, O_WRONLY);
 
-      while (*value) {
-        size_t length = strlen(*value);
-        ssize_t result = write(file, *value, length);
+      if (file != -1) {
+        static const char *const values[] = {"-1", "0", NULL};
+        const char *const *value = values;
 
-        if (result != -1) {
-          ok = 1;
-          break;
+        while (*value) {
+          size_t length = strlen(*value);
+          ssize_t result = write(file, *value, length);
+
+          if (result != -1) {
+            ok = 1;
+            break;
+          }
+
+          if (errno != EINVAL) {
+            LogPrint(LOG_ERR, "write error: %s: %s", path, strerror(errno));
+            break;
+          }
+
+          ++value;
         }
 
-        if (errno != EINVAL) {
-          LogPrint(LOG_ERR, "write error: %s: %s", path, strerror(errno));
-          break;
-        }
-
-        ++value;
+        close(file);
+      } else {
+        LogPrint((errno == ENOENT)? LOG_DEBUG: LOG_ERR,
+                 "open error: %s: %s", path, strerror(errno));
       }
 
-      close(file);
-    } else {
-      LogPrint((errno == ENOENT)? LOG_DEBUG: LOG_ERR,
-               "open error: %s: %s", path, strerror(errno));
+      free(path);
     }
-
-    free(path);
   }
 
   return ok;
@@ -733,15 +736,17 @@ usbReadDeviceDescriptor (UsbDevice *device) {
   int file = -1;
   int sysfs;
 
-  if (file == -1) {
-    char *path;
+  if (devx->sysfsPath) {
+    if (file == -1) {
+      char *path;
 
-    if ((path = makePath(devx->sysfsPath, "descriptors"))) {
-      if ((file = open(path, O_RDONLY)) != -1) {
-        sysfs = 1;
+      if ((path = makePath(devx->sysfsPath, "descriptors"))) {
+        if ((file = open(path, O_RDONLY)) != -1) {
+          sysfs = 1;
+        }
+
+        free(path);
       }
-
-      free(path);
     }
   }
 
