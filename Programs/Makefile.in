@@ -522,13 +522,12 @@ install-manpages: install-man1-directory
 
 install-api: $(INSTALL_API_LIBRARIES) install-api-headers install-api-manpages install-api-key $(INSTALL_XBRLAPI) $(INSTALL_API_BINDINGS)
 
-install-api-libraries: $(API_LIB) $(API_ARC) install-apilib-directory
+install-api-libraries: $(API_LIB) $(API_ARC) install-apilib-directory install-apisoc-directory
 	$(INSTALL_PROGRAM) $(API_LIB) $(INSTALL_APILIB_DIRECTORY)/$(API_LIB).$(API_RELEASE)
 	$(SYMLINK) -f $(API_LIB).$(API_RELEASE) $(INSTALL_APILIB_DIRECTORY)/$(API_LIB)
 	$(SYMLINK) -f $(API_LIB).$(API_RELEASE) $(INSTALL_APILIB_DIRECTORY)/$(API_LIB).$(API_VERSION)
 	$(CONFLIBDIR) $(INSTALL_APILIB_DIRECTORY)
 	$(INSTALL_DATA) $(API_ARC) $(INSTALL_APILIB_DIRECTORY)
-	$(INSTALL_DIRECTORY) -m 1777 $(API_SOCKETPATH)
 
 install-api-libraries-windows: $(API_DLL) $(API_ARC) install-program-directory install-apilib-directory
 	$(INSTALL_PROGRAM) $(API_DLL) $(INSTALL_PROGRAM_DIRECTORY)
@@ -572,13 +571,19 @@ uninstall-data:
 	-rm -f $(INSTALL_DATA_DIRECTORY)/brltty*
 	-[ ! -d $(INSTALL_DATA_DIRECTORY) ] || rmdir $(INSTALL_DATA_DIRECTORY)
 
-uninstall-libraries:
+uninstall-libraries: $(UNINSTALL_API_LIBRARIES)
 	-rm -f $(INSTALL_LIBRARY_DIRECTORY)/$(LIB_NAME)*
 	-[ ! -d $(INSTALL_LIBRARY_DIRECTORY) ] || rmdir $(INSTALL_LIBRARY_DIRECTORY)
+
+uninstall-api-libraries:
 	-rm -f $(INSTALL_APILIB_DIRECTORY)/$(API_LIB)
 	-rm -f $(INSTALL_APILIB_DIRECTORY)/$(API_LIB).$(API_VERSION)
 	-rm -f $(INSTALL_APILIB_DIRECTORY)/$(API_LIB).$(API_RELEASE)
 	$(CONFLIBDIR) $(INSTALL_APILIB_DIRECTORY)
+	-rm -f $(INSTALL_APILIB_DIRECTORY)/$(API_ARC)
+	-rm -f -r $(INSTALL_APISOC_DIRECTORY)
+
+uninstall-api-libraries-windows:
 	-rm -f $(INSTALL_APILIB_DIRECTORY)/$(API_ARC)
 	-rm -f $(INSTALL_APILIB_DIRECTORY)/$(API_IMPLIB)
 	-rm -f $(INSTALL_APILIB_DIRECTORY)/$(API_IMPLIB_VERSIONED)

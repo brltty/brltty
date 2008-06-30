@@ -198,8 +198,9 @@ INSTALL_API = @install_api@
 API_LIBS = @api_libs@
 API_DYNAMIC_LIBRARY = @api_dynamic_library@
 INSTALL_API_LIBRARIES = @install_api_libraries@
+UNINSTALL_API_LIBRARIES = @uninstall_api_libraries@
 API_AUTHFILE = @api_authkeyfile@
-API_SOCKETPATH = @api_socketpath@
+API_SOCKET_DIRECTORY = @api_socket_directory@
 
 API_BINDINGS = @api_bindings@
 ALL_API_BINDINGS = @all_api_bindings@
