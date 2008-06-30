@@ -1182,7 +1182,7 @@ AC_SUBST([bluetooth_objects])
 BRLTTY_BRAILLE_DRIVER([al], [Alva])
 BRLTTY_BRAILLE_DRIVER([at], [Albatross])
 test -n "${api_objects}" && {
-   BRLTTY_BRAILLE_DRIVER([ba], [BrlAPI], [-L$(BLD_TOP)$(PGM_DIR) -lbrlapi])
+   BRLTTY_BRAILLE_DRIVER([ba], [BrlAPI], [$(API_LIBS)])
 }
 BRLTTY_BRAILLE_DRIVER([bd], [Braudi])
 BRLTTY_BRAILLE_DRIVER([bl], [BrailleLite])
