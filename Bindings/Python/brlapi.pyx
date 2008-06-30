@@ -80,7 +80,8 @@ class OperationError(Exception):
 		error.brlerrno = self.brlerrno
 		error.libcerrno = self.libcerrno
 		error.gaierrno = self.gaierrno
-		error.errfun = self.errfun
+		str = self.errfun
+		error.errfun = str
 		return c_brlapi.brlapi_strerror(&error)
 
 class ConnectionError(OperationError):
