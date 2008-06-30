@@ -27,6 +27,7 @@
 #include "misc.h"
 #include "brldefs.h"
 #include "charset.h"
+#include "scancodes.h"
 
 #include "scr_driver.h"
 
@@ -188,8 +189,39 @@ currentVirtualTerminal_PcBiosScreen (void) {
 
 static int
 executeCommand_PcBiosScreen (int command) {
-  if ((command & BRL_MSK_BLK) == BRL_BLK_PASSXT)
-    return simulateKey(command & BRL_MSK_ARG, 0);
+  int blk = command & BRL_MSK_BLK;
+  int arg = command & BRL_MSK_ARG;
+  int press = 0;
+
+  switch (blk) {
+    case BRL_BLK_PASSXT:
+      press = !(arg & 0X80);
+      arg &= 0X7F;
+      /* fallthrough */
+    case BRL_BLK_PASSAT: {
+      press |= !(command & BRL_FLG_KBD_RELEASE);
+
+      if (arg >= 0X80)
+	return 0;
+
+      if (command & BRL_FLG_KBD_EMUL0) {
+	if (!simulateKey(0XE0, 0))
+	  return 0;
+      } else if (command & BRL_FLG_KBD_EMUL1) {
+	if (!simulateKey(0XE1, 0))
+	  return 0;
+      }
+
+      if (blk == BRL_BLK_PASSAT)
+	arg = at2Xt[arg];
+
+      if (!press)
+	arg |= 0x80;
+
+      return simulateKey(arg, 0);
+    }
+  }
+
   return 0;
 }
 

@@ -20,6 +20,7 @@
 #include "misc.h"
 #include "brldefs.h"
 #include "sys_windows.h"
+#include "scancodes.h"
 
 typedef enum {
   PARM_ROOT,
@@ -342,7 +343,7 @@ doInsertWriteConsoleInput (BOOL down, WCHAR wchar, WORD vk, WORD scancode, DWORD
 }
 
 static int 
-doInsertSendInput (BOOL down, WCHAR wchar, WORD vk, WORD scancode) {
+doInsertSendInput (BOOL down, WCHAR wchar, WORD vk, WORD scancode, DWORD flags) {
   if (SendInputProc) {
     UINT num;
     INPUT input;
@@ -350,6 +351,7 @@ doInsertSendInput (BOOL down, WCHAR wchar, WORD vk, WORD scancode) {
 
     input.type = INPUT_KEYBOARD;
     memset(ki, 0, sizeof(*ki));
+    ki->dwFlags = flags;
     if (wchar) {
       ki->wVk = 0;
       ki->wScan = wchar;
@@ -365,12 +367,12 @@ doInsertSendInput (BOOL down, WCHAR wchar, WORD vk, WORD scancode) {
     num = SendInput(1, &input, sizeof(INPUT));
     switch (num) {
       case 1:  return 1;
-      case 0:  LogWindowsError("WriteConsoleInput"); break;
+      case 0:  LogWindowsError("SendInput"); break;
       default: LogPrint(LOG_ERR, "inserted %d keys, expected 1", num); break;
     }
     return 0;
   } else {
-    keybd_event(vk, scancode, down ? 0 : KEYEVENTF_KEYUP, 0);
+    keybd_event(vk, scancode, flags | (down ? 0 : KEYEVENTF_KEYUP), 0);
     return 1;
   }
 }
@@ -473,32 +475,32 @@ insertKey_WindowsScreen (ScreenKey key) {
   } else {
     LogPrint(LOG_DEBUG, "using SendInput");
     if (controlKeyState & LEFT_CTRL_PRESSED)
-      if (!doInsertSendInput(TRUE, 0, VK_CONTROL, 0))
+      if (!doInsertSendInput(TRUE, 0, VK_CONTROL, 0, 0))
         return 0;
     if (controlKeyState & SHIFT_PRESSED)
-      if (!doInsertSendInput(TRUE, 0, VK_SHIFT, 0))
+      if (!doInsertSendInput(TRUE, 0, VK_SHIFT, 0, 0))
         return 0;
     if (controlKeyState & LEFT_ALT_PRESSED)
-      if (!doInsertSendInput(TRUE, 0, VK_MENU, 0))
+      if (!doInsertSendInput(TRUE, 0, VK_MENU, 0, 0))
         return 0;
     if (controlKeyState & RIGHT_ALT_PRESSED)
-      if (!doInsertSendInput(TRUE, 0, VK_RMENU, 0))
+      if (!doInsertSendInput(TRUE, 0, VK_RMENU, 0, 0))
         return 0;
-    if (!doInsertSendInput(TRUE, wchar, vk, scancode))
+    if (!doInsertSendInput(TRUE, wchar, vk, scancode, 0))
       return 0;
-    if (!doInsertSendInput(FALSE, wchar, vk, scancode))
+    if (!doInsertSendInput(FALSE, wchar, vk, scancode, 0))
       return 0;
     if (controlKeyState & RIGHT_ALT_PRESSED)
-      if (!doInsertSendInput(FALSE, 0, VK_RMENU, 0))
+      if (!doInsertSendInput(FALSE, 0, VK_RMENU, 0, 0))
         return 0;
     if (controlKeyState & LEFT_ALT_PRESSED)
-      if (!doInsertSendInput(FALSE, 0, VK_MENU, 0))
+      if (!doInsertSendInput(FALSE, 0, VK_MENU, 0, 0))
         return 0;
     if (controlKeyState & SHIFT_PRESSED)
-      if (!doInsertSendInput(FALSE, 0, VK_SHIFT, 0))
+      if (!doInsertSendInput(FALSE, 0, VK_SHIFT, 0, 0))
         return 0;
     if (controlKeyState & LEFT_CTRL_PRESSED)
-      if (!doInsertSendInput(FALSE, 0, VK_CONTROL, 0))
+      if (!doInsertSendInput(FALSE, 0, VK_CONTROL, 0, 0))
         return 0;
     return 1;
   }
@@ -507,8 +509,31 @@ insertKey_WindowsScreen (ScreenKey key) {
 
 static int
 executeCommand_WindowsScreen (int command) {
-  int blk UNUSED = command & BRL_MSK_BLK;
-  int arg UNUSED = command & BRL_MSK_ARG;
+  int blk = command & BRL_MSK_BLK;
+  int arg = command & BRL_MSK_ARG;
+  int press = 0;
+
+  switch (blk) {
+    case BRL_BLK_PASSXT:
+      press = !(arg & 0X80);
+      arg &= 0X7F;
+      /* fallthrough */
+    case BRL_BLK_PASSAT: {
+      press |= !(command & BRL_FLG_KBD_RELEASE);
+
+      if (arg >= 0X80)
+	return 0;
+
+      if (command & BRL_FLG_KBD_EMUL1)
+	return 0;
+
+      if (blk == BRL_BLK_PASSAT)
+	arg = at2Xt[arg];
+
+      return doInsertSendInput (press, 0, 0, arg,
+	  command & BRL_FLG_KBD_EMUL0 ? KEYEVENTF_EXTENDEDKEY : 0);
+    }
+  }
 
   return 0;
 }
