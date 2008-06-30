@@ -52,15 +52,19 @@
 #include "tbl.h"
 #include "tbl_internal.h"
 
+#ifdef ENABLE_API
 #define BRLAPI_NO_DEPRECATED
 #include "brlapi.h"
+#endif /* ENABLE_API */
 
 static char *opt_characterSet;
 static char *opt_inputFormat;
 static char *opt_outputFormat;
 static int opt_translate;
 static char *opt_dataDirectory;
+#ifdef ENABLE_API
 static int opt_edit;
+#endif /* ENABLE_API */
 
 BEGIN_OPTION_TABLE(programOptions)
   { .letter = 'D',
@@ -72,11 +76,13 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = "Path to directory for configuration files."
   },
 
+#ifdef ENABLE_API
   { .letter = 'e',
     .word = "edit",
     .setting.flag = &opt_edit,
     .description = "Edit table."
   },
+#endif /* ENABLE_API */
 
   { .letter = 't',
     .word = "translate",
@@ -380,6 +386,7 @@ convertTable (void) {
   return status;
 }
 
+#ifdef ENABLE_API
 static wchar_t *
 makeCharacterDescription (TranslationTable table, unsigned char byte, size_t *length, unsigned char *braille) {
   char buffer[0X100];
@@ -871,6 +878,7 @@ editTable (void) {
 
   return status;
 }
+#endif /* ENABLE_API */
 
 static int
 translateText (void) {
@@ -1002,9 +1010,12 @@ main (int argc, char *argv[]) {
     exit(9);
   }
 
+#ifdef ENABLE_API
   if (opt_edit) {
     status = editTable();
-  } else if (opt_translate) {
+  } else
+#endif /* ENABLE_API */
+  if (opt_translate) {
     status = translateText();
   } else {
     status = convertTable();

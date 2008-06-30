@@ -463,6 +463,7 @@ BRLTTY_ARG_DISABLE(
 
       all_api="all-api"
       install_api="install-api"
+      lib_api="-lbrlapi"
 
       api_dynamic_library="api-dynamic-library"
       install_api_libraries="install-api-libraries"
@@ -499,6 +500,7 @@ AC_SUBST([all_api_bindings])
 AC_SUBST([install_api_bindings])
 AC_SUBST([all_api])
 AC_SUBST([install_api])
+AC_SUBST([lib_api])
 AC_SUBST([api_dynamic_library])
 AC_SUBST([install_api_libraries])
 AC_SUBST([api_authkeyfile], [brlapi.key])

@@ -195,6 +195,7 @@ API_OBJECTS = @api_objects@
 API_LIBRARIES = @api_libraries@
 ALL_API = @all_api@
 INSTALL_API = @install_api@
+LIB_API = @lib_api@
 API_DYNAMIC_LIBRARY = @api_dynamic_library@
 INSTALL_API_LIBRARIES = @install_api_libraries@
 API_AUTHFILE = @api_authkeyfile@
