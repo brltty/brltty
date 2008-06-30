@@ -157,30 +157,6 @@ BRLTTY_ARG_REQUIRED(
    [include_directory], ["${includedir}/${PACKAGE_NAME}"]
 )
 
-original_prefix="${prefix}"
-test "${prefix}" = "NONE" && prefix=""
-original_exec_prefix="${exec_prefix}"
-test "${exec_prefix}" = "NONE" && exec_prefix="${prefix}"
-BRLTTY_VAR_EXPAND([brltty_reference_directory], [${execute_root}${program_directory}])
-BRLTTY_ARG_ENABLE(
-   [relocatable-install],
-   [installation using paths relative to the program directory])
-if test -n "${writable_directory}"
-then
-   BRLTTY_DEFINE_DIRECTORY([WRITABLE_DIRECTORY], [${execute_root}${writable_directory}],
-                           [Define this to be a string containing the path to a writable directory.])
-fi
-BRLTTY_DEFINE_DIRECTORY([DATA_DIRECTORY], [${execute_root}${data_directory}],
-                        [Define this to be a string containing the path to the data files directory.])
-BRLTTY_DEFINE_DIRECTORY([LIBRARY_DIRECTORY], [${execute_root}${library_directory}],
-                        [Define this to be a string containing the path to the library directory.])
-BRLTTY_DEFINE_DIRECTORY([CONFIGURATION_DIRECTORY], [${sysconfdir}],
-                        [Define this to be a string containing the path to the configuration directory.])
-BRLTTY_DEFINE_EXPANDED([BRLAPI_ETCDIR], ["${CONFIGURATION_DIRECTORY}"],
-                       [Define this to be a string containing the path to the directory where the authorization key and driver-dependent key names are found.])
-prefix="${original_prefix}"
-exec_prefix="${original_exec_prefix}"
-
 brltty_default_compiler_prefix="${host_os}-"
 BRLTTY_ARG_WITH(
    [compiler-prefix], [PREFIX],
@@ -470,14 +446,14 @@ BRLTTY_ARG_DISABLE(
       api_dynamic_library="api-dynamic-library"
       install_api_libraries="install-api-libraries"
       uninstall_api_libraries="uninstall-api-libraries"
-      api_socket_directory="${localstatedir}/lib/BrlAPI"
+      api_socket_path="${localstatedir}/lib/BrlAPI"
 
       case "${host_os}"
       in
          cygwin*|mingw*)
             AC_DEFINE([BRLAPI_WIN32], [1],
                       [Define this if the Win32 programming interface is available.])
-	    api_socket_directory='\\\\.\\pipe\\BrlAPI'
+	    api_socket_path='\\\\.\\pipe\\BrlAPI'
             api_dynamic_library="api-dynamic-library-windows"
             install_api_libraries="install-api-libraries-windows"
             uninstall_api_libraries="uninstall-api-libraries-windows"
@@ -513,12 +489,7 @@ AC_SUBST([api_dynamic_library])
 AC_SUBST([install_api_libraries])
 AC_SUBST([uninstall_api_libraries])
 AC_SUBST([api_authkeyfile], [brlapi.key])
-AC_SUBST([api_socket_directory])
-original_prefix="${prefix}"
-test "${prefix}" = "NONE" && prefix=""
-BRLTTY_DEFINE_EXPANDED([BRLAPI_SOCKETPATH], ["${api_socket_directory}"],
-		       [Define this to be a string containing the path to the local sockets.])
-prefix="${original_prefix}"
+AC_SUBST([api_socket_path])
 BRLTTY_DEFINE_EXPANDED([BRLAPI_AUTHKEYFILE], ["${api_authkeyfile}"],
                        [Define this to be a string containing the name of the file containing the authorization key.])
 
@@ -1438,6 +1409,32 @@ BRLTTY_ARG_DRIVER([screen], [ScreenDrivers])
 AC_DEFINE_UNQUOTED([SCREEN_DRIVER], ["${brltty_default_code_screen}"],
                    [Define this to be a string containing the default screen driver code.])
 BRLTTY_SUMMARY_ITEM([screen-driver], [brltty_default_code_screen])
+
+original_prefix="${prefix}"
+test "${prefix}" = "NONE" && prefix=""
+original_exec_prefix="${exec_prefix}"
+test "${exec_prefix}" = "NONE" && exec_prefix="${prefix}"
+BRLTTY_VAR_EXPAND([brltty_reference_directory], [${execute_root}${program_directory}])
+BRLTTY_ARG_ENABLE(
+   [relocatable-install],
+   [installation using paths relative to the program directory])
+if test -n "${writable_directory}"
+then
+   BRLTTY_DEFINE_DIRECTORY([WRITABLE_DIRECTORY], [${execute_root}${writable_directory}],
+                           [Define this to be a string containing the path to a writable directory.])
+fi
+BRLTTY_DEFINE_DIRECTORY([DATA_DIRECTORY], [${execute_root}${data_directory}],
+                        [Define this to be a string containing the path to the data files directory.])
+BRLTTY_DEFINE_DIRECTORY([LIBRARY_DIRECTORY], [${execute_root}${library_directory}],
+                        [Define this to be a string containing the path to the library directory.])
+BRLTTY_DEFINE_DIRECTORY([CONFIGURATION_DIRECTORY], [${sysconfdir}],
+                        [Define this to be a string containing the path to the configuration directory.])
+BRLTTY_DEFINE_EXPANDED([BRLAPI_ETCDIR], ["${CONFIGURATION_DIRECTORY}"],
+                       [Define this to be a string containing the path to the directory where the authorization key and driver-dependent key names are found.])
+BRLTTY_DEFINE_EXPANDED([BRLAPI_SOCKETPATH], ["${api_socket_path}"],
+		       [Define this to be a string containing the path to the local sockets.])
+prefix="${original_prefix}"
+exec_prefix="${original_exec_prefix}"
 
 AC_SUBST([install_drivers])
 BRLTTY_SUMMARY_END

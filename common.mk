@@ -73,9 +73,8 @@ INSTALL_APIHDR_DIRECTORY = $(INSTALL_ROOT)$(includedir)
 install-apihdr-directory:
 	$(INSTALL_DIRECTORY) $(INSTALL_APIHDR_DIRECTORY)
 
-INSTALL_APISOC_DIRECTORY = $(INSTALL_ROOT)$(API_SOCKET_DIRECTORY)
 install-apisoc-directory:
-	$(INSTALL_DIRECTORY) -m 1777 $(INSTALL_APISOC_DIRECTORY)
+	-$(INSTALL_DIRECTORY) -m 1777 $(API_SOCKET_DIRECTORY)
 
 clean::
 	-rm -f *.$O *.auto.h *.auto.c core implib.a

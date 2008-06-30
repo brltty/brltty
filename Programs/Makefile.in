@@ -581,7 +581,7 @@ uninstall-api-libraries:
 	-rm -f $(INSTALL_APILIB_DIRECTORY)/$(API_LIB).$(API_RELEASE)
 	$(CONFLIBDIR) $(INSTALL_APILIB_DIRECTORY)
 	-rm -f $(INSTALL_APILIB_DIRECTORY)/$(API_ARC)
-	-rm -f -r $(INSTALL_APISOC_DIRECTORY)
+	-rm -f -r $(API_SOCKET_DIRECTORY)
 
 uninstall-api-libraries-windows:
 	-rm -f $(INSTALL_APILIB_DIRECTORY)/$(API_ARC)
