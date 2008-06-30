@@ -119,11 +119,7 @@ size_t BRLAPI_STDCALL brlapi_getHandleSize(void);
 #define BRLAPI_SOCKETPORT "4101"
 
 /** Default unix path on which connections to \e BrlAPI can be established */
-#ifdef BRLAPI_WIN32
-#define BRLAPI_SOCKETPATH "\\\\.\\pipe\\BrlAPI"
-#else /* BRLAPI_WIN32 */
-#define BRLAPI_SOCKETPATH "/var/lib/BrlAPI/"
-#endif /* BRLAPI_WIN32 */
+#undef BRLAPI_SOCKETPATH
 
 /** \e brltty 's settings directory
  *

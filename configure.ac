@@ -107,6 +107,7 @@ BRLTTY_DEFINE_EXPANDED([CONFIGURATION_FILE], ["${configuration_file}"],
 BRLTTY_PORTABLE_DIRECTORY([includedir], [/usr])
 BRLTTY_PORTABLE_DIRECTORY([datarootdir], [/usr])
 BRLTTY_PORTABLE_DIRECTORY([mandir], [/usr/share])
+BRLTTY_PORTABLE_DIRECTORY([localstatedir], [])
 
 BRLTTY_SUMMARY_ITEM([libdir], [libdir])
 BRLTTY_SUMMARY_ITEM([sysconfdir], [sysconfdir])
@@ -472,9 +473,13 @@ BRLTTY_ARG_DISABLE(
          cygwin*|mingw*)
             AC_DEFINE([BRLAPI_WIN32], [1],
                       [Define this if the Win32 programming interface is available.])
+	    api_socketpath='\\\\.\\pipe\\BrlAPI'
             api_dynamic_library="api-dynamic-library-windows"
             install_api_libraries="install-api-libraries-windows"
             ;;
+	 *)
+	    api_socketpath="${localstatedir}/lib/BrlAPI"
+	    ;;
       esac
 
       BRLTTY_BINDINGS([Caml])
@@ -504,6 +509,12 @@ AC_SUBST([api_libs])
 AC_SUBST([api_dynamic_library])
 AC_SUBST([install_api_libraries])
 AC_SUBST([api_authkeyfile], [brlapi.key])
+AC_SUBST([api_socketpath])
+original_prefix="${prefix}"
+test "${prefix}" = "NONE" && prefix=""
+BRLTTY_DEFINE_EXPANDED([BRLAPI_SOCKETPATH], ["${api_socketpath}"],
+		       [Define this to be a string containing the path to the local sockets.])
+prefix="${original_prefix}"
 BRLTTY_DEFINE_EXPANDED([BRLAPI_AUTHKEYFILE], ["${api_authkeyfile}"],
                        [Define this to be a string containing the name of the file containing the authorization key.])
 

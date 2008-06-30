@@ -528,6 +528,7 @@ install-api-libraries: $(API_LIB) $(API_ARC) install-apilib-directory
 	$(SYMLINK) -f $(API_LIB).$(API_RELEASE) $(INSTALL_APILIB_DIRECTORY)/$(API_LIB).$(API_VERSION)
 	$(CONFLIBDIR) $(INSTALL_APILIB_DIRECTORY)
 	$(INSTALL_DATA) $(API_ARC) $(INSTALL_APILIB_DIRECTORY)
+	$(INSTALL_DIRECTORY) -m 1777 $(API_SOCKETPATH)
 
 install-api-libraries-windows: $(API_DLL) $(API_ARC) install-program-directory install-apilib-directory
 	$(INSTALL_PROGRAM) $(API_DLL) $(INSTALL_PROGRAM_DIRECTORY)
