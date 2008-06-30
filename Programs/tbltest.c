@@ -62,6 +62,7 @@ static char *opt_inputFormat;
 static char *opt_outputFormat;
 static int opt_translate;
 static char *opt_dataDirectory;
+
 #ifdef ENABLE_API
 static int opt_edit;
 #endif /* ENABLE_API */
@@ -1015,6 +1016,7 @@ main (int argc, char *argv[]) {
     status = editTable();
   } else
 #endif /* ENABLE_API */
+
   if (opt_translate) {
     status = translateText();
   } else {

@@ -362,7 +362,7 @@ scrtest.$O:
 TBLTEST_OBJECTS = tbltest.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) lock.$O charset.$O tbl.$O tbl_native.$O tbl_gnome.$O
 
 tbltest$X: $(TBLTEST_OBJECTS) $(ALL_API)
-	$(CC) $(LDFLAGS) -o $@ $(TBLTEST_OBJECTS) -L. $(LIB_API) $(CLIBS) $(LDLIBS)
+	$(CC) $(LDFLAGS) -o $@ $(TBLTEST_OBJECTS) $(API_LIBS) $(CLIBS) $(LDLIBS)
 
 tbltest.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/tbltest.c
@@ -391,8 +391,8 @@ tunetest.$O:
 
 APITEST_OBJECTS = apitest.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) cmd.$O charset.$O lock.$O
 
-apitest$X: $(APITEST_OBJECTS) $(ALL_API)
-	$(CC) $(LDFLAGS) -o $@ $(APITEST_OBJECTS) -L$(BLD_DIR) $(LIB_API) $(LDLIBS)
+apitest$X: $(APITEST_OBJECTS) api
+	$(CC) $(LDFLAGS) -o $@ $(APITEST_OBJECTS) $(API_LIBS) $(LDLIBS)
 
 apitest.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/apitest.c
@@ -467,8 +467,8 @@ tbl2hex.$O:
 
 XBRLAPI_OBJECTS = xbrlapi.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS)
 
-xbrlapi$X: $(XBRLAPI_OBJECTS) $(ALL_API)
-	$(CC) $(LDFLAGS) -o $@ $(XBRLAPI_OBJECTS) -L. $(LIB_API) $(XLIBS) $(LDLIBS)
+xbrlapi$X: $(XBRLAPI_OBJECTS) api
+	$(CC) $(LDFLAGS) -o $@ $(XBRLAPI_OBJECTS) $(API_LIBS) $(XLIBS) $(LDLIBS)
 
 xbrlapi.$O:
 	$(CC) $(CFLAGS) $(X_CFLAGS) -c $(SRC_DIR)/xbrlapi.c
