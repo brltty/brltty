@@ -64,6 +64,23 @@ Programming Interface to BRLTTY.
 Install this package if you have an application
 which directly accesses a refreshable braille display.
 
+%package -n brlapi-caml
+Version: @api_release@
+Group: Applications/System
+License: LGPL
+
+AutoProv: 1
+
+AutoReq: 1
+
+Summary: Caml bindings for BrlAPI.
+%description -n brlapi-caml
+This package provides the Caml bindings for BrlAPI,
+which is the Application Programming Interface to BRLTTY.
+
+Install this package if you have a Caml application
+which directly accesses a refreshable braille display.
+
 %package -n brlapi-java
 Version: @api_release@
 Group: Applications/System
@@ -180,6 +197,10 @@ rm -fr "${RPM_BUILD_ROOT}"
 %{_libdir}/libbrlapi.so.*
 %doc Documents/Manual-BrlAPI/English/*.{sgml,txt,html}
 %doc Documents/README.Gnopernicus
+
+%files -n brlapi-caml
+@OCAMLLIB@/brlapi
+@OCAMLLIB@/stublibs/
 
 %files -n brlapi-java
 @JAVA_JAR_DIR@/*
