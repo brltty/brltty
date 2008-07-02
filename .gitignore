@@ -7,7 +7,6 @@ autom4te*.cache
 config.mk
 config.h
 brltty.spec
-brltty.lsm
 configure
 *.pot
 *.tar
