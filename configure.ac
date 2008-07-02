@@ -35,7 +35,7 @@ brltty_build_directories="${brltty_build_directories} ${brltty_manual_directorie
 
 AC_SUBST([api_major], [0])
 AC_SUBST([api_minor], [5])
-AC_SUBST([api_revision], [1])
+AC_SUBST([api_revision], [2])
 AC_SUBST([api_version], [${api_major}.${api_minor}])
 AC_SUBST([api_release], [${api_version}.${api_revision}])
 AC_DEFINE_UNQUOTED([BRLAPI_RELEASE], ["${api_release}"],
