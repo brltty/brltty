@@ -1446,7 +1446,6 @@ s%\([^ ][^ ]*\)%\1/Makefile:prologue.mk.in:\1/Makefile.in%g
 AC_OUTPUT([
    config.mk
    brltty.spec
-   brltty.lsm
    Programs/brltty-config
    Documents/brltty.conf
    Documents/brltty.1
