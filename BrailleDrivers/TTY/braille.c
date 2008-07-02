@@ -41,7 +41,7 @@ static iconv_t conversionDescriptor = NULL;
 #include <ncurses.h>
 #elif defined(HAVE_PKG_NCURSESW)
 #define USE_CURSES
-#include <ncurses.h>
+#include <ncursesw/ncurses.h>
 #else /* HAVE_PKG_ */
 #warning curses package either unspecified or unsupported
 #define addstr(string) serialWriteData(ttyDevice, string, strlen(string))
