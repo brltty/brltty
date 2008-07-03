@@ -255,6 +255,78 @@ AC_PROG_YACC
 AC_PROG_AWK
 AC_PROG_LN_S
 
+AC_CACHE_CHECK([for linkage editor program creation flags], [brltty_cv_prog_ld_flags], [dnl
+case "${host_os}"
+in
+   linux*|gnu*|openbsd*|freebsd*|kfreebsd*|netbsd*|*qnx*)
+      brltty_cv_prog_ld_flags="-export-dynamic"
+      ;;
+   solaris*)
+      brltty_cv_prog_ld_flags=""
+      ;;
+   hpux*)
+      brltty_cv_prog_ld_flags="-E +s"
+      ;;
+   osf*)
+      brltty_cv_prog_ld_flags=""
+      ;;
+   cygwin*|mingw*)
+      brltty_cv_prog_ld_flags="-export-dynamic --enable-auto-import"
+      ;;
+   msdos*)
+      brltty_cv_prog_ld_flags=""
+      ;;
+   darwin*)
+      brltty_cv_prog_ld_flags=""
+      ;;
+   *)
+      AC_MSG_ERROR([linkage editor program creation flags not configured for ${host_os}])
+      ;;
+esac])
+brltty_link_flags="${brltty_cv_prog_ld_flags}"
+
+AC_CACHE_CHECK([for static linkage flag], [brltty_cv_prog_ld_static], [dnl
+if test "${GCC}" = "yes"
+then
+   brltty_cv_prog_ld_static="-static"
+else
+   case "${host_os}"
+   in
+      linux*|gnu*|openbsd*|freebsd*|kfreebsd*|*qnx*|cygwin*|mingw*)
+         brltty_cv_prog_ld_static="-static"
+         ;;
+      netbsd*)
+         brltty_cv_prog_ld_static="-Bstatic"
+         ;;
+      solaris*)
+         brltty_cv_prog_ld_static="-dn"
+         ;;
+      hpux*)
+         brltty_cv_prog_ld_static="-Bstatic"
+         ;;
+      osf*)
+         brltty_cv_prog_ld_static="-non_shared"
+         ;;
+      *)
+         AC_MSG_ERROR([static linkage not supported by ${host_os}])
+         ;;
+   esac
+   brltty_cv_prog_ld_static="BRLTTY_OPTIONS_LD2CC([${brltty_cv_prog_ld_static}])"
+fi])
+brltty_static_flag="${brltty_cv_prog_ld_static}"
+BRLTTY_ARG_ENABLE(
+   [standalone-programs],
+   [statically linked executables],
+   [],
+[dnl
+   brltty_standalone_programs="yes"
+   LDFLAGS="${LDFLAGS} ${brltty_static_flag}"
+], [dnl
+   AC_DEFINE([ENABLE_SHARED_OBJECTS], [1],
+             [Define this if shared object support is to be included.])
+])
+LDFLAGS="${LDFLAGS} BRLTTY_OPTIONS_LD2CC([${brltty_link_flags}])"
+
 AC_PROG_INSTALL
 BRLTTY_EXECUTABLE_PATH([INSTALL])
 
@@ -412,7 +484,14 @@ BRLTTY_ARG_DISABLE(
    [support for Unicode-based internationalization],
    [],
 [dnl
-   AC_CHECK_HEADERS([unicode/uchar.h], [AC_HAVE_LIBRARY([icuuc])])
+   AC_CHECK_HEADERS([unicode/uchar.h], [dnl
+      if test "${brltty_standalone_programs}" = "yes"
+      then
+         AC_HAVE_LIBRARY([sicuuc])
+      else
+         AC_HAVE_LIBRARY([icuuc])
+      fi
+   ])
 ])
 
 BRLTTY_ARG_DISABLE(
@@ -1003,78 +1082,6 @@ BRLTTY_ARG_DISABLE(
 [dnl
    AC_CHECK_LIB([gpm], [Gpm_Open])
 ])
-
-AC_CACHE_CHECK([for linkage editor program creation flags], [brltty_cv_prog_ld_flags], [dnl
-case "${host_os}"
-in
-   linux*|gnu*|openbsd*|freebsd*|kfreebsd*|netbsd*|*qnx*)
-      brltty_cv_prog_ld_flags="-export-dynamic"
-      ;;
-   solaris*)
-      brltty_cv_prog_ld_flags=""
-      ;;
-   hpux*)
-      brltty_cv_prog_ld_flags="-E +s"
-      ;;
-   osf*)
-      brltty_cv_prog_ld_flags=""
-      ;;
-   cygwin*|mingw*)
-      brltty_cv_prog_ld_flags="-export-dynamic --enable-auto-import"
-      ;;
-   msdos*)
-      brltty_cv_prog_ld_flags=""
-      ;;
-   darwin*)
-      brltty_cv_prog_ld_flags=""
-      ;;
-   *)
-      AC_MSG_ERROR([linkage editor program creation flags not configured for ${host_os}])
-      ;;
-esac])
-brltty_link_flags="${brltty_cv_prog_ld_flags}"
-
-AC_CACHE_CHECK([for static linkage flag], [brltty_cv_prog_ld_static], [dnl
-if test "${GCC}" = "yes"
-then
-   brltty_cv_prog_ld_static="-static"
-else
-   case "${host_os}"
-   in
-      linux*|gnu*|openbsd*|freebsd*|kfreebsd*|*qnx*|cygwin*|mingw*)
-         brltty_cv_prog_ld_static="-static"
-         ;;
-      netbsd*)
-         brltty_cv_prog_ld_static="-Bstatic"
-         ;;
-      solaris*)
-         brltty_cv_prog_ld_static="-dn"
-         ;;
-      hpux*)
-         brltty_cv_prog_ld_static="-Bstatic"
-         ;;
-      osf*)
-         brltty_cv_prog_ld_static="-non_shared"
-         ;;
-      *)
-         AC_MSG_ERROR([static linkage not supported by ${host_os}])
-         ;;
-   esac
-   brltty_cv_prog_ld_static="BRLTTY_OPTIONS_LD2CC([${brltty_cv_prog_ld_static}])"
-fi])
-brltty_static_flag="${brltty_cv_prog_ld_static}"
-BRLTTY_ARG_ENABLE(
-   [standalone-programs],
-   [statically linked executables],
-   [],
-[dnl
-   brltty_standalone_programs="yes"
-   LDFLAGS="${LDFLAGS} ${brltty_static_flag}"
-], [dnl
-   AC_DEFINE([ENABLE_SHARED_OBJECTS], [1],
-             [Define this if shared object support is to be included.])
-])
-LDFLAGS="${LDFLAGS} BRLTTY_OPTIONS_LD2CC([${brltty_link_flags}])"
 
 case "${host_os}"
 in
