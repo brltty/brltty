@@ -479,20 +479,27 @@ BRLTTY_ARG_DISABLE(
 
 AC_CHECK_FUNC([wcslen], [AC_CHECK_HEADERS([wchar.h])])
 
+icu_includes=""
+icu_libraries=""
 BRLTTY_ARG_DISABLE(
    [icu],
    [support for Unicode-based internationalization],
    [],
 [dnl
-   AC_CHECK_HEADERS([unicode/uchar.h], [dnl
+   icu-config --exists && {
+      icu_includes="`icu-config --cppflags-searchpath`"
+      icu_libraries="`icu-config --ldflags`"
+      AC_DEFINE_UNQUOTED([HAVE_ICU], [1],
+                         [Define this if Unicode-based internationalization support is to be included.])
+
       if test "${brltty_standalone_programs}" = "yes"
       then
-         AC_HAVE_LIBRARY([sicuuc])
-      else
-         AC_HAVE_LIBRARY([icuuc])
+         icu_libraries="`echo ${icu_libraries} | sed -e 's/\(-l\)\(icu\)/\1s\2/g'`"
       fi
-   ])
+   }
 ])
+AC_SUBST([icu_includes])
+AC_SUBST([icu_libraries])
 
 BRLTTY_ARG_DISABLE(
    [iconv],

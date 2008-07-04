@@ -22,9 +22,9 @@
 #include <errno.h>
 #include <ctype.h>
 
-#ifdef HAVE_LIBICUUC
+#ifdef HAVE_ICU
 #include <unicode/uchar.h>
-#endif /* HAVE_LIBICUUC */
+#endif /* HAVE_ICU */
 
 #if defined(HAVE_PKG_CURSES)
 #define USE_CURSES
@@ -426,7 +426,7 @@ makeCharacterDescription (TranslationTable table, unsigned char byte, size_t *le
            &descriptionLength);
 #undef DOT
 
-#ifdef HAVE_LIBICUUC
+#ifdef HAVE_ICU
   {
     char *name = buffer + descriptionLength + 1;
     int size = buffer + sizeof(buffer) - name;
@@ -438,7 +438,7 @@ makeCharacterDescription (TranslationTable table, unsigned char byte, size_t *le
       *--name = ' ';
     }
   }
-#endif /* HAVE_LIBICUUC */
+#endif /* HAVE_ICU */
 
   {
     wchar_t *description = calloc(descriptionLength+1, sizeof(*description));

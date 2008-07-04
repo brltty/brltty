@@ -176,6 +176,9 @@ CSPI_INCLUDES = @cspi_includes@
 CSPI_LIBDIRS = @cspi_libdirs@
 CSPI_LIBRARIES = @cspi_libraries@
 
+ICU_INCLUDES = @icu_includes@
+ICU_LIBRARIES = @icu_libraries@
+
 TEXT_TABLE = @text_table@
 ATTRIBUTES_TABLE = @attributes_table@
 

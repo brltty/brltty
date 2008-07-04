@@ -26,9 +26,9 @@
 #include <sys/wait.h>
 #endif /* HAVE_SYS_WAIT_H */
 
-#ifdef HAVE_LIBICUUC
+#ifdef HAVE_ICU
 #include <unicode/uchar.h>
-#endif /* HAVE_LIBICUUC */
+#endif /* HAVE_ICU */
 
 #include "misc.h"
 #include "message.h"
@@ -2054,7 +2054,7 @@ runProgram (void) {
                       length += count;
                     }
 
-#ifdef HAVE_LIBICUUC
+#ifdef HAVE_ICU
                     {
                       char name[0X40];
                       UErrorCode error = U_ZERO_ERROR;
@@ -2066,7 +2066,7 @@ runProgram (void) {
                         length += count;
                       }
                     }
-#endif /* HAVE_LIBICUUC */
+#endif /* HAVE_ICU */
 
                     message(buffer, 0);
                   } else

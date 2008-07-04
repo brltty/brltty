@@ -23,9 +23,9 @@
 #include <ctype.h>
 #include <errno.h>
  
-#ifdef HAVE_LIBICUUC
+#ifdef HAVE_ICU
 #include <unicode/uchar.h>
-#endif /* HAVE_LIBICUUC */
+#endif /* HAVE_ICU */
 
 #include "misc.h"
 #include "charset.h"
@@ -528,13 +528,13 @@ parseCharacters (FileData *data, CharacterString *result, const wchar_t *token, 
                 }
                 name[count] = 0;
 
-#ifdef HAVE_LIBICUUC
+#ifdef HAVE_ICU
                 {
                   UErrorCode error = U_ZERO_ERROR;
                   character = u_charFromName(U_EXTENDED_CHAR_NAME, name, &error);
                   if (U_SUCCESS(error)) ok = 1;
                 }
-#endif /* HAVE_LIBICUUC */
+#endif /* HAVE_ICU */
               }
             } else {
               index = length - 1;

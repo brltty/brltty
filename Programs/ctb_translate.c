@@ -19,9 +19,9 @@
 
 #include <string.h>
 
-#ifdef HAVE_LIBICUUC
+#ifdef HAVE_ICU
 #include <unicode/uchar.h>
-#endif /* HAVE_LIBICUUC */
+#endif /* HAVE_ICU */
 
 #include "tbl.h"
 #include "ctb.h"
@@ -422,7 +422,7 @@ putSequence (ContractionTableOffset offset) {
 
 static void
 findLineBreakOpportunities (unsigned char *opportunities, const wchar_t *characters, size_t length) {
-#ifdef HAVE_LIBICUUC
+#ifdef HAVE_ICU
   /* UAX #14: Line Breaking Properties
    * http://unicode.org/reports/tr14/
    * Section 6: Line Breaking Algorithm
@@ -819,7 +819,7 @@ findLineBreakOpportunities (unsigned char *opportunities, const wchar_t *charact
       }
     }
   }
-#else /* HAVE_LIBICUUC */
+#else /* HAVE_ICU */
   int wasSpace = 0;
   int index;
 
@@ -828,7 +828,7 @@ findLineBreakOpportunities (unsigned char *opportunities, const wchar_t *charact
     opportunities[index] = wasSpace && !isSpace;
     wasSpace = isSpace;
   }
-#endif /* HAVE_LIBICUUC */
+#endif /* HAVE_ICU */
 }
 
 int

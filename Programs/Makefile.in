@@ -125,10 +125,10 @@ tbl_gnome.$O:
 ###############################################################################
 
 ctb_compile.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/ctb_compile.c
+	$(CC) $(CFLAGS) $(ICU_INCLUDES) -c $(SRC_DIR)/ctb_compile.c
 
 ctb_translate.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/ctb_translate.c
+	$(CC) $(CFLAGS) $(ICU_INCLUDES) -c $(SRC_DIR)/ctb_translate.c
 
 ###############################################################################
 
@@ -246,10 +246,10 @@ uninstall-api-bindings:
 BRLTTY_OBJECTS = brltty.$O $(PROGRAM_OBJECTS) config.$O $(BASE_OBJECTS) mount.$O auth.$O cut.$O cmd.$O scancodes.$O lock.$O charset.$O $(TBL_OBJECTS) $(CTB_OBJECTS) touch.$O serial.$O $(USB_OBJECTS) $(BLUETOOTH_OBJECTS) drivers.$O $(SCREEN_OBJECTS) $(SCREEN_DRIVER_OBJECTS) route.$O brl.$O $(BRAILLE_DRIVER_OBJECTS) $(SPEECH_OBJECT) $(SPEECH_DRIVER_OBJECTS) $(TUNE_OBJECTS) $(API_OBJECTS)
 
 brltty$X: $(BRLTTY_OBJECTS)
-	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(SPEECH_DRIVER_LIBRARIES) $(SCREEN_DRIVER_LIBRARIES) $(LDLIBS)
+	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(SPEECH_DRIVER_LIBRARIES) $(SCREEN_DRIVER_LIBRARIES) $(ICU_LIBRARIES) $(LDLIBS)
 
 brltty.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/brltty.c
+	$(CC) $(CFLAGS) $(ICU_INCLUDES) -c $(SRC_DIR)/brltty.c
 
 config.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/config.c
@@ -362,17 +362,17 @@ scrtest.$O:
 TBLTEST_OBJECTS = tbltest.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) lock.$O charset.$O tbl.$O tbl_native.$O tbl_gnome.$O
 
 tbltest$X: $(TBLTEST_OBJECTS) $(BUILD_API)
-	$(CC) $(LDFLAGS) -o $@ $(TBLTEST_OBJECTS) $(API_REF) $(CLIBS) $(LDLIBS)
+	$(CC) $(LDFLAGS) -o $@ $(TBLTEST_OBJECTS) $(API_REF) $(CLIBS) $(ICU_LIBRARIES) $(LDLIBS)
 
 tbltest.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/tbltest.c
+	$(CC) $(CFLAGS) $(ICU_INCLUDES) -c $(SRC_DIR)/tbltest.c
 
 ###############################################################################
 
 CTBTEST_OBJECTS = ctbtest.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) ctb_compile.$O ctb_translate.$O lock.$O charset.$O tbl.$O tbl_native.$O
 
 ctbtest$X: $(CTBTEST_OBJECTS)
-	$(CC) $(LDFLAGS) -o $@ $(CTBTEST_OBJECTS) $(LDLIBS)
+	$(CC) $(LDFLAGS) -o $@ $(CTBTEST_OBJECTS) $(ICU_LIBRARIES) $(LDLIBS)
 
 ctbtest.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/ctbtest.c

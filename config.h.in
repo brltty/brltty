@@ -61,14 +61,8 @@ extern "C" {
 /* Define this if the header file wchar.h exists. */
 #undef HAVE_WCHAR_H
 
-/* Define this if International Components for Unicode functionality is available. */
-#undef HAVE_LIBICUUC
-#undef HAVE_LIBSICUUC
-#ifndef HAVE_LIBICUUC
-#ifdef HAVE_LIBSICUUC
-#define HAVE_LIBICUUC
-#endif /* HAVE_LIBSICUUC */
-#endif /* HAVE_LIBICUUC */
+/* Define this if Unicode-based internationalization support is to be included. */
+#undef HAVE_ICU
 
 /* Define this if the header file iconv.h exists. */
 #undef HAVE_ICONV_H
