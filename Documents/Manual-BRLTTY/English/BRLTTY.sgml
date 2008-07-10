@@ -12,7 +12,7 @@
     <name>Stéphane Doyon <tt><htmlurl url="mailto:s.doyon@videotron.ca" name="&lt;s.doyon@videotron.ca&gt;"></tt>
   <and>
     <name>Dave Mielke <tt><htmlurl url="mailto:dave@mielke.cc" name="&lt;dave@mielke.cc&gt;"></tt>
-  <date>Version 3.9, October 2007
+  <date>Version 3.10, July 2008
   <abstract>
     Copyright &copy; 1995-2008 by The BRLTTY Developers.
     BRLTTY is free software,
@@ -972,6 +972,9 @@ These options are primarily useful when building BRLTTY for use on a boot disk.
   <tag><tt/--disable-iconv/<label id="build-iconv"></tag>
     Reduce program size by excluding support for
     character set conversion.
+  <tag><tt/--disable-icu/<label id="build-icu"></tag>
+    Reduce program size by excluding support for
+    Unicode-based internationalization.
   <tag><tt/--disable-beeper-support/<label id="build-beeper-support"></tag>
     Reduce program size by excluding support for
     the console tone generator.
@@ -3556,6 +3559,21 @@ Notes:
     This setting can also be changed with
     the <ref id="command-SAY_SOFTER-SAY_LOUDER" name="SAY_SOFTER/SAY_LOUDER"> commands.
     The initial setting is <tt/10/.
+  <tag>Speech Pitch<label id="preference-speech-pitch"></tag>
+    Adjust the speech pitch
+    (<tt/0/ is the lowest, <tt/20/ is the highest).
+    This preference is only available if a driver which supports it is being used.
+    The initial setting is <tt/10/.
+  <tag>Speech Punctuation<label id="preference-speech-punctuation"></tag>
+    Adjust the amount of punctuation which is spoken.
+    It can be set to:
+    <itemize>
+      <item>All
+      <item>Some
+      <item>All
+    </itemize>
+    This preference is only available if a driver which supports it is being used.
+    The initial setting is <tt/Some/.
   <tag>Status Style<label id="preference-status-style"></tag>
     This setting specifies the way that the status cells are to be used.
     You shuldn't normally need to play with it.
