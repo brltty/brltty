@@ -314,12 +314,15 @@ else
    brltty_cv_prog_ld_static="BRLTTY_OPTIONS_LD2CC([${brltty_cv_prog_ld_static}])"
 fi])
 brltty_static_flag="${brltty_cv_prog_ld_static}"
+
+pkgconfig_flags_libs="--libs"
 BRLTTY_ARG_ENABLE(
    [standalone-programs],
    [statically linked executables],
    [],
 [dnl
    brltty_standalone_programs="yes"
+   pkgconfig_flags_libs="${pkgconfig_flags_libs} --static"
    LDFLAGS="${LDFLAGS} ${brltty_static_flag}"
 ], [dnl
    AC_DEFINE([ENABLE_SHARED_OBJECTS], [1],
@@ -588,51 +591,48 @@ brltty_libs_curses="${LIBS%${brltty_curses_libs_save}}"
 LIBS="${brltty_curses_libs_save}"
 AC_SUBST([brltty_libs_curses])
 
-AC_PATH_XTRA
-if test "${no_x}" != "yes"
-then
+pkg-config --exists x11 && {
+   brltty_cflags_x="`pkg-config --cflags-only-I x11`"
+   brltty_libs_x="`pkg-config ${pkgconfig_flags_libs} x11`"
+
+   pkg-config --exists xext && {
+      brltty_libs_x="`pkg-config ${pkgconfig_flags_libs} xext` ${brltty_libs_x}"
+
+      pkg-config --exists xtst && {
+         brltty_libs_x="`pkg-config ${pkgconfig_flags_libs} xtst` ${brltty_libs_x}"
+
+         AC_CHECK_HEADERS([X11/extensions/XTest.h])
+         AC_CHECK_HEADERS([X11/extensions/XKB.h])
+      }
+   }
+
+   pkg-config --exists xt && {
+      brltty_libs_x="`pkg-config ${pkgconfig_flags_libs} xt` ${brltty_libs_x}"
+
+      brltty_cppflags_save="${CPPFLAGS}"
+      CPPFLAGS="${CPPFLAGS} ${brltty_cflags_x}"
+
+      brltty_libs_save="${LIBS}"
+      LIBS="${brltty_libs_x} ${LIBS}"
+
+      BRLTTY_PACKAGE_CHOOSE([gui_toolkit],
+         [Xaw X11/Xaw/Form.h X11/Xaw/Paned.h X11/Xaw/Label.h X11/Xaw/Command.h X11/Xaw/Repeater.h],
+         [Xaw3d X11/Xaw3d/Form.h X11/Xaw3d/Paned.h X11/Xaw3d/Label.h X11/Xaw3d/Command.h X11/Xaw3d/Repeater.h],
+         [neXtaw X11/neXtaw/Form.h X11/neXtaw/Paned.h X11/neXtaw/Label.h X11/neXtaw/Command.h X11/neXtaw/Repeater.h],
+         [XawPlus X11/XawPlus/Form.h X11/XawPlus/Paned.h X11/XawPlus/Label.h X11/XawPlus/Command.h X11/XawPlus/Repeater.h],
+         [Xm Xm/Xm.h Xm/Form.h Xm/PanedW.h Xm/Label.h Xm/PushB.h])
+
+      brltty_libs_x="${LIBS%${brltty_libs_save}} ${brltty_libs_x}"
+
+      CPPFLAGS="${brltty_cppflags_save}"
+      LIBS="${brltty_libs_save}"
+   }
+
+   AC_SUBST([brltty_cflags_x])
+   AC_SUBST([brltty_libs_x])
    AC_SUBST([all_xbrlapi], [all-xbrlapi])
    AC_SUBST([install_xbrlapi], [install-xbrlapi])
-
-   brltty_x_cppflags_save="${CPPFLAGS}"
-   CPPFLAGS="${CPPFLAGS} ${X_CFLAGS}"
-
-   brltty_x_ldflags_save="${LDFLAGS}"
-   LDFLAGS="${LDFLAGS} ${X_LIBS}"
-
-   brltty_x_libs_save="${LIBS}"
-
-   AC_HAVE_LIBRARY([X11], [
-      LIBS="${X_EXTRA_LIBS} ${X_PRE_LIBS} -lX11 ${LIBS}"
-
-      AC_HAVE_LIBRARY([Xext], [
-         LIBS="-lXext ${LIBS}"
-         AC_HAVE_LIBRARY([Xtst], [
-            LIBS="-lXtst ${LIBS}"
-            AC_CHECK_HEADERS([X11/extensions/XTest.h])
-            AC_CHECK_HEADERS([X11/extensions/XKB.h])
-         ])
-      ])
-
-      AC_HAVE_LIBRARY([Xt], [
-         LIBS="-lXt ${LIBS}"
-
-         BRLTTY_PACKAGE_CHOOSE([gui_toolkit],
-            [Xaw X11/Xaw/Form.h X11/Xaw/Paned.h X11/Xaw/Label.h X11/Xaw/Command.h X11/Xaw/Repeater.h],
-            [Xaw3d X11/Xaw3d/Form.h X11/Xaw3d/Paned.h X11/Xaw3d/Label.h X11/Xaw3d/Command.h X11/Xaw3d/Repeater.h],
-            [neXtaw X11/neXtaw/Form.h X11/neXtaw/Paned.h X11/neXtaw/Label.h X11/neXtaw/Command.h X11/neXtaw/Repeater.h],
-            [XawPlus X11/XawPlus/Form.h X11/XawPlus/Paned.h X11/XawPlus/Label.h X11/XawPlus/Command.h X11/XawPlus/Repeater.h],
-            [Xm Xm/Xm.h Xm/Form.h Xm/PanedW.h Xm/Label.h Xm/PushB.h])
-      ])
-   ])
-
-   brltty_libs_x="${LDFLAGS#${brltty_x_ldflags_save}} ${LIBS%${brltty_x_libs_save}}"
-   AC_SUBST([brltty_libs_x])
-
-   LIBS="${brltty_x_libs_save}"
-   LDFLAGS="${brltty_x_ldflags_save}"
-   CPPFLAGS="${brltty_x_cppflags_save}"
-fi
+}
 
 test -z "$brltty_package_gui_toolkit" && {
    case "${host_os}"

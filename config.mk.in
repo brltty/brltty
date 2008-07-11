@@ -83,10 +83,7 @@ SYMLINK = @LN_S@
 
 DOXYGEN = @DOXYGEN@
 
-X_CFLAGS = @X_CFLAGS@
-X_LIBS = @X_LIBS@
-X_PRE_LIBS = @X_PRE_LIBS@
-X_EXTRA_LIBS = @X_EXTRA_LIBS@
+X_CFLAGS = @brltty_cflags_x@
 
 CURSES_LIB = @brltty_package_curses@
 GUI_TOOLKIT_LIB = @brltty_package_gui_toolkit@
