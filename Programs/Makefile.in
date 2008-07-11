@@ -16,7 +16,7 @@
 ###############################################################################
 
 all: all-brltty all-brltest all-scrtest tbltest$X ctbtest$X tunetest$X $(ALL_API)
-all-brltty: brltty$X $(BRAILLE_DRIVERS) $(BRAILLE_HELP) $(SPEECH_DRIVERS) $(SCREEN_DRIVERS)
+all-brltty: brltty$X all-braille $(SPEECH_DRIVERS) $(SCREEN_DRIVERS)
 all-brltest: brltest$X $(BRAILLE_DRIVERS)
 all-spktest: spktest$X $(SPEECH_DRIVERS)
 all-scrtest: scrtest$X $(SCREEN_DRIVERS)
@@ -404,8 +404,8 @@ braille-drivers: txt2hlp
 	do (cd $(BLD_TOP)$(BRL_DIR)/$$driver && $(MAKE) braille-driver braille-all) || exit 1; \
 	done
 
-braille-help: txt2hlp
-	for driver in $(BRAILLE_INTERNAL_DRIVER_NAMES); \
+all-braille: $(BRAILLE_DRIVERS)
+	for driver in $(BRAILLE_DRIVER_NAMES); \
 	do (cd $(BLD_TOP)$(BRL_DIR)/$$driver && $(MAKE) braille-all) || exit 1; \
 	done
 
@@ -475,7 +475,7 @@ xbrlapi.$O:
 
 ###############################################################################
 
-check-braille: brltty braille-drivers
+check-braille: brltty$X braille-drivers
 	for code in $(BRAILLE_DRIVER_CODES); \
 	do ls -l $(BLD_TOP)$(DRV_DIR)/libbrlttyb$$code.$(MOD_EXT) || exit 10; \
 	   ./brltty -v -q -N -e -f /dev/null -b $$code -s no -L "$(BLD_TOP)$(DRV_DIR)" -D "$(BLD_TOP)$(DAT_DIR)" -T "$(BLD_TOP)$(TBL_DIR)" -C "$(BLD_TOP)$(CTB_DIR)" 2>&1 || exit 11; \
@@ -489,7 +489,7 @@ check-speech: brltty speech-drivers
 
 ###############################################################################
 
-install:: install-programs install-help install-tables $(INSTALL_DRIVERS) install-manpages $(INSTALL_API)
+install:: install-programs install-data-files install-tables $(INSTALL_DRIVERS) install-manpages $(INSTALL_API)
 
 install-programs: brltty$X install-program-directory install-writable-directory
 	$(INSTALL_PROGRAM) brltty$X $(INSTALL_PROGRAM_DIRECTORY) 
@@ -499,7 +499,7 @@ install-programs: brltty$X install-program-directory install-writable-directory
 install-xbrlapi: xbrlapi$X install-program-directory
 	$(INSTALL_PROGRAM) xbrlapi$X $(INSTALL_PROGRAM_DIRECTORY) 
 
-install-help: $(BRAILLE_DRIVERS) $(BRAILLE_HELP) install-data-directory
+install-data-files: all-braille install-data-directory
 	$(INSTALL_DATA) $(BLD_TOP)$(DAT_DIR)/* $(INSTALL_DATA_DIRECTORY) 
 
 install-tables: $(INSTALL_TEXT_TABLES) $(INSTALL_ATTRIBUTES_TABLES) $(INSTALL_CONTRACTION_TABLES)

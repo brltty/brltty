@@ -131,31 +131,36 @@ INCLUDE_DIRECTORY = @include_directory@
 MANUAL_DIRECTORIES = @brltty_manual_directories@
 
 BRAILLE_DRIVER_CODES = @brltty_item_codes_braille@
-BRAILLE_DRIVER_OBJECTS = @braille_driver_objects@
-BRAILLE_DRIVER_LIBRARIES = @braille_driver_libraries@
-BRAILLE_HELP = @braille_help@
+BRAILLE_DRIVER_NAMES = @brltty_item_names_braille@
 BRAILLE_INTERNAL_DRIVER_CODES = @brltty_internal_codes_braille@
 BRAILLE_INTERNAL_DRIVER_NAMES = @brltty_internal_names_braille@
-BRAILLE_DRIVERS = @braille_drivers@
+BRAILLE_EXTERNAL_DRIVER_CODES = @brltty_external_codes_braille@
 BRAILLE_EXTERNAL_DRIVER_NAMES = @brltty_external_names_braille@
+BRAILLE_DRIVER_OBJECTS = @braille_driver_objects@
+BRAILLE_DRIVER_LIBRARIES = @braille_driver_libraries@
+BRAILLE_DRIVERS = @braille_drivers@
 
 LIBBRAILLE_ROOT = @libbraille_root@
 
 SPEECH_DRIVER_CODES = @brltty_item_codes_speech@
-SPEECH_DRIVER_OBJECTS = @speech_driver_objects@
-SPEECH_DRIVER_LIBRARIES = @speech_driver_libraries@
+SPEECH_DRIVER_NAMES = @brltty_item_names_speech@
 SPEECH_INTERNAL_DRIVER_CODES = @brltty_internal_codes_speech@
 SPEECH_INTERNAL_DRIVER_NAMES = @brltty_internal_names_speech@
-SPEECH_DRIVERS = @speech_drivers@
+SPEECH_EXTERNAL_DRIVER_CODES = @brltty_external_codes_speech@
 SPEECH_EXTERNAL_DRIVER_NAMES = @brltty_external_names_speech@
+SPEECH_DRIVER_OBJECTS = @speech_driver_objects@
+SPEECH_DRIVER_LIBRARIES = @speech_driver_libraries@
+SPEECH_DRIVERS = @speech_drivers@
 
 SCREEN_DRIVER_CODES = @brltty_item_codes_screen@
-SCREEN_DRIVER_OBJECTS = @screen_driver_objects@
-SCREEN_DRIVER_LIBRARIES = @screen_driver_libraries@
+SCREEN_DRIVER_NAMES = @brltty_item_names_screen@
 SCREEN_INTERNAL_DRIVER_CODES = @brltty_internal_codes_screen@
 SCREEN_INTERNAL_DRIVER_NAMES = @brltty_internal_names_screen@
-SCREEN_DRIVERS = @screen_drivers@
+SCREEN_EXTERNAL_DRIVER_CODES = @brltty_external_codes_screen@
 SCREEN_EXTERNAL_DRIVER_NAMES = @brltty_external_names_screen@
+SCREEN_DRIVER_OBJECTS = @screen_driver_objects@
+SCREEN_DRIVER_LIBRARIES = @screen_driver_libraries@
+SCREEN_DRIVERS = @screen_drivers@
 
 FLITE_ROOT = @flite_root@
 FLITE_LANGUAGE = @flite_language@
