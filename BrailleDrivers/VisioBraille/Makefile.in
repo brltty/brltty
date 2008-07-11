@@ -31,7 +31,7 @@ braille.$O:
 VSTP_OBJECTS = vstp_main.$O vstp_transfer.$O
 
 vstp$X: $(VSTP_OBJECTS) brlapi
-	$(CC) $(LDFLAGS) -o $@ $(VSTP_OBJECTS) -L$(BLD_TOP)$(PGM_DIR) -lbrlapi $(LDLIBS)
+	$(CC) $(LDFLAGS) -o $@ $(VSTP_OBJECTS) $(API_LIBS) $(LDLIBS)
 
 vstp_main.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/vstp_main.c
@@ -39,10 +39,15 @@ vstp_main.$O:
 vstp_transfer.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/vstp_transfer.c
 
+api: vstp$X
+braille-all:: $(BUILD_API)
+
 clean::
 	-rm -f vstp$X
 
-install:: vstp$X install-program-directory install-man1-directory
+install-api:: install-vstp
+
+install-vstp: vstp$X install-program-directory install-man1-directory
 	$(INSTALL_PROGRAM) vstp$X $(INSTALL_PROGRAM_DIRECTORY)
 	$(INSTALL_DATA) vstp.1 $(INSTALL_MAN1_DIRECTORY)
 

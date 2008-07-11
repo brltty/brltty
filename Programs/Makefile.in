@@ -401,12 +401,12 @@ apitest.$O:
 
 braille-drivers: txt2hlp
 	for driver in $(BRAILLE_EXTERNAL_DRIVER_NAMES); \
-	do (cd $(BLD_TOP)$(BRL_DIR)/$$driver && $(MAKE) braille-driver braille-help) || exit 1; \
+	do (cd $(BLD_TOP)$(BRL_DIR)/$$driver && $(MAKE) braille-driver braille-all) || exit 1; \
 	done
 
 braille-help: txt2hlp
 	for driver in $(BRAILLE_INTERNAL_DRIVER_NAMES); \
-	do (cd $(BLD_TOP)$(BRL_DIR)/$$driver && $(MAKE) braille-help) || exit 1; \
+	do (cd $(BLD_TOP)$(BRL_DIR)/$$driver && $(MAKE) braille-all) || exit 1; \
 	done
 
 ###############################################################################

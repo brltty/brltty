@@ -26,6 +26,7 @@ $(HELP_FILE): $(HELP_DEPS) $(TXT2HLP)
 	$(INSTALL_DIRECTORY) $(@D)
 	$(TXT2HLP) -- $(@) $(HELP_TEXT)
 braille-help:: $(HELP_FILE)
+braille-all:: braille-help
 
 BRL_DEFS = '-DDRIVER_NAME=$(DRIVER_NAME)' '-DDRIVER_CODE=$(DRIVER_CODE)' '-DDRIVER_COMMENT="$(DRIVER_COMMENT)"' '-DDRIVER_VERSION="$(DRIVER_VERSION)"' '-DDRIVER_DEVELOPERS="$(DRIVER_DEVELOPERS)"' '-DBRLHELP="$(HELP_NAME)"'
 BRL_CFLAGS = $(LIBCFLAGS) $(BRL_DEFS)
@@ -37,7 +38,7 @@ $(BRL_MOD_FILE): braille.$O
 	$(MKMOD) $(@) braille.$O $(BRL_OBJS)
 braille-driver: $(BRL_MOD_FILE)
 
-install-api:
+install-api::
 	$(INSTALL_DIRECTORY) $(INSTALL_ROOT)$(INCLUDE_DIRECTORY)
 	for file in *-$(DRIVER_CODE).h; do test -f $$file && $(INSTALL_DATA) $$file $(INSTALL_ROOT)$(INCLUDE_DIRECTORY); done || :
 
