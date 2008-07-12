@@ -975,6 +975,9 @@ These options are primarily useful when building BRLTTY for use on a boot disk.
   <tag><tt/--disable-icu/<label id="build-icu"></tag>
     Reduce program size by excluding support for
     Unicode-based internationalization.
+  <tag><tt/--disable-x/<label id="build-x"></tag>
+    Reduce program size by excluding support for
+    X11.
   <tag><tt/--disable-beeper-support/<label id="build-beeper-support"></tag>
     Reduce program size by excluding support for
     the console tone generator.
