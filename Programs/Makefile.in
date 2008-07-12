@@ -468,7 +468,7 @@ tbl2hex.$O:
 XBRLAPI_OBJECTS = xbrlapi.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS)
 
 xbrlapi$X: $(XBRLAPI_OBJECTS) api
-	$(CC) $(LDFLAGS) -o $@ $(XBRLAPI_OBJECTS) $(API_LIBS) $(XLIBS) $(LDLIBS)
+	$(CC) $(LDFLAGS) -o $@ $(XBRLAPI_OBJECTS) $(API_LIBS) $(XKB_LIBS) $(X_LIBS) $(LDLIBS)
 
 xbrlapi.$O:
 	$(CC) $(CFLAGS) $(X_CFLAGS) -c $(SRC_DIR)/xbrlapi.c

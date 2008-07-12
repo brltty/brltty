@@ -591,48 +591,64 @@ brltty_libs_curses="${LIBS%${brltty_curses_libs_save}}"
 LIBS="${brltty_curses_libs_save}"
 AC_SUBST([brltty_libs_curses])
 
-pkg-config --exists x11 && {
-   brltty_cflags_x="`pkg-config --cflags-only-I x11`"
-   brltty_libs_x="`pkg-config ${pkgconfig_flags_libs} x11`"
+brltty_cflags_x=""
+brltty_libs_x=""
+brltty_libs_xkb=""
+brltty_libs_xtk=""
+all_xbrlapi=""
+install_xbrlapi=""
+BRLTTY_ARG_DISABLE(
+   [x],
+   [support for X11],
+   [],
+[dnl
+   pkg-config --exists x11 && {
+      brltty_cflags_x="`pkg-config --cflags-only-I x11`"
+      brltty_libs_x="`pkg-config ${pkgconfig_flags_libs} x11`"
 
-   pkg-config --exists xext && {
-      brltty_libs_x="`pkg-config ${pkgconfig_flags_libs} xext` ${brltty_libs_x}"
+      all_xbrlapi="all-xbrlapi"
+      install_xbrlapi="install-xbrlapi"
 
-      pkg-config --exists xtst && {
-         brltty_libs_x="`pkg-config ${pkgconfig_flags_libs} xtst` ${brltty_libs_x}"
+      pkg-config --exists xext && {
+         brltty_libs_xkb="`pkg-config ${pkgconfig_flags_libs} xext` ${brltty_libs_xkb}"
 
-         AC_CHECK_HEADERS([X11/extensions/XTest.h])
-         AC_CHECK_HEADERS([X11/extensions/XKB.h])
+         pkg-config --exists xtst && {
+            brltty_libs_xkb="`pkg-config ${pkgconfig_flags_libs} xtst` ${brltty_libs_xkb}"
+
+            AC_CHECK_HEADERS([X11/extensions/XTest.h])
+            AC_CHECK_HEADERS([X11/extensions/XKB.h])
+         }
+      }
+
+      pkg-config --exists xt && {
+         brltty_libs_xtk="`pkg-config ${pkgconfig_flags_libs} xt` ${brltty_libs_xtk}"
+
+         brltty_cppflags_save="${CPPFLAGS}"
+         CPPFLAGS="${CPPFLAGS} ${brltty_cflags_x}"
+
+         brltty_libs_save="${LIBS}"
+         LIBS="${brltty_libs_xtk} ${brltty_libs_x} ${LIBS}"
+
+         BRLTTY_PACKAGE_CHOOSE([gui_toolkit],
+            [Xaw X11/Xaw/Form.h X11/Xaw/Paned.h X11/Xaw/Label.h X11/Xaw/Command.h X11/Xaw/Repeater.h],
+            [Xaw3d X11/Xaw3d/Form.h X11/Xaw3d/Paned.h X11/Xaw3d/Label.h X11/Xaw3d/Command.h X11/Xaw3d/Repeater.h],
+            [neXtaw X11/neXtaw/Form.h X11/neXtaw/Paned.h X11/neXtaw/Label.h X11/neXtaw/Command.h X11/neXtaw/Repeater.h],
+            [XawPlus X11/XawPlus/Form.h X11/XawPlus/Paned.h X11/XawPlus/Label.h X11/XawPlus/Command.h X11/XawPlus/Repeater.h],
+            [Xm Xm/Xm.h Xm/Form.h Xm/PanedW.h Xm/Label.h Xm/PushB.h])
+
+         brltty_libs_xtk="${LIBS%${brltty_libs_x} ${brltty_libs_save}}"
+
+         CPPFLAGS="${brltty_cppflags_save}"
+         LIBS="${brltty_libs_save}"
       }
    }
-
-   pkg-config --exists xt && {
-      brltty_libs_x="`pkg-config ${pkgconfig_flags_libs} xt` ${brltty_libs_x}"
-
-      brltty_cppflags_save="${CPPFLAGS}"
-      CPPFLAGS="${CPPFLAGS} ${brltty_cflags_x}"
-
-      brltty_libs_save="${LIBS}"
-      LIBS="${brltty_libs_x} ${LIBS}"
-
-      BRLTTY_PACKAGE_CHOOSE([gui_toolkit],
-         [Xaw X11/Xaw/Form.h X11/Xaw/Paned.h X11/Xaw/Label.h X11/Xaw/Command.h X11/Xaw/Repeater.h],
-         [Xaw3d X11/Xaw3d/Form.h X11/Xaw3d/Paned.h X11/Xaw3d/Label.h X11/Xaw3d/Command.h X11/Xaw3d/Repeater.h],
-         [neXtaw X11/neXtaw/Form.h X11/neXtaw/Paned.h X11/neXtaw/Label.h X11/neXtaw/Command.h X11/neXtaw/Repeater.h],
-         [XawPlus X11/XawPlus/Form.h X11/XawPlus/Paned.h X11/XawPlus/Label.h X11/XawPlus/Command.h X11/XawPlus/Repeater.h],
-         [Xm Xm/Xm.h Xm/Form.h Xm/PanedW.h Xm/Label.h Xm/PushB.h])
-
-      brltty_libs_x="${LIBS%${brltty_libs_save}} ${brltty_libs_x}"
-
-      CPPFLAGS="${brltty_cppflags_save}"
-      LIBS="${brltty_libs_save}"
-   }
-
-   AC_SUBST([brltty_cflags_x])
-   AC_SUBST([brltty_libs_x])
-   AC_SUBST([all_xbrlapi], [all-xbrlapi])
-   AC_SUBST([install_xbrlapi], [install-xbrlapi])
-}
+])
+AC_SUBST([brltty_cflags_x])
+AC_SUBST([brltty_libs_x])
+AC_SUBST([brltty_libs_xkb])
+AC_SUBST([brltty_libs_xtk])
+AC_SUBST([all_xbrlapi])
+AC_SUBST([install_xbrlapi])
 
 test -z "$brltty_package_gui_toolkit" && {
    case "${host_os}"
@@ -1216,7 +1232,7 @@ BRLTTY_BRAILLE_DRIVER([vo], [Voyager])
 BRLTTY_BRAILLE_DRIVER([vr], [Virtual])
 BRLTTY_BRAILLE_DRIVER([vs], [VisioBraille])
 test -n "${brltty_package_gui_toolkit}" && {
-   BRLTTY_BRAILLE_DRIVER([xw], [XWindow], [$(XLIBS)])
+   BRLTTY_BRAILLE_DRIVER([xw], [XWindow], [$(XTK_LIBS) $(X_LIBS)])
 }
 BRLTTY_ARG_DRIVER([braille], [BrailleDrivers])
 

@@ -56,7 +56,6 @@ HOSTLDFLAGS = $(COMMONLDFLAGS)
 LDFLAGS = $(COMMONLDFLAGS)
 LDLIBS = @LIBS@
 CLIBS = @brltty_libs_curses@
-XLIBS = @brltty_libs_x@
 
 LD = $(CROSSCOMP)@LD@
 
@@ -84,6 +83,9 @@ SYMLINK = @LN_S@
 DOXYGEN = @DOXYGEN@
 
 X_CFLAGS = @brltty_cflags_x@
+X_LIBS = @brltty_libs_x@
+XKB_LIBS = @brltty_libs_xkb@
+XTK_LIBS = @brltty_libs_xtk@
 
 CURSES_LIB = @brltty_package_curses@
 GUI_TOOLKIT_LIB = @brltty_package_gui_toolkit@
