@@ -201,7 +201,6 @@ rm -fr "${RPM_BUILD_ROOT}"
 
 %files -n brlapi-caml
 @OCAMLLIB@/brlapi
-@OCAMLLIB@/stublibs/
 
 %files -n brlapi-java
 @JAVA_JAR_DIR@/*
