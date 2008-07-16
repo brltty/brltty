@@ -1,4 +1,4 @@
-.TH "BRLTTY" "1" "October 2007" "brltty 3.9" "The BRLTTY Project"
+.TH "BRLTTY" "1" "July 2008" "brltty 3.10" "The BRLTTY Project"
 .SH NAME
 brltty \- refreshable braille display driver for Linux/Unix
 .SH SYNOPSIS
@@ -602,6 +602,9 @@ Baum
 .TP 4
 .B bn
 BrailleNote
+.TP 4
+.B bs
+BrailleSense
 .TP 4
 .B cb
 CombiBraille

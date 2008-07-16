@@ -224,50 +224,77 @@ rm -fr "${RPM_BUILD_ROOT}"
 %doc Documents/BrlAPIref
 
 %changelog
-* Wed Oct 17 2007 Dave Mielke <dave@mielke.cc> 3.9
-+  Core changes:
-      The startup log and initial braille display message contain the build revision.
-      The -v [--verify] option identifies the screen driver.
-      Failure of the braille and/or screen driver to start isn't fatal.
-      Repeated retries are scheduled for each driver until it starts.
-      Attempts to connect to gpm are only made when it's actually needed.
-      Standalone programs no longer include support for shared objects.
-      The MSDOS operating system is supported.
-      MSDOS option syntax (/flag and /name:value) is supported.
-      The syntax +x to clear a short option flag is supported.
-      Help output groups options by function rather than lists them alphabetically.
-      Needed but missing resources are created (by default) in /lib/brltty/rw/:
-         command line option: -W [--writable-directory=]
-         configuration file directive: writable-directory
-         environment variable: BRLTTY_WRITABLE_DIRECTORY
-         configure script option: --with-writable-directory=
-+  BrlAPI changes:
-      Version updated to 0.5.1.
-      TCP sockets are more responsive.
-      The -h [--host] option of xbrlapi has been changed to -b [--brlapi].
+* Wed Jul 16 2008 Dave Mielke <dave@mielke.cc> 3.10
++  The core and drivers (excluding text tables) are now Unicode-based.
++  The DESCCHAR function now shows (if possible) the character's name.
++  Linear cuts no longer include newline characters.
++  Specifying the braille device as "serial:" now defaults to the first serial device.
++  Add a driver for the Braille Sense.
++  Bring the French manual fully up-to-date (was at 3.6).
++  Linux-specific changes:
+      Don't unnecessarily wake up USB devices when searching.
++  Albatross braille driver changes:
+      Correctly handle keys which send their code on both press and release.
 +  Baum braille driver changes:
-      The autosuspend feature of Linux USB devices is disabled.
-      Don't probe for emulation modes if a serial device is being used.
-      Add the protocol= (all, native) parameter.
-+  HandyTech braille driver changes:
-      The Easy Braille is supported.
-+  Papenmeier braille driver changes:
-      The Trio models are supported.
-      The second set of vertical status keys does vertical routing.
-+  Linux changes:
-      USB devices maintained by udev under /dev/bus/usb/ are supported.
-+  Cygwin changes:
-      The emulation layer (rather than Windows functions) is used.
-      Serial devices named ttySn (rather than COMn) are used.
-+  Windows changes:
-      Write to the event log.
-      The -I [--install-service] and -R [--remove-service] options have been added.
-      The -r [--release-device] option defaults to "on".
-+  Table changes:
-      Corrections to Finnish braille [text.fi1.tbl, text.fi2.tbl].
-      Corrections to Portuguese braille [text.pt.tbl].
-      Corrections to American English grade 2 braille [en-us-g2.ctb].
-      Unified English Braille table rename: uebc-g2 -> en-uebc-g2
-      Chinese table renames: big5 -> zh-tw-big5, gb2312 -> zh-tw-gb2312
-      New Chinese tables: zh-tw-utf8, zh-tw-ucb
+      Bind TL1+TR3 to the BACK funct5ion.
++  EuroBraille braille driver changes:
+      Rewritten.
+      Add support for the Iris PC keyboard.
+      Add key binding to do Shift+Tab directly (dots 235 + space).
+      New EsysIris key bindings:
+         VK_L34 -> FREEZE
+         VK_L67 -> HOME
++  FreedomScientific braille driver changes:
+      New PAC Mate key bindings:
+         routing key + left wheel press -> SETLEFT
+         routing key + right wheel press -> DESCCHAR
++  General speech support changes:
+      Add a preference for setting the pitch.
+      Add a preference for setting the punctuation level.
++  SpeechDispatcher speech driver changes:
+      Change the connection name to "main" (from "driver").
+      Single character entry/deletion now always speaks.
+      Try to reopen the connection if an error occurs.
+      Support setting pitch and punctuation level.
++  Theta speech driver changes:
+      It wouldn't compile with newer gccs.
++  Linux screen driver changes:
+      Now works on big endian architectures.
+      Add support for multi-byte character sets.
+      Add the Charset= parameter.
+      Add support for the right Alt key (AltGr).
++  PcBios screen driver changes:
+      Add AT/XT scancode support.
++  Windows screen driver changes:
+      Add the FollowFocus= parameter.
+      Add AT/XT scancode support.
++  Text table changes:
+      Rename no-h to no-generic.
+      Rename no-p to no-oub [Offentlig Utvalg for Blindeskrift].
++  Contraction table changes:
+      Unicode characters can be specified by value [\uxxxx].
+      Unicode characters can be specified by name [\<name>].
+      When the cursor is:
+      *  On a word - it is uncontracted (not rendered in computer braille).
+      *  Between words - the space is expanded.
+      Rename the opcode "repeated" to "repeatable".
+      Fixes to the English Grade 2 [en-us-g2] table.
+      Fix the UEB [Unified English Braille] percent sign.
+      Fixes to the Chinese [zh-...] tables.
+      Rename zh-tw-big5 to zh-tw.
+      Remove zh-tw-gb2312.
+      Remove zh-tw-utf8.
++  BrlAPI changes:
+      Now at release 0.5.2.
+      Present a blinking cursor if that's what the user has configured.
+      Install/uninstall "/var/lib/BrlAPI/".
++  Caml bindings changes:
+      Install and uninstall now work properly.
++  Java bindings changes:
+      Package the classes into org.a11y.BrlAPI.
+      Rename the classes to remove the (now redundant) Brlapi prefix.
++  Python bindings changes:
+      Improved error handling facilities.
++  tbltest changes:
+      Added the -e [--edit] option for editing a text table.
 

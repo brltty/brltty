@@ -1,6 +1,81 @@
 Note: this file is in reversed chronological order (bottom to top).
 
 
+July 16, 2008:
+ - BRLTTY 3.10 released:
+   The core and drivers (excluding text tables) are now Unicode-based.
+   The DESCCHAR function now shows (if possible) the character's name.
+   Linear cuts no longer include newline characters.
+   Specifying the braille device as "serial:" now defaults to the first serial device.
+   Add a driver for the Braille Sense.
+   Bring the French manual fully up-to-date (was at 3.6).
+   Linux-specific changes:
+      Don't unnecessarily wake up USB devices when searching.
+   Albatross braille driver changes:
+      Correctly handle keys which send their code on both press and release.
+   Baum braille driver changes:
+      Bind TL1+TR3 to the BACK funct5ion.
+   EuroBraille braille driver changes:
+      Rewritten.
+      Add support for the Iris PC keyboard.
+      Add key binding to do Shift+Tab directly (dots 235 + space).
+      New EsysIris key bindings:
+         VK_L34 -> FREEZE
+         VK_L67 -> HOME
+   FreedomScientific braille driver changes:
+      New PAC Mate key bindings:
+         routing key + left wheel press -> SETLEFT
+         routing key + right wheel press -> DESCCHAR
+   General speech support changes:
+      Add a preference for setting the pitch.
+      Add a preference for setting the punctuation level.
+   SpeechDispatcher speech driver changes:
+      Change the connection name to "main" (from "driver").
+      Single character entry/deletion now always speaks.
+      Try to reopen the connection if an error occurs.
+      Support setting pitch and punctuation level.
+   Theta speech driver changes:
+      It wouldn't compile with newer gccs.
+   Linux screen driver changes:
+      Now works on big endian architectures.
+      Add support for multi-byte character sets.
+      Add the Charset= parameter.
+      Add support for the right Alt key (AltGr).
+   PcBios screen driver changes:
+      Add AT/XT scancode support.
+   Windows screen driver changes:
+      Add the FollowFocus= parameter.
+      Add AT/XT scancode support.
+   Text table changes:
+      Rename no-h to no-generic.
+      Rename no-p to no-oub [Offentlig Utvalg for Blindeskrift].
+   Contraction table changes:
+      Unicode characters can be specified by value [\uxxxx].
+      Unicode characters can be specified by name [\<name>].
+      When the cursor is:
+      *  On a word - it is uncontracted (not rendered in computer braille).
+      *  Between words - the space is expanded.
+      Rename the opcode "repeated" to "repeatable".
+      Fixes to the English Grade 2 [en-us-g2] table.
+      Fix the UEB [Unified English Braille] percent sign.
+      Fixes to the Chinese [zh-...] tables.
+      Rename zh-tw-big5 to zh-tw.
+      Remove zh-tw-gb2312.
+      Remove zh-tw-utf8.
+   BrlAPI changes:
+      Now at release 0.5.2.
+      Present a blinking cursor if that's what the user has configured.
+      Install/uninstall "/var/lib/BrlAPI/".
+   Caml bindings changes:
+      Install and uninstall now work properly.
+   Java bindings changes:
+      Package the classes into org.a11y.BrlAPI.
+      Rename the classes to remove the (now redundant) Brlapi prefix.
+   Python bindings changes:
+      Improved error handling facilities.
+   tbltest changes:
+      Added the -e [--edit] option for editing a text table.
+
 October 17, 2007:
  - BRLTTY 3.9 released:
    Core changes:
