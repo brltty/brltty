@@ -270,7 +270,8 @@ rm -fr "${RPM_BUILD_ROOT}"
       Add AT/XT scancode support.
 +  Text table changes:
       Rename no-h to no-generic.
-      Rename no-p to no-oub [Offentlig Utvalg for Blindeskrift].
+      Remove no-p.
+      Add no-oub [Offentlig Utvalg for Blindeskrift].
 +  Contraction table changes:
       Unicode characters can be specified by value [\uxxxx].
       Unicode characters can be specified by name [\<name>].
