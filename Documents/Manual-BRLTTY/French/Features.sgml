@@ -771,6 +771,20 @@ Remarques:
     Vous pouvez aussi changer ce paramètre avec la commande
     <ref id="command-SAY_SOFTER-SAY_LOUDER" name="SAY_SOFTER/SAY_LOUDER">.
     La valeur initiale est <tt>10</tt>.
+  <tag>Speech Pitch<label id="preference-speech-pitch"></tag>
+    Ajuste le volume de la synthèse ((<tt/0/ est le plus bas, <tt/20/ est
+    le plus élevé). Cette préférence n'est disponible que si vous utilisez
+    un pilote qui la supporte. Le réglage initial est <tt/10/.
+  <tag>Speech Punctuation<label id="preference-speech-punctuation"></tag>
+    Ajuste la quantité de ponctuation parlée. Elle peut être inijialisée à:
+    <itemize>
+      <item>All (toutes)
+      <item>Some (certaines)
+      <item>All (toutes)
+    </itemize>
+    
+    Cette préférence n'est disponible que si vous utilisez
+    un pilote qui la supporte. Le réglage initial est <tt/Some/.
   <tag>Status Style<label id="preference-status-style"></tag>
     Ce paramètre spécifie la façon dont les cellules de statut doivent être
     utilisées. Normalement, vous ne devriez pas avoir besoin de jouer avec ça.

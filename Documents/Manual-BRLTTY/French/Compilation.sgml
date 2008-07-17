@@ -929,6 +929,12 @@ les fonctions inutiles.
     Réduit la taille du programme en excluant le support pour la conversion
     des codages.
 
+  <tag><tt/--disable-icu/<label id="build-icu"></tag>
+    Réduit la taille du programme en excluant le support pour 
+    l'internationalisation basée sur l'Unicode.
+    
+  <tag><tt/--disable-x/<label id="build-x"></tag>
+    Réduit la taille du programme en excluant le support pour X11.
   <tag><tt>--disable-table-selection</tt><label id="build-table-selection"></tag>
     Réduit la taille du programme en excluant les entrées de sélection
     des tables du menu Préférences (voir les préférences <ref id="preference-text-table" name="Text Table">,

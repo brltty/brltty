@@ -23,7 +23,7 @@ Les tables d'abrégé suivantes sont fournies:
   <tag>en-uebc-g2</tag>Braille abrégé anglais unifié
   <tag>fr-abrege</tag>Français unifié abrégé
   <tag>fr-integral</tag>Français unifié désabrégé
-  <tag>zh-tw</tag>Chinois Thaïwanais (utilisant le codage BIG5).
+  <tag>zh-tw</tag>Chinois Thaïwanais
   <tag>zh-tw-ucb</tag>Braille Chinois Thaïwanais "Unique"
 </descrip>
 
