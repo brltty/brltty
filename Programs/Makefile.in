@@ -399,12 +399,12 @@ apitest.$O:
 
 ###############################################################################
 
-braille-drivers: txt2hlp
+braille-drivers: txt2hlp$X
 	for driver in $(BRAILLE_EXTERNAL_DRIVER_NAMES); \
 	do (cd $(BLD_TOP)$(BRL_DIR)/$$driver && $(MAKE) braille-driver braille-all) || exit 1; \
 	done
 
-all-braille: $(BRAILLE_DRIVERS)
+all-braille: txt2hlp$X $(BRAILLE_DRIVERS)
 	for driver in $(BRAILLE_DRIVER_NAMES); \
 	do (cd $(BLD_TOP)$(BRL_DIR)/$$driver && $(MAKE) braille-all) || exit 1; \
 	done
@@ -447,7 +447,7 @@ scr.auto.h: $(SRC_DIR)/mkdrvtab
 
 TXT2HLP_OBJECTS = txt2hlp.$O $(HOST_OBJECTS)
 
-txt2hlp: $(TXT2HLP_OBJECTS)
+txt2hlp$X: $(TXT2HLP_OBJECTS)
 	$(HOSTCC) $(HOSTLDFLAGS) -o $@ $(TXT2HLP_OBJECTS) $(LDLIBS)
 
 txt2hlp.$O:

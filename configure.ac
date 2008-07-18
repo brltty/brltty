@@ -542,7 +542,7 @@ BRLTTY_ARG_DISABLE(
          cygwin*|mingw*)
             AC_DEFINE([BRLAPI_WIN32], [1],
                       [Define this if the Win32 programming interface is available.])
-	    api_socket_path='\\\\.\\pipe\\BrlAPI'
+	    api_socket_path='\\\\\\\\.\\\\pipe\\\\BrlAPI'
             api_dynamic_library="api-dynamic-library-windows"
             install_api_libraries="install-api-libraries-windows"
             uninstall_api_libraries="uninstall-api-libraries-windows"
