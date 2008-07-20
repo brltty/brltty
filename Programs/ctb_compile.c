@@ -18,32 +18,13 @@
 #include "prologue.h"
 
 #include <stdio.h>
-#include <stdarg.h>
 #include <string.h>
-#include <ctype.h>
-#include <errno.h>
  
-#ifdef HAVE_ICU
-#include <unicode/uchar.h>
-#endif /* HAVE_ICU */
-
 #include "misc.h"
-#include "charset.h"
+#include "datafile.h"
 #include "ctb.h"
 #include "ctb_internal.h"
 #include "brl.h"
-
-typedef struct {
-  BYTE length;
-  wchar_t characters[0XFF];
-} CharacterString;
-
-typedef struct {
-  BYTE length;
-  BYTE bytes[0XFF];
-} ByteString;
-
-static int errorCount;
 
 static ContractionTableHeader *tableHeader;
 static ContractionTableOffset tableSize;
@@ -113,44 +94,13 @@ static const wchar_t *const opcodeNames[CTO_None] = {
 };
 static unsigned char opcodeLengths[CTO_None] = {0};
 
-typedef struct {
-  const char *fileName;
-  int lineNumber;		/*line number in table */
-} FileData;
-
-static void compileError (FileData *data, char *format, ...) PRINTF(2, 3);
-static void
-compileError (FileData *data, char *format, ...) {
-  char message[0X100];
-
-  {
-    const char *file = NULL;
-    const int *line = NULL;
-    va_list args;
-
-    if (data) {
-      file = data->fileName;
-      if (data->lineNumber) line = &data->lineNumber;
-    }
-
-    va_start(args, format);
-    formatInputError(message, sizeof(message),
-                     file, line,
-                     format, args);
-    va_end(args);
-  }
-
-  LogPrint(LOG_WARNING, "%s", message);
-  errorCount++;
-}
-
 static int
-allocateBytes (FileData *data, ContractionTableOffset *offset, int count, int alignment) {
+allocateBytes (DataFile *file, ContractionTableOffset *offset, int count, int alignment) {
   int size = (tableUsed = (tableUsed + (alignment - 1)) / alignment * alignment) + count;
   if (size > tableSize) {
     void *table = realloc(tableHeader, size|=0XFFF);
     if (!table) {
-      compileError(data, "Not enough memory for contraction table.");
+      reportDataError(file, "Not enough memory for contraction table.");
       return 0;
     }
     memset(((BYTE *)table)+tableSize, 0, size-tableSize);
@@ -163,8 +113,8 @@ allocateBytes (FileData *data, ContractionTableOffset *offset, int count, int al
 }
 
 static int
-saveBytes (FileData *data, ContractionTableOffset *offset, const void *bytes, int count, int alignment) {
-  if (allocateBytes(data, offset, count, alignment)) {
+saveBytes (DataFile *file, ContractionTableOffset *offset, const void *bytes, int count, int alignment) {
+  if (allocateBytes(file, offset, count, alignment)) {
     BYTE *address = getContractionTableItem(tableHeader, *offset);
     memcpy(address, bytes, count);
     return 1;
@@ -173,8 +123,8 @@ saveBytes (FileData *data, ContractionTableOffset *offset, const void *bytes, in
 }
 
 static int
-saveSequence (FileData *data, ContractionTableOffset *offset, const ByteString *sequence) {
-  if (allocateBytes(data, offset, sequence->length+1, __alignof__(BYTE))) {
+saveSequence (DataFile *file, ContractionTableOffset *offset, const ByteOperand *sequence) {
+  if (allocateBytes(file, offset, sequence->length+1, __alignof__(BYTE))) {
     BYTE *address = getContractionTableItem(tableHeader, *offset);
     memcpy(address+1, sequence->bytes, (*address = sequence->length));
     return 1;
@@ -241,10 +191,10 @@ saveCharacterTable (void) {
 
 static ContractionTableRule *
 addRule (
-  FileData *data,
+  DataFile *file,
   ContractionTableOpcode opcode,
-  CharacterString *find,
-  ByteString *replace,
+  CharacterOperand *find,
+  ByteOperand *replace,
   ContractionTableCharacterAttributes after,
   ContractionTableCharacterAttributes before
 ) {
@@ -253,7 +203,7 @@ addRule (
   if (find) ruleSize += find->length * sizeof(find->characters[0]);
   if (replace) ruleSize += replace->length;
 
-  if (allocateBytes(data, &ruleOffset, ruleSize, __alignof__(ContractionTableRule))) {
+  if (allocateBytes(file, &ruleOffset, ruleSize, __alignof__(ContractionTableRule))) {
     ContractionTableRule *newRule = getContractionTableItem(tableHeader, ruleOffset);
 
     newRule->opcode = opcode;
@@ -304,20 +254,24 @@ addRule (
 }
 
 static const struct CharacterClass *
-findCharacterClass (const wchar_t *name, int length) {
+findCharacterClass (const DataOperand *operand) {
   const struct CharacterClass *class = characterClasses;
+
   while (class) {
-    if ((length == class->length) &&
-        (wmemcmp(name, class->name, length) == 0))
-      return class;
+    if (operand->length == class->length)
+      if (wmemcmp(operand->address, class->name, operand->length) == 0)
+        return class;
+
     class = class->next;
   }
+
   return NULL;
 }
 
 static struct CharacterClass *
-addCharacterClass (FileData *data, const wchar_t *name, int length) {
+addCharacterClass (DataFile *file, const wchar_t *name, int length) {
   struct CharacterClass *class;
+
   if (characterClassAttribute) {
     if ((class = malloc(sizeof(*class) + ((length - 1) * sizeof(class->name[0]))))) {
       memset(class, 0, sizeof(*class));
@@ -331,7 +285,8 @@ addCharacterClass (FileData *data, const wchar_t *name, int length) {
       return class;
     }
   }
-  compileError(data, "character class table overflow: %.*" PRIws, length, name);
+
+  reportDataError(file, "character class table overflow: %.*" PRIws, length, name);
   return NULL;
 }
 
@@ -360,361 +315,154 @@ allocateCharacterClasses (void) {
 }
 
 static ContractionTableOpcode
-getOpcode (FileData *data, const wchar_t *token, int length) {
+getOpcode (DataFile *file, const DataOperand *operand) {
   ContractionTableOpcode opcode;
-  for (opcode=0; opcode<CTO_None; ++opcode)
-    if (length == opcodeLengths[opcode])
-      if (wmemcmp(token, opcodeNames[opcode], length) == 0)
+
+  for (opcode=0; opcode<CTO_None; opcode+=1)
+    if (operand->length == opcodeLengths[opcode])
+      if (wmemcmp(operand->address, opcodeNames[opcode], operand->length) == 0)
         return opcode;
-  compileError(data, "opcode not defined: %.*" PRIws, length, token);
+
+  reportDataError(file, "opcode not defined: %.*" PRIws, operand->length, operand->address);
   return CTO_None;
 }
 
 static int
-getToken (FileData *data, const wchar_t **token, int *length, const char *description) { /*find the next string of contiguous nonblank characters */
-  const wchar_t *start = *token + *length;
-  int count = 0;
-
-  while (iswspace(*start)) start++;
-  while (start[count] && !iswspace(start[count])) count++;
-  *token = start;
-  if (!(*length = count)) {
-    if (description)
-      compileError(data, "%s not specified.", description);
-    return 0;
-  }
-  return 1;
-}				/*token obtained */
-
-static int
-hexadecimalDigit (FileData *data, int *value, wchar_t digit) {
-  if (digit >= WC_C('0') && digit <= WC_C('9'))
-    *value = digit - WC_C('0');
-  else if (digit >= WC_C('a') && digit <= WC_C('f'))
-    *value = digit - WC_C('a') + 10;
-  else if (digit >= WC_C('A') && digit <= WC_C('F'))
-    *value = digit - WC_C('A') + 10;
-  else
-    return 0;
-  return 1;
-}
-
-static int
-octalDigit (FileData *data, int *value, wchar_t digit) {
-  if (digit < WC_C('0') || digit > WC_C('7')) return 0;
-  *value = digit - WC_C('0');
-  return 1;
-}
-
-static int
-parseCharacters (FileData *data, CharacterString *result, const wchar_t *token, const int length) {	/*interpret find string */
-  int count = 0;		/*loop counters */
-  int index;		/*loop counters */
-  for (index = 0; index < length; index++) {
-    wchar_t character = token[index];
-    if (character == WC_C('\\')) { /* escape sequence */
-      int ok = 0;
-      int start = index;
-      if (++index < length) {
-        switch (character = token[index]) {
-          case WC_C('\\'):
-            ok = 1;
-            break;
-
-          case WC_C('f'):
-            character = WC_C('\f');
-            ok = 1;
-            break;
-
-          case WC_C('n'):
-            character = WC_C('\n');
-            ok = 1;
-            break;
-
-          case WC_C('r'):
-            character = WC_C('\r');
-            ok = 1;
-            break;
-
-          case WC_C('s'):
-            character = WC_C(' ');
-            ok = 1;
-            break;
-
-          case WC_C('t'):
-            character = WC_C('\t');
-            ok = 1;
-            break;
-
-          case WC_C('v'):
-            character = WC_C('\v');
-            ok = 1;
-            break;
-
-          {
-            int count;
-
-          case WC_C('o'):
-            count = 3;
-
-            if ((length - index) > count) {
-              character = 0;
-              ok = 1;
-
-              do {
-                int octet;
-                if (!octalDigit(data, &octet, token[++index])) {
-                  ok = 0;
-                  break;
-                }
-
-                character = (character << 3) | octet;
-              } while (--count);
-            }
-            break;
-          }
-
-          {
-            int count;
-
-          case WC_C('U'):
-            count = 8;
-            goto hexadecimal;
-
-          case WC_C('u'):
-            count = 4;
-            goto hexadecimal;
-
-          case WC_C('x'):
-            count = 2;
-          hexadecimal:
-
-            if ((length - index) > count) {
-              character = 0;
-              ok = 1;
-
-              do {
-                int nibble;
-                if (!hexadecimalDigit(data, &nibble, token[++index])) {
-                  ok = 0;
-                  break;
-                }
-
-                character = (character << 4) | nibble;
-              } while (--count);
-            }
-            break;
-          }
-
-          case WC_C('<'): {
-            const wchar_t *first = &token[++index];
-            const wchar_t *end = wmemchr(first, WC_C('>'), length-index);
-
-            if (end) {
-              int count = end - first;
-              index += count;
-
-              {
-                char name[count+1];
-
-                {
-                  int i;
-                  for (i=0; i<count; i+=1) {
-                    wchar_t wc = first[i];
-                    if (wc == WC_C('_')) wc = WC_C(' ');
-                    if (!iswLatin1(wc)) goto badName;
-                    name[i] = wc;
-                  }
-                }
-                name[count] = 0;
-
-#ifdef HAVE_ICU
-                {
-                  UErrorCode error = U_ZERO_ERROR;
-                  character = u_charFromName(U_EXTENDED_CHAR_NAME, name, &error);
-                  if (U_SUCCESS(error)) ok = 1;
-                }
-#endif /* HAVE_ICU */
-              }
-            } else {
-              index = length - 1;
-            }
-
-          badName:
-            break;
-          }
-        }
-      }
-      if (!ok) {
-        index++;
-        compileError(data, "invalid escape sequence: %.*" PRIws,
-                     index-start, &token[start]);
-        return 0;
-      }
-    }
-    if (!character) character = WC_C(' ');
-    result->characters[count++] = character;
-  }
-  result->length = count;
-  return 1;
-}				/*find string interpreted */
-
-static int
-parseDots (FileData *data, ByteString *cells, const wchar_t *token, const int length) {	/*get dot patterns */
+parseDots (DataFile *file, ByteOperand *cells, const DataOperand *operand) {
   BYTE cell = 0;		/*assembly place for dots */
   int count = 0;		/*loop counters */
   int index;		/*loop counters */
   int start = 0;
 
-  for (index = 0; index < length; index++) {
+  for (index=0; index<operand->length; index+=1) {
     int started = index != start;
-    wchar_t character = token[index];
-    switch (character) { /*or dots to make up Braille cell */
+    wchar_t character = operand->address[index];
+
+    switch (character) {
       {
         int dot;
+
       case WC_C('1'):
         dot = BRL_DOT1;
         goto haveDot;
+
       case WC_C('2'):
         dot = BRL_DOT2;
         goto haveDot;
+
       case WC_C('3'):
         dot = BRL_DOT3;
         goto haveDot;
+
       case WC_C('4'):
         dot = BRL_DOT4;
         goto haveDot;
+
       case WC_C('5'):
         dot = BRL_DOT5;
         goto haveDot;
+
       case WC_C('6'):
         dot = BRL_DOT6;
         goto haveDot;
+
       case WC_C('7'):
         dot = BRL_DOT7;
         goto haveDot;
+
       case WC_C('8'):
         dot = BRL_DOT8;
       haveDot:
+
         if (started && !cell) goto invalid;
+
         if (cell & dot) {
-          compileError(data, "dot specified more than once: %.1" PRIws, &character);
+          reportDataError(file, "dot specified more than once: %.1" PRIws, &character);
           return 0;
         }
+
         cell |= dot;
         break;
       }
+
       case WC_C('0'):			/*blank */
         if (started) goto invalid;
         break;
+
       case WC_C('-'):			/*got all dots for this cell */
         if (!started) {
-          compileError(data, "missing cell specification: %.*" PRIws,
-                       length-index, &token[index]);
+          reportDataError(file, "missing cell specification: %.*" PRIws,
+                          operand->length-index, &operand->address[index]);
           return 0;
         }
+
         cells->bytes[count++] = cell;
         cell = 0;
         start = index + 1;
         break;
+
       default:
       invalid:
-        compileError(data, "invalid dot number: %.1" PRIws, &character);
+        reportDataError(file, "invalid dot number: %.1" PRIws, &character);
         return 0;
     }
   }
+
   if (index == start) {
-    compileError(data, "missing cell specification.");
+    reportDataError(file, "missing cell specification");
     return 0;
   }
+
   cells->bytes[count++] = cell;		/*last cell */
   cells->length = count;
   return 1;
 }				/*end of function parseDots */
 
 static int
-getCharacters (FileData *data, CharacterString *characters, const wchar_t **token, int *length) {
-  if (getToken(data, token, length, "characters"))
-    if (parseCharacters(data, characters, *token, *length))
-      return 1;
-  return 0;
+getFindText (DataFile *file, CharacterOperand *find, DataOperand *operand) {
+  return getCharacterOperand(file, find, operand, "find text");
 }
 
 static int
-getFindText (FileData *data, CharacterString *find, const wchar_t **token, int *length) {
-  if (getToken(data, token, length, "find text"))
-    if (parseCharacters(data, find, *token, *length))
-      return 1;
-  return 0;
-}
-
-static int
-getReplacePattern (FileData *data, ByteString *replace, const wchar_t **token, int *length) {
-  if (getToken(data, token, length, "replacement pattern")) {
-    if (*length == 1 && **token == WC_C('=')) {
+getReplacePattern (DataFile *file, ByteOperand *replace, DataOperand *operand) {
+  if (getDataOperand(file, operand, "replacement pattern")) {
+    if ((operand->length == 1) && (*operand->address == WC_C('='))) {
       replace->length = 0;
       return 1;
     }
-    if (parseDots(data, replace, *token, *length))
-      return 1;
+
+    if (parseDots(file, replace, operand)) return 1;
+  }
+
+  return 0;
+}
+
+static int
+getCharacterClass (DataFile *file, const struct CharacterClass **class, DataOperand *operand) {
+  if (getDataOperand(file, operand, "character class name")) {
+    if ((*class = findCharacterClass(operand))) return 1;
+    reportDataError(file, "character class not defined: %.*" PRIws, operand->length, operand->address);
   }
   return 0;
 }
 
 static int
-getCharacterClass (FileData *data, const struct CharacterClass **class, const wchar_t **token, int *length) {
-  if (getToken(data, token, length, "character class name")) {
-    if ((*class = findCharacterClass(*token, *length))) return 1;
-    compileError(data, "character class not defined: %.*" PRIws, *length, *token);
-  }
-  return 0;
-}
-
-static int processFile (const char *fileName);
-static int
-includeFile (FileData *data, CharacterString *path) {
-  const char *prefixAddress = data->fileName;
-  int prefixLength = 0;
-  const wchar_t *suffixAddress = path->characters;
-  int suffixLength = path->length;
-
-  if (*suffixAddress != WC_C('/')) {
-    const char *ptr = strrchr(prefixAddress, '/');
-    if (ptr) prefixLength = ptr - prefixAddress + 1;
-  }
-
-  {
-    char file[prefixLength + suffixLength + 1];
-    snprintf(file, sizeof(file), "%.*s%.*" PRIws,
-             prefixLength, prefixAddress, suffixLength, suffixAddress);
-    return processFile(file);
-  }
-}
-
-static int
-processWcharLine (FileData *data, const wchar_t *line) {
+parseContractionLine (DataFile *file, DataOperand *operand, void *data) {
   int ok = 0;
-  const wchar_t *token = line;
-  int length = 0;			/*length of token */
   ContractionTableOpcode opcode;
   ContractionTableCharacterAttributes after = 0;
   ContractionTableCharacterAttributes before = 0;
 
 doOpcode:
-  if (!getToken(data, &token, &length, NULL)) return 1;			/*blank line */
-  if (*token == WC_C('#')) return 1;
-  opcode = getOpcode(data, token, length);
-
-  switch (opcode) { /*Carry out operations */
+  switch ((opcode = getOpcode(file, operand))) {
     case CTO_None:
       break;
 
     case CTO_IncludeFile: {
-      CharacterString path;
-      if (getToken(data, &token, &length, "include file path"))
-        if (parseCharacters(data, &path, token, length))
-          if (!includeFile(data, &path))
-            goto failure;
+      CharacterOperand path;
+      if (getCharacterOperand(file, &path, operand, "include file path"))
+        if (!includeDataFile(file, &path))
+          goto failure;
       break;
     }
 
@@ -737,74 +485,74 @@ doOpcode:
     case CTO_MidNum:
     case CTO_EndNum:
     case CTO_Repeatable: {
-      CharacterString find;
-      ByteString replace;
-      if (getFindText(data, &find, &token, &length))
-        if (getReplacePattern(data, &replace, &token, &length))
-          if (!addRule(data, opcode, &find, &replace, after, before))
+      CharacterOperand find;
+      ByteOperand replace;
+      if (getFindText(file, &find, operand))
+        if (getReplacePattern(file, &replace, operand))
+          if (!addRule(file, opcode, &find, &replace, after, before))
             goto failure;
       break;
     }
 
     case CTO_Contraction:
     case CTO_Literal: {
-      CharacterString find;
-      if (getFindText(data, &find, &token, &length))
-        if (!addRule(data, opcode, &find, NULL, after, before))
+      CharacterOperand find;
+      if (getFindText(file, &find, operand))
+        if (!addRule(file, opcode, &find, NULL, after, before))
           goto failure;
       break;
     }
 
     case CTO_CapitalSign: {
-      ByteString cells;
-      if (getToken(data, &token, &length, "capital sign"))
-        if (parseDots(data, &cells, token, length)) {
+      ByteOperand cells;
+      if (getDataOperand(file, operand, "capital sign"))
+        if (parseDots(file, &cells, operand)) {
           ContractionTableOffset offset;
-          if (!saveSequence(data, &offset, &cells)) goto failure;
+          if (!saveSequence(file, &offset, &cells)) goto failure;
           tableHeader->capitalSign = offset;
         }
       break;
     }
 
     case CTO_BeginCapitalSign: {
-      ByteString cells;
-      if (getToken(data, &token, &length, "begin capital sign"))
-        if (parseDots(data, &cells, token, length)) {
+      ByteOperand cells;
+      if (getDataOperand(file, operand, "begin capital sign"))
+        if (parseDots(file, &cells, operand)) {
           ContractionTableOffset offset;
-          if (!saveSequence(data, &offset, &cells)) goto failure;
+          if (!saveSequence(file, &offset, &cells)) goto failure;
           tableHeader->beginCapitalSign = offset;
         }
       break;
     }
 
     case CTO_EndCapitalSign: {
-      ByteString cells;
-      if (getToken(data, &token, &length, "end capital sign"))
-        if (parseDots(data, &cells, token, length)) {
+      ByteOperand cells;
+      if (getDataOperand(file, operand, "end capital sign"))
+        if (parseDots(file, &cells, operand)) {
           ContractionTableOffset offset;
-          if (!saveSequence(data, &offset, &cells)) goto failure;
+          if (!saveSequence(file, &offset, &cells)) goto failure;
           tableHeader->endCapitalSign = offset;
         }
       break;
     }
 
     case CTO_EnglishLetterSign: {
-      ByteString cells;
-      if (getToken(data, &token, &length, "letter sign"))
-        if (parseDots(data, &cells, token, length)) {
+      ByteOperand cells;
+      if (getDataOperand(file, operand, "letter sign"))
+        if (parseDots(file, &cells, operand)) {
           ContractionTableOffset offset;
-          if (!saveSequence(data, &offset, &cells)) goto failure;
+          if (!saveSequence(file, &offset, &cells)) goto failure;
           tableHeader->englishLetterSign = offset;
         }
       break;
     }
 
     case CTO_NumberSign: {
-      ByteString cells;
-      if (getToken(data, &token, &length, "number sign"))
-        if (parseDots(data, &cells, token, length)) {
+      ByteOperand cells;
+      if (getDataOperand(file, operand, "number sign"))
+        if (parseDots(file, &cells, operand)) {
           ContractionTableOffset offset;
-          if (!saveSequence(data, &offset, &cells)) goto failure;
+          if (!saveSequence(file, &offset, &cells)) goto failure;
           tableHeader->numberSign = offset;
         }
       break;
@@ -812,12 +560,14 @@ doOpcode:
 
     case CTO_Class: {
       const struct CharacterClass *class;
-      CharacterString characters;
-      if (getToken(data, &token, &length, "character class name")) {
-        if ((class = findCharacterClass(token, length))) {
-          compileError(data, "character class already defined: %.*" PRIws, length, token);
-        } else if ((class = addCharacterClass(data, token, length))) {
-          if (getCharacters(data, &characters, &token, &length)) {
+      CharacterOperand characters;
+
+      if (getDataOperand(file, operand, "character class name")) {
+        if ((class = findCharacterClass(operand))) {
+          reportDataError(file, "character class already defined: %.*" PRIws,
+                          operand->length, operand->address);
+        } else if ((class = addCharacterClass(file, operand->address, operand->length))) {
+          if (getCharacterOperand(file, &characters, operand, "characters")) {
             int index;
             for (index=0; index<characters.length; ++index) {
               wchar_t character = characters.characters[index];
@@ -842,15 +592,15 @@ doOpcode:
       attributes = &before;
     doClass:
 
-      if (getCharacterClass(data, &class, &token, &length)) {
+      if (getCharacterClass(file, &class, operand)) {
         *attributes |= class->attribute;
-        goto doOpcode;
+        if (getDataOperand(file, operand, "opcode")) goto doOpcode;
       }
       break;
     }
 
     default:
-      compileError(data, "unimplemented opcode: %.*" PRIws, length, token);
+      reportDataError(file, "unimplemented opcode: %.*" PRIws, operand->length, operand->address);
       break;
   }				/*end of loop for processing tableStream */
   ok = 1;
@@ -859,58 +609,10 @@ failure:
   return ok;
 }
 
-static int
-processUtf8Line (char *line, void *dataAddress) {
-  FileData *data = dataAddress;
-  size_t length = strlen(line);
-  const char *byte = line;
-  wchar_t characters[length+1];
-  wchar_t *character = characters;
-
-  data->lineNumber++;
-
-  while (length) {
-    const char *start = byte;
-    wint_t wc = convertUtf8ToWchar(&byte, &length);
-
-    if (wc == WEOF) {
-      compileError(data, "illegal UTF-8 character at offset %d", start-line);
-      return 1;
-    }
-
-    *character++ = wc;
-  }
-
-  *character = 0;
-  return processWcharLine(data, characters);
-}
-
-static int
-processFile (const char *fileName) {
-  int ok = 1;
-  FILE *stream;
-
-  FileData data;
-  data.fileName = fileName;
-  data.lineNumber = 0;
-  LogPrint(LOG_DEBUG, "Including contraction table: %s", fileName);
-
-  if ((stream = openDataFile(data.fileName, "r"))) {
-    if (!processLines(stream, processUtf8Line, &data)) return 0;
-    fclose(stream);
-  } else {
-    LogPrint(LOG_ERR,
-             "Cannot open contraction table '%s': %s",
-             data.fileName, strerror(errno));
-  }
-  return ok;
-}				/*compilation completed */
-
 ContractionTable *
 compileContractionTable (const char *fileName) {
   int ok = 0;
   ContractionTableOffset headerOffset;
-  errorCount = 0;
 
   tableHeader = NULL;
   tableSize = 0;
@@ -929,7 +631,7 @@ compileContractionTable (const char *fileName) {
   if (allocateBytes(NULL, &headerOffset, sizeof(*tableHeader), __alignof__(*tableHeader))) {
     if (headerOffset == 0) {
       if (allocateCharacterClasses()) {
-        if (processFile(fileName)) {
+        if (processDataFile(fileName, parseContractionLine, NULL)) {
           if (saveCharacterTable()) {
             ok = 1;
           }
@@ -938,16 +640,11 @@ compileContractionTable (const char *fileName) {
         deallocateCharacterClasses();
       }
     } else {
-      compileError(NULL, "contraction table header not allocated at offset 0.");
+      reportDataError(NULL, "contraction table header not allocated at offset 0.");
     }
   }
 
   if (characterTable) free(characterTable);
-
-  if (errorCount) {
-    LogPrint(LOG_WARNING, "%d %s in contraction table '%s'.",
-             errorCount, ((errorCount == 1)? "error": "errors"), fileName);
-  }
 
   if (ok) {
     ContractionTable *table;
