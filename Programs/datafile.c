@@ -97,7 +97,7 @@ getDataOperand (DataFile *file, DataOperand *operand, const char *description) {
 }
 
 static int
-hexadecimalDigit (DataFile *file, int *value, wchar_t digit) {
+isHexadecimalDigit (wchar_t digit, int *value, int *shift) {
   if (digit >= WC_C('0') && digit <= WC_C('9'))
     *value = digit - WC_C('0');
   else if (digit >= WC_C('a') && digit <= WC_C('f'))
@@ -106,27 +106,30 @@ hexadecimalDigit (DataFile *file, int *value, wchar_t digit) {
     *value = digit - WC_C('A') + 10;
   else
     return 0;
+
+  *shift = 4;
   return 1;
 }
 
 static int
-octalDigit (DataFile *file, int *value, wchar_t digit) {
+isOctalDigit (wchar_t digit, int *value, int *shift) {
   if (digit < WC_C('0') || digit > WC_C('7')) return 0;
   *value = digit - WC_C('0');
+  *shift = 3;
   return 1;
 }
 
 static int
 parseCharacterOperand (DataFile *file, CharacterOperand *result, const DataOperand *operand) {
-  int count = 0;		/*loop counters */
-  int index;		/*loop counters */
+  int length = 0;		/*loop counters */
+  int index = 0;
 
-  for (index=0; index<operand->length; index+=1) {
+  while (index < operand->length) {
     wchar_t character = operand->address[index];
 
-    if (character == WC_C('\\')) { /* escape sequence */
-      int ok = 0;
+    if (character == WC_C('\\')) {
       int start = index;
+      int ok = 0;
 
       if (++index < operand->length) {
         switch (character = operand->address[index]) {
@@ -166,61 +169,45 @@ parseCharacterOperand (DataFile *file, CharacterOperand *result, const DataOpera
 
           {
             int count;
+            int (*isDigit) (wchar_t digit, int *value, int *shift);
 
           case WC_C('o'):
             count = 3;
-
-            if ((operand->length - index) > count) {
-              character = 0;
-              ok = 1;
-
-              do {
-                int octet;
-
-                if (!octalDigit(file, &octet, operand->address[++index])) {
-                  ok = 0;
-                  break;
-                }
-
-                character = (character << 3) | octet;
-              } while (--count);
-            } else {
-              index += count;
-            }
-            break;
-          }
-
-          {
-            int count;
+            isDigit = isOctalDigit;
+            goto doNumber;
 
           case WC_C('U'):
             count = 8;
-            goto hexadecimal;
+            goto doHexadecimal;
 
           case WC_C('u'):
             count = 4;
-            goto hexadecimal;
+            goto doHexadecimal;
 
           case WC_C('x'):
             count = 2;
-          hexadecimal:
+            goto doHexadecimal;
 
-            if ((operand->length - index) > count) {
-              character = 0;
-              ok = 1;
+          doHexadecimal:
+            isDigit = isHexadecimalDigit;
+            goto doNumber;
 
-              do {
-                int nibble;
+          doNumber:
+            character = 0;
 
-                if (!hexadecimalDigit(file, &nibble, operand->address[++index])) {
-                  ok = 0;
-                  break;
-                }
+            while (++index < operand->length) {
+              {
+                int value;
+                int shift;
 
-                character = (character << 4) | nibble;
-              } while (--count);
-            } else {
-              index += count;
+                if (!isDigit(operand->address[index], &value, &shift)) break;
+                character = (character << shift) | value;
+              }
+
+              if (!--count) {
+                ok = 1;
+                break;
+              }
             }
             break;
           }
@@ -266,7 +253,7 @@ parseCharacterOperand (DataFile *file, CharacterOperand *result, const DataOpera
       }
 
       if (!ok) {
-        index += 1;
+        if (index < operand->length) index += 1;
         reportDataError(file, "invalid escape sequence: %.*" PRIws,
                         index-start, &operand->address[start]);
         return 0;
@@ -274,9 +261,11 @@ parseCharacterOperand (DataFile *file, CharacterOperand *result, const DataOpera
     }
 
     if (!character) character = WC_C(' ');
-    result->characters[count++] = character;
+    result->characters[length++] = character;
+
+    index += 1;
   }
-  result->length = count;
+  result->length = length;
 
   return 1;
 }
