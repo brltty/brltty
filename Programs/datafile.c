@@ -89,6 +89,7 @@ findDataOperand (DataFile *file) {
 
 int
 getDataOperand (DataFile *file, DataOperand *operand, const char *description) {
+  file->start = file->end;
   if (!findDataOperand(file)) {
     if (description) reportDataError(file, "%s not specified", description);
     return 0;
