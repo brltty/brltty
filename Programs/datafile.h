@@ -39,7 +39,7 @@ typedef struct {
   unsigned char bytes[0XFF];
 } ByteOperand;
 
-typedef int (*DataParser) (DataFile *file, DataOperand *operand, void *data);
+typedef int (*DataParser) (DataFile *file, void *data);
 
 extern int processDataFile (const char *name, DataParser parser, void *data);
 extern int includeDataFile (DataFile *file, const CharacterOperand *name);

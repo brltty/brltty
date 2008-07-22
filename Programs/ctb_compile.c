@@ -447,162 +447,166 @@ getCharacterClass (DataFile *file, const struct CharacterClass **class, DataOper
 }
 
 static int
-parseContractionLine (DataFile *file, DataOperand *operand, void *data) {
+parseContractionLine (DataFile *file, void *data) {
   int ok = 0;
-  ContractionTableOpcode opcode;
+  DataOperand operand;
   ContractionTableCharacterAttributes after = 0;
   ContractionTableCharacterAttributes before = 0;
 
-doOpcode:
-  switch ((opcode = getOpcode(file, operand))) {
-    case CTO_None:
-      break;
+  while (getDataOperand(file, &operand, "opcode")) {
+    ContractionTableOpcode opcode;
 
-    case CTO_IncludeFile: {
-      CharacterOperand path;
-      if (getCharacterOperand(file, &path, operand, "include file path"))
-        if (!includeDataFile(file, &path))
-          goto failure;
-      break;
-    }
+    switch ((opcode = getOpcode(file, &operand))) {
+      case CTO_None:
+        break;
 
-    case CTO_Always:
-    case CTO_LargeSign:
-    case CTO_LastLargeSign:
-    case CTO_WholeWord:
-    case CTO_JoinedWord:
-    case CTO_LowWord:
-    case CTO_SuffixableWord:
-    case CTO_PrefixableWord:
-    case CTO_BegWord:
-    case CTO_BegMidWord:
-    case CTO_MidWord:
-    case CTO_MidEndWord:
-    case CTO_EndWord:
-    case CTO_PrePunc:
-    case CTO_PostPunc:
-    case CTO_BegNum:
-    case CTO_MidNum:
-    case CTO_EndNum:
-    case CTO_Repeatable: {
-      CharacterOperand find;
-      ByteOperand replace;
-      if (getFindText(file, &find, operand))
-        if (getReplacePattern(file, &replace, operand))
-          if (!addRule(file, opcode, &find, &replace, after, before))
+      case CTO_IncludeFile: {
+        CharacterOperand path;
+        if (getCharacterOperand(file, &path, &operand, "include file path"))
+          if (!includeDataFile(file, &path))
             goto failure;
-      break;
-    }
+        break;
+      }
 
-    case CTO_Contraction:
-    case CTO_Literal: {
-      CharacterOperand find;
-      if (getFindText(file, &find, operand))
-        if (!addRule(file, opcode, &find, NULL, after, before))
-          goto failure;
-      break;
-    }
+      case CTO_Always:
+      case CTO_LargeSign:
+      case CTO_LastLargeSign:
+      case CTO_WholeWord:
+      case CTO_JoinedWord:
+      case CTO_LowWord:
+      case CTO_SuffixableWord:
+      case CTO_PrefixableWord:
+      case CTO_BegWord:
+      case CTO_BegMidWord:
+      case CTO_MidWord:
+      case CTO_MidEndWord:
+      case CTO_EndWord:
+      case CTO_PrePunc:
+      case CTO_PostPunc:
+      case CTO_BegNum:
+      case CTO_MidNum:
+      case CTO_EndNum:
+      case CTO_Repeatable: {
+        CharacterOperand find;
+        ByteOperand replace;
+        if (getFindText(file, &find, &operand))
+          if (getReplacePattern(file, &replace, &operand))
+            if (!addRule(file, opcode, &find, &replace, after, before))
+              goto failure;
+        break;
+      }
 
-    case CTO_CapitalSign: {
-      ByteOperand cells;
-      if (getDataOperand(file, operand, "capital sign"))
-        if (parseDots(file, &cells, operand)) {
-          ContractionTableOffset offset;
-          if (!saveSequence(file, &offset, &cells)) goto failure;
-          tableHeader->capitalSign = offset;
-        }
-      break;
-    }
+      case CTO_Contraction:
+      case CTO_Literal: {
+        CharacterOperand find;
+        if (getFindText(file, &find, &operand))
+          if (!addRule(file, opcode, &find, NULL, after, before))
+            goto failure;
+        break;
+      }
 
-    case CTO_BeginCapitalSign: {
-      ByteOperand cells;
-      if (getDataOperand(file, operand, "begin capital sign"))
-        if (parseDots(file, &cells, operand)) {
-          ContractionTableOffset offset;
-          if (!saveSequence(file, &offset, &cells)) goto failure;
-          tableHeader->beginCapitalSign = offset;
-        }
-      break;
-    }
+      case CTO_CapitalSign: {
+        ByteOperand cells;
+        if (getDataOperand(file, &operand, "capital sign"))
+          if (parseDots(file, &cells, &operand)) {
+            ContractionTableOffset offset;
+            if (!saveSequence(file, &offset, &cells)) goto failure;
+            tableHeader->capitalSign = offset;
+          }
+        break;
+      }
 
-    case CTO_EndCapitalSign: {
-      ByteOperand cells;
-      if (getDataOperand(file, operand, "end capital sign"))
-        if (parseDots(file, &cells, operand)) {
-          ContractionTableOffset offset;
-          if (!saveSequence(file, &offset, &cells)) goto failure;
-          tableHeader->endCapitalSign = offset;
-        }
-      break;
-    }
+      case CTO_BeginCapitalSign: {
+        ByteOperand cells;
+        if (getDataOperand(file, &operand, "begin capital sign"))
+          if (parseDots(file, &cells, &operand)) {
+            ContractionTableOffset offset;
+            if (!saveSequence(file, &offset, &cells)) goto failure;
+            tableHeader->beginCapitalSign = offset;
+          }
+        break;
+      }
 
-    case CTO_EnglishLetterSign: {
-      ByteOperand cells;
-      if (getDataOperand(file, operand, "letter sign"))
-        if (parseDots(file, &cells, operand)) {
-          ContractionTableOffset offset;
-          if (!saveSequence(file, &offset, &cells)) goto failure;
-          tableHeader->englishLetterSign = offset;
-        }
-      break;
-    }
+      case CTO_EndCapitalSign: {
+        ByteOperand cells;
+        if (getDataOperand(file, &operand, "end capital sign"))
+          if (parseDots(file, &cells, &operand)) {
+            ContractionTableOffset offset;
+            if (!saveSequence(file, &offset, &cells)) goto failure;
+            tableHeader->endCapitalSign = offset;
+          }
+        break;
+      }
 
-    case CTO_NumberSign: {
-      ByteOperand cells;
-      if (getDataOperand(file, operand, "number sign"))
-        if (parseDots(file, &cells, operand)) {
-          ContractionTableOffset offset;
-          if (!saveSequence(file, &offset, &cells)) goto failure;
-          tableHeader->numberSign = offset;
-        }
-      break;
-    }
+      case CTO_EnglishLetterSign: {
+        ByteOperand cells;
+        if (getDataOperand(file, &operand, "letter sign"))
+          if (parseDots(file, &cells, &operand)) {
+            ContractionTableOffset offset;
+            if (!saveSequence(file, &offset, &cells)) goto failure;
+            tableHeader->englishLetterSign = offset;
+          }
+        break;
+      }
 
-    case CTO_Class: {
-      const struct CharacterClass *class;
-      CharacterOperand characters;
+      case CTO_NumberSign: {
+        ByteOperand cells;
+        if (getDataOperand(file, &operand, "number sign"))
+          if (parseDots(file, &cells, &operand)) {
+            ContractionTableOffset offset;
+            if (!saveSequence(file, &offset, &cells)) goto failure;
+            tableHeader->numberSign = offset;
+          }
+        break;
+      }
 
-      if (getDataOperand(file, operand, "character class name")) {
-        if ((class = findCharacterClass(operand))) {
-          reportDataError(file, "character class already defined: %.*" PRIws,
-                          operand->length, operand->address);
-        } else if ((class = addCharacterClass(file, operand->address, operand->length))) {
-          if (getCharacterOperand(file, &characters, operand, "characters")) {
-            int index;
-            for (index=0; index<characters.length; ++index) {
-              wchar_t character = characters.characters[index];
-              ContractionTableCharacter *entry = getCharacterEntry(character);
-              if (!entry) goto failure;
-              entry->attributes |= class->attribute;
+      case CTO_Class: {
+        const struct CharacterClass *class;
+        CharacterOperand characters;
+
+        if (getDataOperand(file, &operand, "character class name")) {
+          if ((class = findCharacterClass(&operand))) {
+            reportDataError(file, "character class already defined: %.*" PRIws,
+                            operand.length, operand.address);
+          } else if ((class = addCharacterClass(file, operand.address, operand.length))) {
+            if (getCharacterOperand(file, &characters, &operand, "characters")) {
+              int index;
+              for (index=0; index<characters.length; ++index) {
+                wchar_t character = characters.characters[index];
+                ContractionTableCharacter *entry = getCharacterEntry(character);
+                if (!entry) goto failure;
+                entry->attributes |= class->attribute;
+              }
             }
           }
         }
+        break;
       }
-      break;
-    }
 
-    {
-      ContractionTableCharacterAttributes *attributes;
-      const struct CharacterClass *class;
+      {
+        ContractionTableCharacterAttributes *attributes;
+        const struct CharacterClass *class;
 
-    case CTO_After:
-      attributes = &after;
-      goto doClass;
-    case CTO_Before:
-      attributes = &before;
-    doClass:
+      case CTO_After:
+        attributes = &after;
+        goto doClass;
+      case CTO_Before:
+        attributes = &before;
+      doClass:
 
-      if (getCharacterClass(file, &class, operand)) {
-        *attributes |= class->attribute;
-        if (getDataOperand(file, operand, "opcode")) goto doOpcode;
+        if (getCharacterClass(file, &class, &operand)) {
+          *attributes |= class->attribute;
+          continue;
+        }
+        break;
       }
-      break;
-    }
 
-    default:
-      reportDataError(file, "unimplemented opcode: %.*" PRIws, operand->length, operand->address);
-      break;
-  }				/*end of loop for processing tableStream */
+      default:
+        reportDataError(file, "unimplemented opcode: %.*" PRIws, operand.length, operand.address);
+        break;
+    }				/*end of loop for processing tableStream */
+    break;
+  }
   ok = 1;
 
 failure:

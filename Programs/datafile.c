@@ -34,6 +34,9 @@ struct DataFileStruct {
   int line;		/*line number in table */
   DataParser parser;
   void *data;
+
+  const wchar_t *start;
+  const wchar_t *end;
 };
 
 void
@@ -78,21 +81,25 @@ includeDataFile (DataFile *file, const CharacterOperand *name) {
   }
 }
 
+static int
+findDataOperand (DataFile *file) {
+  while (iswspace(file->start[0])) file->start += 1;
+  return *(file->end = file->start) != 0;
+}
+
 int
 getDataOperand (DataFile *file, DataOperand *operand, const char *description) {
-  const wchar_t *start = operand->address + operand->length;
-  int count = 0;
-
-  while (iswspace(*start)) start += 1;
-  while (start[count] && !iswspace(start[count])) count += 1;
-
-  operand->address = start;
-  if (!(operand->length = count)) {
-    if (description)
-      reportDataError(file, "%s not specified", description);
+  if (!findDataOperand(file)) {
+    if (description) reportDataError(file, "%s not specified", description);
     return 0;
   }
 
+  do {
+    file->end += 1;
+  } while (file->end[0] && !iswspace(file->end[0]));
+
+  operand->address = file->start;
+  operand->length = file->end - file->start;
   return 1;
 }
 
@@ -280,15 +287,10 @@ getCharacterOperand (DataFile *file, CharacterOperand *characters, DataOperand *
 
 static int
 processWcharLine (DataFile *file, const wchar_t *line) {
-  DataOperand operand;
-
-  operand.address = line;
-  operand.length = 0;
-
-  if (!getDataOperand(file, &operand, NULL)) return 1;			/*blank line */
-  if (*operand.address == WC_C('#')) return 1;
-
-  return file->parser(file, &operand, file->data);
+  file->end = file->start = line;
+  if (!findDataOperand(file)) return 1;			/*blank line */
+  if (file->start[0] == WC_C('#')) return 1;
+  return file->parser(file, file->data);
 }
 
 static int
