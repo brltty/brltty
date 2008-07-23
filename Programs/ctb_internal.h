@@ -110,11 +110,6 @@ typedef struct { /*translation table*/
   ContractionTableOffset rules[HASHNUM]; /*locations of multi-character rules in table*/
 } ContractionTableHeader;
 
-static inline void *
-getContractionTableItem (ContractionTableHeader *header, ContractionTableOffset offset) {
-  return (char *)header + offset;
-}
-
 typedef struct {
   wchar_t value;
   wchar_t uppercase;

@@ -22,13 +22,17 @@
  
 #include "misc.h"
 #include "datafile.h"
+#include "dataarea.h"
 #include "ctb.h"
 #include "ctb_internal.h"
 #include "brl.h"
 
-static ContractionTableHeader *tableHeader;
-static ContractionTableOffset tableSize;
-static ContractionTableOffset tableUsed;
+typedef struct {
+  unsigned char length;
+  unsigned char bytes[0XFF];
+} ByteOperand;
+
+static DataArea *dataArea;
 
 static ContractionTableCharacter *characterTable = NULL;
 static int characterTableSize = 0;
@@ -94,38 +98,15 @@ static const wchar_t *const opcodeNames[CTO_None] = {
 };
 static unsigned char opcodeLengths[CTO_None] = {0};
 
-static int
-allocateBytes (DataFile *file, ContractionTableOffset *offset, int count, int alignment) {
-  int size = (tableUsed = (tableUsed + (alignment - 1)) / alignment * alignment) + count;
-  if (size > tableSize) {
-    void *table = realloc(tableHeader, size|=0XFFF);
-    if (!table) {
-      reportDataError(file, "Not enough memory for contraction table.");
-      return 0;
-    }
-    memset(((BYTE *)table)+tableSize, 0, size-tableSize);
-    tableHeader = (ContractionTableHeader *) table;
-    tableSize = size;
-  }
-  *offset = tableUsed;
-  tableUsed += count;
-  return 1;
-}
-
-static int
-saveBytes (DataFile *file, ContractionTableOffset *offset, const void *bytes, int count, int alignment) {
-  if (allocateBytes(file, offset, count, alignment)) {
-    BYTE *address = getContractionTableItem(tableHeader, *offset);
-    memcpy(address, bytes, count);
-    return 1;
-  }
-  return 0;
+static inline ContractionTableHeader *
+getContractionTableHeader (void) {
+  return getDataItem(dataArea, 0);
 }
 
 static int
 saveSequence (DataFile *file, ContractionTableOffset *offset, const ByteOperand *sequence) {
-  if (allocateBytes(file, offset, sequence->length+1, __alignof__(BYTE))) {
-    BYTE *address = getContractionTableItem(tableHeader, *offset);
+  if (allocateDataItem(dataArea, offset, sequence->length+1, __alignof__(BYTE))) {
+    BYTE *address = getDataItem(dataArea, *offset);
     memcpy(address+1, sequence->bytes, (*address = sequence->length));
     return 1;
   }
@@ -180,12 +161,17 @@ static int
 saveCharacterTable (void) {
   ContractionTableOffset offset;
   if (!characterEntryCount) return 1;
-  if (!saveBytes(NULL, &offset, characterTable,
-                 (tableHeader->characterCount = characterEntryCount) * sizeof(characterTable[0]),
-                 __alignof__(characterTable[0])))
+  if (!saveDataItem(dataArea, &offset, characterTable,
+                    characterEntryCount * sizeof(characterTable[0]),
+                    __alignof__(characterTable[0])))
     return 0;
 
-  tableHeader->characters = offset;
+  {
+    ContractionTableHeader *header = getContractionTableHeader();
+    header->characters = offset;
+    header->characterCount = characterEntryCount;
+  }
+
   return 1;
 }
 
@@ -203,8 +189,8 @@ addRule (
   if (find) ruleSize += find->length * sizeof(find->characters[0]);
   if (replace) ruleSize += replace->length;
 
-  if (allocateBytes(file, &ruleOffset, ruleSize, __alignof__(ContractionTableRule))) {
-    ContractionTableRule *newRule = getContractionTableItem(tableHeader, ruleOffset);
+  if (allocateDataItem(dataArea, &ruleOffset, ruleSize, __alignof__(ContractionTableRule))) {
+    ContractionTableRule *newRule = getDataItem(dataArea, ruleOffset);
 
     newRule->opcode = opcode;
     newRule->after = after;
@@ -232,11 +218,11 @@ addRule (
         if (newRule->opcode == CTO_Always) character->always = ruleOffset;
         offsetAddress = &character->rules;
       } else {
-        offsetAddress = &tableHeader->rules[CTH(newRule->findrep)];
+        offsetAddress = &getContractionTableHeader()->rules[CTH(newRule->findrep)];
       }
 
       while (*offsetAddress) {
-        ContractionTableRule *currentRule = getContractionTableItem(tableHeader, *offsetAddress);
+        ContractionTableRule *currentRule = getDataItem(dataArea, *offsetAddress);
         if (newRule->findlen > currentRule->findlen) break;
         if (newRule->findlen == currentRule->findlen) {
           if ((currentRule->opcode == CTO_Always) && (newRule->opcode != CTO_Always)) break;
@@ -483,7 +469,7 @@ parseContractionLine (DataFile *file, void *data) {
       case CTO_IncludeFile: {
         DataString path;
         if (getDataString(file, &path, "include file path"))
-          if (!includeDataFile(file, &path))
+          if (!includeDataFile(file, path.characters, path.length))
             return 0;
         break;
       }
@@ -530,7 +516,7 @@ parseContractionLine (DataFile *file, void *data) {
         if (getCells(file, &cells, "capital sign")) {
           ContractionTableOffset offset;
           if (!saveSequence(file, &offset, &cells)) return 0;
-          tableHeader->capitalSign = offset;
+          getContractionTableHeader()->capitalSign = offset;
         }
         break;
       }
@@ -540,7 +526,7 @@ parseContractionLine (DataFile *file, void *data) {
         if (getCells(file, &cells, "begin capital sign")) {
           ContractionTableOffset offset;
           if (!saveSequence(file, &offset, &cells)) return 0;
-          tableHeader->beginCapitalSign = offset;
+          getContractionTableHeader()->beginCapitalSign = offset;
         }
         break;
       }
@@ -550,7 +536,7 @@ parseContractionLine (DataFile *file, void *data) {
         if (getCells(file, &cells, "end capital sign")) {
           ContractionTableOffset offset;
           if (!saveSequence(file, &offset, &cells)) return 0;
-          tableHeader->endCapitalSign = offset;
+          getContractionTableHeader()->endCapitalSign = offset;
         }
         break;
       }
@@ -560,7 +546,7 @@ parseContractionLine (DataFile *file, void *data) {
         if (getCells(file, &cells, "letter sign")) {
           ContractionTableOffset offset;
           if (!saveSequence(file, &offset, &cells)) return 0;
-          tableHeader->englishLetterSign = offset;
+          getContractionTableHeader()->englishLetterSign = offset;
         }
         break;
       }
@@ -570,7 +556,7 @@ parseContractionLine (DataFile *file, void *data) {
         if (getCells(file, &cells, "number sign")) {
           ContractionTableOffset offset;
           if (!saveSequence(file, &offset, &cells)) return 0;
-          tableHeader->numberSign = offset;
+          getContractionTableHeader()->numberSign = offset;
         }
         break;
       }
@@ -631,12 +617,7 @@ parseContractionLine (DataFile *file, void *data) {
 
 ContractionTable *
 compileContractionTable (const char *fileName) {
-  int ok = 0;
-  ContractionTableOffset headerOffset;
-
-  tableHeader = NULL;
-  tableSize = 0;
-  tableUsed = 0;
+  ContractionTable *table = NULL;
 
   characterTable = NULL;
   characterTableSize = 0;
@@ -648,38 +629,42 @@ compileContractionTable (const char *fileName) {
       opcodeLengths[opcode] = wcslen(opcodeNames[opcode]);
   }
 
-  if (allocateBytes(NULL, &headerOffset, sizeof(*tableHeader), __alignof__(*tableHeader))) {
-    if (headerOffset == 0) {
-      if (allocateCharacterClasses()) {
-        if (processDataFile(fileName, parseContractionLine, NULL)) {
-          if (saveCharacterTable()) {
-            ok = 1;
-          }
-        }
+  if ((dataArea = newDataArea())) {
+    int compiled = 0;
+    ContractionTableOffset headerOffset;
 
-        deallocateCharacterClasses();
+    if (allocateDataItem(dataArea, &headerOffset, sizeof(ContractionTableHeader), __alignof__(ContractionTableHeader))) {
+      if (headerOffset == 0) {
+        if (allocateCharacterClasses()) {
+          if (processDataFile(fileName, parseContractionLine, NULL)) {
+            if (saveCharacterTable()) {
+              compiled = 1;
+            }
+          }
+
+          deallocateCharacterClasses();
+        }
+      } else {
+        reportDataError(NULL, "contraction table header not allocated at offset 0");
       }
-    } else {
-      reportDataError(NULL, "contraction table header not allocated at offset 0.");
     }
+
+    if (compiled) {
+      if ((table = malloc(sizeof(*table)))) {
+        table->header = getContractionTableHeader();
+        clearDataArea(dataArea);
+
+        table->characters = NULL;
+        table->charactersSize = 0;
+        table->characterCount = 0;
+      }
+    }
+
+    destroyDataArea(dataArea);
   }
 
   if (characterTable) free(characterTable);
-
-  if (ok) {
-    ContractionTable *table;
-
-    if ((table = malloc(sizeof(*table)))) {
-      table->header = tableHeader;
-      table->characters = NULL;
-      table->charactersSize = 0;
-      table->characterCount = 0;
-      return table;
-    }
-  }
-
-  if (tableHeader) free(tableHeader);
-  return NULL;
+  return table;
 }
 
 int

@@ -42,9 +42,14 @@ static const ContractionTableRule *currentRule;	/*pointer to current rule in tab
 #define setOffset() assignOffset(dest-destmin)
 #define clearOffset() assignOffset(CTB_NO_OFFSET)
 
+static inline void *
+getContractionTableItem (ContractionTableOffset offset) {
+  return (char *)table->header + offset;
+}
+
 static const ContractionTableCharacter *
 getContractionTableCharacter (wchar_t character) {
-  const ContractionTableCharacter *characters = getContractionTableItem(table->header, table->header->characters);
+  const ContractionTableCharacter *characters = getContractionTableItem(table->header->characters);
   int first = 0;
   int last = table->header->characterCount - 1;
 
@@ -218,7 +223,7 @@ selectRule (int length) {
   }
 
   while (ruleOffset) {
-    currentRule = getContractionTableItem(table->header, ruleOffset);
+    currentRule = getContractionTableItem(ruleOffset);
     currentOpcode = currentRule->opcode;
     currentFindLength = currentRule->findlen;
 
@@ -407,7 +412,7 @@ putCharacter (wchar_t character) {
   if (ctc) {
     ContractionTableOffset offset = ctc->always;
     if (offset) {
-      const ContractionTableRule *rule = getContractionTableItem(table->header, offset);
+      const ContractionTableRule *rule = getContractionTableItem(offset);
       if (rule->replen) return putReplace(rule);
     }
   }
@@ -416,7 +421,7 @@ putCharacter (wchar_t character) {
 
 static int
 putSequence (ContractionTableOffset offset) {
-  const BYTE *sequence = getContractionTableItem(table->header, offset);
+  const BYTE *sequence = getContractionTableItem(offset);
   return putBytes(sequence+1, *sequence);
 }
 

@@ -24,28 +24,22 @@ extern "C" {
 
 typedef struct DataFileStruct DataFile;
 
+typedef int (*DataParser) (DataFile *file, void *data);
+
+extern int processDataFile (const char *name, DataParser parser, void *data);
+extern int includeDataFile (DataFile *file, const wchar_t *name, int length);
+extern void reportDataError (DataFile *file, char *format, ...) PRINTF(2, 3);
+
 typedef struct {
   const wchar_t *characters;
   int length;
 } DataOperand;
+extern int getDataOperand (DataFile *file, DataOperand *operand, const char *description);
 
 typedef struct {
   unsigned char length;
   wchar_t characters[0XFF];
 } DataString;
-
-typedef struct {
-  unsigned char length;
-  unsigned char bytes[0XFF];
-} ByteOperand;
-
-typedef int (*DataParser) (DataFile *file, void *data);
-
-extern int processDataFile (const char *name, DataParser parser, void *data);
-extern int includeDataFile (DataFile *file, const DataString *name);
-extern void reportDataError (DataFile *file, char *format, ...) PRINTF(2, 3);
-
-extern int getDataOperand (DataFile *file, DataOperand *operand, const char *description);
 extern int getDataString (DataFile *file, DataString *string, const char *description);
 
 #ifdef __cplusplus

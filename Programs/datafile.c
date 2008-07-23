@@ -62,21 +62,19 @@ reportDataError (DataFile *file, char *format, ...) {
 }
 
 int
-includeDataFile (DataFile *file, const DataString *name) {
+includeDataFile (DataFile *file, const wchar_t *name, int length) {
   const char *prefixAddress = file->name;
   int prefixLength = 0;
-  const wchar_t *suffixAddress = name->characters;
-  int suffixLength = name->length;
 
-  if (*suffixAddress != WC_C('/')) {
+  if (*name != WC_C('/')) {
     const char *prefixEnd = strrchr(prefixAddress, '/');
     if (prefixEnd) prefixLength = prefixEnd - prefixAddress + 1;
   }
 
   {
-    char path[prefixLength + suffixLength + 1];
+    char path[prefixLength + length + 1];
     snprintf(path, sizeof(path), "%.*s%.*" PRIws,
-             prefixLength, prefixAddress, suffixLength, suffixAddress);
+             prefixLength, prefixAddress, length, name);
     return processDataFile(path, file->parser, file->data);
   }
 }
