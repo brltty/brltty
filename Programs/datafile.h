@@ -25,14 +25,14 @@ extern "C" {
 typedef struct DataFileStruct DataFile;
 
 typedef struct {
-  const wchar_t *address;
+  const wchar_t *characters;
   int length;
 } DataOperand;
 
 typedef struct {
   unsigned char length;
   wchar_t characters[0XFF];
-} CharacterOperand;
+} DataString;
 
 typedef struct {
   unsigned char length;
@@ -42,11 +42,11 @@ typedef struct {
 typedef int (*DataParser) (DataFile *file, void *data);
 
 extern int processDataFile (const char *name, DataParser parser, void *data);
-extern int includeDataFile (DataFile *file, const CharacterOperand *name);
+extern int includeDataFile (DataFile *file, const DataString *name);
 extern void reportDataError (DataFile *file, char *format, ...) PRINTF(2, 3);
 
 extern int getDataOperand (DataFile *file, DataOperand *operand, const char *description);
-extern int getCharacterOperand (DataFile *file, CharacterOperand *characters, DataOperand *operand, const char *description);
+extern int getDataString (DataFile *file, DataString *string, const char *description);
 
 #ifdef __cplusplus
 }

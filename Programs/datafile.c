@@ -62,7 +62,7 @@ reportDataError (DataFile *file, char *format, ...) {
 }
 
 int
-includeDataFile (DataFile *file, const CharacterOperand *name) {
+includeDataFile (DataFile *file, const DataString *name) {
   const char *prefixAddress = file->name;
   int prefixLength = 0;
   const wchar_t *suffixAddress = name->characters;
@@ -90,6 +90,7 @@ findDataOperand (DataFile *file) {
 int
 getDataOperand (DataFile *file, DataOperand *operand, const char *description) {
   file->start = file->end;
+
   if (!findDataOperand(file)) {
     if (description) reportDataError(file, "%s not specified", description);
     return 0;
@@ -99,48 +100,50 @@ getDataOperand (DataFile *file, DataOperand *operand, const char *description) {
     file->end += 1;
   } while (file->end[0] && !iswspace(file->end[0]));
 
-  operand->address = file->start;
+  operand->characters = file->start;
   operand->length = file->end - file->start;
   return 1;
 }
 
 static int
-isHexadecimalDigit (wchar_t digit, int *value, int *shift) {
-  if (digit >= WC_C('0') && digit <= WC_C('9'))
-    *value = digit - WC_C('0');
-  else if (digit >= WC_C('a') && digit <= WC_C('f'))
-    *value = digit - WC_C('a') + 10;
-  else if (digit >= WC_C('A') && digit <= WC_C('F'))
-    *value = digit - WC_C('A') + 10;
-  else
+isHexadecimalDigit (wchar_t character, int *value, int *shift) {
+  if ((character >= WC_C('0')) && (character <= WC_C('9'))) {
+    *value = character - WC_C('0');
+  } else if ((character >= WC_C('a')) && (character <= WC_C('f'))) {
+    *value = character - WC_C('a') + 10;
+  } else if ((character >= WC_C('A')) && (character <= WC_C('F'))) {
+    *value = character - WC_C('A') + 10;
+  } else {
     return 0;
+  }
 
   *shift = 4;
   return 1;
 }
 
 static int
-isOctalDigit (wchar_t digit, int *value, int *shift) {
-  if (digit < WC_C('0') || digit > WC_C('7')) return 0;
-  *value = digit - WC_C('0');
+isOctalDigit (wchar_t character, int *value, int *shift) {
+  if ((character < WC_C('0')) || (character > WC_C('7'))) return 0;
+  *value = character - WC_C('0');
   *shift = 3;
   return 1;
 }
 
 static int
-parseCharacterOperand (DataFile *file, CharacterOperand *result, const DataOperand *operand) {
-  int length = 0;		/*loop counters */
+parseDataString (DataFile *file, DataString *string, const wchar_t *characters, int length) {
   int index = 0;
 
-  while (index < operand->length) {
-    wchar_t character = operand->address[index];
+  string->length = 0;
+
+  while (index < length) {
+    wchar_t character = characters[index];
 
     if (character == WC_C('\\')) {
       int start = index;
       int ok = 0;
 
-      if (++index < operand->length) {
-        switch (character = operand->address[index]) {
+      if (++index < length) {
+        switch (character = characters[index]) {
           case WC_C('\\'):
             ok = 1;
             break;
@@ -177,7 +180,7 @@ parseCharacterOperand (DataFile *file, CharacterOperand *result, const DataOpera
 
           {
             int count;
-            int (*isDigit) (wchar_t digit, int *value, int *shift);
+            int (*isDigit) (wchar_t character, int *value, int *shift);
 
           case WC_C('o'):
             count = 3;
@@ -203,12 +206,12 @@ parseCharacterOperand (DataFile *file, CharacterOperand *result, const DataOpera
           doNumber:
             character = 0;
 
-            while (++index < operand->length) {
+            while (++index < length) {
               {
                 int value;
                 int shift;
 
-                if (!isDigit(operand->address[index], &value, &shift)) break;
+                if (!isDigit(characters[index], &value, &shift)) break;
                 character = (character << shift) | value;
               }
 
@@ -217,12 +220,13 @@ parseCharacterOperand (DataFile *file, CharacterOperand *result, const DataOpera
                 break;
               }
             }
+
             break;
           }
 
           case WC_C('<'): {
-            const wchar_t *first = &operand->address[++index];
-            const wchar_t *end = wmemchr(first, WC_C('>'), operand->length-index);
+            const wchar_t *first = &characters[++index];
+            const wchar_t *end = wmemchr(first, WC_C('>'), length-index);
 
             if (end) {
               int count = end - first;
@@ -251,7 +255,7 @@ parseCharacterOperand (DataFile *file, CharacterOperand *result, const DataOpera
 #endif /* HAVE_ICU */
               }
             } else {
-              index = operand->length - 1;
+              index = length - 1;
             }
 
           badName:
@@ -261,28 +265,30 @@ parseCharacterOperand (DataFile *file, CharacterOperand *result, const DataOpera
       }
 
       if (!ok) {
-        if (index < operand->length) index += 1;
+        if (index < length) index += 1;
         reportDataError(file, "invalid escape sequence: %.*" PRIws,
-                        index-start, &operand->address[start]);
+                        index-start, &characters[start]);
         return 0;
       }
     }
 
     if (!character) character = WC_C(' ');
-    result->characters[length++] = character;
+    string->characters[string->length++] = character;
 
     index += 1;
   }
-  result->length = length;
 
   return 1;
 }
 
 int
-getCharacterOperand (DataFile *file, CharacterOperand *characters, DataOperand *operand, const char *description) {
-  if (getDataOperand(file, operand, description))
-    if (parseCharacterOperand(file, characters, operand))
+getDataString (DataFile *file, DataString *string, const char *description) {
+  DataOperand operand;
+
+  if (getDataOperand(file, &operand, description))
+    if (parseDataString(file, string, operand.characters, operand.length))
       return 1;
+
   return 0;
 }
 
