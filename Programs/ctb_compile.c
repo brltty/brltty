@@ -104,7 +104,7 @@ getContractionTableHeader (void) {
 }
 
 static int
-saveSequence (DataFile *file, ContractionTableOffset *offset, const ByteOperand *sequence) {
+saveSequence (DataFile *file, DataOffset *offset, const ByteOperand *sequence) {
   if (allocateDataItem(dataArea, offset, sequence->length+1, __alignof__(BYTE))) {
     BYTE *address = getDataItem(dataArea, *offset);
     memcpy(address+1, sequence->bytes, (*address = sequence->length));
@@ -159,7 +159,7 @@ getCharacterEntry (wchar_t character) {
 
 static int
 saveCharacterTable (void) {
-  ContractionTableOffset offset;
+  DataOffset offset;
   if (!characterEntryCount) return 1;
   if (!saveDataItem(dataArea, &offset, characterTable,
                     characterEntryCount * sizeof(characterTable[0]),
@@ -184,7 +184,7 @@ addRule (
   ContractionTableCharacterAttributes after,
   ContractionTableCharacterAttributes before
 ) {
-  ContractionTableOffset ruleOffset;
+  DataOffset ruleOffset;
   int ruleSize = sizeof(ContractionTableRule) - sizeof(find->characters[0]);
   if (find) ruleSize += find->length * sizeof(find->characters[0]);
   if (replace) ruleSize += replace->length;
@@ -196,17 +196,19 @@ addRule (
     newRule->after = after;
     newRule->before = before;
 
-    if (find)
+    if (find) {
       wmemcpy(&newRule->findrep[0], &find->characters[0],
               (newRule->findlen = find->length));
-    else
+    } else {
       newRule->findlen = 0;
+    }
 
-    if (replace)
+    if (replace) {
       memcpy(&newRule->findrep[newRule->findlen], &replace->bytes[0],
              (newRule->replen = replace->length));
-    else
+    } else {
       newRule->replen = 0;
+    }
 
     /*link new rule into table.*/
     {
@@ -223,10 +225,13 @@ addRule (
 
       while (*offsetAddress) {
         ContractionTableRule *currentRule = getDataItem(dataArea, *offsetAddress);
+
         if (newRule->findlen > currentRule->findlen) break;
-        if (newRule->findlen == currentRule->findlen) {
-          if ((currentRule->opcode == CTO_Always) && (newRule->opcode != CTO_Always)) break;
-        }
+
+        if (newRule->findlen == currentRule->findlen)
+          if ((currentRule->opcode == CTO_Always) && (newRule->opcode != CTO_Always))
+            break;
+
         offsetAddress = &currentRule->next;
       }
 
@@ -236,6 +241,7 @@ addRule (
 
     return newRule;
   }
+
   return NULL;
 }
 
@@ -514,7 +520,7 @@ parseContractionLine (DataFile *file, void *data) {
       case CTO_CapitalSign: {
         ByteOperand cells;
         if (getCells(file, &cells, "capital sign")) {
-          ContractionTableOffset offset;
+          DataOffset offset;
           if (!saveSequence(file, &offset, &cells)) return 0;
           getContractionTableHeader()->capitalSign = offset;
         }
@@ -524,7 +530,7 @@ parseContractionLine (DataFile *file, void *data) {
       case CTO_BeginCapitalSign: {
         ByteOperand cells;
         if (getCells(file, &cells, "begin capital sign")) {
-          ContractionTableOffset offset;
+          DataOffset offset;
           if (!saveSequence(file, &offset, &cells)) return 0;
           getContractionTableHeader()->beginCapitalSign = offset;
         }
@@ -534,7 +540,7 @@ parseContractionLine (DataFile *file, void *data) {
       case CTO_EndCapitalSign: {
         ByteOperand cells;
         if (getCells(file, &cells, "end capital sign")) {
-          ContractionTableOffset offset;
+          DataOffset offset;
           if (!saveSequence(file, &offset, &cells)) return 0;
           getContractionTableHeader()->endCapitalSign = offset;
         }
@@ -544,7 +550,7 @@ parseContractionLine (DataFile *file, void *data) {
       case CTO_EnglishLetterSign: {
         ByteOperand cells;
         if (getCells(file, &cells, "letter sign")) {
-          ContractionTableOffset offset;
+          DataOffset offset;
           if (!saveSequence(file, &offset, &cells)) return 0;
           getContractionTableHeader()->englishLetterSign = offset;
         }
@@ -554,7 +560,7 @@ parseContractionLine (DataFile *file, void *data) {
       case CTO_NumberSign: {
         ByteOperand cells;
         if (getCells(file, &cells, "number sign")) {
-          ContractionTableOffset offset;
+          DataOffset offset;
           if (!saveSequence(file, &offset, &cells)) return 0;
           getContractionTableHeader()->numberSign = offset;
         }
@@ -631,7 +637,7 @@ compileContractionTable (const char *fileName) {
 
   if ((dataArea = newDataArea())) {
     int compiled = 0;
-    ContractionTableOffset headerOffset;
+    DataOffset headerOffset;
 
     if (allocateDataItem(dataArea, &headerOffset, sizeof(ContractionTableHeader), __alignof__(ContractionTableHeader))) {
       if (headerOffset == 0) {

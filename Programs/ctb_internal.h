@@ -27,7 +27,7 @@ extern "C" {
 #define HASHNUM 1087
 #define CTH(x) (((x[0]<<8)+x[1])%HASHNUM)
 
-typedef unsigned long int ContractionTableOffset;
+typedef uint32_t ContractionTableOffset;
 
 typedef enum {
   CTC_Space       = 0X01,

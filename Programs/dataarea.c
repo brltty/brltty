@@ -48,23 +48,24 @@ destroyDataArea (DataArea *area) {
 }
 
 int
-allocateDataItem (DataArea *area, DataOffset *offset, int count, int alignment) {
-  size_t size = (area->used = (area->used + (alignment - 1)) / alignment * alignment) + count;
+allocateDataItem (DataArea *area, DataOffset *offset, size_t size, int alignment) {
+  size_t newUsed = (area->used = (area->used + (alignment - 1)) / alignment * alignment) + size;
 
-  if (size > area->size) {
-    unsigned char *address = realloc(area->address, size|=0XFFF);
+  if (newUsed > area->size) {
+    size_t newSize = newUsed | 0XFFF;
+    unsigned char *newAddress = realloc(area->address, newSize);
 
-    if (!address) {
+    if (!newAddress) {
       return 0;
     }
 
-    memset(address+area->size, 0, size-area->size);
-    area->address = address;
-    area->size = size;
+    memset(newAddress+area->size, 0, newSize-area->size);
+    area->address = newAddress;
+    area->size = newSize;
   }
 
   *offset = area->used;
-  area->used += count;
+  area->used = newUsed;
   return 1;
 }
 
@@ -74,8 +75,8 @@ getDataItem (DataArea *area, DataOffset offset) {
 }
 
 int
-saveDataItem (DataArea *area, DataOffset *offset, const void *bytes, int count, int alignment) {
-  if (!allocateDataItem(area, offset, count, alignment)) return 0;
-  memcpy(getDataItem(area, *offset), bytes, count);
+saveDataItem (DataArea *area, DataOffset *offset, const void *item, size_t size, int alignment) {
+  if (!allocateDataItem(area, offset, size, alignment)) return 0;
+  memcpy(getDataItem(area, *offset), item, size);
   return 1;
 }

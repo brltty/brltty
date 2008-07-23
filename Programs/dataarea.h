@@ -28,9 +28,9 @@ extern void destroyDataArea (DataArea *area);
 extern void clearDataArea (DataArea *area);
 
 typedef unsigned long int DataOffset;
-extern int allocateDataItem (DataArea *area, DataOffset *offset, int count, int alignment);
+extern int allocateDataItem (DataArea *area, DataOffset *offset, size_t size, int alignment);
 extern void *getDataItem (DataArea *area, DataOffset offset);
-extern int saveDataItem (DataArea *area, DataOffset *offset, const void *item, int count, int alignment);
+extern int saveDataItem (DataArea *area, DataOffset *offset, const void *item, size_t size, int alignment);
 
 #ifdef __cplusplus
 }
