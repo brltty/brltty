@@ -19,6 +19,7 @@
 
 #include <string.h>
 
+#include "misc.h"
 #include "dataarea.h"
 
 struct DataAreaStruct {
@@ -28,7 +29,7 @@ struct DataAreaStruct {
 };
 
 void
-clearDataArea (DataArea *area) {
+resetDataArea (DataArea *area) {
   area->address = NULL;
   area->size = 0;
   area->used = 0;
@@ -37,7 +38,7 @@ clearDataArea (DataArea *area) {
 DataArea *
 newDataArea (void) {
   DataArea *area;
-  if ((area = malloc(sizeof(*area)))) clearDataArea(area);
+  if ((area = malloc(sizeof(*area)))) resetDataArea(area);
   return area;
 }
 
@@ -56,6 +57,7 @@ allocateDataItem (DataArea *area, DataOffset *offset, size_t size, int alignment
     unsigned char *newAddress = realloc(area->address, newSize);
 
     if (!newAddress) {
+      LogPrint(LOG_ERR, "insufficient memory for data area");
       return 0;
     }
 
@@ -64,7 +66,7 @@ allocateDataItem (DataArea *area, DataOffset *offset, size_t size, int alignment
     area->size = newSize;
   }
 
-  *offset = area->used;
+  if (offset) *offset = area->used;
   area->used = newUsed;
   return 1;
 }

@@ -103,16 +103,6 @@ getContractionTableHeader (void) {
   return getDataItem(dataArea, 0);
 }
 
-static int
-saveSequence (DataFile *file, DataOffset *offset, const ByteOperand *sequence) {
-  if (allocateDataItem(dataArea, offset, sequence->length+1, __alignof__(BYTE))) {
-    BYTE *address = getDataItem(dataArea, *offset);
-    memcpy(address+1, sequence->bytes, (*address = sequence->length));
-    return 1;
-  }
-  return 0;
-}
-
 static ContractionTableCharacter *
 getCharacterEntry (wchar_t character) {
   int first = 0;
@@ -337,7 +327,17 @@ getOpcode (DataFile *file) {
 }
 
 static int
-parseCells (DataFile *file, ByteOperand *cells, const wchar_t *characters, int length) {
+saveCellsOperand (DataFile *file, DataOffset *offset, const ByteOperand *sequence) {
+  if (allocateDataItem(dataArea, offset, sequence->length+1, __alignof__(BYTE))) {
+    BYTE *address = getDataItem(dataArea, *offset);
+    memcpy(address+1, sequence->bytes, (*address = sequence->length));
+    return 1;
+  }
+  return 0;
+}
+
+static int
+parseCellsOperand (DataFile *file, ByteOperand *cells, const wchar_t *characters, int length) {
   BYTE cell = 0;
   int start = 0;
   int index;
@@ -408,6 +408,12 @@ parseCells (DataFile *file, ByteOperand *cells, const wchar_t *characters, int l
         }
 
         cells->bytes[cells->length++] = cell;
+
+        if (cells->length == ARRAY_COUNT(cells->bytes)) {
+          reportDataError(file, "cells operand too long");
+          return 0;
+        }
+
         cell = 0;
         start = index + 1;
         break;
@@ -429,11 +435,11 @@ parseCells (DataFile *file, ByteOperand *cells, const wchar_t *characters, int l
 }
 
 static int
-getCells (DataFile *file, ByteOperand *cells, const char *description) {
+getCellsOperand (DataFile *file, ByteOperand *cells, const char *description) {
   DataOperand operand;
 
   if (getDataOperand(file, &operand, description))
-    if (parseCells(file, cells, operand.characters, operand.length))
+    if (parseCellsOperand(file, cells, operand.characters, operand.length))
       return 1;
 
   return 0;
@@ -449,7 +455,7 @@ getReplacePattern (DataFile *file, ByteOperand *replace) {
       return 1;
     }
 
-    if (parseCells(file, replace, operand.characters, operand.length)) return 1;
+    if (parseCellsOperand(file, replace, operand.characters, operand.length)) return 1;
   }
 
   return 0;
@@ -519,9 +525,9 @@ parseContractionLine (DataFile *file, void *data) {
 
       case CTO_CapitalSign: {
         ByteOperand cells;
-        if (getCells(file, &cells, "capital sign")) {
+        if (getCellsOperand(file, &cells, "capital sign")) {
           DataOffset offset;
-          if (!saveSequence(file, &offset, &cells)) return 0;
+          if (!saveCellsOperand(file, &offset, &cells)) return 0;
           getContractionTableHeader()->capitalSign = offset;
         }
         break;
@@ -529,9 +535,9 @@ parseContractionLine (DataFile *file, void *data) {
 
       case CTO_BeginCapitalSign: {
         ByteOperand cells;
-        if (getCells(file, &cells, "begin capital sign")) {
+        if (getCellsOperand(file, &cells, "begin capital sign")) {
           DataOffset offset;
-          if (!saveSequence(file, &offset, &cells)) return 0;
+          if (!saveCellsOperand(file, &offset, &cells)) return 0;
           getContractionTableHeader()->beginCapitalSign = offset;
         }
         break;
@@ -539,9 +545,9 @@ parseContractionLine (DataFile *file, void *data) {
 
       case CTO_EndCapitalSign: {
         ByteOperand cells;
-        if (getCells(file, &cells, "end capital sign")) {
+        if (getCellsOperand(file, &cells, "end capital sign")) {
           DataOffset offset;
-          if (!saveSequence(file, &offset, &cells)) return 0;
+          if (!saveCellsOperand(file, &offset, &cells)) return 0;
           getContractionTableHeader()->endCapitalSign = offset;
         }
         break;
@@ -549,9 +555,9 @@ parseContractionLine (DataFile *file, void *data) {
 
       case CTO_EnglishLetterSign: {
         ByteOperand cells;
-        if (getCells(file, &cells, "letter sign")) {
+        if (getCellsOperand(file, &cells, "letter sign")) {
           DataOffset offset;
-          if (!saveSequence(file, &offset, &cells)) return 0;
+          if (!saveCellsOperand(file, &offset, &cells)) return 0;
           getContractionTableHeader()->englishLetterSign = offset;
         }
         break;
@@ -559,9 +565,9 @@ parseContractionLine (DataFile *file, void *data) {
 
       case CTO_NumberSign: {
         ByteOperand cells;
-        if (getCells(file, &cells, "number sign")) {
+        if (getCellsOperand(file, &cells, "number sign")) {
           DataOffset offset;
-          if (!saveSequence(file, &offset, &cells)) return 0;
+          if (!saveCellsOperand(file, &offset, &cells)) return 0;
           getContractionTableHeader()->numberSign = offset;
         }
         break;
@@ -615,7 +621,7 @@ parseContractionLine (DataFile *file, void *data) {
       default:
         reportDataError(file, "unimplemented opcode: %" PRIws, opcodeNames[opcode]);
         break;
-    }				/*end of loop for processing tableStream */
+    }
 
     return 1;
   }
@@ -636,33 +642,22 @@ compileContractionTable (const char *fileName) {
   }
 
   if ((dataArea = newDataArea())) {
-    int compiled = 0;
-    DataOffset headerOffset;
+    if (allocateDataItem(dataArea, NULL, sizeof(ContractionTableHeader), __alignof__(ContractionTableHeader))) {
+      if (allocateCharacterClasses()) {
+        if (processDataFile(fileName, parseContractionLine, NULL)) {
+          if (saveCharacterTable()) {
+            if ((table = malloc(sizeof(*table)))) {
+              table->header = getContractionTableHeader();
+              resetDataArea(dataArea);
 
-    if (allocateDataItem(dataArea, &headerOffset, sizeof(ContractionTableHeader), __alignof__(ContractionTableHeader))) {
-      if (headerOffset == 0) {
-        if (allocateCharacterClasses()) {
-          if (processDataFile(fileName, parseContractionLine, NULL)) {
-            if (saveCharacterTable()) {
-              compiled = 1;
+              table->characters = NULL;
+              table->charactersSize = 0;
+              table->characterCount = 0;
             }
           }
-
-          deallocateCharacterClasses();
         }
-      } else {
-        reportDataError(NULL, "contraction table header not allocated at offset 0");
-      }
-    }
 
-    if (compiled) {
-      if ((table = malloc(sizeof(*table)))) {
-        table->header = getContractionTableHeader();
-        clearDataArea(dataArea);
-
-        table->characters = NULL;
-        table->charactersSize = 0;
-        table->characterCount = 0;
+        deallocateCharacterClasses();
       }
     }
 

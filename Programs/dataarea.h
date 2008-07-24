@@ -25,7 +25,7 @@ extern "C" {
 typedef struct DataAreaStruct DataArea;
 extern DataArea *newDataArea (void);
 extern void destroyDataArea (DataArea *area);
-extern void clearDataArea (DataArea *area);
+extern void resetDataArea (DataArea *area);
 
 typedef unsigned long int DataOffset;
 extern int allocateDataItem (DataArea *area, DataOffset *offset, size_t size, int alignment);

@@ -270,6 +270,11 @@ parseDataString (DataFile *file, DataString *string, const wchar_t *characters, 
       }
     }
 
+    if (string->length == ARRAY_COUNT(string->characters)) {
+      reportDataError(file, "string operand too long");
+      return 0;
+    }
+
     if (!character) character = WC_C(' ');
     string->characters[string->length++] = character;
 
@@ -347,4 +352,4 @@ processDataFile (const char *name, DataParser parser, void *data) {
   }
 
   return ok;
-}				/*compilation completed */
+}

@@ -379,7 +379,7 @@ selectRule (int length) {
             break;
         }
       }
-    }				/*Done with checking this rule */
+    }
 
     ruleOffset = currentRule->next;
   }
@@ -1031,7 +1031,7 @@ contractText (
     if ((dest == destmin) || dest[-1]) {
       previousOpcode = currentOpcode;
     }
-  }				/*end of translation loop */
+  }
 
 done:
   if (src < srcmax) {
@@ -1070,4 +1070,4 @@ done:
   *inputLength = src - srcmin;
   *outputLength = dest - destmin;
   return 1;
-}				/*translation completed */
+}
