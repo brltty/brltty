@@ -397,7 +397,8 @@ processUtf8Line (char *line, void *dataAddress) {
     wint_t wc = convertUtf8ToWchar(&byte, &length);
 
     if (wc == WEOF) {
-      reportDataError(file, "illegal UTF-8 character at offset %d", start-line);
+      unsigned int offset = start - line;
+      reportDataError(file, "illegal UTF-8 character at offset %u", offset);
       return 1;
     }
 
