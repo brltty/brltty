@@ -419,7 +419,7 @@ CAMLprim value brlapiml_leaveRawMode(value handle, value unit)
 CAMLprim value brlapiml_sendRaw(value handle, value str)
 {
   CAMLparam2(handle, str);
-  ssize_t res;
+  int res;
   unsigned char packet[BRLAPI_MAXPACKETSIZE];
   ssize_t i, size = MIN(sizeof(packet), caml_string_length(str));
   for (i=0; i<size; i++) packet[i] = Byte(str, i);
@@ -431,7 +431,7 @@ CAMLprim value brlapiml_recvRaw(value handle, value unit)
 {
   CAMLparam2(handle, unit);
   unsigned char packet[BRLAPI_MAXPACKETSIZE];
-  ssize_t i, size;
+  int i, size;
   CAMLlocal1(str);
   brlapiCheckError(recvRaw, &size, packet, sizeof(packet));
   str = caml_alloc_string(size);
