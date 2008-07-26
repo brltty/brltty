@@ -24,9 +24,9 @@ extern "C" {
 
 typedef struct DataFileStruct DataFile;
 
-typedef int (*DataParser) (DataFile *file, void *data);
+typedef int (*DataProcessor) (DataFile *file, void *data);
 
-extern int processDataFile (const char *name, DataParser parser, void *data);
+extern int processDataFile (const char *name, DataProcessor processor, void *data);
 extern int includeDataFile (DataFile *file, const wchar_t *name, int length);
 extern void reportDataError (DataFile *file, char *format, ...) PRINTF(2, 3);
 
@@ -41,6 +41,22 @@ typedef struct {
   wchar_t characters[0XFF];
 } DataString;
 extern int getDataString (DataFile *file, DataString *string, const char *description);
+
+typedef struct {
+  const wchar_t *name;
+  DataProcessor processor;
+} DataProperty;
+extern int processPropertyOperand (DataFile *file, const DataProperty *properties, const char *description, void *data);
+
+extern int processIncludeOperands (DataFile *file, void *data);
+
+#define BRL_DOT_COUNT 8
+extern const wchar_t brlDotNumbers[BRL_DOT_COUNT];
+extern const unsigned char brlDotBits[BRL_DOT_COUNT];
+extern int brlDotNumberToIndex (wchar_t number, int *index);
+extern int brlDotBitToIndex (unsigned char bit, int *index);
+
+extern int getDotOperand (DataFile *file, int *index);
 
 #ifdef __cplusplus
 }

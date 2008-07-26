@@ -47,69 +47,6 @@ testHexadecimalDigit (unsigned char character, unsigned char *index) {
 }
 
 static int
-getBit (TblInputData *input, unsigned char *set, unsigned char *mask) {
-  const unsigned char *location = input->location;
-  int length = tblFindSpace(input) - location;
-
-  if (!*location) {
-    tblReportError(input, "missing bit state");
-    return 0;
-  }
-
-  *mask = 0;
-  if (tblTestWord(location, length, "on")) {
-    *set = 1;
-  } else if (tblTestWord(location, length, "off")) {
-    *set = 0;
-  } else {
-    static const unsigned char operators[] = {'=', '~'};
-    if (testCharacter(*input->location, set, operators, sizeof(operators))) {
-      typedef struct {
-        const char *name;
-        unsigned char mask;
-      } BitEntry;
-      static const BitEntry bitTable[] = {
-        {"fg-blue"  , 0X01},
-        {"fg-green" , 0X02},
-        {"fg-red"   , 0X04},
-        {"fg-bright", 0X08},
-        {"bg-blue"  , 0X10},
-        {"bg-green" , 0X20},
-        {"bg-red"   , 0X40},
-        {"blink"    , 0X80},
-        {"bit01"    , 0X01},
-        {"bit02"    , 0X02},
-        {"bit04"    , 0X04},
-        {"bit08"    , 0X08},
-        {"bit10"    , 0X10},
-        {"bit20"    , 0X20},
-        {"bit40"    , 0X40},
-        {"bit80"    , 0X80},
-        {NULL       , 0X00},
-      };
-      const BitEntry *bit = bitTable;
-
-      ++location, --length;
-      while (bit->name) {
-        if (tblTestWord(location, length, bit->name)) {
-          *mask = bit->mask;
-          break;
-        }
-        ++bit;
-      }
-    }
-
-    if (!*mask) {
-      tblReportError(input, "invalid bit state");
-      return 0;
-    }
-  }
-
-  input->location = location + length;
-  return 1;
-}
-
-static int
 getByte (TblInputData *input, unsigned char *byte) {
   const unsigned char *location = input->location;
   switch (*location++) {
@@ -223,23 +160,6 @@ getCell (TblInputData *input, unsigned char *cell) {
   return 1;
 }
 
-static int
-getDot (TblInputData *input, unsigned char *dot) {
-  if (!*input->location) {
-    tblReportError(input, "missing dot number");
-    return 0;
-  }
-
-  if (!testDotNumber(*input->location, dot) ||
-      ((tblFindSpace(input) - input->location) != 1)) {
-    tblReportError(input, "invalid dot number");
-    return 0;
-  }
-
-  ++input->location;
-  return 1;
-}
-
 static void
 processByteDirective (TblInputData *input) {
   unsigned char index;
@@ -256,29 +176,6 @@ processByteDirective (TblInputData *input) {
   }
 }
 
-static void
-processDotDirective (TblInputData *input) {
-  unsigned char index;
-  tblSkipSpace(input);
-  if (getDot(input, &index)) {
-    unsigned char set;
-    unsigned char mask;
-    tblSkipSpace(input);
-    if (getBit(input, &set, &mask)) {
-      tblSkipSpace(input);
-      if (tblIsEndOfLine(input)) {
-        input->masks[index] = mask;
-        mask = tblDotBit(index);
-        if (set) {
-          input->undefined |= mask;
-        } else {
-          input->undefined &= ~mask;
-        }
-      }
-    }
-  }
-}
-
 static int
 processTableLine (TblInputData *input) {
   tblSkipSpace(input);
@@ -289,7 +186,6 @@ processTableLine (TblInputData *input) {
     } DirectiveEntry;
     static const DirectiveEntry directiveTable[] = {
       {"byte", processByteDirective},
-      {"dot" , processDotDirective },
       {NULL  , processByteDirective}
     };
     const DirectiveEntry *directive = directiveTable;

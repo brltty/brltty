@@ -47,8 +47,6 @@ typedef struct {
 } ContractionTableCharacter;
 
 typedef enum { /*Op codes*/
-  CTO_IncludeFile, /*include a file*/
-
   CTO_CapitalSign, /*dot pattern for capital sign*/
   CTO_BeginCapitalSign, /*dot pattern for beginning capital block*/
   CTO_EndCapitalSign, /*dot pattern for ending capital block*/
@@ -86,6 +84,7 @@ typedef enum { /*Op codes*/
   CTO_After, /*only match if after character in class*/
   CTO_Before, /*only match if before character in class*/
 
+  CTO_IncludeFile, /*include a file*/
   CTO_None /*For internal use only*/
 } ContractionTableOpcode;
 

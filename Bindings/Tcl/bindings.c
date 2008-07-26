@@ -21,7 +21,7 @@
 #include <string.h>
 
 #include <tcl.h>
-#include "iso_11548-1.h"
+#include "brldots.h"
 
 #define BRLAPI_NO_DEPRECATED
 #define BRLAPI_NO_SINGLE_SESSION

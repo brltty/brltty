@@ -134,7 +134,6 @@ extern const BrailleDriver noBraille;
 typedef unsigned char TranslationTable[TRANSLATION_TABLE_SIZE];
 extern TranslationTable textTable;	 /* current text to braille translation table */
 extern TranslationTable untextTable;     /* current braille to text translation table */
-extern TranslationTable attributesTable; /* current attributes to braille translation table */
 
 extern void makeUntextTable (void);
 

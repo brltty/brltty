@@ -33,6 +33,7 @@
 #include "misc.h"
 #include "message.h"
 #include "tunes.h"
+#include "attr.h"
 #include "tbl.h"
 #include "ctb.h"
 #include "route.h"

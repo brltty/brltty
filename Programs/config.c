@@ -50,6 +50,7 @@
 #include "brl.h"
 #include "spk.h"
 #include "scr.h"
+#include "attr.h"
 #include "tbl.h"
 #include "ctb.h"
 #include "tunes.h"
@@ -513,7 +514,15 @@ replaceTextTable (const char *file) {
 
 static int
 replaceAttributesTable (const char *file) {
-  return replaceTranslationTable(attributesTable, file);
+  int ok = 0;
+  char *path = makePath(opt_tablesDirectory, file);
+  if (path) {
+    if (loadAttributesTable(path, attributesTable)) ok = 1;
+    free(path);
+  }
+  if (!ok) LogPrint(LOG_ERR, "%s: %s", gettext("cannot load attributes table"), file);
+LogPrint(LOG_NOTICE, "attr=%d", ok); exit(0);
+  return ok;
 }
 
 int

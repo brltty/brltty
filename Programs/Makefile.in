@@ -128,6 +128,9 @@ tbl_native.$O:
 tbl_gnome.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/tbl_gnome.c
 
+attr.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/attr.c
+
 ###############################################################################
 
 ctb_compile.$O:
@@ -249,7 +252,7 @@ uninstall-api-bindings:
 
 ###############################################################################
 
-BRLTTY_OBJECTS = brltty.$O $(PROGRAM_OBJECTS) config.$O $(BASE_OBJECTS) datafile.$O dataarea.$O mount.$O auth.$O cut.$O cmd.$O scancodes.$O lock.$O charset.$O $(TBL_OBJECTS) $(CTB_OBJECTS) touch.$O serial.$O $(USB_OBJECTS) $(BLUETOOTH_OBJECTS) drivers.$O $(SCREEN_OBJECTS) $(SCREEN_DRIVER_OBJECTS) route.$O brl.$O $(BRAILLE_DRIVER_OBJECTS) $(SPEECH_OBJECT) $(SPEECH_DRIVER_OBJECTS) $(TUNE_OBJECTS) $(API_OBJECTS)
+BRLTTY_OBJECTS = brltty.$O $(PROGRAM_OBJECTS) config.$O $(BASE_OBJECTS) datafile.$O dataarea.$O mount.$O auth.$O cut.$O cmd.$O scancodes.$O lock.$O charset.$O $(TBL_OBJECTS) attr.$O $(CTB_OBJECTS) touch.$O serial.$O $(USB_OBJECTS) $(BLUETOOTH_OBJECTS) drivers.$O $(SCREEN_OBJECTS) $(SCREEN_DRIVER_OBJECTS) route.$O brl.$O $(BRAILLE_DRIVER_OBJECTS) $(SPEECH_OBJECT) $(SPEECH_DRIVER_OBJECTS) $(TUNE_OBJECTS) $(API_OBJECTS)
 
 brltty$X: $(BRLTTY_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(SPEECH_DRIVER_LIBRARIES) $(SCREEN_DRIVER_LIBRARIES) $(ICU_LIBRARIES) $(LDLIBS)
@@ -434,8 +437,8 @@ screen-drivers:
 text.auto.h: $(TEXT_TABLE) tbl2hex$X
 	./tbl2hex$X -- $(TEXT_TABLE) >$@
 
-attrib.auto.h: $(ATTRIBUTES_TABLE) tbl2hex$X
-	./tbl2hex$X -- $(ATTRIBUTES_TABLE) >$@
+attr.auto.h: $(ATTRIBUTES_TABLE) attr2hex$X
+	./attr2hex$X -- $(ATTRIBUTES_TABLE) >$@
 
 cmds.auto.h: $(SRC_DIR)/brldefs.h $(SRC_DIR)/brldefs.awk $(SRC_DIR)/cmds.awk
 	$(AWK) -f $(SRC_DIR)/brldefs.awk -f $(SRC_DIR)/cmds.awk $(SRC_DIR)/brldefs.h >$@
@@ -468,6 +471,16 @@ tbl2hex$X: $(TBL2HEX_OBJECTS)
 
 tbl2hex.$O:
 	$(HOSTCC) $(HOSTCFLAGS) -c $(SRC_DIR)/tbl2hex.c
+
+###############################################################################
+
+ATTR2HEX_OBJECTS = attr2hex.$O $(HOST_OBJECTS) host_lock.$O host_charset.$O host_datafile.$O host_attr.$O
+
+attr2hex$X: $(ATTR2HEX_OBJECTS)
+	$(HOSTCC) $(HOSTLDFLAGS) -o $@ $(ATTR2HEX_OBJECTS) $(ICU_LIBRARIES) $(LDLIBS)
+
+attr2hex.$O:
+	$(HOSTCC) $(HOSTCFLAGS) -c $(SRC_DIR)/attr2hex.c
 
 ###############################################################################
 
@@ -629,7 +642,7 @@ distclean clean::
 	for language do (cd $(BLD_TOP)$(BND_DIR)/$$language && $(MAKE) $@); done
 
 clean::
-	-rm -f brltty$X xbrlapi$X txt2hlp$X tbl2hex$X *test$X *-static$X
+	-rm -f brltty$X xbrlapi$X txt2hlp$X tbl2hex$X attr2hex$X *test$X *-static$X
 	-rm -f brlapi_constants.h *.$(LIB_EXT) *.$(ARC_EXT) *.def
 	-rm -f $(BLD_TOP)$(DRV_DIR)/* $(BLD_TOP)$(DAT_DIR)/*
 

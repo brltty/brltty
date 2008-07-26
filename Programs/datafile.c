@@ -28,16 +28,39 @@
 #include "misc.h"
 #include "datafile.h"
 #include "charset.h"
+#include "brldots.h"
 
 struct DataFileStruct {
   const char *name;
   int line;		/*line number in table */
-  DataParser parser;
+  DataProcessor processor;
   void *data;
 
   const wchar_t *start;
   const wchar_t *end;
 };
+
+const wchar_t brlDotNumbers[BRL_DOT_COUNT] = WS_C("12345678");
+const unsigned char brlDotBits[BRL_DOT_COUNT] = {
+  BRL_DOT1, BRL_DOT2, BRL_DOT3, BRL_DOT4,
+  BRL_DOT5, BRL_DOT6, BRL_DOT7, BRL_DOT8
+};
+
+int
+brlDotNumberToIndex (wchar_t number, int *index) {
+  const wchar_t *character = wmemchr(brlDotNumbers, number, ARRAY_COUNT(brlDotNumbers));
+  if (!character) return 0;
+  *index = character - brlDotNumbers;
+  return 1;
+}
+
+int
+brlDotBitToIndex (unsigned char bit, int *index) {
+  const unsigned char *cell = memchr(brlDotBits, bit, ARRAY_COUNT(brlDotBits));
+  if (!cell) return 0;
+  *index = cell - brlDotBits;
+  return 1;
+}
 
 void
 reportDataError (DataFile *file, char *format, ...) {
@@ -59,24 +82,6 @@ reportDataError (DataFile *file, char *format, ...) {
   }
 
   LogPrint(LOG_WARNING, "%s", message);
-}
-
-int
-includeDataFile (DataFile *file, const wchar_t *name, int length) {
-  const char *prefixAddress = file->name;
-  int prefixLength = 0;
-
-  if (*name != WC_C('/')) {
-    const char *prefixEnd = strrchr(prefixAddress, '/');
-    if (prefixEnd) prefixLength = prefixEnd - prefixAddress + 1;
-  }
-
-  {
-    char path[prefixLength + length + 1];
-    snprintf(path, sizeof(path), "%.*s%.*" PRIws,
-             prefixLength, prefixAddress, length, name);
-    return processDataFile(path, file->parser, file->data);
-  }
 }
 
 static int
@@ -296,11 +301,85 @@ getDataString (DataFile *file, DataString *string, const char *description) {
 }
 
 static int
+parseDotOperand (DataFile *file, int *index, const wchar_t *characters, int length) {
+  if (length == 1)
+    if (brlDotNumberToIndex(characters[0], index))
+      return 1;
+
+  reportDataError(file, "invalid braille dot number: %.*" PRIws, length, characters);
+  return 0;
+}
+
+int
+getDotOperand (DataFile *file, int *index) {
+  DataOperand number;
+
+  if (getDataOperand(file, &number, "dot number"))
+    if (parseDotOperand(file, index, number.characters, number.length))
+      return 1;
+
+  return 0;
+}
+
+int
+includeDataFile (DataFile *file, const wchar_t *name, int length) {
+  const char *prefixAddress = file->name;
+  int prefixLength = 0;
+
+  if (*name != WC_C('/')) {
+    const char *prefixEnd = strrchr(prefixAddress, '/');
+    if (prefixEnd) prefixLength = prefixEnd - prefixAddress + 1;
+  }
+
+  {
+    char path[prefixLength + length + 1];
+    snprintf(path, sizeof(path), "%.*s%.*" PRIws,
+             prefixLength, prefixAddress, length, name);
+    return processDataFile(path, file->processor, file->data);
+  }
+}
+
+int
+processIncludeOperands (DataFile *file, void *data) {
+  DataString path;
+
+  if (getDataString(file, &path, "include file path"))
+    if (!includeDataFile(file, path.characters, path.length))
+      return 0;
+
+  return 1;
+}
+
+int
+processPropertyOperand (DataFile *file, const DataProperty *properties, const char *description, void *data) {
+  DataOperand name;
+
+  if (getDataOperand(file, &name, description)) {
+    {
+      const DataProperty *property = properties;
+
+      while (property->name) {
+        if (name.length == wcslen(property->name))
+          if (wmemcmp(name.characters, property->name, name.length) == 0)
+            return property->processor(file, data);
+
+        property += 1;
+      }
+    }
+
+    reportDataError(file, "unknown %s: %.*" PRIws,
+                    description, name.length, name.characters);
+  }
+
+  return 1;
+}
+
+static int
 processWcharLine (DataFile *file, const wchar_t *line) {
   file->end = file->start = line;
   if (!findDataOperand(file)) return 1;			/*blank line */
   if (file->start[0] == WC_C('#')) return 1;
-  return file->parser(file, file->data);
+  return file->processor(file, file->data);
 }
 
 static int
@@ -330,14 +409,14 @@ processUtf8Line (char *line, void *dataAddress) {
 }
 
 int
-processDataFile (const char *name, DataParser parser, void *data) {
+processDataFile (const char *name, DataProcessor processor, void *data) {
   int ok = 0;
   DataFile file;
   FILE *stream;
 
   file.name = name;
   file.line = 0;
-  file.parser = parser;
+  file.processor = processor;
   file.data = data;
 
   LogPrint(LOG_DEBUG, "including data file: %s", file.name);

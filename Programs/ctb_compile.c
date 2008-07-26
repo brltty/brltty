@@ -57,8 +57,6 @@ static struct CharacterClass *characterClasses;
 static ContractionTableCharacterAttributes characterClassAttribute;
 
 static const wchar_t *const opcodeNames[CTO_None] = {
-  WS_C("include"),
-
   WS_C("capsign"),
   WS_C("begcaps"),
   WS_C("endcaps"),
@@ -94,7 +92,9 @@ static const wchar_t *const opcodeNames[CTO_None] = {
 
   WS_C("class"),
   WS_C("after"),
-  WS_C("before")
+  WS_C("before"),
+
+  WS_C("include")
 };
 static unsigned char opcodeLengths[CTO_None] = {0};
 
@@ -467,7 +467,7 @@ getFindText (DataFile *file, DataString *find) {
 }
 
 static int
-parseContractionLine (DataFile *file, void *data) {
+processContractionLine (DataFile *file, void *data) {
   ContractionTableCharacterAttributes after = 0;
   ContractionTableCharacterAttributes before = 0;
 
@@ -478,13 +478,9 @@ parseContractionLine (DataFile *file, void *data) {
       case CTO_None:
         break;
 
-      case CTO_IncludeFile: {
-        DataString path;
-        if (getDataString(file, &path, "include file path"))
-          if (!includeDataFile(file, path.characters, path.length))
-            return 0;
+      case CTO_IncludeFile:
+        if (!processIncludeOperands(file, data)) return 0;
         break;
-      }
 
       case CTO_Always:
       case CTO_LargeSign:
@@ -644,7 +640,7 @@ compileContractionTable (const char *fileName) {
   if ((dataArea = newDataArea())) {
     if (allocateDataItem(dataArea, NULL, sizeof(ContractionTableHeader), __alignof__(ContractionTableHeader))) {
       if (allocateCharacterClasses()) {
-        if (processDataFile(fileName, parseContractionLine, NULL)) {
+        if (processDataFile(fileName, processContractionLine, NULL)) {
           if (saveCharacterTable()) {
             if ((table = malloc(sizeof(*table)))) {
               table->header = getContractionTableHeader();

@@ -15,8 +15,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRL_INCLUDED_ISO_11548_1
-#define BRL_INCLUDED_ISO_11548_1
+#ifndef BRL_INCLUDED_BRLDOTS
+#define BRL_INCLUDED_BRLDOTS
 
 #ifdef __cplusplus
 extern "C" {
@@ -79,4 +79,4 @@ static inline unsigned int brlDotsToNumbers (BrlDots dots, BrlDotNumbersBuffer n
 }
 #endif /* __cplusplus */
 
-#endif /* BRL_INCLUDED_ISO_11548_1 */
+#endif /* BRL_INCLUDED_BRLDOTS */

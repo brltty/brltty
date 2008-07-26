@@ -29,6 +29,7 @@
 #include "drivers.h"
 #include "brl.h"
 #include "tbl.h"
+#include "attr.h"
 #include "brl.auto.h"
 #include "cmd.h"
 
@@ -71,8 +72,8 @@ TranslationTable textTable = {
 };
 TranslationTable untextTable;
 
-TranslationTable attributesTable = {
-  #include "attrib.auto.h"
+AttributesTable attributesTable = {
+  #include "attr.auto.h"
 };
 
 int

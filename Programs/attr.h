@@ -15,36 +15,23 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_TBL
-#define BRLTTY_INCLUDED_TBL
+#ifndef BRLTTY_INCLUDED_ATTR
+#define BRLTTY_INCLUDED_ATTR
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-#include <stdio.h>
+typedef unsigned char AttributesTable[0X100];
 
-#include "brl.h"
+extern AttributesTable attributesTable;
 
-#define TBL_UNDEFINED 0X1
-#define TBL_DUPLICATE 0X2
-#define TBL_UNUSED    0X4
+extern int loadAttributesTable (const char *name, AttributesTable table);
 
-extern int loadTranslationTable (
-  const char *path,
-  FILE *file,
-  TranslationTable table,
-  int options
-);
-
-extern unsigned char convertWcharToDots (TranslationTable table, wchar_t character);
-
-extern void reverseTranslationTable (TranslationTable from, TranslationTable to);
-
-extern void fixTextTablePath (char **path);
+extern void fixAttributesTablePath (char **path);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_TBL */
+#endif /* BRLTTY_INCLUDED_ATTR */

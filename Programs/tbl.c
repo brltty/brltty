@@ -251,17 +251,7 @@ reverseTranslationTable (TranslationTable from, TranslationTable to) {
   for (byte=TRANSLATION_TABLE_SIZE-1; byte>=0; byte--) to[from[byte]] = byte;
 }
 
-static void
-fixTranslationTablePath (char **path, const char *prefix) {
-  fixPath(path, TRANSLATION_TABLE_EXTENSION, prefix);
-}
-
 void
 fixTextTablePath (char **path) {
-  fixTranslationTablePath(path, TEXT_TABLE_PREFIX);
-}
-
-void
-fixAttributesTablePath (char **path) {
-  fixTranslationTablePath(path, ATTRIBUTES_TABLE_PREFIX);
+  fixPath(path, TRANSLATION_TABLE_EXTENSION, TEXT_TABLE_PREFIX);
 }
