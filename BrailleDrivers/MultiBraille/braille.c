@@ -341,11 +341,12 @@ static struct KeyStroke getbrlkey (void) {
 				c_temp = c;
 				keystroke.block = EOF;	/* invalid / not supported keystroke */
 				serialReadData (MB_serialDevice, &c, 1, 0, 0);		/* read keynumber */
-  				/* keystroke.key = c; */
+  				keystroke.key = 0;
   				/* LogPrint(LOG_NOTICE, "MultiBraille.o: Ignored: Key=%d, Block=%c", keystroke.key, c_temp); */
 				return keystroke;
 		}
 	}
 	keystroke.block = EOF;
+	keystroke.key = 0;
 	return keystroke;
 }
