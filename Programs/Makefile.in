@@ -128,8 +128,11 @@ tbl_native.$O:
 tbl_gnome.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/tbl_gnome.c
 
-attr.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/attr.c
+attr_load.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/attr_load.c
+
+attr_table.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/attr_table.c
 
 ###############################################################################
 
@@ -252,7 +255,7 @@ uninstall-api-bindings:
 
 ###############################################################################
 
-BRLTTY_OBJECTS = brltty.$O $(PROGRAM_OBJECTS) config.$O $(BASE_OBJECTS) datafile.$O dataarea.$O mount.$O auth.$O cut.$O cmd.$O scancodes.$O lock.$O charset.$O $(TBL_OBJECTS) attr.$O $(CTB_OBJECTS) touch.$O serial.$O $(USB_OBJECTS) $(BLUETOOTH_OBJECTS) drivers.$O $(SCREEN_OBJECTS) $(SCREEN_DRIVER_OBJECTS) route.$O brl.$O $(BRAILLE_DRIVER_OBJECTS) $(SPEECH_OBJECT) $(SPEECH_DRIVER_OBJECTS) $(TUNE_OBJECTS) $(API_OBJECTS)
+BRLTTY_OBJECTS = brltty.$O $(PROGRAM_OBJECTS) config.$O $(BASE_OBJECTS) datafile.$O dataarea.$O mount.$O auth.$O cut.$O cmd.$O scancodes.$O lock.$O charset.$O $(TBL_OBJECTS) attr_load.$O attr_table.$O $(CTB_OBJECTS) touch.$O serial.$O $(USB_OBJECTS) $(BLUETOOTH_OBJECTS) drivers.$O $(SCREEN_OBJECTS) $(SCREEN_DRIVER_OBJECTS) route.$O brl.$O $(BRAILLE_DRIVER_OBJECTS) $(SPEECH_OBJECT) $(SPEECH_DRIVER_OBJECTS) $(TUNE_OBJECTS) $(API_OBJECTS)
 
 brltty$X: $(BRLTTY_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(SPEECH_DRIVER_LIBRARIES) $(SCREEN_DRIVER_LIBRARIES) $(ICU_LIBRARIES) $(LDLIBS)
@@ -474,7 +477,7 @@ tbl2hex.$O:
 
 ###############################################################################
 
-ATTR2HEX_OBJECTS = attr2hex.$O $(HOST_OBJECTS) host_lock.$O host_charset.$O host_datafile.$O host_attr.$O
+ATTR2HEX_OBJECTS = attr2hex.$O $(HOST_OBJECTS) host_lock.$O host_charset.$O host_datafile.$O host_attr_load.$O
 
 attr2hex$X: $(ATTR2HEX_OBJECTS)
 	$(HOSTCC) $(HOSTLDFLAGS) -o $@ $(ATTR2HEX_OBJECTS) $(ICU_LIBRARIES) $(LDLIBS)

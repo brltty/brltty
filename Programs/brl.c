@@ -72,10 +72,6 @@ TranslationTable textTable = {
 };
 TranslationTable untextTable;
 
-AttributesTable attributesTable = {
-  #include "attr.auto.h"
-};
-
 int
 haveBrailleDriver (const char *code) {
   return haveDriver(code, BRAILLE_DRIVER_CODES, driverTable);
