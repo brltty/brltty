@@ -521,7 +521,6 @@ replaceAttributesTable (const char *file) {
     free(path);
   }
   if (!ok) LogPrint(LOG_ERR, "%s: %s", gettext("cannot load attributes table"), file);
-LogPrint(LOG_NOTICE, "attr=%d", ok); exit(0);
   return ok;
 }
 
