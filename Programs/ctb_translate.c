@@ -23,10 +23,9 @@
 #include <unicode/uchar.h>
 #endif /* HAVE_ICU */
 
-#include "tbl.h"
 #include "ctb.h"
 #include "ctb_internal.h"
-#include "brl.h"
+#include "tbl.h"
 
 static ContractionTable *table;
 static const wchar_t *src, *srcmin, *srcmax, *cursor;

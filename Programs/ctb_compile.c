@@ -21,11 +21,11 @@
 #include <string.h>
  
 #include "misc.h"
-#include "datafile.h"
-#include "dataarea.h"
 #include "ctb.h"
 #include "ctb_internal.h"
-#include "brl.h"
+#include "datafile.h"
+#include "dataarea.h"
+#include "brldots.h"
 
 typedef struct {
   unsigned char length;
