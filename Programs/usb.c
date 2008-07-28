@@ -538,6 +538,18 @@ usbOpenInterface (
     if (!usbClaimInterface(device, interface))
       return 0;
 
+  {
+    unsigned char bytes[1];
+    int size = usbControlRead(device, UsbControlRecipient_Interface, UsbControlType_Standard,
+                              UsbStandardRequest_GetInterface, 0, interface,
+                              bytes, sizeof(bytes), 1000);
+
+    if ((size != -1) && (bytes[0] == alternative)) {
+      device->interface = descriptor;
+      return 1;
+    }
+  }
+
   if (usbSetAlternative(device, interface, alternative)) {
     device->interface = descriptor;
     return 1;
