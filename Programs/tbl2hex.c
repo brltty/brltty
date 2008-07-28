@@ -65,6 +65,12 @@ dumpBytes (FILE *stream, const unsigned char *bytes, size_t count) {
 
     {
       unsigned int counter = 0;
+      unsigned int maximum = 8;
+
+      while (maximum > 1) {
+        if (byte[maximum-1]) break;
+        maximum -= 1;
+      }
 
       while (byte < end) {
         if (first) {
@@ -87,7 +93,7 @@ dumpBytes (FILE *stream, const unsigned char *bytes, size_t count) {
         fprintf(stream, " 0X%02X", *byte++);
         if (ferror(stdout)) return 0;
 
-        if (++counter == 8) break;
+        if (++counter == maximum) break;
       }
     }
   }
