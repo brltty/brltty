@@ -15,73 +15,139 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/* tbl2hex.c - filter to compile 256-byte table file into C code
- * $Id: tbl2hex.c,v 1.3 1996/09/24 01:04:25 nn201 Exp $
- */
-
 #include "prologue.h"
 
 #include <stdio.h>
+#include <string.h>
 
 #include "options.h"
 #include "misc.h"
-#include "brl.h"
 #include "tbl.h"
+#include "attr.h"
+
+static char *opt_tableType;
+#define TBL_TYPE_TEXT "text"
+#define TBL_TYPE_ATTRIBUTES "attributes"
+static const char *tableType_text = TBL_TYPE_TEXT;
+static const char *tableType_attributes = TBL_TYPE_ATTRIBUTES;
+static const char *const optionStrings_TableType[] = {
+  TBL_TYPE_ATTRIBUTES ", " TBL_TYPE_TEXT,
+  NULL
+};
 
 BEGIN_OPTION_TABLE(programOptions)
+  { .letter = 't',
+    .word = "type",
+    .argument = strtext("table-type"),
+    .setting.string = &opt_tableType,
+    .defaultSetting = TBL_TYPE_TEXT,
+    .description = strtext("The kind of table being generated: one of {%s}"),
+    .strings = optionStrings_TableType
+  },
 END_OPTION_TABLE
+
+int
+dumpBytes (FILE *stream, const unsigned char *bytes, size_t count) {
+  const unsigned char *byte = bytes;
+  const unsigned char *end = byte + count;
+  int first = 1;
+  int digits;
+
+  if (count) {
+    char buffer[0X10];
+    snprintf(buffer, sizeof(buffer), "%X%n", count-1, &digits);
+  } else {
+    digits = 1;
+  }
+
+  while (byte < end) {
+    while (!*byte && (byte < (end - 1))) byte += 1;
+
+    {
+      unsigned int counter = 0;
+
+      while (byte < end) {
+        if (first) {
+          first = 0;
+        } else {
+          fprintf(stream, ",");
+          if (ferror(stream)) return 0;
+
+          if (!counter) {
+            fprintf(stream, "\n");
+            if (ferror(stream)) return 0;
+          }
+        }
+
+        if (!counter) {
+          fprintf(stream, "[0X%0*X] =", digits, byte-bytes);
+          if (ferror(stream)) return 0;
+        }
+
+        fprintf(stream, " 0X%02X", *byte++);
+        if (ferror(stdout)) return 0;
+
+        if (++counter == 8) break;
+      }
+    }
+  }
+
+  if (!first) {
+    fprintf(stream, "\n");
+    if (ferror(stream)) return 0;
+  }
+
+  return 1;
+}
 
 int
 main (int argc, char *argv[]) {
   int status;
   char *path;
-  TranslationTable table;
 
   {
     static const OptionsDescriptor descriptor = {
       OPTION_TABLE(programOptions),
       .applicationName = "tbl2hex",
-      .argumentsSummary = "translation-table"
+      .argumentsSummary = "table-file"
     };
     processOptions(&descriptor, &argc, &argv);
   }
 
   if (argc == 0) {
-    LogPrint(LOG_ERR, "missing translation table.");
+    LogPrint(LOG_ERR, "missing table file.");
     exit(2);
   }
   path = *argv++, argc--;
 
-  if (loadTranslationTable(path, NULL, table, 0)) {
-    unsigned int columns = 8;
-    unsigned int rows = 0X100 / columns;
-    unsigned int row;
+  if (strcasecmp(opt_tableType, tableType_text) == 0) {
+    TranslationTable table;
 
-    for (row=0; row<rows; row++) {
-      const unsigned char *buffer = &table[row * columns];
-      unsigned int column;
-
-      for (column=0; column<columns; column++) {
-        int newline = column == (columns - 1);
-        int comma = (row < (rows - 1)) || !newline;
-
-        printf("0X%02X", buffer[column]);
-        if (ferror(stdout)) break;
-
-        if (comma) {
-          putchar(',');
-          if (ferror(stdout)) break;
-        }
-
-        putchar(newline? '\n': ' ');
-        if (ferror(stdout)) break;
+    if (loadTranslationTable(path, NULL, table, 0)) {
+      if (dumpBytes(stdout, table, sizeof(table))) {
+        status = 0;
+      } else {
+        status = 4;
       }
+    } else {
+      status = 3;
+    }
+  } else if (strcasecmp(opt_tableType, tableType_attributes) == 0) {
+    AttributesTable table;
 
-      if (!ferror(stdout)) fflush(stdout);
-      status = ferror(stdout)? 4: 0;
+    if (loadAttributesTable(path, table)) {
+      if (dumpBytes(stdout, table, sizeof(table))) {
+        status = 0;
+      } else {
+        status = 4;
+      }
+    } else {
+      status = 3;
     }
   } else {
-    status = 3;
+    LogPrint(LOG_ERR, "unimplemented table type: %s", opt_tableType);
+    status = 5;
   }
+
   return status;
 }

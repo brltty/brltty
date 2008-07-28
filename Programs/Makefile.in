@@ -438,10 +438,10 @@ screen-drivers:
 ###############################################################################
 
 text.auto.h: $(TEXT_TABLE) tbl2hex$X
-	./tbl2hex$X -- $(TEXT_TABLE) >$@
+	./tbl2hex$X -t text -- $(TEXT_TABLE) >$@
 
-attr.auto.h: $(ATTRIBUTES_TABLE) attr2hex$X
-	./attr2hex$X -- $(ATTRIBUTES_TABLE) >$@
+attr.auto.h: $(ATTRIBUTES_TABLE) tbl2hex$X
+	./tbl2hex$X -t attributes -- $(ATTRIBUTES_TABLE) >$@
 
 cmds.auto.h: $(SRC_DIR)/brldefs.h $(SRC_DIR)/brldefs.awk $(SRC_DIR)/cmds.awk
 	$(AWK) -f $(SRC_DIR)/brldefs.awk -f $(SRC_DIR)/cmds.awk $(SRC_DIR)/brldefs.h >$@
@@ -467,23 +467,13 @@ txt2hlp.$O:
 
 ###############################################################################
 
-TBL2HEX_OBJECTS = tbl2hex.$O $(HOST_OBJECTS) host_lock.$O host_charset.$O host_tbl.$O host_tbl_native.$O
+TBL2HEX_OBJECTS = tbl2hex.$O $(HOST_OBJECTS) host_lock.$O host_charset.$O host_datafile.$O host_tbl.$O host_tbl_native.$O host_attr_load.$O
 
 tbl2hex$X: $(TBL2HEX_OBJECTS)
-	$(HOSTCC) $(HOSTLDFLAGS) -o $@ $(TBL2HEX_OBJECTS) $(LDLIBS)
+	$(HOSTCC) $(HOSTLDFLAGS) -o $@ $(TBL2HEX_OBJECTS) $(ICU_LIBRARIES) $(LDLIBS)
 
 tbl2hex.$O:
 	$(HOSTCC) $(HOSTCFLAGS) -c $(SRC_DIR)/tbl2hex.c
-
-###############################################################################
-
-ATTR2HEX_OBJECTS = attr2hex.$O $(HOST_OBJECTS) host_lock.$O host_charset.$O host_datafile.$O host_attr_load.$O
-
-attr2hex$X: $(ATTR2HEX_OBJECTS)
-	$(HOSTCC) $(HOSTLDFLAGS) -o $@ $(ATTR2HEX_OBJECTS) $(ICU_LIBRARIES) $(LDLIBS)
-
-attr2hex.$O:
-	$(HOSTCC) $(HOSTCFLAGS) -c $(SRC_DIR)/attr2hex.c
 
 ###############################################################################
 
@@ -645,7 +635,7 @@ distclean clean::
 	for language do (cd $(BLD_TOP)$(BND_DIR)/$$language && $(MAKE) $@); done
 
 clean::
-	-rm -f brltty$X xbrlapi$X txt2hlp$X tbl2hex$X attr2hex$X *test$X *-static$X
+	-rm -f brltty$X xbrlapi$X txt2hlp$X tbl2hex$X *test$X *-static$X
 	-rm -f brlapi_constants.h *.$(LIB_EXT) *.$(ARC_EXT) *.def
 	-rm -f $(BLD_TOP)$(DRV_DIR)/* $(BLD_TOP)$(DAT_DIR)/*
 
