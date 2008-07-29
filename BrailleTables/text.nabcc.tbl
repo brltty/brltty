@@ -256,160 +256,160 @@
 # The 5 letters with a circumflex accent (^) use the [1-5] dot combinations:
 
    #Hex    Dots       Dec Char Description
-   \XC2 ( 2    78)  # 194   ¬  latin capital letter a with circumflex
-   \XCA ( 23   78)  # 202      latin capital letter e with circumflex
-   \XCE ( 2  5 78)  # 206   Œ  latin capital letter i with circumflex
-   \XD4 ( 2  5678)  # 212   ‘  latin capital letter o with circumflex
-   \XDB ( 2   678)  # 219   €  latin capital letter u with circumflex
-   \XE2 ( 2     8)  # 226   ‚  latin small letter a with circumflex
-   \XEA ( 23    8)  # 234   Í  latin small letter e with circumflex
-   \XEE ( 2  5  8)  # 238   Ó  latin small letter i with circumflex
-   \XF4 ( 2  56 8)  # 244   Ù  latin small letter o with circumflex
-   \XFB ( 2   6 8)  # 251   ˚  latin small letter u with circumflex
+   \XC2 ( 2    78)  # 194   √Ç  latin capital letter a with circumflex
+   \XCA ( 23   78)  # 202   √ä  latin capital letter e with circumflex
+   \XCE ( 2  5 78)  # 206   √é  latin capital letter i with circumflex
+   \XD4 ( 2  5678)  # 212   √î  latin capital letter o with circumflex
+   \XDB ( 2   678)  # 219   √õ  latin capital letter u with circumflex
+   \XE2 ( 2     8)  # 226   √¢  latin small letter a with circumflex
+   \XEA ( 23    8)  # 234   √™  latin small letter e with circumflex
+   \XEE ( 2  5  8)  # 238   √Æ  latin small letter i with circumflex
+   \XF4 ( 2  56 8)  # 244   √¥  latin small letter o with circumflex
+   \XFB ( 2   6 8)  # 251   √ª  latin small letter u with circumflex
 
 # The 5 letters with a grave accent (`) use the [6-0] dot combinations:
 
    #Hex    Dots       Dec Char Description
-   \XC0 ( 23 5 78)  # 192   ¿  latin capital letter a with grave
-   \XC8 ( 23 5678)  # 200   »  latin capital letter e with grave
-   \XCC ( 23  678)  # 204   Ã  latin capital letter i with grave
-   \XD2 (  3 5 78)  # 210   “  latin capital letter o with grave
-   \XD9 (  3 5678)  # 217   Ÿ  latin capital letter u with grave
-   \XE0 ( 23 5  8)  # 224   ‡  latin small letter a with grave
-   \XE8 ( 23 56 8)  # 232   Ë  latin small letter e with grave
-   \XEC ( 23  6 8)  # 236   Ï  latin small letter i with grave
-   \XF2 (  3 5  8)  # 242   Ú  latin small letter o with grave
-   \XF9 (  3 56 8)  # 249   ˘  latin small letter u with grave
+   \XC0 ( 23 5 78)  # 192   √Ä  latin capital letter a with grave
+   \XC8 ( 23 5678)  # 200   √à  latin capital letter e with grave
+   \XCC ( 23  678)  # 204   √å  latin capital letter i with grave
+   \XD2 (  3 5 78)  # 210   √í  latin capital letter o with grave
+   \XD9 (  3 5678)  # 217   √ô  latin capital letter u with grave
+   \XE0 ( 23 5  8)  # 224   √†  latin small letter a with grave
+   \XE8 ( 23 56 8)  # 232   √®  latin small letter e with grave
+   \XEC ( 23  6 8)  # 236   √¨  latin small letter i with grave
+   \XF2 (  3 5  8)  # 242   √≤  latin small letter o with grave
+   \XF9 (  3 56 8)  # 249   √π  latin small letter u with grave
 
 # The 6 letters with an acute accent (') use the [a-f] dot combinations with
 # dots 3 and 6 added:
 
    #Hex    Dots       Dec Char Description
-   \XC1 (1    678)  # 193   ¡  latin capital letter a with acute
-   \XC9 (12   678)  # 201   …  latin capital letter e with acute
-   \XCD (1  4 678)  # 205   Õ  latin capital letter i with acute
-   \XD3 (1  45678)  # 211   ”  latin capital letter o with acute
-   \XDA (1   5678)  # 218   ⁄  latin capital letter u with acute
-   \XDD (12 4 678)  # 221   ›  latin capital letter y with acute
-   \XE1 (1    6 8)  # 225   ·  latin small letter a with acute
-   \XE9 (12   6 8)  # 233   È  latin small letter e with acute
-   \XED (1  4 6 8)  # 237   Ì  latin small letter i with acute
-   \XF3 (1  456 8)  # 243   Û  latin small letter o with acute
-   \XFA (1   56 8)  # 250   ˙  latin small letter u with acute
-   \XFD (12 4 6 8)  # 253   ˝  latin small letter y with acute
+   \XC1 (1    678)  # 193   √Å  latin capital letter a with acute
+   \XC9 (12   678)  # 201   √â  latin capital letter e with acute
+   \XCD (1  4 678)  # 205   √ç  latin capital letter i with acute
+   \XD3 (1  45678)  # 211   √ì  latin capital letter o with acute
+   \XDA (1   5678)  # 218   √ö  latin capital letter u with acute
+   \XDD (12 4 678)  # 221   √ù  latin capital letter y with acute
+   \XE1 (1    6 8)  # 225   √°  latin small letter a with acute
+   \XE9 (12   6 8)  # 233   √©  latin small letter e with acute
+   \XED (1  4 6 8)  # 237   √≠  latin small letter i with acute
+   \XF3 (1  456 8)  # 243   √≥  latin small letter o with acute
+   \XFA (1   56 8)  # 250   √∫  latin small letter u with acute
+   \XFD (12 4 6 8)  # 253   √Ω  latin small letter y with acute
 
 # The 6 letters with a dieresis accent (") use the [f-j] dot combinations with
 # dots 3 and 6 added, and the number sign (because it fits the sequence
 # reasonably well):
 
    #Hex    Dots       Dec Char Description
-   \XC4 (1234 678)  # 196   ƒ  latin capital letter a with diaeresis
-   \XCB (12345678)  # 203   À  latin capital letter e with diaeresis
-   \XCF (123 5678)  # 207   œ  latin capital letter i with diaeresis
-   \XD6 ( 234 678)  # 214   ÷  latin capital letter o with diaeresis
-   \XDC ( 2345678)  # 220   ‹  latin capital letter u with diaeresis
-   \XE4 (1234 6 8)  # 228   ‰  latin small letter a with diaeresis
-   \XEB (123456 8)  # 235   Î  latin small letter e with diaeresis
-   \XEF (123 56 8)  # 239   Ô  latin small letter i with diaeresis
-   \XF6 ( 234 6 8)  # 246   ˆ  latin small letter o with diaeresis
-   \XFC ( 23456 8)  # 252   ¸  latin small letter u with diaeresis
-   \XFF (  3456 8)  # 255   ˇ  latin small letter y with diaeresis
+   \XC4 (1234 678)  # 196   √Ñ  latin capital letter a with diaeresis
+   \XCB (12345678)  # 203   √ã  latin capital letter e with diaeresis
+   \XCF (123 5678)  # 207   √è  latin capital letter i with diaeresis
+   \XD6 ( 234 678)  # 214   √ñ  latin capital letter o with diaeresis
+   \XDC ( 2345678)  # 220   √ú  latin capital letter u with diaeresis
+   \XE4 (1234 6 8)  # 228   √§  latin small letter a with diaeresis
+   \XEB (123456 8)  # 235   √´  latin small letter e with diaeresis
+   \XEF (123 56 8)  # 239   √Ø  latin small letter i with diaeresis
+   \XF6 ( 234 6 8)  # 246   √∂  latin small letter o with diaeresis
+   \XFC ( 23456 8)  # 252   √º  latin small letter u with diaeresis
+   \XFF (  3456 8)  # 255   √ø  latin small letter y with diaeresis
 
 # There is no uppercase y-dieresis in the Latin1 character set. The German
 # lowercase double-s, which also doesn't have an uppercase counterpart in the
 # Latin1 character set, uses its representation:
 
    #Hex    Dots       Dec Char Description
-   \XDF (  345678)  # 223   ﬂ  latin small letter sharp s
+   \XDF (  345678)  # 223   √ü  latin small letter sharp s
 
 # The remaining accented letters are:
 
    #Hex    Dots       Dec Char Description
-   \XC3 (    5 78)  # 195   √  latin capital letter a with tilde
-   \XD1 (   4 678)  # 209   —  latin capital letter n with tilde
-   \XD5 (    5678)  # 213   ’  latin capital letter o with tilde
-   \XC5 (  345 78)  # 197   ≈  latin capital letter a with ring above
-   \XC7 (  34 678)  # 199   «  latin capital letter c with cedilla
-   \XD8 (  34  78)  # 216   ÿ  latin capital letter o with stroke
-   \XC6 (  3   78)  # 198   ∆  latin capital letter ae
-   \XD0 (     678)  # 208   –  latin capital letter eth
-   \XDE (  3  678)  # 222   ﬁ  latin capital letter thorn
-   \XE3 (    5  8)  # 227   „  latin small letter a with tilde
-   \XF1 (   4 6 8)  # 241   Ò  latin small letter n with tilde
-   \XF5 (    56 8)  # 245   ı  latin small letter o with tilde
-   \XE5 (  345  8)  # 229   Â  latin small letter a with ring above
-   \XE7 (  34 6 8)  # 231   Á  latin small letter c with cedilla
-   \XF8 (  34   8)  # 248   ¯  latin small letter o with stroke
-   \XE6 (  3    8)  # 230   Ê  latin small letter ae
-   \XF0 (     6 8)  # 240     latin small letter eth
-   \XFE (  3  6 8)  # 254   ˛  latin small letter thorn
+   \XC3 (    5 78)  # 195   √É  latin capital letter a with tilde
+   \XD1 (   4 678)  # 209   √ë  latin capital letter n with tilde
+   \XD5 (    5678)  # 213   √ï  latin capital letter o with tilde
+   \XC5 (  345 78)  # 197   √Ö  latin capital letter a with ring above
+   \XC7 (  34 678)  # 199   √á  latin capital letter c with cedilla
+   \XD8 (  34  78)  # 216   √ò  latin capital letter o with stroke
+   \XC6 (  3   78)  # 198   √Ü  latin capital letter ae
+   \XD0 (     678)  # 208   √ê  latin capital letter eth
+   \XDE (  3  678)  # 222   √û  latin capital letter thorn
+   \XE3 (    5  8)  # 227   √£  latin small letter a with tilde
+   \XF1 (   4 6 8)  # 241   √±  latin small letter n with tilde
+   \XF5 (    56 8)  # 245   √µ  latin small letter o with tilde
+   \XE5 (  345  8)  # 229   √•  latin small letter a with ring above
+   \XE7 (  34 6 8)  # 231   √ß  latin small letter c with cedilla
+   \XF8 (  34   8)  # 248   √∏  latin small letter o with stroke
+   \XE6 (  3    8)  # 230   √¶  latin small letter ae
+   \XF0 (     6 8)  # 240   √∞  latin small letter eth
+   \XFE (  3  6 8)  # 254   √æ  latin small letter thorn
 
 # Some characters are the same as other characters which they resemble but with
 # dot 7 added:
 
    #Hex    Dots       Dec Char Description
-   \XAD (  3  67 )  # 173   ≠  soft hyphen
-   \XAB (12   67 )  # 171   ´  left-pointing double angle quotation mark
-   \XBB (  345 7 )  # 187   ª  right-pointing double angle quotation mark
-   \XA6 (1   567 )  # 166   ¶  broken bar
-   \XB9 ( 2    7 )  # 185   π  superscript one
-   \XB2 ( 23   7 )  # 178   ≤  superscript two
-   \XB3 ( 2  5 7 )  # 179   ≥  superscript three
-   \XB1 (  34 67 )  # 177   ±  plus-minus sign
-   \XD7 (1    67 )  # 215   ◊  multiplication sign
-   \XF7 (  34  7 )  # 247   ˜  division sign
-   \XB7 (   4 67 )  # 183   ∑  middle dot
-   \XA1 ( 234 67 )  # 161   °  inverted exclamation mark
-   \XBF (1  4567 )  # 191   ø  inverted question mark
-   \XA2 (12 4 67 )  # 162   ¢  cent sign
-   \XA3 (  34567 )  # 163   £  pound sign
+   \XAD (  3  67 )  # 173   ¬≠  soft hyphen
+   \XAB (12   67 )  # 171   ¬´  left-pointing double angle quotation mark
+   \XBB (  345 7 )  # 187   ¬ª  right-pointing double angle quotation mark
+   \XA6 (1   567 )  # 166   ¬¶  broken bar
+   \XB9 ( 2    7 )  # 185   ¬π  superscript one
+   \XB2 ( 23   7 )  # 178   ¬≤  superscript two
+   \XB3 ( 2  5 7 )  # 179   ¬≥  superscript three
+   \XB1 (  34 67 )  # 177   ¬±  plus-minus sign
+   \XD7 (1    67 )  # 215   √ó  multiplication sign
+   \XF7 (  34  7 )  # 247   √∑  division sign
+   \XB7 (   4 67 )  # 183   ¬∑  middle dot
+   \XA1 ( 234 67 )  # 161   ¬°  inverted exclamation mark
+   \XBF (1  4567 )  # 191   ¬ø  inverted question mark
+   \XA2 (12 4 67 )  # 162   ¬¢  cent sign
+   \XA3 (  34567 )  # 163   ¬£  pound sign
 
 # A few more characters follow this same convention but their relationships
 # to their base characters is a bit obscure:
 
    #Hex    Dots       Dec Char Description
-   \XA4 (1  4 67 )  # 164   §  currency sign
-   \XA5 (1234 67 )  # 165   •  yen sign
+   \XA4 (1  4 67 )  # 164   ¬§  currency sign
+   \XA5 (1234 67 )  # 165   ¬•  yen sign
 
 # Some characters are represented by the first letters of their names lowered
 # by one row of dots:
 
    #Hex    Dots       Dec Char Description
-   \XAC ( 2  567 )  # 172   ¨  not sign
-   \XB6 ( 23 5 7 )  # 182   ∂  pilcrow sign
-   \XA9 ( 23 567 )  # 169   ©  copyright sign
-   \XAE ( 23  67 )  # 174   Æ  registered sign
-   \XA7 (  3 5 7 )  # 167   ß  section sign
-   \XB0 (  3 567 )  # 176   ∞  degree sign
+   \XAC ( 2  567 )  # 172   ¬¨  not sign
+   \XB6 ( 23 5 7 )  # 182   ¬∂  pilcrow sign
+   \XA9 ( 23 567 )  # 169   ¬©  copyright sign
+   \XAE ( 23  67 )  # 174   ¬Æ  registered sign
+   \XA7 (  3 5 7 )  # 167   ¬ß  section sign
+   \XB0 (  3 567 )  # 176   ¬∞  degree sign
 
 # The three fraction characters use combinations of dots 1 and 4 (which
 # progress from left to right as the value of the fraction increases) together
 # with dots 2,3,5,6,7:
 
    #Hex    Dots       Dec Char Description
-   \XBC (123 567 )  # 188   º  vulgar fraction one quarter
-   \XBD (1234567 )  # 189   Ω  vulgar fraction one half
-   \XBE ( 234567 )  # 190   æ  vulgar fraction three quarters
+   \XBC (123 567 )  # 188   ¬º  vulgar fraction one quarter
+   \XBD (1234567 )  # 189   ¬Ω  vulgar fraction one half
+   \XBE ( 234567 )  # 190   ¬æ  vulgar fraction three quarters
 
 # Each of the three extended accent characters is the same as its conventional
 # compose character but with dot 7 added:
 
    #Hex    Dots       Dec Char Description
-   \XB4 (  3   7 )  # 180   ¥  acute accent
-   \XB8 (     67 )  # 184   ∏  cedilla
-   \XA8 (    5 7 )  # 168   ®  diaeresis
+   \XB4 (  3   7 )  # 180   ¬¥  acute accent
+   \XB8 (     67 )  # 184   ¬∏  cedilla
+   \XA8 (    5 7 )  # 168   ¬®  diaeresis
 
 # The two gender symbols are:
 
    #Hex    Dots       Dec Char Description
-   \XBA (      7 )  # 186   ∫  masculine ordinal indicator
-   \XAA (       8)  # 170   ™  feminine ordinal indicator
+   \XBA (      7 )  # 186   ¬∫  masculine ordinal indicator
+   \XAA (       8)  # 170   ¬™  feminine ordinal indicator
 
 # The three remaining characters are:
 
    #Hex    Dots       Dec Char Description
-   \XAF ( 2   67 )  # 175   Ø  macron
-   \XB5 (    567 )  # 181   µ  micro sign
+   \XAF ( 2   67 )  # 175   ¬Ø  macron
+   \XB5 (    567 )  # 181   ¬µ  micro sign
    \XA0 (      78)  # 160  ~   no-break space
 
 # The nonbreaking space is dots 7 and 8 because this presents a sequence of
