@@ -17,8 +17,8 @@
 
 #include "prologue.h"
 
-#include "attr.h"
+#include "atb.h"
 
 AttributesTable attributesTable = {
-  #include "attr.auto.h"
+#include "attr.auto.h"
 };

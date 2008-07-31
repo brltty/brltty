@@ -126,7 +126,7 @@ unsigned int		protocol_handleBrailleKey(unsigned int key)
     case 0x107:	res = BRL_BLK_PASSKEY + BRL_KEY_FUNCTION + 11; break;
       
     default:
-      res = BRL_BLK_PASSCHAR | untextTable[dots];
+      res = BRL_BLK_PASSDOTS | dots;
       break;
     }
   if (res != EOF)

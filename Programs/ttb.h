@@ -15,23 +15,30 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_ATTR
-#define BRLTTY_INCLUDED_ATTR
+#ifndef BRLTTY_INCLUDED_TTB
+#define BRLTTY_INCLUDED_TTB
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-typedef unsigned char AttributesTable[0X100];
+typedef struct TextTableStruct TextTable;
 
-extern AttributesTable attributesTable;
+extern TextTable *textTable;
 
-extern int loadAttributesTable (const char *name, AttributesTable table);
+extern TextTable *compileTextTable (const char *name);
+extern void destroyTextTable (TextTable *table);
 
-extern void fixAttributesTablePath (char **path);
+extern void fixTextTablePath (char **path);
+
+extern unsigned char convertCharacterToDots (TextTable *table, wchar_t character);
+extern wchar_t convertDotsToCharacter (TextTable *table, unsigned char dots);
+
+#define UNICODE_REPLACEMENT_CHARACTER 0XFFFD
+#define UNICODE_BRAILLE_ROW 0X2800
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_ATTR */
+#endif /* BRLTTY_INCLUDED_TTB */

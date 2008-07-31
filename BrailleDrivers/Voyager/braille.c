@@ -58,7 +58,6 @@ typedef enum {
 #define BRL_HAVE_STATUS_CELLS
 #define BRL_HAVE_FIRMNESS
 #include "brl_driver.h"
-#include "tbl.h"
 
 typedef struct {
   int (*openPort) (char **parameters, const char *device);

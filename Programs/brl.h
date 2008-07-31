@@ -132,10 +132,7 @@ extern const BrailleDriver noBraille;
 
 #define TRANSLATION_TABLE_SIZE 0X100
 typedef unsigned char TranslationTable[TRANSLATION_TABLE_SIZE];
-extern TranslationTable textTable;	 /* current text to braille translation table */
-extern TranslationTable untextTable;     /* current braille to text translation table */
-
-extern void makeUntextTable (void);
+extern void reverseTranslationTable (TranslationTable from, TranslationTable to);
 
 #define DOTS_TABLE_SIZE 8
 typedef unsigned char DotsTable[DOTS_TABLE_SIZE];

@@ -29,9 +29,9 @@
 #include "options.h"
 #include "misc.h"
 #include "charset.h"
-#include "brl.h"
+//#include "brl.h"
+#include "ttb.h"
 #include "ctb.h"
-#include "tbl.h"
 
 static char *opt_dataDirectory;
 static char *opt_contractionsDirectory;
@@ -80,7 +80,6 @@ BEGIN_OPTION_TABLE(programOptions)
     .word = "text-table",
     .argument = "file",
     .setting.string = &opt_textTable,
-    .defaultSetting = TEXT_TABLE,
     .description = "Text translation table."
   },
 
@@ -93,8 +92,6 @@ BEGIN_OPTION_TABLE(programOptions)
   },
 END_OPTION_TABLE
 
-TranslationTable textTable;
-TranslationTable untextTable;
 static ContractionTable *contractionTable;
 
 static int outputWidth;
@@ -109,15 +106,15 @@ static int
 contractLine (char *line, void *data) {
   LineProcessingData *lpd = data;
   int lineLength = strlen(line);
-  wchar_t characters[lineLength];
-  const wchar_t *inputBuffer = characters;
+  wchar_t inputCharacters[lineLength];
+  const wchar_t *inputBuffer = inputCharacters;
 
   {
     int i;
-    for (i=0; i<lineLength; ++i) {
+    for (i=0; i<lineLength; i+=1) {
       wint_t character = convertCharToWchar(line[i]);
-      if (character == WEOF) character = 0XFFFD;
-      characters[i] = character;
+      if (character == WEOF) character = UNICODE_REPLACEMENT_CHARACTER;
+      inputCharacters[i] = character;
     }
   }
 
@@ -146,16 +143,17 @@ contractLine (char *line, void *data) {
       outputBuffer = NULL;
       outputWidth <<= 1;
     } else {
+      wchar_t outputCharacters[outputCount];
+
       {
         int index;
-        for (index=0; index<outputCount; ++index)
-          outputBuffer[index] = untextTable[outputBuffer[index]];
+        for (index=0; index<outputCount; index+=1)
+          outputCharacters[index] = convertDotsToCharacter(textTable, outputBuffer[index]);
       }
 
       {
         FILE *output = stdout;
-        fwrite(outputBuffer, 1, outputCount, output);
-        if (!ferror(output)) fputc('\n', output);
+        fprintf(output, "%.*" PRIws "\n", outputCount, outputCharacters);
         if (ferror(output)) {
           LogError("output");
           lpd->status = 12;
@@ -218,44 +216,51 @@ main (int argc, char *argv[]) {
     fixContractionTablePath(&opt_contractionTable);
     if ((contractionTablePath = makePath(opt_contractionsDirectory, opt_contractionTable))) {
       if ((contractionTable = compileContractionTable(contractionTablePath))) {
-        char *textTablePath;
+        if (*opt_textTable) {
+          char *textTablePath;
 
-        fixTextTablePath(&opt_textTable);
-        if ((textTablePath = makePath(opt_tablesDirectory, opt_textTable))) {
-          if (loadTranslationTable(textTablePath, NULL, textTable, 0)) {
-            reverseTranslationTable(textTable, untextTable);
+          fixTextTablePath(&opt_textTable);
+          if ((textTablePath = makePath(opt_tablesDirectory, opt_textTable))) {
+            if (!(textTable = compileTextTable(textTablePath))) status = 4;
 
-            if (argc) {
-              do {
-                char *path = *argv;
-                if (strcmp(path, "-") == 0) {
-                  status = contractFile(stdin);
-                } else {
-                  FILE *file = fopen(path, "r");
-                  if (file) {
-                    status = contractFile(file);
-                    fclose(file);
-                  } else {
-                    LogPrint(LOG_ERR, "cannot open input file: %s: %s",
-                             path, strerror(errno));
-                    status = 6;
-                  }
-                }
-              } while ((status == 0) && (++argv, --argc));
-            } else {
-              status = contractFile(stdin);
-            }
+            free(textTablePath);
           } else {
             status = 4;
           }
-          free(textTablePath);
         } else {
-          status = 4;
+          opt_textTable = TEXT_TABLE;
         }
+
+        if (textTable) {
+          if (argc) {
+            do {
+              char *path = *argv;
+              if (strcmp(path, "-") == 0) {
+                status = contractFile(stdin);
+              } else {
+                FILE *file = fopen(path, "r");
+                if (file) {
+                  status = contractFile(file);
+                  fclose(file);
+                } else {
+                  LogPrint(LOG_ERR, "cannot open input file: %s: %s",
+                           path, strerror(errno));
+                  status = 6;
+                }
+              }
+            } while ((status == 0) && (++argv, --argc));
+          } else {
+            status = contractFile(stdin);
+          }
+
+          destroyTextTable(textTable);
+        }
+
         destroyContractionTable(contractionTable);
       } else {
         status = 3;
       }
+
       free(contractionTablePath);
     } else {
       status = 3;

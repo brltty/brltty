@@ -37,7 +37,7 @@ typedef enum {
 #define BRL_HAVE_PACKET_IO
 #include "brl_driver.h"
 #include "braille.h"
-#include "tbl.h"
+#include "ttb.h"
 
 static int logInputPackets = 0;
 static int logOutputPackets = 0;
@@ -222,7 +222,7 @@ writePrompt (BrailleDisplay *brl, const char *prompt) {
   int index = 0;
   if (length > dataCells) length = dataCells;
   while (index < length) {
-    dataArea[index] = textTable[(unsigned char)prompt[index]];
+    dataArea[index] = convertCharacterToDots(textTable, (unsigned char)prompt[index]);
      ++index;
   }
   while (index < dataCells) dataArea[index++] = 0;
@@ -237,20 +237,20 @@ getByte (void) {
   return byte;
 }
 
-static unsigned char
+static wchar_t
 getCharacter (BrailleDisplay *brl) {
   for (;;) {
     switch (getByte()) {
       default:
         break;
       case BNI_CHARACTER:
-        return untextTable[inputTable[getByte()]];
+        return convertDotsToCharacter(textTable, inputTable[getByte()]);
       case BNI_SPACE:
         switch (getByte()) {
           default:
             break;
           case BNC_SPACE:
-            return ' ';
+            return WC_C(' ');
         }
         break;
       case BNI_BACKSPACE:
@@ -258,7 +258,7 @@ getCharacter (BrailleDisplay *brl) {
           default:
             break;
           case BNC_SPACE:
-            return '\b';
+            return WC_C('\b');
         }
         break;
       case BNI_ENTER:
@@ -266,7 +266,7 @@ getCharacter (BrailleDisplay *brl) {
           default:
             break;
           case BNC_SPACE:
-            return '\r';
+            return WC_C('\r');
         }
         break;
     }
@@ -505,28 +505,28 @@ getDecimalInteger (BrailleDisplay *brl, unsigned int *integer, unsigned int widt
   memset(buffer, '0', width);
   buffer[width] = 0;
   for (;;) {
-    unsigned char character;
+    wchar_t character;
     char prompt[0X40];
     snprintf(prompt, sizeof(prompt), "%s: %s", description, buffer);
     writePrompt(brl, prompt);
-    switch (character = getCharacter(brl)) {
+    switch ((character = getCharacter(brl))) {
       default:
         continue;
-      case '\r':
+      case WC_C('\r'):
         *integer = atoi(buffer);
         return 1;
       case '\b':
         return 0;
-      case '0':
-      case '1':
-      case '2':
-      case '3':
-      case '4':
-      case '5':
-      case '6':
-      case '7':
-      case '8':
-      case '9':
+      case WC_C('0'):
+      case WC_C('1'):
+      case WC_C('2'):
+      case WC_C('3'):
+      case WC_C('4'):
+      case WC_C('5'):
+      case WC_C('6'):
+      case WC_C('7'):
+      case WC_C('8'):
+      case WC_C('9'):
         memcpy(buffer, buffer+1, width-1);
         buffer[width-1] = character;
         break;
@@ -545,56 +545,56 @@ getHexadecimalCharacter (BrailleDisplay *brl, unsigned char *character) {
     switch (getCharacter(brl)) {
       default:
         continue;
-      case '\r':
+      case WC_C('\r'):
         return 1;
-      case '\b':
+      case WC_C('\b'):
         return 0;
-      case '0':
+      case WC_C('0'):
         digit = 0X0;
         break;
-      case '1':
+      case WC_C('1'):
         digit = 0X1;
         break;
-      case '2':
+      case WC_C('2'):
         digit = 0X2;
         break;
-      case '3':
+      case WC_C('3'):
         digit = 0X3;
         break;
-      case '4':
+      case WC_C('4'):
         digit = 0X4;
         break;
-      case '5':
+      case WC_C('5'):
         digit = 0X5;
         break;
-      case '6':
+      case WC_C('6'):
         digit = 0X6;
         break;
-      case '7':
+      case WC_C('7'):
         digit = 0X7;
         break;
-      case '8':
+      case WC_C('8'):
         digit = 0X8;
         break;
-      case '9':
+      case WC_C('9'):
         digit = 0X9;
         break;
-      case 'a':
+      case WC_C('a'):
         digit = 0XA;
         break;
-      case 'b':
+      case WC_C('b'):
         digit = 0XB;
         break;
-      case 'c':
+      case WC_C('c'):
         digit = 0XC;
         break;
-      case 'd':
+      case WC_C('d'):
         digit = 0XD;
         break;
-      case 'e':
+      case WC_C('e'):
         digit = 0XE;
         break;
-      case 'f':
+      case WC_C('f'):
         digit = 0XF;
         break;
     }

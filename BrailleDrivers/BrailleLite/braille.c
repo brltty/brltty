@@ -39,7 +39,6 @@ typedef enum {
 #define BRLPARMS "baudrate", "kbemu"
 
 #include "brl_driver.h"
-#include "tbl.h"
 #include "braille.h"
 #include "io_serial.h"
 

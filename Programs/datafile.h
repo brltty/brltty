@@ -27,12 +27,16 @@ typedef struct DataFileStruct DataFile;
 typedef int (*DataProcessor) (DataFile *file, void *data);
 
 extern int processDataFile (const char *name, DataProcessor processor, void *data);
-extern int includeDataFile (DataFile *file, const wchar_t *name, int length);
+extern int includeDataFile (DataFile *file, const wchar_t *name, unsigned int length);
 extern void reportDataError (DataFile *file, char *format, ...) PRINTF(2, 3);
+
+extern int findDataOperand (DataFile *file, const char *description);
+extern int getDataCharacter (DataFile *file, wchar_t *character);
+extern int ungetDataCharacters (DataFile *file, unsigned int count);
 
 typedef struct {
   const wchar_t *characters;
-  int length;
+  unsigned int length;
 } DataOperand;
 extern int getDataOperand (DataFile *file, DataOperand *operand, const char *description);
 

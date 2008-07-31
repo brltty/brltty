@@ -39,7 +39,6 @@ typedef enum {
 #define BRLPARMS "device", "driver", "table"
 
 #include "brl_driver.h"
-#include "tbl.h"
 
 static TranslationTable outputTable;
 static TranslationTable inputTable;

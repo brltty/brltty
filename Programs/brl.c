@@ -28,8 +28,7 @@
 #include "charset.h"
 #include "drivers.h"
 #include "brl.h"
-#include "tbl.h"
-#include "attr.h"
+#include "ttb.h"
 #include "brl.auto.h"
 #include "cmd.h"
 
@@ -67,11 +66,6 @@ const BrailleDriver *braille = &noBraille;
  * Output braille translation tables.
  * The files *.auto.h (the default tables) are generated at compile-time.
  */
-TranslationTable textTable = {
-  #include "text.auto.h"
-};
-TranslationTable untextTable;
-
 int
 haveBrailleDriver (const char *code) {
   return haveDriver(code, BRAILLE_DRIVER_CODES, driverTable);
@@ -136,7 +130,7 @@ writeBrailleWindow (BrailleDisplay *brl, const wchar_t *text) {
     /* Do Braille translation using text table. Six-dot mode is ignored
      * since case can be important, and blinking caps won't work. 
      */
-    for (i=0; i<brl->x*brl->y; ++i) brl->buffer[i] = convertWcharToDots(textTable, text[i]);
+    for (i=0; i<brl->x*brl->y; ++i) brl->buffer[i] = convertCharacterToDots(textTable, text[i]);
   }
   return braille->writeWindow(brl, text);
 }
@@ -196,7 +190,7 @@ setStatusText (BrailleDisplay *brl, const char *text) {
 
         if (!(c = text[i])) break;
         if ((wc = convertCharToWchar(c)) == WEOF) wc = WC_C('?');
-        cells[i] = convertWcharToDots(textTable, wc);
+        cells[i] = convertCharacterToDots(textTable, wc);
       }
     }
 
@@ -300,8 +294,10 @@ learnMode (BrailleDisplay *brl, int poll, int timeout) {
 #endif /* ENABLE_LEARN_MODE */
 
 void
-makeUntextTable (void) {
-  reverseTranslationTable(textTable, untextTable);
+reverseTranslationTable (TranslationTable from, TranslationTable to) {
+  int byte;
+  memset(to, 0, sizeof(TranslationTable));
+  for (byte=TRANSLATION_TABLE_SIZE-1; byte>=0; byte--) to[from[byte]] = byte;
 }
 
 void

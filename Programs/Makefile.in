@@ -15,7 +15,8 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-all: all-brltty all-brltest all-scrtest tbltest$X ctbtest$X tunetest$X $(ALL_API)
+all: all-brltty $(ALL_XBRLAPI) $(ALL_API_BINDINGS)
+everything: all-brltty all-brltest all-scrtest all-spktest$X tbltest$X ctbtest$X tunetest$X $(ALL_API)
 all-brltty: brltty$X all-braille $(SPEECH_DRIVERS) $(SCREEN_DRIVERS)
 all-brltest: brltest$X $(BRAILLE_DRIVERS)
 all-spktest: spktest$X $(SPEECH_DRIVERS)
@@ -128,11 +129,17 @@ tbl_native.$O:
 tbl_gnome.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/tbl_gnome.c
 
-attr_load.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/attr_load.c
+ttb_compile.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/ttb_compile.c
 
-attr_table.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/attr_table.c
+ttb_translate.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/ttb_translate.c
+
+atb_compile.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/atb_compile.c
+
+atb_translate.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/atb_translate.c
 
 ###############################################################################
 
@@ -255,7 +262,7 @@ uninstall-api-bindings:
 
 ###############################################################################
 
-BRLTTY_OBJECTS = brltty.$O $(PROGRAM_OBJECTS) config.$O $(BASE_OBJECTS) datafile.$O dataarea.$O mount.$O auth.$O cut.$O cmd.$O scancodes.$O lock.$O charset.$O $(TBL_OBJECTS) attr_load.$O attr_table.$O $(CTB_OBJECTS) touch.$O serial.$O $(USB_OBJECTS) $(BLUETOOTH_OBJECTS) drivers.$O $(SCREEN_OBJECTS) $(SCREEN_DRIVER_OBJECTS) route.$O brl.$O $(BRAILLE_DRIVER_OBJECTS) $(SPEECH_OBJECT) $(SPEECH_DRIVER_OBJECTS) $(TUNE_OBJECTS) $(API_OBJECTS)
+BRLTTY_OBJECTS = brltty.$O $(PROGRAM_OBJECTS) config.$O $(BASE_OBJECTS) datafile.$O dataarea.$O mount.$O auth.$O cut.$O cmd.$O scancodes.$O lock.$O charset.$O ttb_compile.$O ttb_translate.$O atb_compile.$O atb_translate.$O $(CTB_OBJECTS) touch.$O serial.$O $(USB_OBJECTS) $(BLUETOOTH_OBJECTS) drivers.$O $(SCREEN_OBJECTS) $(SCREEN_DRIVER_OBJECTS) route.$O brl.$O $(BRAILLE_DRIVER_OBJECTS) $(SPEECH_OBJECT) $(SPEECH_DRIVER_OBJECTS) $(TUNE_OBJECTS) $(API_OBJECTS)
 
 brltty$X: $(BRLTTY_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(SPEECH_DRIVER_LIBRARIES) $(SCREEN_DRIVER_LIBRARIES) $(ICU_LIBRARIES) $(LDLIBS)
@@ -341,7 +348,7 @@ bluetooth_linux.$O:
 
 ###############################################################################
 
-BRLTEST_OBJECTS = brltest.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) mount.$O tbl.$O tbl_native.$O cmd.$O charset.$O lock.$O drivers.$O brl.$O $(BRAILLE_DRIVER_OBJECTS) touch.$O serial.$O $(USB_OBJECTS) $(BLUETOOTH_OBJECTS)
+BRLTEST_OBJECTS = brltest.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) mount.$O ttb_translate.$O cmd.$O charset.$O lock.$O drivers.$O brl.$O $(BRAILLE_DRIVER_OBJECTS) touch.$O serial.$O $(USB_OBJECTS) $(BLUETOOTH_OBJECTS)
 
 brltest$X: $(BRLTEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTEST_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(LDLIBS)
@@ -381,7 +388,7 @@ tbltest.$O:
 
 ###############################################################################
 
-CTBTEST_OBJECTS = ctbtest.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) datafile.$O dataarea.$O ctb_compile.$O ctb_translate.$O lock.$O charset.$O tbl.$O tbl_native.$O
+CTBTEST_OBJECTS = ctbtest.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) datafile.$O dataarea.$O ttb_compile.$O ttb_translate.$O ctb_compile.$O ctb_translate.$O lock.$O charset.$O
 
 ctbtest$X: $(CTBTEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(CTBTEST_OBJECTS) $(ICU_LIBRARIES) $(LDLIBS)
@@ -467,7 +474,7 @@ txt2hlp.$O:
 
 ###############################################################################
 
-TBL2HEX_OBJECTS = tbl2hex.$O $(HOST_OBJECTS) host_lock.$O host_charset.$O host_datafile.$O host_tbl.$O host_tbl_native.$O host_attr_load.$O
+TBL2HEX_OBJECTS = tbl2hex.$O $(HOST_OBJECTS) host_lock.$O host_charset.$O host_datafile.$O host_dataarea.$O host_ttb_compile.$O host_atb_compile.$O host_ctb_compile.$O
 
 tbl2hex$X: $(TBL2HEX_OBJECTS)
 	$(HOSTCC) $(HOSTLDFLAGS) -o $@ $(TBL2HEX_OBJECTS) $(ICU_LIBRARIES) $(LDLIBS)

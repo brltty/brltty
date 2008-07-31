@@ -29,10 +29,8 @@
 #include "program.h"
 #include "options.h"
 #include "brl.h"
-#include "tbl.h"
 #include "misc.h"
 #include "message.h"
-#include "scr.h"
 #include "defaults.h"
 
 int updateInterval = DEFAULT_UPDATE_INTERVAL;
@@ -192,7 +190,6 @@ main (int argc, char *argv[]) {
     }
 
     if (chdir(opt_dataDirectory) != -1) {
-      makeUntextTable();
       initializeBrailleDisplay(&brl);
       brl.dataDirectory = opt_dataDirectory;
       identifyBrailleDriver(braille, 0);		/* start-up messages */

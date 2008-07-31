@@ -33,8 +33,8 @@
 #include "misc.h"
 #include "message.h"
 #include "tunes.h"
-#include "attr.h"
-#include "tbl.h"
+#include "ttb.h"
+#include "atb.h"
 #include "ctb.h"
 #include "route.h"
 #include "cut.h"
@@ -309,17 +309,17 @@ static void
 setCoordinateAlphabetic (unsigned char *cell, int x, int y) {
   /* The coords are given with letters as the DOS tsr */
   *cell = ((updateIntervals / 16) % (y / 25 + 1))? 0:
-          convertWcharToDots(textTable, (y % 25 + 'a')) |
+          convertCharacterToDots(textTable, (y % 25 + WC_C('a'))) |
           ((x / brl.x) << 6);
 }
 
 static void
 setStateLetter (unsigned char *cell) {
-  *cell = convertWcharToDots(textTable,
-                             p->showAttributes? WC_C('a'):
-                             isFrozenScreen()? WC_C('f'):
-                             p->trackCursor? WC_C('t'):
-                             WC_C(' '));
+  *cell = convertCharacterToDots(textTable,
+                                 p->showAttributes? WC_C('a'):
+                                 isFrozenScreen()? WC_C('f'):
+                                 p->trackCursor? WC_C('t'):
+                                 WC_C(' '));
 }
 
 static void
@@ -341,9 +341,9 @@ setStatusCellsNone (unsigned char *cells) {
 static void
 setStatusCellsAlva (unsigned char *cells) {
   if (isHelpScreen()) {
-    cells[0] = convertWcharToDots(textTable, WC_C('h'));
-    cells[1] = convertWcharToDots(textTable, WC_C('l'));
-    cells[2] = convertWcharToDots(textTable, WC_C('p'));
+    cells[0] = convertCharacterToDots(textTable, WC_C('h'));
+    cells[1] = convertCharacterToDots(textTable, WC_C('l'));
+    cells[2] = convertCharacterToDots(textTable, WC_C('p'));
   } else {
     setCoordinateAlphabetic(&cells[0], scr.posx, scr.posy);
     setCoordinateAlphabetic(&cells[1], p->winx, p->winy);
@@ -402,7 +402,7 @@ setStatusCellsVoyager (unsigned char *cells) {
   setNumberVertical(&cells[0], p->winy+1);
   setNumberVertical(&cells[1], scr.posy+1);
   if (isFrozenScreen()) {
-    cells[2] = convertWcharToDots(textTable, WC_C('F'));
+    cells[2] = convertCharacterToDots(textTable, WC_C('F'));
   } else {
     setNumberVertical(&cells[2], scr.posx+1);
   }
@@ -1943,7 +1943,7 @@ runProgram (void) {
                   break;
 
                 case BRL_BLK_PASSDOTS:
-                  if (!insertCharacter(untextTable[arg], flags)) playTune(&tune_command_rejected);
+                  if (!insertCharacter(convertDotsToCharacter(textTable, arg), flags)) playTune(&tune_command_rejected);
                   break;
 
                 case BRL_BLK_PASSAT:
@@ -2567,7 +2567,7 @@ runProgram (void) {
             int i;
             for (i=0; i<(brl.x*brl.y); ++i) {
               const ScreenCharacter *character = &characters[i];
-              brl.buffer[i] = convertWcharToDots(textTable, character->text);
+              brl.buffer[i] = convertCharacterToDots(textTable, character->text);
               if (prefs.textStyle) brl.buffer[i] &= ~(BRL_DOT7 | BRL_DOT8);
               textBuffer[i] = character->text;
             }

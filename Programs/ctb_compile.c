@@ -467,7 +467,7 @@ getFindText (DataFile *file, DataString *find) {
 }
 
 static int
-processContractionLine (DataFile *file, void *data) {
+processContractionTableLine (DataFile *file, void *data) {
   ContractionTableCharacterAttributes after = 0;
   ContractionTableCharacterAttributes before = 0;
 
@@ -640,10 +640,11 @@ compileContractionTable (const char *fileName) {
   if ((dataArea = newDataArea())) {
     if (allocateDataItem(dataArea, NULL, sizeof(ContractionTableHeader), __alignof__(ContractionTableHeader))) {
       if (allocateCharacterClasses()) {
-        if (processDataFile(fileName, processContractionLine, NULL)) {
+        if (processDataFile(fileName, processContractionTableLine, NULL)) {
           if (saveCharacterTable()) {
             if ((table = malloc(sizeof(*table)))) {
-              table->header = getContractionTableHeader();
+              table->header.fields = getContractionTableHeader();
+              table->size = getDataSize(dataArea);
               resetDataArea(dataArea);
 
               table->characters = NULL;
@@ -664,12 +665,17 @@ compileContractionTable (const char *fileName) {
   return table;
 }
 
-int
-destroyContractionTable (ContractionTable *contractionTable) {
-  if (contractionTable->characters) free(contractionTable->characters);
-  if (contractionTable->header) free(contractionTable->header);
-  free(contractionTable);
-  return 1;
+void
+destroyContractionTable (ContractionTable *table) {
+  if (table->characters) {
+    free(table->characters);
+    table->characters = NULL;
+  }
+
+  if (table->size) {
+    free(table->header.fields);
+    free(table);
+  }
 }
 
 void

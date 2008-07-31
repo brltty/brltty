@@ -60,7 +60,7 @@
 #include "brlapi_keyranges.h"
 #include "cmd.h"
 #include "brl.h"
-#include "tbl.h"
+#include "ttb.h"
 #include "brltty.h"
 #include "misc.h"
 #include "auth.h"
@@ -573,7 +573,7 @@ void getDots(const BrailleWindow *brailleWindow, unsigned char *buf)
   int i;
   unsigned char c;
   for (i=0; i<displaySize; i++) {
-    c = convertWcharToDots(textTable, brailleWindow->text[i]);
+    c = convertCharacterToDots(textTable, brailleWindow->text[i]);
     buf[i] = (c & brailleWindow->andAttr[i]) | brailleWindow->orAttr[i];
   }
   if (brailleWindow->cursor) buf[brailleWindow->cursor-1] |= cursorShape;

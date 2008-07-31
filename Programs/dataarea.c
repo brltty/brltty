@@ -49,7 +49,7 @@ destroyDataArea (DataArea *area) {
 }
 
 int
-allocateDataItem (DataArea *area, DataOffset *offset, size_t size, int alignment) {
+allocateDataItem (DataArea *area, DataOffset *offset, size_t size, unsigned int alignment) {
   size_t newUsed = (area->used = (area->used + (alignment - 1)) / alignment * alignment) + size;
 
   if (newUsed > area->size) {
@@ -74,6 +74,11 @@ allocateDataItem (DataArea *area, DataOffset *offset, size_t size, int alignment
 void *
 getDataItem (DataArea *area, DataOffset offset) {
   return area->address + offset;
+}
+
+size_t
+getDataSize (DataArea *area) {
+  return area->used;
 }
 
 int

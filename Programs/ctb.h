@@ -28,7 +28,7 @@ typedef struct ContractionTableStruct ContractionTable;
 #define CTB_NO_CURSOR -1
 
 extern ContractionTable *compileContractionTable (const char *fileName);
-extern int destroyContractionTable (ContractionTable *contractionTable);
+extern void destroyContractionTable (ContractionTable *table);
 extern int contractText (
   ContractionTable *contractionTable, /* Pointer to translation table */
   const wchar_t *inputBuffer, /* What is to be translated */

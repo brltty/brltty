@@ -24,7 +24,6 @@
 #include "misc.h"
 
 #include "brl_driver.h"
-#include "tbl.h"
 
 static TranslationTable outputTable;
 static TranslationTable inputTable;

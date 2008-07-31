@@ -84,20 +84,40 @@ reportDataError (DataFile *file, char *format, ...) {
   LogPrint(LOG_WARNING, "%s", message);
 }
 
-static int
-findDataOperand (DataFile *file) {
+int
+findDataOperand (DataFile *file, const char *description) {
+  file->start = file->end;
+
   while (iswspace(file->start[0])) file->start += 1;
-  return *(file->end = file->start) != 0;
+  if (*(file->end = file->start)) return 1;
+  if (description) reportDataError(file, "%s not specified", description);
+  return 0;
+}
+
+int
+getDataCharacter (DataFile *file, wchar_t *character) {
+  if (!*file->end) return 0;
+  *character = *file->end++;
+  return 1;
+}
+
+int
+ungetDataCharacters (DataFile *file, unsigned int count) {
+  unsigned int maximum = file->end - file->start;
+
+  if (count > maximum) {
+    reportDataError(file, "unget character count out of range: %u > %u",
+                    count, maximum);
+    return 0;
+  }
+
+  file->end -= count;
+  return 1;
 }
 
 int
 getDataOperand (DataFile *file, DataOperand *operand, const char *description) {
-  file->start = file->end;
-
-  if (!findDataOperand(file)) {
-    if (description) reportDataError(file, "%s not specified", description);
-    return 0;
-  }
+  if (!findDataOperand(file, description)) return 0;
 
   do {
     file->end += 1;
@@ -198,6 +218,7 @@ parseDataString (DataFile *file, DataString *string, const wchar_t *characters, 
             count = 4;
             goto doHexadecimal;
 
+          case WC_C('X'):
           case WC_C('x'):
             count = 2;
             goto doHexadecimal;
@@ -280,9 +301,7 @@ parseDataString (DataFile *file, DataString *string, const wchar_t *characters, 
       return 0;
     }
 
-    if (!character) character = WC_C(' ');
     string->characters[string->length++] = character;
-
     index += 1;
   }
 
@@ -322,9 +341,9 @@ getDotOperand (DataFile *file, int *index) {
 }
 
 int
-includeDataFile (DataFile *file, const wchar_t *name, int length) {
+includeDataFile (DataFile *file, const wchar_t *name, unsigned int length) {
   const char *prefixAddress = file->name;
-  int prefixLength = 0;
+  unsigned int prefixLength = 0;
 
   if (*name != WC_C('/')) {
     const char *prefixEnd = strrchr(prefixAddress, '/');
@@ -365,6 +384,11 @@ processPropertyOperand (DataFile *file, const DataProperty *properties, const ch
 
         property += 1;
       }
+
+      if (property->processor) {
+        ungetDataCharacters(file, name.length);
+        return property->processor(file, data);
+      }
     }
 
     reportDataError(file, "unknown %s: %.*" PRIws,
@@ -377,7 +401,7 @@ processPropertyOperand (DataFile *file, const DataProperty *properties, const ch
 static int
 processWcharLine (DataFile *file, const wchar_t *line) {
   file->end = file->start = line;
-  if (!findDataOperand(file)) return 1;			/*blank line */
+  if (!findDataOperand(file, NULL)) return 1;			/*blank line */
   if (file->start[0] == WC_C('#')) return 1;
   return file->processor(file, file->data);
 }

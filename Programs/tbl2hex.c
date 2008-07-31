@@ -22,16 +22,24 @@
 
 #include "options.h"
 #include "misc.h"
-#include "tbl.h"
-#include "attr.h"
+
+#include "ttb.h"
+#include "ttb_internal.h"
+
+#include "atb.h"
+
+#include "ctb.h"
+#include "ctb_internal.h"
 
 static char *opt_tableType;
 #define TBL_TYPE_TEXT "text"
 #define TBL_TYPE_ATTRIBUTES "attributes"
+#define TBL_TYPE_CONTRACTION "contraction"
 static const char *tableType_text = TBL_TYPE_TEXT;
 static const char *tableType_attributes = TBL_TYPE_ATTRIBUTES;
+static const char *tableType_contraction = TBL_TYPE_CONTRACTION;
 static const char *const optionStrings_TableType[] = {
-  TBL_TYPE_ATTRIBUTES ", " TBL_TYPE_TEXT,
+  TBL_TYPE_ATTRIBUTES ", " TBL_TYPE_CONTRACTION ", " TBL_TYPE_TEXT,
   NULL
 };
 
@@ -127,21 +135,25 @@ main (int argc, char *argv[]) {
   path = *argv++, argc--;
 
   if (strcasecmp(opt_tableType, tableType_text) == 0) {
-    TranslationTable table;
+    TextTable *table;
 
-    if (loadTranslationTable(path, NULL, table, 0)) {
-      if (dumpBytes(stdout, table, sizeof(table))) {
+    if ((table = compileTextTable(path))) {
+      if (dumpBytes(stdout, table->header.bytes, table->size)) {
         status = 0;
       } else {
         status = 4;
       }
+
+      destroyTextTable(table);
     } else {
       status = 3;
     }
-  } else if (strcasecmp(opt_tableType, tableType_attributes) == 0) {
+  } else
+
+  if (strcasecmp(opt_tableType, tableType_attributes) == 0) {
     AttributesTable table;
 
-    if (loadAttributesTable(path, table)) {
+    if (compileAttributesTable(path, table)) {
       if (dumpBytes(stdout, table, sizeof(table))) {
         status = 0;
       } else {
@@ -150,7 +162,25 @@ main (int argc, char *argv[]) {
     } else {
       status = 3;
     }
-  } else {
+  } else
+
+  if (strcasecmp(opt_tableType, tableType_contraction) == 0) {
+    ContractionTable *table;
+
+    if ((table = compileContractionTable(path))) {
+      if (dumpBytes(stdout, table->header.bytes, table->size)) {
+        status = 0;
+      } else {
+        status = 4;
+      }
+
+      destroyContractionTable(table);
+    } else {
+      status = 3;
+    }
+  } else
+
+  {
     LogPrint(LOG_ERR, "unimplemented table type: %s", opt_tableType);
     status = 5;
   }

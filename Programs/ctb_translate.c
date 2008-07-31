@@ -25,7 +25,7 @@
 
 #include "ctb.h"
 #include "ctb_internal.h"
-#include "tbl.h"
+#include "ttb.h"
 
 static ContractionTable *table;
 static const wchar_t *src, *srcmin, *srcmax, *cursor;
@@ -41,16 +41,16 @@ static const ContractionTableRule *currentRule;	/*pointer to current rule in tab
 #define setOffset() assignOffset(dest-destmin)
 #define clearOffset() assignOffset(CTB_NO_OFFSET)
 
-static inline void *
+static inline const void *
 getContractionTableItem (ContractionTableOffset offset) {
-  return (char *)table->header + offset;
+  return &table->header.bytes[offset];
 }
 
 static const ContractionTableCharacter *
 getContractionTableCharacter (wchar_t character) {
-  const ContractionTableCharacter *characters = getContractionTableItem(table->header->characters);
+  const ContractionTableCharacter *characters = getContractionTableItem(table->header.fields->characters);
   int first = 0;
-  int last = table->header->characterCount - 1;
+  int last = table->header.fields->characterCount - 1;
 
   while (first <= last) {
     int current = (first + last) / 2;
@@ -217,7 +217,7 @@ selectRule (int length) {
     wchar_t characters[2];
     characters[0] = toLowerCase(src[0]);
     characters[1] = toLowerCase(src[1]);
-    ruleOffset = table->header->rules[CTH(characters)];
+    ruleOffset = table->header.fields->rules[CTH(characters)];
     maximumLength = 0;
   }
 
@@ -401,7 +401,7 @@ putReplace (const ContractionTableRule *rule) {
 
 static int
 putComputerBraille (wchar_t character) {
-  BYTE cell = convertWcharToDots(textTable, character);
+  BYTE cell = convertCharacterToDots(textTable, character);
   return putBytes(&cell, 1);
 }
 
@@ -892,10 +892,10 @@ contractText (
         continue;
       }
 
-      if (table->header->numberSign && (previousOpcode != CTO_MidNum) &&
+      if (table->header.fields->numberSign && (previousOpcode != CTO_MidNum) &&
           !testCharacter(before, CTC_Digit) && testCharacter(*src, CTC_Digit)) {
-        if (!putSequence(table->header->numberSign)) break;
-      } else if (table->header->englishLetterSign && testCharacter(*src, CTC_Letter)) {
+        if (!putSequence(table->header.fields->numberSign)) break;
+      } else if (table->header.fields->englishLetterSign && testCharacter(*src, CTC_Letter)) {
         if ((currentOpcode == CTO_Contraction) ||
             ((currentOpcode != CTO_EndNum) && testCharacter(before, CTC_Digit)) ||
             (testCharacter(*src, CTC_Letter) &&
@@ -905,23 +905,23 @@ contractText (
              (((src + 1) == srcmax) ||
               testCharacter(src[1], CTC_Space) ||
               (testCharacter(src[1], CTC_Punctuation) && (src[1] != '.') && (src[1] != '\''))))) {
-          if (!putSequence(table->header->englishLetterSign)) break;
+          if (!putSequence(table->header.fields->englishLetterSign)) break;
         }
       }
 
       if (testCharacter(*src, CTC_UpperCase)) {
         if (!testCharacter(before, CTC_UpperCase)) {
-          if (table->header->beginCapitalSign &&
+          if (table->header.fields->beginCapitalSign &&
               (src + 1 < srcmax) && testCharacter(src[1], CTC_UpperCase)) {
-            if (!putSequence(table->header->beginCapitalSign)) break;
-          } else if (table->header->capitalSign) {
-            if (!putSequence(table->header->capitalSign)) break;
+            if (!putSequence(table->header.fields->beginCapitalSign)) break;
+          } else if (table->header.fields->capitalSign) {
+            if (!putSequence(table->header.fields->capitalSign)) break;
           }
         }
       } else if (testCharacter(*src, CTC_LowerCase)) {
-        if (table->header->endCapitalSign && (src - 2 >= srcmin) &&
+        if (table->header.fields->endCapitalSign && (src - 2 >= srcmin) &&
             testCharacter(src[-1], CTC_UpperCase) && testCharacter(src[-2], CTC_UpperCase)) {
-          if (!putSequence(table->header->endCapitalSign)) break;
+          if (!putSequence(table->header.fields->endCapitalSign)) break;
         }
       }
 

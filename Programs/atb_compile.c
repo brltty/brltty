@@ -21,7 +21,7 @@
 
 #include "misc.h"
 #include "datafile.h"
-#include "attr.h"
+#include "atb.h"
 
 typedef struct {
   unsigned char attribute;
@@ -30,10 +30,10 @@ typedef struct {
 
 typedef struct {
   DotData dots[8];
-} AttributesData;
+} AttributesTableData;
 
 static void
-makeAttributesTable (AttributesTable table, const AttributesData *attributes) {
+makeAttributesTable (AttributesTable table, const AttributesTableData *atd) {
   unsigned char bits = 0;
 
   do {
@@ -42,7 +42,7 @@ makeAttributesTable (AttributesTable table, const AttributesData *attributes) {
 
     *cell = 0;
     for (dotIndex=0; dotIndex<BRL_DOT_COUNT; dotIndex+=1) {
-      const DotData *dot = &attributes->dots[dotIndex];
+      const DotData *dot = &atd->dots[dotIndex];
       int isSet = bits & dot->attribute;
       if (!isSet == !dot->operation) *cell |= brlDotBits[dotIndex];
     }
@@ -129,11 +129,11 @@ getAttributeOperand (DataFile *file, unsigned char *bit, unsigned char *operatio
 
 static int
 processDotOperands (DataFile *file, void *data) {
-  AttributesData *attributes = data;
+  AttributesTableData *atd = data;
   int dotIndex;
 
   if (getDotOperand(file, &dotIndex)) {
-    DotData *dot = &attributes->dots[dotIndex];
+    DotData *dot = &atd->dots[dotIndex];
 
     if (getAttributeOperand(file, &dot->attribute, &dot->operation)) return 1;
   }
@@ -142,7 +142,7 @@ processDotOperands (DataFile *file, void *data) {
 }
 
 static int
-processAttributesLine (DataFile *file, void *data) {
+processAttributesTableLine (DataFile *file, void *data) {
   static const DataProperty properties[] = {
     {.name=WS_C("dot"), .processor=processDotOperands},
     {.name=WS_C("include"), .processor=processIncludeOperands},
@@ -153,14 +153,14 @@ processAttributesLine (DataFile *file, void *data) {
 }
 
 int
-loadAttributesTable (const char *name, AttributesTable table) {
+compileAttributesTable (const char *name, AttributesTable table) {
   int ok = 0;
-  AttributesData attributes;
+  AttributesTableData atd;
 
-  memset(&attributes, 0, sizeof(attributes));
+  memset(&atd, 0, sizeof(atd));
 
-  if (processDataFile(name, processAttributesLine, &attributes)) {
-    makeAttributesTable(table, &attributes);
+  if (processDataFile(name, processAttributesTableLine, &atd)) {
+    makeAttributesTable(table, &atd);
     ok = 1;
   }
 

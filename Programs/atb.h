@@ -15,26 +15,23 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_DATAAREA
-#define BRLTTY_INCLUDED_DATAAREA
+#ifndef BRLTTY_INCLUDED_ATB
+#define BRLTTY_INCLUDED_ATB
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-typedef struct DataAreaStruct DataArea;
-extern DataArea *newDataArea (void);
-extern void destroyDataArea (DataArea *area);
-extern void resetDataArea (DataArea *area);
+typedef unsigned char AttributesTable[0X100];
 
-typedef unsigned long int DataOffset;
-extern int allocateDataItem (DataArea *area, DataOffset *offset, size_t size, unsigned int alignment);
-extern void *getDataItem (DataArea *area, DataOffset offset);
-extern size_t getDataSize (DataArea *area);
-extern int saveDataItem (DataArea *area, DataOffset *offset, const void *item, size_t size, int alignment);
+extern AttributesTable attributesTable;
+
+extern int compileAttributesTable (const char *name, AttributesTable table);
+
+extern void fixAttributesTablePath (char **path);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_DATAAREA */
+#endif /* BRLTTY_INCLUDED_ATB */

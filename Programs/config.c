@@ -50,8 +50,8 @@
 #include "brl.h"
 #include "spk.h"
 #include "scr.h"
-#include "attr.h"
-#include "tbl.h"
+#include "ttb.h"
+#include "atb.h"
 #include "ctb.h"
 #include "tunes.h"
 #include "message.h"
@@ -494,22 +494,21 @@ BEGIN_OPTION_TABLE(programOptions)
 END_OPTION_TABLE
 
 static int
-replaceTranslationTable (TranslationTable table, const char *file) {
+replaceTextTable (const char *file) {
   int ok = 0;
   char *path = makePath(opt_tablesDirectory, file);
   if (path) {
-    if (loadTranslationTable(path, NULL, table, 0)) ok = 1;
+    TextTable *newTable = compileTextTable(path);
+    if (newTable) {
+      TextTable *oldTable = textTable;
+      textTable = newTable;
+      destroyTextTable(oldTable);
+      ok = 1;
+    }
     free(path);
   }
-  if (!ok) LogPrint(LOG_ERR, "%s: %s", gettext("cannot load translation table"), file);
+  if (!ok) LogPrint(LOG_ERR, "%s: %s", gettext("cannot load attributes table"), file);
   return ok;
-}
-
-static int
-replaceTextTable (const char *file) {
-  if (!replaceTranslationTable(textTable, file)) return 0;
-  makeUntextTable();
-  return 1;
 }
 
 static int
@@ -517,7 +516,7 @@ replaceAttributesTable (const char *file) {
   int ok = 0;
   char *path = makePath(opt_tablesDirectory, file);
   if (path) {
-    if (loadAttributesTable(path, attributesTable)) ok = 1;
+    if (compileAttributesTable(path, attributesTable)) ok = 1;
     free(path);
   }
   if (!ok) LogPrint(LOG_ERR, "%s: %s", gettext("cannot load attributes table"), file);
@@ -2469,7 +2468,6 @@ startup (int argc, char *argv[]) {
   }
   if (!*opt_textTable) {
     opt_textTable = TEXT_TABLE;
-    makeUntextTable();
   }
   LogPrint(LOG_INFO, "%s: %s", gettext("Text Table"), opt_textTable);
 #ifdef ENABLE_PREFERENCES_MENU

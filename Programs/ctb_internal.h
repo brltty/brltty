@@ -117,7 +117,12 @@ typedef struct {
 } CharacterEntry;
 
 struct ContractionTableStruct {
-  ContractionTableHeader *header;
+  union {
+    ContractionTableHeader *fields;
+    const unsigned char *bytes;
+  } header;
+
+  size_t size;
 
   CharacterEntry *characters;
   int charactersSize;
