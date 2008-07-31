@@ -76,9 +76,11 @@ dumpBytes (FILE *stream, const unsigned char *bytes, size_t count) {
       unsigned int counter = 0;
       unsigned int maximum = 8;
 
-      while (maximum > 1) {
-        if (byte[maximum-1]) break;
-        maximum -= 1;
+      if ((byte + maximum) != end) {
+        while (maximum > 1) {
+          if (byte[maximum-1]) break;
+          maximum -= 1;
+        }
       }
 
       while (byte < end) {
