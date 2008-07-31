@@ -32,12 +32,6 @@ typedef struct {
   unsigned char bytes[0XFF];
 } ByteOperand;
 
-static DataArea *dataArea;
-
-static ContractionTableCharacter *characterTable = NULL;
-static int characterTableSize = 0;
-static int characterEntryCount = 0;
-
 static const wchar_t *const characterClassNames[] = {
   WS_C("space"),
   WS_C("letter"),
@@ -47,14 +41,13 @@ static const wchar_t *const characterClassNames[] = {
   WS_C("lowercase"),
   NULL
 };
+
 struct CharacterClass {
   struct CharacterClass *next;
   ContractionTableCharacterAttributes attribute;
   BYTE length;
   wchar_t name[1];
 };
-static struct CharacterClass *characterClasses;
-static ContractionTableCharacterAttributes characterClassAttribute;
 
 static const wchar_t *const opcodeNames[CTO_None] = {
   WS_C("capsign"),
@@ -96,21 +89,33 @@ static const wchar_t *const opcodeNames[CTO_None] = {
 
   WS_C("include")
 };
-static unsigned char opcodeLengths[CTO_None] = {0};
+
+typedef struct {
+  DataArea *area;
+
+  ContractionTableCharacter *characterTable;
+  int characterTableSize;
+  int characterEntryCount;
+
+  struct CharacterClass *characterClasses;
+  ContractionTableCharacterAttributes characterClassAttribute;
+
+  unsigned char opcodeNameLengths[CTO_None];
+} ContractionTableData;
 
 static inline ContractionTableHeader *
-getContractionTableHeader (void) {
-  return getDataItem(dataArea, 0);
+getContractionTableHeader (ContractionTableData *ctd) {
+  return getDataItem(ctd->area, 0);
 }
 
 static ContractionTableCharacter *
-getCharacterEntry (wchar_t character) {
+getCharacterEntry (wchar_t character, ContractionTableData *ctd) {
   int first = 0;
-  int last = characterEntryCount - 1;
+  int last = ctd->characterEntryCount - 1;
 
   while (first <= last) {
     int current = (first + last) / 2;
-    ContractionTableCharacter *entry = &characterTable[current];
+    ContractionTableCharacter *entry = &ctd->characterTable[current];
 
     if (entry->value < character) {
       first = current + 1;
@@ -121,26 +126,26 @@ getCharacterEntry (wchar_t character) {
     }
   }
 
-  if (characterEntryCount == characterTableSize) {
-    int newSize = characterTableSize;
+  if (ctd->characterEntryCount == ctd->characterTableSize) {
+    int newSize = ctd->characterTableSize;
     newSize = newSize? newSize<<1: 0X80;
 
     {
-      ContractionTableCharacter *newTable = realloc(characterTable, (newSize * sizeof(*newTable)));
+      ContractionTableCharacter *newTable = realloc(ctd->characterTable, (newSize * sizeof(*newTable)));
       if (!newTable) return NULL;
 
-      characterTable = newTable;
-      characterTableSize = newSize;
+      ctd->characterTable = newTable;
+      ctd->characterTableSize = newSize;
     }
   }
 
-  memmove(&characterTable[first+1],
-          &characterTable[first],
-          (characterEntryCount - first) * sizeof(*characterTable));
-  ++characterEntryCount;
+  memmove(&ctd->characterTable[first+1],
+          &ctd->characterTable[first],
+          (ctd->characterEntryCount - first) * sizeof(*ctd->characterTable));
+  ctd->characterEntryCount += 1;
 
   {
-    ContractionTableCharacter *entry = &characterTable[first];
+    ContractionTableCharacter *entry = &ctd->characterTable[first];
     memset(entry, 0, sizeof(*entry));
     entry->value = character;
     return entry;
@@ -148,18 +153,18 @@ getCharacterEntry (wchar_t character) {
 }
 
 static int
-saveCharacterTable (void) {
+saveCharacterTable (ContractionTableData *ctd) {
   DataOffset offset;
-  if (!characterEntryCount) return 1;
-  if (!saveDataItem(dataArea, &offset, characterTable,
-                    characterEntryCount * sizeof(characterTable[0]),
-                    __alignof__(characterTable[0])))
+  if (!ctd->characterEntryCount) return 1;
+  if (!saveDataItem(ctd->area, &offset, ctd->characterTable,
+                    ctd->characterEntryCount * sizeof(ctd->characterTable[0]),
+                    __alignof__(ctd->characterTable[0])))
     return 0;
 
   {
-    ContractionTableHeader *header = getContractionTableHeader();
+    ContractionTableHeader *header = getContractionTableHeader(ctd);
     header->characters = offset;
-    header->characterCount = characterEntryCount;
+    header->characterCount = ctd->characterEntryCount;
   }
 
   return 1;
@@ -172,15 +177,16 @@ addRule (
   DataString *find,
   ByteOperand *replace,
   ContractionTableCharacterAttributes after,
-  ContractionTableCharacterAttributes before
+  ContractionTableCharacterAttributes before,
+  ContractionTableData *ctd
 ) {
   DataOffset ruleOffset;
   int ruleSize = sizeof(ContractionTableRule) - sizeof(find->characters[0]);
   if (find) ruleSize += find->length * sizeof(find->characters[0]);
   if (replace) ruleSize += replace->length;
 
-  if (allocateDataItem(dataArea, &ruleOffset, ruleSize, __alignof__(ContractionTableRule))) {
-    ContractionTableRule *newRule = getDataItem(dataArea, ruleOffset);
+  if (allocateDataItem(ctd->area, &ruleOffset, ruleSize, __alignof__(ContractionTableRule))) {
+    ContractionTableRule *newRule = getDataItem(ctd->area, ruleOffset);
 
     newRule->opcode = opcode;
     newRule->after = after;
@@ -205,16 +211,16 @@ addRule (
       ContractionTableOffset *offsetAddress;
 
       if (newRule->findlen == 1) {
-        ContractionTableCharacter *character = getCharacterEntry(newRule->findrep[0]);
+        ContractionTableCharacter *character = getCharacterEntry(newRule->findrep[0], ctd);
         if (!character) return NULL;
         if (newRule->opcode == CTO_Always) character->always = ruleOffset;
         offsetAddress = &character->rules;
       } else {
-        offsetAddress = &getContractionTableHeader()->rules[CTH(newRule->findrep)];
+        offsetAddress = &getContractionTableHeader(ctd)->rules[CTH(newRule->findrep)];
       }
 
       while (*offsetAddress) {
-        ContractionTableRule *currentRule = getDataItem(dataArea, *offsetAddress);
+        ContractionTableRule *currentRule = getDataItem(ctd->area, *offsetAddress);
 
         if (newRule->findlen > currentRule->findlen) break;
 
@@ -236,8 +242,8 @@ addRule (
 }
 
 static const struct CharacterClass *
-findCharacterClass (const wchar_t *name, int length) {
-  const struct CharacterClass *class = characterClasses;
+findCharacterClass (const wchar_t *name, int length, ContractionTableData *ctd) {
+  const struct CharacterClass *class = ctd->characterClasses;
 
   while (class) {
     if (length == class->length)
@@ -251,19 +257,19 @@ findCharacterClass (const wchar_t *name, int length) {
 }
 
 static struct CharacterClass *
-addCharacterClass (DataFile *file, const wchar_t *name, int length) {
+addCharacterClass (DataFile *file, const wchar_t *name, int length, ContractionTableData *ctd) {
   struct CharacterClass *class;
 
-  if (characterClassAttribute) {
+  if (ctd->characterClassAttribute) {
     if ((class = malloc(sizeof(*class) + ((length - 1) * sizeof(class->name[0]))))) {
       memset(class, 0, sizeof(*class));
       wmemcpy(class->name, name, (class->length = length));
 
-      class->attribute = characterClassAttribute;
-      characterClassAttribute <<= 1;
+      class->attribute = ctd->characterClassAttribute;
+      ctd->characterClassAttribute <<= 1;
 
-      class->next = characterClasses;
-      characterClasses = class;
+      class->next = ctd->characterClasses;
+      ctd->characterClasses = class;
       return class;
     }
   }
@@ -273,11 +279,11 @@ addCharacterClass (DataFile *file, const wchar_t *name, int length) {
 }
 
 static int
-getCharacterClass (DataFile *file, const struct CharacterClass **class) {
+getCharacterClass (DataFile *file, const struct CharacterClass **class, ContractionTableData *ctd) {
   DataOperand operand;
 
   if (getDataOperand(file, &operand, "character class name")) {
-    if ((*class = findCharacterClass(operand.characters, operand.length))) return 1;
+    if ((*class = findCharacterClass(operand.characters, operand.length, ctd))) return 1;
     reportDataError(file, "character class not defined: %.*" PRIws, operand.length, operand.characters);
   }
 
@@ -285,22 +291,21 @@ getCharacterClass (DataFile *file, const struct CharacterClass **class) {
 }
 
 static void
-deallocateCharacterClasses (void) {
-  while (characterClasses) {
-    struct CharacterClass *class = characterClasses;
-    characterClasses = characterClasses->next;
+deallocateCharacterClasses (ContractionTableData *ctd) {
+  while (ctd->characterClasses) {
+    struct CharacterClass *class = ctd->characterClasses;
+    ctd->characterClasses = ctd->characterClasses->next;
     free(class);
   }
 }
 
 static int
-allocateCharacterClasses (void) {
+allocateCharacterClasses (ContractionTableData *ctd) {
   const wchar_t *const *name = characterClassNames;
-  characterClasses = NULL;
-  characterClassAttribute = 1;
+
   while (*name) {
-    if (!addCharacterClass(NULL, *name, wcslen(*name))) {
-      deallocateCharacterClasses();
+    if (!addCharacterClass(NULL, *name, wcslen(*name), ctd)) {
+      deallocateCharacterClasses(ctd);
       return 0;
     }
     ++name;
@@ -309,14 +314,14 @@ allocateCharacterClasses (void) {
 }
 
 static ContractionTableOpcode
-getOpcode (DataFile *file) {
+getOpcode (DataFile *file, ContractionTableData *ctd) {
   DataOperand operand;
 
   if (getDataOperand(file, &operand, "opcode")) {
     ContractionTableOpcode opcode;
 
     for (opcode=0; opcode<CTO_None; opcode+=1)
-      if (operand.length == opcodeLengths[opcode])
+      if (operand.length == ctd->opcodeNameLengths[opcode])
         if (wmemcmp(operand.characters, opcodeNames[opcode], operand.length) == 0)
           return opcode;
 
@@ -327,9 +332,9 @@ getOpcode (DataFile *file) {
 }
 
 static int
-saveCellsOperand (DataFile *file, DataOffset *offset, const ByteOperand *sequence) {
-  if (allocateDataItem(dataArea, offset, sequence->length+1, __alignof__(BYTE))) {
-    BYTE *address = getDataItem(dataArea, *offset);
+saveCellsOperand (DataFile *file, DataOffset *offset, const ByteOperand *sequence, ContractionTableData *ctd) {
+  if (allocateDataItem(ctd->area, offset, sequence->length+1, __alignof__(BYTE))) {
+    BYTE *address = getDataItem(ctd->area, *offset);
     memcpy(address+1, sequence->bytes, (*address = sequence->length));
     return 1;
   }
@@ -468,13 +473,14 @@ getFindText (DataFile *file, DataString *find) {
 
 static int
 processContractionTableLine (DataFile *file, void *data) {
+  ContractionTableData *ctd = data;
   ContractionTableCharacterAttributes after = 0;
   ContractionTableCharacterAttributes before = 0;
 
   while (1) {
     ContractionTableOpcode opcode;
 
-    switch ((opcode = getOpcode(file))) {
+    switch ((opcode = getOpcode(file, ctd))) {
       case CTO_None:
         break;
 
@@ -505,7 +511,7 @@ processContractionTableLine (DataFile *file, void *data) {
         ByteOperand replace;
         if (getFindText(file, &find))
           if (getReplacePattern(file, &replace))
-            if (!addRule(file, opcode, &find, &replace, after, before))
+            if (!addRule(file, opcode, &find, &replace, after, before, ctd))
               return 0;
         break;
       }
@@ -514,7 +520,7 @@ processContractionTableLine (DataFile *file, void *data) {
       case CTO_Literal: {
         DataString find;
         if (getFindText(file, &find))
-          if (!addRule(file, opcode, &find, NULL, after, before))
+          if (!addRule(file, opcode, &find, NULL, after, before, ctd))
             return 0;
         break;
       }
@@ -523,8 +529,8 @@ processContractionTableLine (DataFile *file, void *data) {
         ByteOperand cells;
         if (getCellsOperand(file, &cells, "capital sign")) {
           DataOffset offset;
-          if (!saveCellsOperand(file, &offset, &cells)) return 0;
-          getContractionTableHeader()->capitalSign = offset;
+          if (!saveCellsOperand(file, &offset, &cells, ctd)) return 0;
+          getContractionTableHeader(ctd)->capitalSign = offset;
         }
         break;
       }
@@ -533,8 +539,8 @@ processContractionTableLine (DataFile *file, void *data) {
         ByteOperand cells;
         if (getCellsOperand(file, &cells, "begin capital sign")) {
           DataOffset offset;
-          if (!saveCellsOperand(file, &offset, &cells)) return 0;
-          getContractionTableHeader()->beginCapitalSign = offset;
+          if (!saveCellsOperand(file, &offset, &cells, ctd)) return 0;
+          getContractionTableHeader(ctd)->beginCapitalSign = offset;
         }
         break;
       }
@@ -543,8 +549,8 @@ processContractionTableLine (DataFile *file, void *data) {
         ByteOperand cells;
         if (getCellsOperand(file, &cells, "end capital sign")) {
           DataOffset offset;
-          if (!saveCellsOperand(file, &offset, &cells)) return 0;
-          getContractionTableHeader()->endCapitalSign = offset;
+          if (!saveCellsOperand(file, &offset, &cells, ctd)) return 0;
+          getContractionTableHeader(ctd)->endCapitalSign = offset;
         }
         break;
       }
@@ -553,8 +559,8 @@ processContractionTableLine (DataFile *file, void *data) {
         ByteOperand cells;
         if (getCellsOperand(file, &cells, "letter sign")) {
           DataOffset offset;
-          if (!saveCellsOperand(file, &offset, &cells)) return 0;
-          getContractionTableHeader()->englishLetterSign = offset;
+          if (!saveCellsOperand(file, &offset, &cells, ctd)) return 0;
+          getContractionTableHeader(ctd)->englishLetterSign = offset;
         }
         break;
       }
@@ -563,8 +569,8 @@ processContractionTableLine (DataFile *file, void *data) {
         ByteOperand cells;
         if (getCellsOperand(file, &cells, "number sign")) {
           DataOffset offset;
-          if (!saveCellsOperand(file, &offset, &cells)) return 0;
-          getContractionTableHeader()->numberSign = offset;
+          if (!saveCellsOperand(file, &offset, &cells, ctd)) return 0;
+          getContractionTableHeader(ctd)->numberSign = offset;
         }
         break;
       }
@@ -575,10 +581,10 @@ processContractionTableLine (DataFile *file, void *data) {
         if (getDataOperand(file, &name, "character class name")) {
           const struct CharacterClass *class;
 
-          if ((class = findCharacterClass(name.characters, name.length))) {
+          if ((class = findCharacterClass(name.characters, name.length, ctd))) {
             reportDataError(file, "character class already defined: %.*" PRIws,
                             name.length, name.characters);
-          } else if ((class = addCharacterClass(file, name.characters, name.length))) {
+          } else if ((class = addCharacterClass(file, name.characters, name.length, ctd))) {
             DataString characters;
 
             if (getDataString(file, &characters, "characters")) {
@@ -586,7 +592,7 @@ processContractionTableLine (DataFile *file, void *data) {
 
               for (index=0; index<characters.length; index+=1) {
                 wchar_t character = characters.characters[index];
-                ContractionTableCharacter *entry = getCharacterEntry(character);
+                ContractionTableCharacter *entry = getCharacterEntry(character, ctd);
                 if (!entry) return 0;
                 entry->attributes |= class->attribute;
               }
@@ -607,7 +613,7 @@ processContractionTableLine (DataFile *file, void *data) {
         attributes = &before;
       doClass:
 
-        if (getCharacterClass(file, &class)) {
+        if (getCharacterClass(file, &class, ctd)) {
           *attributes |= class->attribute;
           continue;
         }
@@ -626,26 +632,33 @@ processContractionTableLine (DataFile *file, void *data) {
 ContractionTable *
 compileContractionTable (const char *fileName) {
   ContractionTable *table = NULL;
+  ContractionTableData ctd;
 
-  characterTable = NULL;
-  characterTableSize = 0;
-  characterEntryCount = 0;
+  memset(&ctd, 0, sizeof(ctd));
 
-  if (!opcodeLengths[0]) {
+  ctd.characterTable = NULL;
+  ctd.characterTableSize = 0;
+  ctd.characterEntryCount = 0;
+
+  ctd.characterClasses = NULL;
+  ctd.characterClassAttribute = 1;
+
+  {
     ContractionTableOpcode opcode;
-    for (opcode=0; opcode<CTO_None; ++opcode)
-      opcodeLengths[opcode] = wcslen(opcodeNames[opcode]);
+
+    for (opcode=0; opcode<CTO_None; opcode+=1)
+      ctd.opcodeNameLengths[opcode] = wcslen(opcodeNames[opcode]);
   }
 
-  if ((dataArea = newDataArea())) {
-    if (allocateDataItem(dataArea, NULL, sizeof(ContractionTableHeader), __alignof__(ContractionTableHeader))) {
-      if (allocateCharacterClasses()) {
-        if (processDataFile(fileName, processContractionTableLine, NULL)) {
-          if (saveCharacterTable()) {
+  if ((ctd.area = newDataArea())) {
+    if (allocateDataItem(ctd.area, NULL, sizeof(ContractionTableHeader), __alignof__(ContractionTableHeader))) {
+      if (allocateCharacterClasses(&ctd)) {
+        if (processDataFile(fileName, processContractionTableLine, &ctd)) {
+          if (saveCharacterTable(&ctd)) {
             if ((table = malloc(sizeof(*table)))) {
-              table->header.fields = getContractionTableHeader();
-              table->size = getDataSize(dataArea);
-              resetDataArea(dataArea);
+              table->header.fields = getContractionTableHeader(&ctd);
+              table->size = getDataSize(ctd.area);
+              resetDataArea(ctd.area);
 
               table->characters = NULL;
               table->charactersSize = 0;
@@ -654,14 +667,14 @@ compileContractionTable (const char *fileName) {
           }
         }
 
-        deallocateCharacterClasses();
+        deallocateCharacterClasses(&ctd);
       }
     }
 
-    destroyDataArea(dataArea);
+    destroyDataArea(ctd.area);
   }
 
-  if (characterTable) free(characterTable);
+  if (ctd.characterTable) free(ctd.characterTable);
   return table;
 }
 
