@@ -15,7 +15,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-#Unified English Braille Code, brltty grade 2 contraction table
+#Unified English Grade 2 Braille Contraction Table
 #By Michael Curran <mick@kulgan.net>
 
 #This is by no means complete, but at least all the important ascii symbols and general grade 2 contractions are here.

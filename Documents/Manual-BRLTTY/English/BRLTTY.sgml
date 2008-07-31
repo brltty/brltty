@@ -4150,7 +4150,7 @@ This feature isn't available if the
 The following contraction tables are provided:
 <descrip>
   <tag/compress/Remove excessive white-space.
-  <tag/en-uebc-g2/Grade 2 Unified English Braille Code
+  <tag/en-ueb-g2/Grade 2 Unified English Braille.
   <tag/en-us-g2/Grade 2 American English.
   <tag/fr-abrege/Contracted Unified French.
   <tag/fr-integral/Uncontracted Unified French.

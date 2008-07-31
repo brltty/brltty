@@ -122,7 +122,7 @@
 # specified, no contraction table will be available.
 # (can be overridden with the -c [--contraction-table=] option)
 #contraction-table	compress	# Remove excess white space.
-#contraction-table	en-uebc-g2	# Grade 2 Unified English Braille Code
+#contraction-table	en-ueb-g2	# Grade 2 Unified English Braille
 #contraction-table	en-us-g2	# Grade 2 American English
 #contraction-table	fr-abrege	# Contracted French
 #contraction-table	fr-integral	# Uncontracted French
