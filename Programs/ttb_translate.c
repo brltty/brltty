@@ -19,6 +19,7 @@
 
 #include "ttb.h"
 #include "ttb_internal.h"
+#include "brldots.h"
 
 static const unsigned char internalTextTableBytes[] = {
 #include "text.auto.h"
@@ -86,9 +87,11 @@ convertCharacterToDots (TextTable *table, wchar_t character) {
       return table->header.fields->byteToDots[character & cellMask];
 
     default: {
-      const UnicodeCellEntry *cell = getUnicodeCellEntry(table, character);
-      if (cell) return cell->dots;
-      return 0;
+      const UnicodeCellEntry *cell;
+      if ((cell = getUnicodeCellEntry(table, character))) return cell->dots;
+      if ((cell = getUnicodeCellEntry(table, UNICODE_REPLACEMENT_CHARACTER))) return cell->dots;
+      if ((cell = getUnicodeCellEntry(table, WC_C('?')))) return cell->dots;
+      return BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT4 | BRL_DOT5 | BRL_DOT6 | BRL_DOT7 | BRL_DOT8;
     }
   }
 }

@@ -22,6 +22,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#include <strings.h>
+
 /* The bits for each braille dot as defined by the ISO 11548-1 standard.
  *
  * From least- to most-significant octal digit:
