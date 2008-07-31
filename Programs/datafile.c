@@ -166,8 +166,14 @@ parseDataString (DataFile *file, DataString *string, const wchar_t *characters, 
       int ok = 0;
 
       if (++index < length) {
-        switch (character = characters[index]) {
+        switch ((character = characters[index])) {
+          case WC_C('#'):
           case WC_C('\\'):
+            ok = 1;
+            break;
+
+          case WC_C('b'):
+            character = WC_C('\b');
             ok = 1;
             break;
 
