@@ -15,26 +15,30 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_ATB
-#define BRLTTY_INCLUDED_ATB
+#ifndef BRLTTY_INCLUDED_ATB_INTERNAL
+#define BRLTTY_INCLUDED_ATB_INTERNAL
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-typedef struct AttributesTableStruct AttributesTable;
+typedef uint32_t AttributesTableOffset;
 
-extern AttributesTable *attributesTable;
+typedef struct {
+  unsigned char attributesToDots[0X100];
+} AttributesTableHeader;
 
-extern AttributesTable *compileAttributesTable (const char *name);
-extern void destroyAttributesTable (AttributesTable *table);
+struct AttributesTableStruct {
+  union {
+    AttributesTableHeader *fields;
+    const unsigned char *bytes;
+  } header;
 
-extern void fixAttributesTablePath (char **path);
-
-extern unsigned char convertAttributesToDots (AttributesTable *table, unsigned char attributes);
+  size_t size;
+};
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_ATB */
+#endif /* BRLTTY_INCLUDED_ATB_INTERNAL */

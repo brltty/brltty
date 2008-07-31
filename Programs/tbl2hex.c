@@ -27,6 +27,7 @@
 #include "ttb_internal.h"
 
 #include "atb.h"
+#include "atb_internal.h"
 
 #include "ctb.h"
 #include "ctb_internal.h"
@@ -151,14 +152,16 @@ main (int argc, char *argv[]) {
   } else
 
   if (strcasecmp(opt_tableType, tableType_attributes) == 0) {
-    AttributesTable table;
+    AttributesTable *table;
 
-    if (compileAttributesTable(path, table)) {
-      if (dumpBytes(stdout, table, sizeof(table))) {
+    if ((table = compileAttributesTable(path))) {
+      if (dumpBytes(stdout, table->header.bytes, table->size)) {
         status = 0;
       } else {
         status = 4;
       }
+
+      destroyAttributesTable(table);
     } else {
       status = 3;
     }

@@ -2501,7 +2501,7 @@ runProgram (void) {
 
               if (p->showAttributes) {
                 for (outputOffset=0; outputOffset<outputLength; ++outputOffset) {
-                  brl.buffer[outputOffset] = attributesTable[outputBuffer[outputOffset]];
+                  brl.buffer[outputOffset] = convertAttributesToDots(attributesTable, outputBuffer[outputOffset]);
                 }
               } else {
                 int i;
@@ -2561,7 +2561,7 @@ runProgram (void) {
           if (p->showAttributes) {
             int i;
             for (i=0; i<(brl.x*brl.y); ++i) {
-              brl.buffer[i] = attributesTable[characters[i].attributes];
+              brl.buffer[i] = convertAttributesToDots(attributesTable, characters[i].attributes);
             }
           } else {
             int i;

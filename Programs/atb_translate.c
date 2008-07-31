@@ -18,7 +18,20 @@
 #include "prologue.h"
 
 #include "atb.h"
+#include "atb_internal.h"
 
-AttributesTable attributesTable = {
+static const unsigned char internalAttributesTableBytes[] = {
 #include "attr.auto.h"
 };
+
+static AttributesTable internalAttributesTable = {
+  .header.bytes = internalAttributesTableBytes,
+  .size = 0
+};
+
+AttributesTable *attributesTable = &internalAttributesTable;
+
+unsigned char
+convertAttributesToDots (AttributesTable *table, unsigned char attributes) {
+  return table->header.fields->attributesToDots[attributes];
+}

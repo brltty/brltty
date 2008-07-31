@@ -507,7 +507,7 @@ replaceTextTable (const char *file) {
     }
     free(path);
   }
-  if (!ok) LogPrint(LOG_ERR, "%s: %s", gettext("cannot load attributes table"), file);
+  if (!ok) LogPrint(LOG_ERR, "%s: %s", gettext("cannot load text table"), file);
   return ok;
 }
 
@@ -516,7 +516,13 @@ replaceAttributesTable (const char *file) {
   int ok = 0;
   char *path = makePath(opt_tablesDirectory, file);
   if (path) {
-    if (compileAttributesTable(path, attributesTable)) ok = 1;
+    AttributesTable *newTable = compileAttributesTable(path);
+    if (newTable) {
+      AttributesTable *oldTable = attributesTable;
+      attributesTable = newTable;
+      destroyAttributesTable(oldTable);
+      ok = 1;
+    }
     free(path);
   }
   if (!ok) LogPrint(LOG_ERR, "%s: %s", gettext("cannot load attributes table"), file);

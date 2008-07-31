@@ -21,7 +21,9 @@
 
 #include "misc.h"
 #include "datafile.h"
+#include "dataarea.h"
 #include "atb.h"
+#include "atb_internal.h"
 
 typedef struct {
   unsigned char attribute;
@@ -29,11 +31,18 @@ typedef struct {
 } DotData;
 
 typedef struct {
+  DataArea *area;
   DotData dots[8];
 } AttributesTableData;
 
-static void
-makeAttributesTable (AttributesTable table, const AttributesTableData *atd) {
+static inline AttributesTableHeader *
+getAttributesTableHeader (AttributesTableData *atd) {
+  return getDataItem(atd->area, 0);
+}
+
+static int
+makeAttributesToDots (AttributesTableData *atd) {
+  unsigned char *table = getAttributesTableHeader(atd)->attributesToDots;
   unsigned char bits = 0;
 
   do {
@@ -47,6 +56,8 @@ makeAttributesTable (AttributesTable table, const AttributesTableData *atd) {
       if (!isSet == !dot->operation) *cell |= brlDotBits[dotIndex];
     }
   } while ((bits += 1));
+
+  return 1;
 }
 
 static int
@@ -152,19 +163,38 @@ processAttributesTableLine (DataFile *file, void *data) {
   return processPropertyOperand(file, properties, "attributes table directive", data);
 }
 
-int
-compileAttributesTable (const char *name, AttributesTable table) {
-  int ok = 0;
+AttributesTable *
+compileAttributesTable (const char *name) {
+  AttributesTable *table = NULL;
   AttributesTableData atd;
 
   memset(&atd, 0, sizeof(atd));
 
-  if (processDataFile(name, processAttributesTableLine, &atd)) {
-    makeAttributesTable(table, &atd);
-    ok = 1;
+  if ((atd.area = newDataArea())) {
+    if (allocateDataItem(atd.area, NULL, sizeof(AttributesTableHeader), __alignof__(AttributesTableHeader))) {
+      if (processDataFile(name, processAttributesTableLine, &atd)) {
+        if (makeAttributesToDots(&atd)) {
+          if ((table = malloc(sizeof(*table)))) {
+            table->header.fields = getAttributesTableHeader(&atd);
+            table->size = getDataSize(atd.area);
+            resetDataArea(atd.area);
+          }
+        }
+      }
+    }
+
+    destroyDataArea(atd.area);
   }
 
-  return ok;
+  return table;
+}
+
+void
+destroyAttributesTable (AttributesTable *table) {
+  if (table->size) {
+    free(table->header.fields);
+    free(table);
+  }
 }
 
 void
