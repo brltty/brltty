@@ -162,7 +162,7 @@ getCharacterOperand (DataFile *file, wchar_t *character) {
   const char *description = "unicode character";
 
   if (getDataString(file, &string, description)) {
-    if (~(string.characters[0] & 0X7FFFFFFF)) {
+    if (!(string.characters[0] & ~UNICODE_CHARACTER_MASK)) {
       *character = string.characters[0];
       return 1;
     } else {

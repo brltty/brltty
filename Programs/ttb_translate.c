@@ -71,23 +71,27 @@ getUnicodeRowEntry (TextTable *table, wchar_t row) {
 static const UnicodeCellEntry *
 getUnicodeCellEntry (TextTable *table, wchar_t cell) {
   const UnicodeRowEntry *row = getUnicodeRowEntry(table, (cell >> UNICODE_CELL_BITS));
-  if (row) return &row->cells[cell & (UNICODE_CELLS_PER_ROW - 1)];
+
+  if (row) {
+    cell &= UNICODE_CELL_MASK;
+    return &row->cells[cell];
+  }
+
   return NULL;
 }
 
 unsigned char
 convertCharacterToDots (TextTable *table, wchar_t character) {
-  const wchar_t cellMask = UNICODE_CELLS_PER_ROW - 1;
-
-  switch (character & ~cellMask) {
+  switch (character & ~UNICODE_CELL_MASK) {
     case UNICODE_BRAILLE_ROW:
-      return character & cellMask;
+      return character & UNICODE_CELL_MASK;
 
     case 0XF000:
-      return table->header.fields->byteToDots[character & cellMask];
+      return table->header.fields->byteToDots[character & UNICODE_CELL_MASK];
 
     default: {
       const UnicodeCellEntry *cell;
+
       if ((cell = getUnicodeCellEntry(table, character))) return cell->dots;
       if ((cell = getUnicodeCellEntry(table, UNICODE_REPLACEMENT_CHARACTER))) return cell->dots;
       if ((cell = getUnicodeCellEntry(table, WC_C('?')))) return cell->dots;
