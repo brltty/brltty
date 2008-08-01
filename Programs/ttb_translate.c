@@ -38,18 +38,18 @@ getTextTableItem (TextTable *table, TextTableOffset offset) {
 }
 
 static const UnicodeGroupEntry *
-getUnicodeGroupEntry (TextTable *table, wchar_t group) {
-  TextTableOffset offset = table->header.fields->unicodeGroups[group];
+getUnicodeGroupEntry (TextTable *table, wchar_t character) {
+  TextTableOffset offset = table->header.fields->unicodeGroups[UNICODE_GROUP_NUMBER(character)];
   if (offset) return getTextTableItem(table, offset);
   return NULL;
 }
 
 static const UnicodePlainEntry *
-getUnicodePlainEntry (TextTable *table, wchar_t plain) {
-  const UnicodeGroupEntry *group = getUnicodeGroupEntry(table, (plain >> UNICODE_PLAIN_BITS));
+getUnicodePlainEntry (TextTable *table, wchar_t character) {
+  const UnicodeGroupEntry *group = getUnicodeGroupEntry(table, character);
 
   if (group) {
-    TextTableOffset offset = group->plains[plain & (UNICODE_PLAINS_PER_GROUP - 1)];
+    TextTableOffset offset = group->plains[UNICODE_PLAIN_NUMBER(character)];
     if (offset) return getTextTableItem(table, offset);
   }
 
@@ -57,11 +57,11 @@ getUnicodePlainEntry (TextTable *table, wchar_t plain) {
 }
 
 static const UnicodeRowEntry *
-getUnicodeRowEntry (TextTable *table, wchar_t row) {
-  const UnicodePlainEntry *plain = getUnicodePlainEntry(table, (row >> UNICODE_ROW_BITS));
+getUnicodeRowEntry (TextTable *table, wchar_t character) {
+  const UnicodePlainEntry *plain = getUnicodePlainEntry(table, character);
 
   if (plain) {
-    TextTableOffset offset = plain->rows[row & (UNICODE_ROWS_PER_PLAIN - 1)];
+    TextTableOffset offset = plain->rows[UNICODE_ROW_NUMBER(character)];
     if (offset) return getTextTableItem(table, offset);
   }
 
@@ -69,12 +69,12 @@ getUnicodeRowEntry (TextTable *table, wchar_t row) {
 }
 
 static const UnicodeCellEntry *
-getUnicodeCellEntry (TextTable *table, wchar_t cell) {
-  const UnicodeRowEntry *row = getUnicodeRowEntry(table, (cell >> UNICODE_CELL_BITS));
+getUnicodeCellEntry (TextTable *table, wchar_t character) {
+  const UnicodeRowEntry *row = getUnicodeRowEntry(table, character);
 
   if (row) {
-    cell &= UNICODE_CELL_MASK;
-    return &row->cells[cell];
+    unsigned int cellNumber = UNICODE_CELL_NUMBER(character);
+    if (BITMASK_TEST(row->defined, cellNumber)) return &row->cells[cellNumber];
   }
 
   return NULL;

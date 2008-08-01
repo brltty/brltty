@@ -43,8 +43,9 @@ getTextTableHeader (TextTableData *ttd) {
 }
 
 static DataOffset
-getUnicodeGroupOffset (wchar_t group, TextTableData *ttd) {
-  DataOffset groupOffset = getTextTableHeader(ttd)->unicodeGroups[group];
+getUnicodeGroupOffset (wchar_t character, TextTableData *ttd) {
+  unsigned int groupNumber = UNICODE_GROUP_NUMBER(character);
+  DataOffset groupOffset = getTextTableHeader(ttd)->unicodeGroups[groupNumber];
 
   if (!groupOffset) {
     if (!allocateDataItem(ttd->area, &groupOffset, 
@@ -52,21 +53,21 @@ getUnicodeGroupOffset (wchar_t group, TextTableData *ttd) {
                           __alignof__(UnicodeGroupEntry)))
       return 0;
 
-    getTextTableHeader(ttd)->unicodeGroups[group] = groupOffset;
+    getTextTableHeader(ttd)->unicodeGroups[groupNumber] = groupOffset;
   }
 
   return groupOffset;
 }
 
 static DataOffset
-getUnicodePlainOffset (wchar_t plain, TextTableData *ttd) {
-  DataOffset groupOffset = getUnicodeGroupOffset((plain >> UNICODE_PLAIN_BITS), ttd);
+getUnicodePlainOffset (wchar_t character, TextTableData *ttd) {
+  DataOffset groupOffset = getUnicodeGroupOffset(character, ttd);
   if (!groupOffset) return 0;
-  plain &= UNICODE_PLAINS_PER_GROUP - 1;
 
   {
     UnicodeGroupEntry *group = getDataItem(ttd->area, groupOffset);
-    DataOffset plainOffset = group->plains[plain];
+    unsigned int plainNumber = UNICODE_PLAIN_NUMBER(character);
+    DataOffset plainOffset = group->plains[plainNumber];
 
     if (!plainOffset) {
       if (!allocateDataItem(ttd->area, &plainOffset, 
@@ -75,7 +76,7 @@ getUnicodePlainOffset (wchar_t plain, TextTableData *ttd) {
         return 0;
 
       group = getDataItem(ttd->area, groupOffset);
-      group->plains[plain] = plainOffset;
+      group->plains[plainNumber] = plainOffset;
     }
 
     return plainOffset;
@@ -83,15 +84,14 @@ getUnicodePlainOffset (wchar_t plain, TextTableData *ttd) {
 }
 
 static DataOffset
-getUnicodeRowOffset (wchar_t row, TextTableData *ttd) {
-  DataOffset plainOffset = getUnicodePlainOffset((row >> UNICODE_ROW_BITS), ttd);
-
+getUnicodeRowOffset (wchar_t character, TextTableData *ttd) {
+  DataOffset plainOffset = getUnicodePlainOffset(character, ttd);
   if (!plainOffset) return 0;
-  row &= UNICODE_ROWS_PER_PLAIN - 1;
 
   {
     UnicodePlainEntry *plain = getDataItem(ttd->area, plainOffset);
-    DataOffset rowOffset = plain->rows[row];
+    unsigned int rowNumber = UNICODE_ROW_NUMBER(character);
+    DataOffset rowOffset = plain->rows[rowNumber];
 
     if (!rowOffset) {
       if (!allocateDataItem(ttd->area, &rowOffset, 
@@ -100,24 +100,18 @@ getUnicodeRowOffset (wchar_t row, TextTableData *ttd) {
         return 0;
 
       plain = getDataItem(ttd->area, plainOffset);
-      plain->rows[row] = rowOffset;
+      plain->rows[rowNumber] = rowOffset;
     }
 
     return rowOffset;
   }
 }
 
-static UnicodeCellEntry *
-getUnicodeCellAddress (wchar_t cell, TextTableData *ttd) {
-  DataOffset rowOffset = getUnicodeRowOffset((cell >> UNICODE_CELL_BITS), ttd);
+static UnicodeRowEntry *
+getUnicodeRowEntry (wchar_t character, TextTableData *ttd) {
+  DataOffset rowOffset = getUnicodeRowOffset(character, ttd);
   if (!rowOffset) return NULL;
-  cell &= UNICODE_CELLS_PER_ROW - 1;
-
-  {
-    UnicodeRowEntry *row = getDataItem(ttd->area, rowOffset);
-
-    return &row->cells[cell];
-  }
+  return getDataItem(ttd->area, rowOffset);
 }
 
 static int
@@ -130,10 +124,15 @@ setByte (unsigned char byte, unsigned char dots, TextTableData *ttd) {
 
 static int
 setCharacter (wchar_t character, unsigned char dots, TextTableData *ttd) {
-  UnicodeCellEntry *cell = getUnicodeCellAddress(character, ttd);
-  if (!cell) return 0;
+  UnicodeRowEntry *row = getUnicodeRowEntry(character, ttd);
+  if (!row) return 0;
 
-  cell->dots = dots;
+  {
+    unsigned int cellNumber = UNICODE_CELL_NUMBER(character);
+    row->cells[cellNumber].dots = dots;
+    BITMASK_SET(row->defined, cellNumber);
+  }
+
   getTextTableHeader(ttd)->dotsToCharacter[dots] = character;
   return 1;
 }

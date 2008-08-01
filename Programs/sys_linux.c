@@ -26,6 +26,7 @@
 #include "misc.h"
 #include "system.h"
 #include "sys_linux.h"
+#include "bitmask.h"
 
 #ifdef HAVE_LINUX_INPUT_H
 #include <linux/input.h>
