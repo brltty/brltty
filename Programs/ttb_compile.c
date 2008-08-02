@@ -113,8 +113,10 @@ setTextTableByte (unsigned char byte, unsigned char dots, TextTableData *ttd) {
   header->byteToDots[byte] = dots;
   BITMASK_SET(header->byteDotsDefined, byte);
 
-  header->dotsToByte[dots] = byte;
-  BITMASK_SET(header->dotsByteDefined, dots);
+  if (!BITMASK_TEST(header->dotsByteDefined, dots)) {
+    header->dotsToByte[dots] = byte;
+    BITMASK_SET(header->dotsByteDefined, dots);
+  }
 
   return 1;
 }
@@ -132,8 +134,10 @@ setTextTableCharacter (wchar_t character, unsigned char dots, TextTableData *ttd
 
   {
     TextTableHeader *header = getTextTableHeader(ttd);
-    header->dotsToCharacter[dots] = character;
-    BITMASK_SET(header->dotsCharacterDefined, dots);
+    if (!BITMASK_TEST(header->dotsCharacterDefined, dots)) {
+      header->dotsToCharacter[dots] = character;
+      BITMASK_SET(header->dotsCharacterDefined, dots);
+    }
   }
 
   return 1;
