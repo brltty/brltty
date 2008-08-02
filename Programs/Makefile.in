@@ -527,10 +527,10 @@ install-data-files: all-braille install-data-directory
 install-tables: $(INSTALL_TEXT_TABLES) $(INSTALL_ATTRIBUTES_TABLES) $(INSTALL_CONTRACTION_TABLES)
 
 install-text-tables: install-data-directory
-	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/text.*.tbl $(INSTALL_DATA_DIRECTORY)
+	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/*.ttb $(INSTALL_DATA_DIRECTORY)
 
 install-attributes-tables: install-data-directory
-	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/attr*.tbl $(INSTALL_DATA_DIRECTORY)
+	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/*.atb $(INSTALL_DATA_DIRECTORY)
 
 install-contraction-tables: install-data-directory
 	$(INSTALL_DATA) $(SRC_TOP)$(CTB_DIR)/*.ctb $(INSTALL_DATA_DIRECTORY)
@@ -587,9 +587,7 @@ uninstall-programs:
 	-rm -f $(INSTALL_PROGRAM_DIRECTORY)/xbrlapi$X
 
 uninstall-data:
-	-rm -f $(INSTALL_DATA_DIRECTORY)/*.tbl
-	-rm -f $(INSTALL_DATA_DIRECTORY)/*.ctb
-	-rm -f $(INSTALL_DATA_DIRECTORY)/*.cti
+	-rm -f $(INSTALL_DATA_DIRECTORY)/*.[tac]t[bi]
 	-rm -f $(INSTALL_DATA_DIRECTORY)/brltty*
 	-[ ! -d $(INSTALL_DATA_DIRECTORY) ] || rmdir $(INSTALL_DATA_DIRECTORY)
 
