@@ -132,6 +132,9 @@ tbl_gnome.$O:
 ttb_compile.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/ttb_compile.c
 
+ttb_native.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/ttb_native.c
+
 ttb_translate.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/ttb_translate.c
 
@@ -262,7 +265,7 @@ uninstall-api-bindings:
 
 ###############################################################################
 
-BRLTTY_OBJECTS = brltty.$O $(PROGRAM_OBJECTS) config.$O $(BASE_OBJECTS) datafile.$O dataarea.$O mount.$O auth.$O cut.$O cmd.$O scancodes.$O lock.$O charset.$O ttb_compile.$O ttb_translate.$O atb_compile.$O atb_translate.$O $(CTB_OBJECTS) touch.$O serial.$O $(USB_OBJECTS) $(BLUETOOTH_OBJECTS) drivers.$O $(SCREEN_OBJECTS) $(SCREEN_DRIVER_OBJECTS) route.$O brl.$O $(BRAILLE_DRIVER_OBJECTS) $(SPEECH_OBJECT) $(SPEECH_DRIVER_OBJECTS) $(TUNE_OBJECTS) $(API_OBJECTS)
+BRLTTY_OBJECTS = brltty.$O $(PROGRAM_OBJECTS) config.$O $(BASE_OBJECTS) datafile.$O dataarea.$O mount.$O auth.$O cut.$O cmd.$O scancodes.$O lock.$O charset.$O ttb_compile.$O ttb_native.$O ttb_translate.$O atb_compile.$O atb_translate.$O $(CTB_OBJECTS) touch.$O serial.$O $(USB_OBJECTS) $(BLUETOOTH_OBJECTS) drivers.$O $(SCREEN_OBJECTS) $(SCREEN_DRIVER_OBJECTS) route.$O brl.$O $(BRAILLE_DRIVER_OBJECTS) $(SPEECH_OBJECT) $(SPEECH_DRIVER_OBJECTS) $(TUNE_OBJECTS) $(API_OBJECTS)
 
 brltty$X: $(BRLTTY_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(SPEECH_DRIVER_LIBRARIES) $(SCREEN_DRIVER_LIBRARIES) $(ICU_LIBRARIES) $(LDLIBS)
@@ -388,7 +391,7 @@ tbltest.$O:
 
 ###############################################################################
 
-CTBTEST_OBJECTS = ctbtest.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) datafile.$O dataarea.$O ttb_compile.$O ttb_translate.$O ctb_compile.$O ctb_translate.$O lock.$O charset.$O
+CTBTEST_OBJECTS = ctbtest.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) datafile.$O dataarea.$O ttb_compile.$O ttb_native.$O ttb_translate.$O ctb_compile.$O ctb_translate.$O lock.$O charset.$O
 
 ctbtest$X: $(CTBTEST_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(CTBTEST_OBJECTS) $(ICU_LIBRARIES) $(LDLIBS)
@@ -474,7 +477,7 @@ txt2hlp.$O:
 
 ###############################################################################
 
-TBL2HEX_OBJECTS = tbl2hex.$O $(HOST_OBJECTS) host_lock.$O host_charset.$O host_datafile.$O host_dataarea.$O host_ttb_compile.$O host_atb_compile.$O host_ctb_compile.$O
+TBL2HEX_OBJECTS = tbl2hex.$O $(HOST_OBJECTS) host_lock.$O host_charset.$O host_datafile.$O host_dataarea.$O host_ttb_compile.$O host_ttb_native.$O host_atb_compile.$O host_ctb_compile.$O
 
 tbl2hex$X: $(TBL2HEX_OBJECTS)
 	$(HOSTCC) $(HOSTLDFLAGS) -o $@ $(TBL2HEX_OBJECTS) $(ICU_LIBRARIES) $(LDLIBS)
