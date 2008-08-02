@@ -73,8 +73,14 @@ typedef struct {
 
 typedef struct {
   unsigned char byteToDots[BYTES_PER_CHARSET];
-  wchar_t dotsToCharacter[0X100];
+  BITMASK(byteDotsDefined, BYTES_PER_CHARSET, char);
+
+  unsigned char dotsToByte[0X100];
+  BITMASK(dotsByteDefined, 0X100, char);
+
   TextTableOffset unicodeGroups[UNICODE_GROUP_COUNT];
+  wchar_t dotsToCharacter[0X100];
+  BITMASK(dotsCharacterDefined, 0X100, char);
 } TextTableHeader;
 
 struct TextTableStruct {

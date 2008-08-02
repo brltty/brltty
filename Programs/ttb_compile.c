@@ -22,19 +22,11 @@
 #include "misc.h"
 #include "datafile.h"
 #include "dataarea.h"
-#include "charset.h"
 #include "ttb.h"
 #include "ttb_internal.h"
 
-#define BYTE_DEFINED 0X01
-
-typedef struct {
-  unsigned char flags;
-} ByteData;
-
 typedef struct {
   DataArea *area;
-  ByteData bytes[BYTES_PER_CHARSET];
 } TextTableData;
 
 static inline TextTableHeader *
@@ -115,15 +107,20 @@ getUnicodeRowEntry (wchar_t character, TextTableData *ttd) {
 }
 
 static int
-setByte (unsigned char byte, unsigned char dots, TextTableData *ttd) {
+setTextTableByte (unsigned char byte, unsigned char dots, TextTableData *ttd) {
   TextTableHeader *header = getTextTableHeader(ttd);
 
   header->byteToDots[byte] = dots;
+  BITMASK_SET(header->byteDotsDefined, byte);
+
+  header->dotsToByte[dots] = byte;
+  BITMASK_SET(header->dotsByteDefined, dots);
+
   return 1;
 }
 
 static int
-setCharacter (wchar_t character, unsigned char dots, TextTableData *ttd) {
+setTextTableCharacter (wchar_t character, unsigned char dots, TextTableData *ttd) {
   UnicodeRowEntry *row = getUnicodeRowEntry(character, ttd);
   if (!row) return 0;
 
@@ -133,7 +130,12 @@ setCharacter (wchar_t character, unsigned char dots, TextTableData *ttd) {
     BITMASK_SET(row->defined, cellNumber);
   }
 
-  getTextTableHeader(ttd)->dotsToCharacter[dots] = character;
+  {
+    TextTableHeader *header = getTextTableHeader(ttd);
+    header->dotsToCharacter[dots] = character;
+    BITMASK_SET(header->dotsCharacterDefined, dots);
+  }
+
   return 1;
 }
 
@@ -249,15 +251,7 @@ processByteOperands (DataFile *file, void *data) {
     unsigned char dots;
 
     if (getDotsOperand(file, &dots)) {
-      if (!setByte(byte, dots, ttd)) return 0;
-
-      {
-        wint_t character = convertCharToWchar(byte);
-
-        if (character != WEOF)
-          if (!setCharacter(character, dots, ttd))
-            return 0;
-      }
+      if (!setTextTableByte(byte, dots, ttd)) return 0;
     }
   }
 
@@ -273,15 +267,7 @@ processCharOperands (DataFile *file, void *data) {
     unsigned char dots;
 
     if (getDotsOperand(file, &dots)) {
-      if (!setCharacter(character, dots, ttd)) return 0;
-
-      {
-        int byte = convertWcharToChar(character);
-
-        if (byte != EOF)
-          if (!setByte(byte, dots, ttd))
-            return 0;
-      }
+      if (!setTextTableCharacter(character, dots, ttd)) return 0;
     }
   }
 
