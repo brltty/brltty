@@ -334,5 +334,5 @@ destroyTextTable (TextTable *table) {
 
 void
 fixTextTablePath (char **path) {
-  fixPath(path, TRANSLATION_TABLE_EXTENSION, TEXT_TABLE_PREFIX);
+  fixPath(path, TEXT_TABLE_EXTENSION);
 }

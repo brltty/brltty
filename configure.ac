@@ -1347,11 +1347,11 @@ BRLTTY_TEXT_TABLE([ru], [Russian (koi8-r)])
 BRLTTY_TEXT_TABLE([se], [Swedish (1996 standard)])
 BRLTTY_TEXT_TABLE([se-old], [Swedish (1989 standard)])
 BRLTTY_TEXT_TABLE([vni], [Vietnamese (iso-8859-1)])
-BRLTTY_ARG_TABLE([text], [nabcc], [text])
+BRLTTY_ARG_TABLE([text], [nabcc], [ttb])
 
 BRLTTY_ATTRIBUTES_TABLE([attributes], [])
 BRLTTY_ATTRIBUTES_TABLE([attrib], [])
-BRLTTY_ARG_TABLE([attributes], [attributes], [])
+BRLTTY_ARG_TABLE([attributes], [attributes], [atb])
 
 BRLTTY_ARG_DISABLE(
    [speech-support],

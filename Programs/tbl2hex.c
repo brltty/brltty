@@ -32,27 +32,7 @@
 #include "ctb.h"
 #include "ctb_internal.h"
 
-static char *opt_tableType;
-#define TBL_TYPE_TEXT "text"
-#define TBL_TYPE_ATTRIBUTES "attributes"
-#define TBL_TYPE_CONTRACTION "contraction"
-static const char *tableType_text = TBL_TYPE_TEXT;
-static const char *tableType_attributes = TBL_TYPE_ATTRIBUTES;
-static const char *tableType_contraction = TBL_TYPE_CONTRACTION;
-static const char *const optionStrings_TableType[] = {
-  TBL_TYPE_ATTRIBUTES ", " TBL_TYPE_CONTRACTION ", " TBL_TYPE_TEXT,
-  NULL
-};
-
 BEGIN_OPTION_TABLE(programOptions)
-  { .letter = 't',
-    .word = "type",
-    .argument = strtext("table-type"),
-    .setting.string = &opt_tableType,
-    .defaultSetting = TBL_TYPE_TEXT,
-    .description = strtext("The kind of table being generated: one of {%s}"),
-    .strings = optionStrings_TableType
-  },
 END_OPTION_TABLE
 
 int
@@ -137,57 +117,61 @@ main (int argc, char *argv[]) {
   }
   path = *argv++, argc--;
 
-  if (strcasecmp(opt_tableType, tableType_text) == 0) {
-    TextTable *table;
-
-    if ((table = compileTextTable(path))) {
-      if (dumpBytes(stdout, table->header.bytes, table->size)) {
-        status = 0;
-      } else {
-        status = 4;
-      }
-
-      destroyTextTable(table);
-    } else {
-      status = 3;
-    }
-  } else
-
-  if (strcasecmp(opt_tableType, tableType_attributes) == 0) {
-    AttributesTable *table;
-
-    if ((table = compileAttributesTable(path))) {
-      if (dumpBytes(stdout, table->header.bytes, table->size)) {
-        status = 0;
-      } else {
-        status = 4;
-      }
-
-      destroyAttributesTable(table);
-    } else {
-      status = 3;
-    }
-  } else
-
-  if (strcasecmp(opt_tableType, tableType_contraction) == 0) {
-    ContractionTable *table;
-
-    if ((table = compileContractionTable(path))) {
-      if (dumpBytes(stdout, table->header.bytes, table->size)) {
-        status = 0;
-      } else {
-        status = 4;
-      }
-
-      destroyContractionTable(table);
-    } else {
-      status = 3;
-    }
-  } else
-
   {
-    LogPrint(LOG_ERR, "unimplemented table type: %s", opt_tableType);
-    status = 5;
+    const char *extension = locatePathExtension(path);
+
+    if (strcmp(extension, TEXT_TABLE_EXTENSION) == 0) {
+      TextTable *table;
+
+      if ((table = compileTextTable(path))) {
+        if (dumpBytes(stdout, table->header.bytes, table->size)) {
+          status = 0;
+        } else {
+          status = 4;
+        }
+
+        destroyTextTable(table);
+      } else {
+        status = 3;
+      }
+    } else
+
+    if (strcmp(extension, ATTRIBUTES_TABLE_EXTENSION) == 0) {
+      AttributesTable *table;
+
+      if ((table = compileAttributesTable(path))) {
+        if (dumpBytes(stdout, table->header.bytes, table->size)) {
+          status = 0;
+        } else {
+          status = 4;
+        }
+
+        destroyAttributesTable(table);
+      } else {
+        status = 3;
+      }
+    } else
+
+    if (strcmp(extension, CONTRACTION_TABLE_EXTENSION) == 0) {
+      ContractionTable *table;
+
+      if ((table = compileContractionTable(path))) {
+        if (dumpBytes(stdout, table->header.bytes, table->size)) {
+          status = 0;
+        } else {
+          status = 4;
+        }
+
+        destroyContractionTable(table);
+      } else {
+        status = 3;
+      }
+    } else
+
+    {
+      LogPrint(LOG_ERR, "unrecognized file extension: %s", extension);
+      status = 5;
+    }
   }
 
   return status;

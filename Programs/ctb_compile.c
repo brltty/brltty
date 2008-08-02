@@ -693,5 +693,5 @@ destroyContractionTable (ContractionTable *table) {
 
 void
 fixContractionTablePath (char **path) {
-  fixPath(path, CONTRACTION_TABLE_EXTENSION, CONTRACTION_TABLE_PREFIX);
+  fixPath(path, CONTRACTION_TABLE_EXTENSION);
 }

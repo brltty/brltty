@@ -319,24 +319,28 @@ The build procedure should result in the installation of the following files:
         Driver-specific configuration data.
         Their names look more or less like <tt/brltty-/<em/driver/<tt/.conf/,
         where <em/driver/ is the two-letter <ref id="drivers" name="driver identification code">.
+      <tag/*.atb/
+        Attributes tables
+        (see section <ref id="table-attributes" name="Attributes Tables"> for details).
+        Their names look like <em/name/<tt/.atb/.
+      <tag/*.ati/
+        Include files for attributes tables.
       <tag/*.ctb/
         Contraction tables
-        (see section <ref id="contraction" name="Contracted Braille"> for details).
+        (see section <ref id="table-contraction" name="Contraction Tables"> for details).
         Their names look like <em/language/<tt/-/<em/country/<tt/-/<em/level/<tt/.ctb/.
       <tag/*.cti/
         Include files for contraction tables.
+      <tag/*.ttb/
+        Text tables
+        (see section <ref id="table-text" name="Text Tables"> for details).
+        Their names look like <em/language/<tt/.ttb/.
+      <tag/*.tti/
+        Include files for text tables.
       <tag/*.hlp/
         Driver-specific help pages.
         Their names look more or less like <tt/brltty-/<em/driver/<tt/.hlp/,
         where <em/driver/ is the two-letter <ref id="drivers" name="driver identification code">.
-      <tag/*.tbl/
-        Translation tables
-        (see section <ref id="translation" name="Translation Tables"> for details).
-        Their names look like <tt/text./<em/language/<tt/.tbl/.
-        There are also a couple of special tables which map
-        character highlighting attributes to braille dots:
-        <tt/attrib.tbl/ does it the original way,
-        and <tt/attributes.tbl/ does it the current way.
     </descrip>
   <tag>/var/lib/BrlAPI/</>
     Local sockets for connecting to the Application Programming Interface.
@@ -504,11 +508,10 @@ for any additional display-specific instructions.
         This is equivalent to specifying <tt/--with-libbraille/.
     </descrip>
   <tag><tt/--with-text-table=/<em/file/<label id="build-text-table"></tag>
-    Specify the default text translation table
-    (see section <ref id="translation-text" name="Text Translation"> for details).
+    Specify the default text table
+    (see section <ref id="table-text" name="Text Tables"> for details).
     The absolute path to a table outside the source tree may be specified.
-    The <tt/.tbl/ extension is optional.
-    For a simple file name, the <tt/text./ prefix is optional.
+    The <tt/.ttb/ extension is optional.
     If this option isn't specified,
     then <tt/nabcc/,
     a commonly (in North America) used 8-dot variant of the
@@ -520,10 +523,10 @@ for any additional display-specific instructions.
     This setting can be changed with the
     <ref id="preference-text-table" name="Text Table"> preference.
   <tag><tt/--with-attributes-table=/<em/file/<label id="build-attributes-table"></tag>
-    Specify the default attributes translation table
-    (see section <ref id="translation-attributes" name="Attributes Translation"> for details).
+    Specify the default attributes table
+    (see section <ref id="table-attributes" name="Attributes Translation"> for details).
     The absolute path to a table outside the source tree may be specified.
-    The <tt/.tbl/ extension is optional.
+    The <tt/.atb/ extension is optional.
     If this option isn't specified,
     then <tt/attributes/ is assumed.
     Change it to <tt/attrib/ if you'd like it done the old way.
@@ -962,7 +965,7 @@ These options are primarily useful when building BRLTTY for use on a boot disk.
     (see section <ref id="learn" name="Command Learn Mode">).
   <tag><tt/--disable-contracted-braille/<label id="build-contracted-braille"></tag>
     Reduce program size by excluding support for contracted braille
-    (see section <ref id="contraction" name="Contracted Braille">).
+    (see section <ref id="table-contraction" name="Contraction Tables">).
   <tag><tt/--disable-usb-support/<label id="build-usb-support"></tag>
     Reduce program size by excluding support for USB devices.
   <tag><tt/--disable-bluetooth-support/<label id="build-bluetooth-support"></tag>
@@ -1199,7 +1202,7 @@ can be created in order to establish system defaults for such things as
 the location of the preferences file,
 the braille display driver to be used,
 the device to which the braille display is connected,
-and the text translation table to be used.
+and the text table to be used.
 Many options
 (see section <ref id="options" name="Command Line Options"> for details)
 allow explicit run-time specification of such things as
@@ -1679,17 +1682,17 @@ The following is written to standard output:
     Unprintable characters are written as blanks.
 </enum>
 
-<sect2>tbltest<label id="utility-tbltest"><p>
-This utility tests a translation table
-(see section <ref id="translation" name="Translation Tables">).
-<tscreen>tbltest -<em/option/ ... <em/input-table/ <em/output-table/</tscreen>
+<sect2>ttbtest<label id="utility-ttbtest"><p>
+This utility tests a text table
+(see section <ref id="table-text" name="Text Tables">).
+<tscreen>ttbtest -<em/option/ ... <em/input-table/ <em/output-table/</tscreen>
 <descrip>
   <tag><em/input-table/</tag>
-    The file system path to the input translation table.
+    The file system path to the input text table.
     If it's relative then it's anchored at the directory configured via the
     <ref id="build-data-directory" name="--with-data-directory"> build option.
   <tag><em/output-table/</tag>
-    The file system path to the output translation table.
+    The file system path to the output text table.
     If it's relative then it's anchored at the current working directory.
     If this parameter isn't supplied then no output table is written.
   <tag><tt/-c/<em/charset/ <tt/--character-set=/<em/charset/</tag>
@@ -1722,14 +1725,14 @@ This utility tests a translation table
 
 The following table formats are supported:
 <descrip>
-  <tag/tbl/BRLTTY
+  <tag/ttb/BRLTTY
   <tag/sbl/SuSE Blinux
   <tag/a2b/Gnopernicus
 </descrip>
 
 <sect2>ctbtest<label id="utility-ctbtest"><p>
 This utility tests a contraction table
-(see section <ref id="contraction" name="Contracted Braille">).
+(see section <ref id="table-contraction" name="Contraction Tables">).
 The text read from the input files (or standard input)
 is rewritten to standard output as contracted braille.
 <tscreen>ctbtest -<em/option/ ... <em/input-file/ ...</tscreen>
@@ -1747,10 +1750,10 @@ is rewritten to standard output as contracted braille.
     The <tt/.ctb/ extension is optional.
     If this option isn't supplied then <tt/en-us-g2/ is assumed.
   <tag><tt/-t/<em/file/ <tt/--text-table=/<em/file/</tag>
-    The file system path to the text translation table to use.
+    The file system path to the text table to use.
     If it's relative then it's anchored at the directory configured via the
     <ref id="build-data-directory" name="--with-data-directory"> build option.
-    The <tt/.tbl/ extension and the <tt/text./ prefix are both optional.
+    The <tt/.ttb/ extension is optional.
     If this option isn't supplied then the table defined via the
     <ref id="build-text-table" name="--with-text-table">
     build option is assumed.
@@ -1763,7 +1766,7 @@ is rewritten to standard output as contracted braille.
     Display a summary of the command line options, and then exit.
 </descrip>
 
-The text translation table is used:
+The text table is used:
 <itemize>
   <item>
     To define the output character set so that
@@ -1775,7 +1778,7 @@ The text translation table is used:
     (see section <ref id="contraction-opcodes-translation" name="Character Translation">).
 </itemize>
 
-The <tt/text.brf.tbl/ text translation table is provided for use with this utility.
+The <tt/brf.ttb/ text table is provided for use with this utility.
 It defines the format used within <tt/.brf/ files. 
 This is also the preferred format used
 by most braille printers
@@ -2020,11 +2023,11 @@ via the <ref id="preferences-menu" name="preferences menu">.
     rather than the characters themselves (the content).
     This feature is useful, for example,
     when you need to locate a highlighted item.
-    When showing screen content, the text translation table is used
+    When showing screen content, the text table is used
     (see the <ref id="options-text-table" name="-t"> command line option,
     the <ref id="configure-text-table" name="text-table"> configuration file directive,
     and the <ref id="build-text-table" name="--with-text-table"> build option).
-    When showing screen attributes, the attributes translation table is used
+    When showing screen attributes, the attributes table is used
     (see the <ref id="options-attributes-table" name="-a"> command line option,
     the <ref id="configure-attributes-table" name="attributes-table"> configuration file directive,
     and the <ref id="build-attributes-table" name="--with-attributes-table"> build option).
@@ -2358,13 +2361,13 @@ The following directives are recognized:
     This directive can be overridden with the
     <ref id="options-api-parameters" name="-A"> command line option.
   <tag><tt/attributes-table/ <em/file/<label id="configure-attributes-table"></tag>
-    Specify the attributes translation table
-    (see section <ref id="translation" name="Translation Tables"> for details).
+    Specify the attributes table
+    (see section <ref id="table-attributes" name="Attributes Tables"> for details).
     If a relative path is supplied, then it's anchored at <tt>/etc/brltty</>
     (see the <ref id="build-data-directory" name="--with-data-directory">
     and the <ref id="build-execute-root" name="--with-execute-root">
     build options for more details).
-    The <tt/.tbl/ extension is optional.
+    The <tt/.atb/ extension is optional.
     See the <ref id="build-attributes-table" name="--with-attributes-table">
     build option for the default established during the build procedure.
     This directive can be overridden with the
@@ -2409,7 +2412,7 @@ The following directives are recognized:
     <ref id="options-braille-parameters" name="-B"> command line option.
   <tag><tt/contraction-table/ <em/file/<label id="configure-contraction-table"></tag>
     Specify the contraction table
-    (see section <ref id="contraction" name="Contracted Braille"> for details).
+    (see section <ref id="table-contraction" name="Contraction Tables"> for details).
     If a relative path is supplied, then it's anchored at <tt>/etc/brltty</>
     (see the <ref id="build-data-directory" name="--with-data-directory">
     and the <ref id="build-execute-root" name="--with-execute-root">
@@ -2489,14 +2492,13 @@ The following directives are recognized:
     This directive can be overridden with the
     <ref id="options-speech-parameters" name="-S"> command line option.
   <tag><tt/text-table/ <em/file/<label id="configure-text-table"></tag>
-    Specify the text translation table
-    (see section <ref id="translation" name="Translation Tables"> for details).
+    Specify the text table
+    (see section <ref id="table-text" name="Text Tables"> for details).
     If a relative path is supplied, then it's anchored at <tt>/etc/brltty</>
     (see the <ref id="build-data-directory" name="--with-data-directory">
     and the <ref id="build-execute-root" name="--with-execute-root">
     build options for more details).
-    The <tt/.tbl/ extension is optional.
-    For a simple file name, the <tt/text./ prefix is optional.
+    The <tt/.ttb/ extension is optional.
     See the <ref id="build-text-table" name="--with-text-table">
     build option for the default established during the build procedure.
     This directive can be overridden with the
@@ -2508,13 +2510,13 @@ Many settings can be explicitly specified when invoking BRLTTY.
 The <tt/brltty/ command accepts the following options:
 <descrip>
   <tag><tt/-a/<em/file/ <tt/--attributes-table=/<em/file/<label id="options-attributes-table"></tag>
-    Specify the attributes translation table
-    (see section <ref id="translation" name="Translation Tables"> for details).
+    Specify the attributes table
+    (see section <ref id="table-attributes" name="Attributes Tables"> for details).
     If a relative path is supplied, then it's anchored at <tt>/etc/brltty</>
     (see the <ref id="build-data-directory" name="--with-data-directory">
     and the <ref id="build-execute-root" name="--with-execute-root">
     build options for more details).
-    The <tt/.tbl/ extension is optional.
+    The <tt/.atb/ extension is optional.
     See the <ref id="configure-attributes-table" name="attributes-table">
     configuration file directive for the default run-time setting.
     This setting can be changed with the
@@ -2526,7 +2528,7 @@ The <tt/brltty/ command accepts the following options:
     configuration file directive for the default run-time setting.
   <tag><tt/-c/<em/file/ <tt/--contraction-table=/<em/file/<label id="options-contraction-table"></tag>
     Specify the contraction table
-    (see section <ref id="contraction" name="Contracted Braille"> for details).
+    (see section <ref id="table-contraction" name="Contraction Tables"> for details).
     If a relative path is supplied, then it's anchored at <tt>/etc/brltty</>
     (see the <ref id="build-data-directory" name="--with-data-directory">
     and the <ref id="build-execute-root" name="--with-execute-root">
@@ -2612,14 +2614,13 @@ The <tt/brltty/ command accepts the following options:
     This option isn't available if the
     <ref id="build-speech-support" name="--disable-speech-support"> build option was specified.
   <tag><tt/-t/<em/file/ <tt/--text-table=/<em/file/<label id="options-text-table"></tag>
-    Specify the text translation table
-    (see section <ref id="translation" name="Translation Tables"> for details).
+    Specify the text table
+    (see section <ref id="table-text" name="Text Tables"> for details).
     If a relative path is supplied, then it's anchored at <tt>/etc/brltty</>
     (see the <ref id="build-data-directory" name="--with-data-directory">
     and the <ref id="build-execute-root" name="--with-execute-root">
     build options for more details).
-    The <tt/.tbl/ extension is optional.
-    For a simple file name, the <tt/text./ prefix is optional.
+    The <tt/.ttb/ extension is optional.
     See the <ref id="configure-text-table" name="text-table">
     configureation file directive for the default run-time setting.
     This setting can be changed with the
@@ -2687,7 +2688,7 @@ The <tt/brltty/ command accepts the following options:
         Parameters for the Application Programming Interface
         (see the <ref id="options-api-parameters" name="-A"> command line option).
       <tag><tt/BRLTTY_ATTRIBUTES_TABLE/</tag>
-        The attributes translation table
+        The attributes table
         (see the <ref id="options-attributes-table" name="-a"> command line option).
       <tag><tt/BRLTTY_BRAILLE_DEVICE/</tag>
         The braille display device
@@ -2727,7 +2728,7 @@ The <tt/brltty/ command accepts the following options:
         Parameters for the speech synthesizer driver
         (see the <ref id="options-speech-parameters" name="-S"> command line option).
       <tag><tt/BRLTTY_TEXT_TABLE/</tag>
-        The text translation table
+        The text table
         (see the <ref id="options-text-table" name="-a"> command line option).
     </descrip>
   <tag><tt/-F/<em/file/ <tt/--speech-fifo=/<em/file/<label id="options-speech-fifo"></tag>
@@ -3708,22 +3709,22 @@ Notes:
     </descrip>
     The initial setting is braille display driver dependent.
   <tag>Text Table<label id="preference-text-table"></tag>
-    Select the text translation table.
-    See section <ref id="translation-text" name="Text Translation"> for details.
+    Select the text table.
+    See section <ref id="table-text" name="Text Tables"> for details.
     See the <ref id="options-text-table" name="-t"> command line option for the initial setting.
     This preference isn't saved.
     It isn't presented if the
     <ref id="build-table-selection" name="--disable-table-selection"> build option was specified.
   <tag>Attributesw Table<label id="preference-attributes-table"></tag>
-    Select the attributes translation table.
-    See section <ref id="translation-attributes" name="Attributes Translation"> for details.
+    Select the attributes table.
+    See section <ref id="table-attributes" name="Attributes Tables"> for details.
     See the <ref id="options-attributes-table" name="-a"> command line option for the initial setting.
     This preference isn't saved.
     It isn't presented if the
     <ref id="build-table-selection" name="--disable-table-selection"> build option was specified.
   <tag>Contraction Table<label id="preference-contraction-table"></tag>
     Select the contraction table.
-    See section <ref id="contraction" name="Contracted Braille"> for details.
+    See section <ref id="table-contraction" name="Contraction Tables"> for details.
     See the <ref id="options-contraction-table" name="-c"> command line option for the initial setting.
     This preference isn't saved.
     It isn't presented if the
@@ -3935,15 +3936,13 @@ either for a few seconds
 (see the <ref id="options-message-delay" name="-M"> command line option)
 or until any key on the display is pressed.
 
-<sect>Translation Tables<label id="translation"><p>
-BRLTTY uses two <bf/translation tables/ to govern
-the mapping from bytes to dot combinations.
+<sect>Tables<label id="tables"><p>
 
-<sect1>Text Translation<label id="translation-text"><p>
-The first, and most important, is the text translation table.
+<sect1>Text Tables<label id="table-text"><p>
+The text table is used to convert a host character into its braille representation.
 BRLTTY is initially configured to use the
 <ref id="nabcc" name="North American Braille Computer Code"> (NABCC).
-In addition to this default text translation table,
+In addition to this default text table,
 several alternatives are provided:
 <descrip>
   <tag/brf/good for viewing <tt/.brf/ files in text editor or pager
@@ -3973,64 +3972,11 @@ several alternatives are provided:
 See the <ref id="options-text-table" name="-t"> command line option,
 the <ref id="configure-text-table" name="text-table"> configuration file directive,
 and the <ref id="build-text-table" name="--with-text-table"> build option
-for details regarding how to use an alternate text translation table.
+for details regarding how to use an alternate text table.
 
-<sect1>Attributes Translation<label id="translation-attributes"><p>
-The attributes translation table is used when BRLTTY
-is displaying screen attributes rather than screen content
-(see the <ref id="command-DISPMD" name="DISPMD"> command).
-Each of the eight braille dots represents one of the eight <tt/VGA/ attribute bits.
-The following attributes translation tables are provided:
-<descrip>
-  <tag/attributes/
-    The lefthand column represents the foreground colours:
-    <descrip>
-      <tag/Dot 1/Red
-      <tag/Dot 2/Green
-      <tag/Dot 3/Blue
-      <tag/Dot 7/Bright
-    </descrip>
-    The righthand column represents the background colours:
-    <descrip>
-      <tag/Dot 4/Red
-      <tag/Dot 5/Green
-      <tag/Dot 6/Blue
-      <tag/Dot 8/Blink
-    </descrip>
-    A dot is raised when its corresponding attribute bit is on.
-    This is the default attributes translation table
-    because it's the most intuitive.
-    One of its problems, though, is that it's difficult to discern
-    the difference between normal (white on black)
-    and reverse (black on white) video.
-  <tag/attrib/
-    The lefthand column represents the foreground colours:
-    <descrip>
-      <tag/Dot 1/Red
-      <tag/Dot 2/Green
-      <tag/Dot 3/Blue
-      <tag/Dot 7/Bright
-    </descrip>
-    The righthand column represents the background colours:
-    <descrip>
-      <tag/Dot 4/Red
-      <tag/Dot 5/Green
-      <tag/Dot 6/Blue
-      <tag/Dot 8/Blink
-    </descrip>
-    A background bit being on triggers its corresponding dot,
-    whereas a foreground bit being off triggers its corresponding dot.
-    This unintuitive logic actually makes it easier
-    to read the most commonly used attribute combinations.
-</descrip>
-See the <ref id="options-attributes-table" name="-a"> command line option,
-the <ref id="configure-attributes-table" name="attributes-table"> configuration file directive,
-and the <ref id="build-attributes-table" name="--with-attributes-table"> build option
-for details regarding how to use an alternate attributes translation table.
-
-<sect1>Table Format<p>
-A translation table consists of a sequence of directives, one per line,
-which define how each possible byte value is to be represented in braille.
+<sect2>Text Table Format<p>
+A text table consists of a sequence of directives, one per line,
+which define how each character is to be represented in braille.
 White-space (blanks, tabs) at the beginning of a line,
 as well as before and/or after any operand of any directive,
 is ignored.
@@ -4043,7 +3989,6 @@ The following directives are provided:
   <tag><tt/byte/ <em/byte/ <em/dots/ &num; <em/comment/</tag>
     Use the <tt/byte/ directive to specify
     how a byte (character) is to be represented in braille.
-    See the text translation tables for examples of its use.
     Since this is by far the most commonly used directive,
     the <tt/byte/ keyword itself is optional.
 
@@ -4086,11 +4031,76 @@ The following directives are provided:
       <item>\\ 12567
       <item>\x20 0
     </itemize>
+</descrip>
+
+<sect1>Attributes Tables<label id="table-attributes"><p>
+The attributes table is used when BRLTTY
+is displaying screen attributes rather than screen content
+(see the <ref id="command-DISPMD" name="DISPMD"> command).
+Each of the eight braille dots represents one of the eight <tt/VGA/ attribute bits.
+The following attributes tables are provided:
+<descrip>
+  <tag/attributes/
+    The lefthand column represents the foreground colours:
+    <descrip>
+      <tag/Dot 1/Red
+      <tag/Dot 2/Green
+      <tag/Dot 3/Blue
+      <tag/Dot 7/Bright
+    </descrip>
+    The righthand column represents the background colours:
+    <descrip>
+      <tag/Dot 4/Red
+      <tag/Dot 5/Green
+      <tag/Dot 6/Blue
+      <tag/Dot 8/Blink
+    </descrip>
+    A dot is raised when its corresponding attribute bit is on.
+    This is the default attributes table
+    because it's the most intuitive.
+    One of its problems, though, is that it's difficult to discern
+    the difference between normal (white on black)
+    and reverse (black on white) video.
+  <tag/attrib/
+    The lefthand column represents the foreground colours:
+    <descrip>
+      <tag/Dot 1/Red
+      <tag/Dot 2/Green
+      <tag/Dot 3/Blue
+      <tag/Dot 7/Bright
+    </descrip>
+    The righthand column represents the background colours:
+    <descrip>
+      <tag/Dot 4/Red
+      <tag/Dot 5/Green
+      <tag/Dot 6/Blue
+      <tag/Dot 8/Blink
+    </descrip>
+    A background bit being on triggers its corresponding dot,
+    whereas a foreground bit being off triggers its corresponding dot.
+    This unintuitive logic actually makes it easier
+    to read the most commonly used attribute combinations.
+</descrip>
+See the <ref id="options-attributes-table" name="-a"> command line option,
+the <ref id="configure-attributes-table" name="attributes-table"> configuration file directive,
+and the <ref id="build-attributes-table" name="--with-attributes-table"> build option
+for details regarding how to use an alternate attributes table.
+
+<sect2>Attributes Table Format<p>
+An attributes table consists of a sequence of directives, one per line,
+which define how a character attribute is to be represented in braille.
+White-space (blanks, tabs) at the beginning of a line,
+as well as before and/or after any operand of any directive,
+is ignored.
+Lines containing only white-space are ignored.
+If the first non-white-space character of a line is "&num;"
+then that line is a comment and is ignored.
+
+The following directives are provided:
+<descrip>
   <tag><tt/dot/ <em/dot/ <em/state/ &num; <em/comment/</tag>
     Use the <tt/dot/ directive to specify
-    how the undefined bytes are to be represented in braille.
-    See the attributes translation tables for examples of its use.
-    The default is that all dots are <tt/on/.
+    what a specific braille dot represents.
 
     <descrip>
       <tag><em/dot/</tag>
@@ -4101,13 +4111,11 @@ The following directives are provided:
         When the dot is raised.
         It may be:
         <descrip>
-          <tag><tt/on/</tag>The dot is raised.
-          <tag><tt/off/</tag>The dot isn't raised.
-          <tag><tt/=/<em/bit/</tag>The dot is raised if the named bit is on (set to 1).
-          <tag><tt/&tilde;/<em/bit/</tag>The dot is raised if the named bit is off (set to 0).
+          <tag><tt/=/<em/bit/</tag>The dot is raised if the named attribute is on.
+          <tag><tt/&tilde;/<em/bit/</tag>The dot is raised if the named attribute is off.
         </descrip>
 
-        The names of the bits are:
+        The names of the attribute bits are:
         <descrip>
           <tag/0X01/fg-blue
           <tag/0X02/fg-green
@@ -4122,14 +4130,12 @@ The following directives are provided:
 
     Examples:
     <itemize>
-      <item>dot 1 on
-      <item>dot 2 off
-      <item>dot 3 =fg-red
-      <item>dot 4 &tilde;bg-blue
+      <item>dot 1 =fg-red
+      <item>dot 2 &tilde;bg-blue
     </itemize>
 </descrip>
 
-<sect>Contracted Braille<label id="contraction"><p>
+<sect1>Contraction Tables<label id="table-contraction"><p>
 BRLTTY can display in-line contracted braille.
 It does this if:
 <itemize>
@@ -4158,7 +4164,7 @@ The following contraction tables are provided:
   <tag/zh-tw-ucb/Taiwanese Unique Chinese Braille
 </descrip>
 
-<sect1>File Format<p>
+<sect2>File Format<p>
 Blank lines are ignored.
 Any leading and trailing white-space (any number of blanks and/or tabs) is ignored.
 Lines which begin with a number sign (<tt/&num;/) are ignored,
@@ -4216,11 +4222,11 @@ The following operand types are supported:
     A space may be specified via the special dot number <tt/0/.
 </descrip>
 
-<sect1>Opcodes<label id="contraction-opcodes"><p>
+<sect2>Opcodes<label id="contraction-opcodes"><p>
 An opcode is a keyword which tells the translator how to interpret the operands.
 The opcodes are grouped here by function.
 
-<sect2>Table Administration<label id="contraction-opcodes-administration"><p>
+<sect3>Table Administration<label id="contraction-opcodes-administration"><p>
 These opcodes make it easier to write contraction tables.
 They have no direct effect on the character translation.
 <descrip>
@@ -4246,7 +4252,7 @@ They have no direct effect on the character translation.
     If this opcode isn't used then the <tt/C/ locale is assumed.
 </descrip>
 
-<sect2>Special Symbol Definition<label id="contraction-opcodes-symbols"><p>
+<sect3>Special Symbol Definition<label id="contraction-opcodes-symbols"><p>
 These opcodes define special symbols which must be
 inserted into the braille text in order to clarify it.
 <descrip>
@@ -4262,7 +4268,7 @@ inserted into the braille text in order to clarify it.
     The symbol which marks the beginning of a number.
 </descrip>
 
-<sect2>Character Translation<label id="contraction-opcodes-translation"><p>
+<sect3>Character Translation<label id="contraction-opcodes-translation"><p>
 These opcodes define the braille representations for character sequences.
 Each of them defines an entry within the contraction table.
 These entries may be defined in any order except, as noted below,
@@ -4359,7 +4365,7 @@ Now, finally, here are the opcode descriptions themselves:
     Translate the characters if they're at the end of a number.
 </descrip>
 
-<sect2>Character Classes<label id="contraction-opcodes-classes"><p>
+<sect3>Character Classes<label id="contraction-opcodes-classes"><p>
 These opcodes define and use character classes.
 A character class associates a set of characters with a name.
 The name then refers to any character within the class.

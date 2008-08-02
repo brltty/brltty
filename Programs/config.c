@@ -132,7 +132,6 @@ static char *opt_textTable;
 static char *opt_attributesTable;
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
-static char *opt_contractionsDirectory;
 static char *opt_contractionTable;
 ContractionTable *contractionTable = NULL;
 #endif /* ENABLE_CONTRACTED_BRAILLE */
@@ -349,15 +348,6 @@ BEGIN_OPTION_TABLE(programOptions)
   },
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
-  { .letter = 'C',
-    .word = "contractions-directory",
-    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
-    .argument = strtext("directory"),
-    .setting.string = &opt_contractionsDirectory,
-    .defaultSetting = DATA_DIRECTORY,
-    .description = strtext("Path to directory for contractions tables.")
-  },
-
   { .letter = 'c',
     .word = "contraction-table",
     .flags = OPT_Config | OPT_Environ,
@@ -553,7 +543,7 @@ static int
 loadContractionTable (const char *file) {
   ContractionTable *table = NULL;
   if (*file) {
-    char *path = makePath(opt_contractionsDirectory, file);
+    char *path = makePath(opt_tablesDirectory, file);
     LogPrint(LOG_DEBUG, "compiling contraction table: %s", file);
     if (path) {
       if (!(table = compileContractionTable(path))) {
@@ -2267,11 +2257,6 @@ startup (int argc, char *argv[]) {
       &opt_writableDirectory,
       &opt_dataDirectory,
       &opt_tablesDirectory,
-
-#ifdef ENABLE_CONTRACTED_BRAILLE
-      &opt_contractionsDirectory,
-#endif /* ENABLE_CONTRACTED_BRAILLE */
-
       NULL
     };
     fixInstallPaths(paths);
@@ -2479,7 +2464,7 @@ startup (int argc, char *argv[]) {
 #ifdef ENABLE_PREFERENCES_MENU
 #ifdef ENABLE_TABLE_SELECTION
   globPrepare(&glob_textTable, opt_tablesDirectory,
-              TEXT_TABLE_PREFIX "*" TRANSLATION_TABLE_EXTENSION,
+              "*" TEXT_TABLE_EXTENSION,
               opt_textTable, 0);
 #endif /* ENABLE_TABLE_SELECTION */
 #endif /* ENABLE_PREFERENCES_MENU */
@@ -2495,13 +2480,12 @@ startup (int argc, char *argv[]) {
 #ifdef ENABLE_PREFERENCES_MENU
 #ifdef ENABLE_TABLE_SELECTION
   globPrepare(&glob_attributesTable, opt_tablesDirectory,
-              "attr*" TRANSLATION_TABLE_EXTENSION,
+              "*" ATTRIBUTES_TABLE_EXTENSION,
               opt_attributesTable, 0);
 #endif /* ENABLE_TABLE_SELECTION */
 #endif /* ENABLE_PREFERENCES_MENU */
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
-  LogPrint(LOG_INFO, "%s: %s", gettext("Contractions Directory"), opt_contractionsDirectory);
   if (*opt_contractionTable) {
     fixContractionTablePath(&opt_contractionTable);
     loadContractionTable(opt_contractionTable);
@@ -2511,8 +2495,8 @@ startup (int argc, char *argv[]) {
            *opt_contractionTable? opt_contractionTable: gettext("none"));
 #ifdef ENABLE_PREFERENCES_MENU
 #ifdef ENABLE_TABLE_SELECTION
-  globPrepare(&glob_contractionTable, opt_contractionsDirectory,
-              CONTRACTION_TABLE_PREFIX "*" CONTRACTION_TABLE_EXTENSION,
+  globPrepare(&glob_contractionTable, opt_tablesDirectory,
+              "*" CONTRACTION_TABLE_EXTENSION,
               opt_contractionTable, 1);
 #endif /* ENABLE_TABLE_SELECTION */
 #endif /* ENABLE_PREFERENCES_MENU */

@@ -43,10 +43,10 @@ The path to the attributes translation table.
 Relative paths are anchored at
 .BR "/etc/brltty/" "."
 The
-.B ".tbl"
+.B ".atb"
 extension is optional.
 The built-in default is
-.BR "attributes.tbl" "."
+.BR "attributes.atb" "."
 .TP
 \fB-b \fIdriver\fB,\fR...|\fBauto\fR (\fB--braille-driver=\fR)
 The driver for the braille display
@@ -234,13 +234,10 @@ The path to the text translation table.
 Relative paths are anchored at
 .BR "/etc/brltty/" "."
 The
-.B ".tbl"
+.B ".ttb"
 extension is optional.
-For a simple file name, the
-.B "text."
-prefix is optional.
 The built-in default is
-.B "text.nabcc.tbl"
+.B "nabcc.ttb"
 (the North American Braille Computer Code).
 .TP
 \fB-v\fR (\fB--verify\fR)

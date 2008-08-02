@@ -199,5 +199,5 @@ destroyAttributesTable (AttributesTable *table) {
 
 void
 fixAttributesTablePath (char **path) {
-  fixPath(path, TRANSLATION_TABLE_EXTENSION, ATTRIBUTES_TABLE_PREFIX);
+  fixPath(path, ATTRIBUTES_TABLE_EXTENSION);
 }

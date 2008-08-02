@@ -33,32 +33,12 @@
 #include "ttb.h"
 #include "ctb.h"
 
-static char *opt_dataDirectory;
-static char *opt_contractionsDirectory;
 static char *opt_contractionTable;
 static char *opt_tablesDirectory;
 static char *opt_textTable;
 static char *opt_outputWidth;
 
 BEGIN_OPTION_TABLE(programOptions)
-  { .letter = 'D',
-    .word = "data-directory",
-    .flags = OPT_Hidden,
-    .argument = "file",
-    .setting.string = &opt_dataDirectory,
-    .defaultSetting = DATA_DIRECTORY,
-    .description = "Path to directory for configuration files."
-  },
-
-  { .letter = 'C',
-    .word = "contractions-directory",
-    .flags = OPT_Hidden,
-    .argument = strtext("directory"),
-    .setting.string = &opt_contractionsDirectory,
-    .defaultSetting = DATA_DIRECTORY,
-    .description = strtext("Path to directory for contractions tables.")
-  },
-
   { .letter = 'c',
     .word = "contraction-table",
     .argument = "file",
@@ -191,9 +171,7 @@ main (int argc, char *argv[]) {
 
   {
     char **const paths[] = {
-      &opt_dataDirectory,
       &opt_tablesDirectory,
-      &opt_contractionsDirectory,
       NULL
     };
     fixInstallPaths(paths);
@@ -214,7 +192,7 @@ main (int argc, char *argv[]) {
     char *contractionTablePath;
 
     fixContractionTablePath(&opt_contractionTable);
-    if ((contractionTablePath = makePath(opt_contractionsDirectory, opt_contractionTable))) {
+    if ((contractionTablePath = makePath(opt_tablesDirectory, opt_contractionTable))) {
       if ((contractionTable = compileContractionTable(contractionTablePath))) {
         if (*opt_textTable) {
           char *textTablePath;

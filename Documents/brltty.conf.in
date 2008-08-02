@@ -85,9 +85,9 @@
 #release-device	on	# Release the device.
 #release-device	off	# Don't release the device.
 
-# The text-table directive specifies which text translation table to
-# use. Relative paths are anchored at "@DATA_DIRECTORY@". If not specified,
-# "@text_table@" will be used.
+# The text-table directive specifies which text table to use. Relative paths
+# are anchored at "@DATA_DIRECTORY@". If not specified, "@text_table@" will be
+# used.
 # (can be overridden with the -t [--text-table=] option)
 #text-table	cz	# Czech (iso-8859-2)
 #text-table	da	# Danish
@@ -110,16 +110,16 @@
 #text-table	se-old	# Swedish (1989 standard)
 #text-table	vni	# Vietnamese
 
-# The attributes-table directive specifies which attributes translation
-# table to use. Relative paths are anchored at "@DATA_DIRECTORY@". If not
-# specified, "@attributes_table@" will be used.
+# The attributes-table directive specifies which attributes table to use.
+# Relative paths are anchored at "@DATA_DIRECTORY@". If not specified,
+# "@attributes_table@" will be used.
 # (can be overridden with the -a [--attributes-table=] option)
-#attributes-table	attributes.tbl	#
-#attributes-table	attrib.tbl	#
+#attributes-table	attributes	#
+#attributes-table	attrib	#
 
-# The contraction-table directive specifies which braille contraction
-# table to use. Relative paths are anchored at "@DATA_DIRECTORY@". If not
-# specified, no contraction table will be available.
+# The contraction-table directive specifies which contraction table to use.
+# Relative paths are anchored at "@DATA_DIRECTORY@". If not specified, no
+# contraction table will be available.
 # (can be overridden with the -c [--contraction-table=] option)
 #contraction-table	compress	# Remove excess white space.
 #contraction-table	en-ueb-g2	# Grade 2 Unified English Braille
@@ -329,16 +329,10 @@
 #data-directory @DATA_DIRECTORY@
 
 # The tables-directory directive specifies the absolute path to the directory
-# which contains the text and attributes tables. If not specified,
-# "@DATA_DIRECTORY@" will be used.
+# which contains the text, attributes, and contraction tables. If not
+# specified, "@DATA_DIRECTORY@" will be used.
 # (can be overridden with the -T [--tables-directory=] option)
 #tables-directory @DATA_DIRECTORY@
-
-# The contractions-directory directive specifies the absolute path to the
-# directory which contains the contraction tables. If not specified,
-# "@DATA_DIRECTORY@" will be used.
-# (can be overridden with the -C [--contractions-directory=] option)
-#contractions-directory @DATA_DIRECTORY@
 
 
 ################################################

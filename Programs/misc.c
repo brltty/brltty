@@ -415,6 +415,12 @@ locatePathName (const char *path) {
   return name;
 }
 
+const char *
+locatePathExtension (const char *path) {
+  const char *name = locatePathName(path);
+  return strrchr(name, '.');
+}
+
 int
 isExplicitPath (const char *path) {
   return locatePathName(path) != path;
@@ -438,21 +444,11 @@ makePath (const char *directory, const char *file) {
 }
 
 void
-fixPath (char **path, const char *extension, const char *prefix) {
-  const unsigned int prefixLength = strlen(prefix);
+fixPath (char **path, const char *extension) {
   const unsigned int pathLength = strlen(*path);
   const unsigned int extensionLength = strlen(extension);
-  char buffer[prefixLength + pathLength + extensionLength + 1];
+  char buffer[pathLength + extensionLength + 1];
   unsigned int length = 0;
-
-  if (prefixLength) {
-    if (!strchr(*path, '/')) {
-      if (strncmp(*path, prefix, prefixLength) != 0) {
-        memcpy(&buffer[length], prefix, prefixLength);
-        length += prefixLength;
-      }
-    }
-  }
 
   memcpy(&buffer[length], *path, pathLength);
   length += pathLength;

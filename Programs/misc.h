@@ -162,10 +162,11 @@ extern int isPathDelimiter (const char character);
 extern int isAbsolutePath (const char *path);
 extern char *getPathDirectory (const char *path);
 extern const char *locatePathName (const char *path);
+extern const char *locatePathExtension (const char *path);
 extern int isExplicitPath (const char *path);
 
 extern char *makePath (const char *directory, const char *file);
-extern void fixPath (char **path, const char *extension, const char *prefix);
+extern void fixPath (char **path, const char *extension);
 extern int makeDirectory (const char *path);
 
 extern const char *writableDirectory;

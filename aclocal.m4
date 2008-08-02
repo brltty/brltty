@@ -62,7 +62,7 @@ then
    $1_table="${brltty_default_table}"
 fi
 AC_SUBST([install_$1_tables])
-BRLTTY_FILE_PATH([$1_table], [tbl], [$3])
+BRLTTY_FILE_PATH([$1_table], [$3], [])
 BRLTTY_SUMMARY_ITEM([$1-table], [$1_table])
 AC_DEFINE_UNQUOTED(BRLTTY_UPPERCASE([$1_table]), ["${$1_table}"],
                    [Define this to be a string containing the path to the default $1 table.])

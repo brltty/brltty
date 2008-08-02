@@ -184,7 +184,7 @@
 \XA4 (  3  678)  # currency sign
 \XA5 (   4 6 8)  # yen sign
 \XA6 ( 2   678)  # broken bar
-\XA7 (1 3  678)  # section sign
+\XA7 (12345678)  # section sign
 \XA8 ( 2    78)  # diaeresis
 \XA9 (1  4567 )  # copyright sign
 \XAA (12  5  8)  # feminine ordinal indicator

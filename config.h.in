@@ -359,11 +359,9 @@ extern "C" {
 #undef HAVE_PKG_XAWPLUS
 #undef HAVE_PKG_XM
 
-#define TRANSLATION_TABLE_EXTENSION ".tbl"
-#define TEXT_TABLE_PREFIX "text."
-#define ATTRIBUTES_TABLE_PREFIX ""
+#define TEXT_TABLE_EXTENSION ".ttb"
+#define ATTRIBUTES_TABLE_EXTENSION ".atb"
 #define CONTRACTION_TABLE_EXTENSION ".ctb"
-#define CONTRACTION_TABLE_PREFIX ""
 
 #ifdef __cplusplus
 }
