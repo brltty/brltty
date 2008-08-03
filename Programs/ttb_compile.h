@@ -22,6 +22,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#include <stdio.h>
+
 #include "datafile.h"
 
 typedef struct TextTableDataStruct TextTableData;

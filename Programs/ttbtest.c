@@ -20,7 +20,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
-#include <ctype.h>
 
 #ifdef HAVE_ICU
 #include <unicode/uchar.h>
@@ -29,9 +28,8 @@
 #include "program.h"
 #include "options.h"
 #include "misc.h"
-#include "brl.h"
+#include "brldots.h"
 #include "charset.h"
-#include "datafile.h"
 #include "ttb.h"
 #include "ttb_internal.h"
 #include "ttb_compile.h"
@@ -92,25 +90,25 @@ BEGIN_OPTION_TABLE(programOptions)
   },
 END_OPTION_TABLE
 
-static const DotsTable dotsInternal = {
+static const BrlDotTable dotsInternal = {
   BRL_DOT1, BRL_DOT2, BRL_DOT3, BRL_DOT4,
   BRL_DOT5, BRL_DOT6, BRL_DOT7, BRL_DOT8
 };
 
-static const DotsTable dots12345678 = {
+static const BrlDotTable dots12345678 = {
   0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80
 };
 
-static const DotsTable dots14253678 = {
+static const BrlDotTable dots14253678 = {
   0X01, 0X04, 0X10, 0X02, 0X08, 0X20, 0X40, 0X80
 };
 
 static unsigned char
-mapDots (unsigned char input, const DotsTable from, const DotsTable to) {
+mapDots (unsigned char input, const BrlDotTable from, const BrlDotTable to) {
   unsigned char output = 0;
   {
     int dot;
-    for (dot=0; dot<DOTS_TABLE_SIZE; ++dot) {
+    for (dot=0; dot<BRL_DOT_COUNT; ++dot) {
       if (input & from[dot]) output |= to[dot];
     }
   }
@@ -188,12 +186,12 @@ readTable_native (const char *path, FILE *file, void *data) {
 
 static int
 writeDots_native (FILE *file, unsigned char dots) {
-  int dot;
+  unsigned char dot;
 
   if (fprintf(file, "(") == EOF) return 0;
-  for (dot=0; dot<BRL_DOT_COUNT; dot+=1) {
-    wchar_t character = (dots & brlDotBits[dot])? brlDotNumbers[dot]: WC_C(' ');
-    if (fprintf(file, "%.1" PRIws, &character) == EOF) return 0;
+  for (dot=0X01; dot; dot<<=1) {
+    char number = (dots & dot)? brlDotToNumber(dot): ' ';
+    if (fprintf(file, "%c", number) == EOF) return 0;
   }
   if (fprintf(file, ")") == EOF) return 0;
 

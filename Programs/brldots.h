@@ -40,6 +40,8 @@ extern "C" {
  *     7  8     6  7    100  200
  */
 
+#define BRL_DOT_COUNT 8
+
 #define BRL_DOT(number) (1 << ((number) - 1))
 #define BRL_DOT1 BRL_DOT(1) /* upper-left dot of standard braille cell */
 #define BRL_DOT2 BRL_DOT(2) /* middle-left dot of standard braille cell */
@@ -61,7 +63,9 @@ static inline char brlDotToNumber (BrlDots dot) {
   return shift? (shift + '0'): 0;
 }
 
-typedef char BrlDotNumbersBuffer[9];
+typedef BrlDots BrlDotTable[BRL_DOT_COUNT];
+
+typedef char BrlDotNumbersBuffer[BRL_DOT_COUNT + 1];
 
 static inline unsigned int brlDotsToNumbers (BrlDots dots, BrlDotNumbersBuffer numbers) {
   char *number = numbers;
