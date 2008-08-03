@@ -92,15 +92,10 @@ struct TextTableStruct {
   size_t size;
 };
 
-#include "datafile.h"
-
-typedef struct TextTableDataStruct TextTableData;
-extern TextTable *processTextTableFile (const char *name, DataProcessor processor);
-extern int setTextTableByte (unsigned char byte, unsigned char dots, TextTableData *ttd);
-extern int setTextTableCharacter (wchar_t character, unsigned char dots, TextTableData *ttd);
-
-typedef TextTable *TextTableCompiler (const char *name);
-extern TextTableCompiler compileTextTable_native;
+static inline const void *
+getTextTableItem (TextTable *table, TextTableOffset offset) {
+  return &table->header.bytes[offset];
+}
 
 #ifdef __cplusplus
 }

@@ -35,6 +35,7 @@ struct DataFileStruct {
   int line;		/*line number in table */
   DataProcessor processor;
   void *data;
+  FILE *stream;
 
   const wchar_t *start;
   const wchar_t *end;
@@ -360,7 +361,7 @@ includeDataFile (DataFile *file, const wchar_t *name, unsigned int length) {
     char path[prefixLength + length + 1];
     snprintf(path, sizeof(path), "%.*s%.*" PRIws,
              prefixLength, prefixAddress, length, name);
-    return processDataFile(path, file->processor, file->data);
+    return processDataFile(path, NULL, file->processor, file->data);
   }
 }
 
@@ -440,10 +441,9 @@ processUtf8Line (char *line, void *dataAddress) {
 }
 
 int
-processDataFile (const char *name, DataProcessor processor, void *data) {
+processDataFile (const char *name, FILE *stream, DataProcessor processor, void *data) {
   int ok = 0;
   DataFile file;
-  FILE *stream;
 
   file.name = name;
   file.line = 0;
@@ -451,14 +451,17 @@ processDataFile (const char *name, DataProcessor processor, void *data) {
   file.data = data;
 
   LogPrint(LOG_DEBUG, "including data file: %s", file.name);
-
-  if ((stream = openDataFile(file.name, "r"))) {
-    if (processLines(stream, processUtf8Line, &file)) ok = 1;
-    fclose(stream);
-  } else {
+  if (stream) {
+    file.stream = stream;
+  } else if (!(file.stream = openDataFile(file.name, "r"))) {
     LogPrint(LOG_ERR,
              "cannot open data file '%s': %s",
              file.name, strerror(errno));
+  }
+
+  if (file.stream) {
+    if (processLines(file.stream, processUtf8Line, &file)) ok = 1;
+    if (!stream) fclose(file.stream);
   }
 
   return ok;

@@ -35,11 +35,6 @@ static TextTable internalTextTable = {
 
 TextTable *textTable = &internalTextTable;
 
-static const void *
-getTextTableItem (TextTable *table, TextTableOffset offset) {
-  return &table->header.bytes[offset];
-}
-
 static const UnicodeGroupEntry *
 getUnicodeGroupEntry (TextTable *table, wchar_t character) {
   TextTableOffset offset = table->header.fields->unicodeGroups[UNICODE_GROUP_NUMBER(character)];

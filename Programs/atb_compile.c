@@ -172,7 +172,7 @@ compileAttributesTable (const char *name) {
 
   if ((atd.area = newDataArea())) {
     if (allocateDataItem(atd.area, NULL, sizeof(AttributesTableHeader), __alignof__(AttributesTableHeader))) {
-      if (processDataFile(name, processAttributesTableLine, &atd)) {
+      if (processDataFile(name, NULL, processAttributesTableLine, &atd)) {
         if (makeAttributesToDots(&atd)) {
           if ((table = malloc(sizeof(*table)))) {
             table->header.fields = getAttributesTableHeader(&atd);

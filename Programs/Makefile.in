@@ -16,7 +16,7 @@
 ###############################################################################
 
 all: all-brltty $(ALL_XBRLAPI) $(ALL_API_BINDINGS)
-everything: all-brltty all-brltest all-scrtest all-spktest$X tbltest$X ctbtest$X tunetest$X $(ALL_API)
+everything: all-brltty all-brltest all-scrtest all-spktest$X ttbtest$X ctbtest$X tunetest$X $(ALL_API)
 all-brltty: brltty$X all-braille $(SPEECH_DRIVERS) $(SCREEN_DRIVERS)
 all-brltest: brltest$X $(BRAILLE_DRIVERS)
 all-spktest: spktest$X $(SPEECH_DRIVERS)
@@ -120,20 +120,14 @@ charset.$O:
 
 ###############################################################################
 
-tbl.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/tbl.c
-
-tbl_native.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/tbl_native.c
-
-tbl_gnome.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/tbl_gnome.c
-
 ttb_compile.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/ttb_compile.c
 
 ttb_native.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/ttb_native.c
+
+ttb_gnome.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/ttb_gnome.c
 
 ttb_translate.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/ttb_translate.c
@@ -381,13 +375,13 @@ scrtest.$O:
 
 ###############################################################################
 
-TBLTEST_OBJECTS = tbltest.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) lock.$O charset.$O tbl.$O tbl_native.$O tbl_gnome.$O
+TTBTEST_OBJECTS = ttbtest.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) lock.$O charset.$O datafile.$O dataarea.$O ttb_compile.$O ttb_native.$O
 
-tbltest$X: $(TBLTEST_OBJECTS) $(BUILD_API)
-	$(CC) $(LDFLAGS) -o $@ $(TBLTEST_OBJECTS) $(API_REF) $(CLIBS) $(ICU_LIBRARIES) $(LDLIBS)
+ttbtest$X: $(TTBTEST_OBJECTS) $(BUILD_API)
+	$(CC) $(LDFLAGS) -o $@ $(TTBTEST_OBJECTS) $(API_REF) $(CLIBS) $(ICU_LIBRARIES) $(LDLIBS)
 
-tbltest.$O:
-	$(CC) $(CFLAGS) $(ICU_INCLUDES) -c $(SRC_DIR)/tbltest.c
+ttbtest.$O:
+	$(CC) $(CFLAGS) $(ICU_INCLUDES) -c $(SRC_DIR)/ttbtest.c
 
 ###############################################################################
 

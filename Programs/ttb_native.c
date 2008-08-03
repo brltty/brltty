@@ -19,6 +19,7 @@
 
 #include "ttb.h"
 #include "ttb_internal.h"
+#include "ttb_compile.h"
 
 static int
 getByteOperand (DataFile *file, unsigned char *byte) {
@@ -168,6 +169,6 @@ processTextTableLine (DataFile *file, void *data) {
 }
 
 TextTable *
-compileTextTable_native (const char *name) {
-  return processTextTableFile(name, processTextTableLine);
+compileTextTable_native (const char *name, FILE *stream) {
+  return processTextTableFile(name, stream, processTextTableLine);
 }

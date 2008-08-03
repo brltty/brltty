@@ -24,6 +24,7 @@
 #include "dataarea.h"
 #include "ttb.h"
 #include "ttb_internal.h"
+#include "ttb_compile.h"
 
 struct TextTableDataStruct {
   DataArea *area;
@@ -143,25 +144,57 @@ setTextTableCharacter (wchar_t character, unsigned char dots, TextTableData *ttd
   return 1;
 }
 
-TextTable *
-processTextTableFile (const char *name, DataProcessor processor) {
-  TextTable *table = NULL;
-  TextTableData ttd;
+TextTableData *
+newTextTableData (void) {
+  TextTableData *ttd;
 
-  memset(&ttd, 0, sizeof(ttd));
+  if ((ttd = malloc(sizeof(*ttd)))) {
+    memset(ttd, 0, sizeof(*ttd));
 
-  if ((ttd.area = newDataArea())) {
-    if (allocateDataItem(ttd.area, NULL, sizeof(TextTableHeader), __alignof__(TextTableHeader))) {
-      if (processDataFile(name, processor, &ttd)) {
-        if ((table = malloc(sizeof(*table)))) {
-          table->header.fields = getTextTableHeader(&ttd);
-          table->size = getDataSize(ttd.area);
-          resetDataArea(ttd.area);
-        }
+    if ((ttd->area = newDataArea())) {
+      if (allocateDataItem(ttd->area, NULL, sizeof(TextTableHeader), __alignof__(TextTableHeader))) {
+        return ttd;
       }
+
+      destroyDataArea(ttd->area);
     }
 
-    destroyDataArea(ttd.area);
+    free(ttd);
+  }
+
+  return NULL;;
+}
+
+void
+destroyTextTableData (TextTableData *ttd) {
+  destroyDataArea(ttd->area);
+  free(ttd);
+}
+
+TextTable *
+newTextTable (TextTableData *ttd) {
+  TextTable *table = malloc(sizeof(*table));
+
+  if (table) {
+    table->header.fields = getTextTableHeader(ttd);
+    table->size = getDataSize(ttd->area);
+    resetDataArea(ttd->area);
+  }
+
+  return table;
+}
+
+TextTable *
+processTextTableFile (const char *name, FILE *stream, DataProcessor processor) {
+  TextTable *table = NULL;
+  TextTableData *ttd;
+
+  if ((ttd = newTextTableData())) {
+    if (processDataFile(name, stream, processor, ttd)) {
+      table = newTextTable(ttd);
+    }
+
+    destroyTextTableData(ttd);
   }
 
   return table;
@@ -169,7 +202,7 @@ processTextTableFile (const char *name, DataProcessor processor) {
 
 TextTable *
 compileTextTable (const char *name) {
-  return compileTextTable_native(name);
+  return compileTextTable_native(name, NULL);
 }
 
 void
