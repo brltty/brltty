@@ -72,7 +72,7 @@ processEncodingOperands (DataFile *file, void *data) {
   DataOperand encoding;
 
   if (getDataOperand(file, &encoding, "character encoding name")) {
-    if (!testDataWord(WS_C("UTF-8"), encoding.characters, encoding.length)) {
+    if (!isKeyword(WS_C("UTF-8"), encoding.characters, encoding.length)) {
       reportDataError(file, "unsupported character encoding: %.*" PRIws,
                       encoding.length, encoding.characters);
     }
@@ -88,7 +88,7 @@ processUcsBlockOperands (DataFile *file, void *data) {
   if (getDataOperand(file, &action, "UCS block action")) {
     const wchar_t *expected = inUcsBlock? WS_C("END"): WS_C("START");
 
-    if (testDataWord(expected, action.characters, action.length)) {
+    if (isKeyword(expected, action.characters, action.length)) {
       inUcsBlock = !inUcsBlock;
     } else {
       reportDataError(file, "unexpected UCS block action: %.*" PRIws " (expecting %" PRIws ")",
