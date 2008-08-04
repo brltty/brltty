@@ -653,7 +653,7 @@ compileContractionTable (const char *fileName) {
   if ((ctd.area = newDataArea())) {
     if (allocateDataItem(ctd.area, NULL, sizeof(ContractionTableHeader), __alignof__(ContractionTableHeader))) {
       if (allocateCharacterClasses(&ctd)) {
-        if (processDataFile(fileName, NULL, processContractionTableLine, &ctd)) {
+        if (processDataFile(fileName, processContractionTableLine, &ctd)) {
           if (saveCharacterTable(&ctd)) {
             if ((table = malloc(sizeof(*table)))) {
               table->header.fields = getContractionTableHeader(&ctd);

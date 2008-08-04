@@ -24,9 +24,10 @@ extern "C" {
 
 typedef struct DataFileStruct DataFile;
 
-typedef int (*DataProcessor) (DataFile *file, void *data);
+typedef int DataProcessor (DataFile *file, void *data);
 
-extern int processDataFile (const char *name, FILE *stream, DataProcessor processor, void *data);
+extern int processDataFile (const char *name, DataProcessor processor, void *data);
+extern int processDataStream (FILE *stream, const char *name, DataProcessor processor, void *data);
 extern int includeDataFile (DataFile *file, const wchar_t *name, unsigned int length);
 extern void reportDataError (DataFile *file, char *format, ...) PRINTF(2, 3);
 
@@ -48,7 +49,7 @@ extern int getDataString (DataFile *file, DataString *string, const char *descri
 
 typedef struct {
   const wchar_t *name;
-  DataProcessor processor;
+  DataProcessor *processor;
 } DataProperty;
 extern int processPropertyOperand (DataFile *file, const DataProperty *properties, const char *description, void *data);
 

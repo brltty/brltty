@@ -17,6 +17,7 @@
 
 #include "prologue.h"
 
+#include "misc.h"
 #include "ttb.h"
 #include "ttb_internal.h"
 #include "ttb_compile.h"
@@ -156,7 +157,7 @@ processCharOperands (DataFile *file, void *data) {
   return 1;
 }
 
-static int
+int
 processTextTableLine (DataFile *file, void *data) {
   static const DataProperty properties[] = {
     {.name=WS_C("byte"), .processor=processByteOperands},
@@ -169,6 +170,21 @@ processTextTableLine (DataFile *file, void *data) {
 }
 
 TextTable *
-compileTextTable_native (const char *name, FILE *stream) {
-  return processTextTableFile(name, stream, processTextTableLine);
+compileTextTable (const char *name) {
+  TextTable *table = NULL;
+  FILE *stream;
+
+  if ((stream = openDataFile(name, "r"))) {
+    TextTableData *ttd;
+
+    if ((ttd = processTextTableStream(stream, name, processTextTableLine))) {
+      table = newTextTable(ttd);
+
+      destroyTextTableData(ttd);
+    }
+
+    fclose(stream);
+  }
+
+  return table;
 }

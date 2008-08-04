@@ -29,14 +29,16 @@ extern "C" {
 typedef struct TextTableDataStruct TextTableData;
 extern TextTableData *newTextTableData (void);
 extern void destroyTextTableData (TextTableData *ttd);
+
+extern TextTableData *processTextTableStream (FILE *stream, const char *name, DataProcessor processor);
 extern TextTable *newTextTable (TextTableData *ttd);
 
-extern TextTable *processTextTableFile (const char *name, FILE *stream, DataProcessor processor);
-extern int setTextTableByte (unsigned char byte, unsigned char dots, TextTableData *ttd);
-extern int setTextTableCharacter (wchar_t character, unsigned char dots, TextTableData *ttd);
+extern DataProcessor processTextTableLine;
 
-typedef TextTable *TextTableCompiler (const char *name, FILE *stream);
-extern TextTableCompiler compileTextTable_native;
+extern void *getTextTableItem (TextTableData *ttd, TextTableOffset offset);
+extern TextTableHeader *getTextTableHeader (TextTableData *ttd);
+extern int setTextTableCharacter (wchar_t character, unsigned char dots, TextTableData *ttd);
+extern int setTextTableByte (unsigned char byte, unsigned char dots, TextTableData *ttd);
 
 #ifdef __cplusplus
 }

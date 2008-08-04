@@ -92,11 +92,6 @@ struct TextTableStruct {
   size_t size;
 };
 
-static inline const void *
-getTextTableItem (TextTable *table, TextTableOffset offset) {
-  return &table->header.bytes[offset];
-}
-
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

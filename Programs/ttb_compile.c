@@ -30,9 +30,14 @@ struct TextTableDataStruct {
   DataArea *area;
 };
 
-static inline TextTableHeader *
+void *
+getTextTableItem (TextTableData *ttd, TextTableOffset offset) {
+  return getDataItem(ttd->area, offset);
+}
+
+TextTableHeader *
 getTextTableHeader (TextTableData *ttd) {
-  return getDataItem(ttd->area, 0);
+  return getTextTableItem(ttd, 0);
 }
 
 static DataOffset
@@ -108,21 +113,6 @@ getUnicodeRowEntry (wchar_t character, TextTableData *ttd) {
 }
 
 int
-setTextTableByte (unsigned char byte, unsigned char dots, TextTableData *ttd) {
-  TextTableHeader *header = getTextTableHeader(ttd);
-
-  header->byteToDots[byte] = dots;
-  BITMASK_SET(header->byteDotsDefined, byte);
-
-  if (!BITMASK_TEST(header->dotsByteDefined, dots)) {
-    header->dotsToByte[dots] = byte;
-    BITMASK_SET(header->dotsByteDefined, dots);
-  }
-
-  return 1;
-}
-
-int
 setTextTableCharacter (wchar_t character, unsigned char dots, TextTableData *ttd) {
   UnicodeRowEntry *row = getUnicodeRowEntry(character, ttd);
   if (!row) return 0;
@@ -139,6 +129,21 @@ setTextTableCharacter (wchar_t character, unsigned char dots, TextTableData *ttd
       header->dotsToCharacter[dots] = character;
       BITMASK_SET(header->dotsCharacterDefined, dots);
     }
+  }
+
+  return 1;
+}
+
+int
+setTextTableByte (unsigned char byte, unsigned char dots, TextTableData *ttd) {
+  TextTableHeader *header = getTextTableHeader(ttd);
+
+  header->byteToDots[byte] = dots;
+  BITMASK_SET(header->byteDotsDefined, byte);
+
+  if (!BITMASK_TEST(header->dotsByteDefined, dots)) {
+    header->dotsToByte[dots] = byte;
+    BITMASK_SET(header->dotsByteDefined, dots);
   }
 
   return 1;
@@ -184,25 +189,16 @@ newTextTable (TextTableData *ttd) {
   return table;
 }
 
-TextTable *
-processTextTableFile (const char *name, FILE *stream, DataProcessor processor) {
-  TextTable *table = NULL;
+TextTableData *
+processTextTableStream (FILE *stream, const char *name, DataProcessor processor) {
   TextTableData *ttd;
 
   if ((ttd = newTextTableData())) {
-    if (processDataFile(name, stream, processor, ttd)) {
-      table = newTextTable(ttd);
-    }
-
+    if (processDataStream(stream, name, processor, ttd)) return ttd;
     destroyTextTableData(ttd);
   }
 
-  return table;
-}
-
-TextTable *
-compileTextTable (const char *name) {
-  return compileTextTable_native(name, NULL);
+  return NULL;
 }
 
 void
