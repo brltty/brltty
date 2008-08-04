@@ -38,8 +38,10 @@ extern DataProcessor processGnomeBrailleLine;
 
 extern void *getTextTableItem (TextTableData *ttd, TextTableOffset offset);
 extern TextTableHeader *getTextTableHeader (TextTableData *ttd);
-extern int setTextTableCharacter (wchar_t character, unsigned char dots, TextTableData *ttd);
-extern int setTextTableByte (unsigned char byte, unsigned char dots, TextTableData *ttd);
+extern const UnicodeCellEntry *getUnicodeCellEntry (TextTableData *ttd, wchar_t character);
+
+extern int setTextTableCharacter (TextTableData *ttd, wchar_t character, unsigned char dots);
+extern int setTextTableByte (TextTableData *ttd, unsigned char byte, unsigned char dots);
 
 #ifdef __cplusplus
 }

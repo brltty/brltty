@@ -113,7 +113,7 @@ processUcsCharOperands (DataFile *file, void *data) {
           unsigned char dots;
 
           if (testBrailleRepresentation(file, representation.characters[0], &dots)) {
-            if (!setTextTableCharacter(string.characters[0], dots, ttd)) return 0;
+            if (!setTextTableCharacter(ttd, string.characters[0], dots)) return 0;
           }
         } else {
           reportDataError(file, "multi-cell braille representation not supported");
@@ -139,7 +139,7 @@ processUnicodeCharOperands (DataFile *file, void *data) {
       unsigned char dots;
 
       if (testBrailleRepresentation(file, representation, &dots)) {
-        if (!setTextTableCharacter(character, dots, ttd)) return 0;
+        if (!setTextTableCharacter(ttd, character, dots)) return 0;
       }
     }
   }

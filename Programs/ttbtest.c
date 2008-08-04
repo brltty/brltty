@@ -117,20 +117,15 @@ mapDots (unsigned char input, const BrlDotTable from, const BrlDotTable to) {
 
 typedef TextTableData *TableReader (const char *path, FILE *file, void *data);
 typedef int TableWriter (const char *path, FILE *file, TextTableData *ttd, void *data);
-typedef int ByteWriter (FILE *file, unsigned char byte, unsigned char dots, void *data);
 typedef int CharacterWriter (FILE *file, wchar_t character, unsigned char dots, void *data);
 
-static int
-writeBytes (FILE *file, TextTableData *ttd, ByteWriter writer, void *data) {
-  const TextTableHeader *header = getTextTableHeader(ttd);
-  int byte;
-
-  for (byte=0; byte<BYTES_PER_CHARSET; byte+=1)
-    if (BITMASK_TEST(header->byteDotsDefined, byte))
-      if (!writer(file, byte, header->byteToDots[byte], data))
-        return 0;
-
-  return 1;
+static unsigned char
+getDots (TextTableData *ttd, wchar_t character) {
+  const UnicodeCellEntry *cell;
+  if ((cell = getUnicodeCellEntry(ttd, character))) return cell->dots;
+  if ((cell = getUnicodeCellEntry(ttd, UNICODE_REPLACEMENT_CHARACTER))) return cell->dots;
+  if ((cell = getUnicodeCellEntry(ttd, WC_C('?')))) return cell->dots;
+  return 0;
 }
 
 static int
@@ -199,14 +194,6 @@ writeDots_native (FILE *file, unsigned char dots) {
 }
 
 static int
-writeByte_native (FILE *file, unsigned char byte, unsigned char dots, void *data) {
-  if (fprintf(file, "byte \\x%02X ", byte) == EOF) return 0;
-  if (!writeDots_native(file, dots)) return 0;
-  if (fprintf(file, "\n") == EOF) return 0;
-  return 1;
-}
-
-static int
 writeCharacter_native (FILE *file, wchar_t character, unsigned char dots, void *data) {
   uint32_t value = character;
 
@@ -253,7 +240,6 @@ writeTable_native (const char *path, FILE *file, TextTableData *ttd, void *data)
         goto error;
   }
 
-  if (!writeBytes(file, ttd, writeByte_native, data)) goto error;
   if (!writeCharacters(file, ttd, writeCharacter_native, data)) goto error;
   return 1;
 
@@ -283,7 +269,7 @@ readTable_binary (const char *path, FILE *file, void *data) {
       }
 
       if (data) dots = mapDots(dots, data, dotsInternal);
-      if (!setTextTableByte(byte, dots, ttd)) break;
+      if (!setTextTableByte(ttd, byte, dots)) break;
     }
     if (byte == count) return ttd;
 
@@ -295,16 +281,15 @@ readTable_binary (const char *path, FILE *file, void *data) {
 
 static int
 writeTable_binary (const char *path, FILE *file, TextTableData *ttd, void *data) {
-  const TextTableHeader *header = getTextTableHeader(ttd);
   int byte;
 
   for (byte=0; byte<0X100; byte+=1) {
     unsigned char dots;
 
-    if (BITMASK_TEST(header->byteDotsDefined, byte)) {
-      dots = header->byteToDots[byte];
-    } else {
-      dots = 0;
+    {
+      wint_t character = convertCharToWchar(byte);
+      if (character == WEOF) character = UNICODE_REPLACEMENT_CHARACTER;
+      dots = getDots(ttd, character);
     }
 
     if (data) dots = mapDots(dots, dotsInternal, data);
@@ -478,6 +463,522 @@ convertTable (void) {
   return status;
 }
 
+#ifdef ENABLE_API
+#define BRLAPI_NO_DEPRECATED
+#include "brlapi.h"
+
+#if defined(HAVE_PKG_CURSES)
+#define USE_CURSES
+#include <curses.h>
+#elif defined(HAVE_PKG_NCURSES)
+#define USE_CURSES
+#include <ncurses.h>
+#elif defined(HAVE_PKG_NCURSESW)
+#define USE_CURSES
+#define USE_FUNC_GET_WCH
+#include <ncursesw/ncurses.h>
+#else
+#warning curses package either unspecified or unsupported
+#define printw printf
+#define clear() printf("\r\n\v")
+#define refresh() fflush(stdout)
+#define beep() printf("\a")
+#endif /* HAVE_PKG_CURSES */
+
+static wchar_t *
+makeCharacterDescription (TextTableData *ttd, wchar_t character, size_t *length, unsigned char *braille) {
+  char buffer[0X100];
+  int characterIndex;
+  int brailleIndex;
+  int descriptionLength;
+
+  unsigned char dots = getDots(ttd, character);
+  wchar_t printableCharacter;
+  char printablePrefix;
+
+  printableCharacter = character;
+  if (iswLatin1(printableCharacter)) {
+    printablePrefix = '^';
+    if (!(printableCharacter & 0X60)) {
+      printableCharacter |= 0X40;
+      if (printableCharacter & 0X80) printablePrefix = '~';
+    } else if (printableCharacter == 0X7F) {
+      printableCharacter ^= 0X40;       
+    } else if (printableCharacter != printablePrefix) {
+      printablePrefix = ' ';
+    }
+  } else {
+    printablePrefix = ' ';
+  }
+
+#define DOT(n) ((dots & BRLAPI_DOT##n)? ((n) + '0'): ' ')
+  {
+    uint32_t value = character;
+
+    snprintf(buffer, sizeof(buffer),
+             "%04" PRIx32 " %c%nx %nx [%c%c%c%c%c%c%c%c]%n",
+             value, printablePrefix, &characterIndex, &brailleIndex,
+             DOT(1), DOT(2), DOT(3), DOT(4), DOT(5), DOT(6), DOT(7), DOT(8),
+             &descriptionLength);
+  }
+#undef DOT
+
+#ifdef HAVE_ICU
+  {
+    char *name = buffer + descriptionLength + 1;
+    int size = buffer + sizeof(buffer) - name;
+    UErrorCode error = U_ZERO_ERROR;
+
+    u_charName(character, U_EXTENDED_CHAR_NAME, name, size, &error);
+    if (U_SUCCESS(error)) {
+      descriptionLength += strlen(name) + 1;
+      *--name = ' ';
+    }
+  }
+#endif /* HAVE_ICU */
+
+  {
+    wchar_t *description = calloc(descriptionLength+1, sizeof(*description));
+    if (description) {
+      int i;
+      for (i=0; i<descriptionLength; i+=1) {
+        wint_t wc = convertCharToWchar(buffer[i]);
+        description[i] = (wc != WEOF)? wc: WC_C(' ');
+      }
+
+      description[characterIndex] = printableCharacter;
+      description[brailleIndex] = UNICODE_BRAILLE_ROW | dots;
+      description[descriptionLength] = 0;
+
+      if (length) *length = descriptionLength;
+      if (braille) *braille = dots;
+      return description;
+    }
+  }
+
+  return NULL;
+}
+
+static void
+printCharacterString (const wchar_t *wcs) {
+  while (*wcs) {
+    wint_t wc = *wcs++;
+    printw("%" PRIwc, wc);
+  }
+}
+
+typedef struct {
+  TextTableData *ttd;
+  wchar_t currentCharacter;
+
+  brlapi_fileDescriptor brlapiFileDescriptor;
+  unsigned int displayWidth;
+  unsigned int displayHeight;
+  const char *brlapiErrorFunction;
+  const char *brlapiErrorMessage;
+} EditTableData;
+
+static int
+haveBrailleDisplay (EditTableData *data) {
+  return data->brlapiFileDescriptor != (brlapi_fileDescriptor)-1;
+}
+
+static void
+setBrlapiError (EditTableData *data, const char *function) {
+  if ((data->brlapiErrorFunction = function)) {
+    data->brlapiErrorMessage = brlapi_strerror(&brlapi_error);
+  } else {
+    data->brlapiErrorMessage = NULL;
+  }
+}
+
+static void
+releaseBrailleDisplay (EditTableData *data) {
+  brlapi_closeConnection();
+  data->brlapiFileDescriptor = (brlapi_fileDescriptor)-1;
+}
+
+static int
+claimBrailleDisplay (EditTableData *data) {
+  data->brlapiFileDescriptor = brlapi_openConnection(NULL, NULL);
+  if (haveBrailleDisplay(data)) {
+    if (brlapi_getDisplaySize(&data->displayWidth, &data->displayHeight) != -1) {
+      if (brlapi_enterTtyMode(BRLAPI_TTY_DEFAULT, NULL) != -1) {
+        setBrlapiError(data, NULL);
+        return 1;
+      } else {
+        setBrlapiError(data, "brlapi_enterTtyMode");
+      }
+    } else {
+      setBrlapiError(data, "brlapi_getDisplaySize");
+    }
+
+    releaseBrailleDisplay(data);
+  } else {
+    setBrlapiError(data, "brlapi_openConnection");
+  }
+
+  return 0;
+}
+
+static int
+updateCharacterDescription (EditTableData *data) {
+  int ok = 0;
+
+  size_t descriptionLength;
+  unsigned char descriptionDots;
+  wchar_t *descriptionText = makeCharacterDescription(
+    data->ttd,
+    data->currentCharacter,
+    &descriptionLength,
+    &descriptionDots
+  );
+
+  if (descriptionText) {
+    ok = 1;
+    clear();
+
+#if defined(USE_CURSES)
+    printw("F2:Save F8:Exit\n");
+    printw("Up:Up1 Dn:Down1 PgUp:Up16 PgDn:Down16 Home:First End:Last\n");
+    printw("\n");
+#else /* standard input/output */
+#endif /* clear screen */
+
+    printCharacterString(descriptionText);
+    printw("\n");
+
+#define DOT(n) ((descriptionDots & BRLAPI_DOT##n)? '#': ' ')
+    printw(" +---+ \n");
+    printw("1|%c %c|4\n", DOT(1), DOT(4));
+    printw("2|%c %c|5\n", DOT(2), DOT(5));
+    printw("3|%c %c|6\n", DOT(3), DOT(6));
+    printw("7|%c %c|8\n", DOT(7), DOT(8));
+    printw(" +---+ \n");
+#undef DOT
+
+    if (data->brlapiErrorFunction) {
+      printw("BrlAPI error: %s: %s\n",
+             data->brlapiErrorFunction, data->brlapiErrorMessage);
+      setBrlapiError(data, NULL);
+    }
+
+    refresh();
+
+    if (haveBrailleDisplay(data)) {
+      brlapi_writeArguments_t args = BRLAPI_WRITEARGUMENTS_INITIALIZER;
+      wchar_t text[data->displayWidth];
+      size_t length = MIN(data->displayWidth, descriptionLength);
+
+      wmemcpy(text, descriptionText, length);
+      wmemset(&text[length], WC_C(' '), data->displayWidth-length);
+
+      args.regionBegin = 1;
+      args.regionSize = data->displayWidth;
+      args.text = (char *)text;
+      args.textSize = data->displayWidth * sizeof(text[0]);
+      args.charset = "WCHAR_T";
+
+      if (brlapi_write(&args) == -1) {
+        setBrlapiError(data, "brlapi_write");
+        releaseBrailleDisplay(data);
+      }
+    }
+
+    free(descriptionText);
+  }
+
+  return ok;
+}
+
+static int
+doKeyboardCommand (EditTableData *data) {
+#if defined(USE_CURSES)
+#ifdef USE_FUNC_GET_WCH
+  wint_t ch;
+  int ret = get_wch(&ch);
+
+  if (ret == KEY_CODE_YES)
+#else /* USE_FUNC_GET_WCH */
+  int ch = getch();
+
+  if (ch >= 0X100)
+#endif /* USE_FUNC_GET_WCH */
+  {
+    switch (ch) {
+      case KEY_UP:
+        data->currentCharacter -= 1;
+        break;
+
+      case KEY_DOWN:
+        data->currentCharacter += 1;
+        break;
+
+      case KEY_PPAGE:
+        data->currentCharacter -= 0X10;
+        break;
+
+      case KEY_NPAGE:
+        data->currentCharacter += 0X10;
+        break;
+
+      case KEY_HOME:
+        data->currentCharacter = 0;
+        break;
+
+      case KEY_END:
+        data->currentCharacter = 0XFF;
+        break;
+
+      case KEY_F(2): {
+        FILE *outputFile;
+
+        if (!outputPath) outputPath = inputPath;
+        if (!outputFormat) outputFormat = inputFormat;
+        outputFile = openTable(&outputPath, "w", NULL, stdout, "<standard-output>");
+
+        if (outputFile) {
+          outputFormat->write(outputPath, outputFile, data->ttd, outputFormat->data);
+          fclose(outputFile);
+        }
+
+        break;
+      }
+
+      case KEY_F(8):
+        return 0;
+
+      default:
+        beep();
+        break;
+    }
+  } else
+
+#ifdef USE_FUNC_GET_WCH
+  if (ret == OK)
+#endif /* USE_FUNC_GET_WCH */
+#else /* standard input/output */
+  wint_t ch = fgetwc(stdin);
+  if (ch == WEOF) return 0;
+#endif /* read character */
+  {
+    if ((ch >= UNICODE_BRAILLE_ROW) &&
+        (ch <= (UNICODE_BRAILLE_ROW | UNICODE_CELL_MASK))) {
+      /* Set braille pattern */
+      setTextTableCharacter(data->ttd, data->currentCharacter, ch & 0XFF);
+    } else {
+      /* Switch to char */
+      int c = convertWcharToChar(ch);
+      if (c != EOF) {
+        data->currentCharacter = c;
+      } else {
+        beep();
+      }
+    }
+  }
+
+  return 1;
+}
+
+static int
+doBrailleCommand (EditTableData *data) {
+  if (haveBrailleDisplay(data)) {
+    brlapi_keyCode_t key;
+    int ret = brlapi_readKey(0, &key);
+
+    if (ret == 1) {
+      unsigned long code = key & BRLAPI_KEY_CODE_MASK;
+
+      switch (key & BRLAPI_KEY_TYPE_MASK) {
+        case BRLAPI_KEY_TYPE_CMD:
+          switch (code & BRLAPI_KEY_CMD_BLK_MASK) {
+            case 0:
+              switch (code) {
+                case BRLAPI_KEY_CMD_LNUP:
+                  data->currentCharacter -= 1;
+                  break;
+
+                case BRLAPI_KEY_CMD_LNDN:
+                  data->currentCharacter += 1;
+                  break;
+
+                case BRLAPI_KEY_CMD_PRPGRPH:
+                  data->currentCharacter -= 0X10;
+                  break;
+
+                case BRLAPI_KEY_CMD_NXPGRPH:
+                  data->currentCharacter += 0X10;
+                  break;
+
+                case BRLAPI_KEY_CMD_TOP_LEFT:
+                case BRLAPI_KEY_CMD_TOP:
+                  data->currentCharacter = 0;
+                  break;
+
+                case BRLAPI_KEY_CMD_BOT_LEFT:
+                case BRLAPI_KEY_CMD_BOT:
+                  data->currentCharacter = 0XFF;
+                  break;
+
+                default:
+                  beep();
+                  break;
+              }
+              break;
+
+            case BRLAPI_KEY_CMD_PASSDOTS:
+              setTextTableCharacter(data->ttd, data->currentCharacter, code & BRLAPI_KEY_CMD_ARG_MASK);
+              break;
+
+            default:
+              beep();
+              break;
+          }
+          break;
+
+        case BRLAPI_KEY_TYPE_SYM: {
+          /* latin1 */
+          if (code < 0X100) code |= BRLAPI_KEY_SYM_UNICODE;
+
+          if ((code & 0X1f000000) == BRLAPI_KEY_SYM_UNICODE) {
+            /* unicode */
+            if ((code & 0Xffff00) == UNICODE_BRAILLE_ROW) {
+              /* Set braille pattern */
+              setTextTableCharacter(data->ttd, data->currentCharacter, code & 0XFF);
+            } else {
+              /* Switch to char */
+              int c = convertWcharToChar(code & 0XFFFFFF);
+              if (c != EOF) {
+                data->currentCharacter = c;
+              } else {
+                beep();
+              }
+            }
+          } else {
+            switch (code) {
+              case BRLAPI_KEY_SYM_UP:
+                data->currentCharacter -= 1;
+                break;
+
+              case BRLAPI_KEY_SYM_DOWN:
+                data->currentCharacter += 1;
+                break;
+
+              case BRLAPI_KEY_SYM_PAGE_UP:
+                data->currentCharacter -= 0X10;
+                break;
+
+              case BRLAPI_KEY_SYM_PAGE_DOWN:
+                data->currentCharacter += 0X10;
+                break;
+
+              case BRLAPI_KEY_SYM_HOME:
+                data->currentCharacter = 0;
+                break;
+
+              case BRLAPI_KEY_SYM_END:
+                data->currentCharacter = 0XFF;
+                break;
+
+              default:
+                beep();
+                break;
+            }
+          }
+          break;
+        }
+
+        default:
+          beep();
+          break;
+      }
+    } else if (ret == -1) {
+      setBrlapiError(data, "brlapi_readKey");
+      releaseBrailleDisplay(data);
+    }
+  }
+
+  return 1;
+}
+
+static int
+editTable (void) {
+  int status;
+  EditTableData data;
+
+  data.ttd = NULL;
+  {
+    FILE *inputFile = openTable(&inputPath, "r", opt_tablesDirectory, NULL, NULL);
+
+    if (inputFile) {
+      if ((data.ttd = inputFormat->read(inputPath, inputFile, inputFormat->data))) {
+        status = 0;
+      } else {
+        status = 4;
+      }
+
+      fclose(inputFile);
+    } else {
+      status = 3;
+    }
+  }
+
+  if (!status) {
+    claimBrailleDisplay(&data);
+
+#if defined(USE_CURSES)
+    initscr();
+    cbreak();
+    noecho();
+    nonl();
+    intrflush(stdscr, FALSE);
+    keypad(stdscr, TRUE);
+#else /* standard input/output */
+#endif /* initialize keyboard and screen */
+
+    data.currentCharacter = 0;
+    while (updateCharacterDescription(&data)) {
+      fd_set set;
+      FD_ZERO(&set);
+
+      {
+        int maximumFileDescriptor = STDIN_FILENO;
+        FD_SET(STDIN_FILENO, &set);
+
+        if (haveBrailleDisplay(&data)) {
+          FD_SET(data.brlapiFileDescriptor, &set);
+          if (data.brlapiFileDescriptor > maximumFileDescriptor)
+            maximumFileDescriptor = data.brlapiFileDescriptor;
+        }
+
+        select(maximumFileDescriptor+1, &set, NULL, NULL, NULL);
+      }
+
+      if (FD_ISSET(STDIN_FILENO, &set))
+        if (!doKeyboardCommand(&data))
+          break;
+
+      if (haveBrailleDisplay(&data) && FD_ISSET(data.brlapiFileDescriptor, &set))
+        if (!doBrailleCommand(&data))
+          break;
+    }
+
+    clear();
+    refresh();
+
+#if defined(USE_CURSES)
+    endwin();
+#else /* standard input/output */
+#endif /* restore keyboard and screen */
+
+    if (haveBrailleDisplay(&data)) releaseBrailleDisplay(&data);
+    if (data.ttd) destroyTextTableData(data.ttd);
+  }
+
+  return status;
+}
+#endif /* ENABLE_API */
+
 int
 main (int argc, char *argv[]) {
   int status;
@@ -536,7 +1037,7 @@ main (int argc, char *argv[]) {
 
 #ifdef ENABLE_API
   if (opt_edit) {
-//  status = editTable();
+    status = editTable();
   } else
 #endif /* ENABLE_API */
 
