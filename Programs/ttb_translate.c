@@ -21,7 +21,6 @@
 
 #include "ttb.h"
 #include "ttb_internal.h"
-#include "charset.h"
 #include "brldots.h"
 
 static const unsigned char internalTextTableBytes[] = {
@@ -83,46 +82,18 @@ getUnicodeCellEntry (TextTable *table, wchar_t character) {
   return NULL;
 }
 
-static int
-getDots (TextTable *table, wchar_t character, unsigned char *dots) {
-  {
-    const UnicodeCellEntry *cell = getUnicodeCellEntry(table, character);
-    if (cell) {
-      *dots = cell->dots;
-      return 1;
-    }
-  }
-
-  {
-    int byte = convertWcharToChar(character);
-    if (byte != EOF) {
-      const TextTableHeader *header = table->header.fields;
-      if (BITMASK_TEST(header->byteDotsDefined, byte)) {
-        *dots = header->byteToDots[byte];
-        return 1;
-      }
-    }
-  }
-
-  return 0;
-}
-
 unsigned char
 convertCharacterToDots (TextTable *table, wchar_t character) {
   switch (character & ~UNICODE_CELL_MASK) {
     case UNICODE_BRAILLE_ROW:
       return character & UNICODE_CELL_MASK;
 
-    case 0XF000:
-      return table->header.fields->byteToDots[character & UNICODE_CELL_MASK];
-
     default: {
-      unsigned char dots;
       const UnicodeCellEntry *cell;
 
-      if (getDots(table, character, &dots)) return dots;
+      if ((cell = getUnicodeCellEntry(table, character))) return cell->dots;
       if ((cell = getUnicodeCellEntry(table, UNICODE_REPLACEMENT_CHARACTER))) return cell->dots;
-      if (getDots(table, WC_C('?'), &dots)) return dots;
+      if ((cell = getUnicodeCellEntry(table, WC_C('?')))) return cell->dots;
       return BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT4 | BRL_DOT5 | BRL_DOT6 | BRL_DOT7 | BRL_DOT8;
     }
   }
@@ -132,11 +103,5 @@ wchar_t
 convertDotsToCharacter (TextTable *table, unsigned char dots) {
   const TextTableHeader *header = table->header.fields;
   if (BITMASK_TEST(header->dotsCharacterDefined, dots)) return header->dotsToCharacter[dots];
-
-  if (BITMASK_TEST(header->dotsByteDefined, dots)) {
-    wint_t character = convertCharToWchar(header->dotsToByte[dots]);
-    if (character != WEOF) return character;
-  }
-
   return UNICODE_REPLACEMENT_CHARACTER;
 }

@@ -22,6 +22,7 @@
 #include "misc.h"
 #include "datafile.h"
 #include "dataarea.h"
+#include "charset.h"
 #include "ttb.h"
 #include "ttb_internal.h"
 #include "ttb_compile.h"
@@ -136,15 +137,11 @@ setTextTableCharacter (wchar_t character, unsigned char dots, TextTableData *ttd
 
 int
 setTextTableByte (unsigned char byte, unsigned char dots, TextTableData *ttd) {
-  TextTableHeader *header = getTextTableHeader(ttd);
+  wint_t character = convertCharToWchar(byte);
 
-  header->byteToDots[byte] = dots;
-  BITMASK_SET(header->byteDotsDefined, byte);
-
-  if (!BITMASK_TEST(header->dotsByteDefined, dots)) {
-    header->dotsToByte[dots] = byte;
-    BITMASK_SET(header->dotsByteDefined, dots);
-  }
+  if (character != WEOF)
+    if (!setTextTableCharacter(character, dots, ttd))
+      return 0;
 
   return 1;
 }
