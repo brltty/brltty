@@ -28,8 +28,11 @@ typedef int DataProcessor (DataFile *file, void *data);
 
 extern int processDataFile (const char *name, DataProcessor processor, void *data);
 extern int processDataStream (FILE *stream, const char *name, DataProcessor processor, void *data);
-extern int includeDataFile (DataFile *file, const wchar_t *name, unsigned int length);
 extern void reportDataError (DataFile *file, char *format, ...) PRINTF(2, 3);
+
+extern int testDataWord (const wchar_t *word, const wchar_t *characters, int length);
+extern int isHexadecimalDigit (wchar_t character, int *value, int *shift);
+extern int isOctalDigit (wchar_t character, int *value, int *shift);
 
 extern int findDataOperand (DataFile *file, const char *description);
 extern int getDataCharacter (DataFile *file, wchar_t *character);
@@ -54,6 +57,7 @@ typedef struct {
 extern int processPropertyOperand (DataFile *file, const DataProperty *properties, const char *description, void *data);
 
 extern int processIncludeOperands (DataFile *file, void *data);
+extern int includeDataFile (DataFile *file, const wchar_t *name, unsigned int length);
 
 #define BRL_DOT_COUNT 8
 extern const wchar_t brlDotNumbers[BRL_DOT_COUNT];

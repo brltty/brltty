@@ -223,6 +223,18 @@ writeCharacter_native (FILE *file, wchar_t character, unsigned char dots, void *
   if (fprintf(file, " ") == EOF) goto error;
   if (!writeDots_native(file, dots)) goto error;
 
+#ifdef HAVE_ICU
+  {
+    char name[0X40];
+    UErrorCode error = U_ZERO_ERROR;
+
+    u_charName(character, U_EXTENDED_CHAR_NAME, name, sizeof(name), &error);
+    if (U_SUCCESS(error)) {
+      if (fprintf(file, " %s", name) == EOF) return 0;
+    }
+  }
+#endif /* HAVE_ICU */
+
   if (fprintf(file, "\n") == EOF) goto error;
   return 1;
 

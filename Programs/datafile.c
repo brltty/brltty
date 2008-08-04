@@ -85,6 +85,13 @@ reportDataError (DataFile *file, char *format, ...) {
 }
 
 int
+testDataWord (const wchar_t *word, const wchar_t *characters, int length) {
+  if (length != wcslen(word)) return 0;
+  if (wmemcmp(characters, word, length) != 0) return 0;
+  return 1;
+}
+
+int
 findDataOperand (DataFile *file, const char *description) {
   file->start = file->end;
 
@@ -128,7 +135,7 @@ getDataOperand (DataFile *file, DataOperand *operand, const char *description) {
   return 1;
 }
 
-static int
+int
 isHexadecimalDigit (wchar_t character, int *value, int *shift) {
   if ((character >= WC_C('0')) && (character <= WC_C('9'))) {
     *value = character - WC_C('0');
@@ -144,7 +151,7 @@ isHexadecimalDigit (wchar_t character, int *value, int *shift) {
   return 1;
 }
 
-static int
+int
 isOctalDigit (wchar_t character, int *value, int *shift) {
   if ((character < WC_C('0')) || (character > WC_C('7'))) return 0;
   *value = character - WC_C('0');
@@ -384,9 +391,8 @@ processPropertyOperand (DataFile *file, const DataProperty *properties, const ch
       const DataProperty *property = properties;
 
       while (property->name) {
-        if (name.length == wcslen(property->name))
-          if (wmemcmp(name.characters, property->name, name.length) == 0)
-            return property->processor(file, data);
+        if (testDataWord(property->name, name.characters, name.length))
+          return property->processor(file, data);
 
         property += 1;
       }
