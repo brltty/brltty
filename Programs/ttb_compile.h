@@ -34,6 +34,7 @@ extern TextTableData *processTextTableStream (FILE *stream, const char *name, Da
 extern TextTable *newTextTable (TextTableData *ttd);
 
 extern DataProcessor processTextTableLine;
+extern DataProcessor processGnomeBrailleLine;
 
 extern void *getTextTableItem (TextTableData *ttd, TextTableOffset offset);
 extern TextTableHeader *getTextTableHeader (TextTableData *ttd);

@@ -375,7 +375,7 @@ scrtest.$O:
 
 ###############################################################################
 
-TTBTEST_OBJECTS = ttbtest.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) lock.$O charset.$O datafile.$O dataarea.$O ttb_compile.$O ttb_native.$O
+TTBTEST_OBJECTS = ttbtest.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) lock.$O charset.$O datafile.$O dataarea.$O ttb_compile.$O ttb_native.$O ttb_gnome.$O
 
 ttbtest$X: $(TTBTEST_OBJECTS) $(BUILD_API)
 	$(CC) $(LDFLAGS) -o $@ $(TTBTEST_OBJECTS) $(API_REF) $(CLIBS) $(ICU_LIBRARIES) $(LDLIBS)
