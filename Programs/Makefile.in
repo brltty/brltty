@@ -494,13 +494,13 @@ xbrlapi.$O:
 check-braille: brltty$X braille-drivers
 	for code in $(BRAILLE_DRIVER_CODES); \
 	do ls -l $(BLD_TOP)$(DRV_DIR)/libbrlttyb$$code.$(MOD_EXT) || exit 10; \
-	   ./brltty -v -q -N -e -f /dev/null -b $$code -s no -L "$(BLD_TOP)$(DRV_DIR)" -D "$(BLD_TOP)$(DAT_DIR)" -T "$(BLD_TOP)$(TBL_DIR)" -C "$(BLD_TOP)$(CTB_DIR)" 2>&1 || exit 11; \
+	   ./brltty -v -q -N -e -f /dev/null -b $$code -s no -L "$(BLD_TOP)$(DRV_DIR)" -D "$(BLD_TOP)$(DAT_DIR)" -T "$(BLD_TOP)$(TBL_DIR)" 2>&1 || exit 11; \
 	done
 
 check-speech: brltty speech-drivers
 	for code in $(SPEECH_DRIVER_CODES); \
 	do ls -l $(BLD_TOP)$(DRV_DIR)/libbrlttys$$code.$(MOD_EXT) || exit 10; \
-	   ./brltty -v -q -N -e -f /dev/null -b no -s $$code -L "$(BLD_TOP)$(DRV_DIR)" -D "$(BLD_TOP)$(DAT_DIR)" -T "$(BLD_TOP)$(TBL_DIR)" -C "$(BLD_TOP)$(CTB_DIR)" 2>&1 || exit 11; \
+	   ./brltty -v -q -N -e -f /dev/null -b no -s $$code -L "$(BLD_TOP)$(DRV_DIR)" -D "$(BLD_TOP)$(DAT_DIR)" -T "$(BLD_TOP)$(TBL_DIR)" 2>&1 || exit 11; \
 	done
 
 ###############################################################################
@@ -527,8 +527,8 @@ install-attributes-tables: install-data-directory
 	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/*.atb $(INSTALL_DATA_DIRECTORY)
 
 install-contraction-tables: install-data-directory
-	$(INSTALL_DATA) $(SRC_TOP)$(CTB_DIR)/*.ctb $(INSTALL_DATA_DIRECTORY)
-	$(INSTALL_DATA) $(SRC_TOP)$(CTB_DIR)/*.cti $(INSTALL_DATA_DIRECTORY)
+	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/*.ctb $(INSTALL_DATA_DIRECTORY)
+	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/*.cti $(INSTALL_DATA_DIRECTORY)
 
 install-drivers: $(BRAILLE_DRIVERS) $(SPEECH_DRIVERS) $(SCREEN_DRIVERS) install-library-directory
 	$(INSTALL_PROGRAM) $(BLD_TOP)$(DRV_DIR)/*.$(MOD_EXT) $(INSTALL_LIBRARY_DIRECTORY)

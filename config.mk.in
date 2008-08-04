@@ -21,7 +21,6 @@ PACKAGE_VERSION = @PACKAGE_VERSION@
 PGM_DIR = Programs
 DOC_DIR = Documents
 TBL_DIR = BrailleTables
-CTB_DIR = ContractionTables
 BRL_DIR = BrailleDrivers
 SPK_DIR = SpeechDrivers
 SCR_DIR = ScreenDrivers
