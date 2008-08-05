@@ -178,7 +178,7 @@ compileTextTable (const char *name) {
     TextTableData *ttd;
 
     if ((ttd = processTextTableStream(stream, name, processTextTableLine))) {
-      table = newTextTable(ttd);
+      table = makeTextTable(ttd);
 
       destroyTextTableData(ttd);
     }

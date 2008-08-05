@@ -31,7 +31,7 @@ extern TextTableData *newTextTableData (void);
 extern void destroyTextTableData (TextTableData *ttd);
 
 extern TextTableData *processTextTableStream (FILE *stream, const char *name, DataProcessor processor);
-extern TextTable *newTextTable (TextTableData *ttd);
+extern TextTable *makeTextTable (TextTableData *ttd);
 
 extern DataProcessor processTextTableLine;
 extern DataProcessor processGnomeBrailleLine;

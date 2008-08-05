@@ -186,7 +186,7 @@ destroyTextTableData (TextTableData *ttd) {
 }
 
 TextTable *
-newTextTable (TextTableData *ttd) {
+makeTextTable (TextTableData *ttd) {
   TextTable *table = malloc(sizeof(*table));
 
   if (table) {
