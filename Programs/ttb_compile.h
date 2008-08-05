@@ -41,6 +41,7 @@ extern TextTableHeader *getTextTableHeader (TextTableData *ttd);
 extern const UnicodeCellEntry *getUnicodeCellEntry (TextTableData *ttd, wchar_t character);
 
 extern int setTextTableCharacter (TextTableData *ttd, wchar_t character, unsigned char dots);
+extern void unsetTextTableCharacter (TextTableData *ttd, wchar_t character);
 extern int setTextTableByte (TextTableData *ttd, unsigned char byte, unsigned char dots);
 
 #ifdef __cplusplus

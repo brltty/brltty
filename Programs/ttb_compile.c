@@ -147,6 +147,29 @@ setTextTableCharacter (TextTableData *ttd, wchar_t character, unsigned char dots
   return 1;
 }
 
+void
+unsetTextTableCharacter (TextTableData *ttd, wchar_t character) {
+  UnicodeRowEntry *row = getUnicodeRowEntry(ttd, character, 0);
+  if (row) {
+    unsigned int cellNumber = UNICODE_CELL_NUMBER(character);
+
+    if (BITMASK_TEST(row->defined, cellNumber)) {
+      UnicodeCellEntry *cell = &row->cells[cellNumber];
+      TextTableHeader *header = getTextTableHeader(ttd);
+
+      if (BITMASK_TEST(header->dotsCharacterDefined, cell->dots)) {
+        if (header->dotsToCharacter[cell->dots] == character) {
+          header->dotsToCharacter[cell->dots] = 0;
+          BITMASK_CLEAR(header->dotsCharacterDefined, cell->dots);
+        }
+      }
+
+      cell->dots = 0;
+      BITMASK_CLEAR(row->defined, cellNumber);
+    }
+  }
+}
+
 int
 setTextTableByte (TextTableData *ttd, unsigned char byte, unsigned char dots) {
   wint_t character = convertCharToWchar(byte);

@@ -576,7 +576,7 @@ makeCharacterDescription (TextTableData *ttd, wchar_t character, size_t *length,
     uint32_t value = character;
 
     snprintf(buffer, sizeof(buffer),
-             "%04" PRIx32 " %c%nx %nx %c%c%c%c%c%c%c%c%c%c%n",
+             "%04" PRIX32 " %c%nx %nx %c%c%c%c%c%c%c%c%c%c%n",
              value, printablePrefix, &characterIndex, &brailleIndex,
              (gotDots? '[': ' '),
              DOT(1), DOT(2), DOT(3), DOT(4), DOT(5), DOT(6), DOT(7), DOT(8),
@@ -703,22 +703,22 @@ updateCharacterDescription (EditTableData *etd) {
 }
 
 static void
-setPreviousCharacter (EditTableData *etd) {
+setPreviousUnicodeCharacter (EditTableData *etd) {
   etd->character = (etd->character - 1) & UNICODE_CHARACTER_MASK;
 }
 
 static void
-setNextCharacter (EditTableData *etd) {
+setNextUnicodeCharacter (EditTableData *etd) {
   etd->character = (etd->character + 1) & UNICODE_CHARACTER_MASK;
 }
 
 static void
-setFirstCharacter (EditTableData *etd) {
+setFirstUnicodeCharacter (EditTableData *etd) {
   etd->character = 0;
 }
 
 static void
-setLastCharacter (EditTableData *etd) {
+setLastUnicodeCharacter (EditTableData *etd) {
   etd->character = UNICODE_CHARACTER_MASK;
 }
 
@@ -799,30 +799,30 @@ findCharacter (EditTableData *etd, int backward) {
 }
 
 static int
-findPreviousCharacter (EditTableData *etd) {
+setPreviousDefinedCharacter (EditTableData *etd) {
   return findCharacter(etd, 1);
 }
 
 static int
-findNextCharacter (EditTableData *etd) {
+setNextDefinedCharacter (EditTableData *etd) {
   return findCharacter(etd, 0);
 }
 
 static int
-findFirstCharacter (EditTableData *etd) {
-  setLastCharacter(etd);
-  if (findNextCharacter(etd)) return 1;
+setFirstDefinedCharacter (EditTableData *etd) {
+  setLastUnicodeCharacter(etd);
+  if (setNextDefinedCharacter(etd)) return 1;
 
-  setFirstCharacter(etd);
+  setFirstUnicodeCharacter(etd);
   return 0;
 }
 
 static int
-findLastCharacter (EditTableData *etd) {
-  setFirstCharacter(etd);
-  if (findPreviousCharacter(etd)) return 1;
+setLastDefinedCharacter (EditTableData *etd) {
+  setFirstUnicodeCharacter(etd);
+  if (setPreviousDefinedCharacter(etd)) return 1;
 
-  setLastCharacter(etd);
+  setLastUnicodeCharacter(etd);
   return 0;
 }
 
@@ -842,27 +842,31 @@ doKeyboardCommand (EditTableData *etd) {
   {
     switch (ch) {
       case KEY_LEFT:
-        setPreviousCharacter(etd);
+        setPreviousUnicodeCharacter(etd);
         break;
 
       case KEY_RIGHT:
-        setNextCharacter(etd);
+        setNextUnicodeCharacter(etd);
         break;
 
       case KEY_UP:
-        findPreviousCharacter(etd);
+        setPreviousDefinedCharacter(etd);
         break;
 
       case KEY_DOWN:
-        findNextCharacter(etd);
+        setNextDefinedCharacter(etd);
         break;
 
       case KEY_HOME:
-        findFirstCharacter(etd);
+        setFirstDefinedCharacter(etd);
         break;
 
       case KEY_END:
-        findLastCharacter(etd);
+        setLastDefinedCharacter(etd);
+        break;
+
+      case KEY_DC:
+        unsetTextTableCharacter(etd->ttd, etd->character);
         break;
 
       case KEY_F(2): {
@@ -927,29 +931,33 @@ doBrailleCommand (EditTableData *etd) {
             case 0:
               switch (code) {
                 case BRLAPI_KEY_CMD_FWINLT:
-                  setPreviousCharacter(etd);
+                  setPreviousUnicodeCharacter(etd);
                   break;
 
                 case BRLAPI_KEY_CMD_FWINRT:
-                  setNextCharacter(etd);
+                  setNextUnicodeCharacter(etd);
                   break;
 
                 case BRLAPI_KEY_CMD_LNUP:
-                  findPreviousCharacter(etd);
+                  setPreviousDefinedCharacter(etd);
                   break;
 
                 case BRLAPI_KEY_CMD_LNDN:
-                  findNextCharacter(etd);
+                  setNextDefinedCharacter(etd);
                   break;
 
                 case BRLAPI_KEY_CMD_TOP_LEFT:
                 case BRLAPI_KEY_CMD_TOP:
-                  findFirstCharacter(etd);
+                  setFirstDefinedCharacter(etd);
                   break;
 
                 case BRLAPI_KEY_CMD_BOT_LEFT:
                 case BRLAPI_KEY_CMD_BOT:
-                  findLastCharacter(etd);
+                  setLastDefinedCharacter(etd);
+                  break;
+
+                case BRLAPI_KEY_CMD_BACK:
+                  unsetTextTableCharacter(etd->ttd, etd->character);
                   break;
 
                 default:
@@ -989,27 +997,31 @@ doBrailleCommand (EditTableData *etd) {
           } else {
             switch (code) {
               case BRLAPI_KEY_SYM_LEFT:
-                setPreviousCharacter(etd);
+                setPreviousUnicodeCharacter(etd);
                 break;
 
               case BRLAPI_KEY_SYM_RIGHT:
-                setNextCharacter(etd);
+                setNextUnicodeCharacter(etd);
                 break;
 
               case BRLAPI_KEY_SYM_UP:
-                findPreviousCharacter(etd);
+                setPreviousDefinedCharacter(etd);
                 break;
 
               case BRLAPI_KEY_SYM_DOWN:
-                findNextCharacter(etd);
+                setNextDefinedCharacter(etd);
                 break;
 
               case BRLAPI_KEY_SYM_HOME:
-                findFirstCharacter(etd);
+                setFirstDefinedCharacter(etd);
                 break;
 
               case BRLAPI_KEY_SYM_END:
-                findLastCharacter(etd);
+                setLastDefinedCharacter(etd);
+                break;
+
+              case BRLAPI_KEY_SYM_DELETE:
+                unsetTextTableCharacter(etd->ttd, etd->character);
                 break;
 
               default:
@@ -1068,7 +1080,7 @@ editTable (void) {
 #else /* standard input/output */
 #endif /* initialize keyboard and screen */
 
-    findFirstCharacter(&etd);
+    setFirstDefinedCharacter(&etd);
     while (updateCharacterDescription(&etd)) {
       fd_set set;
       FD_ZERO(&set);
