@@ -604,7 +604,7 @@ changedPreferences (void) {
 int
 loadPreferences (int change) {
   int ok = 0;
-  FILE *file = openDataFile(preferencesFile, "rb");
+  FILE *file = openDataFile(preferencesFile, "rb", 1);
   if (file) {
     Preferences newPreferences;
     size_t length = fread(&newPreferences, 1, sizeof(newPreferences), file);
@@ -760,7 +760,7 @@ getPreferences (void) {
 int 
 savePreferences (void) {
   int ok = 0;
-  FILE *file = openDataFile(preferencesFile, "w+b");
+  FILE *file = openDataFile(preferencesFile, "w+b", 0);
   if (file) {
     size_t length = fwrite(&prefs, 1, sizeof(prefs), file);
     if (length == sizeof(prefs)) {

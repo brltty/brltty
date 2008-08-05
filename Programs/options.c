@@ -649,7 +649,7 @@ processConfigurationFile (
   const char *path,
   int optional
 ) {
-  FILE *file = openDataFile(path, "r");
+  FILE *file = openDataFile(path, "r", optional);
   if (file != NULL) { /* The configuration file has been successfully opened. */
     int processed;
 
@@ -678,11 +678,7 @@ processConfigurationFile (
     LogPrint(LOG_ERR, gettext("file '%s' processing error."), path);
     info->errorCount++;
   } else {
-    int ok = optional && (errno == ENOENT);
-    LogPrint((ok? LOG_DEBUG: LOG_ERR), "%s: %s: %s",
-             gettext("cannot open configuration file"),
-             path, strerror(errno));
-    if (ok) return 1;
+    if (optional && (errno == ENOENT)) return 1;
     info->errorCount++;
   }
   return 0;

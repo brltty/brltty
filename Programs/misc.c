@@ -687,7 +687,7 @@ isDosDevice (const char *path, const char *prefix) {
 #endif /* ALLOW_DOS_DEVICE_NAMES */
 
 FILE *
-openFile (const char *path, const char *mode) {
+openFile (const char *path, const char *mode, int optional) {
   FILE *file = fopen(path, mode);
   if (file) {
     LogPrint(LOG_DEBUG, "file opened: %s fd=%d", path, fileno(file));
@@ -699,7 +699,7 @@ openFile (const char *path, const char *mode) {
 }
 
 FILE *
-openDataFile (const char *path, const char *mode) {
+openDataFile (const char *path, const char *mode, int optional) {
   static const char *userDirectory = NULL;
   const char *name = locatePathName(path);
   char *userPath;
@@ -718,14 +718,14 @@ openDataFile (const char *path, const char *mode) {
     userPath = NULL;
   } else if ((userPath = makePath(userDirectory, name))) {
     if (access(userPath, F_OK) != -1) {
-      file = openFile(userPath, mode);
+      file = openFile(userPath, mode, optional);
       goto done;
     }
   }
 
-  if (!(file = openFile(path, mode))) {
+  if (!(file = openFile(path, mode, optional))) {
     if (((*mode == 'w') || (*mode == 'a')) && (errno == EACCES) && userPath) {
-      if (makeDirectory(userDirectory)) file = openFile(userPath, mode);
+      if (makeDirectory(userDirectory)) file = openFile(userPath, mode, optional);
     }
   }
 

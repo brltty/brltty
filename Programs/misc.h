@@ -84,8 +84,8 @@ extern char **splitString (const char *string, char delimiter, int *count);
 extern void deallocateStrings (char **array);
 extern char *joinStrings (const char *const *strings, int count);
 
-extern FILE *openFile (const char *path, const char *mode);
-extern FILE *openDataFile (const char *path, const char *mode);
+extern FILE *openFile (const char *path, const char *mode, int optional);
+extern FILE *openDataFile (const char *path, const char *mode, int optional);
 
 extern int processLines (
   FILE *file,

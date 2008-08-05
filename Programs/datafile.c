@@ -463,11 +463,9 @@ processDataFile (const char *name, DataProcessor processor, void *data) {
   int ok = 0;
   FILE *stream;
 
-  if ((stream = openDataFile(name, "r"))) {
+  if ((stream = openDataFile(name, "r", 0))) {
     if (processDataStream(stream, name, processor, data)) ok = 1;
     fclose(stream);
-  } else {
-    LogPrint(LOG_ERR, "cannot open data file '%s': %s", name, strerror(errno));
   }
 
   return ok;

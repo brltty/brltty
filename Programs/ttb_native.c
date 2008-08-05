@@ -174,7 +174,7 @@ compileTextTable (const char *name) {
   TextTable *table = NULL;
   FILE *stream;
 
-  if ((stream = openDataFile(name, "r"))) {
+  if ((stream = openDataFile(name, "r", 0))) {
     TextTableData *ttd;
 
     if ((ttd = processTextTableStream(stream, name, processTextTableLine))) {
