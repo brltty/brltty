@@ -30,11 +30,12 @@ typedef struct TextTableDataStruct TextTableData;
 extern TextTableData *newTextTableData (void);
 extern void destroyTextTableData (TextTableData *ttd);
 
-extern TextTableData *processTextTableStream (FILE *stream, const char *name, DataProcessor processor);
+extern TextTableData *processTextTableLines (FILE *stream, const char *name, DataProcessor processor);
 extern TextTable *makeTextTable (TextTableData *ttd);
 
-extern DataProcessor processTextTableLine;
-extern DataProcessor processGnomeBrailleLine;
+typedef TextTableData *TextTableProcessor (FILE *stream, const char *name);
+extern TextTableProcessor processTextTableStream;
+extern TextTableProcessor processGnomeBrailleStream;
 
 extern void *getTextTableItem (TextTableData *ttd, TextTableOffset offset);
 extern TextTableHeader *getTextTableHeader (TextTableData *ttd);

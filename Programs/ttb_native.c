@@ -157,7 +157,7 @@ processByteOperands (DataFile *file, void *data) {
   return 1;
 }
 
-int
+static int
 processTextTableLine (DataFile *file, void *data) {
   static const DataProperty properties[] = {
     {.name=WS_C("char"), .processor=processCharOperands},
@@ -169,6 +169,11 @@ processTextTableLine (DataFile *file, void *data) {
   return processPropertyOperand(file, properties, "text table directive", data);
 }
 
+TextTableData *
+processTextTableStream (FILE *stream, const char *name) {
+  return processTextTableLines(stream, name, processTextTableLine);
+}
+
 TextTable *
 compileTextTable (const char *name) {
   TextTable *table = NULL;
@@ -177,7 +182,7 @@ compileTextTable (const char *name) {
   if ((stream = openDataFile(name, "r", 0))) {
     TextTableData *ttd;
 
-    if ((ttd = processTextTableStream(stream, name, processTextTableLine))) {
+    if ((ttd = processTextTableStream(stream, name))) {
       table = makeTextTable(ttd);
 
       destroyTextTableData(ttd);

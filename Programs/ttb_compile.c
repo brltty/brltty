@@ -222,6 +222,18 @@ destroyTextTableData (TextTableData *ttd) {
   free(ttd);
 }
 
+TextTableData *
+processTextTableLines (FILE *stream, const char *name, DataProcessor processor) {
+  TextTableData *ttd;
+
+  if ((ttd = newTextTableData())) {
+    if (processDataStream(stream, name, processor, ttd)) return ttd;
+    destroyTextTableData(ttd);
+  }
+
+  return NULL;
+}
+
 TextTable *
 makeTextTable (TextTableData *ttd) {
   TextTable *table = malloc(sizeof(*table));
@@ -233,18 +245,6 @@ makeTextTable (TextTableData *ttd) {
   }
 
   return table;
-}
-
-TextTableData *
-processTextTableStream (FILE *stream, const char *name, DataProcessor processor) {
-  TextTableData *ttd;
-
-  if ((ttd = newTextTableData())) {
-    if (processDataStream(stream, name, processor, ttd)) return ttd;
-    destroyTextTableData(ttd);
-  }
-
-  return NULL;
 }
 
 void

@@ -165,7 +165,7 @@ writeCharacters (FILE *file, TextTableData *ttd, CharacterWriter writer, void *d
 
 static TextTableData *
 readTable_native (const char *path, FILE *file, void *data) {
-  return processTextTableStream(file, path, processTextTableLine);
+  return processTextTableStream(file, path);
 }
 
 static int
@@ -296,7 +296,7 @@ writeTable_binary (const char *path, FILE *file, TextTableData *ttd, void *data)
 #ifdef HAVE_ICONV_H
 static TextTableData *
 readTable_gnome (const char *path, FILE *file, void *data) {
-  return processTextTableStream(file, path, processGnomeBrailleLine);
+  return processGnomeBrailleStream(file, path);
 }
 
 static int

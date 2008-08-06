@@ -21,7 +21,7 @@
 #include "ttb_internal.h"
 #include "ttb_compile.h"
 
-static int inUcsBlock = 0;
+static int inUcsBlock;
 
 static int
 getUnicodeCharacter (DataFile *file, wchar_t *character, const char *description) {
@@ -147,7 +147,7 @@ processUnicodeCharOperands (DataFile *file, void *data) {
   return 1;
 }
 
-int
+static int
 processGnomeBrailleLine (DataFile *file, void *data) {
   const DataProperty *properties;
 
@@ -177,4 +177,18 @@ processGnomeBrailleLine (DataFile *file, void *data) {
   }
 
   return processPropertyOperand(file, properties, "gnome braille directive", data);
+}
+
+TextTableData *
+processGnomeBrailleStream (FILE *stream, const char *name) {
+  TextTableData *ttd;
+
+  inUcsBlock = 0;
+  if ((ttd = processTextTableLines(stream, name, processGnomeBrailleLine))) {
+    if (inUcsBlock) {
+      reportDataError(NULL, "unterminated UCS block");
+    }
+  };
+
+  return ttd;
 }
