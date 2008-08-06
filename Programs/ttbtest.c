@@ -726,15 +726,15 @@ findCharacter (EditTableData *etd, int backward) {
   int cellNumber = UNICODE_CELL_NUMBER(etd->character);
 
   const int increment = backward? -1: 1;
-  const int groupReset = backward? UNICODE_GROUP_MAXIMUM: 0;
-  const int plainReset = backward? UNICODE_PLAIN_MAXIMUM: 0;
-  const int rowReset = backward? UNICODE_ROW_MAXIMUM: 0;
-  const int cellReset = backward? UNICODE_CELL_MAXIMUM: 0;
+  const int groupLimit = backward? 0: UNICODE_GROUP_MAXIMUM;
+  const int plainLimit = backward? 0: UNICODE_PLAIN_MAXIMUM;
+  const int rowLimit = backward? 0: UNICODE_ROW_MAXIMUM;
+  const int cellLimit = backward? 0: UNICODE_CELL_MAXIMUM;
 
-  const int groupLimit = UNICODE_GROUP_MAXIMUM - groupReset;
-  const int plainLimit = UNICODE_PLAIN_MAXIMUM - plainReset;
-  const int rowLimit = UNICODE_ROW_MAXIMUM - rowReset;
-  const int cellLimit = UNICODE_CELL_MAXIMUM - cellReset;
+  const int groupReset = UNICODE_GROUP_MAXIMUM - groupLimit;
+  const int plainReset = UNICODE_PLAIN_MAXIMUM - plainLimit;
+  const int rowReset = UNICODE_ROW_MAXIMUM - rowLimit;
+  const int cellReset = UNICODE_CELL_MAXIMUM - cellLimit - increment;
 
   const TextTableHeader *header = getTextTableHeader(etd->ttd);
   int groupCounter = UNICODE_GROUP_COUNT;
