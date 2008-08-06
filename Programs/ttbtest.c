@@ -644,8 +644,8 @@ updateCharacterDescription (EditTableData *etd) {
     printw("Left/Right: previous/next unicode character\n");
     printw("Up/Down: previous/next defined character\n");
     printw("Home/End: first/last defined character\n");
-    printw("F1-F8: toggle dot 1-8 - up / down\n");
-    printw("F9: toggle character - define (as empty cell) / undefine\n");
+    printw("F1-F8: toggle dot 1-8 (define if necessary)\n");
+    printw("F9: clear / undefine / define (as empty cell)\n");
     printw("F11: save\n");
     printw("F12: exit\n");
     printw("\n");
@@ -824,7 +824,8 @@ setLastDefinedCharacter (EditTableData *etd) {
 
 static int
 toggleCharacter (EditTableData *etd) {
-  if (getUnicodeCellEntry(etd->ttd, etd->character)) {
+  const UnicodeCellEntry *cell = getUnicodeCellEntry(etd->ttd, etd->character);
+  if (cell && !cell->dots) {
     unsetTextTableCharacter(etd->ttd, etd->character);
   } else if (!setTextTableCharacter(etd->ttd, etd->character, 0)) {
     return 0;
