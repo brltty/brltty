@@ -125,6 +125,18 @@ getUnicodeCellEntry (TextTableData *ttd, wchar_t character) {
   return NULL;
 }
 
+static void
+resetDotsCharacter (TextTableData *ttd, unsigned char dots, wchar_t character) {
+  TextTableHeader *header = getTextTableHeader(ttd);
+
+  if (BITMASK_TEST(header->dotsCharacterDefined, dots)) {
+    if (header->dotsToCharacter[dots] == character) {
+      header->dotsToCharacter[dots] = 0;
+      BITMASK_CLEAR(header->dotsCharacterDefined, dots);
+    }
+  }
+}
+
 int
 setTextTableCharacter (TextTableData *ttd, wchar_t character, unsigned char dots) {
   UnicodeRowEntry *row = getUnicodeRowEntry(ttd, character, 1);
@@ -132,12 +144,20 @@ setTextTableCharacter (TextTableData *ttd, wchar_t character, unsigned char dots
 
   {
     unsigned int cellNumber = UNICODE_CELL_NUMBER(character);
-    row->cells[cellNumber].dots = dots;
-    BITMASK_SET(row->defined, cellNumber);
+    UnicodeCellEntry *cell = &row->cells[cellNumber];
+
+    if (!BITMASK_TEST(row->defined, cellNumber)) {
+      BITMASK_SET(row->defined, cellNumber);
+    } else if (cell->dots != dots) {
+      resetDotsCharacter(ttd, cell->dots, character);
+    }
+
+    cell->dots = dots;
   }
 
   {
     TextTableHeader *header = getTextTableHeader(ttd);
+
     if (!BITMASK_TEST(header->dotsCharacterDefined, dots)) {
       header->dotsToCharacter[dots] = character;
       BITMASK_SET(header->dotsCharacterDefined, dots);
@@ -150,20 +170,14 @@ setTextTableCharacter (TextTableData *ttd, wchar_t character, unsigned char dots
 void
 unsetTextTableCharacter (TextTableData *ttd, wchar_t character) {
   UnicodeRowEntry *row = getUnicodeRowEntry(ttd, character, 0);
+
   if (row) {
     unsigned int cellNumber = UNICODE_CELL_NUMBER(character);
 
     if (BITMASK_TEST(row->defined, cellNumber)) {
       UnicodeCellEntry *cell = &row->cells[cellNumber];
-      TextTableHeader *header = getTextTableHeader(ttd);
 
-      if (BITMASK_TEST(header->dotsCharacterDefined, cell->dots)) {
-        if (header->dotsToCharacter[cell->dots] == character) {
-          header->dotsToCharacter[cell->dots] = 0;
-          BITMASK_CLEAR(header->dotsCharacterDefined, cell->dots);
-        }
-      }
-
+      resetDotsCharacter(ttd, cell->dots, character);
       cell->dots = 0;
       BITMASK_CLEAR(row->defined, cellNumber);
     }
