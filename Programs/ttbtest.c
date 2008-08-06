@@ -37,7 +37,6 @@
 static char *opt_characterSet;
 static char *opt_inputFormat;
 static char *opt_outputFormat;
-static int opt_translate;
 static char *opt_tablesDirectory;
 
 #ifdef ENABLE_API
@@ -61,12 +60,6 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = "Edit table."
   },
 #endif /* ENABLE_API */
-
-  { .letter = 't',
-    .word = "translate",
-    .setting.flag = &opt_translate,
-    .description = "Translate."
-  },
 
   { .letter = 'i',
     .word = "input-format",
@@ -648,10 +641,13 @@ updateCharacterDescription (EditTableData *etd) {
     clear();
 
 #if defined(USE_CURSES)
-    printw("F2:Save F8:Exit\n");
     printw("Left/Right: previous/next unicode character\n");
     printw("Up/Down: previous/next defined character\n");
     printw("Home/End: first/last defined character\n");
+    printw("F1-F8: toggle dot 1-8 - up / down\n");
+    printw("F9: toggle character - define (as empty cell) / undefine\n");
+    printw("F11: save\n");
+    printw("F12: exit\n");
     printw("\n");
 #else /* standard input/output */
 #endif /* clear screen */
@@ -827,6 +823,24 @@ setLastDefinedCharacter (EditTableData *etd) {
 }
 
 static int
+toggleCharacter (EditTableData *etd) {
+  if (getUnicodeCellEntry(etd->ttd, etd->character)) {
+    unsetTextTableCharacter(etd->ttd, etd->character);
+  } else if (!setTextTableCharacter(etd->ttd, etd->character, 0)) {
+    return 0;
+  }
+
+  return 1;
+}
+
+static int
+toggleDot (EditTableData *etd, unsigned char dot) {
+  const UnicodeCellEntry *cell = getUnicodeCellEntry(etd->ttd, etd->character);
+  unsigned char dots = cell? cell->dots: 0;
+  return setTextTableCharacter(etd->ttd, etd->character, dots^dot);
+}
+
+static int
 doKeyboardCommand (EditTableData *etd) {
 #if defined(USE_CURSES)
 #ifdef USE_FUNC_GET_WCH
@@ -850,26 +864,58 @@ doKeyboardCommand (EditTableData *etd) {
         break;
 
       case KEY_UP:
-        setPreviousDefinedCharacter(etd);
+        if (!setPreviousDefinedCharacter(etd)) beep();
         break;
 
       case KEY_DOWN:
-        setNextDefinedCharacter(etd);
+        if (!setNextDefinedCharacter(etd)) beep();;
         break;
 
       case KEY_HOME:
-        setFirstDefinedCharacter(etd);
+        if (!setFirstDefinedCharacter(etd)) beep();
         break;
 
       case KEY_END:
-        setLastDefinedCharacter(etd);
+        if (!setLastDefinedCharacter(etd)) beep();
         break;
 
-      case KEY_DC:
-        unsetTextTableCharacter(etd->ttd, etd->character);
+      case KEY_F(1):
+        if (!toggleDot(etd, BRLAPI_DOT1)) beep();
         break;
 
-      case KEY_F(2): {
+      case KEY_F(2):
+        if (!toggleDot(etd, BRLAPI_DOT2)) beep();
+        break;
+
+      case KEY_F(3):
+        if (!toggleDot(etd, BRLAPI_DOT3)) beep();
+        break;
+
+      case KEY_F(4):
+        if (!toggleDot(etd, BRLAPI_DOT4)) beep();
+        break;
+
+      case KEY_F(5):
+        if (!toggleDot(etd, BRLAPI_DOT5)) beep();
+        break;
+
+      case KEY_F(6):
+        if (!toggleDot(etd, BRLAPI_DOT6)) beep();
+        break;
+
+      case KEY_F(7):
+        if (!toggleDot(etd, BRLAPI_DOT7)) beep();
+        break;
+
+      case KEY_F(8):
+        if (!toggleDot(etd, BRLAPI_DOT8)) beep();
+        break;
+
+      case KEY_F(9):
+        if (!toggleCharacter(etd)) beep();
+        break;
+
+      case KEY_F(11): {
         FILE *outputFile;
 
         if (!outputPath) outputPath = inputPath;
@@ -883,7 +929,7 @@ doKeyboardCommand (EditTableData *etd) {
         break;
       }
 
-      case KEY_F(8):
+      case KEY_F(12):
         return 0;
 
       default:
@@ -939,25 +985,21 @@ doBrailleCommand (EditTableData *etd) {
                   break;
 
                 case BRLAPI_KEY_CMD_LNUP:
-                  setPreviousDefinedCharacter(etd);
+                  if (!setPreviousDefinedCharacter(etd)) beep();
                   break;
 
                 case BRLAPI_KEY_CMD_LNDN:
-                  setNextDefinedCharacter(etd);
+                  if (!setNextDefinedCharacter(etd)) beep();
                   break;
 
                 case BRLAPI_KEY_CMD_TOP_LEFT:
                 case BRLAPI_KEY_CMD_TOP:
-                  setFirstDefinedCharacter(etd);
+                  if (!setFirstDefinedCharacter(etd)) beep();
                   break;
 
                 case BRLAPI_KEY_CMD_BOT_LEFT:
                 case BRLAPI_KEY_CMD_BOT:
-                  setLastDefinedCharacter(etd);
-                  break;
-
-                case BRLAPI_KEY_CMD_BACK:
-                  unsetTextTableCharacter(etd->ttd, etd->character);
+                  if (!setLastDefinedCharacter(etd)) beep();
                   break;
 
                 default:
@@ -1005,23 +1047,19 @@ doBrailleCommand (EditTableData *etd) {
                 break;
 
               case BRLAPI_KEY_SYM_UP:
-                setPreviousDefinedCharacter(etd);
+                if (!setPreviousDefinedCharacter(etd)) beep();
                 break;
 
               case BRLAPI_KEY_SYM_DOWN:
-                setNextDefinedCharacter(etd);
+                if (!setNextDefinedCharacter(etd)) beep();
                 break;
 
               case BRLAPI_KEY_SYM_HOME:
-                setFirstDefinedCharacter(etd);
+                if (!setFirstDefinedCharacter(etd)) beep();
                 break;
 
               case BRLAPI_KEY_SYM_END:
-                setLastDefinedCharacter(etd);
-                break;
-
-              case BRLAPI_KEY_SYM_DELETE:
-                unsetTextTableCharacter(etd->ttd, etd->character);
+                if (!setLastDefinedCharacter(etd)) beep();
                 break;
 
               default:
@@ -1184,12 +1222,6 @@ main (int argc, char *argv[]) {
     status = editTable();
   } else
 #endif /* ENABLE_API */
-
-/*
-  if (opt_translate) {
-    status = translateText();
-  } else
-*/
 
   {
     status = convertTable();
