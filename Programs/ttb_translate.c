@@ -19,6 +19,7 @@
 
 #include <stdio.h>
 
+#include "charset.h"
 #include "ttb.h"
 #include "ttb_internal.h"
 #include "brldots.h"
@@ -89,7 +90,7 @@ convertCharacterToDots (TextTable *table, wchar_t character) {
       return character & UNICODE_CELL_MASK;
 
     case 0XF000: {
-      wint_t wc = character & UNICODE_CELL_MASK;
+      wint_t wc = convertCharToWchar(character & UNICODE_CELL_MASK);
       if (wc == WEOF) goto unknownCharacter;
       character = wc;
     }
