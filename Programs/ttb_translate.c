@@ -88,10 +88,17 @@ convertCharacterToDots (TextTable *table, wchar_t character) {
     case UNICODE_BRAILLE_ROW:
       return character & UNICODE_CELL_MASK;
 
+    case 0XF000: {
+      wint_t wc = character & UNICODE_CELL_MASK;
+      if (wc == WEOF) goto unknownCharacter;
+      character = wc;
+    }
+
     default: {
       const UnicodeCellEntry *cell;
-
       if ((cell = getUnicodeCellEntry(table, character))) return cell->dots;
+
+    unknownCharacter:
       if ((cell = getUnicodeCellEntry(table, UNICODE_REPLACEMENT_CHARACTER))) return cell->dots;
       if ((cell = getUnicodeCellEntry(table, WC_C('?')))) return cell->dots;
       return BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT4 | BRL_DOT5 | BRL_DOT6 | BRL_DOT7 | BRL_DOT8;
