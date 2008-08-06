@@ -692,7 +692,7 @@ openFile (const char *path, const char *mode, int optional) {
   if (file) {
     LogPrint(LOG_DEBUG, "file opened: %s fd=%d", path, fileno(file));
   } else {
-    LogPrint((errno == ENOENT)? LOG_DEBUG: LOG_ERR,
+    LogPrint((optional && (errno == ENOENT))? LOG_DEBUG: LOG_ERR,
              "cannot open file: %s: %s", path, strerror(errno));
   }
   return file;
