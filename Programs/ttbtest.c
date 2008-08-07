@@ -473,7 +473,7 @@ convertTable (void) {
 #define USE_FUNC_GET_WCH
 #include <ncursesw/ncurses.h>
 
-#else /* no curses package */
+#else /* standard input/output */
 #warning curses package either unspecified or unsupported
 #define printw printf
 #define clear() printf("\r\n\v")
@@ -536,7 +536,7 @@ claimBrailleDisplay (EditTableData *etd) {
 }
 
 static wchar_t *
-makeCharacterDescription (TextTableData *ttd, wchar_t character, size_t *length, unsigned char *braille) {
+makeCharacterDescription (TextTableData *ttd, wchar_t character, size_t *length, int *defined, unsigned char *braille) {
   char buffer[0X100];
   int characterIndex;
   int brailleIndex;
@@ -607,6 +607,7 @@ makeCharacterDescription (TextTableData *ttd, wchar_t character, size_t *length,
       description[descriptionLength] = 0;
 
       if (length) *length = descriptionLength;
+      if (defined) *defined = gotDots;
       if (braille) *braille = dots;
       return description;
     }
@@ -627,16 +628,12 @@ static int
 updateCharacterDescription (EditTableData *etd) {
   int ok = 0;
 
-  size_t descriptionLength;
-  unsigned char descriptionDots;
-  wchar_t *descriptionText = makeCharacterDescription(
-    etd->ttd,
-    etd->character,
-    &descriptionLength,
-    &descriptionDots
-  );
+  size_t length;
+  int defined;
+  unsigned char dots;
+  wchar_t *description = makeCharacterDescription(etd->ttd, etd->character, &length, &defined, &dots);
 
-  if (descriptionText) {
+  if (description) {
     ok = 1;
     clear();
 
@@ -644,18 +641,40 @@ updateCharacterDescription (EditTableData *etd) {
     printw("Left/Right: previous/next unicode character\n");
     printw("Up/Down: previous/next defined character\n");
     printw("Home/End: first/last defined character\n");
-    printw("F1-F8: toggle dot 1-8 (define if necessary)\n");
-    printw("F9: clear / undefine / define (as empty cell)\n");
-    printw("F11: save\n");
-    printw("F12: exit\n");
+
+#define DOT(n) printw("F%u: %s dot %u  ", n, ((dots & BRLAPI_DOT##n)? "lower": "raise"), n)
+    DOT(1);
+    DOT(5);
+    printw("F9: %s",
+           !defined? "define (as empty cell)":
+           dots? "clear all dots":
+           "undefine character");
+    printw("\n");
+
+    DOT(2);
+    DOT(6);
+    printw("F10:");
+    printw("\n");
+
+    DOT(3);
+    DOT(7);
+    printw("F11: save table");
+    printw("\n");
+
+    DOT(4);
+    DOT(8);
+    printw("F12: exit table editor");
+    printw("\n");
+#undef DOT
+
     printw("\n");
 #else /* standard input/output */
 #endif /* clear screen */
 
-    printCharacterString(descriptionText);
+    printCharacterString(description);
     printw("\n");
 
-#define DOT(n) ((descriptionDots & BRLAPI_DOT##n)? '#': ' ')
+#define DOT(n) ((dots & BRLAPI_DOT##n)? '#': ' ')
     printw(" +---+ \n");
     printw("1|%c %c|4\n", DOT(1), DOT(4));
     printw("2|%c %c|5\n", DOT(2), DOT(5));
@@ -675,10 +694,12 @@ updateCharacterDescription (EditTableData *etd) {
     if (haveBrailleDisplay(etd)) {
       brlapi_writeArguments_t args = BRLAPI_WRITEARGUMENTS_INITIALIZER;
       wchar_t text[etd->displayWidth];
-      size_t length = MIN(etd->displayWidth, descriptionLength);
 
-      wmemcpy(text, descriptionText, length);
-      wmemset(&text[length], WC_C(' '), etd->displayWidth-length);
+      {
+        size_t count = MIN(etd->displayWidth, length);
+        wmemcpy(text, description, count);
+        wmemset(&text[count], WC_C(' '), etd->displayWidth-count);
+      }
 
       args.regionBegin = 1;
       args.regionSize = etd->displayWidth;
@@ -692,7 +713,7 @@ updateCharacterDescription (EditTableData *etd) {
       }
     }
 
-    free(descriptionText);
+    free(description);
   }
 
   return ok;
@@ -768,21 +789,23 @@ findCharacter (EditTableData *etd, int backward) {
             }
 
             cellNumber = cellReset;
+
             if (rowNumber == rowLimit) break;
             rowNumber += increment;
           }
         }
 
-        cellNumber = cellReset;
         rowNumber = rowReset;
+        cellNumber = cellReset;
+
         if (plainNumber == plainLimit) break;
         plainNumber += increment;
       }
     }
 
-    cellNumber = cellReset;
-    rowNumber = rowReset;
     plainNumber = plainReset;
+    rowNumber = rowReset;
+    cellNumber = cellReset;
 
     if (groupNumber == groupLimit) {
       groupNumber = groupReset;
