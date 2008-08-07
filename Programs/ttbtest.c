@@ -198,6 +198,18 @@ writeCharacter_native (FILE *file, wchar_t character, unsigned char dots, void *
 
   if (fprintf(file, " ") == EOF) goto error;
   if (!writeDots_native(file, dots)) goto error;
+  if (fprintf(file, "  #") == EOF) goto error;
+
+  {
+    wint_t braille = UNICODE_BRAILLE_ROW | dots;
+    if (fprintf(file, " %" PRIwc, braille) == EOF) goto error;
+  }
+
+  {
+    Utf8Buffer utf8;
+    convertWcharToUtf8(((iswprint(character) && !iswspace(character))? character: WC_C(' ')), utf8);
+    if (fprintf(file, " %s", utf8) == EOF) goto error;
+  }
 
 #ifdef HAVE_ICU
   {
@@ -206,7 +218,7 @@ writeCharacter_native (FILE *file, wchar_t character, unsigned char dots, void *
 
     u_charName(character, U_EXTENDED_CHAR_NAME, name, sizeof(name), &error);
     if (U_SUCCESS(error)) {
-      if (fprintf(file, " %s", name) == EOF) return 0;
+      if (fprintf(file, " [%s]", name) == EOF) return 0;
     }
   }
 #endif /* HAVE_ICU */
@@ -403,44 +415,38 @@ openTable (const char **file, const char *mode, const char *directory, FILE *std
 static int
 convertTable (void) {
   int status;
+  FILE *inputFile = openTable(&inputPath, "r", opt_tablesDirectory, stdin, "<standard-input>");
 
-  if (outputFormat != inputFormat) {
-    FILE *inputFile = openTable(&inputPath, "r", opt_tablesDirectory, stdin, "<standard-input>");
+  if (inputFile) {
+    TextTableData *ttd;
 
-    if (inputFile) {
-      TextTableData *ttd;
+    if ((ttd = inputFormat->read(inputPath, inputFile, inputFormat->data))) {
+      if (outputPath) {
+        FILE *outputFile = openTable(&outputPath, "w", NULL, stdout, "<standard-output>");
 
-      if ((ttd = inputFormat->read(inputPath, inputFile, inputFormat->data))) {
-        if (outputPath) {
-          FILE *outputFile = openTable(&outputPath, "w", NULL, stdout, "<standard-output>");
-
-          if (outputFile) {
-            if (outputFormat->write(outputPath, outputFile, ttd, outputFormat->data)) {
-              status = 0;
-            } else {
-              status = 6;
-            }
-
-            fclose(outputFile);
+        if (outputFile) {
+          if (outputFormat->write(outputPath, outputFile, ttd, outputFormat->data)) {
+            status = 0;
           } else {
-            status = 5;
+            status = 6;
           }
-        } else {
-          status = 0;
-        }
 
-        destroyTextTableData(ttd);
+          fclose(outputFile);
+        } else {
+          status = 5;
+        }
       } else {
-        status = 4;
+        status = 0;
       }
 
-      fclose(inputFile);
+      destroyTextTableData(ttd);
     } else {
-      status = 3;
+      status = 4;
     }
+
+    fclose(inputFile);
   } else {
-    LogPrint(LOG_ERR, "same input and output formats: %s", outputFormat->name);
-    status = 2;
+    status = 3;
   }
 
   return status;
