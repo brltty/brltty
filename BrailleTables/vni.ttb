@@ -17,259 +17,259 @@
 
 # BRLTTY Text Translation Table - Vietnamese (iso-8859-1)
 
-\X00 (   4  78)  # null
-\X01 (1     78)  # start of heading
-\X02 (12    78)  # start of text
-\X03 (1  4  78)  # end of text
-\X04 (1  45 78)  # end of transmission
-\X05 (1   5 78)  # enquiry
-\X06 (12 4  78)  # acknowledge
-\X07 (12 45 78)  # bell
-\X08 (12  5 78)  # backspace
-\X09 ( 2 4  78)  # horizontal tabulation
-\X0A ( 2 45 78)  # line feed
-\X0B (1 3   78)  # vertical tabulation
-\X0C (123   78)  # form feed
-\X0D (1 34  78)  # carriage return
-\X0E (1 345 78)  # shift out
-\X0F (1 3 5 78)  # shift in
-\X10 (1234  78)  # data link escape
-\X11 (12345 78)  # device control one
-\X12 (123 5 78)  # device control two
-\X13 ( 234  78)  # device control three
-\X14 ( 2345 78)  # device control four
-\X15 (1 3  678)  # negative acknowledge
-\X16 (123  678)  # synchronous idle
-\X17 ( 2 45678)  # end of transmission block
-\X18 (1 34 678)  # cancel
-\X19 (1 345678)  # end of medium
-\X1A (1 3 5678)  # substitute
-\X1B ( 2 4 678)  # escape
-\X1C (12  5678)  # file separator
-\X1D (12 45678)  # group separator
-\X1E (   45 78)  # record separator
-\X1F (   45678)  # unit separator
-\X20 (        )  # space
-\X21 ( 23 5   )  # exclamation mark
-\X22 (     678)  # quotation mark
-\X23 (  3456  )  # number sign
-\X24 (  345   )  # dollar sign
-\X25 ( 2 4 6  )  # percent sign
-\X26 (  34 6 8)  # ampersand
-\X27 (  3     )  # apostrophe
-\X28 (123 567 )  # left parenthesis
-\X29 ( 234567 )  # right parenthesis
-\X2A (  3 5   )  # asterisk
-\X2B (  34 6  )  # plus sign
-\X2C ( 2      )  # comma
-\X2D (  3  6  )  # hyphen-minus
-\X2E ( 2  56  )  # full stop
-\X2F (  34    )  # solidus
-\X30 (  3 56 8)  # digit zero
-\X31 ( 2     8)  # digit one
-\X32 ( 23    8)  # digit two
-\X33 ( 2  5  8)  # digit three
-\X34 ( 2  56 8)  # digit four
-\X35 ( 2   6 8)  # digit five
-\X36 ( 23 5  8)  # digit six
-\X37 ( 23 56 8)  # digit seven
-\X38 ( 23  6 8)  # digit eight
-\X39 (  3 5  8)  # digit nine
-\X3A ( 2  5   )  # colon
-\X3B ( 23     )  # semicolon
-\X3C ( 23  6  )  # less-than sign
-\X3D ( 23 56  )  # equals sign
-\X3E (  3 56  )  # greater-than sign
-\X3F ( 2   6  )  # question mark
-\X40 (   4  7 )  # commercial at
-\X41 (1     7 )  # latin capital letter a
-\X42 (12    7 )  # latin capital letter b
-\X43 (1  4  7 )  # latin capital letter c
-\X44 (1 3 567 )  # latin capital letter d
-\X45 (1   5 7 )  # latin capital letter e
-\X46 (12 4  7 )  # latin capital letter f
-\X47 (12 45 7 )  # latin capital letter g
-\X48 (12  5 7 )  # latin capital letter h
-\X49 ( 2 4  7 )  # latin capital letter i
-\X4A ( 2 45 7 )  # latin capital letter j
-\X4B (1 3   7 )  # latin capital letter k
-\X4C (123   7 )  # latin capital letter l
-\X4D (1 34  7 )  # latin capital letter m
-\X4E (1 345 7 )  # latin capital letter n
-\X4F (1 3 5 7 )  # latin capital letter o
-\X50 (1234  7 )  # latin capital letter p
-\X51 (12345 7 )  # latin capital letter q
-\X52 (123 5 7 )  # latin capital letter r
-\X53 ( 234  7 )  # latin capital letter s
-\X54 ( 2345 7 )  # latin capital letter t
-\X55 (1 3  67 )  # latin capital letter u
-\X56 (123  67 )  # latin capital letter v
-\X57 ( 2 4567 )  # latin capital letter w
-\X58 (1 34 67 )  # latin capital letter x
-\X59 (1 34567 )  # latin capital letter y
-\X5A (1 3 567 )  # latin capital letter z
-\X5B (123 56 8)  # left square bracket
-\X5C (1    6 8)  # reverse solidus
-\X5D ( 23456 8)  # right square bracket
-\X5E (   45 7 )  # circumflex accent
-\X5F (   4567 )  # low line
-\X60 (   4    )  # grave accent
-\X61 (1       )  # latin small letter a
-\X62 (12      )  # latin small letter b
-\X63 (1  4    )  # latin small letter c
-\X64 (1 3 56  )  # latin small letter d
-\X65 (1   5   )  # latin small letter e
-\X66 (12 4    )  # latin small letter f
-\X67 (12 45   )  # latin small letter g
-\X68 (12  5   )  # latin small letter h
-\X69 ( 2 4    )  # latin small letter i
-\X6A ( 2 45   )  # latin small letter j
-\X6B (1 3     )  # latin small letter k
-\X6C (123     )  # latin small letter l
-\X6D (1 34    )  # latin small letter m
-\X6E (1 345   )  # latin small letter n
-\X6F (1 3 5   )  # latin small letter o
-\X70 (1234    )  # latin small letter p
-\X71 (12345   )  # latin small letter q
-\X72 (123 5   )  # latin small letter r
-\X73 ( 234    )  # latin small letter s
-\X74 ( 2345   )  # latin small letter t
-\X75 (1 3  6  )  # latin small letter u
-\X76 (123  6  )  # latin small letter v
-\X77 ( 2 456  )  # latin small letter w
-\X78 (1 34 6  )  # latin small letter x
-\X79 (1 3456  )  # latin small letter y
-\X7A (1 3 56  )  # latin small letter z
-\X7B (123 5678)  # left curly bracket
-\X7C (   456 8)  # vertical line
-\X7D ( 2345678)  # right curly bracket
-\X7E (   45   )  # tilde
-\X7F (   456  )  # delete
-\X80 (   4   8)  # <control>
-\X81 (1      8)  # <control>
-\X82 (12     8)  # break permitted here
-\X83 (1  4   8)  # no break here
-\X84 (1  45  8)  # <control>
-\X85 (1   5  8)  # next line
-\X86 (12 4   8)  # start of selected area
-\X87 (12 45  8)  # end of selected area
-\X88 (12  5  8)  # character tabulation set
-\X89 ( 2 4   8)  # character tabulation with justification
-\X8A ( 2 45  8)  # line tabulation set
-\X8B (1 3    8)  # partial line down
-\X8C (123    8)  # partial line up
-\X8D (1 34   8)  # reverse line feed
-\X8E (1 345  8)  # single shift two
-\X8F (1 3 5  8)  # single shift three
-\X90 (1234   8)  # device control string
-\X91 (12345  8)  # private use one
-\X92 (123 5  8)  # private use two
-\X93 ( 234   8)  # set transmit state
-\X94 ( 2345  8)  # cancel character
-\X95 (1 3  6 8)  # message waiting
-\X96 (123  6 8)  # start of guarded area
-\X97 ( 2 456 8)  # end of guarded area
-\X98 (1 34 6 8)  # start of string
-\X99 (1 3456 8)  # <control>
-\X9A (1 3 56 8)  # single character introducer
-\X9B ( 2 4 6 8)  # control sequence introducer
-\X9C (12  56 8)  # string terminator
-\X9D (12 456 8)  # operating system command
-\X9E (   45  8)  # privacy message
-\X9F (   456 8)  # application program command
-\XA0 (        )  # no-break space
-\XA1 (12345678)  # inverted exclamation mark
-\XA2 (12345678)  # cent sign
-\XA3 (12345678)  # pound sign
-\XA4 (12345678)  # currency sign
-\XA5 (12345678)  # yen sign
-\XA6 (12345678)  # broken bar
-\XA7 (12345678)  # section sign
-\XA8 (12345678)  # diaeresis
-\XA9 (1  4  7 )  # copyright sign
-\XAA (12345678)  # feminine ordinal indicator
-\XAB ( 23  67 )  # left-pointing double angle quotation mark
-\XAC (12345678)  # not sign
-\XAD (12345678)  # soft hyphen
-\XAE (1234  7 )  # registered sign
-\XAF (12345678)  # macron
-\XB0 (12345678)  # degree sign
-\XB1 (12345678)  # plus-minus sign
-\XB2 (12345678)  # superscript two
-\XB3 (12345678)  # superscript three
-\XB4 (12345678)  # acute accent
-\XB5 (12345678)  # micro sign
-\XB6 (12345678)  # pilcrow sign
-\XB7 (  3 5   )  # middle dot
-\XB8 (12345678)  # cedilla
-\XB9 (12345678)  # superscript one
-\XBA (12345678)  # masculine ordinal indicator
-\XBB (  3 567 )  # right-pointing double angle quotation mark
-\XBC (12345678)  # vulgar fraction one quarter
-\XBD (12345678)  # vulgar fraction one half
-\XBE (12345678)  # vulgar fraction three quarters
-\XBF (12345678)  # inverted question mark
-\XC0 (    567 )  # latin capital letter a with grave
-\XC1 (  3 5 7 )  # latin capital letter a with acute
-\XC2 (      7 )  # latin capital letter a with circumflex
-\XC3 (  3  67 )  # latin capital letter a with tilde
-\XC4 (     67 )  # latin capital letter a with diaeresis
-\XC5 ( 2   67 )  # latin capital letter a with ring above
-\XC6 ( 2   67 )  # latin capital letter ae
-\XC7 (1234 67 )  # latin capital letter c with cedilla
-\XC8 (    56 8)  # latin capital letter e with grave
-\XC9 (  3 5  8)  # latin capital letter e with acute
-\XCA (       8)  # latin capital letter e with circumflex
-\XCB (     6 8)  # latin capital letter e with diaeresis
-\XCC (    567 )  # latin capital letter i with grave
-\XCD (  3 5 7 )  # latin capital letter i with acute
-\XCE (1234567 )  # latin capital letter i with circumflex
-\XCF (     6  )  # latin capital letter i with diaeresis
-\XD0 (12345678)  # latin capital letter eth
-\XD1 (1  45 7 )  # latin capital letter n with tilde
-\XD2 (     67 )  # latin capital letter o with grave
-\XD3 (  3  67 )  # latin capital letter o with acute
-\XD4 ( 2 4 67 )  # latin capital letter o with circumflex
-\XD5 (  3  6  )  # latin capital letter o with tilde
-\XD6 (12  567 )  # latin capital letter o with diaeresis
-\XD7 (  3 5   )  # multiplication sign
-\XD8 (    56  )  # latin capital letter o with stroke
-\XD9 (  3 5   )  # latin capital letter u with grave
-\XDA ( 2   6 8)  # latin capital letter u with acute
-\XDB ( 2   6  )  # latin capital letter u with circumflex
-\XDC (  3  6 8)  # latin capital letter u with diaeresis
-\XDD (1 34567 )  # latin capital letter y with acute
-\XDE (12345678)  # latin capital letter thorn
-\XDF ( 234    )  # latin small letter sharp s
-\XE0 (    567 )  # latin small letter a with grave
-\XE1 (  3 5 7 )  # latin small letter a with acute
-\XE2 (      7 )  # latin small letter a with circumflex
-\XE3 (  3  67 )  # latin small letter a with tilde
-\XE4 (     67 )  # latin small letter a with diaeresis
-\XE5 ( 2   67 )  # latin small letter a with ring above
-\XE6 ( 2   6  )  # latin small letter ae
-\XE7 (1234 6  )  # latin small letter c with cedilla
-\XE8 (    56 8)  # latin small letter e with grave
-\XE9 (  3 5  8)  # latin small letter e with acute
-\XEA (       8)  # latin small letter e with circumflex
-\XEB (     6 8)  # latin small letter e with diaeresis
-\XEC (    56  )  # latin small letter i with grave
-\XED (  3 5   )  # latin small letter i with acute
-\XEE (123456  )  # latin small letter i with circumflex
-\XEF (     6  )  # latin small letter i with diaeresis
-\XF0 (12345678)  # latin small letter eth
-\XF1 (1  45   )  # latin small letter n with tilde
-\XF2 (     6  )  # latin small letter o with grave
-\XF3 (  3  6  )  # latin small letter o with acute
-\XF4 ( 2 4 6  )  # latin small letter o with circumflex
-\XF5 (  3  6  )  # latin small letter o with tilde
-\XF6 (12  56  )  # latin small letter o with diaeresis
-\XF7 (  34    )  # division sign
-\XF8 (    56  )  # latin small letter o with stroke
-\XF9 (  3 5   )  # latin small letter u with grave
-\XFA ( 2   6 8)  # latin small letter u with acute
-\XFB ( 2   6  )  # latin small letter u with circumflex
-\XFC (  3  6 8)  # latin small letter u with diaeresis
-\XFD (1 3456  )  # latin small letter y with acute
-\XFE (12345678)  # latin small letter thorn
-\XFF (1 3456  )  # latin small letter y with diaeresis
+char \x00 (   4  78)  # ⣈   [NULL]
+char \x01 (1     78)  # ⣁   [START OF HEADING]
+char \x02 (12    78)  # ⣃   [START OF TEXT]
+char \x03 (1  4  78)  # ⣉   [END OF TEXT]
+char \x04 (1  45 78)  # ⣙   [END OF TRANSMISSION]
+char \x05 (1   5 78)  # ⣑   [ENQUIRY]
+char \x06 (12 4  78)  # ⣋   [ACKNOWLEDGE]
+char \x07 (12 45 78)  # ⣛   [BELL]
+char \x08 (12  5 78)  # ⣓   [BACKSPACE]
+char \x09 ( 2 4  78)  # ⣊   [CHARACTER TABULATION]
+char \x0A ( 2 45 78)  # ⣚   [LINE FEED (LF)]
+char \x0B (1 3   78)  # ⣅   [LINE TABULATION]
+char \x0C (123   78)  # ⣇   [FORM FEED (FF)]
+char \x0D (1 34  78)  # ⣍   [CARRIAGE RETURN (CR)]
+char \x0E (1 345 78)  # ⣝   [SHIFT OUT]
+char \x0F (1 3 5 78)  # ⣕   [SHIFT IN]
+char \x10 (1234  78)  # ⣏   [DATA LINK ESCAPE]
+char \x11 (12345 78)  # ⣟   [DEVICE CONTROL ONE]
+char \x12 (123 5 78)  # ⣗   [DEVICE CONTROL TWO]
+char \x13 ( 234  78)  # ⣎   [DEVICE CONTROL THREE]
+char \x14 ( 2345 78)  # ⣞   [DEVICE CONTROL FOUR]
+char \x15 (1 3  678)  # ⣥   [NEGATIVE ACKNOWLEDGE]
+char \x16 (123  678)  # ⣧   [SYNCHRONOUS IDLE]
+char \x17 ( 2 45678)  # ⣺   [END OF TRANSMISSION BLOCK]
+char \x18 (1 34 678)  # ⣭   [CANCEL]
+char \x19 (1 345678)  # ⣽   [END OF MEDIUM]
+char \x1A (1 3 5678)  # ⣵   [SUBSTITUTE]
+char \x1B ( 2 4 678)  # ⣪   [ESCAPE]
+char \x1C (12  5678)  # ⣳   [INFORMATION SEPARATOR FOUR]
+char \x1D (12 45678)  # ⣻   [INFORMATION SEPARATOR THREE]
+char \x1E (   45 78)  # ⣘   [INFORMATION SEPARATOR TWO]
+char \x1F (   45678)  # ⣸   [INFORMATION SEPARATOR ONE]
+char \x20 (        )  # ⠀   [SPACE]
+char \x21 ( 23 5   )  # ⠖ ! [EXCLAMATION MARK]
+char \x22 (     678)  # ⣠ " [QUOTATION MARK]
+char \x23 (  3456  )  # ⠼ # [NUMBER SIGN]
+char \x24 (  345   )  # ⠜ $ [DOLLAR SIGN]
+char \x25 ( 2 4 6  )  # ⠪ % [PERCENT SIGN]
+char \x26 (  34 6 8)  # ⢬ & [AMPERSAND]
+char \x27 (  3     )  # ⠄ ' [APOSTROPHE]
+char \x28 (123 567 )  # ⡷ ( [LEFT PARENTHESIS]
+char \x29 ( 234567 )  # ⡾ ) [RIGHT PARENTHESIS]
+char \x2A (  3 5   )  # ⠔ * [ASTERISK]
+char \x2B (  34 6  )  # ⠬ + [PLUS SIGN]
+char \x2C ( 2      )  # ⠂ , [COMMA]
+char \x2D (  3  6  )  # ⠤ - [HYPHEN-MINUS]
+char \x2E ( 2  56  )  # ⠲ . [FULL STOP]
+char \x2F (  34    )  # ⠌ / [SOLIDUS]
+char \x30 (  3 56 8)  # ⢴ 0 [DIGIT ZERO]
+char \x31 ( 2     8)  # ⢂ 1 [DIGIT ONE]
+char \x32 ( 23    8)  # ⢆ 2 [DIGIT TWO]
+char \x33 ( 2  5  8)  # ⢒ 3 [DIGIT THREE]
+char \x34 ( 2  56 8)  # ⢲ 4 [DIGIT FOUR]
+char \x35 ( 2   6 8)  # ⢢ 5 [DIGIT FIVE]
+char \x36 ( 23 5  8)  # ⢖ 6 [DIGIT SIX]
+char \x37 ( 23 56 8)  # ⢶ 7 [DIGIT SEVEN]
+char \x38 ( 23  6 8)  # ⢦ 8 [DIGIT EIGHT]
+char \x39 (  3 5  8)  # ⢔ 9 [DIGIT NINE]
+char \x3A ( 2  5   )  # ⠒ : [COLON]
+char \x3B ( 23     )  # ⠆ ; [SEMICOLON]
+char \x3C ( 23  6  )  # ⠦ < [LESS-THAN SIGN]
+char \x3D ( 23 56  )  # ⠶ = [EQUALS SIGN]
+char \x3E (  3 56  )  # ⠴ > [GREATER-THAN SIGN]
+char \x3F ( 2   6  )  # ⠢ ? [QUESTION MARK]
+char \x40 (   4  7 )  # ⡈ @ [COMMERCIAL AT]
+char \x41 (1     7 )  # ⡁ A [LATIN CAPITAL LETTER A]
+char \x42 (12    7 )  # ⡃ B [LATIN CAPITAL LETTER B]
+char \x43 (1  4  7 )  # ⡉ C [LATIN CAPITAL LETTER C]
+char \x44 (1 3 567 )  # ⡵ D [LATIN CAPITAL LETTER D]
+char \x45 (1   5 7 )  # ⡑ E [LATIN CAPITAL LETTER E]
+char \x46 (12 4  7 )  # ⡋ F [LATIN CAPITAL LETTER F]
+char \x47 (12 45 7 )  # ⡛ G [LATIN CAPITAL LETTER G]
+char \x48 (12  5 7 )  # ⡓ H [LATIN CAPITAL LETTER H]
+char \x49 ( 2 4  7 )  # ⡊ I [LATIN CAPITAL LETTER I]
+char \x4A ( 2 45 7 )  # ⡚ J [LATIN CAPITAL LETTER J]
+char \x4B (1 3   7 )  # ⡅ K [LATIN CAPITAL LETTER K]
+char \x4C (123   7 )  # ⡇ L [LATIN CAPITAL LETTER L]
+char \x4D (1 34  7 )  # ⡍ M [LATIN CAPITAL LETTER M]
+char \x4E (1 345 7 )  # ⡝ N [LATIN CAPITAL LETTER N]
+char \x4F (1 3 5 7 )  # ⡕ O [LATIN CAPITAL LETTER O]
+char \x50 (1234  7 )  # ⡏ P [LATIN CAPITAL LETTER P]
+char \x51 (12345 7 )  # ⡟ Q [LATIN CAPITAL LETTER Q]
+char \x52 (123 5 7 )  # ⡗ R [LATIN CAPITAL LETTER R]
+char \x53 ( 234  7 )  # ⡎ S [LATIN CAPITAL LETTER S]
+char \x54 ( 2345 7 )  # ⡞ T [LATIN CAPITAL LETTER T]
+char \x55 (1 3  67 )  # ⡥ U [LATIN CAPITAL LETTER U]
+char \x56 (123  67 )  # ⡧ V [LATIN CAPITAL LETTER V]
+char \x57 ( 2 4567 )  # ⡺ W [LATIN CAPITAL LETTER W]
+char \x58 (1 34 67 )  # ⡭ X [LATIN CAPITAL LETTER X]
+char \x59 (1 34567 )  # ⡽ Y [LATIN CAPITAL LETTER Y]
+char \x5A (1 3 567 )  # ⡵ Z [LATIN CAPITAL LETTER Z]
+char \x5B (123 56 8)  # ⢷ [ [LEFT SQUARE BRACKET]
+char \x5C (1    6 8)  # ⢡ \ [REVERSE SOLIDUS]
+char \x5D ( 23456 8)  # ⢾ ] [RIGHT SQUARE BRACKET]
+char \x5E (   45 7 )  # ⡘ ^ [CIRCUMFLEX ACCENT]
+char \x5F (   4567 )  # ⡸ _ [LOW LINE]
+char \x60 (   4    )  # ⠈ ` [GRAVE ACCENT]
+char \x61 (1       )  # ⠁ a [LATIN SMALL LETTER A]
+char \x62 (12      )  # ⠃ b [LATIN SMALL LETTER B]
+char \x63 (1  4    )  # ⠉ c [LATIN SMALL LETTER C]
+char \x64 (1 3 56  )  # ⠵ d [LATIN SMALL LETTER D]
+char \x65 (1   5   )  # ⠑ e [LATIN SMALL LETTER E]
+char \x66 (12 4    )  # ⠋ f [LATIN SMALL LETTER F]
+char \x67 (12 45   )  # ⠛ g [LATIN SMALL LETTER G]
+char \x68 (12  5   )  # ⠓ h [LATIN SMALL LETTER H]
+char \x69 ( 2 4    )  # ⠊ i [LATIN SMALL LETTER I]
+char \x6A ( 2 45   )  # ⠚ j [LATIN SMALL LETTER J]
+char \x6B (1 3     )  # ⠅ k [LATIN SMALL LETTER K]
+char \x6C (123     )  # ⠇ l [LATIN SMALL LETTER L]
+char \x6D (1 34    )  # ⠍ m [LATIN SMALL LETTER M]
+char \x6E (1 345   )  # ⠝ n [LATIN SMALL LETTER N]
+char \x6F (1 3 5   )  # ⠕ o [LATIN SMALL LETTER O]
+char \x70 (1234    )  # ⠏ p [LATIN SMALL LETTER P]
+char \x71 (12345   )  # ⠟ q [LATIN SMALL LETTER Q]
+char \x72 (123 5   )  # ⠗ r [LATIN SMALL LETTER R]
+char \x73 ( 234    )  # ⠎ s [LATIN SMALL LETTER S]
+char \x74 ( 2345   )  # ⠞ t [LATIN SMALL LETTER T]
+char \x75 (1 3  6  )  # ⠥ u [LATIN SMALL LETTER U]
+char \x76 (123  6  )  # ⠧ v [LATIN SMALL LETTER V]
+char \x77 ( 2 456  )  # ⠺ w [LATIN SMALL LETTER W]
+char \x78 (1 34 6  )  # ⠭ x [LATIN SMALL LETTER X]
+char \x79 (1 3456  )  # ⠽ y [LATIN SMALL LETTER Y]
+char \x7A (1 3 56  )  # ⠵ z [LATIN SMALL LETTER Z]
+char \x7B (123 5678)  # ⣷ { [LEFT CURLY BRACKET]
+char \x7C (   456 8)  # ⢸ | [VERTICAL LINE]
+char \x7D ( 2345678)  # ⣾ } [RIGHT CURLY BRACKET]
+char \x7E (   45   )  # ⠘ ~ [TILDE]
+char \x7F (   456  )  # ⠸   [DELETE]
+char \x80 (   4   8)  # ⢈   [<control-0080>]
+char \x81 (1      8)  # ⢁   [<control-0081>]
+char \x82 (12     8)  # ⢃   [BREAK PERMITTED HERE]
+char \x83 (1  4   8)  # ⢉   [NO BREAK HERE]
+char \x84 (1  45  8)  # ⢙   [<control-0084>]
+char \x85 (1   5  8)  # ⢑   [NEXT LINE (NEL)]
+char \x86 (12 4   8)  # ⢋   [START OF SELECTED AREA]
+char \x87 (12 45  8)  # ⢛   [END OF SELECTED AREA]
+char \x88 (12  5  8)  # ⢓   [CHARACTER TABULATION SET]
+char \x89 ( 2 4   8)  # ⢊   [CHARACTER TABULATION WITH JUSTIFICATION]
+char \x8A ( 2 45  8)  # ⢚   [LINE TABULATION SET]
+char \x8B (1 3    8)  # ⢅   [PARTIAL LINE FORWARD]
+char \x8C (123    8)  # ⢇   [PARTIAL LINE BACKWARD]
+char \x8D (1 34   8)  # ⢍   [REVERSE LINE FEED]
+char \x8E (1 345  8)  # ⢝   [SINGLE SHIFT TWO]
+char \x8F (1 3 5  8)  # ⢕   [SINGLE SHIFT THREE]
+char \x90 (1234   8)  # ⢏   [DEVICE CONTROL STRING]
+char \x91 (12345  8)  # ⢟   [PRIVATE USE ONE]
+char \x92 (123 5  8)  # ⢗   [PRIVATE USE TWO]
+char \x93 ( 234   8)  # ⢎   [SET TRANSMIT STATE]
+char \x94 ( 2345  8)  # ⢞   [CANCEL CHARACTER]
+char \x95 (1 3  6 8)  # ⢥   [MESSAGE WAITING]
+char \x96 (123  6 8)  # ⢧   [START OF GUARDED AREA]
+char \x97 ( 2 456 8)  # ⢺   [END OF GUARDED AREA]
+char \x98 (1 34 6 8)  # ⢭   [START OF STRING]
+char \x99 (1 3456 8)  # ⢽   [<control-0099>]
+char \x9A (1 3 56 8)  # ⢵   [SINGLE CHARACTER INTRODUCER]
+char \x9B ( 2 4 6 8)  # ⢪   [CONTROL SEQUENCE INTRODUCER]
+char \x9C (12  56 8)  # ⢳   [STRING TERMINATOR]
+char \x9D (12 456 8)  # ⢻   [OPERATING SYSTEM COMMAND]
+char \x9E (   45  8)  # ⢘   [PRIVACY MESSAGE]
+char \x9F (   456 8)  # ⢸   [APPLICATION PROGRAM COMMAND]
+char \xA0 (        )  # ⠀   [NO-BREAK SPACE]
+char \xA1 (12345678)  # ⣿ ¡ [INVERTED EXCLAMATION MARK]
+char \xA2 (12345678)  # ⣿ ¢ [CENT SIGN]
+char \xA3 (12345678)  # ⣿ £ [POUND SIGN]
+char \xA4 (12345678)  # ⣿ ¤ [CURRENCY SIGN]
+char \xA5 (12345678)  # ⣿ ¥ [YEN SIGN]
+char \xA6 (12345678)  # ⣿ ¦ [BROKEN BAR]
+char \xA7 (12345678)  # ⣿ § [SECTION SIGN]
+char \xA8 (12345678)  # ⣿ ¨ [DIAERESIS]
+char \xA9 (1  4  7 )  # ⡉ © [COPYRIGHT SIGN]
+char \xAA (12345678)  # ⣿ ª [FEMININE ORDINAL INDICATOR]
+char \xAB ( 23  67 )  # ⡦ « [LEFT-POINTING DOUBLE ANGLE QUOTATION MARK]
+char \xAC (12345678)  # ⣿ ¬ [NOT SIGN]
+char \xAD (12345678)  # ⣿ ­ [SOFT HYPHEN]
+char \xAE (1234  7 )  # ⡏ ® [REGISTERED SIGN]
+char \xAF (12345678)  # ⣿ ¯ [MACRON]
+char \xB0 (12345678)  # ⣿ ° [DEGREE SIGN]
+char \xB1 (12345678)  # ⣿ ± [PLUS-MINUS SIGN]
+char \xB2 (12345678)  # ⣿ ² [SUPERSCRIPT TWO]
+char \xB3 (12345678)  # ⣿ ³ [SUPERSCRIPT THREE]
+char \xB4 (12345678)  # ⣿ ´ [ACUTE ACCENT]
+char \xB5 (12345678)  # ⣿ µ [MICRO SIGN]
+char \xB6 (12345678)  # ⣿ ¶ [PILCROW SIGN]
+char \xB7 (  3 5   )  # ⠔ · [MIDDLE DOT]
+char \xB8 (12345678)  # ⣿ ¸ [CEDILLA]
+char \xB9 (12345678)  # ⣿ ¹ [SUPERSCRIPT ONE]
+char \xBA (12345678)  # ⣿ º [MASCULINE ORDINAL INDICATOR]
+char \xBB (  3 567 )  # ⡴ » [RIGHT-POINTING DOUBLE ANGLE QUOTATION MARK]
+char \xBC (12345678)  # ⣿ ¼ [VULGAR FRACTION ONE QUARTER]
+char \xBD (12345678)  # ⣿ ½ [VULGAR FRACTION ONE HALF]
+char \xBE (12345678)  # ⣿ ¾ [VULGAR FRACTION THREE QUARTERS]
+char \xBF (12345678)  # ⣿ ¿ [INVERTED QUESTION MARK]
+char \xC0 (    567 )  # ⡰ À [LATIN CAPITAL LETTER A WITH GRAVE]
+char \xC1 (  3 5 7 )  # ⡔ Á [LATIN CAPITAL LETTER A WITH ACUTE]
+char \xC2 (      7 )  # ⡀ Â [LATIN CAPITAL LETTER A WITH CIRCUMFLEX]
+char \xC3 (  3  67 )  # ⡤ Ã [LATIN CAPITAL LETTER A WITH TILDE]
+char \xC4 (     67 )  # ⡠ Ä [LATIN CAPITAL LETTER A WITH DIAERESIS]
+char \xC5 ( 2   67 )  # ⡢ Å [LATIN CAPITAL LETTER A WITH RING ABOVE]
+char \xC6 ( 2   67 )  # ⡢ Æ [LATIN CAPITAL LETTER AE]
+char \xC7 (1234 67 )  # ⡯ Ç [LATIN CAPITAL LETTER C WITH CEDILLA]
+char \xC8 (    56 8)  # ⢰ È [LATIN CAPITAL LETTER E WITH GRAVE]
+char \xC9 (  3 5  8)  # ⢔ É [LATIN CAPITAL LETTER E WITH ACUTE]
+char \xCA (       8)  # ⢀ Ê [LATIN CAPITAL LETTER E WITH CIRCUMFLEX]
+char \xCB (     6 8)  # ⢠ Ë [LATIN CAPITAL LETTER E WITH DIAERESIS]
+char \xCC (    567 )  # ⡰ Ì [LATIN CAPITAL LETTER I WITH GRAVE]
+char \xCD (  3 5 7 )  # ⡔ Í [LATIN CAPITAL LETTER I WITH ACUTE]
+char \xCE (1234567 )  # ⡿ Î [LATIN CAPITAL LETTER I WITH CIRCUMFLEX]
+char \xCF (     6  )  # ⠠ Ï [LATIN CAPITAL LETTER I WITH DIAERESIS]
+char \xD0 (12345678)  # ⣿ Ð [LATIN CAPITAL LETTER ETH]
+char \xD1 (1  45 7 )  # ⡙ Ñ [LATIN CAPITAL LETTER N WITH TILDE]
+char \xD2 (     67 )  # ⡠ Ò [LATIN CAPITAL LETTER O WITH GRAVE]
+char \xD3 (  3  67 )  # ⡤ Ó [LATIN CAPITAL LETTER O WITH ACUTE]
+char \xD4 ( 2 4 67 )  # ⡪ Ô [LATIN CAPITAL LETTER O WITH CIRCUMFLEX]
+char \xD5 (  3  6  )  # ⠤ Õ [LATIN CAPITAL LETTER O WITH TILDE]
+char \xD6 (12  567 )  # ⡳ Ö [LATIN CAPITAL LETTER O WITH DIAERESIS]
+char \xD7 (  3 5   )  # ⠔ × [MULTIPLICATION SIGN]
+char \xD8 (    56  )  # ⠰ Ø [LATIN CAPITAL LETTER O WITH STROKE]
+char \xD9 (  3 5   )  # ⠔ Ù [LATIN CAPITAL LETTER U WITH GRAVE]
+char \xDA ( 2   6 8)  # ⢢ Ú [LATIN CAPITAL LETTER U WITH ACUTE]
+char \xDB ( 2   6  )  # ⠢ Û [LATIN CAPITAL LETTER U WITH CIRCUMFLEX]
+char \xDC (  3  6 8)  # ⢤ Ü [LATIN CAPITAL LETTER U WITH DIAERESIS]
+char \xDD (1 34567 )  # ⡽ Ý [LATIN CAPITAL LETTER Y WITH ACUTE]
+char \xDE (12345678)  # ⣿ Þ [LATIN CAPITAL LETTER THORN]
+char \xDF ( 234    )  # ⠎ ß [LATIN SMALL LETTER SHARP S]
+char \xE0 (    567 )  # ⡰ à [LATIN SMALL LETTER A WITH GRAVE]
+char \xE1 (  3 5 7 )  # ⡔ á [LATIN SMALL LETTER A WITH ACUTE]
+char \xE2 (      7 )  # ⡀ â [LATIN SMALL LETTER A WITH CIRCUMFLEX]
+char \xE3 (  3  67 )  # ⡤ ã [LATIN SMALL LETTER A WITH TILDE]
+char \xE4 (     67 )  # ⡠ ä [LATIN SMALL LETTER A WITH DIAERESIS]
+char \xE5 ( 2   67 )  # ⡢ å [LATIN SMALL LETTER A WITH RING ABOVE]
+char \xE6 ( 2   6  )  # ⠢ æ [LATIN SMALL LETTER AE]
+char \xE7 (1234 6  )  # ⠯ ç [LATIN SMALL LETTER C WITH CEDILLA]
+char \xE8 (    56 8)  # ⢰ è [LATIN SMALL LETTER E WITH GRAVE]
+char \xE9 (  3 5  8)  # ⢔ é [LATIN SMALL LETTER E WITH ACUTE]
+char \xEA (       8)  # ⢀ ê [LATIN SMALL LETTER E WITH CIRCUMFLEX]
+char \xEB (     6 8)  # ⢠ ë [LATIN SMALL LETTER E WITH DIAERESIS]
+char \xEC (    56  )  # ⠰ ì [LATIN SMALL LETTER I WITH GRAVE]
+char \xED (  3 5   )  # ⠔ í [LATIN SMALL LETTER I WITH ACUTE]
+char \xEE (123456  )  # ⠿ î [LATIN SMALL LETTER I WITH CIRCUMFLEX]
+char \xEF (     6  )  # ⠠ ï [LATIN SMALL LETTER I WITH DIAERESIS]
+char \xF0 (12345678)  # ⣿ ð [LATIN SMALL LETTER ETH]
+char \xF1 (1  45   )  # ⠙ ñ [LATIN SMALL LETTER N WITH TILDE]
+char \xF2 (     6  )  # ⠠ ò [LATIN SMALL LETTER O WITH GRAVE]
+char \xF3 (  3  6  )  # ⠤ ó [LATIN SMALL LETTER O WITH ACUTE]
+char \xF4 ( 2 4 6  )  # ⠪ ô [LATIN SMALL LETTER O WITH CIRCUMFLEX]
+char \xF5 (  3  6  )  # ⠤ õ [LATIN SMALL LETTER O WITH TILDE]
+char \xF6 (12  56  )  # ⠳ ö [LATIN SMALL LETTER O WITH DIAERESIS]
+char \xF7 (  34    )  # ⠌ ÷ [DIVISION SIGN]
+char \xF8 (    56  )  # ⠰ ø [LATIN SMALL LETTER O WITH STROKE]
+char \xF9 (  3 5   )  # ⠔ ù [LATIN SMALL LETTER U WITH GRAVE]
+char \xFA ( 2   6 8)  # ⢢ ú [LATIN SMALL LETTER U WITH ACUTE]
+char \xFB ( 2   6  )  # ⠢ û [LATIN SMALL LETTER U WITH CIRCUMFLEX]
+char \xFC (  3  6 8)  # ⢤ ü [LATIN SMALL LETTER U WITH DIAERESIS]
+char \xFD (1 3456  )  # ⠽ ý [LATIN SMALL LETTER Y WITH ACUTE]
+char \xFE (12345678)  # ⣿ þ [LATIN SMALL LETTER THORN]
+char \xFF (1 3456  )  # ⠽ ÿ [LATIN SMALL LETTER Y WITH DIAERESIS]

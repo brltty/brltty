@@ -52,259 +52,259 @@
 # Comments from Russians are very welcome as neither Hans Schou nor Dave Mielke
 # understand a single word in Russian.
 
-\X00 (12345678)  # null
-\X01 (1    678)  # start of heading
-\X02 (12 4 678)  # start of text
-\X03 (1  4 678)  # end of text
-\X04 (1  4 67 )  # end of transmission
-\X05 (1   5678)  # enquiry
-\X06 ( 23 5  8)  # acknowledge
-\X07 ( 23 5678)  # bell
-\X08 (  3   78)  # backspace
-\X09 ( 2 4 6 8)  # horizontal tabulation
-\X0A (     678)  # line feed
-\X0B (  345678)  # vertical tabulation
-\X0C (123  67 )  # form feed
-\X0D (   45  8)  # carriage return
-\X0E (1 34567 )  # shift out
-\X0F (123 5678)  # shift in
-\X10 (  3456 8)  # data link escape
-\X11 (12 456 8)  # device control one
-\X12 ( 234 6 8)  # device control two
-\X13 (   45 78)  # device control three
-\X14 (  345  8)  # device control four
-\X15 ( 23 5 78)  # negative acknowledge
-\X16 (123  6  )  # synchronous idle
-\X17 ( 2  5678)  # end of transmission block
-\X18 (  34  78)  # cancel
-\X19 (1 3456  )  # end of medium
-\X1A (   4 678)  # substitute
-\X1B ( 2 4 678)  # escape
-\X1C (12  5678)  # file separator
-\X1D (12 45678)  # group separator
-\X1E (1234 678)  # record separator
-\X1F (   45678)  # unit separator
-\X20 (        )  # space
-\X21 ( 23 5 7 )  # exclamation mark
-\X22 (    5   )  # quotation mark
-\X23 (  3456  )  # number sign
-\X24 (    5 7 )  # dollar sign
-\X25 (1  4 6  )  # percent sign
-\X26 ( 2  5 78)  # ampersand
-\X27 (  3     )  # apostrophe
-\X28 (   4  78)  # left parenthesis
-\X29 (    5 78)  # right parenthesis
-\X2A (12   678)  # asterisk
-\X2B (  34 6  )  # plus sign
-\X2C (     6  )  # comma
-\X2D (  3  6  )  # hyphen-minus
-\X2E (   4 6  )  # full stop
-\X2F (  34    )  # solidus
-\X30 (  3 56  )  # digit zero
-\X31 ( 2      )  # digit one
-\X32 ( 23     )  # digit two
-\X33 ( 2  5   )  # digit three
-\X34 ( 2  56  )  # digit four
-\X35 ( 2   6  )  # digit five
-\X36 ( 23 5   )  # digit six
-\X37 ( 23 56  )  # digit seven
-\X38 ( 23  6  )  # digit eight
-\X39 (  3 5   )  # digit nine
-\X3A ( 23   7 )  # colon
-\X3B (    56  )  # semicolon
-\X3C (12   6  )  # less-than sign
-\X3D (123456  )  # equals sign
-\X3E (  345   )  # greater-than sign
-\X3F (1  456  )  # question mark
-\X40 (   4  7 )  # commercial at
-\X41 (1     78)  # latin capital letter a
-\X42 (12    78)  # latin capital letter b
-\X43 (1  4  78)  # latin capital letter c
-\X44 (1  45 78)  # latin capital letter d
-\X45 (1   5 78)  # latin capital letter e
-\X46 (12 4  78)  # latin capital letter f
-\X47 (12 45 78)  # latin capital letter g
-\X48 (12  5 78)  # latin capital letter h
-\X49 ( 2 4  78)  # latin capital letter i
-\X4A ( 2 45 78)  # latin capital letter j
-\X4B (1 3   78)  # latin capital letter k
-\X4C (123   78)  # latin capital letter l
-\X4D (1 34  78)  # latin capital letter m
-\X4E (1 345 78)  # latin capital letter n
-\X4F (1 3 5 78)  # latin capital letter o
-\X50 (1234  78)  # latin capital letter p
-\X51 (12345 78)  # latin capital letter q
-\X52 (123 5 78)  # latin capital letter r
-\X53 ( 234  78)  # latin capital letter s
-\X54 ( 2345 78)  # latin capital letter t
-\X55 (1 3  678)  # latin capital letter u
-\X56 (123  678)  # latin capital letter v
-\X57 ( 2 45678)  # latin capital letter w
-\X58 (1 34 678)  # latin capital letter x
-\X59 (1 345678)  # latin capital letter y
-\X5A (1 3 5678)  # latin capital letter z
-\X5B ( 234 678)  # left square bracket
-\X5C (  3 567 )  # reverse solidus
-\X5D (12 4567 )  # right square bracket
-\X5E (   45 7 )  # circumflex accent
-\X5F (   456  )  # low line
-\X60 (   4    )  # grave accent
-\X61 (1      8)  # latin small letter a
-\X62 (12     8)  # latin small letter b
-\X63 (1  4   8)  # latin small letter c
-\X64 (1  45  8)  # latin small letter d
-\X65 (1   5  8)  # latin small letter e
-\X66 (12 4   8)  # latin small letter f
-\X67 (12 45  8)  # latin small letter g
-\X68 (12  5  8)  # latin small letter h
-\X69 ( 2 4   8)  # latin small letter i
-\X6A ( 2 45  8)  # latin small letter j
-\X6B (1 3    8)  # latin small letter k
-\X6C (123    8)  # latin small letter l
-\X6D (1 34   8)  # latin small letter m
-\X6E (1 345  8)  # latin small letter n
-\X6F (1 3 5  8)  # latin small letter o
-\X70 (1234   8)  # latin small letter p
-\X71 (12345  8)  # latin small letter q
-\X72 (123 5  8)  # latin small letter r
-\X73 ( 234   8)  # latin small letter s
-\X74 ( 2345  8)  # latin small letter t
-\X75 (1 3  6 8)  # latin small letter u
-\X76 (123  6 8)  # latin small letter v
-\X77 ( 2 456 8)  # latin small letter w
-\X78 (1 34 6 8)  # latin small letter x
-\X79 (1 3456 8)  # latin small letter y
-\X7A (1 3 56 8)  # latin small letter z
-\X7B ( 23  678)  # left curly bracket
-\X7C (  34567 )  # vertical line
-\X7D (12 456  )  # right curly bracket
-\X7E (   45   )  # tilde
-\X7F (   4567 )  # delete
-\X80 ( 2345678)  # box drawings light horizontal
-\X81 (12   6 8)  # box drawings light vertical
-\X82 ( 23456 8)  # box drawings light down and right
-\X83 (    5  8)  # box drawings light down and left
-\X84 (12 4 6 8)  # box drawings light up and right
-\X85 (       8)  # box drawings light up and left
-\X86 (1  4 6 8)  # box drawings light vertical and right
-\X87 (  3    8)  # box drawings light vertical and left
-\X88 (1    6 8)  # box drawings light down and horizontal
-\X89 (  34 6 8)  # box drawings light up and horizontal
-\X8A (123 56 8)  # box drawings light vertical and horizontal
-\X8B (  34   8)  # upper half block
-\X8C (   4 6 8)  # lower half block
-\X8D (     6 8)  # full block
-\X8E ( 2    78)  # left half block
-\X8F ( 23   78)  # right half block
-\X90 (  3 5 78)  # light shade
-\X91 ( 2   67 )  # medium shade
-\X92 (  3 56 8)  # dark shade
-\X93 ( 2  56 8)  # top half integral
-\X94 ( 23 56 8)  # black square
-\X95 ( 23    8)  # bullet operator
-\X96 (    56 8)  # square root
-\X97 (  3 5  8)  # almost equal to
-\X98 (   456 8)  # less-than or equal to
-\X99 (  3 5678)  # greater-than or equal to
-\X9A (12  56 8)  # no-break space
-\X9B ( 2  5  8)  # bottom half integral
-\X9C ( 23 567 )  # degree sign
-\X9D ( 2   6 8)  # superscript two
-\X9E (  345 78)  # middle dot
-\X9F (1  45678)  # division sign
-\XA0 (1  456 8)  # box drawings double horizontal
-\XA1 (  3  67 )  # box drawings double vertical
-\XA2 (    5678)  # box drawings down single and right double
-\XA3 (1    6  )  # cyrillic small letter io
-\XA4 ( 2    7 )  # box drawings down double and right single
-\XA5 (   4   8)  # box drawings double down and right
-\XA6 (12   67 )  # box drawings down single and left double
-\XA7 (      7 )  # box drawings down double and left single
-\XA8 (1  4567 )  # box drawings double down and left
-\XA9 (      78)  # box drawings up single and right double
-\XAA ( 2   678)  # box drawings up double and right single
-\XAB (   4 67 )  # box drawings double up and right
-\XAC ( 2  5 7 )  # box drawings up single and left double
-\XAD (  3  6 8)  # box drawings up double and left single
-\XAE (1234567 )  # box drawings double up and left
-\XAF (    567 )  # box drawings vertical single and right double
-\XB0 ( 23  6 8)  # box drawings vertical double and right single
-\XB1 ( 2     8)  # box drawings double vertical and right
-\XB2 (123456 8)  # box drawings vertical single and left double
-\XB3 (1    67 )  # cyrillic capital letter io
-\XB4 ( 2  567 )  # box drawings vertical double and left single
-\XB5 (1234 6 8)  # box drawings double vertical and left
-\XB6 (  3  678)  # box drawings down single and horizontal double
-\XB7 (1   56 8)  # box drawings down double and horizontal single
-\XB8 ( 23  67 )  # box drawings double down and horizontal
-\XB9 (  3 5 7 )  # box drawings up single and horizontal double
-\XBA (  3   7 )  # box drawings up double and horizontal single
-\XBB (  34  7 )  # box drawings double up and horizontal
-\XBC (     67 )  # box drawings vertical single and horizontal double
-\XBD (  34 67 )  # box drawings vertical double and horizontal single
-\XBE (  345 7 )  # box drawings double vertical and horizontal
-\XBF (  34 678)  # copyright sign
-\XC0 (12  56  )  # cyrillic small letter yu
-\XC1 (1       )  # cyrillic small letter a
-\XC2 (12      )  # cyrillic small letter be
-\XC3 (1  4    )  # cyrillic small letter tse
-\XC4 (1  45   )  # cyrillic small letter de
-\XC5 (1   5   )  # cyrillic small letter ie
-\XC6 (12 4    )  # cyrillic small letter ef
-\XC7 (12 45   )  # cyrillic small letter ghe
-\XC8 (12  5   )  # cyrillic small letter ha
-\XC9 ( 2 4    )  # cyrillic small letter i
-\XCA (1234 6  )  # cyrillic small letter short i
-\XCB (1 3     )  # cyrillic small letter ka
-\XCC (123     )  # cyrillic small letter el
-\XCD (1 34    )  # cyrillic small letter em
-\XCE (1 345   )  # cyrillic small letter en
-\XCF (1 3 5   )  # cyrillic small letter o
-\XD0 (1234    )  # cyrillic small letter pe
-\XD1 (12 4 6  )  # cyrillic small letter ya
-\XD2 (123 5   )  # cyrillic small letter er
-\XD3 ( 234    )  # cyrillic small letter es
-\XD4 ( 2345   )  # cyrillic small letter te
-\XD5 (1 3  6  )  # cyrillic small letter u
-\XD6 ( 2 45   )  # cyrillic small letter zhe
-\XD7 ( 2 456  )  # cyrillic small letter ve
-\XD8 ( 23456  )  # cyrillic small letter soft sign
-\XD9 ( 234 6  )  # cyrillic small letter yeru
-\XDA (1 3 56  )  # cyrillic small letter ze
-\XDB (1   56  )  # cyrillic small letter sha
-\XDC ( 2 4 6  )  # cyrillic small letter e
-\XDD (1 34 6  )  # cyrillic small letter shcha
-\XDE (12345   )  # cyrillic small letter che
-\XDF (123 56  )  # cyrillic small letter hard sign
-\XE0 (12  567 )  # cyrillic capital letter yu
-\XE1 (1     7 )  # cyrillic capital letter a
-\XE2 (12    7 )  # cyrillic capital letter be
-\XE3 (1  4  7 )  # cyrillic capital letter tse
-\XE4 (1  45 7 )  # cyrillic capital letter de
-\XE5 (1   5 7 )  # cyrillic capital letter ie
-\XE6 (12 4  7 )  # cyrillic capital letter ef
-\XE7 (12 45 7 )  # cyrillic capital letter ghe
-\XE8 (12  5 7 )  # cyrillic capital letter ha
-\XE9 ( 2 4  7 )  # cyrillic capital letter i
-\XEA (1234 67 )  # cyrillic capital letter short i
-\XEB (1 3   7 )  # cyrillic capital letter ka
-\XEC (123   7 )  # cyrillic capital letter el
-\XED (1 34  7 )  # cyrillic capital letter em
-\XEE (1 345 7 )  # cyrillic capital letter en
-\XEF (1 3 5 7 )  # cyrillic capital letter o
-\XF0 (1234  7 )  # cyrillic capital letter pe
-\XF1 (12 4 67 )  # cyrillic capital letter ya
-\XF2 (123 5 7 )  # cyrillic capital letter er
-\XF3 ( 234  7 )  # cyrillic capital letter es
-\XF4 ( 2345 7 )  # cyrillic capital letter te
-\XF5 (1 3  67 )  # cyrillic capital letter u
-\XF6 ( 2 45 7 )  # cyrillic capital letter zhe
-\XF7 ( 2 4567 )  # cyrillic capital letter ve
-\XF8 ( 234567 )  # cyrillic capital letter soft sign
-\XF9 ( 234 67 )  # cyrillic capital letter yeru
-\XFA (1 3 567 )  # cyrillic capital letter ze
-\XFB (1   567 )  # cyrillic capital letter sha
-\XFC ( 2 4 67 )  # cyrillic capital letter e
-\XFD (1 34 67 )  # cyrillic capital letter shcha
-\XFE (12345 7 )  # cyrillic capital letter che
-\XFF (123 567 )  # cyrillic capital letter hard sign
+char \x00 (12345678)  # ⣿   [NULL]
+char \x01 (1    678)  # ⣡   [START OF HEADING]
+char \x02 (12 4 678)  # ⣫   [START OF TEXT]
+char \x03 (1  4 678)  # ⣩   [END OF TEXT]
+char \x04 (1  4 67 )  # ⡩   [END OF TRANSMISSION]
+char \x05 (1   5678)  # ⣱   [ENQUIRY]
+char \x06 ( 23 5  8)  # ⢖   [ACKNOWLEDGE]
+char \x07 ( 23 5678)  # ⣶   [BELL]
+char \x08 (  3   78)  # ⣄   [BACKSPACE]
+char \x09 ( 2 4 6 8)  # ⢪   [CHARACTER TABULATION]
+char \x0A (     678)  # ⣠   [LINE FEED (LF)]
+char \x0B (  345678)  # ⣼   [LINE TABULATION]
+char \x0C (123  67 )  # ⡧   [FORM FEED (FF)]
+char \x0D (   45  8)  # ⢘   [CARRIAGE RETURN (CR)]
+char \x0E (1 34567 )  # ⡽   [SHIFT OUT]
+char \x0F (123 5678)  # ⣷   [SHIFT IN]
+char \x10 (  3456 8)  # ⢼   [DATA LINK ESCAPE]
+char \x11 (12 456 8)  # ⢻   [DEVICE CONTROL ONE]
+char \x12 ( 234 6 8)  # ⢮   [DEVICE CONTROL TWO]
+char \x13 (   45 78)  # ⣘   [DEVICE CONTROL THREE]
+char \x14 (  345  8)  # ⢜   [DEVICE CONTROL FOUR]
+char \x15 ( 23 5 78)  # ⣖   [NEGATIVE ACKNOWLEDGE]
+char \x16 (123  6  )  # ⠧   [SYNCHRONOUS IDLE]
+char \x17 ( 2  5678)  # ⣲   [END OF TRANSMISSION BLOCK]
+char \x18 (  34  78)  # ⣌   [CANCEL]
+char \x19 (1 3456  )  # ⠽   [END OF MEDIUM]
+char \x1A (   4 678)  # ⣨   [SUBSTITUTE]
+char \x1B ( 2 4 678)  # ⣪   [ESCAPE]
+char \x1C (12  5678)  # ⣳   [INFORMATION SEPARATOR FOUR]
+char \x1D (12 45678)  # ⣻   [INFORMATION SEPARATOR THREE]
+char \x1E (1234 678)  # ⣯   [INFORMATION SEPARATOR TWO]
+char \x1F (   45678)  # ⣸   [INFORMATION SEPARATOR ONE]
+char \x20 (        )  # ⠀   [SPACE]
+char \x21 ( 23 5 7 )  # ⡖ ! [EXCLAMATION MARK]
+char \x22 (    5   )  # ⠐ " [QUOTATION MARK]
+char \x23 (  3456  )  # ⠼ # [NUMBER SIGN]
+char \x24 (    5 7 )  # ⡐ $ [DOLLAR SIGN]
+char \x25 (1  4 6  )  # ⠩ % [PERCENT SIGN]
+char \x26 ( 2  5 78)  # ⣒ & [AMPERSAND]
+char \x27 (  3     )  # ⠄ ' [APOSTROPHE]
+char \x28 (   4  78)  # ⣈ ( [LEFT PARENTHESIS]
+char \x29 (    5 78)  # ⣐ ) [RIGHT PARENTHESIS]
+char \x2A (12   678)  # ⣣ * [ASTERISK]
+char \x2B (  34 6  )  # ⠬ + [PLUS SIGN]
+char \x2C (     6  )  # ⠠ , [COMMA]
+char \x2D (  3  6  )  # ⠤ - [HYPHEN-MINUS]
+char \x2E (   4 6  )  # ⠨ . [FULL STOP]
+char \x2F (  34    )  # ⠌ / [SOLIDUS]
+char \x30 (  3 56  )  # ⠴ 0 [DIGIT ZERO]
+char \x31 ( 2      )  # ⠂ 1 [DIGIT ONE]
+char \x32 ( 23     )  # ⠆ 2 [DIGIT TWO]
+char \x33 ( 2  5   )  # ⠒ 3 [DIGIT THREE]
+char \x34 ( 2  56  )  # ⠲ 4 [DIGIT FOUR]
+char \x35 ( 2   6  )  # ⠢ 5 [DIGIT FIVE]
+char \x36 ( 23 5   )  # ⠖ 6 [DIGIT SIX]
+char \x37 ( 23 56  )  # ⠶ 7 [DIGIT SEVEN]
+char \x38 ( 23  6  )  # ⠦ 8 [DIGIT EIGHT]
+char \x39 (  3 5   )  # ⠔ 9 [DIGIT NINE]
+char \x3A ( 23   7 )  # ⡆ : [COLON]
+char \x3B (    56  )  # ⠰ ; [SEMICOLON]
+char \x3C (12   6  )  # ⠣ < [LESS-THAN SIGN]
+char \x3D (123456  )  # ⠿ = [EQUALS SIGN]
+char \x3E (  345   )  # ⠜ > [GREATER-THAN SIGN]
+char \x3F (1  456  )  # ⠹ ? [QUESTION MARK]
+char \x40 (   4  7 )  # ⡈ @ [COMMERCIAL AT]
+char \x41 (1     78)  # ⣁ A [LATIN CAPITAL LETTER A]
+char \x42 (12    78)  # ⣃ B [LATIN CAPITAL LETTER B]
+char \x43 (1  4  78)  # ⣉ C [LATIN CAPITAL LETTER C]
+char \x44 (1  45 78)  # ⣙ D [LATIN CAPITAL LETTER D]
+char \x45 (1   5 78)  # ⣑ E [LATIN CAPITAL LETTER E]
+char \x46 (12 4  78)  # ⣋ F [LATIN CAPITAL LETTER F]
+char \x47 (12 45 78)  # ⣛ G [LATIN CAPITAL LETTER G]
+char \x48 (12  5 78)  # ⣓ H [LATIN CAPITAL LETTER H]
+char \x49 ( 2 4  78)  # ⣊ I [LATIN CAPITAL LETTER I]
+char \x4A ( 2 45 78)  # ⣚ J [LATIN CAPITAL LETTER J]
+char \x4B (1 3   78)  # ⣅ K [LATIN CAPITAL LETTER K]
+char \x4C (123   78)  # ⣇ L [LATIN CAPITAL LETTER L]
+char \x4D (1 34  78)  # ⣍ M [LATIN CAPITAL LETTER M]
+char \x4E (1 345 78)  # ⣝ N [LATIN CAPITAL LETTER N]
+char \x4F (1 3 5 78)  # ⣕ O [LATIN CAPITAL LETTER O]
+char \x50 (1234  78)  # ⣏ P [LATIN CAPITAL LETTER P]
+char \x51 (12345 78)  # ⣟ Q [LATIN CAPITAL LETTER Q]
+char \x52 (123 5 78)  # ⣗ R [LATIN CAPITAL LETTER R]
+char \x53 ( 234  78)  # ⣎ S [LATIN CAPITAL LETTER S]
+char \x54 ( 2345 78)  # ⣞ T [LATIN CAPITAL LETTER T]
+char \x55 (1 3  678)  # ⣥ U [LATIN CAPITAL LETTER U]
+char \x56 (123  678)  # ⣧ V [LATIN CAPITAL LETTER V]
+char \x57 ( 2 45678)  # ⣺ W [LATIN CAPITAL LETTER W]
+char \x58 (1 34 678)  # ⣭ X [LATIN CAPITAL LETTER X]
+char \x59 (1 345678)  # ⣽ Y [LATIN CAPITAL LETTER Y]
+char \x5A (1 3 5678)  # ⣵ Z [LATIN CAPITAL LETTER Z]
+char \x5B ( 234 678)  # ⣮ [ [LEFT SQUARE BRACKET]
+char \x5C (  3 567 )  # ⡴ \ [REVERSE SOLIDUS]
+char \x5D (12 4567 )  # ⡻ ] [RIGHT SQUARE BRACKET]
+char \x5E (   45 7 )  # ⡘ ^ [CIRCUMFLEX ACCENT]
+char \x5F (   456  )  # ⠸ _ [LOW LINE]
+char \x60 (   4    )  # ⠈ ` [GRAVE ACCENT]
+char \x61 (1      8)  # ⢁ a [LATIN SMALL LETTER A]
+char \x62 (12     8)  # ⢃ b [LATIN SMALL LETTER B]
+char \x63 (1  4   8)  # ⢉ c [LATIN SMALL LETTER C]
+char \x64 (1  45  8)  # ⢙ d [LATIN SMALL LETTER D]
+char \x65 (1   5  8)  # ⢑ e [LATIN SMALL LETTER E]
+char \x66 (12 4   8)  # ⢋ f [LATIN SMALL LETTER F]
+char \x67 (12 45  8)  # ⢛ g [LATIN SMALL LETTER G]
+char \x68 (12  5  8)  # ⢓ h [LATIN SMALL LETTER H]
+char \x69 ( 2 4   8)  # ⢊ i [LATIN SMALL LETTER I]
+char \x6A ( 2 45  8)  # ⢚ j [LATIN SMALL LETTER J]
+char \x6B (1 3    8)  # ⢅ k [LATIN SMALL LETTER K]
+char \x6C (123    8)  # ⢇ l [LATIN SMALL LETTER L]
+char \x6D (1 34   8)  # ⢍ m [LATIN SMALL LETTER M]
+char \x6E (1 345  8)  # ⢝ n [LATIN SMALL LETTER N]
+char \x6F (1 3 5  8)  # ⢕ o [LATIN SMALL LETTER O]
+char \x70 (1234   8)  # ⢏ p [LATIN SMALL LETTER P]
+char \x71 (12345  8)  # ⢟ q [LATIN SMALL LETTER Q]
+char \x72 (123 5  8)  # ⢗ r [LATIN SMALL LETTER R]
+char \x73 ( 234   8)  # ⢎ s [LATIN SMALL LETTER S]
+char \x74 ( 2345  8)  # ⢞ t [LATIN SMALL LETTER T]
+char \x75 (1 3  6 8)  # ⢥ u [LATIN SMALL LETTER U]
+char \x76 (123  6 8)  # ⢧ v [LATIN SMALL LETTER V]
+char \x77 ( 2 456 8)  # ⢺ w [LATIN SMALL LETTER W]
+char \x78 (1 34 6 8)  # ⢭ x [LATIN SMALL LETTER X]
+char \x79 (1 3456 8)  # ⢽ y [LATIN SMALL LETTER Y]
+char \x7A (1 3 56 8)  # ⢵ z [LATIN SMALL LETTER Z]
+char \x7B ( 23  678)  # ⣦ { [LEFT CURLY BRACKET]
+char \x7C (  34567 )  # ⡼ | [VERTICAL LINE]
+char \x7D (12 456  )  # ⠻ } [RIGHT CURLY BRACKET]
+char \x7E (   45   )  # ⠘ ~ [TILDE]
+char \x7F (   4567 )  # ⡸   [DELETE]
+char \xA0 (12  56 8)  # ⢳   [NO-BREAK SPACE]
+char \xA9 (  34 678)  # ⣬ © [COPYRIGHT SIGN]
+char \xB0 ( 23 567 )  # ⡶ ° [DEGREE SIGN]
+char \xB2 ( 2   6 8)  # ⢢ ² [SUPERSCRIPT TWO]
+char \xB7 (  345 78)  # ⣜ · [MIDDLE DOT]
+char \xF7 (1  45678)  # ⣹ ÷ [DIVISION SIGN]
+char \u0401 (1    67 )  # ⡡ Ё [CYRILLIC CAPITAL LETTER IO]
+char \u0410 (1     7 )  # ⡁ А [CYRILLIC CAPITAL LETTER A]
+char \u0411 (12    7 )  # ⡃ Б [CYRILLIC CAPITAL LETTER BE]
+char \u0412 ( 2 4567 )  # ⡺ В [CYRILLIC CAPITAL LETTER VE]
+char \u0413 (12 45 7 )  # ⡛ Г [CYRILLIC CAPITAL LETTER GHE]
+char \u0414 (1  45 7 )  # ⡙ Д [CYRILLIC CAPITAL LETTER DE]
+char \u0415 (1   5 7 )  # ⡑ Е [CYRILLIC CAPITAL LETTER IE]
+char \u0416 ( 2 45 7 )  # ⡚ Ж [CYRILLIC CAPITAL LETTER ZHE]
+char \u0417 (1 3 567 )  # ⡵ З [CYRILLIC CAPITAL LETTER ZE]
+char \u0418 ( 2 4  7 )  # ⡊ И [CYRILLIC CAPITAL LETTER I]
+char \u0419 (1234 67 )  # ⡯ Й [CYRILLIC CAPITAL LETTER SHORT I]
+char \u041A (1 3   7 )  # ⡅ К [CYRILLIC CAPITAL LETTER KA]
+char \u041B (123   7 )  # ⡇ Л [CYRILLIC CAPITAL LETTER EL]
+char \u041C (1 34  7 )  # ⡍ М [CYRILLIC CAPITAL LETTER EM]
+char \u041D (1 345 7 )  # ⡝ Н [CYRILLIC CAPITAL LETTER EN]
+char \u041E (1 3 5 7 )  # ⡕ О [CYRILLIC CAPITAL LETTER O]
+char \u041F (1234  7 )  # ⡏ П [CYRILLIC CAPITAL LETTER PE]
+char \u0420 (123 5 7 )  # ⡗ Р [CYRILLIC CAPITAL LETTER ER]
+char \u0421 ( 234  7 )  # ⡎ С [CYRILLIC CAPITAL LETTER ES]
+char \u0422 ( 2345 7 )  # ⡞ Т [CYRILLIC CAPITAL LETTER TE]
+char \u0423 (1 3  67 )  # ⡥ У [CYRILLIC CAPITAL LETTER U]
+char \u0424 (12 4  7 )  # ⡋ Ф [CYRILLIC CAPITAL LETTER EF]
+char \u0425 (12  5 7 )  # ⡓ Х [CYRILLIC CAPITAL LETTER HA]
+char \u0426 (1  4  7 )  # ⡉ Ц [CYRILLIC CAPITAL LETTER TSE]
+char \u0427 (12345 7 )  # ⡟ Ч [CYRILLIC CAPITAL LETTER CHE]
+char \u0428 (1   567 )  # ⡱ Ш [CYRILLIC CAPITAL LETTER SHA]
+char \u0429 (1 34 67 )  # ⡭ Щ [CYRILLIC CAPITAL LETTER SHCHA]
+char \u042A (123 567 )  # ⡷ Ъ [CYRILLIC CAPITAL LETTER HARD SIGN]
+char \u042B ( 234 67 )  # ⡮ Ы [CYRILLIC CAPITAL LETTER YERU]
+char \u042C ( 234567 )  # ⡾ Ь [CYRILLIC CAPITAL LETTER SOFT SIGN]
+char \u042D ( 2 4 67 )  # ⡪ Э [CYRILLIC CAPITAL LETTER E]
+char \u042E (12  567 )  # ⡳ Ю [CYRILLIC CAPITAL LETTER YU]
+char \u042F (12 4 67 )  # ⡫ Я [CYRILLIC CAPITAL LETTER YA]
+char \u0430 (1       )  # ⠁ а [CYRILLIC SMALL LETTER A]
+char \u0431 (12      )  # ⠃ б [CYRILLIC SMALL LETTER BE]
+char \u0432 ( 2 456  )  # ⠺ в [CYRILLIC SMALL LETTER VE]
+char \u0433 (12 45   )  # ⠛ г [CYRILLIC SMALL LETTER GHE]
+char \u0434 (1  45   )  # ⠙ д [CYRILLIC SMALL LETTER DE]
+char \u0435 (1   5   )  # ⠑ е [CYRILLIC SMALL LETTER IE]
+char \u0436 ( 2 45   )  # ⠚ ж [CYRILLIC SMALL LETTER ZHE]
+char \u0437 (1 3 56  )  # ⠵ з [CYRILLIC SMALL LETTER ZE]
+char \u0438 ( 2 4    )  # ⠊ и [CYRILLIC SMALL LETTER I]
+char \u0439 (1234 6  )  # ⠯ й [CYRILLIC SMALL LETTER SHORT I]
+char \u043A (1 3     )  # ⠅ к [CYRILLIC SMALL LETTER KA]
+char \u043B (123     )  # ⠇ л [CYRILLIC SMALL LETTER EL]
+char \u043C (1 34    )  # ⠍ м [CYRILLIC SMALL LETTER EM]
+char \u043D (1 345   )  # ⠝ н [CYRILLIC SMALL LETTER EN]
+char \u043E (1 3 5   )  # ⠕ о [CYRILLIC SMALL LETTER O]
+char \u043F (1234    )  # ⠏ п [CYRILLIC SMALL LETTER PE]
+char \u0440 (123 5   )  # ⠗ р [CYRILLIC SMALL LETTER ER]
+char \u0441 ( 234    )  # ⠎ с [CYRILLIC SMALL LETTER ES]
+char \u0442 ( 2345   )  # ⠞ т [CYRILLIC SMALL LETTER TE]
+char \u0443 (1 3  6  )  # ⠥ у [CYRILLIC SMALL LETTER U]
+char \u0444 (12 4    )  # ⠋ ф [CYRILLIC SMALL LETTER EF]
+char \u0445 (12  5   )  # ⠓ х [CYRILLIC SMALL LETTER HA]
+char \u0446 (1  4    )  # ⠉ ц [CYRILLIC SMALL LETTER TSE]
+char \u0447 (12345   )  # ⠟ ч [CYRILLIC SMALL LETTER CHE]
+char \u0448 (1   56  )  # ⠱ ш [CYRILLIC SMALL LETTER SHA]
+char \u0449 (1 34 6  )  # ⠭ щ [CYRILLIC SMALL LETTER SHCHA]
+char \u044A (123 56  )  # ⠷ ъ [CYRILLIC SMALL LETTER HARD SIGN]
+char \u044B ( 234 6  )  # ⠮ ы [CYRILLIC SMALL LETTER YERU]
+char \u044C ( 23456  )  # ⠾ ь [CYRILLIC SMALL LETTER SOFT SIGN]
+char \u044D ( 2 4 6  )  # ⠪ э [CYRILLIC SMALL LETTER E]
+char \u044E (12  56  )  # ⠳ ю [CYRILLIC SMALL LETTER YU]
+char \u044F (12 4 6  )  # ⠫ я [CYRILLIC SMALL LETTER YA]
+char \u0451 (1    6  )  # ⠡ ё [CYRILLIC SMALL LETTER IO]
+char \u2219 ( 23    8)  # ⢆ ∙ [BULLET OPERATOR]
+char \u221A (    56 8)  # ⢰ √ [SQUARE ROOT]
+char \u2248 (  3 5  8)  # ⢔ ≈ [ALMOST EQUAL TO]
+char \u2264 (   456 8)  # ⢸ ≤ [LESS-THAN OR EQUAL TO]
+char \u2265 (  3 5678)  # ⣴ ≥ [GREATER-THAN OR EQUAL TO]
+char \u2320 ( 2  56 8)  # ⢲ ⌠ [TOP HALF INTEGRAL]
+char \u2321 ( 2  5  8)  # ⢒ ⌡ [BOTTOM HALF INTEGRAL]
+char \u2500 ( 2345678)  # ⣾ ─ [BOX DRAWINGS LIGHT HORIZONTAL]
+char \u2502 (12   6 8)  # ⢣ │ [BOX DRAWINGS LIGHT VERTICAL]
+char \u250C ( 23456 8)  # ⢾ ┌ [BOX DRAWINGS LIGHT DOWN AND RIGHT]
+char \u2510 (    5  8)  # ⢐ ┐ [BOX DRAWINGS LIGHT DOWN AND LEFT]
+char \u2514 (12 4 6 8)  # ⢫ └ [BOX DRAWINGS LIGHT UP AND RIGHT]
+char \u2518 (       8)  # ⢀ ┘ [BOX DRAWINGS LIGHT UP AND LEFT]
+char \u251C (1  4 6 8)  # ⢩ ├ [BOX DRAWINGS LIGHT VERTICAL AND RIGHT]
+char \u2524 (  3    8)  # ⢄ ┤ [BOX DRAWINGS LIGHT VERTICAL AND LEFT]
+char \u252C (1    6 8)  # ⢡ ┬ [BOX DRAWINGS LIGHT DOWN AND HORIZONTAL]
+char \u2534 (  34 6 8)  # ⢬ ┴ [BOX DRAWINGS LIGHT UP AND HORIZONTAL]
+char \u253C (123 56 8)  # ⢷ ┼ [BOX DRAWINGS LIGHT VERTICAL AND HORIZONTAL]
+char \u2550 (1  456 8)  # ⢹ ═ [BOX DRAWINGS DOUBLE HORIZONTAL]
+char \u2551 (  3  67 )  # ⡤ ║ [BOX DRAWINGS DOUBLE VERTICAL]
+char \u2552 (    5678)  # ⣰ ╒ [BOX DRAWINGS DOWN SINGLE AND RIGHT DOUBLE]
+char \u2553 ( 2    7 )  # ⡂ ╓ [BOX DRAWINGS DOWN DOUBLE AND RIGHT SINGLE]
+char \u2554 (   4   8)  # ⢈ ╔ [BOX DRAWINGS DOUBLE DOWN AND RIGHT]
+char \u2555 (12   67 )  # ⡣ ╕ [BOX DRAWINGS DOWN SINGLE AND LEFT DOUBLE]
+char \u2556 (      7 )  # ⡀ ╖ [BOX DRAWINGS DOWN DOUBLE AND LEFT SINGLE]
+char \u2557 (1  4567 )  # ⡹ ╗ [BOX DRAWINGS DOUBLE DOWN AND LEFT]
+char \u2558 (      78)  # ⣀ ╘ [BOX DRAWINGS UP SINGLE AND RIGHT DOUBLE]
+char \u2559 ( 2   678)  # ⣢ ╙ [BOX DRAWINGS UP DOUBLE AND RIGHT SINGLE]
+char \u255A (   4 67 )  # ⡨ ╚ [BOX DRAWINGS DOUBLE UP AND RIGHT]
+char \u255B ( 2  5 7 )  # ⡒ ╛ [BOX DRAWINGS UP SINGLE AND LEFT DOUBLE]
+char \u255C (  3  6 8)  # ⢤ ╜ [BOX DRAWINGS UP DOUBLE AND LEFT SINGLE]
+char \u255D (1234567 )  # ⡿ ╝ [BOX DRAWINGS DOUBLE UP AND LEFT]
+char \u255E (    567 )  # ⡰ ╞ [BOX DRAWINGS VERTICAL SINGLE AND RIGHT DOUBLE]
+char \u255F ( 23  6 8)  # ⢦ ╟ [BOX DRAWINGS VERTICAL DOUBLE AND RIGHT SINGLE]
+char \u2560 ( 2     8)  # ⢂ ╠ [BOX DRAWINGS DOUBLE VERTICAL AND RIGHT]
+char \u2561 (123456 8)  # ⢿ ╡ [BOX DRAWINGS VERTICAL SINGLE AND LEFT DOUBLE]
+char \u2562 ( 2  567 )  # ⡲ ╢ [BOX DRAWINGS VERTICAL DOUBLE AND LEFT SINGLE]
+char \u2563 (1234 6 8)  # ⢯ ╣ [BOX DRAWINGS DOUBLE VERTICAL AND LEFT]
+char \u2564 (  3  678)  # ⣤ ╤ [BOX DRAWINGS DOWN SINGLE AND HORIZONTAL DOUBLE]
+char \u2565 (1   56 8)  # ⢱ ╥ [BOX DRAWINGS DOWN DOUBLE AND HORIZONTAL SINGLE]
+char \u2566 ( 23  67 )  # ⡦ ╦ [BOX DRAWINGS DOUBLE DOWN AND HORIZONTAL]
+char \u2567 (  3 5 7 )  # ⡔ ╧ [BOX DRAWINGS UP SINGLE AND HORIZONTAL DOUBLE]
+char \u2568 (  3   7 )  # ⡄ ╨ [BOX DRAWINGS UP DOUBLE AND HORIZONTAL SINGLE]
+char \u2569 (  34  7 )  # ⡌ ╩ [BOX DRAWINGS DOUBLE UP AND HORIZONTAL]
+char \u256A (     67 )  # ⡠ ╪ [BOX DRAWINGS VERTICAL SINGLE AND HORIZONTAL DOUBLE]
+char \u256B (  34 67 )  # ⡬ ╫ [BOX DRAWINGS VERTICAL DOUBLE AND HORIZONTAL SINGLE]
+char \u256C (  345 7 )  # ⡜ ╬ [BOX DRAWINGS DOUBLE VERTICAL AND HORIZONTAL]
+char \u2580 (  34   8)  # ⢌ ▀ [UPPER HALF BLOCK]
+char \u2584 (   4 6 8)  # ⢨ ▄ [LOWER HALF BLOCK]
+char \u2588 (     6 8)  # ⢠ █ [FULL BLOCK]
+char \u258C ( 2    78)  # ⣂ ▌ [LEFT HALF BLOCK]
+char \u2590 ( 23   78)  # ⣆ ▐ [RIGHT HALF BLOCK]
+char \u2591 (  3 5 78)  # ⣔ ░ [LIGHT SHADE]
+char \u2592 ( 2   67 )  # ⡢ ▒ [MEDIUM SHADE]
+char \u2593 (  3 56 8)  # ⢴ ▓ [DARK SHADE]
+char \u25A0 ( 23 56 8)  # ⢶ ■ [BLACK SQUARE]
