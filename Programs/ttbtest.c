@@ -483,7 +483,13 @@ convertTable (void) {
 
 typedef struct {
   TextTableData *ttd;
-  wchar_t character;
+  unsigned updated:1;
+
+  const char *charset;
+  union {
+    wchar_t unicode;
+    unsigned char byte;
+  } character;
 
   brlapi_fileDescriptor brlapiFileDescriptor;
   unsigned int displayWidth;
@@ -533,6 +539,19 @@ claimBrailleDisplay (EditTableData *etd) {
   }
 
   return 0;
+}
+
+static int
+getCharacter (EditTableData *etd, wchar_t *character) {
+  if (etd->charset) {
+    wint_t wc = convertCharToWchar(etd->character.byte);
+    if (wc == WEOF) return 0;;
+    *character = wc;
+  } else {
+    *character = etd->character.unicode;
+  }
+
+  return 1;
 }
 
 static wchar_t *
@@ -628,10 +647,13 @@ static int
 updateCharacterDescription (EditTableData *etd) {
   int ok = 0;
 
+  wchar_t character;
+  int gotCharacter = getCharacter(etd, &character);
+
   size_t length;
-  int defined;
+  int gotDots;
   unsigned char dots;
-  wchar_t *description = makeCharacterDescription(etd->ttd, etd->character, &length, &defined, &dots);
+  wchar_t *description = makeCharacterDescription(etd->ttd, character, &length, &gotDots, &dots);
 
   if (description) {
     ok = 1;
@@ -646,7 +668,8 @@ updateCharacterDescription (EditTableData *etd) {
     DOT(1);
     DOT(5);
     printw("F9: %s",
-           !defined? "define (as empty cell)":
+           !gotCharacter? "":
+           !gotDots? "define (as empty cell)":
            dots? "clear all dots":
            "undefine character");
     printw("\n");
@@ -664,12 +687,17 @@ updateCharacterDescription (EditTableData *etd) {
     DOT(4);
     DOT(8);
     printw("F12: exit table editor");
+    if (etd->updated) printw(" (unsaved changes)");
     printw("\n");
 #undef DOT
 
     printw("\n");
 #else /* standard input/output */
 #endif /* write header */
+
+    if (etd->charset) {
+      printw("%02X: %s\n", etd->character.byte, etd->charset);
+    }
 
     printCharacterString(description);
     printw("\n");
@@ -720,99 +748,140 @@ updateCharacterDescription (EditTableData *etd) {
 }
 
 static void
-setPreviousUnicodeCharacter (EditTableData *etd) {
-  etd->character = (etd->character - 1) & UNICODE_CHARACTER_MASK;
+setPreviousActualCharacter (EditTableData *etd) {
+  if (etd->charset) {
+    etd->character.byte = (etd->character.byte - 1) & CHARSET_BYTE_MAXIMUM;
+  } else {
+    etd->character.unicode = (etd->character.unicode - 1) & UNICODE_CHARACTER_MASK;
+  }
 }
 
 static void
-setNextUnicodeCharacter (EditTableData *etd) {
-  etd->character = (etd->character + 1) & UNICODE_CHARACTER_MASK;
+setNextActualCharacter (EditTableData *etd) {
+  if (etd->charset) {
+    etd->character.byte = (etd->character.byte + 1) & CHARSET_BYTE_MAXIMUM;
+  } else {
+    etd->character.unicode = (etd->character.unicode + 1) & UNICODE_CHARACTER_MASK;
+  }
 }
 
 static void
-setFirstUnicodeCharacter (EditTableData *etd) {
-  etd->character = 0;
+setFirstActualCharacter (EditTableData *etd) {
+  if (etd->charset) {
+    etd->character.byte = 0;
+  } else {
+    etd->character.unicode = 0;
+  }
 }
 
 static void
-setLastUnicodeCharacter (EditTableData *etd) {
-  etd->character = UNICODE_CHARACTER_MASK;
+setLastActualCharacter (EditTableData *etd) {
+  if (etd->charset) {
+    etd->character.byte = CHARSET_BYTE_MAXIMUM;
+  } else {
+    etd->character.unicode = UNICODE_CHARACTER_MASK;
+  }
 }
 
 static int
 findCharacter (EditTableData *etd, int backward) {
-  int groupNumber = UNICODE_GROUP_NUMBER(etd->character);
-  int plainNumber = UNICODE_PLAIN_NUMBER(etd->character);
-  int rowNumber = UNICODE_ROW_NUMBER(etd->character);
-  int cellNumber = UNICODE_CELL_NUMBER(etd->character);
-
   const int increment = backward? -1: 1;
-  const int groupLimit = backward? 0: UNICODE_GROUP_MAXIMUM;
-  const int plainLimit = backward? 0: UNICODE_PLAIN_MAXIMUM;
-  const int rowLimit = backward? 0: UNICODE_ROW_MAXIMUM;
-  const int cellLimit = backward? 0: UNICODE_CELL_MAXIMUM;
 
-  const int groupReset = UNICODE_GROUP_MAXIMUM - groupLimit;
-  const int plainReset = UNICODE_PLAIN_MAXIMUM - plainLimit;
-  const int rowReset = UNICODE_ROW_MAXIMUM - rowLimit;
-  const int cellReset = UNICODE_CELL_MAXIMUM - cellLimit - increment;
+  if (etd->charset) {
+    const int byteLimit = backward? 0: CHARSET_BYTE_MAXIMUM;
+    const int byteReset = CHARSET_BYTE_MAXIMUM - byteLimit - increment;
 
-  const TextTableHeader *header = getTextTableHeader(etd->ttd);
-  int groupCounter = UNICODE_GROUP_COUNT;
+    unsigned char byte = etd->character.byte;
+    int counter = CHARSET_BYTE_COUNT;
 
-  do {
-    TextTableOffset groupOffset = header->unicodeGroups[groupNumber];
+    do {
+      if (byte == byteLimit) byte = byteReset;
+      byte += increment;
 
-    if (groupOffset) {
-      const UnicodeGroupEntry *group = getTextTableItem(etd->ttd, groupOffset);
+      {
+        wint_t wc = convertCharToWchar(byte);
 
-      while (1) {
-        TextTableOffset plainOffset = group->plains[plainNumber];
+        if (wc != WEOF) {
+          if (getUnicodeCellEntry(etd->ttd, wc)) {
+            etd->character.byte = byte;
+            return 1;
+          }
+        }       
+      }
+    } while ((counter -= 1) >= 0);
+  } else {
+    const int groupLimit = backward? 0: UNICODE_GROUP_MAXIMUM;
+    const int plainLimit = backward? 0: UNICODE_PLAIN_MAXIMUM;
+    const int rowLimit = backward? 0: UNICODE_ROW_MAXIMUM;
+    const int cellLimit = backward? 0: UNICODE_CELL_MAXIMUM;
 
-        if (plainOffset) {
-          const UnicodePlainEntry *plain = getTextTableItem(etd->ttd, plainOffset);
+    const int groupReset = UNICODE_GROUP_MAXIMUM - groupLimit;
+    const int plainReset = UNICODE_PLAIN_MAXIMUM - plainLimit;
+    const int rowReset = UNICODE_ROW_MAXIMUM - rowLimit;
+    const int cellReset = UNICODE_CELL_MAXIMUM - cellLimit - increment;
 
-          while (1) {
-            TextTableOffset rowOffset = plain->rows[rowNumber];
+    int groupNumber = UNICODE_GROUP_NUMBER(etd->character.unicode);
+    int plainNumber = UNICODE_PLAIN_NUMBER(etd->character.unicode);
+    int rowNumber = UNICODE_ROW_NUMBER(etd->character.unicode);
+    int cellNumber = UNICODE_CELL_NUMBER(etd->character.unicode);
 
-            if (rowOffset) {
-              const UnicodeRowEntry *row = getTextTableItem(etd->ttd, rowOffset);
+    const TextTableHeader *header = getTextTableHeader(etd->ttd);
+    int groupCounter = UNICODE_GROUP_COUNT;
 
-              while (cellNumber != cellLimit) {
-                cellNumber += increment;
+    do {
+      TextTableOffset groupOffset = header->unicodeGroups[groupNumber];
 
-                if (BITMASK_TEST(row->defined, cellNumber)) {
-                  etd->character = UNICODE_CHARACTER(groupNumber, plainNumber, rowNumber, cellNumber);
-                  return 1;
+      if (groupOffset) {
+        const UnicodeGroupEntry *group = getTextTableItem(etd->ttd, groupOffset);
+
+        while (1) {
+          TextTableOffset plainOffset = group->plains[plainNumber];
+
+          if (plainOffset) {
+            const UnicodePlainEntry *plain = getTextTableItem(etd->ttd, plainOffset);
+
+            while (1) {
+              TextTableOffset rowOffset = plain->rows[rowNumber];
+
+              if (rowOffset) {
+                const UnicodeRowEntry *row = getTextTableItem(etd->ttd, rowOffset);
+
+                while (cellNumber != cellLimit) {
+                  cellNumber += increment;
+
+                  if (BITMASK_TEST(row->defined, cellNumber)) {
+                    etd->character.unicode = UNICODE_CHARACTER(groupNumber, plainNumber, rowNumber, cellNumber);
+                    return 1;
+                  }
                 }
               }
+
+              cellNumber = cellReset;
+
+              if (rowNumber == rowLimit) break;
+              rowNumber += increment;
             }
-
-            cellNumber = cellReset;
-
-            if (rowNumber == rowLimit) break;
-            rowNumber += increment;
           }
+
+          rowNumber = rowReset;
+          cellNumber = cellReset;
+
+          if (plainNumber == plainLimit) break;
+          plainNumber += increment;
         }
-
-        rowNumber = rowReset;
-        cellNumber = cellReset;
-
-        if (plainNumber == plainLimit) break;
-        plainNumber += increment;
       }
-    }
 
-    plainNumber = plainReset;
-    rowNumber = rowReset;
-    cellNumber = cellReset;
+      plainNumber = plainReset;
+      rowNumber = rowReset;
+      cellNumber = cellReset;
 
-    if (groupNumber == groupLimit) {
-      groupNumber = groupReset;
-    } else {
-      groupNumber += increment;
-    }
-  } while ((groupCounter -= 1) >= 0);
+      if (groupNumber == groupLimit) {
+        groupNumber = groupReset;
+      } else {
+        groupNumber += increment;
+      }
+    } while ((groupCounter -= 1) >= 0);
+  }
 
   return 0;
 }
@@ -829,39 +898,89 @@ setNextDefinedCharacter (EditTableData *etd) {
 
 static int
 setFirstDefinedCharacter (EditTableData *etd) {
-  setLastUnicodeCharacter(etd);
+  setLastActualCharacter(etd);
   if (setNextDefinedCharacter(etd)) return 1;
 
-  setFirstUnicodeCharacter(etd);
+  setFirstActualCharacter(etd);
   return 0;
 }
 
 static int
 setLastDefinedCharacter (EditTableData *etd) {
-  setFirstUnicodeCharacter(etd);
+  setFirstActualCharacter(etd);
   if (setPreviousDefinedCharacter(etd)) return 1;
 
-  setLastUnicodeCharacter(etd);
+  setLastActualCharacter(etd);
   return 0;
 }
 
 static int
 toggleCharacter (EditTableData *etd) {
-  const UnicodeCellEntry *cell = getUnicodeCellEntry(etd->ttd, etd->character);
-  if (cell && !cell->dots) {
-    unsetTextTableCharacter(etd->ttd, etd->character);
-  } else if (!setTextTableCharacter(etd->ttd, etd->character, 0)) {
-    return 0;
+  wchar_t character;
+  if (!getCharacter(etd, &character)) return 0;
+
+  {
+    const UnicodeCellEntry *cell = getUnicodeCellEntry(etd->ttd, character);
+    if (cell && !cell->dots) {
+      unsetTextTableCharacter(etd->ttd, character);
+    } else if (!setTextTableCharacter(etd->ttd, character, 0)) {
+      return 0;
+    }
   }
 
+  etd->updated = 1;
   return 1;
 }
 
 static int
 toggleDot (EditTableData *etd, unsigned char dot) {
-  const UnicodeCellEntry *cell = getUnicodeCellEntry(etd->ttd, etd->character);
-  unsigned char dots = cell? cell->dots: 0;
-  return setTextTableCharacter(etd->ttd, etd->character, dots^dot);
+  wchar_t character;
+
+  if (getCharacter(etd, &character)) {
+    const UnicodeCellEntry *cell = getUnicodeCellEntry(etd->ttd, character);
+    unsigned char dots = cell? cell->dots: 0;
+
+    if (setTextTableCharacter(etd->ttd, character, dots^dot)) {
+      etd->updated = 1;
+      return 1;
+    }
+  }
+
+  return 0;
+}
+
+static int
+setDots (EditTableData *etd, unsigned char dots) {
+  wchar_t character;
+
+  if (getCharacter(etd, &character)) {
+    if (setTextTableCharacter(etd->ttd, character, dots)) {
+      etd->updated = 1;
+      return 1;
+    }
+  }
+
+  return 0;
+}
+
+static int
+saveTable (EditTableData *etd) {
+  int ok = 0;
+  FILE *outputFile;
+
+  if (!outputPath) outputPath = inputPath;
+  if (!outputFormat) outputFormat = inputFormat;
+
+  if ((outputFile = openTable(&outputPath, "w", NULL, stdout, "<standard-output>"))) {
+    if (outputFormat->write(outputPath, outputFile, etd->ttd, outputFormat->data)) {
+      ok = 1;
+      etd->updated = 0;
+    }
+
+    fclose(outputFile);
+  }
+
+  return ok;
 }
 
 static int
@@ -880,11 +999,11 @@ doKeyboardCommand (EditTableData *etd) {
   {
     switch (ch) {
       case KEY_LEFT:
-        setPreviousUnicodeCharacter(etd);
+        setPreviousActualCharacter(etd);
         break;
 
       case KEY_RIGHT:
-        setNextUnicodeCharacter(etd);
+        setNextActualCharacter(etd);
         break;
 
       case KEY_UP:
@@ -939,19 +1058,9 @@ doKeyboardCommand (EditTableData *etd) {
         if (!toggleCharacter(etd)) beep();
         break;
 
-      case KEY_F(11): {
-        FILE *outputFile;
-
-        if (!outputPath) outputPath = inputPath;
-        if (!outputFormat) outputFormat = inputFormat;
-
-        if ((outputFile = openTable(&outputPath, "w", NULL, stdout, "<standard-output>"))) {
-          outputFormat->write(outputPath, outputFile, etd->ttd, outputFormat->data);
-          fclose(outputFile);
-        }
-
+      case KEY_F(11):
+        if (!saveTable(etd)) beep();
         break;
-      }
 
       case KEY_F(12):
         return 0;
@@ -972,13 +1081,18 @@ doKeyboardCommand (EditTableData *etd) {
   {
     if ((ch >= UNICODE_BRAILLE_ROW) &&
         (ch <= (UNICODE_BRAILLE_ROW | UNICODE_CELL_MASK))) {
-      setTextTableCharacter(etd->ttd, etd->character, ch & UNICODE_CELL_MASK);
+      if (!setDots(etd, ch & UNICODE_CELL_MASK)) beep();
     } else {
-      int c = convertWcharToChar(ch);
-      if (c != EOF) {
-        etd->character = c;
+      if (etd->charset) {
+        int c = convertWcharToChar(ch);
+
+        if (c != EOF) {
+          etd->character.byte = c;
+        } else {
+          beep();
+        }
       } else {
-        beep();
+        etd->character.unicode = ch;
       }
     }
   }
@@ -1001,11 +1115,11 @@ doBrailleCommand (EditTableData *etd) {
             case 0:
               switch (code) {
                 case BRLAPI_KEY_CMD_FWINLT:
-                  setPreviousUnicodeCharacter(etd);
+                  setPreviousActualCharacter(etd);
                   break;
 
                 case BRLAPI_KEY_CMD_FWINRT:
-                  setNextUnicodeCharacter(etd);
+                  setNextActualCharacter(etd);
                   break;
 
                 case BRLAPI_KEY_CMD_LNUP:
@@ -1033,7 +1147,7 @@ doBrailleCommand (EditTableData *etd) {
               break;
 
             case BRLAPI_KEY_CMD_PASSDOTS:
-              setTextTableCharacter(etd->ttd, etd->character, code & BRLAPI_KEY_CMD_ARG_MASK);
+              if (!setDots(etd, code & BRLAPI_KEY_CMD_ARG_MASK)) beep();
               break;
 
             default:
@@ -1050,24 +1164,30 @@ doBrailleCommand (EditTableData *etd) {
             /* unicode */
             if ((code & 0Xffff00) == UNICODE_BRAILLE_ROW) {
               /* Set braille pattern */
-              setTextTableCharacter(etd->ttd, etd->character, code & UNICODE_CELL_MASK);
+              if (!setDots(etd, code & UNICODE_CELL_MASK)) beep();
             } else {
-              /* Switch to char */
-              int c = convertWcharToChar(code & 0XFFFFFF);
-              if (c != EOF) {
-                etd->character = c;
+              wchar_t character = code & 0XFFFFFF;
+
+              if (etd->charset) {
+                int c = convertWcharToChar(character);
+
+                if (c != EOF) {
+                  etd->character.byte = c;
+                } else {
+                  beep();
+                }
               } else {
-                beep();
+                etd->character.unicode = character;
               }
             }
           } else {
             switch (code) {
               case BRLAPI_KEY_SYM_LEFT:
-                setPreviousUnicodeCharacter(etd);
+                setPreviousActualCharacter(etd);
                 break;
 
               case BRLAPI_KEY_SYM_RIGHT:
-                setNextUnicodeCharacter(etd);
+                setNextActualCharacter(etd);
                 break;
 
               case BRLAPI_KEY_SYM_UP:
@@ -1113,6 +1233,8 @@ editTable (void) {
   EditTableData etd;
 
   etd.ttd = NULL;
+  etd.updated = 0;
+
   {
     FILE *inputFile = openTable(&inputPath, "r", opt_tablesDirectory, NULL, NULL);
 
@@ -1142,7 +1264,9 @@ editTable (void) {
 #else /* standard input/output */
 #endif /* initialize keyboard and screen */
 
+    etd.charset = *opt_characterSet? opt_characterSet: NULL;
     setFirstDefinedCharacter(&etd);
+
     while (updateCharacterDescription(&etd)) {
       fd_set set;
       FD_ZERO(&set);

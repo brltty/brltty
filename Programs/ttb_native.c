@@ -28,7 +28,7 @@ getByteOperand (DataFile *file, unsigned char *byte) {
   const char *description = "local character";
 
   if (getDataString(file, &string, description)) {
-    if ((string.length == 1) && (string.characters[0] < BYTES_PER_CHARSET)) {
+    if ((string.length == 1) && (string.characters[0] < CHARSET_BYTE_COUNT)) {
       *byte = string.characters[0];
       return 1;
     } else {

@@ -26,7 +26,9 @@ extern "C" {
 
 typedef uint32_t TextTableOffset;
 
-#define BYTES_PER_CHARSET 0X100
+#define CHARSET_BYTE_BITS 8
+#define CHARSET_BYTE_COUNT (1 << CHARSET_BYTE_BITS)
+#define CHARSET_BYTE_MAXIMUM (CHARSET_BYTE_COUNT - 1)
 
 #define UNICODE_CELL_BITS 8
 #define UNICODE_ROW_BITS 8
