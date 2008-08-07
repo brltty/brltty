@@ -476,7 +476,7 @@ convertTable (void) {
 #else /* standard input/output */
 #warning curses package either unspecified or unsupported
 #define printw printf
-#define clear() printf("\r\n\v")
+#define erase() printf("\r\n\v")
 #define refresh() fflush(stdout)
 #define beep() printf("\a")
 #endif /* curses package */
@@ -635,7 +635,7 @@ updateCharacterDescription (EditTableData *etd) {
 
   if (description) {
     ok = 1;
-    clear();
+    erase();
 
 #if defined(USE_CURSES)
     printw("Left/Right: previous/next unicode character\n");
@@ -669,7 +669,7 @@ updateCharacterDescription (EditTableData *etd) {
 
     printw("\n");
 #else /* standard input/output */
-#endif /* clear screen */
+#endif /* write header */
 
     printCharacterString(description);
     printw("\n");
@@ -1169,7 +1169,7 @@ editTable (void) {
           break;
     }
 
-    clear();
+    erase();
     refresh();
 
 #if defined(USE_CURSES)
