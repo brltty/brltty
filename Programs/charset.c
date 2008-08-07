@@ -463,7 +463,7 @@ setCharset (const char *name) {
   } else if (currentCharset) {
     return currentCharset;
   } else {
-    name = (MB_CUR_MAX == 1)? getLocaleCharset(): "ISO-8859-1";
+    name = getLocaleCharset();
   }
   if (!(charset = strdup(name))) return NULL;
 
