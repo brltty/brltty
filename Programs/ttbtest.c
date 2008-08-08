@@ -34,7 +34,7 @@
 #include "ttb_internal.h"
 #include "ttb_compile.h"
 
-static char *opt_characterSet;
+static char *opt_charset;
 static char *opt_inputFormat;
 static char *opt_outputFormat;
 static char *opt_tablesDirectory;
@@ -76,9 +76,9 @@ BEGIN_OPTION_TABLE(programOptions)
   },
 
   { .letter = 'c',
-    .word = "character-set",
+    .word = "charset",
     .argument = "charset",
-    .setting.string = &opt_characterSet,
+    .setting.string = &opt_charset,
     .description = "8-bit character set to use."
   },
 END_OPTION_TABLE
@@ -110,7 +110,7 @@ mapDots (unsigned char input, const BrlDotTable from, const BrlDotTable to) {
 
 typedef TextTableData *TableReader (const char *path, FILE *file, void *data);
 typedef int TableWriter (const char *path, FILE *file, TextTableData *ttd, void *data);
-typedef int CharacterWriter (FILE *file, wchar_t character, unsigned char dots, void *data);
+typedef int CharacterWriter (FILE *file, wchar_t character, unsigned char dots, const unsigned char *byte, void *data);
 
 static int
 getDots (TextTableData *ttd, wchar_t character, unsigned char *dots) {
@@ -122,35 +122,60 @@ getDots (TextTableData *ttd, wchar_t character, unsigned char *dots) {
 
 static int
 writeCharacters (FILE *file, TextTableData *ttd, CharacterWriter writer, void *data) {
-  const TextTableHeader *header = getTextTableHeader(ttd);
-  unsigned int groupNumber;
+  if (*opt_charset) {
+    unsigned char byte = 0;
 
-  for (groupNumber=0; groupNumber<UNICODE_GROUP_COUNT; groupNumber+=1) {
-    TextTableOffset groupOffset = header->unicodeGroups[groupNumber];
+    do {
+      wint_t character = convertCharToWchar(byte);
 
-    if (groupOffset) {
-      const UnicodeGroupEntry *group = getTextTableItem(ttd, groupOffset);
-      unsigned int plainNumber;
+      if (character != WEOF) {
+        const UnicodeCellEntry *cell = getUnicodeCellEntry(ttd, character);
 
-      for (plainNumber=0; plainNumber<UNICODE_PLAINS_PER_GROUP; plainNumber+=1) {
-        TextTableOffset plainOffset = group->plains[plainNumber];
+        if (cell) {
+          if (!writer(file, character, cell->dots, &byte, data)) return 0;
+        }
+      }
+    } while ((byte += 1));
+  }
 
-        if (plainOffset) {
-          const UnicodePlainEntry *plain = getTextTableItem(ttd, plainOffset);
-          unsigned int rowNumber;
+  {
+    const TextTableHeader *header = getTextTableHeader(ttd);
+    unsigned int groupNumber;
 
-          for (rowNumber=0; rowNumber<UNICODE_ROWS_PER_PLAIN; rowNumber+=1) {
-            TextTableOffset rowOffset = plain->rows[rowNumber];
+    for (groupNumber=0; groupNumber<UNICODE_GROUP_COUNT; groupNumber+=1) {
+      TextTableOffset groupOffset = header->unicodeGroups[groupNumber];
 
-            if (rowOffset) {
-              const UnicodeRowEntry *row = getTextTableItem(ttd, rowOffset);
-              unsigned int cellNumber;
+      if (groupOffset) {
+        const UnicodeGroupEntry *group = getTextTableItem(ttd, groupOffset);
+        unsigned int plainNumber;
 
-              for (cellNumber=0; cellNumber<UNICODE_CELLS_PER_ROW; cellNumber+=1) {
-                if (BITMASK_TEST(row->defined, cellNumber)) {
-                  wchar_t character = UNICODE_CHARACTER(groupNumber, plainNumber, rowNumber, cellNumber);
+        for (plainNumber=0; plainNumber<UNICODE_PLAINS_PER_GROUP; plainNumber+=1) {
+          TextTableOffset plainOffset = group->plains[plainNumber];
 
-                  if (!writer(file, character, row->cells[cellNumber].dots, data)) return 0;
+          if (plainOffset) {
+            const UnicodePlainEntry *plain = getTextTableItem(ttd, plainOffset);
+            unsigned int rowNumber;
+
+            for (rowNumber=0; rowNumber<UNICODE_ROWS_PER_PLAIN; rowNumber+=1) {
+              TextTableOffset rowOffset = plain->rows[rowNumber];
+
+              if (rowOffset) {
+                const UnicodeRowEntry *row = getTextTableItem(ttd, rowOffset);
+                unsigned int cellNumber;
+
+                for (cellNumber=0; cellNumber<UNICODE_CELLS_PER_ROW; cellNumber+=1) {
+                  if (BITMASK_TEST(row->defined, cellNumber)) {
+                    wchar_t character = UNICODE_CHARACTER(groupNumber, plainNumber, rowNumber, cellNumber);
+
+                    if (*opt_charset)
+                      if (convertWcharToChar(character) != EOF)
+                        continue;
+
+                    {
+                      const UnicodeCellEntry *cell = &row->cells[cellNumber];
+                      if (!writer(file, character, cell->dots, NULL, data)) return 0;
+                    }
+                  }
                 }
               }
             }
@@ -161,6 +186,13 @@ writeCharacters (FILE *file, TextTableData *ttd, CharacterWriter writer, void *d
   }
 
   return 1;
+}
+
+static int
+writeUtf8 (FILE *file, wchar_t character) {
+  Utf8Buffer utf8;
+  size_t utfs = convertWcharToUtf8(character, utf8);
+  return fprintf(file, "%.*s", utfs, utf8) != EOF;
 }
 
 static TextTableData *
@@ -183,7 +215,7 @@ writeDots_native (FILE *file, unsigned char dots) {
 }
 
 static int
-writeCharacter_native (FILE *file, wchar_t character, unsigned char dots, void *data) {
+writeCharacter_native (FILE *file, wchar_t character, unsigned char dots, const unsigned char *byte, void *data) {
   uint32_t value = character;
 
   if (fprintf(file, "char ") == EOF) goto error;
@@ -196,20 +228,28 @@ writeCharacter_native (FILE *file, wchar_t character, unsigned char dots, void *
     if (fprintf(file, "\\U%08X", value) == EOF) goto error;
   }
 
-  if (fprintf(file, " ") == EOF) goto error;
+  if (fprintf(file, "\t") == EOF) goto error;
   if (!writeDots_native(file, dots)) goto error;
   if (fprintf(file, "  #") == EOF) goto error;
 
-  {
-    wint_t braille = UNICODE_BRAILLE_ROW | dots;
-    if (fprintf(file, " %" PRIwc, braille) == EOF) goto error;
+  if (*opt_charset) {
+    const int width = 2;
+    char buffer[width + 1];
+
+    if (byte) {
+      snprintf(buffer, sizeof(buffer), "%0*X", width, *byte);
+    } else {
+      snprintf(buffer, sizeof(buffer), "%*s", width, "");
+    }
+
+    if (fprintf(file, " %s", buffer) == EOF) goto error;
   }
 
-  {
-    Utf8Buffer utf8;
-    convertWcharToUtf8(((iswprint(character) && !iswspace(character))? character: WC_C(' ')), utf8);
-    if (fprintf(file, " %s", utf8) == EOF) goto error;
-  }
+  if (fprintf(file, " ") == EOF) goto error;
+  if (!writeUtf8(file, UNICODE_BRAILLE_ROW | dots)) goto error;
+
+  if (fprintf(file, " ") == EOF) goto error;
+  if (!writeUtf8(file, ((iswprint(character) && !iswspace(character))? character: WC_C(' ')))) goto error;
 
 #ifdef HAVE_ICU
   {
@@ -232,7 +272,12 @@ error:
 
 static int
 writeTable_native (const char *path, FILE *file, TextTableData *ttd, void *data) {
-  if (fprintf(file, "# generated by %s\n", programName) == EOF) goto error;
+  if (fprintf(file, "# generated by %s:", programName) == EOF) goto error;
+  if (*opt_charset)
+    if (fprintf(file, " charset=%s", opt_charset) == EOF)
+      goto error;
+  if (fprintf(file, "\n") == EOF) goto error;
+
   if (!writeCharacters(file, ttd, writeCharacter_native, data)) goto error;
   return 1;
 
@@ -304,7 +349,7 @@ readTable_gnome (const char *path, FILE *file, void *data) {
 }
 
 static int
-writeCharacter_gnome (FILE *file, wchar_t character, unsigned char dots, void *data) {
+writeCharacter_gnome (FILE *file, wchar_t character, unsigned char dots, const unsigned char *byte, void *data) {
   wchar_t pattern = UNICODE_BRAILLE_ROW | dots;
 
   if (iswprint(character) && !iswspace(character)) {
@@ -1283,7 +1328,7 @@ editTable (void) {
 #else /* standard input/output */
 #endif /* initialize keyboard and screen */
 
-    etd.charset = *opt_characterSet? opt_characterSet: NULL;
+    etd.charset = *opt_charset? opt_charset: NULL;
     setFirstDefinedCharacter(&etd);
 
     while (updateCharacterDescription(&etd)) {
@@ -1379,8 +1424,8 @@ main (int argc, char *argv[]) {
     outputFormat = NULL;
   }
 
-  if (*opt_characterSet && !setCharset(opt_characterSet)) {
-    LogPrint(LOG_ERR, "can't establish character set: %s", opt_characterSet);
+  if (*opt_charset && !setCharset(opt_charset)) {
+    LogPrint(LOG_ERR, "can't establish character set: %s", opt_charset);
     exit(9);
   }
 
