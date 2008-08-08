@@ -17,33 +17,10 @@
 
 # BRLTTY Text Translation Table - Unified French - 2007
 
-# This is the 2007 unification of french computer braille tables, originally
-# using cp1252 character set
+# This is the 2007 unification of french computer braille tables, based on the
+# cp1252 character set
 #
-# http://www.avh.asso.fr/index.php?module=14&nameRub=table_braille_informatique
-#
-# and here adapted to latin9.
-#
-# Some cp1252 characters are missing from latin9, so are not represented in this
-# table:
-# 164 (   45   ) currency sign
-# 166 (   45  8) broken bar
-# 168 (   4 6  ) diaeresis
-# 180 (    5   ) acute accent
-# 184 (   456  ) cedilla
-# 188 (1 3  6 8) vulgar fraction one quarter
-# 189 (   4 6 8) vulgar fraction one half
-# 190 (1 34 6 8) vulgar fraction three quarters
-# 
-# Some cp1252 characters are present in latin9, but in a different place, so
-# these character positions are not represented.
-#
-# The only characters which are present in latin9 but not in cp1252 (and hence
-# not covered by the official table) are \X80-\X9F, which are control
-# characters.  For this range, we just use the cp1252 coding "as is": the
-# comment provides the cp1252 meaning in square brackets and the latin9 meaning
-# in parentheses.  Some cp1252 characters would conflict with latin9 equivalents
-# so these have been set to 12345678 instead.
+# http://www.avh.asso.fr/rubriques/infos_braille/table_braille_informatique.php
 
 char \x00 (12345  8)  # ⢟   [NULL]
 char \x01 (1234 678)  # ⣯   [START OF HEADING]
@@ -173,15 +150,42 @@ char \x7C (   456 8)  # ⢸ | [VERTICAL LINE]
 char \x7D (    5678)  # ⣰ } [RIGHT CURLY BRACKET]
 char \x7E (  3    8)  # ⢄ ~ [TILDE]
 char \x7F (123    8)  # ⢇   [DELETE]
+char \u20AC (1   5 78)  # ⣑ € [EURO SIGN]
+char \u201A (     67 )  # ⡠ ‚ [SINGLE LOW-9 QUOTATION MARK]
+char \u0192 (12 4   8)  # ⢋ ƒ [LATIN SMALL LETTER F WITH HOOK]
+char \u201E (    56  )  # ⠰ „ [DOUBLE LOW-9 QUOTATION MARK]
+char \u2026 (  3  6 8)  # ⢤ … [HORIZONTAL ELLIPSIS]
+char \u2020 (  3 56 8)  # ⢴ † [DAGGER]
+char \u2021 (  3 567 )  # ⡴ ‡ [DOUBLE DAGGER]
+char \u02C6 (   4   8)  # ⢈ ˆ [MODIFIER LETTER CIRCUMFLEX ACCENT]
+char \u2030 (  34 678)  # ⣬ ‰ [PER MILLE SIGN]
+char \u0160 ( 234 678)  # ⣮ Š [LATIN CAPITAL LETTER S WITH CARON]
+char \u2039 (    5 7 )  # ⡐ ‹ [SINGLE LEFT-POINTING ANGLE QUOTATION MARK]
+char \u0152 ( 2 4 67 )  # ⡪ Œ [LATIN CAPITAL LIGATURE OE]
+char \u017D (1 3 5678)  # ⣵ Ž [LATIN CAPITAL LETTER Z WITH CARON]
+char \u2018 (     6 8)  # ⢠ ‘ [LEFT SINGLE QUOTATION MARK]
+char \u2019 (  3   7 )  # ⡄ ’ [RIGHT SINGLE QUOTATION MARK]
+char \u201C (  3   78)  # ⣄ “ [LEFT DOUBLE QUOTATION MARK]
+char \u201D (     678)  # ⣠ ” [RIGHT DOUBLE QUOTATION MARK]
+char \u2022 (12 45 78)  # ⣛ • [BULLET]
+char \u2013 (   4  78)  # ⣈ – [EN DASH]
+char \u2014 (   45 78)  # ⣘ — [EM DASH]
+char \u02DC (   4 67 )  # ⡨ ˜ [SMALL TILDE]
+char \u2122 ( 2345  8)  # ⢞ ™ [TRADE MARK SIGN]
+char \u0161 ( 234 6 8)  # ⢮ š [LATIN SMALL LETTER S WITH CARON]
+char \u203A (    5  8)  # ⢐ › [SINGLE RIGHT-POINTING ANGLE QUOTATION MARK]
+char \u0153 ( 2 4 6 8)  # ⢪ œ [LATIN SMALL LIGATURE OE]
+char \u017E (1 3 56 8)  # ⢵ ž [LATIN SMALL LETTER Z WITH CARON]
+char \u0178 (1  45678)  # ⣹ Ÿ [LATIN CAPITAL LETTER Y WITH DIAERESIS]
 char \xA0 (      7 )  # ⡀   [NO-BREAK SPACE]
 char \xA1 ( 23 5  8)  # ⢖ ¡ [INVERTED EXCLAMATION MARK]
 char \xA2 (1  4  78)  # ⣉ ¢ [CENT SIGN]
 char \xA3 ( 23   7 )  # ⡆ £ [POUND SIGN]
-char \xA4 (1   5 78)  # ⣑ ¤ [CURRENCY SIGN]
+char \xA4 (   45   )  # ⠘ ¤ [CURRENCY SIGN]
 char \xA5 ( 2  5678)  # ⣲ ¥ [YEN SIGN]
-char \xA6 ( 234 678)  # ⣮ ¦ [BROKEN BAR]
+char \xA6 (   45  8)  # ⢘ ¦ [BROKEN BAR]
 char \xA7 (1234   8)  # ⢏ § [SECTION SIGN]
-char \xA8 ( 234 6 8)  # ⢮ ¨ [DIAERESIS]
+char \xA8 (   4 6  )  # ⠨ ¨ [DIAERESIS]
 char \xA9 (1  4   8)  # ⢉ © [COPYRIGHT SIGN]
 char \xAA (1    678)  # ⣡ ª [FEMININE ORDINAL INDICATOR]
 char \xAB ( 23 56 8)  # ⢶ « [LEFT-POINTING DOUBLE ANGLE QUOTATION MARK]
@@ -193,17 +197,17 @@ char \xB0 ( 2   67 )  # ⡢ ° [DEGREE SIGN]
 char \xB1 (  3  678)  # ⣤ ± [PLUS-MINUS SIGN]
 char \xB2 (   45 7 )  # ⡘ ² [SUPERSCRIPT TWO]
 char \xB3 (   4567 )  # ⡸ ³ [SUPERSCRIPT THREE]
-char \xB4 (1 3 5678)  # ⣵ ´ [ACUTE ACCENT]
+char \xB4 (    5   )  # ⠐ ´ [ACUTE ACCENT]
 char \xB5 ( 2  5 7 )  # ⡒ µ [MICRO SIGN]
 char \xB6 (   45678)  # ⣸ ¶ [PILCROW SIGN]
 char \xB7 (       8)  # ⢀ · [MIDDLE DOT]
-char \xB8 (1 3 56 8)  # ⢵ ¸ [CEDILLA]
+char \xB8 (   456  )  # ⠸ ¸ [CEDILLA]
 char \xB9 (   4  7 )  # ⡈ ¹ [SUPERSCRIPT ONE]
 char \xBA ( 2   678)  # ⣢ º [MASCULINE ORDINAL INDICATOR]
 char \xBB ( 23 567 )  # ⡶ » [RIGHT-POINTING DOUBLE ANGLE QUOTATION MARK]
-char \xBC ( 2 4 67 )  # ⡪ ¼ [VULGAR FRACTION ONE QUARTER]
-char \xBD ( 2 4 6 8)  # ⢪ ½ [VULGAR FRACTION ONE HALF]
-char \xBE (1  45678)  # ⣹ ¾ [VULGAR FRACTION THREE QUARTERS]
+char \xBC (1 3  6 8)  # ⢥ ¼ [VULGAR FRACTION ONE QUARTER]
+char \xBD (   4 6 8)  # ⢨ ½ [VULGAR FRACTION ONE HALF]
+char \xBE (1 34 6 8)  # ⢭ ¾ [VULGAR FRACTION THREE QUARTERS]
 char \xBF ( 2   6 8)  # ⢢ ¿ [INVERTED QUESTION MARK]
 char \xC0 (123 567 )  # ⡷ À [LATIN CAPITAL LETTER A WITH GRAVE]
 char \xC1 (123 5678)  # ⣷ Á [LATIN CAPITAL LETTER A WITH ACUTE]
@@ -269,30 +273,3 @@ char \xFC (12  56 8)  # ⢳ ü [LATIN SMALL LETTER U WITH DIAERESIS]
 char \xFD (1 3456 8)  # ⢽ ý [LATIN SMALL LETTER Y WITH ACUTE]
 char \xFE ( 2 45  8)  # ⢚ þ [LATIN SMALL LETTER THORN]
 char \xFF ( 2  56 8)  # ⢲ ÿ [LATIN SMALL LETTER Y WITH DIAERESIS]
-char \u0152 (12345678)  # ⣿ Œ [LATIN CAPITAL LIGATURE OE]
-char \u0153 (12345678)  # ⣿ œ [LATIN SMALL LIGATURE OE]
-char \u0160 (12345678)  # ⣿ Š [LATIN CAPITAL LETTER S WITH CARON]
-char \u0161 (12345678)  # ⣿ š [LATIN SMALL LETTER S WITH CARON]
-char \u0178 (12345678)  # ⣿ Ÿ [LATIN CAPITAL LETTER Y WITH DIAERESIS]
-char \u017D (12345678)  # ⣿ Ž [LATIN CAPITAL LETTER Z WITH CARON]
-char \u017E (12345678)  # ⣿ ž [LATIN SMALL LETTER Z WITH CARON]
-char \u0192 (12 4   8)  # ⢋ ƒ [LATIN SMALL LETTER F WITH HOOK]
-char \u02C6 (   4   8)  # ⢈ ˆ [MODIFIER LETTER CIRCUMFLEX ACCENT]
-char \u02DC (   4 67 )  # ⡨ ˜ [SMALL TILDE]
-char \u2013 (   4  78)  # ⣈ – [EN DASH]
-char \u2014 (   45 78)  # ⣘ — [EM DASH]
-char \u2018 (     6 8)  # ⢠ ‘ [LEFT SINGLE QUOTATION MARK]
-char \u2019 (  3   7 )  # ⡄ ’ [RIGHT SINGLE QUOTATION MARK]
-char \u201A (     67 )  # ⡠ ‚ [SINGLE LOW-9 QUOTATION MARK]
-char \u201C (  3   78)  # ⣄ “ [LEFT DOUBLE QUOTATION MARK]
-char \u201D (     678)  # ⣠ ” [RIGHT DOUBLE QUOTATION MARK]
-char \u201E (    56  )  # ⠰ „ [DOUBLE LOW-9 QUOTATION MARK]
-char \u2020 (  3 56 8)  # ⢴ † [DAGGER]
-char \u2021 (  3 567 )  # ⡴ ‡ [DOUBLE DAGGER]
-char \u2022 (12 45 78)  # ⣛ • [BULLET]
-char \u2026 (  3  6 8)  # ⢤ … [HORIZONTAL ELLIPSIS]
-char \u2030 (  34 678)  # ⣬ ‰ [PER MILLE SIGN]
-char \u2039 (    5 7 )  # ⡐ ‹ [SINGLE LEFT-POINTING ANGLE QUOTATION MARK]
-char \u203A (    5  8)  # ⢐ › [SINGLE RIGHT-POINTING ANGLE QUOTATION MARK]
-char \u20AC (12345678)  # ⣿ € [EURO SIGN]
-char \u2122 ( 2345  8)  # ⢞ ™ [TRADE MARK SIGN]
