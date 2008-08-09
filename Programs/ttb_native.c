@@ -163,7 +163,7 @@ processTextTableLine (DataFile *file, void *data) {
     {.name=WS_C("char"), .processor=processCharOperands},
     {.name=WS_C("byte"), .processor=processByteOperands},
     {.name=WS_C("include"), .processor=processIncludeOperands},
-    {.name=NULL, .processor=processByteOperands}
+    {.name=NULL, .processor=NULL}
   };
 
   return processPropertyOperand(file, properties, "text table directive", data);
