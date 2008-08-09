@@ -24,6 +24,9 @@
 # the two bottom dots [78]. This means, for example, that side edges and the
 # cross are represented by a full cell [12345678].
 
+# The only missing characters within the range \u2500-\u257F are \u2571,
+# \u2572, and \u2573, which permit the drawing of diagonals.
+
 char \u2500	( 23 56  )  # ⠶ ─ [BOX DRAWINGS LIGHT HORIZONTAL]
 char \u254C	( 23 56  )  # ⠶ ╌ [BOX DRAWINGS LIGHT DOUBLE DASH HORIZONTAL]
 char \u2504	( 23 56  )  # ⠶ ┄ [BOX DRAWINGS LIGHT TRIPLE DASH HORIZONTAL]
