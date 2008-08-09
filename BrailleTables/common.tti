@@ -15,4 +15,9 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
+# This BRLTTY text subtable is included by all general purpose text tables. Its
+# sole purpose is to be a common place wherein to include text subtables which
+# define braille representations that are generally useful in all contexts.
+
+# The box drawing characters.
 include box.tti
