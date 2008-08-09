@@ -178,3 +178,5 @@ char \u016F	( 23456  )  # F9 ⠾ ů [LATIN SMALL LETTER U WITH RING ABOVE]
 char \xFA	(  34 6  )  # FA ⠬ ú [LATIN SMALL LETTER U WITH ACUTE]
 char \xFC	(12  56 8)  # FC ⢳ ü [LATIN SMALL LETTER U WITH DIAERESIS]
 char \xFD	(1234 6  )  # FD ⠯ ý [LATIN SMALL LETTER Y WITH ACUTE]
+
+include common.tti

@@ -274,3 +274,5 @@ char \xFC	(12  56  )  # FC ⠳ ü [LATIN SMALL LETTER U WITH DIAERESIS]
 char \xFD	( 23   7 )  # FD ⡆ ý [LATIN SMALL LETTER Y WITH ACUTE]
 char \xFE	(  345  8)  # FE ⢜ þ [LATIN SMALL LETTER THORN]
 char \xFF	(1   567 )  # FF ⡱ ÿ [LATIN SMALL LETTER Y WITH DIAERESIS]
+
+include common.tti
