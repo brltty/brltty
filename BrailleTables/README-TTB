@@ -1,21 +1,64 @@
-Translation Tables
+Text Tables
+-----------
+
+Files with names of the form *.ttb are text tables, and with names of the form 
+*.tti are text subtables. They are used by BRLTTY to translate the characters 
+on the screen into their corresponding braille representations.
+
+A text table consists of a sequence of directives, one per line, which define 
+how a set of characters is to be represented in braille. UTF-8 character 
+encoding must be used. White-space (blanks, tabs) at the beginning of a line, 
+as well as before and/or after any operand of any directive, is ignored. Lines 
+containing only white-space are ignored. If the first non-white-space character 
+of a line is "#" then that line is a comment and is ignored.
+
+===============================================================================
+
+The Char Directive
 ------------------
 
-Files within this directory with names of the form text.*.tbl are text
-translation tables. They are used by BRLTTY to translate the characters on the
-screen into their corresponding braille representations.
+   char <character> <dots> # <comment>
 
-Files within this directory with names of the form attr*.tbl are attributes
-translation tables. They are used by BRLTTY to translate the VGA highlighting
-attributes of the characters on the screen into corresponding combinations of
-braille dots.
+Use the "char" directive to specify how a Unicode character is to be 
+represented in braille.
 
-A translation table consists of a sequence of directives, one per line, which
-define how each possible byte value is to be represented in braille. 
-White-space (blanks, tabs) at the beginning of a line, as well as before and/or
-after any operand of any directive, is ignored. Lines containing only
-white-space are ignored. If the first non-white-space character of a line is
-"#" then that line is a comment and is ignored.
+The <character> operand specifies the Unicode character being defined. It may
+be:
+*  Any single character other than a backslash or a white-space character.
+*  A backslash-prefixed special character. These are:
+   -  \b          The backspace character.
+   -  \f          The formfeed character.
+   -  \n          The newline character.
+   -  \o###       The three-digit octal representation of a character.
+   -  \r          The carriage return character.
+   -  \s          The space character.
+   -  \t          The horizontal tab character.
+   -  \u####      The four-digit hexadecimal representation of a character.
+   -  \U########  The eight-digit hexadecimal representation of a character.
+   -  \v          The vertical tab character.
+   -  \x##        The two-digit hexadecimal representation of a character.
+   -  \X##        ... (the case of the X and of the digits isn't significant)
+   -  \#          A literal number sign.
+   -  \<name>     The Unicode name of a character (use _ for space).
+   -  \\          A literal backslash.
+
+The <dots> operand specifies the braille representation of the character. It is 
+a sequence of one to eight dot numbers. If the dot number sequence is enclosed 
+within parentheses then the dot numbers may be separated from one another by 
+white-space. A dot number is a digit within the range 1-8 as defined by the 
+standard braille dot numbering convention. The special dot number 0 is 
+recognized when not enclosed within parentheses, and means no dots; it may not 
+be used in conjunction with any other dot number.
+
+Examples:
+
+   char a 1
+   char b (12)
+   char c ( 1  4        )
+   char \\ 12567
+   char \s 0
+   char \x20 ()
+   char \<LATIN_SMALL_LETTER_D> 145
 
 ===============================================================================
 
@@ -24,101 +67,34 @@ The Byte Directive
 
    byte <byte> <dots> # <comment>
 
-Use the "byte" directive to specify how a byte (character) is to be represented
-in braille. See the text translation tables for examples of its use. Since this
-is by far the most commonly used directive, the "byte" keyword itself is
-optional.
+Use the "byte" directive to specify how a character in the local character set 
+is to be represented in braille. It has been retained for backward 
+compatibility but should not be used. Unicode characters should be defined (via 
+the "char" directive) so that the text table remains valid regardless of what 
+the local character set is.
 
-The <byte> operand specifies the byte being defined. It may be:
-*  Any single character other than a backslash or a white-space character.
-*  A backslash-prefixed special character. These are:
-   -  \\    A literal backslash.
-   -  \#    A literal number sign.
-   -  \x##  The two-digit hexadecimal representation of any character.
-   -  \X##  ... (the case of the X and of the digits isn't significant)
+The <byte> operand specifies the local character being defined. It may be 
+specified in the same ways as the <character> operand of the "char" directive 
+except that the Unicode-specific forms (\u, \U, \<) may not be used.
 
-The <dots> operand specifies the braille representation of the byte. It is a
-sequence of one to eight dot numbers. If the dot number sequence is enclosed
-within parentheses then the dot numbers may be separated from one another by
-white-space. A dot number is a digit within the range 1-8 as defined by the
-standard braille dot numbering convention (see below). The special dot number 0
-is recognized when not enclosed within parentheses, and means no dots; it may
-not be used in conjunction with any other dot number.
-
-Examples:
-
-   byte a 1
-   b 12
-   c (14)
-   d ( 1  4   5    )
-   \\ 12567
-   \x20 0
+The <dots> operand specifies the braille representation of the character. It 
+may be specified in the same ways as the <dots> operand of the "char" 
+directive. a
 
 ===============================================================================
 
-The Dot Directive
------------------
+The Include Directive
+---------------------
 
-   dot <dot> <state> # <comment>
+   include <file>
 
-Use the "dot" directive to specify how the undefined bytes are to be
-represented in braille. See the attributes translation tables for examples of
-its use. The default is that all dots are on.
+Use the "include" directive to include the content of a text subtable. It is 
+recursive, which means that any text subtable can itself include yet another 
+text subtable. Care must be taken so that an "include loop" is not created.
 
-The <dot> operand specifies the dot being defined. It is a single digit within
-the range 1-8 as defined by the standard braille dot numbering convention (see
-below).
-
-The <state> operand specifies when the dot is raised. It may be:
-*  on    The dot is raised.
-*  off   The dot isn't raised.
-*  =bit  The dot is raised if the named bit is on (set to 1).
-*  ~bit  The dot is raised if the named bit is off (set to 0).
-
-The names of the bits are:
-*  0X01  fg-blue
-*  0X02  fg-green
-*  0X04  fg-red
-*  0X08  fg-bright
-*  0X10  bg-blue
-*  0X20  bg-green
-*  0X40  bg-red
-*  0X80  blink
-
-Examples:
-
-   dot 1 on
-   dot 2 off
-   dot 3 =fg-red
-   dot 4 ~bg-blue
+The <file> operand specifies the file to be included. It may be either a 
+relative or an absolute path. If relative, it is anchored at the directory 
+containing the including file.
 
 ===============================================================================
 
-Standard Braille Dot Numbering Convention
------------------------------------------
-
-A standard braille cell consists of six dots arranged in three rows and two
-columns. Each dot can be specifically identified by its number as follows:
-
-   Dot  Position     Row  Col
-    1   top-left      1    1
-    2   middle-left   2    1
-    3   bottom-left   3    1
-    4   top-right     1    2
-    5   middle-right  2    2
-    6   bottom-right  3    2
-
-Computer braille has introduced a fourth row at the bottom.
-
-   Dot  Position     Row  Col
-    7   below-left    4    1
-    8   below-right   4    2
-
-Perhaps a picture will make this numbering convention easier to understand.
-
-   1 o o 4
-   2 o o 5
-   3 o o 6
-   7 o o 8
-
-===============================================================================
