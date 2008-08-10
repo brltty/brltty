@@ -48,7 +48,7 @@ typedef struct {
   unsigned char length;
   wchar_t characters[0XFF];
 } DataString;
-extern int getDataString (DataFile *file, DataString *string, const char *description);
+extern int getDataString (DataFile *file, DataString *string, int noUnicode, const char *description);
 
 typedef struct {
   const wchar_t *name;

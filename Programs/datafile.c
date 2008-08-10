@@ -160,7 +160,7 @@ getDataOperand (DataFile *file, DataOperand *operand, const char *description) {
 }
 
 static int
-parseDataString (DataFile *file, DataString *string, const wchar_t *characters, int length) {
+parseDataString (DataFile *file, DataString *string, const wchar_t *characters, int length, int noUnicode) {
   int index = 0;
 
   string->length = 0;
@@ -224,10 +224,12 @@ parseDataString (DataFile *file, DataString *string, const wchar_t *characters, 
             goto doNumber;
 
           case WC_C('U'):
+            if (noUnicode) break;
             count = 8;
             goto doHexadecimal;
 
           case WC_C('u'):
+            if (noUnicode) break;
             count = 4;
             goto doHexadecimal;
 
@@ -264,6 +266,8 @@ parseDataString (DataFile *file, DataString *string, const wchar_t *characters, 
           case WC_C('<'): {
             const wchar_t *first = &characters[++index];
             const wchar_t *end = wmemchr(first, WC_C('>'), length-index);
+
+            if (noUnicode) break;
 
             if (end) {
               int count = end - first;
@@ -322,11 +326,11 @@ parseDataString (DataFile *file, DataString *string, const wchar_t *characters, 
 }
 
 int
-getDataString (DataFile *file, DataString *string, const char *description) {
+getDataString (DataFile *file, DataString *string, int noUnicode, const char *description) {
   DataOperand operand;
 
   if (getDataOperand(file, &operand, description))
-    if (parseDataString(file, string, operand.characters, operand.length))
+    if (parseDataString(file, string, operand.characters, operand.length, noUnicode))
       return 1;
 
   return 0;
@@ -375,7 +379,7 @@ int
 processIncludeOperands (DataFile *file, void *data) {
   DataString path;
 
-  if (getDataString(file, &path, "include file path"))
+  if (getDataString(file, &path, 0, "include file path"))
     if (!includeDataFile(file, path.characters, path.length))
       return 0;
 

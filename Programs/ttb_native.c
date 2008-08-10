@@ -27,7 +27,7 @@ getByteOperand (DataFile *file, unsigned char *byte) {
   DataString string;
   const char *description = "local character";
 
-  if (getDataString(file, &string, description)) {
+  if (getDataString(file, &string, 1, description)) {
     if ((string.length == 1) && (string.characters[0] < CHARSET_BYTE_COUNT)) {
       *byte = string.characters[0];
       return 1;
@@ -45,7 +45,7 @@ getCharacterOperand (DataFile *file, wchar_t *character) {
   DataString string;
   const char *description = "unicode character";
 
-  if (getDataString(file, &string, description)) {
+  if (getDataString(file, &string, 0, description)) {
     if (!(string.characters[0] & ~UNICODE_CHARACTER_MASK)) {
       *character = string.characters[0];
       return 1;

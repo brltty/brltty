@@ -468,7 +468,7 @@ getReplacePattern (DataFile *file, ByteOperand *replace) {
 
 static int
 getFindText (DataFile *file, DataString *find) {
-  return getDataString(file, find, "find text");
+  return getDataString(file, find, 0, "find text");
 }
 
 static int
@@ -587,7 +587,7 @@ processContractionTableLine (DataFile *file, void *data) {
           } else if ((class = addCharacterClass(file, name.characters, name.length, ctd))) {
             DataString characters;
 
-            if (getDataString(file, &characters, "characters")) {
+            if (getDataString(file, &characters, 0, "characters")) {
               int index;
 
               for (index=0; index<characters.length; index+=1) {
