@@ -2,9 +2,9 @@ Attributes Tables
 -----------------
 
 Files with names of the form *.atb are attributes tables, and with names of the 
-form *.ati are attributes subtables. They are used by BRLTTY to translate the 
-VGA highlighting attributes of the characters on the screen into corresponding 
-combinations of braille dots.
+form *.ati are attributes subtables. They are used when BRLTTY is displaying 
+screen attributes rather than screen content. Each of the eight braille dots 
+represents one of the eight VGA attribute bits.
 
 An attributes table consists of a sequence of directives, one per line, which 
 define how combinations of VGA attributes are to be represented in braille. 
@@ -24,14 +24,15 @@ The Dot Directive
 Use the "dot" directive to specify what a specific dot represents. The default 
 is that all dots are down and not used to represent anything.
 
-The <dot> operand specifies the dot being defined. It is a single digit within
-the range 1-8 as defined by the standard braille dot numbering convention.
+The <dot> operand specifies the dot being defined. It is a single digit within 
+the range 1-8 as defined by the standard braille dot numbering convention (see 
+README-DOTS).
 
 The <state> operand specifies what the dot represents. It may be:
 *  =attribute  The dot is raised if the named attribute is on.
 *  ~attribute  The dot is raised if the named attribute is off.
 
-The names of the attributes are:
+The names of the attribute bits are:
 *  0X01  fg-blue
 *  0X02  fg-green
 *  0X04  fg-red
@@ -55,8 +56,8 @@ The Include Directive
 
 Use the "include" directive to include the content of an attributes subtable. 
 It is recursive, which means that any attributes subtable can itself include 
-yet another attributes subtable. Care must be taken so that an "include loop" 
-is not created.
+yet another attributes subtable. Care must be taken to ensure that an "include
+loop" is not created.
 
 The <file> operand specifies the file to be included. It may be either a 
 relative or an absolute path. If relative, it is anchored at the directory 

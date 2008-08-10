@@ -3939,7 +3939,11 @@ or until any key on the display is pressed.
 <sect>Tables<label id="tables"><p>
 
 <sect1>Text Tables<label id="table-text"><p>
-The text table is used to convert a host character into its braille representation.
+Files with names of the form <tt/*.ttb/ are text tables,
+and with names of the form <tt/*.tti/ are text subtables.
+They are used by BRLTTY to translate the characters on the screen
+into their corresponding braille representations.
+
 BRLTTY is initially configured to use the
 <ref id="nabcc" name="North American Braille Computer Code"> (NABCC).
 In addition to this default text table,
@@ -3977,24 +3981,24 @@ for details regarding how to use an alternate text table.
 <sect2>Text Table Format<p>
 A text table consists of a sequence of directives, one per line,
 which define how each character is to be represented in braille.
-White-space (blanks, tabs) at the beginning of a line,
+UTF-8 character encoding must be used.
+White-space (blanks, tabs) at the beginning of a line, 
 as well as before and/or after any operand of any directive,
 is ignored.
 Lines containing only white-space are ignored.
 If the first non-white-space character of a line is "&num;"
 then that line is a comment and is ignored.
 
+<sect2>Text Table Directives<p>
 The following directives are provided:
 <descrip>
-  <tag><tt/byte/ <em/byte/ <em/dots/ &num; <em/comment/</tag>
-    Use the <tt/byte/ directive to specify
-    how a byte (character) is to be represented in braille.
-    Since this is by far the most commonly used directive,
-    the <tt/byte/ keyword itself is optional.
+  <tag><tt/char/ <em/character/ <em/dots/ &num; <em/comment/</tag>
+    Use the <tt/char/ directive to specify
+    how a Unicode character is to be represented in braille.
 
     <descrip>
-      <tag><em/byte/</tag>
-        The byte being defined.
+      <tag><em/character/</tag>
+        The Unicode character being defined.
         It may be:
         <itemize>
           <item>
@@ -4003,14 +4007,25 @@ The following directives are provided:
             A backslash-prefixed special character.
             These are:
             <descrip>
-              <tag/\\/A literal backslash.
-              <tag/\&num;/A literal number sign.
-              <tag/\x&num;&num;/The two-digit hexadecimal representation of any character.
-              <tag/\X&num;&num;/... (the case of the X and of the digits isn't significant)
+            - <tag/\b/The backspace character.
+            - <tag/\f/The formfeed character.
+            - <tag/\n/The newline character.
+            - <tag/\o&num;&num;&num;/The three-digit octal representation of a character.
+            - <tag/\r/The carriage return character.
+            - <tag/\s/The space character.
+            - <tag/\t/The horizontal tab character.
+            - <tag/\u&num;&num;&num;&num;/The four-digit hexadecimal representation of a character.
+            - <tag/\U&num;&num;&num;&num;&num;&num;&num;&num;/The eight-digit hexadecimal representation of a character.
+            - <tag/\v/The vertical tab character.
+            - <tag/\x&num;&num;/The two-digit hexadecimal representation of a character.
+            - <tag/\X&num;&num;/... (the case of the X and of the digits isn't significant)
+            - <tag/\&num;/A literal number sign.
+            - <tag/\&lt;name&gt;/The Unicode name of a character (use _ for space).
+            - <tag/\\/A literal backslash.
             </descrip>
         </itemize>
       <tag><em/dots/</tag>
-        The braille representation of the byte.
+        The braille representation of the Unicode character.
         It is a sequence of one to eight dot numbers.
         If the dot number sequence is enclosed within parentheses
         then the dot numbers may be separated from one another by white-space.
@@ -4024,20 +4039,60 @@ The following directives are provided:
 
     Examples:
     <itemize>
-      <item>byte a 1
-      <item>b 12
-      <item>c (14)
-      <item>d ( 1  4   5    )
-      <item>\\ 12567
-      <item>\x20 0
+      <item><tt/char a 1/
+      <item><tt/char b (12)/
+      <item><tt/char c ( 4  1   )/
+      <item><tt/char \\ 12567/
+      <item><tt/char \s 0/
+      <item><tt/char \x20 ()/
+      <item><tt/char \&lt;LATIN_SMALL_LETTER_D&gt; 145/
     </itemize>
+  <tag><tt/byte/ <em/byte/ <em/dots/ &num; <em/comment/</tag>
+    Use the <tt/byte/ directive to specify how
+    a character in the local character set 
+    is to be represented in braille.
+    It has been retained for backward compatibility but should not be used.
+    Unicode characters should be defined
+    (via the <tt/char/ directive)
+    so that the text table remains valid
+    regardless of what the local character set is.
+
+    <descrip>
+      <tag><em/byte/</tag>
+        The local character being defined.
+        It may be specified in the same ways
+        as the <em/character/ operand of the <tt/char/ directive 
+        except that the Unicode-specific forms
+        (\u, \U, \&lt;)
+        may not be used.
+      <tag><em/dots/</tag>
+        The braille representation of the local character.
+        It may be specified in the same ways
+        as the <em/dots/ operand of the <tt/char/ directive.
+    </descrip>
+  <tag><tt/include/ <em/file/ <em/dots/ &num; <em/comment/</tag>
+    Use the <tt/include/ directive to include the content of a text subtable.
+    It is recursive, which means that
+    any text subtable can itself include yet another text subtable.
+    Care must be taken to ensure that an "include loop" is not created.
+
+    <descrip>
+      <tag><em/file/</tag>
+        The file to be included.
+        It may be either a relative or an absolute path.
+        If relative, it is anchored at the directory containing the including file.
+    </descrip>
 </descrip>
 
 <sect1>Attributes Tables<label id="table-attributes"><p>
-The attributes table is used when BRLTTY
+Files with names of the form *.atb are attributes tables,
+and with names of the form *.ati are attributes subtables.
+They are used when BRLTTY
 is displaying screen attributes rather than screen content
 (see the <ref id="command-DISPMD" name="DISPMD"> command).
-Each of the eight braille dots represents one of the eight <tt/VGA/ attribute bits.
+Each of the eight braille dots represents
+one of the eight <tt/VGA/ attribute bits.
+
 The following attributes tables are provided:
 <descrip>
   <tag/attributes/
@@ -4088,7 +4143,9 @@ for details regarding how to use an alternate attributes table.
 
 <sect2>Attributes Table Format<p>
 An attributes table consists of a sequence of directives, one per line,
-which define how a character attribute is to be represented in braille.
+which define how combinations of <tt/VGA/ attributes
+are to be represented in braille. 
+UTF-8 character encoding must be used.
 White-space (blanks, tabs) at the beginning of a line,
 as well as before and/or after any operand of any directive,
 is ignored.
@@ -4096,11 +4153,12 @@ Lines containing only white-space are ignored.
 If the first non-white-space character of a line is "&num;"
 then that line is a comment and is ignored.
 
+<sect2>Attributes Table Directives<p>
 The following directives are provided:
 <descrip>
   <tag><tt/dot/ <em/dot/ <em/state/ &num; <em/comment/</tag>
     Use the <tt/dot/ directive to specify
-    what a specific braille dot represents.
+    what a specific dot represents.
 
     <descrip>
       <tag><em/dot/</tag>
@@ -4108,31 +4166,43 @@ The following directives are provided:
         It is a single digit within the range <tt/1/-<tt/8/ as defined by the
         <ref id="dots" name="Standard Braille Dot Numbering Convention">.
       <tag><em/state/</tag>
-        When the dot is raised.
+        What the dot represents.
         It may be:
         <descrip>
-          <tag><tt/=/<em/bit/</tag>The dot is raised if the named attribute is on.
-          <tag><tt/&tilde;/<em/bit/</tag>The dot is raised if the named attribute is off.
+          <tag><tt/=/<em/attribute/</tag>The dot is raised if the named attribute is on.
+          <tag><tt/&tilde;/<em/attribute/</tag>The dot is raised if the named attribute is off.
         </descrip>
 
         The names of the attribute bits are:
         <descrip>
-          <tag/0X01/fg-blue
-          <tag/0X02/fg-green
-          <tag/0X04/fg-red
-          <tag/0X08/fg-bright
-          <tag/0X10/bg-blue
-          <tag/0X20/bg-green
-          <tag/0X40/bg-red
-          <tag/0X80/blink
+          <tag/0X01/<tt/fg-blue/
+          <tag/0X02/<tt/fg-green/
+          <tag/0X04/<tt/fg-red/
+          <tag/0X08/<tt/fg-bright/
+          <tag/0X10/<tt/bg-blue/
+          <tag/0X20/<tt/bg-green/
+          <tag/0X40/<tt/bg-red/
+          <tag/0X80/<tt/blink/
         </descrip>
     </descrip>
 
     Examples:
     <itemize>
-      <item>dot 1 =fg-red
-      <item>dot 2 &tilde;bg-blue
+      <item><tt/dot 1 =fg-red/
+      <item><tt/dot 2 &tilde;bg-blue/
     </itemize>
+  <tag><tt/include/ <em/file/ <em/dots/ &num; <em/comment/</tag>
+    Use the <tt/include/ directive to include the content of an attributes subtable.
+    It is recursive, which means that
+    any attributes subtable can itself include yet another attributes subtable.
+    Care must be taken to ensure that an "include loop" is not created.
+
+    <descrip>
+      <tag><em/file/</tag>
+        The file to be included.
+        It may be either a relative or an absolute path.
+        If relative, it is anchored at the directory containing the including file.
+    </descrip>
 </descrip>
 
 <sect1>Contraction Tables<label id="table-contraction"><p>

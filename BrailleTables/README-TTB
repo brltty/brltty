@@ -6,11 +6,11 @@ Files with names of the form *.ttb are text tables, and with names of the form
 on the screen into their corresponding braille representations.
 
 A text table consists of a sequence of directives, one per line, which define 
-how a set of characters is to be represented in braille. UTF-8 character 
-encoding must be used. White-space (blanks, tabs) at the beginning of a line, 
-as well as before and/or after any operand of any directive, is ignored. Lines 
-containing only white-space are ignored. If the first non-white-space character 
-of a line is "#" then that line is a comment and is ignored.
+how each character is to be represented in braille. UTF-8 character encoding 
+must be used. White-space (blanks, tabs) at the beginning of a line, as well as 
+before and/or after any operand of any directive, is ignored. Lines containing 
+only white-space are ignored. If the first non-white-space character of a line 
+is "#" then that line is a comment and is ignored.
 
 ===============================================================================
 
@@ -42,19 +42,19 @@ be:
    -  \<name>     The Unicode name of a character (use _ for space).
    -  \\          A literal backslash.
 
-The <dots> operand specifies the braille representation of the character. It is 
-a sequence of one to eight dot numbers. If the dot number sequence is enclosed 
-within parentheses then the dot numbers may be separated from one another by 
-white-space. A dot number is a digit within the range 1-8 as defined by the 
-standard braille dot numbering convention. The special dot number 0 is 
-recognized when not enclosed within parentheses, and means no dots; it may not 
-be used in conjunction with any other dot number.
+The <dots> operand specifies the braille representation of the Unicode 
+character. It is a sequence of one to eight dot numbers. If the dot number 
+sequence is enclosed within parentheses then the dot numbers may be separated 
+from one another by white-space. A dot number is a digit within the range 1-8 
+as defined by the standard braille dot numbering convention (see README-DOTS). 
+The special dot number 0 is recognized when not enclosed within parentheses, 
+and means no dots; it may not be used in conjunction with any other dot number.
 
 Examples:
 
    char a 1
    char b (12)
-   char c ( 1  4        )
+   char c ( 4  1   )
    char \\ 12567
    char \s 0
    char \x20 ()
@@ -77,9 +77,9 @@ The <byte> operand specifies the local character being defined. It may be
 specified in the same ways as the <character> operand of the "char" directive 
 except that the Unicode-specific forms (\u, \U, \<) may not be used.
 
-The <dots> operand specifies the braille representation of the character. It 
-may be specified in the same ways as the <dots> operand of the "char" 
-directive. a
+The <dots> operand specifies the braille representation of the local character. 
+It may be specified in the same ways as the <dots> operand of the "char" 
+directive.
 
 ===============================================================================
 
@@ -90,7 +90,8 @@ The Include Directive
 
 Use the "include" directive to include the content of a text subtable. It is 
 recursive, which means that any text subtable can itself include yet another 
-text subtable. Care must be taken so that an "include loop" is not created.
+text subtable. Care must be taken to ensure that an "include loop" is not
+created.
 
 The <file> operand specifies the file to be included. It may be either a 
 relative or an absolute path. If relative, it is anchored at the directory 
