@@ -24,8 +24,10 @@
 # the two bottom dots [78]. This means, for example, that side edges and the
 # cross are represented by a full cell [12345678].
 
-# The only missing characters within the range \u2500-\u257F are \u2571,
-# \u2572, and \u2573, which permit the drawing of diagonals.
+# For diagonals within boxes, the top-left and bottom-right dots [18] are used
+# to represent the line which descends toward the right, and the top-right and
+# bottom-left dots [47] are used to represent the line which ascends toward the
+# right. The X is represented by all four of these dots [1478].
 
 char \u2500	( 23 56  )  # ⠶ ─ [BOX DRAWINGS LIGHT HORIZONTAL]
 char \u254C	( 23 56  )  # ⠶ ╌ [BOX DRAWINGS LIGHT DOUBLE DASH HORIZONTAL]
@@ -159,3 +161,7 @@ char \u257C	( 23 56  )  # ⠶ ╼ [BOX DRAWINGS LIGHT LEFT AND HEAVY RIGHT]
 char \u257D	(12345678)  # ⣿ ╽ [BOX DRAWINGS LIGHT UP AND HEAVY DOWN]
 char \u257E	( 23 56  )  # ⠶ ╾ [BOX DRAWINGS HEAVY LEFT AND LIGHT RIGHT]
 char \u257F	(12345678)  # ⣿ ╿ [BOX DRAWINGS HEAVY UP AND LIGHT DOWN]
+
+char \u2571	(   4  7 )  # ⡈ ╱ [BOX DRAWINGS LIGHT DIAGONAL UPPER RIGHT TO LOWER LEFT]
+char \u2572	(1      8)  # ⢁ ╲ [BOX DRAWINGS LIGHT DIAGONAL UPPER LEFT TO LOWER RIGHT]
+char \u2573	(1  4  78)  # ⣉ ╳ [BOX DRAWINGS LIGHT DIAGONAL CROSS]

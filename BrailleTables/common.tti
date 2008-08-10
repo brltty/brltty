@@ -19,5 +19,5 @@
 # sole purpose is to be a common place wherein to include text subtables which
 # define braille representations that are generally useful in all contexts.
 
-# The box drawing characters.
-include box.tti
+# the box drawing characters
+include boxes.tti
