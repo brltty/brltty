@@ -1018,8 +1018,6 @@ BRLTTY_ARG_DISABLE(
    AC_DEFINE([ENABLE_TABLE_SELECTION], [1],
              [Define this to include table selection within the preferences menu.])
 ])
-translation_table_objects='tbl.$O tbl_native.$O'
-AC_SUBST([translation_table_objects])
 
 BRLTTY_ARG_DISABLE(
    [learn-mode],
