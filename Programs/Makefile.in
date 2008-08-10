@@ -522,6 +522,7 @@ install-tables: $(INSTALL_TEXT_TABLES) $(INSTALL_ATTRIBUTES_TABLES) $(INSTALL_CO
 
 install-text-tables: install-data-directory
 	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/*.ttb $(INSTALL_DATA_DIRECTORY)
+	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/*.tti $(INSTALL_DATA_DIRECTORY)
 
 install-attributes-tables: install-data-directory
 	$(INSTALL_DATA) $(SRC_TOP)$(TBL_DIR)/*.atb $(INSTALL_DATA_DIRECTORY)
@@ -583,6 +584,7 @@ uninstall-programs:
 uninstall-data:
 	-rm -f $(INSTALL_DATA_DIRECTORY)/*.[tac]t[bi]
 	-rm -f $(INSTALL_DATA_DIRECTORY)/brltty*
+	-[ ! -d $(INSTALL_WRITABLE_DIRECTORY) ] || rmdir $(INSTALL_WRITABLE_DIRECTORY)
 	-[ ! -d $(INSTALL_DATA_DIRECTORY) ] || rmdir $(INSTALL_DATA_DIRECTORY)
 
 uninstall-libraries: $(UNINSTALL_API_LIBRARIES)
