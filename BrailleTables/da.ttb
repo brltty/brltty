@@ -15,7 +15,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# BRLTTY Text Translation Table - Danish (iso-8859-1)
+# BRLTTY Text Table - Danish (iso-8859-1)
 
 # This is the table which comes closest to the Danish standard 1252 table. All
 # control characters are mapped as their corresponding capital letters with

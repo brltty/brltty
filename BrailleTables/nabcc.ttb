@@ -16,10 +16,10 @@
 ###############################################################################
 
 ########################################################################
-# BRLTTY Text Translation Table - North American Braille Computer Code #
+# BRLTTY Text Table - North American Braille Computer Code #
 ########################################################################
 
-# This is a description of the default text translation table used by BRLTTY.  
+# This is a description of the default text table used by BRLTTY.  
 # It's based on the North American Braille Computer Code, but defines the full
 # Latin1 (ISO-8859-1) character set.
 

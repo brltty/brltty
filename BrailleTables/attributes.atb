@@ -15,7 +15,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# BRLTTY Attributes Translation Table - 
+# BRLTTY Attributes Table - 
 
 dot 1 =fg-blue
 dot 2 =fg-green

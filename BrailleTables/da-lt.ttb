@@ -15,7 +15,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# BRLTTY Text Translation Table - Danish LogText (iso-8859-1)
+# BRLTTY Text Table - Danish LogText (iso-8859-1)
 
 # Danish LogText users are accustomed to the percent sign (%) and the
 # exclamation point (!) being mapped to patterns which differ from the new 1252
