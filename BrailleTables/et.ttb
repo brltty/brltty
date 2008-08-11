@@ -1,0 +1,31 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2008 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU General Public License, as published by the Free Software
+# Foundation.  Please see the file COPYING for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+# Estonian
+#
+# Samuel Thibault <samuel.thibault@ens-lyon.org>
+# 
+# Note: this is based on the Unesco report on the progress of unification of
+# braille writing « L'ÉCRITURE BRAILLE DANS LE MONDE », by Sir Clutha
+# MACKENZIE, dated _1954_, so this table may be quite outdated.
+
+# a-z as usual
+
+char \xE4	(  345   )  # ⠜ ä [LATIN SMALL LETTER A WITH DIAERESIS]
+char \xF5	( 234 6  )  # ⠮ õ [LATIN SMALL LETTER O WITH TILDE]
+char \xF6	( 2 4 6  )  # ⠪ ö [LATIN SMALL LETTER O WITH DIAERESIS]
+char \xFC	(12  56  )  # ⠳ ü [LATIN SMALL LETTER U WITH DIAERESIS]

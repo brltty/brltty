@@ -1,0 +1,60 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2008 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU General Public License, as published by the Free Software
+# Foundation.  Please see the file COPYING for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+# Bulgarian
+#
+# Samuel Thibault <samuel.thibault@ens-lyon.org>
+# 
+# Note: this is based on the Unesco report on the progress of unification of
+# braille writing « L'ÉCRITURE BRAILLE DANS LE MONDE », by Sir Clutha
+# MACKENZIE, dated _1954_, so this table may be quite outdated.
+
+char \u0430	(1       )  # ⠁ а [CYRILLIC SMALL LETTER A]
+char \u0431	(12      )  # ⠃ б [CYRILLIC SMALL LETTER BE]
+char \u0432	( 2 456  )  # ⠺ в [CYRILLIC SMALL LETTER VE]
+char \u0433	(12 45   )  # ⠛ г [CYRILLIC SMALL LETTER GHE]
+char \u0434	(1  45   )  # ⠙ д [CYRILLIC SMALL LETTER DE]
+char \u0435	(1   5   )  # ⠑ е [CYRILLIC SMALL LETTER IE]
+char \u0436	( 2 45   )  # ⠚ ж [CYRILLIC SMALL LETTER ZHE]
+char \u0437	(1 3 56  )  # ⠵ з [CYRILLIC SMALL LETTER ZE]
+char \u0438	( 2 4    )  # ⠊ и [CYRILLIC SMALL LETTER I]
+char \u0439	(1 3456  )  # ⠽ й [CYRILLIC SMALL LETTER SHORT I]
+char \u043A	(1 3     )  # ⠅ к [CYRILLIC SMALL LETTER KA]
+char \u043B	(123     )  # ⠇ л [CYRILLIC SMALL LETTER EL]
+char \u043C	(1 34    )  # ⠍ м [CYRILLIC SMALL LETTER EM]
+char \u043D	(1 345   )  # ⠝ н [CYRILLIC SMALL LETTER EN]
+char \u043E	(1 3 5   )  # ⠕ о [CYRILLIC SMALL LETTER O]
+char \u043F	(1234    )  # ⠏ п [CYRILLIC SMALL LETTER PE]
+char \u0440	(123 5   )  # ⠗ р [CYRILLIC SMALL LETTER ER]
+char \u0441	( 234    )  # ⠎ с [CYRILLIC SMALL LETTER ES]
+char \u0442	( 2345   )  # ⠞ т [CYRILLIC SMALL LETTER TE]
+char \u0443	(1 3  6  )  # ⠥ у [CYRILLIC SMALL LETTER U]
+char \u0444	(12 4    )  # ⠋ ф [CYRILLIC SMALL LETTER EF]
+char \u0445	(12  5   )  # ⠓ х [CYRILLIC SMALL LETTER HA]
+char \u0446	(1  4    )  # ⠉ ц [CYRILLIC SMALL LETTER TSE]
+char \u0447	(12345   )  # ⠟ ч [CYRILLIC SMALL LETTER CHE]
+char \u0448	(1   56  )  # ⠱ ш [CYRILLIC SMALL LETTER SHA]
+char \u0449	(1 34 6  )  # ⠭ щ [CYRILLIC SMALL LETTER SHCHA]
+char \u044B	(  345   )  # ⠜ ы [CYRILLIC SMALL LETTER YERU] ié, not sure about the unicode character
+char \u044E	(12  56  )  # ⠳ ю [CYRILLIC SMALL LETTER YU]
+char \u044F	(12 4 6  )  # ⠫ я [CYRILLIC SMALL LETTER YA]
+char \u044D	( 2 4 6  )  # ⠪ э [CYRILLIC SMALL LETTER E] e, not sure about the unicode character
+
+# ponctuation as ususal, except
+char \x3F	( 2   6  )  # ⠢ ? [QUESTION MARK]
+
+# numbers as usual

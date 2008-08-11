@@ -1,0 +1,69 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2008 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU General Public License, as published by the Free Software
+# Foundation.  Please see the file COPYING for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+# Armenian
+#
+# Samuel Thibault <samuel.thibault@ens-lyon.org>
+# 
+# Note: this is based on the Unesco report on the progress of unification of
+# braille writing « L'ÉCRITURE BRAILLE DANS LE MONDE », by Sir Clutha
+# MACKENZIE, dated _1954_, so this table may be quite outdated.
+
+char \u0561	(1       )  # ⠁ ա [ARMENIAN SMALL LETTER AYB]
+char \u0562	(1234    )  # ⠏ բ [ARMENIAN SMALL LETTER BEN]
+char \u0563	(12345   )  # ⠟ գ [ARMENIAN SMALL LETTER GIM]
+char \u0564	(1  456  )  # ⠹ դ [ARMENIAN SMALL LETTER DA]
+char \u0565	(1 3456  )  # ⠽ ե [ARMENIAN SMALL LETTER ECH]
+char \u0566	(1 3 56  )  # ⠵ զ [ARMENIAN SMALL LETTER ZA]
+char \u0567	(1   5   )  # ⠑ է [ARMENIAN SMALL LETTER EH]
+char \u0568	(1 3  6  )  # ⠥ ը [ARMENIAN SMALL LETTER ET]
+char \u0569	( 2345   )  # ⠞ թ [ARMENIAN SMALL LETTER TO]
+char \u056A	(  345   )  # ⠜ ժ [ARMENIAN SMALL LETTER ZHE]
+char \u056B	( 2 4    )  # ⠊ ի [ARMENIAN SMALL LETTER INI]
+char \u056C	(123     )  # ⠇ լ [ARMENIAN SMALL LETTER LIWN]
+char \u056D	(1 34 6  )  # ⠭ խ [ARMENIAN SMALL LETTER XEH]
+char \u056E	(  34    )  # ⠌ ծ [ARMENIAN SMALL LETTER CA]
+char \u056F	(12 45   )  # ⠛ կ [ARMENIAN SMALL LETTER KEN]
+char \u0570	(12  5   )  # ⠓ հ [ARMENIAN SMALL LETTER HO]
+char \u0571	(  34 6  )  # ⠬ ձ [ARMENIAN SMALL LETTER JA]
+char \u0572	(12   6  )  # ⠣ ղ [ARMENIAN SMALL LETTER GHAD]
+char \u0573	( 2 45   )  # ⠚ ճ [ARMENIAN SMALL LETTER CHEH]
+char \u0574	(1 34    )  # ⠍ մ [ARMENIAN SMALL LETTER MEN]
+char \u0575	(1   56  )  # ⠱ յ [ARMENIAN SMALL LETTER YI]
+char \u0576	(1 345   )  # ⠝ ն [ARMENIAN SMALL LETTER NOW]
+char \u0577	(1  4 6  )  # ⠩ շ [ARMENIAN SMALL LETTER SHA]
+char \u0578	( 2 4 6  )  # ⠪ ո [ARMENIAN SMALL LETTER VO]
+char \u0579	(1    6  )  # ⠡ չ [ARMENIAN SMALL LETTER CHA]
+char \u057A	(12      )  # ⠃ պ [ARMENIAN SMALL LETTER PEH]
+char \u057B	(1  4    )  # ⠉ ջ [ARMENIAN SMALL LETTER JHEH]
+char \u057C	(12 456  )  # ⠻ ռ [ARMENIAN SMALL LETTER RA]
+char \u057D	( 234    )  # ⠎ ս [ARMENIAN SMALL LETTER SEH]
+char \u057E	(123  6  )  # ⠧ վ [ARMENIAN SMALL LETTER VEW]
+char \u057F	(1  45   )  # ⠙ տ [ARMENIAN SMALL LETTER TIWN]
+char \u0580	(123 5   )  # ⠗ ր [ARMENIAN SMALL LETTER REH]
+char \u0581	( 234 6  )  # ⠮ ց [ARMENIAN SMALL LETTER CO]
+char \u0582	( 2 456  )  # ⠺ ւ [ARMENIAN SMALL LETTER YIWN]
+char \u0583	(12 4 6  )  # ⠫ փ [ARMENIAN SMALL LETTER PIWR]
+char \u0584	(1 3     )  # ⠅ ք [ARMENIAN SMALL LETTER KEH]
+char \u0585	(1 3 5   )  # ⠕ օ [ARMENIAN SMALL LETTER OH]
+char \u0586	(12 4    )  # ⠋ ֆ [ARMENIAN SMALL LETTER FEH]
+
+# yev ⠯ (means "and"), is that ԵՈ ?
+
+# punctuation as usual, except
+char \x3F	( 23  6  )  # ⠦ ? [QUESTION MARK]
+char \u055D	(     6  )  # ⠠ ՝ [ARMENIAN COMMA]

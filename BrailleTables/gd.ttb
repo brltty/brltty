@@ -1,0 +1,42 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2008 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU General Public License, as published by the Free Software
+# Foundation.  Please see the file COPYING for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+# Gaelic
+#
+# Samuel Thibault <samuel.thibault@ens-lyon.org>
+# 
+# Note: this is based on the Unesco report on the progress of unification of
+# braille writing « L'ÉCRITURE BRAILLE DANS LE MONDE », by Sir Clutha
+# MACKENZIE, dated _1954_, so this table may be quite outdated.
+
+# a-z as usual
+
+char \xE1	(1234 6  )  # ⠯ á [LATIN SMALL LETTER A WITH ACUTE]
+char \xE9	(123456  )  # ⠿ é [LATIN SMALL LETTER E WITH ACUTE]
+char \xED	(123 56  )  # ⠷ í [LATIN SMALL LETTER I WITH ACUTE]
+char \xF3	( 234 6  )  # ⠮ ó [LATIN SMALL LETTER O WITH ACUTE]
+char \xFA	( 23456  )  # ⠾ ú [LATIN SMALL LETTER U WITH ACUTE]
+
+char \u1E03	(12   6  )  # ⠣ ḃ [LATIN SMALL LETTER B WITH DOT ABOVE]
+char \u010B	(1  4 6  )  # ⠩ ċ [LATIN SMALL LETTER C WITH DOT ABOVE]
+char \u1E0B	(1  456  )  # ⠹ ḋ [LATIN SMALL LETTER D WITH DOT ABOVE]
+char \u1E1F	(1   56  )  # ⠱ ḟ [LATIN SMALL LETTER F WITH DOT ABOVE]
+char \u0121	(12 4 6  )  # ⠫ ġ [LATIN SMALL LETTER G WITH DOT ABOVE]
+char \u1E41	(12 456  )  # ⠻ ṁ [LATIN SMALL LETTER M WITH DOT ABOVE]
+char \u1E57	(12  56  )  # ⠳ ṗ [LATIN SMALL LETTER P WITH DOT ABOVE]
+char \u1E61	( 2 4 6  )  # ⠪ ṡ [LATIN SMALL LETTER S WITH DOT ABOVE]
+char \u1E6B	( 2 456  )  # ⠺ ṫ [LATIN SMALL LETTER T WITH DOT ABOVE]

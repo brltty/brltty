@@ -3949,28 +3949,37 @@ BRLTTY is initially configured to use the
 In addition to this default text table,
 several alternatives are provided:
 <descrip>
+  <tag/bg/Bulgarian (from UNESCO report, 1954)
   <tag/brf/good for viewing <tt/.brf/ files in text editor or pager
   <tag/cz/Czech (iso-8859-2)
   <tag/da/Danish (iso-8859-1)
   <tag/de/German (iso-8859-1)
   <tag/en_UK/English (United Kingdom)
   <tag/en_US/English (United States)
+  <tag/eo/Esperanto
   <tag/es/Spanish (iso-8859-1)
+  <tag/et/Estonian (from UNESCO report, 1954)
   <tag/fi1/Finnish (iso-8859-1)
   <tag/fi2/Finnish (iso-8859-1)
   <tag/fr_CA/French (Canada)
   <tag/fr_FR/French (France)
   <tag/fr-2007/Unified French (iso-8859-1)
   <tag/fr-cbifs/Code Braille Informatique Français Standard (iso-8859-1)
+  <tag/gd/Gaelic (from UNESCO report, 1954)
+  <tag/hy/Armenian (from UNESCO report, 1954)
+  <tag/is/Icelandic (from UNESCO report, 1954)
   <tag/it/Italian (iso-8859-1)
+  <tag/lt/Lituanian (from UNESCO report, 1954)
   <tag/nabcc/North American Braille Computer Code (iso-8859-1)
   <tag/no-generic/Norwegian (with support for other languages)
   <tag/no-oub/Norwegian (Offentlig Utvalg for Blindeskrift)
   <tag/pl/Polish (iso-8859-2)
   <tag/pt/Portuguese (iso-8859-1)
+  <tag/ro/Romanian (from UNESCO report, 1954)
   <tag/ru/Russian (koi8-r)
   <tag/se/Swedish (1996 standard)
   <tag/se-old/Swedish (1989 standard)
+  <tag/tr/Turkish (from UNESCO report, 1954)
   <tag/vni/Vietnamese (iso-8859-1)
 </descrip>
 See the <ref id="options-text-table" name="-t"> command line option,

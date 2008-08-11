@@ -89,25 +89,34 @@
 # are anchored at "@DATA_DIRECTORY@". If not specified, "@text_table@" will be
 # used.
 # (can be overridden with the -t [--text-table=] option)
+#text-table	bg	# Bulgarian (from UNESCO report, 1954)
 #text-table	cz	# Czech (iso-8859-2)
 #text-table	da	# Danish
 #text-table	de	# German
 #text-table	en_UK	# English (United Kingdom)
 #text-table	en_US	# English (United States)
+#text-table	eo	# Esperanto
 #text-table	es	# Spanish
+#text-table	et	# Estonian (from UNESCO report, 1954)
 #text-table	fr_CA	# French (Canada)
 #text-table	fr_FR	# French (France)
 #text-table	fr-2007	# French (Unified)
 #text-table	fr-cbifs	# French (Code Braille Informatique Français Standard)
+#text-table	gd	# Gaelic (from UNESCO report, 1954)
+#text-table	hy	# Armenian (from UNESCO report, 1954)
+#text-table	is	# Icelandic (from UNESCO report, 1954)
 #text-table	it	# Italian
+#text-table	lt	# Lituanian (from UNESCO report, 1954)
 #text-table	nabcc	# North American Braille Computer Code
 #text-table	no-generic	# Norwegian (with support for other languages)
 #text-table	no-oub	# Norwegian (Offentlig Utvalg for Blindeskrift)
 #text-table	pl	# Polish (iso-8859-2)
 #text-table	pt	# Portuguese (iso-8859-1)
+#text-table	ro	# Romanian (from UNESCO report, 1954)
 #text-table	ru	# Russian (koi8-r)
 #text-table	se	# Swedish (1996 standard)
 #text-table	se-old	# Swedish (1989 standard)
+#text-table	tr	# Turkish (from UNESCO report, 1954)
 #text-table	vni	# Vietnamese
 
 # The attributes-table directive specifies which attributes table to use.

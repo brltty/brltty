@@ -1,0 +1,37 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2008 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU General Public License, as published by the Free Software
+# Foundation.  Please see the file COPYING for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+# Icelandic
+#
+# Samuel Thibault <samuel.thibault@ens-lyon.org>
+# 
+# Note: this is based on the Unesco report on the progress of unification of
+# braille writing « L'ÉCRITURE BRAILLE DANS LE MONDE », by Sir Clutha
+# MACKENZIE, dated _1954_, so this table may be quite outdated.
+
+char \xF0	(123 56  )  # ⠷ ð [LATIN SMALL LETTER ETH]
+char \xF6	( 234 6  )  # ⠮ ö [LATIN SMALL LETTER O WITH DIAERESIS]
+char \xFE	( 23456  )  # ⠾ þ [LATIN SMALL LETTER THORN]
+
+char \xE1	(1    6  )  # ⠡ á [LATIN SMALL LETTER A WITH ACUTE]
+char \xE9	(12   6  )  # ⠣ é [LATIN SMALL LETTER E WITH ACUTE]
+char \xED	(1  4 6  )  # ⠩ í [LATIN SMALL LETTER I WITH ACUTE]
+char \xF3	(1  456  )  # ⠹ ó [LATIN SMALL LETTER O WITH ACUTE]
+char \xFA	(1   56  )  # ⠱ ú [LATIN SMALL LETTER U WITH ACUTE]
+char \xFD	(12 4 6  )  # ⠫ ý [LATIN SMALL LETTER Y WITH ACUTE]
+
+char \x3F	( 2   6  )  # ⠢ ? [QUESTION MARK]
