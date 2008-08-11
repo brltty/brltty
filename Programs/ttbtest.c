@@ -19,6 +19,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 #include <errno.h>
 
 #ifdef HAVE_ICU
@@ -721,6 +722,16 @@ updateCharacterDescription (EditTableData *etd) {
     DOT(2);
     DOT(6);
     printw("F10:");
+    {
+      static const char *label_SwitchCase = "switch case";
+      const char *label = NULL;
+      if (etd->charset) {
+        if (isalpha(etd->character.byte)) label = label_SwitchCase;
+      } else {
+        if (iswalpha(etd->character.unicode)) label = label_SwitchCase;
+      }
+      if (label) printw(" %s", label);
+    }
     printw("\n");
 
     DOT(3);
@@ -959,6 +970,37 @@ setLastDefinedCharacter (EditTableData *etd) {
 }
 
 static int
+setAlternateCharacter (EditTableData *etd) {
+  if (etd->charset) {
+    if (isalpha(etd->character.byte)) {
+      if (islower(etd->character.byte)) {
+        etd->character.byte = toupper(etd->character.byte);
+        return 1;
+      }
+
+      if (isupper(etd->character.byte)) {
+        etd->character.byte = tolower(etd->character.byte);
+        return 1;
+      }
+    }
+  } else {
+    if (iswalpha(etd->character.unicode)) {
+      if (iswlower(etd->character.unicode)) {
+        etd->character.unicode = towupper(etd->character.unicode);
+        return 1;
+      }
+
+      if (iswupper(etd->character.unicode)) {
+        etd->character.unicode = towlower(etd->character.unicode);
+        return 1;
+      }
+    }
+  }
+
+  return 0;
+}
+
+static int
 toggleCharacter (EditTableData *etd) {
   wchar_t character;
   if (!getCharacter(etd, &character)) return 0;
@@ -1102,6 +1144,10 @@ doKeyboardCommand (EditTableData *etd) {
 
       case KEY_F(9):
         if (!toggleCharacter(etd)) beep();
+        break;
+
+      case KEY_F(10):
+        if (!setAlternateCharacter(etd)) beep();
         break;
 
       case KEY_F(11):
