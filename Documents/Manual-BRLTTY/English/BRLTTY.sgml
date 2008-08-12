@@ -3947,7 +3947,7 @@ several alternatives are provided:
 <descrip>
   <tag/bg/Bulgarian (from UNESCO report, 1954)
   <tag/brf/good for viewing <tt/.brf/ files in text editor or pager
-  <tag/cz/Czech (iso-8859-2)
+  <tag/cs/Czech (iso-8859-2)
   <tag/da/Danish (iso-8859-1)
   <tag/de/German (iso-8859-1)
   <tag/en_UK/English (United Kingdom)
@@ -3973,10 +3973,10 @@ several alternatives are provided:
   <tag/pt/Portuguese (iso-8859-1)
   <tag/ro/Romanian (from UNESCO report, 1954)
   <tag/ru/Russian (koi8-r)
-  <tag/se/Swedish (1996 standard)
-  <tag/se-old/Swedish (1989 standard)
+  <tag/sv/Swedish (1996 standard)
+  <tag/sv-old/Swedish (1989 standard)
   <tag/tr/Turkish (from UNESCO report, 1954)
-  <tag/vni/Vietnamese (iso-8859-1)
+  <tag/vi/Vietnamese (iso-8859-1)
 </descrip>
 See the <ref id="options-text-table" name="-t"> command line option,
 the <ref id="configure-text-table" name="text-table"> configuration file directive,
