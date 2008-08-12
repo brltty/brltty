@@ -82,6 +82,25 @@ processEncodingOperands (DataFile *file, void *data) {
 }
 
 static int
+processDelegateOperands (DataFile *file, void *data) {
+  DataOperand type;
+
+  if (getDataOperand(file, &type, "delegate type")) {
+    if (isKeyword(WS_C("FILE"), type.characters, type.length)) {
+      DataOperand name;
+
+      if (getDataOperand(file, &name, "file name")) {
+        return includeDataFile(file, name.characters, name.length);
+      }
+    } else {
+      return includeDataFile(file, type.characters, type.length);
+    }
+  }
+
+  return 1;
+}
+
+static int
 processUcsBlockOperands (DataFile *file, void *data) {
   DataOperand action;
 
@@ -164,7 +183,7 @@ processGnomeBrailleLine (DataFile *file, void *data) {
   //  {.name=WC_C("NAME"), .processor=processNameOperands},
   //  {.name=WC_C("LOCALES"), .processor=processLocalesOperands},
   //  {.name=WC_C("UCS-SUFFIX"), .processor=processUcsSuffixOperands},
-  //  {.name=WC_C("DELEGATE"), .processor=processDelegateOperands},
+      {.name=WC_C("DELEGATE"), .processor=processDelegateOperands},
   //  {.name=WC_C("UTF8-STRING"), .processor=processUtf8StringOperands},
       {.name=WC_C("UCS-BLOCK"), .processor=processUcsBlockOperands},
       {.name=WC_C("UCS-CHAR"), .processor=processUcsCharOperands},
