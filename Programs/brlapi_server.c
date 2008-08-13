@@ -99,7 +99,7 @@ const char *const api_parameters[] = { "auth", "host", "stacksize", NULL };
 static size_t stackSize;
 
 #define RELEASE "BrlAPI Server: release " BRLAPI_RELEASE
-#define COPYRIGHT "   Copyright (C) 2002-2008 by Sebastien Hinderer <Sebastien.Hinderer@ens-lyon.org>, \
+#define COPYRIGHT "   Copyright (C) 2002-2008 by Sébastien Hinderer <Sebastien.Hinderer@ens-lyon.org>, \
 Samuel Thibault <samuel.thibault@ens-lyon.org>"
 
 #define WERR(x, y, ...) do { \

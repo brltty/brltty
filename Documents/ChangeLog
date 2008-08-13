@@ -1126,7 +1126,7 @@ March 11, 2004:
    Give the "always" contraction table opcode a lower priority for matching. (dm)
    Allow a contracted braille match string to contain spaces. (dm)
    Fix the dependencies for the host_... objects. (np)
-   Add entries for the French words a, à, and y. (np)
+   Add entries for the French words a, Ã , and y. (np)
 
 March 8, 2004:
  - BRLTTY 3.5pre1 released:
@@ -1462,13 +1462,13 @@ August 4, 2003:
       Document cut&paste in README.
       Initial support for file transfer.
       Several bug fixes.
-   Implement brlapi. Sébastien Hinderer <Sebastien.Hinderer@ens-lyon.fr> + Samuel Thibault <Samuel.Thibault@ens-lyon.fr>
+   Implement brlapi. SÃ©bastien Hinderer <Sebastien.Hinderer@ens-lyon.fr> + Samuel Thibault <Samuel.Thibault@ens-lyon.fr>
    Core changes to support big5.ctb: (dm)
       Change ctb opcode "ignore" to "replace".
    Add table for Chinese big5 character set (big5.ctb). Samuel Yang <mison@bbs.ee.ntu.edu.tw>
    Add Czech text table (text.cz.tbl). Jan Buchal <buchal@brailcom.org>
    Add alert messages preference. (dm)
-   VisioBraille driver enhancements. Sébastien Hinderer <Sebastien.Hinderer@ens-lyon.fr>
+   VisioBraille driver enhancements. SÃ©bastien Hinderer <Sebastien.Hinderer@ens-lyon.fr>
    IA64 sizeof returns a long and needs a long printf format. (dm)
    Make install no longer installs unneeded tables. (dm)
       (--without-text-table, --without-attributes-table, --disable-contracted-braille)
@@ -1490,7 +1490,7 @@ February 3, 2003:
    Added --disable-speech-support. (dm)
    Added --disable-tainted-components. (dm)
    Updated config.guess and config.sub (from automake-1.5). (dm)
-   Updated VisioBraille driver. Sébastien Hinderer <Sebastien.Hinderer@ens-lyon.fr>
+   Updated VisioBraille driver. SÃ©bastien Hinderer <Sebastien.Hinderer@ens-lyon.fr>
    Support building in another directory. (dm)
    Fix Linux MIDI device initialization. (dm)
    Add core support for visual displays. (dm)
@@ -1694,7 +1694,7 @@ July 13, 2002:
    Vario driver can now be statically linked. (dm)
    Add cut-and-paste for VideoBraille. Christian Comaschi <christian_comaschi@libero.it>
    Add identification output to VisioBraille driver. (dm)
-   Add support for 5.0 PROM family to VisioBraille driver. Sébastien Hinderer <Sebastien.Hinderer@ens-lyon.fr>
+   Add support for 5.0 PROM family to VisioBraille driver. SÃ©bastien Hinderer <Sebastien.Hinderer@ens-lyon.fr>
    Add program, uid, and gid parameters to ExternalSpeech driver. (sd)
    Stop GenericSay from reannouncing BRLTTY version during cursor routing. (dm)
    Add command parameter to GenericSay driver. (dm)
@@ -1788,11 +1788,11 @@ July 13, 2002:
 
 June 26, 2001:
  - BRLTTY 2.98 released:
- - fixes to the TSI driver for Navigator 80, by Stéphane Doyon
+ - fixes to the TSI driver for Navigator 80, by StÃ©phane Doyon
  - added driver for MiniBraille displays, by David Sauer <sauer@brailcom.cz>
  - added driver for Videobraille displays, by Christian Comaschi
    <christian_comaschi@libero.it>
- - added driver for VisioBraille displays, by Sébastien Hinderer
+ - added driver for VisioBraille displays, by SÃ©bastien Hinderer
    <jrf3@wanadoo.fr>
  - autodetection of BrailleLite 18 vs 40, by Willi Lutzenberger 
    <willutz@gmx.net>
@@ -1815,7 +1815,7 @@ March 2001:
  - version 2.96 (beta):
  - Vario support updates from Mario Lang <mlang@home.delysid.org>
  - ALVA Satellite 544 support from Kazunori MINATANI <99112004@gakushuin.ac.jp>
- - Various pieces from Stéphane Doyon, most notably:
+ - Various pieces from StÃ©phane Doyon, most notably:
    - cursor routing race fix that showed as a BRLTTY freeze with
      latest 2.4.0-test* Linux kernels;
    - BRLTTY now doesn't exit on startup when minor i.e. non-fatal
@@ -1909,7 +1909,7 @@ March 2001:
     - BRLTTY now has the ability to determine the character set used by 
       the screen fonts.
   - Credits owner for the previous item corrected (they actually should go to
-    August Hörandl).
+    August HÃ¶randl).
   - All possible dynamic loadable braille drivers are listed if there is no
     valid selection provided.  (NP)
 
@@ -1917,7 +1917,7 @@ March 2001:
   - Released BRLTTY 2.30 (beta)
   - Braille terminal drivers are now dynamically loadable.  This is a big
     change. Credits go to:
-      August Hörandl <august.hoerandl@gmx.at>
+      August HÃ¶randl <august.hoerandl@gmx.at>
         Original work
       Dave Mielke <dave@mielke.cc>
         Resynching with current BRLTTY version, cleanup, etc.
@@ -1995,7 +1995,7 @@ June 1999:
     useful in lynx!
   -  Added attribute underlining/blinking functions (experimental).
   -  Incorporated Papenmeier braille terminal driver + German manual.
-     Thanks to August Hörandl <hoerandl@elina.htlw1.ac.at> and his team!
+     Thanks to August HÃ¶randl <hoerandl@elina.htlw1.ac.at> and his team!
   -  Alva driver fixes.
 
 

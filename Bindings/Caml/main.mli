@@ -2,7 +2,7 @@
  * libbrlapi - A library providing access to braille terminals for applications.
  *
  * Copyright (C) 2002-2008 by
- *   Sébastien Hinderer <Sebastien.Hinderer@ens-lyon.org>
+ *   SÃ©bastien Hinderer <Sebastien.Hinderer@ens-lyon.org>
  *   Samuel Thibault <Samuel.Thibault@ens-lyon.org>
  * All rights reserved.
  *
@@ -28,8 +28,8 @@ BRLAPI_RELEASE
 BRLAPI_MAJOR
 BRLAPI_MINOR
 BRLAPI_REVISION
-Faire un fichier .in: @VAR@ est remplacé par la valeur de VAR
-telle que définie dans configure.ac.
+Faire un fichier .in: @VAR@ est remplacÃ© par la valeur de VAR
+telle que dÃ©finie dans configure.ac.
 *)
 
 (*
@@ -41,7 +41,7 @@ BRLAPI_SOCKETPATH
 BRLAPI_ETCDIR
 BRLAPI_AUTHKEYFILE
 BRLAPI_DEFAUTH
-Idem que précédemmment
+Idem que prÃ©cÃ©demmment
 C'est du ni<eau proto. Faut-il binder ?
 *)
 
@@ -143,7 +143,7 @@ external write :
 BRLAPI_KEYCODE_MAX
 Les constantes pour travailler sur les flags de touches ?
 Les KEY_SYM ?
-Oui: pour être cohérent avec le fait de fournir le int64
+Oui: pour Ãªtre cohÃ©rent avec le fait de fournir le int64
 Flags: entiers.
 *)
 

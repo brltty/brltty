@@ -1,101 +1,101 @@
-Ceci est le fichier README relatif à la version 0.2 du pilote VisioBraille
+Ceci est le fichier README relatif Ã  la version 0.2 du pilote VisioBraille
 pour BRLTTY.
 
-Ce pilote a été testé avec succès avec les terminaux équipés de PROMs 0.0g et
+Ce pilote a Ã©tÃ© testÃ© avec succÃ¨s avec les terminaux Ã©quipÃ©s de PROMs 0.0g et
 5.0q-fr. Il est vraisemblable que toutes les PROMs de version >=4
-soient supportées par le présent pilote.
+soient supportÃ©es par le prÃ©sent pilote.
 
 Auteur et mainteneur actuel:
-Sébastien Hinderer <Sebastien.Hinderer@ens-lyon.org>
+SÃ©bastien Hinderer <Sebastien.Hinderer@ens-lyon.org>
 
-Bien que ce pilote soit utilisé de manière intensive, il n'est pas impossible
+Bien que ce pilote soit utilisÃ© de maniÃ¨re intensive, il n'est pas impossible
 que certaines erreurs subsistent.
-Si vous en trouvez, ou si vous avez des commentaires/suggestions quant à
-l'évolution de ce pilote, n'hésitez surtout pas à me contacter. 
+Si vous en trouvez, ou si vous avez des commentaires/suggestions quant Ã 
+l'Ã©volution de ce pilote, n'hÃ©sitez surtout pas Ã  me contacter. 
 
-Notes pour l'installation et Paramètres
+Notes pour l'installation et ParamÃ¨tres
 =======================================
 
 Une table braille compatible avec celle fournie en standard dans le TVB
-(basée sur la table SAGEM) est disponible, dans le fichier text.visiob.tbl du
-répertoire ../../BrailleTables
+(basÃ©e sur la table SAGEM) est disponible, dans le fichier text.visiob.tbl du
+rÃ©pertoire ../../BrailleTables
 
-Paramètres acceptés par ce pilote :
+ParamÃ¨tres acceptÃ©s par ce pilote :
 
-- displaysize : permet de spécifier la taille de la plage tactile.
+- displaysize : permet de spÃ©cifier la taille de la plage tactile.
 
-- promversion: permet de spécifier la version de PROM utilisée.
-Ce paramètre n'est nécessaire que pour des PROMs de version inférieure ou
-égale à 3. Le support de ces PROMs n'étant disponible que pour Linux, et
+- promversion: permet de spÃ©cifier la version de PROM utilisÃ©e.
+Ce paramÃ¨tre n'est nÃ©cessaire que pour des PROMs de version infÃ©rieure ou
+Ã©gale Ã  3. Le support de ces PROMs n'Ã©tant disponible que pour Linux, et
 moyennant une modification du noyau, merci de contacter directement l'auteur
 si vous souhaitez utiliser une telle PROM.
 
-- baud: permet de spécifier la vitesse de la communication série.
-Ce parmètre n'est pas nécessaire pour les terminaux VisioBraille et
-n'est fourni que pour permettre l'utilisation d'émulateurs de terminaux qui
-ne pourraient pas communiquer à une vitesse suffisante. Par conséquent,
-n'utilisez pas ce paramètre, à moins de savoir ce que vous faites.
+- baud: permet de spÃ©cifier la vitesse de la communication sÃ©rie.
+Ce parmÃ¨tre n'est pas nÃ©cessaire pour les terminaux VisioBraille et
+n'est fourni que pour permettre l'utilisation d'Ã©mulateurs de terminaux qui
+ne pourraient pas communiquer Ã  une vitesse suffisante. Par consÃ©quent,
+n'utilisez pas ce paramÃ¨tre, Ã  moins de savoir ce que vous faites.
 
-Pour des informations sur la manière de passer des paramètres au pilote, ou
-pour toute autre précision concernant l'installation et l'utilisation de
-brltty, merci de consulter la documentation du répertoire ../../Documents
+Pour des informations sur la maniÃ¨re de passer des paramÃ¨tres au pilote, ou
+pour toute autre prÃ©cision concernant l'installation et l'utilisation de
+brltty, merci de consulter la documentation du rÃ©pertoire ../../Documents
 
 Notes pour l'utilisation. 
 =========================
 
-  Voici la description des fonctions attachées aux touches des claviers
+  Voici la description des fonctions attachÃ©es aux touches des claviers
 auxiliaires ainsi qu'aux commandes ploc-ploc.
 
 ~~a Active l'aide de BRLTTY
-~~b Active/désactive les bips
+~~b Active/dÃ©sactive les bips
 ~~c Menu de configuration BRLTTY (~~c pour le quitter)
 ~~d page down
 ~~e end
 ~~h home 
-~~i Active/désactive le mode info (Cf le manuel BRLTTY pour en savoir plus)
-~~r Réinitialise les paramètres de BRLTTY
-~~s Sauvegarde la configuration des paramètres BRLTTY  
+~~i Active/dÃ©sactive le mode info (Cf le manuel BRLTTY pour en savoir plus)
+~~r RÃ©initialise les paramÃ¨tres de BRLTTY
+~~s Sauvegarde la configuration des paramÃ¨tres BRLTTY  
 ~~u page up
 
 Clavier auxiliaire: 
 Sous Linux, les touches A1,A2,A3,A6,A7,A8 permettent d'activer les
-6 premières consoles virtuelles (correspond à alt-f1 à alt-f6).
-L'action de ces touches n'est pas définie sur les autres systèmes
+6 premiÃ¨res consoles virtuelles (correspond Ã  alt-f1 Ã  alt-f6).
+L'action de ces touches n'est pas dÃ©finie sur les autres systÃ¨mes
 d'exploitation.
-B6 coin supérieur gauche de l'écran
-D6 coin inférieur gauche de l'écran
-A4 fenêtre non vide précédente
-A5 fenêtre non vide suivante
-B7 ligne précédente
+B6 coin supÃ©rieur gauche de l'Ã©cran
+D6 coin infÃ©rieur gauche de l'Ã©cran
+A4 fenÃªtre non vide prÃ©cÃ©dente
+A5 fenÃªtre non vide suivante
+B7 ligne prÃ©cÃ©dente
 D7 ligne suivante
-C6 fenêtre précédente
-C8 fenêtre suivante
-C7 fenêtre contenant le curseur
-C1 flèche gauche
-C3 flèche droite
-B2 flèche haut
-D2 flèche bas
+C6 fenÃªtre prÃ©cÃ©dente
+C8 fenÃªtre suivante
+C7 fenÃªtre contenant le curseur
+C1 flÃ¨che gauche
+C3 flÃ¨che droite
+B2 flÃ¨che haut
+D2 flÃ¨che bas
 B3 curseur on/off
 D1 delete
 
-  En outre, les touches backspace, tab, ctrl, alt... sont siulées de la même
-manière que sous DOS et Windows.
+  En outre, les touches backspace, tab, ctrl, alt... sont siulÃ©es de la mÃªme
+maniÃ¨re que sous DOS et Windows.
 
 Autres liens
 ============
 
 Un programme permettant le transfert de visiobases entre PC et TVB est
-disponible à l'adresse suivante :
+disponible Ã  l'adresse suivante :
 
 http://brl.thefreecat.org
 
-Ce qu'il reste à faire
+Ce qu'il reste Ã  faire
 ======================
 
-  Pour les prochaines versions du driver, il serait peut-être souhaitable
-d'inclure la possibilité de reprohrammer les touches, un peu comme cela se
+  Pour les prochaines versions du driver, il serait peut-Ãªtre souhaitable
+d'inclure la possibilitÃ© de reprohrammer les touches, un peu comme cela se
 fait sous DOS avec la commande ~~f.
 
 
 -- 
-Sébastien Hinderer <Sebastien.Hinderer@ens-lyon.org>
+SÃ©bastien Hinderer <Sebastien.Hinderer@ens-lyon.org>
