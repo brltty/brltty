@@ -187,7 +187,7 @@ rm -fr "${RPM_BUILD_ROOT}"
 %{_sysconfdir}/brltty
 %doc %{_mandir}/man1/*
 %doc Documents/Manual-BRLTTY/English/*.{sgml,txt,html}
-%doc COPYING
+%doc LICENSE-GPL
 %doc Documents/ChangeLog Documents/TODO
 %doc doc/*
 %config(noreplace) %verify(not size md5 mtime) %{_sysconfdir}/brltty.conf

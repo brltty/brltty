@@ -9,7 +9,8 @@ dnl Process this file with autoconf 2.53 to produce a configure script.
 #
 # This is free software, placed under the terms of the
 # GNU General Public License, as published by the Free Software
-# Foundation.  Please see the file COPYING for details.
+# Foundation; either version 2 of the License, or (at your option) any
+# later version. Please see the file LICENSE-GPL for details.
 #
 # Web Page: http://mielke.cc/brltty/
 #
