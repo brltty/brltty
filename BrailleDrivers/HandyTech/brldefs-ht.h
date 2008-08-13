@@ -15,7 +15,7 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/* brldefs-ht.h : Useful definitions to handle HandyTech dispalys */
+/* brldefs-ht.h : Useful definitions to handle HandyTech displays */
 
 #ifndef BRLTTY_INCLUDED_HT_BRLDEFS
 #define BRLTTY_INCLUDED_HT_BRLDEFS
