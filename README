@@ -10,18 +10,18 @@ Web Page: http://mielke.cc/brltty/
 
 BRLTTY is free software. It comes with ABSOLUTELY NO WARRANTY.
 
-BRLTTY is placed under the terms of the GNU General Public License [GPL] as
-published by the Free Software Foundation; see the file COPYING for details.
-Version 2 (or any later version) of the GPL may be used when redistributing
-and/or modifying this software. This statement applies to all the files
-contained within this directory structure except for those explicitly listed in
-the next paragraph as a special exception has been made regarding those files
-which are part of the client side of BRLTTY's API.
+BRLTTY is placed under the terms of the GNU General Public License [GPL] as 
+published by the Free Software Foundation; see the file LICENSE-GPL for 
+details. Version 2 (or any later version) of the GPL may be used when 
+redistributing and/or modifying this software. This statement applies to all 
+the files contained within this directory structure except for those explicitly 
+listed in the next paragraph as a special exception has been made regarding 
+those files which are part of the client side of BRLTTY's API.
 
 A special exception has been made for those files which are part of the client
 side of BRLTTY's API, BrlAPI. They are placed under the terms of the GNU Lesser
 General Public License [LGPL] as published by the Free Software Foundation; see
-the file COPYING-API for details. Version 2.1 (or any later version) of the
+the file LICENSE-LGPL for details. Version 2.1 (or any later version) of the
 LGPL may be used when redistributing and/or modifying these files. The files
 covered by this special exception are:
 
