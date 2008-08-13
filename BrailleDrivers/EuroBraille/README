@@ -3,7 +3,7 @@ This is the EuroBraille family driver for BRLTTY, version 2.0.0
 Initial writing by Nicolas Pitre <nico@cam.org>, Copyright 1997-1998.
 
 This code is copyrighted under the GNU Public License.  See the file
-COPYING included with BRLTTY for details.
+LICENSE-GPL included with BRLTTY for details.
 
 This driver is currently maintained by 
 	* Yannick Plassiard <yan@mistigri.org>

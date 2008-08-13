@@ -18,7 +18,7 @@
 
 /* EcoBraille/braille.c - Braille display library for ECO Braille series
  * Copyright (C) 1999 by Oscar Fernandez <ofa@once.es>
- * See the GNU Public license for details in the ../COPYING file
+ * See the GNU Public license for details in the LICENSE-GPL file
  *
  * For debuging define DEBUG variable
  */
