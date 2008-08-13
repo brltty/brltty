@@ -4,7 +4,7 @@ display.
 
 Version 3.10, July 2008
 
-Copyright (C) 1995-2008 by The BRLTTY Team - All Rights Reserved.
+Copyright (C) 1995-2008 by The BRLTTY Developers.
 
 Web Page: http://mielke.cc/brltty/
 
@@ -14,23 +14,38 @@ BRLTTY is placed under the terms of the GNU General Public License [GPL] as
 published by the Free Software Foundation; see the file LICENSE-GPL for 
 details. Version 2 (or any later version) of the GPL may be used when 
 redistributing and/or modifying this software. This statement applies to all 
-the files contained within this directory structure except for those explicitly 
-listed in the next paragraph as a special exception has been made regarding 
-those files which are part of the client side of BRLTTY's API.
+the files contained within this directory structure except for those which are 
+explicitly listed as exceptions within the following paragraphs.
 
-A special exception has been made for those files which are part of the client
-side of BRLTTY's API, BrlAPI. They are placed under the terms of the GNU Lesser
-General Public License [LGPL] as published by the Free Software Foundation; see
-the file LICENSE-LGPL for details. Version 2.1 (or any later version) of the
-LGPL may be used when redistributing and/or modifying these files. The files
-covered by this special exception are:
+A special exception has been made for all of the text, attributes, and 
+contraction tables and subtables (which reside within the BrailleTables/ 
+subdirectory). They are placed under the terms of the GNU Lesser General Public 
+License [LGPL] as published by the Free Software Foundation; see the file 
+LICENSE-LGPL for details. Version 2.1 (or any later version) of the LGPL may be 
+used when redistributing and/or modifying these files. The files covered by 
+this special exception are:
 
-   Programs/brlapi.h.in
-   Programs/brlapi_keycodes.h
-   Programs/brlapi_protocol.h
-   Programs/brlapi_client.c
-   Programs/brlapi_common.h
-   BrailleDrivers/VisioBraille/brldefs-vs.h
+   *.ttb
+   *.tti
+   *.atb
+   *.ati
+   *.ctb
+   *.cti
+
+A special exception has been made for those files which are part of the client 
+side of BrlAPI (BRLTTY's Application Programming Interface). They are placed 
+under the terms of the GNU Lesser General Public License [LGPL] as published by 
+the Free Software Foundation; see the file LICENSE-LGPL for details. Version 
+2.1 (or any later version) of the LGPL may be used when redistributing and/or 
+modifying these files. The files covered by this special exception are:
+
+   brlapi.h.in
+   brlapi_keycodes.h
+   brlapi_protocol.h
+   brlapi_client.c
+   brlapi_common.h
+   brldefs-ht.h
+   brldefs-vs.h
 
 This software is maintained by: Dave Mielke <dave@mielke.cc>
 
