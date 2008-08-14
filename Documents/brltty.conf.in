@@ -86,9 +86,10 @@
 #release-device	off	# Don't release the device.
 
 # The text-table directive specifies which text table to use. Relative paths
-# are anchored at "@DATA_DIRECTORY@". If not specified, "@text_table@" will be
-# used.
+# are anchored at "@DATA_DIRECTORY@". If not specified, locale-based
+# autoselection with fallback to "@text_table@" will be performed.
 # (can be overridden with the -t [--text-table=] option)
+#text-table	auto	# locale-based autoselection with fallback to "@text_table@"
 #text-table	bg	# Bulgarian (from UNESCO report, 1954)
 #text-table	cs	# Czech (iso-8859-2)
 #text-table	da	# Danish

@@ -26,6 +26,7 @@
 #include <string.h>
 #include <strings.h>
 #include <errno.h>
+#include <locale.h>
 #include <signal.h>
 #include <fcntl.h>
 #include <sys/stat.h>
@@ -337,6 +338,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .flags = OPT_Config | OPT_Environ,
     .argument = strtext("file"),
     .setting.string = &opt_textTable,
+    .defaultSetting = "auto",
     .description = strtext("Path to text translation table file.")
   },
 
@@ -483,6 +485,25 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = strtext("Log the versions of the core, API, and built-in drivers, and then exit.")
   },
 END_OPTION_TABLE
+
+static int
+testTextTable (char *tableName) {
+  int found = 0;
+  char *fileName = tableName;
+  char *filePath;
+
+  fixTextTablePath(&fileName);
+  LogPrint(LOG_DEBUG, "checking for text table: %s", fileName);
+
+  if ((filePath = makePath(opt_tablesDirectory, fileName))) {
+    if (access(filePath, F_OK) != -1) found = 1;
+
+    free(filePath);
+  }
+
+  if (fileName != tableName) free(fileName);
+  return found;
+}
 
 static int
 replaceTextTable (const char *file) {
@@ -2454,14 +2475,46 @@ startup (int argc, char *argv[]) {
   LogPrint(LOG_INFO, "%s: %s", gettext("Library Directory"), opt_libraryDirectory);
   LogPrint(LOG_INFO, "%s: %s", gettext("Tables Directory"), opt_tablesDirectory);
 
+  /* handle text table option */
   if (*opt_textTable) {
-    fixTextTablePath(&opt_textTable);
-    if (!replaceTextTable(opt_textTable)) opt_textTable = "";
+    if (strcmp(opt_textTable, "auto") == 0) {
+      const char *locale = setlocale(LC_CTYPE, NULL);
+      opt_textTable = "";
+
+      if (locale) {
+        char name[strlen(locale) + 1];
+
+        {
+          size_t length = strcspn(locale, ".@");
+          strncpy(name, locale, length);
+          name[length] = 0;
+        }
+
+        if (!testTextTable(name)) {
+          char *delimiter = strchr(name, '_');
+
+          if (delimiter) {
+            *delimiter = 0;
+            if (!testTextTable(name)) name[0] = 0;
+          }
+        }
+
+        if (name[0]) {
+          opt_textTable = strdupWrapper(name);
+          fixTextTablePath(&opt_textTable);
+          if (!replaceTextTable(opt_textTable)) opt_textTable = "";
+        }
+      }
+    } else {
+      fixTextTablePath(&opt_textTable);
+      if (!replaceTextTable(opt_textTable)) opt_textTable = "";
+    }
   }
-  if (!*opt_textTable) {
-    opt_textTable = TEXT_TABLE;
-  }
+
+  if (!*opt_textTable) opt_textTable = TEXT_TABLE;
   LogPrint(LOG_INFO, "%s: %s", gettext("Text Table"), opt_textTable);
+exit(0);
+
 #ifdef ENABLE_PREFERENCES_MENU
 #ifdef ENABLE_TABLE_SELECTION
   globPrepare(&glob_textTable, opt_tablesDirectory,
@@ -2470,14 +2523,15 @@ startup (int argc, char *argv[]) {
 #endif /* ENABLE_TABLE_SELECTION */
 #endif /* ENABLE_PREFERENCES_MENU */
 
+  /* handle attributes table option */
   if (*opt_attributesTable) {
     fixAttributesTablePath(&opt_attributesTable);
     if (!replaceAttributesTable(opt_attributesTable)) opt_attributesTable = "";
   }
-  if (!*opt_attributesTable) {
-    opt_attributesTable = ATTRIBUTES_TABLE;
-  }
+
+  if (!*opt_attributesTable) opt_attributesTable = ATTRIBUTES_TABLE;
   LogPrint(LOG_INFO, "%s: %s", gettext("Attributes Table"), opt_attributesTable);
+
 #ifdef ENABLE_PREFERENCES_MENU
 #ifdef ENABLE_TABLE_SELECTION
   globPrepare(&glob_attributesTable, opt_tablesDirectory,
@@ -2487,6 +2541,7 @@ startup (int argc, char *argv[]) {
 #endif /* ENABLE_PREFERENCES_MENU */
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
+  /* handle contraction table option */
   if (*opt_contractionTable) {
     fixContractionTablePath(&opt_contractionTable);
     loadContractionTable(opt_contractionTable);

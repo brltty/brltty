@@ -24,7 +24,6 @@
 
 #include "scr.h"
 #include "tunes.h"
-#include "charset.h"
 #include "cut.h"
 
 /* Global state variables */

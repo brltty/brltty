@@ -1745,7 +1745,7 @@ is rewritten to standard output as contracted braille.
     <ref id="build-data-directory" name="--with-data-directory"> build option.
     The <tt/.ctb/ extension is optional.
     If this option isn't supplied then <tt/en-us-g2/ is assumed.
-  <tag><tt/-t/<em/file/ <tt/--text-table=/<em/file/</tag>
+  <tag><tt/-t/<em/file/|<tt/auto/ <tt/--text-table=/<em/file/|<tt/auto/</tag>
     The file system path to the text table to use.
     If it's relative then it's anchored at the directory configured via the
     <ref id="build-data-directory" name="--with-data-directory"> build option.
@@ -2487,7 +2487,7 @@ The following directives are recognized:
     build option for the defaults established during the build procedure.
     This directive can be overridden with the
     <ref id="options-speech-parameters" name="-S"> command line option.
-  <tag><tt/text-table/ <em/file/<label id="configure-text-table"></tag>
+  <tag><tt/text-table/ <em/file/|<tt/auto/<label id="configure-text-table"></tag>
     Specify the text table
     (see section <ref id="table-text" name="Text Tables"> for details).
     If a relative path is supplied, then it's anchored at <tt>/etc/brltty</>
@@ -2497,6 +2497,7 @@ The following directives are recognized:
     The <tt/.ttb/ extension is optional.
     See the <ref id="build-text-table" name="--with-text-table">
     build option for the default established during the build procedure.
+    The default is to perform locale-based autoselection with fallback to <tt/nabcc/.
     This directive can be overridden with the
     <ref id="options-text-table" name="-t"> command line option.
 </descrip>
@@ -3945,6 +3946,7 @@ BRLTTY is initially configured to use the
 In addition to this default text table,
 several alternatives are provided:
 <descrip>
+  <tag/auto/locale-based autodetection
   <tag/bg/Bulgarian (from UNESCO report, 1954)
   <tag/brf/good for viewing <tt/.brf/ files in text editor or pager
   <tag/cs/Czech (iso-8859-2)
