@@ -2513,7 +2513,6 @@ startup (int argc, char *argv[]) {
 
   if (!*opt_textTable) opt_textTable = TEXT_TABLE;
   LogPrint(LOG_INFO, "%s: %s", gettext("Text Table"), opt_textTable);
-exit(0);
 
 #ifdef ENABLE_PREFERENCES_MENU
 #ifdef ENABLE_TABLE_SELECTION
