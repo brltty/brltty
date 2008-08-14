@@ -20,9 +20,10 @@
 #
 # Samuel Thibault <samuel.thibault@ens-lyon.org>
 # 
-# Note: this is based on the Unesco report on the progress of unification of
+# This table is based on the Unesco report on the progress of unification of
 # braille writing « L'ÉCRITURE BRAILLE DANS LE MONDE », by Sir Clutha
-# MACKENZIE, dated _1954_, so this table may be quite outdated.
+# MACKENZIE: http://unesdoc.unesco.org/images/0013/001352/135251fo.pdf
+# The document is dated 1954, so this table may be quite outdated.
 
 char \u010D	(1  4 6  )  # ⠩ č [LATIN SMALL LETTER C WITH CARON]
 char \u0161	( 234 6  )  # ⠮ š [LATIN SMALL LETTER S WITH CARON]
