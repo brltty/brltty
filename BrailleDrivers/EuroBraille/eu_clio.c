@@ -336,7 +336,7 @@ int     clio_reset(BrailleDisplay *brl)
   static const unsigned char packet[] = {0X02, 'S', 'I'};
 
   LogPrint(LOG_INFO, "eu Clio hardware reset requested");
-  if (clio_writePacket(brl, (unsigned char *)packet, 3) == -1)
+  if (clio_writePacket(brl, packet, sizeof(packet)) == -1)
     {
       LogPrint(LOG_WARNING, "Clio: Failed to send ident request.\n");
       return -1;
