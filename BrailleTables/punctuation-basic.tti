@@ -1,0 +1,34 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2008 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+# This BRLTTY text subtable defines the braille representations for the basic
+# English punctuation marks.
+
+char \x20	(        )  # ⠀   [SPACE]
+char \x21	( 23 5   )  # ⠖ ! [EXCLAMATION MARK]
+char \x22	( 23 56  )  # ⠶ " [QUOTATION MARK]
+char \x27	(  3     )  # ⠄ ' [APOSTROPHE]
+char \x28	( 23  6  )  # ⠦ ( [LEFT PARENTHESIS]
+char \x29	(  3 56  )  # ⠴ ) [RIGHT PARENTHESIS]
+char \x2C	( 2      )  # ⠂ , [COMMA]
+char \x2D	(  3  6  )  # ⠤ - [HYPHEN-MINUS]
+char \x2E	( 2  56  )  # ⠲ . [FULL STOP]
+char \x3A	( 2  5   )  # ⠒ : [COLON]
+char \x3B	( 23     )  # ⠆ ; [SEMICOLON]
+char \x3F	( 23  6  )  # ⠦ ? [QUESTION MARK]
+char \xA0	(        )  # ⠀   [NO-BREAK SPACE]

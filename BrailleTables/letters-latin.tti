@@ -17,7 +17,7 @@
 ###############################################################################
 
 # This BRLTTY text subtable defines the standard braille representations
-# for the 26-letter alphabet used by many languages.
+# for the 26-letter Latin alphabet used by many languages.
 
 # uppercase letters
 char \x41	(1     7 )  # ⡁ A [LATIN CAPITAL LETTER A]
