@@ -93,6 +93,7 @@
 #text-table	cs	# Czech (iso-8859-2)
 #text-table	da	# Danish
 #text-table	de	# German
+#text-table	en_CA	# English (Canada)
 #text-table	en_UK	# English (United Kingdom)
 #text-table	en_US	# English (United States)
 #text-table	eo	# Esperanto

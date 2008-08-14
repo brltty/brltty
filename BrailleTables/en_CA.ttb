@@ -1,0 +1,100 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2008 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+# BRLTTY Text Table - English (Canada)
+#
+# Dave Mielke <dave@mielke.cc>
+
+# ASCII character representations as used by English-speaking North Americans
+include en-na-ascii.tti
+
+# equivalents to \x20 [SPACE]
+char \xA0	(        )  # ⠀   [NO-BREAK SPACE]
+
+# equivalents to \x2D [HYPHEN-MINUS]
+char \xAD	(  3  6  )  # ⠤ ­ [SOFT HYPHEN]
+char \u2010	(  3  6  )  # ⠤ ‐ [HYPHEN]
+char \u2011	(  3  6  )  # ⠤ ‑ [NON-BREAKING HYPHEN]
+char \u2013	(  3  6  )  # ⠤ – [EN DASH]
+char \u2212	(  3  6  )  # ⠤ − [MINUS SIGN]
+
+# equivalents to \x7C [VERTICAL LINE]
+char \xA6	(12  56  )  # ⠳ ¦ [BROKEN BAR]
+
+# symbols represented using Letters with dot 8 added
+char \xA9	(1  4   8)  # ⢉ © [COPYRIGHT SIGN]
+char \xB0	(1  45  8)  # ⢙ ° [DEGREE SIGN]
+char \u20AC	(1   5  8)  # ⢑ € [EURO SIGN]
+char \xB5	(1 34   8)  # ⢍ µ [MICRO SIGN]
+char \xAC	(1 345  8)  # ⢝ ¬ [NOT SIGN]
+char \xB6	(1234   8)  # ⢏ ¶ [PILCROW SIGN]
+char \xAE	(123 5  8)  # ⢗ ® [REGISTERED SIGN]
+char \xA7	( 234   8)  # ⢎ § [SECTION SIGN]
+char \xA5	(1 3456 8)  # ⢽ ¥ [YEN SIGN]
+
+# symbols represented using punctuation with dot 7 added
+char \xA1	( 234 67 )  # ⡮ ¡ [INVERTED EXCLAMATION MARK]
+char \xBF	(1  4567 )  # ⡹ ¿ [INVERTED QUESTION MARK]
+char \xB7	(   4 67 )  # ⡨ · [MIDDLE DOT]
+char \xAB	(123 567 )  # ⡷ « [LEFT-POINTING DOUBLE ANGLE QUOTATION MARK]
+char \xBB	( 234567 )  # ⡾ » [RIGHT-POINTING DOUBLE ANGLE QUOTATION MARK]
+char \xB1	(  34 67 )  # ⡬ ± [PLUS-MINUS SIGN]
+char \xD7	(1    67 )  # ⡡ × [MULTIPLICATION SIGN]
+char \xF7	(  34  7 )  # ⡌ ÷ [DIVISION SIGN]
+char \xA2	(12 4 67 )  # ⡫ ¢ [CENT SIGN]
+char \xA3	(  34567 )  # ⡼ £ [POUND SIGN]
+
+# French lowercase accented letters
+char \xE7	(1234 6 8)  # ⢯ ç [LATIN SMALL LETTER C WITH CEDILLA]
+char \xE9	(123456 8)  # ⢿ é [LATIN SMALL LETTER E WITH ACUTE]
+char \xE0	(123 56 8)  # ⢷ à [LATIN SMALL LETTER A WITH GRAVE]
+char \xE8	( 234 6 8)  # ⢮ è [LATIN SMALL LETTER E WITH GRAVE]
+char \xF9	( 23456 8)  # ⢾ ù [LATIN SMALL LETTER U WITH GRAVE]
+char \xE2	(1    6 8)  # ⢡ â [LATIN SMALL LETTER A WITH CIRCUMFLEX]
+char \xEA	(12   6 8)  # ⢣ ê [LATIN SMALL LETTER E WITH CIRCUMFLEX]
+char \xEE	(1  4 6 8)  # ⢩ î [LATIN SMALL LETTER I WITH CIRCUMFLEX]
+char \xF4	(1  456 8)  # ⢹ ô [LATIN SMALL LETTER O WITH CIRCUMFLEX]
+char \xFB	(1   56 8)  # ⢱ û [LATIN SMALL LETTER U WITH CIRCUMFLEX]
+char \xEB	(12 4 6 8)  # ⢫ ë [LATIN SMALL LETTER E WITH DIAERESIS]
+char \xEF	(12 456 8)  # ⢻ ï [LATIN SMALL LETTER I WITH DIAERESIS]
+
+# French uppercase accented letters
+char \xC7	(1234 678)  # ⣯ Ç [LATIN CAPITAL LETTER C WITH CEDILLA]
+char \xC9	(12345678)  # ⣿ É [LATIN CAPITAL LETTER E WITH ACUTE]
+char \xC0	(123 5678)  # ⣷ À [LATIN CAPITAL LETTER A WITH GRAVE]
+char \xC8	( 234 678)  # ⣮ È [LATIN CAPITAL LETTER E WITH GRAVE]
+char \xD9	( 2345678)  # ⣾ Ù [LATIN CAPITAL LETTER U WITH GRAVE]
+char \xC2	(1    678)  # ⣡ Â [LATIN CAPITAL LETTER A WITH CIRCUMFLEX]
+char \xCA	(12   678)  # ⣣ Ê [LATIN CAPITAL LETTER E WITH CIRCUMFLEX]
+char \xCE	(1  4 678)  # ⣩ Î [LATIN CAPITAL LETTER I WITH CIRCUMFLEX]
+char \xD4	(1  45678)  # ⣹ Ô [LATIN CAPITAL LETTER O WITH CIRCUMFLEX]
+char \xDB	(1   5678)  # ⣱ Û [LATIN CAPITAL LETTER U WITH CIRCUMFLEX]
+char \xCB	(12 4 678)  # ⣫ Ë [LATIN CAPITAL LETTER E WITH DIAERESIS]
+char \xCF	(12 45678)  # ⣻ Ï [LATIN CAPITAL LETTER I WITH DIAERESIS]
+
+# German lowercase accented letters
+char \xE4	(  345  8)  # ⢜ ä [LATIN SMALL LETTER A WITH DIAERESIS]
+char \xF6	( 2 4 6 8)  # ⢪ ö [LATIN SMALL LETTER O WITH DIAERESIS]
+char \xFC	(12  56 8)  # ⢳ ü [LATIN SMALL LETTER U WITH DIAERESIS]
+
+# German uppercase accented letters
+char \xC4	(  345 78)  # ⣜ Ä [LATIN CAPITAL LETTER A WITH DIAERESIS]
+char \xD6	( 2 4 678)  # ⣪ Ö [LATIN CAPITAL LETTER O WITH DIAERESIS]
+char \xDC	(12  5678)  # ⣳ Ü [LATIN CAPITAL LETTER U WITH DIAERESIS]
+
+include common.tti
