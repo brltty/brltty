@@ -25,17 +25,36 @@
 # MACKENZIE: http://unesdoc.unesco.org/images/0013/001352/135251fo.pdf
 # The document is dated 1954, so this table may be quite outdated.
 
-char \xE7	(1    6  )  # ⠡ ç [LATIN SMALL LETTER C WITH CEDILLA]
-char \u011F	(12   6  )  # ⠣ ğ [LATIN SMALL LETTER G WITH BREVE]
+# letters as usual
+include letters-latin.tti
+char \x69	( 2 4    )  # ⠊ i [LATIN SMALL LETTER I]
 char \u0130	( 2 4    )  # ⠊ İ [LATIN CAPITAL LETTER I WITH DOT ABOVE]
 char \u0131	(  3 5   )  # ⠔ ı [LATIN SMALL LETTER DOTLESS I]
 char \x49	(  3 5   )  # ⠔ I [LATIN CAPITAL LETTER I]
+
+# lowercase accented letters
+char \xE7	(1    6  )  # ⠡ ç [LATIN SMALL LETTER C WITH CEDILLA]
+char \u011F	(12   6  )  # ⠣ ğ [LATIN SMALL LETTER G WITH BREVE]
 char \xF6	( 2 4 6  )  # ⠪ ö [LATIN SMALL LETTER O WITH DIAERESIS]
 char \u015F	(1  4 6  )  # ⠩ ş [LATIN SMALL LETTER S WITH CEDILLA]
 char \xFC	(12  56  )  # ⠳ ü [LATIN SMALL LETTER U WITH DIAERESIS]
-
 char \xE2	(  345   )  # ⠜ â [LATIN SMALL LETTER A WITH CIRCUMFLEX]
 char \xEE	(  34    )  # ⠌ î [LATIN SMALL LETTER I WITH CIRCUMFLEX]
 char \xFB	(1   56  )  # ⠱ û [LATIN SMALL LETTER U WITH CIRCUMFLEX]
 
+# uppercase accented letters
+char \xC7	(1    67 )  # ⡡ Ç [LATIN CAPITAL LETTER C WITH CEDILLA]
+char \u011E	(12   67 )  # ⡣ Ğ [LATIN CAPITAL LETTER G WITH BREVE]
+char \xD6	( 2 4 67 )  # ⡪ Ö [LATIN CAPITAL LETTER O WITH DIAERESIS]
+char \u015E	(1  4 67 )  # ⡩ Ş [LATIN CAPITAL LETTER S WITH CEDILLA]
+char \xDC	(12  567 )  # ⡳ Ü [LATIN CAPITAL LETTER U WITH DIAERESIS]
+char \xC2	(  345 7 )  # ⡜ Â [LATIN CAPITAL LETTER A WITH CIRCUMFLEX]
+char \xCE	(  34  7 )  # ⡌ Î [LATIN CAPITAL LETTER I WITH CIRCUMFLEX]
+char \xDB	(1   567 )  # ⡱ Û [LATIN CAPITAL LETTER U WITH CIRCUMFLEX]
+
+include numbers-dot8.tti
+
+include punctuation-basic.tti
 char \x3F	( 2   6  )  # ⠢ ? [QUESTION MARK]
+
+include common.tti
