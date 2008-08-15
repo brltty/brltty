@@ -26,8 +26,22 @@
 # The document is dated 1954, so this table may be quite outdated.
 
 # a-z as usual
+include letters-latin.tti
 
+# lowercase accented letters
 char \xE4	(  345   )  # ⠜ ä [LATIN SMALL LETTER A WITH DIAERESIS]
 char \xF5	( 234 6  )  # ⠮ õ [LATIN SMALL LETTER O WITH TILDE]
 char \xF6	( 2 4 6  )  # ⠪ ö [LATIN SMALL LETTER O WITH DIAERESIS]
 char \xFC	(12  56  )  # ⠳ ü [LATIN SMALL LETTER U WITH DIAERESIS]
+
+# uppercase accented letters
+char \xC4	(  345 7 )  # ⡜ Ä [LATIN CAPITAL LETTER A WITH DIAERESIS]
+char \xD5	( 234 67 )  # ⡮ Õ [LATIN CAPITAL LETTER O WITH TILDE]
+char \xD6	( 2 4 67 )  # ⡪ Ö [LATIN CAPITAL LETTER O WITH DIAERESIS]
+char \xDC	(12  567 )  # ⡳ Ü [LATIN CAPITAL LETTER U WITH DIAERESIS]
+
+include numbers-dot8.tti
+
+include punctuation-basic.tti
+
+include common.tti
