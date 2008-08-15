@@ -24,7 +24,7 @@
 # "Maison pour tous", 19 rue Victor Hugo 70100 GRAY
 # esperanto-muzeo@wanadoo.fr
 
-# letters as usual
+# letters as usual (except qwxy)
 include letters-latin.tti
 # except w (because dots 2456 is j with circumflex)
 char \x77	( 23456  )  # ⠾ w [LATIN SMALL LETTER W]
