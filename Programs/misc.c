@@ -444,28 +444,25 @@ makePath (const char *directory, const char *file) {
   return joinStrings(&components[first], count-first);
 }
 
-void
-fixPath (char **path, const char *extension) {
-  const unsigned int pathLength = strlen(*path);
-  const unsigned int extensionLength = strlen(extension);
-  char buffer[pathLength + extensionLength + 1];
-  unsigned int length = 0;
+char *
+ensureExtension (const char *path, const char *extension) {
+  const char *components[2];
+  int count = 0;
+  const size_t pathLength = strlen(path);
+  const size_t extensionLength = strlen(extension);
 
-  memcpy(&buffer[length], *path, pathLength);
-  length += pathLength;
-
-  if (extensionLength) {
+  components[count++] = path;
+  if (extensionLength)
     if ((pathLength < extensionLength) ||
-        (memcmp(&buffer[length-extensionLength], extension, extensionLength) != 0)) {
-      memcpy(&buffer[length], extension, extensionLength);
-      length += extensionLength;
-    }
-  }
+        (strcmp(&path[pathLength-extensionLength], extension) != 0))
+      components[count++] = extension;
 
-  if (length > pathLength) {
-    buffer[length] = 0;
-    *path = strdupWrapper(buffer);
-  }
+  return joinStrings(components, count);
+}
+
+int
+testPath (const char *path) {
+  return access(path, F_OK) != -1;
 }
 
 int
@@ -571,7 +568,7 @@ getDeviceDirectory (void) {
         const unsigned int rootLength = strlen(root);
         char path[rootLength + directoryLength + 1];
         snprintf(path, sizeof(path), "%s%s", root, directory);
-        if (access(path, F_OK) != -1) {
+        if (testPath(path)) {
           deviceDirectory = strdupWrapper(path);
           goto found;
         }
@@ -718,7 +715,7 @@ openDataFile (const char *path, const char *mode, int optional) {
   if (!*userDirectory) {
     userPath = NULL;
   } else if ((userPath = makePath(userDirectory, name))) {
-    if (access(userPath, F_OK) != -1) {
+    if (testPath(userPath)) {
       file = openFile(userPath, mode, optional);
       goto done;
     }

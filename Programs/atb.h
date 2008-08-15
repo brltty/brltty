@@ -30,7 +30,7 @@ extern AttributesTable *attributesTable;
 extern AttributesTable *compileAttributesTable (const char *name);
 extern void destroyAttributesTable (AttributesTable *table);
 
-extern void fixAttributesTablePath (char **path);
+extern char *ensureAttributesTableExtension (const char *path);
 
 extern unsigned char convertAttributesToDots (AttributesTable *table, unsigned char attributes);
 

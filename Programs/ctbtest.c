@@ -190,59 +190,71 @@ main (int argc, char *argv[]) {
   outputBuffer = NULL;
 
   {
-    char *contractionTablePath;
+    char *contractionTableFile;
 
-    fixContractionTablePath(&opt_contractionTable);
-    if ((contractionTablePath = makePath(opt_tablesDirectory, opt_contractionTable))) {
-      if ((contractionTable = compileContractionTable(contractionTablePath))) {
-        if (*opt_textTable) {
-          char *textTablePath;
+    if ((contractionTableFile = ensureContractionTableExtension(opt_contractionTable))) {
+      char *contractionTablePath;
 
-          fixTextTablePath(&opt_textTable);
-          if ((textTablePath = makePath(opt_tablesDirectory, opt_textTable))) {
-            if (!(textTable = compileTextTable(textTablePath))) status = 4;
+      if ((contractionTablePath = makePath(opt_tablesDirectory, contractionTableFile))) {
+        if ((contractionTable = compileContractionTable(contractionTablePath))) {
+          if (*opt_textTable) {
+            char *textTableFile;
 
-            free(textTablePath);
-          } else {
-            status = 4;
-          }
-        } else {
-          opt_textTable = TEXT_TABLE;
-        }
+            if ((textTableFile = ensureTextTableExtension(opt_textTable))) {
+              char *textTablePath;
 
-        if (textTable) {
-          if (argc) {
-            do {
-              char *path = *argv;
-              if (strcmp(path, "-") == 0) {
-                status = contractFile(stdin);
+              if ((textTablePath = makePath(opt_tablesDirectory, textTableFile))) {
+                if (!(textTable = compileTextTable(textTablePath))) status = 4;
+
+                free(textTablePath);
               } else {
-                FILE *file = fopen(path, "r");
-                if (file) {
-                  status = contractFile(file);
-                  fclose(file);
-                } else {
-                  LogPrint(LOG_ERR, "cannot open input file: %s: %s",
-                           path, strerror(errno));
-                  status = 6;
-                }
+                status = 4;
               }
-            } while ((status == 0) && (++argv, --argc));
+
+              free(textTableFile);
+            } else {
+              status = 4;
+            }
           } else {
-            status = contractFile(stdin);
+            opt_textTable = TEXT_TABLE;
           }
 
-          destroyTextTable(textTable);
+          if (textTable) {
+            if (argc) {
+              do {
+                char *path = *argv;
+                if (strcmp(path, "-") == 0) {
+                  status = contractFile(stdin);
+                } else {
+                  FILE *file = fopen(path, "r");
+                  if (file) {
+                    status = contractFile(file);
+                    fclose(file);
+                  } else {
+                    LogPrint(LOG_ERR, "cannot open input file: %s: %s",
+                             path, strerror(errno));
+                    status = 6;
+                  }
+                }
+              } while ((status == 0) && (++argv, --argc));
+            } else {
+              status = contractFile(stdin);
+            }
+
+            destroyTextTable(textTable);
+          }
+
+          destroyContractionTable(contractionTable);
+        } else {
+          status = 3;
         }
 
-        destroyContractionTable(contractionTable);
+        free(contractionTablePath);
       } else {
         status = 3;
       }
 
-      free(contractionTablePath);
-    } else {
-      status = 3;
+      free(contractionTableFile);
     }
   }
 

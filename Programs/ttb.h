@@ -30,7 +30,7 @@ extern TextTable *textTable;
 extern TextTable *compileTextTable (const char *name);
 extern void destroyTextTable (TextTable *table);
 
-extern void fixTextTablePath (char **path);
+extern char *ensureTextTableExtension (const char *path);
 
 extern unsigned char convertCharacterToDots (TextTable *table, wchar_t character);
 extern wchar_t convertDotsToCharacter (TextTable *table, unsigned char dots);

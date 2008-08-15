@@ -167,7 +167,8 @@ extern const char *locatePathExtension (const char *path);
 extern int isExplicitPath (const char *path);
 
 extern char *makePath (const char *directory, const char *file);
-extern void fixPath (char **path, const char *extension);
+extern char *ensureExtension (const char *path, const char *extension);
+extern int testPath (const char *path);
 extern int makeDirectory (const char *path);
 
 extern const char *writableDirectory;

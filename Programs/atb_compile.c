@@ -198,7 +198,7 @@ destroyAttributesTable (AttributesTable *table) {
   }
 }
 
-void
-fixAttributesTablePath (char **path) {
-  fixPath(path, ATTRIBUTES_TABLE_EXTENSION);
+char *
+ensureAttributesTableExtension (const char *path) {
+  return ensureExtension(path, ATTRIBUTES_TABLE_EXTENSION);
 }

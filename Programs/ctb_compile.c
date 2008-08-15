@@ -692,7 +692,7 @@ destroyContractionTable (ContractionTable *table) {
   }
 }
 
-void
-fixContractionTablePath (char **path) {
-  fixPath(path, CONTRACTION_TABLE_EXTENSION);
+char *
+ensureContractionTableExtension (const char *path) {
+  return ensureExtension(path, CONTRACTION_TABLE_EXTENSION);
 }

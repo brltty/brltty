@@ -256,7 +256,7 @@ destroyTextTable (TextTable *table) {
   }
 }
 
-void
-fixTextTablePath (char **path) {
-  fixPath(path, TEXT_TABLE_EXTENSION);
+char *
+ensureTextTableExtension (const char *path) {
+  return ensureExtension(path, TEXT_TABLE_EXTENSION);
 }

@@ -487,57 +487,80 @@ BEGIN_OPTION_TABLE(programOptions)
 END_OPTION_TABLE
 
 static int
-testTextTable (char *tableName) {
-  int found = 0;
-  char *fileName = tableName;
-  char *filePath;
+testTextTable (char *table) {
+  int exists = 0;
+  char *file;
 
-  fixTextTablePath(&fileName);
-  LogPrint(LOG_DEBUG, "checking for text table: %s", fileName);
+  if ((file = ensureTextTableExtension(table))) {
+    char *path;
 
-  if ((filePath = makePath(opt_tablesDirectory, fileName))) {
-    if (access(filePath, F_OK) != -1) found = 1;
+    LogPrint(LOG_DEBUG, "checking for text table: %s", file);
 
-    free(filePath);
+    if ((path = makePath(opt_tablesDirectory, file))) {
+      if (testPath(path)) exists = 1;
+
+      free(path);
+    }
+
+    free(file);
   }
 
-  if (fileName != tableName) free(fileName);
-  return found;
+  return exists;
 }
 
 static int
-replaceTextTable (const char *file) {
+replaceTextTable (const char *name) {
   int ok = 0;
-  char *path = makePath(opt_tablesDirectory, file);
-  if (path) {
-    TextTable *newTable = compileTextTable(path);
-    if (newTable) {
-      TextTable *oldTable = textTable;
-      textTable = newTable;
-      destroyTextTable(oldTable);
-      ok = 1;
+  char *file;
+
+  if ((file = ensureTextTableExtension(name))) {
+    char *path;
+
+    if ((path = makePath(opt_tablesDirectory, file))) {
+      TextTable *newTable;
+
+      if ((newTable = compileTextTable(path))) {
+        TextTable *oldTable = textTable;
+        textTable = newTable;
+        destroyTextTable(oldTable);
+        ok = 1;
+      }
+
+      free(path);
     }
-    free(path);
+
+    free(file);
   }
-  if (!ok) LogPrint(LOG_ERR, "%s: %s", gettext("cannot load text table"), file);
+
+  if (!ok) LogPrint(LOG_ERR, "%s: %s", gettext("cannot load text table"), name);
   return ok;
 }
 
 static int
-replaceAttributesTable (const char *file) {
+replaceAttributesTable (const char *name) {
   int ok = 0;
-  char *path = makePath(opt_tablesDirectory, file);
-  if (path) {
-    AttributesTable *newTable = compileAttributesTable(path);
-    if (newTable) {
-      AttributesTable *oldTable = attributesTable;
-      attributesTable = newTable;
-      destroyAttributesTable(oldTable);
-      ok = 1;
+  char *file;
+
+  if ((file = ensureAttributesTableExtension(name))) {
+    char *path;
+
+    if ((path = makePath(opt_tablesDirectory, file))) {
+      AttributesTable *newTable;
+
+      if ((newTable = compileAttributesTable(path))) {
+        AttributesTable *oldTable = attributesTable;
+        attributesTable = newTable;
+        destroyAttributesTable(oldTable);
+        ok = 1;
+      }
+
+      free(path);
     }
-    free(path);
+
+    free(file);
   }
-  if (!ok) LogPrint(LOG_ERR, "%s: %s", gettext("cannot load attributes table"), file);
+
+  if (!ok) LogPrint(LOG_ERR, "%s: %s", gettext("cannot load attributes table"), name);
   return ok;
 }
 
@@ -562,19 +585,31 @@ exitContractionTable (void) {
 }
 
 static int
-loadContractionTable (const char *file) {
+loadContractionTable (const char *name) {
   ContractionTable *table = NULL;
-  if (*file) {
-    char *path = makePath(opt_tablesDirectory, file);
-    LogPrint(LOG_DEBUG, "compiling contraction table: %s", file);
-    if (path) {
-      if (!(table = compileContractionTable(path))) {
-        LogPrint(LOG_ERR, "%s: %s", gettext("cannot compile contraction table"), path);
+
+  if (*name) {
+    char *file;
+
+    if ((file = ensureContractionTableExtension(name))) {
+      char *path;
+
+      if ((path = makePath(opt_tablesDirectory, file))) {
+        LogPrint(LOG_DEBUG, "compiling contraction table: %s", path);
+
+        if (!(table = compileContractionTable(path))) {
+          LogPrint(LOG_ERR, "%s: %s", gettext("cannot compile contraction table"), path);
+        }
+
+        free(path);
       }
-      free(path);
+
+      free(file);
     }
+
     if (!table) return 0;
   }
+
   if (contractionTable) destroyContractionTable(contractionTable);
   contractionTable = table;
   return 1;
@@ -2499,14 +2534,11 @@ startup (int argc, char *argv[]) {
           }
         }
 
-        if (name[0]) {
-          opt_textTable = strdupWrapper(name);
-          fixTextTablePath(&opt_textTable);
-          if (!replaceTextTable(opt_textTable)) opt_textTable = "";
-        }
+        if (name[0])
+          if (replaceTextTable(name))
+            opt_textTable = strdupWrapper(name);
       }
     } else {
-      fixTextTablePath(&opt_textTable);
       if (!replaceTextTable(opt_textTable)) opt_textTable = "";
     }
   }
@@ -2523,11 +2555,9 @@ startup (int argc, char *argv[]) {
 #endif /* ENABLE_PREFERENCES_MENU */
 
   /* handle attributes table option */
-  if (*opt_attributesTable) {
-    fixAttributesTablePath(&opt_attributesTable);
-    if (!replaceAttributesTable(opt_attributesTable)) opt_attributesTable = "";
-  }
-
+  if (*opt_attributesTable)
+    if (!replaceAttributesTable(opt_attributesTable))
+      opt_attributesTable = "";
   if (!*opt_attributesTable) opt_attributesTable = ATTRIBUTES_TABLE;
   LogPrint(LOG_INFO, "%s: %s", gettext("Attributes Table"), opt_attributesTable);
 
@@ -2541,13 +2571,11 @@ startup (int argc, char *argv[]) {
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
   /* handle contraction table option */
-  if (*opt_contractionTable) {
-    fixContractionTablePath(&opt_contractionTable);
-    loadContractionTable(opt_contractionTable);
-  }
   atexit(exitContractionTable);
+  if (*opt_contractionTable) loadContractionTable(opt_contractionTable);
   LogPrint(LOG_INFO, "%s: %s", gettext("Contraction Table"),
            *opt_contractionTable? opt_contractionTable: gettext("none"));
+
 #ifdef ENABLE_PREFERENCES_MENU
 #ifdef ENABLE_TABLE_SELECTION
   globPrepare(&glob_contractionTable, opt_tablesDirectory,
