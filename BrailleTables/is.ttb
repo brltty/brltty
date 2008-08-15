@@ -25,24 +25,29 @@
 # MACKENZIE: http://unesdoc.unesco.org/images/0013/001352/135251fo.pdf
 # The document is dated 1954, so this table may be quite outdated.
 
+# letters as usual
 include letters-latin.tti
+
+# lowercase non-Latin and accented letters
 char \xF0	(123 56  )  # ⠷ ð [LATIN SMALL LETTER ETH]
-char \xD0	(123 567 )  # ⡷ Ð [LATIN CAPITAL LETTER ETH]
 char \xF6	( 234 6  )  # ⠮ ö [LATIN SMALL LETTER O WITH DIAERESIS]
-char \xD6	( 234 67 )  # ⡮ Ö [LATIN CAPITAL LETTER O WITH DIAERESIS]
 char \xFE	( 23456  )  # ⠾ þ [LATIN SMALL LETTER THORN]
-char \xDE	( 234567 )  # ⡾ Þ [LATIN CAPITAL LETTER THORN]
 char \xE1	(1    6  )  # ⠡ á [LATIN SMALL LETTER A WITH ACUTE]
-char \xC1	(1    67 )  # ⡡ Á [LATIN CAPITAL LETTER A WITH ACUTE]
 char \xE9	(12   6  )  # ⠣ é [LATIN SMALL LETTER E WITH ACUTE]
-char \xC9	(12   67 )  # ⡣ É [LATIN CAPITAL LETTER E WITH ACUTE]
 char \xED	(1  4 6  )  # ⠩ í [LATIN SMALL LETTER I WITH ACUTE]
-char \xCD	(1  4 67 )  # ⡩ Í [LATIN CAPITAL LETTER I WITH ACUTE]
 char \xF3	(1  456  )  # ⠹ ó [LATIN SMALL LETTER O WITH ACUTE]
-char \xD3	(1  4567 )  # ⡹ Ó [LATIN CAPITAL LETTER O WITH ACUTE]
 char \xFA	(1   56  )  # ⠱ ú [LATIN SMALL LETTER U WITH ACUTE]
-char \xDA	(1   567 )  # ⡱ Ú [LATIN CAPITAL LETTER U WITH ACUTE]
 char \xFD	(12 4 6  )  # ⠫ ý [LATIN SMALL LETTER Y WITH ACUTE]
+
+# uppercase non-Latin and accented letters
+char \xD0	(123 567 )  # ⡷ Ð [LATIN CAPITAL LETTER ETH]
+char \xD6	( 234 67 )  # ⡮ Ö [LATIN CAPITAL LETTER O WITH DIAERESIS]
+char \xDE	( 234567 )  # ⡾ Þ [LATIN CAPITAL LETTER THORN]
+char \xC1	(1    67 )  # ⡡ Á [LATIN CAPITAL LETTER A WITH ACUTE]
+char \xC9	(12   67 )  # ⡣ É [LATIN CAPITAL LETTER E WITH ACUTE]
+char \xCD	(1  4 67 )  # ⡩ Í [LATIN CAPITAL LETTER I WITH ACUTE]
+char \xD3	(1  4567 )  # ⡹ Ó [LATIN CAPITAL LETTER O WITH ACUTE]
+char \xDA	(1   567 )  # ⡱ Ú [LATIN CAPITAL LETTER U WITH ACUTE]
 char \xDD	(12 4 67 )  # ⡫ Ý [LATIN CAPITAL LETTER Y WITH ACUTE]
 
 include numbers-dot8.tti
