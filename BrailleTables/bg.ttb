@@ -25,6 +25,7 @@
 # MACKENZIE: http://unesdoc.unesco.org/images/0013/001352/135251fo.pdf
 # The document is dated 1954, so this table may be quite outdated.
 
+# lowercase letters
 char \u0430	(1       )  # ⠁ а [CYRILLIC SMALL LETTER A]
 char \u0431	(12      )  # ⠃ б [CYRILLIC SMALL LETTER BE]
 char \u0432	( 2 456  )  # ⠺ в [CYRILLIC SMALL LETTER VE]
@@ -56,7 +57,44 @@ char \u044E	(12  56  )  # ⠳ ю [CYRILLIC SMALL LETTER YU]
 char \u044F	(12 4 6  )  # ⠫ я [CYRILLIC SMALL LETTER YA]
 char \u044D	( 2 4 6  )  # ⠪ э [CYRILLIC SMALL LETTER E] e, not sure about the unicode character
 
-# ponctuation as ususal, except
-char \x3F	( 2   6  )  # ⠢ ? [QUESTION MARK]
+# uppercase letters
+char \u0410	(1     7 )  # ⡁ А [CYRILLIC CAPITAL LETTER A]
+char \u0411	(12    7 )  # ⡃ Б [CYRILLIC CAPITAL LETTER BE]
+char \u0412	( 2 4567 )  # ⡺ В [CYRILLIC CAPITAL LETTER VE]
+char \u0413	(12 45 7 )  # ⡛ Г [CYRILLIC CAPITAL LETTER GHE]
+char \u0414	(1  45 7 )  # ⡙ Д [CYRILLIC CAPITAL LETTER DE]
+char \u0415	(1   5 7 )  # ⡑ Е [CYRILLIC CAPITAL LETTER IE]
+char \u0416	( 2 45 7 )  # ⡚ Ж [CYRILLIC CAPITAL LETTER ZHE]
+char \u0417	(1 3 567 )  # ⡵ З [CYRILLIC CAPITAL LETTER ZE]
+char \u0418	( 2 4  7 )  # ⡊ И [CYRILLIC CAPITAL LETTER I]
+char \u0419	(1 34567 )  # ⡽ Й [CYRILLIC CAPITAL LETTER SHORT I]
+char \u041A	(1 3   7 )  # ⡅ К [CYRILLIC CAPITAL LETTER KA]
+char \u041B	(123   7 )  # ⡇ Л [CYRILLIC CAPITAL LETTER EL]
+char \u041C	(1 34  7 )  # ⡍ М [CYRILLIC CAPITAL LETTER EM]
+char \u041D	(1 345 7 )  # ⡝ Н [CYRILLIC CAPITAL LETTER EN]
+char \u041E	(1 3 5 7 )  # ⡕ О [CYRILLIC CAPITAL LETTER O]
+char \u041F	(1234  7 )  # ⡏ П [CYRILLIC CAPITAL LETTER PE]
+char \u0420	(123 5 7 )  # ⡗ Р [CYRILLIC CAPITAL LETTER ER]
+char \u0421	( 234  7 )  # ⡎ С [CYRILLIC CAPITAL LETTER ES]
+char \u0422	( 2345 7 )  # ⡞ Т [CYRILLIC CAPITAL LETTER TE]
+char \u0423	(1 3  67 )  # ⡥ У [CYRILLIC CAPITAL LETTER U]
+char \u0424	(12 4  7 )  # ⡋ Ф [CYRILLIC CAPITAL LETTER EF]
+char \u0425	(12  5 7 )  # ⡓ Х [CYRILLIC CAPITAL LETTER HA]
+char \u0426	(1  4  7 )  # ⡉ Ц [CYRILLIC CAPITAL LETTER TSE]
+char \u0427	(12345 7 )  # ⡟ Ч [CYRILLIC CAPITAL LETTER CHE]
+char \u0428	(1   567 )  # ⡱ Ш [CYRILLIC CAPITAL LETTER SHA]
+char \u0429	(1 34 67 )  # ⡭ Щ [CYRILLIC CAPITAL LETTER SHCHA]
+char \u042B	(  345 7 )  # ⡜ Ы [CYRILLIC CAPITAL LETTER YERU]
+char \u042E	(12  567 )  # ⡳ Ю [CYRILLIC CAPITAL LETTER YU]
+char \u042F	(12 4 67 )  # ⡫ Я [CYRILLIC CAPITAL LETTER YA]
+char \u042D	( 2 4 67 )  # ⡪ Э [CYRILLIC CAPITAL LETTER E]
 
 # numbers as usual
+include numbers-dot8.tti
+
+# punctuation as usual
+include punctuation-basic.tti
+# except
+char \x3F	( 2   6  )  # ⠢ ? [QUESTION MARK]
+
+include common.tti
