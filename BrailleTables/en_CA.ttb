@@ -20,8 +20,8 @@
 # Dave Mielke <dave@mielke.cc>
 
 # This text table implements North American style English braille, the
-# additional letters of the French and German alphabets, and easy-to-remember
-# representations for many common extra symbols.
+# additional letters of the French, German, and Italian alphabets, and
+# easy-to-remember representations for many common extra symbols.
 
 # ASCII character representations as used by English-speaking North Americans
 include en-na-ascii.tti
@@ -103,5 +103,13 @@ char \xDF	(  3456 8)  # ⢼ ß [LATIN SMALL LETTER SHARP S]
 char \xC4	(  345 78)  # ⣜ Ä [LATIN CAPITAL LETTER A WITH DIAERESIS]
 char \xD6	( 2 4 678)  # ⣪ Ö [LATIN CAPITAL LETTER O WITH DIAERESIS]
 char \xDC	(12  5678)  # ⣳ Ü [LATIN CAPITAL LETTER U WITH DIAERESIS]
+
+# Italian lowercase accented letters
+char \xEC	(  34   8)  # ⢌ ì [LATIN SMALL LETTER I WITH GRAVE]
+char \xF2	(  34 6 8)  # ⢬ ò [LATIN SMALL LETTER O WITH GRAVE]
+
+# Italian uppercase accented letters
+char \xCC	(  34  78)  # ⣌ Ì [LATIN CAPITAL LETTER I WITH GRAVE]
+char \xD2	(  34 678)  # ⣬ Ò [LATIN CAPITAL LETTER O WITH GRAVE]
 
 include common.tti
