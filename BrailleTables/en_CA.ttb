@@ -17,8 +17,11 @@
 ###############################################################################
 
 # BRLTTY Text Table - English (Canada)
-#
 # Dave Mielke <dave@mielke.cc>
+
+# This text table implements North American style English braille, the
+# additional letters of the French and German alphabets, and easy-to-remember
+# representations for many common extra symbols.
 
 # ASCII character representations as used by English-speaking North Americans
 include en-na-ascii.tti
@@ -94,6 +97,7 @@ char \xCF	(12 45678)  # ⣻ Ï [LATIN CAPITAL LETTER I WITH DIAERESIS]
 char \xE4	(  345  8)  # ⢜ ä [LATIN SMALL LETTER A WITH DIAERESIS]
 char \xF6	( 2 4 6 8)  # ⢪ ö [LATIN SMALL LETTER O WITH DIAERESIS]
 char \xFC	(12  56 8)  # ⢳ ü [LATIN SMALL LETTER U WITH DIAERESIS]
+char \xDF	(  3456 8)  # ⢼ ß [LATIN SMALL LETTER SHARP S]
 
 # German uppercase accented letters
 char \xC4	(  345 78)  # ⣜ Ä [LATIN CAPITAL LETTER A WITH DIAERESIS]
