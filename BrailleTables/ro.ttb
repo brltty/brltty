@@ -25,10 +25,26 @@
 # MACKENZIE: http://unesdoc.unesco.org/images/0013/001352/135251fo.pdf
 # The document is dated 1954, so this table may be quite outdated.
 
+# letters as usual
+include letters-latin.tti
+
+# lowercase accented letters
 char \u0103	(123 56  )  # ⠷ ă [LATIN SMALL LETTER A WITH BREVE]
 char \xE2	(1    6  )  # ⠡ â [LATIN SMALL LETTER A WITH CIRCUMFLEX]
 char \xEE	(1  4 6  )  # ⠩ î [LATIN SMALL LETTER I WITH CIRCUMFLEX]
 char \u015F	(1234 6  )  # ⠯ ş [LATIN SMALL LETTER S WITH CEDILLA]
 char \u0163	( 2 4 6  )  # ⠪ ţ [LATIN SMALL LETTER T WITH CEDILLA]
 
+# uppercase accented letters
+char \xC2	(1    67 )  # ⡡ Â [LATIN CAPITAL LETTER A WITH CIRCUMFLEX]
+char \xCE	(1  4 67 )  # ⡩ Î [LATIN CAPITAL LETTER I WITH CIRCUMFLEX]
+char \u0102	(123 567 )  # ⡷ Ă [LATIN CAPITAL LETTER A WITH BREVE]
+char \u015E	(1234 67 )  # ⡯ Ş [LATIN CAPITAL LETTER S WITH CEDILLA]
+char \u0162	( 2 4 67 )  # ⡪ Ţ [LATIN CAPITAL LETTER T WITH CEDILLA]
+
+include numbers-dot8.tti
+
+include punctuation-basic.tti
 char \x3F	( 2   6  )  # ⠢ ? [QUESTION MARK]
+
+include common.tti
