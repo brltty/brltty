@@ -25,6 +25,7 @@
 # MACKENZIE: http://unesdoc.unesco.org/images/0013/001352/135251fo.pdf
 # The document is dated 1954, so this table may be quite outdated.
 
+# lowercase letters
 char \u0561	(1       )  # ⠁ ա [ARMENIAN SMALL LETTER AYB]
 char \u0562	(1234    )  # ⠏ բ [ARMENIAN SMALL LETTER BEN]
 char \u0563	(12345   )  # ⠟ գ [ARMENIAN SMALL LETTER GIM]
@@ -64,8 +65,54 @@ char \u0584	(1 3     )  # ⠅ ք [ARMENIAN SMALL LETTER KEH]
 char \u0585	(1 3 5   )  # ⠕ օ [ARMENIAN SMALL LETTER OH]
 char \u0586	(12 4    )  # ⠋ ֆ [ARMENIAN SMALL LETTER FEH]
 
+# uppercase letters
+char \u0531	(1     7 )  # ⡁ Ա [ARMENIAN CAPITAL LETTER AYB]
+char \u0532	(1234  7 )  # ⡏ Բ [ARMENIAN CAPITAL LETTER BEN]
+char \u0533	(12345 7 )  # ⡟ Գ [ARMENIAN CAPITAL LETTER GIM]
+char \u0534	(1  4567 )  # ⡹ Դ [ARMENIAN CAPITAL LETTER DA]
+char \u0535	(1 34567 )  # ⡽ Ե [ARMENIAN CAPITAL LETTER ECH]
+char \u0536	(1 3 567 )  # ⡵ Զ [ARMENIAN CAPITAL LETTER ZA]
+char \u0537	(1   5 7 )  # ⡑ Է [ARMENIAN CAPITAL LETTER EH]
+char \u0538	(1 3  67 )  # ⡥ Ը [ARMENIAN CAPITAL LETTER ET]
+char \u0539	( 2345 7 )  # ⡞ Թ [ARMENIAN CAPITAL LETTER TO]
+char \u053A	(  345 7 )  # ⡜ Ժ [ARMENIAN CAPITAL LETTER ZHE]
+char \u053B	( 2 4  7 )  # ⡊ Ի [ARMENIAN CAPITAL LETTER INI]
+char \u053C	(123   7 )  # ⡇ Լ [ARMENIAN CAPITAL LETTER LIWN]
+char \u053D	(1 34 67 )  # ⡭ Խ [ARMENIAN CAPITAL LETTER XEH]
+char \u053E	(  34  7 )  # ⡌ Ծ [ARMENIAN CAPITAL LETTER CA]
+char \u053F	(12 45 7 )  # ⡛ Կ [ARMENIAN CAPITAL LETTER KEN]
+char \u0540	(12  5 7 )  # ⡓ Հ [ARMENIAN CAPITAL LETTER HO]
+char \u0541	(  34 67 )  # ⡬ Ձ [ARMENIAN CAPITAL LETTER JA]
+char \u0542	(12   67 )  # ⡣ Ղ [ARMENIAN CAPITAL LETTER GHAD]
+char \u0543	( 2 45 7 )  # ⡚ Ճ [ARMENIAN CAPITAL LETTER CHEH]
+char \u0544	(1 34  7 )  # ⡍ Մ [ARMENIAN CAPITAL LETTER MEN]
+char \u0545	(1   567 )  # ⡱ Յ [ARMENIAN CAPITAL LETTER YI]
+char \u0546	(1 345 7 )  # ⡝ Ն [ARMENIAN CAPITAL LETTER NOW]
+char \u0547	(1  4 67 )  # ⡩ Շ [ARMENIAN CAPITAL LETTER SHA]
+char \u0548	( 2 4 67 )  # ⡪ Ո [ARMENIAN CAPITAL LETTER VO]
+char \u0549	(1    67 )  # ⡡ Չ [ARMENIAN CAPITAL LETTER CHA]
+char \u054A	(12    7 )  # ⡃ Պ [ARMENIAN CAPITAL LETTER PEH]
+char \u054B	(1  4  7 )  # ⡉ Ջ [ARMENIAN CAPITAL LETTER JHEH]
+char \u054C	(12 4567 )  # ⡻ Ռ [ARMENIAN CAPITAL LETTER RA]
+char \u054D	( 234  7 )  # ⡎ Ս [ARMENIAN CAPITAL LETTER SEH]
+char \u054E	(123  67 )  # ⡧ Վ [ARMENIAN CAPITAL LETTER VEW]
+char \u054F	(1  45 7 )  # ⡙ Տ [ARMENIAN CAPITAL LETTER TIWN]
+char \u0550	(123 5 7 )  # ⡗ Ր [ARMENIAN CAPITAL LETTER REH]
+char \u0551	( 234 67 )  # ⡮ Ց [ARMENIAN CAPITAL LETTER CO]
+char \u0552	( 2 4567 )  # ⡺ Ւ [ARMENIAN CAPITAL LETTER YIWN]
+char \u0553	(12 4 67 )  # ⡫ Փ [ARMENIAN CAPITAL LETTER PIWR]
+char \u0554	(1 3   7 )  # ⡅ Ք [ARMENIAN CAPITAL LETTER KEH]
+char \u0555	(1 3 5 7 )  # ⡕ Օ [ARMENIAN CAPITAL LETTER OH]
+char \u0556	(12 4  7 )  # ⡋ Ֆ [ARMENIAN CAPITAL LETTER FEH]
+
 # yev ⠯ (means "and"), is that ԵՈ ?
 
-# punctuation as usual, except
+include numbers-dot8.tti
+
+# punctuation as usual
+include punctuation-basic.tti
+# except
 char \x3F	( 23  6  )  # ⠦ ? [QUESTION MARK]
 char \u055D	(     6  )  # ⠠ ՝ [ARMENIAN COMMA]
+
+include common.tti
