@@ -24,28 +24,13 @@
 # "Maison pour tous", 19 rue Victor Hugo 70100 GRAY
 # esperanto-muzeo@wanadoo.fr
 
-char \x61	(1       )  # ⠁ a [LATIN SMALL LETTER A]
-char \x62	(12      )  # ⠃ b [LATIN SMALL LETTER B]
-char \x63	(1  4    )  # ⠉ c [LATIN SMALL LETTER C]
-char \x64	(1  45   )  # ⠙ d [LATIN SMALL LETTER D]
-char \x65	(1   5   )  # ⠑ e [LATIN SMALL LETTER E]
-char \x66	(12 4    )  # ⠋ f [LATIN SMALL LETTER F]
-char \x67	(12 45   )  # ⠛ g [LATIN SMALL LETTER G]
-char \x68	(12  5   )  # ⠓ h [LATIN SMALL LETTER H]
-char \x69	( 2 4    )  # ⠊ i [LATIN SMALL LETTER I]
-char \x6A	( 2 45   )  # ⠚ j [LATIN SMALL LETTER J]
-char \x6B	(1 3     )  # ⠅ k [LATIN SMALL LETTER K]
-char \x6C	(123     )  # ⠇ l [LATIN SMALL LETTER L]
-char \x6D	(1 34    )  # ⠍ m [LATIN SMALL LETTER M]
-char \x6E	(1 345   )  # ⠝ n [LATIN SMALL LETTER N]
-char \x6F	(1 3 5   )  # ⠕ o [LATIN SMALL LETTER O]
-char \x70	(1234    )  # ⠏ p [LATIN SMALL LETTER P]
-char \x72	(123 5   )  # ⠗ r [LATIN SMALL LETTER R]
-char \x73	( 234    )  # ⠎ s [LATIN SMALL LETTER S]
-char \x74	( 2345   )  # ⠞ t [LATIN SMALL LETTER T]
-char \x75	(1 3  6  )  # ⠥ u [LATIN SMALL LETTER U]
-char \x76	(123  6  )  # ⠧ v [LATIN SMALL LETTER V]
-char \x7A	(1 3 56  )  # ⠵ z [LATIN SMALL LETTER Z]
+# letters as usual
+include letters-latin.tti
+# except w (because dots 2456 is j with circumflex)
+char \x77	( 23456  )  # ⠾ w [LATIN SMALL LETTER W]
+char \x57	( 234567 )  # ⡾ W [LATIN CAPITAL LETTER W]
+
+# lowercase accented letters
 char \u0109	(1  4 6  )  # ⠩ ĉ [LATIN SMALL LETTER C WITH CIRCUMFLEX]
 char \u011D	(12 456  )  # ⠻ ĝ [LATIN SMALL LETTER G WITH CIRCUMFLEX]
 char \u0125	(12  56  )  # ⠳ ĥ [LATIN SMALL LETTER H WITH CIRCUMFLEX]
@@ -53,33 +38,16 @@ char \u0135	( 2 456  )  # ⠺ ĵ [LATIN SMALL LETTER J WITH CIRCUMFLEX]
 char \u015D	( 234 6  )  # ⠮ ŝ [LATIN SMALL LETTER S WITH CIRCUMFLEX]
 char \u016D	(  34 6  )  # ⠬ ŭ [LATIN SMALL LETTER U WITH BREVE]
 
-char \x41	(1     7 )  # ⡁ A [LATIN CAPITAL LETTER A]
-char \x42	(12    7 )  # ⡃ B [LATIN CAPITAL LETTER B]
-char \x43	(1  4  7 )  # ⡉ C [LATIN CAPITAL LETTER C]
-char \x44	(1  45 7 )  # ⡙ D [LATIN CAPITAL LETTER D]
-char \x45	(1   5 7 )  # ⡑ E [LATIN CAPITAL LETTER E]
-char \x46	(12 4  7 )  # ⡋ F [LATIN CAPITAL LETTER F]
-char \x47	(12 45 7 )  # ⡛ G [LATIN CAPITAL LETTER G]
-char \x48	(12  5 7 )  # ⡓ H [LATIN CAPITAL LETTER H]
-char \x49	( 2 4  7 )  # ⡊ I [LATIN CAPITAL LETTER I]
-char \x4A	( 2 45 7 )  # ⡚ J [LATIN CAPITAL LETTER J]
-char \x4B	(1 3   7 )  # ⡅ K [LATIN CAPITAL LETTER K]
-char \x4C	(123   7 )  # ⡇ L [LATIN CAPITAL LETTER L]
-char \x4D	(1 34  7 )  # ⡍ M [LATIN CAPITAL LETTER M]
-char \x4E	(1 345 7 )  # ⡝ N [LATIN CAPITAL LETTER N]
-char \x4F	(1 3 5 7 )  # ⡕ O [LATIN CAPITAL LETTER O]
-char \x50	(1234  7 )  # ⡏ P [LATIN CAPITAL LETTER P]
-char \x52	(123 5 7 )  # ⡗ R [LATIN CAPITAL LETTER R]
-char \x53	( 234  7 )  # ⡎ S [LATIN CAPITAL LETTER S]
-char \x54	( 2345 7 )  # ⡞ T [LATIN CAPITAL LETTER T]
-char \x55	(1 3  67 )  # ⡥ U [LATIN CAPITAL LETTER U]
-char \x56	(123  67 )  # ⡧ V [LATIN CAPITAL LETTER V]
-char \x5A	(1 3 567 )  # ⡵ Z [LATIN CAPITAL LETTER Z]
+# uppercase accented letters
 char \u0108	(1  4 67 )  # ⡩ Ĉ [LATIN CAPITAL LETTER C WITH CIRCUMFLEX]
 char \u011C	(12 4567 )  # ⡻ Ĝ [LATIN CAPITAL LETTER G WITH CIRCUMFLEX]
 char \u0124	(12  567 )  # ⡳ Ĥ [LATIN CAPITAL LETTER H WITH CIRCUMFLEX]
 char \u0134	( 2 4567 )  # ⡺ Ĵ [LATIN CAPITAL LETTER J WITH CIRCUMFLEX]
 char \u015C	( 234 67 )  # ⡮ Ŝ [LATIN CAPITAL LETTER S WITH CIRCUMFLEX]
 char \u016C	(  34 67 )  # ⡬ Ŭ [LATIN CAPITAL LETTER U WITH BREVE]
+
+include numbers-dot8.tti
+
+include punctuation-basic.tti
 
 include common.tti
