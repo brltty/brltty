@@ -22,6 +22,9 @@
 # the standard representations for the letters of the Latin alphabet
 include letters-latin.tti
 
+# the numbers 0-9 are represented using the Nemeth (lower numbers) scheme
+include numbers-nemeth.tti
+
 char \x20	(        )  # ⠀   [SPACE]
 char \x21	( 234 6  )  # ⠮ ! [EXCLAMATION MARK]
 char \x22	(    5   )  # ⠐ " [QUOTATION MARK]
@@ -38,16 +41,7 @@ char \x2C	(     6  )  # ⠠ , [COMMA]
 char \x2D	(  3  6  )  # ⠤ - [HYPHEN-MINUS]
 char \x2E	(   4 6  )  # ⠨ . [FULL STOP]
 char \x2F	(  34    )  # ⠌ / [SOLIDUS]
-char \x30	(  3 56  )  # ⠴ 0 [DIGIT ZERO]
-char \x31	( 2      )  # ⠂ 1 [DIGIT ONE]
-char \x32	( 23     )  # ⠆ 2 [DIGIT TWO]
-char \x33	( 2  5   )  # ⠒ 3 [DIGIT THREE]
-char \x34	( 2  56  )  # ⠲ 4 [DIGIT FOUR]
-char \x35	( 2   6  )  # ⠢ 5 [DIGIT FIVE]
-char \x36	( 23 5   )  # ⠖ 6 [DIGIT SIX]
-char \x37	( 23 56  )  # ⠶ 7 [DIGIT SEVEN]
-char \x38	( 23  6  )  # ⠦ 8 [DIGIT EIGHT]
-char \x39	(  3 5   )  # ⠔ 9 [DIGIT NINE]
+# Hindu-Arabic numerals     # 30-39
 char \x3A	(1   56  )  # ⠱ : [COLON]
 char \x3B	(    56  )  # ⠰ ; [SEMICOLON]
 char \x3C	(12   6  )  # ⠣ < [LESS-THAN SIGN]

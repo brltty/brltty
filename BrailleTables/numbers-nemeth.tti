@@ -1,0 +1,33 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2008 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+# This BRLTTY text subtable implements the Nemeth scheme for representing the
+# 10 Hindu-Arabic numerals in braille. The letters a-j are lowered by one dot
+# position, with the letters a-i representing the digits 1-9, and with the
+# letter j representing the digit 0.
+
+char \x30	(  3 56  )  # 30 ⠴ 0 [DIGIT ZERO]
+char \x31	( 2      )  # 31 ⠂ 1 [DIGIT ONE]
+char \x32	( 23     )  # 32 ⠆ 2 [DIGIT TWO]
+char \x33	( 2  5   )  # 33 ⠒ 3 [DIGIT THREE]
+char \x34	( 2  56  )  # 34 ⠲ 4 [DIGIT FOUR]
+char \x35	( 2   6  )  # 35 ⠢ 5 [DIGIT FIVE]
+char \x36	( 23 5   )  # 36 ⠖ 6 [DIGIT SIX]
+char \x37	( 23 56  )  # 37 ⠶ 7 [DIGIT SEVEN]
+char \x38	( 23  6  )  # 38 ⠦ 8 [DIGIT EIGHT]
+char \x39	(  3 5   )  # 39 ⠔ 9 [DIGIT NINE]
