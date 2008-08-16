@@ -50,6 +50,7 @@ char \xD3	(1  4567 )  # ⡹ Ó [LATIN CAPITAL LETTER O WITH ACUTE]
 char \xDA	(1   567 )  # ⡱ Ú [LATIN CAPITAL LETTER U WITH ACUTE]
 char \xDD	(12 4 67 )  # ⡫ Ý [LATIN CAPITAL LETTER Y WITH ACUTE]
 
+# the numbers 0-9 are represented by the letters j,a-i with dot 8 added
 include numbers-dot8.tti
 
 include punctuation-basic.tti

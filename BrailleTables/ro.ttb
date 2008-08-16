@@ -42,6 +42,7 @@ char \u0102	(123 567 )  # ⡷ Ă [LATIN CAPITAL LETTER A WITH BREVE]
 char \u015E	(1234 67 )  # ⡯ Ş [LATIN CAPITAL LETTER S WITH CEDILLA]
 char \u0162	( 2 4 67 )  # ⡪ Ţ [LATIN CAPITAL LETTER T WITH CEDILLA]
 
+# the numbers 0-9 are represented by the letters j,a-i with dot 8 added
 include numbers-dot8.tti
 
 include punctuation-basic.tti

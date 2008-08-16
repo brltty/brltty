@@ -47,6 +47,7 @@ char \u0134	( 2 4567 )  # ⡺ Ĵ [LATIN CAPITAL LETTER J WITH CIRCUMFLEX]
 char \u015C	( 234 67 )  # ⡮ Ŝ [LATIN CAPITAL LETTER S WITH CIRCUMFLEX]
 char \u016C	(  34 67 )  # ⡬ Ŭ [LATIN CAPITAL LETTER U WITH BREVE]
 
+# the numbers 0-9 are represented by the letters j,a-i with dot 8 added
 include numbers-dot8.tti
 
 include punctuation-basic.tti

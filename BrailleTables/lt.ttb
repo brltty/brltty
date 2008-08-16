@@ -36,6 +36,7 @@ char \u0161	( 234 6  )  # ⠮ š [LATIN SMALL LETTER S WITH CARON]
 char \u010C	(1  4 67 )  # ⡩ Č [LATIN CAPITAL LETTER C WITH CARON]
 char \u0160	( 234 67 )  # ⡮ Š [LATIN CAPITAL LETTER S WITH CARON]
 
+# the numbers 0-9 are represented by the letters j,a-i with dot 8 added
 include numbers-dot8.tti
 
 include punctuation-basic.tti

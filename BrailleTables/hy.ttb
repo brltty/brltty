@@ -107,6 +107,7 @@ char \u0556	(12 4  7 )  # ⡋ Ֆ [ARMENIAN CAPITAL LETTER FEH]
 
 # yev ⠯ (means "and"), is that ԵՈ ?
 
+# the numbers 0-9 are represented by the letters j,a-i with dot 8 added
 include numbers-dot8.tti
 
 # punctuation as usual

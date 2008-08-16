@@ -89,7 +89,7 @@ char \u042E	(12  567 )  # ⡳ Ю [CYRILLIC CAPITAL LETTER YU]
 char \u042F	(12 4 67 )  # ⡫ Я [CYRILLIC CAPITAL LETTER YA]
 char \u042D	( 2 4 67 )  # ⡪ Э [CYRILLIC CAPITAL LETTER E]
 
-# numbers as usual
+# the numbers 0-9 are represented by the letters j,a-i with dot 8 added
 include numbers-dot8.tti
 
 # punctuation as usual

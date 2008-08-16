@@ -60,6 +60,7 @@ char \u1E56	(12  567 )  # ⡳ Ṗ [LATIN CAPITAL LETTER P WITH DOT ABOVE]
 char \u1E60	( 2 4 67 )  # ⡪ Ṡ [LATIN CAPITAL LETTER S WITH DOT ABOVE]
 char \u1E6A	( 2 4567 )  # ⡺ Ṫ [LATIN CAPITAL LETTER T WITH DOT ABOVE]
 
+# the numbers 0-9 are represented by the letters j,a-i with dot 8 added
 include numbers-dot8.tti
 
 include punctuation-basic.tti

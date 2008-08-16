@@ -52,6 +52,7 @@ char \xC2	(  345 7 )  # ⡜ Â [LATIN CAPITAL LETTER A WITH CIRCUMFLEX]
 char \xCE	(  34  7 )  # ⡌ Î [LATIN CAPITAL LETTER I WITH CIRCUMFLEX]
 char \xDB	(1   567 )  # ⡱ Û [LATIN CAPITAL LETTER U WITH CIRCUMFLEX]
 
+# the numbers 0-9 are represented by the letters j,a-i with dot 8 added
 include numbers-dot8.tti
 
 include punctuation-basic.tti

@@ -40,6 +40,7 @@ char \xD5	( 234 67 )  # ⡮ Õ [LATIN CAPITAL LETTER O WITH TILDE]
 char \xD6	( 2 4 67 )  # ⡪ Ö [LATIN CAPITAL LETTER O WITH DIAERESIS]
 char \xDC	(12  567 )  # ⡳ Ü [LATIN CAPITAL LETTER U WITH DIAERESIS]
 
+# the numbers 0-9 are represented by the letters j,a-i with dot 8 added
 include numbers-dot8.tti
 
 include punctuation-basic.tti
