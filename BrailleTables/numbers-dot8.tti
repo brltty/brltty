@@ -16,8 +16,8 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# This BRLTTY text subtable implements a simple scheme for representing the 10
-# decimal digits in braille. Dot 8 is added to the letters a-j, with the
+# This BRLTTY text subtable implements a common scheme for representing the 10
+# Hindu-Arabic numerals in braille. Dot 8 is added to the letters a-j, with the
 # letters a-i representing the digits 1-9, and with the letter j representing
 # the digit 0.
 
