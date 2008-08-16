@@ -70,14 +70,14 @@ char \x3D	(123456  )  # 3D ⠿ = [EQUALS SIGN]
 char \x3E	(  3 56  )  # 3E ⠴ > [GREATER-THAN SIGN]
 char \x3F	( 2   6  )  # 3F ⠢ ? [QUESTION MARK]
 char \x40	(   4  7 )  # 40 ⡈ @ [COMMERCIAL AT]
-# uppercase Latin alphabet -> 41-5A
+# uppercase Latin alphabet  # 41-5A
 char \x5B	(123 567 )  # 5B ⡷ [ [LEFT SQUARE BRACKET]
 char \x5C	(   45 7 )  # 5C ⡘ \ [REVERSE SOLIDUS]
 char \x5D	( 234567 )  # 5D ⡾ ] [RIGHT SQUARE BRACKET]
 char \x5E	(    567 )  # 5E ⡰ ^ [CIRCUMFLEX ACCENT]
 char \x5F	(   4567 )  # 5F ⡸ _ [LOW LINE]
 char \x60	(   4    )  # 60 ⠈ ` [GRAVE ACCENT]
-# lowercase Latin alphabet -> 61-7A
+# lowercase Latin alphabet  # 61-7A
 char \x7B	(123 56  )  # 7B ⠷ { [LEFT CURLY BRACKET]
 char \x7C	(   45   )  # 7C ⠘ | [VERTICAL LINE]
 char \x7D	( 23456  )  # 7D ⠾ } [RIGHT CURLY BRACKET]
