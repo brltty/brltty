@@ -20,13 +20,13 @@
 # 10 Hindu-Arabic numerals in braille. The digit 0 is represented by dots 3456,
 # and the digits 1-9 are represented by the letters a-i with dot 6 added.
 
-char \x30	(  3456  )  # 30 ⠼ 0 [DIGIT ZERO]
-char \x31	(1    6  )  # 31 ⠡ 1 [DIGIT ONE]
-char \x32	(12   6  )  # 32 ⠣ 2 [DIGIT TWO]
-char \x33	(1  4 6  )  # 33 ⠩ 3 [DIGIT THREE]
-char \x34	(1  456  )  # 34 ⠹ 4 [DIGIT FOUR]
-char \x35	(1   56  )  # 35 ⠱ 5 [DIGIT FIVE]
-char \x36	(12 4 6  )  # 36 ⠫ 6 [DIGIT SIX]
-char \x37	(12 456  )  # 37 ⠻ 7 [DIGIT SEVEN]
-char \x38	(12  56  )  # 38 ⠳ 8 [DIGIT EIGHT]
-char \x39	( 2 4 6  )  # 39 ⠪ 9 [DIGIT NINE]
+char \x30	(  3456  )  # ⠼ 0 [DIGIT ZERO]
+char \x31	(1    6  )  # ⠡ 1 [DIGIT ONE]
+char \x32	(12   6  )  # ⠣ 2 [DIGIT TWO]
+char \x33	(1  4 6  )  # ⠩ 3 [DIGIT THREE]
+char \x34	(1  456  )  # ⠹ 4 [DIGIT FOUR]
+char \x35	(1   56  )  # ⠱ 5 [DIGIT FIVE]
+char \x36	(12 4 6  )  # ⠫ 6 [DIGIT SIX]
+char \x37	(12 456  )  # ⠻ 7 [DIGIT SEVEN]
+char \x38	(12  56  )  # ⠳ 8 [DIGIT EIGHT]
+char \x39	( 2 4 6  )  # ⠪ 9 [DIGIT NINE]
