@@ -25,7 +25,7 @@
 # MACKENZIE: http://unesdoc.unesco.org/images/0013/001352/135251fo.pdf
 # The document is dated 1954, so this table may be quite outdated.
 
-# letters as usual (except jkqvwxyz)
+# the standard representations for the letters of the Latin alphabet
 include letters-latin.tti
 
 # lowercase accented letters
