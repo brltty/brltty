@@ -24,7 +24,7 @@
 #include "misc.h"
 #include "brldefs.h"
 #include "cmd.h"
-
+#include "ttb.h"
 #include "charset.h"
 
 const CommandEntry commandTable[] = {
@@ -215,21 +215,27 @@ handleRepeatFlags (int *command, RepeatState *state, int panning, int delay, int
   }
 }
 
+static brlapi_keyCode_t
+cmdWCharToBrlapi (wchar_t wc) {
+  if (iswLatin1(wc)) {
+    /* latin1 character */
+    return BRLAPI_KEY_TYPE_SYM | wc;
+  } else {
+    /* unicode character */
+    return BRLAPI_KEY_TYPE_SYM | BRLAPI_KEY_SYM_UNICODE | wc;
+  }
+}
+
 brlapi_keyCode_t
 cmdBrlttyToBrlapi (int command) {
   brlapi_keyCode_t code;
   switch (command & BRL_MSK_BLK) {
-  case BRL_BLK_PASSCHAR: {
-    wchar_t wc = convertCharToWchar(command & BRL_MSK_ARG);
-    if (iswLatin1(wc)) {
-      /* latin1 character */
-      code = wc;
-    } else {
-      /* unicode character */
-      code = BRLAPI_KEY_SYM_UNICODE | wc;
-    }
+  case BRL_BLK_PASSCHAR:
+    code = cmdWCharToBrlapi(convertCharToWchar(command & BRL_MSK_ARG));
     break;
-  }
+  case BRL_BLK_PASSDOTS:
+    code = cmdWCharToBrlapi(convertDotsToCharacter(textTable, command & BRL_MSK_ARG));
+    break;
   case BRL_BLK_PASSKEY:
     switch (command & BRL_MSK_ARG) {
     case BRL_KEY_ENTER:		code = BRLAPI_KEY_SYM_LINEFEED;	 break;
@@ -261,7 +267,8 @@ cmdBrlttyToBrlapi (int command) {
     | (command & BRL_FLG_LINE_TOLEFT	? BRLAPI_KEY_FLG_LINE_TOLEFT	: 0)
       ;
   if ((command & BRL_MSK_BLK) == BRL_BLK_PASSCHAR
-   || (command & BRL_MSK_BLK) == BRL_BLK_PASSKEY)
+   || (command & BRL_MSK_BLK) == BRL_BLK_PASSKEY
+   || (command & BRL_MSK_BLK) == BRL_BLK_PASSDOTS)
     code = code
     | (command & BRL_FLG_CHAR_CONTROL	? BRLAPI_KEY_FLG_CONTROL	: 0)
     | (command & BRL_FLG_CHAR_META	? BRLAPI_KEY_FLG_META		: 0)
