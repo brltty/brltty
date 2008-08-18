@@ -1041,19 +1041,6 @@ insertKey (ScreenKey key, int flags) {
   return insertScreenKey(key);
 }
 
-static int
-insertCharacter (unsigned char character, int flags) {
-  ScreenKey key;
-
-  {
-    wint_t wc = convertCharToWchar(character);
-    if (wc == WEOF) return 0;
-    key = wc;
-  }
-
-  return insertKey(key, flags);
-}
-
 static RepeatState repeatState;
 
 void
@@ -1939,12 +1926,16 @@ runProgram (void) {
                   break;
                 }
 
-                case BRL_BLK_PASSCHAR:
-                  if (!insertCharacter(arg, flags)) playTune(&tune_command_rejected);
+                case BRL_BLK_PASSCHAR: {
+                  wint_t character = convertCharToWchar(arg);
+                  if ((character == WEOF) ||
+                      !insertKey(character, flags))
+                    playTune(&tune_command_rejected);
                   break;
+                }
 
                 case BRL_BLK_PASSDOTS:
-                  if (!insertCharacter(convertDotsToCharacter(textTable, arg), flags)) playTune(&tune_command_rejected);
+                  if (!insertKey(convertDotsToCharacter(textTable, arg), flags)) playTune(&tune_command_rejected);
                   break;
 
                 case BRL_BLK_PASSAT:
