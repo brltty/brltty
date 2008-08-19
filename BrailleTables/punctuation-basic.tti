@@ -19,7 +19,6 @@
 # This BRLTTY text subtable defines the braille representations for the basic
 # English punctuation marks.
 
-char \x20	(        )  # ⠀   [SPACE]
 char \x21	( 23 5   )  # ⠖ ! [EXCLAMATION MARK]
 char \x22	( 23 56  )  # ⠶ " [QUOTATION MARK]
 char \x27	(  3     )  # ⠄ ' [APOSTROPHE]
