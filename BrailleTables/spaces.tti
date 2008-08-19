@@ -16,12 +16,19 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# This BRLTTY text subtable is included by all general purpose text tables. Its
-# sole purpose is to be a common place wherein to include text subtables which
-# define braille representations that are generally useful in all contexts.
+# This BRLTTY text subtable defines all the space characters to be empty
+# braille cells.
 
-# the space characters
-include spaces.tti
-
-# the box drawing characters
-include boxes.tti
+char \x20	(        )  # ⠀   [SPACE]
+char \xA0	(        )  # ⠀   [NO-BREAK SPACE]
+char \u2002	(        )  # ⠀   [EN SPACE]
+char \u2003	(        )  # ⠀   [EM SPACE]
+char \u2004	(        )  # ⠀   [THREE-PER-EM SPACE]
+char \u2005	(        )  # ⠀   [FOUR-PER-EM SPACE]
+char \u2006	(        )  # ⠀   [SIX-PER-EM SPACE]
+char \u2007	(        )  # ⠀   [FIGURE SPACE]
+char \u2008	(        )  # ⠀   [PUNCTUATION SPACE]
+char \u2009	(        )  # ⠀   [THIN SPACE]
+char \u200A	(        )  # ⠀   [HAIR SPACE]
+char \u202F	(        )  # ⠀   [NARROW NO-BREAK SPACE]
+char \u205F	(        )  # ⠀   [MEDIUM MATHEMATICAL SPACE]
