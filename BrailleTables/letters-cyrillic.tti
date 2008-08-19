@@ -17,7 +17,7 @@
 ###############################################################################
 
 # This BRLTTY text subtable defines the standard braille representations
-# for the Cyrillic alphabet.
+# for the letters of the Cyrillic alphabet.
 
 # lowercase letters
 char \u0430	(1       )  # ⠁ а [CYRILLIC SMALL LETTER A]
