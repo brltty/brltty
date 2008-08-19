@@ -64,6 +64,7 @@ char \u0583	(12 4 6  )  # ⠫ փ [ARMENIAN SMALL LETTER PIWR]
 char \u0584	(1 3     )  # ⠅ ք [ARMENIAN SMALL LETTER KEH]
 char \u0585	(1 3 5   )  # ⠕ օ [ARMENIAN SMALL LETTER OH]
 char \u0586	(12 4    )  # ⠋ ֆ [ARMENIAN SMALL LETTER FEH]
+char \u0587	(1234 6  )  # ⠯ և [ARMENIAN SMALL LIGATURE ECH YIWN]
 
 # uppercase letters
 char \u0531	(1     7 )  # ⡁ Ա [ARMENIAN CAPITAL LETTER AYB]
@@ -104,8 +105,6 @@ char \u0553	(12 4 67 )  # ⡫ Փ [ARMENIAN CAPITAL LETTER PIWR]
 char \u0554	(1 3   7 )  # ⡅ Ք [ARMENIAN CAPITAL LETTER KEH]
 char \u0555	(1 3 5 7 )  # ⡕ Օ [ARMENIAN CAPITAL LETTER OH]
 char \u0556	(12 4  7 )  # ⡋ Ֆ [ARMENIAN CAPITAL LETTER FEH]
-
-# yev ⠯ (means "and"), is that ԵՈ ?
 
 # the numbers 0-9 are represented by the letters j,a-i with dot 8 added
 include numbers-dot8.tti
