@@ -27,10 +27,10 @@
 
 # the standard representations for the letters of the Latin alphabet
 include letters-latin.tti
-char \x69	( 2 4    )  # ⠊ i [LATIN SMALL LETTER I]
-char \u0130	( 2 4    )  # ⠊ İ [LATIN CAPITAL LETTER I WITH DOT ABOVE]
 char \u0131	(  3 5   )  # ⠔ ı [LATIN SMALL LETTER DOTLESS I]
-char \x49	(  3 5   )  # ⠔ I [LATIN CAPITAL LETTER I]
+char \x49	(  3 5 7 )  # ⡔ I [LATIN CAPITAL LETTER I]
+char \x69	( 2 4    )  # ⠊ i [LATIN SMALL LETTER I]
+char \u0130	( 2 4  7 )  # ⡊ İ [LATIN CAPITAL LETTER I WITH DOT ABOVE]
 
 # lowercase accented letters
 char \xE7	(1    6  )  # ⠡ ç [LATIN SMALL LETTER C WITH CEDILLA]
