@@ -447,13 +447,15 @@ typedef enum {
 #define BAUM_KEY_BLU BAUM_KEY(0X20, BACK6)
 
 #define BAUM_SHIFT_DOT (BAUM_SHIFT_BACK10A + BAUM_WIDTH_BACK10A)
-#define BAUM_WIDTH_DOT 6
+#define BAUM_WIDTH_DOT 8
 #define BAUM_KEY_DOT1 BAUM_KEY(0X01, DOT)
 #define BAUM_KEY_DOT2 BAUM_KEY(0X02, DOT)
 #define BAUM_KEY_DOT3 BAUM_KEY(0X04, DOT)
 #define BAUM_KEY_DOT4 BAUM_KEY(0X08, DOT)
 #define BAUM_KEY_DOT5 BAUM_KEY(0X10, DOT)
 #define BAUM_KEY_DOT6 BAUM_KEY(0X20, DOT)
+#define BAUM_KEY_DOT7 BAUM_KEY(0X40, DOT)
+#define BAUM_KEY_DOT8 BAUM_KEY(0X80, DOT)
 
 #define BAUM_SHIFT_BUTTON (BAUM_SHIFT_DOT + BAUM_WIDTH_DOT)
 #define BAUM_WIDTH_BUTTON 8
@@ -2214,7 +2216,8 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   } else if (routingKeyCount == 0) {
     if (keys && (keys == (keys & (BAUM_KEY_DOT1 | BAUM_KEY_DOT2 | BAUM_KEY_DOT3 |
                                   BAUM_KEY_DOT4 | BAUM_KEY_DOT5 | BAUM_KEY_DOT6 |
-                                  BAUM_KEY_B9 | BAUM_KEY_B0)))) {
+                                  BAUM_KEY_DOT7 | BAUM_KEY_DOT8 |
+                                  BAUM_KEY_F2 | BAUM_KEY_F3)))) {
       command = BRL_BLK_PASSDOTS;
 #define DOT(dot,key) if (keys & BAUM_KEY_##key) command |= BRL_DOT##dot
       DOT(1, DOT1);
@@ -2223,8 +2226,10 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
       DOT(4, DOT4);
       DOT(5, DOT5);
       DOT(6, DOT6);
-      DOT(7, B9);
-      DOT(8, B0);
+      DOT(7, DOT7);
+      DOT(8, DOT8);
+      DOT(7, F2);
+      DOT(8, F3);
 #undef DOT
     } else {
       switch (keys) {
@@ -2297,6 +2302,9 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
         KEY(BAUM_KEY_TL3|BAUM_KEY_TR1|BAUM_KEY_TR3, BRL_CMD_AUTOSPEAK);
 
         KEY(BAUM_KEY_B11, BRL_BLK_PASSDOTS);
+        KEY(BAUM_KEY_B9, BRL_BLK_PASSDOTS);
+        KEY(BAUM_KEY_B0, BRL_BLK_PASSDOTS);
+
         KEY(BAUM_KEY_PRESS, BRL_BLK_PASSKEY+BRL_KEY_ENTER);
         KEY(BAUM_KEY_LEFT, BRL_BLK_PASSKEY+BRL_KEY_CURSOR_LEFT);
         KEY(BAUM_KEY_RIGHT, BRL_BLK_PASSKEY+BRL_KEY_CURSOR_RIGHT);
