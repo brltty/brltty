@@ -935,8 +935,9 @@ testTunesFm (void) {
 #ifdef ENABLE_TABLE_SELECTION
 typedef struct {
   const char *directory;
+  const char *extension;
   const char *pattern;
-  const char *initial;
+  char *initial;
   char *current;
   unsigned none:1;
 
@@ -955,12 +956,20 @@ static GlobData glob_textTable;
 static GlobData glob_attributesTable;
 
 static void
-globPrepare (GlobData *data, const char *directory, const char *pattern, const char *initial, int none) {
+globPrepare (GlobData *data, const char *directory, const char *extension, const char *initial, int none) {
   memset(data, 0, sizeof(*data));
+
   data->directory = directory;
-  data->pattern = pattern;
-  data->current = strdupWrapper(data->initial = initial);
+  data->extension = extension;
   data->none = (none != 0);
+
+  {
+    const char *components[] = {"*", extension};
+    data->pattern = joinStrings(components, ARRAY_COUNT(components));
+  }
+
+  data->initial = *initial? ensureExtension(initial, extension): strdupWrapper("");
+  data->current = data->initial;
 }
 
 static void
@@ -2548,9 +2557,7 @@ startup (int argc, char *argv[]) {
 
 #ifdef ENABLE_PREFERENCES_MENU
 #ifdef ENABLE_TABLE_SELECTION
-  globPrepare(&glob_textTable, opt_tablesDirectory,
-              "*" TEXT_TABLE_EXTENSION,
-              opt_textTable, 0);
+  globPrepare(&glob_textTable, opt_tablesDirectory, TEXT_TABLE_EXTENSION, opt_textTable, 0);
 #endif /* ENABLE_TABLE_SELECTION */
 #endif /* ENABLE_PREFERENCES_MENU */
 
@@ -2563,9 +2570,7 @@ startup (int argc, char *argv[]) {
 
 #ifdef ENABLE_PREFERENCES_MENU
 #ifdef ENABLE_TABLE_SELECTION
-  globPrepare(&glob_attributesTable, opt_tablesDirectory,
-              "*" ATTRIBUTES_TABLE_EXTENSION,
-              opt_attributesTable, 0);
+  globPrepare(&glob_attributesTable, opt_tablesDirectory, ATTRIBUTES_TABLE_EXTENSION, opt_attributesTable, 0);
 #endif /* ENABLE_TABLE_SELECTION */
 #endif /* ENABLE_PREFERENCES_MENU */
 
@@ -2578,9 +2583,7 @@ startup (int argc, char *argv[]) {
 
 #ifdef ENABLE_PREFERENCES_MENU
 #ifdef ENABLE_TABLE_SELECTION
-  globPrepare(&glob_contractionTable, opt_tablesDirectory,
-              "*" CONTRACTION_TABLE_EXTENSION,
-              opt_contractionTable, 1);
+  globPrepare(&glob_contractionTable, opt_tablesDirectory, CONTRACTION_TABLE_EXTENSION, opt_contractionTable, 1);
 #endif /* ENABLE_TABLE_SELECTION */
 #endif /* ENABLE_PREFERENCES_MENU */
 #endif /* ENABLE_CONTRACTED_BRAILLE */
