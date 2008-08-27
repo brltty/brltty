@@ -32,7 +32,7 @@ Simulation of keyboard arrow keys:
 
 Special modes
   This help: CR1+CR40
-  Key describer (learn mode): CR1+CR2+CR79+CR40
+  Key describer (learn mode): CR1+CR2+CR39+CR40
   Freeze/unfreeze screen: cnvx+cncv (toggle)
   Attribute underlining on/off: Ldn+Rup (toggle)
   Show attribute representations: Ldn+Rup+cnvx (toggle)
