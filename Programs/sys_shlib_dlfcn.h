@@ -43,7 +43,7 @@ int
 findSharedSymbol (void *object, const char *symbol, void *pointerAddress) {
 #ifdef HAVE_DLOPEN 
   void **address = pointerAddress;
-  *address = dlsym(object, symbol);
+  if ((*address = dlsym(object, symbol))) return 1;
 
   {
     const char *error = dlerror();
