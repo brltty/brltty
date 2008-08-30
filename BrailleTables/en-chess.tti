@@ -1,0 +1,35 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2008 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+# This text subtable defines braille representations for the chdss figures in
+# terms of the letters that are used for them in the English language.
+
+# See: http://en.wikipedia.org/wiki/Chess_symbols_in_Unicode
+
+char \u2654	(1 3   7 )  # ⡅ ♔ [WHITE CHESS KING]
+char \u2655	(12345 7 )  # ⡟ ♕ [WHITE CHESS QUEEN]
+char \u2656	(123 5 7 )  # ⡗ ♖ [WHITE CHESS ROOK]
+char \u2657	(12    7 )  # ⡃ ♗ [WHITE CHESS BISHOP]
+char \u2658	(1 345 7 )  # ⡝ ♘ [WHITE CHESS KNIGHT]
+char \u2659	(1234  7 )  # ⡏ ♙ [WHITE CHESS PAWN]
+char \u265A	(1 3     )  # ⠅ ♚ [BLACK CHESS KING]
+char \u265B	(12345   )  # ⠟ ♛ [BLACK CHESS QUEEN]
+char \u265C	(123 5   )  # ⠗ ♜ [BLACK CHESS ROOK]
+char \u265D	(12      )  # ⠃ ♝ [BLACK CHESS BISHOP]
+char \u265E	(1 345   )  # ⠝ ♞ [BLACK CHESS KNIGHT]
+char \u265F	(1234    )  # ⠏ ♟ [BLACK CHESS PAWN]
