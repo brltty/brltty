@@ -156,7 +156,7 @@ static unsigned char BRL_UART_HANDSHAK[] = {0xFF, 0xFF, 0x05, 0x01};
 #define DIM_BRL_UART_HANDSHAK 4
 #endif /* 0 */
 /* Normal header for sending dots, with cursor always off */
-static unsigned char BRL_SEND_HEAD[] = {0xFF, 0xFF, 0x04, 0x00, 0x00, 0x01};
+static unsigned char BRL_SEND_HEAD[] = {0XFF, 0XFF, 0X04, 0X00, 0X99, 0X00};
 #define DIM_BRL_SEND_FIXED 6
 #define DIM_BRL_SEND 8
 /* Two extra bytes for lenght and offset */
