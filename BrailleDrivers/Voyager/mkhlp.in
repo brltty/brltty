@@ -29,7 +29,7 @@ mkhlpfile()
    cells=$3
    cells_m_1=`expr $cells - 1`
 
-   gcc -DHAVE_CONFIG_H -DGENHLP -I${SRC_DIR} -I${BLD_DIR} -I${SRC_TOP} -I${BLD_TOP} -E ${SRC_DIR}/braille.c |
+   gcc -DHAVE_CONFIG_H -DGENHLP -I${BLD_DIR} -I${SRC_DIR} -I${BLD_TOP}/Programs -I${SRC_TOP}/Programs -I${BLD_TOP} -I${SRC_TOP} -E ${SRC_DIR}/braille.c |
       ${SRC_DIR}/trhlp |
       cat "${SRC_DIR}/help.template" - |
       sort -t: -s -k 1,1 |
