@@ -143,9 +143,7 @@ contractLine (char *line, void *data) {
         FILE *output = stdout;
 
         fprintf(output, "%.*" PRIws "\n", outputCount, outputCharacters);
-        if (!ferror(output))
-          if (opt_forceOutput)
-            fflush(output);
+        if (opt_forceOutput && !ferror(output)) fflush(output);
 
         if (ferror(output)) {
           LogError("output");
