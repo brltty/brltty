@@ -38,6 +38,7 @@ static char *opt_contractionTable;
 static char *opt_tablesDirectory;
 static char *opt_textTable;
 static char *opt_outputWidth;
+static int opt_forceOutput;
 
 BEGIN_OPTION_TABLE(programOptions)
   { .letter = 'c',
@@ -45,7 +46,7 @@ BEGIN_OPTION_TABLE(programOptions)
     .argument = "file",
     .setting.string = &opt_contractionTable,
     .defaultSetting = "en-us-g2",
-    .description = "Path to contraction table file."
+    .description = "Contraction table."
   },
 
   { .letter = 'T',
@@ -54,14 +55,14 @@ BEGIN_OPTION_TABLE(programOptions)
     .argument = strtext("directory"),
     .setting.string = &opt_tablesDirectory,
     .defaultSetting = DATA_DIRECTORY,
-    .description = strtext("Path to directory for text and attributes tables.")
+    .description = strtext("Path to directory containing tables.")
   },
 
   { .letter = 't',
     .word = "text-table",
     .argument = "file",
     .setting.string = &opt_textTable,
-    .description = "Text translation table."
+    .description = "Text table."
   },
 
   { .letter = 'w',
@@ -70,6 +71,12 @@ BEGIN_OPTION_TABLE(programOptions)
     .setting.string = &opt_outputWidth,
     .defaultSetting = "",
     .description = "Maximum length of an output line."
+  },
+
+  { .letter = 'f',
+    .word = "force-output",
+    .setting.flag = &opt_forceOutput,
+    .description = "Force immediate output."
   },
 END_OPTION_TABLE
 
@@ -134,7 +141,12 @@ contractLine (char *line, void *data) {
 
       {
         FILE *output = stdout;
+
         fprintf(output, "%.*" PRIws "\n", outputCount, outputCharacters);
+        if (!ferror(output))
+          if (opt_forceOutput)
+            fflush(output);
+
         if (ferror(output)) {
           LogError("output");
           lpd->status = 12;
