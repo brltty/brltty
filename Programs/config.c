@@ -984,11 +984,12 @@ globBegin (GlobData *data) {
   {
 #ifdef HAVE_FCHDIR
     int originalDirectory = open(".", O_RDONLY);
-    if (originalDirectory != -1) {
+    if (originalDirectory != -1)
 #else /* HAVE_FCHDIR */
     char *originalDirectory = getWorkingDirectory();
-    if (originalDirectory) {
+    if (originalDirectory)
 #endif /* HAVE_FCHDIR */
+    {
       if (chdir(data->directory) != -1) {
 #if defined(HAVE_GLOB_H)
         memset(&data->glob, 0, sizeof(data->glob));
@@ -1000,7 +1001,7 @@ globBegin (GlobData *data) {
            * include the leading NULL pointers and some don't. Let's just
            * figure it out the hard way by finding the trailing NULL.
            */
-          while (data->paths[data->count]) ++data->count;
+          while (data->paths[data->count]) data->count += 1;
         }
 #elif defined(__MINGW32__)
         struct _finddata_t findData;
@@ -1009,7 +1010,7 @@ globBegin (GlobData *data) {
         data->count = 0;
         data->findHandle = _findfirst(data->pattern, &findData);
         if (data->findHandle != -1) {
-          int allocated = 16;
+          int allocated = 0X10;
           data->paths = malloc(allocated * sizeof(char*));
           do {
             if (data->count >= allocated) {
@@ -1845,7 +1846,7 @@ activateBrailleDriver (int verify) {
       if (activateDriver(&data, verify)) return 1;
     }
 
-    ++device;
+    device += 1;
   }
 
   brailleDevice = NULL;
@@ -2304,8 +2305,6 @@ validateInterval (int *value, const char *string) {
 
 void
 startup (int argc, char *argv[]) {
-  int problemCount;
-
   {
     static const OptionsDescriptor descriptor = {
       OPTION_TABLE(programOptions),
@@ -2314,7 +2313,7 @@ startup (int argc, char *argv[]) {
       .configurationFile = &opt_configurationFile,
       .applicationName = "brltty"
     };
-    problemCount = processOptions(&descriptor, &argc, &argv);
+    processOptions(&descriptor, &argc, &argv);
   }
 
   {
@@ -2330,17 +2329,14 @@ startup (int argc, char *argv[]) {
 
   if (argc) {
     LogPrint(LOG_ERR, "%s: %s", gettext("excess argument"), argv[0]);
-    ++problemCount;
   }
 
   if (!validateInterval(&updateInterval, opt_updateInterval)) {
     LogPrint(LOG_ERR, "%s: %s", gettext("invalid update interval"), opt_updateInterval);
-    ++problemCount;
   }
 
   if (!validateInterval(&messageDelay, opt_messageDelay)) {
     LogPrint(LOG_ERR, "%s: %s", gettext("invalid message delay"), opt_messageDelay);
-    ++problemCount;
   }
 
   /* Set logging levels. */
@@ -2375,7 +2371,6 @@ startup (int argc, char *argv[]) {
       }
 
       LogPrint(LOG_ERR, "%s: %s", gettext("invalid log level"), opt_logLevel);
-      ++problemCount;
     }
   setLevel:
 
@@ -2653,12 +2648,4 @@ startup (int argc, char *argv[]) {
 #endif /* ENABLE_SPEECH_SUPPORT */
 
   if (opt_verify) exit(0);
-
-  if (problemCount) {
-    char buffer[0X40];
-    snprintf(buffer, sizeof(buffer),
-             ngettext("%d startup problem", "%d startup problems", problemCount),
-             problemCount);
-    message(buffer, MSG_WAITKEY);
-  }
 }
