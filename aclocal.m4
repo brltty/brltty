@@ -143,7 +143,7 @@ fi])
 
 AC_DEFUN([BRLTTY_HELP_STRING], [dnl
 AC_HELP_STRING([$1], patsubst([$2], [
-.*$]), [brltty_help_prefix])dnl
+.*$]), m4_defn([brltty_help_prefix]))dnl
 patsubst(patsubst([$2], [\`[^
 ]*]), [
 ], [\&brltty_help_prefix])[]dnl
@@ -383,11 +383,11 @@ fi])])
 
 AC_DEFUN([BRLTTY_TEXT_TABLE], [dnl
 define([brltty_tables_text], ifdef([brltty_tables_text], [brltty_tables_text])[
-m4_text_wrap([$2], [           ], [- m4_format([%-8s ], [$1])], brltty_help_width)])])
+m4_text_wrap([$2], [           ], [- ]m4_format([%-8s ], [$1]), brltty_help_width)])])
 
 AC_DEFUN([BRLTTY_ATTRIBUTES_TABLE], [dnl
 define([brltty_tables_attributes], ifdef([brltty_tables_attributes], [brltty_tables_attributes])[
-m4_text_wrap([$2], [             ], [- m4_format([%-10s ], [$1])], brltty_help_width)])])
+m4_text_wrap([$2], [             ], [- ]m4_format([%-10s ], [$1]), brltty_help_width)])])
 
 AC_DEFUN([BRLTTY_SUMMARY_BEGIN], [dnl
 brltty_summary_lines="Options Summary:"
