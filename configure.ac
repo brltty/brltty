@@ -55,7 +55,6 @@ AC_DEFINE_UNQUOTED([PACKAGE_TITLE], ["${PACKAGE_TITLE}"],
 PACKAGE_REVISION="`"${srcdir}/revision" "${srcdir}"`"
 if test -z "${PACKAGE_REVISION}"
 then
-   AC_MSG_WARN([package revision not known])
    PACKAGE_REVISION=""
 fi
 AC_DEFINE_UNQUOTED([PACKAGE_REVISION], ["${PACKAGE_REVISION}"],
