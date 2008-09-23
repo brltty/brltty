@@ -866,6 +866,13 @@ probeBaumDisplay (BrailleDisplay *brl) {
             return 1;
 
           case BAUM_RSP_CellCount: /* newer models */
+            if ((response.data.values.cellCount < 1) ||
+                (response.data.values.cellCount > MAXIMUM_CELL_COUNT)) {
+              LogPrint(LOG_DEBUG, "Unexpected Cell Count: %u",
+                       response.data.values.cellCount);
+              continue;
+            }
+
             cellCount = response.data.values.cellCount;
             return 1;
 
