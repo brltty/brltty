@@ -1689,43 +1689,141 @@ static const UsbSerialOperations *usbSerial = NULL;
 static int
 openUsbPort (const char *device) {
   static const UsbChannelDefinition definitions[] = {
-    { /* SuperVario 24 */
+    { /* Vario40 (40 cells) */
+      .vendor=0X0403, .product=0XFE70,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=2,
+      .disableAutosuspend=1
+    }
+    ,
+    { /* PocketVario (24 cells) */
       .vendor=0X0403, .product=0XFE71,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
       .disableAutosuspend=1
     }
     ,
-    { /* SuperVario 40 */
+    { /* SuperVario 40 (40 cells) */
       .vendor=0X0403, .product=0XFE72,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
       .disableAutosuspend=1
     }
     ,
-    { /* SuperVario 32 */
+    { /* SuperVario 32 (32 cells) */
       .vendor=0X0403, .product=0XFE73,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
       .disableAutosuspend=1
     }
     ,
-    { /* SuperVario 64 */
+    { /* SuperVario 64 (64 cells) */
       .vendor=0X0403, .product=0XFE74,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
       .disableAutosuspend=1
     }
     ,
-    { /* SuperVario 80 */
+    { /* SuperVario 80 (80 cells) */
       .vendor=0X0403, .product=0XFE75,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
       .disableAutosuspend=1
     }
     ,
-    { /* VarioConnect 40 */
+    { /* VarioPro 80 (80 cells) */
+      .vendor=0X0403, .product=0XFE76,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=2,
+      .disableAutosuspend=1
+    }
+    ,
+    { /* VarioPro 64 (64 cells) */
+      .vendor=0X0403, .product=0XFE77,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=2,
+      .disableAutosuspend=1
+    }
+    ,
+    { /* VarioPro 40 (40 cells) */
+      .vendor=0X0904, .product=0X2000,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=2,
+      .disableAutosuspend=1
+    }
+    ,
+    { /* EcoVario 24 (24 cells) */
+      .vendor=0X0904, .product=0X2001,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=2,
+      .disableAutosuspend=1
+    }
+    ,
+    { /* EcoVario 40 (40 cells) */
+      .vendor=0X0904, .product=0X2002,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=2,
+      .disableAutosuspend=1
+    }
+    ,
+    { /* VarioConnect 40 (40 cells) */
       .vendor=0X0904, .product=0X2007,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=2,
+      .disableAutosuspend=1
+    }
+    ,
+    { /* VarioConnect 32 (32 cells) */
+      .vendor=0X0904, .product=0X2008,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=2,
+      .disableAutosuspend=1
+    }
+    ,
+    { /* VarioConnect 24 (24 cells) */
+      .vendor=0X0904, .product=0X2009,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=2,
+      .disableAutosuspend=1
+    }
+    ,
+    { /* VarioConnect 64 (64 cells) */
+      .vendor=0X0904, .product=0X2010,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=2,
+      .disableAutosuspend=1
+    }
+    ,
+    { /* VarioConnect 80 (80 cells) */
+      .vendor=0X0904, .product=0X2011,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=2,
+      .disableAutosuspend=1
+    }
+    ,
+    { /* VarioPro 40 (40 cells) */
+      .vendor=0X0904, .product=0X2012,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=2,
+      .disableAutosuspend=1
+    }
+    ,
+    { /* EcoVario 32 (32 cells) */
+      .vendor=0X0904, .product=0X2014,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=2,
+      .disableAutosuspend=1
+    }
+    ,
+    { /* EcoVario 64 (64 cells) */
+      .vendor=0X0904, .product=0X2015,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=2,
+      .disableAutosuspend=1
+    }
+    ,
+    { /* EcoVario 80 (80 cells) */
+      .vendor=0X0904, .product=0X2016,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
       .disableAutosuspend=1

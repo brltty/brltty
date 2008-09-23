@@ -1091,38 +1091,122 @@ usbGetSerialOperations (UsbDevice *device) {
         usbFtdiInputFilter
       }
       ,
-      { /* Baum SuperVario 24 */
+      { /* Baum Vario40 (40 cells) */
+        0X0403, 0XFE70,
+        &usbFtdiOperations_FT232BM,
+        usbFtdiInputFilter
+      }
+      ,
+      { /* Baum PocketVario (24 cells) */
         0X0403, 0XFE71,
         &usbFtdiOperations_FT232BM,
         usbFtdiInputFilter
       }
       ,
-      { /* Baum SuperVario 40 */
+      { /* Baum SuperVario 40 (40 cells) */
         0X0403, 0XFE72,
         &usbFtdiOperations_FT232BM,
         usbFtdiInputFilter
       }
       ,
-      { /* Baum SuperVario 32 */
+      { /* Baum SuperVario 32 (32 cells) */
         0X0403, 0XFE73,
         &usbFtdiOperations_FT232BM,
         usbFtdiInputFilter
       }
       ,
-      { /* Baum SuperVario 64 */
+      { /* Baum SuperVario 64 (64 cells) */
         0X0403, 0XFE74,
         &usbFtdiOperations_FT232BM,
         usbFtdiInputFilter
       }
       ,
-      { /* Baum SuperVario 80 */
+      { /* Baum SuperVario 80 (80 cells) */
         0X0403, 0XFE75,
         &usbFtdiOperations_FT232BM,
         usbFtdiInputFilter
       }
       ,
-      { /* Baum VarioConnect 40 */
+      { /* Baum VarioPro 80 (80 cells) */
+        0X0403, 0XFE76,
+        &usbFtdiOperations_FT232BM,
+        usbFtdiInputFilter
+      }
+      ,
+      { /* Baum VarioPro 64 (64 cells) */
+        0X0403, 0XFE77,
+        &usbFtdiOperations_FT232BM,
+        usbFtdiInputFilter
+      }
+      ,
+      { /* Baum VarioPro 40 (40 cells) */
+        0X0904, 0X2000,
+        &usbFtdiOperations_FT232BM,
+        usbFtdiInputFilter
+      }
+      ,
+      { /* Baum EcoVario 24 (24 cells) */
+        0X0904, 0X2001,
+        &usbFtdiOperations_FT232BM,
+        usbFtdiInputFilter
+      }
+      ,
+      { /* Baum EcoVario 40 (40 cells) */
+        0X0904, 0X2002,
+        &usbFtdiOperations_FT232BM,
+        usbFtdiInputFilter
+      }
+      ,
+      { /* Baum VarioConnect 40 (40 cells) */
         0X0904, 0X2007,
+        &usbFtdiOperations_FT232BM,
+        usbFtdiInputFilter
+      }
+      ,
+      { /* Baum VarioConnect 32 (32 cells) */
+        0X0904, 0X2008,
+        &usbFtdiOperations_FT232BM,
+        usbFtdiInputFilter
+      }
+      ,
+      { /* Baum VarioConnect 24 (24 cells) */
+        0X0904, 0X2009,
+        &usbFtdiOperations_FT232BM,
+        usbFtdiInputFilter
+      }
+      ,
+      { /* Baum VarioConnect 64 (64 cells) */
+        0X0904, 0X2010,
+        &usbFtdiOperations_FT232BM,
+        usbFtdiInputFilter
+      }
+      ,
+      { /* Baum VarioConnect 80 (80 cells) */
+        0X0904, 0X2011,
+        &usbFtdiOperations_FT232BM,
+        usbFtdiInputFilter
+      }
+      ,
+      { /* Baum VarioPro 40 (40 cells) */
+        0X0904, 0X2012,
+        &usbFtdiOperations_FT232BM,
+        usbFtdiInputFilter
+      }
+      ,
+      { /* Baum EcoVario 32 (32 cells) */
+        0X0904, 0X2014,
+        &usbFtdiOperations_FT232BM,
+        usbFtdiInputFilter
+      }
+      ,
+      { /* Baum EcoVario 64 (64 cells) */
+        0X0904, 0X2015,
+        &usbFtdiOperations_FT232BM,
+        usbFtdiInputFilter
+      }
+      ,
+      { /* Baum EcoVario 80 (80 cells) */
+        0X0904, 0X2016,
         &usbFtdiOperations_FT232BM,
         usbFtdiInputFilter
       }
