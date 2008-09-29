@@ -451,6 +451,10 @@ cdef class Connection:
 		cdef int retval
 		cdef char *c_dots
 		cdef unsigned char *c_udots
+		(x, y) = self.displaySize
+		dispSize = x * y
+		if (len(dots) < dispSize):
+			dots = dots + "".center(dispSize - len(dots), '\0')
 		c_dots = dots
 		c_udots = <unsigned char *>c_dots
 		c_brlapi.Py_BEGIN_ALLOW_THREADS
