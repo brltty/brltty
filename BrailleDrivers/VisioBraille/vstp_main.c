@@ -220,10 +220,22 @@ int main(int argc, char *argv[]) {
 
  signal(SIGINT,handleint);
  signal(SIGTERM,handleint);
+
+#ifdef SIGHUP
  signal(SIGHUP,handleint);
+#endif /* SIGHUP */
+
+#ifdef SIGQUIT
  signal(SIGQUIT,handleint);
+#endif /* SIGQUIT */
+
+#ifdef SIGPIPE
  signal(SIGPIPE,handleint);
+#endif /* SIGPIPE */
+
+#ifdef SIGALRM
  signal(SIGALRM,transfer_timeout);
+#endif /* SIGALRM */
 
  if (visiobases_dir && chdir(visiobases_dir)<0) {
   perror(visiobases_dir);

@@ -38,6 +38,10 @@
 
 #include "vstp.h"
 
+#ifdef __MINGW32__
+#define alarm(t) (void)0
+#endif
+
 /* SEND */
 /* tries to send a message */
 #define SEND(buf,size) \
