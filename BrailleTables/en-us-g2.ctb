@@ -44,7 +44,6 @@ always 0 245
 lastlargesign a 1
 always a 1
 always A 1
-sufword abalone =
 always about 1-12
 contraction ab
 always above 1-12-1236
@@ -98,6 +97,7 @@ begword auto = autofocus
 # the letter b
 always b 12
 always B 12
+always balone = abalone baloney
 midword bb 23
 midendword bble 12-3456
 lowword be 23
