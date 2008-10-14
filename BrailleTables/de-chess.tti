@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# This text subtable defines braille representations for the chdss figures in
+# This text subtable defines braille representations for the chess figures in
 # terms of the letters that are used for them in the German language.
 
 # See: http://en.wikipedia.org/wiki/Chess_symbols_in_Unicode
