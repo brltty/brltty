@@ -163,6 +163,7 @@ struct SerialDeviceStruct {
 
 #ifdef __MINGW32__
   HANDLE fileHandle;
+  int pending;
 #endif /* __MINGW32__ */
 
 #ifdef __MSDOS__
@@ -1025,19 +1026,30 @@ serialAwaitInput (SerialDevice *serial, int timeout) {
   if (!serialFlushAttributes(serial)) return 0;
 
 #ifdef __MINGW32__
-  COMMTIMEOUTS timeouts = {MAXDWORD, 0, timeout, 0, 0};
-  DWORD bytesRead;
-  int ret;
-  char c;
-  if (!(SetCommTimeouts(serial->fileHandle, &timeouts))) {
-    LogWindowsError("SetCommTimeouts serialAwaitInput");
-    return 0;
+  if (serial->pending != -1) return 1;
+
+  {
+    COMMTIMEOUTS timeouts = {MAXDWORD, 0, timeout, 0, 0};
+    DWORD bytesRead;
+    char c;
+
+    if (!(SetCommTimeouts(serial->fileHandle, &timeouts))) {
+      LogWindowsError("SetCommTimeouts serialAwaitInput");
+      return 0;
+    }
+
+    if (!ReadFile(serial->fileHandle, &c, 1, &bytesRead, NULL)) {
+      LogWindowsError("ReadFile");
+      return 0;
+    }
+
+    if (bytesRead) {
+      serial->pending = (unsigned char)c;
+      return 1;
+    }
   }
 
-  ret = ReadFile(serial->fileHandle, &c, 0, &bytesRead, NULL);
-  if (!ret)
-    LogWindowsError("ReadFile");
-  return ret;
+  return 0;
 #else /* __MINGW32__ */
   return awaitInput(serial->fileDescriptor, timeout);
 #endif /* __MINGW32__ */
@@ -1055,21 +1067,27 @@ serialReadChunk (
   COMMTIMEOUTS timeouts = {MAXDWORD, 0, initialTimeout, 0, 0};
   DWORD bytesRead;
 
-  if (!(SetCommTimeouts(serial->fileHandle, &timeouts))) {
-    LogWindowsError("SetCommTimeouts serialReadChunk1");
-    setSystemErrno();
-    return 0;
-  }
+  if (serial->pending != -1) {
+    * (unsigned char *) buffer = serial->pending;
+    serial->pending = -1;
+    bytesRead = 1;
+  } else {
+    if (!(SetCommTimeouts(serial->fileHandle, &timeouts))) {
+      LogWindowsError("SetCommTimeouts serialReadChunk1");
+      setSystemErrno();
+      return 0;
+    }
 
-  if (!ReadFile(serial->fileHandle, buffer+*offset, count, &bytesRead, NULL)) {
-    LogWindowsError("ReadFile");
-    setSystemErrno();
-    return 0;
-  }
+    if (!ReadFile(serial->fileHandle, buffer+*offset, count, &bytesRead, NULL)) {
+      LogWindowsError("ReadFile");
+      setSystemErrno();
+      return 0;
+    }
 
-  if (!bytesRead) {
-    errno = EAGAIN;
-    return 0;
+    if (!bytesRead) {
+      errno = EAGAIN;
+      return 0;
+    }
   }
 
   count -= bytesRead;
@@ -1377,6 +1395,10 @@ serialOpenDevice (const char *path) {
             serial->pendingFlowControlProc = NULL;
             serial->flowControlRunning = 0;
 #endif /* HAVE_POSIX_THREADS */
+
+#ifdef __MINGW32__
+            serial->pending = -1;
+#endif /* __MINGW32__ */
 
             LogPrint(LOG_DEBUG, "serial device opened: %s: fd=%d",
                      device,
