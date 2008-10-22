@@ -220,7 +220,9 @@ brl_destruct (BrailleDisplay *brl) {
 #ifdef USE_CURSES
   if (ttyScreen) {
     endwin();
+#ifndef __MINGW32__
     delscreen(ttyScreen);
+#endif /* __MINGW32__ */
     ttyScreen = NULL;
   }
 #endif /* USE_CURSES */
