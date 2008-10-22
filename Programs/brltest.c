@@ -223,10 +223,16 @@ main (int argc, char *argv[]) {
   return status;
 }
 
-/* dummy function to allow brl.o to link... */
+/* dummy functions to allow drivers to link... */
+unsigned char
+cursorDots (void) {
+  return (BRL_DOT7 | BRL_DOT8);
+}
+
 void
 setHelpPageNumber (short page) {
 }
+
 int
 currentVirtualTerminal (void) {
   return 0;
