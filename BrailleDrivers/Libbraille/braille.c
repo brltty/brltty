@@ -75,10 +75,21 @@ brl_construct(BrailleDisplay *brl, char **parameters, const char *device)
     {
       LogPrint(LOG_INFO, "Libbraille Version: %s", braille_info(BRL_VERSION));
 
+#ifdef BRL_PATH
       LogPrint(LOG_DEBUG, "Libbraille Installation Directory: %s", braille_info(BRL_PATH));
+#endif /* BRL_PATH */
+
+#ifdef BRL_PATHCONF
       LogPrint(LOG_DEBUG, "Libbraille Configuration Directory: %s", braille_info(BRL_PATHCONF));
+#endif /* BRL_PATHCONF */
+
+#ifdef BRL_PATHTBL
       LogPrint(LOG_DEBUG, "Libbraille Tables Directory: %s", braille_info(BRL_PATHTBL));
+#endif /* BRL_PATHTBL */
+
+#ifdef BRL_PATHDRV
       LogPrint(LOG_DEBUG, "Libbraille Drivers Directory: %s", braille_info(BRL_PATHDRV));
+#endif /* BRL_PATHDRV */
 
       LogPrint(LOG_INFO, "Libbraille Table: %s", braille_info(BRL_TABLE));
       LogPrint(LOG_INFO, "Libbraille Driver: %s", braille_info(BRL_DRIVER));
