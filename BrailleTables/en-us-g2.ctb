@@ -20,6 +20,7 @@
 # Created by John Boyer <director@chpi.org>.
 
 class vowel aeiouyAEIOUY
+class consonent bcdfghjklmnpqrstvwxzBCDFGHJKLMNPQRSTVWXZ
 
 numsign 3456  number sign, just one operand
 letsign 56
@@ -763,6 +764,7 @@ always shouse 234-125-1256-234-15
 always ssh =
 always shood =
 word such 234-16
+before consonent sufword such 234-16
 word sch =
 always sword =
 
