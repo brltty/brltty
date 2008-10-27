@@ -491,9 +491,9 @@ ssize_t	clio_readPacket(BrailleDisplay *brl, void *packet, size_t size)
     return 0;
 
   /* ignoring packets received twice **/
-  if ((needsEscape[((unsigned)buffer[end - 1])] != 1
+  if ((needsEscape[((unsigned char)buffer[end - 1])] != 1
        && buffer[end - 2] == prevPktNbr)
-      || (needsEscape[((unsigned)buffer[end - 1])] == 1 
+      || (needsEscape[((unsigned char)buffer[end - 1])] == 1 
 	  && buffer[end - 3] == prevPktNbr))
     {
       memmove(buffer, buffer + end + 1, pos - framelen);
@@ -501,7 +501,7 @@ ssize_t	clio_readPacket(BrailleDisplay *brl, void *packet, size_t size)
       return 0;
     }
   /* Updating pprevPktNbr */
-  if (needsEscape[((unsigned)buffer[end - 1])] != 1)
+  if (needsEscape[((unsigned char)buffer[end - 1])] != 1)
     prevPktNbr = buffer[end - 2];
   else
     prevPktNbr = buffer[end - 3];
