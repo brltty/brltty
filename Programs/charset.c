@@ -315,8 +315,8 @@ convertWcharToUtf8 (wchar_t wc, Utf8Buffer utf8) {
     *utf8 = wc;
     utfs = 1;
   } else {
-    char buffer[MB_LEN_MAX];
-    char *end = buffer + sizeof(buffer);
+    Utf8Buffer buffer;
+    char *end = &buffer[0] + sizeof(buffer);
     char *byte = end;
     static const wchar_t mask = (1 << ((sizeof(wchar_t) * 8) - 6)) - 1;
 
