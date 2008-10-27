@@ -546,6 +546,8 @@ interpretIdentity (BrailleDisplay *brl, unsigned char id, int major, int minor) 
                terminal->helpFile);
       brl->x = terminal->textColumns;
       brl->y = terminal->textRows;
+      brl->statusColumns = terminal->statusCount;
+      brl->statusRows = 1;
 
       /* TODO: ?? HACK */
       BRLSYMBOL.helpFile = terminal->helpFile;

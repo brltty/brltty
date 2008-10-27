@@ -103,6 +103,8 @@ void
 initializeBrailleDisplay (BrailleDisplay *brl) {
   brl->x = 80;
   brl->y = 1;
+  brl->statusColumns = 0;
+  brl->statusRows = 0;
   brl->helpPage = 0;
   brl->buffer = NULL;
   brl->writeDelay = 0;

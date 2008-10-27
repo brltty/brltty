@@ -42,19 +42,20 @@ typedef enum {
 typedef struct BrailleDataStruct BrailleData;
 
 typedef struct {
-  unsigned int x, y;			/* the dimensions of the display */
-  unsigned int helpPage;			/* the page number within the help file */
-  unsigned char *buffer;	/* the contents of the display */
-  int cursor;		/* the position of the cursor within the display */
-  unsigned isCoreBuffer:1;	/* the core allocated the buffer */
-  unsigned resizeRequired:1;	/* the display size has changed */
+  unsigned int x, y;
+  unsigned int statusColumns, statusRows;
+  unsigned int helpPage;
+  unsigned char *buffer;
+  int cursor;
+  unsigned isCoreBuffer:1;
+  unsigned resizeRequired:1;
   unsigned int writeDelay;
   void (*bufferResized) (int infoLevel, int rows, int columns);
   const char *dataDirectory;
   unsigned touchEnabled:1;
   unsigned highlightWindow:1;
   BrailleData *data;
-} BrailleDisplay;				/* used for writing to a braille display */
+} BrailleDisplay;
 
 extern void initializeBrailleDisplay (BrailleDisplay *brl);
 extern unsigned int drainBrailleOutput (BrailleDisplay *brl, int minimumDelay);

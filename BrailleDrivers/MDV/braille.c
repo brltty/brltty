@@ -373,6 +373,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
   brl->helpPage = 0;
   brl->x = brl_cols;		/* initialize size of display */
   brl->y = BRLROWS;		/* always 1 */
+  brl->statusColumns = nrstatcells;
+  brl->statusRows = 1;
 
   /* Allocate space for buffers */
   /* For portability we want to avoid declarations such as char array[v]
@@ -440,9 +442,6 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text)
   int i;
   unsigned char *p;
 
-  if (brl->x != brl_cols || brl->y != BRLROWS)
-    return 1;
-    
   if(memcmp(prevdata, brl->buffer, brl_cols) == 0
      && memcmp(prevstatbuf, statbuf, nrstatcells) == 0)
     return 1;

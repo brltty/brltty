@@ -112,9 +112,10 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
 
   if (!serialSetFlowControl(CB_serialDevice, SERIAL_FLOW_HARDWARE)) goto failure;
 
+  brl->x = brl_cols = BRLCOLS(id);
   brl->y = BRLROWS;
-  if ((brl->x = brl_cols = BRLCOLS(id)) == -1)
-    goto failure;
+  brl->statusColumns = 5;
+  brl->statusRows = 1;
 
   /* Allocate space for buffers */
   prevdata = mallocWrapper (brl->x * brl->y);

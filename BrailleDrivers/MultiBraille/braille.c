@@ -155,8 +155,10 @@ static int brl_construct (BrailleDisplay *brl, char **parameters, const char *de
 	if (!serialSetFlowControl(MB_serialDevice, SERIAL_FLOW_HARDWARE)) goto failure;
 
 	if (brlcols == 25) goto failure;						/* MultiBraille Vertical uses a different protocol --> not supported */
-	if ((brl->x = brlcols) == -1) goto failure;
+	brl->x = brlcols;
 	brl->y = BRLROWS;
+	brl->statusColumns = 5;
+	brl->statusRows = 1;
 
 	/* Allocate space for buffers */
 	prevdata = mallocWrapper (brl->x * brl->y);

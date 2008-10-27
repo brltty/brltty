@@ -266,7 +266,6 @@ static unsigned char *rawdata = NULL;	/* translated data to send to Braille */
 static unsigned char *prevdata = NULL;	/* previously sent raw data */
 static unsigned char StatusCells[MAX_STCELLS];		/* to hold status info */
 static unsigned char PrevStatus[MAX_STCELLS];	/* to hold previous status */
-static unsigned char NbStCells;	/* number of status cells */
 static const ModelEntry *model;		/* points to terminal model config struct */
 static int rewriteRequired = 0;		/* 1 if display need to be rewritten */
 static int rewriteInterval;
@@ -626,9 +625,9 @@ updateDisplayConfiguration (BrailleDisplay *brl, const unsigned char *packet, in
 
   if (count >= 3) {
     unsigned char cells = packet[9];
-    if (cells != NbStCells) {
-      NbStCells = cells;
-      LogPrint(LOG_INFO, "Status cell count changed to %d.", NbStCells);
+    if (cells != brl->statusColumns) {
+      brl->statusColumns = cells;
+      LogPrint(LOG_INFO, "Status cell count changed to %d.", brl->statusColumns);
     }
   }
 
@@ -666,8 +665,9 @@ identifyModel (BrailleDisplay *brl, unsigned char identifier) {
   /* Set model parameters... */
   brl->x = model->columns;
   brl->y = 1;
+  brl->statusColumns = model->statusCells;
+  brl->statusRows = 1;
   brl->helpPage = model->helpPage;			/* initialise size of display */
-  NbStCells = model->statusCells;
 
   if (model->flags & MOD_FLG__CONFIGURABLE) {
     BRLSYMBOL.firmness = brl_firmness;
@@ -813,7 +813,7 @@ static int brl_writeWindow (BrailleDisplay *brl, const wchar_t *text)
     int index;
     for (index=from; index<to; index++)
       rawdata[index - from] = outputTable[(prevdata[index] = brl->buffer[index])];
-    WriteToBrlDisplay (brl, NbStCells+from, to-from, rawdata);
+    WriteToBrlDisplay (brl, brl->statusColumns+from, to-from, rawdata);
   }
   return 1;
 }
@@ -825,11 +825,11 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *st)
   int i;
 
   /* Update status cells on braille display */
-  if (memcmp (st, PrevStatus, NbStCells))	/* only if it changed */
+  if (memcmp (st, PrevStatus, brl->statusColumns) != 0)	/* only if it changed */
     {
-      for (i=0; i<NbStCells; ++i)
+      for (i=0; i<brl->statusColumns; ++i)
         StatusCells[i] = outputTable[(PrevStatus[i] = st[i])];
-      WriteToBrlDisplay (brl, 0, NbStCells, StatusCells);
+      WriteToBrlDisplay (brl, 0, brl->statusColumns, StatusCells);
     }
   return 1;
 }
@@ -944,7 +944,7 @@ GetKey (BrailleDisplay *brl, unsigned int *Keys, unsigned int *Pos) {
 #else /* ABT3_OLD_FIRMWARE */
 
   int key = packet[0];
-  if (key < (KEY_ROUTING_OFFSET + brl->x + NbStCells)) {
+  if (key < (KEY_ROUTING_OFFSET + brl->x + brl->statusColumns)) {
     if (key >= (KEY_ROUTING_OFFSET + brl->x)) {
       /* status key */
       *Keys |= StatusKeys1[key - (KEY_ROUTING_OFFSET + brl->x)];

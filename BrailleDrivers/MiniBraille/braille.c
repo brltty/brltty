@@ -377,6 +377,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
       brl->x = sizeof(textCells);
       brl->y = 1;
+      brl->statusColumns = sizeof(statusCells);
+      brl->statusRows = 1;
 
       beep(brl);
       return 1;
