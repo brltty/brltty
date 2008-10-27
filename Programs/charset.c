@@ -318,10 +318,11 @@ convertWcharToUtf8 (wchar_t wc, Utf8Buffer utf8) {
     char buffer[MB_LEN_MAX];
     char *end = buffer + sizeof(buffer);
     char *byte = end;
+    static const wchar_t mask = (1 << ((sizeof(wchar_t) * 8) - 6)) - 1;
 
     do {
       *--byte = (wc & 0X3F) | 0X80;
-    } while (wc >>= 6);
+    } while ((wc = (wc >> 6) & mask));
 
     utfs = end - byte;
     if ((*byte & 0X7F) >= (1 << (7 - utfs))) {
