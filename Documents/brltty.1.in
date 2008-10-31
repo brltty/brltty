@@ -288,6 +288,17 @@ Relative paths are anchored at
 The built-in default is
 that no FIFO is created.
 .TP
+\fB-I\fR (\fB--install-service\fR)
+(Windows only)
+Install
+.B brltty
+as the
+.B BrlAPI
+service so that it will be started at boot
+and so that applications can know that a
+.B BrlAPI
+server is running.
+.TP
 \fB-M \fIcsecs\fR (\fB--message-delay=\fR)
 The message hold time in hundredths of a second.
 The built-in default is
@@ -305,6 +316,17 @@ writes its process identifier (pid) into the specified file at start-up.
 The file is removed when
 .B brltty
 terminates.
+.TP
+\fB-R\fR (\fB--remove-service\fR)
+(Windows only)
+Remove the
+.B BrlAPI
+service so that
+.B brltty
+will not be started at boot
+and so that applications can know that no
+.B BrlAPI
+server is running.
 .TP
 \fB-S \fR[\fIdriver\fB:\fR]\fIname\fB=\fIvalue\fB,\fR... (\fB--speech-parameters=\fR)
 Parameters for the speech synthesizer driver.
