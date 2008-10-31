@@ -2739,7 +2739,7 @@ The <tt/brltty/ command accepts the following options:
     <ref id="build-speech-support" name="--disable-speech-support"> build option was specified.
   <tag><tt/-I/ <tt/--install-service/<label id="options-install-service"></tag>
     Install BRLTTY as the BrlAPI service.
-    This emans that:
+    This means that:
     <itemize>
       <item>BRLTTY will be automatically started when the system is booted.
       <item>Applications can know that a BrlAPI server is running.
@@ -2756,7 +2756,7 @@ The <tt/brltty/ command accepts the following options:
     If not specified, BRLTTY doesn't write its process identifier anywhere.
   <tag><tt/-R/ <tt/--remove-service/<label id="options-remove-service"></tag>
     Remove the BrlAPI service.
-    This emans that:
+    This means that:
     <itemize>
       <item>BRLTTY will not be automatically started when the system is booted.
       <item>Applications can know that no BrlAPI server is running.
