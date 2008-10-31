@@ -2737,6 +2737,14 @@ The <tt/brltty/ command accepts the following options:
     configuration file directive for the default run-time setting.
     This option isn't available if the
     <ref id="build-speech-support" name="--disable-speech-support"> build option was specified.
+  <tag><tt/-I/ <tt/--install-service/<label id="options-install-service"></tag>
+    Install BRLTTY as the BrlAPI service.
+    This emans that:
+    <itemize>
+      <item>BRLTTY will be automatically started when the system is booted.
+      <item>Applications can know that a BrlAPI server is running.
+    </itemize>
+    This option is only supported on the Windows platform.
   <tag><tt/-M/<em/csecs/ <tt/--message-delay=/<em/csecs/<label id="options-message-delay"></tag>
     Specify the amount of time (in hundredths of a second)
     that BRLTTY keeps its own internally generated messages on the braille display.
@@ -2746,6 +2754,14 @@ The <tt/brltty/ command accepts the following options:
   <tag><tt/-P/<em/file/ <tt/--pid-file=/<em/file/<label id="options-pid-file"></tag>
     Specify the file wherein BRLTTY is to write its process identifier (pid).
     If not specified, BRLTTY doesn't write its process identifier anywhere.
+  <tag><tt/-R/ <tt/--remove-service/<label id="options-remove-service"></tag>
+    Remove the BrlAPI service.
+    This emans that:
+    <itemize>
+      <item>BRLTTY will not be automatically started when the system is booted.
+      <item>Applications can know that no BrlAPI server is running.
+    </itemize>
+    This option is only supported on the Windows platform.
   <tag><tt/-S/[<em/driver/<tt/:/]<em/name/<tt/=/<em/value/<tt/,/... <tt/--speech-parameters=/[<em/driver/<tt/:/]<em/name/<tt/=/<em/value/<tt/,/...<label id="options-speech-parameters"></tag>
     Specify parameters for the speech synthesizer drivers.
     If the same parameter is specified more than once,
@@ -3990,7 +4006,7 @@ for details regarding how to use an alternate text table.
 <sect2>Text Table Format<p>
 A text table consists of a sequence of directives, one per line,
 which define how each character is to be represented in braille.
-UTF-8 character encoding must be used.
+<tt/UTF-8/ character encoding must be used.
 White-space (blanks, tabs) at the beginning of a line, 
 as well as before and/or after any operand of any directive,
 is ignored.
@@ -4154,7 +4170,7 @@ for details regarding how to use an alternate attributes table.
 An attributes table consists of a sequence of directives, one per line,
 which define how combinations of <tt/VGA/ attributes
 are to be represented in braille. 
-UTF-8 character encoding must be used.
+<tt/UTF-8/ character encoding must be used.
 White-space (blanks, tabs) at the beginning of a line,
 as well as before and/or after any operand of any directive,
 is ignored.

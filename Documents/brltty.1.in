@@ -294,7 +294,7 @@ Install
 .B brltty
 as the
 .B BrlAPI
-service so that it will be started at boot
+service so that it will be automatically started when the system is booted
 and so that applications can know that a
 .B BrlAPI
 server is running.
@@ -323,7 +323,7 @@ Remove the
 .B BrlAPI
 service so that
 .B brltty
-will not be started at boot
+will not be automatically started when the system is booted
 and so that applications can know that no
 .B BrlAPI
 server is running.
