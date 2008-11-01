@@ -1035,11 +1035,13 @@ serialAwaitInput (SerialDevice *serial, int timeout) {
 
     if (!(SetCommTimeouts(serial->fileHandle, &timeouts))) {
       LogWindowsError("SetCommTimeouts serialAwaitInput");
+      setSystemErrno();
       return 0;
     }
 
     if (!ReadFile(serial->fileHandle, &c, 1, &bytesRead, NULL)) {
       LogWindowsError("ReadFile");
+      setSystemErrno();
       return 0;
     }
 
@@ -1048,6 +1050,7 @@ serialAwaitInput (SerialDevice *serial, int timeout) {
       return 1;
     }
   }
+  errno = EAGAIN;
 
   return 0;
 #else /* __MINGW32__ */
@@ -1091,7 +1094,7 @@ serialReadChunk (
   }
 
   count -= bytesRead;
-  offset += bytesRead;
+  *offset += bytesRead;
   timeouts.ReadTotalTimeoutConstant = subsequentTimeout;
   if (!(SetCommTimeouts(serial->fileHandle, &timeouts))) {
     LogWindowsError("SetCommTimeouts serialReadChunk2");
@@ -1106,7 +1109,7 @@ serialReadChunk (
     }
 
     count -= bytesRead;
-    offset += bytesRead;
+    *offset += bytesRead;
   }
 
   if (!count) return 1;
@@ -1153,7 +1156,7 @@ serialWriteData (
     }
 
     while (left && WriteFile(serial->fileHandle, data, left, &bytesWritten, NULL)) {
-      if (!bytesWritten) return size;
+      if (!bytesWritten) break;
       left -= bytesWritten;
       data += bytesWritten;
     }
