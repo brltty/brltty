@@ -944,7 +944,8 @@ typedef struct {
 #if defined(HAVE_GLOB_H)
   glob_t glob;
 #elif defined(__MINGW32__)
-  long findHandle;
+  char **names;
+  int offset;
 #endif /* glob: paradigm-specific field declarations */
 
   const char **paths;
@@ -952,8 +953,16 @@ typedef struct {
   unsigned char setting;
   const char *pathsArea[3];
 } GlobData;
+
 static GlobData glob_textTable;
 static GlobData glob_attributesTable;
+
+static int
+qsortCompare_fileNames (const void *element1, const void *element2) {
+  const char *const *name1 = element1;
+  const char *const *name2 = element2;
+  return strcmp(*name1, *name2);
+}
 
 static void
 globPrepare (GlobData *data, const char *directory, const char *extension, const char *initial, int none) {
@@ -1005,23 +1014,27 @@ globBegin (GlobData *data) {
         }
 #elif defined(__MINGW32__)
         struct _finddata_t findData;
+        long findHandle = _findfirst(data->pattern, &findData);
+        int allocated = data->count | 0XF;
 
-        data->paths = NULL;
-        data->count = 0;
-        data->findHandle = _findfirst(data->pattern, &findData);
-        if (data->findHandle != -1) {
-          int allocated = 0X10;
-          data->paths = malloc(allocated * sizeof(char*));
+        data->offset = data->count;
+        data->names = malloc(allocated * sizeof(*data->names));
+
+        if (findHandle != -1) {
           do {
             if (data->count >= allocated) {
               allocated = allocated * 2;
-              data->paths = realloc(data->paths, allocated * sizeof(char*));
+              data->names = realloc(data->names, allocated * sizeof(*data->names));
             }
-            data->paths[data->count++] = strdup(findData.name);
-          } while (_findnext(data->findHandle, &findData) == 0);
-          _findclose(data->findHandle);
-          data->paths = realloc(data->paths, data->count * sizeof(char*));
+
+            data->names[data->count++] = strdup(findData.name);
+          } while (_findnext(findHandle, &findData) == 0);
+
+          _findclose(findHandle);
         }
+
+        data->names = realloc(data->names, data->count * sizeof(*data->names));
+        data->paths = data->names;
 #endif /* glob: paradigm-specific field initialization */
 
 #ifdef HAVE_FCHDIR
@@ -1049,6 +1062,7 @@ globBegin (GlobData *data) {
     }
   }
 
+  qsort(&data->paths[index], data->count-index, sizeof(*data->paths), qsortCompare_fileNames);
   if (data->none) data->paths[--index] = "";
   data->paths[--index] = data->initial;
   data->paths += index;
@@ -1081,10 +1095,10 @@ globEnd (GlobData *data) {
     globfree(&data->glob);
   }
 #elif defined(__MINGW32__)
-  if (data->paths) {
+  if (data->names) {
     int i;
-    for (i=0; i<data->count; i++) free(data->paths[i]);
-    free(data->paths);
+    for (i=data->offset; i<data->count; i++) free(data->names[i]);
+    free(data->names);
   }
 #endif /* glob: paradigm-specific memory deallocation */
 }
