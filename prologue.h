@@ -204,7 +204,7 @@ typedef int SocketDescriptor;
 #endif /* PACKED */
 
 #ifdef HAVE_ATTRIBUTE_FORMAT_PRINTF
-#define PRINTF(fmt,var) __attribute__((format(printf, fmt, var)))
+#define PRINTF(fmt,var) __attribute__((format(__printf__, fmt, var)))
 #else /* HAVE_ATTRIBUTE_FORMAT_PRINTF */
 #define PRINTF(fmt,var)
 #endif /* HAVE_ATTRIBUTE_FORMAT_PRINTF */

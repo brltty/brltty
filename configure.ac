@@ -726,11 +726,11 @@ then
 fi
 
 AC_CACHE_CHECK(
-   [if the compiler understands __attribute__((format(printf)))],
+   [if the compiler understands __attribute__((format(__printf__)))],
    [brltty_cv_c_attribute_format_printf],
    [AC_TRY_COMPILE([
 extern void conf_attribute_format_printf(const char *format, ...)
-       __attribute__((format(printf, 1, 2)));
+       __attribute__((format(__printf__, 1, 2)));
 ],
 [],
 [brltty_cv_c_attribute_format_printf=yes],
