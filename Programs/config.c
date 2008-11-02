@@ -25,6 +25,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <strings.h>
+#include <ctype.h>
 #include <errno.h>
 #include <locale.h>
 #include <signal.h>
@@ -2260,23 +2261,54 @@ createPidFile (void) {
 #if defined(__MINGW32__)
 static void
 background (void) {
-  LPTSTR cmdline = GetCommandLine();
-  int len = strlen(cmdline);
-  char newcmdline[len+4];
-  STARTUPINFO startupinfo;
-  PROCESS_INFORMATION processinfo;
-  
-  memset(&startupinfo, 0, sizeof(startupinfo));
-  startupinfo.cb = sizeof(startupinfo);
+  char *variableName;
 
-  memcpy(newcmdline, cmdline, len);
-  memcpy(newcmdline+len, " -n", 4);
-
-  if (!CreateProcess(NULL, newcmdline, NULL, NULL, TRUE, CREATE_NEW_PROCESS_GROUP, NULL, NULL, &startupinfo, &processinfo)) {
-    LogWindowsError("CreateProcess");
-    exit(10);
+  {
+    const char *components[] = {programName, "_DAEMON"};
+    variableName = joinStrings(components, ARRAY_COUNT(components));
   }
-  ExitProcess(0);
+
+  {
+    int i;
+    for (i=0; variableName[i]; i+=1) {
+      char c = variableName[i];
+
+      if (c == '_') continue;
+      if (isdigit(c) && (i > 0)) continue;
+
+      if (isalpha(c)) {
+        if (islower(c)) variableName[i] = toupper(c);
+        continue;
+      }
+
+      variableName[i] = '_';
+    }
+  }
+
+  if (!getenv(variableName)) {
+    LPTSTR commandLine = GetCommandLine();
+    STARTUPINFO startupInfo;
+    PROCESS_INFORMATION processInfo;
+    
+    memset(&startupInfo, 0, sizeof(startupInfo));
+    startupInfo.cb = sizeof(startupInfo);
+
+    if (!SetEnvironmentVariable(variableName, "")) {
+      LogWindowsError("SetEnvironmentVariable");
+      exit(11);
+    }
+
+    if (!CreateProcess(NULL, commandLine, NULL, NULL, TRUE,
+                       CREATE_NEW_PROCESS_GROUP,
+                       NULL, NULL, &startupInfo, &processInfo)) {
+      LogWindowsError("CreateProcess");
+      exit(10);
+    }
+
+    ExitProcess(0);
+  }
+
+  free(variableName);
 }
 
 #elif defined(__MSDOS__)
