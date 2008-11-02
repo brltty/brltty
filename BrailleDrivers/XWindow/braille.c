@@ -638,7 +638,7 @@ int CALLBACK fontEnumProc(ENUMLOGFONTEX *lpelfe, NEWTEXTMETRICEX *lpntme, DWORD 
 		LogPrint(LOG_ERR,"font %s", lpelfe->elfFullName);
 		return 1;
 	}
-	LogPrint(LOG_INFO, "Using braille font `%s\'\n",lpelfe->elfFullName);
+	LogPrint(LOG_INFO, "Using braille font `%s\'",lpelfe->elfFullName);
 	return 0;
 }
 #endif /* USE_WINDOWS */

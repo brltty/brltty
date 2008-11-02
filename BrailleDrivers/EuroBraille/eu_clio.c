@@ -309,7 +309,7 @@ int     clio_init(BrailleDisplay *brl, t_eubrl_io *io)
   brlCols = 0;
   if (!io)
     {
-      LogPrint(LOG_ERR, "eu: Clio : Invalid IO Subsystem driver.\n");
+      LogPrint(LOG_ERR, "eu: Clio : Invalid IO Subsystem driver.");
       return (-1);
     }
   memset(brlFirmwareVersion, 0, 21);
@@ -338,7 +338,7 @@ int     clio_reset(BrailleDisplay *brl)
   LogPrint(LOG_INFO, "eu Clio hardware reset requested");
   if (clio_writePacket(brl, packet, sizeof(packet)) == -1)
     {
-      LogPrint(LOG_WARNING, "Clio: Failed to send ident request.\n");
+      LogPrint(LOG_WARNING, "Clio: Failed to send ident request.");
       return -1;
     }
   return 1;
@@ -508,7 +508,7 @@ ssize_t	clio_readPacket(BrailleDisplay *brl, void *packet, size_t size)
 
   if ((tmpres = malloc(size + 1)) == NULL)
     {
-      LogPrint(LOG_ERR, "clio: Failed to allocate memory.\n");
+      LogPrint(LOG_ERR, "clio: Failed to allocate memory.");
       return (-1);
     }
   if (start != -1 && end != -1
