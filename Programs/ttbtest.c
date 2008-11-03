@@ -439,6 +439,18 @@ writeCharacter_libLouis (FILE *file, wchar_t character, unsigned char dots, cons
       if (dots & (1 << (i - 1)))
 	fprintf(file, "%c", '0' + i);
     }
+#ifdef HAVE_ICU
+  {
+    char name[0X40];
+    UErrorCode error = U_ZERO_ERROR;
+
+    u_charName(character, U_EXTENDED_CHAR_NAME, name, sizeof(name), &error);
+    if (U_SUCCESS(error)) {
+      if (fprintf(file, "\t\t%s", name) == EOF) return 0;
+    }
+  }
+#endif /* HAVE_ICU */
+
   fprintf(file, "\n");
 
   return 1;
