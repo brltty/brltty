@@ -130,6 +130,9 @@ ttb_native.$O:
 ttb_gnome.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/ttb_gnome.c
 
+ttb_louis.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/ttb_louis.c
+
 ttb_translate.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/ttb_translate.c
 
@@ -376,7 +379,7 @@ scrtest.$O:
 
 ###############################################################################
 
-TTBTEST_OBJECTS = ttbtest.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) lock.$O charset.$O datafile.$O dataarea.$O ttb_compile.$O ttb_native.$O ttb_gnome.$O
+TTBTEST_OBJECTS = ttbtest.$O $(PROGRAM_OBJECTS) $(BASE_OBJECTS) lock.$O charset.$O datafile.$O dataarea.$O ttb_compile.$O ttb_native.$O ttb_gnome.$O ttb_louis.$O
 
 ttbtest$X: $(TTBTEST_OBJECTS) $(BUILD_API)
 	$(CC) $(LDFLAGS) -o $@ $(TTBTEST_OBJECTS) $(API_REF) $(CLIBS) $(ICU_LIBRARIES) $(LDLIBS)

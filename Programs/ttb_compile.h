@@ -37,6 +37,7 @@ extern TextTable *makeTextTable (TextTableData *ttd);
 typedef TextTableData *TextTableProcessor (FILE *stream, const char *name);
 extern TextTableProcessor processTextTableStream;
 extern TextTableProcessor processGnomeBrailleStream;
+extern TextTableProcessor processLibLouisStream;
 
 extern void *getTextTableItem (TextTableData *ttd, TextTableOffset offset);
 extern TextTableHeader *getTextTableHeader (TextTableData *ttd);
