@@ -13,7 +13,9 @@
 ;Product Info
 
 	!define PRODUCT "BRLTTY"
-	!define VERSION "3.10-2"
+	!ifndef VERSION
+		!error "VERSION is not defined"
+	!endif
 
 	!define MUI_WELCOMEPAGE_TITLE "Setup for ${PRODUCT}, Version ${VERSION}"
 
@@ -23,7 +25,15 @@
 	;Name and file
 	Name "${PRODUCT}"
 	Caption "${PRODUCT} ${VERSION} Setup"
-	OutFile "brltty_setup.exe"
+	!ifdef OUTFILE
+		OutFile "${OUTFILE}"
+	!else
+		OutFile "brltty-win-${VERSION}.exe"
+	!endif
+
+	!ifndef DISTDIR
+		!define DISTDIR "brltty-win-${VERSION}"
+	!endif
 
 	SetCompressor /SOLID LZMA
 	SetOverwrite IfNewer
@@ -51,7 +61,7 @@
 ;Pages
 
 	!insertmacro MUI_PAGE_WELCOME
-	!insertmacro MUI_PAGE_LICENSE "dist\copying.txt"
+	!insertmacro MUI_PAGE_LICENSE "${DISTDIR}\copying.txt"
 	!insertmacro MUI_PAGE_DIRECTORY
 
 	;Start Menu Folder Page Configuration
@@ -62,7 +72,7 @@
 	!insertmacro MUI_PAGE_STARTMENU Application $StartMenuFolder
 
 	!insertmacro MUI_PAGE_INSTFILES
-	!define MUI_FINISHPAGE_SHOWREADME "$INSTDIR\README.first.txt"
+	!define MUI_FINISHPAGE_SHOWREADME "$INSTDIR\README.install.txt"
 	!insertmacro MUI_PAGE_FINISH
   
 	!insertmacro MUI_UNPAGE_CONFIRM
@@ -79,13 +89,18 @@
 Section "install"
 
 	SetOutPath "$INSTDIR"
+	SetShellVarContext all
 
 	;Stop the BRLTTY service if it is running.
 	ExecWait "$SYSDIR\net.exe stop brlapi"
 
-	File /r "dist\*"
+	File /r /x *install.bat /x brltty.conf "${DISTDIR}\*"
+	# Install the config file separately so we can avoid overwriting it.
+	SetOverwrite off
+	File /oname=etc\brltty.conf "${DISTDIR}\etc\brltty.conf"
+	SetOverwrite IfNewer
 
-	!insertmacro InstallLib DLL NOTSHARED REBOOT_NOTPROTECTED "dist\bin\brlapi-0.5.dll" "$SYSDIR\brlapi-0.5.dll" "$SYSDIR"
+	!insertmacro InstallLib DLL NOTSHARED REBOOT_NOTPROTECTED "${DISTDIR}\bin\brlapi-0.5.dll" "$SYSDIR\brlapi-0.5.dll" "$SYSDIR"
 
 	;Store installation folder
 	WriteRegStr HKLM "Software\${PRODUCT}" "" $INSTDIR
@@ -118,6 +133,8 @@ SectionEnd
 ;Uninstaller Section
 
 Section "Uninstall"
+
+	SetShellVarContext all
 
 	;Stop and remove the BRLTTY service
 	ExecWait "$SYSDIR\net.exe stop brlapi"
