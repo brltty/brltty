@@ -16,8 +16,10 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# BRLTTY Text Table - Munda
+# BRLTTY Text Table - Santali
 
+include devanagari.tti
 include bengali.tti
+include oriya.tti
 
 include common.tti

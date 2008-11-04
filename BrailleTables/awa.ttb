@@ -16,8 +16,8 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# BRLTTY Text Table - Munda
+# BRLTTY Text Table - Awadhi
 
-include bengali.tti
+include devanagari.tti
 
 include common.tti
