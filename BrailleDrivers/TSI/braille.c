@@ -103,8 +103,9 @@ static int no_multiple_updates;
 
 /* We periodicaly refresh the display even if nothing has changed, will clear
    out any garble... */
-#define FULL_FRESHEN_EVERY 12 /* every 12 writebrl, do a full update. This
+#define FULL_FRESHEN_EVERY 12 /* do a full update every nth writeWindow(). This
 				 should be a little over every 0.5secs. */
+static int fullFreshenEvery;
 
 /* A query is sent if we don't get any keys in a certain time, to detect
    if the display was turned off. */
@@ -462,6 +463,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
 #endif /* NO_MULTIPLE_UPDATES */
   if(slow_update == 2) no_multiple_updates = 1;
 
+  fullFreshenEvery = FULL_FRESHEN_EVERY;
 #ifdef HIGHBAUD
   if(speed == 2){ /* if supported (PB) go to 19.2Kbps */
     serialWriteData (serialDevice, BRL_UART192, DIM_BRL_UART192);
@@ -480,6 +482,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
       if(QueryDisplay(reply)) {
 	LogPrint(LOG_INFO,"Found display again at 9600bps.");
 	LogPrint(LOG_INFO, "Must be a TSI emulator.");
+        fullFreshenEvery = 1;
       }else{
 	LogPrint(LOG_ERR,"Display lost after baud switching");
 	goto failure;
@@ -669,7 +672,7 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text)
   if (--count<=0) {
     /* Force an update of the whole display every now and then to clear any
        garble. */
-    count = FULL_FRESHEN_EVERY;
+    count = fullFreshenEvery;
     memcpy(prevdata, dispbuf, ncells);
     display_all (brl, dispbuf);
   }else if(no_multiple_updates){
