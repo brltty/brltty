@@ -51,9 +51,9 @@ A+D: Route cursor to current line
 
 Cut and Paste
 CRt#+A: Mark beginning of region to cut
-CRt#+A+B: Mark beginning of cut region for append
+CRt#+B: Mark beginning of cut region for append
 CRt#+D: Mark bottom-right of rectangular region and cut
-CRt#+D+C: Mark end of linear region and cut
+CRt#+C: Mark end of linear region and cut
 CRtx+CRty: Cut text from x through y
 Chord-1234: Paste cut text
 
@@ -69,7 +69,7 @@ DOWN+ B/C: Go to previous/next prompt (same prompt as current line)
 CRa#+RL: Remember current position as mark #
 CRa#+RR: Go to mark #
 CRt#+DOWN: Go right # cells
-CRt#+ B/C: Go to previous/next line indented no more than #
+CRt#+ A+B/D+C: Go to previous/next line indented no more than #
 
 Typing in Braille
 Chord-1478: Input mode (toggle)

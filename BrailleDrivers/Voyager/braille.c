@@ -1102,16 +1102,16 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
       PHKEY(401, "CRt#", K_A,
             BRL_BLK_CUTBEGIN + routingKeys[0] - textOffset,
             "Mark beginning of region to cut");
-      PHKEY(401, "CRt#", K_A|K_B,
+      PHKEY(401, "CRt#", K_B,
             BRL_BLK_CUTAPPEND + routingKeys[0] - textOffset,
             "Mark beginning of cut region for append");
       PHKEY(401, "CRt#", K_D,
             BRL_BLK_CUTRECT + routingKeys[0] - textOffset,
             "Mark bottom-right of rectangular region and cut");
-      PHKEY(401, "CRt#", K_D|K_C,
+      PHKEY(401, "CRt#", K_C,
             BRL_BLK_CUTLINE + routingKeys[0] - textOffset,
             "Mark end of linear region and cut");
-      PHKEY2(501, "CRt#", K_B, K_C,
+      PHKEY2(501, "CRt#", K_A|K_B, K_D|K_C,
              BRL_BLK_PRINDENT + routingKeys[0] - textOffset,
              BRL_BLK_NXINDENT + routingKeys[0] - textOffset,
              "Go to previous/next line indented no more than #");
