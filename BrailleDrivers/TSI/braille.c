@@ -285,6 +285,8 @@ static struct inbytedesc pb_key_desc[PB_KEY_LEN] =
 /* Global variables */
 
 static SerialDevice *serialDevice;              /* file descriptor for comm port */
+static int serialBaud;
+static int charactersPerSecond;
 static unsigned char *rawdata,	/* translated data to send to display */
                      *prevdata, /* previous data sent */
                      *dispbuf;
@@ -315,7 +317,7 @@ QueryDisplay(unsigned char *reply)
     if (serialAwaitInput(serialDevice, 100)) {
       if ((count = myread(reply, Q_REPLY_LENGTH)) != -1) {
         if ((count == Q_REPLY_LENGTH) && (memcmp(reply, Q_HEADER, Q_HEADER_LENGTH) == 0)) {
-          LogPrint(LOG_DEBUG, "Valid reply received.");
+          LogBytes(LOG_DEBUG, "TSI Reply", reply, count);
           return 1;
         } else {
           LogBytes(LOG_WARNING, "Unexpected Response", reply, count);
@@ -367,13 +369,13 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
   if (!(serialDevice = serialOpenDevice(device))) goto failure;
   /* Try to detect display by sending query */
   LogPrint(LOG_DEBUG,"Sending query at 9600bps");
-  if(!serialRestartDevice(serialDevice, 9600)) goto failure;
+  if(!serialRestartDevice(serialDevice, serialBaud=9600)) goto failure;
   if(!QueryDisplay(reply)){
 #ifdef HIGHBAUD
     /* Then send the query at 19200bps, in case a PB was left ON
        at that speed */
     LogPrint(LOG_DEBUG,"Sending query at 19200bps");
-    if(!serialSetBaud(serialDevice, 19200)) goto failure;
+    if(!serialSetBaud(serialDevice, serialBaud=19200)) goto failure;
     if(!QueryDisplay(reply)) goto failure;
 #endif /* HIGHBAUD */
   }
@@ -465,14 +467,14 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
     serialWriteData (serialDevice, BRL_UART192, DIM_BRL_UART192);
     serialDrainOutput(serialDevice);
     approximateDelay(BAUD_DELAY);
-    if(!serialSetBaud(serialDevice, 19200)) goto failure;
+    if(!serialSetBaud(serialDevice, serialBaud=19200)) goto failure;
     LogPrint(LOG_DEBUG,"Switched to 19200bps. Checking if display followed.");
     if(QueryDisplay(reply))
       LogPrint(LOG_DEBUG,"Display responded at 19200bps.");
     else{
       LogPrint(LOG_INFO,"Display did not respond at 19200bps, "
 	       "falling back to 9600bps.");
-      if(!serialSetBaud(serialDevice, 9600)) goto failure;
+      if(!serialSetBaud(serialDevice, serialBaud=9600)) goto failure;
       serialDrainOutput(serialDevice);
       approximateDelay(BAUD_DELAY); /* just to be safe */
       if(QueryDisplay(reply)) {
@@ -485,6 +487,9 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
     }
   }
 #endif /* HIGHBAUD */
+
+  charactersPerSecond = serialBaud / serialGetCharacterBits(serialDevice);
+  slow_update = 0;
 
   /* Mark time of last command to initialize typematic watch */
   gettimeofday (&last_ping, NULL);
@@ -549,7 +554,8 @@ brl_destruct (BrailleDisplay *brl)
 }
 
 static void 
-display (const unsigned char *pattern, 
+display (BrailleDisplay *brl, 
+         const unsigned char *pattern, 
 	 unsigned start, unsigned stop)
 /* display a given dot pattern. We process only part of the pattern, from
    byte (cell) start to byte stop. That pattern should be shown at position 
@@ -597,7 +603,11 @@ display (const unsigned char *pattern,
      I no longer have access to a Nav40 and PB80 for testing: I only have a
      PB40.  */
 
-  serialWriteData (serialDevice, rawdata, DIM_BRL_SEND + 2 * length);
+  {
+    int count = DIM_BRL_SEND + 2 * length;
+    serialWriteData (serialDevice, rawdata, count);
+    brl->writeDelay += (count * 1000 / charactersPerSecond) + 1;
+  }
 
   /* First a drain after the write helps make sure we don't fill up the
      buffer with info that will be overwritten immediately. This is not needed
@@ -640,9 +650,10 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *s)
 
 
 static void 
-display_all (unsigned char *pattern)
+display_all (BrailleDisplay *brl,
+             unsigned char *pattern)
 {
-  display (pattern, 0, ncells - 1);
+  display (brl, pattern, 0, ncells - 1);
 }
 
 
@@ -660,7 +671,7 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text)
        garble. */
     count = FULL_FRESHEN_EVERY;
     memcpy(prevdata, dispbuf, ncells);
-    display_all (dispbuf);
+    display_all (brl, dispbuf);
   }else if(no_multiple_updates){
     int start, stop;
     
@@ -671,7 +682,7 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text)
       if(dispbuf[stop] != prevdata[stop]) break;
     
     memcpy(prevdata+start, dispbuf+start, stop-start+1);
-    display (dispbuf, start, stop);
+    display (brl, dispbuf, start, stop);
   }else{
     int base = 0, i = 0, collecting = 0, simil = 0;
     
@@ -681,7 +692,7 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text)
 	  simil++;
 	  if (collecting && 2 * simil > DIM_BRL_SEND)
 	    {
-	      display (dispbuf, base, i - simil);
+	      display (brl, dispbuf, base, i - simil);
 	      base = i;
 	      collecting = 0;
 	      simil = 0;
@@ -699,7 +710,7 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text)
 	}
     
     if (collecting)
-      display (dispbuf, base, i - simil - 1);
+      display (brl, dispbuf, base, i - simil - 1);
   }
 return 1;
 }
@@ -717,7 +728,7 @@ is_repeat_cmd (int cmd)
 
 
 static void 
-flicker ()
+flicker (BrailleDisplay *brl)
 {
   unsigned char *buf;
 
@@ -727,11 +738,11 @@ flicker ()
     {
       memset (buf, FLICKER_CHAR, ncells);
 
-      display_all (buf);
+      display_all (brl, buf);
       accurateDelay (FLICKER_DELAY);
-      display_all (prevdata);
+      display_all (brl, prevdata);
       accurateDelay (FLICKER_DELAY);
-      display_all (buf);
+      display_all (brl, buf);
       accurateDelay (FLICKER_DELAY);
       /* Note that we don't put prevdata back on the display, since flicker()
          normally preceeds the displaying of a special message. */
@@ -782,7 +793,7 @@ cut_cursor (BrailleDisplay *brl)
 	pos = brl_cols - 1;
     }
 
-  flicker ();
+  flicker (brl);
 
   while (res == 0)
     {
@@ -793,7 +804,7 @@ cut_cursor (BrailleDisplay *brl)
 	pos = brl_cols - 1;
       oldchar = prevdata[pos];
       prevdata[pos] |= CUT_CSR_CHAR;
-      display_all (prevdata);
+      display_all (brl, prevdata);
       prevdata[pos] = oldchar;
 
       while ((key = brl_readCommand (brl, BRL_CTX_SCREEN)) == EOF) approximateDelay(1); /* just yield */
@@ -841,7 +852,7 @@ cut_cursor (BrailleDisplay *brl)
 	}
     }
 
-  display_all (prevdata);
+  display_all (brl, prevdata);
   running = 0;
   return (res);
 }
@@ -1156,7 +1167,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context)
 	       && sw_which[1] == sw_lastkey - 1)
 	{
 	  ResetTypematic ();
-	  display_all (prevdata);
+	  display_all (brl, prevdata);
 	  /* Special: No res code... */
 	}
 #endif /* 0 */
@@ -1283,7 +1294,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context)
 #if 0
   /* typematic reset */
     KEYSPECIAL (KEY_CLEFT | KEY_BRIGHT, ResetTypematic ();
-		display_all (prevdata);
+		display_all (brl, prevdata);
     );
 #endif /* 0 */
   };
