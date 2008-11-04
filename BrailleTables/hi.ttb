@@ -18,6 +18,6 @@
 
 # BRLTTY Text Table - Hindi
 
-include devangari.tti
+include devanagari.tti
 
 include common.tti
