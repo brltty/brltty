@@ -392,55 +392,64 @@ static int
 writeCharacter_libLouis (FILE *file, wchar_t character, unsigned char dots, const unsigned char *byte, void *data) {
   int i;
 
-  if (iswspace(character)) {
-    fprintf(file, "space");
-  } else if (iswdigit(character)) {
-    fprintf(file, "digit");
-  } else if (iswpunct(character)) {
-    fprintf(file, "punctuation");
-  } else if (iswlower(character)) {
-    fprintf(file, "lowercase");
-  } else if (iswupper(character)) {
-    fprintf(file, "uppercase");
-  } else {
-    fprintf(file, "letter");
-  }
-  fprintf(file, " ");
+  {
+    const char *type;
 
+    if (iswspace(character)) {
+      type = "space";
+    } else if (iswdigit(character)) {
+      type = "digit";
+    } else if (iswpunct(character)) {
+      type = "punctuation";
+    } else if (iswlower(character)) {
+      type = "lowercase";
+    } else if (iswupper(character)) {
+      type = "uppercase";
+    } else {
+      type = "letter";
+    }
+
+    if (fprintf(file, "%s", type) == EOF) return 0;
+  }
+
+  if (fprintf(file, "\t") == EOF) return 0;
   if (character == WC_C('\\')) {
-    fprintf(file, "\\\\");
+    if (fprintf(file, "\\\\") == EOF) return 0;
   } else if (character == WC_C('\f')) {
-    fprintf(file, "\\f");
+    if (fprintf(file, "\\f") == EOF) return 0;
   } else if (character == WC_C('\n')) {
-    fprintf(file, "\\n");
+    if (fprintf(file, "\\n") == EOF) return 0;
   } else if (character == WC_C('\r')) {
-    fprintf(file, "\\r");
+    if (fprintf(file, "\\r") == EOF) return 0;
   } else if (character == WC_C(' ')) {
-    fprintf(file, "\\s");
+    if (fprintf(file, "\\s") == EOF) return 0;
   } else if (character == WC_C('\t')) {
-    fprintf(file, "\\t");
+    if (fprintf(file, "\\t") == EOF) return 0;
   } else if (character == WC_C('\v')) {
-    fprintf(file, "\\v");
+    if (fprintf(file, "\\v") == EOF) return 0;
   } else if ((character > 0X20) && (character < 0X7F)) {
     wint_t value = character;
-    fprintf(file, "%" PRIwc, value);
+    if (fprintf(file, "%" PRIwc, value) == EOF) return 0;
   } else {
     unsigned long int value = character;
     int digits = (value < (1 <<  8))? 2:
                  (value < (1 << 12))? 3:
                  (value < (1 << 16))? 4:
                                       8;
-    fprintf(file, "\\x%0*lx", digits, value);
+    if (fprintf(file, "\\x%0*lx", digits, value) == EOF) return 0;
   }
-  fprintf(file, " ");
 
-  if (!dots)
-    fprintf(file, "0");
-  else
+  if (fprintf(file, "\t") == EOF) return 0;
+  if (!dots) {
+    if (fprintf(file, "0") == EOF) return 0;
+  } else {
     for (i = 1; i <= 8; i++) {
-      if (dots & (1 << (i - 1)))
-	fprintf(file, "%c", '0' + i);
+      if (dots & (1 << (i - 1))) {
+	if (fprintf(file, "%c", '0' + i) == EOF) return 0;
+      }
     }
+  }
+
 #ifdef HAVE_ICU
   {
     char name[0X40];
@@ -448,13 +457,12 @@ writeCharacter_libLouis (FILE *file, wchar_t character, unsigned char dots, cons
 
     u_charName(character, U_EXTENDED_CHAR_NAME, name, sizeof(name), &error);
     if (U_SUCCESS(error)) {
-      if (fprintf(file, "\t\t%s", name) == EOF) return 0;
+      if (fprintf(file, "\t# %s", name) == EOF) return 0;
     }
   }
 #endif /* HAVE_ICU */
 
-  fprintf(file, "\n");
-
+  if (fprintf(file, "\n") == EOF) return 0;
   return 1;
 }
 
