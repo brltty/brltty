@@ -432,9 +432,8 @@ writeCharacter_libLouis (FILE *file, wchar_t character, unsigned char dots, cons
     if (fprintf(file, "%" PRIwc, value) == EOF) return 0;
   } else {
     unsigned long int value = character;
-    int digits = (value < (1 <<  8))? 2:
-                 (value < (1 << 12))? 3:
-                 (value < (1 << 16))? 4:
+    int digits = (value < (1 << 16))? 4:
+                 (value < (1 << 20))? 5:
                                       8;
     if (fprintf(file, "\\x%0*lx", digits, value) == EOF) return 0;
   }
