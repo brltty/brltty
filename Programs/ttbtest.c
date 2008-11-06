@@ -407,28 +407,30 @@ writeCharacter_libLouis (FILE *file, wchar_t character, unsigned char dots, cons
   }
   fprintf(file, " ");
 
-  if (character == '\\') {
+  if (character == WC_C('\\')) {
     fprintf(file, "\\\\");
-  } else if (character == '\f') {
+  } else if (character == WC_C('\f')) {
     fprintf(file, "\\f");
-  } else if (character == '\n') {
+  } else if (character == WC_C('\n')) {
     fprintf(file, "\\n");
-  } else if (character == '\r') {
+  } else if (character == WC_C('\r')) {
     fprintf(file, "\\r");
-  } else if (character == ' ') {
+  } else if (character == WC_C(' ')) {
     fprintf(file, "\\s");
-  } else if (character == '\t') {
+  } else if (character == WC_C('\t')) {
     fprintf(file, "\\t");
-  } else if (character == '\v') {
+  } else if (character == WC_C('\v')) {
     fprintf(file, "\\v");
-  } else if (character > 0X20 && character < 0X7F) {
-    fprintf(file, "%c", character);
-  } else if (character < 0X1000) {
-    fprintf(file, "\\x%04x", character);
-  } else if (character < 0X10000) {
-    fprintf(file, "\\x%05x", character);
+  } else if ((character > 0X20) && (character < 0X7F)) {
+    wint_t value = character;
+    fprintf(file, "%" PRIwc, value);
   } else {
-    fprintf(file, "\\x%08x", character);
+    unsigned long int value = character;
+    int digits = (value < (1 <<  8))? 2:
+                 (value < (1 << 12))? 3:
+                 (value < (1 << 16))? 4:
+                                      8;
+    fprintf(file, "\\x%0*lx", digits, value);
   }
   fprintf(file, " ");
 

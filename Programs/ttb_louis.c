@@ -55,11 +55,14 @@ getUnicodeCharacters (DataFile *file, wchar_t *character, int num, const char *d
 	      character[i] |= value;
 	      length -= 1;
 	    }
+            if (digit == c) goto invalid;
 	    c = digit;
 	    continue;
 	  }
 	  default:
-	    reportDataError(file, "unknown escape sequence \\%" PRIwc, *c);
+          invalid:
+	    reportDataError(file, "unknown escape sequence: %.*" PRIws,
+                            c-string.characters+1, string.characters);
 	}
       } else {
 	character[i] = *c++;
