@@ -88,7 +88,7 @@ reportDataError (DataFile *file, char *format, ...) {
 int
 isKeyword (const wchar_t *keyword, const wchar_t *characters, int length) {
   if (length != wcslen(keyword)) return 0;
-  if (wmemcmp(characters, keyword, length) != 0) return 0;
+  if (wcsncasecmp(characters, keyword, length) != 0) return 0;
   return 1;
 }
 
