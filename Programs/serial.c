@@ -924,6 +924,7 @@ serialCompareAttributes (const SerialAttributes *attributes, const SerialAttribu
 static int
 serialReadAttributes (SerialDevice *serial) {
 #if defined(__MINGW32__)
+  serial->currentAttributes.DCBlength = sizeof(serial->currentAttributes);
   if (GetCommState(serial->fileHandle, &serial->currentAttributes)) return 1;
   LogWindowsError("GetCommState");
 #elif defined(__MSDOS__)
@@ -1174,10 +1175,20 @@ serialWriteData (
 static int
 serialGetLines (SerialDevice *serial, SerialLines *lines) {
 #if defined(__MINGW32__)
+  DCB dcb;
   if (!GetCommModemStatus(serial->fileHandle, &serial->linesState)) {
     LogWindowsError("GetCommModemStatus");
     return 0;
   }
+  dcb.DCBlength = sizeof(dcb);
+  if (!GetCommState(serial->fileHandle, &dcb)) {
+    LogWindowsError("GetCommState");
+    return 0;
+  }
+  if (dcb.fRtsControl == RTS_CONTROL_ENABLE)
+    serial->linesState |= SERIAL_LINE_RTS;
+  if (dcb.fDtrControl == DTR_CONTROL_ENABLE)
+    serial->linesState |= SERIAL_LINE_DTR;
 #elif defined(__MSDOS__)
   serial->linesState = serialReadPort(serial, SERIAL_PORT_MSR) & 0XF0;
 #elif defined(TIOCMGET)
@@ -1198,6 +1209,7 @@ static int
 serialSetLines (SerialDevice *serial, SerialLines high, SerialLines low) {
 #if defined(__MINGW32__)
   DCB dcb;
+  dcb.DCBlength = sizeof(dcb);
   if (GetCommState(serial->fileHandle, &dcb)) {
     if (low & SERIAL_LINE_RTS)
       dcb.fRtsControl = RTS_CONTROL_DISABLE;
