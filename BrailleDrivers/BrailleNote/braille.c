@@ -389,6 +389,7 @@ adjustStatusCells (BrailleDisplay *brl, const char *parameter) {
       dataArea = statusArea + statusCells;
       brl->x -= statusCells;
       dataCells -= statusCells;
+      if ((brl->statusColumns = statusCells)) brl->statusRows = 1;
     } else {
       LogPrint(LOG_WARNING, "%s: %s", "invalid status cell count", parameter);
     }

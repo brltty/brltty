@@ -810,6 +810,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
         if (acknowledged && model) {
           brl->x = textCells;
           brl->y = 1;
+          if ((brl->statusColumns = statusCells)) brl->statusRows = 1;
           return 1;
         }
       }

@@ -617,6 +617,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
        */
       brl->x = textCells;		/* initialize size of display */
       brl->y = 1;		/* always 1 */
+      if ((brl->statusColumns = statusCells)) brl->statusRows = 1;
 
       if ((currentCells = malloc(totalCells))) {
         if ((previousCells = malloc(totalCells))) {
