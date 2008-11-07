@@ -21,5 +21,6 @@
 include devanagari.tti
 include bengali.tti
 include oriya.tti
+include ascii-basic.tti
 
 include common.tti

@@ -19,5 +19,6 @@
 # BRLTTY Text Table - Manipuri
 
 include bengali.tti
+include ascii-basic.tti
 
 include common.tti

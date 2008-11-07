@@ -16,9 +16,9 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# BRLTTY Text Table - Kannada
+# This BRLTTY text subtable defines a set of braille representations for the 
+# ASCII character set designed for languages which don't use them themselves.
 
-include kannada.tti
-include ascii-basic.tti
-
-include common.tti
+include letters-latin.tti
+include numbers-dot8.tti
+include punctuation-basic.tti

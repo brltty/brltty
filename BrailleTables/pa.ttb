@@ -19,5 +19,6 @@
 # BRLTTY Text Table - Panjabi
 
 include gurmukhi.tti
+include ascii-basic.tti
 
 include common.tti

@@ -19,5 +19,6 @@
 # BRLTTY Text Table - Marathi
 
 include devanagari.tti
+include ascii-basic.tti
 
 include common.tti

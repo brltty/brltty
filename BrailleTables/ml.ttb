@@ -19,5 +19,6 @@
 # BRLTTY Text Table - Malayalam
 
 include malayalam.tti
+include ascii-basic.tti
 
 include common.tti
