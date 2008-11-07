@@ -1198,7 +1198,7 @@ serialGetLines (SerialDevice *serial, SerialLines *lines) {
   }
 #else /* get lines */
 #warning getting modem lines not supported on this platform
-  serial->linesState = SERIAL_LINE_CTS | SERIAL_LINE_DSR | SERIAL_LINE_CAR;
+  serial->linesState = SERIAL_LINE_RTS | SERIAL_LINE_CTS | SERIAL_LINE_DTR | SERIAL_LINE_DSR | SERIAL_LINE_CAR;
 #endif /* get lines */
 
   *lines = serial->linesState;
