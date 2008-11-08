@@ -1,0 +1,77 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2008 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU General Public License, as published by the Free Software
+# Foundation; either version 2 of the License, or (at your option) any
+# later version. Please see the file LICENSE-GPL for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+# udev rules file for brltty
+
+ACTION!="add", GOTO="brltty_end"
+SUBSYSTEM!="usb_device", GOTO="brltty_end"
+
+# Alva
+SYSFS{idVendor}=="06b0", SYSFS{idProduct}=="0001", ENV{BRLTTY_DRIVER}="al", GOTO="brltty_usb"
+
+# Baum
+SYSFS{idVendor}=="0403", SYSFS{idProduct}=="fe70", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb"
+SYSFS{idVendor}=="0403", SYSFS{idProduct}=="fe71", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb"
+SYSFS{idVendor}=="0403", SYSFS{idProduct}=="fe72", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb"
+SYSFS{idVendor}=="0403", SYSFS{idProduct}=="fe73", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb"
+SYSFS{idVendor}=="0403", SYSFS{idProduct}=="fe74", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb"
+SYSFS{idVendor}=="0403", SYSFS{idProduct}=="fe75", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb"
+SYSFS{idVendor}=="0403", SYSFS{idProduct}=="fe76", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb"
+SYSFS{idVendor}=="0403", SYSFS{idProduct}=="fe77", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb"
+SYSFS{idVendor}=="0904", SYSFS{idProduct}=="2000", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb"
+SYSFS{idVendor}=="0904", SYSFS{idProduct}=="2001", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb"
+SYSFS{idVendor}=="0904", SYSFS{idProduct}=="2002", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb"
+SYSFS{idVendor}=="0904", SYSFS{idProduct}=="2007", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb"
+SYSFS{idVendor}=="0904", SYSFS{idProduct}=="2008", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb"
+SYSFS{idVendor}=="0904", SYSFS{idProduct}=="2009", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb"
+SYSFS{idVendor}=="0904", SYSFS{idProduct}=="2010", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb"
+SYSFS{idVendor}=="0904", SYSFS{idProduct}=="2011", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb"
+SYSFS{idVendor}=="0904", SYSFS{idProduct}=="2012", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb"
+SYSFS{idVendor}=="0904", SYSFS{idProduct}=="2014", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb"
+SYSFS{idVendor}=="0904", SYSFS{idProduct}=="2015", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb"
+SYSFS{idVendor}=="0904", SYSFS{idProduct}=="2016", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb"
+
+# BrailleSense
+SYSFS{idVendor}=="045e", SYSFS{idProduct}=="930a", ENV{BRLTTY_DRIVER}="bs", GOTO="brltty_usb"
+
+# EuroBraille
+SYSFS{idVendor}=="c251", SYSFS{idProduct}=="1122", ENV{BRLTTY_DRIVER}="eu", GOTO="brltty_usb"
+
+# FreedomScientific
+SYSFS{idVendor}=="0f4e", SYSFS{idProduct}=="0100", ENV{BRLTTY_DRIVER}="fs", GOTO="brltty_usb"
+SYSFS{idVendor}=="0f4e", SYSFS{idProduct}=="0111", ENV{BRLTTY_DRIVER}="fs", GOTO="brltty_usb"
+SYSFS{idVendor}=="0f4e", SYSFS{idProduct}=="0112", ENV{BRLTTY_DRIVER}="fs", GOTO="brltty_usb"
+
+# HandyTech
+SYSFS{idVendor}=="0921", SYSFS{idProduct}=="1200", ENV{BRLTTY_DRIVER}="ht", GOTO="brltty_usb"
+SYSFS{idVendor}=="0403", SYSFS{idProduct}=="6001", ENV{BRLTTY_DRIVER}="ht", GOTO="brltty_usb"
+
+# Papenmeier
+SYSFS{idVendor}=="0403", SYSFS{idProduct}=="f208", ENV{BRLTTY_DRIVER}="pm", GOTO="brltty_usb"
+
+# Voyager
+SYSFS{idVendor}=="0798", SYSFS{idProduct}=="0001", ENV{BRLTTY_DRIVER}="vo", GOTO="brltty_usb"
+
+GOTO="brltty_end"
+
+LABEL="brltty_usb"
+ENV{BRLTTY_DEVICE}="usb:"
+RUN+="/bin/brltty -E"
+GOTO="brltty_end"
+
+LABEL="brltty_end"
