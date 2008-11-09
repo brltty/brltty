@@ -86,7 +86,7 @@ RUN+="/bin/brltty -E -P$env{BRLTTY_PID_FILE}"
 GOTO="brltty_end"
 
 LABEL="brltty_remove"
-PROGRAM=="/bin/sh -c 'kill -TERM `cat $env{BRLTTY_PID_FILE}`'"
+RUN+="/bin/sh -c 'kill -TERM `cat $env{BRLTTY_PID_FILE}`'"
 GOTO="brltty_end"
 
 LABEL="brltty_end"
