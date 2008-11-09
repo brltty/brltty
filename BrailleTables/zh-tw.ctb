@@ -8105,12 +8105,12 @@ always	\u2014	36-36
 always	\u2015	36-36
 always	\u2016	1246-123
 always	\u2017	1456
-always	\u2018	3
+always	\u2018	4
 always	\u2019	3
 always	\u201A	1456
 always	\u201B	1456
-always	\u201C	236-236
-always	\u201D	356-356
+always	\u201C	5
+always	\u201D	5
 always	\u201E	1456
 always	\u201F	1456
 always	\u2020	346
@@ -12177,7 +12177,7 @@ always	\u2FFC	1456
 always	\u2FFD	1456
 always	\u2FFE	1456
 always	\u2FFF	1456
-always	\u3000	1456
+always	\u3000	0
 always	\u3001	6-0
 always	\u3002	36-0
 always	\u3003	4-3456
