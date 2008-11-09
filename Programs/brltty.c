@@ -261,53 +261,53 @@ awaitRoutingStatus (RoutingStatus ok) {
 }
 
 static void
-setDigitUpper (unsigned char *cell, int digit) {
+renderDigitUpper (unsigned char *cell, int digit) {
   *cell |= portraitDigits[digit];
 }
 
 static void
-setDigitLower (unsigned char *cell, int digit) {
+renderDigitLower (unsigned char *cell, int digit) {
   *cell |= lowerDigit(portraitDigits[digit]);
 }
 
 static void
-setNumberUpper (unsigned char *cells, int number) {
-  setDigitUpper(&cells[0], (number / 10) % 10);
-  setDigitUpper(&cells[1], number % 10);
+renderNumberUpper (unsigned char *cells, int number) {
+  renderDigitUpper(&cells[0], (number / 10) % 10);
+  renderDigitUpper(&cells[1], number % 10);
 }
 
 static void
-setNumberLower (unsigned char *cells, int number) {
-  setDigitLower(&cells[0], (number / 10) % 10);
-  setDigitLower(&cells[1], number % 10);
+renderNumberLower (unsigned char *cells, int number) {
+  renderDigitLower(&cells[0], (number / 10) % 10);
+  renderDigitLower(&cells[1], number % 10);
 }
 
 static void
-setNumberVertical (unsigned char *cell, int number) {
-  setDigitUpper(cell, (number / 10) % 10);
-  setDigitLower(cell, number % 10);
+renderNumberVertical (unsigned char *cell, int number) {
+  renderDigitUpper(cell, (number / 10) % 10);
+  renderDigitLower(cell, number % 10);
 }
 
 static void
-setCoordinateUpper (unsigned char *cells, int x, int y) {
-  setNumberUpper(&cells[0], x);
-  setNumberUpper(&cells[2], y);
+renderCoordinateUpper (unsigned char *cells, int x, int y) {
+  renderNumberUpper(&cells[0], x);
+  renderNumberUpper(&cells[2], y);
 }
 
 static void
-setCoordinateLower (unsigned char *cells, int x, int y) {
-  setNumberLower(&cells[0], x);
-  setNumberLower(&cells[2], y);
+renderCoordinateLower (unsigned char *cells, int x, int y) {
+  renderNumberLower(&cells[0], x);
+  renderNumberLower(&cells[2], y);
 }
 
 static void
-setCoordinateVertical (unsigned char *cells, int x, int y) {
-  setNumberUpper(&cells[0], y);
-  setNumberLower(&cells[0], x);
+renderCoordinateVertical (unsigned char *cells, int x, int y) {
+  renderNumberUpper(&cells[0], y);
+  renderNumberLower(&cells[0], x);
 }
 
 static void
-setCoordinateAlphabetic (unsigned char *cell, int x, int y) {
+renderCoordinateAlphabetic (unsigned char *cell, int x, int y) {
   /* The coords are given with letters as the DOS tsr */
   *cell = ((updateIntervals / 16) % (y / 25 + 1))? 0:
           convertCharacterToDots(textTable, (y % 25 + WC_C('a'))) |
@@ -315,7 +315,7 @@ setCoordinateAlphabetic (unsigned char *cell, int x, int y) {
 }
 
 static void
-setStateLetter (unsigned char *cell) {
+renderStateLetter (unsigned char *cell) {
   *cell = convertCharacterToDots(textTable,
                                  p->showAttributes? WC_C('a'):
                                  isFrozenScreen()? WC_C('f'):
@@ -324,7 +324,7 @@ setStateLetter (unsigned char *cell) {
 }
 
 static void
-setStateDots (unsigned char *cell) {
+renderStateDots (unsigned char *cell) {
   *cell = (isFrozenScreen()    ? BRL_DOT1: 0) |
           (prefs.showCursor    ? BRL_DOT4: 0) |
           (p->showAttributes   ? BRL_DOT2: 0) |
@@ -336,36 +336,36 @@ setStateDots (unsigned char *cell) {
 }
 
 static void
-setStatusCellsNone (unsigned char *cells) {
+renderStatusCells_none (unsigned char *cells) {
 }
 
 static void
-setStatusCellsAlva (unsigned char *cells) {
+renderStatusCells_Alva (unsigned char *cells) {
   if (isHelpScreen()) {
     cells[0] = convertCharacterToDots(textTable, WC_C('h'));
     cells[1] = convertCharacterToDots(textTable, WC_C('l'));
     cells[2] = convertCharacterToDots(textTable, WC_C('p'));
   } else {
-    setCoordinateAlphabetic(&cells[0], scr.posx, scr.posy);
-    setCoordinateAlphabetic(&cells[1], p->winx, p->winy);
-    setStateLetter(&cells[2]);
+    renderCoordinateAlphabetic(&cells[0], scr.posx, scr.posy);
+    renderCoordinateAlphabetic(&cells[1], p->winx, p->winy);
+    renderStateLetter(&cells[2]);
   }
 }
 
 static void
-setStatusCellsTieman (unsigned char *cells) {
-  setCoordinateUpper(&cells[0], scr.posx+1, scr.posy+1);
-  setCoordinateLower(&cells[0], p->winx+1, p->winy+1);
-  setStateDots(&cells[4]);
+renderStatusCells_Tieman (unsigned char *cells) {
+  renderCoordinateUpper(&cells[0], scr.posx+1, scr.posy+1);
+  renderCoordinateLower(&cells[0], p->winx+1, p->winy+1);
+  renderStateDots(&cells[4]);
 }
 
 static void
-setStatusCellsPB80 (unsigned char *cells) {
-  setNumberVertical(&cells[0], p->winy+1);
+renderStatusCells_PB80 (unsigned char *cells) {
+  renderNumberVertical(&cells[0], p->winy+1);
 }
 
 static void
-setStatusCellsGeneric (unsigned char *cells) {
+renderStatusCells_generic (unsigned char *cells) {
   cells[BRL_firstStatusCell] = BRL_STATUS_CELLS_GENERIC;
   cells[BRL_GSC_BRLCOL] = p->winx+1;
   cells[BRL_GSC_BRLROW] = p->winy+1;
@@ -394,36 +394,36 @@ setStatusCellsGeneric (unsigned char *cells) {
 }
 
 static void
-setStatusCellsMDV (unsigned char *cells) {
-  setCoordinateVertical(&cells[0], p->winx+1, p->winy+1);
+renderStatusCells_MDV (unsigned char *cells) {
+  renderCoordinateVertical(&cells[0], p->winx+1, p->winy+1);
 }
 
 static void
-setStatusCellsVoyager (unsigned char *cells) {
-  setNumberVertical(&cells[0], p->winy+1);
-  setNumberVertical(&cells[1], scr.posy+1);
+renderStatusCells_Voyager (unsigned char *cells) {
+  renderNumberVertical(&cells[0], p->winy+1);
+  renderNumberVertical(&cells[1], scr.posy+1);
   if (isFrozenScreen()) {
     cells[2] = convertCharacterToDots(textTable, WC_C('F'));
   } else {
-    setNumberVertical(&cells[2], scr.posx+1);
+    renderNumberVertical(&cells[2], scr.posx+1);
   }
 }
 
-typedef void (*SetStatusCellsHandler) (unsigned char *cells);
+typedef void (*RenderStatusCells) (unsigned char *cells);
 
 typedef struct {
-  SetStatusCellsHandler set;
+  RenderStatusCells render;
   unsigned char count;
 } StatusStyleEntry;
 
 static const StatusStyleEntry statusStyleTable[] = {
-  {setStatusCellsNone, 0},
-  {setStatusCellsAlva, 3},
-  {setStatusCellsTieman, 5},
-  {setStatusCellsPB80, 1},
-  {setStatusCellsGeneric, 0},
-  {setStatusCellsMDV, 2},
-  {setStatusCellsVoyager, 3}
+  {renderStatusCells_none, 0},
+  {renderStatusCells_Alva, 3},
+  {renderStatusCells_Tieman, 5},
+  {renderStatusCells_PB80, 1},
+  {renderStatusCells_generic, BRL_MAX_STATUS_CELL_COUNT},
+  {renderStatusCells_MDV, 2},
+  {renderStatusCells_Voyager, 3}
 };
 static const int statusStyleCount = ARRAY_COUNT(statusStyleTable);
 
@@ -433,7 +433,7 @@ setStatusCells (void) {
     unsigned char cells[BRL_MAX_STATUS_CELL_COUNT];        /* status cell buffer */
     memset(cells, 0, sizeof(cells));
     if (prefs.statusStyle < statusStyleCount)
-      statusStyleTable[prefs.statusStyle].set(cells);
+      statusStyleTable[prefs.statusStyle].render(cells);
     if (!braille->writeStatus(&brl, cells)) return 0;
   }
   return 1;
@@ -457,9 +457,9 @@ showInfo (void) {
     char prefix[cellCount];
 
     memset(cells, 0, cellCount);
-    setCoordinateUpper(&cells[0], scr.posx+1, scr.posy+1);
-    setCoordinateLower(&cells[0], p->winx+1, p->winy+1);
-    setStateDots(&cells[4]);
+    renderCoordinateUpper(&cells[0], scr.posx+1, scr.posy+1);
+    renderCoordinateLower(&cells[0], p->winx+1, p->winy+1);
+    renderStateDots(&cells[4]);
 
     memset(prefix, 'x', cellCount);
     snprintf(text, sizeof(text), "%.*s %02d %c%c%c%c%c%c%n",
