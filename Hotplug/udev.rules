@@ -19,55 +19,56 @@
 # udev rules file for brltty
 
 SUBSYSTEM=="usb_device", GOTO="brltty_usb_begin"
+SUBSYSTEM=="usb", KERNEL!="*:*", GOTO="brltty_usb_begin"
 GOTO="brltty_end"
 
 LABEL="brltty_usb_begin"
 
 # Alva
-SYSFS{idVendor}=="06b0", SYSFS{idProduct}=="0001", ENV{BRLTTY_DRIVER}="al", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="6b0/1/*", ENV{BRLTTY_DRIVER}="al", GOTO="brltty_usb_run"
 
 # Baum
-SYSFS{idVendor}=="0403", SYSFS{idProduct}=="fe70", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb_run"
-SYSFS{idVendor}=="0403", SYSFS{idProduct}=="fe71", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb_run"
-SYSFS{idVendor}=="0403", SYSFS{idProduct}=="fe72", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb_run"
-SYSFS{idVendor}=="0403", SYSFS{idProduct}=="fe73", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb_run"
-SYSFS{idVendor}=="0403", SYSFS{idProduct}=="fe74", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb_run"
-SYSFS{idVendor}=="0403", SYSFS{idProduct}=="fe75", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb_run"
-SYSFS{idVendor}=="0403", SYSFS{idProduct}=="fe76", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb_run"
-SYSFS{idVendor}=="0403", SYSFS{idProduct}=="fe77", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb_run"
-SYSFS{idVendor}=="0904", SYSFS{idProduct}=="2000", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb_run"
-SYSFS{idVendor}=="0904", SYSFS{idProduct}=="2001", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb_run"
-SYSFS{idVendor}=="0904", SYSFS{idProduct}=="2002", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb_run"
-SYSFS{idVendor}=="0904", SYSFS{idProduct}=="2007", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb_run"
-SYSFS{idVendor}=="0904", SYSFS{idProduct}=="2008", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb_run"
-SYSFS{idVendor}=="0904", SYSFS{idProduct}=="2009", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb_run"
-SYSFS{idVendor}=="0904", SYSFS{idProduct}=="2010", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb_run"
-SYSFS{idVendor}=="0904", SYSFS{idProduct}=="2011", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb_run"
-SYSFS{idVendor}=="0904", SYSFS{idProduct}=="2012", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb_run"
-SYSFS{idVendor}=="0904", SYSFS{idProduct}=="2014", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb_run"
-SYSFS{idVendor}=="0904", SYSFS{idProduct}=="2015", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb_run"
-SYSFS{idVendor}=="0904", SYSFS{idProduct}=="2016", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="403/fe70/*", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="403/fe71/*", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="403/fe72/*", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="403/fe73/*", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="403/fe74/*", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="403/fe75/*", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="403/fe76/*", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="403/fe77/*", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="904/2000/*", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="904/2001/*", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="904/2002/*", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="904/2007/*", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="904/2008/*", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="904/2009/*", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="904/2010/*", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="904/2011/*", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="904/2012/*", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="904/2014/*", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="904/2015/*", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="904/2016/*", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb_run"
 
 # BrailleSense
-SYSFS{idVendor}=="045e", SYSFS{idProduct}=="930a", ENV{BRLTTY_DRIVER}="bs", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="45e/930a/*", ENV{BRLTTY_DRIVER}="bs", GOTO="brltty_usb_run"
 
 # EuroBraille
-SYSFS{idVendor}=="c251", SYSFS{idProduct}=="1122", ENV{BRLTTY_DRIVER}="eu", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="c251/1122/*", ENV{BRLTTY_DRIVER}="eu", GOTO="brltty_usb_run"
 
 # FreedomScientific
-SYSFS{idVendor}=="0f4e", SYSFS{idProduct}=="0100", ENV{BRLTTY_DRIVER}="fs", GOTO="brltty_usb_run"
-SYSFS{idVendor}=="0f4e", SYSFS{idProduct}=="0111", ENV{BRLTTY_DRIVER}="fs", GOTO="brltty_usb_run"
-SYSFS{idVendor}=="0f4e", SYSFS{idProduct}=="0112", ENV{BRLTTY_DRIVER}="fs", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="f4e/100/*", ENV{BRLTTY_DRIVER}="fs", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="f4e/111/*", ENV{BRLTTY_DRIVER}="fs", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="f4e/112/*", ENV{BRLTTY_DRIVER}="fs", GOTO="brltty_usb_run"
 
 # HandyTech
-SYSFS{idVendor}=="0921", SYSFS{idProduct}=="1200", ENV{BRLTTY_DRIVER}="ht", GOTO="brltty_usb_run"
-SYSFS{idVendor}=="0403", SYSFS{idProduct}=="6001", ENV{BRLTTY_DRIVER}="ht", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="921/1200/*", ENV{BRLTTY_DRIVER}="ht", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="403/6001/*", ENV{BRLTTY_DRIVER}="ht", GOTO="brltty_usb_run"
 
 # Papenmeier
-SYSFS{idVendor}=="0403", SYSFS{idProduct}=="f208", ENV{BRLTTY_DRIVER}="pm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="403/f208/*", ENV{BRLTTY_DRIVER}="pm", GOTO="brltty_usb_run"
 
 # Voyager
-SYSFS{idVendor}=="0798", SYSFS{idProduct}=="0001", ENV{BRLTTY_DRIVER}="vo", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="798/1/*", ENV{BRLTTY_DRIVER}="vo", GOTO="brltty_usb_run"
 
 GOTO="brltty_end"
 
