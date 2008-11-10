@@ -64,6 +64,7 @@ char \u0BA4	( 2345   )  # ⠞ த [TAMIL LETTER TA]
 
 
 char \u0BA8	(1 345   )  # ⠝ ந [TAMIL LETTER NA]
+char \u0BA9	(    56  )  # ⠰ ன [TAMIL LETTER NNNA]
 char \u0BAA	(1234    )  # ⠏ ப [TAMIL LETTER PA]
 
 
@@ -80,6 +81,7 @@ char \u0BB6	(1  4 6  )  # ⠩ ஶ [TAMIL LETTER SHA]
 char \u0BB7	(1234 6  )  # ⠯ ஷ [TAMIL LETTER SSA]
 char \u0BB8	( 234    )  # ⠎ ஸ [TAMIL LETTER SA]
 char \u0BB9	(12  5   )  # ⠓ ஹ [TAMIL LETTER HA]
+
 char \u0BBE	(  345   )  # ⠜ ா [TAMIL VOWEL SIGN AA]
 char \u0BBF	( 2 4    )  # ⠊ ி [TAMIL VOWEL SIGN I]
 char \u0BC0	(  3 5   )  # ⠔ ீ [TAMIL VOWEL SIGN II]
@@ -94,6 +96,7 @@ char \u0BCA	( 2 4 67 )  # ⡪ ொ [TAMIL VOWEL SIGN O]
 char \u0BCB	(1 3 5   )  # ⠕ ோ [TAMIL VOWEL SIGN OO]
 char \u0BCC	( 2 4 6  )  # ⠪ ௌ [TAMIL VOWEL SIGN AU]
 char \u0BCD	(   4    )  # ⠈ ் [TAMIL SIGN VIRAMA]
+
 char \u0BE6	( 2 45   )  # ⠚ ௦ [TAMIL DIGIT ZERO]
 char \u0BE7	(1       )  # ⠁ ௧ [TAMIL DIGIT ONE]
 char \u0BE8	(12      )  # ⠃ ௨ [TAMIL DIGIT TWO]
