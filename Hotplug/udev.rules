@@ -83,6 +83,7 @@ ACTION=="remove", GOTO="brltty_remove"
 GOTO="brltty_end"
 
 LABEL="brltty_add"
+SYMLINK+="brltty/$env{BRLTTY_DRIVER}-$env{BRLTTY_DEVICE}"
 RUN+="/bin/brltty -E -P$env{BRLTTY_PID_FILE}"
 GOTO="brltty_end"
 
