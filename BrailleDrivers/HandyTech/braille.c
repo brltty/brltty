@@ -116,8 +116,8 @@ static const ModelEntry modelTable[] = {
   ,
   { .identifier = HT_Model_ModularEvolution64,
     .name = "Modular Evolution 64",
-    .textCells = 60,
-    .statusCells = 4,
+    .textCells = 64,
+    .statusCells = 0,
     .helpPage = 0,
     .interpretByte = interpretKeyByte,
     .interpretKeys = interpretBrailleStarKeys,
@@ -127,8 +127,8 @@ static const ModelEntry modelTable[] = {
   ,
   { .identifier = HT_Model_ModularEvolution88,
     .name = "Modular Evolution 88",
-    .textCells = 80,
-    .statusCells = 8,
+    .textCells = 88,
+    .statusCells = 0,
     .helpPage = 0,
     .interpretByte = interpretKeyByte,
     .interpretKeys = interpretBrailleStarKeys,
@@ -710,10 +710,9 @@ writeBookwormCells (BrailleDisplay *brl) {
 
 static int
 writeEvolutionCells (BrailleDisplay *brl) {
-  unsigned char buffer[model->textCells + model->statusCells];
+  unsigned char buffer[model->textCells];
 
   memcpy(buffer, rawData, model->textCells);
-  memcpy(buffer+model->textCells, rawStatus, model->statusCells);
 
   return writeExtendedPacket(brl, HT_EXTPKT_Braille, buffer, sizeof(buffer));
 }
