@@ -163,9 +163,6 @@
 #braille-parameters bm:Protocols=default # [default,all,native]
 #braille-parameters bm:VarioKeys=no # [no,yes]
 
-# BrailleNote Braille Driver Parameters
-#braille-parameters bn:StatusCells=0
-
 # FreedomScientific Braille Driver Parameters
 #braille-parameters fs:DebugPackets=no # [no,yes]
 #braille-parameters fs:StatusCells= # [0,n,-n]

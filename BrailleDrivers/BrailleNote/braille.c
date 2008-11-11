@@ -29,11 +29,6 @@
 
 #include "misc.h"
 
-typedef enum {
-  PARM_STATUSCELLS
-} DriverParameter;
-#define BRLPARMS "statuscells"
-
 #define BRL_HAVE_STATUS_CELLS
 #define BRL_HAVE_PACKET_IO
 #include "brl_driver.h"
@@ -379,23 +374,6 @@ visualDisplay (BrailleDisplay *brl, unsigned char byte, BRL_DriverCommandContext
   return EOF;
 }
 
-static void
-adjustStatusCells (BrailleDisplay *brl, const char *parameter) {
-  if (*parameter) {
-    const int minimum = 0;
-    const int maximum = MIN(BRL_MAX_STATUS_CELL_COUNT, brl->x-1);
-    if (validateInteger(&statusCells, parameter, &minimum, &maximum)) {
-      statusArea = dataArea;
-      dataArea = statusArea + statusCells;
-      brl->x -= statusCells;
-      dataCells -= statusCells;
-      if ((brl->statusColumns = statusCells)) brl->statusRows = 1;
-    } else {
-      LogPrint(LOG_WARNING, "%s: %s", "invalid status cell count", parameter);
-    }
-  }
-}
-
 static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   {
@@ -426,6 +404,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
                 statusCells -= 2;
                 brl->x += 2;
               }
+              if ((brl->statusColumns = statusCells)) brl->statusRows = 1;
               dataCells = brl->x * brl->y;
               cellCount = statusCells + dataCells;
               if ((cellBuffer = malloc(cellCount))) {
@@ -437,7 +416,6 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
                 temporaryKeyboardMode = persistentKeyboardMode;
                 persistentRoutingOperation = BRL_BLK_ROUTE;
                 temporaryRoutingOperation = persistentRoutingOperation;
-                adjustStatusCells(brl, parameters[PARM_STATUSCELLS]);
                 return 1;
               } else {
                 LogError("cell buffer allocation");
