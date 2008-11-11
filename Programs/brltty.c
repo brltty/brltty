@@ -2627,9 +2627,9 @@ runProgram (void) {
           const StatusStyleEntry *style = &statusStyleTable[prefs.statusStyle];
 
           if (style->count > 0) {
-            unsigned char cells[MAX(style->count, statusCount)];
+            unsigned char cells[style->count];
             style->render(cells);
-            memcpy(&brl.buffer[statusStart], cells, statusCount);
+            memcpy(&brl.buffer[statusStart], cells, MIN(style->count, statusCount));
           }
         }
 
