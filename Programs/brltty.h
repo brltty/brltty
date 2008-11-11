@@ -47,6 +47,14 @@ typedef enum {
   spRight
 } StatusPosition;
 
+typedef enum {
+  ssNone,
+  ssSpace,
+  ssBlock,
+  ssStatusSide,
+  ssTextSide
+} StatusSeparator;
+
 /*
  * Structure definition for preferences (settings which are saveable).
  * PREFS_MAGIC_NUMBER has to be bumped whenever the definition of
@@ -102,6 +110,7 @@ typedef struct {
   unsigned char speechPitch;
   unsigned char statusPosition;
   unsigned char statusCount;
+  unsigned char statusSeparator;
 } PACKED Preferences;
 extern Preferences prefs;		/* current preferences settings */
 #define PREFERENCES_TIME(time) ((time) * 10)

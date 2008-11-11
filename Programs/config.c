@@ -646,11 +646,13 @@ dimensionsChanged (int infoLevel, int rows, int columns) {
   statusCount = 0;
 
   if (!haveStatusCells()) {
+    int separatorWidth = (prefs.statusSeparator == ssNone)? 0: 1;
+
     switch (prefs.statusPosition) {
       case spLeft:
         statusStart = 0;
         statusCount = prefs.statusCount;
-        textStart = statusCount + 1;
+        textStart = statusCount + separatorWidth;
         textCount = columns - textStart;
         break;
 
@@ -658,7 +660,7 @@ dimensionsChanged (int infoLevel, int rows, int columns) {
         statusCount = prefs.statusCount;
         statusStart = columns - statusCount;
         textStart = 0;
-        textCount = statusStart - 1;
+        textCount = statusStart - separatorWidth;
         break;
     }
   }
@@ -768,6 +770,11 @@ loadPreferences (int change) {
         prefs.statusCount = DEFAULT_STATUS_COUNT;
       }
 
+      if (length == 47) {
+        length++;
+        prefs.statusSeparator = DEFAULT_STATUS_SEPARATOR;
+      }
+
       if (prefs.version == 3) {
         prefs.version++;
         prefs.autorepeatPanning = DEFAULT_AUTOREPEAT_PANNING;
@@ -846,6 +853,7 @@ resetPreferences (void) {
 
   prefs.statusPosition = DEFAULT_STATUS_POSITION;
   prefs.statusCount = DEFAULT_STATUS_COUNT;
+  prefs.statusSeparator = DEFAULT_STATUS_SEPARATOR;
   prefs.statusStyle = braille->statusStyle;
 }
 
@@ -905,6 +913,11 @@ testStatusPosition (void) {
 static int
 testStatusCount (void) {
   return prefs.statusPosition != spNone;
+}
+
+static int
+testStatusSeparator (void) {
+  return (prefs.statusPosition != spNone) && (prefs.statusCount > 0);
 }
 
 static int
@@ -1218,6 +1231,11 @@ changedStatusCount (unsigned char setting) {
 }
 
 static int
+changedStatusSeparator (unsigned char setting) {
+  return changedWindowAttributes();
+}
+
+static int
 testAutorepeat (void) {
   return prefs.autorepeat;
 }
@@ -1325,6 +1343,14 @@ updatePreferences (void) {
       strtext("None"),
       strtext("Left"),
       strtext("Right")
+    };
+
+    static const char *statusSeparators[] = {
+      strtext("None"),
+      strtext("Space"),
+      strtext("Block"),
+      strtext("Status Side"),
+      strtext("Text Side")
     };
 
     static const char *statusStyles[] = {
@@ -1456,6 +1482,7 @@ updatePreferences (void) {
 #endif /* ENABLE_SPEECH_SUPPORT */
       SYMBOLIC_ITEM(prefs.statusPosition, changedStatusPosition, testStatusPosition, strtext("Status Position"), statusPositions),
       NUMERIC_ITEM(prefs.statusCount, changedStatusCount, testStatusCount, strtext("Status Count"), 0, MAX((int)brl.x/2-1, 0), 1),
+      SYMBOLIC_ITEM(prefs.statusSeparator, changedStatusSeparator, testStatusSeparator, strtext("Status Separator"), statusSeparators),
       SYMBOLIC_ITEM(prefs.statusStyle, NULL, testStatusStyle, strtext("Status Style"), statusStyles),
 #ifdef ENABLE_TABLE_SELECTION
       GLOB_ITEM(glob_textTable, changedTextTable, NULL, strtext("Text Table")),

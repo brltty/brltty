@@ -93,6 +93,7 @@ extern "C" {
 
 #define DEFAULT_STATUS_POSITION spNone
 #define DEFAULT_STATUS_COUNT 1
+#define DEFAULT_STATUS_SEPARATOR ssNone
 
 #ifdef __cplusplus
 }
