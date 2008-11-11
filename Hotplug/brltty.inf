@@ -1,0 +1,246 @@
+[Version]
+Signature = "$Chicago$"
+provider  = %manufacturer%
+DriverVer = 03/31/2007,0.1.12.1
+CatalogFile = brltty.cat
+CatalogFile.NT = brltty.cat
+CatalogFile.NTAMD64 = brltty_x64.cat
+
+Class = LibUsbDevices
+ClassGUID = {EB781AAF-9C70-4523-A5DF-642A87ECA567}
+
+[ClassInstall]
+AddReg=libusb_class_install_add_reg
+
+[ClassInstall32]
+AddReg=libusb_class_install_add_reg
+
+[libusb_class_install_add_reg]
+HKR,,,,"LibUSB-Win32 Devices"
+HKR,,Icon,,"-20"
+
+[Manufacturer]
+%manufacturer%=Devices,NT,NTAMD64
+
+;--------------------------------------------------------------------------
+; Files
+;--------------------------------------------------------------------------
+
+[SourceDisksNames]
+1 = "Libusb-Win32 Driver Installation Disk",,
+
+[SourceDisksFiles]
+libusb0.sys = 1,,
+libusb0.dll = 1,,
+libusb0_x64.sys = 1,,
+libusb0_x64.dll = 1,,
+
+[DestinationDirs]
+libusb_files_sys = 10,system32\drivers
+libusb_files_sys_x64 = 10,system32\drivers
+libusb_files_dll = 10,system32
+libusb_files_dll_wow64 = 10,syswow64
+libusb_files_dll_x64 = 10,system32
+
+[libusb_files_sys]
+libusb0.sys
+
+[libusb_files_sys_x64]
+libusb0.sys,libusb0_x64.sys
+
+[libusb_files_dll]
+libusb0.dll
+
+[libusb_files_dll_wow64]
+libusb0.dll
+
+[libusb_files_dll_x64]
+libusb0.dll,libusb0_x64.dll
+
+;--------------------------------------------------------------------------
+; Device driver
+;--------------------------------------------------------------------------
+
+[LIBUSB_DEV]
+CopyFiles = libusb_files_sys, libusb_files_dll
+AddReg    = libusb_add_reg
+
+[LIBUSB_DEV.NT]
+CopyFiles = libusb_files_sys, libusb_files_dll
+
+[LIBUSB_DEV.NTAMD64]
+CopyFiles = libusb_files_sys_x64, libusb_files_dll_wow64, libusb_files_dll_x64
+
+[LIBUSB_DEV.HW]
+DelReg = libusb_del_reg_hw
+AddReg = libusb_add_reg_hw
+
+[LIBUSB_DEV.NT.HW]
+DelReg = libusb_del_reg_hw
+AddReg = libusb_add_reg_hw
+
+[LIBUSB_DEV.NTAMD64.HW]
+DelReg = libusb_del_reg_hw
+AddReg = libusb_add_reg_hw
+
+[LIBUSB_DEV.NT.Services]
+AddService = libusb0, 0x00000002, libusb_add_service
+
+[LIBUSB_DEV.NTAMD64.Services]
+AddService = libusb0, 0x00000002, libusb_add_service
+
+[libusb_add_reg]
+HKR,,DevLoader,,*ntkern
+HKR,,NTMPDriver,,libusb0.sys
+
+; Older versions of this .inf file installed filter drivers. They are not
+; needed any more and must be removed
+[libusb_del_reg_hw]
+HKR,,LowerFilters
+HKR,,UpperFilters
+
+; Device properties
+[libusb_add_reg_hw]
+HKR,,SurpriseRemovalOK, 0x00010001, 1
+
+;--------------------------------------------------------------------------
+; Services
+;--------------------------------------------------------------------------
+
+[libusb_add_service]
+DisplayName    = "LibUsb-Win32 - Kernel Driver 03/31/2007, 0.1.12.1"
+ServiceType    = 1
+StartType      = 3
+ErrorControl   = 0
+ServiceBinary  = %12%\libusb0.sys
+
+;--------------------------------------------------------------------------
+; Devices
+;--------------------------------------------------------------------------
+
+[Devices]
+
+"LibUsb-Win32 ALVA"=LIBUSB_DEV, USB\VID_06B0&PID_0001
+
+"LibUsb-Win32 Baum Vario40"=LIBUSB_DEV, USB\VID_0403&PID_FE70
+"LibUsb-Win32 Baum PocketVario 24"=LIBUSB_DEV, USB\VID_0403&PID_FE71
+"LibUsb-Win32 Baum SuperVario 40"=LIBUSB_DEV, USB\VID_0403&PID_FE72
+"LibUsb-Win32 Baum SuperVario 32"=LIBUSB_DEV, USB\VID_0403&PID_FE73
+"LibUsb-Win32 Baum SuperVario 64"=LIBUSB_DEV, USB\VID_0403&PID_FE74
+"LibUsb-Win32 Baum SuperVario 80"=LIBUSB_DEV, USB\VID_0403&PID_FE75
+"LibUsb-Win32 Baum VarioPro 80"=LIBUSB_DEV, USB\VID_0403&PID_FE76
+"LibUsb-Win32 Baum VarioPro 64"=LIBUSB_DEV, USB\VID_0403&PID_FE77
+"LibUsb-Win32 Baum VarioPro 40"=LIBUSB_DEV, USB\VID_0904&PID_2000
+"LibUsb-Win32 Baum EcoVario 24"=LIBUSB_DEV, USB\VID_0904&PID_2001
+"LibUsb-Win32 Baum EcoVario 40"=LIBUSB_DEV, USB\VID_0904&PID_2002
+"LibUsb-Win32 Baum VarioConnect 40"=LIBUSB_DEV, USB\VID_0904&PID_2007
+"LibUsb-Win32 Baum VarioConnect 32"=LIBUSB_DEV, USB\VID_0904&PID_2008
+"LibUsb-Win32 Baum VarioConnect 24"=LIBUSB_DEV, USB\VID_0904&PID_2009
+"LibUsb-Win32 Baum VarioConnect 64"=LIBUSB_DEV, USB\VID_0904&PID_2010
+"LibUsb-Win32 Baum VarioConnect 80"=LIBUSB_DEV, USB\VID_0904&PID_2011
+"LibUsb-Win32 Baum VarioPro 40"=LIBUSB_DEV, USB\VID_0904&PID_2012
+"LibUsb-Win32 Baum EcoVario 32"=LIBUSB_DEV, USB\VID_0904&PID_2014
+"LibUsb-Win32 Baum EcoVario 64"=LIBUSB_DEV, USB\VID_0904&PID_2015
+"LibUsb-Win32 Baum EcoVario 80"=LIBUSB_DEV, USB\VID_0904&PID_2016
+
+"LibUsb-Win32 Braille Sense"=LIBUSB_DEV, USB\VID_045E&PID_930A
+
+"LibUsb-Win32 EuroBraille ESYS 12/40"=LIBUSB_DEV, USB\VID_C251&PID_1122
+
+"LibUsb-Win32 FreedomScientific Focus"=LIBUSB_DEV, USB\VID_0F4E&PID_0100
+"LibUsb-Win32 FreedomScientific PAC Mate"=LIBUSB_DEV, USB\VID_0F4E&PID_0111
+"LibUsb-Win32 FreedomScientific Focus 2"=LIBUSB_DEV, USB\VID_0F4E&PID_0112
+
+"LibUsb-Win32 HandyTech (GoHubs)"=LIBUSB_DEV, USB\VID_0921&PID_1200
+"LibUsb-Win32 HandyTech (FTDI)"=LIBUSB_DEV, USB\VID_0403&PID_6001
+
+"LibUsb-Win32 Papenmeier"=LIBUSB_DEV, USB\VID_0403&PID_F208
+
+"LibUsb-Win32 Voyager"=LIBUSB_DEV, USB\VID_0798&PID_0001
+
+[Devices.NT]
+
+"LibUsb-Win32 ALVA"=LIBUSB_DEV, USB\VID_06B0&PID_0001
+
+"LibUsb-Win32 Baum Vario40"=LIBUSB_DEV, USB\VID_0403&PID_FE70
+"LibUsb-Win32 Baum PocketVario 24"=LIBUSB_DEV, USB\VID_0403&PID_FE71
+"LibUsb-Win32 Baum SuperVario 40"=LIBUSB_DEV, USB\VID_0403&PID_FE72
+"LibUsb-Win32 Baum SuperVario 32"=LIBUSB_DEV, USB\VID_0403&PID_FE73
+"LibUsb-Win32 Baum SuperVario 64"=LIBUSB_DEV, USB\VID_0403&PID_FE74
+"LibUsb-Win32 Baum SuperVario 80"=LIBUSB_DEV, USB\VID_0403&PID_FE75
+"LibUsb-Win32 Baum VarioPro 80"=LIBUSB_DEV, USB\VID_0403&PID_FE76
+"LibUsb-Win32 Baum VarioPro 64"=LIBUSB_DEV, USB\VID_0403&PID_FE77
+"LibUsb-Win32 Baum VarioPro 40"=LIBUSB_DEV, USB\VID_0904&PID_2000
+"LibUsb-Win32 Baum EcoVario 24"=LIBUSB_DEV, USB\VID_0904&PID_2001
+"LibUsb-Win32 Baum EcoVario 40"=LIBUSB_DEV, USB\VID_0904&PID_2002
+"LibUsb-Win32 Baum VarioConnect 40"=LIBUSB_DEV, USB\VID_0904&PID_2007
+"LibUsb-Win32 Baum VarioConnect 32"=LIBUSB_DEV, USB\VID_0904&PID_2008
+"LibUsb-Win32 Baum VarioConnect 24"=LIBUSB_DEV, USB\VID_0904&PID_2009
+"LibUsb-Win32 Baum VarioConnect 64"=LIBUSB_DEV, USB\VID_0904&PID_2010
+"LibUsb-Win32 Baum VarioConnect 80"=LIBUSB_DEV, USB\VID_0904&PID_2011
+"LibUsb-Win32 Baum VarioPro 40"=LIBUSB_DEV, USB\VID_0904&PID_2012
+"LibUsb-Win32 Baum EcoVario 32"=LIBUSB_DEV, USB\VID_0904&PID_2014
+"LibUsb-Win32 Baum EcoVario 64"=LIBUSB_DEV, USB\VID_0904&PID_2015
+"LibUsb-Win32 Baum EcoVario 80"=LIBUSB_DEV, USB\VID_0904&PID_2016
+
+"LibUsb-Win32 Braille Sense"=LIBUSB_DEV, USB\VID_045E&PID_930A
+
+"LibUsb-Win32 EuroBraille ESYS 12/40"=LIBUSB_DEV, USB\VID_C251&PID_1122
+
+"LibUsb-Win32 FreedomScientific Focus"=LIBUSB_DEV, USB\VID_0F4E&PID_0100
+"LibUsb-Win32 FreedomScientific PAC Mate"=LIBUSB_DEV, USB\VID_0F4E&PID_0111
+"LibUsb-Win32 FreedomScientific Focus 2"=LIBUSB_DEV, USB\VID_0F4E&PID_0112
+
+"LibUsb-Win32 HandyTech (GoHubs)"=LIBUSB_DEV, USB\VID_0921&PID_1200
+"LibUsb-Win32 HandyTech (FTDI)"=LIBUSB_DEV, USB\VID_0403&PID_6001
+
+"LibUsb-Win32 Papenmeier"=LIBUSB_DEV, USB\VID_0403&PID_F208
+
+"LibUsb-Win32 Voyager"=LIBUSB_DEV, USB\VID_0798&PID_0001
+
+[Devices.NTAMD64]
+
+"LibUsb-Win32 ALVA"=LIBUSB_DEV, USB\VID_06B0&PID_0001
+
+"LibUsb-Win32 Baum Vario40"=LIBUSB_DEV, USB\VID_0403&PID_FE70
+"LibUsb-Win32 Baum PocketVario 24"=LIBUSB_DEV, USB\VID_0403&PID_FE71
+"LibUsb-Win32 Baum SuperVario 40"=LIBUSB_DEV, USB\VID_0403&PID_FE72
+"LibUsb-Win32 Baum SuperVario 32"=LIBUSB_DEV, USB\VID_0403&PID_FE73
+"LibUsb-Win32 Baum SuperVario 64"=LIBUSB_DEV, USB\VID_0403&PID_FE74
+"LibUsb-Win32 Baum SuperVario 80"=LIBUSB_DEV, USB\VID_0403&PID_FE75
+"LibUsb-Win32 Baum VarioPro 80"=LIBUSB_DEV, USB\VID_0403&PID_FE76
+"LibUsb-Win32 Baum VarioPro 64"=LIBUSB_DEV, USB\VID_0403&PID_FE77
+"LibUsb-Win32 Baum VarioPro 40"=LIBUSB_DEV, USB\VID_0904&PID_2000
+"LibUsb-Win32 Baum EcoVario 24"=LIBUSB_DEV, USB\VID_0904&PID_2001
+"LibUsb-Win32 Baum EcoVario 40"=LIBUSB_DEV, USB\VID_0904&PID_2002
+"LibUsb-Win32 Baum VarioConnect 40"=LIBUSB_DEV, USB\VID_0904&PID_2007
+"LibUsb-Win32 Baum VarioConnect 32"=LIBUSB_DEV, USB\VID_0904&PID_2008
+"LibUsb-Win32 Baum VarioConnect 24"=LIBUSB_DEV, USB\VID_0904&PID_2009
+"LibUsb-Win32 Baum VarioConnect 64"=LIBUSB_DEV, USB\VID_0904&PID_2010
+"LibUsb-Win32 Baum VarioConnect 80"=LIBUSB_DEV, USB\VID_0904&PID_2011
+"LibUsb-Win32 Baum VarioPro 40"=LIBUSB_DEV, USB\VID_0904&PID_2012
+"LibUsb-Win32 Baum EcoVario 32"=LIBUSB_DEV, USB\VID_0904&PID_2014
+"LibUsb-Win32 Baum EcoVario 64"=LIBUSB_DEV, USB\VID_0904&PID_2015
+"LibUsb-Win32 Baum EcoVario 80"=LIBUSB_DEV, USB\VID_0904&PID_2016
+
+"LibUsb-Win32 Braille Sense"=LIBUSB_DEV, USB\VID_045E&PID_930A
+
+"LibUsb-Win32 EuroBraille ESYS 12/40"=LIBUSB_DEV, USB\VID_C251&PID_1122
+
+"LibUsb-Win32 FreedomScientific Focus"=LIBUSB_DEV, USB\VID_0F4E&PID_0100
+"LibUsb-Win32 FreedomScientific PAC Mate"=LIBUSB_DEV, USB\VID_0F4E&PID_0111
+"LibUsb-Win32 FreedomScientific Focus 2"=LIBUSB_DEV, USB\VID_0F4E&PID_0112
+
+"LibUsb-Win32 HandyTech (GoHubs)"=LIBUSB_DEV, USB\VID_0921&PID_1200
+"LibUsb-Win32 HandyTech (FTDI)"=LIBUSB_DEV, USB\VID_0403&PID_6001
+
+"LibUsb-Win32 Papenmeier"=LIBUSB_DEV, USB\VID_0403&PID_F208
+
+"LibUsb-Win32 Voyager"=LIBUSB_DEV, USB\VID_0798&PID_0001
+
+;--------------------------------------------------------------------------
+; Strings
+;--------------------------------------------------------------------------
+
+[Strings]
+manufacturer = "BRLTTY"
