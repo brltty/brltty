@@ -41,6 +41,12 @@ typedef enum {
   sayEnqueue
 } SayMode;
 
+typedef enum {
+  spNone,
+  spLeft,
+  spRight
+} StatusPosition;
+
 /*
  * Structure definition for preferences (settings which are saveable).
  * PREFS_MAGIC_NUMBER has to be bumped whenever the definition of
@@ -94,6 +100,8 @@ typedef struct {
   unsigned char brailleFirmness;
   unsigned char speechPunctuation;
   unsigned char speechPitch;
+  unsigned char statusPosition;
+  unsigned char statusCount;
 } PACKED Preferences;
 extern Preferences prefs;		/* current preferences settings */
 #define PREFERENCES_TIME(time) ((time) * 10)
@@ -115,6 +123,10 @@ extern int updatePreferences (void);
 extern unsigned char cursorDots (void);
 
 extern BrailleDisplay brl;			/* braille driver reference */
+extern unsigned int textStart;
+extern unsigned int textCount;
+extern unsigned int statusStart;
+extern unsigned int statusCount;
 extern short fwinshift;			/* Full window horizontal distance */
 extern short hwinshift;			/* Half window horizontal distance */
 extern short vwinshift;			/* Window vertical distance */

@@ -64,6 +64,10 @@ Preferences prefs;                /* environment (i.e. global) parameters */
 static unsigned char infoMode = 0; /* display screen image or info */
 
 BrailleDisplay brl;                        /* For the Braille routines */
+unsigned int textStart;
+unsigned int textCount;
+unsigned int statusStart;
+unsigned int statusCount;
 short fwinshift;                /* Full window horizontal distance */
 short hwinshift;                /* Half window horizontal distance */
 short vwinshift;                /* Window vertical distance */
@@ -516,7 +520,7 @@ slideWindowVertically (int y) {
 
 static void 
 placeWindowHorizontally (int x) {
-  p->winx = x / brl.x * brl.x;
+  p->winx = x / textCount * textCount;
 }
 
 static void 
@@ -547,22 +551,22 @@ trackCursor (int place) {
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
   if (place)
-    if ((scr.posx < p->winx) || (scr.posx >= (p->winx + brl.x)) ||
+    if ((scr.posx < p->winx) || (scr.posx >= (p->winx + textCount)) ||
         (scr.posy < p->winy) || (scr.posy >= (p->winy + brl.y)))
       placeWindowHorizontally(scr.posx);
 
   if (prefs.slidingWindow) {
-    int reset = brl.x * 3 / 10;
-    int trigger = prefs.eagerSlidingWindow? brl.x*3/20: 0;
+    int reset = textCount * 3 / 10;
+    int trigger = prefs.eagerSlidingWindow? textCount*3/20: 0;
     if (scr.posx < (p->winx + trigger))
       p->winx = MAX(scr.posx-reset, 0);
-    else if (scr.posx >= (p->winx + brl.x - trigger))
-      p->winx = MAX(MIN(scr.posx+reset+1, scr.cols)-(int)brl.x, 0);
+    else if (scr.posx >= (p->winx + textCount - trigger))
+      p->winx = MAX(MIN(scr.posx+reset+1, scr.cols)-(int)textCount, 0);
   } else if (scr.posx < p->winx) {
-    p->winx -= ((p->winx - scr.posx - 1) / brl.x + 1) * brl.x;
+    p->winx -= ((p->winx - scr.posx - 1) / textCount + 1) * textCount;
     if (p->winx < 0) p->winx = 0;
   } else
-    p->winx += (scr.posx - p->winx) / brl.x * brl.x;
+    p->winx += (scr.posx - p->winx) / textCount * textCount;
 
   slideWindowVertically(scr.posy);
 }
@@ -849,7 +853,7 @@ getCursorOffset (int x, int y) {
 static int
 getContractedLength (int x, int y) {
   int inputLength = scr.cols - x;
-  int outputLength = brl.x * brl.y;
+  int outputLength = textCount * brl.y;
   wchar_t inputBuffer[inputLength];
   unsigned char outputBuffer[outputLength];
   readScreenText(x, y, inputLength, 1, inputBuffer);
@@ -875,7 +879,7 @@ placeRightEdge (int column) {
   } else
 #endif /* ENABLE_CONTRACTED_BRAILLE */
   {
-    p->winx = column / brl.x * brl.x;
+    p->winx = column / textCount * textCount;
   }
 }
 
@@ -924,29 +928,45 @@ getWindowLength (void) {
   if (isContracting()) return getContractedLength(p->winx, p->winy);
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
-  return brl.x;
+  return textCount;
 }
 
 static int
-getOffset (int arg, int end) {
+isTextOffset (int *arg, int end, int relaxed) {
+  int value = *arg;
+
+  if (value < textStart) return 0;
+  if ((value -= textStart) >= textCount) return 0;
+
+  if ((p->winx + value) >= scr.cols) {
+    if (!relaxed) return 0;
+    value = scr.cols - 1;
+  }
+
 #ifdef ENABLE_CONTRACTED_BRAILLE
   if (contracted) {
     int result = 0;
     int index;
-    for (index=0; index<contractedLength; ++index) {
+
+    for (index=0; index<contractedLength; index+=1) {
       int offset = contractedOffsets[index];
+
       if (offset != CTB_NO_OFFSET) {
-        if (offset > arg) {
+        if (offset > value) {
           if (end) result = index - 1;
           break;
         }
+
         result = index;
       }
     }
-    return result;
+
+    value = result;
   }
 #endif /* ENABLE_CONTRACTED_BRAILLE */
-  return arg;
+
+  *arg = value;
+  return 1;
 }
 
 static int cursorState;                /* display cursor on (toggled during blink) */
@@ -1079,8 +1099,8 @@ checkPointer (void) {
     if (moved) {
       if (column < p->winx) {
         p->winx = column;
-      } else if (column >= (p->winx + brl.x)) {
-        p->winx = column + 1 - brl.x;
+      } else if (column >= (p->winx + textCount)) {
+        p->winx = column + 1 - textCount;
       }
 
       if (row < p->winy) {
@@ -1108,7 +1128,7 @@ highlightWindow (void) {
       right = left;
       bottom = top;
     } else if (!brl.touchEnabled) {
-      right = brl.x - 1;
+      right = textCount - 1;
       bottom = brl.y - 1;
     } else if (!touchGetRegion(&left, &right, &top, &bottom)) {
       unhighlightScreenRegion();
@@ -1433,7 +1453,7 @@ runProgram (void) {
                         int end = p->winx + count - 1;
                         if (end < length) length = end;
                       } else {
-                        int start = p->winx + brl.x;
+                        int start = p->winx + textCount;
                         if (start > length) start = length;
                         address += start;
                         length -= start;
@@ -1445,7 +1465,7 @@ runProgram (void) {
                           ++address, --length;
 
                       p->winy = line;
-                      p->winx = (address - buffer) / brl.x * brl.x;
+                      p->winx = (address - buffer) / textCount * textCount;
                       found = 1;
                       break;
                     }
@@ -1466,8 +1486,8 @@ runProgram (void) {
                 playTune(&tune_bounce);
               break;
             case BRL_CMD_LNEND:
-              if (p->winx < (scr.cols - brl.x))
-                p->winx = scr.cols - brl.x;
+              if (p->winx < (scr.cols - textCount))
+                p->winx = scr.cols - textCount;
               else
                 playTune(&tune_bounce);
               break;
@@ -1505,8 +1525,8 @@ runProgram (void) {
                     if (prefs.blankWindowsSkipMode == sbwEndOfLine) goto skipEndOfLine;
                     if (!showCursor() ||
                         (scr.posy != p->winy) ||
-                        (scr.posx >= (p->winx + brl.x))) {
-                      int charCount = MIN(scr.cols, p->winx+brl.x);
+                        (scr.posx >= (p->winx + textCount))) {
+                      int charCount = MIN(scr.cols, p->winx+textCount);
                       int charIndex;
                       ScreenCharacter characters[charCount];
                       readScreen(0, p->winy, charCount, 1, characters);
@@ -1957,8 +1977,7 @@ runProgram (void) {
                   break;
 
                 case BRL_BLK_ROUTE:
-                  if (arg < brl.x) {
-                    arg = getOffset(arg, 0);
+                  if (isTextOffset(&arg, 0, 1)) {
                     if (routeCursor(MIN(p->winx+arg, scr.cols-1), p->winy, scr.number)) {
                       playTune(&tune_routing_started);
                       break;
@@ -1968,30 +1987,26 @@ runProgram (void) {
                   break;
 
                 case BRL_BLK_CUTBEGIN:
-                  if (arg < brl.x && p->winx+arg < scr.cols) {
-                    arg = getOffset(arg, 0);
+                  if (isTextOffset(&arg, 0, 0)) {
                     cutBegin(p->winx+arg, p->winy);
                   } else
                     playTune(&tune_command_rejected);
                   break;
                 case BRL_BLK_CUTAPPEND:
-                  if (arg < brl.x && p->winx+arg < scr.cols) {
-                    arg = getOffset(arg, 0);
+                  if (isTextOffset(&arg, 0, 0)) {
                     cutAppend(p->winx+arg, p->winy);
                   } else
                     playTune(&tune_command_rejected);
                   break;
                 case BRL_BLK_CUTRECT:
-                  if (arg < brl.x) {
-                    arg = getOffset(arg, 1);
+                  if (isTextOffset(&arg, 1, 1)) {
                     if (cutRectangle(MIN(p->winx+arg, scr.cols-1), p->winy))
                       break;
                   }
                   playTune(&tune_command_rejected);
                   break;
                 case BRL_BLK_CUTLINE:
-                  if (arg < brl.x) {
-                    arg = getOffset(arg, 1);
+                  if (isTextOffset(&arg, 1, 1)) {
                     if (cutLine(MIN(p->winx+arg, scr.cols-1), p->winy))
                       break;
                   }
@@ -1999,7 +2014,7 @@ runProgram (void) {
                   break;
 
                 case BRL_BLK_DESCCHAR:
-                  if (arg < brl.x && p->winx+arg < scr.cols) {
+                  if (isTextOffset(&arg, 0, 0)) {
                     static char *colours[] = {
                       strtext("black"),
                       strtext("blue"),
@@ -2023,7 +2038,6 @@ runProgram (void) {
                     int length = 0;
                     ScreenCharacter character;
 
-                    arg = getOffset(arg, 0);
                     readScreen(p->winx+arg, p->winy, 1, 1, &character);
 
                     {
@@ -2067,8 +2081,7 @@ runProgram (void) {
                   break;
 
                 case BRL_BLK_SETLEFT:
-                  if (arg < brl.x && p->winx+arg < scr.cols) {
-                    arg = getOffset(arg, 0);
+                  if (isTextOffset(&arg, 0, 0)) {
                     p->winx += arg;
                   } else
                     playTune(&tune_command_rejected);
@@ -2111,21 +2124,24 @@ runProgram (void) {
                 case BRL_BLK_NXINDENT:
                   increment = 1;
                 findIndent:
-                  arg = getOffset(arg, 0);
-                  findRow(MIN(p->winx+arg, scr.cols-1),
-                          increment, testIndent, NULL);
+                  if (isTextOffset(&arg, 0, 0)) {
+                    findRow(MIN(p->winx+arg, scr.cols-1),
+                            increment, testIndent, NULL);
+                  } else {
+                    playTune(&tune_command_rejected);
+                  }
                   break;
                 }
 
                 case BRL_BLK_PRDIFCHAR:
-                  if (arg < brl.x && p->winx+arg < scr.cols)
-                    upDifferentCharacter(isSameText, getOffset(arg, 0));
+                  if (isTextOffset(&arg, 0, 0))
+                    upDifferentCharacter(isSameText, arg);
                   else
                     playTune(&tune_command_rejected);
                   break;
                 case BRL_BLK_NXDIFCHAR:
-                  if (arg < brl.x && p->winx+arg < scr.cols)
-                    downDifferentCharacter(isSameText, getOffset(arg, 0));
+                  if (isTextOffset(&arg, 0, 0))
+                    downDifferentCharacter(isSameText, arg);
                   else
                     playTune(&tune_command_rejected);
                   break;
@@ -2159,7 +2175,7 @@ runProgram (void) {
         if (!(command & BRL_MSK_BLK)) {
           if (command & BRL_FLG_ROUTE) {
             int left = p->winx;
-            int right = left + brl.x - 1;
+            int right = left + textCount - 1;
 
             int top = p->winy;
             int bottom = top + brl.y - 1;
@@ -2381,16 +2397,17 @@ runProgram (void) {
       if (infoMode) {
         if (!showInfo()) writable = 0;
       } else {
-        const int cellCount = brl.x * brl.y;
-        wchar_t textBuffer[cellCount];
+        const unsigned int textLength = textCount * brl.y;
+        wchar_t textBuffer[textLength];
 
-        wmemset(textBuffer, WC_C(' '), cellCount);
+        memset(brl.buffer, 0, brl.x*brl.y);
+        wmemset(textBuffer, WC_C(' '), textLength);
         brl.cursor = -1;
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
         contracted = 0;
         if (isContracting()) {
-          int windowLength = cellCount;
+          unsigned int windowLength = textLength;
 
           while (1) {
             int cursorOffset = CTB_NO_CURSOR;
@@ -2456,14 +2473,11 @@ runProgram (void) {
                 }
               }
 
-              memcpy(brl.buffer, outputBuffer, outputLength);
-              memset(brl.buffer+outputLength, 0, windowLength-outputLength);
-
               if (cursorOffset < inputEnd) {
                 while (cursorOffset >= 0) {
                   int offset = contractedOffsets[cursorOffset];
-                  if (offset >= 0) {
-                    if (offset < brl.x) brl.cursor = offset;
+                  if (offset != CTB_NO_OFFSET) {
+                    brl.cursor = ((offset / textCount) * brl.x) + textStart + (offset % textCount);
                     break;
                   }
                   --cursorOffset;
@@ -2480,26 +2494,43 @@ runProgram (void) {
               int inputOffset;
               int outputOffset = 0;
               unsigned char attributes = 0;
+              unsigned char attributesBuffer[outputLength];
 
               for (inputOffset=0; inputOffset<contractedLength; ++inputOffset) {
                 int offset = contractedOffsets[inputOffset];
-                if (offset >= 0) {
-                  while (outputOffset < offset) outputBuffer[outputOffset++] = attributes;
+                if (offset != CTB_NO_OFFSET) {
+                  while (outputOffset < offset) attributesBuffer[outputOffset++] = attributes;
                   attributes = 0;
                 }
                 attributes |= inputCharacters[inputOffset].attributes;
               }
-              while (outputOffset < outputLength) outputBuffer[outputOffset++] = attributes;
+              while (outputOffset < outputLength) attributesBuffer[outputOffset++] = attributes;
 
               if (p->showAttributes) {
                 for (outputOffset=0; outputOffset<outputLength; ++outputOffset) {
-                  brl.buffer[outputOffset] = convertAttributesToDots(attributesTable, outputBuffer[outputOffset]);
+                  outputBuffer[outputOffset] = convertAttributesToDots(attributesTable, attributesBuffer[outputOffset]);
                 }
               } else {
                 int i;
                 for (i=0; i<outputLength; ++i) {
-                  overlayAttributesUnderline(&brl.buffer[i], outputBuffer[i]);
+                  overlayAttributesUnderline(&outputBuffer[i], attributesBuffer[i]);
                 }
+              }
+            }
+
+            {
+              const unsigned char *source = outputBuffer;
+              unsigned char *target = brl.buffer;
+              int length = outputLength;
+
+              while (length > 0) {
+                int count = length;
+                if (count > textCount) count = textCount;
+                memcpy(&target[textStart], source, count);
+
+                source += count;
+                target += brl.x;
+                length -= count;
               }
             }
 
@@ -2510,11 +2541,11 @@ runProgram (void) {
         if (!contracted)
 #endif /* ENABLE_CONTRACTED_BRAILLE */
         {
-          int winlen = MIN(brl.x, scr.cols-p->winx);
-          ScreenCharacter characters[cellCount];
+          int windowColumns = MIN(textCount, scr.cols-p->winx);
+          ScreenCharacter characters[textLength];
 
-          readScreen(p->winx, p->winy, winlen, brl.y, characters);
-          if (winlen < brl.x) {
+          readScreen(p->winx, p->winy, windowColumns, brl.y, characters);
+          if (windowColumns < textCount) {
             /* We got a rectangular piece of text with readScreen but the display
              * is in an off-right position with some cells at the end blank
              * so we'll insert these cells and blank them.
@@ -2522,28 +2553,28 @@ runProgram (void) {
             int i;
 
             for (i=brl.y-1; i>0; i--) {
-              memmove(characters + (i * brl.x),
-                      characters + (i * winlen),
-                      winlen * sizeof(*characters));
+              memmove(characters + (i * textCount),
+                      characters + (i * windowColumns),
+                      windowColumns * sizeof(*characters));
             }
 
             for (i=0; i<brl.y; i++) {
-              clearScreenCharacters(characters + (i * brl.x) + winlen,
-                                    brl.x-winlen);
+              clearScreenCharacters(characters + (i * textCount) + windowColumns,
+                                    textCount-windowColumns);
             }
           }
 
           /*
            * If the cursor is visible and in range: 
            */
-          if ((scr.posx >= p->winx) && (scr.posx < (p->winx + brl.x)) &&
+          if ((scr.posx >= p->winx) && (scr.posx < (p->winx + textCount)) &&
               (scr.posy >= p->winy) && (scr.posy < (p->winy + brl.y)))
-            brl.cursor = (scr.posy - p->winy) * brl.x + scr.posx - p->winx;
+            brl.cursor = ((scr.posy - p->winy) * brl.x) + textStart + scr.posx - p->winx;
 
           /* blank out capital letters if they're blinking and should be off */
           if (prefs.blinkingCapitals && !capitalsState) {
             int i;
-            for (i=0; i<brl.x*brl.y; i++) {
+            for (i=0; i<textCount*brl.y; i++) {
               ScreenCharacter *character = &characters[i];
               if (iswupper(character->text)) character->text = WC_C(' ');
             }
@@ -2551,28 +2582,36 @@ runProgram (void) {
 
           /* convert to dots using the current translation table */
           if (p->showAttributes) {
-            int i;
-            for (i=0; i<(brl.x*brl.y); ++i) {
-              brl.buffer[i] = convertAttributesToDots(attributesTable, characters[i].attributes);
+            int row;
+
+            for (row=0; row<brl.y; row+=1) {
+              const ScreenCharacter *source = &characters[row * textCount];
+              unsigned char *target = &brl.buffer[(row * brl.x) + textStart];
+              int column;
+
+              for (column=0; column<textCount; column+=1) {
+                target[column] = convertAttributesToDots(attributesTable, source[column].attributes);
+              }
             }
           } else {
-            int i;
-            for (i=0; i<(brl.x*brl.y); ++i) {
-              const ScreenCharacter *character = &characters[i];
-              brl.buffer[i] = convertCharacterToDots(textTable, character->text);
-              if (prefs.textStyle) brl.buffer[i] &= ~(BRL_DOT7 | BRL_DOT8);
-              textBuffer[i] = character->text;
-            }
+            int underline = showAttributesUnderline();
+            int row;
 
-            /* Attribute underlining: if viewing text (not attributes), attribute
-             * underlining is active and visible and we're not in help, then we
-             * get the attributes for the current region and OR the underline.
-             */
-            if (showAttributesUnderline()) {
-              int count = brl.x * brl.y;
-              int i;
-              for (i=0; i<count; ++i) {
-                overlayAttributesUnderline(&brl.buffer[i], characters[i].attributes);
+            for (row=0; row<brl.y; row+=1) {
+              const ScreenCharacter *source = &characters[row * textCount];
+              unsigned char *target = &brl.buffer[(row * brl.x) + textStart];
+              wchar_t *text = &textBuffer[(row * brl.x) + textStart];
+              int column;
+
+              for (column=0; column<textCount; column+=1) {
+                const ScreenCharacter *character = &source[column];
+                unsigned char *dots = &target[column];
+
+                *dots = convertCharacterToDots(textTable, character->text);
+                if (prefs.textStyle) *dots &= ~(BRL_DOT7 | BRL_DOT8);
+                if (underline) overlayAttributesUnderline(dots, character->attributes);
+
+                text[column] = character->text;
               }
             }
           }
@@ -2581,6 +2620,16 @@ runProgram (void) {
         if (brl.cursor >= 0) {
           if (showCursor()) {
             brl.buffer[brl.cursor] |= cursorDots();
+          }
+        }
+
+        if (statusCount > 0) {
+          const StatusStyleEntry *style = &statusStyleTable[prefs.statusStyle];
+
+          if (style->count > 0) {
+            unsigned char cells[MAX(style->count, statusCount)];
+            style->render(cells);
+            memcpy(&brl.buffer[statusStart], cells, statusCount);
           }
         }
 

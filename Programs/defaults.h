@@ -91,6 +91,9 @@ extern "C" {
 #define DEFAULT_SPEECH_PITCH SPK_PITCH_DEFAULT
 #define DEFAULT_SPEECH_PUNCTUATION SPK_PUNCTUATION_SOME
 
+#define DEFAULT_STATUS_POSITION spNone
+#define DEFAULT_STATUS_COUNT 1
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

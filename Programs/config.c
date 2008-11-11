@@ -633,12 +633,41 @@ applySpeechPreferences (void) {
 }
 #endif /* ENABLE_SPEECH_SUPPORT */
 
+static int
+haveStatusCells (void) {
+  return brl.statusColumns > 0;
+}
+
 static void
 dimensionsChanged (int infoLevel, int rows, int columns) {
-  fwinshift = MAX(columns-prefs.windowOverlap, 1);
-  hwinshift = columns / 2;
-  vwinshift = (rows > 1)? rows: 5;
+  textStart = 0;
+  textCount = columns;
+  statusStart = 0;
+  statusCount = 0;
 
+  if (!haveStatusCells()) {
+    switch (prefs.statusPosition) {
+      case spLeft:
+        statusStart = 0;
+        statusCount = prefs.statusCount;
+        textStart = statusCount + 1;
+        textCount = columns - textStart;
+        break;
+
+      case spRight:
+        statusCount = prefs.statusCount;
+        statusStart = columns - statusCount;
+        textStart = 0;
+        textCount = statusStart - 1;
+        break;
+    }
+  }
+  LogPrint(LOG_DEBUG, "regions: text=%d.%d status=%d.%d",
+           textStart, textCount, statusStart, statusCount);
+
+  fwinshift = MAX(textCount-prefs.windowOverlap, 1);
+  hwinshift = textCount / 2;
+  vwinshift = (rows > 1)? rows: 5;
   LogPrint(LOG_DEBUG, "shifts: fwin=%d hwin=%d vwin=%d",
            fwinshift, hwinshift, vwinshift);
 }
@@ -729,6 +758,16 @@ loadPreferences (int change) {
         prefs.speechPitch = DEFAULT_SPEECH_PITCH;
       }
 
+      if (length == 45) {
+        length++;
+        prefs.statusPosition = DEFAULT_STATUS_POSITION;
+      }
+
+      if (length == 46) {
+        length++;
+        prefs.statusCount = DEFAULT_STATUS_COUNT;
+      }
+
       if (prefs.version == 3) {
         prefs.version++;
         prefs.autorepeatPanning = DEFAULT_AUTOREPEAT_PANNING;
@@ -805,6 +844,8 @@ resetPreferences (void) {
   prefs.speechPitch = DEFAULT_SPEECH_PITCH;
   prefs.speechPunctuation = DEFAULT_SPEECH_PUNCTUATION;
 
+  prefs.statusPosition = DEFAULT_STATUS_POSITION;
+  prefs.statusCount = DEFAULT_STATUS_COUNT;
   prefs.statusStyle = braille->statusStyle;
 }
 
@@ -840,20 +881,35 @@ testBrailleFirmness (void) {
 }
 
 static int
-testBrailleSensitivity (void) {
-  return braille->sensitivity != NULL;
-}
-
-static int
 changedBrailleFirmness (unsigned char setting) {
   setBrailleFirmness(&brl, setting);
   return 1;
 }
 
 static int
+testBrailleSensitivity (void) {
+  return braille->sensitivity != NULL;
+}
+
+static int
 changedBrailleSensitivity (unsigned char setting) {
   setBrailleSensitivity(&brl, setting);
   return 1;
+}
+
+static int
+testStatusPosition (void) {
+  return !haveStatusCells();
+}
+
+static int
+testStatusCount (void) {
+  return prefs.statusPosition != spNone;
+}
+
+static int
+testStatusStyle (void) {
+  return (prefs.statusPosition != spNone) || haveStatusCells();
 }
 
 #ifdef ENABLE_SPEECH_SUPPORT
@@ -1152,6 +1208,16 @@ changedWindowOverlap (unsigned char setting) {
 }
 
 static int
+changedStatusPosition (unsigned char setting) {
+  return changedWindowAttributes();
+}
+
+static int
+changedStatusCount (unsigned char setting) {
+  return changedWindowAttributes();
+}
+
+static int
 testAutorepeat (void) {
   return prefs.autorepeat;
 }
@@ -1253,6 +1319,12 @@ updatePreferences (void) {
       strtext("All"),
       strtext("End of Line"),
       strtext("Rest of Line")
+    };
+
+    static const char *statusPositions[] = {
+      strtext("None"),
+      strtext("Left"),
+      strtext("Right")
     };
 
     static const char *statusStyles[] = {
@@ -1382,7 +1454,9 @@ updatePreferences (void) {
       NUMERIC_ITEM(prefs.speechPitch, changedSpeechPitch, testSpeechPitch, strtext("Speech Pitch"), 0, SPK_PITCH_MAXIMUM, 1),
       SYMBOLIC_ITEM(prefs.speechPunctuation, changedSpeechPunctuation, testSpeechPunctuation, strtext("Speech Punctuation"), punctuationLevels),
 #endif /* ENABLE_SPEECH_SUPPORT */
-      SYMBOLIC_ITEM(prefs.statusStyle, NULL, NULL, strtext("Status Style"), statusStyles),
+      SYMBOLIC_ITEM(prefs.statusPosition, changedStatusPosition, testStatusPosition, strtext("Status Position"), statusPositions),
+      NUMERIC_ITEM(prefs.statusCount, changedStatusCount, testStatusCount, strtext("Status Count"), 0, MAX((int)brl.x/2-1, 0), 1),
+      SYMBOLIC_ITEM(prefs.statusStyle, NULL, testStatusStyle, strtext("Status Style"), statusStyles),
 #ifdef ENABLE_TABLE_SELECTION
       GLOB_ITEM(glob_textTable, changedTextTable, NULL, strtext("Text Table")),
       GLOB_ITEM(glob_attributesTable, changedAttributesTable, NULL, strtext("Attributes Table")),
