@@ -112,8 +112,18 @@ typedef struct {
   unsigned char statusCount;
   unsigned char statusSeparator;
 } PACKED Preferences;
+
 extern Preferences prefs;		/* current preferences settings */
 #define PREFERENCES_TIME(time) ((time) * 10)
+
+typedef void (*RenderStatusCells) (unsigned char *cells);
+
+typedef struct {
+  RenderStatusCells render;
+  unsigned char count;
+} StatusStyleEntry;
+
+extern const StatusStyleEntry *getStatusStyle (void);
 
 extern int opt_releaseDevice;
 extern char *opt_pcmDevice;

@@ -413,13 +413,6 @@ renderStatusCells_Voyager (unsigned char *cells) {
   }
 }
 
-typedef void (*RenderStatusCells) (unsigned char *cells);
-
-typedef struct {
-  RenderStatusCells render;
-  unsigned char count;
-} StatusStyleEntry;
-
 static const StatusStyleEntry statusStyleTable[] = {
   {renderStatusCells_none, 0},
   {renderStatusCells_Alva, 3},
@@ -429,7 +422,14 @@ static const StatusStyleEntry statusStyleTable[] = {
   {renderStatusCells_MDV, 2},
   {renderStatusCells_Voyager, 3}
 };
-static const int statusStyleCount = ARRAY_COUNT(statusStyleTable);
+static const unsigned int statusStyleCount = ARRAY_COUNT(statusStyleTable);
+
+const StatusStyleEntry *
+getStatusStyle (void) {
+  unsigned char style = prefs.statusStyle;
+  if (style >= statusStyleCount) style = 0;
+  return &statusStyleTable[style];
+}
 
 static int
 setStatusCells (void) {
@@ -2624,7 +2624,7 @@ runProgram (void) {
         }
 
         if (statusCount > 0) {
-          const StatusStyleEntry *style = &statusStyleTable[prefs.statusStyle];
+          const StatusStyleEntry *style = getStatusStyle();
 
           if (style->count > 0) {
             unsigned char cells[style->count];

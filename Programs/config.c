@@ -647,21 +647,27 @@ dimensionsChanged (int infoLevel, int rows, int columns) {
 
   if (!haveStatusCells()) {
     int separatorWidth = (prefs.statusSeparator == ssNone)? 0: 1;
+    int statusWidth = prefs.statusCount;
 
-    switch (prefs.statusPosition) {
-      case spLeft:
-        statusStart = 0;
-        statusCount = prefs.statusCount;
-        textStart = statusCount + separatorWidth;
-        textCount = columns - textStart;
-        break;
+    if (!statusWidth) statusWidth = getStatusStyle()->count;
+    statusWidth = MAX(MIN(statusWidth, brl.x-1-separatorWidth), 0);
 
-      case spRight:
-        statusCount = prefs.statusCount;
-        statusStart = columns - statusCount;
-        textStart = 0;
-        textCount = statusStart - separatorWidth;
-        break;
+    if (statusWidth > 0) {
+      switch (prefs.statusPosition) {
+        case spLeft:
+          statusStart = 0;
+          statusCount = statusWidth;
+          textStart = statusCount + separatorWidth;
+          textCount = columns - textStart;
+          break;
+
+        case spRight:
+          statusCount = statusWidth;
+          statusStart = columns - statusCount;
+          textCount = statusStart - separatorWidth;
+          textStart = 0;
+          break;
+      }
     }
   }
   LogPrint(LOG_DEBUG, "regions: text=%d.%d status=%d.%d",
@@ -912,12 +918,12 @@ testStatusPosition (void) {
 
 static int
 testStatusCount (void) {
-  return prefs.statusPosition != spNone;
+  return testStatusPosition() && (prefs.statusPosition != spNone);
 }
 
 static int
 testStatusSeparator (void) {
-  return (prefs.statusPosition != spNone) && (prefs.statusCount > 0);
+  return testStatusCount();
 }
 
 static int
@@ -1236,6 +1242,11 @@ changedStatusSeparator (unsigned char setting) {
 }
 
 static int
+changedStatusStyle (unsigned char setting) {
+  return changedWindowAttributes();
+}
+
+static int
 testAutorepeat (void) {
   return prefs.autorepeat;
 }
@@ -1483,7 +1494,7 @@ updatePreferences (void) {
       SYMBOLIC_ITEM(prefs.statusPosition, changedStatusPosition, testStatusPosition, strtext("Status Position"), statusPositions),
       NUMERIC_ITEM(prefs.statusCount, changedStatusCount, testStatusCount, strtext("Status Count"), 0, MAX((int)brl.x/2-1, 0), 1),
       SYMBOLIC_ITEM(prefs.statusSeparator, changedStatusSeparator, testStatusSeparator, strtext("Status Separator"), statusSeparators),
-      SYMBOLIC_ITEM(prefs.statusStyle, NULL, testStatusStyle, strtext("Status Style"), statusStyles),
+      SYMBOLIC_ITEM(prefs.statusStyle, changedStatusStyle, testStatusStyle, strtext("Status Style"), statusStyles),
 #ifdef ENABLE_TABLE_SELECTION
       GLOB_ITEM(glob_textTable, changedTextTable, NULL, strtext("Text Table")),
       GLOB_ITEM(glob_attributesTable, changedAttributesTable, NULL, strtext("Attributes Table")),
