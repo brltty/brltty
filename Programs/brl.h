@@ -154,8 +154,6 @@ extern int portraitFlag (int number, int on);
 
 extern int learnMode (BrailleDisplay *brl, int poll, int timeout);
 
-extern int showDotPattern (unsigned char dots, unsigned char duration);
-
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

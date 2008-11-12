@@ -418,7 +418,7 @@ static const StatusStyleEntry statusStyleTable[] = {
   {renderStatusCells_Alva, 3},
   {renderStatusCells_Tieman, 5},
   {renderStatusCells_PB80, 1},
-  {renderStatusCells_generic, BRL_MAX_STATUS_CELL_COUNT},
+  {renderStatusCells_generic, BRL_genericStatusCellCount},
   {renderStatusCells_MDV, 2},
   {renderStatusCells_Voyager, 3}
 };
@@ -433,13 +433,28 @@ getStatusStyle (void) {
 
 static int
 setStatusCells (void) {
-  if (braille->writeStatus) {
-    unsigned char cells[BRL_MAX_STATUS_CELL_COUNT];        /* status cell buffer */
-    memset(cells, 0, sizeof(cells));
-    if (prefs.statusStyle < statusStyleCount)
-      statusStyleTable[prefs.statusStyle].render(cells);
-    if (!braille->writeStatus(&brl, cells)) return 0;
+  if (braille->writeStatus && (brl.statusColumns > 0)) {
+    const StatusStyleEntry *style = getStatusStyle();
+
+    if (style->count > 0) {
+      unsigned int length = brl.statusColumns * brl.statusRows;
+      unsigned char cells[style->count];        /* status cell buffer */
+      style->render(cells);
+
+      if ((style->render != renderStatusCells_generic) &&
+          (length > style->count)) {
+        unsigned char buffer[length];
+        memcpy(buffer, cells, style->count);
+        memset(&buffer[style->count], 0, length-style->count);
+        if (!braille->writeStatus(&brl, buffer)) return 0;
+      } else if (!braille->writeStatus(&brl, cells)) {
+        return 0;
+      }
+    } else if (!clearStatusCells(&brl)) {
+      return 0;
+    }
   }
+
   return 1;
 }
 
@@ -2760,15 +2775,18 @@ message (const char *string, short flags) {
 
 int
 showDotPattern (unsigned char dots, unsigned char duration) {
-  if (braille->writeStatus) {
-    unsigned char cells[BRL_MAX_STATUS_CELL_COUNT];        /* status cell buffer */
-    memset(cells, dots, sizeof(cells));
+  if (braille->writeStatus && (brl.statusColumns > 0)) {
+    unsigned int count = brl.statusColumns * brl.statusRows;
+    unsigned char cells[count];        /* status cell buffer */
+    memset(cells, dots, count);
     if (!braille->writeStatus(&brl, cells)) return 0;
   }
 
   memset(brl.buffer, dots, brl.x*brl.y);
-  return braille->writeWindow(&brl, NULL);
+  if (!braille->writeWindow(&brl, NULL)) return 0;
+
   drainBrailleOutput(&brl, duration);
+  return 1;
 }
 
 #ifdef __MINGW32__

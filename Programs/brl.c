@@ -170,36 +170,33 @@ showBrailleString (BrailleDisplay *brl, const char *string, unsigned int duratio
 }
 
 int
-clearStatusCells (BrailleDisplay *brl) {
-  if (braille->writeStatus) {
-    unsigned char cells[BRL_MAX_STATUS_CELL_COUNT];        /* status cell buffer */
-    memset(cells, 0, sizeof(cells));
+setStatusText (BrailleDisplay *brl, const char *text) {
+  if (braille->writeStatus && (brl->statusColumns > 0)) {
+    unsigned int count = brl->statusColumns * brl->statusRows;
+    unsigned char cells[count];        /* status cell buffer */
+    {
+      unsigned int index = 0;
+
+      while (index < count) {
+        char c;
+        wchar_t wc;
+
+        if (!(c = text[index])) break;
+        if ((wc = convertCharToWchar(c)) == WEOF) wc = WC_C('?');
+        cells[index++] = convertCharacterToDots(textTable, wc);
+      }
+
+      memset(&cells[index], 0, count-index);
+    }
+
     if (!braille->writeStatus(brl, cells)) return 0;
   }
   return 1;
 }
 
 int
-setStatusText (BrailleDisplay *brl, const char *text) {
-  if (braille->writeStatus) {
-    unsigned char cells[BRL_MAX_STATUS_CELL_COUNT];        /* status cell buffer */
-    memset(cells, 0, sizeof(cells));
-
-    {
-      int i;
-      for (i=0; i<sizeof(cells); ++i) {
-        char c;
-        wchar_t wc;
-
-        if (!(c = text[i])) break;
-        if ((wc = convertCharToWchar(c)) == WEOF) wc = WC_C('?');
-        cells[i] = convertCharacterToDots(textTable, wc);
-      }
-    }
-
-    if (!braille->writeStatus(brl, cells)) return 0;
-  }
-  return 1;
+clearStatusCells (BrailleDisplay *brl) {
+  return setStatusText(brl, "");
 }
 
 static void

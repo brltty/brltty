@@ -78,6 +78,8 @@ extern void playTune (const TuneDefinition *tune);
 extern const char *const midiInstrumentTable[];
 extern const unsigned int midiInstrumentCount;
 
+extern int showDotPattern (unsigned char dots, unsigned char duration);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
