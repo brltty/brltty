@@ -1146,9 +1146,19 @@ highlightWindow (void) {
     } else if (!brl.touchEnabled) {
       right = textCount - 1;
       bottom = brl.y - 1;
-    } else if (!touchGetRegion(&left, &right, &top, &bottom)) {
-      unhighlightScreenRegion();
-      return;
+    } else {
+      int clear = 1;
+
+      if (touchGetRegion(&left, &right, &top, &bottom)) {
+        left = MAX(left, textStart);
+        right = MIN(right, textStart+textCount-1);
+        if (isTextOffset(&left, 0, 0) && isTextOffset(&right, 1, 1)) clear = 0;
+      }
+
+      if (clear) {
+        unhighlightScreenRegion();
+        return;
+      }
     }
 
     highlightScreenRegion(p->winx+left, p->winx+right, p->winy+top, p->winy+bottom);
