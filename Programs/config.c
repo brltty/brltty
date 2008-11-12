@@ -670,14 +670,14 @@ dimensionsChanged (int infoLevel, int rows, int columns) {
       }
     }
   }
-  LogPrint(LOG_DEBUG, "regions: text=%d.%d status=%d.%d",
+  LogPrint(LOG_DEBUG, "regions: text=%u.%u status=%u.%u",
            textStart, textCount, statusStart, statusCount);
 
-  fwinshift = MAX(textCount-prefs.windowOverlap, 1);
-  hwinshift = textCount / 2;
-  vwinshift = (rows > 1)? rows: 5;
-  LogPrint(LOG_DEBUG, "shifts: fwin=%d hwin=%d vwin=%d",
-           fwinshift, hwinshift, vwinshift);
+  fullWindowShift = MAX(textCount-prefs.windowOverlap, 1);
+  halfWindowShift = textCount / 2;
+  verticalWindowShift = (rows > 1)? rows: 5;
+  LogPrint(LOG_DEBUG, "shifts: full=%u half=%u vertical=%u",
+           fullWindowShift, halfWindowShift, verticalWindowShift);
 }
 
 static int

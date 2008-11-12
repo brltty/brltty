@@ -69,9 +69,9 @@ unsigned int textStart;
 unsigned int textCount;
 unsigned int statusStart;
 unsigned int statusCount;
-short fwinshift;                /* Full window horizontal distance */
-short hwinshift;                /* Half window horizontal distance */
-short vwinshift;                /* Window vertical distance */
+unsigned int fullWindowShift;                /* Full window horizontal distance */
+unsigned int halfWindowShift;                /* Half window horizontal distance */
+unsigned int verticalWindowShift;                /* Window vertical distance */
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
 static int contracted = 0;
@@ -442,7 +442,7 @@ setStatusCells (void) {
       unsigned char cells[style->count];        /* status cell buffer */
       style->render(cells);
 
-      if ((style->render != renderStatusCells_generic) &&
+      if ((prefs.statusStyle != ST_Generic) &&
           (length > style->count)) {
         unsigned char buffer[length];
         memcpy(buffer, cells, style->count);
@@ -914,7 +914,7 @@ shiftWindowLeft (void) {
   } else
 #endif /* ENABLE_CONTRACTED_BRAILLE */
   {
-    p->winx -= MIN(fwinshift, p->winx);
+    p->winx -= MIN(fullWindowShift, p->winx);
   }
 
   return 1;
@@ -930,7 +930,7 @@ shiftWindowRight (void) {
   } else
 #endif /* ENABLE_CONTRACTED_BRAILLE */
   {
-    shift = fwinshift;
+    shift = fullWindowShift;
   }
 
   if (p->winx >= (scr.cols - shift)) return 0;
@@ -1343,12 +1343,12 @@ runProgram (void) {
             case BRL_CMD_WINUP:
               if (p->winy == 0)
                 playTune (&tune_bounce);
-              p->winy = MAX (p->winy - vwinshift, 0);
+              p->winy = MAX (p->winy - verticalWindowShift, 0);
               break;
             case BRL_CMD_WINDN:
               if (p->winy == scr.rows - brl.y)
                 playTune (&tune_bounce);
-              p->winy = MIN (p->winy + vwinshift, scr.rows - brl.y);
+              p->winy = MIN (p->winy + verticalWindowShift, scr.rows - brl.y);
               break;
 
             case BRL_CMD_LNUP:
@@ -1524,11 +1524,11 @@ runProgram (void) {
               if (p->winx == 0)
                 playTune(&tune_bounce);
               else
-                p->winx = MAX(p->winx-hwinshift, 0);
+                p->winx = MAX(p->winx-halfWindowShift, 0);
               break;
             case BRL_CMD_HWINRT:
-              if (p->winx < (scr.cols - hwinshift))
-                p->winx += hwinshift;
+              if (p->winx < (scr.cols - halfWindowShift))
+                p->winx += halfWindowShift;
               else
                 playTune(&tune_bounce);
               break;

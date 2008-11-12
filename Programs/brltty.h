@@ -146,9 +146,9 @@ extern unsigned int textStart;
 extern unsigned int textCount;
 extern unsigned int statusStart;
 extern unsigned int statusCount;
-extern short fwinshift;			/* Full window horizontal distance */
-extern short hwinshift;			/* Half window horizontal distance */
-extern short vwinshift;			/* Window vertical distance */
+extern unsigned int fullWindowShift;			/* Full window horizontal distance */
+extern unsigned int halfWindowShift;			/* Half window horizontal distance */
+extern unsigned int verticalWindowShift;			/* Window vertical distance */
 
 extern void restartBrailleDriver (void);
 extern int constructBrailleDriver (void);
