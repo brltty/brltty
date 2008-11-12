@@ -37,6 +37,7 @@
 #include "misc.h"
 #include "lock.h"
 #include "charset.h"
+#include "unicode.h"
 
 static char *currentCharset = NULL;
 
@@ -306,6 +307,16 @@ convertWcharToChar (wchar_t wc) {
   return EOF;
 }
 #endif /* conversions */
+
+void
+convertCharsToWchars (const char *c, wchar_t *wc, size_t count) {
+  while (count > 0) {
+    wint_t wi = convertCharToWchar(*c++);
+    if (wi == WEOF) wi = UNICODE_REPLACEMENT_CHARACTER;
+    *wc++ = wi;
+    count -= 1;
+  }
+}
 
 size_t
 convertWcharToUtf8 (wchar_t wc, Utf8Buffer utf8) {

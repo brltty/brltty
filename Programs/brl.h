@@ -61,11 +61,6 @@ extern void initializeBrailleDisplay (BrailleDisplay *brl);
 extern unsigned int drainBrailleOutput (BrailleDisplay *brl, int minimumDelay);
 extern int ensureBrailleBuffer (BrailleDisplay *brl, int infoLevel);
 
-extern int writeBrailleWindow (BrailleDisplay *brl, const wchar_t *text);
-extern int writeBrailleText (BrailleDisplay *brl, const char *text, size_t length);
-extern int writeBrailleString (BrailleDisplay *brl, const char *string);
-extern int showBrailleString (BrailleDisplay *brl, const char *string, unsigned int);
-
 extern int clearStatusCells (BrailleDisplay *brl);
 extern int setStatusText (BrailleDisplay *brl, const char *text);
 

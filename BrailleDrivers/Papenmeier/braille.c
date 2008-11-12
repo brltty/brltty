@@ -41,6 +41,7 @@
 #include <errno.h>
 
 #include "misc.h"
+#include "message.h"
 
 typedef enum {
    PARM_CONFIGFILE,
@@ -218,7 +219,7 @@ handleCommand (BrailleDisplay *brl, int cmd, int repeat) {
         const char *right = states[(currentModifiers >> 2) & 0X3];
         char buffer[20];
         snprintf(buffer, sizeof(buffer), "%-6s %-6s", left, right);
-        showBrailleString(brl, buffer, 2000);
+        message(NULL, buffer, MSG_SILENT);
         return BRL_CMD_NOOP;
       }
     }

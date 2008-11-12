@@ -577,8 +577,8 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context)
 	    dot8shift = 0;
 #endif /* USE_TEXTTRANS */
 	    if(kbemu)
-	      message ("keyboard emu on", MSG_SILENT);
-	    else message ("keyboard emu off", MSG_SILENT);
+	      message (NULL, "keyboard emu on", MSG_SILENT);
+	    else message (NULL, "keyboard emu off", MSG_SILENT);
 	    return BRL_CMD_NOOP;
 	  case BLT_ROTATE:	/* rotate Braille Lite by 180 degrees */
 	    reverse_kbd ^= 1;
@@ -590,13 +590,13 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context)
 	  case BLT_REPEAT:	/* set repeat count */
 	    hold = 0;
 	    sprintf (outmsg, "Repeat count:");
-	    message (outmsg, MSG_SILENT | MSG_NODELAY);
+	    message (NULL, outmsg, MSG_SILENT | MSG_NODELAY);
 	    intoverride = 1;
 	    state = ST_REPEAT;
 	    return BRL_CMD_NOOP;
 	  case BLT_CONFIG:	/* configuration menu */
 	    sprintf (outmsg, "Config? [m/s/r/z]");
-	    message (outmsg, MSG_SILENT | MSG_NODELAY);
+	    message (NULL, outmsg, MSG_SILENT | MSG_NODELAY);
 	    intoverride = 1;
 	    state = ST_CONFIG;
 	    return BRL_CMD_NOOP;
@@ -656,7 +656,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context)
 	    return BRL_CMD_NOOP;
 	  case BLT_ABORT:	/* abort - quit keyboard emulation */
 	    kbemu = 0;
-	    message ("keyboard emu off", MSG_SILENT);
+	    message (NULL, "keyboard emu off", MSG_SILENT);
 	    return BRL_CMD_NOOP;
 	  default:		/* unrecognised command */
 	    shift = shiftlck = ctrl = meta = 0;
@@ -771,7 +771,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context)
 	    sprintf (outmsg, "Repeat count: %d", hold);
 	  else sprintf (outmsg, "Repeat count: ");
 	  intoverride = 0;
-	  message (outmsg, MSG_SILENT | MSG_NODELAY);
+	  message (NULL, outmsg, MSG_SILENT | MSG_NODELAY);
 	  intoverride = 1;
 	}
       else if (key.routing)
@@ -779,7 +779,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context)
 	  hold = key.routing +1;
 	  sprintf (outmsg, "Repeat count: %d", hold);
 	  intoverride = 0;
-	  message (outmsg, MSG_SILENT | MSG_NODELAY);
+	  message (NULL, outmsg, MSG_SILENT | MSG_NODELAY);
 	  intoverride = 1;
 	}
       else {

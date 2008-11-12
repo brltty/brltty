@@ -203,12 +203,12 @@ static int clio_handleCommandKey(BrailleDisplay *brl, unsigned int key)
   if (key == CL_STAR && !flagLevel1)
     {
       flagLevel2 = !flagLevel2;
-      if (flagLevel2) message("Level 2 ...", MSG_NODELAY);
+      if (flagLevel2) message(NULL, "Level 2 ...", MSG_NODELAY);
     }
   else if (key == CL_SHARP && !flagLevel2)
     {
       flagLevel1 = !flagLevel1;
-      if (flagLevel1) message("Level 1 ...", MSG_NODELAY);
+      if (flagLevel1) message(NULL, "Level 1 ...", MSG_NODELAY);
     }
   if (flagLevel1)
     {

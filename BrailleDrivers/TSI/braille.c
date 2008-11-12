@@ -1026,7 +1026,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context)
   if(packtype == K_BATTERY){
     const char *text = "-><- Display battery is low";
     if(brl_cols < strlen(text)) text = "Display battery low";
-    message(text, MSG_WAITKEY);
+    message(NULL, text, MSG_WAITKEY);
     return (EOF);
   }else if(packtype == K_QUERYREP){
     /* flush the last 10bytes of the reply. */

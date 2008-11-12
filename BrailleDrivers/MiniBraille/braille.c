@@ -124,7 +124,7 @@ inputFunction_showTime (BrailleDisplay *brl) {
   const struct tm *local = localtime(&clock);
   char text[sizeof(textCells) + 1];
   strftime(text, sizeof(text), "%Y-%m-%d %H:%M:%S", local);
-  message(text, 0);
+  message(NULL, text, 0);
   return BRL_CMD_NOOP;
 }
 
@@ -333,7 +333,7 @@ setInputMode (const InputMode *mode) {
   if (mode->temporary) {
     char title[sizeof(textCells) + 1];
     snprintf(title, sizeof(title), "%s Mode", mode->name);
-    message(title, MSG_NODELAY|MSG_SILENT);
+    message(NULL, title, MSG_NODELAY|MSG_SILENT);
   }
 
   inputMode = mode;

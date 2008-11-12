@@ -125,6 +125,11 @@ typedef struct {
 
 extern const StatusStyleEntry *getStatusStyle (void);
 
+extern int writeBrailleCharacters (const char *mode, const wchar_t *characters, size_t length);
+extern int writeBrailleBytes (const char *mode, const char *bytes, size_t length);
+extern int writeBrailleString (const char *mode, const char *string);
+extern int showBrailleString (const char *mode, const char *string, unsigned int duration);
+
 extern int opt_releaseDevice;
 extern char *opt_pcmDevice;
 extern char *opt_midiDevice;

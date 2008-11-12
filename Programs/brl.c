@@ -125,51 +125,6 @@ drainBrailleOutput (BrailleDisplay *brl, int minimumDelay) {
 }
 
 int
-writeBrailleWindow (BrailleDisplay *brl, const wchar_t *text) {
-  brl->cursor = -1;
-
-  {
-    int i;
-    /* Do Braille translation using text table. Six-dot mode is ignored
-     * since case can be important, and blinking caps won't work. 
-     */
-    for (i=0; i<brl->x*brl->y; ++i) brl->buffer[i] = convertCharacterToDots(textTable, text[i]);
-  }
-  return braille->writeWindow(brl, text);
-}
-
-int
-writeBrailleText (BrailleDisplay *brl, const char *text, size_t length) {
-  size_t size = brl->x * brl->y;
-  wchar_t characters[size];
-
-  if (length > size) length = size;
-  {
-    int i;
-    for (i=0; i<length; ++i) {
-      wint_t character = convertCharToWchar(text[i]);
-      if (character == WEOF) character = WC_C('?');
-      characters[i] = character;
-    }
-  }
-  wmemset(&characters[length], WC_C(' '), size-length);
-
-  return writeBrailleWindow(brl, characters);
-}
-
-int
-writeBrailleString (BrailleDisplay *brl, const char *string) {
-  return writeBrailleText(brl, string, strlen(string));
-}
-
-int
-showBrailleString (BrailleDisplay *brl, const char *string, unsigned int duration) {
-  int ok = writeBrailleString(brl, string);
-  drainBrailleOutput(brl, duration);
-  return ok;
-}
-
-int
 setStatusText (BrailleDisplay *brl, const char *text) {
   unsigned int length = brl->statusColumns * brl->statusRows;
 
@@ -263,8 +218,10 @@ readBrailleCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 #ifdef ENABLE_LEARN_MODE
 int
 learnMode (BrailleDisplay *brl, int poll, int timeout) {
-  if (!setStatusText(brl, "lrn")) return 0;
-  if (!message("command learn mode", MSG_NODELAY)) return 0;
+  const char *mode = "lrn";
+
+  if (!setStatusText(brl, mode)) return 0;
+  if (!message(mode, "command learn mode", MSG_NODELAY)) return 0;
 
   hasTimedOut(0);
   do {
@@ -283,7 +240,7 @@ learnMode (BrailleDisplay *brl, int poll, int timeout) {
         char buffer[0X100];
         describeCommand(command, buffer, sizeof(buffer));
         LogPrint(LOG_DEBUG, "Learn: %s", buffer);
-        if (!message(buffer, MSG_NODELAY|MSG_SILENT)) return 0;
+        if (!message(mode, buffer, MSG_NODELAY|MSG_SILENT)) return 0;
       }
 
       hasTimedOut(0);
@@ -292,7 +249,7 @@ learnMode (BrailleDisplay *brl, int poll, int timeout) {
     drainBrailleOutput(brl, poll);
   } while (!hasTimedOut(timeout));
 
-  return message("done", 0);
+  return message(mode, "done", 0);
 }
 #endif /* ENABLE_LEARN_MODE */
 

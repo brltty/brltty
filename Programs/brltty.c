@@ -459,12 +459,143 @@ setStatusCells (void) {
   return 1;
 }
 
+static void
+renderStatusSeparator (wchar_t *text, unsigned char *dots) {
+  if (prefs.statusSeparator != ssNone) {
+    int onRight = statusStart > 0;
+    unsigned int column = (onRight? statusStart: textStart) - 1;
+
+    wchar_t textSeparator;
+    const wchar_t textLeftLine = 0X23B8;
+    const wchar_t textRightLine = 0X23B9;
+    const wchar_t textBothLines = 0X2502;
+
+    unsigned char dotsSeparator;
+    const unsigned char dotsLeftLine = BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT7;
+    const unsigned char dotsRightLine = BRL_DOT4 | BRL_DOT5 | BRL_DOT6 | BRL_DOT8;
+    const unsigned char dotsBothLines = dotsLeftLine | dotsRightLine;
+
+    text += column;
+    dots += column;
+
+    switch (prefs.statusSeparator) {
+      case ssBlock:
+        textSeparator = textBothLines;
+        dotsSeparator = dotsBothLines;
+        break;
+
+      case ssStatusSide:
+        textSeparator = onRight? textRightLine: textLeftLine;
+        dotsSeparator = onRight? dotsRightLine: dotsLeftLine;
+        break;
+
+      case ssTextSide:
+        textSeparator = onRight? textLeftLine: textRightLine;
+        dotsSeparator = onRight? dotsLeftLine: dotsRightLine;
+        break;
+
+      default:
+        textSeparator = WC_C(' ');
+        dotsSeparator = 0;
+        break;
+    }
+
+    {
+      int row;
+      for (row=0; row<brl.y; row+=1) {
+        *text = textSeparator;
+        text += brl.x;
+
+        *dots = dotsSeparator;
+        dots += brl.x;
+      }
+    }
+  }
+}
+
+static void
+renderBrailleCharacters (
+  wchar_t *text, unsigned char *dots,
+  unsigned int start, unsigned int columns,
+  const wchar_t *characters, size_t length
+) {
+  unsigned int rows = brl.y;
+
+  text += start;
+  dots += start;
+
+  while (rows > 0) {
+    size_t count = length;
+    if (count > columns) count = columns;
+
+    {
+      int i;
+      for (i=0; i<count; i+=1) {
+        dots[i] = convertCharacterToDots(textTable, (text[i] = *characters++));
+      }
+    }
+
+    {
+      unsigned int x = columns - count;
+      wmemset(&text[count], WC_C(' '), x);
+      memset(&dots[count], 0, x);
+    }
+
+    text += brl.x;
+    dots += brl.x;
+    length -= count;
+    rows -= 1;
+  }
+}
+
+int
+writeBrailleCharacters (const char *mode, const wchar_t *characters, size_t length) {
+  wchar_t textBuffer[brl.x * brl.y];
+
+  renderBrailleCharacters(textBuffer, brl.buffer,
+                          textStart, textCount,
+                          characters, length);
+
+  {
+    size_t modeLength = strlen(mode);
+    wchar_t modeCharacters[modeLength];
+    convertCharsToWchars(mode, modeCharacters, modeLength);
+    renderBrailleCharacters(textBuffer, brl.buffer,
+                            statusStart, statusCount,
+                            modeCharacters, modeLength);
+  }
+
+  renderStatusSeparator(textBuffer, brl.buffer);
+
+  return braille->writeWindow(&brl, textBuffer);
+}
+
+int
+writeBrailleBytes (const char *mode, const char *bytes, size_t length) {
+  wchar_t characters[length];
+  convertCharsToWchars(bytes, characters, length);
+  return writeBrailleCharacters(mode, characters, length);
+}
+
+int
+writeBrailleString (const char *mode, const char *string) {
+  return writeBrailleBytes(mode, string, strlen(string));
+}
+
+int
+showBrailleString (const char *mode, const char *string, unsigned int duration) {
+  int ok = writeBrailleString(mode, string);
+  drainBrailleOutput(&brl, duration);
+  return ok;
+}
+
 static int
 showInfo (void) {
+  const char *mode = "info";
   const size_t size = brl.x * brl.y;
   char text[size + 1];
 
-  if (!setStatusText(&brl, gettext("info"))) return 0;
+  if (!setStatusText(&brl, mode)) return 0;
 
   /* Here we must be careful. Some displays (e.g. Braille Lite 18)
    * are very small, and others (e.g. Bookworm) are even smaller.
@@ -508,8 +639,7 @@ showInfo (void) {
       }
     }
 
-    wmemset(&characters[length], WC_C(' '), size-length);
-    return writeBrailleWindow(&brl, characters);
+    return writeBrailleCharacters(mode, characters, length);
   }
 
   {
@@ -522,7 +652,7 @@ showInfo (void) {
              isFrozenScreen()? 'f': ' ',
              prefs.textStyle? '6': '8',
              prefs.blinkingCapitals? 'B': ' ');
-    return writeBrailleString(&brl, text);
+    return writeBrailleString("info", text);
   }
 }
 
@@ -1232,7 +1362,7 @@ runProgram (void) {
       if (scr.unreadable) {
         if (!suspended) {
           setStatusCells();
-          writeBrailleString(&brl, scr.unreadable);
+          writeBrailleString("wrn", scr.unreadable);
 #ifdef ENABLE_API
           if (apiStarted)
             api_suspend(&brl);
@@ -1826,7 +1956,7 @@ runProgram (void) {
               if (isHelpScreen()) {
                 deactivateHelpScreen();
               } else if (!activateHelpScreen()) {
-                message(gettext("help not available"), 0);
+                message(NULL, gettext("help not available"), 0);
               }
               break;
             case BRL_CMD_INFO:
@@ -2101,7 +2231,7 @@ runProgram (void) {
                     }
 #endif /* HAVE_ICU */
 
-                    message(buffer, 0);
+                    message(NULL, buffer, 0);
                   } else
                     playTune(&tune_command_rejected);
                   break;
@@ -2682,55 +2812,7 @@ runProgram (void) {
             }
           }
 
-          if (prefs.statusSeparator != ssNone) {
-            int onRight = statusStart > 0;
-            unsigned int column = (onRight? statusStart: textStart) - 1;
-
-            unsigned char *dots = &brl.buffer[column];
-            unsigned char dotsSeparator;
-            const unsigned char dotsLeftLine = BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT7;
-            const unsigned char dotsRightLine = BRL_DOT4 | BRL_DOT5 | BRL_DOT6 | BRL_DOT8;
-            const unsigned char dotsBothLines = dotsLeftLine | dotsRightLine;
-
-            wchar_t *text = &textBuffer[column];
-            wchar_t textSeparator;
-            const wchar_t textLeftLine = 0X23B8;
-            const wchar_t textRightLine = 0X23B9;
-            const wchar_t textBothLines = 0X2502;
-
-            switch (prefs.statusSeparator) {
-              case ssBlock:
-                dotsSeparator = dotsBothLines;
-                textSeparator = textBothLines;
-                break;
-
-              case ssStatusSide:
-                dotsSeparator = onRight? dotsRightLine: dotsLeftLine;
-                textSeparator = onRight? textRightLine: textLeftLine;
-                break;
-
-              case ssTextSide:
-                dotsSeparator = onRight? dotsLeftLine: dotsRightLine;
-                textSeparator = onRight? textLeftLine: textRightLine;
-                break;
-
-              default:
-                dotsSeparator = 0;
-                textSeparator = WC_C(' ');
-                break;
-            }
-
-            {
-              int row;
-              for (row=0; row<brl.y; row+=1) {
-                *dots = dotsSeparator;
-                dots += brl.x;
-
-                *text = textSeparator;
-                text += brl.x;
-              }
-            }
-          }
+          renderStatusSeparator(textBuffer, brl.buffer);
         }
 
         if (!(setStatusCells() && braille->writeWindow(&brl, textBuffer))) writable = 0;
@@ -2760,8 +2842,10 @@ runProgram (void) {
 }
 
 int 
-message (const char *string, short flags) {
+message (const char *mode, const char *string, short flags) {
   int ok = 1;
+
+  if (!mode) mode = "";
 
 #ifdef ENABLE_SPEECH_SUPPORT
   if (prefs.alertTunes && !(flags & MSG_SILENT)) sayString(&spk, string, 1);
@@ -2769,7 +2853,7 @@ message (const char *string, short flags) {
 
   if (braille && brl.buffer) {
     size_t length = strlen(string);
-    size_t size = brl.x * brl.y;
+    size_t size = textCount * brl.y;
     char text[size];
 
 #ifdef ENABLE_API
@@ -2800,7 +2884,7 @@ message (const char *string, short flags) {
         text[index - 1] = '>';
       }
 
-      if (!writeBrailleText(&brl, text, index)) {
+      if (!writeBrailleBytes(mode, text, index)) {
         ok = 0;
         break;
       }

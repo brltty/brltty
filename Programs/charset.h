@@ -44,6 +44,7 @@ extern wint_t convertUtf8ToWchar (const char **utf8, size_t *utfs);
 
 extern wint_t convertCharToWchar (char c);
 extern int convertWcharToChar (wchar_t wc);
+extern void convertCharsToWchars (const char *c, wchar_t *wc, size_t count);
 
 extern int lockCharset (LockOptions options);
 extern void unlockCharset (void);

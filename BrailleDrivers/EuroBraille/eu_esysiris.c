@@ -91,12 +91,12 @@ static int esysiris_handleCommandKey(BrailleDisplay *brl, unsigned int key)
       if (key == VK_FDB && !flagLevel1)
 	{
 	  flagLevel2 = !flagLevel2;
-	  if (flagLevel2) message("Level 2 ...", MSG_NODELAY);
+	  if (flagLevel2) message(NULL, "Level 2 ...", MSG_NODELAY);
 	}
       else if (key == VK_FGB && !flagLevel2)
 	{
 	  flagLevel1 = !flagLevel1;
-	  if (flagLevel1) message("Level 1 ...", MSG_NODELAY);
+	  if (flagLevel1) message(NULL, "Level 1 ...", MSG_NODELAY);
 	}
       if (flagLevel1)
 	{

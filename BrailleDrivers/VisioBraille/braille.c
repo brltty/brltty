@@ -648,7 +648,7 @@ static int brl_readKey(BrailleDisplay *brl)
     char buf [100];
     sprintf(buf,"Keycode: 0x%x",ch);
     printcode = 0; /* MUST BE DONE BEFORE THE CALL TO MESSAGE */
-    message(buf,MSG_WAITKEY | MSG_NODELAY);
+    message(NULL,buf,MSG_WAITKEY | MSG_NODELAY);
     return EOF;
   }
   if (routing) {

@@ -80,7 +80,7 @@ BEGIN_OPTION_TABLE(programOptions)
 END_OPTION_TABLE
 
 int
-message (const char *string, short flags) {
+message (const char *mode, const char *string, short flags) {
   size_t length = strlen(string);
   size_t size = brl.x * brl.y;
   char buffer[size];

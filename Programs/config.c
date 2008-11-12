@@ -890,7 +890,7 @@ savePreferences (void) {
     }
     fclose(file);
   }
-  if (!ok) message(gettext("not saved"), 0);
+  if (!ok) message(NULL, gettext("not saved"), 0);
   return ok;
 }
 
@@ -1312,6 +1312,7 @@ nextSetting (MenuItem *item) {
 int
 updatePreferences (void) {
   static unsigned char saveOnExit = 0;                /* 1 == save preferences on exit */
+  const char *mode = "prf";
   int ok = 1;
 
 #ifdef ENABLE_TABLE_SELECTION
@@ -1322,8 +1323,8 @@ updatePreferences (void) {
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 #endif /* ENABLE_TABLE_SELECTION */
 
-  if (setStatusText(&brl, "prf") &&
-      message(gettext("Preferences Menu"), 0)) {
+  if (setStatusText(&brl, mode) &&
+      message(mode, gettext("Preferences Menu"), 0)) {
     static const char *booleanValues[] = {
       strtext("No"),
       strtext("Yes")
@@ -1571,7 +1572,7 @@ updatePreferences (void) {
         indexChanged = 0;
 
         /* Then draw the braille window */
-        if (!writeBrailleText(&brl, &line[lineIndent], MAX(0, lineLength-lineIndent))) ok = 0;
+        if (!writeBrailleBytes(mode, &line[lineIndent], MAX(0, lineLength-lineIndent))) ok = 0;
         drainBrailleOutput(&brl, updateInterval);
         if (!ok) break;
 
@@ -1587,7 +1588,7 @@ updatePreferences (void) {
               /* This is quick and dirty... Something more intelligent 
                * and friendly needs to be done here...
                */
-              message( 
+              message(mode,
                   "Press UP and DOWN to select an item, "
                   "HOME to toggle the setting. "
                   "Routing keys are available too! "
@@ -1598,7 +1599,7 @@ updatePreferences (void) {
             case BRL_CMD_PREFLOAD:
               prefs = oldPreferences;
               changedPreferences();
-              message(gettext("changes discarded"), 0);
+              message(mode, gettext("changes discarded"), 0);
               break;
             case BRL_BLK_PASSKEY+BRL_KEY_ENTER:
             case BRL_CMD_PREFSAVE:
@@ -2032,7 +2033,7 @@ startBrailleDriver (void) {
       {
         char banner[0X100];
         makeProgramBanner(banner, sizeof(banner));
-        if (message(banner, 0)) return 1;
+        if (message(NULL, banner, 0)) return 1;
       }
     }
 
@@ -2075,7 +2076,7 @@ static void
 exitBrailleDriver (void) {
   if (brailleConstructed) {
     clearStatusCells(&brl);
-    message(gettext("BRLTTY terminated"), MSG_NODELAY|MSG_SILENT);
+    message(NULL, gettext("BRLTTY terminated"), MSG_NODELAY|MSG_SILENT);
   }
 
   stopBrailleDriver();

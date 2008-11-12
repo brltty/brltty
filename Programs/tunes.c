@@ -544,7 +544,7 @@ playTune (const TuneDefinition *tune) {
       unsigned char duration = tune->tactile >> 8;
       showDotPattern(dots, duration);
     } else if (prefs.alertMessages && tune->message) {
-      message(tune->message, 0);
+      message(NULL, tune->message, 0);
     }
   }
 }
