@@ -30,6 +30,7 @@
 #include "options.h"
 #include "misc.h"
 #include "charset.h"
+#include "unicode.h"
 //#include "brl.h"
 #include "ttb.h"
 #include "ctb.h"
