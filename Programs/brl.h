@@ -61,6 +61,13 @@ extern void initializeBrailleDisplay (BrailleDisplay *brl);
 extern unsigned int drainBrailleOutput (BrailleDisplay *brl, int minimumDelay);
 extern int ensureBrailleBuffer (BrailleDisplay *brl, int infoLevel);
 
+extern void renderBrailleCharacters (
+  wchar_t *text, unsigned char *dots,
+  unsigned int start, unsigned int width,
+  unsigned int columns, unsigned int rows,
+  const wchar_t *characters, size_t length
+);
+
 extern int clearStatusCells (BrailleDisplay *brl);
 extern int setStatusText (BrailleDisplay *brl, const char *text);
 
@@ -73,6 +80,7 @@ typedef enum {
   BRL_FIRMNESS_HIGH,
   BRL_FIRMNESS_MAXIMUM
 } BrailleFirmness;
+extern void setBrailleFirmness (BrailleDisplay *brl, BrailleFirmness setting);
 
 typedef enum {
   BRL_SENSITIVITY_MINIMUM,
@@ -81,7 +89,6 @@ typedef enum {
   BRL_SENSITIVITY_HIGH,
   BRL_SENSITIVITY_MAXIMUM
 } BrailleSensitivity;
-extern void setBrailleFirmness (BrailleDisplay *brl, BrailleFirmness setting);
 extern void setBrailleSensitivity (BrailleDisplay *brl, BrailleSensitivity setting);
 
 /* Routines provided by each braille driver.

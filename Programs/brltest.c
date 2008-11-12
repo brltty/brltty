@@ -31,6 +31,7 @@
 #include "options.h"
 #include "brl.h"
 #include "misc.h"
+#include "charset.h"
 #include "message.h"
 #include "defaults.h"
 
@@ -96,7 +97,15 @@ message (const char *mode, const char *string, short flags) {
     if (length -= count) {
       buffer[(count = size) - 1] = WC_C('-');
     }
-    if (!writeBrailleText(&brl, buffer, count)) return 0;
+
+    {
+      wchar_t characters[count];
+      wchar_t text[brl.x * brl.y];
+      convertCharsToWchars(buffer, characters, count);
+      renderBrailleCharacters(text, brl.buffer, 0, brl.x,
+                              brl.x, brl.y, characters, count);
+      if (!braille->writeWindow(&brl, text)) return 0;
+    }
 
     if (length) {
       int timer = 0;

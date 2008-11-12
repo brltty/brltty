@@ -513,47 +513,12 @@ renderStatusSeparator (wchar_t *text, unsigned char *dots) {
   }
 }
 
-static void
-renderBrailleCharacters (
-  wchar_t *text, unsigned char *dots,
-  unsigned int start, unsigned int columns,
-  const wchar_t *characters, size_t length
-) {
-  unsigned int rows = brl.y;
-
-  text += start;
-  dots += start;
-
-  while (rows > 0) {
-    size_t count = length;
-    if (count > columns) count = columns;
-
-    {
-      int i;
-      for (i=0; i<count; i+=1) {
-        dots[i] = convertCharacterToDots(textTable, (text[i] = *characters++));
-      }
-    }
-
-    {
-      unsigned int x = columns - count;
-      wmemset(&text[count], WC_C(' '), x);
-      memset(&dots[count], 0, x);
-    }
-
-    text += brl.x;
-    dots += brl.x;
-    length -= count;
-    rows -= 1;
-  }
-}
-
 int
 writeBrailleCharacters (const char *mode, const wchar_t *characters, size_t length) {
   wchar_t textBuffer[brl.x * brl.y];
 
   renderBrailleCharacters(textBuffer, brl.buffer,
-                          textStart, textCount,
+                          textStart, textCount, brl.x, brl.y,
                           characters, length);
 
   {
@@ -561,7 +526,7 @@ writeBrailleCharacters (const char *mode, const wchar_t *characters, size_t leng
     wchar_t modeCharacters[modeLength];
     convertCharsToWchars(mode, modeCharacters, modeLength);
     renderBrailleCharacters(textBuffer, brl.buffer,
-                            statusStart, statusCount,
+                            statusStart, statusCount, brl.x, brl.y,
                             modeCharacters, modeLength);
   }
 

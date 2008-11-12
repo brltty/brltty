@@ -124,6 +124,41 @@ drainBrailleOutput (BrailleDisplay *brl, int minimumDelay) {
   return duration;
 }
 
+void
+renderBrailleCharacters (
+  wchar_t *text, unsigned char *dots,
+  unsigned int start, unsigned int width,
+  unsigned int columns, unsigned int rows,
+  const wchar_t *characters, size_t length
+) {
+  text += start;
+  dots += start;
+
+  while (rows > 0) {
+    size_t count = length;
+    if (count > width) count = width;
+
+    {
+      int i;
+      for (i=0; i<count; i+=1) {
+        dots[i] = convertCharacterToDots(textTable, (text[i] = *characters++));
+      }
+    }
+
+    {
+      unsigned int x = width - count;
+      wmemset(&text[count], WC_C(' '), x);
+      memset(&dots[count], 0, x);
+    }
+
+    text += columns;
+    dots += columns;
+    length -= count;
+    rows -= 1;
+  }
+}
+
+
 int
 setStatusText (BrailleDisplay *brl, const char *text) {
   unsigned int length = brl->statusColumns * brl->statusRows;
