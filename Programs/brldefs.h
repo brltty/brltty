@@ -274,7 +274,6 @@ typedef enum {
  * +  specified by the ISO/TR 11548-1 standard
  * +  used within the Unicode braille row:
  */
-#define BRL_UC_ROW 0X2800
 /*
  * From least- to most-significant octal digit:
  * +  the first contains dots 1-3

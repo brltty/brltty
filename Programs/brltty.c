@@ -42,6 +42,7 @@
 #include "touch.h"
 #include "cmd.h"
 #include "charset.h"
+#include "unicode.h"
 #include "scancodes.h"
 #include "scr.h"
 #include "brl.h"
@@ -498,7 +499,7 @@ showInfo (void) {
       int i;
       for (i=0; i<length; ++i) {
         if (i < cellCount) {
-          characters[i] = BRL_UC_ROW | cells[i];
+          characters[i] = UNICODE_BRAILLE_ROW | cells[i];
         } else {
           wint_t character = convertCharToWchar(text[i]);
           if (character == WEOF) character = WC_C('?');
@@ -2412,18 +2413,17 @@ runProgram (void) {
       if (infoMode) {
         if (!showInfo()) writable = 0;
       } else {
+        const unsigned int windowLength = brl.x * brl.y;
         const unsigned int textLength = textCount * brl.y;
-        wchar_t textBuffer[textLength];
+        wchar_t textBuffer[windowLength];
 
-        memset(brl.buffer, 0, brl.x*brl.y);
-        wmemset(textBuffer, WC_C(' '), textLength);
+        memset(brl.buffer, 0, windowLength);
+        wmemset(textBuffer, WC_C(' '), windowLength);
         brl.cursor = -1;
 
 #ifdef ENABLE_CONTRACTED_BRAILLE
         contracted = 0;
         if (isContracting()) {
-          unsigned int windowLength = textLength;
-
           while (1) {
             int cursorOffset = CTB_NO_CURSOR;
 
@@ -2431,7 +2431,7 @@ runProgram (void) {
             ScreenCharacter inputCharacters[inputLength];
             wchar_t inputText[inputLength];
 
-            int outputLength = windowLength;
+            int outputLength = textLength;
             unsigned char outputBuffer[outputLength];
 
             if ((scr.posy == p->winy) && (scr.posx >= p->winx)) cursorOffset = scr.posx - p->winx;
@@ -2454,7 +2454,7 @@ runProgram (void) {
               int inputEnd = inputLength;
 
               if (contractedTrack) {
-                if (outputLength == windowLength) {
+                if (outputLength == textLength) {
                   int inputIndex = inputEnd;
                   while (inputIndex) {
                     int offset = contractedOffsets[--inputIndex];
@@ -2614,8 +2614,9 @@ runProgram (void) {
 
             for (row=0; row<brl.y; row+=1) {
               const ScreenCharacter *source = &characters[row * textCount];
-              unsigned char *target = &brl.buffer[(row * brl.x) + textStart];
-              wchar_t *text = &textBuffer[(row * brl.x) + textStart];
+              unsigned int start = (row * brl.x) + textStart;
+              unsigned char *target = &brl.buffer[start];
+              wchar_t *text = &textBuffer[start];
               int column;
 
               for (column=0; column<textCount; column+=1) {
@@ -2644,6 +2645,31 @@ runProgram (void) {
           if (style->count > 0) {
             unsigned char cells[style->count];
             style->render(cells);
+
+            {
+              const unsigned char *source = cells;
+              unsigned char *target = brl.buffer + statusStart;
+              wchar_t *text = textBuffer + statusStart;
+              unsigned int length = statusCount * brl.y;
+              if (length > style->count) length = style->count;
+
+              while (length > 0) {
+                unsigned int count = statusCount;
+                if (count > length) count = length;
+
+                {
+                  int i;
+                  for (i=0; i<count; i+=1) {
+                    text[i] = UNICODE_BRAILLE_ROW | (target[i] = source[i]);
+                  }
+                }
+
+                source += count;
+                target += brl.x;
+                text += brl.x;
+                length -= count;
+              }
+            }
             memcpy(&brl.buffer[statusStart], cells, MIN(style->count, statusCount));
 
             if (prefs.statusSeparator != ssNone) {

@@ -35,9 +35,6 @@ extern char *ensureTextTableExtension (const char *path);
 extern unsigned char convertCharacterToDots (TextTable *table, wchar_t character);
 extern wchar_t convertDotsToCharacter (TextTable *table, unsigned char dots);
 
-#define UNICODE_REPLACEMENT_CHARACTER 0XFFFD
-#define UNICODE_BRAILLE_ROW 0X2800
-
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
