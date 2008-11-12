@@ -8109,8 +8109,8 @@ always	\u2018	4
 always	\u2019	3
 always	\u201A	1456
 always	\u201B	1456
-always	\u201C	5
-always	\u201D	5
+always	\u201C	236-236
+always	\u201D	356-356
 always	\u201E	1456
 always	\u201F	1456
 always	\u2020	346
@@ -22530,7 +22530,7 @@ always	\u586D	123456-3
 always	\u586E	1456
 always	\u586F	14-234-3
 always	\u5870	1456
-always	\u5871	135-345-1
+always	\u5871	14-1346-4
 always	\u5872	1456
 always	\u5873	1456
 always	\u5874	135-1356-5
