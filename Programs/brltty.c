@@ -2680,26 +2680,54 @@ runProgram (void) {
                 length -= count;
               }
             }
-            memcpy(&brl.buffer[statusStart], cells, MIN(style->count, statusCount));
+          }
 
-            if (prefs.statusSeparator != ssNone) {
-              int onRight = statusStart > 0;
-              unsigned char *separator = &brl.buffer[(onRight? statusStart: textStart) - 1];
-              const unsigned char leftSide = BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT7;
-              const unsigned char rightSide = BRL_DOT4 | BRL_DOT5 | BRL_DOT6 | BRL_DOT8;
+          if (prefs.statusSeparator != ssNone) {
+            int onRight = statusStart > 0;
+            unsigned int column = (onRight? statusStart: textStart) - 1;
 
-              switch (prefs.statusSeparator) {
-                case ssBlock:
-                  *separator = leftSide | rightSide;
-                  break;
+            unsigned char *dots = &brl.buffer[column];
+            unsigned char dotsSeparator;
+            const unsigned char dotsLeftLine = BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT7;
+            const unsigned char dotsRightLine = BRL_DOT4 | BRL_DOT5 | BRL_DOT6 | BRL_DOT8;
+            const unsigned char dotsBothLines = dotsLeftLine | dotsRightLine;
 
-                case ssStatusSide:
-                  *separator = onRight? rightSide: leftSide;
-                  break;
+            wchar_t *text = &textBuffer[column];
+            wchar_t textSeparator;
+            const wchar_t textLeftLine = 0X23B8;
+            const wchar_t textRightLine = 0X23B9;
+            const wchar_t textBothLines = 0X2502;
 
-                case ssTextSide:
-                  *separator = onRight? leftSide: rightSide;
-                  break;
+            switch (prefs.statusSeparator) {
+              case ssBlock:
+                dotsSeparator = dotsBothLines;
+                textSeparator = textBothLines;
+                break;
+
+              case ssStatusSide:
+                dotsSeparator = onRight? dotsRightLine: dotsLeftLine;
+                textSeparator = onRight? textRightLine: textLeftLine;
+                break;
+
+              case ssTextSide:
+                dotsSeparator = onRight? dotsLeftLine: dotsRightLine;
+                textSeparator = onRight? textLeftLine: textRightLine;
+                break;
+
+              default:
+                dotsSeparator = 0;
+                textSeparator = WC_C(' ');
+                break;
+            }
+
+            {
+              int row;
+              for (row=0; row<brl.y; row+=1) {
+                *dots = dotsSeparator;
+                dots += brl.x;
+
+                *text = textSeparator;
+                text += brl.x;
               }
             }
           }
