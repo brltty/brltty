@@ -691,6 +691,7 @@ changedPreferences (void) {
   changedWindowAttributes();
   setTuneDevice(prefs.tuneDevice);
   applyBraillePreferences();
+
 #ifdef ENABLE_SPEECH_SUPPORT
   applySpeechPreferences();
 #endif /* ENABLE_SPEECH_SUPPORT */
@@ -700,9 +701,11 @@ int
 loadPreferences (int change) {
   int ok = 0;
   FILE *file = openDataFile(preferencesFile, "rb", 1);
+
   if (file) {
     Preferences newPreferences;
     size_t length = fread(&newPreferences, 1, sizeof(newPreferences), file);
+
     if (ferror(file)) {
       LogPrint(LOG_ERR, "%s: %s: %s",
                gettext("cannot read preferences file"), preferencesFile, strerror(errno));
@@ -793,8 +796,10 @@ loadPreferences (int change) {
 
       if (change) changedPreferences();
     }
+
     fclose(file);
   }
+
   return ok;
 }
 
@@ -865,7 +870,7 @@ resetPreferences (void) {
 
 static void
 getPreferences (void) {
-  if (!loadPreferences(0)) resetPreferences();
+  if (!loadPreferences(1)) resetPreferences();
   setTuneDevice(prefs.tuneDevice);
 }
 
