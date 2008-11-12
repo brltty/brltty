@@ -24,6 +24,7 @@
 
 #include "misc.h"
 #include "charset.h"
+#include "unicode.h"
 
 #if defined(WINDOWS)
 #define USE_WINDOWS
@@ -274,7 +275,7 @@ static void keypress(Widget w, XEvent *event, String *params, Cardinal *num_para
 
   if ((keysym & 0x1f000000) == 0x1000000) {
     /* unicode */
-    if ((keysym & 0xffff00) == BRL_UC_ROW)
+    if ((keysym & ~UNICODE_CELL_MASK) == UNICODE_BRAILLE_ROW)
       keypressed = BRL_BLK_PASSDOTS | (keysym & 0xff);
     else {
       int c = convertWcharToChar(keysym & 0xffffff);
@@ -1249,11 +1250,11 @@ static int brl_writeWindow(BrailleDisplay *brl, const wchar_t *text)
 	|(!!(c&BRL_DOT7))<<6
 	|(!!(c&BRL_DOT8))<<7;
 #ifdef USE_XAW
-      convertWcharToUtf8(BRL_UC_ROW | c, utf8);
+      convertWcharToUtf8(UNICODE_BRAILLE_ROW | c, utf8);
 
       XtVaSetValues(displayb[i], XtNlabel, utf8, NULL);
 #elif defined(USE_WINDOWS)
-      data[0] = BRL_UC_ROW | c;
+      data[0] = UNICODE_BRAILLE_ROW | c;
       data[1] = 0;
       SetWindowTextW(displayb[i],data);
 #endif /* USE_WINDOWS */
