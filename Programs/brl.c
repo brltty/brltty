@@ -171,13 +171,15 @@ showBrailleString (BrailleDisplay *brl, const char *string, unsigned int duratio
 
 int
 setStatusText (BrailleDisplay *brl, const char *text) {
-  if (braille->writeStatus && (brl->statusColumns > 0)) {
-    unsigned int count = brl->statusColumns * brl->statusRows;
-    unsigned char cells[count];        /* status cell buffer */
+  unsigned int length = brl->statusColumns * brl->statusRows;
+
+  if (braille->writeStatus && (length > 0)) {
+    unsigned char cells[length];
+
     {
       unsigned int index = 0;
 
-      while (index < count) {
+      while (index < length) {
         char c;
         wchar_t wc;
 
@@ -186,11 +188,12 @@ setStatusText (BrailleDisplay *brl, const char *text) {
         cells[index++] = convertCharacterToDots(textTable, wc);
       }
 
-      memset(&cells[index], 0, count-index);
+      memset(&cells[index], 0, length-index);
     }
 
     if (!braille->writeStatus(brl, cells)) return 0;
   }
+
   return 1;
 }
 

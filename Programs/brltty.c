@@ -433,7 +433,7 @@ getStatusStyle (void) {
 
 static int
 setStatusCells (void) {
-  if (braille->writeStatus && (brl.statusColumns > 0)) {
+  if (braille->writeStatus) {
     const StatusStyleEntry *style = getStatusStyle();
 
     if (style->count > 0) {

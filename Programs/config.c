@@ -917,8 +917,18 @@ testStatusPosition (void) {
 }
 
 static int
+changedStatusPosition (unsigned char setting) {
+  return changedWindowAttributes();
+}
+
+static int
 testStatusCount (void) {
   return testStatusPosition() && (prefs.statusPosition != spNone);
+}
+
+static int
+changedStatusCount (unsigned char setting) {
+  return changedWindowAttributes();
 }
 
 static int
@@ -927,8 +937,19 @@ testStatusSeparator (void) {
 }
 
 static int
+changedStatusSeparator (unsigned char setting) {
+  return changedWindowAttributes();
+}
+
+static int
 testStatusStyle (void) {
   return (prefs.statusPosition != spNone) || haveStatusCells();
+}
+
+static int
+changedStatusStyle (unsigned char setting) {
+  if (!testStatusCount()) return 1;
+  return changedWindowAttributes();
 }
 
 #ifdef ENABLE_SPEECH_SUPPORT
@@ -1223,26 +1244,6 @@ testSlidingWindow (void) {
 
 static int
 changedWindowOverlap (unsigned char setting) {
-  return changedWindowAttributes();
-}
-
-static int
-changedStatusPosition (unsigned char setting) {
-  return changedWindowAttributes();
-}
-
-static int
-changedStatusCount (unsigned char setting) {
-  return changedWindowAttributes();
-}
-
-static int
-changedStatusSeparator (unsigned char setting) {
-  return changedWindowAttributes();
-}
-
-static int
-changedStatusStyle (unsigned char setting) {
   return changedWindowAttributes();
 }
 
