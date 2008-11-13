@@ -466,9 +466,9 @@ renderStatusSeparator (wchar_t *text, unsigned char *dots) {
     unsigned int column = (onRight? statusStart: textStart) - 1;
 
     wchar_t textSeparator;
-    const wchar_t textSeparator_left = 0X23B8;
-    const wchar_t textSeparator_right = 0X23B9;
-    const wchar_t textSeparator_block = 0X2503;
+    const wchar_t textSeparator_left = 0X23B8; /* LEFT VERTICAL BOX LINE */
+    const wchar_t textSeparator_right = 0X23B9; /* RIGHT VERTICAL BOX LINE */
+    const wchar_t textSeparator_block = 0X2503; /* BOX DRAWINGS HEAVY VERTICAL */
 
     unsigned char dotsSeparator;
     const unsigned char dotsSeparator_left = BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT7;
@@ -2640,16 +2640,23 @@ runProgram (void) {
 
             {
               const unsigned char *source = outputBuffer;
-              unsigned char *target = brl.buffer;
+              unsigned char *target = &brl.buffer[textStart];
+              wchar_t *text = &textBuffer[textStart];
               int length = outputLength;
 
               while (length > 0) {
-                int count = length;
+                unsigned int count = length;
                 if (count > textCount) count = textCount;
-                memcpy(&target[textStart], source, count);
 
-                source += count;
+                {
+                  int i;
+                  for (i=0; i<count; i+=1) {
+                    text[i] = UNICODE_BRAILLE_ROW | (target[i] = *source++);
+                  }
+                }
+
                 target += brl.x;
+                text += brl.x;
                 length -= count;
               }
             }
