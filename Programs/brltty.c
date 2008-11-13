@@ -466,32 +466,32 @@ renderStatusSeparator (wchar_t *text, unsigned char *dots) {
     unsigned int column = (onRight? statusStart: textStart) - 1;
 
     wchar_t textSeparator;
-    const wchar_t textLeftLine = 0X23B8;
-    const wchar_t textRightLine = 0X23B9;
-    const wchar_t textBothLines = 0X2502;
+    const wchar_t textSeparator_left = 0X23B8;
+    const wchar_t textSeparator_right = 0X23B9;
+    const wchar_t textSeparator_block = 0X2503;
 
     unsigned char dotsSeparator;
-    const unsigned char dotsLeftLine = BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT7;
-    const unsigned char dotsRightLine = BRL_DOT4 | BRL_DOT5 | BRL_DOT6 | BRL_DOT8;
-    const unsigned char dotsBothLines = dotsLeftLine | dotsRightLine;
+    const unsigned char dotsSeparator_left = BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT7;
+    const unsigned char dotsSeparator_right = BRL_DOT4 | BRL_DOT5 | BRL_DOT6 | BRL_DOT8;
+    const unsigned char dotsSeparator_block = dotsSeparator_left | dotsSeparator_right;
 
     text += column;
     dots += column;
 
     switch (prefs.statusSeparator) {
       case ssBlock:
-        textSeparator = textBothLines;
-        dotsSeparator = dotsBothLines;
+        textSeparator = textSeparator_block;
+        dotsSeparator = dotsSeparator_block;
         break;
 
       case ssStatusSide:
-        textSeparator = onRight? textRightLine: textLeftLine;
-        dotsSeparator = onRight? dotsRightLine: dotsLeftLine;
+        textSeparator = onRight? textSeparator_right: textSeparator_left;
+        dotsSeparator = onRight? dotsSeparator_right: dotsSeparator_left;
         break;
 
       case ssTextSide:
-        textSeparator = onRight? textLeftLine: textRightLine;
-        dotsSeparator = onRight? dotsLeftLine: dotsRightLine;
+        textSeparator = onRight? textSeparator_left: textSeparator_right;
+        dotsSeparator = onRight? dotsSeparator_left: dotsSeparator_right;
         break;
 
       default:
