@@ -194,9 +194,10 @@ typedef enum {
   PARM_LINES,
   PARM_COLUMNS,
   PARM_MODEL,
-  PARM_INPUT
+  PARM_INPUT,
+  PARM_FONT
 } DriverParameter;
-#define BRLPARMS "tkparms", "lines", "columns", "model", "input"
+#define BRLPARMS "tkparms", "lines", "columns", "model", "input", "font"
 
 #include "brl_driver.h"
 #include "braille.h"
@@ -207,6 +208,7 @@ typedef enum {
 static int cols,lines;
 static int input;
 static char *model = "simple";
+static const char *font = "-*-clearlyu-*-r-*-*-17-*-*-*-*-*-iso10646-1,-*-fixed-*-r-*-*-17-*-*-*-*-*-iso10646-1,-*-unifont-*-r-*-*-17-*-*-*-*-*-iso10646-1";
 static int xtArgc = 1;
 static char *xtDefArgv[]= { "brltty", NULL };
 static char **xtArgv = xtDefArgv;
@@ -239,7 +241,7 @@ static XmString display_cs;
 #endif /* USE_XAW */
 #endif /* USE_XT */
 #ifdef USE_XAW
-static XFontSet fontset, fontsetb;
+static XFontSet fontset;
 #elif defined(USE_WINDOWS)
 static HFONT font;
 static int totlines;
@@ -824,15 +826,7 @@ static void generateToplevel(void)
 #endif /* USE_XT */
 
 #ifdef USE_XAW
-  if (!(fontsetb = XCreateFontSet(XtDisplay(toplevel),"-*-clearlyu-*-r-*-*-17-*-*-*-*-*-iso10646-1", &missing_charset_list_return, &missing_charset_count_return, &def_string_return)))
-    LogPrint(LOG_ERR,"Error while loading braille font");
-  if (missing_charset_count_return) {
-    int i;
-    for (i=0; i<missing_charset_count_return; i++)
-      LogPrint(LOG_INFO,"Could not load a braille font for charset %s",missing_charset_list_return[i]);
-    XFreeStringList(missing_charset_list_return);
-  }
-  if (!(fontset = XCreateFontSet(XtDisplay(toplevel),"-*-fixed-medium-r-*-*-24-*-*-*-*-*-iso10646-1", &missing_charset_list_return, &missing_charset_count_return, &def_string_return)))
+  if (!(fontset = XCreateFontSet(XtDisplay(toplevel), font, &missing_charset_list_return, &missing_charset_count_return, &def_string_return)))
     LogPrint(LOG_ERR,"Error while loading unicode font");
   if (missing_charset_count_return) {
     int i;
@@ -931,11 +925,11 @@ static void generateToplevel(void)
 	NULL);
 
 #ifdef USE_XAW
-      if (fontsetb) {
+      if (fontset) {
 	displayb[y*cols+x] = XtVaCreateManagedWidget("displayb",labelWidgetClass,tmp_vbox,
 	  XtNtranslations, transl,
 	  XtNinternational, True,
-	  XNFontSet, fontsetb,
+	  XNFontSet, fontset,
 	  XtNshowGrip,False,
 	  XtNlabel, dispb,
 	  NULL);
@@ -1099,7 +1093,11 @@ static int brl_construct(BrailleDisplay *brl, char **parameters, const char *dev
     for (keyModel = models; keyModel < &models[XtNumber(models)] && strcmp(keyModel->name,model); keyModel++);
     if (keyModel == &models[XtNumber(models)]) keyModel = NULL;
   }
-  
+
+  if (*parameters[PARM_FONT]) {
+    font = parameters[PARM_FONT];
+  }
+
 #if defined(USE_XT)
   XtToolkitThreadInitialize();
   XtSetLanguageProc(NULL, NULL, NULL);
@@ -1116,10 +1114,6 @@ static void destroyToplevel(void)
 {
 #if defined(USE_XT)
 #ifdef USE_XAW
-  if (fontsetb) {
-    XFreeFontSet(XtDisplay(toplevel),fontsetb);
-    fontsetb = NULL;
-  }
   if (fontset) {
     XFreeFontSet(XtDisplay(toplevel),fontset);
     fontset = NULL;

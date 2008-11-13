@@ -200,6 +200,7 @@
 
 # XWindow Braille Driver Parameters
 #braille-parameters xw:Columns=40 # [1-80]
+#braille-parameters xw:Font=name # []
 #braille-parameters xw:Input=off # [off,on]
 #braille-parameters xw:Lines=1 # [1-3]
 #braille-parameters xw:Model=bare # [bare]
