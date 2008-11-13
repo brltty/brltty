@@ -522,8 +522,19 @@ processBootParameters (
     for (optionIndex=0; optionIndex<info->optionCount; ++optionIndex) {
       const OptionEntry *option = &info->optionTable[optionIndex];
       if ((option->bootParameter) && (option->bootParameter <= count)) {
-        const char *parameter = parameters[option->bootParameter-1];
-        if (*parameter) ensureSetting(info, option, parameter);
+        char *parameter = parameters[option->bootParameter-1];
+
+        if (*parameter) {
+          {
+            char *byte = parameter;
+
+            do {
+              if (*byte == '+') *byte = ',';
+            } while (*++byte);
+          }
+
+          ensureSetting(info, option, parameter);
+        }
       }
     }
 
