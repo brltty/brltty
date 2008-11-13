@@ -1071,6 +1071,7 @@ isTextOffset (int *arg, int end, int relaxed) {
         result = index;
       }
     }
+    if (end && (index == contractedLength)) result = contractedLength - 1;
 
     value = result;
   }
