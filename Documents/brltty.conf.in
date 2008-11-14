@@ -195,7 +195,6 @@
 
 # Voyager Braille Driver Parameters
 #braille-parameters vo:InputMode=no # [no,yes]
-#braille-parameters vo:StatusCells=3 # [0,n,-n]
 
 # XWindow Braille Driver Parameters
 #braille-parameters xw:Columns=40 # [1-80]

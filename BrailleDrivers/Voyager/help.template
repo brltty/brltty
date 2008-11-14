@@ -12,7 +12,6 @@
 012:    On the right (from left to right): 4 5 6 8
 013:  Cursor Routing Keys:
 013:    CRa1 to CRa<CELLS>: all routing keys (numbered from left to right).
-013:    CRs1 to CRs4: routing keys over status cells (numbered from the end inward).
 013:    CRt1 to CRt<COLS>: routing keys over text cells (numbered from left to right).
 020:Chords:
 021:  The prefix "Chord-" means that the space bar (B+C) must be pressed
@@ -34,8 +33,6 @@
 689:
 690:Virtual Console Selection
 699:
-880:Status Key Shortcuts
-889:
 890:When in Preferences Menu
 899:
 999:-----End of help screen-----

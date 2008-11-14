@@ -50,13 +50,11 @@
 #include "misc.h"
 
 typedef enum {
-  PARM_INPUTMODE,
-  PARM_STATUSCELLS
+  PARM_INPUTMODE
 } DriverParameter;
-#define BRLPARMS "inputmode", "statuscells"
+#define BRLPARMS "inputmode"
 
 #define BRLSTAT ST_VoyagerStyle
-#define BRL_HAVE_STATUS_CELLS
 #define BRL_HAVE_FIRMNESS
 #include "brl_driver.h"
 
@@ -524,14 +522,9 @@ static unsigned char *currentCells = NULL; /* buffer to prepare new pattern */
 static unsigned char *previousCells = NULL; /* previous pattern displayed */
 
 #define MAXIMUM_CELLS 70 /* arbitrary max for allocations */
-static unsigned char totalCells;
-static unsigned char textOffset;
-static unsigned char textCells;
-static unsigned char statusOffset;
-static unsigned char statusCells;
-#define IS_TEXT_RANGE(key1,key2) (((key1) >= textOffset) && ((key2) < (textOffset + textCells)))
+static unsigned char cellCount;
+#define IS_TEXT_RANGE(key1,key2) (((key1) <= (key2)) && ((key2) < cellCount))
 #define IS_TEXT_KEY(key) IS_TEXT_RANGE((key), (key))
-#define IS_STATUS_KEY(key) (((key) >= statusOffset) && ((key) < (statusOffset + statusCells)))
 
 static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
@@ -552,18 +545,18 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
   if (io->openPort(parameters, device)) {
     /* find out how big the display is */
-    totalCells = 0;
+    cellCount = 0;
     {
       unsigned char count;
       if (io->getCellCount(&count)) {
         switch (count) {
           case 48:
-            totalCells = 44;
+            cellCount = 44;
             brl->helpPage = 0;
             break;
 
           case 72:
-            totalCells = 70;
+            cellCount = 70;
             brl->helpPage = 1;
             break;
 
@@ -574,38 +567,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       }
     }
 
-    if (totalCells) {
-      LogPrint(LOG_INFO, "Voyager Cell Count: %u", totalCells);
-
-      /* position the text and status cells */
-      textCells = totalCells;
-      textOffset = statusOffset = 0;
-      {
-        int cells = 3;
-        const char *word = parameters[PARM_STATUSCELLS];
-
-        {
-          int maximum = textCells / 2;
-          int minimum = -maximum;
-          int value = cells;
-          if (validateInteger(&value, word, &minimum, &maximum)) {
-            cells = value;
-          } else {
-            LogPrint(LOG_WARNING, "%s: %s", "invalid status cells specification", word);
-          }
-        }
-
-        if (cells) {
-          if (cells < 0) {
-            statusOffset = textCells + cells;
-            cells = -cells;
-          } else {
-            textOffset = cells + 1;
-          }
-          textCells -= cells + 1;
-        }
-        statusCells = cells;
-      }
+    if (cellCount) {
+      LogPrint(LOG_INFO, "Voyager Cell Count: %u", cellCount);
 
       /* log information about the display */
       io->logSerialNumber();
@@ -615,15 +578,14 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       /* currentCells holds the status cells and the text cells.
        * We export directly to BRLTTY only the text cells.
        */
-      brl->x = textCells;		/* initialize size of display */
+      brl->x = cellCount;		/* initialize size of display */
       brl->y = 1;		/* always 1 */
-      if ((brl->statusColumns = statusCells)) brl->statusRows = 1;
 
-      if ((currentCells = malloc(totalCells))) {
-        if ((previousCells = malloc(totalCells))) {
+      if ((currentCells = malloc(cellCount))) {
+        if ((previousCells = malloc(cellCount))) {
           /* Force rewrite of display */
-          memset(currentCells, 0, totalCells); /* no dots */
-          memset(previousCells, 0XFF, totalCells); /* all dots */
+          memset(currentCells, 0, cellCount); /* no dots */
+          memset(previousCells, 0XFF, cellCount); /* all dots */
 
           if (io->setDisplayState(1)) {
             io->soundBeep(200);
@@ -672,34 +634,28 @@ brl_destruct (BrailleDisplay *brl) {
 }
 
 static int
-brl_writeStatus (BrailleDisplay *brl, const unsigned char *cells) {
-  memcpy(currentCells+statusOffset, cells, statusCells);
-  return 1;
-}
-
-static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
-  unsigned char buffer[totalCells];
+  unsigned char buffer[cellCount];
 
-  memcpy(currentCells+textOffset, brl->buffer, textCells);
+  memcpy(currentCells, brl->buffer, cellCount);
 
   /* If content hasn't changed, do nothing. */
-  if (memcmp(previousCells, currentCells, totalCells) == 0) return 1;
+  if (memcmp(previousCells, currentCells, cellCount) == 0) return 1;
 
   /* remember current content */
-  memcpy(previousCells, currentCells, totalCells);
+  memcpy(previousCells, currentCells, cellCount);
 
   /* translate to voyager dot pattern coding */
   {
     int i;
-    for (i=0; i<totalCells; i++)
+    for (i=0; i<cellCount; i++)
       buffer[i] = outputTable[currentCells[i]];
   }
 
   /* The firmware supports multiples of 8 cells, so there are extra cells
    * in the firmware's imagination that don't actually exist physically.
    */
-  switch (totalCells) {
+  switch (cellCount) {
     case 44: {
       /* Two ghost cells at the beginning of the display,
        * plus two more after the sixth physical cell.
@@ -883,7 +839,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
       unsigned char key = packet[i];
       if (!key) break;
 
-      if ((key < 1) || (key > totalCells)) {
+      if ((key < 1) || (key > cellCount)) {
         LogPrint(LOG_NOTICE, "Invalid routing key number: %u", key);
         continue;
       }
@@ -899,7 +855,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 
   {
     int key;
-    for (key=0; key<totalCells; key++)
+    for (key=0; key<cellCount; key++)
       if (activeKeys.routing[key])
         routingKeys[routingCount++] = key;
   }
@@ -1033,37 +989,13 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
     if (routingCount == 1) {
       if (IS_TEXT_KEY(routingKeys[0])) {
         HLP(301,"CRt#", "Route cursor to cell")
-        cmd = BRL_BLK_ROUTE + routingKeys[0] - textOffset;
-      } else {
-        int key = statusOffset? totalCells - 1 - routingKeys[0]:
-                                routingKeys[0] - statusOffset;
-        switch (key) {
-          case 0:
-            HLP(881, "CRs1", "Help screen (toggle)")
-            cmd = BRL_CMD_HELP;
-            break;
-
-          case 1:
-            HLP(882, "CRs2", "Preferences menu (toggle)")
-            cmd = BRL_CMD_PREFMENU;
-            break;
-
-          case 2:
-            HLP(883, "CRs3", "Learn mode (toggle)")
-            cmd = BRL_CMD_LEARN;
-            break;
-
-          case 3:
-            HLP(884, "CRs4", "Route cursor to current line")
-            cmd = BRL_CMD_CSRJMP_VERT;
-            break;
-        }
+        cmd = BRL_BLK_ROUTE + routingKeys[0];
       }
     } else if ((routingCount == 2) &&
                IS_TEXT_RANGE(routingKeys[0], routingKeys[1])) {
       HLP(405, "CRtx+CRty", "Cut text from x through y")
-      cmd = BRL_BLK_CUTBEGIN + routingKeys[0] - textOffset;
-      pendingCommand = BRL_BLK_CUTLINE + routingKeys[1] - textOffset;
+      cmd = BRL_BLK_CUTBEGIN + routingKeys[0];
+      pendingCommand = BRL_BLK_CUTLINE + routingKeys[1];
     }
   } else if (activeKeys.control & (K_UP|K_RL|K_RR)) {
     /* Some routing keys combined with UP RL or RR (actually any key
@@ -1076,9 +1008,9 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
         case K_UP:
           HLP(692, "UP+ CRa<CELLS-1>/CRa<CELLS>",
               "Switch to previous/next virtual console")
-          if (routingKeys[0] == totalCells-1) {
+          if (routingKeys[0] == cellCount-1) {
             cmd = BRL_CMD_SWITCHVT_NEXT;
-          } else if (routingKeys[0] == totalCells-2) {
+          } else if (routingKeys[0] == cellCount-2) {
             cmd = BRL_CMD_SWITCHVT_PREV;
           } else {
             HLP(691, "UP+CRa#", "Switch to virtual console #")
@@ -1098,23 +1030,23 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
     /* One text routing key with some other keys */
     switch (activeKeys.control) {
       PHKEY(501, "CRt#", K_DOWN,
-            BRL_BLK_SETLEFT + routingKeys[0] - textOffset,
+            BRL_BLK_SETLEFT + routingKeys[0],
             "Go right # cells");
       PHKEY(401, "CRt#", K_A,
-            BRL_BLK_CUTBEGIN + routingKeys[0] - textOffset,
+            BRL_BLK_CUTBEGIN + routingKeys[0],
             "Mark beginning of region to cut");
       PHKEY(401, "CRt#", K_B,
-            BRL_BLK_CUTAPPEND + routingKeys[0] - textOffset,
+            BRL_BLK_CUTAPPEND + routingKeys[0],
             "Mark beginning of cut region for append");
       PHKEY(401, "CRt#", K_D,
-            BRL_BLK_CUTRECT + routingKeys[0] - textOffset,
+            BRL_BLK_CUTRECT + routingKeys[0],
             "Mark bottom-right of rectangular region and cut");
       PHKEY(401, "CRt#", K_C,
-            BRL_BLK_CUTLINE + routingKeys[0] - textOffset,
+            BRL_BLK_CUTLINE + routingKeys[0],
             "Mark end of linear region and cut");
       PHKEY2(501, "CRt#", K_A|K_B, K_D|K_C,
-             BRL_BLK_PRINDENT + routingKeys[0] - textOffset,
-             BRL_BLK_NXINDENT + routingKeys[0] - textOffset,
+             BRL_BLK_PRINDENT + routingKeys[0],
+             BRL_BLK_NXINDENT + routingKeys[0],
              "Go to previous/next line indented no more than #");
     }
   }
