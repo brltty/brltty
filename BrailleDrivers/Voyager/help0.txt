@@ -12,7 +12,6 @@ Key Names:
     On the right (from left to right): 4 5 6 8
   Cursor Routing Keys:
     CRa1 to CRa44: all routing keys (numbered from left to right).
-    CRs1 to CRs4: routing keys over status cells (numbered from the end inward).
     CRt1 to CRt40: routing keys over text cells (numbered from left to right).
 Chords:
   The prefix "Chord-" means that the space bar (B+C) must be pressed
@@ -90,12 +89,6 @@ Chord-8: Right arrow
 Virtual Console Selection
 UP+CRa#: Switch to virtual console #
 UP+ CRa43/CRa44: Switch to previous/next virtual console
-
-Status Key Shortcuts
-CRs1: Help screen (toggle)
-CRs2: Preferences menu (toggle)
-CRs3: Learn mode (toggle)
-CRs4: Route cursor to current line
 
 When in Preferences Menu
 DOWN/UP: Select previous/next setting
