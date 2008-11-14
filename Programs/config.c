@@ -1378,7 +1378,8 @@ updatePreferences (void) {
       "PowerBraille 80",
       strtext("Generic"),
       "MDV",
-      "Voyager"
+      "Voyager",
+      strtext("Time")
     };
 
     static const char *textStyles[] = {

@@ -36,7 +36,8 @@ typedef enum {
   ST_PB80Style,
   ST_Generic,
   ST_MDVStyle,
-  ST_VoyagerStyle
+  ST_VoyagerStyle,
+  ST_TimeStyle
 } StatusCellsStyle;
 
 typedef struct BrailleDataStruct BrailleData;

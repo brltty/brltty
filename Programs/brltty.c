@@ -20,8 +20,10 @@
 
 #include <string.h>
 #include <ctype.h>
-#include <signal.h>
 #include <errno.h>
+#include <errno.h>
+#include <signal.h>
+#include <time.h>
 
 #ifdef HAVE_SYS_WAIT_H
 #include <sys/wait.h>
@@ -294,25 +296,25 @@ renderNumberVertical (unsigned char *cell, int number) {
 }
 
 static void
-renderCoordinateUpper (unsigned char *cells, int x, int y) {
+renderCoordinatesUpper (unsigned char *cells, int x, int y) {
   renderNumberUpper(&cells[0], x);
   renderNumberUpper(&cells[2], y);
 }
 
 static void
-renderCoordinateLower (unsigned char *cells, int x, int y) {
+renderCoordinatesLower (unsigned char *cells, int x, int y) {
   renderNumberLower(&cells[0], x);
   renderNumberLower(&cells[2], y);
 }
 
 static void
-renderCoordinateVertical (unsigned char *cells, int x, int y) {
+renderCoordinatesVertical (unsigned char *cells, int x, int y) {
   renderNumberUpper(&cells[0], y);
   renderNumberLower(&cells[0], x);
 }
 
 static void
-renderCoordinateAlphabetic (unsigned char *cell, int x, int y) {
+renderCoordinatesAlphabetic (unsigned char *cell, int x, int y) {
   /* The coords are given with letters as the DOS tsr */
   *cell = ((updateIntervals / 16) % (y / 25 + 1))? 0:
           convertCharacterToDots(textTable, (y % 25 + WC_C('a'))) |
@@ -351,16 +353,16 @@ renderStatusCells_Alva (unsigned char *cells) {
     cells[1] = convertCharacterToDots(textTable, WC_C('l'));
     cells[2] = convertCharacterToDots(textTable, WC_C('p'));
   } else {
-    renderCoordinateAlphabetic(&cells[0], scr.posx, scr.posy);
-    renderCoordinateAlphabetic(&cells[1], p->winx, p->winy);
+    renderCoordinatesAlphabetic(&cells[0], scr.posx, scr.posy);
+    renderCoordinatesAlphabetic(&cells[1], p->winx, p->winy);
     renderStateLetter(&cells[2]);
   }
 }
 
 static void
 renderStatusCells_Tieman (unsigned char *cells) {
-  renderCoordinateUpper(&cells[0], scr.posx+1, scr.posy+1);
-  renderCoordinateLower(&cells[0], p->winx+1, p->winy+1);
+  renderCoordinatesUpper(&cells[0], scr.posx+1, scr.posy+1);
+  renderCoordinatesLower(&cells[0], p->winx+1, p->winy+1);
   renderStateDots(&cells[4]);
 }
 
@@ -400,7 +402,7 @@ renderStatusCells_generic (unsigned char *cells) {
 
 static void
 renderStatusCells_MDV (unsigned char *cells) {
-  renderCoordinateVertical(&cells[0], p->winx+1, p->winy+1);
+  renderCoordinatesVertical(&cells[0], p->winx+1, p->winy+1);
 }
 
 static void
@@ -414,6 +416,14 @@ renderStatusCells_Voyager (unsigned char *cells) {
   }
 }
 
+static void
+renderStatusCells_time (unsigned char *cells) {
+  time_t now = time(NULL);
+  struct tm *local = localtime(&now);
+  renderNumberUpper(cells, local->tm_hour);
+  renderNumberLower(cells, local->tm_min);
+}
+
 static const StatusStyleEntry statusStyleTable[] = {
   {renderStatusCells_none, 0},
   {renderStatusCells_Alva, 3},
@@ -421,7 +431,8 @@ static const StatusStyleEntry statusStyleTable[] = {
   {renderStatusCells_PB80, 1},
   {renderStatusCells_generic, BRL_genericStatusCellCount},
   {renderStatusCells_MDV, 2},
-  {renderStatusCells_Voyager, 3}
+  {renderStatusCells_Voyager, 3},
+  {renderStatusCells_time, 2}
 };
 static const unsigned int statusStyleCount = ARRAY_COUNT(statusStyleTable);
 
@@ -573,8 +584,8 @@ showInfo (void) {
     char prefix[cellCount];
 
     memset(cells, 0, cellCount);
-    renderCoordinateUpper(&cells[0], scr.posx+1, scr.posy+1);
-    renderCoordinateLower(&cells[0], p->winx+1, p->winy+1);
+    renderCoordinatesUpper(&cells[0], scr.posx+1, scr.posy+1);
+    renderCoordinatesLower(&cells[0], p->winx+1, p->winy+1);
     renderStateDots(&cells[4]);
 
     memset(prefix, 'x', cellCount);
@@ -2897,9 +2908,9 @@ message (const char *mode, const char *string, short flags) {
 int
 showDotPattern (unsigned char dots, unsigned char duration) {
   if (braille->writeStatus && (brl.statusColumns > 0)) {
-    unsigned int count = brl.statusColumns * brl.statusRows;
-    unsigned char cells[count];        /* status cell buffer */
-    memset(cells, dots, count);
+    unsigned int length = brl.statusColumns * brl.statusRows;
+    unsigned char cells[length];        /* status cell buffer */
+    memset(cells, dots, length);
     if (!braille->writeStatus(&brl, cells)) return 0;
   }
 
