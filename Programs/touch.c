@@ -22,6 +22,7 @@
 
 #include "misc.h"
 #include "touch.h"
+#include "brltty.h"
 
 static int touchLeft;
 static int touchRight;
@@ -110,8 +111,8 @@ touchCropWindow (BrailleDisplay *brl, const unsigned char *pressure) {
 
 static inline void
 touchUncropWindow (BrailleDisplay *brl) {
-  touchLeft = 0;
-  touchRight = brl->x - 1;
+  touchLeft = textStart;
+  touchRight = textStart + textCount - 1;
   touchTop = 0;
   touchBottom = brl->y - 1;
 }
