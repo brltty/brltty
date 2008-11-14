@@ -30,10 +30,9 @@
 #include "misc.h"
 
 typedef enum {
-  PARM_DEBUGPACKETS,
-  PARM_STATUSCELLS
+  PARM_DEBUGPACKETS
 } DriverParameter;
-#define BRLPARMS "debugpackets", "statuscells"
+#define BRLPARMS "debugpackets"
 
 #define BRLSTAT ST_AlvaStyle
 #define BRL_HAVE_STATUS_CELLS
@@ -750,17 +749,6 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
               {
                 int cells = model->statusCells;
-                const char *word = parameters[PARM_STATUSCELLS];
-                if (word && *word) {
-                  int maximum = textCells / 2;
-                  int minimum = -maximum;
-                  int value;
-                  if (validateInteger(&value, word, &minimum, &maximum)) {
-                    cells = value;
-                  } else {
-                    LogPrint(LOG_WARNING, "%s: %s", "invalid status cells specification", word);
-                  }
-                }
 
                 if (cells) {
                   if (cells < 0) {

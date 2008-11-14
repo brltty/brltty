@@ -165,7 +165,6 @@
 
 # FreedomScientific Braille Driver Parameters
 #braille-parameters fs:DebugPackets=no # [no,yes]
-#braille-parameters fs:StatusCells= # [0,n,-n]
 
 # HandyTech Braille Driver Parameters
 #braille-parameters ht:InputMode=no # [no,yes]
