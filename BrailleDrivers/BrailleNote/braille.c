@@ -29,7 +29,6 @@
 
 #include "misc.h"
 
-#define BRL_HAVE_STATUS_CELLS
 #define BRL_HAVE_PACKET_IO
 #include "brl_driver.h"
 #include "braille.h"
@@ -404,7 +403,6 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
                 statusCells -= 2;
                 brl->x += 2;
               }
-              if ((brl->statusColumns = statusCells)) brl->statusRows = 1;
               dataCells = brl->x * brl->y;
               cellCount = statusCells + dataCells;
               if ((cellBuffer = malloc(cellCount))) {
@@ -464,17 +462,6 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   if (memcmp(dataArea, brl->buffer, dataCells) != 0) {
     memcpy(dataArea, brl->buffer, dataCells);
     refreshCells(brl);
-  }
-  return 1;
-}
-
-static int
-brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) {
-  if (memcmp(statusArea, status, statusCells) != 0) {
-    memcpy(statusArea, status, statusCells);
-    /* refreshCells();
-     * Not needed since writebrl will be called shortly.
-     */
   }
   return 1;
 }
