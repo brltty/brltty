@@ -35,7 +35,6 @@ typedef enum {
 #define BRLPARMS "debugpackets"
 
 #define BRLSTAT ST_AlvaStyle
-#define BRL_HAVE_STATUS_CELLS
 #define BRL_HAVE_PACKET_IO
 #define BRL_HAVE_FIRMNESS
 #include "brl_driver.h"
@@ -240,8 +239,7 @@ typedef struct {
 typedef struct {
   const char *identifier;
   const DotsTable *dotsTable;
-  unsigned char totalCells;
-  unsigned char statusCells;
+  unsigned char cellCount;
   signed char hotkeysRow;
 } ModelEntry;
 
@@ -249,25 +247,20 @@ static const DotsTable dots12345678 = {0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40,
 static const DotsTable dots12374568 = {0X01, 0X02, 0X04, 0X10, 0X20, 0X40, 0X08, 0X80};
 
 static const ModelEntry modelTable[] = {
-  {"Focus 40"     , &dots12345678, 40, 0, -1},
-  {"Focus 44"     , &dots12374568, 44, 3, -1},
-  {"Focus 70"     , &dots12374568, 70, 3, -1},
-  {"Focus 80"     , &dots12345678, 80, 0, -1},
-  {"Focus 84"     , &dots12374568, 84, 3, -1},
-  {"pm display 20", &dots12345678, 20, 0,  1},
-  {"pm display 40", &dots12345678, 40, 0,  1},
-  {"pm display 80", &dots12345678, 80, 0,  1},
-  {NULL           , NULL         ,  0, 0, -1}
+  {"Focus 40"     , &dots12345678, 40, -1},
+  {"Focus 44"     , &dots12374568, 44, -1},
+  {"Focus 70"     , &dots12374568, 70, -1},
+  {"Focus 80"     , &dots12345678, 80, -1},
+  {"Focus 84"     , &dots12374568, 84, -1},
+  {"pm display 20", &dots12345678, 20,  1},
+  {"pm display 40", &dots12345678, 40,  1},
+  {"pm display 80", &dots12345678, 80,  1},
+  {NULL           , NULL         ,  0, -1}
 };
 static const ModelEntry *model;
 
 static TranslationTable outputTable;
 static unsigned char outputBuffer[84];
-
-static unsigned char textOffset;
-static unsigned char textCells;
-static unsigned char statusOffset;
-static unsigned char statusCells;
 
 static int writeFrom;
 static int writeTo;
@@ -605,8 +598,8 @@ getPacket (BrailleDisplay *brl, Packet *packet) {
           switch (packet->header.arg1) {
             case PKT_ERR_TIMEOUT: {
               int originalLimit = outputPayloadLimit;
-              if (outputPayloadLimit > model->totalCells)
-                outputPayloadLimit = model->totalCells;
+              if (outputPayloadLimit > model->cellCount)
+                outputPayloadLimit = model->cellCount;
               if (outputPayloadLimit > 1)
                 outputPayloadLimit--;
               if (outputPayloadLimit != originalLimit)
@@ -704,7 +697,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
               memset(&generic, 0, sizeof(generic));
               generic.identifier = "Generic";
-              generic.totalCells = 20;
+              generic.cellCount = 20;
               generic.dotsTable = &dots12345678;
               generic.hotkeysRow = 1;
 
@@ -733,9 +726,9 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
                   int size;
                   if (isInteger(&size, ++word)) {
                     static char identifier[sizeof(response.payload.info.model)];
-                    generic.totalCells = size;
+                    generic.cellCount = size;
                     snprintf(identifier, sizeof(identifier), "%s %d",
-                             generic.identifier, generic.totalCells);
+                             generic.identifier, generic.cellCount);
                     generic.identifier = identifier;
                   }
                 }
@@ -744,27 +737,10 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
             if (model) {
               makeOutputTable(model->dotsTable[0], outputTable);
-              textCells = model->totalCells;
-              textOffset = statusOffset = 0;
 
-              {
-                int cells = model->statusCells;
-
-                if (cells) {
-                  if (cells < 0) {
-                    statusOffset = textCells + cells;
-                    cells = -cells;
-                  } else {
-                    textOffset = cells + 1;
-                  }
-                  textCells -= cells + 1;
-                }
-                statusCells = cells;
-              }
-
-              memset(outputBuffer, 0, model->totalCells);
+              memset(outputBuffer, 0, model->cellCount);
               writeFrom = 0;
-              writeTo = model->totalCells - 1;
+              writeTo = model->cellCount - 1;
 
               acknowledgementHandler = NULL;
               acknowledgementsMissing = 0;
@@ -776,9 +752,9 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
               activeKeys = 0;
               wheelCounter = 0;
 
-              LogPrint(LOG_INFO, "Detected %s: text=%d, status=%d, firmware=%s",
+              LogPrint(LOG_INFO, "Detected %s: cells=%d, firmware=%s",
                        model->identifier,
-                       textCells, statusCells,
+                       model->cellCount,
                        response.payload.info.firmware);
             }
             break;
@@ -796,9 +772,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
         }
 
         if (acknowledged && model) {
-          brl->x = textCells;
+          brl->x = model->cellCount;
           brl->y = 1;
-          if ((brl->statusColumns = statusCells)) brl->statusRows = 1;
           return 1;
         }
       }
@@ -825,14 +800,8 @@ brl_destruct (BrailleDisplay *brl) {
 
 static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
-  updateCells(brl, brl->buffer, textCells, textOffset);
+  updateCells(brl, brl->buffer, model->cellCount, 0);
   writeRequest(brl);
-  return 1;
-}
-
-static int
-brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) {
-  updateCells(brl, status, statusCells, statusOffset);
   return 1;
 }
 
@@ -1089,7 +1058,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
           static const int keyCount = ARRAY_COUNT(keys);
 
           unsigned int key;
-          button -= (model->totalCells - keyCount) / 2;
+          button -= (model->cellCount - keyCount) / 2;
 
           if (button < 0) {
             key = KEY_ADVANCE_LEFT;
@@ -1109,8 +1078,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 
         activeKeys = 0;
         if (press) {
-          if ((button >= textOffset) && (button < (textOffset + textCells))) {
-            button -= textOffset;
+          if (button < model->cellCount) {
             switch (row) {
               default:
                 break;
@@ -1171,8 +1139,6 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
                 break;
             }
             if (command != BRL_CMD_NOOP) command += button;
-          } else if ((button >= statusOffset) && (button < (statusOffset + statusCells))) {
-            button -= statusOffset;
           }
         }
 
