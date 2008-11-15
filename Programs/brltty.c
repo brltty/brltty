@@ -297,17 +297,17 @@ renderNumberVertical (unsigned char *cell, int number) {
 }
 
 static void
-renderCoordinatesVertical (unsigned char *cells, int x, int y) {
-  renderNumberUpper(&cells[0], y);
-  renderNumberLower(&cells[0], x);
+renderCoordinatesVertical (unsigned char *cells, int column, int row) {
+  renderNumberUpper(&cells[0], row);
+  renderNumberLower(&cells[0], column);
 }
 
 static void
-renderCoordinatesAlphabetic (unsigned char *cell, int x, int y) {
-  /* The coords are given with letters as the DOS tsr */
-  *cell = ((updateIntervals / 16) % (y / 25 + 1))? 0:
-          convertCharacterToDots(textTable, (y % 25 + WC_C('a'))) |
-          ((x / brl.x) << 6);
+renderCoordinatesAlphabetic (unsigned char *cell, int column, int row) {
+  /* The coordinates are given with letters as the DOS tsr */
+  *cell = ((updateIntervals / 16) % (row / 25 + 1))? 0:
+          convertCharacterToDots(textTable, (row % 25 + WC_C('a'))) |
+          ((column / textCount) << 6);
 }
 
 static void
@@ -457,7 +457,7 @@ renderStatusStyle_Tieman (unsigned char *cells) {
 
 static void
 renderStatusStyle_PB80 (unsigned char *cells) {
-  renderNumberVertical(&cells[0], p->winy+1);
+  renderStatusField_windowRow(&cells[0]);
 }
 
 static void
@@ -491,18 +491,14 @@ renderStatusStyle_generic (unsigned char *cells) {
 
 static void
 renderStatusStyle_MDV (unsigned char *cells) {
-  renderCoordinatesVertical(&cells[0], p->winx+1, p->winy+1);
+  renderStatusField_windowCoordinates(&cells[0]);
 }
 
 static void
 renderStatusStyle_Voyager (unsigned char *cells) {
-  renderNumberVertical(&cells[0], p->winy+1);
-  renderNumberVertical(&cells[1], scr.posy+1);
-  if (isFrozenScreen()) {
-    cells[2] = convertCharacterToDots(textTable, WC_C('F'));
-  } else {
-    renderNumberVertical(&cells[2], scr.posx+1);
-  }
+  renderStatusField_windowRow(&cells[0]);
+  renderStatusField_cursorRow(&cells[1]);
+  renderStatusField_cursorColumn(&cells[2]);
 }
 
 static void
