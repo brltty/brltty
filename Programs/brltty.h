@@ -63,7 +63,11 @@ typedef enum {
   sfCursorCoordinates,
   sfCursorColumn,
   sfCursorRow,
-  sfScreenNumber
+  sfCursorAndWindowColumn,
+  sfCursorAndWindowRow,
+  sfScreenNumber,
+  sfStateDots,
+  sfTime
 } StatusField;
 
 /*

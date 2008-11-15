@@ -297,18 +297,6 @@ renderNumberVertical (unsigned char *cell, int number) {
 }
 
 static void
-renderCoordinatesUpper (unsigned char *cells, int x, int y) {
-  renderNumberUpper(&cells[0], x);
-  renderNumberUpper(&cells[2], y);
-}
-
-static void
-renderCoordinatesLower (unsigned char *cells, int x, int y) {
-  renderNumberLower(&cells[0], x);
-  renderNumberLower(&cells[2], y);
-}
-
-static void
 renderCoordinatesVertical (unsigned char *cells, int x, int y) {
   renderNumberUpper(&cells[0], y);
   renderNumberLower(&cells[0], x);
@@ -329,18 +317,6 @@ renderStateLetter (unsigned char *cell) {
                                  isFrozenScreen()? WC_C('f'):
                                  p->trackCursor? WC_C('t'):
                                  WC_C(' '));
-}
-
-static void
-renderStateDots (unsigned char *cell) {
-  *cell = (isFrozenScreen()    ? BRL_DOT1: 0) |
-          (prefs.showCursor    ? BRL_DOT4: 0) |
-          (p->showAttributes   ? BRL_DOT2: 0) |
-          (prefs.cursorStyle   ? BRL_DOT5: 0) |
-          (prefs.alertTunes    ? BRL_DOT3: 0) |
-          (prefs.blinkingCursor? BRL_DOT6: 0) |
-          (p->trackCursor      ? BRL_DOT7: 0) |
-          (prefs.slidingWindow ? BRL_DOT8: 0);
 }
 
 typedef void (*RenderStatusField) (unsigned char *cells);
@@ -376,8 +352,40 @@ renderStatusField_cursorRow (unsigned char *cells) {
 }
 
 static void
+renderStatusField_cursorAndWindowColumn (unsigned char *cells) {
+  renderNumberUpper(cells, scr.posx+1);
+  renderNumberLower(cells, p->winx+1);
+}
+
+static void
+renderStatusField_cursorAndWindowRow (unsigned char *cells) {
+  renderNumberUpper(cells, scr.posy+1);
+  renderNumberLower(cells, p->winy+1);
+}
+
+static void
 renderStatusField_screenNumber (unsigned char *cells) {
   renderNumberVertical(cells, scr.number);
+}
+
+static void
+renderStatusField_stateDots (unsigned char *cells) {
+  *cells = (isFrozenScreen()    ? BRL_DOT1: 0) |
+           (prefs.showCursor    ? BRL_DOT4: 0) |
+           (p->showAttributes   ? BRL_DOT2: 0) |
+           (prefs.cursorStyle   ? BRL_DOT5: 0) |
+           (prefs.alertTunes    ? BRL_DOT3: 0) |
+           (prefs.blinkingCursor? BRL_DOT6: 0) |
+           (p->trackCursor      ? BRL_DOT7: 0) |
+           (prefs.slidingWindow ? BRL_DOT8: 0);
+}
+
+static void
+renderStatusField_time (unsigned char *cells) {
+  time_t now = time(NULL);
+  struct tm *local = localtime(&now);
+  renderNumberUpper(cells, local->tm_hour);
+  renderNumberLower(cells, local->tm_min);
 }
 
 typedef struct {
@@ -393,7 +401,11 @@ static const StatusFieldEntry statusFieldTable[] = {
   {renderStatusField_cursorCoordinates, 2},
   {renderStatusField_cursorColumn, 1},
   {renderStatusField_cursorRow, 1},
+  {renderStatusField_cursorAndWindowColumn, 2},
+  {renderStatusField_cursorAndWindowRow, 2},
   {renderStatusField_screenNumber, 1},
+  {renderStatusField_stateDots, 1},
+  {renderStatusField_time, 2}
 };
 static const unsigned int statusFieldCount = ARRAY_COUNT(statusFieldTable);
 
@@ -438,9 +450,9 @@ renderStatusStyle_Alva (unsigned char *cells) {
 
 static void
 renderStatusStyle_Tieman (unsigned char *cells) {
-  renderCoordinatesUpper(&cells[0], scr.posx+1, scr.posy+1);
-  renderCoordinatesLower(&cells[0], p->winx+1, p->winy+1);
-  renderStateDots(&cells[4]);
+  renderStatusField_cursorAndWindowColumn(&cells[0]);
+  renderStatusField_cursorAndWindowRow(&cells[2]);
+  renderStatusField_stateDots(&cells[4]);
 }
 
 static void
@@ -495,10 +507,7 @@ renderStatusStyle_Voyager (unsigned char *cells) {
 
 static void
 renderStatusStyle_time (unsigned char *cells) {
-  time_t now = time(NULL);
-  struct tm *local = localtime(&now);
-  renderNumberUpper(cells, local->tm_hour);
-  renderNumberLower(cells, local->tm_min);
+  renderStatusField_time(cells);
 }
 
 typedef struct {
@@ -671,9 +680,9 @@ showInfo (void) {
     char prefix[cellCount];
 
     memset(cells, 0, cellCount);
-    renderCoordinatesUpper(&cells[0], scr.posx+1, scr.posy+1);
-    renderCoordinatesLower(&cells[0], p->winx+1, p->winy+1);
-    renderStateDots(&cells[4]);
+    renderStatusField_cursorAndWindowColumn(&cells[0]);
+    renderStatusField_cursorAndWindowRow(&cells[2]);
+    renderStatusField_stateDots(&cells[4]);
 
     memset(prefix, 'x', cellCount);
     snprintf(text, sizeof(text), "%.*s %02d %c%c%c%c%c%c%n",

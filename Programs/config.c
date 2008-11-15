@@ -1431,7 +1431,11 @@ updatePreferences (void) {
       strtext("Cursor Coordinates"),
       strtext("Cursor Column"),
       strtext("Cursor Row"),
-      strtext("Screen Number")
+      strtext("Cursor and Window Column"),
+      strtext("Cursor and Window Row"),
+      strtext("Screen Number"),
+      strtext("State Dots"),
+      strtext("Time")
     };
 
     static const char *textStyles[] = {
