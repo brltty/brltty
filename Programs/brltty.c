@@ -343,12 +343,88 @@ renderStateDots (unsigned char *cell) {
           (prefs.slidingWindow ? BRL_DOT8: 0);
 }
 
+typedef void (*RenderStatusField) (unsigned char *cells);
+
 static void
-renderStatusCells_none (unsigned char *cells) {
+renderStatusField_windowCoordinates (unsigned char *cells) {
+  renderCoordinatesVertical(cells, p->winx+1, p->winy+1);
 }
 
 static void
-renderStatusCells_Alva (unsigned char *cells) {
+renderStatusField_windowColumn (unsigned char *cells) {
+  renderNumberVertical(cells, p->winx+1);
+}
+
+static void
+renderStatusField_windowRow (unsigned char *cells) {
+  renderNumberVertical(cells, p->winy+1);
+}
+
+static void
+renderStatusField_cursorCoordinates (unsigned char *cells) {
+  renderCoordinatesVertical(cells, scr.posx+1, scr.posy+1);
+}
+
+static void
+renderStatusField_cursorColumn (unsigned char *cells) {
+  renderNumberVertical(cells, scr.posx+1);
+}
+
+static void
+renderStatusField_cursorRow (unsigned char *cells) {
+  renderNumberVertical(cells, scr.posy+1);
+}
+
+static void
+renderStatusField_screenNumber (unsigned char *cells) {
+  renderNumberVertical(cells, scr.number);
+}
+
+typedef struct {
+  RenderStatusField render;
+  unsigned char length;
+} StatusFieldEntry;
+
+static const StatusFieldEntry statusFieldTable[] = {
+  {NULL, 0},
+  {renderStatusField_windowCoordinates, 2},
+  {renderStatusField_windowColumn, 1},
+  {renderStatusField_windowRow, 1},
+  {renderStatusField_cursorCoordinates, 2},
+  {renderStatusField_cursorColumn, 1},
+  {renderStatusField_cursorRow, 1},
+  {renderStatusField_screenNumber, 1},
+};
+static const unsigned int statusFieldCount = ARRAY_COUNT(statusFieldTable);
+
+unsigned int
+getStatusFieldsLength (const unsigned char *fields) {
+  unsigned int length = 0;
+  while (*fields != sfEnd) length += statusFieldTable[*fields++].length;
+  return length;
+}
+
+static void
+renderStatusFields (const unsigned char *fields, unsigned char *cells) {
+  while (*fields != sfEnd) {
+    StatusField field = *fields++;
+
+    if (field < statusFieldCount) {
+      const StatusFieldEntry *sf = &statusFieldTable[field];
+      sf->render(cells);
+      cells += sf->length;
+    }
+  }
+}
+
+typedef void (*RenderStatusStyle) (unsigned char *cells);
+
+static void
+renderStatusStyle_none (unsigned char *cells) {
+}
+
+static void
+renderStatusStyle_Alva (unsigned char *cells) {
   if (isHelpScreen()) {
     cells[0] = convertCharacterToDots(textTable, WC_C('h'));
     cells[1] = convertCharacterToDots(textTable, WC_C('l'));
@@ -361,19 +437,19 @@ renderStatusCells_Alva (unsigned char *cells) {
 }
 
 static void
-renderStatusCells_Tieman (unsigned char *cells) {
+renderStatusStyle_Tieman (unsigned char *cells) {
   renderCoordinatesUpper(&cells[0], scr.posx+1, scr.posy+1);
   renderCoordinatesLower(&cells[0], p->winx+1, p->winy+1);
   renderStateDots(&cells[4]);
 }
 
 static void
-renderStatusCells_PB80 (unsigned char *cells) {
+renderStatusStyle_PB80 (unsigned char *cells) {
   renderNumberVertical(&cells[0], p->winy+1);
 }
 
 static void
-renderStatusCells_generic (unsigned char *cells) {
+renderStatusStyle_generic (unsigned char *cells) {
   cells[BRL_firstStatusCell] = BRL_STATUS_CELLS_GENERIC;
   cells[BRL_GSC_BRLCOL] = p->winx+1;
   cells[BRL_GSC_BRLROW] = p->winy+1;
@@ -402,12 +478,12 @@ renderStatusCells_generic (unsigned char *cells) {
 }
 
 static void
-renderStatusCells_MDV (unsigned char *cells) {
+renderStatusStyle_MDV (unsigned char *cells) {
   renderCoordinatesVertical(&cells[0], p->winx+1, p->winy+1);
 }
 
 static void
-renderStatusCells_Voyager (unsigned char *cells) {
+renderStatusStyle_Voyager (unsigned char *cells) {
   renderNumberVertical(&cells[0], p->winy+1);
   renderNumberVertical(&cells[1], scr.posy+1);
   if (isFrozenScreen()) {
@@ -418,30 +494,40 @@ renderStatusCells_Voyager (unsigned char *cells) {
 }
 
 static void
-renderStatusCells_time (unsigned char *cells) {
+renderStatusStyle_time (unsigned char *cells) {
   time_t now = time(NULL);
   struct tm *local = localtime(&now);
   renderNumberUpper(cells, local->tm_hour);
   renderNumberLower(cells, local->tm_min);
 }
 
+typedef struct {
+  RenderStatusStyle render;
+  unsigned char length;
+} StatusStyleEntry;
+
 static const StatusStyleEntry statusStyleTable[] = {
-  {renderStatusCells_none, 0},
-  {renderStatusCells_Alva, 3},
-  {renderStatusCells_Tieman, 5},
-  {renderStatusCells_PB80, 1},
-  {renderStatusCells_generic, BRL_genericStatusCellCount},
-  {renderStatusCells_MDV, 2},
-  {renderStatusCells_Voyager, 3},
-  {renderStatusCells_time, 2}
+  {renderStatusStyle_none, 0},
+  {renderStatusStyle_Alva, 3},
+  {renderStatusStyle_Tieman, 5},
+  {renderStatusStyle_PB80, 1},
+  {renderStatusStyle_generic, BRL_genericStatusCellCount},
+  {renderStatusStyle_MDV, 2},
+  {renderStatusStyle_Voyager, 3},
+  {renderStatusStyle_time, 2}
 };
 static const unsigned int statusStyleCount = ARRAY_COUNT(statusStyleTable);
 
-const StatusStyleEntry *
+static const StatusStyleEntry *
 getStatusStyle (void) {
   unsigned char style = prefs.statusStyle;
   if (style >= statusStyleCount) style = 0;
   return &statusStyleTable[style];
+}
+
+unsigned int
+getStatusStyleLength (void) {
+  return getStatusStyle()->length;
 }
 
 static int
@@ -449,16 +535,16 @@ setStatusCells (void) {
   if (braille->writeStatus) {
     const StatusStyleEntry *style = getStatusStyle();
 
-    if (style->count > 0) {
+    if (style->length > 0) {
       unsigned int length = brl.statusColumns * brl.statusRows;
-      unsigned char cells[style->count];        /* status cell buffer */
+      unsigned char cells[style->length];        /* status cell buffer */
       style->render(cells);
 
       if ((prefs.statusStyle != ST_Generic) &&
-          (length > style->count)) {
+          (length > style->length)) {
         unsigned char buffer[length];
-        memcpy(buffer, cells, style->count);
-        memset(&buffer[style->count], 0, length-style->count);
+        memcpy(buffer, cells, style->length);
+        memset(&buffer[style->length], 0, length-style->length);
         if (!braille->writeStatus(&brl, buffer)) return 0;
       } else if (!braille->writeStatus(&brl, cells)) {
         return 0;
@@ -529,17 +615,17 @@ int
 writeBrailleCharacters (const char *mode, const wchar_t *characters, size_t length) {
   wchar_t textBuffer[brl.x * brl.y];
 
-  renderBrailleCharacters(textBuffer, brl.buffer,
-                          textStart, textCount, brl.x, brl.y,
-                          characters, length);
+  fillTextCells(textBuffer, brl.buffer,
+                textStart, textCount, brl.x, brl.y,
+                characters, length);
 
   {
     size_t modeLength = strlen(mode);
     wchar_t modeCharacters[modeLength];
     convertCharsToWchars(mode, modeCharacters, modeLength);
-    renderBrailleCharacters(textBuffer, brl.buffer,
-                            statusStart, statusCount, brl.x, brl.y,
-                            modeCharacters, modeLength);
+    fillTextCells(textBuffer, brl.buffer,
+                  statusStart, statusCount, brl.x, brl.y,
+                  modeCharacters, modeLength);
   }
 
   renderStatusSeparator(textBuffer, brl.buffer);
@@ -2770,35 +2856,28 @@ runProgram (void) {
         }
 
         if (statusCount > 0) {
-          const StatusStyleEntry *style = getStatusStyle();
+          if (prefs.statusStyle == ST_Generic) {
+            const unsigned char *fields = prefs.statusFields;
+            unsigned int length = getStatusFieldsLength(fields);
 
-          if (style->count > 0) {
-            unsigned char cells[style->count];
-            style->render(cells);
+            if (length > 0) {
+              unsigned char cells[length];
+              memset(cells, 0, length);
+              renderStatusFields(fields, cells);
+              fillStatusCells(textBuffer, brl.buffer,
+                              statusStart, statusCount, brl.x, brl.y,
+                              cells, length);
+            }
+          } else {
+            const StatusStyleEntry *style = getStatusStyle();
 
-            {
-              const unsigned char *source = cells;
-              unsigned char *target = brl.buffer + statusStart;
-              wchar_t *text = textBuffer + statusStart;
-              unsigned int length = statusCount * brl.y;
-              if (length > style->count) length = style->count;
-
-              while (length > 0) {
-                unsigned int count = statusCount;
-                if (count > length) count = length;
-
-                {
-                  int i;
-                  for (i=0; i<count; i+=1) {
-                    text[i] = UNICODE_BRAILLE_ROW | (target[i] = source[i]);
-                  }
-                }
-
-                source += count;
-                target += brl.x;
-                text += brl.x;
-                length -= count;
-              }
+            if (style->length > 0) {
+              unsigned char cells[style->length];
+              memset(cells, 0, style->length);
+              style->render(cells);
+              fillStatusCells(textBuffer, brl.buffer,
+                              statusStart, statusCount, brl.x, brl.y,
+                              cells, style->length);
             }
           }
 

@@ -27,6 +27,7 @@
 #include "async.h"
 #include "message.h"
 #include "charset.h"
+#include "unicode.h"
 #include "drivers.h"
 #include "brl.h"
 #include "ttb.h"
@@ -124,38 +125,68 @@ drainBrailleOutput (BrailleDisplay *brl, int minimumDelay) {
   return duration;
 }
 
-void
-renderBrailleCharacters (
+static void
+fillCells (
   wchar_t *text, unsigned char *dots,
   unsigned int start, unsigned int width,
   unsigned int columns, unsigned int rows,
-  const wchar_t *characters, size_t length
+  void *data, unsigned int length,
+  void (*fillCell) (wchar_t *text, unsigned char *dots, void *data)
 ) {
   text += start;
   dots += start;
 
   while (rows > 0) {
+    unsigned int index = 0;
     size_t count = length;
     if (count > width) count = width;
 
-    {
-      int i;
-      for (i=0; i<count; i+=1) {
-        dots[i] = convertCharacterToDots(textTable, (text[i] = *characters++));
-      }
+    while (index < count) {
+      fillCell(&text[index], &dots[index], data);
+      index += 1;
     }
+    length -= count;
 
-    {
-      unsigned int x = width - count;
-      wmemset(&text[count], WC_C(' '), x);
-      memset(&dots[count], 0, x);
-    }
+    count = width - index;
+    wmemset(&text[index], WC_C(' '), count);
+    memset(&dots[index], 0, count);
 
     text += columns;
     dots += columns;
-    length -= count;
     rows -= 1;
   }
+}
+
+static void
+fillTextCell (wchar_t *text, unsigned char *dots, void *data) {
+  wchar_t **character = data;
+  *dots = convertCharacterToDots(textTable, (*text = *(*character)++));
+}
+
+void
+fillTextCells (
+  wchar_t *text, unsigned char *dots,
+  unsigned int start, unsigned int width,
+  unsigned int columns, unsigned int rows,
+  const wchar_t *characters, size_t length
+) {
+  fillCells(text, dots, start, width, columns, rows, &characters, length, fillTextCell);
+}
+
+static void
+fillStatusCell (wchar_t *text, unsigned char *dots, void *data) {
+  unsigned char **cell = data;
+  *text = UNICODE_BRAILLE_ROW | (*dots = *(*cell)++);
+}
+
+void
+fillStatusCells (
+  wchar_t *text, unsigned char *dots,
+  unsigned int start, unsigned int width,
+  unsigned int columns, unsigned int rows,
+  const unsigned char *cells, size_t length
+) {
+  fillCells(text, dots, start, width, columns, rows, &cells, length, fillStatusCell);
 }
 
 

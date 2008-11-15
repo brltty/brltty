@@ -649,7 +649,13 @@ brailleDimensionsChanged (int infoLevel, int rows, int columns) {
     int separatorWidth = (prefs.statusSeparator == ssNone)? 0: 1;
     int statusWidth = prefs.statusCount;
 
-    if (!statusWidth) statusWidth = getStatusStyle()->count;
+    if (!statusWidth) {
+      if (prefs.statusStyle == ST_Generic) {
+        statusWidth = getStatusFieldsLength(prefs.statusFields);
+      } else {
+        statusWidth = getStatusStyleLength();
+      }
+    }
     statusWidth = MAX(MIN(statusWidth, brl.x-1-separatorWidth), 0);
 
     if (statusWidth > 0) {
@@ -769,6 +775,16 @@ loadPreferences (int change) {
         prefs.speechPitch = DEFAULT_SPEECH_PITCH;
       }
 
+      if (prefs.version == 3) {
+        prefs.version++;
+        prefs.autorepeatPanning = DEFAULT_AUTOREPEAT_PANNING;
+      }
+
+      if (prefs.version == 4) {
+        prefs.version++;
+        prefs.brailleSensitivity = DEFAULT_BRAILLE_SENSITIVITY;
+      }
+
       if (length == 45) {
         length++;
         prefs.statusPosition = DEFAULT_STATUS_POSITION;
@@ -784,14 +800,8 @@ loadPreferences (int change) {
         prefs.statusSeparator = DEFAULT_STATUS_SEPARATOR;
       }
 
-      if (prefs.version == 3) {
-        prefs.version++;
-        prefs.autorepeatPanning = DEFAULT_AUTOREPEAT_PANNING;
-      }
-
-      if (prefs.version == 4) {
-        prefs.version++;
-        prefs.brailleSensitivity = DEFAULT_BRAILLE_SENSITIVITY;
+      while (length < 58) {
+        prefs.statusFields[length++ - 48] = sfEnd;
       }
 
       if (change) changedPreferences();
@@ -866,6 +876,7 @@ resetPreferences (void) {
   prefs.statusCount = DEFAULT_STATUS_COUNT;
   prefs.statusSeparator = DEFAULT_STATUS_SEPARATOR;
   prefs.statusStyle = braille->statusStyle;
+  memset(prefs.statusFields, sfEnd, sizeof(prefs.statusFields));
 }
 
 static void

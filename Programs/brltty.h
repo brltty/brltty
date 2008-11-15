@@ -55,6 +55,17 @@ typedef enum {
   ssTextSide
 } StatusSeparator;
 
+typedef enum {
+  sfEnd,
+  sfWindowCoordinates,
+  sfWindowColumn,
+  sfWindowRow,
+  sfCursorCoordinates,
+  sfCursorColumn,
+  sfCursorRow,
+  sfScreenNumber
+} StatusField;
+
 /*
  * Structure definition for preferences (settings which are saveable).
  * PREFS_MAGIC_NUMBER has to be bumped whenever the definition of
@@ -111,19 +122,14 @@ typedef struct {
   unsigned char statusPosition;
   unsigned char statusCount;
   unsigned char statusSeparator;
+  unsigned char statusFields[10];
 } PACKED Preferences;
 
 extern Preferences prefs;		/* current preferences settings */
 #define PREFERENCES_TIME(time) ((time) * 10)
 
-typedef void (*RenderStatusCells) (unsigned char *cells);
-
-typedef struct {
-  RenderStatusCells render;
-  unsigned char count;
-} StatusStyleEntry;
-
-extern const StatusStyleEntry *getStatusStyle (void);
+extern unsigned int getStatusFieldsLength (const unsigned char *fields);
+extern unsigned int getStatusStyleLength (void);
 
 extern int writeBrailleCharacters (const char *mode, const wchar_t *characters, size_t length);
 extern int writeBrailleBytes (const char *mode, const char *bytes, size_t length);
