@@ -85,8 +85,6 @@
 #include "misc.h"
 #include "message.h"
 
-#define BRLSTAT ST_PB80Style
-#define BRL_HAVE_STATUS_CELLS
 #include "brl_driver.h"
 #include "braille.h"
 #include "io_serial.h"
@@ -439,8 +437,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
     displayType = PB65_80;
     has_sw = 1;
     sw_bcnt = SW_CNT81;
-    sw_lastkey = 79;
-    brl_cols = 80;
+    sw_lastkey = 80;
     speed = 2;
     slow_update = 2;
     LogPrint(LOG_INFO, "Detected PowerBraille 80");
@@ -639,18 +636,6 @@ display (BrailleDisplay *brl,
     break;
   };
 }
-
-static int
-brl_writeStatus (BrailleDisplay *brl, const unsigned char *s)
-/* Only the PB80, which actually has 81cells, can be considered to have status
-   cells, and it has only one. We could also decide to devote some of
-   the cells of the PB65? */
-{
-  if(ncells == 81)
-    dispbuf[80] = s[0];
-  return 1;
-}
-
 
 static void 
 display_all (BrailleDisplay *brl,
