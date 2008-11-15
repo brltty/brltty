@@ -310,15 +310,6 @@ renderCoordinatesAlphabetic (unsigned char *cell, int column, int row) {
           ((column / textCount) << 6);
 }
 
-static void
-renderStateLetter (unsigned char *cell) {
-  *cell = convertCharacterToDots(textTable,
-                                 p->showAttributes? WC_C('a'):
-                                 isFrozenScreen()? WC_C('f'):
-                                 p->trackCursor? WC_C('t'):
-                                 WC_C(' '));
-}
-
 typedef void (*RenderStatusField) (unsigned char *cells);
 
 static void
@@ -381,6 +372,15 @@ renderStatusField_stateDots (unsigned char *cells) {
 }
 
 static void
+renderStatusField_stateLetter (unsigned char *cells) {
+  *cells = convertCharacterToDots(textTable,
+                                  p->showAttributes? WC_C('a'):
+                                  isFrozenScreen()? WC_C('f'):
+                                  p->trackCursor? WC_C('t'):
+                                  WC_C(' '));
+}
+
+static void
 renderStatusField_time (unsigned char *cells) {
   time_t now = time(NULL);
   struct tm *local = localtime(&now);
@@ -388,78 +388,18 @@ renderStatusField_time (unsigned char *cells) {
   renderNumberLower(cells, local->tm_min);
 }
 
-typedef struct {
-  RenderStatusField render;
-  unsigned char length;
-} StatusFieldEntry;
-
-static const StatusFieldEntry statusFieldTable[] = {
-  {NULL, 0},
-  {renderStatusField_windowCoordinates, 2},
-  {renderStatusField_windowColumn, 1},
-  {renderStatusField_windowRow, 1},
-  {renderStatusField_cursorCoordinates, 2},
-  {renderStatusField_cursorColumn, 1},
-  {renderStatusField_cursorRow, 1},
-  {renderStatusField_cursorAndWindowColumn, 2},
-  {renderStatusField_cursorAndWindowRow, 2},
-  {renderStatusField_screenNumber, 1},
-  {renderStatusField_stateDots, 1},
-  {renderStatusField_time, 2}
-};
-static const unsigned int statusFieldCount = ARRAY_COUNT(statusFieldTable);
-
-unsigned int
-getStatusFieldsLength (const unsigned char *fields) {
-  unsigned int length = 0;
-  while (*fields != sfEnd) length += statusFieldTable[*fields++].length;
-  return length;
+static void
+renderStatusField_alphabeticWindowCoordinates (unsigned char *cells) {
+  renderCoordinatesAlphabetic(cells, p->winx, p->winy);
 }
 
 static void
-renderStatusFields (const unsigned char *fields, unsigned char *cells) {
-  while (*fields != sfEnd) {
-    StatusField field = *fields++;
-
-    if (field < statusFieldCount) {
-      const StatusFieldEntry *sf = &statusFieldTable[field];
-      sf->render(cells);
-      cells += sf->length;
-    }
-  }
-}
-
-typedef void (*RenderStatusStyle) (unsigned char *cells);
-
-static void
-renderStatusStyle_none (unsigned char *cells) {
+renderStatusField_alphabeticCursorCoordinates (unsigned char *cells) {
+  renderCoordinatesAlphabetic(cells, scr.posx, scr.posy);
 }
 
 static void
-renderStatusStyle_Alva (unsigned char *cells) {
-  renderCoordinatesAlphabetic(&cells[0], scr.posx, scr.posy);
-  renderCoordinatesAlphabetic(&cells[1], p->winx, p->winy);
-  renderStateLetter(&cells[2]);
-}
-
-static void
-renderStatusStyle_Tieman (unsigned char *cells) {
-  static const unsigned char fields[] = {
-    sfCursorAndWindowColumn, sfCursorAndWindowRow, sfStateDots, sfEnd
-  };
-  renderStatusFields(fields, cells);
-}
-
-static void
-renderStatusStyle_PB80 (unsigned char *cells) {
-  static const unsigned char fields[] = {
-    sfWindowRow, sfEnd
-  };
-  renderStatusFields(fields, cells);
-}
-
-static void
-renderStatusStyle_generic (unsigned char *cells) {
+renderStatusField_generic (unsigned char *cells) {
   cells[BRL_firstStatusCell] = BRL_STATUS_CELLS_GENERIC;
   cells[BRL_GSC_BRLCOL] = p->winx+1;
   cells[BRL_GSC_BRLROW] = p->winy+1;
@@ -486,45 +426,96 @@ renderStatusStyle_generic (unsigned char *cells) {
   cells[BRL_GSC_AUTOREPEAT] = prefs.autorepeat;
   cells[BRL_GSC_AUTOSPEAK] = prefs.autospeak;
 }
+typedef struct {
+  RenderStatusField render;
+  unsigned char length;
+} StatusFieldEntry;
 
-static void
-renderStatusStyle_MDV (unsigned char *cells) {
-  static const unsigned char fields[] = {
-    sfWindowCoordinates, sfEnd
-  };
-  renderStatusFields(fields, cells);
+static const StatusFieldEntry statusFieldTable[] = {
+  {NULL, 0},
+  {renderStatusField_windowCoordinates, 2},
+  {renderStatusField_windowColumn, 1},
+  {renderStatusField_windowRow, 1},
+  {renderStatusField_cursorCoordinates, 2},
+  {renderStatusField_cursorColumn, 1},
+  {renderStatusField_cursorRow, 1},
+  {renderStatusField_cursorAndWindowColumn, 2},
+  {renderStatusField_cursorAndWindowRow, 2},
+  {renderStatusField_screenNumber, 1},
+  {renderStatusField_stateDots, 1},
+  {renderStatusField_stateLetter, 1},
+  {renderStatusField_time, 2},
+  {renderStatusField_alphabeticWindowCoordinates, 1},
+  {renderStatusField_alphabeticCursorCoordinates, 1},
+  {renderStatusField_generic, BRL_genericStatusCellCount}
+};
+static const unsigned int statusFieldCount = ARRAY_COUNT(statusFieldTable);
+
+unsigned int
+getStatusFieldsLength (const unsigned char *fields) {
+  unsigned int length = 0;
+  while (*fields != sfEnd) length += statusFieldTable[*fields++].length;
+  return length;
 }
 
 static void
-renderStatusStyle_Voyager (unsigned char *cells) {
-  static const unsigned char fields[] = {
-    sfWindowRow, sfCursorRow, sfCursorColumn, sfEnd
-  };
-  renderStatusFields(fields, cells);
+renderStatusFields (const unsigned char *fields, unsigned char *cells) {
+  while (*fields != sfEnd) {
+    StatusField field = *fields++;
+
+    if (field < statusFieldCount) {
+      const StatusFieldEntry *sf = &statusFieldTable[field];
+      sf->render(cells);
+      cells += sf->length;
+    }
+  }
 }
 
-static void
-renderStatusStyle_time (unsigned char *cells) {
-  static const unsigned char fields[] = {
-    sfTime, sfEnd
-  };
-  renderStatusFields(fields, cells);
-}
+static const unsigned char statusStyleFields_none[] = {
+  sfEnd
+};
+
+static const unsigned char statusStyleFields_Alva[] = {
+  sfAlphabeticCursorCoordinates, sfAlphabeticWindowCoordinates, sfStateLetter, sfEnd
+};
+
+static const unsigned char statusStyleFields_Tieman[] = {
+  sfCursorAndWindowColumn, sfCursorAndWindowRow, sfStateDots, sfEnd
+};
+
+static const unsigned char statusStyleFields_PB80[] = {
+  sfWindowRow, sfEnd
+};
+
+static const unsigned char statusStyleFields_generic[] = {
+  sfGeneric, sfEnd
+};
+
+static const unsigned char statusStyleFields_MDV[] = {
+  sfWindowCoordinates, sfEnd
+};
+
+static const unsigned char statusStyleFields_Voyager[] = {
+  sfWindowRow, sfCursorRow, sfCursorColumn, sfEnd
+};
+
+static const unsigned char statusStyleFields_time[] = {
+  sfTime, sfEnd
+};
 
 typedef struct {
-  RenderStatusStyle render;
-  unsigned char length;
+  const unsigned char *fields;
 } StatusStyleEntry;
 
 static const StatusStyleEntry statusStyleTable[] = {
-  {renderStatusStyle_none, 0},
-  {renderStatusStyle_Alva, 3},
-  {renderStatusStyle_Tieman, 5},
-  {renderStatusStyle_PB80, 1},
-  {renderStatusStyle_generic, BRL_genericStatusCellCount},
-  {renderStatusStyle_MDV, 2},
-  {renderStatusStyle_Voyager, 3},
-  {renderStatusStyle_time, 2}
+  {statusStyleFields_none},
+  {statusStyleFields_Alva},
+  {statusStyleFields_Tieman},
+  {statusStyleFields_PB80},
+  {statusStyleFields_generic},
+  {statusStyleFields_MDV},
+  {statusStyleFields_Voyager},
+  {statusStyleFields_time}
 };
 static const unsigned int statusStyleCount = ARRAY_COUNT(statusStyleTable);
 
@@ -537,24 +528,27 @@ getStatusStyle (void) {
 
 unsigned int
 getStatusStyleLength (void) {
-  return getStatusStyle()->length;
+  return getStatusFieldsLength(getStatusStyle()->fields);
 }
 
 static int
 setStatusCells (void) {
   if (braille->writeStatus) {
     const StatusStyleEntry *style = getStatusStyle();
+    unsigned int length = getStatusFieldsLength(style->fields);
 
-    if (style->length > 0) {
-      unsigned int length = brl.statusColumns * brl.statusRows;
-      unsigned char cells[style->length];        /* status cell buffer */
-      style->render(cells);
+    if (length > 0) {
+      unsigned int count = brl.statusColumns * brl.statusRows;
+      unsigned char cells[length];        /* status cell buffer */
+
+      memset(cells, 0, length);
+      renderStatusFields(style->fields, cells);
 
       if ((prefs.statusStyle != ST_Generic) &&
-          (length > style->length)) {
-        unsigned char buffer[length];
-        memcpy(buffer, cells, style->length);
-        memset(&buffer[style->length], 0, length-style->length);
+          (count > length)) {
+        unsigned char buffer[count];
+        memcpy(buffer, cells, length);
+        memset(&buffer[length], 0, count-length);
         if (!braille->writeStatus(&brl, buffer)) return 0;
       } else if (!braille->writeStatus(&brl, cells)) {
         return 0;
@@ -681,7 +675,7 @@ showInfo (void) {
     char prefix[cellCount];
 
     memset(cells, 0, cellCount);
-    renderStatusStyle_Tieman(&cells[0]);
+    renderStatusFields(statusStyleTable[ST_TiemanStyle].fields, &cells[0]);
 
     memset(prefix, 'x', cellCount);
     snprintf(text, sizeof(text), "%.*s %02d %c%c%c%c%c%c%n",
@@ -2864,29 +2858,28 @@ runProgram (void) {
         }
 
         if (statusCount > 0) {
-          if (prefs.statusStyle == ST_Generic) {
-            const unsigned char *fields = prefs.statusFields;
-            unsigned int length = getStatusFieldsLength(fields);
+          const unsigned char *fields;
+          unsigned int length;
 
-            if (length > 0) {
-              unsigned char cells[length];
-              memset(cells, 0, length);
-              renderStatusFields(fields, cells);
-              fillStatusCells(textBuffer, brl.buffer,
-                              statusStart, statusCount, brl.x, brl.y,
-                              cells, length);
-            }
-          } else {
-            const StatusStyleEntry *style = getStatusStyle();
+          switch (prefs.statusStyle) {
+            case ST_Generic:
+              fields = prefs.statusFields;
+              break;
 
-            if (style->length > 0) {
-              unsigned char cells[style->length];
-              memset(cells, 0, style->length);
-              style->render(cells);
-              fillStatusCells(textBuffer, brl.buffer,
-                              statusStart, statusCount, brl.x, brl.y,
-                              cells, style->length);
+            default: {
+              const StatusStyleEntry *style = getStatusStyle();
+              fields = style->fields;
+              break;
             }
+          }
+
+          if ((length = getStatusFieldsLength(fields)) > 0) {
+            unsigned char cells[length];
+            memset(cells, 0, length);
+            renderStatusFields(fields, cells);
+            fillStatusCells(textBuffer, brl.buffer,
+                            statusStart, statusCount, brl.x, brl.y,
+                            cells, length);
           }
 
           fillStatusSeparator(textBuffer, brl.buffer);
