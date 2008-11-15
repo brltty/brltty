@@ -149,6 +149,7 @@ extern unsigned char cursorDots (void);
 extern BrailleDisplay brl;			/* braille driver reference */
 extern unsigned int textStart;
 extern unsigned int textCount;
+extern unsigned char textMaximized;
 extern unsigned int statusStart;
 extern unsigned int statusCount;
 extern unsigned int fullWindowShift;			/* Full window horizontal distance */
@@ -158,6 +159,9 @@ extern unsigned int verticalWindowShift;			/* Window vertical distance */
 extern void restartBrailleDriver (void);
 extern int constructBrailleDriver (void);
 extern void destructBrailleDriver (void);
+
+extern int reconfigureBrailleWindow (void);
+extern int haveStatusCells (void);
 
 #ifdef ENABLE_SPEECH_SUPPORT
 extern SpeechSynthesizer spk;

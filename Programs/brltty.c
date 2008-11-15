@@ -69,6 +69,7 @@ static unsigned char infoMode = 0; /* display screen image or info */
 BrailleDisplay brl;                        /* For the Braille routines */
 unsigned int textStart;
 unsigned int textCount;
+unsigned char textMaximized = 0;
 unsigned int statusStart;
 unsigned int statusCount;
 unsigned int fullWindowShift;                /* Full window horizontal distance */
@@ -1937,7 +1938,12 @@ runProgram (void) {
               }
               break;
             case BRL_CMD_INFO:
-              TOGGLE_NOPLAY(infoMode);
+              if ((prefs.statusPosition == spNone) || haveStatusCells()) {
+                TOGGLE_NOPLAY(infoMode);
+              } else {
+                TOGGLE_NOPLAY(textMaximized);
+                reconfigureBrailleWindow();
+              }
               break;
 
 #ifdef ENABLE_LEARN_MODE

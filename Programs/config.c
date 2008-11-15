@@ -633,19 +633,19 @@ applySpeechPreferences (void) {
 }
 #endif /* ENABLE_SPEECH_SUPPORT */
 
-static int
+int
 haveStatusCells (void) {
   return brl.statusColumns > 0;
 }
 
 static void
-dimensionsChanged (int infoLevel, int rows, int columns) {
+brailleDimensionsChanged (int infoLevel, int rows, int columns) {
   textStart = 0;
   textCount = columns;
   statusStart = 0;
   statusCount = 0;
 
-  if (!haveStatusCells()) {
+  if (!(textMaximized || haveStatusCells())) {
     int separatorWidth = (prefs.statusSeparator == ssNone)? 0: 1;
     int statusWidth = prefs.statusCount;
 
@@ -680,15 +680,15 @@ dimensionsChanged (int infoLevel, int rows, int columns) {
            fullWindowShift, halfWindowShift, verticalWindowShift);
 }
 
-static int
-changedWindowAttributes (void) {
-  dimensionsChanged(LOG_INFO, brl.y, brl.x);
+int
+reconfigureBrailleWindow (void) {
+  brailleDimensionsChanged(LOG_INFO, brl.y, brl.x);
   return 1;
 }
 
 static void
 changedPreferences (void) {
-  changedWindowAttributes();
+  reconfigureBrailleWindow();
   setTuneDevice(prefs.tuneDevice);
   applyBraillePreferences();
 
@@ -923,7 +923,7 @@ testStatusPosition (void) {
 
 static int
 changedStatusPosition (unsigned char setting) {
-  return changedWindowAttributes();
+  return reconfigureBrailleWindow();
 }
 
 static int
@@ -933,7 +933,7 @@ testStatusCount (void) {
 
 static int
 changedStatusCount (unsigned char setting) {
-  return changedWindowAttributes();
+  return reconfigureBrailleWindow();
 }
 
 static int
@@ -943,7 +943,7 @@ testStatusSeparator (void) {
 
 static int
 changedStatusSeparator (unsigned char setting) {
-  return changedWindowAttributes();
+  return reconfigureBrailleWindow();
 }
 
 static int
@@ -954,7 +954,7 @@ testStatusStyle (void) {
 static int
 changedStatusStyle (unsigned char setting) {
   if (!testStatusCount()) return 1;
-  return changedWindowAttributes();
+  return reconfigureBrailleWindow();
 }
 
 #ifdef ENABLE_SPEECH_SUPPORT
@@ -1249,7 +1249,7 @@ testSlidingWindow (void) {
 
 static int
 changedWindowOverlap (unsigned char setting) {
-  return changedWindowAttributes();
+  return reconfigureBrailleWindow();
 }
 
 static int
@@ -1810,7 +1810,7 @@ unloadDriverObject (void **object) {
 void
 initializeBraille (void) {
   initializeBrailleDisplay(&brl);
-  brl.bufferResized = &dimensionsChanged;
+  brl.bufferResized = &brailleDimensionsChanged;
   brl.dataDirectory = opt_dataDirectory;
 }
 
