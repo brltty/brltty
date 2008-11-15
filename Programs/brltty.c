@@ -2922,7 +2922,7 @@ message (const char *mode, const char *string, short flags) {
   if (!mode) mode = "";
 
 #ifdef ENABLE_SPEECH_SUPPORT
-  if (prefs.alertTunes && !(flags & MSG_SILENT)) sayString(&spk, string, 1);
+  if (prefs.autospeak && !(flags & MSG_SILENT)) sayString(&spk, string, 1);
 #endif /* ENABLE_SPEECH_SUPPORT */
 
   if (braille && brl.buffer) {
