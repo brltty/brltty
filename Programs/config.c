@@ -1591,7 +1591,7 @@ updatePreferences (void) {
 
     while (ok) {
       MenuItem *item = &menu[menuIndex];
-      char valueBuffer[0X100];
+      char valueBuffer[0X10];
       const char *value;
 
       testProgramTermination();
@@ -1614,8 +1614,7 @@ updatePreferences (void) {
         char line[lineLength + 1];
 
         /* First we draw the current menu item in the buffer */
-        snprintf(line,  sizeof(line), "%s%s%s",
-                 label, delimiter, value);
+        snprintf(line,  sizeof(line), "%s%s%s", label, delimiter, value);
 
 #ifdef ENABLE_SPEECH_SUPPORT
         if (prefs.autospeak) {

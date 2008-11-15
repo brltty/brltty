@@ -564,7 +564,7 @@ setStatusCells (void) {
 
 static void
 fillStatusSeparator (wchar_t *text, unsigned char *dots) {
-  if (prefs.statusSeparator != ssNone) {
+  if (statusCount > 0) {
     int onRight = statusStart > 0;
     unsigned int column = (onRight? statusStart: textStart) - 1;
 
