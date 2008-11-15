@@ -166,7 +166,7 @@ extern void restartBrailleDriver (void);
 extern int constructBrailleDriver (void);
 extern void destructBrailleDriver (void);
 
-extern int reconfigureBrailleWindow (void);
+extern void reconfigureWindow (void);
 extern int haveStatusCells (void);
 
 #ifdef ENABLE_SPEECH_SUPPORT

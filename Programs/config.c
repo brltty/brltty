@@ -639,7 +639,7 @@ haveStatusCells (void) {
 }
 
 static void
-brailleDimensionsChanged (int infoLevel, int rows, int columns) {
+windowConfigurationChanged (int infoLevel, int rows, int columns) {
   textStart = 0;
   textCount = columns;
   statusStart = 0;
@@ -686,15 +686,14 @@ brailleDimensionsChanged (int infoLevel, int rows, int columns) {
            fullWindowShift, halfWindowShift, verticalWindowShift);
 }
 
-int
-reconfigureBrailleWindow (void) {
-  brailleDimensionsChanged(LOG_INFO, brl.y, brl.x);
-  return 1;
+void
+reconfigureWindow (void) {
+  windowConfigurationChanged(LOG_INFO, brl.y, brl.x);
 }
 
 static void
 changedPreferences (void) {
-  reconfigureBrailleWindow();
+  reconfigureWindow();
   setTuneDevice(prefs.tuneDevice);
   applyBraillePreferences();
 
@@ -934,7 +933,8 @@ testStatusPosition (void) {
 
 static int
 changedStatusPosition (unsigned char setting) {
-  return reconfigureBrailleWindow();
+  reconfigureWindow();
+  return 1;
 }
 
 static int
@@ -944,7 +944,8 @@ testStatusCount (void) {
 
 static int
 changedStatusCount (unsigned char setting) {
-  return reconfigureBrailleWindow();
+  reconfigureWindow();
+  return 1;
 }
 
 static int
@@ -954,7 +955,8 @@ testStatusSeparator (void) {
 
 static int
 changedStatusSeparator (unsigned char setting) {
-  return reconfigureBrailleWindow();
+  reconfigureWindow();
+  return 1;
 }
 
 static int
@@ -964,9 +966,36 @@ testStatusStyle (void) {
 
 static int
 changedStatusStyle (unsigned char setting) {
-  if (!testStatusCount()) return 1;
-  return reconfigureBrailleWindow();
+  if (testStatusCount()) reconfigureWindow();
+  return 1;
 }
+
+static int
+testStatusField (unsigned char index) {
+  return testStatusCount() && (prefs.statusStyle == ST_Generic) &&
+         ((index == 0) || (prefs.statusFields[index-1] != sfEnd));
+}
+
+static int
+changedStatusField (unsigned char index, unsigned char setting) {
+  if ((setting == sfEnd) && (prefs.statusFields[index+1] != sfEnd)) return 0;
+  reconfigureWindow();
+  return 1;
+}
+
+#define STATUS_FIELD_HANDLERS(n) \
+  static int testStatusField##n (void) { return testStatusField(n-1); } \
+  static int changedStatusField##n (unsigned char setting) { return changedStatusField(n-1, setting); }
+STATUS_FIELD_HANDLERS(1)
+STATUS_FIELD_HANDLERS(2)
+STATUS_FIELD_HANDLERS(3)
+STATUS_FIELD_HANDLERS(4)
+STATUS_FIELD_HANDLERS(5)
+STATUS_FIELD_HANDLERS(6)
+STATUS_FIELD_HANDLERS(7)
+STATUS_FIELD_HANDLERS(8)
+STATUS_FIELD_HANDLERS(9)
+#undef STATUS_FIELD_HANDLERS
 
 #ifdef ENABLE_SPEECH_SUPPORT
 static int
@@ -1260,7 +1289,8 @@ testSlidingWindow (void) {
 
 static int
 changedWindowOverlap (unsigned char setting) {
-  return reconfigureBrailleWindow();
+  reconfigureWindow();
+  return 1;
 }
 
 static int
@@ -1393,6 +1423,17 @@ updatePreferences (void) {
       strtext("Time")
     };
 
+    static const char *statusFields[] = {
+      strtext("End"),
+      strtext("Window Coordinates"),
+      strtext("Window Column"),
+      strtext("Window Row"),
+      strtext("Cursor Coordinates"),
+      strtext("Cursor Column"),
+      strtext("Cursor Row"),
+      strtext("Screen Number")
+    };
+
     static const char *textStyles[] = {
       "8-dot",
       "6-dot"
@@ -1457,6 +1498,7 @@ updatePreferences (void) {
     #define SYMBOLIC_ITEM(setting, changed, test, label, names) TEXT_ITEM(setting, changed, test, label, names, ARRAY_COUNT(names))
     #define BOOLEAN_ITEM(setting, changed, test, label) SYMBOLIC_ITEM(setting, changed, test, label, booleanValues)
     #define GLOB_ITEM(data, changed, test, label) TEXT_ITEM(data.setting, changed, test, label, data.paths, data.count)
+    #define STATUS_FIELD_ITEM(number) SYMBOLIC_ITEM(prefs.statusFields[number-1], changedStatusField##number, testStatusField##number, strtext("Status Field ") #number, statusFields)
     MenuItem menu[] = {
       BOOLEAN_ITEM(saveOnExit, NULL, NULL, strtext("Save on Exit")),
       SYMBOLIC_ITEM(prefs.textStyle, NULL, NULL, strtext("Text Style"), textStyles),
@@ -1514,6 +1556,15 @@ updatePreferences (void) {
       NUMERIC_ITEM(prefs.statusCount, changedStatusCount, testStatusCount, strtext("Status Count"), 0, MAX((int)brl.x/2-1, 0), 1),
       SYMBOLIC_ITEM(prefs.statusSeparator, changedStatusSeparator, testStatusSeparator, strtext("Status Separator"), statusSeparators),
       SYMBOLIC_ITEM(prefs.statusStyle, changedStatusStyle, testStatusStyle, strtext("Status Style"), statusStyles),
+      STATUS_FIELD_ITEM(1),
+      STATUS_FIELD_ITEM(2),
+      STATUS_FIELD_ITEM(3),
+      STATUS_FIELD_ITEM(4),
+      STATUS_FIELD_ITEM(5),
+      STATUS_FIELD_ITEM(6),
+      STATUS_FIELD_ITEM(7),
+      STATUS_FIELD_ITEM(8),
+      STATUS_FIELD_ITEM(9),
 #ifdef ENABLE_TABLE_SELECTION
       GLOB_ITEM(glob_textTable, changedTextTable, NULL, strtext("Text Table")),
       GLOB_ITEM(glob_attributesTable, changedAttributesTable, NULL, strtext("Attributes Table")),
@@ -1821,7 +1872,7 @@ unloadDriverObject (void **object) {
 void
 initializeBraille (void) {
   initializeBrailleDisplay(&brl);
-  brl.bufferResized = &brailleDimensionsChanged;
+  brl.bufferResized = &windowConfigurationChanged;
   brl.dataDirectory = opt_dataDirectory;
 }
 

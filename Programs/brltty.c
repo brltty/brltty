@@ -558,7 +558,7 @@ setStatusCells (void) {
 }
 
 static void
-renderStatusSeparator (wchar_t *text, unsigned char *dots) {
+fillStatusSeparator (wchar_t *text, unsigned char *dots) {
   if (prefs.statusSeparator != ssNone) {
     int onRight = statusStart > 0;
     unsigned int column = (onRight? statusStart: textStart) - 1;
@@ -628,7 +628,7 @@ writeBrailleCharacters (const char *mode, const wchar_t *characters, size_t leng
                   modeCharacters, modeLength);
   }
 
-  renderStatusSeparator(textBuffer, brl.buffer);
+  fillStatusSeparator(textBuffer, brl.buffer);
 
   return braille->writeWindow(&brl, textBuffer);
 }
@@ -2028,7 +2028,7 @@ runProgram (void) {
                 TOGGLE_NOPLAY(infoMode);
               } else {
                 TOGGLE_NOPLAY(textMaximized);
-                reconfigureBrailleWindow();
+                reconfigureWindow();
               }
               break;
 
@@ -2881,7 +2881,7 @@ runProgram (void) {
             }
           }
 
-          renderStatusSeparator(textBuffer, brl.buffer);
+          fillStatusSeparator(textBuffer, brl.buffer);
         }
 
         if (!(setStatusCells() && braille->writeWindow(&brl, textBuffer))) writable = 0;
