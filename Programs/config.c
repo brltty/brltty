@@ -1591,7 +1591,7 @@ updatePreferences (void) {
 
     while (ok) {
       MenuItem *item = &menu[menuIndex];
-      char valueBuffer[0X10];
+      char valueBuffer[0X100];
       const char *value;
 
       testProgramTermination();
