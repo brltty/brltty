@@ -437,27 +437,25 @@ renderStatusStyle_none (unsigned char *cells) {
 
 static void
 renderStatusStyle_Alva (unsigned char *cells) {
-  if (isHelpScreen()) {
-    cells[0] = convertCharacterToDots(textTable, WC_C('h'));
-    cells[1] = convertCharacterToDots(textTable, WC_C('l'));
-    cells[2] = convertCharacterToDots(textTable, WC_C('p'));
-  } else {
-    renderCoordinatesAlphabetic(&cells[0], scr.posx, scr.posy);
-    renderCoordinatesAlphabetic(&cells[1], p->winx, p->winy);
-    renderStateLetter(&cells[2]);
-  }
+  renderCoordinatesAlphabetic(&cells[0], scr.posx, scr.posy);
+  renderCoordinatesAlphabetic(&cells[1], p->winx, p->winy);
+  renderStateLetter(&cells[2]);
 }
 
 static void
 renderStatusStyle_Tieman (unsigned char *cells) {
-  renderStatusField_cursorAndWindowColumn(&cells[0]);
-  renderStatusField_cursorAndWindowRow(&cells[2]);
-  renderStatusField_stateDots(&cells[4]);
+  static const unsigned char fields[] = {
+    sfCursorAndWindowColumn, sfCursorAndWindowRow, sfStateDots, sfEnd
+  };
+  renderStatusFields(fields, cells);
 }
 
 static void
 renderStatusStyle_PB80 (unsigned char *cells) {
-  renderStatusField_windowRow(&cells[0]);
+  static const unsigned char fields[] = {
+    sfWindowRow, sfEnd
+  };
+  renderStatusFields(fields, cells);
 }
 
 static void
@@ -491,19 +489,26 @@ renderStatusStyle_generic (unsigned char *cells) {
 
 static void
 renderStatusStyle_MDV (unsigned char *cells) {
-  renderStatusField_windowCoordinates(&cells[0]);
+  static const unsigned char fields[] = {
+    sfWindowCoordinates, sfEnd
+  };
+  renderStatusFields(fields, cells);
 }
 
 static void
 renderStatusStyle_Voyager (unsigned char *cells) {
-  renderStatusField_windowRow(&cells[0]);
-  renderStatusField_cursorRow(&cells[1]);
-  renderStatusField_cursorColumn(&cells[2]);
+  static const unsigned char fields[] = {
+    sfWindowRow, sfCursorRow, sfCursorColumn, sfEnd
+  };
+  renderStatusFields(fields, cells);
 }
 
 static void
 renderStatusStyle_time (unsigned char *cells) {
-  renderStatusField_time(cells);
+  static const unsigned char fields[] = {
+    sfTime, sfEnd
+  };
+  renderStatusFields(fields, cells);
 }
 
 typedef struct {
@@ -676,9 +681,7 @@ showInfo (void) {
     char prefix[cellCount];
 
     memset(cells, 0, cellCount);
-    renderStatusField_cursorAndWindowColumn(&cells[0]);
-    renderStatusField_cursorAndWindowRow(&cells[2]);
-    renderStatusField_stateDots(&cells[4]);
+    renderStatusStyle_Tieman(&cells[0]);
 
     memset(prefix, 'x', cellCount);
     snprintf(text, sizeof(text), "%.*s %02d %c%c%c%c%c%c%n",
