@@ -208,7 +208,7 @@ typedef enum {
 static int cols,lines;
 static int input;
 static char *model = "simple";
-static const char *font = "-*-clearlyu-*-r-*-*-17-*-*-*-*-*-iso10646-1,-*-fixed-*-r-*-*-17-*-*-*-*-*-iso10646-1,-*-unifont-*-r-*-*-17-*-*-*-*-*-iso10646-1";
+static const char *fontname = "-*-clearlyu-*-r-*-*-17-*-*-*-*-*-iso10646-1,-*-fixed-*-r-*-*-17-*-*-*-*-*-iso10646-1,-*-unifont-*-r-*-*-17-*-*-*-*-*-iso10646-1";
 static int xtArgc = 1;
 static char *xtDefArgv[]= { "brltty", NULL };
 static char **xtArgv = xtDefArgv;
@@ -826,7 +826,7 @@ static void generateToplevel(void)
 #endif /* USE_XT */
 
 #ifdef USE_XAW
-  if (!(fontset = XCreateFontSet(XtDisplay(toplevel), font, &missing_charset_list_return, &missing_charset_count_return, &def_string_return)))
+  if (!(fontset = XCreateFontSet(XtDisplay(toplevel), fontname, &missing_charset_list_return, &missing_charset_count_return, &def_string_return)))
     LogPrint(LOG_ERR,"Error while loading unicode font");
   if (missing_charset_count_return) {
     int i;
@@ -1095,7 +1095,7 @@ static int brl_construct(BrailleDisplay *brl, char **parameters, const char *dev
   }
 
   if (*parameters[PARM_FONT]) {
-    font = parameters[PARM_FONT];
+    fontname = parameters[PARM_FONT];
   }
 
 #if defined(USE_XT)
