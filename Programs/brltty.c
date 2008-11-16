@@ -487,7 +487,7 @@ static const unsigned char statusStyleFields_PB80[] = {
   sfWindowRow, sfEnd
 };
 
-static const unsigned char statusStyleFields_generic[] = {
+static const unsigned char statusStyleFields_configurable[] = {
   sfGeneric, sfEnd
 };
 
@@ -512,7 +512,7 @@ static const StatusStyleEntry statusStyleTable[] = {
   {statusStyleFields_Alva},
   {statusStyleFields_Tieman},
   {statusStyleFields_PB80},
-  {statusStyleFields_generic},
+  {statusStyleFields_configurable},
   {statusStyleFields_MDV},
   {statusStyleFields_Voyager},
   {statusStyleFields_time}
@@ -544,7 +544,7 @@ setStatusCells (void) {
       memset(cells, 0, length);
       renderStatusFields(style->fields, cells);
 
-      if ((prefs.statusStyle != ST_Generic) &&
+      if ((prefs.statusStyle != ST_Configurable) &&
           (count > length)) {
         unsigned char buffer[count];
         memcpy(buffer, cells, length);
@@ -2862,7 +2862,7 @@ runProgram (void) {
           unsigned int length;
 
           switch (prefs.statusStyle) {
-            case ST_Generic:
+            case ST_Configurable:
               fields = prefs.statusFields;
               break;
 

@@ -51,7 +51,7 @@ typedef enum {
 } DriverParameter;
 #define BRLPARMS "configfile", "debugkeys", "debugreads", "debugwrites"
 
-#define BRLSTAT ST_Generic
+#define BRLSTAT ST_Configurable
 #define BRL_HAVE_STATUS_CELLS
 #define BRL_HAVE_FIRMNESS
 #define BRLCONST

@@ -65,7 +65,7 @@
 #include "charset.h"
 #include "cmd.h"
 
-#define BRLSTAT ST_Generic
+#define BRLSTAT ST_Configurable
 #define BRL_HAVE_STATUS_CELLS
 #include "brl_driver.h"
 #include "braille.h"

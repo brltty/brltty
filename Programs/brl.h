@@ -34,7 +34,7 @@ typedef enum {
   ST_AlvaStyle,
   ST_TiemanStyle,
   ST_PB80Style,
-  ST_Generic,
+  ST_Configurable,
   ST_MDVStyle,
   ST_VoyagerStyle,
   ST_TimeStyle

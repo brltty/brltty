@@ -650,7 +650,7 @@ windowConfigurationChanged (int infoLevel, int rows, int columns) {
     int statusWidth = prefs.statusCount;
 
     if (!statusWidth) {
-      if (prefs.statusStyle == ST_Generic) {
+      if (prefs.statusStyle == ST_Configurable) {
         statusWidth = getStatusFieldsLength(prefs.statusFields);
       } else {
         statusWidth = getStatusStyleLength();
@@ -972,7 +972,7 @@ changedStatusStyle (unsigned char setting) {
 
 static int
 testStatusField (unsigned char index) {
-  return testStatusCount() && (prefs.statusStyle == ST_Generic) &&
+  return testStatusCount() && (prefs.statusStyle == ST_Configurable) &&
          ((index == 0) || (prefs.statusFields[index-1] != sfEnd));
 }
 
@@ -1417,7 +1417,7 @@ updatePreferences (void) {
       "Alva",
       "Tieman",
       "PowerBraille 80",
-      strtext("Generic"),
+      strtext("Configurable"),
       "MDV",
       "Voyager",
       strtext("Time")
