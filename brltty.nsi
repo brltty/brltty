@@ -61,7 +61,7 @@
 ;Pages
 
 	!insertmacro MUI_PAGE_WELCOME
-	!insertmacro MUI_PAGE_LICENSE "${DISTDIR}\copying.txt"
+	!insertmacro MUI_PAGE_LICENSE "${DISTDIR}\COPYING.txt"
 	!insertmacro MUI_PAGE_DIRECTORY
 
 	;Start Menu Folder Page Configuration
@@ -101,6 +101,8 @@ Section "install"
 	SetOverwrite IfNewer
 
 	!insertmacro InstallLib DLL NOTSHARED REBOOT_NOTPROTECTED "${DISTDIR}\bin\brlapi-0.5.dll" "$SYSDIR\brlapi-0.5.dll" "$SYSDIR"
+	!insertmacro InstallLib DLL NOTSHARED REBOOT_NOTPROTECTED "${DISTDIR}\bin\libusb0.dll" "$SYSDIR\libusb0.dll" "$SYSDIR"
+	!insertmacro InstallLib DLL NOTSHARED REBOOT_NOTPROTECTED "${DISTDIR}\bin\libusb0.sys" "$SYSDIR\drivers\libusb0.sys" "$SYSDIR\drivers"
 
 	;Store installation folder
 	WriteRegStr HKLM "Software\${PRODUCT}" "" $INSTDIR
@@ -117,12 +119,19 @@ Section "install"
 
 		;Create shortcuts
 		CreateDirectory "$SMPROGRAMS\$StartMenuFolder"
+		CreateShortCut "$SMPROGRAMS\$StartMenuFolder\Configure BRLTTY.lnk" "$INSTDIR\brlttycnf.exe"
+		CreateShortCut "$SMPROGRAMS\$StartMenuFolder\Install BRLTTY service.lnk" "$INSTDIR\install.bat"
+		CreateShortCut "$SMPROGRAMS\$StartMenuFolder\Uninstall BRLTTY service.lnk" "$INSTDIR\uninstall.bat"
 		CreateShortCut "$SMPROGRAMS\$StartMenuFolder\Uninstall.lnk" "$INSTDIR\Uninstall.exe"
 
 	!insertmacro MUI_STARTMENU_WRITE_END
 
 	;Remove the BRLTTY service if it exists.
 	ExecWait "$INSTDIR\bin\brltty.exe -R"
+	;Install usb inf.
+	ExecWait "rundll32 libusb0.dll,usb_install_driver_np_rundll $INSTDIR\bin\brltty.inf"
+	ExecWait "rundll32 libusb0.dll,usb_install_service_np_rundll"
+	ExecWait "$INSTDIR\brlttycnf.exe"
 	;Install and start the BRLTTY service
 	ExecWait "$INSTDIR\bin\brltty.exe -I"
 	ExecWait "$SYSDIR\net.exe start brlapi"
@@ -139,8 +148,11 @@ Section "Uninstall"
 	;Stop and remove the BRLTTY service
 	ExecWait "$SYSDIR\net.exe stop brlapi"
 	ExecWait "$INSTDIR\bin\brltty.exe -R"
+	ExecWait "rundll32 libusb0.dll,usb_uninstall_service_np_rundll"
 
 	!insertmacro UninstallLib DLL NOTSHARED REBOOT_NOTPROTECTED "$SYSDIR\brlapi-0.5.dll"
+	!insertmacro UninstallLib DLL NOTSHARED REBOOT_NOTPROTECTED "$SYSDIR\libusb0.dll"
+	!insertmacro UninstallLib DLL NOTSHARED REBOOT_NOTPROTECTED "$SYSDIR\drivers\libusb0.sys"
 
 	RMDir /r "$INSTDIR"
 
