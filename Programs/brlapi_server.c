@@ -629,7 +629,7 @@ out:
 /* Frees all resources associated to a connection */
 static void freeConnection(Connection *c)
 {
-  if (c->fd>=0) {
+  if (c->fd != INVALID_FILE_DESCRIPTOR) {
     if (c->auth != 1) unauthConnections--;
     closeFileDescriptor(c->fd);
   }
