@@ -1036,7 +1036,22 @@ testStatusField (unsigned char index) {
 
 static int
 changedStatusField (unsigned char index, unsigned char setting) {
-  if ((setting == sfEnd) && (prefs.statusFields[index+1] != sfEnd)) return 0;
+  switch (setting) {
+    case sfGeneric:
+      if (index > 0) return 0;
+      if (!haveStatusCells()) return 0;
+      if (!braille->statusFields) return 0;
+      if (*braille->statusFields != sfGeneric) return 0;
+
+    case sfEnd:
+      if (prefs.statusFields[index+1] != sfEnd) return 0;
+      break;
+
+    default:
+      if ((index > 0) && (prefs.statusFields[index-1] == sfGeneric)) return 0;
+      break;
+  }
+
   reconfigureWindow();
   return 1;
 }
