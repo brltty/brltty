@@ -134,7 +134,7 @@ extern ContractionTable *contractionTable;
 
 extern void testProgramTermination (void);
 extern void startup (int argc, char *argv[]);
-extern int loadPreferences (int change);
+extern int loadPreferences (void);
 extern int savePreferences (void);
 extern int updatePreferences (void);
 

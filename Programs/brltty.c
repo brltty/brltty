@@ -1956,7 +1956,7 @@ runProgram (void) {
               break;
 #endif /* ENABLE_PREFERENCES_MENU */
             case BRL_CMD_PREFLOAD:
-              if (loadPreferences(1)) {
+              if (loadPreferences()) {
                 resetBlinkingStates();
                 playTune(&tune_command_done);
               }

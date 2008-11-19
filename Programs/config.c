@@ -697,7 +697,7 @@ changedPreferences (void) {
 }
 
 static void
-configureStatusFields (void) {
+resetStatusFields (void) {
   const unsigned char *fields = braille->statusFields;
   unsigned int count = brl.statusColumns * brl.statusRows;
 
@@ -744,6 +744,7 @@ configureStatusFields (void) {
     fields = fieldsTable[count - 1];
   }
 
+  memset(prefs.statusFields, sfEnd, sizeof(prefs.statusFields));
   if (fields) {
     unsigned int index = 0;
 
@@ -756,7 +757,7 @@ configureStatusFields (void) {
 }
 
 int
-loadPreferences (int change) {
+loadPreferences (void) {
   int ok = 0;
   FILE *file = openDataFile(preferencesFile, "rb", 1);
 
@@ -852,16 +853,12 @@ loadPreferences (int change) {
         prefs.statusSeparator = DEFAULT_STATUS_SEPARATOR;
       }
 
-      while (length < 58) {
-        prefs.statusFields[length++ - 48] = sfEnd;
+      if (length < 58) {
+        length = 58;
+        resetStatusFields();
       }
 
-      if (prefs.version == 5) {
-        prefs.version++;
-        configureStatusFields();
-      }
-
-      if (change) changedPreferences();
+      changedPreferences();
     }
 
     fclose(file);
@@ -932,14 +929,13 @@ resetPreferences (void) {
   prefs.statusPosition = DEFAULT_STATUS_POSITION;
   prefs.statusCount = DEFAULT_STATUS_COUNT;
   prefs.statusSeparator = DEFAULT_STATUS_SEPARATOR;
-  memset(prefs.statusFields, sfEnd, sizeof(prefs.statusFields));
-  configureStatusFields();
+  resetStatusFields();
   reconfigureWindow();
 }
 
 static void
 getPreferences (void) {
-  if (!loadPreferences(1)) resetPreferences();
+  if (!loadPreferences()) resetPreferences();
   setTuneDevice(prefs.tuneDevice);
 }
 

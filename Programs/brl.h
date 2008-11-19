@@ -44,7 +44,6 @@ typedef enum {
   sfTime,
   sfAlphabeticWindowCoordinates,
   sfAlphabeticCursorCoordinates,
-  /* values specified below this line are meant for internal use only */
   sfGeneric
 } StatusField;
 
