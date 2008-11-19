@@ -735,8 +735,18 @@ resetStatusFields (void) {
       sfWindowCoordinates, sfCursorCoordinates, sfStateDots, sfEnd
     };
 
+    static const unsigned char fields6[] = {
+      sfWindowCoordinates, sfCursorCoordinates, sfStateDots, sfScreenNumber,
+      sfEnd
+    };
+
+    static const unsigned char fields7[] = {
+      sfWindowCoordinates, sfCursorCoordinates, sfStateDots, sfTime,
+      sfEnd
+    };
+
     static const unsigned char *fieldsTable[] = {
-      fields1, fields2, fields3, fields4, fields5
+      fields1, fields2, fields3, fields4, fields5, fields6, fields7
     };
     static const unsigned char fieldsCount = ARRAY_COUNT(fieldsTable);
 
