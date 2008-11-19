@@ -701,6 +701,11 @@ resetStatusFields (void) {
   const unsigned char *fields = braille->statusFields;
   unsigned int count = brl.statusColumns * brl.statusRows;
 
+  prefs.statusPosition = spNone;
+  prefs.statusCount = 0;
+  prefs.statusSeparator = ssNone;
+  memset(prefs.statusFields, sfEnd, sizeof(prefs.statusFields));
+
   if (!count && (brl.x > 40)) {
     count = (brl.x % 20) * brl.y;
 
@@ -754,7 +759,6 @@ resetStatusFields (void) {
     fields = fieldsTable[count - 1];
   }
 
-  memset(prefs.statusFields, sfEnd, sizeof(prefs.statusFields));
   if (fields) {
     unsigned int index = 0;
 
@@ -1468,20 +1472,20 @@ updatePreferences (void) {
 
     static const char *statusFields[] = {
       strtext("End"),
-      strtext("Window Coordinates"),
-      strtext("Window Column"),
-      strtext("Window Row"),
-      strtext("Cursor Coordinates"),
-      strtext("Cursor Column"),
-      strtext("Cursor Row"),
-      strtext("Cursor and Window Column"),
-      strtext("Cursor and Window Row"),
-      strtext("Screen Number"),
-      strtext("State Dots"),
-      strtext("State Letter"),
-      strtext("Time"),
-      strtext("Alphabetic Window Coordinates"),
-      strtext("Alphabetic Cursor Coordinates"),
+      strtext("Window Coordinates (2 cells)"),
+      strtext("Window Column (1 cell)"),
+      strtext("Window Row (1 cell)"),
+      strtext("Cursor Coordinates (2 cells)"),
+      strtext("Cursor Column (1 cell)"),
+      strtext("Cursor Row (1 cell)"),
+      strtext("Cursor and Window Column (2 cells)"),
+      strtext("Cursor and Window Row (2 cells)"),
+      strtext("Screen Number (1 cell)"),
+      strtext("State Dots (1 cell)"),
+      strtext("State Letter (1 cell)"),
+      strtext("Time (2 cells)"),
+      strtext("Alphabetic Window Coordinates (1 cell)"),
+      strtext("Alphabetic Cursor Coordinates (1 cell)"),
       strtext("Generic")
     };
 
