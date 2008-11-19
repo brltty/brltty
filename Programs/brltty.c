@@ -471,81 +471,20 @@ renderStatusFields (const unsigned char *fields, unsigned char *cells) {
   }
 }
 
-static const unsigned char statusStyleFields_none[] = {
-  sfEnd
-};
-
-static const unsigned char statusStyleFields_Alva[] = {
-  sfAlphabeticCursorCoordinates, sfAlphabeticWindowCoordinates, sfStateLetter, sfEnd
-};
-
-static const unsigned char statusStyleFields_Tieman[] = {
-  sfCursorAndWindowColumn, sfCursorAndWindowRow, sfStateDots, sfEnd
-};
-
-static const unsigned char statusStyleFields_PB80[] = {
-  sfWindowRow, sfEnd
-};
-
-static const unsigned char statusStyleFields_configurable[] = {
-  sfGeneric, sfEnd
-};
-
-static const unsigned char statusStyleFields_MDV[] = {
-  sfWindowCoordinates, sfEnd
-};
-
-static const unsigned char statusStyleFields_Voyager[] = {
-  sfWindowRow, sfCursorRow, sfCursorColumn, sfEnd
-};
-
-static const unsigned char statusStyleFields_time[] = {
-  sfTime, sfEnd
-};
-
-typedef struct {
-  const unsigned char *fields;
-} StatusStyleEntry;
-
-static const StatusStyleEntry statusStyleTable[] = {
-  {statusStyleFields_none},
-  {statusStyleFields_Alva},
-  {statusStyleFields_Tieman},
-  {statusStyleFields_PB80},
-  {statusStyleFields_configurable},
-  {statusStyleFields_MDV},
-  {statusStyleFields_Voyager},
-  {statusStyleFields_time}
-};
-static const unsigned int statusStyleCount = ARRAY_COUNT(statusStyleTable);
-
-static const StatusStyleEntry *
-getStatusStyle (void) {
-  unsigned char style = prefs.statusStyle;
-  if (style >= statusStyleCount) style = 0;
-  return &statusStyleTable[style];
-}
-
-unsigned int
-getStatusStyleLength (void) {
-  return getStatusFieldsLength(getStatusStyle()->fields);
-}
-
 static int
 setStatusCells (void) {
   if (braille->writeStatus) {
-    const StatusStyleEntry *style = getStatusStyle();
-    unsigned int length = getStatusFieldsLength(style->fields);
+    const unsigned char *fields = prefs.statusFields;
+    unsigned int length = getStatusFieldsLength(fields);
 
     if (length > 0) {
-      unsigned int count = brl.statusColumns * brl.statusRows;
       unsigned char cells[length];        /* status cell buffer */
+      unsigned int count = brl.statusColumns * brl.statusRows;
 
       memset(cells, 0, length);
-      renderStatusFields(style->fields, cells);
+      renderStatusFields(fields, cells);
 
-      if ((prefs.statusStyle != ST_Configurable) &&
-          (count > length)) {
+      if (count > length) {
         unsigned char buffer[count];
         memcpy(buffer, cells, length);
         memset(&buffer[length], 0, count-length);
@@ -674,8 +613,14 @@ showInfo (void) {
     unsigned char cells[cellCount];
     char prefix[cellCount];
 
-    memset(cells, 0, cellCount);
-    renderStatusFields(statusStyleTable[ST_TiemanStyle].fields, &cells[0]);
+    {
+      static const unsigned char fields[] = {
+        sfCursorAndWindowColumn, sfCursorAndWindowRow, sfStateDots, sfEnd
+      };
+
+      memset(cells, 0, cellCount);
+      renderStatusFields(fields, cells);
+    }
 
     memset(prefix, 'x', cellCount);
     snprintf(text, sizeof(text), "%.*s %02d %c%c%c%c%c%c%n",
@@ -2858,22 +2803,10 @@ runProgram (void) {
         }
 
         if (statusCount > 0) {
-          const unsigned char *fields;
-          unsigned int length;
+          const unsigned char *fields = prefs.statusFields;
+          unsigned int length = getStatusFieldsLength(fields);
 
-          switch (prefs.statusStyle) {
-            case ST_Configurable:
-              fields = prefs.statusFields;
-              break;
-
-            default: {
-              const StatusStyleEntry *style = getStatusStyle();
-              fields = style->fields;
-              break;
-            }
-          }
-
-          if ((length = getStatusFieldsLength(fields)) > 0) {
+          if (length > 0) {
             unsigned char cells[length];
             memset(cells, 0, length);
             renderStatusFields(fields, cells);

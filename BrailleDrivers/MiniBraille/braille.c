@@ -36,7 +36,7 @@
 #include "misc.h"
 #include "message.h"
 
-#define BRLSTAT ST_TiemanStyle
+#define BRL_STATUS_FIELDS sfCursorAndWindowColumn, sfCursorAndWindowRow, sfStateDots
 #define BRL_HAVE_STATUS_CELLS
 #include "brl_driver.h"
 

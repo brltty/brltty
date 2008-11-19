@@ -649,13 +649,7 @@ windowConfigurationChanged (int infoLevel, int rows, int columns) {
     int separatorWidth = (prefs.statusSeparator == ssNone)? 0: 1;
     int statusWidth = prefs.statusCount;
 
-    if (!statusWidth) {
-      if (prefs.statusStyle == ST_Configurable) {
-        statusWidth = getStatusFieldsLength(prefs.statusFields);
-      } else {
-        statusWidth = getStatusStyleLength();
-      }
-    }
+    if (!statusWidth) statusWidth = getStatusFieldsLength(prefs.statusFields);
     statusWidth = MAX(MIN(statusWidth, brl.x-1-separatorWidth), 0);
 
     if (statusWidth > 0) {
@@ -700,6 +694,65 @@ changedPreferences (void) {
 #ifdef ENABLE_SPEECH_SUPPORT
   applySpeechPreferences();
 #endif /* ENABLE_SPEECH_SUPPORT */
+}
+
+static void
+configureStatusFields (void) {
+  const unsigned char *fields = braille->statusFields;
+  unsigned int count = brl.statusColumns * brl.statusRows;
+
+  if (!count && (brl.x > 40)) {
+    count = (brl.x % 20) * brl.y;
+
+    if (count) {
+      prefs.statusPosition = spRight;
+
+      if (count > 1) {
+        count -= 1;
+        prefs.statusSeparator = ssStatusSide;
+      }
+    }
+  }
+
+  if (!fields && count) {
+    static const unsigned char fields1[] = {
+      sfWindowRow, sfEnd
+    };
+
+    static const unsigned char fields2[] = {
+      sfWindowRow, sfCursorRow, sfEnd
+    };
+
+    static const unsigned char fields3[] = {
+      sfWindowRow, sfCursorRow, sfCursorColumn, sfEnd
+    };
+
+    static const unsigned char fields4[] = {
+      sfWindowCoordinates, sfCursorCoordinates, sfEnd
+    };
+
+    static const unsigned char fields5[] = {
+      sfWindowCoordinates, sfCursorCoordinates, sfStateDots, sfEnd
+    };
+
+    static const unsigned char *fieldsTable[] = {
+      fields1, fields2, fields3, fields4, fields5
+    };
+    static const unsigned char fieldsCount = ARRAY_COUNT(fieldsTable);
+
+    if (count > fieldsCount) count = fieldsCount;
+    fields = fieldsTable[count - 1];
+  }
+
+  if (fields) {
+    unsigned int index = 0;
+
+    while (index < (ARRAY_COUNT(prefs.statusFields) - 1)) {
+      unsigned char field = fields[index];
+      if (field == sfEnd) break;
+      prefs.statusFields[index++] = field;
+    }
+  }
 }
 
 int
@@ -803,6 +856,11 @@ loadPreferences (int change) {
         prefs.statusFields[length++ - 48] = sfEnd;
       }
 
+      if (prefs.version == 5) {
+        prefs.version++;
+        configureStatusFields();
+      }
+
       if (change) changedPreferences();
     }
 
@@ -874,8 +932,9 @@ resetPreferences (void) {
   prefs.statusPosition = DEFAULT_STATUS_POSITION;
   prefs.statusCount = DEFAULT_STATUS_COUNT;
   prefs.statusSeparator = DEFAULT_STATUS_SEPARATOR;
-  prefs.statusStyle = braille->statusStyle;
   memset(prefs.statusFields, sfEnd, sizeof(prefs.statusFields));
+  configureStatusFields();
+  reconfigureWindow();
 }
 
 static void
@@ -960,19 +1019,8 @@ changedStatusSeparator (unsigned char setting) {
 }
 
 static int
-testStatusStyle (void) {
-  return (prefs.statusPosition != spNone) || haveStatusCells();
-}
-
-static int
-changedStatusStyle (unsigned char setting) {
-  if (testStatusCount()) reconfigureWindow();
-  return 1;
-}
-
-static int
 testStatusField (unsigned char index) {
-  return testStatusCount() && (prefs.statusStyle == ST_Configurable) &&
+  return (haveStatusCells() || (prefs.statusPosition != spNone)) &&
          ((index == 0) || (prefs.statusFields[index-1] != sfEnd));
 }
 
@@ -1412,17 +1460,6 @@ updatePreferences (void) {
       strtext("Text Side")
     };
 
-    static const char *statusStyles[] = {
-      strtext("None"),
-      "Alva",
-      "Tieman",
-      "PowerBraille 80",
-      strtext("Configurable"),
-      "MDV",
-      "Voyager",
-      strtext("Time")
-    };
-
     static const char *statusFields[] = {
       strtext("End"),
       strtext("Window Coordinates"),
@@ -1438,7 +1475,8 @@ updatePreferences (void) {
       strtext("State Letter"),
       strtext("Time"),
       strtext("Alphabetic Window Coordinates"),
-      strtext("Alphabetic Cursor Coordinates")
+      strtext("Alphabetic Cursor Coordinates"),
+      strtext("Generic")
     };
 
     static const char *textStyles[] = {
@@ -1562,7 +1600,6 @@ updatePreferences (void) {
       SYMBOLIC_ITEM(prefs.statusPosition, changedStatusPosition, testStatusPosition, strtext("Status Position"), statusPositions),
       NUMERIC_ITEM(prefs.statusCount, changedStatusCount, testStatusCount, strtext("Status Count"), 0, MAX((int)brl.x/2-1, 0), 1),
       SYMBOLIC_ITEM(prefs.statusSeparator, changedStatusSeparator, testStatusSeparator, strtext("Status Separator"), statusSeparators),
-      SYMBOLIC_ITEM(prefs.statusStyle, changedStatusStyle, testStatusStyle, strtext("Status Style"), statusStyles),
       STATUS_FIELD_ITEM(1),
       STATUS_FIELD_ITEM(2),
       STATUS_FIELD_ITEM(3),

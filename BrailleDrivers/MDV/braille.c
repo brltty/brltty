@@ -62,7 +62,7 @@
 
 #include "misc.h"
 
-#define BRLSTAT ST_MDVStyle
+#define BRL_STATUS_FIELDS sfWindowCoordinates
 #define BRL_HAVE_STATUS_CELLS
 #include "brl_driver.h"
 #include "braille.h"

@@ -62,9 +62,11 @@ static int brl_writeWindow (BrailleDisplay *brl, const wchar_t *characters);
   static const char *const brl_parameters[] = {BRLPARMS, NULL};
 #endif /* BRLPARMS */
 
-#ifndef BRLSTAT
-#  define BRLSTAT ST_None
-#endif /* BRLSTAT */
+#ifdef BRL_STATUS_FIELDS
+static const unsigned char brl_statusFields[] = {BRL_STATUS_FIELDS, sfEnd};
+#else /* BRL_STATUS_FIELDS */
+#define brl_statusFields NULL
+#endif /* BRL_STATUS_FIELDS */
 
 #ifndef BRLSYMBOL
 #  define BRLSYMBOL CONCATENATE(brl_driver_,DRIVER_CODE)
@@ -85,7 +87,7 @@ BRLCONST BrailleDriver BRLSYMBOL = {
 #endif /* BRLPARMS */
 
   BRLHELP,
-  BRLSTAT,
+  brl_statusFields,
 
   brl_construct,
   brl_destruct,

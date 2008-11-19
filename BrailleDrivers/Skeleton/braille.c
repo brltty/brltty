@@ -22,6 +22,7 @@
 
 #include "misc.h"
 
+//#define BRL_STATUS_FIELDS sf...
 //#define BRL_HAVE_STATUS_CELLS
 //#define BRL_HAVE_PACKET_IO
 //#define BRL_HAVE_KEY_CODES

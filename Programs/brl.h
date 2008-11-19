@@ -28,17 +28,25 @@ extern "C" {
 #include "driver.h"
 #include "brldefs.h"
 
-/* status cell styles */
 typedef enum {
-  ST_None,
-  ST_AlvaStyle,
-  ST_TiemanStyle,
-  ST_PB80Style,
-  ST_Configurable,
-  ST_MDVStyle,
-  ST_VoyagerStyle,
-  ST_TimeStyle
-} StatusCellsStyle;
+  sfEnd,
+  sfWindowCoordinates,
+  sfWindowColumn,
+  sfWindowRow,
+  sfCursorCoordinates,
+  sfCursorColumn,
+  sfCursorRow,
+  sfCursorAndWindowColumn,
+  sfCursorAndWindowRow,
+  sfScreenNumber,
+  sfStateDots,
+  sfStateLetter,
+  sfTime,
+  sfAlphabeticWindowCoordinates,
+  sfAlphabeticCursorCoordinates,
+  /* values specified below this line are meant for internal use only */
+  sfGeneric
+} StatusField;
 
 typedef struct BrailleDataStruct BrailleData;
 
@@ -107,7 +115,7 @@ typedef struct {
   DRIVER_DEFINITION_DECLARATION;
   const char *const *parameters;
   const char *helpFile;
-  int statusStyle;
+  const unsigned char *statusFields;
 
   /* Routines provided by the braille driver library: */
   int (*construct) (BrailleDisplay *brl, char **parameters, const char *device);
