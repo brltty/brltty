@@ -90,35 +90,69 @@
 # autoselection with fallback to "@text_table@" will be performed.
 # (can be overridden with the -t [--text-table=] option)
 #text-table	auto	# locale-based autoselection with fallback to "@text_table@"
+#text-table	ar	Arabic (generic)
+#text-table	as	Assamese
+#text-table	awa	Awadhi
 #text-table	bg	# Bulgarian (from UNESCO report, 1954)
+#text-table	bh	Bihari
+#text-table	bn	Bengali
+#text-table	bra	Braj
 #text-table	cs	# Czech (iso-8859-2)
+#text-table	cy	Welsh
 #text-table	da	# Danish
 #text-table	de	# German
+#text-table	dra	Dravidian
+#text-table	el	Greek
 #text-table	en_CA	# English (Canada)
 #text-table	en_UK	# English (United Kingdom)
 #text-table	en_US	# English (United States)
 #text-table	eo	# Esperanto
 #text-table	es	# Spanish
 #text-table	et	# Estonian (from UNESCO report, 1954)
+#text-table	fr	French (default)
 #text-table	fr_CA	# French (Canada)
 #text-table	fr_FR	# French (France)
 #text-table	fr-2007	# French (Unified)
 #text-table	fr-cbifs	# French (Code Braille Informatique Français Standard)
 #text-table	gd	# Gaelic (from UNESCO report, 1954)
+#text-table	gon	Gondi
+#text-table	gu	Gujarati
+#text-table	hi	Hindi
 #text-table	hr	# Croatian
 #text-table	hy	# Armenian (from UNESCO report, 1954)
 #text-table	is	# Icelandic (from UNESCO report, 1954)
 #text-table	it	# Italian
+#text-table	kha	Khasi
+#text-table	kn	Kannada
+#text-table	kok	Konkani
+#text-table	kru	Kurukh
 #text-table	lt	# Lituanian (from UNESCO report, 1954)
+#text-table	lv	Latvian
+#text-table	ml	Malayalam
+#text-table	mni	Manipuri
+#text-table	mr	Marathi
+#text-table	mun	Mundari
+#text-table	mwr	Marwari
 #text-table	nabcc	# North American Braille Computer Code
+#text-table	ne	Nepali
+#text-table	new	Newari
+#text-table	nl_BE	Dutch (Belgium)
+#text-table	nl_NL	Dutch (Netherlands)
 #text-table	no-generic	# Norwegian (with support for other languages)
 #text-table	no-oub	# Norwegian (Offentlig Utvalg for Blindeskrift)
+#text-table	nwc	Old Newari
+#text-table	or	Oriya
+#text-table	pa	Panjabi
 #text-table	pl	# Polish (iso-8859-2)
 #text-table	pt	# Portuguese (iso-8859-1)
 #text-table	ro	# Romanian (from UNESCO report, 1954)
 #text-table	ru	# Russian (koi8-r)
+#text-table	sat	Santali
+#text-table	sk	Slovak
 #text-table	sv	# Swedish (1996 standard)
 #text-table	sv-old	# Swedish (1989 standard)
+#text-table	ta	Tamil
+#text-table	te	Telugu
 #text-table	tr	# Turkish (from UNESCO report, 1954)
 #text-table	vi	# Vietnamese
 
@@ -133,7 +167,8 @@
 # Relative paths are anchored at "@DATA_DIRECTORY@". If not specified, no
 # contraction table will be available.
 # (can be overridden with the -c [--contraction-table=] option)
-#contraction-table	compress	# Remove excess white space.
+#contraction-table	compress	# remove excess white-space
+#contraction-table	de	# Contracted German
 #contraction-table	en-ueb-g2	# Grade 2 Unified English Braille
 #contraction-table	en-us-g2	# Grade 2 American English
 #contraction-table	fr-abrege	# Contracted French

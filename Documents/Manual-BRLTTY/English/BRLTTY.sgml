@@ -3963,11 +3963,20 @@ In addition to this default text table,
 several alternatives are provided:
 <descrip>
   <tag/auto/locale-based autodetection
+  <tag/ar/Arabic (generic)
+  <tag/as/Assamese
+  <tag/awa/Awadhi
   <tag/bg/Bulgarian (from UNESCO report, 1954)
+  <tag/bh/Bihari
+  <tag/bn/Bengali
+  <tag/bra/Braj
   <tag/brf/good for viewing <tt/.brf/ files in text editor or pager
   <tag/cs/Czech (iso-8859-2)
+  <tag/cy/Welsh
   <tag/da/Danish (iso-8859-1)
   <tag/de/German (iso-8859-1)
+  <tag/dra/Dravidian
+  <tag/el/Greek
   <tag/en_CA/English (Canada)
   <tag/en_UK/English (United Kingdom)
   <tag/en_US/English (United States)
@@ -3976,25 +3985,50 @@ several alternatives are provided:
   <tag/et/Estonian (from UNESCO report, 1954)
   <tag/fi1/Finnish (iso-8859-1)
   <tag/fi2/Finnish (iso-8859-1)
+  <tag/fr/French (default)
   <tag/fr_CA/French (Canada)
   <tag/fr_FR/French (France)
   <tag/fr-2007/Unified French (iso-8859-1)
   <tag/fr-cbifs/Code Braille Informatique Français Standard (iso-8859-1)
   <tag/gd/Gaelic (from UNESCO report, 1954)
+  <tag/gon/Gondi
+  <tag/gu/Gujarati
+  <tag/hi/Hindi
   <tag/hr/Croatian
   <tag/hy/Armenian (from UNESCO report, 1954)
   <tag/is/Icelandic (from UNESCO report, 1954)
   <tag/it/Italian (iso-8859-1)
+  <tag/kha/Khasi
+  <tag/kn/Kannada
+  <tag/kok/Konkani
+  <tag/kru/Kurukh
   <tag/lt/Lituanian (from UNESCO report, 1954)
+  <tag/lv/Latvian
+  <tag/ml/Malayalam
+  <tag/mni/Manipuri
+  <tag/mr/Marathi
+  <tag/mun/Mundari
+  <tag/mwr/Marwari
   <tag/nabcc/North American Braille Computer Code (iso-8859-1)
+  <tag/ne/Nepali
+  <tag/new/Newari
+  <tag/nl_BE/Dutch (Belgium)
+  <tag/nl_NL/Dutch (Netherlands)
   <tag/no-generic/Norwegian (with support for other languages)
   <tag/no-oub/Norwegian (Offentlig Utvalg for Blindeskrift)
+  <tag/nwc/Old Newari
+  <tag/or/Oriya
+  <tag/pa/Panjabi
   <tag/pl/Polish (iso-8859-2)
   <tag/pt/Portuguese (iso-8859-1)
   <tag/ro/Romanian (from UNESCO report, 1954)
   <tag/ru/Russian (koi8-r)
+  <tag/sat/Santali
+  <tag/sk/Slovak
   <tag/sv/Swedish (1996 standard)
   <tag/sv-old/Swedish (1989 standard)
+  <tag/ta/Tamil
+  <tag/te/Telugu
   <tag/tr/Turkish (from UNESCO report, 1954)
   <tag/vi/Vietnamese (iso-8859-1)
 </descrip>
@@ -4250,11 +4284,12 @@ This feature isn't available if the
 
 The following contraction tables are provided:
 <descrip>
-  <tag/compress/Remove excessive white-space.
-  <tag/en-ueb-g2/Grade 2 Unified English Braille.
-  <tag/en-us-g2/Grade 2 American English.
-  <tag/fr-abrege/Contracted Unified French.
-  <tag/fr-integral/Uncontracted Unified French.
+  <tag/compress/remove excess white-space
+  <tag/de/Contracted German
+  <tag/en-ueb-g2/Grade 2 Unified English Braille
+  <tag/en-us-g2/Grade 2 American English
+  <tag/fr-abrege/Contracted Unified French
+  <tag/fr-integral/Uncontracted Unified French
   <tag/zh-tw/Taiwanese Chinese
   <tag/zh-tw-ucb/Taiwanese Unique Chinese Braille
 </descrip>
