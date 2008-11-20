@@ -971,7 +971,7 @@ testIndent (int column, int row, void *data) {
   readScreen(0, row, count, 1, characters);
   while (column >= 0) {
     wchar_t text = characters[column].text;
-    if ((text != ' ') && (text != 0)) return 1;
+    if (text != WC_C(' ')) return 1;
     --column;
   }
   return 0;
@@ -1555,7 +1555,7 @@ runProgram (void) {
                   readScreen(0, line, scr.cols, 1, characters);
                   for (i=0; i<scr.cols; i++) {
                     wchar_t text = characters[i].text;
-                    if ((text != ' ') && (text != 0)) break;
+                    if (text != WC_C(' ')) break;
                   }
                   if ((i == scr.cols) == findBlank) {
                     if (!findBlank) {
@@ -1586,7 +1586,7 @@ runProgram (void) {
                 size_t length = 0;
                 readScreen(0, p->winy, scr.cols, 1, characters);
                 while (length < scr.cols) {
-                  if (characters[length].text == ' ') break;
+                  if (characters[length].text == WC_C(' ')) break;
                   ++length;
                 }
                 if (length < scr.cols) {
@@ -1703,17 +1703,19 @@ runProgram (void) {
                 int oldX = p->winx;
                 if (shiftWindowLeft()) {
                   if (prefs.skipBlankWindows) {
+                    int charCount;
                     if (prefs.blankWindowsSkipMode == sbwEndOfLine) goto skipEndOfLine;
+                    charCount = MIN(scr.cols, p->winx+textCount);
                     if (!showCursor() ||
                         (scr.posy != p->winy) ||
-                        (scr.posx >= (p->winx + textCount))) {
-                      int charCount = MIN(scr.cols, p->winx+textCount);
+                        (scr.posx < 0) ||
+                        (scr.posx >= charCount)) {
                       int charIndex;
                       ScreenCharacter characters[charCount];
                       readScreen(0, p->winy, charCount, 1, characters);
                       for (charIndex=0; charIndex<charCount; ++charIndex) {
                         wchar_t text = characters[charIndex].text;
-                        if ((text != ' ') && (text != 0)) break;
+                        if (text != WC_C(' ')) break;
                       }
                       if (charIndex == charCount) goto wrapUp;
                     }
@@ -1734,13 +1736,13 @@ runProgram (void) {
                   int charIndex;
                   ScreenCharacter characters[scr.cols];
                   readScreen(0, p->winy, scr.cols, 1, characters);
-                  for (charIndex=scr.cols-1; charIndex>=0; --charIndex) {
+                  for (charIndex=scr.cols-1; charIndex>0; --charIndex) {
                     wchar_t text = characters[charIndex].text;
-                    if ((text != ' ') && (text != 0)) break;
+                    if (text != WC_C(' ')) break;
                   }
-                  if (showCursor() && (scr.posy == p->winy))
+                  if (showCursor() && (scr.posy == p->winy) && SCR_COLUMN_OK(scr.posx)) {
                     charIndex = MAX(charIndex, scr.posx);
-                  charIndex = MAX(charIndex, 0);
+                  }
                   if (charIndex < p->winx) placeRightEdge(charIndex);
                 }
                 break;
@@ -1767,14 +1769,16 @@ runProgram (void) {
                 charCount = getWindowLength();
                 charCount = MIN(charCount, scr.cols-p->winx);
                 readScreen(p->winx, p->winy, charCount, 1, characters);
-                for (charIndex=(charCount-1); charIndex>=0; charIndex--) {
+                for (charIndex=charCount-1; charIndex>=0; charIndex--) {
                   wchar_t text = characters[charIndex].text;
-                  if ((text != ' ') && (text != 0)) break;
+                  if (text != WC_C(' ')) break;
                 }
                 if (showCursor() &&
                     (scr.posy == p->winy) &&
-                    (scr.posx < (p->winx + charCount)))
+                    (scr.posx >= 0) &&
+                    (scr.posx < (p->winx + charCount))) {
                   charIndex = MAX(charIndex, scr.posx-p->winx);
+                }
                 if (charIndex >= 0) break;
               }
               break;
@@ -1794,7 +1798,7 @@ runProgram (void) {
                       readScreen(p->winx, p->winy, charCount, 1, characters);
                       for (charIndex=0; charIndex<charCount; ++charIndex) {
                         wchar_t text = characters[charIndex].text;
-                        if ((text != ' ') && (text != 0)) break;
+                        if (text != WC_C(' ')) break;
                       }
                       if (charIndex == charCount) goto wrapDown;
                     }
@@ -1836,12 +1840,14 @@ runProgram (void) {
                 readScreen(p->winx, p->winy, charCount, 1, characters);
                 for (charIndex=0; charIndex<charCount; charIndex++) {
                   wchar_t text = characters[charIndex].text;
-                  if ((text != ' ') && (text != 0)) break;
+                  if (text != WC_C(' ')) break;
                 }
                 if (showCursor() &&
                     (scr.posy == p->winy) &&
-                    (scr.posx >= p->winx))
+                    (scr.posx < scr.cols) &&
+                    (scr.posx >= p->winx)) {
                   charIndex = MIN(charIndex, scr.posx-p->winx);
+                }
                 if (charIndex < charCount) break;
               }
               break;
@@ -2492,12 +2498,12 @@ runProgram (void) {
                     int x;
 
                     while (oldLength > oldX) {
-                      if (oldCharacters[oldLength-1].text != ' ') break;
+                      if (oldCharacters[oldLength-1].text != WC_C(' ')) break;
                       --oldLength;
                     }
 
                     while (newLength > newX) {
-                      if (newCharacters[newLength-1].text != ' ') break;
+                      if (newCharacters[newLength-1].text != WC_C(' ')) break;
                       --newLength;
                     }
 
