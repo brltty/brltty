@@ -121,7 +121,13 @@ static const ScreenState initialScreenState = {
 static ScreenState **screenStates = NULL;
 static int screenCount = 0;
 static ScreenState *p;
-ScreenDescription scr;          /* For screen state infos */
+
+static ScreenDescription scr;          /* For screen state infos */
+#define SCR_COORDINATE_OK(coordinate,limit) (((coordinate) >= 0) && ((coordinate) < (limit)))
+#define SCR_COLUMN_OK(column) SCR_COORDINATE_OK((column), scr.cols)
+#define SCR_ROW_OK(row) SCR_COORDINATE_OK((row), scr.rows)
+#define SCR_COORDINATES_OK(column,row) (SCR_COLUMN_OK((column)) && SCR_ROW_OK((row)))
+#define SCR_CURSOR_OK() SCR_COORDINATES_OK(scr.posx, scr.posy)
 
 static void
 getScreenAttributes (void) {
@@ -304,54 +310,57 @@ renderCoordinatesVertical (unsigned char *cells, int column, int row) {
 
 static void
 renderCoordinatesAlphabetic (unsigned char *cell, int column, int row) {
-  /* The coordinates are given with letters as the DOS tsr */
-  *cell = ((updateIntervals / 16) % (row / 25 + 1))? 0:
+  /* the coordinates are presented as an underlined letter as the Alva DOS TSR */
+  *cell = !SCR_COORDINATES_OK(column, row)? convertCharacterToDots(textTable, WC_C('z')):
+          ((updateIntervals / 16) % (row / 25 + 1))? 0:
           convertCharacterToDots(textTable, (row % 25 + WC_C('a'))) |
           ((column / textCount) << 6);
 }
 
 typedef void (*RenderStatusField) (unsigned char *cells);
+#define SF_COLUMN_NUMBER(column) (SCR_COLUMN_OK((column))? (column)+1: 0)
+#define SF_ROW_NUMBER(row) (SCR_ROW_OK((row))? (row)+1: 0)
 
 static void
 renderStatusField_windowCoordinates (unsigned char *cells) {
-  renderCoordinatesVertical(cells, p->winx+1, p->winy+1);
+  renderCoordinatesVertical(cells, SF_COLUMN_NUMBER(p->winx), SF_ROW_NUMBER(p->winy));
 }
 
 static void
 renderStatusField_windowColumn (unsigned char *cells) {
-  renderNumberVertical(cells, p->winx+1);
+  renderNumberVertical(cells, SF_COLUMN_NUMBER(p->winx));
 }
 
 static void
 renderStatusField_windowRow (unsigned char *cells) {
-  renderNumberVertical(cells, p->winy+1);
+  renderNumberVertical(cells, SF_ROW_NUMBER(p->winy));
 }
 
 static void
 renderStatusField_cursorCoordinates (unsigned char *cells) {
-  renderCoordinatesVertical(cells, scr.posx+1, scr.posy+1);
+  renderCoordinatesVertical(cells, SF_COLUMN_NUMBER(scr.posx), SF_ROW_NUMBER(scr.posy));
 }
 
 static void
 renderStatusField_cursorColumn (unsigned char *cells) {
-  renderNumberVertical(cells, scr.posx+1);
+  renderNumberVertical(cells, SF_COLUMN_NUMBER(scr.posx));
 }
 
 static void
 renderStatusField_cursorRow (unsigned char *cells) {
-  renderNumberVertical(cells, scr.posy+1);
+  renderNumberVertical(cells, SF_ROW_NUMBER(scr.posy));
 }
 
 static void
 renderStatusField_cursorAndWindowColumn (unsigned char *cells) {
-  renderNumberUpper(cells, scr.posx+1);
-  renderNumberLower(cells, p->winx+1);
+  renderNumberUpper(cells, SF_COLUMN_NUMBER(scr.posx));
+  renderNumberLower(cells, SF_COLUMN_NUMBER(p->winx));
 }
 
 static void
 renderStatusField_cursorAndWindowRow (unsigned char *cells) {
-  renderNumberUpper(cells, scr.posy+1);
-  renderNumberLower(cells, p->winy+1);
+  renderNumberUpper(cells, SF_ROW_NUMBER(scr.posy));
+  renderNumberLower(cells, SF_ROW_NUMBER(p->winy));
 }
 
 static void
@@ -401,10 +410,10 @@ renderStatusField_alphabeticCursorCoordinates (unsigned char *cells) {
 static void
 renderStatusField_generic (unsigned char *cells) {
   cells[BRL_firstStatusCell] = BRL_STATUS_CELLS_GENERIC;
-  cells[BRL_GSC_BRLCOL] = p->winx+1;
-  cells[BRL_GSC_BRLROW] = p->winy+1;
-  cells[BRL_GSC_CSRCOL] = scr.posx+1;
-  cells[BRL_GSC_CSRROW] = scr.posy+1;
+  cells[BRL_GSC_BRLCOL] = SF_COLUMN_NUMBER(p->winx);
+  cells[BRL_GSC_BRLROW] = SF_ROW_NUMBER(p->winy);
+  cells[BRL_GSC_CSRCOL] = SF_COLUMN_NUMBER(scr.posx);
+  cells[BRL_GSC_CSRROW] = SF_ROW_NUMBER(scr.posy);
   cells[BRL_GSC_SCRNUM] = scr.number;
   cells[BRL_GSC_FREEZE] = isFrozenScreen();
   cells[BRL_GSC_DISPMD] = p->showAttributes;
@@ -654,7 +663,9 @@ showInfo (void) {
 
   {
     snprintf(text, sizeof(text), "%02d:%02d %02d:%02d %02d %c%c%c%c%c%c",
-             p->winx+1, p->winy+1, scr.posx+1, scr.posy+1, scr.number, 
+             SF_COLUMN_NUMBER(p->winx), SF_ROW_NUMBER(p->winy),
+             SF_COLUMN_NUMBER(scr.posx), SF_ROW_NUMBER(scr.posy),
+             scr.number, 
              p->trackCursor? 't': ' ',
              prefs.showCursor? (prefs.blinkingCursor? 'B': 'v'):
                                (prefs.blinkingCursor? 'b': ' '),
@@ -679,8 +690,10 @@ placeWindowHorizontally (int x) {
   p->winx = x / textCount * textCount;
 }
 
-static void 
+static int
 trackCursor (int place) {
+  if (!SCR_CURSOR_OK()) return 0;
+
 #ifdef ENABLE_CONTRACTED_BRAILLE
   if (contracted) {
     p->winy = scr.posy;
@@ -702,7 +715,7 @@ trackCursor (int place) {
       p->winx = length;
     }
     contractedTrack = 1;
-    return;
+    return 1;
   }
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
@@ -725,6 +738,7 @@ trackCursor (int place) {
     p->winx += (scr.posx - p->winx) / textCount * textCount;
 
   slideWindowVertically(scr.posy);
+  return 1;
 }
 
 #ifdef ENABLE_SPEECH_SUPPORT
@@ -1002,7 +1016,7 @@ isContracting (void) {
 
 static int
 getCursorOffset (int x, int y) {
-  if ((scr.posy == y) && (scr.posx >= x)) return scr.posx - x;
+  if ((scr.posy == y) && (scr.posx >= x) && (scr.posx < scr.cols)) return scr.posx - x;
   return -1;
 }
 
@@ -1352,7 +1366,7 @@ runProgram (void) {
    */
 
   p->trkx = scr.posx; p->trky = scr.posy;
-  trackCursor(1);        /* set initial window position */
+  if (!trackCursor(1)) p->winx = p->winy = 0; /* set initial window position */
   p->motx = p->winx; p->moty = p->winy;
   oldwinx = p->winx; oldwiny = p->winy;
   highlightWindow();
