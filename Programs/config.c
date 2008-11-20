@@ -1828,20 +1828,30 @@ updatePreferences (void) {
     #endif /* ENABLE_SPEECH_SUPPORT */
 
             default:
-              if (command >= BRL_BLK_ROUTE && command < BRL_BLK_ROUTE+brl.x) {
-                unsigned char oldSetting = *item->setting;
+              if ((command >= BRL_BLK_ROUTE) &&
+                  (command < (BRL_BLK_ROUTE + brl.x))) {
                 int key = command - BRL_BLK_ROUTE;
-                if (item->names) {
-                  *item->setting = key % (item->maximum + 1);
+
+                if ((key >= textStart) && (key < (textStart + textCount))) {
+                  unsigned char oldSetting = *item->setting;
+                  key -= textStart;
+
+                  if (item->names) {
+                    *item->setting = key % (item->maximum + 1);
+                  } else {
+                    *item->setting = rescaleInteger(key, brl.x-1, item->maximum-item->minimum) + item->minimum;
+                  }
+
+                  if (item->changed && !item->changed(*item->setting)) {
+                    *item->setting = oldSetting;
+                    playTune(&tune_command_rejected);
+                  } else if (*item->setting != oldSetting) {
+                    settingChanged = 1;
+                  }
                 } else {
-                  *item->setting = rescaleInteger(key, brl.x-1, item->maximum-item->minimum) + item->minimum;
-                }
-                if (item->changed && !item->changed(*item->setting)) {
-                  *item->setting = oldSetting;
                   playTune(&tune_command_rejected);
-                } else if (*item->setting != oldSetting) {
-                  settingChanged = 1;
                 }
+
                 break;
               }
 
