@@ -1855,7 +1855,7 @@ runProgram (void) {
                 break;
               }
             case BRL_CMD_HOME:
-              trackCursor(1);
+              if (!trackCursor(1)) playTune(&tune_command_rejected);
               break;
 
             case BRL_CMD_RESTARTBRL:
