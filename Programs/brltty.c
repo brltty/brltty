@@ -2367,10 +2367,10 @@ runProgram (void) {
         if (!(command & BRL_MSK_BLK)) {
           if (command & BRL_FLG_ROUTE) {
             int left = p->winx;
-            int right = left + textCount - 1;
+            int right = MIN(left+textCount, scr.cols) - 1;
 
             int top = p->winy;
-            int bottom = top + brl.y - 1;
+            int bottom = MIN(top+brl.y, scr.rows) - 1;
 
             if ((scr.posx < left) || (scr.posx > right) ||
                 (scr.posy < top) || (scr.posy > bottom)) {
@@ -2472,8 +2472,11 @@ runProgram (void) {
 
           if (oldCharacters) {
             if ((newScreen == oldScreen) && (p->winy == oldwiny) && (newWidth == oldWidth)) {
+              int onScreen = (newX >= 0) && (newX < newWidth);
+
               if (!isSameRow(newCharacters, oldCharacters, newWidth, isSameText)) {
-                if ((newY == p->winy) && (newY == oldY)) {
+                if ((newY == p->winy) && (newY == oldY) && onScreen) {
+                  if (oldX < 0) oldX = 0;
                   if ((newX > oldX) &&
                       isSameRow(newCharacters, oldCharacters, oldX, isSameText) &&
                       isSameRow(newCharacters+newX, oldCharacters+oldX, newWidth-newX, isSameText)) {
@@ -2482,9 +2485,10 @@ runProgram (void) {
                     goto speak;
                   }
 
+                  if (oldX >= oldWidth) oldX = oldWidth - 1;
                   if ((newX < oldX) &&
                       isSameRow(newCharacters, oldCharacters, newX, isSameText) &&
-                      isSameRow(newCharacters+newX, oldCharacters+oldX, newWidth-oldX, isSameText)) {
+                      isSameRow(newCharacters+newX, oldCharacters+oldX, oldWidth-oldX, isSameText)) {
                     column = newX;
                     count = oldX - newX;
                     characters = oldCharacters;
@@ -2539,7 +2543,7 @@ runProgram (void) {
                   while (newCharacters[count-1].text == oldCharacters[count-1].text) --count;
                   count -= column;
                 }
-              } else if ((newY == p->winy) && ((newX != oldX) || (newY != oldY))) {
+              } else if ((newY == p->winy) && ((newX != oldX) || (newY != oldY)) && onScreen) {
                 column = newX;
                 count = 1;
               } else {
