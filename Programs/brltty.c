@@ -2476,30 +2476,11 @@ runProgram (void) {
 
               if (!isSameRow(newCharacters, oldCharacters, newWidth, isSameText)) {
                 if ((newY == p->winy) && (newY == oldY) && onScreen) {
-                  if (oldX < 0) oldX = 0;
-                  if ((newX > oldX) &&
-                      isSameRow(newCharacters, oldCharacters, oldX, isSameText) &&
-                      isSameRow(newCharacters+newX, oldCharacters+oldX, newWidth-newX, isSameText)) {
-                    column = oldX;
-                    count = newX - oldX;
-                    goto speak;
-                  }
-
-                  if (oldX >= oldWidth) oldX = oldWidth - 1;
-                  if ((newX < oldX) &&
-                      isSameRow(newCharacters, oldCharacters, newX, isSameText) &&
-                      isSameRow(newCharacters+newX, oldCharacters+oldX, oldWidth-oldX, isSameText)) {
-                    column = newX;
-                    count = oldX - newX;
-                    characters = oldCharacters;
-                    goto speak;
-                  }
-
                   if ((newX == oldX) &&
                       isSameRow(newCharacters, oldCharacters, newX, isSameText)) {
                     int oldLength = oldWidth;
                     int newLength = newWidth;
-                    int x;
+                    int x = newX + 1;
 
                     while (oldLength > oldX) {
                       if (oldCharacters[oldLength-1].text != WC_C(' ')) break;
@@ -2511,7 +2492,7 @@ runProgram (void) {
                       --newLength;
                     }
 
-                    for (x=newX+1; 1; ++x) {
+                    while (1) {
                       int done = 1;
 
                       if (x < newLength) {
@@ -2536,7 +2517,27 @@ runProgram (void) {
                       }
 
                       if (done) break;
+                      x += 1;
                     }
+                  }
+
+                  if (oldX < 0) oldX = 0;
+                  if ((newX > oldX) &&
+                      isSameRow(newCharacters, oldCharacters, oldX, isSameText) &&
+                      isSameRow(newCharacters+newX, oldCharacters+oldX, newWidth-newX, isSameText)) {
+                    column = oldX;
+                    count = newX - oldX;
+                    goto speak;
+                  }
+
+                  if (oldX >= oldWidth) oldX = oldWidth - 1;
+                  if ((newX < oldX) &&
+                      isSameRow(newCharacters, oldCharacters, newX, isSameText) &&
+                      isSameRow(newCharacters+newX, oldCharacters+oldX, oldWidth-oldX, isSameText)) {
+                    column = newX;
+                    count = oldX - newX;
+                    characters = oldCharacters;
+                    goto speak;
                   }
 
                   while (newCharacters[column].text == oldCharacters[column].text) ++column;
@@ -2770,7 +2771,8 @@ runProgram (void) {
            * If the cursor is visible and in range: 
            */
           if ((scr.posx >= p->winx) && (scr.posx < (p->winx + textCount)) &&
-              (scr.posy >= p->winy) && (scr.posy < (p->winy + brl.y)))
+              (scr.posy >= p->winy) && (scr.posy < (p->winy + brl.y)) &&
+              (scr.posx < scr.cols) && (scr.posy < scr.rows))
             brl.cursor = ((scr.posy - p->winy) * brl.x) + textStart + scr.posx - p->winx;
 
           /* blank out capital letters if they're blinking and should be off */
