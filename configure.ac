@@ -489,9 +489,10 @@ BRLTTY_ARG_DISABLE(
    [support for Unicode-based internationalization],
    [],
 [dnl
-   icu-config --exists && {
-      icu_includes="`icu-config --cppflags-searchpath`"
-      icu_libraries="`icu-config --ldflags`"
+   AC_PATH_PROG([ICU_CONFIG], [icu-config])
+   test -n "${ICU_CONFIG}" && ${ICU_CONFIG} --exists && {
+      icu_includes="`${ICU_CONFIG} --cppflags-searchpath`"
+      icu_libraries="`${ICU_CONFIG} --ldflags`"
       AC_DEFINE_UNQUOTED([HAVE_ICU], [1],
                          [Define this if Unicode-based internationalization support is to be included.])
 
