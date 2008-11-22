@@ -1645,7 +1645,7 @@ updatePreferences (void) {
     int menuSize = ARRAY_COUNT(menu);
     static int menuIndex = 0;                        /* current menu item */
 
-    int lineIndent = 0;                                /* braille window pos in buffer */
+    unsigned int lineIndent = 0;                                /* braille window pos in buffer */
     int indexChanged = 1;
     int settingChanged = 0;                        /* 1 when item's value has changed */
 
@@ -1662,21 +1662,22 @@ updatePreferences (void) {
       testProgramTermination();
       closeTuneDevice(0);
 
-      if (!item->names) {
-        snprintf(valueBuffer, sizeof(valueBuffer), "%d", *item->setting);
-        value = valueBuffer;
-      } else {
+      if (item->names) {
         if (!*(value = item->names[*item->setting - item->minimum])) value = strtext("<off>");
         value = gettext(value);
+      } else {
+        snprintf(valueBuffer, sizeof(valueBuffer), "%d", *item->setting);
+        value = valueBuffer;
       }
 
       {
         const char *label = gettext(item->label);
         const char *delimiter = ": ";
-        int settingIndent = strlen(label) + strlen(delimiter);
-        int valueLength = strlen(value);
-        int lineLength = settingIndent + valueLength;
+        unsigned int settingIndent = strlen(label) + strlen(delimiter);
+        unsigned int valueLength = strlen(value);
+        unsigned int lineLength = settingIndent + valueLength;
         char line[lineLength + 1];
+        unsigned int textLength = textCount * brl.y;
 
         /* First we draw the current menu item in the buffer */
         snprintf(line,  sizeof(line), "%s%s%s", label, delimiter, value);
@@ -1697,7 +1698,8 @@ updatePreferences (void) {
         if (settingChanged) {
           settingChanged = 0;
           /* make sure the updated value is visible */
-          if ((lineLength-lineIndent > brl.x*brl.y) && (lineIndent < settingIndent))
+          if (((lineLength - lineIndent) > textLength) &&
+              (lineIndent < settingIndent))
             lineIndent = settingIndent;
         }
         indexChanged = 0;
@@ -1777,15 +1779,16 @@ updatePreferences (void) {
 
             case BRL_CMD_FWINLT:
               if (lineIndent > 0)
-                lineIndent -= MIN(brl.x*brl.y, lineIndent);
+                lineIndent -= MIN(textLength, lineIndent);
               else
                 playTune(&tune_bounce);
               break;
             case BRL_CMD_FWINRT:
-              if (lineLength-lineIndent > brl.x*brl.y)
-                lineIndent += brl.x*brl.y;
-              else
+              if ((lineLength - lineIndent) > textLength) {
+                lineIndent += textLength;
+              } else {
                 playTune(&tune_bounce);
+              }
               break;
 
             {
@@ -1839,7 +1842,7 @@ updatePreferences (void) {
                   if (item->names) {
                     *item->setting = key % (item->maximum + 1);
                   } else {
-                    *item->setting = rescaleInteger(key, brl.x-1, item->maximum-item->minimum) + item->minimum;
+                    *item->setting = rescaleInteger(key, textCount-1, item->maximum-item->minimum) + item->minimum;
                   }
 
                   if (item->changed && !item->changed(*item->setting)) {
@@ -1847,6 +1850,12 @@ updatePreferences (void) {
                     playTune(&tune_command_rejected);
                   } else if (*item->setting != oldSetting) {
                     settingChanged = 1;
+                  }
+                } else if ((key >= statusStart) && (key < (statusStart + statusCount))) {
+                  switch (key - statusStart) {
+                    default:
+                      playTune(&tune_command_rejected);
+                      break;
                   }
                 } else {
                   playTune(&tune_command_rejected);
