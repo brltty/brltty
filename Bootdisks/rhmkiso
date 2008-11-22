@@ -296,9 +296,9 @@ brlttyInstallRoot="${temporaryDirectory}/install"
                --with-screen-driver="lx,-all" \
 	       --with-braille-driver="-tt,-vr,${brailleDrivers}" \
 	       --with-text-table="${textTable}" \
-	       --disable-speech-support --without-libbraille --without-curses --without-x --without-icu \
+	       --disable-speech-support --without-libbraille --without-curses --disable-x \
 	       --disable-pcm-support --disable-fm-support --disable-midi-support \
-               --enable-standalone-programs --disable-api --disable-gpm
+               --enable-standalone-programs --disable-api --disable-gpm --disable-icu
    make -s -C Programs all
    strip Programs/brltty
    make -s -C Programs install-programs install-data-files install-tables
