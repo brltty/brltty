@@ -94,10 +94,15 @@ static size_t commandCount;
 
 static int brailleColumns;
 static int brailleRows;
-static int brailleCells;
-static unsigned char *previousBraille = NULL;
-static wchar_t *previousText = NULL;
-static unsigned char previousStatus[BRL_MAX_STATUS_CELL_COUNT];
+static int brailleCount;
+static unsigned char *brailleCells = NULL;
+static wchar_t *textCharacters = NULL;
+
+static int statusColumns;
+static int statusRows;
+static int statusCount;
+static unsigned char *statusCells = NULL;
+static unsigned char genericCells[BRL_genericStatusCellCount];
 
 typedef struct {
 #ifdef AF_LOCAL
@@ -830,55 +835,90 @@ findCommand (const char *name) {
 
 static int
 dimensionsChanged (BrailleDisplay *brl) {
-  int ok = 0;
-  int columns;
-  int rows;
+  int ok = 1;
   const char *word;
 
+  int columns1;
+  int rows1;
+
+  int columns2 = 0;
+  int rows2 = 0;
+
   if ((word = nextWord())) {
-    if (isInteger(&columns, word) && (columns > 0)) {
-      ok = 1;
+    if (isInteger(&columns1, word) && (columns1 > 0)) {
+      rows1 = 1;
 
       if ((word = nextWord())) {
-        if (!isInteger(&rows, word) || (rows < 1)) {
-          LogPrint(LOG_WARNING, "Invalid row count.");
+        if (isInteger(&rows1, word) && (rows1 > 0)) {
+          if ((word = nextWord())) {
+            if (isInteger(&columns2, word) && (columns2 > 0)) {
+              rows2 = 0;
+
+              if ((word = nextWord())) {
+                if (isInteger(&rows2, word) && (rows2 > 0)) {
+                } else {
+                  LogPrint(LOG_WARNING, "invalid status row count: %s", word);
+                  ok = 0;
+                }
+              }
+            } else {
+              LogPrint(LOG_WARNING, "invalid status column count: %s", word);
+              ok = 0;
+            }
+          }
+        } else {
+          LogPrint(LOG_WARNING, "invalid text row count: %s", word);
           ok = 0;
         }
-      } else {
-        rows = 1;
       }
     } else {
-      LogPrint(LOG_WARNING, "Invalid column count.");
+      LogPrint(LOG_WARNING, "invalid text column count: %s", word);
+      ok = 0;
     }
   } else {
-    LogPrint(LOG_WARNING, "Missing column count.");
+    LogPrint(LOG_WARNING, "missing text column count");
   }
 
   if (ok) {
-    int cells = columns * rows;
+    int count1 = columns1 * rows1;
+    int count2 = columns2 * rows2;
     unsigned char *braille;
     wchar_t *text;
+    unsigned char *status;
 
-    if ((braille = malloc(cells))) {
-      if ((text = calloc(cells, sizeof(*text)))) {
-        brailleColumns = columns;
-        brailleRows = rows;
-        brailleCells = cells;
+    if ((braille = calloc(count1, sizeof(*braille)))) {
+      if ((text = calloc(count1, sizeof(*text)))) {
+        if ((status = calloc(count2, sizeof(*status)))) {
+          brailleColumns = columns1;
+          brailleRows = rows1;
+          brailleCount = count1;
 
-        memset(braille, 0, cells);
-        if (previousBraille) free(previousBraille);
-        previousBraille = braille;
+          statusColumns = columns2;
+          statusRows = rows2;
+          statusCount = count2;
 
-        wmemset(text, WC_C(' '), cells);
-        if (previousText) free(previousText);
-        previousText = text;
+          if (brailleCells) free(brailleCells);
+          brailleCells = braille;
+          memset(brailleCells, 0, count1);
 
-        memset(previousStatus, 0, sizeof(previousStatus));
+          if (textCharacters) free(textCharacters);
+          textCharacters = text;
+          wmemset(textCharacters, WC_C(' '), count1);
 
-        brl->x = columns;
-        brl->y = rows;
-        brl->helpPage = 0;
-        return 1;
+          if (statusCells) free(statusCells);
+          statusCells = status;
+          memset(statusCells, 0, count2);
+          memset(genericCells, 0, BRL_genericStatusCellCount);
+
+          brl->x = brailleColumns;
+          brl->y = brailleRows;
+          brl->statusColumns = statusColumns;
+          brl->statusRows = statusRows;
+          brl->helpPage = 0;
+          return 1;
+        }
+
+        free(text);
       }
 
       free(braille);
@@ -995,14 +1035,19 @@ failed:
 
 static void
 brl_destruct (BrailleDisplay *brl) {
-  if (previousText) {
-    free(previousText);
-    previousText = NULL;
+  if (statusCells) {
+    free(statusCells);
+    statusCells = NULL;
   }
 
-  if (previousBraille) {
-    free(previousBraille);
-    previousBraille = NULL;
+  if (textCharacters) {
+    free(textCharacters);
+    textCharacters = NULL;
+  }
+
+  if (brailleCells) {
+    free(brailleCells);
+    brailleCells = NULL;
   }
 
   if (fileDescriptor != -1) {
@@ -1016,13 +1061,13 @@ brl_destruct (BrailleDisplay *brl) {
 static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   if (text) {
-    if (wmemcmp(text, previousText, brailleCells) != 0) {
+    if (wmemcmp(text, textCharacters, brailleCount) != 0) {
       const wchar_t *address = text;
-      int cells = brailleCells;
+      int count = brailleCount;
 
       writeString("Visual \"");
 
-      while (cells-- > 0) {
+      while (count-- > 0) {
         wchar_t character = *address++;
 
         switch (character) {
@@ -1038,34 +1083,44 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
       writeString("\"");
       writeLine();
 
-      wmemcpy(previousText, text, brailleCells);
+      wmemcpy(textCharacters, text, brailleCount);
     }
   }
 
-  if (memcmp(brl->buffer, previousBraille, brailleCells) != 0) {
+  if (memcmp(brl->buffer, brailleCells, brailleCount) != 0) {
     writeString("Braille \"");
-    writeDots(brl->buffer, brailleCells);
+    writeDots(brl->buffer, brailleCount);
     writeString("\"");
     writeLine();
 
-    memcpy(previousBraille, brl->buffer, brailleCells);
+    memcpy(brailleCells, brl->buffer, brailleCount);
   }
+
   return 1;
 }
 
 static int
-brl_writeStatus (BrailleDisplay *brl, const unsigned char *st) {
-  int generic = st[BRL_firstStatusCell] == BRL_STATUS_CELLS_GENERIC;
-  int cells = BRL_MAX_STATUS_CELL_COUNT;
+brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) {
+  int generic = status[BRL_firstStatusCell] == BRL_STATUS_CELLS_GENERIC;
+  unsigned char *cells;
+  int count;
 
-  if (memcmp(st, previousStatus, cells) != 0) {
+  if (generic) {
+    cells = genericCells;
+    count = BRL_genericStatusCellCount;
+  } else {
+    cells = statusCells;
+    count = statusCount;
+  }
+
+  if (memcmp(status, cells, count) != 0) {
     if (generic) {
-      int all = previousStatus[BRL_firstStatusCell] != BRL_STATUS_CELLS_GENERIC;
+      int all = cells[BRL_firstStatusCell] != BRL_STATUS_CELLS_GENERIC;
       int i;
 
-      for (i=1; i<BRL_MAX_STATUS_CELL_COUNT; ++i) {
-        unsigned char value = st[i];
-        if (all || (value != previousStatus[i])) {
+      for (i=1; i<count; ++i) {
+        unsigned char value = status[i];
+        if (all || (value != cells[i])) {
           static const char *const names[] = {
             [BRL_firstStatusCell] = NULL,
             [BRL_GSC_BRLCOL] = "BRLCOL",
@@ -1107,21 +1162,15 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *st) {
         }
       }
     } else {
-      while (cells) {
-        if (st[--cells]) {
-          ++cells;
-          break;
-        }
-      }
-
       writeString("Status \"");
-      writeDots(st, cells);
+      writeDots(cells, count);
       writeString("\"");
       writeLine();
     }
 
-    memcpy(previousStatus, st, cells);
+    memcpy(cells, status, count);
   }
+
   return 1;
 }
 
