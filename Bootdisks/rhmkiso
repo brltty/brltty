@@ -52,7 +52,7 @@ check_ext2() {
       dd bs="${initrdBlockSize}" count="${initrdPadBlocks}" if="/dev/zero" of="${initrdImage}" seek="${initrdImageBlocks}"
       e2fsck -y -f "${initrdImage}" && resize2fs "${initrdImage}" || {
          newImage="${temporaryDirectory}/new.${initrdType}"
-         cp -a -- "${initrdImage}" "${newImage}"
+         cp -RpPd -- "${initrdImage}" "${newImage}"
          mke2fs -q -b "${initrdBlockSize}" -F "${newImage}"
 
          newRoot="${temporaryDirectory}/new"
@@ -63,7 +63,7 @@ check_ext2() {
 
          "mount_${initrdType}" "${initrdRoot}" "${initrdImage}"
          initrdMounted=true
-         cp -a -- "${initrdRoot}/." "${newRoot}"
+         cp -RpPd -- "${initrdRoot}/." "${newRoot}"
          initrdMounted=false
          "unmount_${initrdType}" "${initrdRoot}" "${initrdImage}"
 
@@ -173,7 +173,7 @@ originalMounted=true
 
 modifiedRoot="${temporaryDirectory}/modified"
 mkdir "${modifiedRoot}"
-cp -a -- "${originalRoot}/." "${modifiedRoot}"
+cp -RpPd -- "${originalRoot}/." "${modifiedRoot}"
 
 loaderDirectory=""
 for directory in boot/isolinux isolinux
@@ -296,12 +296,12 @@ brlttyInstallRoot="${temporaryDirectory}/install"
                --with-screen-driver="lx,-all" \
 	       --with-braille-driver="-tt,-vr,${brailleDrivers}" \
 	       --with-text-table="${textTable}" \
-	       --disable-speech-support --without-libbraille --without-curses --without-x \
+	       --disable-speech-support --without-libbraille --without-curses --without-x --without-icu \
 	       --disable-pcm-support --disable-fm-support --disable-midi-support \
                --enable-standalone-programs --disable-api --disable-gpm
    make -s -C Programs all
    strip Programs/brltty
-   make -s -C Programs install-programs install-help install-tables
+   make -s -C Programs install-programs install-data-files install-tables
 ) || exit "${?}"
 
 "check_${initrdType}"
