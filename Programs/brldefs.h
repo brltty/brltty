@@ -266,7 +266,6 @@ typedef enum {
 
   BRL_genericStatusCellCount
 } BRL_GenericStatusCell;
-#define BRL_MAX_STATUS_CELL_COUNT (MAX(22, BRL_genericStatusCellCount))
 
 /* The bits for each braille dot.
  *
