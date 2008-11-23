@@ -71,14 +71,14 @@ extern int ensureBrailleBuffer (BrailleDisplay *brl, int infoLevel);
 
 extern void fillTextRegion (
   wchar_t *text, unsigned char *dots,
-  unsigned int start, unsigned int width,
+  unsigned int start, unsigned int count,
   unsigned int columns, unsigned int rows,
   const wchar_t *characters, size_t length
 );
 
 extern void fillDotsRegion (
   wchar_t *text, unsigned char *dots,
-  unsigned int start, unsigned int width,
+  unsigned int start, unsigned int count,
   unsigned int columns, unsigned int rows,
   const unsigned char *cells, size_t length
 );

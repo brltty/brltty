@@ -128,7 +128,7 @@ drainBrailleOutput (BrailleDisplay *brl, int minimumDelay) {
 static void
 fillRegion (
   wchar_t *text, unsigned char *dots,
-  unsigned int start, unsigned int width,
+  unsigned int start, unsigned int count,
   unsigned int columns, unsigned int rows,
   void *data, unsigned int length,
   void (*fill) (wchar_t *text, unsigned char *dots, void *data)
@@ -138,18 +138,18 @@ fillRegion (
 
   while (rows > 0) {
     unsigned int index = 0;
-    size_t count = length;
-    if (count > width) count = width;
+    size_t amount = length;
+    if (amount > count) amount = count;
 
-    while (index < count) {
+    while (index < amount) {
       fill(&text[index], &dots[index], data);
       index += 1;
     }
-    length -= count;
+    length -= amount;
 
-    count = width - index;
-    wmemset(&text[index], WC_C(' '), count);
-    memset(&dots[index], 0, count);
+    amount = count - index;
+    wmemset(&text[index], WC_C(' '), amount);
+    memset(&dots[index], 0, amount);
 
     text += columns;
     dots += columns;
@@ -166,11 +166,11 @@ fillText (wchar_t *text, unsigned char *dots, void *data) {
 void
 fillTextRegion (
   wchar_t *text, unsigned char *dots,
-  unsigned int start, unsigned int width,
+  unsigned int start, unsigned int count,
   unsigned int columns, unsigned int rows,
   const wchar_t *characters, size_t length
 ) {
-  fillRegion(text, dots, start, width, columns, rows, &characters, length, fillText);
+  fillRegion(text, dots, start, count, columns, rows, &characters, length, fillText);
 }
 
 static void
@@ -182,11 +182,11 @@ fillDots (wchar_t *text, unsigned char *dots, void *data) {
 void
 fillDotsRegion (
   wchar_t *text, unsigned char *dots,
-  unsigned int start, unsigned int width,
+  unsigned int start, unsigned int count,
   unsigned int columns, unsigned int rows,
   const unsigned char *cells, size_t length
 ) {
-  fillRegion(text, dots, start, width, columns, rows, &cells, length, fillDots);
+  fillRegion(text, dots, start, count, columns, rows, &cells, length, fillDots);
 }
 
 
