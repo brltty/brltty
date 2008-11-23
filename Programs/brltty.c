@@ -2775,11 +2775,13 @@ runProgram (void) {
 
             for (row=0; row<brl.y; row+=1) {
               const ScreenCharacter *source = &characters[row * textCount];
-              unsigned char *target = &brl.buffer[(row * brl.x) + textStart];
+              unsigned int start = (row * brl.x) + textStart;
+              unsigned char *target = &brl.buffer[start];
+              wchar_t *text = &textBuffer[start];
               int column;
 
               for (column=0; column<textCount; column+=1) {
-                target[column] = convertAttributesToDots(attributesTable, source[column].attributes);
+                text[column] = UNICODE_BRAILLE_ROW | (target[column] = convertAttributesToDots(attributesTable, source[column].attributes));
               }
             }
           } else {
