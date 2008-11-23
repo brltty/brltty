@@ -102,7 +102,7 @@ message (const char *mode, const char *string, short flags) {
       wchar_t characters[count];
       wchar_t text[brl.x * brl.y];
       convertCharsToWchars(buffer, characters, count);
-      fillTextCells(text, brl.buffer, 0, brl.x, brl.x, brl.y, characters, count);
+      fillTextRegion(text, brl.buffer, 0, brl.x, brl.x, brl.y, characters, count);
       if (!braille->writeWindow(&brl, text)) return 0;
     }
 

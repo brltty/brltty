@@ -69,14 +69,14 @@ extern void initializeBrailleDisplay (BrailleDisplay *brl);
 extern unsigned int drainBrailleOutput (BrailleDisplay *brl, int minimumDelay);
 extern int ensureBrailleBuffer (BrailleDisplay *brl, int infoLevel);
 
-extern void fillTextCells (
+extern void fillTextRegion (
   wchar_t *text, unsigned char *dots,
   unsigned int start, unsigned int width,
   unsigned int columns, unsigned int rows,
   const wchar_t *characters, size_t length
 );
 
-extern void fillStatusCells (
+extern void fillDotsRegion (
   wchar_t *text, unsigned char *dots,
   unsigned int start, unsigned int width,
   unsigned int columns, unsigned int rows,

@@ -567,17 +567,17 @@ int
 writeBrailleCharacters (const char *mode, const wchar_t *characters, size_t length) {
   wchar_t textBuffer[brl.x * brl.y];
 
-  fillTextCells(textBuffer, brl.buffer,
-                textStart, textCount, brl.x, brl.y,
-                characters, length);
+  fillTextRegion(textBuffer, brl.buffer,
+                 textStart, textCount, brl.x, brl.y,
+                 characters, length);
 
   {
     size_t modeLength = strlen(mode);
     wchar_t modeCharacters[modeLength];
     convertCharsToWchars(mode, modeCharacters, modeLength);
-    fillTextCells(textBuffer, brl.buffer,
-                  statusStart, statusCount, brl.x, brl.y,
-                  modeCharacters, modeLength);
+    fillTextRegion(textBuffer, brl.buffer,
+                   statusStart, statusCount, brl.x, brl.y,
+                   modeCharacters, modeLength);
   }
 
   fillStatusSeparator(textBuffer, brl.buffer);
@@ -673,7 +673,7 @@ showInfo (void) {
              isFrozenScreen()? 'f': ' ',
              prefs.textStyle? '6': '8',
              prefs.blinkingCapitals? 'B': ' ');
-    return writeBrailleString("info", text);
+    return writeBrailleString(mode, text);
   }
 }
 
@@ -1388,12 +1388,17 @@ runProgram (void) {
         if (!suspended) {
           setStatusCells();
           writeBrailleString("wrn", scr.unreadable);
+
 #ifdef ENABLE_API
-          if (apiStarted)
+          if (apiStarted) {
             api_suspend(&brl);
-          else
+          } else
 #endif /* ENABLE_API */
+
+          {
             destructBrailleDriver();
+          }
+
           suspended = 1;
         }
       } else {
@@ -2714,29 +2719,9 @@ runProgram (void) {
               }
             }
 
-            {
-              const unsigned char *source = outputBuffer;
-              unsigned char *target = &brl.buffer[textStart];
-              wchar_t *text = &textBuffer[textStart];
-              int length = outputLength;
-
-              while (length > 0) {
-                unsigned int count = length;
-                if (count > textCount) count = textCount;
-
-                {
-                  int i;
-                  for (i=0; i<count; i+=1) {
-                    text[i] = UNICODE_BRAILLE_ROW | (target[i] = *source++);
-                  }
-                }
-
-                target += brl.x;
-                text += brl.x;
-                length -= count;
-              }
-            }
-
+            fillDotsRegion(textBuffer, brl.buffer,
+                           textStart, textCount, brl.x, brl.y,
+                           outputBuffer, outputLength);
             break;
           }
         }
@@ -2836,9 +2821,9 @@ runProgram (void) {
             unsigned char cells[length];
             memset(cells, 0, length);
             renderStatusFields(fields, cells);
-            fillStatusCells(textBuffer, brl.buffer,
-                            statusStart, statusCount, brl.x, brl.y,
-                            cells, length);
+            fillDotsRegion(textBuffer, brl.buffer,
+                           statusStart, statusCount, brl.x, brl.y,
+                           cells, length);
           }
 
           fillStatusSeparator(textBuffer, brl.buffer);

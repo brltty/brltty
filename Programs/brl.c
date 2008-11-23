@@ -126,12 +126,12 @@ drainBrailleOutput (BrailleDisplay *brl, int minimumDelay) {
 }
 
 static void
-fillCells (
+fillRegion (
   wchar_t *text, unsigned char *dots,
   unsigned int start, unsigned int width,
   unsigned int columns, unsigned int rows,
   void *data, unsigned int length,
-  void (*fillCell) (wchar_t *text, unsigned char *dots, void *data)
+  void (*fill) (wchar_t *text, unsigned char *dots, void *data)
 ) {
   text += start;
   dots += start;
@@ -142,7 +142,7 @@ fillCells (
     if (count > width) count = width;
 
     while (index < count) {
-      fillCell(&text[index], &dots[index], data);
+      fill(&text[index], &dots[index], data);
       index += 1;
     }
     length -= count;
@@ -158,35 +158,35 @@ fillCells (
 }
 
 static void
-fillTextCell (wchar_t *text, unsigned char *dots, void *data) {
+fillText (wchar_t *text, unsigned char *dots, void *data) {
   wchar_t **character = data;
   *dots = convertCharacterToDots(textTable, (*text = *(*character)++));
 }
 
 void
-fillTextCells (
+fillTextRegion (
   wchar_t *text, unsigned char *dots,
   unsigned int start, unsigned int width,
   unsigned int columns, unsigned int rows,
   const wchar_t *characters, size_t length
 ) {
-  fillCells(text, dots, start, width, columns, rows, &characters, length, fillTextCell);
+  fillRegion(text, dots, start, width, columns, rows, &characters, length, fillText);
 }
 
 static void
-fillStatusCell (wchar_t *text, unsigned char *dots, void *data) {
+fillDots (wchar_t *text, unsigned char *dots, void *data) {
   unsigned char **cell = data;
   *text = UNICODE_BRAILLE_ROW | (*dots = *(*cell)++);
 }
 
 void
-fillStatusCells (
+fillDotsRegion (
   wchar_t *text, unsigned char *dots,
   unsigned int start, unsigned int width,
   unsigned int columns, unsigned int rows,
   const unsigned char *cells, size_t length
 ) {
-  fillCells(text, dots, start, width, columns, rows, &cells, length, fillStatusCell);
+  fillRegion(text, dots, start, width, columns, rows, &cells, length, fillDots);
 }
 
 
