@@ -1,0 +1,77 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2008 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+# This BRLTTY contraction subtable defines the standard braille representations
+# for the letters of the Latin alphabet.
+
+# lowercase letters
+always	\x61	1	LATIN SMALL LETTER A
+always	\x62	12	LATIN SMALL LETTER B
+always	\x63	14	LATIN SMALL LETTER C
+always	\x64	145	LATIN SMALL LETTER D
+always	\x65	15	LATIN SMALL LETTER E
+always	\x66	124	LATIN SMALL LETTER F
+always	\x67	1245	LATIN SMALL LETTER G
+always	\x68	125	LATIN SMALL LETTER H
+always	\x69	24	LATIN SMALL LETTER I
+always	\x6A	245	LATIN SMALL LETTER J
+always	\x6B	13	LATIN SMALL LETTER K
+always	\x6C	123	LATIN SMALL LETTER L
+always	\x6D	134	LATIN SMALL LETTER M
+always	\x6E	1345	LATIN SMALL LETTER N
+always	\x6F	135	LATIN SMALL LETTER O
+always	\x70	1234	LATIN SMALL LETTER P
+always	\x71	12345	LATIN SMALL LETTER Q
+always	\x72	1235	LATIN SMALL LETTER R
+always	\x73	234	LATIN SMALL LETTER S
+always	\x74	2345	LATIN SMALL LETTER T
+always	\x75	136	LATIN SMALL LETTER U
+always	\x76	1236	LATIN SMALL LETTER V
+always	\x77	2456	LATIN SMALL LETTER W
+always	\x78	1346	LATIN SMALL LETTER X
+always	\x79	13456	LATIN SMALL LETTER Y
+always	\x7A	1356	LATIN SMALL LETTER Z
+
+# uppercase letters
+always	\x41	1	LATIN CAPITAL LETTER A
+always	\x42	12	LATIN CAPITAL LETTER B
+always	\x43	14	LATIN CAPITAL LETTER C
+always	\x44	145	LATIN CAPITAL LETTER D
+always	\x45	15	LATIN CAPITAL LETTER E
+always	\x46	124	LATIN CAPITAL LETTER F
+always	\x47	1245	LATIN CAPITAL LETTER G
+always	\x48	125	LATIN CAPITAL LETTER H
+always	\x49	24	LATIN CAPITAL LETTER I
+always	\x4A	245	LATIN CAPITAL LETTER J
+always	\x4B	13	LATIN CAPITAL LETTER K
+always	\x4C	123	LATIN CAPITAL LETTER L
+always	\x4D	134	LATIN CAPITAL LETTER M
+always	\x4E	1345	LATIN CAPITAL LETTER N
+always	\x4F	135	LATIN CAPITAL LETTER O
+always	\x50	1234	LATIN CAPITAL LETTER P
+always	\x51	12345	LATIN CAPITAL LETTER Q
+always	\x52	1235	LATIN CAPITAL LETTER R
+always	\x53	234	LATIN CAPITAL LETTER S
+always	\x54	2345	LATIN CAPITAL LETTER T
+always	\x55	136	LATIN CAPITAL LETTER U
+always	\x56	1236	LATIN CAPITAL LETTER V
+always	\x57	2456	LATIN CAPITAL LETTER W
+always	\x58	1346	LATIN CAPITAL LETTER X
+always	\x59	13456	LATIN CAPITAL LETTER Y
+always	\x5A	1356	LATIN CAPITAL LETTER Z
+
