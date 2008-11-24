@@ -16,3 +16,24 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
+# Minimal German 6-dot contractioned Braille Table (Vollschrift)
+# Created by Mario Lang <mlang@delysid.org>.
+
+include de-basis.ctb
+
+always au 16
+always eu 126
+always ei 146
+always ch 1456
+always sch 156
+always st 23456
+always ie 346
+always äu 34
+
+# exceptions
+always dienstag 145-346-1345-234-2345-1-1245 shouldn't use the st-contraction
+always donnerstag = shouldn't use the st-contraction
+always samstag = shouldn't use the st-contraction
+
+# names
+always daniel = shouldn't use the ie-contraction
