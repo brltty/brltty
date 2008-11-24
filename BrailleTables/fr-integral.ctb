@@ -32,31 +32,8 @@ midnum / 34
 midnum : 25
 endnum # 56-3456
 
-always a 1		lettre a
-always b 12		lettre b
-always c 14		lettre c
-always d 145		lettre d
-always e 15		lettre e
-always f 124		lettre f
-always g 1245		lettre g
-always h 125		lettre h
-always i 24		lettre i
-always j 245		lettre j
-always k 13		lettre k
-always l 123		lettre l
-always m 134		lettre m
-always n 1345		lettre n
-always o 135		lettre o
-always p 1234		lettre p
-always q 12345		lettre q
-always r 1235		lettre r
-always s 234		lettre s
-always t 2345		lettre t
-always u 136		lettre u
-always v 1236		lettre v
-always x 1346		lettre x
-always y 13456		lettre y
-always z 1356		lettre z
+include letters-latin.cti
+
 always ç 12346		c cédille
 always é 123456		e accent aigu
 always à 12356		a accent grave
@@ -71,33 +48,7 @@ always ë 1246		e tréma
 always ï 12456		i tréma
 always ü 1256		u tréma
 always oe 246		oe ligatur
-always w 2456		lettre w
 
-always A 1		lettre A
-always B 12		lettre B
-always C 14		lettre C
-always D 145		lettre D
-always E 15		lettre E
-always F 124		lettre F
-always G 1245		lettre G
-always H 125		lettre H
-always I 24		lettre I
-always J 245		lettre J
-always K 13		lettre K
-always L 123		lettre L
-always M 134		lettre M
-always N 1345		lettre N
-always O 135		lettre O
-always P 1234		lettre P
-always Q 12345		lettre Q
-always R 1235		lettre R
-always S 234		lettre S
-always T 2345		lettre T
-always U 136		lettre U
-always V 1236		lettre V
-always X 1346		lettre X
-always Y 13456		lettre Y
-always Z 1356		lettre Z
 always Ç 12346		C cédille
 always É 123456		E accent aigu
 always À 12356		A accent grave
@@ -112,7 +63,6 @@ always Ë 1246		E tréma
 always Ï 12456		I tréma
 always Ü 1256		U tréma
 always Oe 246		Oe ligatur
-always W 2456		lettre w
 
 always , 2		virgule
 always ; 23		point-virgule
