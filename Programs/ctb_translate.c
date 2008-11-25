@@ -407,7 +407,7 @@ putReplace (const ContractionTableRule *rule) {
 }
 
 static const ContractionTableRule *
-getCharacterRule (wchar_t character) {
+getAlwaysRule (wchar_t character) {
   const ContractionTableCharacter *ctc = getContractionTableCharacter(character);
   if (ctc) {
     ContractionTableOffset offset = ctc->always;
@@ -422,12 +422,12 @@ getCharacterRule (wchar_t character) {
 static int
 putCharacter (wchar_t character) {
   {
-    const ContractionTableRule *rule = getCharacterRule(character);
+    const ContractionTableRule *rule = getAlwaysRule(character);
     if (rule) return putReplace(rule);
   }
 
   if (character != UNICODE_REPLACEMENT_CHARACTER) {
-    const ContractionTableRule *rule = getCharacterRule(UNICODE_REPLACEMENT_CHARACTER);
+    const ContractionTableRule *rule = getAlwaysRule(UNICODE_REPLACEMENT_CHARACTER);
     if (rule) return putReplace(rule);
   }
 
@@ -1029,6 +1029,7 @@ contractText (
         }
       }
     } else {
+      currentOpcode = CTO_Always;
       if (!putCharacter(*src)) break;
       src += 1;
     }
