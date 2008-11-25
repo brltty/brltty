@@ -47,10 +47,63 @@ always ß 6-2346
 always ü 1256
 always Ü 1256
 
+# accented letters
+always À 4-1      [C0] upper a grave
+always Á 4-1      [C1] upper a acute
+always Â 4-1      [C2] upper a circumflex
+always Ã 4-1      [C3] upper a tilde
+always Ç 4-14     [C7] upper c cedilla
+always È 4-15     [C8] upper e grave
+always É 4-15     [C9] upper e acute
+always Ê 4-15     [CA] upper e circumflex
+always Ë 4-15     [CB] upper e dieresis
+always Ì 4-24     [CC] upper i grave
+always Í 4-24     [CD] upper i acute
+always Î 4-24     [CE] upper i circumflex
+always Ï 4-24     [CF] upper i dieresis
+always Ð 4-15     [D0] upper eth
+always Ñ 4-1345   [D1] upper n tilde
+always Ò 4-135    [D2] upper o grave
+always Ó 4-135    [D3] upper o acute
+always Ô 4-135    [D4] upper o circumflex
+always Õ 4-135    [D5] upper o tilde
+always Ø 4-135    [D8] upper o slash
+always Ù 4-136    [D9] upper u grave
+always Ú 4-136    [DA] upper u acute
+always Û 4-136    [DB] upper u circumflex
+always Ý 4-13456  [DD] upper y acute
+always Þ 4-2345   [DE] upper t horn
+always à   4-1      [E0] lower a grave
+always á   4-1      [E1] lower a acute
+always â   4-1      [E2] lower a circumflex
+always ã   4-1      [E3] lower a tilde
+always å   4-1      [E5] lower a ring
+always æ   1-15     [E6] lower ae
+always ç   4-14     [E7] lower c cedilla
+always è   4-15     [E8] lower e grave
+always é   4-15     [E9] lower e acute
+always ê   4-15     [EA] lower e circumflex
+always ë   4-15     [EB] lower e dieresis
+always ì   4-24     [EC] lower i grave
+always í   4-24     [ED] lower i acute
+always î   4-24     [EE] lower i circumflex
+always ï   4-24     [EF] lower i dieresis
+always ð   4-15     [F0] lower eth
+always ñ   4-1345   [F1] lower n tilde
+always ò   4-135    [F2] lower o grave
+always ó   4-135    [F3] lower o acute
+always ô   4-135    [F4] lower o circumflex
+always õ   4-135    [F5] lower o tilde
+always ø   4-135    [F8] lower o slash
+always ù   4-136    [F9] lower u grave
+always ú   4-136    [FA] lower u acute
+always û   4-136    [FB] lower u circumflex
+always ý   4-13456  [FD] lower y acute
+always þ   4-2345   [FE] lower t horn
+always ÿ   4-13456  [FF] lower y dieresis
+
 # common abbreviations
 word GmbH 46-1245-134-12-45-125
-
-always é 4-15
 
 prepunc " 236
 postpunc " 356
@@ -84,7 +137,9 @@ always .\s.\s. 3-3-3 . . .
 endnum ! 12346 (factorial)
 always ! 235
 
-always ? 26
+endword ? 26
+always ? 6-26
+always \uFFFD 6-26
 
 always ( 2356
 always ) 2356
@@ -136,7 +191,7 @@ always < 5-13
 always = 2356
 always > 46-2
 midnum + 235
-always + 346
+always + 6-235
 midnum - 36
 always × 46-16 multiplication sign
 midnum ÷ 46-34 division sign
