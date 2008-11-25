@@ -225,9 +225,16 @@ addRule (
 
         if (newRule->findlen > currentRule->findlen) break;
 
-        if (newRule->findlen == currentRule->findlen)
+        if (newRule->findlen == currentRule->findlen) {
+          if ((newRule->opcode == currentRule->opcode) &&
+              (newRule->after == currentRule->after) &&
+              (newRule->before == currentRule->before) &&
+              (wmemcmp(newRule->findrep, currentRule->findrep, newRule->findlen) == 0))
+            break;
+
           if ((currentRule->opcode == CTO_Always) && (newRule->opcode != CTO_Always))
             break;
+        }
 
         offsetAddress = &currentRule->next;
       }
