@@ -26,7 +26,6 @@
 
 #include "ctb.h"
 #include "ctb_internal.h"
-#include "ttb.h"
 #include "unicode.h"
 #include "brldots.h"
 
@@ -405,11 +404,6 @@ putCell (BYTE byte) {
 static int
 putReplace (const ContractionTableRule *rule) {
   return putCells((BYTE *)&rule->findrep[rule->findlen], rule->replen);
-}
-
-static int
-putComputerBraille (wchar_t character) {
-  return putCell(convertCharacterToDots(textTable, character));
 }
 
 static const ContractionTableRule *
@@ -895,10 +889,7 @@ contractText (
         if (testCharacter(*src, CTC_Space) || testCharacter(src[-1], CTC_Space))
           literal = NULL;
 
-    if (literal) {
-      if (!putComputerBraille(*src)) break;
-      src += 1;
-    } else if (selectRule(srcmax-src) || selectRule(1)) {
+    if ((!literal && selectRule(srcmax-src)) || selectRule(1)) {
       if (!literal &&
           ((currentOpcode == CTO_Literal) ||
            ((cursor >= src) && (cursor < (src + currentFindLength))))) {
