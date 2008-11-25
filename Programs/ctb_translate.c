@@ -27,6 +27,8 @@
 #include "ctb.h"
 #include "ctb_internal.h"
 #include "ttb.h"
+#include "unicode.h"
+#include "brldots.h"
 
 static ContractionTable *table;
 static const wchar_t *src, *srcmin, *srcmax, *cursor;
@@ -388,41 +390,60 @@ selectRule (int length) {
 }
 
 static int
-putBytes (const BYTE *bytes, int count) {
+putCells (const BYTE *cells, int count) {
   if (dest + count > destmax) return 0;
-  memcpy(dest, bytes, count);
+  memcpy(dest, cells, count);
   dest += count;
   return 1;
 }
 
 static int
+putCell (BYTE byte) {
+  return putCells(&byte, 1);
+}
+
+static int
 putReplace (const ContractionTableRule *rule) {
-  return putBytes((BYTE *)&rule->findrep[rule->findlen], rule->replen);
+  return putCells((BYTE *)&rule->findrep[rule->findlen], rule->replen);
 }
 
 static int
 putComputerBraille (wchar_t character) {
-  BYTE cell = convertCharacterToDots(textTable, character);
-  return putBytes(&cell, 1);
+  return putCell(convertCharacterToDots(textTable, character));
 }
 
-static int
-putCharacter (wchar_t character) {
+static const ContractionTableRule *
+getCharacterRule (wchar_t character) {
   const ContractionTableCharacter *ctc = getContractionTableCharacter(character);
   if (ctc) {
     ContractionTableOffset offset = ctc->always;
     if (offset) {
       const ContractionTableRule *rule = getContractionTableItem(offset);
-      if (rule->replen) return putReplace(rule);
+      if (rule->replen) return rule;
     }
   }
-  return putComputerBraille(character);
+  return NULL;
+}
+
+static int
+putCharacter (wchar_t character) {
+  {
+    const ContractionTableRule *rule = getCharacterRule(character);
+    if (rule) return putReplace(rule);
+  }
+
+  if (character != UNICODE_REPLACEMENT_CHARACTER) {
+    const ContractionTableRule *rule = getCharacterRule(UNICODE_REPLACEMENT_CHARACTER);
+    if (rule) return putReplace(rule);
+  }
+
+  return putCell(BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT4 | BRL_DOT5 | BRL_DOT6 | BRL_DOT7 | BRL_DOT8);
 }
 
 static int
 putSequence (ContractionTableOffset offset) {
   const BYTE *sequence = getContractionTableItem(offset);
-  return putBytes(sequence+1, *sequence);
+  return putCells(sequence+1, *sequence);
 }
 
 static void
@@ -874,7 +895,10 @@ contractText (
         if (testCharacter(*src, CTC_Space) || testCharacter(src[-1], CTC_Space))
           literal = NULL;
 
-    if ((!literal && selectRule(srcmax-src)) || selectRule(1)) {
+    if (literal) {
+      if (!putComputerBraille(*src)) break;
+      src += 1;
+    } else if (selectRule(srcmax-src) || selectRule(1)) {
       if (!literal &&
           ((currentOpcode == CTO_Literal) ||
            ((cursor >= src) && (cursor < (src + currentFindLength))))) {
@@ -1014,7 +1038,7 @@ contractText (
         }
       }
     } else {
-      if (!putComputerBraille(*src)) break;
+      if (!putCharacter(*src)) break;
       src += 1;
     }
 
