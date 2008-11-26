@@ -19,8 +19,6 @@
 # Basic German 6-dot Braille Contraction Table
 # Created by Mario Lang <mlang@delysid.org>.
 
-class s s
-
 numsign 3456  number sign, just one operand
 letsign 6
 capsign 46 # FIXME: only allowed at begword, midendword capsign is 45 
