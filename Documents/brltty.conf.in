@@ -168,7 +168,9 @@
 # contraction table will be available.
 # (can be overridden with the -c [--contraction-table=] option)
 #contraction-table	compress	# remove excess white-space
-#contraction-table	de	# Contracted German
+#contraction-table	de-basis	# Uncontracted German
+#contraction-table	de-kurzschrift	# Contracted German (1998 standard)
+#contraction-table	de-vollschrift	# Contracted German (basic syllables only)
 #contraction-table	en-ueb-g2	# Grade 2 Unified English Braille
 #contraction-table	en-us-g2	# Grade 2 American English
 #contraction-table	fr-abrege	# Contracted French

@@ -4285,7 +4285,9 @@ This feature isn't available if the
 The following contraction tables are provided:
 <descrip>
   <tag/compress/remove excess white-space
-  <tag/de/Contracted German
+  <tag/de-basis/Uncontracted German
+  <tag/de-kurzschrift/Contracted German (1998 standard)
+  <tag/de-vollschrift/Contracted German (basic syllables only)
   <tag/en-ueb-g2/Grade 2 Unified English Braille
   <tag/en-us-g2/Grade 2 American English
   <tag/fr-abrege/Contracted Unified French
