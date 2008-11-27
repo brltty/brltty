@@ -19,6 +19,7 @@
 #include "prologue.h"
 
 #include <stdio.h>
+#include <string.h>
 
 #include "misc.h"
 
@@ -215,7 +216,10 @@ sayText (const void *data) {
   const SayData *say = data;
 
   if (say->count == 1) {
-    spd_char(connectionHandle, say->priority, (const char *)say->text);
+    char string[say->length + 1];
+    memcpy(string, say->text, say->length);
+    string[say->length] = 0;
+    spd_char(connectionHandle, say->priority, string);
   } else {
     spd_sayf(connectionHandle, say->priority, "%.*s", say->length, say->text);
   }
