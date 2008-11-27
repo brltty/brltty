@@ -23,6 +23,7 @@ include de-vollschrift.ctb
 
 # Ausnahmen für Vokalgruppen aus de-vollschrift.ctb
 always barrier 12-356-1235-24-12456 shouldn't use the ie-contraction
+always bankier 12-235-13-24-12456 shouldn't use the ie-contraction
 midendword iell 24-15-12345 shouldn't use the ie-contraction
 
 class r r
@@ -82,22 +83,27 @@ endword bel 12-13456 shouldn't use the be-contraction
 midword belläng 12-13456-5-123-1245 kabellänge shouldn't use the ll-contraction
 midword bellaeng 12-13456-5-123-1245
 endword ben 12-14 shouldn't use the be-contraction
+endword bend 12-14-145 shouldn't use the be-contraction
+endword bende 12-14-145-15 shouldn't use the be-contraction
+endword benden 12-14-145-14 shouldn't use the be-contraction
+endword bender 12-14-145-12456 shouldn't use the be-contraction
+endword bendes 12-14-145-123456 shouldn't use the be-contraction
 endword ber 12-12456 shouldn't use the be-contraction
+sufword ober 135-12-12456 shouldn't use the be-contraction
 endword bes 12-123456 shouldn't use the be-contraction
 
+always umgeht 136-134-1245-2356-2345 shouldn't use the ge-contraction
+always geig 1245-146-1245 should use the ei-contraction
+always geisel 1245-146-234-13456 shouldn't use the ge-contraction
 prfword gel 1245-13456 shouldn't use the ge-contraction
 midendword gelhaft 1245-13456-125-124
 midword gelläng 1245-13456-5-123-1245
 midword gellaeng 1245-13456-5-123-1245
 prfword geln 1245-13456-1345
 midendword gelung 1245-13456-136
-<before st midendword gelungs 1245-13456-136-234
+before st midendword gelungs 1245-13456-136-234
 prfword gen 1245-14 shouldn't use the ge-contraction
-prfword gend 1245-14-145 shouldn't use the ge-contraction
-prfword gende 1245-14-145-15 shouldn't use the ge-contraction
-prfword genden 1245-14-145-14 shouldn't use the ge-contraction
-prfword gender 1245-14-145-12456 shouldn't use the ge-contraction
-prfword gendes 1245-14-145-123456 shouldn't use the ge-contraction
+midendword gend 1245-14-145 shouldn't use the ge-contraction
 midendword ger 1245-12456 should use er-contraction if not part of a word intro
 begword abge 1-12-12346
 begword ange 235-12346
@@ -110,6 +116,7 @@ sufword ungerecht 256-12346-1235-2345
 sufword zuge 2-1356-12346
 endword ges 1245-123456 shouldn't use the ge-contraction
 midendword ien 24-14 shouldn't use the ie-contraction
+midendword ienen 346-1345-14 should use the ie-contraction
 endword tel 2345-13456 should use the el-contraction
 midendword ten 2345-14 should use the en-contraction
 midendword ter 2345-12456 should use the er-contraction
@@ -155,6 +162,8 @@ sufword barschaft 12-356-156-1-124-2345 shouldn't use the shaft-contraction
 always blumensamen 12-123-136-134-14-234-1-134-14 shouldn't use the sam-contraction
 prfword dezimal = if we use the mal-contraction here, we get a new word dezim
 begmidword dezimal 145-15-1356-24-134-25
+sufword small 234-134-1-12345 shouldn't use the mal-contraction
+word beaufort 12-15-16-124-26-2345 shouldn't use the auf-contraction
 sufword erheiter 12456-125-146-2345-12456 shouldn't use the heit-contraction
 prfword formal 124-26-134-1-123 shouldn't use the mal-contraction
 begword formal 124-26-134-25 shouldn't use the mal-contraction
@@ -366,6 +375,8 @@ contraction gg
 begword gelt 1245-13456-2345 gelten shouldn't use the ge-contraction
 prfword gene 1245-14-15
 always geogra = Geographie shouldn't use the ge-contraction
+always sonogra = shouldn't use the so-contraction
+always sonn = shouldn't use the so-contraction
 prfword gern 1245-12456-1345
 midendword gerlich 1245-12456-456 bürgerlich shouldn't use the ge-contraction
 always gern 1245-12456-1345 we shouldn't use the ge-contraction here
@@ -468,7 +479,8 @@ always langobard 123-235-1245-135-12-356-145 shouldn't use the lang-contraction
 always lass 2-123
 always läss 5-123
 always laess 5-123
-always klassi 13-123-1-2346-24 shouldn't use the lass-contraction
+always class = shouldn't use the lass-contraction
+sufword klass 13-123-1-2346 shouldn't use the lass-contraction
 always laich 123-1-24-1456 shouldn't use the ich-contraction
 always lasagne = shouldn't use the sag-contraction
 always lasso 123-1-2346-135 shouldn't use the lass-contraction
@@ -539,7 +551,8 @@ always nommen 1345-1346
 contraction nx
 always notwendig 1345-2456
 contraction nw
-always normal 1345-35-134-1-123 We shouldn't use the mal-contraction here
+always normal 1345-26-134-1-123 shouldn't use the mal-contraction
+always anim 235-24-134 animal shouldn't use the mal-contraction
 always nur 1345-1235
 contraction nr
 always nutz 1345-1356
@@ -618,9 +631,11 @@ always sitz 2-24
 word so 1234
 always so 2-1234
 word soda = shouldn't use the so-contraction
+sufword south = shouldn't use the so-contraction
 always konson = shouldn't use the so-contraction
 always solch 234-1456
 always soll 2-234
+always sonder 234-135-1345-145-12456 shouldn't use the so-contraction
 always sondern 234-1345
 contraction sn
 always sonst 234-135-1345-23456 shouldn't use the so-contraction
@@ -669,6 +684,7 @@ word und 136
 always und 2-136
 always kundlich 13-256-145-456 shouldn't use the und-contraction
 always mund 134-256-145 shouldn't use the und-contraction
+sufword under 256-145-12456 shouldn't use the und-contraction
 word unter 256
 begmidword unter 2-256
 
@@ -696,6 +712,7 @@ always während 345-145
 contraction äd
 sufword war 356
 sufword wär 5-356
+sufword warm 2456-356-134 shouldn't use the war-contraction
 always weg 2456-1245
 contraction wg
 always weis 2-146 Anweisung
@@ -738,6 +755,7 @@ contraction zt
 word zu 1356
 contraction z
 always zu 2-1356
+before st midendword zug =
 word zum 1356-134
 word zunächst 1356-1345
 word zur 1356-1235
@@ -749,6 +767,11 @@ contraction zw
 
 # exceptions
 always beilstein 12-146-123-23456-1246 shouldn't use the bei-contraction
+word bein 12-146-1345 shouldn't use the bei-contraction
+word beine 12-146-1345-15 shouldn't use the bei-contraction
+word beinen 12-146-1345-14 shouldn't use the bei-contraction
+word beines 12-146-1345-123456 shouldn't use the bei-contraction
+always bauform 12-16-124-26-134 shouldn't use the auf-contraction
 always bssy 12-234-234-6-13456 shouldn't use the ss-contraction
 always bundes 12-256-145-123456 shouldn't use the und-contraction
 always donnerstag 145-135-1345-1345-12456-234-2345-1-1245 shouldn't use the st-contraction

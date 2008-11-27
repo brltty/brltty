@@ -103,6 +103,24 @@ always ÿ   4-13456  [FF] lower y dieresis
 # common abbreviations
 word GmbH 46-1245-134-12-45-125
 
+midnum ^ 4-346-3456
+always \u2070 4-346-3456-245  superscript 0
+always \u00B9 4-346-3456-1    superscript 1
+always \u00B2 4-346-3456-12        superscript 2
+always \u00B3 4-346-3456-14   superscript 3
+always \u2074 4-346-3456-145  superscript 4
+always \u2075 4-346-3456-15   superscript 5
+always \u2076 4-346-3456-124  superscript 6
+always \u2077 4-346-3456-1245 superscript 7
+always \u2078 4-346-3456-125  superscript 8
+always \u2079 4-346-3456-24   superscript 9
+
+always ° 4-356 Grad
+before space endnum ' 4-35 Winkelminute
+before space endnum \u2032 4-35 Winkelminute
+before space endnum '' 4-35-35
+before space endnum \u2033 4-35-35
+
 prepunc " 236
 postpunc " 356
 always " 6-4
@@ -112,7 +130,6 @@ always ' 6-6
 prepunc `` 236
 always ` 4
 
-midnum ^ 45
 always ^ 456-126
 
 always ~ 4-156
@@ -142,11 +159,11 @@ always \uFFFD 6-26
 always ( 2356
 always ) 2356
 
-always [ 456-12356
-always ] 456-23456
+always [ 6-2356
+always ] 6-2356
 
-always { 46-12356
-always } 46-23456
+always { 56-2356
+always } 56-2356
 
 always # 3456
 
@@ -157,12 +174,11 @@ repeatable *** 6-35-35-35
 midnum / 256
 always / 5-2
 
-endnum % 123456
-always % 6-123456
+always % 3456-245-356
+always \u2030 3456-245-356-356 promille
+always & 5-136
 
-always & 6-12346
-
-always @ 3457
+always @ 4-345
 
 always \\ 347
 
@@ -200,7 +216,6 @@ always $ 256-3456
 always © 2356-6-14-2356 copyright
 always ¶ 4-1234-345 paragraph
 always § 4-234-3 section
-always ° 45-46-16 degrees
 always ¢ 4-14 cents
 always £ 4-123 pounds
 always ¥ 4-13456 yen
