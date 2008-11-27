@@ -3955,7 +3955,7 @@ or until any key on the display is pressed.
 Files with names of the form <tt/*.ttb/ are text tables,
 and with names of the form <tt/*.tti/ are text subtables.
 They are used by BRLTTY to translate the characters on the screen
-into their corresponding braille representations.
+into their corresponding 8-dot computer braille representations.
 
 BRLTTY is initially configured to use the
 <ref id="nabcc" name="North American Braille Computer Code"> (NABCC).
@@ -4265,8 +4265,12 @@ The following directives are provided:
 </descrip>
 
 <sect1>Contraction Tables<label id="table-contraction"><p>
-BRLTTY can display in-line contracted braille.
-It does this if:
+Files with names of the form <tt/*.ctb/ are contraction tables,
+and with names of the form <tt/*.cti/ are contraction subtables.
+They are used by BRLTTY to translate character sequences on the screen
+into their corresponding contracted braille representations.
+
+BRLTTY presents contracted braille if:
 <itemize>
   <item>
     A contraction table has been selected.
@@ -4296,62 +4300,72 @@ The following contraction tables are provided:
   <tag/zh-tw-ucb/Taiwanese Unique Chinese Braille
 </descrip>
 
-<sect2>File Format<p>
-Blank lines are ignored.
-Any leading and trailing white-space (any number of blanks and/or tabs) is ignored.
-Lines which begin with a number sign (<tt/&num;/) are ignored,
-i.e. they're comments.
-<tscreen>&num; This is a comment.</tscreen>
-All other lines define table entries.
+<sect2>Contraction Table Format<p>
+A contraction table consists of a sequence of entries, one per line,
+which define how character sequences are to be represented in braille.
+<tt/UTF-8/ character encoding must be used.
+White-space (blanks, tabs) at the beginning of a line,
+as well as before and/or after any operand,
+is ignored.
+Lines containing only white-space are ignored.
+If the first non-white-space character of a line is "&num;"
+then that line is a comment and is ignored.
 
-The general form of a table entry is an opcode followed by its operands.
-The opcode and its operands are separated from one another by white-space.
-Each opcode has a specific number of operands,
-and any text following its last operand is treated as a comment.
-<tscreen><em/opcode/ <em/operand/ ... <em/comment/</tscreen>
+The format of a contraction table entry is:
+<tscreen><em/directive/ <em/operand/ ... [<em/comment/]</tscreen>
+Each directive has a specific number of operands.
+Any text beyond the last operand of a directive is interpreted as a comment.
+The order of the entries within a contraction table is, in general,
+anything that is convenient for its maintainer(s).
+An entry which defines an entity, e.g. <tt/class/,
+must precede all references to that entity.
 
-The following operand types are supported:
+Entries which match character sequences
+are automatically rearranged from longest to shortest
+so that longer matches are always preferred.
+If more than one entry matches the same character sequence
+then their original table ordering is maintained.
+Thus, the same sequence may be translated differently under different circumstances.
+
+<sect2>Contraction Table Operands<p>
 <descrip>
-  <tag/string/
-    A sequence of characters other than
-    white-space (which terminates the string)
-    and backslashes (<tt/&bsol;/).
-    The following special representations are also supported:
-    <descrip>
-      <tag><tt/&bsol;&bsol;/</tag>backslash
-      <tag><tt/&bsol;f/</tag>form feed
-      <tag><tt/&bsol;n/</tag>new line
-      <tag><tt/&bsol;o/<em/ooo/</tag>3-digit octal value
-      <tag><tt/&bsol;r/</tag>carriage return
-      <tag><tt/&bsol;s/</tag>blank (space)
-      <tag><tt/&bsol;t/</tag>horizontal tab
-      <tag><tt/&bsol;v/</tag>vertical tab
-      <tag><tt/&bsol;x/<em/xx/</tag>2-digit hexadecimal value
-    </descrip>
-  <tag/number/
-    An integer.
-    It may be specified in any of the following ways:
-    <descrip>
-      <tag/decimal/
-        A sequence of decimal digits (<tt/0/-<tt/9/),
-        with the first digit being nonzero (<tt/1/-<tt/9/).
-      <tag/hexadecimal/
-        A sequence of hexadecimal digits (<tt/0/-<tt/9/, and either <tt/a/-<tt/f/ or <tt/A/-<tt/F/),
-        preceded by either <tt/0x/ or <tt/0X/.
-      <tag/octal/
-        A sequence of octal digits (<tt/0/-<tt/7/),
-        with the first digit being zero (<tt/0/).
-    </descrip>
-  <tag/dots/
-    A braille symbol.
-    The braille dots must be specified via their standard numbers
-    (see section <ref id="dots" name="Standard Braille Dot Numbering Convention">),
-    and, for a multi-cell symbol, the cell specifications
-    must be separated from one another by a dash (<tt/-/).
-    For example, the contraction for the English word <tt/lord/
-    (the letter <tt/l/ prefixed with dot 5)
-    would be specified as <tt/5-123/.
-    A space may be specified via the special dot number <tt/0/.
+  <tag><em/characters/</tag>
+    The first operand of a character sequence matching directive
+    is the character sequence to be matched.
+    Each character within the sequence may be:
+    <itemize>
+      <item>
+        Any single character other than a backslash or a white-space character.
+      <item>
+        A backslash-prefixed special character.
+        These are:
+        <descrip>
+        - <tag/\b/The backspace character.
+        - <tag/\f/The formfeed character.
+        - <tag/\n/The newline character.
+        - <tag/\o&num;&num;&num;/The three-digit octal representation of a character.
+        - <tag/\r/The carriage return character.
+        - <tag/\s/The space character.
+        - <tag/\t/The horizontal tab character.
+        - <tag/\u&num;&num;&num;&num;/The four-digit hexadecimal representation of a character.
+        - <tag/\U&num;&num;&num;&num;&num;&num;&num;&num;/The eight-digit hexadecimal representation of a character.
+        - <tag/\v/The vertical tab character.
+        - <tag/\x&num;&num;/The two-digit hexadecimal representation of a character.
+        - <tag/\X&num;&num;/... (the case of the X and of the digits isn't significant)
+        - <tag/\&num;/A literal number sign.
+        - <tag/\&lt;name&gt;/The Unicode name of a character (use _ for space).
+        - <tag/\\/A literal backslash.
+        </descrip>
+    </itemize>
+  <tag><em/representation/</tag>
+    The second operand of those character sequence matching directives which have one
+    is the braille representation of the sequence.
+    Each braille cell is specified as a sequence of one to eight dot numbers.
+    A dot number is a digit within the range <tt/1/-<tt/8/ as defined by the
+    <ref id="dots" name="Standard Braille Dot Numbering Convention">.
+    The special dot number <tt/0/,
+    which may not be used in conjunction with any other dot number,
+    means no dots.
 </descrip>
 
 <sect2>Opcodes<label id="contraction-opcodes"><p>

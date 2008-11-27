@@ -3,7 +3,7 @@ Text Tables
 
 Files with names of the form *.ttb are text tables, and with names of the form 
 *.tti are text subtables. They are used by BRLTTY to translate the characters 
-on the screen into their corresponding braille representations.
+on the screen into their corresponding 8-dot computer braille representations.
 
 A text table consists of a sequence of directives, one per line, which define 
 how each character is to be represented in braille. UTF-8 character encoding 

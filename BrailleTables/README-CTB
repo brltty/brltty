@@ -1,31 +1,66 @@
 Contraction Tables
-==================
+------------------
 
-Each line of a contraction table consists of UTF8-encoded characters and may be 
-empty, a comment, or a table entry. An empty line contains only whitespace (any 
-number of blanks and/or tabs). A line is a comment if the first non-whitespace 
-character is '#'. The format of a table entry is:
+Files with names of the form *.ctb are contraction tables, and with names of 
+the form *.cti are contraction subtables. They are used by BRLTTY to translate 
+character sequences on the screen into their corresponding contracted braille 
+representations.
 
-   opcode operand ... [comment]
+A contraction table consists of a sequence of entries, one per line, which 
+define how character sequences are to be represented in braille. UTF-8 
+character encoding must be used. White-space (blanks, tabs) at the beginning of 
+a line, as well as before and/or after any operand, is ignored. Lines 
+containing only white-space are ignored. If the first non-white-space character 
+of a line is "#" then that line is a comment and is ignored.
 
-Each opcode has a specific number of operands (most have two). The opcode, each 
-of its operands, and the optional comment are separated from one another by 
-whitespace. Leading whitespace is ignored.
+The format of a contraction table entry is:
 
-The order of the entries in the table may be anything that is convenient. You
-may wish to bear in mind, however, that the compiler rearranges entries so that
-the longest of several entries beginning with the same two characters is tested
-first. If entries have the same first operand, they are arranged in the order
-in which they are found in the table. Thus, the same string may have different
-translations under different circumstances. This method of arrangement is also
-followed for entries whose first operand is just one character.
+   directive operand ... [comment]
 
-In specifying the first operand, you may simply type it, if all the characters
-are on the keyboard. For those characters which are not, use a backslash
-followed by two hexadecimal digits. If you wish, you can follow the C
-convention and place "0x" between the backslash and the hexadecimal digits. To
-enter a backslash, use two in sequence, "\\".
+Each directive has a specific number of operands. Any text beyond the last 
+operand of a directive is interpreted as a comment. The order of the entries 
+within a contraction table is, in general, anything that is convenient for its 
+maintainer(s). An entry which defines an entity, e.g. class, must precede all 
+references to that entity.
 
-In most entries, the first operand is the string to be translated, and the
-second operand is the dot patterns of the Braille cells in the translation. The
-standard dot numbering is used. Cells are separated by hyphens ('-').
+Entries which match character sequences are automatically rearranged from 
+longest to shortest so that longer matches are always preferred. If more than 
+one entry matches the same character sequence then their original table 
+ordering is maintained. Thus, the same sequence may be translated differently 
+under different circumstances.
+
+
+The Characters Operand
+----------------------
+
+The first operand of a character sequence matching directive is the character 
+sequence to be matched. Each character within the sequence may be:
+*  Any single character other than a backslash or a white-space character.
+*  A backslash-prefixed special character. These are:
+   -  \b          The backspace character.
+   -  \f          The formfeed character.
+   -  \n          The newline character.
+   -  \o###       The three-digit octal representation of a character.
+   -  \r          The carriage return character.
+   -  \s          The space character.
+   -  \t          The horizontal tab character.
+   -  \u####      The four-digit hexadecimal representation of a character.
+   -  \U########  The eight-digit hexadecimal representation of a character.
+   -  \v          The vertical tab character.
+   -  \x##        The two-digit hexadecimal representation of a character.
+   -  \X##        ... (the case of the X and of the digits isn't significant)
+   -  \#          A literal number sign.
+   -  \<name>     The Unicode name of a character (use _ for space).
+   -  \\          A literal backslash.
+
+
+The Representation Operand
+--------------------------
+
+The second operand of those character sequence matching directives which have 
+one is the braille representation of the sequence. Each braille cell is 
+specified as a sequence of one to eight dot numbers. A dot number is a digit 
+within the range 1-8 as defined by the standard braille dot numbering 
+convention (see README-DOTS). The special dot number 0, which may not be used 
+in conjunction with any other dot number, means no dots.
+
