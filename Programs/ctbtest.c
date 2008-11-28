@@ -87,6 +87,18 @@ static int outputWidth;
 static int outputExtend;
 static unsigned char *outputBuffer;
 
+static void
+writeLocalCharacter (FILE *stream, unsigned char cell) {
+  fputc(convertDotsToCharacter(textTable, cell), stream);
+}
+
+static void
+writeUtf8Braille (FILE *stream, unsigned char cell) {
+  Utf8Buffer utf8;
+  size_t utfs = convertWcharToUtf8(cell|UNICODE_BRAILLE_ROW, utf8);
+  fprintf(stream, "%.*s", utfs, utf8);
+}
+
 typedef struct {
   unsigned char status;
 } LineProcessingData;
@@ -132,18 +144,17 @@ contractLine (char *line, void *data) {
       outputBuffer = NULL;
       outputWidth <<= 1;
     } else {
-      wchar_t outputCharacters[outputCount];
-
-      {
-        int index;
-        for (index=0; index<outputCount; index+=1)
-          outputCharacters[index] = convertDotsToCharacter(textTable, outputBuffer[index]);
-      }
-
       {
         FILE *output = stdout;
+        void (*writeCell) (FILE *stream, unsigned char cell) = textTable? writeLocalCharacter: writeUtf8Braille;
+        int index;
 
-        fprintf(output, "%.*" PRIws "\n", outputCount, outputCharacters);
+        for (index=0; index<outputCount; index+=1) {
+          writeCell(output, outputBuffer[index]);
+          if (ferror(output)) break;
+        }
+
+        if (!ferror(output)) fputc('\n', output);
         if (opt_forceOutput && !ferror(output)) fflush(output);
 
         if (ferror(output)) {
@@ -215,7 +226,7 @@ main (int argc, char *argv[]) {
               char *textTablePath;
 
               if ((textTablePath = makePath(opt_tablesDirectory, textTableFile))) {
-                if (!(textTable = compileTextTable(textTablePath))) status = 4;
+                status = (textTable = compileTextTable(textTablePath))? 0: 4;
 
                 free(textTablePath);
               } else {
@@ -227,10 +238,11 @@ main (int argc, char *argv[]) {
               status = 4;
             }
           } else {
-            opt_textTable = TEXT_TABLE;
+            textTable = NULL;
+            status = 0;
           }
 
-          if (textTable) {
+          if (!status) {
             if (argc) {
               do {
                 char *path = *argv;
@@ -252,7 +264,7 @@ main (int argc, char *argv[]) {
               status = contractFile(stdin);
             }
 
-            destroyTextTable(textTable);
+            if (textTable) destroyTextTable(textTable);
           }
 
           destroyContractionTable(contractionTable);
