@@ -23,8 +23,6 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#include <limits.h>
-
 #include "lock.h"
 
 extern const char *setCharset (const char *name);
@@ -34,7 +32,8 @@ extern const char *getLocaleCharset (void);
 extern const char *getWcharCharset (void);
 
 #define UTF8_SIZE(bits) (((bits) < 8)? 1: (((bits) + 3) / 5))
-typedef char Utf8Buffer[UTF8_SIZE(sizeof(wchar_t) * 8) + 1];
+#define UTF8_LEN_MAX UTF8_SIZE(sizeof(wchar_t) * 8)
+typedef char Utf8Buffer[UTF8_LEN_MAX + 1];
 
 extern size_t convertCharToUtf8 (char c, Utf8Buffer utf8);
 extern int convertUtf8ToChar (const char **utf8, size_t *utfs);

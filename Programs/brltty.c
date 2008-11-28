@@ -756,7 +756,7 @@ trackSpeech (int index) {
 
 static void
 sayScreenCharacters (const ScreenCharacter *characters, size_t count, int immediate) {
-  unsigned char text[count * MB_LEN_MAX];
+  unsigned char text[count * UTF8_LEN_MAX];
   unsigned char *t = text;
 
   unsigned char attributes[count];

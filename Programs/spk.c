@@ -97,7 +97,7 @@ initializeSpeechSynthesizer (SpeechSynthesizer *spk) {
 void
 sayCharacters (SpeechSynthesizer *spk, const char *characters, size_t count, int mute) {
   if (count) {
-    unsigned char bytes[count * MB_LEN_MAX];
+    unsigned char bytes[count * UTF8_LEN_MAX];
     unsigned char *b = bytes;
 
     {
