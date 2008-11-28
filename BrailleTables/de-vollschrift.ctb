@@ -21,6 +21,7 @@
 
 include de-basis.ctb
 
+class cst cst
 class s s
 class t t
 
@@ -43,8 +44,9 @@ endword studie 23456-136-145-24-15 shouldn't use the ie-contraction
 midendword ien = shouldn't use the ie-contraction
 midendword iell = shouldn't use the ie-contraction
 begmidword dien 145-346-1345
+always indien = shouldn't use the ie-contraction
 midendword ietät =
-midendword ungscharakt 136-1345-1245-234-1456-1-1235-1-13-2345
+before cst midword ungs = Bindungscharakter, Regierungschef
 
 # unsolvable problems:
 # die Premiere vs. ich premiere
@@ -60,8 +62,10 @@ always esther = shouldn't use the st-contraction
 always koffein = shouldn't use the ei-contraction
 always lilie = shouldn't use the ie-contraction
 always museum = shouldn't use the eu-contraction
+always propriet = proprietär shouldn't use the ie-contraction
 always samstag = shouldn't use the st-contraction
 word wisst = shouldn't use the st-contraction
+always vietnam = shouldn't use the ie-contraction
 
 # names
 always daniel = shouldn't use the ie-contraction
