@@ -32,10 +32,9 @@ typedef enum {
 } RoutingStatus;
 
 extern int startCursorRouting (int column, int row, int screen);
-extern int testCursorRouting (int wait);
+extern RoutingStatus getRoutingStatus (int wait);
 
-extern volatile pid_t routingProcess;
-extern volatile RoutingStatus routingStatus;
+extern pid_t routingProcess;
 
 #ifdef __cplusplus
 }

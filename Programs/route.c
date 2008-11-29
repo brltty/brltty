@@ -38,8 +38,7 @@
 #define CURSOR_ROUTING_INTERVAL	0	/* how often to check for response */
 #define CURSOR_ROUTING_TIMEOUT	2000	/* max wait for response to key press */
 
-volatile pid_t routingProcess = 0;
-volatile RoutingStatus routingStatus = ROUTE_NONE;
+pid_t routingProcess = 0;
 
 typedef enum {
   CRR_DONE,
@@ -283,8 +282,8 @@ doCursorRouting (int column, int row, int screen) {
   return ROUTE_DONE;
 }
 
-int
-testCursorRouting (int wait) {
+RoutingStatus
+getRoutingStatus (int wait) {
   if (routingProcess) {
     int options = 0;
     if (!wait) options |= WNOHANG;
@@ -293,24 +292,21 @@ testCursorRouting (int wait) {
       int status;
       pid_t process = waitpid(routingProcess, &status, options);
 
-      if (process != routingProcess) {
-        return 1;
+      if (process == routingProcess) {
+        routingProcess = 0;
+        return WIFEXITED(status)? WEXITSTATUS(status): ROUTE_ERROR;
       }
-
-      routingProcess = 0;
-      routingStatus = WIFEXITED(status)? WEXITSTATUS(status): ROUTE_ERROR;
     }
   }
 
-  return 0;
+  return ROUTE_NONE;
 }
 
 static void
 stopCursorRouting (void) {
   if (routingProcess) {
     kill(routingProcess, SIGUSR1);
-    testCursorRouting(1);
-    routingStatus = ROUTE_NONE;
+    getRoutingStatus(1);
   }
 }
 

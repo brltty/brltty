@@ -228,14 +228,11 @@ terminationHandler (int signalNumber) {
   terminationSignal = signalNumber;
 }
 
-static int
-testRoutingStatus (RoutingStatus ok, int wait) {
-  if (testCursorRouting(wait)) return 0;
-  if (routingStatus == ROUTE_NONE) return 0;
-
-  playTune((routingStatus > ok)? &tune_routing_failed: &tune_routing_succeeded);
-  routingStatus = ROUTE_NONE;
-  return 1;
+static void
+checkRoutingStatus (RoutingStatus ok, int wait) {
+  RoutingStatus status = getRoutingStatus(wait);
+  if (status != ROUTE_NONE)
+    playTune((status > ok)? &tune_routing_failed: &tune_routing_succeeded);
 }
 
 static void
@@ -1340,7 +1337,7 @@ runProgram (void) {
 
     testProgramTermination();
     closeTuneDevice(0);
-    testRoutingStatus(ROUTE_DONE, 0);
+    checkRoutingStatus(ROUTE_DONE, 0);
 
     if (opt_releaseDevice) {
       if (scr.unreadable) {
@@ -2342,7 +2339,7 @@ runProgram (void) {
                               MIN(MAX(scr.posy, top), bottom),
                               scr.number)) {
                 playTune(&tune_routing_started);
-                testRoutingStatus(ROUTE_WRONG_COLUMN, 1);
+                checkRoutingStatus(ROUTE_WRONG_COLUMN, 1);
 
                 {
                   ScreenDescription description;
