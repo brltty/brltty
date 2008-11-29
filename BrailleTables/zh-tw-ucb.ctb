@@ -18,6 +18,8 @@
 
 # Braille representation table for Chinese (Unique Chinese Braille).
 
+include nabcc.cti
+
 always	\u00A7	1246-256	§
 always	\u00AF	23467-278	¯
 always	\u00B0	45-46-16	°

@@ -1,0 +1,128 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2008 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+# This BRLTTY contraction subtable implements the North American Braille
+# Computer Code.
+
+include	letters-latin.cti
+
+always	\s	0
+
+always	a	1
+always	b	12
+always	c	14
+always	d	145
+always	e	15
+always	f	124
+always	g	1245
+always	h	125
+always	i	24
+always	j	245
+always	k	13
+always	l	123
+always	m	134
+always	n	1345
+always	o	135
+always	p	1234
+always	q	12345
+always	r	1235
+always	s	234
+always	t	2345
+always	u	136
+always	v	1236
+always	w	2456
+always	x	1346
+always	y	13456
+always	z	1356
+
+always	A	17
+always	B	127
+always	C	147
+always	D	1457
+always	E	157
+always	F	1247
+always	G	12457
+always	H	1257
+always	I	247
+always	J	2457
+always	K	137
+always	L	1237
+always	M	1347
+always	N	13457
+always	O	1357
+always	P	12347
+always	Q	123457
+always	R	12357
+always	S	2347
+always	T	23457
+always	U	1367
+always	V	12367
+always	W	24567
+always	X	13467
+always	Y	134567
+always	Z	13567
+
+always	1	2
+always	2	23
+always	3	25
+always	4	256
+always	5	26
+always	6	235
+always	7	2356
+always	8	236
+always	9	35
+always	0	356
+
+always	&	12346
+always	=	123456
+always	(	12356
+always	!	2346
+always	)	23456
+
+always	*	16
+always	<	126
+always	%	146
+always	?	1456
+always	:	156
+always	$	1246
+always	}	12456
+always	|	1256
+always	{	246
+
+always	]	124567
+always	\\	12567
+always	[	2467
+
+always	/	34
+always	+	346
+always	\#	3456
+always	>	345
+always	'	3
+always	-	36
+
+always	`	4
+always	~	45
+always	_	456
+always	"	5
+always	.	46
+always	;	56
+always	,	6
+
+always	@	47
+always	^	457
+

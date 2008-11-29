@@ -18,6 +18,8 @@
 
 # Braille representation table for Chinese (Taiwan).
 
+include nabcc.cti
+
 always	\u0081	1456
 always	\u0082	1456
 always	\u0083	1456
