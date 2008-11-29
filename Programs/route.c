@@ -282,6 +282,7 @@ doCursorRouting (int column, int row, int screen) {
   return ROUTE_DONE;
 }
 
+#ifdef SIGUSR1
 RoutingStatus
 getRoutingStatus (int wait) {
   if (routingProcess) {
@@ -314,6 +315,16 @@ static void
 exitCursorRouting (void) {
   stopCursorRouting();
 }
+#else /* SIGUSR1 */
+static RoutingStatus routingStatus = ROUTE_NONE;
+
+RoutingStatus
+getRoutingStatus (int wait) {
+  RoutingStatus status = routingStatus;
+  routingStatus = ROUTE_NONE;
+  return status;
+}
+#endif /* SIGUSR1 */
 
 int
 startCursorRouting (int column, int row, int screen) {
