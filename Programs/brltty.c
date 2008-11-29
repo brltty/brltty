@@ -228,50 +228,14 @@ terminationHandler (int signalNumber) {
   terminationSignal = signalNumber;
 }
 
-#ifdef SIGCHLD
-static void
-childDeathHandler (int signalNumber) {
-  pid_t process;
-  int status;
-  while ((process = waitpid(-1, &status, WNOHANG)) > 0) {
-    if (process == routingProcess) {
-      routingProcess = 0;
-      routingStatus = WIFEXITED(status)? WEXITSTATUS(status): ROUTE_ERROR;
-    }
-  }
-}
-#endif /* SIGCHLD */
-
 static int
-testRoutingStatus (RoutingStatus ok) {
-  if (routingStatus != ROUTE_NONE) {
-    playTune((routingStatus > ok)? &tune_routing_failed: &tune_routing_succeeded);
-    routingStatus = ROUTE_NONE;
-    return 1;
-  }
-  return 0;
-}
+testRoutingStatus (RoutingStatus ok, int wait) {
+  if (testCursorRouting(wait)) return 0;
+  if (routingStatus == ROUTE_NONE) return 0;
 
-static void
-awaitRoutingStatus (RoutingStatus ok) {
-#ifdef SIGCHLD
-  sigset_t newMask, oldMask;
-  sigemptyset(&newMask);
-  sigaddset(&newMask, SIGCHLD);
-  sigprocmask(SIG_BLOCK, &newMask, &oldMask);
-#endif /* SIGCHLD */
-
-  while (!testRoutingStatus(ok)) {
-#ifdef SIGCHLD
-    sigsuspend(&oldMask);
-#else /* SIGCHLD */
-    approximateDelay(100);
-#endif /* SIGCHLD */
-  }
-
-#ifdef SIGCHLD
-  sigprocmask(SIG_SETMASK, &oldMask, NULL);
-#endif /* SIGCHLD */
+  playTune((routingStatus > ok)? &tune_routing_failed: &tune_routing_succeeded);
+  routingStatus = ROUTE_NONE;
+  return 1;
 }
 
 static void
@@ -1342,11 +1306,6 @@ beginProgram (int argc, char *argv[]) {
   /* Setup everything required on startup */
   startup(argc, argv);
 
-#ifdef SIGCHLD
-  /* Install the handler which monitors the death of child processes. */
-  handleSignal(SIGCHLD, childDeathHandler);
-#endif /* SIGCHLD */
-
   return 0;
 }
 
@@ -1381,7 +1340,7 @@ runProgram (void) {
 
     testProgramTermination();
     closeTuneDevice(0);
-    testRoutingStatus(ROUTE_DONE);
+    testRoutingStatus(ROUTE_DONE, 0);
 
     if (opt_releaseDevice) {
       if (scr.unreadable) {
@@ -2383,7 +2342,7 @@ runProgram (void) {
                               MIN(MAX(scr.posy, top), bottom),
                               scr.number)) {
                 playTune(&tune_routing_started);
-                awaitRoutingStatus(ROUTE_WRONG_COLUMN);
+                testRoutingStatus(ROUTE_WRONG_COLUMN, 1);
 
                 {
                   ScreenDescription description;

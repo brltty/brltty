@@ -20,6 +20,7 @@
 
 #include <string.h>
 #include <sys/time.h>
+#include <sys/wait.h>
 #include <signal.h>
 
 #include "misc.h"
@@ -100,16 +101,16 @@ error:
 
 static void
 insertCursorKey (CursorRoutingData *crd, ScreenKey key) {
-#ifdef SIGCHLD
+#ifdef SIGUSR1
   sigset_t oldMask;
   sigprocmask(SIG_BLOCK, &crd->signalMask, &oldMask);
-#endif /* SIGCHLD */
+#endif /* SIGUSR1 */
 
   insertScreenKey(key);
 
-#ifdef SIGCHLD
+#ifdef SIGUSR1
   sigprocmask(SIG_SETMASK, &oldMask, NULL);
-#endif /* SIGCHLD */
+#endif /* SIGUSR1 */
 }
 
 static int
@@ -249,12 +250,12 @@ static RoutingStatus
 doCursorRouting (int column, int row, int screen) {
   CursorRoutingData crd;
 
-#ifdef SIGCHLD
+#ifdef SIGUSR1
   /* Set up the signal mask. */
   sigemptyset(&crd.signalMask);
   sigaddset(&crd.signalMask, SIGUSR1);
   sigprocmask(SIG_UNBLOCK, &crd.signalMask, NULL);
-#endif /* SIGCHLD */
+#endif /* SIGUSR1 */
 
   /* initialize the routing data structure */
   crd.screenNumber = screen;
@@ -282,56 +283,49 @@ doCursorRouting (int column, int row, int screen) {
   return ROUTE_DONE;
 }
 
-#ifdef SIGCHLD
-static void
-preCursorRouting (sigset_t *oldMask) {
-  sigset_t newMask;
-
-  sigemptyset(&newMask);
-  sigaddset(&newMask, SIGCHLD);
-  sigprocmask(SIG_BLOCK, &newMask, oldMask);
-
-  /*
-   * First, we must check if a subprocess is already running. 
-   * If so, we send it a SIGUSR1 and wait for it to die. 
-   * 
-   * N.B. According to man 2 wait, setting SIGCHLD handler to SIG_IGN may mean
-   * that wait can't catch the dying child.
-   */
+int
+testCursorRouting (int wait) {
   if (routingProcess) {
-    kill(routingProcess, SIGUSR1);
-    do {
-      sigsuspend(oldMask);
-    } while (routingProcess);
-    routingStatus = ROUTE_NONE;
-  }
-}
+    int options = 0;
+    if (!wait) options |= WNOHANG;
 
-static void
-postCursorRouting (const sigset_t *oldMask) {
-  sigprocmask(SIG_SETMASK, oldMask, NULL); /* unblock SIGCHLD */
+    {
+      int status;
+      pid_t process = waitpid(routingProcess, &status, options);
+
+      if (process != routingProcess) {
+        return 1;
+      }
+
+      routingProcess = 0;
+      routingStatus = WIFEXITED(status)? WEXITSTATUS(status): ROUTE_ERROR;
+    }
+  }
+
+  return 0;
 }
 
 static void
 stopCursorRouting (void) {
-  sigset_t originalSignalMask;
-  preCursorRouting(&originalSignalMask);
-  postCursorRouting(&originalSignalMask);
+  if (routingProcess) {
+    kill(routingProcess, SIGUSR1);
+    testCursorRouting(1);
+    routingStatus = ROUTE_NONE;
+  }
 }
 
 static void
 exitCursorRouting (void) {
   stopCursorRouting();
 }
-#endif /* SIGCHLD */
 
 int
 startCursorRouting (int column, int row, int screen) {
-#ifdef SIGCHLD
+#ifdef SIGUSR1
   int started = 0;
-  sigset_t originalSignalMask;
 
-  preCursorRouting(&originalSignalMask);
+  stopCursorRouting();
+
   switch (routingProcess = fork()) {
     case 0: { /* child: cursor routing subprocess */
       int result = ROUTE_ERROR;
@@ -359,11 +353,10 @@ startCursorRouting (int column, int row, int screen) {
       started = 1;
       break;
   }
-  postCursorRouting(&originalSignalMask);
 
   return started;
-#else /* SIGCHLD */
+#else /* SIGUSR1 */
   routingStatus = doCursorRouting(column, row, screen);
   return 1;
-#endif /* SIGCHLD */
+#endif /* SIGUSR1 */
 }
