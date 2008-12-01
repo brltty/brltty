@@ -275,10 +275,10 @@ doRouting (int column, int row, int screen) {
 
   if (routing.rowBuffer) free(routing.rowBuffer);
 
-  if (routing.screenNumber != screen) return ROUTE_ERROR;
-  if (routing.cury != row) return ROUTE_WRONG_ROW;
-  if ((column >= 0) && (routing.curx != column)) return ROUTE_WRONG_COLUMN;
-  return ROUTE_DONE;
+  if (routing.screenNumber != screen) return ROUTING_ERROR;
+  if (routing.cury != row) return ROUTING_WRONG_ROW;
+  if ((column >= 0) && (routing.curx != column)) return ROUTING_WRONG_COLUMN;
+  return ROUTING_DONE;
 }
 
 #ifdef SIGUSR1
@@ -304,7 +304,7 @@ getRoutingStatus (int wait) {
 
       if (process == routingProcess) {
         routingProcess = NOT_ROUTING;
-        return WIFEXITED(status)? WEXITSTATUS(status): ROUTE_ERROR;
+        return WIFEXITED(status)? WEXITSTATUS(status): ROUTING_ERROR;
       }
 
       if (process == -1) {
@@ -312,7 +312,7 @@ getRoutingStatus (int wait) {
 
         if (errno == ECHILD) {
           routingProcess = NOT_ROUTING;
-          return ROUTE_ERROR;
+          return ROUTING_ERROR;
         }
 
         LogError("waitpid");
@@ -320,7 +320,7 @@ getRoutingStatus (int wait) {
     }
   }
 
-  return ROUTE_NONE;
+  return ROUTING_NONE;
 }
 
 static void
@@ -336,12 +336,12 @@ exitRouting (void) {
   stopRouting();
 }
 #else /* SIGUSR1 */
-static RoutingStatus routingStatus = ROUTE_NONE;
+static RoutingStatus routingStatus = ROUTING_NONE;
 
 RoutingStatus
 getRoutingStatus (int wait) {
   RoutingStatus status = routingStatus;
-  routingStatus = ROUTE_NONE;
+  routingStatus = ROUTING_NONE;
   return status;
 }
 
@@ -360,7 +360,7 @@ startRouting (int column, int row, int screen) {
 
   switch (routingProcess = fork()) {
     case 0: { /* child: cursor routing subprocess */
-      int result = ROUTE_ERROR;
+      int result = ROUTING_ERROR;
       nice(ROUTING_NICENESS);
       if (constructRoutingScreen())
         result = doRouting(column, row, screen);		/* terminate child process */

@@ -24,11 +24,11 @@ extern "C" {
 #endif /* __cplusplus */
 
 typedef enum {
-  ROUTE_NONE,
-  ROUTE_DONE,
-  ROUTE_WRONG_COLUMN,
-  ROUTE_WRONG_ROW,
-  ROUTE_ERROR
+  ROUTING_NONE,
+  ROUTING_DONE,
+  ROUTING_WRONG_COLUMN,
+  ROUTING_WRONG_ROW,
+  ROUTING_ERROR
 } RoutingStatus;
 
 extern int startRouting (int column, int row, int screen);
