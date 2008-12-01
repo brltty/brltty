@@ -114,6 +114,7 @@ endword bes 12-123456 shouldn't use the be-contraction
 always umgeht 136-134-1245-2356-2345 shouldn't use the ge-contraction
 always geig 1245-146-1245 should use the ei-contraction
 always geisel 1245-146-234-13456 shouldn't use the ge-contraction
+always geist 1245-146-23456
 prfword gel 1245-13456 shouldn't use the ge-contraction
 midendword gelhaft 1245-13456-125-124
 midword gelläng 1245-13456-5-123-1245
@@ -213,6 +214,7 @@ begword zung 1356-256-1245 shouldn't use the ung-contraction
 # Einformige Kürzungen, nur alleinstehend
 word als 146
 word auch 34
+word eu =
 word das 145
 word dass 2346
 word den 15
@@ -576,6 +578,7 @@ contraction lg
 always läng 5-123-1245
 always laeng 5-123-1245
 always jahrelang 245-1235-15-123-1245 shouldn't use the el-contraction
+before s always jahres 245-1235-123456
 always langobard 123-235-1245-135-12-356-145 shouldn't use the lang-contraction
 always lass 2-123
 always läss 5-123
@@ -589,7 +592,7 @@ always länd =
 always laend =
 always leb 123-12
 contraction lb
-always leicht 123-2345
+always leicht 123-1456
 always letzt 123-2345
 contraction lt
 always lieb 123-346-12
@@ -715,6 +718,7 @@ sufword unversehr 256-1236-12456-234-1235
 always selbst 234-23456
 always selbständig 234-13456-12-5-23456-45 shouldn't use the selbst-contraction
 always selbstaendig 234-13456-12-5-23456-45 shouldn't use the selbst-contraction
+always setz 2-15
 sufword sesam 234-123456-1-134 shouldn't use the sam-contraction
 always sind 234-145
 contraction sd
@@ -910,6 +914,7 @@ always geier 1245-146-12456 should use the ei-contraction
 midendword geingang 1245-1246-1245-235-1245
 class g g
 midendword geingän 1245-1246-1245-345-1345
+always gelungen 12346-123-256-1245-14
 always generat 1245-14-12456-1-2345
 always generier 1245-14-12456-346-1235
 always gerät 12346-1235-345-2345 should use the ge-contraction
@@ -919,32 +924,39 @@ always geraeusch 12346-1235-34-156 should use the ge-contraction
 always gerecht 12346-1235-2345
 always gericht 12346-2-3456
 begword german 1245-12456-134-235 shouldn't use the ge-contraction
+always gewiesen 12346-2456-346-234-14 shouldn't use the wie-contraction
 prfword hallen 125-1-12345-14 shouldn't use the allen-contraction
 always hauf 125-16-124 shouldn't use the auf-contraction
+always hotel 125-135-2345-13456 shouldn't use the te-contraction
 always installer 35-23456-1-12345-12456 shouldn't use the aller-contraction
 after st always ionstrieb 245-234-2345-1235-346-12
 after st always ionstrupp 245-234-2345-1235-136-1234-1234
+always komponist 13-135-134-1234-135-1345-24-23456 shouldn't use the nis-contraction
 prfword linie 123-35-24-15 shouldn't use the ie-contraction
 prfword materie 134-1-2345-12456-24-15 shouldn't use the ie-contraction
 always metallen 134-15-2345-1-12345-14 shouldn't use the allen-contraction
+always regel 1235-15-1245-13456
 always release = shouldn't use the el-contraction
 always round 1235-135-256-145 shouldn't use the und-contraction
 sufword rund 1235-256-145 shouldn't use the und-contraction
 midendword sammel 234-1-1346-13456 shouldn't use the sam-contraction
 midendword samml 234-1-1346-123 shouldn't use the sam-contraction
 always schwung 156-2456-256-1245 shouldn't use the ung-contraction
+always september 234-15-1234-2345-12356-12-12456 should use the em-contraction
 before s always sichts 234-3456-2345-234 Ansichtssache shouldn't use the ss-contraction
 always sprung 234-1234-1235-256-1245 shouldn't use the ung-contraction
 always sschmuck 234-156-134-136-46
 always sschwierig 234-156-45
 always ssitz 234-2-24 shouldn't use the ss-contraction
 always ssonntag =
+always sspiel 234-2-346
 always ssprach 234-234-1234
 always sstand 234-2-23456
 always ssteiger 234-23456-146-1245-12456
 always sstunde 234-23456-256-145-15 shouldn't use the und-contraction
 always sstunden 234-23456-256-145-14
 midendword stitel 234-2345-24-2345-13456
+always studien 23456-136-145-24-14 shouldn't use the ie-contraction
 always stunde 23456-256-145-15 shouldn't use the und-contraction
 always stunden 23456-256-145-14
 always sturz 23456-136-1235-1356 Absturzursache shouldn't use the zu-contraction
@@ -952,6 +964,8 @@ always tagesstät 2345-1-1245-123456-23456-345-2345 shouldn't use the ss-contrac
 always tagesstaet 2345-1-1245-123456-23456-345-2345 shouldn't use the ss-contraction
 always wagen 2456-1-1245-14 shouldn't use the ge-contraction
 always weiber 2456-146-12-12456 shouldn't use the be-contraction
+sufword verbund 36-12-256-145 shouldn't use the und-contraction
+midendword verbund 1236-12456-12-256-145 shouldn't use the und-contraction
 midword versamm 1236-12456-234-1-1346 shouldn't use the sam-contraction
 
 # names

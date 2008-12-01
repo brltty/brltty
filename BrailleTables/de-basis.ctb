@@ -202,7 +202,7 @@ always - 6-36
 
 # mathematical symbols
 always < 5-13
-always = 2356
+always = 4-2356
 always > 46-2
 midnum + 235
 always + 6-235
