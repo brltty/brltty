@@ -19,6 +19,7 @@
 #include "prologue.h"
 
 #include <string.h>
+#include <errno.h>
 #include <sys/time.h>
 #include <sys/wait.h>
 #include <signal.h>
@@ -289,6 +290,7 @@ getRoutingStatus (int wait) {
     int options = 0;
     if (!wait) options |= WNOHANG;
 
+  doWait:
     {
       int status;
       pid_t process = waitpid(routingProcess, &status, options);
@@ -296,6 +298,11 @@ getRoutingStatus (int wait) {
       if (process == routingProcess) {
         routingProcess = 0;
         return WIFEXITED(status)? WEXITSTATUS(status): ROUTE_ERROR;
+      }
+
+      if (process == -1) {
+        if (errno == EINTR) goto doWait;
+        LogError("waitpid");
       }
     }
   }
