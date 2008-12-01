@@ -39,13 +39,11 @@
 #define CURSOR_ROUTING_INTERVAL	0	/* how often to check for response */
 #define CURSOR_ROUTING_TIMEOUT	2000	/* max wait for response to key press */
 
-pid_t routingProcess = 0;
-
 typedef enum {
   CRR_DONE,
   CRR_NEAR,
   CRR_FAIL
-} CursorRoutingResult;
+} RoutingResult;
 
 typedef struct {
   sigset_t signalMask;
@@ -62,16 +60,16 @@ typedef struct {
 
   long timeSum;
   int timeCount;
-} CursorRoutingData;
+} RoutingData;
 
 static int
-readRow (CursorRoutingData *crd, ScreenCharacter *buffer, int row) {
+readScreenRow (RoutingData *crd, ScreenCharacter *buffer, int row) {
   if (!buffer) buffer = crd->rowBuffer;
   return readScreen(0, row, crd->screenColumns, 1, buffer);
 }
 
 static int
-getCurrentPosition (CursorRoutingData *crd) {
+getCurrentPosition (RoutingData *crd) {
   ScreenDescription description;
   describeScreen(&description);
 
@@ -92,7 +90,7 @@ getCurrentPosition (CursorRoutingData *crd) {
 
   crd->cury = description.posy - crd->verticalDelta;
   crd->curx = description.posx;
-  if (readRow(crd, NULL, description.posy)) return 1;
+  if (readScreenRow(crd, NULL, description.posy)) return 1;
 
 error:
   crd->screenNumber = -1;
@@ -100,7 +98,7 @@ error:
 }
 
 static void
-insertCursorKey (CursorRoutingData *crd, ScreenKey key) {
+insertCursorKey (RoutingData *crd, ScreenKey key) {
 #ifdef SIGUSR1
   sigset_t oldMask;
   sigprocmask(SIG_BLOCK, &crd->signalMask, &oldMask);
@@ -114,7 +112,7 @@ insertCursorKey (CursorRoutingData *crd, ScreenKey key) {
 }
 
 static int
-awaitCursorMotion (CursorRoutingData *crd, int direction) {
+awaitCursorMotion (RoutingData *crd, int direction) {
   long timeout = crd->timeSum / crd->timeCount;
   struct timeval start;
   gettimeofday(&start, NULL);
@@ -131,7 +129,7 @@ awaitCursorMotion (CursorRoutingData *crd, int direction) {
 
       do {
         ScreenCharacter buffer[crd->screenColumns];
-        if (!readRow(crd, buffer, row)) break;
+        if (!readScreenRow(crd, buffer, row)) break;
 
         {
           int before = crd->curx;
@@ -176,8 +174,8 @@ awaitCursorMotion (CursorRoutingData *crd, int direction) {
   return 1;
 }
 
-static CursorRoutingResult
-adjustCursorPosition (CursorRoutingData *crd, int where, int trgy, int trgx, ScreenKey forward, ScreenKey backward) {
+static RoutingResult
+adjustCursorPosition (RoutingData *crd, int where, int trgy, int trgx, ScreenKey forward, ScreenKey backward) {
   while (1) {
     int dify = trgy - crd->cury;
     int difx = (trgx < 0)? 0: (trgx - crd->curx);
@@ -236,19 +234,19 @@ adjustCursorPosition (CursorRoutingData *crd, int where, int trgy, int trgx, Scr
   }
 }
 
-static CursorRoutingResult
-adjustCursorHorizontally (CursorRoutingData *crd, int where, int row, int column) {
+static RoutingResult
+adjustCursorHorizontally (RoutingData *crd, int where, int row, int column) {
   return adjustCursorPosition(crd, where, row, column, SCR_KEY_CURSOR_RIGHT, SCR_KEY_CURSOR_LEFT);
 }
 
-static CursorRoutingResult
-adjustCursorVertically (CursorRoutingData *crd, int where, int row) {
+static RoutingResult
+adjustCursorVertically (RoutingData *crd, int where, int row) {
   return adjustCursorPosition(crd, where, row, -1, SCR_KEY_CURSOR_DOWN, SCR_KEY_CURSOR_UP);
 }
 
 static RoutingStatus
-doCursorRouting (int column, int row, int screen) {
-  CursorRoutingData crd;
+doRouting (int column, int row, int screen) {
+  RoutingData crd;
 
 #ifdef SIGUSR1
   /* Set up the signal mask. */
@@ -284,9 +282,18 @@ doCursorRouting (int column, int row, int screen) {
 }
 
 #ifdef SIGUSR1
+#define NOT_ROUTING 0
+
+static pid_t routingProcess = NOT_ROUTING;
+
+int
+isRouting (void) {
+  return routingProcess != NOT_ROUTING;
+}
+
 RoutingStatus
 getRoutingStatus (int wait) {
-  if (routingProcess) {
+  if (isRouting()) {
     int options = 0;
     if (!wait) options |= WNOHANG;
 
@@ -296,7 +303,7 @@ getRoutingStatus (int wait) {
       pid_t process = waitpid(routingProcess, &status, options);
 
       if (process == routingProcess) {
-        routingProcess = 0;
+        routingProcess = NOT_ROUTING;
         return WIFEXITED(status)? WEXITSTATUS(status): ROUTE_ERROR;
       }
 
@@ -311,16 +318,16 @@ getRoutingStatus (int wait) {
 }
 
 static void
-stopCursorRouting (void) {
-  if (routingProcess) {
+stopRouting (void) {
+  if (isRouting()) {
     kill(routingProcess, SIGUSR1);
     getRoutingStatus(1);
   }
 }
 
 static void
-exitCursorRouting (void) {
-  stopCursorRouting();
+exitRouting (void) {
+  stopRouting();
 }
 #else /* SIGUSR1 */
 static RoutingStatus routingStatus = ROUTE_NONE;
@@ -331,28 +338,33 @@ getRoutingStatus (int wait) {
   routingStatus = ROUTE_NONE;
   return status;
 }
+
+int
+isRouting (void) {
+  return 0;
+}
 #endif /* SIGUSR1 */
 
 int
-startCursorRouting (int column, int row, int screen) {
+startRouting (int column, int row, int screen) {
 #ifdef SIGUSR1
   int started = 0;
 
-  stopCursorRouting();
+  stopRouting();
 
   switch (routingProcess = fork()) {
     case 0: { /* child: cursor routing subprocess */
       int result = ROUTE_ERROR;
       nice(CURSOR_ROUTING_NICENESS);
       if (constructRoutingScreen())
-        result = doCursorRouting(column, row, screen);		/* terminate child process */
+        result = doRouting(column, row, screen);		/* terminate child process */
       destructRoutingScreen();		/* close second thread of screen reading */
       _exit(result);		/* terminate child process */
     }
 
     case -1: /* error: fork() failed */
       LogError("fork");
-      routingProcess = 0;
+      routingProcess = NOT_ROUTING;
       break;
 
     default: /* parent: continue while cursor is being routed */
@@ -360,7 +372,7 @@ startCursorRouting (int column, int row, int screen) {
         static int first = 1;
         if (first) {
           first = 0;
-          atexit(exitCursorRouting);
+          atexit(exitRouting);
         }
       }
 
@@ -370,7 +382,7 @@ startCursorRouting (int column, int row, int screen) {
 
   return started;
 #else /* SIGUSR1 */
-  routingStatus = doCursorRouting(column, row, screen);
+  routingStatus = doRouting(column, row, screen);
   return 1;
 #endif /* SIGUSR1 */
 }

@@ -31,10 +31,9 @@ typedef enum {
   ROUTE_ERROR
 } RoutingStatus;
 
-extern int startCursorRouting (int column, int row, int screen);
+extern int startRouting (int column, int row, int screen);
+extern int isRouting (void);
 extern RoutingStatus getRoutingStatus (int wait);
-
-extern pid_t routingProcess;
 
 #ifdef __cplusplus
 }

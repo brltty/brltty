@@ -97,7 +97,7 @@ gpmCloseConnection (int alreadyClosed) {
 
 static int
 routeCursor_RealScreen (int column, int row, int screen) {
-  return startCursorRouting(column, row, screen);
+  return startRouting(column, row, screen);
 }
 
 static int

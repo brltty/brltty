@@ -1831,7 +1831,7 @@ runProgram (void) {
               writable = 1;
               break;
             case BRL_CMD_PASTE:
-              if (isLiveScreen() && !routingProcess) {
+              if (isLiveScreen() && !isRouting()) {
                 if (cutPaste()) break;
               }
               playTune(&tune_command_rejected);
@@ -2400,7 +2400,7 @@ runProgram (void) {
             }
           }
           /* If the cursor moves in cursor tracking mode: */
-          if (!routingProcess && (scr.posx != p->trkx || scr.posy != p->trky)) {
+          if (!isRouting() && (scr.posx != p->trkx || scr.posy != p->trky)) {
             trackCursor(0);
             p->trkx = scr.posx;
             p->trky = scr.posy;
