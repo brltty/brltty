@@ -35,9 +35,9 @@
  * NOTE: if you try to route the cursor to an invalid place, BRLTTY won't
  * give up until the timeout has elapsed!
  */
-#define CURSOR_ROUTING_NICENESS	10	/* niceness of cursor routing subprocess */
-#define CURSOR_ROUTING_INTERVAL	0	/* how often to check for response */
-#define CURSOR_ROUTING_TIMEOUT	2000	/* max wait for response to key press */
+#define ROUTING_NICENESS	10	/* niceness of cursor routing subprocess */
+#define ROUTING_INTERVAL	0	/* how often to check for response */
+#define ROUTING_TIMEOUT	2000	/* max wait for response to key press */
 
 typedef enum {
   CRR_DONE,
@@ -119,7 +119,7 @@ awaitCursorMotion (RoutingData *routing, int direction) {
 
   while (1) {
     long time;
-    approximateDelay(CURSOR_ROUTING_INTERVAL);
+    approximateDelay(ROUTING_INTERVAL);
     time = millisecondsSince(&start) + 1;
 
     {
@@ -258,7 +258,7 @@ doRouting (int column, int row, int screen) {
   /* initialize the routing data structure */
   routing.screenNumber = screen;
   routing.rowBuffer = NULL;
-  routing.timeSum = CURSOR_ROUTING_TIMEOUT;
+  routing.timeSum = ROUTING_TIMEOUT;
   routing.timeCount = 1;
 
   if (getCurrentPosition(&routing)) {
@@ -309,6 +309,12 @@ getRoutingStatus (int wait) {
 
       if (process == -1) {
         if (errno == EINTR) goto doWait;
+
+        if (errno == ECHILD) {
+          routingProcess = NOT_ROUTING;
+          return ROUTE_ERROR;
+        }
+
         LogError("waitpid");
       }
     }
@@ -355,7 +361,7 @@ startRouting (int column, int row, int screen) {
   switch (routingProcess = fork()) {
     case 0: { /* child: cursor routing subprocess */
       int result = ROUTE_ERROR;
-      nice(CURSOR_ROUTING_NICENESS);
+      nice(ROUTING_NICENESS);
       if (constructRoutingScreen())
         result = doRouting(column, row, screen);		/* terminate child process */
       destructRoutingScreen();		/* close second thread of screen reading */
