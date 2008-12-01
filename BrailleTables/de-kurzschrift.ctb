@@ -86,9 +86,12 @@ endword tes 2345-123456
 
 endword bel 12-13456 shouldn't use the be-contraction
 endword beln 12-13456-1345 shouldn't use the be-contraction
+endword belns 12-13456-1345-234 shouldn't use the be-contraction
 endword bels 12-13456-234 shouldn't use the be-contraction
 midword belläng 12-13456-5-123-1245 kabellänge shouldn't use the ll-contraction
 midword bellaeng 12-13456-5-123-1245
+midendword belung 12-13456-136
+before st midendword belungs 12-13456-136-234
 always belveder 12-13456-1236-15-145-12456 shouldn't use the be-contraction
 always wirbel 2456-24-1235-12-13456 shouldn't use the be-contraction
 endword ben 12-14 shouldn't use the be-contraction
@@ -99,6 +102,12 @@ endword bender 12-14-145-12456 shouldn't use the be-contraction
 endword bendes 12-14-145-123456 shouldn't use the be-contraction
 endword bens 12-14-234 shouldn't use the be-contraction
 endword ber 12-12456 shouldn't use the be-contraction
+endword berei 12-12456-146 shouldn't use the be-contraction
+endword bereien 12-12456-146-14 shouldn't use the be-contraction
+endword berin 12-12456-35 shouldn't use the be-contraction
+endword berinnen 12-12456-35-1345-14 shouldn't use the be-contraction
+endword bern 12-12456-1345 shouldn't use the be-contraction
+endword bers 12-12456-234 shouldn't use the be-contraction
 always ober 135-12-12456 shouldn't use the be-contraction
 endword bes 12-123456 shouldn't use the be-contraction
 
@@ -111,14 +120,14 @@ midword gelläng 1245-13456-5-123-1245
 midword gellaeng 1245-13456-5-123-1245
 prfword geln 1245-13456-1345
 prfword gelns 1245-13456-1345-234
+prfword gels 1245-13456-234
 midendword gelung 1245-13456-136
 before st midendword gelungs 1245-13456-136-234
 prfword gen 1245-14 shouldn't use the ge-contraction
 midendword gend 1245-14-145 shouldn't use the ge-contraction
-midendword gens 1245-14-234 shouldn't use the ge-contraction
+endword gens 1245-14-234 shouldn't use the ge-contraction
 midendword ger 1245-12456 should use er-contraction if not part of a word intro
 begword abge 1-12-12346
-begword ange 235-12346
 begword unange 256-235-12346
 begmidword aufger 2-16-12346-1235
 begmidword ausger 34-12346-1235
@@ -152,6 +161,7 @@ word vertikal 1236-12456-2345-24-13-1-123 shouldn't use the ver-contraction
 # Nachsilbenkürzungen
 endword falls 124
 midendword heit 125
+before s midword heits 125-234
 midendword keit 13
 midendword mal 134
 midendword nis 1346
@@ -162,12 +172,19 @@ before cst midword ungs 136-234 Bindungscharakter, Regierungschef
 midendword wärts 2456
 
 midendword ation 5-1345
+before s midword ations 5-1345-234
 midendword ativ 5-1236
 after st always ion 245
+after st before s always ions 245-234
 endword ismus 5-24
 midendword istisch 5-156
+endword nismus 1345-5-24 shouldn't use the nis-contraction
+midendword nistisch 1345-5-156
 midendword ität 5-345
 midendword itaet 5-345
+before s midword itäts 5-345-234
+before s midword itaets 5-345-234
+midendword mität 134-5-345 shouldn't use the mit-contraction
 
 sufword anis 235-24-234 shouldn't use the nis-contraction
 before st midword ations 5-1345-234
@@ -181,9 +198,9 @@ sufword erheiter 12456-125-146-2345-12456 shouldn't use the heit-contraction
 prfword formal 124-26-134-1-123 shouldn't use the mal-contraction
 begword formal 124-26-134-25 shouldn't use the mal-contraction
 word firnis = shouldn't use the nis-contraction
+begword gesam 12346-234-1-134 shouldn't use the sam-contraction
 always herrschaft 1235-1235-156-1-124-2345 can not use the shaft-contraction
 always hoheit 125-135-125-146-2345 shouldn't use the heit-contraction
-after st before s always ions 245-234
 always kuhdung 13-136-125-145-256-1245 shouldn't use the ung-contraction
 prfword maximal = shouldn't use the mal-contraction
 begmidword maximal 134-1-6-1346-24-134-25 shouldn't use the mal-contraction
@@ -245,6 +262,31 @@ word nicht 1345
 always nicht 2-1345
 word so 1234
 always so 2-1234
+begword		absol		=
+begword		absorb		=
+begword		absorp		=
+always		aerosol		1-12456-135-234-135-123
+always		amtsober	1-134-2345-234-135-12-12456
+always		anthroposo	235-2345-125-1235-135-1234-135-234-135
+always		iso		=
+always		konson		=
+begmidword	sensor		234-14-234-26
+endword		sensor		234-14-234-135-1235
+word		soda		=
+always		soft		=
+always		soldat		=
+always		sommer		234-135-1346-12456
+always		sonder		234-135-1345-145-12456
+always		sonogra		=
+always		sonn		=
+always		sonst		234-135-1345-23456
+always		sorg		234-26-1245
+always		source		=
+sufword		south		=
+always		sowjet		=
+begmidword	sozial		234-135-1356-24-25
+endword		sozial		234-135-1356-24-1-123
+always		soziolo		=
 word über 1256
 word ueber 1256
 always über 2-1256
@@ -281,7 +323,7 @@ always all 1-12345
 sufword alle 1-15
 always allegor 1-12345-15-1245-26 Allegorie shouldn't use the ae-contraction
 always allein 1-1246
-word allem 1-12345-12356 shouldn't use the alle-contraction because of allemal
+word allem 1-12356
 always allen 1-14
 always aller 1-12456
 always allerg 1-12345-12456-1245 Allergiker
@@ -293,6 +335,7 @@ always ander 2-12456
 always änder 5-12456
 always aender 5-12456
 always arbeit 356-12
+before s always arbeits 356-12-234
 always arben 356-12-14
 always kauf 13-16-124
 begword aussprech 16-2-2346
@@ -312,6 +355,10 @@ always beeren 12-15-15-1235-14
 always behr 12-2356-1235 entbehren
 begword beid 12-145 beiderseits
 always berg 12-12456-1245 shouldn't use the be-contraction
+always berge 12-12456-12346 shouldn't use the be-contraction
+always bergen 12-12456-1245-14 shouldn't use the be-contraction
+always berger 12-12456-1245-12456 shouldn't use the be-contraction
+always berges 12-12456-1245-123456 shouldn't use the be-contraction
 always besonder 23
 always besser 234-234
 contraction ss
@@ -438,10 +485,6 @@ prfword genen 1245-14-14
 prfword gener 1245-14-12456
 prfword genes 1245-14-123456
 always geogra = Geographie shouldn't use the ge-contraction
-always soldat = shouldn't use the so-contraction
-always sonogra = shouldn't use the so-contraction
-always sonn = shouldn't use the so-contraction
-always sowjet = shouldn't use the so-contraction
 prfword gern 1245-12456-1345
 midendword gerlich 1245-12456-456 bürgerlich shouldn't use the ge-contraction
 always gern 1245-12456-1345 we shouldn't use the ge-contraction here
@@ -633,6 +676,7 @@ contraction pt
 
 always recht 1235-2345
 contraction rt
+before s always rechts 1235-2345-234
 always regier 1235-1245
 contraction rg
 before s always regierungs 1235-1245-136-234
@@ -675,15 +719,10 @@ sufword sesam 234-123456-1-134 shouldn't use the sam-contraction
 always sind 234-145
 contraction sd
 always sitz 2-24
-word soda = shouldn't use the so-contraction
-sufword south = shouldn't use the so-contraction
-always konson = shouldn't use the so-contraction
 always solch 234-1456
 always soll 2-234
-always sonder 234-135-1345-145-12456 shouldn't use the so-contraction
 always sondern 234-1345
 contraction sn
-always sonst 234-135-1345-23456 shouldn't use the so-contraction
 always sozial 234-123
 contraction sl
 always spiel 2-346
@@ -723,7 +762,7 @@ contraction tz
 always trüb = trüber shouldn't use the über-contraction
 
 always unbeirr 256-23-24-1235-1235 unbeirrt shouldn't use the bei-contraction
-always kundlich 13-256-145-456 shouldn't use the und-contraction
+always kund 13-256-145 shouldn't use the und-contraction
 always mund 134-256-145 shouldn't use the und-contraction
 always wund 2456-256-145 shouldn't use the und-contraction
 sufword under 256-145-12456 shouldn't use the und-contraction
@@ -812,10 +851,42 @@ always abnormität 1-12-1345-26-134-5-345 shouldn't use the mit-contraction
 always abnormitaet 1-12-1345-26-134-5-345 shouldn't use the mit-contraction
 always abrund 1-12-1235-256-145 shouldn't use the und-contraction
 begword abschieds 1-12-156-346-145-234 Abschiedsschmerz
-begword absorb = shouldn't use the so-contraction
-begword absorp = shouldn't use the so-contraction
-begword absol = shouldn't use the so-contraction
+always achteck 1-1456-2345-15-46 shouldn't use the te-contraction
+always afrikarefer 1-124-1235-24-13-1-1235-15-124-12456 shouldn't use the ar-contraction
+sufword agent 1-1245-14-2345 shouldn't use the ge-contraction
+always akadem 1-13-1-145-12356 shouldn't use the dem-contraction
+always akteur 1-13-2345-126-1235 shouldn't use the te-contraction
+always alarm 25-356-134 Alarmmeldung shouldn't use the mm-contraction
+always albern 25-12-12456-1345 shouldn't use the be-contraction
+always albert 25-12-12456-2345 shouldn't use the be-contraction
+always alexander 25-15-6-1346-235-145-12456 shouldn't use the ander-contraction
+always algerier 25-1245-12456-24-12456 shouldn't use the ie-contraction
+sufword allee 1-12345-15-15 shouldn't use the alle-contraction
+word alleen 1-12345-15-14 shouldn't use the alle-contraction
+before st always alltags 1-12345-2345-1-1245-234
+begword alm 25-134
+before s begword alters 25-2345-12456-234
+always amateur 1-134-1-2345-126-1235 should use the eu-contraction
+class r
+before r always amerika 1-134-12456-24-13-1
+always amtschines 1-134-2345-234-1456-35-123456 shouldn't use the sch-contraction
+always amtsstub 1-134-2345-234-23456-136-12 shouldn't use the ss-contraction
+always andalusier 235-145-25-136-234-24-12456 shouldn't use the ie-contraction
+midendword anebel 1-1345-15-12-13456 Andromedanebel shouldn't use the an-contraction
+before st always anfangs 235-124-235-1245-234
+before st always angriffs 235-1245-1235-24-124-124-234
+always anklage 235-13-123-1-12346 Anklagerede shouldn't use the er-contraction
+always anklang 235-13-123-235-1245 shouldn't use the lang-contraction
+always ankläng 235-13-123-345-1345-1245 shouldn't use the läng-contraction
+begword anlagen 235-123-1-1245-14
+always anlauf 235-123-16-124 shouldn't use the auf-contraction
+class m m
+before m always anleihe 235-123-146-125-15 Anleihemarkt shouldn't use the em-contraction
+class egn egn
+before egn begword anti 235-2345-24
+always antichrist 235-2345-24-1456-1235-24-23456 shouldn't use the ich-contraction
 always anästh 235-345-234-2345-125 Anästhesie
+migdendword austausch 16-234-2345-16-156 shouldn't use the st-contraction
 always beilstein 12-146-123-23456-1246 shouldn't use the bei-contraction
 word bein 12-146-1345 shouldn't use the bei-contraction
 word beine 12-146-1345-15 shouldn't use the bei-contraction
@@ -825,27 +896,63 @@ always bauform 12-16-124-26-134 shouldn't use the auf-contraction
 always beteuer 23-2345-126-12456 shouldn't use the te-contraction
 always bssy 12-234-234-6-13456 shouldn't use the ss-contraction
 always bundes 12-256-145-123456 shouldn't use the und-contraction
+prfword chemikalie 1456-12356-24-13-25-24-15
 always donnerstag 145-135-1345-1345-12456-234-2345-1-1245 shouldn't use the st-contraction
+midword ehilfs = Analysehilfsmittel shouldn't use the eh-contraction
+midendword emethod = Analysemethode shouldn't use the eh-contraction
 midendword enorm 15-1345-26-134 Aussprachenorm shouldn't use the en-contraction 
 always eschatolog 123456-1456-1-2345-135-123-135-1245 shouldn't use the sch-contraction
 always esther 123456-2345-125-12456 shouldn't use the st-contraction
 always ästhe 345-234-2345-125-15 ästhetisch
+midword estell 15-2-13456
 always found 124-135-256-145 Foundation shouldn't use the und-contraction
 always geier 1245-146-12456 should use the ei-contraction
+midendword geingang 1245-1246-1245-235-1245
+class g g
+midendword geingän 1245-1246-1245-345-1345
+always generat 1245-14-12456-1-2345
+always generier 1245-14-12456-346-1235
 always gerät 12346-1235-345-2345 should use the ge-contraction
 always geraet 12346-1235-345-2345 should use the ge-contraction
 always geräusch 12346-1235-34-156 should use the ge-contraction
 always geraeusch 12346-1235-34-156 should use the ge-contraction
-always iso = shouldn't use the so-contraction
-always linien 123-35-24-14 shouldn't use the ie-contraction
+always gerecht 12346-1235-2345
+always gericht 12346-2-3456
+begword german 1245-12456-134-235 shouldn't use the ge-contraction
+prfword hallen 125-1-12345-14 shouldn't use the allen-contraction
+always hauf 125-16-124 shouldn't use the auf-contraction
+always installer 35-23456-1-12345-12456 shouldn't use the aller-contraction
+after st always ionstrieb 245-234-2345-1235-346-12
+after st always ionstrupp 245-234-2345-1235-136-1234-1234
+prfword linie 123-35-24-15 shouldn't use the ie-contraction
+prfword materie 134-1-2345-12456-24-15 shouldn't use the ie-contraction
+always metallen 134-15-2345-1-12345-14 shouldn't use the allen-contraction
 always release = shouldn't use the el-contraction
+always round 1235-135-256-145 shouldn't use the und-contraction
 sufword rund 1235-256-145 shouldn't use the und-contraction
+midendword sammel 234-1-1346-13456 shouldn't use the sam-contraction
+midendword samml 234-1-1346-123 shouldn't use the sam-contraction
 always schwung 156-2456-256-1245 shouldn't use the ung-contraction
-always soft = shouldn't use the so-contraction
-always source 234-135-136-1235-6-14-15 shouldn't use the so-contraction
-always sorg 234-26-1245 shouldn't use the so-contraction
+before s always sichts 234-3456-2345-234 Ansichtssache shouldn't use the ss-contraction
 always sprung 234-1234-1235-256-1245 shouldn't use the ung-contraction
+always sschmuck 234-156-134-136-46
+always sschwierig 234-156-45
+always ssitz 234-2-24 shouldn't use the ss-contraction
+always ssonntag =
+always ssprach 234-234-1234
+always sstand 234-2-23456
+always ssteiger 234-23456-146-1245-12456
+always sstunde 234-23456-256-145-15 shouldn't use the und-contraction
+always sstunden 234-23456-256-145-14
+midendword stitel 234-2345-24-2345-13456
+always stunde 23456-256-145-15 shouldn't use the und-contraction
+always stunden 23456-256-145-14
 always sturz 23456-136-1235-1356 Absturzursache shouldn't use the zu-contraction
+always tagesstät 2345-1-1245-123456-23456-345-2345 shouldn't use the ss-contraction
+always tagesstaet 2345-1-1245-123456-23456-345-2345 shouldn't use the ss-contraction
+always wagen 2456-1-1245-14 shouldn't use the ge-contraction
+always weiber 2456-146-12-12456 shouldn't use the be-contraction
+midword versamm 1236-12456-234-1-1346 shouldn't use the sam-contraction
 
 # names
 always daniel 145-235-24-13456 shouldn't use the ie-contraction

@@ -53,14 +53,24 @@ before cst midword ungs = Bindungscharakter, Regierungschef
 # die Premieren vs. sie premieren
 
 # exceptions
+word aktie = shouldn't use the ie-contraction
+always algerier = shouldn't use the ie-contraction
+prfword amphibie = shouldn't use the ie-contraction
+always amtschef 1-134-2345-234-1456-15-124 shouldn't use the sch-contraction
+always amtschines 1-134-2345-234-1456-24-1345-15-234 shouldn't use the sch-contraction
+always andalusier = shouldn't use the ie-contraction
 always asthma = shouldn't use the st-contraction
 before t always bundes = shouldn't use the st-contraction
+prfword chemikalie 1456-15-134-24-13-1-123-24-15 shouldn't use the ie-contraction
 always dienstag 145-346-1345-234-2345-1-1245 shouldn't use the st-contraction
 always donnerstag = shouldn't use the st-contraction
 always eschatolog 15-234-1456-1-2345-135-123-135-1245 shouldn't use the sch-contraction
 always esther = shouldn't use the st-contraction
+prfword folie = shouldn't use the ie-contraction
 always koffein = shouldn't use the ei-contraction
 always lilie = shouldn't use the ie-contraction
+prfword linie 123-24-1345-24-15 shouldn't use the ie-contraction
+prfword materie = shouldn't use the ie-contraction
 always museum = shouldn't use the eu-contraction
 always propriet = proprietär shouldn't use the ie-contraction
 always samstag = shouldn't use the st-contraction
