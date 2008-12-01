@@ -32,7 +32,7 @@
 #include "async.h"
 #include "scr.h"
 #include "scr_real.h"
-#include "route.h"
+#include "routing.h"
 
 #ifdef HAVE_LIBGPM
 #include <gpm.h>

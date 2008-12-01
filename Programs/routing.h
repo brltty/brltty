@@ -16,8 +16,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_ROUTE
-#define BRLTTY_INCLUDED_ROUTE
+#ifndef BRLTTY_INCLUDED_ROUTING
+#define BRLTTY_INCLUDED_ROUTING
 
 #ifdef __cplusplus
 extern "C" {
@@ -39,4 +39,4 @@ extern RoutingStatus getRoutingStatus (int wait);
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_ROUTE */
+#endif /* BRLTTY_INCLUDED_ROUTING */

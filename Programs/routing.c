@@ -26,7 +26,7 @@
 
 #include "misc.h"
 #include "scr.h"
-#include "route.h"
+#include "routing.h"
 
 /*
  * These control the performance of cursor routing.  The optimal settings
