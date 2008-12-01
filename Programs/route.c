@@ -63,45 +63,45 @@ typedef struct {
 } RoutingData;
 
 static int
-readScreenRow (RoutingData *crd, ScreenCharacter *buffer, int row) {
-  if (!buffer) buffer = crd->rowBuffer;
-  return readScreen(0, row, crd->screenColumns, 1, buffer);
+readScreenRow (RoutingData *routing, ScreenCharacter *buffer, int row) {
+  if (!buffer) buffer = routing->rowBuffer;
+  return readScreen(0, row, routing->screenColumns, 1, buffer);
 }
 
 static int
-getCurrentPosition (RoutingData *crd) {
+getCurrentPosition (RoutingData *routing) {
   ScreenDescription description;
   describeScreen(&description);
 
-  if (description.number != crd->screenNumber) {
-    crd->screenNumber = description.number;
+  if (description.number != routing->screenNumber) {
+    routing->screenNumber = description.number;
     return 0;
   }
 
-  if (!crd->rowBuffer) {
-    crd->screenRows = description.rows;
-    crd->screenColumns = description.cols;
-    crd->verticalDelta = 0;
-    if (!(crd->rowBuffer = calloc(crd->screenColumns, sizeof(*crd->rowBuffer)))) goto error;
-  } else if ((crd->screenRows != description.rows) ||
-             (crd->screenColumns != description.cols)) {
+  if (!routing->rowBuffer) {
+    routing->screenRows = description.rows;
+    routing->screenColumns = description.cols;
+    routing->verticalDelta = 0;
+    if (!(routing->rowBuffer = calloc(routing->screenColumns, sizeof(*routing->rowBuffer)))) goto error;
+  } else if ((routing->screenRows != description.rows) ||
+             (routing->screenColumns != description.cols)) {
     goto error;
   }
 
-  crd->cury = description.posy - crd->verticalDelta;
-  crd->curx = description.posx;
-  if (readScreenRow(crd, NULL, description.posy)) return 1;
+  routing->cury = description.posy - routing->verticalDelta;
+  routing->curx = description.posx;
+  if (readScreenRow(routing, NULL, description.posy)) return 1;
 
 error:
-  crd->screenNumber = -1;
+  routing->screenNumber = -1;
   return 0;
 }
 
 static void
-insertCursorKey (RoutingData *crd, ScreenKey key) {
+insertCursorKey (RoutingData *routing, ScreenKey key) {
 #ifdef SIGUSR1
   sigset_t oldMask;
-  sigprocmask(SIG_BLOCK, &crd->signalMask, &oldMask);
+  sigprocmask(SIG_BLOCK, &routing->signalMask, &oldMask);
 #endif /* SIGUSR1 */
 
   insertScreenKey(key);
@@ -112,8 +112,8 @@ insertCursorKey (RoutingData *crd, ScreenKey key) {
 }
 
 static int
-awaitCursorMotion (RoutingData *crd, int direction) {
-  long timeout = crd->timeSum / crd->timeCount;
+awaitCursorMotion (RoutingData *routing, int direction) {
+  long timeout = routing->timeSum / routing->timeCount;
   struct timeval start;
   gettimeofday(&start, NULL);
 
@@ -123,48 +123,48 @@ awaitCursorMotion (RoutingData *crd, int direction) {
     time = millisecondsSince(&start) + 1;
 
     {
-      int row = crd->cury + crd->verticalDelta;
+      int row = routing->cury + routing->verticalDelta;
       int bestRow = row;
       int bestLength = 0;
 
       do {
-        ScreenCharacter buffer[crd->screenColumns];
-        if (!readScreenRow(crd, buffer, row)) break;
+        ScreenCharacter buffer[routing->screenColumns];
+        if (!readScreenRow(routing, buffer, row)) break;
 
         {
-          int before = crd->curx;
+          int before = routing->curx;
           int after = before;
 
-          while (buffer[before].text == crd->rowBuffer[before].text)
+          while (buffer[before].text == routing->rowBuffer[before].text)
             if (--before < 0)
               break;
 
-          while (buffer[after].text == crd->rowBuffer[after].text)
-            if (++after >= crd->screenColumns)
+          while (buffer[after].text == routing->rowBuffer[after].text)
+            if (++after >= routing->screenColumns)
               break;
 
           {
             int length = after - before - 1;
             if (length > bestLength) {
               bestRow = row;
-              if ((bestLength = length) == crd->screenColumns) break;
+              if ((bestLength = length) == routing->screenColumns) break;
             }
           }
         }
 
         row -= direction;
-      } while ((row >= 0) && (row < crd->screenRows));
+      } while ((row >= 0) && (row < routing->screenRows));
 
-      crd->verticalDelta = bestRow - crd->cury;
+      routing->verticalDelta = bestRow - routing->cury;
     }
 
-    crd->oldy = crd->cury;
-    crd->oldx = crd->curx;
-    if (!getCurrentPosition(crd)) return 0;
+    routing->oldy = routing->cury;
+    routing->oldx = routing->curx;
+    if (!getCurrentPosition(routing)) return 0;
 
-    if ((crd->cury != crd->oldy) || (crd->curx != crd->oldx)) {
-      crd->timeSum += time * 8;
-      crd->timeCount += 1;
+    if ((routing->cury != routing->oldy) || (routing->curx != routing->oldx)) {
+      routing->timeSum += time * 8;
+      routing->timeCount += 1;
       break;
     }
 
@@ -175,10 +175,10 @@ awaitCursorMotion (RoutingData *crd, int direction) {
 }
 
 static RoutingResult
-adjustCursorPosition (RoutingData *crd, int where, int trgy, int trgx, ScreenKey forward, ScreenKey backward) {
+adjustCursorPosition (RoutingData *routing, int where, int trgy, int trgx, ScreenKey forward, ScreenKey backward) {
   while (1) {
-    int dify = trgy - crd->cury;
-    int difx = (trgx < 0)? 0: (trgx - crd->curx);
+    int dify = trgy - routing->cury;
+    int difx = (trgx < 0)? 0: (trgx - routing->curx);
     int dir;
 
     /* determine which direction the cursor needs to move in */
@@ -191,32 +191,32 @@ adjustCursorPosition (RoutingData *crd, int where, int trgy, int trgx, ScreenKey
     }
 
     /* tell the cursor to move in the needed direction */
-    insertCursorKey(crd, ((dir > 0)? forward: backward));
-    if (!awaitCursorMotion(crd, dir)) return CRR_FAIL;
+    insertCursorKey(routing, ((dir > 0)? forward: backward));
+    if (!awaitCursorMotion(routing, dir)) return CRR_FAIL;
 
-    if (crd->cury != crd->oldy) {
-      if (crd->oldy != trgy) {
-        if (((crd->cury - crd->oldy) * dir) > 0) {
-          int dif = trgy - crd->cury;
+    if (routing->cury != routing->oldy) {
+      if (routing->oldy != trgy) {
+        if (((routing->cury - routing->oldy) * dir) > 0) {
+          int dif = trgy - routing->cury;
           if ((dif * dify) >= 0) continue;
           if (where > 0) {
-            if (crd->cury > trgy) return CRR_NEAR;
+            if (routing->cury > trgy) return CRR_NEAR;
           } else if (where < 0) {
-            if (crd->cury < trgy) return CRR_NEAR;
+            if (routing->cury < trgy) return CRR_NEAR;
           } else {
             if ((dif * dif) < (dify * dify)) return CRR_NEAR;
           }
         }
       }
-    } else if (crd->curx != crd->oldx) {
-      if (((crd->curx - crd->oldx) * dir) > 0) {
-        int dif = trgx - crd->curx;
-        if (crd->cury != trgy) continue;
+    } else if (routing->curx != routing->oldx) {
+      if (((routing->curx - routing->oldx) * dir) > 0) {
+        int dif = trgx - routing->curx;
+        if (routing->cury != trgy) continue;
         if ((dif * difx) >= 0) continue;
         if (where > 0) {
-          if (crd->curx > trgx) return CRR_NEAR;
+          if (routing->curx > trgx) return CRR_NEAR;
         } else if (where < 0) {
-          if (crd->curx < trgx) return CRR_NEAR;
+          if (routing->curx < trgx) return CRR_NEAR;
         } else {
           if ((dif * dif) < (difx * difx)) return CRR_NEAR;
         }
@@ -229,55 +229,55 @@ adjustCursorPosition (RoutingData *crd, int where, int trgy, int trgx, ScreenKey
      * try going back to the previous position since it was obviously
      * the nearest ever reached.
      */
-    insertCursorKey(crd, ((dir > 0)? backward: forward));
-    return awaitCursorMotion(crd, -dir)? CRR_NEAR: CRR_FAIL;
+    insertCursorKey(routing, ((dir > 0)? backward: forward));
+    return awaitCursorMotion(routing, -dir)? CRR_NEAR: CRR_FAIL;
   }
 }
 
 static RoutingResult
-adjustCursorHorizontally (RoutingData *crd, int where, int row, int column) {
-  return adjustCursorPosition(crd, where, row, column, SCR_KEY_CURSOR_RIGHT, SCR_KEY_CURSOR_LEFT);
+adjustCursorHorizontally (RoutingData *routing, int where, int row, int column) {
+  return adjustCursorPosition(routing, where, row, column, SCR_KEY_CURSOR_RIGHT, SCR_KEY_CURSOR_LEFT);
 }
 
 static RoutingResult
-adjustCursorVertically (RoutingData *crd, int where, int row) {
-  return adjustCursorPosition(crd, where, row, -1, SCR_KEY_CURSOR_DOWN, SCR_KEY_CURSOR_UP);
+adjustCursorVertically (RoutingData *routing, int where, int row) {
+  return adjustCursorPosition(routing, where, row, -1, SCR_KEY_CURSOR_DOWN, SCR_KEY_CURSOR_UP);
 }
 
 static RoutingStatus
 doRouting (int column, int row, int screen) {
-  RoutingData crd;
+  RoutingData routing;
 
 #ifdef SIGUSR1
   /* Set up the signal mask. */
-  sigemptyset(&crd.signalMask);
-  sigaddset(&crd.signalMask, SIGUSR1);
-  sigprocmask(SIG_UNBLOCK, &crd.signalMask, NULL);
+  sigemptyset(&routing.signalMask);
+  sigaddset(&routing.signalMask, SIGUSR1);
+  sigprocmask(SIG_UNBLOCK, &routing.signalMask, NULL);
 #endif /* SIGUSR1 */
 
   /* initialize the routing data structure */
-  crd.screenNumber = screen;
-  crd.rowBuffer = NULL;
-  crd.timeSum = CURSOR_ROUTING_TIMEOUT;
-  crd.timeCount = 1;
+  routing.screenNumber = screen;
+  routing.rowBuffer = NULL;
+  routing.timeSum = CURSOR_ROUTING_TIMEOUT;
+  routing.timeCount = 1;
 
-  if (getCurrentPosition(&crd)) {
+  if (getCurrentPosition(&routing)) {
     if (column < 0) {
-      adjustCursorVertically(&crd, 0, row);
+      adjustCursorVertically(&routing, 0, row);
     } else {
-      if (adjustCursorVertically(&crd, -1, row) != CRR_FAIL)
-        if (adjustCursorHorizontally(&crd, 0, row, column) == CRR_NEAR)
-          if (crd.cury < row)
-            if (adjustCursorVertically(&crd, 1, crd.cury+1) != CRR_FAIL)
-              adjustCursorHorizontally(&crd, 0, row, column);
+      if (adjustCursorVertically(&routing, -1, row) != CRR_FAIL)
+        if (adjustCursorHorizontally(&routing, 0, row, column) == CRR_NEAR)
+          if (routing.cury < row)
+            if (adjustCursorVertically(&routing, 1, routing.cury+1) != CRR_FAIL)
+              adjustCursorHorizontally(&routing, 0, row, column);
     }
   }
 
-  if (crd.rowBuffer) free(crd.rowBuffer);
+  if (routing.rowBuffer) free(routing.rowBuffer);
 
-  if (crd.screenNumber != screen) return ROUTE_ERROR;
-  if (crd.cury != row) return ROUTE_WRONG_ROW;
-  if ((column >= 0) && (crd.curx != column)) return ROUTE_WRONG_COLUMN;
+  if (routing.screenNumber != screen) return ROUTE_ERROR;
+  if (routing.cury != row) return ROUTE_WRONG_ROW;
+  if ((column >= 0) && (routing.curx != column)) return ROUTE_WRONG_COLUMN;
   return ROUTE_DONE;
 }
 
