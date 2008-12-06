@@ -28,8 +28,11 @@ midendword iell 24-15-12345 shouldn't use the ie-contraction
 always indien 35-145-24-14 shouldn't use the ie-contraction
 always propriet 12345-1234-1235-24-15-2345 proprietär shouldn't use the ie-contraction
 
+class e e
+class g g
 class r r
 class st st
+class konsonant bcdfghjklmnpqrstvwxyz
 
 # Due to their low usage frequency in typical german text the letters
 # c, q, x and y are reused for the en-, ll-, ex/mm/nis- and el-contractions.
@@ -65,7 +68,49 @@ midendword lich 456
 midendword ll 12345
 midendword mm 1346
 begmidword or 26
+
+after konsonant midword ss =
+after konsonant midendword ssatz 234-234-1356
+after konsonant midendword ssätz 234-5-234-1356
+after konsonant midendword ssaetz 234-5-234-1356
+after konsonant midword ssch 234-156
+always sschicht 234-156-3456-2345
+always sschlag 234-156-1245
+always sschläg 234-5-156-1245
+always sschlaeg 234-5-156-1245
+always sschließ 234-156-2346
+always sschmuck 234-156-134-136-46
+always sschnur 234-156-1345-136-1235 shouldn't use the nur-contraction
+always sschool 234-234-1456-135-135-123 foreign word, sch-contraction not allowed
+always sschreib 234-156-12
+always sschrieb 234-2-156
+always sschrift 234-156-2345
+always sschwierig 234-156-45
+always sselbst 234-234-23456
+always sselbständ 234-234-13456-12-5-23456 shouldn't use the selbst-contraction
+always sselbstaend 234-234-13456-12-5-23456 shouldn't use the selbst-contraction
+after konsonant always ssetz 234-2-15
+after konsonant midendword ssesam 234-234-123456-1-134 shouldn't use the sam-contraction
+after konsonant always ssitz 234-2-24
+always ssolch 234-234-1456
+after konsonant midendword ssoll 234-2-234
+always ssondern 234-234-1345
+always ssozial 234-234-123
+always sspiel 234-2-346
+always ssprach 234-234-1234
+always sspräch 234-5-234-1234
+always sspraech 234-5-234-1234
+always ssprech 234-2-2346
+after konsonant midendword sst 234-23456
+always sstaat 234-23456-2345
+after konsonant midendword sstand 234-2-23456
+after konsonant midendword sständ 234-5-23456
+after konsonant midendword sstaend 234-5-23456
+after konsonant midendword sstell 234-2-13456
+always ssteiger 234-23456-146-1245-12456
+before e always sstund 234-23456-256-145 shouldn't use the und-contraction
 midendword ss 2346
+
 midendword te 236
 always un 256
 
@@ -81,6 +126,7 @@ always est 15-23456
 endword tel 2345-13456
 endword tels 2345-13456-234
 endword ten 2345-14
+endword tens 2345-14-234
 endword ter 2345-12456
 endword tes 2345-123456
 
@@ -100,6 +146,7 @@ endword bende 12-14-145-15 shouldn't use the be-contraction
 endword benden 12-14-145-14 shouldn't use the be-contraction
 endword bender 12-14-145-12456 shouldn't use the be-contraction
 endword bendes 12-14-145-123456 shouldn't use the be-contraction
+endword benen 12-14-14 shouldn't use the be-contraction
 endword bens 12-14-234 shouldn't use the be-contraction
 endword ber 12-12456 shouldn't use the be-contraction
 endword berei 12-12456-146 shouldn't use the be-contraction
@@ -140,8 +187,8 @@ endword ges 1245-123456 shouldn't use the ge-contraction
 midendword ien 24-14 shouldn't use the ie-contraction
 midendword ienen 346-1345-14 should use the ie-contraction
 endword tel 2345-13456 should use the el-contraction
-midendword ten 2345-14 should use the en-contraction
-midendword ter 2345-12456 should use the er-contraction
+endword ten 2345-14 should use the en-contraction
+endword ter 2345-12456 should use the er-contraction
 endword tes 2345-123456 should use the es-contraction
 always trigraph = shouldn't use the ig-contraction
 
@@ -164,6 +211,7 @@ endword falls 124
 midendword heit 125
 before s midword heits 125-234
 midendword keit 13
+before s midword keits 13-234
 midendword mal 134
 midendword nis 1346
 midendword sam 2346
@@ -286,8 +334,6 @@ always		sorg		234-26-1245
 always		source		=
 sufword		south		=
 always		sowjet		=
-begmidword	sozial		234-135-1356-24-25
-endword		sozial		234-135-1356-24-1-123
 always		soziolo		=
 word über 1256
 word ueber 1256
@@ -364,6 +410,8 @@ always berges 12-12456-1245-123456 shouldn't use the be-contraction
 always besonder 23
 always besser 234-234
 contraction ss
+word beim 12-134
+contraction bm
 always bis 12-234
 always bison =
 always bist 12-23456
@@ -579,6 +627,7 @@ always läng 5-123-1245
 always laeng 5-123-1245
 always jahrelang 245-1235-15-123-1245 shouldn't use the el-contraction
 before s always jahres 245-1235-123456
+before g always jahresta 245-1235-123456-2345-1
 always langobard 123-235-1245-135-12-356-145 shouldn't use the lang-contraction
 always lass 2-123
 always läss 5-123
@@ -898,21 +947,33 @@ word beinen 12-146-1345-14 shouldn't use the bei-contraction
 word beines 12-146-1345-123456 shouldn't use the bei-contraction
 always bauform 12-16-124-26-134 shouldn't use the auf-contraction
 always beteuer 23-2345-126-12456 shouldn't use the te-contraction
+always beute 12-126-236 should use the eu-contraction
+always beutel 12-126-2345-13456 should use the eu-contraction
 always bssy 12-234-234-6-13456 shouldn't use the ss-contraction
 always bundes 12-256-145-123456 shouldn't use the und-contraction
 prfword chemikalie 1456-12356-24-13-25-24-15
 always donnerstag 145-135-1345-1345-12456-234-2345-1-1245 shouldn't use the st-contraction
+sufword eheinstitut 15-125-15-35-23456-24-2345-136-2345
+begword eheleu 15-125-15-123-126
+before g begword eherin 15-125-15-1235-35 Ehering(e) shouldn't use the er-contraction
 midword ehilfs = Analysehilfsmittel shouldn't use the eh-contraction
 midendword emethod = Analysemethode shouldn't use the eh-contraction
 midendword enorm 15-1345-26-134 Aussprachenorm shouldn't use the en-contraction 
 always eschatolog 123456-1456-1-2345-135-123-135-1245 shouldn't use the sch-contraction
 always esther 123456-2345-125-12456 shouldn't use the st-contraction
 always ästhe 345-234-2345-125-15 ästhetisch
+midendword erecht 15-1235-2345
+midendword ericht 15-2-3456
+always erepublik 15-1235-13
+midendword emann 15-134-1345
+midendword emänn 15-5-134-1345
+midendword emaenn 15-5-134-1345
+midendword estand 15-2-23456
 midword estell 15-2-13456
 always found 124-135-256-145 Foundation shouldn't use the und-contraction
+always gebunden 12346-12-256-145-14 shouldn't use the und-contraction
 always geier 1245-146-12456 should use the ei-contraction
 midendword geingang 1245-1246-1245-235-1245
-class g g
 midendword geingän 1245-1246-1245-345-1345
 always gelungen 12346-123-256-1245-14
 always generat 1245-14-12456-1-2345
@@ -929,8 +990,10 @@ prfword hallen 125-1-12345-14 shouldn't use the allen-contraction
 always hauf 125-16-124 shouldn't use the auf-contraction
 always hotel 125-135-2345-13456 shouldn't use the te-contraction
 always installer 35-23456-1-12345-12456 shouldn't use the aller-contraction
+always interview 35-2345-12456-1236-24-15-2456 shouldn't use the ie-contraction
 after st always ionstrieb 245-234-2345-1235-346-12
 after st always ionstrupp 245-234-2345-1235-136-1234-1234
+always jubel 245-136-12-13456 shouldn't use the be-contraction
 always komponist 13-135-134-1234-135-1345-24-23456 shouldn't use the nis-contraction
 prfword linie 123-35-24-15 shouldn't use the ie-contraction
 prfword materie 134-1-2345-12456-24-15 shouldn't use the ie-contraction
@@ -939,22 +1002,30 @@ always regel 1235-15-1245-13456
 always release = shouldn't use the el-contraction
 always round 1235-135-256-145 shouldn't use the und-contraction
 sufword rund 1235-256-145 shouldn't use the und-contraction
+word räson = shouldn't use the so-contraction
+word röschen 1235-246-234-1456-14 should use the ch-contraction
 midendword sammel 234-1-1346-13456 shouldn't use the sam-contraction
 midendword samml 234-1-1346-123 shouldn't use the sam-contraction
+endword schef 234-1456-15-124
+endword schefin 234-1456-15-124-35
+endword schefins 234-1456-15-124-35-234
+endword schefinnen 234-1456-15-124-35-1345-14
+endword schefs 234-1456-15-124-234
+endword eschef 123456-1456-15-124
+endword eschefin 123456-1456-15-124-35
+endword eschefins 123456-1456-15-124-35-234
+endword eschefinnen 123456-1456-15-124-35-1345-14
+endword eschefs 123456-1456-15-124-234
 always schwung 156-2456-256-1245 shouldn't use the ung-contraction
 always september 234-15-1234-2345-12356-12-12456 should use the em-contraction
 before s always sichts 234-3456-2345-234 Ansichtssache shouldn't use the ss-contraction
+always silber 234-24-123-12-12456 shouldn't use the be-contraction
 always sprung 234-1234-1235-256-1245 shouldn't use the ung-contraction
-always sschmuck 234-156-134-136-46
-always sschwierig 234-156-45
 always ssitz 234-2-24 shouldn't use the ss-contraction
 always ssonntag =
 always sspiel 234-2-346
 always ssprach 234-234-1234
 always sstand 234-2-23456
-always ssteiger 234-23456-146-1245-12456
-always sstunde 234-23456-256-145-15 shouldn't use the und-contraction
-always sstunden 234-23456-256-145-14
 midendword stitel 234-2345-24-2345-13456
 always studien 23456-136-145-24-14 shouldn't use the ie-contraction
 always stunde 23456-256-145-15 shouldn't use the und-contraction
@@ -962,11 +1033,15 @@ always stunden 23456-256-145-14
 always sturz 23456-136-1235-1356 Absturzursache shouldn't use the zu-contraction
 always tagesstät 2345-1-1245-123456-23456-345-2345 shouldn't use the ss-contraction
 always tagesstaet 2345-1-1245-123456-23456-345-2345 shouldn't use the ss-contraction
+always team = shouldn't use the te-contraction
+midendword termin 2345-12456-134-35 shouldn't use the te-contraction
 always wagen 2456-1-1245-14 shouldn't use the ge-contraction
 always weiber 2456-146-12-12456 shouldn't use the be-contraction
 sufword verbund 36-12-256-145 shouldn't use the und-contraction
 midendword verbund 1236-12456-12-256-145 shouldn't use the und-contraction
 midword versamm 1236-12456-234-1-1346 shouldn't use the sam-contraction
+always viertel 1236-346-1235-2345-13456 shouldn't use the te-contraction
+before g always zeitsta 1356-2345-234-2345-1
 
 # names
 always daniel 145-235-24-13456 shouldn't use the ie-contraction

@@ -67,12 +67,15 @@ always donnerstag = shouldn't use the st-contraction
 always eschatolog 15-234-1456-1-2345-135-123-135-1245 shouldn't use the sch-contraction
 always esther = shouldn't use the st-contraction
 prfword folie = shouldn't use the ie-contraction
+sufword hoer 125-246-1235 should use the oe-symbol
+always interview = shouldn't use the ie-contraction
 always koffein = shouldn't use the ei-contraction
 always lilie = shouldn't use the ie-contraction
 prfword linie 123-24-1345-24-15 shouldn't use the ie-contraction
 prfword materie = shouldn't use the ie-contraction
 always museum = shouldn't use the eu-contraction
 always propriet = proprietär shouldn't use the ie-contraction
+word röschen 1235-246-234-1456-15-1345 should use the ch-contraction
 always samstag = shouldn't use the st-contraction
 word wisst = shouldn't use the st-contraction
 always vietnam = shouldn't use the ie-contraction
