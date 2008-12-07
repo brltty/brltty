@@ -543,14 +543,14 @@ identifyModel (BrailleDisplay *brl, unsigned char identifier) {
            model->textCells, (model->textCells == 1)? "cell": "cells",
            model->statusCells, (model->statusCells == 1)? "cell": "cells");
 
-  brl->x = model->textCells;			/* initialise size of display */
-  brl->y = BRLROWS;
+  brl->textColumns = model->textCells;			/* initialise size of display */
+  brl->textRows = BRLROWS;
   brl->statusColumns = model->statusCells;
   brl->statusRows = 1;
   brl->helpPage = model->helpPage;		/* position in the model list */
 
-  if (!reallocateBuffer(&rawData, brl->x*brl->y)) return 0;
-  if (!reallocateBuffer(&prevData, brl->x*brl->y)) return 0;
+  if (!reallocateBuffer(&rawData, brl->textColumns*brl->textRows)) return 0;
+  if (!reallocateBuffer(&prevData, brl->textColumns*brl->textRows)) return 0;
 
   currentKeys = pressedKeys = nullKeys;
   inputMode = 0;

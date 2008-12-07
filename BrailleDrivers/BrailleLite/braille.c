@@ -363,14 +363,14 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
           }
 
           LogPrint(LOG_NOTICE, "Braille Lite %d detected.", blitesz);
-          brl->x = blitesz;	/* initialise size of display - */
-          brl->y = 1;		/* Braille Lites are single line displays */
+          brl->textColumns = blitesz;	/* initialise size of display - */
+          brl->textRows = 1;		/* Braille Lites are single line displays */
 
           /* Allocate space for buffers */
-          if ((prevdata = malloc(brl->x))) {
-            memset(prevdata, 0, brl->x);
+          if ((prevdata = malloc(brl->textColumns))) {
+            memset(prevdata, 0, brl->textColumns);
 
-            if ((rawdata = malloc(brl->x))) {
+            if ((rawdata = malloc(brl->textColumns))) {
               if (serialSetFlowControl(BL_serialDevice, SERIAL_FLOW_HARDWARE)) return 1;
 
               free(rawdata);

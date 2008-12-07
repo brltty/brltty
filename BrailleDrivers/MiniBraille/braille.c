@@ -375,8 +375,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       cursorDots = 0XFF;
       cursorOffset = sizeof(textCells) / 2;
 
-      brl->x = sizeof(textCells);
-      brl->y = 1;
+      brl->textColumns = sizeof(textCells);
+      brl->textRows = 1;
       brl->statusColumns = sizeof(statusCells);
       brl->statusRows = 1;
 

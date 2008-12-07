@@ -371,8 +371,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
   }
 
   brl->helpPage = 0;
-  brl->x = brl_cols;		/* initialize size of display */
-  brl->y = BRLROWS;		/* always 1 */
+  brl->textColumns = brl_cols;		/* initialize size of display */
+  brl->textRows = BRLROWS;		/* always 1 */
   brl->statusColumns = nrstatcells;
   brl->statusRows = 1;
 

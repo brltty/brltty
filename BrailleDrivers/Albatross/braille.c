@@ -254,8 +254,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
         if (byte == 0XFF) {
           if (!acknowledgeDisplay(brl)) break;
           clearDisplay(brl);
-          brl->x = windowWidth;
-          brl->y = 1;
+          brl->textColumns = windowWidth;
+          brl->textRows = 1;
           return 1;
         }
 
@@ -298,8 +298,8 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
     if (byte == 0XFF) {
       if (acknowledgeDisplay(brl)) {
         refreshDisplay(brl);
-        brl->x = windowWidth;
-        brl->y = 1;
+        brl->textColumns = windowWidth;
+        brl->textRows = 1;
         brl->resizeRequired = 1;
       }
       continue;

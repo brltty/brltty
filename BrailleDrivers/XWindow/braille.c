@@ -669,8 +669,8 @@ static int brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context
       regenerate = 0;
       destroyToplevel();
       generateToplevel();
-      brl->x = cols;
-      brl->y = lines;
+      brl->textColumns = cols;
+      brl->textRows = lines;
       brl->resizeRequired = 1;
     }
     if (keypressed!=EOF) {
@@ -1103,8 +1103,8 @@ static int brl_construct(BrailleDisplay *brl, char **parameters, const char *dev
   XtSetLanguageProc(NULL, NULL, NULL);
 #endif /* USE_XT */ 
 
-  brl->x=cols;
-  brl->y=lines;
+  brl->textColumns=cols;
+  brl->textRows=lines;
 
   generateToplevel();
 
@@ -1180,8 +1180,8 @@ static int brl_writeWindow(BrailleDisplay *brl, const wchar_t *text)
     }
   }
 
-  if (text && wmemcmp(text,displayedVisual,brl->y*brl->x)) {
-    for (i=0;i<brl->y*brl->x;i++) {
+  if (text && wmemcmp(text,displayedVisual,brl->textRows*brl->textColumns)) {
+    for (i=0;i<brl->textRows*brl->textColumns;i++) {
       if (displayedVisual[i] != text[i]) {
 	wc = text[i];
 	if (wc == 0) wc = WC_C(' ');
@@ -1229,9 +1229,9 @@ static int brl_writeWindow(BrailleDisplay *brl, const wchar_t *text)
   }
 
 #if defined(USE_XAW) || defined(USE_WINDOWS)
-  if (!displayb[0] || (memcmp(brl->buffer,displayedWindow,brl->y*brl->x) == 0)) return 1;
+  if (!displayb[0] || (memcmp(brl->buffer,displayedWindow,brl->textRows*brl->textColumns) == 0)) return 1;
 
-  for (i=0;i<brl->y*brl->x;i++)
+  for (i=0;i<brl->textRows*brl->textColumns;i++)
     if (displayedWindow[i] != brl->buffer[i]) {
       unsigned char c = brl->buffer[i];
       c =

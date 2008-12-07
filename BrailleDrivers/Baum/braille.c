@@ -293,7 +293,7 @@ changeCellCount (BrailleDisplay *brl, int count) {
     cellCount = count;
     logCellCount();
 
-    brl->x = textCount;
+    brl->textColumns = textCount;
     brl->resizeRequired = 1;
   }
 }
@@ -2033,8 +2033,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
             clearCells(0, cellCount);
             if (!updateCells(brl)) goto failed;
 
-            brl->x = textCount;
-            brl->y = 1;
+            brl->textColumns = textCount;
+            brl->textRows = 1;
             brl->helpPage = useVarioKeys? 1: 0;
 
             activeKeys = pressedKeys;

@@ -112,16 +112,16 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
 
   if (!serialSetFlowControl(CB_serialDevice, SERIAL_FLOW_HARDWARE)) goto failure;
 
-  brl->x = brl_cols = BRLCOLS(id);
-  brl->y = BRLROWS;
+  brl->textColumns = brl_cols = BRLCOLS(id);
+  brl->textRows = BRLROWS;
   brl->statusColumns = 5;
   brl->statusRows = 1;
 
   /* Allocate space for buffers */
-  prevdata = mallocWrapper (brl->x * brl->y);
+  prevdata = mallocWrapper (brl->textColumns * brl->textRows);
   /* rawdata has to have room for the pre- and post-data sequences,
    * the status cells, and escaped 0x1b's: */
-  rawdata = mallocWrapper (20 + brl->x * brl->y * 2);
+  rawdata = mallocWrapper (20 + brl->textColumns * brl->textRows * 2);
   return 1;
 
 failure:
@@ -149,8 +149,8 @@ brl_destruct (BrailleDisplay *brl)
       rawlen += pre_data[0];
     }
   /* Clear the five status cells and the main display: */
-  memset (rawdata + rawlen, 0, 5 + brl->x * brl->y);
-  rawlen += 5 + brl->x * brl->y;
+  memset (rawdata + rawlen, 0, 5 + brl->textColumns * brl->textRows);
+  rawlen += 5 + brl->textColumns * brl->textRows;
   if (post_data[0])
     {
       memcpy (rawdata + rawlen, post_data + 1, post_data[0]);
@@ -191,14 +191,14 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text)
   unsigned char *post_data = (unsigned char *)POST_DATA;
 
   /* Only refresh display if the data has changed: */
-  if (memcmp (brl->buffer, prevdata, brl->x * brl->y) || \
+  if (memcmp (brl->buffer, prevdata, brl->textColumns * brl->textRows) || \
       memcmp (status, oldstatus, 5))
     {
       /* Save new Braille data: */
-      memcpy (prevdata, brl->buffer, brl->x * brl->y);
+      memcpy (prevdata, brl->buffer, brl->textColumns * brl->textRows);
 
       /* Dot mapping from standard to CombiBraille: */
-      for (i = 0; i < brl->x * brl->y; brl->buffer[i] = outputTable[brl->buffer[i]], \
+      for (i = 0; i < brl->textColumns * brl->textRows; brl->buffer[i] = outputTable[brl->buffer[i]], \
 	   i++);
 
       rawlen = 0;
@@ -213,7 +213,7 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text)
 	  if (status[i] == 0x1b)	/* CombiBraille hack */
 	    rawdata[rawlen++] = 0x1b;
 	}
-      for (i = 0; i < brl->x * brl->y; i++)
+      for (i = 0; i < brl->textColumns * brl->textRows; i++)
 	{
 	  rawdata[rawlen++] = brl->buffer[i];
 	  if (brl->buffer[i] == 0x1b)	/* CombiBraille hack */

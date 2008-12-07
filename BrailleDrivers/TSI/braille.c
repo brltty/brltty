@@ -501,8 +501,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
 
   ResetTypematic ();
 
-  brl->x = brl_cols;		/* initialise size of display */
-  brl->y = BRLROWS;		/* always 1 */
+  brl->textColumns = brl_cols;		/* initialise size of display */
+  brl->textRows = BRLROWS;		/* always 1 */
 
   /* Allocate space for buffers */
   dispbuf = malloc(ncells);
@@ -650,7 +650,7 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text)
 {
   static int count = 0;
 
-  /* assert: brl->x == brl_cols */
+  /* assert: brl->textColumns == brl_cols */
 
   memcpy(dispbuf, brl->buffer, brl_cols);
 

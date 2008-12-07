@@ -98,8 +98,8 @@ brl_construct(BrailleDisplay *brl, char **parameters, const char *device)
       LogPrint(LOG_INFO, "Display Type: %s", braille_info(BRL_TERMINAL));
       LogPrint(LOG_INFO, "Display Size: %d", braille_size());
 
-      brl->x = braille_size();  /* initialise size of display */
-      brl->y = 1;
+      brl->textColumns = braille_size();  /* initialise size of display */
+      brl->textRows = 1;
       brl->helpPage = 0;
 
       braille_timeout(100);
@@ -125,15 +125,15 @@ brl_writeWindow(BrailleDisplay *brl, const wchar_t *text)
 {
   if(text)
     {
-      char bytes[brl->x];
+      char bytes[brl->textColumns];
       int i;
 
-      for(i = 0; i < brl->x; ++i)
+      for(i = 0; i < brl->textColumns; ++i)
         {
           wchar_t character = text[i];
           bytes[i] = iswLatin1(character)? character: '?';
         }
-      braille_write(bytes, brl->x);
+      braille_write(bytes, brl->textColumns);
 
       if(brl->cursor >= 0)
         {

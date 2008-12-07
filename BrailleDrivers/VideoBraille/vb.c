@@ -37,8 +37,8 @@ static int brl_construct(BrailleDisplay *brl, char **parameters, const char *dev
   /*	Seems to signal en error */ 
   if (!vbinit()) {
     /* Theese are pretty static */ 
-    brl->x=40;
-    brl->y=1;
+    brl->textColumns=40;
+    brl->textRows=1;
     return 1;
   }
   return 0;

@@ -910,8 +910,8 @@ dimensionsChanged (BrailleDisplay *brl) {
           memset(statusCells, 0, count2);
           memset(genericCells, 0, BRL_genericStatusCellCount);
 
-          brl->x = brailleColumns;
-          brl->y = brailleRows;
+          brl->textColumns = brailleColumns;
+          brl->textRows = brailleRows;
           brl->statusColumns = statusColumns;
           brl->statusRows = statusRows;
           brl->helpPage = 0;

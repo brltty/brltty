@@ -76,7 +76,7 @@ static int
 writeCells (BrailleDisplay *brl) {
   static const unsigned char header[] = {'D'};
   static const unsigned char trailer[] = {'\r'};
-  unsigned char buffer[sizeof(header) + brl->x + sizeof(trailer)];
+  unsigned char buffer[sizeof(header) + brl->textColumns + sizeof(trailer)];
   unsigned char *byte = buffer;
 
   memcpy(byte, header, sizeof(header));
@@ -84,7 +84,7 @@ writeCells (BrailleDisplay *brl) {
 
   {
     int i;
-    for (i=0; i<brl->x; *byte++=outputTable[outputBuffer[i++]]);
+    for (i=0; i<brl->textColumns; *byte++=outputTable[outputBuffer[i++]]);
   }
 
   memcpy(byte, trailer, sizeof(trailer));
@@ -153,8 +153,8 @@ identifyDisplay (BrailleDisplay *brl) {
               if (!count) {
                 LogPrint(LOG_INFO, "Detected: %.*s", (int)length, identity);
 
-                brl->x = cells;
-                brl->y = 1;
+                brl->textColumns = cells;
+                brl->textRows = 1;
 
                 return 1;
               }
@@ -193,9 +193,9 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     charactersPerSecond = baud / 10;
     if (serialRestartDevice(serialDevice, baud)) {
       if (identifyDisplay(brl)) {
-        if ((outputBuffer = malloc(brl->x))) {
+        if ((outputBuffer = malloc(brl->textColumns))) {
           if (setTable(brl, 0)) {
-            memset(outputBuffer, 0, brl->x);
+            memset(outputBuffer, 0, brl->textColumns);
             writeCells(brl);
 
             return 1;
@@ -231,8 +231,8 @@ brl_destruct (BrailleDisplay *brl) {
 
 static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
-  if (memcmp(brl->buffer, outputBuffer, brl->x) != 0) {
-    memcpy(outputBuffer, brl->buffer, brl->x);
+  if (memcmp(brl->buffer, outputBuffer, brl->textColumns) != 0) {
+    memcpy(outputBuffer, brl->buffer, brl->textColumns);
     writeCells(brl);
   }
   return 1;
@@ -284,7 +284,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 
           if (interpretNumber(&key, &bytes, &count)) {
             if (!count) {
-              if ((key > 0) && (key <= brl->x)) return BRL_BLK_ROUTE + (key - 1);
+              if ((key > 0) && (key <= brl->textColumns)) return BRL_BLK_ROUTE + (key - 1);
             }
           }
 

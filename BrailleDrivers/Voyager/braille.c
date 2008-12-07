@@ -578,8 +578,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       /* currentCells holds the status cells and the text cells.
        * We export directly to BRLTTY only the text cells.
        */
-      brl->x = cellCount;		/* initialize size of display */
-      brl->y = 1;		/* always 1 */
+      brl->textColumns = cellCount;		/* initialize size of display */
+      brl->textRows = 1;		/* always 1 */
 
       if ((currentCells = malloc(cellCount))) {
         if ((previousCells = malloc(cellCount))) {

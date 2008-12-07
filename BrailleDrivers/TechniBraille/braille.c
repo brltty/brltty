@@ -109,34 +109,34 @@ writePacket (BrailleDisplay *brl, unsigned char function, unsigned char *data, u
 
 static int
 writeBrailleCells (BrailleDisplay *brl) {
-  unsigned char cells[brl->x];
+  unsigned char cells[brl->textColumns];
   int i;
-  for (i=0; i<brl->x; ++i) cells[i] = outputTable[brailleCells[i]];
-  return writePacket(brl, 1, cells, brl->x);
+  for (i=0; i<brl->textColumns; ++i) cells[i] = outputTable[brailleCells[i]];
+  return writePacket(brl, 1, cells, brl->textColumns);
 }
 
 static int
 clearBrailleCells (BrailleDisplay *brl) {
-  memset(brailleCells, 0, brl->x);
+  memset(brailleCells, 0, brl->textColumns);
   return writeBrailleCells(brl);
 }
 
 static int
 writeVisualText (BrailleDisplay *brl) {
-  unsigned char bytes[brl->x];
+  unsigned char bytes[brl->textColumns];
   int i;
 
-  for (i=0; i<brl->x; ++i) {
+  for (i=0; i<brl->textColumns; ++i) {
     wchar_t character = visualText[i];
     bytes[i] = iswLatin1(character)? character: '?';
   }
 
-  return writePacket(brl, 2, bytes, brl->x);
+  return writePacket(brl, 2, bytes, brl->textColumns);
 }
 
 static int
 clearVisualText (BrailleDisplay *brl) {
-  wmemset(visualText, WC_C(' '), brl->x);
+  wmemset(visualText, WC_C(' '), brl->textColumns);
   return writeVisualText(brl);
 }
 
@@ -166,8 +166,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
             if (size <= 0) break;
 
             if (response[1] == 4) {
-              brl->x = response[2];
-              brl->y = 1;
+              brl->textColumns = response[2];
+              brl->textRows = 1;
               brl->helpPage = 0;
 
               if (!clearBrailleCells(brl)) break;
@@ -199,14 +199,14 @@ brl_destruct (BrailleDisplay *brl) {
 static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   if (text) {
-    if (wmemcmp(text, visualText, brl->x) != 0) {
-      wmemcpy(visualText, text, brl->x);
+    if (wmemcmp(text, visualText, brl->textColumns) != 0) {
+      wmemcpy(visualText, text, brl->textColumns);
       if (!writeVisualText(brl)) return 0;
     }
   }
 
-  if (memcmp(brl->buffer, brailleCells, brl->x) != 0) {
-    memcpy(brailleCells, brl->buffer, brl->x);
+  if (memcmp(brl->buffer, brailleCells, brl->textColumns) != 0) {
+    memcpy(brailleCells, brl->buffer, brl->textColumns);
     if (!writeBrailleCells(brl)) return 0;
   }
   return 1;
@@ -229,7 +229,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 
       case 2: {
         unsigned char column = packet[2];
-        if (column && (column <= brl->x)) return BRL_BLK_ROUTE + (column - 1);
+        if (column && (column <= brl->textColumns)) return BRL_BLK_ROUTE + (column - 1);
         break;
       }
 

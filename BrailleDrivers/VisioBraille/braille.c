@@ -167,10 +167,10 @@ static int brl_reset(BrailleDisplay *brl)
 
 /* Function : brl_construct */
 /* Opens and configures the serial port properly */
-/* if brl->x <= 0 when brl_construct is called, then brl->x is initialized */
+/* if brl->textColumns <= 0 when brl_construct is called, then brl->textColumns is initialized */
 /* either with the BRAILLEDISPLAYSIZE constant, defined in braille.h */
 /* or with the size got through identification request if it succeeds */
-/* Else, brl->x is left unmodified by brl_construct, so that */
+/* Else, brl->textColumns is left unmodified by brl_construct, so that */
 /* the braille display can be resized without reloading the driver */ 
 static int brl_construct(BrailleDisplay *brl, char **parameters, const char *device)
 {
@@ -221,7 +221,7 @@ static int brl_construct(BrailleDisplay *brl, char **parameters, const char *dev
     }
     if (i==0) {
       LogPrint(LOG_WARNING,"Unable to identify terminal properly");  
-      if (!brl->x) brl->x = BRAILLEDISPLAYSIZE;  
+      if (!brl->textColumns) brl->textColumns = BRAILLEDISPLAYSIZE;  
     } else {
       LogPrint(LOG_INFO,"Braille terminal description:");
       LogPrint(LOG_INFO,"   version=%c%c%c",terminfo.version[0],terminfo.version[1],terminfo.version[2]);
@@ -234,12 +234,12 @@ static int brl_construct(BrailleDisplay *brl, char **parameters, const char *dev
       LogPrint(LOG_INFO,"   prog=%c",terminfo.prog);
       LogPrint(LOG_INFO,"   lcd=%c",terminfo.lcd);
       LogPrint(LOG_INFO,"   f2=%s",terminfo.f2);  
-      if (brl->x<=0) brl->x = (terminfo.size[0]-'0')*10 + (terminfo.size[1]-'0');
+      if (brl->textColumns<=0) brl->textColumns = (terminfo.size[0]-'0')*10 + (terminfo.size[1]-'0');
     }
 #else /* SendIdReq */
-    brl->x = ds;
+    brl->textColumns = ds;
 #endif /* SendIdReq */
-  brl->y=1; 
+  brl->textRows=1; 
   return 1;
 }
 
@@ -522,10 +522,10 @@ static int brl_writeWindow(BrailleDisplay *brl, const wchar_t *text)
   static unsigned char brailleDisplay[81]= { 0x3e }; /* should be large enough for everyone */
   static unsigned char prevData[80];
   int i;
-  if (memcmp(&prevData,brl->buffer,brl->x)==0) return 1;
-  for (i=0; i<brl->x; i++) brailleDisplay[i+1] = outputTable[*(brl->buffer+i)];
-  if (brl_writePacket(brl,(unsigned char *) &brailleDisplay,brl->x+1)==0) {
-    memcpy(&prevData,brl->buffer,brl->x);
+  if (memcmp(&prevData,brl->buffer,brl->textColumns)==0) return 1;
+  for (i=0; i<brl->textColumns; i++) brailleDisplay[i+1] = outputTable[*(brl->buffer+i)];
+  if (brl_writePacket(brl,(unsigned char *) &brailleDisplay,brl->textColumns+1)==0) {
+    memcpy(&prevData,brl->buffer,brl->textColumns);
   }
   return 1;
 }

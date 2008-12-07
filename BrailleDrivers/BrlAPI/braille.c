@@ -64,9 +64,9 @@ static int brl_construct(BrailleDisplay *brl, char **parameters, const char *dev
   LogPrint(LOG_DEBUG, "Connected to %s using %s", settings.host, settings.auth);
   CHECK((brlapi_enterTtyModeWithPath(NULL, 0, NULL)>=0), out0);
   LogPrint(LOG_DEBUG, "Got tty successfully");
-  CHECK((brlapi_getDisplaySize(&brl->x, &brl->y)==0), out1);
-  LogPrint(LOG_DEBUG,"Found out display size: %dx%d", brl->x, brl->y);
-  displaySize = brl->x*brl->y;
+  CHECK((brlapi_getDisplaySize(&brl->textColumns, &brl->textRows)==0), out1);
+  LogPrint(LOG_DEBUG,"Found out display size: %dx%d", brl->textColumns, brl->textRows);
+  displaySize = brl->textColumns*brl->textRows;
   prevData = malloc(displaySize);
   CHECK((prevData!=NULL), out1);
   prevText = malloc(displaySize * sizeof(wchar_t));

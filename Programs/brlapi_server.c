@@ -2418,9 +2418,9 @@ int api_resume(BrailleDisplay *brl) {
     resumeDriver(brl);
     if (driverConstructed) {
       /* TODO: handle clients' resize */
-      displayDimensions[0] = htonl(brl->x);
-      displayDimensions[1] = htonl(brl->y);
-      displaySize = brl->x * brl->y;
+      displayDimensions[0] = htonl(brl->textColumns);
+      displayDimensions[1] = htonl(brl->textRows);
+      displaySize = brl->textColumns * brl->textRows;
       disp = brl;
     }
   }
@@ -2467,9 +2467,9 @@ void api_link(BrailleDisplay *brl)
   ApiBraille.writePacket = NULL;
   braille=&ApiBraille;
   /* TODO: handle clients' resize */
-  displayDimensions[0] = htonl(brl->x);
-  displayDimensions[1] = htonl(brl->y);
-  displaySize = brl->x * brl->y;
+  displayDimensions[0] = htonl(brl->textColumns);
+  displayDimensions[1] = htonl(brl->textRows);
+  displaySize = brl->textColumns * brl->textRows;
   disp = brl;
 }
 

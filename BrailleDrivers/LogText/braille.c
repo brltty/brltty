@@ -364,8 +364,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
    makeDownloadFifo();
    if ((serialDevice = serialOpenDevice(device))) {
       if (serialRestartDevice(serialDevice, 9600)) {
-         brl->y = screenHeight;
-         brl->x = screenWidth;
+         brl->textRows = screenHeight;
+         brl->textColumns = screenWidth;
          brl->buffer = &sourceImage[0][0];
          memset(sourceImage, 0, sizeof(sourceImage));
          deviceStatus = DEV_ONLINE;

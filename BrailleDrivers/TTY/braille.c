@@ -184,8 +184,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
             refresh();
 #endif /* USE_CURSES */
 
-            brl->x = windowColumns;
-            brl->y = windowLines; 
+            brl->textColumns = windowColumns;
+            brl->textRows = windowLines; 
 
             LogPrint(LOG_INFO, "TTY: type=%s baud=%d size=%dx%d",
                      ttyType, ttyBaud, windowColumns, windowLines);
@@ -267,10 +267,10 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   static int previousCursor = -1;
   char *previousLocale;
 
-  if ((memcmp(previousContent, brl->buffer, brl->x*brl->y) == 0) &&
+  if ((memcmp(previousContent, brl->buffer, brl->textColumns*brl->textRows) == 0) &&
       (brl->cursor == previousCursor))
     return 1;
-  memcpy(previousContent, brl->buffer, brl->x*brl->y);
+  memcpy(previousContent, brl->buffer, brl->textColumns*brl->textRows);
   previousCursor = brl->cursor;
 
   if (classificationLocale) {
@@ -288,21 +288,21 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 
   {
     int row;
-    for (row=0; row<brl->y; row++) {
-      writeText(&text[row*brl->x], brl->x);
-      if (row < brl->y-1)
+    for (row=0; row<brl->textRows; row++) {
+      writeText(&text[row*brl->textColumns], brl->textColumns);
+      if (row < brl->textRows-1)
         addstr("\r\n");
     }
   }
 
 #ifdef USE_CURSES
-  if ((brl->cursor >= 0) && (brl->cursor < (brl->x * brl->y)))
-    move(brl->cursor/brl->x, brl->cursor%brl->x);
+  if ((brl->cursor >= 0) && (brl->cursor < (brl->textColumns * brl->textRows)))
+    move(brl->cursor/brl->textColumns, brl->cursor%brl->textColumns);
   else
-    move(brl->y, 0);
+    move(brl->textRows, 0);
   refresh();
 #else /* USE_CURSES */
-  if ((brl->y == 1) && (brl->cursor >= 0) && (brl->cursor < brl->x)) {
+  if ((brl->textRows == 1) && (brl->cursor >= 0) && (brl->cursor < brl->textColumns)) {
     addch('\r');
     writeText(text, brl->cursor);
   } else {

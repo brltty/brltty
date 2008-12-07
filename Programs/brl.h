@@ -50,7 +50,7 @@ typedef enum {
 typedef struct BrailleDataStruct BrailleData;
 
 typedef struct {
-  unsigned int x, y;
+  unsigned int textColumns, textRows;
   unsigned int statusColumns, statusRows;
   unsigned int helpPage;
   unsigned char *buffer;

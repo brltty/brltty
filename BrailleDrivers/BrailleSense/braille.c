@@ -404,7 +404,7 @@ writePacket (
 
 static int
 writeCells (BrailleDisplay *brl) {
-  size_t count = brl->x * brl->y;
+  size_t count = brl->textColumns * brl->textRows;
   unsigned char cells[count];
 
   {
@@ -417,7 +417,7 @@ writeCells (BrailleDisplay *brl) {
 
 static int
 clearCells (BrailleDisplay *brl) {
-  memset(previousCells, 0, brl->x*brl->y);
+  memset(previousCells, 0, brl->textColumns*brl->textRows);
   return writeCells(brl);
 }
 
@@ -453,8 +453,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     if (io->configurePort()) {
       charactersPerSecond = SERIAL_BAUD / 10;
 
-      brl->x = 32;
-      brl->y = 1;
+      brl->textColumns = 32;
+      brl->textRows = 1;
       brl->helpPage = 0;
 
       inputMode = 0;
@@ -475,7 +475,7 @@ brl_destruct (BrailleDisplay *brl) {
 
 static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
-  size_t count = brl->x * brl->y;
+  size_t count = brl->textColumns * brl->textRows;
 
   if (memcmp(brl->buffer, previousCells, count) != 0) {
     memcpy(previousCells, brl->buffer, count);

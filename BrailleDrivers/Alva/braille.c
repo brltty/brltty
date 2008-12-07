@@ -611,8 +611,8 @@ reallocateBuffer (unsigned char **buffer, int size) {
 
 static int
 reallocateBuffers (BrailleDisplay *brl) {
-  if (reallocateBuffer(&rawdata, brl->x*brl->y))
-    if (reallocateBuffer(&prevdata, brl->x*brl->y))
+  if (reallocateBuffer(&rawdata, brl->textColumns*brl->textRows))
+    if (reallocateBuffer(&prevdata, brl->textColumns*brl->textRows))
       return 1;
 
   LogPrint(LOG_ERR, "Cannot allocate braille buffers.");
@@ -633,8 +633,8 @@ updateDisplayConfiguration (BrailleDisplay *brl, const unsigned char *packet, in
 
   if (count >= 4) {
     unsigned char columns = packet[11];
-    if (columns != brl->x) {
-      brl->x = columns;
+    if (columns != brl->textColumns) {
+      brl->textColumns = columns;
       if (!autodetecting) {
         if (!reallocateBuffers(brl)) return 0;
         brl->resizeRequired = 1;
@@ -663,8 +663,8 @@ identifyModel (BrailleDisplay *brl, unsigned char identifier) {
            model->name, model->columns, model->statusCells);
 
   /* Set model parameters... */
-  brl->x = model->columns;
-  brl->y = 1;
+  brl->textColumns = model->columns;
+  brl->textRows = 1;
   brl->statusColumns = model->statusCells;
   brl->statusRows = 1;
   brl->helpPage = model->helpPage;			/* initialise size of display */
@@ -797,14 +797,14 @@ static int brl_writeWindow (BrailleDisplay *brl, const wchar_t *text)
   if (rewriteRequired) {
     /* We rewrite the whole display */
     from = 0;
-    to = brl->x;
+    to = brl->textColumns;
     rewriteRequired = 0;
   } else {
     /* We update only the display part that has been changed */
     from = 0;
-    while ((from < brl->x) && (brl->buffer[from] == prevdata[from])) from++;
+    while ((from < brl->textColumns) && (brl->buffer[from] == prevdata[from])) from++;
 
-    to = brl->x - 1;
+    to = brl->textColumns - 1;
     while ((to > from) && (brl->buffer[to] == prevdata[to])) to--;
     to++;
   }
@@ -944,10 +944,10 @@ GetKey (BrailleDisplay *brl, unsigned int *Keys, unsigned int *Pos) {
 #else /* ABT3_OLD_FIRMWARE */
 
   int key = packet[0];
-  if (key < (KEY_ROUTING_OFFSET + brl->x + brl->statusColumns)) {
-    if (key >= (KEY_ROUTING_OFFSET + brl->x)) {
+  if (key < (KEY_ROUTING_OFFSET + brl->textColumns + brl->statusColumns)) {
+    if (key >= (KEY_ROUTING_OFFSET + brl->textColumns)) {
       /* status key */
-      *Keys |= StatusKeys1[key - (KEY_ROUTING_OFFSET + brl->x)];
+      *Keys |= StatusKeys1[key - (KEY_ROUTING_OFFSET + brl->textColumns)];
       return 1;
     }
 

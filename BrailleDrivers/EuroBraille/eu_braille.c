@@ -69,7 +69,7 @@ static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) 
 {
   protocolp = NULL;
-  brl->x = 0;
+  brl->textColumns = 0;
   iop = NULL;
   {
     static const DotsTable dots = {0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80};
@@ -187,7 +187,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
 	  return (0);
 	}      
     }
-  LogPrint(LOG_INFO, "EuroBraille driver initialized: %d display length connected", brl->x);
+  LogPrint(LOG_INFO, "EuroBraille driver initialized: %d display length connected", brl->textColumns);
   brl->helpPage = 0;
   return (1);
 }

@@ -397,13 +397,13 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
           if (size) {
             if (response.data.code == BNI_DESCRIBE) {
               statusCells = response.data.values.description.statusCells;
-              brl->x = response.data.values.description.textCells;
-              brl->y = 1;
-              if ((statusCells == 5) && (brl->x == 30)) {
+              brl->textColumns = response.data.values.description.textCells;
+              brl->textRows = 1;
+              if ((statusCells == 5) && (brl->textColumns == 30)) {
                 statusCells -= 2;
-                brl->x += 2;
+                brl->textColumns += 2;
               }
-              dataCells = brl->x * brl->y;
+              dataCells = brl->textColumns * brl->textRows;
               cellCount = statusCells + dataCells;
               if ((cellBuffer = malloc(cellCount))) {
                 memset(cellBuffer, 0, cellCount);

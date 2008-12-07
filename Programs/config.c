@@ -634,7 +634,7 @@ windowConfigurationChanged (int infoLevel, int rows, int columns) {
     int statusWidth = prefs.statusCount;
 
     if (!statusWidth) statusWidth = getStatusFieldsLength(prefs.statusFields);
-    statusWidth = MAX(MIN(statusWidth, brl.x-1-separatorWidth), 0);
+    statusWidth = MAX(MIN(statusWidth, brl.textColumns-1-separatorWidth), 0);
 
     if (statusWidth > 0) {
       switch (prefs.statusPosition) {
@@ -666,7 +666,7 @@ windowConfigurationChanged (int infoLevel, int rows, int columns) {
 
 void
 reconfigureWindow (void) {
-  windowConfigurationChanged(LOG_INFO, brl.y, brl.x);
+  windowConfigurationChanged(LOG_INFO, brl.textRows, brl.textColumns);
 }
 
 static void
@@ -706,8 +706,8 @@ resetStatusFields (void) {
   prefs.statusSeparator = ssNone;
   memset(prefs.statusFields, sfEnd, sizeof(prefs.statusFields));
 
-  if (!count && (brl.x > 40)) {
-    count = (brl.x % 20) * brl.y;
+  if (!count && (brl.textColumns > 40)) {
+    count = (brl.textColumns % 20) * brl.textRows;
 
     if (count) {
       prefs.statusPosition = spRight;
@@ -1623,7 +1623,7 @@ updatePreferences (void) {
       SYMBOLIC_ITEM(prefs.speechPunctuation, changedSpeechPunctuation, testSpeechPunctuation, strtext("Speech Punctuation"), punctuationLevels),
 #endif /* ENABLE_SPEECH_SUPPORT */
       SYMBOLIC_ITEM(prefs.statusPosition, changedStatusPosition, testStatusPosition, strtext("Status Position"), statusPositions),
-      NUMERIC_ITEM(prefs.statusCount, changedStatusCount, testStatusCount, strtext("Status Count"), 0, MAX((int)brl.x/2-1, 0), 1),
+      NUMERIC_ITEM(prefs.statusCount, changedStatusCount, testStatusCount, strtext("Status Count"), 0, MAX((int)brl.textColumns/2-1, 0), 1),
       SYMBOLIC_ITEM(prefs.statusSeparator, changedStatusSeparator, testStatusSeparator, strtext("Status Separator"), statusSeparators),
       STATUS_FIELD_ITEM(1),
       STATUS_FIELD_ITEM(2),
@@ -1677,7 +1677,7 @@ updatePreferences (void) {
         unsigned int valueLength = strlen(value);
         unsigned int lineLength = settingIndent + valueLength;
         char line[lineLength + 1];
-        unsigned int textLength = textCount * brl.y;
+        unsigned int textLength = textCount * brl.textRows;
 
         /* First we draw the current menu item in the buffer */
         snprintf(line,  sizeof(line), "%s%s%s", label, delimiter, value);
@@ -1832,7 +1832,7 @@ updatePreferences (void) {
 
             default:
               if ((command >= BRL_BLK_ROUTE) &&
-                  (command < (BRL_BLK_ROUTE + brl.x))) {
+                  (command < (BRL_BLK_ROUTE + brl.textColumns))) {
                 int key = command - BRL_BLK_ROUTE;
 
                 if ((key >= textStart) && (key < (textStart + textCount))) {

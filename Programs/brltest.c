@@ -83,7 +83,7 @@ END_OPTION_TABLE
 int
 message (const char *mode, const char *string, short flags) {
   size_t length = strlen(string);
-  size_t size = brl.x * brl.y;
+  size_t size = brl.textColumns * brl.textRows;
   char buffer[size];
 
   clearStatusCells(&brl);
@@ -100,9 +100,9 @@ message (const char *mode, const char *string, short flags) {
 
     {
       wchar_t characters[count];
-      wchar_t text[brl.x * brl.y];
+      wchar_t text[brl.textColumns * brl.textRows];
       convertCharsToWchars(buffer, characters, count);
-      fillTextRegion(text, brl.buffer, 0, brl.x, brl.x, brl.y, characters, count);
+      fillTextRegion(text, brl.buffer, 0, brl.textColumns, brl.textColumns, brl.textRows, characters, count);
       if (!braille->writeWindow(&brl, text)) return 0;
     }
 

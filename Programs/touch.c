@@ -44,7 +44,7 @@ static inline int
 touchCheckColumn (BrailleDisplay *brl, const unsigned char *pressure, int column) {
   int row;
   for (row=touchTop; row<=touchBottom; ++row) {
-    if (pressure[(row * brl->x) + column]) return 1;
+    if (pressure[(row * brl->textColumns) + column]) return 1;
   }
   return 0;
 }
@@ -53,7 +53,7 @@ static inline int
 touchCheckRow (BrailleDisplay *brl, const unsigned char *pressure, int row) {
   int column;
   for (column=touchLeft; column<=touchRight; ++column) {
-    if (pressure[(row * brl->x) + column]) return 1;
+    if (pressure[(row * brl->textColumns) + column]) return 1;
   }
   return 0;
 }
@@ -114,7 +114,7 @@ touchUncropWindow (BrailleDisplay *brl) {
   touchLeft = textStart;
   touchRight = textStart + textCount - 1;
   touchTop = 0;
-  touchBottom = brl->y - 1;
+  touchBottom = brl->textRows - 1;
 }
 
 static inline int
@@ -126,7 +126,7 @@ touchRecropWindow (BrailleDisplay *brl, const unsigned char *pressure) {
 int
 touchAnalyzePressure (BrailleDisplay *brl, const unsigned char *pressure) {
   if (pressure) {
-    LogBytes(LOG_DEBUG, "Touch Pressure", pressure, brl->x*brl->y);
+    LogBytes(LOG_DEBUG, "Touch Pressure", pressure, brl->textColumns*brl->textRows);
   } else {
     LogPrint(LOG_DEBUG, "Touch Pressure off");
   }

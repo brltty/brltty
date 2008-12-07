@@ -155,16 +155,16 @@ static int brl_construct (BrailleDisplay *brl, char **parameters, const char *de
 	if (!serialSetFlowControl(MB_serialDevice, SERIAL_FLOW_HARDWARE)) goto failure;
 
 	if (brlcols == 25) goto failure;						/* MultiBraille Vertical uses a different protocol --> not supported */
-	brl->x = brlcols;
-	brl->y = BRLROWS;
+	brl->textColumns = brlcols;
+	brl->textRows = BRLROWS;
 	brl->statusColumns = 5;
 	brl->statusRows = 1;
 
 	/* Allocate space for buffers */
-	prevdata = mallocWrapper (brl->x * brl->y);
+	prevdata = mallocWrapper (brl->textColumns * brl->textRows);
 	/* rawdata has to have room for the pre- and post-data sequences,
 	 * the status cells, and escaped 0x1b's: */
-	rawdata = mallocWrapper (20 + brl->x * brl->y * 2);
+	rawdata = mallocWrapper (20 + brl->textColumns * brl->textRows * 2);
 
 	return 1;
 
@@ -190,8 +190,8 @@ static void brl_destruct (BrailleDisplay *brl) {
 		rawlen += pre_data[0];
 	}
 	/* Clear the five status cells and the main display: */
-	memset (rawdata + rawlen, 0, 5 + 1+ brl->x * brl->y);
-	rawlen += 5 + 1 + brl->x * brl->y;  /* +1 is for dummy module */
+	memset (rawdata + rawlen, 0, 5 + 1+ brl->textColumns * brl->textRows);
+	rawlen += 5 + 1 + brl->textColumns * brl->textRows;  /* +1 is for dummy module */
 	if (post_data[0]) {
 		memcpy (rawdata + rawlen, post_data + 1, post_data[0]);
 		rawlen += post_data[0];
@@ -227,12 +227,12 @@ static int brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 	unsigned char *post_data = (unsigned char *)"\001\015";
 
 	/* Only refresh display if the data has changed: */
-	if (memcmp (brl->buffer, prevdata, brl->x * brl->y) || memcmp (status, oldstatus, 5)) {
+	if (memcmp (brl->buffer, prevdata, brl->textColumns * brl->textRows) || memcmp (status, oldstatus, 5)) {
 		/* Save new Braille data: */
-		memcpy (prevdata, brl->buffer, brl->x * brl->y);
+		memcpy (prevdata, brl->buffer, brl->textColumns * brl->textRows);
 
 		/* Dot mapping from standard to MultiBraille: */
-		for (i = 0; i < brl->x * brl->y; brl->buffer[i] = outputTable[brl->buffer[i]], i++);
+		for (i = 0; i < brl->textColumns * brl->textRows; brl->buffer[i] = outputTable[brl->buffer[i]], i++);
 
     rawlen = 0;
 		if (pre_data[0]) {
@@ -253,7 +253,7 @@ static int brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 		
 		
 		/* write braille message itself */
-		for (i = 0; i < brl->x * brl->y; i++) {
+		for (i = 0; i < brl->textColumns * brl->textRows; i++) {
 			rawdata[rawlen++] = brl->buffer[i];
 		}
       

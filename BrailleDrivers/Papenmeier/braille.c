@@ -545,8 +545,8 @@ interpretIdentity (BrailleDisplay *brl, unsigned char id, int major, int minor) 
                terminal->modelName,
                terminal->textColumns, terminal->textRows,
                terminal->helpFile);
-      brl->x = terminal->textColumns;
-      brl->y = terminal->textRows;
+      brl->textColumns = terminal->textColumns;
+      brl->textRows = terminal->textRows;
       brl->statusColumns = terminal->statusCount;
       brl->statusRows = 1;
 

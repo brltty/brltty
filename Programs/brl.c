@@ -102,8 +102,8 @@ identifyBrailleDrivers (int full) {
 
 void
 initializeBrailleDisplay (BrailleDisplay *brl) {
-  brl->x = 80;
-  brl->y = 1;
+  brl->textColumns = 80;
+  brl->textRows = 1;
   brl->statusColumns = 0;
   brl->statusRows = 0;
   brl->helpPage = 0;
@@ -225,11 +225,11 @@ clearStatusCells (BrailleDisplay *brl) {
 
 static void
 brailleBufferResized (BrailleDisplay *brl, int infoLevel) {
-  memset(brl->buffer, 0, brl->x*brl->y);
+  memset(brl->buffer, 0, brl->textColumns*brl->textRows);
   LogPrint(infoLevel, "Braille Display Dimensions: %d %s, %d %s",
-           brl->y, (brl->y == 1)? "row": "rows",
-           brl->x, (brl->x == 1)? "column": "columns");
-  if (brl->bufferResized) brl->bufferResized(infoLevel, brl->y, brl->x);
+           brl->textRows, (brl->textRows == 1)? "row": "rows",
+           brl->textColumns, (brl->textColumns == 1)? "column": "columns");
+  if (brl->bufferResized) brl->bufferResized(infoLevel, brl->textRows, brl->textColumns);
 }
 
 static int
@@ -240,7 +240,7 @@ resizeBrailleBuffer (BrailleDisplay *brl, int infoLevel) {
     if (brl->isCoreBuffer) {
       static void *currentAddress = NULL;
       static size_t currentSize = 0;
-      size_t newSize = brl->x * brl->y;
+      size_t newSize = brl->textColumns * brl->textRows;
 
       if (newSize > currentSize) {
         void *newAddress = malloc(newSize);

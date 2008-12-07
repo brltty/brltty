@@ -230,11 +230,11 @@ static int brl_construct(BrailleDisplay *brl, char **parameters, const char *dev
   /* Set model params */
   model = &Models[ModelID];
   brl->helpPage = ModelID;
-  brl->x = model->Cols;		/* initialise size of main display */
-  brl->y = BRLROWS;		/* ever is 1 in this type of braille lines */
+  brl->textColumns = model->Cols;		/* initialise size of main display */
+  brl->textRows = BRLROWS;		/* ever is 1 in this type of braille lines */
   
   /* Need to calculate the size; Cols + Status + 1 (space between) */
-  BrailleSize = brl->x + model->NbStCells + 1;
+  BrailleSize = brl->textColumns + model->NbStCells + 1;
 
   /* Allocate space for buffers */
   rawdata = malloc(BrailleSize); /* Phisical size */
@@ -281,7 +281,7 @@ static int brl_writeWindow(BrailleDisplay *brl, const wchar_t *text)
   i++;  /* step a phisical space with main cells */
   
   /* Make main info to rawdata */
-  for(j=0; j < brl->x; j++)
+  for(j=0; j < brl->textColumns; j++)
       rawdata[i++] = outputTable[brl->buffer[j]];
      
   /* Write to Braille Display */

@@ -326,7 +326,7 @@ static int brl_construct (BrailleDisplay *brl, char **parameters, const char *de
 
   /* Set model params... */
    brl->helpPage = 0;
-   brl->y = BRLROWS;
+   brl->textRows = BRLROWS;
    while (!NbCols)
      {
 	int i = 0;
@@ -867,9 +867,9 @@ static int readbrlkey(BrailleDisplay *brl, char key_context)
 	    NbCols = 32;
 	  else
 	    NbCols = 40;
-	  brl->x = NbCols;
-	  prevdata = realloc(prevdata, brl->x * brl->y);
-	  lcd_data = realloc(lcd_data, brl->x * brl->y * sizeof(*lcd_data));
+	  brl->textColumns = NbCols;
+	  prevdata = realloc(prevdata, brl->textColumns * brl->textRows);
+	  lcd_data = realloc(lcd_data, brl->textColumns * brl->textRows * sizeof(*lcd_data));
 	  res = BRL_CMD_NOOP;
 	  break;
 	}
