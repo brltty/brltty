@@ -60,6 +60,9 @@ async.$O:
 keyboard.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/keyboard.c
 
+keymap.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/keymap.c
+
 ###############################################################################
 
 sys_skeleton.$O:
