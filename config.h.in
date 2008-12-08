@@ -363,6 +363,7 @@ extern "C" {
 #define TEXT_TABLE_EXTENSION ".ttb"
 #define ATTRIBUTES_TABLE_EXTENSION ".atb"
 #define CONTRACTION_TABLE_EXTENSION ".ctb"
+#define KEY_TABLE_EXTENSION ".ktb"
 
 #ifdef __cplusplus
 }

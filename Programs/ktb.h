@@ -16,24 +16,24 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_KEYMAP
-#define BRLTTY_INCLUDED_KEYMAP
+#ifndef BRLTTY_INCLUDED_KTB
+#define BRLTTY_INCLUDED_KTB
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-typedef struct KeymapStruct Keymap;
+typedef struct KeyTableStruct KeyTable;
 
-extern Keymap *keymap;
+extern KeyTable *keyTable;
 
-extern Keymap *compileKeymap (const char *name);
-extern void destroyKeymap (Keymap *map);
+extern KeyTable *compileKeyTable (const char *name);
+extern void destroyKeyTable (KeyTable *table);
 
-extern char *ensureKeymapExtension (const char *path);
+extern char *ensureKeyTableExtension (const char *path);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_KEYMAP */
+#endif /* BRLTTY_INCLUDED_KTB */

@@ -60,8 +60,8 @@ async.$O:
 keyboard.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/keyboard.c
 
-keymap_compile.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/keymap_compile.c
+ktb_compile.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/ktb_compile.c
 
 ###############################################################################
 

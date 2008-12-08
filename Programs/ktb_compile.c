@@ -24,12 +24,12 @@
 #include "datafile.h"
 #include "dataarea.h"
 #include "cmd.h"
-#include "keymap.h"
-#include "keymap_internal.h"
+#include "ktb.h"
+#include "ktb_internal.h"
 
 typedef struct {
   DataArea *area;
-} KeymapData;
+} KeyTableData;
 
 static int
 parseKeyOperand (DataFile *file, unsigned int *keyCode, const wchar_t *characters, int length) {
@@ -295,13 +295,13 @@ getCommandOperand (DataFile *file, int *value) {
 
 static int
 processBindOperands (DataFile *file, void *data) {
-  KeymapData *kmd = data;
-  KeymapEntry entry;
+  KeyTableData *ktd = data;
+  KeyTableEntry entry;
 
   if (getKeyOperand(file, &entry.keyCode)) {
     if (getCommandOperand(file, &entry.command)) {
       DataOffset offset;
-      if (saveDataItem(kmd->area, &offset,
+      if (saveDataItem(ktd->area, &offset,
                        &entry, sizeof(entry), __alignof__(sizeof(entry)))) {
         return 1;
       }
@@ -312,51 +312,51 @@ processBindOperands (DataFile *file, void *data) {
 }
 
 static int
-processKeymapLine (DataFile *file, void *data) {
+processKeyTableLine (DataFile *file, void *data) {
   static const DataProperty properties[] = {
     {.name=WS_C("bind"), .processor=processBindOperands},
     {.name=WS_C("include"), .processor=processIncludeOperands},
     {.name=NULL, .processor=NULL}
   };
 
-  return processPropertyOperand(file, properties, "keymap directive", data);
+  return processPropertyOperand(file, properties, "key table directive", data);
 }
 
-Keymap *
-compileKeymap (const char *name) {
-  Keymap *map = NULL;
-  KeymapData kmd;
+KeyTable *
+compileKeyTable (const char *name) {
+  KeyTable *table = NULL;
+  KeyTableData ktd;
 
-  memset(&kmd, 0, sizeof(kmd));
+  memset(&ktd, 0, sizeof(ktd));
 
-  if ((kmd.area = newDataArea())) {
-    if (processDataFile(name, processKeymapLine, &kmd)) {
-      if ((map = malloc(sizeof(*map)))) {
-	map->entries = NULL;
-	if ((map->size = getDataSize(kmd.area)) > 0) {
-	  if ((map->entries = malloc(map->size))) {
-	    memcpy(map->entries, getDataItem(kmd.area, 0), map->size);
-	    resetDataArea(kmd.area);
+  if ((ktd.area = newDataArea())) {
+    if (processDataFile(name, processKeyTableLine, &ktd)) {
+      if ((table = malloc(sizeof(*table)))) {
+	table->entries = NULL;
+	if ((table->size = getDataSize(ktd.area)) > 0) {
+	  if ((table->entries = malloc(table->size))) {
+	    memcpy(table->entries, getDataItem(ktd.area, 0), table->size);
+	    resetDataArea(ktd.area);
 	  }
         }
       }
     }
 
-    destroyDataArea(kmd.area);
+    destroyDataArea(ktd.area);
   }
 
-  return map;
+  return table;
 }
 
 void
-destroyKeymap (Keymap *map) {
-  if (map->size) {
-    free(map->entries);
-    free(map);
+destroyKeyTable (KeyTable *table) {
+  if (table->size) {
+    free(table->entries);
+    free(table);
   }
 }
 
 char *
-ensureKeymapExtension (const char *path) {
-  return ensureExtension(path, KEYMAP_EXTENSION);
+ensureKeyTableExtension (const char *path) {
+  return ensureExtension(path, KEY_TABLE_EXTENSION);
 }

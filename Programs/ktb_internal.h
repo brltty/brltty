@@ -16,8 +16,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_KEYMAP_INTERNAL
-#define BRLTTY_INCLUDED_KEYMAP_INTERNAL
+#ifndef BRLTTY_INCLUDED_KTB_INTERNAL
+#define BRLTTY_INCLUDED_KTB_INTERNAL
 
 #ifdef __cplusplus
 extern "C" {
@@ -25,15 +25,15 @@ extern "C" {
 
 #include "keyboard.h"
 
-typedef uint32_t KeymapOffset;
+typedef uint32_t KeyTableOffset;
 
 typedef struct {
   KeyCode keyCode;
   int command;
-} KeymapEntry;
+} KeyTableEntry;
 
-struct KeymapStruct {
-  KeymapEntry *entries;
+struct KeyTableStruct {
+  KeyTableEntry *entries;
   size_t size;
 };
 
@@ -41,4 +41,4 @@ struct KeymapStruct {
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_KEYMAP_INTERNAL */
+#endif /* BRLTTY_INCLUDED_KTB_INTERNAL */
