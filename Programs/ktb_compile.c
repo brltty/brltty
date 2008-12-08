@@ -315,7 +315,7 @@ processBindOperands (DataFile *file, void *data) {
   KeyBinding *binding;
 
   if (ktd->bindingsCount == ktd->bindingsSize) {
-    unsigned int newSize = ktd->bindingsSize? ktd->bindingsSize<<1: 0X1;
+    unsigned int newSize = ktd->bindingsSize? ktd->bindingsSize<<1: 0X10;
     KeyBinding *newBindings = realloc(ktd->bindingsTable, (newSize * sizeof(*newBindings)));
 
     if (!newBindings) return 0;
