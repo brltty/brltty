@@ -677,18 +677,20 @@ loadKeyTable (const char *name) {
   return 1;
 }
 
-static int tryKeyboardMonitor (void);
+static void scheduleKeyboardMonitor (int interval);
 
 static void
-retryKeyboardMonitor (void *data) {
-  tryKeyboardMonitor();
+tryKeyboardMonitor (void *data) {
+  LogPrint(LOG_DEBUG, "starting keyboard monitor");
+  if (!startKeyboardMonitor(&keyboardProperties)) {
+    LogPrint(LOG_DEBUG, "keyboard monitor failed");
+    scheduleKeyboardMonitor(5000);
+  }
 }
 
-static int
-tryKeyboardMonitor (void) {
-  if (startKeyboardMonitor(&keyboardProperties)) return 1;
-  asyncRelativeAlarm(5000, retryKeyboardMonitor, NULL);
-  return 0;
+static void
+scheduleKeyboardMonitor (int interval) {
+  asyncRelativeAlarm(interval, tryKeyboardMonitor, NULL);
 }
 
 int
@@ -2987,7 +2989,7 @@ startup (int argc, char *argv[]) {
 
   if (parseKeyboardProperties(&keyboardProperties, opt_keyboardProperties))
     if (keyTable)
-      tryKeyboardMonitor();
+      scheduleKeyboardMonitor(0);
 
   /* initialize screen driver */
   atexit(exitScreen);
