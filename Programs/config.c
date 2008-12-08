@@ -142,6 +142,7 @@ ContractionTable *contractionTable = NULL;
 
 static char *opt_keyTable;
 static char *opt_keyboardProperties;
+static KeyboardProperties keyboardProperties;
 
 #ifdef ENABLE_API
 static int opt_noApi;
@@ -674,6 +675,20 @@ loadKeyTable (const char *name) {
   if (keyTable) destroyKeyTable(keyTable);
   keyTable = table;
   return 1;
+}
+
+static int tryKeyboardMonitor (void);
+
+static void
+retryKeyboardMonitor (void *data) {
+  tryKeyboardMonitor();
+}
+
+static int
+tryKeyboardMonitor (void) {
+  if (startKeyboardMonitor(&keyboardProperties)) return 1;
+  asyncRelativeAlarm(5000, retryKeyboardMonitor, NULL);
+  return 0;
 }
 
 int
@@ -2970,11 +2985,9 @@ startup (int argc, char *argv[]) {
   LogPrint(LOG_INFO, "%s: %s", gettext("Key Table"),
            *opt_keyTable? opt_keyTable: gettext("none"));
 
-  {
-    KeyboardProperties properties;
-    parseKeyboardProperties(&properties, opt_keyboardProperties);
-    if (keyTable) startKeyboardMonitor(&properties);
-  }
+  if (parseKeyboardProperties(&keyboardProperties, opt_keyboardProperties))
+    if (keyTable)
+      tryKeyboardMonitor();
 
   /* initialize screen driver */
   atexit(exitScreen);
