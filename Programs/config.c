@@ -56,6 +56,7 @@
 #include "ttb.h"
 #include "atb.h"
 #include "ctb.h"
+#include "ktb.h"
 #include "tunes.h"
 #include "message.h"
 #include "misc.h"
@@ -138,6 +139,9 @@ static char *opt_attributesTable;
 static char *opt_contractionTable;
 ContractionTable *contractionTable = NULL;
 #endif /* ENABLE_CONTRACTED_BRAILLE */
+
+static char *opt_keyTable;
+KeyTable *keyTable = NULL;
 
 #ifdef ENABLE_API
 static int opt_noApi;
@@ -360,6 +364,14 @@ BEGIN_OPTION_TABLE(programOptions)
     .description = strtext("Path to contraction table file.")
   },
 #endif /* ENABLE_CONTRACTED_BRAILLE */
+
+  { .letter = 'k',
+    .word = "key-table",
+    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
+    .argument = strtext("file"),
+    .setting.string = &opt_keyTable,
+    .description = strtext("Path to key table file.")
+  },
 
 #ifdef ENABLE_SPEECH_SUPPORT
   { .letter = 's',
@@ -616,6 +628,45 @@ loadContractionTable (const char *name) {
   return 1;
 }
 #endif /* ENABLE_CONTRACTED_BRAILLE */
+
+static void
+exitKeyTable (void) {
+  if (keyTable) {
+    destroyKeyTable(keyTable);
+    keyTable = NULL;
+  }
+}
+
+static int
+loadKeyTable (const char *name) {
+  KeyTable *table = NULL;
+
+  if (*name) {
+    char *file;
+
+    if ((file = ensureKeyTableExtension(name))) {
+      char *path;
+
+      if ((path = makePath(opt_tablesDirectory, file))) {
+        LogPrint(LOG_DEBUG, "compiling key table: %s", path);
+
+        if (!(table = compileKeyTable(path))) {
+          LogPrint(LOG_ERR, "%s: %s", gettext("cannot compile key table"), path);
+        }
+
+        free(path);
+      }
+
+      free(file);
+    }
+
+    if (!table) return 0;
+  }
+
+  if (keyTable) destroyKeyTable(keyTable);
+  keyTable = table;
+  return 1;
+}
 
 int
 haveStatusCells (void) {
@@ -2904,6 +2955,13 @@ startup (int argc, char *argv[]) {
 #endif /* ENABLE_TABLE_SELECTION */
 #endif /* ENABLE_PREFERENCES_MENU */
 #endif /* ENABLE_CONTRACTED_BRAILLE */
+
+  /* handle key table option */
+  atexit(exitKeyTable);
+  if (*opt_keyTable) loadKeyTable(opt_keyTable);
+  LogPrint(LOG_INFO, "%s: %s", gettext("Contraction Table"),
+           *opt_contractionTable? opt_contractionTable: gettext("none"));
+
 
   /* initialize screen driver */
   atexit(exitScreen);
