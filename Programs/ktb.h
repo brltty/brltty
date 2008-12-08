@@ -25,6 +25,8 @@ extern "C" {
 
 typedef struct KeyTableStruct KeyTable;
 
+extern KeyTable *keyTable;
+
 extern KeyTable *compileKeyTable (const char *name);
 extern void destroyKeyTable (KeyTable *table);
 

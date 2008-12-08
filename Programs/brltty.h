@@ -132,7 +132,6 @@ extern char *opt_midiDevice;
 extern int updateInterval;
 extern int messageDelay;
 extern ContractionTable *contractionTable;
-extern KeyTable *keyTable;
 
 extern void testProgramTermination (void);
 extern void startup (int argc, char *argv[]);

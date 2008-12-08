@@ -35,14 +35,9 @@ typedef struct {
   unsigned int bindingsCount;
 } KeyTableData;
 
-static inline void *
-getKeyTableItem (KeyTableData *ktd, DataOffset offset) {
-  return getDataItem(ktd->area, offset);
-}
-
 static inline KeyTableHeader *
 getKeyTableHeader (KeyTableData *ktd) {
-  return getKeyTableItem(ktd, 0);
+  return getDataItem(ktd->area, 0);
 }
 
 static int

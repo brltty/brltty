@@ -16,38 +16,14 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_KTB_INTERNAL
-#define BRLTTY_INCLUDED_KTB_INTERNAL
+#include "prologue.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
+#include "ktb.h"
+#include "ktb_internal.h"
 
-#include "keydefs.h"
+KeyTable *keyTable = NULL;
 
-typedef uint32_t KeyTableOffset;
-
-typedef struct {
-  KeyCode key;
-  int command;
-} KeyBinding;
-
-typedef struct {
-  KeyTableOffset bindingsTable;
-  uint32_t bindingsCount;
-} KeyTableHeader;
-
-struct KeyTableStruct {
-  union {
-    KeyTableHeader *fields;
-    const unsigned char *bytes;
-  } header;
-
-  size_t size;
-};
-
-#ifdef __cplusplus
+static inline const void *
+getKeyTableItem (KeyTable *table, KeyTableOffset offset) {
+  return &table->header.bytes[offset];
 }
-#endif /* __cplusplus */
-
-#endif /* BRLTTY_INCLUDED_KTB_INTERNAL */

@@ -141,7 +141,6 @@ ContractionTable *contractionTable = NULL;
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
 static char *opt_keyTable;
-KeyTable *keyTable = NULL;
 static char *opt_keyboardProperties;
 
 #ifdef ENABLE_API
