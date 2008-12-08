@@ -304,8 +304,8 @@ int	esysiris_init(BrailleDisplay *brl, t_eubrl_io *io)
     }
   if (brlCols > 0)
     { /* Succesfully identified hardware. */
-      brl->y = 1;
-      brl->x = brlCols;
+      brl->textRows = 1;
+      brl->textColumns = brlCols;
       LogPrint(LOG_INFO, "eu: %s connected.",
 	       modelTable[brlType]);
       return (1);
@@ -380,7 +380,7 @@ int	esysiris_keyToCommand(BrailleDisplay *brl, unsigned int key, BRL_DriverComma
 void	esysiris_writeWindow(BrailleDisplay *brl)
 {
   static unsigned char previousBrailleWindow[80];
-  int displaySize = brl->x * brl->y;
+  int displaySize = brl->textColumns * brl->textRows;
   unsigned char buf[displaySize + 2];
   
   if (displaySize > sizeof(previousBrailleWindow)) {
