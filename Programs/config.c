@@ -142,6 +142,7 @@ ContractionTable *contractionTable = NULL;
 
 static char *opt_keyTable;
 KeyTable *keyTable = NULL;
+static char *opt_keyboardProperties;
 
 #ifdef ENABLE_API
 static int opt_noApi;
@@ -371,6 +372,14 @@ BEGIN_OPTION_TABLE(programOptions)
     .argument = strtext("file"),
     .setting.string = &opt_keyTable,
     .description = strtext("Path to key table file.")
+  },
+
+  { .letter = 'K',
+    .word = "keyboard-properties",
+    .flags = OPT_Hidden | OPT_Extend | OPT_Config | OPT_Environ,
+    .argument = strtext("arg,..."),
+    .setting.string = &opt_keyboardProperties,
+    .description = strtext("Properties of the keyboard.")
   },
 
 #ifdef ENABLE_SPEECH_SUPPORT
@@ -2958,10 +2967,15 @@ startup (int argc, char *argv[]) {
 
   /* handle key table option */
   atexit(exitKeyTable);
-  if (*opt_keyTable) loadKeyTable(opt_keyTable);
-  LogPrint(LOG_INFO, "%s: %s", gettext("Contraction Table"),
-           *opt_contractionTable? opt_contractionTable: gettext("none"));
-
+  if (*opt_keyTable)  {
+    if (loadKeyTable(opt_keyTable)) {
+      KeyboardProperties properties;
+      parseKeyboardProperties(&properties, opt_keyboardProperties);
+      startKeyboardMonitor(&properties);
+    }
+  }
+  LogPrint(LOG_INFO, "%s: %s", gettext("Key Table"),
+           *opt_keyTable? opt_keyTable: gettext("none"));
 
   /* initialize screen driver */
   atexit(exitScreen);
