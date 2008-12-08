@@ -28,12 +28,21 @@ extern "C" {
 typedef uint32_t KeyTableOffset;
 
 typedef struct {
-  KeyCode keyCode;
+  KeyCode key;
   int command;
-} KeyTableEntry;
+} KeyBinding;
+
+typedef struct {
+  KeyTableOffset bindingsTable;
+  uint32_t bindingsCount;
+} KeyTableHeader;
 
 struct KeyTableStruct {
-  KeyTableEntry *entries;
+  union {
+    KeyTableHeader *fields;
+    const unsigned char *bytes;
+  } header;
+
   size_t size;
 };
 

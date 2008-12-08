@@ -29,13 +29,27 @@
 
 typedef struct {
   DataArea *area;
+
+  KeyBinding *bindingsTable;
+  unsigned int bindingsSize;
+  unsigned int bindingsCount;
 } KeyTableData;
 
+static inline void *
+getKeyTableItem (KeyTableData *ktd, DataOffset offset) {
+  return getDataItem(ktd->area, offset);
+}
+
+static inline KeyTableHeader *
+getKeyTableHeader (KeyTableData *ktd) {
+  return getKeyTableItem(ktd, 0);
+}
+
 static int
-parseKeyOperand (DataFile *file, unsigned int *keyCode, const wchar_t *characters, int length) {
+parseKeyOperand (DataFile *file, KeyCode *code, const wchar_t *characters, int length) {
   typedef struct {
     const wchar_t *name;
-    KeyCode keyCode;
+    KeyCode code;
   } KeyEntry;
 
   static const KeyEntry keyTable[] = {
@@ -240,23 +254,24 @@ parseKeyOperand (DataFile *file, unsigned int *keyCode, const wchar_t *character
   while (key->name) {
     if ((length == wcslen(key->name)) &&
 	(wmemcmp(characters, key->name, length) == 0)) {
-      *keyCode = key->keyCode;
+      *code = key->code;
       return 1;
     }
 
     key += 1;
   }
 
-  reportDataError(file, "invalid key name: %.*" PRIws, length, characters);
+  reportDataError(file, "unknown key name: %.*" PRIws, length, characters);
   return 0;
 }
 
 static int
-getKeyOperand (DataFile *file, unsigned int *keyCode) {
-  DataOperand key;
+getKeyOperand (DataFile *file, KeyCode *code) {
+  DataOperand name;
 
-  if (getDataOperand(file, &key, "key code"))
-    if (parseKeyOperand(file, keyCode, key.characters, key.length)) return 1;
+  if (getDataOperand(file, &name, "key name")) {
+    if (parseKeyOperand(file, code, name.characters, name.length)) return 1;
+  }
 
   return 0;
 }
@@ -269,6 +284,7 @@ parseCommandOperand (DataFile *file, int *value, const wchar_t *characters, int 
     if (length == strlen(command->name)) {
       int index;
       for (index=0; index<length && characters[index]==command->name[index]; index++);
+
       if (index == length) {
 	*value = command->code;
 	return 1;
@@ -278,17 +294,17 @@ parseCommandOperand (DataFile *file, int *value, const wchar_t *characters, int 
     command += 1;
   }
 
-  reportDataError(file, "invalid command name: %.*" PRIws, length, characters);
+  reportDataError(file, "unknown command name: %.*" PRIws, length, characters);
   return 0;
 }
 
 static int
 getCommandOperand (DataFile *file, int *value) {
-  DataOperand commandName;
+  DataOperand name;
 
-  if (getDataOperand(file, &commandName, "command name"))
-    if (parseCommandOperand(file, value, commandName.characters, commandName.length))
-      return 1;
+  if (getDataOperand(file, &name, "command name")) {
+    if (parseCommandOperand(file, value, name.characters, name.length)) return 1;
+  }
 
   return 0;
 }
@@ -296,15 +312,23 @@ getCommandOperand (DataFile *file, int *value) {
 static int
 processBindOperands (DataFile *file, void *data) {
   KeyTableData *ktd = data;
-  KeyTableEntry entry;
+  KeyBinding *binding;
 
-  if (getKeyOperand(file, &entry.keyCode)) {
-    if (getCommandOperand(file, &entry.command)) {
-      DataOffset offset;
-      if (saveDataItem(ktd->area, &offset,
-                       &entry, sizeof(entry), __alignof__(sizeof(entry)))) {
-        return 1;
-      }
+  if (ktd->bindingsCount == ktd->bindingsSize) {
+    unsigned int newSize = ktd->bindingsSize? ktd->bindingsSize<<1: 0X1;
+    KeyBinding *newBindings = realloc(ktd->bindingsTable, (newSize * sizeof(*newBindings)));
+
+    if (!newBindings) return 0;
+    ktd->bindingsTable = newBindings;
+    ktd->bindingsSize = newSize;
+  }
+
+  binding = &ktd->bindingsTable[ktd->bindingsCount];
+  memset(binding, 0, sizeof(*binding));
+
+  if (getKeyOperand(file, &binding->key)) {
+    if (getCommandOperand(file, &binding->command)) {
+      ktd->bindingsCount += 1;
     }
   }
 
@@ -322,6 +346,26 @@ processKeyTableLine (DataFile *file, void *data) {
   return processPropertyOperand(file, properties, "key table directive", data);
 }
 
+static int
+saveKeyBindings (KeyTableData *ktd) {
+  KeyTableHeader *header = getKeyTableHeader(ktd);
+
+  if ((header->bindingsCount = ktd->bindingsCount)) {
+    DataOffset offset;
+
+    if (!saveDataItem(ktd->area, &offset, ktd->bindingsTable,
+                      ktd->bindingsCount * sizeof(ktd->bindingsTable[0]),
+                      __alignof__(ktd->bindingsTable[0])))
+      return 0;
+
+    header->bindingsTable = offset;
+  } else {
+    header->bindingsTable = 0;
+  }
+
+  return 1;
+}
+
 KeyTable *
 compileKeyTable (const char *name) {
   KeyTable *table = NULL;
@@ -329,15 +373,19 @@ compileKeyTable (const char *name) {
 
   memset(&ktd, 0, sizeof(ktd));
 
+  ktd.bindingsTable = NULL;
+  ktd.bindingsSize = 0;
+  ktd.bindingsCount = 0;
+
   if ((ktd.area = newDataArea())) {
-    if (processDataFile(name, processKeyTableLine, &ktd)) {
-      if ((table = malloc(sizeof(*table)))) {
-	table->entries = NULL;
-	if ((table->size = getDataSize(ktd.area)) > 0) {
-	  if ((table->entries = malloc(table->size))) {
-	    memcpy(table->entries, getDataItem(ktd.area, 0), table->size);
-	    resetDataArea(ktd.area);
-	  }
+    if (allocateDataItem(ktd.area, NULL, sizeof(KeyTableHeader), __alignof__(KeyTableHeader))) {
+      if (processDataFile(name, processKeyTableLine, &ktd)) {
+        if (saveKeyBindings(&ktd)) {
+          if ((table = malloc(sizeof(*table)))) {
+            table->header.fields = getKeyTableHeader(&ktd);
+            table->size = getDataSize(ktd.area);
+            resetDataArea(ktd.area);
+          }
         }
       }
     }
@@ -345,13 +393,15 @@ compileKeyTable (const char *name) {
     destroyDataArea(ktd.area);
   }
 
+  if (ktd.bindingsTable) free(ktd.bindingsTable);
+
   return table;
 }
 
 void
 destroyKeyTable (KeyTable *table) {
   if (table->size) {
-    free(table->entries);
+    free(table->header.fields);
     free(table);
   }
 }
