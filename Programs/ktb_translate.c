@@ -27,3 +27,17 @@ static inline const void *
 getKeyTableItem (KeyTable *table, KeyTableOffset offset) {
   return &table->header.bytes[offset];
 }
+
+const KeyBinding *
+getKeyBinding (KeyTable *table, KeyCode key) {
+  const KeyTableHeader *header = table->header.fields;
+  const KeyBinding *binding = getKeyTableItem(table, header->bindingsTable);
+  unsigned int count = header->bindingsCount;
+
+  while (count) {
+    if (key == binding->key) return binding;
+    binding += 1, count -= 1;
+  }
+
+  return NULL;
+}

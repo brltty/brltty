@@ -23,6 +23,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#include "keydefs.h"
+
 typedef struct KeyTableStruct KeyTable;
 
 extern KeyTable *keyTable;
@@ -31,6 +33,13 @@ extern KeyTable *compileKeyTable (const char *name);
 extern void destroyKeyTable (KeyTable *table);
 
 extern char *ensureKeyTableExtension (const char *path);
+
+typedef struct {
+  KeyCode key;
+  int command;
+} KeyBinding;
+
+extern const KeyBinding *getKeyBinding (KeyTable *table, KeyCode key);
 
 #ifdef __cplusplus
 }

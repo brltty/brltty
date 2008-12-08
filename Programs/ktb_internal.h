@@ -23,14 +23,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#include "keydefs.h"
-
 typedef uint32_t KeyTableOffset;
-
-typedef struct {
-  KeyCode key;
-  int command;
-} KeyBinding;
 
 typedef struct {
   KeyTableOffset bindingsTable;
