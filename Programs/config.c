@@ -2967,15 +2967,15 @@ startup (int argc, char *argv[]) {
 
   /* handle key table option */
   atexit(exitKeyTable);
-  if (*opt_keyTable)  {
-    if (loadKeyTable(opt_keyTable)) {
-      KeyboardProperties properties;
-      parseKeyboardProperties(&properties, opt_keyboardProperties);
-      startKeyboardMonitor(&properties);
-    }
-  }
+  if (*opt_keyTable) loadKeyTable(opt_keyTable);
   LogPrint(LOG_INFO, "%s: %s", gettext("Key Table"),
            *opt_keyTable? opt_keyTable: gettext("none"));
+
+  {
+    KeyboardProperties properties;
+    parseKeyboardProperties(&properties, opt_keyboardProperties);
+    if (keyTable) startKeyboardMonitor(&properties);
+  }
 
   /* initialize screen driver */
   atexit(exitScreen);
