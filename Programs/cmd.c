@@ -26,6 +26,7 @@
 #include "cmd.h"
 #include "ttb.h"
 #include "charset.h"
+#include "queue.h"
 
 const CommandEntry commandTable[] = {
 #ifdef ENABLE_LEARN_MODE
@@ -114,6 +115,58 @@ describeCommand (int command, char *buffer, int size) {
       }
     }
   }
+}
+
+typedef struct {
+  int command;
+} CommandQueueItem;
+
+static Queue *
+getCommandQueue (int create) {
+  static Queue *commandQueue = NULL;
+
+  if (create && !commandQueue) {
+    commandQueue = newQueue(NULL, NULL);
+  }
+
+  return commandQueue;
+}
+
+int
+enqueueCommand (int command) {
+  if (command != EOF) {
+    Queue *queue = getCommandQueue(1);
+
+    if (queue) {
+      CommandQueueItem *item = malloc(sizeof(CommandQueueItem));
+
+      if (item) {
+        item->command = command;
+        if (enqueueItem(queue, item)) return 1;
+
+        free(item);
+      }
+    }
+  }
+
+  return 0;
+}
+
+int
+dequeueCommand (void) {
+  int command = EOF;
+  Queue *queue = getCommandQueue(0);
+
+  if (queue) {
+    CommandQueueItem *item = dequeueItem(queue);
+
+    if (item) {
+      command = item->command;
+      free(item);
+    }
+  }
+
+  return command;
 }
 
 void

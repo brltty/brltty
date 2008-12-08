@@ -37,6 +37,9 @@ extern const CommandEntry commandTable[];
 
 extern void describeCommand (int command, char *buffer, int size);
 
+extern int enqueueCommand (int command);
+extern int dequeueCommand (void);
+
 typedef struct {
   int command;
   int timeout;
