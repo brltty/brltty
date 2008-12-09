@@ -567,9 +567,9 @@ handleKeyboardEvent (const AsyncInputResult *result) {
         KeyCode code = map[event->code];
 
         if (code) {
-          HandleKeyEvent *handleKeyEvent = result->data;
+          KeyEventHandler *handleKeyEvent = result->data;
 
-          if (handleKeyEvent(code)) {
+          if (handleKeyEvent(code, event->value)) {
             return sizeof(*event);
           }
         } else {
@@ -592,7 +592,7 @@ handleKeyboardEvent (const AsyncInputResult *result) {
 }
 
 int
-startKeyboardMonitor (const KeyboardProperties *keyboardProperties, HandleKeyEvent handleKeyEvent) {
+startKeyboardMonitor (const KeyboardProperties *keyboardProperties, KeyEventHandler handleKeyEvent) {
   int uinput = getUinputDevice();
 
   if (uinput != -1) {

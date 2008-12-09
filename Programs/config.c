@@ -678,11 +678,12 @@ loadKeyTable (const char *name) {
 }
 
 static int
-handleKeyEvent (KeyCode key) {
+handleKeyEvent (KeyCode key, int press) {
   const KeyBinding *binding = getKeyBinding(keyTable, key);
 
   if (binding) {
-    enqueueCommand(binding->command);
+LogPrint(LOG_NOTICE, "key=%d prs=%d", key, press);
+    if (press) enqueueCommand(binding->command);
     return 1;
   }
 
