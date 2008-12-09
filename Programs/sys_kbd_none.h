@@ -19,6 +19,6 @@
 #warning keyboard monitor support not available on this platform
 
 int
-startKeyboardMonitor (const KeyboardProperties *keyboardProperties) {
+startKeyboardMonitor (const KeyboardProperties *keyboardProperties, HandleKeyEvent handleKeyEvent) {
   return 0;
 }

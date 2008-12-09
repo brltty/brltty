@@ -99,8 +99,11 @@ extern void writePort1 (unsigned short int port, unsigned char value);
 
 
 #include "keyboard.h"
+#include "keydefs.h"
 
-extern int startKeyboardMonitor (const KeyboardProperties *keyboardProperties);
+typedef int HandleKeyEvent (KeyCode key);
+
+extern int startKeyboardMonitor (const KeyboardProperties *keyboardProperties, HandleKeyEvent handleKeyEvent);
 
 
 #ifdef __cplusplus

@@ -677,12 +677,24 @@ loadKeyTable (const char *name) {
   return 1;
 }
 
+static int
+handleKeyEvent (KeyCode key) {
+  const KeyBinding *binding = getKeyBinding(keyTable, key);
+
+  if (binding) {
+    enqueueCommand(binding->command);
+    return 1;
+  }
+
+  return 0;
+}
+
 static void scheduleKeyboardMonitor (int interval);
 
 static void
 tryKeyboardMonitor (void *data) {
   LogPrint(LOG_DEBUG, "starting keyboard monitor");
-  if (!startKeyboardMonitor(&keyboardProperties)) {
+  if (!startKeyboardMonitor(&keyboardProperties, handleKeyEvent)) {
     LogPrint(LOG_DEBUG, "keyboard monitor failed");
     scheduleKeyboardMonitor(5000);
   }
