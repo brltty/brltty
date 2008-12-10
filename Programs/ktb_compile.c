@@ -248,8 +248,7 @@ parseKeyOperand (DataFile *file, KeyCode *code, const wchar_t *characters, int l
   const KeyEntry *key = keyTable;
 
   while (key->name) {
-    if ((length == wcslen(key->name)) &&
-	(wmemcmp(characters, key->name, length) == 0)) {
+    if (isKeyword(key->name, characters, length)) {
       *code = key->code;
       return 1;
     }
