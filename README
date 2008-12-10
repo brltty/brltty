@@ -18,7 +18,7 @@ the files contained within this directory structure except for those which are
 explicitly listed as exceptions within the following paragraphs.
 
 A special exception has been made for all of the text, attributes, and 
-contraction tables and subtables (which reside within the BrailleTables/ 
+contraction tables and subtables (which reside within the Tables/ 
 subdirectory). They are placed under the terms of the GNU Lesser General Public 
 License [LGPL] as published by the Free Software Foundation; see the file 
 LICENSE-LGPL for details. Version 2.1 (or any later version) of the LGPL may be 
@@ -244,7 +244,7 @@ top-level directory. There is one subdirectory for each Braille display type,
 containing display-specific source files and documentation.
 
 Finally, some Braille definition tables, along with tools to manipulate them,
-are available in the `BrailleTables' subdirectory.
+are available in the `Tables' subdirectory.
 
 -------------------------------------------------------------------------------
 

@@ -32,12 +32,7 @@
 
 #include "spk_driver.h"
 #include "speech.h"		/* for speech definitions */
-#include "BrailleDrivers/CombiBraille/braille.h"
-
-static size_t spk_size = 0X1000;
-static unsigned char *spk_buffer = NULL;
-static unsigned int spk_written = 0;
-
+#include "Drivers/Braille/MultiBraille/braille.h"
 
 /* charset conversion table from iso latin-1 == iso 8859-1 to cp437==ibmpc
  * for chars >=128. 
@@ -63,53 +58,43 @@ static unsigned char latin2cp437[128] =
 static int
 spk_construct (SpeechSynthesizer *spk, char **parameters)
 {
-  if ((spk_buffer = malloc(spk_size))) {
-    return 1;
-  } else {
-    LogError("malloc");
-  }
-  return 0;
+  return 1;
 }
 
-
-static void
-spk_write (const unsigned char *address, unsigned int count)
-{
-  serialWriteData(CB_serialDevice, address, count);
-  spk_written += count;
-}
-
-static void
-spk_flush (void)
-{
-  approximateDelay(spk_written * 1000 / CB_charactersPerSecond);
-  spk_written = 0;
-}
 
 static void
 spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, size_t len, size_t count, const unsigned char *attributes)
 {
   unsigned char *pre_speech = (unsigned char *)PRE_SPEECH;
   unsigned char *post_speech = (unsigned char *)POST_SPEECH;
+  unsigned char c;
   int i;
 
-  if (pre_speech[0]) spk_write(pre_speech+1, pre_speech[0]);
-  for (i = 0; i < len; i++) {
-    unsigned char byte = buffer[i];
-    unsigned char *byte_address = &byte;
-    unsigned int byte_count = 1;
-    if (byte >= 0X80) byte = latin2cp437[byte];
-    if (byte < 33) {	/* space or control character */
-      byte = ' ';
-    } else if (byte <= MAX_TRANS) {
-      const char *word = vocab[byte - 33];
-      byte_address = (unsigned char *)word;
-      byte_count = strlen(word);
+  if (pre_speech[0])
+    {
+      serialWriteData (MB_serialDevice, pre_speech+1, pre_speech[0]);
     }
-    spk_write(byte_address, byte_count);
-  }
-  if (post_speech[0]) spk_write(post_speech+1, post_speech[0]);
-  spk_flush();
+  for (i = 0; i < len; i++)
+    {
+      c = buffer[i];
+      if (c >= 128) c = latin2cp437[c];
+      if (c < 33)	/* space or control character */
+	{
+	  static const char blank = ' ';
+	  serialWriteData (MB_serialDevice, &blank, 1);
+	}
+      else if (c > MAX_TRANS)
+	serialWriteData (MB_serialDevice, &c, 1);
+      else
+	{
+          const char *word = vocab[c - 33];
+	  serialWriteData (MB_serialDevice, word, strlen (word));
+	}
+    }
+  if (post_speech[0])
+    {
+      serialWriteData (MB_serialDevice, post_speech+1, post_speech[0]);
+    }
 }
 
 
@@ -117,17 +102,11 @@ static void
 spk_mute (SpeechSynthesizer *spk)
 {
   unsigned char *mute_seq = (unsigned char *)MUTE_SEQ;
-
-  spk_write(mute_seq+1, mute_seq[0]);
-  spk_flush();
+  serialWriteData (MB_serialDevice, mute_seq+1, mute_seq[0]);
 }
 
 
 static void
 spk_destruct (SpeechSynthesizer *spk)
 {
-  if (spk_buffer) {
-    free(spk_buffer);
-    spk_buffer = NULL;
-  }
 }

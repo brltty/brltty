@@ -1233,7 +1233,7 @@ BRLTTY_BRAILLE_DRIVER([vs], [VisioBraille])
 test -n "${brltty_package_gui_toolkit}" && {
    BRLTTY_BRAILLE_DRIVER([xw], [XWindow], [$(XTK_LIBS) $(X_LIBS)])
 }
-BRLTTY_ARG_DRIVER([braille], [BrailleDrivers])
+BRLTTY_ARG_DRIVER([braille], [Braille])
 
 AC_CACHE_CHECK([for device directory], [brltty_cv_device_directory], [dnl
 case "${host_os}"
@@ -1440,7 +1440,7 @@ BRLTTY_ARG_DISABLE(
    BRLTTY_IF_PACKAGE([ViaVoice], [viavoice], [include/eci.h], [BRLTTY_SPEECH_DRIVER([vv], [ViaVoice], [-L$(VIAVOICE_ROOT)/lib -libmeci50])])
 ])
 AC_SUBST([speech_support_object])
-BRLTTY_ARG_DRIVER([speech], [SpeechDrivers])
+BRLTTY_ARG_DRIVER([speech], [Speech])
 
 case "${host_os}"
 in
@@ -1479,7 +1479,7 @@ AC_SUBST([cspi_includes])
 AC_SUBST([cspi_libdirs])
 AC_SUBST([cspi_libraries])
 
-BRLTTY_ARG_DRIVER([screen], [ScreenDrivers])
+BRLTTY_ARG_DRIVER([screen], [Screen])
 AC_DEFINE_UNQUOTED([SCREEN_DRIVER], ["${brltty_default_code_screen}"],
                    [Define this to be a string containing the default screen driver code.])
 BRLTTY_SUMMARY_ITEM([screen-driver], [brltty_default_code_screen])
@@ -1524,6 +1524,6 @@ AC_OUTPUT([
    Documents/brltty.conf
    Documents/brltty.1
    Documents/BrlAPIref.doxy
-   BrailleDrivers/Voyager/mkhlp
+   Drivers/Braille/Voyager/mkhlp
    Bindings/Python/setup.py
    ${brltty_make_files}])

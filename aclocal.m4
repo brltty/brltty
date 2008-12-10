@@ -331,7 +331,7 @@ if test "${brltty_enabled_$1_support}" != "no"
 then
    if test -n "${brltty_internal_codes_$1}"
    then
-      [$1_driver_objects="`echo "${brltty_internal_names_$1}" | sed -e 's%\([^ ][^ ]*\)%$(BLD_TOP)$2/\1/$1.$O%g'`"]
+      [$1_driver_objects="`echo "${brltty_internal_names_$1}" | sed -e 's%\([^ ][^ ]*\)%$(BLD_TOP)Drivers/$2/\1/$1.$O%g'`"]
       $1_help="$1-help"
    fi
 
@@ -351,7 +351,7 @@ fi
 
 for brltty_driver in ${brltty_item_names_$1}
 do
-   brltty_build_directories="${brltty_build_directories} $2/${brltty_driver}"
+   brltty_build_directories="${brltty_build_directories} Drivers/$2/${brltty_driver}"
 done
 
 AC_SUBST([$1_driver_objects])

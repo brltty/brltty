@@ -16,10 +16,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/* CombiBraille/speech.c - Speech library
- * For Tieman B.V.'s CombiBraille (serial interface only)
- * Maintained by Nikhil Nair <nn201@cus.cam.ac.uk>
- * $Id: speech.c,v 1.2 1996/09/24 01:04:29 nn201 Exp $
+/* Alva/speech.c - Speech library
+ * For the Alva Delphi.
  */
 
 #include "prologue.h"
@@ -32,7 +30,7 @@
 
 #include "spk_driver.h"
 #include "speech.h"		/* for speech definitions */
-#include "BrailleDrivers/MultiBraille/braille.h"
+#include "Drivers/Braille/Alva/braille.h"
 
 /* charset conversion table from iso latin-1 == iso 8859-1 to cp437==ibmpc
  * for chars >=128. 
@@ -65,14 +63,16 @@ spk_construct (SpeechSynthesizer *spk, char **parameters)
 static void
 spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, size_t len, size_t count, const unsigned char *attributes)
 {
-  unsigned char *pre_speech = (unsigned char *)PRE_SPEECH;
-  unsigned char *post_speech = (unsigned char *)POST_SPEECH;
+  static unsigned char *pre_speech = (unsigned char *)PRE_SPEECH;
+  static unsigned char *post_speech = (unsigned char *)POST_SPEECH;
+  unsigned char buf[256];
   unsigned char c;
   int i;
 
   if (pre_speech[0])
     {
-      serialWriteData (MB_serialDevice, pre_speech+1, pre_speech[0]);
+      memcpy (buf, pre_speech + 1, pre_speech[0]);
+      AL_writeData (buf, pre_speech[0]);
     }
   for (i = 0; i < len; i++)
     {
@@ -80,20 +80,21 @@ spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, size_t len, size_t
       if (c >= 128) c = latin2cp437[c];
       if (c < 33)	/* space or control character */
 	{
-	  static const char blank = ' ';
-	  serialWriteData (MB_serialDevice, &blank, 1);
+	  buf[0] = ' ';
+	  AL_writeData (buf, 1);
 	}
       else if (c > MAX_TRANS)
-	serialWriteData (MB_serialDevice, &c, 1);
+	AL_writeData (&c, 1);
       else
 	{
-          const char *word = vocab[c - 33];
-	  serialWriteData (MB_serialDevice, word, strlen (word));
+	  memcpy (buf, vocab[c - 33], strlen (vocab[c - 33]));
+	  AL_writeData (buf, strlen (vocab[c - 33]));
 	}
     }
   if (post_speech[0])
     {
-      serialWriteData (MB_serialDevice, post_speech+1, post_speech[0]);
+      memcpy (buf, post_speech + 1, post_speech[0]);
+      AL_writeData (buf, post_speech[0]);
     }
 }
 
@@ -101,8 +102,11 @@ spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, size_t len, size_t
 static void
 spk_mute (SpeechSynthesizer *spk)
 {
-  unsigned char *mute_seq = (unsigned char *)MUTE_SEQ;
-  serialWriteData (MB_serialDevice, mute_seq+1, mute_seq[0]);
+  static unsigned char *mute_seq = (unsigned char *)MUTE_SEQ;
+  unsigned char buffer[32];
+
+  memcpy (buffer, mute_seq + 1, mute_seq[0]);
+  AL_writeData (buffer, mute_seq[0]);
 }
 
 

@@ -16,8 +16,10 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/* Alva/speech.c - Speech library
- * For the Alva Delphi.
+/* CombiBraille/speech.c - Speech library
+ * For Tieman B.V.'s CombiBraille (serial interface only)
+ * Maintained by Nikhil Nair <nn201@cus.cam.ac.uk>
+ * $Id: speech.c,v 1.2 1996/09/24 01:04:29 nn201 Exp $
  */
 
 #include "prologue.h"
@@ -30,7 +32,12 @@
 
 #include "spk_driver.h"
 #include "speech.h"		/* for speech definitions */
-#include "BrailleDrivers/Alva/braille.h"
+#include "Drivers/Braille/CombiBraille/braille.h"
+
+static size_t spk_size = 0X1000;
+static unsigned char *spk_buffer = NULL;
+static unsigned int spk_written = 0;
+
 
 /* charset conversion table from iso latin-1 == iso 8859-1 to cp437==ibmpc
  * for chars >=128. 
@@ -56,61 +63,71 @@ static unsigned char latin2cp437[128] =
 static int
 spk_construct (SpeechSynthesizer *spk, char **parameters)
 {
-  return 1;
+  if ((spk_buffer = malloc(spk_size))) {
+    return 1;
+  } else {
+    LogError("malloc");
+  }
+  return 0;
 }
 
 
 static void
+spk_write (const unsigned char *address, unsigned int count)
+{
+  serialWriteData(CB_serialDevice, address, count);
+  spk_written += count;
+}
+
+static void
+spk_flush (void)
+{
+  approximateDelay(spk_written * 1000 / CB_charactersPerSecond);
+  spk_written = 0;
+}
+
+static void
 spk_say (SpeechSynthesizer *spk, const unsigned char *buffer, size_t len, size_t count, const unsigned char *attributes)
 {
-  static unsigned char *pre_speech = (unsigned char *)PRE_SPEECH;
-  static unsigned char *post_speech = (unsigned char *)POST_SPEECH;
-  unsigned char buf[256];
-  unsigned char c;
+  unsigned char *pre_speech = (unsigned char *)PRE_SPEECH;
+  unsigned char *post_speech = (unsigned char *)POST_SPEECH;
   int i;
 
-  if (pre_speech[0])
-    {
-      memcpy (buf, pre_speech + 1, pre_speech[0]);
-      AL_writeData (buf, pre_speech[0]);
+  if (pre_speech[0]) spk_write(pre_speech+1, pre_speech[0]);
+  for (i = 0; i < len; i++) {
+    unsigned char byte = buffer[i];
+    unsigned char *byte_address = &byte;
+    unsigned int byte_count = 1;
+    if (byte >= 0X80) byte = latin2cp437[byte];
+    if (byte < 33) {	/* space or control character */
+      byte = ' ';
+    } else if (byte <= MAX_TRANS) {
+      const char *word = vocab[byte - 33];
+      byte_address = (unsigned char *)word;
+      byte_count = strlen(word);
     }
-  for (i = 0; i < len; i++)
-    {
-      c = buffer[i];
-      if (c >= 128) c = latin2cp437[c];
-      if (c < 33)	/* space or control character */
-	{
-	  buf[0] = ' ';
-	  AL_writeData (buf, 1);
-	}
-      else if (c > MAX_TRANS)
-	AL_writeData (&c, 1);
-      else
-	{
-	  memcpy (buf, vocab[c - 33], strlen (vocab[c - 33]));
-	  AL_writeData (buf, strlen (vocab[c - 33]));
-	}
-    }
-  if (post_speech[0])
-    {
-      memcpy (buf, post_speech + 1, post_speech[0]);
-      AL_writeData (buf, post_speech[0]);
-    }
+    spk_write(byte_address, byte_count);
+  }
+  if (post_speech[0]) spk_write(post_speech+1, post_speech[0]);
+  spk_flush();
 }
 
 
 static void
 spk_mute (SpeechSynthesizer *spk)
 {
-  static unsigned char *mute_seq = (unsigned char *)MUTE_SEQ;
-  unsigned char buffer[32];
+  unsigned char *mute_seq = (unsigned char *)MUTE_SEQ;
 
-  memcpy (buffer, mute_seq + 1, mute_seq[0]);
-  AL_writeData (buffer, mute_seq[0]);
+  spk_write(mute_seq+1, mute_seq[0]);
+  spk_flush();
 }
 
 
 static void
 spk_destruct (SpeechSynthesizer *spk)
 {
+  if (spk_buffer) {
+    free(spk_buffer);
+    spk_buffer = NULL;
+  }
 }

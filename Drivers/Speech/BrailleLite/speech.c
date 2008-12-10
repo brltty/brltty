@@ -31,7 +31,7 @@
 
 #include "spk_driver.h"
 #include "speech.h"		/* for BLite speech definitions */
-#include "BrailleDrivers/BrailleLite/braille.h"		/* for BLite speech definitions */
+#include "Drivers/Braille/BrailleLite/braille.h"		/* for BLite speech definitions */
 
 
 #if 0
