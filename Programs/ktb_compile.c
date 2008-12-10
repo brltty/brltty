@@ -19,6 +19,7 @@
 #include "prologue.h"
 
 #include <string.h>
+#include <ctype.h>
 
 #include "misc.h"
 #include "datafile.h"
@@ -278,7 +279,11 @@ parseCommandOperand (DataFile *file, int *value, const wchar_t *characters, int 
   while (command->name) {
     if (length == strlen(command->name)) {
       int index;
-      for (index=0; index<length && characters[index]==command->name[index]; index++);
+      for (
+        index = 0;
+        (index < length) && (towlower(characters[index]) == tolower(command->name[index]));
+        index += 1
+      );
 
       if (index == length) {
 	*value = command->code;
