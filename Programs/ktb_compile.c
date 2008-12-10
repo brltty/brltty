@@ -95,6 +95,7 @@ parseKeyOperand (DataFile *file, KeyCode *code, const wchar_t *characters, int l
     {WS_C("SYMBOL_RightBracket_RightBrace"), KEY_SYMBOL_RightBracket_RightBrace},
     {WS_C("SYMBOL_Backslash_Bar"), KEY_SYMBOL_Backslash_Bar},
     {WS_C("SYMBOL_Semicolon_Colon"), KEY_SYMBOL_Semicolon_Colon},
+    {WS_C("SYMBOL_Apostrophe_Quote"), KEY_SYMBOL_Apostrophe_Quote},
     {WS_C("SYMBOL_Grave_Tilde"), KEY_SYMBOL_Grave_Tilde},
     {WS_C("SYMBOL_Comma_Less"), KEY_SYMBOL_Comma_Less},
     {WS_C("SYMBOL_Period_Greater"), KEY_SYMBOL_Period_Greater},

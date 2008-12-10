@@ -74,6 +74,7 @@ typedef enum {
   KEY_SYMBOL_RightBracket_RightBrace = 48,
   KEY_SYMBOL_Backslash_Bar = 49,
   KEY_SYMBOL_Semicolon_Colon = 51,
+  KEY_SYMBOL_Apostrophe_Quote = 52,
   KEY_SYMBOL_Grave_Tilde = 53,
   KEY_SYMBOL_Comma_Less = 54,
   KEY_SYMBOL_Period_Greater = 55,

@@ -171,7 +171,7 @@ handleKeyboardEvent (const AsyncInputResult *result) {
           [KEY_K] = KEY_LETTER_K,
           [KEY_L] = KEY_LETTER_L,
           [KEY_SEMICOLON] = KEY_SYMBOL_Semicolon_Colon,
-          /* [KEY_APOSTROPHE] = KEY_..., */
+          [KEY_APOSTROPHE] = KEY_SYMBOL_Apostrophe_Quote,
           [KEY_GRAVE] = KEY_SYMBOL_Grave_Tilde,
           [KEY_LEFTSHIFT] = KEY_FUNCTION_ShiftLeft,
           [KEY_BACKSLASH] = KEY_SYMBOL_Backslash_Bar,
@@ -264,7 +264,7 @@ handleKeyboardEvent (const AsyncInputResult *result) {
           [KEY_UNDO] = KEY_FUNCTION_Undo,
           /* [KEY_FRONT] = KEY_..., */
           [KEY_COPY] = KEY_FUNCTION_Copy,
-          /* [KEY_OPEN] = KEY_, */
+          [KEY_OPEN] = KEY_FUNCTION_Execute,
           [KEY_PASTE] = KEY_FUNCTION_Paste,
           [KEY_FIND] = KEY_FUNCTION_Find,
           [KEY_CUT] = KEY_FUNCTION_Cut,
