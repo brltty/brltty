@@ -682,7 +682,6 @@ handleKeyEvent (KeyCode key, int press) {
   const KeyBinding *binding = getKeyBinding(keyTable, key);
 
   if (binding) {
-LogPrint(LOG_NOTICE, "key=%d prs=%d", key, press);
     if (press) enqueueCommand(binding->command);
     return 1;
   }
