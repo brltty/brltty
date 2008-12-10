@@ -1143,7 +1143,7 @@ in
       usb_object="darwin"
       ;;
    *)
-      AC_CHECK_HEADERS([usb.h], [usb_object="libusb"])
+      AC_CHECK_HEADERS([usb.h], [AC_HAVE_LIBRARY([usb], [usb_object="libusb"])])
       ;;
 esac
 if test -n "${usb_object}"
@@ -1155,12 +1155,6 @@ then
 [dnl
       AC_DEFINE([ENABLE_USB_SUPPORT], [1],
                 [Define this if Universal Serial Bus support is to be included.])
-      case "${usb_object}"
-      in
-         libusb)
-            AC_HAVE_LIBRARY([usb])
-            ;;
-      esac
       usb_objects="usb."'$O'" usb_${usb_object}."'$O'
 ])
 else
