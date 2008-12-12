@@ -126,8 +126,13 @@ always est 15-23456
 endword tel 2345-13456
 endword tels 2345-13456-234
 endword ten 2345-14
+endword tenem 2345-14-12356
+endword tenen 2345-14-14
+endword tener 2345-14-12456
+endword tenes 2345-14-123456
 endword tens 2345-14-234
 endword ter 2345-12456
+endword tern 2345-12456-1345
 endword tes 2345-123456
 
 endword bel 12-13456 shouldn't use the be-contraction
@@ -143,9 +148,11 @@ always wirbel 2456-24-1235-12-13456 shouldn't use the be-contraction
 endword ben 12-14 shouldn't use the be-contraction
 endword bend 12-14-145 shouldn't use the be-contraction
 endword bende 12-14-145-15 shouldn't use the be-contraction
+endword bendem 12-14-145-12356 shouldn't use the be-contraction
 endword benden 12-14-145-14 shouldn't use the be-contraction
 endword bender 12-14-145-12456 shouldn't use the be-contraction
 endword bendes 12-14-145-123456 shouldn't use the be-contraction
+endword benem 12-14-12356 shouldn't use the be-contraction
 endword benen 12-14-14 shouldn't use the be-contraction
 endword bens 12-14-234 shouldn't use the be-contraction
 endword ber 12-12456 shouldn't use the be-contraction
@@ -626,6 +633,9 @@ contraction lg
 always läng 5-123-1245
 always laeng 5-123-1245
 always jahrelang 245-1235-15-123-1245 shouldn't use the el-contraction
+always jahrhundertelang 245-125-15-123-1245 shouldn't use the el-contraction
+always jahrzehntelang 245-1356-15-123-1245 shouldn't use the el-contraction
+always jahrtausendelang 245-2345-15-123-1245 shouldn't use the el-contraction
 before s always jahres 245-1235-123456
 before g always jahresta 245-1235-123456-2345-1
 always langobard 123-235-1245-135-12-356-145 shouldn't use the lang-contraction
@@ -821,10 +831,12 @@ always wund 2456-256-145 shouldn't use the und-contraction
 sufword under 256-145-12456 shouldn't use the und-contraction
 
 word überhaupt 1256-125
+word ueberhaupt 1256-125
 always übrig 1256-45
 
 always verhältnis 1236-125
 contraction vh
+always verhaeltnis 1236-125
 always viel 1236-123
 contraction vl
 word vielleicht 1236-2345
@@ -838,6 +850,7 @@ contraction wh
 always währ 5-2456-125
 always während 345-145
 contraction äd
+always waehrend 345-145
 sufword warm 2456-356-134 shouldn't use the war-contraction
 always weg 2456-1245
 contraction wg
@@ -877,9 +890,11 @@ contraction zt
 before st midendword zug =
 word zum 1356-134
 word zunächst 1356-1345
+word zunaechst 1356-1345
 word zur 1356-1235
 sufword zurschau 1356-1235-156-16
 sufword zurück 1356-46
+sufword zurueck 1356-46
 always zusammen 1356-234
 always zwischen 1356-2456
 contraction zw
@@ -905,6 +920,7 @@ always abnormitaet 1-12-1345-26-134-5-345 shouldn't use the mit-contraction
 always abrund 1-12-1235-256-145 shouldn't use the und-contraction
 begword abschieds 1-12-156-346-145-234 Abschiedsschmerz
 always achteck 1-1456-2345-15-46 shouldn't use the te-contraction
+always asocia 1-234-135-6-14-24-1 asociación shouldn't use the so-contraction
 always afrikarefer 1-124-1235-24-13-1-1235-15-124-12456 shouldn't use the ar-contraction
 sufword agent 1-1245-14-2345 shouldn't use the ge-contraction
 always akadem 1-13-1-145-12356 shouldn't use the dem-contraction
@@ -939,6 +955,7 @@ class egn egn
 before egn begword anti 235-2345-24
 always antichrist 235-2345-24-1456-1235-24-23456 shouldn't use the ich-contraction
 always anästh 235-345-234-2345-125 Anästhesie
+always augen 16-1245-14 shouldn't use the ge-contraction
 migdendword austausch 16-234-2345-16-156 shouldn't use the st-contraction
 always beilstein 12-146-123-23456-1246 shouldn't use the bei-contraction
 word bein 12-146-1345 shouldn't use the bei-contraction
@@ -971,6 +988,7 @@ midendword emaenn 15-5-134-1345
 midendword estand 15-2-23456
 midword estell 15-2-13456
 always found 124-135-256-145 Foundation shouldn't use the und-contraction
+always geben 12346-12-14
 always gebunden 12346-12-256-145-14 shouldn't use the und-contraction
 always geier 1245-146-12456 should use the ei-contraction
 midendword geingang 1245-1246-1245-235-1245
@@ -995,6 +1013,7 @@ after st always ionstrieb 245-234-2345-1235-346-12
 after st always ionstrupp 245-234-2345-1235-136-1234-1234
 always jubel 245-136-12-13456 shouldn't use the be-contraction
 always komponist 13-135-134-1234-135-1345-24-23456 shouldn't use the nis-contraction
+always liechtenstein 123-346-1456-2345-14-23456-1246 shouldn't use the te-contraction
 prfword linie 123-35-24-15 shouldn't use the ie-contraction
 prfword materie 134-1-2345-12456-24-15 shouldn't use the ie-contraction
 always metallen 134-15-2345-1-12345-14 shouldn't use the allen-contraction
@@ -1016,6 +1035,7 @@ endword eschefin 123456-1456-15-124-35
 endword eschefins 123456-1456-15-124-35-234
 endword eschefinnen 123456-1456-15-124-35-1345-14
 endword eschefs 123456-1456-15-124-234
+always schueler 156-1256-123-12456 should use the ue-symbol
 always schwung 156-2456-256-1245 shouldn't use the ung-contraction
 always september 234-15-1234-2345-12356-12-12456 should use the em-contraction
 before s always sichts 234-3456-2345-234 Ansichtssache shouldn't use the ss-contraction
@@ -1030,6 +1050,7 @@ midendword stitel 234-2345-24-2345-13456
 always studien 23456-136-145-24-14 shouldn't use the ie-contraction
 always stunde 23456-256-145-15 shouldn't use the und-contraction
 always stunden 23456-256-145-14
+always esystem 15-234-6-13456-23456-12356 shouldn't use the es-contraction
 always sturz 23456-136-1235-1356 Absturzursache shouldn't use the zu-contraction
 always tagesstät 2345-1-1245-123456-23456-345-2345 shouldn't use the ss-contraction
 always tagesstaet 2345-1-1245-123456-23456-345-2345 shouldn't use the ss-contraction
