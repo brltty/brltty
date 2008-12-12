@@ -2939,7 +2939,9 @@ startup (int argc, char *argv[]) {
           name[length] = 0;
         }
 
-        if (!testTextTable(name)) {
+        if (strcmp(name, "C") == 0) {
+          name[0] = 0;
+        } else if (!testTextTable(name)) {
           char *delimiter = strchr(name, '_');
 
           if (delimiter) {
