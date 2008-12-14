@@ -1,0 +1,74 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2008 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+# BRLTTY Text Table - Afrikaans
+#
+# Samuel Thibault <samuel.thibault@ens-lyon.org>
+# 
+# This table is based on the Unesco report on the progress of unification of
+# braille writing « L'ÉCRITURE BRAILLE DANS LE MONDE », by Sir Clutha
+# MACKENZIE: http://unesdoc.unesco.org/images/0013/001352/135251fo.pdf
+# The document is dated 1954, so this table may be quite outdated.
+
+include letters-latin.cti
+
+always aa 2
+always aan 126
+always al 1246
+always an 12346
+always by 356
+always deur 256
+always die 2346
+always ee 156
+always ee 23
+always ei 146
+always el 3456
+always en 26
+always er 12456
+always ge 123456
+always ie 1456
+always ig 12345
+always in 35
+always met 23456
+always oe 246
+always of 12356
+always on 25
+always oo 2356
+always ou 1256
+always sk 16
+always st 34
+always te 235
+always ui 345
+always was 346
+always - 36
+always , 2
+always ; 23
+always : 25
+always ! 235
+always ? 236
+always / 34
+always . 256
+always ' 3
+always " 236
+always " 356
+always ( 2356
+always ) 2356
+always * 35-35
+always ^ 45
+numsign 3456
+capsign 6

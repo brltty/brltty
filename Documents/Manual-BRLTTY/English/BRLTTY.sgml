@@ -3990,11 +3990,14 @@ several alternatives are provided:
   <tag/fr_FR/French (France)
   <tag/fr-2007/Unified French (iso-8859-1)
   <tag/fr-cbifs/Code Braille Informatique Français Standard (iso-8859-1)
+  <tag/ga/Irish
   <tag/gd/Gaelic (from UNESCO report, 1954)
   <tag/gon/Gondi
   <tag/gu/Gujarati
+  <tag/he/Hebrew
   <tag/hi/Hindi
   <tag/hr/Croatian
+  <tag/hu/Hungarian
   <tag/hy/Armenian (from UNESCO report, 1954)
   <tag/is/Icelandic (from UNESCO report, 1954)
   <tag/it/Italian (iso-8859-1)
@@ -4004,9 +4007,12 @@ several alternatives are provided:
   <tag/kru/Kurukh
   <tag/lt/Lituanian (from UNESCO report, 1954)
   <tag/lv/Latvian
+  <tag/mg/Malagasy
+  <tag/mi/Maori
   <tag/ml/Malayalam
   <tag/mni/Manipuri
   <tag/mr/Marathi
+  <tag/mt/Maltese
   <tag/mun/Mundari
   <tag/mwr/Marwari
   <tag/nabcc/North American Braille Computer Code (iso-8859-1)
@@ -4019,14 +4025,18 @@ several alternatives are provided:
   <tag/nwc/Old Newari
   <tag/or/Oriya
   <tag/pa/Panjabi
+  <tag/pi/Pali
   <tag/pl/Polish (iso-8859-2)
   <tag/pt/Portuguese (iso-8859-1)
   <tag/ro/Romanian (from UNESCO report, 1954)
   <tag/ru/Russian (koi8-r)
+  <tag/sa/Sanskrit
   <tag/sat/Santali
+  <tag/sd/Sindhi
   <tag/sk/Slovak
   <tag/sv/Swedish (1996 standard)
   <tag/sv-old/Swedish (1989 standard)
+  <tag/sw/Swahili
   <tag/ta/Tamil
   <tag/te/Telugu
   <tag/tr/Turkish (from UNESCO report, 1954)
@@ -4288,16 +4298,29 @@ This feature isn't available if the
 
 The following contraction tables are provided:
 <descrip>
+  <tag/af/Afrikaans
+  <tag/am/Amharic
   <tag/compress/remove excess white-space
   <tag/de-basis/Uncontracted German
   <tag/de-kurzschrift/Contracted German (1998 standard)
   <tag/de-vollschrift/Contracted German (basic syllables only)
   <tag/en-ueb-g2/Grade 2 Unified English Braille
   <tag/en-us-g2/Grade 2 American English
+  <tag/es/Spanish
   <tag/fr-abrege/Contracted Unified French
   <tag/fr-integral/Uncontracted Unified French
+  <tag/ha/Hausa
+  <tag/id/Indonesian
+  <tag/mg/Malagasy
+  <tag/mun/Munda
+  <tag/nl/Dutch
+  <tag/ny/Chichewa
+  <tag/phonetic/Phonetic Alphabet
+  <tag/pt/Portuguese
+  <tag/sw/Swahili
   <tag/zh-tw/Taiwanese Chinese
   <tag/zh-tw-ucb/Taiwanese Unique Chinese Braille
+  <tag/zu/Zulu
 </descrip>
 
 <sect2>Contraction Table Format<p>

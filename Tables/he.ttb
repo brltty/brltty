@@ -1,0 +1,66 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2008 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+# BRLTTY Text Table - Hebrew
+#
+# Samuel Thibault <samuel.thibault@ens-lyon.org>
+# 
+# This table is based on the Unesco report on the progress of unification of
+# braille writing « L'ÉCRITURE BRAILLE DANS LE MONDE », by Sir Clutha
+# MACKENZIE: http://unesdoc.unesco.org/images/0013/001352/135251fo.pdf
+# The document is dated 1954, so this table may be quite outdated.
+
+char \u05B1	( 2   6  )  # ⠢ ֱ [HEBREW POINT HATAF SEGOL]
+char \u05B2	( 2  5   )  # ⠒ ֲ [HEBREW POINT HATAF PATAH]
+char \u05B3	(  345   )  # ⠜ ֳ [HEBREW POINT HATAF QAMATS]
+char \u05B4	( 2 4    )  # ⠊ ִ [HEBREW POINT HIRIQ]
+char \u05B5	(  34    )  # ⠌ ֵ [HEBREW POINT TSERE]
+char \u05B6	(1   5   )  # ⠑ ֶ [HEBREW POINT SEGOL]
+char \u05B7	(1  4    )  # ⠉ ַ [HEBREW POINT PATAH]
+char \u05B8	(12   6  )  # ⠣ ָ [HEBREW POINT QAMATS]
+char \u05B9	(1 3 5   )  # ⠕ ֹ [HEBREW POINT HOLAM]
+char \u05BB	(1 3  6  )  # ⠥ ֻ [HEBREW POINT QUBUTS]
+char \u05D0	(1       )  # ⠁ א [HEBREW LETTER ALEF]
+char \u05D1	(12      )  # ⠃ ב [HEBREW LETTER BET]
+char \u05D2	(12 45   )  # ⠛ ג [HEBREW LETTER GIMEL]
+char \u05D3	(1  45   )  # ⠙ ד [HEBREW LETTER DALET]
+char \u05D4	(12  5   )  # ⠓ ה [HEBREW LETTER HE]
+char \u05D5	( 2 456  )  # ⠺ ו [HEBREW LETTER VAV]
+char \u05D6	(1 3 56  )  # ⠵ ז [HEBREW LETTER ZAYIN]
+char \u05D7	(1 34 6  )  # ⠭ ח [HEBREW LETTER HET]
+char \u05D8	( 2345   )  # ⠞ ט [HEBREW LETTER TET]
+char \u05D9	( 2 45   )  # ⠚ י [HEBREW LETTER YOD]
+char \u05DA	(1 3     )  # ⠅ ך [HEBREW LETTER FINAL KAF]
+char \u05DB	(1    6  )  # ⠡ כ [HEBREW LETTER KAF]
+char \u05DC	(123     )  # ⠇ ל [HEBREW LETTER LAMED]
+char \u05DD	(1 34    )  # ⠍ ם [HEBREW LETTER FINAL MEM]
+char \u05DE	(1 34    )  # ⠍ מ [HEBREW LETTER MEM]
+char \u05DF	(1 345   )  # ⠝ ן [HEBREW LETTER FINAL NUN]
+char \u05E0	(1 345   )  # ⠝ נ [HEBREW LETTER NUN]
+char \u05E1	( 234    )  # ⠎ ס [HEBREW LETTER SAMEKH]
+char \u05E2	(12 4 6  )  # ⠫ ע [HEBREW LETTER AYIN]
+char \u05E3	(1234    )  # ⠏ ף [HEBREW LETTER FINAL PE]
+char \u05E4	(1234    )  # ⠏ פ [HEBREW LETTER PE]
+char \u05E5	( 234 6  )  # ⠮ ץ [HEBREW LETTER FINAL TSADI]
+char \u05E6	( 234 6  )  # ⠮ צ [HEBREW LETTER TSADI]
+char \u05E7	(12345   )  # ⠟ ק [HEBREW LETTER QOF]
+char \u05E8	(123 5   )  # ⠗ ר [HEBREW LETTER RESH]
+char \u05E9	(1  4 6  )  # ⠩ ש [HEBREW LETTER SHIN]
+char \u05EA	(12  56  )  # ⠳ ת [HEBREW LETTER TAV]
+
+include common.tti

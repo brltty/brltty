@@ -114,11 +114,14 @@
 #text-table	fr_FR	# French (France)
 #text-table	fr-2007	# French (Unified)
 #text-table	fr-cbifs	# French (Code Braille Informatique Français Standard)
+#text-table	ga	Irish
 #text-table	gd	# Gaelic (from UNESCO report, 1954)
 #text-table	gon	Gondi
 #text-table	gu	Gujarati
+#text-table	he	Hebrew
 #text-table	hi	Hindi
 #text-table	hr	# Croatian
+#text-table	hu	Hungarian
 #text-table	hy	# Armenian (from UNESCO report, 1954)
 #text-table	is	# Icelandic (from UNESCO report, 1954)
 #text-table	it	# Italian
@@ -128,9 +131,12 @@
 #text-table	kru	Kurukh
 #text-table	lt	# Lituanian (from UNESCO report, 1954)
 #text-table	lv	Latvian
+#text-table	mg	Malagasy
+#text-table	mi	Maori
 #text-table	ml	Malayalam
 #text-table	mni	Manipuri
 #text-table	mr	Marathi
+#text-table	mt	Maltese
 #text-table	mun	Mundari
 #text-table	mwr	Marwari
 #text-table	nabcc	# North American Braille Computer Code
@@ -143,14 +149,18 @@
 #text-table	nwc	Old Newari
 #text-table	or	Oriya
 #text-table	pa	Panjabi
+#text-table	pi	Pali
 #text-table	pl	# Polish (iso-8859-2)
 #text-table	pt	# Portuguese (iso-8859-1)
 #text-table	ro	# Romanian (from UNESCO report, 1954)
 #text-table	ru	# Russian (koi8-r)
+#text-table	sa	Sanskrit
 #text-table	sat	Santali
+#text-table	sd	Sindhi
 #text-table	sk	Slovak
 #text-table	sv	# Swedish (1996 standard)
 #text-table	sv-old	# Swedish (1989 standard)
+#text-table	sw	Swahili
 #text-table	ta	Tamil
 #text-table	te	Telugu
 #text-table	tr	# Turkish (from UNESCO report, 1954)
@@ -167,16 +177,29 @@
 # Relative paths are anchored at "@DATA_DIRECTORY@". If not specified, no
 # contraction table will be available.
 # (can be overridden with the -c [--contraction-table=] option)
+#contraction-table	af	Afrikaans
+#contraction-table	am	Amharic
 #contraction-table	compress	# remove excess white-space
 #contraction-table	de-basis	# Uncontracted German
 #contraction-table	de-kurzschrift	# Contracted German (1998 standard)
 #contraction-table	de-vollschrift	# Contracted German (basic syllables only)
 #contraction-table	en-ueb-g2	# Grade 2 Unified English Braille
 #contraction-table	en-us-g2	# Grade 2 American English
+#contraction-table	es	Spanish
 #contraction-table	fr-abrege	# Contracted French
 #contraction-table	fr-integral	# Uncontracted French
+#contraction-table	ha	Hausa
+#contraction-table	id	Indonesian
+#contraction-table	mg	Malagasy
+#contraction-table	mun	Munda
+#contraction-table	nl	Dutch
+#contraction-table	ny	Chichewa
+#contraction-table	phonetic	Phonetic Alphabet
+#contraction-table	pt	Portuguese
+#contraction-table	sw	Swahili
 #contraction-table	zh-tw	# Taiwanese Chinese
 #contraction-table	zh-tw-ucb	# Taiwanese Unique Chinese Braille
+#contraction-table	zu	Zulu
 
 
 #############################
