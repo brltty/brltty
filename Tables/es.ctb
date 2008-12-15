@@ -21,31 +21,31 @@
 # Samuel Thibault <samuel.thibault@ens-lyon.org>
 # 
 # This table is based on the Unesco report on the progress of unification of
-# braille writing « L'ÉCRITURE BRAILLE DANS LE MONDE », by Sir Clutha
+# braille writing Â«Â L'Ã‰CRITURE BRAILLE DANS LE MONDEÂ Â», by Sir Clutha
 # MACKENZIE: http://unesdoc.unesco.org/images/0013/001352/135251fo.pdf
 # The document is dated 1954, so this table may be quite outdated.
 
 include letters-latin.cti
-class voy aeiouäáéíóú
-class con bcdfghjklmnñpqrstvwxz
+class voy aeiouÃ¤Ã¡Ã©Ã­Ã³Ãº
+class con bcdfghjklmnÃ±pqrstvwxz
 
 endword ble 12
 word bien 12
 endword cia 14
 word cual 14
 word de 145
-word fué 124
+word fuÃ© 124
 word grande 1245
 word ha 125
 word si 24
-word jamás 245
+word jamÃ¡s 245
 always al 13
 endword mente 134
 word me 134
 word no 1345
 word por 1234
 always que 12345
-word recién 1235
+word reciÃ©n 1235
 endword se 234
 word se 234
 endword te 2345
@@ -63,12 +63,12 @@ word las 12346
 begmidword ll 123456
 endword ella 123456
 word ella 123456
-always á 12356
-word más 12356
-always é 2346
-word él 2346
-always ú 23456
-word tú 23456
+always Ã¡ 12356
+word mÃ¡s 12356
+always Ã© 2346
+word Ã©l 2346
+always Ãº 23456
+word tÃº 23456
 always ar 16
 word para 16
 begmidword em 126
@@ -77,15 +77,15 @@ word siempre 126
 always an 146
 word ante 146
 always ad 1456
-word además 1456
+word ademÃ¡s 1456
 always or 156
 word yo 156
 always es 1246
 word es 1246
-always ñ 12456
-endword año 12456
-word año 12456
-begword ä 1256
+always Ã± 12456
+endword aÃ±o 12456
+word aÃ±o 12456
+begword Ã¤ 1256
 midendword ue 1256
 word pues 1256
 always os 246
@@ -135,21 +135,21 @@ midword cl 36
 always - 36
 word lo 36
 numsign 3456
-endword ión 3456
-word número 3456
-always í 34
-word sí 34
-always ó 346
+endword iÃ³n 3456
+word nÃºmero 3456
+always Ã­ 34
+word sÃ­ 34
+always Ã³ 346
 word aquel 346
 always im 345
 word tu 345
 
 # terminations
 
-endword acción 1-3456
-endword ección 15-3456
-endword icción 24-3456
-endword ucción 136-3456
+endword acciÃ³n 1-3456
+endword ecciÃ³n 15-3456
+endword icciÃ³n 24-3456
+endword ucciÃ³n 136-3456
 endword ando 146-145
 endword ando 26-145
 endword ado 1456-135
@@ -172,16 +172,16 @@ word sin\sembargo 234-456-15
 
 word abajo 2-245
 word acaso 1-14
-word acción 1-3456
+word acciÃ³n 1-3456
 word acerca 1-14-14
 word adelante 1456-123
 word ahora 4-125
 word algo 13-135
-word algún 13-23456
+word algÃºn 13-23456
 word alguno 13-1345-135
 word alguien 13-1345
-word allá 5-123456
-word allí 1-123456
+word allÃ¡ 5-123456
+word allÃ­ 1-123456
 word alrededor 13-156
 word antes 146-234
 word anterior 146-2345
@@ -189,9 +189,9 @@ word anterioridad 146-2345-145
 word anteriormente 146-2345-134
 word apenas 1-1234
 word aquello 346-135
-word aquí 1-12345
+word aquÃ­ 1-12345
 word arriba 16-1235
-word atrás 1-356
+word atrÃ¡s 1-356
 word bajo 12-245
 word bastante 12-2345
 word bella 12-123456
@@ -204,7 +204,7 @@ word cada 14-1456
 word cerca 14-14
 word casi 14-234
 word ciego 14-1245
-word condición 25-145-3456
+word condiciÃ³n 25-145-3456
 word condicional 25-145-3456-13
 word condicionalmente 25-145-3456-13-134
 word conjunto 25-245-2345
@@ -219,13 +219,13 @@ word cuanto 14-2345
 word cuyo 14-13456
 word debajo 145-12-245
 word delante 145-1234-2345
-word demás 145-134
+word demÃ¡s 145-134
 word demasiado 145-134-145
 word desde 145-234
-word después 145-1234
-word detrás 145-356
-word difícil 145-124
-word difícilmente 145-124-134
+word despuÃ©s 145-1234
+word detrÃ¡s 145-356
+word difÃ­cil 145-124
+word difÃ­cilmente 145-124-134
 word dificultad 145-124-2345
 word donde 145-145
 word durante 145-136
@@ -241,11 +241,11 @@ word estar 1246-1235
 word estaba 1246-2345-12
 word estaban 1246-2345-12-146
 word estado 1246-2345-145
-word éste 5-1356
+word Ã©ste 5-1356
 word exterior 1346-2345
 word exteriormente 1346-2345-134
-word fácil 124-14
-word fácilmente 124-14-134
+word fÃ¡cil 124-14
+word fÃ¡cilmente 124-14-134
 word facilidad 124-14-145
 word favor 124-1236
 word favorable 124-1236-12
@@ -256,15 +256,15 @@ word generalmente 1245-1345-134
 word hacia 125-14
 word hasta 125-2345
 word haber 125-1235
-word había 125-12
-word habían 125-12-146
+word habÃ­a 125-12
+word habÃ­an 125-12-146
 word habido 125-12-145
 word hijo 125-245
 word hermano 125-134
 word hombre 125-23
 word hacer 236-1235
-word hacía 236-14
-word hacían 236-14-146
+word hacÃ­a 236-14
+word hacÃ­an 236-14-146
 word igual 24-1245
 word igualdad 24-1245-145
 word igualmente 14-1245-134
@@ -295,7 +295,7 @@ word mujer 134-136
 word muy 6-134
 word nada 1345-1456
 word nadie 1345-145
-word ningún 1345-1245
+word ningÃºn 1345-1245
 word ninguna 1345-1245-1
 word ninguno 1345-1245-135
 word ningunas 1345-1245-12346
@@ -304,24 +304,24 @@ word nosotros 45-1345
 word nuestro 56-1345
 word nuevo 1345-1236
 word nunca 1345-14
-word número 3456
+word nÃºmero 3456
 word otro 135-356
 word padre 1234-1
-word pequeño 1234-12345-12456
+word pequeÃ±o 1234-12345-12456
 word poco 1234-14
 word porque 1234-12345
-word porqué 5-1234-12345
+word porquÃ© 5-1234-12345
 word pronto 235-2345
 word propio 235-1234
 word propiedad 235-1234-145
 word propiamente 235-1234-134
-word qué 5-12345
+word quÃ© 5-12345
 word quien 12345-1345
-word quién 5-12345-1345
-word quizá 12345-1356
+word quiÃ©n 5-12345-1345
+word quizÃ¡ 12345-1356
 word recientemente 1235-2345-134
 word reciente 1235-2345
-word según 234-1245
+word segÃºn 234-1245
 word sido 234-145
 word sino 234-1345
 word siquiera 234-12345
@@ -329,21 +329,21 @@ word solo 234-123
 word sus 234-234
 word superior 234-1234
 word suyo 234-13456
-word también 2345-12
+word tambiÃ©n 2345-12
 word tampoco 2345-1234-14
 word tanto 2345-2345
 word tener 2345-1235
-word tenía 2345-1345
-word tenían 2345-1345-146
+word tenÃ­a 2345-1345
+word tenÃ­an 2345-1345-146
 word tenido 2345-1345-145
 word tiempo 2345-1234
-word todavía 2345-1236
+word todavÃ­a 2345-1236
 word todo 2345-145
-word tú 5-2345
+word tÃº 5-2345
 word tuyo 2345-13456
-word último 23456-123
-word único 23456-14
-word únicamente 23456-14-134
+word Ãºltimo 23456-123
+word Ãºnico 23456-14
+word Ãºnicamente 23456-14-134
 word usted 134-145
 word verdad 1236-145
 word veces 1236-14
