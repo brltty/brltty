@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# BRLTTY Text Table - VisioBraille (iso-8859-1)
+# BRLTTY Text Table - French (VisioBraille)
 
 # This table is the default one for VisioBraille braille terminals.
 # It was first used by Sagem printers, before being adopted by Handialog as

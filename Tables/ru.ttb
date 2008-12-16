@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# BRLTTY Text Table - Russian (koi8-r)
+# BRLTTY Text Table - Russian
 # by Hans Schou <chlor@schou.dk> and Dave Mielke <dave@mielke.cc>
 
 # This is the Russian braille table. It is based on the KOI8-R character set

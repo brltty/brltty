@@ -16,9 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-########################################################################
-# BRLTTY Text Table - North American Braille Computer Code #
-########################################################################
+# BRLTTY Text Table - North American Braille Computer Code
 
 # This is a description of the default text table used by BRLTTY.  
 # It's based on the North American Braille Computer Code, but defines the full

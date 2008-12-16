@@ -16,6 +16,6 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# BRLTTY Text Table - French (default)
+# BRLTTY Text Table - French
 
 include fr-2007.ttb

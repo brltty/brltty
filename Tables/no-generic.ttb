@@ -16,8 +16,8 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# BRLTTY Text Table - Generic Norwegian (iso-8859-1), with some
-# unofficial character representations to accommodate multilingual usage.
+# BRLTTY Text Table - Norwegian (with support for other languages)
+# Some unofficial character representations to accommodate multilingual usage.
 # For example, numbers are represented with dot 6 rather than with dot 8.
 
 # the standard representations for the letters of the Latin alphabet

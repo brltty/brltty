@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# BRLTTY Text Table - Vietnamese (iso-8859-1)
+# BRLTTY Text Table - Vietnamese
 
 # the standard representations for the Latin control characters
 include control-latin.tti

@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# BRLTTY Text Table - Portugal Portuguese (iso-8859-1)
+# BRLTTY Text Table - Portuguese
 
 # the standard representations for the letters of the Latin alphabet
 include letters-latin.tti

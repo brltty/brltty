@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# BRLTTY Text Table - Polish (iso-8859-2)
+# BRLTTY Text Table - Polish
 
 # the standard representations for the letters of the Latin alphabet
 include letters-latin.tti

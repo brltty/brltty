@@ -2497,7 +2497,8 @@ The following directives are recognized:
     The <tt/.ttb/ extension is optional.
     See the <ref id="build-text-table" name="--with-text-table">
     build option for the default established during the build procedure.
-    The default is to perform locale-based autoselection with fallback to <tt/nabcc/.
+    The default is to perform locale-based autoselection with fallback to the built-in table
+    (See the <ref id="configure-text-table" name="text-table"> configuration file directive).
     This directive can be overridden with the
     <ref id="options-text-table" name="-t"> command line option.
 </descrip>
@@ -3962,51 +3963,51 @@ BRLTTY is initially configured to use the
 In addition to this default text table,
 several alternatives are provided:
 <descrip>
-  <tag/auto/locale-based autodetection
+  <tag/auto/locale-based autoselection
   <tag/ar/Arabic (generic)
   <tag/as/Assamese
   <tag/awa/Awadhi
-  <tag/bg/Bulgarian (from UNESCO report, 1954)
+  <tag/bg/Bulgarian
   <tag/bh/Bihari
   <tag/bn/Bengali
   <tag/bo/Tibetan
   <tag/bra/Braj
-  <tag/brf/good for viewing <tt/.brf/ files in text editor or pager
-  <tag/cs/Czech (iso-8859-2)
+  <tag/brf/for viewing <tt/.brf/ files within an editor or pager
+  <tag/cs/Czech
   <tag/cy/Welsh
-  <tag/da/Danish (iso-8859-1)
-  <tag/de/German (iso-8859-1)
+  <tag/da/Danish
+  <tag/de/German
   <tag/dra/Dravidian
   <tag/el/Greek
   <tag/en_CA/English (Canada)
   <tag/en_UK/English (United Kingdom)
   <tag/en_US/English (United States)
   <tag/eo/Esperanto
-  <tag/es/Spanish (iso-8859-1)
-  <tag/et/Estonian (from UNESCO report, 1954)
-  <tag/fi1/Finnish (iso-8859-1)
-  <tag/fi2/Finnish (iso-8859-1)
-  <tag/fr/French (default)
+  <tag/es/Spanish
+  <tag/et/Estonian
+  <tag/fi1/Finnish
+  <tag/fi2/Finnish
+  <tag/fr/French
   <tag/fr_CA/French (Canada)
   <tag/fr_FR/French (France)
-  <tag/fr-2007/Unified French (iso-8859-1)
-  <tag/fr-cbifs/Code Braille Informatique Français Standard (iso-8859-1)
+  <tag/fr-2007/French (unified)
+  <tag/fr-cbifs/French (Code Braille Informatique Français Standard)
   <tag/ga/Irish
-  <tag/gd/Gaelic (from UNESCO report, 1954)
+  <tag/gd/Gaelic
   <tag/gon/Gondi
   <tag/gu/Gujarati
   <tag/he/Hebrew
   <tag/hi/Hindi
   <tag/hr/Croatian
   <tag/hu/Hungarian
-  <tag/hy/Armenian (from UNESCO report, 1954)
-  <tag/is/Icelandic (from UNESCO report, 1954)
-  <tag/it/Italian (iso-8859-1)
+  <tag/hy/Armenian
+  <tag/is/Icelandic
+  <tag/it/Italian
   <tag/kha/Khasi
   <tag/kn/Kannada
   <tag/kok/Konkani
   <tag/kru/Kurukh
-  <tag/lt/Lituanian (from UNESCO report, 1954)
+  <tag/lt/Lituanian
   <tag/lv/Latvian
   <tag/mg/Malagasy
   <tag/mi/Maori
@@ -4016,7 +4017,7 @@ several alternatives are provided:
   <tag/mt/Maltese
   <tag/mun/Mundari
   <tag/mwr/Marwari
-  <tag/nabcc/North American Braille Computer Code (iso-8859-1)
+  <tag/nabcc/North American Braille Computer Code
   <tag/ne/Nepali
   <tag/new/Newari
   <tag/nl_BE/Dutch (Belgium)
@@ -4027,21 +4028,20 @@ several alternatives are provided:
   <tag/or/Oriya
   <tag/pa/Panjabi
   <tag/pi/Pali
-  <tag/pl/Polish (iso-8859-2)
-  <tag/pt/Portuguese (iso-8859-1)
-  <tag/ro/Romanian (from UNESCO report, 1954)
-  <tag/ru/Russian (koi8-r)
+  <tag/pl/Polish
+  <tag/pt/Portuguese
+  <tag/ro/Romanian
+  <tag/ru/Russian
   <tag/sa/Sanskrit
   <tag/sat/Santali
   <tag/sd/Sindhi
   <tag/sk/Slovak
-  <tag/sv/Swedish (1996 standard)
-  <tag/sv-old/Swedish (1989 standard)
+  <tag/sv/Swedish
   <tag/sw/Swahili
   <tag/ta/Tamil
   <tag/te/Telugu
-  <tag/tr/Turkish (from UNESCO report, 1954)
-  <tag/vi/Vietnamese (iso-8859-1)
+  <tag/tr/Turkish
+  <tag/vi/Vietnamese
 </descrip>
 See the <ref id="options-text-table" name="-t"> command line option,
 the <ref id="configure-text-table" name="text-table"> configuration file directive,
@@ -4319,7 +4319,7 @@ The following contraction tables are provided:
   <tag/mun/Munda (contracted)
   <tag/nl/Dutch (contracted)
   <tag/ny/Chichewa (contracted)
-  <tag/phonetic/Phonetic Alphabet
+  <tag/ipa/International Phonetic Alphabet
   <tag/pt/Portuguese (grade 2)
   <tag/si/Sinhalese (uncontracted)
   <tag/sw/Swahili (contracted)

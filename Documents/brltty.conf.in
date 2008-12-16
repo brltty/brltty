@@ -89,82 +89,83 @@
 # are anchored at "@DATA_DIRECTORY@". If not specified, locale-based
 # autoselection with fallback to "@text_table@" will be performed.
 # (can be overridden with the -t [--text-table=] option)
-#text-table	auto	# locale-based autoselection with fallback to "@text_table@"
-#text-table	ar	Arabic (generic)
-#text-table	as	Assamese
-#text-table	awa	Awadhi
-#text-table	bg	# Bulgarian (from UNESCO report, 1954)
-#text-table	bh	Bihari
-#text-table	bn	Bengali
-#text-table	bo	Tibetan
-#text-table	bra	Braj
-#text-table	cs	# Czech (iso-8859-2)
-#text-table	cy	Welsh
+#text-table	auto	# locale-based autoselection (fallback to "@text_table@")
+#text-table	ar	# Arabic (generic)
+#text-table	as	# Assamese
+#text-table	awa	# Awadhi
+#text-table	bg	# Bulgarian
+#text-table	bh	# Bihari
+#text-table	bn	# Bengali
+#text-table	bo	# Tibetan
+#text-table	bra	# Braj
+#text-table	cs	# Czech
+#text-table	cy	# Welsh
 #text-table	da	# Danish
 #text-table	de	# German
-#text-table	dra	Dravidian
-#text-table	el	Greek
+#text-table	dra	# Dravidian
+#text-table	el	# Greek
 #text-table	en_CA	# English (Canada)
 #text-table	en_UK	# English (United Kingdom)
 #text-table	en_US	# English (United States)
 #text-table	eo	# Esperanto
 #text-table	es	# Spanish
-#text-table	et	# Estonian (from UNESCO report, 1954)
-#text-table	fr	French (default)
+#text-table	et	# Estonian
+#text-table	fi1	# Finnish
+#text-table	fi2	# Finnish
+#text-table	fr	# French
 #text-table	fr_CA	# French (Canada)
 #text-table	fr_FR	# French (France)
-#text-table	fr-2007	# French (Unified)
+#text-table	fr-2007	# French (unified)
 #text-table	fr-cbifs	# French (Code Braille Informatique Français Standard)
-#text-table	ga	Irish
-#text-table	gd	# Gaelic (from UNESCO report, 1954)
-#text-table	gon	Gondi
-#text-table	gu	Gujarati
-#text-table	he	Hebrew
-#text-table	hi	Hindi
+#text-table	ga	# Irish
+#text-table	gd	# Gaelic
+#text-table	gon	# Gondi
+#text-table	gu	# Gujarati
+#text-table	he	# Hebrew
+#text-table	hi	# Hindi
 #text-table	hr	# Croatian
-#text-table	hu	Hungarian
-#text-table	hy	# Armenian (from UNESCO report, 1954)
-#text-table	is	# Icelandic (from UNESCO report, 1954)
+#text-table	hu	# Hungarian
+#text-table	hy	# Armenian
+#text-table	is	# Icelandic
 #text-table	it	# Italian
-#text-table	kha	Khasi
-#text-table	kn	Kannada
-#text-table	kok	Konkani
-#text-table	kru	Kurukh
-#text-table	lt	# Lituanian (from UNESCO report, 1954)
-#text-table	lv	Latvian
-#text-table	mg	Malagasy
-#text-table	mi	Maori
-#text-table	ml	Malayalam
-#text-table	mni	Manipuri
-#text-table	mr	Marathi
-#text-table	mt	Maltese
-#text-table	mun	Mundari
-#text-table	mwr	Marwari
+#text-table	kha	# Khasi
+#text-table	kn	# Kannada
+#text-table	kok	# Konkani
+#text-table	kru	# Kurukh
+#text-table	lt	# Lituanian
+#text-table	lv	# Latvian
+#text-table	mg	# Malagasy
+#text-table	mi	# Maori
+#text-table	ml	# Malayalam
+#text-table	mni	# Manipuri
+#text-table	mr	# Marathi
+#text-table	mt	# Maltese
+#text-table	mun	# Mundari
+#text-table	mwr	# Marwari
 #text-table	nabcc	# North American Braille Computer Code
-#text-table	ne	Nepali
-#text-table	new	Newari
-#text-table	nl_BE	Dutch (Belgium)
-#text-table	nl_NL	Dutch (Netherlands)
+#text-table	ne	# Nepali
+#text-table	new	# Newari
+#text-table	nl_BE	# Dutch (Belgium)
+#text-table	nl_NL	# Dutch (Netherlands)
 #text-table	no-generic	# Norwegian (with support for other languages)
 #text-table	no-oub	# Norwegian (Offentlig Utvalg for Blindeskrift)
-#text-table	nwc	Old Newari
-#text-table	or	Oriya
-#text-table	pa	Panjabi
-#text-table	pi	Pali
-#text-table	pl	# Polish (iso-8859-2)
-#text-table	pt	# Portuguese (iso-8859-1)
-#text-table	ro	# Romanian (from UNESCO report, 1954)
-#text-table	ru	# Russian (koi8-r)
-#text-table	sa	Sanskrit
-#text-table	sat	Santali
-#text-table	sd	Sindhi
-#text-table	sk	Slovak
-#text-table	sv	# Swedish (1996 standard)
-#text-table	sv-old	# Swedish (1989 standard)
-#text-table	sw	Swahili
-#text-table	ta	Tamil
-#text-table	te	Telugu
-#text-table	tr	# Turkish (from UNESCO report, 1954)
+#text-table	nwc	# Old Newari
+#text-table	or	# Oriya
+#text-table	pa	# Panjabi
+#text-table	pi	# Pali
+#text-table	pl	# Polish
+#text-table	pt	# Portuguese
+#text-table	ro	# Romanian
+#text-table	ru	# Russian
+#text-table	sa	# Sanskrit
+#text-table	sat	# Santali
+#text-table	sd	# Sindhi
+#text-table	sk	# Slovak
+#text-table	sv	# Swedish
+#text-table	sw	# Swahili
+#text-table	ta	# Tamil
+#text-table	te	# Telugu
+#text-table	tr	# Turkish
 #text-table	vi	# Vietnamese
 
 # The attributes-table directive specifies which attributes table to use.
@@ -178,34 +179,34 @@
 # Relative paths are anchored at "@DATA_DIRECTORY@". If not specified, no
 # contraction table will be available.
 # (can be overridden with the -c [--contraction-table=] option)
-#contraction-table	af	Afrikaans (contracted)
-#contraction-table	am	Amharic (uncontracted)
+#contraction-table	af	# Afrikaans (contracted)
+#contraction-table	am	# Amharic (uncontracted)
 #contraction-table	de-basis	# German (uncontracted)
 #contraction-table	de-kurzschrift	# German (contracted - 1998 standard)
 #contraction-table	de-vollschrift	# German (basic contractions)
 #contraction-table	en-ueb-g2	# Unified English Braille (grade 2)
 #contraction-table	en-us-g2	# American English (grade 2)
-#contraction-table	es	Spanish (grade 2)
+#contraction-table	es	# Spanish (grade 2)
 #contraction-table	fr-abrege	# French (contracted)
 #contraction-table	fr-integral	# French (uncontracted)
-#contraction-table	ha	Hausa (contracted)
-#contraction-table	id	Indonesian (contracted)
-#contraction-table	ja	Japanese (uncontracted)
-#contraction-table	ko-g1	Korean (grade 1)
-#contraction-table	ko-g2	Korean (grade 2)
-#contraction-table	ko	Korean (uncontracted)
-#contraction-table	mg	Malagasy (contracted)
-#contraction-table	mun	Munda (contracted)
-#contraction-table	nl	Dutch (contracted)
-#contraction-table	ny	Chichewa (contracted)
-#contraction-table	phonetic	Phonetic Alphabet
-#contraction-table	pt	Portuguese (grade 2)
-#contraction-table	si	Sinhalese (uncontracted)
-#contraction-table	sw	Swahili (contracted)
-#contraction-table	th	Thai (contracted)
+#contraction-table	ha	# Hausa (contracted)
+#contraction-table	id	# Indonesian (contracted)
+#contraction-table	ja	# Japanese (uncontracted)
+#contraction-table	ko-g1	# Korean (grade 1)
+#contraction-table	ko-g2	# Korean (grade 2)
+#contraction-table	ko	# Korean (uncontracted)
+#contraction-table	mg	# Malagasy (contracted)
+#contraction-table	mun	# Munda (contracted)
+#contraction-table	nl	# Dutch (contracted)
+#contraction-table	ny	# Chichewa (contracted)
+#contraction-table	ipa	# International Phonetic Alphabet
+#contraction-table	pt	# Portuguese (grade 2)
+#contraction-table	si	# Sinhalese (uncontracted)
+#contraction-table	sw	# Swahili (contracted)
+#contraction-table	th	# Thai (contracted)
 #contraction-table	zh-tw	# Taiwanese Chinese (uncontracted)
 #contraction-table	zh-tw-ucb	# Taiwanese Chinese (Unique Chinese Braille)
-#contraction-table	zu	Zulu (contracted)
+#contraction-table	zu	# Zulu (contracted)
 
 
 #############################

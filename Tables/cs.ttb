@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# BRLTTY Text Table - Czech (iso-8859-2)
+# BRLTTY Text Table - Czech
 
 # the numbers 0-9 are represented by the letters j,a-i with dot 8 added
 include numbers-dot8.tti
