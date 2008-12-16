@@ -1,0 +1,86 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2008 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+# BRLTTY Text Table - Tibetan
+#
+# Samuel Thibault <samuel.thibault@ens-lyon.org>
+#
+# From "Braille without borders"
+
+char \u0F40	(1 3     )  # ⠅ ཀ [TIBETAN LETTER KA]
+char \u0F41	(1  4    )  # ⠉ ཁ [TIBETAN LETTER KHA]
+char \u0F42	(12 45   )  # ⠛ ག [TIBETAN LETTER GA]
+char \u0F44	( 23 56  )  # ⠶ ང [TIBETAN LETTER NGA]
+char \u0F45	(1  456  )  # ⠹ ཅ [TIBETAN LETTER CA]
+char \u0F46	(1 3456  )  # ⠽ ཆ [TIBETAN LETTER CHA]
+char \u0F47	(12345   )  # ⠟ ཇ [TIBETAN LETTER JA]
+char \u0F49	(  345   )  # ⠜ ཉ [TIBETAN LETTER NYA]
+char \u0F4F	( 2345   )  # ⠞ ཏ [TIBETAN LETTER TA]
+char \u0F50	( 23456  )  # ⠾ ཐ [TIBETAN LETTER THA]
+char \u0F51	(1  45   )  # ⠙ ད [TIBETAN LETTER DA]
+char \u0F53	(1 345   )  # ⠝ ན [TIBETAN LETTER NA]
+char \u0F54	(1234    )  # ⠏ པ [TIBETAN LETTER PA]
+char \u0F55	(1234 6  )  # ⠯ ཕ [TIBETAN LETTER PHA]
+char \u0F56	(12      )  # ⠃ བ [TIBETAN LETTER BA]
+char \u0F58	(1 34    )  # ⠍ མ [TIBETAN LETTER MA]
+char \u0F59	(1 34 6  )  # ⠭ ཙ [TIBETAN LETTER TSA]
+char \u0F5A	(1 3 56  )  # ⠵ ཚ [TIBETAN LETTER TSHA]
+char \u0F5B	(123456  )  # ⠿ ཛ [TIBETAN LETTER DZA]
+char \u0F5D	( 2 456  )  # ⠺ ཝ [TIBETAN LETTER WA]
+char \u0F5E	(1  4 6  )  # ⠩ ཞ [TIBETAN LETTER ZHA]
+char \u0F5F	( 234    )  # ⠎ ཟ [TIBETAN LETTER ZA]
+char \u0F60	(12 4 6  )  # ⠫ འ [TIBETAN LETTER -A]
+char \u0F61	( 2 45   )  # ⠚ ཡ [TIBETAN LETTER YA]
+char \u0F62	(123 5   )  # ⠗ ར [TIBETAN LETTER RA]
+char \u0F63	(123     )  # ⠇ ལ [TIBETAN LETTER LA]
+char \u0F64	(1   56  )  # ⠱ ཤ [TIBETAN LETTER SHA]
+char \u0F66	( 234 6  )  # ⠮ ས [TIBETAN LETTER SA]
+char \u0F67	(12  5   )  # ⠓ ཧ [TIBETAN LETTER HA]
+char \u0F68	(1       )  # ⠁ ཨ [TIBETAN LETTER A]
+
+# subjoined letters
+char \u0F90	(1 3     )  # ⠅  ྐ [TIBETAN SUBJOINED LETTER KA]
+char \u0F91	(1  4    )  # ⠉  ྑ [TIBETAN SUBJOINED LETTER KHA]
+char \u0F92	(12 45   )  # ⠛  ྒ [TIBETAN SUBJOINED LETTER GA]
+char \u0F94	( 23 56  )  # ⠶  ྔ [TIBETAN SUBJOINED LETTER NGA]
+char \u0F95	(1  456  )  # ⠹  ྕ [TIBETAN SUBJOINED LETTER CA]
+char \u0F96	(1 3456  )  # ⠽  ྖ [TIBETAN SUBJOINED LETTER CHA]
+char \u0F97	(12345   )  # ⠟  ྗ [TIBETAN SUBJOINED LETTER JA]
+char \u0F99	(  345   )  # ⠜  ྙ [TIBETAN SUBJOINED LETTER NYA]
+char \u0F9F	( 2345   )  # ⠞  ྟ [TIBETAN SUBJOINED LETTER TA]
+char \u0FA0	( 23456  )  # ⠾  ྠ [TIBETAN SUBJOINED LETTER THA]
+char \u0FA1	(1  45   )  # ⠙  ྡ [TIBETAN SUBJOINED LETTER DA]
+char \u0FA3	(1 345   )  # ⠝  ྣ [TIBETAN SUBJOINED LETTER NA]
+char \u0FA4	(1234    )  # ⠏  ྤ [TIBETAN SUBJOINED LETTER PA]
+char \u0FA5	(1234 6  )  # ⠯  ྥ [TIBETAN SUBJOINED LETTER PHA]
+char \u0FA6	(12      )  # ⠃  ྦ [TIBETAN SUBJOINED LETTER BA]
+char \u0FA8	(1 34    )  # ⠍  ྨ [TIBETAN SUBJOINED LETTER MA]
+char \u0FA9	(1 34 6  )  # ⠭  ྩ [TIBETAN SUBJOINED LETTER TSA]
+char \u0FAA	(1 3 56  )  # ⠵  ྪ [TIBETAN SUBJOINED LETTER TSHA]
+char \u0FAB	(123456  )  # ⠿  ྫ [TIBETAN SUBJOINED LETTER DZA]
+char \u0FAD	( 2 456  )  # ⠺  ྭ [TIBETAN SUBJOINED LETTER WA]
+char \u0FAE	(1  4 6  )  # ⠩  ྮ [TIBETAN SUBJOINED LETTER ZHA]
+char \u0FAF	( 234    )  # ⠎  ྯ [TIBETAN SUBJOINED LETTER ZA]
+char \u0FB0	(12 4 6  )  # ⠫  ྰ [TIBETAN SUBJOINED LETTER -A]
+char \u0FB1	( 2 45   )  # ⠚  ྱ [TIBETAN SUBJOINED LETTER YA]
+char \u0FB2	(123 5   )  # ⠗  ྲ [TIBETAN SUBJOINED LETTER RA]
+char \u0FB3	(123     )  # ⠇  ླ [TIBETAN SUBJOINED LETTER LA]
+char \u0FB4	(1   56  )  # ⠱  ྴ [TIBETAN SUBJOINED LETTER SHA]
+char \u0FB6	( 234 6  )  # ⠮  ྶ [TIBETAN SUBJOINED LETTER SA]
+char \u0FB7	(12  5   )  # ⠓  ྷ [TIBETAN SUBJOINED LETTER HA]
+char \u0FB8	(1       )  # ⠁  ྸ [TIBETAN SUBJOINED LETTER A]

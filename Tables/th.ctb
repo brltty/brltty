@@ -1,0 +1,118 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2008 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+# BRLTTY Contraction Table - Thai (contracted)
+#
+# Samuel Thibault <samuel.thibault@ens-lyon.org>
+# 
+# This table is based on the Unesco report on the progress of unification of
+# braille writing « L'ÉCRITURE BRAILLE DANS LE MONDE », by Sir Clutha
+# MACKENZIE: http://unesdoc.unesco.org/images/0013/001352/135251fo.pdf
+# The document is dated 1954, so this table may be quite outdated.
+
+# consonants
+always ก 1245	  	THAI CHARACTER KO KAI
+always ข 346		THAI CHARACTER KHO KHAI
+always ฃ 2346		THAI CHARACTER KHO KHUAT
+always ค 136	  	THAI CHARACTER KHO KHWAI
+always ฅ 6-136	  	THAI CHARACTER KHO KHON
+always ฆ 36-136	  	THAI CHARACTER KHO RAKHANG
+always ง 12456	  	THAI CHARACTER NGO NGU
+always จ 245	  	THAI CHARACTER CHO CHAN
+always ฉ 34	  	THAI CHARACTER CHO CHING
+always ช 13	  	THAI CHARACTER CHO CHANG
+always ซ 36-13	  	THAI CHARACTER SO SO
+always ฌ 6-346	  	THAI CHARACTER CHO CHOE
+always ญ 6-13456  	THAI CHARACTER YO YING
+always ฎ 6-145	  	THAI CHARACTER DO CHADA
+always ฏ 6-1256  	THAI CHARACTER TO PATAK
+always ฐ 6-2345	  	THAI CHARACTER THO THAN
+always ฑ 6-23456  	THAI CHARACTER THO NANGMONTHO
+always ฒ 56-23456	THAI CHARACTER THO PHUTHAO
+always ณ 6-1345	  	THAI CHARACTER NO NEN
+always ด 145	  	THAI CHARACTER DO DEK
+always ต 1256	  	THAI CHARACTER TO TAO
+always ถ 2345	  	THAI CHARACTER THO THUNG
+always ท 23456	  	THAI CHARACTER THO THAHAN
+always ธ 356-23456	THAI CHARACTER THO THONG
+always น 1345	  	THAI CHARACTER NO NU
+always บ 1236	  	THAI CHARACTER BO BAIMAI
+always ป 12346	  	THAI CHARACTER PO PLA
+always ผ 1234	  	THAI CHARACTER PHO PHUNG
+always ฝ 1346	  	THAI CHARACTER FO FA
+always พ 1456	  	THAI CHARACTER PHO PHAN
+always ฟ 1246	  	THAI CHARACTER FO FAN
+always ภ 6-1456	  	THAI CHARACTER PHO SAMPHAO
+always ม 134	  	THAI CHARACTER MO MA
+always ย 13456	  	THAI CHARACTER YO YAK
+always ร 1235	  	THAI CHARACTER RO RUA
+always ล 123	  	THAI CHARACTER LO LING
+always ว 2456	  	THAI CHARACTER WO WAEN
+always ศ 6-234	  	THAI CHARACTER SO SALA
+always ษ 36-234	  	THAI CHARACTER SO RUSI
+always ส 234	  	THAI CHARACTER SO SUA
+always ห 125	  	THAI CHARACTER HO HIP
+always ฬ 36-123	  	THAI CHARACTER LO CHULA
+always อ 135	  	THAI CHARACTER O ANG
+always ฮ 123456	  	THAI CHARACTER HO NOKHUK
+
+# vowels
+always ะ 1	  	THAI CHARACTER SARA A
+always า 16	  	THAI CHARACTER SARA AA
+always ำ 1356	  	THAI CHARACTER SARA AM
+always  ิ 12	  	THAI CHARACTER SARA I
+always  ี 23	  	THAI CHARACTER SARA II
+always  ึ 246	  	THAI CHARACTER SARA UE
+always  ื 26	  	THAI CHARACTER SARA UEE
+always  ุ 14	  	THAI CHARACTER SARA U
+always  ู 25	  	THAI CHARACTER SARA UU
+always เ 124	  	THAI CHARACTER SARA E
+always แ 126	  	THAI CHARACTER SARA AE
+always โ 24	  	THAI CHARACTER SARA O
+always ใ 156-1	  	THAI CHARACTER SARA AI MAIMUAN
+always ไ 156	  	THAI CHARACTER SARA AI MAIMALAI
+
+# contractions
+always เๅะ 135-1
+always ออ 135
+always วั 15
+always เีย 12356
+always เี่อ 12345
+always เออ 146
+always เา 235
+
+# accents etc
+always ๆ 2	  	THAI CHARACTER MAIYAMOK
+always  ็ 6	  	THAI CHARACTER MAITAIKHU
+always  ่ 35	  	THAI CHARACTER MAI EK
+always  ้ 256	  	THAI CHARACTER MAI THO
+always  ๊ 2356	  	THAI CHARACTER MAI TRI
+always  ๋ 236	  	THAI CHARACTER MAI CHATTAWA
+always  ์ 356	  	THAI CHARACTER THANTHAKHAT
+
+# digits
+always ๐ 2458	  	THAI DIGIT ZERO
+always ๑ 18	  	THAI DIGIT ONE
+always ๒ 128	  	THAI DIGIT TWO
+always ๓ 148	  	THAI DIGIT THREE
+always ๔ 1458	  	THAI DIGIT FOUR
+always ๕ 158	  	THAI DIGIT FIVE
+always ๖ 1248	  	THAI DIGIT SIX
+always ๗ 12458	  	THAI DIGIT SEVEN
+always ๘ 1258	  	THAI DIGIT EIGHT
+always ๙ 248	  	THAI DIGIT NINE

@@ -1,0 +1,41 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2008 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+# BRLTTY Contraction Table - Korean (grade 1)
+#
+# Samuel Thibault <samuel.thibault@ens-lyon.org>
+
+include ko.ctb
+
+always 가 1246
+always 사 123
+always 것 456
+always 억 1456
+always 언 23456
+always 얼 2345
+always 연 16
+always 열 1256
+always 영 12456
+always 옥 1346
+always 온 12356
+always 옹 123456
+always 운 1245
+always 울 12346
+always 은 1356
+always 을 2346
+always 인 12345

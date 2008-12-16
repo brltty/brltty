@@ -1,0 +1,81 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2008 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+# BRLTTY Contraction Table - Sinhalese (uncontracted)
+#
+# Samuel Thibault <samuel.thibault@ens-lyon.org>
+# 
+# This table is based on the Unesco report on the progress of unification of
+# braille writing « L'ÉCRITURE BRAILLE DANS LE MONDE », by Sir Clutha
+# MACKENZIE: http://unesdoc.unesco.org/images/0013/001352/135251fo.pdf
+# The document is dated 1954, so this table may be quite outdated.
+
+always අ 1	  SINHALA LETTER AYANNA
+always ආ 345	  SINHALA LETTER AAYANNA
+always ඇ 12356	  SINHALA LETTER AEYANNA
+always ඈ 12456	  SINHALA LETTER AEEYANNA
+always ඉ 24	  SINHALA LETTER IYANNA
+always ඊ 35	  SINHALA LETTER IIYANNA
+always උ 136	  SINHALA LETTER UYANNA
+always ඌ 1256	  SINHALA LETTER UUYANNA
+always ඍ 5-1235	  SINHALA LETTER IRUYANNA
+always ඎ 6-1235	  SINHALA LETTER IRUUYANNA
+always ඏ 5-123	  SINHALA LETTER ILUYANNA
+always ඐ 6-123	  SINHALA LETTER ILUUYANNA
+always එ 15	  SINHALA LETTER EYANNA
+always ඒ 26	  SINHALA LETTER EEYANNA
+always ඓ 34	  SINHALA LETTER AIYANNA
+always ඔ 135	  SINHALA LETTER OYANNA
+always ඕ 1346	  SINHALA LETTER OOYANNA
+always ඖ 246	  SINHALA LETTER AUYANNA
+always ක 13	  SINHALA LETTER ALPAPRAANA KAYANNA
+always ඛ 46	  SINHALA LETTER MAHAAPRAANA KAYANNA
+always ග 1245	  SINHALA LETTER ALPAPRAANA GAYANNA
+always ඝ 126	  SINHALA LETTER MAHAAPRAANA GAYANNA
+always ඞ 346	  SINHALA LETTER KANTAJA NAASIKYAYA
+always ච 14	  SINHALA LETTER ALPAPRAANA CAYANNA
+always ඡ 16	  SINHALA LETTER MAHAAPRAANA CAYANNA
+always ජ 245	  SINHALA LETTER ALPAPRAANA JAYANNA
+always ඣ 356	  SINHALA LETTER MAHAAPRAANA JAYANNA
+always ඤ 25	  SINHALA LETTER TAALUJA NAASIKYAYA
+always ට 23456	  SINHALA LETTER ALPAPRAANA TTAYANNA
+always ඨ 2456	  SINHALA LETTER MAHAAPRAANA TTAYANNA
+always ඩ 1246	  SINHALA LETTER ALPAPRAANA DDAYANNA
+always ඪ 123456	  SINHALA LETTER MAHAAPRAANA DDAYANNA
+always ණ 3456	  SINHALA LETTER MUURDHAJA NAYANNA
+always ත 2345	  SINHALA LETTER ALPAPRAANA TAYANNA
+always ථ 1456	  SINHALA LETTER MAHAAPRAANA TAYANNA
+always ද 145	  SINHALA LETTER ALPAPRAANA DAYANNA
+always ධ 2346	  SINHALA LETTER MAHAAPRAANA DAYANNA
+always න 1345	  SINHALA LETTER DANTAJA NAYANNA
+always ප 1234	  SINHALA LETTER ALPAPRAANA PAYANNA
+always ඵ 235	  SINHALA LETTER MAHAAPRAANA PAYANNA
+always බ 12	  SINHALA LETTER ALPAPRAANA BAYANNA
+always භ 45	  SINHALA LETTER MAHAAPRAANA BAYANNA
+always ම 134	  SINHALA LETTER MAYANNA
+always ඹ 56	  SINHALA LETTER AMBA BAYANNA
+always ය 13456	  SINHALA LETTER YAYANNA
+always ර 1235	  SINHALA LETTER RAYANNA
+always ල 123	  SINHALA LETTER DANTAJA LAYANNA
+always ව 1236	  SINHALA LETTER VAYANNA
+always ශ 12346	  SINHALA LETTER TAALUJA SAYANNA
+always ෂ 146	  SINHALA LETTER MUURDHAJA SAYANNA
+always ස 234	  SINHALA LETTER DANTAJA SAYANNA
+always හ 125	  SINHALA LETTER HAYANNA
+always ළ 456	  SINHALA LETTER MUURDHAJA LAYANNA
+always ෆ 124	  SINHALA LETTER FAYANNA
