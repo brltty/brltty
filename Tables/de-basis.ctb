@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# Basic German 6-dot Braille Contraction Table
+# BRLTTY Contraction Table - German (uncontracted)
 # Created by Mario Lang <mlang@delysid.org>.
 
 numsign 3456  number sign, just one operand

@@ -96,6 +96,7 @@
 #text-table	bg	# Bulgarian (from UNESCO report, 1954)
 #text-table	bh	Bihari
 #text-table	bn	Bengali
+#text-table	bo	Tibetan
 #text-table	bra	Braj
 #text-table	cs	# Czech (iso-8859-2)
 #text-table	cy	Welsh
@@ -177,29 +178,34 @@
 # Relative paths are anchored at "@DATA_DIRECTORY@". If not specified, no
 # contraction table will be available.
 # (can be overridden with the -c [--contraction-table=] option)
-#contraction-table	af	Afrikaans
-#contraction-table	am	Amharic
-#contraction-table	compress	# remove excess white-space
-#contraction-table	de-basis	# Uncontracted German
-#contraction-table	de-kurzschrift	# Contracted German (1998 standard)
-#contraction-table	de-vollschrift	# Contracted German (basic syllables only)
-#contraction-table	en-ueb-g2	# Grade 2 Unified English Braille
-#contraction-table	en-us-g2	# Grade 2 American English
-#contraction-table	es	Spanish
-#contraction-table	fr-abrege	# Contracted French
-#contraction-table	fr-integral	# Uncontracted French
-#contraction-table	ha	Hausa
-#contraction-table	id	Indonesian
-#contraction-table	mg	Malagasy
-#contraction-table	mun	Munda
-#contraction-table	nl	Dutch
-#contraction-table	ny	Chichewa
+#contraction-table	af	Afrikaans (contracted)
+#contraction-table	am	Amharic (uncontracted)
+#contraction-table	de-basis	# German (uncontracted)
+#contraction-table	de-kurzschrift	# German (contracted - 1998 standard)
+#contraction-table	de-vollschrift	# German (basic contractions)
+#contraction-table	en-ueb-g2	# Unified English Braille (grade 2)
+#contraction-table	en-us-g2	# American English (grade 2)
+#contraction-table	es	Spanish (grade 2)
+#contraction-table	fr-abrege	# French (contracted)
+#contraction-table	fr-integral	# French (uncontracted)
+#contraction-table	ha	Hausa (contracted)
+#contraction-table	id	Indonesian (contracted)
+#contraction-table	ja	Japanese (uncontracted)
+#contraction-table	ko-g1	Korean (grade 1)
+#contraction-table	ko-g2	Korean (grade 2)
+#contraction-table	ko	Korean (uncontracted)
+#contraction-table	mg	Malagasy (contracted)
+#contraction-table	mun	Munda (contracted)
+#contraction-table	nl	Dutch (contracted)
+#contraction-table	ny	Chichewa (contracted)
 #contraction-table	phonetic	Phonetic Alphabet
-#contraction-table	pt	Portuguese
-#contraction-table	sw	Swahili
-#contraction-table	zh-tw	# Taiwanese Chinese
-#contraction-table	zh-tw-ucb	# Taiwanese Unique Chinese Braille
-#contraction-table	zu	Zulu
+#contraction-table	pt	Portuguese (grade 2)
+#contraction-table	si	Sinhalese (uncontracted)
+#contraction-table	sw	Swahili (contracted)
+#contraction-table	th	Thai (contracted)
+#contraction-table	zh-tw	# Taiwanese Chinese (uncontracted)
+#contraction-table	zh-tw-ucb	# Taiwanese Chinese (Unique Chinese Braille)
+#contraction-table	zu	Zulu (contracted)
 
 
 #############################

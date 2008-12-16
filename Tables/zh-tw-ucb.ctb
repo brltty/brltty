@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# Braille representation table for Chinese (Unique Chinese Braille).
+# BRLTTY Contraction Table - Taiwanese Chinese (Unique Chinese Braille)
 
 include nabcc.cti
 

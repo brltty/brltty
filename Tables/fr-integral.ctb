@@ -16,6 +16,8 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
+# BRLTTY Contraction Table - French (uncontracted)
+
 # Définitions pour code braille français international unifié
 # Par Nicolas Pitre <nico@cam.org>
 # Référence: http://www.inlb.qc.ca/apropos/c2003unificationdubraille.aspx

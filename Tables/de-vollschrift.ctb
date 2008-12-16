@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# Minimal German 6-dot contractioned Braille Table (Vollschrift)
+# BRLTTY Contraction Table - German (basic contractions)
 # Created by Mario Lang <mlang@delysid.org>.
 
 include de-basis.ctb

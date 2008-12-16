@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# German Braille Contraction Table (Kurzschrift)
+# BRLTTY Contraction Table - German (contracted - 1998 standard)
 # Created by Mario Lang <mlang@delysid.org>.
 
 include de-vollschrift.ctb

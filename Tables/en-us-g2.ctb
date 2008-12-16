@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# U.S. English Grade 2 Braille Contraction Table
+# BRLTTY Contraction Table - American English (grade 2)
 # Created by John Boyer <director@chpi.org>.
 
 class vowel aeiouyAEIOUY

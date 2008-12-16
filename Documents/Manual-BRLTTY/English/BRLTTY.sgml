@@ -3969,6 +3969,7 @@ several alternatives are provided:
   <tag/bg/Bulgarian (from UNESCO report, 1954)
   <tag/bh/Bihari
   <tag/bn/Bengali
+  <tag/bo/Tibetan
   <tag/bra/Braj
   <tag/brf/good for viewing <tt/.brf/ files in text editor or pager
   <tag/cs/Czech (iso-8859-2)
@@ -4298,29 +4299,34 @@ This feature isn't available if the
 
 The following contraction tables are provided:
 <descrip>
-  <tag/af/Afrikaans
-  <tag/am/Amharic
-  <tag/compress/remove excess white-space
-  <tag/de-basis/Uncontracted German
-  <tag/de-kurzschrift/Contracted German (1998 standard)
-  <tag/de-vollschrift/Contracted German (basic syllables only)
-  <tag/en-ueb-g2/Grade 2 Unified English Braille
-  <tag/en-us-g2/Grade 2 American English
-  <tag/es/Spanish
-  <tag/fr-abrege/Contracted Unified French
-  <tag/fr-integral/Uncontracted Unified French
-  <tag/ha/Hausa
-  <tag/id/Indonesian
-  <tag/mg/Malagasy
-  <tag/mun/Munda
-  <tag/nl/Dutch
-  <tag/ny/Chichewa
+  <tag/af/Afrikaans (contracted)
+  <tag/am/Amharic (uncontracted)
+  <tag/de-basis/German (uncontracted)
+  <tag/de-kurzschrift/German (contracted - 1998 standard)
+  <tag/de-vollschrift/German (basic contractions)
+  <tag/en-ueb-g2/Unified English Braille (grade 2)
+  <tag/en-us-g2/American English (grade 2)
+  <tag/es/Spanish (grade 2)
+  <tag/fr-abrege/French (contracted)
+  <tag/fr-integral/French (uncontracted)
+  <tag/ha/Hausa (contracted)
+  <tag/id/Indonesian (contracted)
+  <tag/ja/Japanese (uncontracted)
+  <tag/ko-g1/Korean (grade 1)
+  <tag/ko-g2/Korean (grade 2)
+  <tag/ko/Korean (uncontracted)
+  <tag/mg/Malagasy (contracted)
+  <tag/mun/Munda (contracted)
+  <tag/nl/Dutch (contracted)
+  <tag/ny/Chichewa (contracted)
   <tag/phonetic/Phonetic Alphabet
-  <tag/pt/Portuguese
-  <tag/sw/Swahili
-  <tag/zh-tw/Taiwanese Chinese
-  <tag/zh-tw-ucb/Taiwanese Unique Chinese Braille
-  <tag/zu/Zulu
+  <tag/pt/Portuguese (grade 2)
+  <tag/si/Sinhalese (uncontracted)
+  <tag/sw/Swahili (contracted)
+  <tag/th/Thai (contracted)
+  <tag/zh-tw/Taiwanese Chinese (uncontracted)
+  <tag/zh-tw-ucb/Taiwanese Chinese (Unique Chinese Braille)
+  <tag/zu/Zulu (contracted)
 </descrip>
 
 <sect2>Contraction Table Format<p>
