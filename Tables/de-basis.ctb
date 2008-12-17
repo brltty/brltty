@@ -123,6 +123,8 @@ before space endnum \u2033 4-35-35
 
 prepunc " 236
 postpunc " 356
+begword « 236
+endword » 356
 always " 6-4
 
 always ' 6-6

@@ -532,7 +532,7 @@ always gegenwart 1245-2456
 contraction gw
 always gegenwärt 5-1245-2456
 always gegenwaert 5-1245-2456
-always gelb 1245-12346-12 should use the el-contraction
+always gelb 1245-13456-12 should use the el-contraction
 always geld 1245-13456-145 should use the el-contraction
 always gelegen 1245-1245
 contraction gg
@@ -936,7 +936,6 @@ before st always alltags 1-12345-2345-1-1245-234
 begword alm 25-134
 before s begword alters 25-2345-12456-234
 always amateur 1-134-1-2345-126-1235 should use the eu-contraction
-class r
 before r always amerika 1-134-12456-24-13-1
 always amtschines 1-134-2345-234-1456-35-123456 shouldn't use the sch-contraction
 always amtsstub 1-134-2345-234-23456-136-12 shouldn't use the ss-contraction
@@ -956,7 +955,7 @@ before egn begword anti 235-2345-24
 always antichrist 235-2345-24-1456-1235-24-23456 shouldn't use the ich-contraction
 always anästh 235-345-234-2345-125 Anästhesie
 always augen 16-1245-14 shouldn't use the ge-contraction
-migdendword austausch 16-234-2345-16-156 shouldn't use the st-contraction
+midendword austausch 16-234-2345-16-156 shouldn't use the st-contraction
 always beilstein 12-146-123-23456-1246 shouldn't use the bei-contraction
 word bein 12-146-1345 shouldn't use the bei-contraction
 word beine 12-146-1345-15 shouldn't use the bei-contraction
