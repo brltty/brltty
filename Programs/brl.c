@@ -276,7 +276,8 @@ ensureBrailleBuffer (BrailleDisplay *brl, int infoLevel) {
 
 int
 readBrailleCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
-  int command = braille->readCommand(brl, context);
+  int command = dequeueCommand();
+  if (command == EOF) command = braille->readCommand(brl, context);
   resizeBrailleBuffer(brl, LOG_INFO);
   return command;
 }

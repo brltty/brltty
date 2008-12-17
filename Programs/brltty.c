@@ -1387,10 +1387,6 @@ runProgram (void) {
 
         command = writable? readBrailleCommand(&brl, context): BRL_CMD_RESTARTBRL;
 
-        if (command == EOF) {
-          command = dequeueCommand();
-        }
-
         if (brl.highlightWindow) {
           brl.highlightWindow = 0;
           highlightWindow();
