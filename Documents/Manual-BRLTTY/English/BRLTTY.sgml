@@ -513,7 +513,7 @@ for any additional display-specific instructions.
     The absolute path to a table outside the source tree may be specified.
     The <tt/.ttb/ extension is optional.
     If this option isn't specified,
-    then <tt/nabcc/,
+    then <tt/en-nabcc/,
     a commonly (in North America) used 8-dot variant of the
     <ref id="nabcc" name="North American Braille Computer Code">,
     is assumed.
@@ -4017,7 +4017,7 @@ several alternatives are provided:
   <tag/mt/Maltese
   <tag/mun/Mundari
   <tag/mwr/Marwari
-  <tag/nabcc/North American Braille Computer Code
+  <tag/en-nabcc/English (North American Braille Computer Code)
   <tag/ne/Nepali
   <tag/new/Newari
   <tag/nl_BE/Dutch (Belgium)

@@ -142,7 +142,7 @@
 #text-table	mt	# Maltese
 #text-table	mun	# Mundari
 #text-table	mwr	# Marwari
-#text-table	nabcc	# North American Braille Computer Code
+#text-table	en-nabcc	# English (North American Braille Computer Code)
 #text-table	ne	# Nepali
 #text-table	new	# Newari
 #text-table	nl_BE	# Dutch (Belgium)
