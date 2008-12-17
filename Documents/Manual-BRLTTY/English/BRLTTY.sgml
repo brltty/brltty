@@ -3979,9 +3979,11 @@ several alternatives are provided:
   <tag/de/German
   <tag/dra/Dravidian
   <tag/el/Greek
+  <tag/en/English
   <tag/en_CA/English (Canada)
   <tag/en_UK/English (United Kingdom)
   <tag/en_US/English (United States)
+  <tag/en-nabcc/English (North American Braille Computer Code)
   <tag/eo/Esperanto
   <tag/es/Spanish
   <tag/et/Estonian
@@ -4017,7 +4019,6 @@ several alternatives are provided:
   <tag/mt/Maltese
   <tag/mun/Mundari
   <tag/mwr/Marwari
-  <tag/en-nabcc/English (North American Braille Computer Code)
   <tag/ne/Nepali
   <tag/new/Newari
   <tag/nl_BE/Dutch (Belgium)
