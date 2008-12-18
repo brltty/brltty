@@ -35,7 +35,7 @@ getKeyBinding (KeyTable *table, KeyCode key) {
   unsigned int count = header->bindingsCount;
 
   while (count) {
-    if (key == binding->key) return binding;
+    if (key == binding->key.code) return binding;
     binding += 1, count -= 1;
   }
 

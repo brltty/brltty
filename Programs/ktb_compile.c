@@ -42,7 +42,7 @@ getKeyTableHeader (KeyTableData *ktd) {
 }
 
 static int
-parseKeyOperand (DataFile *file, KeyCode *code, const wchar_t *characters, int length) {
+parseKeyName (DataFile *file, KeyCode *code, const wchar_t *characters, int length) {
   typedef struct {
     const wchar_t *name;
     KeyCode code;
@@ -288,18 +288,59 @@ parseKeyOperand (DataFile *file, KeyCode *code, const wchar_t *characters, int l
 }
 
 static int
-getKeyOperand (DataFile *file, KeyCode *code) {
-  DataOperand name;
+parseKeyCombination (DataFile *file, KeyCombination *key, const wchar_t *characters, int length) {
+  while (1) {
+    const wchar_t *end = wmemchr(characters, WC_C('+'), length);
+    if (!end) break;
 
-  if (getDataOperand(file, &name, "key name")) {
-    if (parseKeyOperand(file, code, name.characters, name.length)) return 1;
+    {
+      int count = end - characters;
+      KeyCode code;
+
+      if (!count) {
+        reportDataError(file, "missing modifier key name");
+        return 0;
+      }
+      if (!parseKeyName(file, &code, characters, count)) return 0;
+
+      if (BITMASK_TEST(key->modifiers, code)) {
+        reportDataError(file, "duplicate modifier key name: %.*" PRIws, count, characters);
+        return 0;
+      }
+      BITMASK_SET(key->modifiers, code);
+
+      length -= count + 1;
+      characters = end + 1;
+    }
+  }
+
+  if (!length) {
+    reportDataError(file, "missing key name");
+    return 0;
+  }
+  if (!parseKeyName(file, &key->code, characters, length)) return 0;
+
+  if (BITMASK_TEST(key->modifiers, key->code)) {
+    reportDataError(file, "duplicate key name: %.*" PRIws, length, characters);
+    return 0;
+  }
+
+  return 1;
+}
+
+static int
+getKeyOperand (DataFile *file, KeyCombination *key) {
+  DataOperand names;
+
+  if (getDataOperand(file, &names, "key combination")) {
+    if (parseKeyCombination(file, key, names.characters, names.length)) return 1;
   }
 
   return 0;
 }
 
 static int
-parseCommandOperand (DataFile *file, int *value, const wchar_t *characters, int length) {
+parseCommandName (DataFile *file, int *value, const wchar_t *characters, int length) {
   const CommandEntry *command = commandTable;
 
   while (command->name) {
@@ -329,7 +370,7 @@ getCommandOperand (DataFile *file, int *value) {
   DataOperand name;
 
   if (getDataOperand(file, &name, "command name")) {
-    if (parseCommandOperand(file, value, name.characters, name.length)) return 1;
+    if (parseCommandName(file, value, name.characters, name.length)) return 1;
   }
 
   return 0;
