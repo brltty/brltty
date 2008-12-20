@@ -73,4 +73,7 @@ char \uFB43	(1234    )  # ⠏ ףּ [HEBREW LETTER FINAL PE WITH DAGESH]
 char \uFB44	(1234    )  # ⠏ פּ [HEBREW LETTER PE WITH DAGESH]
 char \uFB4A	(12  56  )  # ⠳ תּ [HEBREW LETTER TAV WITH DAGESH]
 
+include letters-latin-dot8.tti
+include numbers-nemeth.tti
+include punctuation-alternate.tti
 include common.tti

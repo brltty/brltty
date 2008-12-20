@@ -106,13 +106,10 @@ char \u0554	(1 3   7 )  # ⡅ Ք [ARMENIAN CAPITAL LETTER KEH]
 char \u0555	(1 3 5 7 )  # ⡕ Օ [ARMENIAN CAPITAL LETTER OH]
 char \u0556	(12 4  7 )  # ⡋ Ֆ [ARMENIAN CAPITAL LETTER FEH]
 
-# the numbers 0-9 are represented by the letters j,a-i with dot 8 added
-include numbers-dot8.tti
-
-# punctuation as usual
-include punctuation-basic.tti
-# except
-char \x3F	( 23  6  )  # ⠦ ? [QUESTION MARK]
+# punctuation
 char \u055D	(     6  )  # ⠠ ՝ [ARMENIAN COMMA]
 
+include letters-latin-dot8.tti
+include numbers-nemeth.tti
+include punctuation-alternate.tti
 include common.tti

@@ -1,0 +1,53 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2008 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+# This BRLTTY text subtable defines alternate braille representations for the
+# ASCII punctuation characters.
+
+char \x21	( 23 5  8)  # ⢖ ! [EXCLAMATION MARK]
+char \x22	( 23 56 8)  # ⢶ " [QUOTATION MARK]
+char \x23	(  3456 8)  # ⢼ # [NUMBER SIGN]
+char \x24	(12 4 6 8)  # ⢫ $ [DOLLAR SIGN]
+char \x25	(1  4 6 8)  # ⢩ % [PERCENT SIGN]
+char \x26	( 234 6 8)  # ⢮ & [AMPERSAND]
+char \x27	(  3     )  # ⠄ ' [APOSTROPHE]
+char \x28	( 23  6 8)  # ⢦ ( [LEFT PARENTHESIS]
+char \x29	(  3 56 8)  # ⢴ ) [RIGHT PARENTHESIS]
+char \x2A	(  3 5  8)  # ⢔ * [ASTERISK]
+char \x2B	(  34 6 8)  # ⢬ + [PLUS SIGN]
+char \x2C	( 2     8)  # ⢂ , [COMMA]
+char \x2D	(  3  6  )  # ⠤ - [HYPHEN-MINUS]
+char \x2E	( 2  56 8)  # ⢲ . [FULL STOP]
+char \x2F	(  34   8)  # ⢌ / [SOLIDUS]
+char \x3A	( 2  5  8)  # ⢒ : [COLON]
+char \x3B	( 23    8)  # ⢆ ; [SEMICOLON]
+char \x3C	(12   6 8)  # ⢣ < [LESS-THAN SIGN]
+char \x3D	(123456 8)  # ⢿ = [EQUALS SIGN]
+char \x3E	(  345  8)  # ⢜ > [GREATER-THAN SIGN]
+char \x3F	( 2   6 8)  # ⢢ ? [QUESTION MARK]
+char \x40	(   4  7 )  # ⡈ @ [COMMERCIAL AT]
+char \x5B	(123 56 8)  # ⢷ [ [LEFT SQUARE BRACKET]
+char \x5C	(1    6 8)  # ⢡ \ [REVERSE SOLIDUS]
+char \x5D	( 23456 8)  # ⢾ ] [RIGHT SQUARE BRACKET]
+char \x5E	(   45 7 )  # ⡘ ^ [CIRCUMFLEX ACCENT]
+char \x5F	(   456  )  # ⠸ _ [LOW LINE]
+char \x60	(   4    )  # ⠈ ` [GRAVE ACCENT]
+char \x7B	( 23  678)  # ⣦ { [LEFT CURLY BRACKET]
+char \x7C	(12  56 8)  # ⢳ | [VERTICAL LINE]
+char \x7D	(  3 5678)  # ⣴ } [RIGHT CURLY BRACKET]
+char \x7E	(   45   )  # ⠘ ~ [TILDE]

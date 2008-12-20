@@ -28,12 +28,7 @@
 # the standard representations for the letters of the Cyrillic alphabet
 include letters-cyrillic.tti
 
-# the numbers 0-9 are represented by the letters j,a-i with dot 8 added
-include numbers-dot8.tti
-
-# punctuation as usual
-include punctuation-basic.tti
-# except
-char \x3F	( 2   6  )  # ⠢ ? [QUESTION MARK]
-
+include letters-latin-dot8.tti
+include numbers-nemeth.tti
+include punctuation-alternate.tti
 include common.tti

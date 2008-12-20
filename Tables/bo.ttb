@@ -84,3 +84,8 @@ char \u0FB4	(1   56  )  # ⠱  ྴ [TIBETAN SUBJOINED LETTER SHA]
 char \u0FB6	( 234 6  )  # ⠮  ྶ [TIBETAN SUBJOINED LETTER SA]
 char \u0FB7	(12  5   )  # ⠓  ྷ [TIBETAN SUBJOINED LETTER HA]
 char \u0FB8	(1       )  # ⠁  ྸ [TIBETAN SUBJOINED LETTER A]
+
+include letters-latin-dot8.tti
+include numbers-nemeth.tti
+include punctuation-alternate.tti
+include common.tti
