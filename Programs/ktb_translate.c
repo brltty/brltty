@@ -39,7 +39,7 @@ getKeyBinding (KeyTable *table, KeyCodeMask modifiers, KeyCode code) {
 
   while (count) {
     if ((code == binding->key.code) &&
-        (memcmp(modifiers, binding->key.modifiers, sizeof(binding->key.modifiers)) == 0))
+        (memcmp(modifiers, binding->key.modifiers, KEY_CODE_MASK_SIZE) == 0))
       return binding;
     binding += 1, count -= 1;
   }
@@ -49,7 +49,7 @@ getKeyBinding (KeyTable *table, KeyCodeMask modifiers, KeyCode code) {
 
 int
 isKeySubset (const KeyCodeMask set, const KeyCodeMask subset) {
-  unsigned int count = sizeof(KeyCodeMask) / sizeof(*set);
+  unsigned int count = KEY_CODE_MASK_ELEMENT_COUNT;
 
   while (count) {
     if (~*set & *subset) return 0;

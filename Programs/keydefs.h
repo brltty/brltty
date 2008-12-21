@@ -251,7 +251,10 @@ typedef enum {
   KeyCodeCount
 } KeyCode;
 
-typedef BITMASK(KeyCodeMask, KeyCodeCount, char);
+#define KEY_CODE_MASK_ELEMENT_TYPE char
+typedef BITMASK(KeyCodeMask, KeyCodeCount, KEY_CODE_MASK_ELEMENT_TYPE);
+#define KEY_CODE_MASK_SIZE sizeof(KeyCodeMask)
+#define KEY_CODE_MASK_ELEMENT_COUNT (KEY_CODE_MASK_SIZE / sizeof(KEY_CODE_MASK_ELEMENT_TYPE))
 
 #ifdef __cplusplus
 }

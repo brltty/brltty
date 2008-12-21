@@ -688,7 +688,7 @@ handleKeyEvent (KeyCodeMask modifiers, KeyCode code, int press) {
 
   {
     KeyCodeMask keys;
-    memcpy(keys, modifiers, sizeof(keys));
+    memcpy(keys, modifiers, KEY_CODE_MASK_SIZE);
     BITMASK_SET(keys, code);
     if (isKeyModifiers(keyTable, keys)) return 1;
   }
