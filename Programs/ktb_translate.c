@@ -18,6 +18,9 @@
 
 #include "prologue.h"
 
+#include <string.h>
+
+#include "misc.h"
 #include "ktb.h"
 #include "ktb_internal.h"
 
@@ -29,15 +32,43 @@ getKeyTableItem (KeyTable *table, KeyTableOffset offset) {
 }
 
 const KeyBinding *
-getKeyBinding (KeyTable *table, KeyCode key) {
+getKeyBinding (KeyTable *table, KeyCodeMask modifiers, KeyCode code) {
   const KeyTableHeader *header = table->header.fields;
   const KeyBinding *binding = getKeyTableItem(table, header->bindingsTable);
   unsigned int count = header->bindingsCount;
 
   while (count) {
-    if (key == binding->key.code) return binding;
+    if ((code == binding->key.code) &&
+        (memcmp(modifiers, binding->key.modifiers, sizeof(binding->key.modifiers)) == 0))
+      return binding;
     binding += 1, count -= 1;
   }
 
   return NULL;
+}
+
+int
+isKeySubset (const KeyCodeMask set, const KeyCodeMask subset) {
+  unsigned int count = sizeof(KeyCodeMask) / sizeof(*set);
+
+  while (count) {
+    if (~*set & *subset) return 0;
+    set += 1, subset += 1, count -= 1;
+  }
+
+  return 1;
+}
+
+int
+isKeyModifiers (KeyTable *table, KeyCodeMask modifiers) {
+  const KeyTableHeader *header = table->header.fields;
+  const KeyBinding *binding = getKeyTableItem(table, header->bindingsTable);
+  unsigned int count = header->bindingsCount;
+
+  while (count) {
+    if (isKeySubset(binding->key.modifiers, modifiers)) return 1;
+    binding += 1, count -= 1;
+  }
+
+  return 0;
 }

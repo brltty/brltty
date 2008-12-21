@@ -678,12 +678,19 @@ loadKeyTable (const char *name) {
 }
 
 static int
-handleKeyEvent (KeyCode key, int press) {
-  const KeyBinding *binding = getKeyBinding(keyTable, key);
+handleKeyEvent (KeyCodeMask modifiers, KeyCode code, int press) {
+  const KeyBinding *binding = getKeyBinding(keyTable, modifiers, code);
 
   if (binding) {
     if (press) enqueueCommand(binding->command);
     return 1;
+  }
+
+  {
+    KeyCodeMask keys;
+    memcpy(keys, modifiers, sizeof(keys));
+    BITMASK_SET(keys, code);
+    if (isKeyModifiers(keyTable, keys)) return 1;
   }
 
   return 0;

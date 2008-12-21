@@ -27,6 +27,11 @@
 
 #include "async.h"
 
+typedef struct {
+  KeyEventHandler *handleKeyEvent;
+  KeyCodeMask pressedKeys;
+} KeyboardMonitorData;
+
 static int
 getKeyboardDevice (const KeyboardProperties *requiredProperties) {
   static int keyboardDevice = -1;
@@ -121,6 +126,8 @@ getKeyboardDevice (const KeyboardProperties *requiredProperties) {
 
 static size_t
 handleKeyboardEvent (const AsyncInputResult *result) {
+  KeyboardMonitorData *kmd = result->data;
+
   if (result->error) {
     LogPrint(LOG_DEBUG, "keyboard read error: %s", strerror(result->error));
   } else if (result->end) {
@@ -564,18 +571,24 @@ handleKeyboardEvent (const AsyncInputResult *result) {
              [KEY_BRL_DOT10] = KEY_...,
              [KEY_MIN_INTERESTING] = KEY_... */
         };
+
+        int handled = 0;
         KeyCode code = map[event->code];
+        int press = event->value != 0;
 
         if (code) {
-          KeyEventHandler *handleKeyEvent = result->data;
+          if (!press) BITMASK_CLEAR(kmd->pressedKeys, code);
 
-          if (handleKeyEvent(code, event->value)) {
-            return sizeof(*event);
+          if (kmd->handleKeyEvent(kmd->pressedKeys, code, press)) {
+            handled = 1;
           }
+
+          if (press) BITMASK_SET(kmd->pressedKeys, code);
         } else {
-          LogPrint(LOG_INFO, "unmapped Linux keycode %d", event->code);
+          LogPrint(LOG_INFO, "unmapped Linux keycode: %d", event->code);
         }
 
+        if (handled) return sizeof(*event);
         writeKeyEvent(event->code, event->value);
       } else {
         writeInputEvent(event);
@@ -599,12 +612,21 @@ startKeyboardMonitor (const KeyboardProperties *keyboardProperties, KeyEventHand
     int keyboard = getKeyboardDevice(keyboardProperties);
 
     if (keyboard != -1) {
-      if (asyncRead(keyboard, sizeof(struct input_event), handleKeyboardEvent, handleKeyEvent)) {
+      KeyboardMonitorData *kmd;
+
+      if ((kmd = malloc(sizeof(*kmd)))) {
+        memset(kmd, 0, sizeof(*kmd));
+        kmd->handleKeyEvent = handleKeyEvent;
+
+        if (asyncRead(keyboard, sizeof(struct input_event), handleKeyboardEvent, kmd)) {
 #ifdef EVIOCGRAB
-        ioctl(keyboard, EVIOCGRAB, 1);
+          ioctl(keyboard, EVIOCGRAB, 1);
 #endif /* EVIOCGRAB */
 
-        return 1;
+          return 1;
+        }
+
+        free(kmd);
       }
     }
   }
