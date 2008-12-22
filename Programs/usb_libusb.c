@@ -228,11 +228,13 @@ usbReadEndpoint (
     errno = -result;
   }
 
-#ifdef __MINGW32__
-#ifndef ETIMEDOUT
-  if (errno == 116) errno = EAGAIN;
+#if defined(__MINGW32__) && !defined(ETIMEDOUT)
+#  define ETIMEDOUT 116
+#endif /* __MINGW32__ && !ETIMEDOUT */
+
+#ifdef ETIMEDOUT
+  if (errno == ETIMEDOUT) errno = EAGAIN;
 #endif /* ETIMEDOUT */
-#endif /* __MINGW32__ */
 
   if (errno != EAGAIN) LogError("USB endpoint read");
   return -1;
