@@ -577,7 +577,7 @@ handleKeyboardEvent (const AsyncInputResult *result) {
         int press = event->value != 0;
 
         if (code) {
-          if (!press) BITMASK_CLEAR(kmd->pressedKeys, code);
+          BITMASK_CLEAR(kmd->pressedKeys, code);
 
           if (kmd->handleKeyEvent(kmd->pressedKeys, code, press)) {
             handled = 1;
