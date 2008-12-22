@@ -1143,7 +1143,10 @@ in
       usb_object="darwin"
       ;;
    *)
-      AC_CHECK_HEADERS([usb.h], [AC_HAVE_LIBRARY([usb], [usb_object="libusb"])])
+      AC_CHECK_HEADERS([usb.h], [AC_HAVE_LIBRARY([usb], [dnl
+         usb_object="libusb"
+         LIBS="-lusb ${LIBS}"
+])])
       ;;
 esac
 if test -n "${usb_object}"
