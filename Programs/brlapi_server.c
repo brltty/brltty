@@ -2422,7 +2422,8 @@ out:
 }
 
 void api_flush(BrailleDisplay *brl, BRL_DriverCommandContext caller) {
-  (void) api_readCommand(brl, caller);
+  if (api_readCommand(brl, caller) == BRL_CMD_RESTARTBRL)
+    restartBrailleDriver();
 }
 
 int api_resume(BrailleDisplay *brl) {
