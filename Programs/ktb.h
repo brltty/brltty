@@ -44,9 +44,12 @@ typedef struct {
   int command;
 } KeyBinding;
 
+extern void copyKeyCodeMask (KeyCodeMask to, const KeyCodeMask from);
+extern int sameKeyCodeMasks (const KeyCodeMask mask1, const KeyCodeMask mask2);
+extern int isKeySubset (const KeyCodeMask set, const KeyCodeMask subset);
+
 extern const KeyBinding *getKeyBinding (KeyTable *table, KeyCodeMask modifiers, KeyCode code);
 extern int isKeyModifiers (KeyTable *table, KeyCodeMask modifiers);
-extern int isKeySubset (const KeyCodeMask set, const KeyCodeMask subset);
 
 #ifdef __cplusplus
 }
