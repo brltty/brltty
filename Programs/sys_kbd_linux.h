@@ -29,7 +29,14 @@
 
 typedef struct {
   KeyEventHandler *handleKeyEvent;
+
+#ifdef HAVE_LINUX_INPUT_H
   KeyCodeMask pressedKeys;
+  BITMASK(handledKeys, KEY_MAX+1, char);
+  struct input_event *keyEventBuffer;
+  unsigned int keyEventLimit;
+  unsigned int keyEventCount;
+#endif /* HAVE_LINUX_INPUT_H */
 } KeyboardMonitorData;
 
 static int
@@ -578,18 +585,61 @@ handleKeyboardEvent (const AsyncInputResult *result) {
 
         if (code) {
           BITMASK_CLEAR(kmd->pressedKeys, code);
-
-          if (kmd->handleKeyEvent(kmd->pressedKeys, code, press)) {
-            handled = 1;
-          }
-
+          if (kmd->handleKeyEvent(kmd->pressedKeys, code, press)) handled = 1;
           if (press) BITMASK_SET(kmd->pressedKeys, code);
         } else {
           LogPrint(LOG_INFO, "unmapped Linux keycode: %d", event->code);
         }
 
-        if (handled) return sizeof(*event);
-        writeKeyEvent(event->code, event->value);
+        if (press) {
+          if (handled) {
+            if (kmd->keyEventCount == kmd->keyEventLimit) {
+              unsigned int newLimit = kmd->keyEventLimit? kmd->keyEventLimit<<1: 0X1;
+              struct input_event *newBuffer = realloc(kmd->keyEventBuffer, (newLimit * sizeof(*newBuffer)));
+
+              if (newBuffer) {
+                kmd->keyEventBuffer = newBuffer;
+                kmd->keyEventLimit = newLimit;
+              }
+            }
+
+            if (kmd->keyEventCount < kmd->keyEventLimit) {
+              kmd->keyEventBuffer[kmd->keyEventCount++] = *event;
+              BITMASK_SET(kmd->handledKeys, event->code);
+            }
+          } else {
+            {
+              const struct input_event *keyEvent = kmd->keyEventBuffer;
+
+              while (kmd->keyEventCount) {
+                writeKeyEvent(keyEvent->code, keyEvent->value);
+                keyEvent += 1, kmd->keyEventCount -= 1;
+              }
+            }
+            memset(kmd->handledKeys, 0, sizeof(kmd->handledKeys));
+
+            writeKeyEvent(event->code, event->value);
+          }
+        } else if (BITMASK_TEST(kmd->handledKeys, event->code)) {
+          BITMASK_CLEAR(kmd->handledKeys, event->code);
+
+          {
+            struct input_event *to = kmd->keyEventBuffer;
+            const struct input_event *from = to;
+            unsigned int count = kmd->keyEventCount;
+
+            while (count) {
+              if (from->code != event->code)
+                if (to != from)
+                  *to++ = *from;
+
+              from += 1, count -= 1;
+            }
+            kmd->keyEventCount = to - kmd->keyEventBuffer;
+          }
+        } else {
+          writeKeyEvent(event->code, event->value);
+        }
       } else {
         writeInputEvent(event);
       }
@@ -617,6 +667,12 @@ startKeyboardMonitor (const KeyboardProperties *keyboardProperties, KeyEventHand
       if ((kmd = malloc(sizeof(*kmd)))) {
         memset(kmd, 0, sizeof(*kmd));
         kmd->handleKeyEvent = handleKeyEvent;
+
+#ifdef HAVE_LINUX_INPUT_H
+        kmd->keyEventBuffer = NULL;
+        kmd->keyEventLimit = 0;
+        kmd->keyEventCount = 0;
+#endif /* HAVE_LINUX_INPUT_H */
 
         if (asyncRead(keyboard, sizeof(struct input_event), handleKeyboardEvent, kmd)) {
 #ifdef EVIOCGRAB
