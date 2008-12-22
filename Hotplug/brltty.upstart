@@ -1,0 +1,11 @@
+# BRLTTY is a background process (daemon) providing access to the Linux/Unix
+# console (when in text mode) for a blind person using a refreshable braille
+# display.
+#
+# This service is started automatically by init so that braille output is
+# available as soon as possible on system startup.
+
+start on startup
+console output
+service
+exec /bin/brltty -n
