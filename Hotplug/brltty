@@ -31,10 +31,9 @@ case "${ACTION}"
 in
    add)
       driver="${programName#*-}"
+      device="usb:"
 
-      device=usb:
-
-      echo -b"${driver}" -d"${device}"  && {
+      brltty -b"${driver}" -d"${device}" && {
          [ -n "${REMOVER}" ] && ln -s -f -- "${0}" "${REMOVER}"
       }
       ;;
