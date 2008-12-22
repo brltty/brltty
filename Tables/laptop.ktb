@@ -21,8 +21,8 @@
 bind	LOCK_Capitals+LETTER_R			RESTARTBRL
 bind	LOCK_Capitals+FUNCTION_ArrowUp		LNUP
 bind	LOCK_Capitals+FUNCTION_ArrowDown	LNDN
-bind	LOCK_Capitals+FUNCTION_Home		TOPLEFT
-bind	LOCK_Capitals+FUNCTION_End		BOTLEFT
+bind	LOCK_Capitals+FUNCTION_Home		TOP_LEFT
+bind	LOCK_Capitals+FUNCTION_End		BOT_LEFT
 bind	LOCK_Capitals+FUNCTION_Enter		CSRTRK
 
 # cut and paste
