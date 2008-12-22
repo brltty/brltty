@@ -285,6 +285,9 @@ static RepeatState repeatState;
 static int coreActive; /* Whether core is active */
 static int offline; /* Whether device is offline */
 static int driverConstructed; /* Whether device is really opened, protected by driverMutex */
+static wchar_t *coreWindowText; /* Last text written by the core */
+static unsigned char *coreWindowDots; /* Last dots written by the core */
+static int coreWindowCursor; /* Last cursor position set by the core */
 static pthread_mutex_t suspendMutex; /* Protects use of driverConstructed state */
 
 static const char *auth = BRLAPI_DEFAUTH;
@@ -2233,6 +2236,9 @@ static inline void setCurrentRootTty(void) {
 static int api_writeWindow(BrailleDisplay *brl, const wchar_t *text)
 {
   int ok = 1;
+  memcpy(coreWindowText, text, displaySize * sizeof(*coreWindowText));
+  memcpy(coreWindowDots, brl->buffer, displaySize * sizeof(*coreWindowDots));
+  coreWindowCursor = brl->cursor;
   setCurrentRootTty();
   pthread_mutex_lock(&connectionsMutex);
   pthread_mutex_lock(&rawMutex);
@@ -2342,7 +2348,17 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
     /* no RAW, no connection filling tty, hence suspend if needed */
     pthread_mutex_lock(&driverMutex);
     if (!coreActive) {
-      if (driverConstructed) suspendDriver(brl);
+      if (driverConstructed) {
+	/* Put back core output before suspending */
+	unsigned char *oldbuf = disp->buffer;
+	disp->buffer = coreWindowDots;
+	brl->cursor = coreWindowCursor;
+	pthread_mutex_lock(&driverMutex);
+	trueBraille->writeWindow(brl, coreWindowText);
+	pthread_mutex_unlock(&driverMutex);
+	disp->buffer = oldbuf;
+	suspendDriver(brl);
+      }
       pthread_mutex_unlock(&driverMutex);
       pthread_mutex_unlock(&rawMutex);
       goto out;
@@ -2421,6 +2437,8 @@ int api_resume(BrailleDisplay *brl) {
       displayDimensions[0] = htonl(brl->textColumns);
       displayDimensions[1] = htonl(brl->textRows);
       displaySize = brl->textColumns * brl->textRows;
+      coreWindowText = realloc(coreWindowText, displaySize * sizeof(*coreWindowText));
+      coreWindowDots = realloc(coreWindowDots, displaySize * sizeof(*coreWindowDots));
       disp = brl;
     }
   }
@@ -2470,6 +2488,9 @@ void api_link(BrailleDisplay *brl)
   displayDimensions[0] = htonl(brl->textColumns);
   displayDimensions[1] = htonl(brl->textRows);
   displaySize = brl->textColumns * brl->textRows;
+  coreWindowText = calloc(displaySize, sizeof(*coreWindowText));
+  coreWindowDots = calloc(displaySize, sizeof(*coreWindowDots));
+  coreWindowCursor = 0;
   disp = brl;
 }
 
@@ -2478,6 +2499,10 @@ void api_link(BrailleDisplay *brl)
 void api_unlink(BrailleDisplay *brl)
 {
   LogPrint(LOG_DEBUG, "api unlink");
+  free(coreWindowText);
+  coreWindowText = NULL;
+  free(coreWindowDots);
+  coreWindowDots = NULL;
   braille=trueBraille;
   trueBraille=&noBraille;
   pthread_mutex_lock(&driverMutex);
