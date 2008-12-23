@@ -277,13 +277,8 @@ getKeyTableHeader (KeyTableData *ktd) {
 }
 
 static int
-compareKeyName (const void *target, const void *element) {
-  const DataOperand *name = target;
-  const KeyNameEntry *const *key = element;
-
-  const wchar_t *location1 = name->characters;
-  const wchar_t *end1 = location1 + name->length;
-  const char *location2 = (*key)->name;
+compareToName (const wchar_t *location1, int length1, const char *location2) {
+  const wchar_t *end1 = location1 + length1;
 
   while (1) {
     if (location1 == end1) return *location2? -1: 0;
@@ -303,12 +298,19 @@ compareKeyName (const void *target, const void *element) {
 }
 
 static int
+compareToKeyName (const void *target, const void *element) {
+  const DataOperand *name = target;
+  const KeyNameEntry *const *key = element;
+  return compareToName(name->characters, name->length, (*key)->name);
+}
+
+static int
 parseKeyName (DataFile *file, KeyCode *code, const wchar_t *characters, int length, KeyTableData *ktd) {
   DataOperand name = {
     .characters = characters,
     .length = length
   };
-  const KeyNameEntry **key = bsearch(&name, ktd->keyNameTable, ktd->keyNameCount, sizeof(*ktd->keyNameTable), compareKeyName);
+  const KeyNameEntry **key = bsearch(&name, ktd->keyNameTable, ktd->keyNameCount, sizeof(*ktd->keyNameTable), compareToKeyName);
 
   if (key) {
     *code = (*key)->code;
@@ -372,29 +374,10 @@ getKeyOperand (DataFile *file, KeyCombination *key, KeyTableData *ktd) {
 }
 
 static int
-compareCommandName (const void *target, const void *element) {
+compareToCommandName (const void *target, const void *element) {
   const DataOperand *name = target;
   const CommandEntry *const *command = element;
-
-  const wchar_t *location1 = name->characters;
-  const wchar_t *end1 = location1 + name->length;
-  const char *location2 = (*command)->name;
-
-  while (1) {
-    if (location1 == end1) return *location2? -1: 0;
-    if (!*location2) return 1;
-
-    {
-      wchar_t character1 = towlower(*location1);
-      char character2 = tolower(*location2);
-
-      if (character1 < character2) return -1;
-      if (character1 > character2) return 1;
-    }
-
-    location1 += 1;
-    location2 += 1;
-  }
+  return compareToName(name->characters, name->length, (*command)->name);
 }
 
 static int
@@ -403,7 +386,7 @@ parseCommandName (DataFile *file, int *value, const wchar_t *characters, int len
     .characters = characters,
     .length = length
   };
-  const CommandEntry **command = bsearch(&name, ktd->commandTable, ktd->commandCount, sizeof(*ktd->commandTable), compareCommandName);
+  const CommandEntry **command = bsearch(&name, ktd->commandTable, ktd->commandCount, sizeof(*ktd->commandTable), compareToCommandName);
 
   if (command) {
     *value = (*command)->code;
