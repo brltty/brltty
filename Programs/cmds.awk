@@ -33,7 +33,7 @@ function brlBlock(name, symbol, value, help) {
 }
 
 function brlKey(name, symbol, value, help) {
-  writeCommandEntry(name, "BRL_BLK_PASSKEY+" symbol, help)
+  writeCommandEntry("KEY_" name, "BRL_BLK_PASSKEY+" symbol, help)
 }
 
 function brlFlag(name, symbol, value, help) {
