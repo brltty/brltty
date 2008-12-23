@@ -28,7 +28,7 @@ bind KeyPad_One_End Bot_Left
 bind KeyPad_Nine_PageUp PrDifLn
 bind KeyPad_Three_PageDown NxDifLn
 
-bind KeyPad_Zero_Insert+KeyPad_Five Home
+bind KeyPad_Zero_Insert+KeyPad_Five PrefMenu
 bind KeyPad_Zero_Insert+KeyPad_Four_ArrowLeft Freeze
 bind KeyPad_Zero_Insert+KeyPad_Six_ArrowRight CsrJmp_Vert
 bind KeyPad_Zero_Insert+KeyPad_Eight_ArrowUp PrPgrph
