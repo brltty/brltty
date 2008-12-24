@@ -34,17 +34,7 @@ extern void destroyKeyTable (KeyTable *table);
 
 extern char *ensureKeyTableExtension (const char *path);
 
-typedef struct {
-  KeyCode code;
-  KeyCodeMask modifiers;
-} KeyCombination;
-
-typedef struct {
-  KeyCombination key;
-  int command;
-} KeyBinding;
-
-extern const KeyBinding *getKeyBinding (KeyTable *table, const KeyCodeSet *modifiers, KeyCode code);
+extern int getKeyCommand (KeyTable *table, const KeyCodeSet *modifiers, KeyCode code);
 extern int isKeyModifiers (KeyTable *table, const KeyCodeSet *modifiers);
 
 #ifdef __cplusplus

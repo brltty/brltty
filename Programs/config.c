@@ -679,10 +679,10 @@ loadKeyTable (const char *name) {
 
 static int
 handleKeyEvent (const KeyCodeSet *modifiers, KeyCode code, int press) {
-  const KeyBinding *binding = getKeyBinding(keyTable, modifiers, code);
+  int command = getKeyCommand(keyTable, modifiers, code);
 
-  if (binding) {
-    if (press) enqueueCommand(binding->command);
+  if (command != EOF) {
+    if (press) enqueueCommand(command);
     return 1;
   }
 

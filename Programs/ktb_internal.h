@@ -23,6 +23,16 @@
 extern "C" {
 #endif /* __cplusplus */
 
+typedef struct {
+  KeyCode code;
+  KeyCodeMask modifiers;
+} KeyCombination;
+
+typedef struct {
+  KeyCombination key;
+  int command;
+} KeyBinding;
+
 typedef uint32_t KeyTableOffset;
 
 typedef struct {
