@@ -43,3 +43,30 @@ isKeySubset (const KeyCodeMask set, const KeyCodeMask subset) {
 
   return 1;
 }
+
+int
+addKeyCode (KeyCodeSet *set, KeyCode code) {
+  if (BITMASK_TEST(set->mask, code)) return 0;
+  BITMASK_SET(set->mask, code);
+  set->codes[set->count++] = code;
+  return 1;
+}
+
+int
+removeKeyCode (KeyCodeSet *set, KeyCode code) {
+  if (!BITMASK_TEST(set->mask, code)) return 0;
+  BITMASK_CLEAR(set->mask, code);
+
+  {
+    int index;
+    for (index=0; index<set->count; index+=1) {
+      if (set->codes[index] == code) {
+        memmove(&set->codes[index], &set->codes[index+1],
+                ((--set->count - index) * sizeof(set->codes[0])));
+        break;
+      }
+    }
+  }
+
+  return 1;
+}

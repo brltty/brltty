@@ -678,7 +678,7 @@ loadKeyTable (const char *name) {
 }
 
 static int
-handleKeyEvent (KeyCodeMask modifiers, KeyCode code, int press) {
+handleKeyEvent (const KeyCodeSet *modifiers, KeyCode code, int press) {
   const KeyBinding *binding = getKeyBinding(keyTable, modifiers, code);
 
   if (binding) {
@@ -687,10 +687,9 @@ handleKeyEvent (KeyCodeMask modifiers, KeyCode code, int press) {
   }
 
   {
-    KeyCodeMask keys;
-    copyKeyCodeMask(keys, modifiers);
-    BITMASK_SET(keys, code);
-    if (isKeyModifiers(keyTable, keys)) return 1;
+    KeyCodeSet keys = *modifiers;
+    addKeyCode(&keys, code);
+    if (isKeyModifiers(keyTable, &keys)) return 1;
   }
 
   return 0;

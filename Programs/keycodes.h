@@ -260,6 +260,15 @@ extern void copyKeyCodeMask (KeyCodeMask to, const KeyCodeMask from);
 extern int sameKeyCodeMasks (const KeyCodeMask mask1, const KeyCodeMask mask2);
 extern int isKeySubset (const KeyCodeMask set, const KeyCodeMask subset);
 
+typedef struct {
+  KeyCodeMask mask;
+  unsigned int count;
+  KeyCode codes[KeyCodeCount];
+} KeyCodeSet;
+
+extern int addKeyCode (KeyCodeSet *set, KeyCode code);
+extern int removeKeyCode (KeyCodeSet *set, KeyCode code);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

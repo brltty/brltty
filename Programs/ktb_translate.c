@@ -32,14 +32,14 @@ getKeyTableItem (KeyTable *table, KeyTableOffset offset) {
 }
 
 const KeyBinding *
-getKeyBinding (KeyTable *table, KeyCodeMask modifiers, KeyCode code) {
+getKeyBinding (KeyTable *table, const KeyCodeSet *modifiers, KeyCode code) {
   const KeyTableHeader *header = table->header.fields;
   const KeyBinding *binding = getKeyTableItem(table, header->bindingsTable);
   unsigned int count = header->bindingsCount;
 
   while (count) {
     if ((code == binding->key.code) &&
-        sameKeyCodeMasks(modifiers, binding->key.modifiers))
+        sameKeyCodeMasks(modifiers->mask, binding->key.modifiers))
       return binding;
     binding += 1, count -= 1;
   }
@@ -48,13 +48,13 @@ getKeyBinding (KeyTable *table, KeyCodeMask modifiers, KeyCode code) {
 }
 
 int
-isKeyModifiers (KeyTable *table, KeyCodeMask modifiers) {
+isKeyModifiers (KeyTable *table, const KeyCodeSet *modifiers) {
   const KeyTableHeader *header = table->header.fields;
   const KeyBinding *binding = getKeyTableItem(table, header->bindingsTable);
   unsigned int count = header->bindingsCount;
 
   while (count) {
-    if (isKeySubset(binding->key.modifiers, modifiers)) return 1;
+    if (isKeySubset(binding->key.modifiers, modifiers->mask)) return 1;
     binding += 1, count -= 1;
   }
 

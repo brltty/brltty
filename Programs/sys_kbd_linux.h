@@ -31,7 +31,7 @@ typedef struct {
   KeyEventHandler *handleKeyEvent;
 
 #ifdef HAVE_LINUX_INPUT_H
-  KeyCodeMask pressedKeys;
+  KeyCodeSet pressedKeys;
   BITMASK(handledKeys, KEY_MAX+1, char);
   struct input_event *keyEventBuffer;
   unsigned int keyEventLimit;
@@ -584,9 +584,9 @@ handleKeyboardEvent (const AsyncInputResult *result) {
         int press = event->value != 0;
 
         if (code) {
-          BITMASK_CLEAR(kmd->pressedKeys, code);
-          if (kmd->handleKeyEvent(kmd->pressedKeys, code, press)) handled = 1;
-          if (press) BITMASK_SET(kmd->pressedKeys, code);
+          removeKeyCode(&kmd->pressedKeys, code);
+          if (kmd->handleKeyEvent(&kmd->pressedKeys, code, press)) handled = 1;
+          if (press) addKeyCode(&kmd->pressedKeys, code);
         } else {
           LogPrint(LOG_INFO, "unmapped Linux keycode: %d", event->code);
         }

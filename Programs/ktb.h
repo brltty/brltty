@@ -44,8 +44,8 @@ typedef struct {
   int command;
 } KeyBinding;
 
-extern const KeyBinding *getKeyBinding (KeyTable *table, KeyCodeMask modifiers, KeyCode code);
-extern int isKeyModifiers (KeyTable *table, KeyCodeMask modifiers);
+extern const KeyBinding *getKeyBinding (KeyTable *table, const KeyCodeSet *modifiers, KeyCode code);
+extern int isKeyModifiers (KeyTable *table, const KeyCodeSet *modifiers);
 
 #ifdef __cplusplus
 }
