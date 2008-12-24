@@ -16,8 +16,8 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_KEYDEFS
-#define BRLTTY_INCLUDED_KEYDEFS
+#ifndef BRLTTY_INCLUDED_KEYCODES
+#define BRLTTY_INCLUDED_KEYCODES
 
 #ifdef __cplusplus
 extern "C" {
@@ -256,8 +256,12 @@ typedef BITMASK(KeyCodeMask, KeyCodeCount, KEY_CODE_MASK_ELEMENT_TYPE);
 #define KEY_CODE_MASK_SIZE sizeof(KeyCodeMask)
 #define KEY_CODE_MASK_ELEMENT_COUNT (KEY_CODE_MASK_SIZE / sizeof(KEY_CODE_MASK_ELEMENT_TYPE))
 
+extern void copyKeyCodeMask (KeyCodeMask to, const KeyCodeMask from);
+extern int sameKeyCodeMasks (const KeyCodeMask mask1, const KeyCodeMask mask2);
+extern int isKeySubset (const KeyCodeMask set, const KeyCodeMask subset);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_KEYDEFS */
+#endif /* BRLTTY_INCLUDED_KEYCODES */
