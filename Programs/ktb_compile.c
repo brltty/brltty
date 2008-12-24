@@ -182,7 +182,7 @@ static const KeyNameEntry keyNameTable[] = {
   {"KEYPAD_Plus", KEY_KEYPAD_Plus}, {"KPPlus", KEY_KEYPAD_Plus},
   {"KEYPAD_Enter", KEY_KEYPAD_Enter}, {"KPEnter", KEY_KEYPAD_Enter},
   {"KEYPAD_One_End", KEY_KEYPAD_One_End},
-  {"KP1", KEY_KEYPAD_One_End}, {"KPEnd", KEY_KEYPAD_One_End}
+  {"KP1", KEY_KEYPAD_One_End}, {"KPEnd", KEY_KEYPAD_One_End},
   {"KEYPAD_Two_ArrowDown", KEY_KEYPAD_Two_ArrowDown},
   {"KP2", KEY_KEYPAD_Two_ArrowDown}, {"KPArrowDown", KEY_KEYPAD_Two_ArrowDown},
   {"KEYPAD_Three_PageDown", KEY_KEYPAD_Three_PageDown},
