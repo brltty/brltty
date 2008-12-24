@@ -18,21 +18,21 @@
 
 # BRLTTY Key Table - Bindings for keyboards without a keypad (laptop)
 
-bind	LOCK_Capitals+LETTER_R			RESTARTBRL
-bind	LOCK_Capitals+FUNCTION_ArrowUp		LNUP
-bind	LOCK_Capitals+FUNCTION_ArrowDown	LNDN
-bind	LOCK_Capitals+FUNCTION_Home		TOP_LEFT
-bind	LOCK_Capitals+FUNCTION_End		BOT_LEFT
-bind	LOCK_Capitals+FUNCTION_Enter		CSRTRK
+bind	CapsLock+R			RESTARTBRL
+bind	CapsLock+ArrowUp		LNUP
+bind	CapsLock+ArrowDown		LNDN
+bind	CapsLock+Home			TOP_LEFT
+bind	CapsLock+End			BOT_LEFT
+bind	CapsLock+Enter			CSRTRK
 
 # cut and paste
-bind	LOCK_Capitals+LETTER_V			PASTE
+bind	CapsLock+V			PASTE
 
 # speech
-bind	LOCK_Capitals+FUNCTION_PageUp		SAY_ABOVE
-bind	LOCK_Capitals+FUNCTION_Space		SAY_LINE
-bind	LOCK_Capitals+FUNCTION_PageDown		SAY_BELOW
-bind	LOCK_Capitals+FUNCTION_F5		SAY_SLOWER
-bind	LOCK_Capitals+FUNCTION_F6		SAY_FASTER
-bind	LOCK_Capitals+FUNCTION_F7		SAY_SOFTER
-bind	LOCK_Capitals+FUNCTION_F8		SAY_LOUDER
+bind	CapsLock+PageUp			SAY_ABOVE
+bind	CapsLock+Space			SAY_LINE
+bind	CapsLock+PageDown		SAY_BELOW
+bind	CapsLock+F5			SAY_SLOWER
+bind	CapsLock+F6			SAY_FASTER
+bind	CapsLock+F7			SAY_SOFTER
+bind	CapsLock+F8			SAY_LOUDER

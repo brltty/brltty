@@ -18,32 +18,32 @@
 
 # BRLTTY Key Table - Bindings for keypad-based navigation.
 
-bind KeyPad_Five Home
-bind KeyPad_Four_ArrowLeft Back
-bind KeyPad_Six_ArrowRight CsrTrk
-bind KeyPad_Eight_ArrowUp LnUp
-bind KeyPad_Two_ArrowDown LnDn
-bind KeyPad_Seven_Home Top_Left
-bind KeyPad_One_End Bot_Left
-bind KeyPad_Nine_PageUp PrDifLn
-bind KeyPad_Three_PageDown NxDifLn
+bind KP5 Home
+bind KPArrowLeft Back
+bind KPArrowRight CsrTrk
+bind KPArrowUp LnUp
+bind KPArrowDown LnDn
+bind KPHome Top_Left
+bind KPEnd Bot_Left
+bind KPPageUp PrDifLn
+bind KPPageDown NxDifLn
 
-bind KeyPad_Zero_Insert+KeyPad_Five PrefMenu
-bind KeyPad_Zero_Insert+KeyPad_Four_ArrowLeft Freeze
-bind KeyPad_Zero_Insert+KeyPad_Six_ArrowRight CsrJmp_Vert
-bind KeyPad_Zero_Insert+KeyPad_Eight_ArrowUp PrPgrph
-bind KeyPad_Zero_Insert+KeyPad_Two_ArrowDown NxPgrph
-bind KeyPad_Zero_Insert+KeyPad_Seven_Home PrPrompt
-bind KeyPad_Zero_Insert+KeyPad_One_End NxPrompt
-bind KeyPad_Zero_Insert+KeyPad_Nine_PageUp AttrUp
-bind KeyPad_Zero_Insert+KeyPad_Three_PageDown AttrDn
+bind KPInsert+KP5 PrefMenu
+bind KPInsert+KPArrowLeft Freeze
+bind KPInsert+KPArrowRight CsrJmp_Vert
+bind KPInsert+KPArrowUp PrPgrph
+bind KPInsert+KPArrowDown NxPgrph
+bind KPInsert+KPHome PrPrompt
+bind KPInsert+KPEnd NxPrompt
+bind KPInsert+KPPageUp AttrUp
+bind KPInsert+KPPageDown AttrDn
 
-bind KeyPad_Enter+KeyPad_Five Say_Line
-bind KeyPad_Enter+KeyPad_Eight_ArrowUp Say_Above
-bind KeyPad_Enter+KeyPad_Two_ArrowDown Say_Below
-bind KeyPad_Enter+KeyPad_Four_ArrowLeft Mute
-bind KeyPad_Enter+KeyPad_Six_ArrowRight AutoSpeak
-bind KeyPad_Enter+KeyPad_Seven_Home Say_Slower
-bind KeyPad_Enter+KeyPad_Nine_PageUp Say_Faster
-bind KeyPad_Enter+KeyPad_One_End Say_Softer
-bind KeyPad_Enter+KeyPad_Three_PageDown Say_Louder
+bind KPEnter+KP5 Say_Line
+bind KPEnter+KPArrowUp Say_Above
+bind KPEnter+KPArrowDown Say_Below
+bind KPEnter+KPArrowLeft Mute
+bind KPEnter+KPArrowRight AutoSpeak
+bind KPEnter+KP7 Say_Slower
+bind KPEnter+KP9 Say_Faster
+bind KPEnter+KP1 Say_Softer
+bind KPEnter+KP3 Say_Louder
