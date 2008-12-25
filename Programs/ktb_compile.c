@@ -487,7 +487,7 @@ static int
 compareKeyNames (const void *element1, const void *element2) {
   const KeyNameEntry *const *key1 = element1;
   const KeyNameEntry *const *key2 = element2;
-  return strcmp((*key1)->name, (*key2)->name);
+  return strcasecmp((*key1)->name, (*key2)->name);
 }
 
 static int
@@ -520,7 +520,7 @@ static int
 compareCommandNames (const void *element1, const void *element2) {
   const CommandEntry *const *command1 = element1;
   const CommandEntry *const *command2 = element2;
-  return strcmp((*command1)->name, (*command2)->name);
+  return strcasecmp((*command1)->name, (*command2)->name);
 }
 
 static int
