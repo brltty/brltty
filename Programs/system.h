@@ -101,7 +101,13 @@ extern void writePort1 (unsigned short int port, unsigned char value);
 #include "keyboard.h"
 #include "keycodes.h"
 
-typedef int KeyEventHandler (const KeyCodeSet *modifiers, KeyCode code, int press);
+typedef enum {
+  PKS_NO,
+  PKS_MAYBE,
+  PKS_YES
+} PressedKeysState;
+
+typedef PressedKeysState KeyEventHandler (const KeyCodeSet *modifiers, KeyCode code, int press);
 
 extern int startKeyboardMonitor (const KeyboardProperties *keyboardProperties, KeyEventHandler handleKeyEvent);
 

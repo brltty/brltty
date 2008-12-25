@@ -677,22 +677,22 @@ loadKeyTable (const char *name) {
   return 1;
 }
 
-static int
+static PressedKeysState
 handleKeyEvent (const KeyCodeSet *modifiers, KeyCode code, int press) {
   int command = getKeyCommand(keyTable, modifiers, code);
 
   if (command != EOF) {
     if (press) enqueueCommand(command);
-    return 1;
+    return PKS_YES;
   }
 
   {
     KeyCodeSet keys = *modifiers;
     addKeyCode(&keys, code);
-    if (isKeyModifiers(keyTable, &keys)) return 1;
+    if (isKeyModifiers(keyTable, &keys)) return PKS_MAYBE;
   }
 
-  return 0;
+  return PKS_NO;
 }
 
 static void scheduleKeyboardMonitor (int interval);
