@@ -39,11 +39,11 @@ typedef struct {
   unsigned int keyEventLimit;
   unsigned int keyEventCount;
 #endif /* HAVE_LINUX_INPUT_H */
-} KeyboardMonitorData;
+} KeyboardEventData;
 
 static size_t
 handleKeyboardEvent (const AsyncInputResult *result) {
-  KeyboardMonitorData *kmd = result->data;
+  KeyboardEventData *ked = result->data;
 
   if (result->error) {
     LogPrint(LOG_DEBUG, "keyboard read error: %s", strerror(result->error));
@@ -495,9 +495,9 @@ handleKeyboardEvent (const AsyncInputResult *result) {
           KeyCode code = map[event->code];
 
           if (code) {
-            removeKeyCode(&kmd->pressedKeys, code);
-            state = kmd->handleKeyEvent(&kmd->pressedKeys, code, press);
-            if (press) addKeyCode(&kmd->pressedKeys, code);
+            removeKeyCode(&ked->pressedKeys, code);
+            state = ked->handleKeyEvent(&ked->pressedKeys, code, press);
+            if (press) addKeyCode(&ked->pressedKeys, code);
           } else {
             state = PKS_NO;
             LogPrint(LOG_INFO, "unmapped Linux keycode: %d", event->code);
@@ -513,7 +513,7 @@ handleKeyboardEvent (const AsyncInputResult *result) {
           WriteKeysAction action = WKA_NONE;
 
           if (press) {
-            kmd->justModifiers = state == PKS_MAYBE;
+            ked->justModifiers = state == PKS_MAYBE;
 
             switch (state) {
               case PKS_NO:
@@ -521,30 +521,30 @@ handleKeyboardEvent (const AsyncInputResult *result) {
                 break;
 
               default:
-                if (kmd->keyEventCount == kmd->keyEventLimit) {
-                  unsigned int newLimit = kmd->keyEventLimit? kmd->keyEventLimit<<1: 0X1;
-                  struct input_event *newBuffer = realloc(kmd->keyEventBuffer, (newLimit * sizeof(*newBuffer)));
+                if (ked->keyEventCount == ked->keyEventLimit) {
+                  unsigned int newLimit = ked->keyEventLimit? ked->keyEventLimit<<1: 0X1;
+                  struct input_event *newBuffer = realloc(ked->keyEventBuffer, (newLimit * sizeof(*newBuffer)));
 
                   if (newBuffer) {
-                    kmd->keyEventBuffer = newBuffer;
-                    kmd->keyEventLimit = newLimit;
+                    ked->keyEventBuffer = newBuffer;
+                    ked->keyEventLimit = newLimit;
                   }
                 }
 
-                if (kmd->keyEventCount < kmd->keyEventLimit) {
-                  kmd->keyEventBuffer[kmd->keyEventCount++] = *event;
-                  BITMASK_SET(kmd->handledKeys, event->code);
+                if (ked->keyEventCount < ked->keyEventLimit) {
+                  ked->keyEventBuffer[ked->keyEventCount++] = *event;
+                  BITMASK_SET(ked->handledKeys, event->code);
                 }
 
                 break;
             }
-          } else if (kmd->justModifiers) {
-            kmd->justModifiers = 0;
+          } else if (ked->justModifiers) {
+            ked->justModifiers = 0;
             action = WKA_ALL;
-          } else if (BITMASK_TEST(kmd->handledKeys, event->code)) {
-            struct input_event *to = kmd->keyEventBuffer;
+          } else if (BITMASK_TEST(ked->handledKeys, event->code)) {
+            struct input_event *to = ked->keyEventBuffer;
             const struct input_event *from = to;
-            unsigned int count = kmd->keyEventCount;
+            unsigned int count = ked->keyEventCount;
 
             while (count) {
               if (from->code != event->code)
@@ -554,22 +554,22 @@ handleKeyboardEvent (const AsyncInputResult *result) {
               from += 1, count -= 1;
             }
 
-            kmd->keyEventCount = to - kmd->keyEventBuffer;
-            BITMASK_CLEAR(kmd->handledKeys, event->code);
+            ked->keyEventCount = to - ked->keyEventBuffer;
+            BITMASK_CLEAR(ked->handledKeys, event->code);
           } else {
             action = WKA_CURRENT;
           }
 
           switch (action) {
             case WKA_ALL: {
-              const struct input_event *keyEvent = kmd->keyEventBuffer;
+              const struct input_event *keyEvent = ked->keyEventBuffer;
 
-              while (kmd->keyEventCount) {
+              while (ked->keyEventCount) {
                 writeKeyEvent(keyEvent->code, keyEvent->value);
-                keyEvent += 1, kmd->keyEventCount -= 1;
+                keyEvent += 1, ked->keyEventCount -= 1;
               }
 
-              memset(kmd->handledKeys, 0, sizeof(kmd->handledKeys));
+              memset(ked->handledKeys, 0, sizeof(ked->handledKeys));
             }
 
             case WKA_CURRENT:
@@ -593,8 +593,13 @@ handleKeyboardEvent (const AsyncInputResult *result) {
   return 0;
 }
 
+typedef struct {
+  KeyEventHandler *handleKeyEvent;
+  KeyboardProperties properties;
+} KeyboardMonitorData;
+
 static int
-monitorKeyboard (const char *path, const KeyboardProperties *requiredProperties, KeyEventHandler handleKeyEvent) {
+monitorKeyboard (const char *path, const KeyboardMonitorData *kmd) {
   {
     struct stat status;
     if (stat(path, &status) == -1) return 0;
@@ -642,23 +647,23 @@ monitorKeyboard (const char *path, const KeyboardProperties *requiredProperties,
         }
       }
       
-      if (checkKeyboardProperties(&actualProperties, requiredProperties)) {
+      if (checkKeyboardProperties(&actualProperties, &kmd->properties)) {
         LogPrint(LOG_DEBUG, "testing keyboard device: %s", path);
 
         if (hasInputEvent(device, EV_KEY, KEY_ENTER, KEY_MAX)) {
-          KeyboardMonitorData *kmd;
+          KeyboardEventData *ked;
 
-          if ((kmd = malloc(sizeof(*kmd)))) {
-            memset(kmd, 0, sizeof(*kmd));
-            kmd->handleKeyEvent = handleKeyEvent;
+          if ((ked = malloc(sizeof(*ked)))) {
+            memset(ked, 0, sizeof(*ked));
+            ked->handleKeyEvent = kmd->handleKeyEvent;
 
 #ifdef HAVE_LINUX_INPUT_H
-            kmd->keyEventBuffer = NULL;
-            kmd->keyEventLimit = 0;
-            kmd->keyEventCount = 0;
+            ked->keyEventBuffer = NULL;
+            ked->keyEventLimit = 0;
+            ked->keyEventCount = 0;
 #endif /* HAVE_LINUX_INPUT_H */
 
-            if (asyncRead(device, sizeof(struct input_event), handleKeyboardEvent, kmd)) {
+            if (asyncRead(device, sizeof(struct input_event), handleKeyboardEvent, ked)) {
 #ifdef EVIOCGRAB
               ioctl(device, EVIOCGRAB, 1);
 #endif /* EVIOCGRAB */
@@ -667,7 +672,7 @@ monitorKeyboard (const char *path, const KeyboardProperties *requiredProperties,
               return 1;
             }
 
-            free(kmd);
+            free(ked);
           }
         }
       }
@@ -687,7 +692,7 @@ getKeyboardRoot (void) {
 }
 
 static void
-monitorCurrentKeyboards (const KeyboardProperties *properties, KeyEventHandler handleKeyEvent) {
+monitorCurrentKeyboards (const KeyboardMonitorData *kmd) {
 #ifdef HAVE_LINUX_INPUT_H
   const char *root = getKeyboardRoot();
   const size_t rootLength = strlen(root);
@@ -701,7 +706,7 @@ monitorCurrentKeyboards (const KeyboardProperties *properties, KeyEventHandler h
       char path[rootLength + 1 + nameLength + 1];
 
       snprintf(path, sizeof(path), "%s/%s", root, entry->d_name);
-      monitorKeyboard(path, properties, handleKeyEvent);
+      monitorKeyboard(path, kmd);
     }
 
     closedir(directory);
@@ -714,8 +719,16 @@ monitorCurrentKeyboards (const KeyboardProperties *properties, KeyEventHandler h
 int
 startKeyboardMonitor (const KeyboardProperties *properties, KeyEventHandler handleKeyEvent) {
   if (getUinputDevice() != -1) {
-    monitorCurrentKeyboards(properties, handleKeyEvent);
-    return 1;
+    KeyboardMonitorData *kmd;
+
+    if ((kmd = malloc(sizeof(*kmd)))) {
+      memset(kmd, 0, sizeof(*kmd));
+      kmd->handleKeyEvent = handleKeyEvent;
+      kmd->properties = *properties;
+
+      monitorCurrentKeyboards(kmd);
+      return 1;
+    }
   }
 
   return 0;
