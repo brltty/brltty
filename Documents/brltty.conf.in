@@ -362,6 +362,25 @@
 #speech-parameters vv:Roughness= # [0-100]
 
 
+#####################
+# Keyboard Settings #
+#####################
+
+# The key-table directive specifies which key table to use. Relative paths are
+# anchored at "@DATA_DIRECTORY@". If not specified, no key table is used.
+# (can be overridden with the -k [--key-table=] option)
+#key-table	keypad	#
+#key-table	laptop	#
+
+# The keyboard-properties directive specifies which keyboard(s) to monitor.
+# If not specified, all keyboards are monitored.
+# (can be overridden with the -K [--keyboard-properties=] option)
+#keyboard-properties	Device=/dev/input/...	# Linux
+#keyboard-properties	Product=0X0000	#
+#keyboard-properties	Type=any	# [any,ps2,usb,bluetooth]
+#keyboard-properties	Vendor=0X0000	#
+
+
 ##################
 # Sound Settings #
 ##################
@@ -404,7 +423,7 @@
 #data-directory @DATA_DIRECTORY@
 
 # The tables-directory directive specifies the absolute path to the directory
-# which contains the text, attributes, and contraction tables. If not
+# which contains the text, attributes, contraction, and key tables. If not
 # specified, "@DATA_DIRECTORY@" will be used.
 # (can be overridden with the -T [--tables-directory=] option)
 #tables-directory @DATA_DIRECTORY@
