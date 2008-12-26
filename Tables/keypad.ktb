@@ -28,7 +28,7 @@ bind KPInsert+KPEnd Bot_Left
 bind KPInsert+KPPageUp PrDifLn
 bind KPInsert+KPPageDown NxDifLn
 
-bind KPDelete+KP5 PrefMenu
+bind KPDelete+KP5 DescChar
 bind KPDelete+KPArrowLeft Freeze
 bind KPDelete+KPArrowRight CsrJmp_Vert
 bind KPDelete+KPArrowUp PrPgrph
@@ -57,3 +57,7 @@ bind KPPlus+KPArrowUp PrIndent
 bind KPPlus+KPArrowDown NxIndent
 bind KPPlus+KPArrowLeft PrDifChar
 bind KPPlus+KPArrowRight NxDifChar
+
+bind KPMinus+KP5 PrefMenu
+bind KPMinus+KPArrowLeft PrefLoad
+bind KPMinus+KPArrowRight PrefSave
