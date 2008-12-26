@@ -448,6 +448,27 @@ parseCommandName (DataFile *file, int *value, const wchar_t *characters, int len
         *value |= BRL_FLG_TOGGLE_OFF;
         return 1;
       }
+    } else if (isBaseCommand(*command)) {
+      unsigned int maximum = BRL_MSK_ARG - ((*command)->code & BRL_MSK_ARG);
+      unsigned int offset = 0;
+      int index;
+
+      for (index=0; index<length; index+=1) {
+        wchar_t character = characters[index];
+
+        if ((character < WC_C('0')) || (character > WC_C('9'))) {
+          reportDataError(file, "invalid command offset: %.*" PRIws, length, characters);
+          return 0;
+        }
+
+        if ((offset = (offset * 10) + (character - WC_C('0'))) > maximum) {
+          reportDataError(file, "command offset too large: %.*" PRIws, length, characters);
+          return 0;
+        }
+      }
+
+      *value += offset;
+      return 1;
     }
 
     reportDataError(file, "unknown command modifier: %.*" PRIws, length, characters);

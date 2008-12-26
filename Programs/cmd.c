@@ -20,6 +20,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <search.h>
 
 #include "misc.h"
 #include "brldefs.h"
@@ -35,10 +36,30 @@ const CommandEntry commandTable[] = {
   {EOF, NULL, NULL}
 };
 
+static int
+isTypedCommand (int code, const int *codes) {
+  while (*codes != EOF) {
+    if (code == *codes) return 1;
+    codes += 1;
+  }
+
+  return 0;
+}
+
 int
 isToggleCommand (const CommandEntry *command) {
   const char *prefix = "toggle ";
   return strncasecmp(command->description, prefix, strlen(prefix)) == 0;
+}
+
+int
+isBaseCommand (const CommandEntry *command) {
+  static const int codes[] = {
+    BRL_BLK_SWITCHVT, BRL_BLK_SETMARK, BRL_BLK_GOTOMARK, BRL_BLK_GOTOLINE,
+    BRL_BLK_PASSKEY + BRL_KEY_FUNCTION,
+    EOF
+  };
+  return isTypedCommand(command->code, codes);
 }
 
 void
