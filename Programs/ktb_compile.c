@@ -25,6 +25,7 @@
 #include "datafile.h"
 #include "dataarea.h"
 #include "cmd.h"
+#include "brldefs.h"
 #include "ktb.h"
 #include "ktb_internal.h"
 
@@ -344,7 +345,7 @@ compareToKeyName (const void *target, const void *element) {
 
 static int
 parseKeyName (DataFile *file, KeyCode *code, const wchar_t *characters, int length, KeyTableData *ktd) {
-  DataOperand name = {
+  const DataOperand name = {
     .characters = characters,
     .length = length
   };
@@ -420,18 +421,40 @@ compareToCommandName (const void *target, const void *element) {
 
 static int
 parseCommandName (DataFile *file, int *value, const wchar_t *characters, int length, KeyTableData *ktd) {
-  DataOperand name = {
+  const wchar_t *end = wmemchr(characters, WC_C('+'), length);
+  const DataOperand name = {
     .characters = characters,
-    .length = length
+    .length = end? end-characters: length
   };
   const CommandEntry **command = bsearch(&name, ktd->commandTable, ktd->commandCount, sizeof(*ktd->commandTable), compareToCommandName);
 
   if (command) {
     *value = (*command)->code;
-    return 1;
+    if (!end) return 1;
+
+    if (!(length -= end - characters + 1)) {
+      reportDataError(file, "missing command modifier");
+      return 0;
+    }
+    characters = end + 1;
+
+    if (isToggleCommand(*command)) {
+      if (isKeyword(WS_C("on"), characters, length)) {
+        *value |= BRL_FLG_TOGGLE_ON;
+        return 1;
+      }
+
+      if (isKeyword(WS_C("off"), characters, length)) {
+        *value |= BRL_FLG_TOGGLE_OFF;
+        return 1;
+      }
+    }
+
+    reportDataError(file, "unknown command modifier: %.*" PRIws, length, characters);
+  } else {
+    reportDataError(file, "unknown command name: %.*" PRIws, length, characters);
   }
 
-  reportDataError(file, "unknown command name: %.*" PRIws, length, characters);
   return 0;
 }
 

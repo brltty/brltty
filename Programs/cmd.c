@@ -35,6 +35,12 @@ const CommandEntry commandTable[] = {
   {EOF, NULL, NULL}
 };
 
+int
+isToggleCommand (const CommandEntry *command) {
+  const char *prefix = "toggle ";
+  return strncasecmp(command->description, prefix, strlen(prefix)) == 0;
+}
+
 void
 describeCommand (int command, char *buffer, int size) {
   int blk = command & BRL_MSK_BLK;
