@@ -430,6 +430,7 @@ parseCommandName (DataFile *file, int *value, const wchar_t *characters, int len
 
   if (command) {
     *value = (*command)->code;
+    if (isCharacterCommand(*command)) *value |= BRL_MSK_ARG;
     if (!end) return 1;
 
     if (!(length -= end - characters + 1)) {

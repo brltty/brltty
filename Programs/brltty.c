@@ -1101,6 +1101,20 @@ isTextOffset (int *arg, int end, int relaxed) {
   return 1;
 }
 
+static int
+getCharacterCoordinates (int arg, int *column, int *row, int end, int relaxed) {
+  if (arg == BRL_MSK_ARG) {
+    if (!SCR_CURSOR_OK()) return 0;
+    *column = scr.posx;
+    *row = scr.posy;
+  } else {
+    if (!isTextOffset(&arg, end, relaxed)) return 0;
+    *column = p->winx + arg;
+    *row = p->winy;
+  }
+  return 1;
+}
+
 static int cursorState;                /* display cursor on (toggled during blink) */
 static int cursorTimer;
 unsigned char
@@ -2129,45 +2143,65 @@ runProgram (void) {
                   playTune(&tune_command_rejected);
                   break;
 
-                case BRL_BLK_ROUTE:
-                  if (isTextOffset(&arg, 0, 1)) {
-                    if (routeCursor(MIN(p->winx+arg, scr.cols-1), p->winy, scr.number)) {
+                case BRL_BLK_ROUTE: {
+                  int column, row;
+
+                  if (getCharacterCoordinates(arg, &column, &row, 0, 1)) {
+                    if (routeCursor(column, row, scr.number)) {
                       playTune(&tune_routing_started);
                       break;
                     }
                   }
                   playTune(&tune_command_rejected);
                   break;
+                }
 
-                case BRL_BLK_CUTBEGIN:
-                  if (isTextOffset(&arg, 0, 0)) {
-                    cutBegin(p->winx+arg, p->winy);
-                  } else
+                case BRL_BLK_CUTBEGIN: {
+                  int column, row;
+
+                  if (getCharacterCoordinates(arg, &column, &row, 0, 0)) {
+                    cutBegin(column, row);
+                  } else {
                     playTune(&tune_command_rejected);
-                  break;
-                case BRL_BLK_CUTAPPEND:
-                  if (isTextOffset(&arg, 0, 0)) {
-                    cutAppend(p->winx+arg, p->winy);
-                  } else
-                    playTune(&tune_command_rejected);
-                  break;
-                case BRL_BLK_CUTRECT:
-                  if (isTextOffset(&arg, 1, 1)) {
-                    if (cutRectangle(MIN(p->winx+arg, scr.cols-1), p->winy))
-                      break;
                   }
+                  break;
+                }
+
+                case BRL_BLK_CUTAPPEND: {
+                  int column, row;
+
+                  if (getCharacterCoordinates(arg, &column, &row, 0, 0)) {
+                    cutAppend(column, row);
+                  } else {
+                    playTune(&tune_command_rejected);
+                  }
+                  break;
+                }
+
+                case BRL_BLK_CUTRECT: {
+                  int column, row;
+
+                  if (getCharacterCoordinates(arg, &column, &row, 1, 1))
+                    if (cutRectangle(column, row))
+                      break;
                   playTune(&tune_command_rejected);
                   break;
-                case BRL_BLK_CUTLINE:
-                  if (isTextOffset(&arg, 1, 1)) {
-                    if (cutLine(MIN(p->winx+arg, scr.cols-1), p->winy))
+                }
+
+                case BRL_BLK_CUTLINE: {
+                  int column, row;
+
+                  if (getCharacterCoordinates(arg, &column, &row, 1, 1))
+                    if (cutLine(column, row))
                       break;
-                  }
                   playTune(&tune_command_rejected);
                   break;
+                }
 
-                case BRL_BLK_DESCCHAR:
-                  if (isTextOffset(&arg, 0, 0)) {
+                case BRL_BLK_DESCCHAR: {
+                  int column, row;
+
+                  if (getCharacterCoordinates(arg, &column, &row, 0, 0)) {
                     static char *colours[] = {
                       strtext("black"),
                       strtext("blue"),
@@ -2191,7 +2225,7 @@ runProgram (void) {
                     int length = 0;
                     ScreenCharacter character;
 
-                    readScreen(p->winx+arg, p->winy, 1, 1, &character);
+                    readScreen(column, row, 1, 1, &character);
 
                     {
                       uint32_t text = character.text;
@@ -2232,13 +2266,20 @@ runProgram (void) {
                   } else
                     playTune(&tune_command_rejected);
                   break;
+                }
 
-                case BRL_BLK_SETLEFT:
-                  if (isTextOffset(&arg, 0, 0)) {
-                    p->winx += arg;
-                  } else
+                case BRL_BLK_SETLEFT: {
+                  int column, row;
+
+                  if (getCharacterCoordinates(arg, &column, &row, 0, 0)) {
+                    p->winx = column;
+                    p->winy = row;
+                  } else {
                     playTune(&tune_command_rejected);
+                  }
                   break;
+                }
+
                 case BRL_BLK_GOTOLINE:
                   if (flags & BRL_FLG_LINE_SCALED)
                     arg = rescaleInteger(arg, BRL_MSK_ARG, scr.rows-1);
@@ -2270,34 +2311,49 @@ runProgram (void) {
                   break;
 
                 {
+                  int column, row;
                   int increment;
+
                 case BRL_BLK_PRINDENT:
                   increment = -1;
                   goto findIndent;
+
                 case BRL_BLK_NXINDENT:
                   increment = 1;
+
                 findIndent:
-                  if (isTextOffset(&arg, 0, 0)) {
-                    findRow(MIN(p->winx+arg, scr.cols-1),
-                            increment, testIndent, NULL);
+                  if (getCharacterCoordinates(arg, &column, &row, 0, 0)) {
+                    p->winy = row;
+                    findRow(column, increment, testIndent, NULL);
                   } else {
                     playTune(&tune_command_rejected);
                   }
                   break;
                 }
 
-                case BRL_BLK_PRDIFCHAR:
-                  if (isTextOffset(&arg, 0, 0))
-                    upDifferentCharacter(isSameText, arg);
-                  else
+                case BRL_BLK_PRDIFCHAR: {
+                  int column, row;
+
+                  if (getCharacterCoordinates(arg, &column, &row, 0, 0)) {
+                    p->winy = row;
+                    upDifferentCharacter(isSameText, column);
+                  } else {
                     playTune(&tune_command_rejected);
+                  }
                   break;
-                case BRL_BLK_NXDIFCHAR:
-                  if (isTextOffset(&arg, 0, 0))
-                    downDifferentCharacter(isSameText, arg);
-                  else
+                }
+
+                case BRL_BLK_NXDIFCHAR: {
+                  int column, row;
+
+                  if (getCharacterCoordinates(arg, &column, &row, 0, 0)) {
+                    p->winy = row;
+                    downDifferentCharacter(isSameText, column);
+                  } else {
                     playTune(&tune_command_rejected);
+                  }
                   break;
+                }
 
                 default:
                   playTune(&tune_command_rejected);

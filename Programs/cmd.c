@@ -47,19 +47,35 @@ isTypedCommand (int code, const int *codes) {
 }
 
 int
-isToggleCommand (const CommandEntry *command) {
-  const char *prefix = "toggle ";
-  return strncasecmp(command->description, prefix, strlen(prefix)) == 0;
-}
-
-int
 isBaseCommand (const CommandEntry *command) {
   static const int codes[] = {
-    BRL_BLK_SWITCHVT, BRL_BLK_SETMARK, BRL_BLK_GOTOMARK, BRL_BLK_GOTOLINE,
+    BRL_BLK_SWITCHVT,
+    BRL_BLK_SETMARK, BRL_BLK_GOTOMARK,
+    BRL_BLK_GOTOLINE,
     BRL_BLK_PASSKEY + BRL_KEY_FUNCTION,
     EOF
   };
   return isTypedCommand(command->code, codes);
+}
+
+int
+isCharacterCommand (const CommandEntry *command) {
+  static const int codes[] = {
+    BRL_BLK_ROUTE,
+    BRL_BLK_CUTBEGIN, BRL_BLK_CUTAPPEND,
+    BRL_BLK_CUTRECT, BRL_BLK_CUTLINE,
+    BRL_BLK_PRINDENT, BRL_BLK_NXINDENT,
+    BRL_BLK_DESCCHAR, BRL_BLK_SETLEFT,
+    BRL_BLK_PRDIFCHAR, BRL_BLK_NXDIFCHAR,
+    EOF
+  };
+  return isTypedCommand(command->code, codes);
+}
+
+int
+isToggleCommand (const CommandEntry *command) {
+  const char *prefix = "toggle ";
+  return strncasecmp(command->description, prefix, strlen(prefix)) == 0;
 }
 
 void
