@@ -723,12 +723,13 @@ handleKobjectUeventEvent (const AsyncInputResult *result) {
   } else if (result->end) {
     LogPrint(LOG_DEBUG, "netlink end-of-file");
   } else {
-    char *action = result->buffer;
+    char action[result->length + 1];
     char *path;
 
+    memcpy(action, result->buffer, result->length);
     action[result->length] = 0;
 
-    if ((path = strchr(result->buffer, '@'))) {
+    if ((path = strchr(action, '@'))) {
       *path++ = 0;
 
       LogPrint(LOG_DEBUG, "OBJECT_UEVENT: %s %s", action, path);
@@ -736,15 +737,12 @@ handleKobjectUeventEvent (const AsyncInputResult *result) {
         int inputNumber, eventNumber;
 
         if (sscanf(path, "/class/input/input%d/event%d", &inputNumber, &eventNumber) == 2) {
-          static const char sysRoot[] = "/sys";
+          static const char sysfsRoot[] = "/sys";
           static const char devName[] = "/dev";
-          char sysfsPath[strlen(sysRoot) + strlen(path) + sizeof(devName)];
+          char sysfsPath[strlen(sysfsRoot) + strlen(path) + sizeof(devName)];
           int descriptor;
 
-          memcpy(sysfsPath, sysRoot, sizeof(sysRoot));
-          strcat(sysfsPath, path);
-          strcat(sysfsPath, devName);
-
+          snprintf(sysfsPath, sizeof(sysfsPath), "%s%s%s", sysfsRoot, path, devName);
           if ((descriptor = open(sysfsPath, O_RDONLY)) != -1) {
             char stringBuffer[0X10];
             int stringLength;
@@ -755,7 +753,7 @@ handleKobjectUeventEvent (const AsyncInputResult *result) {
               if (sscanf(stringBuffer, "%d:%d", &major, &minor) == 2) {
                 char devPath[14 + 1];
 
-                sprintf(devPath, "input/event%d", eventNumber);
+                snprintf(devPath, sizeof(devPath), "input/event%d", eventNumber);
 
                 {
                   int inputDevice = openCharacterDevice(devPath, O_RDONLY, major, minor);
