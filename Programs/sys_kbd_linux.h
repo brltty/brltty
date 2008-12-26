@@ -20,6 +20,8 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
+#include <sys/socket.h>
+#include <linux/netlink.h>
 
 #ifdef HAVE_LINUX_INPUT_H
 #include <linux/input.h>
@@ -599,87 +601,65 @@ typedef struct {
 } KeyboardMonitorData;
 
 static int
-monitorKeyboard (const char *path, const KeyboardMonitorData *kmd) {
-  {
-    struct stat status;
-    if (stat(path, &status) == -1) return 0;
-    if (!S_ISCHR(status.st_mode)) return 0;
-  }
+monitorKeyboard (int device, const KeyboardMonitorData *kmd) {
+  KeyboardProperties properties = anyKeyboard;
 
   {
-    int device;
-
-    LogPrint(LOG_DEBUG, "checking keyboard device: %s", path);
-    if ((device = open(path, O_RDONLY)) != -1) {
-      KeyboardProperties actualProperties = anyKeyboard;
-      actualProperties.device = path;
+    struct input_id identity;
+    if (ioctl(device, EVIOCGID, &identity) != -1) {
+      LogPrint(LOG_DEBUG, "keyboard device identity: type=%04X vendor=%04X product=%04X version=%04X",
+               identity.bustype, identity.vendor, identity.product, identity.version);
 
       {
-        struct input_id identity;
-        if (ioctl(device, EVIOCGID, &identity) != -1) {
-          LogPrint(LOG_DEBUG, "keyboard device identity: %s type=%04X vendor=%04X product=%04X version=%04X",
-                   path, identity.bustype,
-                   identity.vendor, identity.product, identity.version);
-
-          {
-            static const KeyboardType typeTable[] = {
+        static const KeyboardType typeTable[] = {
 #ifdef BUS_I8042
-              [BUS_I8042] = KBD_TYPE_PS2,
+          [BUS_I8042] = KBD_TYPE_PS2,
 #endif /* BUS_I8042 */
 
 #ifdef BUS_USB
-              [BUS_USB] = KBD_TYPE_USB,
+          [BUS_USB] = KBD_TYPE_USB,
 #endif /* BUS_USB */
 
 #ifdef BUS_BLUETOOTH
-              [BUS_BLUETOOTH] = KBD_TYPE_Bluetooth,
+          [BUS_BLUETOOTH] = KBD_TYPE_Bluetooth,
 #endif /* BUS_BLUETOOTH */
-            };
+        };
 
-            if (identity.bustype < ARRAY_COUNT(typeTable))
-              actualProperties.type = typeTable[identity.bustype];
-          }
-
-          actualProperties.vendor = identity.vendor;
-          actualProperties.product = identity.product;
-        } else {
-          LogPrint(LOG_DEBUG, "cannot get keyboard device identity: %s: %s", path, strerror(errno));
-        }
+        if (identity.bustype < ARRAY_COUNT(typeTable))
+          properties.type = typeTable[identity.bustype];
       }
-      
-      if (checkKeyboardProperties(&actualProperties, &kmd->properties)) {
-        LogPrint(LOG_DEBUG, "testing keyboard device: %s", path);
 
-        if (hasInputEvent(device, EV_KEY, KEY_ENTER, KEY_MAX)) {
-          KeyboardEventData *ked;
+      properties.vendor = identity.vendor;
+      properties.product = identity.product;
+    } else {
+      LogPrint(LOG_DEBUG, "cannot get keyboard device identity: %s", strerror(errno));
+    }
+  }
+  
+  if (checkKeyboardProperties(&properties, &kmd->properties)) {
+    if (hasInputEvent(device, EV_KEY, KEY_ENTER, KEY_MAX)) {
+      KeyboardEventData *ked;
 
-          if ((ked = malloc(sizeof(*ked)))) {
-            memset(ked, 0, sizeof(*ked));
-            ked->handleKeyEvent = kmd->handleKeyEvent;
+      if ((ked = malloc(sizeof(*ked)))) {
+        memset(ked, 0, sizeof(*ked));
+        ked->handleKeyEvent = kmd->handleKeyEvent;
 
 #ifdef HAVE_LINUX_INPUT_H
-            ked->keyEventBuffer = NULL;
-            ked->keyEventLimit = 0;
-            ked->keyEventCount = 0;
+        ked->keyEventBuffer = NULL;
+        ked->keyEventLimit = 0;
+        ked->keyEventCount = 0;
 #endif /* HAVE_LINUX_INPUT_H */
 
-            if (asyncRead(device, sizeof(struct input_event), handleKeyboardEvent, ked)) {
+        if (asyncRead(device, sizeof(struct input_event), handleKeyboardEvent, ked)) {
 #ifdef EVIOCGRAB
-              ioctl(device, EVIOCGRAB, 1);
+          ioctl(device, EVIOCGRAB, 1);
 #endif /* EVIOCGRAB */
 
-              LogPrint(LOG_DEBUG, "keyboard opened: %s fd=%d", path, device);
-              return 1;
-            }
-
-            free(ked);
-          }
+          return 1;
         }
-      }
 
-      close(device);
-    } else {
-      LogPrint(LOG_DEBUG, "cannot open keyboard device: %s: %s", path, strerror(errno));
+        free(ked);
+      }
     }
   }
 
@@ -706,7 +686,27 @@ monitorCurrentKeyboards (const KeyboardMonitorData *kmd) {
       char path[rootLength + 1 + nameLength + 1];
 
       snprintf(path, sizeof(path), "%s/%s", root, entry->d_name);
-      monitorKeyboard(path, kmd);
+      LogPrint(LOG_DEBUG, "checking keyboard device: %s", path);
+
+      {
+        struct stat status;
+
+        if (stat(path, &status) != -1) {
+          if (S_ISCHR(status.st_mode)) {
+            int device;
+
+            if ((device = open(path, O_RDONLY)) != -1) {
+              if (monitorKeyboard(device, kmd)) continue;
+
+              close(device);
+            } else {
+              LogPrint(LOG_DEBUG, "cannot open keyboard device: %s: %s", path, strerror(errno));
+            }
+          }
+        } else {
+          LogPrint(LOG_DEBUG, "cannot stat keyboard device: %s: %s", path, strerror(errno));
+        }
+      }
     }
 
     closedir(directory);
@@ -714,6 +714,114 @@ monitorCurrentKeyboards (const KeyboardMonitorData *kmd) {
     LogPrint(LOG_DEBUG, "cannot open directory: %s", root);
   }
 #endif /* HAVE_LINUX_INPUT_H */
+}
+
+static size_t
+handleKobjectUeventEvent (const AsyncInputResult *result) {
+  if (result->error) {
+    LogPrint(LOG_DEBUG, "netlink read error: %s", strerror(result->error));
+  } else if (result->end) {
+    LogPrint(LOG_DEBUG, "netlink end-of-file");
+  } else {
+    char *action = result->buffer;
+    char *path;
+
+    action[result->length] = 0;
+
+    if ((path = strchr(result->buffer, '@'))) {
+      *path++ = 0;
+
+      LogPrint(LOG_DEBUG, "OBJECT_UEVENT: %s %s", action, path);
+      if (strcmp(action, "add") == 0) {
+        int inputNumber, eventNumber;
+
+        if (sscanf(path, "/class/input/input%d/event%d", &inputNumber, &eventNumber) == 2) {
+          static const char sysRoot[] = "/sys";
+          static const char devName[] = "/dev";
+          char sysfsPath[strlen(sysRoot) + strlen(path) + sizeof(devName)];
+          int descriptor;
+
+          memcpy(sysfsPath, sysRoot, sizeof(sysRoot));
+          strcat(sysfsPath, path);
+          strcat(sysfsPath, devName);
+
+          if ((descriptor = open(sysfsPath, O_RDONLY)) != -1) {
+            char stringBuffer[0X10];
+            int stringLength;
+
+            if ((stringLength = read(descriptor, stringBuffer, sizeof(stringBuffer))) > 0) {
+              int major, minor;
+
+              if (sscanf(stringBuffer, "%d:%d", &major, &minor) == 2) {
+                char devPath[14 + 1];
+
+                sprintf(devPath, "input/event%d", eventNumber);
+
+                {
+                  int inputDevice = openCharacterDevice(devPath, O_RDONLY, major, minor);
+
+                  if (inputDevice != -1) {
+                    KeyboardMonitorData *kmd = result->data;
+                    
+                    if (!monitorKeyboard(inputDevice, kmd)) close(inputDevice);
+                  }
+                }
+              }
+            }
+
+            close(descriptor);
+          }
+        }
+      } else if (strcmp(action, "remove") == 0) {
+        LogPrint(LOG_DEBUG, "netlink device %s removed", path);
+      }
+    }
+
+    return result->length;
+  }
+
+  return 0;
+}
+
+static int
+getKobjectUeventSocket (void) {
+  static int netlinkSocket = -1;
+
+  if (netlinkSocket == -1) {
+    const struct sockaddr_nl socketAddress = {
+      .nl_family = AF_NETLINK,
+      .nl_pid = getpid(),
+      .nl_groups = 0XFFFFFFFF
+    };
+
+    if ((netlinkSocket = socket(PF_NETLINK, SOCK_DGRAM, NETLINK_KOBJECT_UEVENT)) != -1) {
+      if (bind(netlinkSocket, (const struct sockaddr *)&socketAddress, sizeof(socketAddress)) == -1) {
+        LogError("bind");
+        close(netlinkSocket);
+        netlinkSocket = -1;
+      }
+    } else {
+      LogError("socket");
+    }
+  }
+
+  return netlinkSocket;
+}
+
+static int
+monitorKeyboardAdditions (KeyboardMonitorData *kmd) {
+  int kobjectEventSocket = getKobjectUeventSocket();
+
+  if (kobjectEventSocket != -1) {
+    if (asyncRead(kobjectEventSocket,
+                  6+1+PATH_MAX+1,
+                  handleKobjectUeventEvent, kmd))
+      return 1;
+
+    close(kobjectEventSocket);
+  }
+
+  return 0;
 }
 
 int
@@ -727,6 +835,7 @@ startKeyboardMonitor (const KeyboardProperties *properties, KeyEventHandler hand
       kmd->properties = *properties;
 
       monitorCurrentKeyboards(kmd);
+      monitorKeyboardAdditions(kmd);
       return 1;
     }
   }

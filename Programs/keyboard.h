@@ -31,7 +31,6 @@ typedef enum {
 } KeyboardType;
 
 typedef struct {
-  const char *device;
   KeyboardType type;
   int vendor;
   int product;

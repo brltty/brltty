@@ -372,13 +372,12 @@
 #key-table	keypad	#
 #key-table	laptop	#
 
-# The keyboard-properties directive specifies which keyboard(s) to monitor.
+# The keyboard-properties directive specifies which keyboards to monitor.
 # If not specified, all keyboards are monitored.
 # (can be overridden with the -K [--keyboard-properties=] option)
-#keyboard-properties	Device=/dev/input/...	# Linux
-#keyboard-properties	Product=0X0000	#
 #keyboard-properties	Type=any	# [any,ps2,usb,bluetooth]
 #keyboard-properties	Vendor=0X0000	#
+#keyboard-properties	Product=0X0000	#
 
 
 ##################
