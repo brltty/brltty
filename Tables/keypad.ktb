@@ -18,25 +18,25 @@
 
 # BRLTTY Key Table - Bindings for keypad-based navigation.
 
-bind KP5 Home
-bind KPArrowLeft Back
-bind KPArrowRight CsrTrk
-bind KPArrowUp LnUp
-bind KPArrowDown LnDn
-bind KPHome Top_Left
-bind KPEnd Bot_Left
-bind KPPageUp PrDifLn
-bind KPPageDown NxDifLn
+bind KPInsert+KP5 Home
+bind KPInsert+KPArrowLeft Back
+bind KPInsert+KPArrowRight CsrTrk
+bind KPInsert+KPArrowUp LnUp
+bind KPInsert+KPArrowDown LnDn
+bind KPInsert+KPHome Top_Left
+bind KPInsert+KPEnd Bot_Left
+bind KPInsert+KPPageUp PrDifLn
+bind KPInsert+KPPageDown NxDifLn
 
-bind KPInsert+KP5 PrefMenu
-bind KPInsert+KPArrowLeft Freeze
-bind KPInsert+KPArrowRight CsrJmp_Vert
-bind KPInsert+KPArrowUp PrPgrph
-bind KPInsert+KPArrowDown NxPgrph
-bind KPInsert+KPHome PrPrompt
-bind KPInsert+KPEnd NxPrompt
-bind KPInsert+KPPageUp AttrUp
-bind KPInsert+KPPageDown AttrDn
+bind KPDelete+KP5 PrefMenu
+bind KPDelete+KPArrowLeft Freeze
+bind KPDelete+KPArrowRight CsrJmp_Vert
+bind KPDelete+KPArrowUp PrPgrph
+bind KPDelete+KPArrowDown NxPgrph
+bind KPDelete+KPHome PrPrompt
+bind KPDelete+KPEnd NxPrompt
+bind KPDelete+KPPageUp AttrUp
+bind KPDelete+KPPageDown AttrDn
 
 bind KPEnter+KP5 Say_Line
 bind KPEnter+KPArrowUp Say_Above
