@@ -594,37 +594,102 @@ handleKeyboardEvent (const AsyncInputResult *result) {
 }
 
 static int
-monitorKeyboard (int keyboard, KeyEventHandler handleKeyEvent) {
-  KeyboardMonitorData *kmd;
+monitorKeyboard (const char *path, const KeyboardProperties *requiredProperties, KeyEventHandler handleKeyEvent) {
+  {
+    struct stat status;
+    if (stat(path, &status) == -1) return 0;
+    if (!S_ISCHR(status.st_mode)) return 0;
+  }
 
-  if ((kmd = malloc(sizeof(*kmd)))) {
-    memset(kmd, 0, sizeof(*kmd));
-    kmd->handleKeyEvent = handleKeyEvent;
+  {
+    int device;
+
+    LogPrint(LOG_DEBUG, "checking keyboard device: %s", path);
+    if ((device = open(path, O_RDONLY)) != -1) {
+      KeyboardProperties actualProperties = anyKeyboard;
+      actualProperties.device = path;
+
+      {
+        struct input_id identity;
+        if (ioctl(device, EVIOCGID, &identity) != -1) {
+          LogPrint(LOG_DEBUG, "keyboard device identity: %s type=%04X vendor=%04X product=%04X version=%04X",
+                   path, identity.bustype,
+                   identity.vendor, identity.product, identity.version);
+
+          {
+            static const KeyboardType typeTable[] = {
+#ifdef BUS_I8042
+              [BUS_I8042] = KBD_TYPE_PS2,
+#endif /* BUS_I8042 */
+
+#ifdef BUS_USB
+              [BUS_USB] = KBD_TYPE_USB,
+#endif /* BUS_USB */
+
+#ifdef BUS_BLUETOOTH
+              [BUS_BLUETOOTH] = KBD_TYPE_Bluetooth,
+#endif /* BUS_BLUETOOTH */
+            };
+
+            if (identity.bustype < ARRAY_COUNT(typeTable))
+              actualProperties.type = typeTable[identity.bustype];
+          }
+
+          actualProperties.vendor = identity.vendor;
+          actualProperties.product = identity.product;
+        } else {
+          LogPrint(LOG_DEBUG, "cannot get keyboard device identity: %s: %s", path, strerror(errno));
+        }
+      }
+      
+      if (checkKeyboardProperties(&actualProperties, requiredProperties)) {
+        LogPrint(LOG_DEBUG, "testing keyboard device: %s", path);
+
+        if (hasInputEvent(device, EV_KEY, KEY_ENTER, KEY_MAX)) {
+          KeyboardMonitorData *kmd;
+
+          if ((kmd = malloc(sizeof(*kmd)))) {
+            memset(kmd, 0, sizeof(*kmd));
+            kmd->handleKeyEvent = handleKeyEvent;
 
 #ifdef HAVE_LINUX_INPUT_H
-    kmd->keyEventBuffer = NULL;
-    kmd->keyEventLimit = 0;
-    kmd->keyEventCount = 0;
+            kmd->keyEventBuffer = NULL;
+            kmd->keyEventLimit = 0;
+            kmd->keyEventCount = 0;
 #endif /* HAVE_LINUX_INPUT_H */
 
-    if (asyncRead(keyboard, sizeof(struct input_event), handleKeyboardEvent, kmd)) {
+            if (asyncRead(device, sizeof(struct input_event), handleKeyboardEvent, kmd)) {
 #ifdef EVIOCGRAB
-      ioctl(keyboard, EVIOCGRAB, 1);
+              ioctl(device, EVIOCGRAB, 1);
 #endif /* EVIOCGRAB */
 
-      return 1;
-    }
+              LogPrint(LOG_DEBUG, "keyboard opened: %s fd=%d", path, device);
+              return 1;
+            }
 
-    free(kmd);
+            free(kmd);
+          }
+        }
+      }
+
+      close(device);
+    } else {
+      LogPrint(LOG_DEBUG, "cannot open keyboard device: %s: %s", path, strerror(errno));
+    }
   }
 
   return 0;
 }
 
+static const char *
+getKeyboardRoot (void) {
+  return "/dev/input";
+}
+
 static void
-monitorCurrentKeyboards (const KeyboardProperties *requiredProperties, KeyEventHandler handleKeyEvent) {
+monitorCurrentKeyboards (const KeyboardProperties *properties, KeyEventHandler handleKeyEvent) {
 #ifdef HAVE_LINUX_INPUT_H
-  const char root[] = "/dev/input";
+  const char *root = getKeyboardRoot();
   const size_t rootLength = strlen(root);
   DIR *directory;
 
@@ -634,69 +699,9 @@ monitorCurrentKeyboards (const KeyboardProperties *requiredProperties, KeyEventH
     while ((entry = readdir(directory))) {
       const size_t nameLength = strlen(entry->d_name);
       char path[rootLength + 1 + nameLength + 1];
+
       snprintf(path, sizeof(path), "%s/%s", root, entry->d_name);
-
-      {
-        struct stat status;
-        if (stat(path, &status) == -1) continue;
-        if (!S_ISCHR(status.st_mode)) continue;
-      }
-
-      {
-        int device;
-
-        LogPrint(LOG_DEBUG, "checking device: %s", path);
-        if ((device = open(path, O_RDONLY)) != -1) {
-          KeyboardProperties actualProperties = anyKeyboard;
-          actualProperties.device = path;
-
-          {
-            struct input_id identity;
-            if (ioctl(device, EVIOCGID, &identity) != -1) {
-              LogPrint(LOG_DEBUG, "device identity: %s type=%04X vendor=%04X product=%04X version=%04X",
-                       path, identity.bustype,
-                       identity.vendor, identity.product, identity.version);
-
-              {
-                static const KeyboardType typeTable[] = {
-#ifdef BUS_I8042
-                  [BUS_I8042] = KBD_TYPE_PS2,
-#endif /* BUS_I8042 */
-
-#ifdef BUS_USB
-                  [BUS_USB] = KBD_TYPE_USB,
-#endif /* BUS_USB */
-
-#ifdef BUS_BLUETOOTH
-                  [BUS_BLUETOOTH] = KBD_TYPE_Bluetooth,
-#endif /* BUS_BLUETOOTH */
-                };
-
-                if (identity.bustype < ARRAY_COUNT(typeTable))
-                  actualProperties.type = typeTable[identity.bustype];
-              }
-
-              actualProperties.vendor = identity.vendor;
-              actualProperties.product = identity.product;
-            } else {
-              LogPrint(LOG_DEBUG, "cannot get device identity: %s: %s", path, strerror(errno));
-            }
-          }
-          
-          if (checkKeyboardProperties(&actualProperties, requiredProperties)) {
-            LogPrint(LOG_DEBUG, "testing device: %s", path);
-
-            if (hasInputEvent(device, EV_KEY, KEY_ENTER, KEY_MAX)) {
-              LogPrint(LOG_DEBUG, "keyboard opened: %s fd=%d", path, device);
-              if (monitorKeyboard(device, handleKeyEvent)) continue;
-            }
-          }
-
-          close(device);
-        } else {
-          LogPrint(LOG_DEBUG, "cannot open device: %s: %s", path, strerror(errno));
-        }
-      }
+      monitorKeyboard(path, properties, handleKeyEvent);
     }
 
     closedir(directory);
@@ -707,9 +712,9 @@ monitorCurrentKeyboards (const KeyboardProperties *requiredProperties, KeyEventH
 }
 
 int
-startKeyboardMonitor (const KeyboardProperties *keyboardProperties, KeyEventHandler handleKeyEvent) {
+startKeyboardMonitor (const KeyboardProperties *properties, KeyEventHandler handleKeyEvent) {
   if (getUinputDevice() != -1) {
-    monitorCurrentKeyboards(keyboardProperties, handleKeyEvent);
+    monitorCurrentKeyboards(properties, handleKeyEvent);
     return 1;
   }
 

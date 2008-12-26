@@ -109,7 +109,7 @@ typedef enum {
 
 typedef PressedKeysState KeyEventHandler (const KeyCodeSet *modifiers, KeyCode code, int press);
 
-extern int startKeyboardMonitor (const KeyboardProperties *keyboardProperties, KeyEventHandler handleKeyEvent);
+extern int startKeyboardMonitor (const KeyboardProperties *properties, KeyEventHandler handleKeyEvent);
 
 
 #ifdef __cplusplus
