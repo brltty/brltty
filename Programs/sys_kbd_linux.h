@@ -613,65 +613,73 @@ handleKeyboardEvent (const AsyncInputResult *result) {
 
 static int
 monitorKeyboard (int device, KeyboardCommonData *kcd) {
-  KeyboardPrivateData *kpd;
+  struct stat status;
 
-  if ((kpd = malloc(sizeof(*kpd)))) {
-    memset(kpd, 0, sizeof(*kpd));
-    kpd->kcd = kcd;
-    kpd->fileDescriptor = device;
+  if (fstat(device, &status) != -1) {
+    if (S_ISCHR(status.st_mode)) {
+      KeyboardPrivateData *kpd;
 
-#ifdef HAVE_LINUX_INPUT_H
-    kpd->keyEventBuffer = NULL;
-    kpd->keyEventLimit = 0;
-    kpd->keyEventCount = 0;
-#endif /* HAVE_LINUX_INPUT_H */
+      if ((kpd = malloc(sizeof(*kpd)))) {
+        memset(kpd, 0, sizeof(*kpd));
+        kpd->kcd = kcd;
+        kpd->fileDescriptor = device;
 
-    kpd->actualProperties = anyKeyboard;
-    {
-      struct input_id identity;
-      if (ioctl(device, EVIOCGID, &identity) != -1) {
-        LogPrint(LOG_DEBUG, "keyboard device identity: type=%04X vendor=%04X product=%04X version=%04X",
-                 identity.bustype, identity.vendor, identity.product, identity.version);
+    #ifdef HAVE_LINUX_INPUT_H
+        kpd->keyEventBuffer = NULL;
+        kpd->keyEventLimit = 0;
+        kpd->keyEventCount = 0;
+    #endif /* HAVE_LINUX_INPUT_H */
 
+        kpd->actualProperties = anyKeyboard;
         {
-          static const KeyboardType typeTable[] = {
-  #ifdef BUS_I8042
-            [BUS_I8042] = KBD_TYPE_PS2,
-  #endif /* BUS_I8042 */
+          struct input_id identity;
+          if (ioctl(device, EVIOCGID, &identity) != -1) {
+            LogPrint(LOG_DEBUG, "keyboard device identity: type=%04X vendor=%04X product=%04X version=%04X",
+                     identity.bustype, identity.vendor, identity.product, identity.version);
 
-  #ifdef BUS_USB
-            [BUS_USB] = KBD_TYPE_USB,
-  #endif /* BUS_USB */
+            {
+              static const KeyboardType typeTable[] = {
+      #ifdef BUS_I8042
+                [BUS_I8042] = KBD_TYPE_PS2,
+      #endif /* BUS_I8042 */
 
-  #ifdef BUS_BLUETOOTH
-            [BUS_BLUETOOTH] = KBD_TYPE_Bluetooth,
-  #endif /* BUS_BLUETOOTH */
-          };
+      #ifdef BUS_USB
+                [BUS_USB] = KBD_TYPE_USB,
+      #endif /* BUS_USB */
 
-          if (identity.bustype < ARRAY_COUNT(typeTable))
-            kpd->actualProperties.type = typeTable[identity.bustype];
+      #ifdef BUS_BLUETOOTH
+                [BUS_BLUETOOTH] = KBD_TYPE_Bluetooth,
+      #endif /* BUS_BLUETOOTH */
+              };
+
+              if (identity.bustype < ARRAY_COUNT(typeTable))
+                kpd->actualProperties.type = typeTable[identity.bustype];
+            }
+
+            kpd->actualProperties.vendor = identity.vendor;
+            kpd->actualProperties.product = identity.product;
+          } else {
+            LogPrint(LOG_DEBUG, "cannot get keyboard device identity: %s", strerror(errno));
+          }
+        }
+      
+        if (checkKeyboardProperties(&kpd->actualProperties, &kcd->requiredProperties)) {
+          if (hasInputEvent(device, EV_KEY, KEY_ENTER, KEY_MAX)) {
+            if (asyncRead(device, sizeof(struct input_event), handleKeyboardEvent, kpd)) {
+    #ifdef EVIOCGRAB
+              ioctl(device, EVIOCGRAB, 1);
+    #endif /* EVIOCGRAB */
+
+              return 1;
+            }
+          }
         }
 
-        kpd->actualProperties.vendor = identity.vendor;
-        kpd->actualProperties.product = identity.product;
-      } else {
-        LogPrint(LOG_DEBUG, "cannot get keyboard device identity: %s", strerror(errno));
+        free(kpd);
       }
     }
-  
-    if (checkKeyboardProperties(&kpd->actualProperties, &kcd->requiredProperties)) {
-      if (hasInputEvent(device, EV_KEY, KEY_ENTER, KEY_MAX)) {
-        if (asyncRead(device, sizeof(struct input_event), handleKeyboardEvent, kpd)) {
-#ifdef EVIOCGRAB
-          ioctl(device, EVIOCGRAB, 1);
-#endif /* EVIOCGRAB */
-
-          return 1;
-        }
-      }
-    }
-
-    free(kpd);
+  } else {
+    LogPrint(LOG_DEBUG, "cannot stat keyboard device: fd=%d: %s", device, strerror(errno));
   }
 
   return 0;
@@ -701,15 +709,7 @@ monitorCurrentKeyboards (KeyboardCommonData *kcd) {
       LogPrint(LOG_DEBUG, "checking keyboard device: %s", path);
 
       if ((device = open(path, O_RDONLY)) != -1) {
-        struct stat status;
-
-        if (fstat(device, &status) != -1) {
-          if (S_ISCHR(status.st_mode)) {
-            if (monitorKeyboard(device, kcd)) continue;
-          }
-        } else {
-          LogPrint(LOG_DEBUG, "cannot stat keyboard device: %s: %s", path, strerror(errno));
-        }
+        if (monitorKeyboard(device, kcd)) continue;
 
         close(device);
       } else {
