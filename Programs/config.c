@@ -680,23 +680,21 @@ loadKeyTable (const char *name) {
 static PressedKeysState
 handleKeyEvent (const KeyCodeSet *modifiers, KeyCode code, int press) {
   {
+    static int lastCommand = EOF;
     int command = getKeyCommand(keyTable, modifiers, code);
+    int bound = command != EOF;
 
-    if (command != EOF) {
-      static int lastCommand = EOF;
-
-      if (!press) {
-        if (lastCommand != EOF) {
-          lastCommand = EOF;
-          enqueueCommand(BRL_CMD_NOOP);
-        }
-      } else if (command != lastCommand) {
-        lastCommand = command;
-        enqueueCommand(command | BRL_FLG_REPEAT_INITIAL | BRL_FLG_REPEAT_DELAY);
+    if (!press || !bound) {
+      if (lastCommand != EOF) {
+        lastCommand = EOF;
+        enqueueCommand(BRL_CMD_NOOP);
       }
-
-      return PKS_YES;
+    } else if (command != lastCommand) {
+      lastCommand = command;
+      enqueueCommand(command | BRL_FLG_REPEAT_INITIAL | BRL_FLG_REPEAT_DELAY);
     }
+
+    if (bound) return PKS_YES;
   }
 
   {
