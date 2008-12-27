@@ -266,7 +266,7 @@ openCharacterDevice (const char *name, int flags, int major, int minor) {
 
     if (errno == ENOENT) {
       free(path);
-      if ((path = makeWritablePath(name))) {
+      if ((path = makeWritablePath(locatePathName(name)))) {
         if ((descriptor = open(path, flags)) != -1) {
           LogPrint(LOG_DEBUG, "device opened: %s: fd=%d", path, descriptor);
         } else {
