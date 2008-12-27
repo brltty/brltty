@@ -885,7 +885,7 @@ asyncWait (int duration) {
 
       if ((operationElement = getQueueHead(function->operations))) {
         operation = getElementItem(operationElement);
-        startOperation(operation);
+        if (!operation->finished) startOperation(operation);
         requeueElement(functionElement);
       } else {
         deleteElement(functionElement);
