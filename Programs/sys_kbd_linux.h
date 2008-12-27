@@ -31,12 +31,12 @@
 
 typedef struct {
   KeyEventHandler *handleKeyEvent;
-  KeyboardProperties properties;
+  KeyboardProperties requiredProperties;
 } KeyboardCommonData;
 
 typedef struct {
   KeyboardCommonData *kcd;
-  KeyboardProperties properties;
+  KeyboardProperties actualProperties;
 
 #ifdef HAVE_LINUX_INPUT_H
   KeyCodeSet pressedKeys;
@@ -615,7 +615,7 @@ monitorKeyboard (int device, KeyboardCommonData *kcd) {
     kpd->keyEventCount = 0;
 #endif /* HAVE_LINUX_INPUT_H */
 
-    kpd->properties = anyKeyboard;
+    kpd->actualProperties = anyKeyboard;
     {
       struct input_id identity;
       if (ioctl(device, EVIOCGID, &identity) != -1) {
@@ -638,17 +638,17 @@ monitorKeyboard (int device, KeyboardCommonData *kcd) {
           };
 
           if (identity.bustype < ARRAY_COUNT(typeTable))
-            kpd->properties.type = typeTable[identity.bustype];
+            kpd->actualProperties.type = typeTable[identity.bustype];
         }
 
-        kpd->properties.vendor = identity.vendor;
-        kpd->properties.product = identity.product;
+        kpd->actualProperties.vendor = identity.vendor;
+        kpd->actualProperties.product = identity.product;
       } else {
         LogPrint(LOG_DEBUG, "cannot get keyboard device identity: %s", strerror(errno));
       }
     }
   
-    if (checkKeyboardProperties(&kpd->properties, &kcd->properties)) {
+    if (checkKeyboardProperties(&kpd->actualProperties, &kcd->requiredProperties)) {
       if (hasInputEvent(device, EV_KEY, KEY_ENTER, KEY_MAX)) {
         if (asyncRead(device, sizeof(struct input_event), handleKeyboardEvent, kpd)) {
 #ifdef EVIOCGRAB
@@ -851,7 +851,7 @@ startKeyboardMonitor (const KeyboardProperties *properties, KeyEventHandler hand
     if ((kcd = malloc(sizeof(*kcd)))) {
       memset(kcd, 0, sizeof(*kcd));
       kcd->handleKeyEvent = handleKeyEvent;
-      kcd->properties = *properties;
+      kcd->requiredProperties = *properties;
 
       monitorCurrentKeyboards(kcd);
       monitorKeyboardAdditions(kcd);
