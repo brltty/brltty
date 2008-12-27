@@ -743,60 +743,62 @@ handleKobjectUeventEvent (const AsyncInputResult *result) {
   } else if (result->end) {
     LogPrint(LOG_DEBUG, "netlink end-of-file");
   } else {
-    char action[result->length + 1];
-    char *path;
+    const char *buffer = result->buffer;
+    const char *end = memchr(buffer, 0, result->length);
 
-    memcpy(action, result->buffer, result->length);
-    action[result->length] = 0;
+    if (end) {
+      char *path = strchr(buffer, '@');
 
-    if ((path = strchr(action, '@'))) {
-      *path++ = 0;
+      if (path) {
+        const char *action = buffer;
+        int actionLength = path++ - action;
 
-      LogPrint(LOG_DEBUG, "OBJECT_UEVENT: %s %s", action, path);
-      if (strcmp(action, "add") == 0) {
-        int inputNumber, eventNumber;
+        LogPrint(LOG_DEBUG, "OBJECT_UEVENT: %.*s %s", actionLength, action, path);
+        if (strncmp(action, "add", actionLength) == 0) {
+          int inputNumber, eventNumber;
 
-        if (sscanf(path, "/class/input/input%d/event%d", &inputNumber, &eventNumber) == 2) {
-          static const char sysfsRoot[] = "/sys";
-          static const char devName[] = "/dev";
-          char sysfsPath[strlen(sysfsRoot) + strlen(path) + sizeof(devName)];
-          int descriptor;
+          if (sscanf(path, "/class/input/input%d/event%d", &inputNumber, &eventNumber) == 2) {
+            static const char sysfsRoot[] = "/sys";
+            static const char devName[] = "/dev";
+            char sysfsPath[strlen(sysfsRoot) + strlen(path) + sizeof(devName)];
+            int descriptor;
 
-          snprintf(sysfsPath, sizeof(sysfsPath), "%s%s%s", sysfsRoot, path, devName);
-          if ((descriptor = open(sysfsPath, O_RDONLY)) != -1) {
-            char stringBuffer[0X10];
-            int stringLength;
+            snprintf(sysfsPath, sizeof(sysfsPath), "%s%s%s", sysfsRoot, path, devName);
+            if ((descriptor = open(sysfsPath, O_RDONLY)) != -1) {
+              char stringBuffer[0X10];
+              int stringLength;
 
-            if ((stringLength = read(descriptor, stringBuffer, sizeof(stringBuffer))) > 0) {
-              InputDeviceData *idd;
-	      int ok = 0;
+              if ((stringLength = read(descriptor, stringBuffer, sizeof(stringBuffer))) > 0) {
+                InputDeviceData *idd;
+                int ok = 0;
 
-	      if ((idd = malloc(sizeof(*idd)))) {
-		if (sscanf(stringBuffer, "%d:%d", &idd->major, &idd->minor) == 2) {
-                  char eventDevice[0X40];
-		  snprintf(eventDevice, sizeof(eventDevice), "input/event%d", eventNumber);
+                if ((idd = malloc(sizeof(*idd)))) {
+                  if (sscanf(stringBuffer, "%d:%d", &idd->major, &idd->minor) == 2) {
+                    char eventDevice[0X40];
+                    snprintf(eventDevice, sizeof(eventDevice), "input/event%d", eventNumber);
 
-		  if ((idd->name = strdup(eventDevice))) {
-		    idd->kcd = result->data;
-		    if (asyncRelativeAlarm(1000, doOpenInputDevice, idd)) ok = 1;
+                    if ((idd->name = strdup(eventDevice))) {
+                      idd->kcd = result->data;
+                      if (asyncRelativeAlarm(1000, doOpenInputDevice, idd)) ok = 1;
 
-		    if (!ok) free(idd->name);
-		  }
-		}
+                      if (!ok) free(idd->name);
+                    }
+                  }
 
-		if (!ok) free(idd);
+                  if (!ok) free(idd);
+                }
               }
+
+              close(descriptor);
             }
-
-            close(descriptor);
           }
+        } else if (strcmp(action, "remove") == 0) {
+          LogPrint(LOG_DEBUG, "netlink device %s removed", path);
         }
-      } else if (strcmp(action, "remove") == 0) {
-        LogPrint(LOG_DEBUG, "netlink device %s removed", path);
       }
-    }
 
-    return result->length;
+      return end - buffer + 1;
+    }
   }
 
   return 0;

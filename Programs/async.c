@@ -871,10 +871,11 @@ asyncWait (int duration) {
       FunctionEntry *function = getElementItem(functionElement);
       Element *operationElement = getQueueHead(function->operations);
       OperationEntry *operation = getElementItem(operationElement);
+      TransferExtension *extension = operation->extension;
 
       if (!operation->finished) finishOperation(operation);
       if (function->methods->invokeCallback(operation)) {
-        operation->finished = 0;
+        operation->finished = extension->length > 0;
         operation->error = 0;
       } else {
         deleteElement(operationElement);
