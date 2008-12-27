@@ -36,6 +36,7 @@ typedef struct {
 
 typedef struct {
   KeyboardCommonData *kcd;
+  KeyboardProperties properties;
 
 #ifdef HAVE_LINUX_INPUT_H
   KeyCodeSet pressedKeys;
@@ -602,54 +603,53 @@ handleKeyboardEvent (const AsyncInputResult *result) {
 
 static int
 monitorKeyboard (int device, KeyboardCommonData *kcd) {
-  KeyboardProperties properties = anyKeyboard;
+  KeyboardPrivateData *kpd;
 
-  {
-    struct input_id identity;
-    if (ioctl(device, EVIOCGID, &identity) != -1) {
-      LogPrint(LOG_DEBUG, "keyboard device identity: type=%04X vendor=%04X product=%04X version=%04X",
-               identity.bustype, identity.vendor, identity.product, identity.version);
-
-      {
-        static const KeyboardType typeTable[] = {
-#ifdef BUS_I8042
-          [BUS_I8042] = KBD_TYPE_PS2,
-#endif /* BUS_I8042 */
-
-#ifdef BUS_USB
-          [BUS_USB] = KBD_TYPE_USB,
-#endif /* BUS_USB */
-
-#ifdef BUS_BLUETOOTH
-          [BUS_BLUETOOTH] = KBD_TYPE_Bluetooth,
-#endif /* BUS_BLUETOOTH */
-        };
-
-        if (identity.bustype < ARRAY_COUNT(typeTable))
-          properties.type = typeTable[identity.bustype];
-      }
-
-      properties.vendor = identity.vendor;
-      properties.product = identity.product;
-    } else {
-      LogPrint(LOG_DEBUG, "cannot get keyboard device identity: %s", strerror(errno));
-    }
-  }
-  
-  if (checkKeyboardProperties(&properties, &kcd->properties)) {
-    if (hasInputEvent(device, EV_KEY, KEY_ENTER, KEY_MAX)) {
-      KeyboardPrivateData *kpd;
-
-      if ((kpd = malloc(sizeof(*kpd)))) {
-        memset(kpd, 0, sizeof(*kpd));
-        kpd->kcd = kcd;
+  if ((kpd = malloc(sizeof(*kpd)))) {
+    memset(kpd, 0, sizeof(*kpd));
+    kpd->kcd = kcd;
 
 #ifdef HAVE_LINUX_INPUT_H
-        kpd->keyEventBuffer = NULL;
-        kpd->keyEventLimit = 0;
-        kpd->keyEventCount = 0;
+    kpd->keyEventBuffer = NULL;
+    kpd->keyEventLimit = 0;
+    kpd->keyEventCount = 0;
 #endif /* HAVE_LINUX_INPUT_H */
 
+    kpd->properties = anyKeyboard;
+    {
+      struct input_id identity;
+      if (ioctl(device, EVIOCGID, &identity) != -1) {
+        LogPrint(LOG_DEBUG, "keyboard device identity: type=%04X vendor=%04X product=%04X version=%04X",
+                 identity.bustype, identity.vendor, identity.product, identity.version);
+
+        {
+          static const KeyboardType typeTable[] = {
+  #ifdef BUS_I8042
+            [BUS_I8042] = KBD_TYPE_PS2,
+  #endif /* BUS_I8042 */
+
+  #ifdef BUS_USB
+            [BUS_USB] = KBD_TYPE_USB,
+  #endif /* BUS_USB */
+
+  #ifdef BUS_BLUETOOTH
+            [BUS_BLUETOOTH] = KBD_TYPE_Bluetooth,
+  #endif /* BUS_BLUETOOTH */
+          };
+
+          if (identity.bustype < ARRAY_COUNT(typeTable))
+            kpd->properties.type = typeTable[identity.bustype];
+        }
+
+        kpd->properties.vendor = identity.vendor;
+        kpd->properties.product = identity.product;
+      } else {
+        LogPrint(LOG_DEBUG, "cannot get keyboard device identity: %s", strerror(errno));
+      }
+    }
+  
+    if (checkKeyboardProperties(&kpd->properties, &kcd->properties)) {
+      if (hasInputEvent(device, EV_KEY, KEY_ENTER, KEY_MAX)) {
         if (asyncRead(device, sizeof(struct input_event), handleKeyboardEvent, kpd)) {
 #ifdef EVIOCGRAB
           ioctl(device, EVIOCGRAB, 1);
@@ -657,10 +657,10 @@ monitorKeyboard (int device, KeyboardCommonData *kcd) {
 
           return 1;
         }
-
-        free(kpd);
       }
     }
+
+    free(kpd);
   }
 
   return 0;
