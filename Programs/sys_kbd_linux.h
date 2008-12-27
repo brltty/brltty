@@ -792,8 +792,6 @@ handleKobjectUeventEvent (const AsyncInputResult *result) {
               close(descriptor);
             }
           }
-        } else if (strcmp(action, "remove") == 0) {
-          LogPrint(LOG_DEBUG, "netlink device %s removed", path);
         }
       }
 
