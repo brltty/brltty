@@ -720,19 +720,16 @@ typedef struct {
   char *name;
   int major;
   int minor;
-  void *data;
+  KeyboardMonitorData *kmd;
 } InputDeviceData;
 
 static void
 doOpenInputDevice (void *data) {
   InputDeviceData *idd = data;
-  int inputDevice = openCharacterDevice(idd->name, O_RDONLY,
-					idd->major, idd->minor);
+  int device = openCharacterDevice(idd->name, O_RDONLY, idd->major, idd->minor);
 
-  if (inputDevice != -1) {
-    KeyboardMonitorData *kmd = idd->data;
-                    
-    if (!monitorKeyboard(inputDevice, kmd)) close(inputDevice);
+  if (device != -1) {
+    if (!monitorKeyboard(device, idd->kmd)) close(device);
   }
 
   free(idd->name);
@@ -776,11 +773,12 @@ handleKobjectUeventEvent (const AsyncInputResult *result) {
 
 	      if ((idd = malloc(sizeof(*idd)))) {
 		if (sscanf(stringBuffer, "%d:%d", &idd->major, &idd->minor) == 2) {
-		  if ((idd->name = malloc(14+1))) {
-		    snprintf(idd->name, 14, "input/event%d", eventNumber);
-		    idd->data = result->data;
-		    if (asyncRelativeAlarm(1000, doOpenInputDevice, idd))
-		      ok = 1;
+                  char eventDevice[0X40];
+		  snprintf(eventDevice, sizeof(eventDevice), "input/event%d", eventNumber);
+
+		  if ((idd->name = strdup(eventDevice))) {
+		    idd->kmd = result->data;
+		    if (asyncRelativeAlarm(1000, doOpenInputDevice, idd)) ok = 1;
 
 		    if (!ok) free(idd->name);
 		  }
