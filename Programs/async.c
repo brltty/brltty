@@ -439,10 +439,13 @@ invokeInputCallback (OperationEntry *operation) {
   if (operation->error) return 0;
   if (extension->direction.input.end) return 0;
 
-  if (count)
+  operation->finished = 0;
+  if (count) {
     memmove(extension->buffer, &extension->buffer[count],
             extension->length -= count);
-  operation->finished = extension->length > 0;
+    if (extension->length > 0) operation->finished = 1;
+  }
+
   return 1;
 }
 
