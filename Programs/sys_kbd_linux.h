@@ -716,6 +716,29 @@ monitorCurrentKeyboards (const KeyboardMonitorData *kmd) {
 #endif /* HAVE_LINUX_INPUT_H */
 }
 
+typedef struct {
+  char *name;
+  int major;
+  int minor;
+  void *data;
+} InputDeviceData;
+
+static void
+doOpenInputDevice (void *data) {
+  InputDeviceData *idd = data;
+  int inputDevice = openCharacterDevice(idd->name, O_RDONLY,
+					idd->major, idd->minor);
+
+  if (inputDevice != -1) {
+    KeyboardMonitorData *kmd = idd->data;
+                    
+    if (!monitorKeyboard(inputDevice, kmd)) close(inputDevice);
+  }
+
+  free(idd->name);
+  free(idd);
+}
+
 static size_t
 handleKobjectUeventEvent (const AsyncInputResult *result) {
   if (result->error) {
@@ -748,22 +771,22 @@ handleKobjectUeventEvent (const AsyncInputResult *result) {
             int stringLength;
 
             if ((stringLength = read(descriptor, stringBuffer, sizeof(stringBuffer))) > 0) {
-              int major, minor;
+              InputDeviceData *idd;
+	      int ok = 0;
 
-              if (sscanf(stringBuffer, "%d:%d", &major, &minor) == 2) {
-                char devPath[14 + 1];
+	      if ((idd = malloc(sizeof(*idd)))) {
+		if (sscanf(stringBuffer, "%d:%d", &idd->major, &idd->minor) == 2) {
+		  if ((idd->name = malloc(14+1))) {
+		    snprintf(idd->name, 14, "input/event%d", eventNumber);
+		    idd->data = result->data;
+		    if (asyncRelativeAlarm(1000, doOpenInputDevice, idd))
+		      ok = 1;
 
-                snprintf(devPath, sizeof(devPath), "input/event%d", eventNumber);
+		    if (!ok) free(idd->name);
+		  }
+		}
 
-                {
-                  int inputDevice = openCharacterDevice(devPath, O_RDONLY, major, minor);
-
-                  if (inputDevice != -1) {
-                    KeyboardMonitorData *kmd = result->data;
-                    
-                    if (!monitorKeyboard(inputDevice, kmd)) close(inputDevice);
-                  }
-                }
+		if (!ok) free(idd);
               }
             }
 
