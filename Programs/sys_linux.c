@@ -381,7 +381,9 @@ getUinputDevice (void) {
   return uinputDevice;
 }
 
+#ifdef HAVE_LINUX_INPUT_H
 static BITMASK(pressedKeys, KEY_MAX+1, char);
+#endif /* HAVE_LINUX_INPUT_H */
 
 int
 writeKeyEvent (int key, int press) {
@@ -408,10 +410,12 @@ writeKeyEvent (int key, int press) {
 
 void
 releaseAllKeys (void) {
+#ifdef HAVE_LINUX_INPUT_H
   int key;
   for (key=0; key<=KEY_MAX; ++key) {
     if (BITMASK_TEST(pressedKeys, key)) {
       if (!writeKeyEvent(key, 0)) break;
     }
   }
+#endif /* HAVE_LINUX_INPUT_H */
 }

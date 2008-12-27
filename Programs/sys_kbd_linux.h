@@ -16,16 +16,14 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
+#ifdef HAVE_LINUX_INPUT_H
 #include <dirent.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <sys/socket.h>
 #include <linux/netlink.h>
-
-#ifdef HAVE_LINUX_INPUT_H
 #include <linux/input.h>
-#endif /* HAVE_LINUX_INPUT_H */
 
 #include "async.h"
 
@@ -39,7 +37,6 @@ typedef struct {
   int fileDescriptor;
   KeyboardProperties actualProperties;
 
-#ifdef HAVE_LINUX_INPUT_H
   KeyCodeSet pressedKeys;
   BITMASK(handledKeys, KEY_MAX+1, char);
   unsigned justModifiers:1;
@@ -47,7 +44,6 @@ typedef struct {
   struct input_event *keyEventBuffer;
   unsigned int keyEventLimit;
   unsigned int keyEventCount;
-#endif /* HAVE_LINUX_INPUT_H */
 } KeyboardPrivateData;
 
 static void
@@ -68,7 +64,6 @@ handleKeyboardEvent (const AsyncInputResult *result) {
     LogPrint(LOG_DEBUG, "keyboard end-of-file: fd=%d", kpd->fileDescriptor);
     closeKeyboard(kpd);
   } else {
-#ifdef HAVE_LINUX_INPUT_H
     const struct input_event *event = result->buffer;
 
     if (result->length >= sizeof(*event)) {
@@ -603,9 +598,6 @@ handleKeyboardEvent (const AsyncInputResult *result) {
 
       return sizeof(*event);
     }
-#else /* HAVE_LINUX_INPUT_H */
-    return result->length;
-#endif /* HAVE_LINUX_INPUT_H */
   }
 
   return 0;
@@ -624,11 +616,9 @@ monitorKeyboard (int device, KeyboardCommonData *kcd) {
         kpd->kcd = kcd;
         kpd->fileDescriptor = device;
 
-    #ifdef HAVE_LINUX_INPUT_H
         kpd->keyEventBuffer = NULL;
         kpd->keyEventLimit = 0;
         kpd->keyEventCount = 0;
-    #endif /* HAVE_LINUX_INPUT_H */
 
         kpd->actualProperties = anyKeyboard;
         {
@@ -639,17 +629,17 @@ monitorKeyboard (int device, KeyboardCommonData *kcd) {
 
             {
               static const KeyboardType typeTable[] = {
-      #ifdef BUS_I8042
+#ifdef BUS_I8042
                 [BUS_I8042] = KBD_TYPE_PS2,
-      #endif /* BUS_I8042 */
+#endif /* BUS_I8042 */
 
-      #ifdef BUS_USB
+#ifdef BUS_USB
                 [BUS_USB] = KBD_TYPE_USB,
-      #endif /* BUS_USB */
+#endif /* BUS_USB */
 
-      #ifdef BUS_BLUETOOTH
+#ifdef BUS_BLUETOOTH
                 [BUS_BLUETOOTH] = KBD_TYPE_Bluetooth,
-      #endif /* BUS_BLUETOOTH */
+#endif /* BUS_BLUETOOTH */
               };
 
               if (identity.bustype < ARRAY_COUNT(typeTable))
@@ -666,9 +656,9 @@ monitorKeyboard (int device, KeyboardCommonData *kcd) {
         if (checkKeyboardProperties(&kpd->actualProperties, &kcd->requiredProperties)) {
           if (hasInputEvent(device, EV_KEY, KEY_ENTER, KEY_MAX)) {
             if (asyncRead(device, sizeof(struct input_event), handleKeyboardEvent, kpd)) {
-    #ifdef EVIOCGRAB
+#ifdef EVIOCGRAB
               ioctl(device, EVIOCGRAB, 1);
-    #endif /* EVIOCGRAB */
+#endif /* EVIOCGRAB */
 
               return 1;
             }
@@ -685,15 +675,9 @@ monitorKeyboard (int device, KeyboardCommonData *kcd) {
   return 0;
 }
 
-static const char *
-getKeyboardRoot (void) {
-  return "/dev/input";
-}
-
 static void
 monitorCurrentKeyboards (KeyboardCommonData *kcd) {
-#ifdef HAVE_LINUX_INPUT_H
-  const char *root = getKeyboardRoot();
+  const char *root = "/dev/input";
   const size_t rootLength = strlen(root);
   DIR *directory;
 
@@ -721,7 +705,6 @@ monitorCurrentKeyboards (KeyboardCommonData *kcd) {
   } else {
     LogPrint(LOG_DEBUG, "cannot open directory: %s: %s", root, strerror(errno));
   }
-#endif /* HAVE_LINUX_INPUT_H */
 }
 
 typedef struct {
@@ -850,9 +833,11 @@ monitorKeyboardAdditions (KeyboardCommonData *kcd) {
 
   return 0;
 }
+#endif /* HAVE_LINUX_INPUT_H */
 
 int
 startKeyboardMonitor (const KeyboardProperties *properties, KeyEventHandler handleKeyEvent) {
+#ifdef HAVE_LINUX_INPUT_H
   if (getUinputDevice() != -1) {
     KeyboardCommonData *kcd;
 
@@ -866,6 +851,7 @@ startKeyboardMonitor (const KeyboardProperties *properties, KeyEventHandler hand
       return 1;
     }
   }
+#endif /* HAVE_LINUX_INPUT_H */
 
   return 0;
 }
