@@ -36,6 +36,7 @@ typedef struct {
 
 typedef struct {
   KeyboardCommonData *kcd;
+  int fileDescriptor;
   KeyboardProperties actualProperties;
 
 #ifdef HAVE_LINUX_INPUT_H
@@ -49,14 +50,23 @@ typedef struct {
 #endif /* HAVE_LINUX_INPUT_H */
 } KeyboardPrivateData;
 
+static void
+closeKeyboard (KeyboardPrivateData *kpd) {
+  close(kpd->fileDescriptor);
+  free(kpd);
+}
+
 static size_t
 handleKeyboardEvent (const AsyncInputResult *result) {
   KeyboardPrivateData *kpd = result->data;
 
   if (result->error) {
-    LogPrint(LOG_DEBUG, "keyboard read error: %s", strerror(result->error));
+    LogPrint(LOG_DEBUG, "keyboard read error: fd=%d: %s",
+             kpd->fileDescriptor, strerror(result->error));
+    closeKeyboard(kpd);
   } else if (result->end) {
-    LogPrint(LOG_DEBUG, "keyboard end-of-file");
+    LogPrint(LOG_DEBUG, "keyboard end-of-file: fd=%d", kpd->fileDescriptor);
+    closeKeyboard(kpd);
   } else {
 #ifdef HAVE_LINUX_INPUT_H
     const struct input_event *event = result->buffer;
@@ -608,6 +618,7 @@ monitorKeyboard (int device, KeyboardCommonData *kcd) {
   if ((kpd = malloc(sizeof(*kpd)))) {
     memset(kpd, 0, sizeof(*kpd));
     kpd->kcd = kcd;
+    kpd->fileDescriptor = device;
 
 #ifdef HAVE_LINUX_INPUT_H
     kpd->keyEventBuffer = NULL;
