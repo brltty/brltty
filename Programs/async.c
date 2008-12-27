@@ -442,6 +442,7 @@ invokeInputCallback (OperationEntry *operation) {
   if (count)
     memmove(extension->buffer, &extension->buffer[count],
             extension->length -= count);
+  operation->finished = extension->length > 0;
   return 1;
 }
 
@@ -449,7 +450,10 @@ static int
 invokeOutputCallback (OperationEntry *operation) {
   TransferExtension *extension = operation->extension;
 
-  if (!operation->error && (extension->length < extension->size)) return 1;
+  if (!operation->error && (extension->length < extension->size)) {
+    operation->finished = 0;
+    return 1;
+  }
 
   if (extension->direction.output.callback) {
     AsyncOutputResult result;
@@ -871,11 +875,9 @@ asyncWait (int duration) {
       FunctionEntry *function = getElementItem(functionElement);
       Element *operationElement = getQueueHead(function->operations);
       OperationEntry *operation = getElementItem(operationElement);
-      TransferExtension *extension = operation->extension;
 
       if (!operation->finished) finishOperation(operation);
       if (function->methods->invokeCallback(operation)) {
-        operation->finished = extension->length > 0;
         operation->error = 0;
       } else {
         deleteElement(operationElement);
