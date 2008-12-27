@@ -695,34 +695,31 @@ monitorCurrentKeyboards (KeyboardCommonData *kcd) {
     while ((entry = readdir(directory))) {
       const size_t nameLength = strlen(entry->d_name);
       char path[rootLength + 1 + nameLength + 1];
+      int device;
 
       snprintf(path, sizeof(path), "%s/%s", root, entry->d_name);
       LogPrint(LOG_DEBUG, "checking keyboard device: %s", path);
 
-      {
+      if ((device = open(path, O_RDONLY)) != -1) {
         struct stat status;
 
-        if (stat(path, &status) != -1) {
+        if (fstat(device, &status) != -1) {
           if (S_ISCHR(status.st_mode)) {
-            int device;
-
-            if ((device = open(path, O_RDONLY)) != -1) {
-              if (monitorKeyboard(device, kcd)) continue;
-
-              close(device);
-            } else {
-              LogPrint(LOG_DEBUG, "cannot open keyboard device: %s: %s", path, strerror(errno));
-            }
+            if (monitorKeyboard(device, kcd)) continue;
           }
         } else {
           LogPrint(LOG_DEBUG, "cannot stat keyboard device: %s: %s", path, strerror(errno));
         }
+
+        close(device);
+      } else {
+        LogPrint(LOG_DEBUG, "cannot open keyboard device: %s: %s", path, strerror(errno));
       }
     }
 
     closedir(directory);
   } else {
-    LogPrint(LOG_DEBUG, "cannot open directory: %s", root);
+    LogPrint(LOG_DEBUG, "cannot open directory: %s: %s", root, strerror(errno));
   }
 #endif /* HAVE_LINUX_INPUT_H */
 }
@@ -748,7 +745,7 @@ doOpenInputDevice (void *data) {
 }
 
 static size_t
-handleKobjectUeventEvent (const AsyncInputResult *result) {
+handleKobjectUeventString (const AsyncInputResult *result) {
   if (result->error) {
     LogPrint(LOG_DEBUG, "netlink read error: %s", strerror(result->error));
   } else if (result->end) {
@@ -845,7 +842,7 @@ monitorKeyboardAdditions (KeyboardCommonData *kcd) {
   if (kobjectEventSocket != -1) {
     if (asyncRead(kobjectEventSocket,
                   6+1+PATH_MAX+1,
-                  handleKobjectUeventEvent, kcd))
+                  handleKobjectUeventString, kcd))
       return 1;
 
     close(kobjectEventSocket);
