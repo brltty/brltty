@@ -795,7 +795,7 @@ usbReapInput (
 }
 
 int
-usbHidWrite (
+usbHidSetReport (
   UsbDevice *device,
   unsigned char interface,
   unsigned char report,

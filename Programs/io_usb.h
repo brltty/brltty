@@ -417,7 +417,7 @@ typedef struct {
 typedef int (*UsbInputFilter) (UsbInputFilterData *data);
 extern int usbAddInputFilter (UsbDevice *device, UsbInputFilter filter);
 
-extern int usbHidWrite (
+extern int usbHidSetReport (
   UsbDevice *device,
   unsigned char interface,
   unsigned char report,
