@@ -101,7 +101,7 @@ originalImage="boot.iso"
 modifiedImage="brltty.iso"
 brlttyPattern="brltty-*"
 brailleDrivers="all"
-textTable="nabcc"
+textTable="en-nabcc"
 invokeShell=false
 
 showUsage() {
@@ -112,7 +112,7 @@ The following options are supported:
 -o file         The modified (output) image (default: ${modifiedImage}).
 -a file         The BRLTTY archive (default: ${brlttyPattern}).
 -b driver,...   The braille driver(s) to include (default: ${brailleDrivers}).
--t file         The text translation table to build in (default: ${textTable}).
+-t file         The text table to build in (default: ${textTable}).
 -s              Invoke an interactive shell to inspect the modified image.
 -h              Display usage information and exit.
 EOF
