@@ -794,6 +794,21 @@ usbReapInput (
   return -1;
 }
 
+int
+usbHidWrite (
+  UsbDevice *device,
+  unsigned char interface,
+  unsigned char report,
+  const void *buffer,
+  int length,
+  int timeout
+) {
+  return usbControlWrite(device,
+                         UsbControlRecipient_Interface, UsbControlType_Class,
+                         0X09, (0X02 << 8) | report, interface,
+                         buffer, length, timeout);
+}
+
 static int
 usbSetBelkinAttribute (UsbDevice *device, unsigned char request, int value) {
   return usbControlWrite(device, UsbControlRecipient_Device, UsbControlType_Vendor,

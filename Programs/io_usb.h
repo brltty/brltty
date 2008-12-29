@@ -417,6 +417,15 @@ typedef struct {
 typedef int (*UsbInputFilter) (UsbInputFilterData *data);
 extern int usbAddInputFilter (UsbDevice *device, UsbInputFilter filter);
 
+extern int usbHidWrite (
+  UsbDevice *device,
+  unsigned char interface,
+  unsigned char report,
+  const void *buffer,
+  int length,
+  int timeout
+);
+
 typedef struct {
   int (*setBaud) (UsbDevice *device, int rate);
   int (*setFlowControl) (UsbDevice *device, SerialFlowControl flow);
