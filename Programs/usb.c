@@ -805,7 +805,8 @@ usbHidSetReport (
 ) {
   return usbControlWrite(device,
                          UsbControlRecipient_Interface, UsbControlType_Class,
-                         0X09, (0X02 << 8) | report, interface,
+                         UsbHidRequest_SetReport,
+                         (UsbHidReportType_Output << 8) | report, interface,
                          buffer, length, timeout);
 }
 

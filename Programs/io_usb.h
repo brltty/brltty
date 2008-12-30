@@ -417,6 +417,16 @@ typedef struct {
 typedef int (*UsbInputFilter) (UsbInputFilterData *data);
 extern int usbAddInputFilter (UsbDevice *device, UsbInputFilter filter);
 
+typedef enum {
+  UsbHidRequest_SetReport = 0X09
+} UsbHidRequest;
+
+typedef enum {
+  UsbHidReportType_Input   = 0X01,
+  UsbHidReportType_Output  = 0X02,
+  UsbHidReportType_Feature = 0X03
+} UsbHidReportType;
+
 extern int usbHidSetReport (
   UsbDevice *device,
   unsigned char interface,
