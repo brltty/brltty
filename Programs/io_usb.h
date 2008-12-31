@@ -418,7 +418,12 @@ typedef int (*UsbInputFilter) (UsbInputFilterData *data);
 extern int usbAddInputFilter (UsbDevice *device, UsbInputFilter filter);
 
 typedef enum {
-  UsbHidRequest_SetReport = 0X09
+  UsbHidRequest_GetReport   = 0X01,
+  UsbHidRequest_GetIdle     = 0X02,
+  UsbHidRequest_GetProtocol = 0X03,
+  UsbHidRequest_SetReport   = 0X09,
+  UsbHidRequest_SetIdle     = 0X0A,
+  UsbHidRequest_SetProtocol = 0X0B
 } UsbHidRequest;
 
 typedef enum {
@@ -428,6 +433,24 @@ typedef enum {
 } UsbHidReportType;
 
 extern int usbHidSetReport (
+  UsbDevice *device,
+  unsigned char interface,
+  unsigned char report,
+  const void *buffer,
+  int length,
+  int timeout
+);
+
+extern int usbHidGetFeature (
+  UsbDevice *device,
+  unsigned char interface,
+  unsigned char report,
+  void *buffer,
+  int length,
+  int timeout
+);
+
+extern int usbHidSetFeature (
   UsbDevice *device,
   unsigned char interface,
   unsigned char report,
