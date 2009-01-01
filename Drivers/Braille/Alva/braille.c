@@ -249,6 +249,17 @@ static const ModelEntry modelTable[] = {
   { .name = NULL }
 };
 
+static const ModelEntry modelBC640 = {
+  .name = "BC640",
+  .columns = 40,
+  .helpPage = 2
+};
+
+static const ModelEntry modelBC680 = {
+  .name = "BC680",
+  .columns = 80,
+  .helpPage = 2
+};
 
 #define MAX_STCELLS	5	/* hiest number of status cells */
 
@@ -274,12 +285,6 @@ static struct timeval rewriteTime;
 
 
 /* Communication codes */
-
-static const unsigned char BRL_START[] = {'\r', 0X1B, 'B'};	/* escape code to display braille */
-#define BRL_START_LENGTH (sizeof(BRL_START)) 
-
-static const unsigned char BRL_END[] = {'\r'};		/* to send after the braille sequence */
-#define BRL_END_LENGTH (sizeof(BRL_END))
 
 static const unsigned char BRL_ID[] = {0X1B, 'I', 'D', '='};
 #define BRL_ID_LENGTH (sizeof(BRL_ID))
@@ -378,18 +383,192 @@ typedef struct {
   int (*awaitInput) (int milliseconds);
   int (*readPacket) (unsigned char *buffer, int length);
   int (*writePacket) (const unsigned char *buffer, int length, unsigned int *delay);
+  int (*getHidFeature) (unsigned char report, unsigned char *buffer, int length);
 } InputOutputOperations;
 static const InputOutputOperations *io;
+
+typedef struct {
+  void (*initializeVariables) (void);
+  int (*detectModel) (BrailleDisplay *brl);
+  int (*verifyInputPacket) (unsigned char *buffer, int *length);
+  int (*readCommand) (BrailleDisplay *brl, BRL_DriverCommandContext context);
+  int (*writeBraille) (BrailleDisplay *brl, const unsigned char *cells, int start, int count);
+} ProtocolOperations;
+static const ProtocolOperations *protocol;
 
 #define PACKET_SIZE(count) (((count) * 2) + 4)
 #define MAXIMUM_PACKET_SIZE PACKET_SIZE(0XFF)
 static unsigned char inputBuffer[MAXIMUM_PACKET_SIZE];
 static int inputUsed;
 
-static int
-verifyInputPacket (unsigned char *buffer, int *length) {
-  int size = 0;
+static void
+preverifyInputPacket (void) {
   if (logInputBuffer) LogBytes(LOG_DEBUG, "Input Buffer", inputBuffer, inputUsed);
+}
+
+static int
+postverifyInputPacket (unsigned char *buffer, int *length, int size) {
+  if (!size) return 0;
+  if (logInputPackets) LogBytes(LOG_DEBUG, "Input Packet", inputBuffer, size);
+
+  if (*length < size) {
+    LogPrint(LOG_DEBUG, "truncated input packet: %d < %d", *length, size);
+    size = *length;
+  } else {
+    *length = size;
+  }
+
+  memcpy(buffer, &inputBuffer[0], size);
+  memcpy(&inputBuffer[0], &inputBuffer[size], inputUsed-=size);
+  return 1;
+}
+
+static int
+reallocateBuffer (unsigned char **buffer, int size) {
+  void *address = realloc(*buffer, size);
+  if (!address) return 0;
+  *buffer = address;
+  return 1;
+}
+
+static int
+reallocateBuffers (BrailleDisplay *brl) {
+  if (reallocateBuffer(&rawdata, brl->textColumns*brl->textRows))
+    if (reallocateBuffer(&prevdata, brl->textColumns*brl->textRows))
+      return 1;
+
+  LogPrint(LOG_ERR, "cannot allocate braille buffers");
+  return 0;
+}
+
+static int
+setDefaultConfiguration (BrailleDisplay *brl) {
+  LogPrint(LOG_INFO, "Detected Alva %s: %d columns, %d status cells",
+           model->name, model->columns, model->statusCells);
+
+  brl->textColumns = model->columns;
+  brl->textRows = 1;
+  brl->statusColumns = model->statusCells;
+  brl->statusRows = 1;
+  brl->helpPage = model->helpPage;			/* initialise size of display */
+
+  rewriteRequired = 1;			/* To write whole display at first time */
+  gettimeofday(&rewriteTime, NULL);
+  return reallocateBuffers(brl);
+}
+
+static int
+updateConfiguration (BrailleDisplay *brl, int autodetecting, int textColumns, int statusColumns) {
+  if (statusColumns != brl->statusColumns) {
+    brl->statusColumns = statusColumns;
+    LogPrint(LOG_INFO, "Status cell count changed to %d.", brl->statusColumns);
+  }
+
+  if (textColumns != brl->textColumns) {
+    brl->textColumns = textColumns;
+    if (!reallocateBuffers(brl)) return 0;
+    if (!autodetecting) brl->resizeRequired = 1;
+  }
+
+  return 1;
+}
+
+static int
+writeFunction1 (BrailleDisplay *brl, unsigned char code) {
+  unsigned char bytes[] = {0X1B, 'F', 'U', 'N', code, '\r'};
+  return io->writePacket(bytes, sizeof(bytes), &brl->writeDelay);
+}
+
+static int
+writeParameter1 (BrailleDisplay *brl, unsigned char parameter, unsigned char setting) {
+  unsigned char bytes[] = {0X1B, 'P', 'A', 3, 0, parameter, setting, '\r'};
+  return io->writePacket(bytes, sizeof(bytes), &brl->writeDelay);
+}
+
+static int
+updateConfiguration1 (BrailleDisplay *brl, const unsigned char *packet, int autodetecting) {
+  int textColumns = brl->textColumns;
+  int statusColumns = brl->statusColumns;
+  int count = packet[3];
+
+  if (count >= 3) statusColumns = packet[9];
+  if (count >= 4) textColumns = packet[11];
+  return updateConfiguration(brl, autodetecting, textColumns, statusColumns);
+}
+
+static int
+identifyModel1 (BrailleDisplay *brl, unsigned char identifier) {
+  /* Find out which model we are connected to... */
+  for (
+    model = modelTable;
+    model->name && (model->identifier != identifier);
+    model += 1
+  );
+
+  if (model->name) {
+    if (setDefaultConfiguration(brl)) {
+      if (model->flags & MOD_FLG__CONFIGURABLE) {
+        BRLSYMBOL.firmness = brl_firmness;
+
+        writeFunction1(brl, 0X07);
+        while (io->awaitInput(200)) {
+          unsigned char packet[MAXIMUM_PACKET_SIZE];
+          int count = io->readPacket(packet, sizeof(packet));
+
+          if (count == -1) break;
+          if (count == 0) continue;
+
+          if ((packet[0] == 0X7F) && (packet[1] == 0X07)) {
+            updateConfiguration1(brl, packet, 1);
+            break;
+          }
+        }
+
+        writeFunction1(brl, 0X0B);
+      } else {
+        BRLSYMBOL.firmness = NULL; 
+      }
+
+      return 1;
+    }
+  } else {
+    LogPrint(LOG_ERR, "detected unknown Alva model with ID %02X (hex)", identifier);
+  }
+
+  return 0;
+}
+
+static void
+initializeVariables1 (void) {
+}
+
+static int
+detectModel1 (BrailleDisplay *brl) {
+  int probes = 0;
+
+  while (writeFunction1(brl, 0X06) != -1) {
+    while (io->awaitInput(200)) {
+      unsigned char packet[MAXIMUM_PACKET_SIZE];
+      if (io->readPacket(packet, sizeof(packet)) > 0) {
+        if (memcmp(packet, BRL_ID, BRL_ID_LENGTH) == 0) {
+          if (identifyModel1(brl, packet[BRL_ID_LENGTH])) {
+            return 1;
+          }
+        }
+      }
+    }
+
+    if (errno != EAGAIN) break;
+    if (++probes == 3) break;
+  }
+
+  return 0;
+}
+
+static int
+verifyInputPacket1 (unsigned char *buffer, int *length) {
+  int size = 0;
+  preverifyInputPacket();
 
 #if ! ABT3_OLD_FIRMWARE
   while (inputUsed > 0) {
@@ -434,410 +613,11 @@ verifyInputPacket (unsigned char *buffer, int *length) {
   if (inputUsed) size = 1;
 #endif /* ! ABT3_OLD_FIRMWARE */
 
-  if (!size) return 0;
-  if (logInputPackets) LogBytes(LOG_DEBUG, "Input Packet", inputBuffer, size);
-
-  if (*length < size) {
-    LogPrint(LOG_DEBUG, "truncated input packet: %d < %d", *length, size);
-    size = *length;
-  } else {
-    *length = size;
-  }
-
-  memcpy(buffer, &inputBuffer[0], size);
-  memcpy(&inputBuffer[0], &inputBuffer[size], inputUsed-=size);
-  return 1;
+  return postverifyInputPacket(buffer, length, size);
 }
 
 static int
-writeFunction (BrailleDisplay *brl, unsigned char code) {
-  unsigned char bytes[] = {0X1B, 'F', 'U', 'N', code, '\r'};
-  return io->writePacket(bytes, sizeof(bytes), &brl->writeDelay);
-}
-
-static int
-writeParameter (BrailleDisplay *brl, unsigned char parameter, unsigned char setting) {
-  unsigned char bytes[] = {0X1B, 'P', 'A', 3, 0, parameter, setting, '\r'};
-  return io->writePacket(bytes, sizeof(bytes), &brl->writeDelay);
-}
-
-#include "io_serial.h"
-static SerialDevice *serialDevice = NULL;
-static int serialCharactersPerSecond;
-
-static int
-openSerialPort (char **parameters, const char *device) {
-  rewriteInterval = REWRITE_INTERVAL;
-
-  if (!(serialDevice = serialOpenDevice(device))) return 0;
-
-  return 1;
-}
-
-static int
-resetSerialPort (void) {
-  if (!serialRestartDevice(serialDevice, BAUDRATE)) return 0;
-  serialCharactersPerSecond = BAUDRATE / 10;
-  return 1;
-}
-
-static void
-closeSerialPort (void) {
-  if (serialDevice) {
-    serialCloseDevice(serialDevice);
-    serialDevice = NULL;
-  }
-}
-
-static int
-awaitSerialInput (int milliseconds) {
-  return serialAwaitInput(serialDevice, milliseconds);
-}
-
-static int
-readSerialPacket (unsigned char *buffer, int length) {
-  while (1) {
-    unsigned char byte;
-    int count = serialReadData(serialDevice, &byte, 1, 0, 0);
-    if (count < 1) {
-      if (count == -1) LogError("serial read");
-      return count;
-    }
-    inputBuffer[inputUsed++] = byte;
-    if (verifyInputPacket(buffer, &length)) return length;
-  }
-}
-
-static int
-writeSerialPacket (const unsigned char *buffer, int length, unsigned int *delay) {
-  if (logOutputPackets) LogBytes(LOG_DEBUG, "Output Packet", buffer, length);
-  if (delay) *delay += (length * 1000 / serialCharactersPerSecond) + 1;
-  return serialWriteData(serialDevice, buffer, length);
-}
-
-static const InputOutputOperations serialOperations = {
-  openSerialPort, resetSerialPort, closeSerialPort,
-  awaitSerialInput, readSerialPacket, writeSerialPacket
-};
-
-#ifdef ENABLE_USB_SUPPORT
-#include "io_usb.h"
-
-static UsbChannel *usb = NULL;
-
-static int
-openUsbPort (char **parameters, const char *device) {
-  static const UsbChannelDefinition definitions[] = {
-    { .vendor=0X06b0, .product=0X0001,
-      .configuration=1, .interface=0, .alternative=0,
-      .inputEndpoint=1, .outputEndpoint=2
-    }
-    ,
-    { .vendor=0 }
-  };
-
-  rewriteInterval = 0;
-  if ((usb = usbFindChannel(definitions, (void *)device))) {
-    usbBeginInput(usb->device, usb->definition.inputEndpoint, 8);
-    return 1;
-  }
-  return 0;
-}
-
-static int
-resetUsbPort (void) {
-  return 1;
-}
-
-static void
-closeUsbPort (void) {
-  if (usb) {
-    usbCloseChannel(usb);
-    usb = NULL;
-  }
-}
-
-static int
-awaitUsbInput (int milliseconds) {
-  return usbAwaitInput(usb->device, usb->definition.inputEndpoint, milliseconds);
-}
-
-static int
-readUsbPacket (unsigned char *buffer, int length) {
-  while (1) {
-    unsigned char bytes[2];
-    int count = usbReapInput(usb->device, usb->definition.inputEndpoint, bytes, sizeof(bytes), 0, 0);
-    if (count == -1) {
-      if (errno == EAGAIN) return 0;
-      return count;
-    }
-
-    if (bytes[0] || bytes[1]) {
-      memcpy(&inputBuffer[inputUsed], bytes, count);
-      inputUsed += count;
-      if (verifyInputPacket(buffer, &length)) return length;
-    } else if (inputUsed) {
-      LogBytes(LOG_WARNING, "Truncated Packet", inputBuffer, inputUsed);
-      inputUsed = 0;
-    }
-  }
-}
-
-static int
-writeUsbPacket (const unsigned char *buffer, int length, unsigned int *delay) {
-  if (logOutputPackets) LogBytes(LOG_DEBUG, "Output Packet", buffer, length);
-  return usbWriteEndpoint(usb->device, usb->definition.outputEndpoint, buffer, length, 1000);
-}
-
-static const InputOutputOperations usbOperations = {
-  openUsbPort, resetUsbPort, closeUsbPort,
-  awaitUsbInput, readUsbPacket, writeUsbPacket
-};
-#endif /* ENABLE_USB_SUPPORT */
-
-int AL_writeData( unsigned char *data, int len )
-{
-  if (io->writePacket(data, len, NULL) == len) return 1;
-  return 0;
-}
-
-static int
-reallocateBuffer (unsigned char **buffer, int size) {
-  void *address = realloc(*buffer, size);
-  if (!address) return 0;
-  *buffer = address;
-  return 1;
-}
-
-static int
-reallocateBuffers (BrailleDisplay *brl) {
-  if (reallocateBuffer(&rawdata, brl->textColumns*brl->textRows))
-    if (reallocateBuffer(&prevdata, brl->textColumns*brl->textRows))
-      return 1;
-
-  LogPrint(LOG_ERR, "Cannot allocate braille buffers.");
-  return 0;
-}
-
-static int
-updateDisplayConfiguration (BrailleDisplay *brl, const unsigned char *packet, int autodetecting) {
-  int count = packet[3];
-
-  if (count >= 3) {
-    unsigned char cells = packet[9];
-    if (cells != brl->statusColumns) {
-      brl->statusColumns = cells;
-      LogPrint(LOG_INFO, "Status cell count changed to %d.", brl->statusColumns);
-    }
-  }
-
-  if (count >= 4) {
-    unsigned char columns = packet[11];
-    if (columns != brl->textColumns) {
-      brl->textColumns = columns;
-      if (!autodetecting) {
-        if (!reallocateBuffers(brl)) return 0;
-        brl->resizeRequired = 1;
-      }
-    }
-  }
-
-  return 1;
-}
-
-static int
-identifyModel (BrailleDisplay *brl, unsigned char identifier) {
-  /* Find out which model we are connected to... */
-  for (
-    model = modelTable;
-    model->name && (model->identifier != identifier);
-    model++
-  );
-
-  if (!model->name) {
-    /* Unknown model */
-    LogPrint(LOG_ERR, "Detected unknown Alva model with ID %02X (hex).", identifier);
-    return 0;
-  }
-  LogPrint(LOG_INFO, "Detected Alva %s: %d columns, %d status cells",
-           model->name, model->columns, model->statusCells);
-
-  /* Set model parameters... */
-  brl->textColumns = model->columns;
-  brl->textRows = 1;
-  brl->statusColumns = model->statusCells;
-  brl->statusRows = 1;
-  brl->helpPage = model->helpPage;			/* initialise size of display */
-
-  if (model->flags & MOD_FLG__CONFIGURABLE) {
-    BRLSYMBOL.firmness = brl_firmness;
-
-    writeFunction(brl, 0X07);
-    while (io->awaitInput(200)) {
-      unsigned char packet[MAXIMUM_PACKET_SIZE];
-      int count = io->readPacket(packet, sizeof(packet));
-      if (count == -1) break;
-      if (count == 0) continue;
-
-      if ((packet[0] == 0X7F) && (packet[1] == 0X07)) {
-        updateDisplayConfiguration(brl, packet, 1);
-        break;
-      }
-    }
-
-    writeFunction(brl, 0X0B);
-  } else {
-    BRLSYMBOL.firmness = NULL; 
-  }
-
-  /* Allocate space for buffers */
-  if (!reallocateBuffers(brl)) return 0;
-  rewriteRequired = 1;			/* To write whole display at first time */
-  gettimeofday(&rewriteTime, NULL);
-
-  return 1;
-}
-
-static int
-brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
-  unsigned char ModelID;
-
-  {
-    static const DotsTable dots = {0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80};
-    makeOutputTable(dots, outputTable);
-  }
-
-  if (isSerialDevice(&device)) {
-    io = &serialOperations;
-  } else
-
-#ifdef ENABLE_USB_SUPPORT
-  if (isUsbDevice(&device)) {
-    io = &usbOperations;
-  } else
-#endif /* ENABLE_USB_SUPPORT */
-
-  {
-    unsupportedDevice(device);
-    return 0;
-  }
-  inputUsed = 0;
-
-  /* Open the Braille display device */
-  if (io->openPort(parameters, device)) {
-    if (io->resetPort()) {
-      int probes = 0;
-      while (writeFunction(brl, 0X06) != -1) {
-        while (io->awaitInput(200)) {
-          unsigned char packet[MAXIMUM_PACKET_SIZE];
-          if (io->readPacket(packet, sizeof(packet)) > 0) {
-            if (memcmp(packet, BRL_ID, BRL_ID_LENGTH) == 0) {
-              ModelID = packet[BRL_ID_LENGTH];
-              if (identifyModel(brl, ModelID)) {
-                return 1;
-              }
-            }
-          }
-        }
-        if (errno != EAGAIN) break;
-        if (++probes == 3) break;
-      }
-    }
-
-    io->closePort();
-  }
-
-  return 0;
-}
-
-
-static void brl_destruct (BrailleDisplay *brl)
-{
-  if (rawdata) {
-    free(rawdata);
-    rawdata = NULL;
-  }
-
-  if (prevdata) {
-    free(prevdata);
-    prevdata = NULL;
-  }
-
-  io->closePort();
-}
-
-
-static int WriteToBrlDisplay (BrailleDisplay *brl, int Start, int Len, unsigned char *Data)
-{
-  unsigned char outbuf[ BRL_START_LENGTH + 2 + Len + BRL_END_LENGTH ];
-  int outsz = 0;
-
-  memcpy( outbuf, BRL_START, BRL_START_LENGTH );
-  outsz += BRL_START_LENGTH;
-  outbuf[outsz++] = (char)Start;
-  outbuf[outsz++] = (char)Len;
-  memcpy( outbuf+outsz, Data, Len );
-  outsz += Len;
-  memcpy( outbuf+outsz, BRL_END, BRL_END_LENGTH );
-  outsz += BRL_END_LENGTH;
-  return io->writePacket(outbuf, outsz, &brl->writeDelay);
-}
-
-static int brl_writeWindow (BrailleDisplay *brl, const wchar_t *text)
-{
-  int from, to;
-
-  if (rewriteInterval) {
-    struct timeval now;
-    gettimeofday(&now, NULL);
-    if (millisecondsBetween(&rewriteTime, &now) > rewriteInterval) rewriteRequired = 1;
-    if (rewriteRequired) rewriteTime = now;
-  }
-
-  if (rewriteRequired) {
-    /* We rewrite the whole display */
-    from = 0;
-    to = brl->textColumns;
-    rewriteRequired = 0;
-  } else {
-    /* We update only the display part that has been changed */
-    from = 0;
-    while ((from < brl->textColumns) && (brl->buffer[from] == prevdata[from])) from++;
-
-    to = brl->textColumns - 1;
-    while ((to > from) && (brl->buffer[to] == prevdata[to])) to--;
-    to++;
-  }
-
-  if (from < to)			/* there is something different */ {
-    int index;
-    for (index=from; index<to; index++)
-      rawdata[index - from] = outputTable[(prevdata[index] = brl->buffer[index])];
-    WriteToBrlDisplay (brl, brl->statusColumns+from, to-from, rawdata);
-  }
-  return 1;
-}
-
-
-static int
-brl_writeStatus (BrailleDisplay *brl, const unsigned char *st)
-{
-  int i;
-
-  /* Update status cells on braille display */
-  if (memcmp (st, PrevStatus, brl->statusColumns) != 0)	/* only if it changed */
-    {
-      for (i=0; i<brl->statusColumns; ++i)
-        StatusCells[i] = outputTable[(PrevStatus[i] = st[i])];
-      WriteToBrlDisplay (brl, 0, brl->statusColumns, StatusCells);
-    }
-  return 1;
-}
-
-
-
-static int
-GetKey (BrailleDisplay *brl, unsigned int *Keys, unsigned int *Pos) {
+getKey1 (BrailleDisplay *brl, unsigned int *Keys, unsigned int *Pos) {
   unsigned char packet[MAXIMUM_PACKET_SIZE];
   int length = io->readPacket(packet, sizeof(packet));
   if (length < 1) return length;
@@ -905,7 +685,7 @@ GetKey (BrailleDisplay *brl, unsigned int *Keys, unsigned int *Pos) {
     case 0X7F:
       switch (packet[1]) {
         case 0X07: /* text/status cells reconfigured */
-          if (!updateDisplayConfiguration(brl, packet, 0)) return -1;
+          if (!updateConfiguration1(brl, packet, 0)) return -1;
           rewriteRequired = 1;
           return 0;
 
@@ -919,7 +699,7 @@ GetKey (BrailleDisplay *brl, unsigned int *Keys, unsigned int *Pos) {
               unsigned char newSetting = frontKeys & ~progKey;
               LogPrint(LOG_DEBUG, "Reconfiguring front keys: %02X -> %02X",
                        frontKeys, newSetting);
-              writeParameter(brl, 6, newSetting);
+              writeParameter1(brl, 6, newSetting);
             }
           }
 
@@ -932,7 +712,7 @@ GetKey (BrailleDisplay *brl, unsigned int *Keys, unsigned int *Pos) {
       if (length >= BRL_ID_SIZE) {
         if (memcmp(packet, BRL_ID, BRL_ID_LENGTH) == 0) {
           /* The terminal has been turned off and back on. */
-          if (!identifyModel(brl, packet[BRL_ID_LENGTH])) return -1;
+          if (!identifyModel1(brl, packet[BRL_ID_LENGTH])) return -1;
           brl->resizeRequired = 1;
           return 0;
         }
@@ -970,13 +750,12 @@ GetKey (BrailleDisplay *brl, unsigned int *Keys, unsigned int *Pos) {
   return 0;
 }
 
-
 static int
-brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
+readCommand1 (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   static unsigned int CurrentKeys = 0, LastKeys = 0, ReleasedKeys = 0;
   static unsigned int RoutingPos = 0;
   int res = EOF;
-  int ProcessKey = GetKey(brl, &CurrentKeys, &RoutingPos);
+  int ProcessKey = getKey1(brl, &CurrentKeys, &RoutingPos);
 
   if (ProcessKey < 0) {
     /* An input error occurred (perhaps disconnect of USB device) */
@@ -1326,7 +1105,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
                * routing key press event is sometimes generated when at least
                * two front keys are already pressed. The correct routing key
                * event follows eventually, so the best workaround is to let
-               * GetKey() overwrite RoutingPos until some key is released.
+               * getKey1() overwrite RoutingPos until some key is released.
                * The exact bug as I observe it is that for routing keys 25-29
                * an extra press packet for routing key 35-31 is sent before
                * the correct one. In other words, if 25 <= x <= 29 then a key
@@ -1393,8 +1172,625 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   return res;
 }
 
+static int
+writeBraille1 (BrailleDisplay *brl, const unsigned char *cells, int start, int count) {
+  static const unsigned char header[] = {'\r', 0X1B, 'B'};	/* escape code to display braille */
+  static const unsigned char trailer[] = {'\r'};		/* to send after the braille sequence */
+  unsigned char packet[sizeof(header) + 2 + count + sizeof(trailer)];
+  unsigned char *byte = packet;
+
+  memcpy(byte, header, sizeof(header));
+  byte += sizeof(header);
+
+  *byte++ = start;
+  *byte++ = count;
+
+  memcpy(byte, cells, count);
+  byte += count;
+
+  memcpy(byte, trailer, sizeof(trailer));
+  byte += sizeof(trailer);
+
+  return io->writePacket(packet, byte-packet, &brl->writeDelay);
+}
+
+static const ProtocolOperations protocol1Operations = {
+  initializeVariables1,
+  detectModel1, verifyInputPacket1,
+  readCommand1, writeBraille1
+};
+
+#define KEY2_THUMB_SHIFT 0
+#define KEY2_THUMB_COUNT 5
+#define KEY2_ETOUCH_SHIFT (KEY2_THUMB_SHIFT + KEY2_THUMB_COUNT)
+#define KEY2_ETOUCH_COUNT 4
+#define KEY2_SMARTPAD_SHIFT (KEY2_ETOUCH_SHIFT + KEY2_ETOUCH_COUNT)
+#define KEY2_SMARTPAD_COUNT 9
+#define KEY2(type,index) (1 << (KEY2_##type##_SHIFT + (index)))
+
+#define KEY2_TH_1 KEY2(THUMB, 0)
+#define KEY2_TH_2 KEY2(THUMB, 1)
+#define KEY2_TH_3 KEY2(THUMB, 2)
+#define KEY2_TH_4 KEY2(THUMB, 3)
+#define KEY2_TH_5 KEY2(THUMB, 4)
+
+#define KEY2_ET_1 KEY2(ETOUCH, 0)
+#define KEY2_ET_2 KEY2(ETOUCH, 1)
+#define KEY2_ET_3 KEY2(ETOUCH, 2)
+#define KEY2_ET_4 KEY2(ETOUCH, 3)
+
+#define KEY2_SP_1 KEY2(SMARTPAD, 0)
+#define KEY2_SP_2 KEY2(SMARTPAD, 1)
+#define KEY2_SP_L KEY2(SMARTPAD, 2)
+#define KEY2_SP_M KEY2(SMARTPAD, 3)
+#define KEY2_SP_U KEY2(SMARTPAD, 4)
+#define KEY2_SP_D KEY2(SMARTPAD, 5)
+#define KEY2_SP_R KEY2(SMARTPAD, 6)
+#define KEY2_SP_3 KEY2(SMARTPAD, 7)
+#define KEY2_SP_4 KEY2(SMARTPAD, 8)
+
+static unsigned long pressedKeys2;
+static unsigned long activeKeys2;
+
+static void
+initializeVariables2 (void) {
+  pressedKeys2 = 0;
+  activeKeys2 = 0;
+}
+
+static int
+updateConfiguration2 (BrailleDisplay *brl, int autodetecting) {
+  unsigned char buffer[0X20];
+  int length = io->getHidFeature(5, buffer, sizeof(buffer));
+
+  if (length != -1) {
+    int textColumns = brl->textColumns;
+    int statusColumns = brl->statusColumns;
+
+    if (length >= 7) textColumns = buffer[6];
+    if (updateConfiguration(brl, autodetecting, textColumns, statusColumns)) return 1;
+  }
+
+  return 0;
+}
+
+static int
+detectModel2 (BrailleDisplay *brl) {
+  BRLSYMBOL.firmness = NULL;
+
+  if (setDefaultConfiguration(brl))
+    if (updateConfiguration2(brl, 1))
+      return 1;
+
+  return 0;
+}
+
+static int
+verifyInputPacket2 (unsigned char *buffer, int *length) {
+  int size = 0;
+  preverifyInputPacket();
+
+  while (inputUsed > 0) {
+    if (inputBuffer[0] == 0X04) {
+      if (inputUsed < (size = 3)) return 0;
+      break;
+    }
+
+    LogBytes(LOG_WARNING, "Unrecognized Packet", inputBuffer, inputUsed);
+    memcpy(&inputBuffer[0], &inputBuffer[1], --inputUsed);
+  }
+
+  return postverifyInputPacket(buffer, length, size);
+}
+
+static int
+interpretOperatingKeys2 (void) {
+  switch (activeKeys2) {
+    case KEY2_SP_1: return BRL_CMD_HELP;
+    case KEY2_SP_2: return BRL_CMD_LEARN;
+    case KEY2_SP_3: return BRL_CMD_INFO;
+    case KEY2_SP_4: return BRL_CMD_PREFMENU;
+
+    case KEY2_SP_L: return BRL_CMD_SIXDOTS;
+    case KEY2_SP_R: return BRL_CMD_CSRTRK;
+    case KEY2_SP_U: return BRL_CMD_FREEZE;
+    case KEY2_SP_D: return BRL_CMD_DISPMD;
+    case KEY2_SP_M: return BRL_CMD_PASTE;
+
+    case KEY2_TH_3: return BRL_CMD_HOME;
+
+    case KEY2_TH_2: return BRL_CMD_LNUP;
+    case KEY2_TH_4: return BRL_CMD_LNDN;
+    case KEY2_TH_1: return BRL_CMD_FWINLT;
+    case KEY2_TH_5: return BRL_CMD_FWINRT;
+
+    case KEY2_TH_3 | KEY2_TH_2: return BRL_CMD_PRDIFLN;
+    case KEY2_TH_3 | KEY2_TH_4: return BRL_CMD_NXDIFLN;
+    case KEY2_TH_3 | KEY2_TH_1: return BRL_CMD_FWINLTSKIP;
+    case KEY2_TH_3 | KEY2_TH_5: return BRL_CMD_FWINRTSKIP;
+
+    case KEY2_SP_1 | KEY2_TH_3: return BRL_CMD_BACK;
+    case KEY2_SP_1 | KEY2_TH_2: return BRL_CMD_ATTRUP;
+    case KEY2_SP_1 | KEY2_TH_4: return BRL_CMD_ATTRDN;
+    case KEY2_SP_1 | KEY2_TH_1: return BRL_CMD_TOP_LEFT;
+    case KEY2_SP_1 | KEY2_TH_5: return BRL_CMD_BOT_LEFT;
+
+    case KEY2_SP_4 | KEY2_TH_3: return BRL_CMD_CSRJMP_VERT;
+    case KEY2_SP_4 | KEY2_TH_2: return BRL_CMD_PRPGRPH;
+    case KEY2_SP_4 | KEY2_TH_4: return BRL_CMD_NXPGRPH;
+    case KEY2_SP_4 | KEY2_TH_1: return BRL_CMD_PRPROMPT;
+    case KEY2_SP_4 | KEY2_TH_5: return BRL_CMD_NXPROMPT;
+
+    case KEY2_ET_1: return BRL_CMD_LNBEG;
+    case KEY2_ET_2: return BRL_CMD_CHRLT;
+    case KEY2_ET_3: return BRL_CMD_LNEND;
+    case KEY2_ET_4: return BRL_CMD_CHRRT;
+
+    case KEY2_SP_1 | KEY2_SP_L: return BRL_CMD_SAY_SLOWER;
+    case KEY2_SP_1 | KEY2_SP_R: return BRL_CMD_SAY_FASTER;
+    case KEY2_SP_1 | KEY2_SP_D: return BRL_CMD_SAY_SOFTER;
+    case KEY2_SP_1 | KEY2_SP_U: return BRL_CMD_SAY_LOUDER;
+    case KEY2_SP_1 | KEY2_SP_M: return BRL_CMD_AUTOSPEAK;
+    case KEY2_SP_4 | KEY2_SP_L: return BRL_CMD_MUTE;
+    case KEY2_SP_4 | KEY2_SP_R: return BRL_CMD_SAY_LINE;
+    case KEY2_SP_4 | KEY2_SP_U: return BRL_CMD_SAY_ABOVE;
+    case KEY2_SP_4 | KEY2_SP_D: return BRL_CMD_SAY_BELOW;
+    case KEY2_SP_4 | KEY2_SP_M: return BRL_CMD_SPKHOME;
+  }
+
+  return EOF;
+}
+
+static int
+interpretPrimaryRoutingKey2 (void) {
+  switch (activeKeys2) {
+    case 0: return BRL_BLK_ROUTE;
+
+    case KEY2_SP_1: return BRL_BLK_CUTBEGIN;
+    case KEY2_SP_2: return BRL_BLK_CUTAPPEND;
+    case KEY2_SP_3: return BRL_BLK_CUTLINE;
+    case KEY2_SP_4: return BRL_BLK_CUTRECT;
+
+    case KEY2_SP_L: return BRL_BLK_PRINDENT;
+    case KEY2_SP_R: return BRL_BLK_NXINDENT;
+    case KEY2_SP_U: return BRL_BLK_PRDIFCHAR;
+    case KEY2_SP_D: return BRL_BLK_NXDIFCHAR;
+    case KEY2_SP_M: return BRL_BLK_SETLEFT;
+  }
+
+  return EOF;
+}
+
+static int
+interpretSecondaryRoutingKey2 (void) {
+  switch (activeKeys2) {
+    case 0: return BRL_BLK_DESCCHAR;
+  }
+
+  return EOF;
+}
+
+static int
+readCommand2 (BrailleDisplay *brl, BRL_DriverCommandContext context) {
+  while (1) {
+    unsigned char packet[MAXIMUM_PACKET_SIZE];
+    int length = io->readPacket(packet, sizeof(packet));
+
+    if (!length) return EOF;
+    if (length < 0) return BRL_CMD_RESTARTBRL;
+
+    {
+      unsigned char key = packet[1];
+      unsigned char group = packet[2];
+      unsigned char release = group & 0X80;
+      group &= ~release;
+
+      switch (group) {
+        case 0X01:
+          switch (key) {
+            case 0X01:
+              updateConfiguration2(brl, 0);
+              continue;
+
+            default:
+              break;
+          }
+          break;
+
+        {
+          unsigned int shift;
+          unsigned int count;
+
+        case 0X71: /* thumb key */
+          shift = KEY2_THUMB_SHIFT;
+          count = KEY2_THUMB_COUNT;
+          goto doKey;
+
+        case 0X72: /* etouch key */
+          shift = KEY2_ETOUCH_SHIFT;
+          count = KEY2_ETOUCH_COUNT;
+          goto doKey;
+
+        case 0X73: /* smartpad key */
+          shift = KEY2_SMARTPAD_SHIFT;
+          count = KEY2_SMARTPAD_COUNT;
+          goto doKey;
+
+        doKey:
+          if (key < count) {
+            unsigned long bit = 1 << (shift + key);
+
+            if (release) {
+              int command = interpretOperatingKeys2();
+              pressedKeys2 &= ~bit;
+              activeKeys2 = 0;
+              return command;
+            }
+
+            pressedKeys2 |= bit;
+            activeKeys2 = pressedKeys2;
+            return BRL_CMD_NOOP;
+          }
+          break;
+        }
+
+        case 0X74: { /* routing key */
+          unsigned char second = key & 0X80;
+          key &= ~second;
+
+          if (key < brl->textColumns) {
+            int command;
+
+            if (release) {
+              command = EOF;
+            } else {
+              command = second? interpretSecondaryRoutingKey2(): interpretPrimaryRoutingKey2();
+
+              if (command == EOF) {
+                command = BRL_CMD_NOOP;
+              } else {
+                command |= key;
+              }
+            }
+
+            activeKeys2 = 0;
+            return command;
+          }
+          break;
+        }
+
+        default:
+          break;
+      }
+
+      LogPrint(LOG_WARNING, "unknown key: group=%02X key=%02X", group, key);
+    }
+  }
+}
+
+static int
+writeBraille2 (BrailleDisplay *brl, const unsigned char *cells, int start, int count) {
+  unsigned char packet[3 + count];
+  unsigned char *byte = packet;
+
+  *byte++ = 0X02;
+  *byte++ = start;
+  *byte++ = count;
+
+  memcpy(byte, cells, count);
+  byte += count;
+
+  return io->writePacket(packet, byte-packet, &brl->writeDelay);
+}
+
+static const ProtocolOperations protocol2Operations = {
+  initializeVariables2,
+  detectModel2, verifyInputPacket2,
+  readCommand2, writeBraille2
+};
+
+#include "io_serial.h"
+static SerialDevice *serialDevice = NULL;
+static int serialCharactersPerSecond;
+
+static int
+openSerialPort (char **parameters, const char *device) {
+  rewriteInterval = REWRITE_INTERVAL;
+
+  if (!(serialDevice = serialOpenDevice(device))) return 0;
+
+  protocol = &protocol1Operations;
+  return 1;
+}
+
+static int
+resetSerialPort (void) {
+  if (!serialRestartDevice(serialDevice, BAUDRATE)) return 0;
+  serialCharactersPerSecond = BAUDRATE / 10;
+  return 1;
+}
+
+static void
+closeSerialPort (void) {
+  if (serialDevice) {
+    serialCloseDevice(serialDevice);
+    serialDevice = NULL;
+  }
+}
+
+static int
+awaitSerialInput (int milliseconds) {
+  return serialAwaitInput(serialDevice, milliseconds);
+}
+
+static int
+readSerialPacket (unsigned char *buffer, int length) {
+  while (1) {
+    unsigned char byte;
+    int count = serialReadData(serialDevice, &byte, 1, 0, 0);
+    if (count < 1) {
+      if (count == -1) LogError("serial read");
+      return count;
+    }
+    inputBuffer[inputUsed++] = byte;
+    if (protocol->verifyInputPacket(buffer, &length)) return length;
+  }
+}
+
+static int
+writeSerialPacket (const unsigned char *buffer, int length, unsigned int *delay) {
+  if (logOutputPackets) LogBytes(LOG_DEBUG, "Output Packet", buffer, length);
+  if (delay) *delay += (length * 1000 / serialCharactersPerSecond) + 1;
+  return serialWriteData(serialDevice, buffer, length);
+}
+
+static int
+getSerialHidFeature (unsigned char report, unsigned char *buffer, int length) {
+  errno = ENOSYS;
+  return -1;
+}
+
+static const InputOutputOperations serialOperations = {
+  openSerialPort, resetSerialPort, closeSerialPort,
+  awaitSerialInput, readSerialPacket, writeSerialPacket,
+  getSerialHidFeature
+};
+
+#ifdef ENABLE_USB_SUPPORT
+#include "io_usb.h"
+
+static UsbChannel *usb = NULL;
+
+static int
+openUsbPort (char **parameters, const char *device) {
+  static const UsbChannelDefinition definitions[] = {
+    { /* Alva 5nn */
+      .vendor=0X06b0, .product=0X0001,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=2
+    }
+    ,
+    { /* Alva BC640 */
+      .vendor=0X0798, .product=0X0640,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=0
+    }
+    ,
+    { /* Alva BC680 */
+      .vendor=0X0798, .product=0X0680,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=0
+    }
+    ,
+    { .vendor=0 }
+  };
+
+  rewriteInterval = 0;
+  if ((usb = usbFindChannel(definitions, (void *)device))) {
+    if (usb->definition.outputEndpoint) {
+      protocol = &protocol1Operations;
+    } else {
+      protocol = &protocol2Operations;
+
+      switch (usb->definition.product) {
+        case 0X0640:
+          model = &modelBC640;
+          break;
+
+        case 0X0680:
+          model = &modelBC680;
+          break;
+
+        default:
+          model = NULL;
+          break;
+      }
+    }
+
+    usbBeginInput(usb->device, usb->definition.inputEndpoint, 8);
+    return 1;
+  }
+  return 0;
+}
+
+static int
+resetUsbPort (void) {
+  return 1;
+}
+
+static void
+closeUsbPort (void) {
+  if (usb) {
+    usbCloseChannel(usb);
+    usb = NULL;
+  }
+}
+
+static int
+awaitUsbInput (int milliseconds) {
+  return usbAwaitInput(usb->device, usb->definition.inputEndpoint, milliseconds);
+}
+
+static int
+readUsbPacket (unsigned char *buffer, int length) {
+  while (1) {
+    unsigned char byte;
+    int count = usbReapInput(usb->device, usb->definition.inputEndpoint, &byte, 1, 0, 0);
+
+    if (count == -1) {
+      if (errno == EAGAIN) return 0;
+      return count;
+    }
+
+    if (!byte && (inputUsed % 2) && !inputBuffer[inputUsed-1]) {
+      LogBytes(LOG_WARNING, "Truncated Packet", inputBuffer, inputUsed);
+      inputUsed = 0;
+    } else {
+      inputBuffer[inputUsed++] = byte;
+      if (protocol->verifyInputPacket(buffer, &length)) return length;
+    }
+  }
+}
+
+static int
+writeUsbPacket (const unsigned char *buffer, int length, unsigned int *delay) {
+  if (logOutputPackets) LogBytes(LOG_DEBUG, "Output Packet", buffer, length);
+
+  if (usb->definition.outputEndpoint) {
+    return usbWriteEndpoint(usb->device, usb->definition.outputEndpoint, buffer, length, 1000);
+  } else {
+    return usbHidSetReport(usb->device, usb->definition.interface, buffer[0], buffer, length, 1000);
+  }
+}
+
+static int
+getUsbHidFeature (unsigned char report, unsigned char *buffer, int length) {
+  return usbHidGetFeature(usb->device, usb->definition.interface, report, buffer, length, 1000);
+}
+
+static const InputOutputOperations usbOperations = {
+  openUsbPort, resetUsbPort, closeUsbPort,
+  awaitUsbInput, readUsbPacket, writeUsbPacket,
+  getUsbHidFeature
+};
+#endif /* ENABLE_USB_SUPPORT */
+
+int
+AL_writeData( unsigned char *data, int len ) {
+  if (io->writePacket(data, len, NULL) == len) return 1;
+  return 0;
+}
+
+static int
+brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
+  {
+    static const DotsTable dots = {0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80};
+    makeOutputTable(dots, outputTable);
+  }
+
+  if (isSerialDevice(&device)) {
+    io = &serialOperations;
+  } else
+
+#ifdef ENABLE_USB_SUPPORT
+  if (isUsbDevice(&device)) {
+    io = &usbOperations;
+  } else
+#endif /* ENABLE_USB_SUPPORT */
+
+  {
+    unsupportedDevice(device);
+    return 0;
+  }
+
+  /* Open the Braille display device */
+  if (io->openPort(parameters, device)) {
+    if (io->resetPort()) {
+      inputUsed = 0;
+      protocol->initializeVariables();
+
+      if (protocol->detectModel(brl)) {
+        return 1;
+      }
+    }
+
+    io->closePort();
+  }
+
+  return 0;
+}
+
+static void
+brl_destruct (BrailleDisplay *brl) {
+  if (rawdata) {
+    free(rawdata);
+    rawdata = NULL;
+  }
+
+  if (prevdata) {
+    free(prevdata);
+    prevdata = NULL;
+  }
+
+  io->closePort();
+}
+
+static int
+brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
+  int from, to;
+
+  if (rewriteInterval) {
+    struct timeval now;
+    gettimeofday(&now, NULL);
+    if (millisecondsBetween(&rewriteTime, &now) > rewriteInterval) rewriteRequired = 1;
+    if (rewriteRequired) rewriteTime = now;
+  }
+
+  if (rewriteRequired) {
+    /* We rewrite the whole display */
+    from = 0;
+    to = brl->textColumns;
+    rewriteRequired = 0;
+  } else {
+    /* We update only the display part that has been changed */
+    from = 0;
+    while ((from < brl->textColumns) && (brl->buffer[from] == prevdata[from])) from++;
+
+    to = brl->textColumns - 1;
+    while ((to > from) && (brl->buffer[to] == prevdata[to])) to--;
+    to++;
+  }
+
+  if (from < to)			/* there is something different */ {
+    int index;
+    for (index=from; index<to; index++)
+      rawdata[index - from] = outputTable[(prevdata[index] = brl->buffer[index])];
+    protocol->writeBraille(brl, rawdata, brl->statusColumns+from, to-from);
+  }
+  return 1;
+}
+
+static int
+brl_writeStatus (BrailleDisplay *brl, const unsigned char *st) {
+  int i;
+
+  /* Update status cells on braille display */
+  if (memcmp (st, PrevStatus, brl->statusColumns) != 0)	/* only if it changed */
+    {
+      for (i=0; i<brl->statusColumns; ++i)
+        StatusCells[i] = outputTable[(PrevStatus[i] = st[i])];
+      protocol->writeBraille(brl, StatusCells, 0, brl->statusColumns);
+    }
+  return 1;
+}
+
+static int
+brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
+  return protocol->readCommand(brl, context);
+}
+
 static void
 brl_firmness (BrailleDisplay *brl, BrailleFirmness setting) {
-  writeParameter(brl, 3,
+  writeParameter1(brl, 3,
                  setting * 4 / BRL_FIRMNESS_MAXIMUM);
 }

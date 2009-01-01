@@ -29,7 +29,8 @@ Platforms: Linux (kernel 1.1.92 or later)
            NetBSD (release 1.6 or later)
            Supported Braille Displays:
            - Albatross [46/80]
-           - Alva [ABT(3nn), Delphi(4nn), Satellite(5nn), Braille System 40]
+           - Alva [ABT(3nn), Delphi(4nn), Satellite(5nn), Braille System 40,
+                   Braille Controller 640/680]
            - Baum [Inka, Vario/RBT, SuperVario/Brailliant, PocketVario]
            - BrailleLite [18/40/M20/M40]
            - BrailleNote [18/32]

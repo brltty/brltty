@@ -18,7 +18,7 @@
 
 DRIVER_CODE = al
 DRIVER_NAME = Alva
-DRIVER_COMMENT = ABT(3nn), Delphi(4nn), Satellite(5nn), Braille System 40
+DRIVER_COMMENT = ABT(3nn), Delphi(4nn), Satellite(5nn), Braille System 40, Braille Controller 640/680
 DRIVER_VERSION = 2.2
 DRIVER_DEVELOPERS = Nicolas Pitre <nico@cam.org>
 HELP_DEPS = $(HELP_TEXT)
