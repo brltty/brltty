@@ -1,7 +1,7 @@
 /*
  * libbrlapi - A library providing access to braille terminals for applications.
  *
- * Copyright (C) 2005-2008 by
+ * Copyright (C) 2005-2009 by
  *   Sébastien Hinderer <Sebastien.Hinderer@ens-lyon.org>
  *   Samuel Thibault <Samuel.Thibault@ens-lyon.org>
  * All rights reserved.
