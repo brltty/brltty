@@ -1429,7 +1429,18 @@ readCommand2 (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 
             pressedKeys2 |= bit;
             activeKeys2 = pressedKeys2;
-            return BRL_CMD_NOOP;
+
+            {
+              int command = interpretOperatingKeys2();
+
+              if (command == EOF) {
+                command = BRL_CMD_NOOP;
+              } else {
+                command |= BRL_FLG_REPEAT_DELAY;
+              }
+
+              return command;
+            }
           }
           break;
         }
