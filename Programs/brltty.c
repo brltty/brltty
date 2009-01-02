@@ -1636,17 +1636,23 @@ runProgram (void) {
             }
 
             case BRL_CMD_LNBEG:
-              if (p->winx)
+              if (p->winx) {
                 p->winx = 0;
-              else
+              } else {
                 playTune(&tune_bounce);
+              }
               break;
-            case BRL_CMD_LNEND:
-              if (p->winx < (scr.cols - textCount))
-                p->winx = scr.cols - textCount;
-              else
+
+            case BRL_CMD_LNEND: {
+              int end = MAX(scr.cols, textCount) - textCount;
+
+              if (p->winx < end) {
+                p->winx = end;
+              } else {
                 playTune(&tune_bounce);
+              }
               break;
+            }
 
             case BRL_CMD_CHRLT:
               if (p->winx == 0)
