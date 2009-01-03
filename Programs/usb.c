@@ -554,9 +554,13 @@ usbOpenInterface (
                               UsbStandardRequest_GetInterface, 0, interface,
                               bytes, sizeof(bytes), 1000);
 
-    if ((size != -1) && (bytes[0] == alternative)) {
-      device->interface = descriptor;
-      return 1;
+    if (size != -1) {
+      if (bytes[0] == alternative) {
+        device->interface = descriptor;
+        return 1;
+      }
+    } else {
+      LogPrint(LOG_WARNING, "USB standard request not supported: get interface");
     }
   }
 
