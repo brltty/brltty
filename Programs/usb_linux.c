@@ -188,7 +188,7 @@ usbDisconnectInterface (UsbDevice *device, unsigned char interface) {
   char *driver = usbGetDriver(device, interface);
 
   if (driver) {
-    LogPrint(LOG_WARNING, "USB interface in use: %s", driver);
+    LogPrint(LOG_WARNING, "USB interface in use: %u (%s)", interface, driver);
     free(driver);
 
     if (usbDisconnectDriver(device, interface)) return 1;
