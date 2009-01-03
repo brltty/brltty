@@ -313,9 +313,11 @@ usbConfigureDevice (
   {
     unsigned char currentConfiguration;
 
-    if (usbGetConfiguration(device, &currentConfiguration) != -1)
-      if (currentConfiguration == configuration)
-        return 1;
+    if (usbGetConfiguration(device, &currentConfiguration) != -1) {
+      if (currentConfiguration == configuration) return 1;
+    } else {
+      LogPrint(LOG_WARNING, "USB standard request not supported: get configuration");
+    }
   }
 
   if (!usbSetConfiguration(device, configuration)) return 0;
