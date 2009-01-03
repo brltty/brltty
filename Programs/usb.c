@@ -309,6 +309,15 @@ usbConfigureDevice (
   unsigned char configuration
 ) {
   usbCloseInterface(device);
+
+  {
+    unsigned char currentConfiguration;
+
+    if (usbGetConfiguration(device, &currentConfiguration) != -1)
+      if (currentConfiguration == configuration)
+        return 1;
+  }
+
   if (!usbSetConfiguration(device, configuration)) return 0;
   usbDeallocateConfigurationDescriptor(device);
   return 1;
