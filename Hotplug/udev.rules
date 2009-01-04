@@ -26,6 +26,8 @@ LABEL="brltty_usb_begin"
 
 # Alva
 ENV{PRODUCT}=="6b0/1/*", ENV{BRLTTY_DRIVER}="al", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="798/640/*", ENV{BRLTTY_DRIVER}="al", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="798/680/*", ENV{BRLTTY_DRIVER}="al", GOTO="brltty_usb_run"
 
 # Baum
 ENV{PRODUCT}=="403/fe70/*", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb_run"
