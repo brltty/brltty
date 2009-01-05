@@ -4,7 +4,7 @@ Legend:
 th1-th5: thumb keys
 et1-et4: etouch keys
 sp1-sp4: smartpad rectangular keys
-spl,spr,spu,spd,spm: smartpad navigation keys
+spl,spr,spu,spd,spe: smartpad navigation keys
 cr1: primary cursor routing key
 cr2: secondary cursor routing key
 
@@ -34,7 +34,7 @@ sp1+th3: undo unexpected cursor tracking motion
 sp4+th3: bring cursor to line (no horizontal motion)
 spl/spr + cr1: go up/down to nearest line without greater indent
 spu/spd + cr1: go up/down to nearest line with different character
-spm+cr1: position left edge of window at character
+spe+cr1: position left edge of window at character
 
 Feature States:
 spl: toggle braille six/eight dots
@@ -47,15 +47,15 @@ sp1+cr1: start new cut buffer at character
 sp2+cr1: append to existing cur buffer from character
 sp3+cr1: linear cut to character
 sp4+cr1: rectangular cut to character
-spm: insert cut buffer at cursor
+spe: insert cut buffer at cursor
 
 Speech Functions:
 sp1 + spl/spr: decrease/increase speed
 sp1 + spd/spu: decrease/increase volume
-sp1+spm: toggle autospeak
+sp1+spe: toggle autospeak
 sp4+spl: stop speaking
 sp4+spr: say current line
 sp4+spu: say from top of screen through current line
 sp4+spd: say from current line through bottom of screen
-sp4+spm: go to current speech position
+sp4+spe: go to current speech position
 

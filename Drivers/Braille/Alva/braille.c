@@ -1222,7 +1222,7 @@ static const ProtocolOperations protocol1Operations = {
 #define KEY2_SP_1 KEY2(SMARTPAD, 0)
 #define KEY2_SP_2 KEY2(SMARTPAD, 1)
 #define KEY2_SP_L KEY2(SMARTPAD, 2)
-#define KEY2_SP_M KEY2(SMARTPAD, 3)
+#define KEY2_SP_E KEY2(SMARTPAD, 3)
 #define KEY2_SP_U KEY2(SMARTPAD, 4)
 #define KEY2_SP_D KEY2(SMARTPAD, 5)
 #define KEY2_SP_R KEY2(SMARTPAD, 6)
@@ -1295,7 +1295,7 @@ interpretOperatingKeys2 (void) {
     case KEY2_SP_R: return BRL_CMD_CSRTRK;
     case KEY2_SP_U: return BRL_CMD_FREEZE;
     case KEY2_SP_D: return BRL_CMD_DISPMD;
-    case KEY2_SP_M: return BRL_CMD_PASTE;
+    case KEY2_SP_E: return BRL_CMD_PASTE;
 
     case KEY2_TH_3: return BRL_CMD_HOME;
 
@@ -1330,12 +1330,12 @@ interpretOperatingKeys2 (void) {
     case KEY2_SP_1 | KEY2_SP_R: return BRL_CMD_SAY_FASTER;
     case KEY2_SP_1 | KEY2_SP_D: return BRL_CMD_SAY_SOFTER;
     case KEY2_SP_1 | KEY2_SP_U: return BRL_CMD_SAY_LOUDER;
-    case KEY2_SP_1 | KEY2_SP_M: return BRL_CMD_AUTOSPEAK;
+    case KEY2_SP_1 | KEY2_SP_E: return BRL_CMD_AUTOSPEAK;
     case KEY2_SP_4 | KEY2_SP_L: return BRL_CMD_MUTE;
     case KEY2_SP_4 | KEY2_SP_R: return BRL_CMD_SAY_LINE;
     case KEY2_SP_4 | KEY2_SP_U: return BRL_CMD_SAY_ABOVE;
     case KEY2_SP_4 | KEY2_SP_D: return BRL_CMD_SAY_BELOW;
-    case KEY2_SP_4 | KEY2_SP_M: return BRL_CMD_SPKHOME;
+    case KEY2_SP_4 | KEY2_SP_E: return BRL_CMD_SPKHOME;
   }
 
   return EOF;
@@ -1355,7 +1355,7 @@ interpretPrimaryRoutingKey2 (void) {
     case KEY2_SP_R: return BRL_BLK_NXINDENT;
     case KEY2_SP_U: return BRL_BLK_PRDIFCHAR;
     case KEY2_SP_D: return BRL_BLK_NXDIFCHAR;
-    case KEY2_SP_M: return BRL_BLK_SETLEFT;
+    case KEY2_SP_E: return BRL_BLK_SETLEFT;
   }
 
   return EOF;
