@@ -118,7 +118,6 @@
 #include "brl_driver.h"
 #include "braille.h"
 
-static const int logInputBuffer = 0;
 static const int logInputPackets = 0;
 static const int logOutputPackets = 0;
 
@@ -381,7 +380,7 @@ typedef struct {
   int (*resetPort) (void);
   void (*closePort) (void);
   int (*awaitInput) (int milliseconds);
-  int (*readPacket) (unsigned char *buffer, int length);
+  int (*readBytes) (unsigned char *buffer, int length, int wait);
   int (*writePacket) (const unsigned char *buffer, int length, unsigned int *delay);
   int (*getHidFeature) (unsigned char report, unsigned char *buffer, int length);
 } InputOutputOperations;
@@ -390,37 +389,19 @@ static const InputOutputOperations *io;
 typedef struct {
   void (*initializeVariables) (void);
   int (*detectModel) (BrailleDisplay *brl);
-  int (*verifyInputPacket) (unsigned char *buffer, int *length);
+  int (*readPacket) (unsigned char *packet, int size);
   int (*readCommand) (BrailleDisplay *brl, BRL_DriverCommandContext context);
   int (*writeBraille) (BrailleDisplay *brl, const unsigned char *cells, int start, int count);
 } ProtocolOperations;
 static const ProtocolOperations *protocol;
 
-#define PACKET_SIZE(count) (((count) * 2) + 4)
-#define MAXIMUM_PACKET_SIZE PACKET_SIZE(0XFF)
-static unsigned char inputBuffer[MAXIMUM_PACKET_SIZE];
-static int inputUsed;
-
-static void
-preverifyInputPacket (void) {
-  if (logInputBuffer) LogBytes(LOG_DEBUG, "Input Buffer", inputBuffer, inputUsed);
-}
-
 static int
-postverifyInputPacket (unsigned char *buffer, int *length, int size) {
-  if (!size) return 0;
-  if (logInputPackets) LogBytes(LOG_DEBUG, "Input Packet", inputBuffer, size);
+readByte (unsigned char *byte, int wait) {
+  int count = io->readBytes(byte, 1, wait);
+  if (count > 0) return 1;
 
-  if (*length < size) {
-    LogPrint(LOG_DEBUG, "truncated input packet: %d < %d", *length, size);
-    size = *length;
-  } else {
-    *length = size;
-  }
-
-  memcpy(buffer, &inputBuffer[0], size);
-  memcpy(&inputBuffer[0], &inputBuffer[size], inputUsed-=size);
-  return 1;
+  if (count == 0) errno = EAGAIN;
+  return 0;
 }
 
 static int
@@ -473,6 +454,9 @@ updateConfiguration (BrailleDisplay *brl, int autodetecting, int textColumns, in
   return 1;
 }
 
+#define PACKET_SIZE(count) (((count) * 2) + 4)
+#define MAXIMUM_PACKET_SIZE PACKET_SIZE(0XFF)
+
 static int
 writeFunction1 (BrailleDisplay *brl, unsigned char code) {
   unsigned char bytes[] = {0X1B, 'F', 'U', 'N', code, '\r'};
@@ -513,7 +497,7 @@ identifyModel1 (BrailleDisplay *brl, unsigned char identifier) {
         writeFunction1(brl, 0X07);
         while (io->awaitInput(200)) {
           unsigned char packet[MAXIMUM_PACKET_SIZE];
-          int count = io->readPacket(packet, sizeof(packet));
+          int count = protocol->readPacket(packet, sizeof(packet));
 
           if (count == -1) break;
           if (count == 0) continue;
@@ -549,7 +533,8 @@ detectModel1 (BrailleDisplay *brl) {
   while (writeFunction1(brl, 0X06) != -1) {
     while (io->awaitInput(200)) {
       unsigned char packet[MAXIMUM_PACKET_SIZE];
-      if (io->readPacket(packet, sizeof(packet)) > 0) {
+
+      if (protocol->readPacket(packet, sizeof(packet)) > 0) {
         if (memcmp(packet, BRL_ID, BRL_ID_LENGTH) == 0) {
           if (identifyModel1(brl, packet[BRL_ID_LENGTH])) {
             return 1;
@@ -566,63 +551,92 @@ detectModel1 (BrailleDisplay *brl) {
 }
 
 static int
-verifyInputPacket1 (unsigned char *buffer, int *length) {
-  int size = 0;
-  preverifyInputPacket();
+readPacket1 (unsigned char *packet, int size) {
+  int offset = 0;
+  int length = 0;
 
-#if ! ABT3_OLD_FIRMWARE
-  while (inputUsed > 0) {
-    if (inputBuffer[0] == 0X7F) {
-      if (inputUsed < 3) break;
-      if (inputBuffer[2] != 0X7E) goto unrecognized;
-      if (inputUsed < 4) break;
+  while (1) {
+    unsigned char byte;
 
-      {
-        int count = PACKET_SIZE(inputBuffer[3]);
-        int complete = inputUsed >= count;
-        int index;
+    {
+      int started = offset > 0;
 
-        if (!complete) count = inputUsed;
-        for (index=4; index<count; index+=2)
-          if (inputBuffer[index] != 0X7E)
-            goto unrecognized;
-
-        if (complete) size = count;
-        break;
+      if (!readByte(&byte, started)) {
+        if (started) LogBytes(LOG_WARNING, "Partial Packet", packet, offset);
+        return 0;
       }
     }
 
-    if ((inputBuffer[0] & 0XF0) == 0X70) {
-      if (inputUsed >= 2) size = 2;
-      break;
-    }
-
-    {
-      int count = BRL_ID_LENGTH;
-      if (inputUsed < count) count = inputUsed;
-      if (memcmp(&inputBuffer[0], BRL_ID, count) != 0) goto unrecognized;
-      if (inputUsed >= BRL_ID_SIZE) size = BRL_ID_SIZE;
-      break;
-    }
-
-  unrecognized:
-    LogBytes(LOG_WARNING, "Unrecognized Packet", inputBuffer, inputUsed);
-    memcpy(&inputBuffer[0], &inputBuffer[1], --inputUsed);
-  }
+  gotByte:
+    if (offset == 0) {
+#if ! ABT3_OLD_FIRMWARE
+      if (byte == 0X7F) {
+        length = 4;
+      } else if ((byte & 0XF0) == 0X70) {
+        length = 2;
+      } else if (byte == BRL_ID[0]) {
+        length = BRL_ID_SIZE;
+      } else if (!byte) {
+        length = 2;
+      } else {
+        LogBytes(LOG_WARNING, "Ignored Byte", &byte, 1);
+        continue;
+      }
 #else /* ABT3_OLD_FIRMWARE */
-  if (inputUsed) size = 1;
+      length = 1;
+#endif /* ! ABT3_OLD_FIRMWARE */
+    } else {
+      int unexpected = 0;
+
+#if ! ABT3_OLD_FIRMWARE
+      unsigned char type = packet[0];
+
+      if (type == 0X7F) {
+        if (offset == 3) length = PACKET_SIZE(byte);
+        if (((offset % 2) == 0) && (byte != 0X7E)) unexpected = 1;
+      } else if (type == BRL_ID[0]) {
+        if ((offset < BRL_ID_LENGTH) && (byte != BRL_ID[offset])) unexpected = 1;
+      } else if (!type) {
+        if (byte) unexpected = 1;
+      }
+#else /* ABT3_OLD_FIRMWARE */
 #endif /* ! ABT3_OLD_FIRMWARE */
 
-  return postverifyInputPacket(buffer, length, size);
+      if (unexpected) {
+        LogBytes(LOG_WARNING, "Short Packet", packet, offset);
+        offset = 0;
+        length = 0;
+        goto gotByte;
+      }
+    }
+
+    if (offset < size) {
+      packet[offset] = byte;
+    } else {
+      if (offset == size) LogBytes(LOG_WARNING, "Truncated Packet", packet, offset);
+      LogBytes(LOG_WARNING, "Discarded Byte", &byte, 1);
+    }
+
+    if (++offset == length) {
+      if ((offset > size) || !packet[0]) {
+        offset = 0;
+        length = 0;
+        continue;
+      }
+
+      if (logInputPackets) LogBytes(LOG_DEBUG, "Input Packet", packet, offset);
+      return length;
+    }
+  }
 }
 
 static int
 getKey1 (BrailleDisplay *brl, unsigned int *Keys, unsigned int *Pos) {
   unsigned char packet[MAXIMUM_PACKET_SIZE];
-  int length = io->readPacket(packet, sizeof(packet));
+  int length = protocol->readPacket(packet, sizeof(packet));
   if (length < 1) return length;
-#if ! ABT3_OLD_FIRMWARE
 
+#if ! ABT3_OLD_FIRMWARE
   switch (packet[0]) {
     case 0X71: { /* operating keys and status keys */
       unsigned char key = packet[1];
@@ -1196,7 +1210,7 @@ writeBraille1 (BrailleDisplay *brl, const unsigned char *cells, int start, int c
 
 static const ProtocolOperations protocol1Operations = {
   initializeVariables1,
-  detectModel1, verifyInputPacket1,
+  detectModel1, readPacket1,
   readCommand1, writeBraille1
 };
 
@@ -1266,21 +1280,52 @@ detectModel2 (BrailleDisplay *brl) {
 }
 
 static int
-verifyInputPacket2 (unsigned char *buffer, int *length) {
-  int size = 0;
-  preverifyInputPacket();
+readPacket2 (unsigned char *packet, int size) {
+  int offset = 0;
+  int length = 0;
 
-  while (inputUsed > 0) {
-    if (inputBuffer[0] == 0X04) {
-      if (inputUsed < (size = 3)) return 0;
-      break;
+  while (1) {
+    unsigned char byte;
+
+    {
+      int started = offset > 0;
+
+      if (!readByte(&byte, started)) {
+        if (started) LogBytes(LOG_WARNING, "Partial Packet", packet, offset);
+        return 0;
+      }
     }
 
-    LogBytes(LOG_WARNING, "Unrecognized Packet", inputBuffer, inputUsed);
-    memcpy(&inputBuffer[0], &inputBuffer[1], --inputUsed);
-  }
+    if (offset == 0) {
+      switch (byte) {
+        case 0X04:
+          length = 3;
+          break;
 
-  return postverifyInputPacket(buffer, length, size);
+        default:
+          LogBytes(LOG_WARNING, "Ignored Byte", &byte, 1);
+          continue;
+      }
+    }
+
+    if (offset < size) {
+      packet[offset] = byte;
+    } else {
+      if (offset == size) LogBytes(LOG_WARNING, "Truncated Packet", packet, offset);
+      LogBytes(LOG_WARNING, "Discarded Byte", &byte, 1);
+    }
+
+    if (++offset == length) {
+      if (offset > size) {
+        offset = 0;
+        length = 0;
+        continue;
+      }
+
+      if (logInputPackets) LogBytes(LOG_DEBUG, "Input Packet", packet, offset);
+      return length;
+    }
+  }
 }
 
 static int
@@ -1374,7 +1419,7 @@ static int
 readCommand2 (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   while (1) {
     unsigned char packet[MAXIMUM_PACKET_SIZE];
-    int length = io->readPacket(packet, sizeof(packet));
+    int length = protocol->readPacket(packet, sizeof(packet));
 
     if (!length) return EOF;
     if (length < 0) return BRL_CMD_RESTARTBRL;
@@ -1496,7 +1541,7 @@ writeBraille2 (BrailleDisplay *brl, const unsigned char *cells, int start, int c
 
 static const ProtocolOperations protocol2Operations = {
   initializeVariables2,
-  detectModel2, verifyInputPacket2,
+  detectModel2, readPacket2,
   readCommand2, writeBraille2
 };
 
@@ -1535,17 +1580,10 @@ awaitSerialInput (int milliseconds) {
 }
 
 static int
-readSerialPacket (unsigned char *buffer, int length) {
-  while (1) {
-    unsigned char byte;
-    int count = serialReadData(serialDevice, &byte, 1, 0, 0);
-    if (count < 1) {
-      if (count == -1) LogError("serial read");
-      return count;
-    }
-    inputBuffer[inputUsed++] = byte;
-    if (protocol->verifyInputPacket(buffer, &length)) return length;
-  }
+readSerialBytes (unsigned char *buffer, int count, int wait) {
+  const int timeout = 100;
+  return serialReadData(serialDevice, buffer, count,
+                        (wait? timeout: 0), timeout);
 }
 
 static int
@@ -1563,7 +1601,7 @@ getSerialHidFeature (unsigned char report, unsigned char *buffer, int length) {
 
 static const InputOutputOperations serialOperations = {
   openSerialPort, resetSerialPort, closeSerialPort,
-  awaitSerialInput, readSerialPacket, writeSerialPacket,
+  awaitSerialInput, readSerialBytes, writeSerialPacket,
   getSerialHidFeature
 };
 
@@ -1643,24 +1681,15 @@ awaitUsbInput (int milliseconds) {
 }
 
 static int
-readUsbPacket (unsigned char *buffer, int length) {
-  while (1) {
-    unsigned char byte;
-    int count = usbReapInput(usb->device, usb->definition.inputEndpoint, &byte, 1, 0, 0);
-
-    if (count == -1) {
-      if (errno == EAGAIN) return 0;
-      return count;
-    }
-
-    if (!byte && (inputUsed % 2) && !inputBuffer[inputUsed-1]) {
-      LogBytes(LOG_WARNING, "Truncated Packet", inputBuffer, inputUsed);
-      inputUsed = 0;
-    } else {
-      inputBuffer[inputUsed++] = byte;
-      if (protocol->verifyInputPacket(buffer, &length)) return length;
-    }
-  }
+readUsbBytes (unsigned char *buffer, int length, int wait) {
+  const int timeout = 100;
+  int count = usbReapInput(usb->device,
+                           usb->definition.inputEndpoint,
+                           buffer, length,
+                           (wait? timeout: 0), timeout);
+  if (count != -1) return count;
+  if (errno == EAGAIN) return 0;
+  return -1;
 }
 
 static int
@@ -1681,7 +1710,7 @@ getUsbHidFeature (unsigned char report, unsigned char *buffer, int length) {
 
 static const InputOutputOperations usbOperations = {
   openUsbPort, resetUsbPort, closeUsbPort,
-  awaitUsbInput, readUsbPacket, writeUsbPacket,
+  awaitUsbInput, readUsbBytes, writeUsbPacket,
   getUsbHidFeature
 };
 #endif /* ENABLE_USB_SUPPORT */
@@ -1716,10 +1745,9 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
   /* Open the Braille display device */
   if (io->openPort(parameters, device)) {
-    if (io->resetPort()) {
-      inputUsed = 0;
-      protocol->initializeVariables();
+    protocol->initializeVariables();
 
+    if (io->resetPort()) {
       if (protocol->detectModel(brl)) {
         return 1;
       }
