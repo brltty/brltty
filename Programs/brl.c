@@ -202,7 +202,7 @@ setStatusText (BrailleDisplay *brl, const char *text) {
 
       while (index < length) {
         char c;
-        wchar_t wc;
+        wint_t wc;
 
         if (!(c = text[index])) break;
         if ((wc = convertCharToWchar(c)) == WEOF) wc = WC_C('?');
