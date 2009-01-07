@@ -377,11 +377,10 @@ static int BraillePad[6] = {
 
 typedef struct {
   int (*openPort) (char **parameters, const char *device);
-  int (*resetPort) (void);
   void (*closePort) (void);
   int (*awaitInput) (int milliseconds);
   int (*readBytes) (unsigned char *buffer, int length, int wait);
-  int (*writePacket) (const unsigned char *buffer, int length, unsigned int *delay);
+  int (*writeBytes) (const unsigned char *buffer, int length, unsigned int *delay);
   int (*getHidFeature) (unsigned char report, unsigned char *buffer, int length);
 } InputOutputOperations;
 static const InputOutputOperations *io;
@@ -460,13 +459,13 @@ updateConfiguration (BrailleDisplay *brl, int autodetecting, int textColumns, in
 static int
 writeFunction1 (BrailleDisplay *brl, unsigned char code) {
   unsigned char bytes[] = {0X1B, 'F', 'U', 'N', code, '\r'};
-  return io->writePacket(bytes, sizeof(bytes), &brl->writeDelay);
+  return io->writeBytes(bytes, sizeof(bytes), &brl->writeDelay);
 }
 
 static int
 writeParameter1 (BrailleDisplay *brl, unsigned char parameter, unsigned char setting) {
   unsigned char bytes[] = {0X1B, 'P', 'A', 3, 0, parameter, setting, '\r'};
-  return io->writePacket(bytes, sizeof(bytes), &brl->writeDelay);
+  return io->writeBytes(bytes, sizeof(bytes), &brl->writeDelay);
 }
 
 static int
@@ -1205,7 +1204,7 @@ writeBraille1 (BrailleDisplay *brl, const unsigned char *cells, int start, int c
   memcpy(byte, trailer, sizeof(trailer));
   byte += sizeof(trailer);
 
-  return io->writePacket(packet, byte-packet, &brl->writeDelay);
+  return io->writeBytes(packet, byte-packet, &brl->writeDelay);
 }
 
 static const ProtocolOperations protocol1Operations = {
@@ -1536,7 +1535,7 @@ writeBraille2 (BrailleDisplay *brl, const unsigned char *cells, int start, int c
   memcpy(byte, cells, count);
   byte += count;
 
-  return io->writePacket(packet, byte-packet, &brl->writeDelay);
+  return io->writeBytes(packet, byte-packet, &brl->writeDelay);
 }
 
 static const ProtocolOperations protocol2Operations = {
@@ -1551,19 +1550,16 @@ static int serialCharactersPerSecond;
 
 static int
 openSerialPort (char **parameters, const char *device) {
-  rewriteInterval = REWRITE_INTERVAL;
+  if ((serialDevice = serialOpenDevice(device))) {
+    if (serialRestartDevice(serialDevice, BAUDRATE)) {
+      serialCharactersPerSecond = BAUDRATE / serialGetCharacterBits(serialDevice);
+      rewriteInterval = REWRITE_INTERVAL;
+      protocol = &protocol1Operations;
+      return 1;
+    }
+  }
 
-  if (!(serialDevice = serialOpenDevice(device))) return 0;
-
-  protocol = &protocol1Operations;
-  return 1;
-}
-
-static int
-resetSerialPort (void) {
-  if (!serialRestartDevice(serialDevice, BAUDRATE)) return 0;
-  serialCharactersPerSecond = BAUDRATE / 10;
-  return 1;
+  return 0;
 }
 
 static void
@@ -1587,7 +1583,7 @@ readSerialBytes (unsigned char *buffer, int count, int wait) {
 }
 
 static int
-writeSerialPacket (const unsigned char *buffer, int length, unsigned int *delay) {
+writeSerialBytes (const unsigned char *buffer, int length, unsigned int *delay) {
   if (logOutputPackets) LogBytes(LOG_DEBUG, "Output Packet", buffer, length);
   if (delay) *delay += (length * 1000 / serialCharactersPerSecond) + 1;
   return serialWriteData(serialDevice, buffer, length);
@@ -1600,15 +1596,15 @@ getSerialHidFeature (unsigned char report, unsigned char *buffer, int length) {
 }
 
 static const InputOutputOperations serialOperations = {
-  openSerialPort, resetSerialPort, closeSerialPort,
-  awaitSerialInput, readSerialBytes, writeSerialPacket,
+  openSerialPort, closeSerialPort,
+  awaitSerialInput, readSerialBytes, writeSerialBytes,
   getSerialHidFeature
 };
 
 #ifdef ENABLE_USB_SUPPORT
 #include "io_usb.h"
 
-static UsbChannel *usb = NULL;
+static UsbChannel *usbChannel = NULL;
 
 static int
 openUsbPort (char **parameters, const char *device) {
@@ -1635,13 +1631,13 @@ openUsbPort (char **parameters, const char *device) {
   };
 
   rewriteInterval = 0;
-  if ((usb = usbFindChannel(definitions, (void *)device))) {
-    if (usb->definition.outputEndpoint) {
+  if ((usbChannel = usbFindChannel(definitions, (void *)device))) {
+    if (usbChannel->definition.outputEndpoint) {
       protocol = &protocol1Operations;
     } else {
       protocol = &protocol2Operations;
 
-      switch (usb->definition.product) {
+      switch (usbChannel->definition.product) {
         case 0X0640:
           model = &modelBC640;
           break;
@@ -1656,35 +1652,30 @@ openUsbPort (char **parameters, const char *device) {
       }
     }
 
-    usbBeginInput(usb->device, usb->definition.inputEndpoint, 8);
+    usbBeginInput(usbChannel->device, usbChannel->definition.inputEndpoint, 8);
     return 1;
   }
   return 0;
 }
 
-static int
-resetUsbPort (void) {
-  return 1;
-}
-
 static void
 closeUsbPort (void) {
-  if (usb) {
-    usbCloseChannel(usb);
-    usb = NULL;
+  if (usbChannel) {
+    usbCloseChannel(usbChannel);
+    usbChannel = NULL;
   }
 }
 
 static int
 awaitUsbInput (int milliseconds) {
-  return usbAwaitInput(usb->device, usb->definition.inputEndpoint, milliseconds);
+  return usbAwaitInput(usbChannel->device, usbChannel->definition.inputEndpoint, milliseconds);
 }
 
 static int
 readUsbBytes (unsigned char *buffer, int length, int wait) {
   const int timeout = 100;
-  int count = usbReapInput(usb->device,
-                           usb->definition.inputEndpoint,
+  int count = usbReapInput(usbChannel->device,
+                           usbChannel->definition.inputEndpoint,
                            buffer, length,
                            (wait? timeout: 0), timeout);
   if (count != -1) return count;
@@ -1693,31 +1684,31 @@ readUsbBytes (unsigned char *buffer, int length, int wait) {
 }
 
 static int
-writeUsbPacket (const unsigned char *buffer, int length, unsigned int *delay) {
+writeUsbBytes (const unsigned char *buffer, int length, unsigned int *delay) {
   if (logOutputPackets) LogBytes(LOG_DEBUG, "Output Packet", buffer, length);
 
-  if (usb->definition.outputEndpoint) {
-    return usbWriteEndpoint(usb->device, usb->definition.outputEndpoint, buffer, length, 1000);
+  if (usbChannel->definition.outputEndpoint) {
+    return usbWriteEndpoint(usbChannel->device, usbChannel->definition.outputEndpoint, buffer, length, 1000);
   } else {
-    return usbHidSetReport(usb->device, usb->definition.interface, buffer[0], buffer, length, 1000);
+    return usbHidSetReport(usbChannel->device, usbChannel->definition.interface, buffer[0], buffer, length, 1000);
   }
 }
 
 static int
 getUsbHidFeature (unsigned char report, unsigned char *buffer, int length) {
-  return usbHidGetFeature(usb->device, usb->definition.interface, report, buffer, length, 1000);
+  return usbHidGetFeature(usbChannel->device, usbChannel->definition.interface, report, buffer, length, 1000);
 }
 
 static const InputOutputOperations usbOperations = {
-  openUsbPort, resetUsbPort, closeUsbPort,
-  awaitUsbInput, readUsbBytes, writeUsbPacket,
+  openUsbPort, closeUsbPort,
+  awaitUsbInput, readUsbBytes, writeUsbBytes,
   getUsbHidFeature
 };
 #endif /* ENABLE_USB_SUPPORT */
 
 int
 AL_writeData( unsigned char *data, int len ) {
-  if (io->writePacket(data, len, NULL) == len) return 1;
+  if (io->writeBytes(data, len, NULL) == len) return 1;
   return 0;
 }
 
@@ -1747,10 +1738,8 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   if (io->openPort(parameters, device)) {
     protocol->initializeVariables();
 
-    if (io->resetPort()) {
-      if (protocol->detectModel(brl)) {
-        return 1;
-      }
+    if (protocol->detectModel(brl)) {
+      return 1;
     }
 
     io->closePort();
