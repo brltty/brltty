@@ -441,11 +441,13 @@ static int
 updateConfiguration (BrailleDisplay *brl, int autodetecting, int textColumns, int statusColumns) {
   if (statusColumns != brl->statusColumns) {
     brl->statusColumns = statusColumns;
-    LogPrint(LOG_INFO, "Status cell count changed to %d.", brl->statusColumns);
+    LogPrint(LOG_INFO, "status cell count changed to %d", brl->statusColumns);
   }
 
   if (textColumns != brl->textColumns) {
     brl->textColumns = textColumns;
+    LogPrint(LOG_INFO, "text column count changed to %d", brl->textColumns);
+
     if (!reallocateBuffers(brl)) return 0;
     if (!autodetecting) brl->resizeRequired = 1;
   }
@@ -455,6 +457,7 @@ updateConfiguration (BrailleDisplay *brl, int autodetecting, int textColumns, in
 
 #define PACKET_SIZE(count) (((count) * 2) + 4)
 #define MAXIMUM_PACKET_SIZE PACKET_SIZE(0XFF)
+#define PACKET_BYTE(packet, index) ((packet)[PACKET_SIZE((index)) - 1])
 
 static int
 writeFunction1 (BrailleDisplay *brl, unsigned char code) {
@@ -472,10 +475,10 @@ static int
 updateConfiguration1 (BrailleDisplay *brl, const unsigned char *packet, int autodetecting) {
   int textColumns = brl->textColumns;
   int statusColumns = brl->statusColumns;
-  int count = packet[3];
+  int count = PACKET_BYTE(packet, 0);
 
-  if (count >= 3) statusColumns = packet[9];
-  if (count >= 4) textColumns = packet[11];
+  if (count >= 3) statusColumns = PACKET_BYTE(packet, 3);
+  if (count >= 4) textColumns = PACKET_BYTE(packet, 4);
   return updateConfiguration(brl, autodetecting, textColumns, statusColumns);
 }
 
@@ -561,8 +564,9 @@ readPacket1 (unsigned char *packet, int size) {
       int started = offset > 0;
 
       if (!readByte(&byte, started)) {
+        int result = (errno == EAGAIN)? 0: -1;
         if (started) LogBytes(LOG_WARNING, "Partial Packet", packet, offset);
-        return 0;
+        return result;
       }
     }
 
@@ -570,7 +574,7 @@ readPacket1 (unsigned char *packet, int size) {
     if (offset == 0) {
 #if ! ABT3_OLD_FIRMWARE
       if (byte == 0X7F) {
-        length = 4;
+        length = PACKET_SIZE(0);
       } else if ((byte & 0XF0) == 0X70) {
         length = 2;
       } else if (byte == BRL_ID[0]) {
@@ -703,10 +707,10 @@ getKey1 (BrailleDisplay *brl, unsigned int *Keys, unsigned int *Pos) {
           return 0;
 
         case 0X0B: { /* display parameters reconfigured */
-          int count = packet[3];
+          int count = PACKET_BYTE(packet, 0);
 
           if (count >= 8) {
-            unsigned char frontKeys = packet[19];
+            unsigned char frontKeys = PACKET_BYTE(packet, 8);
             const unsigned char progKey = 0X02;
             if (frontKeys & progKey) {
               unsigned char newSetting = frontKeys & ~progKey;
@@ -1290,8 +1294,9 @@ readPacket2 (unsigned char *packet, int size) {
       int started = offset > 0;
 
       if (!readByte(&byte, started)) {
+        int result = (errno == EAGAIN)? 0: -1;
         if (started) LogBytes(LOG_WARNING, "Partial Packet", packet, offset);
-        return 0;
+        return result;
       }
     }
 
