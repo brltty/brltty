@@ -624,8 +624,8 @@ monitorKeyboard (int device, KeyboardCommonData *kcd) {
         {
           struct input_id identity;
           if (ioctl(device, EVIOCGID, &identity) != -1) {
-            LogPrint(LOG_DEBUG, "keyboard device identity: type=%04X vendor=%04X product=%04X version=%04X",
-                     identity.bustype, identity.vendor, identity.product, identity.version);
+            LogPrint(LOG_DEBUG, "input device identity: fd=%d: type=%04X vendor=%04X product=%04X version=%04X",
+                     device, identity.bustype, identity.vendor, identity.product, identity.version);
 
             {
               static const KeyboardType typeTable[] = {
@@ -649,7 +649,8 @@ monitorKeyboard (int device, KeyboardCommonData *kcd) {
             kpd->actualProperties.vendor = identity.vendor;
             kpd->actualProperties.product = identity.product;
           } else {
-            LogPrint(LOG_DEBUG, "cannot get keyboard device identity: %s", strerror(errno));
+            LogPrint(LOG_DEBUG, "cannot get input device identity: fd=%d: %s",
+                     device, strerror(errno));
           }
         }
       
@@ -660,6 +661,7 @@ monitorKeyboard (int device, KeyboardCommonData *kcd) {
               ioctl(device, EVIOCGRAB, 1);
 #endif /* EVIOCGRAB */
 
+              LogPrint(LOG_DEBUG, "Keyboard Device: fd=%d", device);
               return 1;
             }
           }
@@ -669,7 +671,7 @@ monitorKeyboard (int device, KeyboardCommonData *kcd) {
       }
     }
   } else {
-    LogPrint(LOG_DEBUG, "cannot stat keyboard device: fd=%d: %s", device, strerror(errno));
+    LogPrint(LOG_DEBUG, "cannot stat input device: fd=%d: %s", device, strerror(errno));
   }
 
   return 0;
@@ -690,14 +692,14 @@ monitorCurrentKeyboards (KeyboardCommonData *kcd) {
       int device;
 
       snprintf(path, sizeof(path), "%s/%s", root, entry->d_name);
-      LogPrint(LOG_DEBUG, "checking keyboard device: %s", path);
+      LogPrint(LOG_DEBUG, "checking input device: %s", path);
 
       if ((device = open(path, O_RDONLY)) != -1) {
         if (monitorKeyboard(device, kcd)) continue;
 
         close(device);
       } else {
-        LogPrint(LOG_DEBUG, "cannot open keyboard device: %s: %s", path, strerror(errno));
+        LogPrint(LOG_DEBUG, "cannot open input device: %s: %s", path, strerror(errno));
       }
     }
 
