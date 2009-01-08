@@ -121,7 +121,6 @@
 static const int logInputPackets = 0;
 static const int logOutputPackets = 0;
 
-/* Braille display parameters */
 typedef struct {
   const char *name;
   unsigned char identifier;
@@ -130,6 +129,8 @@ typedef struct {
   unsigned char flags;
   unsigned char helpPage;
 } ModelEntry;
+static const ModelEntry *model;		/* points to terminal model config struct */
+
 #define MOD_FLG__CONFIGURABLE 0X01
 
 static const ModelEntry modelTable[] = {
@@ -260,121 +261,6 @@ static const ModelEntry modelBC680 = {
   .helpPage = 2
 };
 
-#define MAX_STCELLS	5	/* hiest number of status cells */
-
-
-
-/* This is the brltty braille mapping standard to Alva's mapping table.
- */
-static TranslationTable outputTable;
-
-
-
-/* Global variables */
-
-static unsigned char *rawdata = NULL;	/* translated data to send to Braille */
-static unsigned char *prevdata = NULL;	/* previously sent raw data */
-static unsigned char StatusCells[MAX_STCELLS];		/* to hold status info */
-static unsigned char PrevStatus[MAX_STCELLS];	/* to hold previous status */
-static const ModelEntry *model;		/* points to terminal model config struct */
-static int rewriteRequired = 0;		/* 1 if display need to be rewritten */
-static int rewriteInterval;
-static struct timeval rewriteTime;
-
-
-
-/* Communication codes */
-
-static const unsigned char BRL_ID[] = {0X1B, 'I', 'D', '='};
-#define BRL_ID_LENGTH (sizeof(BRL_ID))
-#define BRL_ID_SIZE (BRL_ID_LENGTH + 1)
-
-
-/* Key values */
-
-/* NB: The first 7 key values are the same as those returned by the
- * old firmware, so they can be used directly from the input stream as
- * make and break sequence already combined... not to be changed.
- */
-#define KEY_PROG 	0x008	/* the PROG key */
-#define KEY_HOME 	0x004	/* the HOME key */
-#define KEY_CURSOR 	0x002	/* the CURSOR key */
-#define KEY_UP 		0x001	/* the UP key */
-#define KEY_LEFT 	0x010	/* the LEFT key */
-#define KEY_RIGHT 	0x020	/* the RIGHT key */
-#define KEY_DOWN 	0x040	/* the DOWN key */
-#define KEY_CURSOR2 	0x080	/* the CURSOR2 key */
-#define KEY_HOME2 	0x100	/* the HOME2 key */
-#define KEY_PROG2 	0x200	/* the PROG2 key */
-
-#define KEY_STATUS1_A	0x01000	/* first lower status key */
-#define KEY_STATUS1_B	0x02000	/* second lower status key */
-#define KEY_STATUS1_C	0x03000	/* third lower status key */
-#define KEY_STATUS1_D	0x04000	/* fourth lower status key */
-#define KEY_STATUS1_E	0x05000	/* fifth lower status key */
-#define KEY_STATUS1_F	0x06000	/* sixth lower status key */
-#define KEY_ROUTING1	0x08000	/* lower cursor routing key set */
-
-#define KEY_STATUS2_A	0x10000	/* first upper status key */
-#define KEY_STATUS2_B	0x20000	/* second upper status key */
-#define KEY_STATUS2_C	0x30000	/* third upper status key */
-#define KEY_STATUS2_D	0x40000	/* fourth upper status key */
-#define KEY_STATUS2_E	0x50000	/* fifth upper status key */
-#define KEY_STATUS2_F	0x60000	/* sixth upper status key */
-#define KEY_ROUTING2	0x80000	/* upper cursor routing key set */
-
-#define KEY_SPK_F1	0x0100000
-#define KEY_SPK_F2	0x0200000
-#define KEY_SPK_UP	0x1000000
-#define KEY_SPK_DOWN	0x2000000
-#define KEY_SPK_LEFT	0x3000000
-#define KEY_SPK_RIGHT	0x4000000
-
-#define KEY_BRL_F1	0x0400000
-#define KEY_BRL_F2	0x0800000
-#define KEY_BRL_UP	0x5000000
-#define KEY_BRL_DOWN	0x6000000
-#define KEY_BRL_LEFT	0x7000000
-#define KEY_BRL_RIGHT	0x8000000
-
-#define KEY_TUMBLER1A	0x10000000	/* left end of left tumbler key */
-#define KEY_TUMBLER1B	0x20000000	/* right end of left tumbler key */
-#define KEY_TUMBLER2A	0x30000000	/* left end of right tumbler key */
-#define KEY_TUMBLER2B	0x40000000	/* right end of right tumbler key */
-
-/* first cursor routing offset on main display (old firmware only) */
-#define KEY_ROUTING_OFFSET 168
-
-#if ! ABT3_OLD_FIRMWARE
-/* Index for new firmware protocol */
-static int OperatingKeys[14] = {
-  KEY_PROG, KEY_HOME, KEY_CURSOR,
-  KEY_UP, KEY_LEFT, KEY_RIGHT, KEY_DOWN,
-  KEY_CURSOR2, KEY_HOME2, KEY_PROG2,
-  KEY_TUMBLER1A, KEY_TUMBLER1B, KEY_TUMBLER2A, KEY_TUMBLER2B
-};
-#endif /* ! ABT3_OLD_FIRMWARE */
-
-static int StatusKeys1[6] = {
-  KEY_STATUS1_A, KEY_STATUS1_B, KEY_STATUS1_C,
-  KEY_STATUS1_D, KEY_STATUS1_E, KEY_STATUS1_F
-};
-
-static int StatusKeys2[6] = {
-  KEY_STATUS2_A, KEY_STATUS2_B, KEY_STATUS2_C,
-  KEY_STATUS2_D, KEY_STATUS2_E, KEY_STATUS2_F
-};
-
-static int SpeechPad[6] = {
-  KEY_SPK_F1, KEY_SPK_UP, KEY_SPK_LEFT,
-  KEY_SPK_DOWN, KEY_SPK_RIGHT, KEY_SPK_F2
-};
-
-static int BraillePad[6] = {
-  KEY_BRL_F1, KEY_BRL_UP, KEY_BRL_LEFT,
-  KEY_BRL_DOWN, KEY_BRL_RIGHT, KEY_BRL_F2
-};
-
 typedef struct {
   int (*openPort) (char **parameters, const char *device);
   void (*closePort) (void);
@@ -393,6 +279,17 @@ typedef struct {
   int (*writeBraille) (BrailleDisplay *brl, const unsigned char *cells, int start, int count);
 } ProtocolOperations;
 static const ProtocolOperations *protocol;
+
+#define MAX_STCELLS	5	/* hiest number of status cells */
+
+static TranslationTable outputTable;
+static unsigned char *rawdata = NULL;	/* translated data to send to Braille */
+static unsigned char *prevdata = NULL;	/* previously sent raw data */
+static unsigned char StatusCells[MAX_STCELLS];		/* to hold status info */
+static unsigned char PrevStatus[MAX_STCELLS];	/* to hold previous status */
+static int rewriteRequired = 0;		/* 1 if display need to be rewritten */
+static int rewriteInterval;
+static struct timeval rewriteTime;
 
 static int
 readByte (unsigned char *byte, int wait) {
@@ -458,6 +355,93 @@ updateConfiguration (BrailleDisplay *brl, int autodetecting, int textColumns, in
 #define PACKET_SIZE(count) (((count) * 2) + 4)
 #define MAXIMUM_PACKET_SIZE PACKET_SIZE(0XFF)
 #define PACKET_BYTE(packet, index) ((packet)[PACKET_SIZE((index)) - 1])
+
+static const unsigned char BRL_ID[] = {0X1B, 'I', 'D', '='};
+#define BRL_ID_LENGTH (sizeof(BRL_ID))
+#define BRL_ID_SIZE (BRL_ID_LENGTH + 1)
+
+/* NB: The first 7 key values are the same as those returned by the
+ * old firmware, so they can be used directly from the input stream as
+ * make and break sequence already combined... not to be changed.
+ */
+#define KEY_PROG 	0x008	/* the PROG key */
+#define KEY_HOME 	0x004	/* the HOME key */
+#define KEY_CURSOR 	0x002	/* the CURSOR key */
+#define KEY_UP 		0x001	/* the UP key */
+#define KEY_LEFT 	0x010	/* the LEFT key */
+#define KEY_RIGHT 	0x020	/* the RIGHT key */
+#define KEY_DOWN 	0x040	/* the DOWN key */
+#define KEY_CURSOR2 	0x080	/* the CURSOR2 key */
+#define KEY_HOME2 	0x100	/* the HOME2 key */
+#define KEY_PROG2 	0x200	/* the PROG2 key */
+
+#define KEY_STATUS1_A	0x01000	/* first lower status key */
+#define KEY_STATUS1_B	0x02000	/* second lower status key */
+#define KEY_STATUS1_C	0x03000	/* third lower status key */
+#define KEY_STATUS1_D	0x04000	/* fourth lower status key */
+#define KEY_STATUS1_E	0x05000	/* fifth lower status key */
+#define KEY_STATUS1_F	0x06000	/* sixth lower status key */
+#define KEY_ROUTING1	0x08000	/* lower cursor routing key set */
+
+#define KEY_STATUS2_A	0x10000	/* first upper status key */
+#define KEY_STATUS2_B	0x20000	/* second upper status key */
+#define KEY_STATUS2_C	0x30000	/* third upper status key */
+#define KEY_STATUS2_D	0x40000	/* fourth upper status key */
+#define KEY_STATUS2_E	0x50000	/* fifth upper status key */
+#define KEY_STATUS2_F	0x60000	/* sixth upper status key */
+#define KEY_ROUTING2	0x80000	/* upper cursor routing key set */
+
+#define KEY_SPK_F1	0x0100000
+#define KEY_SPK_F2	0x0200000
+#define KEY_SPK_UP	0x1000000
+#define KEY_SPK_DOWN	0x2000000
+#define KEY_SPK_LEFT	0x3000000
+#define KEY_SPK_RIGHT	0x4000000
+
+#define KEY_BRL_F1	0x0400000
+#define KEY_BRL_F2	0x0800000
+#define KEY_BRL_UP	0x5000000
+#define KEY_BRL_DOWN	0x6000000
+#define KEY_BRL_LEFT	0x7000000
+#define KEY_BRL_RIGHT	0x8000000
+
+#define KEY_TUMBLER1A	0x10000000	/* left end of left tumbler key */
+#define KEY_TUMBLER1B	0x20000000	/* right end of left tumbler key */
+#define KEY_TUMBLER2A	0x30000000	/* left end of right tumbler key */
+#define KEY_TUMBLER2B	0x40000000	/* right end of right tumbler key */
+
+/* first cursor routing offset on main display (old firmware only) */
+#define KEY_ROUTING_OFFSET 168
+
+#if ! ABT3_OLD_FIRMWARE
+/* Index for new firmware protocol */
+static const int OperatingKeys[14] = {
+  KEY_PROG, KEY_HOME, KEY_CURSOR,
+  KEY_UP, KEY_LEFT, KEY_RIGHT, KEY_DOWN,
+  KEY_CURSOR2, KEY_HOME2, KEY_PROG2,
+  KEY_TUMBLER1A, KEY_TUMBLER1B, KEY_TUMBLER2A, KEY_TUMBLER2B
+};
+#endif /* ! ABT3_OLD_FIRMWARE */
+
+static const int StatusKeys1[6] = {
+  KEY_STATUS1_A, KEY_STATUS1_B, KEY_STATUS1_C,
+  KEY_STATUS1_D, KEY_STATUS1_E, KEY_STATUS1_F
+};
+
+static const int StatusKeys2[6] = {
+  KEY_STATUS2_A, KEY_STATUS2_B, KEY_STATUS2_C,
+  KEY_STATUS2_D, KEY_STATUS2_E, KEY_STATUS2_F
+};
+
+static const int SpeechPad[6] = {
+  KEY_SPK_F1, KEY_SPK_UP, KEY_SPK_LEFT,
+  KEY_SPK_DOWN, KEY_SPK_RIGHT, KEY_SPK_F2
+};
+
+static const int BraillePad[6] = {
+  KEY_BRL_F1, KEY_BRL_UP, KEY_BRL_LEFT,
+  KEY_BRL_DOWN, KEY_BRL_RIGHT, KEY_BRL_F2
+};
 
 static int
 writeFunction1 (BrailleDisplay *brl, unsigned char code) {
@@ -1217,12 +1201,14 @@ static const ProtocolOperations protocol1Operations = {
   readCommand1, writeBraille1
 };
 
-#define KEY2_THUMB_SHIFT 0
 #define KEY2_THUMB_COUNT 5
-#define KEY2_ETOUCH_SHIFT (KEY2_THUMB_SHIFT + KEY2_THUMB_COUNT)
 #define KEY2_ETOUCH_COUNT 4
-#define KEY2_SMARTPAD_SHIFT (KEY2_ETOUCH_SHIFT + KEY2_ETOUCH_COUNT)
 #define KEY2_SMARTPAD_COUNT 9
+
+#define KEY2_THUMB_SHIFT 0
+#define KEY2_ETOUCH_SHIFT (KEY2_THUMB_SHIFT + KEY2_THUMB_COUNT)
+#define KEY2_SMARTPAD_SHIFT (KEY2_ETOUCH_SHIFT + KEY2_ETOUCH_COUNT)
+
 #define KEY2(type,index) (1 << (KEY2_##type##_SHIFT + (index)))
 
 #define KEY2_TH_1 KEY2(THUMB, 0)
