@@ -1333,7 +1333,7 @@ readPacket2 (unsigned char *packet, int size) {
 }
 
 static int
-interpretOperatingKeys2 (void) {
+interpretKeyCombination2 (void) {
   switch (activeKeys2) {
     case KEY2_SP_1: return BRL_CMD_HELP;
     case KEY2_SP_2: return BRL_CMD_LEARN;
@@ -1420,6 +1420,99 @@ interpretSecondaryRoutingKey2 (void) {
 }
 
 static int
+interpretKeyEvent2 (BrailleDisplay *brl, int *command, unsigned char group, unsigned char key) {
+  unsigned char release = group & 0X80;
+  group &= ~release;
+
+  switch (group) {
+    case 0X01:
+      switch (key) {
+        case 0X01:
+          updateConfiguration2(brl, 0);
+          return 0;
+
+        default:
+          break;
+      }
+      break;
+
+    {
+      unsigned int shift;
+      unsigned int count;
+
+    case 0X71: /* thumb key */
+      shift = KEY2_THUMB_SHIFT;
+      count = KEY2_THUMB_COUNT;
+      goto doKey;
+
+    case 0X72: /* etouch key */
+      shift = KEY2_ETOUCH_SHIFT;
+      count = KEY2_ETOUCH_COUNT;
+      goto doKey;
+
+    case 0X73: /* smartpad key */
+      shift = KEY2_SMARTPAD_SHIFT;
+      count = KEY2_SMARTPAD_COUNT;
+      goto doKey;
+
+    doKey:
+      if (key < count) {
+        unsigned long bit = 1 << (shift + key);
+
+        if (release) {
+          *command = interpretKeyCombination2();
+          pressedKeys2 &= ~bit;
+          activeKeys2 = 0;
+          return 1;
+        }
+
+        pressedKeys2 |= bit;
+        activeKeys2 = pressedKeys2;
+        *command = interpretKeyCombination2();
+
+        if (*command == EOF) {
+          *command = BRL_CMD_NOOP;
+        } else {
+          *command |= BRL_FLG_REPEAT_DELAY;
+        }
+
+        return 1;
+      }
+      break;
+    }
+
+    case 0X74: { /* routing key */
+      unsigned char second = key & 0X80;
+      key &= ~second;
+
+      if (key < brl->textColumns) {
+        if (release) {
+          *command = EOF;
+        } else {
+          *command = second? interpretSecondaryRoutingKey2(): interpretPrimaryRoutingKey2();
+
+          if (*command == EOF) {
+            *command = BRL_CMD_NOOP;
+          } else {
+            *command |= key;
+          }
+        }
+
+        activeKeys2 = 0;
+        return 1;
+      }
+      break;
+    }
+
+    default:
+      break;
+  }
+
+  LogPrint(LOG_WARNING, "unknown key: group=%02X key=%02X", group, key);
+  return 0;
+}
+
+static int
 readCommand2 (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   while (1) {
     unsigned char packet[MAXIMUM_PACKET_SIZE];
@@ -1429,101 +1522,8 @@ readCommand2 (BrailleDisplay *brl, BRL_DriverCommandContext context) {
     if (length < 0) return BRL_CMD_RESTARTBRL;
 
     {
-      unsigned char key = packet[1];
-      unsigned char group = packet[2];
-      unsigned char release = group & 0X80;
-      group &= ~release;
-
-      switch (group) {
-        case 0X01:
-          switch (key) {
-            case 0X01:
-              updateConfiguration2(brl, 0);
-              continue;
-
-            default:
-              break;
-          }
-          break;
-
-        {
-          unsigned int shift;
-          unsigned int count;
-
-        case 0X71: /* thumb key */
-          shift = KEY2_THUMB_SHIFT;
-          count = KEY2_THUMB_COUNT;
-          goto doKey;
-
-        case 0X72: /* etouch key */
-          shift = KEY2_ETOUCH_SHIFT;
-          count = KEY2_ETOUCH_COUNT;
-          goto doKey;
-
-        case 0X73: /* smartpad key */
-          shift = KEY2_SMARTPAD_SHIFT;
-          count = KEY2_SMARTPAD_COUNT;
-          goto doKey;
-
-        doKey:
-          if (key < count) {
-            unsigned long bit = 1 << (shift + key);
-
-            if (release) {
-              int command = interpretOperatingKeys2();
-              pressedKeys2 &= ~bit;
-              activeKeys2 = 0;
-              return command;
-            }
-
-            pressedKeys2 |= bit;
-            activeKeys2 = pressedKeys2;
-
-            {
-              int command = interpretOperatingKeys2();
-
-              if (command == EOF) {
-                command = BRL_CMD_NOOP;
-              } else {
-                command |= BRL_FLG_REPEAT_DELAY;
-              }
-
-              return command;
-            }
-          }
-          break;
-        }
-
-        case 0X74: { /* routing key */
-          unsigned char second = key & 0X80;
-          key &= ~second;
-
-          if (key < brl->textColumns) {
-            int command;
-
-            if (release) {
-              command = EOF;
-            } else {
-              command = second? interpretSecondaryRoutingKey2(): interpretPrimaryRoutingKey2();
-
-              if (command == EOF) {
-                command = BRL_CMD_NOOP;
-              } else {
-                command |= key;
-              }
-            }
-
-            activeKeys2 = 0;
-            return command;
-          }
-          break;
-        }
-
-        default:
-          break;
-      }
-
-      LogPrint(LOG_WARNING, "unknown key: group=%02X key=%02X", group, key);
+      int command;
+      if (interpretKeyEvent2(brl, &command, packet[2], packet[1])) return command;
     }
   }
 }
