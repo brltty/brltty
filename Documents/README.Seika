@@ -1,0 +1,44 @@
+BRLTTY doesn't yet have a native driver for Seika braille displays. They, 
+however, also emulate TSI PowerBraille displays, and, therefore, can still be 
+used with BRLTTY via its TSI braille driver.
+
+The TSI driver expects a serial device whereas a Seika is connected via USB. 
+This isn't a problem on Linux because the kernel automatically creates a pseudo 
+serial device as soon as the Seika is connected. These devices have names of 
+the form ttyUSB<n>, where <n> is a non-negative decimal integer, and, as is 
+true on all Unix-like systems, are in the /dev/ directory. Note that case is 
+critical - the "tty" part of the name is in lowercase whereas the "USB" part of 
+the name is in uppercase.
+
+Ti know which ttyUSB<n> device is your Seika, check which of them you already 
+have before connecting it, and then check again after it has been connected. 
+The easiest way to check which ttyUSB<n> devices you have is via this command:
+
+   ls /dev/ttyUSB*
+
+If you don't have any then the output will look like this:
+
+   ls: /dev/ttyUSB*: No such file or directory
+
+If you do then the output will look like this:
+
+   /dev/ttyUSB0 /dev/ttyUSB1
+
+You need to tell BRLTTY which device your Seika is connected to. This is done 
+via the -d option. If, for example, it's connected to ttyUSB0 then you'd 
+specify -dserial:ttyUSB0. You also need to tell BRLTTY to use its TSI braille 
+driver by specifying the -bts option. The command line to start BRLTTY would 
+look like this:
+
+   brltty -bts -dserial:ttyUSB0
+
+If you prefer not having to specify these options all the time then you can 
+define them as system defaults by adding lines like the following to 
+/etc/brltty.conf:
+
+   braille-driver ts
+   braille-device serial:ttyUSB0
+
+Remember that the device ttyUSB0 is only being used here as an example. You 
+must determine which device your Seika is really connected to and specify it 
+instead.
