@@ -1521,10 +1521,18 @@ readCommand2 (BrailleDisplay *brl, BRL_DriverCommandContext context) {
     if (!length) return EOF;
     if (length < 0) return BRL_CMD_RESTARTBRL;
 
-    {
-      int command;
-      if (interpretKeyEvent2(brl, &command, packet[2], packet[1])) return command;
+    switch (packet[0]) {
+      case 0X04: {
+        int command;
+        if (interpretKeyEvent2(brl, &command, packet[2], packet[1])) return command;
+        continue;
+      }
+
+      default:
+        break;
     }
+
+    LogBytes(LOG_WARNING, "Unexpected Packet", packet, length);
   }
 }
 
