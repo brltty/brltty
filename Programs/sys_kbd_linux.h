@@ -661,7 +661,7 @@ monitorKeyboard (int device, KeyboardCommonData *kcd) {
               ioctl(device, EVIOCGRAB, 1);
 #endif /* EVIOCGRAB */
 
-              LogPrint(LOG_DEBUG, "Keyboard Device: fd=%d", device);
+              LogPrint(LOG_DEBUG, "keyboard found: fd=%d", device);
               return 1;
             }
           }
@@ -683,6 +683,7 @@ monitorCurrentKeyboards (KeyboardCommonData *kcd) {
   const size_t rootLength = strlen(root);
   DIR *directory;
 
+  LogPrint(LOG_DEBUG, "searching for keyboards");
   if ((directory = opendir(root))) {
     struct dirent *entry;
 
@@ -692,12 +693,12 @@ monitorCurrentKeyboards (KeyboardCommonData *kcd) {
       int device;
 
       snprintf(path, sizeof(path), "%s/%s", root, entry->d_name);
-      LogPrint(LOG_DEBUG, "checking input device: %s", path);
-
       if ((device = open(path, O_RDONLY)) != -1) {
+        LogPrint(LOG_DEBUG, "input device opened: %s: fd=%d", path, device);
         if (monitorKeyboard(device, kcd)) continue;
 
         close(device);
+        LogPrint(LOG_DEBUG, "input device closed: %s: fd=%d", path, device);
       } else {
         LogPrint(LOG_DEBUG, "cannot open input device: %s: %s", path, strerror(errno));
       }
@@ -707,6 +708,7 @@ monitorCurrentKeyboards (KeyboardCommonData *kcd) {
   } else {
     LogPrint(LOG_DEBUG, "cannot open directory: %s: %s", root, strerror(errno));
   }
+  LogPrint(LOG_DEBUG, "keyboard search complete");
 }
 
 typedef struct {
@@ -722,7 +724,13 @@ doOpenInputDevice (void *data) {
   int device = openCharacterDevice(idd->name, O_RDONLY, idd->major, idd->minor);
 
   if (device != -1) {
-    if (!monitorKeyboard(device, idd->kcd)) close(device);
+    LogPrint(LOG_DEBUG, "input device opened: %s: fd=%d", idd->name, device);
+    if (!monitorKeyboard(device, idd->kcd)) {
+      close(device);
+      LogPrint(LOG_DEBUG, "input device closed: %s: fd=%d", idd->name, device);
+    }
+  } else {
+    LogPrint(LOG_DEBUG, "cannot open input device: %s: %s", idd->name, strerror(errno));
   }
 
   free(idd->name);
