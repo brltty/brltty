@@ -10,7 +10,7 @@ true on all Unix-like systems, are in the /dev/ directory. Note that case is
 critical - the "tty" part of the name is in lowercase whereas the "USB" part of 
 the name is in uppercase.
 
-Ti know which ttyUSB<n> device is your Seika, check which of them you already 
+To know which ttyUSB<n> device is your Seika, check which of them you already 
 have before connecting it, and then check again after it has been connected. 
 The easiest way to check which ttyUSB<n> devices you have is via this command:
 
