@@ -280,14 +280,20 @@ typedef struct {
 } ProtocolOperations;
 static const ProtocolOperations *protocol;
 
-#define MAX_STCELLS	5	/* hiest number of status cells */
+typedef enum {
+  STATUS_FIRST,
+  STATUS_LEFT,
+  STATUS_RIGHT
+} StatusType;
 
 static TranslationTable outputTable;
-static unsigned char *rawdata = NULL;	/* translated data to send to Braille */
-static unsigned char *prevdata = NULL;	/* previously sent raw data */
-static unsigned char StatusCells[MAX_STCELLS];		/* to hold status info */
-static unsigned char PrevStatus[MAX_STCELLS];	/* to hold previous status */
-static int rewriteRequired = 0;		/* 1 if display need to be rewritten */
+static unsigned char *previousText = NULL;
+static unsigned char *previousStatus = NULL;
+
+static unsigned char textOffset;
+static unsigned char statusOffset;
+
+static int rewriteRequired = 0;
 static int rewriteInterval;
 static struct timeval rewriteTime;
 
@@ -303,15 +309,15 @@ readByte (unsigned char *byte, int wait) {
 static int
 reallocateBuffer (unsigned char **buffer, int size) {
   void *address = realloc(*buffer, size);
-  if (!address) return 0;
+  if (size && !address) return 0;
   *buffer = address;
   return 1;
 }
 
 static int
 reallocateBuffers (BrailleDisplay *brl) {
-  if (reallocateBuffer(&rawdata, brl->textColumns*brl->textRows))
-    if (reallocateBuffer(&prevdata, brl->textColumns*brl->textRows))
+  if (reallocateBuffer(&previousText, brl->textColumns*brl->textRows))
+    if (reallocateBuffer(&previousStatus, brl->statusColumns*brl->statusRows))
       return 1;
 
   LogPrint(LOG_ERR, "cannot allocate braille buffers");
@@ -335,7 +341,7 @@ setDefaultConfiguration (BrailleDisplay *brl) {
 }
 
 static int
-updateConfiguration (BrailleDisplay *brl, int autodetecting, int textColumns, int statusColumns) {
+updateConfiguration (BrailleDisplay *brl, int autodetecting, int textColumns, int statusColumns, StatusType statusType) {
   if (statusColumns != brl->statusColumns) {
     brl->statusColumns = statusColumns;
     LogPrint(LOG_INFO, "status cell count changed to %d", brl->statusColumns);
@@ -349,6 +355,35 @@ updateConfiguration (BrailleDisplay *brl, int autodetecting, int textColumns, in
     if (!autodetecting) brl->resizeRequired = 1;
   }
 
+  {
+    int separator = 0;
+    if (statusColumns) separator = 1;
+
+    switch (statusType) {
+      case STATUS_LEFT:
+        statusOffset = 0;
+        textOffset = statusOffset + statusColumns + separator;
+        break;
+
+      case STATUS_RIGHT:
+        textOffset = 0;
+        statusOffset = textOffset + textColumns + separator;
+        break;
+
+      default:
+        statusOffset = 0;
+        textOffset = statusOffset + statusColumns;
+        separator = 0;
+        break;
+    }
+
+    if (separator) {
+      unsigned char cell = 0;
+      if (!protocol->writeBraille(brl, &cell, MAX(textOffset, statusOffset)-1, 1)) return 0;
+    }
+  }
+
+  rewriteRequired = 1;
   return 1;
 }
 
@@ -463,7 +498,7 @@ updateConfiguration1 (BrailleDisplay *brl, const unsigned char *packet, int auto
 
   if (count >= 3) statusColumns = PACKET_BYTE(packet, 3);
   if (count >= 4) textColumns = PACKET_BYTE(packet, 4);
-  return updateConfiguration(brl, autodetecting, textColumns, statusColumns);
+  return updateConfiguration(brl, autodetecting, textColumns, statusColumns, STATUS_FIRST);
 }
 
 static int
@@ -687,7 +722,6 @@ getKey1 (BrailleDisplay *brl, unsigned int *Keys, unsigned int *Pos) {
       switch (packet[1]) {
         case 0X07: /* text/status cells reconfigured */
           if (!updateConfiguration1(brl, packet, 0)) return -1;
-          rewriteRequired = 1;
           return 0;
 
         case 0X0B: { /* display parameters reconfigured */
@@ -1177,6 +1211,7 @@ static int
 writeBraille1 (BrailleDisplay *brl, const unsigned char *cells, int start, int count) {
   static const unsigned char header[] = {'\r', 0X1B, 'B'};	/* escape code to display braille */
   static const unsigned char trailer[] = {'\r'};		/* to send after the braille sequence */
+
   unsigned char packet[sizeof(header) + 2 + count + sizeof(trailer)];
   unsigned char *byte = packet;
 
@@ -1245,14 +1280,20 @@ initializeVariables2 (void) {
 static int
 updateConfiguration2 (BrailleDisplay *brl, int autodetecting) {
   unsigned char buffer[0X20];
-  int length = io->getHidFeature(5, buffer, sizeof(buffer));
+  int length = io->getHidFeature(0X05, buffer, sizeof(buffer));
 
   if (length != -1) {
     int textColumns = brl->textColumns;
     int statusColumns = brl->statusColumns;
+    int statusSide = 0;
 
+    if (length >= 2) statusColumns = buffer[1];
+    if (length >= 3) statusSide = buffer[2];
     if (length >= 7) textColumns = buffer[6];
-    if (updateConfiguration(brl, autodetecting, textColumns, statusColumns)) return 1;
+    if (statusColumns) textColumns -= statusColumns + 1;
+    if (updateConfiguration(brl, autodetecting, textColumns, statusColumns,
+                            statusSide? STATUS_RIGHT: STATUS_LEFT))
+      return 1;
   }
 
   return 0;
@@ -1425,8 +1466,9 @@ interpretKeyEvent2 (BrailleDisplay *brl, int *command, unsigned char group, unsi
     case 0X01:
       switch (key) {
         case 0X01:
-          updateConfiguration2(brl, 0);
-          return 0;
+          if (updateConfiguration2(brl, 0)) return 0;
+          *command = BRL_CMD_RESTARTBRL;
+          return 1;
 
         default:
           break;
@@ -1770,14 +1812,14 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
 static void
 brl_destruct (BrailleDisplay *brl) {
-  if (rawdata) {
-    free(rawdata);
-    rawdata = NULL;
+  if (previousText) {
+    free(previousText);
+    previousText = NULL;
   }
 
-  if (prevdata) {
-    free(prevdata);
-    prevdata = NULL;
+  if (previousStatus) {
+    free(previousStatus);
+    previousStatus = NULL;
   }
 
   io->closePort();
@@ -1802,33 +1844,35 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   } else {
     /* We update only the display part that has been changed */
     from = 0;
-    while ((from < brl->textColumns) && (brl->buffer[from] == prevdata[from])) from++;
+    while ((from < brl->textColumns) && (brl->buffer[from] == previousText[from])) from++;
 
     to = brl->textColumns - 1;
-    while ((to > from) && (brl->buffer[to] == prevdata[to])) to--;
+    while ((to > from) && (brl->buffer[to] == previousText[to])) to--;
     to++;
   }
 
-  if (from < to)			/* there is something different */ {
+  if (from < to) {
+    unsigned char cells[to - from - 1];
     int index;
+
     for (index=from; index<to; index++)
-      rawdata[index - from] = outputTable[(prevdata[index] = brl->buffer[index])];
-    protocol->writeBraille(brl, rawdata, brl->statusColumns+from, to-from);
+      cells[index - from] = outputTable[(previousText[index] = brl->buffer[index])];
+    protocol->writeBraille(brl, cells, textOffset+from, to-from);
   }
   return 1;
 }
 
 static int
-brl_writeStatus (BrailleDisplay *brl, const unsigned char *st) {
-  int i;
+brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) {
+  if (memcmp(status, previousStatus, brl->statusColumns) != 0) {
+    unsigned char cells[brl->statusColumns];
+    int i;
 
-  /* Update status cells on braille display */
-  if (memcmp (st, PrevStatus, brl->statusColumns) != 0)	/* only if it changed */
-    {
-      for (i=0; i<brl->statusColumns; ++i)
-        StatusCells[i] = outputTable[(PrevStatus[i] = st[i])];
-      protocol->writeBraille(brl, StatusCells, 0, brl->statusColumns);
-    }
+    for (i=0; i<brl->statusColumns; ++i)
+      cells[i] = outputTable[(previousStatus[i] = status[i])];
+    protocol->writeBraille(brl, cells, statusOffset, brl->statusColumns);
+  }
+
   return 1;
 }
 
