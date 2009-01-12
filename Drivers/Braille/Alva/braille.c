@@ -1232,6 +1232,7 @@ static const ProtocolOperations protocol1Operations = {
 #define KEY2_SP_3 KEY2(SMARTPAD, 7)
 #define KEY2_SP_4 KEY2(SMARTPAD, 8)
 
+static uint32_t firmwareVersion2;
 static unsigned long pressedKeys2;
 static unsigned long activeKeys2;
 
@@ -1260,6 +1261,16 @@ updateConfiguration2 (BrailleDisplay *brl, int autodetecting) {
 static int
 detectModel2 (BrailleDisplay *brl) {
   BRLSYMBOL.firmness = NULL;
+
+  {
+    unsigned char buffer[0X40];
+    int length = io->getHidFeature(0X09, buffer, sizeof(buffer));
+
+    firmwareVersion2 = 0;
+    if (length >= 6) firmwareVersion2 |= (buffer[5] << 16);
+    if (length >= 7) firmwareVersion2 |= (buffer[6] <<  8);
+    if (length >= 8) firmwareVersion2 |= (buffer[7] <<  0);
+  }
 
   if (setDefaultConfiguration(brl))
     if (updateConfiguration2(brl, 1))
@@ -1468,14 +1479,24 @@ interpretKeyEvent2 (BrailleDisplay *brl, int *command, unsigned char group, unsi
     }
 
     case 0X74: { /* routing key */
-      unsigned char second = key & 0X80;
-      key &= ~second;
+      unsigned char secondary = key & 0X80;
+      key &= ~secondary;
+
+      if (firmwareVersion2 < 0X011100) {
+        int splitpoint = model->columns - brl->textColumns;
+
+        if (key < splitpoint) {
+          key += brl->textColumns;
+        } else {
+          key -= splitpoint;
+        }
+      }
 
       if (key < brl->textColumns) {
         if (release) {
           *command = EOF;
         } else {
-          *command = second? interpretSecondaryRoutingKey2(): interpretPrimaryRoutingKey2();
+          *command = secondary? interpretSecondaryRoutingKey2(): interpretPrimaryRoutingKey2();
 
           if (*command == EOF) {
             *command = BRL_CMD_NOOP;
