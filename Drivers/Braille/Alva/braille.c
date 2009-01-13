@@ -249,13 +249,22 @@ static const ModelEntry modelTable[] = {
   { .name = NULL }
 };
 
+static const ModelEntry modelBC624 = {
+  .identifier = 0X24,
+  .name = "BC624",
+  .columns = 24,
+  .helpPage = 2
+};
+
 static const ModelEntry modelBC640 = {
+  .identifier = 0X40,
   .name = "BC640",
   .columns = 40,
   .helpPage = 2
 };
 
 static const ModelEntry modelBC680 = {
+  .identifier = 0X80,
   .name = "BC680",
   .columns = 80,
   .helpPage = 2
@@ -343,6 +352,8 @@ setDefaultConfiguration (BrailleDisplay *brl) {
   brl->helpPage = model->helpPage;			/* initialise size of display */
 
   cellCount = model->columns;
+  statusOffset = 0;
+  textOffset = statusOffset + model->statusCells;
   textRewriteRequired = 1;			/* To write whole display at first time */
   statusRewriteRequired = 1;
   return reallocateBuffers(brl);
@@ -350,18 +361,24 @@ setDefaultConfiguration (BrailleDisplay *brl) {
 
 static int
 updateConfiguration (BrailleDisplay *brl, int autodetecting, int textColumns, int statusColumns, StatusType statusType) {
+  int changed = 0;
+
   if (statusColumns != brl->statusColumns) {
+    LogPrint(LOG_INFO, "status cell count changed to %d", statusColumns);
     brl->statusColumns = statusColumns;
-    LogPrint(LOG_INFO, "status cell count changed to %d", brl->statusColumns);
+    changed = 1;
   }
 
   if (textColumns != brl->textColumns) {
+    LogPrint(LOG_INFO, "text column count changed to %d", textColumns);
     brl->textColumns = textColumns;
-    LogPrint(LOG_INFO, "text column count changed to %d", brl->textColumns);
-
-    if (!reallocateBuffers(brl)) return 0;
     if (!autodetecting) brl->resizeRequired = 1;
+    changed = 1;
   }
+
+  if (changed)
+    if (!reallocateBuffers(brl))
+      return 0;
 
   {
     int separator = 0;
@@ -1501,6 +1518,12 @@ interpretKeyEvent2 (BrailleDisplay *brl, int *command, unsigned char group, unsi
 }
 
 static int
+sendQuery2s (unsigned char item) {
+  unsigned char packet[] = {0X1B, item, 0X3F};
+  return writeBytes(packet, sizeof(packet), NULL);
+}
+
+static int
 readPacket2s (unsigned char *packet, int size) {
   int offset = 0;
   int length = 0;
@@ -1520,8 +1543,8 @@ readPacket2s (unsigned char *packet, int size) {
 
     if (offset == 0) {
       switch (byte) {
-        case 0X04:
-          length = 3;
+        case 0X1B:
+          length = 2;
           break;
 
         default:
@@ -1535,6 +1558,16 @@ readPacket2s (unsigned char *packet, int size) {
     } else {
       if (offset == size) LogBytes(LOG_WARNING, "Truncated Packet", packet, offset);
       LogBytes(LOG_WARNING, "Discarded Byte", &byte, 1);
+    }
+
+    if (offset == 1) {
+      switch (byte) {
+        case 0X3F: /* ? */ length =  3; break;
+        case 0X45: /* E */ length =  3; break;
+        case 0X4B: /* K */ length =  4; break;
+        case 0X54: /* T */ length =  4; break;
+        case 0X56: /* V */ length = 13; break;
+      }
     }
 
     if (++offset == length) {
@@ -1551,22 +1584,42 @@ readPacket2s (unsigned char *packet, int size) {
 }
 
 static int
-detectModel2s (BrailleDisplay *brl) {
-  BRLSYMBOL.firmness = NULL;
+identifyModel2s (unsigned char identifier) {
+  static const ModelEntry *const models[] = {
+    &modelBC624, &modelBC640, &modelBC680,
+    NULL
+  };
+  const ModelEntry *const *modelEntry = models;
 
-  {
-    unsigned char buffer[0X40];
-    int length = io->getHidFeature(0X09, buffer, sizeof(buffer));
-
-    firmwareVersion2 = 0;
-    if (length >= 6) firmwareVersion2 |= (buffer[5] << 16);
-    if (length >= 7) firmwareVersion2 |= (buffer[6] <<  8);
-    if (length >= 8) firmwareVersion2 |= (buffer[7] <<  0);
+  while (*modelEntry) {
+    model = *modelEntry++;
+    if (model->identifier == identifier) return 1;
   }
 
-  if (setDefaultConfiguration(brl))
-    if (updateConfiguration2(brl, 1))
-      return 1;
+  return 0;
+}
+
+static int
+detectModel2s (BrailleDisplay *brl) {
+  int probes = 0;
+
+  while (sendQuery2s(0X3F)) {
+    while (io->awaitInput(200)) {
+      unsigned char packet[MAXIMUM_PACKET_SIZE];
+
+      if (protocol->readPacket(packet, sizeof(packet)) > 0) {
+        if ((packet[0] == 0X1B) && (packet[1] == 0X3F)) {
+          if (identifyModel2s(packet[2])) {
+LogPrint(LOG_NOTICE, "name=%s", model->name); exit(0);
+            return 1;
+          }
+        }
+      }
+    }
+
+    if (errno != EAGAIN) break;
+    if (++probes == 3) break;
+  }
 
   return 0;
 }
@@ -1581,11 +1634,18 @@ readCommand2s (BrailleDisplay *brl, BRL_DriverCommandContext context) {
     if (length < 0) return BRL_CMD_RESTARTBRL;
 
     switch (packet[0]) {
-      case 0X04: {
-        int command;
-        if (interpretKeyEvent2(brl, &command, packet[2], packet[1])) return command;
-        continue;
-      }
+      case 0X1B:
+        switch (packet[1]) {
+          case 0X4B: /* K */ {
+            int command;
+            if (interpretKeyEvent2(brl, &command, packet[2], packet[3])) return command;
+            continue;
+          }
+
+          default:
+            break;
+        }
+        break;
 
       default:
         break;
@@ -1597,10 +1657,11 @@ readCommand2s (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 
 static int
 writeBraille2s (BrailleDisplay *brl, const unsigned char *cells, int start, int count) {
-  unsigned char packet[3 + count];
+  unsigned char packet[4 + count];
   unsigned char *byte = packet;
 
-  *byte++ = 0X02;
+  *byte++ = 0X1B;
+  *byte++ = 0X42;
   *byte++ = start;
   *byte++ = count;
 
@@ -1801,6 +1862,13 @@ openUsbPort (const char *device) {
       .vendor=0X06b0, .product=0X0001,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2
+    }
+    ,
+    { /* Alva BC624 */
+      .vendor=0X0798, .product=0X0624,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=0,
+      .data=&modelBC624
     }
     ,
     { /* Alva BC640 */
