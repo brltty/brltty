@@ -1530,7 +1530,7 @@ interpretKeyEvent2 (BrailleDisplay *brl, int *command, unsigned char group, unsi
       unsigned char secondary = key & 0X80;
       key &= ~secondary;
 
-      if (firmwareVersion2 < 0X011100) {
+      if (firmwareVersion2 < 0X011102) {
         int splitpoint = model->columns - brl->textColumns;
 
         if (key < splitpoint) {
