@@ -290,6 +290,7 @@ static TranslationTable outputTable;
 static unsigned char *previousText = NULL;
 static unsigned char *previousStatus = NULL;
 
+static unsigned char cellCount;
 static unsigned char textOffset;
 static unsigned char statusOffset;
 
@@ -341,6 +342,7 @@ setDefaultConfiguration (BrailleDisplay *brl) {
   brl->statusRows = 1;
   brl->helpPage = model->helpPage;			/* initialise size of display */
 
+  cellCount = model->columns;
   textRewriteRequired = 1;			/* To write whole display at first time */
   statusRewriteRequired = 1;
   return reallocateBuffers(brl);
@@ -1531,30 +1533,32 @@ interpretKeyEvent2 (BrailleDisplay *brl, int *command, unsigned char group, unsi
       key &= ~secondary;
 
       if (firmwareVersion2 < 0X011102) {
-        int splitpoint = model->columns - brl->textColumns;
+        int splitpoint = model->columns - cellCount;
 
         if (key < splitpoint) {
-          key += brl->textColumns;
+          key += cellCount;
         } else {
           key -= splitpoint;
         }
       }
 
-      if (key < brl->textColumns) {
-        if (release) {
-          *command = EOF;
-        } else {
-          *command = secondary? interpretSecondaryRoutingKey2(): interpretPrimaryRoutingKey2();
-
-          if (*command == EOF) {
-            *command = BRL_CMD_NOOP;
+      if (key >= textOffset) {
+        if ((key -= textOffset) < brl->textColumns) {
+          if (release) {
+            *command = EOF;
           } else {
-            *command |= key;
-          }
-        }
+            *command = secondary? interpretSecondaryRoutingKey2(): interpretPrimaryRoutingKey2();
 
-        activeKeys2 = 0;
-        return 1;
+            if (*command == EOF) {
+              *command = BRL_CMD_NOOP;
+            } else {
+              *command |= key;
+            }
+          }
+
+          activeKeys2 = 0;
+          return 1;
+        }
       }
       break;
     }
