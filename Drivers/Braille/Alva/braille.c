@@ -262,7 +262,7 @@ static const ModelEntry modelBC680 = {
 };
 
 typedef struct {
-  int (*openPort) (char **parameters, const char *device);
+  int (*openPort) (const char *device);
   void (*closePort) (void);
   int (*awaitInput) (int milliseconds);
   int (*readBytes) (unsigned char *buffer, int length, int wait);
@@ -273,8 +273,8 @@ static const InputOutputOperations *io;
 
 typedef struct {
   void (*initializeVariables) (void);
-  int (*detectModel) (BrailleDisplay *brl);
   int (*readPacket) (unsigned char *packet, int size);
+  int (*detectModel) (BrailleDisplay *brl);
   int (*readCommand) (BrailleDisplay *brl, BRL_DriverCommandContext context);
   int (*writeBraille) (BrailleDisplay *brl, const unsigned char *cells, int start, int count);
 } ProtocolOperations;
@@ -557,30 +557,6 @@ initializeVariables1 (void) {
 }
 
 static int
-detectModel1 (BrailleDisplay *brl) {
-  int probes = 0;
-
-  while (writeFunction1(brl, 0X06)) {
-    while (io->awaitInput(200)) {
-      unsigned char packet[MAXIMUM_PACKET_SIZE];
-
-      if (protocol->readPacket(packet, sizeof(packet)) > 0) {
-        if (memcmp(packet, BRL_ID, BRL_ID_LENGTH) == 0) {
-          if (identifyModel1(brl, packet[BRL_ID_LENGTH])) {
-            return 1;
-          }
-        }
-      }
-    }
-
-    if (errno != EAGAIN) break;
-    if (++probes == 3) break;
-  }
-
-  return 0;
-}
-
-static int
 readPacket1 (unsigned char *packet, int size) {
   int offset = 0;
   int length = 0;
@@ -659,6 +635,30 @@ readPacket1 (unsigned char *packet, int size) {
       return length;
     }
   }
+}
+
+static int
+detectModel1 (BrailleDisplay *brl) {
+  int probes = 0;
+
+  while (writeFunction1(brl, 0X06)) {
+    while (io->awaitInput(200)) {
+      unsigned char packet[MAXIMUM_PACKET_SIZE];
+
+      if (protocol->readPacket(packet, sizeof(packet)) > 0) {
+        if (memcmp(packet, BRL_ID, BRL_ID_LENGTH) == 0) {
+          if (identifyModel1(brl, packet[BRL_ID_LENGTH])) {
+            return 1;
+          }
+        }
+      }
+    }
+
+    if (errno != EAGAIN) break;
+    if (++probes == 3) break;
+  }
+
+  return 0;
 }
 
 static int
@@ -1240,7 +1240,7 @@ writeBraille1 (BrailleDisplay *brl, const unsigned char *cells, int start, int c
 
 static const ProtocolOperations protocol1Operations = {
   initializeVariables1,
-  detectModel1, readPacket1,
+  readPacket1, detectModel1,
   readCommand1, writeBraille1
 };
 
@@ -1305,77 +1305,6 @@ updateConfiguration2 (BrailleDisplay *brl, int autodetecting) {
   }
 
   return 0;
-}
-
-static int
-detectModel2 (BrailleDisplay *brl) {
-  BRLSYMBOL.firmness = NULL;
-
-  {
-    unsigned char buffer[0X40];
-    int length = io->getHidFeature(0X09, buffer, sizeof(buffer));
-
-    firmwareVersion2 = 0;
-    if (length >= 6) firmwareVersion2 |= (buffer[5] << 16);
-    if (length >= 7) firmwareVersion2 |= (buffer[6] <<  8);
-    if (length >= 8) firmwareVersion2 |= (buffer[7] <<  0);
-  }
-
-  if (setDefaultConfiguration(brl))
-    if (updateConfiguration2(brl, 1))
-      return 1;
-
-  return 0;
-}
-
-static int
-readPacket2 (unsigned char *packet, int size) {
-  int offset = 0;
-  int length = 0;
-
-  while (1) {
-    unsigned char byte;
-
-    {
-      int started = offset > 0;
-
-      if (!readByte(&byte, started)) {
-        int result = (errno == EAGAIN)? 0: -1;
-        if (started) LogBytes(LOG_WARNING, "Partial Packet", packet, offset);
-        return result;
-      }
-    }
-
-    if (offset == 0) {
-      switch (byte) {
-        case 0X04:
-          length = 3;
-          break;
-
-        default:
-          LogBytes(LOG_WARNING, "Ignored Byte", &byte, 1);
-          continue;
-      }
-    }
-
-    if (offset < size) {
-      packet[offset] = byte;
-    } else {
-      if (offset == size) LogBytes(LOG_WARNING, "Truncated Packet", packet, offset);
-      LogBytes(LOG_WARNING, "Discarded Byte", &byte, 1);
-    }
-
-    if (++offset == length) {
-      if (offset > size) {
-        offset = 0;
-        length = 0;
-        continue;
-      }
-
-      if (logInputPackets) LogBytes(LOG_DEBUG, "Input Packet", packet, offset);
-      return length;
-    }
-  }
 }
 
 static int
@@ -1572,7 +1501,78 @@ interpretKeyEvent2 (BrailleDisplay *brl, int *command, unsigned char group, unsi
 }
 
 static int
-readCommand2 (BrailleDisplay *brl, BRL_DriverCommandContext context) {
+readPacket2s (unsigned char *packet, int size) {
+  int offset = 0;
+  int length = 0;
+
+  while (1) {
+    unsigned char byte;
+
+    {
+      int started = offset > 0;
+
+      if (!readByte(&byte, started)) {
+        int result = (errno == EAGAIN)? 0: -1;
+        if (started) LogBytes(LOG_WARNING, "Partial Packet", packet, offset);
+        return result;
+      }
+    }
+
+    if (offset == 0) {
+      switch (byte) {
+        case 0X04:
+          length = 3;
+          break;
+
+        default:
+          LogBytes(LOG_WARNING, "Ignored Byte", &byte, 1);
+          continue;
+      }
+    }
+
+    if (offset < size) {
+      packet[offset] = byte;
+    } else {
+      if (offset == size) LogBytes(LOG_WARNING, "Truncated Packet", packet, offset);
+      LogBytes(LOG_WARNING, "Discarded Byte", &byte, 1);
+    }
+
+    if (++offset == length) {
+      if (offset > size) {
+        offset = 0;
+        length = 0;
+        continue;
+      }
+
+      if (logInputPackets) LogBytes(LOG_DEBUG, "Input Packet", packet, offset);
+      return length;
+    }
+  }
+}
+
+static int
+detectModel2s (BrailleDisplay *brl) {
+  BRLSYMBOL.firmness = NULL;
+
+  {
+    unsigned char buffer[0X40];
+    int length = io->getHidFeature(0X09, buffer, sizeof(buffer));
+
+    firmwareVersion2 = 0;
+    if (length >= 6) firmwareVersion2 |= (buffer[5] << 16);
+    if (length >= 7) firmwareVersion2 |= (buffer[6] <<  8);
+    if (length >= 8) firmwareVersion2 |= (buffer[7] <<  0);
+  }
+
+  if (setDefaultConfiguration(brl))
+    if (updateConfiguration2(brl, 1))
+      return 1;
+
+  return 0;
+}
+
+static int
+readCommand2s (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   while (1) {
     unsigned char packet[MAXIMUM_PACKET_SIZE];
     int length = protocol->readPacket(packet, sizeof(packet));
@@ -1596,7 +1596,7 @@ readCommand2 (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 }
 
 static int
-writeBraille2 (BrailleDisplay *brl, const unsigned char *cells, int start, int count) {
+writeBraille2s (BrailleDisplay *brl, const unsigned char *cells, int start, int count) {
   unsigned char packet[3 + count];
   unsigned char *byte = packet;
 
@@ -1610,10 +1610,126 @@ writeBraille2 (BrailleDisplay *brl, const unsigned char *cells, int start, int c
   return writeBytes(packet, byte-packet, &brl->writeDelay);
 }
 
-static const ProtocolOperations protocol2Operations = {
+static const ProtocolOperations protocol2sOperations = {
   initializeVariables2,
-  detectModel2, readPacket2,
-  readCommand2, writeBraille2
+  readPacket2s, detectModel2s,
+  readCommand2s, writeBraille2s
+};
+
+static int
+readPacket2u (unsigned char *packet, int size) {
+  int offset = 0;
+  int length = 0;
+
+  while (1) {
+    unsigned char byte;
+
+    {
+      int started = offset > 0;
+
+      if (!readByte(&byte, started)) {
+        int result = (errno == EAGAIN)? 0: -1;
+        if (started) LogBytes(LOG_WARNING, "Partial Packet", packet, offset);
+        return result;
+      }
+    }
+
+    if (offset == 0) {
+      switch (byte) {
+        case 0X04:
+          length = 3;
+          break;
+
+        default:
+          LogBytes(LOG_WARNING, "Ignored Byte", &byte, 1);
+          continue;
+      }
+    }
+
+    if (offset < size) {
+      packet[offset] = byte;
+    } else {
+      if (offset == size) LogBytes(LOG_WARNING, "Truncated Packet", packet, offset);
+      LogBytes(LOG_WARNING, "Discarded Byte", &byte, 1);
+    }
+
+    if (++offset == length) {
+      if (offset > size) {
+        offset = 0;
+        length = 0;
+        continue;
+      }
+
+      if (logInputPackets) LogBytes(LOG_DEBUG, "Input Packet", packet, offset);
+      return length;
+    }
+  }
+}
+
+static int
+detectModel2u (BrailleDisplay *brl) {
+  BRLSYMBOL.firmness = NULL;
+
+  {
+    unsigned char buffer[0X40];
+    int length = io->getHidFeature(0X09, buffer, sizeof(buffer));
+
+    firmwareVersion2 = 0;
+    if (length >= 6) firmwareVersion2 |= (buffer[5] << 16);
+    if (length >= 7) firmwareVersion2 |= (buffer[6] <<  8);
+    if (length >= 8) firmwareVersion2 |= (buffer[7] <<  0);
+  }
+
+  if (setDefaultConfiguration(brl))
+    if (updateConfiguration2(brl, 1))
+      return 1;
+
+  return 0;
+}
+
+static int
+readCommand2u (BrailleDisplay *brl, BRL_DriverCommandContext context) {
+  while (1) {
+    unsigned char packet[MAXIMUM_PACKET_SIZE];
+    int length = protocol->readPacket(packet, sizeof(packet));
+
+    if (!length) return EOF;
+    if (length < 0) return BRL_CMD_RESTARTBRL;
+
+    switch (packet[0]) {
+      case 0X04: {
+        int command;
+        if (interpretKeyEvent2(brl, &command, packet[2], packet[1])) return command;
+        continue;
+      }
+
+      default:
+        break;
+    }
+
+    LogBytes(LOG_WARNING, "Unexpected Packet", packet, length);
+  }
+}
+
+static int
+writeBraille2u (BrailleDisplay *brl, const unsigned char *cells, int start, int count) {
+  unsigned char packet[3 + count];
+  unsigned char *byte = packet;
+
+  *byte++ = 0X02;
+  *byte++ = start;
+  *byte++ = count;
+
+  memcpy(byte, cells, count);
+  byte += count;
+
+  return writeBytes(packet, byte-packet, &brl->writeDelay);
+}
+
+static const ProtocolOperations protocol2uOperations = {
+  initializeVariables2,
+  readPacket2u,detectModel2u,
+  readCommand2u, writeBraille2u
 };
 
 #include "io_serial.h"
@@ -1621,7 +1737,7 @@ static SerialDevice *serialDevice = NULL;
 static int serialCharactersPerSecond;
 
 static int
-openSerialPort (char **parameters, const char *device) {
+openSerialPort (const char *device) {
   if ((serialDevice = serialOpenDevice(device))) {
     if (serialRestartDevice(serialDevice, BAUDRATE)) {
       serialCharactersPerSecond = BAUDRATE / serialGetCharacterBits(serialDevice);
@@ -1679,7 +1795,7 @@ static const InputOutputOperations serialOperations = {
 static UsbChannel *usbChannel = NULL;
 
 static int
-openUsbPort (char **parameters, const char *device) {
+openUsbPort (const char *device) {
   static const UsbChannelDefinition definitions[] = {
     { /* Alva 5nn */
       .vendor=0X06b0, .product=0X0001,
@@ -1708,7 +1824,7 @@ openUsbPort (char **parameters, const char *device) {
     if (usbChannel->definition.outputEndpoint) {
       protocol = &protocol1Operations;
     } else {
-      protocol = &protocol2Operations;
+      protocol = &protocol2uOperations;
 
       switch (usbChannel->definition.product) {
         case 0X0640:
@@ -1779,6 +1895,64 @@ static const InputOutputOperations usbOperations = {
 };
 #endif /* ENABLE_USB_SUPPORT */
 
+#ifdef ENABLE_BLUETOOTH_SUPPORT
+/* Bluetooth IO */
+#include "io_bluetooth.h"
+#include "io_misc.h"
+
+static int bluetoothConnection = -1;
+
+static int
+openBluetoothPort (const char *device) {
+  return (bluetoothConnection = btOpenConnection(device, 1, 0)) != -1;
+}
+
+static void
+closeBluetoothPort (void) {
+  close(bluetoothConnection);
+  bluetoothConnection = -1;
+}
+
+static int
+awaitBluetoothInput (int milliseconds) {
+  return awaitInput(bluetoothConnection, milliseconds);
+}
+
+static int
+readBluetoothBytes (unsigned char *buffer, int length, int wait) {
+  const int timeout = 100;
+  size_t offset = 0;
+  return readChunk(bluetoothConnection,
+                   buffer, &offset, length,
+                   (wait? timeout: 0), timeout);
+}
+
+static int
+writeBluetoothBytes (const unsigned char *buffer, int length, unsigned int *delay) {
+  int count = writeData(bluetoothConnection, buffer, length);
+  if (count != length) {
+    if (count == -1) {
+      LogError("Alva Bluetooth write");
+    } else {
+      LogPrint(LOG_WARNING, "trunccated bluetooth write: %d < %d", count, length);
+    }
+  }
+  return count;
+}
+
+static int
+getBluetoothHidFeature (unsigned char report, unsigned char *buffer, int length) {
+  errno = ENOSYS;
+  return -1;
+}
+
+static const InputOutputOperations bluetoothOperations = {
+  openBluetoothPort, closeBluetoothPort,
+  awaitBluetoothInput, readBluetoothBytes, writeBluetoothBytes,
+  getBluetoothHidFeature
+};
+#endif /* ENABLE_BLUETOOTH_SUPPORT */
+
 int
 AL_writeData( unsigned char *data, int len ) {
   return writeBytes(data, len, NULL);
@@ -1801,13 +1975,20 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   } else
 #endif /* ENABLE_USB_SUPPORT */
 
+#ifdef ENABLE_BLUETOOTH_SUPPORT
+  if (isBluetoothDevice(&device)) {
+    io = &bluetoothOperations;
+    protocol = &protocol2sOperations;
+  } else
+#endif /* ENABLE_BLUETOOTH_SUPPORT */
+
   {
     unsupportedDevice(device);
     return 0;
   }
 
   /* Open the Braille display device */
-  if (io->openPort(parameters, device)) {
+  if (io->openPort(device)) {
     protocol->initializeVariables();
 
     if (protocol->detectModel(brl)) {
