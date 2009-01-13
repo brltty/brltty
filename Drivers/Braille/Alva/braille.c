@@ -342,7 +342,7 @@ reallocateBuffers (BrailleDisplay *brl) {
 
 static int
 setDefaultConfiguration (BrailleDisplay *brl) {
-  LogPrint(LOG_INFO, "Detected Alva %s: %d columns, %d status cells",
+  LogPrint(LOG_INFO, "detected Alva %s: %d columns, %d status cells",
            model->name, model->columns, model->statusCells);
 
   brl->textColumns = model->columns;
@@ -362,6 +362,33 @@ setDefaultConfiguration (BrailleDisplay *brl) {
 static int
 updateConfiguration (BrailleDisplay *brl, int autodetecting, int textColumns, int statusColumns, StatusType statusType) {
   int changed = 0;
+  int separator = 0;
+
+  if (statusType == STATUS_FIRST) {
+    statusOffset = 0;
+    textOffset = statusOffset + statusColumns;
+  } else if (statusColumns) {
+    separator = 1;
+    textColumns -= statusColumns + separator;
+
+    switch (statusType) {
+      case STATUS_LEFT:
+        statusOffset = 0;
+        textOffset = statusOffset + statusColumns + separator;
+        break;
+
+      case STATUS_RIGHT:
+        textOffset = 0;
+        statusOffset = textOffset + textColumns + separator;
+        break;
+
+      default:
+        break;
+    }
+  } else {
+    statusOffset = 0;
+    textOffset = 0;
+  }
 
   if (statusColumns != brl->statusColumns) {
     LogPrint(LOG_INFO, "status cell count changed to %d", statusColumns);
@@ -380,32 +407,9 @@ updateConfiguration (BrailleDisplay *brl, int autodetecting, int textColumns, in
     if (!reallocateBuffers(brl))
       return 0;
 
-  {
-    int separator = 0;
-    if (statusColumns) separator = 1;
-
-    switch (statusType) {
-      case STATUS_LEFT:
-        statusOffset = 0;
-        textOffset = statusOffset + statusColumns + separator;
-        break;
-
-      case STATUS_RIGHT:
-        textOffset = 0;
-        statusOffset = textOffset + textColumns + separator;
-        break;
-
-      default:
-        statusOffset = 0;
-        textOffset = statusOffset + statusColumns;
-        separator = 0;
-        break;
-    }
-
-    if (separator) {
-      unsigned char cell = 0;
-      if (!protocol->writeBraille(brl, &cell, MAX(textOffset, statusOffset)-1, 1)) return 0;
-    }
+  if (separator) {
+    unsigned char cell = 0;
+    if (!protocol->writeBraille(brl, &cell, MAX(textOffset, statusOffset)-1, 1)) return 0;
   }
 
   textRewriteRequired = 1;
@@ -1303,7 +1307,7 @@ initializeVariables2 (void) {
 }
 
 static int
-updateConfiguration2 (BrailleDisplay *brl, int autodetecting) {
+updateConfiguration2u (BrailleDisplay *brl, int autodetecting) {
   unsigned char buffer[0X20];
   int length = io->getHidFeature(0X05, buffer, sizeof(buffer));
 
@@ -1315,7 +1319,7 @@ updateConfiguration2 (BrailleDisplay *brl, int autodetecting) {
     if (length >= 2) statusColumns = buffer[1];
     if (length >= 3) statusSide = buffer[2];
     if (length >= 7) textColumns = buffer[6];
-    if (statusColumns) textColumns -= statusColumns + 1;
+
     if (updateConfiguration(brl, autodetecting, textColumns, statusColumns,
                             statusSide? STATUS_RIGHT: STATUS_LEFT))
       return 1;
@@ -1420,7 +1424,7 @@ interpretKeyEvent2 (BrailleDisplay *brl, int *command, unsigned char group, unsi
     case 0X01:
       switch (key) {
         case 0X01:
-          if (updateConfiguration2(brl, 0)) return 0;
+          if (updateConfiguration2u(brl, 0)) return 0;
           *command = BRL_CMD_RESTARTBRL;
           return 1;
 
@@ -1518,12 +1522,6 @@ interpretKeyEvent2 (BrailleDisplay *brl, int *command, unsigned char group, unsi
 }
 
 static int
-sendQuery2s (unsigned char item) {
-  unsigned char packet[] = {0X1B, item, 0X3F};
-  return writeBytes(packet, sizeof(packet), NULL);
-}
-
-static int
 readPacket2s (unsigned char *packet, int size) {
   int offset = 0;
   int length = 0;
@@ -1584,18 +1582,72 @@ readPacket2s (unsigned char *packet, int size) {
 }
 
 static int
-identifyModel2s (unsigned char identifier) {
+getAttributes2s (unsigned char item, unsigned char *packet, int size) {
+  unsigned char request[] = {0X1B, item, 0X3F};
+
+  if (writeBytes(request, sizeof(request), NULL)) {
+    while (io->awaitInput(200)) {
+      int length = protocol->readPacket(packet, size);
+      if (length <= 0) break;
+      if ((packet[0] == 0X1B) && (packet[1] == item)) return 1;
+    }
+  }
+
+  return 0;
+}
+
+static int
+updateConfiguration2s (BrailleDisplay *brl, int autodetecting) {
+  unsigned char packet[0X20];
+
+  if (getAttributes2s(0X45, packet, sizeof(packet))) {
+    unsigned char textColumns = packet[2];
+
+    if (getAttributes2s(0X54, packet, sizeof(packet))) {
+      unsigned char statusColumns = packet[2];
+      unsigned char statusSide = packet[3];
+
+      if (updateConfiguration(brl, autodetecting, textColumns, statusColumns,
+                              (statusSide == 'R')? STATUS_RIGHT: STATUS_LEFT))
+        return 1;
+    }
+  }
+
+  return 0;
+}
+
+static int
+identifyModel2s (BrailleDisplay *brl, unsigned char identifier) {
   static const ModelEntry *const models[] = {
     &modelBC624, &modelBC640, &modelBC680,
     NULL
   };
+
+  unsigned char packet[0X20];
   const ModelEntry *const *modelEntry = models;
 
   while (*modelEntry) {
-    model = *modelEntry++;
-    if (model->identifier == identifier) return 1;
+    if ((model = *modelEntry++)->identifier == identifier) {
+      BRLSYMBOL.firmness = NULL;
+
+      firmwareVersion2 = 0;
+      if (getAttributes2s(0X56, packet, sizeof(packet))) {
+        firmwareVersion2 |= (packet[4] << 16);
+        firmwareVersion2 |= (packet[5] <<  8);
+        firmwareVersion2 |= (packet[6] <<  0);
+
+        if (setDefaultConfiguration(brl)) {
+          if (updateConfiguration2s(brl, 1)) {
+            return 1;
+          }
+        }
+      }
+
+      return 0;
+    }
   }
 
+  LogPrint(LOG_ERR, "detected unknown Alva model with ID %02X (hex)", identifier);
   return 0;
 }
 
@@ -1603,23 +1655,17 @@ static int
 detectModel2s (BrailleDisplay *brl) {
   int probes = 0;
 
-  while (sendQuery2s(0X3F)) {
-    while (io->awaitInput(200)) {
-      unsigned char packet[MAXIMUM_PACKET_SIZE];
+  do {
+    unsigned char packet[0X20];
 
-      if (protocol->readPacket(packet, sizeof(packet)) > 0) {
-        if ((packet[0] == 0X1B) && (packet[1] == 0X3F)) {
-          if (identifyModel2s(packet[2])) {
-LogPrint(LOG_NOTICE, "name=%s", model->name); exit(0);
-            return 1;
-          }
-        }
+    if (getAttributes2s(0X3F, packet, sizeof(packet))) {
+      if (identifyModel2s(brl, packet[2])) {
+        return 1;
       }
+    } else if (errno != EAGAIN) {
+      break;
     }
-
-    if (errno != EAGAIN) break;
-    if (++probes == 3) break;
-  }
+  } while (++probes < 3);
 
   return 0;
 }
@@ -1732,7 +1778,7 @@ detectModel2u (BrailleDisplay *brl) {
   BRLSYMBOL.firmness = NULL;
 
   {
-    unsigned char buffer[0X40];
+    unsigned char buffer[0X20];
     int length = io->getHidFeature(0X09, buffer, sizeof(buffer));
 
     firmwareVersion2 = 0;
@@ -1742,7 +1788,7 @@ detectModel2u (BrailleDisplay *brl) {
   }
 
   if (setDefaultConfiguration(brl))
-    if (updateConfiguration2(brl, 1))
+    if (updateConfiguration2u(brl, 1))
       return 1;
 
   return 0;
