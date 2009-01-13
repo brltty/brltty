@@ -1834,7 +1834,8 @@ brl_destruct (BrailleDisplay *brl) {
 
 static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
-  int from, to;
+  int from = 0;
+  int to = brl->textColumns * brl->textRows;
 
   if (textRewriteInterval) {
     struct timeval now;
@@ -1844,17 +1845,10 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   }
 
   if (textRewriteRequired) {
-    /* We rewrite the whole display */
-    from = 0;
-    to = brl->textColumns;
     textRewriteRequired = 0;
   } else {
-    /* We update only the display part that has been changed */
-    from = 0;
-    while ((from < brl->textColumns) && (brl->buffer[from] == previousText[from])) from++;
-
-    to = brl->textColumns - 1;
-    while ((to > from) && (brl->buffer[to] == previousText[to])) to--;
+    while ((from < to) && (brl->buffer[from] == previousText[from])) from++;
+    while ((--to > from) && (brl->buffer[to] == previousText[to]));
     to++;
   }
 
