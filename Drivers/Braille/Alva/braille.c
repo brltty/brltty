@@ -308,6 +308,11 @@ readByte (unsigned char *byte, int wait) {
 }
 
 static int
+writeBytes (const unsigned char *buffer, int length, unsigned int *delay) {
+  return io->writeBytes(buffer, length, delay) != -1;
+}
+
+static int
 reallocateBuffer (unsigned char **buffer, int size) {
   void *address = realloc(*buffer, size);
   if (size && !address) return 0;
@@ -483,13 +488,13 @@ static const int BraillePad[6] = {
 static int
 writeFunction1 (BrailleDisplay *brl, unsigned char code) {
   unsigned char bytes[] = {0X1B, 'F', 'U', 'N', code, '\r'};
-  return io->writeBytes(bytes, sizeof(bytes), &brl->writeDelay);
+  return writeBytes(bytes, sizeof(bytes), &brl->writeDelay);
 }
 
 static int
 writeParameter1 (BrailleDisplay *brl, unsigned char parameter, unsigned char setting) {
   unsigned char bytes[] = {0X1B, 'P', 'A', 3, 0, parameter, setting, '\r'};
-  return io->writeBytes(bytes, sizeof(bytes), &brl->writeDelay);
+  return writeBytes(bytes, sizeof(bytes), &brl->writeDelay);
 }
 
 static int
@@ -517,7 +522,7 @@ identifyModel1 (BrailleDisplay *brl, unsigned char identifier) {
       if (model->flags & MOD_FLG__CONFIGURABLE) {
         BRLSYMBOL.firmness = brl_firmness;
 
-        writeFunction1(brl, 0X07);
+        if (!writeFunction1(brl, 0X07)) return 0;
         while (io->awaitInput(200)) {
           unsigned char packet[MAXIMUM_PACKET_SIZE];
           int count = protocol->readPacket(packet, sizeof(packet));
@@ -531,7 +536,7 @@ identifyModel1 (BrailleDisplay *brl, unsigned char identifier) {
           }
         }
 
-        writeFunction1(brl, 0X0B);
+        if (!writeFunction1(brl, 0X0B)) return 0;
       } else {
         BRLSYMBOL.firmness = NULL; 
       }
@@ -553,7 +558,7 @@ static int
 detectModel1 (BrailleDisplay *brl) {
   int probes = 0;
 
-  while (writeFunction1(brl, 0X06) != -1) {
+  while (writeFunction1(brl, 0X06)) {
     while (io->awaitInput(200)) {
       unsigned char packet[MAXIMUM_PACKET_SIZE];
 
@@ -1228,7 +1233,7 @@ writeBraille1 (BrailleDisplay *brl, const unsigned char *cells, int start, int c
   memcpy(byte, trailer, sizeof(trailer));
   byte += sizeof(trailer);
 
-  return io->writeBytes(packet, byte-packet, &brl->writeDelay);
+  return writeBytes(packet, byte-packet, &brl->writeDelay);
 }
 
 static const ProtocolOperations protocol1Operations = {
@@ -1598,7 +1603,7 @@ writeBraille2 (BrailleDisplay *brl, const unsigned char *cells, int start, int c
   memcpy(byte, cells, count);
   byte += count;
 
-  return io->writeBytes(packet, byte-packet, &brl->writeDelay);
+  return writeBytes(packet, byte-packet, &brl->writeDelay);
 }
 
 static const ProtocolOperations protocol2Operations = {
@@ -1772,8 +1777,7 @@ static const InputOutputOperations usbOperations = {
 
 int
 AL_writeData( unsigned char *data, int len ) {
-  if (io->writeBytes(data, len, NULL) == len) return 1;
-  return 0;
+  return writeBytes(data, len, NULL);
 }
 
 static int
@@ -1856,11 +1860,14 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 
   if (from < to) {
     unsigned char cells[to - from - 1];
-    int index;
 
-    for (index=from; index<to; index++)
-      cells[index - from] = outputTable[(previousText[index] = brl->buffer[index])];
-    protocol->writeBraille(brl, cells, textOffset+from, to-from);
+    {
+      int index;
+      for (index=from; index<to; index++)
+        cells[index - from] = outputTable[(previousText[index] = brl->buffer[index])];
+    }
+
+    if (!protocol->writeBraille(brl, cells, textOffset+from, to-from)) return 0;
   }
   return 1;
 }
@@ -1869,11 +1876,14 @@ static int
 brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) {
   if (statusRewriteRequired || (memcmp(status, previousStatus, brl->statusColumns) != 0)) {
     unsigned char cells[brl->statusColumns];
-    int i;
 
-    for (i=0; i<brl->statusColumns; ++i)
-      cells[i] = outputTable[(previousStatus[i] = status[i])];
-    protocol->writeBraille(brl, cells, statusOffset, brl->statusColumns);
+    {
+      int i;
+      for (i=0; i<brl->statusColumns; ++i)
+        cells[i] = outputTable[(previousStatus[i] = status[i])];
+    }
+
+    if (!protocol->writeBraille(brl, cells, statusOffset, brl->statusColumns)) return 0;
     statusRewriteRequired = 0;
   }
 
