@@ -293,9 +293,10 @@ static unsigned char *previousStatus = NULL;
 static unsigned char textOffset;
 static unsigned char statusOffset;
 
-static int rewriteRequired = 0;
-static int rewriteInterval;
-static struct timeval rewriteTime;
+static int textRewriteRequired = 0;
+static int textRewriteInterval;
+static struct timeval textRewriteTime;
+static int statusRewriteRequired;
 
 static int
 readByte (unsigned char *byte, int wait) {
@@ -335,8 +336,8 @@ setDefaultConfiguration (BrailleDisplay *brl) {
   brl->statusRows = 1;
   brl->helpPage = model->helpPage;			/* initialise size of display */
 
-  rewriteRequired = 1;			/* To write whole display at first time */
-  gettimeofday(&rewriteTime, NULL);
+  textRewriteRequired = 1;			/* To write whole display at first time */
+  statusRewriteRequired = 1;
   return reallocateBuffers(brl);
 }
 
@@ -383,7 +384,8 @@ updateConfiguration (BrailleDisplay *brl, int autodetecting, int textColumns, in
     }
   }
 
-  rewriteRequired = 1;
+  textRewriteRequired = 1;
+  statusRewriteRequired = 1;
   return 1;
 }
 
@@ -1120,7 +1122,6 @@ readCommand1 (BrailleDisplay *brl, BRL_DriverCommandContext context) {
                 break;
               case KEY_CURSOR:
                 res = BRL_CMD_RETURN;
-                rewriteRequired = 1;	/* force rewrite of whole display */
                 break;
               case KEY_PROG:
                 res = BRL_CMD_HELP;
@@ -1615,7 +1616,7 @@ openSerialPort (char **parameters, const char *device) {
   if ((serialDevice = serialOpenDevice(device))) {
     if (serialRestartDevice(serialDevice, BAUDRATE)) {
       serialCharactersPerSecond = BAUDRATE / serialGetCharacterBits(serialDevice);
-      rewriteInterval = REWRITE_INTERVAL;
+      textRewriteInterval = REWRITE_INTERVAL;
       protocol = &protocol1Operations;
       return 1;
     }
@@ -1692,8 +1693,9 @@ openUsbPort (char **parameters, const char *device) {
     { .vendor=0 }
   };
 
-  rewriteInterval = 0;
   if ((usbChannel = usbFindChannel(definitions, (void *)device))) {
+    textRewriteInterval = 0;
+
     if (usbChannel->definition.outputEndpoint) {
       protocol = &protocol1Operations;
     } else {
@@ -1801,6 +1803,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     protocol->initializeVariables();
 
     if (protocol->detectModel(brl)) {
+      memset(&textRewriteTime, 0, sizeof(textRewriteTime));
       return 1;
     }
 
@@ -1829,18 +1832,18 @@ static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   int from, to;
 
-  if (rewriteInterval) {
+  if (textRewriteInterval) {
     struct timeval now;
     gettimeofday(&now, NULL);
-    if (millisecondsBetween(&rewriteTime, &now) > rewriteInterval) rewriteRequired = 1;
-    if (rewriteRequired) rewriteTime = now;
+    if (millisecondsBetween(&textRewriteTime, &now) > textRewriteInterval) textRewriteRequired = 1;
+    if (textRewriteRequired) textRewriteTime = now;
   }
 
-  if (rewriteRequired) {
+  if (textRewriteRequired) {
     /* We rewrite the whole display */
     from = 0;
     to = brl->textColumns;
-    rewriteRequired = 0;
+    textRewriteRequired = 0;
   } else {
     /* We update only the display part that has been changed */
     from = 0;
@@ -1864,13 +1867,14 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 
 static int
 brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) {
-  if (memcmp(status, previousStatus, brl->statusColumns) != 0) {
+  if (statusRewriteRequired || (memcmp(status, previousStatus, brl->statusColumns) != 0)) {
     unsigned char cells[brl->statusColumns];
     int i;
 
     for (i=0; i<brl->statusColumns; ++i)
       cells[i] = outputTable[(previousStatus[i] = status[i])];
     protocol->writeBraille(brl, cells, statusOffset, brl->statusColumns);
+    statusRewriteRequired = 0;
   }
 
   return 1;
