@@ -1806,41 +1806,29 @@ openUsbPort (const char *device) {
     { /* Alva BC640 */
       .vendor=0X0798, .product=0X0640,
       .configuration=1, .interface=0, .alternative=0,
-      .inputEndpoint=1, .outputEndpoint=0
+      .inputEndpoint=1, .outputEndpoint=0,
+      .data=&modelBC640
     }
     ,
     { /* Alva BC680 */
       .vendor=0X0798, .product=0X0680,
       .configuration=1, .interface=0, .alternative=0,
-      .inputEndpoint=1, .outputEndpoint=0
+      .inputEndpoint=1, .outputEndpoint=0,
+      .data=&modelBC680
     }
     ,
     { .vendor=0 }
   };
 
   if ((usbChannel = usbFindChannel(definitions, (void *)device))) {
-    textRewriteInterval = 0;
-
     if (usbChannel->definition.outputEndpoint) {
       protocol = &protocol1Operations;
     } else {
       protocol = &protocol2uOperations;
-
-      switch (usbChannel->definition.product) {
-        case 0X0640:
-          model = &modelBC640;
-          break;
-
-        case 0X0680:
-          model = &modelBC680;
-          break;
-
-        default:
-          model = NULL;
-          break;
-      }
     }
 
+    model = usbChannel->definition.data;
+    textRewriteInterval = 0;
     usbBeginInput(usbChannel->device, usbChannel->definition.inputEndpoint, 8);
     return 1;
   }
