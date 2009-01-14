@@ -300,7 +300,7 @@ static TranslationTable outputTable;
 static unsigned char *previousText = NULL;
 static unsigned char *previousStatus = NULL;
 
-static unsigned char cellCount;
+static unsigned char actualColumns;
 static unsigned char textOffset;
 static unsigned char statusOffset;
 
@@ -352,7 +352,7 @@ setDefaultConfiguration (BrailleDisplay *brl) {
   brl->statusRows = 1;
   brl->helpPage = model->helpPage;			/* initialise size of display */
 
-  cellCount = model->columns;
+  actualColumns = model->columns;
   statusOffset = 0;
   textOffset = statusOffset + model->statusCells;
   textRewriteRequired = 1;			/* To write whole display at first time */
@@ -365,10 +365,11 @@ updateConfiguration (BrailleDisplay *brl, int autodetecting, int textColumns, in
   int changed = 0;
   int separator = 0;
 
+  actualColumns = textColumns;
   if (statusType == STATUS_FIRST) {
     statusOffset = 0;
     textOffset = statusOffset + statusColumns;
-  } else if (statusColumns) {
+  } else if ((statusColumns = MIN(statusColumns, (actualColumns-1)/2))) {
     separator = 1;
     textColumns -= statusColumns + separator;
 
@@ -1300,6 +1301,7 @@ static const ProtocolOperations protocol1Operations = {
 static uint32_t firmwareVersion2;
 static unsigned long pressedKeys2;
 static unsigned long activeKeys2;
+static unsigned char splitOffset2;
 
 static void
 initializeVariables2 (void) {
@@ -1461,10 +1463,9 @@ interpretKeyEvent2 (BrailleDisplay *brl, int *command, unsigned char group, unsi
       unsigned char secondary = key & 0X80;
       key &= ~secondary;
 
-      if (firmwareVersion2 < 0X011102) {
-        int splitpoint = model->columns - cellCount;
-        if (key >= splitpoint) key -= splitpoint;
-      }
+      if (firmwareVersion2 < 0X011102)
+        if (key >= splitOffset2)
+          key -= splitOffset2;
 
       if (key >= textOffset) {
         if ((key -= textOffset) < brl->textColumns) {
@@ -1582,8 +1583,10 @@ updateConfiguration2s (BrailleDisplay *brl, int autodetecting, const unsigned ch
       unsigned char statusSide = buffer[3];
 
       if (updateConfiguration(brl, autodetecting, textColumns, statusColumns,
-                              (statusSide == 'R')? STATUS_RIGHT: STATUS_LEFT))
+                              (statusSide == 'R')? STATUS_RIGHT: STATUS_LEFT)) {
+        splitOffset2 = (model->columns == actualColumns)? 0: actualColumns+1;
         return 1;
+      }
     }
   }
 
@@ -1762,8 +1765,10 @@ updateConfiguration2u (BrailleDisplay *brl, int autodetecting, const unsigned ch
     if (length >= 7) textColumns = buffer[6];
 
     if (updateConfiguration(brl, autodetecting, textColumns, statusColumns,
-                            statusSide? STATUS_RIGHT: STATUS_LEFT))
+                            statusSide? STATUS_RIGHT: STATUS_LEFT)) {
+      splitOffset2 = model->columns - actualColumns;
       return 1;
+    }
   }
 
   return 0;
