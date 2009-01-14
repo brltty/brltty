@@ -2209,7 +2209,7 @@ activateBrailleDriver (int verify) {
 #ifdef ENABLE_BLUETOOTH_SUPPORT
       if (isBluetoothDevice(&dev)) {
         static const char *bluetoothDrivers[] = {
-          "ht", "bm",
+          "ht", "al", "bm",
           NULL
         };
         autodetectableDrivers = bluetoothDrivers;
