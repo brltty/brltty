@@ -276,13 +276,14 @@ typedef struct {
   int (*awaitInput) (int milliseconds);
   int (*readBytes) (unsigned char *buffer, int length, int wait);
   int (*writeBytes) (const unsigned char *buffer, int length, unsigned int *delay);
-  int (*getHidFeature) (unsigned char report, unsigned char *buffer, int length);
+  int (*getFeatureReport) (unsigned char report, unsigned char *buffer, int length);
 } InputOutputOperations;
 static const InputOutputOperations *io;
 
 typedef struct {
   void (*initializeVariables) (void);
   int (*readPacket) (unsigned char *packet, int size);
+  int (*updateConfiguration) (BrailleDisplay *brl, int autodetecting, const unsigned char *packet);
   int (*detectModel) (BrailleDisplay *brl);
   int (*readCommand) (BrailleDisplay *brl, BRL_DriverCommandContext context);
   int (*writeBraille) (BrailleDisplay *brl, const unsigned char *cells, int start, int count);
@@ -521,7 +522,7 @@ writeParameter1 (BrailleDisplay *brl, unsigned char parameter, unsigned char set
 }
 
 static int
-updateConfiguration1 (BrailleDisplay *brl, const unsigned char *packet, int autodetecting) {
+updateConfiguration1 (BrailleDisplay *brl, int autodetecting, const unsigned char *packet) {
   int textColumns = brl->textColumns;
   int statusColumns = brl->statusColumns;
   int count = PACKET_BYTE(packet, 0);
@@ -554,7 +555,7 @@ identifyModel1 (BrailleDisplay *brl, unsigned char identifier) {
           if (count == 0) continue;
 
           if ((packet[0] == 0X7F) && (packet[1] == 0X07)) {
-            updateConfiguration1(brl, packet, 1);
+            updateConfiguration1(brl, 1, packet);
             break;
           }
         }
@@ -751,7 +752,7 @@ getKey1 (BrailleDisplay *brl, unsigned int *Keys, unsigned int *Pos) {
     case 0X7F:
       switch (packet[1]) {
         case 0X07: /* text/status cells reconfigured */
-          if (!updateConfiguration1(brl, packet, 0)) return -1;
+          if (!updateConfiguration1(brl, 0, packet)) return -1;
           return 0;
 
         case 0X0B: { /* display parameters reconfigured */
@@ -1261,7 +1262,7 @@ writeBraille1 (BrailleDisplay *brl, const unsigned char *cells, int start, int c
 
 static const ProtocolOperations protocol1Operations = {
   initializeVariables1,
-  readPacket1, detectModel1,
+  readPacket1, updateConfiguration1, detectModel1,
   readCommand1, writeBraille1
 };
 
@@ -1304,28 +1305,6 @@ static void
 initializeVariables2 (void) {
   pressedKeys2 = 0;
   activeKeys2 = 0;
-}
-
-static int
-updateConfiguration2u (BrailleDisplay *brl, int autodetecting) {
-  unsigned char buffer[0X20];
-  int length = io->getHidFeature(0X05, buffer, sizeof(buffer));
-
-  if (length != -1) {
-    int textColumns = brl->textColumns;
-    int statusColumns = brl->statusColumns;
-    int statusSide = 0;
-
-    if (length >= 2) statusColumns = buffer[1];
-    if (length >= 3) statusSide = buffer[2];
-    if (length >= 7) textColumns = buffer[6];
-
-    if (updateConfiguration(brl, autodetecting, textColumns, statusColumns,
-                            statusSide? STATUS_RIGHT: STATUS_LEFT))
-      return 1;
-  }
-
-  return 0;
 }
 
 static int
@@ -1424,7 +1403,7 @@ interpretKeyEvent2 (BrailleDisplay *brl, int *command, unsigned char group, unsi
     case 0X01:
       switch (key) {
         case 0X01:
-          if (updateConfiguration2u(brl, 0)) return 0;
+          if (protocol->updateConfiguration(brl, 0, NULL)) return 0;
           *command = BRL_CMD_RESTARTBRL;
           return 1;
 
@@ -1484,12 +1463,7 @@ interpretKeyEvent2 (BrailleDisplay *brl, int *command, unsigned char group, unsi
 
       if (firmwareVersion2 < 0X011102) {
         int splitpoint = model->columns - cellCount;
-
-        if (key < splitpoint) {
-          key += cellCount;
-        } else {
-          key -= splitpoint;
-        }
+        if (key >= splitpoint) key -= splitpoint;
       }
 
       if (key >= textOffset) {
@@ -1597,15 +1571,15 @@ getAttributes2s (unsigned char item, unsigned char *packet, int size) {
 }
 
 static int
-updateConfiguration2s (BrailleDisplay *brl, int autodetecting) {
-  unsigned char packet[0X20];
+updateConfiguration2s (BrailleDisplay *brl, int autodetecting, const unsigned char *packet) {
+  unsigned char buffer[0X20];
 
-  if (getAttributes2s(0X45, packet, sizeof(packet))) {
-    unsigned char textColumns = packet[2];
+  if (getAttributes2s(0X45, buffer, sizeof(buffer))) {
+    unsigned char textColumns = buffer[2];
 
-    if (getAttributes2s(0X54, packet, sizeof(packet))) {
-      unsigned char statusColumns = packet[2];
-      unsigned char statusSide = packet[3];
+    if (getAttributes2s(0X54, buffer, sizeof(buffer))) {
+      unsigned char statusColumns = buffer[2];
+      unsigned char statusSide = buffer[3];
 
       if (updateConfiguration(brl, autodetecting, textColumns, statusColumns,
                               (statusSide == 'R')? STATUS_RIGHT: STATUS_LEFT))
@@ -1626,8 +1600,8 @@ identifyModel2s (BrailleDisplay *brl, unsigned char identifier) {
   unsigned char packet[0X20];
   const ModelEntry *const *modelEntry = models;
 
-  while (*modelEntry) {
-    if ((model = *modelEntry++)->identifier == identifier) {
+  while ((model = *modelEntry++)) {
+    if (model->identifier == identifier) {
       BRLSYMBOL.firmness = NULL;
 
       firmwareVersion2 = 0;
@@ -1637,7 +1611,7 @@ identifyModel2s (BrailleDisplay *brl, unsigned char identifier) {
         firmwareVersion2 |= (packet[6] <<  0);
 
         if (setDefaultConfiguration(brl)) {
-          if (updateConfiguration2s(brl, 1)) {
+          if (updateConfiguration2s(brl, 1, NULL)) {
             return 1;
           }
         }
@@ -1719,7 +1693,7 @@ writeBraille2s (BrailleDisplay *brl, const unsigned char *cells, int start, int 
 
 static const ProtocolOperations protocol2sOperations = {
   initializeVariables2,
-  readPacket2s, detectModel2s,
+  readPacket2s, updateConfiguration2s, detectModel2s,
   readCommand2s, writeBraille2s
 };
 
@@ -1774,12 +1748,34 @@ readPacket2u (unsigned char *packet, int size) {
 }
 
 static int
+updateConfiguration2u (BrailleDisplay *brl, int autodetecting, const unsigned char *packet) {
+  unsigned char buffer[0X20];
+  int length = io->getFeatureReport(0X05, buffer, sizeof(buffer));
+
+  if (length != -1) {
+    int textColumns = brl->textColumns;
+    int statusColumns = brl->statusColumns;
+    int statusSide = 0;
+
+    if (length >= 2) statusColumns = buffer[1];
+    if (length >= 3) statusSide = buffer[2];
+    if (length >= 7) textColumns = buffer[6];
+
+    if (updateConfiguration(brl, autodetecting, textColumns, statusColumns,
+                            statusSide? STATUS_RIGHT: STATUS_LEFT))
+      return 1;
+  }
+
+  return 0;
+}
+
+static int
 detectModel2u (BrailleDisplay *brl) {
   BRLSYMBOL.firmness = NULL;
 
   {
     unsigned char buffer[0X20];
-    int length = io->getHidFeature(0X09, buffer, sizeof(buffer));
+    int length = io->getFeatureReport(0X09, buffer, sizeof(buffer));
 
     firmwareVersion2 = 0;
     if (length >= 6) firmwareVersion2 |= (buffer[5] << 16);
@@ -1788,7 +1784,7 @@ detectModel2u (BrailleDisplay *brl) {
   }
 
   if (setDefaultConfiguration(brl))
-    if (updateConfiguration2u(brl, 1))
+    if (updateConfiguration2u(brl, 1, NULL))
       return 1;
 
   return 0;
@@ -1835,7 +1831,7 @@ writeBraille2u (BrailleDisplay *brl, const unsigned char *cells, int start, int 
 
 static const ProtocolOperations protocol2uOperations = {
   initializeVariables2,
-  readPacket2u,detectModel2u,
+  readPacket2u, updateConfiguration2u, detectModel2u,
   readCommand2u, writeBraille2u
 };
 
@@ -1885,7 +1881,7 @@ writeSerialBytes (const unsigned char *buffer, int length, unsigned int *delay) 
 }
 
 static int
-getSerialHidFeature (unsigned char report, unsigned char *buffer, int length) {
+getSerialFeatureReport (unsigned char report, unsigned char *buffer, int length) {
   errno = ENOSYS;
   return -1;
 }
@@ -1893,7 +1889,7 @@ getSerialHidFeature (unsigned char report, unsigned char *buffer, int length) {
 static const InputOutputOperations serialOperations = {
   openSerialPort, closeSerialPort,
   awaitSerialInput, readSerialBytes, writeSerialBytes,
-  getSerialHidFeature
+  getSerialFeatureReport
 };
 
 #ifdef ENABLE_USB_SUPPORT
@@ -1986,14 +1982,14 @@ writeUsbBytes (const unsigned char *buffer, int length, unsigned int *delay) {
 }
 
 static int
-getUsbHidFeature (unsigned char report, unsigned char *buffer, int length) {
+getUsbFeatureReport (unsigned char report, unsigned char *buffer, int length) {
   return usbHidGetFeature(usbChannel->device, usbChannel->definition.interface, report, buffer, length, 1000);
 }
 
 static const InputOutputOperations usbOperations = {
   openUsbPort, closeUsbPort,
   awaitUsbInput, readUsbBytes, writeUsbBytes,
-  getUsbHidFeature
+  getUsbFeatureReport
 };
 #endif /* ENABLE_USB_SUPPORT */
 
@@ -2006,7 +2002,13 @@ static int bluetoothConnection = -1;
 
 static int
 openBluetoothPort (const char *device) {
-  return (bluetoothConnection = btOpenConnection(device, 1, 0)) != -1;
+  if ((bluetoothConnection = btOpenConnection(device, 1, 0)) != -1) {
+    textRewriteInterval = REWRITE_INTERVAL;
+    protocol = &protocol2sOperations;
+    return 1;
+  }
+
+  return 0;
 }
 
 static void
@@ -2043,7 +2045,7 @@ writeBluetoothBytes (const unsigned char *buffer, int length, unsigned int *dela
 }
 
 static int
-getBluetoothHidFeature (unsigned char report, unsigned char *buffer, int length) {
+getBluetoothFeatureReport (unsigned char report, unsigned char *buffer, int length) {
   errno = ENOSYS;
   return -1;
 }
@@ -2051,7 +2053,7 @@ getBluetoothHidFeature (unsigned char report, unsigned char *buffer, int length)
 static const InputOutputOperations bluetoothOperations = {
   openBluetoothPort, closeBluetoothPort,
   awaitBluetoothInput, readBluetoothBytes, writeBluetoothBytes,
-  getBluetoothHidFeature
+  getBluetoothFeatureReport
 };
 #endif /* ENABLE_BLUETOOTH_SUPPORT */
 
@@ -2080,7 +2082,6 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 #ifdef ENABLE_BLUETOOTH_SUPPORT
   if (isBluetoothDevice(&device)) {
     io = &bluetoothOperations;
-    protocol = &protocol2sOperations;
   } else
 #endif /* ENABLE_BLUETOOTH_SUPPORT */
 
