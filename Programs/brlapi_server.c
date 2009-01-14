@@ -1718,7 +1718,7 @@ static FileDescriptor initializeLocalSocket(struct socketInfo *info)
     }
     if ((pid = readPid(tmppath)) && pid != getpid()
 	&& (kill(pid, 0) != -1 || errno != ESRCH)) {
-      LogPrint(LOG_ERR,"a BrlAPI server is already listening on %s (file %s exists)",info->port, tmppath);
+      LogPrint(LOG_ERR,"another BrlAPI server is already listening on %s (file %s exists)",info->port, tmppath);
       goto outmode;
     }
     /* bogus file, myself or non-existent process, remove */
@@ -1760,7 +1760,7 @@ static FileDescriptor initializeLocalSocket(struct socketInfo *info)
     /* failed to link */
     if ((pid = readPid(lockpath)) && pid != getpid()
 	&& (kill(pid, 0) != -1 || errno != ESRCH)) {
-      LogPrint(LOG_ERR,"a BrlAPI server is already listening on %s (file %s exists)",info->port, lockpath);
+      LogPrint(LOG_ERR,"another BrlAPI server is already listening on %s (file %s exists)",info->port, lockpath);
       goto outtmp;
     }
     /* bogus file, myself or non-existent process, remove */
