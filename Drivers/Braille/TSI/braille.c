@@ -489,7 +489,6 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
 #endif /* HIGHBAUD */
 
   charactersPerSecond = serialBaud / serialGetCharacterBits(serialDevice);
-  slow_update = 0;
 
   /* Mark time of last command to initialize typematic watch */
   gettimeofday (&last_ping, NULL);
@@ -606,35 +605,8 @@ display (BrailleDisplay *brl,
   {
     int count = DIM_BRL_SEND + 2 * length;
     serialWriteData (serialDevice, rawdata, count);
-    brl->writeDelay += (count * 1000 / charactersPerSecond) + 1;
+    brl->writeDelay += (count * 1000 / charactersPerSecond) + (slow_update * 20);
   }
-
-  /* First a drain after the write helps make sure we don't fill up the
-     buffer with info that will be overwritten immediately. This is not needed
-     on pb40, but it might be good on nav40 (which runs only at 9600bps).
-
-     Then for pb80 (and probably also needed for nav80 though untested) as
-     well as for some TSI emulators we add a supplementary delay: drain
-     probably waits until the bytes are in the UART, but we still need a few
-     ms to send them out.  This delay will combine with the sleep for this
-     BRLTTY cycle (delay in the main program loop of 40ms).  Keeping the delay
-     in the main brltty loop low keeps the response time good, but SEND_DELAY
-     gives the display time to show what we're sending.
-
-     I found experimentally that a delay of 30ms seems best (at least for
-     pb80). A longer delay, or using approximateDelay() instead of
-     accurateDelay() is too much. This makes the pb a little bit sluggish,
-     but prevents any communication problems. */
-
-  switch(slow_update){
-  /* 0 does nothing */
-  case 1: /* nav 40 */
-    serialDrainOutput(serialDevice); break;
-  case 2: /* nav80, pb80, some emulators */
-    serialDrainOutput(serialDevice);
-    accurateDelay(SEND_DELAY);
-    break;
-  };
 }
 
 static void 
