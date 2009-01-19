@@ -735,7 +735,7 @@ int
 usbReadDeviceDescriptor (UsbDevice *device) {
   UsbDeviceExtension *devx = device->extension;
   int file = -1;
-  int sysfs;
+  int sysfs = 0;
 
   if (devx->sysfsPath) {
     if (file == -1) {
@@ -754,7 +754,6 @@ usbReadDeviceDescriptor (UsbDevice *device) {
   if (file == -1) {
     if (usbOpenUsbfsFile(devx)) {
       file = devx->usbfsFile;
-      sysfs = 0;
     }
   }
 
