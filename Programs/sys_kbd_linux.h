@@ -828,9 +828,11 @@ getKobjectUeventSocket (void) {
 
   return netlinkSocket;
 }
+#endif /* NETLINK_KOBJECT_UEVENT */
 
 static int
 monitorKeyboardAdditions (KeyboardCommonData *kcd) {
+#ifdef NETLINK_KOBJECT_UEVENT
   int kobjectEventSocket = getKobjectUeventSocket();
 
   if (kobjectEventSocket != -1) {
@@ -841,10 +843,10 @@ monitorKeyboardAdditions (KeyboardCommonData *kcd) {
 
     close(kobjectEventSocket);
   }
+#endif /* NETLINK_KOBJECT_UEVENT */
 
   return 0;
 }
-#endif /* NETLINK_KOBJECT_UEVENT */
 #endif /* HAVE_LINUX_INPUT_H */
 
 int
@@ -857,12 +859,9 @@ startKeyboardMonitor (const KeyboardProperties *properties, KeyEventHandler hand
       memset(kcd, 0, sizeof(*kcd));
       kcd->handleKeyEvent = handleKeyEvent;
       kcd->requiredProperties = *properties;
+
       monitorCurrentKeyboards(kcd);
-
-#ifdef NETLINK_KOBJECT_UEVENT
       monitorKeyboardAdditions(kcd);
-#endif /* NETLINK_KOBJECT_UEVENT */
-
       return 1;
     }
   }
