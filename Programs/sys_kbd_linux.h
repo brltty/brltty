@@ -711,6 +711,7 @@ monitorCurrentKeyboards (KeyboardCommonData *kcd) {
   LogPrint(LOG_DEBUG, "keyboard search complete");
 }
 
+#ifdef NETLINK_KOBJECT_UEVENT
 typedef struct {
   char *name;
   int major;
@@ -843,6 +844,7 @@ monitorKeyboardAdditions (KeyboardCommonData *kcd) {
 
   return 0;
 }
+#endif /* NETLINK_KOBJECT_UEVENT */
 #endif /* HAVE_LINUX_INPUT_H */
 
 int
@@ -855,9 +857,12 @@ startKeyboardMonitor (const KeyboardProperties *properties, KeyEventHandler hand
       memset(kcd, 0, sizeof(*kcd));
       kcd->handleKeyEvent = handleKeyEvent;
       kcd->requiredProperties = *properties;
-
       monitorCurrentKeyboards(kcd);
+
+#ifdef NETLINK_KOBJECT_UEVENT
       monitorKeyboardAdditions(kcd);
+#endif /* NETLINK_KOBJECT_UEVENT */
+
       return 1;
     }
   }
