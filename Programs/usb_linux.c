@@ -898,9 +898,9 @@ usbSearchUsbfs (const char *root, UsbDeviceChooser chooser, void *data) {
           devx->sysfsPath = NULL;
 
           if ((devx->usbfsPath = strdup(path))) {
-            if (usbMakeSysfsPath(devx)) {
-              if ((device = usbTestDevice(devx, chooser, data))) break;
-            }
+            usbMakeSysfsPath(devx);
+
+            if ((device = usbTestDevice(devx, chooser, data))) break;
           }
 
           usbDeallocateDeviceExtension(devx);
