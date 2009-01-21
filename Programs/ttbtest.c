@@ -149,17 +149,17 @@ writeCharacters (FILE *file, TextTableData *ttd, CharacterWriter writer, void *d
 
       if (groupOffset) {
         const UnicodeGroupEntry *group = getTextTableItem(ttd, groupOffset);
-        unsigned int plainNumber;
+        unsigned int planeNumber;
 
-        for (plainNumber=0; plainNumber<UNICODE_PLAINS_PER_GROUP; plainNumber+=1) {
-          TextTableOffset plainOffset = group->plains[plainNumber];
+        for (planeNumber=0; planeNumber<UNICODE_PLANES_PER_GROUP; planeNumber+=1) {
+          TextTableOffset planeOffset = group->planes[planeNumber];
 
-          if (plainOffset) {
-            const UnicodePlainEntry *plain = getTextTableItem(ttd, plainOffset);
+          if (planeOffset) {
+            const UnicodePlaneEntry *plane = getTextTableItem(ttd, planeOffset);
             unsigned int rowNumber;
 
-            for (rowNumber=0; rowNumber<UNICODE_ROWS_PER_PLAIN; rowNumber+=1) {
-              TextTableOffset rowOffset = plain->rows[rowNumber];
+            for (rowNumber=0; rowNumber<UNICODE_ROWS_PER_PLANE; rowNumber+=1) {
+              TextTableOffset rowOffset = plane->rows[rowNumber];
 
               if (rowOffset) {
                 const UnicodeRowEntry *row = getTextTableItem(ttd, rowOffset);
@@ -167,7 +167,7 @@ writeCharacters (FILE *file, TextTableData *ttd, CharacterWriter writer, void *d
 
                 for (cellNumber=0; cellNumber<UNICODE_CELLS_PER_ROW; cellNumber+=1) {
                   if (BITMASK_TEST(row->defined, cellNumber)) {
-                    wchar_t character = UNICODE_CHARACTER(groupNumber, plainNumber, rowNumber, cellNumber);
+                    wchar_t character = UNICODE_CHARACTER(groupNumber, planeNumber, rowNumber, cellNumber);
 
                     if (*opt_charset)
                       if (convertWcharToChar(character) != EOF)
@@ -960,17 +960,17 @@ findCharacter (EditTableData *etd, int backward) {
     } while ((counter -= 1) >= 0);
   } else {
     const int groupLimit = backward? 0: UNICODE_GROUP_MAXIMUM;
-    const int plainLimit = backward? 0: UNICODE_PLAIN_MAXIMUM;
+    const int planeLimit = backward? 0: UNICODE_PLANE_MAXIMUM;
     const int rowLimit = backward? 0: UNICODE_ROW_MAXIMUM;
     const int cellLimit = backward? 0: UNICODE_CELL_MAXIMUM;
 
     const int groupReset = UNICODE_GROUP_MAXIMUM - groupLimit;
-    const int plainReset = UNICODE_PLAIN_MAXIMUM - plainLimit;
+    const int planeReset = UNICODE_PLANE_MAXIMUM - planeLimit;
     const int rowReset = UNICODE_ROW_MAXIMUM - rowLimit;
     const int cellReset = UNICODE_CELL_MAXIMUM - cellLimit - increment;
 
     int groupNumber = UNICODE_GROUP_NUMBER(etd->character.unicode);
-    int plainNumber = UNICODE_PLAIN_NUMBER(etd->character.unicode);
+    int planeNumber = UNICODE_PLANE_NUMBER(etd->character.unicode);
     int rowNumber = UNICODE_ROW_NUMBER(etd->character.unicode);
     int cellNumber = UNICODE_CELL_NUMBER(etd->character.unicode);
 
@@ -984,13 +984,13 @@ findCharacter (EditTableData *etd, int backward) {
         const UnicodeGroupEntry *group = getTextTableItem(etd->ttd, groupOffset);
 
         while (1) {
-          TextTableOffset plainOffset = group->plains[plainNumber];
+          TextTableOffset planeOffset = group->planes[planeNumber];
 
-          if (plainOffset) {
-            const UnicodePlainEntry *plain = getTextTableItem(etd->ttd, plainOffset);
+          if (planeOffset) {
+            const UnicodePlaneEntry *plane = getTextTableItem(etd->ttd, planeOffset);
 
             while (1) {
-              TextTableOffset rowOffset = plain->rows[rowNumber];
+              TextTableOffset rowOffset = plane->rows[rowNumber];
 
               if (rowOffset) {
                 const UnicodeRowEntry *row = getTextTableItem(etd->ttd, rowOffset);
@@ -999,7 +999,7 @@ findCharacter (EditTableData *etd, int backward) {
                   cellNumber += increment;
 
                   if (BITMASK_TEST(row->defined, cellNumber)) {
-                    etd->character.unicode = UNICODE_CHARACTER(groupNumber, plainNumber, rowNumber, cellNumber);
+                    etd->character.unicode = UNICODE_CHARACTER(groupNumber, planeNumber, rowNumber, cellNumber);
                     return 1;
                   }
                 }
@@ -1015,12 +1015,12 @@ findCharacter (EditTableData *etd, int backward) {
           rowNumber = rowReset;
           cellNumber = cellReset;
 
-          if (plainNumber == plainLimit) break;
-          plainNumber += increment;
+          if (planeNumber == planeLimit) break;
+          planeNumber += increment;
         }
       }
 
-      plainNumber = plainReset;
+      planeNumber = planeReset;
       rowNumber = rowReset;
       cellNumber = cellReset;
 

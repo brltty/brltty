@@ -48,12 +48,12 @@ getUnicodeGroupEntry (TextTable *table, wchar_t character) {
   return NULL;
 }
 
-static const UnicodePlainEntry *
-getUnicodePlainEntry (TextTable *table, wchar_t character) {
+static const UnicodePlaneEntry *
+getUnicodePlaneEntry (TextTable *table, wchar_t character) {
   const UnicodeGroupEntry *group = getUnicodeGroupEntry(table, character);
 
   if (group) {
-    TextTableOffset offset = group->plains[UNICODE_PLAIN_NUMBER(character)];
+    TextTableOffset offset = group->planes[UNICODE_PLANE_NUMBER(character)];
     if (offset) return getTextTableItem(table, offset);
   }
 
@@ -62,10 +62,10 @@ getUnicodePlainEntry (TextTable *table, wchar_t character) {
 
 static const UnicodeRowEntry *
 getUnicodeRowEntry (TextTable *table, wchar_t character) {
-  const UnicodePlainEntry *plain = getUnicodePlainEntry(table, character);
+  const UnicodePlaneEntry *plane = getUnicodePlaneEntry(table, character);
 
-  if (plain) {
-    TextTableOffset offset = plain->rows[UNICODE_ROW_NUMBER(character)];
+  if (plane) {
+    TextTableOffset offset = plane->rows[UNICODE_ROW_NUMBER(character)];
     if (offset) return getTextTableItem(table, offset);
   }
 

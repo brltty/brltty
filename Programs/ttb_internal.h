@@ -42,11 +42,11 @@ typedef struct {
 } UnicodeRowEntry;
 
 typedef struct {
-  TextTableOffset rows[UNICODE_ROWS_PER_PLAIN];
-} UnicodePlainEntry;
+  TextTableOffset rows[UNICODE_ROWS_PER_PLANE];
+} UnicodePlaneEntry;
 
 typedef struct {
-  TextTableOffset plains[UNICODE_PLAINS_PER_GROUP];
+  TextTableOffset planes[UNICODE_PLANES_PER_GROUP];
 } UnicodeGroupEntry;
 
 typedef struct {

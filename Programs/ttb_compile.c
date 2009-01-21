@@ -60,38 +60,38 @@ getUnicodeGroupOffset (TextTableData *ttd, wchar_t character, int allocate) {
 }
 
 static DataOffset
-getUnicodePlainOffset (TextTableData *ttd, wchar_t character, int allocate) {
+getUnicodePlaneOffset (TextTableData *ttd, wchar_t character, int allocate) {
   DataOffset groupOffset = getUnicodeGroupOffset(ttd, character, allocate);
   if (!groupOffset) return 0;
 
   {
     UnicodeGroupEntry *group = getDataItem(ttd->area, groupOffset);
-    unsigned int plainNumber = UNICODE_PLAIN_NUMBER(character);
-    DataOffset plainOffset = group->plains[plainNumber];
+    unsigned int planeNumber = UNICODE_PLANE_NUMBER(character);
+    DataOffset planeOffset = group->planes[planeNumber];
 
-    if (!plainOffset && allocate) {
-      if (!allocateDataItem(ttd->area, &plainOffset, 
-                            sizeof(UnicodePlainEntry),
-                            __alignof__(UnicodePlainEntry)))
+    if (!planeOffset && allocate) {
+      if (!allocateDataItem(ttd->area, &planeOffset, 
+                            sizeof(UnicodePlaneEntry),
+                            __alignof__(UnicodePlaneEntry)))
         return 0;
 
       group = getDataItem(ttd->area, groupOffset);
-      group->plains[plainNumber] = plainOffset;
+      group->planes[planeNumber] = planeOffset;
     }
 
-    return plainOffset;
+    return planeOffset;
   }
 }
 
 static DataOffset
 getUnicodeRowOffset (TextTableData *ttd, wchar_t character, int allocate) {
-  DataOffset plainOffset = getUnicodePlainOffset(ttd, character, allocate);
-  if (!plainOffset) return 0;
+  DataOffset planeOffset = getUnicodePlaneOffset(ttd, character, allocate);
+  if (!planeOffset) return 0;
 
   {
-    UnicodePlainEntry *plain = getDataItem(ttd->area, plainOffset);
+    UnicodePlaneEntry *plane = getDataItem(ttd->area, planeOffset);
     unsigned int rowNumber = UNICODE_ROW_NUMBER(character);
-    DataOffset rowOffset = plain->rows[rowNumber];
+    DataOffset rowOffset = plane->rows[rowNumber];
 
     if (!rowOffset && allocate) {
       if (!allocateDataItem(ttd->area, &rowOffset, 
@@ -99,8 +99,8 @@ getUnicodeRowOffset (TextTableData *ttd, wchar_t character, int allocate) {
                             __alignof__(UnicodeRowEntry)))
         return 0;
 
-      plain = getDataItem(ttd->area, plainOffset);
-      plain->rows[rowNumber] = rowOffset;
+      plane = getDataItem(ttd->area, planeOffset);
+      plane->rows[rowNumber] = rowOffset;
     }
 
     return rowOffset;
