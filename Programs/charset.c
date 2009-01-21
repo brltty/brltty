@@ -218,9 +218,6 @@ static const CharacterSet characterSets[] = {
 };
 static const CharacterSet *characterSet;
 
-#define UNICODE_ROWS_PER_PLANE 0X100
-#define UNICODE_CELLS_PER_ROW 0X100
-
 static char *unicodeRows[UNICODE_ROWS_PER_PLANE];
 
 static void
