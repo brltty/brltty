@@ -108,8 +108,13 @@ extern void formatInputError (
 );
 
 #ifdef __MINGW32__
+#if (__MINGW32_MAJOR_VERSION < 3) || ((__MINGW32_MAJOR_VERSION == 3) && (__MINGW32_MINOR_VERSION < 10))
 extern int gettimeofday (struct timeval *tvp, void *tzp);
+#endif /* gettimeofday */
+
+#if (__MINGW32_MAJOR_VERSION < 3) || ((__MINGW32_MAJOR_VERSION == 3) && (__MINGW32_MINOR_VERSION < 15))
 extern void usleep (int usec);
+#endif /* usleep */
 #endif /* __MINGW32__ */
 
 extern void approximateDelay (int milliseconds);		/* sleep for `msec' milliseconds */

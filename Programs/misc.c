@@ -853,12 +853,14 @@ gettimeofday (struct timeval *tvp, void *tzp) {
 }
 #endif /* gettimeofday */
 
+#if (__MINGW32_MAJOR_VERSION < 3) || ((__MINGW32_MAJOR_VERSION == 3) && (__MINGW32_MINOR_VERSION < 15))
 void
 usleep (int usec) {
   if (usec > 0) {
     approximateDelay((usec+999)/1000);
   }
 }
+#endif /* usleep */
 #endif /* __MINGW32__ */
 
 long int
