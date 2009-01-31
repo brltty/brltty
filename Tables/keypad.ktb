@@ -61,3 +61,9 @@ bind KPPlus+KPArrowRight NxDifChar
 bind KPMinus+KP5 PrefMenu
 bind KPMinus+KPArrowLeft PrefLoad
 bind KPMinus+KPArrowRight PrefSave
+bind KPMinus+KPArrowUp WinUp
+bind KPMinus+KPArrowDown WinDn
+bind KPMinus+KP7 Help
+bind KPMinus+KP9 Learn
+bind KPMinus+KP1 RestartBrl
+bind KPMinus+KP3 RestartSpeech
