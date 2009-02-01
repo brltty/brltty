@@ -1445,7 +1445,12 @@ serialOpenDevice (const char *path) {
         close(serial->fileDescriptor);
 #endif /* __MINGW32__ */
       } else {
+#ifdef __MINGW32__
+        LogWindowsError("CreateFile");
+        LogPrint(LOG_ERR, "cannot open serial device: %s", device);
+#else /* __MINGW32__ */
         LogPrint(LOG_ERR, "cannot open serial device: %s: %s", device, strerror(errno));
+#endif /* __MINGW32__ */
       }
 
       free(device);
