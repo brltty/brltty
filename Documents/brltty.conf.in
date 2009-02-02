@@ -369,6 +369,7 @@
 # The key-table directive specifies which key table to use. Relative paths are
 # anchored at "@DATA_DIRECTORY@". If not specified, no key table is used.
 # (can be overridden with the -k [--key-table=] option)
+#key-table	desktop	#
 #key-table	keypad	#
 #key-table	laptop	#
 
