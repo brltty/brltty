@@ -19,6 +19,18 @@
 # Special Chinese dictions
 # This is included by zh-tw.ctb
 
+always	\u8655\u5883	12-34-4-13-13456-5
+always	\u76F8\u8655	15-46-3-12-34-4
+always	\u683D\u7A2E	125-23456-3-1-12346-5
+always	\u7A2E\u690D	1-12346-5-1-156-2
+always	\u5171\u8655	13-12346-5-12-34-4
+always	\u7E2C\u91CF	245-2346-5-14-46-2
+always	\u5354\u8ABF	15-346-2-124-246-2
+always	\u8ABF\u7BC0	124-246-2-13-346-2
+always	\u7F79\u96E3	14-16-2-1345-1236-5
+always	\u53EF\u6578	123-2346-4-24-34-4
+always	\u5931\u8ABF	24-156-3-124-246-2
+always	\u8A55\u91CF	1234-13456-2-14-46-2
 always	\u6536\u85CF	24-12356-3-245-1346-2
 always	\u820D\u68C4	24-2346-4-245-16-5
 always	\u860A\u85CF	256-5-245-1346-2
@@ -159,7 +171,7 @@ always	\u5047\u671F	13-23456-5-245-16-2
 always	\u504F\u597D	1234-2345-3-1235-146-5
 always	\u5065\u5C07	13-2345-5-13-46-5
 always	\u5085\u8AAA	12345-34-5-236-5
-always	\u50A2\u4F19	13-23456-3-1235-3-1
+always	\u50A2\u4F19	13-23456-3-1235-25-1
 always	\u50B3\u8A18	1-12456-5-13-16-5
 always	\u50D5\u5C04	1234-34-2-346-5
 always	\u50D5\u5F9E	1234-34-2-125-12346-5
