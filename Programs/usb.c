@@ -238,7 +238,9 @@ usbGetConfiguration (
   int size = usbControlRead(device, UsbControlRecipient_Device, UsbControlType_Standard,
                             UsbStandardRequest_GetConfiguration, 0, 0,
                             configuration, sizeof(*configuration), 1000);
-  return size;
+  if (size != -1) return 1;
+  LogPrint(LOG_WARNING, "USB standard request not supported: get configuration");
+  return 0;
 }
 
 static void
@@ -256,7 +258,7 @@ usbConfigurationDescriptor (
   if (!device->configuration) {
     unsigned char configuration;
 
-    if (usbGetConfiguration(device, &configuration) != -1) {
+    if (usbGetConfiguration(device, &configuration)) {
       UsbDescriptor descriptor;
       unsigned char number;
 
@@ -310,19 +312,20 @@ usbConfigureDevice (
 ) {
   usbCloseInterface(device);
 
+  if (usbSetConfiguration(device, configuration)) {
+    usbDeallocateConfigurationDescriptor(device);
+    return 1;
+  }
+
   {
     unsigned char currentConfiguration;
 
-    if (usbGetConfiguration(device, &currentConfiguration) != -1) {
-      if (currentConfiguration == configuration) return 1;
-    } else {
-      LogPrint(LOG_WARNING, "USB standard request not supported: get configuration");
-    }
+    if (usbGetConfiguration(device, &currentConfiguration))
+      if (currentConfiguration == configuration)
+        return 1;
   }
 
-  if (!usbSetConfiguration(device, configuration)) return 0;
-  usbDeallocateConfigurationDescriptor(device);
-  return 1;
+  return 0;
 }
 
 int
