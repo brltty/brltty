@@ -1,4 +1,4 @@
-Braille Sense Help
+Help for All Models
 
 General Navigation:
 F4: go to cursor

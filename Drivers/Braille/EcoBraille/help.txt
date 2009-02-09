@@ -1,4 +1,4 @@
-BRLTTY Help Screen (EcoBraille)
+Help for All Models (English)
 From left to right, front keys are:
   UP   LEFT   CLICK   RIGHT   DOWN
 

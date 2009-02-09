@@ -1,4 +1,4 @@
-Braille Note Commands
+Help for All Models (commands)
 
 Design Considerations:
 Common navigations can be made with the four thumb keys on the front surface. They're named (from left to right): Previous, Back, Advance, Next.

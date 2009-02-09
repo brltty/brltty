@@ -1,4 +1,4 @@
-Help Screen for Alva ABT and Delphi models
+Help for ABT and Delphi Models
 From left to right, front keys are:
 PROG HOME CURSOR   UP  LEFT  RIGHT  DOWN
 

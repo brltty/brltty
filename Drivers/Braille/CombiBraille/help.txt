@@ -1,4 +1,4 @@
-BRLTTY Help Screen (CombiBraille)
+Help for All Models
 
 Movement keys:
 321     (BC) top of screen

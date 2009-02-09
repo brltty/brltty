@@ -1,4 +1,4 @@
-Help Screen for Alva Satellite Models
+Help for Satellite Models
 From left to right, the front keys are: Home Left Up Down Right Cursor
 The left Satellite keypad is for speech functions.
 The right Satellite keypad is for braille functions.

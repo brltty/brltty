@@ -1,4 +1,4 @@
----BRLTTY MDV Key Bindings help---
+Help for All Models
 
 "CR#" means cursor routing key over text cell number #.
 

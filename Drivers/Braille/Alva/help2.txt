@@ -1,4 +1,4 @@
-Help Screen for Alva BC Models
+Help for Braille Controller Models
 
 Legend:
 th1-th5: thumb keys

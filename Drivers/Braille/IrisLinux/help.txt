@@ -1,4 +1,4 @@
-BRLTTY Help Screen for EuroBRAILLE-Iris embedded Linux driver.
+Help for All Models
 
 To enter in the Learn-Mode, click on the "I Z" cell to enter in the 
 internal

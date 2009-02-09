@@ -1,4 +1,4 @@
-Ecran d'aide pour VisioBraille (~~a pour sortir de l'aide)
+Help for All Models
 
 Les touches du clavier auxiliaire s'utilisent comme sous DOS/Windows.
 Les opérations de changement de mode d'affichage (6-8 points), de simulation de

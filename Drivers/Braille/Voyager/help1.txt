@@ -1,4 +1,4 @@
----BRLTTY Voyager 70 Help Screen---
+Help for 70-cell Models
 
 Key Names:
   Front Panel Keys:

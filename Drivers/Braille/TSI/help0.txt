@@ -1,4 +1,4 @@
----BRLTTY Navigator 20/40 Help Screen---
+Help for Navigator 20/40
 
 "L-" means left keypad and "R-" mean right keypad
   (as in "Rdn" which means the "down" button from the right keypad).

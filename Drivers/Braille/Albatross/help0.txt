@@ -1,4 +1,4 @@
-BRLTTY Help Screen for Albatross models
+Help for All Models
 
 Front Keys:
 Top     go to top-left corner

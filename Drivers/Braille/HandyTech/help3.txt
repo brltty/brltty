@@ -1,4 +1,4 @@
-BRLTTY Help for Handy Tech Braille Star 80 Display
+Help for Braille Star 80
 
 There are two navigation keys, one at the left end and one at the right end of
 the braille line. Each has a top, middle, and bottom position. These six

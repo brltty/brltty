@@ -1,4 +1,4 @@
-Help for Baum Displays with VarioKeys=yes
+Help for All Models (with VarioKeys=yes)
 (for users familiar with BRLTTY's old Vario driver)
 
 TL2/TR2: go left/right one window

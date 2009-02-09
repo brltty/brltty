@@ -1,4 +1,4 @@
-BRLTTY Help Screen (MultiBraille)
+Help for All Models
 
 Movement keys:
 321          top of screen

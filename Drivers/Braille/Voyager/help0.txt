@@ -1,4 +1,4 @@
----BRLTTY Voyager 44 Help Screen---
+Help for 44-cell Models
 
 Key Names:
   Front Panel Keys:

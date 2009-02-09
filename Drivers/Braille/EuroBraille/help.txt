@@ -1,4 +1,4 @@
-BRLTTY help screen for EuroBraille terminals 
+Help for All Models
       Driver developped by Yannick PLASSIARD and Olivier BERT
 
 To enter in the Learn-Mode press Layer1 key (alpha or # or FG+FB) depending

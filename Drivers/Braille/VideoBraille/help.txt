@@ -1,4 +1,4 @@
-BRLTTY Help Screen (VideoBraille)
+Help for All Models
 
 Movement keys:
     Up  Up one line

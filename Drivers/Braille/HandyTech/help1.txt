@@ -1,4 +1,4 @@
-BRLTTY Help for Handy Tech Bookworm Display
+Help for Bookworm
 
 Screen Review Keys:
 bak: left one window

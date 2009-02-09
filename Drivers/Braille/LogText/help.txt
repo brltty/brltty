@@ -1,4 +1,4 @@
-LogText hjælp
+Help for All Models (Danish)
 
 Specielle kommandoer til brltty startes med dot 37,
 efterfulgt af nedenstående koder.

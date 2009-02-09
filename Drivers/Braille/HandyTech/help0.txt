@@ -1,4 +1,4 @@
-BRLTTY Help for Handy Tech Modular Displays
+Help for Modular Models
 From left to right, the front keys are: B1 B2 B3 B4 UP DN B5 B6 B7 B8
 
 Movement Commands:

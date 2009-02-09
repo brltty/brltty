@@ -1,4 +1,4 @@
----BRLTTY PowerBraille 40 Help Screen---
+Help for PowerBraille 40
 
 "Lup" / "Ldn" means left rocker up/down. "Rup" / "Rdn" for the right rocker.
 "lt" is the left top square button, "rt" is the right button.

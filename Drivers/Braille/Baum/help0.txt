@@ -1,4 +1,4 @@
-Help for Baum Displays
+Help for All Models (with VarioKeys=no)
 
 TL2/TR2: go left/right one window
 TL1+TL3 / TR1+TR3: go left/right one character

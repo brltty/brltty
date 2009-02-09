@@ -1,4 +1,4 @@
-Ayuda de BRLTTY (EcoBraille)
+Help for All Models (Spanish)
 Teclado frontal de izquierda a derecha
   ARRIBA   IZQUIERDA   CENTRO   DERECHA   ABAJO
 
