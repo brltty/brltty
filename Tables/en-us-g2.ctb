@@ -21,6 +21,7 @@
 
 class vowel aeiouyAEIOUY
 class consonent bcdfghjklmnpqrstvwxzBCDFGHJKLMNPQRSTVWXZ
+class o oO
 
 numsign 3456  number sign, just one operand
 letsign 56
@@ -298,6 +299,8 @@ sufword disk =
 sufword dispirit 145-24-456-234 dispirited
 begword disul = disulfide
 word do 145
+before o begword dogg =
+word doggo 145-135-2356-135
 sufword doolittle =
 always dumb = dumbbell
 
