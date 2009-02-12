@@ -148,6 +148,7 @@ ServiceBinary  = %12%\libusb0.sys
 "LibUsb-Win32 Braille Sense"=LIBUSB_DEV, USB\VID_045E&PID_930A
 
 "LibUsb-Win32 EuroBraille ESYS 12/40"=LIBUSB_DEV, USB\VID_C251&PID_1122
+"LibUsb-Win32 EuroBraille ESYS 12/40"=LIBUSB_DEV, USB\VID_C251&PID_1124
 
 "LibUsb-Win32 FreedomScientific Focus"=LIBUSB_DEV, USB\VID_0F4E&PID_0100
 "LibUsb-Win32 FreedomScientific PAC Mate"=LIBUSB_DEV, USB\VID_0F4E&PID_0111
@@ -190,6 +191,7 @@ ServiceBinary  = %12%\libusb0.sys
 "LibUsb-Win32 Braille Sense"=LIBUSB_DEV, USB\VID_045E&PID_930A
 
 "LibUsb-Win32 EuroBraille ESYS 12/40"=LIBUSB_DEV, USB\VID_C251&PID_1122
+"LibUsb-Win32 EuroBraille ESYS 12/40"=LIBUSB_DEV, USB\VID_C251&PID_1124
 
 "LibUsb-Win32 FreedomScientific Focus"=LIBUSB_DEV, USB\VID_0F4E&PID_0100
 "LibUsb-Win32 FreedomScientific PAC Mate"=LIBUSB_DEV, USB\VID_0F4E&PID_0111
@@ -232,6 +234,7 @@ ServiceBinary  = %12%\libusb0.sys
 "LibUsb-Win32 Braille Sense"=LIBUSB_DEV, USB\VID_045E&PID_930A
 
 "LibUsb-Win32 EuroBraille ESYS 12/40"=LIBUSB_DEV, USB\VID_C251&PID_1122
+"LibUsb-Win32 EuroBraille ESYS 12/40"=LIBUSB_DEV, USB\VID_C251&PID_1124
 
 "LibUsb-Win32 FreedomScientific Focus"=LIBUSB_DEV, USB\VID_0F4E&PID_0100
 "LibUsb-Win32 FreedomScientific PAC Mate"=LIBUSB_DEV, USB\VID_0F4E&PID_0111

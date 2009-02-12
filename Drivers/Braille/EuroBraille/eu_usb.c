@@ -33,8 +33,15 @@ static UsbChannel *usb = NULL;
 int
 eubrl_usbInit (BrailleDisplay *brl, char **parameters, const char *device) {
   static const UsbChannelDefinition definitions[] = {
-    { /* ESYS 12/40 */
+    { /* ESYS 12/40 (with SD-Card inserted) */
       .vendor=0XC251, .product=0X1122,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=1,
+      .disableAutosuspend=1
+    }
+    ,
+    { /* ESYS 12/40 (with SD-Card not inserted) */
+      .vendor=0XC251, .product=0X1124,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=1,
       .disableAutosuspend=1
