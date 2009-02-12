@@ -875,14 +875,14 @@ readScreenDevice (off_t offset, void *buffer, size_t size) {
   if (lseek(screenDescriptor, offset, SEEK_SET) == -1) {
     LogError("screen seek");
   } else {
-    int count = read(screenDescriptor, buffer, size);
+    ssize_t count = read(screenDescriptor, buffer, size);
     if (count == size) return 1;
 
     if (count == -1) {
       LogError("screen read");
     } else {
-      LogPrint(LOG_ERR, "truncated screen data: expected %d bytes, read %d",
-               size, count);
+      LogPrint(LOG_ERR, "truncated screen data: expected %u bytes, read %d",
+               (unsigned int)size, (int)count);
     }
   }
   return 0;

@@ -64,8 +64,8 @@ eubrl_bluetoothWrite (BrailleDisplay *brl, const void *buf, size_t length)
 	} 
       else 
 	{
-	  LogPrint(LOG_WARNING, "Trunccated bluetooth write: %d < %d", 
-		   count, length);
+	  LogPrint(LOG_WARNING, "Trunccated bluetooth write: %d < %u", 
+		   (int)count, (unsigned int)length);
 	}
     }
   return count;

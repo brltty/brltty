@@ -45,7 +45,7 @@ dumpBytes (FILE *stream, const unsigned char *bytes, size_t count) {
 
   if (count) {
     char buffer[0X10];
-    snprintf(buffer, sizeof(buffer), "%X%n", count-1, &digits);
+    snprintf(buffer, sizeof(buffer), "%X%n", (unsigned int)count-1, &digits);
   } else {
     digits = 1;
   }
@@ -78,7 +78,7 @@ dumpBytes (FILE *stream, const unsigned char *bytes, size_t count) {
         }
 
         if (!counter) {
-          fprintf(stream, "[0X%0*X] =", digits, byte-bytes);
+          fprintf(stream, "[0X%0*X] =", digits, (unsigned int)(byte-bytes));
           if (ferror(stream)) return 0;
         }
 
