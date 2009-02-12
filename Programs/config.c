@@ -1297,8 +1297,8 @@ globPrepare (GlobData *data, const char *directory, const char *extension, const
     data->pattern = joinStrings(components, ARRAY_COUNT(components));
   }
 
-  data->initial = *initial? ensureExtension(initial, extension): strdupWrapper("");
-  data->current = data->initial;
+  data->initial = *initial? ensureExtension(initial, extension): strdup("");
+  data->current = strdup(data->initial);
 }
 
 static void
@@ -1389,7 +1389,7 @@ globBegin (GlobData *data) {
   data->count -= index;
   data->setting = 0;
 
-  for (index=1; index<data->count; ++index) {
+  for (index=1; index<data->count; index+=1) {
     if (strcmp(data->paths[index], data->initial) == 0) {
       data->paths += 1;
       data->count -= 1;
@@ -1397,7 +1397,7 @@ globBegin (GlobData *data) {
     }
   }
 
-  for (index=0; index<data->count; ++index) {
+  for (index=0; index<data->count; index+=1) {
     if (strcmp(data->paths[index], data->current) == 0) {
       data->setting = index;
       break;
@@ -1409,9 +1409,8 @@ static void
 globEnd (GlobData *data) {
 #if defined(HAVE_GLOB_H)
   if (data->glob.gl_pathc) {
-    int index;
-    for (index=0; index<data->glob.gl_offs; ++index)
-      data->glob.gl_pathv[index] = NULL;
+    int i;
+    for (i=0; i<data->glob.gl_offs; i+=1) data->glob.gl_pathv[i] = NULL;
     globfree(&data->glob);
   }
 #elif defined(__MINGW32__)
