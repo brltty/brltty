@@ -1,0 +1,234 @@
+#!/bin/sh
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2009 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU General Public License, as published by the Free Software
+# Foundation; either version 2 of the License, or (at your option) any
+# later version. Please see the file LICENSE-GPL for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+version=3.10
+subversion=x
+apiversion=0.5.2
+whole_version=$version-$subversion
+autohotkey="/c/Program Files/AutoHotkey"
+nsis="/c/Program Files/NSIS"
+
+. "`dirname "${0}"`/prologue.sh"
+
+[ "$MSYSTEM" = "MINGW32" ] || programError 1 "This script is for MinGW32 only"
+
+[ "${#}" -eq 0 ] && syntaxError "missing source root."
+sourceRoot="${1}"
+shift
+cd "${sourceRoot}" || exit "${?}"
+sourceRoot="`pwd`"
+
+if [ "${#}" -eq 0 ]
+then
+   archiveName="`basename "${sourceRoot}"`"
+else
+   archiveName="${1}"
+   shift
+fi
+
+if [ "${#}" -eq 0 ]
+then
+   archiveFile="${archiveName}.zip"
+else
+   archiveFile="${1}"
+   shift
+fi
+[ "${archiveFile#/}" = "${archiveFile}" ] && archiveFile="${initialDirectory}/${archiveFile}"
+
+[ "${#}" -eq 0 ] || syntaxError "too many parameters."
+
+temporaryDirectory=/tmp/brltty-mkwin
+rm -fr ${temporaryDirectory}
+mkdir -p ${temporaryDirectory}
+
+set -e
+
+buildRoot="${temporaryDirectory}/build"
+cp -p -r -- "${sourceRoot}" "${buildRoot}"
+cd "${buildRoot}"
+
+installRoot="${temporaryDirectory}/${archiveName}"
+"./configure" --quiet --prefix=/ --enable-relocatable-install --without-flite --without-mikropuhe --without-speechd --without-swift --without-theta --without-viavoice
+make -s
+"${autohotkey}/Compiler/Ahk2Exe.exe" /in brlttycnf.ahk /out brlttycnf.exe
+make -s install INSTALL_ROOT="${installRoot}" JAVA_JAR_DIR=/lib JAVA_JNI_DIR=/lib
+cp Bindings/Python/dist/Brlapi-$apiversion.win32.exe "${installRoot}"
+cp brlttycnf.exe "${installRoot}"
+
+todos() {
+  sed -e 's/'$'\033''\[[0-9]*m//g' -e 's/$/'$'\015'/ < "$1" > "$2"
+}
+
+todos "${sourceRoot}/COPYING" "${installRoot}/COPYING.txt"
+todos "${sourceRoot}/COPYING-API" "${installRoot}/COPYING-API.txt"
+todos "${sourceRoot}/README" "${installRoot}/README.txt"
+
+mkdir -p "${installRoot}/BrailleDrivers"
+for i in `cd BrailleDrivers ; ls` ; do
+  [ -r "BrailleDrivers/$i/README" ] && todos "${sourceRoot}/BrailleDrivers/$i/README" "${installRoot}/BrailleDrivers/$i.txt"
+done
+
+mkdir -p "${installRoot}/doc"
+for i in BrlAPIref Manual-BRLTTY Manual-BrlAPI
+do
+  for file in `(cd ${sourceRoot}/Documents ; find "$i" -type f ! -name \*.3)`
+  do
+    mkdir -p "${installRoot}/doc/`dirname "$file"`"
+    todos "${sourceRoot}/Documents/$file" "${installRoot}/doc/$file"
+  done
+done
+for i in ChangeLog HISTORY TODO README.windows
+do
+  todos "${sourceRoot}/Documents/$i" "${installRoot}/doc/$i.txt"
+done
+
+todos "${buildRoot}/Documents/brltty.conf" "${installRoot}/etc/brltty.conf"
+todos "${buildRoot}/BrailleTables/README" "${installRoot}/etc/brltty/README-tables.txt"
+
+for i in `find ${installRoot}/share/man -type f -name \*.3 -o -name \*.1`
+do
+  target="${i/%[13]}"txt
+  groff -T ascii -mandoc 2> /dev/null < "$i" | sed -e 's/'$'\033''\[[0-9]*m//g' > "$target"
+  [ -s "$target" ] || rm -f "$i" "$target"
+done
+
+sed -e 's/$/'$'\015''/' > "${installRoot}/README.first.txt" << EOF
+This is an unofficial build of brltty $version + a few fixes for windows.
+
+You should probably read README.txt and doc/README.Windows.txt for information
+on brltty.
+
+For the impatient people who don't want to read docs:
+
+- use the BRLTTY configurator or uncomment by hand the proper lines from
+  etc/brltty.conf.
+- if you need to install libusb-win32 drivers, right-click on bin/brltty.inf
+  and select install or install and activate the libusb-win32 filter from
+  http://libusb-win32.sourceforge.net/
+- to register BRLTTY as a service, run install.bat
+- For Python support (e.g. for NVDA), run Brlapi-$apiversion.win32.exe
+- bluetooth is not supported yet.
+- for sighted users, use the xw braille driver to get a virtual braille box.
+
+If you are getting troubles, please run
+brltty.exe -l debug -n -e 2> debug.log
+by hand, so as to get feedback.
+
+=============================
+Technical notes on this build
+
+- brltty was compiled from version $version plus some fixes using mingw32 and
+  ./configure --enable-relocatable-install --prefix=/
+- to make life easier to windows users, Programs/brlapi_server.c was modified
+  to not use authentication by default: BRLAPI_DEFAUTH turned into "none",
+  and only local sockets were enabled: ":0+127.0.0.1:0" turned into ":0"
+- *usb0* come from libusb-win32 0.1.12.1 from
+  http://libusb-win32.sourceforge.net/
+- libiconv-2.dll comes from libiconv portage from
+  http://gnuwin32.sourceforge.net/
+- libintl3.dll comes from libintl from
+  http://gnuwin32.sourceforge.net/
+- braille.dll comes from http://libbraille.sourceforge.net/
+- python bindings are provided in Brlapi-$apiversion.win32.exe
+- C bindings are provided in include/ and lib/ (a .def file is provided for
+  linking, run
+  lib /def:brlapi.def /name:brlapi-0.5.dll /out:brlapi.lib
+  to produce a brlapi.lib file suitable to your compiler)
+EOF
+
+sed -e 's/$/'$'\015''/' > "${installRoot}/install.bat" << EOF
+@echo off
+.\bin\brltty -I
+net start BrlAPI
+EOF
+
+sed -e 's/$/'$'\015''/' > "${installRoot}/uninstall.bat" << EOF
+@echo off
+net stop BrlAPI
+.\bin\brltty -R
+EOF
+
+cp ${sourceRoot}/Hotplug/brltty.inf "${installRoot}/bin"
+echo "not yet" > "${installRoot}/bin/brltty.cat"
+echo "not yet" > "${installRoot}/bin/brltty_x64.cat"
+cp "$SYSTEMROOT/system32/drivers/libusb0.sys" "${installRoot}/bin"
+cp "$SYSTEMROOT/system32/drivers/libusb0_x64.sys" "${installRoot}/bin"
+cp "$SYSTEMROOT/system32/libusb0.dll" "${installRoot}/bin"
+cp "$SYSTEMROOT/system32/libusb0_x64.dll" "${installRoot}/bin"
+cp "$SYSTEMROOT/system32/braille.dll" "${installRoot}/bin"
+cp "$SYSTEMROOT/system32/msvcr90.dll" "${installRoot}/bin"
+cp /mingw/bin/libiconv2.dll "${installRoot}/bin"
+cp /mingw/bin/libintl3.dll "${installRoot}/bin"
+cp /mingw/bin/curses2.dll "${installRoot}/bin"
+rm -f "${installRoot}/bin/brltty-config"
+rm -f "${installRoot}/bin/brltty-install"
+rm -f "${installRoot}/etc/brlapi.key"
+rmdir -p "${installRoot}/lib/brltty/rw" 2> /dev/null || true
+
+cd ..
+rm -f "${archiveFile}"
+zip -q -A -r "${archiveFile}" "${archiveName}"
+
+sed -e 's/$/'$'\015''/' > "${installRoot}/README.first.txt" << EOF
+This is an unofficial build of brltty $version + a few fixes for windows.
+
+You should probably read README.txt and doc/README.Windows.txt for information
+on brltty.
+
+For the impatient people who don't want to read docs:
+
+- use the BRLTTY configurator or uncomment by hand the proper lines from
+  etc/brltty.conf.
+- For Python support (e.g. for NVDA), run Brlapi-$apiversion.win32.exe
+- bluetooth is not supported yet.
+- for sighted users, use the xw braille driver to get a virtual braille box.
+
+If you are getting troubles, please run
+brltty.exe -l debug -n -e 2> debug.log
+by hand, so as to get feedback.
+
+=============================
+Technical notes on this build
+
+- brltty was compiled from version $version plus some fixes using mingw32 and
+  ./configure --enable-relocatable-install --prefix=/
+- to make life easier to windows users, Programs/brlapi_server.c was modified
+  to not use authentication by default: BRLAPI_DEFAUTH turned into "none",
+  and only local sockets were enabled: ":0+127.0.0.1:0" turned into ":0"
+- *usb0* come from libusb-win32 0.1.12.1 from
+  http://libusb-win32.sourceforge.net/
+- libiconv-2.dll comes from libiconv portage from
+  http://gnuwin32.sourceforge.net/
+- libintl3.dll comes from libintl from
+  http://gnuwin32.sourceforge.net/
+- braille.dll comes from http://libbraille.sourceforge.net/
+- python bindings are provided in Brlapi-$apiversion.win32.exe
+- C bindings are provided in include/ and lib/ (a .def file is provided for
+  linking, run
+  lib /def:brlapi.def /name:brlapi-0.5.dll /out:brlapi.lib
+  to produce a brlapi.lib file suitable to your compiler)
+EOF
+
+cp "${buildRoot}/brltty.nsi" .
+cp "${buildRoot}/langstrings.txt" "${installRoot}/"
+"${nsis}/makensis" -DVERSION=${whole_version} brltty.nsi
+rm -f "${initialDirectory}/brltty-win-${whole_version}.exe"
+mv brltty-win-${whole_version}.exe "${initialDirectory}/brltty-win-${whole_version}.exe"
+
+exit 0
