@@ -226,7 +226,7 @@ Technical notes on this build
 EOF
 
 cp "${buildRoot}/brltty.nsi" .
-cp "${buildRoot}/langstrings.txt" "${installRoot}/"
+cp "${buildRoot}/nsistrings.txt" "${installRoot}/"
 "${nsis}/makensis" -DVERSION=${whole_version} brltty.nsi
 rm -f "${initialDirectory}/brltty-win-${whole_version}.exe"
 mv brltty-win-${whole_version}.exe "${initialDirectory}/brltty-win-${whole_version}.exe"
