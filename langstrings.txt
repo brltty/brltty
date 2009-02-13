@@ -1,0 +1,260 @@
+; Some translations for the brltty.nsi installer
+;Czech
+LangString msg_WelcomePageTitle ${LANG_CZECH} "Instalace ${PRODUCT}, verze ${VERSION}"
+LangString msg_inslibusb32filter ${LANG_CZECH} "Do you want to install the LibUSB-win32 filter?$\r$\n(only useful for USB devices and if you have already installed drivers from your manufacturer for your USB device. Do not install it if you are running windows 64bit)"
+LangString msg_inslibusb32 ${LANG_CZECH} "Chcete nainstalovat ovlada? LibUSB-win32?$\r$\n(u�ite?n� jen pokud nem�te nainstalov�n USB ovlada? dod�van� v�robcem pro va�e za?�zen�)"
+
+LangString shortcut_brlttycnf $(LANG_CZECH) "Nastaven� BRLTTY"
+LangString shortcut_inssrv $(LANG_CZECH) "Instalace slu�by BRLTTY"
+LangString shortcut_rmvsrv $(LANG_CZECH) "Odinstalace slu�by BLRTTY"
+LangString shortcut_uninstall $(LANG_CZECH) "Odinstalace"
+LangString shortcut_inslibusbfilter $(LANG_CZECH) "Install LibUSB-win32 filter"
+LangString shortcut_uninslibusbfilter $(LANG_CZECH) "Uninstall LibUSB-win32 filter"
+LangString shortcut_inslibusb $(LANG_CZECH) "Instalace ovlada?e LibUSB-win32"
+
+;German
+LangString msg_WelcomePageTitle ${LANG_GERMAN} "Setup for ${PRODUCT}, Version ${VERSION}"
+LangString msg_inslibusb32filter ${LANG_GERMAN} "Do you want to install the LibUSB-win32 filter?$\r$\n(only useful for USB devices and if you have already installed drivers from your manufacturer for your USB device. Do not install it if you are running windows 64bit)"
+LangString msg_inslibusb32 ${LANG_GERMAN} "Do you want to install the LibUSB-win32 driver?$\r$\n(only useful if you do not have installed drivers from your manufacturer for your USB device)"
+
+LangString shortcut_brlttycnf $(LANG_GERMAN) "Configure BRLTTY"
+LangString shortcut_InsSrv $(LANG_GERMAN) "Install BRLTTY Service"
+LangString shortcut_RmvSrv $(LANG_GERMAN) "Uninstall BRLTTY Service"
+LangString shortcut_uninstall $(LANG_GERMAN) "Uninstall"
+LangString shortcut_inslibusbfilter $(LANG_GERMAN) "Install LibUSB-win32 filter"
+LangString shortcut_uninslibusbfilter $(LANG_GERMAN) "Uninstall LibUSB-win32 filter"
+LangString shortcut_inslibusb $(LANG_GERMAN) "Install LibUSB-win32 driver"
+
+;English
+LangString msg_WelcomePageTitle ${LANG_ENGLISH} "Setup for ${PRODUCT}, Version ${VERSION}"
+LangString msg_inslibusb32filter ${LANG_ENGLISH} "Do you want to install the LibUSB-win32 filter?$\r$\n(only useful for USB devices and if you have already installed drivers from your manufacturer for your USB device. Do not install it if you are running windows 64bit)"
+LangString msg_inslibusb32 ${LANG_ENGLISH} "Do you want to install the LibUSB-win32 driver?$\r$\n(only useful if you do not have installed drivers from your manufacturer for your USB device)"
+
+LangString shortcut_brlttycnf $(LANG_ENGLISH) "Configure BRLTTY"
+LangString shortcut_inssrv $(LANG_ENGLISH) "Install BRLTTY Service"
+LangString shortcut_rmvsrv $(LANG_ENGLISH) "Uninstall BRLTTY Service"
+LangString shortcut_uninstall $(LANG_ENGLISH) "Uninstall"
+LangString shortcut_inslibusbfilter $(LANG_ENGLISH) "Install LibUSB-win32 filter"
+LangString shortcut_uninslibusbfilter $(LANG_ENGLISH) "Uninstall LibUSB-win32 filter"
+LangString shortcut_inslibusb $(LANG_ENGLISH) "Install LibUSB-win32 driver"
+
+;Spanish
+LangString msg_WelcomePageTitle ${LANG_SPANISH} "Setup for ${PRODUCT}, Version ${VERSION}"
+LangString msg_inslibusb32filter ${LANG_SPANISH} "Do you want to install the LibUSB-win32 filter?$\r$\n(only useful for USB devices and if you have already installed drivers from your manufacturer for your USB device. Do not install it if you are running windows 64bit)"
+LangString msg_inslibusb32 ${LANG_SPANISH} "Do you want to install the LibUSB-win32 driver?$\r$\n(only useful if you do not have installed drivers from your manufacturer for your USB device)"
+
+LangString shortcut_brlttycnf $(LANG_SPANISH) "Configure BRLTTY"
+LangString shortcut_InsSrv $(LANG_SPANISH) "Install BRLTTY Service"
+LangString shortcut_RmvSrv $(LANG_SPANISH) "Uninstall BRLTTY Service"
+LangString shortcut_uninstall $(LANG_SPANISH) "Uninstall"
+LangString shortcut_inslibusbfilter $(LANG_SPANISH) "Install LibUSB-win32 filter"
+LangString shortcut_uninslibusbfilter $(LANG_SPANISH) "Uninstall LibUSB-win32 filter"
+LangString shortcut_inslibusb $(LANG_SPANISH) "Install LibUSB-win32 driver"
+
+;Finnish
+LangString msg_WelcomePageTitle ${LANG_FINNISH} "Setup for ${PRODUCT}, Version ${VERSION}"
+LangString msg_inslibusb32filter ${LANG_FINNISH} "Do you want to install the LibUSB-win32 filter?$\r$\n(only useful for USB devices and if you have already installed drivers from your manufacturer for your USB device. Do not install it if you are running windows 64bit)"
+LangString msg_inslibusb32 ${LANG_FINNISH} "Do you want to install the LibUSB-win32 driver?$\r$\n(only useful if you do not have installed drivers from your manufacturer for your USB device)"
+
+LangString shortcut_brlttycnf $(LANG_FINNISH) "Configure BRLTTY"
+LangString shortcut_InsSrv $(LANG_FINNISH) "Install BRLTTY Service"
+LangString shortcut_RmvSrv $(LANG_FINNISH) "Uninstall BRLTTY Service"
+LangString shortcut_uninstall $(LANG_FINNISH) "Uninstall"
+LangString shortcut_inslibusbfilter $(LANG_FINNISH) "Install LibUSB-win32 filter"
+LangString shortcut_uninslibusbfilter $(LANG_FINNISH) "Uninstall LibUSB-win32 filter"
+LangString shortcut_inslibusb $(LANG_FINNISH) "Install LibUSB-win32 driver"
+
+;French
+LangString msg_WelcomePageTitle ${LANG_FRENCH} "Installation de ${PRODUCT}, Version ${VERSION}"
+LangString msg_inslibusb32filter ${LANG_FRENCH} "Voulez-vous installer le filtre LibUSB-win32 ?$\r$\n(utile seulement pour les plages USB et si vous avez d�j� install� le pilote fourni par le constructeur de votre unit� USB. Ne l'installez pas si votre windows est 64bit)"
+LangString msg_inslibusb32 ${LANG_FRENCH} "Voulez-vous installer le pilote LibUSB-win32?$\r$\n(utile seulement si vous n'avez pas install� le pilote fourni par le constructeur de votre unit� USB)"
+
+LangString shortcut_brlttycnf $(LANG_FRENCH) "Configurer BRLTTY"
+LangString shortcut_InsSrv $(LANG_FRENCH) "Installer le Service BRLTTY"
+LangString shortcut_RmvSrv $(LANG_FRENCH) "D�sinstaller le Service BRLTTY"
+LangString shortcut_uninstall $(LANG_FRENCH) "D�sinstaller"
+LangString shortcut_inslibusbfilter $(LANG_FRENCH) "Installer le filtre LibUSB-win32"
+LangString shortcut_uninslibusbfilter $(LANG_FERNCH) "D�sinstaller le filtre LibUSB-win32"
+LangString shortcut_inslibusb $(LANG_FRENCH) "Installer le pilote LibUSB-win32"
+
+;Galician
+LangString msg_WelcomePageTitle ${LANG_GALICIAN} "Setup for ${PRODUCT}, Version ${VERSION}"
+LangString msg_inslibusb32filter ${LANG_GALICIAN} "Do you want to install the LibUSB-win32 filter?$\r$\n(only useful for USB devices and if you have already installed drivers from your manufacturer for your USB device. Do not install it if you are running windows 64bit)"
+LangString msg_inslibusb32 ${LANG_GALICIAN} "Do you want to install the LibUSB-win32 driver?$\r$\n(only useful if you do not have installed drivers from your manufacturer for your USB device)"
+
+LangString shortcut_brlttycnf $(LANG_GALICIAN) "Configure BRLTTY"
+LangString shortcut_InsSrv $(LANG_GALICIAN) "Install BRLTTY Service"
+LangString shortcut_RmvSrv $(LANG_GALICIAN) "Uninstall BRLTTY Service"
+LangString shortcut_uninstall $(LANG_GALICIAN) "Uninstall"
+LangString shortcut_inslibusbfilter $(LANG_GALICIAN) "Install LibUSB-win32 filter"
+LangString shortcut_uninslibusbfilter $(LANG_GALICIAN) "Uninstall LibUSB-win32 filter"
+LangString shortcut_inslibusb $(LANG_GALICIAN) "Install LibUSB-win32 driver"
+
+;Croatian
+LangString msg_WelcomePageTitle ${LANG_CROATIAN} "Setup for ${PRODUCT}, Version ${VERSION}"
+LangString msg_inslibusb32filter ${LANG_CROATIAN} "Do you want to install the LibUSB-win32 filter?$\r$\n(only useful for USB devices and if you have already installed drivers from your manufacturer for your USB device. Do not install it if you are running windows 64bit)"
+LangString msg_inslibusb32 ${LANG_CROATIAN} "Do you want to install the LibUSB-win32 driver?$\r$\n(only useful if you do not have installed drivers from your manufacturer for your USB device)"
+
+LangString shortcut_brlttycnf $(LANG_CROATIAN) "Configure BRLTTY"
+LangString shortcut_inssrv $(LANG_CROATIAN) "Install BRLTTY Service"
+LangString shortcut_rmvsrv $(LANG_CROATIAN) "Uninstall BRLTTY Service"
+LangString shortcut_uninstall $(LANG_CROATIAN) "Uninstall"
+LangString shortcut_inslibusbfilter $(LANG_CROATIAN) "Install LibUSB-win32 filter"
+LangString shortcut_uninslibusbfilter $(LANG_CROATIAN) "Uninstall LibUSB-win32 filter"
+LangString shortcut_inslibusb $(LANG_CROATIAN) "Install LibUSB-win32 driver"
+
+;Hungarian
+LangString msg_WelcomePageTitle ${LANG_HUNGARIAN} "Setup for ${PRODUCT}, Version ${VERSION}"
+LangString msg_inslibusb32filter ${LANG_HUGARIAN} "Do you want to install the LibUSB-win32 filter?$\r$\n(only useful for USB devices and if you have already installed drivers from your manufacturer for your USB device. Do not install it if you are running windows 64bit)"
+LangString msg_inslibusb32 ${LANG_HUNGARIAN} "Do you want to install the LibUSB-win32 driver?$\r$\n(only useful if you do not have installed drivers from your manufacturer for your USB device)"
+
+LangString shortcut_brlttycnf $(LANG_HUNGARIAN) "Configure BRLTTY"
+LangString shortcut_inssrv $(LANG_HUNGARIAN) "Install BRLTTY Service"
+LangString shortcut_rmvsrv $(LANG_HUNGARIAN) "Uninstall BRLTTY Service"
+LangString shortcut_uninstall $(LANG_HUNGARIAN) "Uninstall"
+LangString shortcut_inslibusbfilter $(LANG_HUNGARIAN) "Install LibUSB-win32 filter"
+LangString shortcut_uninslibusbfilter $(LANG_HUGARIAN) "Uninstall LibUSB-win32 filter"
+LangString shortcut_inslibusb $(LANG_HUNGARIAN) "Install LibUSB-win32 driver"
+
+;Italian
+LangString msg_WelcomePageTitle ${LANG_ITALIAN} "Setup for ${PRODUCT}, Version ${VERSION}"
+LangString msg_inslibusb32filter ${LANG_ITALIAN} "Do you want to install the LibUSB-win32 filter?$\r$\n(only useful for USB devices and if you have already installed drivers from your manufacturer for your USB device. Do not install it if you are running windows 64bit)"
+LangString msg_inslibusb32 ${LANG_ITALIAN} "Do you want to install the LibUSB-win32 driver?$\r$\n(only useful if you do not have installed drivers from your manufacturer for your USB device)"
+
+LangString shortcut_brlttycnf $(LANG_ITALIAN) "Configure BRLTTY"
+LangString shortcut_inssrv $(LANG_ITALIAN) "Install BRLTTY Service"
+LangString shortcut_rmvsrv $(LANG_ITALIAN) "Uninstall BRLTTY Service"
+LangString shortcut_uninstall $(LANG_ITALIAN) "Uninstall"
+LangString shortcut_inslibusbfilter $(LANG_ITALIAN) "Install LibUSB-win32 filter"
+LangString shortcut_uninslibusbfilter $(LANG_ITALIAN) "Uninstall LibUSB-win32 filter"
+LangString shortcut_inslibusb $(LANG_ITALIAN) "Install LibUSB-win32 driver"
+
+;Japanese
+LangString msg_WelcomePageTitle ${LANG_JAPANESE} "Setup for ${PRODUCT}, Version ${VERSION}"
+LangString msg_inslibusb32filter ${LANG_JAPANESE} "Do you want to install the LibUSB-win32 filter?$\r$\n(only useful for USB devices and if you have already installed drivers from your manufacturer for your USB device. Do not install it if you are running windows 64bit)"
+LangString msg_inslibusb32 ${LANG_JAPANESE} "Do you want to install the LibUSB-win32 driver?$\r$\n(only useful if you do not have installed drivers from your manufacturer for your USB device)"
+
+LangString shortcut_brlttycnf $(LANG_JAPANESE) "Configure BRLTTY"
+LangString shortcut_inssrv $(LANG_JAPANESE) "Install BRLTTY Service"
+LangString shortcut_rmvsrv $(LANG_JAPANESE) "Uninstall BRLTTY Service"
+LangString shortcut_uninstall $(LANG_JAPANESE) "Uninstall"
+LangString shortcut_inslibusbfilter $(LANG_JAPANESE) "Install LibUSB-win32 filter"
+LangString shortcut_uninslibusbfilter $(LANG_JAPANESE) "Uninstall LibUSB-win32 filter"
+LangString shortcut_inslibusb $(LANG_JAPANESE) "Install LibUSB-win32 driver"
+
+;Polish
+LangString msg_WelcomePageTitle ${LANG_POLISH} "Setup for ${PRODUCT}, Version ${VERSION}"
+LangString msg_inslibusb32filter ${LANG_POLISH} "Do you want to install the LibUSB-win32 filter?$\r$\n(only useful for USB devices and if you have already installed drivers from your manufacturer for your USB device. Do not install it if you are running windows 64bit)"
+LangString msg_inslibusb32 ${LANG_POLISH} "Do you want to install the LibUSB-win32 driver?$\r$\n(only useful if you do not have installed drivers from your manufacturer for your USB device)"
+
+LangString shortcut_brlttycnf $(LANG_POLISH) "Configure BRLTTY"
+LangString shortcut_inssrv $(LANG_POLISH) "Install BRLTTY Service"
+LangString shortcut_rmvsrv $(LANG_POLISH) "Uninstall BRLTTY Service"
+LangString shortcut_uninstall $(LANG_POLISH) "Uninstall"
+LangString shortcut_inslibusbfilter $(LANG_POLISH) "Install LibUSB-win32 filter"
+LangString shortcut_uninslibusbfilter $(LANG_POLISH) "Uninstall LibUSB-win32 filter"
+LangString shortcut_inslibusb $(LANG_POLISH) "Install LibUSB-win32 driver"
+
+;PortugueseBr
+LangString msg_WelcomePageTitle ${LANG_PORTUGUESEBR} "Setup para o ${PRODUCT}, Vers�o ${VERSION}"
+LangString msg_inslibusb32filter ${LANG_PORTUGUESEBR} "Do you want to install the LibUSB-win32 filter?$\r$\n(only useful for USB devices and if you have already installed drivers from your manufacturer for your USB device. Do not install it if you are running windows 64bit)"
+LangString msg_inslibusb32 ${LANG_PORTUGUESEBR} "Pretende instalar o driver LibUSB-win32?$\r$\n(somente �til se n�o tiver instalado drivers do fabricante para o seu dispositivo USB)"
+
+LangString shortcut_brlttycnf $(LANG_PORTUGUESEBR) "Configurar o BRLTTY"
+LangString shortcut_inssrv $(LANG_PORTUGUESEBR) "Instalar O Servi�o BRLTTY"
+LangString shortcut_rmvsrv $(LANG_PORTUGUESEBR) "Desinstalar O Servi�o BRLTTY"
+LangString shortcut_uninstall $(LANG_PORTUGUESEBR) "Desinstalar"
+LangString shortcut_inslibusbfilter $(LANG_PORTUGUESEBR) "Install LibUSB-win32 filter"
+LangString shortcut_uninslibusbfilter $(LANG_PORTUGUESEBR) "Uninstall LibUSB-win32 filter"
+LangString shortcut_inslibusb $(LANG_PORTUGUESEBR) "Instalar o driver LibUSB-win32"
+
+;Portuguese
+LangString msg_WelcomePageTitle ${LANG_PORTUGUESE} "Setup para o ${PRODUCT}, Vers�o ${VERSION}"
+LangString msg_inslibusb32filter ${LANG_PORTUGUESE} "Do you want to install the LibUSB-win32 filter?$\r$\n(only useful for USB devices and if you have already installed drivers from your manufacturer for your USB device. Do not install it if you are running windows 64bit)"
+LangString msg_inslibusb32 ${LANG_PORTUGUESE} "Pretende instalar o driver LibUSB-win32?$\r$\n(somente �til se n�o tiver instalado drivers do fabricante para o seu dispositivo USB)"
+
+LangString shortcut_brlttycnf $(LANG_PORTUGUESE) "Configurar o BRLTTY"
+LangString shortcut_inssrv $(LANG_PORTUGUESE) "Instalar O Servi�o BRLTTY"
+LangString shortcut_rmvsrv $(LANG_PORTUGUESE) "Desinstalar O Servi�o BRLTTY"
+LangString shortcut_uninstall $(LANG_PORTUGUESE) "Desinstalar"
+LangString shortcut_inslibusbfilter $(LANG_PORTUGUESE) "Install LibUSB-win32 filter"
+LangString shortcut_uninslibusbfilter $(LANG_PORTUGUESE) "Uninstall LibUSB-win32 filter"
+LangString shortcut_inslibusb $(LANG_PORTUGUESE) "Instalar o driver LibUSB-win32"
+
+;Russian
+LangString msg_WelcomePageTitle ${LANG_RUSSIAN} "Setup for ${PRODUCT}, Version ${VERSION}"
+LangString msg_inslibusb32filter ${LANG_RUSSIAN} "Do you want to install the LibUSB-win32 filter?$\r$\n(only useful for USB devices and if you have already installed drivers from your manufacturer for your USB device. Do not install it if you are running windows 64bit)"
+LangString msg_inslibusb32 ${LANG_RUSSIAN} "Do you want to install the LibUSB-win32 driver?$\r$\n(only useful if you do not have installed drivers from your manufacturer for your USB device)"
+
+LangString shortcut_brlttycnf $(LANG_RUSSIAN) "Configure BRLTTY"
+LangString shortcut_inssrv $(LANG_RUSSIAN) "Install BRLTTY Service"
+LangString shortcut_rmvsrv $(LANG_RUSSIAN) "Uninstall BRLTTY Service"
+LangString shortcut_uninstall $(LANG_RUSSIAN) "Uninstall"
+LangString shortcut_inslibusbfilter $(LANG_RUSSIAN) "Install LibUSB-win32 filter"
+LangString shortcut_uninslibusbfilter $(LANG_RUSSIAN) "Uninstall LibUSB-win32 filter"
+LangString shortcut_inslibusb $(LANG_RUSSIAN) "Install LibUSB-win32 driver"
+
+;Swedish
+LangString msg_WelcomePageTitle ${LANG_SWEDISH} "Setup for ${PRODUCT}, Version ${VERSION}"
+LangString msg_inslibusb32filter ${LANG_SWEDISH} "Do you want to install the LibUSB-win32 filter?$\r$\n(only useful for USB devices and if you have already installed drivers from your manufacturer for your USB device. Do not install it if you are running windows 64bit)"
+LangString msg_inslibusb32 ${LANG_SWEDISH} "Do you want to install the LibUSB-win32 driver?$\r$\n(only useful if you do not have installed drivers from your manufacturer for your USB device)"
+
+LangString shortcut_brlttycnf $(LANG_SWEDISH) "Configure BRLTTY"
+LangString shortcut_inssrv $(LANG_SWEDISH) "Install BRLTTY Service"
+LangString shortcut_rmvsrv $(LANG_SWEDISH) "Uninstall BRLTTY Service"
+LangString shortcut_uninstall $(LANG_SWEDISH) "Uninstall"
+LangString shortcut_inslibusbfilter $(LANG_SWEDISH) "Install LibUSB-win32 filter"
+LangString shortcut_uninslibusbfilter $(LANG_SWEDISH) "Uninstall LibUSB-win32 filter"
+LangString shortcut_inslibusb $(LANG_SWEDISH) "Install LibUSB-win32 driver"
+
+;Slovak
+LangString msg_WelcomePageTitle ${LANG_SLOVAK} "Setup for ${PRODUCT}, Version ${VERSION}"
+LangString msg_inslibusb32filter ${LANG_SLOVAK} "Do you want to install the LibUSB-win32 filter?$\r$\n(only useful for USB devices and if you have already installed drivers from your manufacturer for your USB device. Do not install it if you are running windows 64bit)"
+LangString msg_inslibusb32 ${LANG_SLOVAK} "Do you want to install the LibUSB-win32 driver?$\r$\n(only useful if you do not have installed drivers from your manufacturer for your USB device)"
+
+LangString shortcut_brlttycnf $(LANG_SLOVAK) "Configure BRLTTY"
+LangString shortcut_inssrv $(LANG_SLOVAK) "Install BRLTTY Service"
+LangString shortcut_rmvsrv $(LANG_SLOVAK) "Uninstall BRLTTY Service"
+LangString shortcut_uninstall $(LANG_SLOVAK) "Uninstall"
+LangString shortcut_inslibusbfilter $(LANG_SLOVAK) "Install LibUSB-win32 filter"
+LangString shortcut_uninslibusbfilter $(LANG_SLOVAK) "Uninstall LibUSB-win32 filter"
+LangString shortcut_inslibusb $(LANG_SLOVAK) "Install LibUSB-win32 driver"
+
+;Thai
+LangString msg_WelcomePageTitle ${LANG_THAI} "Setup for ${PRODUCT}, Version ${VERSION}"
+LangString msg_inslibusb32filter ${LANG_THAI} "Do you want to install the LibUSB-win32 filter?$\r$\n(only useful for USB devices and if you have already installed drivers from your manufacturer for your USB device. Do not install it if you are running windows 64bit)"
+LangString msg_inslibusb32 ${LANG_THAI} "Do you want to install the LibUSB-win32 driver?$\r$\n(only useful if you do not have installed drivers from your manufacturer for your USB device)"
+
+LangString shortcut_brlttycnf $(LANG_THAI) "Configure BRLTTY"
+LangString shortcut_inssrv $(LANG_THAI) "Install BRLTTY Service"
+LangString shortcut_rmvsrv $(LANG_THAI) "Uninstall BRLTTY Service"
+LangString shortcut_uninstall $(LANG_THAI) "Uninstall"
+LangString shortcut_inslibusbfilter $(LANG_THAI) "Install LibUSB-win32 filter"
+LangString shortcut_uninslibusbfilter $(LANG_THAI) "Uninstall LibUSB-win32 filter"
+LangString shortcut_inslibusb $(LANG_THAI) "Install LibUSB-win32 driver"
+
+;Chinese Simplified
+LangString msg_WelcomePageTitle ${LANG_SIMPCHINESE} "Setup for ${PRODUCT}, Version ${VERSION}"
+LangString msg_inslibusb32filter ${LANG_SIMPCHINESE} "Do you want to install the LibUSB-win32 filter?$\r$\n(only useful for USB devices and if you have already installed drivers from your manufacturer for your USB device. Do not install it if you are running windows 64bit)"
+LangString msg_inslibusb32 ${LANG_SIMPCHINESE} "Do you want to install the LibUSB-win32 driver?$\r$\n(only useful if you do not have installed drivers from your manufacturer for your USB device)"
+
+LangString shortcut_brlttycnf $(LANG_SIMPCHINESE) "Configure BRLTTY"
+LangString shortcut_inssrv $(LANG_SIMPCHINESE) "Install BRLTTY Service"
+LangString shortcut_rmvsrv $(LANG_SIMPCHINESE) "Uninstall BRLTTY Service"
+LangString shortcut_uninstall $(LANG_SIMPCHINESE) "Uninstall"
+LangString shortcut_inslibusbfilter $(LANG_SIMPCHINESE) "Install LibUSB-win32 filter"
+LangString shortcut_uninslibusbfilter $(LANG_SIMPCHINESE) "Uninstall LibUSB-win32 filter"
+LangString shortcut_inslibusb $(LANG_SIMPCHINESE) "Install LibUSB-win32 driver"
+
+;Chinese Traditional
+LangString msg_WelcomePageTitle ${LANG_TRADCHINESE} "Setup for ${PRODUCT}, Version ${VERSION}"
+LangString msg_inslibusb32filter ${LANG_TRADCHINESE} "Do you want to install the LibUSB-win32 filter?$\r$\n(only useful for USB devices and if you have already installed drivers from your manufacturer for your USB device. Do not install it if you are running windows 64bit)"
+LangString msg_inslibusb32 ${LANG_TRADCHINESE} "Do you want to install the LibUSB-win32 driver?$\r$\n(only useful if you do not have installed drivers from your manufacturer for your USB device)"
+
+LangString shortcut_brlttycnf $(LANG_TRADCHINESE) "Configure BRLTTY"
+LangString shortcut_inssrv $(LANG_TRADCHINESE) "Install BRLTTY Service"
+LangString shortcut_rmvsrv $(LANG_TRADCHINESE) "Uninstall BRLTTY Service"
+LangString shortcut_uninstall $(LANG_TRADCHINESE) "Uninstall"
+LangString shortcut_inslibusbfilter $(LANG_TRADCHINESE) "Install LibUSB-win32 filter"
+LangString shortcut_uninslibusbfilter $(LANG_TRADCHINESE) "Uninstall LibUSB-win32 filter"
+LangString shortcut_inslibusb $(LANG_TRADCHINESE) "Install LibUSB-win32 driver"

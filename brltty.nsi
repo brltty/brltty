@@ -17,7 +17,7 @@
 		!error "VERSION is not defined"
 	!endif
 
-	!define MUI_WELCOMEPAGE_TITLE "Setup for ${PRODUCT}, Version ${VERSION}"
+ !define MUI_WELCOMEPAGE_TITLE $(msg_WelcomePageTitle)
 
 ;--------------------------------
 ;General
@@ -64,6 +64,8 @@
 	!insertmacro MUI_PAGE_LICENSE "${DISTDIR}\COPYING.txt"
 	!insertmacro MUI_PAGE_DIRECTORY
 
+;--------------------------------
+
 	;Start Menu Folder Page Configuration
 	!define MUI_STARTMENUPAGE_REGISTRY_ROOT "HKLM" 
 	!define MUI_STARTMENUPAGE_REGISTRY_KEY "Software\${PRODUCT}"
@@ -72,7 +74,7 @@
 	!insertmacro MUI_PAGE_STARTMENU Application $StartMenuFolder
 
 	!insertmacro MUI_PAGE_INSTFILES
-	!define MUI_FINISHPAGE_SHOWREADME "$INSTDIR\README.install.txt"
+	!define MUI_FINISHPAGE_SHOWREADME "$INSTDIR\README.first.txt"
 	!insertmacro MUI_PAGE_FINISH
   
 	!insertmacro MUI_UNPAGE_CONFIRM
@@ -81,7 +83,71 @@
 ;--------------------------------
 ;Languages
  
-	!insertmacro MUI_LANGUAGE "English"
+!define UNINSTALLOG_LOCALIZE ; necessary for localization of messages from the uninstallation log file
+
+;Remember the installer language
+!define MUI_LANGDLL_REGISTRY_ROOT "HKCU"
+!define MUI_LANGDLL_REGISTRY_KEY "Software\${PRODUCT}"
+!define MUI_LANGDLL_REGISTRY_VALUENAME "Installer Language"
+
+!insertmacro MUI_LANGUAGE "English" ; default language
+!insertmacro MUI_LANGUAGE "French"
+!insertmacro MUI_LANGUAGE "German"
+!insertmacro MUI_LANGUAGE "Spanish"
+!insertmacro MUI_LANGUAGE "SimpChinese"
+!insertmacro MUI_LANGUAGE "TradChinese"
+!insertmacro MUI_LANGUAGE "Japanese"
+;!insertmacro MUI_LANGUAGE "Korean"
+!insertmacro MUI_LANGUAGE "Italian"
+;!insertmacro MUI_LANGUAGE "Dutch"
+;!insertmacro MUI_LANGUAGE "Danish"
+!insertmacro MUI_LANGUAGE "Swedish"
+;!insertmacro MUI_LANGUAGE "Norwegian"
+;!insertmacro MUI_LANGUAGE "NorwegianNynorsk"
+!insertmacro MUI_LANGUAGE "Finnish"
+;!insertmacro MUI_LANGUAGE "Greek"
+!insertmacro MUI_LANGUAGE "Russian"
+!insertmacro MUI_LANGUAGE "Portuguese"
+!insertmacro MUI_LANGUAGE "PortugueseBR"
+!insertmacro MUI_LANGUAGE "Polish"
+;!insertmacro MUI_LANGUAGE "Ukrainian"
+!insertmacro MUI_LANGUAGE "Czech"
+!insertmacro MUI_LANGUAGE "Slovak"
+!insertmacro MUI_LANGUAGE "Croatian"
+;!insertmacro MUI_LANGUAGE "Bulgarian"
+!insertmacro MUI_LANGUAGE "Hungarian"
+!insertmacro MUI_LANGUAGE "Thai"
+;!insertmacro MUI_LANGUAGE "Romanian"
+;!insertmacro MUI_LANGUAGE "Latvian"
+;!insertmacro MUI_LANGUAGE "Macedonian"
+;!insertmacro MUI_LANGUAGE "Estonian"
+;!insertmacro MUI_LANGUAGE "Turkish"
+;!insertmacro MUI_LANGUAGE "Lithuanian"
+;!insertmacro MUI_LANGUAGE "Catalan"
+;!insertmacro MUI_LANGUAGE "Slovenian"
+;!insertmacro MUI_LANGUAGE "Serbian"
+;!insertmacro MUI_LANGUAGE "SerbianLatin"
+;!insertmacro MUI_LANGUAGE "Arabic"
+;!insertmacro MUI_LANGUAGE "Farsi"
+;!insertmacro MUI_LANGUAGE "Hebrew"
+;!insertmacro MUI_LANGUAGE "Indonesian"
+;!insertmacro MUI_LANGUAGE "Mongolian"
+;!insertmacro MUI_LANGUAGE "Luxembourgish"
+;!insertmacro MUI_LANGUAGE "Albanian"
+;!insertmacro MUI_LANGUAGE "Breton"
+;!insertmacro MUI_LANGUAGE "Belarusian"
+;!insertmacro MUI_LANGUAGE "Icelandic"
+;!insertmacro MUI_LANGUAGE "Malay"
+;!insertmacro MUI_LANGUAGE "Bosnian"
+;!insertmacro MUI_LANGUAGE "Kurdish"
+;!insertmacro MUI_LANGUAGE "Irish"
+;!insertmacro MUI_LANGUAGE "Uzbek"
+!insertmacro MUI_LANGUAGE "Galician"
+;--------------------------------
+
+;----------------------------
+; Language strings
+!include "${DISTDIR}\langstrings.txt"
 
 ;--------------------------------
 ;Installer Sections
@@ -94,7 +160,7 @@ Section "install"
 	;Stop the BRLTTY service if it is running.
 	ExecWait "$SYSDIR\net.exe stop brlapi"
 
-	File /r /x *install.bat /x brltty.conf "${DISTDIR}\*"
+	File /r /x brltty.conf /x langstrings.txt "${DISTDIR}\*"
 	# Install the config file separately so we can avoid overwriting it.
 	SetOverwrite off
 	File /oname=etc\brltty.conf "${DISTDIR}\etc\brltty.conf"
@@ -103,6 +169,9 @@ Section "install"
 	!insertmacro InstallLib DLL NOTSHARED REBOOT_NOTPROTECTED "${DISTDIR}\bin\brlapi-0.5.dll" "$SYSDIR\brlapi-0.5.dll" "$SYSDIR"
 	!insertmacro InstallLib DLL NOTSHARED REBOOT_NOTPROTECTED "${DISTDIR}\bin\libusb0.dll" "$SYSDIR\libusb0.dll" "$SYSDIR"
 	!insertmacro InstallLib DLL NOTSHARED REBOOT_NOTPROTECTED "${DISTDIR}\bin\libusb0.sys" "$SYSDIR\drivers\libusb0.sys" "$SYSDIR\drivers"
+	!insertmacro InstallLib DLL NOTSHARED REBOOT_NOTPROTECTED "${DISTDIR}\bin\msvcr90.dll" "$SYSDIR\msvcr90.dll" "$SYSDIR"
+	!insertmacro InstallLib DLL NOTSHARED REBOOT_NOTPROTECTED "${DISTDIR}\bin\libintl3.dll" "$SYSDIR\libintl3.dll" "$SYSDIR"
+	!insertmacro InstallLib DLL NOTSHARED REBOOT_NOTPROTECTED "${DISTDIR}\bin\libiconv2.dll" "$SYSDIR\libiconv2.dll" "$SYSDIR"
 
 	;Store installation folder
 	WriteRegStr HKLM "Software\${PRODUCT}" "" $INSTDIR
@@ -119,19 +188,26 @@ Section "install"
 
 		;Create shortcuts
 		CreateDirectory "$SMPROGRAMS\$StartMenuFolder"
-		CreateShortCut "$SMPROGRAMS\$StartMenuFolder\Configure BRLTTY.lnk" "$INSTDIR\brlttycnf.exe"
-		CreateShortCut "$SMPROGRAMS\$StartMenuFolder\Install BRLTTY service.lnk" "$INSTDIR\install.bat"
-		CreateShortCut "$SMPROGRAMS\$StartMenuFolder\Uninstall BRLTTY service.lnk" "$INSTDIR\uninstall.bat"
-		CreateShortCut "$SMPROGRAMS\$StartMenuFolder\Uninstall.lnk" "$INSTDIR\Uninstall.exe"
+		CreateShortCut "$SMPROGRAMS\$StartMenuFolder\$(shortcut_brlttycnf).lnk" "$INSTDIR\brlttycnf.exe" -r
+		CreateShortCut "$SMPROGRAMS\$StartMenuFolder\$(shortcut_inssrv).lnk" "$INSTDIR\install.bat"
+		CreateShortCut "$SMPROGRAMS\$StartMenuFolder\$(shortcut_rmvsrv).lnk" "$INSTDIR\uninstall.bat"
+		CreateShortCut "$SMPROGRAMS\$StartMenuFolder\$(shortcut_uninstall).lnk" "$INSTDIR\Uninstall.exe"
+		CreateShortCut "$SMPROGRAMS\$StartMenuFolder\$(shortcut_inslibusb).lnk" "$SYSDIR\rundll32" "libusb0.dll,usb_install_driver_np_rundll $INSTDIR\bin\brltty.inf"
+		CreateShortCut "$SMPROGRAMS\$StartMenuFolder\$(shortcut_inslibusbfilter).lnk" "$SYSDIR\rundll32" "libusb0.dll,usb_install_service_np_rundll"
+		CreateShortCut "$SMPROGRAMS\$StartMenuFolder\$(shortcut_uninslibusbfilter).lnk" "$SYSDIR\rundll32" "libusb0.dll,usb_uninstall_service_np_rundll"
 
 	!insertmacro MUI_STARTMENU_WRITE_END
 
 	;Remove the BRLTTY service if it exists.
 	ExecWait "$INSTDIR\bin\brltty.exe -R"
 	;Install usb inf.
-	ExecWait "rundll32 libusb0.dll,usb_install_driver_np_rundll $INSTDIR\bin\brltty.inf"
-	ExecWait "rundll32 libusb0.dll,usb_install_service_np_rundll"
 	ExecWait "$INSTDIR\brlttycnf.exe"
+	MessageBox MB_YESNO|MB_DEFBUTTON2 $(msg_inslibusb32filter) IDNO nofilter
+	ExecWait "rundll32 libusb0.dll,usb_install_service_np_rundll"
+nofilter:
+	MessageBox MB_YESNO|MB_DEFBUTTON2 $(msg_inslibusb32) IDNO nodriver
+	ExecWait "rundll32 libusb0.dll,usb_install_driver_np_rundll $INSTDIR\bin\brltty.inf"
+nodriver:
 	;Install and start the BRLTTY service
 	ExecWait "$INSTDIR\bin\brltty.exe -I"
 	ExecWait "$SYSDIR\net.exe start brlapi"
@@ -152,7 +228,6 @@ Section "Uninstall"
 
 	!insertmacro UninstallLib DLL NOTSHARED REBOOT_NOTPROTECTED "$SYSDIR\brlapi-0.5.dll"
 	!insertmacro UninstallLib DLL NOTSHARED REBOOT_NOTPROTECTED "$SYSDIR\libusb0.dll"
-	!insertmacro UninstallLib DLL NOTSHARED REBOOT_NOTPROTECTED "$SYSDIR\drivers\libusb0.sys"
 
 	RMDir /r "$INSTDIR"
 
