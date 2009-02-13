@@ -147,7 +147,7 @@
 
 ;----------------------------
 ; Language strings
-!include "${DISTDIR}\langstrings.txt"
+!include "${DISTDIR}\nsistrings.txt"
 
 ;--------------------------------
 ;Installer Sections
@@ -160,7 +160,7 @@ Section "install"
 	;Stop the BRLTTY service if it is running.
 	ExecWait "$SYSDIR\net.exe stop brlapi"
 
-	File /r /x brltty.conf /x langstrings.txt "${DISTDIR}\*"
+	File /r /x brltty.conf /x nsistrings.txt "${DISTDIR}\*"
 	# Install the config file separately so we can avoid overwriting it.
 	SetOverwrite off
 	File /oname=etc\brltty.conf "${DISTDIR}\etc\brltty.conf"
