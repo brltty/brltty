@@ -2,11 +2,11 @@
 ;Czech
 LangString msg_WelcomePageTitle ${LANG_CZECH} "Instalace ${PRODUCT}, verze ${VERSION}"
 LangString msg_inslibusb32filter ${LANG_CZECH} "Do you want to install the LibUSB-win32 filter?$\r$\n(only useful for USB devices and if you have already installed drivers from your manufacturer for your USB device. Do not install it if you are running windows 64bit)"
-LangString msg_inslibusb32 ${LANG_CZECH} "Chcete nainstalovat ovlada? LibUSB-win32?$\r$\n(uï¿½ite?nï¿½ jen pokud nemï¿½te nainstalovï¿½n USB ovlada? dodï¿½vanï¿½ vï¿½robcem pro vaï¿½e za?ï¿½zenï¿½)"
+LangString msg_inslibusb32 ${LANG_CZECH} "Chcete nainstalovat ovlada? LibUSB-win32?$\r$\n(užite?né jen pokud nemáte nainstalován USB ovlada? dodávaný výrobcem pro vaše za?ízení)"
 
-LangString shortcut_brlttycnf $(LANG_CZECH) "Nastavenï¿½ BRLTTY"
-LangString shortcut_inssrv $(LANG_CZECH) "Instalace sluï¿½by BRLTTY"
-LangString shortcut_rmvsrv $(LANG_CZECH) "Odinstalace sluï¿½by BLRTTY"
+LangString shortcut_brlttycnf $(LANG_CZECH) "Nastavení BRLTTY"
+LangString shortcut_inssrv $(LANG_CZECH) "Instalace služby BRLTTY"
+LangString shortcut_rmvsrv $(LANG_CZECH) "Odinstalace služby BLRTTY"
 LangString shortcut_uninstall $(LANG_CZECH) "Odinstalace"
 LangString shortcut_inslibusbfilter $(LANG_CZECH) "Install LibUSB-win32 filter"
 LangString shortcut_uninslibusbfilter $(LANG_CZECH) "Uninstall LibUSB-win32 filter"
@@ -66,15 +66,15 @@ LangString shortcut_inslibusb $(LANG_FINNISH) "Install LibUSB-win32 driver"
 
 ;French
 LangString msg_WelcomePageTitle ${LANG_FRENCH} "Installation de ${PRODUCT}, Version ${VERSION}"
-LangString msg_inslibusb32filter ${LANG_FRENCH} "Voulez-vous installer le filtre LibUSB-win32 ?$\r$\n(utile seulement pour les plages USB et si vous avez dï¿½jï¿½ installï¿½ le pilote fourni par le constructeur de votre unitï¿½ USB. Ne l'installez pas si votre windows est 64bit)"
-LangString msg_inslibusb32 ${LANG_FRENCH} "Voulez-vous installer le pilote LibUSB-win32?$\r$\n(utile seulement si vous n'avez pas installï¿½ le pilote fourni par le constructeur de votre unitï¿½ USB)"
+LangString msg_inslibusb32filter ${LANG_FRENCH} "Voulez-vous installer le filtre LibUSB-win32 ?$\r$\n(utile seulement pour les plages USB et si vous avez déjà installé le pilote fourni par le constructeur de votre unité USB. Ne l'installez pas si votre windows est 64bit)"
+LangString msg_inslibusb32 ${LANG_FRENCH} "Voulez-vous installer le pilote LibUSB-win32?$\r$\n(utile seulement si vous n'avez pas installé le pilote fourni par le constructeur de votre unité USB)"
 
 LangString shortcut_brlttycnf $(LANG_FRENCH) "Configurer BRLTTY"
 LangString shortcut_InsSrv $(LANG_FRENCH) "Installer le Service BRLTTY"
-LangString shortcut_RmvSrv $(LANG_FRENCH) "Dï¿½sinstaller le Service BRLTTY"
-LangString shortcut_uninstall $(LANG_FRENCH) "Dï¿½sinstaller"
+LangString shortcut_RmvSrv $(LANG_FRENCH) "Désinstaller le Service BRLTTY"
+LangString shortcut_uninstall $(LANG_FRENCH) "Désinstaller"
 LangString shortcut_inslibusbfilter $(LANG_FRENCH) "Installer le filtre LibUSB-win32"
-LangString shortcut_uninslibusbfilter $(LANG_FERNCH) "Dï¿½sinstaller le filtre LibUSB-win32"
+LangString shortcut_uninslibusbfilter $(LANG_FERNCH) "Désinstaller le filtre LibUSB-win32"
 LangString shortcut_inslibusb $(LANG_FRENCH) "Installer le pilote LibUSB-win32"
 
 ;Galician
@@ -156,26 +156,26 @@ LangString shortcut_uninslibusbfilter $(LANG_POLISH) "Uninstall LibUSB-win32 fil
 LangString shortcut_inslibusb $(LANG_POLISH) "Install LibUSB-win32 driver"
 
 ;PortugueseBr
-LangString msg_WelcomePageTitle ${LANG_PORTUGUESEBR} "Setup para o ${PRODUCT}, Versï¿½o ${VERSION}"
+LangString msg_WelcomePageTitle ${LANG_PORTUGUESEBR} "Setup para o ${PRODUCT}, Versão ${VERSION}"
 LangString msg_inslibusb32filter ${LANG_PORTUGUESEBR} "Do you want to install the LibUSB-win32 filter?$\r$\n(only useful for USB devices and if you have already installed drivers from your manufacturer for your USB device. Do not install it if you are running windows 64bit)"
-LangString msg_inslibusb32 ${LANG_PORTUGUESEBR} "Pretende instalar o driver LibUSB-win32?$\r$\n(somente ï¿½til se nï¿½o tiver instalado drivers do fabricante para o seu dispositivo USB)"
+LangString msg_inslibusb32 ${LANG_PORTUGUESEBR} "Pretende instalar o driver LibUSB-win32?$\r$\n(somente útil se não tiver instalado drivers do fabricante para o seu dispositivo USB)"
 
 LangString shortcut_brlttycnf $(LANG_PORTUGUESEBR) "Configurar o BRLTTY"
-LangString shortcut_inssrv $(LANG_PORTUGUESEBR) "Instalar O Serviï¿½o BRLTTY"
-LangString shortcut_rmvsrv $(LANG_PORTUGUESEBR) "Desinstalar O Serviï¿½o BRLTTY"
+LangString shortcut_inssrv $(LANG_PORTUGUESEBR) "Instalar O Serviço BRLTTY"
+LangString shortcut_rmvsrv $(LANG_PORTUGUESEBR) "Desinstalar O Serviço BRLTTY"
 LangString shortcut_uninstall $(LANG_PORTUGUESEBR) "Desinstalar"
 LangString shortcut_inslibusbfilter $(LANG_PORTUGUESEBR) "Install LibUSB-win32 filter"
 LangString shortcut_uninslibusbfilter $(LANG_PORTUGUESEBR) "Uninstall LibUSB-win32 filter"
 LangString shortcut_inslibusb $(LANG_PORTUGUESEBR) "Instalar o driver LibUSB-win32"
 
 ;Portuguese
-LangString msg_WelcomePageTitle ${LANG_PORTUGUESE} "Setup para o ${PRODUCT}, Versï¿½o ${VERSION}"
+LangString msg_WelcomePageTitle ${LANG_PORTUGUESE} "Setup para o ${PRODUCT}, Versão ${VERSION}"
 LangString msg_inslibusb32filter ${LANG_PORTUGUESE} "Do you want to install the LibUSB-win32 filter?$\r$\n(only useful for USB devices and if you have already installed drivers from your manufacturer for your USB device. Do not install it if you are running windows 64bit)"
-LangString msg_inslibusb32 ${LANG_PORTUGUESE} "Pretende instalar o driver LibUSB-win32?$\r$\n(somente ï¿½til se nï¿½o tiver instalado drivers do fabricante para o seu dispositivo USB)"
+LangString msg_inslibusb32 ${LANG_PORTUGUESE} "Pretende instalar o driver LibUSB-win32?$\r$\n(somente útil se não tiver instalado drivers do fabricante para o seu dispositivo USB)"
 
 LangString shortcut_brlttycnf $(LANG_PORTUGUESE) "Configurar o BRLTTY"
-LangString shortcut_inssrv $(LANG_PORTUGUESE) "Instalar O Serviï¿½o BRLTTY"
-LangString shortcut_rmvsrv $(LANG_PORTUGUESE) "Desinstalar O Serviï¿½o BRLTTY"
+LangString shortcut_inssrv $(LANG_PORTUGUESE) "Instalar O Serviço BRLTTY"
+LangString shortcut_rmvsrv $(LANG_PORTUGUESE) "Desinstalar O Serviço BRLTTY"
 LangString shortcut_uninstall $(LANG_PORTUGUESE) "Desinstalar"
 LangString shortcut_inslibusbfilter $(LANG_PORTUGUESE) "Install LibUSB-win32 filter"
 LangString shortcut_uninslibusbfilter $(LANG_PORTUGUESE) "Uninstall LibUSB-win32 filter"
