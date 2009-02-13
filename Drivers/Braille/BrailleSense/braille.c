@@ -25,6 +25,33 @@
 
 #include "brl_driver.h"
 
+typedef enum {
+  /* braille dot keys */
+  KEY_DOT1  = 0X0001,
+  KEY_DOT2  = 0X0002,
+  KEY_DOT3  = 0X0004,
+  KEY_DOT4  = 0X0008,
+  KEY_DOT5  = 0X0010,
+  KEY_DOT6  = 0X0020,
+  KEY_DOT7  = 0X0040,
+  KEY_DOT8  = 0X0080,
+  KEY_SPACE = 0X0100,
+
+  /* Braille Sense keys */
+  KEY_BS_F1 = 0X0200,
+  KEY_BS_F2 = 0X0400,
+  KEY_BS_F3 = 0X0800,
+  KEY_BS_F4 = 0X1000,
+  KEY_BS_SL = 0X2000,
+  KEY_BS_SR = 0X4000,
+
+  /* Sync Braille keys */
+  KEY_SB_LU = 0X10,
+  KEY_SB_RU = 0X20,
+  KEY_SB_RD = 0X40,
+  KEY_SB_LD = 0X80,
+} BrailleKeys;
+
 typedef struct {
   int (*openPort) (const char *device);
   int (*configurePort) (void);
@@ -33,187 +60,11 @@ typedef struct {
   int (*readBytes) (unsigned char *buffer, int length, int wait);
   int (*writeBytes) (const unsigned char *buffer, int length);
 } InputOutputOperations;
+static const InputOutputOperations *io;
 
-/* Serial IO */
-#include "io_serial.h"
-
-static SerialDevice *serialDevice = NULL;
-#define SERIAL_BAUD 115200
-
-static int
-openSerialPort (const char *device) {
-  if ((serialDevice = serialOpenDevice(device))) return 1;
-  return 0;
-}
-
-static int
-configureSerialPort (void) {
-  if (!serialRestartDevice(serialDevice, SERIAL_BAUD)) return 0;
-  return 1;
-}
-
-static int
-awaitSerialInput (int milliseconds) {
-  return serialAwaitInput(serialDevice, milliseconds);
-}
-
-static int
-readSerialBytes (unsigned char *buffer, int count, int wait) {
-  const int timeout = 100;
-  return serialReadData(serialDevice, buffer, count,
-                        (wait? timeout: 0), timeout);
-}
-
-static int
-writeSerialBytes (const unsigned char *buffer, int length) {
-  return serialWriteData(serialDevice, buffer, length);
-}
-
-static void
-closeSerialPort (void) {
-  if (serialDevice) {
-    serialCloseDevice(serialDevice);
-    serialDevice = NULL;
-  }
-}
-
-static const InputOutputOperations serialOperations = {
-  openSerialPort, configureSerialPort, closeSerialPort,
-  awaitSerialInput, readSerialBytes, writeSerialBytes
-};
-
-#ifdef ENABLE_USB_SUPPORT
-/* USB IO */
-#include "io_usb.h"
-
-static UsbChannel *usbChannel = NULL;
-static const UsbSerialOperations *usbSerial = NULL;
-
-static int
-openUsbPort (const char *device) {
-  static const UsbChannelDefinition definitions[] = {
-    { /* Braille Sense */
-      .vendor=0X045E, .product=0X930A,
-      .configuration=1, .interface=0, .alternative=0,
-      .inputEndpoint=1, .outputEndpoint=2
-    }
-    ,
-    { .vendor=0 }
-  };
-
-  if ((usbChannel = usbFindChannel(definitions, (void *)device))) {
-    usbSerial = usbGetSerialOperations(usbChannel->device);
-    usbBeginInput(usbChannel->device,
-                  usbChannel->definition.inputEndpoint,
-                  8);
-    return 1;
-  }
-  return 0;
-}
-
-static int
-configureUsbPort (void) {
-  return 1;
-}
-
-static int
-awaitUsbInput (int milliseconds) {
-  return usbAwaitInput(usbChannel->device,
-                       usbChannel->definition.inputEndpoint,
-                       milliseconds);
-}
-
-static int
-readUsbBytes (unsigned char *buffer, int length, int wait) {
-  const int timeout = 100;
-  int count = usbReapInput(usbChannel->device,
-                           usbChannel->definition.inputEndpoint,
-                           buffer, length,
-                           (wait? timeout: 0), timeout);
-  if (count != -1) return count;
-  if (errno == EAGAIN) return 0;
-  return -1;
-}
-
-static int
-writeUsbBytes (const unsigned char *buffer, int length) {
-  return usbWriteEndpoint(usbChannel->device,
-                          usbChannel->definition.outputEndpoint,
-                          buffer, length, 1000);
-}
-
-static void
-closeUsbPort (void) {
-  if (usbChannel) {
-    usbCloseChannel(usbChannel);
-    usbSerial = NULL;
-    usbChannel = NULL;
-  }
-}
-
-static const InputOutputOperations usbOperations = {
-  openUsbPort, configureUsbPort, closeUsbPort,
-  awaitUsbInput, readUsbBytes, writeUsbBytes
-};
-#endif /* ENABLE_USB_SUPPORT */
-
-#ifdef ENABLE_BLUETOOTH_SUPPORT
-/* Bluetooth IO */
-#include "io_bluetooth.h"
-#include "io_misc.h"
-
-static int bluetoothConnection = -1;
-
-static int
-openBluetoothPort (const char *device) {
-  return (bluetoothConnection = btOpenConnection(device, 1, 0)) != -1;
-}
-
-static int
-configureBluetoothPort (void) {
-  return 1;
-}
-
-static int
-awaitBluetoothInput (int milliseconds) {
-  return awaitInput(bluetoothConnection, milliseconds);
-}
-
-static int
-readBluetoothBytes (unsigned char *buffer, int length, int wait) {
-  const int timeout = 100;
-  size_t offset = 0;
-  return readChunk(bluetoothConnection,
-                   buffer, &offset, length,
-                   (wait? timeout: 0), timeout);
-}
-
-static int
-writeBluetoothBytes (const unsigned char *buffer, int length) {
-  int count = writeData(bluetoothConnection, buffer, length);
-  if (count != length) {
-    if (count == -1) {
-      LogError("Bluetooth write");
-    } else {
-      LogPrint(LOG_WARNING, "Trunccated bluetooth write: %d < %d", count, length);
-    }
-  }
-  return count;
-}
-
-static void
-closeBluetoothPort (void) {
-  if (bluetoothConnection != -1) {
-    close(bluetoothConnection);
-    bluetoothConnection = -1;
-  }
-}
-
-static const InputOutputOperations bluetoothOperations = {
-  openBluetoothPort, configureBluetoothPort, closeBluetoothPort,
-  awaitBluetoothInput, readBluetoothBytes, writeBluetoothBytes
-};
-#endif /* ENABLE_BLUETOOTH_SUPPORT */
+static const int logInputPackets = 0;
+static const int logOutputPackets = 0;
+static int charactersPerSecond;
 
 typedef enum {
   IPT_CURSOR  = 0X00,
@@ -234,34 +85,6 @@ typedef union {
     unsigned char end;
   } PACKED data;
 } PACKED InputPacket;
-
-typedef enum {
-  KEY_DOT1  = 0X0001,
-  KEY_DOT2  = 0X0002,
-  KEY_DOT3  = 0X0004,
-  KEY_DOT4  = 0X0008,
-  KEY_DOT5  = 0X0010,
-  KEY_DOT6  = 0X0020,
-  KEY_DOT7  = 0X0040,
-  KEY_DOT8  = 0X0080,
-  KEY_SPACE = 0X0100,
-  KEY_F1    = 0X0200,
-  KEY_F2    = 0X0400,
-  KEY_F3    = 0X0800,
-  KEY_F4    = 0X1000,
-  KEY_LEFT  = 0X2000,
-  KEY_RIGHT = 0X4000,
-} BrailleKeys;
-
-static const int logInputPackets = 0;
-static const int logOutputPackets = 0;
-
-static const InputOutputOperations *io = NULL;
-static int inputMode;
-static int routingCommand;
-static int charactersPerSecond;
-static TranslationTable outputTable;
-static unsigned char previousCells[40];
 
 static int
 readByte (unsigned char *byte, int wait) {
@@ -402,6 +225,421 @@ writePacket (
   return 1;
 }
 
+typedef struct {
+  unsigned int helpPage;
+  int (*getCellCount) (BrailleDisplay *brl, unsigned int *count);
+  int (*interpretKeys) (BrailleKeys keys);
+} ProtocolOperations;
+static const ProtocolOperations *protocol;
+
+static int inputMode;
+static int routingCommand;
+
+static int
+getBrailleSenseCellCount (BrailleDisplay *brl, unsigned int *count) {
+  *count = 32;
+  return 1;
+}
+
+static int
+interpretBrailleSenseKeys (BrailleKeys keys) {
+  switch (keys) {
+    case KEY_BS_F4:
+    case KEY_SPACE:
+      return BRL_CMD_HOME;
+    case KEY_BS_F4 | KEY_BS_F1:
+      return BRL_CMD_BACK;
+
+    case KEY_DOT1:
+    case KEY_BS_SL:
+      return BRL_CMD_FWINLT;
+    case KEY_DOT4:
+    case KEY_BS_SR:
+      return BRL_CMD_FWINRT;
+
+    case KEY_DOT2:
+      return BRL_CMD_FWINLTSKIP;
+    case KEY_DOT5:
+      return BRL_CMD_FWINRTSKIP;
+
+    case KEY_DOT1 | KEY_DOT2:
+      return BRL_CMD_CHRLT;
+    case KEY_DOT4 | KEY_DOT5:
+      return BRL_CMD_CHRRT;
+
+    case KEY_BS_SL | KEY_BS_F1:
+    case KEY_DOT1 | KEY_DOT2 | KEY_DOT3:
+      return BRL_CMD_LNBEG;
+    case KEY_BS_SR | KEY_BS_F4:
+    case KEY_DOT4 | KEY_DOT5 | KEY_DOT6:
+      return BRL_CMD_LNEND;
+
+    case KEY_BS_F2 | KEY_BS_F3:
+      return BRL_CMD_CSRJMP_VERT;
+    case KEY_BS_F2:
+    case KEY_DOT3:
+      return BRL_CMD_LNUP;
+    case KEY_BS_F3:
+    case KEY_DOT6:
+      return BRL_CMD_LNDN;
+
+    case KEY_DOT7:
+      return BRL_CMD_PRDIFLN;
+    case KEY_DOT8:
+      return BRL_CMD_NXDIFLN;
+
+    case KEY_DOT3 | KEY_DOT7:
+      return BRL_CMD_ATTRUP;
+    case KEY_DOT6 | KEY_DOT8:
+      return BRL_CMD_ATTRDN;
+
+    case KEY_BS_F2 | KEY_BS_F1:
+    case KEY_DOT2 | KEY_DOT3:
+      return BRL_CMD_TOP;
+    case KEY_BS_F3 | KEY_BS_F4:
+    case KEY_DOT5 | KEY_DOT6:
+      return BRL_CMD_BOT;
+
+    case KEY_DOT2 | KEY_DOT3 | KEY_DOT7:
+      return BRL_CMD_TOP_LEFT;
+    case KEY_DOT5 | KEY_DOT6 | KEY_DOT8:
+      return BRL_CMD_BOT_LEFT;
+
+    case KEY_BS_SL | KEY_BS_F1 | KEY_BS_F2:
+    case KEY_DOT1 | KEY_DOT3:
+      return BRL_CMD_PRPROMPT;
+    case KEY_BS_SR | KEY_BS_F4 | KEY_BS_F3:
+    case KEY_DOT4 | KEY_DOT6:
+      return BRL_CMD_NXPROMPT;
+
+    case KEY_BS_SL | KEY_BS_F2:
+    case KEY_DOT2 | KEY_DOT7:
+      return BRL_CMD_PRPGRPH;
+    case KEY_BS_SR | KEY_BS_F3:
+    case KEY_DOT5 | KEY_DOT8:
+      return BRL_CMD_NXPGRPH;
+
+    case KEY_DOT1 | KEY_DOT7:
+      return BRL_CMD_PRSEARCH;
+    case KEY_DOT4 | KEY_DOT8:
+      return BRL_CMD_NXSEARCH;
+
+    case KEY_SPACE | KEY_DOT2 | KEY_DOT4:
+      inputMode = 1;
+      return BRL_CMD_NOOP | BRL_FLG_TOGGLE_ON;
+    case KEY_SPACE | KEY_DOT1 | KEY_DOT3 | KEY_DOT4 | KEY_DOT5:
+      inputMode = 0;
+      return BRL_CMD_NOOP | BRL_FLG_TOGGLE_OFF;
+
+    case KEY_SPACE | KEY_DOT1 | KEY_DOT2 | KEY_DOT5:
+      return BRL_CMD_HELP;
+    case KEY_SPACE | KEY_DOT1 | KEY_DOT2 | KEY_DOT3:
+      return BRL_CMD_LEARN;
+    case KEY_SPACE | KEY_DOT2 | KEY_DOT3 | KEY_DOT4:
+      return BRL_CMD_INFO;
+
+    case KEY_SPACE | KEY_DOT1 | KEY_DOT3 | KEY_DOT4:
+      return BRL_CMD_PREFMENU;
+    case KEY_SPACE | KEY_DOT1 | KEY_DOT2 | KEY_DOT3 | KEY_DOT5:
+      return BRL_CMD_PREFLOAD;
+    case KEY_SPACE | KEY_DOT2 | KEY_DOT4 | KEY_DOT5 | KEY_DOT6:
+      return BRL_CMD_PREFSAVE;
+
+    case KEY_SPACE | KEY_DOT2 | KEY_DOT3 | KEY_DOT5:
+      return BRL_CMD_SIXDOTS | BRL_FLG_TOGGLE_ON;
+    case KEY_SPACE | KEY_DOT2 | KEY_DOT3 | KEY_DOT6:
+      return BRL_CMD_SIXDOTS | BRL_FLG_TOGGLE_OFF;
+
+    case KEY_SPACE | KEY_DOT1 | KEY_DOT4:
+      return BRL_CMD_CSRVIS;
+    case KEY_SPACE | KEY_DOT1 | KEY_DOT2 | KEY_DOT4:
+      return BRL_CMD_FREEZE;
+    case KEY_SPACE | KEY_DOT2 | KEY_DOT3 | KEY_DOT4 | KEY_DOT5:
+      return BRL_CMD_CSRTRK;
+    case KEY_SPACE | KEY_DOT1 | KEY_DOT3 | KEY_DOT6:
+      return BRL_CMD_ATTRVIS;
+
+    case KEY_SPACE | KEY_DOT2:
+      return BRL_BLK_PASSKEY + BRL_KEY_HOME;
+    case KEY_SPACE | KEY_DOT3:
+      return BRL_BLK_PASSKEY + BRL_KEY_END;
+    case KEY_SPACE | KEY_DOT5:
+      return BRL_BLK_PASSKEY + BRL_KEY_PAGE_UP;
+    case KEY_SPACE | KEY_DOT6:
+      return BRL_BLK_PASSKEY + BRL_KEY_PAGE_DOWN;
+    case KEY_SPACE | KEY_DOT2 | KEY_DOT5:
+      return BRL_BLK_PASSKEY + BRL_KEY_CURSOR_UP;
+    case KEY_SPACE | KEY_DOT3 | KEY_DOT6:
+      return BRL_BLK_PASSKEY + BRL_KEY_CURSOR_DOWN;
+    case KEY_SPACE | KEY_DOT2 | KEY_DOT3:
+      return BRL_BLK_PASSKEY + BRL_KEY_CURSOR_LEFT;
+    case KEY_SPACE | KEY_DOT5 | KEY_DOT6:
+      return BRL_BLK_PASSKEY + BRL_KEY_CURSOR_RIGHT;
+
+    case KEY_SPACE | KEY_BS_F1:
+      routingCommand = BRL_BLK_CUTBEGIN;
+      return BRL_CMD_NOOP;
+    case KEY_SPACE | KEY_BS_F2:
+      routingCommand = BRL_BLK_CUTAPPEND;
+      return BRL_CMD_NOOP;
+    case KEY_SPACE | KEY_BS_F3:
+      routingCommand = BRL_BLK_CUTLINE;
+      return BRL_CMD_NOOP;
+    case KEY_SPACE | KEY_BS_F4:
+      routingCommand = BRL_BLK_CUTRECT;
+      return BRL_CMD_NOOP;
+    case KEY_SPACE | KEY_DOT1 | KEY_DOT2 | KEY_DOT3 | KEY_DOT4:
+      return BRL_CMD_PASTE;
+
+    case KEY_SPACE | KEY_BS_SL:
+      routingCommand = BRL_BLK_SETLEFT;
+      return BRL_CMD_NOOP;
+    case KEY_SPACE | KEY_BS_SR:
+      routingCommand = BRL_BLK_DESCCHAR;
+      return BRL_CMD_NOOP;
+
+    default:
+      break;
+  }
+
+  return EOF;
+}
+
+static const ProtocolOperations brailleSenseOperations = {
+  0, getBrailleSenseCellCount, interpretBrailleSenseKeys
+};
+
+static int
+getSyncBrailleCellCount (BrailleDisplay *brl, unsigned int *count) {
+  static const unsigned char data[] = {
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+  };
+
+  if (writePacket(brl, 0XFB, 0X00, data, sizeof(data), NULL, 0)) {
+    InputPacket packet;
+
+    if (readPacket(brl, &packet)) {
+      if (packet.data.type == IPT_CELLS) {
+        *count = packet.data.data;
+        return 1;
+      }
+    }
+  }
+
+  return 0;
+}
+
+static int
+interpretSyncBrailleKeys (BrailleKeys keys) {
+  switch (keys) {
+    default:
+      break;
+  }
+
+  return EOF;
+}
+
+static const ProtocolOperations syncBrailleOperations = {
+  1, getSyncBrailleCellCount, interpretSyncBrailleKeys
+};
+
+/* Serial IO */
+#include "io_serial.h"
+
+static SerialDevice *serialDevice = NULL;
+#define SERIAL_BAUD 115200
+
+static int
+openSerialPort (const char *device) {
+  if (!(serialDevice = serialOpenDevice(device))) return 0;
+  protocol = &brailleSenseOperations;
+  return 1;
+}
+
+static int
+configureSerialPort (void) {
+  if (!serialRestartDevice(serialDevice, SERIAL_BAUD)) return 0;
+  return 1;
+}
+
+static int
+awaitSerialInput (int milliseconds) {
+  return serialAwaitInput(serialDevice, milliseconds);
+}
+
+static int
+readSerialBytes (unsigned char *buffer, int count, int wait) {
+  const int timeout = 100;
+  return serialReadData(serialDevice, buffer, count,
+                        (wait? timeout: 0), timeout);
+}
+
+static int
+writeSerialBytes (const unsigned char *buffer, int length) {
+  return serialWriteData(serialDevice, buffer, length);
+}
+
+static void
+closeSerialPort (void) {
+  if (serialDevice) {
+    serialCloseDevice(serialDevice);
+    serialDevice = NULL;
+  }
+}
+
+static const InputOutputOperations serialOperations = {
+  openSerialPort, configureSerialPort, closeSerialPort,
+  awaitSerialInput, readSerialBytes, writeSerialBytes
+};
+
+#ifdef ENABLE_USB_SUPPORT
+/* USB IO */
+#include "io_usb.h"
+
+static UsbChannel *usbChannel = NULL;
+static const UsbSerialOperations *usbSerial = NULL;
+
+static int
+openUsbPort (const char *device) {
+  static const UsbChannelDefinition definitions[] = {
+    { /* Braille Sense */
+      .vendor=0X045E, .product=0X930A,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=2,
+      .data=&brailleSenseOperations
+    }
+    ,
+    { /* Sync Braille */
+      .vendor=0X0403, .product=0X6001,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=2,
+      .data=&syncBrailleOperations
+    }
+    ,
+    { .vendor=0 }
+  };
+
+  if ((usbChannel = usbFindChannel(definitions, (void *)device))) {
+    usbSerial = usbGetSerialOperations(usbChannel->device);
+    usbBeginInput(usbChannel->device,
+                  usbChannel->definition.inputEndpoint,
+                  8);
+    protocol = usbChannel->definition.data;
+    return 1;
+  }
+  return 0;
+}
+
+static int
+configureUsbPort (void) {
+  return 1;
+}
+
+static int
+awaitUsbInput (int milliseconds) {
+  return usbAwaitInput(usbChannel->device,
+                       usbChannel->definition.inputEndpoint,
+                       milliseconds);
+}
+
+static int
+readUsbBytes (unsigned char *buffer, int length, int wait) {
+  const int timeout = 100;
+  int count = usbReapInput(usbChannel->device,
+                           usbChannel->definition.inputEndpoint,
+                           buffer, length,
+                           (wait? timeout: 0), timeout);
+  if (count != -1) return count;
+  if (errno == EAGAIN) return 0;
+  return -1;
+}
+
+static int
+writeUsbBytes (const unsigned char *buffer, int length) {
+  return usbWriteEndpoint(usbChannel->device,
+                          usbChannel->definition.outputEndpoint,
+                          buffer, length, 1000);
+}
+
+static void
+closeUsbPort (void) {
+  if (usbChannel) {
+    usbCloseChannel(usbChannel);
+    usbSerial = NULL;
+    usbChannel = NULL;
+  }
+}
+
+static const InputOutputOperations usbOperations = {
+  openUsbPort, configureUsbPort, closeUsbPort,
+  awaitUsbInput, readUsbBytes, writeUsbBytes
+};
+#endif /* ENABLE_USB_SUPPORT */
+
+#ifdef ENABLE_BLUETOOTH_SUPPORT
+/* Bluetooth IO */
+#include "io_bluetooth.h"
+#include "io_misc.h"
+
+static int bluetoothConnection = -1;
+
+static int
+openBluetoothPort (const char *device) {
+  if ((bluetoothConnection = btOpenConnection(device, 1, 0)) == -1) return 0;
+  protocol = &brailleSenseOperations;
+  return 1;
+}
+
+static int
+configureBluetoothPort (void) {
+  return 1;
+}
+
+static int
+awaitBluetoothInput (int milliseconds) {
+  return awaitInput(bluetoothConnection, milliseconds);
+}
+
+static int
+readBluetoothBytes (unsigned char *buffer, int length, int wait) {
+  const int timeout = 100;
+  size_t offset = 0;
+  return readChunk(bluetoothConnection,
+                   buffer, &offset, length,
+                   (wait? timeout: 0), timeout);
+}
+
+static int
+writeBluetoothBytes (const unsigned char *buffer, int length) {
+  int count = writeData(bluetoothConnection, buffer, length);
+  if (count != length) {
+    if (count == -1) {
+      LogError("Bluetooth write");
+    } else {
+      LogPrint(LOG_WARNING, "Trunccated bluetooth write: %d < %d", count, length);
+    }
+  }
+  return count;
+}
+
+static void
+closeBluetoothPort (void) {
+  if (bluetoothConnection != -1) {
+    close(bluetoothConnection);
+    bluetoothConnection = -1;
+  }
+}
+
+static const InputOutputOperations bluetoothOperations = {
+  openBluetoothPort, configureBluetoothPort, closeBluetoothPort,
+  awaitBluetoothInput, readBluetoothBytes, writeBluetoothBytes
+};
+#endif /* ENABLE_BLUETOOTH_SUPPORT */
+
+static TranslationTable outputTable;
+static unsigned char previousCells[40];
+
 static int
 writeCells (BrailleDisplay *brl) {
   size_t count = brl->textColumns * brl->textRows;
@@ -453,13 +691,14 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     if (io->configurePort()) {
       charactersPerSecond = SERIAL_BAUD / 10;
 
-      brl->textColumns = 32;
-      brl->textRows = 1;
-      brl->helpPage = 0;
+      if (protocol->getCellCount(brl, &brl->textColumns)) {
+        brl->textRows = 1;
+        brl->helpPage = protocol->helpPage;
 
-      inputMode = 0;
-      routingCommand = BRL_BLK_ROUTE;
-      if (clearCells(brl)) return 1;
+        inputMode = 0;
+        routingCommand = BRL_BLK_ROUTE;
+        if (clearCells(brl)) return 1;
+      }
     }
 
     io->closePort();
@@ -530,163 +769,9 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
         }
       }
 
-      switch (keys) {
-        case KEY_F4:
-        case KEY_SPACE:
-          return BRL_CMD_HOME;
-        case KEY_F4 | KEY_F1:
-          return BRL_CMD_BACK;
-
-        case KEY_DOT1:
-        case KEY_LEFT:
-          return BRL_CMD_FWINLT;
-        case KEY_DOT4:
-        case KEY_RIGHT:
-          return BRL_CMD_FWINRT;
-
-        case KEY_DOT2:
-          return BRL_CMD_FWINLTSKIP;
-        case KEY_DOT5:
-          return BRL_CMD_FWINRTSKIP;
-
-        case KEY_DOT1 | KEY_DOT2:
-          return BRL_CMD_CHRLT;
-        case KEY_DOT4 | KEY_DOT5:
-          return BRL_CMD_CHRRT;
-
-        case KEY_LEFT | KEY_F1:
-        case KEY_DOT1 | KEY_DOT2 | KEY_DOT3:
-          return BRL_CMD_LNBEG;
-        case KEY_RIGHT | KEY_F4:
-        case KEY_DOT4 | KEY_DOT5 | KEY_DOT6:
-          return BRL_CMD_LNEND;
-
-        case KEY_F2 | KEY_F3:
-          return BRL_CMD_CSRJMP_VERT;
-        case KEY_F2:
-        case KEY_DOT3:
-          return BRL_CMD_LNUP;
-        case KEY_F3:
-        case KEY_DOT6:
-          return BRL_CMD_LNDN;
-
-        case KEY_DOT7:
-          return BRL_CMD_PRDIFLN;
-        case KEY_DOT8:
-          return BRL_CMD_NXDIFLN;
-
-        case KEY_DOT3 | KEY_DOT7:
-          return BRL_CMD_ATTRUP;
-        case KEY_DOT6 | KEY_DOT8:
-          return BRL_CMD_ATTRDN;
-
-        case KEY_F2 | KEY_F1:
-        case KEY_DOT2 | KEY_DOT3:
-          return BRL_CMD_TOP;
-        case KEY_F3 | KEY_F4:
-        case KEY_DOT5 | KEY_DOT6:
-          return BRL_CMD_BOT;
-
-        case KEY_DOT2 | KEY_DOT3 | KEY_DOT7:
-          return BRL_CMD_TOP_LEFT;
-        case KEY_DOT5 | KEY_DOT6 | KEY_DOT8:
-          return BRL_CMD_BOT_LEFT;
-
-        case KEY_LEFT | KEY_F1 | KEY_F2:
-        case KEY_DOT1 | KEY_DOT3:
-          return BRL_CMD_PRPROMPT;
-        case KEY_RIGHT | KEY_F4 | KEY_F3:
-        case KEY_DOT4 | KEY_DOT6:
-          return BRL_CMD_NXPROMPT;
-
-        case KEY_LEFT | KEY_F2:
-        case KEY_DOT2 | KEY_DOT7:
-          return BRL_CMD_PRPGRPH;
-        case KEY_RIGHT | KEY_F3:
-        case KEY_DOT5 | KEY_DOT8:
-          return BRL_CMD_NXPGRPH;
-
-        case KEY_DOT1 | KEY_DOT7:
-          return BRL_CMD_PRSEARCH;
-        case KEY_DOT4 | KEY_DOT8:
-          return BRL_CMD_NXSEARCH;
-
-        case KEY_SPACE | KEY_DOT2 | KEY_DOT4:
-          inputMode = 1;
-          return BRL_CMD_NOOP | BRL_FLG_TOGGLE_ON;
-        case KEY_SPACE | KEY_DOT1 | KEY_DOT3 | KEY_DOT4 | KEY_DOT5:
-          inputMode = 0;
-          return BRL_CMD_NOOP | BRL_FLG_TOGGLE_OFF;
-
-        case KEY_SPACE | KEY_DOT1 | KEY_DOT2 | KEY_DOT5:
-          return BRL_CMD_HELP;
-        case KEY_SPACE | KEY_DOT1 | KEY_DOT2 | KEY_DOT3:
-          return BRL_CMD_LEARN;
-        case KEY_SPACE | KEY_DOT2 | KEY_DOT3 | KEY_DOT4:
-          return BRL_CMD_INFO;
-
-        case KEY_SPACE | KEY_DOT1 | KEY_DOT3 | KEY_DOT4:
-          return BRL_CMD_PREFMENU;
-        case KEY_SPACE | KEY_DOT1 | KEY_DOT2 | KEY_DOT3 | KEY_DOT5:
-          return BRL_CMD_PREFLOAD;
-        case KEY_SPACE | KEY_DOT2 | KEY_DOT4 | KEY_DOT5 | KEY_DOT6:
-          return BRL_CMD_PREFSAVE;
-
-        case KEY_SPACE | KEY_DOT2 | KEY_DOT3 | KEY_DOT5:
-          return BRL_CMD_SIXDOTS | BRL_FLG_TOGGLE_ON;
-        case KEY_SPACE | KEY_DOT2 | KEY_DOT3 | KEY_DOT6:
-          return BRL_CMD_SIXDOTS | BRL_FLG_TOGGLE_OFF;
-
-        case KEY_SPACE | KEY_DOT1 | KEY_DOT4:
-          return BRL_CMD_CSRVIS;
-        case KEY_SPACE | KEY_DOT1 | KEY_DOT2 | KEY_DOT4:
-          return BRL_CMD_FREEZE;
-        case KEY_SPACE | KEY_DOT2 | KEY_DOT3 | KEY_DOT4 | KEY_DOT5:
-          return BRL_CMD_CSRTRK;
-        case KEY_SPACE | KEY_DOT1 | KEY_DOT3 | KEY_DOT6:
-          return BRL_CMD_ATTRVIS;
-
-        case KEY_SPACE | KEY_DOT2:
-          return BRL_BLK_PASSKEY + BRL_KEY_HOME;
-        case KEY_SPACE | KEY_DOT3:
-          return BRL_BLK_PASSKEY + BRL_KEY_END;
-        case KEY_SPACE | KEY_DOT5:
-          return BRL_BLK_PASSKEY + BRL_KEY_PAGE_UP;
-        case KEY_SPACE | KEY_DOT6:
-          return BRL_BLK_PASSKEY + BRL_KEY_PAGE_DOWN;
-        case KEY_SPACE | KEY_DOT2 | KEY_DOT5:
-          return BRL_BLK_PASSKEY + BRL_KEY_CURSOR_UP;
-        case KEY_SPACE | KEY_DOT3 | KEY_DOT6:
-          return BRL_BLK_PASSKEY + BRL_KEY_CURSOR_DOWN;
-        case KEY_SPACE | KEY_DOT2 | KEY_DOT3:
-          return BRL_BLK_PASSKEY + BRL_KEY_CURSOR_LEFT;
-        case KEY_SPACE | KEY_DOT5 | KEY_DOT6:
-          return BRL_BLK_PASSKEY + BRL_KEY_CURSOR_RIGHT;
-
-        case KEY_SPACE | KEY_F1:
-          routingCommand = BRL_BLK_CUTBEGIN;
-          return BRL_CMD_NOOP;
-        case KEY_SPACE | KEY_F2:
-          routingCommand = BRL_BLK_CUTAPPEND;
-          return BRL_CMD_NOOP;
-        case KEY_SPACE | KEY_F3:
-          routingCommand = BRL_BLK_CUTLINE;
-          return BRL_CMD_NOOP;
-        case KEY_SPACE | KEY_F4:
-          routingCommand = BRL_BLK_CUTRECT;
-          return BRL_CMD_NOOP;
-        case KEY_SPACE | KEY_DOT1 | KEY_DOT2 | KEY_DOT3 | KEY_DOT4:
-          return BRL_CMD_PASTE;
-
-        case KEY_SPACE | KEY_LEFT:
-          routingCommand = BRL_BLK_SETLEFT;
-          return BRL_CMD_NOOP;
-        case KEY_SPACE | KEY_RIGHT:
-          routingCommand = BRL_BLK_DESCCHAR;
-          return BRL_CMD_NOOP;
-
-        default:
-          break;
+      {
+        int command = protocol->interpretKeys(keys);
+        if (command != EOF) return command;
       }
 
       return BRL_CMD_NOOP;
