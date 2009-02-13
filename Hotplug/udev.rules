@@ -56,7 +56,7 @@ ENV{PRODUCT}=="45e/930a/*", ENV{BRLTTY_DRIVER}="bs", GOTO="brltty_usb_run"
 
 # EuroBraille
 ENV{PRODUCT}=="c251/1122/*", ENV{BRLTTY_DRIVER}="eu", GOTO="brltty_usb_run"
-2NV{PRODUCT}=="c251/1124/*", ENV{BRLTTY_DRIVER}="eu", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="c251/1124/*", ENV{BRLTTY_DRIVER}="eu", GOTO="brltty_usb_run"
 
 # FreedomScientific
 ENV{PRODUCT}=="f4e/100/*", ENV{BRLTTY_DRIVER}="fs", GOTO="brltty_usb_run"
