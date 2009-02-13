@@ -182,7 +182,6 @@ The following braille displays are supported:
 -  Baum [Inka, Vario/RBT, SuperVario/Brailliant, PocketVario]
 -  BrailleLite [18/40/M20/M40]
 -  BrailleNote [18/32]
--  BrailleSense [32]
 -  BrlAPI
 -  CombiBraille [25/45/85]
 -  EcoBraille [20/40/80]
@@ -190,6 +189,7 @@ The following braille displays are supported:
 -  FreedomScientific [Focus 44/70/84, PacMate 20/40/80]
 -  HandyTech [Modular 20/40/80, Modular Evolution 64/88, Braille Wave 40,
               Easy Braille, Braille Star 40/80, Bookworm, Braillino 20]
+-  HIMS [Braille Sense, Sync Braille]
 -  IrisLinux
 -  Libbraille
 -  LogText [32]

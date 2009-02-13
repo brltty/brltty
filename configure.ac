@@ -1200,11 +1200,11 @@ BRLTTY_BRAILLE_DRIVER([bd], [Braudi])
 BRLTTY_BRAILLE_DRIVER([bl], [BrailleLite])
 BRLTTY_BRAILLE_DRIVER([bm], [Baum])
 BRLTTY_BRAILLE_DRIVER([bn], [BrailleNote])
-BRLTTY_BRAILLE_DRIVER([bs], [BrailleSense])
 BRLTTY_BRAILLE_DRIVER([cb], [CombiBraille])
 BRLTTY_BRAILLE_DRIVER([ec], [EcoBraille])
 BRLTTY_BRAILLE_DRIVER([eu], [EuroBraille])
 BRLTTY_BRAILLE_DRIVER([fs], [FreedomScientific])
+BRLTTY_BRAILLE_DRIVER([hm], [HIMS])
 BRLTTY_BRAILLE_DRIVER([ht], [HandyTech])
 case "${host_os}"
 in
