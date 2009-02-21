@@ -86,7 +86,7 @@ directive.
 The Include Directive
 ---------------------
 
-   include <file>
+   include <file> # <comment>
 
 Use the "include" directive to include the content of a text subtable. It is 
 recursive, which means that any text subtable can itself include yet another 

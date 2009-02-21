@@ -1,0 +1,64 @@
+Key Tables
+----------
+
+Files with names of the form *.ktb are key tables, and with names of the form 
+*.kti are key subtables. They are used by BRLTTY to bind keyboard key 
+combinations to BRLTTY commands.
+
+A key table consists of a sequence of directives, one per line, which define 
+what each key combination is to be bound to. UTF-8 character encoding must be 
+used. White-space (blanks, tabs) at the beginning of a line, as well as before 
+and/or after any operand, is ignored. Lines containing only white-space are 
+ignored. If the first non-white-space character of a line is "#" then that line 
+is a comment and is ignored.
+
+===============================================================================
+
+The Bind Directive
+------------------
+
+   bind <keys> <command> # <comment>
+
+Use the "bind" directive to bind a key combination to a command.
+
+The <keys> operand specifies the key combination to be bound. It is a sequence 
+of one or more key names (see the file "ktb_keynames.h" within the "Programs" 
+subdirectory of BRLTTY's source tree) separated by plus (+) signs. The initial 
+keys are known as modifiers and may be pressed in any order. The last key must 
+be pressed while all the modifiers are being held.
+
+The <command> operand specifies the name of a BRLTTY command (see the 
+"cmds.auto.h" file within the "Programs" subdirectory of BRLTTY's build tree).
+*  For feature activation commands:
+   +  If no modifier is appended then the state of the feature is toggled.
+   +  If the modifier +on is appended then the feature is turned on.
+   +  If the modifier +off is appended then the feature is turned off.
+*  For character commands: The command acts on the character where the cursor 
+   is.
+*  For base commands: The modifier +<n>, wehre <n> is a non-negative integer,
+   may be appended. If this modifier isn't specified then 0 is assumed.
+
+Examples:
+
+   bind CapsLock+Enter CsrTrk
+   bind CapsLock+O CsrTrk+off
+   bind CapsLock+P CsrTrk+on
+   bind KPInsert+1 GoToMark+1
+
+===============================================================================
+
+The Include Directive
+---------------------
+
+   include <file> # <comment>
+
+Use the "include" directive to include the content of a key subtable. It is 
+recursive, which means that any key subtable can itself include yet another key 
+subtable. Care must be taken to ensure that an "include loop" is not created.
+
+The <file> operand specifies the file to be included. It may be either a 
+relative or an absolute path. If relative, it is anchored at the directory 
+containing the including file.
+
+===============================================================================
+

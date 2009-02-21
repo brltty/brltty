@@ -52,7 +52,7 @@ Examples:
 The Include Directive
 ---------------------
 
-   include <file>
+   include <file> # <comment>
 
 Use the "include" directive to include the content of an attributes subtable. 
 It is recursive, which means that any attributes subtable can itself include 

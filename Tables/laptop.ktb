@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# BRLTTY Key Table - Bindings for keyboards without a keypad (laptop)
+# BRLTTY Key Table - bindings for keyboards without a keypad
 
 bind	CapsLock+F1			HELP
 bind	CapsLock+ShiftLeft+F1		LEARN

@@ -331,6 +331,12 @@ The build procedure should result in the installation of the following files:
         Their names look like <em/language/<tt/-/<em/country/<tt/-/<em/level/<tt/.ctb/.
       <tag/*.cti/
         Include files for contraction tables.
+      <tag/*.ktb/
+        Key tables
+        (see section <ref id="table-key" name="Key Tables"> for details).
+        Their names look like <em/name/<tt/.ktb/.
+      <tag/*.kti/
+        Include files for key tables.
       <tag/*.ttb/
         Text tables
         (see section <ref id="table-text" name="Text Tables"> for details).
@@ -1888,7 +1894,7 @@ the braille <em/window/ around the screen.
 The keys on the braille display itself can be used to send commands to BRLTTY
 which, in addition to a lot of other things, can also do exactly that.
 
-<sect1>Commands<p>
+<sect1>Commands<label id="commands"><p>
 Unfortunately, the various braille displays don't offer a standard set of controls.
 Some have the six standard dot keys, some have eight, and others have none.
 Some have thumb keys, but there's no standard number of them.
@@ -1996,7 +2002,7 @@ See also the <ref id="command-GOTOMARK" name="GOTOMARK"> routing key command.
     </itemize>
 </descrip>
 
-<sect2>Feature Activation<p>
+<sect2>Feature Activation<label id="commands-features"><p>
 Each of these commands has three forms:
 <bf/activate/ (turn the feature on),
 <bf/deactivate/ (turn the feature off),
@@ -2262,7 +2268,7 @@ See also the <ref id="command-SWITCHVT" name="SWITCHVT"> routing key command.
     Stop, and then restart the speech synthesizer driver.
 </descrip>
 
-<sect2>Routing Keys<p>
+<sect2>Character Commands<label id="commands-characters"><p>
 <descrip>
   <tag>ROUTE<label id="command-ROUTE"></tag>
     Route (bring) the cursor to the character
@@ -2292,10 +2298,6 @@ See also the <ref id="command-SWITCHVT" name="SWITCHVT"> routing key command.
     associated with the routing key,
     and append the linear region to the cut buffer
     (see <ref id="cut" name="Cut and Paste"> for full details).
-  <tag>SWITCHVT<label id="command-SWITCHVT"></tag>
-    Switch to the virtual terminal whose number
-    (counting from 1) matches that of the routing key.
-    See also the <ref id="command-SWITCHVT_PREV-SWITCHVT_NEXT" name="SWITCHVT_PREV/SWITCHVT_NEXT"> virtual terminal switching commands.
   <tag>PRINDENT/NXINDENT<label id="command-PRINDENT-NXINDENT"></tag>
     Go up/down to the nearest line which isn't indented
     more than the column associated with the routing key.
@@ -2318,6 +2320,17 @@ See also the <ref id="command-SWITCHVT" name="SWITCHVT"> routing key command.
     the <ref id="command-CHRLT-CHRRT" name="CHRLT/CHRRT">
     and <ref id="command-HWINLT-HWINRT" name="HWINLT/HWINRT">
     commands).
+  <tag>PRDIFCHAR/NXDIFCHAR<label id="command-PRDIFCHAR-NXDIFCHAR"></tag>
+    Go up/down to the nearest line which has a different character
+    in the column associated with the routing key.
+</descrip>
+
+<sect2>Base Commands<label id="commands-base"><p>
+<descrip>
+  <tag>SWITCHVT<label id="command-SWITCHVT"></tag>
+    Switch to the virtual terminal whose number
+    (counting from 1) matches that of the routing key.
+    See also the <ref id="command-SWITCHVT_PREV-SWITCHVT_NEXT" name="SWITCHVT_PREV/SWITCHVT_NEXT"> virtual terminal switching commands.
   <tag>SETMARK<label id="command-SETMARK"></tag>
     Mark (remember) the current position of the braille window
     in a register associated with the routing key.
@@ -2328,9 +2341,6 @@ See also the <ref id="command-SWITCHVT" name="SWITCHVT"> routing key command.
     (see the <ref id="command-SETMARK" name="SETMARK"> command)
     with the same routing key.
     This feature only affects the current virtual terminal.
-  <tag>PRDIFCHAR/NXDIFCHAR<label id="command-PRDIFCHAR-NXDIFCHAR"></tag>
-    Go up/down to the nearest line which has a different character
-    in the column associated with the routing key.
 </descrip>
 
 <sect1>The Configuration File<label id="configure"><p>
@@ -2375,17 +2385,6 @@ The following directives are recognized:
     build option for the default established during the build procedure.
     This directive can be overridden with the
     <ref id="options-braille-device" name="-d"> command line option.
-  <tag><tt/release-device/ <em/boolean/<label id="configure-release-device"></tag>
-    Whether or not to release the device to which the braille display is connected
-    when the current screen or window can't be read.
-    <descrip>
-      <tag/on/Release the device.
-      <tag/off/Don't release the device.
-    </descrip>
-    The default setting is <tt/on/ on Windows platforms
-    and <tt/off/ on all other platforms.
-    This directive can be overridden with the
-    <ref id="options-release-device" name="-r"> command line option.
   <tag><tt/braille-driver/ <em/driver/<tt/,/...|<tt/auto/<label id="configure-braille-driver"></tag>
     Specify the braille display driver
     (see section <ref id="operand-driver" name="Driver Specification">).
@@ -2422,6 +2421,17 @@ The following directives are recognized:
     <ref id="options-contraction-table" name="-c"> command line option.
     It isn't available if the
     <ref id="build-contracted-braille" name="--disable-contracted-braille"> build option was specified.
+  <tag><tt/key-table/ <em/file/|<tt/auto/<label id="configure-key-table"></tag>
+    Specify the key table
+    (see section <ref id="table-key" name="Key Tables"> for details).
+    If a relative path is supplied, then it's anchored at <tt>/etc/brltty</>
+    (see the <ref id="build-data-directory" name="--with-data-directory">
+    and the <ref id="build-execute-root" name="--with-execute-root">
+    build options for more details).
+    The <tt/.ktb/ extension is optional.
+    The default is not to use a key table.
+    This directive can be overridden with the
+    <ref id="options-key-table" name="-k"> command line option.
   <tag><tt/midi-device/ <em/device/<label id="configure-midi-device"></tag>
     Specify the device to use for the Musical Instrument Digital Interface
     (see section <ref id="operand-midi-device" name="MIDI Device Specification">).
@@ -2436,6 +2446,17 @@ The following directives are recognized:
     <ref id="options-pcm-device" name="-p"> command line option.
     It isn't available if the
     <ref id="build-pcm-support" name="--disable-pcm-support"> build option was specified.
+  <tag><tt/release-device/ <em/boolean/<label id="configure-release-device"></tag>
+    Whether or not to release the device to which the braille display is connected
+    when the current screen or window can't be read.
+    <descrip>
+      <tag/on/Release the device.
+      <tag/off/Don't release the device.
+    </descrip>
+    The default setting is <tt/on/ on Windows platforms
+    and <tt/off/ on all other platforms.
+    This directive can be overridden with the
+    <ref id="options-release-device" name="-r"> command line option.
   <tag><tt/screen-driver/ <em/driver/<label id="configure-screen-driver"></tag>
     Specify the screen driver
     (see section <ref id="screen" name="Supported Screen Drivers">).
@@ -2497,8 +2518,7 @@ The following directives are recognized:
     The <tt/.ttb/ extension is optional.
     See the <ref id="build-text-table" name="--with-text-table">
     build option for the default established during the build procedure.
-    The default is to perform locale-based autoselection with fallback to the built-in table
-    (See the <ref id="configure-text-table" name="text-table"> configuration file directive).
+    The default is to perform locale-based autoselection with fallback to the built-in table.
     This directive can be overridden with the
     <ref id="options-text-table" name="-t"> command line option.
 </descrip>
@@ -2555,6 +2575,18 @@ The <tt/brltty/ command accepts the following options:
   <tag><tt/-h/ <tt/--help/<label id="options-help"></tag>
     Display a summary of the command line options accepted by BRLTTY,
     and then exit.
+  <tag><tt/-k/<em/file/ <tt/--key-table=/<em/file/<label id="options-key-table"></tag>
+    Specify the key table
+    (see section <ref id="table-key" name="Key Tables"> for details).
+    If a relative path is supplied, then it's anchored at <tt>/etc/brltty</>
+    (see the <ref id="build-data-directory" name="--with-data-directory">
+    and the <ref id="build-execute-root" name="--with-execute-root">
+    build options for more details).
+    The <tt/.ktb/ extension is optional.
+    See the <ref id="configure-key-table" name="key-table">
+    configureation file directive for the default run-time setting.
+    This setting can be changed with the
+    <ref id="preference-key-table" name="Key Table"> preference.
   <tag><tt/-l/<em/level/ <tt/--log-level=/<em/level/<label id="options-log-level"></tag>
     Specify the severity threshold for diagnostic message generation.
     The following levels are recognized.
@@ -2691,10 +2723,6 @@ The <tt/brltty/ command accepts the following options:
       <tag><tt/BRLTTY_BRAILLE_DEVICE/</tag>
         The braille display device
         (see the <ref id="options-braille-device" name="-d"> command line option).
-      <tag><tt/BRLTTY_RELEASE_DEVICE/</tag>
-        Whether or not to release the device to which the braille display is connected
-        when the current screen or window can't be read
-        (see the <ref id="options-release-device" name="-r"> command line option).
       <tag><tt/BRLTTY_BRAILLE_DRIVER/</tag>
         The braille display driver
         (see the <ref id="options-braille-driver" name="-b"> command line option).
@@ -2707,12 +2735,19 @@ The <tt/brltty/ command accepts the following options:
       <tag><tt/BRLTTY_CONTRACTION_TABLE/</tag>
         The contraction table
         (see the <ref id="options-contraction-table" name="-c"> command line option).
+      <tag><tt/BRLTTY_KEY_TABLE/</tag>
+        The key table
+        (see the <ref id="options-key-table" name="-k"> command line option).
       <tag><tt/BRLTTY_MIDI_DEVICE/</tag>
         The Musical Instrument Digital Interface device
         (see the <ref id="options-midi-device" name="-m"> command line option).
       <tag><tt/BRLTTY_PCM_DEVICE/</tag>
         The digital audio device
         (see the <ref id="options-pcm-device" name="-p"> command line option).
+      <tag><tt/BRLTTY_RELEASE_DEVICE/</tag>
+        Whether or not to release the device to which the braille display is connected
+        when the current screen or window can't be read
+        (see the <ref id="options-release-device" name="-r"> command line option).
       <tag><tt/BRLTTY_SCREEN_PARAMETERS/</tag>
         Parameters for the screen driver
         (see the <ref id="options-screen-parameters" name="-X"> command line option).
@@ -2727,7 +2762,7 @@ The <tt/brltty/ command accepts the following options:
         (see the <ref id="options-speech-parameters" name="-S"> command line option).
       <tag><tt/BRLTTY_TEXT_TABLE/</tag>
         The text table
-        (see the <ref id="options-text-table" name="-a"> command line option).
+        (see the <ref id="options-text-table" name="-t"> command line option).
     </descrip>
   <tag><tt/-F/<em/file/ <tt/--speech-fifo=/<em/file/<label id="options-speech-fifo"></tag>
     Specify the FIFO (a special file which works like a pipe)
@@ -3743,6 +3778,13 @@ Notes:
     This preference isn't saved.
     It isn't presented if the
     <ref id="build-table-selection" name="--disable-table-selection"> build option was specified.
+  <tag>Key Table<label id="preference-key-table"></tag>
+    Select the key table.
+    See section <ref id="table-key" name="Key Tables"> for details.
+    See the <ref id="options-key-table" name="-k"> command line option for the initial setting.
+    This preference isn't saved.
+    It isn't presented if the
+    <ref id="build-table-selection" name="--disable-table-selection"> build option was specified.
 </descrip>
 
 Notes:
@@ -3959,9 +4001,10 @@ They are used by BRLTTY to translate the characters on the screen
 into their corresponding 8-dot computer braille representations.
 
 BRLTTY is initially configured to use the
-<ref id="nabcc" name="North American Braille Computer Code"> (NABCC).
-In addition to this default text table,
-several alternatives are provided:
+<ref id="nabcc" name="North American Braille Computer Code">
+(NABCC) text table.
+In addition to this default,
+the following alternatives are provided:
 <descrip>
   <tag/auto/locale-based autoselection
   <tag/ar/Arabic (generic)
@@ -4140,7 +4183,7 @@ The following directives are provided:
         It may be specified in the same ways
         as the <em/dots/ operand of the <tt/char/ directive.
     </descrip>
-  <tag><tt/include/ <em/file/ <em/dots/ &num; <em/comment/</tag>
+  <tag><tt/include/ <em/file/ &num; <em/comment/</tag>
     Use the <tt/include/ directive to include the content of a text subtable.
     It is recursive, which means that
     any text subtable can itself include yet another text subtable.
@@ -4261,7 +4304,7 @@ The following directives are provided:
       <item><tt/dot 1 =fg-red/
       <item><tt/dot 2 &tilde;bg-blue/
     </itemize>
-  <tag><tt/include/ <em/file/ <em/dots/ &num; <em/comment/</tag>
+  <tag><tt/include/ <em/file/ &num; <em/comment/</tag>
     Use the <tt/include/ directive to include the content of an attributes subtable.
     It is recursive, which means that
     any attributes subtable can itself include yet another attributes subtable.
@@ -4328,6 +4371,9 @@ The following contraction tables are provided:
   <tag/zh-tw-ucb/Taiwanese Chinese (Unique Chinese Braille)
   <tag/zu/Zulu (contracted)
 </descrip>
+See the <ref id="options-contraction-table" name="-c"> command line option,
+and the <ref id="configure-contraction-table" name="contraction-table"> configuration file directive
+for details regarding how to use a contraction table.
 
 <sect2>Contraction Table Format<p>
 A contraction table consists of a sequence of entries, one per line,
@@ -4584,6 +4630,95 @@ The opcodes which define and use character classes are:
     a character belonging to the specified class.
     If this opcode is used more than once on the same line
     then the union of the characters in all the classes is used.
+</descrip>
+
+<sect1>Key Tables<label id="table-key"><p>
+Files with names of the form <tt/*.ktb/ are key tables,
+and with names of the form <tt/*.kti/ are key subtables.
+They are used by BRLTTY to bind keyboard key combinations
+to BRLTTY commands.
+
+The following key tables are provided:
+<descrip>
+  <tag/desktop/bindings for full keyboards
+  <tag/keypad/bindings for keypad-based navigation
+  <tag/laptop/bindings for keyboards without a keypad
+</descrip>
+See the <ref id="options-key-table" name="-k"> command line option,
+and the <ref id="configure-key-table" name="key-table"> configuration file directive
+for details regarding how to use a key table.
+
+<sect2>Key Table Format<p>
+A key table consists of a sequence of directives, one per line,
+which define what each key combination is to be bound to.
+<tt/UTF-8/ character encoding must be used.
+White-space (blanks, tabs) at the beginning of a line,
+as well as before and/or after any operand of any directive,
+is ignored.
+Lines containing only white-space are ignored.
+If the first non-white-space character of a line is "&num;"
+then that line is a comment and is ignored.
+
+<sect2>Key Table Directives<p>
+The following directives are provided:
+<descrip>
+  <tag><tt/bind/ <em/keys/ <em/command/ &num; <em/comment/</tag>
+    Use the <tt/bind/ directive to bind a key combination to a command.
+
+    <descrip>
+      <tag><em/keys/</tag>
+        The key combination to be bound.
+        It is a sequence of one or more key names
+        (see the file <tt/ktb_keynames.h/ within the <tt/Programs/ subdirectory of BRLTTY's source tree)
+        separated by plus (<tt/+/) signs.
+        The initial keys are known as modifiers and may be pressed in any order.
+        The last key must be pressed while all the modifiers are being held.
+      <tag><em/command/</tag>
+        The name of a BRLTTY command
+        (see section <ref id="commands" name="Commands"> for details).
+
+        For the commands listed in section <ref id="commands-features" name="Feature Activation">:
+        <itemize>
+          <item>
+            If no modifier is appended
+            then the state of the feature is toggled.
+          <item>
+            If the modifier <tt/+on/ is appended
+            then the feature is turned on.
+          <item>
+            If the modifier <tt/+off/ is appended
+            then the feature is turned off.
+        </itemize>
+
+        For the commands listed in section <ref id="commands-characters" name="Character Commands">:
+        The command acts on the character where the cursor is.
+
+        For the commands listed in section <ref id="commands-base" name="Base Commands">:
+        The modifier <tt/+/<em/n/,
+        wehre <em/n/ is a non-negative integer,
+        may be appended.
+        If this modifier isn't specified then <tt/0/ is assumed.
+    </descrip>
+
+    Examples:
+    <itemize>
+      <item><tt/bind CapsLock+Enter CsrTrk/
+      <item><tt/bind CapsLock+O CsrTrk+off/
+      <item><tt/bind CapsLock+P CsrTrk+on/
+      <item><tt/bind KPInsert+1 GoToMark+1/
+    </itemize>
+  <tag><tt/include/ <em/file/ &num; <em/comment/</tag>
+    Use the <tt/include/ directive to include the content of a key subtable.
+    It is recursive, which means that
+    any key subtable can itself include yet another key subtable.
+    Care must be taken to ensure that an "include loop" is not created.
+
+    <descrip>
+      <tag><em/file/</tag>
+        The file to be included.
+        It may be either a relative or an absolute path.
+        If relative, it is anchored at the directory containing the including file.
+    </descrip>
 </descrip>
 
 <sect>Advanced Topics<p>

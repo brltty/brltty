@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# BRLTTY Key Table - Bindings for an extended keyboard used with desktop machines
+# BRLTTY Key Table - bindings for full keyboards
 
 bind KPInsert+KP5 Say_Line
 bind KPInsert+KPArrowUp LnUp
