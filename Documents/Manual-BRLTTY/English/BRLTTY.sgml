@@ -4759,8 +4759,12 @@ and the <ref id="configure-keyboard-properties" name="keyboard-properties"> conf
     The product identifier, specified as a 16-bit unsigned integer.
 </descrip>
 
-The vendor and product identifiers may be specified in decimal, octal, or hexadecimal.
-Specifying <tt/0/ means to match any value.
+The vendor and product identifiers may be specified in
+decimal (no prefix),
+octal (prefixed by <tt/0/),
+or hexadecimal (prefixed by <tt/0x/).
+Specifying <tt/0/ means match any value
+(as if the property weren't specified).
 
 <sect>Advanced Topics<p>
 
