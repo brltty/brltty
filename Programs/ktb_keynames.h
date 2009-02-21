@@ -1,257 +1,506 @@
-{"LETTER_A", KEY_LETTER_A}, {"A", KEY_LETTER_A},
-{"LETTER_B", KEY_LETTER_B}, {"B", KEY_LETTER_B},
-{"LETTER_C", KEY_LETTER_C}, {"C", KEY_LETTER_C},
-{"LETTER_D", KEY_LETTER_D}, {"D", KEY_LETTER_D},
-{"LETTER_E", KEY_LETTER_E}, {"E", KEY_LETTER_E},
-{"LETTER_F", KEY_LETTER_F}, {"F", KEY_LETTER_F},
-{"LETTER_G", KEY_LETTER_G}, {"G", KEY_LETTER_G},
-{"LETTER_H", KEY_LETTER_H}, {"H", KEY_LETTER_H},
-{"LETTER_I", KEY_LETTER_I}, {"I", KEY_LETTER_I},
-{"LETTER_J", KEY_LETTER_J}, {"J", KEY_LETTER_J},
-{"LETTER_K", KEY_LETTER_K}, {"K", KEY_LETTER_K},
-{"LETTER_L", KEY_LETTER_L}, {"L", KEY_LETTER_L},
-{"LETTER_M", KEY_LETTER_M}, {"M", KEY_LETTER_M},
-{"LETTER_N", KEY_LETTER_N}, {"N", KEY_LETTER_N},
-{"LETTER_O", KEY_LETTER_O}, {"O", KEY_LETTER_O},
-{"LETTER_P", KEY_LETTER_P}, {"P", KEY_LETTER_P},
-{"LETTER_Q", KEY_LETTER_Q}, {"Q", KEY_LETTER_Q},
-{"LETTER_R", KEY_LETTER_R}, {"R", KEY_LETTER_R},
-{"LETTER_S", KEY_LETTER_S}, {"S", KEY_LETTER_S},
-{"LETTER_T", KEY_LETTER_T}, {"T", KEY_LETTER_T},
-{"LETTER_U", KEY_LETTER_U}, {"U", KEY_LETTER_U},
-{"LETTER_V", KEY_LETTER_V}, {"V", KEY_LETTER_V},
-{"LETTER_W", KEY_LETTER_W}, {"W", KEY_LETTER_W},
-{"LETTER_X", KEY_LETTER_X}, {"X", KEY_LETTER_X},
-{"LETTER_Y", KEY_LETTER_Y}, {"Y", KEY_LETTER_Y},
-{"LETTER_Z", KEY_LETTER_Z}, {"Z", KEY_LETTER_Z},
+{.code=KEY_LETTER_A, .name="LETTER_A"},
+{.code=KEY_LETTER_A, .name="A"},
 
-{"SYMBOL_One_Exclamation", KEY_SYMBOL_One_Exclamation},
-{"1", KEY_SYMBOL_One_Exclamation},
-{"SYMBOL_Two_At", KEY_SYMBOL_Two_At},
-{"2", KEY_SYMBOL_Two_At},
-{"SYMBOL_Three_Number", KEY_SYMBOL_Three_Number},
-{"3", KEY_SYMBOL_Three_Number},
-{"SYMBOL_Four_Dollar", KEY_SYMBOL_Four_Dollar},
-{"4", KEY_SYMBOL_Four_Dollar},
-{"SYMBOL_Five_Percent", KEY_SYMBOL_Five_Percent},
-{"5", KEY_SYMBOL_Five_Percent},
-{"SYMBOL_Six_Circumflex", KEY_SYMBOL_Six_Circumflex},
-{"6", KEY_SYMBOL_Six_Circumflex},
-{"SYMBOL_Seven_Ampersand", KEY_SYMBOL_Seven_Ampersand},
-{"7", KEY_SYMBOL_Seven_Ampersand},
-{"SYMBOL_Eight_Asterisk", KEY_SYMBOL_Eight_Asterisk},
-{"8", KEY_SYMBOL_Eight_Asterisk},
-{"SYMBOL_Nine_LeftParenthesis", KEY_SYMBOL_Nine_LeftParenthesis},
-{"9", KEY_SYMBOL_Nine_LeftParenthesis},
-{"SYMBOL_Zero_RightParenthesis", KEY_SYMBOL_Zero_RightParenthesis},
-{"0", KEY_SYMBOL_Zero_RightParenthesis},
+{.code=KEY_LETTER_B, .name="LETTER_B"},
+{.code=KEY_LETTER_B, .name="B"},
 
-{"SYMBOL_Grave_Tilde", KEY_SYMBOL_Grave_Tilde},
-{"SYMBOL_Backslash_Bar", KEY_SYMBOL_Backslash_Bar},
-{"SYMBOL_Minus_Underscore", KEY_SYMBOL_Minus_Underscore},
-{"SYMBOL_Equals_Plus", KEY_SYMBOL_Equals_Plus},
-{"SYMBOL_LeftBracket_LeftBrace", KEY_SYMBOL_LeftBracket_LeftBrace},
-{"SYMBOL_RightBracket_RightBrace", KEY_SYMBOL_RightBracket_RightBrace},
-{"SYMBOL_Semicolon_Colon", KEY_SYMBOL_Semicolon_Colon},
-{"SYMBOL_Apostrophe_Quote", KEY_SYMBOL_Apostrophe_Quote},
-{"SYMBOL_Comma_Less", KEY_SYMBOL_Comma_Less},
-{"SYMBOL_Period_Greater", KEY_SYMBOL_Period_Greater},
-{"SYMBOL_Slash_Question", KEY_SYMBOL_Slash_Question},
+{.code=KEY_LETTER_C, .name="LETTER_C"},
+{.code=KEY_LETTER_C, .name="C"},
 
-{"FUNCTION_Escape", KEY_FUNCTION_Escape}, {"Escape", KEY_FUNCTION_Escape},
-{"FUNCTION_Enter", KEY_FUNCTION_Enter}, {"Enter", KEY_FUNCTION_Enter},
-{"FUNCTION_Space", KEY_FUNCTION_Space}, {"Space", KEY_FUNCTION_Space},
-{"FUNCTION_Tab", KEY_FUNCTION_Tab}, {"Tab", KEY_FUNCTION_Tab},
-{"FUNCTION_DeleteBackward", KEY_FUNCTION_DeleteBackward},
-{"DeleteBackward", KEY_FUNCTION_DeleteBackward},
+{.code=KEY_LETTER_D, .name="LETTER_D"},
+{.code=KEY_LETTER_D, .name="D"},
 
-{"FUNCTION_F1", KEY_FUNCTION_F1}, {"F1", KEY_FUNCTION_F1},
-{"FUNCTION_F2", KEY_FUNCTION_F2}, {"F2", KEY_FUNCTION_F2},
-{"FUNCTION_F3", KEY_FUNCTION_F3}, {"F3", KEY_FUNCTION_F3},
-{"FUNCTION_F4", KEY_FUNCTION_F4}, {"F4", KEY_FUNCTION_F4},
-{"FUNCTION_F5", KEY_FUNCTION_F5}, {"F5", KEY_FUNCTION_F5},
-{"FUNCTION_F6", KEY_FUNCTION_F6}, {"F6", KEY_FUNCTION_F6},
-{"FUNCTION_F7", KEY_FUNCTION_F7}, {"F7", KEY_FUNCTION_F7},
-{"FUNCTION_F8", KEY_FUNCTION_F8}, {"F8", KEY_FUNCTION_F8},
-{"FUNCTION_F9", KEY_FUNCTION_F9}, {"F9", KEY_FUNCTION_F9},
-{"FUNCTION_F10", KEY_FUNCTION_F10}, {"F10", KEY_FUNCTION_F10},
-{"FUNCTION_F11", KEY_FUNCTION_F11}, {"F11", KEY_FUNCTION_F11},
-{"FUNCTION_F12", KEY_FUNCTION_F12}, {"F12", KEY_FUNCTION_F12},
-{"FUNCTION_F13", KEY_FUNCTION_F13}, {"F13", KEY_FUNCTION_F13},
-{"FUNCTION_F14", KEY_FUNCTION_F14}, {"F14", KEY_FUNCTION_F14},
-{"FUNCTION_F15", KEY_FUNCTION_F15}, {"F15", KEY_FUNCTION_F15},
-{"FUNCTION_F16", KEY_FUNCTION_F16}, {"F16", KEY_FUNCTION_F16},
-{"FUNCTION_F17", KEY_FUNCTION_F17}, {"F17", KEY_FUNCTION_F17},
-{"FUNCTION_F18", KEY_FUNCTION_F18}, {"F18", KEY_FUNCTION_F18},
-{"FUNCTION_F19", KEY_FUNCTION_F19}, {"F19", KEY_FUNCTION_F19},
-{"FUNCTION_F20", KEY_FUNCTION_F20}, {"F20", KEY_FUNCTION_F20},
-{"FUNCTION_F21", KEY_FUNCTION_F21}, {"F21", KEY_FUNCTION_F21},
-{"FUNCTION_F22", KEY_FUNCTION_F22}, {"F22", KEY_FUNCTION_F22},
-{"FUNCTION_F23", KEY_FUNCTION_F23}, {"F23", KEY_FUNCTION_F23},
-{"FUNCTION_F24", KEY_FUNCTION_F24}, {"F24", KEY_FUNCTION_F24},
+{.code=KEY_LETTER_E, .name="LETTER_E"},
+{.code=KEY_LETTER_E, .name="E"},
 
-{"FUNCTION_Insert", KEY_FUNCTION_Insert}, {"Insert", KEY_FUNCTION_Insert},
-{"FUNCTION_DeleteForward", KEY_FUNCTION_DeleteForward},
-{"DeleteForward", KEY_FUNCTION_DeleteForward},
-{"FUNCTION_Home", KEY_FUNCTION_Home}, {"Home", KEY_FUNCTION_Home},
-{"FUNCTION_End", KEY_FUNCTION_End}, {"End", KEY_FUNCTION_End},
-{"FUNCTION_PageUp", KEY_FUNCTION_PageUp}, {"PageUp", KEY_FUNCTION_PageUp},
-{"FUNCTION_PageDown", KEY_FUNCTION_PageDown}, {"PageDown", KEY_FUNCTION_PageDown},
+{.code=KEY_LETTER_F, .name="LETTER_F"},
+{.code=KEY_LETTER_F, .name="F"},
 
-{"FUNCTION_ArrowUp", KEY_FUNCTION_ArrowUp},
-{"ArrowUp", KEY_FUNCTION_ArrowUp},
-{"FUNCTION_ArrowDown", KEY_FUNCTION_ArrowDown},
-{"ArrowDown", KEY_FUNCTION_ArrowDown},
-{"FUNCTION_ArrowLeft", KEY_FUNCTION_ArrowLeft},
-{"ArrowLeft", KEY_FUNCTION_ArrowLeft},
-{"FUNCTION_ArrowRight", KEY_FUNCTION_ArrowRight},
-{"ArrowRight", KEY_FUNCTION_ArrowRight},
+{.code=KEY_LETTER_G, .name="LETTER_G"},
+{.code=KEY_LETTER_G, .name="G"},
 
-{"FUNCTION_PrintScreen", KEY_FUNCTION_PrintScreen},
-{"PrintScreen", KEY_FUNCTION_PrintScreen},
-{"FUNCTION_SystemRequest", KEY_FUNCTION_SystemRequest},
-{"SystemRequest", KEY_FUNCTION_SystemRequest},
-{"FUNCTION_Pause", KEY_FUNCTION_Pause}, {"Pause", KEY_FUNCTION_Pause},
+{.code=KEY_LETTER_H, .name="LETTER_H"},
+{.code=KEY_LETTER_H, .name="H"},
 
-{"FUNCTION_ShiftLeft", KEY_FUNCTION_ShiftLeft},
-{"ShiftLeft", KEY_FUNCTION_ShiftLeft},
-{"FUNCTION_ShiftRight", KEY_FUNCTION_ShiftRight},
-{"ShiftRight", KEY_FUNCTION_ShiftRight},
-{"FUNCTION_ControlLeft", KEY_FUNCTION_ControlLeft},
-{"ControlLeft", KEY_FUNCTION_ControlLeft},
-{"FUNCTION_ControlRight", KEY_FUNCTION_ControlRight},
-{"ControlRight", KEY_FUNCTION_ControlRight},
-{"FUNCTION_AltLeft", KEY_FUNCTION_AltLeft},
-{"AltLeft", KEY_FUNCTION_AltLeft},
-{"FUNCTION_AltRight", KEY_FUNCTION_AltRight},
-{"AltRight", KEY_FUNCTION_AltRight},
-{"FUNCTION_GuiLeft", KEY_FUNCTION_GuiLeft},
-{"GuiLeft", KEY_FUNCTION_GuiLeft},
-{"FUNCTION_GuiRight", KEY_FUNCTION_GuiRight},
-{"GuiRight", KEY_FUNCTION_GuiRight},
-{"FUNCTION_Application", KEY_FUNCTION_Application},
-{"Application", KEY_FUNCTION_Application},
+{.code=KEY_LETTER_I, .name="LETTER_I"},
+{.code=KEY_LETTER_I, .name="I"},
 
-{"LOCK_Capitals", KEY_LOCK_Capitals}, {"CapsLock", KEY_LOCK_Capitals},
-{"LOCK_Scroll", KEY_LOCK_Scroll}, {"ScrollLock", KEY_LOCK_Scroll},
+{.code=KEY_LETTER_J, .name="LETTER_J"},
+{.code=KEY_LETTER_J, .name="J"},
 
-{"LOCKING_Capitals", KEY_LOCKING_Capitals},
-{"LOCKING_Scroll", KEY_LOCKING_Scroll},
-{"LOCKING_Numbers", KEY_LOCKING_Numbers},
+{.code=KEY_LETTER_K, .name="LETTER_K"},
+{.code=KEY_LETTER_K, .name="K"},
 
-{"KEYPAD_NumLock_Clear", KEY_KEYPAD_NumLock_Clear},
-{"KEYPAD_Slash", KEY_KEYPAD_Slash}, {"KPSlash", KEY_KEYPAD_Slash},
-{"KEYPAD_Asterisk", KEY_KEYPAD_Asterisk}, {"KPAsterisk", KEY_KEYPAD_Asterisk},
-{"KEYPAD_Minus", KEY_KEYPAD_Minus}, {"KPMinus", KEY_KEYPAD_Minus},
-{"KEYPAD_Plus", KEY_KEYPAD_Plus}, {"KPPlus", KEY_KEYPAD_Plus},
-{"KEYPAD_Enter", KEY_KEYPAD_Enter}, {"KPEnter", KEY_KEYPAD_Enter},
-{"KEYPAD_One_End", KEY_KEYPAD_One_End},
-{"KP1", KEY_KEYPAD_One_End}, {"KPEnd", KEY_KEYPAD_One_End},
-{"KEYPAD_Two_ArrowDown", KEY_KEYPAD_Two_ArrowDown},
-{"KP2", KEY_KEYPAD_Two_ArrowDown}, {"KPArrowDown", KEY_KEYPAD_Two_ArrowDown},
-{"KEYPAD_Three_PageDown", KEY_KEYPAD_Three_PageDown},
-{"KP3", KEY_KEYPAD_Three_PageDown}, {"KPPageDown", KEY_KEYPAD_Three_PageDown},
-{"KEYPAD_Four_ArrowLeft", KEY_KEYPAD_Four_ArrowLeft},
-{"KP4", KEY_KEYPAD_Four_ArrowLeft}, {"KPArrowLeft", KEY_KEYPAD_Four_ArrowLeft},
-{"KEYPAD_Five", KEY_KEYPAD_Five}, {"KP5", KEY_KEYPAD_Five},
-{"KEYPAD_Six_ArrowRight", KEY_KEYPAD_Six_ArrowRight},
-{"KP6", KEY_KEYPAD_Six_ArrowRight}, {"KPArrowRight", KEY_KEYPAD_Six_ArrowRight},
-{"KEYPAD_Seven_Home", KEY_KEYPAD_Seven_Home},
-{"KP7", KEY_KEYPAD_Seven_Home}, {"KPHome", KEY_KEYPAD_Seven_Home},
-{"KEYPAD_Eight_ArrowUp", KEY_KEYPAD_Eight_ArrowUp},
-{"KP8", KEY_KEYPAD_Eight_ArrowUp}, {"KPArrowUp", KEY_KEYPAD_Eight_ArrowUp},
-{"KEYPAD_Nine_PageUp", KEY_KEYPAD_Nine_PageUp},
-{"KP9", KEY_KEYPAD_Nine_PageUp}, {"KPPageUp", KEY_KEYPAD_Nine_PageUp},
-{"KEYPAD_Zero_Insert", KEY_KEYPAD_Zero_Insert},
-{"KP0", KEY_KEYPAD_Zero_Insert}, {"KPInsert", KEY_KEYPAD_Zero_Insert},
-{"KEYPAD_Period_Delete", KEY_KEYPAD_Period_Delete},
-{"KPPeriod", KEY_KEYPAD_Period_Delete},
-{"KPDelete", KEY_KEYPAD_Period_Delete},
+{.code=KEY_LETTER_L, .name="LETTER_L"},
+{.code=KEY_LETTER_L, .name="L"},
 
-{"KEYPAD_Equals", KEY_KEYPAD_Equals}, {"KPEquals", KEY_KEYPAD_Equals},
-{"KEYPAD_LeftParenthesis", KEY_KEYPAD_LeftParenthesis},
-{"KEYPAD_RightParenthesis", KEY_KEYPAD_RightParenthesis},
-{"KEYPAD_LeftBrace", KEY_KEYPAD_LeftBrace},
-{"KEYPAD_RightBrace", KEY_KEYPAD_RightBrace},
-{"KEYPAD_Modulo", KEY_KEYPAD_Modulo},
-{"KEYPAD_BitwiseAnd", KEY_KEYPAD_BitwiseAnd},
-{"KEYPAD_BitwiseOr", KEY_KEYPAD_BitwiseOr},
-{"KEYPAD_BitwiseXor", KEY_KEYPAD_BitwiseXor},
-{"KEYPAD_Less", KEY_KEYPAD_Less},
-{"KEYPAD_Greater", KEY_KEYPAD_Greater},
-{"KEYPAD_BooleanAnd", KEY_KEYPAD_BooleanAnd},
-{"KEYPAD_BooleanOr", KEY_KEYPAD_BooleanOr},
-{"KEYPAD_BooleanXor", KEY_KEYPAD_BooleanXor},
-{"KEYPAD_BooleanNot", KEY_KEYPAD_BooleanNot},
+{.code=KEY_LETTER_M, .name="LETTER_M"},
+{.code=KEY_LETTER_M, .name="M"},
 
-{"KEYPAD_Backspace", KEY_KEYPAD_Backspace},
-{"KEYPAD_Space", KEY_KEYPAD_Space},
-{"KEYPAD_Tab", KEY_KEYPAD_Tab},
-{"KEYPAD_Comma", KEY_KEYPAD_Comma},
-{"KEYPAD_Colon", KEY_KEYPAD_Colon},
-{"KEYPAD_Number", KEY_KEYPAD_Number},
-{"KEYPAD_At", KEY_KEYPAD_At},
+{.code=KEY_LETTER_N, .name="LETTER_N"},
+{.code=KEY_LETTER_N, .name="N"},
 
-{"KEYPAD_A", KEY_KEYPAD_A},
-{"KEYPAD_B", KEY_KEYPAD_B},
-{"KEYPAD_C", KEY_KEYPAD_C},
-{"KEYPAD_D", KEY_KEYPAD_D},
-{"KEYPAD_E", KEY_KEYPAD_E},
-{"KEYPAD_F", KEY_KEYPAD_F},
+{.code=KEY_LETTER_O, .name="LETTER_O"},
+{.code=KEY_LETTER_O, .name="O"},
 
-{"KEYPAD_00", KEY_KEYPAD_00},
-{"KEYPAD_000", KEY_KEYPAD_000},
-{"KEYPAD_ThousandsSeparator", KEY_KEYPAD_ThousandsSeparator},
-{"KEYPAD_DecimalSeparator", KEY_KEYPAD_DecimalSeparator},
-{"KEYPAD_CurrencyUnit", KEY_KEYPAD_CurrencyUnit},
-{"KEYPAD_CurrencySubunit", KEY_KEYPAD_CurrencySubunit},
+{.code=KEY_LETTER_P, .name="LETTER_P"},
+{.code=KEY_LETTER_P, .name="P"},
 
-{"FUNCTION_Power", KEY_FUNCTION_Power},
-{"FUNCTION_Sleep", KEY_FUNCTION_Sleep},
-{"FUNCTION_Wakeup", KEY_FUNCTION_Wakeup},
-{"FUNCTION_Stop", KEY_FUNCTION_Stop},
+{.code=KEY_LETTER_Q, .name="LETTER_Q"},
+{.code=KEY_LETTER_Q, .name="Q"},
 
-{"FUNCTION_Help", KEY_FUNCTION_Help},
-{"FUNCTION_Find", KEY_FUNCTION_Find},
+{.code=KEY_LETTER_R, .name="LETTER_R"},
+{.code=KEY_LETTER_R, .name="R"},
 
-{"FUNCTION_Menu", KEY_FUNCTION_Menu},
-{"FUNCTION_Select", KEY_FUNCTION_Select},
-{"FUNCTION_Again", KEY_FUNCTION_Again},
-{"FUNCTION_Execute", KEY_FUNCTION_Execute},
+{.code=KEY_LETTER_S, .name="LETTER_S"},
+{.code=KEY_LETTER_S, .name="S"},
 
-{"FUNCTION_Copy", KEY_FUNCTION_Copy},
-{"FUNCTION_Cut", KEY_FUNCTION_Cut},
-{"FUNCTION_Paste", KEY_FUNCTION_Paste},
-{"FUNCTION_Undo", KEY_FUNCTION_Undo},
+{.code=KEY_LETTER_T, .name="LETTER_T"},
+{.code=KEY_LETTER_T, .name="T"},
 
-{"FUNCTION_Mute", KEY_FUNCTION_Mute},
-{"FUNCTION_VolumeUp", KEY_FUNCTION_VolumeUp},
-{"FUNCTION_VolumeDown", KEY_FUNCTION_VolumeDown},
+{.code=KEY_LETTER_U, .name="LETTER_U"},
+{.code=KEY_LETTER_U, .name="U"},
 
-{"KEYPAD_Clear", KEY_KEYPAD_Clear},
-{"KEYPAD_ClearEntry", KEY_KEYPAD_ClearEntry},
-{"KEYPAD_PlusMinus", KEY_KEYPAD_PlusMinus},
+{.code=KEY_LETTER_V, .name="LETTER_V"},
+{.code=KEY_LETTER_V, .name="V"},
 
-{"KEYPAD_MemoryClear", KEY_KEYPAD_MemoryClear},
-{"KEYPAD_MemoryStore", KEY_KEYPAD_MemoryStore},
-{"KEYPAD_MemoryRecall", KEY_KEYPAD_MemoryRecall},
-{"KEYPAD_MemoryAdd", KEY_KEYPAD_MemoryAdd},
-{"KEYPAD_MemorySubtract", KEY_KEYPAD_MemorySubtract},
-{"KEYPAD_MemoryMultiply", KEY_KEYPAD_MemoryMultiply},
-{"KEYPAD_MemoryDivide", KEY_KEYPAD_MemoryDivide},
+{.code=KEY_LETTER_W, .name="LETTER_W"},
+{.code=KEY_LETTER_W, .name="W"},
 
-{"KEYPAD_Binary", KEY_KEYPAD_Binary},
-{"KEYPAD_Octal", KEY_KEYPAD_Octal},
-{"KEYPAD_Decimal", KEY_KEYPAD_Decimal},
-{"KEYPAD_Hexadecimal", KEY_KEYPAD_Hexadecimal},
+{.code=KEY_LETTER_X, .name="LETTER_X"},
+{.code=KEY_LETTER_X, .name="X"},
 
-{"FUNCTION_Cancel", KEY_FUNCTION_Cancel},
-{"FUNCTION_Clear", KEY_FUNCTION_Clear},
-{"FUNCTION_Prior", KEY_FUNCTION_Prior},
-{"FUNCTION_Return", KEY_FUNCTION_Return},
-{"FUNCTION_Separator", KEY_FUNCTION_Separator},
-{"FUNCTION_Out", KEY_FUNCTION_Out},
-{"FUNCTION_Oper", KEY_FUNCTION_Oper},
-{"FUNCTION_Clear_Again", KEY_FUNCTION_Clear_Again},
-{"FUNCTION_CrSel_Props", KEY_FUNCTION_CrSel_Props},
-{"FUNCTION_ExSel", KEY_FUNCTION_ExSel},
+{.code=KEY_LETTER_Y, .name="LETTER_Y"},
+{.code=KEY_LETTER_Y, .name="Y"},
+
+{.code=KEY_LETTER_Z, .name="LETTER_Z"},
+{.code=KEY_LETTER_Z, .name="Z"},
+
+{.code=KEY_SYMBOL_One_Exclamation, .name="SYMBOL_One_Exclamation"},
+{.code=KEY_SYMBOL_One_Exclamation, .name="1"},
+
+{.code=KEY_SYMBOL_Two_At, .name="SYMBOL_Two_At"},
+{.code=KEY_SYMBOL_Two_At, .name="2"},
+
+{.code=KEY_SYMBOL_Three_Number, .name="SYMBOL_Three_Number"},
+{.code=KEY_SYMBOL_Three_Number, .name="3"},
+
+{.code=KEY_SYMBOL_Four_Dollar, .name="SYMBOL_Four_Dollar"},
+{.code=KEY_SYMBOL_Four_Dollar, .name="4"},
+
+{.code=KEY_SYMBOL_Five_Percent, .name="SYMBOL_Five_Percent"},
+{.code=KEY_SYMBOL_Five_Percent, .name="5"},
+
+{.code=KEY_SYMBOL_Six_Circumflex, .name="SYMBOL_Six_Circumflex"},
+{.code=KEY_SYMBOL_Six_Circumflex, .name="6"},
+
+{.code=KEY_SYMBOL_Seven_Ampersand, .name="SYMBOL_Seven_Ampersand"},
+{.code=KEY_SYMBOL_Seven_Ampersand, .name="7"},
+
+{.code=KEY_SYMBOL_Eight_Asterisk, .name="SYMBOL_Eight_Asterisk"},
+{.code=KEY_SYMBOL_Eight_Asterisk, .name="8"},
+
+{.code=KEY_SYMBOL_Nine_LeftParenthesis, .name="SYMBOL_Nine_LeftParenthesis"},
+{.code=KEY_SYMBOL_Nine_LeftParenthesis, .name="9"},
+
+{.code=KEY_SYMBOL_Zero_RightParenthesis, .name="SYMBOL_Zero_RightParenthesis"},
+{.code=KEY_SYMBOL_Zero_RightParenthesis, .name="0"},
+
+{.code=KEY_SYMBOL_Grave_Tilde, .name="SYMBOL_Grave_Tilde"},
+
+{.code=KEY_SYMBOL_Backslash_Bar, .name="SYMBOL_Backslash_Bar"},
+
+{.code=KEY_SYMBOL_Minus_Underscore, .name="SYMBOL_Minus_Underscore"},
+
+{.code=KEY_SYMBOL_Equals_Plus, .name="SYMBOL_Equals_Plus"},
+
+{.code=KEY_SYMBOL_LeftBracket_LeftBrace, .name="SYMBOL_LeftBracket_LeftBrace"},
+
+{.code=KEY_SYMBOL_RightBracket_RightBrace, .name="SYMBOL_RightBracket_RightBrace"},
+
+{.code=KEY_SYMBOL_Semicolon_Colon, .name="SYMBOL_Semicolon_Colon"},
+
+{.code=KEY_SYMBOL_Apostrophe_Quote, .name="SYMBOL_Apostrophe_Quote"},
+
+{.code=KEY_SYMBOL_Comma_Less, .name="SYMBOL_Comma_Less"},
+
+{.code=KEY_SYMBOL_Period_Greater, .name="SYMBOL_Period_Greater"},
+
+{.code=KEY_SYMBOL_Slash_Question, .name="SYMBOL_Slash_Question"},
+
+{.code=KEY_FUNCTION_Escape, .name="FUNCTION_Escape"},
+{.code=KEY_FUNCTION_Escape, .name="Escape"},
+
+{.code=KEY_FUNCTION_Enter, .name="FUNCTION_Enter"},
+{.code=KEY_FUNCTION_Enter, .name="Enter"},
+
+{.code=KEY_FUNCTION_Space, .name="FUNCTION_Space"},
+{.code=KEY_FUNCTION_Space, .name="Space"},
+
+{.code=KEY_FUNCTION_Tab, .name="FUNCTION_Tab"},
+{.code=KEY_FUNCTION_Tab, .name="Tab"},
+
+{.code=KEY_FUNCTION_DeleteBackward, .name="FUNCTION_DeleteBackward"},
+{.code=KEY_FUNCTION_DeleteBackward, .name="DeleteBackward"},
+
+{.code=KEY_FUNCTION_F1, .name="FUNCTION_F1"},
+{.code=KEY_FUNCTION_F1, .name="F1"},
+
+{.code=KEY_FUNCTION_F2, .name="FUNCTION_F2"},
+{.code=KEY_FUNCTION_F2, .name="F2"},
+
+{.code=KEY_FUNCTION_F3, .name="FUNCTION_F3"},
+{.code=KEY_FUNCTION_F3, .name="F3"},
+
+{.code=KEY_FUNCTION_F4, .name="FUNCTION_F4"},
+{.code=KEY_FUNCTION_F4, .name="F4"},
+
+{.code=KEY_FUNCTION_F5, .name="FUNCTION_F5"},
+{.code=KEY_FUNCTION_F5, .name="F5"},
+
+{.code=KEY_FUNCTION_F6, .name="FUNCTION_F6"},
+{.code=KEY_FUNCTION_F6, .name="F6"},
+
+{.code=KEY_FUNCTION_F7, .name="FUNCTION_F7"},
+{.code=KEY_FUNCTION_F7, .name="F7"},
+
+{.code=KEY_FUNCTION_F8, .name="FUNCTION_F8"},
+{.code=KEY_FUNCTION_F8, .name="F8"},
+
+{.code=KEY_FUNCTION_F9, .name="FUNCTION_F9"},
+{.code=KEY_FUNCTION_F9, .name="F9"},
+
+{.code=KEY_FUNCTION_F10, .name="FUNCTION_F10"},
+{.code=KEY_FUNCTION_F10, .name="F10"},
+
+{.code=KEY_FUNCTION_F11, .name="FUNCTION_F11"},
+{.code=KEY_FUNCTION_F11, .name="F11"},
+
+{.code=KEY_FUNCTION_F12, .name="FUNCTION_F12"},
+{.code=KEY_FUNCTION_F12, .name="F12"},
+
+{.code=KEY_FUNCTION_F13, .name="FUNCTION_F13"},
+{.code=KEY_FUNCTION_F13, .name="F13"},
+
+{.code=KEY_FUNCTION_F14, .name="FUNCTION_F14"},
+{.code=KEY_FUNCTION_F14, .name="F14"},
+
+{.code=KEY_FUNCTION_F15, .name="FUNCTION_F15"},
+{.code=KEY_FUNCTION_F15, .name="F15"},
+
+{.code=KEY_FUNCTION_F16, .name="FUNCTION_F16"},
+{.code=KEY_FUNCTION_F16, .name="F16"},
+
+{.code=KEY_FUNCTION_F17, .name="FUNCTION_F17"},
+{.code=KEY_FUNCTION_F17, .name="F17"},
+
+{.code=KEY_FUNCTION_F18, .name="FUNCTION_F18"},
+{.code=KEY_FUNCTION_F18, .name="F18"},
+
+{.code=KEY_FUNCTION_F19, .name="FUNCTION_F19"},
+{.code=KEY_FUNCTION_F19, .name="F19"},
+
+{.code=KEY_FUNCTION_F20, .name="FUNCTION_F20"},
+{.code=KEY_FUNCTION_F20, .name="F20"},
+
+{.code=KEY_FUNCTION_F21, .name="FUNCTION_F21"},
+{.code=KEY_FUNCTION_F21, .name="F21"},
+
+{.code=KEY_FUNCTION_F22, .name="FUNCTION_F22"},
+{.code=KEY_FUNCTION_F22, .name="F22"},
+
+{.code=KEY_FUNCTION_F23, .name="FUNCTION_F23"},
+{.code=KEY_FUNCTION_F23, .name="F23"},
+
+{.code=KEY_FUNCTION_F24, .name="FUNCTION_F24"},
+{.code=KEY_FUNCTION_F24, .name="F24"},
+
+{.code=KEY_FUNCTION_Insert, .name="FUNCTION_Insert"},
+{.code=KEY_FUNCTION_Insert, .name="Insert"},
+
+{.code=KEY_FUNCTION_DeleteForward, .name="FUNCTION_DeleteForward"},
+{.code=KEY_FUNCTION_DeleteForward, .name="DeleteForward"},
+
+{.code=KEY_FUNCTION_Home, .name="FUNCTION_Home"},
+{.code=KEY_FUNCTION_Home, .name="Home"},
+
+{.code=KEY_FUNCTION_End, .name="FUNCTION_End"},
+{.code=KEY_FUNCTION_End, .name="End"},
+
+{.code=KEY_FUNCTION_PageUp, .name="FUNCTION_PageUp"},
+{.code=KEY_FUNCTION_PageUp, .name="PageUp"},
+
+{.code=KEY_FUNCTION_PageDown, .name="FUNCTION_PageDown"},
+{.code=KEY_FUNCTION_PageDown, .name="PageDown"},
+
+{.code=KEY_FUNCTION_ArrowUp, .name="FUNCTION_ArrowUp"},
+{.code=KEY_FUNCTION_ArrowUp, .name="ArrowUp"},
+
+{.code=KEY_FUNCTION_ArrowDown, .name="FUNCTION_ArrowDown"},
+{.code=KEY_FUNCTION_ArrowDown, .name="ArrowDown"},
+
+{.code=KEY_FUNCTION_ArrowLeft, .name="FUNCTION_ArrowLeft"},
+{.code=KEY_FUNCTION_ArrowLeft, .name="ArrowLeft"},
+
+{.code=KEY_FUNCTION_ArrowRight, .name="FUNCTION_ArrowRight"},
+{.code=KEY_FUNCTION_ArrowRight, .name="ArrowRight"},
+
+{.code=KEY_FUNCTION_PrintScreen, .name="FUNCTION_PrintScreen"},
+{.code=KEY_FUNCTION_PrintScreen, .name="PrintScreen"},
+
+{.code=KEY_FUNCTION_SystemRequest, .name="FUNCTION_SystemRequest"},
+{.code=KEY_FUNCTION_SystemRequest, .name="SystemRequest"},
+
+{.code=KEY_FUNCTION_Pause, .name="FUNCTION_Pause"},
+{.code=KEY_FUNCTION_Pause, .name="Pause"},
+
+{.code=KEY_FUNCTION_ShiftLeft, .name="FUNCTION_ShiftLeft"},
+{.code=KEY_FUNCTION_ShiftLeft, .name="ShiftLeft"},
+
+{.code=KEY_FUNCTION_ShiftRight, .name="FUNCTION_ShiftRight"},
+{.code=KEY_FUNCTION_ShiftRight, .name="ShiftRight"},
+
+{.code=KEY_FUNCTION_ControlLeft, .name="FUNCTION_ControlLeft"},
+{.code=KEY_FUNCTION_ControlLeft, .name="ControlLeft"},
+
+{.code=KEY_FUNCTION_ControlRight, .name="FUNCTION_ControlRight"},
+{.code=KEY_FUNCTION_ControlRight, .name="ControlRight"},
+
+{.code=KEY_FUNCTION_AltLeft, .name="FUNCTION_AltLeft"},
+{.code=KEY_FUNCTION_AltLeft, .name="AltLeft"},
+
+{.code=KEY_FUNCTION_AltRight, .name="FUNCTION_AltRight"},
+{.code=KEY_FUNCTION_AltRight, .name="AltRight"},
+
+{.code=KEY_FUNCTION_GuiLeft, .name="FUNCTION_GuiLeft"},
+{.code=KEY_FUNCTION_GuiLeft, .name="GuiLeft"},
+
+{.code=KEY_FUNCTION_GuiRight, .name="FUNCTION_GuiRight"},
+{.code=KEY_FUNCTION_GuiRight, .name="GuiRight"},
+
+{.code=KEY_FUNCTION_Application, .name="FUNCTION_Application"},
+{.code=KEY_FUNCTION_Application, .name="Application"},
+
+{.code=KEY_LOCK_Capitals, .name="LOCK_Capitals"},
+{.code=KEY_LOCK_Capitals, .name="CapsLock"},
+
+{.code=KEY_LOCK_Scroll, .name="LOCK_Scroll"},
+{.code=KEY_LOCK_Scroll, .name="ScrollLock"},
+
+{.code=KEY_LOCKING_Capitals, .name="LOCKING_Capitals"},
+
+{.code=KEY_LOCKING_Scroll, .name="LOCKING_Scroll"},
+
+{.code=KEY_LOCKING_Numbers, .name="LOCKING_Numbers"},
+
+{.code=KEY_KEYPAD_NumLock_Clear, .name="KEYPAD_NumLock_Clear"},
+
+{.code=KEY_KEYPAD_Slash, .name="KEYPAD_Slash"},
+{.code=KEY_KEYPAD_Slash, .name="KPSlash"},
+
+{.code=KEY_KEYPAD_Asterisk, .name="KEYPAD_Asterisk"},
+{.code=KEY_KEYPAD_Asterisk, .name="KPAsterisk"},
+
+{.code=KEY_KEYPAD_Minus, .name="KEYPAD_Minus"},
+{.code=KEY_KEYPAD_Minus, .name="KPMinus"},
+
+{.code=KEY_KEYPAD_Plus, .name="KEYPAD_Plus"},
+{.code=KEY_KEYPAD_Plus, .name="KPPlus"},
+
+{.code=KEY_KEYPAD_Enter, .name="KEYPAD_Enter"},
+{.code=KEY_KEYPAD_Enter, .name="KPEnter"},
+
+{.code=KEY_KEYPAD_One_End, .name="KEYPAD_One_End"},
+{.code=KEY_KEYPAD_One_End, .name="KP1"},
+{.code=KEY_KEYPAD_One_End, .name="KPEnd"},
+
+{.code=KEY_KEYPAD_Two_ArrowDown, .name="KEYPAD_Two_ArrowDown"},
+{.code=KEY_KEYPAD_Two_ArrowDown, .name="KP2"},
+{.code=KEY_KEYPAD_Two_ArrowDown, .name="KPArrowDown"},
+
+{.code=KEY_KEYPAD_Three_PageDown, .name="KEYPAD_Three_PageDown"},
+{.code=KEY_KEYPAD_Three_PageDown, .name="KP3"},
+{.code=KEY_KEYPAD_Three_PageDown, .name="KPPageDown"},
+
+{.code=KEY_KEYPAD_Four_ArrowLeft, .name="KEYPAD_Four_ArrowLeft"},
+{.code=KEY_KEYPAD_Four_ArrowLeft, .name="KP4"},
+{.code=KEY_KEYPAD_Four_ArrowLeft, .name="KPArrowLeft"},
+
+{.code=KEY_KEYPAD_Five, .name="KEYPAD_Five"},
+{.code=KEY_KEYPAD_Five, .name="KP5"},
+
+{.code=KEY_KEYPAD_Six_ArrowRight, .name="KEYPAD_Six_ArrowRight"},
+{.code=KEY_KEYPAD_Six_ArrowRight, .name="KP6"},
+{.code=KEY_KEYPAD_Six_ArrowRight, .name="KPArrowRight"},
+
+{.code=KEY_KEYPAD_Seven_Home, .name="KEYPAD_Seven_Home"},
+{.code=KEY_KEYPAD_Seven_Home, .name="KP7"},
+{.code=KEY_KEYPAD_Seven_Home, .name="KPHome"},
+
+{.code=KEY_KEYPAD_Eight_ArrowUp, .name="KEYPAD_Eight_ArrowUp"},
+{.code=KEY_KEYPAD_Eight_ArrowUp, .name="KP8"},
+{.code=KEY_KEYPAD_Eight_ArrowUp, .name="KPArrowUp"},
+
+{.code=KEY_KEYPAD_Nine_PageUp, .name="KEYPAD_Nine_PageUp"},
+{.code=KEY_KEYPAD_Nine_PageUp, .name="KP9"},
+{.code=KEY_KEYPAD_Nine_PageUp, .name="KPPageUp"},
+
+{.code=KEY_KEYPAD_Zero_Insert, .name="KEYPAD_Zero_Insert"},
+{.code=KEY_KEYPAD_Zero_Insert, .name="KP0"},
+{.code=KEY_KEYPAD_Zero_Insert, .name="KPInsert"},
+
+{.code=KEY_KEYPAD_Period_Delete, .name="KEYPAD_Period_Delete"},
+{.code=KEY_KEYPAD_Period_Delete, .name="KPPeriod"},
+{.code=KEY_KEYPAD_Period_Delete, .name="KPDelete"},
+
+{.code=KEY_KEYPAD_Equals, .name="KEYPAD_Equals"},
+{.code=KEY_KEYPAD_Equals, .name="KPEquals"},
+
+{.code=KEY_KEYPAD_LeftParenthesis, .name="KEYPAD_LeftParenthesis"},
+
+{.code=KEY_KEYPAD_RightParenthesis, .name="KEYPAD_RightParenthesis"},
+
+{.code=KEY_KEYPAD_LeftBrace, .name="KEYPAD_LeftBrace"},
+
+{.code=KEY_KEYPAD_RightBrace, .name="KEYPAD_RightBrace"},
+
+{.code=KEY_KEYPAD_Modulo, .name="KEYPAD_Modulo"},
+
+{.code=KEY_KEYPAD_BitwiseAnd, .name="KEYPAD_BitwiseAnd"},
+
+{.code=KEY_KEYPAD_BitwiseOr, .name="KEYPAD_BitwiseOr"},
+
+{.code=KEY_KEYPAD_BitwiseXor, .name="KEYPAD_BitwiseXor"},
+
+{.code=KEY_KEYPAD_Less, .name="KEYPAD_Less"},
+
+{.code=KEY_KEYPAD_Greater, .name="KEYPAD_Greater"},
+
+{.code=KEY_KEYPAD_BooleanAnd, .name="KEYPAD_BooleanAnd"},
+
+{.code=KEY_KEYPAD_BooleanOr, .name="KEYPAD_BooleanOr"},
+
+{.code=KEY_KEYPAD_BooleanXor, .name="KEYPAD_BooleanXor"},
+
+{.code=KEY_KEYPAD_BooleanNot, .name="KEYPAD_BooleanNot"},
+
+{.code=KEY_KEYPAD_Backspace, .name="KEYPAD_Backspace"},
+
+{.code=KEY_KEYPAD_Space, .name="KEYPAD_Space"},
+
+{.code=KEY_KEYPAD_Tab, .name="KEYPAD_Tab"},
+
+{.code=KEY_KEYPAD_Comma, .name="KEYPAD_Comma"},
+
+{.code=KEY_KEYPAD_Colon, .name="KEYPAD_Colon"},
+
+{.code=KEY_KEYPAD_Number, .name="KEYPAD_Number"},
+
+{.code=KEY_KEYPAD_At, .name="KEYPAD_At"},
+
+{.code=KEY_KEYPAD_A, .name="KEYPAD_A"},
+
+{.code=KEY_KEYPAD_B, .name="KEYPAD_B"},
+
+{.code=KEY_KEYPAD_C, .name="KEYPAD_C"},
+
+{.code=KEY_KEYPAD_D, .name="KEYPAD_D"},
+
+{.code=KEY_KEYPAD_E, .name="KEYPAD_E"},
+
+{.code=KEY_KEYPAD_F, .name="KEYPAD_F"},
+
+{.code=KEY_KEYPAD_00, .name="KEYPAD_00"},
+
+{.code=KEY_KEYPAD_000, .name="KEYPAD_000"},
+
+{.code=KEY_KEYPAD_ThousandsSeparator, .name="KEYPAD_ThousandsSeparator"},
+
+{.code=KEY_KEYPAD_DecimalSeparator, .name="KEYPAD_DecimalSeparator"},
+
+{.code=KEY_KEYPAD_CurrencyUnit, .name="KEYPAD_CurrencyUnit"},
+
+{.code=KEY_KEYPAD_CurrencySubunit, .name="KEYPAD_CurrencySubunit"},
+
+{.code=KEY_FUNCTION_Power, .name="FUNCTION_Power"},
+
+{.code=KEY_FUNCTION_Sleep, .name="FUNCTION_Sleep"},
+
+{.code=KEY_FUNCTION_Wakeup, .name="FUNCTION_Wakeup"},
+
+{.code=KEY_FUNCTION_Stop, .name="FUNCTION_Stop"},
+
+{.code=KEY_FUNCTION_Help, .name="FUNCTION_Help"},
+
+{.code=KEY_FUNCTION_Find, .name="FUNCTION_Find"},
+
+{.code=KEY_FUNCTION_Menu, .name="FUNCTION_Menu"},
+
+{.code=KEY_FUNCTION_Select, .name="FUNCTION_Select"},
+
+{.code=KEY_FUNCTION_Again, .name="FUNCTION_Again"},
+
+{.code=KEY_FUNCTION_Execute, .name="FUNCTION_Execute"},
+
+{.code=KEY_FUNCTION_Copy, .name="FUNCTION_Copy"},
+
+{.code=KEY_FUNCTION_Cut, .name="FUNCTION_Cut"},
+
+{.code=KEY_FUNCTION_Paste, .name="FUNCTION_Paste"},
+
+{.code=KEY_FUNCTION_Undo, .name="FUNCTION_Undo"},
+
+{.code=KEY_FUNCTION_Mute, .name="FUNCTION_Mute"},
+
+{.code=KEY_FUNCTION_VolumeUp, .name="FUNCTION_VolumeUp"},
+
+{.code=KEY_FUNCTION_VolumeDown, .name="FUNCTION_VolumeDown"},
+
+{.code=KEY_KEYPAD_Clear, .name="KEYPAD_Clear"},
+
+{.code=KEY_KEYPAD_ClearEntry, .name="KEYPAD_ClearEntry"},
+
+{.code=KEY_KEYPAD_PlusMinus, .name="KEYPAD_PlusMinus"},
+
+{.code=KEY_KEYPAD_MemoryClear, .name="KEYPAD_MemoryClear"},
+
+{.code=KEY_KEYPAD_MemoryStore, .name="KEYPAD_MemoryStore"},
+
+{.code=KEY_KEYPAD_MemoryRecall, .name="KEYPAD_MemoryRecall"},
+
+{.code=KEY_KEYPAD_MemoryAdd, .name="KEYPAD_MemoryAdd"},
+
+{.code=KEY_KEYPAD_MemorySubtract, .name="KEYPAD_MemorySubtract"},
+
+{.code=KEY_KEYPAD_MemoryMultiply, .name="KEYPAD_MemoryMultiply"},
+
+{.code=KEY_KEYPAD_MemoryDivide, .name="KEYPAD_MemoryDivide"},
+
+{.code=KEY_KEYPAD_Binary, .name="KEYPAD_Binary"},
+
+{.code=KEY_KEYPAD_Octal, .name="KEYPAD_Octal"},
+
+{.code=KEY_KEYPAD_Decimal, .name="KEYPAD_Decimal"},
+
+{.code=KEY_KEYPAD_Hexadecimal, .name="KEYPAD_Hexadecimal"},
+
+{.code=KEY_FUNCTION_Cancel, .name="FUNCTION_Cancel"},
+
+{.code=KEY_FUNCTION_Clear, .name="FUNCTION_Clear"},
+
+{.code=KEY_FUNCTION_Prior, .name="FUNCTION_Prior"},
+
+{.code=KEY_FUNCTION_Return, .name="FUNCTION_Return"},
+
+{.code=KEY_FUNCTION_Separator, .name="FUNCTION_Separator"},
+
+{.code=KEY_FUNCTION_Out, .name="FUNCTION_Out"},
+
+{.code=KEY_FUNCTION_Oper, .name="FUNCTION_Oper"},
+
+{.code=KEY_FUNCTION_Clear_Again, .name="FUNCTION_Clear_Again"},
+
+{.code=KEY_FUNCTION_CrSel_Props, .name="FUNCTION_CrSel_Props"},
+
+{.code=KEY_FUNCTION_ExSel, .name="FUNCTION_ExSel"},
+
