@@ -2432,6 +2432,15 @@ The following directives are recognized:
     The default is not to use a key table.
     This directive can be overridden with the
     <ref id="options-key-table" name="-k"> command line option.
+  <tag><tt/keyboard-properties/ <em/name/<tt/=/<em/value/<tt/,/...<label id="configure-keyboard-properties"></tag>
+    Specify the properties of the keyboard(s) to be monitored.
+    If the same property is specified more than once,
+    then its rightmost assignment is used.
+    See section <ref id="keyboard-properties" name="Keyboard Properties">
+    for a list of the properties which may be specified.
+    The default is to monitor all keyboards.
+    This directive can be overridden with the
+    <ref id="options-keyboard-properties" name="-K"> command line option.
   <tag><tt/midi-device/ <em/device/<label id="configure-midi-device"></tag>
     Specify the device to use for the Musical Instrument Digital Interface
     (see section <ref id="operand-midi-device" name="MIDI Device Specification">).
@@ -2738,6 +2747,9 @@ The <tt/brltty/ command accepts the following options:
       <tag><tt/BRLTTY_KEY_TABLE/</tag>
         The key table
         (see the <ref id="options-key-table" name="-k"> command line option).
+      <tag><tt/BRLTTY_KEYBOARD_PROPERTIES/</tag>
+        The keyboard properties
+        (see the <ref id="options-keyboard-properties" name="-K"> command line option).
       <tag><tt/BRLTTY_MIDI_DEVICE/</tag>
         The Musical Instrument Digital Interface device
         (see the <ref id="options-midi-device" name="-m"> command line option).
@@ -2781,6 +2793,14 @@ The <tt/brltty/ command accepts the following options:
       <item>Applications can know that a BrlAPI server is running.
     </itemize>
     This option is only supported on the Windows platform.
+  <tag><tt/-K/<em/name/<tt/=/<em/value/<tt/,/... <tt/--keyboard-properties=/<em/name/<tt/=/<em/value/<tt/,/...<label id="options-keyboard-properties"></tag>
+    Specify the properties of the keyboard(s) to be monitored.
+    If the same property is specified more than once,
+    then its rightmost assignment is used.
+    See section <ref id="keyboard-properties" name="Keyboard Properties">
+    for a list of the properties which may be specified.
+    See the <ref id="configure-keyboard-properties" name="keyboard-properties">
+    configuration file directive for the default run-time settings.
   <tag><tt/-M/<em/csecs/ <tt/--message-delay=/<em/csecs/<label id="options-message-delay"></tag>
     Specify the amount of time (in hundredths of a second)
     that BRLTTY keeps its own internally generated messages on the braille display.
@@ -4720,6 +4740,27 @@ The following directives are provided:
         If relative, it is anchored at the directory containing the including file.
     </descrip>
 </descrip>
+
+<sect2>Keyboard Properties<label id="keyboard-properties"><p>
+The default is that all keyboards are monitored.
+A subset of the keyboards may be selected by specifying one or more of the following properties
+(see the <ref id="options-keyboard-properties" name="-K"> command line option,
+and the <ref id="configure-keyboard-properties" name="keyboard-properties"> configuration file directive):
+<descrip>
+  <tag/type/
+    The bus type, specified as one of the following keywords:
+      <tt/any/,
+      <tt/ps2/,
+      <tt/usb/,
+      <tt/bluetooth/.
+  <tag/vendor/
+    The vendor identifier, specified as a 16-bit unsigned integer.
+  <tag/product/
+    The product identifier, specified as a 16-bit unsigned integer.
+</descrip>
+
+The vendor and product identifiers may be specified in decimal, octal, or hexadecimal.
+Specifying <tt/0/ means to match any value.
 
 <sect>Advanced Topics<p>
 

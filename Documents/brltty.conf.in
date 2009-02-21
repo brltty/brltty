@@ -377,8 +377,8 @@
 # If not specified, all keyboards are monitored.
 # (can be overridden with the -K [--keyboard-properties=] option)
 #keyboard-properties	Type=any	# [any,ps2,usb,bluetooth]
-#keyboard-properties	Vendor=0X0000	#
-#keyboard-properties	Product=0X0000	#
+#keyboard-properties	Vendor=0X0000	# [0X0000-0XFFFF]
+#keyboard-properties	Product=0X0000	# [0X0000-0XFFFF]
 
 
 ##################
