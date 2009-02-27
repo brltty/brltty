@@ -1829,6 +1829,13 @@ openUsbPort (const char *device) {
       .disableAutosuspend=1
     }
     ,
+    { /* Refreshabraille 18 (18 cells) */
+      .vendor=0X0904, .product=0X3000,
+      .configuration=1, .interface=0, .alternative=0,
+      .inputEndpoint=1, .outputEndpoint=2,
+      .disableAutosuspend=1
+    }
+    ,
     { .vendor=0 }
   };
 

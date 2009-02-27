@@ -1277,6 +1277,12 @@ usbGetSerialOperations (UsbDevice *device) {
         usbFtdiInputFilter
       }
       ,
+      { /* Baum Refreshabraille 18 (18 cells) */
+        0X0904, 0X3000,
+        &usbFtdiOperations_FT232BM,
+        usbFtdiInputFilter
+      }
+      ,
       {0, 0}
     };
     const UsbSerialAdapter *sa = usbSerialAdapters;
