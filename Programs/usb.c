@@ -1339,9 +1339,31 @@ usbChooseChannel (UsbDevice *device, void *data) {
         if (usbOpenInterface(device, definition->interface, definition->alternative)) {
           int ok = 1;
 
-          if (definition->serial)
-            if (!usbSetSerialParameters(device, definition->serial))
-              ok = 0;
+          if (ok) {
+            if (definition->inputEndpoint) {
+              UsbEndpoint *endpoint = usbGetInputEndpoint(device, definition->inputEndpoint);
+
+              if (!endpoint) {
+                ok = 0;
+              } else if (USB_ENDPOINT_TRANSFER(endpoint->descriptor) == UsbEndpointTransfer_Interrupt) {
+                usbBeginInput(device, definition->inputEndpoint, 8);
+              }
+            }
+          }
+
+          if (ok) {
+            if (definition->outputEndpoint) {
+              UsbEndpoint *endpoint = usbGetOutputEndpoint(device, definition->outputEndpoint);
+
+              if (!endpoint) ok = 0;
+            }
+          }
+
+          if (ok) {
+            if (definition->serial)
+              if (!usbSetSerialParameters(device, definition->serial))
+                ok = 0;
+          }
 
           if (ok) {
             choose->definition = definition;

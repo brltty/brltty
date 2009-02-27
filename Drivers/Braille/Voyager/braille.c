@@ -386,19 +386,11 @@ openUsbPort (char **parameters, const char *device) {
     { .vendor=0 }
   };
 
-  if (!(usb = usbFindChannel(definitions, (void *)device))) return 0;
-
-  /* start the input packet monitor */
-  {
-    int retry = 0;
-    while (1) {
-      int ret = usbBeginInput(usb->device, usb->definition.inputEndpoint, 8);
-      if ((ret != 0) || (errno != EPIPE) || (retry == USB_RETRIES)) break;
-      LogPrint(LOG_WARNING, "begin input retry #%d.", ++retry);
-    }
+  if ((usb = usbFindChannel(definitions, (void *)device))) {
+    return 1;
   }
 
-  return 1;
+  return 0;
 }
 
 static int

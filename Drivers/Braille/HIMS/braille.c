@@ -552,9 +552,6 @@ openUsbPort (const char *device) {
 
   if ((usbChannel = usbFindChannel(definitions, (void *)device))) {
     usbSerial = usbGetSerialOperations(usbChannel->device);
-    usbBeginInput(usbChannel->device,
-                  usbChannel->definition.inputEndpoint,
-                  8);
     protocol = usbChannel->definition.data;
     return 1;
   }

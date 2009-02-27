@@ -1944,7 +1944,6 @@ openUsbPort (const char *device) {
 
     model = usbChannel->definition.data;
     textRewriteInterval = 0;
-    usbBeginInput(usbChannel->device, usbChannel->definition.inputEndpoint, 8);
     return 1;
   }
   return 0;

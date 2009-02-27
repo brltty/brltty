@@ -320,7 +320,6 @@ openUsbPort (char **parameters, const char *device) {
   };
 
   if ((usb = usbFindChannel(definitions, (void *)device))) {
-    usbBeginInput(usb->device, usb->definition.inputEndpoint, 8);
     return 1;
   }
   return 0;
