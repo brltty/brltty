@@ -179,7 +179,8 @@ The following braille displays are supported:
 -  Albatross [46/80]
 -  Alva [ABT(3nn), Delphi(4nn), Satellite(5nn), Braille System 40,
          Braille Controller 640/680]
--  Baum [Inka, Vario/RBT, SuperVario/Brailliant, PocketVario]
+-  Baum [Inka, Vario/RBT, SuperVario/Brailliant, PocketVario, VarioPro,
+         EcoVario, VarioConnect, Refreshabraille]
 -  BrailleLite [18/40/M20/M40]
 -  BrailleNote [18/32]
 -  BrlAPI
@@ -189,7 +190,7 @@ The following braille displays are supported:
 -  FreedomScientific [Focus 44/70/84, PacMate 20/40/80]
 -  HandyTech [Modular 20/40/80, Modular Evolution 64/88, Braille Wave 40,
               Easy Braille, Braille Star 40/80, Bookworm, Braillino 20]
--  HIMS [Braille Sense, Sync Braille]
+-  HIMS [Braille Sense, SyncBraille]
 -  IrisLinux
 -  Libbraille
 -  LogText [32]

@@ -4915,6 +4915,10 @@ BRLTTY supports the following braille displays:
       |Vario/RBT@
       |SuperVario/Brailliant@
       |PocketVario@
+      |VarioPro@
+      |EcoVario@
+      |VarioConnect@
+      |Refreshabraille@
     BrailleLite
       |18/40/M20/M40@
     BrailleNote
@@ -4943,7 +4947,7 @@ BRLTTY supports the following braille displays:
       |Braillino 20@
     HIMS
       |Braille Sense@
-      |Sync Braille@
+      |SyncBraille@
     Libbraille@
     LogText
       |32@

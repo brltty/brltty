@@ -18,7 +18,7 @@
 
 DRIVER_CODE = hm
 DRIVER_NAME = HIMS
-DRIVER_COMMENT = Braille Sense, Sync Braille
+DRIVER_COMMENT = Braille Sense, SyncBraille
 DRIVER_VERSION = 
 DRIVER_DEVELOPERS = Dave Mielke <dave@mielke.cc>
 HELP_DEPS = $(HELP_TEXT)

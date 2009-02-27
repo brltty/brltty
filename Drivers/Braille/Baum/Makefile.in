@@ -18,7 +18,7 @@
 
 DRIVER_CODE = bm
 DRIVER_NAME = Baum
-DRIVER_COMMENT = 
+DRIVER_COMMENT = Inka, Vario/RBT, SuperVario/Brailliant, PocketVario, VarioPro, EcoVario, VarioConnect, Refreshabraille
 DRIVER_VERSION = 
 DRIVER_DEVELOPERS = Dave Mielke <dave@mielke.cc>
 HELP_DEPS = $(HELP_TEXT)
