@@ -46,10 +46,10 @@ typedef enum {
   KEY_BS_SR = 0X4000,
 
   /* Sync Braille keys */
-  KEY_SB_LU = 0X10,
-  KEY_SB_RU = 0X20,
-  KEY_SB_RD = 0X40,
-  KEY_SB_LD = 0X80,
+  KEY_SB_LU = 0X1000,
+  KEY_SB_RU = 0X2000,
+  KEY_SB_RD = 0X4000,
+  KEY_SB_LD = 0X8000,
 } BrailleKeys;
 
 typedef struct {
@@ -226,6 +226,7 @@ writePacket (
 }
 
 typedef struct {
+  const char *modelName;
   unsigned int helpPage;
   int (*getCellCount) (BrailleDisplay *brl, unsigned int *count);
   int (*interpretKeys) (BrailleKeys keys);
@@ -406,6 +407,7 @@ interpretBrailleSenseKeys (BrailleKeys keys) {
 }
 
 static const ProtocolOperations brailleSenseOperations = {
+  "Braille Sense",
   0, getBrailleSenseCellCount, interpretBrailleSenseKeys
 };
 
@@ -416,7 +418,7 @@ getSyncBrailleCellCount (BrailleDisplay *brl, unsigned int *count) {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
   };
 
-  if (writePacket(brl, 0XFB, 0X00, data, sizeof(data), NULL, 0)) {
+  if (writePacket(brl, 0XFB, 0X01, data, sizeof(data), NULL, 0)) {
     InputPacket packet;
 
     if (readPacket(brl, &packet)) {
@@ -433,6 +435,33 @@ getSyncBrailleCellCount (BrailleDisplay *brl, unsigned int *count) {
 static int
 interpretSyncBrailleKeys (BrailleKeys keys) {
   switch (keys) {
+    case KEY_SB_LU:
+      return BRL_CMD_LNUP;
+    case KEY_SB_LD:
+      return BRL_CMD_LNDN;
+
+    case KEY_SB_RU:
+      return BRL_CMD_FWINLT;
+    case KEY_SB_RD:
+      return BRL_CMD_FWINRT;
+
+    case KEY_SB_LU | KEY_SB_LD:
+      return BRL_CMD_LNBEG;
+    case KEY_SB_LU | KEY_SB_LD | KEY_SB_RU:
+      return BRL_CMD_TOP_LEFT;
+    case KEY_SB_LU | KEY_SB_LD | KEY_SB_RD:
+      return BRL_CMD_BOT_LEFT;
+
+    case KEY_SB_RU | KEY_SB_RD:
+      return BRL_CMD_RETURN;
+    case KEY_SB_RU | KEY_SB_RD | KEY_SB_LU:
+      return BRL_CMD_SIXDOTS;
+    case KEY_SB_RU | KEY_SB_RD | KEY_SB_LD:
+      return BRL_CMD_CSRTRK;
+
+    case KEY_SB_LU | KEY_SB_LD | KEY_SB_RU | KEY_SB_RD:
+      return BRL_CMD_PREFMENU;
+
     default:
       break;
   }
@@ -441,6 +470,7 @@ interpretSyncBrailleKeys (BrailleKeys keys) {
 }
 
 static const ProtocolOperations syncBrailleOperations = {
+  "SyncBraille",
   1, getSyncBrailleCellCount, interpretSyncBrailleKeys
 };
 
@@ -690,13 +720,16 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   if (io->openPort(device)) {
     if (io->configurePort()) {
       charactersPerSecond = SERIAL_BAUD / 10;
+      LogPrint(LOG_INFO, "detected: %s", protocol->modelName);
 
-      if (protocol->getCellCount(brl, &brl->textColumns)) {
+      if (protocol->getCellCount(brl, &brl->textColumns) ||
+          protocol->getCellCount(brl, &brl->textColumns)) {
         brl->textRows = 1;
         brl->helpPage = protocol->helpPage;
 
         inputMode = 0;
         routingCommand = BRL_BLK_ROUTE;
+
         if (clearCells(brl)) return 1;
       }
     }
