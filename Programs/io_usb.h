@@ -390,11 +390,6 @@ extern void *usbReapResponse (
   int wait
 );
 
-extern int usbBeginInput (
-  UsbDevice *device,
-  unsigned char endpointNumber,
-  int count
-);
 extern int usbAwaitInput (
   UsbDevice *device,
   unsigned char endpointNumber,
