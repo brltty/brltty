@@ -197,7 +197,6 @@ rm -fr "${RPM_BUILD_ROOT}"
 %{_libdir}/libbrlapi.so.*
 %{_bindir}/xbrlapi
 %doc Documents/Manual-BrlAPI/English/*.{sgml,txt,html}
-%doc Documents/README.Gnopernicus
 
 %files -n brlapi-caml
 @OCAMLLIB@/brlapi
