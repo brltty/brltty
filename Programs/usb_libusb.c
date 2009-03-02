@@ -224,6 +224,12 @@ usbReadEndpoint (
         break;
     }
 
+    if (result >= 0) {
+      if (!usbApplyInputFilters(device, buffer, length, &result)) {
+        result = -EIO;
+      }
+    }
+
     if (result >= 0) return result;
     errno = -result;
   }
