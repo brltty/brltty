@@ -50,6 +50,7 @@ ENV{PRODUCT}=="904/2012/*", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb_run"
 ENV{PRODUCT}=="904/2014/*", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb_run"
 ENV{PRODUCT}=="904/2015/*", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb_run"
 ENV{PRODUCT}=="904/2016/*", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb_run"
+ENV{PRODUCT}=="904/3000/*", ENV{BRLTTY_DRIVER}="bm", GOTO="brltty_usb_run"
 
 # EuroBraille
 ENV{PRODUCT}=="c251/1122/*", ENV{BRLTTY_DRIVER}="eu", GOTO="brltty_usb_run"

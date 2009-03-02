@@ -144,6 +144,7 @@ ServiceBinary  = %12%\libusb0.sys
 "LibUsb-Win32 Baum EcoVario 32"=LIBUSB_DEV, USB\VID_0904&PID_2014
 "LibUsb-Win32 Baum EcoVario 64"=LIBUSB_DEV, USB\VID_0904&PID_2015
 "LibUsb-Win32 Baum EcoVario 80"=LIBUSB_DEV, USB\VID_0904&PID_2016
+"LibUsb-Win32 Baum Refreshabraille 18"=LIBUSB_DEV, USB\VID_0904&PID_3000
 
 "LibUsb-Win32 Braille Sense"=LIBUSB_DEV, USB\VID_045E&PID_930A
 
@@ -187,6 +188,7 @@ ServiceBinary  = %12%\libusb0.sys
 "LibUsb-Win32 Baum EcoVario 32"=LIBUSB_DEV, USB\VID_0904&PID_2014
 "LibUsb-Win32 Baum EcoVario 64"=LIBUSB_DEV, USB\VID_0904&PID_2015
 "LibUsb-Win32 Baum EcoVario 80"=LIBUSB_DEV, USB\VID_0904&PID_2016
+"LibUsb-Win32 Baum Refreshabraille 18"=LIBUSB_DEV, USB\VID_0904&PID_3000
 
 "LibUsb-Win32 Braille Sense"=LIBUSB_DEV, USB\VID_045E&PID_930A
 
@@ -230,6 +232,7 @@ ServiceBinary  = %12%\libusb0.sys
 "LibUsb-Win32 Baum EcoVario 32"=LIBUSB_DEV, USB\VID_0904&PID_2014
 "LibUsb-Win32 Baum EcoVario 64"=LIBUSB_DEV, USB\VID_0904&PID_2015
 "LibUsb-Win32 Baum EcoVario 80"=LIBUSB_DEV, USB\VID_0904&PID_2016
+"LibUsb-Win32 Baum Refreshabraille 18"=LIBUSB_DEV, USB\VID_0904&PID_3000
 
 "LibUsb-Win32 Braille Sense"=LIBUSB_DEV, USB\VID_045E&PID_930A
 
