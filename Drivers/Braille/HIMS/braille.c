@@ -439,11 +439,12 @@ interpretSyncBrailleKeys (BrailleKeys keys) {
       return BRL_CMD_LNUP;
     case KEY_SB_LD:
       return BRL_CMD_LNDN;
-
     case KEY_SB_RU:
       return BRL_CMD_FWINLT;
     case KEY_SB_RD:
       return BRL_CMD_FWINRT;
+    case KEY_SB_RU | KEY_SB_RD:
+      return BRL_CMD_RETURN;
 
     case KEY_SB_LU | KEY_SB_LD:
       return BRL_CMD_LNBEG;
@@ -452,23 +453,19 @@ interpretSyncBrailleKeys (BrailleKeys keys) {
     case KEY_SB_LU | KEY_SB_LD | KEY_SB_RD:
       return BRL_CMD_BOT_LEFT;
 
-    case KEY_SB_RU | KEY_SB_RD:
-      return BRL_CMD_RETURN;
-    case KEY_SB_RU | KEY_SB_RD | KEY_SB_LU:
-      return BRL_CMD_INFO;
-    case KEY_SB_RU | KEY_SB_RD | KEY_SB_LD:
-      return BRL_CMD_PREFMENU;
-
-    case KEY_SB_RU | KEY_SB_LU:
+    case KEY_SB_LU | KEY_SB_RU:
       return BRL_CMD_CSRTRK;
-    case KEY_SB_RU | KEY_SB_LD:
+    case KEY_SB_LU | KEY_SB_RD:
       return BRL_CMD_SIXDOTS;
-
-    case KEY_SB_RD | KEY_SB_LU:
+    case KEY_SB_LD | KEY_SB_RU:
       return BRL_CMD_FREEZE;
-    case KEY_SB_RD | KEY_SB_LD:
+    case KEY_SB_LD | KEY_SB_RD:
       return BRL_CMD_DISPMD;
 
+    case KEY_SB_LU | KEY_SB_RU | KEY_SB_RD:
+      return BRL_CMD_INFO;
+    case KEY_SB_LD | KEY_SB_RU | KEY_SB_RD:
+      return BRL_CMD_PREFMENU;
     case KEY_SB_LU | KEY_SB_LD | KEY_SB_RU | KEY_SB_RD:
       return BRL_CMD_HELP;
 

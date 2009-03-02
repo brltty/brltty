@@ -2,18 +2,16 @@ Help for SyncBraille
 
 lu/ld: go up/down one line
 ru/rd: go left/right one window
+RU+RD: go to cursor or undo last cursor tracking motion
 
 lu+ld: go to beginning of current line
 lu+ld + ru/rd: go to beginning of top/bottom line
 
-RU+RD: go to cursor or undo last cursor tracking motion
-ru+rd+lu: switch to/from status line
-ru+rd+ld: switch to/from preferences menu
+lu+ru: toggle cursor tracking on/off
+lu+rd: toggle 6/8-dot braille
+ld+ru: freeze/unfreeze screen image
+ld+rd: toggle attributes/text display
 
-ru+lu: toggle cursor tracking on/off
-ru+ld: toggle 6/8-dot braille
-
-rd+lu: freeze/unfreeze screen image
-rd+ld: toggle attributes/text display
-
+lu+ru+rd: switch to/from status line
+ld+ru+rd: switch to/from preferences menu
 lu+ld+ru+rd: switch to/from help page
