@@ -374,6 +374,23 @@ usbInterfaceDescriptor (
   return NULL;
 }
 
+unsigned int
+usbAlternativeCount (
+  UsbDevice *device,
+  unsigned char interface
+) {
+  unsigned int count = 0;
+  const UsbDescriptor *descriptor = NULL;
+
+  while (usbNextDescriptor(device, &descriptor)) {
+    if (descriptor->interface.bDescriptorType == UsbDescriptorType_Interface)
+      if (descriptor->interface.bInterfaceNumber == interface)
+        count += 1;
+  }
+
+  return count;
+}
+
 const UsbEndpointDescriptor *
 usbEndpointDescriptor (
   UsbDevice *device,
@@ -559,29 +576,28 @@ usbOpenInterface (
     if (!usbClaimInterface(device, interface))
       return 0;
 
+  if (usbAlternativeCount(device, interface) == 1) goto done;
+
   {
-    unsigned char bytes[1];
+    unsigned char response[1];
     int size = usbControlRead(device, UsbControlRecipient_Interface, UsbControlType_Standard,
                               UsbStandardRequest_GetInterface, 0, interface,
-                              bytes, sizeof(bytes), 1000);
+                              response, sizeof(response), 1000);
 
     if (size != -1) {
-      if (bytes[0] == alternative) {
-        device->interface = descriptor;
-        return 1;
-      }
+      if (response[0] == alternative) goto done;
     } else {
       LogPrint(LOG_WARNING, "USB standard request not supported: get interface");
     }
   }
 
-  if (usbSetAlternative(device, interface, alternative)) {
-    device->interface = descriptor;
-    return 1;
-  }
-
+  if (usbSetAlternative(device, interface, alternative)) goto done;
   if (!device->interface) usbReleaseInterface(device, interface);
   return 0;
+
+done:
+  device->interface = descriptor;
+  return 1;
 }
 
 void

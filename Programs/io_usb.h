@@ -253,6 +253,10 @@ extern const UsbInterfaceDescriptor *usbInterfaceDescriptor (
   unsigned char interface,
   unsigned char alternative
 );
+extern unsigned int usbAlternativeCount (
+  UsbDevice *device,
+  unsigned char interface
+);
 extern const UsbEndpointDescriptor *usbEndpointDescriptor (
   UsbDevice *device,
   unsigned char endpointAddress
