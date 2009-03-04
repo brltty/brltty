@@ -324,10 +324,10 @@ usbConfigureDevice (
   }
 
   {
-    unsigned char currentConfiguration;
+    const UsbConfigurationDescriptor *descriptor = usbConfigurationDescriptor(device);
 
-    if (usbGetConfiguration(device, &currentConfiguration))
-      if (currentConfiguration == configuration)
+    if (descriptor)
+      if (descriptor->bConfigurationValue == configuration)
         return 1;
   }
 
