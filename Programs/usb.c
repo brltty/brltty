@@ -256,9 +256,15 @@ usbConfigurationDescriptor (
   UsbDevice *device
 ) {
   if (!device->configuration) {
-    unsigned char configuration;
+    unsigned char current;
 
-    if (usbGetConfiguration(device, &configuration)) {
+    if (device->descriptor.bNumConfigurations < 2) {
+      current = 1;
+    } else if (!usbGetConfiguration(device, &current)) {
+      current = 0;
+    }
+
+    if (current) {
       UsbDescriptor descriptor;
       unsigned char number;
 
@@ -267,7 +273,7 @@ usbConfigurationDescriptor (
                                     number, 0, &descriptor, 1000);
         if (size == -1) {
           LogPrint(LOG_WARNING, "USB configuration descriptor not readable: %d", number);
-        } else if (descriptor.configuration.bConfigurationValue == configuration) {
+        } else if (descriptor.configuration.bConfigurationValue == current) {
           break;
         }
       }
@@ -297,7 +303,7 @@ usbConfigurationDescriptor (
           LogError("USB configuration descriptor allocate");
         }
       } else {
-        LogPrint(LOG_ERR, "USB configuration descriptor not found: %d", configuration);
+        LogPrint(LOG_ERR, "USB configuration descriptor not found: %d", current);
       }
     }
   }
