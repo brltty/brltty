@@ -197,20 +197,6 @@ usbDisconnectInterface (UsbDevice *device, unsigned char interface) {
   return 0;
 }
 
-static int
-usbDisconnectInterfaces (UsbDevice *device) {
-  const UsbDescriptor *descriptor = NULL;
-  int disconnected = 0;
-
-  while (usbNextDescriptor(device, &descriptor)) {
-    if (descriptor->interface.bDescriptorType == UsbDescriptorType_Interface) {
-      if (usbDisconnectInterface(device, descriptor->interface.bInterfaceNumber)) disconnected = 1;
-    }
-  }
-
-  return disconnected;
-}
-
 int
 usbSetConfiguration (
   UsbDevice *device,
@@ -219,22 +205,9 @@ usbSetConfiguration (
   UsbDeviceExtension *devx = device->extension;
 
   if (usbOpenUsbfsFile(devx)) {
-    int disconnected = 0;
+    unsigned int arg = configuration;
 
-    while (1) {
-      unsigned int arg = configuration;
-
-      if (ioctl(devx->usbfsFile, USBDEVFS_SETCONFIGURATION, &arg) != -1) return 1;
-      if (errno != EBUSY) break;
-      if (disconnected) break;
-
-      if (!usbDisconnectInterfaces(device)) {
-        errno = EBUSY;
-        break;
-      }
-      disconnected = 1;
-    }
-
+    if (ioctl(devx->usbfsFile, USBDEVFS_SETCONFIGURATION, &arg) != -1) return 1;
     LogError("USB configuration set");
   }
 
