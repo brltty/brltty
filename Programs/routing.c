@@ -21,8 +21,11 @@
 #include <string.h>
 #include <errno.h>
 #include <sys/time.h>
-#include <sys/wait.h>
 #include <signal.h>
+
+#ifdef SIGUSR1
+#include <sys/wait.h>
+#endif /* SIGUSR1 */
 
 #include "misc.h"
 #include "scr.h"
