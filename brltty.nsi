@@ -61,13 +61,13 @@
 ;Pages
 
 	!insertmacro MUI_PAGE_WELCOME
-	!insertmacro MUI_PAGE_LICENSE "${DISTDIR}\COPYING.txt"
+	!insertmacro MUI_PAGE_LICENSE "${DISTDIR}\LICENSE-GPL.txt"
 	!insertmacro MUI_PAGE_DIRECTORY
 
 ;--------------------------------
 
 	;Start Menu Folder Page Configuration
-	!define MUI_STARTMENUPAGE_REGISTRY_ROOT "HKLM" 
+	!define MUI_STARTMENUPAGE_REGISTRY_ROOT "HKLM"
 	!define MUI_STARTMENUPAGE_REGISTRY_KEY "Software\${PRODUCT}"
 	!define MUI_STARTMENUPAGE_REGISTRY_VALUENAME "Start Menu Folder"
 
@@ -76,13 +76,13 @@
 	!insertmacro MUI_PAGE_INSTFILES
 	!define MUI_FINISHPAGE_SHOWREADME "$INSTDIR\README.first.txt"
 	!insertmacro MUI_PAGE_FINISH
-  
+
 	!insertmacro MUI_UNPAGE_CONFIRM
 	!insertmacro MUI_UNPAGE_INSTFILES
 
 ;--------------------------------
 ;Languages
- 
+
 !define UNINSTALLOG_LOCALIZE ; necessary for localization of messages from the uninstallation log file
 
 ;Remember the installer language
@@ -183,7 +183,7 @@ Section "install"
 	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT}" "DisplayVersion" "${VERSION}"
 	WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT}" "NoModify" "1"
 	WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT}" "NoRepair" "1"
-  
+
 	!insertmacro MUI_STARTMENU_WRITE_BEGIN Application
 
 		;Create shortcuts

@@ -51,7 +51,7 @@ SelectPortAndDisplay:
   ; Draw and display the window
    Gui, Font, S12 CDefault, Arial
    Gui, Add, Text, x6 y6 w800 h160, %HelpText%
-   
+
    Gui, Add, Text, x6 y166 w400 h20, %SelectBrailleDisplayText%
    Gui, Add, ListBox, vTerminal x6 y190 w400 h150 hscroll vscroll , %TermList%
 
@@ -94,30 +94,30 @@ Validate:
    Msgbox 1, %ScriptName%, %YouHaveSelectedMsg% %Terminal%`n%ConnectedToPortMsg% %ComPort%
    IfMsgBox OK
    {
-   IfInString ComPort, COM
-   {
-     FileAppend braille-device serial:%ComPort%`n, %CnfFile%
-   }
-   Else
-   {
-     FileAppend braille-device %ComPort%`n, %CnfFile%
-   }
-   StringReplace Terminal, Terminal, -, #
-   FileAppend braille-driver %Terminal%`n, %CnfFile%
+     IfInString ComPort, COM
+     {
+       FileAppend braille-device serial:%ComPort%`n, %CnfFile%
+     }
+     Else
+     {
+       FileAppend braille-device %ComPort%`n, %CnfFile%
+     }
+     StringReplace Terminal, Terminal, -, #
+     FileAppend braille-driver %Terminal%`n, %CnfFile%
 
-   ; Restart BRLTTY if the -r parameter was passed
-   If 1 = -r
-   {
-     SplitPath, ComSpec,, SysDir
-     ; Stop BrlAPI and BRLTTY if started
-     RunWait, %SysDir%\net.exe stop BrlApi
-     RunWait, %A_ScriptDir%\bin\brltty.exe -R
+     ; Restart BRLTTY if the -r parameter was passed
+     If 1 = -r
+     {
+       SplitPath, ComSpec,, SysDir
+       ; Stop BrlAPI and BRLTTY if started
+       RunWait, %SysDir%\net.exe stop BrlApi
+       RunWait, %A_ScriptDir%\bin\brltty.exe -R
 
-     ; Restart BRLTTY and BrlAPI
-     RunWait, %A_ScriptDir%\bin\brltty.exe -I
-     RunWait, %SysDir%\net.exe start BrlApi
-   }
-   Gosub GuiClose
+       ; Restart BRLTTY and BrlAPI
+       RunWait, %A_ScriptDir%\bin\brltty.exe -I
+       RunWait, %SysDir%\net.exe start BrlApi
+     }
+     Gosub GuiClose
    }
    ControlFocus, %SelectBrailleDisplayText%, %ScriptName%
 return
@@ -204,18 +204,18 @@ French: ; French translation
   NeedToChooseAFileMsg = Vous devez choisir un afficheur braille
   NeedToChooseAPortMsg = Vous devez choisir un port de communication
   YouHaveSelectedMsg = Vous avez choisi l'afficheur
-  ConnectedToPortMsg = connect√© au port
+  ConnectedToPortMsg = connectÈ au port
 
   HelpText =
   (
   Veuillez choisir le type d'afficheur braille et le port de communication.
   - Si votre afficheur utilise un port USB,
-    * si vous avez install√© le pilote de votre fabriquant, vous devriez choisir son port COM virtuel s'il en fournit un, sinon
+    * si vous avez installÈ le pilote de votre fabriquant, vous devriez choisir son port COM virtuel s'il en fournit un, sinon
       choisissez "USB:" pour utiliser le filtre libusb-win32,
     * si vous ne voulez pas ou ne pouvez pas installer le pilote de votre fabriquant, vous pouvez choisir "USB:" ici et
       installer le pilote libusb-win32.
-  - Si votre afficheur braille utilise un port s√©rie ou est connect√© via un adaptateur USB vers s√©rie, choisissez simplement le port
-    COM appropri√©. Assurez-vous de choisir le bon afficheur car un choix incorrect semble parfois planter certains mat√©riels.
+  - Si votre afficheur braille utilise un port sÈrie ou est connectÈ via un adaptateur USB vers sÈrie, choisissez simplement le port
+    COM appropriÈ. Assurez-vous de choisir le bon afficheur car un choix incorrect semble parfois planter certains matÈriels.
   )
 
   SelectBrailleDisplayText = Choisissez l'afficheur braille
@@ -229,26 +229,26 @@ Return
 Portuguese: ; Portuguese translation
 
   ScriptName =  Configurador do BRLTTY %Version%
-  CnfFileNotFoundMsg = O ficheiro %CnfFile% n√£o foi encontrado
+  CnfFileNotFoundMsg = O ficheiro %CnfFile% n„o foi encontrado
   NeedToChooseAFileMsg = Tem que seleccionar uma linha Braille
-  NeedToChooseAPortMsg = Tem que seleccionar uma porta de mcomunica√ß√£o
+  NeedToChooseAPortMsg = Tem que seleccionar uma porta de mcomunicaÁ„o
   YouHaveSelectedMsg = Seleccionou o terminal
-  ConnectedToPortMsg = conectado √† porta
+  ConnectedToPortMsg = conectado ‡ porta
 
   HelpText =
   (
-  Por favor escolha o tipo da linha Braille e a porta de comunica√ß√£o.
-  - Se o seu dispositivo Braille √© USB,
-  * se tem instalado o driver do fabricante, dever√° seleccionar a porta de s√©rie respectiva se existir, caso contr√°rio
+  Por favor escolha o tipo da linha Braille e a porta de comunicaÁ„o.
+  - Se o seu dispositivo Braille È USB,
+  * se tem instalado o driver do fabricante, dever· seleccionar a porta de sÈrie respectiva se existir, caso contr·rio
   	seleccione "USB:" para usar o filtro libusb-win32's.
-  * se n√£o pretende ou n√£o consegue instalar o driver do fabricante, pode seleccionar aqui "USB:" e instalar
+  * se n„o pretende ou n„o consegue instalar o driver do fabricante, pode seleccionar aqui "USB:" e instalar
   	o driver libusb-win32's.
-  - Se o seu dispositivo braille trabalha via porta s√©rie, seleccione a apropriada. Tenha a certeza que selecciona a linha Braille correcta visto que
-  	utilizar drivers errados poder√° danificar alguns dispositivos...
+  - Se o seu dispositivo braille trabalha via porta sÈrie, seleccione a apropriada. Tenha a certeza que selecciona a linha Braille correcta visto que
+  	utilizar drivers errados poder· danificar alguns dispositivos...
   )
 
   SelectBrailleDisplayText = Seleccione a linha Braille
-  SelectBraillePortText = Seleccione a porta de comunica√ß√£o
+  SelectBraillePortText = Seleccione a porta de comunicaÁ„o
 
   OKBtn = &OK
   CancelBtn = &Cancelar

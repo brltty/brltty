@@ -19,7 +19,7 @@
 
 version=3.10
 subversion=x
-apiversion=0.5.2
+apiversion=0.5.3
 whole_version=$version-$subversion
 autohotkey="/c/Program Files/AutoHotkey"
 nsis="/c/Program Files/NSIS"
@@ -75,13 +75,13 @@ todos() {
   sed -e 's/'$'\033''\[[0-9]*m//g' -e 's/$/'$'\015'/ < "$1" > "$2"
 }
 
-todos "${sourceRoot}/COPYING" "${installRoot}/COPYING.txt"
-todos "${sourceRoot}/COPYING-API" "${installRoot}/COPYING-API.txt"
+todos "${sourceRoot}/LICENSE-GPL" "${installRoot}/LICENSE-GPL.txt"
+todos "${sourceRoot}/LICENSE-LGPL" "${installRoot}/LICENSE-LGPL.txt"
 todos "${sourceRoot}/README" "${installRoot}/README.txt"
 
 mkdir -p "${installRoot}/BrailleDrivers"
-for i in `cd BrailleDrivers ; ls` ; do
-  [ -r "BrailleDrivers/$i/README" ] && todos "${sourceRoot}/BrailleDrivers/$i/README" "${installRoot}/BrailleDrivers/$i.txt"
+for i in `cd Drivers/Braille ; ls` ; do
+  [ -r "Drivers/Braille/$i/README" ] && todos "${sourceRoot}/Drivers/Braille/$i/README" "${installRoot}/BrailleDrivers/$i.txt"
 done
 
 mkdir -p "${installRoot}/doc"
@@ -99,7 +99,10 @@ do
 done
 
 todos "${buildRoot}/Documents/brltty.conf" "${installRoot}/etc/brltty.conf"
-todos "${buildRoot}/BrailleTables/README" "${installRoot}/etc/brltty/README-tables.txt"
+todos "${buildRoot}/Tables/README-ATB" "${installRoot}/etc/brltty/README-ATB.txt"
+todos "${buildRoot}/Tables/README-CTB" "${installRoot}/etc/brltty/README-CTB.txt"
+todos "${buildRoot}/Tables/README-DOTS" "${installRoot}/etc/brltty/README-DOTS.txt"
+todos "${buildRoot}/Tables/README-TTB" "${installRoot}/etc/brltty/README-TTB.txt"
 
 for i in `find ${installRoot}/share/man -type f -name \*.3 -o -name \*.1`
 do

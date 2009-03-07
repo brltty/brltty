@@ -1,7 +1,7 @@
 [Version]
 Signature = "$Chicago$"
 provider  = %manufacturer%
-DriverVer = 03/31/2007,0.1.12.1
+DriverVer = 01/01/1995,0.1.12.1
 CatalogFile = brltty.cat
 CatalogFile.NT = brltty.cat
 CatalogFile.NTAMD64 = brltty_x64.cat
