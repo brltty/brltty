@@ -575,7 +575,10 @@ usbBulkTransfer (
     {
       int count = ioctl(devx->usbfsFile, USBDEVFS_BULK, &arg);
       if (count != -1) return count;
-      LogError("USB bulk transfer");
+      if (USB_ENDPOINT_DIRECTION(endpoint->descriptor) == UsbEndpointDirection_Input)
+        if (errno == ETIMEDOUT)
+          errno = EAGAIN;
+      if (errno != EAGAIN) LogError("USB bulk transfer");
     }
   }
 
