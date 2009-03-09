@@ -1299,13 +1299,15 @@ static const ProtocolOperations protocol1Operations = {
 #define KEY2_SP_4 KEY2(SMARTPAD, 8)
 
 static uint32_t firmwareVersion2;
-static unsigned long pressedKeys2;
+static unsigned long primaryKeys2;
+static unsigned long secondaryKeys2;
 static unsigned long activeKeys2;
 static unsigned char splitOffset2;
 
 static void
 initializeVariables2 (void) {
-  pressedKeys2 = 0;
+  primaryKeys2 = 0;
+  secondaryKeys2 = 0;
   activeKeys2 = 0;
 }
 
@@ -1417,35 +1419,48 @@ interpretKeyEvent2 (BrailleDisplay *brl, int *command, unsigned char group, unsi
     {
       unsigned int shift;
       unsigned int count;
+      int secondary;
+      unsigned long *keys;
 
     case 0X71: /* thumb key */
       shift = KEY2_THUMB_SHIFT;
       count = KEY2_THUMB_COUNT;
+      secondary = 1;
       goto doKey;
 
     case 0X72: /* etouch key */
       shift = KEY2_ETOUCH_SHIFT;
       count = KEY2_ETOUCH_COUNT;
+      secondary = 0;
       goto doKey;
 
     case 0X73: /* smartpad key */
       shift = KEY2_SMARTPAD_SHIFT;
       count = KEY2_SMARTPAD_COUNT;
+      secondary = 1;
       goto doKey;
 
     doKey:
+      keys = &primaryKeys2;
+      if (secondary) {
+        if ((key / count) == 1) {
+          key -= count;
+          keys = &secondaryKeys2;
+        }
+      }
+
       if (key < count) {
         unsigned long bit = 1 << (shift + key);
 
         if (release) {
           *command = interpretKeyCombination2();
-          pressedKeys2 &= ~bit;
+          *keys &= ~bit;
           activeKeys2 = 0;
           return 1;
         }
 
-        pressedKeys2 |= bit;
-        activeKeys2 = pressedKeys2;
+        *keys |= bit;
+        activeKeys2 = primaryKeys2 | secondaryKeys2;
         *command = interpretKeyCombination2();
 
         if (*command == EOF) {
