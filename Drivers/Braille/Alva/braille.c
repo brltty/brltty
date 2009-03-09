@@ -1821,17 +1821,25 @@ readCommand2u (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 
 static int
 writeBraille2u (BrailleDisplay *brl, const unsigned char *cells, int start, int count) {
-  unsigned char packet[3 + count];
-  unsigned char *byte = packet;
+  while (count > 0) {
+    int length = MIN(count, 40);
+    unsigned char packet[3 + length];
+    unsigned char *byte = packet;
 
-  *byte++ = 0X02;
-  *byte++ = start;
-  *byte++ = count;
+    *byte++ = 0X02;
+    *byte++ = start;
+    *byte++ = length;
 
-  memcpy(byte, cells, count);
-  byte += count;
+    memcpy(byte, cells, length);
+    byte += length;
 
-  return writeBytes(packet, byte-packet, &brl->writeDelay);
+    if (!writeBytes(packet, byte-packet, &brl->writeDelay)) return 0;
+    cells += length;
+    start += length;
+    count -= length;
+  }
+
+  return 1;
 }
 
 static const ProtocolOperations protocol2uOperations = {
