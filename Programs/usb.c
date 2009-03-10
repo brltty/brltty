@@ -1322,7 +1322,7 @@ usbGetSerialOperations (UsbDevice *device) {
     }
 
     if (!device->serial)
-      LogPrint(LOG_WARNING, "USB: unsupported serial adapter: vendor=%04X product=%04X",
+      LogPrint(LOG_DEBUG, "USB: unsupported serial adapter: vendor=%04X product=%04X",
                device->descriptor.idVendor, device->descriptor.idProduct);
   }
 
