@@ -30,11 +30,14 @@
 static const int logInputPackets = 0;
 static const int logOutputPackets = 0;
 
-static TranslationTable outputTable;
+static const char productPrefix[] = "PBC*";
+static const unsigned char productPrefixLength = sizeof(productPrefix) - 1;
 
-static unsigned char textCells[40];
+static unsigned char textCells[80];
 static unsigned char statusCells[2];
 static int rewriteRequired;
+
+static TranslationTable outputTable;
 
 typedef struct {
   int (*identifyModel) (BrailleDisplay *brl);
@@ -55,11 +58,13 @@ static const InputOutputOperations *io;
 typedef enum {
   IPT_KEY_NAVIGATION = 0X13,
   IPT_KEY_SIMULATION = 0XFE,
-  IPT_KEY_ROUTING = 0XFF
+  IPT_KEY_ROUTING    = 0XFF
 } InputPacketType;
 
 typedef union {
-  unsigned char bytes[4];
+  unsigned char bytes[1];
+
+  char product[44 + 1];
 
   struct {
     unsigned char type;
@@ -75,6 +80,33 @@ typedef union {
 } PACKED InputPacket;
 
 static int
+getCellCounts (BrailleDisplay *brl, char *product) {
+  static const char delimiters[] = " ";
+  char *next = product;
+  char *word;
+
+  if ((word = strsep(&next, delimiters))) {
+    if (strcmp(word, productPrefix) == 0) {
+      if ((word = strsep(&next, delimiters))) {
+        int size;
+
+        if (*word && isInteger(&size, word)) {
+          if ((size > 0) && (size <= (ARRAY_COUNT(statusCells) + ARRAY_COUNT(textCells)))) {
+            brl->statusColumns = ARRAY_COUNT(statusCells);
+            brl->statusRows = 1;
+            brl->textColumns = size - brl->statusColumns;
+            brl->textRows = 1;
+            return 1;
+          }
+        }
+      }
+    }
+  }
+
+  return 0;
+}
+
+static int
 readByte (unsigned char *byte, int wait) {
   int count = io->readBytes(byte, 1, wait);
   if (count > 0) return 1;
@@ -86,10 +118,11 @@ readByte (unsigned char *byte, int wait) {
 static int
 readPacket (BrailleDisplay *brl, InputPacket *packet) {
   typedef enum {
+    IPG_PRODUCT,
     IPG_KEY,
-    IPG_NONE
+    IPG_DEFAULT
   } InputPacketGroup;
-  InputPacketGroup group = IPG_NONE;
+  InputPacketGroup group = IPG_DEFAULT;
 
   int length = 1;
   int offset = 0;
@@ -116,13 +149,29 @@ readPacket (BrailleDisplay *brl, InputPacket *packet) {
           break;
 
         default:
-          LogBytes(LOG_WARNING, "Ignored Byte", &byte, 1);
-          continue;
+          if (byte == productPrefix[0]) {
+            group = IPG_PRODUCT;
+            length = sizeof(packet->product) - 1;
+          } else {
+            LogBytes(LOG_WARNING, "Ignored Byte", &byte, 1);
+            continue;
+          }
+          break;
       }
     } else {
       int unexpected = 0;
 
       switch (group) {
+        case IPG_PRODUCT:
+          if (offset < productPrefixLength) {
+            if (byte != productPrefix[offset]) unexpected = 1;
+          } else if (offset == productPrefixLength) {
+            if (byte != ' ') unexpected = 1;
+          } else if (byte == '@') {
+            length = offset + 1;
+          }
+          break;
+
         case IPG_KEY:
           if (offset == 1) {
             if (byte != packet->bytes[0]) unexpected = 1;
@@ -131,13 +180,13 @@ readPacket (BrailleDisplay *brl, InputPacket *packet) {
           }
           break;
 
-        case IPG_NONE:
+        default:
           break;
       }
 
       if (unexpected) {
         LogBytes(LOG_WARNING, "Short Packet", packet->bytes, offset);
-        group = IPG_NONE;
+        group = IPG_DEFAULT;
         offset = 0;
         length = 1;
         goto gotByte;
@@ -146,6 +195,10 @@ readPacket (BrailleDisplay *brl, InputPacket *packet) {
 
     packet->bytes[offset++] = byte;
     if (offset == length) {
+      if (group == IPG_PRODUCT) {
+        packet->bytes[length] = 0;
+      }
+
       if (logInputPackets) LogBytes(LOG_DEBUG, "Input Packet", packet->bytes, offset);
       return length;
     }
@@ -166,8 +219,8 @@ writeCells (BrailleDisplay *brl) {
   unsigned char cells[textCount + statusCount];
   unsigned char *cell = cells;
 
-  while (textCount) *cell++ = textCells[--textCount];
-  while (statusCount) *cell++ = statusCells[--statusCount];
+  while (textCount) *cell++ = outputTable[textCells[--textCount]];
+  while (statusCount) *cell++ = outputTable[statusCells[--statusCount]];
 
   return io->methods->writeCells(brl, cells, cell-cells);
 }
@@ -188,13 +241,21 @@ static SerialDevice *serialDevice = NULL;
 
 static int
 openSerialPort (const char *device) {
-  if (!(serialDevice = serialOpenDevice(device))) return 0;
-  return 1;
+  if ((serialDevice = serialOpenDevice(device))) {
+    if (serialRestartDevice(serialDevice, SERIAL_BAUD)) {
+      return 1;
+    }
+
+    serialCloseDevice(serialDevice);
+    serialDevice = NULL;
+  }
+
+  return 0;
 }
 
 static int
 configureSerialPort (void) {
-  if (!serialRestartDevice(serialDevice, SERIAL_BAUD)) return 0;
+  if (!serialSetFlowControl(serialDevice, SERIAL_FLOW_HARDWARE)) return 0;
   return 1;
 }
 
@@ -225,6 +286,23 @@ writeSerialBytes (const unsigned char *buffer, int length) {
 
 static int
 identifySerialModel (BrailleDisplay *brl) {
+  static const unsigned char request[] = {0X40, 0X50, 0X53};
+
+  if (writeBytes(brl, request, sizeof(request))) {
+    while (io->awaitInput(1000)) {
+      InputPacket response;
+
+      while (readPacket(brl, &response)) {
+        if (response.data.type == productPrefix[0]) {
+          if (getCellCounts(brl, response.product)) {
+            brl->helpPage = 0;
+            return 1;
+          }
+        }
+      }
+    }
+  }
+
   return 0;
 }
 
@@ -330,28 +408,8 @@ identifyUsbModel (BrailleDisplay *brl) {
   char *product;
 
   if ((product = usbGetProduct(usbChannel->device, 1000))) {
-    static const char delimiters[] = " ";
-    char *next = product;
-    char *word;
-
-    if ((word = strsep(&next, delimiters))) {
-      if (strcmp(word, "PBC*") == 0) {
-        if ((word = strsep(&next, delimiters))) {
-          int size;
-
-          if (*word && isInteger(&size, word)) {
-            if ((size > 0) && (size <= (ARRAY_COUNT(statusCells) + ARRAY_COUNT(textCells)))) {
-              brl->statusColumns = ARRAY_COUNT(statusCells);
-              brl->statusRows = 1;
-
-              brl->textColumns = size - brl->statusColumns;
-              brl->textRows = 1;
-
-              ok = 1;
-            }
-          }
-        }
-      }
+    if (getCellCounts(brl, product)) {
+      ok = 1;
     }
 
     free(product);
@@ -408,13 +466,12 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   }
 
   if (io->openPort(device)) {
-    if (io->configurePort()) {
-      if (io->methods->identifyModel(brl)) {
-        memset(textCells, 0, sizeof(textCells));
-        memset(statusCells, 0, sizeof(statusCells));
-        rewriteRequired = 1;
-        return 1;
-      }
+    if (io->methods->identifyModel(brl)) {
+      memset(textCells, 0, sizeof(textCells));
+      memset(statusCells, 0, sizeof(statusCells));
+      rewriteRequired = 1;
+
+      if (io->configurePort()) return 1;
     }
 
     io->closePort();
