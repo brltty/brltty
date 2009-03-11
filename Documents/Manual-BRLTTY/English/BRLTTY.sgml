@@ -4971,7 +4971,8 @@ BRLTTY supports the following braille displays:
       |EL 80 II@
       |Elba 20/32@
       |Trio 40/Elba20/Elba32@
-    Pegasus@
+    Pegasus
+      |20/27/40/80@
     TSI
       |Navigator 20/40/80@
       |PowerBraille 40/65/80@
