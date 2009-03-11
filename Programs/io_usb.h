@@ -335,6 +335,10 @@ extern char *usbGetString (
   int timeout
 );
 extern char *usbDecodeString (const UsbStringDescriptor *descriptor);
+extern char *usbGetManufacturer (UsbDevice *device, int timeout);
+extern char *usbGetProduct (UsbDevice *device, int timeout);
+extern char *usbGetSerialNumber (UsbDevice *device, int timeout);
+
 extern void usbLogString (
   UsbDevice *device,
   unsigned char number,

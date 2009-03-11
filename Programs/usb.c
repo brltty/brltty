@@ -150,6 +150,21 @@ usbGetString (
   return usbDecodeString(&descriptor.string);
 }
 
+char *
+usbGetManufacturer (UsbDevice *device, int timeout) {
+  return usbGetString(device, device->descriptor.iManufacturer, timeout);
+}
+
+char *
+usbGetProduct (UsbDevice *device, int timeout) {
+  return usbGetString(device, device->descriptor.iProduct, timeout);
+}
+
+char *
+usbGetSerialNumber (UsbDevice *device, int timeout) {
+  return usbGetString(device, device->descriptor.iSerialNumber, timeout);
+}
+
 void
 usbLogString (
   UsbDevice *device,
