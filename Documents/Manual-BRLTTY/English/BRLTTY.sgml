@@ -4970,7 +4970,8 @@ BRLTTY supports the following braille displays:
       |EL 40 P@
       |EL 80 II@
       |Elba 20/32@
-      Trio 40/Elba20/Elba32@
+      |Trio 40/Elba20/Elba32@
+    Pegasus@
     TSI
       |Navigator 20/40/80@
       |PowerBraille 40/65/80@
@@ -5048,6 +5049,7 @@ BRLTTY supports the following speech synthesizers:
     mn|MiniBraille@
     mp|Mikropuhe@
     no|no driver@
+    pg|Pegasus@
     pm|Papenmeier@
     sd|SpeechDispatcher@
     sw|Swift@

@@ -53,6 +53,7 @@
 #braille-driver	mb	# MultiBraille
 #braille-driver	md	# MDV (protocol 5)
 #braille-driver	mn	# MiniBraille
+#braille-driver	pg	# Pegasus
 #braille-driver	pm	# Papenmeier
 #braille-driver	tn	# TechniBraille
 #braille-driver	ts	# TSI
