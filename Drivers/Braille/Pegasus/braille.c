@@ -123,7 +123,8 @@ getCellCounts (BrailleDisplay *brl, char *product) {
           if (!(*word && isInteger(&size, word))) size = 0;
           while (strsep(&next, delimiters));
 
-          if ((size > 0) && (size <= (ARRAY_COUNT(statusCells) + ARRAY_COUNT(textCells)))) {
+          if ((size > ARRAY_COUNT(statusCells)) &&
+              (size <= (ARRAY_COUNT(statusCells) + ARRAY_COUNT(textCells)))) {
             setCellCounts(brl, size);
             return 1;
           }
