@@ -33,10 +33,10 @@ static const int logOutputPackets = 0;
 static const char productPrefix[] = "PBC";
 static const unsigned char productPrefixLength = sizeof(productPrefix) - 1;
 
+static int routingCommand;
+static int rewriteRequired;
 static unsigned char textCells[80];
 static unsigned char statusCells[2];
-static int rewriteRequired;
-
 static TranslationTable outputTable;
 
 typedef struct {
@@ -494,9 +494,10 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
   if (io->openPort(device)) {
     if (io->methods->identifyModel(brl)) {
+      routingCommand = BRL_BLK_ROUTE;
+      rewriteRequired = 1;
       memset(textCells, 0, sizeof(textCells));
       memset(statusCells, 0, sizeof(statusCells));
-      rewriteRequired = 1;
 
       if (io->configurePort()) return 1;
     }
@@ -531,96 +532,125 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *cells) {
 }
 
 static int
+interpretNavigationKey (unsigned char key) {
+  switch (key) {
+    case 0X15: /* left */
+      return BRL_CMD_FWINLT;
+    case 0X4D: /* right */
+      return BRL_CMD_FWINRT;
+    case 0X3D: /* up */
+      return BRL_CMD_LNUP;
+    case 0X54: /* down */
+      return BRL_CMD_LNDN;
+
+    case 0X16: /* home */
+      return BRL_CMD_TOP_LEFT;
+    case 0X1C: /* enter */
+      return BRL_CMD_BOT_LEFT;
+    case 0X36: /* end */
+      return BRL_CMD_RETURN;
+    case 0X2C: /* escape */
+      return BRL_CMD_CSRTRK;
+
+    case 0X27: /* left-control + left */
+      return BRL_CMD_ATTRUP;
+    case 0X28: /* left-control + right */
+      return BRL_CMD_ATTRDN;
+    case 0X21: /* left-control + up */
+      return BRL_CMD_PRDIFLN;
+    case 0X22: /* left-control + down */
+      return BRL_CMD_NXDIFLN;
+
+    case 0X3F: /* left-control + enter */
+      return BRL_CMD_FREEZE;
+    case 0X2F: /* left-control + end */
+      return BRL_CMD_PREFMENU;
+    case 0X56: /* left-control + escape */
+      return BRL_CMD_INFO;
+
+    case 0X1F: /* left-shift + left */
+      return BRL_CMD_DISPMD;
+    case 0X20: /* left-shift + right */
+      return BRL_CMD_SIXDOTS;
+    case 0X5B: /* left-shift + down */
+      return BRL_CMD_CSRJMP_VERT;
+
+    case 0X17: /* left-shift + home */
+      return BRL_CMD_PRPROMPT;
+    case 0X3A: /* left-shift + enter */
+      return BRL_CMD_NXPROMPT;
+    case 0X3B: /* left-shift + end */
+      return BRL_CMD_PRPGRPH;
+    case 0X18: /* left-shift + escape */
+      return BRL_CMD_NXPGRPH;
+
+    case 0X37: /* right-shift + left */
+      routingCommand = BRL_BLK_SETLEFT;
+      return BRL_CMD_NOOP;
+    case 0X33: /* right-shift + right */
+      return BRL_CMD_PASTE;
+    case 0X38: /* right-shift + down */
+      routingCommand = BRL_BLK_DESCCHAR;
+      return BRL_CMD_NOOP;
+
+    case 0X2A: /* right-shift + home */
+      routingCommand = BRL_BLK_CUTBEGIN;
+      return BRL_CMD_NOOP;
+    case 0X31: /* right-shift + enter */
+      routingCommand = BRL_BLK_CUTAPPEND;
+      return BRL_CMD_NOOP;
+    case 0X32: /* right-shift + end */
+      routingCommand = BRL_BLK_CUTLINE;
+      return BRL_CMD_NOOP;
+    case 0X30: /* right-shift + escape */
+      routingCommand = BRL_BLK_CUTRECT;
+      return BRL_CMD_NOOP;
+
+    default:
+      break;
+  }
+
+  return EOF;
+}
+
+static int
+interpretSimulationKey (unsigned char key) {
+  switch (key) {
+    default:
+      break;
+  }
+
+  return interpretNavigationKey(key);
+}
+
+static int
 brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   InputPacket packet;
   int length;
 
   while ((length = readPacket(brl, &packet))) {
+    int routing = routingCommand;
+
+    routingCommand = BRL_BLK_ROUTE;
+
     switch (packet.data.type) {
-      case IPT_KEY_NAVIGATION:
-        switch (packet.data.fields.key.value) {
-          /* navigation */
-          case 0X3D: /* up */
-            return BRL_CMD_LNUP;
-          case 0X54: /* down */
-            return BRL_CMD_LNDN;
-          case 0X15: /* left */
-            return BRL_CMD_FWINLT;
-          case 0X4D: /* right */
-            return BRL_CMD_FWINRT;
-
-          case 0X16: /* home */
-            return BRL_CMD_TOP_LEFT;
-          case 0X36: /* end */
-            return BRL_CMD_BOT_LEFT;
-          case 0X1C: /* enter */
-            break;
-          case 0X2C: /* escape */
-            return BRL_CMD_HOME;
-
-          /* extended navigation */
-          case 0X5B: /* left-shift + down */
-            break;
-          case 0X1F: /* left-shift + left */
-            return BRL_CMD_HWINLT;
-          case 0X20: /* left-shift + right */
-            return BRL_CMD_HWINRT;
-
-          case 0X17: /* left-shift + home */
-            return BRL_CMD_LNBEG;
-          case 0X18: /* left-shift + escape */
-            break;
-
-          /* switches */
-          case 0X38: /* right-shift + down */
-            return BRL_CMD_ATTRVIS;
-          case 0X37: /* right-shift + left */
-            break;
-          case 0X33: /* right-shift + right */
-            return BRL_CMD_TUNES;
-
-          case 0X2A: /* right-shift + home */
-            return BRL_CMD_SIXDOTS;
-          case 0X32: /* right-shift + end */
-            return BRL_CMD_SKPIDLNS;
-          case 0X31: /* right-shift + enter */
-            return BRL_CMD_CAPBLINK;
-          case 0X30: /* right-shift + escape */
-            return BRL_CMD_CSRVIS;
-
-          /* toggles */
-          case 0X21: /* left-control + up */
-            return BRL_CMD_DISPMD;
-          case 0X22: /* left-control + down */
-            break;
-          case 0X27: /* left-control + left */
-            return BRL_CMD_INFO;
-          case 0X28: /* left-control + right */
-            return BRL_CMD_PREFMENU;
-
-          case 0X2F: /* left-control + end */
-            break;
-          case 0X56: /* left-control + escape */
-            return BRL_CMD_CSRSIZE;
-
-          default:
-            break;
-        }
+      case IPT_KEY_NAVIGATION: {
+        int command = interpretNavigationKey(packet.data.fields.key.value);
+        if (command != EOF) return command;
         break;
+      }
 
-      case 0XFE: /* simulation key */
-        switch (packet.data.fields.key.value) {
-
-          default:
-            break;
-        }
+      case IPT_KEY_SIMULATION: {
+        int command = interpretSimulationKey(packet.data.fields.key.value);
+        if (command != EOF) return command;
         break;
+      }
 
-      case IPT_KEY_ROUTING: { /* routing key */
+      case IPT_KEY_ROUTING: {
         unsigned char value = packet.data.fields.key.value;
 
         if (value < brl->textColumns) {
-          return BRL_BLK_ROUTE + value;
+          return routing + value;
         }
 
         break;

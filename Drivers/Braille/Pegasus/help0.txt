@@ -1,2 +1,36 @@
 Help for Pegasus
 
+Legend:
+Controls: ls: left-shift, lc: left-control, rc: right-control, rs: right-shift
+Diamonds: left, right, up, down
+Squares: tl: top-left, tr: top-right, bl: bottom-left, br: bottom-right
+Top: rn: routing-key, sn: status-key
+
+left/right: go left/right one full window
+up/down: go up/down one line
+tl/bl: go to beginning of top/bottom line
+tr: go to cursor or undo last cursor tracking motion
+br: toggle cursor tracking
+
+lc + left/right: go to previous/next line with different highlighting
+lc + up/down: go to previous/next line with different content
+lc+tl: switch to internal menu
+lc+bl: freeze/unfreeze screen image
+lc+tr: switch to/from preferences menu
+lc+br: switch to/from status line
+
+ls+left: toggle attributes/text display
+ls+right: toggle 6/8-dot braille
+ls+up: bring cursor to character
+ls+down: bring cursor to line
+ls + tl/bl: go to previous/next command prompt
+ls + tr/br: go to last/first line of previous/next paragraph
+
+rs+left, rn: position left end of window at character
+rs+right: paste cut buffer at cursor
+rs+up: bring cursor to character
+rs+down, rn: describe character
+rs+tl, rn: start new cut buffer at character
+rs+bl, rn: append to cut buffer from character
+rs+tr, rn: Linear cut to character
+rs+br, rn: rectangular cut to character
