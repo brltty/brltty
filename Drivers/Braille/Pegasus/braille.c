@@ -79,16 +79,12 @@ typedef union {
   } PACKED data;
 } PACKED InputPacket;
 
-static int
+static void
 setCellCounts (BrailleDisplay *brl, int size) {
-  static const unsigned char sizes[] = {22, 29, 42, 82};
-  if (!memchr(sizes, size, sizeof(sizes))) return 0;
-
   brl->statusColumns = ARRAY_COUNT(statusCells);
   brl->statusRows = 1;
   brl->textColumns = size - brl->statusColumns;
   brl->textRows = 1;
-  return 1;
 }
 
 static int
@@ -100,9 +96,15 @@ getCellCounts (BrailleDisplay *brl, char *product) {
     const unsigned char *index = indexes;
 
     while (*index) {
-      if (*index < length)
-        if (setCellCounts(brl, product[*index]))
+      if (*index < length) {
+        unsigned char size = product[*index];
+        static const unsigned char sizes[] = {22, 29, 42, 82};
+
+        if (memchr(sizes, size, sizeof(sizes))) {
+          setCellCounts(brl, size);
           return 1;
+        }
+      }
 
       index += 1;
     }
@@ -118,11 +120,12 @@ getCellCounts (BrailleDisplay *brl, char *product) {
         if ((word = strsep(&next, delimiters))) {
           int size;
 
-          if (*word && isInteger(&size, word)) {
-            if (setCellCounts(brl, size)) {
-              while (strsep(&next, delimiters));
-              return 1;
-            }
+          if (!(*word && isInteger(&size, word))) size = 0;
+          while (strsep(&next, delimiters));
+
+          if ((size > 0) && (size <= (ARRAY_COUNT(statusCells) + ARRAY_COUNT(textCells)))) {
+            setCellCounts(brl, size);
+            return 1;
           }
         }
       }
