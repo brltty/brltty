@@ -30,7 +30,7 @@
 static const int logInputPackets = 0;
 static const int logOutputPackets = 0;
 
-static const char productPrefix[] = "PBC*";
+static const char productPrefix[] = "PBC";
 static const unsigned char productPrefixLength = sizeof(productPrefix) - 1;
 
 static unsigned char textCells[80];
@@ -80,23 +80,49 @@ typedef union {
 } PACKED InputPacket;
 
 static int
+setCellCounts (BrailleDisplay *brl, int size) {
+  static const unsigned char sizes[] = {22, 29, 42, 82};
+  if (!memchr(sizes, size, sizeof(sizes))) return 0;
+
+  brl->statusColumns = ARRAY_COUNT(statusCells);
+  brl->statusRows = 1;
+  brl->textColumns = size - brl->statusColumns;
+  brl->textRows = 1;
+  return 1;
+}
+
+static int
 getCellCounts (BrailleDisplay *brl, char *product) {
-  static const char delimiters[] = " ";
-  char *next = product;
-  char *word;
+  unsigned int length = strlen(product);
 
-  if ((word = strsep(&next, delimiters))) {
-    if (strcmp(word, productPrefix) == 0) {
-      if ((word = strsep(&next, delimiters))) {
-        int size;
+  {
+    static const unsigned char indexes[] = {3, 42, 0};
+    const unsigned char *index = indexes;
 
-        if (*word && isInteger(&size, word)) {
-          if ((size > 0) && (size <= (ARRAY_COUNT(statusCells) + ARRAY_COUNT(textCells)))) {
-            brl->statusColumns = ARRAY_COUNT(statusCells);
-            brl->statusRows = 1;
-            brl->textColumns = size - brl->statusColumns;
-            brl->textRows = 1;
-            return 1;
+    while (*index) {
+      if (*index < length)
+        if (setCellCounts(brl, product[*index]))
+          return 1;
+
+      index += 1;
+    }
+  }
+
+  {
+    static const char delimiters[] = " ";
+    char *next = product;
+    char *word;
+
+    if ((word = strsep(&next, delimiters))) {
+      if (strncmp(word, productPrefix, productPrefixLength) == 0) {
+        if ((word = strsep(&next, delimiters))) {
+          int size;
+
+          if (*word && isInteger(&size, word)) {
+            if (setCellCounts(brl, size)) {
+              while (strsep(&next, delimiters));
+              return 1;
+            }
           }
         }
       }
@@ -165,8 +191,6 @@ readPacket (BrailleDisplay *brl, InputPacket *packet) {
         case IPG_PRODUCT:
           if (offset < productPrefixLength) {
             if (byte != productPrefix[offset]) unexpected = 1;
-          } else if (offset == productPrefixLength) {
-            if (byte != ' ') unexpected = 1;
           } else if (byte == '@') {
             length = offset + 1;
           }
