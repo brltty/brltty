@@ -650,8 +650,10 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
         unsigned char key = packet.data.fields.key.value;
 
         switch (key) {
-          case 81: return BRL_CMD_HELP;
-          case 82: return BRL_CMD_LEARN;
+          case 81: /* status 1 */
+            return BRL_CMD_HELP;
+          case 82: /* status 2 */
+            return BRL_CMD_LEARN;
 
           default:
             if ((key > 0) && (key <= brl->textColumns)) return routing + key - 1;
