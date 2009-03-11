@@ -34,3 +34,7 @@ rs+tl, rn: start new cut buffer at character
 rs+bl, rn: append to cut buffer from character
 rs+tr, rn: Linear cut to character
 rs+br, rn: rectangular cut to character
+
+rn: bring cursor to character
+s1: switch to/from help page
+s2: switch to/from learn mode

@@ -647,12 +647,16 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
       }
 
       case IPT_KEY_ROUTING: {
-        unsigned char value = packet.data.fields.key.value;
+        unsigned char key = packet.data.fields.key.value;
 
-        if (value < brl->textColumns) {
-          return routing + value;
+        switch (key) {
+          case 81: return BRL_CMD_HELP;
+          case 82: return BRL_CMD_LEARN;
+
+          default:
+            if ((key > 0) && (key <= brl->textColumns)) return routing + key - 1;
+            break;
         }
-
         break;
       }
     }
