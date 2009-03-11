@@ -2282,13 +2282,15 @@ startBrailleDriver (void) {
     playTune(&tune_braille_on);
 
     if (clearStatusCells(&brl)) {
-      int flags = MSG_SILENT;
-      char banner[0X100];
+      if (opt_quiet) return 1;
 
-      if (opt_quiet) flags |= MSG_NODELAY;
-      makeProgramBanner(banner, sizeof(banner));
+      {
+        int flags = MSG_SILENT;
+        char banner[0X100];
 
-      if (message(NULL, banner, flags)) return 1;
+        makeProgramBanner(banner, sizeof(banner));
+        if (message(NULL, banner, flags)) return 1;
+      }
     }
 
     deactivateBrailleDriver();
