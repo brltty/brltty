@@ -262,6 +262,7 @@ contraction yrvs
 #Smaller contractions
 midendword ally 6-13456
 midendword ance 46-15
+midendword ence 56-15
 always ever 5-15
 always for 123456
 midendword ful 56-123
@@ -322,6 +323,13 @@ always 0 245
 include letters-latin.cti
 always " 6-2356
 always ' 3
+endword 'd 3-145
+endword 'll 3-123-123
+endword 'm 3-134
+endword 're 3-1235-15
+endword 's 3-234
+endword 't 3-2345
+endword 've 3-1236-15
 always / 456-34
 always & 4-12346
 always * 5-35
