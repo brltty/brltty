@@ -500,6 +500,14 @@ configureSerialPort (void) {
   return 1;
 }
 
+static void
+closeSerialPort (void) {
+  if (serialDevice) {
+    serialCloseDevice(serialDevice);
+    serialDevice = NULL;
+  }
+}
+
 static int
 awaitSerialInput (int milliseconds) {
   return serialAwaitInput(serialDevice, milliseconds);
@@ -515,14 +523,6 @@ readSerialBytes (unsigned char *buffer, int count, int wait) {
 static int
 writeSerialBytes (const unsigned char *buffer, int length) {
   return serialWriteData(serialDevice, buffer, length);
-}
-
-static void
-closeSerialPort (void) {
-  if (serialDevice) {
-    serialCloseDevice(serialDevice);
-    serialDevice = NULL;
-  }
 }
 
 static const InputOutputOperations serialOperations = {
@@ -544,6 +544,7 @@ openUsbPort (const char *device) {
       .vendor=0X045E, .product=0X930A,
       .configuration=1, .interface=0, .alternative=0,
       .inputEndpoint=1, .outputEndpoint=2,
+      .disableAutosuspend=1,
       .data=&brailleSenseOperations
     }
     ,
@@ -568,6 +569,15 @@ openUsbPort (const char *device) {
 static int
 configureUsbPort (void) {
   return 1;
+}
+
+static void
+closeUsbPort (void) {
+  if (usbChannel) {
+    usbCloseChannel(usbChannel);
+    usbSerial = NULL;
+    usbChannel = NULL;
+  }
 }
 
 static int
@@ -596,15 +606,6 @@ writeUsbBytes (const unsigned char *buffer, int length) {
                           buffer, length, 1000);
 }
 
-static void
-closeUsbPort (void) {
-  if (usbChannel) {
-    usbCloseChannel(usbChannel);
-    usbSerial = NULL;
-    usbChannel = NULL;
-  }
-}
-
 static const InputOutputOperations usbOperations = {
   openUsbPort, configureUsbPort, closeUsbPort,
   awaitUsbInput, readUsbBytes, writeUsbBytes
@@ -620,7 +621,7 @@ static int bluetoothConnection = -1;
 
 static int
 openBluetoothPort (const char *device) {
-  if ((bluetoothConnection = btOpenConnection(device, 1, 0)) == -1) return 0;
+  if ((bluetoothConnection = btOpenConnection(device, 4, 0)) == -1) return 0;
   protocol = &brailleSenseOperations;
   return 1;
 }
@@ -628,6 +629,14 @@ openBluetoothPort (const char *device) {
 static int
 configureBluetoothPort (void) {
   return 1;
+}
+
+static void
+closeBluetoothPort (void) {
+  if (bluetoothConnection != -1) {
+    close(bluetoothConnection);
+    bluetoothConnection = -1;
+  }
 }
 
 static int
@@ -655,14 +664,6 @@ writeBluetoothBytes (const unsigned char *buffer, int length) {
     }
   }
   return count;
-}
-
-static void
-closeBluetoothPort (void) {
-  if (bluetoothConnection != -1) {
-    close(bluetoothConnection);
-    bluetoothConnection = -1;
-  }
 }
 
 static const InputOutputOperations bluetoothOperations = {
