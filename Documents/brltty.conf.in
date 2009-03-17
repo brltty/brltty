@@ -146,8 +146,10 @@
 #text-table	mwr	# Marwari
 #text-table	ne	# Nepali
 #text-table	new	# Newari
+#text-table	nl	# Dutch
 #text-table	nl_BE	# Dutch (Belgium)
 #text-table	nl_NL	# Dutch (Netherlands)
+#text-table	no	# Norwegian
 #text-table	no-generic	# Norwegian (with support for other languages)
 #text-table	no-oub	# Norwegian (Offentlig Utvalg for Blindeskrift)
 #text-table	nwc	# Old Newari
