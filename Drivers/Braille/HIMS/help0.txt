@@ -4,36 +4,19 @@ General Navigation:
 F4: go to cursor
 F4+F1: go back (undo unexpected cursor tracking motion)
 LEFT/RIGHT: go left/right one window
-LEFT+F1 / RIGHT+F4: go to beginning/end of line
 F2/F3: go up/down one line
-F2+F1 / F3+F4: go to top/bottom line
-LEFT+F1+F2 / RIGHT+F4+F3: go to previous/next command prompt
-LEFT+F2 / RIGHT+F3: go to previous/next paragraph
+F2+F1 / F3+F4: go to beginning of top/bottom line
+F1 + LEFT/RIGHT: go to previous/next command prompt
+F2 + LEFT/RIGHT: go up/down to line with different content
+F3 + LEFT/RIGHT: go up/down to line with different highlighting
+F4 + LEFT/RIGHT: go to previous/next paragraph
+F1+F2 + LEFT/RIGHT: go to beginning/end of line
 
-Keyboard (spacebar and dot keys) Modes:
-SP+24: switch to (i)nput mode
-SP+1345: switch to (n)avigation mode
-
-Input Mode:
+Keyboard (spacebar and dot keys):
 SP: space
-1-8 + ...: braille character input
+D1-D8 + ...: braille character input
 F2: uppercase
 F3: control
-
-Navigation Mode:
-SP: go to cursor
-1/4: go left/right one window
-2/5: go left/right to nonblank window
-12/45: go left/right one character
-123/456: go to beginning/end of line
-3/6: go up/down one line
-7/8: go up/down to line with different content
-37/68: go up/down to line with different highlighting
-23/56: go to top/bottom line
-237/568: go to top-left/bottom-left corner
-13/46: go to previous/next command prompt
-27/58: go to previous/next paragraph
-17/48: search backward/forward for text from cut buffer
 
 Display Modes:
 SP+125: switch to/from (h)elp page
@@ -45,10 +28,14 @@ SP+134: enter/leave preferences (m)enu
 SP+1235: (r)estore preferences from disk
 SP+2456: (w)rite preferences to disk
 
+Feature Selection:
 SP+235: switch to (6)-dot mode
 SP+236: switch to (8)-dot mode
+SP+1: switch to/from (a)ttributes display
+SP+12: toggle skipping of (b)lank windows
 SP+14: toggle (c)ursor visibility
 SP+124: toggle screen (f)reeze
+SP+24: toggle skipping of (i)dentical lines
 SP+2345: toggle cursor (t)racking
 SP+136: toggle highlighted character (u)nderlining
 
@@ -67,11 +54,11 @@ Rn: bring cursor to character
 F2+F3: bring cursor to line (no horizontal motion)
 
 Cut and Paste:
-SP+F1, Rn: start new cut buffer at character
-SP+F2, Rn: append to cut buffer from character
-SP+F3, Rn: linear cut to character
-SP+F4, Rn: rectangular cut to character
-SP+1234: (p)aste cut buffer at cursor
+F1+F3+F4, Rn: start new cut buffer at character
+F2+F3+F4, Rn: append to cut buffer from character
+F1+F2+F3, Rn: linear cut to character
+F1+F2+F4, Rn: rectangular cut to character
+F1+F2+F3+F4: paste cut buffer at cursor
 
 Other Routing Key Functions:
 SP+LEFT, Rn: position left end of window at character

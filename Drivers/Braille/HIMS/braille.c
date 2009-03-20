@@ -233,7 +233,6 @@ typedef struct {
 } ProtocolOperations;
 static const ProtocolOperations *protocol;
 
-static int inputMode;
 static int routingCommand;
 
 static int
@@ -244,93 +243,84 @@ getBrailleSenseCellCount (BrailleDisplay *brl, unsigned int *count) {
 
 static int
 interpretBrailleSenseKeys (BrailleKeys keys) {
+  {
+    int command = BRL_BLK_PASSDOTS;
+    BrailleKeys originalKeys = keys;
+
+#define KEY(name,bit) if (keys & KEY_##name) { command |= (bit); keys &= ~KEY_##name; }
+    KEY(DOT1, BRL_DOT1);
+    KEY(DOT2, BRL_DOT2);
+    KEY(DOT3, BRL_DOT3);
+    KEY(DOT4, BRL_DOT4);
+    KEY(DOT5, BRL_DOT5);
+    KEY(DOT6, BRL_DOT6);
+    KEY(DOT7, BRL_DOT7);
+    KEY(DOT8, BRL_DOT8);
+    if (keys == originalKeys) keys &= ~KEY_SPACE;
+
+    if (keys != originalKeys) {
+      KEY(BS_F2, BRL_FLG_CHAR_UPPER);
+      KEY(BS_F3, BRL_FLG_CHAR_CONTROL);
+
+      if (!keys) return command;
+      keys = originalKeys;
+    }
+#undef KEY
+  }
+
   switch (keys) {
     case KEY_BS_F4:
-    case KEY_SPACE:
       return BRL_CMD_HOME;
     case KEY_BS_F4 | KEY_BS_F1:
       return BRL_CMD_BACK;
 
-    case KEY_DOT1:
     case KEY_BS_SL:
       return BRL_CMD_FWINLT;
-    case KEY_DOT4:
     case KEY_BS_SR:
       return BRL_CMD_FWINRT;
 
-    case KEY_DOT2:
-      return BRL_CMD_FWINLTSKIP;
-    case KEY_DOT5:
-      return BRL_CMD_FWINRTSKIP;
+    case KEY_BS_F2:
+      return BRL_CMD_LNUP;
+    case KEY_BS_F3:
+      return BRL_CMD_LNDN;
 
-    case KEY_DOT1 | KEY_DOT2:
-      return BRL_CMD_CHRLT;
-    case KEY_DOT4 | KEY_DOT5:
-      return BRL_CMD_CHRRT;
+    case KEY_BS_F2 | KEY_BS_F1:
+      return BRL_CMD_TOP_LEFT;
+    case KEY_BS_F3 | KEY_BS_F4:
+      return BRL_CMD_BOT_LEFT;
 
-    case KEY_BS_SL | KEY_BS_F1:
-    case KEY_DOT1 | KEY_DOT2 | KEY_DOT3:
+    case KEY_BS_F1 | KEY_BS_SL:
+      return BRL_CMD_PRPROMPT;
+    case KEY_BS_F1 | KEY_BS_SR:
+      return BRL_CMD_NXPROMPT;
+
+    case KEY_BS_F2 | KEY_BS_SL:
+      return BRL_CMD_PRDIFLN;
+    case KEY_BS_F2 | KEY_BS_SR:
+      return BRL_CMD_NXDIFLN;
+
+    case KEY_BS_F3 | KEY_BS_SL:
+      return BRL_CMD_ATTRUP;
+    case KEY_BS_F3 | KEY_BS_SR:
+      return BRL_CMD_ATTRDN;
+
+    case KEY_BS_F4 | KEY_BS_SL:
+      return BRL_CMD_PRPGRPH;
+    case KEY_BS_F4 | KEY_BS_SR:
+      return BRL_CMD_NXPGRPH;
+
+    case KEY_BS_F1 | KEY_BS_F2 | KEY_BS_SL:
       return BRL_CMD_LNBEG;
-    case KEY_BS_SR | KEY_BS_F4:
-    case KEY_DOT4 | KEY_DOT5 | KEY_DOT6:
+    case KEY_BS_F1 | KEY_BS_F2 | KEY_BS_SR:
       return BRL_CMD_LNEND;
+
+    case KEY_BS_F3 | KEY_BS_F4 | KEY_BS_SL:
+      return BRL_CMD_CHRLT;
+    case KEY_BS_F3 | KEY_BS_F4 | KEY_BS_SR:
+      return BRL_CMD_CHRRT;
 
     case KEY_BS_F2 | KEY_BS_F3:
       return BRL_CMD_CSRJMP_VERT;
-    case KEY_BS_F2:
-    case KEY_DOT3:
-      return BRL_CMD_LNUP;
-    case KEY_BS_F3:
-    case KEY_DOT6:
-      return BRL_CMD_LNDN;
-
-    case KEY_DOT7:
-      return BRL_CMD_PRDIFLN;
-    case KEY_DOT8:
-      return BRL_CMD_NXDIFLN;
-
-    case KEY_DOT3 | KEY_DOT7:
-      return BRL_CMD_ATTRUP;
-    case KEY_DOT6 | KEY_DOT8:
-      return BRL_CMD_ATTRDN;
-
-    case KEY_BS_F2 | KEY_BS_F1:
-    case KEY_DOT2 | KEY_DOT3:
-      return BRL_CMD_TOP;
-    case KEY_BS_F3 | KEY_BS_F4:
-    case KEY_DOT5 | KEY_DOT6:
-      return BRL_CMD_BOT;
-
-    case KEY_DOT2 | KEY_DOT3 | KEY_DOT7:
-      return BRL_CMD_TOP_LEFT;
-    case KEY_DOT5 | KEY_DOT6 | KEY_DOT8:
-      return BRL_CMD_BOT_LEFT;
-
-    case KEY_BS_SL | KEY_BS_F1 | KEY_BS_F2:
-    case KEY_DOT1 | KEY_DOT3:
-      return BRL_CMD_PRPROMPT;
-    case KEY_BS_SR | KEY_BS_F4 | KEY_BS_F3:
-    case KEY_DOT4 | KEY_DOT6:
-      return BRL_CMD_NXPROMPT;
-
-    case KEY_BS_SL | KEY_BS_F2:
-    case KEY_DOT2 | KEY_DOT7:
-      return BRL_CMD_PRPGRPH;
-    case KEY_BS_SR | KEY_BS_F3:
-    case KEY_DOT5 | KEY_DOT8:
-      return BRL_CMD_NXPGRPH;
-
-    case KEY_DOT1 | KEY_DOT7:
-      return BRL_CMD_PRSEARCH;
-    case KEY_DOT4 | KEY_DOT8:
-      return BRL_CMD_NXSEARCH;
-
-    case KEY_SPACE | KEY_DOT2 | KEY_DOT4:
-      inputMode = 1;
-      return BRL_CMD_NOOP | BRL_FLG_TOGGLE_ON;
-    case KEY_SPACE | KEY_DOT1 | KEY_DOT3 | KEY_DOT4 | KEY_DOT5:
-      inputMode = 0;
-      return BRL_CMD_NOOP | BRL_FLG_TOGGLE_OFF;
 
     case KEY_SPACE | KEY_DOT1 | KEY_DOT2 | KEY_DOT5:
       return BRL_CMD_HELP;
@@ -351,10 +341,16 @@ interpretBrailleSenseKeys (BrailleKeys keys) {
     case KEY_SPACE | KEY_DOT2 | KEY_DOT3 | KEY_DOT6:
       return BRL_CMD_SIXDOTS | BRL_FLG_TOGGLE_OFF;
 
+    case KEY_SPACE | KEY_DOT1:
+      return BRL_CMD_DISPMD;
+    case KEY_SPACE | KEY_DOT1 | KEY_DOT2:
+      return BRL_CMD_SKPBLNKWINS;
     case KEY_SPACE | KEY_DOT1 | KEY_DOT4:
       return BRL_CMD_CSRVIS;
     case KEY_SPACE | KEY_DOT1 | KEY_DOT2 | KEY_DOT4:
       return BRL_CMD_FREEZE;
+    case KEY_SPACE | KEY_DOT2 | KEY_DOT4:
+      return BRL_CMD_SKPIDLNS;
     case KEY_SPACE | KEY_DOT2 | KEY_DOT3 | KEY_DOT4 | KEY_DOT5:
       return BRL_CMD_CSRTRK;
     case KEY_SPACE | KEY_DOT1 | KEY_DOT3 | KEY_DOT6:
@@ -377,19 +373,19 @@ interpretBrailleSenseKeys (BrailleKeys keys) {
     case KEY_SPACE | KEY_DOT5 | KEY_DOT6:
       return BRL_BLK_PASSKEY + BRL_KEY_CURSOR_RIGHT;
 
-    case KEY_SPACE | KEY_BS_F1:
+    case KEY_BS_F1 | KEY_BS_F3 | KEY_BS_F4:
       routingCommand = BRL_BLK_CUTBEGIN;
       return BRL_CMD_NOOP;
-    case KEY_SPACE | KEY_BS_F2:
+    case KEY_BS_F2 | KEY_BS_F3 | KEY_BS_F4:
       routingCommand = BRL_BLK_CUTAPPEND;
       return BRL_CMD_NOOP;
-    case KEY_SPACE | KEY_BS_F3:
+    case KEY_BS_F1 | KEY_BS_F2 | KEY_BS_F3:
       routingCommand = BRL_BLK_CUTLINE;
       return BRL_CMD_NOOP;
-    case KEY_SPACE | KEY_BS_F4:
+    case KEY_BS_F1 | KEY_BS_F2 | KEY_BS_F4:
       routingCommand = BRL_BLK_CUTRECT;
       return BRL_CMD_NOOP;
-    case KEY_SPACE | KEY_DOT1 | KEY_DOT2 | KEY_DOT3 | KEY_DOT4:
+    case KEY_BS_F1 | KEY_BS_F2 | KEY_BS_F3 | KEY_BS_F4:
       return BRL_CMD_PASTE;
 
     case KEY_SPACE | KEY_BS_SL:
@@ -734,7 +730,6 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
         brl->textRows = 1;
         brl->helpPage = protocol->helpPage;
 
-        inputMode = 0;
         routingCommand = BRL_BLK_ROUTE;
 
         if (clearCells(brl)) return 1;
@@ -783,38 +778,10 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 
     case IPT_KEYS: {
       BrailleKeys keys = packet.data.reserved[0] | (packet.data.reserved[1] << 8);
+      int command = protocol->interpretKeys(keys);
 
-      if (inputMode) {
-        int command = BRL_BLK_PASSDOTS;
-        BrailleKeys originalKeys = keys;
-
-#define KEY(name,bit) if (keys & KEY_##name) { command |= (bit); keys &= ~KEY_##name; }
-        KEY(DOT1, BRL_DOT1);
-        KEY(DOT2, BRL_DOT2);
-        KEY(DOT3, BRL_DOT3);
-        KEY(DOT4, BRL_DOT4);
-        KEY(DOT5, BRL_DOT5);
-        KEY(DOT6, BRL_DOT6);
-        KEY(DOT7, BRL_DOT7);
-        KEY(DOT8, BRL_DOT8);
-        if (keys == originalKeys) keys &= ~KEY_SPACE;
-
-        if (keys != originalKeys) {
-          KEY(BS_F2, BRL_FLG_CHAR_UPPER);
-          KEY(BS_F3, BRL_FLG_CHAR_CONTROL);
-
-          if (!keys) return command;
-          keys = originalKeys;
-        }
-#undef KEY
-      }
-
-      {
-        int command = protocol->interpretKeys(keys);
-        if (command != EOF) return command;
-      }
-
-      return BRL_CMD_NOOP;
+      if (command == EOF) command = BRL_CMD_NOOP;
+      return command;
     }
   }
 
