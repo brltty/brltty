@@ -421,10 +421,12 @@ getSyncBrailleCellCount (BrailleDisplay *brl, unsigned int *count) {
   if (writePacket(brl, 0XFB, 0X01, data, sizeof(data), NULL, 0)) {
     InputPacket packet;
 
-    if (readPacket(brl, &packet)) {
-      if (packet.data.type == IPT_CELLS) {
-        *count = packet.data.data;
-        return 1;
+    while (io->awaitInput(1000)) {
+      if (readPacket(brl, &packet)) {
+        if (packet.data.type == IPT_CELLS) {
+          *count = packet.data.data;
+          return 1;
+        }
       }
     }
   }
@@ -783,28 +785,28 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
       BrailleKeys keys = packet.data.reserved[0] | (packet.data.reserved[1] << 8);
 
       if (inputMode) {
-        const BrailleKeys dotKeys = KEY_DOT1 | KEY_DOT2 | KEY_DOT3 | KEY_DOT4 | KEY_DOT5 | KEY_DOT6 | KEY_DOT7 | KEY_DOT8;
+        int command = BRL_BLK_PASSDOTS;
+        BrailleKeys originalKeys = keys;
 
-        if (keys && !(keys & ~dotKeys)) {
-          int command = BRL_BLK_PASSDOTS;
-          if (keys & KEY_DOT1) command |= BRL_DOT1;
-          if (keys & KEY_DOT2) command |= BRL_DOT2;
-          if (keys & KEY_DOT3) command |= BRL_DOT3;
-          if (keys & KEY_DOT4) command |= BRL_DOT4;
-          if (keys & KEY_DOT5) command |= BRL_DOT5;
-          if (keys & KEY_DOT6) command |= BRL_DOT6;
-          if (keys & KEY_DOT7) command |= BRL_DOT7;
-          if (keys & KEY_DOT8) command |= BRL_DOT8;
-          return command;
+#define KEY(name,bit) if (keys & KEY_##name) { command |= (bit); keys &= ~KEY_##name; }
+        KEY(DOT1, BRL_DOT1);
+        KEY(DOT2, BRL_DOT2);
+        KEY(DOT3, BRL_DOT3);
+        KEY(DOT4, BRL_DOT4);
+        KEY(DOT5, BRL_DOT5);
+        KEY(DOT6, BRL_DOT6);
+        KEY(DOT7, BRL_DOT7);
+        KEY(DOT8, BRL_DOT8);
+        if (keys == originalKeys) keys &= ~KEY_SPACE;
+
+        if (keys != originalKeys) {
+          KEY(BS_F2, BRL_FLG_CHAR_UPPER);
+          KEY(BS_F3, BRL_FLG_CHAR_CONTROL);
+
+          if (!keys) return command;
+          keys = originalKeys;
         }
-
-        switch (keys) {
-          case KEY_SPACE:
-            return BRL_BLK_PASSDOTS;
-
-          default:
-            break;
-        }
+#undef KEY
       }
 
       {
