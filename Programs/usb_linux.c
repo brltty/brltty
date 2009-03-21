@@ -684,9 +684,10 @@ usbWriteEndpoint (
   if ((endpoint = usbGetOutputEndpoint(device, endpointNumber))) {
     UsbEndpointTransfer transfer = USB_ENDPOINT_TRANSFER(endpoint->descriptor);
     switch (transfer) {
+      case UsbEndpointTransfer_Interrupt:
       case UsbEndpointTransfer_Bulk:
         return usbBulkTransfer(endpoint, (void *)buffer, length, timeout);
-
+/*
       case UsbEndpointTransfer_Interrupt: {
         struct usbdevfs_urb *urb = usbInterruptTransfer(endpoint, (void *)buffer, length, timeout);
 
@@ -697,7 +698,7 @@ usbWriteEndpoint (
         }
         break;
       }
-
+*/
       default:
         LogPrint(LOG_ERR, "USB output transfer not supported: %d", transfer);
         errno = ENOSYS;
