@@ -448,10 +448,9 @@ identifyUsbModel (BrailleDisplay *brl) {
 
 static int
 writeUsbCells (BrailleDisplay *brl, const unsigned char *cells, unsigned int count) {
-  unsigned char buffer[2 + count];
+  unsigned char buffer[1 + count];
   unsigned char *byte = buffer;
 
-  *byte++ = 0X00;
   *byte++ = 0X43;
 
   memcpy(byte, cells, count);
