@@ -49,8 +49,6 @@ static const int probeTimeout = 200;
 #define VERTICAL_SENSOR_COUNT 27
 
 static int cellCount;
-static int textCount;
-static int statusCount;
 static int cellsUpdated;
 static unsigned char internalCells[MAXIMUM_CELL_COUNT];
 static unsigned char externalCells[MAXIMUM_CELL_COUNT];
@@ -86,7 +84,7 @@ typedef struct {
   const char *name;
   int serialBaud;
   SerialParity serialParity;
-  int (*readPacket) (unsigned char *packet, int size);
+  int (*readPacket) (BrailleDisplay *brl, unsigned char *packet, int size);
   int (*writePacket) (BrailleDisplay *brl, const unsigned char *packet, int length);
   int (*probeDisplay) (BrailleDisplay *brl);
   int (*updateKeys) (BrailleDisplay *brl, int *keyPressed);
@@ -258,21 +256,22 @@ clearCells (int start, int count) {
 }
 
 static void
-logCellCount (void) {
-  switch ((textCount = cellCount)) {
+logCellCount (BrailleDisplay *brl) {
+  switch ((brl->textColumns = cellCount)) {
     case 44:
     case 84:
-      textCount -= 4;
+      brl->textColumns -= 4;
       break;
 
     case 56:
-      textCount -= 16;
+      brl->textColumns -= 16;
       break;
   }
-  statusCount = cellCount - textCount;
+  brl->textRows = 1;
+  brl->statusRows = (brl->statusColumns = cellCount - brl->textColumns)? 1: 0;
 
   LogPrint(LOG_INFO, "Cell Count: %d (%d text, %d status)",
-           cellCount, textCount, statusCount);
+           cellCount, brl->textColumns, brl->statusColumns);
 }
 
 static void
@@ -291,9 +290,7 @@ changeCellCount (BrailleDisplay *brl, int count) {
     }
 
     cellCount = count;
-    logCellCount();
-
-    brl->textColumns = textCount;
+    logCellCount(brl);
     brl->resizeRequired = 1;
   }
 }
@@ -625,7 +622,7 @@ logBaumPowerdownReason (BaumPowerdownReason reason) {
 }
 
 static int
-readBaumPacket (unsigned char *packet, int size) {
+readBaumPacket (BrailleDisplay *brl, unsigned char *packet, int size) {
   int started = 0;
   int escape = 0;
   int offset = 0;
@@ -723,7 +720,7 @@ readBaumPacket (unsigned char *packet, int size) {
             break;
 
           case BAUM_RSP_HorizontalSensors:
-            length = KEY_GROUP_SIZE(textCount) + 1;
+            length = KEY_GROUP_SIZE(brl->textColumns) + 1;
             break;
 
           default:
@@ -754,8 +751,8 @@ readBaumPacket (unsigned char *packet, int size) {
 }
 
 static int
-getBaumPacket (BaumResponsePacket *packet) {
-  return readBaumPacket(packet->bytes, sizeof(*packet));
+getBaumPacket (BrailleDisplay *brl, BaumResponsePacket *packet) {
+  return readBaumPacket(brl, packet->bytes, sizeof(*packet));
 }
 
 static int
@@ -854,7 +851,7 @@ probeBaumDisplay (BrailleDisplay *brl) {
     cellCount = 0;
     while (io->awaitInput(probeTimeout)) {
       BaumResponsePacket response;
-      int size = getBaumPacket(&response);
+      int size = getBaumPacket(brl, &response);
       if (size) {
         switch (response.data.code) {
           case BAUM_RSP_RoutingKeys: /* Inka */
@@ -919,7 +916,7 @@ updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
   BaumResponsePacket packet;
   int size;
 
-  while ((size = getBaumPacket(&packet))) {
+  while ((size = getBaumPacket(brl, &packet))) {
     switch (packet.data.code) {
       case BAUM_RSP_CellCount:
         changeCellCount(brl, packet.data.values.cellCount);
@@ -1021,9 +1018,9 @@ updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
         continue;
 
       case BAUM_RSP_HorizontalSensor:
-        resetKeyGroup(packet.data.values.horizontalSensors, textCount, packet.data.values.horizontalSensor);
+        resetKeyGroup(packet.data.values.horizontalSensors, brl->textColumns, packet.data.values.horizontalSensor);
       case BAUM_RSP_HorizontalSensors:
-        if (updateKeyGroup(pressedKeys.horizontalSensors, packet.data.values.horizontalSensors, textCount, keyPressed)) return 1;
+        if (updateKeyGroup(pressedKeys.horizontalSensors, packet.data.values.horizontalSensors, brl->textColumns, keyPressed)) return 1;
         continue;
 
       case BAUM_RSP_VerticalSensor: {
@@ -1116,7 +1113,7 @@ typedef enum {
   HT_RSP_RELEASE   = 0X80,
   HT_RSP_IDENTITY  = 0XFE
 } HandyTechResponseCode;
-#define HT_IS_ROUTING_KEY(code) (((code) >= HT_RSP_KEY_CR1) && ((code) < (HT_RSP_KEY_CR1 + textCount)))
+#define HT_IS_ROUTING_KEY(code) (((code) >= HT_RSP_KEY_CR1) && ((code) < (HT_RSP_KEY_CR1 + brl->textColumns)))
 
 typedef union {
   unsigned char bytes[2];
@@ -1151,7 +1148,7 @@ static const HandyTechModelEntry handyTechModelTable[] = {
 static const HandyTechModelEntry *ht;
 
 static int
-readHandyTechPacket (unsigned char *packet, int size) {
+readHandyTechPacket (BrailleDisplay *brl, unsigned char *packet, int size) {
   int offset = 0;
   int length = 0;
 
@@ -1217,8 +1214,8 @@ readHandyTechPacket (unsigned char *packet, int size) {
 }
 
 static int
-getHandyTechPacket (HandyTechResponsePacket *packet) {
-  return readHandyTechPacket(packet->bytes, sizeof(*packet));
+getHandyTechPacket (BrailleDisplay *brl, HandyTechResponsePacket *packet) {
+  return readHandyTechPacket(brl, packet->bytes, sizeof(*packet));
 }
 
 static int
@@ -1254,7 +1251,7 @@ probeHandyTechDisplay (BrailleDisplay *brl) {
   while (writeHandyTechPacket(brl, request, sizeof(request))) {
     while (io->awaitInput(probeTimeout)) {
       HandyTechResponsePacket response;
-      if (getHandyTechPacket(&response)) {
+      if (getHandyTechPacket(brl, &response)) {
         if (response.data.code == HT_RSP_IDENTITY) {
           if (!(ht = findHandyTechModel(response.data.values.identity))) return 0;
           cellCount = ht->textCount;
@@ -1274,7 +1271,7 @@ updateHandyTechKeys (BrailleDisplay *brl, int *keyPressed) {
   HandyTechResponsePacket packet;
   int size;
 
-  while ((size = getHandyTechPacket(&packet))) {
+  while ((size = getHandyTechPacket(brl, &packet))) {
     unsigned char code = packet.data.code;
 
     switch (code) {
@@ -1403,7 +1400,7 @@ typedef union {
 } PACKED PowerBrailleResponsePacket;
 
 static int
-readPowerBraillePacket (unsigned char *packet, int size) {
+readPowerBraillePacket (BrailleDisplay *brl, unsigned char *packet, int size) {
   int offset = 0;
   int length = 0;
 
@@ -1475,8 +1472,8 @@ readPowerBraillePacket (unsigned char *packet, int size) {
 }
 
 static int
-getPowerBraillePacket (PowerBrailleResponsePacket *packet) {
-  return readPowerBraillePacket(packet->bytes, sizeof(*packet));
+getPowerBraillePacket (BrailleDisplay *brl, PowerBrailleResponsePacket *packet) {
+  return readPowerBraillePacket(brl, packet->bytes, sizeof(*packet));
 }
 
 static int
@@ -1509,7 +1506,7 @@ probePowerBrailleDisplay (BrailleDisplay *brl) {
   while (writePowerBraillePacket(brl, request, sizeof(request))) {
     while (io->awaitInput(probeTimeout)) {
       PowerBrailleResponsePacket response;
-      if (getPowerBraillePacket(&response)) {
+      if (getPowerBraillePacket(brl, &response)) {
         if (response.data.code == PB_RSP_IDENTITY) {
           const unsigned char *version = response.data.values.identity.version;
           LogPrint(LOG_INFO, "Baum emulation: PowerBraille Version: %c%c%c%c",
@@ -1531,7 +1528,7 @@ updatePowerBrailleKeys (BrailleDisplay *brl, int *keyPressed) {
   PowerBrailleResponsePacket packet;
   int size;
 
-  while ((size = getPowerBraillePacket(&packet))) {
+  while ((size = getPowerBraillePacket(brl, &packet))) {
     if (!packet.data.zero) {
       switch (packet.data.code) {
         case PB_RSP_IDENTITY:
@@ -1539,7 +1536,7 @@ updatePowerBrailleKeys (BrailleDisplay *brl, int *keyPressed) {
           continue;
 
         case PB_RSP_SENSORS:
-          if (updateKeyGroup(pressedKeys.routingKeys, packet.data.values.sensors.horizontal, textCount, keyPressed)) return 1;
+          if (updateKeyGroup(pressedKeys.routingKeys, packet.data.values.sensors.horizontal, brl->textColumns, keyPressed)) return 1;
           continue;
 
         default:
@@ -1590,19 +1587,19 @@ updatePowerBrailleKeys (BrailleDisplay *brl, int *keyPressed) {
 
 static int
 writePowerBrailleCells (BrailleDisplay *brl) {
-  unsigned char packet[6 + (textCount * 2)];
+  unsigned char packet[6 + (brl->textColumns * 2)];
   unsigned char *byte = packet;
 
   *byte++ = PB_REQ_WRITE;
   *byte++ = 0; /* cursor mode: disabled */
   *byte++ = 0; /* cursor position: nowhere */
   *byte++ = 1; /* cursor type: command */
-  *byte++ = textCount * 2; /* attribute-data pairs */
+  *byte++ = brl->textColumns * 2; /* attribute-data pairs */
   *byte++ = 0; /* start */
 
   {
     int i;
-    for (i=0; i<textCount; ++i) {
+    for (i=0; i<brl->textColumns; ++i) {
       *byte++ = 0; /* attributes */
       *byte++ = externalCells[i]; /* data */
     }
@@ -2032,13 +2029,11 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
           switchSettings = 0;
 
           if (protocol->probeDisplay(brl)) {
-            logCellCount();
+            logCellCount(brl);
 
             clearCells(0, cellCount);
             if (!updateCells(brl)) goto failed;
 
-            brl->textColumns = textCount;
-            brl->textRows = 1;
             brl->helpPage = useVarioKeys? 1: 0;
 
             activeKeys = pressedKeys;
@@ -2067,7 +2062,7 @@ brl_destruct (BrailleDisplay *brl) {
 
 static ssize_t
 brl_readPacket (BrailleDisplay *brl, void *buffer, size_t size) {
-  int count = protocol->readPacket(buffer, size);
+  int count = protocol->readPacket(brl, buffer, size);
   if (!count) count = -1;
   return count;
 }
@@ -2085,7 +2080,7 @@ brl_reset (BrailleDisplay *brl) {
 static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   int start = 0;
-  int count = textCount;
+  int count = brl->textColumns;
 
   while (count > 0) {
     if (brl->buffer[count-1] != internalCells[count-1]) break;
@@ -2105,9 +2100,9 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 
 static int
 brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) {
-  if (memcmp(&internalCells[textCount], status, statusCount) != 0) {
-    memcpy(&internalCells[textCount], status, statusCount);
-    translateCells(textCount, statusCount);
+  if (memcmp(&internalCells[brl->textColumns], status, brl->statusColumns) != 0) {
+    memcpy(&internalCells[brl->textColumns], status, brl->statusColumns);
+    translateCells(brl->textColumns, brl->statusColumns);
   }
   return 1;
 }
@@ -2119,7 +2114,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   int keyPressed;
   int newModifiers = 0;
 
-  unsigned char routingKeys[textCount];
+  unsigned char routingKeys[brl->textColumns];
   int routingKeyCount;
   signed char horizontalSensor;
   signed char leftVerticalSensor;
@@ -2141,8 +2136,8 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   keys = activeKeys.functionKeys;
   command = BRL_CMD_NOOP;
 
-  routingKeyCount = getKeyNumbers(activeKeys.routingKeys, textCount, routingKeys);
-  horizontalSensor = getSensorNumber(activeKeys.horizontalSensors, textCount);
+  routingKeyCount = getKeyNumbers(activeKeys.routingKeys, brl->textColumns, routingKeys);
+  horizontalSensor = getSensorNumber(activeKeys.horizontalSensors, brl->textColumns);
   leftVerticalSensor = getSensorNumber(activeKeys.leftVerticalSensors, VERTICAL_SENSOR_COUNT);
   rightVerticalSensor = getSensorNumber(activeKeys.rightVerticalSensors, VERTICAL_SENSOR_COUNT);
 
@@ -2226,7 +2221,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
     } else if (routingKeyCount == 1) {
       unsigned char key1 = routingKeys[0];
 
-      if ((key1 == 0) || (key1 == textCount-1)) {
+      if ((key1 == 0) || (key1 == brl->textColumns-1)) {
         if (keys) goto doChord;
         newModifiers |= MOD_CHORD;
       } else if (key1 == 1) {
@@ -2241,7 +2236,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
           newModifiers |= MOD_DOT7_LOCK | MOD_DOT7;
         else 
           newModifiers |= MOD_DOT7;
-      } else if (key1 == textCount-2) {
+      } else if (key1 == brl->textColumns-2) {
         if (keys) {
           currentModifiers |= MOD_DOT8;
           goto doCharacter;
@@ -2265,7 +2260,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
           newModifiers |= MOD_UPPER_LOCK | MOD_UPPER;
         else
           newModifiers |= MOD_UPPER;
-      } else if (key1 == textCount-3) {
+      } else if (key1 == brl->textColumns-3) {
         if (keys) {
           currentModifiers |= MOD_META;
           goto doCharacter;
@@ -2278,20 +2273,20 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
       unsigned char key2 = routingKeys[1];
 
       if (keys == 0) {
-        if ((key1 == textCount-2) && (key2 == textCount-1))
+        if ((key1 == brl->textColumns-2) && (key2 == brl->textColumns-1))
           command = BRL_BLK_PASSDOTS; /* space */
-        else if ((key1 == 0) && (key2 == textCount-1))
+        else if ((key1 == 0) && (key2 == brl->textColumns-1))
           newModifiers &= ~(MOD_CHORD |
                             MOD_DOT7 | MOD_DOT7_LOCK |
                             MOD_DOT8 | MOD_DOT8_LOCK |
                             MOD_UPPER | MOD_UPPER_LOCK |
                             MOD_META | MOD_CNTRL);
-        else if ((key1 == 1) && (key2 == textCount-2))
+        else if ((key1 == 1) && (key2 == brl->textColumns-2))
           newModifiers |= MOD_DOT7 | MOD_DOT8;
-        else if ((key1 == 2) && (key2 == textCount-3))
+        else if ((key1 == 2) && (key2 == brl->textColumns-3))
           newModifiers |= MOD_CNTRL;
       } else {
-        if ((key1 == textCount-2) && (key2 == textCount-1)) {
+        if ((key1 == brl->textColumns-2) && (key2 == brl->textColumns-1)) {
           switch (keys) {
             case BAUM_KEY_TL1:
               /* already in input mode */
@@ -2478,7 +2473,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
         KEY(BAUM_KEY_TR3, BRL_BLK_NXINDENT+routingKeys[0]);
 
         default:
-          if (routingKeys[1] == textCount-1) {
+          if (routingKeys[1] == brl->textColumns-1) {
             switch (keys) {
               case BAUM_KEY_TL1:
                 newModifiers = MOD_INPUT;
