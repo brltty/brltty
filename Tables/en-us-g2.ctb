@@ -59,6 +59,7 @@ endword aed 1-1246
 word aforesaid 1-123456-15-234-145
 always after 1-124
 contraction af
+sufword aftereffect 1-124-2345-12456-15-235-15-14-2345
 sufword afternoon 1-124-1345 afternoons
 contraction afn
 always afterward 1-124-2456
@@ -228,8 +229,10 @@ word concvg =
 always cone 14-5-135
 sufword conelrad =
 sufword coney =
+word conies =
 word cons 14-135-1345-234
 sufword conundrum = 
+word cony =
 sufword coronel =
 always could 14-145
 contraction cd
@@ -289,6 +292,7 @@ begword denu = denunciation
 begword dera = derail
 begword deri 145-15-1235-24
 begword dero = derogatory
+begword dingh 145-35-126 dinghy
 begword dinu 145-24-1345-136
 begword dis 256
 word disc =
@@ -371,6 +375,7 @@ always first 124-34
 word fst =
 always fever 124-15-1236-12456
 always ffor 124-123456
+sufword fiance =
 largesign for 123456
 always fore 123456-15
 begword forens 123456-26-234 forensic
@@ -485,6 +490,7 @@ always letter 123-1235
 contraction lr
 word like 123
 begword limea = limeade
+word lingerie 123-35-1245-12456-24-15
 always little 123-123
 contraction ll
 always lord 5-123
@@ -511,6 +517,8 @@ sufword mistreat 134-24-234-2345-1235-2-2345
 begword mistru = mistrust
 begword misty = mistyped
 word monetary 134-5-135-2345-345-13456
+word mongeese =
+sufword mongoose =
 word more 134
 always mother 5-134
 always much 134-16
@@ -543,7 +551,7 @@ word nones 1345-5-135-234
 word nonesuch 1345-5-135-234-16
 word nonetheless 1345-5-135-2346-46-234
 word noone 1345-135-5-135
-sufword nose = nosedive
+begword nosediv = nosedive
 word not 1345
 word noways =
 sufword nowhere 1345-135-5-156
@@ -633,6 +641,7 @@ sufword predator 1234-1235-1246-1-2345-135-1235
 always prof =
 begword proff 1234-1235-12356-124 proffer
 always profit 1234-1235-12356-24-2345
+word pulseaudio =
 
 # the letter q
 always q 12345
