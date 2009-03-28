@@ -1393,7 +1393,6 @@ usbChooseChannel (UsbDevice *device, void *data) {
               UsbEndpoint *endpoint = usbGetOutputEndpoint(device, definition->outputEndpoint);
 
               if (endpoint) {
-                usbWriteEndpoint(device, definition->outputEndpoint, NULL, 0, 1000);
               } else {
                 ok = 0;
               }
