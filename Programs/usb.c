@@ -913,13 +913,22 @@ usbSetBelkinBaud (UsbDevice *device, int rate) {
   return usbSetBelkinAttribute(device, 0, base/rate);
 }
 static int
-usbSetBelkinStopBits (UsbDevice *device, int bits) {
-  if ((bits < 1) || (bits > 2)) {
-    LogPrint(LOG_WARNING, "Unsupported Belkin stop bits: %d", bits);
-    errno = EINVAL;
-    return 0;
+usbSetBelkinFlowControl (UsbDevice *device, SerialFlowControl flow) {
+  int value = 0;
+#define BELKIN_FLOW(from,to) if ((flow & (from)) == (from)) flow &= ~(from), value |= (to)
+  BELKIN_FLOW(SERIAL_FLOW_OUTPUT_CTS, 0X0001);
+  BELKIN_FLOW(SERIAL_FLOW_OUTPUT_DSR, 0X0002);
+  BELKIN_FLOW(SERIAL_FLOW_INPUT_DSR , 0X0004);
+  BELKIN_FLOW(SERIAL_FLOW_INPUT_DTR , 0X0008);
+  BELKIN_FLOW(SERIAL_FLOW_INPUT_RTS , 0X0010);
+  BELKIN_FLOW(SERIAL_FLOW_OUTPUT_RTS, 0X0020);
+  BELKIN_FLOW(SERIAL_FLOW_OUTPUT_XON, 0X0080);
+  BELKIN_FLOW(SERIAL_FLOW_INPUT_XON , 0X0100);
+#undef BELKIN_FLOW
+  if (flow) {
+    LogPrint(LOG_WARNING, "Unsupported Belkin flow control: %02X", flow);
   }
-  return usbSetBelkinAttribute(device, 1, bits-1);
+  return usbSetBelkinAttribute(device, 16, value);
 }
 static int
 usbSetBelkinDataBits (UsbDevice *device, int bits) {
@@ -929,6 +938,15 @@ usbSetBelkinDataBits (UsbDevice *device, int bits) {
     return 0;
   }
   return usbSetBelkinAttribute(device, 2, bits-5);
+}
+static int
+usbSetBelkinStopBits (UsbDevice *device, int bits) {
+  if ((bits < 1) || (bits > 2)) {
+    LogPrint(LOG_WARNING, "Unsupported Belkin stop bits: %d", bits);
+    errno = EINVAL;
+    return 0;
+  }
+  return usbSetBelkinAttribute(device, 1, bits-1);
 }
 static int
 usbSetBelkinParity (UsbDevice *device, SerialParity parity) {
@@ -945,6 +963,14 @@ usbSetBelkinParity (UsbDevice *device, SerialParity parity) {
       return 0;
   }
   return usbSetBelkinAttribute(device, 3, value);
+}
+static int
+usbSetBelkinDataFormat (UsbDevice *device, int dataBits, int stopBits, SerialParity parity) {
+  if (usbSetBelkinDataBits(device, dataBits))
+    if (usbSetBelkinStopBits(device, stopBits))
+      if (usbSetBelkinParity(device, parity))
+        return 1;
+  return 0;
 }
 static int
 usbSetBelkinDtrState (UsbDevice *device, int state) {
@@ -964,33 +990,8 @@ usbSetBelkinRtsState (UsbDevice *device, int state) {
   }
   return usbSetBelkinAttribute(device, 11, state);
 }
-static int
-usbSetBelkinFlowControl (UsbDevice *device, SerialFlowControl flow) {
-  int value = 0;
-#define BELKIN_FLOW(from,to) if ((flow & (from)) == (from)) flow &= ~(from), value |= (to)
-  BELKIN_FLOW(SERIAL_FLOW_OUTPUT_CTS, 0X0001);
-  BELKIN_FLOW(SERIAL_FLOW_OUTPUT_DSR, 0X0002);
-  BELKIN_FLOW(SERIAL_FLOW_INPUT_DSR , 0X0004);
-  BELKIN_FLOW(SERIAL_FLOW_INPUT_DTR , 0X0008);
-  BELKIN_FLOW(SERIAL_FLOW_INPUT_RTS , 0X0010);
-  BELKIN_FLOW(SERIAL_FLOW_OUTPUT_RTS, 0X0020);
-  BELKIN_FLOW(SERIAL_FLOW_OUTPUT_XON, 0X0080);
-  BELKIN_FLOW(SERIAL_FLOW_INPUT_XON , 0X0100);
-#undef BELKIN_FLOW
-  if (flow) {
-    LogPrint(LOG_WARNING, "Unsupported Belkin flow control: %02X", flow);
-  }
-  return usbSetBelkinAttribute(device, 16, value);
-}
-static int
-usbSetBelkinDataFormat (UsbDevice *device, int dataBits, int stopBits, SerialParity parity) {
-  if (usbSetBelkinDataBits(device, dataBits))
-    if (usbSetBelkinStopBits(device, stopBits))
-      if (usbSetBelkinParity(device, parity))
-        return 1;
-  return 0;
-}
 static const UsbSerialOperations usbBelkinOperations = {
+  NULL,
   usbSetBelkinBaud,
   usbSetBelkinFlowControl,
   usbSetBelkinDataFormat,
@@ -1013,36 +1014,6 @@ static int
 usbSetFtdiAttribute (UsbDevice *device, unsigned char request, int value, int index) {
   return usbControlWrite(device, UsbControlRecipient_Device, UsbControlType_Vendor,
                          request, value, index, NULL, 0, 1000) != -1;
-}
-static int
-usbSetFtdiModemState (UsbDevice *device, int state, int shift, const char *name) {
-  if ((state < 0) || (state > 1)) {
-    LogPrint(LOG_WARNING, "Unsupported FTDI %s state: %d", name, state);
-    errno = EINVAL;
-    return 0;
-  }
-  return usbSetFtdiAttribute(device, 1, ((1 << (shift + 8)) | (state << shift)), 0);
-}
-static int
-usbSetFtdiDtrState (UsbDevice *device, int state) {
-  return usbSetFtdiModemState(device, state, 0, "DTR");
-}
-static int
-usbSetFtdiRtsState (UsbDevice *device, int state) {
-  return usbSetFtdiModemState(device, state, 1, "RTS");
-}
-static int
-usbSetFtdiFlowControl (UsbDevice *device, SerialFlowControl flow) {
-  int index = 0;
-#define FTDI_FLOW(from,to) if ((flow & (from)) == (from)) flow &= ~(from), index |= (to)
-  FTDI_FLOW(SERIAL_FLOW_OUTPUT_CTS|SERIAL_FLOW_INPUT_RTS, 0X0100);
-  FTDI_FLOW(SERIAL_FLOW_OUTPUT_DSR|SERIAL_FLOW_INPUT_DTR, 0X0200);
-  FTDI_FLOW(SERIAL_FLOW_OUTPUT_XON|SERIAL_FLOW_INPUT_XON, 0X0400);
-#undef FTDI_FLOW
-  if (flow) {
-    LogPrint(LOG_WARNING, "Unsupported FTDI flow control: %02X", flow);
-  }
-  return usbSetFtdiAttribute(device, 2, ((index & 0X0400)? 0X1311: 0), index);
 }
 static int
 usbSetFtdiBaud (UsbDevice *device, int divisor) {
@@ -1111,6 +1082,19 @@ usbSetFtdiBaud_FT232BM (UsbDevice *device, int rate) {
   }
 }
 static int
+usbSetFtdiFlowControl (UsbDevice *device, SerialFlowControl flow) {
+  int index = 0;
+#define FTDI_FLOW(from,to) if ((flow & (from)) == (from)) flow &= ~(from), index |= (to)
+  FTDI_FLOW(SERIAL_FLOW_OUTPUT_CTS|SERIAL_FLOW_INPUT_RTS, 0X0100);
+  FTDI_FLOW(SERIAL_FLOW_OUTPUT_DSR|SERIAL_FLOW_INPUT_DTR, 0X0200);
+  FTDI_FLOW(SERIAL_FLOW_OUTPUT_XON|SERIAL_FLOW_INPUT_XON, 0X0400);
+#undef FTDI_FLOW
+  if (flow) {
+    LogPrint(LOG_WARNING, "Unsupported FTDI flow control: %02X", flow);
+  }
+  return usbSetFtdiAttribute(device, 2, ((index & 0X0400)? 0X1311: 0), index);
+}
+static int
 usbSetFtdiDataFormat (UsbDevice *device, int dataBits, int stopBits, SerialParity parity) {
   int ok = 1;
   int value = dataBits & 0XFF;
@@ -1143,7 +1127,25 @@ usbSetFtdiDataFormat (UsbDevice *device, int dataBits, int stopBits, SerialParit
   }
   return usbSetFtdiAttribute(device, 4, value, 0);
 }
+static int
+usbSetFtdiModemState (UsbDevice *device, int state, int shift, const char *name) {
+  if ((state < 0) || (state > 1)) {
+    LogPrint(LOG_WARNING, "Unsupported FTDI %s state: %d", name, state);
+    errno = EINVAL;
+    return 0;
+  }
+  return usbSetFtdiAttribute(device, 1, ((1 << (shift + 8)) | (state << shift)), 0);
+}
+static int
+usbSetFtdiDtrState (UsbDevice *device, int state) {
+  return usbSetFtdiModemState(device, state, 0, "DTR");
+}
+static int
+usbSetFtdiRtsState (UsbDevice *device, int state) {
+  return usbSetFtdiModemState(device, state, 1, "RTS");
+}
 static const UsbSerialOperations usbFtdiOperations_SIO = {
+  NULL,
   usbSetFtdiBaud_SIO,
   usbSetFtdiFlowControl,
   usbSetFtdiDataFormat,
@@ -1151,6 +1153,7 @@ static const UsbSerialOperations usbFtdiOperations_SIO = {
   usbSetFtdiRtsState
 };
 static const UsbSerialOperations usbFtdiOperations_FT8U232AM = {
+  NULL,
   usbSetFtdiBaud_FT8U232AM,
   usbSetFtdiFlowControl,
   usbSetFtdiDataFormat,
@@ -1158,11 +1161,105 @@ static const UsbSerialOperations usbFtdiOperations_FT8U232AM = {
   usbSetFtdiRtsState
 };
 static const UsbSerialOperations usbFtdiOperations_FT232BM = {
+  NULL,
   usbSetFtdiBaud_FT232BM,
   usbSetFtdiFlowControl,
   usbSetFtdiDataFormat,
   usbSetFtdiDtrState,
   usbSetFtdiRtsState
+};
+
+static int
+usbSetCp2101Attribute (UsbDevice *device, unsigned char request, int value, int index) {
+  return usbControlWrite(device, UsbControlRecipient_Interface, UsbControlType_Vendor,
+                         request, value, index, NULL, 0, 1000) != -1;
+}
+static int
+usbSetCp2101UartState (UsbDevice *device, int state) {
+  return usbSetCp2101Attribute(device, 0, state, 0);
+}
+static int
+usbEnableCp2101Adapter (UsbDevice *device) {
+  if (!usbSetCp2101UartState(device, 0)) return 0;
+  if (!usbSetCp2101UartState(device, 1)) return 0;
+  return 1;
+}
+static int
+usbSetCp2101Baud (UsbDevice *device, int rate) {
+  const int base = 0X384000;
+  int divisor = base / rate;
+  if ((rate * divisor) != base) {
+    LogPrint(LOG_WARNING, "Unsupported CP2101 baud: %d", rate);
+    errno = EINVAL;
+    return 0;
+  }
+  return usbSetCp2101Attribute(device, 1, divisor, 0);
+}
+static int
+usbSetCp2101FlowControl (UsbDevice *device, SerialFlowControl flow) {
+  if (flow) {
+    LogPrint(LOG_WARNING, "Unsupported CP2101 flow control: %02X", flow);
+  }
+  return 1;
+}
+static int
+usbSetCp2101DataFormat (UsbDevice *device, int dataBits, int stopBits, SerialParity parity) {
+  int ok = 1;
+  int value = dataBits & 0XF;
+  if (dataBits != value) {
+    LogPrint(LOG_WARNING, "Unsupported CP2101 data bits: %d", dataBits);
+    ok = 0;
+  }
+  value <<= 8;
+  switch (parity) {
+    case SERIAL_PARITY_NONE:  value |= 0X00; break;
+    case SERIAL_PARITY_ODD:   value |= 0X10; break;
+    case SERIAL_PARITY_EVEN:  value |= 0X20; break;
+    case SERIAL_PARITY_MARK:  value |= 0X30; break;
+    case SERIAL_PARITY_SPACE: value |= 0X40; break;
+    default:
+      LogPrint(LOG_WARNING, "Unsupported CP2101 parity: %d", parity);
+      ok = 0;
+      break;
+  }
+  switch (stopBits) {
+    case 1: value |= 0X0; break;
+    case 2: value |= 0X2; break;
+    default:
+      LogPrint(LOG_WARNING, "Unsupported CP2101 stop bits: %d", stopBits);
+      ok = 0;
+      break;
+  }
+  if (!ok) {
+    errno = EINVAL;
+    return 0;
+  }
+  return usbSetCp2101Attribute(device, 3, value, 0);
+}
+static int
+usbSetCp2101ModemState (UsbDevice *device, int state, int shift, const char *name) {
+  if ((state < 0) || (state > 1)) {
+    LogPrint(LOG_WARNING, "Unsupported CP2101 %s state: %d", name, state);
+    errno = EINVAL;
+    return 0;
+  }
+  return usbSetCp2101Attribute(device, 7, ((1 << (shift + 8)) | (state << shift)), 0);
+}
+static int
+usbSetCp2101DtrState (UsbDevice *device, int state) {
+  return usbSetCp2101ModemState(device, state, 0, "DTR");
+}
+static int
+usbSetCp2101RtsState (UsbDevice *device, int state) {
+  return usbSetCp2101ModemState(device, state, 1, "RTS");
+}
+static const UsbSerialOperations usbCp2101Operations = {
+  usbEnableCp2101Adapter,
+  usbSetCp2101Baud,
+  usbSetCp2101FlowControl,
+  usbSetCp2101DataFormat,
+  usbSetCp2101DtrState,
+  usbSetCp2101RtsState
 };
 
 const UsbSerialOperations *
@@ -1320,6 +1417,12 @@ usbGetSerialOperations (UsbDevice *device) {
         usbFtdiInputFilter
       }
       ,
+      { /* Seika (40 cells) */
+        0X10C4, 0XEA60,
+        &usbCp2101Operations,
+        NULL
+      }
+      ,
       {0, 0}
     };
     const UsbSerialAdapter *sa = usbSerialAdapters;
@@ -1349,9 +1452,15 @@ int
 usbSetSerialParameters (UsbDevice *device, const SerialParameters *parameters) {
   const UsbSerialOperations *serial = usbGetSerialOperations(device);
   if (!serial) return 0;
+
+  if (serial->enableAdapter)
+    if (!serial->enableAdapter(device))
+      return 0;
+
   if (!serial->setBaud(device, parameters->baud)) return 0;
   if (!serial->setFlowControl(device, parameters->flow)) return 0;
   if (!serial->setDataFormat(device, parameters->data, parameters->stop, parameters->parity)) return 0;
+
   return 1;
 }
 
