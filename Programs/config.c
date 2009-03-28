@@ -2187,7 +2187,7 @@ activateBrailleDriver (int verify) {
 
       if (isSerialDevice(&dev)) {
         static const char *const serialDrivers[] = {
-          "md", "pm", "ts", "ht", "bn", "al", "bm", "pg",
+          "md", "pm", "ts", "ht", "bn", "al", "bm", "pg", "sk",
           NULL
         };
         autodetectableDrivers = serialDrivers;
@@ -2197,7 +2197,7 @@ activateBrailleDriver (int verify) {
 #ifdef ENABLE_USB_SUPPORT
       if (isUsbDevice(&dev)) {
         static const char *const usbDrivers[] = {
-          "al", "bm", "eu", "fs", "hm", "ht", "pg", "pm", "vo",
+          "al", "bm", "eu", "fs", "hm", "ht", "pg", "pm", "sk", "vo",
           NULL
         };
         autodetectableDrivers = usbDrivers;
