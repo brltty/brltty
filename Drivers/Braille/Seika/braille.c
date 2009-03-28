@@ -78,20 +78,19 @@ typedef struct {
 typedef enum {
   TBT_ANY = 0X80,
   TBT_DECIMAL,
-  TBT_KEYS1,
-  TBT_KEYS2
+  TBT_KEYS
 } TemplateByteType;
 
-static const unsigned char identityTemplate[] = {
+static const unsigned char templateString_identity[] = {
   0X73, 0X65, 0X69, 0X6B, 0X61, TBT_DECIMAL,
   0X20, 0X76, TBT_DECIMAL, 0X2E, TBT_DECIMAL, TBT_DECIMAL
 };
 
-static const unsigned char keysTemplate[] = {
-  TBT_KEYS1, TBT_KEYS2
+static const unsigned char templateString_keys[] = {
+  TBT_KEYS, TBT_KEYS
 };
 
-static const unsigned char routingTemplate[] = {
+static const unsigned char templateString_routing[] = {
   0X00, 0X08, 0X09, 0X00, 0X00, 0X00, 0X00,
   TBT_ANY, TBT_ANY, TBT_ANY, TBT_ANY, TBT_ANY,
   0X00, 0X08, 0X09, 0X00, 0X00, 0X00, 0X00,
@@ -104,13 +103,17 @@ typedef struct {
   unsigned char type;
 } TemplateEntry;
 
-#define TEMPLATE_ENTRY(name) {.bytes=name##Template, .length=sizeof(name##Template), .type=IPT_##name}
+#define TEMPLATE_ENTRY(name) { \
+  .bytes=templateString_##name, \
+  .length=sizeof(templateString_##name), \
+  .type=IPT_##name \
+}
 static const TemplateEntry templateTable[] = {
   TEMPLATE_ENTRY(identity),
   TEMPLATE_ENTRY(routing)
 };
 
-static const TemplateEntry templateKeys = TEMPLATE_ENTRY(keys);
+static const TemplateEntry templateEntry_keys = TEMPLATE_ENTRY(keys);
 #undef TEMPLATE
 
 /* Serial IO */
@@ -267,19 +270,20 @@ readPacket (InputPacket *packet) {
       unsigned int count = ARRAY_COUNT(templateTable);
 
       while (count > 0) {
-        if (byte == *template->bytes) {
-          packet->type = template->type;
-          break;
-        }
+        if (byte == *template->bytes) break;
 
         template += 1;
         count -= 1;
       }
 
       if (!count) {
-        LogBytes(LOG_WARNING, "Ignored Byte", &byte, 1);
-        template = NULL;
-        continue;
+        if ((byte & 0XE0) == 0X60) {
+          template = &templateEntry_keys;
+        } else {
+          LogBytes(LOG_WARNING, "Ignored Byte", &byte, 1);
+          template = NULL;
+          continue;
+        }
       }
     } else {
       int unexpected = 0;
@@ -292,15 +296,24 @@ readPacket (InputPacket *packet) {
           if ((byte < '0') || (byte > '9')) unexpected = 1;
           break;
 
+        case TBT_KEYS:
+          if ((byte & 0XE0) != 0XE0) unexpected = 1;
+          break;
+
         default:
           if (byte != template->bytes[offset]) unexpected = 1;
           break;
       }
 
       if (unexpected) {
-        LogBytes(LOG_WARNING, "Short Packet", packet->bytes, offset);
-        offset = 0;
-        template = NULL;
+        if ((offset == 1) && (template->type == IPT_identity)) {
+          template = &templateEntry_keys;
+        } else {
+          LogBytes(LOG_WARNING, "Short Packet", packet->bytes, offset);
+          offset = 0;
+          template = NULL;
+        }
+
         goto gotByte;
       }
     }
@@ -309,13 +322,25 @@ readPacket (InputPacket *packet) {
     if (template && (offset == template->length)) {
       if (logInputPackets) LogBytes(LOG_DEBUG, "Input Packet", packet->bytes, offset);
 
-      switch (packet->type) {
+      switch ((packet->type = template->type)) {
         case IPT_identity:
           packet->fields.identity.model = packet->bytes[5] - '0';
           packet->fields.identity.version = ((packet->bytes[8] - '0') << (4 * 2)) |
                                             ((packet->bytes[10] - '0') << (4 * 1)) |
                                             ((packet->bytes[11] - '0') << (4 * 0));
           break;
+
+        case IPT_keys: {
+          const unsigned char *byte = packet->bytes + offset;
+          packet->fields.keys = 0;
+
+          do {
+            packet->fields.keys <<= 8;
+            packet->fields.keys |= *--byte & 0X1F;
+          } while (byte != packet->bytes);
+
+          break;
+        }
 
         case IPT_routing:
           packet->fields.routing = &packet->bytes[7];
@@ -436,6 +461,18 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 
   while ((length = readPacket(&packet))) {
     switch (packet.type) {
+      case IPT_keys:
+        switch (packet.fields.keys) {
+          case KEY_K1:
+            return BRL_CMD_FWINLT;
+          case KEY_K8:
+            return BRL_CMD_FWINRT;
+
+          default:
+            break;
+        }
+        break;
+
       case IPT_routing: {
         const unsigned char *byte = packet.fields.routing;
         unsigned char bit = 0X1;
