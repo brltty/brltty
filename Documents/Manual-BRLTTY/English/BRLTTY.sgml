@@ -4975,6 +4975,8 @@ BRLTTY supports the following braille displays:
       |Trio 40/Elba20/Elba32@
     Pegasus
       |20/27/40/80@
+    Seika
+      |40@
     TSI
       |Navigator 20/40/80@
       |PowerBraille 40/65/80@
@@ -5055,6 +5057,7 @@ BRLTTY supports the following speech synthesizers:
     pg|Pegasus@
     pm|Papenmeier@
     sd|SpeechDispatcher@
+    sk|Seika@
     sw|Swift@
     th|Theta@
     ts|Telesensory Systems Inc.@

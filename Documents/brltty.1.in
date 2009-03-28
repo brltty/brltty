@@ -622,9 +622,6 @@ Baum
 .B bn
 BrailleNote
 .TP 4
-.B bs
-BrailleSense
-.TP 4
 .B cb
 CombiBraille
 .TP 4
@@ -648,6 +645,9 @@ Festival
 .TP 4
 .B gs
 GenericSay
+.TP 4
+.B hm
+HIMS
 .TP 4
 .B ht
 HandyTech
@@ -676,11 +676,17 @@ Mikropuhe
 .B no
 no driver
 .TP 4
+.B pg
+Pegasus
+.TP 4
 .B pm
 Papenmeier
 .TP 4
 .B sd
 SpeechDispatcher
+.TP 4
+.B sk
+Seika
 .TP 4
 .B sw
 Swift

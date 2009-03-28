@@ -162,6 +162,8 @@ ServiceBinary  = %12%\libusb0.sys
 
 "LibUsb-Win32 Pegasus"=LIBUSB_DEV, USB\VID_4242&PID_0001
 
+"LibUsb-Win32 Seika"=LIBUSB_DEV, USB\VID_10C4&PID_EA60
+
 "LibUsb-Win32 Voyager"=LIBUSB_DEV, USB\VID_0798&PID_0001
 
 [Devices.NT]
@@ -208,6 +210,8 @@ ServiceBinary  = %12%\libusb0.sys
 
 "LibUsb-Win32 Pegasus"=LIBUSB_DEV, USB\VID_4242&PID_0001
 
+"LibUsb-Win32 Seika"=LIBUSB_DEV, USB\VID_10C4&PID_EA60
+
 "LibUsb-Win32 Voyager"=LIBUSB_DEV, USB\VID_0798&PID_0001
 
 [Devices.NTAMD64]
@@ -253,6 +257,8 @@ ServiceBinary  = %12%\libusb0.sys
 "LibUsb-Win32 Papenmeier"=LIBUSB_DEV, USB\VID_0403&PID_F208
 
 "LibUsb-Win32 Pegasus"=LIBUSB_DEV, USB\VID_4242&PID_0001
+
+"LibUsb-Win32 Seika"=LIBUSB_DEV, USB\VID_10C4&PID_EA60
 
 "LibUsb-Win32 Voyager"=LIBUSB_DEV, USB\VID_0798&PID_0001
 

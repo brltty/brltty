@@ -55,6 +55,7 @@
 #braille-driver	mn	# MiniBraille
 #braille-driver	pg	# Pegasus
 #braille-driver	pm	# Papenmeier
+#braille-driver	sk	# Seika
 #braille-driver	tn	# TechniBraille
 #braille-driver	ts	# TSI
 #braille-driver	tt	# TTY
