@@ -898,9 +898,10 @@ usbHidSetFeature (
 }
 
 static int
-usbSetBelkinAttribute (UsbDevice *device, unsigned char request, int value) {
+usbSetBelkinAttribute (UsbDevice *device, unsigned char request, int value, int index) {
+  LogPrint(LOG_DEBUG, "Belkin Request: %02X %04X %04X", request, value, index);
   return usbControlWrite(device, UsbControlRecipient_Device, UsbControlType_Vendor,
-                         request, value, 0, NULL, 0, 1000) != -1;
+                         request, value, index, NULL, 0, 1000) != -1;
 }
 static int
 usbSetBelkinBaud (UsbDevice *device, int rate) {
@@ -910,7 +911,7 @@ usbSetBelkinBaud (UsbDevice *device, int rate) {
     errno = EINVAL;
     return 0;
   }
-  return usbSetBelkinAttribute(device, 0, base/rate);
+  return usbSetBelkinAttribute(device, 0, base/rate, 0);
 }
 static int
 usbSetBelkinFlowControl (UsbDevice *device, SerialFlowControl flow) {
@@ -928,7 +929,7 @@ usbSetBelkinFlowControl (UsbDevice *device, SerialFlowControl flow) {
   if (flow) {
     LogPrint(LOG_WARNING, "Unsupported Belkin flow control: %02X", flow);
   }
-  return usbSetBelkinAttribute(device, 16, value);
+  return usbSetBelkinAttribute(device, 16, value, 0);
 }
 static int
 usbSetBelkinDataBits (UsbDevice *device, int bits) {
@@ -937,7 +938,7 @@ usbSetBelkinDataBits (UsbDevice *device, int bits) {
     errno = EINVAL;
     return 0;
   }
-  return usbSetBelkinAttribute(device, 2, bits-5);
+  return usbSetBelkinAttribute(device, 2, bits-5, 0);
 }
 static int
 usbSetBelkinStopBits (UsbDevice *device, int bits) {
@@ -946,7 +947,7 @@ usbSetBelkinStopBits (UsbDevice *device, int bits) {
     errno = EINVAL;
     return 0;
   }
-  return usbSetBelkinAttribute(device, 1, bits-1);
+  return usbSetBelkinAttribute(device, 1, bits-1, 0);
 }
 static int
 usbSetBelkinParity (UsbDevice *device, SerialParity parity) {
@@ -962,7 +963,7 @@ usbSetBelkinParity (UsbDevice *device, SerialParity parity) {
       errno = EINVAL;
       return 0;
   }
-  return usbSetBelkinAttribute(device, 3, value);
+  return usbSetBelkinAttribute(device, 3, value, 0);
 }
 static int
 usbSetBelkinDataFormat (UsbDevice *device, int dataBits, int stopBits, SerialParity parity) {
@@ -979,7 +980,7 @@ usbSetBelkinDtrState (UsbDevice *device, int state) {
     errno = EINVAL;
     return 0;
   }
-  return usbSetBelkinAttribute(device, 10, state);
+  return usbSetBelkinAttribute(device, 10, state, 0);
 }
 static int
 usbSetBelkinRtsState (UsbDevice *device, int state) {
@@ -988,7 +989,7 @@ usbSetBelkinRtsState (UsbDevice *device, int state) {
     errno = EINVAL;
     return 0;
   }
-  return usbSetBelkinAttribute(device, 11, state);
+  return usbSetBelkinAttribute(device, 11, state, 0);
 }
 static const UsbSerialOperations usbBelkinOperations = {
   NULL,
@@ -1012,6 +1013,7 @@ usbFtdiInputFilter (UsbInputFilterData *data) {
 }
 static int
 usbSetFtdiAttribute (UsbDevice *device, unsigned char request, int value, int index) {
+  LogPrint(LOG_DEBUG, "FTDI Request: %02X %04X %04X", request, value, index);
   return usbControlWrite(device, UsbControlRecipient_Device, UsbControlType_Vendor,
                          request, value, index, NULL, 0, 1000) != -1;
 }
@@ -1171,6 +1173,7 @@ static const UsbSerialOperations usbFtdiOperations_FT232BM = {
 
 static int
 usbSetCp2101Attribute (UsbDevice *device, unsigned char request, int value, int index) {
+  LogPrint(LOG_DEBUG, "CP2101 Request: %02X %04X %04X", request, value, index);
   return usbControlWrite(device, UsbControlRecipient_Interface, UsbControlType_Vendor,
                          request, value, index, NULL, 0, 1000) != -1;
 }
