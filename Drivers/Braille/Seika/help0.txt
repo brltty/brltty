@@ -1,2 +1,39 @@
 Help for Seika
 
+Legend:
+k1/k8: the round key to the left/right of the braille cells
+k2/k3: the left/right end of the left rocker
+k4/k5: the long key left/right of the center
+k6/k7: the left/right end of the right rocker
+cr: any cursor routing key
+
+Basic Navigation:
+k1/k8: go left/right one window
+k2/k3: go up/down one line
+k2+k3: go to beginning of line
+k6/k7: go to previous/next non-blank window
+k2 + k6/k7: go to beginning of top/bottom line
+k3 + k6/k7: go to top/bottom line
+
+Cursor-based Navigation:
+k4: toggle cursor tracking
+k5: go to cursor or undo last cursor tracking motion
+k4+k5: bring cursor to line
+cr: bring cursor to character
+
+Advanced Navigation:
+k4 + k2/k3: go to previous/next line with different highlighting
+k5 + k2/k3: go to previous/next line with different content
+k4 + k6/k7: go to previous/next command prompt
+k5 + k6/k7: go to last/first line of previous/next paragraph
+k1+k8 + k2/k3, cr: go up/down to line without greater indent
+k1+k8+k4, cr: position left end of window at character
+k1+k8+k5, cr: describe character
+k1+k8 + k6/k7, cr: go up/down to line with different character
+
+Cut and Paste:
+k1+k8+k2+k6, cr: start new cut buffer at character
+k1+k8+k2+k7, cr: append to cut buffer from character
+k1+k8+k3+k6, cr: linear cut to character
+k1+k8+k3+k7, cr: rectangular cut to character
+k6+k7: paste cut buffer at cursor

@@ -40,6 +40,7 @@ static const int logOutputPackets = 0;
 #define SERIAL_BAUD 9600
 static const int charactersPerSecond = SERIAL_BAUD / 10;
 
+static int routingCommand;
 static TranslationTable outputTable;
 static unsigned char textCells[40];
 
@@ -425,6 +426,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
               brl->textRows = 1;
               brl->helpPage = 0;
 
+              routingCommand = BRL_BLK_ROUTE;
               memset(textCells, 0XFF, sizeof(textCells));
               return 1;
             }
@@ -460,6 +462,9 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   size_t length;
 
   while ((length = readPacket(&packet))) {
+    int routing = routingCommand;
+    routingCommand = BRL_BLK_ROUTE;
+
     switch (packet.type) {
       case IPT_keys:
         switch (packet.fields.keys) {
@@ -467,6 +472,85 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
             return BRL_CMD_FWINLT;
           case KEY_K8:
             return BRL_CMD_FWINRT;
+
+          case KEY_K2:
+            return BRL_CMD_LNUP;
+          case KEY_K3:
+            return BRL_CMD_LNDN;
+          case KEY_K2 | KEY_K3:
+            return BRL_CMD_LNBEG;
+
+          case KEY_K6:
+            return BRL_CMD_FWINLTSKIP;
+          case KEY_K7:
+            return BRL_CMD_FWINRTSKIP;
+          case KEY_K6 | KEY_K7:
+            return BRL_CMD_PASTE;
+
+          case KEY_K4:
+            return BRL_CMD_CSRTRK;
+          case KEY_K5:
+            return BRL_CMD_RETURN;
+          case KEY_K4 | KEY_K5:
+            return BRL_CMD_CSRJMP_VERT;
+
+          case KEY_K2 | KEY_K6:
+            return BRL_CMD_TOP_LEFT;
+          case KEY_K2 | KEY_K7:
+            return BRL_CMD_BOT_LEFT;
+          case KEY_K3 | KEY_K6:
+            return BRL_CMD_TOP;
+          case KEY_K3 | KEY_K7:
+            return BRL_CMD_BOT;
+
+          case KEY_K4 | KEY_K2:
+            return BRL_CMD_ATTRUP;
+          case KEY_K4 | KEY_K3:
+            return BRL_CMD_ATTRDN;
+          case KEY_K5 | KEY_K2:
+            return BRL_CMD_PRDIFLN;
+          case KEY_K5 | KEY_K3:
+            return BRL_CMD_NXDIFLN;
+          case KEY_K4 | KEY_K6:
+            return BRL_CMD_PRPROMPT;
+          case KEY_K4 | KEY_K7:
+            return BRL_CMD_NXPROMPT;
+          case KEY_K5 | KEY_K6:
+            return BRL_CMD_PRPGRPH;
+          case KEY_K5 | KEY_K7:
+            return BRL_CMD_NXPGRPH;
+
+          case KEY_K1 | KEY_K8 | KEY_K2:
+            routingCommand = BRL_BLK_PRINDENT;
+            return BRL_CMD_NOOP;
+          case KEY_K1 | KEY_K8 | KEY_K3:
+            routingCommand = BRL_BLK_NXINDENT;
+            return BRL_CMD_NOOP;
+          case KEY_K1 | KEY_K8 | KEY_K4:
+            routingCommand = BRL_BLK_SETLEFT;
+            return BRL_CMD_NOOP;
+          case KEY_K1 | KEY_K8 | KEY_K5:
+            routingCommand = BRL_BLK_DESCCHAR;
+            return BRL_CMD_NOOP;
+          case KEY_K1 | KEY_K8 | KEY_K6:
+            routingCommand = BRL_BLK_PRDIFCHAR;
+            return BRL_CMD_NOOP;
+          case KEY_K1 | KEY_K8 | KEY_K7:
+            routingCommand = BRL_BLK_NXDIFCHAR;
+            return BRL_CMD_NOOP;
+
+          case KEY_K1 | KEY_K8 | KEY_K2 | KEY_K6:
+            routingCommand = BRL_BLK_CUTBEGIN;
+            return BRL_CMD_NOOP;
+          case KEY_K1 | KEY_K8 | KEY_K2 | KEY_K7:
+            routingCommand = BRL_BLK_CUTAPPEND;
+            return BRL_CMD_NOOP;
+          case KEY_K1 | KEY_K8 | KEY_K3 | KEY_K6:
+            routingCommand = BRL_BLK_CUTLINE;
+            return BRL_CMD_NOOP;
+          case KEY_K1 | KEY_K8 | KEY_K3 | KEY_K7:
+            routingCommand = BRL_BLK_CUTRECT;
+            return BRL_CMD_NOOP;
 
           default:
             break;
@@ -479,7 +563,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
         unsigned char key;
 
         for (key=0; key<brl->textColumns; key+=1) {
-          if (*byte & bit) return BRL_BLK_ROUTE + key;
+          if (*byte & bit) return routing + key;
 
           if (!(bit <<= 1)) {
             bit = 0X1;
