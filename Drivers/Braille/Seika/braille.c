@@ -467,94 +467,67 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 
     switch (packet.type) {
       case IPT_keys:
+#define CMD(keys,cmd) case (keys): return (cmd)
+#define BLK(keys,blk) case (keys): routingCommand = (blk); return BRL_CMD_NOOP
         switch (packet.fields.keys) {
-          case KEY_K1:
-            return BRL_CMD_FWINLT;
-          case KEY_K8:
-            return BRL_CMD_FWINRT;
+          CMD(KEY_K1, BRL_CMD_FWINLT);
+          CMD(KEY_K8, BRL_CMD_FWINRT);
 
-          case KEY_K2:
-            return BRL_CMD_LNUP;
-          case KEY_K3:
-            return BRL_CMD_LNDN;
-          case KEY_K2 | KEY_K3:
-            return BRL_CMD_LNBEG;
+          CMD(KEY_K2, BRL_CMD_LNUP);
+          CMD(KEY_K3, BRL_CMD_LNDN);
+          CMD(KEY_K2 | KEY_K3, BRL_CMD_LNBEG);
 
-          case KEY_K6:
-            return BRL_CMD_FWINLTSKIP;
-          case KEY_K7:
-            return BRL_CMD_FWINRTSKIP;
-          case KEY_K6 | KEY_K7:
-            return BRL_CMD_PASTE;
+          CMD(KEY_K6, BRL_CMD_FWINLTSKIP);
+          CMD(KEY_K7, BRL_CMD_FWINRTSKIP);
+          CMD(KEY_K6 | KEY_K7, BRL_CMD_PASTE);
 
-          case KEY_K4:
-            return BRL_CMD_CSRTRK;
-          case KEY_K5:
-            return BRL_CMD_RETURN;
-          case KEY_K4 | KEY_K5:
-            return BRL_CMD_CSRJMP_VERT;
+          CMD(KEY_K4, BRL_CMD_CSRTRK);
+          CMD(KEY_K5, BRL_CMD_RETURN);
+          CMD(KEY_K4 | KEY_K5, BRL_CMD_CSRJMP_VERT);
 
-          case KEY_K2 | KEY_K6:
-            return BRL_CMD_TOP_LEFT;
-          case KEY_K2 | KEY_K7:
-            return BRL_CMD_BOT_LEFT;
-          case KEY_K3 | KEY_K6:
-            return BRL_CMD_TOP;
-          case KEY_K3 | KEY_K7:
-            return BRL_CMD_BOT;
+          CMD(KEY_K6 | KEY_K2, BRL_CMD_TOP_LEFT);
+          CMD(KEY_K6 | KEY_K3, BRL_CMD_BOT_LEFT);
+          CMD(KEY_K7 | KEY_K2, BRL_CMD_TOP);
+          CMD(KEY_K7 | KEY_K3, BRL_CMD_BOT);
 
-          case KEY_K4 | KEY_K2:
-            return BRL_CMD_ATTRUP;
-          case KEY_K4 | KEY_K3:
-            return BRL_CMD_ATTRDN;
-          case KEY_K5 | KEY_K2:
-            return BRL_CMD_PRDIFLN;
-          case KEY_K5 | KEY_K3:
-            return BRL_CMD_NXDIFLN;
-          case KEY_K4 | KEY_K6:
-            return BRL_CMD_PRPROMPT;
-          case KEY_K4 | KEY_K7:
-            return BRL_CMD_NXPROMPT;
-          case KEY_K5 | KEY_K6:
-            return BRL_CMD_PRPGRPH;
-          case KEY_K5 | KEY_K7:
-            return BRL_CMD_NXPGRPH;
+          CMD(KEY_K4 | KEY_K2, BRL_CMD_ATTRUP);
+          CMD(KEY_K4 | KEY_K3, BRL_CMD_ATTRDN);
+          CMD(KEY_K5 | KEY_K2, BRL_CMD_PRDIFLN);
+          CMD(KEY_K5 | KEY_K3, BRL_CMD_NXDIFLN);
+          CMD(KEY_K4 | KEY_K6, BRL_CMD_PRPROMPT);
+          CMD(KEY_K4 | KEY_K7, BRL_CMD_NXPROMPT);
+          CMD(KEY_K5 | KEY_K6, BRL_CMD_PRPGRPH);
+          CMD(KEY_K5 | KEY_K7, BRL_CMD_NXPGRPH);
 
-          case KEY_K1 | KEY_K8 | KEY_K2:
-            routingCommand = BRL_BLK_PRINDENT;
-            return BRL_CMD_NOOP;
-          case KEY_K1 | KEY_K8 | KEY_K3:
-            routingCommand = BRL_BLK_NXINDENT;
-            return BRL_CMD_NOOP;
-          case KEY_K1 | KEY_K8 | KEY_K4:
-            routingCommand = BRL_BLK_SETLEFT;
-            return BRL_CMD_NOOP;
-          case KEY_K1 | KEY_K8 | KEY_K5:
-            routingCommand = BRL_BLK_DESCCHAR;
-            return BRL_CMD_NOOP;
-          case KEY_K1 | KEY_K8 | KEY_K6:
-            routingCommand = BRL_BLK_PRDIFCHAR;
-            return BRL_CMD_NOOP;
-          case KEY_K1 | KEY_K8 | KEY_K7:
-            routingCommand = BRL_BLK_NXDIFCHAR;
-            return BRL_CMD_NOOP;
+          BLK(KEY_K1 | KEY_K8 | KEY_K2, BRL_BLK_PRINDENT);
+          BLK(KEY_K1 | KEY_K8 | KEY_K3, BRL_BLK_NXINDENT);
+          BLK(KEY_K1 | KEY_K8 | KEY_K4, BRL_BLK_SETLEFT);
+          BLK(KEY_K1 | KEY_K8 | KEY_K5, BRL_BLK_DESCCHAR);
+          BLK(KEY_K1 | KEY_K8 | KEY_K6, BRL_BLK_PRDIFCHAR);
+          BLK(KEY_K1 | KEY_K8 | KEY_K7, BRL_BLK_NXDIFCHAR);
 
-          case KEY_K1 | KEY_K8 | KEY_K2 | KEY_K6:
-            routingCommand = BRL_BLK_CUTBEGIN;
-            return BRL_CMD_NOOP;
-          case KEY_K1 | KEY_K8 | KEY_K2 | KEY_K7:
-            routingCommand = BRL_BLK_CUTAPPEND;
-            return BRL_CMD_NOOP;
-          case KEY_K1 | KEY_K8 | KEY_K3 | KEY_K6:
-            routingCommand = BRL_BLK_CUTLINE;
-            return BRL_CMD_NOOP;
-          case KEY_K1 | KEY_K8 | KEY_K3 | KEY_K7:
-            routingCommand = BRL_BLK_CUTRECT;
-            return BRL_CMD_NOOP;
+          BLK(KEY_K1 | KEY_K8 | KEY_K2 | KEY_K6, BRL_BLK_CUTBEGIN);
+          BLK(KEY_K1 | KEY_K8 | KEY_K2 | KEY_K7, BRL_BLK_CUTAPPEND);
+          BLK(KEY_K1 | KEY_K8 | KEY_K3 | KEY_K6, BRL_BLK_CUTLINE);
+          BLK(KEY_K1 | KEY_K8 | KEY_K3 | KEY_K7, BRL_BLK_CUTRECT);
+
+          CMD(KEY_K1 | KEY_K2, BRL_CMD_HELP);
+          CMD(KEY_K1 | KEY_K3, BRL_CMD_LEARN);
+          CMD(KEY_K1 | KEY_K4, BRL_CMD_PREFLOAD);
+          CMD(KEY_K1 | KEY_K5, BRL_CMD_PREFSAVE);
+          CMD(KEY_K1 | KEY_K6, BRL_CMD_PREFMENU);
+          CMD(KEY_K1 | KEY_K7, BRL_CMD_INFO);
+
+          CMD(KEY_K8 | KEY_K2, BRL_CMD_DISPMD);
+          CMD(KEY_K8 | KEY_K3, BRL_CMD_FREEZE);
+          CMD(KEY_K8 | KEY_K6, BRL_CMD_SIXDOTS);
+          CMD(KEY_K8 | KEY_K7, BRL_CMD_SKPIDLNS);
 
           default:
             break;
         }
+#undef BLK
+#undef CMD
         break;
 
       case IPT_routing: {

@@ -9,11 +9,11 @@ cr: any cursor routing key
 
 Basic Navigation:
 k1/k8: go left/right one window
-k2/k3: go up/down one line
-k2+k3: go to beginning of line
 k6/k7: go to previous/next non-blank window
-k2 + k6/k7: go to beginning of top/bottom line
-k3 + k6/k7: go to top/bottom line
+k2+k3: go to beginning of line
+k2/k3: go up/down one line
+k6 + k2/k3: go to beginning of top/bottom line
+k7 + k2/k3: go to top/bottom line
 
 Cursor-based Navigation:
 k4: toggle cursor tracking
@@ -37,3 +37,17 @@ k1+k8+k2+k7, cr: append to cut buffer from character
 k1+k8+k3+k6, cr: linear cut to character
 k1+k8+k3+k7, cr: rectangular cut to character
 k6+k7: paste cut buffer at cursor
+
+Mode Selection:
+k1+k2: switch to/from help page
+k1+k3: switch to/from learn mode
+k1+k4: restore preferences from disk
+k1+k5: save preferences to disk
+k1+k6: switch to/from preferences menu
+k1+k7: switch to/from status line
+
+Feature Activation:
+k8+k2: toggle displaying of attributes
+k8+k3: freeze/unfreeze screen image 
+k8+k6: toggle 6-dot braille mode
+k8+k7: toggle skipping of identical lines
