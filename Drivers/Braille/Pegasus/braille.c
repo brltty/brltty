@@ -533,82 +533,51 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *cells) {
 
 static int
 interpretNavigationKey (unsigned char key) {
+#define CMD(keys,cmd) case (keys): return (cmd)
+#define BLK(keys,blk) case (keys): routingCommand = (blk); return BRL_CMD_NOOP
   switch (key) {
-    case 0X15: /* left */
-      return BRL_CMD_FWINLT;
-    case 0X4D: /* right */
-      return BRL_CMD_FWINRT;
-    case 0X3D: /* up */
-      return BRL_CMD_LNUP;
-    case 0X54: /* down */
-      return BRL_CMD_LNDN;
+    CMD(0X15, BRL_CMD_FWINLT); /* left */
+    CMD(0X4D, BRL_CMD_FWINRT); /* right */
+    CMD(0X3D, BRL_CMD_LNUP); /* up */
+    CMD(0X54, BRL_CMD_LNDN); /* down */
 
-    case 0X16: /* home */
-      return BRL_CMD_TOP_LEFT;
-    case 0X1C: /* enter */
-      return BRL_CMD_BOT_LEFT;
-    case 0X36: /* end */
-      return BRL_CMD_RETURN;
-    case 0X2C: /* escape */
-      return BRL_CMD_CSRTRK;
+    CMD(0X16, BRL_CMD_TOP_LEFT); /* home */
+    CMD(0X1C, BRL_CMD_BOT_LEFT); /* enter */
+    CMD(0X36, BRL_CMD_RETURN); /* end */
+    CMD(0X2C, BRL_CMD_CSRTRK); /* escape */
 
-    case 0X27: /* left-control + left */
-      return BRL_CMD_ATTRUP;
-    case 0X28: /* left-control + right */
-      return BRL_CMD_ATTRDN;
-    case 0X21: /* left-control + up */
-      return BRL_CMD_PRDIFLN;
-    case 0X22: /* left-control + down */
-      return BRL_CMD_NXDIFLN;
+    CMD(0X27, BRL_CMD_ATTRUP); /* left-control + left */
+    CMD(0X28, BRL_CMD_ATTRDN); /* left-control + right */
+    CMD(0X21, BRL_CMD_PRDIFLN); /* left-control + up */
+    CMD(0X22, BRL_CMD_NXDIFLN); /* left-control + down */
 
-    case 0X3F: /* left-control + enter */
-      return BRL_CMD_FREEZE;
-    case 0X2F: /* left-control + end */
-      return BRL_CMD_PREFMENU;
-    case 0X56: /* left-control + escape */
-      return BRL_CMD_INFO;
+    CMD(0X3F, BRL_CMD_FREEZE); /* left-control + enter */
+    CMD(0X2F, BRL_CMD_PREFMENU); /* left-control + end */
+    CMD(0X56, BRL_CMD_INFO); /* left-control + escape */
 
-    case 0X1F: /* left-shift + left */
-      return BRL_CMD_DISPMD;
-    case 0X20: /* left-shift + right */
-      return BRL_CMD_SIXDOTS;
-    case 0X5B: /* left-shift + down */
-      return BRL_CMD_CSRJMP_VERT;
+    CMD(0X1F, BRL_CMD_DISPMD); /* left-shift + left */
+    CMD(0X20, BRL_CMD_SIXDOTS); /* left-shift + right */
+    CMD(0X5B, BRL_CMD_CSRJMP_VERT); /* left-shift + down */
 
-    case 0X17: /* left-shift + home */
-      return BRL_CMD_PRPROMPT;
-    case 0X3A: /* left-shift + enter */
-      return BRL_CMD_NXPROMPT;
-    case 0X3B: /* left-shift + end */
-      return BRL_CMD_PRPGRPH;
-    case 0X18: /* left-shift + escape */
-      return BRL_CMD_NXPGRPH;
+    CMD(0X17, BRL_CMD_PRPROMPT); /* left-shift + home */
+    CMD(0X3A, BRL_CMD_NXPROMPT); /* left-shift + enter */
+    CMD(0X3B, BRL_CMD_PRPGRPH); /* left-shift + end */
+    CMD(0X18, BRL_CMD_NXPGRPH); /* left-shift + escape */
 
-    case 0X37: /* right-shift + left */
-      routingCommand = BRL_BLK_SETLEFT;
-      return BRL_CMD_NOOP;
-    case 0X33: /* right-shift + right */
-      return BRL_CMD_PASTE;
-    case 0X38: /* right-shift + down */
-      routingCommand = BRL_BLK_DESCCHAR;
-      return BRL_CMD_NOOP;
+    BLK(0X37, BRL_BLK_SETLEFT); /* right-shift + left */
+    CMD(0X33, BRL_CMD_PASTE); /* right-shift + right */
+    BLK(0X38, BRL_BLK_DESCCHAR); /* right-shift + down */
 
-    case 0X2A: /* right-shift + home */
-      routingCommand = BRL_BLK_CUTBEGIN;
-      return BRL_CMD_NOOP;
-    case 0X31: /* right-shift + enter */
-      routingCommand = BRL_BLK_CUTAPPEND;
-      return BRL_CMD_NOOP;
-    case 0X32: /* right-shift + end */
-      routingCommand = BRL_BLK_CUTLINE;
-      return BRL_CMD_NOOP;
-    case 0X30: /* right-shift + escape */
-      routingCommand = BRL_BLK_CUTRECT;
-      return BRL_CMD_NOOP;
+    BLK(0X2A, BRL_BLK_CUTBEGIN); /* right-shift + home */
+    BLK(0X31, BRL_BLK_CUTAPPEND); /* right-shift + enter */
+    BLK(0X32, BRL_BLK_CUTLINE); /* right-shift + end */
+    BLK(0X30, BRL_BLK_CUTRECT); /* right-shift + escape */
 
     default:
       break;
   }
+#undef BLK
+#undef CMD
 
   return EOF;
 }
