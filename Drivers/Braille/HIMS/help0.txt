@@ -30,8 +30,8 @@ Other Routing Key Functions:
 F1+F3, Rn: position left end of window at character
 F2+F4, Rn: describe character
 
-Chords:
-SP+1: switch to/from (a)ttributes display
+Chords (adding dot 7/8 forces toggles off/on):
+SP+1: toggle displaying of (a)ttributes
 SP+12: toggle skipping of (b)lank windows
 SP+14: toggle (c)ursor visibility
 SP+124: (f)reeze/unfreeze screen image
@@ -39,11 +39,12 @@ SP+125: switch to/from (h)elp page
 SP+24: toggle skipping of (i)dentical lines
 SP+123: enter/leave (l)earn mode
 SP+134: enter/leave preferences (m)enu
-SP+1235: (r)estore preferences from disk
-SP+234: switch to/from (s)tatus line
+SP+134 + 7/8: restore/save preferences from/to disk
+SP+234: toggle displaying of (s)tatus line
 SP+2345: toggle cursor (t)racking
-SP+136: toggle highlighted character (u)nderlining
-SP+2456: (w)rite preferences to disk
+SP+136: toggle (u)nderlining of highlighted characters
+SP+1236, Rn: switch to specific (v)irtual terminal
+SP+1236 + 7/8: switch to previous/next (v)irtual terminal
 SP+1356: (terminate braille terminal)
 SP+235: switch to (6)-dot mode
 SP+236: switch to (8)-dot mode
@@ -69,3 +70,4 @@ SP+3: end key
 SP+26: escape key
 SP+35: insert key
 SP+256: delete key
+SP+2356, Rn: function key
