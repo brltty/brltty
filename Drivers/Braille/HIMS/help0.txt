@@ -38,8 +38,8 @@ SP+124: (f)reeze/unfreeze screen image
 SP+125: switch to/from (h)elp page
 SP+24: toggle skipping of (i)dentical lines
 SP+123: enter/leave (l)earn mode
-SP+134: enter/leave preferences (m)enu
-SP+134 + 7/8: restore/save preferences from/to disk
+SP+1234: switch to/from (p)references menu
+SP+1234 + 7/8: restore/save (p)references from/to disk
 SP+234: toggle displaying of (s)tatus line
 SP+2345: toggle cursor (t)racking
 SP+136: toggle (u)nderlining of highlighted characters
