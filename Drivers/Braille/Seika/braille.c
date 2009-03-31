@@ -415,24 +415,23 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       static const unsigned char request[] = {
         0XFF, 0XFF, 0X1C
       };
+      if (!writeBytes(brl, request, sizeof(request))) break;
 
-      if (writeBytes(brl, request, sizeof(request))) {
-        if (io->awaitInput(1000)) {
-          InputPacket response;
+      while (io->awaitInput(1000)) {
+        InputPacket response;
+        if (!readPacket(&response)) break;
 
-          if (readPacket(&response)) {
-            if (response.type == IPT_identity) {
-              brl->textColumns = sizeof(textCells);
-              brl->textRows = 1;
-              brl->helpPage = 0;
+        if (response.type == IPT_identity) {
+          brl->textColumns = sizeof(textCells);
+          brl->textRows = 1;
+          brl->helpPage = 0;
 
-              routingCommand = BRL_BLK_ROUTE;
-              memset(textCells, 0XFF, sizeof(textCells));
-              return 1;
-            }
-          }
+          routingCommand = BRL_BLK_ROUTE;
+          memset(textCells, 0XFF, sizeof(textCells));
+          return 1;
         }
       }
+      if (errno != EAGAIN) break;
     } while (++probeCount < 3);
 
     io->closePort();
