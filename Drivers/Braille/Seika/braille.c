@@ -25,24 +25,12 @@
 
 #include "brl_driver.h"
 
-typedef struct {
-  int (*openPort) (const char *device);
-  void (*closePort) ();
-  int (*awaitInput) (int milliseconds);
-  int (*readBytes) (unsigned char *buffer, int length, int wait);
-  int (*writeBytes) (const unsigned char *buffer, int length);
-} InputOutputOperations;
-static const InputOutputOperations *io;
-
-static const int logInputPackets = 0;
-static const int logOutputPackets = 0;
-
-#define SERIAL_BAUD 9600
-static const int charactersPerSecond = SERIAL_BAUD / 10;
-
-static int routingCommand;
-static TranslationTable outputTable;
-static unsigned char textCells[40];
+typedef enum {
+  IPT_seika,
+  IPT_tsi,
+  IPT_keys,
+  IPT_routing
+} InputPacketType;
 
 typedef enum {
   KEY_K1 = 0X0001,
@@ -54,12 +42,6 @@ typedef enum {
   KEY_K3 = 0X0800,
   KEY_K4 = 0X1000,
 } BrailleKeys;
-
-typedef enum {
-  IPT_identity,
-  IPT_keys,
-  IPT_routing
-} InputPacketType;
 
 typedef struct {
   unsigned char bytes[24];
@@ -82,22 +64,6 @@ typedef enum {
   TBT_KEYS
 } TemplateByteType;
 
-static const unsigned char templateString_identity[] = {
-  0X73, 0X65, 0X69, 0X6B, 0X61, TBT_DECIMAL,
-  0X20, 0X76, TBT_DECIMAL, 0X2E, TBT_DECIMAL, TBT_DECIMAL
-};
-
-static const unsigned char templateString_keys[] = {
-  TBT_KEYS, TBT_KEYS
-};
-
-static const unsigned char templateString_routing[] = {
-  0X00, 0X08, 0X09, 0X00, 0X00, 0X00, 0X00,
-  TBT_ANY, TBT_ANY, TBT_ANY, TBT_ANY, TBT_ANY,
-  0X00, 0X08, 0X09, 0X00, 0X00, 0X00, 0X00,
-  0X00, 0X00, 0X00, 0X00, 0X00
-};
-
 typedef struct {
   const unsigned char *bytes;
   unsigned char length;
@@ -109,13 +75,316 @@ typedef struct {
   .length=sizeof(templateString_##name), \
   .type=IPT_##name \
 }
-static const TemplateEntry templateTable[] = {
-  TEMPLATE_ENTRY(identity),
-  TEMPLATE_ENTRY(routing)
+
+static const unsigned char templateString_keys[] = {
+  TBT_KEYS, TBT_KEYS
+};
+static const TemplateEntry templateEntry_keys = TEMPLATE_ENTRY(keys);
+
+static const unsigned char templateString_routing[] = {
+  0X00, 0X08, 0X09, 0X00, 0X00, 0X00, 0X00,
+  TBT_ANY, TBT_ANY, TBT_ANY, TBT_ANY, TBT_ANY,
+  0X00, 0X08, 0X09, 0X00, 0X00, 0X00, 0X00,
+  0X00, 0X00, 0X00, 0X00, 0X00
+};
+static const TemplateEntry templateEntry_routing = TEMPLATE_ENTRY(routing);
+
+typedef struct {
+  const char *name;
+  TemplateEntry identityTemplate;
+  int (*probeDisplay) (BrailleDisplay *brl);
+  int (*writeCells) (BrailleDisplay *brl);
+} ProtocolOperations;
+static const ProtocolOperations *protocol;
+
+typedef struct {
+  const ProtocolOperations *const *protocols;
+  int (*openPort) (const char *device);
+  void (*closePort) ();
+  int (*awaitInput) (int milliseconds);
+  int (*readBytes) (unsigned char *buffer, int length, int wait);
+  int (*writeBytes) (const unsigned char *buffer, int length);
+} InputOutputOperations;
+static const InputOutputOperations *io;
+
+static const int logInputPackets = 1;
+static const int logOutputPackets = 0;
+
+#define SERIAL_BAUD 9600
+static const int charactersPerSecond = SERIAL_BAUD / 10;
+
+static int routingCommand;
+static TranslationTable outputTable;
+static unsigned char textCells[40];
+
+static int
+readByte (unsigned char *byte, int wait) {
+  int count = io->readBytes(byte, 1, wait);
+  if (count > 0) return 1;
+
+  if (count == 0) errno = EAGAIN;
+  return 0;
+}
+
+static int
+readPacket (InputPacket *packet) {
+  const TemplateEntry templateTable[] = {
+    protocol->identityTemplate,
+    templateEntry_routing
+  };
+
+  const TemplateEntry *template = NULL;
+  int offset = 0;
+
+  while (1) {
+    unsigned char byte;
+
+    {
+      int started = offset > 0;
+      if (!readByte(&byte, started)) {
+        if (started) LogBytes(LOG_WARNING, "Partial Packet", packet->bytes, offset);
+        return 0;
+      }
+    }
+
+  gotByte:
+    if (!offset) {
+      template = templateTable;
+      unsigned int count = ARRAY_COUNT(templateTable);
+
+      while (count > 0) {
+        if (byte == *template->bytes) break;
+
+        template += 1;
+        count -= 1;
+      }
+
+      if (!count) {
+        if ((byte & 0XE0) == 0X60) {
+          template = &templateEntry_keys;
+        } else {
+          LogBytes(LOG_WARNING, "Ignored Byte", &byte, 1);
+          template = NULL;
+          continue;
+        }
+      }
+    } else {
+      int unexpected = 0;
+
+      switch (template->bytes[offset]) {
+        case TBT_ANY:
+          break;
+
+        case TBT_DECIMAL:
+          if ((byte < '0') || (byte > '9')) unexpected = 1;
+          break;
+
+        case TBT_KEYS:
+          if ((byte & 0XE0) != 0XE0) unexpected = 1;
+          break;
+
+        default:
+          if (byte != template->bytes[offset]) unexpected = 1;
+          break;
+      }
+
+      if (unexpected) {
+        if ((offset == 1) && (template->type == IPT_seika)) {
+          template = &templateEntry_keys;
+        } else if ((offset == 1) && (template->type == IPT_tsi)) {
+          template = &templateEntry_routing;
+        } else {
+          LogBytes(LOG_WARNING, "Short Packet", packet->bytes, offset);
+          offset = 0;
+          template = NULL;
+        }
+
+        goto gotByte;
+      }
+    }
+
+    packet->bytes[offset++] = byte;
+    if (template && (offset == template->length)) {
+      if (logInputPackets) LogBytes(LOG_DEBUG, "Input Packet", packet->bytes, offset);
+
+      switch ((packet->type = template->type)) {
+        case IPT_seika:
+          packet->fields.identity.model = packet->bytes[5] - '0';
+          packet->fields.identity.version = ((packet->bytes[8] - '0') << (4 * 2)) |
+                                            ((packet->bytes[10] - '0') << (4 * 1)) |
+                                            ((packet->bytes[11] - '0') << (4 * 0));
+          break;
+
+        case IPT_tsi:
+          packet->fields.identity.model = 0;
+          packet->fields.identity.version = ((packet->bytes[5] - '0') << (4 * 2)) |
+                                            ((packet->bytes[7] - '0') << (4 * 1));
+          break;
+
+        case IPT_keys: {
+          const unsigned char *byte = packet->bytes + offset;
+          packet->fields.keys = 0;
+
+          do {
+            packet->fields.keys <<= 8;
+            packet->fields.keys |= *--byte & 0X1F;
+          } while (byte != packet->bytes);
+
+          break;
+        }
+
+        case IPT_routing:
+          packet->fields.routing = &packet->bytes[7];
+          break;
+      }
+
+      return offset;
+    }
+  }
+}
+
+static int
+writeBytes (BrailleDisplay *brl, const unsigned char *buffer, size_t length) {
+  if (logOutputPackets) LogBytes(LOG_DEBUG, "Output Packet", buffer, length);
+  if (io->writeBytes(buffer, length) == -1) return 0;
+  brl->writeDelay += (length * 1000 / charactersPerSecond) + 1;
+  return 1;
+}
+
+static const unsigned char templateString_seika[] = {
+  0X73, 0X65, 0X69, 0X6B, 0X61, TBT_DECIMAL,
+  0X20, 0X76, TBT_DECIMAL, 0X2E, TBT_DECIMAL, TBT_DECIMAL
 };
 
-static const TemplateEntry templateEntry_keys = TEMPLATE_ENTRY(keys);
-#undef TEMPLATE
+static int
+probeSeikaDisplay (BrailleDisplay *brl) {
+  int probeCount = 0;
+
+  do {
+    static const unsigned char request[] = {
+      0XFF, 0XFF, 0X1C
+    };
+    if (!writeBytes(brl, request, sizeof(request))) break;
+
+    while (io->awaitInput(1000)) {
+      InputPacket response;
+      if (!readPacket(&response)) break;
+
+      if (response.type == IPT_seika) {
+        return 1;
+      }
+    }
+    if (errno != EAGAIN) break;
+  } while (++probeCount < 3);
+
+  return 0;
+}
+
+static int
+writeSeikaCells (BrailleDisplay *brl) {
+  static const unsigned char header[] = {
+    0XFF, 0XFF,
+    0X73, 0X65, 0X69, 0X6B, 0X61,
+    0X00
+  };
+
+  unsigned char packet[sizeof(header) + (brl->textColumns * 2)];
+  unsigned char *byte = packet;
+
+  memcpy(byte, header, sizeof(header));
+  byte += sizeof(header);
+
+  {
+    int i;
+    for (i=0; i<brl->textColumns; i+=1) {
+      *byte++ = 0;
+      *byte++ = outputTable[textCells[i]];
+    }
+  }
+
+  return writeBytes(brl, packet, byte-packet);
+}
+
+static const ProtocolOperations seikaOperations = {
+  "Seika",
+  TEMPLATE_ENTRY(seika),
+  probeSeikaDisplay,
+  writeSeikaCells
+};
+
+static const unsigned char templateString_tsi[] = {
+  0X00, 0X05, 0X28, 0X08,
+  0X76, TBT_DECIMAL, 0X2E, TBT_DECIMAL,
+  0X01, 0X01, 0X01, 0X01
+};
+
+static int
+probeTsiDisplay (BrailleDisplay *brl) {
+  int probeCount = 0;
+
+  do {
+    static const unsigned char request[] = {
+      0XFF, 0XFF, 0X0A
+    };
+    if (!writeBytes(brl, request, sizeof(request))) break;
+
+    while (io->awaitInput(1000)) {
+      InputPacket response;
+      if (!readPacket(&response)) break;
+
+      if (response.type == IPT_tsi) {
+        return 1;
+      }
+    }
+    if (errno != EAGAIN) break;
+  } while (++probeCount < 3);
+
+  return 0;
+}
+
+static int
+writeTsiCells (BrailleDisplay *brl) {
+  static const unsigned char header[] = {
+    0XFF, 0XFF, 0X04, 0X00, 0X99, 0X00
+  };
+
+  unsigned char packet[sizeof(header) + 2 + (brl->textColumns * 2)];
+  unsigned char *byte = packet;
+
+  memcpy(byte, header, sizeof(header));
+  byte += sizeof(header);
+
+  *byte++ = brl->textColumns * 2;
+  *byte++ = 0;
+
+  {
+    int i;
+    for (i=0; i<brl->textColumns; i+=1) {
+      *byte++ = 0;
+      *byte++ = outputTable[textCells[i]];
+    }
+  }
+
+  return writeBytes(brl, packet, byte-packet);
+}
+
+static const ProtocolOperations tsiOperations = {
+  "TSI",
+  TEMPLATE_ENTRY(tsi),
+  probeTsiDisplay,
+  writeTsiCells
+};
+
+static const ProtocolOperations *const allProtocols[] = {
+  &seikaOperations,
+  &tsiOperations,
+  NULL
+};
+
+static const ProtocolOperations *const nativeProtocols[] = {
+  &seikaOperations,
+  NULL
+};
 
 /* Serial IO */
 #include "io_serial.h"
@@ -160,6 +429,7 @@ writeSerialBytes (const unsigned char *buffer, int length) {
 }
 
 static const InputOutputOperations serialOperations = {
+  nativeProtocols,
   openSerialPort, closeSerialPort,
   awaitSerialInput, readSerialBytes, writeSerialBytes
 };
@@ -235,156 +505,11 @@ writeUsbBytes (const unsigned char *buffer, int length) {
 }
 
 static const InputOutputOperations usbOperations = {
+  allProtocols,
   openUsbPort, closeUsbPort,
   awaitUsbInput, readUsbBytes, writeUsbBytes
 };
 #endif /* ENABLE_USB_SUPPORT */
-
-static int
-readByte (unsigned char *byte, int wait) {
-  int count = io->readBytes(byte, 1, wait);
-  if (count > 0) return 1;
-
-  if (count == 0) errno = EAGAIN;
-  return 0;
-}
-
-static int
-readPacket (InputPacket *packet) {
-  const TemplateEntry *template = NULL;
-  int offset = 0;
-
-  while (1) {
-    unsigned char byte;
-
-    {
-      int started = offset > 0;
-      if (!readByte(&byte, started)) {
-        if (started) LogBytes(LOG_WARNING, "Partial Packet", packet->bytes, offset);
-        return 0;
-      }
-    }
-
-  gotByte:
-    if (!offset) {
-      template = templateTable;
-      unsigned int count = ARRAY_COUNT(templateTable);
-
-      while (count > 0) {
-        if (byte == *template->bytes) break;
-
-        template += 1;
-        count -= 1;
-      }
-
-      if (!count) {
-        if ((byte & 0XE0) == 0X60) {
-          template = &templateEntry_keys;
-        } else {
-          LogBytes(LOG_WARNING, "Ignored Byte", &byte, 1);
-          template = NULL;
-          continue;
-        }
-      }
-    } else {
-      int unexpected = 0;
-
-      switch (template->bytes[offset]) {
-        case TBT_ANY:
-          break;
-
-        case TBT_DECIMAL:
-          if ((byte < '0') || (byte > '9')) unexpected = 1;
-          break;
-
-        case TBT_KEYS:
-          if ((byte & 0XE0) != 0XE0) unexpected = 1;
-          break;
-
-        default:
-          if (byte != template->bytes[offset]) unexpected = 1;
-          break;
-      }
-
-      if (unexpected) {
-        if ((offset == 1) && (template->type == IPT_identity)) {
-          template = &templateEntry_keys;
-        } else {
-          LogBytes(LOG_WARNING, "Short Packet", packet->bytes, offset);
-          offset = 0;
-          template = NULL;
-        }
-
-        goto gotByte;
-      }
-    }
-
-    packet->bytes[offset++] = byte;
-    if (template && (offset == template->length)) {
-      if (logInputPackets) LogBytes(LOG_DEBUG, "Input Packet", packet->bytes, offset);
-
-      switch ((packet->type = template->type)) {
-        case IPT_identity:
-          packet->fields.identity.model = packet->bytes[5] - '0';
-          packet->fields.identity.version = ((packet->bytes[8] - '0') << (4 * 2)) |
-                                            ((packet->bytes[10] - '0') << (4 * 1)) |
-                                            ((packet->bytes[11] - '0') << (4 * 0));
-          break;
-
-        case IPT_keys: {
-          const unsigned char *byte = packet->bytes + offset;
-          packet->fields.keys = 0;
-
-          do {
-            packet->fields.keys <<= 8;
-            packet->fields.keys |= *--byte & 0X1F;
-          } while (byte != packet->bytes);
-
-          break;
-        }
-
-        case IPT_routing:
-          packet->fields.routing = &packet->bytes[7];
-          break;
-      }
-
-      return offset;
-    }
-  }
-}
-
-static int
-writeBytes (BrailleDisplay *brl, const unsigned char *buffer, size_t length) {
-  if (logOutputPackets) LogBytes(LOG_DEBUG, "Output Packet", buffer, length);
-  if (io->writeBytes(buffer, length) == -1) return 0;
-  brl->writeDelay += (length * 1000 / charactersPerSecond) + 1;
-  return 1;
-}
-
-static int
-writeCells (BrailleDisplay *brl) {
-  static const unsigned char header[] = {
-    0XFF, 0XFF,
-    0X73, 0X65, 0X69, 0X6B, 0X61,
-    0X00
-  };
-
-  unsigned char packet[sizeof(header) + (brl->textColumns * 2)];
-  unsigned char *byte = packet;
-
-  memcpy(byte, header, sizeof(header));
-  byte += sizeof(header);
-
-  {
-    int i;
-    for (i=0; i<brl->textColumns; i+=1) {
-      *byte++ = 0;
-      *byte++ = outputTable[textCells[i]];
-    }
-  }
-
-  return writeBytes(brl, packet, byte-packet);
-}
 
 static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
@@ -409,30 +534,24 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   }
 
   if (io->openPort(device)) {
-    int probeCount = 0;
+    const ProtocolOperations *const *protocolAddress = io->protocols;
 
-    do {
-      static const unsigned char request[] = {
-        0XFF, 0XFF, 0X1C
-      };
-      if (!writeBytes(brl, request, sizeof(request))) break;
+    while (*protocolAddress) {
+      protocol = *protocolAddress++;
 
-      while (io->awaitInput(1000)) {
-        InputPacket response;
-        if (!readPacket(&response)) break;
+      if (protocol->probeDisplay(brl)) {
+        LogPrint(LOG_DEBUG, "using %s protocol", protocol->name);
 
-        if (response.type == IPT_identity) {
-          brl->textColumns = sizeof(textCells);
-          brl->textRows = 1;
-          brl->helpPage = 0;
+        brl->textColumns = sizeof(textCells);
+        brl->textRows = 1;
+        brl->helpPage = 0;
 
-          routingCommand = BRL_BLK_ROUTE;
-          memset(textCells, 0XFF, sizeof(textCells));
-          return 1;
-        }
+        routingCommand = BRL_BLK_ROUTE;
+        memset(textCells, 0XFF, sizeof(textCells));
+
+        return 1;
       }
-      if (errno != EAGAIN) break;
-    } while (++probeCount < 3);
+    }
 
     io->closePort();
   }
@@ -449,7 +568,7 @@ static int
 brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   if (memcmp(textCells, brl->buffer, brl->textColumns) != 0) {
     memcpy(textCells, brl->buffer, brl->textColumns);
-    if (!writeCells(brl)) return 0;
+    if (!protocol->writeCells(brl)) return 0;
   }
 
   return 1;
