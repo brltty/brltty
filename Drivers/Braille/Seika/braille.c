@@ -26,8 +26,8 @@
 #include "brl_driver.h"
 
 typedef enum {
-  IPT_seika,
-  IPT_tsi,
+  IPT_seikaIdentity,
+  IPT_tsiIdentity,
   IPT_keys,
   IPT_routing
 } InputPacketType;
@@ -94,7 +94,7 @@ typedef struct {
 } InputOutputOperations;
 static const InputOutputOperations *io;
 
-static const int logInputPackets = 1;
+static const int logInputPackets = 0;
 static const int logOutputPackets = 0;
 
 #define SERIAL_BAUD 9600
@@ -189,9 +189,9 @@ readPacket (InputPacket *packet) {
       }
 
       if (unexpected) {
-        if ((offset == 1) && (template->type == IPT_seika)) {
+        if ((offset == 1) && (template->type == IPT_seikaIdentity)) {
           template = &templateEntry_keys;
-        } else if ((offset == 1) && (template->type == IPT_tsi)) {
+        } else if ((offset == 1) && (template->type == IPT_tsiIdentity)) {
           template = &templateEntry_routing;
         } else {
           LogBytes(LOG_WARNING, "Short Packet", packet->bytes, offset);
@@ -208,14 +208,14 @@ readPacket (InputPacket *packet) {
       if (logInputPackets) LogBytes(LOG_DEBUG, "Input Packet", packet->bytes, offset);
 
       switch ((packet->type = template->type)) {
-        case IPT_seika:
+        case IPT_seikaIdentity:
           packet->fields.identity.model = packet->bytes[5] - '0';
           packet->fields.identity.version = ((packet->bytes[8] - '0') << (4 * 2)) |
                                             ((packet->bytes[10] - '0') << (4 * 1)) |
                                             ((packet->bytes[11] - '0') << (4 * 0));
           break;
 
-        case IPT_tsi:
+        case IPT_tsiIdentity:
           packet->fields.identity.model = 0;
           packet->fields.identity.version = ((packet->bytes[5] - '0') << (4 * 2)) |
                                             ((packet->bytes[7] - '0') << (4 * 1));
@@ -251,7 +251,7 @@ writeBytes (BrailleDisplay *brl, const unsigned char *buffer, size_t length) {
   return 1;
 }
 
-static const unsigned char templateString_seika[] = {
+static const unsigned char templateString_seikaIdentity[] = {
   0X73, 0X65, 0X69, 0X6B, 0X61, TBT_DECIMAL,
   0X20, 0X76, TBT_DECIMAL, 0X2E, TBT_DECIMAL, TBT_DECIMAL
 };
@@ -270,7 +270,7 @@ probeSeikaDisplay (BrailleDisplay *brl) {
       InputPacket response;
       if (!readPacket(&response)) break;
 
-      if (response.type == IPT_seika) {
+      if (response.type == IPT_seikaIdentity) {
         return 1;
       }
     }
@@ -307,12 +307,12 @@ writeSeikaCells (BrailleDisplay *brl) {
 
 static const ProtocolOperations seikaOperations = {
   "Seika",
-  TEMPLATE_ENTRY(seika),
+  TEMPLATE_ENTRY(seikaIdentity),
   probeSeikaDisplay,
   writeSeikaCells
 };
 
-static const unsigned char templateString_tsi[] = {
+static const unsigned char templateString_tsiIdentity[] = {
   0X00, 0X05, 0X28, 0X08,
   0X76, TBT_DECIMAL, 0X2E, TBT_DECIMAL,
   0X01, 0X01, 0X01, 0X01
@@ -332,7 +332,7 @@ probeTsiDisplay (BrailleDisplay *brl) {
       InputPacket response;
       if (!readPacket(&response)) break;
 
-      if (response.type == IPT_tsi) {
+      if (response.type == IPT_tsiIdentity) {
         return 1;
       }
     }
@@ -371,7 +371,7 @@ writeTsiCells (BrailleDisplay *brl) {
 
 static const ProtocolOperations tsiOperations = {
   "TSI",
-  TEMPLATE_ENTRY(tsi),
+  TEMPLATE_ENTRY(tsiIdentity),
   probeTsiDisplay,
   writeTsiCells
 };
