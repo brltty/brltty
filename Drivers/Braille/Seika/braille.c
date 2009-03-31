@@ -76,19 +76,6 @@ typedef struct {
   .type=IPT_##name \
 }
 
-static const unsigned char templateString_keys[] = {
-  TBT_KEYS, TBT_KEYS
-};
-static const TemplateEntry templateEntry_keys = TEMPLATE_ENTRY(keys);
-
-static const unsigned char templateString_routing[] = {
-  0X00, 0X08, 0X09, 0X00, 0X00, 0X00, 0X00,
-  TBT_ANY, TBT_ANY, TBT_ANY, TBT_ANY, TBT_ANY,
-  0X00, 0X08, 0X09, 0X00, 0X00, 0X00, 0X00,
-  0X00, 0X00, 0X00, 0X00, 0X00
-};
-static const TemplateEntry templateEntry_routing = TEMPLATE_ENTRY(routing);
-
 typedef struct {
   const char *name;
   TemplateEntry identityTemplate;
@@ -128,6 +115,19 @@ readByte (unsigned char *byte, int wait) {
 
 static int
 readPacket (InputPacket *packet) {
+  static const unsigned char templateString_keys[] = {
+    TBT_KEYS, TBT_KEYS
+  };
+  static const TemplateEntry templateEntry_keys = TEMPLATE_ENTRY(keys);
+
+  static const unsigned char templateString_routing[] = {
+    0X00, 0X08, 0X09, 0X00, 0X00, 0X00, 0X00,
+    TBT_ANY, TBT_ANY, TBT_ANY, TBT_ANY, TBT_ANY,
+    0X00, 0X08, 0X09, 0X00, 0X00, 0X00, 0X00,
+    0X00, 0X00, 0X00, 0X00, 0X00
+  };
+  static const TemplateEntry templateEntry_routing = TEMPLATE_ENTRY(routing);
+
   const TemplateEntry templateTable[] = {
     protocol->identityTemplate,
     templateEntry_routing
@@ -345,7 +345,8 @@ probeTsiDisplay (BrailleDisplay *brl) {
 static int
 writeTsiCells (BrailleDisplay *brl) {
   static const unsigned char header[] = {
-    0XFF, 0XFF, 0X04, 0X00, 0X99, 0X00
+    0XFF, 0XFF, 0X04,
+    0X00, 0X99, 0X00
   };
 
   unsigned char packet[sizeof(header) + 2 + (brl->textColumns * 2)];
