@@ -463,12 +463,12 @@ extern int usbHidSetFeature (
 );
 
 typedef struct {
-  int (*enableAdapter) (UsbDevice *device);
   int (*setBaud) (UsbDevice *device, int rate);
   int (*setFlowControl) (UsbDevice *device, SerialFlowControl flow);
   int (*setDataFormat) (UsbDevice *device, int dataBits, int stopBits, SerialParity parity);
   int (*setDtrState) (UsbDevice *device, int state);
   int (*setRtsState) (UsbDevice *device, int state);
+  int (*enableAdapter) (UsbDevice *device);
 } UsbSerialOperations;
 
 extern const UsbSerialOperations *usbGetSerialOperations (UsbDevice *device);
