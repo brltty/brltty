@@ -346,7 +346,7 @@ static int
 writeTsiCells (BrailleDisplay *brl) {
   static const unsigned char header[] = {
     0XFF, 0XFF, 0X04,
-    0X00, 0X99, 0X00
+    0X00, 0X63, 0X00
   };
 
   unsigned char packet[sizeof(header) + 2 + (brl->textColumns * 2)];
