@@ -330,11 +330,8 @@ cmdBrlttyToBrlapi (int command, int retainDots) {
     code = cmdWCharToBrlapi(convertCharToWchar(command & BRL_MSK_ARG));
     break;
   case BRL_BLK_PASSDOTS:
-    if (retainDots) {
-      code = BRLAPI_KEY_TYPE_CMD | BRLAPI_KEY_CMD_PASSDOTS | BRL_EXT_GET(command);
-    } else {
-      code = cmdWCharToBrlapi(convertDotsToCharacter(textTable, command & BRL_MSK_ARG));
-    }
+    if (retainDots) goto doDefault;
+    code = cmdWCharToBrlapi(convertDotsToCharacter(textTable, command & BRL_MSK_ARG));
     break;
   case BRL_BLK_PASSKEY:
     switch (command & BRL_MSK_ARG) {
@@ -356,6 +353,7 @@ cmdBrlttyToBrlapi (int command, int retainDots) {
     }
     break;
   default:
+  doDefault:
     code = BRLAPI_KEY_TYPE_CMD
          | (BRL_CODE_GET(BLK, command) << BRLAPI_KEY_CMD_BLK_SHIFT)
          | (BRL_EXT_GET(command)       << BRLAPI_KEY_CMD_ARG_SHIFT)
