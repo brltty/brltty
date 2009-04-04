@@ -23,13 +23,40 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#define BRL_BITS_ARG 8
+#define BRL_BITS_BLK 8
+#define BRL_BITS_FLG 8
+#define BRL_BITS_EXT 8
+
+#define BRL_SHIFT_ARG 0
+#define BRL_SHIFT_BLK (BRL_SHIFT_ARG + BRL_BITS_ARG)
+#define BRL_SHIFT_FLG (BRL_SHIFT_BLK + BRL_BITS_BLK)
+#define BRL_SHIFT_EXT (BRL_SHIFT_FLG + BRL_BITS_FLG)
+
+#define BRL_CODE_MASK(name) ((1 << BRL_BITS_##name) - 1)
+#define BRL_CODE_GET(name,code) (((code) >> BRL_SHIFT_##name) & BRL_CODE_MASK(name))
+#define BRL_CODE_PUT(name,value) ((value) << BRL_SHIFT_##name)
+#define BRL_CODE_SET(name,value) BRL_CODE_PUT(name, ((value) & BRL_CODE_MASK(name)))
+
+#define BRL_MSK(name) BRL_CODE_PUT(name, BRL_CODE_MASK(name))
+#define BRL_MSK_ARG BRL_MSK(ARG)
+#define BRL_MSK_BLK BRL_MSK(BLK)
+#define BRL_MSK_FLG BRL_MSK(FLG)
+#define BRL_MSK_EXT BRL_MSK(EXT)
+#define BRL_MSK_CMD (BRL_MSK_BLK | BRL_MSK_ARG)
+
+#define BRL_EXT_GET(code) (BRL_CODE_GET(ARG, (code)) | (BRL_CODE_GET(EXT, (code)) << BRL_BITS_ARG))
+#define BRL_EXT_SET(value) (BRL_CODE_SET(ARG, (value)) | BRL_CODE_SET(EXT, ((value) >> BRL_BITS_ARG)))
+
+#define BRL_BLK(blk) BRL_CODE_PUT(BLK, (blk))
+#define BRL_FLG(fLG) BRL_CODE_PUT(FLG, (flg))
+
 /* Argument for brl_readCommand() */
 typedef enum {
   BRL_CTX_SCREEN,
-  BRL_CTX_HELP,
-  BRL_CTX_STATUS,
   BRL_CTX_PREFS,
-  BRL_CTX_MESSAGE
+  BRL_CTX_CHORDS,
+  BRL_CTX_WAITING
 } BRL_DriverCommandContext;
 
 /* The following command codes are return values for brl_readCommand().
@@ -151,11 +178,6 @@ typedef enum {
   BRL_driverCommandCount /* must be last */
 } BRL_DriverCommand;
 
-#define BRL_MSK_ARG 0XFF
-#define BRL_MSK_BLK 0XFF00
-#define BRL_MSK_FLG 0XFF0000
-#define BRL_MSK_CMD (BRL_MSK_BLK | BRL_MSK_ARG)
-  
 /* For explicitly setting toggles on/off. */
 #define BRL_FLG_TOGGLE_ON   0X010000 /* enable feature */
 #define BRL_FLG_TOGGLE_OFF  0X020000 /* disable feature */
@@ -220,6 +242,8 @@ typedef enum {
 #define BRL_FLG_CHAR_UPPER   0X020000 /* convert to uppercase */
 #define BRL_FLG_CHAR_CONTROL 0X040000 /* control key pressed */
 #define BRL_FLG_CHAR_META    0X080000 /* meta key pressed */
+
+#define BRL_FLG_DOTS_SPACE   0X010000 /* space key pressed */
 
 #define BRL_BLK_PASSAT 0X2300 /* input AT (aka set 2) keyboard scan code */
 #define BRL_BLK_PASSXT 0X2400 /* input XT (aka set 1) keyboard scan code */

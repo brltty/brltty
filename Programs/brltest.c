@@ -108,7 +108,7 @@ message (const char *mode, const char *string, short flags) {
 
     if (length) {
       int timer = 0;
-      while (braille->readCommand(&brl, BRL_CTX_MESSAGE) == EOF) {
+      while (braille->readCommand(&brl, BRL_CTX_WAITING) == EOF) {
         if (timer > 4000) break;
         approximateDelay(updateInterval);
         timer += updateInterval;

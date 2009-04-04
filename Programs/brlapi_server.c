@@ -2407,7 +2407,7 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
     offline = 0;
     handleAutorepeat(&command, &repeatState);
     if (command != EOF) {
-      clientCode = cmdBrlttyToBrlapi(command);
+      clientCode = cmdBrlttyToBrlapi(command, BRL_CTX_SCREEN);
       /* nobody needs the raw code */
       if ((c = whoGetsKey(&ttys,clientCode,BRL_COMMANDS))) {
         LogPrint(LOG_DEBUG,"Transmitting accepted command %lx as client code %016"BRLAPI_PRIxKEYCODE,(unsigned long)command, clientCode);

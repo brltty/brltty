@@ -1393,13 +1393,10 @@ runProgram (void) {
       while (1) {
         int oldmotx = p->winx;
         int oldmoty = p->winy;
-        BRL_DriverCommandContext context = infoMode? BRL_CTX_STATUS:
-                                           isHelpScreen()? BRL_CTX_HELP:
-                                           BRL_CTX_SCREEN;
         int command;
         testProgramTermination();
 
-        command = writable? readBrailleCommand(&brl, context): BRL_CMD_RESTARTBRL;
+        command = writable? readBrailleCommand(&brl, BRL_CTX_SCREEN): BRL_CMD_RESTARTBRL;
 
         if (brl.highlightWindow) {
           brl.highlightWindow = 0;
@@ -2925,7 +2922,7 @@ message (const char *mode, const char *string, short flags) {
 
       if (flags & MSG_WAITKEY) {
         while (1) {
-          int command = readCommand(BRL_CTX_MESSAGE);
+          int command = readCommand(BRL_CTX_WAITING);
           testProgramTermination();
           if (command == EOF) {
             drainBrailleOutput(&brl, updateInterval);
@@ -2940,7 +2937,7 @@ message (const char *mode, const char *string, short flags) {
           int command;
           testProgramTermination();
           drainBrailleOutput(&brl, updateInterval);
-          while ((command = readCommand(BRL_CTX_MESSAGE)) == BRL_CMD_NOOP);
+          while ((command = readCommand(BRL_CTX_WAITING)) == BRL_CMD_NOOP);
           if (command != EOF) break;
         }
       }

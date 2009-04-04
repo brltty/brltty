@@ -52,7 +52,7 @@ typedef struct {
 extern void resetRepeatState (RepeatState *state);
 extern void handleRepeatFlags (int *command, RepeatState *state, int panning, int delay, int interval);
 
-extern brlapi_keyCode_t cmdBrlttyToBrlapi (int command);
+extern brlapi_keyCode_t cmdBrlttyToBrlapi (int command, int retainDots);
 extern int cmdBrlapiToBrltty (brlapi_keyCode_t code);
 
 #ifdef __cplusplus

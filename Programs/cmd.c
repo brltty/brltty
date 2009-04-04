@@ -116,7 +116,7 @@ describeCommand (int command, char *buffer, int size) {
         break;
 
       case BRL_BLK_PASSDOTS: {
-        unsigned char dots[] = {BRL_DOT1, BRL_DOT2, BRL_DOT3, BRL_DOT4, BRL_DOT5, BRL_DOT6, BRL_DOT7, BRL_DOT8};
+        static const unsigned char dots[] = {BRL_DOT1, BRL_DOT2, BRL_DOT3, BRL_DOT4, BRL_DOT5, BRL_DOT6, BRL_DOT7, BRL_DOT8};
         int dot;
         number = 0;
         for (dot=0; dot<sizeof(dots); ++dot) {
@@ -323,14 +323,18 @@ cmdWCharToBrlapi (wchar_t wc) {
 }
 
 brlapi_keyCode_t
-cmdBrlttyToBrlapi (int command) {
+cmdBrlttyToBrlapi (int command, int retainDots) {
   brlapi_keyCode_t code;
   switch (command & BRL_MSK_BLK) {
   case BRL_BLK_PASSCHAR:
     code = cmdWCharToBrlapi(convertCharToWchar(command & BRL_MSK_ARG));
     break;
   case BRL_BLK_PASSDOTS:
-    code = cmdWCharToBrlapi(convertDotsToCharacter(textTable, command & BRL_MSK_ARG));
+    if (retainDots) {
+      code = BRLAPI_KEY_TYPE_CMD | BRLAPI_KEY_CMD_PASSDOTS | BRL_EXT_GET(command);
+    } else {
+      code = cmdWCharToBrlapi(convertDotsToCharacter(textTable, command & BRL_MSK_ARG));
+    }
     break;
   case BRL_BLK_PASSKEY:
     switch (command & BRL_MSK_ARG) {
@@ -353,8 +357,9 @@ cmdBrlttyToBrlapi (int command) {
     break;
   default:
     code = BRLAPI_KEY_TYPE_CMD
-      | (((command & BRL_MSK_BLK) >> 8) << BRLAPI_KEY_CMD_BLK_SHIFT)
-      |   (command & BRL_MSK_ARG);
+         | (BRL_CODE_GET(BLK, command) << BRLAPI_KEY_CMD_BLK_SHIFT)
+         | (BRL_EXT_GET(command)       << BRLAPI_KEY_CMD_ARG_SHIFT)
+         ;
     break;
   }
   if ((command & BRL_MSK_BLK) == BRL_BLK_GOTOLINE)
@@ -388,8 +393,8 @@ cmdBrlapiToBrltty (brlapi_keyCode_t code) {
   int cmd;
   switch (code & BRLAPI_KEY_TYPE_MASK) {
   case BRLAPI_KEY_TYPE_CMD:
-    cmd = (((code&BRLAPI_KEY_CMD_BLK_MASK)>>BRLAPI_KEY_CMD_BLK_SHIFT)<<8)
-	   |(code&BRLAPI_KEY_CMD_ARG_MASK);
+    cmd = BRL_BLK((code&BRLAPI_KEY_CMD_BLK_MASK)>>BRLAPI_KEY_CMD_BLK_SHIFT)
+	| BRL_EXT_SET((code&BRLAPI_KEY_CMD_ARG_MASK)>>BRLAPI_KEY_CMD_ARG_SHIFT);
     break;
   case BRLAPI_KEY_TYPE_SYM: {
       unsigned long keysym;
