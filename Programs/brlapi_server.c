@@ -301,6 +301,7 @@ static WSADATA wsadata;
 #endif /* __MINGW32__ */
 
 static unsigned char cursorShape;
+static const int retainDots = 0;
 
 /****************************************************************************/
 /** SOME PROTOTYPES                                                        **/
@@ -2370,6 +2371,7 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
     command = BRL_CMD_RESTARTBRL;
     goto out;
   }
+  if ((caller == BRL_CTX_SCREEN) && retainDots) caller = BRL_CTX_CHORDS;
   if (trueBraille->readKey) {
     pthread_mutex_lock(&driverMutex);
     res = trueBraille->readKey(brl);
@@ -2407,7 +2409,7 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
     offline = 0;
     handleAutorepeat(&command, &repeatState);
     if (command != EOF) {
-      clientCode = cmdBrlttyToBrlapi(command, BRL_CTX_SCREEN);
+      clientCode = cmdBrlttyToBrlapi(command, retainDots);
       /* nobody needs the raw code */
       if ((c = whoGetsKey(&ttys,clientCode,BRL_COMMANDS))) {
         LogPrint(LOG_DEBUG,"Transmitting accepted command %lx as client code %016"BRLAPI_PRIxKEYCODE,(unsigned long)command, clientCode);
