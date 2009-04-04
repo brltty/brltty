@@ -457,7 +457,7 @@ typedef enum {
 #define BAUM_SHIFT_BUTTON (BAUM_SHIFT_DOT + BAUM_WIDTH_DOT)
 #define BAUM_WIDTH_BUTTON 8
 #define BAUM_KEY_B9  BAUM_KEY(0X01, BUTTON)
-#define BAUM_KEY_B0  BAUM_KEY(0X02, BUTTON)
+#define BAUM_KEY_B10 BAUM_KEY(0X02, BUTTON)
 #define BAUM_KEY_B11 BAUM_KEY(0X04, BUTTON)
 #define BAUM_KEY_F1  BAUM_KEY(0X10, BUTTON)
 #define BAUM_KEY_F2  BAUM_KEY(0X20, BUTTON)
@@ -2318,11 +2318,17 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 #undef DOT5
 #undef DOT6
   } else if (routingKeyCount == 0) {
-    if (keys && (keys == (keys & (BAUM_KEY_DOT1 | BAUM_KEY_DOT2 | BAUM_KEY_DOT3 |
-                                  BAUM_KEY_DOT4 | BAUM_KEY_DOT5 | BAUM_KEY_DOT6 |
-                                  BAUM_KEY_DOT7 | BAUM_KEY_DOT8 |
-                                  BAUM_KEY_F2 | BAUM_KEY_F3)))) {
+    uint64_t dotKeys = BAUM_KEY_DOT1 | BAUM_KEY_DOT2 | BAUM_KEY_DOT3 |
+                       BAUM_KEY_DOT4 | BAUM_KEY_DOT5 | BAUM_KEY_DOT6 |
+                       BAUM_KEY_DOT7 | BAUM_KEY_DOT8 |
+                       BAUM_KEY_F2 | BAUM_KEY_F3;
+    const uint64_t chordKeys = BAUM_KEY_B9 | BAUM_KEY_B10 | BAUM_KEY_B11;
+    if (context == BRL_CTX_CHORDS) dotKeys |= chordKeys;
+
+    if (keys && (keys == (keys & dotKeys))) {
       command = BRL_BLK_PASSDOTS;
+      if (keys & chordKeys) command |= BRL_DOTS_CHORD;
+
 #define DOT(dot,key) if (keys & BAUM_KEY_##key) command |= BRL_DOT##dot
       DOT(1, DOT1);
       DOT(2, DOT2);
@@ -2407,7 +2413,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 
         KEY(BAUM_KEY_B11, BRL_BLK_PASSDOTS);
         KEY(BAUM_KEY_B9, BRL_BLK_PASSDOTS);
-        KEY(BAUM_KEY_B0, BRL_BLK_PASSDOTS);
+        KEY(BAUM_KEY_B10, BRL_BLK_PASSDOTS);
 
         KEY(BAUM_KEY_PRESS, BRL_BLK_PASSKEY+BRL_KEY_ENTER);
         KEY(BAUM_KEY_LEFT, BRL_BLK_PASSKEY+BRL_KEY_CURSOR_LEFT);
