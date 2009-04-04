@@ -112,16 +112,15 @@ getCellCounts (BrailleDisplay *brl, char *product) {
 
   {
     static const char delimiters[] = " ";
-    char *next = product;
     char *word;
 
-    if ((word = strsep(&next, delimiters))) {
+    if ((word = strtok(product, delimiters))) {
       if (strncmp(word, productPrefix, productPrefixLength) == 0) {
-        if ((word = strsep(&next, delimiters))) {
+        if ((word = strtok(NULL, delimiters))) {
           int size;
 
           if (!(*word && isInteger(&size, word))) size = 0;
-          while (strsep(&next, delimiters));
+          while (strtok(NULL, delimiters));
 
           if ((size > ARRAY_COUNT(statusCells)) &&
               (size <= (ARRAY_COUNT(statusCells) + ARRAY_COUNT(textCells)))) {
