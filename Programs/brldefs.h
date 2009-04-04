@@ -38,6 +38,11 @@ extern "C" {
 #define BRL_CODE_PUT(name,value) ((value) << BRL_SHIFT_##name)
 #define BRL_CODE_SET(name,value) BRL_CODE_PUT(name, ((value) & BRL_CODE_MASK(name)))
 
+#define BRL_ARG(arg) BRL_CODE_PUT(ARG, (arg))
+#define BRL_BLK(blk) BRL_CODE_PUT(BLK, (blk))
+#define BRL_FLG(fLG) BRL_CODE_PUT(FLG, (flg))
+#define BRL_EXT(ext) BRL_CODE_PUT(EXT, (ext))
+
 #define BRL_MSK(name) BRL_CODE_PUT(name, BRL_CODE_MASK(name))
 #define BRL_MSK_ARG BRL_MSK(ARG)
 #define BRL_MSK_BLK BRL_MSK(BLK)
@@ -47,9 +52,6 @@ extern "C" {
 
 #define BRL_EXT_GET(code) (BRL_CODE_GET(ARG, (code)) | (BRL_CODE_GET(EXT, (code)) << BRL_BITS_ARG))
 #define BRL_EXT_SET(value) (BRL_CODE_SET(ARG, (value)) | BRL_CODE_SET(EXT, ((value) >> BRL_BITS_ARG)))
-
-#define BRL_BLK(blk) BRL_CODE_PUT(BLK, (blk))
-#define BRL_FLG(fLG) BRL_CODE_PUT(FLG, (flg))
 
 /* Argument for brl_readCommand() */
 typedef enum {
@@ -243,7 +245,7 @@ typedef enum {
 #define BRL_FLG_CHAR_CONTROL 0X040000 /* control key pressed */
 #define BRL_FLG_CHAR_META    0X080000 /* meta key pressed */
 
-#define BRL_FLG_DOTS_SPACE   0X010000 /* space key pressed */
+#define BRL_DOTS_CHORD BRL_EXT(0X01) /* space key pressed */
 
 #define BRL_BLK_PASSAT 0X2300 /* input AT (aka set 2) keyboard scan code */
 #define BRL_BLK_PASSXT 0X2400 /* input XT (aka set 1) keyboard scan code */
