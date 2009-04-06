@@ -103,12 +103,12 @@ static size_t stackSize;
 Samuel Thibault <samuel.thibault@ens-lyon.org>"
 
 #define WERR(x, y, ...) do { \
-  LogPrint(LOG_ERR, "writing error %d", y); \
+  LogPrint(LOG_ERR, "writing error %d to %"PRIFD, y, x); \
   LogPrint(LOG_ERR, __VA_ARGS__); \
   writeError(x, y); \
 } while(0)
 #define WEXC(x, y, type, packet, size, ...) do { \
-  LogPrint(LOG_ERR, "writing exception %d", y); \
+  LogPrint(LOG_ERR, "writing exception %d to %"PRIFD, y, x); \
   LogPrint(LOG_ERR, __VA_ARGS__); \
   writeException(x, y, type, packet, size); \
 } while(0)
@@ -155,7 +155,7 @@ typedef struct {
   unsigned char *orAttr;
 } BrailleWindow;
 
-typedef enum { TODISPLAY, FULL, EMPTY } BrlBufState;
+typedef enum { TODISPLAY, EMPTY } BrlBufState;
 
 typedef enum {
 #ifdef __MINGW32__
@@ -292,9 +292,6 @@ static pthread_mutex_t suspendMutex; /* Protects use of driverConstructed state 
 
 static const char *auth = BRLAPI_DEFAUTH;
 static AuthDescriptor *authDescriptor;
-
-static Connection *last_conn_write;
-static int refresh;
 
 #ifdef __MINGW32__
 static WSADATA wsadata;
@@ -2244,7 +2241,6 @@ static int api_writeWindow(BrailleDisplay *brl, const wchar_t *text)
   pthread_mutex_lock(&connectionsMutex);
   pthread_mutex_lock(&rawMutex);
   if (!offline && !suspendConnection && !rawConnection && !whoFillsTty(&ttys)) {
-    last_conn_write=NULL;
     pthread_mutex_lock(&driverMutex);
     if (!trueBraille->writeWindow(brl, text)) ok = 0;
     pthread_mutex_unlock(&driverMutex);
@@ -2308,10 +2304,6 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
   }
   setCurrentRootTty();
   c = whoFillsTty(&ttys);
-  if (c && last_conn_write!=c) {
-    last_conn_write=c;
-    refresh=1;
-  }
   if (!offline && c) {
     pthread_mutex_lock(&c->brlMutex);
     pthread_mutex_lock(&driverMutex);
@@ -2322,15 +2314,13 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
         pthread_mutex_unlock(&rawMutex);
 	goto out;
       }
-      refresh=1;
     }
     pthread_mutex_unlock(&driverMutex);
     newCursorShape = cursorDots();
     if (newCursorShape!=cursorShape) {
       cursorShape = newCursorShape;
-      refresh = 1;
     }
-    if ((c->brlbufstate==TODISPLAY) || (refresh)) {
+    if ((c->brlbufstate==TODISPLAY)) {
       unsigned char *oldbuf = disp->buffer, buf[displaySize];
       disp->buffer = buf;
       getDots(&c->brailleWindow, buf);
@@ -2339,10 +2329,6 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
       ok = trueBraille->writeWindow(brl, c->brailleWindow.text);
       pthread_mutex_unlock(&driverMutex);
       disp->buffer = oldbuf;
-      if (ok) {
-	c->brlbufstate = FULL;
-	refresh=0;
-      }
     }
     pthread_mutex_unlock(&c->brlMutex);
   } else {
@@ -2478,7 +2464,6 @@ void api_link(BrailleDisplay *brl)
   LogPrint(LOG_DEBUG, "api link");
   resetRepeatState(&repeatState);
   trueBraille=braille;
-  refresh=1;
   memcpy(&ApiBraille,braille,sizeof(BrailleDriver));
   ApiBraille.writeWindow=api_writeWindow;
   ApiBraille.readCommand=api_readCommand;
