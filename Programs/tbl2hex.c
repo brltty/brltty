@@ -20,6 +20,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
 
 #include "options.h"
 #include "misc.h"
@@ -35,6 +36,103 @@
 
 BEGIN_OPTION_TABLE(programOptions)
 END_OPTION_TABLE
+
+typedef struct {
+  void *object;
+  const unsigned char *bytes;
+  size_t size;
+} TableData;
+
+typedef struct {
+  const char *extension;
+  int (*load) (const char *path, TableData *data);
+  void (*unload) (TableData *data);
+} TableEntry;
+
+static int
+loadTextTable (const char *path, TableData *data) {
+  TextTable *table = compileTextTable(path);
+  if (!table) return 0;
+
+  data->object = table;
+  data->bytes = table->header.bytes;
+  data->size = table->size;
+  return 1;
+}
+
+static void
+unloadTextTable (TableData *data) {
+  destroyTextTable(data->object);
+}
+
+static int
+loadAttributesTable (const char *path, TableData *data) {
+  AttributesTable *table = compileAttributesTable(path);
+  if (!table) return 0;
+
+  data->object = table;
+  data->bytes = table->header.bytes;
+  data->size = table->size;
+  return 1;
+}
+
+static void
+unloadAttributesTable (TableData *data) {
+  destroyAttributesTable(data->object);
+}
+
+static int
+loadContractionTable (const char *path, TableData *data) {
+  ContractionTable *table = compileContractionTable(path);
+  if (!table) return 0;
+
+  data->object = table;
+  data->bytes = table->header.bytes;
+  data->size = table->size;
+  return 1;
+}
+
+static void
+unloadContractionTable (TableData *data) {
+  destroyContractionTable(data->object);
+}
+
+static const TableEntry tableEntries[] = {
+  {
+    .extension = TEXT_TABLE_EXTENSION,
+    .load = loadTextTable,
+    .unload = unloadTextTable
+  }
+  ,
+  {
+    .extension = ATTRIBUTES_TABLE_EXTENSION,
+    .load = loadAttributesTable,
+    .unload = unloadAttributesTable
+  }
+  ,
+  {
+    .extension = CONTRACTION_TABLE_EXTENSION,
+    .load = loadContractionTable,
+    .unload = unloadContractionTable
+  }
+  ,
+  {
+    .extension = NULL
+  }
+};
+
+static const TableEntry *
+findTableEntry (const char *extension) {
+  const TableEntry *entry = tableEntries;
+
+  while (entry->extension) {
+    if (strcmp(entry->extension, extension) == 0) return entry;
+    entry += 1;
+  }
+
+  LogPrint(LOG_ERR, "unrecognized file extension: %s", extension);
+  return NULL;
+}
 
 int
 dumpBytes (FILE *stream, const unsigned char *bytes, size_t count) {
@@ -69,21 +167,21 @@ dumpBytes (FILE *stream, const unsigned char *bytes, size_t count) {
           first = 0;
         } else {
           fprintf(stream, ",");
-          if (ferror(stream)) return 0;
+          if (ferror(stream)) goto outputError;
 
           if (!counter) {
             fprintf(stream, "\n");
-            if (ferror(stream)) return 0;
+            if (ferror(stream)) goto outputError;
           }
         }
 
         if (!counter) {
           fprintf(stream, "[0X%0*X] =", digits, (unsigned int)(byte-bytes));
-          if (ferror(stream)) return 0;
+          if (ferror(stream)) goto outputError;
         }
 
         fprintf(stream, " 0X%02X", *byte++);
-        if (ferror(stdout)) return 0;
+        if (ferror(stdout)) goto outputError;
 
         if (++counter == maximum) break;
       }
@@ -92,10 +190,14 @@ dumpBytes (FILE *stream, const unsigned char *bytes, size_t count) {
 
   if (!first) {
     fprintf(stream, "\n");
-    if (ferror(stream)) return 0;
+    if (ferror(stream)) goto outputError;
   }
 
   return 1;
+
+outputError:
+  LogPrint(LOG_ERR, "table write error: %s", strerror(errno));
+  return 0;
 }
 
 int
@@ -119,58 +221,22 @@ main (int argc, char *argv[]) {
   path = *argv++, argc--;
 
   {
-    const char *extension = locatePathExtension(path);
+    const TableEntry *entry = findTableEntry(locatePathExtension(path));
 
-    if (strcmp(extension, TEXT_TABLE_EXTENSION) == 0) {
-      TextTable *table;
-
-      if ((table = compileTextTable(path))) {
-        if (dumpBytes(stdout, table->header.bytes, table->size)) {
+    if (entry) {
+      TableData data;
+      if (entry->load(path, &data)) {
+        if (dumpBytes(stdout, data.bytes, data.size)) {
           status = 0;
         } else {
           status = 4;
         }
 
-        destroyTextTable(table);
+        entry->unload(&data);
       } else {
         status = 3;
       }
-    } else
-
-    if (strcmp(extension, ATTRIBUTES_TABLE_EXTENSION) == 0) {
-      AttributesTable *table;
-
-      if ((table = compileAttributesTable(path))) {
-        if (dumpBytes(stdout, table->header.bytes, table->size)) {
-          status = 0;
-        } else {
-          status = 4;
-        }
-
-        destroyAttributesTable(table);
-      } else {
-        status = 3;
-      }
-    } else
-
-    if (strcmp(extension, CONTRACTION_TABLE_EXTENSION) == 0) {
-      ContractionTable *table;
-
-      if ((table = compileContractionTable(path))) {
-        if (dumpBytes(stdout, table->header.bytes, table->size)) {
-          status = 0;
-        } else {
-          status = 4;
-        }
-
-        destroyContractionTable(table);
-      } else {
-        status = 3;
-      }
-    } else
-
-    {
-      LogPrint(LOG_ERR, "unrecognized file extension: %s", extension);
+    } else {
       status = 5;
     }
   }
