@@ -114,7 +114,7 @@ getUnicodeRowEntry (TextTableData *ttd, wchar_t character, int allocate) {
   return getDataItem(ttd->area, rowOffset);
 }
 
-const UnicodeCellEntry *
+const unsigned char *
 getUnicodeCellEntry (TextTableData *ttd, wchar_t character) {
   const UnicodeRowEntry *row = getUnicodeRowEntry(ttd, character, 0);
 
@@ -145,15 +145,15 @@ setTextTableCharacter (TextTableData *ttd, wchar_t character, unsigned char dots
 
   {
     unsigned int cellNumber = UNICODE_CELL_NUMBER(character);
-    UnicodeCellEntry *cell = &row->cells[cellNumber];
+    unsigned char *cell = &row->cells[cellNumber];
 
     if (!BITMASK_TEST(row->defined, cellNumber)) {
       BITMASK_SET(row->defined, cellNumber);
-    } else if (cell->dots != dots) {
-      resetDotsCharacter(ttd, cell->dots, character);
+    } else if (*cell != dots) {
+      resetDotsCharacter(ttd, *cell, character);
     }
 
-    cell->dots = dots;
+    *cell = dots;
   }
 
   {
@@ -176,10 +176,10 @@ unsetTextTableCharacter (TextTableData *ttd, wchar_t character) {
     unsigned int cellNumber = UNICODE_CELL_NUMBER(character);
 
     if (BITMASK_TEST(row->defined, cellNumber)) {
-      UnicodeCellEntry *cell = &row->cells[cellNumber];
+      unsigned char *cell = &row->cells[cellNumber];
 
-      resetDotsCharacter(ttd, cell->dots, character);
-      cell->dots = 0;
+      resetDotsCharacter(ttd, *cell, character);
+      *cell = 0;
       BITMASK_CLEAR(row->defined, cellNumber);
     }
   }

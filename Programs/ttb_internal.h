@@ -33,11 +33,7 @@ typedef uint32_t TextTableOffset;
 #define CHARSET_BYTE_MAXIMUM (CHARSET_BYTE_COUNT - 1)
 
 typedef struct {
-  unsigned char dots;
-} UnicodeCellEntry;
-
-typedef struct {
-  UnicodeCellEntry cells[UNICODE_CELLS_PER_ROW];
+  unsigned char cells[UNICODE_CELLS_PER_ROW];
   BITMASK(defined, UNICODE_CELLS_PER_ROW, char);
 } UnicodeRowEntry;
 

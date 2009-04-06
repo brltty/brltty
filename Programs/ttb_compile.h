@@ -41,7 +41,7 @@ extern TextTableProcessor processLibLouisStream;
 
 extern void *getTextTableItem (TextTableData *ttd, TextTableOffset offset);
 extern TextTableHeader *getTextTableHeader (TextTableData *ttd);
-extern const UnicodeCellEntry *getUnicodeCellEntry (TextTableData *ttd, wchar_t character);
+extern const unsigned char *getUnicodeCellEntry (TextTableData *ttd, wchar_t character);
 
 extern int setTextTableCharacter (TextTableData *ttd, wchar_t character, unsigned char dots);
 extern void unsetTextTableCharacter (TextTableData *ttd, wchar_t character);

@@ -116,9 +116,9 @@ typedef int CharacterWriter (FILE *file, wchar_t character, unsigned char dots, 
 
 static int
 getDots (TextTableData *ttd, wchar_t character, unsigned char *dots) {
-  const UnicodeCellEntry *cell = getUnicodeCellEntry(ttd, character);
+  const unsigned char *cell = getUnicodeCellEntry(ttd, character);
   if (!cell) return 0;
-  *dots = cell->dots;
+  *dots = *cell;
   return 1;
 }
 
@@ -131,10 +131,10 @@ writeCharacters (FILE *file, TextTableData *ttd, CharacterWriter writer, void *d
       wint_t character = convertCharToWchar(byte);
 
       if (character != WEOF) {
-        const UnicodeCellEntry *cell = getUnicodeCellEntry(ttd, character);
+        const unsigned char *cell = getUnicodeCellEntry(ttd, character);
 
         if (cell) {
-          if (!writer(file, character, cell->dots, &byte, data)) return 0;
+          if (!writer(file, character, *cell, &byte, data)) return 0;
         }
       }
     } while ((byte += 1));
@@ -174,8 +174,8 @@ writeCharacters (FILE *file, TextTableData *ttd, CharacterWriter writer, void *d
                         continue;
 
                     {
-                      const UnicodeCellEntry *cell = &row->cells[cellNumber];
-                      if (!writer(file, character, cell->dots, NULL, data)) return 0;
+                      const unsigned char *cell = &row->cells[cellNumber];
+                      if (!writer(file, character, *cell, NULL, data)) return 0;
                     }
                   }
                 }
@@ -1100,8 +1100,8 @@ toggleCharacter (EditTableData *etd) {
   if (!getCharacter(etd, &character)) return 0;
 
   {
-    const UnicodeCellEntry *cell = getUnicodeCellEntry(etd->ttd, character);
-    if (cell && !cell->dots) {
+    const unsigned char *cell = getUnicodeCellEntry(etd->ttd, character);
+    if (cell && !*cell) {
       unsetTextTableCharacter(etd->ttd, character);
     } else if (!setTextTableCharacter(etd->ttd, character, 0)) {
       return 0;
@@ -1117,8 +1117,8 @@ toggleDot (EditTableData *etd, unsigned char dot) {
   wchar_t character;
 
   if (getCharacter(etd, &character)) {
-    const UnicodeCellEntry *cell = getUnicodeCellEntry(etd->ttd, character);
-    unsigned char dots = cell? cell->dots: 0;
+    const unsigned char *cell = getUnicodeCellEntry(etd->ttd, character);
+    unsigned char dots = cell? *cell: 0;
 
     if (setTextTableCharacter(etd->ttd, character, dots^dot)) {
       etd->updated = 1;

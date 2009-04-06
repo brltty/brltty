@@ -72,7 +72,7 @@ getUnicodeRowEntry (TextTable *table, wchar_t character) {
   return NULL;
 }
 
-static const UnicodeCellEntry *
+static const unsigned char *
 getUnicodeCellEntry (TextTable *table, wchar_t character) {
   const UnicodeRowEntry *row = getUnicodeRowEntry(table, character);
 
@@ -97,12 +97,12 @@ convertCharacterToDots (TextTable *table, wchar_t character) {
     }
 
     default: {
-      const UnicodeCellEntry *cell;
-      if ((cell = getUnicodeCellEntry(table, character))) return cell->dots;
+      const unsigned char *cell;
+      if ((cell = getUnicodeCellEntry(table, character))) return *cell;
 
     unknownCharacter:
-      if ((cell = getUnicodeCellEntry(table, UNICODE_REPLACEMENT_CHARACTER))) return cell->dots;
-      if ((cell = getUnicodeCellEntry(table, WC_C('?')))) return cell->dots;
+      if ((cell = getUnicodeCellEntry(table, UNICODE_REPLACEMENT_CHARACTER))) return *cell;
+      if ((cell = getUnicodeCellEntry(table, WC_C('?')))) return *cell;
       return BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT4 | BRL_DOT5 | BRL_DOT6 | BRL_DOT7 | BRL_DOT8;
     }
   }
