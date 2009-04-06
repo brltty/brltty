@@ -325,16 +325,21 @@ cmdWCharToBrlapi (wchar_t wc) {
 brlapi_keyCode_t
 cmdBrlttyToBrlapi (int command, int retainDots) {
   brlapi_keyCode_t code;
-  switch (command & BRL_MSK_BLK) {
+  int arg = BRL_ARG_GET(command);
+  int blk = command & BRL_MSK_BLK;
+  switch (blk) {
   case BRL_BLK_PASSCHAR:
-    code = cmdWCharToBrlapi(convertCharToWchar(command & BRL_MSK_ARG));
+    code = cmdWCharToBrlapi(convertCharToWchar(arg));
     break;
   case BRL_BLK_PASSDOTS:
-    if (retainDots) goto doDefault;
-    code = cmdWCharToBrlapi(convertDotsToCharacter(textTable, command & BRL_MSK_ARG));
+    if (retainDots) {
+      if (arg == (BRLAPI_DOTC >> BRLAPI_KEY_CMD_ARG_SHIFT)) arg = 0;
+      goto doDefault;
+    }
+    code = cmdWCharToBrlapi(convertDotsToCharacter(textTable, arg));
     break;
   case BRL_BLK_PASSKEY:
-    switch (command & BRL_MSK_ARG) {
+    switch (arg) {
     case BRL_KEY_ENTER:		code = BRLAPI_KEY_SYM_LINEFEED;	 break;
     case BRL_KEY_TAB:		code = BRLAPI_KEY_SYM_TAB;	 break;
     case BRL_KEY_BACKSPACE:	code = BRLAPI_KEY_SYM_BACKSPACE; break;
@@ -349,25 +354,25 @@ cmdBrlttyToBrlapi (int command, int retainDots) {
     case BRL_KEY_END:		code = BRLAPI_KEY_SYM_END;	 break;
     case BRL_KEY_INSERT:	code = BRLAPI_KEY_SYM_INSERT;	 break;
     case BRL_KEY_DELETE:	code = BRLAPI_KEY_SYM_DELETE;	 break;
-    default: code = BRLAPI_KEY_SYM_FUNCTION + (command & BRL_MSK_ARG) - BRL_KEY_FUNCTION; break;
+    default: code = BRLAPI_KEY_SYM_FUNCTION + arg - BRL_KEY_FUNCTION; break;
     }
     break;
   default:
   doDefault:
     code = BRLAPI_KEY_TYPE_CMD
-         | (BRL_CODE_GET(BLK, command) << BRLAPI_KEY_CMD_BLK_SHIFT)
-         | (BRL_ARG_GET(command)       << BRLAPI_KEY_CMD_ARG_SHIFT)
+         | (blk >> BRL_SHIFT_BLK << BRLAPI_KEY_CMD_BLK_SHIFT)
+         | (arg                  << BRLAPI_KEY_CMD_ARG_SHIFT)
          ;
     break;
   }
-  if ((command & BRL_MSK_BLK) == BRL_BLK_GOTOLINE)
+  if (blk == BRL_BLK_GOTOLINE)
     code = code
     | (command & BRL_FLG_LINE_SCALED	? BRLAPI_KEY_FLG_LINE_SCALED	: 0)
     | (command & BRL_FLG_LINE_TOLEFT	? BRLAPI_KEY_FLG_LINE_TOLEFT	: 0)
       ;
-  if ((command & BRL_MSK_BLK) == BRL_BLK_PASSCHAR
-   || (command & BRL_MSK_BLK) == BRL_BLK_PASSKEY
-   || (command & BRL_MSK_BLK) == BRL_BLK_PASSDOTS)
+  if (blk == BRL_BLK_PASSCHAR
+   || blk == BRL_BLK_PASSKEY
+   || blk == BRL_BLK_PASSDOTS)
     code = code
     | (command & BRL_FLG_CHAR_CONTROL	? BRLAPI_KEY_FLG_CONTROL	: 0)
     | (command & BRL_FLG_CHAR_META	? BRLAPI_KEY_FLG_META		: 0)
