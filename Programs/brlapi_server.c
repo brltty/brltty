@@ -301,7 +301,7 @@ static WSADATA wsadata;
 #endif /* __MINGW32__ */
 
 static unsigned char cursorShape;
-static const int retainDots = 0;
+static const int retainDots = 1;
 
 /****************************************************************************/
 /** SOME PROTOTYPES                                                        **/

@@ -356,7 +356,7 @@ cmdBrlttyToBrlapi (int command, int retainDots) {
   doDefault:
     code = BRLAPI_KEY_TYPE_CMD
          | (BRL_CODE_GET(BLK, command) << BRLAPI_KEY_CMD_BLK_SHIFT)
-         | (BRL_EXT_GET(command)       << BRLAPI_KEY_CMD_ARG_SHIFT)
+         | (BRL_ARG_GET(command)       << BRLAPI_KEY_CMD_ARG_SHIFT)
          ;
     break;
   }
@@ -392,7 +392,7 @@ cmdBrlapiToBrltty (brlapi_keyCode_t code) {
   switch (code & BRLAPI_KEY_TYPE_MASK) {
   case BRLAPI_KEY_TYPE_CMD:
     cmd = BRL_BLK((code&BRLAPI_KEY_CMD_BLK_MASK)>>BRLAPI_KEY_CMD_BLK_SHIFT)
-	| BRL_EXT_SET((code&BRLAPI_KEY_CMD_ARG_MASK)>>BRLAPI_KEY_CMD_ARG_SHIFT);
+	| BRL_ARG_SET((code&BRLAPI_KEY_CMD_ARG_MASK)>>BRLAPI_KEY_CMD_ARG_SHIFT);
     break;
   case BRLAPI_KEY_TYPE_SYM: {
       unsigned long keysym;

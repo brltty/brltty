@@ -50,8 +50,8 @@ extern "C" {
 #define BRL_MSK_EXT BRL_MSK(EXT)
 #define BRL_MSK_CMD (BRL_MSK_BLK | BRL_MSK_ARG)
 
-#define BRL_EXT_GET(code) (BRL_CODE_GET(ARG, (code)) | (BRL_CODE_GET(EXT, (code)) << BRL_BITS_ARG))
-#define BRL_EXT_SET(value) (BRL_CODE_SET(ARG, (value)) | BRL_CODE_SET(EXT, ((value) >> BRL_BITS_ARG)))
+#define BRL_ARG_GET(code) (BRL_CODE_GET(ARG, (code)) | (BRL_CODE_GET(EXT, (code)) << BRL_BITS_ARG))
+#define BRL_ARG_SET(value) (BRL_CODE_SET(ARG, (value)) | BRL_CODE_SET(EXT, ((value) >> BRL_BITS_ARG)))
 
 /* Argument for brl_readCommand() */
 typedef enum {
@@ -245,7 +245,35 @@ typedef enum {
 #define BRL_FLG_CHAR_CONTROL 0X040000 /* control key pressed */
 #define BRL_FLG_CHAR_META    0X080000 /* meta key pressed */
 
-#define BRL_DOTS_CHORD BRL_EXT(0X01) /* space key pressed */
+/* The bits for each braille dot.
+ *
+ * This is the same dot-to-bit mapping which is:
+ * +  specified by the ISO/TR 11548-1 standard
+ * +  used within the Unicode braille row:
+ */
+/*
+ * From least- to most-significant octal digit:
+ * +  the first contains dots 1-3
+ * +  the second contains dots 4-6
+ * +  the third contains dots 7-8
+ * 
+ * Here are a few ways to illustrate a braille cell:
+ *    By Dot   By Bit   As Octal
+ *    Number   Number    Digits
+ *     1  4     0  3    001  010
+ *     2  5     1  4    002  020
+ *     3  6     2  5    004  040
+ *     7  8     6  7    100  200
+ */
+#define BRL_DOT1 BRL_ARG_SET(0001) /* upper-left dot of standard braille cell */
+#define BRL_DOT2 BRL_ARG_SET(0002) /* middle-left dot of standard braille cell */
+#define BRL_DOT3 BRL_ARG_SET(0004) /* lower-left dot of standard braille cell */
+#define BRL_DOT4 BRL_ARG_SET(0010) /* upper-right dot of standard braille cell */
+#define BRL_DOT5 BRL_ARG_SET(0020) /* middle-right dot of standard braille cell */
+#define BRL_DOT6 BRL_ARG_SET(0040) /* lower-right dot of standard braille cell */
+#define BRL_DOT7 BRL_ARG_SET(0100) /* lower-left dot of computer braille cell */
+#define BRL_DOT8 BRL_ARG_SET(0200) /* lower-right dot of computer braille cell */
+#define BRL_DOTC BRL_ARG_SET(0400) /* space key pressed */
 
 #define BRL_BLK_PASSAT 0X2300 /* input AT (aka set 2) keyboard scan code */
 #define BRL_BLK_PASSXT 0X2400 /* input XT (aka set 1) keyboard scan code */
@@ -292,35 +320,6 @@ typedef enum {
 
   BRL_genericStatusCellCount
 } BRL_GenericStatusCell;
-
-/* The bits for each braille dot.
- *
- * This is the same dot-to-bit mapping which is:
- * +  specified by the ISO/TR 11548-1 standard
- * +  used within the Unicode braille row:
- */
-/*
- * From least- to most-significant octal digit:
- * +  the first contains dots 1-3
- * +  the second contains dots 4-6
- * +  the third contains dots 7-8
- * 
- * Here are a few ways to illustrate a braille cell:
- *    By Dot   By Bit   As Octal
- *    Number   Number    Digits
- *     1  4     0  3    001  010
- *     2  5     1  4    002  020
- *     3  6     2  5    004  040
- *     7  8     6  7    100  200
- */
-#define BRL_DOT1 0001 /* upper-left dot of standard braille cell */
-#define BRL_DOT2 0002 /* middle-left dot of standard braille cell */
-#define BRL_DOT3 0004 /* lower-left dot of standard braille cell */
-#define BRL_DOT4 0010 /* upper-right dot of standard braille cell */
-#define BRL_DOT5 0020 /* middle-right dot of standard braille cell */
-#define BRL_DOT6 0040 /* lower-right dot of standard braille cell */
-#define BRL_DOT7 0100 /* lower-left dot of computer braille cell */
-#define BRL_DOT8 0200 /* lower-right dot of computer braille cell */
 
 #ifdef __cplusplus
 }

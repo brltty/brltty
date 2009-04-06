@@ -2327,7 +2327,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 
     if (keys && (keys == (keys & dotKeys))) {
       command = BRL_BLK_PASSDOTS;
-      if (keys & chordKeys) command |= BRL_DOTS_CHORD;
+      if (keys & chordKeys) command |= BRL_DOTC;
 
 #define DOT(dot,key) if (keys & BAUM_KEY_##key) command |= BRL_DOT##dot
       DOT(1, DOT1);
