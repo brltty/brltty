@@ -20,11 +20,18 @@
 ** USB Specific low-level IO routines.
 */
 
+#include <string.h>
+
 #include "prologue.h"
 
 #include <errno.h>
 
+#include "misc.h"
+
 #include "eu_io.h"
+
+#define USB_PACKET_SIZE 64
+
 
 #ifdef ENABLE_USB_SUPPORT
 #include "io_usb.h"
@@ -36,15 +43,15 @@ eubrl_usbInit (BrailleDisplay *brl, char **parameters, const char *device) {
     { /* ESYS 12/40 (with SD-Card inserted) */
       .vendor=0XC251, .product=0X1122,
       .configuration=1, .interface=0, .alternative=0,
-      .inputEndpoint=1, .outputEndpoint=1,
-      .disableAutosuspend=1
+      .inputEndpoint=1, .outputEndpoint=0,
+      .disableAutosuspend=0
     }
     ,
     { /* ESYS 12/40 (with SD-Card not inserted) */
       .vendor=0XC251, .product=0X1124,
       .configuration=1, .interface=0, .alternative=0,
-      .inputEndpoint=1, .outputEndpoint=1,
-      .disableAutosuspend=1
+      .inputEndpoint=1, .outputEndpoint=0,
+      .disableAutosuspend=0
     }
     ,
     { .vendor=0 }
@@ -71,17 +78,25 @@ eubrl_usbClose (BrailleDisplay *brl)
 ssize_t
 eubrl_usbRead (BrailleDisplay *brl, void *buffer, size_t length) 
 {
-  ssize_t count = usbReapInput(usb->device, usb->definition.inputEndpoint, buffer, length, 0, 0);
-  if (count == -1)
-    if (errno == EAGAIN)
-      count = 0;
+  ssize_t count=0;
+
+  if(length>=USB_PACKET_SIZE) count = usbReapInput(usb->device, usb->definition.inputEndpoint, buffer, USB_PACKET_SIZE, 0,0);
+  if(count>0 && count<USB_PACKET_SIZE)
+    {
+      LogPrint(LOG_DEBUG,"eu: We recieved a too small packet");
+      return (-1);
+    }
   return count;
 }
 
 ssize_t
 eubrl_usbWrite(BrailleDisplay *brl, const void *buffer, size_t length)
 {
-  return usbWriteEndpoint(usb->device, usb->definition.outputEndpoint, buffer, length, 1000);
+  if(length>USB_PACKET_SIZE) return(-1);
+  char packetToSend[USB_PACKET_SIZE];
+  memset(packetToSend,0x55,USB_PACKET_SIZE);
+  memcpy(packetToSend,buffer,length);
+  return usbHidSetReport(usb->device, usb->definition.interface, 0, packetToSend, USB_PACKET_SIZE, 10);
 }
 
 

@@ -16,6 +16,7 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
+
 /** EuroBraille/eu_keys.h '- Key defines for all models **/
 
 #ifndef __EU_KEYS_H__
@@ -23,8 +24,8 @@
 
 # define	EUBRL_BRAILLE_KEY	0x10000000
 # define	EUBRL_ROUTING_KEY	0x20000000
-# define	EUBRL_COMMAND_KEY	0x40000000
-# define	EUBRL_PC_KEY	        0x80000000
+# define	EUBRL_COMMAND_KEY	0x80000000
+# define	EUBRL_PC_KEY	        0x40000000
 
 
 /** IRIS models **/
@@ -58,7 +59,6 @@
 #define		VK_L23		(VK_L2 | VK_L3)
 #define		VK_L24		(VK_L2 | VK_L4)
 #define		VK_L34		(VK_L3 | VK_L4)
-
 #define		VK_L56		(VK_L5 | VK_L6)
 #define		VK_L57		(VK_L5 | VK_L7)
 #define		VK_L58		(VK_L5 | VK_L8)
@@ -74,7 +74,6 @@
 #define		VK_L568		(VK_L5 | VK_L6 | VK_L8)
 #define		VK_L578		(VK_L5 | VK_L7 | VK_L8)
 #define		VK_L678		(VK_L6 | VK_L7 | VK_L8)
-
 #define		VK_L1234	(VK_L1 | VK_L2 | VK_L3 | VK_L4)
 #define		VK_L5678	(VK_L5 | VK_L6 | VK_L7 | VK_L8)
 
@@ -83,6 +82,29 @@
 #define		VK_FDH		(VK_FD | VK_FH)
 #define		VK_FGH		(VK_FG | VK_FH)
 #define		VK_FBH		(VK_FB | VK_FH)
+
+/** Esys Model keys **/
+#define		VK_JGG		0x00080000
+#define		VK_JGH		0x00010000
+#define		VK_JGD		0x00040000
+#define		VK_JGB		0x00020000
+#define		VK_JDG		0x08000000
+#define		VK_JDH		0x01000000
+#define		VK_JDD		0x04000000
+#define		VK_JDB		0x02000000
+#define		VK_JDM		0x10000000
+#define		VK_M1G		0x000000002
+#define		VK_M1D		0x000000001
+#define		VK_M1M		0x000000003
+#define		VK_M2G		0x000000002
+#define		VK_M2D		0x000000001
+#define		VK_M2M		0x000000030
+#define		VK_M3G		0x000000002
+#define		VK_M3D		0x000000001
+#define		VK_M3M		0x0000000c0
+#define		VK_M4G		0x000000002
+#define		VK_M4D		0x000000001
+#define		VK_M4M		0x00000000c
 
 /* Old protocol keys : clio/scriba/iris <= 1.70 */
 #define		CL_NONE		0x0000
@@ -117,6 +139,6 @@
 # define	CL_FH		'2'
 
 
-/** Esys Model keys **/
+
 
 #endif /* __EU_KEYS_H__ */

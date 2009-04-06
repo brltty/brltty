@@ -157,6 +157,29 @@ static int esysiris_handleCommandKey(BrailleDisplay *brl, unsigned int key)
 	    }
 	}
     }
+  if (brlType == ESYS_12 || brlType == ESYS_40)
+    { /** Esys models keys */
+      if (key == VK_JGH) res = BRL_CMD_TOP_LEFT;
+      if (key == VK_JGB) res = BRL_CMD_BOT_LEFT;
+      if (key == (VK_JGG | VK_JDG)) res = BRL_BLK_PASSKEY + BRL_KEY_CURSOR_LEFT;
+      if (key == (VK_JGG | VK_JDH)) res = BRL_BLK_PASSKEY + BRL_KEY_CURSOR_UP;
+      if (key == (VK_JGG | VK_JDD)) res = BRL_BLK_PASSKEY + BRL_KEY_CURSOR_RIGHT;
+      if (key == (VK_JGG | VK_JDB)) res = BRL_BLK_PASSKEY + BRL_KEY_CURSOR_DOWN;
+      if (key == (VK_JGG | VK_JDM))  res = BRL_BLK_PASSKEY + BRL_KEY_ENTER;
+      if ((key == (VK_JGG | VK_M1G)) && (key == (VK_JGG | VK_M2G)) && (key == (VK_JGG | VK_M3G)) && (key == (VK_JGG | VK_M4G))) res = BRL_CMD_LNBEG;
+      if ((key == (VK_JGG | VK_M1D)) && (key == (VK_JGG | VK_M2D)) && (key == (VK_JGG | VK_M3D)) && (key == (VK_JGG | VK_M4D))) res = BRL_CMD_LNEND;
+      if (key == VK_JDG) res = BRL_CMD_FWINLT;
+      if (key == VK_JDH) res = BRL_CMD_LNUP;
+      if (key == VK_JDD) res = BRL_CMD_FWINRT;
+      if (key == VK_JDB) res = BRL_CMD_LNDN;
+      if (key == VK_JDM) res = BRL_CMD_HOME;
+      if (key == (VK_JGD | VK_JDG)) routingMode = BRL_BLK_CUTBEGIN;
+      if (key == (VK_JGD | VK_JDD)) routingMode = BRL_BLK_CUTLINE;
+      if (key == (VK_JGD | VK_JDM)) res = BRL_CMD_PASTE;
+      if (key == VK_M1G || key == VK_M2G || key == VK_M3G || key == VK_M4G) res = BRL_CMD_FWINLT;
+      if (key == VK_M1D || key == VK_M2D || key == VK_M3D || key == VK_M4D) res = BRL_CMD_FWINRT;
+      if (key == VK_M1M || key == VK_M2M || key == VK_M3M || key == VK_M4M) res = BRL_CMD_FREEZE;
+    }
   return res;
 }
 
@@ -194,10 +217,7 @@ static int esysiris_KeyboardHandling(BrailleDisplay *brl, char *packet)
       {
 	if (brlType == ESYS_12 || brlType == ESYS_40)
 	  {
-	    unsigned char *buf = (unsigned char *)packet;
-	    unsigned int scrolls = buf[1] * 1024 + buf[2] * 512 + buf[3] * 256 + buf[4];
-	    LogPrint(LOG_DEBUG, "eu: EsysIris: Scrolls: %x", scrolls);
-	    
+            key = (packet[1] << 24) + (packet[2] << 16) + (packet[3] << 8) + packet[4];
 	  }
 	else
 	  {
@@ -288,7 +308,7 @@ int	esysiris_init(BrailleDisplay *brl, t_eubrl_io *io)
     }
   memset(brlFirmwareVersion, 0, 21);
   char outPacket[2] = {'S', 'I'};
-  int	leftTries = 2;
+  int	leftTries = 24;
   iop = io;
       
   while (leftTries-- && brlCols == 0)
@@ -299,8 +319,13 @@ int	esysiris_init(BrailleDisplay *brl, t_eubrl_io *io)
 	  leftTries = 0;
 	  continue;
 	}
-      approximateDelay(500);
-      esysiris_readCommand(brl, BRL_CTX_SCREEN);
+      int i=60;
+      while(i-- && brlCols==0)
+        {
+          esysiris_readCommand(brl, BRL_CTX_SCREEN);
+          approximateDelay(10);
+        }
+      approximateDelay(100);
     }
   if (brlCols > 0)
     { /* Succesfully identified hardware. */
@@ -325,7 +350,7 @@ unsigned int	esysiris_readKey(BrailleDisplay *brl)
   static unsigned char	inPacket[2048];
   unsigned int res = 0;
 
-  while (esysiris_readPacket(brl, inPacket, 2048) == 1)
+  if (esysiris_readPacket(brl, inPacket, 2048) == 1)
     { /* We got a packet */
       switch (inPacket[3])
 	{
@@ -368,7 +393,8 @@ int	esysiris_keyToCommand(BrailleDisplay *brl, unsigned int key, BRL_DriverComma
     }
   if (key & EUBRL_COMMAND_KEY)
     {
-      res = esysiris_handleCommandKey(brl, key & 0x00000fff);
+      if (brlType == ESYS_12 || brlType == ESYS_40) res = esysiris_handleCommandKey(brl, key & 0x7fffffff);
+       else res = esysiris_handleCommandKey(brl, key & 0x00000fff);
     }
   if (key & EUBRL_PC_KEY)
     {
@@ -407,46 +433,67 @@ void	esysiris_writeVisual(BrailleDisplay *brl, const wchar_t *text)
   return;
 }
 
-
 ssize_t esysiris_readPacket(BrailleDisplay *brl, void *packet, size_t size)
 {
   static char buffer[READ_BUFFER_LENGTH];
   static int pos = 0;
-  int	ret, i, start, end, framelen = 0;
+
+  int	i; 
+  int end=-1; int start=-1; 
+  int framelen = 0;
+  int ret = 0;
+  int bytesRead = 0;
 
   if (!iop || !packet || size < 4)
     return (-1);
-  ret = iop->read(brl, buffer + pos, READ_BUFFER_LENGTH - pos);
-  if (ret < 0)
+
+  while( ((READ_BUFFER_LENGTH - pos)>0) ? ((ret = iop->read(brl, buffer + pos, READ_BUFFER_LENGTH - pos))>0) : 0)
+//  if ((READ_BUFFER_LENGTH - pos)>0) ret = iop->read(brl, buffer + pos, READ_BUFFER_LENGTH - pos);
+  {
+    bytesRead+=ret;
+    pos+=ret;
+  }
+
+
+  if (ret < 0 && pos==0)
     return (-1);
-  for (i = 0, start = -1, end = -1; i < pos + ret && (start == -1 || end == -1); i++)
+
+  if(pos==0) {
+    return (0);
+  }
+
+  for (i = 0; i < pos && start==-1; i++)
     {
-      if (buffer[i] == STX && start == -1)
-	{
-	  start = i;
-	  framelen = 0;
-	}
-      if (start > -1 && start + 2 < i)
-	{ /* Catch our packet length */
-	  framelen = buffer[start + 1] * 256 + buffer[start + 2];
-	}
-      if (start != -1 && buffer[i] == ETX)
-	if (i == (start + framelen + 1))
-	  {
-	    end = i;
-	  }
+      if (buffer[i] == STX) start = i;
     }
-  pos += ret;
-  if (start != -1 && end != -1
-      && size > framelen + 2)
+  if (start!=-1 && start+2<=pos)
+    {
+      framelen = buffer[start + 1] * 256 + buffer[start + 2];
+      if (start+framelen+1<=pos) 
+        if (buffer[start+framelen+1] == ETX) end = start+framelen+1;
+    }
+
+  if (start != -1 && end != -1 && size > framelen + 2)
     {
       memcpy(packet, buffer + start, framelen + 2);
       memmove(buffer, buffer + end + 1, pos - framelen - 2);
       pos -= (framelen + 2);
       return (1);
     }
+      else if(pos==bytesRead)
+    {
+      pos=0;
+      return (0);
+    }
+      else if(pos>bytesRead)
+    {
+      memmove(buffer,buffer+(pos-bytesRead),bytesRead);
+      pos = bytesRead;
+      return (0);
+    }
   return (0);
 }
+
 
 ssize_t esysiris_writePacket(BrailleDisplay *brl, const void *packet, size_t size)
 {
