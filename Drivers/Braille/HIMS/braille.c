@@ -229,7 +229,7 @@ typedef struct {
   const char *modelName;
   unsigned int helpPage;
   int (*getCellCount) (BrailleDisplay *brl, unsigned int *count);
-  int (*interpretKeys) (BrailleKeys keys);
+  int (*interpretKeys) (BrailleKeys keys, BRL_DriverCommandContext context);
 } ProtocolOperations;
 static const ProtocolOperations *protocol;
 
@@ -242,7 +242,7 @@ getBrailleSenseCellCount (BrailleDisplay *brl, unsigned int *count) {
 }
 
 static int
-interpretBrailleSenseKeys (BrailleKeys keys) {
+interpretBrailleSenseKeys (BrailleKeys keys, BRL_DriverCommandContext context) {
   {
     int command = BRL_BLK_PASSDOTS;
     BrailleKeys originalKeys = keys;
@@ -256,7 +256,12 @@ interpretBrailleSenseKeys (BrailleKeys keys) {
     KEY(DOT6, BRL_DOT6);
     KEY(DOT7, BRL_DOT7);
     KEY(DOT8, BRL_DOT8);
-    if (keys == originalKeys) keys &= ~KEY_SPACE;
+
+    if (context == BRL_CTX_CHORDS) {
+      KEY(SPACE, BRL_DOTC);
+    } else if (keys == originalKeys) {
+      keys &= ~KEY_SPACE;
+    }
 
     if (keys != originalKeys) {
       KEY(BS_F2, BRL_FLG_CHAR_UPPER);
@@ -395,7 +400,7 @@ getSyncBrailleCellCount (BrailleDisplay *brl, unsigned int *count) {
 }
 
 static int
-interpretSyncBrailleKeys (BrailleKeys keys) {
+interpretSyncBrailleKeys (BrailleKeys keys, BRL_DriverCommandContext context) {
 #define CMD(keys,cmd) case (keys): return (cmd)
   switch (keys) {
     CMD(KEY_SB_LU, BRL_CMD_LNUP);
@@ -729,7 +734,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 
     case IPT_KEYS: {
       BrailleKeys keys = packet.data.reserved[0] | (packet.data.reserved[1] << 8);
-      int command = protocol->interpretKeys(keys);
+      int command = protocol->interpretKeys(keys, context);
 
       if (command == EOF) command = BRL_CMD_NOOP;
       return command;
