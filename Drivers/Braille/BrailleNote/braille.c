@@ -649,7 +649,6 @@ interpretNavigation (BrailleDisplay *brl, unsigned char dots, BRL_DriverCommandC
 static int
 interpretCharacter (BrailleDisplay *brl, unsigned char dots, BRL_DriverCommandContext context) {
   int mask = 0X00;
-  if (context != BRL_CTX_SCREEN) return interpretNavigation(brl, dots, context);
   switch (currentKeyboardMode) {
     case KBM_NAVIGATE:
       return interpretNavigation(brl, dots, context);
@@ -670,6 +669,7 @@ interpretCharacter (BrailleDisplay *brl, unsigned char dots, BRL_DriverCommandCo
 
 static int
 interpretSpaceChord (BrailleDisplay *brl, unsigned char dots, BRL_DriverCommandContext context) {
+  if (context == BRL_CTX_CHORDS) return (BRL_BLK_PASSDOTS + inputTable[dots]) | BRL_DOTC;
   switch (dots) {
     default:
     /* These are overridden by the Braille Note itself. */
