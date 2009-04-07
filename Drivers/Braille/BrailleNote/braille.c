@@ -669,7 +669,7 @@ interpretCharacter (BrailleDisplay *brl, unsigned char dots, BRL_DriverCommandCo
 
 static int
 interpretSpaceChord (BrailleDisplay *brl, unsigned char dots, BRL_DriverCommandContext context) {
-  if (context == BRL_CTX_CHORDS) return (BRL_BLK_PASSDOTS + inputTable[dots]) | BRL_DOTC;
+  if (context == BRL_CTX_CHORDS) return BRL_BLK_PASSDOTS | inputTable[dots] | BRL_DOTC;
   switch (dots) {
     default:
     /* These are overridden by the Braille Note itself. */
