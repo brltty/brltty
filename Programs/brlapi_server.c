@@ -298,7 +298,7 @@ static WSADATA wsadata;
 #endif /* __MINGW32__ */
 
 static unsigned char cursorShape;
-static const int retainDots = 1;
+static const int retainDots = 0;
 
 /****************************************************************************/
 /** SOME PROTOTYPES                                                        **/
@@ -2274,7 +2274,7 @@ found:
 }
 
 /* Function : api_readCommand */
-static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
+static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context)
 {
   int res;
   ssize_t size;
@@ -2357,7 +2357,7 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
     command = BRL_CMD_RESTARTBRL;
     goto out;
   }
-  if ((caller == BRL_CTX_SCREEN) && retainDots) caller = BRL_CTX_CHORDS;
+  if ((context == BRL_CTX_SCREEN) && retainDots) context = BRL_CTX_CHORDS;
   if (trueBraille->readKey) {
     pthread_mutex_lock(&driverMutex);
     res = trueBraille->readKey(brl);
@@ -2366,12 +2366,12 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext caller)
       handleResize(brl);
     keycode = res;
     pthread_mutex_lock(&driverMutex);
-    command = trueBraille->keyToCommand(brl,caller,keycode);
+    command = trueBraille->keyToCommand(brl,context,keycode);
     pthread_mutex_unlock(&driverMutex);
   } else {
     /* we already ensured in ENTERTTYMODE that no connection has how == KEYCODES */
     pthread_mutex_lock(&driverMutex);
-    res = trueBraille->readCommand(brl,caller);
+    res = trueBraille->readCommand(brl,context);
     pthread_mutex_unlock(&driverMutex);
     if (brl->resizeRequired)
       handleResize(brl);
@@ -2409,8 +2409,8 @@ out:
   return command;
 }
 
-void api_flush(BrailleDisplay *brl, BRL_DriverCommandContext caller) {
-  if (disp && api_readCommand(brl, caller) == BRL_CMD_RESTARTBRL)
+void api_flush(BrailleDisplay *brl, BRL_DriverCommandContext context) {
+  if (disp && api_readCommand(brl, context) == BRL_CMD_RESTARTBRL)
     restartBrailleDriver();
 }
 
