@@ -805,7 +805,7 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 }
 
 static int
-interpretKeys (void) {
+interpretKeys (BRL_DriverCommandContext context) {
   unsigned int keys = realKeys | virtualKeys;
   int press = (keys & pressedKeys) != keys;
   int command = BRL_CMD_NOOP;
@@ -822,7 +822,10 @@ interpretKeys (void) {
   }
 
   {
-    if ((keys & DOT_KEYS) && !(keys & ~(DOT_KEYS | SHIFT_KEYS))) {
+    unsigned int dotKeys = DOT_KEYS;
+    if (context == BRL_CTX_CHORDS) dotKeys |= KEY_SPACE;
+
+    if ((keys & dotKeys) && !(keys & ~(dotKeys | SHIFT_KEYS))) {
       command = BRL_BLK_PASSDOTS | flags;
       if (keys & KEY_DOT1) command |= BRL_DOT1;
       if (keys & KEY_DOT2) command |= BRL_DOT2;
@@ -832,6 +835,7 @@ interpretKeys (void) {
       if (keys & KEY_DOT6) command |= BRL_DOT6;
       if (keys & KEY_DOT7) command |= BRL_DOT7;
       if (keys & KEY_DOT8) command |= BRL_DOT8;
+      if (keys & KEY_SPACE) command |= BRL_DOTC;
       if (keys & KEY_SHIFT_LEFT) command |= BRL_FLG_CHAR_UPPER;
       if (keys & KEY_SHIFT_RIGHT) command |= BRL_FLG_CHAR_CONTROL;
       return command;
@@ -1039,7 +1043,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
         realKeys = packet.header.arg1 |
                    (packet.header.arg2 << 8) |
                    (packet.header.arg3 << 16);
-        return interpretKeys();
+        return interpretKeys(context);
 
       case PKT_BUTTON: {
         int button = packet.header.arg1;
@@ -1072,7 +1076,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
           } else {
             virtualKeys &= ~key;
           }
-          return interpretKeys();
+          return interpretKeys(context);
         }
 
         activeKeys = 0;
