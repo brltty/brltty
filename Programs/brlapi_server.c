@@ -2283,6 +2283,7 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context
   int keycode, command = EOF;
   brlapi_keyCode_t clientCode;
   int ok = 1;
+  int drain = 0;
   unsigned char newCursorShape;
 
   pthread_mutex_lock(&connectionsMutex);
@@ -2327,6 +2328,7 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context
       pthread_mutex_lock(&driverMutex);
       brl->cursor = c->brailleWindow.cursor-1;
       ok = trueBraille->writeWindow(brl, c->brailleWindow.text);
+      drain = 1;
       pthread_mutex_unlock(&driverMutex);
       disp->buffer = oldbuf;
     }
@@ -2357,6 +2359,8 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context
     command = BRL_CMD_RESTARTBRL;
     goto out;
   }
+  if (drain)
+    drainBrailleOutput(brl, 0);
   if ((context == BRL_CTX_SCREEN) && retainDots) context = BRL_CTX_CHORDS;
   if (trueBraille->readKey) {
     pthread_mutex_lock(&driverMutex);
