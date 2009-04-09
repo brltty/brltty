@@ -84,6 +84,7 @@ word always 1-123-2456
 contraction alw
 midendword ance 46-15
 largesign and 12346
+sufword anemone =
 midword angh = Shanghai
 begword antenn 1-1345-2345-26-1345 antenna
 begword anterio 1-1345-2345-12456-24-135 anterior
@@ -105,6 +106,7 @@ midword bb 23
 midendword bble 12-3456
 lowword be 23
 begword be 23
+sufword be\s-\s 12-15-36-36
 begword bea 12-2
 always bear 12-15-345
 begword beatif 23-1-2345-24-124
@@ -457,6 +459,7 @@ word in =
 always in 35
 begword incon 35-14-135-1345 incongruous
 begword indis 35-145-24-234 indistinct
+begword iness 35-15-234-234 inessential, inessive
 always iness 24-56-234
 midendword ing 346
 midword inga 35-1245-1 nightingale
