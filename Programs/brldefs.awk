@@ -45,7 +45,10 @@ BEGIN {
 }
 
 /#define[ \t]*BRL_DOT/ {
-  brlDot(substr($2, 8), $2, gensub("BRL_ARG_SET\\((.*)\\)", "\\1", 1, getDefineValue()), getComment($0))
+  value = getDefineValue()
+  sub("^.*\\(", "", value)
+  sub("\\).*$", "", value)
+  brlDot(substr($2, 8), $2, value, getComment($0))
   next
 }
 
