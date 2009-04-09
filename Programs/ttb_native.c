@@ -29,7 +29,7 @@ getByteOperand (DataFile *file, unsigned char *byte) {
   const char *description = "local character";
 
   if (getDataString(file, &string, 1, description)) {
-    if ((string.length == 1) && (string.characters[0] < CHARSET_BYTE_COUNT)) {
+    if ((string.length == 1) && iswLatin1(string.characters[0])) {
       *byte = string.characters[0];
       return 1;
     } else {

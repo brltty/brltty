@@ -477,9 +477,15 @@ fillStatusSeparator (wchar_t *text, unsigned char *dots) {
     unsigned int column = (onRight? statusStart: textStart) - 1;
 
     wchar_t textSeparator;
-    const wchar_t textSeparator_left = 0X23B8; /* LEFT VERTICAL BOX LINE */
+#ifdef HAVE_WCHAR_H 
+    const wchar_t textSeparator_left  = 0X23B8; /* LEFT VERTICAL BOX LINE */
     const wchar_t textSeparator_right = 0X23B9; /* RIGHT VERTICAL BOX LINE */
     const wchar_t textSeparator_block = 0X2503; /* BOX DRAWINGS HEAVY VERTICAL */
+#else /* HAVE_WCHAR_H */
+    const wchar_t textSeparator_left  = 0X5B; /* LEFT SQUARE BRACKET */
+    const wchar_t textSeparator_right = 0X5D; /* RIGHT SQUARE BRACKET */
+    const wchar_t textSeparator_block = 0X7C; /* VERTICAL LINE */
+#endif /* HAVE_WCHAR_H */
 
     unsigned char dotsSeparator;
     const unsigned char dotsSeparator_left = BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT7;

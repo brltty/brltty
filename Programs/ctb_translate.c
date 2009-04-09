@@ -426,9 +426,17 @@ putCharacter (wchar_t character) {
     if (rule) return putReplace(rule);
   }
 
-  if (character != UNICODE_REPLACEMENT_CHARACTER) {
-    const ContractionTableRule *rule = getAlwaysRule(UNICODE_REPLACEMENT_CHARACTER);
-    if (rule) return putReplace(rule);
+  {
+#ifdef HAVE_WCHAR_H 
+    const wchar_t substitute = UNICODE_REPLACEMENT_CHARACTER;
+#else /* HAVE_WCHAR_H */
+    const wchar_t substitute = 0X1A; /* ASCII SUB (CTRL-Z) */
+#endif /* HAVE_WCHAR_H */
+
+    if (character != substitute) {
+      const ContractionTableRule *rule = getAlwaysRule(substitute);
+      if (rule) return putReplace(rule);
+    }
   }
 
   return putCell(BRL_DOT1 | BRL_DOT2 | BRL_DOT3 | BRL_DOT4 | BRL_DOT5 | BRL_DOT6 | BRL_DOT7 | BRL_DOT8);
