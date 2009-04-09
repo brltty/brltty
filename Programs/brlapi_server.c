@@ -2174,6 +2174,7 @@ static int initializeAcceptedKeys(Connection *c)
   if (c->how==BRL_KEYCODES) return 0;
   if (addKeyrange(0,BRLAPI_KEY_MAX,&c->acceptedKeys)==-1) return -1;
   if (removeKeyrange(BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_NOOP,BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_NOOP|BRLAPI_KEY_FLAGS_MASK,&c->acceptedKeys)==-1) return -1;
+  if (removeKeyrange(BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_OFFLINE,BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_OFFLINE|BRLAPI_KEY_FLAGS_MASK,&c->acceptedKeys)==-1) return -1;
   if (removeKeyrange(BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_SWITCHVT_PREV,BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_SWITCHVT_NEXT|BRLAPI_KEY_FLAGS_MASK,&c->acceptedKeys)==-1) return -1;
   if (removeKeyrange(BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_RESTARTBRL,BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_RESTARTSPEECH|BRLAPI_KEY_FLAGS_MASK,&c->acceptedKeys)==-1) return -1;
   if (removeKeyrange(BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_SWITCHVT,BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_SWITCHVT|BRLAPI_KEY_CMD_ARG_MASK|BRLAPI_KEY_FLAGS_MASK,&c->acceptedKeys)==-1) return -1;
@@ -2271,6 +2272,21 @@ found:
       return recur_c ? recur_c : c;
     }
   return c;
+}
+
+/* Temporary function, until we implement proper generic support for variables.
+ */
+static void broadcastKey(Tty *tty, brlapi_keyCode_t code, unsigned int how) {
+  Connection *c;
+  Tty *t;
+  for (c=tty->connections->next; c!=tty->connections; c = c->next) {
+    pthread_mutex_lock(&c->acceptedKeysMutex);
+    if ((c->how==how) && (inKeyrangeList(c->acceptedKeys,code) != NULL))
+      writeKey(c->fd,code);
+    pthread_mutex_unlock(&c->acceptedKeysMutex);
+  }
+  for (t = tty->subttys; t; t = t->next)
+    broadcastKey(t, code, how);
 }
 
 /* Function : api_readCommand */
@@ -2392,11 +2408,17 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context
     command = EOF;
   } else {
     if (command == BRL_CMD_OFFLINE) {
-      offline = 1;
+      if (!offline) {
+	broadcastKey(&ttys, BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_OFFLINE, BRL_COMMANDS);
+	offline = 1;
+      }
       pthread_mutex_unlock(&connectionsMutex);
       return BRL_CMD_OFFLINE;
     }
-    offline = 0;
+    if (offline) {
+      broadcastKey(&ttys, BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_NOOP, BRL_COMMANDS);
+      offline = 0;
+    }
     handleAutorepeat(&command, &repeatState);
     if (command != EOF) {
       clientCode = cmdBrlttyToBrlapi(command, retainDots);
@@ -2484,6 +2506,9 @@ void api_link(BrailleDisplay *brl)
   coreWindowDots = calloc(displaySize, sizeof(*coreWindowDots));
   coreWindowCursor = 0;
   disp = brl;
+  pthread_mutex_lock(&connectionsMutex);
+  broadcastKey(&ttys, BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_NOOP, BRL_COMMANDS);
+  pthread_mutex_unlock(&connectionsMutex);
 }
 
 /* Function : api_unlink */
@@ -2491,6 +2516,9 @@ void api_link(BrailleDisplay *brl)
 void api_unlink(BrailleDisplay *brl)
 {
   LogPrint(LOG_DEBUG, "api unlink");
+  pthread_mutex_lock(&connectionsMutex);
+  broadcastKey(&ttys, BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_OFFLINE, BRL_COMMANDS);
+  pthread_mutex_unlock(&connectionsMutex);
   free(coreWindowText);
   coreWindowText = NULL;
   free(coreWindowDots);
