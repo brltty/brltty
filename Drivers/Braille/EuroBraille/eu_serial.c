@@ -58,7 +58,7 @@ eubrl_serialClose (BrailleDisplay *brl) {
 ssize_t
 eubrl_serialRead (BrailleDisplay *brl, void *buf, size_t length) 
 {
-  return serialReadData(serialDevice, buf, length, 0, 0);
+  return serialReadData(serialDevice, buf, length, 0, 10);
 }
 
 ssize_t
