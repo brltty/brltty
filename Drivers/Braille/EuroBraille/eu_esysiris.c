@@ -466,10 +466,10 @@ ssize_t esysiris_readPacket(BrailleDisplay *brl, void *packet, size_t size)
     {
       if (buffer[i] == STX) start = i;
     }
-  if (start!=-1 && start+2<=pos)
+  if (start!=-1 && start+2<pos)
     {
       framelen = buffer[start + 1] * 256 + buffer[start + 2];
-      if (start+framelen+1<=pos) 
+      if (start+framelen+1<pos) 
         if (buffer[start+framelen+1] == ETX) end = start+framelen+1;
     }
 
