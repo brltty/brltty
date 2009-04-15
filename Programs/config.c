@@ -802,8 +802,7 @@ applyPreferences (void) {
 }
 
 static void
-resetStatusFields (void) {
-  const unsigned char *fields = braille->statusFields;
+resetStatusFields (const unsigned char *fields) {
   unsigned int count = brl.statusColumns * brl.statusRows;
 
   prefs.statusPosition = spNone;
@@ -824,6 +823,7 @@ resetStatusFields (void) {
     }
   }
 
+  if (!fields) fields = braille->statusFields;
   if (!fields && count) {
     static const unsigned char fields1[] = {
       sfWindowRow, sfEnd
@@ -855,7 +855,7 @@ resetStatusFields (void) {
       sfEnd
     };
 
-    static const unsigned char *fieldsTable[] = {
+    static const unsigned char *const fieldsTable[] = {
       fields1, fields2, fields3, fields4, fields5, fields6, fields7
     };
     static const unsigned char fieldsCount = ARRAY_COUNT(fieldsTable);
@@ -937,7 +937,7 @@ resetPreferences (void) {
   prefs.statusPosition = DEFAULT_STATUS_POSITION;
   prefs.statusCount = DEFAULT_STATUS_COUNT;
   prefs.statusSeparator = DEFAULT_STATUS_SEPARATOR;
-  resetStatusFields();
+  resetStatusFields(NULL);
   applyPreferences();
 }
 
@@ -1039,8 +1039,57 @@ loadPreferences (void) {
       }
 
       if (length < 58) {
+        const unsigned char *fields = NULL;
+
+        {
+          static const unsigned char styleNone[] = {
+            sfEnd
+          };
+
+          static const unsigned char styleAlva[] = {
+            sfAlphabeticCursorCoordinates, sfAlphabeticWindowCoordinates, sfStateLetter, sfEnd
+          };
+
+          static const unsigned char styleTieman[] = {
+            sfCursorAndWindowColumn, sfCursorAndWindowRow, sfStateDots, sfEnd
+          };
+
+          static const unsigned char stylePB80[] = {
+            sfWindowRow, sfEnd
+          };
+
+          static const unsigned char styleConfigurable[] = {
+            sfGeneric, sfEnd
+          };
+
+          static const unsigned char styleMDV[] = {
+            sfWindowCoordinates, sfEnd
+          };
+
+          static const unsigned char styleVoyager[] = {
+            sfWindowRow, sfCursorRow, sfCursorColumn, sfEnd
+          };
+
+          static const unsigned char styleTime[] = {
+            sfTime, sfEnd
+          };
+
+          static const unsigned char *const styleTable[] = {
+            styleNone, styleAlva, styleTieman, stylePB80,
+            styleConfigurable, styleMDV, styleVoyager, styleTime
+          };
+          static const unsigned char styleCount = ARRAY_COUNT(styleTable);
+
+          unsigned char style = ((const unsigned char *)&prefs)[38];
+
+          if (style < styleCount) {
+            fields = styleTable[style];
+            if (*fields == sfEnd) fields = NULL;
+          }
+        }
+
         length = 58;
-        resetStatusFields();
+        resetStatusFields(fields);
       }
 
       applyPreferences();
