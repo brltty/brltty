@@ -395,6 +395,7 @@ always funder 124-136-1345-145-12456
 # the letter g
 always g 1245
 always G 1245
+begword genealog 1245-26-15-1-123-135-1245 genealogy
 begword geo = geoengineering
 sufword geoff 1245-15-12356-124 Geoffrey
 midword gg 2356
@@ -498,7 +499,7 @@ word lingerie 123-35-1245-12456-24-15
 always little 123-123
 contraction ll
 always lord 5-123
-word lucknow 123-136-14-13-1345-246
+sufword lucknow 123-136-14-13-1345-246
 
 # the letter m
 always m 134
