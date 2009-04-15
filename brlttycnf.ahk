@@ -186,8 +186,8 @@ English: ; English translation (default)
       else select "USB:" to use libusb-win32's filter,
     * if you do not want or can not install your manufacturer's driver, you can select "USB:" here and install
       libusb-win32's driver.
-  - If your braille device is serial or is connect through a serial to USB converter, just select the proper COM port.
-    Make sure to select the proper braille display as incorrect probing seems to possibly brick some devices.
+  - If your braille device is serial, is connect through a serial to USB converter, or through bluetooth, just select the
+    proper COM port.  Make sure to select the proper braille display as incorrect probing seems to possibly brick some devices.
   )
 
   SelectBrailleDisplayText = Select braille display
@@ -214,8 +214,8 @@ French: ; French translation
       choisissez "USB:" pour utiliser le filtre libusb-win32,
     * si vous ne voulez pas ou ne pouvez pas installer le pilote de votre fabriquant, vous pouvez choisir "USB:" ici et
       installer le pilote libusb-win32.
-  - Si votre afficheur braille utilise un port série ou est connecté via un adaptateur USB vers série, choisissez simplement le port
-    COM approprié. Assurez-vous de choisir le bon afficheur car un choix incorrect semble parfois planter certains matériels.
+  - Si votre afficheur braille utilise un port série, ou est connecté via un adaptateur USB vers série, ou via bluetooth, choisissez simplement
+    le port COM approprié. Assurez-vous de choisir le bon afficheur car un choix incorrect semble parfois planter certains matériels.
   )
 
   SelectBrailleDisplayText = Choisissez l'afficheur braille

@@ -189,6 +189,7 @@ Section "install"
 		;Create shortcuts
 		CreateDirectory "$SMPROGRAMS\$StartMenuFolder"
 		CreateShortCut "$SMPROGRAMS\$StartMenuFolder\$(shortcut_brlttycnf).lnk" "$INSTDIR\brlttycnf.exe" -r
+		CreateShortCut "$SMPROGRAMS\$StartMenuFolder\$(shortcut_brlttydebug).lnk" "$INSTDIR\run-debug.bat"
 		CreateShortCut "$SMPROGRAMS\$StartMenuFolder\$(shortcut_inssrv).lnk" "$INSTDIR\install.bat"
 		CreateShortCut "$SMPROGRAMS\$StartMenuFolder\$(shortcut_rmvsrv).lnk" "$INSTDIR\uninstall.bat"
 		CreateShortCut "$SMPROGRAMS\$StartMenuFolder\$(shortcut_uninstall).lnk" "$INSTDIR\Uninstall.exe"

@@ -126,12 +126,10 @@ For the impatient people who don't want to read docs:
   http://libusb-win32.sourceforge.net/
 - to register BRLTTY as a service, run install.bat
 - For Python support (e.g. for NVDA), run Brlapi-$apiversion.win32.exe
-- bluetooth is not supported yet.
 - for sighted users, use the xw braille driver to get a virtual braille box.
 
-If you are getting troubles, please run
-brltty.exe -l debug -n -e 2> debug.log
-by hand, so as to get feedback.
+If you are getting troubles, please run run-debug.bat and send us the debug.log
+file.
 
 =============================
 Technical notes on this build
@@ -167,6 +165,13 @@ net stop BrlAPI
 .\bin\brltty -R
 EOF
 
+sed -e 's/$/'$'\015''/' > "${installRoot}/run-debug.bat" << EOF
+@echo off
+echo Running brltty in debugging mode.  When done, close this window (use the
+echo alt-space menu for instance) and see %CD%\debug.log
+.\bin\brltty -l debug -n -e > debug.log 2>&1
+EOF
+
 cp ${sourceRoot}/Hotplug/brltty.inf "${installRoot}/bin"
 echo "not yet" > "${installRoot}/bin/brltty.cat"
 echo "not yet" > "${installRoot}/bin/brltty_x64.cat"
@@ -199,12 +204,10 @@ For the impatient people who don't want to read docs:
 - use the BRLTTY configurator or uncomment by hand the proper lines from
   etc/brltty.conf.
 - For Python support (e.g. for NVDA), run Brlapi-$apiversion.win32.exe
-- bluetooth is not supported yet.
 - for sighted users, use the xw braille driver to get a virtual braille box.
 
-If you are getting troubles, please run
-brltty.exe -l debug -n -e 2> debug.log
-by hand, so as to get feedback.
+If you are getting troubles, please run run-debug.bat and send us the debug.log
+file.
 
 =============================
 Technical notes on this build
