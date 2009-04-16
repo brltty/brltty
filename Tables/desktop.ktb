@@ -42,7 +42,7 @@ bind KPInsert+KPSlash CutBegin
 bind KPInsert+KPAsterisk CutLine
 bind KPInsert+KPMinus CutRect
 bind KPInsert+KPPlus Paste
-bind Control+KPInsert+KPPlus CutAppend
+bind ControlLeft+KPInsert+KPPlus CutAppend
 bind ControlLeft+ShiftLeft+KPInsert+KP2 PrefMenu
 bind ControlLeft+ShiftLeft+KPInsert+KPArrowLeft PrefLoad
 bind ControlLeft+ShiftLeft+KPInsert+KPArrowRight PrefSave
