@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <locale.h>
+#include <signal.h>
 
 #include "misc.h"
 #include "charset.h"
@@ -233,6 +234,7 @@ static Pixmap check;
 #endif /* USE_XAW */
 static int lastcursor = -1;
 #ifdef USE_XT
+static Atom wm_delete_window;
 static Widget vbox,keybox;
 static Pixel displayForeground,displayBackground;
 static XtAppContext app_con;
@@ -410,6 +412,11 @@ static void route(Widget w, XEvent *event, String *params, Cardinal *num_params)
   int index = atoi(params[0]);
   LogPrint(LOG_DEBUG,"route(%u)", index);
   keypressed = BRL_BLK_ROUTE | (index&BRL_MSK_ARG);
+}
+
+static void quit(Widget w, XEvent *event, String *params, Cardinal *num_params)
+{
+  XtAppSetExitFlag(app_con);
 }
 #endif /* USE_XT */
 
@@ -652,12 +659,16 @@ static int brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context
 #if defined(USE_XT)
   while (XtAppPending(app_con)) {
     XtAppProcessEvent(app_con,XtIMAll);
+    if (XtAppGetExitFlag(app_con))
+      raise(SIGTERM);
 #elif defined(USE_WINDOWS)
     MSG msg;
 
     while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
-      if (msg.message == WM_QUIT)
-	return BRL_CMD_SHUTDOWN;
+      if (msg.message == WM_QUIT
+	  || msg.message == WM_DESTROY
+	  || msg.message == WM_CLOSE)
+	raise(SIGTERM);
       else {
 	TranslateMessage(&msg);
 	DispatchMessage(&msg);
@@ -722,11 +733,20 @@ static void generateToplevel(void)
 #ifdef USE_XM
     { "popup", popup },
 #endif /* USE_XM */
+    { "Quit", quit },
     };
-  char topActions[] = "\
+  char translations[] = "<Message>WM_PROTOCOLS: Quit()";
+  char inputActions[] = "\
 :<Key>: keypress()\n\
 :<KeyUp>: keypress()\n";
-  XtTranslations topTransl;
+  char popupAction[] =
+	"None<Btn3Down>: "
+#if defined(USE_XAW)
+	"XawPositionSimpleMenu(menu) MenuPopup(menu)"
+#elif defined(USE_XM)
+	"popup()"
+#endif /* USE_ */
+	"\n";
   Widget tmp_vbox;
   char *disp;
 #ifdef USE_XAW
@@ -758,6 +778,7 @@ static void generateToplevel(void)
   free(argv);
 
   XtAppAddActions(app_con,actions,XtNumber(actions));
+  XtOverrideTranslations(toplevel,XtParseTranslationTable(translations));
 
 #elif defined(USE_WINDOWS)
   {
@@ -813,7 +834,6 @@ static void generateToplevel(void)
 
   /* vertical separation */
 #ifdef USE_XT
-  topTransl = XtParseTranslationTable(input?topActions:"");
   vbox = XtVaCreateManagedWidget("vbox",panedWidgetClass,toplevel,
 #ifdef USE_XM
     XmNmarginHeight, 0,
@@ -821,8 +841,10 @@ static void generateToplevel(void)
     XmNspacing, 1,
 #endif /* USE_XM */
     XtNresize, True,
-    XtNtranslations, topTransl,
+    XtNtranslations, XtParseTranslationTable(popupAction),
     NULL);
+  if (input)
+    XtAugmentTranslations(vbox, XtParseTranslationTable(inputActions));
 #endif /* USE_XT */
 
 #ifdef USE_XAW
@@ -953,6 +975,9 @@ static void generateToplevel(void)
   XmStringFree(display_cs);
 #endif /* USE_XM */
   XtFree(disp);
+#ifdef USE_XAW
+  XtFree(dispb);
+#endif /* USE_XAW */
 #endif /* USE_XT */
 #ifdef USE_XT
   XtVaGetValues(display[0],
@@ -1014,22 +1039,12 @@ static void generateToplevel(void)
   SET_VALUE(cb, XtNumber(models));
   AddMenuRadio("bare", menu, cb, !keyModel);
 
-#ifdef USE_XT
-  XtVaSetValues(toplevel, XtNtranslations, XtParseTranslationTable(
-	"None<Btn3Down>: "
-#if defined(USE_XAW)
-	"XawPositionSimpleMenu(menu) MenuPopup(menu)"
-#elif defined(USE_XM)
-	"popup()"
-#else /* USE_ */
-#error Toolkit menu popup unspecified
-#endif /* USE_ */
-	), NULL);
-#endif /* USE_XT */
-
   /* go go go */
 #if defined(USE_XT)
   XtRealizeWidget(toplevel);
+  if (!wm_delete_window)
+    wm_delete_window = XInternAtom(XtDisplay(toplevel), "WM_DELETE_WINDOW", False);
+  XSetWMProtocols(XtDisplay(toplevel),XtWindow(toplevel),&wm_delete_window,1);
 #elif defined(USE_WINDOWS)
   ShowWindow(toplevel, SW_SHOWDEFAULT);
   UpdateWindow(toplevel);

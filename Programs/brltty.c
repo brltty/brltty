@@ -1447,10 +1447,6 @@ runProgram (void) {
                 offline = 1;
               }
               goto isOffline;
-
-            case BRL_CMD_SHUTDOWN:
-              LogPrint(LOG_NOTICE, "shutdown requested");
-              exit(0);
           }
         }
 

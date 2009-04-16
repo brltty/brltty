@@ -2419,11 +2419,6 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context
       broadcastKey(&ttys, BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_NOOP, BRL_COMMANDS);
       offline = 0;
     }
-    if (command == BRL_CMD_SHUTDOWN) {
-      broadcastKey(&ttys, BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_SHUTDOWN, BRL_COMMANDS);
-      pthread_mutex_unlock(&connectionsMutex);
-      return command;
-    }
     handleAutorepeat(&command, &repeatState);
     if (command != EOF) {
       clientCode = cmdBrlttyToBrlapi(command, retainDots);
