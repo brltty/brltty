@@ -36,7 +36,7 @@ static int
 hasInputEvent (int device, uint16_t type, uint16_t code, uint16_t max) {
   BITMASK(mask, max+1, long);
 
-  if (ioctl(device, EVIOCGBIT(type, max), mask) != -1)
+  if (ioctl(device, EVIOCGBIT(type, sizeof(mask)), mask) != -1)
     if (BITMASK_TEST(mask, code))
       return 1;
 
