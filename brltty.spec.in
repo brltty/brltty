@@ -223,78 +223,107 @@ rm -fr "${RPM_BUILD_ROOT}"
 %doc Documents/BrlAPIref
 
 %changelog
-* Wed Jul 16 2008 Dave Mielke <dave@mielke.cc> 3.10
-+  The core and drivers (excluding text tables) are now Unicode-based.
-+  The DESCCHAR function now shows (if possible) the character's name.
-+  Linear cuts no longer include newline characters.
-+  Specifying the braille device as "serial:" now defaults to the first serial device.
-+  Add a driver for the Braille Sense.
-+  Bring the French manual fully up-to-date (was at 3.6).
-+  Linux-specific changes:
-      Don't unnecessarily wake up USB devices when searching.
-+  Albatross braille driver changes:
-      Correctly handle keys which send their code on both press and release.
-+  Baum braille driver changes:
-      Bind TL1+TR3 to the BACK funct5ion.
-+  EuroBraille braille driver changes:
-      Rewritten.
-      Add support for the Iris PC keyboard.
-      Add key binding to do Shift+Tab directly (dots 235 + space).
-      New EsysIris key bindings:
-         VK_L34 -> FREEZE
-         VK_L67 -> HOME
-+  FreedomScientific braille driver changes:
-      New PAC Mate key bindings:
-         routing key + left wheel press -> SETLEFT
-         routing key + right wheel press -> DESCCHAR
-+  General speech support changes:
-      Add a preference for setting the pitch.
-      Add a preference for setting the punctuation level.
-+  SpeechDispatcher speech driver changes:
-      Change the connection name to "main" (from "driver").
-      Single character entry/deletion now always speaks.
-      Try to reopen the connection if an error occurs.
-      Support setting pitch and punctuation level.
-+  Theta speech driver changes:
-      It wouldn't compile with newer gccs.
-+  Linux screen driver changes:
-      Now works on big endian architectures.
-      Add support for multi-byte character sets.
-      Add the Charset= parameter.
-      Add support for the right Alt key (AltGr).
-+  PcBios screen driver changes:
-      Add AT/XT scancode support.
-+  Windows screen driver changes:
-      Add the FollowFocus= parameter.
-      Add AT/XT scancode support.
-+  Text table changes:
-      Rename no-h to no-generic.
-      Remove no-p.
-      Add no-oub [Offentlig Utvalg for Blindeskrift].
-+  Contraction table changes:
-      Unicode characters can be specified by value [\uxxxx].
-      Unicode characters can be specified by name [\<name>].
-      When the cursor is:
-      *  On a word - it is uncontracted (not rendered in computer braille).
-      *  Between words - the space is expanded.
-      Rename the opcode "repeated" to "repeatable".
-      Fixes to the English Grade 2 [en-us-g2] table.
-      Fix the UEB [Unified English Braille] percent sign.
-      Fixes to the Chinese [zh-...] tables.
-      Rename zh-tw-big5 to zh-tw.
-      Remove zh-tw-gb2312.
-      Remove zh-tw-utf8.
-+  BrlAPI changes:
-      Now at release 0.5.2.
-      Present a blinking cursor if that's what the user has configured.
-      Install/uninstall "/var/lib/BrlAPI/".
-+  Caml bindings changes:
-      Install and uninstall now work properly.
-+  Java bindings changes:
-      Package the classes into org.a11y.BrlAPI.
-      Rename the classes to remove the (now redundant) Brlapi prefix.
-+  Python bindings changes:
-      Improved error handling facilities.
-+  tbltest changes:
-      Added the -e [--edit] option for editing a text table.
+* Mon Apr 27 2009 Dave Mielke <dave@mielke.cc> 4.0
++  General Changes:
+      All screen reading, character handling, and tables are now Unicode-based.
+      The "<n> startup problems" message has been removed.
+      Boot operands may contain multiple items separated by plus signs.
+      USB enhancements and fixes.
+      Windows serial I/O fixes.
+      A UDEV rules file for brltty is provided.
+      An upstart job for brltty is provided.
++  Status Cells:
+      Hard-coded styles have been replaced by user-configurable fields.
+      If there are no status cells then a text region may be reserved for them.
+      The INFO command toggles text maximization if a text region is being used.
++  Braille Drivers:
+      The Pegasus and Seika braille drivers have been added.
+      The BrailleSense braille driver has been renamed to HIMS.
++  Alva Braille Driver:
+      The BC6nn series are supported.
++  Baum Braille Driver:
+      The VarioConnect, EcoVario, and Refreshabraille series are supported.
++  BrailleNote Braille Driver:
+      The statuscells= parameter has been removed.
++  EuroBraille Braille Driver:
+      USB support has been added.
+      Robustness has been improved.
+      Bindings for the Esys have been added.
++  FreedomScientific Braille Driver:
+      The statuscells= parameter has been removed.
++  HandyTech Braille Driver:
+      The Evolution models have been redefined to only have text cells.
++  HIMS Braille Driver:
+      The Braille Sense key bindings have been reworked.
+      SyncBraille support has been added.
+      Bluetooth support has been fixed.
++  TSI Braille Driver:
+      The way Seika devices implement PowerBraille emulation is supported.
+      The core's flow control mechanism is used (rather than hard-coded delays).
++  Voyager Braille Driver:
+      The statuscells= parameter has been removed.
+      Key binding changes:
+         CUTAPPEND/CUTLINE moved to CRt# + B/C
+         PRINDENT/NXINDENT moved to CRt# + A+B/C+D
++  XWindow Braille Driver:
+      The font= parameter has been added.
++  SpeechDispatcher Speech Driver:
+      Single characters are now spoken correctly.
++  BrlAPI Server:
+      The version has been changed from 0.5.2 to 0.5.3.
+      enterTtyMode() now works correctly on Windows.
+      Problems when no braille display is connected at startup have been resolved.
+      The core's output is automatically restored when the last client disconnects.
+      Writes to the driver are no longer buffered.
+      Braille keyboard input is now converted to characters.
+      Output to the braille display is now drained the same way the core does.
++  Lisp Bindings:
+      Now compatible with CFFI 0.10.0.
++  Text Tables:
+      The license has been changed from GPL to LGPL.
+      File names have been changed from "text.*.tbl" to "*.ttb".
+      The file extension ".tti" is used for text subtables.
+      Tables must be encoded in UTF-8 (rather than in a local character set).
+      The "byte" keyword is no longer optional.
+      The "dot" directive is no longer supported.
+      The "char" and "include" directives have been added.
+      Language-based tables include common representations for box characters.
+      Tables for several languages have been added.
+      The default is now to select the table based on the locale's name.
+      The tbltest utility has been renamed to ttbtest.
+      The compress, fi2, identity, and simple tables have been removed.
+      The following tables have been renamed (mostly for ISO 639 compliance):
+         cz     -> cs
+         fi1    -> fi
+         nabcc  -> en-nabcc
+         se     -> sv
+         se-old -> sv-1989
+         visiob -> fr-vs
+         vni    -> vi
++  Attributes Tables:
+      The license has been changed from GPL to LGPL.
+      File names have been changed from "attr*.tbl" to "*.atb".
+      The file extension ".ati" is used for attributes subtables.
+      Tables must be encoded in UTF-8 (rather than in Latin1).
+      The "byte" directive is no longer supported.
+      The "include" directive has been added.
++  Contraction Tables:
+      The license has been changed from GPL to LGPL.
+      Tables for several languages have been added.
+      The following tables have been renamed:
+         en-uebc-g2 -> en-ueb-g2
+      The en-ueb-g2, en-us-g2, and zh-tw tables have been updated.
++  Key tables (for binding keyboard keys to brltty commands) have been added:
+      The file extension ".ktb" is used for key tables.
+      The file extension ".kti" is used for key subtables.
+      The desktop, keypad, and laptop key tables are provided.
+      the -k [--key-table=] option has been added.
+      The -K [--keyboard-properties=] option has been added.
++  Source Tree Changes:
+      The text tables have been moved from BrailleTables/ to Tables/.
+      The attributes tables have been moved from BrailleTables/ to Tables/.
+      The contraction tables have been moved from ContractionTables/ to Tables/.
+      The braille drivers have been moved from BrailleDrivers/ to Drivers/Braille/.
+      The speech drivers have been moved from SpeechDrivers/ to Drivers/Speech/.
+      The screen drivers have been moved from ScreenDrivers/ to Drivers/Screen/.
 
