@@ -368,7 +368,7 @@ BEGIN_OPTION_TABLE(programOptions)
 
   { .letter = 'k',
     .word = "key-table",
-    .flags = OPT_Hidden | OPT_Config | OPT_Environ,
+    .flags = OPT_Config | OPT_Environ,
     .argument = strtext("file"),
     .setting.string = &opt_keyTable,
     .description = strtext("Path to key table file.")
