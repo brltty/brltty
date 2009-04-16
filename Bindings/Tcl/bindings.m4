@@ -77,6 +77,23 @@ fi
    AC_PATH_PROGS([TCLSH], [tclsh${TCL_VERSION} tclsh], [TCLSH_NOT_FOUND_BY_CONFIGURE])
 }
 
+TCL_DIR=""
+test -z "${TCL_PACKAGE_PATH}" || {
+   for directory in ${TCL_PACKAGE_PATH}
+   do
+      test `expr "${directory}" : '.*/lib'` -eq 0 || {
+         TCL_DIR="${directory}"
+         break
+      }
+   done
+}
+
+test -n "${TCL_DIR}" || {
+   AC_MSG_WARN([Tcl packages directory not found])
+   TCL_DIR="TCL_PACKAGES_DIRECTORY_NOT_FOUND_BY_CONFIGURE"
+}
+AC_SUBST([TCL_DIR])
+
 AC_SUBST([TCL_OK])
 AC_SUBST([TCL_CPPFLAGS])
 AC_SUBST([TCL_LIBS])

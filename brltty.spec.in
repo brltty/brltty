@@ -209,8 +209,8 @@ rm -fr "${RPM_BUILD_ROOT}"
 @PYTHON_SITE_PKG@/brlapi.*
 
 %files -n brlapi-tcl
-/usr/lib/brlapi-@api_release@/libbrlapi_tcl.so
-/usr/lib/brlapi-@api_release@/pkgIndex.tcl
+@TCL_DIR@/brlapi-@api_release@/libbrlapi_tcl.so
+@TCL_DIR@/brlapi-@api_release@/pkgIndex.tcl
 
 %files -n brlapi-devel
 %defattr(-,root,root)

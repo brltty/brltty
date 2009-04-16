@@ -1,3 +1,4 @@
 Makefile
 reldeps.mk
 libbrlapi_tcl.so
+mkindex

@@ -21,6 +21,7 @@ TCL_OK = @TCL_OK@
 TCLSH = @TCLSH@
 TCL_CPPFLAGS = @TCL_CPPFLAGS@
 TCL_LIBS = @TCL_LIBS@
+TCL_DIR = @TCL_DIR@
 TCL_DESTDIR = $(INSTALL_ROOT)
 
 TCL_API = $(LIB_PFX)$(API_NAME)_tcl.$(LIB_EXT)
@@ -33,12 +34,20 @@ $(TCL_API): bindings.$O $(API_NAME)
 bindings.$O:
 	$(CC) $(TCL_CPPFLAGS) $(LIBCFLAGS) -o $@ -c $(SRC_DIR)/bindings.c
 
-clean::
-	-rm -f $(TCL_API)
+mkindex:
+	echo >$@ 'pkg_mkIndex $(TCL_DESTDIR)$(PKG_DIR) $(TCL_API)'
 
-install: all
-	$(TCLSH) $(SRC_DIR)/pkgutil -root "$(TCL_DESTDIR)" install $(API_NAME) $(API_RELEASE) $(TCL_API)
+clean::
+	-rm -f $(TCL_API) mkindex
+
+PKG_DIR = $(TCL_DIR)/$(API_NAME)-$(API_RELEASE)
+install: all mkindex
+	$(INSTALL_DIRECTORY) $(TCL_DESTDIR)$(PKG_DIR)
+	$(INSTALL_PROGRAM) $(TCL_API) $(TCL_DESTDIR)$(PKG_DIR)
+	$(TCLSH) ./mkindex
 
 uninstall:
-	-$(TCLSH) $(SRC_DIR)/pkgutil -root "$(TCL_DESTDIR)" uninstall $(API_NAME) $(API_RELEASE)
+	-rm -f $(TCL_DESTDIR)$(PKG_DIR)/$(TCL_API)
+	-rm -f $(TCL_DESTDIR)$(PKG_DIR)/pkgIndex.tcl
+	-rmdir $(TCL_DESTDIR)$(PKG_DIR)
 
