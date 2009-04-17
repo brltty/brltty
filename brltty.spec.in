@@ -200,13 +200,14 @@ rm -fr "${RPM_BUILD_ROOT}"
 
 %files -n brlapi-caml
 @OCAMLLIB@/brlapi
+@OCAMLLIB@/stublibs/dllbrlapi_stubs.*
 
 %files -n brlapi-java
 @JAVA_JAR_DIR@/*
 @JAVA_JNI_DIR@/*
 
 %files -n brlapi-python
-@PYTHON_SITE_PKG@/brlapi.*
+@PYTHON_SITE_PKG@/[bB]rlapi[-.]*
 
 %files -n brlapi-tcl
 @TCL_DIR@/brlapi-@api_release@/libbrlapi_tcl.so
