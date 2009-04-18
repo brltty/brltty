@@ -30,9 +30,7 @@
 #include "queue.h"
 
 const CommandEntry commandTable[] = {
-#ifdef ENABLE_LEARN_MODE
   #include "cmds.auto.h"
-#endif /* ENABLE_LEARN_MODE */
   {EOF, NULL, NULL}
 };
 
