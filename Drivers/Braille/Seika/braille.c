@@ -512,6 +512,61 @@ static const InputOutputOperations usbOperations = {
 };
 #endif /* ENABLE_USB_SUPPORT */
 
+#ifdef ENABLE_BLUETOOTH_SUPPORT
+/* Bluetooth IO */
+#include "io_bluetooth.h"
+#include "io_misc.h"
+
+static int bluetoothConnection = -1;
+
+static int
+openBluetoothPort (const char *device) {
+  if ((bluetoothConnection = btOpenConnection(device, 1, 0)) == -1) return 0;
+  return 1;
+}
+
+static void
+closeBluetoothPort (void) {
+  if (bluetoothConnection != -1) {
+    close(bluetoothConnection);
+    bluetoothConnection = -1;
+  }
+}
+
+static int
+awaitBluetoothInput (int milliseconds) {
+  return awaitInput(bluetoothConnection, milliseconds);
+}
+
+static int
+readBluetoothBytes (unsigned char *buffer, int length, int wait) {
+  const int timeout = 100;
+  size_t offset = 0;
+  return readChunk(bluetoothConnection,
+                   buffer, &offset, length,
+                   (wait? timeout: 0), timeout);
+}
+
+static int
+writeBluetoothBytes (const unsigned char *buffer, int length) {
+  int count = writeData(bluetoothConnection, buffer, length);
+  if (count != length) {
+    if (count == -1) {
+      LogError("Bluetooth write");
+    } else {
+      LogPrint(LOG_WARNING, "Trunccated bluetooth write: %d < %d", count, length);
+    }
+  }
+  return count;
+}
+
+static const InputOutputOperations bluetoothOperations = {
+  nativeProtocols,
+  openBluetoothPort, closeBluetoothPort,
+  awaitBluetoothInput, readBluetoothBytes, writeBluetoothBytes
+};
+#endif /* ENABLE_BLUETOOTH_SUPPORT */
+
 static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   {
@@ -528,6 +583,12 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
     io = &usbOperations;
   } else
 #endif /* ENABLE_USB_SUPPORT */
+
+#ifdef ENABLE_BLUETOOTH_SUPPORT
+  if (isBluetoothDevice(&device)) {
+    io = &bluetoothOperations;
+  } else
+#endif /* ENABLE_BLUETOOTH_SUPPORT */
 
   {
     unsupportedDevice(device);
