@@ -1294,6 +1294,11 @@ static const UsbSerialOperations usbSerialOperations_CP2101 = {
 
 const UsbSerialOperations *
 usbGetSerialOperations (UsbDevice *device) {
+  return device->serial;
+}
+
+static int
+usbSetSerialOperations (UsbDevice *device) {
   if (!device->serial) {
     typedef struct {
       uint16_t vendor;
@@ -1460,13 +1465,13 @@ usbGetSerialOperations (UsbDevice *device) {
     while (sa->vendor) {
       if (sa->vendor == device->descriptor.idVendor) {
         if (!sa->product || (sa->product == device->descriptor.idProduct)) {
-          if (sa->inputFilter && !usbAddInputFilter(device, sa->inputFilter)) goto error;
+          if (sa->inputFilter && !usbAddInputFilter(device, sa->inputFilter)) return 0;
           device->serial = sa->operations;
           break;
         }
       }
 
-      ++sa;
+      sa += 1;
     }
 
     if (!device->serial)
@@ -1474,8 +1479,7 @@ usbGetSerialOperations (UsbDevice *device) {
                device->descriptor.idVendor, device->descriptor.idProduct);
   }
 
-error:
-  return device->serial;
+  return 1;
 }
 
 int
@@ -1515,6 +1519,15 @@ usbChooseChannel (UsbDevice *device, void *data) {
         if (usbOpenInterface(device, definition->interface, definition->alternative)) {
           int ok = 1;
 
+          if (ok)
+            if (!usbSetSerialOperations(device))
+              ok = 0;
+
+          if (ok)
+            if (definition->serial)
+              if (!usbSetSerialParameters(device, definition->serial))
+                ok = 0;
+
           if (ok) {
             if (definition->inputEndpoint) {
               UsbEndpoint *endpoint = usbGetInputEndpoint(device, definition->inputEndpoint);
@@ -1531,17 +1544,10 @@ usbChooseChannel (UsbDevice *device, void *data) {
             if (definition->outputEndpoint) {
               UsbEndpoint *endpoint = usbGetOutputEndpoint(device, definition->outputEndpoint);
 
-              if (endpoint) {
-              } else {
+              if (!endpoint) {
                 ok = 0;
               }
             }
-          }
-
-          if (ok) {
-            if (definition->serial)
-              if (!usbSetSerialParameters(device, definition->serial))
-                ok = 0;
           }
 
           if (ok) {
