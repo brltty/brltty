@@ -97,5 +97,5 @@ void		esysiris_writeVisual(BrailleDisplay *brl, const wchar_t *text);
 ssize_t		esysiris_readPacket(BrailleDisplay *brl, void *packet, size_t size);
 ssize_t		esysiris_writePacket(BrailleDisplay *brl, const void *packet, size_t size);
 
-unsigned int		protocol_handleBrailleKey(unsigned int key);
+unsigned int		protocol_handleBrailleKey(unsigned int key, BRL_DriverCommandContext ctx);
 #endif /* __EU_PROTOCOL_H__ */

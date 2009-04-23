@@ -384,7 +384,7 @@ int	esysiris_keyToCommand(BrailleDisplay *brl, unsigned int key, BRL_DriverComma
 
   if (key & EUBRL_BRAILLE_KEY)
     {
-      res = protocol_handleBrailleKey(key);
+      res = protocol_handleBrailleKey(key, ctx);
     }
   if (key & EUBRL_ROUTING_KEY)
     {

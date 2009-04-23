@@ -58,11 +58,18 @@ t_eubrl_protocol	clioProtocol = {
 /*
 ** Handles a braille key : converts it to a BRLTTY Command
 */
-unsigned int		protocol_handleBrailleKey(unsigned int key)
+unsigned int		protocol_handleBrailleKey(unsigned int key, BRL_DriverCommandContext ctx)
 {
   unsigned int res = EOF;
   unsigned int dots = key & 0x000003ff;
   static char altFlag = 0, controlFlag = 0, shiftFlag = 0;
+
+  if (ctx == BRL_CTX_CHORDS)
+    {
+      res = BRL_BLK_PASSDOTS | (dots & 0XFF);
+      if (dots & 0X200) res |= BRL_DOTC;
+      return res;
+    }
 
   switch (dots)
     {
@@ -88,7 +95,7 @@ unsigned int		protocol_handleBrailleKey(unsigned int key)
       
       /** Space, backspace and enter handling */
     case 0x200:
-      res = BRL_BLK_PASSCHAR | ' ';
+      res = BRL_BLK_PASSDOTS;
       break;
     case 0x100:
       res = BRL_BLK_PASSKEY + BRL_KEY_BACKSPACE;
@@ -127,7 +134,7 @@ unsigned int		protocol_handleBrailleKey(unsigned int key)
     case 0x107:	res = BRL_BLK_PASSKEY + BRL_KEY_FUNCTION + 11; break;
       
     default:
-      res = BRL_BLK_PASSDOTS | dots;
+      if (!(dots & ~0XFF)) res = BRL_BLK_PASSDOTS | dots;
       break;
     }
   if (res != EOF)
