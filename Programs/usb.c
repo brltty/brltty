@@ -1475,7 +1475,7 @@ usbSetSerialOperations (UsbDevice *device) {
     }
 
     if (!device->serial)
-      LogPrint(LOG_DEBUG, "USB: unsupported serial adapter: vendor=%04X product=%04X",
+      LogPrint(LOG_DEBUG, "USB: no serial operations: vendor=%04X product=%04X",
                device->descriptor.idVendor, device->descriptor.idProduct);
   }
 
