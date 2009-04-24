@@ -1055,9 +1055,13 @@ always \\ 456-16
 
 always | 456-1256
 
-repeatable \s 0
-repeatable \t 0
+repeatable \s 0 space
+repeatable \t 0 character tabulation
 repeatable \xa0 0 no break space
+
+always \u00A9 45-14 copyright sign
+always \u00AE 45-1235 registered sign
+always \u2122 45-2345 trade mark sign
 
 always -com =
 repeatable --- 36-36-36
