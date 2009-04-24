@@ -1003,7 +1003,7 @@ prepunc `` 236
 always ` 4
 
 midnum ^ 45
-always ^ 456-126
+always ^ 45
 
 always ~ 4-156
 repeatable ~~~ 4-156-4-156-4-156
@@ -1030,13 +1030,13 @@ always ? 236
 always ( 2356
 always ) 2356
 
-always [ 456-12356
-always ] 456-23456
+always [ 6-2356
+always ] 2356-3
 
 always { 46-12356
 always } 46-23456
 
-always # 3456
+always # 456-1456
 
 midnum * 4-16
 always * 35-35
@@ -1045,9 +1045,9 @@ repeatable *** 16-16-16
 midnum / 34
 always / 456-34
 
-always % 4-356
+always % 4-25-1234
 
-always & 456-12346
+always & 4-12346
 
 always @ 4-1
 
@@ -1067,7 +1067,7 @@ always \s-\scom 36-36-14-135-134
 always _ 78
 repeatable ___ 78-78-78
 
-repeatable === 46-13-46-13-46-13
+repeatable === 123456-123456-123456
 
 # the hyphen
 always ­ 36
@@ -1139,9 +1139,9 @@ always þ   4-2345   [FE] lower t horn
 always ÿ   4-13456  [FF] lower y dieresis
 
 # mathematical symbols
-always < 5-13
-always = 46-13
-always > 46-2
+always < 126
+always = 123456
+always > 345
 midnum + 346
 always + 346
 midnum - 36
@@ -1149,7 +1149,7 @@ always - 36
 always × 46-16 multiplication sign
 midnum ÷ 46-34 division sign
 begnum $ 256
-always $ 256-3456
+always $ 256
 
 # other special characters
 always © 2356-6-14-2356 copyright
