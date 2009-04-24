@@ -440,7 +440,6 @@ static const InputOutputOperations serialOperations = {
 #include "io_usb.h"
 
 static UsbChannel *usbChannel = NULL;
-static const UsbSerialOperations *usbSerial = NULL;
 
 static int
 openUsbPort (const char *device) {
@@ -464,7 +463,6 @@ openUsbPort (const char *device) {
   };
 
   if ((usbChannel = usbFindChannel(definitions, (void *)device))) {
-    usbSerial = usbGetSerialOperations(usbChannel->device);
     return 1;
   }
   return 0;
@@ -474,7 +472,6 @@ static void
 closeUsbPort (void) {
   if (usbChannel) {
     usbCloseChannel(usbChannel);
-    usbSerial = NULL;
     usbChannel = NULL;
   }
 }
