@@ -1033,14 +1033,14 @@ always ) 2356
 always [ 6-2356
 always ] 2356-3
 
-always { 46-12356
-always } 46-23456
+always { 246
+always } 12456
 
 always # 456-1456
 
 midnum * 4-16
 always * 35-35
-repeatable *** 16-16-16
+repeatable *** 35-35-35-35-35-35
 
 midnum / 34
 always / 456-34
@@ -1068,8 +1068,8 @@ repeatable --- 36-36-36
 always \s-\s 36-36
 always \s-\scom 36-36-14-135-134
 
-always _ 78
-repeatable ___ 78-78-78
+always _ 46
+repeatable ___ 46-46-46
 
 repeatable === 123456-123456-123456
 
