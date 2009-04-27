@@ -263,7 +263,7 @@ readPacket_old (
 }
 
 static void
-interpretIdentity_TSI (InputPacket *packet) {
+interpretIdentity_330 (InputPacket *packet) {
   packet->fields.identity.version = ((packet->bytes[5] - '0') << (4 * 2)) |
                                     ((packet->bytes[7] - '0') << (4 * 1));
   packet->fields.identity.model = 0;
@@ -271,7 +271,7 @@ interpretIdentity_TSI (InputPacket *packet) {
 }
 
 static int
-readPacket_TSI (InputPacket *packet) {
+readPacket_330 (InputPacket *packet) {
   static const unsigned char templateString_identity[] = {
     0X00, 0X05, 0X28, 0X08,
     0X76, TBT_DECIMAL, 0X2E, TBT_DECIMAL,
@@ -279,17 +279,17 @@ readPacket_TSI (InputPacket *packet) {
   };
   static const TemplateEntry identityTemplate = TEMPLATE_ENTRY(identity);
 
-  return readPacket_old(packet, &identityTemplate, &templateEntry_routing, interpretIdentity_TSI);
+  return readPacket_old(packet, &identityTemplate, &templateEntry_routing, interpretIdentity_330);
 }
 
 static int
-probeDisplay_TSI (BrailleDisplay *brl, InputPacket *response) {
+probeDisplay_330 (BrailleDisplay *brl, InputPacket *response) {
   static const unsigned char request[] = {0XFF, 0XFF, 0X0A};
   return probeDisplay(brl, response, request, sizeof(request));
 }
 
 static int
-writeCells_TSI (BrailleDisplay *brl) {
+writeCells_330 (BrailleDisplay *brl) {
   static const unsigned char header[] = {
     0XFF, 0XFF, 0X04,
     0X00, 0X63, 0X00
@@ -315,11 +315,11 @@ writeCells_TSI (BrailleDisplay *brl) {
   return writeBytes(brl, packet, byte-packet);
 }
 
-static const ProtocolOperations protocolOperations_TSI = {
-  "TSI",
-  readPacket_TSI,
-  probeDisplay_TSI,
-  writeCells_TSI
+static const ProtocolOperations protocolOperations_330 = {
+  "V3.30",
+  readPacket_330,
+  probeDisplay_330,
+  writeCells_330
 };
 
 static void
@@ -512,7 +512,7 @@ static const ProtocolOperations protocolOperations_332 = {
 static const ProtocolOperations *const allProtocols[] = {
   &protocolOperations_332,
   &protocolOperations_331,
-  &protocolOperations_TSI,
+  &protocolOperations_330,
   NULL
 };
 
