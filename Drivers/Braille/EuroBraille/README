@@ -18,7 +18,7 @@ on the following hardware:
    - an Azerbraille 40 and 80 display;
    - a Clio-PupiBraille display (80 cells)
    - an IRIS display (Iris-S20, Iris-S32 and Iris-40).
-   - An ESYS display (bluetooth only).
+   - An ESYS display.
    - The driver is also tested with a NoteBraille display in order to 
      maintain backward compatibility.
 
@@ -29,7 +29,7 @@ Version 2.0.0:
 	- Complete rewrite of the whole driver to support new EsysIris
 	  protocol (serial and ethernet connection supported).
 	- Support Iris (firmware 1.71 and later)
-	- Support ESYS 12/40 display (beta, bluetooth only).
+	- Support ESYS 12/40 display.
 	- Ability to autodetect which protocol to use.
 
 Version 1.3.4:

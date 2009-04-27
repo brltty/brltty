@@ -3,7 +3,8 @@ Help for All Models
 
 To enter in the Learn-Mode press Layer1 key (alpha or # or FG+FB) depending
 on the model of display you have followed by "J" (for notebraille/clio), 
-L6 (for scriba) L5 (for iris).
+L6 (for scriba) L5 (for iris). For Esys put LeftJoystick in the "Right"
+position and RightJoystick in the "Up" position.
 
 Using Cut And Paste
 -------------------

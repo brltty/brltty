@@ -159,26 +159,40 @@ static int esysiris_handleCommandKey(BrailleDisplay *brl, unsigned int key)
     }
   if (brlType == ESYS_12 || brlType == ESYS_40)
     { /** Esys models keys */
-      if (key == VK_JGH) res = BRL_CMD_TOP_LEFT;
-      if (key == VK_JGB) res = BRL_CMD_BOT_LEFT;
-      if (key == (VK_JGG | VK_JDG)) res = BRL_BLK_PASSKEY + BRL_KEY_CURSOR_LEFT;
-      if (key == (VK_JGG | VK_JDH)) res = BRL_BLK_PASSKEY + BRL_KEY_CURSOR_UP;
-      if (key == (VK_JGG | VK_JDD)) res = BRL_BLK_PASSKEY + BRL_KEY_CURSOR_RIGHT;
-      if (key == (VK_JGG | VK_JDB)) res = BRL_BLK_PASSKEY + BRL_KEY_CURSOR_DOWN;
-      if (key == (VK_JGG | VK_JDM))  res = BRL_BLK_PASSKEY + BRL_KEY_ENTER;
-      if ((key == (VK_JGG | VK_M1G)) && (key == (VK_JGG | VK_M2G)) && (key == (VK_JGG | VK_M3G)) && (key == (VK_JGG | VK_M4G))) res = BRL_CMD_LNBEG;
-      if ((key == (VK_JGG | VK_M1D)) && (key == (VK_JGG | VK_M2D)) && (key == (VK_JGG | VK_M3D)) && (key == (VK_JGG | VK_M4D))) res = BRL_CMD_LNEND;
+      if (key == VK_M1G || key == VK_M2G || key == VK_M3G || key == VK_M4G) res = BRL_CMD_FWINLT;
+      if (key == VK_M1D || key == VK_M2D || key == VK_M3D || key == VK_M4D) res = BRL_CMD_FWINRT;
       if (key == VK_JDG) res = BRL_CMD_FWINLT;
       if (key == VK_JDH) res = BRL_CMD_LNUP;
       if (key == VK_JDD) res = BRL_CMD_FWINRT;
       if (key == VK_JDB) res = BRL_CMD_LNDN;
+
       if (key == VK_JDM) res = BRL_CMD_HOME;
+
+      if (key == VK_M1M || key == VK_M2M || key == VK_M3M || key == VK_M4M) res = BRL_CMD_FREEZE;
+
+      if (key == VK_JGH) res = BRL_CMD_TOP_LEFT;
+      if (key == VK_JGB) res = BRL_CMD_BOT_LEFT;
+
       if (key == (VK_JGD | VK_JDG)) routingMode = BRL_BLK_CUTBEGIN;
       if (key == (VK_JGD | VK_JDD)) routingMode = BRL_BLK_CUTLINE;
       if (key == (VK_JGD | VK_JDM)) res = BRL_CMD_PASTE;
-      if (key == VK_M1G || key == VK_M2G || key == VK_M3G || key == VK_M4G) res = BRL_CMD_FWINLT;
-      if (key == VK_M1D || key == VK_M2D || key == VK_M3D || key == VK_M4D) res = BRL_CMD_FWINRT;
-      if (key == VK_M1M || key == VK_M2M || key == VK_M3M || key == VK_M4M) res = BRL_CMD_FREEZE;
+
+      if (key == (VK_JGG | VK_JDG)) res = BRL_CMD_SAY_SOFTER;
+      if (key == (VK_JGG | VK_JDH)) res = BRL_CMD_SAY_ABOVE;
+      if (key == (VK_JGG | VK_JDD)) res = BRL_CMD_SAY_LOUDER;
+      if (key == (VK_JGG | VK_JDB)) res = BRL_CMD_SAY_BELOW;
+      if (key == (VK_JGG | VK_JDM)) res = BRL_CMD_SAY_LINE;
+      if ((key == (VK_JGG | VK_M1G)) || (key == (VK_JGG | VK_M2G)) || (key == (VK_JGG | VK_M3G)) || (key == (VK_JGG | VK_M4G))) res = BRL_CMD_SAY_SLOWER;
+      if ((key == (VK_JGG | VK_M1D)) || (key == (VK_JGG | VK_M2D)) || (key == (VK_JGG | VK_M3D)) || (key == (VK_JGG | VK_M4D))) res = BRL_CMD_SAY_FASTER;
+      if ((key == (VK_JGG | VK_M1M)) || (key == (VK_JGG | VK_M2M)) || (key == (VK_JGG | VK_M3M)) || (key == (VK_JGG | VK_M4M))) res = BRL_CMD_MUTE;
+
+      if ((key == (VK_JGD | VK_M1G)) || (key == (VK_JGD | VK_M2G)) || (key == (VK_JGD | VK_M3G)) || (key == (VK_JGD | VK_M4G))) res = BRL_CMD_LNBEG;
+      if ((key == (VK_JGD | VK_M1D)) || (key == (VK_JGD | VK_M2D)) || (key == (VK_JGD | VK_M3D)) || (key == (VK_JGD | VK_M4D))) res = BRL_CMD_LNEND;
+
+      if (key == (VK_JGD | VK_JDH)) res = BRL_CMD_LEARN;
+      if (key == (VK_JGD | VK_JDB)) res = BRL_CMD_HELP;
+      if (key == (VK_JGD | VK_M1M)) res = BRL_CMD_PREFMENU;
+      if (key == (VK_JGD | VK_M4M)) res = BRL_CMD_CSRTRK;
     }
   return res;
 }
