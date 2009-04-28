@@ -64,7 +64,7 @@ unsigned int		protocol_handleBrailleKey(unsigned int key, BRL_DriverCommandConte
   unsigned int dots = key & 0x000003ff;
   static char altFlag = 0, controlFlag = 0, shiftFlag = 0;
 
-  if (ctx == BRL_CTX_CHORDS)
+  if ((ctx == BRL_CTX_CHORDS) && !(dots & 0X100))
     {
       res = BRL_BLK_PASSDOTS | (dots & 0XFF);
       if (dots & 0X200) res |= BRL_DOTC;
