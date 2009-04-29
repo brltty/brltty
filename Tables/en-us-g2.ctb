@@ -917,6 +917,14 @@ contraction yrvs
 always z 1356
 always Z 1356
 
+# heim (a German syllable) should always be literal
+midendword cheim =
+midendword gheim =
+midendword sheim = Hergesheimer Gundersheimer Rudisheim Weinsheimer
+midendword theim = Altheimer (sic)
+midendword wheim =
+midendword stheim 34-125-15-24-134 Westheimer
+
 always agosom = phagosome
 always ibosom = ribosome
 always omosom = chromosome
