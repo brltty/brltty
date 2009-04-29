@@ -300,7 +300,7 @@ begword dinu 145-24-1345-136
 begword dis 256
 word disc =
 word discs =
-always dish 145-24-146
+sufword dish 145-24-146
 begword disha 256-125-1 dishabile
 begword dishear 256-125-15-345 disheartened
 begword disho 256-125-135 dishonor
