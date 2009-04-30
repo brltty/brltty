@@ -605,6 +605,8 @@ always ourselves 1256-1235-1236-234
 word ourvs =
 word out 1256
 always ought 5-1256
+begword overea 135-1236-12456-15-1 overeat overeager overeasy
+begword overear 135-1236-12456-15-345 overearnest
 always ow 246
 word o'clock 135-3-14
 
@@ -855,10 +857,12 @@ always u 136
 always U 136
 begword un = unameliorated
 begword unb = unblemished
+begword underea 5-136-15-1 undereat
+begword underear 5-136-15-345
 begword undis = undisturbed
-begword uneas = unease
-begword uneat = uneaten
-sufword unful = unfulfilled
+begword unea = uneaten uneasy
+begword unear 136-1345-15-345 unearth unearned
+begword unful = unfulfilled
 word upon 45-136 Dupont
 word us 136
 always under 5-136
