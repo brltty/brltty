@@ -520,41 +520,47 @@ typedef union {
     unsigned char code;
 
     union {
-      unsigned char horizontalSensors[KEY_GROUP_SIZE(MAXIMUM_CELL_COUNT)];
-      struct {
-        unsigned char left[KEY_GROUP_SIZE(VERTICAL_SENSOR_COUNT)];
-        unsigned char right[KEY_GROUP_SIZE(VERTICAL_SENSOR_COUNT)];
-      } PACKED verticalSensors;
-      unsigned char routingKeys[KEY_GROUP_SIZE(MAXIMUM_CELL_COUNT)];
-      unsigned char switches;
-      unsigned char topKeys;
-      unsigned char horizontalSensor;
-      union {
-        unsigned char left;
-        unsigned char right;
-      } PACKED verticalSensor;
-      unsigned char routingKey;
-      unsigned char frontKeys6;
-      unsigned char backKeys6;
-      unsigned char commandKeys;
-      unsigned char frontKeys10[2];
-      unsigned char backKeys10[2];
-      struct {
-        unsigned char buttons;
-        unsigned char dots;
-      } PACKED entryKeys;
-      unsigned char joyStick;
-
       unsigned char cellCount;
       unsigned char versionNumber;
-      unsigned char communicationChannel;
-      unsigned char powerdownReason;
 
       struct {
         unsigned char identifier;
         unsigned char setting;
       } PACKED mode;
 
+      unsigned char communicationChannel;
+      unsigned char powerdownReason;
+      unsigned char horizontalSensors[KEY_GROUP_SIZE(MAXIMUM_CELL_COUNT)];
+
+      struct {
+        unsigned char left[KEY_GROUP_SIZE(VERTICAL_SENSOR_COUNT)];
+        unsigned char right[KEY_GROUP_SIZE(VERTICAL_SENSOR_COUNT)];
+      } PACKED verticalSensors;
+
+      unsigned char routingKeys[KEY_GROUP_SIZE(MAXIMUM_CELL_COUNT)];
+      unsigned char switches;
+      unsigned char topKeys;
+      unsigned char horizontalSensor;
+
+      union {
+        unsigned char left;
+        unsigned char right;
+      } PACKED verticalSensor;
+
+      unsigned char routingKey;
+      unsigned char frontKeys6;
+      unsigned char backKeys6;
+      unsigned char commandKeys;
+      unsigned char frontKeys10[2];
+      unsigned char backKeys10[2];
+
+      struct {
+        unsigned char buttons;
+        unsigned char dots;
+      } PACKED entryKeys;
+
+      unsigned char joyStick;
+      unsigned char errorCode;
       char deviceIdentity[BAUM_DEVICE_IDENTITY_LENGTH];
       char serialNumber[BAUM_SERIAL_NUMBER_LENGTH];
       char bluetoothName[BAUM_BLUETOOTH_NAME_LENGTH];
@@ -824,8 +830,12 @@ setInkaSwitches (BrailleDisplay *brl, unsigned char newSettings, int initialize)
 static int
 probeBaumDisplay (BrailleDisplay *brl) {
   int probes = 0;
-  while (1) {
-    int assumedCellCount = 0;
+
+  do {
+    int identityCellCount = 0;
+
+    baumDeviceType = BAUM_TYPE_Generic;
+    cellCount = 0;
 
     {
       static const unsigned char request[] = {BAUM_REQ_GetDeviceIdentity};
@@ -847,11 +857,10 @@ probeBaumDisplay (BrailleDisplay *brl) {
       if (!writeBaumPacket(brl, request, sizeof(request))) break;
     }
 
-    baumDeviceType = BAUM_TYPE_Generic;
-    cellCount = 0;
     while (io->awaitInput(probeTimeout)) {
       BaumResponsePacket response;
       int size = getBaumPacket(brl, &response);
+
       if (size) {
         switch (response.data.code) {
           case BAUM_RSP_RoutingKeys: /* Inka */
@@ -862,28 +871,35 @@ probeBaumDisplay (BrailleDisplay *brl) {
             setBaumSwitches(brl, response.data.values.switches, 1);
             return 1;
 
-          case BAUM_RSP_CellCount: /* newer models */
-            if ((response.data.values.cellCount < 1) ||
-                (response.data.values.cellCount > MAXIMUM_CELL_COUNT)) {
-              LogPrint(LOG_DEBUG, "Unexpected Cell Count: %u",
-                       response.data.values.cellCount);
-              continue;
+          case BAUM_RSP_CellCount: { /* newer models */
+            unsigned char count = response.data.values.cellCount;
+
+            if ((count > 0) && (count <= MAXIMUM_CELL_COUNT)) {
+              cellCount = count;
+              return 1;
             }
 
-            cellCount = response.data.values.cellCount;
-            return 1;
+            LogPrint(LOG_DEBUG, "unexpected cell count: %u", count);
+            continue;
+          }
 
           case BAUM_RSP_DeviceIdentity:
             logBaumDeviceIdentity(&response);
+
             {
               const int length = sizeof(response.data.values.deviceIdentity);
               char buffer[length+1];
+
               memcpy(buffer, response.data.values.deviceIdentity, length);
               buffer[length] = 0;
 
               {
                 char *digits = strpbrk(buffer, "123456789");
-                if (digits) assumedCellCount = atoi(digits);
+
+                if (digits) {
+                  int count = atoi(digits);
+                  if ((count > 0) && (count <= MAXIMUM_CELL_COUNT)) identityCellCount = count;
+                }
               }
             }
             continue;
@@ -892,7 +908,13 @@ probeBaumDisplay (BrailleDisplay *brl) {
             logBaumSerialNumber(&response);
             continue;
 
+          case BAUM_RSP_ErrorCode:
+            if (response.data.values.errorCode != BAUM_ERR_PacketType) goto unexpectedPacket;
+            LogPrint(LOG_DEBUG, "unsupported request");
+            continue;
+
           default:
+          unexpectedPacket:
             LogBytes(LOG_WARNING, "Unexpected Packet", response.bytes, size);
             continue;
         }
@@ -901,12 +923,12 @@ probeBaumDisplay (BrailleDisplay *brl) {
       }
     }
     if (errno != EAGAIN) break;
-    if (assumedCellCount) {
-      cellCount = assumedCellCount;
+
+    if (identityCellCount) {
+      cellCount = identityCellCount;
       return 1;
     }
-    if (++probes == probeLimit) break;
-  }
+  } while (++probes < probeLimit);
 
   return 0;
 }
