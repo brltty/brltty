@@ -299,6 +299,16 @@ changeCellCount (BrailleDisplay *brl, int count) {
 
 #define ESCAPE 0X1B
 
+typedef unsigned char BaumInteger[2];
+#define MAKE_BAUM_INTEGER_FIRST(i) ((i) & 0XFF)
+#define MAKE_BAUM_INTEGER_SECOND(i) (((i) >> 8) & 0XFF)
+#define MAKE_BAUM_INTEGER(i) MAKE_BAUM_INTEGER_FIRST((i)), MAKE_BAUM_INTEGER_SECOND((i))
+
+static inline uint16_t
+getBaumInteger (const BaumInteger integer) {
+  return (integer[1] << 8) | integer[0];
+}
+
 typedef enum {
   BAUM_REQ_DisplayData             = 0X01,
   BAUM_REQ_GetVersionNumber        = 0X05,
@@ -308,6 +318,9 @@ typedef enum {
   BAUM_REQ_SetProtocolState        = 0X15,
   BAUM_REQ_SetCommunicationChannel = 0X16,
   BAUM_REQ_CausePowerdown          = 0X17,
+  BAUM_REQ_ModuleRegistration      = 0X50,
+  BAUM_REQ_DataRegisters           = 0X51,
+  BAUM_REQ_ServiceRegisters        = 0X52,
   BAUM_REQ_GetDeviceIdentity       = 0X84,
   BAUM_REQ_GetSerialNumber         = 0X8A,
   BAUM_REQ_GetBluetoothName        = 0X8C,
@@ -337,6 +350,9 @@ typedef enum {
   BAUM_RSP_EntryKeys            = 0X33,
   BAUM_RSP_JoyStick             = 0X34,
   BAUM_RSP_ErrorCode            = 0X40,
+  BAUM_RSP_ModuleRegistration   = 0X50,
+  BAUM_RSP_DataRegisters        = 0X51,
+  BAUM_RSP_ServiceRegisters     = 0X52,
   BAUM_RSP_DeviceIdentity       = 0X84,
   BAUM_RSP_SerialNumber         = 0X8A,
   BAUM_RSP_BluetoothName        = 0X8C
@@ -561,6 +577,69 @@ typedef union {
 
       unsigned char joyStick;
       unsigned char errorCode;
+
+      struct {
+        unsigned char length;
+        BaumInteger moduleIdentifier;
+        BaumInteger serialNumber;
+
+        union {
+          unsigned char bytes[0X20];
+
+          struct {
+            BaumInteger hardwareVersion;
+            BaumInteger firmwareVersion;
+            unsigned char event;
+          } PACKED registration;
+
+          union {
+            struct {
+              unsigned char statusFlags;
+              signed char wheelPositions[4];
+              unsigned char wheelKeys;
+              unsigned char displayKeys;
+              unsigned char routingKeys[10];
+            } PACKED display80;
+
+            struct {
+              unsigned char statusFlags;
+              signed char wheelPositions[3];
+              unsigned char wheelKeys;
+              unsigned char displayKeys;
+              unsigned char routingKeys[8];
+            } PACKED display64;
+
+            struct {
+              unsigned char statusFlags;
+              unsigned char controlButtons;
+            } PACKED state;
+
+            struct {
+              unsigned char statusFlags;
+              signed char wheelPosition;
+              unsigned char controlButtons;
+              unsigned char keypadUpper;
+              unsigned char keypadLower;
+            } PACKED phone;
+
+            struct {
+              unsigned char statusFlags;
+              signed char wheelPosition;
+              unsigned char controlKeys;
+              unsigned char potentiometers[6];
+            } PACKED audio;
+
+            struct {
+              unsigned char statusFlags;
+              unsigned char controlButtons;
+              unsigned char cursorKeys;
+              unsigned char controlKeys;
+              unsigned char potentiometers[4];
+            } PACKED voice;
+          } registers;
+        } data;
+      } PACKED modular;
+
       char deviceIdentity[BAUM_DEVICE_IDENTITY_LENGTH];
       char serialNumber[BAUM_SERIAL_NUMBER_LENGTH];
       char bluetoothName[BAUM_BLUETOOTH_NAME_LENGTH];
@@ -571,9 +650,109 @@ typedef union {
 typedef enum {
   BAUM_TYPE_Inka,
   BAUM_TYPE_DM80P,
+  BAUM_TYPE_MODULAR,
   BAUM_TYPE_Generic
 } BaumDeviceType;
 static BaumDeviceType baumDeviceType;
+
+typedef enum {
+  BMT_Display80,
+  BMT_Display64,
+  BMT_State,
+  BMT_Phone,
+  BMT_Audio,
+  BMT_Voice
+} BaumModuleType;
+
+typedef struct {
+  uint16_t identifier;
+  unsigned char type;
+  unsigned char cellCount;
+  unsigned char keyCount;
+  unsigned char buttonCount;
+  unsigned char wheelCount;
+  unsigned char potCount;
+  unsigned hasDisplayKeys:1;
+  unsigned hasCursorKeys:1;
+  unsigned hasKeypad:1;
+} BaumModuleDescription;
+
+static const BaumModuleDescription baumModuleDescriptions[] = {
+  { .identifier = 0X4180,
+    .type = BMT_Display80,
+    .cellCount = 80,
+    .wheelCount = 4,
+    .hasDisplayKeys = 1
+  }
+  ,
+  { .identifier = 0X4181,
+    .type = BMT_Display64,
+    .cellCount = 64,
+    .wheelCount = 3,
+    .hasDisplayKeys = 1
+  }
+  ,
+  { .identifier = 0X4190,
+    .type = BMT_State,
+    .cellCount = 4,
+    .buttonCount = 4
+  }
+  ,
+  { .identifier = 0X4191,
+    .type = BMT_Phone,
+    .cellCount = 12,
+    .buttonCount = 4,
+    .wheelCount = 1,
+    .hasKeypad = 1
+  }
+  ,
+  { .identifier = 0X4192,
+    .type = BMT_Audio,
+    .keyCount = 5,
+    .wheelCount = 1,
+    .potCount = 6
+  }
+  ,
+  { .identifier = 0X4193,
+    .type = BMT_Voice,
+    .keyCount = 4,
+    .buttonCount = 3,
+    .potCount = 4,
+    .hasCursorKeys = 1
+  }
+  ,
+  { .identifier = 0 }
+};
+
+static const BaumModuleDescription *
+getBaumModuleDescription (uint16_t identifier) {
+  const BaumModuleDescription *bmd = baumModuleDescriptions;
+
+  while (bmd->identifier) {
+    if (bmd->identifier == identifier) return bmd;
+    bmd += 1;
+  }
+
+  LogPrint(LOG_DEBUG, "unknown module identifier: %04X", identifier);
+  return NULL;
+}
+
+typedef struct {
+  const BaumModuleDescription *description;
+  uint16_t serialNumber;
+  uint16_t hardwareVersion;
+  uint16_t firmwareVersion;
+} BaumModuleRegistration;
+
+static void
+clearBaumModuleRegistration (BaumModuleRegistration *bmr) {
+  bmr->description = NULL;
+  bmr->serialNumber = 0;
+  bmr->hardwareVersion = 0;
+  bmr->firmwareVersion = 0;
+}
+
+static BaumModuleRegistration baumDisplayModule;
 
 static void
 assumeBaumDeviceIdentity (const char *identity) {
@@ -683,6 +862,9 @@ readBaumPacket (BrailleDisplay *brl, unsigned char *packet, int size) {
           case BAUM_RSP_CommandKeys:
           case BAUM_RSP_JoyStick:
           case BAUM_RSP_ErrorCode:
+          case BAUM_RSP_ModuleRegistration:
+          case BAUM_RSP_DataRegisters:
+          case BAUM_RSP_ServiceRegisters:
             length = 2;
             break;
 
@@ -733,6 +915,17 @@ readBaumPacket (BrailleDisplay *brl, unsigned char *packet, int size) {
             LogBytes(LOG_WARNING, "Unknown Packet", &byte, 1);
             started = 0;
             continue;
+        }
+      } else if (offset == 1) {
+        switch (packet[0]) {
+          case BAUM_RSP_ModuleRegistration:
+          case BAUM_RSP_DataRegisters:
+          case BAUM_RSP_ServiceRegisters:
+            length += byte;
+            break;
+
+          default:
+            break;
         }
       }
 
@@ -828,6 +1021,44 @@ setInkaSwitches (BrailleDisplay *brl, unsigned char newSettings, int initialize)
 }
 
 static int
+handleBaumModuleRegistration (BrailleDisplay *brl, const BaumResponsePacket *response) {
+  uint16_t moduleIdentifier = getBaumInteger(response->data.values.modular.moduleIdentifier);
+  uint16_t serialNumber = getBaumInteger(response->data.values.modular.serialNumber);
+  const BaumModuleDescription *bmd;
+
+  if (response->data.values.modular.data.registration.event == 0X01) {
+    {
+      const unsigned char request[] = {
+        BAUM_REQ_ModuleRegistration,
+        5, /* data length */
+        MAKE_BAUM_INTEGER(moduleIdentifier),
+        MAKE_BAUM_INTEGER(serialNumber),
+        0X01 /* acknowledge the device registration */
+      };
+
+      if (!writeBaumPacket(brl, request, sizeof(request))) return 0;
+    }
+
+    bmd = getBaumModuleDescription(moduleIdentifier);
+  } else {
+    bmd = NULL;
+  }
+
+  if (bmd) {
+    if (bmd->hasDisplayKeys) {
+      baumDisplayModule.description = bmd;
+      baumDisplayModule.serialNumber = serialNumber;
+      baumDisplayModule.hardwareVersion = getBaumInteger(response->data.values.modular.data.registration.hardwareVersion);
+      baumDisplayModule.firmwareVersion = getBaumInteger(response->data.values.modular.data.registration.firmwareVersion);
+
+      cellCount = bmd->cellCount;
+    }
+  }
+
+  return 1;
+}
+
+static int
 probeBaumDisplay (BrailleDisplay *brl) {
   int probes = 0;
 
@@ -837,23 +1068,42 @@ probeBaumDisplay (BrailleDisplay *brl) {
     baumDeviceType = BAUM_TYPE_Generic;
     cellCount = 0;
 
+    clearBaumModuleRegistration(&baumDisplayModule);
+
+    /* newer models return an identity string which contains the cell count */
     {
       static const unsigned char request[] = {BAUM_REQ_GetDeviceIdentity};
       if (!writeBaumPacket(brl, request, sizeof(request))) break;
     }
 
+    /* get the serial number for the log */
     {
       static const unsigned char request[] = {BAUM_REQ_GetSerialNumber};
       if (!writeBaumPacket(brl, request, sizeof(request))) break;
     }
 
+    /* try explicitly asking for the cell count */
     {
       static const unsigned char request[] = {BAUM_REQ_DisplayData, 0};
       if (!writeBaumPacket(brl, request, sizeof(request))) break;
     }
 
+    /* enqueue a request to get the initial key states */
     {
       static const unsigned char request[] = {BAUM_REQ_GetKeys};
+      if (!writeBaumPacket(brl, request, sizeof(request))) break;
+    }
+
+    /* the modular models need to be probed with a general call */
+    {
+      static const unsigned char request[] = {
+        BAUM_REQ_ModuleRegistration, /* packet type */
+        5,                           /* data length */
+        0, 0,                        /* all modules */
+        0, 0,                        /* any serial numer */
+        0X04                         /* do a general call */
+      };
+
       if (!writeBaumPacket(brl, request, sizeof(request))) break;
     }
 
@@ -883,7 +1133,13 @@ probeBaumDisplay (BrailleDisplay *brl) {
             continue;
           }
 
-          case BAUM_RSP_DeviceIdentity:
+          case BAUM_RSP_ModuleRegistration: /* modular models */
+            if (!handleBaumModuleRegistration(brl, &response)) return 0;
+            if (!baumDisplayModule.description) continue;
+            baumDeviceType = BAUM_TYPE_MODULAR;
+            return 1;
+
+          case BAUM_RSP_DeviceIdentity: /* should contain fallback cell count */
             logBaumDeviceIdentity(&response);
 
             {
@@ -1085,6 +1341,11 @@ updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
         setBaumSwitches(brl, packet.data.values.switches, 0);
         continue;
 
+      case BAUM_RSP_ModuleRegistration:
+        if (handleBaumModuleRegistration(brl, &packet)) {
+        }
+        continue;
+
       default:
         LogBytes(LOG_WARNING, "Unexpected Packet", packet.bytes, size);
         continue;
@@ -1096,17 +1357,42 @@ updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
 
 static int
 writeBaumCells (BrailleDisplay *brl) {
-  unsigned char packet[1 + 1 + cellCount];
-  unsigned char *byte = packet;
+  if (baumDeviceType == BAUM_TYPE_MODULAR) {
+    unsigned char packet[2 + 7 + cellCount];
+    unsigned char *byte = packet;
 
-  *byte++ = BAUM_REQ_DisplayData;
-  if ((baumDeviceType == BAUM_TYPE_Inka) || (baumDeviceType == BAUM_TYPE_DM80P))
-    *byte++ = 0;
+    *byte++ = BAUM_REQ_DataRegisters;
+    *byte++ = 7 + cellCount;
 
-  memcpy(byte, externalCells, cellCount);
-  byte += cellCount;
+    *byte++ = MAKE_BAUM_INTEGER_FIRST(baumDisplayModule.description->identifier);
+    *byte++ = MAKE_BAUM_INTEGER_SECOND(baumDisplayModule.description->identifier);
 
-  return writeBaumPacket(brl, packet, byte-packet);
+    *byte++ = MAKE_BAUM_INTEGER_FIRST(baumDisplayModule.serialNumber);
+    *byte++ = MAKE_BAUM_INTEGER_SECOND(baumDisplayModule.serialNumber);
+
+    *byte++ =  0; /* command to write the registers */
+    *byte++ =  0; /* index of the first register to write */
+    *byte++ =  cellCount; /* number of registers to write */
+
+    memcpy(byte, externalCells, cellCount);
+    byte += cellCount;
+
+    return writeBaumPacket(brl, packet, byte-packet);
+  }
+
+  {
+    unsigned char packet[1 + 1 + cellCount];
+    unsigned char *byte = packet;
+
+    *byte++ = BAUM_REQ_DisplayData;
+    if ((baumDeviceType == BAUM_TYPE_Inka) || (baumDeviceType == BAUM_TYPE_DM80P))
+      *byte++ = 0;
+
+    memcpy(byte, externalCells, cellCount);
+    byte += cellCount;
+
+    return writeBaumPacket(brl, packet, byte-packet);
+  }
 }
 
 static const ProtocolOperations baumOperations = {
