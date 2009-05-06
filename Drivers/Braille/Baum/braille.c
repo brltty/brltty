@@ -338,7 +338,7 @@ typedef enum {
   BAUM_RSP_VerticalSensors      = 0X21,
   BAUM_RSP_RoutingKeys          = 0X22,
   BAUM_RSP_Switches             = 0X23,
-  BAUM_RSP_TopKeys              = 0X24,
+  BAUM_RSP_DisplayKeys              = 0X24,
   BAUM_RSP_HorizontalSensor     = 0X25,
   BAUM_RSP_VerticalSensor       = 0X26,
   BAUM_RSP_RoutingKey           = 0X27,
@@ -390,16 +390,16 @@ typedef enum {
 
 #define BAUM_KEY(bit,type) (UINT64_C(bit) << BAUM_SHIFT_##type)
 
-#define BAUM_SHIFT_TOP 0
-#define BAUM_WIDTH_TOP 6
-#define BAUM_KEY_TL1 BAUM_KEY(0X01, TOP)
-#define BAUM_KEY_TL2 BAUM_KEY(0X02, TOP)
-#define BAUM_KEY_TL3 BAUM_KEY(0X04, TOP)
-#define BAUM_KEY_TR1 BAUM_KEY(0X08, TOP)
-#define BAUM_KEY_TR2 BAUM_KEY(0X10, TOP)
-#define BAUM_KEY_TR3 BAUM_KEY(0X20, TOP)
+#define BAUM_SHIFT_DISPLAY 0
+#define BAUM_WIDTH_DISPLAY 6
+#define BAUM_KEY_DK1 BAUM_KEY(0X01, DISPLAY)
+#define BAUM_KEY_DK2 BAUM_KEY(0X02, DISPLAY)
+#define BAUM_KEY_DK3 BAUM_KEY(0X04, DISPLAY)
+#define BAUM_KEY_DK4 BAUM_KEY(0X08, DISPLAY)
+#define BAUM_KEY_DK5 BAUM_KEY(0X10, DISPLAY)
+#define BAUM_KEY_DK6 BAUM_KEY(0X20, DISPLAY)
 
-#define BAUM_SHIFT_COMMAND (BAUM_SHIFT_TOP + BAUM_WIDTH_TOP)
+#define BAUM_SHIFT_COMMAND (BAUM_SHIFT_DISPLAY + BAUM_WIDTH_DISPLAY)
 #define BAUM_WIDTH_COMMAND 7
 #define BAUM_KEY_CK1 BAUM_KEY(0X01, COMMAND)
 #define BAUM_KEY_CK2 BAUM_KEY(0X02, COMMAND)
@@ -555,7 +555,7 @@ typedef union {
 
       unsigned char routingKeys[KEY_GROUP_SIZE(MAXIMUM_CELL_COUNT)];
       unsigned char switches;
-      unsigned char topKeys;
+      unsigned char displayKeys;
       unsigned char horizontalSensor;
 
       union {
@@ -854,7 +854,7 @@ readBaumPacket (BrailleDisplay *brl, unsigned char *packet, int size) {
           case BAUM_RSP_VersionNumber:
           case BAUM_RSP_CommunicationChannel:
           case BAUM_RSP_PowerdownSignal:
-          case BAUM_RSP_TopKeys:
+          case BAUM_RSP_DisplayKeys:
           case BAUM_RSP_HorizontalSensor:
           case BAUM_RSP_RoutingKey:
           case BAUM_RSP_FrontKeys6:
@@ -1216,32 +1216,32 @@ updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
         errno = ENODEV;
         return 0;
 
-      case BAUM_RSP_TopKeys: {
+      case BAUM_RSP_DisplayKeys: {
         unsigned char keys;
 
         switch (baumDeviceType) {
           case BAUM_TYPE_Inka:
             keys = 0;
-#define KEY(bit,name) if (!(packet.data.values.topKeys & (bit))) keys |= BAUM_KEY_##name
-            KEY(004, TL1);
-            KEY(002, TL2);
-            KEY(001, TL3);
-            KEY(040, TR1);
-            KEY(020, TR2);
-            KEY(010, TR3);
+#define KEY(bit,name) if (!(packet.data.values.displayKeys & (bit))) keys |= BAUM_KEY_##name
+            KEY(004, DK1);
+            KEY(002, DK2);
+            KEY(001, DK3);
+            KEY(040, DK4);
+            KEY(020, DK5);
+            KEY(010, DK6);
 #undef KEY
             break;
 
           case BAUM_TYPE_DM80P:
-            keys = packet.data.values.topKeys ^ 0X7F;
+            keys = packet.data.values.displayKeys ^ 0X7F;
             break;
 
           default:
-            keys = packet.data.values.topKeys;
+            keys = packet.data.values.displayKeys;
             break;
         }
 
-        if (updateFunctionKeyByte(keys, BAUM_SHIFT_TOP, BAUM_WIDTH_TOP, keyPressed)) return 1;
+        if (updateFunctionKeyByte(keys, BAUM_SHIFT_DISPLAY, BAUM_WIDTH_DISPLAY, keyPressed)) return 1;
         continue;
       }
 
@@ -1410,12 +1410,12 @@ typedef enum {
 } HandyTechRequestCode;
 
 typedef enum {
-  HT_RSP_KEY_TL1   = 0X04, /* UP */
-  HT_RSP_KEY_TL2   = 0X03, /* B1 */
-  HT_RSP_KEY_TL3   = 0X08, /* DN */
-  HT_RSP_KEY_TR1   = 0X07, /* B2 */
-  HT_RSP_KEY_TR2   = 0X0B, /* B3 */
-  HT_RSP_KEY_TR3   = 0X0F, /* B4 */
+  HT_RSP_KEY_DK1   = 0X04, /* UP */
+  HT_RSP_KEY_DK2   = 0X03, /* B1 */
+  HT_RSP_KEY_DK3   = 0X08, /* DN */
+  HT_RSP_KEY_DK4   = 0X07, /* B2 */
+  HT_RSP_KEY_DK5   = 0X0B, /* B3 */
+  HT_RSP_KEY_DK6   = 0X0F, /* B4 */
   HT_RSP_KEY_CR1   = 0X20,
   HT_RSP_WRITE_ACK = 0X7E,
   HT_RSP_RELEASE   = 0X80,
@@ -1488,12 +1488,12 @@ readHandyTechPacket (BrailleDisplay *brl, unsigned char *packet, int size) {
                   continue;
                 }
 
-              case HT_RSP_KEY_TL1:
-              case HT_RSP_KEY_TL2:
-              case HT_RSP_KEY_TL3:
-              case HT_RSP_KEY_TR1:
-              case HT_RSP_KEY_TR2:
-              case HT_RSP_KEY_TR3:
+              case HT_RSP_KEY_DK1:
+              case HT_RSP_KEY_DK2:
+              case HT_RSP_KEY_DK3:
+              case HT_RSP_KEY_DK4:
+              case HT_RSP_KEY_DK5:
+              case HT_RSP_KEY_DK6:
                 length = 1;
                 break;
             }
@@ -1607,12 +1607,12 @@ updateHandyTechKeys (BrailleDisplay *brl, int *keyPressed) {
         uint64_t bit;
         switch (key) {
 #define KEY(name) case HT_RSP_KEY_##name: bit = BAUM_KEY_##name; break
-          KEY(TL1);
-          KEY(TL2);
-          KEY(TL3);
-          KEY(TR1);
-          KEY(TR2);
-          KEY(TR3);
+          KEY(DK1);
+          KEY(DK2);
+          KEY(DK3);
+          KEY(DK4);
+          KEY(DK5);
+          KEY(DK6);
 #undef KEY
 
           default:
@@ -1853,12 +1853,12 @@ updatePowerBrailleKeys (BrailleDisplay *brl, int *keyPressed) {
       }
     } else {
       uint64_t keys = 0;
-      if (packet.buttons[0] & PB2_BUTTONS0_TL1) keys |= BAUM_KEY_TL1;
-      if (packet.buttons[0] & PB2_BUTTONS0_TL2) keys |= BAUM_KEY_TL2;
-      if (packet.buttons[0] & PB2_BUTTONS0_TL3) keys |= BAUM_KEY_TL3;
-      if (packet.buttons[1] & PB2_BUTTONS1_TR1) keys |= BAUM_KEY_TR1;
-      if (packet.buttons[0] & PB2_BUTTONS0_TR2) keys |= BAUM_KEY_TR2;
-      if (packet.buttons[1] & PB2_BUTTONS1_TR3) keys |= BAUM_KEY_TR3;
+      if (packet.buttons[0] & PB2_BUTTONS0_TL1) keys |= BAUM_KEY_DK1;
+      if (packet.buttons[0] & PB2_BUTTONS0_TL2) keys |= BAUM_KEY_DK2;
+      if (packet.buttons[0] & PB2_BUTTONS0_TL3) keys |= BAUM_KEY_DK3;
+      if (packet.buttons[1] & PB2_BUTTONS1_TR1) keys |= BAUM_KEY_DK4;
+      if (packet.buttons[0] & PB2_BUTTONS0_TR2) keys |= BAUM_KEY_DK5;
+      if (packet.buttons[1] & PB2_BUTTONS1_TR3) keys |= BAUM_KEY_DK6;
 
       /*
        * The PB emulation is deficient as the protocol doesn't report any
@@ -2462,12 +2462,12 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 #define KEY(key,cmd) case (key): command = (cmd); break
 #define KEYv(key,baumCmd,varioCmd) KEY((key), (useVarioKeys? (varioCmd): (baumCmd)))
   if (currentModifiers & MOD_INPUT) {
-#define DOT1 BAUM_KEY_TL1
-#define DOT2 BAUM_KEY_TL2
-#define DOT3 BAUM_KEY_TL3
-#define DOT4 BAUM_KEY_TR1
-#define DOT5 BAUM_KEY_TR2
-#define DOT6 BAUM_KEY_TR3
+#define DOT1 BAUM_KEY_DK1
+#define DOT2 BAUM_KEY_DK2
+#define DOT3 BAUM_KEY_DK3
+#define DOT4 BAUM_KEY_DK4
+#define DOT5 BAUM_KEY_DK5
+#define DOT6 BAUM_KEY_DK6
 
     newModifiers = currentModifiers & (MOD_INPUT | MOD_INPUT_ONCE |
                                        MOD_DOT7_LOCK | MOD_DOT8_LOCK |
@@ -2593,16 +2593,16 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
       } else {
         if ((key1 == brl->textColumns-2) && (key2 == brl->textColumns-1)) {
           switch (keys) {
-            case BAUM_KEY_TL1:
+            case BAUM_KEY_DK1:
               /* already in input mode */
               command = BRL_CMD_NOOP | BRL_FLG_TOGGLE_ON;
               break;
 
-            case BAUM_KEY_TL2:
+            case BAUM_KEY_DK2:
               newModifiers |= MOD_INPUT_ONCE;
               break;
 
-            case BAUM_KEY_TL3:
+            case BAUM_KEY_DK3:
               newModifiers = 0;
               command = BRL_CMD_NOOP | BRL_FLG_TOGGLE_OFF;
               break;
@@ -2648,73 +2648,73 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 #undef DOT
     } else {
       switch (keys) {
-        KEY(BAUM_KEY_TL2, BRL_CMD_FWINLT);
-        KEY(BAUM_KEY_TR2, BRL_CMD_FWINRT);
+        KEY(BAUM_KEY_DK2, BRL_CMD_FWINLT);
+        KEY(BAUM_KEY_DK5, BRL_CMD_FWINRT);
 
-        KEYv(BAUM_KEY_TL1|BAUM_KEY_TL3, BRL_CMD_CHRLT, BRL_CMD_HOME);
-        KEYv(BAUM_KEY_TR1|BAUM_KEY_TR3, BRL_CMD_CHRRT, BRL_CMD_CSRTRK);
+        KEYv(BAUM_KEY_DK1|BAUM_KEY_DK3, BRL_CMD_CHRLT, BRL_CMD_HOME);
+        KEYv(BAUM_KEY_DK4|BAUM_KEY_DK6, BRL_CMD_CHRRT, BRL_CMD_CSRTRK);
 
-        KEYv(BAUM_KEY_TL1|BAUM_KEY_TL2|BAUM_KEY_TL3, BRL_CMD_LNBEG, BRL_CMD_CHRLT);
-        KEYv(BAUM_KEY_TR1|BAUM_KEY_TR2|BAUM_KEY_TR3, BRL_CMD_LNEND, BRL_CMD_CHRRT);
+        KEYv(BAUM_KEY_DK1|BAUM_KEY_DK2|BAUM_KEY_DK3, BRL_CMD_LNBEG, BRL_CMD_CHRLT);
+        KEYv(BAUM_KEY_DK4|BAUM_KEY_DK5|BAUM_KEY_DK6, BRL_CMD_LNEND, BRL_CMD_CHRRT);
 
-        KEYv(BAUM_KEY_TR1, BRL_CMD_LNUP, BRL_CMD_PRDIFLN);
-        KEYv(BAUM_KEY_TR3, BRL_CMD_LNDN, BRL_CMD_NXDIFLN);
+        KEYv(BAUM_KEY_DK4, BRL_CMD_LNUP, BRL_CMD_PRDIFLN);
+        KEYv(BAUM_KEY_DK6, BRL_CMD_LNDN, BRL_CMD_NXDIFLN);
 
-        KEY(BAUM_KEY_TL1|BAUM_KEY_TR1, BRL_CMD_TOP);
-        KEY(BAUM_KEY_TL3|BAUM_KEY_TR3, BRL_CMD_BOT);
+        KEY(BAUM_KEY_DK1|BAUM_KEY_DK4, BRL_CMD_TOP);
+        KEY(BAUM_KEY_DK3|BAUM_KEY_DK6, BRL_CMD_BOT);
 
-        KEYv(BAUM_KEY_TL2|BAUM_KEY_TR1, BRL_CMD_TOP_LEFT, BRL_CMD_INFO);
-        KEYv(BAUM_KEY_TL2|BAUM_KEY_TR3, BRL_CMD_BOT_LEFT, BRL_CMD_NOOP);
+        KEYv(BAUM_KEY_DK2|BAUM_KEY_DK4, BRL_CMD_TOP_LEFT, BRL_CMD_INFO);
+        KEYv(BAUM_KEY_DK2|BAUM_KEY_DK6, BRL_CMD_BOT_LEFT, BRL_CMD_NOOP);
 
-        KEYv(BAUM_KEY_TR2|BAUM_KEY_TR1, BRL_CMD_PRDIFLN, BRL_CMD_ATTRUP);
-        KEYv(BAUM_KEY_TR2|BAUM_KEY_TR3, BRL_CMD_NXDIFLN, BRL_CMD_ATTRDN);
+        KEYv(BAUM_KEY_DK5|BAUM_KEY_DK4, BRL_CMD_PRDIFLN, BRL_CMD_ATTRUP);
+        KEYv(BAUM_KEY_DK5|BAUM_KEY_DK6, BRL_CMD_NXDIFLN, BRL_CMD_ATTRDN);
 
-        KEYv(BAUM_KEY_TL2|BAUM_KEY_TL1, BRL_CMD_ATTRUP, BRL_CMD_TOP_LEFT);
-        KEYv(BAUM_KEY_TL2|BAUM_KEY_TL3, BRL_CMD_ATTRDN, BRL_CMD_BOT_LEFT);
+        KEYv(BAUM_KEY_DK2|BAUM_KEY_DK1, BRL_CMD_ATTRUP, BRL_CMD_TOP_LEFT);
+        KEYv(BAUM_KEY_DK2|BAUM_KEY_DK3, BRL_CMD_ATTRDN, BRL_CMD_BOT_LEFT);
 
-        KEY(BAUM_KEY_TL2|BAUM_KEY_TR2|BAUM_KEY_TL1|BAUM_KEY_TR1, BRL_CMD_PRPROMPT);
-        KEY(BAUM_KEY_TL2|BAUM_KEY_TR2|BAUM_KEY_TL3|BAUM_KEY_TR3, BRL_CMD_NXPROMPT);
+        KEY(BAUM_KEY_DK2|BAUM_KEY_DK5|BAUM_KEY_DK1|BAUM_KEY_DK4, BRL_CMD_PRPROMPT);
+        KEY(BAUM_KEY_DK2|BAUM_KEY_DK5|BAUM_KEY_DK3|BAUM_KEY_DK6, BRL_CMD_NXPROMPT);
 
-        KEY(BAUM_KEY_TL2|BAUM_KEY_TR2|BAUM_KEY_TR1, BRL_CMD_PRPGRPH);
-        KEY(BAUM_KEY_TL2|BAUM_KEY_TR2|BAUM_KEY_TR3, BRL_CMD_NXPGRPH);
+        KEY(BAUM_KEY_DK2|BAUM_KEY_DK5|BAUM_KEY_DK4, BRL_CMD_PRPGRPH);
+        KEY(BAUM_KEY_DK2|BAUM_KEY_DK5|BAUM_KEY_DK6, BRL_CMD_NXPGRPH);
 
-        KEY(BAUM_KEY_TL2|BAUM_KEY_TR1|BAUM_KEY_TR3|BAUM_KEY_TL1, BRL_CMD_PRSEARCH);
-        KEY(BAUM_KEY_TL2|BAUM_KEY_TR1|BAUM_KEY_TR3|BAUM_KEY_TL3, BRL_CMD_NXSEARCH);
+        KEY(BAUM_KEY_DK2|BAUM_KEY_DK4|BAUM_KEY_DK6|BAUM_KEY_DK1, BRL_CMD_PRSEARCH);
+        KEY(BAUM_KEY_DK2|BAUM_KEY_DK4|BAUM_KEY_DK6|BAUM_KEY_DK3, BRL_CMD_NXSEARCH);
 
-        KEYv(BAUM_KEY_TL1, BRL_CMD_CSRTRK|BRL_FLG_TOGGLE_ON, BRL_CMD_LNUP);
-        KEYv(BAUM_KEY_TL3, BRL_CMD_CSRTRK|BRL_FLG_TOGGLE_OFF, BRL_CMD_LNDN);
+        KEYv(BAUM_KEY_DK1, BRL_CMD_CSRTRK|BRL_FLG_TOGGLE_ON, BRL_CMD_LNUP);
+        KEYv(BAUM_KEY_DK3, BRL_CMD_CSRTRK|BRL_FLG_TOGGLE_OFF, BRL_CMD_LNDN);
 
-	KEY(BAUM_KEY_TL1|BAUM_KEY_TR3, BRL_CMD_BACK);
+	KEY(BAUM_KEY_DK1|BAUM_KEY_DK6, BRL_CMD_BACK);
 
-        KEYv(BAUM_KEY_TL2|BAUM_KEY_TR1|BAUM_KEY_TR3, BRL_CMD_HOME, BRL_CMD_LNBEG);
-        KEYv(BAUM_KEY_TL1|BAUM_KEY_TL3|BAUM_KEY_TR2, BRL_CMD_SPKHOME, BRL_CMD_LNEND);
+        KEYv(BAUM_KEY_DK2|BAUM_KEY_DK4|BAUM_KEY_DK6, BRL_CMD_HOME, BRL_CMD_LNBEG);
+        KEYv(BAUM_KEY_DK1|BAUM_KEY_DK3|BAUM_KEY_DK5, BRL_CMD_SPKHOME, BRL_CMD_LNEND);
 
-        KEY(BAUM_KEY_TL1|BAUM_KEY_TL3|BAUM_KEY_TR1|BAUM_KEY_TR3, BRL_CMD_CSRJMP_VERT);
-        KEYv(BAUM_KEY_TL2|BAUM_KEY_TR2, BRL_CMD_INFO, BRL_CMD_SKPBLNKWINS);
+        KEY(BAUM_KEY_DK1|BAUM_KEY_DK3|BAUM_KEY_DK4|BAUM_KEY_DK6, BRL_CMD_CSRJMP_VERT);
+        KEYv(BAUM_KEY_DK2|BAUM_KEY_DK5, BRL_CMD_INFO, BRL_CMD_SKPBLNKWINS);
 
-        KEY(BAUM_KEY_TL1|BAUM_KEY_TR1|BAUM_KEY_TR2, BRL_CMD_DISPMD);
-        KEY(BAUM_KEY_TL1|BAUM_KEY_TL2|BAUM_KEY_TR1, BRL_CMD_FREEZE);
-        KEY(BAUM_KEY_TL1|BAUM_KEY_TL2|BAUM_KEY_TR2, BRL_CMD_HELP);
-        KEY(BAUM_KEY_TL1|BAUM_KEY_TL3|BAUM_KEY_TR1, BRL_CMD_PREFMENU);
-        KEY(BAUM_KEY_TL1|BAUM_KEY_TL2|BAUM_KEY_TL3|BAUM_KEY_TR1, BRL_CMD_PASTE);
-        KEY(BAUM_KEY_TL1|BAUM_KEY_TL2|BAUM_KEY_TL3|BAUM_KEY_TR2, BRL_CMD_PREFLOAD);
-        KEY(BAUM_KEY_TL2|BAUM_KEY_TL3|BAUM_KEY_TR1, BRL_CMD_RESTARTSPEECH);
-        KEY(BAUM_KEY_TL2|BAUM_KEY_TL3|BAUM_KEY_TR1|BAUM_KEY_TR2, BRL_CMD_ATTRVIS);
-        KEY(BAUM_KEY_TL1|BAUM_KEY_TL3|BAUM_KEY_TR3, BRL_CMD_BACK);
-        KEY(BAUM_KEY_TL2|BAUM_KEY_TR1|BAUM_KEY_TR2|BAUM_KEY_TR3, BRL_CMD_PREFSAVE);
+        KEY(BAUM_KEY_DK1|BAUM_KEY_DK4|BAUM_KEY_DK5, BRL_CMD_DISPMD);
+        KEY(BAUM_KEY_DK1|BAUM_KEY_DK2|BAUM_KEY_DK4, BRL_CMD_FREEZE);
+        KEY(BAUM_KEY_DK1|BAUM_KEY_DK2|BAUM_KEY_DK5, BRL_CMD_HELP);
+        KEY(BAUM_KEY_DK1|BAUM_KEY_DK3|BAUM_KEY_DK4, BRL_CMD_PREFMENU);
+        KEY(BAUM_KEY_DK1|BAUM_KEY_DK2|BAUM_KEY_DK3|BAUM_KEY_DK4, BRL_CMD_PASTE);
+        KEY(BAUM_KEY_DK1|BAUM_KEY_DK2|BAUM_KEY_DK3|BAUM_KEY_DK5, BRL_CMD_PREFLOAD);
+        KEY(BAUM_KEY_DK2|BAUM_KEY_DK3|BAUM_KEY_DK4, BRL_CMD_RESTARTSPEECH);
+        KEY(BAUM_KEY_DK2|BAUM_KEY_DK3|BAUM_KEY_DK4|BAUM_KEY_DK5, BRL_CMD_ATTRVIS);
+        KEY(BAUM_KEY_DK1|BAUM_KEY_DK3|BAUM_KEY_DK6, BRL_CMD_BACK);
+        KEY(BAUM_KEY_DK2|BAUM_KEY_DK4|BAUM_KEY_DK5|BAUM_KEY_DK6, BRL_CMD_PREFSAVE);
 
-        KEY(BAUM_KEY_TL2|BAUM_KEY_TL3|BAUM_KEY_TR2, BRL_CMD_SIXDOTS|BRL_FLG_TOGGLE_ON);
-        KEY(BAUM_KEY_TL2|BAUM_KEY_TL3|BAUM_KEY_TR3, BRL_CMD_SIXDOTS|BRL_FLG_TOGGLE_OFF);
+        KEY(BAUM_KEY_DK2|BAUM_KEY_DK3|BAUM_KEY_DK5, BRL_CMD_SIXDOTS|BRL_FLG_TOGGLE_ON);
+        KEY(BAUM_KEY_DK2|BAUM_KEY_DK3|BAUM_KEY_DK6, BRL_CMD_SIXDOTS|BRL_FLG_TOGGLE_OFF);
 
-        KEY(BAUM_KEY_TL1|BAUM_KEY_TR1|BAUM_KEY_TR2|BAUM_KEY_TR3, BRL_CMD_LEARN);
-        KEY(BAUM_KEY_TL1|BAUM_KEY_TL2|BAUM_KEY_TL3|BAUM_KEY_TR3, BRL_CMD_SWITCHVT_NEXT);
-        KEY(BAUM_KEY_TL3|BAUM_KEY_TR1|BAUM_KEY_TR2|BAUM_KEY_TR3, BRL_CMD_SWITCHVT_PREV);
+        KEY(BAUM_KEY_DK1|BAUM_KEY_DK4|BAUM_KEY_DK5|BAUM_KEY_DK6, BRL_CMD_LEARN);
+        KEY(BAUM_KEY_DK1|BAUM_KEY_DK2|BAUM_KEY_DK3|BAUM_KEY_DK6, BRL_CMD_SWITCHVT_NEXT);
+        KEY(BAUM_KEY_DK3|BAUM_KEY_DK4|BAUM_KEY_DK5|BAUM_KEY_DK6, BRL_CMD_SWITCHVT_PREV);
 
-        KEY(BAUM_KEY_TL3|BAUM_KEY_TR1, BRL_CMD_MUTE);
-        KEY(BAUM_KEY_TL3|BAUM_KEY_TR2, BRL_CMD_SAY_LINE);
-        KEY(BAUM_KEY_TL3|BAUM_KEY_TR1|BAUM_KEY_TR2, BRL_CMD_SAY_ABOVE);
-        KEY(BAUM_KEY_TL3|BAUM_KEY_TR2|BAUM_KEY_TR3, BRL_CMD_SAY_BELOW);
-        KEY(BAUM_KEY_TL3|BAUM_KEY_TR1|BAUM_KEY_TR3, BRL_CMD_AUTOSPEAK);
+        KEY(BAUM_KEY_DK3|BAUM_KEY_DK4, BRL_CMD_MUTE);
+        KEY(BAUM_KEY_DK3|BAUM_KEY_DK5, BRL_CMD_SAY_LINE);
+        KEY(BAUM_KEY_DK3|BAUM_KEY_DK4|BAUM_KEY_DK5, BRL_CMD_SAY_ABOVE);
+        KEY(BAUM_KEY_DK3|BAUM_KEY_DK5|BAUM_KEY_DK6, BRL_CMD_SAY_BELOW);
+        KEY(BAUM_KEY_DK3|BAUM_KEY_DK4|BAUM_KEY_DK6, BRL_CMD_AUTOSPEAK);
 
         KEY(BAUM_KEY_B9, BRL_BLK_PASSDOTS);
         KEY(BAUM_KEY_B10, BRL_BLK_PASSDOTS);
@@ -2772,22 +2772,22 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
     switch (keys) {
       KEY(0, BRL_BLK_ROUTE+key);
 
-      KEY(BAUM_KEY_TL1, BRL_BLK_CUTBEGIN+key);
-      KEY(BAUM_KEY_TL2, BRL_BLK_CUTAPPEND+key);
-      KEY(BAUM_KEY_TR1, BRL_BLK_CUTLINE+key);
-      KEY(BAUM_KEY_TR2, BRL_BLK_CUTRECT+key);
+      KEY(BAUM_KEY_DK1, BRL_BLK_CUTBEGIN+key);
+      KEY(BAUM_KEY_DK2, BRL_BLK_CUTAPPEND+key);
+      KEY(BAUM_KEY_DK4, BRL_BLK_CUTLINE+key);
+      KEY(BAUM_KEY_DK5, BRL_BLK_CUTRECT+key);
 
-      KEY(BAUM_KEY_TL3, BRL_BLK_DESCCHAR+key);
-      KEY(BAUM_KEY_TR3, BRL_BLK_SETLEFT+key);
+      KEY(BAUM_KEY_DK3, BRL_BLK_DESCCHAR+key);
+      KEY(BAUM_KEY_DK6, BRL_BLK_SETLEFT+key);
 
-      KEY(BAUM_KEY_TL2|BAUM_KEY_TL1, BRL_BLK_PRINDENT+key);
-      KEY(BAUM_KEY_TL2|BAUM_KEY_TL3, BRL_BLK_NXINDENT+key);
+      KEY(BAUM_KEY_DK2|BAUM_KEY_DK1, BRL_BLK_PRINDENT+key);
+      KEY(BAUM_KEY_DK2|BAUM_KEY_DK3, BRL_BLK_NXINDENT+key);
 
-      KEY(BAUM_KEY_TR2|BAUM_KEY_TR1, BRL_BLK_PRDIFCHAR+key);
-      KEY(BAUM_KEY_TR2|BAUM_KEY_TR3, BRL_BLK_NXDIFCHAR+key);
+      KEY(BAUM_KEY_DK5|BAUM_KEY_DK4, BRL_BLK_PRDIFCHAR+key);
+      KEY(BAUM_KEY_DK5|BAUM_KEY_DK6, BRL_BLK_NXDIFCHAR+key);
 
-      KEY(BAUM_KEY_TL1|BAUM_KEY_TL3, BRL_BLK_SETMARK+key);
-      KEY(BAUM_KEY_TR1|BAUM_KEY_TR3, BRL_BLK_GOTOMARK+key);
+      KEY(BAUM_KEY_DK1|BAUM_KEY_DK3, BRL_BLK_SETMARK+key);
+      KEY(BAUM_KEY_DK4|BAUM_KEY_DK6, BRL_BLK_GOTOMARK+key);
     }
   } else if (routingKeyCount == 2) {
     if (keys == 0) {
@@ -2795,22 +2795,22 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
       pendingCommand = BRL_BLK_CUTLINE + routingKeys[1];
     } else if (routingKeys[1] == routingKeys[0]+1) {
       switch (keys) {
-        KEY(BAUM_KEY_TR1, BRL_BLK_PRINDENT+routingKeys[0]);
-        KEY(BAUM_KEY_TR3, BRL_BLK_NXINDENT+routingKeys[0]);
+        KEY(BAUM_KEY_DK4, BRL_BLK_PRINDENT+routingKeys[0]);
+        KEY(BAUM_KEY_DK6, BRL_BLK_NXINDENT+routingKeys[0]);
 
         default:
           if (routingKeys[1] == brl->textColumns-1) {
             switch (keys) {
-              case BAUM_KEY_TL1:
+              case BAUM_KEY_DK1:
                 newModifiers = MOD_INPUT;
                 command = BRL_CMD_NOOP | BRL_FLG_TOGGLE_ON;
                 break;
 
-              case BAUM_KEY_TL2:
+              case BAUM_KEY_DK2:
                 newModifiers = MOD_INPUT | MOD_INPUT_ONCE;
                 break;
 
-              KEY(BAUM_KEY_TL3, BRL_CMD_NOOP|BRL_FLG_TOGGLE_OFF);
+              KEY(BAUM_KEY_DK3, BRL_CMD_NOOP|BRL_FLG_TOGGLE_OFF);
                 /* already out of input mode */ 
             }
           }
