@@ -424,7 +424,7 @@ static int tryHost(brlapi_handle_t *handle, char *hostAndPort) {
 #else /* __MINGW32__ */
     {
       struct sockaddr_un sa;
-      if (lpath+lport+1>sizeof(sa.sun_path)) {
+      if (lpath+1+lport+1>sizeof(sa.sun_path)) {
 	brlapi_libcerrno=ENAMETOOLONG;
 	brlapi_errfun="path";
 	brlapi_errno = BRLAPI_ERROR_LIBCERR;
@@ -436,8 +436,8 @@ static int tryHost(brlapi_handle_t *handle, char *hostAndPort) {
         goto outlibc;
       }
       sa.sun_family = AF_LOCAL;
-      memcpy(sa.sun_path,BRLAPI_SOCKETPATH,lpath);
-      memcpy(sa.sun_path+lpath,port,lport+1);
+      memcpy(sa.sun_path,BRLAPI_SOCKETPATH "/",lpath+1);
+      memcpy(sa.sun_path+lpath+1,port,lport+1);
       if (connect(handle->fileDescriptor, (struct sockaddr *) &sa, sizeof(sa))<0) {
         brlapi_errfun="connect";
         setSocketErrno();

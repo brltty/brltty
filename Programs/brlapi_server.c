@@ -1666,8 +1666,8 @@ static FileDescriptor initializeLocalSocket(struct socketInfo *info)
   CloseHandle(info->overl.hEvent);
 #else /* __MINGW32__ */
   struct sockaddr_un sa;
-  char tmppath[lpath+lport+3];
-  char lockpath[lpath+lport+2];
+  char tmppath[lpath+lport+4];
+  char lockpath[lpath+lport+3];
   struct stat st;
   char pids[16];
   pid_t pid;
@@ -1695,15 +1695,15 @@ static FileDescriptor initializeLocalSocket(struct socketInfo *info)
     /* read-only, or not mounted yet, wait */
     approximateDelay(1000);
   }
-  memcpy(sa.sun_path,BRLAPI_SOCKETPATH,lpath);
-  memcpy(sa.sun_path+lpath,info->port,lport+1);
-  memcpy(tmppath, BRLAPI_SOCKETPATH, lpath);
-  tmppath[lpath]='.';
-  memcpy(tmppath+lpath+1, info->port, lport);
-  memcpy(lockpath, tmppath, lpath+1+lport);
-  tmppath[lpath+lport+1]='_';
-  tmppath[lpath+lport+2]=0;
-  lockpath[lpath+lport+1]=0;
+  memcpy(sa.sun_path,BRLAPI_SOCKETPATH "/",lpath+1);
+  memcpy(sa.sun_path+lpath+1,info->port,lport+1);
+  memcpy(tmppath, BRLAPI_SOCKETPATH "/", lpath+1);
+  tmppath[lpath+1]='.';
+  memcpy(tmppath+lpath+2, info->port, lport);
+  memcpy(lockpath, tmppath, lpath+2+lport);
+  tmppath[lpath+2+lport]='_';
+  tmppath[lpath+2+lport+1]=0;
+  lockpath[lpath+2+lport]=0;
   while ((lock = open(tmppath, O_WRONLY|O_CREAT|O_EXCL, 
                       S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)) == -1) {
     if (errno == EROFS) {
@@ -1854,13 +1854,13 @@ static void closeSockets(void *arg)
       if (info->addrfamily==PF_LOCAL) {
 	char *path;
 	int lpath=strlen(BRLAPI_SOCKETPATH),lport=strlen(info->port);
-	if ((path=malloc(lpath+lport+2))) {
-	  memcpy(path,BRLAPI_SOCKETPATH,lpath);
-	  memcpy(path+lpath,info->port,lport+1);
+	if ((path=malloc(lpath+lport+3))) {
+	  memcpy(path,BRLAPI_SOCKETPATH "/",lpath+1);
+	  memcpy(path+lpath+1,info->port,lport+1);
 	  if (unlink(path))
 	    LogError("unlinking local socket");
-	  path[lpath]='.';
-	  memcpy(path+lpath+1,info->port,lport+1);
+	  path[lpath+1]='.';
+	  memcpy(path+lpath+2,info->port,lport+1);
 	  if (unlink(path))
 	    LogError("unlinking local socket lock");
 	  free(path);
