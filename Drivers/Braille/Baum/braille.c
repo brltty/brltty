@@ -525,9 +525,9 @@ typedef enum {
   BAUM_ERR_BrailleTableIndex      = 0X2A
 } BaumError;
 
-#define BAUM_DEVICE_IDENTITY_LENGTH 16
-#define BAUM_SERIAL_NUMBER_LENGTH 8
-#define BAUM_BLUETOOTH_NAME_LENGTH 14
+#define BAUM_LENGTH_DeviceIdentity 16
+#define BAUM_LENGTH_SerialNumber 8
+#define BAUM_LENGTH_BluetoothName 14
 
 typedef union {
   unsigned char bytes[17];
@@ -594,74 +594,73 @@ typedef union {
 
           union {
             struct {
-              unsigned char statusFlags;
-              signed char wheelPositions[4];
+              unsigned char flags;
+              signed char wheels[4];
               unsigned char wheelKeys;
               unsigned char displayKeys;
-              unsigned char routingKeys[10];
+              unsigned char routingKeys[KEY_GROUP_SIZE(80)];
             } PACKED display80;
 
             struct {
-              unsigned char statusFlags;
-              signed char wheelPositions[3];
+              unsigned char flags;
+              signed char wheels[3];
               unsigned char wheelKeys;
               unsigned char displayKeys;
-              unsigned char routingKeys[8];
+              unsigned char routingKeys[KEY_GROUP_SIZE(64)];
             } PACKED display64;
 
             struct {
-              unsigned char statusFlags;
-              unsigned char controlButtons;
-            } PACKED state;
+              unsigned char flags;
+              unsigned char buttons;
+            } PACKED status;
 
             struct {
-              unsigned char statusFlags;
-              signed char wheelPosition;
-              unsigned char controlButtons;
-              unsigned char keypadUpper;
-              unsigned char keypadLower;
+              unsigned char flags;
+              signed char wheel;
+              unsigned char buttons;
+              unsigned char keypad[2];
             } PACKED phone;
 
             struct {
-              unsigned char statusFlags;
-              signed char wheelPosition;
-              unsigned char controlKeys;
-              unsigned char potentiometers[6];
+              unsigned char flags;
+              signed char wheel;
+              unsigned char keys;
+              unsigned char pots[6];
             } PACKED audio;
 
             struct {
-              unsigned char statusFlags;
-              unsigned char controlButtons;
-              unsigned char cursorKeys;
-              unsigned char controlKeys;
-              unsigned char potentiometers[4];
+              unsigned char flags;
+              unsigned char buttons;
+              unsigned char cursor;
+              unsigned char keys;
+              unsigned char pots[4];
             } PACKED voice;
           } registers;
         } data;
       } PACKED modular;
 
-      char deviceIdentity[BAUM_DEVICE_IDENTITY_LENGTH];
-      char serialNumber[BAUM_SERIAL_NUMBER_LENGTH];
-      char bluetoothName[BAUM_BLUETOOTH_NAME_LENGTH];
+      char deviceIdentity[BAUM_LENGTH_DeviceIdentity];
+      char serialNumber[BAUM_LENGTH_SerialNumber];
+      char bluetoothName[BAUM_LENGTH_BluetoothName];
     } PACKED values;
   } PACKED data;
 } PACKED BaumResponsePacket;
 
 typedef enum {
-  BAUM_TYPE_Inka,
-  BAUM_TYPE_DM80P,
-  BAUM_TYPE_MODULAR,
-  BAUM_TYPE_Generic
+  BAUM_DEVICE_Inka,
+  BAUM_DEVICE_DM80P,
+  BAUM_DEVICE_Modular,
+  BAUM_DEVICE_Generic
 } BaumDeviceType;
 static BaumDeviceType baumDeviceType;
 
 typedef enum {
-  BMT_Display80,
-  BMT_Display64,
-  BMT_State,
-  BMT_Phone,
-  BMT_Audio,
-  BMT_Voice
+  BAUM_MODULE_Display80,
+  BAUM_MODULE_Display64,
+  BAUM_MODULE_Status,
+  BAUM_MODULE_Phone,
+  BAUM_MODULE_Audio,
+  BAUM_MODULE_Voice
 } BaumModuleType;
 
 typedef struct {
@@ -672,34 +671,34 @@ typedef struct {
   unsigned char buttonCount;
   unsigned char wheelCount;
   unsigned char potCount;
-  unsigned hasDisplayKeys:1;
+  unsigned isDisplay:1;
   unsigned hasCursorKeys:1;
   unsigned hasKeypad:1;
 } BaumModuleDescription;
 
 static const BaumModuleDescription baumModuleDescriptions[] = {
   { .identifier = 0X4180,
-    .type = BMT_Display80,
+    .type = BAUM_MODULE_Display80,
     .cellCount = 80,
     .wheelCount = 4,
-    .hasDisplayKeys = 1
+    .isDisplay = 1
   }
   ,
   { .identifier = 0X4181,
-    .type = BMT_Display64,
+    .type = BAUM_MODULE_Display64,
     .cellCount = 64,
     .wheelCount = 3,
-    .hasDisplayKeys = 1
+    .isDisplay = 1
   }
   ,
   { .identifier = 0X4190,
-    .type = BMT_State,
+    .type = BAUM_MODULE_Status,
     .cellCount = 4,
     .buttonCount = 4
   }
   ,
   { .identifier = 0X4191,
-    .type = BMT_Phone,
+    .type = BAUM_MODULE_Phone,
     .cellCount = 12,
     .buttonCount = 4,
     .wheelCount = 1,
@@ -707,14 +706,14 @@ static const BaumModuleDescription baumModuleDescriptions[] = {
   }
   ,
   { .identifier = 0X4192,
-    .type = BMT_Audio,
+    .type = BAUM_MODULE_Audio,
     .keyCount = 5,
     .wheelCount = 1,
     .potCount = 6
   }
   ,
   { .identifier = 0X4193,
-    .type = BMT_Voice,
+    .type = BAUM_MODULE_Voice,
     .keyCount = 4,
     .buttonCount = 3,
     .potCount = 4,
@@ -846,7 +845,7 @@ readBaumPacket (BrailleDisplay *brl, unsigned char *packet, int size) {
           case BAUM_RSP_Switches:
             if (!cellCount) {
               assumeBaumDeviceIdentity("DM80P");
-              baumDeviceType = BAUM_TYPE_DM80P;
+              baumDeviceType = BAUM_DEVICE_DM80P;
               cellCount = 84;
             }
 
@@ -876,7 +875,7 @@ readBaumPacket (BrailleDisplay *brl, unsigned char *packet, int size) {
             break;
 
           case BAUM_RSP_VerticalSensor:
-            length = (baumDeviceType == BAUM_TYPE_Inka)? 2: 3;
+            length = (baumDeviceType == BAUM_DEVICE_Inka)? 2: 3;
             break;
 
           case BAUM_RSP_VerticalSensors:
@@ -895,11 +894,11 @@ readBaumPacket (BrailleDisplay *brl, unsigned char *packet, int size) {
           case BAUM_RSP_RoutingKeys:
             if (!cellCount) {
               assumeBaumDeviceIdentity("Inka");
-              baumDeviceType = BAUM_TYPE_Inka;
+              baumDeviceType = BAUM_DEVICE_Inka;
               cellCount = 56;
             }
 
-            if (baumDeviceType == BAUM_TYPE_Inka) {
+            if (baumDeviceType == BAUM_DEVICE_Inka) {
               length = 2;
               break;
             }
@@ -1045,7 +1044,7 @@ handleBaumModuleRegistration (BrailleDisplay *brl, const BaumResponsePacket *res
   }
 
   if (bmd) {
-    if (bmd->hasDisplayKeys) {
+    if (bmd->isDisplay) {
       baumDisplayModule.description = bmd;
       baumDisplayModule.serialNumber = serialNumber;
       baumDisplayModule.hardwareVersion = getBaumInteger(response->data.values.modular.data.registration.hardwareVersion);
@@ -1065,7 +1064,7 @@ probeBaumDisplay (BrailleDisplay *brl) {
   do {
     int identityCellCount = 0;
 
-    baumDeviceType = BAUM_TYPE_Generic;
+    baumDeviceType = BAUM_DEVICE_Generic;
     cellCount = 0;
 
     clearBaumModuleRegistration(&baumDisplayModule);
@@ -1136,7 +1135,7 @@ probeBaumDisplay (BrailleDisplay *brl) {
           case BAUM_RSP_ModuleRegistration: /* modular models */
             if (!handleBaumModuleRegistration(brl, &response)) return 0;
             if (!baumDisplayModule.description) continue;
-            baumDeviceType = BAUM_TYPE_MODULAR;
+            baumDeviceType = BAUM_DEVICE_Modular;
             return 1;
 
           case BAUM_RSP_DeviceIdentity: /* should contain fallback cell count */
@@ -1220,7 +1219,7 @@ updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
         unsigned char keys;
 
         switch (baumDeviceType) {
-          case BAUM_TYPE_Inka:
+          case BAUM_DEVICE_Inka:
             keys = 0;
 #define KEY(bit,name) if (!(packet.data.values.displayKeys & (bit))) keys |= BAUM_KEY_##name
             KEY(004, DK1);
@@ -1232,7 +1231,7 @@ updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
 #undef KEY
             break;
 
-          case BAUM_TYPE_DM80P:
+          case BAUM_DEVICE_DM80P:
             keys = packet.data.values.displayKeys ^ 0X7F;
             break;
 
@@ -1304,7 +1303,7 @@ updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
       case BAUM_RSP_VerticalSensor: {
         unsigned char left = packet.data.values.verticalSensor.left;
         unsigned char right;
-        if (baumDeviceType != BAUM_TYPE_Inka) {
+        if (baumDeviceType != BAUM_DEVICE_Inka) {
           right = packet.data.values.verticalSensor.right;
         } else if (left & 0X40) {
           left -= 0X40;
@@ -1328,7 +1327,7 @@ updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
         resetKeyGroup(packet.data.values.routingKeys, cellCount, packet.data.values.routingKey);
         goto doRoutingKeys;
       case BAUM_RSP_RoutingKeys:
-        if (baumDeviceType == BAUM_TYPE_Inka) {
+        if (baumDeviceType == BAUM_DEVICE_Inka) {
           setInkaSwitches(brl, packet.data.values.switches, 0);
           continue;
         }
@@ -1346,7 +1345,13 @@ updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
         }
         continue;
 
+      case BAUM_RSP_ErrorCode:
+        if (packet.data.values.errorCode != BAUM_ERR_PacketType) goto unexpectedPacket;
+        LogPrint(LOG_DEBUG, "unsupported request");
+        continue;
+
       default:
+      unexpectedPacket:
         LogBytes(LOG_WARNING, "Unexpected Packet", packet.bytes, size);
         continue;
     }
@@ -1357,7 +1362,7 @@ updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
 
 static int
 writeBaumCells (BrailleDisplay *brl) {
-  if (baumDeviceType == BAUM_TYPE_MODULAR) {
+  if (baumDeviceType == BAUM_DEVICE_Modular) {
     unsigned char packet[2 + 7 + cellCount];
     unsigned char *byte = packet;
 
@@ -1385,7 +1390,7 @@ writeBaumCells (BrailleDisplay *brl) {
     unsigned char *byte = packet;
 
     *byte++ = BAUM_REQ_DisplayData;
-    if ((baumDeviceType == BAUM_TYPE_Inka) || (baumDeviceType == BAUM_TYPE_DM80P))
+    if ((baumDeviceType == BAUM_DEVICE_Inka) || (baumDeviceType == BAUM_DEVICE_DM80P))
       *byte++ = 0;
 
     memcpy(byte, externalCells, cellCount);
@@ -2447,7 +2452,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   rightVerticalSensor = getSensorNumber(activeKeys.rightVerticalSensors, VERTICAL_SENSOR_COUNT);
 
   if (!(switchSettings & BAUM_SWT_DisableSensors)) {
-    if (baumDeviceType == BAUM_TYPE_Inka) {
+    if (baumDeviceType == BAUM_DEVICE_Inka) {
       if (horizontalSensor >= 0) {
         routingKeys[routingKeyCount++] = horizontalSensor;
         horizontalSensor = -1;
