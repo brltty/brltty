@@ -53,20 +53,35 @@ extern "C" {
  * number part is 0x1000000 and the value part is 0xuvwxyz. Else, the command
  * part is held by bits 28-8 and the value part is held by bits 7-0. This
  * permits to easily handle usual cases like 0x00xy (latin1), 0x01xy (latin2),
- * 0xff08 (backspace), 0xff09 (tab), ...
+ * XK_Backspace (0xff08, backspace), XK_Tab (0xff09, tab), ...
  *
- * For instance, if key == 0x20010008,
- * - key & BRLAPI_KEY_TYPE_MASK == BRLAPI_KEY_TYPE_CMD, so it's a braille
+ * For instance, if key == 0x0000000020010008,
+ * - (key & BRLAPI_KEY_TYPE_MASK) == BRLAPI_KEY_TYPE_CMD, so it's a braille
  * command
- * - key & BRLAPI_KEY_CMD_BLK_MASK == BRLAPI_KEY_CMD_ROUTE, so it's the braille
- * route command.
- * - key & BRLAPI_KEY_CMD_ARG_MASK == 8, so the highlighted cell is the 9th one
- * (cells are numbered from 0)
- * - key & BRLAPI_KEY_FLAGS_MASK == 0, so no modifier key was pressed during the
- * command, and no particular flag applies to the command.
+ * - (key & BRLAPI_KEY_CMD_BLK_MASK) == BRLAPI_KEY_CMD_ROUTE, so it's the
+ * braille route command.
+ * - (key & BRLAPI_KEY_CMD_ARG_MASK) == 8, so the highlighted cell is the 9th
+ * one (cells are numbered from 0)
+ * - (key & BRLAPI_KEY_FLAGS_MASK) == 0, so no modifier key was pressed during
+ * the command, and no particular flag applies to the command.
+ *
+ * if key == 0x000000010000FF09,
+ * - (key & BRLAPI_KEY_TYPE_MASK) == BRLAPI_KEY_TYPE_SYM, so it's a keysym
+ * - (key & BRLAPI_KEY_CODE_MASK) == XK_Tab, so it's the tab key.
+ * - (key & BRLAPI_KEY_FLAGS_MASK) == BRLAPI_KEY_FLG_SHIFT, so the shift
+ *   modifier was pressed during the command.
+ *
+ * in the X11 standard some keysyms are directly unicode, for instance if
+ * key == 0x0000000001001EA0,
+ * - (key & BRLAPI_KEY_TYPE_MASK) == BRLAPI_KEY_TYPE_SYM, so it's a keysym
+ * - (key & BRLAPI_KEY_SYM_UNICODE) != 0 so it's a unicode keysym, whose value
+ * is key & (BRLAPI_KEY_SYM_UNICODE-1).  Of course, one can also consider
+ * (key & BRLAPI_KEY_CODE_MASK) == XK_Abelowdot
+ * - (key & BRLAPI_KEY_FLAGS_MASK) == 0, so no modifier key was pressed during
+ * the command, and no particular flag applies to the command.
  *
  * The brlapi_expandKeyCode() function may be used for splitting key codes into
- * these 4 parts.
+ * these parts.
  * @{
  */
 typedef uint64_t brlapi_keyCode_t;

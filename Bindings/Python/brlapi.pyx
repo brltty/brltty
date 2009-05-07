@@ -8,26 +8,37 @@ This documentation is only a python helper, you should also read C manual pages.
 Example : 
 import brlapi
 import errno
+import Xlib.keysymdef.miscellany
 try:
   b = brlapi.Connection()
   b.enterTtyMode()
   b.ignoreKeys(brlapi.rangeType_all,[0])
+
+  # Accept the home, window up and window down braille commands
   b.acceptKeys(brlapi.rangeType_command,[brlapi.KEY_TYPE_CMD|brlapi.KEY_CMD_HOME, brlapi.KEY_TYPE_CMD|brlapi.KEY_CMD_WINUP, brlapi.KEY_TYPE_CMD|brlapi.KEY_CMD_WINDN])
-  b.writeText("Press home or winup/dn to continue ... ¤")
+
+  # Accept the tab key
+  b.acceptKeys(brlapi.rangeType_key,[brlapi.KEY_TYPE_SYM|Xlib.keysymdef.miscellany.XK_Tab])
+
+  b.writeText("Press home, winup/dn or tab to continue ... Â¤")
   key = b.readKey()
+
   k = b.expandKeyCode(key)
   b.writeText("Key %ld (%x %x %x %x) !" % (key, k["type"], k["command"], k["argument"], k["flags"]))
   b.writeText(None,1)
   b.readKey()
+
   underline = chr(brlapi.DOT7 + brlapi.DOT8)
   # Note: center() can take two arguments only starting from python 2.4
   b.write(
       regionBegin = 1,
       regionSize = 40,
-      text = u"Press any key to exit ¤                 ",
+      text = u"Press any key to exit Â¤                 ",
       orMask = "".center(21,underline) + "".center(19,chr(0)))
+
   b.acceptKeys(brlapi.rangeType_all,[0])
   b.readKey()
+
   b.leaveTtyMode()
 
 except brlapi.ConnectionError, e:

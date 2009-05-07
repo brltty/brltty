@@ -734,6 +734,9 @@ was pressed is to just use a switch statement:
 	  case BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_LNDN:
 	    fprintf(stderr, "line down\n");
 	    break;
+	  case BRLAPI_KEY_TYPE_SYM|XK_Tab:
+	    fprintf(stderr, "tab\n");
+	    break;
 	  default:
 	    fprintf(stderr, "unknown key\n");
 	    break;
