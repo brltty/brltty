@@ -529,6 +529,17 @@ typedef enum {
 #define BAUM_LENGTH_SerialNumber 8
 #define BAUM_LENGTH_BluetoothName 14
 
+typedef enum {
+  BAUM_MRC_Acknowledge = 0X01,
+  BAUM_MRC_Query       = 0X04
+} BaumModuleRegistrationCommand;
+
+typedef enum {
+  BAUM_MRE_Addition  = 1,
+  BAUM_MRE_Removal   = 2,
+  BAUM_MRE_Rejection = 3
+} BaumModuleRegistrationEvent;
+
 typedef union {
   unsigned char bytes[17];
 
@@ -1020,38 +1031,48 @@ setInkaSwitches (BrailleDisplay *brl, unsigned char newSettings, int initialize)
 }
 
 static int
-handleBaumModuleRegistration (BrailleDisplay *brl, const BaumResponsePacket *response) {
-  uint16_t moduleIdentifier = getBaumInteger(response->data.values.modular.moduleIdentifier);
-  uint16_t serialNumber = getBaumInteger(response->data.values.modular.serialNumber);
-  const BaumModuleDescription *bmd;
+writeBaumModuleRegistrationCommand (
+  BrailleDisplay *brl,
+  uint16_t moduleIdentifier, uint16_t serialNumber,
+  BaumModuleRegistrationCommand command
+) {
+  const unsigned char request[] = {
+    BAUM_REQ_ModuleRegistration,
+    5, /* data length */
+    MAKE_BAUM_INTEGER(moduleIdentifier),
+    MAKE_BAUM_INTEGER(serialNumber),
+    command
+  };
 
-  if (response->data.values.modular.data.registration.event == 0X01) {
-    {
-      const unsigned char request[] = {
-        BAUM_REQ_ModuleRegistration,
-        5, /* data length */
-        MAKE_BAUM_INTEGER(moduleIdentifier),
-        MAKE_BAUM_INTEGER(serialNumber),
-        0X01 /* acknowledge the device registration */
-      };
+  return writeBaumPacket(brl, request, sizeof(request));
+}
 
-      if (!writeBaumPacket(brl, request, sizeof(request))) return 0;
+static int
+handleBaumModuleRegistrationEvent (BrailleDisplay *brl, const BaumResponsePacket *packet) {
+  uint16_t moduleIdentifier = getBaumInteger(packet->data.values.modular.moduleIdentifier);
+  uint16_t serialNumber = getBaumInteger(packet->data.values.modular.serialNumber);
+  const BaumModuleDescription *bmd = getBaumModuleDescription(moduleIdentifier);
+
+  if (packet->data.values.modular.data.registration.event == BAUM_MRE_Addition) {
+    if (!writeBaumModuleRegistrationCommand(brl,
+                                            moduleIdentifier, serialNumber,
+                                            BAUM_MRC_Acknowledge))
+      return 0;
+
+    if (bmd) {
+      if (bmd->isDisplay) {
+        baumDisplayModule.description = bmd;
+        baumDisplayModule.serialNumber = serialNumber;
+        baumDisplayModule.hardwareVersion = getBaumInteger(packet->data.values.modular.data.registration.hardwareVersion);
+        baumDisplayModule.firmwareVersion = getBaumInteger(packet->data.values.modular.data.registration.firmwareVersion);
+
+        cellCount = bmd->cellCount;
+      }
     }
-
-    bmd = getBaumModuleDescription(moduleIdentifier);
   } else {
-    bmd = NULL;
-  }
-
-  if (bmd) {
-    if (bmd->isDisplay) {
-      baumDisplayModule.description = bmd;
-      baumDisplayModule.serialNumber = serialNumber;
-      baumDisplayModule.hardwareVersion = getBaumInteger(response->data.values.modular.data.registration.hardwareVersion);
-      baumDisplayModule.firmwareVersion = getBaumInteger(response->data.values.modular.data.registration.firmwareVersion);
-
-      cellCount = bmd->cellCount;
-    }
+    if ((bmd == baumDisplayModule.description) &&
+        (serialNumber == baumDisplayModule.serialNumber))
+      clearBaumModuleRegistration(&baumDisplayModule);
   }
 
   return 1;
@@ -1094,17 +1115,7 @@ probeBaumDisplay (BrailleDisplay *brl) {
     }
 
     /* the modular models need to be probed with a general call */
-    {
-      static const unsigned char request[] = {
-        BAUM_REQ_ModuleRegistration, /* packet type */
-        5,                           /* data length */
-        0, 0,                        /* all modules */
-        0, 0,                        /* any serial numer */
-        0X04                         /* do a general call */
-      };
-
-      if (!writeBaumPacket(brl, request, sizeof(request))) break;
-    }
+    if (!writeBaumModuleRegistrationCommand(brl, 0, 0, BAUM_MRC_Query)) break;
 
     while (io->awaitInput(probeTimeout)) {
       BaumResponsePacket response;
@@ -1133,7 +1144,7 @@ probeBaumDisplay (BrailleDisplay *brl) {
           }
 
           case BAUM_RSP_ModuleRegistration: /* modular models */
-            if (!handleBaumModuleRegistration(brl, &response)) return 0;
+            if (!handleBaumModuleRegistrationEvent(brl, &response)) return 0;
             if (!baumDisplayModule.description) continue;
             baumDeviceType = BAUM_DEVICE_Modular;
             return 1;
@@ -1341,7 +1352,7 @@ updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
         continue;
 
       case BAUM_RSP_ModuleRegistration:
-        if (handleBaumModuleRegistration(brl, &packet)) {
+        if (handleBaumModuleRegistrationEvent(brl, &packet)) {
         }
         continue;
 
