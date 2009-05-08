@@ -483,14 +483,16 @@ driver.
 
 <p>
 A <em/BrlAPI/ client <em/C/ running in some <em/screen/ window number 1 would
-then have to get the Tty path "VT 3 then window 1", which is merely expressed as
-"3 1".  The window number is available in the <tt/WINDOW/ environment variable,
-set by <em/screen/. The VT number, which actually represents the "path to
-screen's output" should be available in the <tt/WINDOWPATH/ environment
-variable, also set by <em/screen/.  The client can thus merely concatenates the
+then have to get the Tty path "VT 3 then window 1", which is merely expressed
+as "3 1".  The window number is available in the <tt/WINDOW/ environment
+variable, set by <em/screen/. The VT number, which actually represents the "path
+to screen's output" should be available in the <tt/WINDOWPATH/ environment
+variable, also set by <em/screen/.  The client can thus merely concatenate the
 content of <tt/WINDOWPATH/ (which could hold many levels of window numbers) and
 of <tt/WINDOW/ and give the result as tty path to the <em/BrlAPI/ server, which
-then knows precisely where the client's usual output resides.
+then knows precisely where the client's usual output resides.  In practice,
+applications just need to call <tt/brlapi_enterTtyMode(BRLAPI_TTY_DEFAULT)/, and
+the the <em/BrlAPI/ client library will automatically perform all that.
 
 <p>
 Whenever the user switches to VT 3, the <em/BrlAPI/ server remembers the window
@@ -508,27 +510,45 @@ the tree.
 <sect1>The X-window case
 
 <p>
-Let's say some X server is running on VT 7.  The user should also launch
-<em/xbrlapi/, which is a focus teller for X-window as well as a keyboard
-simulator (<em/brltty/ can't reliably simulate them at the kernel level in such
-situation).  For accessing AT-SPI contents (like gnome or kde applications),
-gnopernicus should also be launched.  For accessing AT-SPI terminals (like
-gnome-terminal), a second <em/brltty/ daemon running the at-spi screen driver
-and the <em/BrlAPI/ driver should also be launched.  All three would get VT 7,
-in that order (for now): <em/xbrlapi/ first, then <em/gnopernicus/ and
-<em/brltty/ at last.  When the X focus is on an AT-SPI terminal, <em/brltty/
-will hence be able to grab the braille display and key presses.  Else
-<em/gnopernicus/ would get them.  And <em/xbrlapi/ would finally get remaining
-key presses and simulate them.
+Let's say some X server is running on VT 7 of a Linux system. Xorg's <em/xinit/
+and <em/xdm/ commands automatically set the X session's <tt/WINDOWPATH/
+environment variable to "7", so that X11 <em/BrlAPI/ clients started from
+the session just need to call <em/brlapi_enterTtyMode(xid)/ where <em/xid/
+is the X-window ID of the window of the client. The <em/BrlAPI/ library
+will automatically prepend the content of <tt/WINDOWPATH/ to it.
 
 <p>
-The user should also set in his <tt>~/.xsession</tt>, <tt>~/.xinitrc</tt>,
-<tt>~/.gdmrc</tt>... the <tt/WINDOWPATH/ environment variable to "7", so that
-clients running in xterms will be able to prepend it to the content of the
-<tt/WINDOWID/ variable (set by xterms) and give this Tty path to the <em/BrlAPI/
-server.  Any <em/screen/ run in some xterm should then concatenate these
-<tt/WINDOWPATH/ and <tt/WINDOWID/ variables to form a new <tt/WINDOWSPATH/
-variable to give to sessions running in it.
+For text-based <em/BrlAPI/ clients running in an xterm (which should just call
+<tt/brlapi_enterTtyMode(BRLAPI_TTY_DEFAULT)/ as explained in the previous
+section), <em/BrlAPI/ detects the window id thanks to the <tt/WINDOWID/ variable
+set by xterm.
+
+<p>
+Screen readers are not bound to a particular window, so they should call
+<em/brlapi_enterTtyModeWithPath(NULL, 0)/ to let the <em/BrlAPI/ library only
+send the content of <tt/WINDOWPATH/, expressing that screen readers take the
+whole tty.  The user should notably launch <em/xbrlapi/, which is a focus
+teller for X-window as well as a keyboard simulator (<em/brltty/ can't reliably
+simulate them at the kernel level in such situation).  For accessing AT-SPI
+contents (like gnome or kde applications), Orca should also be launched.  For
+accessing AT-SPI terminals (like gnome-terminal) in the same way as in the
+console, a second <em/brltty/ daemon running the at-spi screen driver and the
+<em/BrlAPI/ driver can also be launched.  All three would get the VT of the
+X session, in that order (for now): <em/xbrlapi/ first, then <em/orca/ and
+<em/brltty/ at last.  When the X focus is on an AT-SPI terminal, <em/brltty/
+will hence be able to grab the braille display and key presses.  Else <em/orca/
+would get them.  And <em/xbrlapi/ would finally get remaining key presses and
+simulate them.
+
+<p>
+Note: old versions of <tt/xinit/, <tt/xdm/, <tt/kdm/ or <tt/gdm/ do not
+automatically set the <tt/WINDOWPATH/ variable. The user can set it by hand in
+his <tt>~/.xsession</tt>, <tt>~/.xinitrc</tt>, <tt>~/.gdmrc</tt>... to "7"
+
+<p>
+Note: some Operating Systems like Solaris do not have VTs. In that case
+<tt/WINDOWPATH/ is empty or not even set.  Everything explained above still
+work fine.
 
 <sect1>Detaching
 
@@ -670,13 +690,13 @@ first:
 
 <tscreen><code>
   fprintf(stderr, "Taking control of the tty... ");
-  if (brlapi_enterTtyMode(-1, NULL) >= 0)
+  if (brlapi_enterTtyMode(BRLAPI_TTY_DEFAULT, NULL) >= 0)
   {
     fprintf(stderr, "Ok\n");
 </code></tscreen>
 
 The first parameter tells the server the number of the tty to take
-control of. Setting -1 lets the library determine it for us.
+control of. Setting BRLAPI_TTY_DEFAULT lets the library determine it for us.
 
 <p>The server is asked to send <em/brltty/ commands, which are device-independent.
 
@@ -837,7 +857,7 @@ int main()
 
 /* Get tty control */
   fprintf(stderr, "Taking control of the tty... ");
-  if (brlapi_enterTtyMode(-1, NULL) >= 0)
+  if (brlapi_enterTtyMode(BRLAPI_TTY_DEFAULT, NULL) >= 0)
   {
     fprintf(stderr, "Ok\n");
 

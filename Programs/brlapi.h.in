@@ -334,13 +334,6 @@ int BRLAPI_STDCALL brlapi__getDisplaySize(brlapi_handle_t *handle, unsigned int 
  * whereas a driver name means that raw key codes returned by this
  * driver are expected.
  *
- * In an X window environment, WINDOWPATH might be useful. XFree86 >=4.4 defines
- * an XFree86_VT root window property which exactly holds the used VT, so that
- * it should be given to brlapi_enterTtyMode. If it isn't available, one may,
- * right into .xsession and .xinitrc, grep X's log, for instance:
- *
- * WINDOWPATH="$(grep "using VT number" "/var/log/Xorg.$(echo "$DISPLAY" | sed -e "s/^.*::*\([0-9]*\).*$/\1/").log" | sed -e "s/^.*using VT number \([0-9]*\).*$/\1/")"
- *
  * WINDOWPATH and WINDOWID should be propagated when running remote applications
  * via ssh, for instance, along with BRLAPI_HOST and the authorization key (see
  * SendEnv in ssh_config(5) and AcceptEnv in sshd_config(5))
