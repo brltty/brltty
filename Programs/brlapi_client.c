@@ -1154,6 +1154,8 @@ int brlapi__writeText(brlapi_handle_t *handle, int cursor, const char *str)
       unsigned i;
       memset(&ps,0,sizeof(ps));
       for (min=0;min<dispSize;min++) {
+	if (!*str)
+	  goto endcount;
 	eaten = mbrlen(str,len,&ps);
 	switch(eaten) {
 	  case (size_t)(-2):
