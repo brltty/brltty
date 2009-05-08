@@ -68,8 +68,11 @@ extern "C" {
  * if key == 0x000000010000FF09,
  * - (key & BRLAPI_KEY_TYPE_MASK) == BRLAPI_KEY_TYPE_SYM, so it's a keysym
  * - (key & BRLAPI_KEY_CODE_MASK) == XK_Tab, so it's the tab key.
+ * BRLAPI_KEY_SYM_TAB can also be used here, as well as a few other
+ * BRLAPI_KEY_SYM_* constants which are provided to avoid having to include
+ * X11/keysymdef.h
  * - (key & BRLAPI_KEY_FLAGS_MASK) == BRLAPI_KEY_FLG_SHIFT, so the shift
- *   modifier was pressed during the command.
+ * modifier was pressed during the command.
  *
  * in the X11 standard some keysyms are directly unicode, for instance if
  * key == 0x0000000001001EA0,
