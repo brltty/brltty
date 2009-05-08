@@ -540,6 +540,14 @@ typedef enum {
   BAUM_MRE_Rejection = 3
 } BaumModuleRegistrationEvent;
 
+typedef enum {
+  BAUM_DRF_WheelsChanged  = 0X01,
+  BAUM_DRF_ButtonsChanged = 0X02,
+  BAUM_DRF_KeysChanged    = 0X04,
+  BAUM_DRF_PotsChanged    = 0X04,
+  BAUM_DRF_SensorsChanged = 0X08
+} BaumDataRegistersFlag;
+
 typedef union {
   unsigned char bytes[17];
 
@@ -607,17 +615,17 @@ typedef union {
             struct {
               unsigned char flags;
               signed char wheels[4];
-              unsigned char wheelKeys;
-              unsigned char displayKeys;
-              unsigned char routingKeys[KEY_GROUP_SIZE(80)];
+              unsigned char buttons;
+              unsigned char keys;
+              unsigned char sensors[KEY_GROUP_SIZE(80)];
             } PACKED display80;
 
             struct {
               unsigned char flags;
               signed char wheels[3];
-              unsigned char wheelKeys;
-              unsigned char displayKeys;
-              unsigned char routingKeys[KEY_GROUP_SIZE(64)];
+              unsigned char buttons;
+              unsigned char keys;
+              unsigned char sensors[KEY_GROUP_SIZE(64)];
             } PACKED display64;
 
             struct {
@@ -1079,6 +1087,36 @@ handleBaumModuleRegistrationEvent (BrailleDisplay *brl, const BaumResponsePacket
 }
 
 static int
+handleBaumDataRegisters (
+  BrailleDisplay *brl,
+  unsigned char flags,
+  const signed char *wheel,
+  unsigned char buttons,
+  unsigned char keys,
+  const unsigned char *sensors,
+  int *keyPressed
+) {
+  int changed = 0;
+
+  if (flags & BAUM_DRF_WheelsChanged) {
+  }
+
+  if (flags & BAUM_DRF_ButtonsChanged) {
+  }
+
+  if (flags & BAUM_DRF_KeysChanged) {
+    keys = (keys & 0X07) | ((keys & 0X70) >> 1);
+    if (updateFunctionKeyByte(keys, BAUM_SHIFT_DISPLAY, BAUM_WIDTH_DISPLAY, keyPressed)) changed = 1;
+  }
+
+  if (flags & BAUM_DRF_SensorsChanged) {
+    if (updateKeyGroup(pressedKeys.routingKeys, sensors, brl->textColumns, keyPressed)) changed = 1;
+  }
+
+  return changed;
+}
+
+static int
 probeBaumDisplay (BrailleDisplay *brl) {
   int probes = 0;
 
@@ -1353,6 +1391,37 @@ updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
 
       case BAUM_RSP_ModuleRegistration:
         if (handleBaumModuleRegistrationEvent(brl, &packet)) {
+        }
+        continue;
+
+      case BAUM_RSP_DataRegisters:
+        switch (baumDisplayModule.description->type) {
+          case BAUM_MODULE_Display80:
+            if (handleBaumDataRegisters(brl,
+                                        packet.data.values.modular.data.registers.display80.flags,
+                                        packet.data.values.modular.data.registers.display80.wheels,
+                                        packet.data.values.modular.data.registers.display80.buttons,
+                                        packet.data.values.modular.data.registers.display80.keys,
+                                        packet.data.values.modular.data.registers.display80.sensors,
+                                        keyPressed))
+              return 1;
+            break;
+
+          case BAUM_MODULE_Display64:
+            if (handleBaumDataRegisters(brl,
+                                        packet.data.values.modular.data.registers.display64.flags,
+                                        packet.data.values.modular.data.registers.display64.wheels,
+                                        packet.data.values.modular.data.registers.display64.buttons,
+                                        packet.data.values.modular.data.registers.display64.keys,
+                                        packet.data.values.modular.data.registers.display64.sensors,
+                                        keyPressed))
+              return 1;
+            break;
+
+          default:
+            LogPrint(LOG_WARNING, "unsupported data register configuration: %u",
+                     baumDisplayModule.description->type);
+            break;
         }
         continue;
 
@@ -1672,20 +1741,20 @@ static const ProtocolOperations handyTechOperations = {
 /* PowerBraille Protocol */
 
 #define PB_BUTTONS0_MARKER 0X60
-#define PB1_BUTTONS0_TR3   0X08
-#define PB1_BUTTONS0_TR2   0X04
-#define PB1_BUTTONS0_TR1   0X02
-#define PB1_BUTTONS0_TL2   0X01
-#define PB2_BUTTONS0_TL3   0X08
-#define PB2_BUTTONS0_TR2   0X04
-#define PB2_BUTTONS0_TL1   0X02
-#define PB2_BUTTONS0_TL2   0X01
+#define PB1_BUTTONS0_DK6   0X08
+#define PB1_BUTTONS0_DK5   0X04
+#define PB1_BUTTONS0_DK4   0X02
+#define PB1_BUTTONS0_DK2   0X01
+#define PB2_BUTTONS0_DK3   0X08
+#define PB2_BUTTONS0_DK5   0X04
+#define PB2_BUTTONS0_DK1   0X02
+#define PB2_BUTTONS0_DK2   0X01
 
 #define PB_BUTTONS1_MARKER 0XE0
-#define PB1_BUTTONS1_TL3   0X08
-#define PB1_BUTTONS1_TL1   0X02
-#define PB2_BUTTONS1_TR3   0X04
-#define PB2_BUTTONS1_TR1   0X02
+#define PB1_BUTTONS1_DK3   0X08
+#define PB1_BUTTONS1_DK1   0X02
+#define PB2_BUTTONS1_DK6   0X04
+#define PB2_BUTTONS1_DK4   0X02
 
 typedef enum {
   PB_REQ_WRITE = 0X04,
@@ -1869,12 +1938,15 @@ updatePowerBrailleKeys (BrailleDisplay *brl, int *keyPressed) {
       }
     } else {
       uint64_t keys = 0;
-      if (packet.buttons[0] & PB2_BUTTONS0_TL1) keys |= BAUM_KEY_DK1;
-      if (packet.buttons[0] & PB2_BUTTONS0_TL2) keys |= BAUM_KEY_DK2;
-      if (packet.buttons[0] & PB2_BUTTONS0_TL3) keys |= BAUM_KEY_DK3;
-      if (packet.buttons[1] & PB2_BUTTONS1_TR1) keys |= BAUM_KEY_DK4;
-      if (packet.buttons[0] & PB2_BUTTONS0_TR2) keys |= BAUM_KEY_DK5;
-      if (packet.buttons[1] & PB2_BUTTONS1_TR3) keys |= BAUM_KEY_DK6;
+
+#define KEY(name,index) if (packet.buttons[index] & PB2_BUTTONS##index##_##name) keys |= BAUM_KEY_##name
+      KEY(DK1, 0);
+      KEY(DK2, 0);
+      KEY(DK3, 0);
+      KEY(DK4, 1);
+      KEY(DK5, 0);
+      KEY(DK6, 1);
+#undef KEY
 
       /*
        * The PB emulation is deficient as the protocol doesn't report any
