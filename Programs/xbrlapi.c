@@ -175,14 +175,20 @@ void tobrltty_init(char *auth, char *host) {
 static int getXVTnb(void);
 
 void getVT(void) {
-  if (getenv("WINDOWPATH")) {
+  char *path = getenv("WINDOWPATH");
+  int vtno = -1;
+  if (!path)
+    /* Workaround for old xinit/xdm/gdm/kdm */
+    vtno = getXVTnb();
+
+  if (path || vtno == -1) {
     if (brlapi_enterTtyModeWithPath(NULL,0,NULL)<0)
       fatal_brlapi_errno("geTtyPath",gettext("cannot get tty\n"));
   } else {
-    int vtno = getXVTnb();
     if (brlapi_enterTtyMode(vtno,NULL)<0)
       fatal_brlapi_errno("enterTtyMode",gettext("cannot get tty %d\n"),vtno);
   }
+
   if (brlapi_ignoreAllKeys()<0)
     fatal_brlapi_errno("ignoreAllKeys",gettext("cannot ignore keys\n"));
 #ifdef CAN_SIMULATE_KEY_PRESSES
@@ -298,15 +304,21 @@ static int getXVTnb(void) {
 
   root=DefaultRootWindow(dpy);
 
-  if ((property=XInternAtom(dpy,"XFree86_VT",False))==None)
-    fatal(gettext("no XFree86_VT atom\n"));
-  
-  if (XGetWindowProperty(dpy,root,property,0,1,False,AnyPropertyType,
-    &actual_type, &actual_format, &nitems, &bytes_after, &buf))
-    fatal(gettext("cannot get root window XFree86_VT property\n"));
+  if ((property=XInternAtom(dpy,"XFree86_VT",False))==None) {
+    fprintf(stderr,gettext("no XFree86_VT atom\n"));
+    return -1;
+  }
 
-  if (nitems<1)
-    fatal(gettext("no items for VT number\n"));
+  if (XGetWindowProperty(dpy,root,property,0,1,False,AnyPropertyType,
+    &actual_type, &actual_format, &nitems, &bytes_after, &buf)) {
+    fprintf(stderr,gettext("cannot get root window XFree86_VT property\n"));
+    return -1;
+  }
+
+  if (nitems<1) {
+    fprintf(stderr, gettext("no items for VT number\n"));
+    goto out;
+  }
   if (nitems>1)
     fprintf(stderr,gettext("more than one item for VT number\n"));
   switch (actual_type) {
@@ -317,11 +329,12 @@ static int getXVTnb(void) {
     case 8:  vt = (*(uint8_t *)buf); break;
     case 16: vt = (*(uint16_t *)buf); break;
     case 32: vt = (*(uint32_t *)buf); break;
-    default: fatal(gettext("bad format for VT number\n"));
+    default: fprintf(stderr, gettext("bad format for VT number\n")); goto out;
     }
     break;
-  default: fatal(gettext("bad type for VT number\n"));
+  default: fprintf(stderr, gettext("bad type for VT number\n")); goto out;
   }
+out:
   if (!XFree(buf)) fatal("XFree(VTnobuf)");
   return vt;
 }
