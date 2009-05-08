@@ -2193,13 +2193,6 @@ openUsbPort (const char *device) {
       .disableAutosuspend=1
     }
     ,
-    { /* VarioPro 40 (40 cells) */
-      .vendor=0X0904, .product=0X2012,
-      .configuration=1, .interface=0, .alternative=0,
-      .inputEndpoint=1, .outputEndpoint=2,
-      .disableAutosuspend=1
-    }
-    ,
     { /* EcoVario 32 (32 cells) */
       .vendor=0X0904, .product=0X2014,
       .configuration=1, .interface=0, .alternative=0,

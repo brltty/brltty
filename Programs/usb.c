@@ -1422,12 +1422,6 @@ usbSetSerialOperations (UsbDevice *device) {
         usbInputFilter_FTDI
       }
       ,
-      { /* Baum VarioPro 40 (40 cells) */
-        0X0904, 0X2012,
-        &usbSerialOperations_FTDI_FT232BM,
-        usbInputFilter_FTDI
-      }
-      ,
       { /* Baum EcoVario 32 (32 cells) */
         0X0904, 0X2014,
         &usbSerialOperations_FTDI_FT232BM,
