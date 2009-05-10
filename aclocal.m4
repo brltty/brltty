@@ -467,6 +467,7 @@ fi])
 
 AC_DEFUN([BRLTTY_HAVE_PTHREADS], [dnl
    AC_CACHE_CHECK([if pthreads are available], [brltty_cv_have_pthreads], [dnl
+      SYSCFLAGS="${SYSCFLAGS} -D_REENTRANT"
       case "${host_os}"
       in
          mingw32*)
