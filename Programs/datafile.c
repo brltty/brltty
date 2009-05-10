@@ -319,14 +319,16 @@ parseDataString (DataFile *file, DataString *string, const wchar_t *characters, 
       }
     }
 
+    string->characters[string->length++] = character;
+    index += 1;
+
+    /* there needs to be room for a trailing NUL */
     if (string->length == ARRAY_COUNT(string->characters)) {
       reportDataError(file, "string operand too long");
       return 0;
     }
-
-    string->characters[string->length++] = character;
-    index += 1;
   }
+  string->characters[string->length] = 0;
 
   return 1;
 }
