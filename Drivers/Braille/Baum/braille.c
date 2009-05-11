@@ -541,12 +541,23 @@ typedef enum {
 } BaumModuleRegistrationEvent;
 
 typedef enum {
+  BAUM_DRC_Write = 0X00,
+  BAUM_DRC_Read  = 0X01,
+  BAUM_DRC_Reset = 0X80
+} BaumDataRegistersCommand;
+
+typedef enum {
   BAUM_DRF_WheelsChanged  = 0X01,
   BAUM_DRF_ButtonsChanged = 0X02,
   BAUM_DRF_KeysChanged    = 0X04,
   BAUM_DRF_PotsChanged    = 0X04,
   BAUM_DRF_SensorsChanged = 0X08
 } BaumDataRegistersFlag;
+
+typedef enum {
+  BAUM_SRC_Write = 0X00,
+  BAUM_SRC_Read  = 0X01
+} BaumServiceRegistersCommand;
 
 typedef union {
   unsigned char bytes[17];
@@ -1455,9 +1466,9 @@ writeBaumCells (BrailleDisplay *brl) {
     *byte++ = MAKE_BAUM_INTEGER_FIRST(baumDisplayModule.serialNumber);
     *byte++ = MAKE_BAUM_INTEGER_SECOND(baumDisplayModule.serialNumber);
 
-    *byte++ =  0; /* command to write the registers */
-    *byte++ =  0; /* index of the first register to write */
-    *byte++ =  cellCount; /* number of registers to write */
+    *byte++ = BAUM_DRC_Write;
+    *byte++ = 0; /* index of the first register to write */
+    *byte++ = cellCount; /* number of registers to write */
 
     memcpy(byte, externalCells, cellCount);
     byte += cellCount;
