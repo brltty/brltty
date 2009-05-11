@@ -551,8 +551,16 @@ typedef enum {
   BAUM_DRF_ButtonsChanged = 0X02,
   BAUM_DRF_KeysChanged    = 0X04,
   BAUM_DRF_PotsChanged    = 0X04,
-  BAUM_DRF_SensorsChanged = 0X08
+  BAUM_DRF_SensorsChanged = 0X08,
+  BAUM_DRF_ErrorOccurred  = 0X80
 } BaumDataRegistersFlag;
+
+typedef enum {
+  BAUM_DRE_WheelsNotConnected = 0X01,
+  BAUM_DRE_WheelsNotAdjusted  = 0X02,
+  BAUM_DRE_KeyBufferFull      = 0X04,
+  BAUM_DRE_SerialError        = 0X80
+} BaumDataRegistersError;
 
 typedef enum {
   BAUM_SRC_Write = 0X00,
@@ -625,6 +633,7 @@ typedef union {
           union {
             struct {
               unsigned char flags;
+              unsigned char error;
               signed char wheels[4];
               unsigned char buttons;
               unsigned char keys;
@@ -633,6 +642,7 @@ typedef union {
 
             struct {
               unsigned char flags;
+              unsigned char error;
               signed char wheels[3];
               unsigned char buttons;
               unsigned char keys;
@@ -641,11 +651,13 @@ typedef union {
 
             struct {
               unsigned char flags;
+              unsigned char error;
               unsigned char buttons;
             } PACKED status;
 
             struct {
               unsigned char flags;
+              unsigned char error;
               signed char wheel;
               unsigned char buttons;
               unsigned char keypad[2];
@@ -653,6 +665,7 @@ typedef union {
 
             struct {
               unsigned char flags;
+              unsigned char error;
               signed char wheel;
               unsigned char keys;
               unsigned char pots[6];
@@ -660,6 +673,7 @@ typedef union {
 
             struct {
               unsigned char flags;
+              unsigned char error;
               unsigned char buttons;
               unsigned char cursor;
               unsigned char keys;
