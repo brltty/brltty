@@ -1130,7 +1130,6 @@ handleBaumDataRegisters (
   }
 
   if (flags & BAUM_DRF_KeysChanged) {
-    keys = (keys & 0X07) | ((keys & 0X70) >> 1);
     if (updateFunctionKeyByte(keys, BAUM_SHIFT_DISPLAY, BAUM_WIDTH_DISPLAY, keyPressed)) changed = 1;
   }
 
