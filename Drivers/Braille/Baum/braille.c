@@ -568,7 +568,7 @@ typedef enum {
 } BaumServiceRegistersCommand;
 
 typedef union {
-  unsigned char bytes[17];
+  unsigned char bytes[2 + 0XFF];
 
   struct {
     unsigned char code;
