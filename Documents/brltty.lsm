@@ -1,7 +1,7 @@
 Begin4
 Title: brltty
 Version: 4.0
-Entered-date: 2009/04/27
+Entered-date: 2009/05/15
 Description: Braille Display Driver for Linux/Unix
              BRLTTY is a background process (daemon) which provides access
              to the console screen (when in text mode) for a blind person
@@ -32,7 +32,8 @@ Platforms: Linux (kernel 1.1.92 or later)
            - Alva [ABT(3nn), Delphi(4nn), Satellite(5nn), Braille System 40,
                    Braille Controller 640/680]
            - Baum [Inka, Vario/RBT, SuperVario/Brailliant, PocketVario,
-                   VarioPro, EcoVario, VarioConnect, Refreshabraille]
+                   VarioPro, EcoVario, VarioConnect/BrailleConnect,
+                   Refreshabraille]
            - BrailleLite [18/40/M20/M40]
            - BrailleNote [18/32]
            - BrlAPI
