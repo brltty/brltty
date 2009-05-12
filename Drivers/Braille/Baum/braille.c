@@ -282,7 +282,7 @@ changeCellCount (BrailleDisplay *brl, int count) {
 
       {
         int number;
-        for (number=cellCount; number<count; ++number) {
+        for (number=cellCount; number<count; number+=1) {
           setGroupedKey(pressedKeys.routingKeys, number, 0);
           setGroupedKey(pressedKeys.horizontalSensors, number, 0);
         }
@@ -622,8 +622,6 @@ typedef union {
         BaumInteger serialNumber;
 
         union {
-          unsigned char bytes[0X20];
-
           struct {
             BaumInteger hardwareVersion;
             BaumInteger firmwareVersion;
@@ -1112,14 +1110,11 @@ handleBaumModuleRegistrationEvent (BrailleDisplay *brl, const BaumResponsePacket
 }
 
 static int
-handleBaumDataRegisters (
-  BrailleDisplay *brl,
-  unsigned char flags,
-  const signed char *wheel,
-  unsigned char buttons,
-  unsigned char keys,
-  const unsigned char *sensors,
-  int *keyPressed
+handleBaumDataRegistersEvent (
+  BrailleDisplay *brl, int *keyPressed,
+  unsigned char flags, unsigned char error,
+  const signed char *wheel, unsigned char wheels,
+  unsigned char buttons, unsigned char keys, const unsigned char *sensors
 ) {
   int changed = 0;
 
@@ -1421,24 +1416,26 @@ updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
       case BAUM_RSP_DataRegisters:
         switch (baumDisplayModule.description->type) {
           case BAUM_MODULE_Display80:
-            if (handleBaumDataRegisters(brl,
-                                        packet.data.values.modular.data.registers.display80.flags,
-                                        packet.data.values.modular.data.registers.display80.wheels,
-                                        packet.data.values.modular.data.registers.display80.buttons,
-                                        packet.data.values.modular.data.registers.display80.keys,
-                                        packet.data.values.modular.data.registers.display80.sensors,
-                                        keyPressed))
+            if (handleBaumDataRegistersEvent(brl, keyPressed,
+                                             packet.data.values.modular.data.registers.display80.flags,
+                                             packet.data.values.modular.data.registers.display80.error,
+                                             packet.data.values.modular.data.registers.display80.wheels,
+                                             ARRAY_COUNT(packet.data.values.modular.data.registers.display80.wheels),
+                                             packet.data.values.modular.data.registers.display80.buttons,
+                                             packet.data.values.modular.data.registers.display80.keys,
+                                             packet.data.values.modular.data.registers.display80.sensors))
               return 1;
             break;
 
           case BAUM_MODULE_Display64:
-            if (handleBaumDataRegisters(brl,
-                                        packet.data.values.modular.data.registers.display64.flags,
-                                        packet.data.values.modular.data.registers.display64.wheels,
-                                        packet.data.values.modular.data.registers.display64.buttons,
-                                        packet.data.values.modular.data.registers.display64.keys,
-                                        packet.data.values.modular.data.registers.display64.sensors,
-                                        keyPressed))
+            if (handleBaumDataRegistersEvent(brl, keyPressed,
+                                             packet.data.values.modular.data.registers.display64.flags,
+                                             packet.data.values.modular.data.registers.display64.error,
+                                             packet.data.values.modular.data.registers.display64.wheels,
+                                             ARRAY_COUNT(packet.data.values.modular.data.registers.display64.wheels),
+                                             packet.data.values.modular.data.registers.display64.buttons,
+                                             packet.data.values.modular.data.registers.display64.keys,
+                                             packet.data.values.modular.data.registers.display64.sensors))
               return 1;
             break;
 
@@ -2494,17 +2491,18 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
 
   while (count > 0) {
     if (brl->buffer[count-1] != internalCells[count-1]) break;
-    --count;
+    count -= 1;
   }
 
   while (start < count) {
     if (brl->buffer[start] != internalCells[start]) break;
-    ++start;
+    start += 1;
   }
   count -= start;
 
   memcpy(&internalCells[start], &brl->buffer[start], count);
   translateCells(start, count);
+
   return updateCells(brl);
 }
 
