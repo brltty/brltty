@@ -259,6 +259,7 @@ static void
 logCellCount (BrailleDisplay *brl) {
   switch ((brl->textColumns = cellCount)) {
     case 44:
+    case 68:
     case 84:
       brl->textColumns -= 4;
       break;
@@ -794,6 +795,36 @@ clearBaumModuleRegistration (BaumModuleRegistration *bmr) {
 }
 
 static BaumModuleRegistration baumDisplayModule;
+static BaumModuleRegistration baumStatusModule;
+
+static BaumModuleRegistration *const baumModules[] = {
+  &baumDisplayModule,
+  &baumStatusModule,
+  NULL
+};
+
+static BaumModuleRegistration *
+getBaumModuleRegistration (const BaumModuleDescription *bmd) {
+  if (bmd->isDisplay) return &baumDisplayModule;
+  if (bmd->type == BAUM_MODULE_Status) return &baumStatusModule;
+  return NULL;
+}
+
+static int
+getBaumModuleCellCount (void) {
+  int count = 0;
+
+  {
+    BaumModuleRegistration *const *bmr = baumModules;
+
+    while (*bmr) {
+      const BaumModuleDescription *bmd = (*bmr++)->description;
+      if (bmd) count += bmd->cellCount;
+    }
+  }
+
+  return count;
+}
 
 static void
 assumeBaumDeviceIdentity (const char *identity) {
@@ -1091,19 +1122,29 @@ handleBaumModuleRegistrationEvent (BrailleDisplay *brl, const BaumResponsePacket
       return 0;
 
     if (bmd) {
-      if (bmd->isDisplay) {
-        baumDisplayModule.description = bmd;
-        baumDisplayModule.serialNumber = serialNumber;
-        baumDisplayModule.hardwareVersion = getBaumInteger(packet->data.values.modular.data.registration.hardwareVersion);
-        baumDisplayModule.firmwareVersion = getBaumInteger(packet->data.values.modular.data.registration.firmwareVersion);
+      BaumModuleRegistration *bmr = getBaumModuleRegistration(bmd);
 
-        cellCount = bmd->cellCount;
+      if (bmr) {
+        if (bmr->description) clearBaumModuleRegistration(bmr);
+
+        bmr->description = bmd;
+        bmr->serialNumber = serialNumber;
+        bmr->hardwareVersion = getBaumInteger(packet->data.values.modular.data.registration.hardwareVersion);
+        bmr->firmwareVersion = getBaumInteger(packet->data.values.modular.data.registration.firmwareVersion);
       }
     }
-  } else {
-    if ((bmd == baumDisplayModule.description) &&
-        (serialNumber == baumDisplayModule.serialNumber))
-      clearBaumModuleRegistration(&baumDisplayModule);
+  } else if (bmd) {
+    BaumModuleRegistration *const *bmr = baumModules;
+
+    while (*bmr) {
+      if (((*bmr)->description == bmd) &&
+          ((*bmr)->serialNumber == serialNumber)) {
+        clearBaumModuleRegistration(*bmr);
+        break;
+      }
+
+      bmr += 1;
+    }
   }
 
   return 1;
@@ -1145,7 +1186,10 @@ probeBaumDisplay (BrailleDisplay *brl) {
     baumDeviceType = BAUM_DEVICE_Generic;
     cellCount = 0;
 
-    clearBaumModuleRegistration(&baumDisplayModule);
+    {
+      BaumModuleRegistration *const *bmr = baumModules;
+      while (*bmr) clearBaumModuleRegistration(*bmr++);
+    }
 
     /* newer models return an identity string which contains the cell count */
     {
@@ -1204,6 +1248,7 @@ probeBaumDisplay (BrailleDisplay *brl) {
             if (!handleBaumModuleRegistrationEvent(brl, &response)) return 0;
             if (!baumDisplayModule.description) continue;
             baumDeviceType = BAUM_DEVICE_Modular;
+            cellCount = getBaumModuleCellCount();
             return 1;
 
           case BAUM_RSP_DeviceIdentity: /* should contain fallback cell count */
@@ -1411,6 +1456,8 @@ updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
       case BAUM_RSP_ModuleRegistration:
         if (handleBaumModuleRegistrationEvent(brl, &packet)) {
         }
+
+        changeCellCount(brl, getBaumModuleCellCount());
         continue;
 
       case BAUM_RSP_DataRegisters:
