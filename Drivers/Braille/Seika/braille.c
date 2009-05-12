@@ -60,7 +60,7 @@ typedef struct {
 
 typedef struct {
   const char *name;
-  int (*readPacket) (InputPacket *packet);
+  int (*readPacket) (BrailleDisplay *brl, InputPacket *packet);
   int (*probeDisplay) (BrailleDisplay *brl, InputPacket *response);
   int (*writeCells) (BrailleDisplay *brl);
 } ProtocolOperations;
@@ -114,7 +114,7 @@ probeDisplay (
     if (!writeBytes(brl, requestAddress, requestSize)) break;
 
     while (io->awaitInput(200)) {
-      if (!protocol->readPacket(response)) break;
+      if (!protocol->readPacket(NULL, response)) break;
       if (response->type == IPT_identity) return 1;
     }
     if (errno != EAGAIN) break;
@@ -271,7 +271,7 @@ interpretIdentity_330 (InputPacket *packet) {
 }
 
 static int
-readPacket_330 (InputPacket *packet) {
+readPacket_330 (BrailleDisplay *brl, InputPacket *packet) {
   static const unsigned char templateString_identity[] = {
     0X00, 0X05, 0X28, 0X08,
     0X76, TBT_DECIMAL, 0X2E, TBT_DECIMAL,
@@ -332,7 +332,7 @@ interpretIdentity_331 (InputPacket *packet) {
 }
 
 static int
-readPacket_331 (InputPacket *packet) {
+readPacket_331 (BrailleDisplay *brl, InputPacket *packet) {
   static const unsigned char templateString_identity[] = {
     0X73, 0X65, 0X69, 0X6B, 0X61, TBT_DECIMAL,
     0X20, 0X76, TBT_DECIMAL, 0X2E, TBT_DECIMAL, TBT_DECIMAL
@@ -380,8 +380,13 @@ static const ProtocolOperations protocolOperations_331 = {
   writeCells_331
 };
 
+static inline int
+routingBytes_332 (BrailleDisplay *brl) {
+  return (brl->textColumns + 7) / 8;
+}
+
 static int
-readPacket_332 (InputPacket *packet) {
+readPacket_332 (BrailleDisplay *brl, InputPacket *packet) {
   int offset = 0;
   int length = 0;
 
@@ -419,7 +424,8 @@ readPacket_332 (InputPacket *packet) {
 
           case 0X04:
             packet->type = IPT_routing;
-            length = 7;
+            length = 2;
+            if (brl) length += routingBytes_332(brl);
             break;
 
           case 0X05:
@@ -482,10 +488,7 @@ probeDisplay_332 (BrailleDisplay *brl, InputPacket *response) {
 
 static int
 writeCells_332 (BrailleDisplay *brl) {
-  static const unsigned char header[] = {
-    0XFF, 0XFF, 0X1D, 0X03
-  };
-
+  static const unsigned char header[] = {0XFF, 0XFF, 0X1D, 0X03};
   unsigned char packet[sizeof(header) + 1 + brl->textColumns];
   unsigned char *byte = packet;
 
@@ -776,7 +779,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   InputPacket packet;
   size_t length;
 
-  while ((length = protocol->readPacket(&packet))) {
+  while ((length = protocol->readPacket(brl, &packet))) {
     int routing = routingCommand;
     routingCommand = BRL_BLK_ROUTE;
 
