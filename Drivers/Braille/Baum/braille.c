@@ -1258,7 +1258,7 @@ handleBaumDataRegistersEvent (BrailleDisplay *brl, const BaumResponsePacket *pac
 
       case BAUM_MODULE_Status:
         if (packet->data.values.modular.data.registers.status.flags & BAUM_DRF_ButtonsChanged)
-          if (updateFunctionKeyByte(packet->data.values.modular.data.registers.status.buttons >> 4,
+          if (updateFunctionKeyByte(packet->data.values.modular.data.registers.status.buttons,
                                     BAUM_SHIFT_COMMAND, BAUM_WIDTH_COMMAND, keyPressed))
             return 1;
 
