@@ -352,6 +352,7 @@ begword enor = enormous
 begword enou 15-1345-1256
 lowword enough 26
 word enough 26-1256-126
+sufword enough\s-\s 26-1256-126-36-36
 begword enu 15-1345-136
 begword equino = equinox
 always er 12456
@@ -446,6 +447,7 @@ sufword hmm =
 word himself 125-134-124
 contraction hmf
 lowword his 236
+sufword his\s-\s 125-24-234-36-36
 sufword horse = horseradish
 always hydro =
 
@@ -460,6 +462,7 @@ begword immuno = immunofluorescence
 lowword in 35
 word in =
 always in 35
+sufword in\s-\s 24-1345-36-36
 begword incon 35-14-135-1345 incongruous
 begword indis 35-145-24-234 indistinct
 begword iness 35-15-234-234 inessential, inessive
@@ -879,6 +882,7 @@ begword vice = viceroy
 always w 2456
 always W 2456
 lowword was 356
+sufword was\s-\s 2456-1-234-36-36
 word wh =
 always wh 156
 midendword whart 2456-125-345-2345 Newhart
@@ -887,6 +891,7 @@ midendword whouse 2456-125-1256-234-15 Newhouse
 begword widea = wideawake
 word will 2456
 lowword were 2356
+sufword were\s-\s 2456-12456-15-36-36
 always where 5-156
 word whereupon 5-156-45-136
 word wherever 156-12456-5-15
