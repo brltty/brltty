@@ -21,7 +21,7 @@ May 15, 2009:
    Alva Braille Driver:
       The BC6nn series are supported.
    Baum Braille Driver:
-      The VarioConnect, EcoVario, and Refreshabraille series are supported.
+      The VarioConnect, EcoVario, VarioPro, and Refreshabraille are supported.
    BrailleNote Braille Driver:
       The statuscells= parameter has been removed.
    EuroBraille Braille Driver:
@@ -105,6 +105,7 @@ May 15, 2009:
       The braille drivers have been moved from BrailleDrivers/ to Drivers/Braille/.
       The speech drivers have been moved from SpeechDrivers/ to Drivers/Speech/.
       The screen drivers have been moved from ScreenDrivers/ to Drivers/Screen/.
+      Source for the Windows installer is provided.
 
 July 16, 2008:
  - BRLTTY 3.10 released:

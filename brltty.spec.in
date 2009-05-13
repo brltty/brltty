@@ -224,7 +224,7 @@ rm -fr "${RPM_BUILD_ROOT}"
 %doc Documents/BrlAPIref
 
 %changelog
-* Mon Apr 27 2009 Dave Mielke <dave@mielke.cc> 4.0
+* Fri May 15 2009 Dave Mielke <dave@mielke.cc> 4.0
 +  General Changes:
       All screen reading, character handling, and tables are now Unicode-based.
       The "<n> startup problems" message has been removed.
@@ -243,7 +243,7 @@ rm -fr "${RPM_BUILD_ROOT}"
 +  Alva Braille Driver:
       The BC6nn series are supported.
 +  Baum Braille Driver:
-      The VarioConnect, EcoVario, and Refreshabraille series are supported.
+      The VarioConnect, EcoVario, VarioPro, and Refreshabraille are supported.
 +  BrailleNote Braille Driver:
       The statuscells= parameter has been removed.
 +  EuroBraille Braille Driver:
@@ -327,4 +327,5 @@ rm -fr "${RPM_BUILD_ROOT}"
       The braille drivers have been moved from BrailleDrivers/ to Drivers/Braille/.
       The speech drivers have been moved from SpeechDrivers/ to Drivers/Speech/.
       The screen drivers have been moved from ScreenDrivers/ to Drivers/Screen/.
+      Source for the Windows installer is provided.
 
