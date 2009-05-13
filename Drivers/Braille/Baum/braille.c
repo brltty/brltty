@@ -84,6 +84,7 @@ typedef struct {
   const char *name;
   int serialBaud;
   SerialParity serialParity;
+  DotsTable dotsTable;
   int (*readPacket) (BrailleDisplay *brl, unsigned char *packet, int size);
   int (*writePacket) (BrailleDisplay *brl, const unsigned char *packet, int length);
   int (*probeDisplay) (BrailleDisplay *brl);
@@ -1601,6 +1602,7 @@ writeBaumCells (BrailleDisplay *brl) {
 static const ProtocolOperations baumOperations = {
   "Baum",
   19200, SERIAL_PARITY_NONE,
+  {0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80},
   readBaumPacket, writeBaumPacket,
   probeBaumDisplay, updateBaumKeys, writeBaumCells
 };
@@ -1852,6 +1854,7 @@ writeHandyTechCells (BrailleDisplay *brl) {
 static const ProtocolOperations handyTechOperations = {
   "HandyTech",
   19200, SERIAL_PARITY_ODD,
+  {0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80},
   readHandyTechPacket, writeHandyTechPacket,
   probeHandyTechDisplay, updateHandyTechKeys, writeHandyTechCells
 };
@@ -2125,6 +2128,7 @@ writePowerBrailleCells (BrailleDisplay *brl) {
 static const ProtocolOperations powerBrailleOperations = {
   "PowerBraille",
   9600, SERIAL_PARITY_NONE,
+  {0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80},
   readPowerBraillePacket, writePowerBraillePacket,
   probePowerBrailleDisplay, updatePowerBrailleKeys, writePowerBrailleCells
 };
@@ -2483,11 +2487,6 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   if (!validateYesNo(&useVarioKeys, parameters[PARM_VARIOKEYS]))
     LogPrint(LOG_WARNING, "%s: %s", "invalid vario keys setting", parameters[PARM_VARIOKEYS]);
 
-  {
-    static const DotsTable dots = {0X01, 0X02, 0X04, 0X08, 0X10, 0X20, 0X40, 0X80};
-    makeOutputTable(dots, outputTable);
-  }
-  
   if (isSerialDevice(&device)) {
     io = &serialOperations;
   } else
@@ -2519,6 +2518,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
       while ((protocol = *(protocolAddress++))) {
         LogPrint(LOG_DEBUG, "probing with %s protocol", protocol->name);
+        makeOutputTable(protocol->dotsTable, outputTable);
 
         {
           int bits = 10;
