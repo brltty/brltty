@@ -1195,7 +1195,7 @@ handleBaumModuleRegistrationEvent (BrailleDisplay *brl, const BaumResponsePacket
 }
 
 static int
-handleBaumDataRegistersEvent (
+interpretBaumDisplayControls (
   BrailleDisplay *brl, int *keyPressed,
   unsigned char flags, unsigned char error,
   const signed char *wheel, unsigned char wheels,
@@ -1511,7 +1511,7 @@ updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
 
         switch (bmd->type) {
           case BAUM_MODULE_Display80:
-            if (handleBaumDataRegistersEvent(brl, keyPressed,
+            if (interpretBaumDisplayControls(brl, keyPressed,
                                              packet.data.values.modular.data.registers.display80.flags,
                                              packet.data.values.modular.data.registers.display80.error,
                                              packet.data.values.modular.data.registers.display80.wheels,
@@ -1523,7 +1523,7 @@ updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
             break;
 
           case BAUM_MODULE_Display64:
-            if (handleBaumDataRegistersEvent(brl, keyPressed,
+            if (interpretBaumDisplayControls(brl, keyPressed,
                                              packet.data.values.modular.data.registers.display64.flags,
                                              packet.data.values.modular.data.registers.display64.error,
                                              packet.data.values.modular.data.registers.display64.wheels,
@@ -1532,6 +1532,14 @@ updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
                                              packet.data.values.modular.data.registers.display64.keys,
                                              packet.data.values.modular.data.registers.display64.sensors))
               return 1;
+            break;
+
+          case BAUM_MODULE_Status:
+            if (packet.data.values.modular.data.registers.status.flags & BAUM_DRF_ButtonsChanged) {
+              if (updateFunctionKeyByte(packet.data.values.modular.data.registers.status.buttons,
+                                        BAUM_SHIFT_COMMAND, BAUM_WIDTH_COMMAND, keyPressed))
+                return 1;
+            }
             break;
 
           default:
@@ -2830,6 +2838,11 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 #undef DOT
     } else {
       switch (keys) {
+        KEY(BAUM_KEY_CK1, BRL_CMD_HELP);
+        KEY(BAUM_KEY_CK2, BRL_CMD_LEARN);
+        KEY(BAUM_KEY_CK3, BRL_CMD_INFO);
+        KEY(BAUM_KEY_CK4, BRL_CMD_PREFMENU);
+
         KEY(BAUM_KEY_DK2, BRL_CMD_FWINLT);
         KEY(BAUM_KEY_DK5, BRL_CMD_FWINRT);
 
