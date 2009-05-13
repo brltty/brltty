@@ -632,7 +632,7 @@ typedef union {
           union {
             struct {
               unsigned char flags;
-              unsigned char error;
+              unsigned char errors;
               signed char wheels[4];
               unsigned char buttons;
               unsigned char keys;
@@ -641,7 +641,7 @@ typedef union {
 
             struct {
               unsigned char flags;
-              unsigned char error;
+              unsigned char errors;
               signed char wheels[3];
               unsigned char buttons;
               unsigned char keys;
@@ -650,13 +650,13 @@ typedef union {
 
             struct {
               unsigned char flags;
-              unsigned char error;
+              unsigned char errors;
               unsigned char buttons;
             } PACKED status;
 
             struct {
               unsigned char flags;
-              unsigned char error;
+              unsigned char errors;
               signed char wheel;
               unsigned char buttons;
               unsigned char keypad[2];
@@ -664,7 +664,7 @@ typedef union {
 
             struct {
               unsigned char flags;
-              unsigned char error;
+              unsigned char errors;
               signed char wheel;
               unsigned char keys;
               unsigned char pots[6];
@@ -672,7 +672,7 @@ typedef union {
 
             struct {
               unsigned char flags;
-              unsigned char error;
+              unsigned char errors;
               unsigned char buttons;
               unsigned char cursor;
               unsigned char keys;
@@ -1195,29 +1195,80 @@ handleBaumModuleRegistrationEvent (BrailleDisplay *brl, const BaumResponsePacket
 }
 
 static int
-interpretBaumDisplayControls (
-  BrailleDisplay *brl, int *keyPressed,
-  unsigned char flags, unsigned char error,
-  const signed char *wheel, unsigned char wheels,
-  unsigned char buttons, unsigned char keys, const unsigned char *sensors
-) {
-  int changed = 0;
+handleBaumDataRegistersEvent (BrailleDisplay *brl, const BaumResponsePacket *packet, int *keyPressed) {
+  const BaumModuleDescription *bmd = getBaumModuleDescription(getBaumInteger(packet->data.values.modular.moduleIdentifier));
+  const BaumModuleRegistration *bmr = getBaumModuleRegistration(bmd, getBaumInteger(packet->data.values.modular.serialNumber));
 
-  if (flags & BAUM_DRF_WheelsChanged) {
+  if (bmr) {
+    switch (bmd->type) {
+      {
+        unsigned char flags;
+        unsigned char errors;
+        const signed char *wheel;
+        unsigned char wheels;
+        unsigned char buttons;
+        unsigned char keys;
+        const unsigned char *sensors;
+
+      case BAUM_MODULE_Display80:
+        flags = packet->data.values.modular.data.registers.display80.flags;
+        errors = packet->data.values.modular.data.registers.display80.errors;
+        wheel = packet->data.values.modular.data.registers.display80.wheels;
+        wheels = ARRAY_COUNT(packet->data.values.modular.data.registers.display80.wheels);
+        buttons = packet->data.values.modular.data.registers.display80.buttons;
+        keys = packet->data.values.modular.data.registers.display80.keys;
+        sensors = packet->data.values.modular.data.registers.display80.sensors;
+        goto doDisplay;
+
+      case BAUM_MODULE_Display64:
+        flags = packet->data.values.modular.data.registers.display64.flags;
+        errors = packet->data.values.modular.data.registers.display64.errors;
+        wheel = packet->data.values.modular.data.registers.display64.wheels;
+        wheels = ARRAY_COUNT(packet->data.values.modular.data.registers.display64.wheels);
+        buttons = packet->data.values.modular.data.registers.display64.buttons;
+        keys = packet->data.values.modular.data.registers.display64.keys;
+        sensors = packet->data.values.modular.data.registers.display64.sensors;
+        goto doDisplay;
+
+      doDisplay:
+        {
+          int changed = 0;
+
+          if (flags & BAUM_DRF_WheelsChanged) {
+          }
+
+          if (flags & BAUM_DRF_ButtonsChanged) {
+          }
+
+          if (flags & BAUM_DRF_KeysChanged) {
+            if (updateFunctionKeyByte(keys, BAUM_SHIFT_DISPLAY, BAUM_WIDTH_DISPLAY, keyPressed)) changed = 1;
+          }
+
+          if (flags & BAUM_DRF_SensorsChanged) {
+            if (updateKeyGroup(pressedKeys.routingKeys, sensors, brl->textColumns, keyPressed)) changed = 1;
+          }
+
+          if (changed) return 1;
+        }
+
+        break;
+      }
+
+      case BAUM_MODULE_Status:
+        if (packet->data.values.modular.data.registers.status.flags & BAUM_DRF_ButtonsChanged)
+          if (updateFunctionKeyByte(packet->data.values.modular.data.registers.status.buttons,
+                                    BAUM_SHIFT_COMMAND, BAUM_WIDTH_COMMAND, keyPressed))
+            return 1;
+
+        break;
+
+      default:
+        LogPrint(LOG_WARNING, "unsupported data register configuration: %u", bmd->type);
+        break;
+    }
   }
 
-  if (flags & BAUM_DRF_ButtonsChanged) {
-  }
-
-  if (flags & BAUM_DRF_KeysChanged) {
-    if (updateFunctionKeyByte(keys, BAUM_SHIFT_DISPLAY, BAUM_WIDTH_DISPLAY, keyPressed)) changed = 1;
-  }
-
-  if (flags & BAUM_DRF_SensorsChanged) {
-    if (updateKeyGroup(pressedKeys.routingKeys, sensors, brl->textColumns, keyPressed)) changed = 1;
-  }
-
-  return changed;
+  return 0;
 }
 
 static int
@@ -1504,51 +1555,9 @@ updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
         changeCellCount(brl, getBaumModuleCellCount());
         continue;
 
-      case BAUM_RSP_DataRegisters: {
-        const BaumModuleDescription *bmd = getBaumModuleDescription(getBaumInteger(packet.data.values.modular.moduleIdentifier));
-        const BaumModuleRegistration *bmr = getBaumModuleRegistration(bmd, getBaumInteger(packet.data.values.modular.serialNumber));
-        if (!bmr) continue;
-
-        switch (bmd->type) {
-          case BAUM_MODULE_Display80:
-            if (interpretBaumDisplayControls(brl, keyPressed,
-                                             packet.data.values.modular.data.registers.display80.flags,
-                                             packet.data.values.modular.data.registers.display80.error,
-                                             packet.data.values.modular.data.registers.display80.wheels,
-                                             ARRAY_COUNT(packet.data.values.modular.data.registers.display80.wheels),
-                                             packet.data.values.modular.data.registers.display80.buttons,
-                                             packet.data.values.modular.data.registers.display80.keys,
-                                             packet.data.values.modular.data.registers.display80.sensors))
-              return 1;
-            break;
-
-          case BAUM_MODULE_Display64:
-            if (interpretBaumDisplayControls(brl, keyPressed,
-                                             packet.data.values.modular.data.registers.display64.flags,
-                                             packet.data.values.modular.data.registers.display64.error,
-                                             packet.data.values.modular.data.registers.display64.wheels,
-                                             ARRAY_COUNT(packet.data.values.modular.data.registers.display64.wheels),
-                                             packet.data.values.modular.data.registers.display64.buttons,
-                                             packet.data.values.modular.data.registers.display64.keys,
-                                             packet.data.values.modular.data.registers.display64.sensors))
-              return 1;
-            break;
-
-          case BAUM_MODULE_Status:
-            if (packet.data.values.modular.data.registers.status.flags & BAUM_DRF_ButtonsChanged) {
-              if (updateFunctionKeyByte(packet.data.values.modular.data.registers.status.buttons,
-                                        BAUM_SHIFT_COMMAND, BAUM_WIDTH_COMMAND, keyPressed))
-                return 1;
-            }
-            break;
-
-          default:
-            LogPrint(LOG_WARNING, "unsupported data register configuration: %u", bmd->type);
-            break;
-        }
-
+      case BAUM_RSP_DataRegisters:
+        if (handleBaumDataRegistersEvent(brl, &packet, keyPressed)) return 1;
         continue;
-      }
 
       case BAUM_RSP_ErrorCode:
         if (packet.data.values.errorCode != BAUM_ERR_PacketType) goto unexpectedPacket;
