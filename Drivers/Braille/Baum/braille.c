@@ -1110,6 +1110,44 @@ writeBaumModuleRegistrationCommand (
 }
 
 static int
+writeBaumDataRegisters (
+  BrailleDisplay *brl,
+  const BaumModuleRegistration *bmr,
+  const unsigned char *registers, unsigned char count
+) {
+  const BaumModuleDescription *bmd = bmr->description;
+
+  if (bmd) {
+    if (count < bmd->cellCount) count = bmd->cellCount;
+
+    if (count) {
+      unsigned char packet[2 + 7 + count];
+      unsigned char *byte = packet;
+
+      *byte++ = BAUM_REQ_DataRegisters;
+      *byte++ = 7 + count;
+
+      *byte++ = MAKE_BAUM_INTEGER_FIRST(bmd->identifier);
+      *byte++ = MAKE_BAUM_INTEGER_SECOND(bmd->identifier);
+
+      *byte++ = MAKE_BAUM_INTEGER_FIRST(bmr->serialNumber);
+      *byte++ = MAKE_BAUM_INTEGER_SECOND(bmr->serialNumber);
+
+      *byte++ = BAUM_DRC_Write;
+      *byte++ = 0; /* index of the first register to write */
+      *byte++ = count;
+
+      memcpy(byte, registers, count);
+      byte += count;
+
+      if (!writeBaumPacket(brl, packet, byte-packet)) return 0;
+    }
+  }
+
+  return 1;
+}
+
+static int
 handleBaumModuleRegistrationEvent (BrailleDisplay *brl, const BaumResponsePacket *packet) {
   uint16_t moduleIdentifier = getBaumInteger(packet->data.values.modular.moduleIdentifier);
   uint16_t serialNumber = getBaumInteger(packet->data.values.modular.serialNumber);
@@ -1511,26 +1549,9 @@ updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
 static int
 writeBaumCells (BrailleDisplay *brl) {
   if (baumDeviceType == BAUM_DEVICE_Modular) {
-    unsigned char packet[2 + 7 + cellCount];
-    unsigned char *byte = packet;
-
-    *byte++ = BAUM_REQ_DataRegisters;
-    *byte++ = 7 + cellCount;
-
-    *byte++ = MAKE_BAUM_INTEGER_FIRST(baumDisplayModule.description->identifier);
-    *byte++ = MAKE_BAUM_INTEGER_SECOND(baumDisplayModule.description->identifier);
-
-    *byte++ = MAKE_BAUM_INTEGER_FIRST(baumDisplayModule.serialNumber);
-    *byte++ = MAKE_BAUM_INTEGER_SECOND(baumDisplayModule.serialNumber);
-
-    *byte++ = BAUM_DRC_Write;
-    *byte++ = 0; /* index of the first register to write */
-    *byte++ = cellCount; /* number of registers to write */
-
-    memcpy(byte, externalCells, cellCount);
-    byte += cellCount;
-
-    return writeBaumPacket(brl, packet, byte-packet);
+    if (!writeBaumDataRegisters(brl, &baumDisplayModule, &externalCells[0], brl->textColumns)) return 0;
+    if (!writeBaumDataRegisters(brl, &baumStatusModule, &externalCells[brl->textColumns], brl->statusColumns)) return 0;
+    return 1;
   }
 
   {
