@@ -804,9 +804,16 @@ static BaumModuleRegistration *const baumModules[] = {
 };
 
 static BaumModuleRegistration *
-getBaumModuleRegistration (const BaumModuleDescription *bmd) {
-  if (bmd->isDisplay) return &baumDisplayModule;
-  if (bmd->type == BAUM_MODULE_Status) return &baumStatusModule;
+getBaumModuleRegistration (const BaumModuleDescription *bmd, uint16_t serialNumber) {
+  if (bmd) {
+    BaumModuleRegistration *const *bmr = baumModules;
+
+    while (*bmr) {
+      if (((*bmr)->description == bmd) && ((*bmr)->serialNumber == serialNumber)) return *bmr;
+      bmr += 1;
+    }
+  }
+
   return NULL;
 }
 
@@ -1160,7 +1167,15 @@ handleBaumModuleRegistrationEvent (BrailleDisplay *brl, const BaumResponsePacket
       return 0;
 
     if (bmd) {
-      BaumModuleRegistration *bmr = getBaumModuleRegistration(bmd);
+      BaumModuleRegistration *bmr;
+
+      if (bmd->isDisplay) {
+        bmr = &baumDisplayModule;
+      } else if (bmd->type == BAUM_MODULE_Status) {
+        bmr = &baumStatusModule;
+      } else {
+        bmr = NULL;
+      }
 
       if (bmr) {
         if (bmr->description) clearBaumModuleRegistration(bmr);
@@ -1171,18 +1186,9 @@ handleBaumModuleRegistrationEvent (BrailleDisplay *brl, const BaumResponsePacket
         bmr->firmwareVersion = getBaumInteger(packet->data.values.modular.data.registration.firmwareVersion);
       }
     }
-  } else if (bmd) {
-    BaumModuleRegistration *const *bmr = baumModules;
-
-    while (*bmr) {
-      if (((*bmr)->description == bmd) &&
-          ((*bmr)->serialNumber == serialNumber)) {
-        clearBaumModuleRegistration(*bmr);
-        break;
-      }
-
-      bmr += 1;
-    }
+  } else {
+    BaumModuleRegistration *bmr = getBaumModuleRegistration(bmd, serialNumber);
+    if (bmr) clearBaumModuleRegistration(bmr);
   }
 
   return 1;
@@ -1498,8 +1504,12 @@ updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
         changeCellCount(brl, getBaumModuleCellCount());
         continue;
 
-      case BAUM_RSP_DataRegisters:
-        switch (baumDisplayModule.description->type) {
+      case BAUM_RSP_DataRegisters: {
+        const BaumModuleDescription *bmd = getBaumModuleDescription(getBaumInteger(packet.data.values.modular.moduleIdentifier));
+        const BaumModuleRegistration *bmr = getBaumModuleRegistration(bmd, getBaumInteger(packet.data.values.modular.serialNumber));
+        if (!bmr) continue;
+
+        switch (bmd->type) {
           case BAUM_MODULE_Display80:
             if (handleBaumDataRegistersEvent(brl, keyPressed,
                                              packet.data.values.modular.data.registers.display80.flags,
@@ -1525,11 +1535,12 @@ updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
             break;
 
           default:
-            LogPrint(LOG_WARNING, "unsupported data register configuration: %u",
-                     baumDisplayModule.description->type);
+            LogPrint(LOG_WARNING, "unsupported data register configuration: %u", bmd->type);
             break;
         }
+
         continue;
+      }
 
       case BAUM_RSP_ErrorCode:
         if (packet.data.values.errorCode != BAUM_ERR_PacketType) goto unexpectedPacket;
