@@ -36,14 +36,4 @@ This driver recognizes the following parameters:
 
    Parameter     Settings
    debugpackets  no, yes
-   statuscells   0 (none), positive (left), negative (right)
 
-The "statuscells" parameter specifies how many of the braille cells are to be
-reserved for status indicators. Specify 0 (zero) if you'd like all the cells to
-be used for text, a positive number if you'd like the status cells to be on the
-left, and a negative number if you'd like them to be on the right. The default
-is that the Focus displays have 3 status cells on the left, and that the PAC
-Mate displays have no status cells. An additional blank cell is reserved to
-separate the text and status cells from one another. Use the "Status Style"
-selector of the Preferences Menu to choose the format of the data presented via
-the status cells.
