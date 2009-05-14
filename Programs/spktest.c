@@ -198,7 +198,7 @@ main (int argc, char *argv[]) {
         if (speech->rate) speech->rate(&spk, speechRate);
         if (speech->volume) speech->volume(&spk, speechVolume);
 
-        if (opt_textString) {
+        if (opt_textString && *opt_textString) {
           sayString(&spk, opt_textString, 0);
         } else {
           processLines(stdin, sayLine, NULL);
