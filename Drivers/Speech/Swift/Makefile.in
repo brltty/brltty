@@ -25,5 +25,5 @@ SPK_OBJS = @speech_libraries_sw@
 include $(SRC_TOP)speech.mk
 
 speech.$O:
-	$(CXX) $(SPK_CXXFLAGS) -I$(SWIFT_ROOT)/include -c $(SRC_DIR)/speech.c
+	$(CC) $(SPK_CFLAGS) -I$(SWIFT_ROOT)/include -c $(SRC_DIR)/speech.c
 
