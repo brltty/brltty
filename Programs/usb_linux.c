@@ -284,22 +284,6 @@ usbSetAlternative (
 }
 
 int
-usbResetEndpoint (
-  UsbDevice *device,
-  unsigned char endpointAddress
-) {
-  UsbDeviceExtension *devx = device->extension;
-
-  if (usbOpenUsbfsFile(devx)) {
-    unsigned int arg = endpointAddress;
-    if (ioctl(devx->usbfsFile, USBDEVFS_RESETEP, &arg) != -1) return 1;
-    LogError("USB endpoint reset");
-  }
-
-  return 0;
-}
-
-int
 usbClearEndpoint (
   UsbDevice *device,
   unsigned char endpointAddress
