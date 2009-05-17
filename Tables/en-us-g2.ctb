@@ -68,7 +68,7 @@ word again 1-1245
 contraction ag
 word against 1-1245-34
 contraction agst
-endword agery = orangery
+endword agery = savagery
 word alittle =
 midendword ally 6-13456
 word almost 1-123-134
@@ -154,6 +154,7 @@ begword ber 12-12456
 begword bera 23-1235-1 berating
 begword bere 23-1235-15 bereft
 begword berea 23-1235-2 bereaved
+begword beres 12-12456-15-234 Beresford, Beresina
 begword berh 23-1235-125 berhymed
 begword beribb 23-1235-24-23 beribboned
 begword bering 23-1235-346 beringed (assume Bering with no suffix refers to the Sea and use "er")
@@ -600,6 +601,7 @@ midendword ong 56-1245
 midendword ongen 135-1345-1245-26 uncongenial
 always oon = sooner
 begword orangea = orangeade
+begword oranger = orangery, -ies
 word ou =
 always ou 1256
 midendword ound 46-145
