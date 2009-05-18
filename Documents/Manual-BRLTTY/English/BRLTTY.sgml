@@ -957,6 +957,8 @@ These options are primarily useful when building BRLTTY for use on a boot disk.
     This feature allows the entire installed file hierarchy
     to be copied or moved, in tact, from one place to another,
     and is primarily intended for use on Windows platforms.
+  <tag><tt/--disable-strippingl/<label id="build-strippingl"></tag>
+    Don't remove the symbol tables from executables and shared objects when installing them.
   <tag><tt/--disable-preferences-menu/<label id="build-preferences-menu"></tag>
     Reduce program size by excluding the preferences menu
     (see section <ref id="preferences-menu" name="The Preferences Menu">).

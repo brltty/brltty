@@ -337,17 +337,6 @@ AC_PATH_PROG([DOXYGEN], [doxygen])
 test -n "${DOXYGEN}" && can_make_BrlAPIref=yes || can_make_BrlAPIref=no
 AC_SUBST([can_make_BrlAPIref])
 
-case "${host_os}"
-in
-   darwin*)
-      INSTALL_OPTION_STRIP=""
-      ;;
-   *)
-      INSTALL_OPTION_STRIP="-s"
-      ;;
-esac
-AC_SUBST([INSTALL_OPTION_STRIP])
-
 AC_CACHE_CHECK([for make relocatable object command], [brltty_cv_prog_mkobj], [dnl
 case "${host_os}"
 in
@@ -1496,14 +1485,34 @@ AC_DEFINE_UNQUOTED([SCREEN_DRIVER], ["${brltty_default_code_screen}"],
                    [Define this to be a string containing the default screen driver code.])
 BRLTTY_SUMMARY_ITEM([screen-driver], [brltty_default_code_screen])
 
+BRLTTY_ARG_ENABLE(
+   [relocatable-install],
+   [installation using paths relative to the program directory])
+
+case "${host_os}"
+in
+   darwin*)
+      INSTALL_OPTION_STRIP=""
+      ;;
+   *)
+      INSTALL_OPTION_STRIP="-s"
+      ;;
+esac
+
+BRLTTY_ARG_DISABLE(
+   [stripping],
+   [stripping of executables and shared objects during installation],
+   [],
+   [],
+   [INSTALL_OPTION_STRIP=""]
+)
+AC_SUBST([INSTALL_OPTION_STRIP])
+
 original_prefix="${prefix}"
 test "${prefix}" = "NONE" && prefix=""
 original_exec_prefix="${exec_prefix}"
 test "${exec_prefix}" = "NONE" && exec_prefix="${prefix}"
 BRLTTY_VAR_EXPAND([brltty_reference_directory], [${execute_root}${program_directory}])
-BRLTTY_ARG_ENABLE(
-   [relocatable-install],
-   [installation using paths relative to the program directory])
 if test -n "${writable_directory}"
 then
    BRLTTY_DEFINE_DIRECTORY([WRITABLE_DIRECTORY], [${execute_root}${writable_directory}],
