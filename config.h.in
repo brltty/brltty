@@ -259,12 +259,6 @@ extern "C" {
 /* Define this to be a string containing the default screen driver parameters. */
 #undef SCREEN_PARAMETERS
 
-/* Define this to include the preferences menu. */
-#undef ENABLE_PREFERENCES_MENU
-
-/* Define this to include table selection within the preferences menu. */
-#undef ENABLE_TABLE_SELECTION
-
 /* Define this to include command learn mode. */
 #undef ENABLE_LEARN_MODE
 

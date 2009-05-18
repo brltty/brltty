@@ -1945,7 +1945,6 @@ runProgram (void) {
               }
               break;
 
-#ifdef ENABLE_PREFERENCES_MENU
             case BRL_CMD_PREFMENU:
               if (!updatePreferences()) writable = 0;
               break;
@@ -1954,7 +1953,6 @@ runProgram (void) {
                 playTune(&tune_command_done);
               }
               break;
-#endif /* ENABLE_PREFERENCES_MENU */
             case BRL_CMD_PREFLOAD:
               if (loadPreferences()) {
                 resetBlinkingStates();
