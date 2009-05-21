@@ -95,7 +95,7 @@ writeSerialPacket (unsigned char code, unsigned char *data, unsigned char count)
     if ((buffer[size++] = data[index]) == buffer[0])
       buffer[size++] = buffer[0];
 
-/*LogBytes(LOG_DEBUG, "Output Packet", buffer, size);*/
+  logOutputPacket(buffer, size);
   return serialWriteData(serialDevice, buffer, size) != -1;
 }
 
@@ -107,12 +107,12 @@ readSerialPacket (unsigned char *buffer, int size) {
 
   while ((offset < 1) || (offset < length)) {
     if (offset == size) {
-      LogBytes(LOG_WARNING, "Large Packet", buffer, offset);
+      logTruncatedPacket(buffer, offset);
       offset = 0;
     }
 
     if (!serialReadChunk(serialDevice, buffer, &offset, 1, 0, 100)) {
-      LogBytes(LOG_WARNING, "Partial Packet", buffer, offset);
+      logPartialPacket(buffer, offset);
       return 0;
     }
 
@@ -128,7 +128,7 @@ readSerialPacket (unsigned char *buffer, int size) {
 
       if (!escape) {
         if (offset == 1) {
-          LogBytes(LOG_WARNING, "Discarded Byte", buffer, offset);
+          logIgnoredByte(byte);
           offset = 0;
         }
         continue;
@@ -136,7 +136,7 @@ readSerialPacket (unsigned char *buffer, int size) {
       escape = 0;
 
       if (offset > 1) {
-        LogBytes(LOG_WARNING, "Truncated Packet", buffer, offset-1);
+        logTruncatedPacket(buffer, offset-1);
         buffer[0] = byte;
         offset = 1;
       }
@@ -165,14 +165,14 @@ readSerialPacket (unsigned char *buffer, int size) {
           continue;
 
         default:
-          LogBytes(LOG_WARNING, "Unsupported Packet", buffer, offset);
+          logInputProblem("Unsupported Packet", buffer, offset);
           offset = 0;
           continue;
       }
     }
   }
 
-/*LogBytes(LOG_DEBUG, "Input Packet", buffer, offset);*/
+  logInputPacket(buffer, offset);
   return offset;
 }
 
@@ -181,7 +181,7 @@ nextSerialPacket (unsigned char code, unsigned char *buffer, int size) {
   int length;
   while ((length = readSerialPacket(buffer, size))) {
     if (buffer[0] == code) return length;
-    LogBytes(LOG_WARNING, "Ignored Packet", buffer, length);
+    logInputProblem("Ignored Packet", buffer, length);
   }
   return 0;
 }

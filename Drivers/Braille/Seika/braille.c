@@ -173,7 +173,7 @@ readPacket_old (
     {
       int started = offset > 0;
       if (!readByte(&byte, started)) {
-        if (started) LogBytes(LOG_WARNING, "Partial Packet", packet->bytes, offset);
+        if (started) logPartialPacket(packet->bytes, offset);
         return 0;
       }
     }
@@ -190,7 +190,7 @@ readPacket_old (
         if ((byte & 0XE0) == 0X60) {
           template = &templateEntry_keys;
         } else {
-          LogBytes(LOG_WARNING, "Ignored Byte", &byte, 1);
+          logIgnoredByte(byte);
           template = NULL;
           continue;
         }
@@ -219,7 +219,7 @@ readPacket_old (
         if ((offset == 1) && (template->type == IPT_identity)) {
           template = alternateTemplate;
         } else {
-          LogBytes(LOG_WARNING, "Short Packet", packet->bytes, offset);
+          logShortPacket(packet->bytes, offset);
           offset = 0;
           template = NULL;
         }
@@ -393,7 +393,7 @@ readPacket_332 (BrailleDisplay *brl, InputPacket *packet) {
     {
       int started = offset > 0;
       if (!readByte(&byte, started)) {
-        if (started) LogBytes(LOG_WARNING, "Partial Packet", packet->bytes, offset);
+        if (started) logPartialPacket(packet->bytes, offset);
         return 0;
       }
     }
@@ -406,7 +406,7 @@ readPacket_332 (BrailleDisplay *brl, InputPacket *packet) {
           break;
 
         default:
-          LogBytes(LOG_WARNING, "Ignored Byte", &byte, 1);
+          logIgnoredByte(byte);
           continue;
       }
     } else {
@@ -437,7 +437,7 @@ readPacket_332 (BrailleDisplay *brl, InputPacket *packet) {
       }
 
       if (unexpected) {
-        LogBytes(LOG_WARNING, "Short Packet", packet->bytes, offset);
+        logShortPacket(packet->bytes, offset);
         offset = 0;
         length = 0;
         goto gotByte;
@@ -863,7 +863,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
       }
     }
 
-    LogBytes(LOG_WARNING, "Unexpected Packet", packet.bytes, length);
+    logInputProblem("Unexpected Packet", packet.bytes, length);
   }
   if (errno != EAGAIN) return BRL_CMD_RESTARTBRL;
 

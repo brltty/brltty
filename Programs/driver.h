@@ -48,8 +48,14 @@ typedef struct {
 #define DRIVER_VERSION_STRING (PACKAGE_VERSION "@" PACKAGE_REVISION)
 #define DRIVER_VERSION_DECLARATION(type) const char CONCATENATE(type##_version_,DRIVER_CODE)[] = DRIVER_VERSION_STRING
 
-extern void logInputPacket (const void *packet, size_t size);
 extern void logOutputPacket (const void *packet, size_t size);
+extern void logInputPacket (const void *packet, size_t size);
+extern void logInputProblem (const char *problem, const unsigned char *bytes, size_t count);
+extern void logIgnoredByte (unsigned char byte);
+extern void logDiscardedByte (unsigned char byte);
+extern void logPartialPacket (const void *packet, size_t size);
+extern void logTruncatedPacket (const void *packet, size_t size);
+extern void logShortPacket (const void *packet, size_t size);
 
 #ifdef __cplusplus
 }

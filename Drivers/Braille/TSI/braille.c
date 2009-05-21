@@ -319,7 +319,7 @@ QueryDisplay(unsigned char *reply)
           LogBytes(LOG_DEBUG, "TSI Reply", reply, count);
           return 1;
         } else {
-          LogBytes(LOG_WARNING, "Unexpected Response", reply, count);
+          logInputProblem("Unexpected Response", reply, count);
         }
       } else {
         LogError("Read");

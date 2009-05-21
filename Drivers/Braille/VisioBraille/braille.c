@@ -640,7 +640,7 @@ static int brl_readKey(BrailleDisplay *brl)
   packetSize = brl_readPacket(brl,packet,sizeof(packet));
   if (packetSize==0) return EOF;
   if ((packet[0]!=0x3c) && (packet[0]!=0x3d) && (packet[0]!=0x23)) {
-    LogBytes(LOG_WARNING, "[vs] Discarding unsupported packet", packet, packetSize);
+    logInputProblem("[vs] Discarding unsupported packet", packet, packetSize);
     return EOF;
   }
   ch = packet[1];

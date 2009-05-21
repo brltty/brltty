@@ -45,11 +45,9 @@
 
 typedef enum {
    PARM_CONFIGFILE,
-   PARM_DEBUGKEYS,
-   PARM_DEBUGREADS,
-   PARM_DEBUGWRITES
+   PARM_DEBUGKEYS
 } DriverParameter;
-#define BRLPARMS "configfile", "debugkeys", "debugreads", "debugwrites"
+#define BRLPARMS "configfile", "debugkeys"
 
 #define BRL_STATUS_FIELDS sfGeneric
 #define BRL_HAVE_STATUS_CELLS
@@ -87,8 +85,6 @@ loadConfigurationFile (const char *path) {
 #endif /* ENABLE_PM_CONFIGURATION_FILE */
 
 static unsigned int debugKeys = 0;
-static unsigned int debugReads = 0;
-static unsigned int debugWrites = 0;
 
 /*--- Command Determination ---*/
 
@@ -522,7 +518,7 @@ static unsigned char currentText[BRLCOLSMAX];
 
 static int
 writeBytes (BrailleDisplay *brl, const unsigned char *bytes, int count) {
-  if (debugWrites) LogBytes(LOG_DEBUG, "Write", bytes, count);
+  logOutputPacket(bytes, count);
   if (io->writeBytes(bytes, count) != -1) {
     brl->writeDelay += (count * 1000 / charactersPerSecond) + 1;
     return 1;
@@ -631,7 +627,7 @@ readBytes1 (BrailleDisplay *brl, unsigned char *buffer, size_t offset, size_t co
   if (io->readBytes(buffer, &offset, count, 1000)) {
     if (!(flags & RBF_ETX)) return 1;
     if (*(buffer+offset-1) == cETX) return 1;
-    LogBytes(LOG_WARNING, "Corrupt Packet", buffer, offset);
+    logInputProblem("Corrupt Packet", buffer, offset);
   }
   if ((offset > 0) && (flags & RBF_RESET)) resetTerminal1(brl);
   return 0;
@@ -833,7 +829,7 @@ readCommand1 (BrailleDisplay *brl, BRL_DriverCommandContext context) {
     while (1) {
       READ(0, 1, 0);
       if (buf[0] == cSTX) break;
-      LogBytes(LOG_WARNING, "Discarded Byte", buf, 1);
+      logIgnoredByte(buf[0]);
     }
 
     READ(1, 1, 0);
@@ -851,7 +847,7 @@ readCommand1 (BrailleDisplay *brl, BRL_DriverCommandContext context) {
       case cIdIdentify: {
         const int length = 10;
         READ(2, length-2, RBF_ETX);
-        if (debugReads) LogBytes(LOG_DEBUG, "Identity Packet", buf, length);
+        logInputPacket(buf, length);
         if (interpretIdentity1(brl, buf)) brl->resizeRequired = 1;
         approximateDelay(200);
         restartTerminal1(brl);
@@ -870,7 +866,7 @@ readCommand1 (BrailleDisplay *brl, BRL_DriverCommandContext context) {
           return EOF;
         }
         READ(6, length-6, RBF_ETX);			/* Data */
-        if (debugReads) LogBytes(LOG_DEBUG, "Input Packet", buf, length);
+        logInputPacket(buf, length);
 
         {
           int command = handleKey1(brl, ((buf[2] << 8) | buf[3]),
@@ -899,7 +895,7 @@ readCommand1 (BrailleDisplay *brl, BRL_DriverCommandContext context) {
         message = "data framing error";
       logError:
         READ(2, 1, RBF_ETX);
-        if (debugReads) LogBytes(LOG_DEBUG, "Error Packet", buf, 3);
+        logInputPacket(buf, 3);
         LogPrint(LOG_WARNING, "Output packet error: %02X: %s", buf[1], message);
         restartTerminal1(brl);
         break;
@@ -995,7 +991,7 @@ readPacket2 (BrailleDisplay *brl, Packet2 *packet) {
 
   while (1) {
     if (!io->readBytes(buffer, &offset, 1, 1000)) {
-      LogBytes(LOG_WARNING, "Partial Packet", buffer, offset);
+      logPartialPacket(buffer, offset);
       return 0;
     }
 
@@ -1007,24 +1003,24 @@ readPacket2 (BrailleDisplay *brl, Packet2 *packet) {
       switch (byte) {
         case cSTX:
           if (offset > 1) {
-            LogBytes(LOG_WARNING, "Incomplete Packet", buffer, offset);
+            logInputProblem("Incomplete Packet", buffer, offset);
             offset = 1;
           }
           continue;
 
         case cETX:
           if ((offset >= 5) && (offset == size)) {
-            if (debugReads) LogBytes(LOG_DEBUG, "Input Packet", buffer, offset);
+            logInputPacket(buffer, offset);
             return 1;
           }
-          LogBytes(LOG_WARNING, "Short Packet", buffer, offset);
+          logShortPacket(buffer, offset);
           offset = 0;
           continue;
 
         default:
           switch (offset) {
             case 1:
-              LogBytes(LOG_WARNING, "Discarded Byte", buffer, offset);
+              logIgnoredByte(buffer[0]);
               offset = 0;
               continue;
     
@@ -1052,7 +1048,7 @@ readPacket2 (BrailleDisplay *brl, Packet2 *packet) {
               if (type != 0X30) break;
 
               if (offset == size) {
-                LogBytes(LOG_WARNING, "Long Packet", buffer, offset);
+                logInputProblem("Long Packet", buffer, offset);
                 offset = 0;
                 continue;
               }
@@ -1077,7 +1073,7 @@ readPacket2 (BrailleDisplay *brl, Packet2 *packet) {
       }
     }
 
-    LogBytes(LOG_WARNING, "Corrupt Packet", buffer, offset);
+    logInputProblem("Corrupt Packet", buffer, offset);
     offset = 0;
   }
 }
@@ -1497,12 +1493,6 @@ static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   if (!validateYesNo(&debugKeys, parameters[PARM_DEBUGKEYS]))
     LogPrint(LOG_WARNING, "%s: %s", "invalid debug keys setting", parameters[PARM_DEBUGKEYS]);
-
-  if (!validateYesNo(&debugReads, parameters[PARM_DEBUGREADS]))
-    LogPrint(LOG_WARNING, "%s: %s", "invalid debug reads setting", parameters[PARM_DEBUGREADS]);
-
-  if (!validateYesNo(&debugWrites, parameters[PARM_DEBUGWRITES]))
-    LogPrint(LOG_WARNING, "%s: %s", "invalid debug writes setting", parameters[PARM_DEBUGWRITES]);
 
 #ifdef ENABLE_PM_CONFIGURATION_FILE
   {

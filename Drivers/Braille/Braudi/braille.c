@@ -162,7 +162,7 @@ identifyDisplay (BrailleDisplay *brl) {
           }
         }
 
-        LogBytes(LOG_WARNING, "Unrecognized Identity", identity, length);
+        logInputProblem("Unrecognized Identity", identity, length);
       }
     }
   }
@@ -293,7 +293,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
       }
     }
 
-    LogBytes(LOG_WARNING, "Unexpected Input", buffer, length);
+    logInputProblem("Unexpected Input", buffer, length);
   }
 
   if (errno == EAGAIN) return EOF;

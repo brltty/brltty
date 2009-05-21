@@ -589,7 +589,7 @@ readPacket1 (unsigned char *packet, int size) {
 
       if (!readByte(&byte, started)) {
         int result = (errno == EAGAIN)? 0: -1;
-        if (started) LogBytes(LOG_WARNING, "Partial Packet", packet, offset);
+        if (started) logPartialPacket(packet, offset);
         return result;
       }
     }
@@ -606,7 +606,7 @@ readPacket1 (unsigned char *packet, int size) {
       } else if (!byte) {
         length = 2;
       } else {
-        LogBytes(LOG_WARNING, "Ignored Byte", &byte, 1);
+        logIgnoredByte(byte);
         continue;
       }
 #else /* ABT3_OLD_FIRMWARE */
@@ -630,7 +630,7 @@ readPacket1 (unsigned char *packet, int size) {
 #endif /* ! ABT3_OLD_FIRMWARE */
 
       if (unexpected) {
-        LogBytes(LOG_WARNING, "Short Packet", packet, offset);
+        logShortPacket(packet, offset);
         offset = 0;
         length = 0;
         goto gotByte;
@@ -640,8 +640,8 @@ readPacket1 (unsigned char *packet, int size) {
     if (offset < size) {
       packet[offset] = byte;
     } else {
-      if (offset == size) LogBytes(LOG_WARNING, "Truncated Packet", packet, offset);
-      LogBytes(LOG_WARNING, "Discarded Byte", &byte, 1);
+      if (offset == size) logTruncatedPacket(packet, offset);
+      logDiscardedByte(byte);
     }
 
     if (++offset == length) {
@@ -810,7 +810,7 @@ getKey1 (BrailleDisplay *brl, unsigned int *Keys, unsigned int *Pos) {
   }
 
 #endif /* ! ABT3_OLD_FIRMWARE */
-  LogBytes(LOG_WARNING, "Unexpected Packet", packet, length);
+  logInputProblem("Unexpected Packet", packet, length);
   return 0;
 }
 
@@ -1521,7 +1521,7 @@ readPacket2s (unsigned char *packet, int size) {
 
       if (!readByte(&byte, started)) {
         int result = (errno == EAGAIN)? 0: -1;
-        if (started) LogBytes(LOG_WARNING, "Partial Packet", packet, offset);
+        if (started) logPartialPacket(packet, offset);
         return result;
       }
     }
@@ -1533,7 +1533,7 @@ readPacket2s (unsigned char *packet, int size) {
           break;
 
         default:
-          LogBytes(LOG_WARNING, "Ignored Byte", &byte, 1);
+          logIgnoredByte(byte);
           continue;
       }
     }
@@ -1541,8 +1541,8 @@ readPacket2s (unsigned char *packet, int size) {
     if (offset < size) {
       packet[offset] = byte;
     } else {
-      if (offset == size) LogBytes(LOG_WARNING, "Truncated Packet", packet, offset);
-      LogBytes(LOG_WARNING, "Discarded Byte", &byte, 1);
+      if (offset == size) logTruncatedPacket(packet, offset);
+      logDiscardedByte(byte);
     }
 
     if (offset == 1) {
@@ -1686,7 +1686,7 @@ readCommand2s (BrailleDisplay *brl, BRL_DriverCommandContext context) {
         break;
     }
 
-    LogBytes(LOG_WARNING, "Unexpected Packet", packet, length);
+    logInputProblem("Unexpected Packet", packet, length);
   }
 }
 
@@ -1725,7 +1725,7 @@ readPacket2u (unsigned char *packet, int size) {
 
       if (!readByte(&byte, started)) {
         int result = (errno == EAGAIN)? 0: -1;
-        if (started) LogBytes(LOG_WARNING, "Partial Packet", packet, offset);
+        if (started) logPartialPacket(packet, offset);
         return result;
       }
     }
@@ -1737,7 +1737,7 @@ readPacket2u (unsigned char *packet, int size) {
           break;
 
         default:
-          LogBytes(LOG_WARNING, "Ignored Byte", &byte, 1);
+          logIgnoredByte(byte);
           continue;
       }
     }
@@ -1745,8 +1745,8 @@ readPacket2u (unsigned char *packet, int size) {
     if (offset < size) {
       packet[offset] = byte;
     } else {
-      if (offset == size) LogBytes(LOG_WARNING, "Truncated Packet", packet, offset);
-      LogBytes(LOG_WARNING, "Discarded Byte", &byte, 1);
+      if (offset == size) logTruncatedPacket(packet, offset);
+      logDiscardedByte(byte);
     }
 
     if (++offset == length) {
@@ -1827,7 +1827,7 @@ readCommand2u (BrailleDisplay *brl, BRL_DriverCommandContext context) {
         break;
     }
 
-    LogBytes(LOG_WARNING, "Unexpected Packet", packet, length);
+    logInputProblem("Unexpected Packet", packet, length);
   }
 }
 

@@ -159,7 +159,7 @@ readPacket (BrailleDisplay *brl, InputPacket *packet) {
     {
       int started = offset > 0;
       if (!readByte(&byte, started)) {
-        if (started) LogBytes(LOG_WARNING, "Partial Packet", packet->bytes, offset);
+        if (started) logPartialPacket(packet->bytes, offset);
         return 0;
       }
     }
@@ -179,7 +179,7 @@ readPacket (BrailleDisplay *brl, InputPacket *packet) {
             group = IPG_PRODUCT;
             length = sizeof(packet->product) - 1;
           } else {
-            LogBytes(LOG_WARNING, "Ignored Byte", &byte, 1);
+            logIgnoredByte(byte);
             continue;
           }
           break;
@@ -209,7 +209,7 @@ readPacket (BrailleDisplay *brl, InputPacket *packet) {
       }
 
       if (unexpected) {
-        LogBytes(LOG_WARNING, "Short Packet", packet->bytes, offset);
+        logShortPacket(packet->bytes, offset);
         group = IPG_DEFAULT;
         offset = 0;
         length = 1;
@@ -625,7 +625,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
       }
     }
 
-    LogBytes(LOG_WARNING, "Unexpected Packet", packet.bytes, length);
+    logInputProblem("Unexpected Packet", packet.bytes, length);
   }
 
   if (errno != EAGAIN) return BRL_CMD_RESTARTBRL;

@@ -21,15 +21,50 @@
 #include "misc.h"
 #include "driver.h"
 
-static int logInputPackets = 0;
 static int logOutputPackets = 0;
+static int logInputPackets = 0;
 
-void
-logInputPacket (const void *packet, size_t size) {
-  if (logInputPackets) LogBytes(LOG_WARNING, "Input Packet", packet, size);
+static void
+logPacket (const char *description, const void *packet, size_t size) {
+  LogBytes(LOG_WARNING, description, packet, size);
 }
 
 void
 logOutputPacket (const void *packet, size_t size) {
-  if (logOutputPackets) LogBytes(LOG_WARNING, "Output Packet", packet, size);
+  if (logOutputPackets) logPacket("Output Packet", packet, size);
+}
+
+void
+logInputPacket (const void *packet, size_t size) {
+  if (logInputPackets) logPacket("Input Packet", packet, size);
+}
+
+void
+logInputProblem (const char *problem, const unsigned char *bytes, size_t count) {
+  LogBytes(LOG_WARNING, problem, bytes, count);
+}
+
+void
+logIgnoredByte (unsigned char byte) {
+  logInputProblem("Ignored Byte", &byte, 1);
+}
+
+void
+logDiscardedByte (unsigned char byte) {
+  logInputProblem("Discarded Byte", &byte, 1);
+}
+
+void
+logPartialPacket (const void *packet, size_t size) {
+  logInputProblem("Partial Packet", packet, size);
+}
+
+void
+logTruncatedPacket (const void *packet, size_t size) {
+  logInputProblem("Truncated Packet", packet, size);
+}
+
+void
+logShortPacket (const void *packet, size_t size) {
+  logInputProblem("Short Packet", packet, size);
 }

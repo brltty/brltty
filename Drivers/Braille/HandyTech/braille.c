@@ -1610,7 +1610,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
         break;
     }
 
-    LogBytes(LOG_WARNING, "Unexpected Packet", packet.bytes, size);
+    logInputProblem("Unexpected Packet", packet.bytes, size);
     LogPrint(LOG_WARNING, "state %d", currentState);
   }
 
@@ -1649,7 +1649,7 @@ brl_readPacket (BrailleDisplay *brl, void *buffer, size_t size) {
       int count = io->readBytes(&byte, 1, started);
 
       if (count != 1) {
-        if (!count && started) LogBytes(LOG_WARNING, "Partial Packet", packet, offset);
+        if (!count && started) logPartialPacket(packet, offset);
         return count;
       }
     }
@@ -1679,8 +1679,8 @@ brl_readPacket (BrailleDisplay *brl, void *buffer, size_t size) {
     if (offset < size) {
       packet[offset] = byte;
     } else {
-      if (offset == size) LogBytes(LOG_WARNING, "Truncated Packet", packet, offset);
-      LogBytes(LOG_WARNING, "Discarded Byte", &byte, 1);
+      if (offset == size) logTruncatedPacket(packet, offset);
+      logDiscardedByte(byte);
     }
 
     if (++offset == length) {
@@ -1702,7 +1702,7 @@ brl_readPacket (BrailleDisplay *brl, void *buffer, size_t size) {
           return length;
         }
 
-        LogBytes(LOG_WARNING, "Malformed Packet", packet, offset);
+        logInputProblem("Malformed Packet", packet, offset);
       }
 
       offset = 0;

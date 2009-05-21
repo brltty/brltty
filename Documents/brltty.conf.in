@@ -248,8 +248,6 @@
 # Papenmeier Braille Driver Parameters
 #braille-parameters pm:ConfigFile=@DATA_DIRECTORY@/brltty-pm.conf
 #braille-parameters pm:DebugKeys=no # [no,yes]
-#braille-parameters pm:DebugReads=no # [no,yes]
-#braille-parameters pm:DebugWrites=no # [no,yes]
 
 # TTY Braille Driver Parameters
 #braille-parameters tt:Baud=9600 # 

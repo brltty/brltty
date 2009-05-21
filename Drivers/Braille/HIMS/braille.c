@@ -104,14 +104,14 @@ readPacket (BrailleDisplay *brl, InputPacket *packet) {
     {
       int started = offset > 0;
       if (!readByte(&byte, started)) {
-        if (started) LogBytes(LOG_WARNING, "Partial Packet", packet->bytes, offset);
+        if (started) logPartialPacket(packet->bytes, offset);
         return 0;
       }
     }
 
     if (!offset) {
       if (byte != 0XFA) {
-        LogBytes(LOG_WARNING, "Ignored Byte", &byte, 1);
+        logIgnoredByte(byte);
         continue;
       }
     }
@@ -128,7 +128,7 @@ readPacket (BrailleDisplay *brl, InputPacket *packet) {
           }
 
           if ((checksum & 0XFF) != packet->data.checksum) {
-            LogBytes(LOG_WARNING, "Incorrect Input Checksum", packet->bytes, offset);
+            logInputProblem("Incorrect Input Checksum", packet->bytes, offset);
           }
         }
 
@@ -140,7 +140,7 @@ readPacket (BrailleDisplay *brl, InputPacket *packet) {
         const unsigned char *start = memchr(packet->bytes+1, packet->bytes[0], offset-1);
         const unsigned char *end = packet->bytes + offset;
         if (!start) start = end;
-        LogBytes(LOG_WARNING, "Discarded Bytes", packet->bytes, start-packet->bytes);
+        logInputProblem("Discarded Bytes", packet->bytes, start-packet->bytes);
         memmove(packet->bytes, start, (offset = end - start));
       }
     }
