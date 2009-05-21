@@ -34,9 +34,6 @@
 #include "braille.h"
 #include "ttb.h"
 
-static int logInputPackets = 0;
-static int logOutputPackets = 0;
-
 #include "io_serial.h"
 static SerialDevice *serialDevice = NULL;
 static const int serialBaud = 38400;
@@ -161,7 +158,7 @@ readPacket (unsigned char *packet, int size) {
         continue;
       }
 
-      if (logInputPackets) LogBytes(LOG_DEBUG, "Input Packet", packet, offset);
+      logInputPacket(packet, offset);
       return length;
     }
   }
@@ -186,7 +183,7 @@ writePacket (BrailleDisplay *brl, const unsigned char *packet, int size) {
 
   {
     int count = byte - buffer;
-    if (logOutputPackets) LogBytes(LOG_DEBUG, "Output Packet", buffer, count);
+    logOutputPacket(buffer, count);
 
     {
       int ok = serialWriteData(serialDevice, buffer, count) != -1;

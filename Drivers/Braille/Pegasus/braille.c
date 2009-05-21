@@ -27,9 +27,6 @@
 #define BRL_HAVE_STATUS_CELLS
 #include "brl_driver.h"
 
-static const int logInputPackets = 0;
-static const int logOutputPackets = 0;
-
 static const char productPrefix[] = "PBC";
 static const unsigned char productPrefixLength = sizeof(productPrefix) - 1;
 
@@ -226,7 +223,7 @@ readPacket (BrailleDisplay *brl, InputPacket *packet) {
         packet->bytes[length] = 0;
       }
 
-      if (logInputPackets) LogBytes(LOG_DEBUG, "Input Packet", packet->bytes, offset);
+      logInputPacket(packet->bytes, offset);
       return length;
     }
   }
@@ -234,7 +231,7 @@ readPacket (BrailleDisplay *brl, InputPacket *packet) {
 
 static int
 writeBytes (BrailleDisplay *brl, const unsigned char *buffer, int count) {
-  if (logOutputPackets) LogBytes(LOG_DEBUG, "Output Packet", buffer, count);
+  logOutputPacket(buffer, count);
   if (io->writeBytes(buffer, count) != -1) return 1;
   return 0;
 }

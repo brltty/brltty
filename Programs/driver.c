@@ -1,0 +1,35 @@
+/*
+ * BRLTTY - A background process providing access to the console screen (when in
+ *          text mode) for a blind person using a refreshable braille display.
+ *
+ * Copyright (C) 1995-2009 by The BRLTTY Developers.
+ *
+ * BRLTTY comes with ABSOLUTELY NO WARRANTY.
+ *
+ * This is free software, placed under the terms of the
+ * GNU General Public License, as published by the Free Software
+ * Foundation; either version 2 of the License, or (at your option) any
+ * later version. Please see the file LICENSE-GPL for details.
+ *
+ * Web Page: http://mielke.cc/brltty/
+ *
+ * This software is maintained by Dave Mielke <dave@mielke.cc>.
+ */
+
+#include "prologue.h"
+
+#include "misc.h"
+#include "driver.h"
+
+static int logInputPackets = 0;
+static int logOutputPackets = 0;
+
+void
+logInputPacket (const void *packet, size_t size) {
+  if (logInputPackets) LogBytes(LOG_WARNING, "Input Packet", packet, size);
+}
+
+void
+logOutputPacket (const void *packet, size_t size) {
+  if (logOutputPackets) LogBytes(LOG_WARNING, "Output Packet", packet, size);
+}

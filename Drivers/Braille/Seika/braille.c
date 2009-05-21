@@ -76,9 +76,6 @@ typedef struct {
 } InputOutputOperations;
 static const InputOutputOperations *io;
 
-static const int logInputPackets = 0;
-static const int logOutputPackets = 0;
-
 #define SERIAL_BAUD 9600
 static const int charactersPerSecond = SERIAL_BAUD / 10;
 
@@ -97,7 +94,7 @@ readByte (unsigned char *byte, int wait) {
 
 static int
 writeBytes (BrailleDisplay *brl, const unsigned char *buffer, size_t length) {
-  if (logOutputPackets) LogBytes(LOG_DEBUG, "Output Packet", buffer, length);
+  logOutputPacket(buffer, length);
   if (io->writeBytes(buffer, length) == -1) return 0;
   brl->writeDelay += (length * 1000 / charactersPerSecond) + 1;
   return 1;
@@ -233,7 +230,7 @@ readPacket_old (
 
     packet->bytes[offset++] = byte;
     if (template && (offset == template->length)) {
-      if (logInputPackets) LogBytes(LOG_DEBUG, "Input Packet", packet->bytes, offset);
+      logInputPacket(packet->bytes, offset);
 
       switch ((packet->type = template->type)) {
         case IPT_identity:
@@ -449,7 +446,7 @@ readPacket_332 (BrailleDisplay *brl, InputPacket *packet) {
 
     packet->bytes[offset++] = byte;
     if (offset == length) {
-      if (logInputPackets) LogBytes(LOG_DEBUG, "Input Packet", packet->bytes, offset);
+      logInputPacket(packet->bytes, offset);
 
       switch (packet->type) {
         case IPT_identity:

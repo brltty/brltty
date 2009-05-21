@@ -1637,7 +1637,6 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 
 static ssize_t
 brl_readPacket (BrailleDisplay *brl, void *buffer, size_t size) {
-  static const int logInputPackets = 0;
   unsigned char *packet = buffer;
   int offset = 0;
   int length = 0;
@@ -1699,7 +1698,7 @@ brl_readPacket (BrailleDisplay *brl, void *buffer, size_t size) {
         }
 
         if (ok) {
-          if (logInputPackets) LogBytes(LOG_DEBUG, "Input Packet", packet, offset);
+          logInputPacket(packet, offset);
           return length;
         }
 

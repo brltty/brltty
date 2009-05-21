@@ -39,8 +39,6 @@ typedef enum {
 /* Global Definitions */
 
 static unsigned int useVarioKeys;
-static const unsigned int logInputPackets = 0;
-static const unsigned int logOutputPackets = 0;
 static const int probeLimit = 2;
 static const int probeTimeout = 200;
 
@@ -1024,7 +1022,7 @@ readBaumPacket (BrailleDisplay *brl, unsigned char *packet, int size) {
         continue;
       }
 
-      if (logInputPackets) LogBytes(LOG_DEBUG, "Input Packet", packet, offset);
+      logInputPacket(packet, offset);
       return length;
     }
   }
@@ -1050,7 +1048,7 @@ writeBaumPacket (BrailleDisplay *brl, const unsigned char *packet, int length) {
 
   {
     int count = byte - buffer;
-    if (logOutputPackets) LogBytes(LOG_DEBUG, "Output Packet", buffer, count);
+    logOutputPacket(buffer, count);
 
     {
       int ok = io->writeBytes(buffer, count) != -1;
@@ -1720,7 +1718,7 @@ readHandyTechPacket (BrailleDisplay *brl, unsigned char *packet, int size) {
         continue;
       }
 
-      if (logInputPackets) LogBytes(LOG_DEBUG, "Input Packet", packet, offset);
+      logInputPacket(packet, offset);
       return length;
     }
   }
@@ -1733,7 +1731,7 @@ getHandyTechPacket (BrailleDisplay *brl, HandyTechResponsePacket *packet) {
 
 static int
 writeHandyTechPacket (BrailleDisplay *brl, const unsigned char *packet, int length) {
-  if (logOutputPackets) LogBytes(LOG_DEBUG, "Output Packet", packet, length);
+  logOutputPacket(packet, length);
 
   {
     int ok = io->writeBytes(packet, length) != -1;
@@ -1979,7 +1977,7 @@ readPowerBraillePacket (BrailleDisplay *brl, unsigned char *packet, int size) {
         continue;
       }
 
-      if (logInputPackets) LogBytes(LOG_DEBUG, "Input Packet", packet, offset);
+      logInputPacket(packet, offset);
       return length;
     }
   }
@@ -2003,7 +2001,7 @@ writePowerBraillePacket (BrailleDisplay *brl, const unsigned char *packet, int l
 
   {
     int count = byte - buffer;
-    if (logOutputPackets) LogBytes(LOG_DEBUG, "Output Packet", buffer, count);
+    logOutputPacket(buffer, count);
 
     {
       int ok = io->writeBytes(buffer, count) != -1;

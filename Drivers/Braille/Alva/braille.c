@@ -118,9 +118,6 @@
 #include "brl_driver.h"
 #include "braille.h"
 
-static const int logInputPackets = 0;
-static const int logOutputPackets = 0;
-
 typedef struct {
   const char *name;
   unsigned char identifier;
@@ -654,7 +651,7 @@ readPacket1 (unsigned char *packet, int size) {
         continue;
       }
 
-      if (logInputPackets) LogBytes(LOG_DEBUG, "Input Packet", packet, offset);
+      logInputPacket(packet, offset);
       return length;
     }
   }
@@ -1565,7 +1562,7 @@ readPacket2s (unsigned char *packet, int size) {
         continue;
       }
 
-      if (logInputPackets) LogBytes(LOG_DEBUG, "Input Packet", packet, offset);
+      logInputPacket(packet, offset);
       return length;
     }
   }
@@ -1759,7 +1756,7 @@ readPacket2u (unsigned char *packet, int size) {
         continue;
       }
 
-      if (logInputPackets) LogBytes(LOG_DEBUG, "Input Packet", packet, offset);
+      logInputPacket(packet, offset);
       return length;
     }
   }
@@ -1903,7 +1900,7 @@ readSerialBytes (unsigned char *buffer, int count, int wait) {
 
 static int
 writeSerialBytes (const unsigned char *buffer, int length, unsigned int *delay) {
-  if (logOutputPackets) LogBytes(LOG_DEBUG, "Output Packet", buffer, length);
+  logOutputPacket(buffer, length);
   if (delay) *delay += (length * 1000 / serialCharactersPerSecond) + 1;
   return serialWriteData(serialDevice, buffer, length);
 }
@@ -1999,7 +1996,7 @@ readUsbBytes (unsigned char *buffer, int length, int wait) {
 
 static int
 writeUsbBytes (const unsigned char *buffer, int length, unsigned int *delay) {
-  if (logOutputPackets) LogBytes(LOG_DEBUG, "Output Packet", buffer, length);
+  logOutputPacket(buffer, length);
 
   if (usbChannel->definition.outputEndpoint) {
     return usbWriteEndpoint(usbChannel->device, usbChannel->definition.outputEndpoint, buffer, length, 1000);

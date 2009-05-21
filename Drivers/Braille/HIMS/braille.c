@@ -62,8 +62,6 @@ typedef struct {
 } InputOutputOperations;
 static const InputOutputOperations *io;
 
-static const int logInputPackets = 0;
-static const int logOutputPackets = 0;
 static int charactersPerSecond;
 
 typedef enum {
@@ -134,7 +132,7 @@ readPacket (BrailleDisplay *brl, InputPacket *packet) {
           }
         }
 
-        if (logInputPackets) LogBytes(LOG_DEBUG, "Input Packet", packet->bytes, offset);
+        logInputPacket(packet->bytes, offset);
         return length;
       }
 
@@ -217,7 +215,7 @@ writePacket (
 
   {
     int size = byte - packet;
-    if (logOutputPackets) LogBytes(LOG_DEBUG, "Output Packet", packet, size);
+    logOutputPacket(packet, size);
     if (io->writeBytes(packet, size) == -1) return 0;
     brl->writeDelay += (size * 1000 / charactersPerSecond) + 1;
   }
