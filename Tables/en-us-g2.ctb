@@ -28,7 +28,7 @@ letsign 56
 capsign 6
 begcaps 6-6
 endcaps 6-3
-# If you don't want capitalization comment out the preceding two lines.
+# If you don't want capitalization comment out the preceding three lines.
 
 # the decimal digits
 always 1 1
@@ -68,6 +68,7 @@ word again 1-1245
 contraction ag
 word against 1-1245-34
 contraction agst
+endword ageries = messageries
 endword agery = savagery
 word alittle =
 midendword ally 6-13456
@@ -515,6 +516,7 @@ always M 134
 always many 456-134
 begword mc =
 always medic 134-1246-24-14 medicare
+begword menager 134-26-1-1245-12456 menagery menageries
 midendword ment 56-2345
 midword menth 134-26-1456 Blumenthal
 always mention 134-26-56-1345
