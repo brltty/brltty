@@ -44,8 +44,6 @@ public class Test {
     }
 
     try {
-      System.loadLibrary("brlapi_java");
-
       System.out.print("Connecting to BrlAPI... ");
       Brlapi brlapi = new Brlapi(settings);
       System.out.println("done (fd=" + brlapi.getFileDescriptor() + ")");
