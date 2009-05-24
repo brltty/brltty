@@ -37,7 +37,7 @@ travers l'écran. Les touches de l'afficheur braille lui-même peuvent
 être utilisées pour envoyer les commandes à BRLTTY qui, entre autres
 choses, peut s'en charger.
 
-<sect1>Commandes<p>
+<sect1>Commandes<label id="commands"><p>
 Malheureusement, les différents afficheurs braille n'offrent pas des
 touches de contrôle standard. Certains ont des touches standard six
 points, certains en ont huit, et d'autres n'en ont pas. Certains ont
@@ -141,7 +141,7 @@ Voir aussi la commande de routine <ref id="command-GOTOMARK" name="GOTOMARK">.
     </itemize>
 </descrip>
 
-<sect2>Caractéristiques de l'activation<p>
+<sect2>Activation de fonctionnalités<label id="commands-features"><p>
 Chacune de ces commandes a trois modes: <bf>activate</bf>
 (déclenche la fonction), <bf>deactivate</bf> (annule la fonction),
 et <bf>toggle</bf> (si la fonction est inhibée, la déclenche, et
@@ -163,11 +163,11 @@ par le <ref id="preferences-menu" name="menu préférences">.
     fenêtre braille, plutôt que les caractères eux-mêmes (le
     contenu). Par exemple, cette fonctionnalité est utile si vous
     devez mettre en valeur un item. Quand elle montre le contenu de
-    l'écran, la table de traduction de texte est utilisée (voir
+    l'écran, la table de texte est utilisée (voir
     l'option <ref id="options-text-table" name="-t"> en ligne de commande, la ligne <ref id="configure-text-table" name="text-table"> du
     fichier de configuration et l'option de compilation
     <ref id="build-text-table" name="--with-text-table">).  Quand elle montre les attributs de
-    l'écran, la table de traduction des attributs est utilisée (voir
+    l'écran, la table d'attributs est utilisée (voir
     l'option ``-a'' en ligne de commande, la ligne
     <ref id="build-attributes-table" name="attributes-table"> du fichier de configuration, et l'option de
     compilation ``--with-attributes-table'').  Cette fonctionnalité ne
@@ -321,10 +321,7 @@ par le <ref id="preferences-menu" name="menu préférences">.
   <tag>PREFMENU<label id="command-PREFMENU"></tag>
     Accès au menu des préférences (voir <ref id="preferences-menu" name="Le
     Preferences Menu"> pour des détails complets). Rappelez cette
-    commande pour revenir à l'écran. Cette commande n'est pas
-    disponible si l'option de compilation <ref
-    id="build-preferences-menu" name="--disable-preferences-menu"> a
-    été spécifiée.
+    commande pour revenir à l'écran.
   <tag>PREFSAVE<label id="command-PREFSAVE"></tag>
     Enregistre les paramètres de préférence courants (voir <ref
     id="preferences" name="Preferences"> pour des détails complets).
@@ -394,7 +391,7 @@ Voir aussi la commande de touche de chemin <ref id="command-SWITCHVT" name="SWIT
     Arrête puis relance le pilote de la synthèse vocale.
 </descrip>
 
-<sect2>Les routines<p>
+<sect2>Commandes de caractères<label id="commands-characters"><p>
 <descrip>
   <tag>ROUTE<label id="command-ROUTE"></tag>
     Déplace le curseur au caractère associé à la routine
@@ -420,11 +417,6 @@ Voir aussi la commande de touche de chemin <ref id="command-SWITCHVT" name="SWIT
     Fixe la fin du bloc coupé au caractère associé à la touche de
     direction, et place la partie linéaire sur le bloc coupé (voir
     <ref id="cut" name="Cut and Paste"> pour des détails complets).
-  <tag>SWITCHVT<label id="command-SWITCHVT"></tag>
-    Va au terminal virtuel dont le numéro (démarrant à 1) correspond à
-    celui de la routine. Voir aussi les commandes de
-    déplacement dans les terminaux virtuels <ref id="command-SWITCHVT_PREV-SWITCHVT_NEXT"
-    name="SWITCHVT_PREV/SWITCHVT_NEXT">.
   <tag>PRINDENT/NXINDENT<label id="command-PRINDENT-NXINDENT"></tag>
     Monte/descend à la ligne la plus proche qui n'est pas indentée plus
     que la colonne associée à la routine.
@@ -446,6 +438,18 @@ Voir aussi la commande de touche de chemin <ref id="command-SWITCHVT" name="SWIT
     nécessité pour beaucoup de déplacements élémentaires de la fenêtre
     (comme les commandes <ref id="command-CHRLT-CHRRT"
     name="CHRLT/CHRRT"> et <ref id="command-HWINLT-HWINRT" name="HWINLT/HWINRT">).
+  <tag>PRDIFCHAR/NXDIFCHAR<label id="command-PRDIFCHAR-NXDIFCHAR"></tag>
+    Monte/descend à la ligne contenant un caractère différent la plus proche à la
+    colonne associée à la routine curseur.
+</descrip>
+
+<sect2>Commandes de base<label id="commands-base"><p>
+<descrip>
+  <tag>SWITCHVT<label id="command-SWITCHVT"></tag>
+    Bascule vers le terminal virtuel dont le numéro (en commençant à 1)
+    correspond à la routine curseur.
+    Voir aussi les commandes de basculement entre terminaux virtuels
+    <ref id="command-SWITCHVT_PREV-SWITCHVT_NEXT" name="SWITCHVT_PREV/SWITCHVT_NEXT">.
   <tag>SETMARK<label id="command-SETMARK"></tag>
     Marque la position courante de la fenêtre braille dans
     une mémoire associée à la routine. Voir la commande <ref id="command-GOTOMARK" name="GOTOMARK">.
@@ -455,9 +459,6 @@ Voir aussi la commande de touche de chemin <ref id="command-SWITCHVT" name="SWIT
     (voir la commande <ref id="command-SETMARK" name="SETMARK">) avec
     la même routine.
     Cette caractéristique n'affecte que le terminal virtuel courant.
-  <tag>PRDIFCHAR/NXDIFCHAR<label id="command-PRDIFCHAR-NXDIFCHAR"></tag>
-    Monte ou descend à la ligne la plus proche qui contient un caractère
-    différent dans la colonne associée à la routine-curseur.
 </descrip>
 
 <sect1>Le fichier de configuration<label id="configure"><p>
@@ -484,14 +485,14 @@ Les lignes de commande suivantes sont reconnues:
     pour les paramètres par défaut établis lors de la procédure de
     compilation. Cette ligne de commande peut être évitée avec
     l'option de ligne de commande <ref id="options-api-parameters" name="-A">.
-  <tag><tt>attributes-table</tt> <em>fichier</em><label id="configure-attributes-table"></tag>
-    Spécifie la table de traduction des attributs (voir la section
-    <ref id="translation" name="Translation Tables"> pour des détails).
+<tag><tt/attributes-table/ <em/file/<label id="configure-attributes-table"></tag>
+    Spécifie la table d'attributs (voir la section
+    <ref id="table-attributes" name="Tables d'attributs"> pour des détails).
     Si vous fournissez un chemin relatif, il est déterminé par rapport à <tt>/etc/brltty</tt>
     (voir les options de compilation <ref id="build-data-directory" name="--with-data-directory">
     et <ref id="build-execute-root" name="--with-execute-root">
     pour plus de détails).
-    L'extension <tt>.tbl</tt> est facultative.
+    L'extension <tt>.atb</tt> est facultative.
     Voir l'option de compilation <ref id="build-attributes-table" name="--with-attributes-table">
     pour les paramètres par défaut établis pendant la procédure de compilation.
     Vous pouvez vous passer de cette ligne de commande avec l'option
@@ -503,21 +504,6 @@ Les lignes de commande suivantes sont reconnues:
     pour les paramètres par défaut établis durant la procédure de compilation.
     Vous pouvez vous passer de cette ligne de commande avec
     l'option <ref id="options-braille-device" name="-d">.
-  <tag><tt>release-device</tt> [<em>boléen</em><label id="configure-release-device"></tag>
-    Prendre en compte ou non le périphérique auquel l'afficheur braille est connecté 
-    lorsque  l'écran courant ou la fenêtre  ne peuvent être lus.
-    
-    <descrip>
-          <tag>on</tag>
-                  Prend en compte le périphérique.
-          <tag>off</tag>
-                  Ne prend pas en compte le périphérique.
-    </descrip>
-    
-    Sur les plateformes Windows,  le paramètre est on (actif),  il est off
-    sur toutes les autres.
-    Vous pouvez éviter cette ligne avec l'option en ligne de commande 
-    <ref id="options-release-device" name="-r">.
   <tag><tt>braille-driver</tt> <em>pilote</em><tt>,</tt>...|<tt>auto</tt><label id="configure-braille-driver"></tag>
     Spécifie le pilote de l'afficheur braille (voir la section
     <ref id="operand-driver" name="Spécification du pilote">). Par défaut, c'est
@@ -540,7 +526,7 @@ Les lignes de commande suivantes sont reconnues:
     Vous pouvez éviter cette ligne avec l'option en ligne de commande
     <ref id="options-braille-parameters" name="-B">.
   <tag><tt>contraction-table</tt> <em>fichier</em><label id="configure-contraction-table"></tag>
-    Spécifie la table abrégé (voir la section <ref id="contraction"
+    Spécifie la table abrégé (voir la section <ref id="table-contraction"
     name="Braille abrégé"> pour des détails).
     Si vous fournissez un chemin relatif, il est déterminé par rapport à <tt>/etc/brltty</tt>
     (voir les options de compilation <ref id="build-data-directory" name="--with-data-directory">
@@ -556,6 +542,28 @@ Les lignes de commande suivantes sont reconnues:
     Elle n'est pas disponible si l'option de compilation <ref
     id="build-contracted-braille" name="--disable-contracted-braille">
     a été spécifiée.
+  <tag><tt/key-table/ <em/file/|<tt/auto/<label id="configure-key-table"></tag>
+    Spécifie la table de touches
+    (voir la section <ref id="table-key" name="Tables de touches"> pour plus de détails).
+    Si vous fournissez un chemin relatif, il est ancré sur <tt>/etc/brltty</>
+    (voir les options de compilation <ref id="build-data-directory" name="--with-data-directory">
+    et <ref id="build-execute-root" name="--with-execute-root"> pour plus de 
+    détails).
+    L'extension <tt/.ktb/ est facultative.
+    Par défaut, aucune table de touches n'est utilisée.
+    L'effet de cette instruction peut être annulé par l'option en ligne de
+    commande
+    <ref id="options-key-table" name="-k">.
+  <tag><tt/keyboard-properties/ <em/name/<tt/=/<em/value/<tt/,/...<label id="configure-keyboard-properties"></tag>
+    Spécifie les propriétés du/des claviers(s) qui vont être gérés (monitored).
+    Si vous spécifiez plus d'une fois la même propriété, sa valeur la plus à 
+    droite est utilisée. 
+    Voir la section <ref id="keyboard-properties" name="Propriétés du clavier">
+    pour une liste des propriétés que vous pouvez spécifier. Par défaut, on gère
+    tous les claviers. Vous pouvez annuler l'effet de cette instruction avec 
+    l'option en ligne de commande 
+    <ref id="options-keyboard-properties" name="-K">.
+
   <tag><tt>midi-device</tt> <em>device</em><label id="configure-midi-device"></tag>
     Spécifie le périphérique à utiliser pour l'interface MIDI
     (voir la section <ref id="operand-midi-device"
@@ -582,7 +590,18 @@ Les lignes de commande suivantes sont reconnues:
     compilation.
     Vous pouvez éviter cette ligne avec l'option en ligne de commande
     <ref id="options-screen-parameters" name="-X">.
-  <tag><tt>screen-driver</tt> <em>pilote</em><label id="configure-screen-driver"></tag>
+  <tag><tt/release-device/ <em/boolean/<label id="configure-release-device"></tag>
+    Créer ou non le périphérique auquel l'afficheur braille est connecté lorsque
+    l'écran ou la fenêtre courant ne peuvent pas être lus.
+    <descrip>
+      <tag/on/Créer le périphérique.
+      <tag/off/Ne pas créer le périphérique.
+    </descrip>
+    Par défaut, le réglage est <tt/on/ sur les plateformes Windows et
+    <tt/off/ on sur les autres plateformes. Vous pouvez annuler l'effet de
+    cette instruction avec l'option en ligne de commande
+    <ref id="options-release-device" name="-r">.
+   <tag><tt/screen-driver/ <em/driver/<label id="configure-screen-driver"></tag>
     Voir l'option de compilation <ref id="build-braille-device" name="--with-screen-driver">.
     Vous pouvez éviter cette ligne avec l'option en ligne de commande
     <ref id="options-screen-driver" name="-x">.
@@ -629,19 +648,20 @@ Les lignes de commande suivantes sont reconnues:
     pour les paramètres par défaut établis durant la procédure de compilation.
     Vous pouvez éviter cette ligne avec l'option en ligne de commande
     <ref id="options-speech-parameters" name="-S">.
-  <tag><tt>text-table</tt> <em>file</em><label id="configure-text-table"></tag>
-    Spécifie la table de traduction de texte (voir la section <ref
-    id="translation" name="Tables de traduction"> pour les détails).
+  <tag><tt/text-table/ <em/file/|<tt/auto/<label id="configure-text-table"></tag>
+    Spécifie la table de texte (voir la section <ref
+    id="table-text" name="Tables de texte"> pour les détails).
     Si vous fournissez un chemin relatif, il est déterminé par rapport à <tt>/etc/brltty</tt>
     (voir les options de compilation <ref id="build-data-directory" name="--with-data-directory">
     et <ref id="build-execute-root" name="--with-execute-root">.
     pour plus de détails).
-    L'extension <tt>.tbl</tt> est facultative.
+    L'extension <tt>.ttb</tt> est facultative.
     Pour un nom de fichier simple, le préfixe <tt>text.</tt> est facultatif.
     Voir l'option de compilation <ref id="build-text-table" name="--with-text-table">
     pour les paramètres par défaut établis lors de la procédure de
-    compilation.
-    Vous pouvez éviter cette ligne avec l'option en ligne de commande
+    compilation. Par défaut, on réalise une auto-sélection à partir de la locale
+    avec répercutions sur la table compilée en dur.
+    L'effet de cette instruction peut être annulé avec l'option en ligne de commande
     <ref id="options-text-table" name="-t">.
 </descrip>
 
@@ -650,14 +670,14 @@ Un grand nombre de paramètres peuvent être spécifiés explicitement
 lorsque vous appelez BRLTTY. La commande <tt>brltty</tt> accepte les options
 suivantes:
 <descrip>
-  <tag><tt>-a</tt><em>file</em> <tt>--attributes-table=</tt><em>fichier</em><label id="options-attributes-table"></tag>
-    Spécifie la table de traduction des attributs (voir la section
-    <ref id="translation" name="Tables de traduction"> pour les détails).
+   <tag><tt/-a/<em/file/ <tt/--attributes-table=/<em/file/<label id="options-attributes-table"></tag>
+    Spécifie la table d'attributs (voir la section
+    <ref id="table-attributes" name="Tables d'attributs"> pour les détails).
     Si vous fournissez un chemin relatif, il est déterminé par rapport à <tt>/etc/brltty</tt>
     (voir les options de compilation <ref id="build-data-directory" name="--with-data-directory">
     et <ref id="build-execute-root" name="--with-execute-root">
     pour plus de détails).
-    L'extension <tt>.tbl</tt> est facultative.
+    L'extension <tt>.atb</tt> est facultative.
     Voir la ligne <ref id="configure-attributes-table" name="attributes-table">
     du fichier de configuration pour la sélection des paramètres par défaut
     lors de l'exécution.
@@ -669,7 +689,7 @@ suivantes:
     du fichier de configuration pour les paramètres par défaut
     à l'exécution.
   <tag><tt>-c</tt><em>fichier</em> <tt>--contraction-table=</tt><em>fichier</em><label id="options-contraction-table"></tag>
-    Spécifie la table d'abrégé (voir la section <ref id="contraction" name="Braille abrégé">
+    Spécifie la table d'abrégé (voir la section <ref id="table-contraction" name="Braille abrégé">
     pour les détails).
     Si vous fournissez un chemin relatif, il est rattaché à <tt>/etc/brltty</tt>.
     (voir les options de compilation <ref id="build-data-directory" name="--with-data-directory">
@@ -698,9 +718,21 @@ suivantes:
   <tag><tt>-f</tt><em>fichier</em> <tt>--configuration-file=</tt><em>file</em><label id="options-configuration-file"></tag>
     Spécifie l'emplacement du <ref id="configure" name="fichier de configuration">
     qui doit être utilisé pour l'établissement des paramètres par défaut à l'exécution.
-  <tag><tt>-h</tt> <tt>--help</tt><label id="options-help"></tag>
+   <tag><tt/-h/ <tt/--help/<label id="options-help"></tag>
     Affiche un résumé des options de la ligne de commande acceptées par BRLTTY,
     puis quitte.
+  <tag><tt/-k/<em/file/ <tt/--key-table=/<em/file/<label id="options-key-table"></tag>
+    Spécifie la table de touches
+    (voir la section <ref id="table-key" name="Key Tables"> pour plus de détails).
+    Si vous fournissez un chemin relatif, il est ancré à <tt>/etc/brltty</>
+    (voir les options de compilation <ref id="build-data-directory" name="--with-data-directory">
+    et <ref id="build-execute-root" name="--with-execute-root"> pour plus de détails).
+    L'extension <tt/.ktb/ est facultative. Voir l'instruction
+    <ref id="configure-key-table" name="key-table"> du fichier de
+    configuration pour le paramètre d'exécution par défaut. Vous pouvez modifier
+    ce paramètre avec la préférence 
+    <ref id="preference-key-table" name="Key Table">.
+
   <tag><tt>-l</tt><em>niveau</em> <tt>--log-level=</tt><em>level</em><label id="options-log-level"></tag>
     Spécifie le niveau de sécurité pour l'émission des messages de diagnostique.
     Les niveaux suivants sont reconnus.
@@ -754,14 +786,14 @@ suivantes:
     du fichier de configuration pour les paramètres par défaut à l'exécution.
     Cette option n'est pas disponible si vous avez spécifié l'option de compilation
     <ref id="build-speech-support" name="--disable-speech-support">.
-  <tag><tt>-t</tt><em>fichier</em> <tt>--text-table=</tt><em>file</em><label id="options-text-table"></tag>
-    Spécifie la table de traduction de texte (voir la section
-    <ref id="translation" name="Tables de traduction"> pour les détails).
+   <tag><tt/-t/<em/file/ <tt/--text-table=/<em/file/<label id="options-text-table"></tag>
+    Spécifie la table de texte (voir la section
+    <ref id="table-text" name="Tables de texte"> pour les détails).
     Si vous fournissez un chemin relatif, il est rattaché à <tt>/etc/brltty</tt>
     (voir les options de compilation <ref id="build-data-directory" name="--with-data-directory">
     et <ref id="build-execute-root" name="--with-execute-root"> pour plus de
     détails).
-    L'extension <tt>.tbl</tt> est facultative.
+    L'extension <tt>.ttb</tt> est facultative.
     Pour un nom de fichier simple, le péfixe <tt>text.</tt> est facultatif.
     Voir la ligne <ref id="configure-text-table" name="text-table">
     du fichier de configureation pour les paramètres par défaut à l'exécution.
@@ -825,16 +857,11 @@ suivantes:
         Paramètres pour l'API (voir l'option
         en ligne de commande <ref id="options-api-parameters" name="-A">).
       <tag><tt>BRLTTY_ATTRIBUTES_TABLE</tt></tag>
-        La table de traduction des attributs (voir l'option en ligne de
+        La table d'attributs (voir l'option en ligne de
         commande <ref id="options-attributes-table" name="-a">).
       <tag><tt>BRLTTY_BRAILLE_DEVICE</tt></tag>
         Le périphérique de l'afficheur braille (voir l'option en ligne de commande
         <ref id="options-braille-device" name="-d">).
-      <tag><tt>BRLTTY_RELEASE_DEVICE</tt></tag>
-         Prendre en compte ou non le périphérique auquel l'afficheur braille est connecté 
-         lorsque  l'écran courant ou la fenêtre  ne peuvent être lus (voir
-         l'option <ref id="options-braille-driver" name="-r"> en lignede
-         commande).
       <tag><tt>BRLTTY_BRAILLE_DRIVER</tt></tag>
         Le pilote de l'afficheur braille (voir l'option en ligne de commande
         <ref id="options-braille-driver" name="-b">).
@@ -844,6 +871,13 @@ suivantes:
       <tag><tt>BRLTTY_CONFIGURATION_FILE</tt></tag>
         Le fichier de configuration (voir l'option 
         <ref id="options-configuration-file" name="-f"> de la ligne de commande).
+      <tag><tt/BRLTTY_KEY_TABLE/</tag>
+        La table de touches
+        (voir l'option en ligne de commande <ref id="options-key-table" name="-k">).
+      <tag><tt/BRLTTY_KEYBOARD_PROPERTIES/</tag>
+        Les propriétés du clavier
+        (voir l'option en ligne de commande <ref id="options-keyboard-properties" name="-K">).
+
       <tag><tt>BRLTTY_CONTRACTION_TABLE</tt></tag>
         La table d'abrégé (voir l'option <ref id="options-contraction-table" name="-c">
        en ligne de commande).
@@ -853,6 +887,11 @@ suivantes:
       <tag><tt>BRLTTY_PCM_DEVICE</tt></tag>
         Le périphérique audio (voir l'option <ref id="options-pcm-device" name="-p">
         en ligne de commande).
+      <tag><tt/BRLTTY_RELEASE_DEVICE/</tag>
+        Créer ou non le périphérique auquel l'afficheur est connecté quand 
+        l'écran ou la fenêtre suivant ne peuvent pas être lus 
+        (voir l'option <ref id="options-release-device" name="-r"> de la ligne de commande).
+
       <tag><tt>BRLTTY_SCREEN_PARAMETERS</tt></tag>
         Paramètres pour le pilote d'écran (voir l'option <ref id="options-screen-parameters" name="-X">
         en ligne de commande).
@@ -865,8 +904,8 @@ suivantes:
       <tag><tt>BRLTTY_SPEECH_PARAMETERS</tt></tag>
         Paramètres pour le pilote de la synthèse vocale (voir l'option 
         <ref id="options-speech-parameters" name="-S"> en ligne de commande).
-      <tag><tt>BRLTTY_TEXT_TABLE</tt></tag>
-        La table de traduction de texte (voir l'optien
+      <tag><tt/BRLTTY_TEXT_TABLE/</tag>
+        La table de texte (voir l'optien
         <ref id="options-text-table" name="-a"> en ligne de commande).
     </descrip>
   <tag><tt>-F</tt><em>fichier</em> <tt>--speech-fifo=</tt><em>file</em><label id="options-speech-fifo"></tag>
@@ -879,16 +918,40 @@ suivantes:
     Cette option n'est pas disponible si vous avez spécifié l'option
     de compilation 
     <ref id="build-speech-support" name="--disable-speech-support">.
+  <tag><tt/-I/ <tt/--install-service/<label id="options-install-service"></tag>
+    Installe BRLTTY comme le service BrlAPI.
+    Cela signifie que:
+    <itemize>
+      <item>BRLTTY sera lancé automatiquement quand le système démarrera.
+      <item>Les applications peuvent savoir qu'un serveur BrlAPI est lancé.
+    </itemize>
+    Cette option n'est supportée que sur la plateforme Windows.
+  <tag><tt/-K/<em/name/<tt/=/<em/value/<tt/,/... <tt/--keyboard-properties=/<em/name/<tt/=/<em/value/<tt/,/...<label id="options-keyboard-properties"></tag>
+    Spécifie les propriétés du/des clavier(s) à prendre en charge. Si vous spécifiez
+    la même propriété plus d'une fois, la valeur la plus à droite est utilisée.
+    Voir la section <ref id="keyboard-properties" name="Propriétés du clavier">
+    pour une liste des propriétés que vous pouvez spécifier.
+    Voir l'instruction <ref id="configure-keyboard-properties" name="keyboard-properties">
+    du fichier de configuration pour les paramètres d'exécution par défaut.
+
   <tag><tt>-M</tt><em>csecs</em> <tt>--message-delay=</tt><em>csecs</em><label id="options-message-delay"></tag>
     Spécifie le temps (en centièmes de seconde) que prend ÁRLTTY pour
     afficher ses propres messages internes sur l'afficheur braille. Si
     ce n'est pas spécifié, c'est <tt>400</tt> (4 secondes) qui est utlisé.
   <tag><tt>-N</tt> <tt>--no-api</tt><label id="options-no-speech"></tag>
     Désactive l'interface programmatique de l'application.
-  <tag><tt>-P</tt><em>fichier</em> <tt>--pid-file=</tt><em>fichier</em><label id="options-pid-file"></tag>
+   <tag><tt/-P/<em/file/ <tt/--pid-file=/<em/file/<label id="options-pid-file"></tag>
     Spécifie le fichier à l'intérieur duquel BRLTTY doit écrire ses
     identifiants de processus (pid). Si cela n'est pas spécifié,
     BRLTTY écrit ses identifiants de processus nulle part.
+  <tag><tt/-R/ <tt/--remove-service/<label id="options-remove-service"></tag>
+    Supprime le service BrlAPI.
+    Cela signifie que:
+    <itemize>
+      <item>BRLTTY ne sera pas lancé automatiquement quand le système démarrera.
+      <item>Les applications peuvent savoir qu'aucun serveur BrlAPI n'est lancé.
+    </itemize>
+    Cette option n'est supportée que sur la plateforme Windows.
   <tag><tt>-S</tt>[<em>driver</em><tt>:</tt>]<em>name</em><tt>=</tt><em>value</em><tt>,</tt>...
    <tt>--speech-parameters=</tt>[<em>driver</em><tt>:</tt>]<em>name</em><tt>=</tt><em>value</em><tt>,</tt>...<label id="options-speech-parameters"></tag>
     Spécifie les paramètres pour les pilotes de synthèse vocale.

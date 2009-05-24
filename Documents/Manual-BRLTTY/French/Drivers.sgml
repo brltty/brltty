@@ -1,14 +1,13 @@
 <sect>Codes d'identification de pilote<label id="drivers"><p>
 <table loc="h">
   <tabular ca="ll">
-    Code|Nom@<hline>
+    Code|Name@<hline>
     al|Alva@
     at|Albatross@
     ba|BrlAPI@
     bl|BrailleLite@
     bm|Baum (Native, HT, PB1, PB2)@
     bn|BrailleNote@
-    bs|BrailleSense@
     cb|CombiBraille@
     ec|EcoBraille@
     es|ExternalSpeech@
@@ -17,6 +16,7 @@
     fs|FreedomScientific@
     fv|Festival@
     gs|GenericSay@
+    hm|HIMS@
     ht|HandyTech@
     il|IrisLinux@
     lb|Libbraille@
@@ -26,8 +26,10 @@
     mn|MiniBraille@
     mp|Mikropuhe@
     no|no driver@
+    pg|Pegasus@
     pm|Papenmeier@
     sd|SpeechDispatcher@
+    sk|Seika@
     sw|Swift@
     th|Theta@
     ts|Telesensory Systems Inc.@
