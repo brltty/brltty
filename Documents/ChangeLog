@@ -38,6 +38,7 @@ May 15, 2009:
       Bluetooth support has been fixed.
    TSI Braille Driver:
       The way Seika devices implement PowerBraille emulation is supported.
+      The PowerBraille 81 has been redefined to only have text cells.
       The core's flow control mechanism is used (rather than hard-coded delays).
    Voyager Braille Driver:
       The statuscells= parameter has been removed.
@@ -96,7 +97,7 @@ May 15, 2009:
       The file extension ".ktb" is used for key tables.
       The file extension ".kti" is used for key subtables.
       The desktop, keypad, and laptop key tables are provided.
-      the -k [--key-table=] option has been added.
+      The -k [--key-table=] option has been added.
       The -K [--keyboard-properties=] option has been added.
    Source Tree Changes:
       The text tables have been moved from BrailleTables/ to Tables/.
