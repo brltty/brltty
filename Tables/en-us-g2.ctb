@@ -1043,9 +1043,7 @@ always . 256
 always ... 3-3-3
 always .\s.\s. 3-3-3 . . .
 
-endnum ! 12346 (factorial)
 always ! 235
-
 always ? 236
 
 always ( 2356
