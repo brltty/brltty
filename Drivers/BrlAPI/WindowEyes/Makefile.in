@@ -18,8 +18,8 @@
 
 WE_OBJS = webrloem.$O
 WE_NAME = webrloem109
-WE_LIB = $(LIB_PFX)$(WE_NAME).$(LIB_EXT)
-WE_DLL = $(LIB_PFX)$(WE_NAME).$(LIB_EXT)
+WE_LIB = $(WE_NAME).$(LIB_EXT)
+WE_DLL = $(WE_NAME).$(LIB_EXT)
 WE_IMPLIB = $(ARC_PFX)$(WE_NAME).$(ARC_EXT)
 WE_IMPLIB_VERSIONED = $(ARC_PFX)$(WE_NAME).$(ARC_EXT)
 WE_DEF = $(WE_NAME).def
@@ -27,7 +27,7 @@ WE_DEF = $(WE_NAME).def
 we: $(WE_DYNAMIC_LIBRARY)
 
 we-dynamic-library-windows: $(WE_DLL)
-$(WE_DLL): $(WE_OBJS) api
+$(WE_DLL): $(WE_OBJS) brlapi
 	-rm -f implib.a lib.def
 	$(MKLIB:<name>=${WE_LIB}) $@ $(WE_OBJS) $(API_LIBS)
 	[ ! -f implib.a ] || mv implib.a $(WE_IMPLIB)
@@ -36,3 +36,5 @@ $(WE_DLL): $(WE_OBJS) api
 webrloem.$O:
 	$(CC) $(LIBCFLAGS) -c $(SRC_DIR)/webrloem.c
 
+test$X: we-dynamic-library-windows $(SRC_DIR)/test.c
+	$(CC) $(LDFLAGS) -o $@ $(SRC_DIR)/test.c -L. -l$(WE_NAME) $(LDLIBS)
