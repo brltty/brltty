@@ -610,11 +610,6 @@ int BRLAPI_STDCALL brlapi_describeKeyCode (brlapi_keyCode_t code, brlapi_describ
 /** Unicode braille row */
 #define BRLAPI_UC_ROW	0x2800UL
 
-/** Maximum keyset size, i.e. maximum number of keys
- * allowed in a key set
- */
-#define BRLAPI_MAXKEYSETSIZE (BRLAPI_MAXPACKETSIZE / sizeof(brlapi_keyCode_t))
-
 /* brlapi_readKey */
 /** Read a key from the braille keyboard
  *

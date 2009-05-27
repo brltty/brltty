@@ -64,7 +64,6 @@ let writeArguments_initializer = {
 type handle
 
 let max_packet_size = 512
-let max_keyset_size = 128
 
 type errorCode =
   | SUCCESS

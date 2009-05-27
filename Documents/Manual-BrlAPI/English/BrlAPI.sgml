@@ -1312,9 +1312,7 @@ display and keypresses. For this, it can send either of these types of packet:
   should be sent mustn't change,
   <item><tt/BRLAPI_PACKET_LEAVETTYMODE/ to leave tty handling mode and go back to
   normal mode,
-  <item><tt/BRLAPI_PACKET_IGNOREKEYRANGE/, <tt/BRLAPI_PACKET_ACCEPTKEYRANGE/,
-  <tt/BRLAPI_PACKET_IGNOREKEYSET/, <tt/BRLAPI_PACKET_ACCEPTKEYSET/ to mask and unmask
-  keys,
+  <item><tt/BRLAPI_PACKET_IGNOREKEYRANGE/ and <tt/BRLAPI_PACKET_ACCEPTKEYRANGE/ to mask and unmask keys,
   <item><tt/BRLAPI_PACKET_WRITE/ to display text on this tty,
   <item><tt/BRLAPI_PACKET_ENTERRAWMODE/ to enter raw mode,
   <item><tt/BRLAPI_PACKET_GETDRIVERID/, <tt/BRLAPI_PACKET_GETDRIVERNAME/
@@ -1448,17 +1446,15 @@ between xterms.
 This should be sent to free the tty and masked keys lists.
 This is acknowledged by the server.
 
-<sect2><tt/BRLAPI_PACKET_IGNOREKEYRANGE/, <tt/BRLAPI_PACKET_ACCEPTKEYRANGE/,
-<tt/BRLAPI_PACKET_IGNOREKEYSET/ and <tt/BRLAPI_PACKET_ACCEPTKEYSET/ (see
-<em/brlapi_ignoreKeyRange()/, <em/brlapi_acceptKeyRange()/,
-<em/brlapi_ignoreKeySet()/, and <em/brlapi_acceptKeySet()/)
+<sect2><tt/BRLAPI_PACKET_IGNOREKEYRANGE/ and <tt/BRLAPI_PACKET_ACCEPTKEYRANGE/
+(see <em/brlapi_ignoreKeyRange()/ and <em/brlapi_acceptKeyRange()/)
 <p>
 If the client doesn't want every key press to be signaled to it, but some of
 them to be given to <tt/brltty/ for normal processing, it can send
-<tt/BRLAPI_PACKET_IGNOREKEYRANGE/ (resp. <tt/BRLAPI_PACKET_IGNOREKEYSET/) packets to
-tell ranges (resp. sets) of key codes which shouldn't be
+<tt/BRLAPI_PACKET_IGNOREKEYRANGE/ packets to
+tell ranges of key codes which shouldn't be
 sent to it, but given to <tt/brltty/, and <tt/BRLAPI_PACKET_ACCEPTKEYRANGE/
-(resp. <tt/BRLAPI_PACKET_ACCEPTKEYSET/) packets to tell ranges (resp. sets)
+packets to tell ranges
 of key codes which should be sent to it, and not given to
 <tt/brltty/. The server keeps a dynamic list of ranges, so that arbitrary
 sequences of such packets can be sent.

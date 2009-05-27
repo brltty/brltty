@@ -1654,12 +1654,7 @@ done:
 static int ignore_accept_key_ranges(brlapi_handle_t *handle, int what, brlapi_range_t ranges[], unsigned int n)
 {
   uint32_t ints[n][4];
-  unsigned int i;
-
-  if (n>BRLAPI_MAXKEYSETSIZE) {
-    brlapi_errno = BRLAPI_ERROR_INVALID_PARAMETER;
-    return -1;
-  }
+  unsigned int i, remaining, todo;
 
   for (i=0; i<n; i++) {
     ints[i][0] = htonl(ranges[i].first >> 32);
@@ -1668,7 +1663,14 @@ static int ignore_accept_key_ranges(brlapi_handle_t *handle, int what, brlapi_ra
     ints[i][3] = htonl(ranges[i].last & 0xffffffff);
   };
 
-  return brlapi__writePacketWaitForAck(handle,(what ? BRLAPI_PACKET_ACCEPTKEYRANGES : BRLAPI_PACKET_IGNOREKEYRANGES),ints,sizeof(ints));
+  for (remaining = n; remaining; remaining -= todo) {
+    todo = remaining;
+    if (todo > BRLAPI_MAXPACKETSIZE / (2*sizeof(brlapi_keyCode_t)))
+      todo = BRLAPI_MAXPACKETSIZE / (2*sizeof(brlapi_keyCode_t));
+    if (brlapi__writePacketWaitForAck(handle,(what ? BRLAPI_PACKET_ACCEPTKEYRANGES : BRLAPI_PACKET_IGNOREKEYRANGES),&ints[n-remaining],todo*2*sizeof(brlapi_keyCode_t)))
+      return -1;
+  }
+  return 0;
 }
 
 /* Function : keyrangeMask */
