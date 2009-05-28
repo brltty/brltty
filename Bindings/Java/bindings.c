@@ -66,7 +66,7 @@ static void ThrowError(JNIEnv *jenv, const char *msg) {
     char message[lenmsg + 2 + lenerr + 1];
     snprintf(message, sizeof(message), "%s: %s", msg, error);
 
-    if (!(jcexcep = (*jenv)->FindClass(jenv, "org.a11y.BrlAPI.Error"))) {
+    if (!(jcexcep = (*jenv)->FindClass(jenv, "org/a11y/BrlAPI/Error"))) {
       ThrowException(jenv, ERR_NULLPTR, "ThrowBrlapiErrorFindClass");
       return;
     }
@@ -97,7 +97,7 @@ static void BRLAPI_STDCALL exceptionHandler(brlapi_handle_t *handle, int err, br
   }
   (*env)->SetByteArrayRegion(env, jbuf, 0, size, (jbyte *) buf);
 
-  if (!(jcexcep = (*env)->FindClass(env, "org.a11y.BrlAPI.Exception"))) {
+  if (!(jcexcep = (*env)->FindClass(env, "org/a11y/BrlAPI/Exception"))) {
     ThrowException(env, ERR_NULLPTR, "exceptionHandlerFindClass");
     return;
   }
@@ -130,7 +130,7 @@ static void BRLAPI_STDCALL exceptionHandler(brlapi_handle_t *handle, int err, br
   jfieldID handleID; \
   GET_CLASS(jenv, jcls, jobj, ret); \
   GET_ID(jenv, handleID, jcls, "handle", "J", ret); \
-  handle = (void*) (intptr_t) (*jenv)->GetLongField(jenv, jcls, handleID); \
+  handle = (void*) (intptr_t) (*jenv)->GetLongField(jenv, jobj, handleID); \
   if (!handle) { \
     ThrowException((jenv), ERR_NULLPTR, "connection has been closed"); \
     return ret; \
@@ -155,7 +155,8 @@ JNIEXPORT jint JNICALL Java_org_a11y_BrlAPI_Native_openConnection(JNIEnv *jenv, 
     ThrowException(jenv, ERR_OUTOFMEM, __func__);
     return -1;
   }
-  (*jenv)->SetLongField(jenv, jcls, handleID, (jlong) (intptr_t) handle);
+
+  (*jenv)->SetLongField(jenv, jobj, handleID, (jlong) (intptr_t) handle);
 
   env = jenv;
 
@@ -231,7 +232,7 @@ JNIEXPORT void JNICALL Java_org_a11y_BrlAPI_Native_closeConnection(JNIEnv *jenv,
 
   brlapi__closeConnection(handle);
   free((void*) (intptr_t) handle);
-  (*jenv)->SetLongField(jenv, jcls, handleID, (jlong) (intptr_t) NULL);
+  (*jenv)->SetLongField(jenv, jobj, handleID, (jlong) (intptr_t) NULL);
 }
 
 JNIEXPORT jstring JNICALL Java_org_a11y_BrlAPI_Native_getDriverName(JNIEnv *jenv, jobject jobj) {
@@ -263,7 +264,7 @@ JNIEXPORT jobject JNICALL Java_org_a11y_BrlAPI_Native_getDisplaySize(JNIEnv *jen
     return NULL;
   }
 
-  if (!(jcsize = (*jenv)->FindClass(jenv, "org.a11y.BrlAPI.DisplaySize"))) {
+  if (!(jcsize = (*jenv)->FindClass(jenv, "org/a11y/BrlAPI/DisplaySize"))) {
     ThrowException(jenv, ERR_NULLPTR, __func__);
     return NULL;
   }
