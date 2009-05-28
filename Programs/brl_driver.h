@@ -86,7 +86,6 @@ BRLCONST BrailleDriver BRLSYMBOL = {
   NULL,
 #endif /* BRLPARMS */
 
-  BRLHELP,
   brl_statusFields,
 
   brl_construct,

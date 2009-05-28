@@ -325,7 +325,6 @@ static int brl_construct (BrailleDisplay *brl, char **parameters, const char *de
    serialRestartDevice(serialDevice, BAUDRATE);
 
   /* Set model params... */
-   brl->helpPage = 0;
    brl->textRows = BRLROWS;
    while (!NbCols)
      {

@@ -298,7 +298,9 @@ static unsigned char has_sw,    /* flag: has routing keys or not */
                      sw_bcnt;   /* bytes of sensor switch information */
 static char disp_ver[Q_VER_LENGTH]; /* version of the hardware */
 
-static enum { NAV20_40=0, NAV80, PB40, PB65_80} displayType;
+typedef enum {NAV20_40, NAV80, PB40, PB65_81} DisplayType;
+static DisplayType displayType;
+static const char *helpFiles[] = {"nav2040", "nav80", "pb40", "pb6581"};
 
 static int
 myread(void *buf, unsigned len)
@@ -424,7 +426,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
     break;
   case 65:
     /* pb65 */
-    displayType = PB65_80;
+    displayType = PB65_81;
     has_sw = 1;
     sw_bcnt = SW_CNT81;
     sw_lastkey = 64;
@@ -434,7 +436,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
     break;
   case 81:
     /* pb80 */
-    displayType = PB65_80;
+    displayType = PB65_81;
     has_sw = 1;
     sw_bcnt = SW_CNT81;
     sw_lastkey = 80;
@@ -446,7 +448,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
     LogPrint(LOG_ERR,"Unrecognized braille display");
     goto failure;
   };
-  brl->helpPage = displayType;
+  brl->helpFile = helpFiles[displayType];
 
   no_multiple_updates = 0;
 #ifdef FORCE_DRAIN_AFTER_SEND

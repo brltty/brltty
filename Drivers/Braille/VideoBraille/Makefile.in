@@ -21,7 +21,6 @@ DRIVER_NAME = VideoBraille
 DRIVER_COMMENT = 40
 DRIVER_VERSION = 
 DRIVER_COPYRIGHt = 
-HELP_DEPS = $(HELP_TEXT)
 include $(SRC_TOP)braille.mk
 
 vblow.$O:

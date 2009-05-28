@@ -374,21 +374,6 @@ destructHelpScreen (void) {
   }
 }
 
-void
-setHelpPageNumber (short page) {
-  helpScreen.setPageNumber(page);
-}
-
-short
-getHelpPageNumber (void) {
-  return helpScreen.getPageNumber();
-}
-
-short
-getHelpPageCount (void) {
-  return helpScreen.getPageCount();
-}
-
 
 int
 isFrozenScreen (void) {

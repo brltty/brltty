@@ -2162,16 +2162,30 @@ initializeBrailleDriver (const char *code, int verify) {
 
         /* Initialize the braille driver's help screen. */
         LogPrint(LOG_INFO, "%s: %s", gettext("Help File"),
-                 braille->helpFile? braille->helpFile: gettext("none"));
+                 brl.helpFile? brl.helpFile: gettext("none"));
         {
-          char *path = makePath(opt_dataDirectory, braille->helpFile);
-          if (path) {
-            if (verify || constructHelpScreen(path)) {
-              LogPrint(LOG_INFO, "%s: %s[%d]", gettext("Help Page"), path, getHelpPageNumber());
-            } else {
-              LogPrint(LOG_WARNING, "%s: %s", gettext("cannot open help file"), path);
+          char *file;
+
+          {
+            const char *components[] = {
+              PACKAGE_NAME, "-", braille->definition.code, "-", brl.helpFile, ".hlp"
+            };
+            file = joinStrings(components, ARRAY_COUNT(components));
+          }
+
+          if (file) {
+            char *path;
+
+            if ((path = makePath(opt_dataDirectory, file))) {
+              if (verify || constructHelpScreen(path)) {
+                LogPrint(LOG_INFO, "%s: %s", gettext("Help Path"), path);
+              } else {
+                LogPrint(LOG_WARNING, "%s: %s", gettext("cannot open help file"), path);
+              }
+              free(path);
             }
-            free(path);
+
+            free(file);
           }
         }
 
@@ -2313,7 +2327,6 @@ startBrailleDriver (void) {
   if (activateBrailleDriver(0)) {
     getPreferences();
     applyBraillePreferences();
-    setHelpPageNumber(brl.helpPage);
     playTune(&tune_braille_on);
 
     if (clearStatusCells(&brl)) {

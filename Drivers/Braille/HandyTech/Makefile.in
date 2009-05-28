@@ -21,7 +21,6 @@ DRIVER_NAME = HandyTech
 DRIVER_COMMENT = Modular 20/40/80, Modular Evolution 64/88, Braille Wave 40, Easy Braille, Braille Star 40/80, Bookworm, Braillino 20
 DRIVER_VERSION = 0.4
 DRIVER_DEVELOPERS = Andreas Gross <andi.gross@gmx.de>, Dave Mielke <dave@mielke.cc>, Mario Lang <mlang@delysid.org>
-HELP_DEPS = $(HELP_TEXT)
 include $(SRC_TOP)braille.mk
 
 braille.$O:

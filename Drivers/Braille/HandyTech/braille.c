@@ -64,6 +64,8 @@ static CellWriter writeEvolutionCells;
 
 typedef struct {
   const char *name;
+  const char *helpFile;
+
   ByteInterpreter *interpretByte;
   KeysInterpreter *interpretKeys;
   CellWriter *writeCells;
@@ -73,7 +75,6 @@ typedef struct {
   HT_ModelIdentifier identifier:8;
   unsigned char textCells;
   unsigned char statusCells;
-  unsigned char helpPage;
 
   unsigned char sessionEndLength;
 
@@ -81,13 +82,19 @@ typedef struct {
   unsigned isBookworm:1;
 } ModelEntry;
 
+static const char helpFile_bookworm[] = "bookworm";
+static const char helpFile_easy[] = "easy";
+static const char helpFile_modular[] = "modular";
+static const char helpFile_star40[] = "star40";
+static const char helpFile_star80[] = "star80";
+
 #define HT_BYTE_SEQUENCE(name,bytes) .name##Address = bytes, .name##Length = sizeof(bytes)
 static const ModelEntry modelTable[] = {
   { .identifier = HT_Model_Modular20,
     .name = "Modular 20+4",
     .textCells = 20,
     .statusCells = 4,
-    .helpPage = 0,
+    .helpFile = helpFile_modular,
     .interpretByte = interpretKeyByte,
     .interpretKeys = interpretModularKeys,
     .writeCells = writeStatusAndTextCells
@@ -97,7 +104,7 @@ static const ModelEntry modelTable[] = {
     .name = "Modular 40+4",
     .textCells = 40,
     .statusCells = 4,
-    .helpPage = 0,
+    .helpFile = helpFile_modular,
     .interpretByte = interpretKeyByte,
     .interpretKeys = interpretModularKeys,
     .writeCells = writeStatusAndTextCells
@@ -107,7 +114,7 @@ static const ModelEntry modelTable[] = {
     .name = "Modular 80+4",
     .textCells = 80,
     .statusCells = 4,
-    .helpPage = 0,
+    .helpFile = helpFile_modular,
     .interpretByte = interpretKeyByte,
     .interpretKeys = interpretModularKeys,
     .writeCells = writeStatusAndTextCells
@@ -117,7 +124,7 @@ static const ModelEntry modelTable[] = {
     .name = "Modular Evolution 64",
     .textCells = 64,
     .statusCells = 0,
-    .helpPage = 0,
+    .helpFile = helpFile_modular,
     .interpretByte = interpretKeyByte,
     .interpretKeys = interpretBrailleStarKeys,
     .writeCells = writeEvolutionCells,
@@ -128,7 +135,7 @@ static const ModelEntry modelTable[] = {
     .name = "Modular Evolution 88",
     .textCells = 88,
     .statusCells = 0,
-    .helpPage = 0,
+    .helpFile = helpFile_modular,
     .interpretByte = interpretKeyByte,
     .interpretKeys = interpretBrailleStarKeys,
     .writeCells = writeEvolutionCells,
@@ -139,7 +146,7 @@ static const ModelEntry modelTable[] = {
     .name = "Braille Wave 40",
     .textCells = 40,
     .statusCells = 0,
-    .helpPage = 0,
+    .helpFile = helpFile_modular,
     .interpretByte = interpretKeyByte,
     .interpretKeys = interpretBrailleWaveKeys,
     .writeCells = writeStatusAndTextCells
@@ -150,7 +157,7 @@ static const ModelEntry modelTable[] = {
     .isBookworm = 1,
     .textCells = 8,
     .statusCells = 0,
-    .helpPage = 1,
+    .helpFile = helpFile_bookworm,
     .interpretByte = interpretBookwormByte,
     .writeCells = writeBookwormCells,
     HT_BYTE_SEQUENCE(sessionEnd, BookwormSessionEnd)
@@ -160,7 +167,7 @@ static const ModelEntry modelTable[] = {
     .name = "Braillino 20",
     .textCells = 20,
     .statusCells = 0,
-    .helpPage = 2,
+    .helpFile = helpFile_star40,
     .interpretByte = interpretKeyByte,
     .interpretKeys = interpretBrailleStarKeys,
     .writeCells = writeStatusAndTextCells
@@ -170,7 +177,7 @@ static const ModelEntry modelTable[] = {
     .name = "Braille Star 40",
     .textCells = 40,
     .statusCells = 0,
-    .helpPage = 2,
+    .helpFile = helpFile_star40,
     .interpretByte = interpretKeyByte,
     .interpretKeys = interpretBrailleStarKeys,
     .writeCells = writeStatusAndTextCells
@@ -180,7 +187,7 @@ static const ModelEntry modelTable[] = {
     .name = "Braille Star 80",
     .textCells = 80,
     .statusCells = 0,
-    .helpPage = 3,
+    .helpFile = helpFile_star80,
     .interpretByte = interpretKeyByte,
     .interpretKeys = interpretBrailleStarKeys,
     .writeCells = writeStatusAndTextCells
@@ -190,7 +197,7 @@ static const ModelEntry modelTable[] = {
     .name = "Easy Braille",
     .textCells = 40,
     .statusCells = 0,
-    .helpPage = 4,
+    .helpFile = helpFile_easy,
     .interpretByte = interpretKeyByte,
     .interpretKeys = interpretModularKeys,
     .writeCells = writeStatusAndTextCells
@@ -545,7 +552,7 @@ identifyModel (BrailleDisplay *brl, unsigned char identifier) {
   brl->textRows = BRLROWS;
   brl->statusColumns = model->statusCells;
   brl->statusRows = 1;
-  brl->helpPage = model->helpPage;		/* position in the model list */
+  brl->helpFile = model->helpFile;		/* position in the model list */
 
   if (!reallocateBuffer(&rawData, brl->textColumns*brl->textRows)) return 0;
   if (!reallocateBuffer(&prevData, brl->textColumns*brl->textRows)) return 0;

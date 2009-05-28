@@ -21,7 +21,6 @@ DRIVER_NAME = CombiBraille
 DRIVER_COMMENT = 25/45/85
 DRIVER_VERSION = 
 DRIVER_DEVELOPERS = Nikhil Nair
-HELP_DEPS = $(HELP_TEXT)
 include $(SRC_TOP)braille.mk
 
 braille.$O:

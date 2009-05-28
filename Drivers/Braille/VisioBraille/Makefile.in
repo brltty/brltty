@@ -21,7 +21,6 @@ DRIVER_NAME = VisioBraille
 DRIVER_COMMENT = 20/40
 DRIVER_VERSION = 0.2 (2002)
 DRIVER_DEVELOPERS = Sébastien Hinderer <Sebastien.Hinderer@ens-lyon.org>
-HELP_DEPS = $(HELP_TEXT)
 include $(SRC_TOP)braille.mk
 
 braille.$O:

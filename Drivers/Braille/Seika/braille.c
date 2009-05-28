@@ -741,7 +741,6 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
         brl->textColumns = response.fields.identity.size;
         brl->textRows = 1;
-        brl->helpPage = 0;
 
         routingCommand = BRL_BLK_ROUTE;
         memset(textCells, 0XFF, brl->textColumns);

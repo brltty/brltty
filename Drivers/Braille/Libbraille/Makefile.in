@@ -21,7 +21,6 @@ DRIVER_NAME = Libbraille
 DRIVER_COMMENT = Libbraille
 DRIVER_VERSION = 
 DRIVER_DEVELOPERS = Sébastien Sablé <sable@users.sourceforge.net>
-HELP_DEPS = $(HELP_TEXT)
 BRL_OBJS = @braille_libraries_lb@
 include $(SRC_TOP)braille.mk
 

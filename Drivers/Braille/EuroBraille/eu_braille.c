@@ -188,7 +188,6 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
 	}      
     }
   LogPrint(LOG_INFO, "EuroBraille driver initialized: %d display length connected", brl->textColumns);
-  brl->helpPage = 0;
   return (1);
 }
 

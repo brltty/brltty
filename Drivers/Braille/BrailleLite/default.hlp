@@ -1,0 +1,122 @@
+Help for Braille Lite
+
+left bar left: full window left
+left bar right: line up
+right bar left: line down
+right bar right: full window right
+
+1: line up / 4: line down
+3: character left / 6: character right
+235: line start / 256: line end
+123: top left / 456: bottom left
+1236: next virtual terminal / 3456: previous VT
+234: search forward / 156: search backward (use cut to set search string)
+12356: next prompt / 23456: previous prompt (same prompt as current line)
+1345: next paragraph / 1246: previous paragraph (line after blank line)
+
+2: keyboard left arrow / 5: keyboard right arrow
+23: keyboard up arrow / 56: keyboard down arrow
+12 chord: keyboard backspace
+145 chord: keyboard delete
+2345 chord: keyboard tab
+46 chord: keyboard return
+246 chord: keyboard escape
+
+125: home (goto cursor)
+1256: goto cursor previous position
+14: cursor tracking (toggle)
+124 chord: freeze screen (toggle)
+1456: help mode (toggle)
+12456: learn mode (key describer) (toggle)
+34: status mode (toggle)
+24: attribute display (toggle)
+2346: six dots mode (toggle)
+
+245 chord: route cursor to beginning of line
+45 chord: route cursor to current line
+236 chord: cut start
+126 chord: cut append
+356 chord: cut end rectangular
+16 chord: cut end linear
+1234 chord: paste
+
+36: speak line
+134: mute speech
+
+1235 chord: restart braille driver
+
+25 chord: preferences options:
+  134: menu
+  1235: reset
+  234: save
+  1356: cancel
+
+Chord required for *dangerous* commands, e.g. routing, cut/paste,
+restart driver, etc.
+
+Advance Bar Combinations:
+Left   Right  Description
+center ------ half window left
+------ center half window right
+left   left   up to line with different content
+left   right  down to line with different content
+right  left   up to line with different highlighting
+right  right  down to line with different highlighting
+center left   up to top line
+center right  down to bottom line
+
+Whiz Wheels (Millennium models):
+Wheel Motion Description
+left  up     one line up
+left  down   one line down
+right up     full window left
+right down   full window right
+left  press  attribute underlining (toggle)
+right press  show cursor (toggle)
+
+Internal:
+
+1245 chord: position internal cursor for column-specific function:
+  To move internal cursor:
+    125: centre of window
+    235: left end of window
+    256: right end of window
+    3: character left
+    6: character right
+    left bar left: quarter window left
+    right bar right: quarter window right
+    routing key: go to character
+  To terminate:
+    236 chord: cut start
+    126 chord: cut append
+    356 chord: cut end rectangular
+    16 chord: cut end linear
+    24: describe attributes of selected character
+    1356: cancel
+
+k chord toggles keyboard emulation mode - initially off.
+When on, unchorded characters passed directly to inskey(), unless prefixed
+by:
+
+u chord: uppercase (twice to lock)
+q chord: unlock
+26 chord: add 8th dot to next char typed
+35 chord: prepend ESCAPE to next character (ALT)
+x chord: control character
+z chord: cancel preceding meta/control
+
+Combinations with:
+dot 7: shift
+dot 78: control
+
+Other internals:
+
+2356 chord: rotate BrailleLite by 180 degrees
+o chord: set repeat count for following command (up to 2digits).
+  Type numbers, then type movement command or character (if in
+    keyboard emulation).
+  z chord: cancels special context.
+  e chord: confirms count and waits for key to repeat.
+Goto virtual terminal: use o chord, followed by VT number,
+  followed by v chord or # chord.
+Set/goto mark: use o chord followed by # followed by s to set or m to go.

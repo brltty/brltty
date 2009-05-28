@@ -21,7 +21,6 @@ DRIVER_NAME = Virtual
 DRIVER_COMMENT = TCP/Unix, client/server
 DRIVER_VERSION = 0.1
 DRIVR_DEVELOPERS = Mario Lang <mlang@delysid.org>
-HELP_DEPS = $(HELP_TEXT)
 include $(SRC_TOP)braille.mk
 
 braille.$O:

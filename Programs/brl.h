@@ -52,7 +52,7 @@ typedef struct BrailleDataStruct BrailleData;
 typedef struct {
   unsigned int textColumns, textRows;
   unsigned int statusColumns, statusRows;
-  unsigned int helpPage;
+  const char *helpFile;
   unsigned char *buffer;
   int cursor;
   unsigned isCoreBuffer:1;
@@ -113,7 +113,6 @@ extern void setBrailleSensitivity (BrailleDisplay *brl, BrailleSensitivity setti
 typedef struct {
   DRIVER_DEFINITION_DECLARATION;
   const char *const *parameters;
-  const char *helpFile;
   const unsigned char *statusFields;
 
   /* Routines provided by the braille driver library: */

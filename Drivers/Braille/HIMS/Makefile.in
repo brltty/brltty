@@ -21,7 +21,6 @@ DRIVER_NAME = HIMS
 DRIVER_COMMENT = Braille Sense, SyncBraille
 DRIVER_VERSION = 
 DRIVER_DEVELOPERS = Dave Mielke <dave@mielke.cc>
-HELP_DEPS = $(HELP_TEXT)
 include $(SRC_TOP)braille.mk
 
 braille.$O:

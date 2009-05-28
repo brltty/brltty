@@ -168,7 +168,6 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
             if (response[1] == 4) {
               brl->textColumns = response[2];
               brl->textRows = 1;
-              brl->helpPage = 0;
 
               if (!clearBrailleCells(brl)) break;
               if (!clearVisualText(brl)) break;

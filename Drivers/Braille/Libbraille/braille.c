@@ -100,7 +100,6 @@ brl_construct(BrailleDisplay *brl, char **parameters, const char *device)
 
       brl->textColumns = braille_size();  /* initialise size of display */
       brl->textRows = 1;
-      brl->helpPage = 0;
 
       braille_timeout(100);
 

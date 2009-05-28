@@ -225,7 +225,7 @@ writePacket (
 
 typedef struct {
   const char *modelName;
-  unsigned int helpPage;
+  const char *helpFile;
   int (*getCellCount) (BrailleDisplay *brl, unsigned int *count);
   int (*interpretKeys) (BrailleKeys keys, BRL_DriverCommandContext context);
 } ProtocolOperations;
@@ -370,8 +370,8 @@ interpretBrailleSenseKeys (BrailleKeys keys, BRL_DriverCommandContext context) {
 }
 
 static const ProtocolOperations brailleSenseOperations = {
-  "Braille Sense",
-  0, getBrailleSenseCellCount, interpretBrailleSenseKeys
+  "Braille Sense", "sense",
+  getBrailleSenseCellCount, interpretBrailleSenseKeys
 };
 
 static int
@@ -429,8 +429,8 @@ interpretSyncBrailleKeys (BrailleKeys keys, BRL_DriverCommandContext context) {
 }
 
 static const ProtocolOperations syncBrailleOperations = {
-  "SyncBraille",
-  1, getSyncBrailleCellCount, interpretSyncBrailleKeys
+  "SyncBraille", "sync",
+  getSyncBrailleCellCount, interpretSyncBrailleKeys
 };
 
 /* Serial IO */
@@ -679,7 +679,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       if (protocol->getCellCount(brl, &brl->textColumns) ||
           protocol->getCellCount(brl, &brl->textColumns)) {
         brl->textRows = 1;
-        brl->helpPage = protocol->helpPage;
+        brl->helpFile = protocol->helpFile;
 
         routingCommand = BRL_BLK_ROUTE;
 

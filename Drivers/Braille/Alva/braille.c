@@ -119,16 +119,49 @@
 #include "braille.h"
 
 typedef struct {
+  const char *helpFile;
+} ModuleTypeEntry;
+
+typedef enum {
+  MOD_TYPE_ABT,
+  MOD_TYPE_Delphi,
+  MOD_TYPE_Satellite,
+  MOD_TYPE_BrailleController
+} ModelType;
+
+static const ModuleTypeEntry moduleTypeTable[] = {
+  [MOD_TYPE_ABT] = {
+    .helpFile = "abt+delphi"
+  }
+  ,
+  [MOD_TYPE_Delphi] = {
+    .helpFile = "abt+delphi"
+  }
+  ,
+  [MOD_TYPE_Satellite] = {
+    .helpFile = "satellite"
+  }
+  ,
+  [MOD_TYPE_BrailleController] = {
+    .helpFile = "bc"
+  }
+};
+
+typedef struct {
   const char *name;
   unsigned char identifier;
   unsigned char columns;
   unsigned char statusCells;
   unsigned char flags;
-  unsigned char helpPage;
+  unsigned char type;
 } ModelEntry;
 static const ModelEntry *model;		/* points to terminal model config struct */
 
-#define MOD_FLG__CONFIGURABLE 0X01
+#define MOD_FLAG_CONFIGURABLE 0X01
+
+static const char helpFile_ABT_Delphi[] = "abt+delphi";
+static const char helpFile_Satellite[] = "satellite";
+static const char helpFile_BrailleController[] = "bc";
 
 static const ModelEntry modelTable[] = {
   { .identifier = 0X00,
@@ -136,7 +169,7 @@ static const ModelEntry modelTable[] = {
     .columns = 20,
     .statusCells = 3,
     .flags = 0,
-    .helpPage = 0
+    .type = MOD_TYPE_ABT
   }
   ,
   { .identifier = 0X01,
@@ -144,7 +177,7 @@ static const ModelEntry modelTable[] = {
     .columns = 40,
     .statusCells = 3,
     .flags = 0,
-    .helpPage = 0
+    .type = MOD_TYPE_ABT
   }
   ,
   { .identifier = 0X02,
@@ -152,7 +185,7 @@ static const ModelEntry modelTable[] = {
     .columns = 40,
     .statusCells = 5,
     .flags = 0,
-    .helpPage = 0
+    .type = MOD_TYPE_ABT
   }
   ,
   { .identifier = 0X03,
@@ -160,7 +193,7 @@ static const ModelEntry modelTable[] = {
     .columns = 80,
     .statusCells = 5,
     .flags = 0,
-    .helpPage = 0
+    .type = MOD_TYPE_ABT
   }
   ,
   { .identifier = 0X04,
@@ -168,7 +201,7 @@ static const ModelEntry modelTable[] = {
     .columns = 80,
     .statusCells = 5,
     .flags = 0,
-    .helpPage = 0
+    .type = MOD_TYPE_ABT
   }
   ,
   { .identifier = 0X0A,
@@ -176,7 +209,7 @@ static const ModelEntry modelTable[] = {
     .columns = 20,
     .statusCells = 3,
     .flags = 0,
-    .helpPage = 0
+    .type = MOD_TYPE_Delphi
   }
   ,
   { .identifier = 0X0B,
@@ -184,7 +217,7 @@ static const ModelEntry modelTable[] = {
     .columns = 40,
     .statusCells = 3,
     .flags = 0,
-    .helpPage = 0
+    .type = MOD_TYPE_Delphi
   }
   ,
   { .identifier = 0X0C,
@@ -192,7 +225,7 @@ static const ModelEntry modelTable[] = {
     .columns = 40,
     .statusCells = 5,
     .flags = 0,
-    .helpPage = 0
+    .type = MOD_TYPE_Delphi
   }
   ,
   { .identifier = 0X0D,
@@ -200,47 +233,47 @@ static const ModelEntry modelTable[] = {
     .columns = 80,
     .statusCells = 5,
     .flags = 0,
-    .helpPage = 0
+    .type = MOD_TYPE_Delphi
   }
   ,
   { .identifier = 0X0E,
     .name = "Satellite 544",
     .columns = 40,
     .statusCells = 3,
-    .flags = MOD_FLG__CONFIGURABLE,
-    .helpPage = 1
+    .flags = MOD_FLAG_CONFIGURABLE,
+    .type = MOD_TYPE_Satellite
   }
   ,
   { .identifier = 0X0F,
     .name = "Satellite 570 Pro",
     .columns = 66,
     .statusCells = 3,
-    .flags = MOD_FLG__CONFIGURABLE,
-    .helpPage = 1
+    .flags = MOD_FLAG_CONFIGURABLE,
+    .type = MOD_TYPE_Satellite
   }
   ,
   { .identifier = 0X10,
     .name = "Satellite 584 Pro",
     .columns = 80,
     .statusCells = 3,
-    .flags = MOD_FLG__CONFIGURABLE,
-    .helpPage = 1
+    .flags = MOD_FLAG_CONFIGURABLE,
+    .type = MOD_TYPE_Satellite
   }
   ,
   { .identifier = 0X11,
     .name = "Satellite 544 Traveller",
     .columns = 40,
     .statusCells = 3,
-    .flags = MOD_FLG__CONFIGURABLE,
-    .helpPage = 1
+    .flags = MOD_FLAG_CONFIGURABLE,
+    .type = MOD_TYPE_Satellite
   }
   ,
   { .identifier = 0X13,
     .name = "Braille System 40",
     .columns = 40,
     .statusCells = 0,
-    .flags = MOD_FLG__CONFIGURABLE,
-    .helpPage = 1
+    .flags = MOD_FLAG_CONFIGURABLE,
+    .type = MOD_TYPE_Satellite
   }
   ,
   { .name = NULL }
@@ -250,21 +283,21 @@ static const ModelEntry modelBC624 = {
   .identifier = 0X24,
   .name = "BC624",
   .columns = 24,
-  .helpPage = 2
+  .type = MOD_TYPE_BrailleController
 };
 
 static const ModelEntry modelBC640 = {
   .identifier = 0X40,
   .name = "BC640",
   .columns = 40,
-  .helpPage = 2
+  .type = MOD_TYPE_BrailleController
 };
 
 static const ModelEntry modelBC680 = {
   .identifier = 0X80,
   .name = "BC680",
   .columns = 80,
-  .helpPage = 2
+  .type = MOD_TYPE_BrailleController
 };
 
 typedef struct {
@@ -347,7 +380,7 @@ setDefaultConfiguration (BrailleDisplay *brl) {
   brl->textRows = 1;
   brl->statusColumns = model->statusCells;
   brl->statusRows = 1;
-  brl->helpPage = model->helpPage;			/* initialise size of display */
+  brl->helpFile = moduleTypeTable[model->type].helpFile;
 
   actualColumns = model->columns;
   statusOffset = 0;
@@ -541,7 +574,7 @@ identifyModel1 (BrailleDisplay *brl, unsigned char identifier) {
 
   if (model->name) {
     if (setDefaultConfiguration(brl)) {
-      if (model->flags & MOD_FLG__CONFIGURABLE) {
+      if (model->flags & MOD_FLAG_CONFIGURABLE) {
         BRLSYMBOL.firmness = brl_firmness;
 
         if (!writeFunction1(brl, 0X07)) return 0;
@@ -831,8 +864,9 @@ readCommand1 (BrailleDisplay *brl, BRL_DriverCommandContext context) {
       /* These are the keys that should be processed when pressed */
       LastKeys = CurrentKeys;	/* we keep it until it is released */
       ReleasedKeys = 0;
-      switch (brl->helpPage) {
-        case 0: /* ABT and Delphi models */
+      switch (model->type) {
+        case MOD_TYPE_ABT:
+        case MOD_TYPE_Delphi:
           switch (CurrentKeys) {
             case KEY_HOME | KEY_UP:
               res = BRL_CMD_TOP;
@@ -950,7 +984,7 @@ readCommand1 (BrailleDisplay *brl, BRL_DriverCommandContext context) {
           }
           break;
 
-        case 1: /* Satellite models */
+        case MOD_TYPE_Satellite:
           switch (CurrentKeys) {
             case KEY_UP:
               res = BRL_CMD_LNUP;
@@ -1134,15 +1168,15 @@ readCommand1 (BrailleDisplay *brl, BRL_DriverCommandContext context) {
               break;
           }
           break;
-
       }
       res |= BRL_FLG_REPEAT_INITIAL | BRL_FLG_REPEAT_DELAY;
     } else {
       /* These are the keys that should be processed when released */
       if (!ReleasedKeys) {
         ReleasedKeys = LastKeys;
-        switch (brl->helpPage) {
-          case 0: /* ABT and Delphi models */
+        switch (model->type) {
+          case MOD_TYPE_ABT:
+          case MOD_TYPE_Delphi:
             switch (ReleasedKeys) {
               case KEY_HOME:
                 res = BRL_CMD_TOP_LEFT;
@@ -1185,7 +1219,7 @@ readCommand1 (BrailleDisplay *brl, BRL_DriverCommandContext context) {
             }
             break;
 
-          case 1: /* Satellite models */
+          case MOD_TYPE_Satellite:
             switch (ReleasedKeys) {
               case KEY_HOME:
                 res = BRL_CMD_BACK;
@@ -1218,7 +1252,6 @@ readCommand1 (BrailleDisplay *brl, BRL_DriverCommandContext context) {
                 break;
             }
             break;
-
         }
       }
       LastKeys = CurrentKeys;

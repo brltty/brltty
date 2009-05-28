@@ -20,22 +20,19 @@ DRIVER_CODE = bl
 DRIVER_NAME = BrailleLite
 DRIVER_COMMENT = 18/40/M20/M40
 DRIVER_VERSION = 0.6.0 (June 2003)
-# I don't mean to take away anyone's copyright, but now that significant
-# modifs have been made in more recent years by 2-3 others... it'd become
-# bulky IMHO so let's just live without the copyright notice.
-# DRIVER_DEVELOPERS = Nikhil Nair
-DRIVER_DEVELOPERS = 
-HELP_DEPS = $(SRC_DIR)/help0.txt $(SRC_DIR)/help1.txt
+DRIVER_DEVELOPERS = Nikhil Nair
 include $(SRC_TOP)braille.mk
 
 braille.$O:
 	$(CC) $(BRL_CFLAGS) -c $(SRC_DIR)/braille.c
 
-$(SRC_DIR)/help0.txt: $(SRC_DIR)/help.src
-	sed 's/<x20>\(.*\)$$/\1/' <$(SRC_DIR)/help.src \
-	| grep -v '<x40>' >$@
+help-files: default.hlp 18.hlp
 
-$(SRC_DIR)/help1.txt: $(SRC_DIR)/help.src
-	sed 's/<x40>\(.*\)$$/\1/' <$(SRC_DIR)/help.src \
-	| grep -v '<x20>' >$@
+default.hlp: $(SRC_DIR)/help.src
+	sed -e '1s/<x00>/Braille Lite/' -e 's/^<x40>//' <$(SRC_DIR)/help.src \
+	| grep -v '^<x20>' >$@
+
+18.hlp: $(SRC_DIR)/help.src
+	sed -e '1s/<x00>/Braille Lite 18/' -e 's/^<x20>//' <$(SRC_DIR)/help.src \
+	| grep -v '^<x40>' >$@
 

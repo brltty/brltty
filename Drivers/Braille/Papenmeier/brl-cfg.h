@@ -116,7 +116,7 @@ typedef struct {
   .modelIdentifier = identifier, \
   .modelName = name, \
   .protocolRevision = 1, \
-  .helpFile = "brltty-pm-" #model ".hlp"
+  .helpFile = #model
 
 #define PM_TEXT_CELLS(columns, rows) \
   .textColumns = columns, \

@@ -24,15 +24,11 @@ extern "C" {
 #endif /* __cplusplus */
 
 #include "scr_base.h"
-#include "help.h"
 
 typedef struct {
   BaseScreen base;
   int (*construct) (const char *);
   void (*destruct) (void);		   /* called once to close the help screen */
-  void (*setPageNumber) (short);
-  short (*getPageNumber) (void);
-  short (*getPageCount) (void);
 } HelpScreen;
 
 extern void initializeHelpScreen (HelpScreen *);

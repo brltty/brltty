@@ -431,12 +431,12 @@ apitest.$O:
 
 ###############################################################################
 
-braille-drivers: txt2hlp$X
+braille-drivers:
 	for driver in $(BRAILLE_EXTERNAL_DRIVER_NAMES); \
 	do (cd $(BLD_TOP)$(BRL_DIR)/$$driver && $(MAKE) braille-driver braille-all) || exit 1; \
 	done
 
-all-braille: txt2hlp$X $(BRAILLE_DRIVERS)
+all-braille: $(BRAILLE_DRIVERS)
 	for driver in $(BRAILLE_DRIVER_NAMES); \
 	do (cd $(BLD_TOP)$(BRL_DIR)/$$driver && $(MAKE) braille-all) || exit 1; \
 	done
@@ -474,16 +474,6 @@ spk.auto.h: $(SRC_DIR)/mkdrvtab
 
 scr.auto.h: $(SRC_DIR)/mkdrvtab
 	$(SRC_DIR)/mkdrvtab ScreenDriver scr_driver_ $(SCREEN_INTERNAL_DRIVER_CODES) >$@
-
-###############################################################################
-
-TXT2HLP_OBJECTS = txt2hlp.$O $(HOST_OBJECTS)
-
-txt2hlp$X: $(TXT2HLP_OBJECTS)
-	$(HOSTCC) $(HOSTLDFLAGS) -o $@ $(TXT2HLP_OBJECTS) $(LDLIBS)
-
-txt2hlp.$O:
-	$(HOSTCC) $(HOSTCFLAGS) -c $(SRC_DIR)/txt2hlp.c
 
 ###############################################################################
 
@@ -656,7 +646,7 @@ distclean clean::
 	for language do (cd $(BLD_TOP)$(BND_DIR)/$$language && $(MAKE) $@); done
 
 clean::
-	-rm -f brltty$X xbrlapi$X txt2hlp$X tbl2hex$X *test$X *-static$X
+	-rm -f brltty$X xbrlapi$X tbl2hex$X *test$X *-static$X
 	-rm -f brlapi_constants.h *.$(LIB_EXT) *.$(ARC_EXT) *.def
 	-rm -f $(BLD_TOP)$(DRV_DIR)/* $(BLD_TOP)$(DAT_DIR)/*
 

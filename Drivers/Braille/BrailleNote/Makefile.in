@@ -21,7 +21,6 @@ DRIVER_NAME = BrailleNote
 DRIVER_COMMENT = 18/32
 DRIVER_VERSION = 1.0
 DRIVER_DEVELOPERS = Dave Mielke <dave@mielke.cc>
-HELP_DEPS = $(HELP_TEXT)
 include $(SRC_TOP)braille.mk
 
 braille.$O:

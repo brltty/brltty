@@ -914,7 +914,6 @@ dimensionsChanged (BrailleDisplay *brl) {
           brl->textRows = brailleRows;
           brl->statusColumns = statusColumns;
           brl->statusRows = statusRows;
-          brl->helpPage = 0;
           return 1;
         }
 

@@ -237,10 +237,6 @@ cursorDots (void) {
   return (BRL_DOT7 | BRL_DOT8);
 }
 
-void
-setHelpPageNumber (short page) {
-}
-
 int
 currentVirtualTerminal (void) {
   return 0;

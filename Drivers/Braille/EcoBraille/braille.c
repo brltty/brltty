@@ -229,7 +229,6 @@ static int brl_construct(BrailleDisplay *brl, char **parameters, const char *dev
   
   /* Set model params */
   model = &Models[ModelID];
-  brl->helpPage = ModelID;
   brl->textColumns = model->Cols;		/* initialise size of main display */
   brl->textRows = BRLROWS;		/* ever is 1 in this type of braille lines */
   

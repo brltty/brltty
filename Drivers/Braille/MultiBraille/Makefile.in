@@ -21,7 +21,6 @@ DRIVER_NAME = MultiBraille
 DRIVER_COMMENT = MB125CR/MB145CR/MB185CR
 DRIVER_VERSION = 
 DRIVER_DEVELOPERS = Wolfgang Astleitner
-HELP_DEPS = $(HELP_TEXT)
 include $(SRC_TOP)braille.mk
 
 braille.$O:

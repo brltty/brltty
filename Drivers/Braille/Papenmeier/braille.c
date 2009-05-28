@@ -52,7 +52,6 @@ typedef enum {
 #define BRL_STATUS_FIELDS sfGeneric
 #define BRL_HAVE_STATUS_CELLS
 #define BRL_HAVE_FIRMNESS
-#define BRLCONST
 #include "brl_driver.h"
 #include "braille.h"
 
@@ -544,9 +543,7 @@ interpretIdentity (BrailleDisplay *brl, unsigned char id, int major, int minor) 
       brl->textRows = terminal->textRows;
       brl->statusColumns = terminal->statusCount;
       brl->statusRows = 1;
-
-      /* TODO: ?? HACK */
-      BRLSYMBOL.helpFile = terminal->helpFile;
+      brl->helpFile = terminal->helpFile;
 
       sortCommands();
       return 1;

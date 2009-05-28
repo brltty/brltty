@@ -326,10 +326,10 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
             if (waiting_ack) {
               /* no response, so it must be BLT40 */
               blitesz = 40;
-              brl->helpPage = 1;
+              brl->helpFile = "default";
             } else {
               blitesz = sizeof(cells);
-              brl->helpPage = 0;
+              brl->helpFile = "18";
             }
           }
 

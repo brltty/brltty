@@ -319,7 +319,6 @@ identifySerialModel (BrailleDisplay *brl) {
       while (readPacket(brl, &response)) {
         if (response.data.type == productPrefix[0]) {
           if (getCellCounts(brl, response.product)) {
-            brl->helpPage = 0;
             return 1;
           }
         }

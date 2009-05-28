@@ -18,6 +18,7 @@
 
 #include "prologue.h"
 
+#include "misc.h"
 #include "cmd.h"
 #include "config.tab.c"
 
@@ -169,7 +170,7 @@ printkeys (FILE *fh, const TerminalDefinition *terminal, const CommandDefinition
   }
 }
 
-void terminals(int help, int verbose)
+static void terminals(int help, int verbose)
 {
   int t;
   FILE *fh = stdout;
@@ -181,19 +182,34 @@ void terminals(int help, int verbose)
 
     if (terminal->modelName) {
       if (help) {
-	fh = fopen(terminal->helpFile, "wa");
-	if (!fh) {
-	  perror("fopen");
-	  fprintf(stderr, "read_config: Error creating help file %s for %s.\n", 
-		  terminal->helpFile, terminal->modelName);
-	  continue;
-	}
-	if (verbose)
-	  fprintf(stderr, "read_config: Generating help file %s for %s.\n", 
-		  terminal->helpFile, terminal->modelName);
+        char *path;
+        fh = NULL;
+
+        {
+          const char *components[] = {terminal->helpFile, ".hlp"};
+          path = joinStrings(components, ARRAY_COUNT(components));
+        }
+
+        if (path) {
+          if ((fh = fopen(path, "w"))) {
+            fprintf(fh, "Help for %s\n\n", terminal->modelName);
+
+            if (verbose)
+              fprintf(stderr, "read_config: generating help file %s for %s\n", 
+                      path, terminal->modelName);
+          } else {
+            perror("fopen");
+            fprintf(stderr, "read_config: error creating help file %s for %s\n", 
+                    path, terminal->modelName);
+          }
+
+          free(path);
+        }
+
+        if (!fh) continue;
       } else {
         if (verbose)
-	  fprintf(stderr, "read_config: Writing configuration records for %s.\n",
+	  fprintf(stderr, "read_config: writing configuration records for: %s\n",
 	          terminal->modelName);
       }
       

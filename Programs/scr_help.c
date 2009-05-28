@@ -18,207 +18,102 @@
 
 #include "prologue.h"
 
-#include <stdio.h>
 #include <string.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-
-#ifndef O_BINARY
-#define O_BINARY 0
-#endif /* O_BINARY */
+#include <errno.h>
 
 #include "misc.h"
 #include "scr.h"
 #include "scr_help.h"
 
-static int fileDescriptor;
-static HelpFileHeader fileHeader;
-static short pageNumber;
+typedef struct {
+  wchar_t *characters;
+  size_t length;
+} LineTableEntry;
+
+static LineTableEntry *lineTable = NULL;
+static unsigned int lineCount = 0;
+static unsigned int lineLength = 0;
 static unsigned char cursorRow, cursorColumn;
-static HelpPageEntry *pageDescriptions;
-static unsigned char **pages;
-static unsigned char *characters;
 
 static void
 destruct_HelpScreen (void) {
-  if (characters) {
-    free(characters);
-    characters = NULL;
+  while (lineCount) {
+    free(lineTable[--lineCount].characters);
   }
 
-  if (pages) {
-    free(pages);
-    pages = NULL;
-  }
-
-  if (pageDescriptions) {
-    free(pageDescriptions);
-    pageDescriptions = NULL;
-  }
-
-  if (fileDescriptor != -1) {
-    close(fileDescriptor);
-    fileDescriptor = -1;
+  if (lineTable) {
+    free(lineTable);
+    lineTable = NULL;
   }
 }
 
+typedef struct {
+  unsigned int lineTableSize;
+} HelpLineData;
+
 static int
-loadPages (const char *file) {
-  int empty = 0;
-  unsigned long characterCount = 0;
-  int bytesRead;
+addHelpLine (char *line, void *data) {
+  HelpLineData *hld = data;
 
-  if ((fileDescriptor = open(file, O_RDONLY|O_BINARY)) == -1) {
-    LogError("Help file open");
-    goto failure;
-  }
+  if (lineCount == hld->lineTableSize) {
+    unsigned int newSize = hld->lineTableSize? hld->lineTableSize<<1: 0X1;
+    LineTableEntry *newTable = realloc(lineTable, ARRAY_SIZE(newTable, newSize));
 
-  if ((bytesRead = read(fileDescriptor, &fileHeader, sizeof(fileHeader))) == -1) {
-    LogError("Help file read");
-    goto failure;
-  }
+    if (!newTable) {
+      return 0;
+    }
 
-  if (bytesRead == 0) {
-    LogPrint(LOG_WARNING, "Help file is empty.");
-    empty = 1;
-    fileHeader.pages = 1;
-  } else if (bytesRead != sizeof(fileHeader)) {
-    LogPrint(LOG_ERR, "Help file corrupt");
-    goto failure;
-  }
-
-  if (fileHeader.pages < 1) {
-    LogPrint(LOG_ERR, "Help file corrupt");
-    goto failure;
+    lineTable = newTable;
+    hld->lineTableSize = newSize;
   }
 
   {
-    int size = sizeof(*pageDescriptions) * fileHeader.pages;
+    LineTableEntry *lte = &lineTable[lineCount];
+    unsigned int length = strlen(line);
+    if ((lte->length = length) > lineLength) lineLength = length;
 
-    if (!(pageDescriptions = malloc(size))) {
-      LogError("Help page descriptions allocation");
-      goto failure;
+    if (!(lte->characters = malloc(ARRAY_SIZE(lte->characters, length)))) {
+      return 0;
     }
 
-    if (empty) {
-      putBigEndian(&pageDescriptions->height, 1);
-      putBigEndian(&pageDescriptions->width, 1);
-    } else {
-      if ((bytesRead = read(fileDescriptor, pageDescriptions, size)) == -1) {
-        LogError("Help file read");
-        goto failure;
-      }
-
-      if (bytesRead != size) {
-        LogPrint(LOG_ERR, "Help file corrupt");
-        goto failure;
+    {
+      int i;
+      for (i=0; i<length; i+=1) {
+        lte->characters[i] = line[i] & 0XFF;
       }
     }
   }
+  lineCount += 1;
 
-  {
-    int page;
-    for (page=0; page<fileHeader.pages; page++) {
-      HelpPageEntry *description = &pageDescriptions[page];
-      characterCount += getBigEndian(description->height) * getBigEndian(description->width);
-    }
-  }
-
-  if (!(pages = calloc(fileHeader.pages, sizeof(*pages)))) {
-    LogError("Help page addresses allocation");
-    goto failure;
-  }
-  if (!(characters = calloc(characterCount, sizeof(*characters)))) {
-    LogError("Help page buffer allocation");
-    goto failure;
-  }
-
-  pages[0] = characters;
-  {
-    int page;
-    for (page=0; page<(fileHeader.pages-1); page++) {
-      const HelpPageEntry *description = &pageDescriptions[page];
-      pages[page+1] = pages[page] + (getBigEndian(description->height) * getBigEndian(description->width));
-    }
-  }
-
-  {
-    int page;
-    for (page=0; page<fileHeader.pages; page++) {
-      const HelpPageEntry *description = &pageDescriptions[page];
-      unsigned char *buffer = pages[page];
-      {
-        int row;
-        for (row=0; row<getBigEndian(description->height); row++) {
-          unsigned char lineLength;
-          unsigned char *line = &buffer[row * getBigEndian(description->width)];
-
-          if (empty) {
-            lineLength = 1;
-          } else {
-            if ((bytesRead = read(fileDescriptor, &lineLength, sizeof(lineLength))) == -1) {
-              LogError("Help line length read");
-              goto failure;
-            }
-
-            if (bytesRead != sizeof(lineLength)) {
-              LogPrint(LOG_ERR, "Help file corrupt.");
-              goto failure;
-            }
-          }
-
-          if (lineLength) {
-            if (empty) {
-              memset(line, ' ', lineLength);
-            } else {
-              if ((bytesRead = read(fileDescriptor, line, lineLength)) == -1) {
-                LogError("Help line read");
-                goto failure;
-              }
-
-              if (bytesRead != lineLength) {
-                LogPrint(LOG_ERR, "Help file corrupt");
-                goto failure;
-              }
-            }
-          }
-          memset(&line[lineLength], ' ', getBigEndian(description->width)-lineLength);
-        }
-      }
-    }
-  }
-
-  close(fileDescriptor);
-  fileDescriptor = -1;
   return 1;
-
-failure:
-  destruct_HelpScreen();
-  return 0;
 }
 
 static int
 construct_HelpScreen (const char *file) {
-  if (!pages)
-    if (!loadPages(file))
-      return 0;
-  if ((pageNumber < 0) || (pageNumber >= fileHeader.pages)) pageNumber = 0;
-  return 1;
-}
+  int constructed = 0;
+  FILE *stream;
 
-static void
-setPageNumber_HelpScreen (short page) {
-  pageNumber = page;
-}
+  lineTable = NULL;
+  lineCount = 0;
+  lineLength = 0;
 
-static short
-getPageNumber_HelpScreen (void) {
-  return pageNumber;
-}
+  if ((stream = fopen(file, "r"))) {
+    HelpLineData hld = {
+      .lineTableSize = 0
+    };
 
-static short
-getPageCount_HelpScreen (void) {
-  return (fileDescriptor != -1)? fileHeader.pages: 0;
+    if (processLines(stream, addHelpLine, &hld)) {
+      cursorRow = 0;
+      cursorColumn = 0;
+      constructed = 1;
+    }
+
+    fclose(stream);
+  } else {
+    LogPrint(LOG_ERR, "cannot open driver help file: %s: %s", file, strerror(errno));
+  }
+
+  return constructed;
 }
 
 static int
@@ -228,30 +123,37 @@ currentVirtualTerminal_HelpScreen (void) {
 
 static void
 describe_HelpScreen (ScreenDescription *description) {
-  const HelpPageEntry *page = &pageDescriptions[pageNumber];
   description->posx = cursorColumn;
   description->posy = cursorRow;
-  description->cols = getBigEndian(page->width);
-  description->rows = getBigEndian(page->height);
+  description->cols = lineLength;
+  description->rows = lineCount;
   description->number = currentVirtualTerminal_HelpScreen();
 }
 
 static int
 readCharacters_HelpScreen (const ScreenBox *box, ScreenCharacter *buffer) {
-  const HelpPageEntry *description = &pageDescriptions[pageNumber];
-  if (validateScreenBox(box, getBigEndian(description->width), getBigEndian(description->height))) {
+  if (validateScreenBox(box, lineLength, lineCount)) {
     ScreenCharacter *character = buffer;
-    const unsigned char *page = pages[pageNumber];
     int row;
-    for (row=0; row<box->height; row++) {
-      const unsigned char *line = &page[((box->top + row) * getBigEndian(description->width)) + box->left];
+
+    for (row=0; row<box->height; row+=1) {
+      const LineTableEntry *lte = &lineTable[box->top + row];
       int column;
-      for (column=0; column<box->width; column++) {
-        character->text = line[column];
+
+      for (column=0; column<box->width; column+=1) {
+        int index = box->left + column;
+
+        if (index < lte->length) {
+          character->text = lte->characters[index];
+        } else {
+          character->text = WC_C(' ');
+        }
+
         character->attributes = 0X07;
-        ++character;
+        character += 1;
       }
     }
+
     return 1;
   }
   return 0;
@@ -260,61 +162,53 @@ readCharacters_HelpScreen (const ScreenBox *box, ScreenCharacter *buffer) {
 static int
 insertKey_HelpScreen (ScreenKey key) {
   switch (key) {
-    case SCR_KEY_PAGE_UP:
-      if (pageNumber > 0) {
-        --pageNumber;
-        cursorRow = cursorColumn = 0;
-        return 1;
-      }
-      break;
-    case SCR_KEY_PAGE_DOWN:
-      if (pageNumber < (fileHeader.pages - 1)) {
-        ++pageNumber;
-        cursorRow = cursorColumn = 0;
-        return 1;
-      }
-      break;
     case SCR_KEY_CURSOR_UP:
       if (cursorRow > 0) {
-        --cursorRow;
+        cursorRow -= 1;
         return 1;
       }
       break;
+
     case SCR_KEY_CURSOR_DOWN:
-      if (cursorRow < (getBigEndian(pageDescriptions[pageNumber].height) - 1)) {
-        ++cursorRow;
+      if (cursorRow < (lineCount - 1)) {
+        cursorRow += 1;
         return 1;
       }
       break;
+
     case SCR_KEY_CURSOR_LEFT:
       if (cursorColumn > 0) {
-        --cursorColumn;
+        cursorColumn -= 1;
         return 1;
       }
       break;
+
     case SCR_KEY_CURSOR_RIGHT:
-      if (cursorColumn < (getBigEndian(pageDescriptions[pageNumber].width) - 1)) {
-        ++cursorColumn;
+      if (cursorColumn < (lineLength - 1)) {
+        cursorColumn += 1;
         return 1;
       }
       break;
+
     default:
       break;
   }
+
   return 0;
 }
 
 static int
 routeCursor_HelpScreen (int column, int row, int screen) {
-  const HelpPageEntry *description = &pageDescriptions[pageNumber];
   if (row != -1) {
-    if ((row < 0) || (row >= getBigEndian(description->height))) return 0;
+    if ((row < 0) || (row >= lineCount)) return 0;
     cursorRow = row;
   }
+
   if (column != -1) {
-    if ((column < 0) || (column >= getBigEndian(description->width))) return 0;
+    if ((column < 0) || (column >= lineLength)) return 0;
     cursorColumn = column;
   }
+
   return 1;
 }
 
@@ -328,14 +222,4 @@ initializeHelpScreen (HelpScreen *help) {
   help->base.routeCursor = routeCursor_HelpScreen;
   help->construct = construct_HelpScreen;
   help->destruct = destruct_HelpScreen;
-  help->setPageNumber = setPageNumber_HelpScreen;
-  help->getPageNumber = getPageNumber_HelpScreen;
-  help->getPageCount = getPageCount_HelpScreen;
-  fileDescriptor = -1;
-  pageDescriptions = NULL;
-  pages = NULL;
-  characters = NULL;
-  pageNumber = 0;
-  cursorRow = 0;
-  cursorColumn = 0;
 }
