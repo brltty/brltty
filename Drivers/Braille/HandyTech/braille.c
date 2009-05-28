@@ -35,7 +35,6 @@ typedef enum {
 #define BRL_HAVE_SENSITIVITY
 #include "brl_driver.h"
 #include "touch.h"
-#include "braille.h"
 #include "brldefs-ht.h"
 
 typedef struct {
