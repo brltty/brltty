@@ -300,7 +300,7 @@ static char disp_ver[Q_VER_LENGTH]; /* version of the hardware */
 
 typedef enum {NAV20_40, NAV80, PB40, PB65_81} DisplayType;
 static DisplayType displayType;
-static const char *helpFiles[] = {"nav2040", "nav80", "pb40", "pb6581"};
+static const char *helpFiles[] = {"nav20+nav40", "nav80", "pb40", "pb65+pb81"};
 
 static int
 myread(void *buf, unsigned len)
