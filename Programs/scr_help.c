@@ -28,18 +28,19 @@
 typedef struct {
   wchar_t *characters;
   size_t length;
-} LineTableEntry;
+} HelpLineEntry;
 
-static LineTableEntry *lineTable = NULL;
+static HelpLineEntry *lineTable = NULL;
 static unsigned int lineCount = 0;
+
 static unsigned int lineLength;
 static unsigned char cursorRow, cursorColumn;
 
 static void
 clearHelpScreen (void) {
   while (lineCount) {
-    LineTableEntry *lte = &lineTable[--lineCount];
-    free(lte->characters);
+    HelpLineEntry *hle = &lineTable[--lineCount];
+    free(hle->characters);
   }
 
   if (lineTable) {
@@ -55,37 +56,37 @@ destruct_HelpScreen (void) {
 
 typedef struct {
   unsigned int lineTableSize;
-} HelpLineData;
+} HelpFileData;
 
 static int
 addHelpLine (char *line, void *data) {
-  HelpLineData *hld = data;
+  HelpFileData *hfd = data;
 
-  if (lineCount == hld->lineTableSize) {
-    unsigned int newSize = hld->lineTableSize? hld->lineTableSize<<1: 0X40;
-    LineTableEntry *newTable = realloc(lineTable, ARRAY_SIZE(newTable, newSize));
+  if (lineCount == hfd->lineTableSize) {
+    unsigned int newSize = hfd->lineTableSize? hfd->lineTableSize<<1: 0X40;
+    HelpLineEntry *newTable = realloc(lineTable, ARRAY_SIZE(newTable, newSize));
 
     if (!newTable) {
       return 0;
     }
 
     lineTable = newTable;
-    hld->lineTableSize = newSize;
+    hfd->lineTableSize = newSize;
   }
 
   {
-    LineTableEntry *lte = &lineTable[lineCount];
+    HelpLineEntry *hle = &lineTable[lineCount];
     unsigned int length = strlen(line);
-    if ((lte->length = length) > lineLength) lineLength = length;
+    if ((hle->length = length) > lineLength) lineLength = length;
 
-    if (!(lte->characters = malloc(ARRAY_SIZE(lte->characters, length)))) {
+    if (!(hle->characters = malloc(ARRAY_SIZE(hle->characters, length)))) {
       return 0;
     }
 
     {
       int i;
       for (i=0; i<length; i+=1) {
-        lte->characters[i] = line[i] & 0XFF;
+        hle->characters[i] = line[i] & 0XFF;
       }
     }
   }
@@ -103,11 +104,11 @@ construct_HelpScreen (const char *file) {
   lineLength = 0;
 
   if ((stream = fopen(file, "r"))) {
-    HelpLineData hld = {
+    HelpFileData hfd = {
       .lineTableSize = 0
     };
 
-    if (processLines(stream, addHelpLine, &hld)) {
+    if (processLines(stream, addHelpLine, &hfd)) {
       cursorRow = 0;
       cursorColumn = 0;
       constructed = 1;
@@ -142,14 +143,14 @@ readCharacters_HelpScreen (const ScreenBox *box, ScreenCharacter *buffer) {
     int row;
 
     for (row=0; row<box->height; row+=1) {
-      const LineTableEntry *lte = &lineTable[box->top + row];
+      const HelpLineEntry *hle = &lineTable[box->top + row];
       int column;
 
       for (column=0; column<box->width; column+=1) {
         int index = box->left + column;
 
-        if (index < lte->length) {
-          character->text = lte->characters[index];
+        if (index < hle->length) {
+          character->text = hle->characters[index];
         } else {
           character->text = WC_C(' ');
         }
