@@ -165,7 +165,7 @@ readSerialPacket (unsigned char *buffer, int size) {
           continue;
 
         default:
-          logInputProblem("Unsupported Packet", buffer, offset);
+          logUnknownPacket(byte);
           offset = 0;
           continue;
       }
@@ -181,7 +181,7 @@ nextSerialPacket (unsigned char code, unsigned char *buffer, int size) {
   int length;
   while ((length = readSerialPacket(buffer, size))) {
     if (buffer[0] == code) return length;
-    logInputProblem("Ignored Packet", buffer, length);
+    logUnexpectedPacket(buffer, length);
   }
   return 0;
 }

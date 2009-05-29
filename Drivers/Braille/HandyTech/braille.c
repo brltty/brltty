@@ -1708,7 +1708,7 @@ brl_readPacket (BrailleDisplay *brl, void *buffer, size_t size) {
           return length;
         }
 
-        logInputProblem("Malformed Packet", packet, offset);
+        logCorruptPacket(packet, offset);
       }
 
       offset = 0;

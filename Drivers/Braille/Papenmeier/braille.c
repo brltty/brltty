@@ -624,7 +624,7 @@ readBytes1 (BrailleDisplay *brl, unsigned char *buffer, size_t offset, size_t co
   if (io->readBytes(buffer, &offset, count, 1000)) {
     if (!(flags & RBF_ETX)) return 1;
     if (*(buffer+offset-1) == cETX) return 1;
-    logInputProblem("Corrupt Packet", buffer, offset);
+    logCorruptPacket(buffer, offset);
   }
   if ((offset > 0) && (flags & RBF_RESET)) resetTerminal1(brl);
   return 0;
@@ -1000,7 +1000,7 @@ readPacket2 (BrailleDisplay *brl, Packet2 *packet) {
       switch (byte) {
         case cSTX:
           if (offset > 1) {
-            logInputProblem("Incomplete Packet", buffer, offset);
+            logDiscardedBytes(buffer, offset-1);
             offset = 1;
           }
           continue;
@@ -1045,7 +1045,7 @@ readPacket2 (BrailleDisplay *brl, Packet2 *packet) {
               if (type != 0X30) break;
 
               if (offset == size) {
-                logInputProblem("Long Packet", buffer, offset);
+                logCorruptPacket(buffer, offset);
                 offset = 0;
                 continue;
               }
@@ -1070,7 +1070,7 @@ readPacket2 (BrailleDisplay *brl, Packet2 *packet) {
       }
     }
 
-    logInputProblem("Corrupt Packet", buffer, offset);
+    logCorruptPacket(buffer, offset);
     offset = 0;
   }
 }

@@ -80,6 +80,11 @@ logUnexpectedPacket (const void *packet, size_t size) {
 }
 
 void
+logCorruptPacket (const void *packet, size_t size) {
+  logInputProblem("Corrupt Packet", packet, size);
+}
+
+void
 logDiscardedBytes (const unsigned char *bytes, size_t count) {
   logInputProblem("Discarded Bytes", bytes, count);
 }

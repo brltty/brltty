@@ -67,13 +67,13 @@ readPacket (BrailleDisplay *brl, unsigned char *packet, int length) {
       }
 
       if (offset == size) {
-      //LogBytes(LOG_DEBUG, "Input Packet", packet, offset);
+        logInputPacket(packet, offset);
         return offset;
       }
     }
   }
 
-  logInputProblem("Truncated Input", packet, offset);
+  logTruncatedPacket(packet, offset);
   return 0;
 }
 
@@ -341,7 +341,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
         continue;
     }
 
-    logInputProblem("Unhandled Input", packet, size);
+    logUnexpectedPacket(packet, size);
   }
 
   return EOF;

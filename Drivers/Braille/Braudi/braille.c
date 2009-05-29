@@ -162,7 +162,7 @@ identifyDisplay (BrailleDisplay *brl) {
           }
         }
 
-        logInputProblem("Unrecognized Identity", identity, length);
+        logUnexpectedPacket(identity, length);
       }
     }
   }
