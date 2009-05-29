@@ -991,7 +991,7 @@ readBaumPacket (BrailleDisplay *brl, unsigned char *packet, int size) {
             break;
 
           default:
-            logInputProblem("Unknown Packet", &byte, 1);
+            logUnknownPacket(byte);
             started = 0;
             continue;
         }
@@ -1378,7 +1378,7 @@ probeBaumDisplay (BrailleDisplay *brl) {
 
           default:
           unexpectedPacket:
-            logInputProblem("Unexpected Packet", response.bytes, size);
+            logUnexpectedPacket(response.bytes, size);
             continue;
         }
       } else if (errno != EAGAIN) {
@@ -1566,7 +1566,7 @@ updateBaumKeys (BrailleDisplay *brl, int *keyPressed) {
 
       default:
       unexpectedPacket:
-        logInputProblem("Unexpected Packet", packet.bytes, size);
+        logUnexpectedPacket(packet.bytes, size);
         continue;
     }
   }
@@ -1687,7 +1687,7 @@ readHandyTechPacket (BrailleDisplay *brl, unsigned char *packet, int size) {
             switch (key) {
               default:
                 if (!HT_IS_ROUTING_KEY(key)) {
-                  logInputProblem("Unknown Packet", &byte, 1);
+                  logUnknownPacket(byte);
                   continue;
                 }
 
@@ -1819,7 +1819,7 @@ updateHandyTechKeys (BrailleDisplay *brl, int *keyPressed) {
 #undef KEY
 
           default:
-            logInputProblem("Unexpected Packet", packet.bytes, size);
+            logUnexpectedPacket(packet.bytes, size);
             continue;
         }
         if (!updateFunctionKeys((press? bit: 0), bit, 0, keyPressed)) continue;
@@ -1953,7 +1953,7 @@ readPowerBraillePacket (BrailleDisplay *brl, unsigned char *packet, int size) {
             break;
 
           default:
-            logInputProblem("Unknown Packet", &byte, 1);
+            logUnknownPacket(byte);
             offset = 0;
             length = 0;
             continue;
@@ -2052,7 +2052,7 @@ updatePowerBrailleKeys (BrailleDisplay *brl, int *keyPressed) {
           continue;
 
         default:
-          logInputProblem("Unexpected Packet", packet.bytes, size);
+          logUnexpectedPacket(packet.bytes, size);
           continue;
       }
     } else {

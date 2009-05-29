@@ -46,14 +46,14 @@ readPacket (BrailleDisplay *brl, unsigned char *packet, int length) {
     if (!serialReadChunk(serialDevice, packet, &offset, 1, 0, 1000)) {
       if (errno == EAGAIN) {
         if (!offset) return 0;
-        logInputProblem("Aborted Input", packet, offset);
+        logPartialPacket(packet, offset);
       }
       return -1;
     }
 
     if (offset == 1) {
       if (*byte) {
-        logInputProblem("Discarded Input", packet, offset);
+        logDiscardedByte(packet[0]);
         offset = 0;
       }
     } else {

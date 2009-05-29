@@ -55,6 +55,11 @@ logDiscardedByte (unsigned char byte) {
 }
 
 void
+logUnknownPacket (unsigned char byte) {
+  logInputProblem("Unknown Packet", &byte, 1);
+}
+
+void
 logPartialPacket (const void *packet, size_t size) {
   logInputProblem("Partial Packet", packet, size);
 }
@@ -67,4 +72,14 @@ logTruncatedPacket (const void *packet, size_t size) {
 void
 logShortPacket (const void *packet, size_t size) {
   logInputProblem("Short Packet", packet, size);
+}
+
+void
+logUnexpectedPacket (const void *packet, size_t size) {
+  logInputProblem("Unexpected Packet", packet, size);
+}
+
+void
+logDiscardedBytes (const unsigned char *bytes, size_t count) {
+  logInputProblem("Discarded Bytes", bytes, count);
 }

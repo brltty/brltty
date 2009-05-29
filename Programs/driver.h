@@ -53,9 +53,12 @@ extern void logInputPacket (const void *packet, size_t size);
 extern void logInputProblem (const char *problem, const unsigned char *bytes, size_t count);
 extern void logIgnoredByte (unsigned char byte);
 extern void logDiscardedByte (unsigned char byte);
+extern void logUnknownPacket (unsigned char byte);
 extern void logPartialPacket (const void *packet, size_t size);
 extern void logTruncatedPacket (const void *packet, size_t size);
 extern void logShortPacket (const void *packet, size_t size);
+extern void logUnexpectedPacket (const void *packet, size_t size);
+extern void logDiscardedBytes (const unsigned char *bytes, size_t count);
 
 #ifdef __cplusplus
 }

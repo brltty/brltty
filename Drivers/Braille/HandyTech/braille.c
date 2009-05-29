@@ -1616,7 +1616,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
         break;
     }
 
-    logInputProblem("Unexpected Packet", packet.bytes, size);
+    logUnexpectedPacket(packet.bytes, size);
     LogPrint(LOG_WARNING, "state %d", currentState);
   }
 

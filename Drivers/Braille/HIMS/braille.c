@@ -140,7 +140,7 @@ readPacket (BrailleDisplay *brl, InputPacket *packet) {
         const unsigned char *start = memchr(packet->bytes+1, packet->bytes[0], offset-1);
         const unsigned char *end = packet->bytes + offset;
         if (!start) start = end;
-        logInputProblem("Discarded Bytes", packet->bytes, start-packet->bytes);
+        logDiscardedBytes(packet->bytes, start-packet->bytes);
         memmove(packet->bytes, start, (offset = end - start));
       }
     }

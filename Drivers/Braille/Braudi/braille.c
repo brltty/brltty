@@ -293,7 +293,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
       }
     }
 
-    logInputProblem("Unexpected Input", buffer, length);
+    logUnexpectedPacket(buffer, length);
   }
 
   if (errno == EAGAIN) return EOF;

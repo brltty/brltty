@@ -138,7 +138,7 @@ readPacket (unsigned char *packet, int size) {
             break;
 
           default:
-            logInputProblem("Unknown Packet", &byte, 1);
+            logUnknownPacket(byte);
             offset = 0;
             length = 0;
             continue;
@@ -418,7 +418,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
                 LogError("cell buffer allocation");
               }
             } else {
-              logInputProblem("Unexpected Packet", response.bytes, size);
+              logUnexpectedPacket(response.bytes, size);
             }
           }
         }
@@ -938,7 +938,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
         break;
 
       default:
-        logInputProblem("Unexpected Packet", packet.bytes, size);
+        logUnexpectedPacket(packet.bytes, size);
         continue;
     }
 

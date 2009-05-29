@@ -843,7 +843,7 @@ getKey1 (BrailleDisplay *brl, unsigned int *Keys, unsigned int *Pos) {
   }
 
 #endif /* ! ABT3_OLD_FIRMWARE */
-  logInputProblem("Unexpected Packet", packet, length);
+  logUnexpectedPacket(packet, length);
   return 0;
 }
 
@@ -1719,7 +1719,7 @@ readCommand2s (BrailleDisplay *brl, BRL_DriverCommandContext context) {
         break;
     }
 
-    logInputProblem("Unexpected Packet", packet, length);
+    logUnexpectedPacket(packet, length);
   }
 }
 
@@ -1860,7 +1860,7 @@ readCommand2u (BrailleDisplay *brl, BRL_DriverCommandContext context) {
         break;
     }
 
-    logInputProblem("Unexpected Packet", packet, length);
+    logUnexpectedPacket(packet, length);
   }
 }
 
