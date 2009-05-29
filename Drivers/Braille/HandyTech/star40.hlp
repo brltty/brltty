@@ -61,21 +61,21 @@ B6 UP     go left one character
 B6 DN     go right one character
 B4        go up one line
 B5        go down one line
-B4 b1     go up to last line of previous paragraph
-B5 b1     go down to first line of next paragraph
-B4 b2     go up to previous command prompt
-B5 b2     go down to next command prompt
-B4 b3     go up to previous line containing cut buffer
-B5 b3     go down to next line containing cut buffer
-B4 b6     go up to nearest line with different highlighting
-B5 b6     go down to nearest line with different highlighting
-B4 b7     go up several lines
-B5 b7     go down several lines
-B4 b8     go up to nearest line with different content
-B5 b8     go down to nearest line with different content
+B4 B1     go up to last line of previous paragraph
+B5 B1     go down to first line of next paragraph
+B4 B2     go up to previous command prompt
+B5 B2     go down to next command prompt
+B4 B3     go up to previous line containing cut buffer
+B5 B3     go down to next line containing cut buffer
+B4 B6     go up to nearest line with different highlighting
+B5 B6     go down to nearest line with different highlighting
+B4 B7     go up several lines
+B5 B7     go down several lines
+B4 B8     go up to nearest line with different content
+B5 B8     go down to nearest line with different content
 
 Modes and Features:
-b8        toggle help mode
+B8        toggle help mode
 B8 B1     toggle cursor tracking
 B8 B2     toggle show cursor
 B8 B3     toggle show attributes
