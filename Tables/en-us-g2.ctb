@@ -450,6 +450,7 @@ word himself 125-134-124
 contraction hmf
 lowword his 236
 sufword his\s-\s 125-24-234-36-36
+word holloware 125-135-123-123-135-2456-345-15
 sufword horse = horseradish
 always hydro =
 
@@ -488,6 +489,7 @@ midendword ity 56-13456
 # the letter j
 always j 245
 always J 245
+sufword jihad = jihadis
 word just 245
 
 # the letter k
@@ -520,6 +522,7 @@ begword menager 134-26-1-1245-12456 menagery menageries
 midendword ment 56-2345
 midword menth 134-26-1456 Blumenthal
 always mention 134-26-56-1345
+sufword messagerie =
 always mideast 134-24-145-15-1-34
 word milling 134-24-123-123-346
 begword mishand 134-24-234-125-12346 mishandled
@@ -766,7 +769,7 @@ word shall 146
 word sh =
 always sh 146
 always shaus = In German names
-word shoshone 146-135-146-135-1345-15
+sufword shoshone 146-135-146-135-1345-15 Shoshonean language
 always should 146-145
 word shd =
 always shoulder 146-1256-123-145-12456
@@ -893,6 +896,7 @@ midendword whart 2456-125-345-2345 Newhart
 word which 156
 midendword whouse 2456-125-1256-234-15 Newhouse
 begword widea = wideawake
+word wikinews =
 word will 2456
 lowword were 2356
 sufword were\s-\s 2456-12456-15-36-36
