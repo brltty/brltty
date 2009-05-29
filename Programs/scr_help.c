@@ -32,19 +32,25 @@ typedef struct {
 
 static LineTableEntry *lineTable = NULL;
 static unsigned int lineCount = 0;
-static unsigned int lineLength = 0;
+static unsigned int lineLength;
 static unsigned char cursorRow, cursorColumn;
 
 static void
-destruct_HelpScreen (void) {
+clearHelpScreen (void) {
   while (lineCount) {
-    free(lineTable[--lineCount].characters);
+    LineTableEntry *lte = &lineTable[--lineCount];
+    free(lte->characters);
   }
 
   if (lineTable) {
     free(lineTable);
     lineTable = NULL;
   }
+}
+
+static void
+destruct_HelpScreen (void) {
+  clearHelpScreen();
 }
 
 typedef struct {
@@ -56,7 +62,7 @@ addHelpLine (char *line, void *data) {
   HelpLineData *hld = data;
 
   if (lineCount == hld->lineTableSize) {
-    unsigned int newSize = hld->lineTableSize? hld->lineTableSize<<1: 0X1;
+    unsigned int newSize = hld->lineTableSize? hld->lineTableSize<<1: 0X40;
     LineTableEntry *newTable = realloc(lineTable, ARRAY_SIZE(newTable, newSize));
 
     if (!newTable) {
@@ -93,8 +99,7 @@ construct_HelpScreen (const char *file) {
   int constructed = 0;
   FILE *stream;
 
-  lineTable = NULL;
-  lineCount = 0;
+  clearHelpScreen();
   lineLength = 0;
 
   if ((stream = fopen(file, "r"))) {
