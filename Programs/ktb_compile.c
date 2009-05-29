@@ -30,16 +30,6 @@
 #include "ktb_internal.h"
 
 typedef struct {
-  const char *name;
-  KeyCode code;
-} KeyNameEntry;
-
-static const KeyNameEntry keyNameTable[] = {
-#include "ktb_keynames.h"
-{NULL, KEY_SPECIAL_None}
-};
-
-typedef struct {
   DataArea *area;
 
   const KeyNameEntry **keyNameTable;
@@ -279,9 +269,9 @@ compareKeyNames (const void *element1, const void *element2) {
 }
 
 static int
-allocateKeyNameTable (KeyTableData *ktd) {
+allocateKeyNameTable (KeyTableData *ktd, const KeyNameEntry *keys) {
   {
-    const KeyNameEntry *key = keyNameTable;
+    const KeyNameEntry *key = keys;
 
     ktd->keyNameCount = 0;
     while (key->name) {
@@ -292,7 +282,7 @@ allocateKeyNameTable (KeyTableData *ktd) {
 
   if ((ktd->keyNameTable = malloc(ktd->keyNameCount * sizeof(*ktd->keyNameTable)))) {
     {
-      const KeyNameEntry *key = keyNameTable;
+      const KeyNameEntry *key = keys;
       const KeyNameEntry **address = ktd->keyNameTable;
       while (key->name) *address++ = key++;
     }
@@ -358,7 +348,7 @@ saveKeyBindings (KeyTableData *ktd) {
 }
 
 KeyTable *
-compileKeyTable (const char *name) {
+compileKeyTable (const char *name, const KeyNameEntry *keys) {
   KeyTable *table = NULL;
   KeyTableData ktd;
 
@@ -368,7 +358,7 @@ compileKeyTable (const char *name) {
   ktd.bindingsSize = 0;
   ktd.bindingsCount = 0;
 
-  if (allocateKeyNameTable(&ktd)) {
+  if (allocateKeyNameTable(&ktd, keys)) {
     if (allocateCommandTable(&ktd)) {
       if ((ktd.area = newDataArea())) {
         if (allocateDataItem(ktd.area, NULL, sizeof(KeyTableHeader), __alignof__(KeyTableHeader))) {

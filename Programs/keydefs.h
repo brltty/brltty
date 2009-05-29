@@ -16,30 +16,26 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-#ifndef BRLTTY_INCLUDED_KTB
-#define BRLTTY_INCLUDED_KTB
+#ifndef BRLTTY_INCLUDED_KEYDEFS
+#define BRLTTY_INCLUDED_KEYDEFS
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-#include "keydefs.h"
-#include "keycodes.h"
+typedef unsigned char KeyCode;
+#define KEY_CODE_COUNT 0X100
 
-typedef struct KeyTableStruct KeyTable;
+typedef struct {
+  const char *name;
+  KeyCode code;
+} KeyNameEntry;
 
-extern KeyTable *keyTable;
-
-extern KeyTable *compileKeyTable (const char *name, const KeyNameEntry *keys);
-extern void destroyKeyTable (KeyTable *table);
-
-extern char *ensureKeyTableExtension (const char *path);
-
-extern int getKeyCommand (KeyTable *table, const KeyCodeSet *modifiers, KeyCode code);
-extern int isKeyModifiers (KeyTable *table, const KeyCodeSet *modifiers);
+#define LAST_KEY_NAME {.name=NULL}
+#define KEY_NAME_TABLE(name) const KeyNameEntry name[]
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* BRLTTY_INCLUDED_KTB */
+#endif /* BRLTTY_INCLUDED_KEYDEFS */

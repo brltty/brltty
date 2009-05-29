@@ -20,13 +20,18 @@
 
 #include <string.h>
 
-#include "keyboard.h"
 #include "misc.h"
+#include "keyboard.h"
 
 const KeyboardProperties anyKeyboard = {
   .type = KBD_TYPE_Any,
   .vendor = 0,
   .product = 0
+};
+
+KEY_NAME_TABLE(keyboardKeyNames) = {
+#include "kbdkeys.h"
+LAST_KEY_NAME
 };
 
 int

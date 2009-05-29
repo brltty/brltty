@@ -53,6 +53,7 @@
 #include "atb.h"
 #include "ctb.h"
 #include "ktb.h"
+#include "keyboard.h"
 #include "tunes.h"
 #include "message.h"
 #include "misc.h"
@@ -655,7 +656,7 @@ loadKeyTable (const char *name) {
       if ((path = makePath(opt_tablesDirectory, file))) {
         LogPrint(LOG_DEBUG, "compiling key table: %s", path);
 
-        if (!(table = compileKeyTable(path))) {
+        if (!(table = compileKeyTable(path, keyboardKeyNames))) {
           LogPrint(LOG_ERR, "%s: %s", gettext("cannot compile key table"), path);
         }
 
