@@ -28,8 +28,6 @@ extern "C" {
 
 typedef struct KeyTableStruct KeyTable;
 
-extern KeyTable *keyTable;
-
 extern KeyTable *compileKeyTable (const char *name, const KeyNameEntry *keys);
 extern void destroyKeyTable (KeyTable *table);
 

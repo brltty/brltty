@@ -140,6 +140,7 @@ ContractionTable *contractionTable = NULL;
 static char *opt_keyTable;
 static char *opt_keyboardProperties;
 static KeyboardProperties keyboardProperties;
+static KeyTable *keyboardKeyTable = NULL;
 
 #ifdef ENABLE_API
 static int opt_noApi;
@@ -637,9 +638,9 @@ loadContractionTable (const char *name) {
 
 static void
 exitKeyTable (void) {
-  if (keyTable) {
-    destroyKeyTable(keyTable);
-    keyTable = NULL;
+  if (keyboardKeyTable) {
+    destroyKeyTable(keyboardKeyTable);
+    keyboardKeyTable = NULL;
   }
 }
 
@@ -669,8 +670,8 @@ loadKeyTable (const char *name) {
     if (!table) return 0;
   }
 
-  if (keyTable) destroyKeyTable(keyTable);
-  keyTable = table;
+  if (keyboardKeyTable) destroyKeyTable(keyboardKeyTable);
+  keyboardKeyTable = table;
   return 1;
 }
 
@@ -678,7 +679,7 @@ static PressedKeysState
 handleKeyEvent (const KeyCodeSet *modifiers, KeyCode code, int press) {
   {
     static int lastCommand = EOF;
-    int command = getKeyCommand(keyTable, modifiers, code);
+    int command = getKeyCommand(keyboardKeyTable, modifiers, code);
     int bound = command != EOF;
 
     if (!press || !bound) {
@@ -697,7 +698,7 @@ handleKeyEvent (const KeyCodeSet *modifiers, KeyCode code, int press) {
   {
     KeyCodeSet keys = *modifiers;
     addKeyCode(&keys, code);
-    if (isKeyModifiers(keyTable, &keys)) return PKS_MAYBE;
+    if (isKeyModifiers(keyboardKeyTable, &keys)) return PKS_MAYBE;
   }
 
   return PKS_NO;
@@ -3054,7 +3055,7 @@ startup (int argc, char *argv[]) {
            *opt_keyTable? opt_keyTable: gettext("none"));
 
   if (parseKeyboardProperties(&keyboardProperties, opt_keyboardProperties))
-    if (keyTable)
+    if (keyboardKeyTable)
       scheduleKeyboardMonitor(0);
 
   /* initialize screen driver */

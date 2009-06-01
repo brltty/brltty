@@ -24,8 +24,6 @@
 #include "ktb.h"
 #include "ktb_internal.h"
 
-KeyTable *keyTable = NULL;
-
 static inline const void *
 getKeyTableItem (KeyTable *table, KeyTableOffset offset) {
   return &table->header.bytes[offset];
