@@ -36,6 +36,11 @@ extern char *ensureKeyTableExtension (const char *path);
 extern int getKeyCommand (KeyTable *table, const KeyCodeSet *modifiers, KeyCode code);
 extern int isKeyModifiers (KeyTable *table, const KeyCodeSet *modifiers);
 
+extern KeyCodesState handleKeyEvent (
+  KeyTable *keyTable, int *lastCommand,
+  KeyCodeSet *keyCodeSet, KeyCode code, int press
+);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

@@ -23,6 +23,8 @@
 #include "misc.h"
 #include "ktb.h"
 #include "ktb_internal.h"
+#include "cmd.h"
+#include "brldefs.h"
 
 static inline const void *
 getKeyTableItem (KeyTable *table, KeyTableOffset offset) {
@@ -57,4 +59,32 @@ isKeyModifiers (KeyTable *table, const KeyCodeSet *modifiers) {
   }
 
   return 0;
+}
+
+KeyCodesState
+handleKeyEvent (
+  KeyTable *keyTable, int *lastCommand,
+  KeyCodeSet *keyCodeSet, KeyCode code, int press
+) {
+  removeKeyCode(keyCodeSet, code);
+
+  {
+    int command = getKeyCommand(keyTable, keyCodeSet, code);
+    int bound = command != EOF;
+    if (press) addKeyCode(keyCodeSet, code);
+
+    if (!press || !bound) {
+      if (*lastCommand != EOF) {
+        *lastCommand = EOF;
+        enqueueCommand(BRL_CMD_NOOP);
+      }
+    } else if (command != *lastCommand) {
+      *lastCommand = command;
+      enqueueCommand(command | BRL_FLG_REPEAT_INITIAL | BRL_FLG_REPEAT_DELAY);
+    }
+
+    if (bound) return KCS_YES;
+  }
+
+  return isKeyModifiers(keyTable, keyCodeSet)? KCS_MAYBE: KCS_NO;
 }

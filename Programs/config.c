@@ -138,9 +138,10 @@ ContractionTable *contractionTable = NULL;
 #endif /* ENABLE_CONTRACTED_BRAILLE */
 
 static char *opt_keyTable;
+static KeyTable *keyboardKeyTable = NULL;
+
 static char *opt_keyboardProperties;
 static KeyboardProperties keyboardProperties;
-static KeyTable *keyboardKeyTable = NULL;
 
 #ifdef ENABLE_API
 static int opt_noApi;
@@ -675,33 +676,10 @@ loadKeyTable (const char *name) {
   return 1;
 }
 
-static PressedKeysState
-handleKeyEvent (const KeyCodeSet *modifiers, KeyCode code, int press) {
-  {
-    static int lastCommand = EOF;
-    int command = getKeyCommand(keyboardKeyTable, modifiers, code);
-    int bound = command != EOF;
-
-    if (!press || !bound) {
-      if (lastCommand != EOF) {
-        lastCommand = EOF;
-        enqueueCommand(BRL_CMD_NOOP);
-      }
-    } else if (command != lastCommand) {
-      lastCommand = command;
-      enqueueCommand(command | BRL_FLG_REPEAT_INITIAL | BRL_FLG_REPEAT_DELAY);
-    }
-
-    if (bound) return PKS_YES;
-  }
-
-  {
-    KeyCodeSet keys = *modifiers;
-    addKeyCode(&keys, code);
-    if (isKeyModifiers(keyboardKeyTable, &keys)) return PKS_MAYBE;
-  }
-
-  return PKS_NO;
+static KeyCodesState
+handleKeyboardKeyEvent (KeyCodeSet *keyCodeSet, KeyCode code, int press) {
+  static int lastCommand = EOF;
+  return handleKeyEvent(keyboardKeyTable, &lastCommand, keyCodeSet, code, press);
 }
 
 static void scheduleKeyboardMonitor (int interval);
@@ -709,7 +687,7 @@ static void scheduleKeyboardMonitor (int interval);
 static void
 tryKeyboardMonitor (void *data) {
   LogPrint(LOG_DEBUG, "starting keyboard monitor");
-  if (!startKeyboardMonitor(&keyboardProperties, handleKeyEvent)) {
+  if (!startKeyboardMonitor(&keyboardProperties, handleKeyboardKeyEvent)) {
     LogPrint(LOG_DEBUG, "keyboard monitor failed");
     scheduleKeyboardMonitor(5000);
   }
