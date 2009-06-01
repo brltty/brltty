@@ -186,7 +186,7 @@ The following braille displays are supported:
 -  BrlAPI
 -  CombiBraille [25/45/85]
 -  EcoBraille [20/40/80]
--  EuroBraille [AzerBraille, Clio, Iris, NoteBraille, Scriba]
+-  EuroBraille [AzerBraille, Clio, Iris, NoteBraille, Scriba, Esys 12/40]
 -  FreedomScientific [Focus 44/70/84, PacMate 20/40/80]
 -  HandyTech [Modular 20/40/80, Modular Evolution 64/88, Braille Wave 40,
               Easy Braille, Braille Star 40/80, Bookworm, Braillino 20]
