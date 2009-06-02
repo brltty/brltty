@@ -349,8 +349,8 @@ saveKeyBindings (KeyTableData *ktd) {
 
 KeyTable *
 compileKeyTable (const char *name, const KeyNameEntry *keys) {
-  KeyTable *table = NULL;
-  KeyTableData ktd;
+KeyTable *table = NULL;
+KeyTableData ktd;
 
   memset(&ktd, 0, sizeof(ktd));
 
@@ -368,6 +368,7 @@ compileKeyTable (const char *name, const KeyNameEntry *keys) {
                 table->header.fields = getKeyTableHeader(&ktd);
                 table->size = getDataSize(ktd.area);
                 resetDataArea(ktd.area);
+                resetKeyTable(table);
               }
             }
           }

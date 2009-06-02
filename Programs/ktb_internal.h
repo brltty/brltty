@@ -47,6 +47,9 @@ struct KeyTableStruct {
   } header;
 
   size_t size;
+
+  KeyCodeSet keyCodeSet;
+  int lastCommand;
 };
 
 #ifdef __cplusplus

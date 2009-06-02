@@ -43,12 +43,7 @@ typedef struct {
 
 extern int addKeyCode (KeyCodeSet *set, KeyCode code);
 extern int removeKeyCode (KeyCodeSet *set, KeyCode code);
-
-typedef enum {
-  KCS_NO,
-  KCS_MAYBE,
-  KCS_YES
-} KeyCodesState;
+extern void removeAllKeyCodes (KeyCodeSet *set);
 
 #ifdef __cplusplus
 }

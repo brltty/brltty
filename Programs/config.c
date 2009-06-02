@@ -690,10 +690,9 @@ loadKeyTable (const char *name) {
   return 1;
 }
 
-static KeyCodesState
-handleKeyboardKeyEvent (KeyCodeSet *keyCodeSet, KeyCode code, int press) {
-  static int lastCommand = EOF;
-  return handleKeyEvent(keyboardKeyTable, &lastCommand, keyCodeSet, code, press);
+static KeyTableState
+handleKeyboardKeyEvent (KeyCode code, int press) {
+  return processKeyEvent(keyboardKeyTable, code, press);
 }
 
 static void scheduleKeyboardMonitor (int interval);

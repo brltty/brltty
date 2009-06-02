@@ -70,3 +70,9 @@ removeKeyCode (KeyCodeSet *set, KeyCode code) {
 
   return 1;
 }
+
+void
+removeAllKeyCodes (KeyCodeSet *set) {
+  set->count = 0;
+  memset(set->mask, 0, sizeof(set->mask));
+}

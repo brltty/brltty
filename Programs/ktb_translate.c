@@ -61,30 +61,33 @@ isKeyModifiers (KeyTable *table, const KeyCodeSet *modifiers) {
   return 0;
 }
 
-KeyCodesState
-handleKeyEvent (
-  KeyTable *keyTable, int *lastCommand,
-  KeyCodeSet *keyCodeSet, KeyCode code, int press
-) {
-  removeKeyCode(keyCodeSet, code);
+void
+resetKeyTable (KeyTable *table) {
+  removeAllKeyCodes(&table->keyCodeSet);
+  table->lastCommand = EOF;
+}
+
+KeyTableState
+processKeyEvent (KeyTable *keyTable, KeyCode code, int press) {
+  removeKeyCode(&keyTable->keyCodeSet, code);
 
   {
-    int command = getKeyCommand(keyTable, keyCodeSet, code);
+    int command = getKeyCommand(keyTable, &keyTable->keyCodeSet, code);
     int bound = command != EOF;
-    if (press) addKeyCode(keyCodeSet, code);
+    if (press) addKeyCode(&keyTable->keyCodeSet, code);
 
     if (!press || !bound) {
-      if (*lastCommand != EOF) {
-        *lastCommand = EOF;
+      if (keyTable->lastCommand != EOF) {
+        keyTable->lastCommand = EOF;
         enqueueCommand(BRL_CMD_NOOP);
       }
-    } else if (command != *lastCommand) {
-      *lastCommand = command;
+    } else if (command != keyTable->lastCommand) {
+      keyTable->lastCommand = command;
       enqueueCommand(command | BRL_FLG_REPEAT_INITIAL | BRL_FLG_REPEAT_DELAY);
     }
 
-    if (bound) return KCS_YES;
+    if (bound) return KTS_YES;
   }
 
-  return isKeyModifiers(keyTable, keyCodeSet)? KCS_MAYBE: KCS_NO;
+  return isKeyModifiers(keyTable, &keyTable->keyCodeSet)? KTS_MAYBE: KTS_NO;
 }

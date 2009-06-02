@@ -37,7 +37,6 @@ typedef struct {
   int fileDescriptor;
   KeyboardProperties actualProperties;
 
-  KeyCodeSet pressedKeys;
   BITMASK(handledKeys, KEY_MAX+1, char);
   unsigned justModifiers:1;
 
@@ -69,7 +68,7 @@ handleKeyboardEvent (const AsyncInputResult *result) {
     if (result->length >= sizeof(*event)) {
       if (event->type == EV_KEY) {
         int press = event->value != 0;
-        KeyCodesState state;
+        KeyTableState state;
 
         {
           static const KeyCode map[KEY_MAX] = {
@@ -508,9 +507,9 @@ handleKeyboardEvent (const AsyncInputResult *result) {
           KeyCode code = map[event->code];
 
           if (code) {
-            state = kpd->kcd->handleKeyEvent(&kpd->pressedKeys, code, press);
+            state = kpd->kcd->handleKeyEvent(code, press);
           } else {
-            state = KCS_NO;
+            state = KTS_NO;
             LogPrint(LOG_INFO, "unmapped Linux keycode: %d", event->code);
           }
         }
@@ -524,10 +523,10 @@ handleKeyboardEvent (const AsyncInputResult *result) {
           WriteKeysAction action = WKA_NONE;
 
           if (press) {
-            kpd->justModifiers = state == KCS_MAYBE;
+            kpd->justModifiers = state == KTS_MAYBE;
 
             switch (state) {
-              case KCS_NO:
+              case KTS_NO:
                 action = WKA_ALL;
                 break;
 

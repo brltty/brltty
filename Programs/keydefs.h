@@ -34,6 +34,12 @@ typedef struct {
 #define LAST_KEY_NAME {.name=NULL}
 #define KEY_NAME_TABLE(name) const KeyNameEntry name[]
 
+typedef enum {
+  KTS_NO,
+  KTS_MAYBE,
+  KTS_YES
+} KeyTableState;
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
