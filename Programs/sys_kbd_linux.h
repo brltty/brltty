@@ -525,28 +525,23 @@ handleKeyboardEvent (const AsyncInputResult *result) {
           if (press) {
             kpd->justModifiers = state == KTS_MAYBE;
 
-            switch (state) {
-              case KTS_NO:
-                action = WKA_ALL;
-                break;
+            if (state == KTS_NO) {
+              action = WKA_ALL;
+            } else {
+              if (kpd->keyEventCount == kpd->keyEventLimit) {
+                unsigned int newLimit = kpd->keyEventLimit? kpd->keyEventLimit<<1: 0X1;
+                struct input_event *newBuffer = realloc(kpd->keyEventBuffer, (newLimit * sizeof(*newBuffer)));
 
-              default:
-                if (kpd->keyEventCount == kpd->keyEventLimit) {
-                  unsigned int newLimit = kpd->keyEventLimit? kpd->keyEventLimit<<1: 0X1;
-                  struct input_event *newBuffer = realloc(kpd->keyEventBuffer, (newLimit * sizeof(*newBuffer)));
-
-                  if (newBuffer) {
-                    kpd->keyEventBuffer = newBuffer;
-                    kpd->keyEventLimit = newLimit;
-                  }
+                if (newBuffer) {
+                  kpd->keyEventBuffer = newBuffer;
+                  kpd->keyEventLimit = newLimit;
                 }
+              }
 
-                if (kpd->keyEventCount < kpd->keyEventLimit) {
-                  kpd->keyEventBuffer[kpd->keyEventCount++] = *event;
-                  BITMASK_SET(kpd->handledKeys, event->code);
-                }
-
-                break;
+              if (kpd->keyEventCount < kpd->keyEventLimit) {
+                kpd->keyEventBuffer[kpd->keyEventCount++] = *event;
+                BITMASK_SET(kpd->handledKeys, event->code);
+              }
             }
           } else if (kpd->justModifiers) {
             kpd->justModifiers = 0;
