@@ -655,6 +655,20 @@ loadKeyTable (const char *name) {
     if ((file = ensureKeyTableExtension(name))) {
       char *path;
 
+      if (file == locatePathName(file)) {
+        const char *prefix = "kbd-";
+
+        if (strncmp(file, prefix, strlen(prefix)) != 0) {
+          const char *components[] = {prefix, file};
+          char *newFile = joinStrings(components, ARRAY_COUNT(components));
+
+          if (newFile) {
+            free(file);
+            file = newFile;
+          }
+        }
+      }
+
       if ((path = makePath(opt_tablesDirectory, file))) {
         LogPrint(LOG_DEBUG, "compiling key table: %s", path);
 
