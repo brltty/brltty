@@ -31,30 +31,31 @@ getKeyTableItem (KeyTable *table, KeyTableOffset offset) {
   return &table->header.bytes[offset];
 }
 
-int
-getKeyCommand (KeyTable *table, const KeyCodeSet *modifiers, KeyCode code) {
+static int
+getCommand (KeyTable *table, KeyCode code) {
   const KeyTableHeader *header = table->header.fields;
   const KeyBinding *binding = getKeyTableItem(table, header->bindingsTable);
   unsigned int count = header->bindingsCount;
 
   while (count) {
     if ((code == binding->key.code) &&
-        sameKeyCodeMasks(modifiers->mask, binding->key.modifiers))
+        sameKeyCodeMasks(table->modifiers.mask, binding->key.modifiers))
       return binding->command;
+
     binding += 1, count -= 1;
   }
 
   return EOF;
 }
 
-int
-isKeyModifiers (KeyTable *table, const KeyCodeSet *modifiers) {
+static int
+isModifiers (KeyTable *table) {
   const KeyTableHeader *header = table->header.fields;
   const KeyBinding *binding = getKeyTableItem(table, header->bindingsTable);
   unsigned int count = header->bindingsCount;
 
   while (count) {
-    if (isKeySubset(binding->key.modifiers, modifiers->mask)) return 1;
+    if (isKeySubset(binding->key.modifiers, table->modifiers.mask)) return 1;
     binding += 1, count -= 1;
   }
 
@@ -63,31 +64,32 @@ isKeyModifiers (KeyTable *table, const KeyCodeSet *modifiers) {
 
 void
 resetKeyTable (KeyTable *table) {
-  removeAllKeyCodes(&table->keyCodeSet);
+  removeAllKeyCodes(&table->modifiers);
   table->lastCommand = EOF;
 }
 
 KeyTableState
-processKeyEvent (KeyTable *keyTable, KeyCode code, int press) {
-  removeKeyCode(&keyTable->keyCodeSet, code);
+processKeyEvent (KeyTable *table, KeyCode code, int press) {
+  removeKeyCode(&table->modifiers, code);
 
   {
-    int command = getKeyCommand(keyTable, &keyTable->keyCodeSet, code);
+    int command = getCommand(table, code);
     int bound = command != EOF;
-    if (press) addKeyCode(&keyTable->keyCodeSet, code);
+
+    if (press) addKeyCode(&table->modifiers, code);
 
     if (!press || !bound) {
-      if (keyTable->lastCommand != EOF) {
-        keyTable->lastCommand = EOF;
+      if (table->lastCommand != EOF) {
+        table->lastCommand = EOF;
         enqueueCommand(BRL_CMD_NOOP);
       }
-    } else if (command != keyTable->lastCommand) {
-      keyTable->lastCommand = command;
+    } else if (command != table->lastCommand) {
+      table->lastCommand = command;
       enqueueCommand(command | BRL_FLG_REPEAT_INITIAL | BRL_FLG_REPEAT_DELAY);
     }
 
     if (bound) return KTS_YES;
   }
 
-  return isKeyModifiers(keyTable, &keyTable->keyCodeSet)? KTS_MAYBE: KTS_NO;
+  return isModifiers(table)? KTS_MAYBE: KTS_NO;
 }

@@ -48,7 +48,7 @@ struct KeyTableStruct {
 
   size_t size;
 
-  KeyCodeSet keyCodeSet;
+  KeyCodeSet modifiers;
   int lastCommand;
 };
 

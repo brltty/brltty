@@ -33,11 +33,8 @@ extern void destroyKeyTable (KeyTable *table);
 
 extern char *ensureKeyTableExtension (const char *path);
 
-extern int getKeyCommand (KeyTable *table, const KeyCodeSet *modifiers, KeyCode code);
-extern int isKeyModifiers (KeyTable *table, const KeyCodeSet *modifiers);
-
 extern void resetKeyTable (KeyTable *table);
-extern KeyTableState processKeyEvent (KeyTable *keyTable, KeyCode code, int press);
+extern KeyTableState processKeyEvent (KeyTable *table, KeyCode code, int press);
 
 #ifdef __cplusplus
 }
