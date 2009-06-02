@@ -1,0 +1,34 @@
+Starting from version 7.0, WindowEyes can use OEM-provided drivers, this is
+such driver for making it use the BrlAPI interface.
+
+It can be added by
+* copying webrloem109.dll to the window eyes directory, along wineyes.exe,
+* copy/pasting the content of braille.ini into your braille.ini (found in the
+Application Data\GW Micro\Window-Eyes/users/default/ ), and in the same file,
+appending the following two lines to the [BrailleDisplays] section:
+
+brl##=oem109
+brl###=oem109-raw
+
+where ## and ### are the numbers right after the last one of that section, e.g.
+if there was
+
+brl55=zephyr
+
+then these lines should be added:
+
+brl56=oem109
+brl57=oem109-raw
+
+Restart WindowEyes, two BrlAPI choices should now appear last in the list.
+
+- BrlAPI generic should work with any device, as it binds the brltty commands to
+  WindowEyes commands.
+- BrlAPI device-specific permits to define device-specific bindings: WindowEyes
+  will get keyboard keycode as such, the user can then bind them at will from
+  the WindowEyes interface.
+
+Note that here the Com1/Com2 parameter does not refer to an actual serial
+device (the serial/usb configuration shall be done in brltty.conf), it refers to
+how keycodes should be reported to WindowEyes: Com1 should always be used for
+BrlAPI generic, and Com2 for BrlAPI device-specific.
