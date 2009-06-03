@@ -690,7 +690,7 @@ loadKeyTable (const char *name) {
   return 1;
 }
 
-static KeyTableState
+static KeyCodesState
 handleKeyboardKeyEvent (KeyCode code, int press) {
   return processKeyEvent(keyboardKeyTable, code, press);
 }

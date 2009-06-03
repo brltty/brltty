@@ -26,19 +26,20 @@ extern "C" {
 typedef unsigned char KeyCode;
 #define KEY_CODE_COUNT 0X100
 
+typedef enum {
+  KCS_UNBOUND,
+  KCS_MODIFIERS,
+  KCS_COMMAND
+} KeyCodesState;
+
 typedef struct {
   const char *name;
   KeyCode code;
 } KeyNameEntry;
 
-#define LAST_KEY_NAME {.name=NULL}
+#define NO_KEY 0
+#define LAST_KEY_NAME_ENTRY {.name=NULL, .code=NO_KEY}
 #define KEY_NAME_TABLE(name) const KeyNameEntry name[]
-
-typedef enum {
-  KTS_NO,
-  KTS_MAYBE,
-  KTS_YES
-} KeyTableState;
 
 #ifdef __cplusplus
 }

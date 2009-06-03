@@ -31,7 +31,7 @@ const KeyboardProperties anyKeyboard = {
 
 KEY_NAME_TABLE(keyboardKeyNames) = {
 #include "kbdkeys.h"
-LAST_KEY_NAME
+LAST_KEY_NAME_ENTRY
 };
 
 int

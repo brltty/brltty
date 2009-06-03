@@ -34,7 +34,7 @@ extern void destroyKeyTable (KeyTable *table);
 extern char *ensureKeyTableExtension (const char *path);
 
 extern void resetKeyTable (KeyTable *table);
-extern KeyTableState processKeyEvent (KeyTable *table, KeyCode code, int press);
+extern KeyCodesState processKeyEvent (KeyTable *table, KeyCode code, int press);
 
 #ifdef __cplusplus
 }
