@@ -25,7 +25,7 @@ extern "C" {
 
 typedef struct {
   KeyCode code;
-  KeyCodeMask modifiers;
+  KeySetMask modifiers;
 } KeyCombination;
 
 typedef struct {
@@ -48,8 +48,8 @@ struct KeyTableStruct {
 
   size_t size;
 
-  KeyCodeSet modifiers;
-  int lastCommand;
+  KeySet keys;
+  int command;
 };
 
 #ifdef __cplusplus

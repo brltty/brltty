@@ -107,13 +107,18 @@ parseKeyCombination (DataFile *file, KeyCombination *key, const wchar_t *charact
         reportDataError(file, "missing modifier key name");
         return 0;
       }
-      if (!parseKeyName(file, &code, characters, count,ktd)) return 0;
+      if (!parseKeyName(file, &code, characters, count, ktd)) return 0;
 
-      if (BITMASK_TEST(key->modifiers, code)) {
+      if (code.set) {
+        reportDataError(file, "unexpected modifier key name: %.*" PRIws, count, characters);
+        return 0;
+      }
+
+      if (BITMASK_TEST(key->modifiers, code.key)) {
         reportDataError(file, "duplicate modifier key name: %.*" PRIws, count, characters);
         return 0;
       }
-      BITMASK_SET(key->modifiers, code);
+      BITMASK_SET(key->modifiers, code.key);
 
       length -= count + 1;
       characters = end + 1;
@@ -126,7 +131,7 @@ parseKeyCombination (DataFile *file, KeyCombination *key, const wchar_t *charact
   }
   if (!parseKeyName(file, &key->code, characters, length, ktd)) return 0;
 
-  if (BITMASK_TEST(key->modifiers, key->code)) {
+  if (!key->code.set && BITMASK_TEST(key->modifiers, key->code.key)) {
     reportDataError(file, "duplicate key name: %.*" PRIws, length, characters);
     return 0;
   }
@@ -139,7 +144,7 @@ getKeyOperand (DataFile *file, KeyCombination *key, KeyTableData *ktd) {
   DataOperand names;
 
   if (getDataOperand(file, &names, "key combination")) {
-    if (parseKeyCombination(file, key, names.characters, names.length,ktd)) return 1;
+    if (parseKeyCombination(file, key, names.characters, names.length, ktd)) return 1;
   }
 
   return 0;

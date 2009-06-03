@@ -1,506 +1,523 @@
-{.code=KEY_LETTER_A, .name="LETTER_A"},
-{.code=KEY_LETTER_A, .name="A"},
+/*
+ * BRLTTY - A background process providing access to the console screen (when in
+ *          text mode) for a blind person using a refreshable braille display.
+ *
+ * Copyright (C) 1995-2009 by The BRLTTY Developers.
+ *
+ * BRLTTY comes with ABSOLUTELY NO WARRANTY.
+ *
+ * This is free software, placed under the terms of the
+ * GNU General Public License, as published by the Free Software
+ * Foundation; either version 2 of the License, or (at your option) any
+ * later version. Please see the file LICENSE-GPL for details.
+ *
+ * Web Page: http://mielke.cc/brltty/
+ *
+ * This software is maintained by Dave Mielke <dave@mielke.cc>.
+ */
 
-{.code=KEY_LETTER_B, .name="LETTER_B"},
-{.code=KEY_LETTER_B, .name="B"},
+KEY_NAME_ENTRY(KEY_LETTER_A, "LETTER_A"),
+KEY_NAME_ENTRY(KEY_LETTER_A, "A"),
 
-{.code=KEY_LETTER_C, .name="LETTER_C"},
-{.code=KEY_LETTER_C, .name="C"},
+KEY_NAME_ENTRY(KEY_LETTER_B, "LETTER_B"),
+KEY_NAME_ENTRY(KEY_LETTER_B, "B"),
 
-{.code=KEY_LETTER_D, .name="LETTER_D"},
-{.code=KEY_LETTER_D, .name="D"},
+KEY_NAME_ENTRY(KEY_LETTER_C, "LETTER_C"),
+KEY_NAME_ENTRY(KEY_LETTER_C, "C"),
 
-{.code=KEY_LETTER_E, .name="LETTER_E"},
-{.code=KEY_LETTER_E, .name="E"},
+KEY_NAME_ENTRY(KEY_LETTER_D, "LETTER_D"),
+KEY_NAME_ENTRY(KEY_LETTER_D, "D"),
 
-{.code=KEY_LETTER_F, .name="LETTER_F"},
-{.code=KEY_LETTER_F, .name="F"},
+KEY_NAME_ENTRY(KEY_LETTER_E, "LETTER_E"),
+KEY_NAME_ENTRY(KEY_LETTER_E, "E"),
 
-{.code=KEY_LETTER_G, .name="LETTER_G"},
-{.code=KEY_LETTER_G, .name="G"},
+KEY_NAME_ENTRY(KEY_LETTER_F, "LETTER_F"),
+KEY_NAME_ENTRY(KEY_LETTER_F, "F"),
 
-{.code=KEY_LETTER_H, .name="LETTER_H"},
-{.code=KEY_LETTER_H, .name="H"},
+KEY_NAME_ENTRY(KEY_LETTER_G, "LETTER_G"),
+KEY_NAME_ENTRY(KEY_LETTER_G, "G"),
 
-{.code=KEY_LETTER_I, .name="LETTER_I"},
-{.code=KEY_LETTER_I, .name="I"},
+KEY_NAME_ENTRY(KEY_LETTER_H, "LETTER_H"),
+KEY_NAME_ENTRY(KEY_LETTER_H, "H"),
 
-{.code=KEY_LETTER_J, .name="LETTER_J"},
-{.code=KEY_LETTER_J, .name="J"},
+KEY_NAME_ENTRY(KEY_LETTER_I, "LETTER_I"),
+KEY_NAME_ENTRY(KEY_LETTER_I, "I"),
 
-{.code=KEY_LETTER_K, .name="LETTER_K"},
-{.code=KEY_LETTER_K, .name="K"},
+KEY_NAME_ENTRY(KEY_LETTER_J, "LETTER_J"),
+KEY_NAME_ENTRY(KEY_LETTER_J, "J"),
 
-{.code=KEY_LETTER_L, .name="LETTER_L"},
-{.code=KEY_LETTER_L, .name="L"},
+KEY_NAME_ENTRY(KEY_LETTER_K, "LETTER_K"),
+KEY_NAME_ENTRY(KEY_LETTER_K, "K"),
 
-{.code=KEY_LETTER_M, .name="LETTER_M"},
-{.code=KEY_LETTER_M, .name="M"},
+KEY_NAME_ENTRY(KEY_LETTER_L, "LETTER_L"),
+KEY_NAME_ENTRY(KEY_LETTER_L, "L"),
 
-{.code=KEY_LETTER_N, .name="LETTER_N"},
-{.code=KEY_LETTER_N, .name="N"},
+KEY_NAME_ENTRY(KEY_LETTER_M, "LETTER_M"),
+KEY_NAME_ENTRY(KEY_LETTER_M, "M"),
 
-{.code=KEY_LETTER_O, .name="LETTER_O"},
-{.code=KEY_LETTER_O, .name="O"},
+KEY_NAME_ENTRY(KEY_LETTER_N, "LETTER_N"),
+KEY_NAME_ENTRY(KEY_LETTER_N, "N"),
 
-{.code=KEY_LETTER_P, .name="LETTER_P"},
-{.code=KEY_LETTER_P, .name="P"},
+KEY_NAME_ENTRY(KEY_LETTER_O, "LETTER_O"),
+KEY_NAME_ENTRY(KEY_LETTER_O, "O"),
 
-{.code=KEY_LETTER_Q, .name="LETTER_Q"},
-{.code=KEY_LETTER_Q, .name="Q"},
+KEY_NAME_ENTRY(KEY_LETTER_P, "LETTER_P"),
+KEY_NAME_ENTRY(KEY_LETTER_P, "P"),
 
-{.code=KEY_LETTER_R, .name="LETTER_R"},
-{.code=KEY_LETTER_R, .name="R"},
+KEY_NAME_ENTRY(KEY_LETTER_Q, "LETTER_Q"),
+KEY_NAME_ENTRY(KEY_LETTER_Q, "Q"),
 
-{.code=KEY_LETTER_S, .name="LETTER_S"},
-{.code=KEY_LETTER_S, .name="S"},
+KEY_NAME_ENTRY(KEY_LETTER_R, "LETTER_R"),
+KEY_NAME_ENTRY(KEY_LETTER_R, "R"),
 
-{.code=KEY_LETTER_T, .name="LETTER_T"},
-{.code=KEY_LETTER_T, .name="T"},
+KEY_NAME_ENTRY(KEY_LETTER_S, "LETTER_S"),
+KEY_NAME_ENTRY(KEY_LETTER_S, "S"),
 
-{.code=KEY_LETTER_U, .name="LETTER_U"},
-{.code=KEY_LETTER_U, .name="U"},
+KEY_NAME_ENTRY(KEY_LETTER_T, "LETTER_T"),
+KEY_NAME_ENTRY(KEY_LETTER_T, "T"),
 
-{.code=KEY_LETTER_V, .name="LETTER_V"},
-{.code=KEY_LETTER_V, .name="V"},
+KEY_NAME_ENTRY(KEY_LETTER_U, "LETTER_U"),
+KEY_NAME_ENTRY(KEY_LETTER_U, "U"),
 
-{.code=KEY_LETTER_W, .name="LETTER_W"},
-{.code=KEY_LETTER_W, .name="W"},
+KEY_NAME_ENTRY(KEY_LETTER_V, "LETTER_V"),
+KEY_NAME_ENTRY(KEY_LETTER_V, "V"),
 
-{.code=KEY_LETTER_X, .name="LETTER_X"},
-{.code=KEY_LETTER_X, .name="X"},
+KEY_NAME_ENTRY(KEY_LETTER_W, "LETTER_W"),
+KEY_NAME_ENTRY(KEY_LETTER_W, "W"),
 
-{.code=KEY_LETTER_Y, .name="LETTER_Y"},
-{.code=KEY_LETTER_Y, .name="Y"},
+KEY_NAME_ENTRY(KEY_LETTER_X, "LETTER_X"),
+KEY_NAME_ENTRY(KEY_LETTER_X, "X"),
 
-{.code=KEY_LETTER_Z, .name="LETTER_Z"},
-{.code=KEY_LETTER_Z, .name="Z"},
+KEY_NAME_ENTRY(KEY_LETTER_Y, "LETTER_Y"),
+KEY_NAME_ENTRY(KEY_LETTER_Y, "Y"),
 
-{.code=KEY_SYMBOL_One_Exclamation, .name="SYMBOL_One_Exclamation"},
-{.code=KEY_SYMBOL_One_Exclamation, .name="1"},
+KEY_NAME_ENTRY(KEY_LETTER_Z, "LETTER_Z"),
+KEY_NAME_ENTRY(KEY_LETTER_Z, "Z"),
 
-{.code=KEY_SYMBOL_Two_At, .name="SYMBOL_Two_At"},
-{.code=KEY_SYMBOL_Two_At, .name="2"},
+KEY_NAME_ENTRY(KEY_SYMBOL_One_Exclamation, "SYMBOL_One_Exclamation"),
+KEY_NAME_ENTRY(KEY_SYMBOL_One_Exclamation, "1"),
 
-{.code=KEY_SYMBOL_Three_Number, .name="SYMBOL_Three_Number"},
-{.code=KEY_SYMBOL_Three_Number, .name="3"},
+KEY_NAME_ENTRY(KEY_SYMBOL_Two_At, "SYMBOL_Two_At"),
+KEY_NAME_ENTRY(KEY_SYMBOL_Two_At, "2"),
 
-{.code=KEY_SYMBOL_Four_Dollar, .name="SYMBOL_Four_Dollar"},
-{.code=KEY_SYMBOL_Four_Dollar, .name="4"},
+KEY_NAME_ENTRY(KEY_SYMBOL_Three_Number, "SYMBOL_Three_Number"),
+KEY_NAME_ENTRY(KEY_SYMBOL_Three_Number, "3"),
 
-{.code=KEY_SYMBOL_Five_Percent, .name="SYMBOL_Five_Percent"},
-{.code=KEY_SYMBOL_Five_Percent, .name="5"},
+KEY_NAME_ENTRY(KEY_SYMBOL_Four_Dollar, "SYMBOL_Four_Dollar"),
+KEY_NAME_ENTRY(KEY_SYMBOL_Four_Dollar, "4"),
 
-{.code=KEY_SYMBOL_Six_Circumflex, .name="SYMBOL_Six_Circumflex"},
-{.code=KEY_SYMBOL_Six_Circumflex, .name="6"},
+KEY_NAME_ENTRY(KEY_SYMBOL_Five_Percent, "SYMBOL_Five_Percent"),
+KEY_NAME_ENTRY(KEY_SYMBOL_Five_Percent, "5"),
 
-{.code=KEY_SYMBOL_Seven_Ampersand, .name="SYMBOL_Seven_Ampersand"},
-{.code=KEY_SYMBOL_Seven_Ampersand, .name="7"},
+KEY_NAME_ENTRY(KEY_SYMBOL_Six_Circumflex, "SYMBOL_Six_Circumflex"),
+KEY_NAME_ENTRY(KEY_SYMBOL_Six_Circumflex, "6"),
 
-{.code=KEY_SYMBOL_Eight_Asterisk, .name="SYMBOL_Eight_Asterisk"},
-{.code=KEY_SYMBOL_Eight_Asterisk, .name="8"},
+KEY_NAME_ENTRY(KEY_SYMBOL_Seven_Ampersand, "SYMBOL_Seven_Ampersand"),
+KEY_NAME_ENTRY(KEY_SYMBOL_Seven_Ampersand, "7"),
 
-{.code=KEY_SYMBOL_Nine_LeftParenthesis, .name="SYMBOL_Nine_LeftParenthesis"},
-{.code=KEY_SYMBOL_Nine_LeftParenthesis, .name="9"},
+KEY_NAME_ENTRY(KEY_SYMBOL_Eight_Asterisk, "SYMBOL_Eight_Asterisk"),
+KEY_NAME_ENTRY(KEY_SYMBOL_Eight_Asterisk, "8"),
 
-{.code=KEY_SYMBOL_Zero_RightParenthesis, .name="SYMBOL_Zero_RightParenthesis"},
-{.code=KEY_SYMBOL_Zero_RightParenthesis, .name="0"},
+KEY_NAME_ENTRY(KEY_SYMBOL_Nine_LeftParenthesis, "SYMBOL_Nine_LeftParenthesis"),
+KEY_NAME_ENTRY(KEY_SYMBOL_Nine_LeftParenthesis, "9"),
 
-{.code=KEY_SYMBOL_Grave_Tilde, .name="SYMBOL_Grave_Tilde"},
+KEY_NAME_ENTRY(KEY_SYMBOL_Zero_RightParenthesis, "SYMBOL_Zero_RightParenthesis"),
+KEY_NAME_ENTRY(KEY_SYMBOL_Zero_RightParenthesis, "0"),
 
-{.code=KEY_SYMBOL_Backslash_Bar, .name="SYMBOL_Backslash_Bar"},
+KEY_NAME_ENTRY(KEY_SYMBOL_Grave_Tilde, "SYMBOL_Grave_Tilde"),
 
-{.code=KEY_SYMBOL_Minus_Underscore, .name="SYMBOL_Minus_Underscore"},
+KEY_NAME_ENTRY(KEY_SYMBOL_Backslash_Bar, "SYMBOL_Backslash_Bar"),
 
-{.code=KEY_SYMBOL_Equals_Plus, .name="SYMBOL_Equals_Plus"},
+KEY_NAME_ENTRY(KEY_SYMBOL_Minus_Underscore, "SYMBOL_Minus_Underscore"),
 
-{.code=KEY_SYMBOL_LeftBracket_LeftBrace, .name="SYMBOL_LeftBracket_LeftBrace"},
+KEY_NAME_ENTRY(KEY_SYMBOL_Equals_Plus, "SYMBOL_Equals_Plus"),
 
-{.code=KEY_SYMBOL_RightBracket_RightBrace, .name="SYMBOL_RightBracket_RightBrace"},
+KEY_NAME_ENTRY(KEY_SYMBOL_LeftBracket_LeftBrace, "SYMBOL_LeftBracket_LeftBrace"),
 
-{.code=KEY_SYMBOL_Semicolon_Colon, .name="SYMBOL_Semicolon_Colon"},
+KEY_NAME_ENTRY(KEY_SYMBOL_RightBracket_RightBrace, "SYMBOL_RightBracket_RightBrace"),
 
-{.code=KEY_SYMBOL_Apostrophe_Quote, .name="SYMBOL_Apostrophe_Quote"},
+KEY_NAME_ENTRY(KEY_SYMBOL_Semicolon_Colon, "SYMBOL_Semicolon_Colon"),
 
-{.code=KEY_SYMBOL_Comma_Less, .name="SYMBOL_Comma_Less"},
+KEY_NAME_ENTRY(KEY_SYMBOL_Apostrophe_Quote, "SYMBOL_Apostrophe_Quote"),
 
-{.code=KEY_SYMBOL_Period_Greater, .name="SYMBOL_Period_Greater"},
+KEY_NAME_ENTRY(KEY_SYMBOL_Comma_Less, "SYMBOL_Comma_Less"),
 
-{.code=KEY_SYMBOL_Slash_Question, .name="SYMBOL_Slash_Question"},
+KEY_NAME_ENTRY(KEY_SYMBOL_Period_Greater, "SYMBOL_Period_Greater"),
 
-{.code=KEY_FUNCTION_Escape, .name="FUNCTION_Escape"},
-{.code=KEY_FUNCTION_Escape, .name="Escape"},
+KEY_NAME_ENTRY(KEY_SYMBOL_Slash_Question, "SYMBOL_Slash_Question"),
 
-{.code=KEY_FUNCTION_Enter, .name="FUNCTION_Enter"},
-{.code=KEY_FUNCTION_Enter, .name="Enter"},
+KEY_NAME_ENTRY(KEY_FUNCTION_Escape, "FUNCTION_Escape"),
+KEY_NAME_ENTRY(KEY_FUNCTION_Escape, "Escape"),
 
-{.code=KEY_FUNCTION_Space, .name="FUNCTION_Space"},
-{.code=KEY_FUNCTION_Space, .name="Space"},
+KEY_NAME_ENTRY(KEY_FUNCTION_Enter, "FUNCTION_Enter"),
+KEY_NAME_ENTRY(KEY_FUNCTION_Enter, "Enter"),
 
-{.code=KEY_FUNCTION_Tab, .name="FUNCTION_Tab"},
-{.code=KEY_FUNCTION_Tab, .name="Tab"},
+KEY_NAME_ENTRY(KEY_FUNCTION_Space, "FUNCTION_Space"),
+KEY_NAME_ENTRY(KEY_FUNCTION_Space, "Space"),
 
-{.code=KEY_FUNCTION_DeleteBackward, .name="FUNCTION_DeleteBackward"},
-{.code=KEY_FUNCTION_DeleteBackward, .name="DeleteBackward"},
+KEY_NAME_ENTRY(KEY_FUNCTION_Tab, "FUNCTION_Tab"),
+KEY_NAME_ENTRY(KEY_FUNCTION_Tab, "Tab"),
 
-{.code=KEY_FUNCTION_F1, .name="FUNCTION_F1"},
-{.code=KEY_FUNCTION_F1, .name="F1"},
+KEY_NAME_ENTRY(KEY_FUNCTION_DeleteBackward, "FUNCTION_DeleteBackward"),
+KEY_NAME_ENTRY(KEY_FUNCTION_DeleteBackward, "DeleteBackward"),
 
-{.code=KEY_FUNCTION_F2, .name="FUNCTION_F2"},
-{.code=KEY_FUNCTION_F2, .name="F2"},
+KEY_NAME_ENTRY(KEY_FUNCTION_F1, "FUNCTION_F1"),
+KEY_NAME_ENTRY(KEY_FUNCTION_F1, "F1"),
 
-{.code=KEY_FUNCTION_F3, .name="FUNCTION_F3"},
-{.code=KEY_FUNCTION_F3, .name="F3"},
+KEY_NAME_ENTRY(KEY_FUNCTION_F2, "FUNCTION_F2"),
+KEY_NAME_ENTRY(KEY_FUNCTION_F2, "F2"),
 
-{.code=KEY_FUNCTION_F4, .name="FUNCTION_F4"},
-{.code=KEY_FUNCTION_F4, .name="F4"},
+KEY_NAME_ENTRY(KEY_FUNCTION_F3, "FUNCTION_F3"),
+KEY_NAME_ENTRY(KEY_FUNCTION_F3, "F3"),
 
-{.code=KEY_FUNCTION_F5, .name="FUNCTION_F5"},
-{.code=KEY_FUNCTION_F5, .name="F5"},
+KEY_NAME_ENTRY(KEY_FUNCTION_F4, "FUNCTION_F4"),
+KEY_NAME_ENTRY(KEY_FUNCTION_F4, "F4"),
 
-{.code=KEY_FUNCTION_F6, .name="FUNCTION_F6"},
-{.code=KEY_FUNCTION_F6, .name="F6"},
+KEY_NAME_ENTRY(KEY_FUNCTION_F5, "FUNCTION_F5"),
+KEY_NAME_ENTRY(KEY_FUNCTION_F5, "F5"),
 
-{.code=KEY_FUNCTION_F7, .name="FUNCTION_F7"},
-{.code=KEY_FUNCTION_F7, .name="F7"},
+KEY_NAME_ENTRY(KEY_FUNCTION_F6, "FUNCTION_F6"),
+KEY_NAME_ENTRY(KEY_FUNCTION_F6, "F6"),
 
-{.code=KEY_FUNCTION_F8, .name="FUNCTION_F8"},
-{.code=KEY_FUNCTION_F8, .name="F8"},
+KEY_NAME_ENTRY(KEY_FUNCTION_F7, "FUNCTION_F7"),
+KEY_NAME_ENTRY(KEY_FUNCTION_F7, "F7"),
 
-{.code=KEY_FUNCTION_F9, .name="FUNCTION_F9"},
-{.code=KEY_FUNCTION_F9, .name="F9"},
+KEY_NAME_ENTRY(KEY_FUNCTION_F8, "FUNCTION_F8"),
+KEY_NAME_ENTRY(KEY_FUNCTION_F8, "F8"),
 
-{.code=KEY_FUNCTION_F10, .name="FUNCTION_F10"},
-{.code=KEY_FUNCTION_F10, .name="F10"},
+KEY_NAME_ENTRY(KEY_FUNCTION_F9, "FUNCTION_F9"),
+KEY_NAME_ENTRY(KEY_FUNCTION_F9, "F9"),
 
-{.code=KEY_FUNCTION_F11, .name="FUNCTION_F11"},
-{.code=KEY_FUNCTION_F11, .name="F11"},
+KEY_NAME_ENTRY(KEY_FUNCTION_F10, "FUNCTION_F10"),
+KEY_NAME_ENTRY(KEY_FUNCTION_F10, "F10"),
 
-{.code=KEY_FUNCTION_F12, .name="FUNCTION_F12"},
-{.code=KEY_FUNCTION_F12, .name="F12"},
+KEY_NAME_ENTRY(KEY_FUNCTION_F11, "FUNCTION_F11"),
+KEY_NAME_ENTRY(KEY_FUNCTION_F11, "F11"),
 
-{.code=KEY_FUNCTION_F13, .name="FUNCTION_F13"},
-{.code=KEY_FUNCTION_F13, .name="F13"},
+KEY_NAME_ENTRY(KEY_FUNCTION_F12, "FUNCTION_F12"),
+KEY_NAME_ENTRY(KEY_FUNCTION_F12, "F12"),
 
-{.code=KEY_FUNCTION_F14, .name="FUNCTION_F14"},
-{.code=KEY_FUNCTION_F14, .name="F14"},
+KEY_NAME_ENTRY(KEY_FUNCTION_F13, "FUNCTION_F13"),
+KEY_NAME_ENTRY(KEY_FUNCTION_F13, "F13"),
 
-{.code=KEY_FUNCTION_F15, .name="FUNCTION_F15"},
-{.code=KEY_FUNCTION_F15, .name="F15"},
+KEY_NAME_ENTRY(KEY_FUNCTION_F14, "FUNCTION_F14"),
+KEY_NAME_ENTRY(KEY_FUNCTION_F14, "F14"),
 
-{.code=KEY_FUNCTION_F16, .name="FUNCTION_F16"},
-{.code=KEY_FUNCTION_F16, .name="F16"},
+KEY_NAME_ENTRY(KEY_FUNCTION_F15, "FUNCTION_F15"),
+KEY_NAME_ENTRY(KEY_FUNCTION_F15, "F15"),
 
-{.code=KEY_FUNCTION_F17, .name="FUNCTION_F17"},
-{.code=KEY_FUNCTION_F17, .name="F17"},
+KEY_NAME_ENTRY(KEY_FUNCTION_F16, "FUNCTION_F16"),
+KEY_NAME_ENTRY(KEY_FUNCTION_F16, "F16"),
 
-{.code=KEY_FUNCTION_F18, .name="FUNCTION_F18"},
-{.code=KEY_FUNCTION_F18, .name="F18"},
+KEY_NAME_ENTRY(KEY_FUNCTION_F17, "FUNCTION_F17"),
+KEY_NAME_ENTRY(KEY_FUNCTION_F17, "F17"),
 
-{.code=KEY_FUNCTION_F19, .name="FUNCTION_F19"},
-{.code=KEY_FUNCTION_F19, .name="F19"},
+KEY_NAME_ENTRY(KEY_FUNCTION_F18, "FUNCTION_F18"),
+KEY_NAME_ENTRY(KEY_FUNCTION_F18, "F18"),
 
-{.code=KEY_FUNCTION_F20, .name="FUNCTION_F20"},
-{.code=KEY_FUNCTION_F20, .name="F20"},
+KEY_NAME_ENTRY(KEY_FUNCTION_F19, "FUNCTION_F19"),
+KEY_NAME_ENTRY(KEY_FUNCTION_F19, "F19"),
 
-{.code=KEY_FUNCTION_F21, .name="FUNCTION_F21"},
-{.code=KEY_FUNCTION_F21, .name="F21"},
+KEY_NAME_ENTRY(KEY_FUNCTION_F20, "FUNCTION_F20"),
+KEY_NAME_ENTRY(KEY_FUNCTION_F20, "F20"),
 
-{.code=KEY_FUNCTION_F22, .name="FUNCTION_F22"},
-{.code=KEY_FUNCTION_F22, .name="F22"},
+KEY_NAME_ENTRY(KEY_FUNCTION_F21, "FUNCTION_F21"),
+KEY_NAME_ENTRY(KEY_FUNCTION_F21, "F21"),
 
-{.code=KEY_FUNCTION_F23, .name="FUNCTION_F23"},
-{.code=KEY_FUNCTION_F23, .name="F23"},
+KEY_NAME_ENTRY(KEY_FUNCTION_F22, "FUNCTION_F22"),
+KEY_NAME_ENTRY(KEY_FUNCTION_F22, "F22"),
 
-{.code=KEY_FUNCTION_F24, .name="FUNCTION_F24"},
-{.code=KEY_FUNCTION_F24, .name="F24"},
+KEY_NAME_ENTRY(KEY_FUNCTION_F23, "FUNCTION_F23"),
+KEY_NAME_ENTRY(KEY_FUNCTION_F23, "F23"),
 
-{.code=KEY_FUNCTION_Insert, .name="FUNCTION_Insert"},
-{.code=KEY_FUNCTION_Insert, .name="Insert"},
+KEY_NAME_ENTRY(KEY_FUNCTION_F24, "FUNCTION_F24"),
+KEY_NAME_ENTRY(KEY_FUNCTION_F24, "F24"),
 
-{.code=KEY_FUNCTION_DeleteForward, .name="FUNCTION_DeleteForward"},
-{.code=KEY_FUNCTION_DeleteForward, .name="DeleteForward"},
+KEY_NAME_ENTRY(KEY_FUNCTION_Insert, "FUNCTION_Insert"),
+KEY_NAME_ENTRY(KEY_FUNCTION_Insert, "Insert"),
 
-{.code=KEY_FUNCTION_Home, .name="FUNCTION_Home"},
-{.code=KEY_FUNCTION_Home, .name="Home"},
+KEY_NAME_ENTRY(KEY_FUNCTION_DeleteForward, "FUNCTION_DeleteForward"),
+KEY_NAME_ENTRY(KEY_FUNCTION_DeleteForward, "DeleteForward"),
 
-{.code=KEY_FUNCTION_End, .name="FUNCTION_End"},
-{.code=KEY_FUNCTION_End, .name="End"},
+KEY_NAME_ENTRY(KEY_FUNCTION_Home, "FUNCTION_Home"),
+KEY_NAME_ENTRY(KEY_FUNCTION_Home, "Home"),
 
-{.code=KEY_FUNCTION_PageUp, .name="FUNCTION_PageUp"},
-{.code=KEY_FUNCTION_PageUp, .name="PageUp"},
+KEY_NAME_ENTRY(KEY_FUNCTION_End, "FUNCTION_End"),
+KEY_NAME_ENTRY(KEY_FUNCTION_End, "End"),
 
-{.code=KEY_FUNCTION_PageDown, .name="FUNCTION_PageDown"},
-{.code=KEY_FUNCTION_PageDown, .name="PageDown"},
+KEY_NAME_ENTRY(KEY_FUNCTION_PageUp, "FUNCTION_PageUp"),
+KEY_NAME_ENTRY(KEY_FUNCTION_PageUp, "PageUp"),
 
-{.code=KEY_FUNCTION_ArrowUp, .name="FUNCTION_ArrowUp"},
-{.code=KEY_FUNCTION_ArrowUp, .name="ArrowUp"},
+KEY_NAME_ENTRY(KEY_FUNCTION_PageDown, "FUNCTION_PageDown"),
+KEY_NAME_ENTRY(KEY_FUNCTION_PageDown, "PageDown"),
 
-{.code=KEY_FUNCTION_ArrowDown, .name="FUNCTION_ArrowDown"},
-{.code=KEY_FUNCTION_ArrowDown, .name="ArrowDown"},
+KEY_NAME_ENTRY(KEY_FUNCTION_ArrowUp, "FUNCTION_ArrowUp"),
+KEY_NAME_ENTRY(KEY_FUNCTION_ArrowUp, "ArrowUp"),
 
-{.code=KEY_FUNCTION_ArrowLeft, .name="FUNCTION_ArrowLeft"},
-{.code=KEY_FUNCTION_ArrowLeft, .name="ArrowLeft"},
+KEY_NAME_ENTRY(KEY_FUNCTION_ArrowDown, "FUNCTION_ArrowDown"),
+KEY_NAME_ENTRY(KEY_FUNCTION_ArrowDown, "ArrowDown"),
 
-{.code=KEY_FUNCTION_ArrowRight, .name="FUNCTION_ArrowRight"},
-{.code=KEY_FUNCTION_ArrowRight, .name="ArrowRight"},
+KEY_NAME_ENTRY(KEY_FUNCTION_ArrowLeft, "FUNCTION_ArrowLeft"),
+KEY_NAME_ENTRY(KEY_FUNCTION_ArrowLeft, "ArrowLeft"),
 
-{.code=KEY_FUNCTION_PrintScreen, .name="FUNCTION_PrintScreen"},
-{.code=KEY_FUNCTION_PrintScreen, .name="PrintScreen"},
+KEY_NAME_ENTRY(KEY_FUNCTION_ArrowRight, "FUNCTION_ArrowRight"),
+KEY_NAME_ENTRY(KEY_FUNCTION_ArrowRight, "ArrowRight"),
 
-{.code=KEY_FUNCTION_SystemRequest, .name="FUNCTION_SystemRequest"},
-{.code=KEY_FUNCTION_SystemRequest, .name="SystemRequest"},
+KEY_NAME_ENTRY(KEY_FUNCTION_PrintScreen, "FUNCTION_PrintScreen"),
+KEY_NAME_ENTRY(KEY_FUNCTION_PrintScreen, "PrintScreen"),
 
-{.code=KEY_FUNCTION_Pause, .name="FUNCTION_Pause"},
-{.code=KEY_FUNCTION_Pause, .name="Pause"},
+KEY_NAME_ENTRY(KEY_FUNCTION_SystemRequest, "FUNCTION_SystemRequest"),
+KEY_NAME_ENTRY(KEY_FUNCTION_SystemRequest, "SystemRequest"),
 
-{.code=KEY_FUNCTION_ShiftLeft, .name="FUNCTION_ShiftLeft"},
-{.code=KEY_FUNCTION_ShiftLeft, .name="ShiftLeft"},
+KEY_NAME_ENTRY(KEY_FUNCTION_Pause, "FUNCTION_Pause"),
+KEY_NAME_ENTRY(KEY_FUNCTION_Pause, "Pause"),
 
-{.code=KEY_FUNCTION_ShiftRight, .name="FUNCTION_ShiftRight"},
-{.code=KEY_FUNCTION_ShiftRight, .name="ShiftRight"},
+KEY_NAME_ENTRY(KEY_FUNCTION_ShiftLeft, "FUNCTION_ShiftLeft"),
+KEY_NAME_ENTRY(KEY_FUNCTION_ShiftLeft, "ShiftLeft"),
 
-{.code=KEY_FUNCTION_ControlLeft, .name="FUNCTION_ControlLeft"},
-{.code=KEY_FUNCTION_ControlLeft, .name="ControlLeft"},
+KEY_NAME_ENTRY(KEY_FUNCTION_ShiftRight, "FUNCTION_ShiftRight"),
+KEY_NAME_ENTRY(KEY_FUNCTION_ShiftRight, "ShiftRight"),
 
-{.code=KEY_FUNCTION_ControlRight, .name="FUNCTION_ControlRight"},
-{.code=KEY_FUNCTION_ControlRight, .name="ControlRight"},
+KEY_NAME_ENTRY(KEY_FUNCTION_ControlLeft, "FUNCTION_ControlLeft"),
+KEY_NAME_ENTRY(KEY_FUNCTION_ControlLeft, "ControlLeft"),
 
-{.code=KEY_FUNCTION_AltLeft, .name="FUNCTION_AltLeft"},
-{.code=KEY_FUNCTION_AltLeft, .name="AltLeft"},
+KEY_NAME_ENTRY(KEY_FUNCTION_ControlRight, "FUNCTION_ControlRight"),
+KEY_NAME_ENTRY(KEY_FUNCTION_ControlRight, "ControlRight"),
 
-{.code=KEY_FUNCTION_AltRight, .name="FUNCTION_AltRight"},
-{.code=KEY_FUNCTION_AltRight, .name="AltRight"},
+KEY_NAME_ENTRY(KEY_FUNCTION_AltLeft, "FUNCTION_AltLeft"),
+KEY_NAME_ENTRY(KEY_FUNCTION_AltLeft, "AltLeft"),
 
-{.code=KEY_FUNCTION_GuiLeft, .name="FUNCTION_GuiLeft"},
-{.code=KEY_FUNCTION_GuiLeft, .name="GuiLeft"},
+KEY_NAME_ENTRY(KEY_FUNCTION_AltRight, "FUNCTION_AltRight"),
+KEY_NAME_ENTRY(KEY_FUNCTION_AltRight, "AltRight"),
 
-{.code=KEY_FUNCTION_GuiRight, .name="FUNCTION_GuiRight"},
-{.code=KEY_FUNCTION_GuiRight, .name="GuiRight"},
+KEY_NAME_ENTRY(KEY_FUNCTION_GuiLeft, "FUNCTION_GuiLeft"),
+KEY_NAME_ENTRY(KEY_FUNCTION_GuiLeft, "GuiLeft"),
 
-{.code=KEY_FUNCTION_Application, .name="FUNCTION_Application"},
-{.code=KEY_FUNCTION_Application, .name="Application"},
+KEY_NAME_ENTRY(KEY_FUNCTION_GuiRight, "FUNCTION_GuiRight"),
+KEY_NAME_ENTRY(KEY_FUNCTION_GuiRight, "GuiRight"),
 
-{.code=KEY_LOCK_Capitals, .name="LOCK_Capitals"},
-{.code=KEY_LOCK_Capitals, .name="CapsLock"},
+KEY_NAME_ENTRY(KEY_FUNCTION_Application, "FUNCTION_Application"),
+KEY_NAME_ENTRY(KEY_FUNCTION_Application, "Application"),
 
-{.code=KEY_LOCK_Scroll, .name="LOCK_Scroll"},
-{.code=KEY_LOCK_Scroll, .name="ScrollLock"},
+KEY_NAME_ENTRY(KEY_LOCK_Capitals, "LOCK_Capitals"),
+KEY_NAME_ENTRY(KEY_LOCK_Capitals, "CapsLock"),
 
-{.code=KEY_LOCKING_Capitals, .name="LOCKING_Capitals"},
+KEY_NAME_ENTRY(KEY_LOCK_Scroll, "LOCK_Scroll"),
+KEY_NAME_ENTRY(KEY_LOCK_Scroll, "ScrollLock"),
 
-{.code=KEY_LOCKING_Scroll, .name="LOCKING_Scroll"},
+KEY_NAME_ENTRY(KEY_LOCKING_Capitals, "LOCKING_Capitals"),
 
-{.code=KEY_LOCKING_Numbers, .name="LOCKING_Numbers"},
+KEY_NAME_ENTRY(KEY_LOCKING_Scroll, "LOCKING_Scroll"),
 
-{.code=KEY_KEYPAD_NumLock_Clear, .name="KEYPAD_NumLock_Clear"},
+KEY_NAME_ENTRY(KEY_LOCKING_Numbers, "LOCKING_Numbers"),
 
-{.code=KEY_KEYPAD_Slash, .name="KEYPAD_Slash"},
-{.code=KEY_KEYPAD_Slash, .name="KPSlash"},
+KEY_NAME_ENTRY(KEY_KEYPAD_NumLock_Clear, "KEYPAD_NumLock_Clear"),
 
-{.code=KEY_KEYPAD_Asterisk, .name="KEYPAD_Asterisk"},
-{.code=KEY_KEYPAD_Asterisk, .name="KPAsterisk"},
+KEY_NAME_ENTRY(KEY_KEYPAD_Slash, "KEYPAD_Slash"),
+KEY_NAME_ENTRY(KEY_KEYPAD_Slash, "KPSlash"),
 
-{.code=KEY_KEYPAD_Minus, .name="KEYPAD_Minus"},
-{.code=KEY_KEYPAD_Minus, .name="KPMinus"},
+KEY_NAME_ENTRY(KEY_KEYPAD_Asterisk, "KEYPAD_Asterisk"),
+KEY_NAME_ENTRY(KEY_KEYPAD_Asterisk, "KPAsterisk"),
 
-{.code=KEY_KEYPAD_Plus, .name="KEYPAD_Plus"},
-{.code=KEY_KEYPAD_Plus, .name="KPPlus"},
+KEY_NAME_ENTRY(KEY_KEYPAD_Minus, "KEYPAD_Minus"),
+KEY_NAME_ENTRY(KEY_KEYPAD_Minus, "KPMinus"),
 
-{.code=KEY_KEYPAD_Enter, .name="KEYPAD_Enter"},
-{.code=KEY_KEYPAD_Enter, .name="KPEnter"},
+KEY_NAME_ENTRY(KEY_KEYPAD_Plus, "KEYPAD_Plus"),
+KEY_NAME_ENTRY(KEY_KEYPAD_Plus, "KPPlus"),
 
-{.code=KEY_KEYPAD_One_End, .name="KEYPAD_One_End"},
-{.code=KEY_KEYPAD_One_End, .name="KP1"},
-{.code=KEY_KEYPAD_One_End, .name="KPEnd"},
+KEY_NAME_ENTRY(KEY_KEYPAD_Enter, "KEYPAD_Enter"),
+KEY_NAME_ENTRY(KEY_KEYPAD_Enter, "KPEnter"),
 
-{.code=KEY_KEYPAD_Two_ArrowDown, .name="KEYPAD_Two_ArrowDown"},
-{.code=KEY_KEYPAD_Two_ArrowDown, .name="KP2"},
-{.code=KEY_KEYPAD_Two_ArrowDown, .name="KPArrowDown"},
+KEY_NAME_ENTRY(KEY_KEYPAD_One_End, "KEYPAD_One_End"),
+KEY_NAME_ENTRY(KEY_KEYPAD_One_End, "KP1"),
+KEY_NAME_ENTRY(KEY_KEYPAD_One_End, "KPEnd"),
 
-{.code=KEY_KEYPAD_Three_PageDown, .name="KEYPAD_Three_PageDown"},
-{.code=KEY_KEYPAD_Three_PageDown, .name="KP3"},
-{.code=KEY_KEYPAD_Three_PageDown, .name="KPPageDown"},
+KEY_NAME_ENTRY(KEY_KEYPAD_Two_ArrowDown, "KEYPAD_Two_ArrowDown"),
+KEY_NAME_ENTRY(KEY_KEYPAD_Two_ArrowDown, "KP2"),
+KEY_NAME_ENTRY(KEY_KEYPAD_Two_ArrowDown, "KPArrowDown"),
 
-{.code=KEY_KEYPAD_Four_ArrowLeft, .name="KEYPAD_Four_ArrowLeft"},
-{.code=KEY_KEYPAD_Four_ArrowLeft, .name="KP4"},
-{.code=KEY_KEYPAD_Four_ArrowLeft, .name="KPArrowLeft"},
+KEY_NAME_ENTRY(KEY_KEYPAD_Three_PageDown, "KEYPAD_Three_PageDown"),
+KEY_NAME_ENTRY(KEY_KEYPAD_Three_PageDown, "KP3"),
+KEY_NAME_ENTRY(KEY_KEYPAD_Three_PageDown, "KPPageDown"),
 
-{.code=KEY_KEYPAD_Five, .name="KEYPAD_Five"},
-{.code=KEY_KEYPAD_Five, .name="KP5"},
+KEY_NAME_ENTRY(KEY_KEYPAD_Four_ArrowLeft, "KEYPAD_Four_ArrowLeft"),
+KEY_NAME_ENTRY(KEY_KEYPAD_Four_ArrowLeft, "KP4"),
+KEY_NAME_ENTRY(KEY_KEYPAD_Four_ArrowLeft, "KPArrowLeft"),
 
-{.code=KEY_KEYPAD_Six_ArrowRight, .name="KEYPAD_Six_ArrowRight"},
-{.code=KEY_KEYPAD_Six_ArrowRight, .name="KP6"},
-{.code=KEY_KEYPAD_Six_ArrowRight, .name="KPArrowRight"},
+KEY_NAME_ENTRY(KEY_KEYPAD_Five, "KEYPAD_Five"),
+KEY_NAME_ENTRY(KEY_KEYPAD_Five, "KP5"),
 
-{.code=KEY_KEYPAD_Seven_Home, .name="KEYPAD_Seven_Home"},
-{.code=KEY_KEYPAD_Seven_Home, .name="KP7"},
-{.code=KEY_KEYPAD_Seven_Home, .name="KPHome"},
+KEY_NAME_ENTRY(KEY_KEYPAD_Six_ArrowRight, "KEYPAD_Six_ArrowRight"),
+KEY_NAME_ENTRY(KEY_KEYPAD_Six_ArrowRight, "KP6"),
+KEY_NAME_ENTRY(KEY_KEYPAD_Six_ArrowRight, "KPArrowRight"),
 
-{.code=KEY_KEYPAD_Eight_ArrowUp, .name="KEYPAD_Eight_ArrowUp"},
-{.code=KEY_KEYPAD_Eight_ArrowUp, .name="KP8"},
-{.code=KEY_KEYPAD_Eight_ArrowUp, .name="KPArrowUp"},
+KEY_NAME_ENTRY(KEY_KEYPAD_Seven_Home, "KEYPAD_Seven_Home"),
+KEY_NAME_ENTRY(KEY_KEYPAD_Seven_Home, "KP7"),
+KEY_NAME_ENTRY(KEY_KEYPAD_Seven_Home, "KPHome"),
 
-{.code=KEY_KEYPAD_Nine_PageUp, .name="KEYPAD_Nine_PageUp"},
-{.code=KEY_KEYPAD_Nine_PageUp, .name="KP9"},
-{.code=KEY_KEYPAD_Nine_PageUp, .name="KPPageUp"},
+KEY_NAME_ENTRY(KEY_KEYPAD_Eight_ArrowUp, "KEYPAD_Eight_ArrowUp"),
+KEY_NAME_ENTRY(KEY_KEYPAD_Eight_ArrowUp, "KP8"),
+KEY_NAME_ENTRY(KEY_KEYPAD_Eight_ArrowUp, "KPArrowUp"),
 
-{.code=KEY_KEYPAD_Zero_Insert, .name="KEYPAD_Zero_Insert"},
-{.code=KEY_KEYPAD_Zero_Insert, .name="KP0"},
-{.code=KEY_KEYPAD_Zero_Insert, .name="KPInsert"},
+KEY_NAME_ENTRY(KEY_KEYPAD_Nine_PageUp, "KEYPAD_Nine_PageUp"),
+KEY_NAME_ENTRY(KEY_KEYPAD_Nine_PageUp, "KP9"),
+KEY_NAME_ENTRY(KEY_KEYPAD_Nine_PageUp, "KPPageUp"),
 
-{.code=KEY_KEYPAD_Period_Delete, .name="KEYPAD_Period_Delete"},
-{.code=KEY_KEYPAD_Period_Delete, .name="KPPeriod"},
-{.code=KEY_KEYPAD_Period_Delete, .name="KPDelete"},
+KEY_NAME_ENTRY(KEY_KEYPAD_Zero_Insert, "KEYPAD_Zero_Insert"),
+KEY_NAME_ENTRY(KEY_KEYPAD_Zero_Insert, "KP0"),
+KEY_NAME_ENTRY(KEY_KEYPAD_Zero_Insert, "KPInsert"),
 
-{.code=KEY_KEYPAD_Equals, .name="KEYPAD_Equals"},
-{.code=KEY_KEYPAD_Equals, .name="KPEquals"},
+KEY_NAME_ENTRY(KEY_KEYPAD_Period_Delete, "KEYPAD_Period_Delete"),
+KEY_NAME_ENTRY(KEY_KEYPAD_Period_Delete, "KPPeriod"),
+KEY_NAME_ENTRY(KEY_KEYPAD_Period_Delete, "KPDelete"),
 
-{.code=KEY_KEYPAD_LeftParenthesis, .name="KEYPAD_LeftParenthesis"},
+KEY_NAME_ENTRY(KEY_KEYPAD_Equals, "KEYPAD_Equals"),
+KEY_NAME_ENTRY(KEY_KEYPAD_Equals, "KPEquals"),
 
-{.code=KEY_KEYPAD_RightParenthesis, .name="KEYPAD_RightParenthesis"},
+KEY_NAME_ENTRY(KEY_KEYPAD_LeftParenthesis, "KEYPAD_LeftParenthesis"),
 
-{.code=KEY_KEYPAD_LeftBrace, .name="KEYPAD_LeftBrace"},
+KEY_NAME_ENTRY(KEY_KEYPAD_RightParenthesis, "KEYPAD_RightParenthesis"),
 
-{.code=KEY_KEYPAD_RightBrace, .name="KEYPAD_RightBrace"},
+KEY_NAME_ENTRY(KEY_KEYPAD_LeftBrace, "KEYPAD_LeftBrace"),
 
-{.code=KEY_KEYPAD_Modulo, .name="KEYPAD_Modulo"},
+KEY_NAME_ENTRY(KEY_KEYPAD_RightBrace, "KEYPAD_RightBrace"),
 
-{.code=KEY_KEYPAD_BitwiseAnd, .name="KEYPAD_BitwiseAnd"},
+KEY_NAME_ENTRY(KEY_KEYPAD_Modulo, "KEYPAD_Modulo"),
 
-{.code=KEY_KEYPAD_BitwiseOr, .name="KEYPAD_BitwiseOr"},
+KEY_NAME_ENTRY(KEY_KEYPAD_BitwiseAnd, "KEYPAD_BitwiseAnd"),
 
-{.code=KEY_KEYPAD_BitwiseXor, .name="KEYPAD_BitwiseXor"},
+KEY_NAME_ENTRY(KEY_KEYPAD_BitwiseOr, "KEYPAD_BitwiseOr"),
 
-{.code=KEY_KEYPAD_Less, .name="KEYPAD_Less"},
+KEY_NAME_ENTRY(KEY_KEYPAD_BitwiseXor, "KEYPAD_BitwiseXor"),
 
-{.code=KEY_KEYPAD_Greater, .name="KEYPAD_Greater"},
+KEY_NAME_ENTRY(KEY_KEYPAD_Less, "KEYPAD_Less"),
 
-{.code=KEY_KEYPAD_BooleanAnd, .name="KEYPAD_BooleanAnd"},
+KEY_NAME_ENTRY(KEY_KEYPAD_Greater, "KEYPAD_Greater"),
 
-{.code=KEY_KEYPAD_BooleanOr, .name="KEYPAD_BooleanOr"},
+KEY_NAME_ENTRY(KEY_KEYPAD_BooleanAnd, "KEYPAD_BooleanAnd"),
 
-{.code=KEY_KEYPAD_BooleanXor, .name="KEYPAD_BooleanXor"},
+KEY_NAME_ENTRY(KEY_KEYPAD_BooleanOr, "KEYPAD_BooleanOr"),
 
-{.code=KEY_KEYPAD_BooleanNot, .name="KEYPAD_BooleanNot"},
+KEY_NAME_ENTRY(KEY_KEYPAD_BooleanXor, "KEYPAD_BooleanXor"),
 
-{.code=KEY_KEYPAD_Backspace, .name="KEYPAD_Backspace"},
+KEY_NAME_ENTRY(KEY_KEYPAD_BooleanNot, "KEYPAD_BooleanNot"),
 
-{.code=KEY_KEYPAD_Space, .name="KEYPAD_Space"},
+KEY_NAME_ENTRY(KEY_KEYPAD_Backspace, "KEYPAD_Backspace"),
 
-{.code=KEY_KEYPAD_Tab, .name="KEYPAD_Tab"},
+KEY_NAME_ENTRY(KEY_KEYPAD_Space, "KEYPAD_Space"),
 
-{.code=KEY_KEYPAD_Comma, .name="KEYPAD_Comma"},
+KEY_NAME_ENTRY(KEY_KEYPAD_Tab, "KEYPAD_Tab"),
 
-{.code=KEY_KEYPAD_Colon, .name="KEYPAD_Colon"},
+KEY_NAME_ENTRY(KEY_KEYPAD_Comma, "KEYPAD_Comma"),
 
-{.code=KEY_KEYPAD_Number, .name="KEYPAD_Number"},
+KEY_NAME_ENTRY(KEY_KEYPAD_Colon, "KEYPAD_Colon"),
 
-{.code=KEY_KEYPAD_At, .name="KEYPAD_At"},
+KEY_NAME_ENTRY(KEY_KEYPAD_Number, "KEYPAD_Number"),
 
-{.code=KEY_KEYPAD_A, .name="KEYPAD_A"},
+KEY_NAME_ENTRY(KEY_KEYPAD_At, "KEYPAD_At"),
 
-{.code=KEY_KEYPAD_B, .name="KEYPAD_B"},
+KEY_NAME_ENTRY(KEY_KEYPAD_A, "KEYPAD_A"),
 
-{.code=KEY_KEYPAD_C, .name="KEYPAD_C"},
+KEY_NAME_ENTRY(KEY_KEYPAD_B, "KEYPAD_B"),
 
-{.code=KEY_KEYPAD_D, .name="KEYPAD_D"},
+KEY_NAME_ENTRY(KEY_KEYPAD_C, "KEYPAD_C"),
 
-{.code=KEY_KEYPAD_E, .name="KEYPAD_E"},
+KEY_NAME_ENTRY(KEY_KEYPAD_D, "KEYPAD_D"),
 
-{.code=KEY_KEYPAD_F, .name="KEYPAD_F"},
+KEY_NAME_ENTRY(KEY_KEYPAD_E, "KEYPAD_E"),
 
-{.code=KEY_KEYPAD_00, .name="KEYPAD_00"},
+KEY_NAME_ENTRY(KEY_KEYPAD_F, "KEYPAD_F"),
 
-{.code=KEY_KEYPAD_000, .name="KEYPAD_000"},
+KEY_NAME_ENTRY(KEY_KEYPAD_00, "KEYPAD_00"),
 
-{.code=KEY_KEYPAD_ThousandsSeparator, .name="KEYPAD_ThousandsSeparator"},
+KEY_NAME_ENTRY(KEY_KEYPAD_000, "KEYPAD_000"),
 
-{.code=KEY_KEYPAD_DecimalSeparator, .name="KEYPAD_DecimalSeparator"},
+KEY_NAME_ENTRY(KEY_KEYPAD_ThousandsSeparator, "KEYPAD_ThousandsSeparator"),
 
-{.code=KEY_KEYPAD_CurrencyUnit, .name="KEYPAD_CurrencyUnit"},
+KEY_NAME_ENTRY(KEY_KEYPAD_DecimalSeparator, "KEYPAD_DecimalSeparator"),
 
-{.code=KEY_KEYPAD_CurrencySubunit, .name="KEYPAD_CurrencySubunit"},
+KEY_NAME_ENTRY(KEY_KEYPAD_CurrencyUnit, "KEYPAD_CurrencyUnit"),
 
-{.code=KEY_FUNCTION_Power, .name="FUNCTION_Power"},
+KEY_NAME_ENTRY(KEY_KEYPAD_CurrencySubunit, "KEYPAD_CurrencySubunit"),
 
-{.code=KEY_FUNCTION_Sleep, .name="FUNCTION_Sleep"},
+KEY_NAME_ENTRY(KEY_FUNCTION_Power, "FUNCTION_Power"),
 
-{.code=KEY_FUNCTION_Wakeup, .name="FUNCTION_Wakeup"},
+KEY_NAME_ENTRY(KEY_FUNCTION_Sleep, "FUNCTION_Sleep"),
 
-{.code=KEY_FUNCTION_Stop, .name="FUNCTION_Stop"},
+KEY_NAME_ENTRY(KEY_FUNCTION_Wakeup, "FUNCTION_Wakeup"),
 
-{.code=KEY_FUNCTION_Help, .name="FUNCTION_Help"},
+KEY_NAME_ENTRY(KEY_FUNCTION_Stop, "FUNCTION_Stop"),
 
-{.code=KEY_FUNCTION_Find, .name="FUNCTION_Find"},
+KEY_NAME_ENTRY(KEY_FUNCTION_Help, "FUNCTION_Help"),
 
-{.code=KEY_FUNCTION_Menu, .name="FUNCTION_Menu"},
+KEY_NAME_ENTRY(KEY_FUNCTION_Find, "FUNCTION_Find"),
 
-{.code=KEY_FUNCTION_Select, .name="FUNCTION_Select"},
+KEY_NAME_ENTRY(KEY_FUNCTION_Menu, "FUNCTION_Menu"),
 
-{.code=KEY_FUNCTION_Again, .name="FUNCTION_Again"},
+KEY_NAME_ENTRY(KEY_FUNCTION_Select, "FUNCTION_Select"),
 
-{.code=KEY_FUNCTION_Execute, .name="FUNCTION_Execute"},
+KEY_NAME_ENTRY(KEY_FUNCTION_Again, "FUNCTION_Again"),
 
-{.code=KEY_FUNCTION_Copy, .name="FUNCTION_Copy"},
+KEY_NAME_ENTRY(KEY_FUNCTION_Execute, "FUNCTION_Execute"),
 
-{.code=KEY_FUNCTION_Cut, .name="FUNCTION_Cut"},
+KEY_NAME_ENTRY(KEY_FUNCTION_Copy, "FUNCTION_Copy"),
 
-{.code=KEY_FUNCTION_Paste, .name="FUNCTION_Paste"},
+KEY_NAME_ENTRY(KEY_FUNCTION_Cut, "FUNCTION_Cut"),
 
-{.code=KEY_FUNCTION_Undo, .name="FUNCTION_Undo"},
+KEY_NAME_ENTRY(KEY_FUNCTION_Paste, "FUNCTION_Paste"),
 
-{.code=KEY_FUNCTION_Mute, .name="FUNCTION_Mute"},
+KEY_NAME_ENTRY(KEY_FUNCTION_Undo, "FUNCTION_Undo"),
 
-{.code=KEY_FUNCTION_VolumeUp, .name="FUNCTION_VolumeUp"},
+KEY_NAME_ENTRY(KEY_FUNCTION_Mute, "FUNCTION_Mute"),
 
-{.code=KEY_FUNCTION_VolumeDown, .name="FUNCTION_VolumeDown"},
+KEY_NAME_ENTRY(KEY_FUNCTION_VolumeUp, "FUNCTION_VolumeUp"),
 
-{.code=KEY_KEYPAD_Clear, .name="KEYPAD_Clear"},
+KEY_NAME_ENTRY(KEY_FUNCTION_VolumeDown, "FUNCTION_VolumeDown"),
 
-{.code=KEY_KEYPAD_ClearEntry, .name="KEYPAD_ClearEntry"},
+KEY_NAME_ENTRY(KEY_KEYPAD_Clear, "KEYPAD_Clear"),
 
-{.code=KEY_KEYPAD_PlusMinus, .name="KEYPAD_PlusMinus"},
+KEY_NAME_ENTRY(KEY_KEYPAD_ClearEntry, "KEYPAD_ClearEntry"),
 
-{.code=KEY_KEYPAD_MemoryClear, .name="KEYPAD_MemoryClear"},
+KEY_NAME_ENTRY(KEY_KEYPAD_PlusMinus, "KEYPAD_PlusMinus"),
 
-{.code=KEY_KEYPAD_MemoryStore, .name="KEYPAD_MemoryStore"},
+KEY_NAME_ENTRY(KEY_KEYPAD_MemoryClear, "KEYPAD_MemoryClear"),
 
-{.code=KEY_KEYPAD_MemoryRecall, .name="KEYPAD_MemoryRecall"},
+KEY_NAME_ENTRY(KEY_KEYPAD_MemoryStore, "KEYPAD_MemoryStore"),
 
-{.code=KEY_KEYPAD_MemoryAdd, .name="KEYPAD_MemoryAdd"},
+KEY_NAME_ENTRY(KEY_KEYPAD_MemoryRecall, "KEYPAD_MemoryRecall"),
 
-{.code=KEY_KEYPAD_MemorySubtract, .name="KEYPAD_MemorySubtract"},
+KEY_NAME_ENTRY(KEY_KEYPAD_MemoryAdd, "KEYPAD_MemoryAdd"),
 
-{.code=KEY_KEYPAD_MemoryMultiply, .name="KEYPAD_MemoryMultiply"},
+KEY_NAME_ENTRY(KEY_KEYPAD_MemorySubtract, "KEYPAD_MemorySubtract"),
 
-{.code=KEY_KEYPAD_MemoryDivide, .name="KEYPAD_MemoryDivide"},
+KEY_NAME_ENTRY(KEY_KEYPAD_MemoryMultiply, "KEYPAD_MemoryMultiply"),
 
-{.code=KEY_KEYPAD_Binary, .name="KEYPAD_Binary"},
+KEY_NAME_ENTRY(KEY_KEYPAD_MemoryDivide, "KEYPAD_MemoryDivide"),
 
-{.code=KEY_KEYPAD_Octal, .name="KEYPAD_Octal"},
+KEY_NAME_ENTRY(KEY_KEYPAD_Binary, "KEYPAD_Binary"),
 
-{.code=KEY_KEYPAD_Decimal, .name="KEYPAD_Decimal"},
+KEY_NAME_ENTRY(KEY_KEYPAD_Octal, "KEYPAD_Octal"),
 
-{.code=KEY_KEYPAD_Hexadecimal, .name="KEYPAD_Hexadecimal"},
+KEY_NAME_ENTRY(KEY_KEYPAD_Decimal, "KEYPAD_Decimal"),
 
-{.code=KEY_FUNCTION_Cancel, .name="FUNCTION_Cancel"},
+KEY_NAME_ENTRY(KEY_KEYPAD_Hexadecimal, "KEYPAD_Hexadecimal"),
 
-{.code=KEY_FUNCTION_Clear, .name="FUNCTION_Clear"},
+KEY_NAME_ENTRY(KEY_FUNCTION_Cancel, "FUNCTION_Cancel"),
 
-{.code=KEY_FUNCTION_Prior, .name="FUNCTION_Prior"},
+KEY_NAME_ENTRY(KEY_FUNCTION_Clear, "FUNCTION_Clear"),
 
-{.code=KEY_FUNCTION_Return, .name="FUNCTION_Return"},
+KEY_NAME_ENTRY(KEY_FUNCTION_Prior, "FUNCTION_Prior"),
 
-{.code=KEY_FUNCTION_Separator, .name="FUNCTION_Separator"},
+KEY_NAME_ENTRY(KEY_FUNCTION_Return, "FUNCTION_Return"),
 
-{.code=KEY_FUNCTION_Out, .name="FUNCTION_Out"},
+KEY_NAME_ENTRY(KEY_FUNCTION_Separator, "FUNCTION_Separator"),
 
-{.code=KEY_FUNCTION_Oper, .name="FUNCTION_Oper"},
+KEY_NAME_ENTRY(KEY_FUNCTION_Out, "FUNCTION_Out"),
 
-{.code=KEY_FUNCTION_Clear_Again, .name="FUNCTION_Clear_Again"},
+KEY_NAME_ENTRY(KEY_FUNCTION_Oper, "FUNCTION_Oper"),
 
-{.code=KEY_FUNCTION_CrSel_Props, .name="FUNCTION_CrSel_Props"},
+KEY_NAME_ENTRY(KEY_FUNCTION_Clear_Again, "FUNCTION_Clear_Again"),
 
-{.code=KEY_FUNCTION_ExSel, .name="FUNCTION_ExSel"},
+KEY_NAME_ENTRY(KEY_FUNCTION_CrSel_Props, "FUNCTION_CrSel_Props"),
 
+KEY_NAME_ENTRY(KEY_FUNCTION_ExSel, "FUNCTION_ExSel"),

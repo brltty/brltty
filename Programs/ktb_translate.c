@@ -26,6 +26,11 @@
 #include "cmd.h"
 #include "brldefs.h"
 
+static inline int
+sameKeyCodes (KeyCode code1, KeyCode code2) {
+  return (code1.set == code2.set) && (code1.key == code2.key);
+}
+
 static inline const void *
 getKeyTableItem (KeyTable *table, KeyTableOffset offset) {
   return &table->header.bytes[offset];
@@ -38,8 +43,8 @@ getCommand (KeyTable *table, KeyCode code) {
   unsigned int count = header->bindingsCount;
 
   while (count) {
-    if ((code == binding->key.code) &&
-        sameKeyCodeMasks(table->modifiers.mask, binding->key.modifiers))
+    if (sameKeyCodes(code, binding->key.code) &&
+        sameKeys(table->keys.mask, binding->key.modifiers))
       return binding->command;
 
     binding += 1, count -= 1;
@@ -55,7 +60,7 @@ isModifiers (KeyTable *table) {
   unsigned int count = header->bindingsCount;
 
   while (count) {
-    if (isKeySubset(binding->key.modifiers, table->modifiers.mask)) return 1;
+    if (isKeySubset(binding->key.modifiers, table->keys.mask)) return 1;
     binding += 1, count -= 1;
   }
 
@@ -64,36 +69,36 @@ isModifiers (KeyTable *table) {
 
 void
 resetKeyTable (KeyTable *table) {
-  removeAllKeyCodes(&table->modifiers);
-  table->lastCommand = EOF;
+  removeAllKeys(&table->keys);
+  table->command = EOF;
 }
 
 KeyCodesState
 processKeyEvent (KeyTable *table, KeyCode code, int press) {
   KeyCodesState state = KCS_UNBOUND;
 
-  removeKeyCode(&table->modifiers, code);
+  removeKey(&table->keys, code.key);
 
   if (press) {
     int command = getCommand(table, code);
 
-    addKeyCode(&table->modifiers, code);
+    addKey(&table->keys, code.key);
 
     if (command == EOF) {
       if (isModifiers(table)) state = KCS_MODIFIERS;
       goto release;
     }
 
-    if (command != table->lastCommand) {
-      table->lastCommand = command;
+    if (command != table->command) {
+      table->command = command;
       enqueueCommand(command | BRL_FLG_REPEAT_INITIAL | BRL_FLG_REPEAT_DELAY);
     }
 
     state = KCS_COMMAND;
   } else {
   release:
-    if (table->lastCommand != EOF) {
-      table->lastCommand = EOF;
+    if (table->command != EOF) {
+      table->command = EOF;
       enqueueCommand(BRL_CMD_NOOP);
     }
   }

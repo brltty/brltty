@@ -20,49 +20,49 @@
 
 #include <string.h>
 
-#include "keycodes.h"
+#include "keysets.h"
 
 void
-copyKeyCodeMask (KeyCodeMask to, const KeyCodeMask from) {
-  memcpy(to, from, KEY_CODE_MASK_SIZE);
+copyKeySetMask (KeySetMask to, const KeySetMask from) {
+  memcpy(to, from, KEY_SET_MASK_SIZE);
 }
 
 int
-sameKeyCodeMasks (const KeyCodeMask mask1, const KeyCodeMask mask2) {
-  return memcmp(mask1, mask2, KEY_CODE_MASK_SIZE) == 0;
+sameKeys (const KeySetMask mask1, const KeySetMask mask2) {
+  return memcmp(mask1, mask2, KEY_SET_MASK_SIZE) == 0;
 }
 
 int
-isKeySubset (const KeyCodeMask set, const KeyCodeMask subset) {
-  unsigned int count = KEY_CODE_MASK_ELEMENT_COUNT;
+isKeySubset (const KeySetMask set, const KeySetMask subset) {
+  unsigned int count = KEY_SET_MASK_ELEMENT_COUNT;
 
   while (count) {
-    if (~*set & *subset) return 0;
-    set += 1, subset += 1, count -= 1;
+    if (~*set++ & *subset++) return 0;
+    count -= 1;
   }
 
   return 1;
 }
 
 int
-addKeyCode (KeyCodeSet *set, KeyCode code) {
-  if (BITMASK_TEST(set->mask, code)) return 0;
-  BITMASK_SET(set->mask, code);
-  set->codes[set->count++] = code;
+addKey (KeySet *set, unsigned char key) {
+  if (BITMASK_TEST(set->mask, key)) return 0;
+  BITMASK_SET(set->mask, key);
+  set->keys[set->count++] = key;
   return 1;
 }
 
 int
-removeKeyCode (KeyCodeSet *set, KeyCode code) {
-  if (!BITMASK_TEST(set->mask, code)) return 0;
-  BITMASK_CLEAR(set->mask, code);
+removeKey (KeySet *set, unsigned char key) {
+  if (!BITMASK_TEST(set->mask, key)) return 0;
+  BITMASK_CLEAR(set->mask, key);
 
   {
     int index;
     for (index=0; index<set->count; index+=1) {
-      if (set->codes[index] == code) {
-        memmove(&set->codes[index], &set->codes[index+1],
-                ((--set->count - index) * sizeof(set->codes[0])));
+      if (set->keys[index] == key) {
+        memmove(&set->keys[index], &set->keys[index+1],
+                ((--set->count - index) * sizeof(set->keys[0])));
         break;
       }
     }
@@ -72,7 +72,7 @@ removeKeyCode (KeyCodeSet *set, KeyCode code) {
 }
 
 void
-removeAllKeyCodes (KeyCodeSet *set) {
+removeAllKeys (KeySet *set) {
   set->count = 0;
   memset(set->mask, 0, sizeof(set->mask));
 }

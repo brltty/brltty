@@ -23,8 +23,12 @@
 extern "C" {
 #endif /* __cplusplus */
 
-typedef unsigned char KeyCode;
-#define KEY_CODE_COUNT 0X100
+typedef struct {
+  unsigned char key;
+  unsigned char set;
+} KeyCode;
+
+#define KEYS_PER_SET 0X100
 
 typedef enum {
   KCS_UNBOUND,
@@ -37,9 +41,9 @@ typedef struct {
   KeyCode code;
 } KeyNameEntry;
 
-#define NO_KEY 0
-#define LAST_KEY_NAME_ENTRY {.name=NULL, .code=NO_KEY}
 #define KEY_NAME_TABLE(name) const KeyNameEntry name[]
+#define KEY_NAME_ENTRY(keyValue,keyName)  {.code={.key=keyValue}, .name=keyName}
+#define LAST_KEY_NAME_ENTRY {.name=NULL}
 
 #ifdef __cplusplus
 }

@@ -24,7 +24,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 #include "keydefs.h"
-#include "keycodes.h"
+#include "keysets.h"
 
 typedef struct KeyTableStruct KeyTable;
 

@@ -57,8 +57,8 @@ queue.$O:
 async.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/async.c
 
-keycodes.$O:
-	$(CC) $(CFLAGS) -c $(SRC_DIR)/keycodes.c
+keysets.$O:
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/keysets.c
 
 keyboard.$O:
 	$(CC) $(CFLAGS) -c $(SRC_DIR)/keyboard.c
@@ -115,7 +115,7 @@ sys_msdos.$O:
 
 ###############################################################################
 
-HOST_OBJECTS = host_program.$O host_options.$O host_misc.$O host_io_misc.$O host_queue.$O host_async.$O host_keycodes.$O host_keyboard.$O host_$(SYSTEM_OBJECT)
+HOST_OBJECTS = host_program.$O host_options.$O host_misc.$O host_io_misc.$O host_queue.$O host_async.$O host_keyboard.$O host_$(SYSTEM_OBJECT)
 
 host_%.$O: %.$O
 	$(HOSTCC) $(HOSTCFLAGS) -o $@ -c $(SRC_DIR)/$*.c
@@ -272,7 +272,7 @@ uninstall-api-bindings:
 
 ###############################################################################
 
-BRLTTY_OBJECTS = brltty.$O $(PROGRAM_OBJECTS) config.$O $(BASE_OBJECTS) datafile.$O dataarea.$O mount.$O cut.$O cmd.$O scancodes.$O lock.$O charset.$O ttb_compile.$O ttb_native.$O ttb_translate.$O atb_compile.$O atb_translate.$O $(CTB_OBJECTS) ktb_compile.$O ktb_translate.$O keycodes.$O touch.$O serial.$O $(USB_OBJECTS) $(BLUETOOTH_OBJECTS) drivers.$O driver.$O $(SCREEN_OBJECTS) $(SCREEN_DRIVER_OBJECTS) routing.$O brl.$O $(BRAILLE_DRIVER_OBJECTS) $(SPEECH_OBJECT) $(SPEECH_DRIVER_OBJECTS) $(TUNE_OBJECTS) $(API_OBJECTS)
+BRLTTY_OBJECTS = brltty.$O $(PROGRAM_OBJECTS) config.$O $(BASE_OBJECTS) datafile.$O dataarea.$O mount.$O cut.$O cmd.$O scancodes.$O lock.$O charset.$O ttb_compile.$O ttb_native.$O ttb_translate.$O atb_compile.$O atb_translate.$O $(CTB_OBJECTS) ktb_compile.$O ktb_translate.$O keysets.$O touch.$O serial.$O $(USB_OBJECTS) $(BLUETOOTH_OBJECTS) drivers.$O driver.$O $(SCREEN_OBJECTS) $(SCREEN_DRIVER_OBJECTS) routing.$O brl.$O $(BRAILLE_DRIVER_OBJECTS) $(SPEECH_OBJECT) $(SPEECH_DRIVER_OBJECTS) $(TUNE_OBJECTS) $(API_OBJECTS)
 
 brltty$X: $(BRLTTY_OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(BRLTTY_OBJECTS) $(BRAILLE_DRIVER_LIBRARIES) $(SPEECH_DRIVER_LIBRARIES) $(SCREEN_DRIVER_LIBRARIES) $(ICU_LIBRARIES) $(LDLIBS)

@@ -71,7 +71,7 @@ handleKeyboardEvent (const AsyncInputResult *result) {
         KeyCodesState state;
 
         {
-          static const KeyCode map[KEY_MAX] = {
+          static const unsigned char map[KEY_MAX] = {
             [KEY_ESC] = KEY_FUNCTION_Escape,
             [KEY_1] = KEY_SYMBOL_One_Exclamation,
             [KEY_2] = KEY_SYMBOL_Two_At,
@@ -504,13 +504,17 @@ handleKeyboardEvent (const AsyncInputResult *result) {
                [KEY_BRL_DOT10] = KEY_...,
                [KEY_MIN_INTERESTING] = KEY_... */
           };
-          KeyCode code = map[event->code];
+          unsigned char key = map[event->code];
 
-          if (code) {
+          if (key) {
+            KeyCode code = {
+              .key = key
+            };
+
             state = kpd->kcd->handleKeyEvent(code, press);
           } else {
-            state = KCS_UNBOUND;
             LogPrint(LOG_INFO, "unmapped Linux keycode: %d", event->code);
+            state = KCS_UNBOUND;
           }
         }
 
