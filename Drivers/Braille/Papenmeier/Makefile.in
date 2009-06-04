@@ -28,7 +28,7 @@ PM_CMD_SOURCES = $(SRC_TOP)$(PGM_DIR)/brldefs.h $(SRC_DIR)/brl-cfg.h
 braille.$O:
 	$(CC) $(BRL_CFLAGS) $(YACC_CFLAGS) -c $(SRC_DIR)/braille.c
 
-READ_CONFIG_OBJECTS = read_config.$O $(BLD_TOP)$(PGM_DIR)/host_cmd.$O $(BLD_TOP)$(PGM_DIR)/host_ttb_translate.$O $(BLD_TOP)$(PGM_DIR)/host_charset.$O $(BLD_TOP)$(PGM_DIR)/host_lock.$O $(BLD_TOP)$(PGM_DIR)/host_misc.$O $(BLD_TOP)$(PGM_DIR)/host_io_misc.$O $(BLD_TOP)$(PGM_DIR)/host_queue.$O $(BLD_TOP)$(PGM_DIR)/host_async.$O $(BLD_TOP)$(PGM_DIR)/host_keycodes.$O $(BLD_TOP)$(PGM_DIR)/host_keyboard.$O $(BLD_TOP)$(PGM_DIR)/host_$(SYSTEM_OBJECT)
+READ_CONFIG_OBJECTS = read_config.$O $(BLD_TOP)$(PGM_DIR)/host_cmd.$O $(BLD_TOP)$(PGM_DIR)/host_ttb_translate.$O $(BLD_TOP)$(PGM_DIR)/host_charset.$O $(BLD_TOP)$(PGM_DIR)/host_lock.$O $(BLD_TOP)$(PGM_DIR)/host_misc.$O $(BLD_TOP)$(PGM_DIR)/host_io_misc.$O $(BLD_TOP)$(PGM_DIR)/host_queue.$O $(BLD_TOP)$(PGM_DIR)/host_async.$O $(BLD_TOP)$(PGM_DIR)/host_keyboard.$O $(BLD_TOP)$(PGM_DIR)/host_$(SYSTEM_OBJECT)
 read_config$X: $(READ_CONFIG_OBJECTS)
 	$(HOSTCC) $(HOSTLDFLAGS) -o $@ $(READ_CONFIG_OBJECTS) $(LDLIBS)
 
