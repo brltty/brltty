@@ -77,6 +77,26 @@ KeyCodesState
 processKeyEvent (KeyTable *table, KeyCode code, int press) {
   KeyCodesState state = KCS_UNBOUND;
 
+  if (code.set) {
+    if (press) {
+      unsigned char key = code.key;
+      int command;
+
+      code.key = 0;
+      if ((command = getCommand(table, code)) != EOF) {
+        command += key;
+      } else {
+        command = BRL_CMD_NOOP;
+      }
+
+      enqueueCommand(command);
+      table->command = EOF;
+      state = KCS_COMMAND;
+    }
+
+    return state;
+  }
+
   removeKey(&table->keys, code.key);
 
   if (press) {
