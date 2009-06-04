@@ -33,6 +33,7 @@
 #include "ttb.h"
 #include "brl.auto.h"
 #include "cmd.h"
+#include "queue.h"
 
 #define BRLSYMBOL noBraille
 #define DRIVER_NAME NoBraille
@@ -276,8 +277,22 @@ ensureBrailleBuffer (BrailleDisplay *brl, int infoLevel) {
 int
 readBrailleCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   int command = dequeueCommand();
-  if (command == EOF) command = braille->readCommand(brl, context);
-  resizeBrailleBuffer(brl, LOG_INFO);
+
+  if (command == EOF) {
+    command = braille->readCommand(brl, context);
+    resizeBrailleBuffer(brl, LOG_INFO);
+
+    {
+      KeyCode code;
+      int press;
+
+      while (dequeueKeyEvent(&code, &press)) {
+      }
+    }
+
+    if (command == EOF) command = dequeueCommand();
+  }
+
   return command;
 }
 
@@ -431,4 +446,57 @@ void
 setBrailleSensitivity (BrailleDisplay *brl, BrailleSensitivity setting) {
   LogPrint(LOG_DEBUG, "setting braille sensitivity: %d", setting);
   braille->sensitivity(brl, setting);
+}
+
+typedef struct {
+  KeyCode code;
+  unsigned press:1;
+} KeyEventQueueItem;
+
+static Queue *
+getKeyEventQueue (int create) {
+  static Queue *keyEventQueue = NULL;
+
+  if (create && !keyEventQueue) {
+    keyEventQueue = newQueue(NULL, NULL);
+  }
+
+  return keyEventQueue;
+}
+
+int
+enqueueKeyEvent (KeyCode code, int press) {
+  Queue *queue = getKeyEventQueue(1);
+
+  if (queue) {
+    KeyEventQueueItem *item = malloc(sizeof(KeyEventQueueItem));
+
+    if (item) {
+      item->code = code;
+      item->press = press;
+      if (enqueueItem(queue, item)) return 1;
+
+      free(item);
+    }
+  }
+
+  return 0;
+}
+
+int
+dequeueKeyEvent (KeyCode *code, int *press) {
+  Queue *queue = getKeyEventQueue(0);
+
+  if (queue) {
+    KeyEventQueueItem *item = dequeueItem(queue);
+
+    if (item) {
+      *code = item->code;
+      *press = item->press;
+      free(item);
+      return 1;
+    }
+  }
+
+  return 0;
 }

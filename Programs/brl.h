@@ -27,6 +27,7 @@ extern "C" {
 
 #include "driver.h"
 #include "brldefs.h"
+#include "keydefs.h"
 
 typedef enum {
   sfEnd,
@@ -169,6 +170,9 @@ extern int portraitNumber (int x);
 extern int portraitFlag (int number, int on);
 
 extern int learnMode (BrailleDisplay *brl, int poll, int timeout);
+
+extern int enqueueKeyEvent (KeyCode code, int press);
+extern int dequeueKeyEvent (KeyCode *code, int *press);
 
 #ifdef __cplusplus
 }
