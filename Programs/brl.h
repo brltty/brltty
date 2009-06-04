@@ -53,7 +53,7 @@ typedef struct BrailleDataStruct BrailleData;
 typedef struct {
   unsigned int textColumns, textRows;
   unsigned int statusColumns, statusRows;
-  const char *helpFile;
+  const char *keyBindings;
   unsigned char *buffer;
   int cursor;
   unsigned isCoreBuffer:1;

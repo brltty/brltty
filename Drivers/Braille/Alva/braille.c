@@ -119,7 +119,7 @@
 #include "braille.h"
 
 typedef struct {
-  const char *helpFile;
+  const char *keyBindings;
 } ModuleTypeEntry;
 
 typedef enum {
@@ -131,19 +131,19 @@ typedef enum {
 
 static const ModuleTypeEntry moduleTypeTable[] = {
   [MOD_TYPE_ABT] = {
-    .helpFile = "abt+delphi"
+    .keyBindings = "abt+delphi"
   }
   ,
   [MOD_TYPE_Delphi] = {
-    .helpFile = "abt+delphi"
+    .keyBindings = "abt+delphi"
   }
   ,
   [MOD_TYPE_Satellite] = {
-    .helpFile = "satellite"
+    .keyBindings = "satellite"
   }
   ,
   [MOD_TYPE_BrailleController] = {
-    .helpFile = "bc"
+    .keyBindings = "bc"
   }
 };
 
@@ -158,10 +158,6 @@ typedef struct {
 static const ModelEntry *model;		/* points to terminal model config struct */
 
 #define MOD_FLAG_CONFIGURABLE 0X01
-
-static const char helpFile_ABT_Delphi[] = "abt+delphi";
-static const char helpFile_Satellite[] = "satellite";
-static const char helpFile_BrailleController[] = "bc";
 
 static const ModelEntry modelTable[] = {
   { .identifier = 0X00,
@@ -380,7 +376,7 @@ setDefaultConfiguration (BrailleDisplay *brl) {
   brl->textRows = 1;
   brl->statusColumns = model->statusCells;
   brl->statusRows = 1;
-  brl->helpFile = moduleTypeTable[model->type].helpFile;
+  brl->keyBindings = moduleTypeTable[model->type].keyBindings;
 
   actualColumns = model->columns;
   statusOffset = 0;

@@ -300,7 +300,7 @@ static char disp_ver[Q_VER_LENGTH]; /* version of the hardware */
 
 typedef enum {NAV20_40, NAV80, PB40, PB65_81} DisplayType;
 static DisplayType displayType;
-static const char *helpFiles[] = {"nav20+nav40", "nav80", "pb40", "pb65+pb81"};
+static const char *keyBindings[] = {"nav20+nav40", "nav80", "pb40", "pb65+pb81"};
 
 static int
 myread(void *buf, unsigned len)
@@ -448,7 +448,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
     LogPrint(LOG_ERR,"Unrecognized braille display");
     goto failure;
   };
-  brl->helpFile = helpFiles[displayType];
+  brl->keyBindings = keyBindings[displayType];
 
   no_multiple_updates = 0;
 #ifdef FORCE_DRAIN_AFTER_SEND

@@ -535,15 +535,14 @@ interpretIdentity (BrailleDisplay *brl, unsigned char id, int major, int minor) 
   for (tn=0; tn<pmTerminalCount; tn++) {
     if (pmTerminals[tn].modelIdentifier == id) {
       terminal = &pmTerminals[tn];
-      LogPrint(LOG_INFO, "%s  Size: %dx%d  HelpFile: %s", 
+      LogPrint(LOG_INFO, "%s  Size: %dx%d", 
                terminal->modelName,
-               terminal->textColumns, terminal->textRows,
-               terminal->helpFile);
+               terminal->textColumns, terminal->textRows);
       brl->textColumns = terminal->textColumns;
       brl->textRows = terminal->textRows;
       brl->statusColumns = terminal->statusCount;
       brl->statusRows = 1;
-      brl->helpFile = terminal->helpFile;
+      brl->keyBindings = terminal->keyBindings;
 
       sortCommands();
       return 1;

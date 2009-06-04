@@ -186,7 +186,7 @@ static void terminals(int help, int verbose)
         fh = NULL;
 
         {
-          const char *components[] = {terminal->helpFile, ".hlp"};
+          const char *components[] = {terminal->keyBindings, ".hlp"};
           path = joinStrings(components, ARRAY_COUNT(components));
         }
 
@@ -225,7 +225,7 @@ static void terminals(int help, int verbose)
       fprintf(fh, "%s = %d\n", 
 	      search_symbol(PROTOCOLREVISION), terminal->protocolRevision);
       fprintf(fh, "%s = \"%s\"\n", 
-	      search_symbol(HELPFILE), terminal->helpFile);
+	      search_symbol(HELPFILE), terminal->keyBindings);
 
       fprintf(fh, "%s = %d\n", 
 	      search_symbol(DISPLAYSIZE),      terminal->textColumns);

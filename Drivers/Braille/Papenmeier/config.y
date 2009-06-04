@@ -122,7 +122,7 @@ addTerminal (int identifier) {
       terminal->modelIdentifier = identifier;
       terminal->modelName = NULL;
       terminal->protocolRevision = 0;
-      terminal->helpFile = NULL;
+      terminal->keyBindings = NULL;
 
       terminal->textColumns = 0;
       terminal->textRows = 1;
@@ -187,8 +187,8 @@ static int
 setHelp (char *file) {
   TerminalDefinition *terminal = getCurrentTerminal();
   if (terminal) {
-    if (!terminal->helpFile) {
-      if (duplicateString(&terminal->helpFile, file)) {
+    if (!terminal->keyBindings) {
+      if (duplicateString(&terminal->keyBindings, file)) {
         return 1;
       }
     } else {
@@ -637,7 +637,7 @@ deallocateTerminalTable (void) {
   while (pmTerminalCount) {
     TerminalDefinition *terminal = &pmTerminals[--pmTerminalCount];
     if (terminal->modelName) free(terminal->modelName);
-    if (terminal->helpFile) free(terminal->helpFile);
+    if (terminal->keyBindings) free(terminal->keyBindings);
     if (terminal->statusCells) free(terminal->statusCells);
     if (terminal->modifierKeys) free(terminal->modifierKeys);
     if (terminal->commandDefinitions) free(terminal->commandDefinitions);

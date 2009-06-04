@@ -106,7 +106,7 @@ initializeBrailleDisplay (BrailleDisplay *brl) {
   brl->textRows = 1;
   brl->statusColumns = 0;
   brl->statusRows = 0;
-  brl->helpFile = "default";
+  brl->keyBindings = "default";
   brl->buffer = NULL;
   brl->writeDelay = 0;
   brl->bufferResized = NULL;

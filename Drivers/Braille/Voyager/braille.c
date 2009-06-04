@@ -544,12 +544,12 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
         switch (count) {
           case 48:
             cellCount = 44;
-            brl->helpFile = "44";
+            brl->keyBindings = "44";
             break;
 
           case 72:
             cellCount = 70;
-            brl->helpFile = "70";
+            brl->keyBindings = "70";
             break;
 
           default:

@@ -2154,14 +2154,14 @@ initializeBrailleDriver (const char *code, int verify) {
         LogPrint(LOG_INFO, "%s: %s", gettext("Braille Device"), brailleDevice);
 
         /* Initialize the braille driver's help screen. */
-        LogPrint(LOG_INFO, "%s: %s", gettext("Help File"),
-                 brl.helpFile? brl.helpFile: gettext("none"));
+        LogPrint(LOG_INFO, "%s: %s", gettext("Key Bindings"),
+                 brl.keyBindings? brl.keyBindings: gettext("none"));
         {
           char *file;
 
           {
             const char *components[] = {
-              PACKAGE_NAME, "-", braille->definition.code, "-", brl.helpFile, ".hlp"
+              PACKAGE_NAME, "-", braille->definition.code, "-", brl.keyBindings, ".hlp"
             };
             file = joinStrings(components, ARRAY_COUNT(components));
           }

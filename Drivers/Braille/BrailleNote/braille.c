@@ -396,7 +396,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
               statusCells = response.data.values.description.statusCells;
               brl->textColumns = response.data.values.description.textCells;
               brl->textRows = 1;
-              brl->helpFile = "keys";
+              brl->keyBindings = "keys";
 
               if ((statusCells == 5) && (brl->textColumns == 30)) {
                 statusCells -= 2;

@@ -225,7 +225,7 @@ writePacket (
 
 typedef struct {
   const char *modelName;
-  const char *helpFile;
+  const char *keyBindings;
   int (*getCellCount) (BrailleDisplay *brl, unsigned int *count);
   int (*interpretKeys) (BrailleKeys keys, BRL_DriverCommandContext context);
 } ProtocolOperations;
@@ -679,7 +679,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       if (protocol->getCellCount(brl, &brl->textColumns) ||
           protocol->getCellCount(brl, &brl->textColumns)) {
         brl->textRows = 1;
-        brl->helpFile = protocol->helpFile;
+        brl->keyBindings = protocol->keyBindings;
 
         routingCommand = BRL_BLK_ROUTE;
 

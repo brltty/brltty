@@ -93,7 +93,7 @@ typedef struct {
   unsigned char modelIdentifier;
   unsigned char protocolRevision;
   char *modelName;
-  char *helpFile;
+  char *keyBindings;
 
   uint8_t textColumns;
   uint8_t textRows;
@@ -116,7 +116,7 @@ typedef struct {
   .modelIdentifier = identifier, \
   .modelName = name, \
   .protocolRevision = 1, \
-  .helpFile = #model
+  .keyBindings = #model
 
 #define PM_TEXT_CELLS(columns, rows) \
   .textColumns = columns, \
