@@ -1,0 +1,47 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2009 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+# This key subtable is for Papenmeier displays which have 13 status keys.
+
+parameters toggleOff toggleOn
+
+bind Status1 CMD_HELP
+bind Status2 CMD_LEARN
+bind Status3 CMD_CSRJMP_VERT
+bind Status4 CMD_BACK
+bind Status5 CMD_INFO
+bind @toggleOff@+Status5 CMD_INFO+off
+bind @toggleOn@+Status5 CMD_INFO+on
+bind Status6 CMD_CSRTRK
+bind @toggleOff@+Status6 CMD_CSRTRK+off
+bind @toggleOn@+Status6 CMD_CSRTRK+on
+bind Status7 CMD_DISPMD
+bind @toggleOff@+Status7 CMD_DISPMD+off
+bind @toggleOn@+Status7 CMD_DISPMD+on
+bind Status8 CMD_FREEZE
+bind @toggleOff@+Status8 CMD_FREEZE+off
+bind @toggleOn@+Status8 CMD_FREEZE+on
+bind Status9 CMD_PREFMENU
+bind Status10 CMD_PREFLOAD
+bind Status11 CMD_CSRVIS
+bind @toggleOff@+Status11 CMD_CSRVIS+off
+bind @toggleOn@+Status11 CMD_CSRVIS+on
+bind Status12 CMD_ATTRVIS
+bind @toggleOff@+Status12 CMD_ATTRVIS+off
+bind @toggleOn@+Status12 CMD_ATTRVIS+on
+bind Status13 CMD_PASTE

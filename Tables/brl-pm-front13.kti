@@ -1,0 +1,87 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2009 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+# This key subtable is for Papenmeier displays which have 13 front keys.
+
+parameters statusKeys
+
+bind Front7 CMD_HOME
+bind Front6 CMD_TOP
+bind Front8 CMD_BOT
+bind Front5 CMD_LNUP
+bind Front9 CMD_LNDN
+bind Front4+NoKey CMD_PRDIFLN
+bind Front10+NoKey CMD_NXDIFLN
+bind Front3+NoKey CMD_ATTRUP
+bind Front11+NoKey CMD_ATTRDN
+bind Front2+NoKey CMD_PRPGRPH
+bind Front12+NoKey CMD_NXPGRPH
+bind Front1+NoKey CMD_PRPROMPT
+bind Front13+NoKey CMD_NXPROMPT
+bind Front4+Front3+NoKey CMD_WINUP
+bind Front10+Front11+NoKey CMD_WINDN
+bind Front2+Front1+NoKey CMD_PRSEARCH
+bind Front12+Front13+NoKey CMD_NXSEARCH
+bind Front2+Front1+Routing1 BLK_PRINDENT
+bind Front12+Front13+Routing1 BLK_NXINDENT
+bind Front4+Front7 CMD_LNBEG
+bind Front4+Front6 CMD_TOP_LEFT
+bind Front4+Front8 CMD_BOT_LEFT
+bind Front4+Front5 CMD_FWINLT
+bind Front4+Front9 CMD_FWINRT
+bind Front4+Routing1 BLK_DESCCHAR
+bind Front10+Front7 CMD_LNEND
+bind Front10+Front6 CMD_CHRLT
+bind Front10+Front8 CMD_CHRRT
+bind Front10+Front5 CMD_HWINLT
+bind Front10+Front9 CMD_HWINRT
+bind Front10+Routing1 BLK_SETLEFT
+bind Front3+Front7 KEY_INSERT
+bind Front3+Front6 KEY_PAGE_UP
+bind Front3+Front8 KEY_PAGE_DOWN
+bind Front3+Front5 KEY_CURSOR_UP
+bind Front3+Front9 KEY_CURSOR_DOWN
+bind Front3+Routing1 BLK_SWITCHVT
+bind Front11+Front7 KEY_DELETE
+bind Front11+Front6 KEY_HOME
+bind Front11+Front8 KEY_END
+bind Front11+Front5 KEY_CURSOR_LEFT
+bind Front11+Front9 KEY_CURSOR_RIGHT
+bind Front11+Routing1 KEY_FUNCTION
+bind Front2+Front7 CMD_NODOTS
+bind Front2+Front6 KEY_ESCAPE
+bind Front2+Front8 KEY_TAB
+bind Front2+Front5 KEY_BACKSPACE
+bind Front2+Front9 KEY_ENTER
+bind Front1+Front7 CMD_SPKHOME
+bind Front1+Front6 CMD_SAY_ABOVE
+bind Front1+Front8 CMD_SAY_BELOW
+bind Front1+Front5 CMD_MUTE
+bind Front1+Front9 CMD_SAY_LINE
+bind Front13+Front7 CMD_RESTARTSPEECH
+bind Front13+Front6 CMD_SAY_SLOWER
+bind Front13+Front8 CMD_SAY_FASTER
+bind Front13+Front5 CMD_SAY_SOFTER
+bind Front13+Front9 CMD_SAY_LOUDER
+bind Front1+Routing1 BLK_CUTBEGIN
+bind Front2+Routing1 BLK_CUTAPPEND
+bind Front12+Routing1 BLK_CUTLINE
+bind Front13+Routing1 BLK_CUTRECT
+bind Routing1 BLK_ROUTE
+
+include brl-pm-status@statusKeys@.kti Front1 Front13
