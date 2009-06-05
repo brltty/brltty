@@ -2536,7 +2536,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
             clearCells(0, cellCount);
             if (!updateCells(brl)) goto failed;
 
-            brl->keyBindings = useVarioKeys? "vk": "default";
+            brl->keyBindings = useVarioKeys? "variokeys": "all";
 
             activeKeys = pressedKeys;
             pendingCommand = EOF;

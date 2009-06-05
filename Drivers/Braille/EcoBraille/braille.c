@@ -231,7 +231,6 @@ static int brl_construct(BrailleDisplay *brl, char **parameters, const char *dev
   model = &Models[ModelID];
   brl->textColumns = model->Cols;		/* initialise size of main display */
   brl->textRows = BRLROWS;		/* ever is 1 in this type of braille lines */
-  brl->keyBindings = "english";
   
   /* Need to calculate the size; Cols + Status + 1 (space between) */
   BrailleSize = brl->textColumns + model->NbStCells + 1;
