@@ -30,20 +30,23 @@ typedef struct {
 
 #define KEYS_PER_SET 0X100
 
-typedef enum {
-  KCS_UNBOUND,
-  KCS_MODIFIERS,
-  KCS_COMMAND
-} KeyCodesState;
-
 typedef struct {
   const char *name;
   KeyCode code;
 } KeyNameEntry;
 
 #define KEY_NAME_TABLE(name) const KeyNameEntry name[]
-#define KEY_NAME_ENTRY(keyValue,keyName)  {.code={.key=keyValue}, .name=keyName}
+#define KEY_NAME_ENTRY(keyNumber,keyName) {.code={.key=keyNumber}, .name=keyName}
+#define KEY_SET_ENTRY(setNumber,keyName) {.code={.set=setNumber}, .name=keyName}
 #define LAST_KEY_NAME_ENTRY {.name=NULL}
+
+typedef struct KeyTableStruct KeyTable;
+
+typedef enum {
+  KTS_UNBOUND,
+  KTS_MODIFIERS,
+  KTS_COMMAND
+} KeyTableState;
 
 #ifdef __cplusplus
 }

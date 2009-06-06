@@ -31,6 +31,7 @@
 #include "drivers.h"
 #include "brl.h"
 #include "ttb.h"
+#include "ktb.h"
 #include "brl.auto.h"
 #include "cmd.h"
 #include "queue.h"
@@ -106,7 +107,11 @@ initializeBrailleDisplay (BrailleDisplay *brl) {
   brl->textRows = 1;
   brl->statusColumns = 0;
   brl->statusRows = 0;
+
   brl->keyBindings = "all";
+  brl->keyNames = NULL;
+  brl->keyTable = NULL;
+
   brl->buffer = NULL;
   brl->writeDelay = 0;
   brl->bufferResized = NULL;
@@ -287,6 +292,9 @@ readBrailleCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
       int press;
 
       while (dequeueKeyEvent(&code, &press)) {
+        if (brl->keyTable) {
+          processKeyEvent(brl->keyTable, code, press);
+        }
       }
     }
 
@@ -465,14 +473,15 @@ getKeyEventQueue (int create) {
 }
 
 int
-enqueueKeyEvent (KeyCode code, int press) {
+enqueueKeyEvent (unsigned char set, unsigned char key, int press) {
   Queue *queue = getKeyEventQueue(1);
 
   if (queue) {
     KeyEventQueueItem *item = malloc(sizeof(KeyEventQueueItem));
 
     if (item) {
-      item->code = code;
+      item->code.set = set;
+      item->code.key = key;
       item->press = press;
       if (enqueueItem(queue, item)) return 1;
 

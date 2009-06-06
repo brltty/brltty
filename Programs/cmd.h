@@ -36,9 +36,9 @@ typedef struct {
 extern const CommandEntry commandTable[];
 
 extern void describeCommand (int command, char *buffer, int size);
-extern int isBaseCommand (const CommandEntry *command);
-extern int isCharacterCommand (const CommandEntry *command);
-extern int isToggleCommand (const CommandEntry *command);
+extern int isBaseCommand (int code);
+extern int isCharacterCommand (int code);
+extern int isToggleCommand (int code);
 
 extern int enqueueCommand (int command);
 extern int dequeueCommand (void);

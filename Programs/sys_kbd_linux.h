@@ -68,7 +68,7 @@ handleKeyboardEvent (const AsyncInputResult *result) {
     if (result->length >= sizeof(*event)) {
       if (event->type == EV_KEY) {
         int press = event->value != 0;
-        KeyCodesState state;
+        KeyTableState state;
 
         {
           static const unsigned char map[KEY_MAX] = {
@@ -514,7 +514,7 @@ handleKeyboardEvent (const AsyncInputResult *result) {
             state = kpd->kcd->handleKeyEvent(code, press);
           } else {
             LogPrint(LOG_INFO, "unmapped Linux keycode: %d", event->code);
-            state = KCS_UNBOUND;
+            state = KTS_UNBOUND;
           }
         }
 
@@ -527,9 +527,9 @@ handleKeyboardEvent (const AsyncInputResult *result) {
           WriteKeysAction action = WKA_NONE;
 
           if (press) {
-            kpd->justModifiers = state == KCS_MODIFIERS;
+            kpd->justModifiers = state == KTS_MODIFIERS;
 
-            if (state == KCS_UNBOUND) {
+            if (state == KTS_UNBOUND) {
               action = WKA_ALL;
             } else {
               if (kpd->keyEventCount == kpd->keyEventLimit) {

@@ -690,7 +690,7 @@ loadKeyTable (const char *name) {
   return 1;
 }
 
-static KeyCodesState
+static KeyTableState
 handleKeyboardKeyEvent (KeyCode code, int press) {
   return processKeyEvent(keyboardKeyTable, code, press);
 }
@@ -2156,7 +2156,34 @@ initializeBrailleDriver (const char *code, int verify) {
         /* Initialize the braille driver's help screen. */
         LogPrint(LOG_INFO, "%s: %s", gettext("Key Bindings"),
                  brl.keyBindings? brl.keyBindings: gettext("none"));
-        {
+        if (brl.keyNames) {
+          char *file;
+
+          {
+            const char *components[] = {
+              "brl-", braille->definition.code, "-", brl.keyBindings, KEY_TABLE_EXTENSION
+            };
+            file = joinStrings(components, ARRAY_COUNT(components));
+          }
+
+          if (file) {
+            char *path;
+
+            if ((path = makePath(opt_tablesDirectory, file))) {
+              if (verify || (brl.keyTable = compileKeyTable(path, brl.keyNames))) {
+                LogPrint(LOG_INFO, "%s: %s", gettext("Key Table"), path);
+              } else {
+                LogPrint(LOG_WARNING, "%s: %s", gettext("cannot open key table"), path);
+              }
+
+              free(path);
+            }
+
+            free(file);
+          }
+        }
+
+        if (!brl.keyTable) {
           char *file;
 
           {
@@ -2175,6 +2202,7 @@ initializeBrailleDriver (const char *code, int verify) {
               } else {
                 LogPrint(LOG_WARNING, "%s: %s", gettext("cannot open help file"), path);
               }
+
               free(path);
             }
 
@@ -2286,6 +2314,11 @@ activateBrailleDriver (int verify) {
 static void
 deactivateBrailleDriver (void) {
   destructHelpScreen();
+
+  if (brl.keyTable) {
+    destroyKeyTable(brl.keyTable);
+    brl.keyTable = NULL;
+  }
 
   if (brailleDriver) {
 #ifdef ENABLE_API

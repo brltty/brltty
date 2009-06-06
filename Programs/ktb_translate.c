@@ -73,9 +73,9 @@ resetKeyTable (KeyTable *table) {
   table->command = EOF;
 }
 
-KeyCodesState
+KeyTableState
 processKeyEvent (KeyTable *table, KeyCode code, int press) {
-  KeyCodesState state = KCS_UNBOUND;
+  KeyTableState state = KTS_UNBOUND;
 
   if (code.set) {
     if (press) {
@@ -91,7 +91,7 @@ processKeyEvent (KeyTable *table, KeyCode code, int press) {
 
       enqueueCommand(command);
       table->command = EOF;
-      state = KCS_COMMAND;
+      state = KTS_COMMAND;
     }
 
     return state;
@@ -105,7 +105,7 @@ processKeyEvent (KeyTable *table, KeyCode code, int press) {
     addKey(&table->keys, code.key);
 
     if (command == EOF) {
-      if (isModifiers(table)) state = KCS_MODIFIERS;
+      if (isModifiers(table)) state = KTS_MODIFIERS;
       goto release;
     }
 
@@ -114,7 +114,7 @@ processKeyEvent (KeyTable *table, KeyCode code, int press) {
       enqueueCommand(command | BRL_FLG_REPEAT_INITIAL | BRL_FLG_REPEAT_DELAY);
     }
 
-    state = KCS_COMMAND;
+    state = KTS_COMMAND;
   } else {
   release:
     if (table->command != EOF) {

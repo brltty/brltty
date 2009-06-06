@@ -45,7 +45,7 @@ isTypedCommand (int code, const int *codes) {
 }
 
 int
-isBaseCommand (const CommandEntry *command) {
+isBaseCommand (int code) {
   static const int codes[] = {
     BRL_BLK_SWITCHVT,
     BRL_BLK_SETMARK, BRL_BLK_GOTOMARK,
@@ -53,11 +53,11 @@ isBaseCommand (const CommandEntry *command) {
     BRL_BLK_PASSKEY + BRL_KEY_FUNCTION,
     EOF
   };
-  return isTypedCommand(command->code, codes);
+  return isTypedCommand(code, codes);
 }
 
 int
-isCharacterCommand (const CommandEntry *command) {
+isCharacterCommand (int code) {
   static const int codes[] = {
     BRL_BLK_ROUTE,
     BRL_BLK_CUTBEGIN, BRL_BLK_CUTAPPEND,
@@ -67,13 +67,20 @@ isCharacterCommand (const CommandEntry *command) {
     BRL_BLK_PRDIFCHAR, BRL_BLK_NXDIFCHAR,
     EOF
   };
-  return isTypedCommand(command->code, codes);
+  return isTypedCommand(code, codes);
 }
 
 int
-isToggleCommand (const CommandEntry *command) {
-  const char *prefix = "toggle ";
-  return strncasecmp(command->description, prefix, strlen(prefix)) == 0;
+isToggleCommand (int code) {
+  static const int codes[] = {
+    BRL_CMD_FREEZE, BRL_CMD_DISPMD, BRL_CMD_SIXDOTS,
+    BRL_CMD_SLIDEWIN, BRL_CMD_SKPIDLNS, BRL_CMD_SKPBLNKWINS,
+    BRL_CMD_CSRVIS, BRL_CMD_CSRHIDE, BRL_CMD_CSRTRK, BRL_CMD_CSRSIZE, BRL_CMD_CSRBLINK,
+    BRL_CMD_ATTRVIS, BRL_CMD_ATTRBLINK, BRL_CMD_CAPBLINK,
+    BRL_CMD_TUNES, BRL_CMD_AUTOREPEAT, BRL_CMD_AUTOSPEAK,
+    EOF
+  };
+  return isTypedCommand(code, codes);
 }
 
 void

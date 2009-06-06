@@ -53,7 +53,11 @@ typedef struct BrailleDataStruct BrailleData;
 typedef struct {
   unsigned int textColumns, textRows;
   unsigned int statusColumns, statusRows;
+
   const char *keyBindings;
+  const KeyNameEntry *keyNames;
+  KeyTable *keyTable;
+
   unsigned char *buffer;
   int cursor;
   unsigned isCoreBuffer:1;
@@ -171,7 +175,7 @@ extern int portraitFlag (int number, int on);
 
 extern int learnMode (BrailleDisplay *brl, int poll, int timeout);
 
-extern int enqueueKeyEvent (KeyCode code, int press);
+extern int enqueueKeyEvent (unsigned char set, unsigned char key, int press);
 extern int dequeueKeyEvent (KeyCode *code, int *press);
 
 #ifdef __cplusplus

@@ -26,15 +26,13 @@ extern "C" {
 #include "keydefs.h"
 #include "keysets.h"
 
-typedef struct KeyTableStruct KeyTable;
-
 extern KeyTable *compileKeyTable (const char *name, const KeyNameEntry *keys);
 extern void destroyKeyTable (KeyTable *table);
 
 extern char *ensureKeyTableExtension (const char *path);
 
 extern void resetKeyTable (KeyTable *table);
-extern KeyCodesState processKeyEvent (KeyTable *table, KeyCode code, int press);
+extern KeyTableState processKeyEvent (KeyTable *table, KeyCode code, int press);
 
 #ifdef __cplusplus
 }

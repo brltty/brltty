@@ -168,7 +168,6 @@ parseCommandName (DataFile *file, int *value, const wchar_t *characters, int len
 
   if (command) {
     *value = (*command)->code;
-    if (isCharacterCommand(*command)) *value |= BRL_MSK_ARG;
     if (!end) return 1;
 
     if (!(length -= end - characters + 1)) {
@@ -177,7 +176,7 @@ parseCommandName (DataFile *file, int *value, const wchar_t *characters, int len
     }
     characters = end + 1;
 
-    if (isToggleCommand(*command)) {
+    if (isToggleCommand((*command)->code)) {
       if (isKeyword(WS_C("on"), characters, length)) {
         *value |= BRL_FLG_TOGGLE_ON;
         return 1;
@@ -187,7 +186,7 @@ parseCommandName (DataFile *file, int *value, const wchar_t *characters, int len
         *value |= BRL_FLG_TOGGLE_OFF;
         return 1;
       }
-    } else if (isBaseCommand(*command)) {
+    } else if (isBaseCommand((*command)->code)) {
       unsigned int maximum = BRL_MSK_ARG - ((*command)->code & BRL_MSK_ARG);
       unsigned int offset = 0;
       int index;
@@ -248,6 +247,10 @@ processBindOperands (DataFile *file, void *data) {
 
   if (getKeyOperand(file, &binding->key, ktd)) {
     if (getCommandOperand(file, &binding->command, ktd)) {
+      if (!binding->key.code.set)
+        if (isCharacterCommand(binding->command))
+          binding->command |= BRL_MSK_ARG;
+
       ktd->bindingsCount += 1;
     }
   }
@@ -354,8 +357,8 @@ saveKeyBindings (KeyTableData *ktd) {
 
 KeyTable *
 compileKeyTable (const char *name, const KeyNameEntry *keys) {
-KeyTable *table = NULL;
-KeyTableData ktd;
+  KeyTable *table = NULL;
+  KeyTableData ktd;
 
   memset(&ktd, 0, sizeof(ktd));
 
