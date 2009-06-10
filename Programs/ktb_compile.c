@@ -77,15 +77,16 @@ compareToKeyName (const void *target, const void *element) {
 }
 
 static int
-parseKeyName (DataFile *file, KeyCode *code, const wchar_t *characters, int length, KeyTableData *ktd) {
+parseKeyName (DataFile *file, unsigned char *set, unsigned char *key, const wchar_t *characters, int length, KeyTableData *ktd) {
   const DataOperand name = {
     .characters = characters,
     .length = length
   };
-  const KeyNameEntry **key = bsearch(&name, ktd->keyNameTable, ktd->keyNameCount, sizeof(*ktd->keyNameTable), compareToKeyName);
+  const KeyNameEntry **kne = bsearch(&name, ktd->keyNameTable, ktd->keyNameCount, sizeof(*ktd->keyNameTable), compareToKeyName);
 
-  if (key) {
-    *code = (*key)->code;
+  if (kne) {
+    *set = (*kne)->set;
+    *key = (*kne)->key;
     return 1;
   }
 
@@ -94,31 +95,32 @@ parseKeyName (DataFile *file, KeyCode *code, const wchar_t *characters, int leng
 }
 
 static int
-parseKeyCombination (DataFile *file, KeyCombination *key, const wchar_t *characters, int length, KeyTableData *ktd) {
+parseKeyCombination (DataFile *file, KeyCombination *keys, const wchar_t *characters, int length, KeyTableData *ktd) {
   while (1) {
     const wchar_t *end = wmemchr(characters, WC_C('+'), length);
     if (!end) break;
 
     {
       int count = end - characters;
-      KeyCode code;
+      unsigned char set;
+      unsigned char key;
 
       if (!count) {
         reportDataError(file, "missing modifier key name");
         return 0;
       }
-      if (!parseKeyName(file, &code, characters, count, ktd)) return 0;
+      if (!parseKeyName(file, &set, &key, characters, count, ktd)) return 0;
 
-      if (code.set) {
+      if (set) {
         reportDataError(file, "unexpected modifier key name: %.*" PRIws, count, characters);
         return 0;
       }
 
-      if (BITMASK_TEST(key->modifiers, code.key)) {
+      if (BITMASK_TEST(keys->modifiers, key)) {
         reportDataError(file, "duplicate modifier key name: %.*" PRIws, count, characters);
         return 0;
       }
-      BITMASK_SET(key->modifiers, code.key);
+      BITMASK_SET(keys->modifiers, key);
 
       length -= count + 1;
       characters = end + 1;
@@ -129,9 +131,9 @@ parseKeyCombination (DataFile *file, KeyCombination *key, const wchar_t *charact
     reportDataError(file, "missing key name");
     return 0;
   }
-  if (!parseKeyName(file, &key->code, characters, length, ktd)) return 0;
+  if (!parseKeyName(file, &keys->set, &keys->key, characters, length, ktd)) return 0;
 
-  if (!key->code.set && BITMASK_TEST(key->modifiers, key->code.key)) {
+  if (!keys->set && BITMASK_TEST(keys->modifiers, keys->key)) {
     reportDataError(file, "duplicate key name: %.*" PRIws, length, characters);
     return 0;
   }
@@ -140,7 +142,7 @@ parseKeyCombination (DataFile *file, KeyCombination *key, const wchar_t *charact
 }
 
 static int
-getKeyOperand (DataFile *file, KeyCombination *key, KeyTableData *ktd) {
+getKeysOperand (DataFile *file, KeyCombination *key, KeyTableData *ktd) {
   DataOperand names;
 
   if (getDataOperand(file, &names, "key combination")) {
@@ -245,9 +247,9 @@ processBindOperands (DataFile *file, void *data) {
   binding = &ktd->bindingsTable[ktd->bindingsCount];
   memset(binding, 0, sizeof(*binding));
 
-  if (getKeyOperand(file, &binding->key, ktd)) {
+  if (getKeysOperand(file, &binding->keys, ktd)) {
     if (getCommandOperand(file, &binding->command, ktd)) {
-      if (!binding->key.code.set)
+      if (!binding->keys.set)
         if (getCommandEntry(binding->command)->isCharacter)
           binding->command |= BRL_MSK_ARG;
 

@@ -691,8 +691,8 @@ loadKeyTable (const char *name) {
 }
 
 static KeyTableState
-handleKeyboardKeyEvent (KeyCode code, int press) {
-  return processKeyEvent(keyboardKeyTable, code, press);
+handleKeyboardKeyEvent (unsigned char set, unsigned char key, int press) {
+  return processKeyEvent(keyboardKeyTable, set, key, press);
 }
 
 static void scheduleKeyboardMonitor (int interval);

@@ -176,7 +176,7 @@ extern int portraitFlag (int number, int on);
 extern int learnMode (BrailleDisplay *brl, int poll, int timeout);
 
 extern int enqueueKeyEvent (unsigned char set, unsigned char key, int press);
-extern int dequeueKeyEvent (KeyCode *code, int *press);
+extern int dequeueKeyEvent (unsigned char *set, unsigned char *key, int *press);
 
 #ifdef __cplusplus
 }

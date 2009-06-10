@@ -265,7 +265,7 @@ typedef enum {
   KEY_FUNCTION_Clear_Again,
   KEY_FUNCTION_CrSel_Props,
   KEY_FUNCTION_ExSel
-} KeyboardKeyCode;
+} KeyboardKey;
 
 extern KEY_NAME_TABLE(keyboardKeyNames);
 

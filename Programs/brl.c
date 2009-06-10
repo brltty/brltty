@@ -288,12 +288,13 @@ readBrailleCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
     resizeBrailleBuffer(brl, LOG_INFO);
 
     {
-      KeyCode code;
+      unsigned char set;
+      unsigned char key;
       int press;
 
-      while (dequeueKeyEvent(&code, &press)) {
+      while (dequeueKeyEvent(&set, &key, &press)) {
         if (brl->keyTable) {
-          processKeyEvent(brl->keyTable, code, press);
+          processKeyEvent(brl->keyTable, set, key, press);
         }
       }
     }
@@ -457,7 +458,8 @@ setBrailleSensitivity (BrailleDisplay *brl, BrailleSensitivity setting) {
 }
 
 typedef struct {
-  KeyCode code;
+  unsigned char set;
+  unsigned char key;
   unsigned press:1;
 } KeyEventQueueItem;
 
@@ -480,8 +482,8 @@ enqueueKeyEvent (unsigned char set, unsigned char key, int press) {
     KeyEventQueueItem *item = malloc(sizeof(KeyEventQueueItem));
 
     if (item) {
-      item->code.set = set;
-      item->code.key = key;
+      item->set = set;
+      item->key = key;
       item->press = press;
       if (enqueueItem(queue, item)) return 1;
 
@@ -493,14 +495,15 @@ enqueueKeyEvent (unsigned char set, unsigned char key, int press) {
 }
 
 int
-dequeueKeyEvent (KeyCode *code, int *press) {
+dequeueKeyEvent (unsigned char *set, unsigned char *key, int *press) {
   Queue *queue = getKeyEventQueue(0);
 
   if (queue) {
     KeyEventQueueItem *item = dequeueItem(queue);
 
     if (item) {
-      *code = item->code;
+      *set = item->set;
+      *key = item->key;
       *press = item->press;
       free(item);
       return 1;

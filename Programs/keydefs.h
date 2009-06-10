@@ -23,21 +23,17 @@
 extern "C" {
 #endif /* __cplusplus */
 
-typedef struct {
-  unsigned char key;
-  unsigned char set;
-} KeyCode;
-
 #define KEYS_PER_SET 0X100
 
 typedef struct {
   const char *name;
-  KeyCode code;
+  unsigned char set;
+  unsigned char key;
 } KeyNameEntry;
 
 #define KEY_NAME_TABLE(name) const KeyNameEntry name[]
-#define KEY_NAME_ENTRY(keyNumber,keyName) {.code={.key=keyNumber}, .name=keyName}
-#define KEY_SET_ENTRY(setNumber,keyName) {.code={.set=setNumber}, .name=keyName}
+#define KEY_NAME_ENTRY(keyNumber,keyName) {.key=keyNumber, .name=keyName}
+#define KEY_SET_ENTRY(setNumber,keyName) {.set=setNumber, .name=keyName}
 #define LAST_KEY_NAME_ENTRY {.name=NULL}
 
 typedef struct KeyTableStruct KeyTable;

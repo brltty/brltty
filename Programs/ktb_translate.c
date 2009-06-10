@@ -26,25 +26,20 @@
 #include "cmd.h"
 #include "brldefs.h"
 
-static inline int
-sameKeyCodes (KeyCode code1, KeyCode code2) {
-  return (code1.set == code2.set) && (code1.key == code2.key);
-}
-
 static inline const void *
 getKeyTableItem (KeyTable *table, KeyTableOffset offset) {
   return &table->header.bytes[offset];
 }
 
 static int
-getCommand (KeyTable *table, KeyCode code) {
+getCommand (KeyTable *table, unsigned char set, unsigned char key) {
   const KeyTableHeader *header = table->header.fields;
   const KeyBinding *binding = getKeyTableItem(table, header->bindingsTable);
   unsigned int count = header->bindingsCount;
 
   while (count) {
-    if (sameKeyCodes(code, binding->key.code) &&
-        sameKeys(table->keys.mask, binding->key.modifiers))
+    if ((set == binding->keys.set) && (key == binding->keys.key) &&
+        sameKeys(table->keys.mask, binding->keys.modifiers))
       return binding->command;
 
     binding += 1, count -= 1;
@@ -60,7 +55,7 @@ isModifiers (KeyTable *table) {
   unsigned int count = header->bindingsCount;
 
   while (count) {
-    if (isKeySubset(binding->key.modifiers, table->keys.mask)) return 1;
+    if (isKeySubset(binding->keys.modifiers, table->keys.mask)) return 1;
     binding += 1, count -= 1;
   }
 
@@ -74,16 +69,14 @@ resetKeyTable (KeyTable *table) {
 }
 
 KeyTableState
-processKeyEvent (KeyTable *table, KeyCode code, int press) {
+processKeyEvent (KeyTable *table, unsigned char set, unsigned char key, int press) {
   KeyTableState state = KTS_UNBOUND;
 
-  if (code.set) {
+  if (set) {
     if (press) {
-      unsigned char key = code.key;
       int command;
 
-      code.key = 0;
-      if ((command = getCommand(table, code)) != EOF) {
+      if ((command = getCommand(table, set, 0)) != EOF) {
         command += key;
       } else {
         command = BRL_CMD_NOOP;
@@ -97,12 +90,12 @@ processKeyEvent (KeyTable *table, KeyCode code, int press) {
     return state;
   }
 
-  removeKey(&table->keys, code.key);
+  removeKey(&table->keys, key);
 
   if (press) {
-    int command = getCommand(table, code);
+    int command = getCommand(table, 0, key);
 
-    addKey(&table->keys, code.key);
+    addKey(&table->keys, key);
 
     if (command == EOF) {
       if (isModifiers(table)) state = KTS_MODIFIERS;

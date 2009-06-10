@@ -507,11 +507,7 @@ handleKeyboardEvent (const AsyncInputResult *result) {
           unsigned char key = map[event->code];
 
           if (key) {
-            KeyCode code = {
-              .key = key
-            };
-
-            state = kpd->kcd->handleKeyEvent(code, press);
+            state = kpd->kcd->handleKeyEvent(0, key, press);
           } else {
             LogPrint(LOG_INFO, "unmapped Linux keycode: %d", event->code);
             state = KTS_UNBOUND;
