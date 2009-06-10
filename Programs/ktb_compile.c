@@ -279,22 +279,28 @@ compareKeyNames (const void *element1, const void *element2) {
 }
 
 static int
-allocateKeyNameTable (KeyTableData *ktd, const KeyNameEntry *keys) {
+allocateKeyNameTable (KeyTableData *ktd, const KeyNameEntry *const *keys) {
   {
-    const KeyNameEntry *key = keys;
+    const KeyNameEntry *const *knt = keys;
 
     ktd->keyNameCount = 0;
-    while (key->name) {
-      ktd->keyNameCount += 1;
-      key += 1;
+    while (*knt) {
+      const KeyNameEntry *kne = *knt;
+      while (kne->name) kne += 1;
+      ktd->keyNameCount += kne - *knt;
+      knt += 1;
     }
   }
 
-  if ((ktd->keyNameTable = malloc(ktd->keyNameCount * sizeof(*ktd->keyNameTable)))) {
+  if ((ktd->keyNameTable = malloc(ARRAY_SIZE(ktd->keyNameTable, ktd->keyNameCount)))) {
     {
-      const KeyNameEntry *key = keys;
       const KeyNameEntry **address = ktd->keyNameTable;
-      while (key->name) *address++ = key++;
+      const KeyNameEntry *const *knt = keys;
+
+      while (*knt) {
+        const KeyNameEntry *kne = *knt++;
+        while (kne->name)  *address++ = kne++;
+      }
     }
 
     qsort(ktd->keyNameTable, ktd->keyNameCount, sizeof(*ktd->keyNameTable), compareKeyNames);
@@ -358,7 +364,7 @@ saveKeyBindings (KeyTableData *ktd) {
 }
 
 KeyTable *
-compileKeyTable (const char *name, const KeyNameEntry *keys) {
+compileKeyTable (const char *name, const KeyNameEntry *const *keys) {
   KeyTable *table = NULL;
   KeyTableData ktd;
 

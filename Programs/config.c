@@ -670,9 +670,14 @@ loadKeyTable (const char *name) {
       }
 
       if ((path = makePath(opt_tablesDirectory, file))) {
+        static const KeyNameEntry *const keyNameTables[] = {
+          keyboardKeyNames,
+          NULL
+        };
+
         LogPrint(LOG_DEBUG, "compiling key table: %s", path);
 
-        if (!(table = compileKeyTable(path, keyboardKeyNames))) {
+        if (!(table = compileKeyTable(path, keyNameTables))) {
           LogPrint(LOG_ERR, "%s: %s", gettext("cannot compile key table"), path);
         }
 
@@ -2156,7 +2161,7 @@ initializeBrailleDriver (const char *code, int verify) {
         /* Initialize the braille driver's help screen. */
         LogPrint(LOG_INFO, "%s: %s", gettext("Key Bindings"),
                  brl.keyBindings? brl.keyBindings: gettext("none"));
-        if (brl.keyNames) {
+        if (brl.keyNameTables) {
           char *file;
 
           {
@@ -2170,7 +2175,7 @@ initializeBrailleDriver (const char *code, int verify) {
             char *path;
 
             if ((path = makePath(opt_tablesDirectory, file))) {
-              if (verify || (brl.keyTable = compileKeyTable(path, brl.keyNames))) {
+              if (verify || (brl.keyTable = compileKeyTable(path, brl.keyNameTables))) {
                 LogPrint(LOG_INFO, "%s: %s", gettext("Key Table"), path);
               } else {
                 LogPrint(LOG_WARNING, "%s: %s", gettext("cannot open key table"), path);

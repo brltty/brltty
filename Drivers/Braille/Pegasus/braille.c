@@ -58,11 +58,10 @@ typedef enum {
 
 typedef enum {
   PG_SET_NavigationKeys = 0,
-
   PG_SET_RoutingKeys
 } PG_KeySet;
 
-static KEY_NAME_TABLE(keyNames) = {
+static KEY_NAME_TABLE(keyNames_all) = {
   KEY_NAME_ENTRY(PG_KEY_LeftShift, "LeftShift"),
   KEY_NAME_ENTRY(PG_KEY_RightShift, "RightShift"),
   KEY_NAME_ENTRY(PG_KEY_LeftControl, "LeftControl"),
@@ -83,6 +82,11 @@ static KEY_NAME_TABLE(keyNames) = {
   KEY_NAME_ENTRY(PG_KEY_Status+1, "Status2"),
 
   LAST_KEY_NAME_ENTRY
+};
+
+static const KeyNameEntry *const keyNameTables_all[] = {
+  keyNames_all,
+  NULL
 };
 
 typedef struct {
@@ -131,7 +135,7 @@ setCellCounts (BrailleDisplay *brl, int size) {
   brl->statusRows = 1;
   brl->textColumns = size - brl->statusColumns;
   brl->textRows = 1;
-  brl->keyNames = keyNames;
+  brl->keyNameTables = keyNameTables_all;
 }
 
 static int
