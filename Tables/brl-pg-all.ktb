@@ -54,3 +54,7 @@ bind RightShift+Home CUTBEGIN
 bind RightShift+Enter CUTAPPEND
 bind RightShift+End CUTLINE
 bind RightShift+Escape CUTRECT
+
+bind RoutingKey ROUTE
+bind Status1 HELP
+bind Status2 LEARN
