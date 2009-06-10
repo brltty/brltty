@@ -33,6 +33,7 @@ typedef struct {
 static HelpLineEntry *lineTable = NULL;
 static unsigned int lineCount = 0;
 
+static unsigned int lineTableSize;
 static unsigned int lineLength;
 static unsigned char cursorRow, cursorColumn;
 
@@ -47,31 +48,26 @@ clearHelpScreen (void) {
     free(lineTable);
     lineTable = NULL;
   }
-}
 
-static void
-destruct_HelpScreen (void) {
-  clearHelpScreen();
+  lineTableSize = 0;
+  lineLength = 0;
+  cursorRow = 0;
+  cursorColumn = 0;
 }
-
-typedef struct {
-  unsigned int lineTableSize;
-} HelpFileData;
 
 static int
-addHelpLine (char *line, void *data) {
-  HelpFileData *hfd = data;
-
-  if (lineCount == hfd->lineTableSize) {
-    unsigned int newSize = hfd->lineTableSize? hfd->lineTableSize<<1: 0X40;
+addLine_HelpScreen (const char *line) {
+  if (lineCount == lineTableSize) {
+    unsigned int newSize = lineTableSize? lineTableSize<<1: 0X40;
     HelpLineEntry *newTable = realloc(lineTable, ARRAY_SIZE(newTable, newSize));
 
     if (!newTable) {
+      LogError("malloc");
       return 0;
     }
 
     lineTable = newTable;
-    hfd->lineTableSize = newSize;
+    lineTableSize = newSize;
   }
 
   {
@@ -80,6 +76,7 @@ addHelpLine (char *line, void *data) {
     if ((hle->length = length) > lineLength) lineLength = length;
 
     if (!(hle->characters = malloc(ARRAY_SIZE(hle->characters, length)))) {
+      LogError("malloc");
       return 0;
     }
 
@@ -96,30 +93,37 @@ addHelpLine (char *line, void *data) {
 }
 
 static int
+addHelpLine (char *line, void *data) {
+  return addLine_HelpScreen(line);
+}
+
+static int
 construct_HelpScreen (const char *file) {
   int constructed = 0;
-  FILE *stream;
-
   clearHelpScreen();
-  lineLength = 0;
 
-  if ((stream = fopen(file, "r"))) {
-    HelpFileData hfd = {
-      .lineTableSize = 0
-    };
+  if (file) {
+    FILE *stream;
 
-    if (processLines(stream, addHelpLine, &hfd)) {
-      cursorRow = 0;
-      cursorColumn = 0;
-      constructed = 1;
+    if ((stream = fopen(file, "r"))) {
+      if (processLines(stream, addHelpLine, NULL)) {
+        constructed = 1;
+      }
+
+      fclose(stream);
+    } else {
+      LogPrint(LOG_ERR, "cannot open driver help file: %s: %s", file, strerror(errno));
     }
-
-    fclose(stream);
   } else {
-    LogPrint(LOG_ERR, "cannot open driver help file: %s: %s", file, strerror(errno));
+    constructed = 1;
   }
 
   return constructed;
+}
+
+static void
+destruct_HelpScreen (void) {
+  clearHelpScreen();
 }
 
 static int
@@ -228,4 +232,5 @@ initializeHelpScreen (HelpScreen *help) {
   help->base.routeCursor = routeCursor_HelpScreen;
   help->construct = construct_HelpScreen;
   help->destruct = destruct_HelpScreen;
+  help->addLine = addLine_HelpScreen;
 }

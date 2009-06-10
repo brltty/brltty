@@ -28,7 +28,8 @@ extern "C" {
 typedef struct {
   BaseScreen base;
   int (*construct) (const char *);
-  void (*destruct) (void);		   /* called once to close the help screen */
+  void (*destruct) (void);
+  int (*addLine) (const char *line);
 } HelpScreen;
 
 extern void initializeHelpScreen (HelpScreen *);
