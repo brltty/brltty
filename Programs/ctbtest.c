@@ -96,7 +96,7 @@ static void
 writeUtf8Braille (FILE *stream, unsigned char cell) {
   Utf8Buffer utf8;
   size_t utfs = convertWcharToUtf8(cell|UNICODE_BRAILLE_ROW, utf8);
-  fprintf(stream, "%.*s", utfs, utf8);
+  fprintf(stream, "%.*s", (int)utfs, utf8);
 }
 
 typedef struct {

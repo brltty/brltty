@@ -194,7 +194,7 @@ static int
 writeUtf8 (FILE *file, wchar_t character) {
   Utf8Buffer utf8;
   size_t utfs = convertWcharToUtf8(character, utf8);
-  return fprintf(file, "%.*s", utfs, utf8) != EOF;
+  return fprintf(file, "%.*s", (int)utfs, utf8) != EOF;
 }
 
 static TextTableData *
@@ -699,7 +699,7 @@ makeCharacterDescription (TextTableData *ttd, wchar_t character, size_t *length,
   int brailleIndex;
   int descriptionLength;
 
-  unsigned char dots;
+  unsigned char dots = 0;
   int gotDots = getDots(ttd, character, &dots);
 
   wchar_t printableCharacter;
