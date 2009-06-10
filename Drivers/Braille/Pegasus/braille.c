@@ -30,11 +30,60 @@
 static const char productPrefix[] = "PBC";
 static const unsigned char productPrefixLength = sizeof(productPrefix) - 1;
 
-static int routingCommand;
 static int rewriteRequired;
 static unsigned char textCells[80];
 static unsigned char statusCells[2];
 static TranslationTable outputTable;
+
+typedef enum {
+  PG_KEY_None = 0,
+
+  PG_KEY_LeftShift,
+  PG_KEY_RightShift,
+  PG_KEY_LeftControl,
+  PG_KEY_RighTControl,
+
+  PG_KEY_Left,
+  PG_KEY_Right,
+  PG_KEY_Up,
+  PG_KEY_Down,
+
+  PG_KEY_Home,
+  PG_KEY_End,
+  PG_KEY_Enter,
+  PG_KEY_Escape,
+
+  PG_KEY_Status
+} PG_NavigationKey;
+
+typedef enum {
+  PG_SET_NavigationKeys = 0,
+
+  PG_SET_RoutingKeys
+} PG_KeySet;
+
+static KEY_NAME_TABLE(keyNames) = {
+  KEY_NAME_ENTRY(PG_KEY_LeftShift, "LeftShift"),
+  KEY_NAME_ENTRY(PG_KEY_RightShift, "RightShift"),
+  KEY_NAME_ENTRY(PG_KEY_LeftControl, "LeftControl"),
+  KEY_NAME_ENTRY(PG_KEY_RighTControl, "RighTControl"),
+
+  KEY_NAME_ENTRY(PG_KEY_Left, "Left"),
+  KEY_NAME_ENTRY(PG_KEY_Right, "Right"),
+  KEY_NAME_ENTRY(PG_KEY_Up, "Up"),
+  KEY_NAME_ENTRY(PG_KEY_Down, "Down"),
+
+  KEY_NAME_ENTRY(PG_KEY_Home, "Home"),
+  KEY_NAME_ENTRY(PG_KEY_End, "End"),
+  KEY_NAME_ENTRY(PG_KEY_Enter, "Enter"),
+  KEY_NAME_ENTRY(PG_KEY_Escape, "Escape"),
+
+  KEY_SET_ENTRY(PG_SET_RoutingKeys, "RoutingKey"),
+  KEY_NAME_ENTRY(PG_KEY_Status+0, "Status1"),
+  KEY_NAME_ENTRY(PG_KEY_Status+1, "Status2"),
+
+  LAST_KEY_NAME_ENTRY
+};
 
 typedef struct {
   int (*identifyModel) (BrailleDisplay *brl);
@@ -82,6 +131,7 @@ setCellCounts (BrailleDisplay *brl, int size) {
   brl->statusRows = 1;
   brl->textColumns = size - brl->statusColumns;
   brl->textRows = 1;
+  brl->keyNames = keyNames;
 }
 
 static int
@@ -486,7 +536,6 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
   if (io->openPort(device)) {
     if (io->methods->identifyModel(brl)) {
-      routingCommand = BRL_BLK_ROUTE;
       rewriteRequired = 1;
       memset(textCells, 0, sizeof(textCells));
       memset(statusCells, 0, sizeof(statusCells));
@@ -524,54 +573,64 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *cells) {
 }
 
 static int
+enqueueNavigationKey (PG_NavigationKey modifier, PG_NavigationKey key) {
+  const PG_KeySet set = PG_SET_NavigationKeys;
+  int modifierSpecified = modifier != PG_KEY_None;
+
+  if (modifierSpecified && !enqueueKeyEvent(set, modifier, 1)) return 0;
+  if (!enqueueKeyEvent(set, key, 1)) return 0;;
+  if (!enqueueKeyEvent(set, key, 0)) return 0;;
+  if (modifierSpecified && !enqueueKeyEvent(set, modifier, 0)) return 0;
+  return 1;
+}
+
+static int
 interpretNavigationKey (unsigned char key) {
-#define CMD(keys,cmd) case (keys): return (cmd)
-#define BLK(keys,blk) case (keys): routingCommand = (blk); return BRL_CMD_NOOP
+#define KEY(code,modifier,key) case (code): return enqueueNavigationKey((modifier), (key))
   switch (key) {
-    CMD(0X15, BRL_CMD_FWINLT); /* left */
-    CMD(0X4D, BRL_CMD_FWINRT); /* right */
-    CMD(0X3D, BRL_CMD_LNUP); /* up */
-    CMD(0X54, BRL_CMD_LNDN); /* down */
+    KEY(0X15, PG_KEY_None, PG_KEY_Left);
+    KEY(0X4D, PG_KEY_None, PG_KEY_Right);
+    KEY(0X3D, PG_KEY_None, PG_KEY_Up);
+    KEY(0X54, PG_KEY_None, PG_KEY_Down);
 
-    CMD(0X16, BRL_CMD_TOP_LEFT); /* home */
-    CMD(0X1C, BRL_CMD_BOT_LEFT); /* enter */
-    CMD(0X36, BRL_CMD_RETURN); /* end */
-    CMD(0X2C, BRL_CMD_CSRTRK); /* escape */
+    KEY(0X16, PG_KEY_None, PG_KEY_Home);
+    KEY(0X1C, PG_KEY_None, PG_KEY_Enter);
+    KEY(0X36, PG_KEY_None, PG_KEY_End);
+    KEY(0X2C, PG_KEY_None, PG_KEY_Escape);
 
-    CMD(0X27, BRL_CMD_ATTRUP); /* left-control + left */
-    CMD(0X28, BRL_CMD_ATTRDN); /* left-control + right */
-    CMD(0X21, BRL_CMD_PRDIFLN); /* left-control + up */
-    CMD(0X22, BRL_CMD_NXDIFLN); /* left-control + down */
+    KEY(0X27, PG_KEY_LeftControl, PG_KEY_Left);
+    KEY(0X28, PG_KEY_LeftControl, PG_KEY_Right);
+    KEY(0X21, PG_KEY_LeftControl, PG_KEY_Up);
+    KEY(0X22, PG_KEY_LeftControl, PG_KEY_Down);
 
-    CMD(0X3F, BRL_CMD_FREEZE); /* left-control + enter */
-    CMD(0X2F, BRL_CMD_PREFMENU); /* left-control + end */
-    CMD(0X56, BRL_CMD_INFO); /* left-control + escape */
+    KEY(0X3F, PG_KEY_LeftControl, PG_KEY_Enter);
+    KEY(0X2F, PG_KEY_LeftControl, PG_KEY_End);
+    KEY(0X56, PG_KEY_LeftControl, PG_KEY_Escape);
 
-    CMD(0X1F, BRL_CMD_DISPMD); /* left-shift + left */
-    CMD(0X20, BRL_CMD_SIXDOTS); /* left-shift + right */
-    CMD(0X5B, BRL_CMD_CSRJMP_VERT); /* left-shift + down */
+    KEY(0X1F, PG_KEY_LeftShift, PG_KEY_Left);
+    KEY(0X20, PG_KEY_LeftShift, PG_KEY_Right);
+    KEY(0X5B, PG_KEY_LeftShift, PG_KEY_Down);
 
-    CMD(0X17, BRL_CMD_PRPROMPT); /* left-shift + home */
-    CMD(0X3A, BRL_CMD_NXPROMPT); /* left-shift + enter */
-    CMD(0X3B, BRL_CMD_PRPGRPH); /* left-shift + end */
-    CMD(0X18, BRL_CMD_NXPGRPH); /* left-shift + escape */
+    KEY(0X17, PG_KEY_LeftShift, PG_KEY_Home);
+    KEY(0X3A, PG_KEY_LeftShift, PG_KEY_Enter);
+    KEY(0X3B, PG_KEY_LeftShift, PG_KEY_End);
+    KEY(0X18, PG_KEY_LeftShift, PG_KEY_Escape);
 
-    BLK(0X37, BRL_BLK_SETLEFT); /* right-shift + left */
-    CMD(0X33, BRL_CMD_PASTE); /* right-shift + right */
-    BLK(0X38, BRL_BLK_DESCCHAR); /* right-shift + down */
+    KEY(0X37, PG_KEY_RightShift, PG_KEY_Left);
+    KEY(0X33, PG_KEY_RightShift, PG_KEY_Right);
+    KEY(0X38, PG_KEY_RightShift, PG_KEY_Down);
 
-    BLK(0X2A, BRL_BLK_CUTBEGIN); /* right-shift + home */
-    BLK(0X31, BRL_BLK_CUTAPPEND); /* right-shift + enter */
-    BLK(0X32, BRL_BLK_CUTLINE); /* right-shift + end */
-    BLK(0X30, BRL_BLK_CUTRECT); /* right-shift + escape */
+    KEY(0X2A, PG_KEY_RightShift, PG_KEY_Home);
+    KEY(0X31, PG_KEY_RightShift, PG_KEY_Enter);
+    KEY(0X32, PG_KEY_RightShift, PG_KEY_End);
+    KEY(0X30, PG_KEY_RightShift, PG_KEY_Escape);
 
     default:
       break;
   }
-#undef BLK
-#undef CMD
+#undef KEY
 
-  return EOF;
+  return 0;
 }
 
 static int
@@ -590,37 +649,33 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   int length;
 
   while ((length = readPacket(brl, &packet))) {
-    int routing = routingCommand;
-
-    routingCommand = BRL_BLK_ROUTE;
-
     switch (packet.data.type) {
-      case IPT_KEY_NAVIGATION: {
-        int command = interpretNavigationKey(packet.data.fields.key.value);
-        if (command != EOF) return command;
+      case IPT_KEY_NAVIGATION:
+        if (interpretNavigationKey(packet.data.fields.key.value)) return EOF;
         break;
-      }
 
-      case IPT_KEY_SIMULATION: {
-        int command = interpretSimulationKey(packet.data.fields.key.value);
-        if (command != EOF) return command;
+      case IPT_KEY_SIMULATION:
+        if (interpretSimulationKey(packet.data.fields.key.value)) return EOF;
         break;
-      }
 
       case IPT_KEY_ROUTING: {
-        unsigned char key = packet.data.fields.key.value;
+        unsigned char code = packet.data.fields.key.value;
+        unsigned char set;
+        unsigned char key;
 
-        switch (key) {
-          case 81: /* status 1 */
-            return BRL_CMD_HELP;
-          case 82: /* status 2 */
-            return BRL_CMD_LEARN;
-
-          default:
-            if ((key > 0) && (key <= brl->textColumns)) return routing + key - 1;
-            break;
+        if ((code >= 81) && (code <= 82)) {
+          set = PG_SET_NavigationKeys;
+          key = PG_KEY_Status + (code - 81);
+        } else if ((code > 0) && (code <= brl->textColumns)) {
+          set = PG_SET_RoutingKeys;
+          key = code - 1;
+        } else {
+          break;
         }
-        break;
+
+        enqueueKeyEvent(set, key, 1);
+        enqueueKeyEvent(set, key, 0);
+        return EOF;
       }
     }
 
