@@ -1,0 +1,46 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2009 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+# Key subtable for HandyTech keypad keys
+
+bind B9 SAY_ABOVE
+bind B10 SAY_LINE
+bind B11 SAY_BELOW
+bind B12 MUTE
+bind Zero SPKHOME
+bind B13 SWITCHVT_PREV
+bind B14 SWITCHVT_NEXT
+bind Seven LEARN
+bind Eight MENU_PREV_ITEM
+bind Nine MENU_FIRST_ITEM
+bind Four MENU_PREV_SETTING
+bind Five PREFSAVE
+bind Six MENU_NEXT_SETTING
+bind One PREFMENU
+bind Two MENU_NEXT_ITEM
+bind Three MENU_LAST_ITEM
+bind Zero+Seven KEY_HOME
+bind Zero+Eight KEY_CURSOR_UP
+bind Zero+Nine KEY_PAGE_UP
+bind Zero+Four KEY_CURSOR_LEFT
+bind Zero+Six KEY_CURSOR_RIGHT
+bind Zero+One KEY_END
+bind Zero+Two KEY_CURSOR_DOWN
+bind Zero+Three KEY_PAGE_DOWN
+bind Zero+B13 KEY_INSERT
+bind Zero+B14 KEY_DELETE
