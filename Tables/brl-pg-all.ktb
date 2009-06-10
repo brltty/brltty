@@ -18,39 +18,39 @@
 
 # Key Table for Pegasus
 
-bind Left CMD_FWINLT
-bind Right CMD_FWINRT
-bind Up CMD_LNUP
-bind Down CMD_LNDN
+bind Left FWINLT
+bind Right FWINRT
+bind Up LNUP
+bind Down LNDN
 
-bind Home CMD_TOP_LEFT
-bind Enter CMD_BOT_LEFT
-bind End CMD_RETURN
-bind Escape CMD_CSRTRK
+bind Home TOP_LEFT
+bind Enter BOT_LEFT
+bind End RETURN
+bind Escape CSRTRK
 
-bind LeftControl+Left CMD_ATTRUP
-bind LeftControl+Right CMD_ATTRDN
-bind LeftControl+Up CMD_PRDIFLN
-bind LeftControl+Down CMD_NXDIFLN
+bind LeftControl+Left ATTRUP
+bind LeftControl+Right ATTRDN
+bind LeftControl+Up PRDIFLN
+bind LeftControl+Down NXDIFLN
 
-bind LeftControl+Enter CMD_FREEZE
-bind LeftControl+End CMD_PREFMENU
-bind LeftControl+Escape CMD_INFO
+bind LeftControl+Enter FREEZE
+bind LeftControl+End PREFMENU
+bind LeftControl+Escape INFO
 
-bind LeftShift+Left CMD_DISPMD
-bind LeftShift+Right CMD_SIXDOTS
-bind LeftShift+Down CMD_CSRJMP_VERT
+bind LeftShift+Left DISPMD
+bind LeftShift+Right SIXDOTS
+bind LeftShift+Down CSRJMP_VERT
 
-bind LeftShift+Home CMD_PRPROMPT
-bind LeftShift+Enter CMD_NXPROMPT
-bind LeftShift+End CMD_PRPGRPH
-bind LeftShift+Escape CMD_NXPGRPH
+bind LeftShift+Home PRPROMPT
+bind LeftShift+Enter NXPROMPT
+bind LeftShift+End PRPGRPH
+bind LeftShift+Escape NXPGRPH
 
-bind RightShift+Left BLK_SETLEFT
-bind RightShift+Right CMD_PASTE
-bind RightShift+Down BLK_DESCCHAR
+bind RightShift+Left SETLEFT
+bind RightShift+Right PASTE
+bind RightShift+Down DESCCHAR
 
-bind RightShift+Home BLK_CUTBEGIN
-bind RightShift+Enter BLK_CUTAPPEND
-bind RightShift+End BLK_CUTLINE
-bind RightShift+Escape BLK_CUTRECT
+bind RightShift+Home CUTBEGIN
+bind RightShift+Enter CUTAPPEND
+bind RightShift+End CUTLINE
+bind RightShift+Escape CUTRECT

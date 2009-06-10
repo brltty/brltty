@@ -18,58 +18,58 @@
 
 parameters statusKeys switches
 
-bind @switches@KeyLeftRear+NoKey CMD_BACK
-bind @switches@KeyLeftFront+NoKey CMD_HOME
-bind @switches@KeyRightRear+NoKey CMD_HELP
-bind @switches@KeyRightFront+NoKey CMD_LEARN
+bind @switches@KeyLeftRear+NoKey BACK
+bind @switches@KeyLeftFront+NoKey HOME
+bind @switches@KeyRightRear+NoKey HELP
+bind @switches@KeyRightFront+NoKey LEARN
 
-bind @switches@KeyLeftRear+BarUp1+NoKey CMD_SIXDOTS
-bind @switches@KeyLeftRear+BarDown1+NoKey CMD_PASTE
-bind @switches@KeyLeftRear+BarUp2+NoKey CMD_CAPBLINK
-bind @switches@KeyLeftRear+BarDown2+NoKey CMD_CSRJMP_VERT
-bind @switches@KeyLeftRear+BarLeft1+NoKey CMD_DISPMD
-bind @switches@KeyLeftRear+BarRight1+NoKey CMD_CSRTRK
-bind @switches@KeyLeftRear+BarLeft2+NoKey CMD_ATTRVIS
-bind @switches@KeyLeftRear+BarRight2+NoKey CMD_CSRVIS
+bind @switches@KeyLeftRear+BarUp1+NoKey SIXDOTS
+bind @switches@KeyLeftRear+BarDown1+NoKey PASTE
+bind @switches@KeyLeftRear+BarUp2+NoKey CAPBLINK
+bind @switches@KeyLeftRear+BarDown2+NoKey CSRJMP_VERT
+bind @switches@KeyLeftRear+BarLeft1+NoKey DISPMD
+bind @switches@KeyLeftRear+BarRight1+NoKey CSRTRK
+bind @switches@KeyLeftRear+BarLeft2+NoKey ATTRVIS
+bind @switches@KeyLeftRear+BarRight2+NoKey CSRVIS
 
-bind @switches@KeyLeftFront+BarUp1+NoKey CMD_AUTOSPEAK
-bind @switches@KeyLeftFront+BarDown1+NoKey CMD_AUTOREPEAT
-bind @switches@KeyLeftFront+BarUp2+NoKey CMD_RESTARTBRL
-bind @switches@KeyLeftFront+BarDown2+NoKey CMD_FREEZE
-bind @switches@KeyLeftFront+BarLeft1+NoKey CMD_INFO
-bind @switches@KeyLeftFront+BarRight1+NoKey CMD_PREFMENU
-bind @switches@KeyLeftFront+BarLeft2+NoKey CMD_PREFLOAD
-bind @switches@KeyLeftFront+BarRight2+NoKey CMD_PREFSAVE
+bind @switches@KeyLeftFront+BarUp1+NoKey AUTOSPEAK
+bind @switches@KeyLeftFront+BarDown1+NoKey AUTOREPEAT
+bind @switches@KeyLeftFront+BarUp2+NoKey RESTARTBRL
+bind @switches@KeyLeftFront+BarDown2+NoKey FREEZE
+bind @switches@KeyLeftFront+BarLeft1+NoKey INFO
+bind @switches@KeyLeftFront+BarRight1+NoKey PREFMENU
+bind @switches@KeyLeftFront+BarLeft2+NoKey PREFLOAD
+bind @switches@KeyLeftFront+BarRight2+NoKey PREFSAVE
 
-bind @switches@KeyRightRear+BarUp1+NoKey CMD_SAY_ABOVE
-bind @switches@KeyRightRear+BarDown1+NoKey CMD_SAY_BELOW
-bind @switches@KeyRightRear+BarUp2+NoKey CMD_SAY_LOUDER
-bind @switches@KeyRightRear+BarDown2+NoKey CMD_SAY_SOFTER
-bind @switches@KeyRightRear+BarLeft1+NoKey CMD_MUTE
-bind @switches@KeyRightRear+BarRight1+NoKey CMD_SAY_LINE
-bind @switches@KeyRightRear+BarLeft2+NoKey CMD_SAY_SLOWER
-bind @switches@KeyRightRear+BarRight2+NoKey CMD_SAY_FASTER
+bind @switches@KeyRightRear+BarUp1+NoKey SAY_ABOVE
+bind @switches@KeyRightRear+BarDown1+NoKey SAY_BELOW
+bind @switches@KeyRightRear+BarUp2+NoKey SAY_LOUDER
+bind @switches@KeyRightRear+BarDown2+NoKey SAY_SOFTER
+bind @switches@KeyRightRear+BarLeft1+NoKey MUTE
+bind @switches@KeyRightRear+BarRight1+NoKey SAY_LINE
+bind @switches@KeyRightRear+BarLeft2+NoKey SAY_SLOWER
+bind @switches@KeyRightRear+BarRight2+NoKey SAY_FASTER
 
-bind @switches@KeyRightFront+BarUp1+NoKey CMD_SPKHOME
-bind @switches@KeyRightFront+BarDown1+NoKey CMD_TUNES
-bind @switches@KeyRightFront+BarUp2+NoKey CMD_RESTARTSPEECH
-bind @switches@KeyRightFront+BarDown2+NoKey CMD_SWSIM_BQ
-bind @switches@KeyRightFront+BarLeft1+NoKey CMD_SKPIDLNS
-bind @switches@KeyRightFront+BarRight1+NoKey CMD_SKPBLNKWINS
-bind @switches@KeyRightFront+BarRight2+NoKey CMD_SLIDEWIN
+bind @switches@KeyRightFront+BarUp1+NoKey SPKHOME
+bind @switches@KeyRightFront+BarDown1+NoKey TUNES
+bind @switches@KeyRightFront+BarUp2+NoKey RESTARTSPEECH
+bind @switches@KeyRightFront+BarDown2+NoKey SWSIM_BQ
+bind @switches@KeyRightFront+BarLeft1+NoKey SKPIDLNS
+bind @switches@KeyRightFront+BarRight1+NoKey SKPBLNKWINS
+bind @switches@KeyRightFront+BarRight2+NoKey SLIDEWIN
 
-bind @switches@Routing1 BLK_ROUTE
-bind @switches@BarUp1+Routing1 BLK_PRINDENT
-bind @switches@BarDown1+Routing1 BLK_NXINDENT
-bind @switches@BarUp2+Routing1 BLK_SETLEFT
-bind @switches@BarDown2+Routing1 BLK_DESCCHAR
-bind @switches@BarLeft1+Routing1 BLK_CUTAPPEND
-bind @switches@BarRight1+Routing1 BLK_CUTLINE
-bind @switches@BarLeft2+Routing1 BLK_CUTBEGIN
-bind @switches@BarRight2+Routing1 BLK_CUTRECT
+bind @switches@Routing1 ROUTE
+bind @switches@BarUp1+Routing1 PRINDENT
+bind @switches@BarDown1+Routing1 NXINDENT
+bind @switches@BarUp2+Routing1 SETLEFT
+bind @switches@BarDown2+Routing1 DESCCHAR
+bind @switches@BarLeft1+Routing1 CUTAPPEND
+bind @switches@BarRight1+Routing1 CUTLINE
+bind @switches@BarLeft2+Routing1 CUTBEGIN
+bind @switches@BarRight2+Routing1 CUTRECT
 
-bind @switches@Routing2 BLK_DESCCHAR
+bind @switches@Routing2 DESCCHAR
 
 include brl-pm-status@statusKeys@.kti BarLeft1 BarRight1
 
-bind @switches@StatusX BLK_GOTOLINE+on
+bind @switches@StatusX GOTOLINE+on

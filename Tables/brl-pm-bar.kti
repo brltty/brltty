@@ -20,32 +20,32 @@
 
 parameters statusKeys
 
-bind BarUp1+NoKey CMD_LNUP
-bind BarDown1+NoKey CMD_LNDN
-bind BarUp2+NoKey CMD_TOP
-bind BarDown2+NoKey CMD_BOT
-bind BarLeft1+NoKey CMD_FWINLT
-bind BarRight1+NoKey CMD_FWINRT
-bind BarLeft2+NoKey CMD_LNBEG
-bind BarRight2+NoKey CMD_LNEND
+bind BarUp1+NoKey LNUP
+bind BarDown1+NoKey LNDN
+bind BarUp2+NoKey TOP
+bind BarDown2+NoKey BOT
+bind BarLeft1+NoKey FWINLT
+bind BarRight1+NoKey FWINRT
+bind BarLeft2+NoKey LNBEG
+bind BarRight2+NoKey LNEND
 
-bind SwitchLeftRear+BarUp1+NoKey CMD_PRDIFLN
-bind SwitchLeftRear+BarDown1+NoKey CMD_NXDIFLN
-bind SwitchLeftRear+BarUp2+NoKey CMD_ATTRUP
-bind SwitchLeftRear+BarDown2+NoKey CMD_ATTRDN
-bind SwitchLeftRear+BarLeft1+NoKey CMD_PRPROMPT
-bind SwitchLeftRear+BarRight1+NoKey CMD_NXPROMPT
-bind SwitchLeftRear+BarLeft2+NoKey CMD_PRPGRPH
-bind SwitchLeftRear+BarRight2+NoKey CMD_NXPGRPH
+bind SwitchLeftRear+BarUp1+NoKey PRDIFLN
+bind SwitchLeftRear+BarDown1+NoKey NXDIFLN
+bind SwitchLeftRear+BarUp2+NoKey ATTRUP
+bind SwitchLeftRear+BarDown2+NoKey ATTRDN
+bind SwitchLeftRear+BarLeft1+NoKey PRPROMPT
+bind SwitchLeftRear+BarRight1+NoKey NXPROMPT
+bind SwitchLeftRear+BarLeft2+NoKey PRPGRPH
+bind SwitchLeftRear+BarRight2+NoKey NXPGRPH
 
 bind SwitchRightRear+BarUp1+NoKey KEY_CURSOR_UP
 bind SwitchRightRear+BarDown1+NoKey KEY_CURSOR_DOWN
 bind SwitchRightRear+BarUp2+NoKey KEY_PAGE_UP
 bind SwitchRightRear+BarDown2+NoKey KEY_PAGE_DOWN
-bind SwitchRightRear+BarLeft1+NoKey CMD_FWINLT+route
-bind SwitchRightRear+BarRight1+NoKey CMD_FWINRT+route
-bind SwitchRightRear+BarLeft2+NoKey CMD_LNBEG+route
-bind SwitchRightRear+BarRight2+NoKey CMD_LNEND+route
+bind SwitchRightRear+BarLeft1+NoKey FWINLT+route
+bind SwitchRightRear+BarRight1+NoKey FWINRT+route
+bind SwitchRightRear+BarLeft2+NoKey LNBEG+route
+bind SwitchRightRear+BarRight2+NoKey LNEND+route
 
 bind SwitchLeftRear+SwitchRightRear+BarUp1+NoKey KEY_CURSOR_UP
 bind SwitchLeftRear+SwitchRightRear+BarDown1+NoKey KEY_CURSOR_DOWN
@@ -56,23 +56,23 @@ bind SwitchLeftRear+SwitchRightRear+BarRight1+NoKey KEY_CURSOR_RIGHT
 bind SwitchLeftRear+SwitchRightRear+BarLeft2+NoKey KEY_HOME
 bind SwitchLeftRear+SwitchRightRear+BarRight2+NoKey KEY_END
 
-bind SwitchLeftFront+BarUp1+NoKey CMD_PRSEARCH
-bind SwitchLeftFront+BarDown1+NoKey CMD_NXSEARCH
-bind SwitchLeftFront+BarUp2+NoKey CMD_HELP
-bind SwitchLeftFront+BarDown2+NoKey CMD_LEARN
-bind SwitchLeftFront+BarLeft1+NoKey CMD_CHRLT
-bind SwitchLeftFront+BarRight1+NoKey CMD_CHRRT
-bind SwitchLeftFront+BarLeft2+NoKey CMD_HWINLT
-bind SwitchLeftFront+BarRight2+NoKey CMD_HWINRT
+bind SwitchLeftFront+BarUp1+NoKey PRSEARCH
+bind SwitchLeftFront+BarDown1+NoKey NXSEARCH
+bind SwitchLeftFront+BarUp2+NoKey HELP
+bind SwitchLeftFront+BarDown2+NoKey LEARN
+bind SwitchLeftFront+BarLeft1+NoKey CHRLT
+bind SwitchLeftFront+BarRight1+NoKey CHRRT
+bind SwitchLeftFront+BarLeft2+NoKey HWINLT
+bind SwitchLeftFront+BarRight2+NoKey HWINRT
 
-bind SwitchRightFront+BarUp1+NoKey CMD_MENU_PREV_ITEM
-bind SwitchRightFront+BarDown1+NoKey CMD_MENU_NEXT_ITEM
-bind SwitchRightFront+BarUp2+NoKey CMD_MENU_FIRST_ITEM
-bind SwitchRightFront+BarDown2+NoKey CMD_MENU_LAST_ITEM
-bind SwitchRightFront+BarLeft1+NoKey CMD_MENU_PREV_SETTING
-bind SwitchRightFront+BarRight1+NoKey CMD_MENU_NEXT_SETTING
-bind SwitchRightFront+BarLeft2+NoKey CMD_PREFLOAD
-bind SwitchRightFront+BarRight2+NoKey CMD_PREFSAVE
+bind SwitchRightFront+BarUp1+NoKey MENU_PREV_ITEM
+bind SwitchRightFront+BarDown1+NoKey MENU_NEXT_ITEM
+bind SwitchRightFront+BarUp2+NoKey MENU_FIRST_ITEM
+bind SwitchRightFront+BarDown2+NoKey MENU_LAST_ITEM
+bind SwitchRightFront+BarLeft1+NoKey MENU_PREV_SETTING
+bind SwitchRightFront+BarRight1+NoKey MENU_NEXT_SETTING
+bind SwitchRightFront+BarLeft2+NoKey PREFLOAD
+bind SwitchRightFront+BarRight2+NoKey PREFSAVE
 
 include brl-pm-bar_common.kti @statusKeys@
 include brl-pm-bar_common.kti @statusKeys@ SwitchLeftRear+
