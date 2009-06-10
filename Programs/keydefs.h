@@ -35,6 +35,7 @@ typedef struct {
 #define KEY_NAME_ENTRY(keyNumber,keyName) {.key=keyNumber, .name=keyName}
 #define KEY_SET_ENTRY(setNumber,keyName) {.set=setNumber, .name=keyName}
 #define LAST_KEY_NAME_ENTRY {.name=NULL}
+#define KEY_NAME_TABLE_LIST(name) const KeyNameEntry *const name[]
 
 typedef struct KeyTableStruct KeyTable;
 

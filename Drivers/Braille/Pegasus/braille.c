@@ -84,7 +84,7 @@ static KEY_NAME_TABLE(keyNames_all) = {
   LAST_KEY_NAME_ENTRY
 };
 
-static const KeyNameEntry *const keyNameTables_all[] = {
+static KEY_NAME_TABLE_LIST(keyNameTables_all) = {
   keyNames_all,
   NULL
 };
