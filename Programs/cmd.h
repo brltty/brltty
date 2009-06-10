@@ -34,6 +34,7 @@ typedef struct {
 } CommandEntry;
 
 extern const CommandEntry commandTable[];
+extern const CommandEntry *getCommandEntry (int code);
 
 extern void describeCommand (int command, char *buffer, int size);
 extern int isBaseCommand (int code);

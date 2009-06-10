@@ -35,6 +35,78 @@ const CommandEntry commandTable[] = {
 };
 
 static int
+compareCommandCodes (const void *element1, const void *element2) {
+  const CommandEntry *const *cmd1 = element1;
+  const CommandEntry *const *cmd2 = element2;
+
+  if ((*cmd1)->code < (*cmd2)->code) return -1;
+  if ((*cmd1)->code > (*cmd2)->code) return 1;
+  return 0;
+}
+
+const CommandEntry *
+getCommandEntry (int code) {
+  static const CommandEntry **commandEntries = NULL;
+  static int commandCount;
+
+  if (!commandEntries) {
+    {
+      const CommandEntry *cmd = commandTable;
+      while (cmd->name) cmd += 1;
+      commandCount = cmd - commandTable;
+    }
+
+    {
+      const CommandEntry **entries = malloc(ARRAY_SIZE(entries, commandCount));
+
+      if (!entries) {
+        LogError("malloc");
+        return NULL;
+      }
+
+      {
+        const CommandEntry *cmd = commandTable;
+        const CommandEntry **entry = entries;
+        while (cmd->name) *entry++ = cmd++;
+      }
+
+      qsort(entries, commandCount, sizeof(*entries), compareCommandCodes);
+      commandEntries = entries;
+    }
+  }
+
+  code &= BRL_MSK_CMD;
+  {
+    int first = 0;
+    int last = commandCount - 1;
+
+    while (first <= last) {
+      int current = (first + last) / 2;
+      const CommandEntry *cmd = commandEntries[current];
+
+      if (code < cmd->code) {
+        last = current - 1;
+      } else {
+        first = current + 1;
+      }
+    }
+
+    if (last >= 0) {
+      const CommandEntry *cmd = commandEntries[last];
+      int blk = cmd->code & BRL_MSK_BLK;
+      int arg = cmd->code & BRL_MSK_ARG;
+
+      if (blk == (code & BRL_MSK_BLK)) {
+        if (blk) return cmd;
+        if (arg == (code & BRL_MSK_ARG)) return cmd;
+      }
+    }
+  }
+
+  return NULL;
+}
+
+static int
 isTypedCommand (int code, const int *codes) {
   while (*codes != EOF) {
     if (code == *codes) return 1;
