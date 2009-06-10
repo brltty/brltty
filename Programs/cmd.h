@@ -28,18 +28,19 @@ extern "C" {
 #endif /* __cplusplus */
 
 typedef struct {
-  int code;
   const char *name;
   const char *description;
+  int code;
+  unsigned isMotion:1;
+  unsigned isToggle:1;
+  unsigned isCharacter:1;
+  unsigned isBase:1;
 } CommandEntry;
 
 extern const CommandEntry commandTable[];
 extern const CommandEntry *getCommandEntry (int code);
 
 extern void describeCommand (int command, char *buffer, int size);
-extern int isBaseCommand (int code);
-extern int isCharacterCommand (int code);
-extern int isToggleCommand (int code);
 
 extern int enqueueCommand (int command);
 extern int dequeueCommand (void);

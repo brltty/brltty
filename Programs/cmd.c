@@ -31,7 +31,7 @@
 
 const CommandEntry commandTable[] = {
   #include "cmds.auto.h"
-  {EOF, NULL, NULL}
+  {.name=NULL, .code=EOF, .description=NULL}
 };
 
 static int
@@ -104,55 +104,6 @@ getCommandEntry (int code) {
   }
 
   return NULL;
-}
-
-static int
-isTypedCommand (int code, const int *codes) {
-  while (*codes != EOF) {
-    if (code == *codes) return 1;
-    codes += 1;
-  }
-
-  return 0;
-}
-
-int
-isBaseCommand (int code) {
-  static const int codes[] = {
-    BRL_BLK_SWITCHVT,
-    BRL_BLK_SETMARK, BRL_BLK_GOTOMARK,
-    BRL_BLK_GOTOLINE,
-    BRL_BLK_PASSKEY + BRL_KEY_FUNCTION,
-    EOF
-  };
-  return isTypedCommand(code, codes);
-}
-
-int
-isCharacterCommand (int code) {
-  static const int codes[] = {
-    BRL_BLK_ROUTE,
-    BRL_BLK_CUTBEGIN, BRL_BLK_CUTAPPEND,
-    BRL_BLK_CUTRECT, BRL_BLK_CUTLINE,
-    BRL_BLK_PRINDENT, BRL_BLK_NXINDENT,
-    BRL_BLK_DESCCHAR, BRL_BLK_SETLEFT,
-    BRL_BLK_PRDIFCHAR, BRL_BLK_NXDIFCHAR,
-    EOF
-  };
-  return isTypedCommand(code, codes);
-}
-
-int
-isToggleCommand (int code) {
-  static const int codes[] = {
-    BRL_CMD_FREEZE, BRL_CMD_DISPMD, BRL_CMD_SIXDOTS,
-    BRL_CMD_SLIDEWIN, BRL_CMD_SKPIDLNS, BRL_CMD_SKPBLNKWINS,
-    BRL_CMD_CSRVIS, BRL_CMD_CSRHIDE, BRL_CMD_CSRTRK, BRL_CMD_CSRSIZE, BRL_CMD_CSRBLINK,
-    BRL_CMD_ATTRVIS, BRL_CMD_ATTRBLINK, BRL_CMD_CAPBLINK,
-    BRL_CMD_TUNES, BRL_CMD_AUTOREPEAT, BRL_CMD_AUTOSPEAK,
-    EOF
-  };
-  return isTypedCommand(code, codes);
 }
 
 void

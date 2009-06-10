@@ -203,8 +203,8 @@ typedef enum {
 #define BRL_BLK_CUTRECT   0X0400 /* rectangular cut to character */
 #define BRL_BLK_CUTLINE   0X0500 /* linear cut to character */
 #define BRL_BLK_SWITCHVT  0X0600 /* switch to virtual terminal */
-#define BRL_BLK_PRINDENT  0X0700 /* go up to nearest line without greater indent */
-#define BRL_BLK_NXINDENT  0X0800 /* go down to nearest line without greater indent */
+#define BRL_BLK_PRINDENT  0X0700 /* go up to nearest line without greater indent than character */
+#define BRL_BLK_NXINDENT  0X0800 /* go down to nearest line without greater indent than character */
 #define BRL_BLK_DESCCHAR  0X0900 /* describe character */
 #define BRL_BLK_SETLEFT   0X0A00 /* position left end of window at character */
 #define BRL_BLK_SETMARK   0X0B00 /* remember current window position */
