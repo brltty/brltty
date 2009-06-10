@@ -88,6 +88,12 @@ typedef enum {
   HT_SET_RoutingKeys
 } HT_KeySet;
 
+static KEY_NAME_TABLE(keyNames_routing) = {
+  KEY_SET_ENTRY(HT_SET_RoutingKeys, "RoutingKey"),
+
+  LAST_KEY_NAME_ENTRY
+};
+
 static KEY_NAME_TABLE(keyNames_dots) = {
   KEY_NAME_ENTRY(HT_KEY_B1, "B1"),
   KEY_NAME_ENTRY(HT_KEY_B2, "B2"),
@@ -98,12 +104,6 @@ static KEY_NAME_TABLE(keyNames_dots) = {
   KEY_NAME_ENTRY(HT_KEY_B6, "B6"),
   KEY_NAME_ENTRY(HT_KEY_B7, "B7"),
   KEY_NAME_ENTRY(HT_KEY_B8, "B8"),
-
-  LAST_KEY_NAME_ENTRY
-};
-
-static KEY_NAME_TABLE(keyNames_routing) = {
-  KEY_SET_ENTRY(HT_SET_RoutingKeys, "RoutingKey"),
 
   LAST_KEY_NAME_ENTRY
 };
@@ -150,8 +150,8 @@ static KEY_NAME_TABLE(keyNames_modular) = {
 };
 
 static KEY_NAME_TABLE_LIST(keyNameTables_modular) = {
-  keyNames_dots,
   keyNames_routing,
+  keyNames_dots,
   keyNames_keypad,
   keyNames_modular,
   NULL
@@ -164,19 +164,19 @@ static KEY_NAME_TABLE(keyNames_modularEvolution) = {
   LAST_KEY_NAME_ENTRY
 };
 
-static KEY_NAME_TABLE_LIST(keyNameTables_modularEvolution88) = {
-  keyNames_dots,
+static KEY_NAME_TABLE_LIST(keyNameTables_modularEvolution64) = {
   keyNames_routing,
+  keyNames_dots,
   keyNames_rockers,
-  keyNames_keypad,
   keyNames_modularEvolution,
   NULL
 };
 
-static KEY_NAME_TABLE_LIST(keyNameTables_modularEvolution64) = {
-  keyNames_dots,
+static KEY_NAME_TABLE_LIST(keyNameTables_modularEvolution88) = {
   keyNames_routing,
+  keyNames_dots,
   keyNames_rockers,
+  keyNames_keypad,
   keyNames_modularEvolution,
   NULL
 };
@@ -189,16 +189,16 @@ static KEY_NAME_TABLE(keyNames_brailleStar) = {
 };
 
 static KEY_NAME_TABLE_LIST(keyNameTables_brailleStar40) = {
-  keyNames_dots,
   keyNames_routing,
+  keyNames_dots,
   keyNames_rockers,
   keyNames_brailleStar,
   NULL
 };
 
 static KEY_NAME_TABLE_LIST(keyNameTables_brailleStar80) = {
-  keyNames_dots,
   keyNames_routing,
+  keyNames_dots,
   keyNames_rockers,
   keyNames_keypad,
   keyNames_brailleStar,
@@ -214,10 +214,33 @@ static KEY_NAME_TABLE(keyNames_brailleWave) = {
 };
 
 static KEY_NAME_TABLE_LIST(keyNameTables_brailleWave) = {
-  keyNames_dots,
   keyNames_routing,
+  keyNames_dots,
   keyNames_modular,
   keyNames_brailleWave,
+  NULL
+};
+
+typedef enum {
+  HT_BWK_Backward = 0X01,
+  HT_BWK_Forward = 0X08,
+
+  HT_BWK_Escape = 0X02,
+  HT_BWK_Enter = 0X04
+} HT_BookwormKey;
+
+static KEY_NAME_TABLE(keyNames_bookworm) = {
+  KEY_NAME_ENTRY(HT_BWK_Backward, "Backward"),
+  KEY_NAME_ENTRY(HT_BWK_Forward, "Forward"),
+
+  KEY_NAME_ENTRY(HT_BWK_Escape, "Escape"),
+  KEY_NAME_ENTRY(HT_BWK_Enter, "Enter"),
+
+  LAST_KEY_NAME_ENTRY
+};
+
+static KEY_NAME_TABLE_LIST(keyNameTables_bookworm) = {
+  keyNames_bookworm,
   NULL
 };
 
@@ -349,6 +372,7 @@ static const ModelEntry modelTable[] = {
     .textCells = 8,
     .statusCells = 0,
     .keyBindings = keyBindings_bookworm,
+    .keyNameTables = keyNameTables_bookworm,
     .interpretByte = interpretBookwormByte,
     .writeCells = writeBookwormCells,
     HT_BYTE_SEQUENCE(sessionEnd, BookwormSessionEnd)
