@@ -102,6 +102,12 @@ static KEY_NAME_TABLE(keyNames_dots) = {
   LAST_KEY_NAME_ENTRY
 };
 
+static KEY_NAME_TABLE(keyNames_routing) = {
+  KEY_SET_ENTRY(HT_SET_RoutingKeys, "RoutingKey"),
+
+  LAST_KEY_NAME_ENTRY
+};
+
 static KEY_NAME_TABLE(keyNames_keypad) = {
   KEY_NAME_ENTRY(HT_KEY_B12, "B12"),
   KEY_NAME_ENTRY(HT_KEY_Zero, "Zero"),
@@ -136,7 +142,22 @@ static KEY_NAME_TABLE(keyNames_rockers) = {
   LAST_KEY_NAME_ENTRY
 };
 
-static KEY_NAME_TABLE(keyNames_modularEvolution88) = {
+static KEY_NAME_TABLE(keyNames_modular) = {
+  KEY_NAME_ENTRY(HT_KEY_Up, "Up"),
+  KEY_NAME_ENTRY(HT_KEY_Down, "Down"),
+
+  LAST_KEY_NAME_ENTRY
+};
+
+static KEY_NAME_TABLE_LIST(keyNameTables_modular) = {
+  keyNames_dots,
+  keyNames_routing,
+  keyNames_keypad,
+  keyNames_modular,
+  NULL
+};
+
+static KEY_NAME_TABLE(keyNames_modularEvolution) = {
   KEY_NAME_ENTRY(HT_KEY_Space, "ThumbLeft"),
   KEY_NAME_ENTRY(HT_KEY_SpaceRight, "ThumbRight"),
 
@@ -145,27 +166,22 @@ static KEY_NAME_TABLE(keyNames_modularEvolution88) = {
 
 static KEY_NAME_TABLE_LIST(keyNameTables_modularEvolution88) = {
   keyNames_dots,
+  keyNames_routing,
   keyNames_rockers,
   keyNames_keypad,
-  keyNames_modularEvolution88,
+  keyNames_modularEvolution,
   NULL
-};
-
-static KEY_NAME_TABLE(keyNames_modularEvolution64) = {
-  KEY_NAME_ENTRY(HT_KEY_Space, "ThumbLeft"),
-  KEY_NAME_ENTRY(HT_KEY_SpaceRight, "ThumbRight"),
-
-  LAST_KEY_NAME_ENTRY
 };
 
 static KEY_NAME_TABLE_LIST(keyNameTables_modularEvolution64) = {
   keyNames_dots,
+  keyNames_routing,
   keyNames_rockers,
-  keyNames_modularEvolution64,
+  keyNames_modularEvolution,
   NULL
 };
 
-static KEY_NAME_TABLE(keyNames_brailleStar40) = {
+static KEY_NAME_TABLE(keyNames_brailleStar) = {
   KEY_NAME_ENTRY(HT_KEY_Space, "SpaceLeft"),
   KEY_NAME_ENTRY(HT_KEY_SpaceRight, "SpaceRight"),
 
@@ -174,23 +190,34 @@ static KEY_NAME_TABLE(keyNames_brailleStar40) = {
 
 static KEY_NAME_TABLE_LIST(keyNameTables_brailleStar40) = {
   keyNames_dots,
+  keyNames_routing,
   keyNames_rockers,
-  keyNames_brailleStar40,
+  keyNames_brailleStar,
   NULL
-};
-
-static KEY_NAME_TABLE(keyNames_brailleStar80) = {
-  KEY_NAME_ENTRY(HT_KEY_Space, "SpaceLeft"),
-  KEY_NAME_ENTRY(HT_KEY_SpaceRight, "SpaceRight"),
-
-  LAST_KEY_NAME_ENTRY
 };
 
 static KEY_NAME_TABLE_LIST(keyNameTables_brailleStar80) = {
   keyNames_dots,
+  keyNames_routing,
   keyNames_rockers,
   keyNames_keypad,
-  keyNames_brailleStar80,
+  keyNames_brailleStar,
+  NULL
+};
+
+static KEY_NAME_TABLE(keyNames_brailleWave) = {
+  KEY_NAME_ENTRY(HT_KEY_Escape, "Escape"),
+  KEY_NAME_ENTRY(HT_KEY_Space, "Space"),
+  KEY_NAME_ENTRY(HT_KEY_Return, "Return"),
+
+  LAST_KEY_NAME_ENTRY
+};
+
+static KEY_NAME_TABLE_LIST(keyNameTables_brailleWave) = {
+  keyNames_dots,
+  keyNames_routing,
+  keyNames_modular,
+  keyNames_brailleWave,
   NULL
 };
 
@@ -253,6 +280,7 @@ static const ModelEntry modelTable[] = {
     .textCells = 20,
     .statusCells = 4,
     .keyBindings = keyBindings_modular,
+    .keyNameTables = keyNameTables_modular,
     .interpretByte = interpretKeyByte,
     .interpretKeys = interpretModularKeys,
     .writeCells = writeStatusAndTextCells
@@ -263,6 +291,7 @@ static const ModelEntry modelTable[] = {
     .textCells = 40,
     .statusCells = 4,
     .keyBindings = keyBindings_modular,
+    .keyNameTables = keyNameTables_modular,
     .interpretByte = interpretKeyByte,
     .interpretKeys = interpretModularKeys,
     .writeCells = writeStatusAndTextCells
@@ -273,6 +302,7 @@ static const ModelEntry modelTable[] = {
     .textCells = 80,
     .statusCells = 4,
     .keyBindings = keyBindings_modular,
+    .keyNameTables = keyNameTables_modular,
     .interpretByte = interpretKeyByte,
     .interpretKeys = interpretModularKeys,
     .writeCells = writeStatusAndTextCells
@@ -307,6 +337,7 @@ static const ModelEntry modelTable[] = {
     .textCells = 40,
     .statusCells = 0,
     .keyBindings = keyBindings_modular,
+    .keyNameTables = keyNameTables_brailleWave,
     .interpretByte = interpretKeyByte,
     .interpretKeys = interpretBrailleWaveKeys,
     .writeCells = writeStatusAndTextCells
@@ -328,6 +359,7 @@ static const ModelEntry modelTable[] = {
     .textCells = 20,
     .statusCells = 0,
     .keyBindings = keyBindings_star40,
+    .keyNameTables = keyNameTables_brailleStar40,
     .interpretByte = interpretKeyByte,
     .interpretKeys = interpretBrailleStarKeys,
     .writeCells = writeStatusAndTextCells
@@ -360,6 +392,7 @@ static const ModelEntry modelTable[] = {
     .textCells = 40,
     .statusCells = 0,
     .keyBindings = keyBindings_easy,
+    .keyNameTables = keyNameTables_modular,
     .interpretByte = interpretKeyByte,
     .interpretKeys = interpretModularKeys,
     .writeCells = writeStatusAndTextCells
