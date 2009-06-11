@@ -55,10 +55,10 @@ extern "C" {
 
 /* Argument for brl_readCommand() */
 typedef enum {
-  BRL_CTX_SCREEN,
   BRL_CTX_PREFS,
   BRL_CTX_CHORDS,
-  BRL_CTX_WAITING
+  BRL_CTX_WAITING,
+  BRL_CTX_DEFAULT /* this one must be defined last */
 } BRL_DriverCommandContext;
 
 /* The following command codes are return values for brl_readCommand().
@@ -280,6 +280,8 @@ typedef enum {
 #define BRL_FLG_KBD_RELEASE 0X010000 /* it is a release scan code */
 #define BRL_FLG_KBD_EMUL0 0X020000 /* it is an emulation 0 scan code */
 #define BRL_FLG_KBD_EMUL1 0X040000 /* it is an emulation 1 scan code */
+
+#define BRL_BLK_CONTEXT 0X2600 /* switch to command context */
 
 /*
  * Please comment all BRL_GSC_* definitions. They are

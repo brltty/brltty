@@ -336,7 +336,7 @@ int	esysiris_init(BrailleDisplay *brl, t_eubrl_io *io)
       int i=60;
       while(i-- && brlCols==0)
         {
-          esysiris_readCommand(brl, BRL_CTX_SCREEN);
+          esysiris_readCommand(brl, BRL_CTX_DEFAULT);
           approximateDelay(10);
         }
       approximateDelay(100);

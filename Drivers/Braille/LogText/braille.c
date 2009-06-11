@@ -515,7 +515,7 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *status) {
          column = MAX(1, MIN(column, screenWidth)) - 1;
          if (deviceStatus < DEV_READY) {
             memset(targetImage, 0, sizeof(targetImage));
-            currentContext = BRL_CTX_SCREEN;
+            currentContext = BRL_CTX_DEFAULT;
             currentLine = row;
             cursorRow = screenHeight;
             cursorColumn = screenWidth;
@@ -744,7 +744,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
    if (context != currentContext) {
       LogPrint(LOG_DEBUG, "Context switch: %d -> %d", currentContext, context);
       switch (currentContext = context) {
-         case BRL_CTX_SCREEN:
+         case BRL_CTX_DEFAULT:
             deviceStatus = DEV_ONLINE;
             break;
          default:

@@ -318,7 +318,7 @@ int     clio_init(BrailleDisplay *brl, t_eubrl_io *io)
     {
       clio_reset(brl);      
       approximateDelay(500);
-      clio_readCommand(brl, BRL_CTX_SCREEN);
+      clio_readCommand(brl, BRL_CTX_DEFAULT);
     }
   if (brlCols > 0)
     { /* Succesfully identified hardware. */

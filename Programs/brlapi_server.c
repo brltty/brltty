@@ -2377,7 +2377,7 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context
   }
   if (drain)
     drainBrailleOutput(brl, 0);
-  if ((context == BRL_CTX_SCREEN) && retainDots) context = BRL_CTX_CHORDS;
+  if ((context == BRL_CTX_DEFAULT) && retainDots) context = BRL_CTX_CHORDS;
   if (trueBraille->readKey) {
     pthread_mutex_lock(&driverMutex);
     res = trueBraille->readKey(brl);

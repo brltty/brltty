@@ -334,7 +334,7 @@ static int brl_construct (BrailleDisplay *brl, char **parameters, const char *de
 	while (!NbCols)
 	  {
 	     drainBrailleOutput (brl, 100);
-	     brl_readCommand (brl, BRL_CTX_SCREEN);       /* to get the answer */
+	     brl_readCommand (brl, BRL_CTX_DEFAULT);       /* to get the answer */
 	     if (++i >= 10)
 	       break;
 	  }

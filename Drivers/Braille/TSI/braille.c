@@ -769,7 +769,7 @@ cut_cursor (BrailleDisplay *brl)
       display_all (brl, prevdata);
       prevdata[pos] = oldchar;
 
-      while ((key = brl_readCommand (brl, BRL_CTX_SCREEN)) == EOF) approximateDelay(1); /* just yield */
+      while ((key = brl_readCommand (brl, BRL_CTX_DEFAULT)) == EOF) approximateDelay(1); /* just yield */
       if((key &BRL_MSK_BLK) == BRL_BLK_CUTBEGIN)
 	  res = BRL_BLK_CUTBEGIN + pos;
       else if((key &BRL_MSK_BLK) == BRL_BLK_CUTAPPEND)
