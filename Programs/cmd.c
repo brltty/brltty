@@ -97,8 +97,16 @@ getCommandEntry (int code) {
       int arg = cmd->code & BRL_MSK_ARG;
 
       if (blk == (code & BRL_MSK_BLK)) {
-        if (blk) return cmd;
         if (arg == (code & BRL_MSK_ARG)) return cmd;
+
+        if (blk) {
+          return cmd;
+          int next = last + 1;
+
+          if (next < commandCount)
+            if (blk != (commandEntries[next]->code & BRL_MSK_BLK))
+              return cmd;
+        }
       }
     }
   }
@@ -107,82 +115,80 @@ getCommandEntry (int code) {
 }
 
 void
-describeCommand (int command, char *buffer, int size) {
+describeCommand (int command, char *buffer, size_t size) {
   int blk = command & BRL_MSK_BLK;
   int arg = command & BRL_MSK_ARG;
-  int cmd = blk | arg;
-  const CommandEntry *candidate = NULL;
-  const CommandEntry *last = NULL;
+  const CommandEntry *cmd = getCommandEntry(command);
 
-  {
-    const CommandEntry *current = commandTable;
-    while (current->name) {
-      if ((current->code & BRL_MSK_BLK) == blk) {
-        if (!last || (last->code < current->code)) last = current;
-        if (!candidate || (candidate->code < cmd)) candidate = current;
-      }
-
-      ++current;
-    }
-  }
-  if (candidate)
-    if (candidate->code != cmd)
-      if ((blk == 0) || (candidate->code < last->code))
-        candidate = NULL;
-
-  if (!candidate) {
+  if (!cmd) {
     snprintf(buffer, size, "unknown: %06X", command);
-  } else if ((candidate == last) && (blk != 0)) {
-    unsigned int number;
-    switch (blk) {
-      default:
-        number = cmd - candidate->code + 1;
-        break;
-
-      case BRL_BLK_PASSCHAR:
-        number = cmd - candidate->code;
-        break;
-
-      case BRL_BLK_PASSDOTS: {
-        static const unsigned char dots[] = {BRL_DOT1, BRL_DOT2, BRL_DOT3, BRL_DOT4, BRL_DOT5, BRL_DOT6, BRL_DOT7, BRL_DOT8};
-        int dot;
-        number = 0;
-        for (dot=0; dot<sizeof(dots); ++dot) {
-          if (arg & dots[dot]) {
-            number = (number * 10) + (dot + 1);
-          }
-        }
-        break;
-      }
-    }
-    snprintf(buffer, size, "%s[%d]: %s",
-             candidate->name, number, candidate->description);
   } else {
     int offset;
-    snprintf(buffer, size, "%s: %n%s",
-             candidate->name, &offset, candidate->description);
 
-    if ((blk == 0) && (command & BRL_FLG_TOGGLE_MASK)) {
+    snprintf(buffer, size, "%s: %n%s",
+             cmd->name, &offset, cmd->description);
+
+    if (cmd->isToggle && (command & BRL_FLG_TOGGLE_MASK)) {
       char *description = buffer + offset;
       const char *oldVerb = "toggle";
       int oldLength = strlen(oldVerb);
+
       if (strncmp(description, oldVerb, oldLength) == 0) {
         const char *newVerb = "set";
         int newLength = strlen(newVerb);
+
         memmove(description+newLength, description+oldLength, strlen(description+oldLength)+1);
         memcpy(description, newVerb, newLength);
+
         if (command & BRL_FLG_TOGGLE_ON) {
           char *end = strrchr(description, '/');
           if (end) *end = 0;
         } else {
           char *target = strrchr(description, ' ');
+
           if (target) {
             const char *source = strchr(++target, '/');
+
             if (source) {
               memmove(target, source+1, strlen(source));
             }
           }
         }
+      }
+    }
+
+    {
+      size_t length = strlen(buffer);
+      buffer += length;
+      size -= length;
+    }
+
+    if (cmd->isCharacter || cmd->isBase) {
+      snprintf(buffer, size, " #%u",
+               arg - (cmd->code & BRL_MSK_ARG) + 1);
+    } else if (blk) {
+      switch (blk) {
+        case BRL_BLK_PASSKEY:
+          break;
+
+        case BRL_BLK_PASSDOTS: {
+          static const unsigned char dots[] = {BRL_DOT1, BRL_DOT2, BRL_DOT3, BRL_DOT4, BRL_DOT5, BRL_DOT6, BRL_DOT7, BRL_DOT8};
+          int dot;
+          unsigned int number = 0;
+
+          for (dot=0; dot<sizeof(dots); dot+=1) {
+            if (arg & dots[dot]) {
+              number = (number * 10) + (dot + 1);
+            }
+          }
+
+          snprintf(buffer, size, " %u", number);
+          break;
+        }
+
+        default:
+          snprintf(buffer, size, " 0X%02X", arg);
+          break;
       }
     }
   }

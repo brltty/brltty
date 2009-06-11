@@ -35,7 +35,7 @@ BEGIN {
   gsub(",", "", $1)
   key = tolower(substr($1, 9))
   gsub("_", "-", key)
-  brlKey(substr($1, 9), $1, keyCount++, "simulate pressing the " key " key")
+  brlKey(substr($1, 9), $1, keyCount++, key " key")
   next
 }
 

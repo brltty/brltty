@@ -237,8 +237,8 @@ typedef enum {
   BRL_KEY_FUNCTION
 } BRL_Key;
 
-#define BRL_BLK_PASSCHAR 0X2100 /* input character by value */
-#define BRL_BLK_PASSDOTS 0X2200 /* input character as braille dots */
+#define BRL_BLK_PASSCHAR 0X2100 /* input character as value */
+#define BRL_BLK_PASSDOTS 0X2200 /* input character as dots */
 #define BRL_FLG_CHAR_SHIFT   0X010000 /* shift key pressed */
 #define BRL_FLG_CHAR_UPPER   0X020000 /* convert to uppercase */
 #define BRL_FLG_CHAR_CONTROL 0X040000 /* control key pressed */
@@ -274,9 +274,9 @@ typedef enum {
 #define BRL_DOT8 BRL_ARG_SET(0200) /* lower-right dot of computer braille cell */
 #define BRL_DOTC BRL_ARG_SET(0400) /* space key pressed */
 
-#define BRL_BLK_PASSAT 0X2300 /* input AT (aka set 2) keyboard scan code */
-#define BRL_BLK_PASSXT 0X2400 /* input XT (aka set 1) keyboard scan code */
-#define BRL_BLK_PASSPS2 0X2500 /* input PS/2 (aka set 3) keyboard scan code */
+#define BRL_BLK_PASSAT 0X2300 /* input AT (set 2) keyboard scan code */
+#define BRL_BLK_PASSXT 0X2400 /* input XT (set 1) keyboard scan code */
+#define BRL_BLK_PASSPS2 0X2500 /* input PS/2 (set 3) keyboard scan code */
 #define BRL_FLG_KBD_RELEASE 0X010000 /* it is a release scan code */
 #define BRL_FLG_KBD_EMUL0 0X020000 /* it is an emulation 0 scan code */
 #define BRL_FLG_KBD_EMUL1 0X040000 /* it is an emulation 1 scan code */
