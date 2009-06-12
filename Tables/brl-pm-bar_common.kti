@@ -18,45 +18,45 @@
 
 parameters statusKeys switches
 
-bind @switches@KeyLeftRear BACK
-bind @switches@KeyLeftFront HOME
-bind @switches@KeyRightRear HELP
-bind @switches@KeyRightFront LEARN
+bind @switches@LeftKeyRear BACK
+bind @switches@LeftKeyFront HOME
+bind @switches@RightKeyRear HELP
+bind @switches@RightKeyFront LEARN
 
-bind @switches@KeyLeftRear+BarUp1 SIXDOTS
-bind @switches@KeyLeftRear+BarDown1 PASTE
-bind @switches@KeyLeftRear+BarUp2 CAPBLINK
-bind @switches@KeyLeftRear+BarDown2 CSRJMP_VERT
-bind @switches@KeyLeftRear+BarLeft1 DISPMD
-bind @switches@KeyLeftRear+BarRight1 CSRTRK
-bind @switches@KeyLeftRear+BarLeft2 ATTRVIS
-bind @switches@KeyLeftRear+BarRight2 CSRVIS
+bind @switches@LeftKeyRear+BarUp1 SIXDOTS
+bind @switches@LeftKeyRear+BarDown1 PASTE
+bind @switches@LeftKeyRear+BarUp2 CAPBLINK
+bind @switches@LeftKeyRear+BarDown2 CSRJMP_VERT
+bind @switches@LeftKeyRear+BarLeft1 DISPMD
+bind @switches@LeftKeyRear+BarRight1 CSRTRK
+bind @switches@LeftKeyRear+BarLeft2 ATTRVIS
+bind @switches@LeftKeyRear+BarRight2 CSRVIS
 
-bind @switches@KeyLeftFront+BarUp1 AUTOSPEAK
-bind @switches@KeyLeftFront+BarDown1 AUTOREPEAT
-bind @switches@KeyLeftFront+BarUp2 RESTARTBRL
-bind @switches@KeyLeftFront+BarDown2 FREEZE
-bind @switches@KeyLeftFront+BarLeft1 INFO
-bind @switches@KeyLeftFront+BarRight1 PREFMENU
-bind @switches@KeyLeftFront+BarLeft2 PREFLOAD
-bind @switches@KeyLeftFront+BarRight2 PREFSAVE
+bind @switches@LeftKeyFront+BarUp1 AUTOSPEAK
+bind @switches@LeftKeyFront+BarDown1 AUTOREPEAT
+bind @switches@LeftKeyFront+BarUp2 RESTARTBRL
+bind @switches@LeftKeyFront+BarDown2 FREEZE
+bind @switches@LeftKeyFront+BarLeft1 INFO
+bind @switches@LeftKeyFront+BarRight1 PREFMENU
+bind @switches@LeftKeyFront+BarLeft2 PREFLOAD
+bind @switches@LeftKeyFront+BarRight2 PREFSAVE
 
-bind @switches@KeyRightRear+BarUp1 SAY_ABOVE
-bind @switches@KeyRightRear+BarDown1 SAY_BELOW
-bind @switches@KeyRightRear+BarUp2 SAY_LOUDER
-bind @switches@KeyRightRear+BarDown2 SAY_SOFTER
-bind @switches@KeyRightRear+BarLeft1 MUTE
-bind @switches@KeyRightRear+BarRight1 SAY_LINE
-bind @switches@KeyRightRear+BarLeft2 SAY_SLOWER
-bind @switches@KeyRightRear+BarRight2 SAY_FASTER
+bind @switches@RightKeyRear+BarUp1 SAY_ABOVE
+bind @switches@RightKeyRear+BarDown1 SAY_BELOW
+bind @switches@RightKeyRear+BarUp2 SAY_LOUDER
+bind @switches@RightKeyRear+BarDown2 SAY_SOFTER
+bind @switches@RightKeyRear+BarLeft1 MUTE
+bind @switches@RightKeyRear+BarRight1 SAY_LINE
+bind @switches@RightKeyRear+BarLeft2 SAY_SLOWER
+bind @switches@RightKeyRear+BarRight2 SAY_FASTER
 
-bind @switches@KeyRightFront+BarUp1 SPKHOME
-bind @switches@KeyRightFront+BarDown1 TUNES
-bind @switches@KeyRightFront+BarUp2 RESTARTSPEECH
-bind @switches@KeyRightFront+BarDown2 SWSIM_BQ
-bind @switches@KeyRightFront+BarLeft1 SKPIDLNS
-bind @switches@KeyRightFront+BarRight1 SKPBLNKWINS
-bind @switches@KeyRightFront+BarRight2 SLIDEWIN
+bind @switches@RightKeyFront+BarUp1 SPKHOME
+bind @switches@RightKeyFront+BarDown1 TUNES
+bind @switches@RightKeyFront+BarUp2 RESTARTSPEECH
+bind @switches@RightKeyFront+BarDown2 SWSIM_BQ
+bind @switches@RightKeyFront+BarLeft1 SKPIDLNS
+bind @switches@RightKeyFront+BarRight1 SKPBLNKWINS
+bind @switches@RightKeyFront+BarRight2 SLIDEWIN
 
 bind @switches@!Routing1 ROUTE
 bind @switches@BarUp1+!Routing1 PRINDENT

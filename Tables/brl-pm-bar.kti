@@ -29,57 +29,57 @@ bind BarRight1 FWINRT
 bind BarLeft2 LNBEG
 bind BarRight2 LNEND
 
-bind SwitchLeftRear+BarUp1 PRDIFLN
-bind SwitchLeftRear+BarDown1 NXDIFLN
-bind SwitchLeftRear+BarUp2 ATTRUP
-bind SwitchLeftRear+BarDown2 ATTRDN
-bind SwitchLeftRear+BarLeft1 PRPROMPT
-bind SwitchLeftRear+BarRight1 NXPROMPT
-bind SwitchLeftRear+BarLeft2 PRPGRPH
-bind SwitchLeftRear+BarRight2 NXPGRPH
+bind LeftSwitchRear+BarUp1 PRDIFLN
+bind LeftSwitchRear+BarDown1 NXDIFLN
+bind LeftSwitchRear+BarUp2 ATTRUP
+bind LeftSwitchRear+BarDown2 ATTRDN
+bind LeftSwitchRear+BarLeft1 PRPROMPT
+bind LeftSwitchRear+BarRight1 NXPROMPT
+bind LeftSwitchRear+BarLeft2 PRPGRPH
+bind LeftSwitchRear+BarRight2 NXPGRPH
 
-bind SwitchRightRear+BarUp1 KEY_CURSOR_UP
-bind SwitchRightRear+BarDown1 KEY_CURSOR_DOWN
-bind SwitchRightRear+BarUp2 KEY_PAGE_UP
-bind SwitchRightRear+BarDown2 KEY_PAGE_DOWN
-bind SwitchRightRear+BarLeft1 FWINLT+route
-bind SwitchRightRear+BarRight1 FWINRT+route
-bind SwitchRightRear+BarLeft2 LNBEG+route
-bind SwitchRightRear+BarRight2 LNEND+route
+bind RightSwitchRear+BarUp1 KEY_CURSOR_UP
+bind RightSwitchRear+BarDown1 KEY_CURSOR_DOWN
+bind RightSwitchRear+BarUp2 KEY_PAGE_UP
+bind RightSwitchRear+BarDown2 KEY_PAGE_DOWN
+bind RightSwitchRear+BarLeft1 FWINLT+route
+bind RightSwitchRear+BarRight1 FWINRT+route
+bind RightSwitchRear+BarLeft2 LNBEG+route
+bind RightSwitchRear+BarRight2 LNEND+route
 
-bind SwitchLeftRear+SwitchRightRear+BarUp1 KEY_CURSOR_UP
-bind SwitchLeftRear+SwitchRightRear+BarDown1 KEY_CURSOR_DOWN
-bind SwitchLeftRear+SwitchRightRear+BarUp2 KEY_PAGE_UP
-bind SwitchLeftRear+SwitchRightRear+BarDown2 KEY_PAGE_DOWN
-bind SwitchLeftRear+SwitchRightRear+BarLeft1 KEY_CURSOR_LEFT
-bind SwitchLeftRear+SwitchRightRear+BarRight1 KEY_CURSOR_RIGHT
-bind SwitchLeftRear+SwitchRightRear+BarLeft2 KEY_HOME
-bind SwitchLeftRear+SwitchRightRear+BarRight2 KEY_END
+bind LeftSwitchRear+RightSwitchRear+BarUp1 KEY_CURSOR_UP
+bind LeftSwitchRear+RightSwitchRear+BarDown1 KEY_CURSOR_DOWN
+bind LeftSwitchRear+RightSwitchRear+BarUp2 KEY_PAGE_UP
+bind LeftSwitchRear+RightSwitchRear+BarDown2 KEY_PAGE_DOWN
+bind LeftSwitchRear+RightSwitchRear+BarLeft1 KEY_CURSOR_LEFT
+bind LeftSwitchRear+RightSwitchRear+BarRight1 KEY_CURSOR_RIGHT
+bind LeftSwitchRear+RightSwitchRear+BarLeft2 KEY_HOME
+bind LeftSwitchRear+RightSwitchRear+BarRight2 KEY_END
 
-bind SwitchLeftFront+BarUp1 PRSEARCH
-bind SwitchLeftFront+BarDown1 NXSEARCH
-bind SwitchLeftFront+BarUp2 HELP
-bind SwitchLeftFront+BarDown2 LEARN
-bind SwitchLeftFront+BarLeft1 CHRLT
-bind SwitchLeftFront+BarRight1 CHRRT
-bind SwitchLeftFront+BarLeft2 HWINLT
-bind SwitchLeftFront+BarRight2 HWINRT
+bind LeftSwitchFront+BarUp1 PRSEARCH
+bind LeftSwitchFront+BarDown1 NXSEARCH
+bind LeftSwitchFront+BarUp2 HELP
+bind LeftSwitchFront+BarDown2 LEARN
+bind LeftSwitchFront+BarLeft1 CHRLT
+bind LeftSwitchFront+BarRight1 CHRRT
+bind LeftSwitchFront+BarLeft2 HWINLT
+bind LeftSwitchFront+BarRight2 HWINRT
 
-bind SwitchRightFront+BarUp1 MENU_PREV_ITEM
-bind SwitchRightFront+BarDown1 MENU_NEXT_ITEM
-bind SwitchRightFront+BarUp2 MENU_FIRST_ITEM
-bind SwitchRightFront+BarDown2 MENU_LAST_ITEM
-bind SwitchRightFront+BarLeft1 MENU_PREV_SETTING
-bind SwitchRightFront+BarRight1 MENU_NEXT_SETTING
-bind SwitchRightFront+BarLeft2 PREFLOAD
-bind SwitchRightFront+BarRight2 PREFSAVE
+bind RightSwitchFront+BarUp1 MENU_PREV_ITEM
+bind RightSwitchFront+BarDown1 MENU_NEXT_ITEM
+bind RightSwitchFront+BarUp2 MENU_FIRST_ITEM
+bind RightSwitchFront+BarDown2 MENU_LAST_ITEM
+bind RightSwitchFront+BarLeft1 MENU_PREV_SETTING
+bind RightSwitchFront+BarRight1 MENU_NEXT_SETTING
+bind RightSwitchFront+BarLeft2 PREFLOAD
+bind RightSwitchFront+BarRight2 PREFSAVE
 
 include brl-pm-bar_common.kti @statusKeys@
-include brl-pm-bar_common.kti @statusKeys@ SwitchLeftRear+
-include brl-pm-bar_common.kti @statusKeys@ SwitchLeftFront+
-include brl-pm-bar_common.kti @statusKeys@ SwitchRightRear+
-include brl-pm-bar_common.kti @statusKeys@ SwitchRightFront+
-include brl-pm-bar_common.kti @statusKeys@ SwitchLeftRear+SwitchRightRear+
-include brl-pm-bar_common.kti @statusKeys@ SwitchLeftRear+SwitchRightFront+
-include brl-pm-bar_common.kti @statusKeys@ SwitchLeftFront+SwitchRightRear+
-include brl-pm-bar_common.kti @statusKeys@ SwitchLeftFront+SwitchRightFront+
+include brl-pm-bar_common.kti @statusKeys@ LeftSwitchRear+
+include brl-pm-bar_common.kti @statusKeys@ LeftSwitchFront+
+include brl-pm-bar_common.kti @statusKeys@ RightSwitchRear+
+include brl-pm-bar_common.kti @statusKeys@ RightSwitchFront+
+include brl-pm-bar_common.kti @statusKeys@ LeftSwitchRear+RightSwitchRear+
+include brl-pm-bar_common.kti @statusKeys@ LeftSwitchRear+RightSwitchFront+
+include brl-pm-bar_common.kti @statusKeys@ LeftSwitchFront+RightSwitchRear+
+include brl-pm-bar_common.kti @statusKeys@ LeftSwitchFront+RightSwitchFront+
