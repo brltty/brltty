@@ -19,7 +19,7 @@
 # Key subtable for HandyTech rocker keys
 
 bind RockerLeftTop KEY_CURSOR_UP
-bind RockerLeftBotoom KEY_CURSOR_DOWN
+bind RockerLeftBottom KEY_CURSOR_DOWN
 bind RockerRightTop LNUP
 bind RockerRightBottom LNDN
 bind RockerLeftTop+RockerLeftBottom FWINLT

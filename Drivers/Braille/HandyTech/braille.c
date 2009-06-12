@@ -85,7 +85,8 @@ typedef enum {
 
 typedef enum {
   HT_SET_NavigationKeys = 0,
-  HT_SET_RoutingKeys
+  HT_SET_RoutingKeys,
+  HT_SET_StatusKeys
 } HT_KeySet;
 
 static KEY_NAME_TABLE(keyNames_routing) = {
@@ -264,6 +265,7 @@ static const unsigned char BookwormSessionEnd[] = {0X05, 0X07};	/* bookworm trai
 
 typedef int (ByteInterpreter) (BRL_DriverCommandContext context, unsigned char byte, int *command);
 static ByteInterpreter interpretKeyByte;
+static ByteInterpreter handleKeyByte;
 static ByteInterpreter interpretBookwormByte;
 
 typedef int (KeysInterpreter) (BRL_DriverCommandContext context, const Keys *keys, int *command);
@@ -350,8 +352,7 @@ static const ModelEntry modelTable[] = {
     .statusCells = 0,
     .keyBindings = keyBindings_modularEvolution88,
     .keyNameTables = keyNameTables_modularEvolution88,
-    .interpretByte = interpretKeyByte,
-    .interpretKeys = interpretBrailleStarKeys,
+    .interpretByte = handleKeyByte,
     .writeCells = writeEvolutionCells,
     .hasATC = 1
   }
@@ -1035,6 +1036,32 @@ interpretKeyByte (BRL_DriverCommandContext context, unsigned char byte, int *com
 
   return 0;
 }
+
+static int
+handleKeyByte (BRL_DriverCommandContext context, unsigned char byte, int *command) {
+  int release = (byte & KEY_RELEASE) != 0;
+  if (release) byte &= ~KEY_RELEASE;
+
+  if ((byte >= KEY_ROUTING) &&
+      (byte < (KEY_ROUTING + model->textCells))) {
+    *command = EOF;
+    return enqueueKeyEvent(HT_SET_RoutingKeys, byte-KEY_ROUTING, !release);
+  }
+
+  if ((byte >= KEY_STATUS) &&
+      (byte < (KEY_STATUS + model->statusCells))) {
+    *command = EOF;
+    return enqueueKeyEvent(HT_SET_StatusKeys, byte-KEY_STATUS, !release);
+  }
+
+  if ((byte > 0) && (byte < 0X20)) {
+    *command = EOF;
+    return enqueueKeyEvent(HT_SET_NavigationKeys, byte, !release);
+  }
+
+  return 0;
+}
+
 
 static int
 interpretModularKeys (BRL_DriverCommandContext context, const Keys *keys, int *command) {

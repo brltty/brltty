@@ -16,24 +16,37 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# Key Table for HandyTech Modular Evolution 88
+# Key subtable for HandyTech braille dot keys
 
-bind RoutingKey ROUTE
-bind B1+RoutingKey SETLEFT
-bind B2+RoutingKey DESCCHAR
-bind B3+RoutingKey CUTAPPEND
-bind B4+RoutingKey CUTBEGIN
-bind ThumbLeft+RoutingKey PRINDENT
-bind ThumbRight+RoutingKey NXINDENT
-bind B5+RoutingKey CUTRECT
-bind B6+RoutingKey CUTLINE
-bind B7+RoutingKey SETMARK
-bind B8+RoutingKey GOTOMARK
-
-bind ThumbLeft FWINLT
-bind ThumbRight FWINRT
-bind ThumbLeft+ThumbRight PASTE
-
-include brl-ht-dots.kti
-include brl-ht-rockers.kti
-include brl-ht-keypad.kti
+bind B1 HOME
+bind B2 TOP_LEFT
+bind B3 BACK
+bind B4 LNUP
+bind B5 LNDN
+bind B1+B4 PRPGRPH
+bind B1+B5 NXPGRPH
+bind B2+B4 PRPROMPT
+bind B2+B5 NXPROMPT
+bind B3+B4 PRSEARCH
+bind B3+B5 NXSEARCH
+bind B6+B4 ATTRUP
+bind B6+B5 ATTRDN
+bind B7+B4 WINUP
+bind B7+B5 WINDN
+bind B8+B4 PRDIFLN
+bind B8+B5 NXDIFLN
+bind B8 HELP
+bind B8+B1 CSRTRK
+bind B8+B2 CSRVIS
+bind B8+B3 ATTRVIS
+bind B8+B6 FREEZE
+bind B8+B7 TUNES
+bind B7 SIXDOTS
+bind B7+B1 PREFMENU
+bind B7+B2 PREFLOAD
+bind B7+B3 PREFSAVE
+bind B7+B6 INFO
+bind B6 DISPMD
+bind B6+B1 SKPIDLNS
+bind B6+B2 SKPBLNKWINS
+bind B6+B3 SLIDEWIN
