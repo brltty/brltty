@@ -27,6 +27,7 @@ typedef struct {
   KeySetMask modifiers;
   unsigned char set;
   unsigned char key;
+  unsigned char context;
 } KeyCombination;
 
 typedef struct {

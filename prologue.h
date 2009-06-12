@@ -165,6 +165,9 @@ typedef int SocketDescriptor;
 #define wcswcs strstr
 #define wcsxfrm strxfrm
 
+#define wcstol strtol
+#define wcstoll strtoll
+
 #define iswalnum isalnum
 #define iswalpha isalpha
 #define iswblank isblank

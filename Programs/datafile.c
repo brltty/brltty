@@ -122,6 +122,26 @@ isOctalDigit (wchar_t character, int *value, int *shift) {
 }
 
 int
+isNumber (int *number, const wchar_t *characters, int length) {
+  if (length > 0) {
+    wchar_t string[length + 1];
+    wchar_t *end;
+    long value;
+
+    wmemcpy(string, characters, length);
+    string[length] = 0;
+    value = wcstol(string, &end, 0);
+
+    if (!*end) {
+      *number = value;
+      return 1;
+    }
+  }
+
+  return 0;
+}
+
+int
 findDataOperand (DataFile *file, const char *description) {
   file->start = file->end;
 

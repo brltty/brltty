@@ -41,6 +41,8 @@ typedef struct {
   KeyBinding *bindingsTable;
   unsigned int bindingsSize;
   unsigned int bindingsCount;
+
+  unsigned char context;
 } KeyTableData;
 
 static inline KeyTableHeader *
@@ -138,6 +140,7 @@ parseKeyCombination (DataFile *file, KeyCombination *keys, const wchar_t *charac
     return 0;
   }
 
+  keys->context = ktd->context;
   return 1;
 }
 
@@ -239,7 +242,11 @@ processBindOperands (DataFile *file, void *data) {
     unsigned int newSize = ktd->bindingsSize? ktd->bindingsSize<<1: 0X10;
     KeyBinding *newBindings = realloc(ktd->bindingsTable, (newSize * sizeof(*newBindings)));
 
-    if (!newBindings) return 0;
+    if (!newBindings) {
+      LogError("malloc");
+      return 0;
+    }
+
     ktd->bindingsTable = newBindings;
     ktd->bindingsSize = newSize;
   }
@@ -261,9 +268,36 @@ processBindOperands (DataFile *file, void *data) {
 }
 
 static int
+processContextOperands (DataFile *file, void *data) {
+  KeyTableData *ktd = data;
+  DataOperand context;
+
+  if (getDataOperand(file, &context, "context name or number")) {
+    if (isKeyword(WS_C("default"), context.characters, context.length)) {
+      ktd->context = BRL_CTX_DEFAULT;
+    } else if (isKeyword(WS_C("menu"), context.characters, context.length)) {
+      ktd->context = BRL_CTX_PREFS;
+    } else {
+      int number;
+
+      if (!isNumber(&number, context.characters, context.length)) {
+        reportDataError(file, "unknown context name: %.*" PRIws, context.length, context.characters);
+      } else if ((number < 0) || (number > (BRL_MSK_ARG - BRL_CTX_DEFAULT))) {
+        reportDataError(file, "invalid context number: %.*" PRIws, context.length, context.characters);
+      } else {
+        ktd->context = BRL_CTX_DEFAULT + number;
+      }
+    }
+  }
+
+  return 1;
+}
+
+static int
 processKeyTableLine (DataFile *file, void *data) {
   static const DataProperty properties[] = {
     {.name=WS_C("bind"), .processor=processBindOperands},
+    {.name=WS_C("context"), .processor=processContextOperands},
     {.name=WS_C("include"), .processor=processIncludeOperands},
     {.name=NULL, .processor=NULL}
   };
@@ -373,6 +407,7 @@ compileKeyTable (const char *name, const KeyNameEntry *const *keys) {
   ktd.bindingsTable = NULL;
   ktd.bindingsSize = 0;
   ktd.bindingsCount = 0;
+  ktd.context = BRL_CTX_DEFAULT;
 
   if (allocateKeyNameTable(&ktd, keys)) {
     if (allocateCommandTable(&ktd)) {

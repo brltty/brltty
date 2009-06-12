@@ -294,7 +294,7 @@ readBrailleCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 
       while (dequeueKeyEvent(&set, &key, &press)) {
         if (brl->keyTable) {
-          processKeyEvent(brl->keyTable, set, key, press);
+          processKeyEvent(brl->keyTable, context, set, key, press);
         }
       }
     }

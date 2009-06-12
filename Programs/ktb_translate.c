@@ -32,30 +32,39 @@ getKeyTableItem (KeyTable *table, KeyTableOffset offset) {
 }
 
 static int
-getCommand (KeyTable *table, unsigned char set, unsigned char key) {
+getCommand (KeyTable *table, unsigned char context, unsigned char set, unsigned char key) {
   const KeyTableHeader *header = table->header.fields;
   const KeyBinding *binding = getKeyTableItem(table, header->bindingsTable);
   unsigned int count = header->bindingsCount;
+  int candidate = EOF;
 
   while (count) {
     if ((set == binding->keys.set) && (key == binding->keys.key) &&
-        sameKeys(table->keys.mask, binding->keys.modifiers))
-      return binding->command;
+        sameKeys(table->keys.mask, binding->keys.modifiers)) {
+      if (binding->keys.context == context) return binding->command;
+
+      if (candidate == EOF)
+        if (binding->keys.context == BRL_CTX_DEFAULT)
+          candidate = binding->command;
+    }
 
     binding += 1, count -= 1;
   }
 
-  return EOF;
+  return candidate;
 }
 
 static int
-isModifiers (KeyTable *table) {
+isModifiers (KeyTable *table, unsigned char context) {
   const KeyTableHeader *header = table->header.fields;
   const KeyBinding *binding = getKeyTableItem(table, header->bindingsTable);
   unsigned int count = header->bindingsCount;
 
   while (count) {
-    if (isKeySubset(binding->keys.modifiers, table->keys.mask)) return 1;
+    if ((binding->keys.context == context) || (binding->keys.context == BRL_CTX_DEFAULT)) {
+      if (isKeySubset(binding->keys.modifiers, table->keys.mask)) return 1;
+    }
+
     binding += 1, count -= 1;
   }
 
@@ -69,14 +78,13 @@ resetKeyTable (KeyTable *table) {
 }
 
 KeyTableState
-processKeyEvent (KeyTable *table, unsigned char set, unsigned char key, int press) {
+processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsigned char key, int press) {
   KeyTableState state = KTS_UNBOUND;
+  int command = EOF;
 
   if (set) {
     if (press) {
-      int command;
-
-      if ((command = getCommand(table, set, 0)) != EOF) {
+      if ((command = getCommand(table, context, set, 0)) != EOF) {
         command += key;
       } else {
         command = BRL_CMD_NOOP;
@@ -86,34 +94,52 @@ processKeyEvent (KeyTable *table, unsigned char set, unsigned char key, int pres
       table->command = EOF;
       state = KTS_COMMAND;
     }
+  } else {
+    removeKey(&table->keys, key);
 
-    return state;
+    if (press) {
+      command = getCommand(table, context, 0, key);
+      addKey(&table->keys, key);
+
+      if (command == EOF) {
+        if (isModifiers(table, context)) state = KTS_MODIFIERS;
+        goto release;
+      }
+
+      if (command != table->command) {
+        table->command = command;
+        enqueueCommand((command |= BRL_FLG_REPEAT_INITIAL | BRL_FLG_REPEAT_DELAY));
+      } else {
+        command = EOF;
+      }
+
+      state = KTS_COMMAND;
+    } else {
+    release:
+      if (table->command != EOF) {
+        table->command = EOF;
+        enqueueCommand((command = BRL_CMD_NOOP));
+      }
+    }
   }
 
-  removeKey(&table->keys, key);
+  if (0) {
+    char buffer[0X40];
+    size_t size = sizeof(buffer);
+    int offset = 0;
+    int length;
 
-  if (press) {
-    int command = getCommand(table, 0, key);
+    snprintf(&buffer[offset], size, "Key %s: Ctx:%u Set:%u Key:%u%n",
+             press? "Press": "Release",
+             context, set, key, &length);
+    offset += length, size -= length;
 
-    addKey(&table->keys, key);
-
-    if (command == EOF) {
-      if (isModifiers(table)) state = KTS_MODIFIERS;
-      goto release;
+    if (command != EOF) {
+      snprintf(&buffer[offset], size, " Cmd:%06X", command);
+      offset += length, size -= length;
     }
 
-    if (command != table->command) {
-      table->command = command;
-      enqueueCommand(command | BRL_FLG_REPEAT_INITIAL | BRL_FLG_REPEAT_DELAY);
-    }
-
-    state = KTS_COMMAND;
-  } else {
-  release:
-    if (table->command != EOF) {
-      table->command = EOF;
-      enqueueCommand(BRL_CMD_NOOP);
-    }
+    LogPrint(LOG_DEBUG, "%s", buffer);
   }
 
   return state;
