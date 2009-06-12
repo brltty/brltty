@@ -1850,7 +1850,7 @@ updatePreferences (void) {
         if (!ok) break;
 
         /* Now process any user interaction */
-        command = readBrailleCommand(&brl, BRL_CTX_PREFS);
+        command = readBrailleCommand(&brl, BRL_CTX_MENU);
         handleAutorepeat(&command, NULL);
         if (command != EOF) {
           switch (command) {

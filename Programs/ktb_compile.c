@@ -293,7 +293,7 @@ processContextOperands (DataFile *file, void *data) {
     if (isKeyword(WS_C("default"), context.characters, context.length)) {
       ktd->context = BRL_CTX_DEFAULT;
     } else if (isKeyword(WS_C("menu"), context.characters, context.length)) {
-      ktd->context = BRL_CTX_PREFS;
+      ktd->context = BRL_CTX_MENU;
     } else {
       int number;
 

@@ -858,7 +858,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
     if (!(activeKeys.control & ~FRONT_KEYS)) {
       /* Just front keys */
 
-      if (context == BRL_CTX_PREFS) {
+      if (context == BRL_CTX_MENU) {
 	switch (activeKeys.control) {
           HKEY2(891, K_DOWN, K_UP,
                 BRL_CMD_MENU_PREV_SETTING, BRL_CMD_MENU_NEXT_SETTING,

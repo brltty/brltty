@@ -1556,7 +1556,7 @@ interpretBrailleStarKeys (BRL_DriverCommandContext context, const Keys *keys, in
 static int
 interpretBookwormByte (BRL_DriverCommandContext context, unsigned char byte, int *command) {
   switch (context) {
-    case BRL_CTX_PREFS:
+    case BRL_CTX_MENU:
       switch (byte) {
         case (BWK_BACKWARD):
           *command = BRL_CMD_FWINLT;

@@ -55,7 +55,7 @@ extern "C" {
 
 /* Argument for brl_readCommand() */
 typedef enum {
-  BRL_CTX_PREFS,
+  BRL_CTX_MENU,
   BRL_CTX_CHORDS,
   BRL_CTX_WAITING,
   BRL_CTX_DEFAULT /* this one must be defined last */

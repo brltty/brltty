@@ -1150,7 +1150,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context)
 
     KEYAND(KEY_CNCV) KEY (KEY_BROUND, BRL_CMD_HOME);
     KEYAND(KEY_CNCV | KEY_CUP) KEY(KEY_BROUND | KEY_CUP, BRL_CMD_BACK);
-    KEY (KEY_CROUND, (context == BRL_CTX_PREFS) ? BRL_CMD_MENU_PREV_SETTING
+    KEY (KEY_CROUND, (context == BRL_CTX_MENU) ? BRL_CMD_MENU_PREV_SETTING
 	 : BRL_CMD_CSRTRK);
 
     KEYAND(KEY_BUT1 | KEY_BAR1) KEY (KEY_BLEFT | KEY_BUP, BRL_CMD_TOP_LEFT);
@@ -1177,9 +1177,9 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context)
   /* keyboard cursor keys simulation */
     KEY (KEY_CLEFT, BRL_BLK_PASSKEY+BRL_KEY_CURSOR_LEFT);
     KEY (KEY_CRIGHT, BRL_BLK_PASSKEY+BRL_KEY_CURSOR_RIGHT);
-    KEY (KEY_CUP, (context == BRL_CTX_PREFS && displayType == PB40)
+    KEY (KEY_CUP, (context == BRL_CTX_MENU && displayType == PB40)
 	 ? BRL_CMD_MENU_PREV_SETTING : BRL_BLK_PASSKEY+BRL_KEY_CURSOR_UP);
-    KEY (KEY_CDOWN, (context == BRL_CTX_PREFS && displayType == PB40)
+    KEY (KEY_CDOWN, (context == BRL_CTX_MENU && displayType == PB40)
 	 ? BRL_CMD_MENU_NEXT_SETTING : BRL_BLK_PASSKEY+BRL_KEY_CURSOR_DOWN);
 
   /* special modes */
