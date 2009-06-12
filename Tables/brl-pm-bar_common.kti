@@ -18,58 +18,58 @@
 
 parameters statusKeys switches
 
-bind @switches@KeyLeftRear+NoKey BACK
-bind @switches@KeyLeftFront+NoKey HOME
-bind @switches@KeyRightRear+NoKey HELP
-bind @switches@KeyRightFront+NoKey LEARN
+bind @switches@KeyLeftRear BACK
+bind @switches@KeyLeftFront HOME
+bind @switches@KeyRightRear HELP
+bind @switches@KeyRightFront LEARN
 
-bind @switches@KeyLeftRear+BarUp1+NoKey SIXDOTS
-bind @switches@KeyLeftRear+BarDown1+NoKey PASTE
-bind @switches@KeyLeftRear+BarUp2+NoKey CAPBLINK
-bind @switches@KeyLeftRear+BarDown2+NoKey CSRJMP_VERT
-bind @switches@KeyLeftRear+BarLeft1+NoKey DISPMD
-bind @switches@KeyLeftRear+BarRight1+NoKey CSRTRK
-bind @switches@KeyLeftRear+BarLeft2+NoKey ATTRVIS
-bind @switches@KeyLeftRear+BarRight2+NoKey CSRVIS
+bind @switches@KeyLeftRear+BarUp1 SIXDOTS
+bind @switches@KeyLeftRear+BarDown1 PASTE
+bind @switches@KeyLeftRear+BarUp2 CAPBLINK
+bind @switches@KeyLeftRear+BarDown2 CSRJMP_VERT
+bind @switches@KeyLeftRear+BarLeft1 DISPMD
+bind @switches@KeyLeftRear+BarRight1 CSRTRK
+bind @switches@KeyLeftRear+BarLeft2 ATTRVIS
+bind @switches@KeyLeftRear+BarRight2 CSRVIS
 
-bind @switches@KeyLeftFront+BarUp1+NoKey AUTOSPEAK
-bind @switches@KeyLeftFront+BarDown1+NoKey AUTOREPEAT
-bind @switches@KeyLeftFront+BarUp2+NoKey RESTARTBRL
-bind @switches@KeyLeftFront+BarDown2+NoKey FREEZE
-bind @switches@KeyLeftFront+BarLeft1+NoKey INFO
-bind @switches@KeyLeftFront+BarRight1+NoKey PREFMENU
-bind @switches@KeyLeftFront+BarLeft2+NoKey PREFLOAD
-bind @switches@KeyLeftFront+BarRight2+NoKey PREFSAVE
+bind @switches@KeyLeftFront+BarUp1 AUTOSPEAK
+bind @switches@KeyLeftFront+BarDown1 AUTOREPEAT
+bind @switches@KeyLeftFront+BarUp2 RESTARTBRL
+bind @switches@KeyLeftFront+BarDown2 FREEZE
+bind @switches@KeyLeftFront+BarLeft1 INFO
+bind @switches@KeyLeftFront+BarRight1 PREFMENU
+bind @switches@KeyLeftFront+BarLeft2 PREFLOAD
+bind @switches@KeyLeftFront+BarRight2 PREFSAVE
 
-bind @switches@KeyRightRear+BarUp1+NoKey SAY_ABOVE
-bind @switches@KeyRightRear+BarDown1+NoKey SAY_BELOW
-bind @switches@KeyRightRear+BarUp2+NoKey SAY_LOUDER
-bind @switches@KeyRightRear+BarDown2+NoKey SAY_SOFTER
-bind @switches@KeyRightRear+BarLeft1+NoKey MUTE
-bind @switches@KeyRightRear+BarRight1+NoKey SAY_LINE
-bind @switches@KeyRightRear+BarLeft2+NoKey SAY_SLOWER
-bind @switches@KeyRightRear+BarRight2+NoKey SAY_FASTER
+bind @switches@KeyRightRear+BarUp1 SAY_ABOVE
+bind @switches@KeyRightRear+BarDown1 SAY_BELOW
+bind @switches@KeyRightRear+BarUp2 SAY_LOUDER
+bind @switches@KeyRightRear+BarDown2 SAY_SOFTER
+bind @switches@KeyRightRear+BarLeft1 MUTE
+bind @switches@KeyRightRear+BarRight1 SAY_LINE
+bind @switches@KeyRightRear+BarLeft2 SAY_SLOWER
+bind @switches@KeyRightRear+BarRight2 SAY_FASTER
 
-bind @switches@KeyRightFront+BarUp1+NoKey SPKHOME
-bind @switches@KeyRightFront+BarDown1+NoKey TUNES
-bind @switches@KeyRightFront+BarUp2+NoKey RESTARTSPEECH
-bind @switches@KeyRightFront+BarDown2+NoKey SWSIM_BQ
-bind @switches@KeyRightFront+BarLeft1+NoKey SKPIDLNS
-bind @switches@KeyRightFront+BarRight1+NoKey SKPBLNKWINS
-bind @switches@KeyRightFront+BarRight2+NoKey SLIDEWIN
+bind @switches@KeyRightFront+BarUp1 SPKHOME
+bind @switches@KeyRightFront+BarDown1 TUNES
+bind @switches@KeyRightFront+BarUp2 RESTARTSPEECH
+bind @switches@KeyRightFront+BarDown2 SWSIM_BQ
+bind @switches@KeyRightFront+BarLeft1 SKPIDLNS
+bind @switches@KeyRightFront+BarRight1 SKPBLNKWINS
+bind @switches@KeyRightFront+BarRight2 SLIDEWIN
 
-bind @switches@Routing1 ROUTE
-bind @switches@BarUp1+Routing1 PRINDENT
-bind @switches@BarDown1+Routing1 NXINDENT
-bind @switches@BarUp2+Routing1 SETLEFT
-bind @switches@BarDown2+Routing1 DESCCHAR
-bind @switches@BarLeft1+Routing1 CUTAPPEND
-bind @switches@BarRight1+Routing1 CUTLINE
-bind @switches@BarLeft2+Routing1 CUTBEGIN
-bind @switches@BarRight2+Routing1 CUTRECT
+bind @switches@!Routing1 ROUTE
+bind @switches@BarUp1+!Routing1 PRINDENT
+bind @switches@BarDown1+!Routing1 NXINDENT
+bind @switches@BarUp2+!Routing1 SETLEFT
+bind @switches@BarDown2+!Routing1 DESCCHAR
+bind @switches@BarLeft1+!Routing1 CUTAPPEND
+bind @switches@BarRight1+!Routing1 CUTLINE
+bind @switches@BarLeft2+!Routing1 CUTBEGIN
+bind @switches@BarRight2+!Routing1 CUTRECT
 
-bind @switches@Routing2 DESCCHAR
+bind @switches@!Routing2 DESCCHAR
 
 include brl-pm-status@statusKeys@.kti BarLeft1 BarRight1
 
-bind @switches@StatusX GOTOLINE+on
+bind @switches@!StatusX GOTOLINE+on

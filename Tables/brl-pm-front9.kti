@@ -20,36 +20,36 @@
 
 parameters statusKeys
 
-bind Front1+NoKey FWINLT
-bind Front9+NoKey FWINRT
-bind Front2+NoKey HWINLT
-bind Front8+NoKey HWINRT
-bind Front5 HOME
-bind Front1+Front5 LNBEG
-bind Front9+Front5 LNEND
-bind Front2+Front5 CHRLT
-bind Front8+Front5 CHRRT
-bind Front4 WINUP
-bind Front1+Front4 PRDIFLN
-bind Front9+Front4 ATTRUP
-bind Front2+Front4 PRPGRPH
-bind Front8+Front4 PRSEARCH
-bind Front6 WINDN
-bind Front1+Front6 NXDIFLN
-bind Front9+Front6 ATTRDN
-bind Front2+Front6 NXPGRPH
-bind Front8+Front6 NXSEARCH
-bind Front3 LNUP
-bind Front1+Front3 TOP_LEFT
-bind Front9+Front3 TOP
-bind Front7 LNDN
-bind Front1+Front7 BOT_LEFT
-bind Front9+Front7 BOT
-bind Routing1 ROUTE
-bind Front1+Routing1 CUTBEGIN
-bind Front9+Routing1 CUTRECT
-bind Front2+Routing1 PRINDENT
-bind Front8+Routing1 NXINDENT
-bind Front1+Front9+NoKey PASTE
+bind Front1 FWINLT
+bind Front9 FWINRT
+bind Front2 HWINLT
+bind Front8 HWINRT
+bind !Front5 HOME
+bind Front1+!Front5 LNBEG
+bind Front9+!Front5 LNEND
+bind Front2+!Front5 CHRLT
+bind Front8+!Front5 CHRRT
+bind !Front4 WINUP
+bind Front1+!Front4 PRDIFLN
+bind Front9+!Front4 ATTRUP
+bind Front2+!Front4 PRPGRPH
+bind Front8+!Front4 PRSEARCH
+bind !Front6 WINDN
+bind Front1+!Front6 NXDIFLN
+bind Front9+!Front6 ATTRDN
+bind Front2+!Front6 NXPGRPH
+bind Front8+!Front6 NXSEARCH
+bind !Front3 LNUP
+bind Front1+!Front3 TOP_LEFT
+bind Front9+!Front3 TOP
+bind !Front7 LNDN
+bind Front1+!Front7 BOT_LEFT
+bind Front9+!Front7 BOT
+bind !Routing1 ROUTE
+bind Front1+!Routing1 CUTBEGIN
+bind Front9+!Routing1 CUTRECT
+bind Front2+!Routing1 PRINDENT
+bind Front8+!Routing1 NXINDENT
+bind Front1+Front9 PASTE
 
 include brl-pm-status@statusKeys@.kti Front1 Front9

@@ -20,5 +20,5 @@
 
 parameters toggleOff toggleOn
 
-bind Status1 HELP
-bind Status2 LEARN
+bind !Status1 HELP
+bind !Status2 LEARN
