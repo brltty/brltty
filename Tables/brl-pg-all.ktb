@@ -18,6 +18,11 @@
 
 # Key Table for Pegasus
 
+
+####################
+# Default Bindings #
+####################
+
 bind Left FWINLT
 bind Right FWINRT
 bind Up LNUP
@@ -46,15 +51,57 @@ bind LeftShift+Enter NXPROMPT
 bind LeftShift+End PRPGRPH
 bind LeftShift+Escape NXPGRPH
 
-bind RightShift+Left SETLEFT
+bind RightShift+Left CONTEXT+5 # RoutingKey -> SETLEFT
 bind RightShift+Right PASTE
-bind RightShift+Down DESCCHAR
+bind RightShift+Down CONTEXT+6 # RoutingKey -> DESCCHAR
 
-bind RightShift+Home CUTBEGIN
-bind RightShift+Enter CUTAPPEND
-bind RightShift+End CUTLINE
-bind RightShift+Escape CUTRECT
+bind RightShift+Home CONTEXT+1 # RoutingKey -> CUTBEGIN
+bind RightShift+Enter CONTEXT+2 # RoutingKey -> CUTAPPEND
+bind RightShift+End CONTEXT+3 # RoutingKey -> CUTLINE
+bind RightShift+Escape CONTEXT+4 # RoutingKey -> CUTRECT
 
-bind RoutingKey ROUTE
 bind Status1 HELP
 bind Status2 LEARN
+
+bind RoutingKey ROUTE
+
+
+#################
+# Menu Bindings #
+#################
+
+context menu
+
+bind Left FWINLT
+bind Right FWINRT
+bind Up MENU_PREV_ITEM
+bind Down MENU_NEXT_ITEM
+
+bind Home MENU_FIRST_ITEM
+bind Enter MENU_LAST_ITEM
+bind End MENU_PREV_SETTING
+bind Escape MENU_NEXT_SETTING
+
+
+############################
+# Routing Key Alternatives #
+############################
+
+context 1
+bind RoutingKey CUTBEGIN
+
+context 2
+bind RoutingKey CUTAPPEND
+
+context 3
+bind RoutingKey CUTLINE
+
+context 4
+bind RoutingKey CUTRECT
+
+context 5
+bind RoutingKey SETLEFT
+
+context 6
+bind RoutingKey DESCCHAR
+
