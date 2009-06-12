@@ -18,18 +18,18 @@
 
 # Key subtable for HandyTech rocker keys
 
-bind RockerLeftTop KEY_CURSOR_UP
-bind RockerLeftBottom KEY_CURSOR_DOWN
-bind RockerRightTop LNUP
-bind RockerRightBottom LNDN
-bind RockerLeftTop+RockerLeftBottom FWINLT
-bind RockerRightTop+RockerRightBottom FWINRT
-bind RockerLeftTop+RockerLeftBottom+RockerRightTop+RockerRightBottom HOME
-bind RockerRightTop+RockerRightBottom+RockerLeftTop TOP_LEFT
-bind RockerRightTop+RockerRightBottom+RockerLeftBottom BOT_LEFT
-bind RockerLeftTop+RockerLeftBottom+RockerRightTop TOP
-bind RockerLeftTop+RockerLeftBottom+RockerRightBottom BOT
-bind RockerLeftTop+RockerRightTop PRDIFLN
-bind RockerLeftTop+RockerRightBottom NXDIFLN
-bind RockerLeftBottom+RockerRightTop ATTRUP
-bind RockerLeftBottom+RockerRightBottom ATTRDN
+bind LeftRockerTop KEY_CURSOR_UP
+bind LeftRockerBottom KEY_CURSOR_DOWN
+bind RightRockerTop LNUP
+bind RightRockerBottom LNDN
+bind LeftRockerTop+LeftRockerBottom FWINLT
+bind RightRockerTop+RightRockerBottom FWINRT
+bind LeftRockerTop+LeftRockerBottom+RightRockerTop+RightRockerBottom HOME
+bind RightRockerTop+RightRockerBottom+LeftRockerTop TOP_LEFT
+bind RightRockerTop+RightRockerBottom+LeftRockerBottom BOT_LEFT
+bind LeftRockerTop+LeftRockerBottom+RightRockerTop TOP
+bind LeftRockerTop+LeftRockerBottom+RightRockerBottom BOT
+bind LeftRockerTop+RightRockerTop PRDIFLN
+bind LeftRockerTop+RightRockerBottom NXDIFLN
+bind LeftRockerBottom+RightRockerTop ATTRUP
+bind LeftRockerBottom+RightRockerBottom ATTRDN

@@ -134,11 +134,11 @@ static KEY_NAME_TABLE(keyNames_keypad) = {
 };
 
 static KEY_NAME_TABLE(keyNames_rockers) = {
-  KEY_NAME_ENTRY(HT_KEY_Escape, "RockerLeftTop"),
-  KEY_NAME_ENTRY(HT_KEY_Return, "RockerLeftBottom"),
+  KEY_NAME_ENTRY(HT_KEY_Escape, "LeftRockerTop"),
+  KEY_NAME_ENTRY(HT_KEY_Return, "LeftRockerBottom"),
 
-  KEY_NAME_ENTRY(HT_KEY_Up, "RockerRightTop"),
-  KEY_NAME_ENTRY(HT_KEY_Down, "RockerRightBottom"),
+  KEY_NAME_ENTRY(HT_KEY_Up, "RightRockerTop"),
+  KEY_NAME_ENTRY(HT_KEY_Down, "RightRockerBottom"),
 
   LAST_KEY_NAME_ENTRY
 };
