@@ -29,20 +29,20 @@ bind	CapsLock+!ArrowRight		CHRRT
 bind	CapsLock+!Home			TOP_LEFT
 bind	CapsLock+!End			BOT_LEFT
 bind	CapsLock+!Enter			CSRTRK
-bind	CapsLock+O			CSRTRK+!off
+bind	CapsLock+!O			CSRTRK+off
 bind	CapsLock+!DeleteBackward		BACK
 
 # marks
 bind	CapsLock+!M			SETMARK
 bind	CapsLock+!J			GOTOMARK
-bind	CapsLock+ShiftLeft+1		SETMARK+!1
-bind	CapsLock+1			GOTOMARK+!1
-bind	CapsLock+ShiftLeft+2		SETMARK+!2
-bind	CapsLock+2			GOTOMARK+!2
-bind	CapsLock+ShiftLeft+3		SETMARK+!3
-bind	CapsLock+3			GOTOMARK+!3
-bind	CapsLock+ShiftLeft+4		SETMARK+!4
-bind	CapsLock+4			GOTOMARK+!4
+bind	CapsLock+ShiftLeft+!1		SETMARK+1
+bind	CapsLock+!1			GOTOMARK+1
+bind	CapsLock+ShiftLeft+!2		SETMARK+2
+bind	CapsLock+!2			GOTOMARK+2
+bind	CapsLock+ShiftLeft+!3		SETMARK+3
+bind	CapsLock+!3			GOTOMARK+3
+bind	CapsLock+ShiftLeft+!4		SETMARK+4
+bind	CapsLock+!4			GOTOMARK+4
 
 # cut and paste
 bind	CapsLock+!X			CUTBEGIN
