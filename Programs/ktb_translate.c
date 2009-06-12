@@ -164,7 +164,7 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
     }
   }
 
-  if (1) {
+  if (0) {
     char buffer[0X40];
     size_t size = sizeof(buffer);
     int offset = 0;
@@ -180,7 +180,7 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
       offset += length, size -= length;
     }
 
-    LogPrint(LOG_NOTICE, "%s", buffer);
+    LogPrint(LOG_DEBUG, "%s", buffer);
   }
 
   return state;
