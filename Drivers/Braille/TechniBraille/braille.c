@@ -98,7 +98,7 @@ writePacket (BrailleDisplay *brl, unsigned char function, unsigned char *data, u
 
   {
     int size = byte - buffer;
-  //LogBytes(LOG_DEBUG, "Output Packet", buffer, size);
+    logOutputPacket(buffer, size);
     brl->writeDelay += (count * 1000 / charactersPerSecond) + 1;
     if (serialWriteData(serialDevice, buffer, size) != -1) return 1;
   }
