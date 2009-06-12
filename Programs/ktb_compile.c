@@ -98,6 +98,8 @@ parseKeyName (DataFile *file, unsigned char *set, unsigned char *key, const wcha
 
 static int
 parseKeyCombination (DataFile *file, KeyCombination *keys, const wchar_t *characters, int length, KeyTableData *ktd) {
+  int immediate;
+
   while (1) {
     const wchar_t *end = wmemchr(characters, WC_C('+'), length);
     if (!end) break;
@@ -129,15 +131,30 @@ parseKeyCombination (DataFile *file, KeyCombination *keys, const wchar_t *charac
     }
   }
 
+  immediate = 0;
+  if (length) {
+    if (*characters == WC_C('!')) {
+      characters += 1, length -= 1;
+      immediate = 1;
+    }
+  }
+
   if (!length) {
     reportDataError(file, "missing key name");
     return 0;
   }
   if (!parseKeyName(file, &keys->set, &keys->key, characters, length, ktd)) return 0;
 
-  if (!keys->set && BITMASK_TEST(keys->modifiers, keys->key)) {
-    reportDataError(file, "duplicate key name: %.*" PRIws, length, characters);
-    return 0;
+  if (!keys->set) {
+    if (BITMASK_TEST(keys->modifiers, keys->key)) {
+      reportDataError(file, "duplicate key name: %.*" PRIws, length, characters);
+      return 0;
+    }
+
+    if (!immediate) {
+      BITMASK_SET(keys->modifiers, keys->key);
+      keys->key = 0;
+    }
   }
 
   keys->context = ktd->context;

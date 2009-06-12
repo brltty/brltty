@@ -74,31 +74,33 @@ isModifiers (KeyTable *table, unsigned char context) {
 void
 resetKeyTable (KeyTable *table) {
   removeAllKeys(&table->keys);
-  table->command = EOF;
   table->context = BRL_CTX_DEFAULT;
+  table->command = EOF;
+  table->immediate = 0;
 }
 
-static void
-addCommand (KeyTable *table, int command) {
+static int
+processCommand (KeyTable *table, int command) {
   int blk = command & BRL_MSK_BLK;
   int arg = command & BRL_MSK_ARG;
 
   switch (blk) {
     case BRL_BLK_CONTEXT:
       table->context = BRL_CTX_DEFAULT + arg;
-      return;
+      return 1;
 
     default:
       break;
   }
 
-  enqueueCommand(command);
+  return enqueueCommand(command);
 }
 
 KeyTableState
 processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsigned char key, int press) {
   KeyTableState state = KTS_UNBOUND;
   int command = EOF;
+  int immediate = 1;
 
   if (context == BRL_CTX_DEFAULT) context = table->context;
   if (press) table->context = BRL_CTX_DEFAULT;
@@ -111,8 +113,8 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
         command = BRL_CMD_NOOP;
       }
 
-      addCommand(table, command);
       table->command = EOF;
+      processCommand(table, command);
       state = KTS_COMMAND;
     }
   } else {
@@ -123,13 +125,25 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
       addKey(&table->keys, key);
 
       if (command == EOF) {
+        command = getCommand(table, context, 0, 0);
+        immediate = 0;
+      }
+
+      if (command == EOF) {
         if (isModifiers(table, context)) state = KTS_MODIFIERS;
         goto release;
       }
 
       if (command != table->command) {
         table->command = command;
-        addCommand(table, (command |= BRL_FLG_REPEAT_INITIAL | BRL_FLG_REPEAT_DELAY));
+
+        if ((table->immediate = immediate)) {
+          command |= BRL_FLG_REPEAT_INITIAL | BRL_FLG_REPEAT_DELAY;
+        } else {
+          command |= BRL_FLG_REPEAT_DELAY;
+        }
+
+        processCommand(table, command);
       } else {
         command = EOF;
       }
@@ -138,13 +152,19 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
     } else {
     release:
       if (table->command != EOF) {
+        if (table->immediate) {
+          command = BRL_CMD_NOOP;
+        } else {
+          command = table->command;
+        }
+
         table->command = EOF;
-        addCommand(table, (command = BRL_CMD_NOOP));
+        processCommand(table, command);
       }
     }
   }
 
-  if (0) {
+  if (1) {
     char buffer[0X40];
     size_t size = sizeof(buffer);
     int offset = 0;
@@ -160,7 +180,7 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
       offset += length, size -= length;
     }
 
-    LogPrint(LOG_DEBUG, "%s", buffer);
+    LogPrint(LOG_NOTICE, "%s", buffer);
   }
 
   return state;

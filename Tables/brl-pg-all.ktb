@@ -23,47 +23,47 @@
 # Default Bindings #
 ####################
 
-bind Left FWINLT
-bind Right FWINRT
-bind Up LNUP
-bind Down LNDN
+bind !Left FWINLT
+bind !Right FWINRT
+bind !Up LNUP
+bind !Down LNDN
 
-bind Home TOP_LEFT
-bind Enter BOT_LEFT
-bind End RETURN
-bind Escape CSRTRK
+bind !Home TOP_LEFT
+bind !Enter BOT_LEFT
+bind !End RETURN
+bind !Escape CSRTRK
 
-bind LeftControl+Left ATTRUP
-bind LeftControl+Right ATTRDN
-bind LeftControl+Up PRDIFLN
-bind LeftControl+Down NXDIFLN
+bind LeftControl+!Left ATTRUP
+bind LeftControl+!Right ATTRDN
+bind LeftControl+!Up PRDIFLN
+bind LeftControl+!Down NXDIFLN
 
-bind LeftControl+Enter FREEZE
-bind LeftControl+End PREFMENU
-bind LeftControl+Escape INFO
+bind LeftControl+!Enter FREEZE
+bind LeftControl+!End PREFMENU
+bind LeftControl+!Escape INFO
 
-bind LeftShift+Left DISPMD
-bind LeftShift+Right SIXDOTS
-bind LeftShift+Down CSRJMP_VERT
+bind LeftShift+!Left DISPMD
+bind LeftShift+!Right SIXDOTS
+bind LeftShift+!Down CSRJMP_VERT
 
-bind LeftShift+Home PRPROMPT
-bind LeftShift+Enter NXPROMPT
-bind LeftShift+End PRPGRPH
-bind LeftShift+Escape NXPGRPH
+bind LeftShift+!Home PRPROMPT
+bind LeftShift+!Enter NXPROMPT
+bind LeftShift+!End PRPGRPH
+bind LeftShift+!Escape NXPGRPH
 
-bind RightShift+Left CONTEXT+5 # RoutingKey -> SETLEFT
-bind RightShift+Right PASTE
-bind RightShift+Down CONTEXT+6 # RoutingKey -> DESCCHAR
+bind RightShift+!Left CONTEXT+5 # RoutingKey -> SETLEFT
+bind RightShift+!Right PASTE
+bind RightShift+!Down CONTEXT+6 # RoutingKey -> DESCCHAR
 
-bind RightShift+Home CONTEXT+1 # RoutingKey -> CUTBEGIN
-bind RightShift+Enter CONTEXT+2 # RoutingKey -> CUTAPPEND
-bind RightShift+End CONTEXT+3 # RoutingKey -> CUTLINE
-bind RightShift+Escape CONTEXT+4 # RoutingKey -> CUTRECT
+bind RightShift+!Home CONTEXT+1 # RoutingKey -> CUTBEGIN
+bind RightShift+!Enter CONTEXT+2 # RoutingKey -> CUTAPPEND
+bind RightShift+!End CONTEXT+3 # RoutingKey -> CUTLINE
+bind RightShift+!Escape CONTEXT+4 # RoutingKey -> CUTRECT
 
 bind Status1 HELP
 bind Status2 LEARN
 
-bind RoutingKey ROUTE
+bind !RoutingKey ROUTE
 
 
 #################
@@ -88,20 +88,20 @@ bind Escape MENU_NEXT_SETTING
 ############################
 
 context 1
-bind RoutingKey CUTBEGIN
+bind !RoutingKey CUTBEGIN
 
 context 2
-bind RoutingKey CUTAPPEND
+bind !RoutingKey CUTAPPEND
 
 context 3
-bind RoutingKey CUTLINE
+bind !RoutingKey CUTLINE
 
 context 4
-bind RoutingKey CUTRECT
+bind !RoutingKey CUTRECT
 
 context 5
-bind RoutingKey SETLEFT
+bind !RoutingKey SETLEFT
 
 context 6
-bind RoutingKey DESCCHAR
+bind !RoutingKey DESCCHAR
 

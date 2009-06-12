@@ -51,8 +51,9 @@ struct KeyTableStruct {
   size_t size;
 
   KeySet keys;
-  int command;
   unsigned char context;
+  int command;
+  unsigned immediate:1;
 };
 
 #ifdef __cplusplus

@@ -18,45 +18,45 @@
 
 # BRLTTY Key Table - bindings for keyboards without a keypad
 
-bind	CapsLock+F1			HELP
-bind	CapsLock+ShiftLeft+F1		LEARN
-bind	CapsLock+R			RESTARTBRL
-bind	CapsLock+D			DESCCHAR
-bind	CapsLock+ArrowUp		LNUP
-bind	CapsLock+ArrowDown		LNDN
-bind	CapsLock+ArrowLeft		CHRLT
-bind	CapsLock+ArrowRight		CHRRT
-bind	CapsLock+Home			TOP_LEFT
-bind	CapsLock+End			BOT_LEFT
-bind	CapsLock+Enter			CSRTRK
-bind	CapsLock+O			CSRTRK+off
-bind	CapsLock+DeleteBackward		BACK
+bind	CapsLock+!F1			HELP
+bind	CapsLock+ShiftLeft+!F1		LEARN
+bind	CapsLock+!R			RESTARTBRL
+bind	CapsLock+!D			DESCCHAR
+bind	CapsLock+!ArrowUp		LNUP
+bind	CapsLock+!ArrowDown		LNDN
+bind	CapsLock+!ArrowLeft		CHRLT
+bind	CapsLock+!ArrowRight		CHRRT
+bind	CapsLock+!Home			TOP_LEFT
+bind	CapsLock+!End			BOT_LEFT
+bind	CapsLock+!Enter			CSRTRK
+bind	CapsLock+O			CSRTRK+!off
+bind	CapsLock+!DeleteBackward		BACK
 
 # marks
-bind	CapsLock+M			SETMARK
-bind	CapsLock+J			GOTOMARK
-bind	CapsLock+ShiftLeft+1		SETMARK+1
-bind	CapsLock+1			GOTOMARK+1
-bind	CapsLock+ShiftLeft+2		SETMARK+2
-bind	CapsLock+2			GOTOMARK+2
-bind	CapsLock+ShiftLeft+3		SETMARK+3
-bind	CapsLock+3			GOTOMARK+3
-bind	CapsLock+ShiftLeft+4		SETMARK+4
-bind	CapsLock+4			GOTOMARK+4
+bind	CapsLock+!M			SETMARK
+bind	CapsLock+!J			GOTOMARK
+bind	CapsLock+ShiftLeft+1		SETMARK+!1
+bind	CapsLock+1			GOTOMARK+!1
+bind	CapsLock+ShiftLeft+2		SETMARK+!2
+bind	CapsLock+2			GOTOMARK+!2
+bind	CapsLock+ShiftLeft+3		SETMARK+!3
+bind	CapsLock+3			GOTOMARK+!3
+bind	CapsLock+ShiftLeft+4		SETMARK+!4
+bind	CapsLock+4			GOTOMARK+!4
 
 # cut and paste
-bind	CapsLock+X			CUTBEGIN
-bind	CapsLock+C			CUTRECT
-bind	CapsLock+V			PASTE
+bind	CapsLock+!X			CUTBEGIN
+bind	CapsLock+!C			CUTRECT
+bind	CapsLock+!V			PASTE
 
 # speech
-bind	ControlLeft			MUTE
-bind	ControlRight			MUTE
-bind	CapsLock+PageUp			SAY_ABOVE
-bind	CapsLock+Space			SAY_LINE
-bind	CapsLock+PageDown		SAY_BELOW
-bind	CapsLock+F5			SAY_SLOWER
-bind	CapsLock+F6			SAY_FASTER
-bind	CapsLock+F7			SAY_SOFTER
-bind	CapsLock+F8			SAY_LOUDER
-bind	CapsLock+F9			AUTOSPEAK
+bind	!ControlLeft			MUTE
+bind	!ControlRight			MUTE
+bind	CapsLock+!PageUp			SAY_ABOVE
+bind	CapsLock+!Space			SAY_LINE
+bind	CapsLock+!PageDown		SAY_BELOW
+bind	CapsLock+!F5			SAY_SLOWER
+bind	CapsLock+!F6			SAY_FASTER
+bind	CapsLock+!F7			SAY_SOFTER
+bind	CapsLock+!F8			SAY_LOUDER
+bind	CapsLock+!F9			AUTOSPEAK
