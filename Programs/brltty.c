@@ -1331,7 +1331,6 @@ runProgram (void) {
   int offline = 0;
   int suspended = 0;
   int writable = 1;
-  BRL_DriverCommandContext nextContext = BRL_CTX_DEFAULT;
   short oldwinx, oldwiny;
 
   atexit(exitScreenStates);
@@ -1401,11 +1400,10 @@ runProgram (void) {
         int oldmotx = p->winx;
         int oldmoty = p->winy;
         int command;
-        BRL_DriverCommandContext currentContext = nextContext;
 
         testProgramTermination();
 
-        command = writable? readBrailleCommand(&brl, currentContext): BRL_CMD_RESTARTBRL;
+        command = writable? readBrailleCommand(&brl, BRL_CTX_DEFAULT): BRL_CMD_RESTARTBRL;
 
         if (brl.highlightWindow) {
           brl.highlightWindow = 0;
@@ -1414,8 +1412,6 @@ runProgram (void) {
 
         if (command != EOF) {
           int real = command;
-
-          nextContext = BRL_CTX_DEFAULT;
 
           if (prefs.skipIdenticalLines) {
             switch (command & BRL_MSK_CMD) {
@@ -2362,10 +2358,6 @@ runProgram (void) {
                   }
                   break;
                 }
-
-                case BRL_BLK_CONTEXT:
-                  nextContext = arg;
-                  break;
 
                 default:
                   playTune(&tune_command_rejected);

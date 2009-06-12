@@ -75,12 +75,33 @@ void
 resetKeyTable (KeyTable *table) {
   removeAllKeys(&table->keys);
   table->command = EOF;
+  table->context = BRL_CTX_DEFAULT;
+}
+
+static void
+addCommand (KeyTable *table, int command) {
+  int blk = command & BRL_MSK_BLK;
+  int arg = command & BRL_MSK_ARG;
+
+  switch (blk) {
+    case BRL_BLK_CONTEXT:
+      table->context = BRL_CTX_DEFAULT + arg;
+      return;
+
+    default:
+      break;
+  }
+
+  enqueueCommand(command);
 }
 
 KeyTableState
 processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsigned char key, int press) {
   KeyTableState state = KTS_UNBOUND;
   int command = EOF;
+
+  if (context == BRL_CTX_DEFAULT) context = table->context;
+  if (press) table->context = BRL_CTX_DEFAULT;
 
   if (set) {
     if (press) {
@@ -90,7 +111,7 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
         command = BRL_CMD_NOOP;
       }
 
-      enqueueCommand(command);
+      addCommand(table, command);
       table->command = EOF;
       state = KTS_COMMAND;
     }
@@ -108,7 +129,7 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
 
       if (command != table->command) {
         table->command = command;
-        enqueueCommand((command |= BRL_FLG_REPEAT_INITIAL | BRL_FLG_REPEAT_DELAY));
+        addCommand(table, (command |= BRL_FLG_REPEAT_INITIAL | BRL_FLG_REPEAT_DELAY));
       } else {
         command = EOF;
       }
@@ -118,7 +139,7 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
     release:
       if (table->command != EOF) {
         table->command = EOF;
-        enqueueCommand((command = BRL_CMD_NOOP));
+        addCommand(table, (command = BRL_CMD_NOOP));
       }
     }
   }

@@ -52,6 +52,7 @@ struct KeyTableStruct {
 
   KeySet keys;
   int command;
+  unsigned char context;
 };
 
 #ifdef __cplusplus
