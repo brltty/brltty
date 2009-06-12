@@ -149,6 +149,7 @@ static KEY_NAME_TABLE(keyNames_modular) = {
   LAST_KEY_NAME_ENTRY
 };
 
+static const char keyBindings_modular[] = "mdlr";
 static KEY_NAME_TABLE_LIST(keyNameTables_modular) = {
   keyNames_routing,
   keyNames_dots,
@@ -164,6 +165,7 @@ static KEY_NAME_TABLE(keyNames_modularEvolution) = {
   LAST_KEY_NAME_ENTRY
 };
 
+static const char keyBindings_modularEvolution64[] = "me64";
 static KEY_NAME_TABLE_LIST(keyNameTables_modularEvolution64) = {
   keyNames_routing,
   keyNames_dots,
@@ -172,6 +174,7 @@ static KEY_NAME_TABLE_LIST(keyNameTables_modularEvolution64) = {
   NULL
 };
 
+static const char keyBindings_modularEvolution88[] = "me88";
 static KEY_NAME_TABLE_LIST(keyNameTables_modularEvolution88) = {
   keyNames_routing,
   keyNames_dots,
@@ -188,6 +191,7 @@ static KEY_NAME_TABLE(keyNames_brailleStar) = {
   LAST_KEY_NAME_ENTRY
 };
 
+static const char keyBindings_brailleStar40[] = "bs40";
 static KEY_NAME_TABLE_LIST(keyNameTables_brailleStar40) = {
   keyNames_routing,
   keyNames_dots,
@@ -196,6 +200,7 @@ static KEY_NAME_TABLE_LIST(keyNameTables_brailleStar40) = {
   NULL
 };
 
+static const char keyBindings_brailleStar80[] = "bs80";
 static KEY_NAME_TABLE_LIST(keyNameTables_brailleStar80) = {
   keyNames_routing,
   keyNames_dots,
@@ -213,6 +218,7 @@ static KEY_NAME_TABLE(keyNames_brailleWave) = {
   LAST_KEY_NAME_ENTRY
 };
 
+static const char keyBindings_brailleWave[] = "wave";
 static KEY_NAME_TABLE_LIST(keyNameTables_brailleWave) = {
   keyNames_routing,
   keyNames_dots,
@@ -239,6 +245,7 @@ static KEY_NAME_TABLE(keyNames_bookworm) = {
   LAST_KEY_NAME_ENTRY
 };
 
+static const char keyBindings_bookworm[] = "bkwm";
 static KEY_NAME_TABLE_LIST(keyNameTables_bookworm) = {
   keyNames_bookworm,
   NULL
@@ -290,12 +297,6 @@ typedef struct {
   unsigned isBookworm:1;
 } ModelEntry;
 
-static const char keyBindings_bookworm[] = "bookworm";
-static const char keyBindings_easy[] = "easy";
-static const char keyBindings_modular[] = "modular";
-static const char keyBindings_star40[] = "star40";
-static const char keyBindings_star80[] = "star80";
-
 #define HT_BYTE_SEQUENCE(name,bytes) .name##Address = bytes, .name##Length = sizeof(bytes)
 static const ModelEntry modelTable[] = {
   { .identifier = HT_Model_Modular20,
@@ -335,7 +336,7 @@ static const ModelEntry modelTable[] = {
     .name = "Modular Evolution 64",
     .textCells = 64,
     .statusCells = 0,
-    .keyBindings = keyBindings_modular,
+    .keyBindings = keyBindings_modularEvolution64,
     .keyNameTables = keyNameTables_modularEvolution64,
     .interpretByte = interpretKeyByte,
     .interpretKeys = interpretBrailleStarKeys,
@@ -347,7 +348,7 @@ static const ModelEntry modelTable[] = {
     .name = "Modular Evolution 88",
     .textCells = 88,
     .statusCells = 0,
-    .keyBindings = keyBindings_modular,
+    .keyBindings = keyBindings_modularEvolution88,
     .keyNameTables = keyNameTables_modularEvolution88,
     .interpretByte = interpretKeyByte,
     .interpretKeys = interpretBrailleStarKeys,
@@ -359,7 +360,7 @@ static const ModelEntry modelTable[] = {
     .name = "Braille Wave 40",
     .textCells = 40,
     .statusCells = 0,
-    .keyBindings = keyBindings_modular,
+    .keyBindings = keyBindings_brailleWave,
     .keyNameTables = keyNameTables_brailleWave,
     .interpretByte = interpretKeyByte,
     .interpretKeys = interpretBrailleWaveKeys,
@@ -382,7 +383,7 @@ static const ModelEntry modelTable[] = {
     .name = "Braillino 20",
     .textCells = 20,
     .statusCells = 0,
-    .keyBindings = keyBindings_star40,
+    .keyBindings = keyBindings_brailleStar40,
     .keyNameTables = keyNameTables_brailleStar40,
     .interpretByte = interpretKeyByte,
     .interpretKeys = interpretBrailleStarKeys,
@@ -393,7 +394,7 @@ static const ModelEntry modelTable[] = {
     .name = "Braille Star 40",
     .textCells = 40,
     .statusCells = 0,
-    .keyBindings = keyBindings_star40,
+    .keyBindings = keyBindings_brailleStar40,
     .keyNameTables = keyNameTables_brailleStar40,
     .interpretByte = interpretKeyByte,
     .interpretKeys = interpretBrailleStarKeys,
@@ -404,7 +405,7 @@ static const ModelEntry modelTable[] = {
     .name = "Braille Star 80",
     .textCells = 80,
     .statusCells = 0,
-    .keyBindings = keyBindings_star80,
+    .keyBindings = keyBindings_brailleStar80,
     .keyNameTables = keyNameTables_brailleStar80,
     .interpretByte = interpretKeyByte,
     .interpretKeys = interpretBrailleStarKeys,
@@ -415,7 +416,7 @@ static const ModelEntry modelTable[] = {
     .name = "Easy Braille",
     .textCells = 40,
     .statusCells = 0,
-    .keyBindings = keyBindings_easy,
+    .keyBindings = keyBindings_modular,
     .keyNameTables = keyNameTables_modular,
     .interpretByte = interpretKeyByte,
     .interpretKeys = interpretModularKeys,
@@ -1555,105 +1556,29 @@ interpretBrailleStarKeys (BRL_DriverCommandContext context, const Keys *keys, in
 
 static int
 interpretBookwormByte (BRL_DriverCommandContext context, unsigned char byte, int *command) {
-  switch (context) {
-    case BRL_CTX_MENU:
-      switch (byte) {
-        case (BWK_BACKWARD):
-          *command = BRL_CMD_FWINLT;
-          return 1;
-        case (BWK_FORWARD):
-          *command = BRL_CMD_FWINRT;
-          return 1;
-        case (BWK_ESCAPE):
-          *command = BRL_CMD_PREFLOAD;
-          return 1;
-        case (BWK_ESCAPE | BWK_BACKWARD):
-          *command = BRL_CMD_MENU_PREV_SETTING;
-          return 1;
-        case (BWK_ESCAPE | BWK_FORWARD):
-          *command = BRL_CMD_MENU_NEXT_SETTING;
-          return 1;
-        case (BWK_ENTER):
-          *command = BRL_CMD_PREFMENU;
-          return 1;
-        case (BWK_ENTER | BWK_BACKWARD):
-          *command = BRL_CMD_MENU_PREV_ITEM;
-          return 1;
-        case (BWK_ENTER | BWK_FORWARD):
-          *command = BRL_CMD_MENU_NEXT_ITEM;
-          return 1;
-        case (BWK_ESCAPE | BWK_ENTER):
-          *command = BRL_CMD_PREFSAVE;
-          return 1;
-        case (BWK_ESCAPE | BWK_ENTER | BWK_BACKWARD):
-          *command = BRL_CMD_MENU_FIRST_ITEM;
-          return 1;
-        case (BWK_ESCAPE | BWK_ENTER | BWK_FORWARD):
-          *command = BRL_CMD_MENU_LAST_ITEM;
-          return 1;
-        case (BWK_BACKWARD | BWK_FORWARD):
-          *command = BRL_CMD_NOOP;
-          return 1;
-        case (BWK_BACKWARD | BWK_FORWARD | BWK_ESCAPE):
-          *command = BRL_CMD_NOOP;
-          return 1;
-        case (BWK_BACKWARD | BWK_FORWARD | BWK_ENTER):
-          *command = BRL_CMD_NOOP;
-          return 1;
-        default:
-          break;
-      }
-      break;
-    default:
-      switch (byte) {
-        case (BWK_BACKWARD):
-          *command = BRL_CMD_FWINLT;
-          return 1;
-        case (BWK_FORWARD):
-          *command = BRL_CMD_FWINRT;
-          return 1;
-        case (BWK_ESCAPE):
-          *command = BRL_CMD_CSRTRK;
-          return 1;
-        case (BWK_ESCAPE | BWK_BACKWARD):
-          *command = BRL_CMD_BACK;
-          return 1;
-        case (BWK_ESCAPE | BWK_FORWARD):
-          *command = BRL_CMD_DISPMD;
-          return 1;
-        case (BWK_ENTER):
-          *command = BRL_BLK_ROUTE;
-          return 1;
-        case (BWK_ENTER | BWK_BACKWARD):
-          *command = BRL_CMD_LNUP;
-          return 1;
-        case (BWK_ENTER | BWK_FORWARD):
-          *command = BRL_CMD_LNDN;
-          return 1;
-        case (BWK_ESCAPE | BWK_ENTER):
-          *command = BRL_CMD_PREFMENU;
-          return 1;
-        case (BWK_ESCAPE | BWK_ENTER | BWK_BACKWARD):
-          *command = BRL_CMD_LNBEG;
-          return 1;
-        case (BWK_ESCAPE | BWK_ENTER | BWK_FORWARD):
-          *command = BRL_CMD_LNEND;
-          return 1;
-        case (BWK_BACKWARD | BWK_FORWARD):
-          *command = BRL_CMD_HELP;
-          return 1;
-        case (BWK_BACKWARD | BWK_FORWARD | BWK_ESCAPE):
-          *command = BRL_CMD_CSRSIZE;
-          return 1;
-        case (BWK_BACKWARD | BWK_FORWARD | BWK_ENTER):
-          *command = BRL_CMD_FREEZE;
-          return 1;
-        default:
-          break;
-      }
-      break;
+  static const unsigned char keys[] = {
+    HT_BWK_Backward,
+    HT_BWK_Forward,
+    HT_BWK_Escape,
+    HT_BWK_Enter,
+    0
+  };
+
+  const unsigned char *key = keys;
+  const HT_KeySet set = HT_SET_NavigationKeys;
+
+  while (*key) {
+    if ((byte & *key) && !enqueueKeyEvent(set, *key, 1)) return 0;
+    key += 1;
   }
-  return 0;
+
+  do {
+    key -= 1;
+    if ((byte & *key) && !enqueueKeyEvent(set, *key, 0)) return 0;
+  } while (key != keys);
+
+  *command = EOF;
+  return 1;
 }
 
 static int
