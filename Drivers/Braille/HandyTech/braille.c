@@ -1594,6 +1594,14 @@ interpretBookwormByte (BRL_DriverCommandContext context, unsigned char byte, int
   const unsigned char *key = keys;
   const HT_KeySet set = HT_SET_NavigationKeys;
 
+  if (!byte) return 0;
+  {
+    unsigned char bits = byte;
+    while (*key) bits &= ~*key++;
+    if (bits) return 0;
+    key = keys;
+  }
+
   while (*key) {
     if ((byte & *key) && !enqueueKeyEvent(set, *key, 1)) return 0;
     key += 1;
