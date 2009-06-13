@@ -41,10 +41,10 @@ getCommand (KeyTable *table, unsigned char context, unsigned char set, unsigned 
   while (count) {
     if ((set == binding->keys.set) && (key == binding->keys.key) &&
         sameKeys(table->keys.mask, binding->keys.modifiers)) {
-      if (binding->keys.context == context) return binding->command;
+      if (binding->context == context) return binding->command;
 
       if (candidate == EOF)
-        if (binding->keys.context == BRL_CTX_DEFAULT)
+        if (binding->context == BRL_CTX_DEFAULT)
           candidate = binding->command;
     }
 
@@ -61,7 +61,7 @@ isModifiers (KeyTable *table, unsigned char context) {
   unsigned int count = header->bindingsCount;
 
   while (count) {
-    if ((binding->keys.context == context) || (binding->keys.context == BRL_CTX_DEFAULT)) {
+    if ((binding->context == context) || (binding->context == BRL_CTX_DEFAULT)) {
       if (isKeySubset(binding->keys.modifiers, table->keys.mask)) return 1;
     }
 
@@ -252,7 +252,7 @@ listContext (
   unsigned int count = header->bindingsCount;
 
   while (count) {
-    if (binding->keys.context == context) {
+    if (binding->context == context) {
       char line[0X80];
       size_t size = sizeof(line);
       unsigned int offset = 0;

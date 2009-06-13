@@ -157,7 +157,6 @@ parseKeyCombination (DataFile *file, KeyCombination *keys, const wchar_t *charac
     }
   }
 
-  keys->context = ktd->context;
   return 1;
 }
 
@@ -270,6 +269,7 @@ processBindOperands (DataFile *file, void *data) {
 
   binding = &ktd->bindingsTable[ktd->bindingsCount];
   memset(binding, 0, sizeof(*binding));
+  binding->context = ktd->context;
 
   if (getKeysOperand(file, &binding->keys, ktd)) {
     if (getCommandOperand(file, &binding->command, ktd)) {

@@ -29,12 +29,12 @@ typedef struct {
   KeySetMask modifiers;
   unsigned char set;
   unsigned char key;
-  unsigned char context;
 } KeyCombination;
 
 typedef struct {
-  KeyCombination keys;
   int command;
+  unsigned char context;
+  KeyCombination keys;
 } KeyBinding;
 
 typedef uint32_t KeyTableOffset;
