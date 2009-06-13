@@ -256,7 +256,7 @@ static unsigned int inputMode;
 
 static const unsigned char BookwormSessionEnd[] = {0X05, 0X07};	/* bookworm trailer to display braille */
 
-typedef int (ByteInterpreter) (BRL_DriverCommandContext context, unsigned char byte, int *command);
+typedef int (ByteInterpreter) (unsigned char byte);
 static ByteInterpreter interpretKeyByte;
 static ByteInterpreter interpretKeyByte;
 static ByteInterpreter interpretBookwormByte;
@@ -910,24 +910,21 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *st) {
 }
 
 static int
-interpretKeyByte (BRL_DriverCommandContext context, unsigned char byte, int *command) {
+interpretKeyByte (unsigned char byte) {
   int release = (byte & KEY_RELEASE) != 0;
   if (release) byte &= ~KEY_RELEASE;
 
   if ((byte >= KEY_ROUTING) &&
       (byte < (KEY_ROUTING + model->textCells))) {
-    *command = EOF;
     return enqueueKeyEvent(HT_SET_RoutingKeys, byte-KEY_ROUTING, !release);
   }
 
   if ((byte >= KEY_STATUS) &&
       (byte < (KEY_STATUS + model->statusCells))) {
-    *command = EOF;
     return enqueueKeyEvent(HT_SET_StatusKeys, byte-KEY_STATUS, !release);
   }
 
   if ((byte > 0) && (byte < 0X20)) {
-    *command = EOF;
     return enqueueKeyEvent(HT_SET_NavigationKeys, byte, !release);
   }
 
@@ -935,7 +932,7 @@ interpretKeyByte (BRL_DriverCommandContext context, unsigned char byte, int *com
 }
 
 static int
-interpretBookwormByte (BRL_DriverCommandContext context, unsigned char byte, int *command) {
+interpretBookwormByte (unsigned char byte) {
   static const unsigned char keys[] = {
     HT_BWK_Backward,
     HT_BWK_Forward,
@@ -965,7 +962,6 @@ interpretBookwormByte (BRL_DriverCommandContext context, unsigned char byte, int
     if ((byte & *key) && !enqueueKeyEvent(set, *key, 0)) return 0;
   } while (key != keys);
 
-  *command = EOF;
   return 1;
 }
 
@@ -1066,14 +1062,12 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
                 const unsigned char *bytes = &packet.fields.data.extended.data.bytes[0];
 
                 switch (packet.fields.data.extended.type) {
-                  case HT_EXTPKT_Key: {
-                    int command;
-                    if (model->interpretByte(context, bytes[0], &command)) {
+                  case HT_EXTPKT_Key:
+                    if (model->interpretByte(bytes[0])) {
                       updateCells(brl);
-                      return command;
+                      return EOF;
                     }
                     break;
-                  }
 
                   case HT_EXTPKT_Scancode: {
                     if (length) {
@@ -1133,14 +1127,12 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
                 break;
               }
 
-              default: {
-                int command;
-                if (model->interpretByte(context, packet.fields.type, &command)) {
+              default:
+                if (model->interpretByte(packet.fields.type)) {
                   updateCells(brl);
-                  return command;
+                  return EOF;
                 }
                 break;
-              }
             }
             break;
         }
