@@ -80,13 +80,17 @@ typedef enum {
   HT_KEY_Return = 0X14,
 
   /* Braille star keys */
-  HT_KEY_SpaceRight = 0X18
+  HT_KEY_SpaceRight = 0X18,
+
+  /* ranges and flags */
+  HT_KEY_ROUTING = 0X20,
+  HT_KEY_STATUS = 0X70,
+  HT_KEY_RELEASE = 0X80
 } HT_NavigationKey;
 
 typedef enum {
   HT_SET_NavigationKeys = 0,
-  HT_SET_RoutingKeys,
-  HT_SET_StatusKeys
+  HT_SET_RoutingKeys
 } HT_KeySet;
 
 static KEY_NAME_TABLE(keyNames_routing) = {
@@ -146,6 +150,11 @@ static KEY_NAME_TABLE(keyNames_rockers) = {
 static KEY_NAME_TABLE(keyNames_modular) = {
   KEY_NAME_ENTRY(HT_KEY_Up, "Up"),
   KEY_NAME_ENTRY(HT_KEY_Down, "Down"),
+
+  KEY_NAME_ENTRY(HT_KEY_STATUS+0, "Status1"),
+  KEY_NAME_ENTRY(HT_KEY_STATUS+1, "Status2"),
+  KEY_NAME_ENTRY(HT_KEY_STATUS+2, "Status3"),
+  KEY_NAME_ENTRY(HT_KEY_STATUS+3, "Status4"),
 
   LAST_KEY_NAME_ENTRY
 };
@@ -628,11 +637,6 @@ static struct timeval stateTime;
 static unsigned int retryCount = 0;
 static unsigned char updateRequired = 0;
 
-/* common key constants */
-#define KEY_RELEASE 0X80
-#define KEY_ROUTING 0X20
-#define KEY_STATUS  0X70
-
 static void
 setState (BrailleDisplayState state) {
   if (state == currentState) {
@@ -911,17 +915,17 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *st) {
 
 static int
 interpretKeyByte (unsigned char byte) {
-  int release = (byte & KEY_RELEASE) != 0;
-  if (release) byte &= ~KEY_RELEASE;
+  int release = (byte & HT_KEY_RELEASE) != 0;
+  if (release) byte &= ~HT_KEY_RELEASE;
 
-  if ((byte >= KEY_ROUTING) &&
-      (byte < (KEY_ROUTING + model->textCells))) {
-    return enqueueKeyEvent(HT_SET_RoutingKeys, byte-KEY_ROUTING, !release);
+  if ((byte >= HT_KEY_ROUTING) &&
+      (byte < (HT_KEY_ROUTING + model->textCells))) {
+    return enqueueKeyEvent(HT_SET_RoutingKeys, byte-HT_KEY_ROUTING, !release);
   }
 
-  if ((byte >= KEY_STATUS) &&
-      (byte < (KEY_STATUS + model->statusCells))) {
-    return enqueueKeyEvent(HT_SET_StatusKeys, byte-KEY_STATUS, !release);
+  if ((byte >= HT_KEY_STATUS) &&
+      (byte < (HT_KEY_STATUS + model->statusCells))) {
+    return enqueueKeyEvent(HT_SET_NavigationKeys, byte, !release);
   }
 
   if ((byte > 0) && (byte < 0X20)) {
