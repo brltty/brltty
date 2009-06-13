@@ -252,26 +252,14 @@ static KEY_NAME_TABLE_LIST(keyNameTables_bookworm) = {
   NULL
 };
 
-typedef struct {
-  uint32_t front;
-  signed char column;
-  signed char status;
-} Keys;
-static Keys currentKeys, pressedKeys;
-static const Keys nullKeys = {.front=0, .column=-1, .status=-1};
 static unsigned int inputMode;
 
 static const unsigned char BookwormSessionEnd[] = {0X05, 0X07};	/* bookworm trailer to display braille */
 
 typedef int (ByteInterpreter) (BRL_DriverCommandContext context, unsigned char byte, int *command);
 static ByteInterpreter interpretKeyByte;
-static ByteInterpreter handleKeyByte;
+static ByteInterpreter interpretKeyByte;
 static ByteInterpreter interpretBookwormByte;
-
-typedef int (KeysInterpreter) (BRL_DriverCommandContext context, const Keys *keys, int *command);
-static KeysInterpreter interpretModularKeys;
-static KeysInterpreter interpretBrailleWaveKeys;
-static KeysInterpreter interpretBrailleStarKeys;
 
 typedef int (CellWriter) (BrailleDisplay *brl);
 static CellWriter writeStatusAndTextCells;
@@ -284,7 +272,6 @@ typedef struct {
   const KeyNameEntry *const *keyNameTables;
 
   ByteInterpreter *interpretByte;
-  KeysInterpreter *interpretKeys;
   CellWriter *writeCells;
 
   const unsigned char *sessionEndAddress;
@@ -306,9 +293,8 @@ static const ModelEntry modelTable[] = {
     .textCells = 20,
     .statusCells = 4,
     .keyBindings = keyBindings_modular,
-  //.keyNameTables = keyNameTables_modular,
+    .keyNameTables = keyNameTables_modular,
     .interpretByte = interpretKeyByte,
-    .interpretKeys = interpretModularKeys,
     .writeCells = writeStatusAndTextCells
   }
   ,
@@ -317,9 +303,8 @@ static const ModelEntry modelTable[] = {
     .textCells = 40,
     .statusCells = 4,
     .keyBindings = keyBindings_modular,
-  //.keyNameTables = keyNameTables_modular,
+    .keyNameTables = keyNameTables_modular,
     .interpretByte = interpretKeyByte,
-    .interpretKeys = interpretModularKeys,
     .writeCells = writeStatusAndTextCells
   }
   ,
@@ -328,9 +313,8 @@ static const ModelEntry modelTable[] = {
     .textCells = 80,
     .statusCells = 4,
     .keyBindings = keyBindings_modular,
-  //.keyNameTables = keyNameTables_modular,
+    .keyNameTables = keyNameTables_modular,
     .interpretByte = interpretKeyByte,
-    .interpretKeys = interpretModularKeys,
     .writeCells = writeStatusAndTextCells
   }
   ,
@@ -339,9 +323,8 @@ static const ModelEntry modelTable[] = {
     .textCells = 64,
     .statusCells = 0,
     .keyBindings = keyBindings_modularEvolution64,
-  //.keyNameTables = keyNameTables_modularEvolution64,
+    .keyNameTables = keyNameTables_modularEvolution64,
     .interpretByte = interpretKeyByte,
-    .interpretKeys = interpretBrailleStarKeys,
     .writeCells = writeEvolutionCells,
     .hasATC = 1
   }
@@ -352,7 +335,7 @@ static const ModelEntry modelTable[] = {
     .statusCells = 0,
     .keyBindings = keyBindings_modularEvolution88,
     .keyNameTables = keyNameTables_modularEvolution88,
-    .interpretByte = handleKeyByte,
+    .interpretByte = interpretKeyByte,
     .writeCells = writeEvolutionCells,
     .hasATC = 1
   }
@@ -362,9 +345,8 @@ static const ModelEntry modelTable[] = {
     .textCells = 40,
     .statusCells = 0,
     .keyBindings = keyBindings_brailleWave,
-  //.keyNameTables = keyNameTables_brailleWave,
+    .keyNameTables = keyNameTables_brailleWave,
     .interpretByte = interpretKeyByte,
-    .interpretKeys = interpretBrailleWaveKeys,
     .writeCells = writeStatusAndTextCells
   }
   ,
@@ -385,9 +367,8 @@ static const ModelEntry modelTable[] = {
     .textCells = 20,
     .statusCells = 0,
     .keyBindings = keyBindings_brailleStar40,
-  //.keyNameTables = keyNameTables_brailleStar40,
+    .keyNameTables = keyNameTables_brailleStar40,
     .interpretByte = interpretKeyByte,
-    .interpretKeys = interpretBrailleStarKeys,
     .writeCells = writeStatusAndTextCells
   }
   ,
@@ -396,9 +377,8 @@ static const ModelEntry modelTable[] = {
     .textCells = 40,
     .statusCells = 0,
     .keyBindings = keyBindings_brailleStar40,
-  //.keyNameTables = keyNameTables_brailleStar40,
+    .keyNameTables = keyNameTables_brailleStar40,
     .interpretByte = interpretKeyByte,
-    .interpretKeys = interpretBrailleStarKeys,
     .writeCells = writeStatusAndTextCells
   }
   ,
@@ -407,9 +387,8 @@ static const ModelEntry modelTable[] = {
     .textCells = 80,
     .statusCells = 0,
     .keyBindings = keyBindings_brailleStar80,
-  //.keyNameTables = keyNameTables_brailleStar80,
+    .keyNameTables = keyNameTables_brailleStar80,
     .interpretByte = interpretKeyByte,
-    .interpretKeys = interpretBrailleStarKeys,
     .writeCells = writeStatusAndTextCells
   }
   ,
@@ -418,9 +397,8 @@ static const ModelEntry modelTable[] = {
     .textCells = 40,
     .statusCells = 0,
     .keyBindings = keyBindings_modular,
-  //.keyNameTables = keyNameTables_modular,
+    .keyNameTables = keyNameTables_modular,
     .interpretByte = interpretKeyByte,
-    .interpretKeys = interpretModularKeys,
     .writeCells = writeStatusAndTextCells
   }
   ,
@@ -654,58 +632,6 @@ static unsigned char updateRequired = 0;
 #define KEY_RELEASE 0X80
 #define KEY_ROUTING 0X20
 #define KEY_STATUS  0X70
-#define KEY(code)   (UINT32_C(1) << (code))
-
-/* modular front keys */
-#define KEY_B1              KEY(0X03)
-#define KEY_B2              KEY(0X07)
-#define KEY_B3              KEY(0X0B)
-#define KEY_B4              KEY(0X0F)
-#define KEY_B5              KEY(0X13)
-#define KEY_B6              KEY(0X17)
-#define KEY_B7              KEY(0X1B)
-#define KEY_B8              KEY(0X1F)
-#define KEY_UP              KEY(0X04)
-#define KEY_DOWN            KEY(0X08)
-
-/* keypad keys */
-#define KEY_B12             KEY(0X01)
-#define KEY_ZERO            KEY(0X05)
-#define KEY_B13             KEY(0X09)
-#define KEY_B14             KEY(0X0D)
-#define KEY_B11             KEY(0X11)
-#define KEY_ONE             KEY(0X15)
-#define KEY_TWO             KEY(0X19)
-#define KEY_THREE           KEY(0X1D)
-#define KEY_B10             KEY(0X02)
-#define KEY_FOUR            KEY(0X06)
-#define KEY_FIVE            KEY(0X0A)
-#define KEY_SIX             KEY(0X0E)
-#define KEY_B9              KEY(0X12)
-#define KEY_SEVEN           KEY(0X16)
-#define KEY_EIGHT           KEY(0X1A)
-#define KEY_NINE            KEY(0X1E)
-
-/* braille wave keys */
-#define KEY_ESCAPE          KEY(0X0C)
-#define KEY_SPACE           KEY(0X10)
-#define KEY_RETURN          KEY(0X14)
-
-/* braille star keys */
-#define KEY_SPACE_LEFT      KEY_SPACE
-#define KEY_SPACE_RIGHT     KEY(0X18)
-#define ROCKER_LEFT_TOP     KEY_ESCAPE
-#define ROCKER_LEFT_BOTTOM  KEY_RETURN
-#define ROCKER_LEFT_MIDDLE  (ROCKER_LEFT_TOP | ROCKER_LEFT_BOTTOM)
-#define ROCKER_RIGHT_TOP    KEY_UP
-#define ROCKER_RIGHT_BOTTOM KEY_DOWN
-#define ROCKER_RIGHT_MIDDLE (ROCKER_RIGHT_TOP | ROCKER_RIGHT_BOTTOM)
-
-/* bookworm keys */
-#define BWK_BACKWARD 0X01
-#define BWK_ESCAPE   0X02
-#define BWK_ENTER    0X04
-#define BWK_FORWARD  0X08
 
 static void
 setState (BrailleDisplayState state) {
@@ -779,7 +705,6 @@ identifyModel (BrailleDisplay *brl, unsigned char identifier) {
   if (!reallocateBuffer(&rawData, brl->textColumns*brl->textRows)) return 0;
   if (!reallocateBuffer(&prevData, brl->textColumns*brl->textRows)) return 0;
 
-  currentKeys = pressedKeys = nullKeys;
   inputMode = 0;
 
   memset(rawStatus, 0, model->statusCells);
@@ -989,60 +914,6 @@ interpretKeyByte (BRL_DriverCommandContext context, unsigned char byte, int *com
   int release = (byte & KEY_RELEASE) != 0;
   if (release) byte &= ~KEY_RELEASE;
 
-  currentKeys.column = -1;
-  currentKeys.status = -1;
-
-  if ((byte >= KEY_ROUTING) &&
-      (byte < (KEY_ROUTING + model->textCells))) {
-    *command = BRL_CMD_NOOP;
-    if (!release) {
-      currentKeys.column = byte - KEY_ROUTING;
-      if (model->interpretKeys(context, &currentKeys, command)) {
-        pressedKeys = nullKeys;
-      }
-    }
-    return 1;
-  }
-
-  if ((byte >= KEY_STATUS) &&
-      (byte < (KEY_STATUS + model->statusCells))) {
-    *command = BRL_CMD_NOOP;
-    if (!release) {
-      currentKeys.status = byte - KEY_STATUS;
-      if (model->interpretKeys(context, &currentKeys, command)) {
-        pressedKeys = nullKeys;
-      }
-    }
-    return 1;
-  }
-
-  if (byte < 0X20) {
-    uint32_t key = KEY(byte);
-    *command = BRL_CMD_NOOP;
-    if (release) {
-      currentKeys.front &= ~key;
-      if (pressedKeys.front) {
-        model->interpretKeys(context, &pressedKeys, command);
-        pressedKeys = nullKeys;
-      }
-    } else {
-      currentKeys.front |= key;
-      pressedKeys = currentKeys;
-      if (model->interpretKeys(context, &currentKeys, command)) {
-        *command |= BRL_FLG_REPEAT_DELAY;
-      }
-    }
-    return 1;
-  }
-
-  return 0;
-}
-
-static int
-handleKeyByte (BRL_DriverCommandContext context, unsigned char byte, int *command) {
-  int release = (byte & KEY_RELEASE) != 0;
-  if (release) byte &= ~KEY_RELEASE;
-
   if ((byte >= KEY_ROUTING) &&
       (byte < (KEY_ROUTING + model->textCells))) {
     *command = EOF;
@@ -1060,525 +931,6 @@ handleKeyByte (BRL_DriverCommandContext context, unsigned char byte, int *comman
     return enqueueKeyEvent(HT_SET_NavigationKeys, byte, !release);
   }
 
-  return 0;
-}
-
-
-static int
-interpretModularKeys (BRL_DriverCommandContext context, const Keys *keys, int *command) {
-  if (keys->column >= 0) {
-    switch (keys->front) {
-      default:
-        break;
-      case 0:
-        *command = BRL_BLK_ROUTE + keys->column;
-        return 1;
-      case (KEY_B1):
-        *command = BRL_BLK_SETLEFT + keys->column;
-        return 1;
-      case (KEY_B2):
-        *command = BRL_BLK_DESCCHAR + keys->column;
-        return 1;
-      case (KEY_B3):
-        *command = BRL_BLK_CUTAPPEND + keys->column;
-        return 1;
-      case (KEY_B4):
-        *command = BRL_BLK_CUTBEGIN + keys->column;
-        return 1;
-      case (KEY_UP):
-        *command = BRL_BLK_PRINDENT + keys->column;
-        return 1;
-      case (KEY_DOWN):
-        *command = BRL_BLK_NXINDENT + keys->column;
-        return 1;
-      case (KEY_B5):
-        *command = BRL_BLK_CUTRECT + keys->column;
-        return 1;
-      case (KEY_B6):
-        *command = BRL_BLK_CUTLINE + keys->column;
-        return 1;
-      case (KEY_B7):
-        *command = BRL_BLK_SETMARK + keys->column;
-        return 1;
-      case (KEY_B8):
-        *command = BRL_BLK_GOTOMARK + keys->column;
-        return 1;
-    }
-  } else if (keys->status >= 0) {
-    switch (keys->status) {
-      default:
-        break;
-      case 0:
-        *command = BRL_CMD_HELP;
-        return 1;
-      case 1:
-        *command = BRL_CMD_PREFMENU;
-        return 1;
-      case 2:
-        *command = BRL_CMD_INFO;
-        return 1;
-      case 3:
-        *command = BRL_CMD_FREEZE;
-        return 1;
-    }
-  } else {
-    switch (keys->front) {
-      default:
-        break;
-      case (KEY_B1 | KEY_B8 | KEY_UP):
-        inputMode = 0;
-        *command = EOF;
-        return 1;
-      case (KEY_B1 | KEY_B8 | KEY_DOWN):
-        inputMode = 1;
-        *command = EOF;
-        return 1;
-      case (KEY_B9):
-        *command = BRL_CMD_SAY_ABOVE;
-        return 1;
-      case (KEY_B10):
-        *command = BRL_CMD_SAY_LINE;
-        return 1;
-      case (KEY_B11):
-        *command = BRL_CMD_SAY_BELOW;
-        return 1;
-      case (KEY_B12):
-        *command = BRL_CMD_MUTE;
-        return 1;
-      case (KEY_ZERO):
-        *command = BRL_CMD_SPKHOME;
-        return 1;
-      case (KEY_B13):
-        *command = BRL_CMD_SWITCHVT_PREV;
-        return 1;
-      case (KEY_B14):
-        *command = BRL_CMD_SWITCHVT_NEXT;
-        return 1;
-      case (KEY_SEVEN):
-        *command = BRL_CMD_LEARN;
-        return 1;
-      case (KEY_EIGHT):
-        *command = BRL_CMD_MENU_PREV_ITEM;
-        return 1;
-      case (KEY_NINE):
-        *command = BRL_CMD_MENU_FIRST_ITEM;
-        return 1;
-      case (KEY_FOUR):
-        *command = BRL_CMD_MENU_PREV_SETTING;
-        return 1;
-      case (KEY_FIVE):
-        *command = BRL_CMD_PREFSAVE;
-        return 1;
-      case (KEY_SIX):
-        *command = BRL_CMD_MENU_NEXT_SETTING;
-        return 1;
-      case (KEY_ONE):
-        *command = BRL_CMD_PREFMENU;
-        return 1;
-      case (KEY_TWO):
-        *command = BRL_CMD_MENU_NEXT_ITEM;
-        return 1;
-      case (KEY_THREE):
-        *command = BRL_CMD_MENU_LAST_ITEM;
-        return 1;
-      case (KEY_ZERO | KEY_SEVEN):
-        *command = BRL_BLK_PASSKEY + BRL_KEY_HOME;
-        return 1;
-      case (KEY_ZERO | KEY_EIGHT):
-        *command = BRL_BLK_PASSKEY + BRL_KEY_CURSOR_UP;
-        return 1;
-      case (KEY_ZERO | KEY_NINE):
-        *command = BRL_BLK_PASSKEY + BRL_KEY_PAGE_UP;
-        return 1;
-      case (KEY_ZERO | KEY_FOUR):
-        *command = BRL_BLK_PASSKEY + BRL_KEY_CURSOR_LEFT;
-        return 1;
-      case (KEY_ZERO | KEY_SIX):
-        *command = BRL_BLK_PASSKEY + BRL_KEY_CURSOR_RIGHT;
-        return 1;
-      case (KEY_ZERO | KEY_ONE):
-        *command = BRL_BLK_PASSKEY + BRL_KEY_END;
-        return 1;
-      case (KEY_ZERO | KEY_TWO):
-        *command = BRL_BLK_PASSKEY + BRL_KEY_CURSOR_DOWN;
-        return 1;
-      case (KEY_ZERO | KEY_THREE):
-        *command = BRL_BLK_PASSKEY + BRL_KEY_PAGE_DOWN;
-        return 1;
-      case (KEY_ZERO | KEY_B13):
-        *command = BRL_BLK_PASSKEY + BRL_KEY_INSERT;
-        return 1;
-      case (KEY_ZERO | KEY_B14):
-        *command = BRL_BLK_PASSKEY + BRL_KEY_DELETE;
-        return 1;
-    }
-
-    {
-      int functionKeys = KEY_B9 | KEY_B10 | KEY_B11 | KEY_B12;
-      switch (keys->front & functionKeys) {
-        default:
-          break;
-        case (KEY_B9):
-          *command = BRL_BLK_SETMARK;
-          goto addOffset;
-        case (KEY_B10):
-          *command = BRL_BLK_GOTOMARK;
-          goto addOffset;
-        case (KEY_B11):
-          *command = BRL_BLK_SWITCHVT;
-          goto addOffset;
-        case (KEY_B12):
-          *command = BRL_BLK_PASSKEY + BRL_KEY_FUNCTION;
-          goto addOffset;
-        addOffset:
-          switch (keys->front & ~functionKeys) {
-            default:
-              break;
-            case (KEY_ONE):
-              *command += 0;
-              return 1;
-            case (KEY_TWO):
-              *command += 1;
-              return 1;
-            case (KEY_THREE):
-              *command += 2;
-              return 1;
-            case (KEY_FOUR):
-              *command += 3;
-              return 1;
-            case (KEY_FIVE):
-              *command += 4;
-              return 1;
-            case (KEY_SIX):
-              *command += 5;
-              return 1;
-            case (KEY_SEVEN):
-              *command += 6;
-              return 1;
-            case (KEY_EIGHT):
-              *command += 7;
-              return 1;
-            case (KEY_NINE):
-              *command += 8;
-              return 1;
-            case (KEY_ZERO):
-              *command += 9;
-              return 1;
-            case (KEY_B13):
-              *command += 10;
-              return 1;
-            case (KEY_B14):
-              *command += 11;
-              return 1;
-          }
-      }
-    }
-
-    if (inputMode) {
-      const uint32_t dots = KEY_B1 | KEY_B2 | KEY_B3 | KEY_B4 | KEY_B5 | KEY_B6 | KEY_B7 | KEY_B8;
-      if (keys->front & dots) {
-        uint32_t modifiers = keys->front & ~dots;
-        *command = BRL_BLK_PASSDOTS;
-
-        if (keys->front & KEY_B1) *command |= BRL_DOT7;
-        if (keys->front & KEY_B2) *command |= BRL_DOT3;
-        if (keys->front & KEY_B3) *command |= BRL_DOT2;
-        if (keys->front & KEY_B4) *command |= BRL_DOT1;
-        if (keys->front & KEY_B5) *command |= BRL_DOT4;
-        if (keys->front & KEY_B6) *command |= BRL_DOT5;
-        if (keys->front & KEY_B7) *command |= BRL_DOT6;
-        if (keys->front & KEY_B8) *command |= BRL_DOT8;
-
-        if (modifiers & KEY_UP) {
-          modifiers &= ~KEY_UP;
-          *command |= BRL_FLG_CHAR_CONTROL;
-        }
-        if (modifiers & KEY_DOWN) {
-          modifiers &= ~KEY_DOWN;
-          *command |= BRL_FLG_CHAR_META;
-        }
-        if (!modifiers) return 1;
-      }
-      switch (keys->front) {
-        default:
-          break;
-        case (KEY_UP):
-          *command = BRL_BLK_PASSDOTS;
-          return 1;
-        case (KEY_DOWN):
-          *command = BRL_BLK_PASSKEY + BRL_KEY_ENTER;
-          return 1;
-      }
-    }
-    switch (keys->front) {
-      default:
-        break;
-      case (KEY_UP):
-        *command = BRL_CMD_FWINLT;
-        return 1;
-      case (KEY_DOWN):
-        *command = BRL_CMD_FWINRT;
-        return 1;
-      case (KEY_B1):
-        *command = BRL_CMD_HOME;
-        return 1;
-      case (KEY_B1 | KEY_UP):
-        *command = BRL_CMD_LNBEG;
-        return 1;
-      case (KEY_B1 | KEY_DOWN):
-        *command = BRL_CMD_LNEND;
-        return 1;
-      case (KEY_B2):
-        *command = BRL_CMD_TOP_LEFT;
-        return 1;
-      case (KEY_B2 | KEY_UP):
-        *command = BRL_CMD_TOP;
-        return 1;
-      case (KEY_B2 | KEY_DOWN):
-        *command = BRL_CMD_BOT;
-        return 1;
-      case (KEY_B3):
-        *command = BRL_CMD_BACK;
-        return 1;
-      case (KEY_B3 | KEY_UP):
-        *command = BRL_CMD_HWINLT;
-        return 1;
-      case (KEY_B3 | KEY_DOWN):
-        *command = BRL_CMD_HWINRT;
-        return 1;
-      case (KEY_B6 | KEY_UP):
-        *command = BRL_CMD_CHRLT;
-        return 1;
-      case (KEY_B6 | KEY_DOWN):
-        *command = BRL_CMD_CHRRT;
-        return 1;
-      case (KEY_B4):
-        *command = BRL_CMD_LNUP;
-        return 1;
-      case (KEY_B5):
-        *command = BRL_CMD_LNDN;
-        return 1;
-      case (KEY_B1 | KEY_B4):
-        *command = BRL_CMD_PRPGRPH;
-        return 1;
-      case (KEY_B1 |  KEY_B5):
-        *command = BRL_CMD_NXPGRPH;
-        return 1;
-      case (KEY_B2 | KEY_B4):
-        *command = BRL_CMD_PRPROMPT;
-        return 1;
-      case (KEY_B2 |  KEY_B5):
-        *command = BRL_CMD_NXPROMPT;
-        return 1;
-      case (KEY_B3 | KEY_B4):
-        *command = BRL_CMD_PRSEARCH;
-        return 1;
-      case (KEY_B3 |  KEY_B5):
-        *command = BRL_CMD_NXSEARCH;
-        return 1;
-      case (KEY_B6 | KEY_B4):
-        *command = BRL_CMD_ATTRUP;
-        return 1;
-      case (KEY_B6 |  KEY_B5):
-        *command = BRL_CMD_ATTRDN;
-        return 1;
-      case (KEY_B7 | KEY_B4):
-        *command = BRL_CMD_WINUP;
-        return 1;
-      case (KEY_B7 |  KEY_B5):
-        *command = BRL_CMD_WINDN;
-        return 1;
-      case (KEY_B8 | KEY_B4):
-        *command = BRL_CMD_PRDIFLN;
-        return 1;
-      case (KEY_B8 | KEY_B5):
-        *command = BRL_CMD_NXDIFLN;
-        return 1;
-      case (KEY_B8):
-        *command = BRL_CMD_HELP;
-        return 1;
-      case (KEY_B8 | KEY_B1):
-        *command = BRL_CMD_CSRTRK;
-        return 1;
-      case (KEY_B8 | KEY_B2):
-        *command = BRL_CMD_CSRVIS;
-        return 1;
-      case (KEY_B8 | KEY_B3):
-        *command = BRL_CMD_ATTRVIS;
-        return 1;
-      case (KEY_B8 | KEY_B6):
-        *command = BRL_CMD_FREEZE;
-        return 1;
-      case (KEY_B8 | KEY_B7):
-        *command = BRL_CMD_TUNES;
-        return 1;
-      case (KEY_B7):
-        *command = BRL_CMD_SIXDOTS;
-        return 1;
-      case (KEY_B7 | KEY_B1):
-        *command = BRL_CMD_PREFMENU;
-        return 1;
-      case (KEY_B7 | KEY_B2):
-        *command = BRL_CMD_PREFLOAD;
-        return 1;
-      case (KEY_B7 | KEY_B3):
-        *command = BRL_CMD_PREFSAVE;
-        return 1;
-      case (KEY_B7 | KEY_B6):
-        *command = BRL_CMD_INFO;
-        return 1;
-      case (KEY_B6):
-        *command = BRL_CMD_DISPMD;
-        return 1;
-      case (KEY_B6 | KEY_B1):
-        *command = BRL_CMD_SKPIDLNS;
-        return 1;
-      case (KEY_B6 | KEY_B2):
-        *command = BRL_CMD_SKPBLNKWINS;
-        return 1;
-      case (KEY_B6 | KEY_B3):
-        *command = BRL_CMD_SLIDEWIN;
-        return 1;
-      case (KEY_B2 | KEY_B3 | KEY_UP):
-        *command = BRL_CMD_MUTE;
-        return 1;
-      case (KEY_B2 | KEY_B3 | KEY_DOWN):
-        *command = BRL_CMD_SAY_LINE;
-        return 1;
-      case (KEY_UP | KEY_DOWN):
-        *command = BRL_CMD_PASTE;
-        return 1;
-    }
-  }
-  return 0;
-}
-
-static int
-interpretBrailleWaveKeys (BRL_DriverCommandContext context, const Keys *keys, int *command) {
-  return interpretModularKeys(context, keys, command);
-}
-
-static int
-interpretBrailleStarKeys (BRL_DriverCommandContext context, const Keys *keys, int *command) {
-  if (keys->column >= 0) {
-    switch (keys->front) {
-      default:
-        break;
-      case (ROCKER_LEFT_TOP):
-        *command = BRL_BLK_CUTBEGIN + keys->column;
-        return 1;
-      case (ROCKER_LEFT_MIDDLE):
-        *command = BRL_BLK_PASSKEY + BRL_KEY_FUNCTION + keys->column;
-        return 1;
-      case (ROCKER_LEFT_BOTTOM):
-        *command = BRL_BLK_CUTAPPEND + keys->column;
-        return 1;
-      case (ROCKER_RIGHT_TOP):
-        *command = BRL_BLK_CUTLINE + keys->column;
-        return 1;
-      case (ROCKER_RIGHT_MIDDLE):
-        *command = BRL_BLK_SWITCHVT + keys->column;
-        return 1;
-      case (ROCKER_RIGHT_BOTTOM):
-        *command = BRL_BLK_CUTRECT + keys->column;
-        return 1;
-    }
-  } else if (keys->status >= 0) {
-    switch (keys->front) {
-      default:
-        break;
-    }
-  } else {
-    switch (keys->front) {
-      default:
-        break;
-      case (ROCKER_LEFT_TOP):
-        *command = BRL_BLK_PASSKEY + BRL_KEY_CURSOR_UP;
-        return 1;
-      case (ROCKER_RIGHT_TOP):
-        *command = BRL_CMD_LNUP;
-        return 1;
-      case (ROCKER_LEFT_BOTTOM):
-        *command = BRL_BLK_PASSKEY + BRL_KEY_CURSOR_DOWN;
-        return 1;
-      case (ROCKER_RIGHT_BOTTOM):
-        *command = BRL_CMD_LNDN;
-        return 1;
-      case (ROCKER_LEFT_MIDDLE):
-        *command = BRL_CMD_FWINLT;
-        return 1;
-      case (ROCKER_RIGHT_MIDDLE):
-        *command = BRL_CMD_FWINRT;
-        return 1;
-      case (ROCKER_LEFT_MIDDLE | ROCKER_RIGHT_MIDDLE):
-      case (ROCKER_LEFT_MIDDLE | KEY_B3):
-      case (KEY_B6 | ROCKER_RIGHT_MIDDLE):
-        *command = BRL_CMD_HOME;
-        return 1;
-      case (ROCKER_RIGHT_MIDDLE | ROCKER_LEFT_TOP):
-      case (ROCKER_RIGHT_MIDDLE | KEY_B5):
-      case (KEY_B3 | ROCKER_LEFT_TOP):
-        *command = BRL_CMD_TOP_LEFT;
-        return 1;
-      case (ROCKER_RIGHT_MIDDLE | ROCKER_LEFT_BOTTOM):
-      case (ROCKER_RIGHT_MIDDLE | KEY_B7):
-      case (KEY_B3 | ROCKER_LEFT_BOTTOM):
-        *command = BRL_CMD_BOT_LEFT;
-        return 1;
-      case (ROCKER_LEFT_MIDDLE | ROCKER_RIGHT_TOP):
-      case (ROCKER_LEFT_MIDDLE | KEY_B4):
-      case (KEY_B6 | ROCKER_RIGHT_TOP):
-        *command = BRL_CMD_TOP;
-        return 1;
-      case (ROCKER_LEFT_MIDDLE | ROCKER_RIGHT_BOTTOM):
-      case (ROCKER_LEFT_MIDDLE | KEY_B2):
-      case (KEY_B6 | ROCKER_RIGHT_BOTTOM):
-        *command = BRL_CMD_BOT;
-        return 1;
-      case (ROCKER_LEFT_TOP | ROCKER_RIGHT_TOP):
-      case (ROCKER_LEFT_TOP | KEY_B4):
-      case (KEY_B5 | ROCKER_RIGHT_TOP):
-        *command = BRL_CMD_PRDIFLN;
-        return 1;
-      case (ROCKER_LEFT_TOP | ROCKER_RIGHT_BOTTOM):
-      case (ROCKER_LEFT_TOP | KEY_B2):
-      case (KEY_B5 | ROCKER_RIGHT_BOTTOM):
-        *command = BRL_CMD_NXDIFLN;
-        return 1;
-      case (ROCKER_LEFT_BOTTOM | ROCKER_RIGHT_TOP):
-      case (ROCKER_LEFT_BOTTOM | KEY_B4):
-      case (KEY_B7 | ROCKER_RIGHT_TOP):
-        *command = BRL_CMD_ATTRUP;
-        return 1;
-      case (ROCKER_LEFT_BOTTOM | ROCKER_RIGHT_BOTTOM):
-      case (ROCKER_LEFT_BOTTOM | KEY_B2):
-      case (KEY_B7 | ROCKER_RIGHT_BOTTOM):
-        *command = BRL_CMD_ATTRDN;
-        return 1;
-      case (KEY_B2 | KEY_B4 | KEY_B5 | KEY_SPACE_LEFT):
-        setState(BDS_OFF);
-        *command = EOF;
-        return 1;
-    }
-  }
-  if (!(keys->front & ~(KEY_B1 | KEY_B2 | KEY_B3 | KEY_B4 |
-                        KEY_B5 | KEY_B6 | KEY_B7 | KEY_B8 |
-                        KEY_SPACE_LEFT | KEY_SPACE_RIGHT |
-                        KEY_B9 | KEY_SEVEN | KEY_EIGHT | KEY_NINE |
-                        KEY_B10 | KEY_FOUR | KEY_FIVE | KEY_SIX |
-                        KEY_B11 | KEY_ONE | KEY_TWO | KEY_THREE |
-                        KEY_B12 | KEY_ZERO | KEY_B13 | KEY_B14))) {
-    Keys modularKeys = *keys;
-    if (modularKeys.front & KEY_SPACE_LEFT) {
-      modularKeys.front &= ~KEY_SPACE_LEFT;
-      modularKeys.front |= KEY_UP;
-    }
-    if (modularKeys.front & KEY_SPACE_RIGHT) {
-      modularKeys.front &= ~KEY_SPACE_RIGHT;
-      modularKeys.front |= KEY_DOWN;
-    }
-    if (interpretModularKeys(context, &modularKeys, command)) return 1;
-  }
   return 0;
 }
 
@@ -1660,7 +1012,6 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
         if (packet.fields.data.ok.model == model->identifier) {
           setState(BDS_READY);
           updateRequired = 1;
-          currentKeys = pressedKeys = nullKeys;
           continue;
         }
         break;

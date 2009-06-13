@@ -50,3 +50,12 @@ bind B6 DISPMD
 bind B6+B1 SKPIDLNS
 bind B6+B2 SKPBLNKWINS
 bind B6+B3 SLIDEWIN
+
+bind B1+RoutingKey SETLEFT
+bind B2+RoutingKey DESCCHAR
+bind B3+RoutingKey CUTAPPEND
+bind B4+RoutingKey CUTBEGIN
+bind B5+RoutingKey CUTRECT
+bind B6+RoutingKey CUTLINE
+bind B7+RoutingKey SETMARK
+bind B8+RoutingKey GOTOMARK

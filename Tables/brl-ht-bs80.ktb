@@ -16,16 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# Key Table for HandyTech Modular Evolution 88
+# Key Table for HandyTech Braille Star 80
 
-bind RoutingKey ROUTE
-bind ThumbLeft+RoutingKey PRINDENT
-bind ThumbRight+RoutingKey NXINDENT
-
-bind ThumbLeft FWINLT
-bind ThumbRight FWINRT
-bind ThumbLeft+ThumbRight PASTE
-
-include brl-ht-dots.kti
-include brl-ht-rockers.kti
+include brl-ht-bs.kti
 include brl-ht-keypad.kti
