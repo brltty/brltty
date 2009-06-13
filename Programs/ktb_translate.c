@@ -244,7 +244,7 @@ formatKeyCombination (KeyTable *table, const KeyCombination *keys, char *buffer,
 static int
 listContext (
   KeyTable *table, unsigned char context,
-  const char *title, const char *prefix,
+  const char **title, const char *keysPrefix,
   LineHandler handleLine, void *data
 ) {
   const KeyTableHeader *header = table->header.fields;
@@ -258,10 +258,7 @@ listContext (
       unsigned int offset = 0;
       int length;
 
-      if (title) {
-        if (!handleLine((char *)title, data)) return 0;
-        title = NULL;
-      }
+      unsigned int keysOffset;
 
       {
         char description[0X60];
@@ -270,21 +267,28 @@ listContext (
         offset += length, size -= length;
       }
 
-      if (prefix) {
-        snprintf(&line[offset], size, "%s, %n", prefix, &length);
+      keysOffset = offset;
+      if (keysPrefix) {
+        snprintf(&line[offset], size, "%s, %n", keysPrefix, &length);
         offset += length, size -= length;
       }
 
       {
         char keys[0X40];
         formatKeyCombination(table, &binding->keys, keys, sizeof(keys));
-        snprintf(&line[offset], size, "%s", keys);
+        snprintf(&line[offset], size, "%s%n", keys, &length);
+        offset += length, size -= length;
       }
 
       if ((binding->command & BRL_MSK_BLK) == BRL_BLK_CONTEXT) {
         unsigned char context = BRL_CTX_DEFAULT + (binding->command & BRL_MSK_ARG);
-        if (!listContext(table, context, title, &line[offset], handleLine, data)) return 0;
+        if (!listContext(table, context, title, &line[keysOffset], handleLine, data)) return 0;
       } else {
+        if (*title) {
+          if (!handleLine((char *)*title, data)) return 0;
+          *title = NULL;
+        }
+
         if (!handleLine(line, data)) return 0;
       }
     }
@@ -316,7 +320,9 @@ listKeyBindings (KeyTable *table, LineHandler handleLine, void *data) {
   const ContextEntry *ctx = contextTable;
 
   while (ctx->title) {
-    if (!listContext(table, ctx->context, ctx->title, NULL, handleLine, data)) return 0;
+    const char *title = ctx->title;
+
+    if (!listContext(table, ctx->context, &title, NULL, handleLine, data)) return 0;
     ctx += 1;
   }
 
