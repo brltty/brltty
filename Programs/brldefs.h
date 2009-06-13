@@ -114,7 +114,7 @@ typedef enum {
   /* implicit motion */
   BRL_CMD_HOME /* go to cursor */,
   BRL_CMD_BACK /* go back (undo unexpected cursor tracking motion) */,
-  BRL_CMD_RETURN /* go back (after cursor tracking) or to cursor (cursor not in window) */,
+  BRL_CMD_RETURN /* go back (after cursor tracking) or go to cursor (cursor not in window) */,
   
   /* feature activation and deactivation */
   BRL_CMD_FREEZE /* toggle screen mode frozen/live */,
@@ -146,12 +146,12 @@ typedef enum {
   BRL_CMD_PREFLOAD /* restore saved preferences */,
   
   /* menu navigation */
-  BRL_CMD_MENU_FIRST_ITEM /* go to first item in menu */,
-  BRL_CMD_MENU_LAST_ITEM /* go to last item in menu */,
-  BRL_CMD_MENU_PREV_ITEM /* go to previous item in menu */,
-  BRL_CMD_MENU_NEXT_ITEM /* go to next item in menu */,
-  BRL_CMD_MENU_PREV_SETTING /* change current item in menu to previous choice */,
-  BRL_CMD_MENU_NEXT_SETTING /* change current item in menu to next choice */,
+  BRL_CMD_MENU_FIRST_ITEM /* go to first item */,
+  BRL_CMD_MENU_LAST_ITEM /* go to last item */,
+  BRL_CMD_MENU_PREV_ITEM /* go to previous item */,
+  BRL_CMD_MENU_NEXT_ITEM /* go to next item */,
+  BRL_CMD_MENU_PREV_SETTING /* select previous choice */,
+  BRL_CMD_MENU_NEXT_SETTING /* select next choice */,
  
   /* speech controls */
   BRL_CMD_MUTE /* stop speaking immediately */,

@@ -25,16 +25,15 @@ extern "C" {
 
 #include "misc.h"
 #include "keydefs.h"
-#include "keysets.h"
 
 extern KeyTable *compileKeyTable (const char *name, const KeyNameEntry *const *keys);
 extern void destroyKeyTable (KeyTable *table);
+extern int listKeyBindings (KeyTable *table, LineHandler handleLine, void *data);
 
 extern char *ensureKeyTableExtension (const char *path);
 
 extern void resetKeyTable (KeyTable *table);
 extern KeyTableState processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsigned char key, int press);
-extern int listKeyBindings (KeyTable *table, LineHandler handleLine, void *data);
 
 #ifdef __cplusplus
 }

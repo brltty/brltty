@@ -23,6 +23,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#include "keysets.h"
+
 typedef struct {
   KeySetMask modifiers;
   unsigned char set;
@@ -49,6 +51,9 @@ struct KeyTableStruct {
   } header;
 
   size_t size;
+
+  const KeyNameEntry **keyNameTable;
+  unsigned int keyNameCount;
 
   KeySet keys;
   unsigned char context;

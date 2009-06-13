@@ -186,27 +186,138 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
   return state;
 }
 
-int
-listKeyBindings (KeyTable *table, LineHandler handleLine, void *data) {
+static const char *
+getKeyName (KeyTable *table, unsigned char set, unsigned char key) {
+  int first = 0;
+  int last = table->keyNameCount - 1;
+
+  while (first <= last) {
+    int current = (first + last) / 2;
+    const KeyNameEntry *kne = table->keyNameTable[current];
+
+    if (set < kne->set) goto searchBelow;
+    if (set > kne->set) goto searchAbove;
+    if (key == kne->key) return kne->name;
+
+    if (key < kne->key) {
+    searchBelow:
+      last = current - 1;
+    } else {
+    searchAbove:
+      first = current + 1;
+    }
+  }
+
+  return "?";
+}
+
+static void
+formatKeyCombination (KeyTable *table, const KeyCombination *keys, char *buffer, size_t size) {
+  char delimiter = 0;
+  int length;
+
+  {
+    int key;
+    for (key=0; key<BITMASK_SIZE(keys->modifiers); key+=1) {
+      if (BITMASK_TEST(keys->modifiers, key)) {
+        if (!delimiter) {
+          delimiter = '+';
+        } else if (size) {
+          *buffer++ = delimiter;
+          size -= 1;
+        }
+
+        snprintf(buffer, size, "%s%n", getKeyName(table, 0, key), &length);
+        buffer += length, size -= length;
+      }
+    }
+  }
+
+  if (keys->set || keys->key) {
+    if (delimiter && size) *buffer++ = delimiter, size -= 1;
+    if (size) *buffer++ = '!', size -= 1;
+    snprintf(buffer, size, "%s%n", getKeyName(table, keys->set, keys->key), &length);
+    buffer += length, size -= length;
+  }
+}
+
+static int
+listContext (
+  KeyTable *table, unsigned char context,
+  const char *title, const char *prefix,
+  LineHandler handleLine, void *data
+) {
   const KeyTableHeader *header = table->header.fields;
   const KeyBinding *binding = getKeyTableItem(table, header->bindingsTable);
   unsigned int count = header->bindingsCount;
 
   while (count) {
-    char line[0X80];
-    size_t size = sizeof(line);
-    unsigned int offset = 0;
-    int length;
+    if (binding->keys.context == context) {
+      char line[0X80];
+      size_t size = sizeof(line);
+      unsigned int offset = 0;
+      int length;
 
-    {
-      char description[0X40];
-      describeCommand(binding->command, description, sizeof(description), 0);
-      snprintf(&line[offset], size, "%s:%n", description, &length);
-      offset += length, size -= length;
+      if (title) {
+        if (!handleLine((char *)title, data)) return 0;
+        title = NULL;
+      }
+
+      {
+        char description[0X60];
+        describeCommand(binding->command, description, sizeof(description), 0);
+        snprintf(&line[offset], size, "%s: %n", description, &length);
+        offset += length, size -= length;
+      }
+
+      if (prefix) {
+        snprintf(&line[offset], size, "%s, %n", prefix, &length);
+        offset += length, size -= length;
+      }
+
+      {
+        char keys[0X40];
+        formatKeyCombination(table, &binding->keys, keys, sizeof(keys));
+        snprintf(&line[offset], size, "%s", keys);
+      }
+
+      if ((binding->command & BRL_MSK_BLK) == BRL_BLK_CONTEXT) {
+        unsigned char context = BRL_CTX_DEFAULT + (binding->command & BRL_MSK_ARG);
+        if (!listContext(table, context, title, &line[offset], handleLine, data)) return 0;
+      } else {
+        if (!handleLine(line, data)) return 0;
+      }
     }
 
-    if (!handleLine(line, data)) return 0;
     binding += 1, count -= 1;
+  }
+
+  return 1;
+}
+
+int
+listKeyBindings (KeyTable *table, LineHandler handleLine, void *data) {
+  typedef struct {
+    const char *title;
+    unsigned char context;
+  } ContextEntry;
+
+  static const ContextEntry contextTable[] = {
+    { .context=BRL_CTX_DEFAULT,
+      .title = "Default Bindings"
+    }
+    ,
+    { .context=BRL_CTX_MENU,
+      .title = "Menu Bindings"
+    }
+    ,
+    { .title = NULL }
+  };
+  const ContextEntry *ctx = contextTable;
+
+  while (ctx->title) {
+    if (!listContext(table, ctx->context, ctx->title, NULL, handleLine, data)) return 0;
+    ctx += 1;
   }
 
   return 1;

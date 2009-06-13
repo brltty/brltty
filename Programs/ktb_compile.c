@@ -74,8 +74,8 @@ compareToName (const wchar_t *location1, int length1, const char *location2) {
 static int
 compareToKeyName (const void *target, const void *element) {
   const DataOperand *name = target;
-  const KeyNameEntry *const *key = element;
-  return compareToName(name->characters, name->length, (*key)->name);
+  const KeyNameEntry *const *kne = element;
+  return compareToName(name->characters, name->length, (*kne)->name);
 }
 
 static int
@@ -324,9 +324,23 @@ processKeyTableLine (DataFile *file, void *data) {
 
 static int
 compareKeyNames (const void *element1, const void *element2) {
-  const KeyNameEntry *const *key1 = element1;
-  const KeyNameEntry *const *key2 = element2;
-  return strcasecmp((*key1)->name, (*key2)->name);
+  const KeyNameEntry *const *kne1 = element1;
+  const KeyNameEntry *const *kne2 = element2;
+  return strcasecmp((*kne1)->name, (*kne2)->name);
+}
+
+static int
+compareKeyValues (const void *element1, const void *element2) {
+  const KeyNameEntry *const *kne1 = element1;
+  const KeyNameEntry *const *kne2 = element2;
+
+  if ((*kne1)->set < (*kne2)->set) return -1;
+  if ((*kne1)->set > (*kne2)->set) return 1;
+
+  if ((*kne1)->key < (*kne2)->key) return -1;
+  if ((*kne1)->key > (*kne2)->key) return 1;
+
+  return 0;
 }
 
 static int
@@ -436,6 +450,14 @@ compileKeyTable (const char *name, const KeyNameEntry *const *keys) {
                 table->header.fields = getKeyTableHeader(&ktd);
                 table->size = getDataSize(ktd.area);
                 resetDataArea(ktd.area);
+
+                table->keyNameTable = ktd.keyNameTable;
+                ktd.keyNameTable = NULL;
+
+                table->keyNameCount = ktd.keyNameCount;
+                ktd.keyNameCount = 0;
+
+                qsort(table->keyNameTable, table->keyNameCount, sizeof(*table->keyNameTable), compareKeyValues);
                 resetKeyTable(table);
               }
             }
@@ -448,7 +470,7 @@ compileKeyTable (const char *name, const KeyNameEntry *const *keys) {
       free(ktd.commandTable);
     }
 
-    free(ktd.keyNameTable);
+    if (ktd.keyNameTable) free(ktd.keyNameTable);
   }
 
   if (ktd.bindingsTable) free(ktd.bindingsTable);
@@ -458,10 +480,9 @@ compileKeyTable (const char *name, const KeyNameEntry *const *keys) {
 
 void
 destroyKeyTable (KeyTable *table) {
-  if (table->size) {
-    free(table->header.fields);
-    free(table);
-  }
+  if (table->keyNameTable) free(table->keyNameTable);
+  if (table->header.fields) free(table->header.fields);
+  free(table);
 }
 
 char *
