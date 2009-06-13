@@ -23,6 +23,11 @@
 # Default Bindings #
 ####################
 
+bind !Status1 HELP
+bind !Status2 LEARN
+
+bind !RoutingKey ROUTE
+
 bind !Left FWINLT
 bind !Right FWINRT
 bind !Up LNUP
@@ -59,11 +64,6 @@ bind RightShift+!Home CONTEXT+1 # RoutingKey -> CUTBEGIN
 bind RightShift+!Enter CONTEXT+2 # RoutingKey -> CUTAPPEND
 bind RightShift+!End CONTEXT+3 # RoutingKey -> CUTLINE
 bind RightShift+!Escape CONTEXT+4 # RoutingKey -> CUTRECT
-
-bind Status1 HELP
-bind Status2 LEARN
-
-bind !RoutingKey ROUTE
 
 
 #################
