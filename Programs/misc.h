@@ -88,16 +88,10 @@ extern char *joinStrings (const char *const *strings, int count);
 extern FILE *openFile (const char *path, const char *mode, int optional);
 extern FILE *openDataFile (const char *path, const char *mode, int optional);
 
-extern int processLines (
-  FILE *file,
-  int (*handler) (char *line, void *data),
-  void *data
-);
-extern int readLine (
-  FILE *file,
-  char **buffer,
-  size_t *size
-);
+typedef int LineHandler (char *line, void *data);
+extern int processLines (FILE *file, LineHandler handleLine, void *data);
+extern int readLine (FILE *file, char **buffer, size_t *size);
+
 extern void formatInputError (
   char *buffer,
   int size,

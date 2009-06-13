@@ -2036,6 +2036,25 @@ exitMenu:
   return ok;
 }
 
+static int
+handleHelpLine (char *line, void *data) {
+  return addHelpLine(line);
+}
+
+static int
+loadHelpFile (const char *file) {
+  int loaded = 0;
+  FILE *stream;
+
+  if ((stream = openDataFile(file, "r", 0))) {
+    if (processLines(stream, handleHelpLine, NULL)) loaded = 1;
+
+    fclose(stream);
+  }
+
+  return loaded;
+}
+
 typedef struct {
   const char *driverType;
   const char *const *requestedDrivers;
@@ -2177,6 +2196,10 @@ initializeBrailleDriver (const char *code, int verify) {
             if ((path = makePath(opt_tablesDirectory, file))) {
               if (verify || (brl.keyTable = compileKeyTable(path, brl.keyNameTables))) {
                 LogPrint(LOG_INFO, "%s: %s", gettext("Key Table"), path);
+
+                if (constructHelpScreen()) {
+                  listKeyBindings(brl.keyTable, handleHelpLine, NULL);
+                }
               } else {
                 LogPrint(LOG_WARNING, "%s: %s", gettext("cannot open key table"), path);
               }
@@ -2202,7 +2225,14 @@ initializeBrailleDriver (const char *code, int verify) {
             char *path;
 
             if ((path = makePath(opt_dataDirectory, file))) {
-              if (verify || constructHelpScreen(path)) {
+              int loaded = verify;
+
+              if (!loaded)
+                if (constructHelpScreen())
+                  if (loadHelpFile(path))
+                    loaded = 1;
+
+              if (loaded) {
                 LogPrint(LOG_INFO, "%s: %s", gettext("Help Path"), path);
               } else {
                 LogPrint(LOG_WARNING, "%s: %s", gettext("cannot open help file"), path);

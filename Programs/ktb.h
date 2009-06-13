@@ -23,6 +23,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#include "misc.h"
 #include "keydefs.h"
 #include "keysets.h"
 
@@ -33,6 +34,7 @@ extern char *ensureKeyTableExtension (const char *path);
 
 extern void resetKeyTable (KeyTable *table);
 extern KeyTableState processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsigned char key, int press);
+extern int listKeyBindings (KeyTable *table, LineHandler handleLine, void *data);
 
 #ifdef __cplusplus
 }

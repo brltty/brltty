@@ -362,8 +362,8 @@ deactivateHelpScreen (void) {
 }
 
 int
-constructHelpScreen (const char *file) {
-  return helpConstructed = helpScreen.construct(file);
+constructHelpScreen (void) {
+  return (helpConstructed = helpScreen.construct());
 }
 
 void
@@ -372,6 +372,11 @@ destructHelpScreen (void) {
     helpScreen.destruct();
     helpConstructed = 0;
   }
+}
+
+int
+addHelpLine (const char *line) {
+  return helpScreen.addLine(line);
 }
 
 

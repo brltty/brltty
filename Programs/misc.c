@@ -779,7 +779,7 @@ readLine (FILE *file, char **buffer, size_t *size) {
  * The caller-supplied data pointer is passed straight through to the handler.
  */
 int
-processLines (FILE *file, int (*handler) (char *line, void *data), void *data) {
+processLines (FILE *file, LineHandler handleLine, void *data) {
   unsigned int lineNumber = 0;
   char *buffer = NULL;
   size_t bufferSize = 0;
@@ -793,7 +793,7 @@ processLines (FILE *file, int (*handler) (char *line, void *data), void *data) {
       if (strncmp(line, utf8ByteOrderMark, length) == 0) line += length;
     }
 
-    if (!handler(line, data)) break;
+    if (!handleLine(line, data)) break;
   }
 
   if (buffer) free(buffer);

@@ -40,7 +40,7 @@ typedef struct {
 extern const CommandEntry commandTable[];
 extern const CommandEntry *getCommandEntry (int code);
 
-extern void describeCommand (int command, char *buffer, size_t size);
+extern void describeCommand (int command, char *buffer, size_t size, int details);
 
 extern int enqueueCommand (int command);
 extern int dequeueCommand (void);

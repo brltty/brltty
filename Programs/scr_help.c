@@ -93,32 +93,9 @@ addLine_HelpScreen (const char *line) {
 }
 
 static int
-addHelpLine (char *line, void *data) {
-  return addLine_HelpScreen(line);
-}
-
-static int
-construct_HelpScreen (const char *file) {
-  int constructed = 0;
+construct_HelpScreen (void) {
   clearHelpScreen();
-
-  if (file) {
-    FILE *stream;
-
-    if ((stream = fopen(file, "r"))) {
-      if (processLines(stream, addHelpLine, NULL)) {
-        constructed = 1;
-      }
-
-      fclose(stream);
-    } else {
-      LogPrint(LOG_ERR, "cannot open driver help file: %s: %s", file, strerror(errno));
-    }
-  } else {
-    constructed = 1;
-  }
-
-  return constructed;
+  return 1;
 }
 
 static void

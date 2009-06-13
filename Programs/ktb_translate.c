@@ -185,3 +185,29 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
 
   return state;
 }
+
+int
+listKeyBindings (KeyTable *table, LineHandler handleLine, void *data) {
+  const KeyTableHeader *header = table->header.fields;
+  const KeyBinding *binding = getKeyTableItem(table, header->bindingsTable);
+  unsigned int count = header->bindingsCount;
+
+  while (count) {
+    char line[0X80];
+    size_t size = sizeof(line);
+    unsigned int offset = 0;
+    int length;
+
+    {
+      char description[0X40];
+      describeCommand(binding->command, description, sizeof(description), 0);
+      snprintf(&line[offset], size, "%s:%n", description, &length);
+      offset += length, size -= length;
+    }
+
+    if (!handleLine(line, data)) return 0;
+    binding += 1, count -= 1;
+  }
+
+  return 1;
+}

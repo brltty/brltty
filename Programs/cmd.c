@@ -115,7 +115,7 @@ getCommandEntry (int code) {
 }
 
 void
-describeCommand (int command, char *buffer, size_t size) {
+describeCommand (int command, char *buffer, size_t size, int details) {
   int blk = command & BRL_MSK_BLK;
   int arg = command & BRL_MSK_ARG;
   const CommandEntry *cmd = getCommandEntry(command);
@@ -123,72 +123,71 @@ describeCommand (int command, char *buffer, size_t size) {
   if (!cmd) {
     snprintf(buffer, size, "unknown: %06X", command);
   } else {
-    int offset;
+    int length;
 
-    snprintf(buffer, size, "%s: %n%s",
-             cmd->name, &offset, cmd->description);
+    if (details) {
+      snprintf(buffer, size, "%s: %n", cmd->name, &length);
+      buffer += length, size -= length;
+    }
 
+    snprintf(buffer, size, "%s%n", cmd->description, &length);
     if (cmd->isToggle && (command & BRL_FLG_TOGGLE_MASK)) {
-      char *description = buffer + offset;
       const char *oldVerb = "toggle";
-      int oldLength = strlen(oldVerb);
+      size_t oldLength = strlen(oldVerb);
 
-      if (strncmp(description, oldVerb, oldLength) == 0) {
+      if (strncmp(buffer, oldVerb, oldLength) == 0) {
         const char *newVerb = "set";
-        int newLength = strlen(newVerb);
+        size_t newLength = strlen(newVerb);
 
-        memmove(description+newLength, description+oldLength, strlen(description+oldLength)+1);
-        memcpy(description, newVerb, newLength);
+        memmove(buffer+newLength, buffer+oldLength, length-oldLength+1);
+        memcpy(buffer, newVerb, newLength);
 
         if (command & BRL_FLG_TOGGLE_ON) {
-          char *end = strrchr(description, '/');
+          char *end = strrchr(buffer, '/');
           if (end) *end = 0;
         } else {
-          char *target = strrchr(description, ' ');
+          char *target = strrchr(buffer, ' ');
 
           if (target) {
             const char *source = strchr(++target, '/');
 
-            if (source) {
-              memmove(target, source+1, strlen(source));
-            }
+            if (source) memmove(target, source+1, strlen(source));
           }
         }
+
+        length = strlen(buffer);
       }
     }
+    buffer += length, size -= length;
 
-    {
-      size_t length = strlen(buffer);
-      buffer += length;
-      size -= length;
-    }
+    if (details) {
+      if (cmd->isCharacter || cmd->isBase) {
+        snprintf(buffer, size, " #%u",
+                 arg - (cmd->code & BRL_MSK_ARG) + 1);
+      } else if (blk) {
+        switch (blk) {
+          case BRL_BLK_PASSKEY:
+            break;
 
-    if (cmd->isCharacter || cmd->isBase) {
-      snprintf(buffer, size, " #%u",
-               arg - (cmd->code & BRL_MSK_ARG) + 1);
-    } else if (blk) {
-      switch (blk) {
-        case BRL_BLK_PASSKEY:
-          break;
+          case BRL_BLK_PASSDOTS: {
+            static const unsigned char dots[] = {BRL_DOT1, BRL_DOT2, BRL_DOT3, BRL_DOT4, BRL_DOT5, BRL_DOT6, BRL_DOT7, BRL_DOT8};
+            int dot;
+            unsigned int number = 0;
 
-        case BRL_BLK_PASSDOTS: {
-          static const unsigned char dots[] = {BRL_DOT1, BRL_DOT2, BRL_DOT3, BRL_DOT4, BRL_DOT5, BRL_DOT6, BRL_DOT7, BRL_DOT8};
-          int dot;
-          unsigned int number = 0;
-
-          for (dot=0; dot<sizeof(dots); dot+=1) {
-            if (arg & dots[dot]) {
-              number = (number * 10) + (dot + 1);
+            for (dot=0; dot<sizeof(dots); dot+=1) {
+              if (arg & dots[dot]) {
+                number = (number * 10) + (dot + 1);
+              }
             }
+
+            snprintf(buffer, size, " %u", number);
+            break;
           }
 
-          snprintf(buffer, size, " %u", number);
-          break;
+          default:
+            snprintf(buffer, size, " 0X%02X", arg);
+            break;
         }
-
-        default:
-          snprintf(buffer, size, " 0X%02X", arg);
-          break;
       }
     }
   }

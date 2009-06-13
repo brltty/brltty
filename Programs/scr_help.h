@@ -27,7 +27,7 @@ extern "C" {
 
 typedef struct {
   BaseScreen base;
-  int (*construct) (const char *);
+  int (*construct) (void);
   void (*destruct) (void);
   int (*addLine) (const char *line);
 } HelpScreen;
