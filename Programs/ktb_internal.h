@@ -37,23 +37,12 @@ typedef struct {
   KeyCombination keys;
 } KeyBinding;
 
-typedef uint32_t KeyTableOffset;
-
-typedef struct {
-  KeyTableOffset bindingsTable;
-  uint32_t bindingsCount;
-} KeyTableHeader;
-
 struct KeyTableStruct {
-  union {
-    KeyTableHeader *fields;
-    const unsigned char *bytes;
-  } header;
-
-  size_t size;
-
   const KeyNameEntry **keyNameTable;
   unsigned int keyNameCount;
+
+  KeyBinding *keyBindingTable;
+  unsigned int keyBindingCount;
 
   KeySet keys;
   unsigned char context;

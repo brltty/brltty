@@ -26,16 +26,10 @@
 #include "cmd.h"
 #include "brldefs.h"
 
-static inline const void *
-getKeyTableItem (KeyTable *table, KeyTableOffset offset) {
-  return &table->header.bytes[offset];
-}
-
 static int
 getCommand (KeyTable *table, unsigned char context, unsigned char set, unsigned char key) {
-  const KeyTableHeader *header = table->header.fields;
-  const KeyBinding *binding = getKeyTableItem(table, header->bindingsTable);
-  unsigned int count = header->bindingsCount;
+  const KeyBinding *binding = table->keyBindingTable;
+  unsigned int count = table->keyBindingCount;
   int candidate = EOF;
 
   while (count) {
@@ -56,9 +50,8 @@ getCommand (KeyTable *table, unsigned char context, unsigned char set, unsigned 
 
 static int
 isModifiers (KeyTable *table, unsigned char context) {
-  const KeyTableHeader *header = table->header.fields;
-  const KeyBinding *binding = getKeyTableItem(table, header->bindingsTable);
-  unsigned int count = header->bindingsCount;
+  const KeyBinding *binding = table->keyBindingTable;
+  unsigned int count = table->keyBindingCount;
 
   while (count) {
     if ((binding->context == context) || (binding->context == BRL_CTX_DEFAULT)) {
@@ -247,9 +240,8 @@ listContext (
   const char **title, const char *keysPrefix,
   LineHandler handleLine, void *data
 ) {
-  const KeyTableHeader *header = table->header.fields;
-  const KeyBinding *binding = getKeyTableItem(table, header->bindingsTable);
-  unsigned int count = header->bindingsCount;
+  const KeyBinding *binding = table->keyBindingTable;
+  unsigned int count = table->keyBindingCount;
 
   while (count) {
     if (binding->context == context) {

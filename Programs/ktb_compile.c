@@ -23,32 +23,24 @@
 
 #include "misc.h"
 #include "datafile.h"
-#include "dataarea.h"
 #include "cmd.h"
 #include "brldefs.h"
 #include "ktb.h"
 #include "ktb_internal.h"
 
 typedef struct {
-  DataArea *area;
-
   const KeyNameEntry **keyNameTable;
   unsigned int keyNameCount;
 
   const CommandEntry **commandTable;
   unsigned int commandCount;
 
-  KeyBinding *bindingsTable;
-  unsigned int bindingsSize;
-  unsigned int bindingsCount;
+  KeyBinding *keyBindingTable;
+  unsigned int keyBindingsSize;
+  unsigned int keyBindingCount;
 
   unsigned char context;
 } KeyTableData;
-
-static inline KeyTableHeader *
-getKeyTableHeader (KeyTableData *ktd) {
-  return getDataItem(ktd->area, 0);
-}
 
 static int
 compareToName (const wchar_t *location1, int length1, const char *location2) {
@@ -254,20 +246,20 @@ processBindOperands (DataFile *file, void *data) {
   KeyTableData *ktd = data;
   KeyBinding *binding;
 
-  if (ktd->bindingsCount == ktd->bindingsSize) {
-    unsigned int newSize = ktd->bindingsSize? ktd->bindingsSize<<1: 0X10;
-    KeyBinding *newBindings = realloc(ktd->bindingsTable, (newSize * sizeof(*newBindings)));
+  if (ktd->keyBindingCount == ktd->keyBindingsSize) {
+    unsigned int newSize = ktd->keyBindingsSize? ktd->keyBindingsSize<<1: 0X10;
+    KeyBinding *newTable = realloc(ktd->keyBindingTable, ARRAY_SIZE(newTable, newSize));
 
-    if (!newBindings) {
-      LogError("malloc");
+    if (!newTable) {
+      LogError("realloc");
       return 0;
     }
 
-    ktd->bindingsTable = newBindings;
-    ktd->bindingsSize = newSize;
+    ktd->keyBindingTable = newTable;
+    ktd->keyBindingsSize = newSize;
   }
 
-  binding = &ktd->bindingsTable[ktd->bindingsCount];
+  binding = &ktd->keyBindingTable[ktd->keyBindingCount];
   memset(binding, 0, sizeof(*binding));
   binding->context = ktd->context;
 
@@ -277,7 +269,7 @@ processBindOperands (DataFile *file, void *data) {
         if (getCommandEntry(binding->command)->isCharacter)
           binding->command |= BRL_MSK_ARG;
 
-      ktd->bindingsCount += 1;
+      ktd->keyBindingCount += 1;
     }
   }
 
@@ -408,24 +400,31 @@ allocateCommandTable (KeyTableData *ktd) {
   return 0;
 }
 
-static int
-saveKeyBindings (KeyTableData *ktd) {
-  KeyTableHeader *header = getKeyTableHeader(ktd);
+KeyTable *
+makeKeyTable (KeyTableData *ktd) {
+  KeyTable *table;
 
-  if ((header->bindingsCount = ktd->bindingsCount)) {
-    DataOffset offset;
+  if ((table = malloc(sizeof(*table)))) {
+    table->keyNameTable = ktd->keyNameTable;
+    ktd->keyNameTable = NULL;
+    table->keyNameCount = ktd->keyNameCount;
+    ktd->keyNameCount = 0;
+    qsort(table->keyNameTable, table->keyNameCount, sizeof(*table->keyNameTable), compareKeyValues);
 
-    if (!saveDataItem(ktd->area, &offset, ktd->bindingsTable,
-                      ktd->bindingsCount * sizeof(ktd->bindingsTable[0]),
-                      __alignof__(ktd->bindingsTable[0])))
-      return 0;
+    if ((table->keyBindingTable = realloc(ktd->keyBindingTable, ARRAY_SIZE(table->keyBindingTable, (table->keyBindingCount = ktd->keyBindingCount))))) {
+      ktd->keyBindingTable = NULL;
 
-    getKeyTableHeader(ktd)->bindingsTable = offset;
-  } else {
-    header->bindingsTable = 0;
+      resetKeyTable(table);
+      return table;
+    } else {
+      LogError("realloc");
+    }
+
+    if (table->keyNameTable) free(table->keyNameTable);
+    free(table);
   }
 
-  return 1;
+  return NULL;
 }
 
 KeyTable *
@@ -434,46 +433,25 @@ compileKeyTable (const char *name, const KeyNameEntry *const *keys) {
   KeyTableData ktd;
 
   memset(&ktd, 0, sizeof(ktd));
-
-  ktd.bindingsTable = NULL;
-  ktd.bindingsSize = 0;
-  ktd.bindingsCount = 0;
   ktd.context = BRL_CTX_DEFAULT;
 
   if (allocateKeyNameTable(&ktd, keys)) {
     if (allocateCommandTable(&ktd)) {
-      if ((ktd.area = newDataArea())) {
-        if (allocateDataItem(ktd.area, NULL, sizeof(KeyTableHeader), __alignof__(KeyTableHeader))) {
-          if (processDataFile(name, processKeyTableLine, &ktd)) {
-            if (saveKeyBindings(&ktd)) {
-              if ((table = malloc(sizeof(*table)))) {
-                table->header.fields = getKeyTableHeader(&ktd);
-                table->size = getDataSize(ktd.area);
-                resetDataArea(ktd.area);
+      ktd.keyBindingTable = NULL;
+      ktd.keyBindingsSize = 0;
+      ktd.keyBindingCount = 0;
 
-                table->keyNameTable = ktd.keyNameTable;
-                ktd.keyNameTable = NULL;
+      if (processDataFile(name, processKeyTableLine, &ktd)) {
+        table = makeKeyTable(&ktd);
 
-                table->keyNameCount = ktd.keyNameCount;
-                ktd.keyNameCount = 0;
-
-                qsort(table->keyNameTable, table->keyNameCount, sizeof(*table->keyNameTable), compareKeyValues);
-                resetKeyTable(table);
-              }
-            }
-          }
-        }
-
-        destroyDataArea(ktd.area);
+        if (ktd.keyBindingTable) free(ktd.keyBindingTable);
       }
 
-      free(ktd.commandTable);
+      if (ktd.commandTable) free(ktd.commandTable);
     }
 
     if (ktd.keyNameTable) free(ktd.keyNameTable);
   }
-
-  if (ktd.bindingsTable) free(ktd.bindingsTable);
 
   return table;
 }
@@ -481,7 +459,7 @@ compileKeyTable (const char *name, const KeyNameEntry *const *keys) {
 void
 destroyKeyTable (KeyTable *table) {
   if (table->keyNameTable) free(table->keyNameTable);
-  if (table->header.fields) free(table->header.fields);
+  if (table->keyBindingTable) free(table->keyBindingTable);
   free(table);
 }
 
