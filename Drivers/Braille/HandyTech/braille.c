@@ -228,7 +228,6 @@ typedef struct {
   unsigned char sessionEndLength;
 
   unsigned hasATC:1; /* Active Tactile Control */
-  unsigned isBookworm:1;
 } ModelEntry;
 
 #define HT_BYTE_SEQUENCE(name,bytes) .name##Address = bytes, .name##Length = sizeof(bytes)
@@ -297,7 +296,6 @@ static const ModelEntry modelTable[] = {
   ,
   { .identifier = HT_Model_Bookworm,
     .name = "Bookworm",
-    .isBookworm = 1,
     .textCells = 8,
     .statusCells = 0,
     .keyBindings = keyBindings_bookworm,
@@ -918,7 +916,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
     noInput = 0;
 
     /* a kludge to handle the Bookworm going offline */
-    if (model->isBookworm) {
+    if (model->identifier == HT_Model_Bookworm) {
       if (packet.fields.type == 0X06) {
         if (currentState != BDS_OFF) {
           /* if we get another byte right away then the device
