@@ -37,10 +37,10 @@ bind B6+Down CHRRT
 bind B2+B3+Up MUTE
 bind B2+B3+Down SAY_LINE
 
-bind StatusKeys+0 HELP
-bind StatusKeys+1 PREFMENU
-bind StatusKeys+2 INFO
-bind StatusKeys+3 FREEZE
+bind Status1 HELP
+bind Status2 PREFMENU
+bind Status3 INFO
+bind Status4 FREEZE
 
 include brl-ht-dots.kti
 include brl-ht-keypad.kti
