@@ -52,6 +52,7 @@
 #define BRLSTAT ST_VoyagerStyle
 #define BRL_HAVE_FIRMNESS
 #include "brl_driver.h"
+#include "brldefs-vo.h"
 
 typedef struct {
   int (*openPort) (char **parameters, const char *device);
@@ -511,35 +512,6 @@ static unsigned char *previousCells = NULL; /* previous pattern displayed */
 static unsigned char cellCount;
 #define IS_TEXT_RANGE(key1,key2) (((key1) <= (key2)) && ((key2) < cellCount))
 #define IS_TEXT_KEY(key) IS_TEXT_RANGE((key), (key))
-
-typedef enum {
-  /* The top round keys behind the routing keys, numbered assuming they
-   * are to be used for braille input.
-   */
-  VO_KEY_Dot1 = 1,
-  VO_KEY_Dot2 = 2,
-  VO_KEY_Dot3 = 3,
-  VO_KEY_Dot4 = 4,
-  VO_KEY_Dot5 = 5,
-  VO_KEY_Dot6 = 6,
-  VO_KEY_Dot7 = 7,
-  VO_KEY_Dot8 = 8,
-
-  /* The front keys */
-  VO_KEY_A = 9,              /* Leftmost */
-  VO_KEY_B = 10,             /* Second from left */
-  VO_KEY_RoundLeft = 11,     /* Round key to the left of the central pad */
-  VO_KEY_Up = 12,            /* Up position of central pad */
-  VO_KEY_Down = 13,          /* Down position of central pad */
-  VO_KEY_RoundRight = 14,    /* Round key to the right of the central pad */
-  VO_KEY_C = 15,             /* Second from right */
-  VO_KEY_D = 16              /* Rightmost */
-} VO_NavigationKey;
-
-typedef enum {
-  VO_SET_NavigationKeys = 0,
-  VO_SET_RoutingKeys
-} VO_KeySet;
 
 static KEY_NAME_TABLE(keyNames_all) = {
   KEY_SET_ENTRY(VO_SET_RoutingKeys, "RoutingKey"),
