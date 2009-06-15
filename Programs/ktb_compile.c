@@ -420,7 +420,7 @@ saveKeyBindings (KeyTableData *ktd) {
                       __alignof__(ktd->bindingsTable[0])))
       return 0;
 
-    header->bindingsTable = offset;
+    getKeyTableHeader(ktd)->bindingsTable = offset;
   } else {
     header->bindingsTable = 0;
   }
