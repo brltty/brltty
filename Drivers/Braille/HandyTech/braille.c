@@ -362,7 +362,7 @@ static const ModelEntry modelTable[] = {
 #undef HT_BYTE_SEQUENCE
 
 #define BRLROWS		1
-#define MAX_STCELLS	8	/* highest number of status cells */
+#define MAX_STCELLS	4	/* highest number of status cells */
 
 /* This is the brltty braille mapping standard to Handy's mapping table.
  */
