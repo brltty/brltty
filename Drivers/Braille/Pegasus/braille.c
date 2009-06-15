@@ -26,6 +26,7 @@
 //#define BRL_STATUS_FIELDS sf...
 #define BRL_HAVE_STATUS_CELLS
 #include "brl_driver.h"
+#include "brldefs-pg.h"
 
 static const char productPrefix[] = "PBC";
 static const unsigned char productPrefixLength = sizeof(productPrefix) - 1;
@@ -34,32 +35,6 @@ static int rewriteRequired;
 static unsigned char textCells[80];
 static unsigned char statusCells[2];
 static TranslationTable outputTable;
-
-typedef enum {
-  PG_KEY_None = 0,
-
-  PG_KEY_LeftShift,
-  PG_KEY_RightShift,
-  PG_KEY_LeftControl,
-  PG_KEY_RighTControl,
-
-  PG_KEY_Left,
-  PG_KEY_Right,
-  PG_KEY_Up,
-  PG_KEY_Down,
-
-  PG_KEY_Home,
-  PG_KEY_End,
-  PG_KEY_Enter,
-  PG_KEY_Escape,
-
-  PG_KEY_Status
-} PG_NavigationKey;
-
-typedef enum {
-  PG_SET_NavigationKeys = 0,
-  PG_SET_RoutingKeys
-} PG_KeySet;
 
 static KEY_NAME_TABLE(keyNames_all) = {
   KEY_NAME_ENTRY(PG_KEY_LeftShift, "LeftShift"),
