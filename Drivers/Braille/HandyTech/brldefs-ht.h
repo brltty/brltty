@@ -77,4 +77,60 @@ typedef union {
   } PACKED fields;
 } HT_Packet;
 
+typedef enum {
+  HT_KEY_None = 0,
+
+  HT_KEY_B1 = 0X03,
+  HT_KEY_B2 = 0X07,
+  HT_KEY_B3 = 0X0B,
+  HT_KEY_B4 = 0X0F,
+
+  HT_KEY_B5 = 0X13,
+  HT_KEY_B6 = 0X17,
+  HT_KEY_B7 = 0X1B,
+  HT_KEY_B8 = 0X1F,
+
+  HT_KEY_Up = 0X04,
+  HT_KEY_Down = 0X08,
+
+  /* Keypad keys (star80 and modular) */
+  HT_KEY_B12 = 0X01,
+  HT_KEY_Zero = 0X05,
+  HT_KEY_B13 = 0X09,
+  HT_KEY_B14 = 0X0D,
+
+  HT_KEY_B11 = 0X11,
+  HT_KEY_One = 0X15,
+  HT_KEY_Two = 0X19,
+  HT_KEY_Three = 0X1D,
+
+  HT_KEY_B10 = 0X02,
+  HT_KEY_Four = 0X06,
+  HT_KEY_Five = 0X0A,
+  HT_KEY_Six = 0X0E,
+
+  HT_KEY_B9 = 0X12,
+  HT_KEY_Seven = 0X16,
+  HT_KEY_Eight = 0X1A,
+  HT_KEY_Nine = 0X1E,
+
+  /* Braille wave/star keys */
+  HT_KEY_Escape = 0X0C,
+  HT_KEY_Space = 0X10,
+  HT_KEY_Return = 0X14,
+
+  /* Braille star keys */
+  HT_KEY_SpaceRight = 0X18,
+
+  /* ranges and flags */
+  HT_KEY_ROUTING = 0X20,
+  HT_KEY_STATUS = 0X70,
+  HT_KEY_RELEASE = 0X80
+} HT_NavigationKey;
+
+typedef enum {
+  HT_SET_NavigationKeys = 0,
+  HT_SET_RoutingKeys
+} HT_KeySet;
+
 #endif /* BRLTTY_INCLUDED_HT_BRLDEFS */ 
