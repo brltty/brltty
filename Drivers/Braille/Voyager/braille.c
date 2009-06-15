@@ -690,7 +690,7 @@ static int
 brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   /* Structure to remember which keys are pressed */
   typedef struct {
-    unsigned int control; /* Front and dot keys */
+    uint16_t control; /* Front and dot keys */
     unsigned char routing[MAXIMUM_CELLS];
   } Keys;
 
@@ -701,64 +701,74 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
    */
   static Keys pressedKeys;
 
-  /* read buffer: packet[0] for DOT keys, packet[1] for keys A B C D UP DOWN
-   * RL RR, packet[2]-packet[7] list pressed routing keys by number, maximum
-   * 6 keys, list ends with 0.
-   * All 0s is sent when all keys released.
-   */
-  unsigned char packet[8];
+  while (1) {
+    /* read buffer: packet[0] for DOT keys, packet[1] for keys A B C D UP DOWN
+     * RL RR, packet[2]-packet[7] list pressed routing keys by number, maximum
+     * 6 keys, list ends with 0.
+     * All 0s is sent when all keys released.
+     */
+    unsigned char packet[8];
 
-  if (firstRead) {
-    /* initialize state */
-    firstRead = 0;
-    memset(&pressedKeys, 0, sizeof(pressedKeys));
-  }
+    /* one or more keys were pressed or released */
+    Keys currentKeys;
+    int i;
 
-  {
-    int size = io->getKeys(packet, sizeof(packet));
-    if (size < 0) {
-      if (errno == EAGAIN) {
-        /* no input */
-        size = 0;
-      } else if (errno == ENODEV) {
-        /* Display was disconnected */
-        return BRL_CMD_RESTARTBRL;
-      } else {
-        LogPrint(LOG_ERR, "Voyager read error: %s", strerror(errno));
+    unsigned char controlPresses[0X10];
+    int controlPressCount = 0;
+
+    unsigned char routingPresses[6];
+    int routingPressCount = 0;
+
+    if (firstRead) {
+      /* initialize state */
+      firstRead = 0;
+      memset(&pressedKeys, 0, sizeof(pressedKeys));
+    }
+
+    {
+      int size = io->getKeys(packet, sizeof(packet));
+
+      if (size < 0) {
+        if (errno == EAGAIN) {
+          /* no input */
+          size = 0;
+        } else if (errno == ENODEV) {
+          /* Display was disconnected */
+          return BRL_CMD_RESTARTBRL;
+        } else {
+          LogPrint(LOG_ERR, "Voyager read error: %s", strerror(errno));
+          firstRead = 1;
+          return EOF;
+        }
+      } else if ((size > 0) && (size < sizeof(packet))) {
+        /* The display handles read requests of only and exactly 8bytes */
+        LogPrint(LOG_NOTICE, "Short read: %d", size);
         firstRead = 1;
         return EOF;
       }
-    } else if ((size > 0) && (size < sizeof(packet))) {
-      /* The display handles read requests of only and exactly 8bytes */
-      LogPrint(LOG_NOTICE, "Short read: %d", size);
-      firstRead = 1;
-      return EOF;
+
+      if (size == 0) {
+        /* no new key */
+        break;
+      }
     }
 
-    if (size == 0) {
-      /* no new key */
-      return EOF;
-    }
-  }
-
-  /* one or more keys were pressed or released */
-  {
-    Keys keys;
-    int i;
-    memset(&keys, 0, sizeof(keys));
+    memset(&currentKeys, 0, sizeof(currentKeys));
 
     /* We combine dot and front key info in keystate */
-    keys.control = (packet[1] << 8) | packet[0];
+    currentKeys.control = (packet[1] << 8) | packet[0];
 
-    for (i = VO_KEY_Dot1; i <= VO_KEY_Thumb4; i++) {
-      int mask = 1 << (i - 1);
-      if ((pressedKeys.control & mask) && !(keys.control & mask))
-	enqueueKeyEvent(VO_SET_NavigationKeys, i, 0);
-      if (!(pressedKeys.control & mask) && (keys.control & mask))
-	enqueueKeyEvent(VO_SET_NavigationKeys, i, 1);
+    for (i=0; i<0X10; i+=1) {
+      uint16_t bit = 1 << i;
+
+      if ((pressedKeys.control & bit) && !(currentKeys.control & bit)) {
+        enqueueKeyEvent(VO_SET_NavigationKeys, i+1, 0);
+      } else if (!(pressedKeys.control & bit) && (currentKeys.control & bit)) {
+        controlPresses[controlPressCount++] = i + 1;
+      }
     }
     
-    for (i=2; i<8; i++) {
+    for (i=2; i<8; i+=1) {
       unsigned char key = packet[i];
       if (!key) break;
 
@@ -766,21 +776,23 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
         LogPrint(LOG_NOTICE, "Invalid routing key number: %u", key);
         continue;
       }
-      key--;
+      key -= 1;
 
-      keys.routing[key] = 1;
-      if (!pressedKeys.routing[key])
-	enqueueKeyEvent(VO_SET_RoutingKeys, key, 1);
+      currentKeys.routing[key] = 1;
+      if (!pressedKeys.routing[key]) routingPresses[routingPressCount++] = key;
     }
 
-    {
-      int column;
-      for (column = 0; column < cellCount; column++)
-	if (!keys.routing[column] && pressedKeys.routing[column])
-	  enqueueKeyEvent(VO_SET_RoutingKeys, column, 0);
-    }
+    for (i=0; i<cellCount; i+=1)
+      if (pressedKeys.routing[i] && !currentKeys.routing[i])
+        enqueueKeyEvent(VO_SET_RoutingKeys, i, 0);
 
-    pressedKeys = keys;
+    while (controlPressCount)
+      enqueueKeyEvent(VO_SET_NavigationKeys, controlPresses[--controlPressCount], 1);
+
+    while (routingPressCount)
+      enqueueKeyEvent(VO_SET_RoutingKeys, routingPresses[--routingPressCount], 1);
+
+    pressedKeys = currentKeys;
   }
 
   return EOF;
