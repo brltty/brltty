@@ -96,8 +96,8 @@ typedef enum {
   BRL_CMD_NXPGRPH /* go down to first line of next paragraph */,
   BRL_CMD_PRPROMPT /* go up to previous command prompt */,
   BRL_CMD_NXPROMPT /* go down to next command prompt */,
-  BRL_CMD_PRSEARCH /* search backward for content of cut buffer */,
-  BRL_CMD_NXSEARCH /* search forward for content of cut buffer */,
+  BRL_CMD_PRSEARCH /* search backward for cut text */,
+  BRL_CMD_NXSEARCH /* search forward for cut text */,
   
   /* horizontal motion */
   BRL_CMD_CHRLT /* go left one character */,
@@ -113,8 +113,8 @@ typedef enum {
   
   /* implicit motion */
   BRL_CMD_HOME /* go to cursor */,
-  BRL_CMD_BACK /* go back (undo unexpected cursor tracking motion) */,
-  BRL_CMD_RETURN /* go back (after cursor tracking) or go to cursor (cursor not in window) */,
+  BRL_CMD_BACK /* go back after cursor tracking */,
+  BRL_CMD_RETURN /* go to cursor or go back after cursor tracking */,
   
   /* feature activation and deactivation */
   BRL_CMD_FREEZE /* toggle screen mode frozen/live */,
@@ -142,8 +142,8 @@ typedef enum {
   
   /* preference setting */
   BRL_CMD_PREFMENU /* enter/leave preferences menu */,
-  BRL_CMD_PREFSAVE /* save current preferences */,
-  BRL_CMD_PREFLOAD /* restore saved preferences */,
+  BRL_CMD_PREFSAVE /* save preferences to disk */,
+  BRL_CMD_PREFLOAD /* restore preferences from disk */,
   
   /* menu navigation */
   BRL_CMD_MENU_FIRST_ITEM /* go to first item */,
@@ -154,8 +154,8 @@ typedef enum {
   BRL_CMD_MENU_NEXT_SETTING /* select next choice */,
  
   /* speech controls */
-  BRL_CMD_MUTE /* stop speaking immediately */,
-  BRL_CMD_SPKHOME /* go to current (most recent) speech position */,
+  BRL_CMD_MUTE /* stop speaking */,
+  BRL_CMD_SPKHOME /* go to current speech position */,
   BRL_CMD_SAY_LINE /* speak current line */,
   BRL_CMD_SAY_ABOVE /* speak from top of screen through current line */,
   BRL_CMD_SAY_BELOW /* speak from current line through bottom of screen */,
@@ -169,10 +169,10 @@ typedef enum {
   BRL_CMD_SWITCHVT_NEXT /* switch to next virtual terminal */,
   
   /* miscellaneous */
-  BRL_CMD_CSRJMP_VERT /* bring cursor to line (no horizontal motion) */,
-  BRL_CMD_PASTE /* insert cut buffer at cursor */,
-  BRL_CMD_RESTARTBRL /* reinitialize braille driver */,
-  BRL_CMD_RESTARTSPEECH /* reinitialize speech driver */,
+  BRL_CMD_CSRJMP_VERT /* bring cursor to line */,
+  BRL_CMD_PASTE /* insert cut text at cursor */,
+  BRL_CMD_RESTARTBRL /* restart braille driver */,
+  BRL_CMD_RESTARTSPEECH /* restart speech driver */,
 
   BRL_CMD_OFFLINE /* braille display temporarily unavailable */,
 
@@ -203,10 +203,10 @@ typedef enum {
 #define BRL_BLK_CUTRECT   0X0400 /* rectangular cut to character */
 #define BRL_BLK_CUTLINE   0X0500 /* linear cut to character */
 #define BRL_BLK_SWITCHVT  0X0600 /* switch to virtual terminal */
-#define BRL_BLK_PRINDENT  0X0700 /* go up to nearest line without greater indent than character */
-#define BRL_BLK_NXINDENT  0X0800 /* go down to nearest line without greater indent than character */
+#define BRL_BLK_PRINDENT  0X0700 /* go up to line without greater indent than character */
+#define BRL_BLK_NXINDENT  0X0800 /* go down to line without greater indent than character */
 #define BRL_BLK_DESCCHAR  0X0900 /* describe character */
-#define BRL_BLK_SETLEFT   0X0A00 /* position left end of window at character */
+#define BRL_BLK_SETLEFT   0X0A00 /* place left end of window at character */
 #define BRL_BLK_SETMARK   0X0B00 /* remember current window position */
 #define BRL_BLK_GOTOMARK  0X0C00 /* go to remembered window position */
 
@@ -214,11 +214,11 @@ typedef enum {
 #define BRL_FLG_LINE_SCALED 0X010000 /* scale arg=0X00-0XFF to screen height */
 #define BRL_FLG_LINE_TOLEFT 0X020000 /* go to beginning of line */
 
-#define BRL_BLK_PRDIFCHAR 0X0E00 /* go up to nearest line with different character */
-#define BRL_BLK_NXDIFCHAR 0X0F00 /* go down to nearest line with different character */
+#define BRL_BLK_PRDIFCHAR 0X0E00 /* go up to line with different character */
+#define BRL_BLK_NXDIFCHAR 0X0F00 /* go down to line with different character */
 
 /* For entering a special key. */
-#define BRL_BLK_PASSKEY 0X2000 /* simulate pressing a functional key */
+#define BRL_BLK_PASSKEY 0X2000 /* input keyboard key */
 typedef enum {
   BRL_KEY_ENTER,
   BRL_KEY_TAB,
