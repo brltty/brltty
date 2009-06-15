@@ -24,11 +24,6 @@
 
 #include "misc.h"
 
-typedef enum {
-  PARM_INPUTMODE
-} DriverParameter;
-#define BRLPARMS "inputmode"
-
 #define BRLSTAT ST_AlvaStyle
 #define BRL_HAVE_STATUS_CELLS
 #define BRL_HAVE_PACKET_IO
@@ -205,12 +200,9 @@ static KEY_NAME_TABLE_LIST(keyNameTables_bookworm) = {
   NULL
 };
 
-static unsigned int inputMode;
-
 static const unsigned char BookwormSessionEnd[] = {0X05, 0X07};	/* bookworm trailer to display braille */
 
 typedef int (ByteInterpreter) (unsigned char byte);
-static ByteInterpreter interpretKeyByte;
 static ByteInterpreter interpretKeyByte;
 static ByteInterpreter interpretBookwormByte;
 
@@ -653,8 +645,6 @@ identifyModel (BrailleDisplay *brl, unsigned char identifier) {
   if (!reallocateBuffer(&rawData, brl->textColumns*brl->textRows)) return 0;
   if (!reallocateBuffer(&prevData, brl->textColumns*brl->textRows)) return 0;
 
-  inputMode = 0;
-
   memset(rawStatus, 0, model->statusCells);
   memset(rawData, 0, model->textCells);
 
@@ -744,10 +734,6 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
                 touchAnalyzeCells(brl, NULL);
                 brl->touchEnabled = 1;
               }
-
-              if (*parameters[PARM_INPUTMODE])
-                if (!validateYesNo(&inputMode, parameters[PARM_INPUTMODE]))
-                  LogPrint(LOG_WARNING, "%s: %s", "invalid input setting", parameters[PARM_INPUTMODE]);
 
               return 1;
             }

@@ -237,9 +237,6 @@
 # FreedomScientific Braille Driver Parameters
 #braille-parameters fs:DebugPackets=no # [no,yes]
 
-# HandyTech Braille Driver Parameters
-#braille-parameters ht:InputMode=no # [no,yes]
-
 # Libbraille Braille Driver Parameters
 #braille-parameters lb:Device=/dev/ttyS0 # 
 #braille-parameters lb:Driver=auto # 
