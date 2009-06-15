@@ -525,14 +525,14 @@ static KEY_NAME_TABLE(keyNames_all) = {
   KEY_NAME_ENTRY(VO_KEY_Dot7, "Dot7"),
   KEY_NAME_ENTRY(VO_KEY_Dot8, "Dot8"),
 
-  KEY_NAME_ENTRY(VO_KEY_A, "A"),
-  KEY_NAME_ENTRY(VO_KEY_B, "B"),
-  KEY_NAME_ENTRY(VO_KEY_RoundLeft, "RL"),
+  KEY_NAME_ENTRY(VO_KEY_Thumb1, "Thumb1"),
+  KEY_NAME_ENTRY(VO_KEY_Thumb2, "Thumb2"),
+  KEY_NAME_ENTRY(VO_KEY_Left, "Left"),
   KEY_NAME_ENTRY(VO_KEY_Up, "Up"),
   KEY_NAME_ENTRY(VO_KEY_Down, "Down"),
-  KEY_NAME_ENTRY(VO_KEY_RoundRight, "RR"),
-  KEY_NAME_ENTRY(VO_KEY_C, "C"),
-  KEY_NAME_ENTRY(VO_KEY_D, "D"),
+  KEY_NAME_ENTRY(VO_KEY_Right, "Right"),
+  KEY_NAME_ENTRY(VO_KEY_Thumb3, "Thumb3"),
+  KEY_NAME_ENTRY(VO_KEY_Thumb4, "Thumb4"),
 
   LAST_KEY_NAME_ENTRY
 };
@@ -750,7 +750,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
     /* We combine dot and front key info in keystate */
     keys.control = (packet[1] << 8) | packet[0];
 
-    for (i = VO_KEY_Dot1; i <= VO_KEY_D; i++) {
+    for (i = VO_KEY_Dot1; i <= VO_KEY_Thumb4; i++) {
       int mask = 1 << (i - 1);
       if ((pressedKeys.control & mask) && !(keys.control & mask))
 	enqueueKeyEvent(VO_SET_NavigationKeys, i, 0);

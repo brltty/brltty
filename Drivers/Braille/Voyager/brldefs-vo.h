@@ -34,14 +34,14 @@ typedef enum {
   VO_KEY_Dot8 = 8,
 
   /* The front keys */
-  VO_KEY_A = 9,              /* Leftmost */
-  VO_KEY_B = 10,             /* Second from left */
-  VO_KEY_RoundLeft = 11,     /* Round key to the left of the central pad */
+  VO_KEY_Thumb1 = 9,              /* Leftmost */
+  VO_KEY_Thumb2 = 10,             /* Second from left */
+  VO_KEY_Left = 11,     /* Round key to the left of the central pad */
   VO_KEY_Up = 12,            /* Up position of central pad */
   VO_KEY_Down = 13,          /* Down position of central pad */
-  VO_KEY_RoundRight = 14,    /* Round key to the right of the central pad */
-  VO_KEY_C = 15,             /* Second from right */
-  VO_KEY_D = 16              /* Rightmost */
+  VO_KEY_Right = 14,    /* Round key to the right of the central pad */
+  VO_KEY_Thumb3 = 15,             /* Second from right */
+  VO_KEY_Thumb4 = 16              /* Rightmost */
 } VO_NavigationKey;
 
 typedef enum {
