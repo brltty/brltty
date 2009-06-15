@@ -43,12 +43,15 @@ struct KeyTableStruct {
 
   KeyBinding *keyBindingTable;
   unsigned int keyBindingCount;
+  const KeyBinding **sortedKeyBindings;
 
   KeySet keys;
   unsigned char context;
   int command;
   unsigned immediate:1;
 };
+
+extern int compareKeyBindings (const KeyBinding *binding1, const KeyBinding *binding2);
 
 #ifdef __cplusplus
 }

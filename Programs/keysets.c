@@ -28,8 +28,13 @@ copyKeySetMask (KeySetMask to, const KeySetMask from) {
 }
 
 int
+compareKeys (const KeySetMask mask1, const KeySetMask mask2) {
+  return memcmp(mask1, mask2, KEY_SET_MASK_SIZE);
+}
+
+int
 sameKeys (const KeySetMask mask1, const KeySetMask mask2) {
-  return memcmp(mask1, mask2, KEY_SET_MASK_SIZE) == 0;
+  return compareKeys(mask1, mask2) == 0;
 }
 
 int

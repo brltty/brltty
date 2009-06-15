@@ -64,7 +64,7 @@ compareToName (const wchar_t *location1, int length1, const char *location2) {
 }
 
 static int
-compareToKeyName (const void *target, const void *element) {
+searchKeyName (const void *target, const void *element) {
   const DataOperand *name = target;
   const KeyNameEntry *const *kne = element;
   return compareToName(name->characters, name->length, (*kne)->name);
@@ -76,7 +76,7 @@ parseKeyName (DataFile *file, unsigned char *set, unsigned char *key, const wcha
     .characters = characters,
     .length = length
   };
-  const KeyNameEntry **kne = bsearch(&name, ktd->keyNameTable, ktd->keyNameCount, sizeof(*ktd->keyNameTable), compareToKeyName);
+  const KeyNameEntry **kne = bsearch(&name, ktd->keyNameTable, ktd->keyNameCount, sizeof(*ktd->keyNameTable), searchKeyName);
 
   if (kne) {
     *set = (*kne)->set;
@@ -164,7 +164,7 @@ getKeysOperand (DataFile *file, KeyCombination *key, KeyTableData *ktd) {
 }
 
 static int
-compareToCommandName (const void *target, const void *element) {
+searchCommandName (const void *target, const void *element) {
   const DataOperand *name = target;
   const CommandEntry *const *command = element;
   return compareToName(name->characters, name->length, (*command)->name);
@@ -177,7 +177,7 @@ parseCommandName (DataFile *file, int *value, const wchar_t *characters, int len
     .characters = characters,
     .length = end? end-characters: length
   };
-  const CommandEntry **command = bsearch(&name, ktd->commandTable, ktd->commandCount, sizeof(*ktd->commandTable), compareToCommandName);
+  const CommandEntry **command = bsearch(&name, ktd->commandTable, ktd->commandCount, sizeof(*ktd->commandTable), searchCommandName);
 
   if (command) {
     *value = (*command)->code;
@@ -315,14 +315,14 @@ processKeyTableLine (DataFile *file, void *data) {
 }
 
 static int
-compareKeyNames (const void *element1, const void *element2) {
+sortKeyNames (const void *element1, const void *element2) {
   const KeyNameEntry *const *kne1 = element1;
   const KeyNameEntry *const *kne2 = element2;
   return strcasecmp((*kne1)->name, (*kne2)->name);
 }
 
 static int
-compareKeyValues (const void *element1, const void *element2) {
+sortKeyValues (const void *element1, const void *element2) {
   const KeyNameEntry *const *kne1 = element1;
   const KeyNameEntry *const *kne2 = element2;
 
@@ -360,7 +360,7 @@ allocateKeyNameTable (KeyTableData *ktd, const KeyNameEntry *const *keys) {
       }
     }
 
-    qsort(ktd->keyNameTable, ktd->keyNameCount, sizeof(*ktd->keyNameTable), compareKeyNames);
+    qsort(ktd->keyNameTable, ktd->keyNameCount, sizeof(*ktd->keyNameTable), sortKeyNames);
     return 1;
   }
 
@@ -368,7 +368,7 @@ allocateKeyNameTable (KeyTableData *ktd, const KeyNameEntry *const *keys) {
 }
 
 static int
-compareCommandNames (const void *element1, const void *element2) {
+sortCommandNames (const void *element1, const void *element2) {
   const CommandEntry *const *command1 = element1;
   const CommandEntry *const *command2 = element2;
   return strcasecmp((*command1)->name, (*command2)->name);
@@ -393,11 +393,18 @@ allocateCommandTable (KeyTableData *ktd) {
       while (command->name) *address++ = command++;
     }
 
-    qsort(ktd->commandTable, ktd->commandCount, sizeof(*ktd->commandTable), compareCommandNames);
+    qsort(ktd->commandTable, ktd->commandCount, sizeof(*ktd->commandTable), sortCommandNames);
     return 1;
   }
 
   return 0;
+}
+
+static int
+sortKeyBindings (const void *element1, const void *element2) {
+  const KeyBinding *const *binding1 = element1;
+  const KeyBinding *const *binding2 = element2;
+  return compareKeyBindings(*binding1, *binding2);
 }
 
 KeyTable *
@@ -405,22 +412,50 @@ makeKeyTable (KeyTableData *ktd) {
   KeyTable *table;
 
   if ((table = malloc(sizeof(*table)))) {
-    table->keyNameTable = ktd->keyNameTable;
-    ktd->keyNameTable = NULL;
-    table->keyNameCount = ktd->keyNameCount;
-    ktd->keyNameCount = 0;
-    qsort(table->keyNameTable, table->keyNameCount, sizeof(*table->keyNameTable), compareKeyValues);
+    int keyBindingsAllocated = (table->keyBindingCount = ktd->keyBindingCount) == 0;
 
-    if ((table->keyBindingTable = realloc(ktd->keyBindingTable, ARRAY_SIZE(table->keyBindingTable, (table->keyBindingCount = ktd->keyBindingCount))))) {
-      ktd->keyBindingTable = NULL;
+    if (keyBindingsAllocated) {
+      table->keyBindingTable = NULL;
+      table->sortedKeyBindings = NULL;
+    } else {
+      if ((table->keyBindingTable = realloc(ktd->keyBindingTable, ARRAY_SIZE(table->keyBindingTable, table->keyBindingCount)))) {
+        ktd->keyBindingTable = NULL;
+
+        if ((table->sortedKeyBindings = malloc(ARRAY_SIZE(table->sortedKeyBindings, table->keyBindingCount)))) {
+          {
+            KeyBinding *source = table->keyBindingTable;
+            const KeyBinding **target = table->sortedKeyBindings;
+            unsigned int count = table->keyBindingCount;
+
+            while (count) {
+              *target++ = source++;
+              count -= 1;
+            }
+          }
+
+          qsort(table->sortedKeyBindings, table->keyBindingCount, sizeof(*table->sortedKeyBindings), sortKeyBindings);
+          keyBindingsAllocated = 1;
+        } else {
+          LogError("malloc");
+        }
+
+        if (!keyBindingsAllocated) free(table->keyBindingTable);
+      } else {
+        LogError("realloc");
+      }
+    }
+
+    if (keyBindingsAllocated) {
+      table->keyNameTable = ktd->keyNameTable;
+      ktd->keyNameTable = NULL;
+      table->keyNameCount = ktd->keyNameCount;
+      ktd->keyNameCount = 0;
+      qsort(table->keyNameTable, table->keyNameCount, sizeof(*table->keyNameTable), sortKeyValues);
 
       resetKeyTable(table);
       return table;
-    } else {
-      LogError("realloc");
     }
 
-    if (table->keyNameTable) free(table->keyNameTable);
     free(table);
   }
 
@@ -460,6 +495,7 @@ void
 destroyKeyTable (KeyTable *table) {
   if (table->keyNameTable) free(table->keyNameTable);
   if (table->keyBindingTable) free(table->keyBindingTable);
+  if (table->sortedKeyBindings) free(table->sortedKeyBindings);
   free(table);
 }
 

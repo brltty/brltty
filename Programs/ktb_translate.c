@@ -26,26 +26,54 @@
 #include "cmd.h"
 #include "brldefs.h"
 
+int
+compareKeyBindings (const KeyBinding *binding1, const KeyBinding *binding2) {
+  if (binding1->context < binding2->context) return -1;
+  if (binding1->context > binding2->context) return 1;
+
+  if (binding1->keys.set < binding2->keys.set) return -1;
+  if (binding1->keys.set > binding2->keys.set) return 1;
+
+  if (binding1->keys.key < binding2->keys.key) return -1;
+  if (binding1->keys.key > binding2->keys.key) return 1;
+
+  return compareKeys(binding1->keys.modifiers, binding2->keys.modifiers);
+}
+
 static int
-getCommand (KeyTable *table, unsigned char context, unsigned char set, unsigned char key) {
-  const KeyBinding *binding = table->keyBindingTable;
-  unsigned int count = table->keyBindingCount;
-  int candidate = EOF;
+searchKeyBinding (const void *target, const void *element) {
+  const KeyBinding *reference = target;
+  const KeyBinding *const *binding = element;
+  return compareKeyBindings(reference, *binding);
+}
 
-  while (count) {
-    if ((set == binding->keys.set) && (key == binding->keys.key) &&
-        sameKeys(table->keys.mask, binding->keys.modifiers)) {
-      if (binding->context == context) return binding->command;
+static const KeyBinding *
+getKeyBinding (KeyTable *table, unsigned char context, unsigned char set, unsigned char key) {
+  KeyBinding target;
 
-      if (candidate == EOF)
-        if (binding->context == BRL_CTX_DEFAULT)
-          candidate = binding->command;
-    }
+  target.context = context;
+  target.keys.set = set;
+  target.keys.key = key;
+  copyKeySetMask(target.keys.modifiers, table->keys.mask);
 
-    binding += 1, count -= 1;
+  {
+    const KeyBinding **binding = bsearch(&target, table->sortedKeyBindings, table->keyBindingCount, sizeof(*table->sortedKeyBindings), searchKeyBinding);
+    if (binding) return *binding;
   }
 
-  return candidate;
+  return NULL;
+}
+
+static int
+getCommand (KeyTable *table, unsigned char context, unsigned char set, unsigned char key) {
+  const KeyBinding *binding = getKeyBinding(table, context, set, key);
+  if (binding) return binding->command;
+
+  if (context != BRL_CTX_DEFAULT)
+    if ((binding = getKeyBinding(table, BRL_CTX_DEFAULT, set, key)))
+      return binding->command;
+
+  return EOF;
 }
 
 static int
