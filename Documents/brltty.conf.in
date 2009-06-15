@@ -259,9 +259,6 @@
 #braille-parameters vs:DisplaySize=40 # [20-40]
 #braille-parameters vs:PromVersion=4 # [3-6]
 
-# Voyager Braille Driver Parameters
-#braille-parameters vo:InputMode=no # [no,yes]
-
 # XWindow Braille Driver Parameters
 #braille-parameters xw:Columns=40 # [1-80]
 #braille-parameters xw:Font=name # []

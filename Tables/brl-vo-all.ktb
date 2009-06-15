@@ -1,0 +1,166 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2009 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+# Key Table for Tieman Voyager
+
+
+####################
+# Default Bindings #
+####################
+
+# Basic Navigation
+bind A FWINLT
+bind D FWINRT
+bind B LNUP
+bind C LNDN
+bind A+B TOP_LEFT
+bind A+C BOT_LEFT
+bind D+B TOP
+bind D+C BOT
+bind RL BACK
+bind RR HOME
+bind RL+RR CSRTRK
+bind Up KEY_CURSOR_UP
+bind Down KEY_CURSOR_DOWN
+
+# Modes and Functions
+bind Dot1+Dot2+Dot5 HELP
+bind B+Dot1+Dot2+Dot5 HELP
+bind C+Dot1+Dot2+Dot5 HELP
+bind Dot1+Dot2+Dot3 LEARN
+bind B+Dot1+Dot2+Dot3 LEARN
+bind C+Dot1+Dot2+Dot3 LEARN
+bind Dot2+Dot3+Dot4 INFO
+bind B+Dot2+Dot3+Dot4 INFO
+bind C+Dot2+Dot3+Dot4 INFO
+bind Dot1+Dot2+Dot3+Dot4+Dot5+Dot6+Dot7+Dot8 PREFMENU
+bind B+Dot1+Dot2+Dot3+Dot4+Dot5+Dot6+Dot7+Dot8 PREFMENU
+bind C+Dot1+Dot2+Dot3+Dot4+Dot5+Dot6+Dot7+Dot8 PREFMENU
+bind Dot1+Dot3+Dot4 PREFMENU
+bind B+Dot1+Dot3+Dot4 PREFMENU
+bind C+Dot1+Dot3+Dot4 PREFMENU
+bind Dot1+Dot2+Dot3+Dot5 PREFLOAD
+bind B+Dot1+Dot2+Dot3+Dot5 PREFLOAD
+bind C+Dot1+Dot2+Dot3+Dot5 PREFLOAD
+bind Dot2+Dot4+Dot5+Dot6 PREFSAVE
+bind B+Dot2+Dot4+Dot5+Dot6 PREFSAVE
+bind C+Dot2+Dot4+Dot5+Dot6 PREFSAVE
+bind RL+Up DISPMD
+bind RL+Down SIXDOTS
+bind RR+Up AUTOREPEAT
+bind RR+Down AUTOSPEAK
+bind Dot1 ATTRVIS
+bind B+Dot1 ATTRVIS
+bind C+Dot1 ATTRVIS
+bind Dot1+Dot4 CSRVIS
+bind B+Dot1+Dot4 CSRVIS
+bind C+Dot1+Dot4 CSRVIS
+bind Dot1+Dot2+Dot4 FREEZE
+bind B+Dot1+Dot2+Dot4 FREEZE
+bind C+Dot1+Dot2+Dot4 FREEZE
+
+# Cursor Routing
+bind RoutingKey ROUTE
+bind A+D CSRJMP_VERT
+
+# Cut and Paste
+bind A+RoutingKey CUTBEGIN
+bind B+RoutingKey CUTAPPEND
+bind D+RoutingKey CUTRECT
+bind C+RoutingKey CUTLINE
+bind Dot1+Dot2+Dot3+Dot4 PASTE
+bind B+Dot1+Dot2+Dot3+Dot4 PASTE
+bind C+Dot1+Dot2+Dot3+Dot4 PASTE
+
+# Fancy Navigation
+bind RL+A LNBEG
+bind RL+D LNEND
+bind RR+A CHRLT
+bind RR+D CHRRT
+bind Up+A FWINLTSKIP
+bind Up+D FWINRTSKIP
+bind Down+A PRSEARCH
+bind Down+D NXSEARCH
+bind RL+B ATTRUP
+bind RL+C ATTRDN
+bind RR+B PRDIFLN
+bind RR+C NXDIFLN
+bind Up+B PRPGRPH
+bind Up+C NXPGRPH
+bind Down+B PRPROMPT
+bind Down+C NXPROMPT
+Bind RL+RoutingKey SETMARK
+Bind RR+RoutingKey GOTOMARK
+bind Down+RoutingKey SETLEFT
+bind A+B+RoutingKey PRINDENT
+bind C+D+RoutingKey NXINDENT
+
+# Typing in Braille
+bind B+C PASSDOTS+0
+bind Dot1+Dot2 KEY_BACKSPACE
+bind B+Dot1+Dot2 KEY_BACKSPACE
+bind C+Dot1+Dot2 KEY_BACKSPACE
+bind Dot1+Dot4+Dot5 KEY_DELETE
+bind B+Dot1+Dot4+Dot5 KEY_DELETE
+bind C+Dot1+Dot4+Dot5 KEY_DELETE
+bind Dot1+Dot5 KEY_ESCAPE
+bind B+Dot1+Dot5 KEY_ESCAPE
+bind C+Dot1+Dot5 KEY_ESCAPE
+bind Dot2+Dot4 KEY_INSERT
+bind B+Dot2+Dot4 KEY_INSERT
+bind C+Dot2+Dot4 KEY_INSERT
+bind Dot2+Dot3+Dot4+Dot5 KEY_TAB
+bind B+Dot2+Dot3+Dot4+Dot5 KEY_TAB
+bind C+Dot2+Dot3+Dot4+Dot5 KEY_TAB
+bind Dot4+Dot6 KEY_ENTER
+bind B+Dot4+Dot6 KEY_ENTER
+bind C+Dot4+Dot6 KEY_ENTER
+bind Dot2 KEY_PAGE_UP
+bind B+Dot2 KEY_PAGE_UP
+bind C+Dot2 KEY_PAGE_UP
+bind Dot5 KEY_PAGE_DOWN
+bind B+Dot5 KEY_PAGE_DOWN
+bind C+Dot5 KEY_PAGE_DOWN
+bind Dot3 KEY_HOME
+bind B+Dot3 KEY_HOME
+bind C+Dot3 KEY_HOME
+bind Dot6 KEY_END
+bind B+Dot6 KEY_END
+bind C+Dot6 KEY_END
+bind Dot7 KEY_CURSOR_LEFT
+bind B+Dot7 KEY_CURSOR_LEFT
+bind C+Dot7 KEY_CURSOR_LEFT
+bind Dot8 KEY_CURSOR_RIGHT
+bind B+Dot8 KEY_CURSOR_RIGHT
+bind C+Dot8 KEY_CURSOR_RIGHT
+
+# Virtual Console Selection
+bind Up+RoutingKey SWITCHVT
+
+
+#################
+# Menu Bindings #
+#################
+
+context menu
+
+bind Down MENU_PREV_SETTING
+bind Up MENU_NEXT_SETTING
+bind RL+RR PREFMENU
+bind RL+Up PREFLOAD
+bind RL+Down PREFSAVE

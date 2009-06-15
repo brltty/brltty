@@ -19,15 +19,10 @@
 DRIVER_CODE = vo
 DRIVER_NAME = Voyager
 DRIVER_COMMENT = 44/70
-DRIVER_VERSION = 0.21 (January 2005)
+DRIVER_VERSION = 0.3 (June 2009)
 DRIVER_DEVELOPERS = Stéphane Doyon <s.doyon@videotron.ca>
 include $(SRC_TOP)braille.mk
 
 braille.$O:
 	$(CC) $(BRL_CFLAGS) $(KDRIVER) -c $(SRC_DIR)/braille.c
-
-#Let's not rebuild the help unless the user wants to as it requires python.
-help-files: mkhlp $(SRC_DIR)/trhlp $(SRC_DIR)/braille.c $(SRC_DIR)/help.src
-	chmod u+x mkhlp
-	./mkhlp
 
