@@ -711,7 +711,6 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 
     /* one or more keys were pressed or released */
     Keys currentKeys;
-    int i;
 
     unsigned char controlPresses[0X10];
     int controlPressCount = 0;
@@ -758,33 +757,46 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
     /* We combine dot and front key info in keystate */
     currentKeys.control = (packet[1] << 8) | packet[0];
 
-    for (i=0; i<0X10; i+=1) {
-      uint16_t bit = 1 << i;
+    {
+      unsigned char key = 0;
+      uint16_t bit = 0X1;
 
-      if ((pressedKeys.control & bit) && !(currentKeys.control & bit)) {
-        enqueueKeyEvent(VO_SET_NavigationKeys, i+1, 0);
-      } else if (!(pressedKeys.control & bit) && (currentKeys.control & bit)) {
-        controlPresses[controlPressCount++] = i + 1;
+      while (++key <= 0X10) {
+        if ((pressedKeys.control & bit) && !(currentKeys.control & bit)) {
+          enqueueKeyEvent(VO_SET_NavigationKeys, key, 0);
+        } else if (!(pressedKeys.control & bit) && (currentKeys.control & bit)) {
+          controlPresses[controlPressCount++] = key;
+        }
+
+        bit <<= 1;
       }
     }
     
-    for (i=2; i<8; i+=1) {
-      unsigned char key = packet[i];
-      if (!key) break;
+    {
+      int i;
 
-      if ((key < 1) || (key > cellCount)) {
-        LogPrint(LOG_NOTICE, "Invalid routing key number: %u", key);
-        continue;
+      for (i=2; i<8; i+=1) {
+        unsigned char key = packet[i];
+        if (!key) break;
+
+        if ((key < 1) || (key > cellCount)) {
+          LogPrint(LOG_NOTICE, "Invalid routing key number: %u", key);
+          continue;
+        }
+        key -= 1;
+
+        currentKeys.routing[key] = 1;
+        if (!pressedKeys.routing[key]) routingPresses[routingPressCount++] = key;
       }
-      key -= 1;
-
-      currentKeys.routing[key] = 1;
-      if (!pressedKeys.routing[key]) routingPresses[routingPressCount++] = key;
     }
 
-    for (i=0; i<cellCount; i+=1)
-      if (pressedKeys.routing[i] && !currentKeys.routing[i])
-        enqueueKeyEvent(VO_SET_RoutingKeys, i, 0);
+    {
+      unsigned char key;
+
+      for (key=0; key<cellCount; key+=1)
+        if (pressedKeys.routing[key] && !currentKeys.routing[key])
+          enqueueKeyEvent(VO_SET_RoutingKeys, key, 0);
+    }
 
     while (controlPressCount)
       enqueueKeyEvent(VO_SET_NavigationKeys, controlPresses[--controlPressCount], 1);
