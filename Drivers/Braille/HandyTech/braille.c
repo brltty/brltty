@@ -356,8 +356,8 @@ static const ModelEntry modelTable[] = {
     .name = "Easy Braille",
     .textCells = 40,
     .statusCells = 0,
-    .keyBindings = keyBindings_modular,
-    .keyNameTables = keyNameTables_modular,
+    .keyBindings = keyBindings_easyBraille,
+    .keyNameTables = keyNameTables_easyBraille,
     .interpretByte = interpretKeyByte,
     .writeCells = writeStatusAndTextCells
   }
