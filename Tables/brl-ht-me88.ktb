@@ -18,14 +18,5 @@
 
 # Key Table for HandyTech Modular Evolution 88
 
-bind RoutingKey ROUTE
-bind ThumbLeft+RoutingKey PRINDENT
-bind ThumbRight+RoutingKey NXINDENT
-
-bind ThumbLeft FWINLT
-bind ThumbRight FWINRT
-bind ThumbLeft+ThumbRight PASTE
-
-include brl-ht-dots.kti
-include brl-ht-rockers.kti
+include brl-ht-me.kti
 include brl-ht-keypad.kti

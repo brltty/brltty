@@ -19,23 +19,23 @@
 # Key Table for HandyTech Modular
 
 bind RoutingKey ROUTE
-bind Up+RoutingKey PRINDENT
-bind Down+RoutingKey NXINDENT
+bind Left+RoutingKey PRINDENT
+bind Right+RoutingKey NXINDENT
 
-bind Up FWINLT
-bind Down FWINRT
-bind Up+Down PASTE
+bind Left FWINLT
+bind Right FWINRT
+bind Left+Right PASTE
 
-bind B1+Up LNBEG
-bind B1+Down LNEND
-bind B2+Up TOP
-bind B2+Down BOT
-bind B3+Up HWINLT
-bind B3+Down HWINRT
-bind B6+Up CHRLT
-bind B6+Down CHRRT
-bind B2+B3+Up MUTE
-bind B2+B3+Down SAY_LINE
+bind B1+Left LNBEG
+bind B1+Right LNEND
+bind B2+Left TOP
+bind B2+Right BOT
+bind B3+Left HWINLT
+bind B3+Right HWINRT
+bind B6+Left CHRLT
+bind B6+Right CHRRT
+bind B2+B3+Left MUTE
+bind B2+B3+Right SAY_LINE
 
 bind Status1 HELP
 bind Status2 PREFMENU

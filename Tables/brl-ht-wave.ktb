@@ -18,12 +18,15 @@
 
 # Key Table for HandyTech Braille Wave
 
-bind RoutingKey ROUTE
-bind Up+RoutingKey PRINDENT
-bind Down+RoutingKey NXINDENT
+bind Left FWINLT
+bind Right FWINRT
 
-bind Up FWINLT
-bind Down FWINRT
-bind Up+Down PASTE
+bind RoutingKey ROUTE
+bind Left+RoutingKey PRINDENT
+bind Right+RoutingKey NXINDENT
+
+bind Left+Right PASTE
 
 include brl-ht-dots.kti
+
+bind Escape+Space+Enter INFO

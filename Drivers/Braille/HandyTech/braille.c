@@ -87,8 +87,8 @@ static KEY_NAME_TABLE(keyNames_rockers) = {
 };
 
 static KEY_NAME_TABLE(keyNames_modular) = {
-  KEY_NAME_ENTRY(HT_KEY_Up, "Up"),
-  KEY_NAME_ENTRY(HT_KEY_Down, "Down"),
+  KEY_NAME_ENTRY(HT_KEY_Up, "Left"),
+  KEY_NAME_ENTRY(HT_KEY_Down, "Right"),
 
   KEY_NAME_ENTRY(HT_KEY_STATUS+0, "Status1"),
   KEY_NAME_ENTRY(HT_KEY_STATUS+1, "Status2"),
@@ -108,8 +108,8 @@ static KEY_NAME_TABLE_LIST(keyNameTables_modular) = {
 };
 
 static KEY_NAME_TABLE(keyNames_modularEvolution) = {
-  KEY_NAME_ENTRY(HT_KEY_Space, "ThumbLeft"),
-  KEY_NAME_ENTRY(HT_KEY_SpaceRight, "ThumbRight"),
+  KEY_NAME_ENTRY(HT_KEY_Space, "Left"),
+  KEY_NAME_ENTRY(HT_KEY_SpaceRight, "Right"),
 
   LAST_KEY_NAME_ENTRY
 };
@@ -160,6 +160,9 @@ static KEY_NAME_TABLE_LIST(keyNameTables_brailleStar80) = {
 };
 
 static KEY_NAME_TABLE(keyNames_brailleWave) = {
+  KEY_NAME_ENTRY(HT_KEY_Up, "Left"),
+  KEY_NAME_ENTRY(HT_KEY_Down, "Right"),
+
   KEY_NAME_ENTRY(HT_KEY_Escape, "Escape"),
   KEY_NAME_ENTRY(HT_KEY_Space, "Space"),
   KEY_NAME_ENTRY(HT_KEY_Return, "Return"),
@@ -171,8 +174,22 @@ static const char keyBindings_brailleWave[] = "wave";
 static KEY_NAME_TABLE_LIST(keyNameTables_brailleWave) = {
   keyNames_routing,
   keyNames_dots,
-  keyNames_modular,
   keyNames_brailleWave,
+  NULL
+};
+
+static KEY_NAME_TABLE(keyNames_easyBraille) = {
+  KEY_NAME_ENTRY(HT_KEY_Up, "Left"),
+  KEY_NAME_ENTRY(HT_KEY_Down, "Right"),
+
+  LAST_KEY_NAME_ENTRY
+};
+
+static const char keyBindings_easyBraille[] = "easy";
+static KEY_NAME_TABLE_LIST(keyNameTables_easyBraille) = {
+  keyNames_routing,
+  keyNames_dots,
+  keyNames_easyBraille,
   NULL
 };
 
