@@ -630,11 +630,11 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   while ((length = readPacket(brl, &packet))) {
     switch (packet.data.type) {
       case IPT_KEY_NAVIGATION:
-        if (interpretNavigationKey(packet.data.fields.key.value)) return EOF;
+        if (interpretNavigationKey(packet.data.fields.key.value)) continue;
         break;
 
       case IPT_KEY_SIMULATION:
-        if (interpretSimulationKey(packet.data.fields.key.value)) return EOF;
+        if (interpretSimulationKey(packet.data.fields.key.value)) continue;
         break;
 
       case IPT_KEY_ROUTING: {
@@ -654,8 +654,11 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 
         enqueueKeyEvent(set, key, 1);
         enqueueKeyEvent(set, key, 0);
-        return EOF;
+        continue;
       }
+
+      default:
+        break;
     }
 
     logUnexpectedPacket(packet.bytes, length);
