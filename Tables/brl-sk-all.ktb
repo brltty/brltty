@@ -1,0 +1,134 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2009 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+# Key Table for Seika
+
+
+####################
+# Default Bindings #
+####################
+
+bind !RoutingKey ROUTE
+
+bind K1 FWINLT
+bind K8 FWINRT
+
+bind K2 LNUP
+bind K3 LNDN
+bind K2+K3 LNBEG
+
+bind K6 FWINLTSKIP
+bind K7 FWINRTSKIP
+bind K6+K7 PASTE
+
+bind K4 CSRTRK
+bind K5 RETURN
+bind K4+K5 CSRJMP_VERT
+
+bind K6+K2 TOP_LEFT
+bind K6+K3 BOT_LEFT
+bind K7+K2 TOP
+bind K7+K3 BOT
+
+bind K4+K2 ATTRUP
+bind K4+K3 ATTRDN
+bind K5+K2 PRDIFLN
+bind K5+K3 NXDIFLN
+bind K4+K6 PRPROMPT
+bind K4+K7 NXPROMPT
+bind K5+K6 PRPGRPH
+bind K5+K7 NXPGRPH
+
+bind K1+K8+K2 CONTEXT+7 # RoutingKey -> PRINDENT
+bind K1+K8+K3 CONTEXT+8 # RoutingKey -> NXINDENT
+bind K1+K8+K4 CONTEXT+5 # RoutingKey -> SETLEFT
+bind K1+K8+K5 CONTEXT+6 # RoutingKey -> DESCCHAR
+bind K1+K8+K6 CONTEXT+9 # RoutingKey -> PRDIFCHAR
+bind K1+K8+K7 CONTEXT+10 # RoutingKey -> NXDIFCHAR
+
+bind K1+K8+K2+K6 CONTEXT+1 # RoutingKey -> CUTBEGIN
+bind K1+K8+K2+K7 CONTEXT+2 # RoutingKey -> CUTAPPEND
+bind K1+K8+K3+K6 CONTEXT+3 # RoutingKey -> CUTLINE
+bind K1+K8+K3+K7 CONTEXT+4 # RoutingKey -> CUTRECT
+
+bind K1+K2 HELP
+bind K1+K3 LEARN
+bind K1+K4 PREFLOAD
+bind K1+K5 PREFSAVE
+bind K1+K6 PREFMENU
+bind K1+K7 INFO
+
+bind K8+K2 DISPMD
+bind K8+K3 FREEZE
+bind K8+K6 SIXDOTS
+bind K8+K7 SKPIDLNS
+
+
+#################
+# Menu Bindings #
+#################
+
+context menu
+
+bind K1 FWINLT
+bind K8 FWINRT
+
+bind K2 MENU_PREV_ITEM
+bind K3 MENU_NEXT_ITEM
+
+bind K6 MENU_PREV_SETTING
+bind K7 MENU_NEXT_SETTING
+
+bind K4 PREFLOAD
+bind K5 PREFSAVE
+
+
+############################
+# Routing Key Alternatives #
+############################
+
+context 1
+bind !RoutingKey CUTBEGIN
+
+context 2
+bind !RoutingKey CUTAPPEND
+
+context 3
+bind !RoutingKey CUTLINE
+
+context 4
+bind !RoutingKey CUTRECT
+
+context 5
+bind !RoutingKey SETLEFT
+
+context 6
+bind !RoutingKey DESCCHAR
+
+context 7
+bind !RoutingKey PRINDENT
+
+context 8
+bind !RoutingKey NXINDENT
+
+context 9
+bind !RoutingKey PRDIFCHar
+
+context 10
+bind !RoutingKey NXDIFCHar
+

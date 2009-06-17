@@ -24,6 +24,27 @@
 #include "misc.h"
 
 #include "brl_driver.h"
+#include "brldefs-sk.h"
+
+static KEY_NAME_TABLE(keyNames_all) = {
+  KEY_NAME_ENTRY(SK_KEY_K1, "K1"),
+  KEY_NAME_ENTRY(SK_KEY_K2, "K2"),
+  KEY_NAME_ENTRY(SK_KEY_K3, "K3"),
+  KEY_NAME_ENTRY(SK_KEY_K4, "K4"),
+  KEY_NAME_ENTRY(SK_KEY_K5, "K5"),
+  KEY_NAME_ENTRY(SK_KEY_K6, "K6"),
+  KEY_NAME_ENTRY(SK_KEY_K7, "K7"),
+  KEY_NAME_ENTRY(SK_KEY_K8, "K8"),
+
+  KEY_SET_ENTRY(SK_SET_RoutingKeys, "RoutingKey"),
+
+  LAST_KEY_NAME_ENTRY
+};
+
+static KEY_NAME_TABLE_LIST(keyNameTables_all) = {
+  keyNames_all,
+  NULL
+};
 
 typedef enum {
   IPT_identity,
@@ -31,23 +52,12 @@ typedef enum {
   IPT_routing
 } InputPacketType;
 
-typedef enum {
-  KEY_K1 = 0X0001,
-  KEY_K7 = 0X0002,
-  KEY_K8 = 0X0004,
-  KEY_K6 = 0X0008,
-  KEY_K5 = 0X0010,
-  KEY_K2 = 0X0200,
-  KEY_K3 = 0X0800,
-  KEY_K4 = 0X1000,
-} BrailleKeys;
-
 typedef struct {
   unsigned char bytes[24];
   unsigned char type;
 
   union {
-    BrailleKeys keys;
+    uint16_t keys;
     const unsigned char *routing;
 
     struct {
@@ -79,7 +89,6 @@ static const InputOutputOperations *io;
 #define SERIAL_BAUD 9600
 static const int charactersPerSecond = SERIAL_BAUD / 10;
 
-static int routingCommand;
 static TranslationTable outputTable;
 static unsigned char textCells[40];
 
@@ -741,10 +750,9 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
         brl->textColumns = response.fields.identity.size;
         brl->textRows = 1;
+        brl->keyNameTables = keyNameTables_all;
 
-        routingCommand = BRL_BLK_ROUTE;
         memset(textCells, 0XFF, brl->textColumns);
-
         return 1;
       }
     }
@@ -776,73 +784,32 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   size_t length;
 
   while ((length = protocol->readPacket(brl, &packet))) {
-    int routing = routingCommand;
-    routingCommand = BRL_BLK_ROUTE;
-
     switch (packet.type) {
-      case IPT_keys:
-#define CMD(keys,cmd) case (keys): return (cmd)
-#define BLK(keys,blk) case (keys): routingCommand = (blk); return BRL_CMD_NOOP
-        switch (packet.fields.keys) {
-          CMD(KEY_K1, BRL_CMD_FWINLT);
-          CMD(KEY_K8, BRL_CMD_FWINRT);
+      case IPT_keys: {
+        unsigned char key = 0;
+        uint16_t bit = 0X1;
+        unsigned char keys[0X10];
+        unsigned int keyCount = 0;
 
-          CMD(KEY_K2, BRL_CMD_LNUP);
-          CMD(KEY_K3, BRL_CMD_LNDN);
-          CMD(KEY_K2 | KEY_K3, BRL_CMD_LNBEG);
+        while (++key <= 0X10) {
+          if (packet.fields.keys & bit) {
+            enqueueKeyEvent(SK_SET_NavigationKeys, key, 1);
+            keys[keyCount++] = key;
+          }
 
-          CMD(KEY_K6, BRL_CMD_FWINLTSKIP);
-          CMD(KEY_K7, BRL_CMD_FWINRTSKIP);
-          CMD(KEY_K6 | KEY_K7, BRL_CMD_PASTE);
-
-          CMD(KEY_K4, BRL_CMD_CSRTRK);
-          CMD(KEY_K5, BRL_CMD_RETURN);
-          CMD(KEY_K4 | KEY_K5, BRL_CMD_CSRJMP_VERT);
-
-          CMD(KEY_K6 | KEY_K2, BRL_CMD_TOP_LEFT);
-          CMD(KEY_K6 | KEY_K3, BRL_CMD_BOT_LEFT);
-          CMD(KEY_K7 | KEY_K2, BRL_CMD_TOP);
-          CMD(KEY_K7 | KEY_K3, BRL_CMD_BOT);
-
-          CMD(KEY_K4 | KEY_K2, BRL_CMD_ATTRUP);
-          CMD(KEY_K4 | KEY_K3, BRL_CMD_ATTRDN);
-          CMD(KEY_K5 | KEY_K2, BRL_CMD_PRDIFLN);
-          CMD(KEY_K5 | KEY_K3, BRL_CMD_NXDIFLN);
-          CMD(KEY_K4 | KEY_K6, BRL_CMD_PRPROMPT);
-          CMD(KEY_K4 | KEY_K7, BRL_CMD_NXPROMPT);
-          CMD(KEY_K5 | KEY_K6, BRL_CMD_PRPGRPH);
-          CMD(KEY_K5 | KEY_K7, BRL_CMD_NXPGRPH);
-
-          BLK(KEY_K1 | KEY_K8 | KEY_K2, BRL_BLK_PRINDENT);
-          BLK(KEY_K1 | KEY_K8 | KEY_K3, BRL_BLK_NXINDENT);
-          BLK(KEY_K1 | KEY_K8 | KEY_K4, BRL_BLK_SETLEFT);
-          BLK(KEY_K1 | KEY_K8 | KEY_K5, BRL_BLK_DESCCHAR);
-          BLK(KEY_K1 | KEY_K8 | KEY_K6, BRL_BLK_PRDIFCHAR);
-          BLK(KEY_K1 | KEY_K8 | KEY_K7, BRL_BLK_NXDIFCHAR);
-
-          BLK(KEY_K1 | KEY_K8 | KEY_K2 | KEY_K6, BRL_BLK_CUTBEGIN);
-          BLK(KEY_K1 | KEY_K8 | KEY_K2 | KEY_K7, BRL_BLK_CUTAPPEND);
-          BLK(KEY_K1 | KEY_K8 | KEY_K3 | KEY_K6, BRL_BLK_CUTLINE);
-          BLK(KEY_K1 | KEY_K8 | KEY_K3 | KEY_K7, BRL_BLK_CUTRECT);
-
-          CMD(KEY_K1 | KEY_K2, BRL_CMD_HELP);
-          CMD(KEY_K1 | KEY_K3, BRL_CMD_LEARN);
-          CMD(KEY_K1 | KEY_K4, BRL_CMD_PREFLOAD);
-          CMD(KEY_K1 | KEY_K5, BRL_CMD_PREFSAVE);
-          CMD(KEY_K1 | KEY_K6, BRL_CMD_PREFMENU);
-          CMD(KEY_K1 | KEY_K7, BRL_CMD_INFO);
-
-          CMD(KEY_K8 | KEY_K2, BRL_CMD_DISPMD);
-          CMD(KEY_K8 | KEY_K3, BRL_CMD_FREEZE);
-          CMD(KEY_K8 | KEY_K6, BRL_CMD_SIXDOTS);
-          CMD(KEY_K8 | KEY_K7, BRL_CMD_SKPIDLNS);
-
-          default:
-            break;
+          bit <<= 1;
         }
-#undef BLK
-#undef CMD
+
+        if (keyCount) {
+          do {
+            enqueueKeyEvent(SK_SET_NavigationKeys, keys[--keyCount], 0);
+          } while (keyCount);
+
+          return EOF;
+        }
+
         break;
+      }
 
       case IPT_routing: {
         const unsigned char *byte = packet.fields.routing;
@@ -850,7 +817,11 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
         unsigned char key;
 
         for (key=0; key<brl->textColumns; key+=1) {
-          if (*byte & bit) return routing + key;
+          if (*byte & bit) {
+            enqueueKeyEvent(SK_SET_RoutingKeys, key, 1);
+            enqueueKeyEvent(SK_SET_RoutingKeys, key, 0);
+            return EOF;
+          }
 
           if (!(bit <<= 1)) {
             bit = 0X1;
