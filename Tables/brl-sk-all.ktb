@@ -94,8 +94,8 @@ bind K3 MENU_NEXT_ITEM
 bind K6 MENU_PREV_SETTING
 bind K7 MENU_NEXT_SETTING
 
-bind K4 PREFLOAD
-bind K5 PREFSAVE
+bind K4 MENU_FIRST_ITEM
+bind K5 MENU_LAST_ITEM
 
 
 ############################
