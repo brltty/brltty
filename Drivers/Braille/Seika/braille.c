@@ -783,11 +783,13 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   InputPacket packet;
   size_t length;
 
+nextPacket:
   while ((length = protocol->readPacket(brl, &packet))) {
     switch (packet.type) {
       case IPT_keys: {
-        unsigned char key = 0;
         uint16_t bit = 0X1;
+        unsigned char key = 0;
+
         unsigned char keys[0X10];
         unsigned int keyCount = 0;
 
@@ -805,7 +807,7 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
             enqueueKeyEvent(SK_SET_NavigationKeys, keys[--keyCount], 0);
           } while (keyCount);
 
-          return EOF;
+          continue;
         }
 
         break;
@@ -813,24 +815,35 @@ brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 
       case IPT_routing: {
         const unsigned char *byte = packet.fields.routing;
-        unsigned char bit = 0X1;
-        unsigned char key;
+        unsigned char key = 0;
 
-        for (key=0; key<brl->textColumns; key+=1) {
-          if (*byte & bit) {
-            enqueueKeyEvent(SK_SET_RoutingKeys, key, 1);
-            enqueueKeyEvent(SK_SET_RoutingKeys, key, 0);
-            return EOF;
+        while (key < brl->textColumns) {
+          if (*byte) {
+            unsigned char bit = 0X1;
+
+            do {
+              if (*byte & bit) {
+                enqueueKeyEvent(SK_SET_RoutingKeys, key, 1);
+                enqueueKeyEvent(SK_SET_RoutingKeys, key, 0);
+                goto nextPacket;
+              }
+
+              key += 1;
+            } while ((bit <<= 1));
+
+            break;
+          } else {
+            key += 8;
           }
 
-          if (!(bit <<= 1)) {
-            bit = 0X1;
-            byte += 1;
-          }
+          byte += 1;
         }
 
         break;
       }
+
+      default:
+        break;
     }
 
     logUnexpectedPacket(packet.bytes, length);
