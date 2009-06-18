@@ -26,11 +26,14 @@
 #include "cmd.h"
 #include "brldefs.h"
 
+static inline KeyContext *
+getKeyContext (KeyTable *table, unsigned char context) {
+  if (context < table->keyContextCount) return &table->keyContextTable[context];
+  return NULL;
+}
+
 int
 compareKeyBindings (const KeyBinding *binding1, const KeyBinding *binding2) {
-  if (binding1->context < binding2->context) return -1;
-  if (binding1->context > binding2->context) return 1;
-
   if (binding1->keys.set < binding2->keys.set) return -1;
   if (binding1->keys.set > binding2->keys.set) return 1;
 
@@ -49,16 +52,19 @@ searchKeyBinding (const void *target, const void *element) {
 
 static const KeyBinding *
 getKeyBinding (KeyTable *table, unsigned char context, unsigned char set, unsigned char key) {
-  KeyBinding target;
+  KeyContext *ctx = getKeyContext(table, context);
 
-  target.context = context;
-  target.keys.set = set;
-  target.keys.key = key;
-  copyKeySetMask(target.keys.modifiers, table->keys.mask);
+  if (ctx) {
+    KeyBinding target;
 
-  {
-    const KeyBinding **binding = bsearch(&target, table->sortedKeyBindings, table->keyBindingCount, sizeof(*table->sortedKeyBindings), searchKeyBinding);
-    if (binding) return *binding;
+    target.keys.set = set;
+    target.keys.key = key;
+    copyKeySetMask(target.keys.modifiers, table->keys.mask);
+
+    {
+      const KeyBinding **binding = bsearch(&target, ctx->sortedKeyBindings, ctx->keyBindingCount, sizeof(*ctx->sortedKeyBindings), searchKeyBinding);
+      if (binding) return *binding;
+    }
   }
 
   return NULL;
@@ -78,15 +84,21 @@ getCommand (KeyTable *table, unsigned char context, unsigned char set, unsigned 
 
 static int
 isModifiers (KeyTable *table, unsigned char context) {
-  const KeyBinding *binding = table->keyBindingTable;
-  unsigned int count = table->keyBindingCount;
+  while (1) {
+    KeyContext *ctx = getKeyContext(table, context);
 
-  while (count) {
-    if ((binding->context == context) || (binding->context == BRL_CTX_DEFAULT)) {
-      if (isKeySubset(binding->keys.modifiers, table->keys.mask)) return 1;
+    if (ctx) {
+      const KeyBinding *binding = ctx->keyBindingTable;
+      unsigned int count = ctx->keyBindingCount;
+
+      while (count) {
+        if (isKeySubset(binding->keys.modifiers, table->keys.mask)) return 1;
+        binding += 1, count -= 1;
+      }
     }
 
-    binding += 1, count -= 1;
+    if (context == BRL_CTX_DEFAULT) break;
+    context = BRL_CTX_DEFAULT;
   }
 
   return 0;
@@ -268,11 +280,13 @@ listContext (
   const char **title, const char *keysPrefix,
   LineHandler handleLine, void *data
 ) {
-  const KeyBinding *binding = table->keyBindingTable;
-  unsigned int count = table->keyBindingCount;
+  KeyContext *ctx = getKeyContext(table, context);
 
-  while (count) {
-    if (binding->context == context) {
+  if (ctx) {
+    const KeyBinding *binding = ctx->keyBindingTable;
+    unsigned int count = ctx->keyBindingCount;
+
+    while (count) {
       char line[0X80];
       size_t size = sizeof(line);
       unsigned int offset = 0;
@@ -311,9 +325,9 @@ listContext (
 
         if (!handleLine(line, data)) return 0;
       }
-    }
 
-    binding += 1, count -= 1;
+      binding += 1, count -= 1;
+    }
   }
 
   return 1;

@@ -35,12 +35,53 @@ typedef struct {
   const CommandEntry **commandTable;
   unsigned int commandCount;
 
-  KeyBinding *keyBindingTable;
-  unsigned int keyBindingsSize;
-  unsigned int keyBindingCount;
+  KeyContext *keyContextTable;
+  unsigned int keyContextCount;
 
   unsigned char context;
 } KeyTableData;
+
+static KeyContext *
+getKeyContext (KeyTableData *ktd, unsigned char context) {
+  if (context >= ktd->keyContextCount) {
+    unsigned int newCount = context + 1;
+    KeyContext *newTable = realloc(ktd->keyContextTable, ARRAY_SIZE(newTable, newCount));
+
+    if (!newTable) {
+      LogError("realloc");
+      return NULL;
+    }
+    ktd->keyContextTable = newTable;
+
+    while (ktd->keyContextCount < newCount) {
+      KeyContext *ctx = &ktd->keyContextTable[ktd->keyContextCount++];
+
+      ctx->keyBindingTable = NULL;
+      ctx->keyBindingsSize = 0;
+      ctx->keyBindingCount = 0;
+      ctx->sortedKeyBindings = NULL;
+    }
+  }
+
+  return &ktd->keyContextTable[context];
+}
+
+static KeyContext *
+getCurrentKeyContext (KeyTableData *ktd) {
+  return getKeyContext(ktd, ktd->context);
+}
+
+static void
+destroyKeyContextTable (KeyContext *table, unsigned int count) {
+  while (count) {
+    KeyContext *ctx = &table[--count];
+
+    if (ctx->keyBindingTable) free(ctx->keyBindingTable);
+    if (ctx->sortedKeyBindings) free(ctx->sortedKeyBindings);
+  }
+
+  if (table) free(table);
+}
 
 static int
 compareToName (const wchar_t *location1, int length1, const char *location2) {
@@ -244,32 +285,35 @@ getCommandOperand (DataFile *file, int *value, KeyTableData *ktd) {
 static int
 processBindOperands (DataFile *file, void *data) {
   KeyTableData *ktd = data;
-  KeyBinding *binding;
+  KeyContext *ctx = getCurrentKeyContext(ktd);
 
-  if (ktd->keyBindingCount == ktd->keyBindingsSize) {
-    unsigned int newSize = ktd->keyBindingsSize? ktd->keyBindingsSize<<1: 0X10;
-    KeyBinding *newTable = realloc(ktd->keyBindingTable, ARRAY_SIZE(newTable, newSize));
+  if (!ctx) return 0;
+
+  if (ctx->keyBindingCount == ctx->keyBindingsSize) {
+    unsigned int newSize = ctx->keyBindingsSize? ctx->keyBindingsSize<<1: 0X10;
+    KeyBinding *newTable = realloc(ctx->keyBindingTable, ARRAY_SIZE(newTable, newSize));
 
     if (!newTable) {
       LogError("realloc");
       return 0;
     }
 
-    ktd->keyBindingTable = newTable;
-    ktd->keyBindingsSize = newSize;
+    ctx->keyBindingTable = newTable;
+    ctx->keyBindingsSize = newSize;
   }
 
-  binding = &ktd->keyBindingTable[ktd->keyBindingCount];
-  memset(binding, 0, sizeof(*binding));
-  binding->context = ktd->context;
+  {
+    KeyBinding *binding = &ctx->keyBindingTable[ctx->keyBindingCount];
+    memset(binding, 0, sizeof(*binding));
 
-  if (getKeysOperand(file, &binding->keys, ktd)) {
-    if (getCommandOperand(file, &binding->command, ktd)) {
-      if (!binding->keys.set)
-        if (getCommandEntry(binding->command)->isCharacter)
-          binding->command |= BRL_MSK_ARG;
+    if (getKeysOperand(file, &binding->keys, ktd)) {
+      if (getCommandOperand(file, &binding->command, ktd)) {
+        if (!binding->keys.set)
+          if (getCommandEntry(binding->command)->isCharacter)
+            binding->command |= BRL_MSK_ARG;
 
-      ktd->keyBindingCount += 1;
+        ctx->keyBindingCount += 1;
+      }
     }
   }
 
@@ -411,52 +455,56 @@ KeyTable *
 makeKeyTable (KeyTableData *ktd) {
   KeyTable *table;
 
-  if ((table = malloc(sizeof(*table)))) {
-    int keyBindingsAllocated = (table->keyBindingCount = ktd->keyBindingCount) == 0;
+  {
+    unsigned int context;
 
-    if (keyBindingsAllocated) {
-      table->keyBindingTable = NULL;
-      table->sortedKeyBindings = NULL;
-    } else {
-      if ((table->keyBindingTable = realloc(ktd->keyBindingTable, ARRAY_SIZE(table->keyBindingTable, table->keyBindingCount)))) {
-        ktd->keyBindingTable = NULL;
+    for (context=0; context<ktd->keyContextCount; context+=1) {
+      KeyContext *ctx = &ktd->keyContextTable[context];
 
-        if ((table->sortedKeyBindings = malloc(ARRAY_SIZE(table->sortedKeyBindings, table->keyBindingCount)))) {
-          {
-            KeyBinding *source = table->keyBindingTable;
-            const KeyBinding **target = table->sortedKeyBindings;
-            unsigned int count = table->keyBindingCount;
+      if (ctx->keyBindingCount < ctx->keyBindingsSize) {
+        KeyBinding *newTable = realloc(ctx->keyBindingTable, ARRAY_SIZE(newTable, ctx->keyBindingCount));
+        if (!newTable) return NULL;
 
-            while (count) {
-              *target++ = source++;
-              count -= 1;
-            }
-          }
+        ctx->keyBindingTable = newTable;
+        ctx->keyBindingsSize = ctx->keyBindingCount;
+      }
 
-          qsort(table->sortedKeyBindings, table->keyBindingCount, sizeof(*table->sortedKeyBindings), sortKeyBindings);
-          keyBindingsAllocated = 1;
-        } else {
+      if (ctx->keyBindingCount) {
+        if (!(ctx->sortedKeyBindings = malloc(ARRAY_SIZE(ctx->sortedKeyBindings, ctx->keyBindingCount)))) {
           LogError("malloc");
+          return NULL;
         }
 
-        if (!keyBindingsAllocated) free(table->keyBindingTable);
-      } else {
-        LogError("realloc");
+        {
+          KeyBinding *source = ctx->keyBindingTable;
+          const KeyBinding **target = ctx->sortedKeyBindings;
+          unsigned int count = ctx->keyBindingCount;
+
+          while (count) {
+            *target++ = source++;
+            count -= 1;
+          }
+        }
+
+        qsort(ctx->sortedKeyBindings, ctx->keyBindingCount, sizeof(*ctx->sortedKeyBindings), sortKeyBindings);
       }
     }
+  }
 
-    if (keyBindingsAllocated) {
-      table->keyNameTable = ktd->keyNameTable;
-      ktd->keyNameTable = NULL;
-      table->keyNameCount = ktd->keyNameCount;
-      ktd->keyNameCount = 0;
-      qsort(table->keyNameTable, table->keyNameCount, sizeof(*table->keyNameTable), sortKeyValues);
+  if ((table = malloc(sizeof(*table)))) {
+    table->keyNameTable = ktd->keyNameTable;
+    ktd->keyNameTable = NULL;
+    table->keyNameCount = ktd->keyNameCount;
+    ktd->keyNameCount = 0;
+    qsort(table->keyNameTable, table->keyNameCount, sizeof(*table->keyNameTable), sortKeyValues);
 
-      resetKeyTable(table);
-      return table;
-    }
+    table->keyContextTable = ktd->keyContextTable;
+    ktd->keyContextTable = NULL;
+    table->keyContextCount = ktd->keyContextCount;
+    ktd->keyContextCount = 0;
 
-    free(table);
+    resetKeyTable(table);
+    return table;
   }
 
   return NULL;
@@ -472,14 +520,13 @@ compileKeyTable (const char *name, const KeyNameEntry *const *keys) {
 
   if (allocateKeyNameTable(&ktd, keys)) {
     if (allocateCommandTable(&ktd)) {
-      ktd.keyBindingTable = NULL;
-      ktd.keyBindingsSize = 0;
-      ktd.keyBindingCount = 0;
+      ktd.keyContextTable = NULL;
+      ktd.keyContextCount = 0;
 
       if (processDataFile(name, processKeyTableLine, &ktd)) {
         table = makeKeyTable(&ktd);
 
-        if (ktd.keyBindingTable) free(ktd.keyBindingTable);
+        destroyKeyContextTable(ktd.keyContextTable, ktd.keyContextCount);
       }
 
       if (ktd.commandTable) free(ktd.commandTable);
@@ -494,8 +541,7 @@ compileKeyTable (const char *name, const KeyNameEntry *const *keys) {
 void
 destroyKeyTable (KeyTable *table) {
   if (table->keyNameTable) free(table->keyNameTable);
-  if (table->keyBindingTable) free(table->keyBindingTable);
-  if (table->sortedKeyBindings) free(table->sortedKeyBindings);
+  destroyKeyContextTable(table->keyContextTable, table->keyContextCount);
   free(table);
 }
 

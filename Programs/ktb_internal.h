@@ -33,17 +33,22 @@ typedef struct {
 
 typedef struct {
   int command;
-  unsigned char context;
   KeyCombination keys;
 } KeyBinding;
+
+typedef struct {
+  KeyBinding *keyBindingTable;
+  unsigned int keyBindingsSize;
+  unsigned int keyBindingCount;
+  const KeyBinding **sortedKeyBindings;
+} KeyContext;
 
 struct KeyTableStruct {
   const KeyNameEntry **keyNameTable;
   unsigned int keyNameCount;
 
-  KeyBinding *keyBindingTable;
-  unsigned int keyBindingCount;
-  const KeyBinding **sortedKeyBindings;
+  KeyContext *keyContextTable;
+  unsigned int keyContextCount;
 
   KeySet keys;
   unsigned char context;
