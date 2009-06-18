@@ -164,26 +164,29 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
 
       if (command == EOF) {
         if (isModifiers(table, context)) state = KTS_MODIFIERS;
-        goto release;
-      }
 
-      if (command != table->command) {
-        table->command = command;
+        if (table->command != EOF) {
+          table->command = EOF;
+          processCommand(table, (command = BRL_CMD_NOOP));
+        }
+      } else {
+        if (command != table->command) {
+          table->command = command;
 
-        if ((table->immediate = immediate)) {
-          command |= BRL_FLG_REPEAT_INITIAL | BRL_FLG_REPEAT_DELAY;
+          if ((table->immediate = immediate)) {
+            command |= BRL_FLG_REPEAT_INITIAL | BRL_FLG_REPEAT_DELAY;
+          } else {
+            command |= BRL_FLG_REPEAT_DELAY;
+          }
+
+          processCommand(table, command);
         } else {
-          command |= BRL_FLG_REPEAT_DELAY;
+          command = EOF;
         }
 
-        processCommand(table, command);
-      } else {
-        command = EOF;
+        state = KTS_COMMAND;
       }
-
-      state = KTS_COMMAND;
     } else {
-    release:
       if (table->command != EOF) {
         if (table->immediate) {
           command = BRL_CMD_NOOP;
