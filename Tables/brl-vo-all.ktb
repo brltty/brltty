@@ -159,8 +159,15 @@ bind Up+RoutingKey SWITCHVT
 
 context menu
 
-bind Down MENU_PREV_SETTING
-bind Up MENU_NEXT_SETTING
+bind Left MENU_PREV_ITEM
+bind Right MENU_NEXT_ITEM
+
+bind Up MENU_PREV_SETTING
+bind Down MENU_NEXT_SETTING
+
+bind Right+Up MENU_FIRST_ITEM
+bind Right+Down MENU_LAST_ITEM
+
 bind Left+Right PREFMENU
 bind Left+Up PREFLOAD
 bind Left+Down PREFSAVE
