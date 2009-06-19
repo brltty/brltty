@@ -123,10 +123,11 @@ getInputCommand (KeyTable *table, unsigned char context) {
 
   if (chords && space) {
     command |= BRL_DOTC;
-    space = 0;
+  } else if (!(command & BRL_MSK_ARG) == !space) {
+    return EOF;
   }
 
-  return (!(command & BRL_MSK_ARG) != !space)? command: EOF;
+  return command;
 }
 
 static int
