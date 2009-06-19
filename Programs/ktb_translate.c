@@ -87,7 +87,7 @@ getInputCommand (KeyTable *table, unsigned char context) {
   const KeyContext *ctx;
   int chords = context == BRL_CTX_CHORDS;
   int command = BRL_BLK_PASSDOTS;
-  int spacePressed = 0;
+  int space = 0;
   unsigned int count = 0;
   KeySetMask mask;
 
@@ -109,7 +109,7 @@ getInputCommand (KeyTable *table, unsigned char context) {
           if (ifn->bit) {
             command |= ifn->bit;
           } else {
-            spacePressed = 1;
+            space = 1;
           }
 
           BITMASK_CLEAR(mask, key);
@@ -121,16 +121,12 @@ getInputCommand (KeyTable *table, unsigned char context) {
     if (count < table->keys.count) return EOF;
   }
 
-  if (command & BRL_MSK_ARG) {
-    if (spacePressed) {
-      if (!chords) return EOF;
-      command |= BRL_DOTC;
-    }
-  } else if (!spacePressed) {
-    return EOF;
+  if (chords && space) {
+    command |= BRL_DOTC;
+    space = 0;
   }
 
-  return command;
+  return (!(command & BRL_MSK_ARG) != !space)? command: EOF;
 }
 
 static int
