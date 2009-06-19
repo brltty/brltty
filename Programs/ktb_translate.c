@@ -83,6 +83,57 @@ getCommand (KeyTable *table, unsigned char context, unsigned char set, unsigned 
 }
 
 static int
+getInputCommand (KeyTable *table, unsigned char context) {
+  int command = BRL_BLK_PASSDOTS;
+  int dotPressed = 0;
+  int spacePressed = 0;
+  unsigned int count = 0;
+  KeySetMask mask;
+
+  copyKeySetMask(mask, table->keys.mask);
+
+  {
+    const KeyContext *ctx1 = getKeyContext(table, context);
+    const KeyContext *ctx2 = getKeyContext(table, BRL_CTX_DEFAULT);
+    unsigned char function;
+
+    for (function=0; function<InputFunctionCount; function+=1) {
+      unsigned char key = ctx1? ctx1->inputKeys[function]: 0;
+      if (!key && ctx2) key = ctx2->inputKeys[function];
+
+      if (key) {
+        if (BITMASK_TEST(mask, key)) {
+          const InputFunctionEntry *ifn = &inputFunctionTable[function];
+
+          BITMASK_CLEAR(mask, key);
+          count += 1;
+
+          if (ifn->bit) {
+            command |= ifn->bit;
+            if (ifn->bit & BRL_MSK_ARG) dotPressed = 1;
+          } else {
+            spacePressed = 1;
+          }
+        }
+      }
+    }
+  }
+
+  if (count < table->keys.count) return EOF;
+
+  if (dotPressed) {
+    if (spacePressed) {
+      if (context != BRL_CTX_CHORDS) return EOF;
+      command |= BRL_DOTC;
+    }
+  } else if (!spacePressed) {
+    return EOF;
+  }
+
+  return command;
+}
+
+static int
 isModifiers (KeyTable *table, unsigned char context) {
   while (1) {
     KeyContext *ctx = getKeyContext(table, context);
@@ -158,8 +209,9 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
       addKey(&table->keys, key);
 
       if (command == EOF) {
-        command = getCommand(table, context, 0, 0);
         immediate = 0;
+        command = getInputCommand(table, context);
+        if (command == EOF) command = getCommand(table, context, 0, 0);
       }
 
       if (command == EOF) {

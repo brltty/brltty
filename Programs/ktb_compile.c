@@ -28,6 +28,24 @@
 #include "ktb.h"
 #include "ktb_internal.h"
 
+const InputFunctionEntry inputFunctionTable[InputFunctionCount] = {
+  [IFN_Space] = {.name="Space", .bit=0},
+
+  [IFN_Dot1] = {.name="Dot1", .bit=BRL_DOT1},
+  [IFN_Dot2] = {.name="Dot2", .bit=BRL_DOT2},
+  [IFN_Dot3] = {.name="Dot3", .bit=BRL_DOT3},
+  [IFN_Dot4] = {.name="Dot4", .bit=BRL_DOT4},
+  [IFN_Dot5] = {.name="Dot5", .bit=BRL_DOT5},
+  [IFN_Dot6] = {.name="Dot6", .bit=BRL_DOT6},
+  [IFN_Dot7] = {.name="Dot7", .bit=BRL_DOT7},
+  [IFN_Dot8] = {.name="Dot8", .bit=BRL_DOT8},
+
+  [IFN_Shift] = {.name="Shift", .bit=BRL_FLG_CHAR_SHIFT},
+  [IFN_Upper] = {.name="Upper", .bit=BRL_FLG_CHAR_UPPER},
+  [IFN_Control] = {.name="Control", .bit=BRL_FLG_CHAR_CONTROL},
+  [IFN_Meta] = {.name="Meta", .bit=BRL_FLG_CHAR_META}
+};
+
 typedef struct {
   const KeyNameEntry **keyNameTable;
   unsigned int keyNameCount;
@@ -55,6 +73,7 @@ getKeyContext (KeyTableData *ktd, unsigned char context) {
 
     while (ktd->keyContextCount < newCount) {
       KeyContext *ctx = &ktd->keyContextTable[ktd->keyContextCount++];
+      memset(ctx, 0, sizeof(*ctx));
 
       ctx->keyBindingTable = NULL;
       ctx->keyBindingsSize = 0;
@@ -105,10 +124,63 @@ compareToName (const wchar_t *location1, int length1, const char *location2) {
 }
 
 static int
+sortKeyNames (const void *element1, const void *element2) {
+  const KeyNameEntry *const *kne1 = element1;
+  const KeyNameEntry *const *kne2 = element2;
+  return strcasecmp((*kne1)->name, (*kne2)->name);
+}
+
+static int
 searchKeyName (const void *target, const void *element) {
   const DataOperand *name = target;
   const KeyNameEntry *const *kne = element;
   return compareToName(name->characters, name->length, (*kne)->name);
+}
+
+static int
+sortKeyValues (const void *element1, const void *element2) {
+  const KeyNameEntry *const *kne1 = element1;
+  const KeyNameEntry *const *kne2 = element2;
+
+  if ((*kne1)->set < (*kne2)->set) return -1;
+  if ((*kne1)->set > (*kne2)->set) return 1;
+
+  if ((*kne1)->key < (*kne2)->key) return -1;
+  if ((*kne1)->key > (*kne2)->key) return 1;
+
+  return 0;
+}
+
+static int
+allocateKeyNameTable (KeyTableData *ktd, const KeyNameEntry *const *keys) {
+  {
+    const KeyNameEntry *const *knt = keys;
+
+    ktd->keyNameCount = 0;
+    while (*knt) {
+      const KeyNameEntry *kne = *knt;
+      while (kne->name) kne += 1;
+      ktd->keyNameCount += kne - *knt;
+      knt += 1;
+    }
+  }
+
+  if ((ktd->keyNameTable = malloc(ARRAY_SIZE(ktd->keyNameTable, ktd->keyNameCount)))) {
+    {
+      const KeyNameEntry **address = ktd->keyNameTable;
+      const KeyNameEntry *const *knt = keys;
+
+      while (*knt) {
+        const KeyNameEntry *kne = *knt++;
+        while (kne->name)  *address++ = kne++;
+      }
+    }
+
+    qsort(ktd->keyNameTable, ktd->keyNameCount, sizeof(*ktd->keyNameTable), sortKeyNames);
+    return 1;
+  }
+
+  return 0;
 }
 
 static int
@@ -128,6 +200,23 @@ parseKeyName (DataFile *file, unsigned char *set, unsigned char *key, const wcha
   reportDataError(file, "unknown key name: %.*" PRIws, length, characters);
   return 0;
 }
+
+static int
+getKeyOperand (DataFile *file, unsigned char *key, KeyTableData *ktd) {
+  DataOperand name;
+
+  if (getDataOperand(file, &name, "key name")) {
+    unsigned char set;
+
+    if (parseKeyName(file, &set, key, name.characters, name.length, ktd)) {
+      if (!set) return 1;
+      reportDataError(file, "invalid key name: %.*" PRIws, name.length, name.characters);
+    }
+  }
+
+  return 0;
+}
+
 
 static int
 parseKeyCombination (DataFile *file, KeyCombination *keys, const wchar_t *characters, int length, KeyTableData *ktd) {
@@ -205,10 +294,112 @@ getKeysOperand (DataFile *file, KeyCombination *key, KeyTableData *ktd) {
 }
 
 static int
+sortInputFunctionNames (const void *element1, const void *element2) {
+  const InputFunctionEntry *const *ifn1 = element1;
+  const InputFunctionEntry *const *ifn2 = element2;
+  return strcasecmp((*ifn1)->name, (*ifn2)->name);
+}
+
+static int
+searchInputFunctionName (const void *target, const void *element) {
+  const DataOperand *name = target;
+  const InputFunctionEntry *const *ifn = element;
+  return compareToName(name->characters, name->length, (*ifn)->name);
+}
+
+static int
+parseInputFunctionName (DataFile *file, unsigned char *function, const wchar_t *characters, int length, KeyTableData *ktd) {
+  static const InputFunctionEntry **sortedInputFunctions = NULL;
+
+  if (!sortedInputFunctions) {
+    const InputFunctionEntry **newTable = malloc(ARRAY_SIZE(newTable, InputFunctionCount));
+
+    if (!newTable) {
+      LogError("malloc");
+      return 0;
+    }
+
+    {
+      const InputFunctionEntry *source = inputFunctionTable;
+      const InputFunctionEntry **target = newTable;
+      unsigned int count = InputFunctionCount;
+
+      do {
+        *target++ = source++;
+      } while (--count);
+
+      qsort(newTable, InputFunctionCount, sizeof(*newTable), sortInputFunctionNames);
+    }
+
+    sortedInputFunctions = newTable;
+  }
+
+  {
+    const DataOperand name = {
+      .characters = characters,
+      .length = length
+    };
+    const InputFunctionEntry **ifn = bsearch(&name, sortedInputFunctions, InputFunctionCount, sizeof(*sortedInputFunctions), searchInputFunctionName);
+
+    if (ifn) {
+      *function = *ifn - inputFunctionTable;
+      return 1;
+    }
+  }
+
+  reportDataError(file, "unknown input function name: %.*" PRIws, length, characters);
+  return 0;
+}
+
+static int
+getInputFunctionOperand (DataFile *file, unsigned char *function, KeyTableData *ktd) {
+  DataOperand name;
+
+  if (getDataOperand(file, &name, "input key name")) {
+    if (parseInputFunctionName(file, function, name.characters, name.length, ktd)) return 1;
+  }
+
+  return 0;
+}
+
+static int
+sortCommandNames (const void *element1, const void *element2) {
+  const CommandEntry *const *cmd1 = element1;
+  const CommandEntry *const *cmd2 = element2;
+  return strcasecmp((*cmd1)->name, (*cmd2)->name);
+}
+
+static int
 searchCommandName (const void *target, const void *element) {
   const DataOperand *name = target;
-  const CommandEntry *const *command = element;
-  return compareToName(name->characters, name->length, (*command)->name);
+  const CommandEntry *const *cmd = element;
+  return compareToName(name->characters, name->length, (*cmd)->name);
+}
+
+static int
+allocateCommandTable (KeyTableData *ktd) {
+  {
+    const CommandEntry *command = commandTable;
+
+    ktd->commandCount = 0;
+    while (command->name) {
+      ktd->commandCount += 1;
+      command += 1;
+    }
+  }
+
+  if ((ktd->commandTable = malloc(ktd->commandCount * sizeof(*ktd->commandTable)))) {
+    {
+      const CommandEntry *command = commandTable;
+      const CommandEntry **address = ktd->commandTable;
+      while (command->name) *address++ = command++;
+    }
+
+    qsort(ktd->commandTable, ktd->commandCount, sizeof(*ktd->commandTable), sortCommandNames);
+    return 1;
+  }
+
+  return 0;
 }
 
 static int
@@ -347,101 +538,39 @@ processContextOperands (DataFile *file, void *data) {
 }
 
 static int
+processInputOperands (DataFile *file, void *data) {
+  KeyTableData *ktd = data;
+  KeyContext *ctx = getCurrentKeyContext(ktd);
+
+  if (!ctx) return 0;
+
+  {
+    unsigned char function;
+
+    if (getInputFunctionOperand(file, &function, ktd)) {
+      unsigned char key;
+
+      if (getKeyOperand(file, &key, ktd)) {
+        ctx->inputKeys[function] = key;
+        return 1;
+      }
+    }
+  }
+
+  return 1;
+}
+
+static int
 processKeyTableLine (DataFile *file, void *data) {
   static const DataProperty properties[] = {
     {.name=WS_C("bind"), .processor=processBindOperands},
     {.name=WS_C("context"), .processor=processContextOperands},
     {.name=WS_C("include"), .processor=processIncludeOperands},
+    {.name=WS_C("input"), .processor=processInputOperands},
     {.name=NULL, .processor=NULL}
   };
 
   return processPropertyOperand(file, properties, "key table directive", data);
-}
-
-static int
-sortKeyNames (const void *element1, const void *element2) {
-  const KeyNameEntry *const *kne1 = element1;
-  const KeyNameEntry *const *kne2 = element2;
-  return strcasecmp((*kne1)->name, (*kne2)->name);
-}
-
-static int
-sortKeyValues (const void *element1, const void *element2) {
-  const KeyNameEntry *const *kne1 = element1;
-  const KeyNameEntry *const *kne2 = element2;
-
-  if ((*kne1)->set < (*kne2)->set) return -1;
-  if ((*kne1)->set > (*kne2)->set) return 1;
-
-  if ((*kne1)->key < (*kne2)->key) return -1;
-  if ((*kne1)->key > (*kne2)->key) return 1;
-
-  return 0;
-}
-
-static int
-allocateKeyNameTable (KeyTableData *ktd, const KeyNameEntry *const *keys) {
-  {
-    const KeyNameEntry *const *knt = keys;
-
-    ktd->keyNameCount = 0;
-    while (*knt) {
-      const KeyNameEntry *kne = *knt;
-      while (kne->name) kne += 1;
-      ktd->keyNameCount += kne - *knt;
-      knt += 1;
-    }
-  }
-
-  if ((ktd->keyNameTable = malloc(ARRAY_SIZE(ktd->keyNameTable, ktd->keyNameCount)))) {
-    {
-      const KeyNameEntry **address = ktd->keyNameTable;
-      const KeyNameEntry *const *knt = keys;
-
-      while (*knt) {
-        const KeyNameEntry *kne = *knt++;
-        while (kne->name)  *address++ = kne++;
-      }
-    }
-
-    qsort(ktd->keyNameTable, ktd->keyNameCount, sizeof(*ktd->keyNameTable), sortKeyNames);
-    return 1;
-  }
-
-  return 0;
-}
-
-static int
-sortCommandNames (const void *element1, const void *element2) {
-  const CommandEntry *const *command1 = element1;
-  const CommandEntry *const *command2 = element2;
-  return strcasecmp((*command1)->name, (*command2)->name);
-}
-
-static int
-allocateCommandTable (KeyTableData *ktd) {
-  {
-    const CommandEntry *command = commandTable;
-
-    ktd->commandCount = 0;
-    while (command->name) {
-      ktd->commandCount += 1;
-      command += 1;
-    }
-  }
-
-  if ((ktd->commandTable = malloc(ktd->commandCount * sizeof(*ktd->commandTable)))) {
-    {
-      const CommandEntry *command = commandTable;
-      const CommandEntry **address = ktd->commandTable;
-      while (command->name) *address++ = command++;
-    }
-
-    qsort(ktd->commandTable, ktd->commandCount, sizeof(*ktd->commandTable), sortCommandNames);
-    return 1;
-  }
-
-  return 0;
 }
 
 static int

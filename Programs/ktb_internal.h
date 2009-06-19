@@ -25,6 +25,33 @@ extern "C" {
 
 #include "keysets.h"
 
+typedef enum {
+  IFN_Space,
+
+  IFN_Dot1,
+  IFN_Dot2,
+  IFN_Dot3,
+  IFN_Dot4,
+  IFN_Dot5,
+  IFN_Dot6,
+  IFN_Dot7,
+  IFN_Dot8,
+
+  IFN_Shift,
+  IFN_Upper,
+  IFN_Control,
+  IFN_Meta,
+
+  InputFunctionCount
+} InputFunction;
+
+typedef struct {
+  const char *name;
+  int bit;
+} InputFunctionEntry;
+
+extern const InputFunctionEntry inputFunctionTable[InputFunctionCount];
+
 typedef struct {
   KeySetMask modifiers;
   unsigned char set;
@@ -41,6 +68,8 @@ typedef struct {
   unsigned int keyBindingsSize;
   unsigned int keyBindingCount;
   const KeyBinding **sortedKeyBindings;
+
+  unsigned char inputKeys[InputFunctionCount];
 } KeyContext;
 
 struct KeyTableStruct {
