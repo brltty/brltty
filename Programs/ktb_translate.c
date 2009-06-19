@@ -170,8 +170,9 @@ processCommand (KeyTable *table, int command) {
 
   switch (blk) {
     case BRL_BLK_CONTEXT:
-      table->context = BRL_CTX_DEFAULT + arg;
-      return 1;
+      if (!BRL_DELAYED_COMMAND(command)) table->context = BRL_CTX_DEFAULT + arg;
+      command = BRL_CMD_NOOP;
+      break;
 
     default:
       break;
