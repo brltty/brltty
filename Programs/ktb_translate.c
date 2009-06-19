@@ -324,7 +324,6 @@ formatKeyCombination (KeyTable *table, const KeyCombination *keys, char *buffer,
 
   if (keys->set || keys->key) {
     if (delimiter && size) *buffer++ = delimiter, size -= 1;
-    if (size) *buffer++ = '!', size -= 1;
     snprintf(buffer, size, "%s%n", getKeyName(table, keys->set, keys->key), &length);
     buffer += length, size -= length;
   }
