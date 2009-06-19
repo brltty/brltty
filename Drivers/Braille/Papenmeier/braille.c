@@ -176,7 +176,7 @@ handleCommand (BrailleDisplay *brl, int cmd, int repeat) {
     cmd |= rescaleInteger(arg, terminal->statusCount-1, BRL_MSK_ARG);
   }
 
-  if (!IS_DELAYED_COMMAND(repeat)) {
+  if (!BRL_DELAYED_COMMAND(repeat)) {
     switch (cmd) {
       case BRL_CMD_INPUT | BRL_FLG_TOGGLE_ON:
         inputMode = 1;

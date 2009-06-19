@@ -190,7 +190,7 @@ typedef enum {
 #define BRL_FLG_REPEAT_INITIAL 0X800000 /* execute command on key press */
 #define BRL_FLG_REPEAT_DELAY   0X400000 /* wait before repeating */
 #define BRL_FLG_REPEAT_MASK    (BRL_FLG_REPEAT_INITIAL | BRL_FLG_REPEAT_DELAY) /* mask for all repeat flags */
-#define IS_DELAYED_COMMAND(cmd) (((cmd) & BRL_FLG_REPEAT_DELAY) && !((cmd) & BRL_FLG_REPEAT_INITIAL))
+#define BRL_DELAYED_COMMAND(cmd) (((cmd) & BRL_FLG_REPEAT_DELAY) && !((cmd) & BRL_FLG_REPEAT_INITIAL))
   
 /* cursor routing keys block offset values */
 /*

@@ -318,7 +318,7 @@ learnMode (BrailleDisplay *brl, int poll, int timeout) {
     int command = readBrailleCommand(brl, BRL_CTX_DEFAULT);
     if (command != EOF) {
       LogPrint(LOG_DEBUG, "Learn: command=%06X", command);
-      if (IS_DELAYED_COMMAND(command)) continue;
+      if (BRL_DELAYED_COMMAND(command)) continue;
 
       {
         int cmd = command & BRL_MSK_CMD;

@@ -278,7 +278,7 @@ handleRepeatFlags (int *command, RepeatState *state, int panning, int delay, int
               if (panning) break;
 
             default:
-              if (IS_DELAYED_COMMAND(flags)) *command = BRL_CMD_NOOP;
+              if (BRL_DELAYED_COMMAND(flags)) *command = BRL_CMD_NOOP;
               flags = 0;
 
             case BRL_CMD_LNUP:
@@ -336,7 +336,7 @@ handleRepeatFlags (int *command, RepeatState *state, int panning, int delay, int
       }     
     }
   } else if (*command != EOF) {
-    if (IS_DELAYED_COMMAND(*command)) {
+    if (BRL_DELAYED_COMMAND(*command)) {
       *command = BRL_CMD_NOOP;
     } else {
       *command &= ~BRL_FLG_REPEAT_MASK;
