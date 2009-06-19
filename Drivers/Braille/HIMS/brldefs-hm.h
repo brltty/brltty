@@ -37,8 +37,8 @@ typedef enum {
   HM_KEY_BS_F2 = 11,
   HM_KEY_BS_F3 = 12,
   HM_KEY_BS_F4 = 13,
-  HM_KEY_BS_ScrollLeft = 14,
-  HM_KEY_BS_ScrollRight = 15,
+  HM_KEY_BS_Backward = 14,
+  HM_KEY_BS_Forward = 15,
 
   /* SyncBraille keys */
   HM_KEY_SB_LeftUp = 13,

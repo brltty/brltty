@@ -41,9 +41,9 @@ bind F4 HOME
 bind F1+F4 BACK
 bind F2+F3 CSRJMP_VERT
 
-bind ScrollLeft FWINLT
-bind ScrollRight FWINRT
-bind ScrollLeft+ScrollRight LNBEG
+bind Backward FWINLT
+bind Forward FWINRT
+bind Backward+Forward LNBEG
 
 bind F2 LNUP
 bind F3 LNDN
@@ -51,23 +51,23 @@ bind F3 LNDN
 bind F1+F2 FWINLTSKIP
 bind F3+F4 FWINRTSKIP
 
-bind F1+ScrollLeft PRPROMPT
-bind F1+ScrollRight NXPROMPT
+bind F1+Backward PRPROMPT
+bind F1+Forward NXPROMPT
 
-bind F2+ScrollLeft PRDIFLN
-bind F2+ScrollRight NXDIFLN
+bind F2+Backward PRDIFLN
+bind F2+Forward NXDIFLN
 
-bind F3+ScrollLeft ATTRUP
-bind F3+ScrollRight ATTRDN
+bind F3+Backward ATTRUP
+bind F3+Forward ATTRDN
 
-bind F4+ScrollLeft PRPGRPH
-bind F4+ScrollRight NXPGRPH
+bind F4+Backward PRPGRPH
+bind F4+Forward NXPGRPH
 
-bind F1+F2+ScrollLeft TOP_LEFT
-bind F1+F2+ScrollRight BOT_LEFT
+bind F1+F2+Backward TOP_LEFT
+bind F1+F2+Forward BOT_LEFT
 
-bind F3+F4+ScrollLeft CHRLT
-bind F3+F4+ScrollRight CHRRT
+bind F3+F4+Backward CHRLT
+bind F3+F4+Forward CHRRT
 
 bind F1+F3+F4 CONTEXT+1 # RoutingKey -> CUTBEGIN
 bind F2+F3+F4 CONTEXT+2 # RoutingKey -> CUTAPPEND

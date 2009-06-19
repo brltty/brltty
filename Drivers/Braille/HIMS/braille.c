@@ -231,8 +231,8 @@ static KEY_NAME_TABLE(keyNames_brailleSense) = {
   KEY_NAME_ENTRY(HM_KEY_BS_F3, "F3"),
   KEY_NAME_ENTRY(HM_KEY_BS_F4, "F4"),
 
-  KEY_NAME_ENTRY(HM_KEY_BS_ScrollLeft, "ScrollLeft"),
-  KEY_NAME_ENTRY(HM_KEY_BS_ScrollRight, "ScrollRight"),
+  KEY_NAME_ENTRY(HM_KEY_BS_Backward, "Backward"),
+  KEY_NAME_ENTRY(HM_KEY_BS_Forward, "Forward"),
 
   LAST_KEY_NAME_ENTRY
 };
