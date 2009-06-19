@@ -129,6 +129,22 @@ bind Space+Dot2+Dot5+Dot6 KEY_DELETE
 bind Space+Dot2+Dot3+Dot5+Dot6 CONTEXT+8 # RoutingKey -> KEY_FUNCTION
 
 
+#################
+# Menu Bindings #
+#################
+
+context menu
+
+bind F2 MENU_PREV_ITEM
+bind F3 MENU_NEXT_ITEM
+
+bind Backward MENU_PREV_SETTING
+bind Forward MENU_NEXT_SETTING
+
+bind F1+F2 MENU_FIRST_ITEM
+bind F3+F4 MENU_LAST_ITEM
+
+
 ############################
 # Routing Key Alternatives #
 ############################
