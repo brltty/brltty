@@ -84,46 +84,46 @@ getCommand (KeyTable *table, unsigned char context, unsigned char set, unsigned 
 
 static int
 getInputCommand (KeyTable *table, unsigned char context) {
+  const KeyContext *ctx;
+  int chords = context == BRL_CTX_CHORDS;
   int command = BRL_BLK_PASSDOTS;
-  int dotPressed = 0;
   int spacePressed = 0;
   unsigned int count = 0;
   KeySetMask mask;
 
+  if (chords) context = BRL_CTX_DEFAULT;
+  ctx = getKeyContext(table, context);
+  if (!ctx) return EOF;
   copyKeySetMask(mask, table->keys.mask);
 
   {
-    const KeyContext *ctx1 = getKeyContext(table, context);
-    const KeyContext *ctx2 = getKeyContext(table, BRL_CTX_DEFAULT);
     unsigned char function;
 
     for (function=0; function<InputFunctionCount; function+=1) {
-      unsigned char key = ctx1? ctx1->inputKeys[function]: 0;
-      if (!key && ctx2) key = ctx2->inputKeys[function];
+      unsigned char key = ctx->inputKeys[function];
 
       if (key) {
         if (BITMASK_TEST(mask, key)) {
           const InputFunctionEntry *ifn = &inputFunctionTable[function];
 
-          BITMASK_CLEAR(mask, key);
-          count += 1;
-
           if (ifn->bit) {
             command |= ifn->bit;
-            if (ifn->bit & BRL_MSK_ARG) dotPressed = 1;
           } else {
             spacePressed = 1;
           }
+
+          BITMASK_CLEAR(mask, key);
+          if ((count += 1) == table->keys.count) break;
         }
       }
     }
+
+    if (count < table->keys.count) return EOF;
   }
 
-  if (count < table->keys.count) return EOF;
-
-  if (dotPressed) {
+  if (command & BRL_MSK_ARG) {
     if (spacePressed) {
-      if (context != BRL_CTX_CHORDS) return EOF;
+      if (!chords) return EOF;
       command |= BRL_DOTC;
     }
   } else if (!spacePressed) {
