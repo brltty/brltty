@@ -21,6 +21,7 @@
 #include <string.h>
 
 #include "misc.h"
+#include "charset.h"
 #include "ktb.h"
 #include "ktb_internal.h"
 #include "cmd.h"
@@ -327,10 +328,29 @@ formatKeyCombination (KeyTable *table, const KeyCombination *keys, char *buffer,
 }
 
 static int
+addUtf8Line (const char *line, KeyTableHelpLineHandler handleLine, void *data) {
+  const char *utf8 = line;
+  wchar_t buffer[strlen(utf8) + 1];
+  wchar_t *target = buffer;
+
+  while (*utf8) {
+    size_t utfs;
+    wint_t character = convertUtf8ToWchar(&utf8, &utfs);
+
+    if (character == WEOF) character = WC_C('?');
+    *target++ = character;
+  }
+  *target = 0;
+
+  return handleLine(buffer, data);
+  return 1;
+}
+
+static int
 listContext (
   KeyTable *table, unsigned char context,
   const char **title, const char *keysPrefix,
-  LineHandler handleLine, void *data
+  KeyTableHelpLineHandler handleLine, void *data
 ) {
   KeyContext *ctx = getKeyContext(table, context);
 
@@ -371,11 +391,12 @@ listContext (
         if (!listContext(table, context, title, &line[keysOffset], handleLine, data)) return 0;
       } else {
         if (*title) {
-          if (!handleLine((char *)*title, data)) return 0;
+          if (!addUtf8Line("", handleLine, data)) return 0;
+          if (!addUtf8Line(*title, handleLine, data)) return 0;
           *title = NULL;
         }
 
-        if (!handleLine(line, data)) return 0;
+        if (!addUtf8Line(line, handleLine, data)) return 0;
       }
 
       binding += 1, count -= 1;
@@ -386,13 +407,13 @@ listContext (
 }
 
 int
-listKeyBindings (KeyTable *table, LineHandler handleLine, void *data) {
+listKeyBindings (KeyTable *table, KeyTableHelpLineHandler handleLine, void *data) {
   typedef struct {
-    const char *title;
     unsigned char context;
-  } ContextEntry;
+    const char *title;
+  } SectionEntry;
 
-  static const ContextEntry contextTable[] = {
+  static const SectionEntry sectionTable[] = {
     { .context=BRL_CTX_DEFAULT,
       .title = "Default Bindings"
     }
@@ -403,13 +424,17 @@ listKeyBindings (KeyTable *table, LineHandler handleLine, void *data) {
     ,
     { .title = NULL }
   };
-  const ContextEntry *ctx = contextTable;
+  const SectionEntry *section = sectionTable;
 
-  while (ctx->title) {
-    const char *title = ctx->title;
+  if (table->title)
+    if (!handleLine(table->title, data))
+      return 0;
 
-    if (!listContext(table, ctx->context, &title, NULL, handleLine, data)) return 0;
-    ctx += 1;
+  while (section->title) {
+    const char *title = section->title;
+
+    if (!listContext(table, section->context, &title, NULL, handleLine, data)) return 0;
+    section += 1;
   }
 
   return 1;

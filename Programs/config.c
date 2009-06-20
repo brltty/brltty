@@ -2038,7 +2038,12 @@ exitMenu:
 }
 
 static int
-handleHelpLine (char *line, void *data) {
+handleWcharHelpLine (wchar_t *line, void *data) {
+  return addHelpLine(line);
+}
+
+static int
+handleUtf8HelpLine (char *line, void *data) {
   const char *utf8 = line;
   wchar_t buffer[strlen(utf8) + 1];
   wchar_t *target = buffer;
@@ -2052,7 +2057,7 @@ handleHelpLine (char *line, void *data) {
   }
   *target = 0;
 
-  return addHelpLine(buffer);
+  return handleWcharHelpLine(buffer, data);
 }
 
 static int
@@ -2061,7 +2066,7 @@ loadHelpFile (const char *file) {
   FILE *stream;
 
   if ((stream = openDataFile(file, "r", 0))) {
-    if (processLines(stream, handleHelpLine, NULL)) loaded = 1;
+    if (processLines(stream, handleUtf8HelpLine, NULL)) loaded = 1;
 
     fclose(stream);
   }
@@ -2212,7 +2217,7 @@ initializeBrailleDriver (const char *code, int verify) {
                 LogPrint(LOG_INFO, "%s: %s", gettext("Key Table"), path);
 
                 if (constructHelpScreen()) {
-                  listKeyBindings(brl.keyTable, handleHelpLine, NULL);
+                  listKeyBindings(brl.keyTable, handleWcharHelpLine, NULL);
                 }
               } else {
                 LogPrint(LOG_WARNING, "%s: %s", gettext("cannot open key table"), path);
