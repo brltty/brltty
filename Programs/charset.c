@@ -404,6 +404,20 @@ truncated:
   return WEOF;
 }
 
+void
+convertStringToWchars (const char **utf8, wchar_t **characters, size_t count) {
+  while (**utf8 && (count > 1)) {
+    size_t utfs = UTF8_LEN_MAX;
+    wint_t character = convertUtf8ToWchar(utf8, &utfs);
+
+    if (character == WEOF) break;
+    *(*characters)++ = character;
+    count -= 1;
+  }
+
+  if (count) **characters = 0;
+}
+
 size_t
 convertCharToUtf8 (char c, Utf8Buffer utf8) {
   wint_t wc = convertCharToWchar(c);

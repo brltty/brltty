@@ -470,27 +470,20 @@ processWcharLine (DataFile *file, const wchar_t *line) {
 static int
 processUtf8Line (char *line, void *dataAddress) {
   DataFile *file = dataAddress;
-  size_t length = strlen(line);
+  size_t size = strlen(line) + 1;
   const char *byte = line;
-  wchar_t characters[length+1];
+  wchar_t characters[size];
   wchar_t *character = characters;
 
   file->line += 1;
+  convertStringToWchars(&byte, &character, size);
 
-  while (length) {
-    const char *start = byte;
-    wint_t wc = convertUtf8ToWchar(&byte, &length);
-
-    if (wc == WEOF) {
-      unsigned int offset = start - line;
-      reportDataError(file, "illegal UTF-8 character at offset %u", offset);
-      return 1;
-    }
-
-    *character++ = wc;
+  if (*byte) {
+    unsigned int offset = byte - line;
+    reportDataError(file, "illegal UTF-8 character at offset %u", offset);
+    return 1;
   }
 
-  *character = 0;
   return processWcharLine(file, characters);
 }
 

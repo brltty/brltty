@@ -2045,18 +2045,11 @@ handleWcharHelpLine (wchar_t *line, void *data) {
 static int
 handleUtf8HelpLine (char *line, void *data) {
   const char *utf8 = line;
-  wchar_t buffer[strlen(utf8) + 1];
-  wchar_t *target = buffer;
+  size_t count = strlen(utf8) + 1;
+  wchar_t buffer[count];
+  wchar_t *characters = buffer;
 
-  while (*utf8) {
-    size_t utfs;
-    wint_t character = convertUtf8ToWchar(&utf8, &utfs);
-
-    if (character == WEOF) character = WC_C('?');
-    *target++ = character;
-  }
-  *target = 0;
-
+  convertStringToWchars(&utf8, &characters, count);
   return handleWcharHelpLine(buffer, data);
 }
 

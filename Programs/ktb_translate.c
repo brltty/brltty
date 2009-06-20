@@ -328,20 +328,12 @@ formatKeyCombination (KeyTable *table, const KeyCombination *keys, char *buffer,
 }
 
 static int
-addUtf8Line (const char *line, KeyTableHelpLineHandler handleLine, void *data) {
-  const char *utf8 = line;
-  wchar_t buffer[strlen(utf8) + 1];
-  wchar_t *target = buffer;
+addLine (const char *line, KeyTableHelpLineHandler handleLine, void *data) {
+  size_t count = strlen(line) + 1;
+  wchar_t buffer[count];
+  wchar_t *characters = buffer;
 
-  while (*utf8) {
-    size_t utfs;
-    wint_t character = convertUtf8ToWchar(&utf8, &utfs);
-
-    if (character == WEOF) character = WC_C('?');
-    *target++ = character;
-  }
-  *target = 0;
-
+  convertStringToWchars(&line, &characters, count);
   return handleLine(buffer, data);
   return 1;
 }
@@ -391,12 +383,12 @@ listContext (
         if (!listContext(table, context, title, &line[keysOffset], handleLine, data)) return 0;
       } else {
         if (*title) {
-          if (!addUtf8Line("", handleLine, data)) return 0;
-          if (!addUtf8Line(*title, handleLine, data)) return 0;
+          if (!addLine("", handleLine, data)) return 0;
+          if (!addLine(*title, handleLine, data)) return 0;
           *title = NULL;
         }
 
-        if (!addUtf8Line(line, handleLine, data)) return 0;
+        if (!addLine(line, handleLine, data)) return 0;
       }
 
       binding += 1, count -= 1;

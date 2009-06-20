@@ -40,6 +40,7 @@ extern int convertUtf8ToChar (const char **utf8, size_t *utfs);
 
 extern size_t convertWcharToUtf8 (wchar_t wc, Utf8Buffer utf8);
 extern wint_t convertUtf8ToWchar (const char **utf8, size_t *utfs);
+extern void convertStringToWchars (const char **utf8, wchar_t **characters, size_t count);
 
 extern wint_t convertCharToWchar (char c);
 extern int convertWcharToChar (wchar_t wc);
