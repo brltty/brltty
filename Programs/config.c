@@ -2210,7 +2210,7 @@ initializeBrailleDriver (const char *code, int verify) {
                 LogPrint(LOG_INFO, "%s: %s", gettext("Key Table"), path);
 
                 if (constructHelpScreen()) {
-                  listKeyBindings(brl.keyTable, handleWcharHelpLine, NULL);
+                  listKeyTable(brl.keyTable, handleWcharHelpLine, NULL);
                 }
               } else {
                 LogPrint(LOG_WARNING, "%s: %s", gettext("cannot open key table"), path);
