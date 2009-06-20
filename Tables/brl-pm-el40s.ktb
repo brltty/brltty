@@ -16,6 +16,6 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# Key Table for Papenmeier BrailleX EL40s
+title Papenmeier BrailleX EL40s
 
 include brl-pm-bar.kti 0

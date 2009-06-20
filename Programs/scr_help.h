@@ -29,7 +29,7 @@ typedef struct {
   BaseScreen base;
   int (*construct) (void);
   void (*destruct) (void);
-  int (*addLine) (const char *line);
+  int (*addLine) (const wchar_t *line);
 } HelpScreen;
 
 extern void initializeHelpScreen (HelpScreen *);

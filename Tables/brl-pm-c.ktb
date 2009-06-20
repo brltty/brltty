@@ -16,6 +16,6 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# Key Table for Papenmeier BrailleX Compact/Tiny
+title Papenmeier BrailleX Compact/Tiny
 
 include brl-pm-front9.kti 0

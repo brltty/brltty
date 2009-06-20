@@ -34,7 +34,7 @@ static HelpLineEntry *lineTable = NULL;
 static unsigned int lineCount = 0;
 
 static unsigned int lineTableSize;
-static unsigned int lineLength;
+static size_t lineLength;
 static unsigned char cursorRow, cursorColumn;
 
 static void
@@ -56,13 +56,13 @@ clearHelpScreen (void) {
 }
 
 static int
-addLine_HelpScreen (const char *line) {
+addLine_HelpScreen (const wchar_t *line) {
   if (lineCount == lineTableSize) {
     unsigned int newSize = lineTableSize? lineTableSize<<1: 0X40;
     HelpLineEntry *newTable = realloc(lineTable, ARRAY_SIZE(newTable, newSize));
 
     if (!newTable) {
-      LogError("malloc");
+      LogError("realloc");
       return 0;
     }
 
@@ -72,7 +72,7 @@ addLine_HelpScreen (const char *line) {
 
   {
     HelpLineEntry *hle = &lineTable[lineCount];
-    unsigned int length = strlen(line);
+    size_t length = wcslen(line);
     if ((hle->length = length) > lineLength) lineLength = length;
 
     if (!(hle->characters = malloc(ARRAY_SIZE(hle->characters, length)))) {
@@ -80,12 +80,7 @@ addLine_HelpScreen (const char *line) {
       return 0;
     }
 
-    {
-      int i;
-      for (i=0; i<length; i+=1) {
-        hle->characters[i] = line[i] & 0XFF;
-      }
-    }
+    wmemcpy(hle->characters, line, length);
   }
   lineCount += 1;
 

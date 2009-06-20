@@ -47,6 +47,8 @@ const InputFunctionEntry inputFunctionTable[InputFunctionCount] = {
 };
 
 typedef struct {
+  wchar_t *title;
+
   const KeyNameEntry **keyNameTable;
   unsigned int keyNameCount;
 
@@ -561,12 +563,33 @@ processInputOperands (DataFile *file, void *data) {
 }
 
 static int
+processTitleOperands (DataFile *file, void *data) {
+  KeyTableData *ktd = data;
+  DataOperand title;
+
+  if (getDataText(file, &title, "title text")) {
+    if (ktd->title) {
+      reportDataError(file, "title specified more than once");
+    } else if (!(ktd->title = malloc(ARRAY_SIZE(ktd->title, title.length+1)))) {
+      LogError("malloc");
+    } else {
+      wmemcpy(ktd->title, title.characters, title.length);
+      ktd->title[title.length] = 0;
+      return 1;
+    }
+  }
+
+  return 1;
+}
+
+static int
 processKeyTableLine (DataFile *file, void *data) {
   static const DataProperty properties[] = {
     {.name=WS_C("bind"), .processor=processBindOperands},
     {.name=WS_C("context"), .processor=processContextOperands},
     {.name=WS_C("include"), .processor=processIncludeOperands},
     {.name=WS_C("input"), .processor=processInputOperands},
+    {.name=WS_C("title"), .processor=processTitleOperands},
     {.name=NULL, .processor=NULL}
   };
 
@@ -621,6 +644,9 @@ makeKeyTable (KeyTableData *ktd) {
   }
 
   if ((table = malloc(sizeof(*table)))) {
+    table->title = ktd->title;
+    ktd->title = NULL;
+
     table->keyNameTable = ktd->keyNameTable;
     ktd->keyNameTable = NULL;
     table->keyNameCount = ktd->keyNameCount;
@@ -649,6 +675,8 @@ compileKeyTable (const char *name, const KeyNameEntry *const *keys) {
 
   if (allocateKeyNameTable(&ktd, keys)) {
     if (allocateCommandTable(&ktd)) {
+      ktd.title = NULL;
+
       ktd.keyContextTable = NULL;
       ktd.keyContextCount = 0;
 
@@ -656,6 +684,7 @@ compileKeyTable (const char *name, const KeyNameEntry *const *keys) {
         table = makeKeyTable(&ktd);
 
         destroyKeyContextTable(ktd.keyContextTable, ktd.keyContextCount);
+        if (ktd.title) free(ktd.title);
       }
 
       if (ktd.commandTable) free(ktd.commandTable);
@@ -669,6 +698,7 @@ compileKeyTable (const char *name, const KeyNameEntry *const *keys) {
 
 void
 destroyKeyTable (KeyTable *table) {
+  if (table->title) free(table->title);
   if (table->keyNameTable) free(table->keyNameTable);
   destroyKeyContextTable(table->keyContextTable, table->keyContextCount);
   free(table);

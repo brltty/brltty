@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# BRLTTY Key Table - bindings for full keyboards
+title Bindings for Full Keyboards
 
 bind KPInsert+!KP5 Say_Line
 bind KPInsert+!KPArrowUp LnUp

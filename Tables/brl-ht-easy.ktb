@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# Key Table for HandyTech Easy Braille
+title HandyTech Easy Braille
 
 bind Left FWINLT
 bind Right FWINRT

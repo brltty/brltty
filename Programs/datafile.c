@@ -185,6 +185,23 @@ getDataOperand (DataFile *file, DataOperand *operand, const char *description) {
   return 1;
 }
 
+int
+getDataText (DataFile *file, DataOperand *text, const char *description) {
+  if (!findDataOperand(file, description)) return 0;
+  file->end = file->start + wcslen(file->start);
+
+  text->characters = file->start;
+  text->length = file->end - file->start;
+
+  while (text->length) {
+    unsigned int newLength = text->length - 1;
+    if (!iswspace(text->characters[newLength])) break;
+    text->length = newLength;
+  }
+
+  return 1;
+}
+
 static int
 parseDataString (DataFile *file, DataString *string, const wchar_t *characters, int length, int noUnicode) {
   int index = 0;

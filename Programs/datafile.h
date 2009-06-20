@@ -44,7 +44,9 @@ typedef struct {
   const wchar_t *characters;
   unsigned int length;
 } DataOperand;
+
 extern int getDataOperand (DataFile *file, DataOperand *operand, const char *description);
+extern int getDataText (DataFile *file, DataOperand *text, const char *description);
 
 typedef struct {
   unsigned char length;

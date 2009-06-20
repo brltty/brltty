@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# BRLTTY Key Table - bindings for keypad-based navigation
+title Bindings for Keypad-based Navigation
 
 bind KPInsert+!KP5 Home
 bind KPInsert+!KPArrowLeft Back

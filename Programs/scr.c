@@ -375,7 +375,7 @@ destructHelpScreen (void) {
 }
 
 int
-addHelpLine (const char *line) {
+addHelpLine (const wchar_t *line) {
   return helpScreen.addLine(line);
 }
 

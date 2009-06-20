@@ -16,7 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-# Key Table for HandyTech Braille Star 80
+title HandyTech Braille Star 80
 
 include brl-ht-bs.kti
 include brl-ht-keypad.kti

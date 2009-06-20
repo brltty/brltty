@@ -73,6 +73,8 @@ typedef struct {
 } KeyContext;
 
 struct KeyTableStruct {
+  wchar_t *title;
+
   const KeyNameEntry **keyNameTable;
   unsigned int keyNameCount;
 

@@ -64,6 +64,7 @@
 #include "brltty.h"
 #include "defaults.h"
 #include "io_serial.h"
+#include "charset.h"
 
 #ifdef ENABLE_USB_SUPPORT
 #include "io_usb.h"
@@ -2038,7 +2039,20 @@ exitMenu:
 
 static int
 handleHelpLine (char *line, void *data) {
-  return addHelpLine(line);
+  const char *utf8 = line;
+  wchar_t buffer[strlen(utf8) + 1];
+  wchar_t *target = buffer;
+
+  while (*utf8) {
+    size_t utfs;
+    wint_t character = convertUtf8ToWchar(&utf8, &utfs);
+
+    if (character == WEOF) character = WC_C('?');
+    *target++ = character;
+  }
+  *target = 0;
+
+  return addHelpLine(buffer);
 }
 
 static int
