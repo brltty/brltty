@@ -213,6 +213,7 @@ always C 14
 begword cart 14-345-2345 carthorse
 word carthage 14-345-1456-1-1245-15
 midword cch 14-16
+sufword cheat 16-2-2345 Cheatham
 always chloro 16-123-135-1235-135
 sufword citron = citronella
 sufword coed 14-135-1246
@@ -415,7 +416,7 @@ always ghz = (gigahertz)
 begword givea = giveaway
 sufword gnome = gnomedb
 word go 1245
-always good 1245-145
+sufword good 1245-145
 contraction gd
 begword gos = goshawk gosherd
 word gosh 1245-135-146
@@ -509,6 +510,7 @@ contraction lr
 word like 123
 begword limea = limeade
 word lingerie 123-35-1245-12456-24-15
+word lionel =
 always little 123-123
 contraction ll
 always lord 5-123
