@@ -91,49 +91,56 @@ getCommand (KeyTable *table, unsigned char context, unsigned char set, unsigned 
 static int
 getInputCommand (KeyTable *table, unsigned char context) {
   const KeyContext *ctx;
-  int chords = context == BRL_CTX_CHORDS;
-  int command = BRL_BLK_PASSDOTS;
-  int space = 0;
-  unsigned int count = 0;
-  KeySetMask mask;
+  int chordsRequested = context == BRL_CTX_CHORDS;
+  int dotsCommand = BRL_BLK_PASSDOTS;
+  int dotPressed = 0;
+  int spacePressed = 0;
+  unsigned int keyCount = 0;
+  KeySetMask keyMask;
 
-  if (chords) context = BRL_CTX_DEFAULT;
+  if (chordsRequested) context = table->persistentContext;
   ctx = getKeyContext(table, context);
   if (!ctx) return EOF;
-  copyKeySetMask(mask, table->keys.mask);
+  copyKeySetMask(keyMask, table->keys.mask);
 
   {
+    int bitsForced = 0;
     unsigned char function;
 
     for (function=0; function<InputFunctionCount; function+=1) {
       unsigned char key = ctx->inputKeys[function];
 
       if (key) {
-        if (BITMASK_TEST(mask, key)) {
-          const InputFunctionEntry *ifn = &inputFunctionTable[function];
+        const InputFunctionEntry *ifn = &inputFunctionTable[function];
+        int keyPressed = BITMASK_TEST(keyMask, key);
 
-          if (ifn->bit) {
-            command |= ifn->bit;
-          } else {
-            space = 1;
+        if (keyPressed) {
+          if (!ifn->bit) {
+            spacePressed = 1;
+          } else if (ifn->bit & BRL_MSK_ARG) {
+            dotPressed = 1;
           }
 
-          BITMASK_CLEAR(mask, key);
-          if ((count += 1) == table->keys.count) break;
+          dotsCommand |= ifn->bit;
+          BITMASK_CLEAR(keyMask, key);
+          keyCount += 1;
+        } else if (key == BRL_MSK_ARG) {
+          bitsForced |= ifn->bit;
         }
       }
     }
 
-    if (count < table->keys.count) return EOF;
+    if (keyCount < table->keys.count) return EOF;
+    if (dotPressed) dotsCommand |= bitsForced;
   }
 
-  if (chords && space) {
-    command |= BRL_DOTC;
-  } else if (!(command & BRL_MSK_ARG) == !space) {
+  if (chordsRequested && spacePressed) {
+    dotsCommand |= BRL_DOTC;
+  } else if (dotPressed == spacePressed) {
     return EOF;
   }
 
-  return command;
+  return dotsCommand;
 }
 
 static int
@@ -353,67 +360,94 @@ addLine (const char *line, KeyTableHelpLineHandler handleLine, void *data) {
 }
 
 static int
+listSectionTitle (const wchar_t **title, KeyTableHelpLineHandler handleLine, void *data) {
+  if (*title) {
+    if (!addLine("", handleLine, data)) return 0;
+    if (!handleLine(*title, data)) return 0;
+    *title = NULL;
+  }
+
+  return 1;
+}
+
+static int
 listKeyContext (
   KeyTable *table, const KeyContext *ctx,
   const wchar_t **title, const char *keysPrefix,
   KeyTableHelpLineHandler handleLine, void *data
 ) {
-  const KeyBinding *binding = ctx->keyBindingTable;
-  unsigned int count = ctx->keyBindingCount;
+  {
+    unsigned char function;
 
-  while (count) {
-    char line[0X80];
-    size_t size = sizeof(line);
-    unsigned int offset = 0;
-    int length;
+    for (function=0; function<InputFunctionCount; function+=1) {
+      unsigned char key = ctx->inputKeys[function];
 
-    unsigned int keysOffset;
+      if (key) {
+        const InputFunctionEntry *ifn = &inputFunctionTable[function];
+        char line[0X40];
 
-    {
-      char description[0X60];
-      describeCommand(binding->command, description, sizeof(description), 0);
-      snprintf(&line[offset], size, "%s: %n", description, &length);
-      offset += length, size -= length;
+        if (!listSectionTitle(title, handleLine, data)) return 0;
+        snprintf(line, sizeof(line), "input %s: %s",
+                 ifn->name,
+                 ((key == BRL_MSK_ARG)? "On": getKeyName(table, 0, key)));
+        if (!addLine(line, handleLine, data)) return 0;
+      }
     }
+  }
 
-    keysOffset = offset;
-    if (keysPrefix) {
-      snprintf(&line[offset], size, "%s, %n", keysPrefix, &length);
-      offset += length, size -= length;
-    }
+  {
+    const KeyBinding *binding = ctx->keyBindingTable;
+    unsigned int count = ctx->keyBindingCount;
 
-    {
-      char keys[0X40];
-      formatKeyCombination(table, &binding->keys, keys, sizeof(keys));
-      snprintf(&line[offset], size, "%s%n", keys, &length);
-      offset += length, size -= length;
-    }
+    while (count) {
+      char line[0X80];
+      size_t size = sizeof(line);
+      unsigned int offset = 0;
+      int length;
 
-    if ((binding->command & BRL_MSK_BLK) == BRL_BLK_CONTEXT) {
-      const KeyContext *c = getKeyContext(table, (BRL_CTX_DEFAULT + (binding->command & BRL_MSK_ARG)));
+      unsigned int keysOffset;
 
-      if (c) {
-        if (isTemporaryKeyContext(table, c)) {
-          if (!listKeyContext(table, c, title, &line[keysOffset], handleLine, data)) return 0;
-        } else {
-          char buffer[0X80];
+      {
+        char description[0X60];
+        describeCommand(binding->command, description, sizeof(description), 0);
+        snprintf(&line[offset], size, "%s: %n", description, &length);
+        offset += length, size -= length;
+      }
 
-          snprintf(buffer, sizeof(buffer), "switch to %" PRIws ": %s",
-                   c->name, &line[keysOffset]);
-          if (!addLine(buffer, handleLine, data)) return 0;
+      keysOffset = offset;
+      if (keysPrefix) {
+        snprintf(&line[offset], size, "%s, %n", keysPrefix, &length);
+        offset += length, size -= length;
+      }
+
+      {
+        char keys[0X40];
+        formatKeyCombination(table, &binding->keys, keys, sizeof(keys));
+        snprintf(&line[offset], size, "%s%n", keys, &length);
+        offset += length, size -= length;
+      }
+
+      if ((binding->command & BRL_MSK_BLK) == BRL_BLK_CONTEXT) {
+        const KeyContext *c = getKeyContext(table, (BRL_CTX_DEFAULT + (binding->command & BRL_MSK_ARG)));
+
+        if (c) {
+          if (isTemporaryKeyContext(table, c)) {
+            if (!listKeyContext(table, c, title, &line[keysOffset], handleLine, data)) return 0;
+          } else {
+            char buffer[0X80];
+
+            snprintf(buffer, sizeof(buffer), "switch to %" PRIws ": %s",
+                     c->name, &line[keysOffset]);
+            if (!addLine(buffer, handleLine, data)) return 0;
+          }
         }
-      }
-    } else {
-      if (*title) {
-        if (!addLine("", handleLine, data)) return 0;
-        if (!handleLine(*title, data)) return 0;
-        *title = NULL;
+      } else {
+        if (!listSectionTitle(title, handleLine, data)) return 0;
+        if (!addLine(line, handleLine, data)) return 0;
       }
 
-      if (!addLine(line, handleLine, data)) return 0;
+      binding += 1, count -= 1;
     }
-
-    binding += 1, count -= 1;
   }
 
   return 1;

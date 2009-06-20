@@ -255,23 +255,6 @@ parseKeyName (DataFile *file, unsigned char *set, unsigned char *key, const wcha
 }
 
 static int
-getKeyOperand (DataFile *file, unsigned char *key, KeyTableData *ktd) {
-  DataOperand name;
-
-  if (getDataOperand(file, &name, "key name")) {
-    unsigned char set;
-
-    if (parseKeyName(file, &set, key, name.characters, name.length, ktd)) {
-      if (!set) return 1;
-      reportDataError(file, "invalid key name: %.*" PRIws, name.length, name.characters);
-    }
-  }
-
-  return 0;
-}
-
-
-static int
 parseKeyCombination (DataFile *file, KeyCombination *keys, const wchar_t *characters, int length, KeyTableData *ktd) {
   int immediate;
 
@@ -341,6 +324,27 @@ getKeysOperand (DataFile *file, KeyCombination *key, KeyTableData *ktd) {
 
   if (getDataOperand(file, &names, "key combination")) {
     if (parseKeyCombination(file, key, names.characters, names.length, ktd)) return 1;
+  }
+
+  return 0;
+}
+
+static int
+getInputKeyOperand (DataFile *file, unsigned char *key, KeyTableData *ktd) {
+  DataOperand name;
+
+  if (getDataOperand(file, &name, "input key name")) {
+    unsigned char set;
+
+    if (isKeyword(WS_C("on"), name.characters, name.length)) {
+      *key = BRL_MSK_ARG;
+      return 1;
+    }
+
+    if (parseKeyName(file, &set, key, name.characters, name.length, ktd)) {
+      if (!set) return 1;
+      reportDataError(file, "invalid input key name: %.*" PRIws, name.length, name.characters);
+    }
   }
 
   return 0;
@@ -624,7 +628,7 @@ processInputOperands (DataFile *file, void *data) {
     if (getInputFunctionOperand(file, &function, ktd)) {
       unsigned char key;
 
-      if (getKeyOperand(file, &key, ktd)) {
+      if (getInputKeyOperand(file, &key, ktd)) {
         ctx->inputKeys[function] = key;
         return 1;
       }
