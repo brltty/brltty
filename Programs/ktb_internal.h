@@ -64,6 +64,8 @@ typedef struct {
 } KeyBinding;
 
 typedef struct {
+  wchar_t *name;
+
   KeyBinding *keyBindingTable;
   unsigned int keyBindingsSize;
   unsigned int keyBindingCount;
@@ -81,8 +83,10 @@ struct KeyTableStruct {
   KeyContext *keyContextTable;
   unsigned int keyContextCount;
 
+  unsigned char persistentContext;
+  unsigned char currentContext;
+
   KeySet keys;
-  unsigned char context;
   int command;
   unsigned immediate:1;
 };

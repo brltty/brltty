@@ -27,10 +27,15 @@
 #include "cmd.h"
 #include "brldefs.h"
 
-static inline KeyContext *
+static inline const KeyContext *
 getKeyContext (KeyTable *table, unsigned char context) {
   if (context < table->keyContextCount) return &table->keyContextTable[context];
   return NULL;
+}
+
+static inline int
+isTemporaryKeyContext (const KeyTable *table, const KeyContext *ctx) {
+  return ((ctx - table->keyContextTable) > BRL_CTX_DEFAULT) && !ctx->name;
 }
 
 int
@@ -53,7 +58,7 @@ searchKeyBinding (const void *target, const void *element) {
 
 static const KeyBinding *
 getKeyBinding (KeyTable *table, unsigned char context, unsigned char set, unsigned char key) {
-  KeyContext *ctx = getKeyContext(table, context);
+  const KeyContext *ctx = getKeyContext(table, context);
 
   if (ctx) {
     KeyBinding target;
@@ -134,7 +139,7 @@ getInputCommand (KeyTable *table, unsigned char context) {
 static int
 isModifiers (KeyTable *table, unsigned char context) {
   while (1) {
-    KeyContext *ctx = getKeyContext(table, context);
+    const KeyContext *ctx = getKeyContext(table, context);
 
     if (ctx) {
       const KeyBinding *binding = ctx->keyBindingTable;
@@ -155,8 +160,8 @@ isModifiers (KeyTable *table, unsigned char context) {
 
 void
 resetKeyTable (KeyTable *table) {
+  table->currentContext = table->persistentContext = BRL_CTX_DEFAULT;
   removeAllKeys(&table->keys);
-  table->context = BRL_CTX_DEFAULT;
   table->command = EOF;
   table->immediate = 0;
 }
@@ -168,7 +173,16 @@ processCommand (KeyTable *table, int command) {
 
   switch (blk) {
     case BRL_BLK_CONTEXT:
-      if (!BRL_DELAYED_COMMAND(command)) table->context = BRL_CTX_DEFAULT + arg;
+      if (!BRL_DELAYED_COMMAND(command)) {
+        unsigned char context = BRL_CTX_DEFAULT + arg;
+        const KeyContext *ctx = getKeyContext(table, context);
+
+        if (ctx) {
+          table->currentContext = context;
+          if (!isTemporaryKeyContext(table, ctx)) table->persistentContext = context;
+        }
+      }
+
       command = BRL_CMD_NOOP;
       break;
 
@@ -185,8 +199,8 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
   int command = EOF;
   int immediate = 1;
 
-  if (context == BRL_CTX_DEFAULT) context = table->context;
-  if (press) table->context = BRL_CTX_DEFAULT;
+  if (context == BRL_CTX_DEFAULT) context = table->currentContext;
+  if (press) table->currentContext = table->persistentContext;
 
   if (set) {
     if (press) {
@@ -340,59 +354,66 @@ addLine (const char *line, KeyTableHelpLineHandler handleLine, void *data) {
 
 static int
 listContext (
-  KeyTable *table, unsigned char context,
-  const char **title, const char *keysPrefix,
+  KeyTable *table, const KeyContext *ctx,
+  const wchar_t **title, const char *keysPrefix,
   KeyTableHelpLineHandler handleLine, void *data
 ) {
-  KeyContext *ctx = getKeyContext(table, context);
+  const KeyBinding *binding = ctx->keyBindingTable;
+  unsigned int count = ctx->keyBindingCount;
 
-  if (ctx) {
-    const KeyBinding *binding = ctx->keyBindingTable;
-    unsigned int count = ctx->keyBindingCount;
+  while (count) {
+    char line[0X80];
+    size_t size = sizeof(line);
+    unsigned int offset = 0;
+    int length;
 
-    while (count) {
-      char line[0X80];
-      size_t size = sizeof(line);
-      unsigned int offset = 0;
-      int length;
+    unsigned int keysOffset;
 
-      unsigned int keysOffset;
-
-      {
-        char description[0X60];
-        describeCommand(binding->command, description, sizeof(description), 0);
-        snprintf(&line[offset], size, "%s: %n", description, &length);
-        offset += length, size -= length;
-      }
-
-      keysOffset = offset;
-      if (keysPrefix) {
-        snprintf(&line[offset], size, "%s, %n", keysPrefix, &length);
-        offset += length, size -= length;
-      }
-
-      {
-        char keys[0X40];
-        formatKeyCombination(table, &binding->keys, keys, sizeof(keys));
-        snprintf(&line[offset], size, "%s%n", keys, &length);
-        offset += length, size -= length;
-      }
-
-      if ((binding->command & BRL_MSK_BLK) == BRL_BLK_CONTEXT) {
-        unsigned char context = BRL_CTX_DEFAULT + (binding->command & BRL_MSK_ARG);
-        if (!listContext(table, context, title, &line[keysOffset], handleLine, data)) return 0;
-      } else {
-        if (*title) {
-          if (!addLine("", handleLine, data)) return 0;
-          if (!addLine(*title, handleLine, data)) return 0;
-          *title = NULL;
-        }
-
-        if (!addLine(line, handleLine, data)) return 0;
-      }
-
-      binding += 1, count -= 1;
+    {
+      char description[0X60];
+      describeCommand(binding->command, description, sizeof(description), 0);
+      snprintf(&line[offset], size, "%s: %n", description, &length);
+      offset += length, size -= length;
     }
+
+    keysOffset = offset;
+    if (keysPrefix) {
+      snprintf(&line[offset], size, "%s, %n", keysPrefix, &length);
+      offset += length, size -= length;
+    }
+
+    {
+      char keys[0X40];
+      formatKeyCombination(table, &binding->keys, keys, sizeof(keys));
+      snprintf(&line[offset], size, "%s%n", keys, &length);
+      offset += length, size -= length;
+    }
+
+    if ((binding->command & BRL_MSK_BLK) == BRL_BLK_CONTEXT) {
+      const KeyContext *c = getKeyContext(table, (BRL_CTX_DEFAULT + (binding->command & BRL_MSK_ARG)));
+
+      if (c) {
+        if (isTemporaryKeyContext(table, c)) {
+          if (!listContext(table, c, title, &line[keysOffset], handleLine, data)) return 0;
+        } else {
+          char buffer[0X80];
+
+          snprintf(buffer, sizeof(buffer), "switch to %" PRIws ": %s",
+                   c->name, &line[keysOffset]);
+          if (!addLine(buffer, handleLine, data)) return 0;
+        }
+      }
+    } else {
+      if (*title) {
+        if (!addLine("", handleLine, data)) return 0;
+        if (!handleLine(*title, data)) return 0;
+        *title = NULL;
+      }
+
+      if (!addLine(line, handleLine, data)) return 0;
+    }
+
+    binding += 1, count -= 1;
   }
 
   return 1;
@@ -402,16 +423,16 @@ int
 listKeyBindings (KeyTable *table, KeyTableHelpLineHandler handleLine, void *data) {
   typedef struct {
     unsigned char context;
-    const char *title;
+    const wchar_t *title;
   } SectionEntry;
 
   static const SectionEntry sectionTable[] = {
     { .context=BRL_CTX_DEFAULT,
-      .title = "Default Bindings"
+      .title = WS_C("Default Bindings")
     }
     ,
     { .context=BRL_CTX_MENU,
-      .title = "Menu Bindings"
+      .title = WS_C("Menu Bindings")
     }
     ,
     { .title = NULL }
@@ -423,10 +444,29 @@ listKeyBindings (KeyTable *table, KeyTableHelpLineHandler handleLine, void *data
       return 0;
 
   while (section->title) {
-    const char *title = section->title;
+    const KeyContext *ctx = getKeyContext(table, section->context);
 
-    if (!listContext(table, section->context, &title, NULL, handleLine, data)) return 0;
+    if (ctx) {
+      const wchar_t *title = section->title;
+
+      if (!listContext(table, ctx, &title, NULL, handleLine, data)) return 0;
+    }
+
     section += 1;
+  }
+
+  {
+    unsigned int context;
+
+    for (context=BRL_CTX_DEFAULT+1; context<table->keyContextCount; context+=1) {
+      const KeyContext *ctx = getKeyContext(table, context);
+
+      if (ctx && !isTemporaryKeyContext(table, ctx)) {
+        const wchar_t *title = ctx->name;
+
+        if (!listContext(table, ctx, &title, NULL, handleLine, data)) return 0;
+      }
+    }
   }
 
   return 1;

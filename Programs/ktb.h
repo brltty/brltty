@@ -29,7 +29,7 @@ extern "C" {
 extern KeyTable *compileKeyTable (const char *name, const KeyNameEntry *const *keys);
 extern void destroyKeyTable (KeyTable *table);
 
-typedef int KeyTableHelpLineHandler (wchar_t *line, void *data);
+typedef int KeyTableHelpLineHandler (const wchar_t *line, void *data);
 extern int listKeyBindings (KeyTable *table, KeyTableHelpLineHandler handleLine, void *data);
 
 extern char *ensureKeyTableExtension (const char *path);

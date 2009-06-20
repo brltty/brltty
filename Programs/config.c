@@ -2038,7 +2038,7 @@ exitMenu:
 }
 
 static int
-handleWcharHelpLine (wchar_t *line, void *data) {
+handleWcharHelpLine (const wchar_t *line, void *data) {
   return addHelpLine(line);
 }
 

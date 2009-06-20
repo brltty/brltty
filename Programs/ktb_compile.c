@@ -77,6 +77,8 @@ getKeyContext (KeyTableData *ktd, unsigned char context) {
       KeyContext *ctx = &ktd->keyContextTable[ktd->keyContextCount++];
       memset(ctx, 0, sizeof(*ctx));
 
+      ctx->name = NULL;
+
       ctx->keyBindingTable = NULL;
       ctx->keyBindingsSize = 0;
       ctx->keyBindingCount = 0;
@@ -97,6 +99,7 @@ destroyKeyContextTable (KeyContext *table, unsigned int count) {
   while (count) {
     KeyContext *ctx = &table[--count];
 
+    if (ctx->name) free(ctx->name);
     if (ctx->keyBindingTable) free(ctx->keyBindingTable);
     if (ctx->sortedKeyBindings) free(ctx->sortedKeyBindings);
   }
@@ -519,10 +522,14 @@ processContextOperands (DataFile *file, void *data) {
   DataOperand context;
 
   if (getDataOperand(file, &context, "context name or number")) {
+    int ok = 0;
+
     if (isKeyword(WS_C("default"), context.characters, context.length)) {
       ktd->context = BRL_CTX_DEFAULT;
+      ok = 1;
     } else if (isKeyword(WS_C("menu"), context.characters, context.length)) {
       ktd->context = BRL_CTX_MENU;
+      ok = 1;
     } else {
       int number;
 
@@ -532,6 +539,26 @@ processContextOperands (DataFile *file, void *data) {
         reportDataError(file, "invalid context number: %.*" PRIws, context.length, context.characters);
       } else {
         ktd->context = BRL_CTX_DEFAULT + number;
+        ok = 1;
+      }
+    }
+
+    if (ok) {
+      KeyContext *ctx = getCurrentKeyContext(ktd);
+
+      if (ctx) {
+        DataOperand name;
+
+        if (getDataText(file, &name, NULL)) {
+          if (ctx->name) {
+            reportDataError(file, "context name specified more than once");
+          } else if (!(ctx->name = malloc(ARRAY_SIZE(ctx->name, name.length+1)))) {
+            LogError("malloc");
+          } else {
+            wmemcpy(ctx->name, name.characters, name.length);
+            ctx->name[name.length] = 0;
+          }
+        }
       }
     }
   }
