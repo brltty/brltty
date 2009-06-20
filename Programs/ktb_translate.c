@@ -112,9 +112,10 @@ getInputCommand (KeyTable *table, unsigned char context) {
 
       if (key) {
         const InputFunctionEntry *ifn = &inputFunctionTable[function];
-        int keyPressed = BITMASK_TEST(keyMask, key);
 
-        if (keyPressed) {
+        if (key == BRL_MSK_ARG) {
+          bitsForced |= ifn->bit;
+        } else if (BITMASK_TEST(keyMask, key)) {
           if (!ifn->bit) {
             spacePressed = 1;
           } else if (ifn->bit & BRL_MSK_ARG) {
@@ -124,8 +125,6 @@ getInputCommand (KeyTable *table, unsigned char context) {
           dotsCommand |= ifn->bit;
           BITMASK_CLEAR(keyMask, key);
           keyCount += 1;
-        } else if (key == BRL_MSK_ARG) {
-          bitsForced |= ifn->bit;
         }
       }
     }
@@ -455,9 +454,21 @@ listKeyContext (
 
 int
 listKeyBindings (KeyTable *table, KeyTableHelpLineHandler handleLine, void *data) {
-  if (table->title)
-    if (!handleLine(table->title, data))
-      return 0;
+  {
+    char line[0X40];
+    size_t size = sizeof(line);
+    int offset = 0;
+    int length;
+
+    snprintf(&line[offset], size, "Help%n", &length);
+    offset += length, size -= length;
+
+    if (table->title) {
+      snprintf(&line[offset], size, " for %" PRIws "%n", table->title, &length);
+      offset += length, size -= length;
+      if (!addLine(line, handleLine, data)) return 0;
+    }
+  }
 
   {
     static const unsigned char contexts[] = {
