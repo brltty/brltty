@@ -353,7 +353,7 @@ addLine (const char *line, KeyTableHelpLineHandler handleLine, void *data) {
 }
 
 static int
-listContext (
+listKeyContext (
   KeyTable *table, const KeyContext *ctx,
   const wchar_t **title, const char *keysPrefix,
   KeyTableHelpLineHandler handleLine, void *data
@@ -394,7 +394,7 @@ listContext (
 
       if (c) {
         if (isTemporaryKeyContext(table, c)) {
-          if (!listContext(table, c, title, &line[keysOffset], handleLine, data)) return 0;
+          if (!listKeyContext(table, c, title, &line[keysOffset], handleLine, data)) return 0;
         } else {
           char buffer[0X80];
 
@@ -421,38 +421,30 @@ listContext (
 
 int
 listKeyBindings (KeyTable *table, KeyTableHelpLineHandler handleLine, void *data) {
-  typedef struct {
-    unsigned char context;
-    const wchar_t *title;
-  } SectionEntry;
-
-  static const SectionEntry sectionTable[] = {
-    { .context=BRL_CTX_DEFAULT,
-      .title = WS_C("Default Bindings")
-    }
-    ,
-    { .context=BRL_CTX_MENU,
-      .title = WS_C("Menu Bindings")
-    }
-    ,
-    { .title = NULL }
-  };
-  const SectionEntry *section = sectionTable;
-
   if (table->title)
     if (!handleLine(table->title, data))
       return 0;
 
-  while (section->title) {
-    const KeyContext *ctx = getKeyContext(table, section->context);
+  {
+    static const unsigned char contexts[] = {
+      BRL_CTX_DEFAULT,
+      BRL_CTX_MENU
+    };
 
-    if (ctx) {
-      const wchar_t *title = section->title;
+    const unsigned char *context = contexts;
+    unsigned int count = ARRAY_COUNT(contexts);
 
-      if (!listContext(table, ctx, &title, NULL, handleLine, data)) return 0;
+    while (count) {
+      const KeyContext *ctx = getKeyContext(table, *context);
+
+      if (ctx) {
+        const wchar_t *title = ctx->name;
+
+        if (!listKeyContext(table, ctx, &title, NULL, handleLine, data)) return 0;
+      }
+
+      context += 1, count -= 1;
     }
-
-    section += 1;
   }
 
   {
@@ -464,7 +456,7 @@ listKeyBindings (KeyTable *table, KeyTableHelpLineHandler handleLine, void *data
       if (ctx && !isTemporaryKeyContext(table, ctx)) {
         const wchar_t *title = ctx->name;
 
-        if (!listContext(table, ctx, &title, NULL, handleLine, data)) return 0;
+        if (!listKeyContext(table, ctx, &title, NULL, handleLine, data)) return 0;
       }
     }
   }

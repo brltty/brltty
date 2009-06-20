@@ -89,9 +89,57 @@ getKeyContext (KeyTableData *ktd, unsigned char context) {
   return &ktd->keyContextTable[context];
 }
 
-static KeyContext *
+static inline KeyContext *
 getCurrentKeyContext (KeyTableData *ktd) {
   return getKeyContext(ktd, ktd->context);
+}
+
+static int
+setKeyContextName (KeyContext *ctx, const wchar_t *name, size_t length) {
+  if (ctx->name) free(ctx->name);
+
+  if (!(ctx->name = malloc(ARRAY_SIZE(ctx->name, length+1)))) {
+    LogError("malloc");
+    return 0;
+  }
+
+  wmemcpy(ctx->name, name, length);
+  ctx->name[length] = 0;
+  return 1;
+}
+
+static int
+setDefaultKeyContextProperties (KeyTableData *ktd) {
+  typedef struct {
+    unsigned char context;
+    const wchar_t *name;
+  } PropertiesEntry;
+
+  static const PropertiesEntry propertiesTable[] = {
+    { .context=BRL_CTX_DEFAULT,
+      .name = WS_C("Default Bindings")
+    }
+    ,
+    { .context=BRL_CTX_MENU,
+      .name = WS_C("Menu Bindings")
+    }
+    ,
+    { .name = NULL }
+  };
+  const PropertiesEntry *properties = propertiesTable;
+
+  while (properties->name) {
+    KeyContext *ctx = getKeyContext(ktd, properties->context);
+    if (!ctx) return 0;
+
+    if (!ctx->name)
+      if (!setKeyContextName(ctx, properties->name, wcslen(properties->name)))
+        return 0;
+
+    properties += 1;
+  }
+
+  return 1;
 }
 
 static void
@@ -552,11 +600,8 @@ processContextOperands (DataFile *file, void *data) {
         if (getDataText(file, &name, NULL)) {
           if (ctx->name) {
             reportDataError(file, "context name specified more than once");
-          } else if (!(ctx->name = malloc(ARRAY_SIZE(ctx->name, name.length+1)))) {
-            LogError("malloc");
-          } else {
-            wmemcpy(ctx->name, name.characters, name.length);
-            ctx->name[name.length] = 0;
+          } else if (!setKeyContextName(ctx, name.characters, name.length)) {
+            return 0;
           }
         }
       }
@@ -630,9 +675,48 @@ sortKeyBindings (const void *element1, const void *element2) {
   return compareKeyBindings(*binding1, *binding2);
 }
 
+static int
+prepareKeyBindings (KeyContext *ctx) {
+  if (ctx->keyBindingCount < ctx->keyBindingsSize) {
+    KeyBinding *newTable = realloc(ctx->keyBindingTable, ARRAY_SIZE(newTable, ctx->keyBindingCount));
+
+    if (!newTable) {
+      LogError("realloc");
+      return 0;
+    }
+
+    ctx->keyBindingTable = newTable;
+    ctx->keyBindingsSize = ctx->keyBindingCount;
+  }
+
+  if (ctx->keyBindingCount) {
+    if (!(ctx->sortedKeyBindings = malloc(ARRAY_SIZE(ctx->sortedKeyBindings, ctx->keyBindingCount)))) {
+      LogError("malloc");
+      return 0;
+    }
+
+    {
+      KeyBinding *source = ctx->keyBindingTable;
+      const KeyBinding **target = ctx->sortedKeyBindings;
+      unsigned int count = ctx->keyBindingCount;
+
+      while (count) {
+        *target++ = source++;
+        count -= 1;
+      }
+    }
+
+    qsort(ctx->sortedKeyBindings, ctx->keyBindingCount, sizeof(*ctx->sortedKeyBindings), sortKeyBindings);
+  }
+
+  return 1;
+}
+
 KeyTable *
 makeKeyTable (KeyTableData *ktd) {
   KeyTable *table;
+
+  if (!setDefaultKeyContextProperties(ktd)) return 0;
 
   {
     unsigned int context;
@@ -640,33 +724,7 @@ makeKeyTable (KeyTableData *ktd) {
     for (context=0; context<ktd->keyContextCount; context+=1) {
       KeyContext *ctx = &ktd->keyContextTable[context];
 
-      if (ctx->keyBindingCount < ctx->keyBindingsSize) {
-        KeyBinding *newTable = realloc(ctx->keyBindingTable, ARRAY_SIZE(newTable, ctx->keyBindingCount));
-        if (!newTable) return NULL;
-
-        ctx->keyBindingTable = newTable;
-        ctx->keyBindingsSize = ctx->keyBindingCount;
-      }
-
-      if (ctx->keyBindingCount) {
-        if (!(ctx->sortedKeyBindings = malloc(ARRAY_SIZE(ctx->sortedKeyBindings, ctx->keyBindingCount)))) {
-          LogError("malloc");
-          return NULL;
-        }
-
-        {
-          KeyBinding *source = ctx->keyBindingTable;
-          const KeyBinding **target = ctx->sortedKeyBindings;
-          unsigned int count = ctx->keyBindingCount;
-
-          while (count) {
-            *target++ = source++;
-            count -= 1;
-          }
-        }
-
-        qsort(ctx->sortedKeyBindings, ctx->keyBindingCount, sizeof(*ctx->sortedKeyBindings), sortKeyBindings);
-      }
+      if (!prepareKeyBindings(ctx)) return NULL;
     }
   }
 
