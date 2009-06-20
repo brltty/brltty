@@ -293,8 +293,81 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
   return state;
 }
 
-static const char *
-getKeyName (KeyTable *table, unsigned char set, unsigned char key) {
+typedef struct {
+  const wchar_t *sectionTitle;
+
+  wchar_t *lineCharacters;
+  size_t lineSize;
+  size_t lineLength;
+
+  KeyTableHelpLineHandler *handleLine;
+  void *handlerData;
+} HelpGenerationData;
+
+static int
+handleLine (const wchar_t *line, HelpGenerationData *hgd) {
+  return hgd->handleLine(line, hgd->handlerData);
+}
+
+static int
+addCharacters (const wchar_t *characters, size_t count, HelpGenerationData *hgd) {
+  size_t newLength = hgd->lineLength + count;
+
+  if (hgd->sectionTitle) {
+    if (!handleLine(WS_C(""), hgd)) return 0;
+    if (!handleLine(hgd->sectionTitle, hgd)) return 0;
+    hgd->sectionTitle = NULL;
+  }
+
+  if (newLength > hgd->lineSize) {
+    size_t newSize = (newLength | 0X3F) + 1;
+    wchar_t *newCharacters = realloc(hgd->lineCharacters, ARRAY_SIZE(newCharacters, newSize));
+
+    if (!newCharacters) {
+      LogError("realloc");
+      return 0;
+    }
+
+    hgd->lineCharacters = newCharacters;
+    hgd->lineSize = newSize;
+  }
+
+  wmemcpy(&hgd->lineCharacters[hgd->lineLength], characters, count);
+  hgd->lineLength = newLength;
+  return 1;
+}
+
+static int
+addCharacter (wchar_t character, HelpGenerationData *hgd) {
+  return addCharacters(&character, 1, hgd);
+}
+
+static int
+addCharacterString (const wchar_t *string, HelpGenerationData *hgd) {
+  return addCharacters(string, wcslen(string), hgd);
+}
+
+static int
+addUtf8String (const char *string, HelpGenerationData *hgd) {
+  size_t size = strlen(string) + 1;
+  wchar_t characters[size];
+  wchar_t *character = characters;
+
+  convertStringToWchars(&string, &character, size);
+  return addCharacters(characters, character-characters, hgd);
+}
+
+static int
+endLine (HelpGenerationData *hgd) {
+  if (!addCharacter(0, hgd)) return 0;
+  if (!handleLine(hgd->lineCharacters, hgd)) return 0;
+
+  hgd->lineLength = 0;
+  return 1;
+}
+
+static int
+addKeyName (KeyTable *table, unsigned char set, unsigned char key, HelpGenerationData *hgd) {
   int first = 0;
   int last = table->keyNameCount - 1;
 
@@ -304,7 +377,7 @@ getKeyName (KeyTable *table, unsigned char set, unsigned char key) {
 
     if (set < kne->set) goto searchBelow;
     if (set > kne->set) goto searchAbove;
-    if (key == kne->key) return kne->name;
+    if (key == kne->key) return addUtf8String(kne->name, hgd);
 
     if (key < kne->key) {
     searchBelow:
@@ -315,66 +388,41 @@ getKeyName (KeyTable *table, unsigned char set, unsigned char key) {
     }
   }
 
-  return "?";
+  return addCharacter(WC_C('?'), hgd);
 }
 
-static void
-formatKeyCombination (KeyTable *table, const KeyCombination *keys, char *buffer, size_t size) {
-  char delimiter = 0;
-  int length;
+static int
+addKeyCombination (KeyTable *table, const KeyCombination *keys, HelpGenerationData *hgd) {
+  wchar_t delimiter = 0;
 
   {
     int key;
     for (key=0; key<BITMASK_SIZE(keys->modifiers); key+=1) {
       if (BITMASK_TEST(keys->modifiers, key)) {
         if (!delimiter) {
-          delimiter = '+';
-        } else if (size) {
-          *buffer++ = delimiter;
-          size -= 1;
+          delimiter = WC_C('+');
+        } else if (!addCharacter(delimiter, hgd)) {
+          return 0;
         }
 
-        snprintf(buffer, size, "%s%n", getKeyName(table, 0, key), &length);
-        buffer += length, size -= length;
+        if (!addKeyName(table, 0, key, hgd)) return 0;
       }
     }
   }
 
   if (keys->set || keys->key) {
-    if (delimiter && size) *buffer++ = delimiter, size -= 1;
-    snprintf(buffer, size, "%s%n", getKeyName(table, keys->set, keys->key), &length);
-    buffer += length, size -= length;
-  }
-}
+    if (delimiter)
+      if (!addCharacter(delimiter, hgd))
+        return 0;
 
-static int
-addLine (const char *line, KeyTableHelpLineHandler handleLine, void *data) {
-  size_t count = strlen(line) + 1;
-  wchar_t buffer[count];
-  wchar_t *characters = buffer;
-
-  convertStringToWchars(&line, &characters, count);
-  return handleLine(buffer, data);
-  return 1;
-}
-
-static int
-listSectionTitle (const wchar_t **title, KeyTableHelpLineHandler handleLine, void *data) {
-  if (*title) {
-    if (!addLine("", handleLine, data)) return 0;
-    if (!handleLine(*title, data)) return 0;
-    *title = NULL;
+    if (!addKeyName(table, keys->set, keys->key, hgd)) return 0;
   }
 
   return 1;
 }
 
 static int
-listKeyContext (
-  KeyTable *table, const KeyContext *ctx,
-  const wchar_t **title, const char *keysPrefix,
-  KeyTableHelpLineHandler handleLine, void *data
-) {
+listKeyContext (KeyTable *table, const KeyContext *ctx, const wchar_t *keysPrefix, HelpGenerationData *hgd) {
   {
     unsigned char function;
 
@@ -383,13 +431,18 @@ listKeyContext (
 
       if (key) {
         const InputFunctionEntry *ifn = &inputFunctionTable[function];
-        char line[0X40];
 
-        if (!listSectionTitle(title, handleLine, data)) return 0;
-        snprintf(line, sizeof(line), "input %s: %s",
-                 ifn->name,
-                 ((key == BRL_MSK_ARG)? "On": getKeyName(table, 0, key)));
-        if (!addLine(line, handleLine, data)) return 0;
+        if (!addCharacterString(WS_C("input "), hgd)) return 0;
+        if (!addUtf8String(ifn->name, hgd)) return 0;
+        if (!addCharacterString(WS_C(": "), hgd)) return 0;
+
+        if (key == BRL_MSK_ARG) {
+          if (!addCharacterString(WS_C("On"), hgd)) return 0;
+        } else {
+          if (!addKeyName(table, 0, key, hgd)) return 0;
+        }
+
+        if (!endLine(hgd)) return 0;
       }
     }
   }
@@ -399,50 +452,47 @@ listKeyContext (
     unsigned int count = ctx->keyBindingCount;
 
     while (count) {
-      char line[0X80];
-      size_t size = sizeof(line);
-      unsigned int offset = 0;
-      int length;
-
-      unsigned int keysOffset;
+      size_t keysOffset;
 
       {
         char description[0X60];
+
         describeCommand(binding->command, description, sizeof(description), 0);
-        snprintf(&line[offset], size, "%s: %n", description, &length);
-        offset += length, size -= length;
+        if (!addUtf8String(description, hgd)) return 0;
+        if (!addCharacterString(WS_C(": "), hgd)) return 0;
       }
 
-      keysOffset = offset;
+      keysOffset = hgd->lineLength;
       if (keysPrefix) {
-        snprintf(&line[offset], size, "%s, %n", keysPrefix, &length);
-        offset += length, size -= length;
+        if (!addCharacterString(keysPrefix, hgd)) return 0;
+        if (!addCharacterString(WS_C(", "), hgd)) return 0;
       }
 
-      {
-        char keys[0X40];
-        formatKeyCombination(table, &binding->keys, keys, sizeof(keys));
-        snprintf(&line[offset], size, "%s%n", keys, &length);
-        offset += length, size -= length;
-      }
+      if (!addKeyCombination(table, &binding->keys, hgd)) return 0;
 
       if ((binding->command & BRL_MSK_BLK) == BRL_BLK_CONTEXT) {
         const KeyContext *c = getKeyContext(table, (BRL_CTX_DEFAULT + (binding->command & BRL_MSK_ARG)));
 
         if (c) {
-          if (isTemporaryKeyContext(table, c)) {
-            if (!listKeyContext(table, c, title, &line[keysOffset], handleLine, data)) return 0;
-          } else {
-            char buffer[0X80];
+          size_t length = hgd->lineLength - keysOffset;
+          wchar_t keys[length + 1];
 
-            snprintf(buffer, sizeof(buffer), "switch to %" PRIws ": %s",
-                     c->name, &line[keysOffset]);
-            if (!addLine(buffer, handleLine, data)) return 0;
+          wmemcpy(keys, &hgd->lineCharacters[keysOffset], length);
+          keys[length] = 0;
+          hgd->lineLength = 0;
+
+          if (isTemporaryKeyContext(table, c)) {
+            if (!listKeyContext(table, c, keys, hgd)) return 0;
+          } else {
+            if (!addCharacterString(WS_C("switch to "), hgd)) return 0;
+            if (!addCharacterString(c->name, hgd)) return 0;
+            if (!addCharacterString(WS_C(": "), hgd)) return 0;
+            if (!addCharacterString(keys, hgd)) return 0;
+            if (!endLine(hgd)) return 0;
           }
         }
       } else {
-        if (!listSectionTitle(title, handleLine, data)) return 0;
-        if (!addLine(line, handleLine, data)) return 0;
+        if (!endLine(hgd)) return 0;
       }
 
       binding += 1, count -= 1;
@@ -454,20 +504,20 @@ listKeyContext (
 
 int
 listKeyBindings (KeyTable *table, KeyTableHelpLineHandler handleLine, void *data) {
-  {
-    char line[0X40];
-    size_t size = sizeof(line);
-    int offset = 0;
-    int length;
+  HelpGenerationData hgd = {
+    .sectionTitle = NULL,
+    .lineCharacters = NULL,
+    .lineSize = 0,
+    .lineLength = 0,
+    .handleLine = handleLine,
+    .handlerData = data
+  };
 
-    snprintf(&line[offset], size, "Help%n", &length);
-    offset += length, size -= length;
-
-    if (table->title) {
-      snprintf(&line[offset], size, " for %" PRIws "%n", table->title, &length);
-      offset += length, size -= length;
-      if (!addLine(line, handleLine, data)) return 0;
-    }
+  if (!addCharacterString(WS_C("Help"), &hgd)) return 0;
+  if (table->title) {
+    if (!addCharacterString(WS_C(" for "), &hgd)) return 0;
+    if (!addCharacterString(table->title, &hgd)) return 0;
+    if (!endLine(&hgd)) return 0;
   }
 
   {
@@ -483,9 +533,8 @@ listKeyBindings (KeyTable *table, KeyTableHelpLineHandler handleLine, void *data
       const KeyContext *ctx = getKeyContext(table, *context);
 
       if (ctx) {
-        const wchar_t *title = ctx->name;
-
-        if (!listKeyContext(table, ctx, &title, NULL, handleLine, data)) return 0;
+        hgd.sectionTitle = ctx->name;
+        if (!listKeyContext(table, ctx, NULL, &hgd)) return 0;
       }
 
       context += 1, count -= 1;
@@ -499,9 +548,8 @@ listKeyBindings (KeyTable *table, KeyTableHelpLineHandler handleLine, void *data
       const KeyContext *ctx = getKeyContext(table, context);
 
       if (ctx && !isTemporaryKeyContext(table, ctx)) {
-        const wchar_t *title = ctx->name;
-
-        if (!listKeyContext(table, ctx, &title, NULL, handleLine, data)) return 0;
+        hgd.sectionTitle = ctx->name;
+        if (!listKeyContext(table, ctx, NULL, &hgd)) return 0;
       }
     }
   }
