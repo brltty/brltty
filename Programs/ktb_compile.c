@@ -28,22 +28,22 @@
 #include "ktb.h"
 #include "ktb_internal.h"
 
-const InputFunctionEntry inputFunctionTable[InputFunctionCount] = {
-  [IFN_Space] = {.name="Space", .bit=0},
+const KeyboardFunctionEntry keyboardFunctionTable[KeyboardFunctionCount] = {
+  [KBF_Space] = {.name="space", .bit=0},
 
-  [IFN_Dot1] = {.name="Dot1", .bit=BRL_DOT1},
-  [IFN_Dot2] = {.name="Dot2", .bit=BRL_DOT2},
-  [IFN_Dot3] = {.name="Dot3", .bit=BRL_DOT3},
-  [IFN_Dot4] = {.name="Dot4", .bit=BRL_DOT4},
-  [IFN_Dot5] = {.name="Dot5", .bit=BRL_DOT5},
-  [IFN_Dot6] = {.name="Dot6", .bit=BRL_DOT6},
-  [IFN_Dot7] = {.name="Dot7", .bit=BRL_DOT7},
-  [IFN_Dot8] = {.name="Dot8", .bit=BRL_DOT8},
+  [KBF_Dot1] = {.name="dot1", .bit=BRL_DOT1},
+  [KBF_Dot2] = {.name="dot2", .bit=BRL_DOT2},
+  [KBF_Dot3] = {.name="dot3", .bit=BRL_DOT3},
+  [KBF_Dot4] = {.name="dot4", .bit=BRL_DOT4},
+  [KBF_Dot5] = {.name="dot5", .bit=BRL_DOT5},
+  [KBF_Dot6] = {.name="dot6", .bit=BRL_DOT6},
+  [KBF_Dot7] = {.name="dot7", .bit=BRL_DOT7},
+  [KBF_Dot8] = {.name="dot8", .bit=BRL_DOT8},
 
-  [IFN_Shift] = {.name="Shift", .bit=BRL_FLG_CHAR_SHIFT},
-  [IFN_Upper] = {.name="Upper", .bit=BRL_FLG_CHAR_UPPER},
-  [IFN_Control] = {.name="Control", .bit=BRL_FLG_CHAR_CONTROL},
-  [IFN_Meta] = {.name="Meta", .bit=BRL_FLG_CHAR_META}
+  [KBF_Shift] = {.name="shift", .bit=BRL_FLG_CHAR_SHIFT},
+  [KBF_Uppercase] = {.name="uppercase", .bit=BRL_FLG_CHAR_UPPER},
+  [KBF_Control] = {.name="control", .bit=BRL_FLG_CHAR_CONTROL},
+  [KBF_Meta] = {.name="meta", .bit=BRL_FLG_CHAR_META}
 };
 
 typedef struct {
@@ -250,7 +250,7 @@ parseKeyName (DataFile *file, unsigned char *set, unsigned char *key, const wcha
     return 1;
   }
 
-  reportDataError(file, "unknown key name: %.*" PRIws, length, characters);
+  reportDataError(file, "unknown key: %.*" PRIws, length, characters);
   return 0;
 }
 
@@ -268,18 +268,18 @@ parseKeyCombination (DataFile *file, KeyCombination *keys, const wchar_t *charac
       unsigned char key;
 
       if (!count) {
-        reportDataError(file, "missing modifier key name");
+        reportDataError(file, "missing modifier key");
         return 0;
       }
       if (!parseKeyName(file, &set, &key, characters, count, ktd)) return 0;
 
       if (set) {
-        reportDataError(file, "unexpected modifier key name: %.*" PRIws, count, characters);
+        reportDataError(file, "unexpected modifier key: %.*" PRIws, count, characters);
         return 0;
       }
 
       if (BITMASK_TEST(keys->modifiers, key)) {
-        reportDataError(file, "duplicate modifier key name: %.*" PRIws, count, characters);
+        reportDataError(file, "duplicate modifier key: %.*" PRIws, count, characters);
         return 0;
       }
       BITMASK_SET(keys->modifiers, key);
@@ -298,14 +298,14 @@ parseKeyCombination (DataFile *file, KeyCombination *keys, const wchar_t *charac
   }
 
   if (!length) {
-    reportDataError(file, "missing key name");
+    reportDataError(file, "missing key");
     return 0;
   }
   if (!parseKeyName(file, &keys->set, &keys->key, characters, length, ktd)) return 0;
 
   if (!keys->set) {
     if (BITMASK_TEST(keys->modifiers, keys->key)) {
-      reportDataError(file, "duplicate key name: %.*" PRIws, length, characters);
+      reportDataError(file, "duplicate key: %.*" PRIws, length, characters);
       return 0;
     }
 
@@ -330,20 +330,20 @@ getKeysOperand (DataFile *file, KeyCombination *key, KeyTableData *ktd) {
 }
 
 static int
-getInputKeyOperand (DataFile *file, unsigned char *key, KeyTableData *ktd) {
+getMappedKeyOperand (DataFile *file, unsigned char *key, KeyTableData *ktd) {
   DataOperand name;
 
-  if (getDataOperand(file, &name, "input key name")) {
+  if (getDataOperand(file, &name, "mapped key name")) {
     unsigned char set;
 
-    if (isKeyword(WS_C("on"), name.characters, name.length)) {
+    if (isKeyword(WS_C("superimpose"), name.characters, name.length)) {
       *key = BRL_MSK_ARG;
       return 1;
     }
 
     if (parseKeyName(file, &set, key, name.characters, name.length, ktd)) {
       if (!set) return 1;
-      reportDataError(file, "invalid input key name: %.*" PRIws, name.length, name.characters);
+      reportDataError(file, "invalid mapped key: %.*" PRIws, name.length, name.characters);
     }
   }
 
@@ -351,25 +351,25 @@ getInputKeyOperand (DataFile *file, unsigned char *key, KeyTableData *ktd) {
 }
 
 static int
-sortInputFunctionNames (const void *element1, const void *element2) {
-  const InputFunctionEntry *const *ifn1 = element1;
-  const InputFunctionEntry *const *ifn2 = element2;
-  return strcasecmp((*ifn1)->name, (*ifn2)->name);
+sortKeyboardFunctionNames (const void *element1, const void *element2) {
+  const KeyboardFunctionEntry *const *kbf1 = element1;
+  const KeyboardFunctionEntry *const *kbf2 = element2;
+  return strcasecmp((*kbf1)->name, (*kbf2)->name);
 }
 
 static int
-searchInputFunctionName (const void *target, const void *element) {
+searchKeyboardFunctionName (const void *target, const void *element) {
   const DataOperand *name = target;
-  const InputFunctionEntry *const *ifn = element;
-  return compareToName(name->characters, name->length, (*ifn)->name);
+  const KeyboardFunctionEntry *const *kbf = element;
+  return compareToName(name->characters, name->length, (*kbf)->name);
 }
 
 static int
-parseInputFunctionName (DataFile *file, unsigned char *function, const wchar_t *characters, int length, KeyTableData *ktd) {
-  static const InputFunctionEntry **sortedInputFunctions = NULL;
+parseKeyboardFunctionName (DataFile *file, unsigned char *function, const wchar_t *characters, int length, KeyTableData *ktd) {
+  static const KeyboardFunctionEntry **sortedKeyboardFunctions = NULL;
 
-  if (!sortedInputFunctions) {
-    const InputFunctionEntry **newTable = malloc(ARRAY_SIZE(newTable, InputFunctionCount));
+  if (!sortedKeyboardFunctions) {
+    const KeyboardFunctionEntry **newTable = malloc(ARRAY_SIZE(newTable, KeyboardFunctionCount));
 
     if (!newTable) {
       LogError("malloc");
@@ -377,18 +377,18 @@ parseInputFunctionName (DataFile *file, unsigned char *function, const wchar_t *
     }
 
     {
-      const InputFunctionEntry *source = inputFunctionTable;
-      const InputFunctionEntry **target = newTable;
-      unsigned int count = InputFunctionCount;
+      const KeyboardFunctionEntry *source = keyboardFunctionTable;
+      const KeyboardFunctionEntry **target = newTable;
+      unsigned int count = KeyboardFunctionCount;
 
       do {
         *target++ = source++;
       } while (--count);
 
-      qsort(newTable, InputFunctionCount, sizeof(*newTable), sortInputFunctionNames);
+      qsort(newTable, KeyboardFunctionCount, sizeof(*newTable), sortKeyboardFunctionNames);
     }
 
-    sortedInputFunctions = newTable;
+    sortedKeyboardFunctions = newTable;
   }
 
   {
@@ -396,24 +396,24 @@ parseInputFunctionName (DataFile *file, unsigned char *function, const wchar_t *
       .characters = characters,
       .length = length
     };
-    const InputFunctionEntry **ifn = bsearch(&name, sortedInputFunctions, InputFunctionCount, sizeof(*sortedInputFunctions), searchInputFunctionName);
+    const KeyboardFunctionEntry **kbf = bsearch(&name, sortedKeyboardFunctions, KeyboardFunctionCount, sizeof(*sortedKeyboardFunctions), searchKeyboardFunctionName);
 
-    if (ifn) {
-      *function = *ifn - inputFunctionTable;
+    if (kbf) {
+      *function = *kbf - keyboardFunctionTable;
       return 1;
     }
   }
 
-  reportDataError(file, "unknown input function name: %.*" PRIws, length, characters);
+  reportDataError(file, "unknown keyboard function: %.*" PRIws, length, characters);
   return 0;
 }
 
 static int
-getInputFunctionOperand (DataFile *file, unsigned char *function, KeyTableData *ktd) {
+getKeyboardFunctionOperand (DataFile *file, unsigned char *function, KeyTableData *ktd) {
   DataOperand name;
 
-  if (getDataOperand(file, &name, "input key name")) {
-    if (parseInputFunctionName(file, function, name.characters, name.length, ktd)) return 1;
+  if (getDataOperand(file, &name, "keyboard function name")) {
+    if (parseKeyboardFunctionName(file, function, name.characters, name.length, ktd)) return 1;
   }
 
   return 0;
@@ -616,20 +616,20 @@ processContextOperands (DataFile *file, void *data) {
 }
 
 static int
-processInputOperands (DataFile *file, void *data) {
+processMapOperands (DataFile *file, void *data) {
   KeyTableData *ktd = data;
   KeyContext *ctx = getCurrentKeyContext(ktd);
 
   if (!ctx) return 0;
 
   {
-    unsigned char function;
+    unsigned char key;
 
-    if (getInputFunctionOperand(file, &function, ktd)) {
-      unsigned char key;
+    if (getMappedKeyOperand(file, &key, ktd)) {
+      unsigned char function;
 
-      if (getInputKeyOperand(file, &key, ktd)) {
-        ctx->inputKeys[function] = key;
+      if (getKeyboardFunctionOperand(file, &function, ktd)) {
+        ctx->mappedKeys[function] = key;
         return 1;
       }
     }
@@ -645,7 +645,7 @@ processTitleOperands (DataFile *file, void *data) {
 
   if (getDataText(file, &title, "title text")) {
     if (ktd->title) {
-      reportDataError(file, "title specified more than once");
+      reportDataError(file, "table title specified more than once");
     } else if (!(ktd->title = malloc(ARRAY_SIZE(ktd->title, title.length+1)))) {
       LogError("malloc");
     } else {
@@ -664,7 +664,7 @@ processKeyTableLine (DataFile *file, void *data) {
     {.name=WS_C("bind"), .processor=processBindOperands},
     {.name=WS_C("context"), .processor=processContextOperands},
     {.name=WS_C("include"), .processor=processIncludeOperands},
-    {.name=WS_C("input"), .processor=processInputOperands},
+    {.name=WS_C("map"), .processor=processMapOperands},
     {.name=WS_C("title"), .processor=processTitleOperands},
     {.name=NULL, .processor=NULL}
   };

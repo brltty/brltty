@@ -89,7 +89,7 @@ getCommand (KeyTable *table, unsigned char context, unsigned char set, unsigned 
 }
 
 static int
-getInputCommand (KeyTable *table, unsigned char context) {
+getKeyboardCommand (KeyTable *table, unsigned char context) {
   const KeyContext *ctx;
   int chordsRequested = context == BRL_CTX_CHORDS;
   int dotsCommand = BRL_BLK_PASSDOTS;
@@ -107,22 +107,22 @@ getInputCommand (KeyTable *table, unsigned char context) {
     int bitsForced = 0;
     unsigned char function;
 
-    for (function=0; function<InputFunctionCount; function+=1) {
-      unsigned char key = ctx->inputKeys[function];
+    for (function=0; function<KeyboardFunctionCount; function+=1) {
+      unsigned char key = ctx->mappedKeys[function];
 
       if (key) {
-        const InputFunctionEntry *ifn = &inputFunctionTable[function];
+        const KeyboardFunctionEntry *kbf = &keyboardFunctionTable[function];
 
         if (key == BRL_MSK_ARG) {
-          bitsForced |= ifn->bit;
+          bitsForced |= kbf->bit;
         } else if (BITMASK_TEST(keyMask, key)) {
-          if (!ifn->bit) {
+          if (!kbf->bit) {
             spacePressed = 1;
-          } else if (ifn->bit & BRL_MSK_ARG) {
+          } else if (kbf->bit & BRL_MSK_ARG) {
             dotPressed = 1;
           }
 
-          dotsCommand |= ifn->bit;
+          dotsCommand |= kbf->bit;
           BITMASK_CLEAR(keyMask, key);
           keyCount += 1;
         }
@@ -229,7 +229,7 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
 
       if (command == EOF) {
         immediate = 0;
-        command = getInputCommand(table, context);
+        command = getKeyboardCommand(table, context);
         if (command == EOF) command = getCommand(table, context, 0, 0);
       }
 
@@ -435,18 +435,18 @@ listKeyContext (ListGenerationData *lgd, const KeyContext *ctx, const wchar_t *k
   {
     unsigned char function;
 
-    for (function=0; function<InputFunctionCount; function+=1) {
-      unsigned char key = ctx->inputKeys[function];
+    for (function=0; function<KeyboardFunctionCount; function+=1) {
+      unsigned char key = ctx->mappedKeys[function];
 
       if (key) {
-        const InputFunctionEntry *ifn = &inputFunctionTable[function];
+        const KeyboardFunctionEntry *kbf = &keyboardFunctionTable[function];
 
-        if (!putCharacterString(lgd, WS_C("input "))) return 0;
-        if (!putUtf8String(lgd, ifn->name)) return 0;
+        if (!putUtf8String(lgd, kbf->name)) return 0;
+        if (!putCharacterString(lgd, WS_C(" key"))) return 0;
         if (!putCharacterString(lgd, WS_C(": "))) return 0;
 
         if (key == BRL_MSK_ARG) {
-          if (!putCharacterString(lgd, WS_C("On"))) return 0;
+          if (!putCharacterString(lgd, WS_C("superimposed"))) return 0;
         } else {
           if (!putKeyName(lgd, 0, key)) return 0;
         }

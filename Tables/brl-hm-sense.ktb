@@ -23,17 +23,17 @@ title HIMS Braille Sense
 # Default Bindings #
 ####################
 
-input Dot1 Dot1
-input Dot2 Dot2
-input Dot3 Dot3
-input Dot4 Dot4
-input Dot5 Dot5
-input Dot6 Dot6
-input Dot7 Dot7
-input Dot8 Dot8
-input Space Space
-input Upper F2
-input Control F3
+map Dot1 DOT1
+map Dot2 DOT2
+map Dot3 DOT3
+map Dot4 DOT4
+map Dot5 DOT5
+map Dot6 DOT6
+map Dot7 DOT7
+map Dot8 DOT8
+map Space SPACE
+map F2 UPPERCASE
+map F3 CONTROL
 
 bind RoutingKey ROUTE
 
