@@ -2118,10 +2118,7 @@ runProgram (void) {
                 }
 
                 case BRL_BLK_PASSCHAR: {
-                  wint_t character = convertCharToWchar(arg);
-                  if ((character == WEOF) ||
-                      !insertKey(character, flags))
-                    playTune(&tune_command_rejected);
+                  if (!insertKey(BRL_ARG_GET(command), flags)) playTune(&tune_command_rejected);
                   break;
                 }
 

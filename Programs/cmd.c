@@ -362,7 +362,7 @@ cmdBrlttyToBrlapi (int command, int retainDots) {
   int blk = command & BRL_MSK_BLK;
   switch (blk) {
   case BRL_BLK_PASSCHAR:
-    code = cmdWCharToBrlapi(convertCharToWchar(arg));
+    code = cmdWCharToBrlapi(arg);
     break;
   case BRL_BLK_PASSDOTS:
     if (retainDots) {
@@ -454,12 +454,8 @@ cmdBrlapiToBrltty (brlapi_keyCode_t code) {
 	if (keysym >= BRLAPI_KEY_SYM_FUNCTION && keysym <= BRLAPI_KEY_SYM_FUNCTION + 34)
 	  cmd = BRL_BLK_PASSKEY | (BRL_KEY_FUNCTION + keysym - BRLAPI_KEY_SYM_FUNCTION);
 	else if (keysym < 0x100 || (keysym & 0x1F000000) == BRLAPI_KEY_SYM_UNICODE) {
-	  int c = convertWcharToChar(keysym & 0xFFFFFF);
-	  if (c == EOF)
-	    /* Not convertible to current 8bit charset */
-	    return EOF;
-	  else
-	    cmd = BRL_BLK_PASSCHAR | c;
+	  wchar_t c = keysym & 0xFFFFFF;
+	  cmd = BRL_BLK_PASSCHAR | BRL_ARG_SET(c);
 	} else return EOF;
 	break;
       }
