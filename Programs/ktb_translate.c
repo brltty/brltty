@@ -77,18 +77,6 @@ getKeyBinding (KeyTable *table, unsigned char context, unsigned char set, unsign
 }
 
 static int
-getCommand (KeyTable *table, unsigned char context, unsigned char set, unsigned char key) {
-  const KeyBinding *binding = getKeyBinding(table, context, set, key);
-  if (binding) return binding->command;
-
-  if (context != BRL_CTX_DEFAULT)
-    if ((binding = getKeyBinding(table, BRL_CTX_DEFAULT, set, key)))
-      return binding->command;
-
-  return EOF;
-}
-
-static int
 getKeyboardCommand (KeyTable *table, unsigned char context) {
   int chordsRequested = context == BRL_CTX_CHORDS;
   const KeyContext *ctx;
@@ -139,21 +127,16 @@ getKeyboardCommand (KeyTable *table, unsigned char context) {
 
 static int
 isModifiers (KeyTable *table, unsigned char context) {
-  while (1) {
-    const KeyContext *ctx = getKeyContext(table, context);
+  const KeyContext *ctx = getKeyContext(table, context);
 
-    if (ctx) {
-      const KeyBinding *binding = ctx->keyBindingTable;
-      unsigned int count = ctx->keyBindingCount;
+  if (ctx) {
+    const KeyBinding *binding = ctx->keyBindingTable;
+    unsigned int count = ctx->keyBindingCount;
 
-      while (count) {
-        if (isKeySubset(binding->keys.modifiers, table->keys.mask)) return 1;
-        binding += 1, count -= 1;
-      }
+    while (count) {
+      if (isKeySubset(binding->keys.modifiers, table->keys.mask)) return 1;
+      binding += 1, count -= 1;
     }
-
-    if (context == BRL_CTX_DEFAULT) break;
-    context = BRL_CTX_DEFAULT;
   }
 
   return 0;
@@ -205,8 +188,14 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
 
   if (set) {
     if (press) {
-      if ((command = getCommand(table, context, set, 0)) != EOF) {
-        command += key;
+      const KeyBinding *binding = getKeyBinding(table, context, set, key);
+
+      if (!binding)
+        if (context != BRL_CTX_DEFAULT)
+          binding = getKeyBinding(table, BRL_CTX_DEFAULT, set, key);
+
+      if (binding) {
+        command = binding->command + key;
       } else {
         command = BRL_CMD_NOOP;
       }
@@ -219,13 +208,31 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
     removeKey(&table->keys, key);
 
     if (press) {
-      command = getCommand(table, context, 0, key);
+      const KeyBinding *binding = getKeyBinding(table, context, 0, key);
       addKey(&table->keys, key);
 
-      if (command == EOF) {
+      if (binding) {
+        command = binding->command;
+      } else if ((binding = getKeyBinding(table, context, 0, 0))) {
+        command = binding->command;
         immediate = 0;
-        command = getKeyboardCommand(table, context);
-        if (command == EOF) command = getCommand(table, context, 0, 0);
+      } else if ((command = getKeyboardCommand(table, context)) != EOF) {
+        immediate = 0;
+      } else if (context == BRL_CTX_DEFAULT) {
+        command = EOF;
+      } else {
+        removeKey(&table->keys, key);
+        binding = getKeyBinding(table, BRL_CTX_DEFAULT, 0, key);
+        addKey(&table->keys, key);
+
+        if (binding) {
+          command = binding->command;
+        } else if ((binding = getKeyBinding(table, BRL_CTX_DEFAULT, 0, 0))) {
+          command = binding->command;
+          immediate = 0;
+        } else {
+          command = EOF;
+        }
       }
 
       if (command == EOF) {
