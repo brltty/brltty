@@ -90,56 +90,51 @@ getCommand (KeyTable *table, unsigned char context, unsigned char set, unsigned 
 
 static int
 getKeyboardCommand (KeyTable *table, unsigned char context) {
-  const KeyContext *ctx;
   int chordsRequested = context == BRL_CTX_CHORDS;
-  int dotsCommand = BRL_BLK_PASSDOTS;
-  int dotPressed = 0;
-  int spacePressed = 0;
-  unsigned int keyCount = 0;
-  KeySetMask keyMask;
+  const KeyContext *ctx;
 
   if (chordsRequested) context = table->persistentContext;
-  ctx = getKeyContext(table, context);
-  if (!ctx) return EOF;
-  copyKeySetMask(keyMask, table->keys.mask);
+  if (!(ctx = getKeyContext(table, context))) return EOF;
 
-  {
-    int bitsForced = 0;
-    unsigned char function;
+  if (ctx->keyMap) {
+    int keyboardCommand = BRL_BLK_PASSDOTS;
+    int dotPressed = 0;
+    int spacePressed = 0;
 
-    for (function=0; function<KeyboardFunctionCount; function+=1) {
-      unsigned char key = ctx->mappedKeys[function];
+    {
+      unsigned int keyIndex;
 
-      if (key) {
-        const KeyboardFunctionEntry *kbf = &keyboardFunctionTable[function];
+      for (keyIndex=0; keyIndex<table->keys.count; keyIndex+=1) {
+        KeyboardFunction function = ctx->keyMap[table->keys.keys[keyIndex]];
 
-        if (key == BRL_MSK_ARG) {
-          bitsForced |= kbf->bit;
-        } else if (BITMASK_TEST(keyMask, key)) {
+        if (function == KBF_None) return EOF;
+
+        {
+          const KeyboardFunctionEntry *kbf = &keyboardFunctionTable[function];
+
+          keyboardCommand |= kbf->bit;
+
           if (!kbf->bit) {
             spacePressed = 1;
           } else if (kbf->bit & BRL_MSK_ARG) {
             dotPressed = 1;
           }
-
-          dotsCommand |= kbf->bit;
-          BITMASK_CLEAR(keyMask, key);
-          keyCount += 1;
         }
       }
+
+      if (dotPressed) keyboardCommand |= ctx->superimposedBits;
     }
 
-    if (keyCount < table->keys.count) return EOF;
-    if (dotPressed) dotsCommand |= bitsForced;
+    if (chordsRequested && spacePressed) {
+      keyboardCommand |= BRL_DOTC;
+    } else if (dotPressed == spacePressed) {
+      return EOF;
+    }
+
+    return keyboardCommand;
   }
 
-  if (chordsRequested && spacePressed) {
-    dotsCommand |= BRL_DOTC;
-  } else if (dotPressed == spacePressed) {
-    return EOF;
-  }
-
-  return dotsCommand;
+  return EOF;
 }
 
 static int
@@ -431,30 +426,47 @@ endLine (ListGenerationData *lgd) {
 }
 
 static int
-listKeyContext (ListGenerationData *lgd, const KeyContext *ctx, const wchar_t *keysPrefix) {
-  {
-    unsigned char function;
+listKeyboardFunctions (ListGenerationData *lgd, const KeyContext *ctx) {
+  if (ctx->keyMap) {
+    {
+      unsigned int key;
 
-    for (function=0; function<KeyboardFunctionCount; function+=1) {
-      unsigned char key = ctx->mappedKeys[function];
+      for (key=0; key<KEYS_PER_SET; key+=1) {
+        KeyboardFunction function = ctx->keyMap[key];
 
-      if (key) {
+        if (function != KBF_None) {
+          const KeyboardFunctionEntry *kbf = &keyboardFunctionTable[function];
+
+          if (!putUtf8String(lgd, kbf->name)) return 0;
+          if (!putCharacterString(lgd, WS_C(" key"))) return 0;
+          if (!putCharacterString(lgd, WS_C(": "))) return 0;
+          if (!putKeyName(lgd, 0, key)) return 0;
+          if (!endLine(lgd)) return 0;
+        }
+      }
+    }
+
+    {
+      KeyboardFunction function;
+
+      for (function=0; function<KBF_None; function+=1) {
         const KeyboardFunctionEntry *kbf = &keyboardFunctionTable[function];
 
-        if (!putUtf8String(lgd, kbf->name)) return 0;
-        if (!putCharacterString(lgd, WS_C(" key"))) return 0;
-        if (!putCharacterString(lgd, WS_C(": "))) return 0;
-
-        if (key == BRL_MSK_ARG) {
-          if (!putCharacterString(lgd, WS_C("superimposed"))) return 0;
-        } else {
-          if (!putKeyName(lgd, 0, key)) return 0;
+        if (ctx->superimposedBits & kbf->bit) {
+          if (!putUtf8String(lgd, kbf->name)) return 0;
+          if (!putCharacterString(lgd, WS_C(" key: superimposed"))) return 0;
+          if (!endLine(lgd)) return 0;
         }
-
-        if (!endLine(lgd)) return 0;
       }
     }
   }
+
+  return 1;
+}
+
+static int
+listKeyContext (ListGenerationData *lgd, const KeyContext *ctx, const wchar_t *keysPrefix) {
+  if (!listKeyboardFunctions(lgd, ctx)) return 0;
 
   {
     const KeyBinding *binding = ctx->keyBindingTable;
@@ -565,8 +577,8 @@ listKeyTable (KeyTable *table, KeyTableListHandler handleLine, void *data) {
     .handleLine = handleLine,
     .handlerData = data
   };
-  int ok = doListKeyTable(&lgd);
 
+  int result = doListKeyTable(&lgd);
   if (lgd.lineCharacters) free(lgd.lineCharacters);
-  return ok;
+  return result;
 }

@@ -26,8 +26,6 @@ extern "C" {
 #include "keysets.h"
 
 typedef enum {
-  KBF_Space,
-
   KBF_Dot1,
   KBF_Dot2,
   KBF_Dot3,
@@ -37,12 +35,13 @@ typedef enum {
   KBF_Dot7,
   KBF_Dot8,
 
+  KBF_Space,
   KBF_Shift,
   KBF_Uppercase,
   KBF_Control,
   KBF_Meta,
 
-  KeyboardFunctionCount
+  KBF_None /* must be last */
 } KeyboardFunction;
 
 typedef struct {
@@ -50,7 +49,7 @@ typedef struct {
   int bit;
 } KeyboardFunctionEntry;
 
-extern const KeyboardFunctionEntry keyboardFunctionTable[KeyboardFunctionCount];
+extern const KeyboardFunctionEntry keyboardFunctionTable[KBF_None];
 
 typedef struct {
   KeySetMask modifiers;
@@ -71,7 +70,8 @@ typedef struct {
   unsigned int keyBindingCount;
   const KeyBinding **sortedKeyBindings;
 
-  unsigned char mappedKeys[KeyboardFunctionCount];
+  unsigned char *keyMap;
+  int superimposedBits;
 } KeyContext;
 
 struct KeyTableStruct {

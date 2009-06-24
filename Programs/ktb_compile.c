@@ -28,9 +28,7 @@
 #include "ktb.h"
 #include "ktb_internal.h"
 
-const KeyboardFunctionEntry keyboardFunctionTable[KeyboardFunctionCount] = {
-  [KBF_Space] = {.name="space", .bit=0},
-
+const KeyboardFunctionEntry keyboardFunctionTable[KBF_None] = {
   [KBF_Dot1] = {.name="dot1", .bit=BRL_DOT1},
   [KBF_Dot2] = {.name="dot2", .bit=BRL_DOT2},
   [KBF_Dot3] = {.name="dot3", .bit=BRL_DOT3},
@@ -40,6 +38,7 @@ const KeyboardFunctionEntry keyboardFunctionTable[KeyboardFunctionCount] = {
   [KBF_Dot7] = {.name="dot7", .bit=BRL_DOT7},
   [KBF_Dot8] = {.name="dot8", .bit=BRL_DOT8},
 
+  [KBF_Space] = {.name="space", .bit=0},
   [KBF_Shift] = {.name="shift", .bit=BRL_FLG_CHAR_SHIFT},
   [KBF_Uppercase] = {.name="uppercase", .bit=BRL_FLG_CHAR_UPPER},
   [KBF_Control] = {.name="control", .bit=BRL_FLG_CHAR_CONTROL},
@@ -83,6 +82,9 @@ getKeyContext (KeyTableData *ktd, unsigned char context) {
       ctx->keyBindingsSize = 0;
       ctx->keyBindingCount = 0;
       ctx->sortedKeyBindings = NULL;
+
+      ctx->keyMap = NULL;
+      ctx->superimposedBits = 0;
     }
   }
 
@@ -150,6 +152,7 @@ destroyKeyContextTable (KeyContext *table, unsigned int count) {
     if (ctx->name) free(ctx->name);
     if (ctx->keyBindingTable) free(ctx->keyBindingTable);
     if (ctx->sortedKeyBindings) free(ctx->sortedKeyBindings);
+    if (ctx->keyMap) free(ctx->keyMap);
   }
 
   if (table) free(table);
@@ -337,7 +340,7 @@ getMappedKeyOperand (DataFile *file, unsigned char *key, KeyTableData *ktd) {
     unsigned char set;
 
     if (isKeyword(WS_C("superimpose"), name.characters, name.length)) {
-      *key = BRL_MSK_ARG;
+      *key = 0;
       return 1;
     }
 
@@ -369,7 +372,7 @@ parseKeyboardFunctionName (DataFile *file, unsigned char *function, const wchar_
   static const KeyboardFunctionEntry **sortedKeyboardFunctions = NULL;
 
   if (!sortedKeyboardFunctions) {
-    const KeyboardFunctionEntry **newTable = malloc(ARRAY_SIZE(newTable, KeyboardFunctionCount));
+    const KeyboardFunctionEntry **newTable = malloc(ARRAY_SIZE(newTable, KBF_None));
 
     if (!newTable) {
       LogError("malloc");
@@ -379,13 +382,13 @@ parseKeyboardFunctionName (DataFile *file, unsigned char *function, const wchar_
     {
       const KeyboardFunctionEntry *source = keyboardFunctionTable;
       const KeyboardFunctionEntry **target = newTable;
-      unsigned int count = KeyboardFunctionCount;
+      unsigned int count = KBF_None;
 
       do {
         *target++ = source++;
       } while (--count);
 
-      qsort(newTable, KeyboardFunctionCount, sizeof(*newTable), sortKeyboardFunctionNames);
+      qsort(newTable, KBF_None, sizeof(*newTable), sortKeyboardFunctionNames);
     }
 
     sortedKeyboardFunctions = newTable;
@@ -396,7 +399,7 @@ parseKeyboardFunctionName (DataFile *file, unsigned char *function, const wchar_
       .characters = characters,
       .length = length
     };
-    const KeyboardFunctionEntry **kbf = bsearch(&name, sortedKeyboardFunctions, KeyboardFunctionCount, sizeof(*sortedKeyboardFunctions), searchKeyboardFunctionName);
+    const KeyboardFunctionEntry **kbf = bsearch(&name, sortedKeyboardFunctions, KBF_None, sizeof(*sortedKeyboardFunctions), searchKeyboardFunctionName);
 
     if (kbf) {
       *function = *kbf - keyboardFunctionTable;
@@ -619,7 +622,6 @@ static int
 processMapOperands (DataFile *file, void *data) {
   KeyTableData *ktd = data;
   KeyContext *ctx = getCurrentKeyContext(ktd);
-
   if (!ctx) return 0;
 
   {
@@ -629,7 +631,21 @@ processMapOperands (DataFile *file, void *data) {
       unsigned char function;
 
       if (getKeyboardFunctionOperand(file, &function, ktd)) {
-        ctx->mappedKeys[function] = key;
+        if (!key) {
+          ctx->superimposedBits |= keyboardFunctionTable[function].bit;
+          return 1;
+        }
+
+        if (!ctx->keyMap) {
+          if (!(ctx->keyMap = malloc(ARRAY_SIZE(ctx->keyMap, KEYS_PER_SET)))) {
+            LogError("malloc");
+            return 0;
+          }
+
+          memset(ctx->keyMap, KBF_None, KEYS_PER_SET);
+        }
+
+        ctx->keyMap[key] = function;
         return 1;
       }
     }
