@@ -237,8 +237,8 @@ typedef enum {
   BRL_KEY_FUNCTION
 } BRL_Key;
 
-#define BRL_BLK_PASSCHAR 0X2100 /* input character as value */
-#define BRL_BLK_PASSDOTS 0X2200 /* input character as dots */
+#define BRL_BLK_PASSCHAR 0X2100 /* input unicode character */
+#define BRL_BLK_PASSDOTS 0X2200 /* input braille character */
 #define BRL_FLG_CHAR_SHIFT   0X010000 /* shift key pressed */
 #define BRL_FLG_CHAR_UPPER   0X020000 /* convert to uppercase */
 #define BRL_FLG_CHAR_CONTROL 0X040000 /* control key pressed */

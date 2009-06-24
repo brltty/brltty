@@ -117,7 +117,7 @@ getCommandEntry (int code) {
 void
 describeCommand (int command, char *buffer, size_t size, int details) {
   int blk = command & BRL_MSK_BLK;
-  int arg = command & BRL_MSK_ARG;
+  uint16_t arg = BRL_ARG_GET(command);
   const CommandEntry *cmd = getCommandEntry(command);
 
   if (!cmd) {
@@ -169,20 +169,28 @@ describeCommand (int command, char *buffer, size_t size, int details) {
           case BRL_BLK_PASSKEY:
             break;
 
-          case BRL_BLK_PASSDOTS: {
-            static const unsigned char dots[] = {BRL_DOT1, BRL_DOT2, BRL_DOT3, BRL_DOT4, BRL_DOT5, BRL_DOT6, BRL_DOT7, BRL_DOT8};
-            int dot;
-            unsigned int number = 0;
-
-            for (dot=0; dot<sizeof(dots); dot+=1) {
-              if (arg & dots[dot]) {
-                number = (number * 10) + (dot + 1);
-              }
-            }
-
-            snprintf(buffer, size, " %u", number);
+          case BRL_BLK_PASSCHAR:
+            snprintf(buffer, size, " [U+%04" PRIX16 "]", arg);
             break;
-          }
+
+          case BRL_BLK_PASSDOTS:
+            if (arg) {
+              static const unsigned char dots[] = {BRL_DOT1, BRL_DOT2, BRL_DOT3, BRL_DOT4, BRL_DOT5, BRL_DOT6, BRL_DOT7, BRL_DOT8};
+              int dot;
+              unsigned int number = 0;
+
+              for (dot=0; dot<sizeof(dots); dot+=1) {
+                if (arg & dots[dot]) {
+                  number = (number * 10) + (dot + 1);
+                }
+              }
+
+              snprintf(buffer, size, " [%s %u]",
+                       ((number < 10)? "dot": "dots"), number);
+            } else {
+              snprintf(buffer, size, " [space]");
+            }
+            break;
 
           default:
             snprintf(buffer, size, " 0X%02X", arg);
