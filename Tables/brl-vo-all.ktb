@@ -23,71 +23,61 @@ title Tieman Voyager
 # Default Bindings #
 ####################
 
-# Basic Navigation
+bind RoutingKey ROUTE
+bind Thumb1+Thumb4 CSRJMP_VERT
+
 bind Thumb1 FWINLT
 bind Thumb4 FWINRT
 bind Thumb2 LNUP
 bind Thumb3 LNDN
+
 bind Thumb1+Thumb2 TOP_LEFT
 bind Thumb1+Thumb3 BOT_LEFT
 bind Thumb4+Thumb2 TOP
 bind Thumb4+Thumb3 BOT
-bind Left BACK
-bind Right HOME
-bind Left+Right CSRTRK
+
 bind Up KEY_CURSOR_UP
 bind Down KEY_CURSOR_DOWN
 
-# Modes and Functions
-bind Dot1+Dot2+Dot5 HELP
-bind Thumb2+Dot1+Dot2+Dot5 HELP
-bind Thumb3+Dot1+Dot2+Dot5 HELP
-bind Dot1+Dot2+Dot3 LEARN
-bind Thumb2+Dot1+Dot2+Dot3 LEARN
-bind Thumb3+Dot1+Dot2+Dot3 LEARN
-bind Dot2+Dot3+Dot4 INFO
-bind Thumb2+Dot2+Dot3+Dot4 INFO
-bind Thumb3+Dot2+Dot3+Dot4 INFO
-bind Dot1+Dot2+Dot3+Dot4+Dot5+Dot6+Dot7+Dot8 PREFMENU
-bind Thumb2+Dot1+Dot2+Dot3+Dot4+Dot5+Dot6+Dot7+Dot8 PREFMENU
-bind Thumb3+Dot1+Dot2+Dot3+Dot4+Dot5+Dot6+Dot7+Dot8 PREFMENU
-bind Dot1+Dot3+Dot4 PREFMENU
-bind Thumb2+Dot1+Dot3+Dot4 PREFMENU
-bind Thumb3+Dot1+Dot3+Dot4 PREFMENU
-bind Dot1+Dot2+Dot3+Dot5 PREFLOAD
-bind Thumb2+Dot1+Dot2+Dot3+Dot5 PREFLOAD
-bind Thumb3+Dot1+Dot2+Dot3+Dot5 PREFLOAD
-bind Dot2+Dot4+Dot5+Dot6 PREFSAVE
-bind Thumb2+Dot2+Dot4+Dot5+Dot6 PREFSAVE
-bind Thumb3+Dot2+Dot4+Dot5+Dot6 PREFSAVE
+bind Left BACK
+bind Right HOME
+bind Left+Right CSRTRK
+
 bind Left+Up DISPMD
 bind Left+Down SIXDOTS
 bind Right+Up AUTOREPEAT
 bind Right+Down AUTOSPEAK
-bind Dot1 ATTRVIS
-bind Thumb2+Dot1 ATTRVIS
-bind Thumb3+Dot1 ATTRVIS
-bind Dot1+Dot4 CSRVIS
+
+bind Thumb2+Dot1+Dot2 SKPBLNKWINS
+bind Thumb2+Dot1+Dot2+Dot7 SKPBLNKWINS+off
+bind Thumb2+Dot1+Dot2+Dot8 SKPBLNKWINS+on
 bind Thumb2+Dot1+Dot4 CSRVIS
-bind Thumb3+Dot1+Dot4 CSRVIS
-bind Dot1+Dot2+Dot4 FREEZE
+bind Thumb2+Dot1+Dot4+Dot7 CSRVIS+off
+bind Thumb2+Dot1+Dot4+Dot8 CSRVIS+on
 bind Thumb2+Dot1+Dot2+Dot4 FREEZE
-bind Thumb3+Dot1+Dot2+Dot4 FREEZE
+bind Thumb2+Dot1+Dot2+Dot4+Dot7 FREEZE+off
+bind Thumb2+Dot1+Dot2+Dot4+Dot8 FREEZE+on
+bind Thumb2+Dot1+Dot2+Dot5 HELP
+bind Thumb2+Dot2+Dot4 SKPIDLNS
+bind Thumb2+Dot2+Dot4+Dot7 SKPIDLNS+off
+bind Thumb2+Dot2+Dot4+Dot8 SKPIDLNS+on
+bind Thumb2+Dot1+Dot2+Dot3 LEARN
+bind Thumb2+Dot1+Dot3+Dot4 PREFMENU
+bind Thumb2+Dot1+Dot3+Dot4+Dot7 PREFLOAD
+bind Thumb2+Dot1+Dot3+Dot4+Dot8 PREFSAVE
+bind Thumb2+Dot2+Dot3+Dot4 INFO
+bind Thumb2+Dot1+dot3+Dot6 ATTRVIS
+bind Thumb2+Dot1+Dot3+Dot6+Dot7 ATTRVIS+off
+bind Thumb2+Dot1+Dot3+Dot6+Dot8 ATTRVIS+on
 
-# Cursor Routing
-bind RoutingKey ROUTE
-bind Thumb1+Thumb4 CSRJMP_VERT
-
-# Cut and Paste
 bind Thumb1+RoutingKey CUTBEGIN
 bind Thumb2+RoutingKey CUTAPPEND
-bind Thumb4+RoutingKey CUTRECT
 bind Thumb3+RoutingKey CUTLINE
+bind Thumb4+RoutingKey CUTRECT
 bind Dot1+Dot2+Dot3+Dot4 PASTE
 bind Thumb2+Dot1+Dot2+Dot3+Dot4 PASTE
 bind Thumb3+Dot1+Dot2+Dot3+Dot4 PASTE
 
-# Fancy Navigation
 bind Left+Thumb1 LNBEG
 bind Left+Thumb4 LNEND
 bind Right+Thumb1 CHRLT
@@ -96,6 +86,7 @@ bind Up+Thumb1 FWINLTSKIP
 bind Up+Thumb4 FWINRTSKIP
 bind Down+Thumb1 PRSEARCH
 bind Down+Thumb4 NXSEARCH
+
 bind Left+Thumb2 ATTRUP
 bind Left+Thumb3 ATTRDN
 bind Right+Thumb2 PRDIFLN
@@ -104,53 +95,40 @@ bind Up+Thumb2 PRPGRPH
 bind Up+Thumb3 NXPGRPH
 bind Down+Thumb2 PRPROMPT
 bind Down+Thumb3 NXPROMPT
+
 Bind Left+RoutingKey SETMARK
 Bind Right+RoutingKey GOTOMARK
+bind Up+RoutingKey DESCCHAR
 bind Down+RoutingKey SETLEFT
+
 bind Thumb1+Thumb2+RoutingKey PRINDENT
 bind Thumb3+Thumb4+RoutingKey NXINDENT
 
-# Typing in Braille
-bind Thumb2+Thumb3 PASSDOTS
-bind Dot1+Dot2 KEY_BACKSPACE
-bind Thumb2+Dot1+Dot2 KEY_BACKSPACE
-bind Thumb3+Dot1+Dot2 KEY_BACKSPACE
-bind Dot1+Dot4+Dot5 KEY_DELETE
-bind Thumb2+Dot1+Dot4+Dot5 KEY_DELETE
-bind Thumb3+Dot1+Dot4+Dot5 KEY_DELETE
-bind Dot1+Dot5 KEY_ESCAPE
-bind Thumb2+Dot1+Dot5 KEY_ESCAPE
-bind Thumb3+Dot1+Dot5 KEY_ESCAPE
-bind Dot2+Dot4 KEY_INSERT
-bind Thumb2+Dot2+Dot4 KEY_INSERT
-bind Thumb3+Dot2+Dot4 KEY_INSERT
-bind Dot2+Dot3+Dot4+Dot5 KEY_TAB
-bind Thumb2+Dot2+Dot3+Dot4+Dot5 KEY_TAB
-bind Thumb3+Dot2+Dot3+Dot4+Dot5 KEY_TAB
-bind Dot4+Dot6 KEY_ENTER
-bind Thumb2+Dot4+Dot6 KEY_ENTER
-bind Thumb3+Dot4+Dot6 KEY_ENTER
-bind Dot2 KEY_PAGE_UP
-bind Thumb2+Dot2 KEY_PAGE_UP
-bind Thumb3+Dot2 KEY_PAGE_UP
-bind Dot5 KEY_PAGE_DOWN
-bind Thumb2+Dot5 KEY_PAGE_DOWN
-bind Thumb3+Dot5 KEY_PAGE_DOWN
-bind Dot3 KEY_HOME
-bind Thumb2+Dot3 KEY_HOME
-bind Thumb3+Dot3 KEY_HOME
-bind Dot6 KEY_END
-bind Thumb2+Dot6 KEY_END
-bind Thumb3+Dot6 KEY_END
-bind Dot7 KEY_CURSOR_LEFT
-bind Thumb2+Dot7 KEY_CURSOR_LEFT
-bind Thumb3+Dot7 KEY_CURSOR_LEFT
-bind Dot8 KEY_CURSOR_RIGHT
-bind Thumb2+Dot8 KEY_CURSOR_RIGHT
-bind Thumb3+Dot8 KEY_CURSOR_RIGHT
+map Dot1 DOT1
+map Dot2 DOT2
+map Dot3 DOT3
+map Dot4 DOT4
+map Dot5 DOT5
+map Dot6 DOT6
+map Dot7 DOT7
+map Dot8 DOT8
+map Thumb2 SPACE
+map Thumb3 SPACE
+map Left UPPERCASE
+map Right CONTROL
 
-# Virtual Console Selection
-bind Up+RoutingKey SWITCHVT
+bind Thumb3+Dot1+Dot2 KEY_BACKSPACE
+bind Thumb3+Dot1+Dot4+Dot5 KEY_DELETE
+bind Thumb3+Dot1+Dot5 KEY_ESCAPE
+bind Thumb3+Dot2+Dot4 KEY_INSERT
+bind Thumb3+Dot2+Dot3+Dot4+Dot5 KEY_TAB
+bind Thumb3+Dot4+Dot6 KEY_ENTER
+bind Thumb3+Dot2 KEY_PAGE_UP
+bind Thumb3+Dot5 KEY_PAGE_DOWN
+bind Thumb3+Dot3 KEY_HOME
+bind Thumb3+Dot6 KEY_END
+bind Thumb3+Dot7 KEY_CURSOR_LEFT
+bind Thumb3+Dot8 KEY_CURSOR_RIGHT
 
 
 #################
