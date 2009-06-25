@@ -77,6 +77,23 @@ getKeyBinding (KeyTable *table, unsigned char context, unsigned char set, unsign
 }
 
 static int
+isModifiers (KeyTable *table, unsigned char context) {
+  const KeyContext *ctx = getKeyContext(table, context);
+
+  if (ctx) {
+    const KeyBinding *binding = ctx->keyBindingTable;
+    unsigned int count = ctx->keyBindingCount;
+
+    while (count) {
+      if (isKeySubset(binding->keys.modifiers, table->keys.mask)) return 1;
+      binding += 1, count -= 1;
+    }
+  }
+
+  return 0;
+}
+
+static int
 getKeyboardCommand (KeyTable *table, unsigned char context) {
   int chordsRequested = context == BRL_CTX_CHORDS;
   const KeyContext *ctx;
@@ -123,23 +140,6 @@ getKeyboardCommand (KeyTable *table, unsigned char context) {
   }
 
   return EOF;
-}
-
-static int
-isModifiers (KeyTable *table, unsigned char context) {
-  const KeyContext *ctx = getKeyContext(table, context);
-
-  if (ctx) {
-    const KeyBinding *binding = ctx->keyBindingTable;
-    unsigned int count = ctx->keyBindingCount;
-
-    while (count) {
-      if (isKeySubset(binding->keys.modifiers, table->keys.mask)) return 1;
-      binding += 1, count -= 1;
-    }
-  }
-
-  return 0;
 }
 
 void
@@ -236,7 +236,11 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
       }
 
       if (command == EOF) {
-        if (isModifiers(table, context)) state = KTS_MODIFIERS;
+        if (isModifiers(table, context)) {
+          state = KTS_MODIFIERS;
+        } else if (context != BRL_CTX_DEFAULT) {
+          if (isModifiers(table, BRL_CTX_DEFAULT)) state = KTS_MODIFIERS;
+        }
 
         if (table->command != EOF) {
           table->command = EOF;
