@@ -32,29 +32,53 @@
 #define BRL_STATUS_FIELDS sfCursorAndWindowColumn, sfCursorAndWindowRow, sfStateDots
 #define BRL_HAVE_STATUS_CELLS
 #include "brl_driver.h"
+#include "brldefs-cb.h"
 #include "braille.h"
 #include "io_serial.h"
 
-/* Command translation table: */
-static int cmdtrans[0X100] = {
-   #include "cmdtrans.h"		/* for keybindings */
+static KEY_NAME_TABLE(keyNames_all) = {
+  KEY_NAME_ENTRY(CB_KEY_Dot1, "Dot1"),
+  KEY_NAME_ENTRY(CB_KEY_Dot2, "Dot2"),
+  KEY_NAME_ENTRY(CB_KEY_Dot3, "Dot3"),
+  KEY_NAME_ENTRY(CB_KEY_Dot4, "Dot4"),
+  KEY_NAME_ENTRY(CB_KEY_Dot5, "Dot5"),
+  KEY_NAME_ENTRY(CB_KEY_Dot6, "Dot6"),
+
+  KEY_NAME_ENTRY(CB_KEY_Thumb1, "Thumb1"),
+  KEY_NAME_ENTRY(CB_KEY_Thumb2, "Thumb2"),
+  KEY_NAME_ENTRY(CB_KEY_Thumb3, "Thumb3"),
+  KEY_NAME_ENTRY(CB_KEY_Thumb4, "Thumb4"),
+  KEY_NAME_ENTRY(CB_KEY_Thumb5, "Thumb5"),
+
+  KEY_NAME_ENTRY(CB_KEY_Status1, "Status1"),
+  KEY_NAME_ENTRY(CB_KEY_Status2, "Status2"),
+  KEY_NAME_ENTRY(CB_KEY_Status3, "Status3"),
+  KEY_NAME_ENTRY(CB_KEY_Status4, "Status4"),
+  KEY_NAME_ENTRY(CB_KEY_Status5, "Status5"),
+  KEY_NAME_ENTRY(CB_KEY_Status6, "Status6"),
+
+  KEY_SET_ENTRY(CB_SET_RoutingKeys, "RoutingKey"),
+
+  LAST_KEY_NAME_ENTRY
 };
 
-static TranslationTable outputTable;	/* dot mapping table (output) */
+static KEY_NAME_TABLE_LIST(keyNameTables_all) = {
+  keyNames_all,
+  NULL
+};
+
 SerialDevice *CB_serialDevice;			/* file descriptor for Braille display */
-static int brl_cols;			/* file descriptor for Braille display */
 int CB_charactersPerSecond;			/* file descriptor for Braille display */
+
+static TranslationTable outputTable;	/* dot mapping table (output) */
+static int brl_cols;			/* file descriptor for Braille display */
 static unsigned char *prevdata;	/* previously received data */
 static unsigned char status[5], oldstatus[5];	/* status cells - always five */
 static unsigned char *rawdata;		/* writebrl() buffer for raw Braille data */
 static short rawlen;			/* length of rawdata buffer */
 
-/* Function prototypes: */
-static int getbrlkey (void);		/* get a keystroke from the CombiBraille */
-
 static int
-brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
-{
+brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   short n, success;		/* loop counters, flags, etc. */
   unsigned char *init_seq = (unsigned char *)INIT_SEQ;	/* bytewise accessible copies */
   unsigned char *init_ack = (unsigned char *)INIT_ACK;
@@ -116,6 +140,7 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device)
   brl->textRows = BRLROWS;
   brl->statusColumns = 5;
   brl->statusRows = 1;
+  brl->keyNameTables = keyNameTables_all;
 
   /* Allocate space for buffers */
   prevdata = mallocWrapper (brl->textColumns * brl->textRows);
@@ -134,10 +159,8 @@ failure:
   return 0;
 }
 
-
 static void
-brl_destruct (BrailleDisplay *brl)
-{
+brl_destruct (BrailleDisplay *brl) {
   unsigned char *pre_data = (unsigned char *)PRE_DATA;	/* bytewise accessible copies */
   unsigned char *post_data = (unsigned char *)POST_DATA;
   unsigned char *close_seq = (unsigned char *)CLOSE_SEQ;
@@ -171,10 +194,8 @@ brl_destruct (BrailleDisplay *brl)
   serialCloseDevice (CB_serialDevice);
 }
 
-
 static int
-brl_writeStatus (BrailleDisplay *brl, const unsigned char *s)
-{
+brl_writeStatus (BrailleDisplay *brl, const unsigned char *s) {
   short i;
 
   /* Dot mapping: */
@@ -182,10 +203,8 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char *s)
   return 1;
 }
 
-
 static int
-brl_writeWindow (BrailleDisplay *brl, const wchar_t *text)
-{
+brl_writeWindow (BrailleDisplay *brl, const wchar_t *text) {
   short i;			/* loop counter */
   unsigned char *pre_data = (unsigned char *)PRE_DATA;	/* bytewise accessible copies */
   unsigned char *post_data = (unsigned char *)POST_DATA;
@@ -230,36 +249,8 @@ brl_writeWindow (BrailleDisplay *brl, const wchar_t *text)
   return 1;
 }
 
-
 static int
-brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context)
-{
-  static int status = 0;	/* cursor routing keys mode */
-  int cmd = getbrlkey();
-  if (cmd != EOF) {
-    int blk = (cmd = cmdtrans[cmd]) & BRL_MSK_BLK;
-    if (blk) {
-      int arg = cmd & BRL_MSK_ARG;
-      if (arg == BRL_MSK_ARG) {
-        status = blk;
-	return BRL_CMD_NOOP;
-      }
-      if (arg == (BRL_MSK_ARG - 1)) {
-        cmd += brl_cols - 1;
-      }
-      if (status && (blk == BRL_BLK_ROUTE)) {
-        cmd = status + arg;
-      }
-    }
-    status = 0;
-  }
-  return cmd;
-}
-
-
-static int
-getbrlkey (void)
-{
+getKey (void) {
   static short ptr = 0;		/* input queue pointer */
   static unsigned char q[4];	/* input queue */
   unsigned char c;		/* character buffer */
@@ -281,5 +272,46 @@ getbrlkey (void)
 	return (q[2] ? q[2] : q[3] | 0x0060);
       return ((int) q[2] | 0x80);
     }
+  return EOF;
+}
+
+static void
+putKey (unsigned char set, unsigned char key) {
+  enqueueKeyEvent(set, key, 1);
+  enqueueKeyEvent(set, key, 0);
+}
+
+static void
+putKeys (unsigned char bits, unsigned char keys, unsigned char count) {
+  const unsigned char set = CB_SET_NavigationKeys;
+  unsigned int key = 0;
+
+  while (key < count) {
+    if (bits & (1 << key)) enqueueKeyEvent(set, keys+key, 1);
+    key += 1;
+  }
+
+  while (key) {
+    key -= 1;
+    if (bits & (1 << key)) enqueueKeyEvent(set, keys+key, 0);
+  }
+}
+
+static int
+brl_readCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
+  int key;
+
+  while ((key = getKey()) != EOF) {
+    if (key >= 0X86) {
+      putKey(CB_SET_RoutingKeys, (key - 0X86));
+    } else if (key >= 0X80) {
+      putKey(CB_SET_NavigationKeys, (CB_KEY_Status1 + (key - 0X80)));
+    } else if (key >= 0X60) {
+      putKeys(key, CB_KEY_Thumb1, 5);
+    } else if (key < 0X40) {
+      putKeys(key, CB_KEY_Dot6, 6);
+    }
+  }
+
   return EOF;
 }

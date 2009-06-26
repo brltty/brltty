@@ -1,0 +1,108 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2009 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+title CombiBraille
+
+
+####################
+# Default Bindings #
+####################
+
+bind Dot1 LNUP
+bind Dot4 LNDN
+bind Dot1+Dot2+Dot3 TOP
+bind Dot4+Dot5+Dot6 BOT
+bind Dot1+Dot2 WINUP
+bind Dot4+Dot5 WINDN
+
+bind Dot3 FWINLT
+bind Dot6 FWINRT
+bind Dot2+Dot4+Dot6 HWINLT
+bind Dot1+Dot3+Dot5 HWINRT
+bind Dot1+Dot3 CHRLT
+bind Dot4+Dot6 CHRRT
+bind Dot2+Dot3 LNBEG
+bind Dot5+Dot6 LNEND
+
+bind Dot3+Dot6 HOME
+bind Dot1+Dot4 CSRTRK
+bind Dot5 CSRVIS
+bind Dot2+Dot4+Dot5 SKPIDLNS
+bind Dot2+Dot4+Dot5+Dot6 SLIDEWIN
+bind Dot2+Dot3+Dot5 SIXDOTS
+bind Dot2+Dot3+Dot4 TUNES
+
+bind Dot1+Dot2+Dot4 FREEZE
+bind Dot1+Dot3+Dot4 DISPMD
+
+bind Dot1+Dot2+Dot5 HELP
+bind Dot3+Dot4 INFO
+bind Dot1+Dot3+Dot4+Dot6 PREFMENU
+bind Dot1+Dot2+Dot3+Dot5 PREFLOAD
+bind Dot1+Dot2+Dot3+Dot4+Dot5+Dot6 PREFSAVE
+
+bind Dot1+Dot2+Dot3+Dot4 PASTE
+
+bind Dot1+Dot6 MUTE
+bind Dot1+Dot5+Dot6 SAY_LINE
+
+bind Thumb1 FWINLT
+bind Thumb2 LNUP
+bind Thumb3 CSRTRK
+bind Thumb4 LNDN
+bind Thumb5 FWINRT
+
+bind Thumb1+Thumb2 TOP_LEFT
+bind Thumb2+Thumb3 TOP
+bind Thumb3+Thumb4 BOT
+bind Thumb4+Thumb5 BOT_LEFT
+
+bind Thumb1+Thumb3 LNBEG
+bind Thumb3+Thumb5 LNEND
+
+bind Thumb1+Thumb4 HWINLT
+bind Thumb2+Thumb5 HWINRT
+
+bind Thumb1+Thumb5 SAY_LINE
+bind Thumb2+Thumb4 MUTE
+
+bind Status1 CONTEXT+1
+bind Status2 CONTEXT+2
+bind Status3 CONTEXT+3
+bind Status4 CONTEXT+4
+bind Status5 LEARN
+bind Status6 HELP
+
+bind RoutingKey ROUTE
+
+
+############################
+# Routing Key Alternatives #
+############################
+
+context 1
+bind !RoutingKey CUTBEGIN
+
+context 2
+bind !RoutingKey CUTAPPEND
+
+context 3
+bind !RoutingKey CUTLINE
+
+context 4
+bind !RoutingKey CUTRECT
