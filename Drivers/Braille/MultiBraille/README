@@ -20,14 +20,16 @@ SUPPORTED HARDWARE
 ==================
 
 This driver has only been tested on a "tieman Braillenotebook V2.1" with a
-build-in MultiBraille MB145CR, but the following hardware should also be supported:
+build-in MultiBraille MB145CR, but the following hardware should also be
+supported:
 
 - Brailleline 125 (MB125CR)
 - Brailleline 145 (MB145CR) / PICO II
 - Brailleline 185 (MB185CR)
 
-I received the technical documentation for these lines from tieman germany and 
-developed the driver so that it should be able to identify the above listed lines.
+I received the technical documentation for these displays from tieman germany
+and developed the driver so that it should be able to identify the above listed
+displays.
 
 Problem:
 the tech. doc. is poor (I know that my spoken/written english is not
@@ -36,8 +38,8 @@ You have to be very creative to get something out from these docs...
 A lot of trial and error-programming...
 
 I did not include support for the speech synthesiser yet.
-Mainly because I didn't get the clue how to realize it - the section in the tech.
-docs about this is too poor or I didn't just get it ...
+Mainly because I didn't get the clue how to realize it - the section in the
+tech. docs about this is too poor or I didn't just get it ...
 
 
 CONFIGURATION AND COMPILATION
@@ -161,15 +163,15 @@ Dot Number      Dot Present Means
 THANKS
 ======
 
-Guenter Grill   The owner of the braille line
-(owner of line) Testing, tips, phone calls to tieman germany and netherl.
+Guenter Grill   The owner of the braille display
+(owner)         Testing, tips, phone calls to tieman germany and netherl.
                 to organise technical documentation (was a really hard job -
                 tieman ignored my emails, but Guenter didn't give up calling -
                 finally we've received the needed information ;-)
 
 Mario Lang      Tips, explanations, ...
-(Uni Graz)      Mario is also using linux and brltty, but he owns a combi-
-                braille. So he could help me finding the differences
+(TU Graz)       Mario is also using linux and brltty and he had access to a
+                combibraille. So he could help me finding the differences
                 between CombiBraille and MultiBraille
 
 Nicolas Pitre   For always emailing back so fast when I needed some
@@ -183,7 +185,7 @@ PERSONAL NOTES
 
 I myself can't read braille. Neither with sensing nor visually.
 For me it's absolutely impressing how blind people work on computers
-using a brailleline that only displays 40 chars / 1 line.
+using a braille display that only displays 40 chars / 1 line.
 The information (the whole screen) needs to be 'rebuilt internally'.
 I even can't remember a number with six digits ... It is amazing to me.
 
@@ -194,10 +196,10 @@ and so on - finally I learned to use 'lynx'! (I began to like this tool).
 
 At the beginning I only thought that I need to install linux on Guenter's
 notebook.
-But - his braille line wasn't supported. So I wrote this driver. I learned
+But - his braille display wasn't supported. So I wrote this driver. I learned
 many new things when writing the driver and I hope that this driver will help
-many people who need braille lines. It was my first contact with braille and I
-hope the result is not that bad ;-)
+many people who need braille displays. It was my first contact with braille and
+I hope the result is not that bad ;-)
 
 If you find bugs, have some comments (solving something in a better way, ..),
 please contact me:

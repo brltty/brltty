@@ -32,11 +32,11 @@
  */
 
 
-/* Description of the escape-sequences used by these lines:
+/* Description of the escape-sequences used by these displays:
  - [ESC][0]
-   signal sent to the braille line so that we get the init message
+   signal sent to the braille display so that we get the init message
  - [ESC][V][braille length][firmware version][CR]
-   init message sent back by the braille line
+   init message sent back by the braille display
    * braille length:   20 / 25 / 40 / 80 (decimal)
    * firmware version: needs to be divided by 10.0: so if we receive
      21 (decimal) --> version 2.1
@@ -44,7 +44,7 @@
    don't know what this is good for. description: init the PC for reading
    the top keys as braille keys (0: mode off, 1: mode on)
  - [ESC][Z][braille data][CR]
-   braille data from PC to braille line
+   braille data from PC to braille display
    (braille-encoded characters ([20|25|40|80] * 8 bit)
  - [ESC][B][beep data][CR]
    send a beep to the piezo-beeper:
@@ -71,13 +71,13 @@
 
 static TranslationTable outputTable;	/* dot mapping table (output) */
 SerialDevice *MB_serialDevice;			/* file descriptor for Braille display */
-static int brlcols;		/* length of braille line (auto-detected) */
+static int brlcols;		/* length of braille display (auto-detected) */
 static unsigned char *prevdata;	/* previously received data */
 static unsigned char status[5], oldstatus[5];	/* status cells - always five */
 static unsigned char *rawdata;		/* writebrl() buffer for raw Braille data */
 static short rawlen;			/* length of rawdata buffer */
 
-/* message event coming from the braille line to the PC */
+/* message event coming from the braille display to the PC */
 typedef struct KeyStroke {
 	int block;				/* EOF or blocknumber: */
 										/* front keys: 84 (~ [ESC][T][keynumber][CR] )
@@ -108,7 +108,7 @@ static int brl_construct (BrailleDisplay *brl, char **parameters, const char *de
 		return 0;
 	}
 
-	brlcols = -1;		/* length of braille line (auto-detected) */
+	brlcols = -1;		/* length of braille display (auto-detected) */
 	prevdata = rawdata = NULL;		/* clear pointers */
 
 	/* No need to load translation tables, as these are now
