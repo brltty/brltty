@@ -71,7 +71,6 @@ SerialDevice *CB_serialDevice;			/* file descriptor for Braille display */
 int CB_charactersPerSecond;			/* file descriptor for Braille display */
 
 static TranslationTable outputTable;	/* dot mapping table (output) */
-static int brl_cols;			/* file descriptor for Braille display */
 static unsigned char *prevdata;	/* previously received data */
 static unsigned char status[5], oldstatus[5];	/* status cells - always five */
 static unsigned char *rawdata;		/* writebrl() buffer for raw Braille data */
@@ -79,12 +78,6 @@ static short rawlen;			/* length of rawdata buffer */
 
 static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
-  short n, success;		/* loop counters, flags, etc. */
-  unsigned char *init_seq = (unsigned char *)INIT_SEQ;	/* bytewise accessible copies */
-  unsigned char *init_ack = (unsigned char *)INIT_ACK;
-  unsigned char c;
-  char id = -1;
-
   {
     static const DotsTable dots = {0X01, 0X02, 0X04, 0X80, 0X40, 0X20, 0X08, 0X10};
     makeOutputTable(dots, outputTable);
@@ -97,65 +90,82 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
 
   prevdata = rawdata = NULL;		/* clear pointers */
 
-  /* No need to load translation tables, as these are now
-   * defined in tables.h
-   */
+  if ((CB_serialDevice = serialOpenDevice(device))) {
+    if (serialRestartDevice(CB_serialDevice, BAUDRATE)) {
+      static const unsigned char init_seq[] = { 27, '?' };
+      static const unsigned char init_ack[] = { 27, '?' };
 
-  /* Now open the Braille display device for random access */
-  if (!(CB_serialDevice = serialOpenDevice(device))) goto failure;
-  if (!serialRestartDevice(CB_serialDevice, BAUDRATE)) goto failure;
-  CB_charactersPerSecond = BAUDRATE / 10;
+      CB_charactersPerSecond = BAUDRATE / 10;
 
-  /* CombiBraille initialisation procedure: */
-  success = 0;
-  if (init_seq[0])
-    if (serialWriteData (CB_serialDevice, init_seq + 1, init_seq[0]) != init_seq[0])
-      goto failure;
-  hasTimedOut (0);		/* initialise timeout testing */
-  n = 0;
-  do
-    {
-      approximateDelay (20);
-      if (serialReadData (CB_serialDevice, &c, 1, 0, 0) != 1)
-        continue;
-      if (n < init_ack[0] && c != init_ack[1 + n])
-        continue;
-      if (n == init_ack[0]) {
-        id = c;
-        success = 1;
-        break;
+      if (serialWriteData(CB_serialDevice, init_seq, sizeof(init_seq)) == sizeof(init_seq)) {
+        short n;
+        unsigned char c;
+        signed char id = -1;
+
+        hasTimedOut(0);		/* initialise timeout testing */
+        n = 0;
+        do {
+          approximateDelay (20);
+          if (serialReadData(CB_serialDevice, &c, 1, 0, 0) != 1)
+            continue;
+          if (n < sizeof(init_ack) && c != init_ack[n])
+            continue;
+          if (n == sizeof(init_ack)) {
+            id = c;
+            break;
+          }
+          n++;
+        } while (!hasTimedOut(ACK_TIMEOUT) && n <= sizeof(init_ack));
+
+        if (id != -1) {
+          if (serialSetFlowControl(CB_serialDevice, SERIAL_FLOW_HARDWARE)) {
+            typedef struct {
+              char identifier;
+              char textColumns;
+            } ModelEntry;
+
+            static const ModelEntry modelTable[] = {
+              { .identifier = 0, .textColumns = 20 },
+              { .identifier = 1, .textColumns = 40 },
+              { .identifier = 2, .textColumns = 80 },
+              { .identifier = 7, .textColumns = 20 },
+              { .identifier = 8, .textColumns = 40 },
+              { .identifier = 9, .textColumns = 80 },
+              { .textColumns = 0 }
+            };
+
+            const ModelEntry *model = modelTable;
+
+            while (model->textColumns) {
+              if (id == model->identifier) break;
+              model++;
+            }
+              
+            if (model->textColumns) {
+              brl->textColumns = model->textColumns;
+              brl->textRows = BRLROWS;
+              brl->statusColumns = 5;
+              brl->statusRows = 1;
+              brl->keyNameTables = keyNameTables_all;
+
+              /* Allocate space for buffers */
+              prevdata = mallocWrapper (brl->textColumns * brl->textRows);
+              /* rawdata has to have room for the pre- and post-data sequences,
+               * the status cells, and escaped 0x1b's: */
+              rawdata = mallocWrapper (20 + brl->textColumns * brl->textRows * 2);
+
+              return 1;
+            } else {
+              LogPrint(LOG_ERR, "Detected unknown CombiBraille model with ID %02X.", id);
+            }
+          }
+        }
       }
-      n++;
-    }
-  while (!hasTimedOut (ACK_TIMEOUT) && n <= init_ack[0]);
-
-  if (!success)
-    {
-      goto failure;
     }
 
-  if (!serialSetFlowControl(CB_serialDevice, SERIAL_FLOW_HARDWARE)) goto failure;
+    serialCloseDevice(CB_serialDevice);
+  }
 
-  brl->textColumns = brl_cols = BRLCOLS(id);
-  brl->textRows = BRLROWS;
-  brl->statusColumns = 5;
-  brl->statusRows = 1;
-  brl->keyNameTables = keyNameTables_all;
-
-  /* Allocate space for buffers */
-  prevdata = mallocWrapper (brl->textColumns * brl->textRows);
-  /* rawdata has to have room for the pre- and post-data sequences,
-   * the status cells, and escaped 0x1b's: */
-  rawdata = mallocWrapper (20 + brl->textColumns * brl->textRows * 2);
-  return 1;
-
-failure:
-  if (prevdata)
-    free (prevdata);
-  if (rawdata)
-    free (rawdata);
-  if (CB_serialDevice)
-    serialCloseDevice (CB_serialDevice);
   return 0;
 }
 
