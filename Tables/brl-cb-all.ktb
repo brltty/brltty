@@ -23,6 +23,26 @@ title CombiBraille
 # Default Bindings #
 ####################
 
+bind Thumb1 FWINLT
+bind Thumb2 LNUP
+bind Thumb3 CSRTRK
+bind Thumb4 LNDN
+bind Thumb5 FWINRT
+
+bind Thumb1+Thumb2 TOP_LEFT
+bind Thumb2+Thumb3 TOP
+bind Thumb3+Thumb4 BOT
+bind Thumb4+Thumb5 BOT_LEFT
+
+bind Thumb1+Thumb3 LNBEG
+bind Thumb3+Thumb5 LNEND
+
+bind Thumb1+Thumb4 HWINLT
+bind Thumb2+Thumb5 HWINRT
+
+bind Thumb1+Thumb5 SAY_LINE
+bind Thumb2+Thumb4 MUTE
+
 bind Dot1 LNUP
 bind Dot4 LNDN
 bind Dot1+Dot2+Dot3 TOP
@@ -60,26 +80,6 @@ bind Dot1+Dot2+Dot3+Dot4 PASTE
 
 bind Dot1+Dot6 MUTE
 bind Dot1+Dot5+Dot6 SAY_LINE
-
-bind Thumb1 FWINLT
-bind Thumb2 LNUP
-bind Thumb3 CSRTRK
-bind Thumb4 LNDN
-bind Thumb5 FWINRT
-
-bind Thumb1+Thumb2 TOP_LEFT
-bind Thumb2+Thumb3 TOP
-bind Thumb3+Thumb4 BOT
-bind Thumb4+Thumb5 BOT_LEFT
-
-bind Thumb1+Thumb3 LNBEG
-bind Thumb3+Thumb5 LNEND
-
-bind Thumb1+Thumb4 HWINLT
-bind Thumb2+Thumb5 HWINRT
-
-bind Thumb1+Thumb5 SAY_LINE
-bind Thumb2+Thumb4 MUTE
 
 bind Status1 CONTEXT+1
 bind Status2 CONTEXT+2
