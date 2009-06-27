@@ -811,11 +811,7 @@ writeBookwormCells (BrailleDisplay *brl) {
 
 static int
 writeEvolutionCells (BrailleDisplay *brl) {
-  unsigned char buffer[model->textCells];
-
-  memcpy(buffer, rawData, model->textCells);
-
-  return writeExtendedPacket(brl, HT_EXTPKT_Braille, buffer, sizeof(buffer));
+  return writeExtendedPacket(brl, HT_EXTPKT_Braille, rawData, model->textCells);
 }
 
 static int
