@@ -258,10 +258,10 @@ static void brl_destruct(BrailleDisplay *brl)
 static int brl_writeWindow(BrailleDisplay *brl, const wchar_t *text)
 {
   /* The following table defines how internal brltty format is converted to */
-  /* VisioBraille format. Do *NOT* modify this table. */
+  /* VisioBraille format. */
   /* The table is declared static so that it is in data segment and not */
   /* in the stack */ 
-  static TranslationTable outputTable = {
+  static const TranslationTable outputTable = {
     [0] = 0X20,
     [BRL_DOT1] = 0X41,
     [BRL_DOT1 | BRL_DOT2] = 0X42,
