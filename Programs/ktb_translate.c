@@ -188,11 +188,11 @@ processKeyEvent (KeyTable *table, unsigned char context, unsigned char set, unsi
 
   if (set) {
     if (press) {
-      const KeyBinding *binding = getKeyBinding(table, context, set, key);
+      const KeyBinding *binding = getKeyBinding(table, context, set, 0);
 
       if (!binding)
         if (context != BRL_CTX_DEFAULT)
-          binding = getKeyBinding(table, BRL_CTX_DEFAULT, set, key);
+          binding = getKeyBinding(table, BRL_CTX_DEFAULT, set, 0);
 
       if (binding) {
         command = binding->command + key;
