@@ -25,27 +25,6 @@
  *  some defines and the big config table
  */
 
-#include "prologue.h"
-
-#include "brl.h"
-typedef enum {
-  BRL_CMD_INPUT = BRL_driverCommandCount /* toggle input mode */,
-  BRL_CMD_SWSIM_LC /* simulate left switch centered */,
-  BRL_CMD_SWSIM_LR /* simulate left switch rear */,
-  BRL_CMD_SWSIM_LF /* simulate left switch front */,
-  BRL_CMD_SWSIM_RC /* simulate right switch centered */,
-  BRL_CMD_SWSIM_RR /* simulate right switch rear */,
-  BRL_CMD_SWSIM_RF /* simulate right switch front */,
-  BRL_CMD_SWSIM_BC /* simulate both switches centered */,
-  BRL_CMD_SWSIM_BQ /* show positions of both switches */,
-  BRL_CMD_NODOTS = BRL_BLK_PASSDOTS /* input character corresponding to no braille dots */
-} InternalDriverCommands;
-
-typedef enum {
-  BRL_GSC_INPUT = BRL_genericStatusCellCount /* input mode */,
-  InternalStatusCellCount
-} InternalStatusCell;
-
 #define KEY_NONE     0X000
 #define KEY_ROUTING1 0X001  /* first row of routing keys */
 #define KEY_ROUTING2 0X002  /* second row of routing keys */
@@ -222,7 +201,7 @@ PM_BEGIN_STATUS(22)
   OFFS_FLAG  + BRL_GSC_SKPIDLNS,
   OFFS_FLAG  + BRL_GSC_TUNES,
   OFFS_EMPTY,
-  OFFS_FLAG  + BRL_GSC_INPUT,
+  OFFS_EMPTY,
   OFFS_FLAG  + BRL_GSC_AUTOSPEAK,
   OFFS_FLAG  + BRL_GSC_AUTOREPEAT,
   OFFS_EMPTY
@@ -389,7 +368,6 @@ PM_END_MODIFIERS
       { BRL_BLK_PASSKEY+BRL_KEY_CURSOR_RIGHT, KEYS_FRONT +  9, 0020 }, \
       { BRL_BLK_PASSKEY+BRL_KEY_FUNCTION    , KEY_ROUTING1   , 0020 }, \
                                                                \
-      { BRL_CMD_NODOTS                  , KEYS_FRONT +  7, 0004 }, \
       { BRL_BLK_PASSKEY+BRL_KEY_ESCAPE      , KEYS_FRONT +  6, 0004 }, \
       { BRL_BLK_PASSKEY+BRL_KEY_TAB         , KEYS_FRONT +  8, 0004 }, \
       { BRL_BLK_PASSKEY+BRL_KEY_BACKSPACE   , KEYS_FRONT +  5, 0004 }, \
@@ -449,9 +427,6 @@ PM_END_MODIFIERS
   CMDS_BAR(KEY_NONE, MOD_BAR_KRR|(mod), \
            BRL_CMD_SAY_ABOVE, BRL_CMD_SAY_BELOW, BRL_CMD_SAY_LOUDER, BRL_CMD_SAY_SOFTER, \
            BRL_CMD_MUTE, BRL_CMD_SAY_LINE, BRL_CMD_SAY_SLOWER, BRL_CMD_SAY_FASTER), \
-  CMDS_BAR(KEY_NONE, MOD_BAR_KRF|(mod), \
-           BRL_CMD_SPKHOME, BRL_CMD_TUNES, BRL_CMD_RESTARTSPEECH, BRL_CMD_SWSIM_BQ, \
-           BRL_CMD_SKPIDLNS, BRL_CMD_SKPBLNKWINS, BRL_CMD_NOOP, BRL_CMD_SLIDEWIN), \
   {BRL_BLK_ROUTE, KEY_ROUTING1, (mod)}, \
   CMDS_BAR(KEY_ROUTING1, (mod), \
            BRL_BLK_PRINDENT, BRL_BLK_NXINDENT, BRL_BLK_SETLEFT, BRL_BLK_DESCCHAR, \
@@ -479,11 +454,7 @@ PM_END_MODIFIERS
            BRL_CMD_MENU_PREV_SETTING, BRL_CMD_MENU_NEXT_SETTING, BRL_CMD_PREFLOAD, BRL_CMD_PREFSAVE), \
   CMDS_BAR_COMMON(CMDS_BAR_COMMON_ALL)
 
-#define CMDS_BAR_COMMON_SWSIM(mod) \
-  CMDS_BAR(KEY_NONE, MOD_BAR_KLF|MOD_BAR_KRF|(mod), \
-           BRL_CMD_SWSIM_LC, BRL_CMD_SWSIM_RC, BRL_CMD_SWSIM_BQ, BRL_CMD_SWSIM_BC, \
-           BRL_CMD_SWSIM_LR, BRL_CMD_SWSIM_RR, BRL_CMD_SWSIM_LF, BRL_CMD_SWSIM_RF)
-#define CMDS_BAR_SWSIM CMDS_BAR_COMMON(CMDS_BAR_COMMON_SWSIM)
+#define CMDS_BAR_COMMON_SWSIM(mod)
 
 
 /* commands for 2 status keys */
@@ -561,7 +532,6 @@ PM_END_MODIFIERS
       CHGONOFF( BRL_CMD_SKPIDLNS   , KEYS_STATUS + 16, on, off ), \
       CHGONOFF( BRL_CMD_TUNES      , KEYS_STATUS + 17, on, off ), \
               { BRL_CMD_RESTARTBRL , KEYS_STATUS + 18, 0X0000  }, \
-      CHGONOFF( BRL_CMD_INPUT      , KEYS_STATUS + 19, on, off ), \
       CHGONOFF( BRL_CMD_AUTOSPEAK  , KEYS_STATUS + 20, on, off ), \
       CHGONOFF( BRL_CMD_AUTOREPEAT , KEYS_STATUS + 21, on, off ), \
               { BRL_CMD_PASTE      , KEYS_STATUS + 22, 0X0000  }
@@ -609,20 +579,17 @@ PM_BEGIN_COMMANDS(BarBasic_Status20)
 PM_END_COMMANDS
 
 PM_BEGIN_COMMANDS(BarSimulate_Status0)
-  CMDS_BAR_ALL,
-  CMDS_BAR_SWSIM
+  CMDS_BAR_ALL
 PM_END_COMMANDS
 
 PM_BEGIN_COMMANDS(BarSimulate_Status2)
   CMDS_BAR_ALL,
-  CMDS_STAT_2,
-  CMDS_BAR_SWSIM
+  CMDS_STAT_2
 PM_END_COMMANDS
 
 PM_BEGIN_COMMANDS(BarSimulate_Status20)
   CMDS_BAR_ALL,
-  CMDS_STAT_20(0X8000, 0X4000),
-  CMDS_BAR_SWSIM
+  CMDS_STAT_20(0X8000, 0X4000)
 PM_END_COMMANDS
 
 

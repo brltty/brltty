@@ -56,13 +56,11 @@ static const TerminalDefinition *terminal = NULL;
 static TranslationTable outputTable;
 static unsigned int currentModifiers = 0;
 static unsigned int activeModifiers = 0;
-static int inputMode = 0;
  
 static void
 resetState (void) {
   currentModifiers = 0;
   activeModifiers = 0;
-  inputMode = 0;
 }
 
 static int
@@ -123,51 +121,10 @@ changeModifiers (int remove, int add) {
 
 static int
 handleCommand (BrailleDisplay *brl, int cmd, int repeat) {
-  if (cmd == BRL_CMD_INPUT) {
-    /* translate toggle -> ON/OFF */
-    cmd |= inputMode? BRL_FLG_TOGGLE_OFF: BRL_FLG_TOGGLE_ON;
-  } else if ((cmd & BRL_MSK_BLK) == BRL_BLK_GOTOLINE) {
+  if ((cmd & BRL_MSK_BLK) == BRL_BLK_GOTOLINE) {
     int arg = cmd & BRL_MSK_ARG;
     cmd &= ~BRL_MSK_ARG;
     cmd |= rescaleInteger(arg, terminal->statusCount-1, BRL_MSK_ARG);
-  }
-
-  if (!BRL_DELAYED_COMMAND(repeat)) {
-    switch (cmd) {
-      case BRL_CMD_INPUT | BRL_FLG_TOGGLE_ON:
-        inputMode = 1;
-        cmd = BRL_CMD_NOOP | BRL_FLG_TOGGLE_ON;
-        break;
-
-      case BRL_CMD_INPUT | BRL_FLG_TOGGLE_OFF:
-        inputMode = 0;
-        cmd = BRL_CMD_NOOP | BRL_FLG_TOGGLE_OFF;
-        break;
-
-      case BRL_CMD_SWSIM_LC:
-        return changeModifiers(MOD_BAR_SLR|MOD_BAR_SLF, MOD_BAR_SLC);
-      case BRL_CMD_SWSIM_LR:
-        return changeModifiers(MOD_BAR_SLF, MOD_BAR_SLR);
-      case BRL_CMD_SWSIM_LF:
-        return changeModifiers(MOD_BAR_SLR, MOD_BAR_SLF);
-      case BRL_CMD_SWSIM_RC:
-        return changeModifiers(MOD_BAR_SRR|MOD_BAR_SRF, MOD_BAR_SRC);
-      case BRL_CMD_SWSIM_RR:
-        return changeModifiers(MOD_BAR_SRF, MOD_BAR_SRR);
-      case BRL_CMD_SWSIM_RF:
-        return changeModifiers(MOD_BAR_SRR, MOD_BAR_SRF);
-      case BRL_CMD_SWSIM_BC:
-        return changeModifiers(MOD_BAR_SLR|MOD_BAR_SLF|MOD_BAR_SRR|MOD_BAR_SRF, MOD_BAR_SLC|MOD_BAR_SRC);
-      case BRL_CMD_SWSIM_BQ: {
-        static const char *const states[] = {"center", "rear", "front", "both"};
-        const char *left = states[currentModifiers & 0X3];
-        const char *right = states[(currentModifiers >> 2) & 0X3];
-        char buffer[20];
-        snprintf(buffer, sizeof(buffer), "%-6s %-6s", left, right);
-        message(NULL, buffer, MSG_SILENT);
-        return BRL_CMD_NOOP;
-      }
-    }
   }
 
   return cmd | repeat;
@@ -188,15 +145,7 @@ handleModifier (BrailleDisplay *brl, int bit, int press) {
   }
 
   if (modifiers) {
-    if (inputMode && !(modifiers & ~0XFF)) {
-      static const unsigned char dots[] = {BRL_DOT1, BRL_DOT2, BRL_DOT3, BRL_DOT4, BRL_DOT5, BRL_DOT6, BRL_DOT7, BRL_DOT8};
-      const unsigned char *dot = dots;
-      int mod;
-      command = BRL_BLK_PASSDOTS;
-      for (mod=1; mod<0X100; ++dot, mod<<=1)
-        if (modifiers & mod)
-          command |= *dot;
-    } else if (findCommand(&command, KEY_NONE, modifiers)) {
+    if (findCommand(&command, KEY_NONE, modifiers)) {
     }
   }
 
@@ -1514,9 +1463,8 @@ brl_writeStatus (BrailleDisplay *brl, const unsigned char* s) {
     if (s[BRL_firstStatusCell] == BRL_STATUS_CELLS_GENERIC) {
       int i;
 
-      unsigned char values[InternalStatusCellCount];
+      unsigned char values[BRL_genericStatusCellCount];
       memcpy(values, s, BRL_genericStatusCellCount);
-      values[BRL_GSC_INPUT] = inputMode;
 
       for (i=0; i<terminal->statusCount; i++) {
         int code = terminal->statusCells[i];
