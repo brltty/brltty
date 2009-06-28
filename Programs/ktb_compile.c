@@ -325,7 +325,7 @@ static int
 getKeysOperand (DataFile *file, KeyCombination *key, KeyTableData *ktd) {
   DataString names;
 
-  if (getDataString(file, &names, 0, "key combination")) {
+  if (getDataString(file, &names, 1, "key combination")) {
     if (parseKeyCombination(file, key, names.characters, names.length, ktd)) return 1;
   }
 
@@ -336,7 +336,7 @@ static int
 getMappedKeyOperand (DataFile *file, unsigned char *key, KeyTableData *ktd) {
   DataString name;
 
-  if (getDataString(file, &name, 0, "mapped key name")) {
+  if (getDataString(file, &name, 1, "mapped key name")) {
     unsigned char set;
 
     if (isKeyword(WS_C("superimpose"), name.characters, name.length)) {
@@ -529,9 +529,9 @@ parseCommandName (DataFile *file, int *value, const wchar_t *characters, int len
 
 static int
 getCommandOperand (DataFile *file, int *value, KeyTableData *ktd) {
-  DataOperand name;
+  DataString name;
 
-  if (getDataOperand(file, &name, "command name")) {
+  if (getDataString(file, &name, 1, "command name")) {
     if (parseCommandName(file, value, name.characters, name.length, ktd)) return 1;
   }
 
@@ -579,9 +579,9 @@ processBindOperands (DataFile *file, void *data) {
 static int
 processContextOperands (DataFile *file, void *data) {
   KeyTableData *ktd = data;
-  DataOperand context;
+  DataString context;
 
-  if (getDataOperand(file, &context, "context name or number")) {
+  if (getDataString(file, &context, 1, "context name or number")) {
     int ok = 0;
 
     if (isKeyword(WS_C("default"), context.characters, context.length)) {
