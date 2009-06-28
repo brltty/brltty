@@ -18,6 +18,11 @@
 
 title Bindings for Keypad-based Navigation
 
+
+####################
+# Default Bindings #
+####################
+
 bind KPInsert+!KP5 Home
 bind KPInsert+!KPArrowLeft Back
 bind KPInsert+!KPArrowRight CsrTrk
@@ -67,3 +72,30 @@ bind KPMinus+!KP7 Help
 bind KPMinus+!KP9 Learn
 bind KPMinus+!KP1 RestartBrl
 bind KPMinus+!KP3 RestartSpeech
+
+
+#################
+# Menu Bindings #
+#################
+
+bind KPInsert+!KPArrowLeft FWINLT
+bind KPInsert+!KPArrowRight FWINRT
+bind KPInsert+!KPArrowUp MENU_PREV_ITEM
+bind KPInsert+!KPArrowDown MENU_NEXT_ITEM
+bind KPInsert+!KPHome MENU_FIRST_ITEM
+bind KPInsert+!KPEnd MENU_LAST_ITEM
+bind KPInsert+!KPPageUp MENU_PREV_SETTING
+bind KPInsert+!KPPageDown MENU_NEXT_SETTING
+
+bind KPInsert+!KPEnter PREFMENU
+bind KPInsert+!KPPlus PREFSAVE
+bind KPInsert+!KPMinus PREFLOAD
+
+
+#################
+# Braille Input #
+#################
+
+assign brailleOff KPInsert+!KPSlash
+assign brailleOn KPInsert+!KPAsterisk
+include kbd-braille.kti
