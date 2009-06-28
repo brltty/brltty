@@ -23,8 +23,6 @@ bind !Status2 LEARN
 bind !Status3 CSRJMP_VERT
 bind !Status4 BACK
 bind !Status5 INFO
-bind \{toggleOff}+!Status5 INFO+off
-bind \{toggleOn}+!Status5 INFO+on
 bind !Status6 CSRTRK
 bind \{toggleOff}+!Status6 CSRTRK+off
 bind \{toggleOn}+!Status6 CSRTRK+on

@@ -51,7 +51,6 @@ bind \{switches}RightKeyRear+BarRight2 SAY_FASTER
 bind \{switches}RightKeyFront+BarUp1 SPKHOME
 bind \{switches}RightKeyFront+BarDown1 TUNES
 bind \{switches}RightKeyFront+BarUp2 RESTARTSPEECH
-bind \{switches}RightKeyFront+BarDown2 SWSIM_BQ
 bind \{switches}RightKeyFront+BarLeft1 SKPIDLNS
 bind \{switches}RightKeyFront+BarRight1 SKPBLNKWINS
 bind \{switches}RightKeyFront+BarRight2 SLIDEWIN
@@ -72,4 +71,4 @@ assign toggleOff BarLeft1
 assign toggleOn BarRight1
 include brl-pm-status\{statusKeys}.kti
 
-bind \{switches}!StatusKey2 GOTOLINE+on
+bind \{switches}!StatusKey2 GOTOLINE

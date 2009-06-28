@@ -491,6 +491,11 @@ parseCommandName (DataFile *file, int *value, const wchar_t *characters, int len
         *value |= BRL_FLG_TOGGLE_OFF;
         return 1;
       }
+    } else if ((*command)->isMotion) {
+      if (isKeyword(WS_C("route"), characters, length)) {
+        *value |= BRL_FLG_ROUTE;
+        return 1;
+      }
     } else if ((*command)->isBase) {
       unsigned int maximum = BRL_MSK_ARG - ((*command)->code & BRL_MSK_ARG);
       unsigned int offset = 0;

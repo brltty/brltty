@@ -193,6 +193,9 @@ static KEY_NAME_TABLE(keyNames_bar) = {
   KEY_NAME_ENTRY(PM_KEY_RightKeyRear, "RightKeyRear"),
   KEY_NAME_ENTRY(PM_KEY_RightKeyFront, "RightKeyFront"),
 
+  KEY_SET_ENTRY(PM_SET_RoutingKeys2, "RoutingKey2"),
+  KEY_SET_ENTRY(PM_SET_StatusKeys2, "StatusKey2"),
+
   LAST_KEY_NAME_ENTRY
 };
 

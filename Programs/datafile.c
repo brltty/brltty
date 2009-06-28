@@ -536,7 +536,12 @@ processAssignOperands (DataFile *file, void *data) {
   if (getDataOperand(file, &name, "variable name")) {
     DataOperand value;
 
-    if (getDataOperand(file, &value, "variable value")) {
+    if (!getDataOperand(file, &value, NULL)) {
+      value.characters = NULL;
+      value.length = 0;
+    }
+
+    {
       DataVariable *variable = getWritableDataVariable(file, &name);
 
       if (variable) {
