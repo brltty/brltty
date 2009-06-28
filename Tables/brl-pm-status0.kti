@@ -18,5 +18,3 @@
 
 # This key subtable is for Papenmeier displays which have no status keys.
 
-parameters toggleOff toggleOn
-

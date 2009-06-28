@@ -18,8 +18,6 @@
 
 # This key subtable is for Papenmeier displays which have an Easy Access Bar.
 
-parameters statusKeys
-
 bind BarUp1 LNUP
 bind BarDown1 LNDN
 bind BarUp2 TOP
@@ -74,12 +72,29 @@ bind RightSwitchFront+BarRight1 MENU_NEXT_SETTING
 bind RightSwitchFront+BarLeft2 PREFLOAD
 bind RightSwitchFront+BarRight2 PREFSAVE
 
-include brl-pm-bar_common.kti @statusKeys@
-include brl-pm-bar_common.kti @statusKeys@ LeftSwitchRear+
-include brl-pm-bar_common.kti @statusKeys@ LeftSwitchFront+
-include brl-pm-bar_common.kti @statusKeys@ RightSwitchRear+
-include brl-pm-bar_common.kti @statusKeys@ RightSwitchFront+
-include brl-pm-bar_common.kti @statusKeys@ LeftSwitchRear+RightSwitchRear+
-include brl-pm-bar_common.kti @statusKeys@ LeftSwitchRear+RightSwitchFront+
-include brl-pm-bar_common.kti @statusKeys@ LeftSwitchFront+RightSwitchRear+
-include brl-pm-bar_common.kti @statusKeys@ LeftSwitchFront+RightSwitchFront+
+assign switches
+include brl-pm-bar_common.kti
+
+assign switches LeftSwitchRear+
+include brl-pm-bar_common.kti
+
+assign switches LeftSwitchFront+
+include brl-pm-bar_common.kti
+
+assign switches RightSwitchRear+
+include brl-pm-bar_common.kti
+
+assign switches RightSwitchFront+
+include brl-pm-bar_common.kti
+
+assign switches LeftSwitchRear+RightSwitchRear+
+include brl-pm-bar_common.kti
+
+assign switches LeftSwitchRear+RightSwitchFront+
+include brl-pm-bar_common.kti
+
+assign switches LeftSwitchFront+RightSwitchRear+
+include brl-pm-bar_common.kti
+
+assign switches LeftSwitchFront+RightSwitchFront+
+include brl-pm-bar_common.kti

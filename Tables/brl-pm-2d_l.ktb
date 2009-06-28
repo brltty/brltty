@@ -18,4 +18,5 @@
 
 title Papenmeier BrailleX 2D Lite (plus)
 
-include brl-pm-front9.kti 13
+assign statusKeys 13
+include brl-pm-front9.kti

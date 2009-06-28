@@ -18,4 +18,5 @@
 
 title Papenmeier BrailleX IB 80 CR Soft
 
-include brl-pm-front9.kti 4
+assign statusKeys 4
+include brl-pm-front9.kti

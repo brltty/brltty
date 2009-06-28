@@ -18,8 +18,6 @@
 
 # This key subtable is for Papenmeier displays which have 9 front keys.
 
-parameters statusKeys
-
 bind Front1 FWINLT
 bind Front9 FWINRT
 bind Front2 HWINLT
@@ -52,4 +50,6 @@ bind Front2+!Routing1 PRINDENT
 bind Front8+!Routing1 NXINDENT
 bind Front1+Front9 PASTE
 
-include brl-pm-status@statusKeys@.kti Front1 Front9
+assign toggleOff Front1
+assign toggleOn Front9
+include brl-pm-status\{statusKeys}.kti

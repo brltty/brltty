@@ -18,4 +18,5 @@
 
 title Papenmeier BrailleX Elba 20
 
-include brl-pm-bar.kti 0
+assign statusKeys 0
+include brl-pm-bar.kti

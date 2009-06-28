@@ -18,7 +18,5 @@
 
 # This key subtable is for Papenmeier displays which have 2 status keys.
 
-parameters toggleOff toggleOn
-
 bind !Status1 HELP
 bind !Status2 LEARN

@@ -18,4 +18,5 @@
 
 title Papenmeier BrailleX EL 2D-80
 
-include brl-pm-bar.kti 20
+assign statusKeys 20
+include brl-pm-bar.kti
