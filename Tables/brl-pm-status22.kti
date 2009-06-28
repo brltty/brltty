@@ -23,8 +23,6 @@ bind !Status2 LEARN
 bind !Status3 CSRJMP_VERT
 bind !Status4 BACK
 bind !Status5 INFO
-bind \{toggleOff}+!Status5 INFO+off
-bind \{toggleOn}+!Status5 INFO+on
 bind !Status6 CSRTRK
 bind \{toggleOff}+!Status6 CSRTRK+off
 bind \{toggleOn}+!Status6 CSRTRK+on
@@ -56,9 +54,6 @@ bind !Status17 TUNES
 bind \{toggleOff}+!Status17 TUNES+off
 bind \{toggleOn}+!Status17 TUNES+on
 bind !Status18 RESTARTBRL
-bind !Status19 INPUT
-bind \{toggleOff}+!Status19 INPUT+off
-bind \{toggleOn}+!Status19 INPUT+on
 bind !Status20 AUTOSPEAK
 bind \{toggleOff}+!Status20 AUTOSPEAK+off
 bind \{toggleOn}+!Status20 AUTOSPEAK+on

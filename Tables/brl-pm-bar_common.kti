@@ -56,20 +56,20 @@ bind \{switches}RightKeyFront+BarLeft1 SKPIDLNS
 bind \{switches}RightKeyFront+BarRight1 SKPBLNKWINS
 bind \{switches}RightKeyFront+BarRight2 SLIDEWIN
 
-bind \{switches}!Routing1 ROUTE
-bind \{switches}BarUp1+!Routing1 PRINDENT
-bind \{switches}BarDown1+!Routing1 NXINDENT
-bind \{switches}BarUp2+!Routing1 SETLEFT
-bind \{switches}BarDown2+!Routing1 DESCCHAR
-bind \{switches}BarLeft1+!Routing1 CUTAPPEND
-bind \{switches}BarRight1+!Routing1 CUTLINE
-bind \{switches}BarLeft2+!Routing1 CUTBEGIN
-bind \{switches}BarRight2+!Routing1 CUTRECT
+bind \{switches}!RoutingKey1 ROUTE
+bind \{switches}BarUp1+!RoutingKey1 PRINDENT
+bind \{switches}BarDown1+!RoutingKey1 NXINDENT
+bind \{switches}BarUp2+!RoutingKey1 SETLEFT
+bind \{switches}BarDown2+!RoutingKey1 DESCCHAR
+bind \{switches}BarLeft1+!RoutingKey1 CUTAPPEND
+bind \{switches}BarRight1+!RoutingKey1 CUTLINE
+bind \{switches}BarLeft2+!RoutingKey1 CUTBEGIN
+bind \{switches}BarRight2+!RoutingKey1 CUTRECT
 
-bind \{switches}!Routing2 DESCCHAR
+bind \{switches}!RoutingKey2 DESCCHAR
 
 assign toggleOff BarLeft1
 assign toggleOn BarRight1
 include brl-pm-status\{statusKeys}.kti
 
-bind \{switches}!StatusX GOTOLINE+on
+bind \{switches}!StatusKey2 GOTOLINE+on

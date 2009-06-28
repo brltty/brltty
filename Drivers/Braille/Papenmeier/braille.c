@@ -47,6 +47,7 @@
 #define BRL_HAVE_STATUS_CELLS
 #define BRL_HAVE_FIRMNESS
 #include "brl_driver.h"
+#include "brldefs-pm.h"
 #include "braille.h"
 #include "brl-cfg.h"
 
@@ -54,128 +55,7 @@
 
 static const TerminalDefinition *terminal = NULL;
 static TranslationTable outputTable;
-static unsigned int currentModifiers = 0;
-static unsigned int activeModifiers = 0;
  
-static void
-resetState (void) {
-  currentModifiers = 0;
-  activeModifiers = 0;
-}
-
-static int
-compareCommands (const void *item1, const void *item2) {
-  const CommandDefinition *cmd1 = item1;
-  const CommandDefinition *cmd2 = item2;
-  if (cmd1->key < cmd2->key) return -1;
-  if (cmd1->key > cmd2->key) return 1;
-  if (cmd1->modifiers < cmd2->modifiers) return -1;
-  if (cmd1->modifiers > cmd2->modifiers) return 1;
-  return 0;
-}
-
-static void
-sortCommands (void) {
-  qsort(terminal->commandDefinitions, terminal->commandCount, sizeof(*terminal->commandDefinitions), compareCommands);
-}
-
-static int
-findCommand (int *command, int key, int modifiers) {
-  int first = 0;
-  int last = terminal->commandCount - 1;
-  CommandDefinition ref;
-  ref.key = key;
-  ref.modifiers = modifiers;
-  while (first <= last) {
-    int current = (first + last) / 2;
-    CommandDefinition *cmd = &terminal->commandDefinitions[current];
-    int relation = compareCommands(cmd, &ref);
-
-    if (!relation) {
-      *command = cmd->code;
-      return 1;
-    }
-
-    if (relation > 0) {
-      last = current - 1;
-    } else {
-      first = current + 1;
-    }
-  }
-  return 0;
-}
-
-static int
-changeModifiers (int remove, int add) {
-  int originalModifiers = currentModifiers;
-
-  currentModifiers &= ~remove;
-  currentModifiers |= add;
-
-  if (currentModifiers != originalModifiers) {
-    activeModifiers = (currentModifiers & ~originalModifiers)? currentModifiers: 0;
-  }
-
-  return BRL_CMD_NOOP;
-}
-
-static int
-handleCommand (BrailleDisplay *brl, int cmd, int repeat) {
-  if ((cmd & BRL_MSK_BLK) == BRL_BLK_GOTOLINE) {
-    int arg = cmd & BRL_MSK_ARG;
-    cmd &= ~BRL_MSK_ARG;
-    cmd |= rescaleInteger(arg, terminal->statusCount-1, BRL_MSK_ARG);
-  }
-
-  return cmd | repeat;
-}
-
-static int
-handleModifier (BrailleDisplay *brl, int bit, int press) {
-  int command = BRL_CMD_NOOP;
-  int modifiers;
-
-  if (press) {
-    activeModifiers = (currentModifiers |= bit);
-    modifiers = activeModifiers;
-  } else {
-    currentModifiers &= ~bit;
-    modifiers = activeModifiers;
-    activeModifiers = 0;
-  }
-
-  if (modifiers) {
-    if (findCommand(&command, KEY_NONE, modifiers)) {
-    }
-  }
-
-  return handleCommand(brl, command, (press? BRL_FLG_REPEAT_DELAY: 0));
-}
-
-static int
-handleKey (BrailleDisplay *brl, int code, int press, int offset) {
-  int i;
-
-  /* look for modfier keys */
-  for (i=0; i<terminal->modifierCount; i++)
-    if (terminal->modifierKeys[i] == code)
-      return handleModifier(brl, 1<<i, press);
-
-  /* must be a "normal key" - search for cmd on key press */
-  if (press) {
-    int command;
-    activeModifiers = 0;
-    if (findCommand(&command, code, currentModifiers)) {
-      return handleCommand(brl, command+offset,
-                           (BRL_FLG_REPEAT_INITIAL | BRL_FLG_REPEAT_DELAY));
-    }
-
-    /* no command found */
-    LogPrint(LOG_DEBUG, "cmd: %d[%04X] ??", code, currentModifiers); 
-  }
-  return BRL_CMD_NOOP;
-}
-
 /*--- Input/Output Operations ---*/
 
 typedef struct {
@@ -422,8 +302,8 @@ interpretIdentity (BrailleDisplay *brl, unsigned char id, int major, int minor) 
   LogPrint(LOG_INFO, "Papenmeier ID: %d  Version: %d.%02d", 
            id, major, minor);
   for (tn=0; tn<pmTerminalCount; tn++) {
-    if (pmTerminals[tn].modelIdentifier == id) {
-      terminal = &pmTerminals[tn];
+    if (pmTerminalTable[tn].modelIdentifier == id) {
+      terminal = &pmTerminalTable[tn];
       LogPrint(LOG_INFO, "%s  Size: %dx%d", 
                terminal->modelName,
                terminal->textColumns, terminal->textRows);
@@ -432,8 +312,8 @@ interpretIdentity (BrailleDisplay *brl, unsigned char id, int major, int minor) 
       brl->statusColumns = terminal->statusCount;
       brl->statusRows = 1;
       brl->keyBindings = terminal->keyBindings;
+      brl->keyNameTables = terminal->keyNameTables;
 
-      sortCommands();
       return 1;
     }
   }
@@ -502,7 +382,7 @@ resetTerminal1 (BrailleDisplay *brl) {
   static const unsigned char sequence[] = {cSTX, 0X01, cETX};
   LogPrint(LOG_WARNING, "Resetting terminal.");
   io->flushPort(brl);
-  if (writeBytes(brl, sequence, sizeof(sequence))) resetState();
+  writeBytes(brl, sequence, sizeof(sequence));
 }
 
 #define RBF_ETX 1
@@ -593,70 +473,41 @@ interpretIdentity1 (BrailleDisplay *brl, const unsigned char *identity) {
 
 static int
 handleKey1 (BrailleDisplay *brl, int code, int press, int time) {
-  /* which key -> translate to OFFS_* + number */
-  /* attn: number starts with 1 */
-  int num;
+  int key;
 
   if (rcvFrontFirst <= code && 
       code <= rcvFrontLast) { /* front key */
-    num = 1 + (code - rcvFrontFirst) / 3;
-    return handleKey(brl, KEYS_FRONT+num, press, 0);
+    key = (code - rcvFrontFirst) / 3;
+    return enqueueKeyEvent(PM_SET_NavigationKeys, PM_KEY_FRONT+key, press);
   }
 
   if (rcvStatusFirst <= code && 
       code <= rcvStatusLast) { /* status key */
-    num = 1 + (code - rcvStatusFirst) / 3;
-    return handleKey(brl, KEYS_STATUS+num, press, 0);
+    key = (code - rcvStatusFirst) / 3;
+    return enqueueKeyEvent(PM_SET_NavigationKeys, PM_KEY_STATUS+key, press);
   }
 
   if (rcvBarFirst <= code && 
       code <= rcvBarLast) { /* easy access bar */
-    {
-      static const int modifiers[] = {
-        MOD_BAR_SLR, MOD_BAR_SLF,
-        MOD_BAR_KLR, MOD_BAR_KLF,
-        MOD_BAR_KRR, MOD_BAR_KRF,
-        MOD_BAR_SRR, MOD_BAR_SRF,
-        0
-      };
-      const int *modifier = modifiers;
-
-      int remove = 0;
-      int add = 0;
-      int bit = 1;
-
-      while (*modifier) {
-        if (time & bit) {
-          add |= *modifier;
-        } else {
-          remove |= *modifier;
-        }
-
-        bit <<= 1;
-        ++modifier;
-      }
-
-      changeModifiers(remove, add);
-    }
-
-    num = 1 + (code - rcvBarFirst) / 3;
-    return handleKey(brl, KEYS_BAR+num, press, 0);
+    key = (code - rcvBarFirst) / 3;
+    return enqueueKeyEvent(PM_SET_NavigationKeys, PM_KEY_BAR+key, press);
   }
 
   if (rcvSwitchFirst <= code && 
       code <= rcvSwitchLast) { /* easy access bar */
-    num = 1 + (code - rcvSwitchFirst) / 3;
-    return handleKey(brl, KEYS_SWITCH+num, press, 0);
+    key = (code - rcvSwitchFirst) / 3;
+    return enqueueKeyEvent(PM_SET_NavigationKeys, PM_KEY_SWITCH+key, press);
   }
 
   if (rcvCursorFirst <= code && 
       code <= rcvCursorLast) { /* Routing Keys */ 
-    num = (code - rcvCursorFirst) / 3;
-    return handleKey(brl, KEY_ROUTING1, press, num);
+    key = (code - rcvCursorFirst) / 3;
+LogPrint(LOG_NOTICE, "base=%u code=%u key=%u prs=%d", rcvCursorFirst, code, key, press);
+    return enqueueKeyEvent(PM_SET_RoutingKeys1, key, press);
   }
 
-  LogPrint(LOG_WARNING, "Unexpected key: %04X", code);
-  return BRL_CMD_NOOP;
+  LogPrint(LOG_WARNING, "unexpected key: %04X", code);
+  return 1;
 }
 
 static int
@@ -702,7 +553,6 @@ initializeTerminal1 (BrailleDisplay *brl) {
 static void
 restartTerminal1 (BrailleDisplay *brl) {
   initializeTerminal1(brl);
-  resetState();
 }
 
 static int
@@ -753,10 +603,10 @@ readCommand1 (BrailleDisplay *brl, BRL_DriverCommandContext context) {
         logInputPacket(buf, length);
 
         {
-          int command = handleKey1(brl, ((buf[2] << 8) | buf[3]),
-                                   (buf[6] == PRESSED),
-                                   ((buf[7] << 8) | buf[8]));
-          if (command != EOF) return command;
+          handleKey1(brl, ((buf[2] << 8) | buf[3]),
+                     (buf[6] == PRESSED),
+                     ((buf[7] << 8) | buf[8]));
+          return EOF;
         }
         break;
       }
@@ -855,8 +705,8 @@ typedef struct {
 #define PM2_MAKE_INTEGER2(tens,ones) ((LOW_NIBBLE((tens)) * 10) + LOW_NIBBLE((ones)))
 
 typedef struct {
-  int code;
-  int offset;
+  unsigned char set;
+  unsigned char key;
 } InputMapping2;
 static InputMapping2 *inputMap2 = NULL;
 static int inputBytes2;
@@ -897,6 +747,7 @@ readPacket2 (BrailleDisplay *brl, Packet2 *packet) {
             logInputPacket(buffer, offset);
             return 1;
           }
+
           logShortPacket(buffer, offset);
           offset = 0;
           continue;
@@ -1093,32 +944,22 @@ readCommand2 (BrailleDisplay *brl, BRL_DriverCommandContext context) {
         /* Find out which keys have been released.
          * The first one determines the command to be executed.
          */
-        {
-          int release = 0;
-          for (byte=0; byte<bytes; ++byte) {
-            unsigned char old = inputState2[byte];
-            unsigned char new = packet.data.bytes[byte];
+        for (byte=0; byte<bytes; ++byte) {
+          unsigned char old = inputState2[byte];
+          unsigned char new = packet.data.bytes[byte];
 
-            if (new != old) {
-              InputMapping2 *mapping = &inputMap2[byte * 8];
-              unsigned char bit = 0X01;
+          if (new != old) {
+            InputMapping2 *mapping = &inputMap2[byte * 8];
+            unsigned char bit = 0X01;
 
-              while (bit) {
-                if (!(new & bit) && (old & bit)) {
-                  if (mapping->code != KEY_NONE) {
-                    int cmd = handleKey(brl, mapping->code, 0, mapping->offset);
-                    if (!release) {
-                      command = cmd;
-                      release = 1;
-                    }
-                  }
-
-                  if ((inputState2[byte] &= ~bit) == new) break;
-                }
-
-                mapping++;
-                bit <<= 1;
+            while (bit) {
+              if (!(new & bit) && (old & bit)) {
+                enqueueKeyEvent(mapping->set, mapping->key, 0);
+                if ((inputState2[byte] &= ~bit) == new) break;
               }
+
+              mapping++;
+              bit <<= 1;
             }
           }
         }
@@ -1136,10 +977,7 @@ readCommand2 (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 
             while (bit) {
               if ((new & bit) && !(old & bit)) {
-                if (mapping->code != KEY_NONE) {
-                  command = handleKey(brl, mapping->code, 1, mapping->offset);
-                }
-
+                enqueueKeyEvent(mapping->set, mapping->key, 1);
                 if ((inputState2[byte] |= bit) == new) break;
               }
 
@@ -1214,7 +1052,7 @@ typedef struct {
 } InputModule2;
 
 static void
-addInputMapping2 (const InputModule2 *module, unsigned char bit, int code, int offset) {
+addInputMapping2 (const InputModule2 *module, unsigned char bit, unsigned char set, unsigned char key) {
   if (terminal->protocolRevision < 2) {
     bit += module->bit;
   } else {
@@ -1223,8 +1061,8 @@ addInputMapping2 (const InputModule2 *module, unsigned char bit, int code, int o
 
   {
     InputMapping2 *mapping = &inputMap2[(module->byte * 8) + bit];
-    mapping->code = code;
-    mapping->offset = offset;
+    mapping->set = set;
+    mapping->key = key;
   }
 }
 
@@ -1243,8 +1081,8 @@ static void
 mapInputKey2 (int count, InputModule2 *module, int rear, int front) {
   while (count--) {
     nextInputModule2(module, inputKeySize2);
-    addInputMapping2(module, 0, rear, 0);
-    addInputMapping2(module, 1, front, 0);
+    addInputMapping2(module, 0, PM_SET_NavigationKeys, rear);
+    addInputMapping2(module, 1, PM_SET_NavigationKeys, front);
   }
 }
 
@@ -1258,50 +1096,46 @@ mapInputModules2 (void) {
     int i;
     for (i=0; i<inputBits2; ++i) {
       InputMapping2 *mapping = &inputMap2[i];
-      mapping->code = KEY_NONE;
-      mapping->offset = 0;
+      mapping->set = 0;
+      mapping->key = 0;
     }
   }
 
-  mapInputKey2(terminal->rightKeys, &module,
-               KEYS_SWITCH+KEY_RIGHT_REAR,
-               KEYS_SWITCH+KEY_RIGHT_FRONT);
+  mapInputKey2(terminal->rightKeys, &module, PM_KEY_RightKeyRear, PM_KEY_RightKeyFront);
 
   {
     unsigned char column = terminal->textColumns;
     while (column) {
       nextInputModule2(&module, 1);
-      addInputMapping2(&module, 0, KEY_ROUTING2, --column);
+      addInputMapping2(&module, 0, PM_SET_RoutingKeys2, --column);
 
       nextInputModule2(&module, 1);
-      addInputMapping2(&module, 0, KEY_ROUTING1, column);
+      addInputMapping2(&module, 0, PM_SET_RoutingKeys1, column);
     }
   }
 
-  mapInputKey2(terminal->leftKeys, &module,
-               KEYS_SWITCH+KEY_LEFT_REAR,
-               KEYS_SWITCH+KEY_LEFT_FRONT);
+  mapInputKey2(terminal->leftKeys, &module, PM_KEY_LeftKeyRear, PM_KEY_LeftKeyFront);
 
   {
     unsigned char cell = terminal->statusCount;
     while (cell) {
       nextInputModule2(&module, 1);
-      addInputMapping2(&module, 0, KEY_STATUS2, cell-1);
+      addInputMapping2(&module, 0, PM_SET_StatusKeys2, cell-1);
 
       nextInputModule2(&module, 1);
-      addInputMapping2(&module, 0, KEYS_STATUS+cell--, 0);
+      addInputMapping2(&module, 0, PM_SET_NavigationKeys, PM_KEY_STATUS+cell--);
     }
   }
 
   nextInputModule2(&module, 8);
-  addInputMapping2(&module, 0, KEYS_BAR+BAR_U2, 0);
-  addInputMapping2(&module, 1, KEYS_BAR+BAR_U1, 0);
-  addInputMapping2(&module, 2, KEYS_BAR+BAR_D1, 0);
-  addInputMapping2(&module, 3, KEYS_BAR+BAR_D2, 0);
-  addInputMapping2(&module, 4, KEYS_BAR+BAR_R1, 0);
-  addInputMapping2(&module, 5, KEYS_BAR+BAR_L1, 0);
-  addInputMapping2(&module, 6, KEYS_BAR+BAR_R2, 0);
-  addInputMapping2(&module, 7, KEYS_BAR+BAR_L2, 0);
+  addInputMapping2(&module, 0, PM_SET_NavigationKeys, PM_KEY_BarUp2);
+  addInputMapping2(&module, 1, PM_SET_NavigationKeys, PM_KEY_BarUp1);
+  addInputMapping2(&module, 2, PM_SET_NavigationKeys, PM_KEY_BarDown1);
+  addInputMapping2(&module, 3, PM_SET_NavigationKeys, PM_KEY_BarDown2);
+  addInputMapping2(&module, 4, PM_SET_NavigationKeys, PM_KEY_BarRight1);
+  addInputMapping2(&module, 5, PM_SET_NavigationKeys, PM_KEY_BarLeft1);
+  addInputMapping2(&module, 6, PM_SET_NavigationKeys, PM_KEY_BarRight2);
+  addInputMapping2(&module, 7, PM_SET_NavigationKeys, PM_KEY_BarLeft2);
 }
 
 static int
@@ -1361,15 +1195,6 @@ identifyTerminal (BrailleDisplay *brl) {
   return 0;
 }
 
-static void
-resetTerminalTable (void) {
-  if (pmTerminalsAllocated) {
-    pmTerminals = pmTerminalTable;
-    pmTerminalCount = ARRAY_COUNT(pmTerminalTable);
-    pmTerminalsAllocated = 0;
-  }
-}
-
 static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   if (isSerialDevice(&device)) {
@@ -1402,7 +1227,6 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
       if (identifyTerminal(brl)) {
         memset(currentText, outputTable[0], terminal->textColumns);
         memset(currentStatus, outputTable[0], terminal->statusCount);
-        resetState();
         protocol->initializeTerminal(brl);
         if (io->preparePort()) return 1;
       }
@@ -1413,7 +1237,6 @@ brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
   }
 
 failed:
-  resetTerminalTable();
   return 0;
 }
 
@@ -1421,7 +1244,6 @@ static void
 brl_destruct (BrailleDisplay *brl) {
   io->closePort();
   protocol->releaseResources();
-  resetTerminalTable();
 }
 
 static void
