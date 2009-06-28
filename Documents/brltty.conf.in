@@ -242,10 +242,6 @@
 #braille-parameters lb:Driver=auto # 
 #braille-parameters lb:Table=us.tbl # 
 
-# Papenmeier Braille Driver Parameters
-#braille-parameters pm:ConfigFile=@DATA_DIRECTORY@/brltty-pm.conf
-#braille-parameters pm:DebugKeys=no # [no,yes]
-
 # TTY Braille Driver Parameters
 #braille-parameters tt:Baud=9600 # 
 #braille-parameters tt:CharSet=ISO8859-1 # 

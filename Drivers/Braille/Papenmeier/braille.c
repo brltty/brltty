@@ -43,47 +43,12 @@
 #include "misc.h"
 #include "message.h"
 
-typedef enum {
-   PARM_CONFIGFILE,
-   PARM_DEBUGKEYS
-} DriverParameter;
-#define BRLPARMS "configfile", "debugkeys"
-
 #define BRL_STATUS_FIELDS sfGeneric
 #define BRL_HAVE_STATUS_CELLS
 #define BRL_HAVE_FIRMNESS
 #include "brl_driver.h"
 #include "braille.h"
-
-#ifdef ENABLE_PM_CONFIGURATION_FILE
-#include "config.tab.c"
- 
-static int
-yyerror (char *problem)  /* Called by yyparse on error */
-{
-  LogPrint(LOG_CRIT, "Papenmeier configuration error: line %d: %s",
-           lineNumber, problem);
-  return 0;
-}
-
-static void
-loadConfigurationFile (const char *path) {
-  LogPrint(LOG_DEBUG, "Loading Papenmeier configuration file: %s", path);
-  if ((configurationFile = fopen(path, "r")) != NULL) {
-    parseConfigurationFile();
-    fclose(configurationFile);
-    configurationFile = NULL;
-  } else {
-    LogPrint((errno == ENOENT)? LOG_DEBUG: LOG_ERR,
-             "Cannot open Papenmeier configuration file '%s': %s",
-             path, strerror(errno));
-  }
-}
-#else /* ENABLE_PM_CONFIGURATION_FILE */
 #include "brl-cfg.h"
-#endif /* ENABLE_PM_CONFIGURATION_FILE */
-
-static unsigned int debugKeys = 0;
 
 /*--- Command Determination ---*/
 
@@ -142,14 +107,6 @@ findCommand (int *command, int key, int modifiers) {
   return 0;
 }
 
-static void
-logModifiers (void) {
-  if (debugKeys) {
-    LogPrint(LOG_DEBUG, "modifiers: %04X [%04X]",
-             currentModifiers, activeModifiers);
-  }
-}
-
 static int
 changeModifiers (int remove, int add) {
   int originalModifiers = currentModifiers;
@@ -159,7 +116,6 @@ changeModifiers (int remove, int add) {
 
   if (currentModifiers != originalModifiers) {
     activeModifiers = (currentModifiers & ~originalModifiers)? currentModifiers: 0;
-    logModifiers();
   }
 
   return BRL_CMD_NOOP;
@@ -181,17 +137,11 @@ handleCommand (BrailleDisplay *brl, int cmd, int repeat) {
       case BRL_CMD_INPUT | BRL_FLG_TOGGLE_ON:
         inputMode = 1;
         cmd = BRL_CMD_NOOP | BRL_FLG_TOGGLE_ON;
-        if (debugKeys) {
-          LogPrint(LOG_DEBUG, "input mode on"); 
-        }
         break;
 
       case BRL_CMD_INPUT | BRL_FLG_TOGGLE_OFF:
         inputMode = 0;
         cmd = BRL_CMD_NOOP | BRL_FLG_TOGGLE_OFF;
-        if (debugKeys) {
-          LogPrint(LOG_DEBUG, "input mode off"); 
-        }
         break;
 
       case BRL_CMD_SWSIM_LC:
@@ -236,7 +186,6 @@ handleModifier (BrailleDisplay *brl, int bit, int press) {
     modifiers = activeModifiers;
     activeModifiers = 0;
   }
-  logModifiers();
 
   if (modifiers) {
     if (inputMode && !(modifiers & ~0XFF)) {
@@ -247,12 +196,7 @@ handleModifier (BrailleDisplay *brl, int bit, int press) {
       for (mod=1; mod<0X100; ++dot, mod<<=1)
         if (modifiers & mod)
           command |= *dot;
-      if (debugKeys)
-        LogPrint(LOG_DEBUG, "cmd: [%02X]->%04X", modifiers, command); 
     } else if (findCommand(&command, KEY_NONE, modifiers)) {
-      if (debugKeys)
-        LogPrint(LOG_DEBUG, "cmd: [%04X]->%04X",
-                 modifiers, command); 
     }
   }
 
@@ -262,7 +206,6 @@ handleModifier (BrailleDisplay *brl, int bit, int press) {
 static int
 handleKey (BrailleDisplay *brl, int code, int press, int offset) {
   int i;
-  int cmd;
 
   /* look for modfier keys */
   for (i=0; i<terminal->modifierCount; i++)
@@ -274,9 +217,6 @@ handleKey (BrailleDisplay *brl, int code, int press, int offset) {
     int command;
     activeModifiers = 0;
     if (findCommand(&command, code, currentModifiers)) {
-      if (debugKeys)
-        LogPrint(LOG_DEBUG, "cmd: %d[%04X]->%04X (+%d)", 
-                 code, currentModifiers, command, offset); 
       return handleCommand(brl, command+offset,
                            (BRL_FLG_REPEAT_INITIAL | BRL_FLG_REPEAT_DELAY));
     }
@@ -852,7 +792,6 @@ readCommand1 (BrailleDisplay *brl, BRL_DriverCommandContext context) {
 
       case cIdReceive: {
         int length;
-        int i;
 
         READ(2, 4, 0);
         length = (buf[4] << 8) | buf[5];	/* packet size */
@@ -1476,9 +1415,6 @@ identifyTerminal (BrailleDisplay *brl) {
 static void
 resetTerminalTable (void) {
   if (pmTerminalsAllocated) {
-#ifdef ENABLE_PM_CONFIGURATION_FILE
-    deallocateTerminalTable();
-#endif /* ENABLE_PM_CONFIGURATION_FILE */
     pmTerminals = pmTerminalTable;
     pmTerminalCount = ARRAY_COUNT(pmTerminalTable);
     pmTerminalsAllocated = 0;
@@ -1487,28 +1423,6 @@ resetTerminalTable (void) {
 
 static int
 brl_construct (BrailleDisplay *brl, char **parameters, const char *device) {
-  if (!validateYesNo(&debugKeys, parameters[PARM_DEBUGKEYS]))
-    LogPrint(LOG_WARNING, "%s: %s", "invalid debug keys setting", parameters[PARM_DEBUGKEYS]);
-
-#ifdef ENABLE_PM_CONFIGURATION_FILE
-  {
-    const char *name = parameters[PARM_CONFIGFILE];
-    if (!*name) {
-      if (!(name = getenv(PM_CONFIG_ENV))) {
-        name = PM_CONFIG_FILE;
-      }
-    }
-
-    {
-      char *path = makePath(brl->dataDirectory, name);
-      if (path) {
-        loadConfigurationFile(path);
-        free(path);
-      }
-    }
-  }
-#endif /* ENABLE_PM_CONFIGURATION_FILE */
-
   if (isSerialDevice(&device)) {
     io = &serialOperations;
   } else

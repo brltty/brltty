@@ -1058,17 +1058,6 @@ BRLTTY_ARG_DISABLE(
 AC_SUBST([fm_tune_objects])
 
 BRLTTY_ARG_DISABLE(
-   [pm-configfile],
-   [user customization of Papenmeier driver],
-   [],
-[dnl
-   AC_DEFINE([ENABLE_PM_CONFIGURATION_FILE], [1],
-             [Define this to include Papenmeier configuration file support.])
-   PM_CONFIGFILE_DEPENDENCY=configuration-file
-])
-AC_SUBST([PM_CONFIGFILE_DEPENDENCY])
-
-BRLTTY_ARG_DISABLE(
    [gpm],
    [mouse tracking via GPM],
    [],
