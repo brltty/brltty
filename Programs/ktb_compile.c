@@ -323,9 +323,9 @@ parseKeyCombination (DataFile *file, KeyCombination *keys, const wchar_t *charac
 
 static int
 getKeysOperand (DataFile *file, KeyCombination *key, KeyTableData *ktd) {
-  DataOperand names;
+  DataString names;
 
-  if (getDataOperand(file, &names, "key combination")) {
+  if (getDataString(file, &names, 0, "key combination")) {
     if (parseKeyCombination(file, key, names.characters, names.length, ktd)) return 1;
   }
 
@@ -334,9 +334,9 @@ getKeysOperand (DataFile *file, KeyCombination *key, KeyTableData *ktd) {
 
 static int
 getMappedKeyOperand (DataFile *file, unsigned char *key, KeyTableData *ktd) {
-  DataOperand name;
+  DataString name;
 
-  if (getDataOperand(file, &name, "mapped key name")) {
+  if (getDataString(file, &name, 0, "mapped key name")) {
     unsigned char set;
 
     if (isKeyword(WS_C("superimpose"), name.characters, name.length)) {
@@ -677,6 +677,7 @@ processTitleOperands (DataFile *file, void *data) {
 static int
 processKeyTableLine (DataFile *file, void *data) {
   static const DataProperty properties[] = {
+    {.name=WS_C("assign"), .processor=processAssignOperands},
     {.name=WS_C("bind"), .processor=processBindOperands},
     {.name=WS_C("context"), .processor=processContextOperands},
     {.name=WS_C("include"), .processor=processIncludeOperands},
@@ -698,14 +699,20 @@ sortKeyBindings (const void *element1, const void *element2) {
 static int
 prepareKeyBindings (KeyContext *ctx) {
   if (ctx->keyBindingCount < ctx->keyBindingsSize) {
-    KeyBinding *newTable = realloc(ctx->keyBindingTable, ARRAY_SIZE(newTable, ctx->keyBindingCount));
+    if (ctx->keyBindingCount) {
+      KeyBinding *newTable = realloc(ctx->keyBindingTable, ARRAY_SIZE(newTable, ctx->keyBindingCount));
 
-    if (!newTable) {
-      LogError("realloc");
-      return 0;
+      if (!newTable) {
+        LogError("realloc");
+        return 0;
+      }
+
+      ctx->keyBindingTable = newTable;
+    } else {
+      free(ctx->keyBindingTable);
+      ctx->keyBindingTable = NULL;
     }
 
-    ctx->keyBindingTable = newTable;
     ctx->keyBindingsSize = ctx->keyBindingCount;
   }
 

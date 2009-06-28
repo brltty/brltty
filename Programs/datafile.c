@@ -27,6 +27,7 @@
 #endif /* HAVE_ICU */
 
 #include "misc.h"
+#include "queue.h"
 #include "datafile.h"
 #include "charset.h"
 #include "brldots.h"
@@ -36,6 +37,9 @@ struct DataFileStruct {
   int line;		/*line number in table */
   DataProcessor *processor;
   void *data;
+
+  DataFile *includer;
+  Queue *variables;
 
   const wchar_t *start;
   const wchar_t *end;
@@ -141,6 +145,95 @@ isNumber (int *number, const wchar_t *characters, int length) {
   return 0;
 }
 
+typedef struct {
+  DataOperand name;
+  DataOperand value;
+} DataVariable;
+
+static void
+deallocateDataVariable (void *item, void *data) {
+  DataVariable *variable = item;
+
+  if (variable->name.characters) free((void *)variable->name.characters);
+  if (variable->value.characters) free((void *)variable->value.characters);
+  free(variable);
+}
+
+static int
+testDataVariableName (void *item, void *data) {
+  const DataVariable *variable = item;
+  const DataOperand *name = data;
+  if (variable->name.length == name->length)
+    if (wmemcmp(variable->name.characters, name->characters, name->length) == 0)
+      return 1;
+
+  return 0;
+}
+
+static const DataVariable *
+getReadableDataVariable (DataFile *file, DataOperand *name) {
+  while (file) {
+    if (file->variables) {
+      DataVariable *variable = findItem(file->variables, testDataVariableName, name);
+      if (variable) return variable;
+    }
+
+    file = file->includer;
+  }
+
+  return NULL;
+}
+
+static DataVariable *
+getWritableDataVariable (DataFile *file, DataOperand *name) {
+  if (!file->variables)
+    if (!(file->variables = newQueue(deallocateDataVariable, NULL)))
+      return NULL;
+
+  if (file->variables) {
+    DataVariable *variable = findItem(file->variables, testDataVariableName, name);
+    if (variable) return variable;
+
+    if ((variable = malloc(sizeof(*variable)))) {
+      wchar_t *nameCharacters;
+
+      if ((nameCharacters = malloc(ARRAY_SIZE(nameCharacters, name->length)))) {
+        wmemcpy(nameCharacters, name->characters, name->length);
+        variable->name.characters = nameCharacters;
+        variable->name.length = name->length;
+        variable->value.characters = NULL;
+        variable->value.length = 0;
+
+        if (enqueueItem(file->variables, variable)) return variable;
+
+        free(nameCharacters);
+      }
+
+      free(variable);
+    }
+  }
+
+  return NULL;
+}
+
+static int
+setDataVariable (DataVariable *variable, const DataOperand *value) {
+  wchar_t *valueCharacters;
+
+  if (!value->length) {
+    valueCharacters = NULL;
+  } else if (!(valueCharacters = malloc(ARRAY_SIZE(valueCharacters, value->length)))) {
+    return 0;
+  } else {
+    wmemcpy(valueCharacters, value->characters, value->length);
+  }
+
+  if (variable->value.characters) free((void *)variable->value.characters);
+  variable->value.characters = valueCharacters;
+  variable->value.length = value->length;
+  return 1;
+}
+
 int
 findDataOperand (DataFile *file, const char *description) {
   file->start = file->end;
@@ -210,6 +303,10 @@ parseDataString (DataFile *file, DataString *string, const wchar_t *characters, 
 
   while (index < length) {
     wchar_t character = characters[index];
+    DataOperand substitution = {
+      .characters = &character,
+      .length = 1
+    };
 
     if (character == WC_C('\\')) {
       int start = index;
@@ -306,6 +403,31 @@ parseDataString (DataFile *file, DataString *string, const wchar_t *characters, 
             break;
           }
 
+          case WC_C('{'): {
+            const wchar_t *first = &characters[++index];
+            const wchar_t *end = wmemchr(first, WC_C('}'), length-index);
+
+            if (end) {
+              int count = end - first;
+              DataOperand name = {
+                .characters = first,
+                .length = count
+              };
+              const DataVariable *variable = getReadableDataVariable(file, &name);
+
+              index += count;
+
+              if (variable) {
+                substitution = variable->value;
+                ok = 1;
+              }
+            } else {
+              index = length - 1;
+            }
+
+            break;
+          }
+
           case WC_C('<'): {
             const wchar_t *first = &characters[++index];
             const wchar_t *end = wmemchr(first, WC_C('>'), length-index);
@@ -355,14 +477,19 @@ parseDataString (DataFile *file, DataString *string, const wchar_t *characters, 
         return 0;
       }
     }
-
-    string->characters[string->length++] = character;
     index += 1;
 
-    /* there needs to be room for a trailing NUL */
-    if (string->length == ARRAY_COUNT(string->characters)) {
-      reportDataError(file, "string operand too long");
-      return 0;
+    {
+      unsigned int newLength = string->length + substitution.length;
+
+      /* there needs to be room for a trailing NUL */
+      if (newLength >= ARRAY_COUNT(string->characters)) {
+        reportDataError(file, "string operand too long");
+        return 0;
+      }
+
+      wmemcpy(&string->characters[string->length], substitution.characters, substitution.length);
+      string->length = newLength;
     }
   }
   string->characters[string->length] = 0;
@@ -403,6 +530,25 @@ getDotOperand (DataFile *file, int *index) {
 }
 
 int
+processAssignOperands (DataFile *file, void *data) {
+  DataOperand name;
+
+  if (getDataOperand(file, &name, "variable name")) {
+    DataOperand value;
+
+    if (getDataOperand(file, &value, "variable value")) {
+      DataVariable *variable = getWritableDataVariable(file, &name);
+
+      if (variable) {
+        if (setDataVariable(variable, &value)) return 1;
+      }
+    }
+  }
+
+  return 1;
+}
+
+int
 includeDataFile (DataFile *file, const wchar_t *name, unsigned int length) {
   const char *prefixAddress = file->name;
   unsigned int prefixLength = 0;
@@ -414,9 +560,17 @@ includeDataFile (DataFile *file, const wchar_t *name, unsigned int length) {
 
   {
     char path[prefixLength + length + 1];
+    FILE *stream;
+    int ok = 0;
+
     snprintf(path, sizeof(path), "%.*s%.*" PRIws,
              prefixLength, prefixAddress, length, name);
-    return processDataFile(path, file->processor, file->data);
+    if ((stream = openDataFile(path, "r", 0))) {
+      if (processDataStream(file, stream, path, file->processor, file->data)) ok = 1;
+      fclose(stream);
+    }
+
+    return ok;
   }
 }
 
@@ -488,7 +642,11 @@ processUtf8Line (char *line, void *dataAddress) {
 }
 
 int
-processDataStream (FILE *stream, const char *name, DataProcessor processor, void *data) {
+processDataStream (
+  DataFile *includer,
+  FILE *stream, const char *name,
+  DataProcessor processor, void *data
+) {
   DataFile file;
 
   file.name = name;
@@ -496,8 +654,17 @@ processDataStream (FILE *stream, const char *name, DataProcessor processor, void
   file.processor = processor;
   file.data = data;
 
+  file.includer = includer;
+  file.variables = NULL;
+
   LogPrint(LOG_DEBUG, "including data file: %s", file.name);
-  return processLines(stream, processUtf8Line, &file);
+  {
+    int ok = processLines(stream, processUtf8Line, &file);
+
+    if (file.variables) deallocateQueue(file.variables);
+
+    return ok;
+  }
 }
 
 int
@@ -506,7 +673,7 @@ processDataFile (const char *name, DataProcessor processor, void *data) {
   FILE *stream;
 
   if ((stream = openDataFile(name, "r", 0))) {
-    if (processDataStream(stream, name, processor, data)) ok = 1;
+    if (processDataStream(NULL, stream, name, processor, data)) ok = 1;
     fclose(stream);
   }
 

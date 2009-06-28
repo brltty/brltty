@@ -228,7 +228,7 @@ processTextTableLines (FILE *stream, const char *name, DataProcessor processor) 
   TextTableData *ttd;
 
   if ((ttd = newTextTableData())) {
-    if (processDataStream(stream, name, processor, ttd)) return ttd;
+    if (processDataStream(NULL, stream, name, processor, ttd)) return ttd;
     destroyTextTableData(ttd);
   }
 

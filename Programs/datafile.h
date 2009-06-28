@@ -28,8 +28,13 @@ typedef struct DataFileStruct DataFile;
 typedef int DataProcessor (DataFile *file, void *data);
 
 extern int processDataFile (const char *name, DataProcessor processor, void *data);
-extern int processDataStream (FILE *stream, const char *name, DataProcessor processor, void *data);
 extern void reportDataError (DataFile *file, char *format, ...) PRINTF(2, 3);
+
+extern int processDataStream (
+  DataFile *includer,
+  FILE *stream, const char *name,
+  DataProcessor processor, void *data
+);
 
 extern int isKeyword (const wchar_t *keyword, const wchar_t *characters, int length);
 extern int isNumber (int *number, const wchar_t *characters, int length);
@@ -59,6 +64,8 @@ typedef struct {
   DataProcessor *processor;
 } DataProperty;
 extern int processPropertyOperand (DataFile *file, const DataProperty *properties, const char *description, void *data);
+
+extern int processAssignOperands (DataFile *file, void *data);
 
 extern int processIncludeOperands (DataFile *file, void *data);
 extern int includeDataFile (DataFile *file, const wchar_t *name, unsigned int length);

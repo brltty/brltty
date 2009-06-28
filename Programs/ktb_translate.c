@@ -60,7 +60,7 @@ static const KeyBinding *
 getKeyBinding (KeyTable *table, unsigned char context, unsigned char set, unsigned char key) {
   const KeyContext *ctx = getKeyContext(table, context);
 
-  if (ctx) {
+  if (ctx && ctx->sortedKeyBindings) {
     KeyBinding target;
 
     target.keys.set = set;
