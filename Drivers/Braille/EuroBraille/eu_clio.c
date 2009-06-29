@@ -80,7 +80,7 @@ struct		s_clioModelType
 {
   enum clioModelType	type;
   char		modelCode[3];
-  char		modelDesc[30];
+  const char	*modelDesc;
 }	t_clioModelType;
 
 /** Static Local Variables */
@@ -91,7 +91,7 @@ static t_eubrl_io*	iop = NULL; /* I/O methods */
 static unsigned char	brlFirmwareVersion[21];
 static int		routingMode = BRL_BLK_ROUTE;
 static int refreshDisplay = 0;
-static struct s_clioModelType		clioModels[] =
+static const struct s_clioModelType		clioModels[] =
   {
     {UNKNOWN, "", ""},
     {CE2, "CE2", "Clio-EuroBraille 20"},
