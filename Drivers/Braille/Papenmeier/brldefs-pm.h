@@ -20,6 +20,11 @@
 
 typedef enum {
   PM_KEY_BAR = 1,
+  PM_KEY_SWITCH = PM_KEY_BAR + 8,
+  PM_KEY_FRONT = PM_KEY_SWITCH + 8,
+  PM_KEY_STATUS = PM_KEY_FRONT + 13,
+  PM_KEY_KEYBOARD = PM_KEY_STATUS + 22,
+
   PM_KEY_BarLeft1 = PM_KEY_BAR,
   PM_KEY_BarLeft2,
   PM_KEY_BarUp1,
@@ -29,7 +34,6 @@ typedef enum {
   PM_KEY_BarDown1,
   PM_KEY_BarDown2,
 
-  PM_KEY_SWITCH = PM_KEY_BAR + 8,
   PM_KEY_LeftSwitchRear = PM_KEY_SWITCH,
   PM_KEY_LeftSwitchFront,
   PM_KEY_LeftKeyRear,
@@ -39,8 +43,19 @@ typedef enum {
   PM_KEY_RightSwitchRear,
   PM_KEY_RightSwitchFront,
 
-  PM_KEY_FRONT = PM_KEY_SWITCH + 8,
-  PM_KEY_STATUS = PM_KEY_FRONT + 13
+  PM_KEY_Dot1 = PM_KEY_KEYBOARD,
+  PM_KEY_Dot2,
+  PM_KEY_Dot3,
+  PM_KEY_Dot4,
+  PM_KEY_Dot5,
+  PM_KEY_Dot6,
+  PM_KEY_Dot7,
+  PM_KEY_Dot8,
+  PM_KEY_RightThumb,
+  PM_KEY_Space,
+  PM_KEY_LeftThumb,
+  PM_KEY_RightSpace,
+  PM_KEY_LeftSpace
 } PM_NavigationKey;
 
 typedef enum {

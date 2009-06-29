@@ -16,28 +16,6 @@
  * This software is maintained by Dave Mielke <dave@mielke.cc>.
  */
 
-/*
- * Support for all Papenmeier Terminal + config file
- *   Heimo.Schön <heimo.schoen@gmx.at>
- *   August Hörandl <august.hoerandl@gmx.at>
- *
- * Papenmeier/brl-cfg.h
- *  some defines and the big config table
- */
-
-#define KEY_NONE     0X000
-#define KEY_ROUTING1 0X001  /* first row of routing keys */
-#define KEY_ROUTING2 0X002  /* second row of routing keys */
-#define KEY_STATUS2  0X003  /* second row of status keys */
-#define KEYS_FRONT   0X100
-#define KEYS_STATUS  0X200
-#define KEYS_BAR     0X300
-#define KEYS_SWITCH  0X400
-
-
-#define MODMAX    16
-#define KEYMAX     8
-
 #define OFFS_EMPTY       0
 #define OFFS_HORIZ    1000	/* added to status show */
 #define OFFS_FLAG     2000
@@ -47,8 +25,8 @@
 typedef struct {
   unsigned char modelIdentifier;
   unsigned char protocolRevision;
-  char *modelName;
-  char *keyBindings;
+  const char *modelName;
+  const char *keyBindings;
   const KeyNameEntry *const *keyNameTables;
 
   uint8_t textColumns;
@@ -61,7 +39,7 @@ typedef struct {
   uint8_t rightKeys;
   uint8_t statusCount;
 
-  uint16_t *statusCells;
+  const uint16_t *statusCells;
 } ModelEntry; 
 
 #define PM_MODEL_IDENTITY(identifier, model, name) \
@@ -92,7 +70,7 @@ typedef struct {
   .keyNameTables = keyNameTables_##k##_status##s
 
 
-#define PM_BEGIN_STATUS(count) static uint16_t pmStatus_##count[] = {
+#define PM_BEGIN_STATUS(count) static const uint16_t pmStatus_##count[] = {
 #define PM_END_STATUS };
 
 #define pmStatus_0 NULL
@@ -264,6 +242,25 @@ static KEY_NAME_TABLE(keyNames_status) = {
 #define keyNames_status13 PM_STATUS_KEYS(13)
 #define keyNames_status20 PM_STATUS_KEYS(20)
 #define keyNames_status22 PM_STATUS_KEYS(22)
+
+static KEY_NAME_TABLE(keyNames_keyboard) = {
+  KEY_NAME_ENTRY(PM_KEY_Dot1, "Dot1"),
+  KEY_NAME_ENTRY(PM_KEY_Dot2, "Dot2"),
+  KEY_NAME_ENTRY(PM_KEY_Dot3, "Dot3"),
+  KEY_NAME_ENTRY(PM_KEY_Dot4, "Dot4"),
+  KEY_NAME_ENTRY(PM_KEY_Dot5, "Dot5"),
+  KEY_NAME_ENTRY(PM_KEY_Dot6, "Dot6"),
+  KEY_NAME_ENTRY(PM_KEY_Dot7, "Dot7"),
+  KEY_NAME_ENTRY(PM_KEY_Dot8, "Dot8"),
+
+  KEY_NAME_ENTRY(PM_KEY_Space, "Space"),
+  KEY_NAME_ENTRY(PM_KEY_LeftSpace, "LeftSpace"),
+  KEY_NAME_ENTRY(PM_KEY_RightSpace, "RightSpace"),
+  KEY_NAME_ENTRY(PM_KEY_LeftThumb, "LeftThumb"),
+  KEY_NAME_ENTRY(PM_KEY_RightThumb, "RightThumb"),
+
+  LAST_KEY_NAME_ENTRY
+};
 
 static KEY_NAME_TABLE(keyNames_routingKeys1) = {
   KEY_SET_ENTRY(PM_SET_RoutingKeys1, "RoutingKey1"),
