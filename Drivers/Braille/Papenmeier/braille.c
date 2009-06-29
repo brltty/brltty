@@ -47,8 +47,8 @@
 #define BRL_HAVE_FIRMNESS
 #include "brl_driver.h"
 #include "brldefs-pm.h"
+#include "models.h"
 #include "braille.h"
-#include "brl-cfg.h"
 
 static const ModelEntry *model = NULL;
 static TranslationTable outputTable;
