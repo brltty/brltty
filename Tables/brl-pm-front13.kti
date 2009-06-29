@@ -31,56 +31,91 @@ bind Dot3 PRPGRPH
 bind Dot6 NXPGRPH
 bind Dot7 PRPROMPT
 bind Dot8 NXPROMPT
+
 bind Dot1+Dot2 WINUP
 bind Dot4+Dot5 WINDN
 bind Dot3+Dot7 PRSEARCH
 bind Dot6+Dot8 NXSEARCH
+
+bind Dot1+Dot2+!RoutingKey1 PRDIFCHAR
+bind Dot4+Dot5+!RoutingKey1 NXDIFCHAR
 bind Dot3+Dot7+!RoutingKey1 PRINDENT
 bind Dot6+Dot8+!RoutingKey1 NXINDENT
+
 bind Dot1+!Shift LNBEG
 bind Dot1+!Home TOP_LEFT
 bind Dot1+!End BOT_LEFT
 bind Dot1+!Up FWINLT
 bind Dot1+!Down FWINRT
-bind Dot1+!RoutingKey1 DESCCHAR
+bind Dot1+!RoutingKey1 SETLEFT
+
 bind Dot4+!Shift LNEND
 bind Dot4+!Home CHRLT
 bind Dot4+!End CHRRT
 bind Dot4+!Up HWINLT
 bind Dot4+!Down HWINRT
-bind Dot4+!RoutingKey1 SETLEFT
-bind Dot2+!Shift KEY_INSERT
-bind Dot2+!Home KEY_PAGE_UP
-bind Dot2+!End KEY_PAGE_DOWN
-bind Dot2+!Up KEY_CURSOR_UP
-bind Dot2+!Down KEY_CURSOR_DOWN
-bind Dot2+!RoutingKey1 SWITCHVT
-bind Dot5+!Shift KEY_DELETE
-bind Dot5+!Home KEY_HOME
-bind Dot5+!End KEY_END
-bind Dot5+!Up KEY_CURSOR_LEFT
-bind Dot5+!Down KEY_CURSOR_RIGHT
-bind Dot5+!RoutingKey1 KEY_FUNCTION
-bind Dot3+!Home KEY_ESCAPE
-bind Dot3+!End KEY_TAB
-bind Dot3+!Up KEY_BACKSPACE
-bind Dot3+!Down KEY_ENTER
+bind Dot4+!RoutingKey1 DESCCHAR
+
 bind Dot7+!Shift SPKHOME
 bind Dot7+!Home SAY_ABOVE
 bind Dot7+!End SAY_BELOW
 bind Dot7+!Up MUTE
 bind Dot7+!Down SAY_LINE
+
 bind Dot8+!Shift RESTARTSPEECH
 bind Dot8+!Home SAY_SLOWER
 bind Dot8+!End SAY_FASTER
 bind Dot8+!Up SAY_SOFTER
 bind Dot8+!Down SAY_LOUDER
+
 bind Dot7+!RoutingKey1 CUTBEGIN
 bind Dot3+!RoutingKey1 CUTAPPEND
 bind Dot6+!RoutingKey1 CUTLINE
 bind Dot8+!RoutingKey1 CUTRECT
+
 bind !RoutingKey1 ROUTE
 
 assign toggleOff Dot7
 assign toggleOn Dot8
 include brl-pm-status\{statusKeys}.kti
+
+
+##############
+# Input Mode #
+##############
+
+assign inputContext 1
+context \{inputContext} Input Mode
+
+map Dot1 DOT1
+map Dot2 DOT2
+map Dot3 DOT3
+map Dot4 DOT4
+map Dot5 DOT5
+map Dot6 DOT6
+map Dot7 DOT7
+map Dot8 DOT8
+
+bind Dot2+!Shift KEY_INSERT
+bind Dot2+!Home KEY_PAGE_UP
+bind Dot2+!End KEY_PAGE_DOWN
+bind Dot2+!Up KEY_CURSOR_UP
+bind Dot2+!Down KEY_CURSOR_DOWN
+bind Dot2+!RoutingKey1 KEY_FUNCTION
+
+bind Dot5+!Shift KEY_DELETE
+bind Dot5+!Home KEY_HOME
+bind Dot5+!End KEY_END
+bind Dot5+!Up KEY_CURSOR_LEFT
+bind Dot5+!Down KEY_CURSOR_RIGHT
+bind Dot5+!RoutingKey1 SWITCHVT
+
+bind Dot3+!Shift PASSDOTS
+bind Dot3+!Home KEY_ESCAPE
+bind Dot3+!End KEY_TAB
+bind Dot3+!Up KEY_BACKSPACE
+bind Dot3+!Down KEY_ENTER
+
+context default
+bind Dot2+Dot3+!Shift context+0
+bind Dot5+Dot6+!Shift context+\{inputContext}

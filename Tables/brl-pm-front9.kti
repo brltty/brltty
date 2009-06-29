@@ -18,36 +18,41 @@
 
 # This key subtable is for Papenmeier displays which have 9 front keys.
 
-bind Function FWINLT
-bind Attribute FWINRT
+bind !Home HOME
+bind !Up WINUP
+bind !Down WINDN
+bind !Back LNUP
+bind !Forward LNDN
 bind Cursor HWINLT
 bind Braille HWINRT
-bind !Home HOME
+bind Function FWINLT
+bind Attribute FWINRT
+
 bind Function+!Home LNBEG
 bind Attribute+!Home LNEND
 bind Cursor+!Home CHRLT
 bind Braille+!Home CHRRT
-bind !Up WINUP
+
 bind Function+!Up PRDIFLN
 bind Attribute+!Up ATTRUP
 bind Cursor+!Up PRPGRPH
 bind Braille+!Up PRSEARCH
-bind !Down WINDN
 bind Function+!Down NXDIFLN
 bind Attribute+!Down ATTRDN
 bind Cursor+!Down NXPGRPH
 bind Braille+!Down NXSEARCH
-bind !Back LNUP
+
 bind Function+!Back TOP_LEFT
 bind Attribute+!Back TOP
-bind !Forward LNDN
 bind Function+!Forward BOT_LEFT
 bind Attribute+!Forward BOT
+
 bind !RoutingKey1 ROUTE
 bind Function+!RoutingKey1 CUTBEGIN
 bind Attribute+!RoutingKey1 CUTRECT
 bind Cursor+!RoutingKey1 PRINDENT
 bind Braille+!RoutingKey1 NXINDENT
+
 bind Function+Attribute PASTE
 
 assign toggleOff Function
