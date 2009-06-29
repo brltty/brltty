@@ -75,6 +75,31 @@ bind Dot8+!RoutingKey1 CUTRECT
 
 bind !RoutingKey1 ROUTE
 
+bind Dot1+Dot4 CSRVIS
+bind Dot1+Dot4+Dot7 CSRVIS+off
+bind Dot1+Dot4+Dot8 CSRVIS+on
+bind Dot1+Dot2+Dot4 FREEZE
+bind Dot1+Dot2+Dot5 HELP
+bind Dot2+Dot4 SKPIDLNS
+bind Dot2+Dot4+Dot7 SKPIDLNS+off
+bind Dot2+Dot4+Dot8 SKPIDLNS+on
+bind Dot1+Dot2+Dot3 LEARN
+bind Dot1+Dot2+Dot3+Dot4 PREFMENU
+bind Dot1+Dot2+Dot3+Dot4+Dot7 PREFLOAD
+bind Dot1+Dot2+Dot3+Dot4+Dot8 PREFSAVE
+bind Dot1+Dot2+Dot3+Dot5 AUTOREPEAT
+bind Dot1+Dot2+Dot3+Dot5+Dot7 AUTOREPEAT+off
+bind Dot1+Dot2+Dot3+Dot5+Dot8 AUTOREPEAT+on
+bind Dot2+Dot3+Dot4 INFO
+bind Dot2+Dot3+Dot4+Dot5 CSRTRK
+bind Dot2+Dot3+Dot4+Dot5+Dot7 CSRTRK+off
+bind Dot2+Dot3+Dot4+Dot5+Dot8 CSRTRK+on
+bind Dot1+Dot3+Dot6 ATTRVIS
+bind Dot1+Dot3+Dot6+Dot7 ATTRVIS+off
+bind Dot1+Dot3+Dot6+Dot8 ATTRVIS+on
+bind Dot2+Dot3+Dot5 SIXDOTS+on
+bind Dot2+Dot3+Dot6 SIXDOTS+off
+
 assign toggleOff Dot7
 assign toggleOn Dot8
 include brl-pm-status\{statusKeys}.kti
