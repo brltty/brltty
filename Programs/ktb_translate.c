@@ -25,7 +25,7 @@
 #include "ktb.h"
 #include "ktb_internal.h"
 #include "cmd.h"
-#include "brldefs.h"
+#include "brl.h"
 
 static inline const KeyContext *
 getKeyContext (KeyTable *table, unsigned char context) {

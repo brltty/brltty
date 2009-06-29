@@ -279,6 +279,114 @@ ensureBrailleBuffer (BrailleDisplay *brl, int infoLevel) {
   return 1;
 }
 
+typedef struct {
+  int command;
+} CommandQueueItem;
+
+static Queue *
+getCommandQueue (int create) {
+  static Queue *commandQueue = NULL;
+
+  if (create && !commandQueue) {
+    commandQueue = newQueue(NULL, NULL);
+  }
+
+  return commandQueue;
+}
+
+int
+enqueueCommand (int command) {
+  if (command != EOF) {
+    Queue *queue = getCommandQueue(1);
+
+    if (queue) {
+      CommandQueueItem *item = malloc(sizeof(CommandQueueItem));
+
+      if (item) {
+        item->command = command;
+        if (enqueueItem(queue, item)) return 1;
+
+        free(item);
+      }
+    }
+  }
+
+  return 0;
+}
+
+static int
+dequeueCommand (void) {
+  int command = EOF;
+  Queue *queue = getCommandQueue(0);
+
+  if (queue) {
+    CommandQueueItem *item = dequeueItem(queue);
+
+    if (item) {
+      command = item->command;
+      free(item);
+    }
+  }
+
+  return command;
+}
+
+typedef struct {
+  unsigned char set;
+  unsigned char key;
+  unsigned press:1;
+} KeyEventQueueItem;
+
+static Queue *
+getKeyEventQueue (int create) {
+  static Queue *keyEventQueue = NULL;
+
+  if (create && !keyEventQueue) {
+    keyEventQueue = newQueue(NULL, NULL);
+  }
+
+  return keyEventQueue;
+}
+
+int
+enqueueKeyEvent (unsigned char set, unsigned char key, int press) {
+  Queue *queue = getKeyEventQueue(1);
+
+  if (queue) {
+    KeyEventQueueItem *item = malloc(sizeof(KeyEventQueueItem));
+
+    if (item) {
+      item->set = set;
+      item->key = key;
+      item->press = press;
+      if (enqueueItem(queue, item)) return 1;
+
+      free(item);
+    }
+  }
+
+  return 0;
+}
+
+static int
+dequeueKeyEvent (unsigned char *set, unsigned char *key, int *press) {
+  Queue *queue = getKeyEventQueue(0);
+
+  if (queue) {
+    KeyEventQueueItem *item = dequeueItem(queue);
+
+    if (item) {
+      *set = item->set;
+      *key = item->key;
+      *press = item->press;
+      free(item);
+      return 1;
+    }
+  }
+
+  return 0;
+}
+
 int
 readBrailleCommand (BrailleDisplay *brl, BRL_DriverCommandContext context) {
   int command = dequeueCommand();
@@ -455,60 +563,4 @@ void
 setBrailleSensitivity (BrailleDisplay *brl, BrailleSensitivity setting) {
   LogPrint(LOG_DEBUG, "setting braille sensitivity: %d", setting);
   braille->sensitivity(brl, setting);
-}
-
-typedef struct {
-  unsigned char set;
-  unsigned char key;
-  unsigned press:1;
-} KeyEventQueueItem;
-
-static Queue *
-getKeyEventQueue (int create) {
-  static Queue *keyEventQueue = NULL;
-
-  if (create && !keyEventQueue) {
-    keyEventQueue = newQueue(NULL, NULL);
-  }
-
-  return keyEventQueue;
-}
-
-int
-enqueueKeyEvent (unsigned char set, unsigned char key, int press) {
-  Queue *queue = getKeyEventQueue(1);
-
-  if (queue) {
-    KeyEventQueueItem *item = malloc(sizeof(KeyEventQueueItem));
-
-    if (item) {
-      item->set = set;
-      item->key = key;
-      item->press = press;
-      if (enqueueItem(queue, item)) return 1;
-
-      free(item);
-    }
-  }
-
-  return 0;
-}
-
-int
-dequeueKeyEvent (unsigned char *set, unsigned char *key, int *press) {
-  Queue *queue = getKeyEventQueue(0);
-
-  if (queue) {
-    KeyEventQueueItem *item = dequeueItem(queue);
-
-    if (item) {
-      *set = item->set;
-      *key = item->key;
-      *press = item->press;
-      free(item);
-      return 1;
-    }
-  }
-
-  return 0;
 }

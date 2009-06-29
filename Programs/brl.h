@@ -91,6 +91,8 @@ extern void fillDotsRegion (
 extern int clearStatusCells (BrailleDisplay *brl);
 extern int setStatusText (BrailleDisplay *brl, const char *text);
 
+extern int enqueueCommand (int command);
+extern int enqueueKeyEvent (unsigned char set, unsigned char key, int press);
 extern int readBrailleCommand (BrailleDisplay *, BRL_DriverCommandContext);
 
 typedef enum {
@@ -174,9 +176,6 @@ extern int portraitNumber (int x);
 extern int portraitFlag (int number, int on);
 
 extern int learnMode (BrailleDisplay *brl, int poll, int timeout);
-
-extern int enqueueKeyEvent (unsigned char set, unsigned char key, int press);
-extern int dequeueKeyEvent (unsigned char *set, unsigned char *key, int *press);
 
 #ifdef __cplusplus
 }
