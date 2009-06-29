@@ -182,6 +182,7 @@ extern int api_resume (BrailleDisplay *brl);
 extern int api_claimDriver (BrailleDisplay *brl);
 extern void api_releaseDriver (BrailleDisplay *brl);
 extern void api_flush (BrailleDisplay *brl, BRL_DriverCommandContext caller);
+extern int api_handleCommand (int command);
 extern const char *const api_parameters[];
 extern int apiStarted;
 

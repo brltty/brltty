@@ -2289,6 +2289,43 @@ static void broadcastKey(Tty *tty, brlapi_keyCode_t code, unsigned int how) {
     broadcastKey(t, code, how);
 }
 
+/* The core produced a command, try to send it to a brlapi client.
+ * On success, return EOF, else return the command.  */
+static int api__handleCommand(int command) {
+  Connection *c;
+  brlapi_keyCode_t clientCode;
+
+  if (command == BRL_CMD_OFFLINE) {
+    if (!offline) {
+      broadcastKey(&ttys, BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_OFFLINE, BRL_COMMANDS);
+      offline = 1;
+    }
+    return BRL_CMD_OFFLINE;
+  }
+  if (offline) {
+    broadcastKey(&ttys, BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_NOOP, BRL_COMMANDS);
+    offline = 0;
+  }
+  handleAutorepeat(&command, &repeatState);
+  if (command != EOF) {
+    clientCode = cmdBrlttyToBrlapi(command, retainDots);
+    /* nobody needs the raw code */
+    if ((c = whoGetsKey(&ttys,clientCode,BRL_COMMANDS))) {
+      LogPrint(LOG_DEBUG,"Transmitting accepted command %lx as client code %016"BRLAPI_PRIxKEYCODE,(unsigned long)command, clientCode);
+      writeKey(c->fd,clientCode);
+      return EOF;
+    }
+  }
+  return command;
+}
+
+int api_handleCommand(int command) {
+  pthread_mutex_lock(&connectionsMutex);
+  command = api__handleCommand(command);
+  pthread_mutex_unlock(&connectionsMutex);
+  return command;
+}
+
 /* Function : api_readCommand */
 static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context)
 {
@@ -2406,30 +2443,8 @@ static int api_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context
     LogPrint(LOG_DEBUG,"Transmitting accepted key %lu",(unsigned long)keycode);
     writeKey(c->fd,clientCode);
     command = EOF;
-  } else {
-    if (command == BRL_CMD_OFFLINE) {
-      if (!offline) {
-	broadcastKey(&ttys, BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_OFFLINE, BRL_COMMANDS);
-	offline = 1;
-      }
-      pthread_mutex_unlock(&connectionsMutex);
-      return BRL_CMD_OFFLINE;
-    }
-    if (offline) {
-      broadcastKey(&ttys, BRLAPI_KEY_TYPE_CMD|BRLAPI_KEY_CMD_NOOP, BRL_COMMANDS);
-      offline = 0;
-    }
-    handleAutorepeat(&command, &repeatState);
-    if (command != EOF) {
-      clientCode = cmdBrlttyToBrlapi(command, retainDots);
-      /* nobody needs the raw code */
-      if ((c = whoGetsKey(&ttys,clientCode,BRL_COMMANDS))) {
-        LogPrint(LOG_DEBUG,"Transmitting accepted command %lx as client code %016"BRLAPI_PRIxKEYCODE,(unsigned long)command, clientCode);
-	writeKey(c->fd,clientCode);
-        command = EOF;
-      }
-    }
-  }
+  } else
+    command = api__handleCommand(command);
 out:
   pthread_mutex_unlock(&connectionsMutex);
   return command;
