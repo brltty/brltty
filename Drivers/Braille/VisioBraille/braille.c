@@ -67,11 +67,13 @@ static ssize_t brl_writePacket(BrailleDisplay *brl, const void *packet, size_t s
 {
   const unsigned char *p = packet;
   int lgtho = 1;
-  static unsigned char obuf[MAXPACKETSIZE] = { 02 };
+  unsigned char obuf[MAXPACKETSIZE];
   const unsigned char *x;
-  unsigned char *y = obuf+1;
+  unsigned char *y = obuf;
   unsigned char chksum=0;
   int i,res;
+
+  *y++ = 02;
   for (x=p; (x-p) < size; x++) {
     chksum ^= *x;
     if ((*x) <= 5) {
