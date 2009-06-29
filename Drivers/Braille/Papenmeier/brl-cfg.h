@@ -62,7 +62,7 @@ typedef struct {
   uint8_t statusCount;
 
   uint16_t *statusCells;
-} TerminalDefinition; 
+} ModelEntry; 
 
 #define PM_MODEL_IDENTITY(identifier, model, name) \
   .modelIdentifier = identifier, \
@@ -76,7 +76,7 @@ typedef struct {
 
 #define PM_FRONT_KEYS(f, s) \
   .frontKeys = f, \
-  PM_TERMINAL_TABLES(front##f, s)
+  PM_MODEL_TABLES(front##f, s)
 
 #define PM_BAR(ls, rs, lk, rk, s) \
   .hasBar = 1, \
@@ -84,9 +84,9 @@ typedef struct {
   .rightSwitches = rs, \
   .leftKeys = lk, \
   .rightKeys = rk, \
-  PM_TERMINAL_TABLES(bar, s)
+  PM_MODEL_TABLES(bar, s)
 
-#define PM_TERMINAL_TABLES(k, s) \
+#define PM_MODEL_TABLES(k, s) \
   .statusCells = pmStatus_##s, \
   .statusCount = s, \
   .keyNameTables = keyNameTables_##k##_status##s
@@ -326,7 +326,7 @@ static KEY_NAME_TABLE_LIST(keyNameTables_bar_status20) = {
 };
 
 
-static const TerminalDefinition pmTerminalTable[] = {
+static const ModelEntry modelTable[] = {
   { PM_MODEL_IDENTITY(0, c_486, "BrailleX Compact 486"),
     PM_TEXT_CELLS(40, 1),
     PM_FRONT_KEYS(9, 0)
@@ -436,4 +436,4 @@ static const TerminalDefinition pmTerminalTable[] = {
   }
 };
 
-static const unsigned int pmTerminalCount = ARRAY_COUNT(pmTerminalTable);
+static const unsigned int modelCount = ARRAY_COUNT(modelTable);
