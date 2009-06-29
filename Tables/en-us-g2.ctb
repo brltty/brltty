@@ -416,6 +416,7 @@ always ghz = (gigahertz)
 begword givea = giveaway
 sufword gnome = gnomedb
 word go 1245
+begword goath = goatherd
 sufword good 1245-145
 contraction gd
 begword gos = goshawk gosherd
@@ -618,6 +619,7 @@ midendword ount 46-2345
 always ourselves 1256-1235-1236-234
 word ourvs =
 word out 1256
+begword outdist 1256-2345-145-24-234-2345 outdistance
 always ought 5-1256
 begword overea 135-1236-12456-15-1 overeat overeager overeasy
 begword overear 135-1236-12456-15-345 overearnest
