@@ -39,3 +39,10 @@ bind B2+B3+SpaceRight SAY_LINE
 
 include brl-ht-dots.kti
 include brl-ht-rockers.kti
+
+assign brailleContext 1
+assign brailleOn B1+B8+SpaceRight
+assign brailleOff B1+B8+SpaceLeft
+assign space SpaceLeft
+assign enter SpaceRight
+include brl-ht-input.kti
