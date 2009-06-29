@@ -992,27 +992,23 @@ readCommand2 (BrailleDisplay *brl, BRL_DriverCommandContext context) {
       }
 
       case 0X0C: {
-        int command = BRL_BLK_PASSDOTS;
-        unsigned char modifiers = packet.data.bytes[0];
-        unsigned char dots = packet.data.bytes[1];
+        unsigned char modifierKeys = packet.data.bytes[0];
+        unsigned char dotKeys = packet.data.bytes[1];
+        uint16_t allKeys = (modifierKeys << 8) | dotKeys;
+        PM_NavigationKey pressedKeys[0X10];
+        unsigned char pressedCount = 0;
+        const PM_KeySet set = PM_SET_NavigationKeys;
+        unsigned char keyOffset;
 
-        if (dots) {
-          if (dots & 0X01) command |= BRL_DOT1;
-          if (dots & 0X02) command |= BRL_DOT2;
-          if (dots & 0X04) command |= BRL_DOT3;
-          if (dots & 0X08) command |= BRL_DOT4;
-          if (dots & 0X10) command |= BRL_DOT5;
-          if (dots & 0X20) command |= BRL_DOT6;
-          if (dots & 0X40) command |= BRL_DOT7;
-          if (dots & 0X80) command |= BRL_DOT8;
-          if (modifiers & 0X02) command |= BRL_FLG_CHAR_UPPER;
-        } else if (!(modifiers & 0X02)) {
-          return BRL_CMD_NOOP;
+        for (keyOffset=0; keyOffset<13; keyOffset+=1) {
+          if (allKeys & (1 << keyOffset)) {
+            PM_NavigationKey key = PM_KEY_KEYBOARD + keyOffset;
+            enqueueKeyEvent(set, key, 1);
+            pressedKeys[pressedCount++] = key;
+          }
         }
 
-        if (modifiers & 0X04) command |= BRL_FLG_CHAR_CONTROL;
-        if (modifiers & 0X01) command |= BRL_FLG_CHAR_META;
-        enqueueCommand(command);
+        while (pressedCount) enqueueKeyEvent(set, pressedKeys[--pressedCount], 0);
         continue;
       }
     }
