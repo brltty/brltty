@@ -16,8 +16,7 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-context \{brailleContext} Braille Input
-bind \{brailleOff} CONTEXT+0
+context \{brailleContext} Braille Input Mode
 map f DOT1
 map d DOT2
 map s DOT3
@@ -37,3 +36,4 @@ map AltLeft META
 
 context default
 bind \{brailleOn} CONTEXT+\{brailleContext}
+bind \{brailleOff} CONTEXT+0
