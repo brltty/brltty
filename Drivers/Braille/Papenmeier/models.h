@@ -21,55 +21,6 @@
 #define OFFS_FLAG     2000
 #define OFFS_NUMBER   3000
 
-
-typedef struct {
-  unsigned char modelIdentifier;
-  unsigned char protocolRevision;
-  const char *modelName;
-  const char *keyBindings;
-  const KeyNameEntry *const *keyNameTables;
-
-  uint8_t textColumns;
-  uint8_t textRows;
-  uint8_t frontKeys;
-  uint8_t hasBar;
-  uint8_t leftSwitches;
-  uint8_t rightSwitches;
-  uint8_t leftKeys;
-  uint8_t rightKeys;
-  uint8_t statusCount;
-
-  const uint16_t *statusCells;
-} ModelEntry; 
-
-#define PM_MODEL_IDENTITY(identifier, model, name) \
-  .modelIdentifier = identifier, \
-  .modelName = name, \
-  .protocolRevision = 1, \
-  .keyBindings = #model, \
-  .keyNameTables = keyNameTables_##model
-
-#define PM_TEXT_CELLS(columns, rows) \
-  .textColumns = columns, \
-  .textRows = rows
-
-#define PM_FRONT_KEYS(f, s) \
-  .frontKeys = f, \
-  PM_MODEL_TABLES(front##f, s)
-
-#define PM_BAR(ls, rs, lk, rk, s) \
-  .hasBar = 1, \
-  .leftSwitches = ls, \
-  .rightSwitches = rs, \
-  .leftKeys = lk, \
-  .rightKeys = rk, \
-  PM_MODEL_TABLES(bar, s)
-
-#define PM_MODEL_TABLES(k, s) \
-  .statusCells = pmStatus_##s, \
-  .statusCount = s
-
-
 #define PM_BEGIN_STATUS(count) static const uint16_t pmStatus_##count[] = {
 #define PM_END_STATUS };
 
@@ -150,6 +101,48 @@ PM_BEGIN_STATUS(22)
   OFFS_FLAG  + BRL_GSC_AUTOREPEAT,
   OFFS_EMPTY
 PM_END_STATUS
+
+
+typedef struct {
+  unsigned char modelIdentifier;
+  unsigned char protocolRevision;
+  const char *modelName;
+  const char *keyBindings;
+  const KeyNameEntry *const *keyNameTables;
+
+  uint8_t textColumns;
+  uint8_t frontKeys;
+  uint8_t hasBar;
+  uint8_t leftSwitches;
+  uint8_t rightSwitches;
+  uint8_t leftKeys;
+  uint8_t rightKeys;
+  uint8_t statusCount;
+
+  const uint16_t *statusCells;
+} ModelEntry; 
+
+#define PM_MODEL_IDENTITY(identifier, model, name) \
+  .modelIdentifier = identifier, \
+  .modelName = name, \
+  .protocolRevision = 1, \
+  .keyBindings = #model, \
+  .keyNameTables = keyNameTables_##model
+
+#define PM_CELL_COUNTS(columns, status) \
+  .textColumns = columns, \
+  .statusCells = pmStatus_##status, \
+  .statusCount = status
+
+#define PM_FRONT_KEYS(front) \
+  .frontKeys = front
+
+#define PM_BAR(ls, rs, lk, rk) \
+  .hasBar = 1, \
+  .leftSwitches = ls, \
+  .rightSwitches = rs, \
+  .leftKeys = lk, \
+  .rightKeys = rk
 
 
 static KEY_NAME_TABLE(keyNames_bar) = {
@@ -454,111 +447,111 @@ static KEY_NAME_TABLE_LIST(keyNameTables_elba_trio_32) = {
 
 static const ModelEntry modelTable[] = {
   { PM_MODEL_IDENTITY(0, c_486, "BrailleX Compact 486"),
-    PM_TEXT_CELLS(40, 1),
-    PM_FRONT_KEYS(9, 0)
+    PM_CELL_COUNTS(40, 0),
+    PM_FRONT_KEYS(9)
   }
   ,
   { PM_MODEL_IDENTITY(1, 2d_l, "BrailleX 2D Lite (plus)"),
-    PM_TEXT_CELLS(40, 1),
-    PM_FRONT_KEYS(9, 13)
+    PM_CELL_COUNTS(40, 13),
+    PM_FRONT_KEYS(9)
   }
   ,
   { PM_MODEL_IDENTITY(2, c, "BrailleX Compact/Tiny"),
-    PM_TEXT_CELLS(40, 1),
-    PM_FRONT_KEYS(9, 0)
+    PM_CELL_COUNTS(40, 0),
+    PM_FRONT_KEYS(9)
   }
   ,
   { PM_MODEL_IDENTITY(3, 2d_s, "BrailleX 2D Screen Soft"),
-    PM_TEXT_CELLS(80, 1),
-    PM_FRONT_KEYS(13, 22)
+    PM_CELL_COUNTS(80, 22),
+    PM_FRONT_KEYS(13)
   }
   ,
   { PM_MODEL_IDENTITY(6, ib_80, "BrailleX IB 80 CR Soft"),
-    PM_TEXT_CELLS(80, 1),
-    PM_FRONT_KEYS(9, 4)
+    PM_CELL_COUNTS(80, 4),
+    PM_FRONT_KEYS(9)
   }
   ,
   { PM_MODEL_IDENTITY(64, el_2d_40, "BrailleX EL 2D-40"),
-    PM_TEXT_CELLS(40, 1),
-    PM_BAR(1, 1, 1, 1, 13)
+    PM_CELL_COUNTS(40, 13),
+    PM_BAR(1, 1, 1, 1)
   }
   ,
   { PM_MODEL_IDENTITY(65, el_2d_66, "BrailleX EL 2D-66"),
-    PM_TEXT_CELLS(66, 1),
-    PM_BAR(1, 1, 1, 1, 13)
+    PM_CELL_COUNTS(66, 13),
+    PM_BAR(1, 1, 1, 1)
   }
   ,
   { PM_MODEL_IDENTITY(66, el_80, "BrailleX EL 80"),
-    PM_TEXT_CELLS(80, 1),
-    PM_BAR(1, 1, 1, 1, 2)
+    PM_CELL_COUNTS(80, 2),
+    PM_BAR(1, 1, 1, 1)
   }
   ,
   { PM_MODEL_IDENTITY(67, el_2d_80, "BrailleX EL 2D-80"),
-    PM_TEXT_CELLS(80, 1),
-    PM_BAR(1, 1, 1, 1, 20)
+    PM_CELL_COUNTS(80, 20),
+    PM_BAR(1, 1, 1, 1)
   }
   ,
   { PM_MODEL_IDENTITY(68, el_40_p, "BrailleX EL 40 P"),
-    PM_TEXT_CELLS(40, 1),
-    PM_BAR(1, 1, 1, 0, 0)
+    PM_CELL_COUNTS(40, 0),
+    PM_BAR(1, 1, 1, 0)
   }
   ,
   { PM_MODEL_IDENTITY(69, elba_32, "BrailleX Elba 32"),
-    PM_TEXT_CELLS(32, 1),
-    PM_BAR(1, 1, 1, 1, 0)
+    PM_CELL_COUNTS(32, 0),
+    PM_BAR(1, 1, 1, 1)
   }
   ,
   { PM_MODEL_IDENTITY(70, elba_20, "BrailleX Elba 20"),
-    PM_TEXT_CELLS(20, 1),
-    PM_BAR(1, 1, 1, 1, 0)
+    PM_CELL_COUNTS(20, 0),
+    PM_BAR(1, 1, 1, 1)
   }
   ,
   { PM_MODEL_IDENTITY(85, el40s, "BrailleX EL40s"),
-    PM_TEXT_CELLS(40, 1),
-    PM_BAR(0, 0, 1, 1, 0)
+    PM_CELL_COUNTS(40, 0),
+    PM_BAR(0, 0, 1, 1)
   }
   ,
   { PM_MODEL_IDENTITY(86, el80_ii, "BrailleX EL80-II"),
-    PM_TEXT_CELLS(80, 1),
-    PM_BAR(0, 0, 1, 1, 2)
+    PM_CELL_COUNTS(80, 2),
+    PM_BAR(0, 0, 1, 1)
   }
   ,
   { PM_MODEL_IDENTITY(87, el66s, "BrailleX EL66s"),
-    PM_TEXT_CELLS(66, 1),
-    PM_BAR(0, 0, 1, 1, 0)
+    PM_CELL_COUNTS(66, 0),
+    PM_BAR(0, 0, 1, 1)
   }
   ,
   { PM_MODEL_IDENTITY(88, el80s, "BrailleX EL80s"),
-    PM_TEXT_CELLS(80, 1),
-    PM_BAR(0, 0, 1, 1, 0)
+    PM_CELL_COUNTS(80, 0),
+    PM_BAR(0, 0, 1, 1)
   }
   ,
   { PM_MODEL_IDENTITY(89, trio, "BrailleX Trio"),
     .protocolRevision = 2,
-    PM_TEXT_CELLS(40, 1),
-    PM_BAR(0, 0, 1, 1, 0)
+    PM_CELL_COUNTS(40, 0),
+    PM_BAR(0, 0, 1, 1)
   }
   ,
   { PM_MODEL_IDENTITY(90, el70s, "BrailleX EL70s"),
-    PM_TEXT_CELLS(70, 1),
-    PM_BAR(0, 0, 1, 1, 0)
+    PM_CELL_COUNTS(70, 0),
+    PM_BAR(0, 0, 1, 1)
   }
   ,
   { PM_MODEL_IDENTITY(91, el2d_80s, "BrailleX EL2D-80s"),
-    PM_TEXT_CELLS(80, 1),
-    PM_BAR(0, 0, 1, 1, 20)
+    PM_CELL_COUNTS(80, 20),
+    PM_BAR(0, 0, 1, 1)
   }
   ,
   { PM_MODEL_IDENTITY(92, elba_trio_20, "BrailleX Elba (Trio 20)"),
     .protocolRevision = 2,
-    PM_TEXT_CELLS(20, 1),
-    PM_BAR(0, 0, 1, 1, 0)
+    PM_CELL_COUNTS(20, 0),
+    PM_BAR(0, 0, 1, 1)
   }
   ,
   { PM_MODEL_IDENTITY(93, elba_trio_32, "BrailleX Elba (Trio 32)"),
     .protocolRevision = 2,
-    PM_TEXT_CELLS(32, 1),
-    PM_BAR(0, 0, 1, 1, 0)
+    PM_CELL_COUNTS(32, 0),
+    PM_BAR(0, 0, 1, 1)
   }
 };
 

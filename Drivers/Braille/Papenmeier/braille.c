@@ -301,14 +301,11 @@ interpretIdentity (BrailleDisplay *brl, unsigned char id, int major, int minor) 
   for (modelIndex=0; modelIndex<modelCount; modelIndex++) {
     if (modelTable[modelIndex].modelIdentifier == id) {
       model = &modelTable[modelIndex];
-      LogPrint(LOG_INFO, "%s  Size: %dx%d", 
-               model->modelName,
-               model->textColumns, model->textRows);
+      LogPrint(LOG_INFO, "%s  Size: %d", model->modelName, model->textColumns);
 
       brl->textColumns = model->textColumns;
-      brl->textRows = model->textRows;
-      brl->statusColumns = model->statusCount;
-      brl->statusRows = 1;
+      brl->textRows = 1;
+      brl->statusRows = (brl->statusColumns = model->statusCount)? 1: 0;
       brl->keyBindings = model->keyBindings;
       brl->keyNameTables = model->keyNameTables;
 
