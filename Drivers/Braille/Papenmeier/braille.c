@@ -1000,6 +1000,10 @@ readCommand2 (BrailleDisplay *brl, BRL_DriverCommandContext context) {
         const PM_KeySet set = PM_SET_NavigationKeys;
         unsigned char keyOffset;
 
+#define BIT(key) (1 << ((key) - PM_KEY_KEYBOARD))
+        if (allKeys & (BIT(PM_KEY_LeftSpace) | BIT(PM_KEY_RightSpace))) allKeys &= ~BIT(PM_KEY_Space);
+#undef BIT
+
         for (keyOffset=0; keyOffset<13; keyOffset+=1) {
           if (allKeys & (1 << keyOffset)) {
             PM_NavigationKey key = PM_KEY_KEYBOARD + keyOffset;
