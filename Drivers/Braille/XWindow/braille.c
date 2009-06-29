@@ -253,19 +253,19 @@ static int totlines;
 static int modelWidth,modelHeight;
 #endif /* USE_WINDOWS */
 
-static long keypressed;
-
 #ifdef USE_XT
 static void KeyPressCB(Widget w, XtPointer closure, XtPointer callData)
 {
   LogPrint(LOG_DEBUG,"keypresscb(%p)", closure);
-  keypressed = (long)closure;
+  enqueueCommand((long) closure);
 }
 
 static void keypress(Widget w, XEvent *event, String *params, Cardinal *num_params) {
   static Modifiers my_modifiers;
+  long keypressed;
   Modifiers modifiers, modifier;
   KeySym keysym;
+
   if (event->type != KeyPress && event->type != KeyRelease) {
     LogPrint(LOG_ERR,"keypress is not a KeyPress");
     return;
@@ -397,6 +397,7 @@ static void keypress(Widget w, XEvent *event, String *params, Cardinal *num_para
   else
     keypressed = BRL_CMD_NOOP;
   LogPrint(LOG_DEBUG,"keypressed %#lx", keypressed);
+  enqueueCommand(keypressed);
   return;
 
 modif:
@@ -411,7 +412,7 @@ static void route(Widget w, XEvent *event, String *params, Cardinal *num_params)
 {
   int index = atoi(params[0]);
   LogPrint(LOG_DEBUG,"route(%u)", index);
-  keypressed = BRL_BLK_ROUTE | (index&BRL_MSK_ARG);
+  enqueueCommand(BRL_BLK_ROUTE | (index&BRL_MSK_ARG));
 }
 
 static void quit(Widget w, XEvent *event, String *params, Cardinal *num_params)
@@ -621,9 +622,12 @@ static actionfun_t actionfun[] = {
 #ifdef USE_WINDOWS
 static LRESULT CALLBACK wndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
   if (uMsg == WM_COMMAND) {
+    long keypressed;
     hwnd = GET_WM_COMMAND_HWND(wParam, lParam);
     keypressed = GetWindowLong(hwnd, GWL_USERDATA);
-    if (!keypressed) {
+    if (keypressed) {
+      enqueueCommand(keypressed);
+    } else {
       /* menu entry */
       GET_ACTIONFUN(wParam)(NULL, (XtPointer)(GET_VALUE(wParam)), NULL);
     }
@@ -655,7 +659,6 @@ int CALLBACK fontEnumProc(ENUMLOGFONTEX *lpelfe, NEWTEXTMETRICEX *lpntme, DWORD 
 
 static int brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context)
 {
-  int res=EOF;
 #if defined(USE_XT)
   while (XtAppPending(app_con)) {
     XtAppProcessEvent(app_con,XtIMAll);
@@ -684,13 +687,8 @@ static int brl_readCommand(BrailleDisplay *brl, BRL_DriverCommandContext context
       brl->textRows = lines;
       brl->resizeRequired = 1;
     }
-    if (keypressed!=EOF) {
-      res=keypressed;
-      keypressed=EOF;
-      break;
-    }
   }
-  return res;
+  return EOF;
 }
 
 #ifdef USE_XT
