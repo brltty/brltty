@@ -80,12 +80,12 @@ assign toggleOn Dot8
 include brl-pm-status\{statusKeys}.kti
 
 
-##############
-# Input Mode #
-##############
+######################
+# Braille Input Mode #
+######################
 
-assign inputContext 1
-context \{inputContext} Input Mode
+assign brailleContext 1
+context \{brailleContext} Braille Input Mode
 
 map Dot1 DOT1
 map Dot2 DOT2
@@ -118,4 +118,22 @@ bind Dot3+!Down KEY_ENTER
 
 context default
 bind Dot2+Dot3+!Shift context+0
-bind Dot5+Dot6+!Shift context+\{inputContext}
+bind Dot5+Dot6+!Shift context+\{brailleContext}
+
+
+#################
+# Menu Bindings #
+#################
+
+context menu
+bind !Shift PREFMENU
+bind !Home MENU_PREV_SETTING
+bind !End MENU_NEXT_SETTING
+bind !Up MENU_PREV_ITEM
+bind !Down MENU_NEXT_ITEM
+bind !Dot1 MENU_FIRST_ITEM
+bind !Dot4 MENU_LAST_ITEM
+bind !Dot2 PREFLOAD
+bind !Dot5 PREFSAVE
+bind !Dot7 FWINLT
+bind !Dot8 FWINRT
