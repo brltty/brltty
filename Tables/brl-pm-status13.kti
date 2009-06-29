@@ -30,8 +30,6 @@ bind !Status7 DISPMD
 bind \{toggleOff}+!Status7 DISPMD+off
 bind \{toggleOn}+!Status7 DISPMD+on
 bind !Status8 FREEZE
-bind \{toggleOff}+!Status8 FREEZE+off
-bind \{toggleOn}+!Status8 FREEZE+on
 bind !Status9 PREFMENU
 bind !Status10 PREFLOAD
 bind !Status11 CSRVIS

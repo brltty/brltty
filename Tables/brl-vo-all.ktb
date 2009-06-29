@@ -55,8 +55,6 @@ bind Thumb2+Dot1+Dot4 CSRVIS
 bind Thumb2+Dot1+Dot4+Dot7 CSRVIS+off
 bind Thumb2+Dot1+Dot4+Dot8 CSRVIS+on
 bind Thumb2+Dot1+Dot2+Dot4 FREEZE
-bind Thumb2+Dot1+Dot2+Dot4+Dot7 FREEZE+off
-bind Thumb2+Dot1+Dot2+Dot4+Dot8 FREEZE+on
 bind Thumb2+Dot1+Dot2+Dot5 HELP
 bind Thumb2+Dot2+Dot4 SKPIDLNS
 bind Thumb2+Dot2+Dot4+Dot7 SKPIDLNS+off
