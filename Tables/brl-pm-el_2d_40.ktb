@@ -20,3 +20,4 @@ title Papenmeier BrailleX EL 2D-40
 
 assign statusKeys 13
 include brl-pm-bar.kti
+include brl-pm-switches.kti

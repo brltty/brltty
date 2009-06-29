@@ -1,0 +1,88 @@
+###############################################################################
+# BRLTTY - A background process providing access to the console screen (when in
+#          text mode) for a blind person using a refreshable braille display.
+#
+# Copyright (C) 1995-2009 by The BRLTTY Developers.
+#
+# BRLTTY comes with ABSOLUTELY NO WARRANTY.
+#
+# This is free software, placed under the terms of the
+# GNU Lesser General Public License, as published by the Free Software
+# Foundation; either version 2.1 of the License, or (at your option) any
+# later version. Please see the file LICENSE-LGPL for details.
+#
+# Web Page: http://mielke.cc/brltty/
+#
+# This software is maintained by Dave Mielke <dave@mielke.cc>.
+###############################################################################
+
+# This key subtable is for Papenmeier displays which have switches.
+
+bind LeftSwitchRear+BarUp1 PRDIFLN
+bind LeftSwitchRear+BarDown1 NXDIFLN
+bind LeftSwitchRear+BarUp2 ATTRUP
+bind LeftSwitchRear+BarDown2 ATTRDN
+bind LeftSwitchRear+BarLeft1 PRPROMPT
+bind LeftSwitchRear+BarRight1 NXPROMPT
+bind LeftSwitchRear+BarLeft2 PRPGRPH
+bind LeftSwitchRear+BarRight2 NXPGRPH
+
+bind RightSwitchRear+BarUp1 KEY_CURSOR_UP
+bind RightSwitchRear+BarDown1 KEY_CURSOR_DOWN
+bind RightSwitchRear+BarUp2 KEY_PAGE_UP
+bind RightSwitchRear+BarDown2 KEY_PAGE_DOWN
+bind RightSwitchRear+BarLeft1 FWINLT+route
+bind RightSwitchRear+BarRight1 FWINRT+route
+bind RightSwitchRear+BarLeft2 LNBEG+route
+bind RightSwitchRear+BarRight2 LNEND+route
+
+bind LeftSwitchRear+RightSwitchRear+BarUp1 KEY_CURSOR_UP
+bind LeftSwitchRear+RightSwitchRear+BarDown1 KEY_CURSOR_DOWN
+bind LeftSwitchRear+RightSwitchRear+BarUp2 KEY_PAGE_UP
+bind LeftSwitchRear+RightSwitchRear+BarDown2 KEY_PAGE_DOWN
+bind LeftSwitchRear+RightSwitchRear+BarLeft1 KEY_CURSOR_LEFT
+bind LeftSwitchRear+RightSwitchRear+BarRight1 KEY_CURSOR_RIGHT
+bind LeftSwitchRear+RightSwitchRear+BarLeft2 KEY_HOME
+bind LeftSwitchRear+RightSwitchRear+BarRight2 KEY_END
+
+bind LeftSwitchFront+BarUp1 PRSEARCH
+bind LeftSwitchFront+BarDown1 NXSEARCH
+bind LeftSwitchFront+BarUp2 HELP
+bind LeftSwitchFront+BarDown2 LEARN
+bind LeftSwitchFront+BarLeft1 CHRLT
+bind LeftSwitchFront+BarRight1 CHRRT
+bind LeftSwitchFront+BarLeft2 HWINLT
+bind LeftSwitchFront+BarRight2 HWINRT
+
+bind RightSwitchFront+BarUp1 MENU_PREV_ITEM
+bind RightSwitchFront+BarDown1 MENU_NEXT_ITEM
+bind RightSwitchFront+BarUp2 MENU_FIRST_ITEM
+bind RightSwitchFront+BarDown2 MENU_LAST_ITEM
+bind RightSwitchFront+BarLeft1 MENU_PREV_SETTING
+bind RightSwitchFront+BarRight1 MENU_NEXT_SETTING
+bind RightSwitchFront+BarLeft2 PREFLOAD
+bind RightSwitchFront+BarRight2 PREFSAVE
+
+assign switches LeftSwitchRear+
+include brl-pm-bar_common.kti
+
+assign switches LeftSwitchFront+
+include brl-pm-bar_common.kti
+
+assign switches RightSwitchRear+
+include brl-pm-bar_common.kti
+
+assign switches RightSwitchFront+
+include brl-pm-bar_common.kti
+
+assign switches LeftSwitchRear+RightSwitchRear+
+include brl-pm-bar_common.kti
+
+assign switches LeftSwitchRear+RightSwitchFront+
+include brl-pm-bar_common.kti
+
+assign switches LeftSwitchFront+RightSwitchRear+
+include brl-pm-bar_common.kti
+
+assign switches LeftSwitchFront+RightSwitchFront+
+include brl-pm-bar_common.kti

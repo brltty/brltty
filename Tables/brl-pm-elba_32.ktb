@@ -20,3 +20,4 @@ title Papenmeier BrailleX Elba 32
 
 assign statusKeys 0
 include brl-pm-bar.kti
+include brl-pm-switches.kti

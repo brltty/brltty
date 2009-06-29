@@ -20,3 +20,4 @@ title Papenmeier BrailleX EL 80
 
 assign statusKeys 2
 include brl-pm-bar.kti
+include brl-pm-switches.kti
