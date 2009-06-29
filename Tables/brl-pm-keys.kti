@@ -16,6 +16,8 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
+# This key subtable is for Papenmeier displays which have keys.
+
 bind \{switches}LeftKeyRear BACK
 bind \{switches}LeftKeyFront HOME
 bind \{switches}RightKeyRear HELP

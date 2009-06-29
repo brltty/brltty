@@ -64,25 +64,25 @@ bind RightSwitchFront+BarLeft2 PREFLOAD
 bind RightSwitchFront+BarRight2 PREFSAVE
 
 assign switches LeftSwitchRear+
-include brl-pm-bar_common.kti
+include brl-pm-keys.kti
 
 assign switches LeftSwitchFront+
-include brl-pm-bar_common.kti
+include brl-pm-keys.kti
 
 assign switches RightSwitchRear+
-include brl-pm-bar_common.kti
+include brl-pm-keys.kti
 
 assign switches RightSwitchFront+
-include brl-pm-bar_common.kti
+include brl-pm-keys.kti
 
 assign switches LeftSwitchRear+RightSwitchRear+
-include brl-pm-bar_common.kti
+include brl-pm-keys.kti
 
 assign switches LeftSwitchRear+RightSwitchFront+
-include brl-pm-bar_common.kti
+include brl-pm-keys.kti
 
 assign switches LeftSwitchFront+RightSwitchRear+
-include brl-pm-bar_common.kti
+include brl-pm-keys.kti
 
 assign switches LeftSwitchFront+RightSwitchFront+
-include brl-pm-bar_common.kti
+include brl-pm-keys.kti

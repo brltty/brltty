@@ -28,4 +28,4 @@ bind BarLeft2 LNBEG
 bind BarRight2 LNEND
 
 assign switches
-include brl-pm-bar_common.kti
+include brl-pm-keys.kti
