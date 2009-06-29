@@ -16,25 +16,18 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-title HandyTech Braille Wave
+context \{brailleContext} Braille Input
+bind \{brailleOff} CONTEXT+0
+map B4 DOT1
+map B3 DOT2
+map B2 DOT3
+map B5 DOT4
+map B6 DOT5
+map B7 DOT6
+map B1 DOT7
+map B8 DOT8
+map \{space} SPACE
+bind \{enter} KEY_ENTER
 
-bind Left FWINLT
-bind Right FWINRT
-
-bind RoutingKey ROUTE
-bind Left+RoutingKey PRINDENT
-bind Right+RoutingKey NXINDENT
-
-bind Left+Right PASTE
-
-include brl-ht-dots.kti
-
-bind Escape+Space+Enter INFO
-
-assign brailleContext 1
-assign brailleOn B1+B8+Right
-assign brailleOff B1+B8+Left
-assign space Space
-assign enter Enter
-include brl-ht-input.kti
-
+context default
+bind \{brailleOn} CONTEXT+\{brailleContext}
