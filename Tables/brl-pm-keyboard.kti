@@ -16,8 +16,18 @@
 # This software is maintained by Dave Mielke <dave@mielke.cc>.
 ###############################################################################
 
-title Papenmeier BrailleX Trio
+# This key subtable is for Papenmeier displays which have a braille keyboard.
 
-assign statusKeys 0
-include brl-pm-bar.kti
-include brl-pm-keyboard.kti
+map Dot1 DOT1
+map Dot2 DOT2
+map Dot3 DOT3
+map Dot4 DOT4
+map Dot5 DOT5
+map Dot6 DOT6
+map Dot7 DOT7
+map Dot8 DOT8
+
+map LeftSpace SPACE
+map RightSpace SPACE
+map LeftThumb UPPERCASE
+map RightThumb CONTROL
