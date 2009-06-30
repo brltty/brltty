@@ -464,6 +464,10 @@ allocateCommandTable (KeyTableData *ktd) {
 
 static int
 parseCommandName (DataFile *file, int *value, const wchar_t *characters, int length, KeyTableData *ktd) {
+  int toggleDone = 0;
+  int motionDone = 0;
+  int offsetDone = 0;
+
   const wchar_t *end = wmemchr(characters, WC_C('+'), length);
   const DataOperand name = {
     .characters = characters,
@@ -471,9 +475,14 @@ parseCommandName (DataFile *file, int *value, const wchar_t *characters, int len
   };
   const CommandEntry **command = bsearch(&name, ktd->commandTable, ktd->commandCount, sizeof(*ktd->commandTable), searchCommandName);
 
-  if (command) {
-    *value = (*command)->code;
-    if (!end) return 1;
+  if (!command) {
+    reportDataError(file, "unknown command name: %.*" PRIws, length, characters);
+    return 0;
+  }
+  *value = (*command)->code;
+
+  while (end) {
+    DataOperand modifier;
 
     if (!(length -= end - characters + 1)) {
       reportDataError(file, "missing command modifier");
@@ -481,50 +490,60 @@ parseCommandName (DataFile *file, int *value, const wchar_t *characters, int len
     }
     characters = end + 1;
 
-    if ((*command)->isToggle) {
-      if (isKeyword(WS_C("on"), characters, length)) {
+    modifier.characters = characters;
+    end = wmemchr(characters, WC_C('+'), length);
+    modifier.length = end? end-characters: length;
+
+    if ((*command)->isToggle && !toggleDone) {
+      if (isKeyword(WS_C("on"), modifier.characters, modifier.length)) {
         *value |= BRL_FLG_TOGGLE_ON;
-        return 1;
+      }  else if (isKeyword(WS_C("off"), modifier.characters, modifier.length)) {
+        *value |= BRL_FLG_TOGGLE_OFF;
+      } else {
+        goto notToggle;
       }
 
-      if (isKeyword(WS_C("off"), characters, length)) {
-        *value |= BRL_FLG_TOGGLE_OFF;
-        return 1;
-      }
-    } else if ((*command)->isMotion) {
-      if (isKeyword(WS_C("route"), characters, length)) {
+      toggleDone = 1;
+      continue;
+    }
+  notToggle:
+
+    if ((*command)->isMotion && !motionDone) {
+      if (isKeyword(WS_C("route"), modifier.characters, modifier.length)) {
         *value |= BRL_FLG_ROUTE;
-        return 1;
+      } else {
+        goto notMotion;
       }
-    } else if ((*command)->isBase) {
+
+      motionDone = 1;
+      continue;
+    }
+  notMotion:
+
+    if ((*command)->isBase && !offsetDone) {
       unsigned int maximum = BRL_MSK_ARG - ((*command)->code & BRL_MSK_ARG);
       unsigned int offset = 0;
       int index;
 
-      for (index=0; index<length; index+=1) {
-        wchar_t character = characters[index];
+      for (index=0; index<modifier.length; index+=1) {
+        wchar_t character = modifier.characters[index];
 
-        if ((character < WC_C('0')) || (character > WC_C('9'))) {
-          reportDataError(file, "invalid command offset: %.*" PRIws, length, characters);
-          return 0;
-        }
-
-        if ((offset = (offset * 10) + (character - WC_C('0'))) > maximum) {
-          reportDataError(file, "command offset too large: %.*" PRIws, length, characters);
-          return 0;
-        }
+        if (character < WC_C('0')) goto notOffset;
+        if (character > WC_C('9')) goto notOffset;
+        if ((offset = (offset * 10) + (character - WC_C('0'))) > maximum) goto notOffset;
       }
 
       *value += offset;
-      return 1;
+      offsetDone = 1;
+      continue;
     }
+  notOffset:
 
-    reportDataError(file, "unknown command modifier: %.*" PRIws, length, characters);
-  } else {
-    reportDataError(file, "unknown command name: %.*" PRIws, length, characters);
+    reportDataError(file, "unknown command modifier: %.*" PRIws, modifier.length, modifier.characters);
+    return 0;
   }
 
-  return 0;
+  return 1;
 }
 
 static int
