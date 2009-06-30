@@ -25,11 +25,13 @@ function writeCommandEntry(name, symbol, help) {
   if (help ~ /^toggle /) print "  .isToggle = 1,"
 
   if (symbol ~ /^BRL_BLK_/) {
-    if (help ~ / character$/) {
+    if (symbol ~ /^BRL_BLK_PASS/) {
+      if (symbol ~ /^BRL_BLK_PASSKEY.*KEY_FUNCTION$/) {
+        print "  .isBase = 1,"
+      }
+    } else if (help ~ / character$/) {
       print "  .isCharacter = 1,"
-    } else if (symbol !~ /^BRL_BLK_PASS/) {
-      print "  .isBase = 1,"
-    } else if (symbol ~ /^BRL_BLK_PASSKEY.*KEY_FUNCTION$/) {
+    } else {
       print "  .isBase = 1,"
     }
   }
