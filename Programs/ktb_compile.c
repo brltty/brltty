@@ -469,15 +469,23 @@ parseCommandName (DataFile *file, int *value, const wchar_t *characters, int len
   int offsetDone = 0;
 
   const wchar_t *end = wmemchr(characters, WC_C('+'), length);
-  const DataOperand name = {
-    .characters = characters,
-    .length = end? end-characters: length
-  };
-  const CommandEntry **command = bsearch(&name, ktd->commandTable, ktd->commandCount, sizeof(*ktd->commandTable), searchCommandName);
+  const CommandEntry **command;
 
-  if (!command) {
-    reportDataError(file, "unknown command name: %.*" PRIws, length, characters);
-    return 0;
+  {
+    const DataOperand name = {
+      .characters = characters,
+      .length = end? end-characters: length
+    };
+
+    if (!name.length) {
+      reportDataError(file, "missing command name");
+      return 0;
+    }
+
+    if (!(command = bsearch(&name, ktd->commandTable, ktd->commandCount, sizeof(*ktd->commandTable), searchCommandName))) {
+      reportDataError(file, "unknown command name: %.*" PRIws, name.length, name.characters);
+      return 0;
+    }
   }
   *value = (*command)->code;
 
@@ -488,10 +496,11 @@ parseCommandName (DataFile *file, int *value, const wchar_t *characters, int len
       reportDataError(file, "missing command modifier");
       return 0;
     }
+
     characters = end + 1;
+    end = wmemchr(characters, WC_C('+'), length);
 
     modifier.characters = characters;
-    end = wmemchr(characters, WC_C('+'), length);
     modifier.length = end? end-characters: length;
 
     if ((*command)->isToggle && !toggleDone) {
