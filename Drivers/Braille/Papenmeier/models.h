@@ -179,7 +179,7 @@ static KEY_NAME_TABLE(keyNames_keys) = {
 static KEY_NAME_TABLE(keyNames_front9) = {
   KEY_NAME_ENTRY(PM_KEY_FRONT+0, "Function"),
   KEY_NAME_ENTRY(PM_KEY_FRONT+1, "Cursor"),
-  KEY_NAME_ENTRY(PM_KEY_FRONT+2, "Back"),
+  KEY_NAME_ENTRY(PM_KEY_FRONT+2, "Backward"),
   KEY_NAME_ENTRY(PM_KEY_FRONT+3, "Up"),
   KEY_NAME_ENTRY(PM_KEY_FRONT+4, "Home"),
   KEY_NAME_ENTRY(PM_KEY_FRONT+5, "Down"),

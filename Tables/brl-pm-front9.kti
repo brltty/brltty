@@ -21,7 +21,7 @@
 bind !Home HOME
 bind !Up WINUP
 bind !Down WINDN
-bind !Back LNUP
+bind !Backward LNUP
 bind !Forward LNDN
 bind Cursor HWINLT
 bind Braille HWINRT
@@ -42,8 +42,8 @@ bind Attribute+!Down ATTRDN
 bind Cursor+!Down NXPGRPH
 bind Braille+!Down NXSEARCH
 
-bind Function+!Back TOP_LEFT
-bind Attribute+!Back TOP
+bind Function+!Backward TOP_LEFT
+bind Attribute+!Backward TOP
 bind Function+!Forward BOT_LEFT
 bind Attribute+!Forward BOT
 
