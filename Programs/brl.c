@@ -35,6 +35,7 @@
 #include "brl.auto.h"
 #include "cmd.h"
 #include "queue.h"
+#include "brltty.h"
 
 #define BRLSYMBOL noBraille
 #define DRIVER_NAME NoBraille
@@ -316,19 +317,26 @@ enqueueCommand (int command) {
 
 static int
 dequeueCommand (void) {
-  int command = EOF;
   Queue *queue = getCommandQueue(0);
 
   if (queue) {
-    CommandQueueItem *item = dequeueItem(queue);
+    CommandQueueItem *item;
 
-    if (item) {
-      command = item->command;
+    while ((item = dequeueItem(queue))) {
+      int command = item->command;
       free(item);
+
+#ifdef ENABLE_API
+      if (apiStarted)
+        if ((command = api_handleCommand(command)) == EOF)
+          continue;
+#endif /* ENABLE_API */
+
+      return command;
     }
   }
 
-  return command;
+  return EOF;
 }
 
 typedef struct {
